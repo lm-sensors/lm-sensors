@@ -16,7 +16,8 @@ Quickstart:
   * Add the line 
        path=/lib/modules/current/extra
     to /etc/conf.modules or /etc/modules.conf (whichever one exists)
-    if it is not there yet
+    if it is not there yet. Depending on your version of modutils,
+    you may have to add all default paths to it too.
   * Do a `depmod -a'.
   * Add  the line
       /usr/local/lib 

@@ -236,6 +236,9 @@ This assumes /lib/modules/current will always be linked to the correct
 modules tree. If not, you will have to change it as appropriate for
 your system.
 
+You may also have to add all default paths to this file. You can get
+a list of them by doing a `modprobe -c', before and after your changes.
+
 Next, you will have to run `depmod -a' to have them recognised. Most
 distributions run this command when you boot, so if you were cross-
 compiling, you can skip this step.
