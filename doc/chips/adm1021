@@ -54,6 +54,8 @@ Supported chips:
 Author: Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock
         <phil@netroedge.com>
 
+License: GPL
+
 
 Module Parameters
 -----------------
@@ -63,23 +65,37 @@ Module Parameters
 * force_adm1021: short array (min = 1, max = 48)
   List of adapter,address pairs which are unquestionably assumed to contain
   a `adm1021' chip
+* force_adm1023: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `adm1023' chip
 * force_max1617: short array (min = 1, max = 48)
   List of adapter,address pairs which are unquestionably assumed to contain
   a `max1617' chip
 * force_max1617a: short array (min = 1, max = 48)
   List of adapter,address pairs which are unquestionably assumed to contain
   a `max1617a' chip
-* ignore: short array (min = 1, max = 48)
-  List of adapter,address pairs not to scan
-* ignore_range: short array (min = 1, max = 48)
-  List of adapter,start-addr,end-addr triples not to scan
+* force_thmc10: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `thmc10' chip
+* force_lm84: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `lm84' chip
+* force_gl523sm: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `gl523sm' chip
+* force_mc1066: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `mc1066' chip
 * probe: short array (min = 1, max = 48)
   List of adapter,address pairs to scan additionally
 * probe_range: short array (min = 1, max = 48)
   List of adapter,start-addr,end-addr triples to scan additionally
-* read_only: int (0 = disable, 1 = enable , default 0)
-  Read only mode.This is useful for Laptop's if BIOS managed Thermal Zone (Fan on/off).
-  Otherwise it confuse BIOS by writing any limit register's.
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* read_only: int
+  Don't set any values, read only mode
 
 
 Description
@@ -128,108 +144,181 @@ Please report results.
 Chip Features
 -------------
 
-Chip `adm1021'
-             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
-              temp               NONE               NONE     R     0
-          temp_low               temp               temp     RW    0
-         temp_over               temp               temp     RW    0
-       remote_temp               NONE               NONE     R     0
-   remote_temp_low        remote_temp        remote_temp     RW    0
-  remote_temp_over        remote_temp        remote_temp     RW    0
-            alarms               NONE               NONE     R     0
-          die_code               NONE               NONE     R     0
+Chip 'adm1021'
 
-             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
-              temp                    SENSORS_ADM1021_TEMP               temp:3
-          temp_low               SENSORS_ADM1021_TEMP_HYST               temp:2
-         temp_over               SENSORS_ADM1021_TEMP_OVER               temp:1
-       remote_temp             SENSORS_ADM1021_REMOTE_TEMP        remote_temp:3
-   remote_temp_low        SENSORS_ADM1021_REMOTE_TEMP_HYST        remote_temp:2
-  remote_temp_over        SENSORS_ADM1021_REMOTE_TEMP_OVER        remote_temp:1
-            alarms                  SENSORS_ADM1021_ALARMS             alarms:1
-          die_code                SENSORS_ADM1021_DIE_CODE           die_code:1
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp                  -                     -                       R-     0
+temp_low              temp                  temp                    RW     0
+temp_over             temp                  temp                    RW     0
+remote_temp           -                     -                       R-     0
+remote_temp_low       remote_temp           remote_temp             RW     0
+remote_temp_over      remote_temp           remote_temp             RW     0
+alarms                -                     -                       R-     0
+die_code              -                     -                       R-     0
 
-
-Chip `thmc10'
-             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
-              temp               NONE               NONE     R     0
-          temp_low               temp               temp     RW    0
-         temp_over               temp               temp     RW    0
-       remote_temp               NONE               NONE     R     0
-   remote_temp_low        remote_temp        remote_temp     RW    0
-  remote_temp_over        remote_temp        remote_temp     RW    0
-            alarms               NONE               NONE     R     0
-          die_code               NONE               NONE     R     0
-
-             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
-              temp                    SENSORS_ADM1021_TEMP               temp:3
-          temp_low               SENSORS_ADM1021_TEMP_HYST               temp:2
-         temp_over               SENSORS_ADM1021_TEMP_OVER               temp:1
-       remote_temp             SENSORS_ADM1021_REMOTE_TEMP        remote_temp:3
-   remote_temp_low        SENSORS_ADM1021_REMOTE_TEMP_HYST        remote_temp:2
-  remote_temp_over        SENSORS_ADM1021_REMOTE_TEMP_OVER        remote_temp:1
-            alarms                  SENSORS_ADM1021_ALARMS             alarms:1
-          die_code                SENSORS_ADM1021_DIE_CODE           die_code:1
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp                  SENSORS_ADM1021_TEMP                              temp1:3
+temp_low              SENSORS_ADM1021_TEMP_HYST                         temp1:2
+temp_over             SENSORS_ADM1021_TEMP_OVER                         temp1:1
+remote_temp           SENSORS_ADM1021_REMOTE_TEMP                       temp2:3
+remote_temp_low       SENSORS_ADM1021_REMOTE_TEMP_HYST                  temp2:2
+remote_temp_over      SENSORS_ADM1021_REMOTE_TEMP_OVER                  temp2:1
+alarms                SENSORS_ADM1021_ALARMS                           alarms:1
+die_code              SENSORS_ADM1021_DIE_CODE                       die_code:1
 
 
-Chip `max1617'
-             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
-              temp               NONE               NONE     R     0
-          temp_low               temp               temp     RW    0
-         temp_over               temp               temp     RW    0
-       remote_temp               NONE               NONE     R     0
-   remote_temp_low        remote_temp        remote_temp     RW    0
-  remote_temp_over        remote_temp        remote_temp     RW    0
-            alarms               NONE               NONE     R     0
+Chip 'adm1023'
 
-             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
-              temp                    SENSORS_MAX1617_TEMP               temp:3
-          temp_low               SENSORS_MAX1617_TEMP_HYST               temp:2
-         temp_over               SENSORS_MAX1617_TEMP_OVER               temp:1
-       remote_temp             SENSORS_MAX1617_REMOTE_TEMP        remote_temp:3
-   remote_temp_low        SENSORS_MAX1617_REMOTE_TEMP_HYST        remote_temp:2
-  remote_temp_over        SENSORS_MAX1617_REMOTE_TEMP_OVER        remote_temp:1
-            alarms                  SENSORS_MAX1617_ALARMS             alarms:1
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp                  -                     -                       R-     0
+temp_low              temp                  temp                    RW     0
+temp_over             temp                  temp                    RW     0
+remote_temp           -                     -                       R-     3
+remote_temp_low       remote_temp           remote_temp             RW     3
+remote_temp_over      remote_temp           remote_temp             RW     3
+alarms                -                     -                       R-     0
 
-
-Chip `max1617a'
-             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
-              temp               NONE               NONE     R     0
-          temp_low               temp               temp     RW    0
-         temp_over               temp               temp     RW    0
-       remote_temp               NONE               NONE     R     0
-   remote_temp_low        remote_temp        remote_temp     RW    0
-  remote_temp_over        remote_temp        remote_temp     RW    0
-            alarms               NONE               NONE     R     0
-
-             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
-              temp                   SENSORS_MAX1617A_TEMP               temp:3
-          temp_low              SENSORS_MAX1617A_TEMP_HYST               temp:2
-         temp_over              SENSORS_MAX1617A_TEMP_OVER               temp:1
-       remote_temp            SENSORS_MAX1617A_REMOTE_TEMP        remote_temp:3
-   remote_temp_low       SENSORS_MAX1617A_REMOTE_TEMP_HYST        remote_temp:2
-  remote_temp_over       SENSORS_MAX1617A_REMOTE_TEMP_OVER        remote_temp:1
-            alarms                 SENSORS_MAX1617A_ALARMS             alarms:1
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp                  SENSORS_ADM1021_TEMP                              temp1:3
+temp_low              SENSORS_ADM1021_TEMP_HYST                         temp1:2
+temp_over             SENSORS_ADM1021_TEMP_OVER                         temp1:1
+remote_temp           SENSORS_ADM1021_REMOTE_TEMP                       temp2:4
+remote_temp_low       SENSORS_ADM1021_REMOTE_TEMP_HYST                  temp2:2
+remote_temp_over      SENSORS_ADM1021_REMOTE_TEMP_OVER                  temp2:1
+alarms                SENSORS_ADM1021_ALARMS                           alarms:1
 
 
-Chip `mc1066'
-             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
-              temp               NONE               NONE     R     0
-          temp_low               temp               temp     RW    0
-         temp_over               temp               temp     RW    0
-       remote_temp               NONE               NONE     R     0
-   remote_temp_low        remote_temp        remote_temp     RW    0
-  remote_temp_over        remote_temp        remote_temp     RW    0
-            alarms               NONE               NONE     R     0
+Chip 'max1617'
 
-             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
-              temp                    SENSORS_MAX1617_TEMP               temp:3
-          temp_low               SENSORS_MAX1617_TEMP_HYST               temp:2
-         temp_over               SENSORS_MAX1617_TEMP_OVER               temp:1
-       remote_temp             SENSORS_MAX1617_REMOTE_TEMP        remote_temp:3
-   remote_temp_low        SENSORS_MAX1617_REMOTE_TEMP_HYST        remote_temp:2
-  remote_temp_over        SENSORS_MAX1617_REMOTE_TEMP_OVER        remote_temp:1
-            alarms                  SENSORS_MAX1617_ALARMS             alarms:1
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp                  -                     -                       R-     0
+temp_low              temp                  temp                    RW     0
+temp_over             temp                  temp                    RW     0
+remote_temp           -                     -                       R-     0
+remote_temp_low       remote_temp           remote_temp             RW     0
+remote_temp_over      remote_temp           remote_temp             RW     0
+alarms                -                     -                       R-     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp                  SENSORS_MAX1617_TEMP                              temp1:3
+temp_low              SENSORS_MAX1617_TEMP_HYST                         temp1:2
+temp_over             SENSORS_MAX1617_TEMP_OVER                         temp1:1
+remote_temp           SENSORS_MAX1617_REMOTE_TEMP                       temp2:3
+remote_temp_low       SENSORS_MAX1617_REMOTE_TEMP_HYST                  temp2:2
+remote_temp_over      SENSORS_MAX1617_REMOTE_TEMP_OVER                  temp2:1
+alarms                SENSORS_MAX1617_ALARMS                           alarms:1
+
+
+Chip 'max1617a'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp                  -                     -                       R-     0
+temp_low              temp                  temp                    RW     0
+temp_over             temp                  temp                    RW     0
+remote_temp           -                     -                       R-     0
+remote_temp_low       remote_temp           remote_temp             RW     0
+remote_temp_over      remote_temp           remote_temp             RW     0
+alarms                -                     -                       R-     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp                  SENSORS_MAX1617A_TEMP                             temp1:3
+temp_low              SENSORS_MAX1617A_TEMP_HYST                        temp1:2
+temp_over             SENSORS_MAX1617A_TEMP_OVER                        temp1:1
+remote_temp           SENSORS_MAX1617A_REMOTE_TEMP                      temp2:3
+remote_temp_low       SENSORS_MAX1617A_REMOTE_TEMP_HYST                 temp2:2
+remote_temp_over      SENSORS_MAX1617A_REMOTE_TEMP_OVER                 temp2:1
+alarms                SENSORS_MAX1617A_ALARMS                          alarms:1
+
+
+Chip 'thmc10'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp                  -                     -                       R-     0
+temp_low              temp                  temp                    RW     0
+temp_over             temp                  temp                    RW     0
+remote_temp           -                     -                       R-     0
+remote_temp_low       remote_temp           remote_temp             RW     0
+remote_temp_over      remote_temp           remote_temp             RW     0
+alarms                -                     -                       R-     0
+die_code              -                     -                       R-     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp                  SENSORS_ADM1021_TEMP                              temp1:3
+temp_low              SENSORS_ADM1021_TEMP_HYST                         temp1:2
+temp_over             SENSORS_ADM1021_TEMP_OVER                         temp1:1
+remote_temp           SENSORS_ADM1021_REMOTE_TEMP                       temp2:3
+remote_temp_low       SENSORS_ADM1021_REMOTE_TEMP_HYST                  temp2:2
+remote_temp_over      SENSORS_ADM1021_REMOTE_TEMP_OVER                  temp2:1
+alarms                SENSORS_ADM1021_ALARMS                           alarms:1
+die_code              SENSORS_ADM1021_DIE_CODE                       die_code:1
+
+
+Chip 'lm84'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp                  -                     -                       R-     0
+temp_low              temp                  temp                    RW     0
+temp_over             temp                  temp                    RW     0
+remote_temp           -                     -                       R-     0
+remote_temp_low       remote_temp           remote_temp             RW     0
+remote_temp_over      remote_temp           remote_temp             RW     0
+alarms                -                     -                       R-     0
+die_code              -                     -                       R-     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp                  SENSORS_ADM1021_TEMP                              temp1:3
+temp_low              SENSORS_ADM1021_TEMP_HYST                         temp1:2
+temp_over             SENSORS_ADM1021_TEMP_OVER                         temp1:1
+remote_temp           SENSORS_ADM1021_REMOTE_TEMP                       temp2:3
+remote_temp_low       SENSORS_ADM1021_REMOTE_TEMP_HYST                  temp2:2
+remote_temp_over      SENSORS_ADM1021_REMOTE_TEMP_OVER                  temp2:1
+alarms                SENSORS_ADM1021_ALARMS                           alarms:1
+die_code              SENSORS_ADM1021_DIE_CODE                       die_code:1
+
+
+Chip 'gl523'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp                  -                     -                       R-     0
+temp_low              temp                  temp                    RW     0
+temp_over             temp                  temp                    RW     0
+remote_temp           -                     -                       R-     0
+remote_temp_low       remote_temp           remote_temp             RW     0
+remote_temp_over      remote_temp           remote_temp             RW     0
+alarms                -                     -                       R-     0
+die_code              -                     -                       R-     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp                  SENSORS_ADM1021_TEMP                              temp1:3
+temp_low              SENSORS_ADM1021_TEMP_HYST                         temp1:2
+temp_over             SENSORS_ADM1021_TEMP_OVER                         temp1:1
+remote_temp           SENSORS_ADM1021_REMOTE_TEMP                       temp2:3
+remote_temp_low       SENSORS_ADM1021_REMOTE_TEMP_HYST                  temp2:2
+remote_temp_over      SENSORS_ADM1021_REMOTE_TEMP_OVER                  temp2:1
+alarms                SENSORS_ADM1021_ALARMS                           alarms:1
+die_code              SENSORS_ADM1021_DIE_CODE                       die_code:1
+
+
+Chip 'mc1066'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp                  -                     -                       R-     0
+temp_low              temp                  temp                    RW     0
+temp_over             temp                  temp                    RW     0
+remote_temp           -                     -                       R-     0
+remote_temp_low       remote_temp           remote_temp             RW     0
+remote_temp_over      remote_temp           remote_temp             RW     0
+alarms                -                     -                       R-     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp                  SENSORS_MAX1617_TEMP                              temp1:3
+temp_low              SENSORS_MAX1617_TEMP_HYST                         temp1:2
+temp_over             SENSORS_MAX1617_TEMP_OVER                         temp1:1
+remote_temp           SENSORS_MAX1617_REMOTE_TEMP                       temp2:3
+remote_temp_low       SENSORS_MAX1617_REMOTE_TEMP_HYST                  temp2:2
+remote_temp_over      SENSORS_MAX1617_REMOTE_TEMP_OVER                  temp2:1
+alarms                SENSORS_MAX1617_ALARMS                           alarms:1
+
 
 
 
