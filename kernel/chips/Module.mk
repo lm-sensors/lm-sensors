@@ -24,17 +24,15 @@ KERNELCHIPSDIR := $(MODULE_DIR)
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 # These targets are NOT included in 'mkpatch' ...
-KERNELCHIPSTARGETS :=  \
-                      $(MODULE_DIR)/adm1024.o \
-                      $(MODULE_DIR)/fscpos.o \
-                      $(MODULE_DIR)/it87.o \
-                      $(MODULE_DIR)/maxilife.o \
-                      $(MODULE_DIR)/mtp008.o
+KERNELCHIPSTARGETS := 
 
 # These targets ARE included in 'mkpatch', except for LTC1710, which we
 # leave here because it used to be in 'mkpatch' ...
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM1021=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1021.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM1024=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1024.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM1025=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1025.o
@@ -53,6 +51,9 @@ KERNELCHIPSTARGETS += $(MODULE_DIR)/ds1621.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_EEPROM=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/eeprom.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_FSCPOS=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/fscpos.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_GL518SM=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/gl518sm.o
@@ -80,6 +81,12 @@ KERNELCHIPSTARGETS += $(MODULE_DIR)/ltc1710.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_MATORB=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/matorb.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_MAXILIFE=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/maxilife.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_MTP008=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/mtp008.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_PCF8574=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/pcf8574.o

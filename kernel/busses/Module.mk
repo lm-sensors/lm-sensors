@@ -24,10 +24,12 @@ KERNELBUSSESDIR := $(MODULE_DIR)
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 # These targets are NOT included in 'mkpatch' ...
-KERNELBUSSESTARGETS :=  \
-                       $(MODULE_DIR)/i2c-ali1535.o
+KERNELBUSSESTARGETS := 
 
 # These targets ARE included in 'mkpatch' ...
+ifneq ($(shell if grep -q '^CONFIG_I2C_ALI1535=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ali1535.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_ALI15X3=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ali15x3.o
 endif
