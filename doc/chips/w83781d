@@ -780,3 +780,26 @@ fans run at low speed, and 0x7F or 0x80 to make them run at full speed.
 Please contact us if you can figure out how it is supposed to work. As
 long as we don't know more, the w83781d driver doesn't handle PWM on
 AS99127F chips at all.
+
+Additional info about PWM on the AS99127F by Marcansoft:
+
+I've been fiddling around with the (in)famous 0x59 register and
+found out the following values do work as a form of coarse pwm:
+
+0x80 - seems to turn fans off after some time(1-2 minutes)... might be
+some form of auto-fan-control based on temp? hmm (Qfan? this mobo is an
+old ASUS, it isn't marketed as Qfan. Maybe some beta pre-attemp at Qfan
+that was dropped at the BIOS)
+0x81 - off
+0x82 - slightly "on-ner" than off, but my fans do not get to move. I can
+hear the high-pitched PWM sound that motors give off at too-low-pwm.
+0x83 - now they do move. Estimate about 70% speed or so.
+0x84-0x8f - full on
+
+Changing the high nibble doesn't seem to do much except the high bit
+(0x80) must be set for PWM to work, else the current pwm doesn't seem to
+change.
+
+My mobo is an ASUS A7V266-E. This behaviour is similar to what I got
+with speedfan under Windows, where 0-15% would be off, 15-2x% (can't
+remember the exact value) would be 70% and higher would be full on.
