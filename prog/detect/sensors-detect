@@ -78,6 +78,14 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        driver => "i2c-ali15x3",
        match => sub { $_[0] =~ /^SMBus ALI15X3 adapter at [0-9,a-f]{4}/ },
      }
+     { 
+       vendid => 0x106b,
+       devid  => 0x000e,
+       func => 0,
+       procid => "Apple Computer Inc. Hydra Mac I/O",
+       driver => "i2c-hydra",
+       match => sub { $_[0] =~ /^Hydra i2c/ },
+     },
 );
 
 use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect 

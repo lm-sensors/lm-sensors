@@ -21,6 +21,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/stddef.h>
+#include <asm/system.h>
 
 #include "i2c.h"
 #ifdef I2C_SPINLOCK

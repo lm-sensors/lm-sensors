@@ -183,7 +183,7 @@ Module i2c.o
 ============
 
 This is Simon Vogl's i2c module (this one is different from the i2c module
-included in kernels around 1.2.120!). 
+included in kernels around 2.1.120!). 
 
 A driver
 --------

@@ -339,11 +339,12 @@ extern int i2c_adapter_id(struct i2c_adapter *adap);
 #define HW_B_BT848	0x05	/* BT848 video boards			*/
 #define HW_B_WNV	0x06	/* Winnov Videums			*/
 #define HW_B_VIA        0x07    /* Via vt82c586b			*/
+#define HW_B_HYDRA	0x08	/* Apple Hydra Mac I/O			*/
 
 /* --- PCF 8584 based algorithms					*/
 #define HW_P_LP		0x00	/* Parallel port interface		*/
-#define HW_P_ISA	0x01	/* generic ISA Bus inteface card	*/
-#define HW_P_ELEK	0x02	/* Elektor ISA Bus inteface card	*/
+#define HW_P_ISA	0x01	/* generic ISA Bus interface card	*/
+#define HW_P_ELEK	0x02	/* Elektor ISA Bus interface card	*/
 
 
 

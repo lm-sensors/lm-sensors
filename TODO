@@ -3,6 +3,8 @@ Many, many things. Most notably:
 KERNEL MODULES
 ==============
 
+* `modprobe w83781d force_w38781d=0,0x49' let to strange beeping on Frodo's
+   computer. Why?
 * Increase use count of adapter driver if directory of chip is entered
 * maxilife.c: Introduce new insmod variables
 * maxilife.c: Round REG_TO_VID correctly

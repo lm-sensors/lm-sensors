@@ -24,6 +24,7 @@ static char rcsid[] = "$Id: bit-lp.c,v 1.6 1998/12/30 08:36:08 i2c Exp i2c $";
 #include <linux/ioport.h>
 #include <linux/module.h>
 #include <asm/io.h>
+#include <linux/stddef.h>
 
 #include "i2c.h"
 #include "algo-bit.h"

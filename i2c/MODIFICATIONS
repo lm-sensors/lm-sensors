@@ -48,3 +48,9 @@ Here come the changes:
 * Removed files: object files and executables
   Everywhere, remakeable files are removed, to keep the source distribution
   small and lean.
+
+* algo-bit.h: Removed comment typo (Geert)
+
+* bit-lp.c: Added #include <linux/stddef> (Geert)
+
+* i2c.h: Added HW_B_HYDRA, removed two comment typos (Geert)

@@ -22,10 +22,15 @@
 #include <unistd.h>
 #include <asm/io.h>
 
+
 /* To keep glibc2 happy */
-#ifdef __GLIBC__
+#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ == 0
 #include <sys/perm.h>
 #endif
+
+#ifdef __powerpc__
+unsigned long isa_io_base = 0; /* XXX for now */
+#endif /* __powerpc__ */
 
 char hexchar(int i)
 {
@@ -93,6 +98,7 @@ int main(int argc, char *argv[])
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
   sleep(5);
 
+#ifndef __powerpc__
   if ((datareg < 0x400) && (datareg < 0x400)) {
     if(ioperm(datareg,1,1)) {
       fprintf(stderr,"Error: Could not ioperm() data register!\n");
@@ -108,6 +114,7 @@ int main(int argc, char *argv[])
       exit(1);
     }
   }
+#endif
 
   printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
   for (i = 0; i < 256; i+=16) {

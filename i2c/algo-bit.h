@@ -11,7 +11,7 @@
 struct bit_adapter {
         char name[32];		/* give it a nice name 			*/
 	unsigned int id;	/* not used yet, maybe later		*/
-	void *data;		/* private data for lolevel routines	*/
+	void *data;		/* private data for lowlevel routines	*/
 	void (*setsda) (void *data, int state);
 	void (*setscl) (void *data, int state);
 	int  (*getsda) (void *data);
