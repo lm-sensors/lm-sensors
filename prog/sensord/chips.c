@@ -33,103 +33,103 @@
 
 static char buff[4096];
 
-static char *
+static const char *
 fmtExtra
 (int alarm, int beep) {
   if (alarm)
     sprintf (buff + strlen (buff), " [ALARM]");
   if (beep)
-    sprintf (buff + strlen (buff), " [BEEP]");
+    sprintf (buff + strlen (buff), " (beep)");
   return buff;
 }
 
-static char *
+static const char *
 fmtValu_0
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "%.0f", values[0]);
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtTemps_0
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "%.0f C (limit = %.0f C, hysteresis = %.0f C)", values[0], values[1], values[2]);
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtTemps_1
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "%.1f C (limit = %.1f C, hysteresis = %.1f C)", values[0], values[1], values[2]);
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtVolt_2
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "%+.2f V", values[0]);
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtVolts_2
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "%+.2f V (min = %+.2f V, max = %+.2f V)", values[0], values[1], values[2]);
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtFans_0
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "%.0f RPM (min = %.0f RPM, div = %.0f)", values[0], values[1], values[2]);
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtMHz_2
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "%.2f MHz (min = %.2f MHz, max = %.2f MHz)", values[0], values[1], values[2]);
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtChassisIntrusionDetection
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "Chassis intrusion detection");
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtBoardTemperatureInput
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "Board temperature input"); /* N.B: "(usually LM75 chips)" */
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtSoundAlarm
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "Sound alarm %s", (values[0] < 0.5) ? "disabled" : "enabled");
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtInt
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "%d", (int) values[0]);
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtIntCrossInt
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "%dx%d", (int) values[0], (int) values[1]);
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtIntDashInt
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   sprintf (buff, "%d-%d", (int) values[0], (int) values[1]);
   return fmtExtra (alarm, beep);
 }
@@ -332,10 +332,10 @@ static const ChipDescriptor via686a_chip = {
 
 /** LM80 **/
 
-static char * /* N.B: in sensors the first temp is %.2f!! */
+static const char *
 fmtTemps_LM80
-(double values[], int alarm, int beep) {
-  sprintf (buff, "%.0f C (hot limit = %.0f C, hot hysteresis = %.0f C, os limit = %.0f C, os hysteresis = %.0f C)", values[0], values[1], values[2], values[3], values[4]);
+(const double values[], int alarm, int beep) {
+  sprintf (buff, "%.2f C (hot limit = %.0f C, hot hysteresis = %.0f C, os limit = %.0f C, os hysteresis = %.0f C)", values[0], values[1], values[2], values[3], values[4]);
   return fmtExtra (alarm, beep);
 }
 
@@ -378,9 +378,9 @@ static const ChipDescriptor lm80_chip = {
 /** GL518 **/
 
 /* N.B: sensors supports a "gl518sm-r00" but it is not picked up in main.c...
-static char *
+static const char *
 fmtVolts_GL518_R00
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   if (values[0] == 0.0)
     sprintf (buff, "n/a (min = %+.2f V, max = %+.2f V)", values[1], values[2]);
   else
@@ -473,7 +473,7 @@ static const FeatureDescriptor w83781d_features[] = {
     { SENSORS_W83781D_FAN2, SENSORS_W83781D_FAN2_MIN, SENSORS_W83781D_FAN2_DIV, -1 } },
   { fmtFans_0, W83781D_ALARM_FAN3, W83781D_ALARM_FAN3,
     { SENSORS_W83781D_FAN3, SENSORS_W83781D_FAN3_MIN, SENSORS_W83781D_FAN3_DIV, -1 } },
-  { fmtTemps_1, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
+  { fmtTemps_0, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
     { SENSORS_W83781D_TEMP1, SENSORS_W83781D_TEMP1_OVER, SENSORS_W83781D_TEMP1_HYST, -1 } },
   { fmtTemps_1, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
     { SENSORS_W83781D_TEMP2, SENSORS_W83781D_TEMP2_OVER, SENSORS_W83781D_TEMP2_HYST, -1 } },
@@ -483,7 +483,7 @@ static const FeatureDescriptor w83781d_features[] = {
     { SENSORS_W83781D_VID, -1 } },
   { fmtChassisIntrusionDetection, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
     { SENSORS_W83781D_ALARMS, -1 } },
-  { fmtSoundAlarm, 0, 0, /* N.B: Is this beep correct for as99127f? */
+  { fmtSoundAlarm, 0, 0,
     { SENSORS_W83781D_BEEP_ENABLE, -1 } },
   { NULL }
 };
@@ -494,9 +494,21 @@ static const ChipDescriptor w83781d_chip = {
 
 /** W83782D **/
 
-static char *
-fmtTemps_W8378x
-(double values[], int alarm, int beep) {
+static const char *
+fmtTemps_W8378x_0
+(const double values[], int alarm, int beep) {
+  int sensorID = (int) values[3];
+  const char *sensor = (sensorID == 1) ? "PII/Celeron diode" :
+    (sensorID == 2) ? "3904 transistor" : "thermistor";
+   /* Is this still right? */
+  sprintf (buff, "%.0f C (limit = %.0f C, hysteresis = %.0f C, sensor = %s)",
+           values[0], values[1], values[2], sensor);
+  return fmtExtra (alarm, beep);
+}
+
+static const char *
+fmtTemps_W8378x_1
+(const double values[], int alarm, int beep) {
   int sensorID = (int) values[3];
   const char *sensor = (sensorID == 1) ? "PII/Celeron diode" :
     (sensorID == 2) ? "3904 transistor" : "thermistor";
@@ -504,7 +516,7 @@ fmtTemps_W8378x
   sprintf (buff, "%.1f C (limit = %.1f C, hysteresis = %.1f C, sensor = %s)",
            values[0], values[1], values[2], sensor);
   return fmtExtra (alarm, beep);
-} /* N.B: TEMP1 in sensors is just %.0f.. */
+}
 
 static const char *w83782d_names[] = {
   SENSORS_W83782D_PREFIX, SENSORS_W83627HF_PREFIX, NULL
@@ -533,11 +545,11 @@ static const FeatureDescriptor w83782d_features[] = {
     { SENSORS_W83782D_FAN2, SENSORS_W83782D_FAN2_MIN, SENSORS_W83782D_FAN2_DIV, -1 } },
   { fmtFans_0, W83781D_ALARM_FAN3, W83781D_ALARM_FAN3,
     { SENSORS_W83782D_FAN3, SENSORS_W83782D_FAN3_MIN, SENSORS_W83782D_FAN3_DIV, -1 } },
-  { fmtTemps_W8378x, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
+  { fmtTemps_W8378x_0, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
     { SENSORS_W83782D_TEMP1, SENSORS_W83782D_TEMP1_OVER, SENSORS_W83782D_TEMP1_HYST, SENSORS_W83782D_SENS1, -1 } },
-  { fmtTemps_W8378x, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
+  { fmtTemps_W8378x_1, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
     { SENSORS_W83782D_TEMP2, SENSORS_W83782D_TEMP2_OVER, SENSORS_W83782D_TEMP2_HYST, SENSORS_W83782D_SENS2, -1 } },
-  { fmtTemps_W8378x, W83781D_ALARM_TEMP3, W83781D_ALARM_TEMP3,
+  { fmtTemps_W8378x_1, W83781D_ALARM_TEMP3, W83781D_ALARM_TEMP3,
     { SENSORS_W83782D_TEMP3, SENSORS_W83782D_TEMP3_OVER, SENSORS_W83782D_TEMP3_HYST, SENSORS_W83782D_SENS3, -1 } },
   { fmtVolt_2, 0, 0,
     { SENSORS_W83782D_VID, -1 } },
@@ -575,9 +587,9 @@ static const FeatureDescriptor w83783s_features[] = {
     { SENSORS_W83783S_FAN2, SENSORS_W83783S_FAN2_MIN, SENSORS_W83783S_FAN2_DIV, -1 } },
   { fmtFans_0, W83781D_ALARM_FAN3, W83781D_ALARM_FAN3,
     { SENSORS_W83783S_FAN3, SENSORS_W83783S_FAN3_MIN, SENSORS_W83783S_FAN3_DIV, -1 } },
-  { fmtTemps_W8378x, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
+  { fmtTemps_W8378x_0, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
     { SENSORS_W83783S_TEMP1, SENSORS_W83783S_TEMP1_OVER, SENSORS_W83783S_TEMP1_HYST, SENSORS_W83783S_SENS1, -1 } },
-  { fmtTemps_W8378x, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
+  { fmtTemps_W8378x_1, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
     { SENSORS_W83783S_TEMP2, SENSORS_W83783S_TEMP2_OVER, SENSORS_W83783S_TEMP2_HYST, SENSORS_W83783S_SENS2, -1 } },
   { fmtVolt_2, 0, 0,
     { SENSORS_W83783S_VID, -1 } },
@@ -594,17 +606,17 @@ static const ChipDescriptor w83783s_chip = {
 
 /** MAXILIFE **/
 
-static char *
+static const char *
 fmtTemps_Maxilife
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   if (!values[0] && !values[1] && !values[2])
     return NULL;
   return fmtTemps_1 (values, alarm, beep);
 }
 
-static char *
+static const char *
 fmtFans_Maxilife
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   if (!values[0] && !values[1] && !values[2])
     return NULL;
   if (values[0] < 0) {
@@ -615,17 +627,17 @@ fmtFans_Maxilife
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtMHz_Maxilife
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   if (!values[0] && !values[1] && !values[2])
     return NULL;
   return fmtMHz_2 (values, alarm, beep);
 }
 
-static char *
+static const char *
 fmtVolts_Maxilife
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   if (!values[0] && !values[1] && !values[2])
     return NULL;
   return fmtVolts_2 (values, alarm, beep);
@@ -671,9 +683,9 @@ static const ChipDescriptor maxilife_chip = {
 
 /** EEPROM **/
 
-static char *
+static const char *
 fmtType_EEPROM
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   if ((int) values[0] == 4)
     sprintf (buff, "SDRAM DIMM SPD");
   else
@@ -681,9 +693,9 @@ fmtType_EEPROM
   return fmtExtra (alarm, beep);
 }
 
-static char *
+static const char *
 fmtRowCol_EEPROM
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   int row = (int) values[0];
   int col = (int) values[1];
   int num = (int) values[2];
@@ -713,9 +725,9 @@ static const ChipDescriptor eeprom_chip = {
 
 /** DDCMON **/
 
-static char *
+static const char *
 fmtID_DDCMON
-(double values[], int alarm, int beep) {
+(const double values[], int alarm, int beep) {
   int value = (int) values[0];
   buff[0] = ((value >> 10) & 0x1f) + '@';
   buff[1] = ((value >> 5) & 0x1f) + '@';

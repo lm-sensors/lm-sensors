@@ -68,16 +68,35 @@ static int
 sensord
 (void) {
   int ret = 0;
+  int scanValue = 0, logValue = 0;
 
   sensorLog (LOG_INFO, "sensord started");
 
   while (!done && (ret == 0)) {
     if (ret == 0)
       ret = reloadLib ();
-    if (ret == 0)
+    if ((ret == 0) && scanTime) {
+      ret = scanChips ();
+      if (scanValue <= 0)
+        scanValue += scanTime;
+    }
+    if ((ret == 0) && logTime && (logValue <= 0)) {
       ret = readChips ();
-    if (!done && (ret == 0))
+      logValue += logTime;
+    }
+    if (!done && (ret == 0)) {
+      int sleepTime;
+      if (!logTime) {
+        sleepTime = scanValue;
+      } else if (!scanTime) {
+        sleepTime = logValue;
+      } else {
+        sleepTime = (scanValue < logValue) ? scanValue : logValue;
+      }
       sleep (sleepTime);
+      scanValue -= sleepTime;
+      logValue -= sleepTime;
+    }
   }
 
   sensorLog (LOG_INFO, "sensord %s", ret ? "failed" : "stopped");
@@ -146,7 +165,12 @@ main
     ret = sensord ();
     undaemonize ();
   } else {
-    ret = readChips ();
+    if (doSet)
+      ret = setChips ();
+    else if (doScan)
+      ret = scanChips ();
+    else
+      ret = readChips ();
   }
   
   if (unloadLib ())

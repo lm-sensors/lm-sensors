@@ -20,7 +20,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#define version "0.3.0"
+#define version "0.4.0"
 
 #include "lib/sensors.h"
 
@@ -30,9 +30,10 @@ extern void sensorLog (int priority, const char *fmt, ...);
 
 extern int isDaemon;
 extern const char *sensorsCfgFile;
-extern int sleepTime;
+extern int scanTime;
 extern int logTime;
 extern int syslogFacility;
+extern int doScan;
 extern int doSet;
 extern sensors_chip_name chipNames[];
 extern int numChipNames;
@@ -50,12 +51,14 @@ extern int unloadLib (void);
 /* from sense.c */
 
 extern int readChips (void);
+extern int scanChips (void);
+extern int setChips (void);
 
 /* from chips.c */
 
 #define MAX_DATA 5
 
-typedef char * (*FormatterFN) (double values[], int alarm, int beep);
+typedef const char * (*FormatterFN) (const double values[], int alarm, int beep);
 
 typedef struct {
   FormatterFN format;

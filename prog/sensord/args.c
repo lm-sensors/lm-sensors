@@ -33,9 +33,10 @@
 
 int isDaemon = 0;
 const char *sensorsCfgFile = "sensors.conf";
-int sleepTime = 5 * 60;
+int scanTime = 60;
 int logTime = 30 * 60;
 int syslogFacility = LOG_LOCAL4;
+int doScan = 0;
 int doSet = 0;
 sensors_chip_name chipNames[MAX_CHIP_NAMES];
 int numChipNames = 0;
@@ -86,15 +87,25 @@ parseFacility
   return facilities[i].id;
 }
 
-/* TODO: -s, --set */
-
 static const char *daemonSyntax =
-  "  -i, --interval <time>     -- interval between checking sensors (default 5m)\n"
+  "  -i, --interval <time>     -- interval between scanning alarms (default 60s)\n"
   "  -l, --log-interval <time> -- interval between logging sensors (default 30m)\n"
-  "  -f, --syslog-facility <f> -- syslog facility to use (default local4)\n";
+  "  -f, --syslog-facility <f> -- syslog facility to use (default local4)\n"
+  "  -c, --config-file <file>  -- configuration file (default sensors.conf)\n"
+  "  -v, --version             -- display version and exit\n"
+  "  -h, --help                -- display help and exit\n"
+  "\n"
+  "Specify a value of 0 for either interval to disable that operation;\n"
+  "for example, specify --log-interval 0 to only scan for alarms."
+  "\n"
+  "If no path is specified, a list of directories is examined for the config file;\n"
+  "specify the filename `-' to read the config file from stdin.\n"
+  "\n"
+  "If no chips are specified, all chip info will be printed.\n";
+
 static const char *appSyntax =
-  "  -s, --set                 -- execute set statements too (root only)\n";
-static const char *commonSyntax =
+  "  -a, --alarm-scan          -- only scan for alarms\n"
+  "  -s, --set                 -- execute set statements too (root only)\n"
   "  -c, --config-file <file>  -- configuration file (default sensors.conf)\n"
   "  -v, --version             -- display version and exit\n"
   "  -h, --help                -- display help and exit\n"
@@ -116,9 +127,10 @@ static const struct option daemonLongOptions[] = {
   { NULL, 0, NULL, 0 }
 };
 
-static const char *appShortOptions = "sc:vh";
+static const char *appShortOptions = "asc:vh";
 
 static const struct option appLongOptions[] = {
+  { "alarm-scan", no_argument, NULL, 'a' },
   { "set", no_argument, NULL, 's' },
   { "config-file", required_argument, NULL, 'c' },
   { "version", no_argument, NULL, 'v' },
@@ -140,7 +152,7 @@ parseArgs
   while ((c = getopt_long (argc, argv, shortOptions, longOptions, NULL)) != EOF) {
     switch(c) {
       case 'i':
-        if ((sleepTime = parseTime (optarg)) < 0)
+        if ((scanTime = parseTime (optarg)) < 0)
           return -1;
         break;
       case 'l':
@@ -150,6 +162,9 @@ parseArgs
       case 'f':
         if ((syslogFacility = parseFacility (optarg)) < 0)
           return -1;
+        break;
+      case 'a':
+        doScan = 1;
         break;
       case 's':
         doSet = 1;
@@ -163,7 +178,7 @@ parseArgs
         exit (EXIT_SUCCESS);
         break;
       case 'h':
-        printf ("Syntax: %s {options} {chips}\n%s%s", argv[0], isDaemon ? daemonSyntax : appSyntax, commonSyntax);
+        printf ("Syntax: %s {options} {chips}\n%s", argv[0], isDaemon ? daemonSyntax : appSyntax);
         exit (EXIT_SUCCESS);
         break;
       case ':':
@@ -177,9 +192,16 @@ parseArgs
         break;
     }
   }
+
+  if (doScan && doSet) {
+    fprintf (stderr, "Error: Incompatible --set and --alarm-scan.\n");
+    return -1;
+  }
   
-  if (logTime < sleepTime)
-    logTime = sleepTime;
+  if (!logTime && !scanTime) {
+    fprintf (stderr, "Error: No logging or alarm scanning.\n");
+    return -1;
+  }
 
   return 0;
 }

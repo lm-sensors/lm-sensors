@@ -1,4 +1,4 @@
-.\" Copyright 1999 Merlin Hughes <merlin@merlin.org>
+.\" Copyright 1999-2000 Merlin Hughes <merlin@merlin.org>
 .\" sensord is distributed under the GPL
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
@@ -21,98 +21,239 @@
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
-.TH sensord 8  "December 2, 1999" "Version 0.2.0" "Linux System Administration"
+.TH sensord 8  "July 7, 2000" "Version 0.4.0" "Linux System Administration"
 .SH NAME
 sensord \- Sensor information logging daemon.
 .SH SYNOPSIS
 .B sensord [
 .I options
+.B ] [
+.I chips
 .B ]
 
 .SH DESCRIPTION
 .B Sensord
-is a daemon that records in a log file the readings of all sensor chips at
-an interval of thirty minutes, or as configured on the command line.
+is a daemon that can be used to periodically log sensor readings from
+hardware health-monitoring chips to
+.BR syslog (3)
+and to alert when a sensor alarm is signalled; for example, if a
+fan fails, a temperature limit is exceeded, etc.
 
 .B Sensord
 knows about certain chips, and outputs nicely formatted readings for them; but
 it can also display the information of unknown chips, as long as 
-.I libsensors
+.BR libsensors
 knows about them.
-
 .SH OPTIONS
-.IP "-c config-file"
-Specify a configuration file. If no file is specified, the name `sensors.conf'
-is used. If the name does not contain a leading directory slash, or this parameter
-is not present, the following paths are examined:
-.BR /etc ,
-.BR /usr/lib/sensors ,
-.BR /usr/local/lib/sensors ,
-.BR /usr/lib ,
-.BR /usr/local/lib .
-.IP "-i interval"
-Specifies the interval, in seconds, between sensor readings. The default
-is 1800 seconds (30 minutes).
-.IP "-l log-file"
-Specify the log file to which to append. If no file is specified, the
-default log file `/var/log/sensors' is created. Note that this file is
-interpreted relative to the root directory `/', not the current directory.
-.IP -h
-Prints a help message and exits.
-.IP -v
-Displays the program version and exits.
-.SH SIGNALS
-Upon receipt of a SIGHUP (see
-.BR signal (7)
-for details) this daemon closes and reopens its log file. Use this to rotate
-log-files: Rename the old log file and then HUP this daemon; it will
-commence writing to a new log file.
+.IP "-i, --interval time"
+Specify the interval between scanning for sensor alarms; the default is to
+scan every minute.
 
+The time should be specified as a raw integer (seconds) or with a suffix
+`s' for seconds, `m' for minutes or `h' for hours; for example, the
+default interval is `60' or `1m'.
+
+Specify an interval of zero to suppress scanning explicitly for alarms.
+.IP "-l, --log-interval time"
+Specify the interval between logging all sensor readings; the default is
+to log all readings every half hour.
+
+The time is specified as before; e.g., `30m'.
+
+Specify an interval of zero to suppress logging of regular sensor
+readings.
+.IP "-f, --syslog-facility facility"
+Specify the
+.BR syslog (3)
+facility to use when logging sensor readings and alarms; the default is
+to use
+.IR local4 .
+
+Other possibile facilities include
+.IR local0
+through
+.IR local7 ,
+.IR daemon
+or
+.IR user .
+.IP "-c, --config-file file"
+Specify a
+.BR libsensors
+configuration file. If no file is specified, the name `sensors.conf'
+is used.
+
+If the sensors configuration name does not contain a directory separator,
+the following paths are searched for the file:
+`/etc', `/usr/lib/sensors', `/usr/local/lib/sensors', `/usr/lib', `/usr/local/lib'.
+.IP "-h, --help"
+Prints a help message and exits.
+.IP "-v, --version"
+Displays the program version and exits.
+.SH CHIPS
+To restrict the devices that are scanned by this daemon, you may
+optionally specify a list of chip names. By default, all available
+chips are scanned.
+
+A typical chip name would be `w83782d-*' (you may want to escape the
+`*' for your shell) which would scan any W83782D chips on any bus. See
+.BR sensors.conf (5)
+for more details. Another option is to simply not load the sensor
+modules for chips in which you have no interest.
+.SH SIGNALS
 Upon receipt of a SIGTERM (see
 .BR signal (7)
 for details) this daemon should gracefully shut down.
+.SH LOGGING
+All messages from this daemon are logged to
+.BR syslog (3)
+under the program name `sensord' and facility
+.IR local4 ,
+or whatever is specified on the command line.
+
+Regular sensor readings are logged at the level
+.IR info .
+Alarms are logged at the level
+.IR alert .
+Inconsequential status messages are logged at
+the minimum level,
+.IR debug .
+
+You can use an appropriate `/etc/syslog.conf'
+file to direct these messages in a useful manner. See
+.BR syslog.conf (5)
+for full details, however the following is a sample configuration:
+.IP
+.nf
+# Sample syslog.conf entries
+*.info;...;local4.none;local4.warn  /var/log/messages
+local4.debug                       -/var/log/sensors
+local4.alert                        /dev/console
+local4.alert                        *
+.fi
+.PP
+The first line ensures that regular sensor readings do not clutter
+`/var/log/messages'; we first say `local4.none' to eliminate
+informational messages; then `local4.warn' to enable warnings and
+above. The second line says to log all regular sensor readings to
+`/var/log/sensors'; the leading hyphen `-' means that this file
+is not flushed after every message. The final two lines ensure
+that alarms are printed to the system console as well as
+to all connected users (in addition to `/var/log/messages' and
+`/var/log/sensors').
+.SH LOG ROTATION
+On a typical system with a good sensor chip, expect about 2KB per sensor
+reading in the log file. This works out at about 3MB per month. You
+should be rotating your syslog files anyway, but just to be sure you'll
+want to use something like
+.BR logrotate (8)
+or equivalent. You might, for example, want an entry in
+`/etc/logrotate.d/syslog' containing:
+.IP
+.nf
+# Sample logrotate.d entry
+/var/log/sensors {
+    postrotate
+        /usr/sbin/killall -HUP syslogd
+    endscript
+}
+.fi
+.PP
+Note, of course, that you want to restart
+.BR syslogd (8)
+and not
+.BR sensord (8)
+.
+.SH ALARMS
+Alarms generally indicate a critical condition; for example, a fan
+failure or an unacceptable temperature or voltage. However, some
+sensor chips do not support alarms, while others are incorrectly
+configured and may signal alarms incorrectly.
+
+Typically, an alarm will only be signaled once,
+even if the critical condition persists. This means that it is very
+easy to miss an alarm!
+
+In other cases, however,
+uninteresting alarms (e.g., chassis intrusion detection) will be
+repeated continuously. You can configure
+.BR libsensors
+to ignore unwanted sensor reading such as these by placing an
+`ignore' entry in the appropriate chip-specific section of the
+.BR sensors.conf (5)
+configuration file.
+
+For example, I have the following entry:
+.IP
+.nf
+# Sample /etc/sensors.conf entry
+chip "w83782d-*"
+    ignore "alarms"
+.fi
+.PP
+In this case, `alarms' was the sensor label reported in
+the relevant sensor log message.
+
+Alternatively, you may be able to reset the alarm with your
+BIOS.
+.SH BEEPS
+If you see `(beep)' beside any sensor reading, that just means that
+your system is configured to issue an audio warning from the
+motherboard if an alarm is signalled on that sensor.
+.SH MODULES
+It is expected that all required sensor modules are loaded prior to
+this daemon being started. Typically, this is achieved with an entry
+in `/etc/rc.d/...' containing
+.BR modprobe (1)
+commands to load the required modules before starting the daemon.
+
+For example, on my box I have a `sensord' initialization script
+containing (among others) the following commands:
+.IP
+.nf
+# Sample /etc/rc.d/init.d scriptlet
+echo -n "Loading AMD756 module: "
+modprobe i2c-amd756 || { failure ; echo ; exit 1 ; }
+echo_success
+echo
+echo -n "Loading W83781D module: "
+modprobe w83781d || { failure ; echo ; exit 1 ; }
+echo_success
+echo
+echo -n "Starting sensord: "
+daemon sensord
+RETVAL=$?
+echo
+.fi
+.PP
+Ignore the platform-specific shell functions; the general idea
+should be fairly clear.
 .SH ERRORS
 Errors encountered by this daemon are logged to
 .BR syslogd (8)
-under the program name `sensord', after which the daemon aborts
-with a failure note in its own log file.
-.SH NOTES
-It is expected that all required modules are loaded prior to this daemon
-being started. Typically, this is achieved with an entry in
-`/etc/rc.d/...' containing
-.BR modprobe (1)
-commands to load the required modules before starting the daemon.
-.SH WARNING
-On a typical system with one sensor chip, expect about 1KB per sensor
-entry in the log file. This works out at about 1.5MB per month. You
-must rotate the sensor log files, using something like
-.BR logrotate (8)
-or equivalent. You might, for example, create `/etc/logrotate.d/sensord'
-containing:
-.IP
-.nf
-  # Sample logrotate.d entry
-  /var/log/sensors {
-      missingok
-      postrotate
-          /usr/sbin/killall -HUP sensord
-      endscript
-  }
-.fi
-.PP
+after which the daemon will exit.
 .SH BUGS
 .B Sensord
-does not currently support reading alarm events from sensor devices.
+doesn't yet cope with the flipped alarm bits on
+.IR AS99127F
+chips.
 .SH FILES
 .I /etc/sensors.conf
 .RS
-The system wide configuration file. See
+The system-wide
+.BR libsensors
+configuration file. See
 .BR sensors.conf (5)
 for further details.
 .RE
-.I /var/log/sensors
+.I /etc/syslog.conf
 .RS
-The default sensor log file.
+The system-wide
+.BR syslog (3)
+/
+.BR syslogd (8)
+configuration file. See
+.BR syslog.conf (5)
+for further details.
 .RE
 .SH "CONFORMING TO"
 lm_sensors-2.x
