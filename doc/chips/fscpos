@@ -2,14 +2,14 @@ Kernel driver `fscpos.o'
 ======================
 
 Status: Beta
-   tested with motherboard d1107
+   Tested with motherboard d1107
    
-   think twice before you're using the write mode of some
+   Think twice before you're using the write mode of some
    variables, especially the watchdog
 	
 
 Supported chips:
-  * fujitsu siemens poseidon chip
+  * Fujitsu Siemens Poseidon chip
     Prefix `fscpos'
     Addresses scanned: I2C 0x73 
 
@@ -35,28 +35,28 @@ Description
 -----------
 
 This driver implements support for the Fujitsu Siemens Poseidon chip.
-It is descibed in the 'Register Set Specification BMC Poseidon based Systemboard'
-from Fujitsu Siemens.
+It is descibed in the 'Register Set Specification BMC Poseidon based
+Systemboard' from Fujitsu Siemens.
 
-The poseidon chip implements a hardware based system management for e. g. controlling
-fan speed and core voltage.
-There is also a watchdog counter on the chip which can trigger an alarm and even
-shutdown the system.
+The poseidon chip implements a hardware based system management,
+e.g. for controlling fan speed and core voltage.
+There is also a watchdog counter on the chip which can trigger
+an alarm and even shutdown the system.
 
 The chip provides three temperature values (cpu, motherboard and auxiliary),
-three current values (12 volt, 5 volt and batterie) and
+three current values (12 volt, 5 volt and battery) and
 three fans (power supply, cpu and auxiliary). 
 
 Temperatures are measured in degrees Celcius. The resolution is 1 degree.
 
 FAN rotation speeds are reported in RPM (rotations per minute). 
 The value can be divided by a programmable divider (1, 2, 4 or 8) which 
-is stord on the chip.
+is stored on the chip.
 
 Voltage sensors (also known as IN sensors) report their values in volts.
 
 All values are reported as final values from the driver. 
-There is not need for further calculations
+There is no need for further calculations.
 
 Chip Features
 -------------
