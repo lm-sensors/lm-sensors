@@ -2449,11 +2449,6 @@ sub lm78_alias_detect
 #   4 means that the LM75 was found in a probable state (temperatures
 #       make sense);
 #   3 means that the configuration register passes the test;
-#   2 means that the configuration register test failed, so the chipset
-#       is unlikely to be a LM75;
-#   1 means that the chip contains only zeroes, so it's unlikely to be
-#       a LM75 (we could even consider returning no confidence value
-#       at all). *TODO*
 # Registers used:
 #   0x01: Temperature
 #   0x01: Configuration
@@ -2482,14 +2477,17 @@ sub lm75_detect
   # Default state as seen on the Asus TX97-E
   return 5
     if $conf == 0 and ($hyst&0x80ff) == 0x002d and ($os&0x80ff) == 0x0034;
+  # All bytes have the same value, obviously a misdetection.
+  return
+    if (($conf<<8)|$conf) == $cur and $cur == $hyst && $cur == $os;
+  # Unused bits in conf register
+  return
+    if ($conf&0xe0) != 0;
   # Most probable value ranges
   return 4
-    if ($conf&0xe0) == 0 and (($cur&0x00ff) <= 125 || ($cur&0x00ff) >= 201)
+    if (($cur&0x00ff) <= 125 || ($cur&0x00ff) >= 201)
        and ($hyst&0x00ff) <= 125 and ($os&0x00ff) <= 125 and $hyst<$os;
-  # Unused bits in conf register
-  return 3
-    if ($conf&0xe0) == 0;
-  return 2;
+  return 3;
 }
   
 # $_[0]: A reference to the file descriptor to access this chip.
@@ -2961,7 +2959,7 @@ sub adm1024_detect
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, 3 if simply detected, 6 if detected and
+# Returns: undef if not detected, 3 if simply detected, 5 if detected and
 #          manufacturer ID matches, 7 if detected and manufacturer ID and
 #          revision match
 # Registers used:
@@ -2995,8 +2993,8 @@ sub adm1021_detect
     # match reasonable expectations
     my $misdetect = 0;
     # Negative temperatures
-    $misdetect++ if i2c_smbus_read_byte_data($file,0x00) > 128;
-    $misdetect++ if i2c_smbus_read_byte_data($file,0x01) > 128;
+    $misdetect++ if ((my $lte=i2c_smbus_read_byte_data($file,0x00)) > 128);
+    $misdetect++ if ((my $rte=i2c_smbus_read_byte_data($file,0x01)) > 128);
     # Negative high limits
     $misdetect++ if ((my $lhi=i2c_smbus_read_byte_data($file,0x05)) >= 128);
     $misdetect++ if ((my $rhi=i2c_smbus_read_byte_data($file,0x07)) >= 128);
@@ -3010,10 +3008,13 @@ sub adm1021_detect
     $misdetect++ if $llo > $lhi;
     $misdetect++ if $rlo > $rhi;
     return if $misdetect >= 4;
+	# Also return if all six bytes have the same value
+	return if $lte == $rte and $lte == $lhi and $lte == $rhi
+      and $lte == $llo and $lte == $rlo;
   }
   return 3 if $chip == 2;
   return 7 if $chip <= 3;
-  return 6;
+  return 5;
 }
 
 # $_[0]: Address
