@@ -3927,6 +3927,54 @@ sub system_safeness_by_acpi
 }
 
 # returns:
+# system id string (e.g. 'IBM'), unsafe system
+# '1', safe system
+# 0, could not determine
+# VPD is documented here:
+# http://www.pc.ibm.com/qtechinfo/MIGR-45120.html
+sub system_safeness_by_vpd
+{
+  my $pos = 0xF0000;
+  my $found = 0;
+  my $bbid;
+
+  return 0
+    unless open MEM, '/dev/mem';
+  binmode MEM;
+  unless (seek MEM, $pos, SEEK_SET)
+  {
+    close MEM;
+    return 0;
+  }
+  while ($pos <= 0xFFFD0 && !$found)
+  {
+    my $r = read(MEM, my $buf, 48);
+    unless ($r == 48)
+    {
+      close MEM;
+      return 0;
+    }
+    seek (MEM, -32, SEEK_CUR);
+    my $len;
+    if (substr($buf, 0, 5) eq "\xAA\x55VPD"
+     && ord(substr($buf, 5, 1)) >= 0x30
+     && unpack('%8C*', substr($buf, 0x0D, 0x30-0x0D)) == 0)
+    {
+      $bbid = substr($buf, 13, 9);
+      $bbid =~ s/[\x00 ]*$//; # right trim
+      $found++;
+    }
+    $pos += 16;
+  }
+  close MEM;
+
+  return '1' unless $found;
+  print " System vendor (VPD): IBM\n";
+  print " BIOS version (VPD): $bbid\n";
+  return 'IBM';
+}
+
+# returns:
 # 1 : the system is known to be safe
 # 0 : the system safeness is unknown
 # If the system is know to be unsafe (i.e. for now, IBM systems), never
@@ -3939,10 +3987,10 @@ sub safe_system_vendor
   	return 0;
   }
 
-  # We now have two methods for detecting IBM systems: ACPI and DMI.
-  # The ACPI scan is easy and handled internally. The DMI scan, being more
-  # complex, is handled by dmidecode, externally. Each method can return
-  # three status:
+  # We now have three methods for detecting IBM systems: ACPI, DMI and VPD.
+  # The ACPI and VPD scans are easy and handled internally. The DMI scan,
+  # being more complex, is handled by dmidecode, externally.
+  # Each method can return three status:
   #  * the system is known to be safe (returns '1');
   #  * the system is known to be unsafe (returns a string that identifies
   #    the system, e.g. 'IBM');
@@ -3950,7 +3998,7 @@ sub safe_system_vendor
   #    (returns 0).
   # We then combine both results to come to a conclusion. The rules we
   # follow are (in order):
-  #  * if both methods return 0, we can't say anything and return 0 (meaning
+  #  * if all methods return 0, we can't say anything and return 0 (meaning
   #    "system safeness is unknown");
   #  * else, if no method returns an identifier string (that is, each method
   #    returns either 0 or '1'), we assume that the system is safe and
@@ -3960,27 +4008,38 @@ sub safe_system_vendor
 
   my $safeness_acpi = system_safeness_by_acpi();
   my $safeness_dmi = system_safeness_by_dmi();
+  my $safeness_vpd = system_safeness_by_vpd();
 
   return 0
-  	unless ($safeness_acpi || $safeness_dmi);
+    unless ($safeness_acpi || $safeness_dmi || $safeness_vpd);
 
   return 1
-    if ((!$safeness_acpi || $safeness_acpi eq '1')
-         && (!$safeness_dmi || $safeness_dmi eq '1'));
+    if (!$safeness_acpi || $safeness_acpi eq '1')
+    && (!$safeness_dmi || $safeness_dmi eq '1')
+    && (!$safeness_vpd || $safeness_vpd eq '1');
 
-  my $safeness = (!$safeness_acpi || $safeness_acpi eq '1')?
-    $safeness_dmi:$safeness_acpi;
-
-  print " Sorry, we won't let you go on. $safeness systems are known to have\n",
+  my $sysname;
+  # Order matters, we trust VPD more than DMI, and DMI more than ACPI
+  foreach my $safeness ($safeness_vpd, $safeness_dmi, $safeness_acpi)
+  {
+    if ($safeness && $safeness ne '1')
+    {
+      $sysname = $safeness;
+      last;
+    }
+  }
+  
+  print " Sorry, we won't let you go on. $sysname systems are known to have\n",
         " serious problems with lm_sensors, resulting in hardware failures.\n",
         " For more information, see README.thinkpad or\n",
         " http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/README.thinkpad.\n";
 
-  if($safeness_acpi eq '1' || $safeness_dmi eq '1')
+  if($safeness_vpd eq '1')
   {
-    print " We used two methods to determine your system's vendor, and they led\n",
-          " to different results. We'd appreciate to have feedback about such\n",
-          " systems. Please, take some time and contact the lm_sensors mailing\n",
+    print " We used three different methods to determine your system's vendor,\n",
+          " and the one we believed to be the best failed in your case.\n",
+          " We'd appreciate to have feedback about this.\n",
+          " Please, take some time and contact the lm_sensors mailing\n",
           " list at <sensors\@stimpy.netroedge.com>.\n",
           " We need the following information:\n",
           "  * The brand and model of your system\n",
