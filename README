@@ -32,8 +32,7 @@ HOWEVER, the userspace tools in this package will work for
 2.4, 2.5, and 2.6 kernels.
 
 WARNING! You must have at least i2c-2.8.1.
-EVEN IF your kernel does contain i2c support!!!!!!!!!
-You may wish to get the latest i2c package, i2c-2.8.2,
+EVEN IF your kernel does contain i2c support!
 
 The I2C package in existing 2.4 kernels is NOT sufficient
 for compilation of this package.
