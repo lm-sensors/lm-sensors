@@ -739,7 +739,7 @@ void LM87_update_client(struct i2c_client *client)
 void LM87_in(struct i2c_client *client, int operation, int ctl_name,
 		int *nrels_mag, long *results)
 {
-	long scales[6] = { 270, 100, 
+	long scales[6] = { 250, 270, 
 #ifdef LM87_5V_VCC
 500,
 #else
