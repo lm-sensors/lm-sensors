@@ -19,6 +19,9 @@ ask CVS about it:
 
 2.9.1 (2005????)
   Library: Add support for 2.6 fscpos driver (Stefan Ott)
+           Fix sis5595 in4 (Aurelien Jarno)
+           Add support for 2.6 gl520sm driver (Maarten Deprez)
+  Man pages pwmconfig, fancontrol: New (Aurelien Jarno)
   Module bmcsensors: Fix compile error
   Module ds1621: Fix detection (Aurelien Jarno)
   Module eeprom: Discard SPD-centric checksum module parameter
@@ -28,11 +31,16 @@ ask CVS about it:
                Support VID on the IT8712F
   Module lm90: Fix MAX6657, MAX6658 and MAX6659 detection
   Module w83781d: Revert AS99127F temp2 and temp3 computation change
+  Module w83627hf: Support secondary Super-I/O address
+                   Enable temp2 and temp3 if they are disabled
   Program ddcmon: New; user-space replacement for the ddcmon driver
   Program eeprog: Fix missing first char in ascii mode (J. A. McMahan Jr.)
   Program lm_sensors.init: Cleanups (Axel Thimm)
   Program mkpatch: Add adm1031, fscher, lm63, lm93 and max1619
+  Program pwmconfig: Secure the creation of temporary files (Aurelien Jarno)
   Program sensord: Fix erroneous error message (Aurelien Jarno)
+                   Support sis5595 in4 (Aurelien Jarno)
+  Program sensors: Display sis5595 in4 (Aurelien Jarno)
   Program sensors-detect: Fix MAX6657, MAX6658 and MAX6659 detection
                           Improve IT8705F and IT8712F detection
                           Improve udev detection
