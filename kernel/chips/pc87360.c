@@ -829,8 +829,14 @@ static void pc87360_init_client(struct i2c_client *client, int use_thermistors)
 				   diodes */
 				reg = pc87360_read_value(data, LD_TEMP, (i-11)/2,
 							 PC87365_REG_TEMP_STATUS);
-				if (reg & 0x01)
+				if (reg & 0x01) {
+#ifdef DEBUG
+					printk(KERN_DEBUG "pc87360.o: Skipping "
+					       "temp%d, pin already in use by ",
+					       "temp%d\n", i-7, (i-11)/2);
+#endif
 					continue;
+				}
 			
 				/* Forcibly enable thermistor channel */
 				reg = pc87360_read_value(data, LD_IN, i,
@@ -873,6 +879,15 @@ static void pc87360_init_client(struct i2c_client *client, int use_thermistors)
 			pc87360_write_value(data, LD_TEMP, NO_BANK,
 					    PC87365_REG_TEMP_CONFIG,
 					    reg & 0xFE);
+		}
+
+		if (init >= 2) {
+			/* Chip config as documented by National Semi. */
+			pc87360_write_value(data, LD_TEMP, 0xF, 0xA, 0x08);
+			pc87360_write_value(data, LD_TEMP, 0xF, 0xB, 0x04);
+			pc87360_write_value(data, LD_TEMP, 0xF, 0xC, 0x35);
+			pc87360_write_value(data, LD_TEMP, 0xF, 0xD, 0x05);
+			pc87360_write_value(data, LD_TEMP, 0xF, 0xE, 0x05);
 		}
 	}
 }
