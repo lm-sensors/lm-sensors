@@ -25,6 +25,9 @@ ask CVS about it:
                             Fix w83697hf supposed to have temp3
                             Limits initialization for adm1025/ne1619
                             Handle fscher voltage conversions
+                            Add Tyan Trinity S2495 KT400 setup (Eric
+                              Schumann)
+                            Fix fscher fan labels (Reinhard Nissl)
   Library: Better 2.6 eeprom support
            Change it87 hyst to low
            Add 2.6 gl518sm, fscher support
@@ -49,6 +52,7 @@ ask CVS about it:
                    Simplify gl518sm print
                    Do not ignore errors in FSC chips prints
                    Fix w83l785ts print
+                   Cleanup FSC chips prints
   Program sensors-detect: Fix PATH issues
                           Correctly point to the fscher driver
   
