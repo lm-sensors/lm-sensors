@@ -97,7 +97,7 @@
    SIS630. DANGEROUS! */
 static int force = 0;
 MODULE_PARM(force, "i");
-MODULE_PARM_DESC(force, "Forcibly enable the SIS630. DANGEROUS!")
+MODULE_PARM_DESC(force, "Forcibly enable the SIS630. DANGEROUS!");
 
 
 #ifdef MODULE
