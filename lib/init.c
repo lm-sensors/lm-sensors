@@ -89,6 +89,7 @@ void free_proc_chips_entry(sensors_proc_chips_entry entry)
 void free_chip_name(sensors_chip_name name)
 {
   free(name.prefix);
+  free(name.busname);
 }
 
 void free_bus(sensors_bus bus)
