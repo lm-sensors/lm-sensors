@@ -20,7 +20,7 @@ Supported chips:
   * Winbond W83627HF
     Prefix 'w83627hf'
     Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
-    Datasheet: Available on request from Winbond
+    Datasheet: Possibly available on request from Winbond
 
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>,

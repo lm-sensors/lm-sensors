@@ -62,6 +62,7 @@ gl525sm-to-be-written
 
 lm75
 	lm75		1	-	-	-	yes	no
+	lm77		1	-	-	-	yes	no
 
 lm78
 	lm78		1	7	3	-	yes	yes

@@ -4,6 +4,10 @@ Kernel driver `thmc50.o'
 Status: Complete and some-what tested
 
 Supported chips: 
+  * Analog Devices ADM1022
+    Prefix: `adm1022'
+    Addresses scanned: I2C 0x2D - 0x2F (inclusive)
+    Datasheet: Publicly available at the Analog Devices website
   * Texas Instruments THMC50
     Prefix: `thmc50'
     Addresses scanned: I2C 0x2D - 0x2F (inclusive)

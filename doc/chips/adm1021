@@ -1,14 +1,21 @@
 Kernel driver `adm1021.o'
 =========================
 
-Status: Complete; tested for the ADM1021 and MAX1617,
-        untested for the MAX1617A and the THMC10.
+Status: Complete; tested for most devices.
 
 Supported chips:
   * Analog Devices ADM1021
     Prefix `adm1021'
     Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
     Datasheet: Publicly available at the Analog Devices website
+  * Genesys Logic GL523SM
+    Prefix `gl523sm'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Datasheet:
+  * Intel Xeon Processor
+    Prefix - any other - requires 'force' parameter - see MODPARMS file
+    Addresses scanned: none
+    Datasheet: Publicly available at Intel website
   * Maxim MAX1617
     Prefix `max1617'
     Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
@@ -17,6 +24,10 @@ Supported chips:
     Prefix `max1617a'
     Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
     Datasheet: Publicly available at the Maxim website
+  * National Semiconductor LM84
+    Prefix `lm84'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Datasheet: Publicly available at the National Semiconductor website
   * TI THMC10
     Prefix `thmc10'
     Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)

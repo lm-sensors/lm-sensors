@@ -4,9 +4,13 @@ Kernel driver `lm75.o'
 Status: Complete and well-tested
 
 Supported chips: 
-  * National Semiconductors LM75
+  * National Semiconductor LM75
     Prefix: `lm75'
     Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Datasheet: Publicly available at the National Semiconductors website
+  * National Semiconductor LM77
+    Prefix: `lm75'
+    Addresses scanned: I2C 0x48 - 0x4b (inclusive)
     Datasheet: Publicly available at the National Semiconductors website
 
 Author: Frodo Looijaard <frodol@dds.nl>
@@ -47,6 +51,10 @@ will do no harm, but will return 'old' values.
 
 The LM75 is usually used in combination with LM78-like chips, to measure
 the temperature of the processor(s).
+
+The LM77 is supported as well. It is not distinguished from an LM75
+and the two additional registers in the LM77 are not supported.
+The prefix in the /proc directory is still 'lm75'.
 
 
 Chip Features
