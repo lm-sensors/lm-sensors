@@ -34,7 +34,7 @@ sub print_diff
   my ($package_root,$kernel_root,$kernel_file,$package_file) = @_;
   my ($diff_command,$dummy);
 
-  $diff_command = "diff -u2";
+  $diff_command = "diff -u";
   if ( -e "$kernel_root/$kernel_file") {
     $diff_command .= " $kernel_root/$kernel_file ";
   } else {
