@@ -29,7 +29,7 @@
 #include "compat.h"
 
 /* Addresses to scan */
-static unsigned short normal_i2c[] = {0x4c,0x4d,SENSORS_I2C_END};
+static unsigned short normal_i2c[] = {0x2c,0x2d,SENSORS_I2C_END};
 static unsigned short normal_i2c_range[] = {SENSORS_I2C_END};
 static unsigned int normal_isa[] = {SENSORS_ISA_END};
 static unsigned int normal_isa_range[] = {SENSORS_ISA_END};

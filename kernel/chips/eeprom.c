@@ -27,7 +27,24 @@
 #include "i2c-isa.h"
 #include "version.h"
 
+/* Addresses to scan */
+static unsigned short normal_i2c[] = {SENSORS_I2C_END};
+static unsigned short normal_i2c_range[] = {0x50,0x57,SENSORS_I2C_END};
+static unsigned int normal_isa[] = {SENSORS_ISA_END};
+static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+
+/* Insmod parameters */
+SENSORS_INSMOD_1(eeprom);
+
+static int checksum = 0;
+MODULE_PARM(checksum,"i");
+MODULE_PARM_DESC(checksum,"Only accept eeproms whose checksum is correct");
+
+
 /* Many constants specified below */
+
+/* EEPROM registers */
+#define EEPROM_REG_CHECKSUM 0x3f
 
 /* EEPROM memory types: */
 #define ONE_K		1
@@ -61,6 +78,7 @@ static int eeprom_init(void);
 static int eeprom_cleanup(void);
 
 static int eeprom_attach_adapter(struct i2c_adapter *adapter);
+static int eeprom_detect(struct i2c_adapter *adapter, int address, int kind);
 static int eeprom_detach_client(struct i2c_client *client);
 static int eeprom_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
@@ -123,103 +141,124 @@ static int eeprom_initialized = 0;
 #define MAX_EEPROM_NR 8
 static struct i2c_client *eeprom_list[MAX_EEPROM_NR];
 
-
 int eeprom_attach_adapter(struct i2c_adapter *adapter)
 {
-  int address,err,i;
+  return sensors_detect(adapter,&addr_data,eeprom_detect);
+}
+
+/* This function is called by sensors_detect */
+int eeprom_detect(struct i2c_adapter *adapter, int address, int kind)
+{
+  int i,cs;
   struct i2c_client *new_client;
   struct eeprom_data *data;
+  int err=0;
+  const char *type_name,*client_name;
 
-  err = 0;
-  /* Make sure we aren't probing the ISA bus!! */
-  if (i2c_is_isa_adapter(adapter)) return 0;
-  
-  /* OK, this is no detection. I know. It will do for now, though.  */
-
-  /* Set err only if a global error would make registering other clients
-     impossible too (like out-of-memory). */
-     
-  /* Serial EEPROMs for SMBus use addresses from 0x50 to 0x57 */
-  for (address = 0x50; (! err) && (address <= 0x57); address ++) {
-
-    /* Later on, we will keep a list of registered addresses for each
-       adapter, and check whether they are used here */
-    
-    if (smbus_read_byte(adapter,address) < 0) {
+  /* Make sure we aren't probing the ISA bus!! This is just a safety check
+     at this moment; sensors_detect really won't call us. */
 #ifdef DEBUG
-      printk("eeprom.o: No eeprom found at: 0x%X\n",address);
+  if (i2c_is_isa_adapter(adapter)) {
+    printk("eeprom.o: eeprom_detect called for an ISA bus adapter?!?\n");
+    return 0;
+  }
 #endif
-      continue;
-    }
 
-    /* Real detection code goes here */
+  /* Here, we have to do the address registration check for the I2C bus.
+     But that is not yet implemented. */
 
-    /* Allocate space for a new client structure */
-    if (! (new_client =  kmalloc(sizeof(struct i2c_client) +
-                                sizeof(struct eeprom_data),
-                               GFP_KERNEL))) {
-      err = -ENOMEM;
-      continue;
-    }
+  /* OK. For now, we presume we have a valid client. We now create the
+     client structure, even though we cannot fill it completely yet.
+     But it allows us to access eeprom_{read,write}_value. */
+  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
+                              sizeof(struct eeprom_data),
+                              GFP_KERNEL))) {
+    err = -ENOMEM;
+    goto ERROR0;
+  }
 
-    /* Find a place in our global list */
-    for (i = 0; i < MAX_EEPROM_NR; i++)
-      if (! eeprom_list[i])
-         break;
-    if (i == MAX_EEPROM_NR) {
-      err = -ENOMEM;
-      printk("eeprom.o: No empty slots left, recompile and heighten "
-             "MAX_EEPROM_NR!\n");
+  data = (struct eeprom_data *) (((struct i2c_client *) new_client) + 1);
+  new_client->addr = address;
+  new_client->data = data;
+  new_client->adapter = adapter;
+  new_client->driver = &eeprom_driver;
+
+  /* Now, we do the remaining detection. It is not there, unless you force
+     the checksum to work out. */
+  if (checksum) {
+    cs = 0;
+    for (i = 0; i <= 0x3e; i++)
+      cs += smbus_read_byte_data(adapter,address,i);
+    cs &= 0xff;
+    if (smbus_read_byte_data(adapter,address,EEPROM_REG_CHECKSUM) != cs)
       goto ERROR1;
-    }
-    eeprom_list[i] = new_client;
-    
-    /* Fill the new client structure with data */
-    data = (struct eeprom_data *) (new_client + 1);
-    new_client->data = data;
-    new_client->id = i;
-    new_client->addr = address;
-    new_client->adapter = adapter;
-    new_client->driver = &eeprom_driver;
-    strcpy(new_client->name,"EEPROM chip");
-    data->valid = 0;
-    data->update_lock = MUTEX;
-    
-    /* Tell i2c-core a new client has arrived */
-    if ((err = i2c_attach_client(new_client)))
-      goto ERROR2;
-    
-    /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,"eeprom",
-                                      eeprom_dir_table_template)) < 0)
-      goto ERROR3;
-    data->sysctl_id = err;
-    err = 0;
+  }
+  
+  /* Determine the chip type - only one kind supported! */
+  if (kind <= 0)
+    kind = eeprom;
 
-    continue;
+  if (kind == eeprom) {
+    type_name = "eeprom";
+    client_name = "EEPROM chip";
+  } else {
+#ifdef DEBUG
+    printk("eeprom.o: Internal error: unknown kind (%d)?!?",kind);
+#endif
+    goto ERROR1;
+  }
+
+  /* Fill in the remaining client fields and put it into the global list */
+  strcpy(new_client->name,client_name);
+
+  /* Find a place in our global list */
+  for (i = 0; i < MAX_EEPROM_NR; i++)
+    if (! eeprom_list[i])
+       break;
+  if (i == MAX_EEPROM_NR) {
+    err = -ENOMEM;
+    printk("eeprom.o: No empty slots left, recompile and heighten "
+           "MAX_EEPROM_NR!\n");
+    goto ERROR2;
+  }
+  eeprom_list[i] = new_client;
+  new_client->id = i;
+  data->valid = 0;
+  data->update_lock = MUTEX;
+
+  /* Tell the I2C layer a new client has arrived */
+  if ((err = i2c_attach_client(new_client)))
+    goto ERROR3;
+
+  /* Register a new directory entry with module sensors */
+  if ((i = sensors_register_entry(new_client,type_name,
+                                  eeprom_dir_table_template)) < 0) {
+    err = i;
+    goto ERROR4;
+  }
+  data->sysctl_id = i;
+
+  return 0;
+
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
+ERROR4:
+  i2c_detach_client(new_client);
 ERROR3:
-    i2c_detach_client(new_client);
+  for (i = 0; i < MAX_EEPROM_NR; i++)
+    if (new_client == eeprom_list[i])
+      eeprom_list[i] = NULL;
 ERROR2:
-    eeprom_list[i] = NULL;
 ERROR1:
-    kfree(new_client);
-  }
+  kfree(new_client);
+ERROR0:
   return err;
 }
 
 int eeprom_detach_client(struct i2c_client *client)
 {
   int err,i;
-  for (i = 0; i < MAX_EEPROM_NR; i++)
-    if (client == eeprom_list[i])
-      break;
-  if ((i == MAX_EEPROM_NR)) {
-    printk("eeprom.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
 
   sensors_deregister_entry(((struct eeprom_data *)(client->data))->sysctl_id);
 
@@ -228,8 +267,17 @@ int eeprom_detach_client(struct i2c_client *client)
     return err;
   }
 
+  for (i = 0; i < MAX_EEPROM_NR; i++)
+    if (client == eeprom_list[i])
+      break;
+  if ((i == MAX_EEPROM_NR)) {
+    printk("eeprom.o: Client to detach not found.\n");
+    return -ENOENT;
+  }
   eeprom_list[i] = NULL;
+
   kfree(client);
+
   return 0;
 }
 
