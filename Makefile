@@ -24,13 +24,17 @@
 # If your /bin/sh is not bash, change the below definition so that make can
 # find bash. Or you can hope your sh-like shell understands all scripts.
 # I think so, but I have not tested it.
-# SHELL=/usr/bin/bash
+#SHELL := /usr/bin/bash
+
+# The currently running kernel version. This is used right below to
+# determine where the kernel sources can be found.
+KERNELVERSION := $(shell uname -r)
 
 # The location of linux itself. This is used to find the kernel headers
 # and other things.
-#LINUX=/usr/src/linux
-LINUX=/lib/modules/$(shell uname -r)/build
-LINUX_HEADERS=$(LINUX)/include
+#LINUX := /usr/src/linux
+LINUX := /lib/modules/$(KERNELVERSION)/build
+LINUX_HEADERS := $(LINUX)/include
 
 # Determine whether we need to compile the kernel modules, or only the
 # user-space utilities. By default, the kernel modules are compiled.
@@ -81,8 +85,9 @@ PREFIX := /usr/local
 # This is the directory into which the modules will be installed.
 # The magic invocation will return something like this:
 #   /lib/modules/2.2.15-ac9/misc
-# MODDIR := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`/misc
-MODPREF := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`
+#MODDIR := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`/misc
+#MODPREF := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`
+MODPREF := /lib/modules/$(KERNELVERSION)
 
 # This is the directory where sensors.conf will be installed, if no other
 # configuration file is found

@@ -2,7 +2,7 @@
 
 INSTALLATION INSTRUCTIONS
 
-REQUIRES kernel 2.4.13 or later, or i2c-2.6.1 or later!!!
+REQUIRES i2c-2.6.6 or later!!!
 
 FOR 2.5 KERNELS, we do not recommend attempting to compile this package.
                  Use kernel patches linked from our download page instead!!!
@@ -155,12 +155,13 @@ At the top of the Makefile are a couple of configuration variables that
 you may want to change. As far as possible, the Makefile tries to figure
 out by itself their settings, but it is possible to overrule them. A list
 is found below. Most important are the variables that determine where
-your kernel is located (LINUX=/usr/src/linux), where the i2c header files
+your kernel is located (LINUX=/lib/modules/KERNELVERSION/build, usually
+links to /usr/src/linux or something similar), where the i2c header files
 are (I2C_HEADERS=/usr/local/include) and where you want to install 
-your modules (MODDIR=/lib/modules/KERNELVERSION/misc) and
-header files (LINUX_INCLUDE_DIR=/usr/local/include/linux). You can see
-that the installation locations are choosen in such a way that they
-are separate from the true kernel.
+your modules (MODDIR=/lib/modules/KERNELVERSION) and header files
+(LINUX_INCLUDE_DIR=/usr/local/include/linux). You can see that the
+installation locations are choosen in such a way that they are separate
+from the true kernel.
 
 Compilation is done by `make all'; `make install' installs the package.
 You will get a lot of warnings about files which are not found, all 
@@ -177,7 +178,9 @@ SHELL (default: /bin/sh)
   You may have to specify the full path to Bash here, if /bin/sh is some
   other shell. There have been conflicting reports on whether this is 
   needed.
-LINUX default: /usr/src/linux
+KERNELVERSION
+  The version of the currently running kernel.
+LINUX (default: /lib/modules/$(KERNELVERSION)/build)
   The location of your kernel tree.
 COMPILE_KERNEL
   Determine whether you want to consider the kernel modules for compilation
@@ -189,7 +192,7 @@ COMPILE_KERNEL
   You may want to set this to 0 if you have just patched and compiled
   your kernel using the same version of this package, and just want to
   compile the user-space tools.
-I2C_HEADERS default: /usr/local/include
+I2C_HEADERS (default: /usr/local/include)
   This lists where the i2c headers are found. If you used compilation
   option 1 for the i2c package, the default will be right. If you used
   compilation options 2 or 3, it will not, and may actually cause
@@ -200,41 +203,41 @@ SMP
   This must be set to 1 for a SMP kernel. The magic invocation should
   determine this automatically, so you should not have to bother with 
   this.
-WARN default: 0
-  Generate additional compilation warnings; mainly interesting for
-  developers.
 MODVER
   This must be set to 1 if CONFIG_MODVERSIONS is defined. The magic
   invocation should determine this automatically, so you should not
   have to bother with this.
-DEBUG default: 0
+WARN (default: 0)
+  Generate additional compilation warnings; mainly interesting for
+  developers.
+DEBUG (default: 0)
   Some drivers will issue more debug information if you set this to
   1. Don't do it, unless you are a developer or are instructed to do
   so by the lm_sensors team.
-PREFIX default: /usr/local
-  Prefix for almost all installation directories
-MODDIR default: /lib/modules/KERNELVERSION/misc)
-  The location where the kernel modules will be installed. 
-ETCDIR default: /etc
-  Installation location of the sensors.conf configuration file
-LIBDIR default: $(PREFIX)/lib
+PREFIX (default: /usr/local)
+  Prefix for almost all installation directories.
+MODPREF (default: /lib/modules/$(KERNELVERSION))
+  The location where the kernel modules will be installed.
+ETCDIR (default: /etc)
+  Installation location of the sensors.conf configuration file.
+LIBDIR (default: $(PREFIX)/lib)
   Installation location of all static and shared libraries.
-BINDIR default: $(PREFIX)/bin
-  Installation directory of programs useful for users
-SBINDIR default: $(PREFIX)/sbin
-  Installation directory of system administrator-only programs
-INCLUDEDIR default: $(PREFIX)/include
-  Base installation directory for include files (see next two vars)
-SYSINCLUDEDIR default: $(INCLUDEDIR)/linux
-  Installation directory for system include files
-LIBINCLUDEDIR default: $(INCLUDEDIR)/sensors
+BINDIR (default: $(PREFIX)/bin)
+  Installation directory of programs useful for users.
+SBINDIR (default: $(PREFIX)/sbin)
+  Installation directory of system administrator-only programs.
+INCLUDEDIR (default: $(PREFIX)/include)
+  Base installation directory for include files (see next two vars).
+SYSINCLUDEDIR (default: $(INCLUDEDIR)/linux)
+  Installation directory for system include files.
+LIBINCLUDEDIR (default: $(INCLUDEDIR)/sensors)
   Installation directory for libsensors include files.
-MANDIR default: $(PREFIX)/man
-  Base installation directory for manual pages
-MANOWN default: root
-  Owner of manual pages
-MANGRP default: root
-  Group of manual pages
+MANDIR (default: $(PREFIX)/man)
+  Base installation directory for manual pages.
+MANOWN (default: root)
+  Owner of manual pages.
+MANGRP (default: root)
+  Group of manual pages.
 
 
 
