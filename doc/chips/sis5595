@@ -16,6 +16,20 @@ Supported chips:
 
 Author: Kyösti Mälkki <kmalkki@cc.hut.fi>
 
+   Note: The chips below contain a 0008 device which is incompatible with the
+         5595. We recognize these by the presence of the listed
+         "blacklist" PCI ID and refuse to load.
+
+   NOT SUPPORTED	PCI ID		BLACKLIST PCI ID	
+	 540		0008		0540
+	 550		0008		0550
+	5513		0008		5511
+	5581		0008		5597
+	5582		0008		5597
+	5597		0008		5597
+	5598		0008		5597/5598
+	 630		0008		0630
+	 730		0008		0730
 
 Module Parameters
 -----------------
