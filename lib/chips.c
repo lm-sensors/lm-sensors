@@ -419,7 +419,7 @@ static sensors_chip_feature max1617a_features[] =
 static sensors_chip_feature gl518_features[] =
   {
     { SENSORS_GL518_VDD, "vdd", NOMAP,NOMAP,
-                            R, GL518_SYSCTL_VDD, VALUE(3), 2, "in0", 3 },
+                            R, GL518_SYSCTL_VDD, VALUE(3), 2, "in_input0", 3 },
     { SENSORS_GL518_VIN1, "vin1", NOMAP,NOMAP,
                              R, GL518_SYSCTL_VIN1, VALUE(3), 
                              2 },
@@ -487,7 +487,7 @@ static sensors_chip_feature gl518_features[] =
                                GL518_SYSCTL_BEEP, VALUE(2), 0 },
     { SENSORS_GL518_FAN1OFF, "fan1_off", SENSORS_GL518_FAN1,
                                NOMAP, RW,
-                               GL518_SYSCTL_FAN1OFF, VALUE(1), 0 },
+                               GL518_SYSCTL_FAN1OFF, VALUE(1), 0, "fan_auto1", 0 },
     { SENSORS_GL518_FAN1PIN, "fan1_off_pin", SENSORS_GL518_FAN1OFF,
                                NOMAP, RW,
                                GL518_SYSCTL_FAN1OFF, VALUE(2), 0 },
