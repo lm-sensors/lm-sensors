@@ -18,11 +18,17 @@ Bus and device numbers may differ, but the function number must be identical
 an entry, you have a PIIX4 SMBus controller.
 
 On some computers (most notably, some Dells), the SMBus is disabled by
-default. If you compile the i2c-piix4 module with '-DFORCE_PIIX4_ENABLE',
-it will try to enable it. THIS IS VERY DANGEROUS! If the BIOS did not
+default. If you use the insmod parameter 'force=1', the kernel module
+ will try to enable it. THIS IS VERY DANGEROUS! If the BIOS did not
 set up a correct address for this module, you could get in big trouble
 (read: crashes, data corruption, etc.). Try this only as a last resort
-(try BIOS updates first, for example), and backup first!
+(try BIOS updates first, for example), and backup first! An even more
+dangerous option is 'force_addr=<IOPORT>'. This will not only enable the
+PIIX4 like 'force' foes, but it will also set a new base I/O port address.
+The SMBus parts of the PIIX4 needs a range of 8 of these addresses to
+function correctly. If these addresses are already reserved by some other
+device, you will get into big trouble! DON'T USE THIS IF YOU ARE NOT VERY
+SURE ABOUT WHAT YOU ARE DOING!
 
 The PIIX4E is just an new version of the PIIX4; it is supported as well. The
 PIIX/PIIX3 does not implement an SMBus or I2C bus, so you can't use this
