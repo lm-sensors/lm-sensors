@@ -590,7 +590,6 @@ void bar(void){
 						fflush(stderr); 
 						rewind(stderr);
 						break;
-			default:
 		}
 	stav++;
 
