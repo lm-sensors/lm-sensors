@@ -4610,6 +4610,76 @@ void print_lm90(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_lm63(const sensors_chip_name *name)
+{
+  char *label;
+  double cur, high, low;
+  int valid, alarms;
+
+  if (!sensors_get_feature(*name, SENSORS_LM63_ALARMS, &cur))
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_LM63_LOCAL_TEMP,
+      &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_LM63_LOCAL_TEMP, &cur)
+   && !sensors_get_feature(*name, SENSORS_LM63_LOCAL_HIGH, &high)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, high, 0, MAXONLY, 0, 0);
+      printf(" %s\n",
+      	alarms&LM63_ALARM_LOCAL_HIGH?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get local temperature data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_LM63_REMOTE_TEMP,
+      &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_LM63_REMOTE_TEMP, &cur)
+   && !sensors_get_feature(*name, SENSORS_LM63_REMOTE_HIGH, &high)
+   && !sensors_get_feature(*name, SENSORS_LM63_REMOTE_LOW, &low)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, high, low, MINMAX, 1, 1);
+      printf(" %s\n",
+        alarms&LM63_ALARM_REMOTE_OPEN?"OPEN":
+        alarms&LM63_ALARM_REMOTE_CRIT?"CRITICAL":
+      	alarms&(LM63_ALARM_REMOTE_HIGH|LM63_ALARM_REMOTE_LOW)?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get remote temperature data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_LM63_REMOTE_TCRIT,
+      &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_LM63_REMOTE_TCRIT, &high)
+   && !sensors_get_feature(*name, SENSORS_LM63_REMOTE_TCRIT_HYST, &low)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(high, low, 0, HYSTONLY, 0, 0);
+      printf("\n");
+    }
+  } else
+    printf("ERROR: Can't get remote tcrit data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_LM63_FAN,
+      &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_LM63_FAN, &cur)
+   && !sensors_get_feature(*name, SENSORS_LM63_FAN_LOW, &low)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%4.0f RPM  (min = %4.0f RPM) %s\n", cur, low,
+	alarms&LM63_ALARM_FAN_LOW?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get remote tcrit data!\n");
+  free_the_label(&label);
+}
 
 void print_adm1031(const sensors_chip_name *name)
 {
