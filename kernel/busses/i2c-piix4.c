@@ -19,7 +19,13 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* Note: we assume there can only be one PIIX4, with one SMBus interface */
+/*
+   Supports:
+	Intel PIIX4
+	Serverworks OSB4, CSB5
+
+   Note: we assume there can only be one device, with one SMBus interface.
+*/
 
 #include <linux/version.h>
 #include <linux/module.h>
@@ -145,7 +151,7 @@ static struct i2c_adapter piix4_adapter = {
 
 static int __initdata piix4_initialized;
 static unsigned short piix4_smba = 0;
-static kind = 0;
+static int kind = 0;
 
 /* Detect whether a PIIX4 can be found, and initialize it, where necessary.
    Note the differences between kernels with the old PCI BIOS interface and
@@ -493,7 +499,7 @@ int __init i2c_piix4_init(void)
 		return res;
 	}
 	piix4_initialized++;
-	sprintf(piix4_adapter.name, kind==1?"SMBus PIIX4 adapter at %04x":"SMBus OSB4 adapter at %04x",
+	sprintf(piix4_adapter.name, kind==1?"SMBus PIIX4 adapter at %04x":"SMBus OSB4/CSB5 adapter at %04x",
 		piix4_smba);
 	if ((res = i2c_add_adapter(&piix4_adapter))) {
 		printk
