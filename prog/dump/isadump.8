@@ -5,6 +5,7 @@ isadump \- examine ISA registers
 .SH SYNOPSIS
 .B isadump
 .RB [ -y ]
+.RB [ "-k V1,V2..." ]
 .I addrreg
 .I datareg
 .RI [ "bank " [ bankreg ]]
@@ -32,6 +33,12 @@ Disable interactive mode. By default, isadump will wait for a confirmation
 from the user before messing with the ISA bus. When this flag is used, it
 will perform the operation directly. This is mainly meant to be used in
 scripts.
+.TP
+.B -k V1,V2...
+Specify a comma-separated list of bytes to send as the key sequence to enter
+the chip configuration mode. Most Super-I/O chips need this.
+Known key sequences are: 0x87,0x01,0x55,0x55 for ITE, 0x55 for SMSC, 0x87,0x87
+for Winbond and VIA, none needed for National Semiconductor.
 
 .SH OPTIONS (I2C-like access mode)
 At least two options must be provided to isadump. \fIaddrreg\fR contains the
