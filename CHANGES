@@ -31,6 +31,7 @@ ask CVS about it:
   Module sensors: Fix for kernel 2.4.0-test8
                   (remove copy_to_user_ret and put_user_ret)
   Module w83781d: limit fan divisors to 8 max. for as99127f
+  Program decode-dimms: Add html output option, update for SPD spec 1.2B.
   Program i2cdump: Add smbus block read support
   Programs i2cdetect, i2cdump: Improve error reporting
   Program sensors: new switch -u (--unknown)
