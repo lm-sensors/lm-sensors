@@ -1707,10 +1707,12 @@ static void lm93_fan_smart_tach(struct i2c_client *client, int operation,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
+		int mapping;
+
 		lm93_update_client(client);
 
 		/* extract the relevant mapping */
-		int mapping = (data->sf_tach_to_pwm >> (nr * 2)) & 0x03;
+		mapping = (data->sf_tach_to_pwm >> (nr * 2)) & 0x03;
 
 		/* if there's a mapping and it's enabled */
 		if (mapping && ((data->sfc2 >> nr) & 0x01))
