@@ -1,6 +1,6 @@
 Kernel driver `i2c-ipmb.o'
 
-Status: Alpha
+Status: IN DEVELOPMENT - DOESN'T WORK AT ALL - DON'T BOTHER TRYING IT
 
 Supported adapters:
   * IPMI BMC

@@ -19,6 +19,7 @@
 */
 
 /*
+    THIS DOESN'T WORK YET - DON'T BOTHER TRYING IT.	
     This implements an i2c adapter for the BMC IPMB.
 */
 
