@@ -18,28 +18,32 @@
 ## package. To protect the innocent, we define kversion and make the
 ## resulting package dependable on the specific version of the kernel.
 
-## The only customizable variables are prefix and kversion.
-## If you have used a custom tug in the vesrion of your kernel rpm,
-## you may need to adjust mversion as well. 
+#This spec file is good for stock kernels of RedHat based distributions.
+#If you run a stock smp kernel, the package suitable for smp kernel will be
+#built. If you run a stock up kernel, the package suitable for up kernel will be
+#built.
 
-## If i2c has been installed into a location defferent from prefix or /usr;
+## The only customizable variable is prefix.
+## If i2c has been installed into a location different from prefix or /usr;
 ## you must define I2C_HEADERS below.
 ## This package IS relocatable (change prefix to relocate).
 
-%define prefix /usr/local
-%define I2C_HEADERS %{prefix}/include
+%define prefix /usr
 
 #Define your kernel version here.
-%define kversion 2.2.14
-%define mversion %{kversion}
-#Another example for the above: %define kversion 2.2.14-SMP
+%define smptag %(uname -r| cut -f2 -d - |sed 's/[0-9]//g')
+%define versiontag %(uname -r|sed 's/smp//')
+%define kversion %(uname -r)
+%define kname kernel%(echo %{smptag}|sed 's/smp/-smp/')
+
+%define I2C_HEADERS %(rpm -ql kernel-i2c|grep include/linux/i2c.h|head -1|sed 's!/linux/i2c.h!!')
 
 %define name lm_sensors
 %define ver 2.5.0
 Summary: Hardware Health Monitoring Tools
 Name: %{name}
 Version: %{ver}
-Release: 1
+Release: 1rh
 Group: Applications/System
 Copyright: GPL
 Source0: http://www.lm-sensors.nu/lm-sensors/archive/%{name}-%{ver}.tar.gz
@@ -47,17 +51,16 @@ Buildroot: /var/tmp/%{name}
 Docdir: %{prefix}/doc
 Requires: %{name}-drivers >= %{ver}
 Url: http://www.netroedge.com/~lm78/
-
 ##For officially distributed packages, please sign below
-##Packager: Lm_sensors Group <sensors@stimpy.netroedge.com> 
+Packager: Constantine Gavrilov <const-g@xpert.com>
+Distribution: RedHat 6.1
 
 %package drivers
 Summary: Chip and bus drivers for general SMBus access and hardware monitoring.
-Group: Base/Kernel
-###Latest RedHat distributions define a different Group: Group: System Environment/Kernel
-
+Group: System Environment/Kernel
 Copyright: GPL
-Requires: kernel-i2c >= %{ver}, kernel = %{kversion}
+Version: %{ver}%{smptag}
+Requires: kernel-i2c >= %{ver}, %{kname} = %{versiontag}
 
 %package devel
 Summary: Development environment for hardware health monitoring applications
@@ -109,11 +112,16 @@ monitoring.
 
 %build
 #even for non-SMP systems parallel make will build faster
-make -j4 I2C_HEADERS=%{I2C_HEADERS}
+if [ %{smptag} = smp ]; then
+ make -j4 MODVER=1 SMP=1 I2C_HEADERS=%{I2C_HEADERS}
+else
+ make -j4 MODVER=1 SMP=0 I2C_HEADERS=%{I2C_HEADERS}
+fi
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT PREFIX=%{prefix}
+make install DESTDIR=$RPM_BUILD_ROOT PREFIX=%{prefix} \
+	MODDIR=/lib/modules/%{kversion}/misc
 #back up stock config
 cp -a $RPM_BUILD_ROOT/etc/sensors.conf $RPM_BUILD_ROOT/etc/sensors.ex
 
@@ -145,11 +153,10 @@ depmod -a || /bin/true
 %doc doc/{useful_addresses.html,version-2}
 
 %files drivers
-%dir /lib/modules/%{mversion}
-%dir /lib/modules/%{mversion}/misc
-/lib/modules/%{mversion}/misc/*
-%dir %{prefix}/include/linux
-%{prefix}/include/linux/*.h
+%dir /lib/modules/%{kversion}
+%dir /lib/modules/%{kversion}/misc
+/lib/modules/%{kversion}/misc/*
+%{prefix}/include/linux/*
 %doc doc/busses doc/chips doc/developers doc/kernel
 
 %files devel

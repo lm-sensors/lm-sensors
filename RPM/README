@@ -1,5 +1,9 @@
 ##by Constantine Gavrilov <const-g@xpert.com>
 
+Use lm_sensors-rh.spec to build against stock kernels of RedHat based
+distributions.
+Use lm_sesnosrs.spec to build against custom built kernels.
+
 Short instructions on how to build:
 
 1) Put lm_sesnosrs.spec into SPECS directory of your rpm tree
@@ -12,9 +16,11 @@ Short instructions on how to build:
 3) Adjust the following variables in lm_sesnosrs.spec:
  a) prefix - where the stuff gets installed;
  b) kversion - kernel version you are running;
- c) ver - version of lm_sensors you are compiling (if necessary);
- d) Group - to which groups the packages belong  (if necessary).
- e) If i2c has been installed into a location defferent form prefix or /usr,
+ c) mversion (if necessary) - defines path for modules' install (equal to
+    kversion by default) -- modules will be installed to /lib/modules/%{mversion}. 
+ d) ver - version of lm_sensors you are compiling (if necessary);
+ e) Group - to which groups the packages belong  (if necessary).
+ f) If i2c has been installed into a location defferent form prefix or /usr,
     you must ajust I2C_HEADERS as well.
  
 4) Type `rpm -bb lm_sensors.spec' from the SPECS directory.
@@ -57,4 +63,3 @@ resulting package dependable on the specific version of the kernel.
 
 For help on building this rpms, suggestions, comments, etc,  you may contact me
 at <const-g@xpert.com> .
-
