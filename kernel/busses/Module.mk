@@ -98,16 +98,16 @@ all :: all-kernel-busses
 
 #
 # If $MODPREF/kernel exists, we presume the new (2.4.0) /lib/modules/x.y.z directory
-# layout, so we install in kernel/drivers/i2c/ and remove old versions in misc/
-# Otherwise we install in misc/ as before.
+# layout, so we install in kernel/drivers/i2c/busses and remove old versions in misc/
+# and kernel/drivers/i2c/ . Otherwise we install in misc/ as before.
 #
 install-kernel-busses: all-kernel-busses
 	if [ -n "$(KERNELBUSSESTARGETS)" ] ; then \
 	  if [ -d "$(DESTDIR)$(MODPREF)/kernel" ] ; then \
-	    $(MKDIR) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c ; \
-	    $(INSTALL) -o root -g root -m 644 $(KERNELBUSSESTARGETS) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c ; \
+	    $(MKDIR) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/busses ; \
+	    $(INSTALL) -o root -g root -m 644 $(KERNELBUSSESTARGETS) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/busses ; \
 	    for i in $(KERNELBUSSESTARGETS) ; do \
-	      $(RM) $(DESTDIR)$(MODPREF)/misc/`basename $$i` ; \
+	      $(RM) $(DESTDIR)$(MODPREF)/misc/`basename $$i` $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/`basename $$i` ; \
 	    done \
 	  else \
 	    $(MKDIR) $(DESTDIR)$(MODPREF)/misc ; \

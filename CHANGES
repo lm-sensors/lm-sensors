@@ -17,11 +17,12 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.7.1 (2003????)
+2.8.0 (2003????)
   NOTE: Requires i2c-2.7.0 or newer.
   File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
   Library: Add support for exponents and logarithms for vt1211/vt8235 temps
-  Makefile: Generate warnings if new library won't be found by ld.so
+  Makefiles: Generate warnings if new library won't be found by ld.so;
+             Modules now install in kernel/drivers/i2c/[busses,chips]
   Module adm1021: Ignore failed reads and report old value
   Modules ddcmon, eeprom: Use i2c block reads if possible
   Module i2c-i810.c: Fix for some chips
