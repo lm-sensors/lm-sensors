@@ -1650,7 +1650,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
         name => "SMSC LPC47B397-NC Super IO",
         driver => "smsc47b397",
         devid => 0x6f,
-        logdev => 0x0a,
+        logdev => 0x08,
       },
     ],
   },
