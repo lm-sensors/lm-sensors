@@ -374,8 +374,8 @@ static void lm63_init_client(struct i2c_client *client)
 		(data->config & 0x04) ? "tachometer input" :
 		"alert output");
 	printk(KERN_DEBUG "lm63: PWM clock %s kHz, output frequency %u Hz\n",
-		(data->config_fan & 0x04) ? "1.4" : "360",
-		((data->config_fan & 0x04) ? 700 : 180000) / data->pwm1_freq);
+		(data->config_fan & 0x08) ? "1.4" : "360",
+		((data->config_fan & 0x08) ? 700 : 180000) / data->pwm1_freq);
 	printk(KERN_DEBUG "lm63: PWM output active %s, %s mode\n",
 		(data->config_fan & 0x10) ? "low" : "high",
 		(data->config_fan & 0x20) ? "manual" : "auto");
