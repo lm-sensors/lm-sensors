@@ -162,8 +162,10 @@ int Voodoo3_I2CReadByte()
   out();
   for (i=7; i>=0; i--) {
     out();
+    out();
     clkon();
     data|=(rdat()<<i);
+    out();
     out();
     clkoff();
   }
@@ -190,6 +192,7 @@ int Voodoo3_I2CSendByte(unsigned char data)
     clkon();
     out();
     dat(temp);
+    out();
     clkoff();
     out();
   }
