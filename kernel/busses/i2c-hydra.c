@@ -185,7 +185,7 @@ static
 #else
 extern
 #endif
-       int __init i2c_init_hydra(void)
+       int __init i2c_hydra_init(void)
 {
 	if (find_hydra() < 0) {
 		printk("Error while reading PCI configuration\n");
@@ -212,7 +212,7 @@ MODULE_DESCRIPTION("i2c for Apple Hydra Mac I/O");
 
 int init_module(void) 
 {
-	return i2c_init_hydra();
+	return i2c_hydra_init();
 }
 
 void cleanup_module(void) 
