@@ -87,7 +87,6 @@
 */
 #define MAP_ACPI 1
 #undef FORCE_ALI15X3_ENABLE
-#undef DEBUG
 
 /* ALI15X3 SMBus address offsets */
 #define SMBHSTSTS (0 + ali15x3_smba)
@@ -513,13 +512,17 @@ s32 ali15x3_access(u8 addr, char read_write,
       outb_p(command, SMBHSTCMD);
       if (read_write == SMBUS_WRITE) {
         len = data->block[0];
-        if (len < 0) 
+        if (len < 0) {
           len = 0;
-        if (len > 32)
+          data->block[0] = len;
+        }	
+        if (len > 32) {
           len = 32;
+          data->block[0] = len;
+        }	
         outb_p(len,SMBHSTDAT0);
         outb_p(inb_p(SMBHSTCNT) | ALI15X3_BLOCK_CLR, SMBHSTCNT); /* Reset SMBBLKDAT */
-        for (i = 1; i <= len; i ++)
+        for (i = 1; i <= len; i++)
           outb_p(data->block[i],SMBBLKDAT);
       }
       size = ALI15X3_BLOCK_DATA;
@@ -546,10 +549,17 @@ s32 ali15x3_access(u8 addr, char read_write,
       data->word = inb_p(SMBHSTDAT0) + (inb_p(SMBHSTDAT1) << 8);
       break;
     case ALI15X3_BLOCK_DATA:
-      data->block[0] = inb_p(SMBHSTDAT0);
+      len = inb_p(SMBHSTDAT0);
+      if(len > 32)	
+        len = 32;
+      data->block[0] = len;
       outb_p(inb_p(SMBHSTCNT) | ALI15X3_BLOCK_CLR, SMBHSTCNT); /* Reset SMBBLKDAT */
-      for (i = 1; i <= data->block[0]; i++)
+      for (i = 1; i <= data->block[0]; i++) {
         data->block[i] = inb_p(SMBBLKDAT);
+#ifdef DEBUG
+        printk("i2c-ali15x3.o: Blk: len=%d, i=%d, data=%02x\n", len, i, data->block[i]);
+#endif DEBUG
+      }
       break;
   }
   return 0;
