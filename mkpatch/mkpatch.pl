@@ -699,6 +699,9 @@ sub main
   } 
   close INPUT;
 
+  die "First apply the i2c patches to `$kernel_root'!" 
+       if ! -d "$kernel_root/drivers/i2c";
+
   # --> Read "version.h"
   open INPUT, "$package_root/version.h"
         or die "Can't open `$package_root/version.h'";
