@@ -629,7 +629,6 @@ void print_w83781d(const sensors_chip_name *name)
       printf("ERROR: Can't get IN6 data!\n");
     free_the_label(&label);
   }
-/* FIXME - add alarms 7 and 8 */
   if (is82d) {
     if (!sensors_get_label(*name,SENSORS_W83782D_IN7,&label) &&
         !sensors_get_feature(*name,SENSORS_W83782D_IN7,&cur) &&
@@ -637,8 +636,8 @@ void print_w83781d(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_W83782D_IN7_MAX,&max)) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
-             cur,min,max,alarms&W83781D_ALARM_IN6?"ALARM":"     ",
-             beeps&W83781D_ALARM_IN6?"(beep)":"");
+             cur,min,max,alarms&W83782D_ALARM_IN7?"ALARM":"     ",
+             beeps&W83782D_ALARM_IN7?"(beep)":"");
     } else
       printf("ERROR: Can't get IN7 data!\n");
     free_the_label(&label);
@@ -648,8 +647,8 @@ void print_w83781d(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_W83782D_IN8_MAX,&max)) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
-             cur,min,max,alarms&W83781D_ALARM_IN6?"ALARM":"     ",
-             beeps&W83781D_ALARM_IN6?"(beep)":"");
+             cur,min,max,alarms&W83782D_ALARM_IN8?"ALARM":"     ",
+             beeps&W83782D_ALARM_IN8?"(beep)":"");
     } else
       printf("ERROR: Can't get IN6 data!\n");
     free_the_label(&label);
