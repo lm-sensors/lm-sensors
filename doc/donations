@@ -3,23 +3,31 @@ The lm_sensors team gratefully acknowledges the following donations.
 Drivers are very difficult to develop without actual hardware.
 Generally, the work goes quickly once we have the hardware.
 
-Evaluation boards are fine. Real computer hardware is even better
-because it let us do real-world testing over a longer period of time,
-and also supports the project in general.
+Evaluation boards are fine. Real computer hardware is much better though,
+because it lets us do real-world testing over a longer period of time.
+In many cases, the way a chipset is integrated in systems must be taken
+into acount in the driver, and evaluation boards don't help much there.
+Donation of usable computer hardware also supports the project in general,
+so hardware which isn't directly related to the development of a hardware
+monitoring driver, but can be used to build test systems, is welcome too.
 
 If you would like to make a donation, please contact us at
 sensors@stimpy.netroedge.com. Thanks!
 
 
+Donations are listed in chronological order. Note that the person mentioned
+is the one who holds the device now, which is not necesarily the one to who
+the donation was sent in the first place.
 
 
 Donation from	Donation and subsequent development work	Date & Person
 -------------	----------------------------------------	-------------
-AMD		various sensor evaluation boards		2000
-		Drivers developed: various
 
 TI		i810 motherboard w/ 366 Celeron			1999-07
 		Drivers developed: i801, i810, w83627hf
+
+AMD		various sensor evaluation boards		2000
+		Drivers developed: various
 
 SiS		SiS 540/630 motherboard w/ 5595			2000-01
 		Drivers developed: sis5595 improvements
@@ -27,8 +35,8 @@ SiS		SiS 540/630 motherboard w/ 5595			2000-01
 Cendio Systems 	Asus P3B-F w/ AS99127F				2000-05
 		Drivers developed: as99127f improvements
 
-Atipa		SuperMicro370DLE w/ Serverworks, LM87		2000-09
-		Drivers developed: serverworks support added
+Atipa		SuperMicro 370DLE w/ Serverworks, LM87		2000-09
+		Drivers developed: serverworks support added	Jean Delvare
 		to i2c-piix4; lm87 testing and improvements
 
 Fujitsu		Complete system for general project support	2001-11
@@ -60,9 +68,12 @@ National	LM83 evaluation board				2003-12
 Semiconductor	Drivers developed: lm83 testing and		Jean Delvare
 		improvements; lm83 ported to Linux 2.6
 
-Analog Devices	ADM1025 and ADT7467/8 evaluation boards		2004-01
+Analog Devices	ADM1025 evaluation board			2004-01
 		Drivers developed: adm1025 testing and		Jean Delvare
 		improvements; adm1025 ported to Linux 2.6
+
+Analog Devices	ADT7467/8 evaluation boards			2004-01
+		Drivers developed: nothing yet			Jean Delvare
 
 Analog Devices  ADM1031 evaluation board			2004-04
 		Drivers developed: adm1031 for Linux 2.4 and	Jean Delvare
