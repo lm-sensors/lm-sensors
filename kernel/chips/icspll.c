@@ -23,7 +23,8 @@
 /*
     ** WARNING  **
     Supports limited combinations of clock chips and busses.
-    Use on unsupported chips may crash your system.
+    Clock chip must be at address 0x69
+    This driver may crash your system.
     See doc/chips/icspll for details.
 */
 
@@ -46,7 +47,16 @@
 #define THIS_MODULE NULL
 #endif
 
-/* Many constants specified below */
+
+/* Addresses to scan */
+#define ADDRESS 0x69
+static unsigned short normal_i2c[] = { SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { ADDRESS, SENSORS_I2C_END };
+static unsigned int normal_isa[] = { SENSORS_ISA_END };
+static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
+
+/* Insmod parameters */
+SENSORS_INSMOD_1(icspll);
 
 #define ICSPLL_SIZE 7
 #define MAXBLOCK_SIZE 32
@@ -54,11 +64,9 @@
 /* Each client has this additional data */
 struct icspll_data {
 	int sysctl_id;
-
 	struct semaphore update_lock;
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
-
 	u8 data[ICSPLL_SIZE];	/* Register values */
 	int memtype;
 };
@@ -80,7 +88,8 @@ static int icspll_attach_adapter(struct i2c_adapter *adapter);
 static int icspll_detach_client(struct i2c_client *client);
 static int icspll_command(struct i2c_client *client, unsigned int cmd,
 			  void *arg);
-
+static int icspll_detect(struct i2c_adapter *adapter, int address,
+		       unsigned short flags, int kind);
 static void icspll_inc_use(struct i2c_client *client);
 static void icspll_dec_use(struct i2c_client *client);
 
@@ -96,7 +105,7 @@ static void icspll_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver icspll_driver = {
-	/* name */ "ICS/PLL clock reader",
+	/* name */ "Clock chip reader",
 	/* id */ I2C_DRIVERID_ICSPLL,
 	/* flags */ I2C_DF_NOTIFY,
 	/* attach_adapter */ &icspll_attach_adapter,
@@ -126,7 +135,14 @@ static int __initdata icspll_initialized = 0;
 static int icspll_id = 0;
 int icspll_attach_adapter(struct i2c_adapter *adapter)
 {
-	int address, err, i;
+	return sensors_detect(adapter, &addr_data, icspll_detect);
+}
+
+/* This function is called by sensors_detect */
+int icspll_detect(struct i2c_adapter *adapter, int address,
+   	          unsigned short flags, int kind)
+{
+	int err, i;
 	struct i2c_client *new_client;
 	struct icspll_data *data;
 
@@ -135,83 +151,70 @@ int icspll_attach_adapter(struct i2c_adapter *adapter)
 	if (i2c_is_isa_adapter(adapter))
 		return 0;
 
-	/* OK, this is no detection. I know. It will do for now, though.  */
+	if (address != ADDRESS)
+		return 0;
 
-	/* Set err only if a global error would make registering other clients
-	   impossible too (like out-of-memory). */
-
-	/* ICS and PLL clock chips seem to all be at 0x69.
-	   Don't know what is out there at 0x6A, don't scan that yet. */
-
-	for (address = 0x69; (!err) && (address <= 0x69); address++) {
-
-		/* Later on, we will keep a list of registered addresses for each
-		   adapter, and check whether they are used here */
-
-		/* these chips only support block transfers so use that for detection */
-		if (i2c_smbus_read_block_data
-		    (adapter, address, 0x00, tempdata) < 0) {
-#ifdef DEBUG
-			printk("icspll.o: No icspll found at: 0x%X\n",
-			       address);
-#endif
-			continue;
-		}
-
-		/* Real detection code goes here */
-
-		/* Allocate space for a new client structure */
-		if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-					   sizeof(struct icspll_data),
-					   GFP_KERNEL))) {
-			err = -ENOMEM;
-			continue;
-		}
-
-		/* Fill the new client structure with data */
-		data = (struct icspll_data *) (new_client + 1);
-		new_client->data = data;
-		new_client->id = icspll_id++;
-		new_client->addr = address;
-		new_client->adapter = adapter;
-		new_client->driver = &icspll_driver;
-		new_client->flags = 0;
-		strcpy(new_client->name, "ICSPLL chip");
-		data->valid = 0;
-		init_MUTEX(&data->update_lock);
-/* fill data structure so unknown registers are 0xFF */
-		data->data[0] = ICSPLL_SIZE;
-		for (i = 1; i <= ICSPLL_SIZE; i++)
-			data->data[i] = 0xFF;
-
-		/* Tell i2c-core a new client has arrived */
-		if ((err = i2c_attach_client(new_client)))
-			goto ERROR2;
-
-		/* Register a new directory entry with module sensors */
-		if ((err = sensors_register_entry(new_client, "icspll",
-						  icspll_dir_table_template
-						  THIS_MODULE)) < 0)
-			goto ERROR3;
-		data->sysctl_id = err;
-		err = 0;
-
-		continue;
-/* OK, this is not exactly good programming practice, usually. But it is
-   very code-efficient in this case. */
-
-	      ERROR3:
-		i2c_detach_client(new_client);
-	      ERROR2:
-	      ERROR1:
-		kfree(new_client);
+	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_WRITE_BLOCK_DATA |
+				     I2C_FUNC_SMBUS_READ_I2C_BLOCK)) {
+		printk("icspll.o: Adapter does not support SMBus writes and Block reads\n");
+		goto ERROR0;
 	}
+
+	/* Allocate space for a new client structure */
+	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
+				   sizeof(struct icspll_data),
+				   GFP_KERNEL))) {
+		err = -ENOMEM;
+		goto ERROR0;
+	}
+
+	/* Fill the new client structure with data */
+	data = (struct icspll_data *) (new_client + 1);
+	new_client->data = data;
+	new_client->id = icspll_id++;
+	new_client->addr = address;
+	new_client->adapter = adapter;
+	new_client->driver = &icspll_driver;
+	new_client->flags = 0;
+	strcpy(new_client->name, "Clock chip");
+	data->valid = 0;
+	init_MUTEX(&data->update_lock);
+
+	/* use write-quick for detection */
+	if (i2c_smbus_write_quick(new_client, 0x00) < 0) {
+		printk("icspll.o: No device found at 0x%X\n", address);
+		goto ERROR1;
+	}
+
+	/* fill data structure so unknown registers are 0xFF */
+	data->data[0] = ICSPLL_SIZE;
+	for (i = 1; i <= ICSPLL_SIZE; i++)
+		data->data[i] = 0xFF;
+
+	/* Tell i2c-core a new client has arrived */
+	if ((err = i2c_attach_client(new_client)))
+		goto ERROR2;
+
+	/* Register a new directory entry with module sensors */
+	if ((err = sensors_register_entry(new_client, "icspll",
+					  icspll_dir_table_template,
+					  THIS_MODULE)) < 0)
+		goto ERROR3;
+	data->sysctl_id = err;
+	err = 0;
+
+      ERROR3:
+	i2c_detach_client(new_client);
+      ERROR2:
+      ERROR1:
+	kfree(new_client);
+      ERROR0:
 	return err;
 }
 
 int icspll_detach_client(struct i2c_client *client)
 {
-	int err, i;
+	int err;
 
 	sensors_deregister_entry(((struct icspll_data *) (client->data))->
 				 sysctl_id);
@@ -267,8 +270,8 @@ void icspll_update_client(struct i2c_client *client)
 	    (jiffies < data->last_updated) || !data->valid) {
 
 		len =
-		    i2c_smbus_read_block_data(client->adapter,
-					      client->addr, 0x00,
+		    i2c_smbus_read_block_data(client,
+					      0x00,
 					      tempdata);
 #ifdef DEBUG
 		printk("icspll.o: read returned %d values\n", len);
