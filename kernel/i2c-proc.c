@@ -30,7 +30,7 @@
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
-#endif /* MODULE */
+#endif /* def MODULE */
 
 static int i2cproc_init(void);
 static int i2cproc_cleanup(void);
@@ -41,14 +41,12 @@ static int i2cproc_command(struct i2c_client *client, unsigned int cmd,
 static void i2cproc_inc_use(struct i2c_client *client);
 static void i2cproc_dec_use(struct i2c_client *client);
 
-#if (LINUX_VERSION_CODE > KERNEL_VERSION(2,1,0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
 
 static int read_bus_i2c(char *buf, char **start, off_t offset, int len,
                         int *eof , void *private);
 
-static struct proc_dir_entry *proc_bus_i2c;
-
-#else /* (LINUX_VERSION_CODE > KERNEL_VERSION(2,1,0)) */
+#else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
 
 static int read_bus_i2c(char *buf, char **start, off_t offset, int len,
                         int unused);
@@ -80,7 +78,10 @@ static struct proc_dir_entry proc_bus_i2c_dir =
     /* get_info */	&read_bus_i2c
   };
 
-#endif /* (LINUX_VERSION_CODE > KERNEL_VERSION(2,1,0)) */
+/* List of registered entries in /proc/bus */
+static struct proc_dir_entry *i2cproc_proc_entries[I2C_ADAP_MAX];
+
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
 
 /* Used by init/cleanup */
 static int i2cproc_initialized;
@@ -113,14 +114,19 @@ static struct i2c_client i2cproc_client_template = {
   /* data */		NULL
 };
 
+
 int i2cproc_init(void)
 {
   int res;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
+  struct proc_dir_entry *proc_bus_i2c;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
+
   printk("i2c-proc.o version %s (%s)\n",LM_VERSION,LM_DATE);
   i2cproc_initialized = 0;
 
-#if (LINUX_VERSION_CODE > KERNEL_VERSION(2,1,0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
   if (! proc_bus) {
     printk("i2c-proc.o: /proc/bus/ does not exist, module not inserted.\n");
     i2cproc_cleanup();
@@ -136,7 +142,7 @@ int i2cproc_init(void)
     return -ENOENT;
   }
   i2cproc_initialized += 2;
-#else
+#else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
   /* In Linux 2.0.x, there is no /proc/bus! But I hope no other module
      introduced it, or we are fucked. */
   if ((res = proc_register_dynamic(&proc_root, &proc_bus_dir))) {
@@ -152,7 +158,7 @@ int i2cproc_init(void)
     return res;
   }
   i2cproc_initialized ++;
-#endif
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
   if ((res = i2c_add_driver(&i2cproc_driver))) {
     printk("i2c-proc.o: Driver registration failed, module not inserted.\n");
     i2cproc_cleanup();
@@ -175,13 +181,13 @@ int i2cproc_cleanup(void)
     i2cproc_initialized--;
   }
   if (i2cproc_initialized >= 1) {
-#if (LINUX_VERSION_CODE > KERNEL_VERSION(2,1,0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
     if ((res = remove_proc_entry("i2c",proc_bus))) {
       printk("i2c-proc.o: could not delete /proc/bus/i2c, module not removed.");
       return res;
     }
     i2cproc_initialized -= 2;
-#else
+#else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
     if (i2cproc_initialized >= 2) {
       if ((res = proc_unregister(&proc_bus_dir,proc_bus_i2c_dir.low_ino))) {
          printk("i2c-proc.o: could not delete /proc/bus/i2c, "
@@ -196,17 +202,17 @@ int i2cproc_cleanup(void)
        return res;
     }    
     i2cproc_initialized --;
-#endif
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
   }
   return 0;
 }
 
-#if (LINUX_VERSION_CODE > KERNEL_VERSION(2,1,0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
 int read_bus_i2c(char *buf, char **start, off_t offset, int len, int *eof, 
                  void *private)
-#else
+#else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
 int read_bus_i2c(char *buf, char **start, off_t offset, int len, int unused)
-#endif
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
 {
   int i;
   len = 0;
@@ -216,12 +222,25 @@ int read_bus_i2c(char *buf, char **start, off_t offset, int len, int unused)
                      i2c_is_smbus_adapter(i2cproc_adapters[i])?"smbus":
 #ifdef DEBUG
                        i2c_is_isa_adapter(i2cproc_adapters[i])?"isa":
-#endif
+#endif /* def DEBUG */
                        "i2c",
                      i2cproc_adapters[i]->name,
                      i2cproc_adapters[i]->algo->name);
   return len;
 }
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
+int read_bus_i2c_file(char *buf, char **start, off_t offset, int len, 
+                      int *eof, void *private)
+#else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
+int read_bus_i2c_file(char *buf, char **start, off_t offset, int len, 
+                      int unused)
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
+{
+  len = 0;
+  return len;
+}
+
 
 /* We need to add the adapter to i2cproc_adapters, if it is interesting
    enough */
@@ -229,6 +248,9 @@ int i2cproc_attach_adapter(struct i2c_adapter *adapter)
 {
   struct i2c_client *client;
   int i,res;
+  char name[8];
+
+  struct proc_dir_entry *proc_entry;
 
 #ifndef DEBUG
   if (i2c_is_isa_adapter(adapter))
@@ -251,15 +273,55 @@ int i2cproc_attach_adapter(struct i2c_adapter *adapter)
   client->adapter = adapter;
   if ((res = i2c_attach_client(client))) {
     printk("i2c-proc.o: Attaching client failed.\n");
+    kfree(client);
     return res;
   }
   i2cproc_adapters[i] = adapter;
+
+  sprintf(name,"i2c-%d",i);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
+  proc_entry = create_proc_entry(name,0,proc_bus);
+  if (! proc_entry)
+  else {
+    printk("i2c-proc.o: Could not create /proc/bus/%s\n",name);
+    kfree(client);
+    return -ENOENT;
+  }
+  proc_entry->read_proc = &read_bus_i2c_file;
+#else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
+  if (!(proc_entry = kmalloc(sizeof(struct proc_dir_entry)+strlen(name)+1,
+                             GFP_KERNEL))) {
+    printk("i2c-proc.o: Out of memory!\n");
+    return -ENOMEM;
+  }
+
+  memset(proc_entry,0,sizeof(struct proc_dir_entry));
+  proc_entry->namelen = strlen(name);
+  proc_entry->name = (char *) (proc_entry + 1);
+  proc_entry->mode = S_IRUGO | S_IFREG;
+  proc_entry->nlink = 1;
+  proc_entry->get_info = &read_bus_i2c_file;
+  strcpy((char *) proc_entry->name,name);
+
+  if ((res = proc_register_dynamic(&proc_bus_dir, proc_entry))) {
+    printk("i2c-proc.o: Could not create %s.\n",name);
+    kfree(proc_entry);
+    kfree(client);
+    return res;
+  }
+  
+  i2cproc_proc_entries[i] = proc_entry;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
   return 0;
 }
   
 int i2cproc_detach_client(struct i2c_client *client)
 {
   int i,res;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
+  char name[8];
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
 
   printk("OK!\n");
 #ifndef DEBUG
@@ -269,8 +331,25 @@ int i2cproc_detach_client(struct i2c_client *client)
 
   for (i = 0; i < I2C_ADAP_MAX; i++) 
     if (client->adapter == i2cproc_adapters[i]) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
+      sprintf(name,"i2c-%d",i);
+      if ((res = remove_proc_entry(name,proc_bus))) {
+        printk("i2c-proc.o: Deregistration of /proc entry failed, "
+               "client not detached.\n");
+        return res;
+      }
+#else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
+      if ((res = proc_unregister(&proc_bus_dir,
+                                 i2cproc_proc_entries[i]->low_ino))) {
+        printk("i2c-proc.o: Deregistration of /proc entry failed, "
+               "client not detached.\n");
+        return res;
+      }
+      kfree(i2cproc_proc_entries[i]);
+      i2cproc_proc_entries[i] = NULL;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
       if ((res = i2c_detach_client(client))) {
-        printk("i2c-bus.o: Client deregistration failed, "
+        printk("i2c-proc.o: Client deregistration failed, "
                "client not detached.\n");
         return res;
       }
@@ -314,5 +393,5 @@ int cleanup_module(void)
   return i2cproc_cleanup();
 }
 
-#endif /* MODULE */
+#endif /* def MODULE */
 
