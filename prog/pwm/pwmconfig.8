@@ -1,0 +1,33 @@
+.TH PWMCONFIG 8 "January 27, 2005"
+.SH NAME
+pwmconfig \- tests the PWM outputs of sensors and configures fancontrol
+
+.SH SYNOPSIS
+.B pwmconfig
+
+.SH DESCRIPTION
+.B pwmconfig
+searches your sensors for pulse width modulation (PWM)
+controls, and test each one to see if it controls a fan on
+your motherboard. Note that many motherboards do not have PWM
+circuitry installed, even if your sensor chip supports PWM.
+
+It attempts to briefly stop each fan using the PWM controls. It then
+attempts to restore each fan to full speed after testing. However, it
+is \fBvery important\fP that you physically verify that the fans have 
+been returned to full speed after the program has completed.
+
+.SH WARNING
+This program will stop your fans, one at a time, for approximately 5 seconds each.
+This may cause your processor temperature to rise. Verify that all fans are running 
+at normal speed after this program has exited.
+
+.SH CONFORMING TO
+lm_sensors-2.x
+
+.SH SEE ALSO
+fancontrol(8), sensors(1).
+
+.SH AUTHOR
+.PP
+Marius Reiner <marius.reiner@hdev.de>

@@ -18,17 +18,23 @@
 MODULE_DIR := prog/pwm
 PROGPWMDIR := $(MODULE_DIR)
 
+PROGPWMMAN8DIR := $(MANDIR)/man8
+PROGPWMMAN8FILES := $(MODULE_DIR)/fancontrol.8 $(MODULE_DIR)/pwmconfig.8
+
 PROGPWMTARGETS := $(MODULE_DIR)/fancontrol \
                   $(MODULE_DIR)/fancontrol.pl \
                   $(MODULE_DIR)/pwmconfig
 
 REMOVEPWMBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(SBINDIR)/%,$(PROGPWMTARGETS))
+REMOVEPWMMAN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(PROGPWMMAN8DIR)/%,$(PROGPWMMAN8FILES))
 
 install-prog-pwm: $(PROGPWMTARGETS)
-	$(MKDIR) $(DESTDIR)$(SBINDIR)
+	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGPWMMAN8DIR)
 	$(INSTALL) -m 755 $(PROGPWMTARGETS) $(DESTDIR)$(SBINDIR)
+	$(INSTALL) -m 644 $(PROGPWMMAN8FILES) $(DESTDIR)$(PROGPWMMAN8DIR)
 
 user_install :: install-prog-pwm
 
 user_uninstall::
 	$(RM) $(REMOVEPWMBIN)
+	$(RM) $(REMOVEPWMMAN)

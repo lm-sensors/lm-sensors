@@ -1,0 +1,103 @@
+.TH FANCONTROL 8 "January 27, 2005"
+.SH NAME
+fancontrol \- automated software based fan speed regulation
+
+.SH SYNOPSIS
+.B fancontrol
+.I [configfile]
+
+.SH DESCRIPTION
+\fBfancontrol\fP is a shell script for use with lm_sensors. It reads its
+configuration from a file, then calculates fan speeds from temperatures and
+sets the corresponding PWM outputs to the computed values.
+
+.SH WARNING
+Please be careful when using the fan control features of your mainboard, in
+addition to the risk of burning your CPU, at higher temperatures there will be
+a higher wearout of your other hardware components, too. So if you plan to use
+these components in 50 years, \fBmaybe\fP you shouldn't use fancontrol
+at all.  Also please keep in mind most fans aren't designed to be
+powered by a PWMed voltage.
+
+In practice it doesn't seem to be a major issue, the fans will get slightly
+warmer, just be sure to have a temperature alarm and/or shutdown call, in case
+some fan fails, because you probably won't hear it anymore ;)
+
+.SH CONFIGURATION
+For easy configuration, there's a script
+named \fBpwmconfig\fP(8) which lets you interactively write your 
+configuration file for \fBfancontrol\fP. Alternatively you can write this 
+file yourself using the information from this manpage.
+
+Since most of you are going to use \fBpwmconfig\fP(8) script, the config
+file syntax will be discussed last. First I'm going to describe the various
+variables available for changing \fBfancontrol\fP's behaviour:
+
+.TP
+.B INTERVAL
+This variable defines at which interval in seconds the main loop of
+\fBfancontrol\fP will be executed
+.TP
+.B FCTEMPS
+Maps PWM outputs to temperature sensors so \fBfancontrol\fP knows which
+temperature sensors should be used for calculation of new values for
+the corresponding PWM outputs.
+.TP
+.B FCFANS
+FCFANS records the association between a PWM and a fan.
+Then \fBfancontrol\fP can check the fan speed and restart it if it
+stops unexpectedly.
+.TP
+.B MINTEMP
+The temperature below which the fan gets switched off completely.
+.TP
+.B MAXTEMP
+The temperature over which the fan gets switched to full speed.
+.TP
+.B MINSTART
+Sets the minimum speed at which the fan begins spinning. You should
+use a safe value to be sure it works, even when the fan gets old.
+.TP
+.B MINSTOP
+The minimum speed at which the fan still spins. Use a safe value here,
+too.
+.PP
+If you set up your configuration by hand, be sure to include ALL variables and
+use valid values, there's no error handling yet! The file format is a bit
+strange:
+.IP
+.nf
+VARIABLE=chip/pwmdev=value chip/pwmdev2=value2
+VARIABLE2=...
+.fi
+.PP
+Each variable has its own line. The variable name is followed by an equal sign
+and the device=value pairs. These consist of the relative path to the pwm
+output (from /proc/sys/dev/sensors/) for which the value is valid, equal sign
+followed by the value and are seperated by a blank. Example:
+.IP
+MINTEMP=w83627hf-isa-0290/pwm2=40 w83627hf-isa-0290/pwm1=54
+.PP
+You have to play with the temperature values a bit to get happy. For initial
+setup I recommend using the \fBpwmconfig\fP script. Small changes can be made by
+editing the config file directly following the rules above.
+
+.SH THE ALGORITHM
+
+\fBfancontrol\fP first reads its configuration, writes it to arrays and loops its
+main function.  This function gets the temperatures and fanspeeds from
+lm_sensors proc files and calculates new speeds depending on temperature
+changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the
+new values are written to the PWM outputs. Currently the speed increases
+quadratically with rising temperature. This way you won't hear your fans most
+of the time at best.
+
+.SH CONFORMING TO
+lm_sensors-2.x
+       
+.SH SEE ALSO
+pwmconfig(8), sensors(1).
+
+.SH AUTHOR
+.PP
+Marius Reiner <marius.reiner@hdev.de>
