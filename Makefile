@@ -102,7 +102,7 @@ LIBINCLUDEDIR := $(INCLUDEDIR)/sensors
 # to do this. 
 
 # The subdirectories we need to build things in 
-SRCDIRS := src lib prog/sensors prog/dump etc
+SRCDIRS := kernel lib prog/sensors prog/dump etc
 ifeq ($(I2C),1)
 SRCDIRS += i2c i2c/detect i2c/drivers i2c/eeprom
 endif
@@ -122,7 +122,7 @@ LN := ln -sfn
 # create non-kernel object files (which are linked into executables).
 # ARCFLAGS are used to create archive object files (static libraries), and
 # LIBCFLAGS are for shared library objects.
-CFLAGS := -I. -Ii2c -O2 -DLM_SENSORS
+CFLAGS := -I. -Ii2c -Ikernel -Ikernel/include -O2 -DLM_SENSORS
 
 ifeq ($(DEBUG),1)
 CFLAGS += -DDEBUG

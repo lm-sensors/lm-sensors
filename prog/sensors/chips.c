@@ -23,7 +23,7 @@
 #include "chips.h"
 #include "lib/sensors.h"
 #include "lib/chips.h"
-#include "src/sensors.h"
+#include "kernel/include/sensors.h"
 
 static char *spacestr(int n);
 static void print_label(const char *label, int space);

@@ -20,7 +20,7 @@
 #include "chips.h"
 #include "data.h"
 #include "sensors.h"
-#include "src/sensors.h"
+#include "kernel/include/sensors.h"
 
 /* For each chip, a list of features;
    For each feature, the number, its name, the logical mapping (for example,

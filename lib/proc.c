@@ -22,7 +22,7 @@
 #include <string.h>
 #include <sys/sysctl.h>
 #include <linux/sysctl.h>
-#include "src/sensors.h"
+#include "kernel/include/sensors.h"
 #include "data.h"
 #include "error.h"
 #include "access.h"

@@ -18,18 +18,14 @@
 # Note that MODULE_DIR (the directory in which this file resides) is a
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
-MODULE_DIR := kernel
-
-SRCDIRS := kernel/busses kernel/chips
+MODULE_DIR := kernel/busses
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-SRCTARGETS := $(MODULE_DIR)/smbus.o \
-              $(MODULE_DIR)/i2c-proc.o \
-              $(MODULE_DIR)/i2c-dev.o
+SRCTARGETS := $(MODULE_DIR)/i2c-piix4.o $(MODULE_DIR)/i2c-isa.o
 
-SRCHEADERFILES := $(MODULE_DIR)/include/sensors.h $(MODULE_DIR)/include/isa.h \
-                  $(MODULE_DIR)/include/smbus.h $(MODULE_DIR)/include/i2c-dev.h
+SRCHEADERFILES := $(MODULE_DIR)/../include/sensors.h $(MODULE_DIR)/../include/isa.h \
+                  $(MODULE_DIR)/../include/smbus.h $(MODULE_DIR)/../include/i2c-dev.h
 
 # Include all dependency files
 INCLUDEFILES += $(SRCTARGETS:.o=.d)
@@ -37,20 +33,12 @@ INCLUDEFILES += $(SRCTARGETS:.o=.d)
 all-src: $(SRCTARGETS)
 all :: all-src
 
-# Include all makefiles for sub-modules
-INCLUDEFILES := 
-include $(patsubst %,%/Module.mk,$(SRCDIRS))
-ifneq ($(MAKECMDGOALS),clean)
-include $(INCLUDEFILES)
-endif
-
-
-install-src: all-src
+install-src-busses: all-src
 	$(MKDIR) $(MODDIR) $(SYSINCLUDEDIR)
 	$(INSTALL) -o root -g root -m 644 $(SRCTARGETS) $(MODDIR)
 	$(INSTALL) -o root -g root -m 644 $(SRCHEADERFILES) $(SYSINCLUDEDIR)
-install :: install-src
+install :: install-src-busses
 
-clean-src:
+clean-src-busses:
 	$(RM) $(SRCTARGETS) $(SRCTARGETS:.o=.d)
-clean :: clean-src
+clean :: clean-src-busses
