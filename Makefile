@@ -204,14 +204,14 @@ ALL_CPPFLAGS += $(CPPFLAGS)
 ALL_CFLAGS += $(CFLAGS)
 
 MODCPPFLAGS :=
-MODCFLAGS :=
+MODCFLAGS := -fno-strict-aliasing
 
 ifeq ($(MACHINE),alpha)
 MODCFLAGS += -ffixed-8 -mno-fp-regs -mcpu=ev56
 endif
 
 ifeq ($(MACHINE),x86_64)
-MODCFLAGS += -fno-strict-aliasing -fno-common -fomit-frame-pointer -mno-red-zone \
+MODCFLAGS += -fno-common -fomit-frame-pointer -mno-red-zone \
 	     -mcmodel=kernel -fno-reorder-blocks -finline-limit=2000 -fno-strength-reduce
 endif
 
