@@ -336,7 +336,7 @@ int main(int argc, char *argv[])
     if(size == I2C_SMBUS_BLOCK_DATA || size == I2C_SMBUS_I2C_BLOCK_DATA) {
       if(size == I2C_SMBUS_BLOCK_DATA) {
         res = i2c_smbus_read_block_data(file, bank, cblock);
-      } else if(size == I2C_SMBUS_I2C_BLOCK_DATA) {
+      } else {
 #if USE_I2C_BLOCK
         res = 0;
         for (i = 0; i < 256; i+=32) {
