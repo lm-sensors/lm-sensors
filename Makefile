@@ -21,17 +21,26 @@
 # You need a full complement of GNU utilities to run this Makefile succesfully;
 # most notably, you need bash, GNU make, flex and bison.
 
+# The location of your kernel headers (which should be the linux and asm
+# subdirectories). For most people, the below works perfectly. If you use 
+# Debian, you may want to change this to something like /usr/src/linux/include.
+LINUX_HEADERS=/usr/include
+
+# The location of linux itself. This is only used to determine whether you
+# use a SMP kernel in the magic invocation just below.
+LINUX=/usr/src/linux
+
 # Uncomment the third line on SMP systems if the magic invocation fails. It
 # is a bit complicated because SMP configuration changed around kernel 2.1.130
-SMP := $(shell if grep -q '^SMP[[:space:]]*=' /usr/src/linux/Makefile || \
-                  grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_SMP[[:space:]]*1' /usr/include/linux/autoconf.h ; \
+SMP := $(shell if grep -q '^SMP[[:space:]]*=' $(LINUX)/Makefile || \
+                  grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_SMP[[:space:]]*1' $(LINUX_HEADERS)/linux/autoconf.h ; \
                then echo 1; else echo 0; fi)
 #SMP := 0
 #SMP := 1
 
 # Uncomment the second or third line if the magic invocation fails.
 # We need to know whether CONFIG_MODVERSIONS is defined.
-MODVER := $(shell if cat /usr/include/linux/config.h /usr/include/linux/autoconf.h 2>/dev/null | grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_MODVERSIONS[[:space:]]*1'; then echo 1; else echo 0; fi)
+MODVER := $(shell if cat $(LINUX_HEADERS)/linux/config.h $(LINUX_HEADERS)/linux/autoconf.h 2>/dev/null | grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_MODVERSIONS[[:space:]]*1'; then echo 1; else echo 0; fi)
 #MODVER := 0
 #MODVER := 1
 
@@ -102,7 +111,9 @@ MANGRP := root
 # find bash.
 # SHELL=/usr/bin/bash
 
-# Below this, nothing should need to be changed.
+##################################################
+# Below this, nothing should need to be changed. #
+##################################################
 
 # Note that this is a monolithic Makefile; it calls no sub-Makefiles,
 # but instead, it compiles everything right from here. Yes, there are
@@ -138,7 +149,7 @@ GREP := grep
 # create non-kernel object files (which are linked into executables).
 # ARCFLAGS are used to create archive object files (static libraries), and
 # LIBCFLAGS are for shared library objects.
-CFLAGS := -I. -Ii2c -Ikernel/include -O2 -DLM_SENSORS
+CFLAGS := -I. -Ii2c -Ikernel/include -I$(LINUX_HEADERS) -O2 -DLM_SENSORS
 
 ifeq ($(DEBUG),1)
 CFLAGS += -DDEBUG
