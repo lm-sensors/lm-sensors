@@ -293,10 +293,21 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	data->fannr = 2;
 
 	switch (devid) {
+		case 0xe8:
+			type_name = "pc87363";
+			break;
 		case 0xe4:
-		case 0xe5:
-		case 0xe9:
+			type_name = "pc87364";
 			data->fannr = 3;
+			break;
+		case 0xe5:
+			type_name = "pc87365";
+			data->fannr = 3;
+			break;
+		case 0xe9:
+			type_name = "pc87366";
+			data->fannr = 3;
+			break;
 	}
 
 	request_region(address, PC87360_EXTENT, "pc87360");
