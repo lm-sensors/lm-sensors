@@ -419,7 +419,9 @@ s32 amd756_access(struct i2c_adapter * adap, u16 addr,
 		data->word = inw_p(SMB_HOST_DATA);	/* TODO: endian???? */
 		break;
 	case AMD756_BLOCK_DATA:
-		data->block[0] = inw_p(SMB_HOST_DATA & 63);
+		data->block[0] = inw_p(SMB_HOST_DATA) & 0x3f;
+		if(data->block[0] > 32)
+			data->block[0] = 32;
 		/* i = inw_p(SMBHSTCNT); Reset SMBBLKDAT */
 		for (i = 1; i <= data->block[0]; i++)
 			data->block[i] = inb_p(SMB_HOST_BLOCK_DATA);
