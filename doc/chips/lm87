@@ -86,8 +86,8 @@ FAN2/AIN2	(pin 6)
 The most common configuration is to use the values shown here on the
 left (Vccp2, 2.5V, FAN1, and FAN2).  However, for a third temperature
 sensor, it is possible to do away with Vccp2 and 2.5V (IN0) for the
-second external temp doide inputs.  Ironicly, it seems that you can
-monitor the core voltage of the second processor or it's temperature,
+second external temp doide inputs.  Strangely, it seems that you can
+monitor the core voltage of the second processor or its temperature,
 but never both at the same time.  Also, either/both FAN1 and FAN2
 inputs can be substituted for aux analog inputs AIN1 and/or AIN2,
 respectively.
@@ -109,8 +109,8 @@ register.
 
  - External temp sensors 2 (possible second CPU temp)
    This will disable the 2.5V and Vccp2 readings.
-   Ironicly, National decided that you can read the
-   temperature of a second CPU or it's core voltage,
+   Strangely, National decided that you can read the
+   temperature of a second CPU or its core voltage,
    but not both!  Comment out if FAULT is reported.  */
 
 /* #define LM87_EXT2 1 */
