@@ -394,7 +394,7 @@ static struct i2c_driver lm92_driver = {
 	dec_use:		lm92_dec_use
 };
 
-static int __init lm92_init (void)
+static int __init sensors_lm92_init (void)
 {
 	int result;
 
@@ -406,7 +406,7 @@ static int __init lm92_init (void)
 	return (0);
 }
 
-static void __exit lm92_exit (void)
+static void __exit sensors_lm92_exit (void)
 {
 	i2c_del_driver (&lm92_driver);
 }
@@ -420,6 +420,6 @@ MODULE_DESCRIPTION ("Linux support for LM92 Temperature Sensor");
 MODULE_LICENSE ("GPL");
 #endif	/* #ifdef MODULE_LICENSE */
 
-module_init (lm92_init);
-module_exit (lm92_exit);
+module_init (sensors_lm92_init);
+module_exit (sensors_lm92_exit);
 
