@@ -65,6 +65,7 @@ our @afcmaxtemp;
 our @afcmintemp;
 our @afcminstart;
 our @afcminstop;
+our $fanrestored;
 
 sub loadconfig($);
 sub pwmdisable($);
@@ -298,22 +299,26 @@ sub pwmenable($)
 ################################################################ 
 sub restorefans()
 {
-   $SIG{TERM} = 'IGNORE';
-   $SIG{HUP}  = 'IGNORE';
-   $SIG{INT}  = 'IGNORE';
-   $SIG{QUIT} = 'IGNORE';
-
-   print("Aborting, restoring fans...\n");
-   my $fcvcount = 0;
-
-   while ( $fcvcount < $#afcpwm+1)
+   unless ($fanrestored)
      {
-       my $pwmo = $afcpwm[$fcvcount];
-       &pwmdisable($afcpwm[$fcvcount]);
-       $fcvcount++;
+       $SIG{TERM} = 'IGNORE';
+       $SIG{HUP}  = 'IGNORE';
+       $SIG{INT}  = 'IGNORE';
+       $SIG{QUIT} = 'IGNORE';
+
+       print("Aborting, restoring fans...\n");
+       my $fcvcount = 0;
+
+       while ($fcvcount < $#afcpwm+1)
+         {
+           my $pwmo = $afcpwm[$fcvcount];
+           &pwmdisable($afcpwm[$fcvcount]);
+           $fcvcount++;
+         }
+       print("Verify fans have returned to full speed\n");
+       $fanrestored = 1;
+       exit(0);
      }
-   print("Verify fans have returned to full speed\n");
-   exit(0);
 }
 
 
