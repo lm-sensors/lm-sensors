@@ -30,7 +30,8 @@ ask CVS about it:
   Program sensors: Add PCF8591 and W83697HF support
   Program sensors-detect: Add several Nvidia chips, add PCF8591,
                           fix Via686a and it87 detection,
-                          add AMD768
+                          add AMD768, IPMI-BMC-KCS and -SMIC,
+                          fix uninitialized values
 
 
 2.6.2 (20011118)

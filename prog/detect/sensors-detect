@@ -185,7 +185,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
      {
        vendid => 0x10b9,
        devid => 0x7101,
-       funcid => 0,
+       func => 0,
        procid => "Acer Labs 1533/1543",
        driver => "i2c-ali15x3",
        match => sub { $_[0] =~ /^SMBus ALI15X3 adapter at/ },
@@ -193,7 +193,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
      {
        vendid => 0x10b9,
        devid => 0x7101,
-       funcid => 0,
+       func => 0,
        procid => "Acer Labs 1535",
        driver => "i2c-ali1535",
        match => sub { $_[0] =~ /^SMBus ALI1535 adapter at/ },
@@ -535,7 +535,8 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             via686a_isa_detect adm1022_detect ltc1710_detect gl525sm_detect
             lm87_detect ite_detect ite_isa_detect ite_alias_detect
             ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect
-            fscscy_detect pcf8591_detect arp_detect);
+            fscscy_detect pcf8591_detect arp_detect ipmi_kcs_detect
+            ipmi_smic_detect );
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -839,6 +840,16 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        name => "SMBus 2.0 ARP-Capable Device??",
        i2c_addrs => [0x61],
        i2c_detect => sub { arp_detect @_},
+     },
+     {
+       name => "IPMI BMC KCS",
+       isa_addrs => [ 0x0ca0 ],
+       isa_detect => sub { ipmi_kcs_detect @_ },
+     },
+     {
+       name => "IPMI BMC SMIC",
+       isa_addrs => [ 0x0ca8 ],
+       isa_detect => sub { ipmi_smic_detect @_ },
      },
 );
 
@@ -2384,6 +2395,23 @@ sub arp_detect
 {
   return (1);
 }
+
+# Returns: 4
+# These are simple detectors that only look for a register at the
+# standard location. No writes are performed.
+# For KCS, use the STATUS register. For SMIC, use the FLAGS register.
+sub ipmi_kcs_detect
+{
+  return if inb (0x0ca3) == 0xff;
+  return (4);
+}
+
+sub ipmi_smic_detect
+{
+  return if inb (0x0cab) == 0xff;
+  return (4);
+}
+
 
 
 ################
