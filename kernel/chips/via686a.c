@@ -46,6 +46,10 @@
 #include "sensors.h"
 #include <linux/init.h>
 
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
+
 #ifndef PCI_DEVICE_ID_VIA_82C686_4
 #define PCI_DEVICE_ID_VIA_82C686_4 0x3057
 #endif

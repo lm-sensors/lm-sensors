@@ -47,6 +47,10 @@
 #include <linux/i2c.h>
 #include "version.h"
 
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
+
 #ifndef PCI_DEVICE_ID_INTEL_82801AA_3
 #define PCI_DEVICE_ID_INTEL_82801AA_3   0x2413
 #endif

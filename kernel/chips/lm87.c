@@ -36,6 +36,9 @@
 #include "sensors.h"
 #include <linux/init.h>
 
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 /* Chip configuration settings.  These should be set to reflect the
 HARDWARE configuration of your chip.  By default (read: when all of

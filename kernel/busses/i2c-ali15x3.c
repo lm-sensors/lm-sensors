@@ -70,8 +70,11 @@
 #include <linux/ioport.h>
 #include <linux/i2c.h>
 #include "version.h"
-
 #include <linux/init.h>
+
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 /* ALI15X3 SMBus address offsets */
 #define SMBHSTSTS (0 + ali15x3_smba)
@@ -93,7 +96,7 @@
 #define SMBREV    0x008
 
 /* Other settings */
-#define MAX_TIMEOUT 500		/* times 1/100 sec */
+#define MAX_TIMEOUT 200		/* times 1/100 sec */
 #define ALI15X3_SMB_IOSIZE 32
 
 /* this is what the Award 1004 BIOS sets them to on a ASUS P5A MB.
@@ -179,7 +182,7 @@ static struct i2c_adapter ali15x3_adapter = {
 
 static int __initdata ali15x3_initialized;
 static unsigned short ali15x3_smba = 0;
-
+static int locked=0;
 
 /* Detect whether a ALI15X3 can be found, and initialize it, where necessary.
    Note the differences between kernels with the old PCI BIOS interface and

@@ -36,6 +36,10 @@
 #include "version.h"
 #include <linux/init.h>
 
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
+
 /* 3DFX defines */
 #ifndef PCI_DEVICE_ID_3DFX_VOODOO3
 #define PCI_DEVICE_ID_3DFX_VOODOO3 0x05

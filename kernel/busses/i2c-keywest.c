@@ -29,12 +29,9 @@
 #include <asm/io.h>
 #include <linux/types.h>
 #include <linux/delay.h>
-
 #include <linux/i2c.h>
-
 #include <linux/init.h>
 #include <linux/mm.h>
-
 #include <asm/prom.h>
 // #include <asm/dbdma.h>
 // #include <asm/cuda.h>
@@ -43,6 +40,9 @@
 #include <linux/nvram.h>
 // #include <linux/vt_kern.h>
 
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 #define POLL_SANITY 100 
 

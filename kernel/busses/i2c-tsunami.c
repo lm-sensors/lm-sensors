@@ -31,15 +31,17 @@
 
 #include <linux/version.h>
 #include <linux/module.h>
-
 #include <asm/io.h>
 #include <asm/hwrpb.h>
 #include <asm/core_tsunami.h>
-
 #include <linux/i2c.h>
 #include <linux/i2c-algo-bit.h>
 #include "version.h"
 #include <linux/init.h>
+
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 /* Memory Presence Detect Register (MPD-RW) bits 
    with except of reserved RAZ bits */

@@ -38,8 +38,11 @@
 #include <linux/ioport.h>
 #include <linux/i2c.h>
 #include "version.h"
-
 #include <linux/init.h>
+
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 /* Note: We assume all devices are identical
          to the Intel PIIX4; we only mention it during detection.   */

@@ -27,13 +27,13 @@
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
-
 #include <linux/i2c.h>
-
-
 #include <linux/init.h>
-
 #include "version.h"
+
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 static void isa_inc_use(struct i2c_adapter *adapter);
 static void isa_dec_use(struct i2c_adapter *adapter);

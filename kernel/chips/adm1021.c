@@ -25,8 +25,11 @@
 #include <linux/i2c.h>
 #include "sensors.h"
 #include "version.h"
-
 #include <linux/init.h>
+
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
     (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))

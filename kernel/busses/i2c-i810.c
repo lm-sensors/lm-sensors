@@ -43,6 +43,10 @@
 #include "version.h"
 #include <linux/init.h>
 
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
+
 /* PCI defines */
 #ifndef PCI_DEVICE_ID_INTEL_82810_IG1
 #define PCI_DEVICE_ID_INTEL_82810_IG1 0x7121

@@ -64,8 +64,11 @@
 #include <linux/ioport.h>
 #include <linux/i2c.h>
 #include "version.h"
-
 #include <linux/init.h>
+
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 #ifndef DECLARE_MUTEX
 #define DECLARE_MUTEX(name)  struct semaphore name = MUTEX

@@ -39,8 +39,11 @@
 #include <linux/ioport.h>
 #include <linux/i2c.h>
 #include "version.h"
-
 #include <linux/init.h>
+
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 #ifndef PCI_DEVICE_ID_AMD_756
 #define PCI_DEVICE_ID_AMD_756 0x740B

@@ -28,12 +28,14 @@
 #include <linux/pci.h>
 #include <asm/io.h>
 #include <linux/types.h>
-
 #include <linux/i2c.h>
 #include <linux/i2c-algo-bit.h>
 #include "version.h"
-
 #include <linux/init.h>
+
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 /* PCI device */
 #define VENDOR		PCI_VENDOR_ID_VIA
