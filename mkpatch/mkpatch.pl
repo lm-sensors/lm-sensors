@@ -886,7 +886,7 @@ sub gen_drivers_i2c_Config_in
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
     dep_tristate '  AMD 756/766/768/8111 and nVidia nForce' CONFIG_I2C_AMD756 $CONFIG_I2C
     if [ "$CONFIG_I2C_AMD756" != "n" ]; then
-      dep_mbool '  SMBus multiplexing on the Tyan S4882' CONFIG_I2C_AMD756_S4882 $CONFIG_I2C_AMD756
+      dep_tristate '    SMBus multiplexing on the Tyan S4882' CONFIG_I2C_AMD756_S4882 $CONFIG_I2C_AMD756
     fi
     dep_tristate '  AMD 8111 SMBus 2.0' CONFIG_I2C_AMD8111 $CONFIG_I2C
     if [ "$CONFIG_ALPHA" = "y" ]; then
