@@ -47,5 +47,6 @@ extern void print_fscscy(const sensors_chip_name *name);
 extern void print_pcf8591(const sensors_chip_name *name);
 extern void print_vt1211(const sensors_chip_name *name);
 extern void print_smsc47m1(const sensors_chip_name *name);
+extern void print_lm92(const sensors_chip_name *name);
 
 #endif /* def PROG_SENSORS_CHIPS_H */

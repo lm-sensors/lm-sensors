@@ -3310,6 +3310,84 @@ void print_smsc47m1(const sensors_chip_name *name)
 
 }
 
+static void lm92_print_temp (float n_cur,float n_high,float n_low,float n_crit,float n_hyst)
+{
+	char suffix[5];
+
+	if (fahrenheit) {
+		sprintf (suffix,"%cF",176);
+		n_cur = deg_ctof (n_cur);
+		n_high = deg_ctof (n_high);
+		n_low = deg_ctof (n_low);
+		n_crit = deg_ctof (n_crit);
+		n_hyst = deg_ctof (n_hyst);
+	} else sprintf (suffix,"%cC",176);
+
+	printf ("%+6.4f%s (high = %+6.4f%s, low = %+6.4f%s, crit = %+6.4f%s, hyst = %+6.4f%s)",
+			n_cur,suffix,
+			n_high,suffix,
+			n_low,suffix,
+			n_crit,suffix,
+			n_hyst,suffix);
+}
+
+void print_lm92 (const sensors_chip_name *name)
+{
+	char *label = NULL;
+	double temp[5],alarms[3];
+	int valid,comma = 0;
+
+	if (fahrenheit) {
+		sprintf (degv,"%cF",176);
+		n
+	if (!sensors_get_feature (*name,SENSORS_LM92_ALARMS_HIGH,alarms) &&
+		!sensors_get_feature (*name,SENSORS_LM92_ALARMS_LOW,alarms + 1) &&
+		!sensors_get_feature (*name,SENSORS_LM92_ALAMRS_CRIT,alarms + 2)) {
+		alarms[0] = (int) (alarms[0] + 0.5);
+		alarms[1] = (int) (alarms[1] + 0.5);
+		alarms[2] = (int) (alarms[2] + 0.5);
+	} else {
+		printf ("ERROR: Can't get alarm data!\n");
+		return;
+	}
+
+	if (!sensors_get_label_and_valid (*name,SENSORS_LM92_TEMP,&label,&valid) &&
+		!sensors_get_feature (*name,SENSORS_LM92_TEMP,temp) &&
+		!sensors_get_feature (*name,SENSORS_LM92_TEMP_HIGH,temp + 1) &&
+		!sensors_get_feature (*name,SENSORS_LM92_TEMP_LOW,temp + 2) &&
+		!sensors_get_feature (*name,SENSORS_LM92_TEMP_CRIT,temp + 3) &&
+		!sensors_get_feature (*name,SENSORS_LM92_TEMP_HYST,temp + 4)) {
+		if (valid) {
+			print_label (label,10);
+			print_temp_info (temp[0],temp[1],temp[2],temp[3],temp[4]);
+			if (alarms[0] || alarms[1] || alarms[2]) {
+				printf (" ALARMS (");
+
+				if (alarms[0]) {
+					comma = 1;
+					printf ("HIGH");
+				}
+
+				if (alarms[1]) {
+					if (comma) printf (",");
+					comma = 1;
+					printf ("LOW");
+				}
+
+				if (alarms[2]) {
+					if (comma) printf (",");
+					printf ("CRIT");
+				}
+
+				printf (")");
+			}
+			printf ("\n");
+		}
+	} else printf ("ERROR: Can't get temperature data!\n");
+
+	free_the_label (&label);
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;

@@ -1195,4 +1195,15 @@
 #define SENSORS_SMSC47M1_FAN2_DIV 76 /* RW */
 #define SENSORS_SMSC47M1_ALARMS 81 /* R */
 
+#define SENSORS_LM92_PREFIX "lm92"
+
+#define SENSORS_LM92_TEMP_HIGH		1	/* RW */
+#define SENSORS_LM92_TEMP_LOW		2	/* RW */
+#define SENSORS_LM92_TEMP_CRIT		3	/* RW */
+#define SENSORS_LM92_TEMP_HYST		4	/* RW */
+#define SENSORS_LM92_TEMP			5	/* R */
+#define SENSORS_LM92_ALARMS_HIGH	6	/* R */
+#define SENSORS_LM92_ALARMS_LOW		7	/* R */
+#define SENSORS_LM92_ALARMS_CRIT	8	/* R */
+
 #endif /* def LIB_SENSORS_CHIPS_H */

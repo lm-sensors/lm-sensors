@@ -186,11 +186,11 @@ static void lm92_temp (struct i2c_client *client,int operation,int ctl_name,int 
 
 		if (operation == SENSORS_PROC_REAL_READ) {
 			lm92_read (client);
-			results[0] = NATIVE_TO_PROC (data->temp.high);
-			results[1] = NATIVE_TO_PROC (data->temp.low);
-			results[2] = NATIVE_TO_PROC (data->temp.crit);
-			results[3] = NATIVE_TO_PROC (data->temp.hyst);
-			results[4] = NATIVE_TO_PROC (data->temp.input);
+			results[0] = NATIVE_TO_PROC (data->temp.input);
+			results[1] = NATIVE_TO_PROC (data->temp.high);
+			results[2] = NATIVE_TO_PROC (data->temp.low);
+			results[3] = NATIVE_TO_PROC (data->temp.crit);
+			results[4] = NATIVE_TO_PROC (data->temp.hyst);
 			*nrels_mag = 5;
 		} else if (operation == SENSORS_PROC_REAL_WRITE && *nrels_mag == 4) {
 			data->temp.high = PROC_TO_NATIVE (results[0]);
