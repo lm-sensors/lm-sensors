@@ -18,7 +18,23 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.8.8 (???)
+  File doc/lm_sensors-FAQ.texi: Add 4.6.1
+                                Update 4.7
+  File doc/chips/w83l785ts: Improvements
+  File kernel/include/sensors_vid.h: Support VRM 10.0
+  Makefiles: Implement user_uninstall (Rudolf Marek)
+  Module pca9540: Refine detection
+  Module pc87360: Change voltage magnitude from 2 to 3
+                  Support VID
+                  Fix fan_div file when fan count is less than 3
   Module w83627hf: Add alternate VCORE/in0 calculation method
+  Module w83781d: Fix default VRM for w83791d
+  Module w83l785ts: Implement read error handling (backport from 2.6)
+  Program fancontrol.init: New (Dean Takemori)
+  Program fancontrol.pl: Restore fans on many kinds of errors/interrupts
+  Program sensors-detect: Support LM93
+                          Support PC8739x Super-I/O family (no sensors)
+                          Fix PCA9540 support
 
 2.8.7 (20040611)
   File README.thinkpad: Update 24RF08 status
