@@ -17,7 +17,6 @@ kernel/busses/i2c-viapro.c	drivers/i2c/i2c-viapro.c
 kernel/busses/i2c-voodoo3.c	drivers/i2c/i2c-voodoo3.c
 kernel/busses/i2c-sis630.c	drivers/i2c/i2c-sis630.c
 kernel/busses/i2c-sis645.c	drivers/i2c/i2c-sis645.c
-kernel/sensors.c		drivers/sensors/sensors.c
 kernel/chips/adm1021.c		drivers/sensors/adm1021.c
 kernel/chips/adm1024.c		drivers/sensors/adm1024.c
 kernel/chips/adm1025.c		drivers/sensors/adm1025.c
@@ -51,5 +50,6 @@ kernel/chips/vt1211.c		drivers/sensors/vt1211.c
 kernel/chips/vt8231.c		drivers/sensors/vt8231.c
 kernel/chips/w83781d.c		drivers/sensors/w83781d.c
 kernel/include/sensors.h	include/linux/sensors.h
+kernel/include/sensors_compat.h	include/linux/sensors_compat.h
 kernel/include/sensors_vid.h	include/linux/sensors_vid.h
 mkpatch/Config.in		drivers/sensors/Config.in

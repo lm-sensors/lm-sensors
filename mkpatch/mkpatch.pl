@@ -746,72 +746,6 @@ sub gen_drivers_char_Config_in
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
  
-
-# This generates diffs for drivers/char/mem.c They are a bit intricate.
-# Lines are generated at the beginning to declare sensors_init_all
-# At the bottom, a call to sensors_init_all is added when the
-# new lm_sensors stuff is configured in.
-# Of course, care is taken old lines are removed.
-# $_[0]: sensors package root (like /tmp/sensors)
-# $_[1]: Linux kernel tree (like /usr/src/linux)
-sub gen_drivers_char_mem_c
-{
-  my ($package_root,$kernel_root) = @_;
-  my $kernel_file = "drivers/char/mem.c";
-  my $package_file = $temp;
-  my $right_place = 0;
-  my $done = 0;
-  my $atstart = 1;
-  my $pr1 = 0;
-  my $pr2 = 0;
-
-  open INPUT,"$kernel_root/$kernel_file"
-        or die "Can't open `$kernel_root/$kernel_file'";
-  open OUTPUT,">$package_root/$package_file"
-        or die "Can't open $package_root/$package_file";
-  MAIN: while(<INPUT>) {
-    if ($atstart and m@#ifdef@) {
-      $pr1 = 1;
-      print OUTPUT << 'EOF';
-#ifdef CONFIG_SENSORS
-extern void sensors_init_all(void);
-#endif
-EOF
-      $atstart = 0;
-    }
-    if (not $right_place and m@CONFIG_SENSORS@) {
-      $_ = <INPUT> while not m@#endif@;
-      $_ = <INPUT>;
-      redo MAIN;
-    }
-    $right_place = 1 if (m@lp_m68k_init\(\);@);
-    if ($right_place and not $done and
-        m@CONFIG_SENSORS@) {
-      $_ = <INPUT> while not m@#endif@;
-      $_ = <INPUT>;
-      $_ = <INPUT> if m@^$@;
-      redo MAIN;
-    }
-    if ($right_place and not $done and m@return 0;@) {
-      $pr2 = 1;
-      print OUTPUT <<'EOF';
-#ifdef CONFIG_SENSORS
-	sensors_init_all();
-#endif
-
-EOF
-      $done = 1;
-    }
-    print OUTPUT;
-  }
-  close INPUT;
-  close OUTPUT;
-  die "Automatic patch generation for `drivers/char/mem.c' failed.\n".
-      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 == 0 or $pr2 == 0;
-  print_diff $package_root,$kernel_root,$kernel_file,$package_file;
-}
-
-
 # This generates diffs for drivers/i2c/Config.in
 # Several adapter drivers that are included in the lm_sensors package are
 # added at the first and onlu sensors marker.
@@ -891,9 +825,6 @@ sub gen_drivers_sensors_Makefile
 MOD_LIST_NAME := SENSORS_MODULES
 O_TARGET := sensor.o
 
-export-objs	:= sensors.o
-
-obj-$(CONFIG_SENSORS)		+= sensors.o
 obj-$(CONFIG_SENSORS_ADM1021)	+= adm1021.o
 obj-$(CONFIG_SENSORS_ADM1024)	+= adm1024.o
 obj-$(CONFIG_SENSORS_ADM1025)	+= adm1025.o
@@ -1410,149 +1341,6 @@ EOF
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
-# This generates diffs for drivers/i2c/i2c-core.c
-# Lines are generated at the beginning to declare several *_init functions.
-# At the bottom, calls to them are added when the sensors stuff is configured
-# in.
-# $_[0]: sensors package root (like /tmp/sensors)
-# $_[1]: Linux kernel tree (like /usr/src/linux)
-sub gen_drivers_i2c_i2c_core_c
-{
-  my ($package_root,$kernel_root) = @_;
-  my $kernel_file = "drivers/i2c/i2c-core.c";
-  my $package_file = $temp;
-  my $patch_nr = 1;
-
-  open INPUT,"$kernel_root/$kernel_file"
-        or die "Can't open `$kernel_root/$kernel_file'";
-  open OUTPUT,">$package_root/$package_file"
-        or die "Can't open $package_root/$package_file";
-  while(<INPUT>) {
-    if (m@sensors code starts here@) {
-      print OUTPUT;
-      while (<INPUT>) {
-        last if m@sensors code ends here@;
-      }
-      if ($patch_nr == 1) {
-        print OUTPUT << 'EOF';
-#ifdef CONFIG_I2C_ALI1535
-	extern int i2c_ali1535_init(void);
-#endif
-#ifdef CONFIG_I2C_ALI15X3
-	extern int i2c_ali15x3_init(void);
-#endif
-#ifdef CONFIG_I2C_AMD756
-	extern int i2c_amd756_init(void);
-#endif
-#ifdef CONFIG_I2C_AMD8111
-	extern int i2c_amd8111_init(void);
-#endif
-#ifdef CONFIG_I2C_HYDRA
-	extern int i2c_hydra_init(void);
-#endif
-#ifdef CONFIG_I2C_I801
-	extern int i2c_i801_init(void);
-#endif
-#ifdef CONFIG_I2C_I810
-	extern int i2c_i810_init(void);
-#endif
-#ifdef CONFIG_I2C_ISA
-	extern int i2c_isa_init(void);
-#endif
-#ifdef CONFIG_I2C_PIIX4
-	extern int i2c_piix4_init(void);
-#endif
-#ifdef CONFIG_I2C_SIS5595
-	extern int i2c_sis5595_init(void);
-#endif
-#ifdef CONFIG_I2C_SIS630
-	extern int i2c_sis630_init(void);
-#endif
-#ifdef CONFIG_I2C_SIS645
-	extern int sis645_init(void);
-#endif
-#ifdef CONFIG_I2C_SAVAGE4
-	extern int i2c_savage4_init(void);
-#endif
-#ifdef CONFIG_I2C_TSUNAMI
-	extern int i2c_tsunami_init(void);
-#endif
-#ifdef CONFIG_I2C_VIA
-	extern int i2c_via_init(void);
-#endif
-#ifdef CONFIG_I2C_VIAPRO
-	extern int i2c_vt596_init(void);
-#endif
-#ifdef CONFIG_I2C_VOODOO3
-	extern int i2c_voodoo3_init(void);
-#endif
-EOF
-      } elsif ($patch_nr == 2) {
-      print OUTPUT << 'EOF';
-#ifdef CONFIG_I2C_ALI1535
-	i2c_ali1535_init();
-#endif
-#ifdef CONFIG_I2C_ALI15X3
-	i2c_ali15x3_init();
-#endif
-#ifdef CONFIG_I2C_AMD756
-	i2c_amd756_init();
-#endif
-#ifdef CONFIG_I2C_AMD8111
-	i2c_amd8111_init();
-#endif
-#ifdef CONFIG_I2C_HYDRA
-	i2c_hydra_init();
-#endif
-#ifdef CONFIG_I2C_I801
-	i2c_i801_init();
-#endif
-#ifdef CONFIG_I2C_I810
-	i2c_i810_init();
-#endif
-#ifdef CONFIG_I2C_PIIX4
-	i2c_piix4_init();
-#endif
-#ifdef CONFIG_I2C_SIS5595
-	i2c_sis5595_init();
-#endif
-#ifdef CONFIG_I2C_SIS630
-	i2c_sis630_init();
-#endif
-#ifdef CONFIG_I2C_SIS645
-	sis645_init();
-#endif
-#ifdef CONFIG_I2C_SAVAGE4
-	i2c_savage4_init();
-#endif
-#ifdef CONFIG_I2C_TSUNAMI
-	i2c_tsunami_init();
-#endif
-#ifdef CONFIG_I2C_VIA
-	i2c_via_init();
-#endif
-#ifdef CONFIG_I2C_VIAPRO
-	i2c_vt596_init();
-#endif
-#ifdef CONFIG_I2C_VOODOO3
-	i2c_voodoo3_init();
-#endif
-#ifdef CONFIG_I2C_ISA
-	i2c_isa_init();
-#endif
-EOF
-      }
-      $patch_nr ++;
-    }
-    print OUTPUT;
-  }
-  close INPUT;
-  close OUTPUT;
-  die "Automatic patch generation for `drivers/i2c/i2c-core.c' failed.\n".
-      "See our home page http://www.lm-sensors.nu for assistance!" if $patch_nr != 3;
-  print_diff $package_root,$kernel_root,$kernel_file,$package_file;
-}
-
 # Generate the diffs for the list of MAINTAINERS
 # $_[0]: i2c package root (like /tmp/i2c)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
@@ -1664,10 +1452,8 @@ sub main
   gen_drivers_Makefile $package_root, $kernel_root;
   gen_drivers_sensors_Makefile $package_root, $kernel_root;
   gen_drivers_char_Config_in $package_root, $kernel_root;
-  gen_drivers_char_mem_c $package_root, $kernel_root;
   gen_drivers_i2c_Config_in $package_root, $kernel_root;
   gen_drivers_i2c_Makefile $package_root, $kernel_root;
-  gen_drivers_i2c_i2c_core_c $package_root, $kernel_root;
   gen_Documentation_Configure_help $package_root, $kernel_root;
   gen_MAINTAINERS $package_root, $kernel_root;
 }
