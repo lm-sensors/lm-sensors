@@ -3,7 +3,8 @@
 # Here you can set several defaults.
 
 # The number of devices to create (max: 256)
-NUMBER=32
+# If not provided on the command line, default to 32
+NUMBER=${1:-32}
 
 # The owner and group of the devices
 OUSER=root
