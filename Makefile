@@ -31,6 +31,13 @@
 LINUX=/usr/src/linux
 LINUX_HEADERS=$(LINUX)/include
 
+# Determine whether we need to compile the kernel modules, or only the
+# user-space utilities.
+COMPILE_KERNEL := $(shell if test -d $(LINUX)/drivers/sensors ; \
+                          then echo 0; else echo 1; fi)
+#COMPILE_KERNEL := 0
+#COMPILE_KERNEL := 1
+
 # If you have installed the i2c header at some other place (like 
 # /usr/local/include/linux), set that directory here. Please check this out
 # if you get strange compilation errors; the default Linux i2c headers
@@ -122,10 +129,12 @@ MANGRP := root
 # all, install and clean. Use double colons instead of single ones
 # to do this. 
 
-
 # The subdirectories we need to build things in 
-SRCDIRS := kernel kernel/busses kernel/chips kernel/include lib prog/sensors \
-           prog/dump prog/detect etc
+SRCDIRS := 
+ifeq ($(COMPILE_KERNEL),1)
+SRCDIRS += kernel kernel/busses kernel/chips kernel/include
+endif
+SRCDIRS += lib prog/sensors prog/dump prog/detect etc
 
 # Some often-used commands with default options
 MKDIR := mkdir -p
