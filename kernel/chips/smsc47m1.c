@@ -117,8 +117,9 @@ static inline u8 MIN_TO_REG(long rpm, int div)
                                 983040/(((val)-preload)*(div)))
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
-#define PWM_FROM_REG(val) ((((val) & 0x7f) * 1005) / 640)
-#define PWM_TO_REG(val) SENSORS_LIMIT((((val) * 645) / 1000), 0, 63)
+/* reg is 6 middle bits; /proc is 8 bits */
+#define PWM_FROM_REG(val) (((val) << 1) & 0xfc)
+#define PWM_TO_REG(val)   (((SENSORS_LIMIT((val), 0, 255)) >> 1) & 0x7e)
 
 struct smsc47m1_data {
 	struct i2c_client client;
@@ -458,22 +459,27 @@ void smsc47m1_pwm(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		smsc47m1_update_client(client);
 		results[0] = PWM_FROM_REG(data->pwm[nr - 1]);
-		results[1] = data->pwm[nr - 1] >> 7;
+		results[1] = data->pwm[nr - 1] & 0x01;
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->pwm[nr - 1] &= 0x80;
+			data->pwm[nr - 1] &= 0x81;
 			data->pwm[nr - 1] |= PWM_TO_REG(results[0]);
 			if (*nrels_mag >= 2) {
-				if(results[1] && (!(data->pwm[nr-1] & 0x80))) {
-					/* output PWM */
+				if(results[1] && (!(data->pwm[nr-1] & 0x01))) {
+					/* enable PWM */
+/* hope BIOS did it already
 					smsc47m1_write_value(client,
 					          SMSC47M1_REG_PPIN(nr), 0x04);
-					data->pwm[nr - 1] |= 0x80;
+*/
+					data->pwm[nr - 1] |= 0x01;
+				} else if((!results[1]) && (data->pwm[nr-1] & 0x01)) {
+					/* disable PWM */
+					data->pwm[nr - 1] &= 0xfe;
 				}
 			}
 			smsc47m1_write_value(client, SMSC47M1_REG_PWM(nr),
-					    data->pwm[nr - 1]);
+					     data->pwm[nr - 1]);
 		}
 	}
 }
