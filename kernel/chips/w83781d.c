@@ -949,7 +949,9 @@ void w83781d_init_client(struct i2c_client *client)
 
   /* Reset all except Watchdog values and last conversion values
      This sets fan-divs to 2, among others */
+  /* Disable beeps (reset turns them on) */
   w83781d_write_value(client,W83781D_REG_CONFIG,0x80);
+  w83781d_write_value(client,W83781D_REG_BEEP_INTS2,0);
 
   vid = w83781d_read_value(client,W83781D_REG_VID_FANDIV) & 0x0f;
   vid |= (w83781d_read_value(client,W83781D_REG_CHIPID) & 0x01) << 4;
