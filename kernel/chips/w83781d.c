@@ -1,7 +1,7 @@
 /*
     w83781d.c - Part of lm_sensors, Linux kernel modules for hardware
                 monitoring
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>,
+    Copyright (c) 1998, 1999, 2000  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>,
     and Mark Studebaker <mdsxyz123@yahoo.com>
 
@@ -26,7 +26,7 @@
     Chip	#vin	#fanin	#pwm	#temp	wchipid	vendid	i2c	ISA
     as99127f	9	3	2-4	3	0x20	0x12c3	yes	no
     w83781d	7	3	0	3	0x10	0x5ca3	yes	yes
-    w83627hf	9	3	2-4	3	0x20	0x5ca3	yes	yes(LPC)
+    w83627hf	9	3	2	3	0x20	0x5ca3	yes	yes(LPC)
     w83782d	9	3	2-4	3	0x30	0x5ca3	yes	yes
     w83783s	5-6	3	2	1-2	0x40	0x5ca3	yes	no
 
@@ -105,7 +105,7 @@ SENSORS_INSMOD_5(w83781d, w83782d, w83783s, w83627hf, as99127f);
 #define W83781D_REG_CONFIG 0x40
 #define W83781D_REG_ALARM1 0x41
 #define W83781D_REG_ALARM2 0x42
-#define W83781D_REG_ALARM3 0x450	/* W83782D only */
+#define W83781D_REG_ALARM3 0x450	/* not on W83781D */
 
 #define W83781D_REG_BEEP_CONFIG 0x4D
 #define W83781D_REG_BEEP_INTS1 0x56
@@ -123,9 +123,10 @@ SENSORS_INSMOD_5(w83781d, w83782d, w83783s, w83627hf, as99127f);
 #define W83781D_REG_VBAT 0x5D
 
 /* PWM 782D (1-4) and 783S (1-2) only */
-#define W83781D_REG_PWM1 0x5B	/* 782d and 783s datasheets disagree */
-				/* on which is which. */
-#define W83781D_REG_PWM2 0x5A	/* We follow the 782d convention here */
+#define W83781D_REG_PWM1 0x5B	/* 782d and 783s/627hf datasheets disagree */
+				/* on which is which; */
+#define W83781D_REG_PWM2 0x5A	/* We follow the 782d convention here, */
+				/* However 782d is probably wrong. */
 #define W83781D_REG_PWM3 0x5E
 #define W83781D_REG_PWM4 0x5F
 #define W83781D_REG_PWMCLK12 0x5C
@@ -140,11 +141,11 @@ static const u8 regpwm[] = { W83781D_REG_PWM1, W83781D_REG_PWM2,
 
 /* The following are undocumented in the data sheets however we
    received the information in an email from Winbond tech support */
-/* Sensor selection 782D/783S only */
+/* Sensor selection - not on 781d */
 #define W83781D_REG_SCFG1 0x5D
 static const u8 BIT_SCFG1[] = { 0x02, 0x04, 0x08 };
 #define W83781D_REG_SCFG2 0x59
-static const u8 BIT_SCFG2[] = { 0x10, 0x04, 0x08 };
+static const u8 BIT_SCFG2[] = { 0x10, 0x20, 0x40 };
 #define W83781D_DEFAULT_BETA 3435
 
 /* RT Table registers */
@@ -1054,12 +1055,6 @@ int w83781d_read_value(struct i2c_client *client, u16 reg)
 	return res;
 }
 
-/* The SMBus locks itself, usually, but nothing may access the Winbond between
-   bank switches. ISA access must always be locked explicitly! 
-   We ignore the W83781D BUSY flag at this moment - it could lead to deadlocks,
-   would slow down the W83781D access and should not be necessary. 
-   There are some ugly typecasts here, but the good news is - they should
-   nowhere else be necessary! */
 int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 {
 	int word_sized, bank;
@@ -1177,7 +1172,7 @@ void w83781d_init_client(struct i2c_client *client)
    We assume that they are 32 bytes long, in order for temp 1-3.
    Data sheet documentation is sparse.
    We also assume that it is only for the 781D although I suspect
-   that the 782D/783D support it as well....
+   that the others support it as well....
 */
 
 	if (type == w83781d) {
@@ -1254,6 +1249,8 @@ void w83781d_init_client(struct i2c_client *client)
 				    IN_TO_REG(W83781D_INIT_IN_MIN_8));
 		w83781d_write_value(client, W83781D_REG_IN_MAX(8),
 				    IN_TO_REG(W83781D_INIT_IN_MAX_8));
+		w83781d_write_value(client, W83781D_REG_VBAT,
+		    (w83781d_read_value(client, W83781D_REG_VBAT) | 0x01));
 	}
 	w83781d_write_value(client, W83781D_REG_FAN_MIN(1),
 			    FAN_TO_REG(W83781D_INIT_FAN_MIN_1, 2));

@@ -18,6 +18,7 @@ ask CVS about it:
   Module maxilife: Add support for Maxilife '99 (NBA)
   Module via686a: Enable sensors if not enabled by BIOS
   Module w83781d: Improve w83783s support, w83627hf always has 2 pwm
+  Module w83781d: Fix sensor2&3 selection, enable VBAT (in8) monitoring
   Program isadump: Add Winbond-style bank selection
   Program sensors-detect: Fix i801 detection
 
