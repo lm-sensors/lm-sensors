@@ -23,13 +23,53 @@
 #include <linux/sysctl.h>
 
 #ifdef __KERNEL__
+
+/* The type of callback functions used in sensors_{proc,sysctl}_real */
+typedef void (*sensors_real_callback) (struct i2c_client *client,
+                                       int operation, int ctl_name,
+                                       int *nrels_mag, long *results);
+
+/* Values for the operation field in the above function type */
+#define SENSORS_PROC_REAL_INFO 1
+#define SENSORS_PROC_REAL_READ 2
+#define SENSORS_PROC_REAL_WRITE 3
+
+/* These funcion reads or writes a 'real' value (encoded by the combination
+   of an integer and a magnitude, the last is the power of ten the value
+   should be divided with) to a /proc/sys directory. To use these functions,
+   you must (before registering the ctl_table) set the extra2 field to the
+   client, and the extra1 field to a function of the form:
+      void func(struct i2c_client *client, int operation, int ctl_name,
+                int *nrels_mag, long *results)
+   This last function can be called for three values of operation. If
+   operation equals SENSORS_PROC_REAL_INFO, the magnitude should be returned
+   in nrels_mag. If operation equals SENSORS_PROC_REAL_READ, values should
+   be read into results. nrels_mag should return the number of elements
+   read; the maximum number is put in it on entry. Finally, if operation
+   equals SENSORS_PROC_REAL_WRITE, the values in results should be
+   written to the chip. nrels_mag contains on entry the number of elements
+   found.
+   In all cases, client points to the client we wish to interact with,
+   and ctl_name is the SYSCTL id of the file we are accessing. */
+extern int sensors_sysctl_real (ctl_table *table, int *name, int nlen,
+                                void *oldval, size_t *oldlenp, void *newval,
+                                size_t newlen, void **context);
+extern int sensors_proc_real(ctl_table *ctl, int write, struct file * filp,
+                             void *buffer, size_t *lenp);
+
+
+
+/* These rather complex functions must be called when you want to add or
+   delete an entry in /proc/sys/dev/sensors/chips (not yet implemented). It
+   also creates a new directory within /proc/sys/dev/sensors/.
+   ctl_template should be a template of the newly created directory. It is
+   copied in memory. The extra2 field of each file is set to point to client.
+   If any driver wants subdirectories within the newly created directory,
+   these functions must be updated! */
 extern int sensors_register_entry(struct i2c_client *client,
                                   const char *prefix, ctl_table *ctl_template);
 extern void sensors_deregister_entry(int id);
-extern void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
-                                long *results, int magnitude);
-extern void sensors_write_reals(int nrels,void *buffer,int *bufsize,
-                                long *results, int magnitude);
+
 
 #endif /* def __KERNEL__ */
 

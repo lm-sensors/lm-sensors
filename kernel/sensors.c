@@ -28,15 +28,19 @@
 #include "isa.h"
 #include "sensors.h"
 
+
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-int sensors_register_entry(struct i2c_client *client ,const char *prefix, 
-                           ctl_table *ctl_template);
 static int sensors_create_name(char **name, const char *prefix,
                                struct i2c_adapter * adapter, int addr);
+static void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
+                                long *results, int magnitude);
+static void sensors_write_reals(int nrels,void *buffer,int *bufsize,
+                                long *results, int magnitude);
+
 static int sensors_init(void);
 static int sensors_cleanup(void);
 
@@ -77,7 +81,7 @@ int sensors_create_name(char **name, const char *prefix,
    to /proc/sys/dev/sensors/chips (not yet implemented). It also creates
    a new directory within /proc/sys/dev/sensors/.
    ctl_template should be a template of the newly created directory. It is
-   copied in memory. The extra1 field of each file is set to point to client.
+   copied in memory. The extra2 field of each file is set to point to client.
    If any driver wants subdirectories within the newly created directory,
    this function must be updated! */
 int sensors_register_entry(struct i2c_client *client ,const char *prefix, 
@@ -121,7 +125,7 @@ int sensors_register_entry(struct i2c_client *client ,const char *prefix,
   new_table[4].ctl_name = id;
   memcpy(new_table+6,ctl_template,(len-6) * sizeof(ctl_table));
   for (i = 6; i < len; i++)
-    new_table[i].extra1 = client;
+    new_table[i].extra2 = client;
 
   if (! (new_header = register_sysctl_table(new_table,0))) {
     kfree(new_table);
@@ -146,6 +150,104 @@ void sensors_deregister_entry(int id)
     sensors_entries[id] = 0;
   }
 }
+
+/* This funcion reads or writes a 'real' value (encoded by the combination
+   of an integer and a magnitude, the last is the power of ten the value
+   should be divided with) to a /proc/sys directory. To use this function,
+   you must (before registering the ctl_table) set the extra2 field to the
+   client, and the extra1 field to a function of the form:
+      void func(struct i2c_client *client, int operation, int ctl_name,
+                int *nrels_mag, long *results)
+   This function can be called for three values of operation. If operation
+   equals SENSORS_PROC_REAL_INFO, the magnitude should be returned in 
+   nrels_mag. If operation equals SENSORS_PROC_REAL_READ, values should
+   be read into results. nrels_mag should return the number of elements
+   read; the maximum number is put in it on entry. Finally, if operation
+   equals SENSORS_PROC_REAL_WRITE, the values in results should be
+   written to the chip. nrels_mag contains on entry the number of elements
+   found.
+   In all cases, client points to the client we wish to interact with,
+   and ctl_name is the SYSCTL id of the file we are accessing. */
+int sensors_proc_real(ctl_table *ctl, int write, struct file * filp,
+                      void *buffer, size_t *lenp)
+{
+#define MAX_RESULTS 20
+  int mag,nrels=MAX_RESULTS;
+  long results[MAX_RESULTS];
+  sensors_real_callback callback = ctl -> extra1;
+  struct i2c_client *client = ctl -> extra2;
+
+  /* If buffer is size 0, or we try to read when not at the start, we
+     return nothing. Note that I think writing when not at the start
+     does not work either, but anyway, this is straight from the kernel
+     sources. */
+  if (!*lenp || (filp->f_pos && !write)) {
+    *lenp = 0;
+    return 0;
+  }
+
+  /* Get the magnitude */
+  callback(client,SENSORS_PROC_REAL_INFO,ctl->ctl_name,&mag,NULL);
+
+  if (write) {
+    /* Read the complete input into results, converting to longs */
+    sensors_parse_reals(&nrels,buffer,*lenp,results,mag);
+
+    if (! nrels)
+      return 0;
+
+    /* Now feed this information back to the client */
+    callback(client,SENSORS_PROC_REAL_WRITE,ctl->ctl_name,&nrels,results);
+    
+    filp->f_pos += *lenp;
+    return 0;
+  } else { /* read */
+    /* Get the information from the client into results */
+    callback(client,SENSORS_PROC_REAL_READ,ctl->ctl_name,&nrels,results);
+
+    /* And write them to buffer, converting to reals */
+    sensors_write_reals(nrels,buffer,lenp,results,mag);
+    sensors_write_reals(nrels,buffer,lenp,results,mag);
+    filp->f_pos += *lenp;
+    return 0;
+  }
+}
+
+/* This function is equivalent to sensors_proc_real, only it interacts with
+   the sysctl(2) syscall, and returns no reals, but integers */
+int sensors_sysctl_real (ctl_table *table, int *name, int nlen, void *oldval,
+               size_t *oldlenp, void *newval, size_t newlen,
+               void **context)
+{
+  long results[MAX_RESULTS];
+  int oldlen,nrels=MAX_RESULTS;
+  sensors_real_callback callback = table -> extra1;
+  struct i2c_client *client = table -> extra2;
+
+  /* Check if we need to output the old values */
+  if (oldval && oldlenp && ! get_user_data(oldlen,oldlenp) && oldlen) {
+    callback(client,SENSORS_PROC_REAL_READ,table->ctl_name,&nrels,results);
+
+    /* Note the rounding factor! */
+    if (nrels * sizeof(long) < oldlen)
+      oldlen = nrels * sizeof(long);
+    oldlen = (oldlen / sizeof(long)) * sizeof(long);
+    copy_to_user(oldval,results,oldlen);
+    put_user(oldlen,oldlenp);
+  }
+
+  if (newval && newlen) {
+    /* Note the rounding factor! */
+    newlen -= newlen % sizeof(long);
+    nrels = newlen / sizeof(long);
+    copy_from_user(results,newval,newlen);
+    
+    /* Get the new values back to the client */
+    callback(client,SENSORS_PROC_REAL_WRITE,table->ctl_name,&nrels,results);
+  }
+  return 0;
+}
+    
 
 /* nrels contains initially the maximum number of elements which can be
    put in results, and finally the number of elements actually put there.

@@ -33,7 +33,7 @@
 #include "i2c.h"
 #include "compat.h"
 
-/* Many LM78 constants needed below */
+/* Many LM78 constants specified below */
 
 /* Length of ISA address segment */
 #define LM78_EXTENT 8
@@ -81,7 +81,7 @@ static int lm78_in_conv[7] = {10000, 10000, 10000, 16892, 38000,
                            (val)>=0x06?0:205-(val)*5)
 #define ALARMS_FROM_REG(val) (val)
 
-#define DIV_FROM_REG(val) (1 >> (val))
+#define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 
 /* Initial limits */
@@ -203,27 +203,19 @@ static int lm78_write_value(struct i2c_client *client, u8 register, u8 value);
 static void lm78_update_client(struct i2c_client *client);
 static void lm78_init_client(struct i2c_client *client);
 
-static int lm78_sysctl (ctl_table *table, int *name, int nlen, void *oldval, 
-                        size_t *oldlenp, void *newval, size_t newlen,
-                        void **context);
-static int lm78_proc (ctl_table *ctl, int write, struct file * filp,
-                      void *buffer, size_t *lenp);
 
-
-static void write_in(struct i2c_client *client, int nr, int nrels, 
-                     long *results);
-static void read_in(struct i2c_client *client, int nr, long *results);
-static void write_fan(struct i2c_client *client, int nr, int nrels, 
-                      long *results);
-static void read_fan(struct i2c_client *client, int nr, long *results);
-static void write_temp(struct i2c_client *client, int nrels, long *results);
-static void read_temp(struct i2c_client *client, long *results);
-static void read_vid(struct i2c_client *client, long *results);
-static void read_alarms(struct i2c_client *client, long *results);
-static void write_fan_div(struct i2c_client *client, int nrels, long *results);
-static void read_fan_div(struct i2c_client *client, long *results);
-
-
+void lm78_in(struct i2c_client *client, int operation, int ctl_name,
+             int *nrels_mag, long *results);
+void lm78_fan(struct i2c_client *client, int operation, int ctl_name,
+              int *nrels_mag, long *results);
+void lm78_temp(struct i2c_client *client, int operation, int ctl_name,
+               int *nrels_mag, long *results);
+void lm78_vid(struct i2c_client *client, int operation, int ctl_name,
+              int *nrels_mag, long *results);
+void lm78_alarms(struct i2c_client *client, int operation, int ctl_name,
+                 int *nrels_mag, long *results);
+void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
+                  int *nrels_mag, long *results);
 
 /* I choose here for semi-static LM78 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -254,20 +246,34 @@ static int lm78_initialized = 0;
    is done through one of the 'extra' fields which are initialized 
    when a new copy is allocated. */
 static ctl_table lm78_dir_table_template[] = {
-  { LM78_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_VID, "vid", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
+  { LM78_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_in },
+  { LM78_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_in },
+  { LM78_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_in },
+  { LM78_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_in },
+  { LM78_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_in },
+  { LM78_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_in },
+  { LM78_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_in },
+  { LM78_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_fan },
+  { LM78_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_fan },
+  { LM78_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_fan },
+  { LM78_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_temp },
+  { LM78_SYSCTL_VID, "vid", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_vid },
+  { LM78_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_fan_div },
+  { LM78_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &lm78_alarms },
   { 0 }
 };
 
@@ -699,281 +705,138 @@ void lm78_update_client(struct i2c_client *client)
   up(&data->update_lock);
 }
 
-/* This function is called when /proc/sys/dev/lm78-???/... is accessed */
-int lm78_proc (ctl_table *ctl, int write, struct file * filp,
-               void *buffer, size_t *lenp)
+
+/* The next few functions are the call-back functions of the /proc/sys and
+   sysctl files. Which function is used is defined in the ctl_table in
+   the extra1 field.
+   Each function must return the magnitude (power of 10 to divide the date
+   with) if it is called with operation==SENSORS_PROC_REAL_INFO. It must
+   put a maximum of *nrels elements in results reflecting the data of this
+   file, and set *nrels to the number it actually put in it, if operation==
+   SENSORS_PROC_REAL_READ. Finally, it must get upto *nrels elements from
+   results and write them to the chip, if operations==SENSORS_PROC_REAL_WRITE.
+   Note that on SENSORS_PROC_REAL_READ, I do not check whether results is
+   large enough (by checking the incoming value of *nrels). This is not very
+   good practice, but as long as you put less than about 5 values in results,
+   you can assume it is large enough. */
+void lm78_in(struct i2c_client *client, int operation, int ctl_name, 
+             int *nrels_mag, long *results)
 {
-  int nrels,mag;
-  long results[7];
-  struct i2c_client *client = ctl -> extra1;
+  struct lm78_data *data = client->data;
+  int nr = ctl_name - LM78_SYSCTL_IN0;
 
-  /* If buffer is size 0, or we try to read when not at the start, we 
-     return nothing. Note that I think writing when not at the start
-     does not work either, but anyway, this is straight from the kernel
-     sources. */
-  if (!*lenp || (filp->f_pos && !write)) {
-    *lenp = 0;
-    return 0;
-  }
-
-  /* How many numbers are found within these files, and how to scale them? */
-  switch (ctl->ctl_name) {
-    case LM78_SYSCTL_IN0: case LM78_SYSCTL_IN1: case LM78_SYSCTL_IN2: 
-    case LM78_SYSCTL_IN3: case LM78_SYSCTL_IN4: case LM78_SYSCTL_IN5:
-    case LM78_SYSCTL_IN6:
-      nrels=3;
-      mag=2;
-      break;
-    case LM78_SYSCTL_TEMP:
-      nrels=3;
-      mag=1;
-      break;
-    case LM78_SYSCTL_FAN_DIV:
-      nrels=3;
-      mag=0;
-      break;
-    case LM78_SYSCTL_FAN1: case LM78_SYSCTL_FAN2: case LM78_SYSCTL_FAN3:
-      nrels=2;
-      mag=0;
-      break;
-    case LM78_SYSCTL_VID:
-      nrels=1;
-      mag=2;
-      break;
-    case LM78_SYSCTL_ALARMS:
-      nrels=1;
-      mag=0;
-      break;
-    default: /* Should never be called */
-      return -EINVAL;
-  }
- 
-  /* OK, try writing stuff. */
-  if (write) {
-    sensors_parse_reals(&nrels,buffer,*lenp,results,mag);
-    if (nrels == 0)
-      return 0;
-    switch (ctl->ctl_name) {
-      case LM78_SYSCTL_IN0: write_in(client,0,nrels,results); break;
-      case LM78_SYSCTL_IN1: write_in(client,1,nrels,results); break;
-      case LM78_SYSCTL_IN2: write_in(client,2,nrels,results); break;
-      case LM78_SYSCTL_IN3: write_in(client,3,nrels,results); break;
-      case LM78_SYSCTL_IN4: write_in(client,4,nrels,results); break;
-      case LM78_SYSCTL_IN5: write_in(client,5,nrels,results); break;
-      case LM78_SYSCTL_IN6: write_in(client,6,nrels,results); break;
-      case LM78_SYSCTL_FAN1: write_fan(client,1,nrels,results); break;
-      case LM78_SYSCTL_FAN2: write_fan(client,2,nrels,results); break;
-      case LM78_SYSCTL_FAN3: write_fan(client,3,nrels,results); break;
-      case LM78_SYSCTL_FAN_DIV: write_fan_div(client,nrels,results);break;
-      case LM78_SYSCTL_TEMP: write_temp(client,nrels,results);break;
-      case LM78_SYSCTL_VID: case LM78_SYSCTL_ALARMS: break;
-      default: /* Should never be called */ *lenp=0; return -EINVAL; break;
-    }
-    filp->f_pos += *lenp;
-    return 0;
-  } else { /* read */
-    /* Update all values in LM_Sensor_Data */
-
-    lm78_update_client((struct i2c_client *) (ctl->extra1));
-
-    /* Read the values to print into results */
-    switch (ctl->ctl_name) {
-      case LM78_SYSCTL_IN0: read_in(client,0,results);break;
-      case LM78_SYSCTL_IN1: read_in(client,1,results);break;
-      case LM78_SYSCTL_IN2: read_in(client,2,results);break;
-      case LM78_SYSCTL_IN3: read_in(client,3,results);break;
-      case LM78_SYSCTL_IN4: read_in(client,4,results);break;
-      case LM78_SYSCTL_IN5: read_in(client,5,results);break;
-      case LM78_SYSCTL_IN6: read_in(client,6,results);break;
-      case LM78_SYSCTL_FAN1: read_fan(client,1,results);break;
-      case LM78_SYSCTL_FAN2: read_fan(client,2,results);break;
-      case LM78_SYSCTL_FAN3: read_fan(client,3,results);break;
-      case LM78_SYSCTL_TEMP: read_temp(client,results);break;
-      case LM78_SYSCTL_FAN_DIV: read_fan_div(client,results);break;
-      case LM78_SYSCTL_VID: read_vid(client,results);break;
-      case LM78_SYSCTL_ALARMS: read_alarms(client,results);break;
-      default: /* Should never be called */ return -EINVAL;
-    }
-    /* OK, print it now */
-    sensors_write_reals(nrels,buffer,lenp,results,mag);
-    filp->f_pos += *lenp;
-    return 0;
-  }
-}
-
-/* This function is called when a sysctl on a lm78 file is done */
-int lm78_sysctl (ctl_table *table, int *name, int nlen, void *oldval, 
-               size_t *oldlenp, void *newval, size_t newlen,
-               void **context)
-{
-  long results[7];
-  int nrels,oldlen;
-  struct i2c_client *client = table -> extra1;
- 
-  /* How many numbers are found within these files, and how to scale them? */
-  switch (table->ctl_name) {
-    case LM78_SYSCTL_IN0: case LM78_SYSCTL_IN1: case LM78_SYSCTL_IN2: 
-    case LM78_SYSCTL_IN3: case LM78_SYSCTL_IN4: case LM78_SYSCTL_IN5: 
-    case LM78_SYSCTL_IN6: case LM78_SYSCTL_TEMP: 
-    case LM78_SYSCTL_FAN_DIV:
-      nrels=3;
-      break;
-    case LM78_SYSCTL_FAN1: case LM78_SYSCTL_FAN2: case LM78_SYSCTL_FAN3:
-      nrels=2;
-      break;
-    case LM78_SYSCTL_VID: case LM78_SYSCTL_ALARMS:
-      nrels=1;
-      break;
-    default: /* Should never be called */
-      return -EINVAL;
-  }
-
-  /* Check if we need to output the old values */
-  if (oldval && oldlenp && ! get_user_data(oldlen,oldlenp) && oldlen) {
-
-    /* Update all values in LM_Sensor_Data */
-    lm78_update_client((struct i2c_client *) (table->extra1));
-    switch (table->ctl_name) {
-      case LM78_SYSCTL_IN0: read_in(client,0,results);break;
-      case LM78_SYSCTL_IN1: read_in(client,1,results);break;
-      case LM78_SYSCTL_IN2: read_in(client,2,results);break;
-      case LM78_SYSCTL_IN3: read_in(client,3,results);break;
-      case LM78_SYSCTL_IN4: read_in(client,4,results);break;
-      case LM78_SYSCTL_IN5: read_in(client,5,results);break;
-      case LM78_SYSCTL_IN6: read_in(client,6,results);break;
-      case LM78_SYSCTL_FAN1: read_fan(client,1,results);break;
-      case LM78_SYSCTL_FAN2: read_fan(client,2,results);break;
-      case LM78_SYSCTL_FAN3: read_fan(client,3,results);break;
-      case LM78_SYSCTL_TEMP: read_temp(client,results);break;
-      case LM78_SYSCTL_FAN_DIV: read_fan_div(client,results);break;
-      case LM78_SYSCTL_VID: read_vid(client,results);break;
-      case LM78_SYSCTL_ALARMS: read_alarms(client,results);break;
-      default: /* Should never be called */ return -EINVAL;
-    }
-    
-    /* Note the rounding factor! */
-    if (nrels * sizeof(long) < oldlen)
-      oldlen = nrels * sizeof(long);
-    oldlen = (oldlen / sizeof(long)) * sizeof(long);
-    copy_to_user(oldval,results,oldlen);
-    put_user(oldlen,oldlenp);
-  }
-
-  /* Check to see whether we need to read the new values */
-  if (newval && newlen) {
-    if (nrels * sizeof(long) < newlen)
-      newlen = nrels * sizeof(long);
-    nrels = newlen / sizeof(long);
-    newlen = (newlen / sizeof(long)) * sizeof(long);
-    copy_from_user(results,newval,newlen);
-    
-    switch (table->ctl_name) {
-      case LM78_SYSCTL_IN0: write_in(client,0,nrels,results); break;
-      case LM78_SYSCTL_IN1: write_in(client,1,nrels,results); break;
-      case LM78_SYSCTL_IN2: write_in(client,2,nrels,results); break;
-      case LM78_SYSCTL_IN3: write_in(client,3,nrels,results); break;
-      case LM78_SYSCTL_IN4: write_in(client,4,nrels,results); break;
-      case LM78_SYSCTL_IN5: write_in(client,5,nrels,results); break;
-      case LM78_SYSCTL_IN6: write_in(client,6,nrels,results); break;
-      case LM78_SYSCTL_FAN1: write_fan(client,1,nrels,results); break;
-      case LM78_SYSCTL_FAN2: write_fan(client,2,nrels,results); break;
-      case LM78_SYSCTL_FAN3: write_fan(client,3,nrels,results); break;
-      case LM78_SYSCTL_TEMP: write_temp(client,nrels,results); break;
-      case LM78_SYSCTL_FAN_DIV: write_fan_div(client,nrels,results);break;
-      case LM78_SYSCTL_VID: case LM78_SYSCTL_ALARMS: break;
-      default: /* Should never be called */ return -EINVAL; break;
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 2;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    lm78_update_client(client);
+    results[0] = IN_FROM_REG(data->in_min[nr],nr);
+    results[1] = IN_FROM_REG(data->in_max[nr],nr);
+    results[2] = IN_FROM_REG(data->in[nr],nr);
+    *nrels_mag = 3;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+      if (*nrels_mag >= 1) {
+        data->in_min[nr] = IN_TO_REG(results[0],nr);
+        lm78_write_value(client,LM78_REG_IN_MIN(nr),data->in_min[nr]);
+      }
+      if (*nrels_mag >= 2) {
+      data->in_max[nr] = IN_TO_REG(results[1],nr);
+      lm78_write_value(client,LM78_REG_IN_MAX(nr),data->in_max[nr]);
     }
   }
-  return 1; /* We have done all the work */
 }
 
-void write_in(struct i2c_client *client, int nr, int nrels, long *results)
+void lm78_fan(struct i2c_client *client, int operation, int ctl_name,
+              int *nrels_mag, long *results)
 {
   struct lm78_data *data = client->data;
-  if (nrels >= 1) {
-    data->in_min[nr] = IN_TO_REG(results[0],nr);
-    lm78_write_value(client,LM78_REG_IN_MIN(nr),data->in_min[nr]);
-  }
-  if (nrels >= 2) {
-    data->in_max[nr] = IN_TO_REG(results[1],nr);
-    lm78_write_value(client,LM78_REG_IN_MAX(nr),data->in_max[nr]);
-  }
-}
+  int nr = ctl_name - LM78_SYSCTL_FAN1 + 1;
 
-void read_in(struct i2c_client *client, int nr, long *results)
-{
-  struct lm78_data *data = client->data;
-  results[0] = IN_FROM_REG(data->in_min[nr],nr);
-  results[1] = IN_FROM_REG(data->in_max[nr],nr);
-  results[2] = IN_FROM_REG(data->in[nr],nr);
-}
-
-void write_fan(struct i2c_client *client, int nr, int nrels, long *results)
-{
-  struct lm78_data *data = client->data;
-  if (nrels >= 1) {
-    data->fan_min[nr-1] = FAN_TO_REG(results[0]);
-    lm78_write_value(client,LM78_REG_FAN_MIN(nr),data->fan_min[nr-1]);
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    lm78_update_client(client);
+    results[0] = FAN_FROM_REG(data->fan_min[nr-1]);
+    results[1] = FAN_FROM_REG(data->fan[nr-1]);
+    *nrels_mag = 2;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 1) {
+      data->fan_min[nr-1] = FAN_TO_REG(results[0]);
+      lm78_write_value(client,LM78_REG_FAN_MIN(nr),data->fan_min[nr-1]);
+    }
   }
 }
 
-void read_fan(struct i2c_client *client, int nr, long *results)
-{
-  struct lm78_data *data = client->data;
-  results[0] = FAN_FROM_REG(data->fan_min[nr-1]);
-  results[1] = FAN_FROM_REG(data->fan[nr-1]);
-}
 
-void write_temp(struct i2c_client *client, int nrels, long *results)
+void lm78_temp(struct i2c_client *client, int operation, int ctl_name,
+               int *nrels_mag, long *results)
 {
   struct lm78_data *data = client->data;
-  if (nrels >= 1) {
-    data->temp_over = TEMP_TO_REG(results[0]);
-    lm78_write_value(client,LM78_REG_TEMP_OVER,data->temp_over);
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 1;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    lm78_update_client(client);
+    results[0] = TEMP_FROM_REG(data->temp_over);
+    results[1] = TEMP_FROM_REG(data->temp_hyst);
+    results[2] = TEMP_FROM_REG(data->temp);
+    *nrels_mag = 3;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 1) {
+      data->temp_over = TEMP_TO_REG(results[0]);
+      lm78_write_value(client,LM78_REG_TEMP_OVER,data->temp_over);
+    }
+    if (*nrels_mag >= 2) {
+      data->temp_hyst = TEMP_TO_REG(results[1]);
+      lm78_write_value(client,LM78_REG_TEMP_HYST,data->temp_hyst);
+    }
   }
-  if (nrels >= 2) {
-    data->temp_hyst = TEMP_TO_REG(results[1]);
-    lm78_write_value(client,LM78_REG_TEMP_HYST,data->temp_hyst);
+}
+
+void lm78_vid(struct i2c_client *client, int operation, int ctl_name,
+              int *nrels_mag, long *results)
+{
+  struct lm78_data *data = client->data;
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    lm78_update_client(client);
+    results[0] = VID_FROM_REG(data->vid);
+    *nrels_mag = 1;
   }
 }
 
-void read_temp(struct i2c_client *client, long *results)
+void lm78_alarms(struct i2c_client *client, int operation, int ctl_name,
+                 int *nrels_mag, long *results)
 {
   struct lm78_data *data = client->data;
-  results[0] = TEMP_FROM_REG(data->temp_over);
-  results[1] = TEMP_FROM_REG(data->temp_hyst);
-  results[2] = TEMP_FROM_REG(data->temp);
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    lm78_update_client(client);
+    results[0] = ALARMS_FROM_REG(data->alarms);
+    *nrels_mag = 1;
+  }
 }
 
-void read_vid(struct i2c_client *client, long *results)
+void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
+                  int *nrels_mag, long *results)
 {
   struct lm78_data *data = client->data;
-  results[0] = VID_FROM_REG(data->vid);
-}
-
-void read_alarms(struct i2c_client *client, long *results)
-{
-  struct lm78_data *data = client->data;
-  results[0] = ALARMS_FROM_REG(data->alarms);
-}
-
-void read_fan_div(struct i2c_client *client, long *results)
-{
-  struct lm78_data *data = client->data;
-  results[0] = DIV_FROM_REG(data->fan_div[0]);
-  results[1] = DIV_FROM_REG(data->fan_div[1]);
-  results[2] = 2;
-}
- 
-void write_fan_div(struct i2c_client *client, int nrels, long *results)
-{
-  struct lm78_data *data = client->data;
-  if (nrels >= 2)
-    data->fan_div[1] = DIV_TO_REG(results[1]);
-  if (nrels >= 1) {
-    data->fan_div[0] = DIV_TO_REG(results[0]);
-    lm78_write_value(client,LM78_REG_VID_FANDIV,
-                     (data->fan_div[0] >> 4) | (data->fan_div[1] >> 6));
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    lm78_update_client(client);
+    results[0] = DIV_FROM_REG(data->fan_div[0]);
+    results[1] = DIV_FROM_REG(data->fan_div[1]);
+    results[2] = 2;
+    *nrels_mag = 3;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 2)
+      data->fan_div[1] = DIV_TO_REG(results[1]);
+    if (*nrels_mag >= 1) {
+      data->fan_div[0] = DIV_TO_REG(results[0]);
+      lm78_write_value(client,LM78_REG_VID_FANDIV,
+                       (data->fan_div[0] >> 4) | (data->fan_div[1] >> 6));
+    }
   }
 }
 
@@ -1012,7 +875,7 @@ int lm78_cleanup(void)
 #ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>");
-MODULE_DESCRIPTION("LM78 driver");
+MODULE_DESCRIPTION("LM78, LM78-J and LM79 driver");
 
 int init_module(void)
 {
