@@ -15,6 +15,7 @@ ask CVS about it:
 
 2.5.3 (2000????)
   Programs i2cdetect, i2cdump: Improve error reporting
+  Program sensors: new switch -u (--unknown)
 
 2.5.2 (20000709)
   File sensors.conf.eg: Fix lm80 in8 calculation

@@ -64,7 +64,7 @@ void print_long_help(void)
   printf("  -c, --config-file     Specify a config file\n");
   printf("  -h, --help            Display this help text\n");
   printf("  -s, --set             Execute `set' statements too (root only)\n");
-  printf("  -u, --unknown         Treat chips as unknown one (testing only)\n");
+  printf("  -u, --unknown         Treat chips as unknown ones (testing only)\n");
   printf("  -v, --version         Display the program version\n");
   printf("\n");
   printf("By default, a list of directories is examined for the config file `sensors.conf'\n");
