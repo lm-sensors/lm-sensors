@@ -56,30 +56,48 @@ at all!
   SMBus emulation on i2c busses. Base algorithm, on which SMBus-only adapters
   rely.
 
-(src) i2c-piix4: smbus i2c-core
+(src/busses) i2c-piix4: smbus i2c-core
   PIIX4 SMBus access.
 
-(src) i2c-via: algo-bit i2c-core
+(src/busses) i2c-via: algo-bit i2c-core
   VIA VT82C586B bus access. This is often used instead of the PIIX4 as SMBus
   host.
 
-(src) i2c-isa: i2c-core
+(src/busses) i2c-ali15x3: smbus i2c-core
+  Acer Labs M1541 and M1543C bus access.
+
+(src/busses) i2c-isa: i2c-core
   Defines the ISA bus as being a I2C adapter. It isn't, of course; but this is
   often used by sensor client modules, to keep the code small and simple.
 
 (src) sensors: i2c-core
   General purpose routines for sensor client modules
 
-(src) lm78: sensors smbus i2c-core
+(src/chips) lm78: sensors smbus i2c-core
   LM78, LM78-J and LM79 chip driver
 
-(src) lm75: sensors smbus i2c-core
+(src/chips) lm75: sensors smbus i2c-core
   LM75 chip driver
 
-(src) gl518sm: sensors smbus i2c-core
+(src/chips) gl518sm: sensors smbus i2c-core
   GL518SM revision 0x00 and 0x80 chip driver
 
-(src) eeprom: sensors smbus i2c-core
+(src/chips) adm1021: sensors smbus i2c-core
+  ADM1021 chip driver 
+
+(src/chips) adm9240: sensors smbus i2c-core
+  ADM9240 chip driver
+
+(src/chips) ltc1710: sensors smbus i2c-core
+  LTC1710 chip driver
+
+(src/chips) sis5595: sensors smbus i2c-core
+  SIS-5595 chipset hardware monitor driver
+
+(src/chips) w83781d: sensors smbus i2c-core
+  W83781D chip driver
+
+(src/chips) eeprom: sensors smbus i2c-core
   Driver for DIMMs connected to the SMBus. You need prog/eeprom/decode-dimms.pl
   to make sense of its output.
 
@@ -106,8 +124,8 @@ at all!
     base (i) Base address of parallel port
 
 (i2c) i2c-dev: i2c-core
-  /dev interface for I2C adapters. This will be superseded by a module which
-  will also implement SMBus access.
+  /dev interface for I2C adapters. This is superseded by a module which
+  will also implement SMBus access. Please do not use this anymore.
 
 Several other modules are not yet ported by Simon Vogl. They are mostly in
 i2c/old-code.
@@ -115,6 +133,6 @@ i2c/old-code.
 Usually, if you load the modules through modprobe, you need the following
 commands:
   modprobe i2c-proc
-  modprobe isa     # Unless you are certain no sensor chips live on the ISA bus
-  modprobe piix4   # One such line for each adapter you own
-  modprobe lm78    # One such line for each device you own
+  modprobe i2c-isa  # Unless you are certain no sensor chips live on the ISA bus
+  modprobe i2c-piix4 # One such line for each adapter you own
+  modprobe lm78     # One such line for each device you own

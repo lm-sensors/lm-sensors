@@ -129,6 +129,16 @@ Replace /WHEREVER/lm_sensors-2.X.Y with the base directory of the package
 source code.
 
 Please examine the files in the doc subdirectory for more information, 
-especially about individual driver. You can always mail us at 
+especially about individual drivers. You can always mail us at 
 <lm78@stimpy.netroedge.com>. Alternatively, consider useing the (free)
 support site at http://www.netroedge.com/~lm78/support.html. Good luck!
+
+
+USEFUL PROGRAMS
+===============
+
+The prog subdirectory contains lots of useful programs, many of which are
+not installed. doc/progs contains some documentation for each of them.
+Most important are prog/mkdev/mkdev.sh, which creates /dev/i2c-* files,
+and prog/detect/dectect.pl, which tries to detect what adapters are
+present on your system.

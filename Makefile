@@ -114,7 +114,7 @@ MANGRP := root
 
 # The subdirectories we need to build things in 
 SRCDIRS := kernel kernel/busses kernel/chips kernel/include lib prog/sensors \
-           prog/dump prog/doc etc
+           prog/dump prog/doc prog/detect etc
 ifeq ($(I2C),1)
 SRCDIRS += i2c i2c/detect i2c/drivers i2c/eeprom
 endif

@@ -4,7 +4,7 @@ Sensors FAQ for lm_sensors version 2
 [Internal comments/questions/uncertainties are in square brackets.]
 
 Note: some questions were specific for version 1. These are put together
-under chapter 5: version 1 questions.
+under chapter 6: version 1 questions.
 
 1 What sensors are available on my PC?
 1.1 What can a sensor chip like the "LM78" do? 
@@ -62,8 +62,8 @@ a few moments)" message. Why?
 
 1 What sensors are available on my PC?
 
-	Most medium/high-end computers since late 1997 now come with a LM78 or 
-LM79 hardware health monitoring chip and an SMBus. 
+	Most medium/high-end computers since late 1997 now come with a LM78- or 
+LM79-like hardware health monitoring chip and an SMBus. 
 	
 	
 1.1 What can a sensor chip like the "LM78" do? 
@@ -214,18 +214,20 @@ gl518sm.o and w83781d.o at this moment). Type 'sensors' to determine whether
 the read values make any sense. Remove modules if you are convinced that
 the values are bogus. Also, see some of the driver-specific questions below.
 	There will be an automatic detection program in later versions of
-this package; it is simply not implemented yet. We need the /dev interface
-first. Sorry for the inconvenience, in the meantime.
+this package; it is only partially  implemented yet. Look for it in the
+prog/detect directory. For 2.2.0, it will only be able to detect the bus
+type, not the chip type.
 
 
 3.3 Which modules should I insert?
 
-	Using modprobe, you should always insert i2c-proc.o. You need one
-module for each adapter you own; if there are chips on the ISA bus, this
-includes isa.o. Finally, you need one module for each type of chip you
-own. That's all. On my computer, I could use the following line:
-    modprobe i2c-proc && modprobe isa && modprobe piix4 && modprobe lm78 \
-                      && modprobe lm75
+	Using modprobe, you should always insert i2c-proc.o, and optionally
+i2c-dev.o. You need one module for each adapter you own; if there are 
+chips on the ISA bus, this includes isa.o. Finally, you need one module 
+for each type of chip you own. That's all. On my computer, I could use the 
+following line:
+    modprobe i2c-proc && modprobe i2c-isa && modprobe i2c-piix4 && \
+                         modprobe lm78 && modprobe lm75 && modprobe i2c-dev
 
 
 3.4 Do I need the configuration file?
@@ -512,6 +514,7 @@ can not be sure.
 
 
 -----------
+Rev 2.1 (Frodo) Corrections for lm_sensors 2.2, 19990112
 Rev 2.0 (Frodo) Major revision for lm_sensors 2.1, 19981229
 Rev 1.10 (Frodo) Modified 3.8, updated some other things, 19980924
 Rev 1.9 (Frodo) Added 3.15, 19980906
