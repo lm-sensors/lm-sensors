@@ -77,12 +77,12 @@ SENSORS_MODULE_PARM(force_subclients, "List of subclient addresses: " \
 #define ASB100_REG_FAN_MIN(nr) (0x3a + (nr))
 
 /* TEMPERATURE registers 1-4 */
-static const u16 asb100_reg_temp[] =      {0, 0x27, 0x150, 0x250, 0x17};
-static const u16 asb100_reg_temp_over[] = {0, 0x39, 0x155, 0x255, 0x18};
-static const u16 asb100_reg_temp_hyst[] = {0, 0x3a, 0x153, 0x253, 0x19};
+static const u16 asb100_reg_temp[]	= {0, 0x27, 0x150, 0x250, 0x17};
+static const u16 asb100_reg_temp_max[]	= {0, 0x39, 0x155, 0x255, 0x18};
+static const u16 asb100_reg_temp_hyst[]	= {0, 0x3a, 0x153, 0x253, 0x19};
 
 #define ASB100_REG_TEMP(nr) (asb100_reg_temp[nr])
-#define ASB100_REG_TEMP_OVER(nr) (asb100_reg_temp_over[nr])
+#define ASB100_REG_TEMP_MAX(nr) (asb100_reg_temp_max[nr])
 #define ASB100_REG_TEMP_HYST(nr) (asb100_reg_temp_hyst[nr])
 
 #define ASB100_REG_TEMP2_CONFIG	0x0152
@@ -204,7 +204,7 @@ struct asb100_data {
 	u8 fan[3];		/* Register value */
 	u8 fan_min[3];		/* Register value */
 	u16 temp[4];		/* Register value (0 and 3 are u8 only) */
-	u16 temp_over[4];	/* Register value (0 and 3 are u8 only) */
+	u16 temp_max[4];	/* Register value (0 and 3 are u8 only) */
 	u16 temp_hyst[4];	/* Register value (0 and 3 are u8 only) */
 	u8 fan_div[3];		/* Register encoding, right justified */
 	u8 pwm;			/* Register encoding */
@@ -628,7 +628,7 @@ static int asb100_read_value(struct i2c_client *client, u16 reg)
 		case 0x53: /* HYST */
 			res = swap_bytes(i2c_smbus_read_word_data (cl, 2));
 			break;
-		case 0x55: /* OVER */
+		case 0x55: /* MAX */
 		default:
 			res = swap_bytes(i2c_smbus_read_word_data (cl, 3));
 			break;
@@ -670,7 +670,7 @@ static void asb100_write_value(struct i2c_client *client, u16 reg, u16 value)
 		case 0x53: /* HYST */
 			i2c_smbus_write_word_data(cl, 2, swap_bytes(value));
 			break;
-		case 0x55: /* OVER */
+		case 0x55: /* MAX */
 			i2c_smbus_write_word_data(cl, 3, swap_bytes(value));
 			break;
 		}
@@ -731,8 +731,8 @@ static void asb100_update_client(struct i2c_client *client)
 		for (i = 1; i <= 4; i++) {
 			data->temp[i-1] = asb100_read_value(client,
 					ASB100_REG_TEMP(i));
-			data->temp_over[i-1] = asb100_read_value(client,
-					ASB100_REG_TEMP_OVER(i));
+			data->temp_max[i-1] = asb100_read_value(client,
+					ASB100_REG_TEMP_MAX(i));
 			data->temp_hyst[i-1] = asb100_read_value(client,
 					ASB100_REG_TEMP_HYST(i));
 		}
@@ -843,16 +843,16 @@ void asb100_temp(struct i2c_client *client, int operation, int ctl_name,
 
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		asb100_update_client(client);
-		results[0] = TEMP_FROM_REG(data->temp_over[nr]);
+		results[0] = TEMP_FROM_REG(data->temp_max[nr]);
 		results[1] = TEMP_FROM_REG(data->temp_hyst[nr]);
 		results[2] = TEMP_FROM_REG(data->temp[nr]);
 		*nrels_mag = 3;
 
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->temp_over[nr] = TEMP_TO_REG(results[0]);
-			asb100_write_value(client, ASB100_REG_TEMP_OVER(nr+1),
-				data->temp_over[nr]);
+			data->temp_max[nr] = TEMP_TO_REG(results[0]);
+			asb100_write_value(client, ASB100_REG_TEMP_MAX(nr+1),
+				data->temp_max[nr]);
 		}
 		if (*nrels_mag >= 2) {
 			data->temp_hyst[nr] = TEMP_TO_REG(results[1]);
@@ -874,17 +874,17 @@ void asb100_temp_add(struct i2c_client *client, int operation,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		asb100_update_client(client);
 
-		results[0] = LM75_TEMP_FROM_REG(data->temp_over[nr]);
+		results[0] = LM75_TEMP_FROM_REG(data->temp_max[nr]);
 		results[1] = LM75_TEMP_FROM_REG(data->temp_hyst[nr]);
 		results[2] = LM75_TEMP_FROM_REG(data->temp[nr]);
 		*nrels_mag = 3;
 
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->temp_over[nr] =
+			data->temp_max[nr] =
 				LM75_TEMP_TO_REG(results[0]);
-			asb100_write_value(client, ASB100_REG_TEMP_OVER(nr+1),
-				data->temp_over[nr]);
+			asb100_write_value(client, ASB100_REG_TEMP_MAX(nr+1),
+				data->temp_max[nr]);
 		}
 		if (*nrels_mag >= 2) {
 			data->temp_hyst[nr] =
