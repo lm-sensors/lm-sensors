@@ -10,6 +10,10 @@ I2C CODE CHANGES
 KERNEL MODULES
 ==============
 
+* All clients: We can remove the foo_list of registered clients. They are not 
+  used anymore.
+* Most clients: Some typecasts to `struct i2c_client' are completely 
+  unnecessary by now. Remove them.
 * LM78 detection: Tom Webster has proven that the reset bit in the 
   id register can be one (strange!)
 * maxilife.c: Introduce new insmod variables
@@ -57,3 +61,4 @@ OTHERS
   tsx-11.mit.edu /pub/linux/sources/sbin or 
   sunsite.unc.edu /pub/linux/system/daemons/watchdog
 * Add experimental drivers
+
