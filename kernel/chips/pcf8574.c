@@ -313,9 +313,10 @@ void pcf8574_status(struct i2c_client *client, int operation,
 		pcf8574_update_client(client);
 		tmpstatus = data->status;		
 		tmpstatus = (tmpstatus & 0xf0) >> 4;
-		data->status &= 0x0f;
 		results[0] = tmpstatus; 
-		results[1] = data->status; 
+		tmpstatus = data->status;		
+		tmpstatus &= 0x0f;
+		results[1] = tmpstatus; 
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
