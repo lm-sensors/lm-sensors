@@ -242,7 +242,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind)
     i = adm1021_read_value(new_client,ADM1021_REG_MAN_ID);
     if (i == 0x41)
       kind = adm1021;
-    if (i == 0x49)
+    else if (i == 0x49)
       kind = thmc10;
     else if ((i== 0x4d) && 
              (adm1021_read_value(new_client,ADM1021_REG_DEV_ID) == 0x01))
