@@ -1729,8 +1729,8 @@ chip "max1619-*"
    set temp2_max   100
 
 # change critical limit and hysteresis to fit your needs
-   set temp2_crit  55
-   set temp2_hyst  50
+   set temp2_crit  50
+   set temp2_hyst  40
 
 
 chip "lm90-*" "adm1032-*"
