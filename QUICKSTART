@@ -5,7 +5,10 @@ NOTE: PLEASE SKIM THE INSTALL DOCUMENT, OR BETTER YET READ IT CAREFULLY!
 The instructions in this document will generally work if you have a standard
 system, but not always!!
 
-Quickstart for i2c option 1 (modules) and lm_sensors option 1 (modules):
+Quickstart for i2c option 1 (modules) and lm_sensors option 1 (modules).
+This is the recommended EASIEST METHOD.
+Other methods are described in INSTALL.
+---------------------------------------
 
   * Make sure you have the kernel tree corresponding to your current
     kernel in /usr/src/linux. Distribution kernels usually won't do,
@@ -13,13 +16,15 @@ Quickstart for i2c option 1 (modules) and lm_sensors option 1 (modules):
     ftp://ftp.kernel/org/pub/linux/kernel/).
 
   * Download, build, and install the latest i2c package.
-    This is not necessary if you are using lm_sensors 2.5.5
-    with a 2.4 kernel.
+    This is necessary for lm_sensors 2.6.0 with ALL KERNELS.
+    Quickstart for i2c: make; make install; depmod -a
 
   * Do `make'.
     The warnings about .d files at the start are harmless.
     If you have compile problems, you probably should not have skipped step 2.
     Go back and install the latest i2c package.
+    If you still have compile problems, you probably should not
+    have skipped step 1.
 
   * Do (as root) `make install'.
 
@@ -43,4 +48,5 @@ Quickstart for i2c option 1 (modules) and lm_sensors option 1 (modules):
 
   * Run `sensors' to see your output.
 
-  * That's it! If you have problems, read the INSTALL document.
+  * That's it! If you have problems, read the INSTALL document and,
+    of course our excellent FAQ (doc/FAQ).
