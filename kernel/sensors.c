@@ -866,12 +866,14 @@ int __init sensors_init(void)
 	if (!
 	    (sensors_proc_header =
 	     register_sysctl_table(sensors_proc, 0))) return -ENOMEM;
+#if 0
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1))
 	sensors_proc_header->ctl_table->child->de->owner = THIS_MODULE;
 #else
 	sensors_proc_header->ctl_table->child->de->fill_inode =
 	    &sensors_fill_inode;
 #endif				/* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1)) */
+#endif
 	sensors_initialized++;
 	return 0;
 }

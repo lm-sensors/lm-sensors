@@ -5,7 +5,8 @@ system, and may cause problems.
 Quickstart:
   * Make sure you have the kernel tree corresponding to your current
     kernel in /usr/src/linux. Distribution kernels usually won't do,
-    compile your own.
+    compile your own from a 'vanilla' tree (get one from
+    ftp://ftp.kernel/org/pub/linux/kernel/).
   * Install the i2c package. This won't do any harm, even if use a very 
     recent 2.3 or 2.4 kernel, though it may be unnecessary
   * Do a `make' followed by a `make install'. The warnings about .d

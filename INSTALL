@@ -115,6 +115,10 @@ somewhat, not the files in /usr/include/{linux,asm} are used, but instead
 those in /usr/src/linux/include/{linux,asm}. It is also possible to
 tell the Makefile the kernel is somewhere else than at /usr/src/linux.
 
+To keep problems to a minimum, please use a 'vanilla' kernel tree,
+as distributed on ftp://ftp.kernel/org/pub/linux/kernel, and not one
+patched by your distribution.
+
 
 Separate from kernel compilation (compilation option 1)
 =======================================================

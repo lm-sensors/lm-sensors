@@ -23,7 +23,7 @@ but you may need to download it separately at:
   http://www.netroedge.com/~lm78
 Users of kernel 2.3.34 and later (and also all soon to be 2.4.x) kernels
 will be happy to know that the new I2C implementation has been included 
-in the kernel, but you can still patch it with the latest version 
+in the kernel; you can still patch it with the latest version 
 (see i2c/mkpatch/mkpatch.pl), but this is optional.
 
 WARNING! The default module installation directory changed since version
