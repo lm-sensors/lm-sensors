@@ -1490,14 +1490,13 @@ static sensors_chip_feature w83791d_features[] =
     { 0 }
   };
 
-/* w83l785ts has temporary 2.6 mappings, to be removed as pending kernel patch is applied */
 static sensors_chip_feature w83l785ts_features[] =
   {
     { SENSORS_W83L785TS_TEMP, "temp", NOMAP, NOMAP,
-                        R, W83L785TS_SYSCTL_TEMP, VALUE(2), 0, "temp_input", 3 },
+                        R, W83L785TS_SYSCTL_TEMP, VALUE(2), 0 },
     { SENSORS_W83L785TS_TEMP_OVER, "temp_over", SENSORS_W83L785TS_TEMP,
                         SENSORS_W83L785TS_TEMP, R,
-                        W83L785TS_SYSCTL_TEMP, VALUE(1), 0, "temp_max", 3 },
+                        W83L785TS_SYSCTL_TEMP, VALUE(1), 0 },
     { 0 }
   };
 
