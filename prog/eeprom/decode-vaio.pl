@@ -34,7 +34,9 @@
 #  Gave the label "OEM Data" to the field at 0x20.
 #  Gave the label "Timestamp" to the field at 0xE0.
 #  Renamed "Model Number" to "Model Name".
-#  Added some Documentation.
+#  Added some documentation.
+# Version 1.1  2004-01-17  Jean Delvare <khali@linux-fr.org>
+#  Added support for Linux 2.5/2.6 (i.e. sysfs).
 #
 # EEPROM data decoding for Sony Vaio laptops. 
 #
@@ -43,6 +45,8 @@
 #
 # Please note that this is a guess-only work.  Sony support refused to help
 # me, so if someone can provide information, please contact me.
+# My knowledge is summarized on this page:
+# http://www.ensicaen.ismra.fr/~delvare/vaio/eeprom.html
 #
 # It seems that if present, the EEPROM is always at 0x57.
 #
@@ -66,6 +70,8 @@
 #
 
 use strict;
+use Fcntl qw(:DEFAULT :seek);
+use vars qw($sysfs);
 
 sub print_item
 {
@@ -74,30 +80,73 @@ sub print_item
 	printf("\%16s : \%s\n",$label,$value);
 }
 
+# Abstract reads so that other functions don't have to care wether
+# we need to use procfs or sysfs
+sub read_eeprom_bytes
+{
+	my ($bus, $addr, $offset, $length) = @_;
+	my $filename;
+	
+	if ($sysfs)
+	{
+		$filename = "/sys/bus/i2c/devices/$bus-00$addr/eeprom";
+		sysopen(FH, $filename, O_RDONLY)
+			or die "Can't open $filename";
+		sysseek(FH, $offset, SEEK_SET)
+			or die "Can't seek in $filename";
+
+		my ($r, $bytes);
+		$bytes = '';
+		$offset = 0;
+		while($length)
+		{
+			$r = sysread(FH, $bytes, $length, $offset);
+			die "Can't read $filename"
+				unless defined($r);
+			die "Unexpected EOF in $filename"
+				unless $r;
+			$offset += $r;
+			$length -= $r;
+		}
+		close(FH);
+		
+		return $bytes;
+	}
+	else
+	{
+		my $base = $offset & 0xf0;
+		$offset -= $base;
+		my $values = '';
+		my $remains = $length + $offset;
+		
+		# Get all lines in a single string
+		while ($remains > 0)
+		{
+			$filename = "/proc/sys/dev/sensors/eeprom-i2c-$bus-$addr/"
+			          . sprintf('%02x', $base);
+			open(FH, $filename)
+				or die "Can't open $filename";
+			$values .= <FH>;
+			close(FH);
+			$remains -= 16;
+			$base += 16;
+		}
+		
+		# Store the useful part in an array
+		my @bytes = split(/[ \n]/, $values);
+		@bytes = @bytes[$offset..$offset+$length-1];
+
+		# Back to a binary string
+		return pack('C*', @bytes);
+	}
+}
+
 sub decode_string
 {
-	my ($bus,$addr,$base,$offset,$length) = @_;
+	my ($bus, $addr, $offset, $length) = @_;
 
-	my $line='';
-	my $remains=$length+$offset;
-	while($remains>0)
-	{
-		my $filename="/proc/sys/dev/sensors/eeprom-i2c-$bus-$addr/".sprintf('%02x',$base);
-		open(FH,$filename) || die "Can't open $filename";
-		$line.=<FH>;
-		close(FH);
-		$remains-=16;
-		$base+=16;
-	}
-
-	my @bytes=split(/[ \n]/,$line);
-	@bytes=@bytes[$offset..$offset+$length-1];
-	my $string='';
-	my $item;
-	while(defined($item=shift(@bytes)) && ($item!=0))
-	{
-		$string.=chr($item);
-	}
+	my $string = read_eeprom_bytes($bus, $addr, $offset, $length);
+	$string =~ s/\x00.*$//;
 	
 	return($string);
 }
@@ -106,14 +155,8 @@ sub decode_uuid
 {
 	my ($bus,$addr,$base) = @_;
 
-	my $filename="/proc/sys/dev/sensors/eeprom-i2c-$bus-$addr/".sprintf('%02x',$base);
-	open(FH,$filename) || die "Can't open $filename";
-	my $line=<FH>;
-	close(FH);
-
-	my @bytes=split(/[ \n]/,$line);
+	my @bytes = unpack('C16', read_eeprom_bytes($bus, $addr, $base, 16));
 	my $string='';
-	my $item;
 
 	for(my $i=0;$i<16;$i++)
 	{
@@ -131,20 +174,22 @@ sub vaio_decode
 {
 	my ($bus,$addr) = @_;
 	
-	print_item('Machine Name',decode_string($bus,$addr,128,0,32));
-	print_item('Serial Number',decode_string($bus,$addr,192,0,32));
-	print_item('UUID',decode_uuid($bus,$addr,16));
-	print_item('Revision',decode_string($bus,$addr,160,0,10));
-	print_item('Model Name','PCG-'.decode_string($bus,$addr,160,10,4));
-	print_item('OEM Data',decode_string($bus,$addr,32,0,16));
-	print_item('Timestamp',decode_string($bus,$addr,224,0,32));
+	print_item('Machine Name', decode_string($bus, $addr, 128, 32));
+	print_item('Serial Number', decode_string($bus, $addr, 192, 32));
+	print_item('UUID', decode_uuid($bus, $addr, 16));
+	print_item('Revision', decode_string($bus, $addr, 160, 10));
+	print_item('Model Name', 'PCG-'.decode_string($bus, $addr, 170, 4));
+	print_item('OEM Data', decode_string($bus, $addr, 32, 16));
+	print_item('Timestamp', decode_string($bus, $addr, 224, 32));
 }
 
 BEGIN
 {
 	print("Sony Vaio EEPROM Decoder\n");
-	print("Written by Jean Delvare.  Copyright 2002,2003.\n");
-	print("Version 1.0\n\n");
+	print("Copyright (c) 2002-2004  Jean Delvare\n");
+	print("Version 1.1\n\n");
+	
+	$sysfs = 0;
 }
 
 END
@@ -162,6 +207,11 @@ if ( -r '/proc/sys/dev/sensors/eeprom-i2c-0-57')
 	{
 		vaio_decode('0','57');
 	}
+}
+elsif ( -r '/sys/bus/i2c/devices/0-0057')
+{
+	$sysfs = 1;
+	vaio_decode('0', '57');
 }
 else
 {
