@@ -185,6 +185,17 @@
 #	ignore in0
 #
 #
+# STATEMENT ORDER
+# ---------------
+# Statements can go in any order, EXCEPT that some statements depend
+# on others. Dependencies could be either in the library or the driver.
+# A 'compute' statement must go before a 'set' statement
+# for the same feature or else the 'set' won't be computed correctly.
+# This is a library dependency.
+# A 'set fan1_div' statement must go before a 'set fan1_min' statement,
+# because the driver uses the divisor in calculating the minimum.
+#
+#
 # BUS LINES
 # ---------
 # There is one other feature: the 'bus' statement. An example is below.
@@ -381,10 +392,10 @@ chip "w83782d-*" "w83783s-*" "w83627hf-*"
     set in3_max 5.0 * 1.05
     set in4_min 12 * 0.90
     set in4_max 12 * 1.10
-    set in5_min -12 * 0.90
-    set in5_max -12 * 1.10
-    set in6_min -5 * 0.95
-    set in6_max -5 * 1.05
+    set in5_max -12 * 0.90
+    set in5_min -12 * 1.10
+    set in6_max -5 * 0.95
+    set in6_min -5 * 1.05
     set in7_min 5 * 0.95
     set in7_max 5 * 1.05
     set in8_min 3.0 * 0.80
@@ -445,10 +456,10 @@ chip "w83697hf-*"
     set in3_max 5.0 * 1.05
     set in4_min 12 * 0.90
     set in4_max 12 * 1.10
-    set in5_min -12 * 0.90
-    set in5_max -12 * 1.10
-    set in6_min -5 * 0.95
-    set in6_max -5 * 1.05
+    set in5_max -12 * 0.90
+    set in5_min -12 * 1.10
+    set in6_max -5 * 0.95
+    set in6_min -5 * 1.05
     set in7_min 5 * 0.95
     set in7_max 5 * 1.05
     set in8_min 3.0 * 0.80
@@ -978,6 +989,8 @@ chip "lm87-*"
 #   set "12V_max" xxx
 #   set Vccp2_max xxx
 #
+#   set fan1_div xxx
+#   set fan2_div xxx
 #   set fan1_min xxx
 #   set fan2_min xxx
 #   set temp1_min xxx
@@ -986,8 +999,6 @@ chip "lm87-*"
 #   set temp2_max xxx
 #   set temp3_min xxx
 #   set temp3_max xxx
-#   set fan1_div xxx
-#   set fan2_div xxx
 
 # It is unlikely you will need to use the following 6 lines (see above)
 #   compute "2.5V" xxx
@@ -1053,12 +1064,12 @@ chip "adm9240-*" "ds1780-*" "lm81-*"
 #   set "12V_max" xxx
 #   set Vccp2_max xxx
 #
+#   set fan1_div xxx
+#   set fan2_div xxx
 #   set fan1_min xxx
 #   set fan2_min xxx
 #   set temp1_hyst xxx
 #   set temp1_over xxx
-#   set fan1_div xxx
-#   set fan2_div xxx
 
 #   compute "2.5V" xxx
 #   compute Vccp1 xxx
@@ -1108,10 +1119,10 @@ chip "it87-*" "it8705-*" "it8712-*"
     set in3_max 5.0 * 1.05
     set in4_min 12 * 0.95
     set in4_max 12 * 1.05
-    set in5_min -12 * 0.95
-    set in5_max -12 * 1.05
-    set in6_min -5 * 0.95
-    set in6_max -5 * 1.05
+    set in5_max -12 * 0.95
+    set in5_min -12 * 1.05
+    set in6_max -5 * 0.95
+    set in6_min -5 * 1.05
     set in7_min 5 * 0.95
     set in7_max 5 * 1.05
     #the chip does not support in8 min/max
