@@ -1325,291 +1325,151 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
 	name => "ITE 8702F Super IO Sensors",
 	driver => "to-be-written",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x87, 0x01, 0x55, 0x55],
-	devidreg => 0x20,
 	devid => 0x8702,
-	logdevreg => 0x07,
 	logdev => 0x04,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
      }, 
      {
 	name => "ITE 8705F Super IO Sensors",
 	driver => "it87",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x87, 0x01, 0x55, 0x55],
-	devidreg => 0x20,
 	devid => 0x8705,
-	logdevreg => 0x07,
 	logdev => 0x04,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
      }, 
      {
 	name => "ITE 8712F Super IO Sensors",
 	driver => "it87",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x87, 0x01, 0x55, 0x55],
-	devidreg => 0x20,
 	devid => 0x8712,
-	logdevreg => 0x07,
 	logdev => 0x04,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
      },
      {
 	name => "Nat. Semi. PC87351 Super IO Fan Sensors",
 	driver => "to-be-written",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [],
-	devidreg => 0x20,
 	devid => 0xe2,
-	logdevreg => 0x07,
 	logdev => 0x08,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
      }, 
      {
 	name => "Nat. Semi. PC87360 Super IO Fan Sensors",
 	driver => "pc87360-fan",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [],
-	devidreg => 0x20,
 	devid => 0xe1,
-	logdevreg => 0x07,
 	logdev => 0x09,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
      }, 
      {
 	name => "Nat. Semi. PC87363 Super IO Fan Sensors",
 	driver => "pc87360-fan",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [],
-	devidreg => 0x20,
 	devid => 0xe8,
-	logdevreg => 0x07,
 	logdev => 0x09,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
      }, 
      {
 	name => "Nat. Semi. PC87364 Super IO Fan Sensors",
 	driver => "pc87360-fan",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [],
-	devidreg => 0x20,
 	devid => 0xe4,
-	logdevreg => 0x07,
 	logdev => 0x09,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
      }, 
      {
 	name => "Nat. Semi. PC87365 Super IO Sensors",
 	driver => "to-be-written",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [],
-	devidreg => 0x20,
 	devid => 0xe5,
-	logdevreg => 0x07,
 	logdev => 0x09, # fans; voltages at 0x0d; temps at 0x0e
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
      }, 
      {
 	name => "Nat. Semi. PC87366 Super IO Sensors",
 	driver => "to-be-written",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [],
-	devidreg => 0x20,
 	devid => 0xe9,
-	logdevreg => 0x07,
 	logdev => 0x09, # fans; voltages at 0x0d; temps at 0x0e
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
      }, 
      {
 	name => "Nat. Semi. PC87372 Super IO Fan Sensors",
 	driver => "to-be-written",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [],
-	devidreg => 0x20,
 	devid => 0xf0,
-	logdevreg => 0x07,
 	logdev => 0x09,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
      }, 
      {
 	name => "SMSC 47B27x Super IO Fan Sensors",
 	driver => "smsc47m1",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x55],
-	devidreg => 0x20,
 	devid => 0x51,
-	logdevreg => 0x07,
 	logdev => 0x0a,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
 	exit => [0xaa],
      }, 
      {
 	name => "SMSC 47M10x/13x Super IO Fan Sensors",
 	driver => "smsc47m1",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x55],
-	devidreg => 0x20,
 	devid => 0x59,
-	logdevreg => 0x07,
 	logdev => 0x0a,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
 	exit => [0xaa],
      }, 
      {
 	name => "SMSC 47M14x Super IO Fan Sensors",
 	driver => "smsc47m1",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x55],
-	devidreg => 0x20,
 	devid => 0x5f,
-	logdevreg => 0x07,
 	logdev => 0x0a,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
 	exit => [0xaa],
      }, 
      {
 	name => "SMSC 47M15x/192 Super IO Fan Sensors",
 	driver => "to-be-written",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x55],
-	devidreg => 0x20,
 	devid => 0x60,
-	logdevreg => 0x07,
 	logdev => 0x0a,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
 	exit => [0xaa],
      }, 
      {
 	name => "VT1211 Super IO Sensors",
 	driver => "vt1211",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x87, 0x87],
-	devidreg => 0x20,
 	devid => 0x3c,
-	logdevreg => 0x07,
 	logdev => 0x0b,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
 	exit => [0xaa],
      }, 
      {
 	name => "Winbond W83627HF Super IO Sensors",
 	driver => "w83627hf",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x87, 0x87],
-	devidreg => 0x20,
 	devid => 0x52,
-	logdevreg => 0x07,
 	logdev => 0x0b,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
 	exit => [0xaa],
      }, 
      {
 	name => "Winbond W83627THF Super IO Sensors",
 	driver => "w83627hf",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x87, 0x87],
-	devidreg => 0x20,
 	devid => 0x82,
-	logdevreg => 0x07,
 	logdev => 0x0b,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
 	exit => [0xaa],
      }, 
      {
 	name => "Winbond W83637HF Super IO Sensors",
 	driver => "w83627hf",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x87, 0x87],
-	devidreg => 0x20,
 	devid => 0x70,
-	logdevreg => 0x07,
 	logdev => 0x0b,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
 	exit => [0xaa],
      }, 
      {
 	name => "Winbond W83697HF Super IO Sensors",
 	driver => "w83627hf",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x87, 0x87],
-	devidreg => 0x20,
 	devid => 0x60,
-	logdevreg => 0x07,
 	logdev => 0x0b,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
 	exit => [0xaa],
      }, 
      {
 	name => "Winbond W83697UF Super IO PWM",
 	driver => "to-be-written",
-	addrreg => 0x2e,
-	datareg => 0x2f,
 	enter => [0x87, 0x87],
-	devidreg => 0x20,
 	devid => 0x68,
-	logdevreg => 0x07,
 	logdev => 0x0b,
-	actreg => 0x30,
-	actmask => 0x01,
-	basereg => 0x60,
 	exit => [0xaa],
      }, 
 );
@@ -1750,6 +1610,17 @@ use vars qw($modules_conf $dev_i2c);
 
 sub initialize_conf
 {
+  my $use_devfs = 0;
+  open INPUTFILE, "/proc/mounts" or die "Can't access /proc/mounts!";
+  while (<INPUTFILE>) {
+    if (m@^none /dev devfs @) {
+      $use_devfs = 1;
+      $dev_i2c = '/dev/i2c/';
+      last;
+    }
+  }
+  close INPUTFILE;
+
   if (-f '/etc/modules.conf') {
     $modules_conf = '/etc/modules.conf';
   } elsif (-f '/etc/conf.modules') {
@@ -1758,15 +1629,13 @@ sub initialize_conf
     $modules_conf = '/etc/modules.conf';
   }
 
-  if (-c '/dev/i2c-0') {
-    $dev_i2c = '/dev/i2c-';
-  } elsif (-d '/dev/i2c') { # devfs
-    $dev_i2c = '/dev/i2c/';
-  } elsif (-c '/dev/i2c0') {
-    $dev_i2c = '/dev/i2c';
-  } else { # default
-    print "No i2c device files found. Use prog/mkdev/mkdev.sh to create them.\n";
-    exit -1;
+  if (!$use_devfs) {
+    if (-c '/dev/i2c-0') {
+      $dev_i2c = '/dev/i2c-';
+    } else { # default
+      print "No i2c device files found. Use prog/mkdev/mkdev.sh to create them.\n";
+      exit -1;
+    }
   }
 }
 
@@ -2521,60 +2390,68 @@ sub scan_isa_bus
 
 sub exit_superio
 {
-  my ($chip, $success) = @_;
+  my ($addrreg, $datareg, $chip, $success) = @_;
 
   # If detection succeeded and an exit sequence exists, use it
   if ($success && defined ($$chip{exit})) {
     foreach my $byte (@{$$chip{exit}}) {
-      outb($$chip{addrreg}, $byte);
+      outb($addrreg, $byte);
     }
     return;
   }
 
   # Else return to "Wait For Key" state (PNP-ISA spec)
-  outb($$chip{addrreg}, 0x02);
-  outb($$chip{datareg}, 0x02);
+  outb($addrreg, 0x02);
+  outb($datareg, 0x02);
 }
 
 sub scan_superio
 {
+  my ($addrreg, $datareg) = @_;
   my ($chip,$val,$addr,$conf);
+
+  my %superio = (
+    devidreg => 0x20,
+    logdevreg => 0x07,
+    actreg => 0x30,
+    actmask => 0x01,
+    basereg => 0x60,
+  );
+  
   foreach $chip (@superio_ids) {
     print "Probing for `$$chip{name}'\n";
 # write the password
     foreach $val (@{$$chip{enter}}) {
-      outb($$chip{addrreg}, $val);
+      outb($addrreg, $val);
     }
 # check the device ID
-    outb($$chip{addrreg}, $$chip{devidreg});
-    $val = inb($$chip{datareg});
+    outb($addrreg, $superio{devidreg});
+    $val = inb($datareg);
     if($$chip{devid}>0xff) {
-      outb($$chip{addrreg}, $$chip{devidreg} + 1);
-      $val = ($val << 8) | inb($$chip{datareg});
+      outb($addrreg, $superio{devidreg} + 1);
+      $val = ($val << 8) | inb($datareg);
     }
     if($val == $$chip{devid}) {
       print "  Success...";
 # switch to the sensor logical device
-      outb($$chip{addrreg}, $$chip{logdevreg});
-      outb($$chip{datareg}, $$chip{logdev});
+      outb($addrreg, $superio{logdevreg});
+      outb($datareg, $$chip{logdev});
 # check the activation register
-      if(exists $$chip{actreg}) {
-	outb($$chip{addrreg}, $$chip{actreg});
-	$val = inb($$chip{datareg});
-	if(!($val & $$chip{actmask})) {
-	  print " but not activated, module may not find\n";
-	  exit_superio($chip, 1);
-	  next;
-	}
+      outb($addrreg, $superio{actreg});
+      $val = inb($datareg);
+      if(!($val & $superio{actmask})) {
+	print " but not activated\n";
+	exit_superio($addrreg, $datareg, $chip, 1);
+	next;
       }
 # Get the IO base register
-      outb($$chip{addrreg}, $$chip{basereg});
-      $addr = inb($$chip{datareg});
-      outb($$chip{addrreg}, $$chip{basereg} + 1);
-      $addr = ($addr << 8) | inb($$chip{datareg});
+      outb($addrreg, $superio{basereg});
+      $addr = inb($datareg);
+      outb($addrreg, $superio{basereg} + 1);
+      $addr = ($addr << 8) | inb($datareg);
       if($addr == 0) {
-	print " but not activated, module may not find\n";
-	exit_superio($chip, 1);
+	print " but no address specified\n";
+	exit_superio($addrreg, $datareg, $chip, 1);
 	next;
       }	        
       printf " found at address 0x%04x\n", $addr;
@@ -2584,14 +2461,14 @@ sub scan_superio
                      };
       add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver},
                                             $new_hash;
-      exit_superio($chip, 1);
+      exit_superio($addrreg, $datareg, $chip, 1);
     } else {
       if($val == 0xff || $val == 0xffff || $val == 0) {	
         print "  Failed!\n";
       } else {
         printf "  Failed! (0x%02x)\n", $val;
       }
-      exit_superio($chip, 0);
+      exit_superio($addrreg, $datareg, $chip, 0);
     }
   }
 }
@@ -4509,34 +4386,34 @@ sub main
                  \@not_to_scan   unless $inp =~ /^\s*[Nn]/;
   }
 
-  print "\n Some chips are also accessible through the ISA bus. ISA probes ",
-        "are\n",
-        " typically a bit more dangerous, as we have to write to I/O ports ",
-        "to do\n",
-        " this. ";
+  print "\nSome chips are also accessible through the ISA bus. ISA probes are\n".
+        "typically a bit more dangerous, as we have to write to I/O ports to do\n".
+        "this. This is usually safe though.\n\n";
   if ($> != 0) {
     print "As you are not root, we shall skip this step.\n";
   } else {
-    print " Do you want to scan the ISA bus? (YES/no): ";
-    if (not <STDIN> =~ /^\s*[Nn]/) {
+    print "Do you want to scan the ISA bus? (YES/no): ";
+    unless (<STDIN> =~ /^\s*n/i) {
       initialize_ioports();
       scan_isa_bus();
       close_ioports();
     }
   }
 
-  print "\n Some Super I/O chips may also contain sensors. Super I/O probes ",
-        "are\n",
-        " typically a bit more dangerous, as we have to write to I/O ports ",
-        "to do\n",
-        " this. ";
+  print "\nSome Super I/O chips may also contain sensors. Super I/O probes are\n".
+        "typically a bit more dangerous, as we have to write to I/O ports to do\n".
+        "this. This is usually safe though.\n\n";
   if ($> != 0) {
     print "As you are not root, we shall skip this step.\n";
   } else {
-    print " Do you want to scan for Super I/O sensors? (YES/no): ";
-    if (not <STDIN> =~ /^\s*[Nn]/) {
+    print "Do you want to scan for Super I/O sensors? (YES/no): ";
+    unless (<STDIN> =~ /^\s*n/i) {
       initialize_ioports();
-      scan_superio();
+      scan_superio(0x2e, 0x2f);
+      print "\nDo you want to scan for secondary Super I/O sensors? (YES/no): ";
+      unless (<STDIN> =~ /^\s*n/i) {
+        scan_superio(0x4e, 0x4f);
+      }
       close_ioports();
     }
   }
