@@ -3,45 +3,67 @@ The lm_sensors team gratefully acknowledges the following donations.
 Drivers are very difficult to develop without actual hardware.
 Generally, the work goes quickly once we have the hardware.
 
+Evaluation boards are fine. Real computer hardware is even better
+because it let us do real-world testing over a longer period of time,
+and also supports the project in general.
+
 If you would like to make a donation, please contact us at
-sensors@stimpy.netroedge.com.
+sensors@stimpy.netroedge.com. Thanks!
 
 
 
 
-Donation from	Donation and subsequent development work	Approx. date
--------------	----------------------------------------	------------
+Donation from	Donation and subsequent development work	Date & Person
+-------------	----------------------------------------	-------------
 AMD		various sensor evaluation boards		2000
 		Drivers developed: various
 
-TI		i810 motherboard w/ 366 Celeron			7/99	
+TI		i810 motherboard w/ 366 Celeron			1999-07
 		Drivers developed: i801, i810, w83627hf
 
-SiS		SiS 540/630 motherboard w/ 5595			1/00	
+SiS		SiS 540/630 motherboard w/ 5595			2000-01
 		Drivers developed: sis5595 improvements
 
-Cendio Systems 	Asus P3B-F w/ as99127f				5/00
+Cendio Systems 	Asus P3B-F w/ AS99127F				2000-05
 		Drivers developed: as99127f improvements
 
-Atipa		SuperMicro370DLE w/ Serverworks, LM87		9/00
-		Drivers developed: serverworks support added to i2c-piix4;
-                                   lm87 testing and improvements
+Atipa		SuperMicro370DLE w/ Serverworks, LM87		2000-09
+		Drivers developed: serverworks support added
+		to i2c-piix4; lm87 testing and improvements
 
-Fujitsu Siemens Computers	Complete system for		11/01
-				general project suupport
+Fujitsu		Complete system for general project support	2001-11
+Siemens
+Computers
 
-HardData Ltd.	Tyan 2466 w/ 1G Duron; W83627HF and W83782D	5/02
+HardData Ltd.	Tyan 2466 w/ 1G Duron; W83627HF and W83782D	2002-05
 		Drivers developed: Tyan 2466 initialization;
 		DDR recognition
 
-Intel		SMBus 2.0 system				6/02
-		Drivers developed: SMBus 2.0 support in i2c-core and
-		i2c-i801; ADM1025 improvements; 82801 improvements;
-		smsc47m1 driver
+Intel		SMBus 2.0 system				2002-06
+		Drivers developed: SMBus 2.0 support in
+		i2c-core and i2c-i801; ADM1025 improvements;
+		82801 improvements; smsc47m1 driver
 
-Via		8231 and two 8233 motherboards			6/02
+Via		8231 and two 8233 motherboards			2002-06
 		Drivers developed: VT8231 support in via686a;
-		vt1211; VT8233A and VT8231 support in i2c-viapro
+		vt1211; VT8233A and VT8231 support in
+		i2c-viapro
 
-HP		IPMI system					10/02
+HP		IPMI system					2002-10
 		Drivers developed: bmcsensors, i2c-ipmi
+
+Analog Devices	ADM1032 evaluation board			2003-10
+		Drivers developed: ADM1032 support in lm90;	Jean Delvare
+		lm90 ported to Linux 2.6
+
+National	LM83 evaluation board				2003-12
+Semiconductor	Drivers developed: lm83 testing and		Jean Delvare
+		improvements; lm83 ported to Linux 2.6
+
+Analog Devices	ADM1025 and ADT7467/8 evaluation boards		2004-01
+		Drivers developed: adm1025 testing and		Jean Delvare
+		improvements; adm1025 ported to Linux 2.6
+
+Analog Devices  ADM1031 evaluation board			2004-04
+		Drivers developed: adm1031 for Linux 2.4 and	Jean Delvare
+		2.6
