@@ -28,8 +28,8 @@ See also: <br>
 	DEF:ttemp=%%RRDDIR%%/sensors.rrd:temp2:AVERAGE
 	DEF:la=%%RRDDIR%%/sensors.rrd:loadavg:AVERAGE
 	CDEF:lla=10,la,*
-	LINE2:temp#FF00FF:"CPU Temp"
-	LINE2:ttemp#FF0000:"Motherboard Temp"
+	LINE2:ttemp#FF0000:"CPU Temp"
+	LINE2:temp#FF00FF:"Motherboard Temp"
 	LINE2:lla#00FFFF:"Load Average * 10">
 </P>
 
