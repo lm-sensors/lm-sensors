@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright 1998, Philip Edelbrock <phil@netroedge.com>
+# Copyright 1998, 1999 Philip Edelbrock <phil@netroedge.com>
 #
 # Version 0.3
 #
@@ -21,7 +21,7 @@
 #
 
 print "PC-100 DIMM Serial Presence Detect Tester/Decoder\n";
-print "Written by Philip Edelbrock.  Copyright 1998.\n";
+print "Written by Philip Edelbrock.  Copyright 1998, 1999.\n";
 print "Version 0.2\n\n";
 
 $dimm_count=0;

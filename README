@@ -58,9 +58,9 @@ The latest version of this package can always be found on our homepage:
 http://www.netroedge.com/~lm78. Pre-release  versions can be retrieved
 through anonymous CVS; see doc/cvs for more information.
 
-This whole package is copyright (c) 1998-1999 by Frodo Looijaard and Philip
+This whole package is copyright (c) 1998, 1999-1999 by Frodo Looijaard and Philip
 Edelbrock, except for (almost) everything in the i2c directory, which
-is copyright (c) 1995-1998 by Simon Vogl. See the individual files for
+is copyright (c) 1995-1999 by Simon Vogl. See the individual files for
 more exact copyright information.  This package may be distributed
 according to the GNU General Public License (GPL), as included in the
 file COPYING.

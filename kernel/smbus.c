@@ -1,7 +1,7 @@
 /*
     smbus.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
-    Copyright (c) 1998  Frodo Looijaard <frodol@dds.nl> 
+    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl> 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

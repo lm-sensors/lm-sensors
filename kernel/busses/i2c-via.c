@@ -4,7 +4,7 @@
 
     i2c Support for Via Technologies 82C586B South Bridge
 
-    Copyright (c) 1998 Kyösti Mälkki <kmalkki@cc.hut.fi>
+    Copyright (c) 1998, 1999 Kyösti Mälkki <kmalkki@cc.hut.fi>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

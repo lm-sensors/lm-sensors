@@ -1,6 +1,5 @@
 Many, many things. Most notably:
 
-* Change all copyrights to 1998,1999
 * Check CDROM insert-remove error of Matt Mueller
 * Create wait-queues for bus locking instead of pure semaphores, to make
   it more interactive

@@ -1,5 +1,5 @@
 This is a design for version 2 of our smbus and lm_sensors module. This
-document is Copyright (c) 1998 by Frodo Looijaard. You may freely copy and
+document is Copyright (c) 1998, 1999 by Frodo Looijaard. You may freely copy and
 distribute it, as long as you recognize me as the author, and mark any
 changes you make as being your own, and distribute this notice with it.
 
