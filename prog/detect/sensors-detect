@@ -125,7 +125,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
             lm80_detect w83781d_detect w83781d_alias_detect
             w83781d_isa_detect gl518sm_detect gl520sm_detect adm9240_detect 
             adm1021_detect sis5595_isa_detect eeprom_detect
-            adm1022_detect ltc1710_detect);
+            adm1022_detect ltc1710_detect gl525sm_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -246,7 +246,13 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        name => "Genesys Logic GL520SM",
        driver => "gl520sm",
        i2c_addrs => [0x2c, 0x2d],
-       i2c_detect => sub { gl520sm_detect @_} ,
+       i2c_detect => sub { gl520sm_detect, @_} ,
+     },
+     {
+       name => "Genesys Logic GL525SM",
+#        driver => "xxxxxxx",
+       i2c_addrs => [0x2d],
+       i2c_detect => sub { gl525sm_detect, @_} ,
      },
      {
        name => "Analog Devices ADM9240",
@@ -291,13 +297,13 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        i2c_detect => sub { adm1021_detect 3, @_ },
      },
      {
-       name => "National Semiconductor LM84"
+       name => "National Semiconductor LM84",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 4, @_ },
      },
      {
-       name => "Genesys Logic GL523SM"
+       name => "Genesys Logic GL523SM",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 5, @_ },
@@ -1381,6 +1387,20 @@ sub gl520sm_detect
   return unless (i2c_smbus_read_byte_data($file,0x03) & 0x80) == 0x00;
   # The line below must be better checked before I dare to use it.
   # return unless i2c_smbus_read_byte_data($file,0x01) == 0x00;
+  return (5);
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, (5) if detected.
+# Registers used:
+#   0x00: Device ID
+# Mediocre detection
+sub gl525sm_detect
+{
+  my ($file,$addr) = @_;
+  return unless i2c_smbus_read_byte_data($file,0x00) == 0x25;
   return (5);
 }
 
