@@ -77,7 +77,7 @@ int isa_master_xfer (struct isa_adapter *adap, struct i2c_msg msgs[],
                      int num)
 {
 #ifdef DEBUG
-  printk("isa.o: isa_master_xfer called for adapter `%s' "
+  printk("i2c-isa.o: isa_master_xfer called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
 #endif
@@ -88,7 +88,7 @@ int isa_master_xfer (struct isa_adapter *adap, struct i2c_msg msgs[],
 int isa_slave_send (struct isa_adapter *adap, char *data, int len)
 {
 #ifdef DEBUG
-  printk("isa.o: isa_slave_send called for adapter `%s' "
+  printk("i2c-isa.o: isa_slave_send called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
 #endif
@@ -99,7 +99,7 @@ int isa_slave_send (struct isa_adapter *adap, char *data, int len)
 int isa_slave_recv (struct isa_adapter *adap, char *data, int len)
 {
 #ifdef DEBUG
-  printk("isa.o: isa_slave_recv called for adapter `%s' "
+  printk("i2c-isa.o: isa_slave_recv called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
 #endif
@@ -132,13 +132,13 @@ int isa_init(void)
   printk("isa.o version %s (%s)\n",LM_VERSION,LM_DATE);
 #ifdef DEBUG
   if (isa_initialized) {
-    printk("isa.o: Oops, isa_init called a second time!\n");
+    printk("i2c-isa.o: Oops, isa_init called a second time!\n");
     return -EBUSY;
   }
 #endif
   isa_initialized = 0;
   if ((res = isa_add_algorithm(&isa_algorithm))) {
-    printk("isa.o: Algorithm registration failed, module not inserted.\n");
+    printk("i2c-isa.o: Algorithm registration failed, module not inserted.\n");
     isa_cleanup();
     return res;
   }
@@ -147,13 +147,13 @@ int isa_init(void)
   isa_adapter.id = ALGO_ISA | ISA_MAIN;
   isa_adapter.algo = &isa_algorithm;
   if ((res = isa_add_adapter(&isa_adapter))) {
-    printk("isa.o: Adapter registration failed, "
+    printk("i2c-isa.o: Adapter registration failed, "
            "module isa.o is not inserted\n.");
     isa_cleanup();
     return res;
   }
   isa_initialized++;
-  printk("isa.o: ISA bus access for i2c modules initialized.\n");
+  printk("i2c-isa.o: ISA bus access for i2c modules initialized.\n");
   return 0;
 }
 
@@ -163,7 +163,7 @@ int isa_cleanup(void)
   if (isa_initialized >= 2)
   {
     if ((res = isa_del_adapter(&isa_adapter))) {
-      printk("isa.o: Adapter deregistration failed, module not removed.\n");
+      printk("i2c-isa.o: Adapter deregistration failed, module not removed.\n");
       return res;
     } else
       isa_initialized--;
@@ -171,7 +171,7 @@ int isa_cleanup(void)
   if (isa_initialized >= 1)
   {
     if ((res = isa_del_algorithm(&isa_algorithm))) {
-      printk("isa.o: Algorithm deregistration failed, module not removed.\n");
+      printk("i2c-isa.o: Algorithm deregistration failed, module not removed.\n");
       return res;
     } else
       isa_initialized--;

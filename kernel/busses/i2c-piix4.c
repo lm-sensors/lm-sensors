@@ -107,7 +107,7 @@ int piix4_setup(void)
 
   /* First check whether we can access PCI at all */
   if (pci_present() == 0) {
-    printk("piix4.o: Error: No PCI-bus found!\n");
+    printk("i2c-piix4.o: Error: No PCI-bus found!\n");
     error_return=-ENODEV;
     goto END;
   }
@@ -131,7 +131,7 @@ int piix4_setup(void)
      
   if (res) {
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
-    printk("piix4.o: Error: Can't detect PIIX4, function 3!\n");
+    printk("i2c-piix4.o: Error: Can't detect PIIX4, function 3!\n");
     error_return=-ENODEV;
     goto END;
   } 
@@ -142,7 +142,7 @@ int piix4_setup(void)
   piix4_smba &= 0xfff0;
 
   if (check_region(piix4_smba, 8)) {
-    printk("piix4.o: PIIX4_smb region 0x%x already in use!\n", piix4_smba);
+    printk("i2c-piix4.o: PIIX4_smb region 0x%x already in use!\n", piix4_smba);
     error_return=-ENODEV;
     goto END;
   }
@@ -161,7 +161,7 @@ int piix4_setup(void)
   if ((temp & 1) == 0) {
     pci_write_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
                                      SMBHSTCFG, temp | 1);
-    printk("piix4.0: WARNING: PIIX4 SMBus interface has been FORCEFULLY "
+    printk("i2c-piix4.o: WARNING: PIIX4 SMBus interface has been FORCEFULLY "
            "ENABLED!!\n");
     /* Update configuration value */
     pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
@@ -181,17 +181,17 @@ int piix4_setup(void)
 
 #ifdef DEBUG
   if ((temp & 0x0E) == 8)
-     printk("piix4.o: PIIX4 using Interrupt 9 for SMBus.\n");
+     printk("i2c-piix4.o: PIIX4 using Interrupt 9 for SMBus.\n");
   else if ((temp & 0x0E) == 0)
-     printk("piix4.o: PIIX4 using Interrupt SMI# for SMBus.\n");
+     printk("i2c-piix4.o: PIIX4 using Interrupt SMI# for SMBus.\n");
   else 
-     printk("piix4.o: PIIX4: Illegal Interrupt configuration (or code out "
+     printk("i2c-piix4.o: PIIX4: Illegal Interrupt configuration (or code out "
             "of date)!\n");
 
   pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn, SMBREV, 
                               &temp);
-  printk("piix4.o: SMBREV = 0x%X\n",temp);
-  printk("piix4.o: PIIX4_smba = 0x%X\n",piix4_smba);
+  printk("i2c-piix4.o: SMBREV = 0x%X\n",temp);
+  printk("i2c-piix4.o: PIIX4_smba = 0x%X\n",piix4_smba);
 #endif /* DEBUG */
 
 END:
@@ -214,7 +214,7 @@ int piix4_transaction(void)
   int timeout=0;
 
 #ifdef DEBUG
-  printk("piix4.o: Transaction (pre): CNT=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, "
+  printk("i2c-piix4.o: Transaction (pre): CNT=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, "
          "DAT1=%02x\n",
          inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
          inb_p(SMBHSTDAT1));
@@ -223,17 +223,17 @@ int piix4_transaction(void)
   /* Make sure the SMBus host is ready to start transmitting */
   if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-    printk("piix4.o: SMBus busy (%02x). Resetting... \n",temp);
+    printk("i2c-piix4.o: SMBus busy (%02x). Resetting... \n",temp);
 #endif
     outb_p(temp, SMBHSTSTS);
     if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-      printk("piix4.o: Failed! (%02x)\n",temp);
+      printk("i2c-piix4.o: Failed! (%02x)\n",temp);
 #endif
       return -1;
     } else {
 #ifdef DEBUG
-      printk("piix4.o: Successfull!\n");
+      printk("i2c-piix4.o: Successfull!\n");
 #endif
     }
   }
@@ -250,7 +250,7 @@ int piix4_transaction(void)
   /* If the SMBus is still busy, we give up */
   if (timeout >= MAX_TIMEOUT) {
 #ifdef DEBUG
-    printk("piix4.o: SMBus Timeout!\n"); 
+    printk("i2c-piix4.o: SMBus Timeout!\n"); 
     result = -1;
 #endif
   }
@@ -258,13 +258,13 @@ int piix4_transaction(void)
   if (temp & 0x10) {
     result = -1;
 #ifdef DEBUG
-    printk("piix4.o: Error: Failed bus transaction\n");
+    printk("i2c-piix4.o: Error: Failed bus transaction\n");
 #endif
   }
 
   if (temp & 0x08) {
     result = -1;
-    printk("piix4.o: Bus collision! SMBus may be locked until next hard
+    printk("i2c-piix4.o: Bus collision! SMBus may be locked until next hard
            reset. (sorry!)\n");
     /* Clock stops and slave is stuck in mid-transmission */
   }
@@ -272,7 +272,7 @@ int piix4_transaction(void)
   if (temp & 0x04) {
     result = -1;
 #ifdef DEBUG
-    printk("piix4.o: Error: no response!\n");
+    printk("i2c-piix4.o: Error: no response!\n");
 #endif
   }
 
@@ -281,11 +281,11 @@ int piix4_transaction(void)
 
   if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-    printk("piix4.o: Failed reset at end of transaction (%02x)\n",temp);
+    printk("i2c-piix4.o: Failed reset at end of transaction (%02x)\n",temp);
 #endif
   }
 #ifdef DEBUG
-  printk("piix4.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
+  printk("i2c-piix4.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
          "DAT0=%02x, DAT1=%02x\n",
          inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
          inb_p(SMBHSTDAT1));
@@ -301,7 +301,7 @@ s32 piix4_access(u8 addr, char read_write,
 
   switch(size) {
     case SMBUS_PROC_CALL:
-      printk("piix4.o: SMBUS_PROC_CALL not supported!\n");
+      printk("i2c-piix4.o: SMBUS_PROC_CALL not supported!\n");
       return -1;
     case SMBUS_QUICK:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
@@ -387,13 +387,13 @@ int piix4_init(void)
 #ifdef DEBUG
 /* PE- It might be good to make this a permanent part of the code! */
   if (piix4_initialized) {
-    printk("piix4.o: Oops, piix4_init called a second time!\n");
+    printk("i2c-piix4.o: Oops, piix4_init called a second time!\n");
     return -EBUSY;
   }
 #endif
   piix4_initialized = 0;
   if ((res = piix4_setup())) {
-    printk("piix4.o: PIIX4 not detected, module not inserted.\n");
+    printk("i2c-piix4.o: PIIX4 not detected, module not inserted.\n");
     piix4_cleanup();
     return res;
   }
@@ -403,12 +403,12 @@ int piix4_init(void)
   piix4_adapter.algo = &smbus_algorithm;
   piix4_adapter.smbus_access = &piix4_access;
   if ((res = smbus_add_adapter(&piix4_adapter))) {
-    printk("piix4.o: Adapter registration failed, module not inserted.\n");
+    printk("i2c-piix4.o: Adapter registration failed, module not inserted.\n");
     piix4_cleanup();
     return res;
   }
   piix4_initialized++;
-  printk("piix4.o: PIIX4 bus detected and initialized\n");
+  printk("i2c-piix4.o: PIIX4 bus detected and initialized\n");
   return 0;
 }
 
@@ -418,7 +418,7 @@ int piix4_cleanup(void)
   if (piix4_initialized >= 2)
   {
     if ((res = smbus_del_adapter(&piix4_adapter))) {
-      printk("piix4.o: smbus_del_adapter failed, module not removed\n");
+      printk("i2c-piix4.o: smbus_del_adapter failed, module not removed\n");
       return res;
     } else
       piix4_initialized--;

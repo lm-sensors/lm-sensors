@@ -183,7 +183,7 @@ int ali15x3_setup(void)
 
   /* First check whether we can access PCI at all */
   if (pci_present() == 0) {
-    printk("ali15x3.o: Error: No PCI-bus found!\n");
+    printk("i2c-ali15x3.o: Error: No PCI-bus found!\n");
     error_return=-ENODEV;
     goto END;
   }
@@ -201,7 +201,7 @@ int ali15x3_setup(void)
      
   if (res) {
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
-    printk("ali15x3.o: Error: Can't detect ali15x3!\n");
+    printk("i2c-ali15x3.o: Error: Can't detect ali15x3!\n");
     error_return=-ENODEV;
     goto END;
   } 
@@ -232,7 +232,7 @@ int ali15x3_setup(void)
                               ACPIBA,&ali15x3_acpia);
   ali15x3_acpia &= (0xffff & ~ (ALI15X3_ACPI_IOSIZE - 1));
   if(ali15x3_acpia == 0) {
-    printk("ali15x3.o: ALI15X3_acpi region uninitialized - upgrade BIOS?\n");
+    printk("i2c-ali15x3.o: ALI15X3_acpi region uninitialized - upgrade BIOS?\n");
     error_return=-ENODEV;
   }
 #endif
@@ -241,7 +241,7 @@ int ali15x3_setup(void)
                               SMBBA,&ali15x3_smba);
   ali15x3_smba &= (0xffff & ~ (ALI15X3_SMB_IOSIZE - 1));
   if(ali15x3_smba == 0) {
-    printk("ali15x3.o: ALI15X3_smb region uninitialized - upgrade BIOS?\n");
+    printk("i2c-ali15x3.o: ALI15X3_smb region uninitialized - upgrade BIOS?\n");
     error_return=-ENODEV;
   }
 
@@ -250,14 +250,14 @@ int ali15x3_setup(void)
 
 #ifdef MAP_ACPI
   if (check_region(ali15x3_acpia, ALI15X3_ACPI_IOSIZE)) {
-    printk("ali15x3.o: ALI15X3_acpi region 0x%x already in use!\n", ali15x3_acpia);
-    printk("ali15x3.o: If conflicting ACPI software is installed, undefine MAP_ACPI and recompile!\n");
+    printk("i2c-ali15x3.o: ALI15X3_acpi region 0x%x already in use!\n", ali15x3_acpia);
+    printk("i2c-ali15x3.o: If conflicting ACPI software is installed, undefine MAP_ACPI and recompile!\n");
     error_return=-ENODEV;
   }
 #endif
 
   if (check_region(ali15x3_smba, ALI15X3_SMB_IOSIZE)) {
-    printk("ali15x3.o: ALI15X3_smb region 0x%x already in use!\n", ali15x3_smba);
+    printk("i2c-ali15x3.o: ALI15X3_smb region 0x%x already in use!\n", ali15x3_smba);
     error_return=-ENODEV;
   }
 
@@ -285,7 +285,7 @@ int ali15x3_setup(void)
   if ((temp & 1) == 0) {
     pci_write_config_byte_united(ALI15X3_dev, ALI15X3_bus, ALI15X3_devfn,
                                      SMBHSTCFG, temp | 1);
-    printk("ali15x3.0: WARNING: ALI15X3 SMBus interface has been FORCEFULLY "
+    printk("i2c-ali15x3.o: WARNING: ALI15X3 SMBus interface has been FORCEFULLY "
            "ENABLED!!\n");
   }
 #else /* FORCE_ALI15X3_ENABLE */
@@ -312,12 +312,12 @@ int ali15x3_setup(void)
   1533 ISA Bridge device, NOT in the 7101 device.
   Don't bother with finding the 1533 device and reading the register.
   if ((....... & 0x0F) == 1)
-     printk("ali15x3.o: ALI15X3 using Interrupt 9 for SMBus.\n");
+     printk("i2c-ali15x3.o: ALI15X3 using Interrupt 9 for SMBus.\n");
 */
   pci_read_config_byte_united(ALI15X3_dev, ALI15X3_bus, ALI15X3_devfn, SMBREV, 
                               &temp);
-  printk("ali15x3.o: SMBREV = 0x%X\n",temp);
-  printk("ali15x3.o: ALI15X3_smba = 0x%X\n",ali15x3_smba);
+  printk("i2c-ali15x3.o: SMBREV = 0x%X\n",temp);
+  printk("i2c-ali15x3.o: ALI15X3_smba = 0x%X\n",ali15x3_smba);
 #endif /* DEBUG */
 
 END:
@@ -340,7 +340,7 @@ int ali15x3_transaction(void)
   int timeout=0;
 
 #ifdef DEBUG
-  printk("ali15x3.o: Transaction (pre): STS=%02x, CNT=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, "
+  printk("i2c-ali15x3.o: Transaction (pre): STS=%02x, CNT=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, "
          "DAT1=%02x\n",
          inb_p(SMBHSTSTS), inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
          inb_p(SMBHSTDAT1));
@@ -367,7 +367,7 @@ int ali15x3_transaction(void)
 /* Abort - reset the host controller */
 /*
 #ifdef DEBUG
-    printk("ali15x3.o: Resetting host controller to clear busy condition\n",temp);
+    printk("i2c-ali15x3.o: Resetting host controller to clear busy condition\n",temp);
 #endif
     outb_p(ALI15X3_ABORT, SMBHSTCNT);
     temp = inb_p(SMBHSTSTS);
@@ -380,7 +380,7 @@ int ali15x3_transaction(void)
    then the BUSY bit may come back on when you try and use the chip again.
    If that's the case you are stuck.
 */
-       printk("ali15x3.o: Resetting entire SMB Bus to clear busy condition (%02x)\n",temp);
+       printk("i2c-ali15x3.o: Resetting entire SMB Bus to clear busy condition (%02x)\n",temp);
        outb_p(ALI15X3_T_OUT, SMBHSTCNT);
        temp = inb_p(SMBHSTSTS);
      }
@@ -396,7 +396,7 @@ int ali15x3_transaction(void)
       /* this is probably going to be correctable only by a power reset
          as one of the bits now appears to be stuck */
       /* This may be a bus or device with electrical problems. */
-      printk("ali15x3.o: SMBus reset failed! (0x%02x) - controller or device on bus is probably hung\n",temp);
+      printk("i2c-ali15x3.o: SMBus reset failed! (0x%02x) - controller or device on bus is probably hung\n",temp);
       return -1;
     }
   } else {
@@ -419,13 +419,13 @@ int ali15x3_transaction(void)
   /* If the SMBus is still busy, we give up */
   if (timeout >= MAX_TIMEOUT) {
     result = -1;
-    printk("ali15x3.o: SMBus Timeout!\n"); 
+    printk("i2c-ali15x3.o: SMBus Timeout!\n"); 
   }
 
   if (temp & ALI15X3_STS_TERM) {
     result = -1;
 #ifdef DEBUG
-    printk("ali15x3.o: Error: Failed bus transaction\n");
+    printk("i2c-ali15x3.o: Error: Failed bus transaction\n");
 #endif
   }
 
@@ -438,18 +438,18 @@ int ali15x3_transaction(void)
   if (temp & ALI15X3_STS_COLL) {
     result = -1;
 #ifdef DEBUG
-    printk("ali15x3.o: Error: no response or bus collision ADD=%02x\n", inb_p(SMBHSTADD));
+    printk("i2c-ali15x3.o: Error: no response or bus collision ADD=%02x\n", inb_p(SMBHSTADD));
 #endif
   }
 
 /* haven't ever seen this */
   if (temp & ALI15X3_STS_DEV) {
     result = -1;
-    printk("ali15x3.o: Error: device error\n");
+    printk("i2c-ali15x3.o: Error: device error\n");
   }
 
 #ifdef DEBUG
-  printk("ali15x3.o: Transaction (post): STS=%02x, CNT=%02x, CMD=%02x, ADD=%02x, "
+  printk("i2c-ali15x3.o: Transaction (post): STS=%02x, CNT=%02x, CMD=%02x, ADD=%02x, "
          "DAT0=%02x, DAT1=%02x\n",
          inb_p(SMBHSTSTS), inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
          inb_p(SMBHSTDAT1));
@@ -475,12 +475,12 @@ s32 ali15x3_access(u8 addr, char read_write,
     temp=inb_p(SMBHSTSTS);
   }
   if (timeout >= MAX_TIMEOUT) {
-    printk("ali15x3.o: Idle wait Timeout! STS=0x%02x\n", temp); 
+    printk("i2c-ali15x3.o: Idle wait Timeout! STS=0x%02x\n", temp); 
   }
 
   switch(size) {
     case SMBUS_PROC_CALL:
-      printk("ali15x3.o: SMBUS_PROC_CALL not supported!\n");
+      printk("i2c-ali15x3.o: SMBUS_PROC_CALL not supported!\n");
       return -1;
     case SMBUS_QUICK:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
@@ -563,13 +563,13 @@ int ali15x3_init(void)
 #ifdef DEBUG
 /* PE- It might be good to make this a permanent part of the code! */
   if (ali15x3_initialized) {
-    printk("ali15x3.o: Oops, ali15x3_init called a second time!\n");
+    printk("i2c-ali15x3.o: Oops, ali15x3_init called a second time!\n");
     return -EBUSY;
   }
 #endif
   ali15x3_initialized = 0;
   if ((res = ali15x3_setup())) {
-    printk("ali15x3.o: ALI15X3 not detected, module not inserted.\n");
+    printk("i2c-ali15x3.o: ALI15X3 not detected, module not inserted.\n");
     ali15x3_cleanup();
     return res;
   }
@@ -582,12 +582,12 @@ int ali15x3_init(void)
   ali15x3_adapter.algo = &smbus_algorithm;
   ali15x3_adapter.smbus_access = &ali15x3_access;
   if ((res = smbus_add_adapter(&ali15x3_adapter))) {
-    printk("ali15x3.o: Adapter registration failed, module not inserted.\n");
+    printk("i2c-ali15x3.o: Adapter registration failed, module not inserted.\n");
     ali15x3_cleanup();
     return res;
   }
   ali15x3_initialized++;
-  printk("ali15x3.o: ALI15X3 SMBus Controller detected and initialized\n");
+  printk("i2c-ali15x3.o: ALI15X3 SMBus Controller detected and initialized\n");
   return 0;
 }
 
@@ -597,7 +597,7 @@ int ali15x3_cleanup(void)
   if (ali15x3_initialized >= 2)
   {
     if ((res = smbus_del_adapter(&ali15x3_adapter))) {
-      printk("ali15x3.o: smbus_del_adapter failed, module not removed\n");
+      printk("i2c-ali15x3.o: smbus_del_adapter failed, module not removed\n");
       return res;
     } else
       ali15x3_initialized--;
