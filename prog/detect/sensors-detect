@@ -76,6 +76,7 @@ sub adapter_pci_detection
        devid  => 0x0008,
        func => 0,
        procid => "Silicon Integrated Systems 85C503",
+       driver => "i2c-ali15x3"
      } ,
      {
        vendid => 0x10b9,
