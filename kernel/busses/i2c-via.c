@@ -216,7 +216,7 @@ static
 #else
 extern
 #endif
-       int __init i2c_init_i2c_via(void)
+       int __init i2c_init_via(void)
 {
 	if (find_via() < 0) {
 		printk("Error while reading PCI configuration\n");
@@ -252,7 +252,7 @@ MODULE_DESCRIPTION("i2c for Via vt82c586b southbridge");
 
 int init_module(void) 
 {
-	return i2c_init_i2c_via();
+	return i2c_init_via();
 }
 
 void cleanup_module(void) 

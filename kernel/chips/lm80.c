@@ -200,7 +200,12 @@ struct lm80_data {
 };
 
 
-static int __init sensors_lm80_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_lm80_init(void);
 static int __init lm80_cleanup(void);
 
 static int lm80_attach_adapter(struct i2c_adapter *adapter);

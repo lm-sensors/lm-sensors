@@ -192,7 +192,7 @@ static
 #else
 extern
 #endif
-       int __init sensors_gl518_init(void);
+       int __init sensors_gl518sm_init(void);
 static int __init gl518_cleanup(void);
 static int gl518_attach_adapter(struct i2c_adapter *adapter);
 static int gl518_detect(struct i2c_adapter *adapter, int address, 
@@ -1023,7 +1023,7 @@ void gl518_iterate(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init sensors_gl518_init(void)
+int __init sensors_gl518sm_init(void)
 {
   int res;
 
@@ -1062,7 +1062,7 @@ MODULE_DESCRIPTION("GL518SM driver");
 
 int init_module(void)
 {
-  return sensors_gl518_init();
+  return sensors_gl518sm_init();
 }
 
 int cleanup_module(void)
