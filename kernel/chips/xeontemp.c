@@ -30,6 +30,10 @@
 #include <linux/init.h>
 #include "version.h"
 
+#ifndef I2C_DRIVERID_XEONTEMP
+#define I2C_DRIVERID_XEONTEMP	1045
+#endif
+
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { 0x18, 0x1a, 0x29, 0x2b,
 	0x4c, 0x4e, SENSORS_I2C_END
