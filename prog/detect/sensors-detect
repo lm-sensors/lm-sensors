@@ -261,6 +261,22 @@ sub parse_not_to_scan
   return sort { $a <=> $b } @res;
 }
 
+# @_[0]: Reference to list 1
+# @_[1]: Reference to list 2
+# Result: 0 if they have no elements in common, 1 if they have
+# Elements must be numeric.
+sub any_list_match
+{
+  my ($list1,$list2) = @_;
+  my ($el1,$el2);
+  foreach $el1 (@$list1) {
+    foreach $el2 (@$list2) {
+      return 1 if $el1 == $el2;
+    }
+  }
+  return 0;
+}
+
 ###################
 # I/O port access #
 ###################
@@ -677,55 +693,44 @@ use vars qw(@chips_detected);
 #    with field 'driver', being a string with the driver name for this chip;
 #    with field 'detected'
 #      being a reference to a list of
-#        references to hashes
-#          with field 'adap' containing an adapter string as appearing
-#               in /proc/bus/i2c
-#          with field 'algo' containing an algorithm string as appearing
-#               in /proc/bus/i2c
-#          with field 'devnr', contianing the /dev/i2c-* number of this
-#               adapter;
-#          with field 'driver', containing the driver name for this adapter;
-#          with field 'address', containing the I2C address of the detection;
-#          with field 'confidence', containing the confidence level of this
-#               detection
-#          with field 'chipname", containing the chip name
-#          with optional field 'main' containing the address of the main
-#               chip this is a subsidiary off (like LM75 emulations on 
-#               Winbond chips)
-#          with optional field 'isa_addr' containing the ISA address this
-#               chip is on (for aliased chips, also the other fields are
-#               present; else 'driver', 'address', 'algo' and 'adap' are not 
-#               present)
-#          
+#        references to hashes of type 'detect_data';
 #    with field 'misdetected'
 #      being a reference to a list of
-#        references to hashes
-#          with field 'adap' containing an adapter string as appearing
-#               in /proc/bus/i2c
-#          with field 'algo' containing an algorithm string as appearing
-#               in /proc/bus/i2c
-#          with field 'devnr', contianing the /dev/i2c-* number of this
-#               adapter;
-#          with field 'driver', containing the driver name for this adapter;
-#          with field 'address', containing the I2C address of the detection;
-#          with field 'confidence', containing the confidence level of this
-#               detection
-#          with field 'chipname", containing the chip name
-#          with optional field 'main' containing the address of the main
-#               chip this is a subsidiary off (like LM75 emulations on 
-#               Winbond chips)
-#          with optional field 'isa_addr' containing the ISA address this
-#               chip is on (for aliased chips, also the other fields are
-#               present; else 'driver', 'address', 'algo' and 'adap' are not 
-#               present)
+#        references to hashes of type 'detect_data'
 
+# Type detect_data:
+# A hash
+#   with field 'i2c_adap' containing an adapter string as appearing
+#        in /proc/bus/i2c (if this is an I2C detection)
+#  with field 'i2c_algo' containing an algorithm string as appearing
+#       in /proc/bus/i2c (if this is an I2C detection)
+#  with field 'i2c_devnr', contianing the /dev/i2c-* number of this
+#       adapter (if this is an I2C detection)
+#  with field 'i2c_driver', containing the driver name for this adapter
+#       (if this is an I2C detection)
+#  with field 'i2c_addr', containing the I2C address of the detection;
+#       (if this is an I2C detection)
+#  with field 'i2c_sub_addrs', containing a reference to a list of
+#       other I2C addresses (if this is an I2C detection)
+#  with field 'isa_addr' containing the ISA address this chip is on 
+#       (if this is an ISA detection)
+#  with field 'conf', containing the confidence level of this detection
+#  with field 'chipname', containing the chip name
+
+# This adds a detection to the above structure. We do no alias detection
+# here; so you should do ISA detections *after* all I2C detections.
+# Not all possibilities of i2c_addr and i2c_sub_addrs are exhausted.
+# In all normal cases, it should be all right.
 # $_[0]: chip driver
 # $_[1]: reference to data hash
-sub add_to_chips_detected
+# Returns: Nothing
+sub add_i2c_to_chips_detected
 {
   my ($chipdriver,$datahash) = @_;
-  my ($detected_ref,$misdetected_ref, $new_detected_ref,$new_misdetected_ref,
-      $i,$j,$found_it);
+  my ($i,$new_detected_ref,$new_misdetected_ref,$detected_ref,$misdetected_ref,
+      $main_entry,$detected_entry,$put_in_detected,@hash_addrs,@entry_addrs);
+
+  # First determine where the hash has to be added.
   for ($i = 0; $i < @chips_detected; $i++) {
     last if ($chips_detected[$i]->{driver} eq $chipdriver);
   }
@@ -734,85 +739,104 @@ sub add_to_chips_detected
                             detected => [],
                             misdetected => [] };
   }
-
   $new_detected_ref = $chips_detected[$i]->{detected};
   $new_misdetected_ref = $chips_detected[$i]->{misdetected};
 
-  # This is tricky, mostly because of the datastructures involved. We walk
-  # through all previous detections for this address. If the to-be-inserted
-  # detection matches an item in it, we look at the confidence values.
-  # If the to-be-inserted detections's confidence is greater, we delegate
-  # the previous detection to the misdetections, and replace it with this
-  # detection. If it is equal or less, we add the to-be-inserted detection
-  # to the misdetections. As soon as a match is found, we break. If no
-  # matches are found at all, add the to-be-inserted detection with the
-  # detections.
-  $found_it = 0;
-  LOOP: for ($i = 0; $i < @chips_detected; $i++) {
-    $detected_ref = $chips_detected[$i]->{detected};
-    $misdetected_ref = $chips_detected[$i]->{misdetected};
-    for ($j = 0; $j < @$detected_ref ; $j++) {
-      if ($detected_ref->[$j]->{driver} eq $datahash->{driver} and
-          $detected_ref->[$j]->{adap} eq $datahash->{adap} and
-          $detected_ref->[$j]->{algo} eq $datahash->{algo} and
-          $detected_ref->[$j]->{address} eq $datahash->{address}) {
-        if ($detected_ref->[$j]->{confidence} < $datahash->{confidence}) {
-          push @$misdetected_ref, $detected_ref->[$j];
-          splice @$detected_ref, $j, 1;
-          push @$new_detected_ref, $datahash;
-          $found_it = 1;
-          last LOOP;
-        } else {
-          push @$new_misdetected_ref, $datahash;
-          $found_it = 1;
-          last LOOP;
+  # Find out whether our new entry should go into the detected or the
+  # misdetected list. We only compare main i2c_addr here; so we can have
+  # the unlikely case that we replace a subsidiary i2c_addr with a higher
+  # confidence value. Too bad.
+  $put_in_detected = 1;
+  FIND_LOOP:
+  foreach $main_entry (@chips_detected) {
+    foreach $detected_entry (@{$main_entry->{detected}}) {
+      if ($detected_entry->{i2c_devnr} == $datahash->{i2c_devnr} and
+          $detected_entry->{i2c_addr} == $datahash->{i2c_addr}) {
+        if ($detected_entry->{conf} >= $datahash->{conf}) {
+          $put_in_detected = 0;
         }
+        last FIND_LOOP;
       }
     }
   }
-  push @$new_detected_ref, $datahash if not $found_it
+
+  if ($put_in_detected) {
+    # Here, we move all entries from detected to misdetected which
+    # match at least in one main or sub address. This may not be the
+    # best idea to do, as it may remove detections without replacing
+    # them with second-best ones. Too bad.
+    @hash_addrs = ($datahash->{i2c_addr});
+    push @hash_addrs, @{$datahash->{i2c_sub_addrs}} 
+         if exists $datahash->{i2c_sub_addrs};
+    foreach $main_entry (@chips_detected) {
+      $detected_ref = $main_entry->{detected};
+      $misdetected_ref = $main_entry->{misdetected};
+      for ($i = @$detected_ref-1; $i >=0; $i--) {
+        @entry_addrs = ($detected_ref->[$i]->{i2c_addr});
+        push @entry_addrs, @{$detected_ref->[$i]->{i2c_sub_addrs}}
+             if exists $detected_ref->[$i]->{i2c_sub_addrs};
+        if (any_list_match \@entry_addrs, \@hash_addrs) {
+          push @$misdetected_ref,$detected_ref->[$i];
+          splice @$detected_ref, $i, 1;
+        }
+      }
+    }
+
+    # Now add the new entry to detected
+    push @$new_detected_ref, $datahash;
+  } else {
+    # No hard work here 
+    push @$new_misdetected_ref, $datahash;
+  }
 }
 
+# This adds a detection to the above structure. We also do alias detection
+# here; so you should do ISA detections *after* all I2C detections.
+# $_[0]: alias detection function
+# $_[1]: chip driver
+# $_[2]: reference to data hash
+# Returns: Nothing
 sub add_isa_to_chips_detected
 {
   my ($alias_detect,$chipdriver,$datahash) = @_;
-  my ($detected_ref,$misdetected_ref, $new_detected_ref,$new_misdetected_ref,
-      $i,$j,$found_it);
+  my ($i,$new_detected_ref,$new_misdetected_ref,$detected_ref,$misdetected_ref,
+      $main_entry);
 
-  # First locate this chip driver's location in the big structure, or
-  # create it */
+  # First determine where the hash has to be added.
   for ($i = 0; $i < @chips_detected; $i++) {
     last if ($chips_detected[$i]->{driver} eq $chipdriver);
   }
   if ($i == @chips_detected) {
     push @chips_detected, { driver => $chipdriver,
                             detected => [],
-                            misdetected => [], };
+                            misdetected => [] };
   }
   $new_detected_ref = $chips_detected[$i]->{detected};
   $new_misdetected_ref = $chips_detected[$i]->{misdetected};
-  
+
   # Now, we are looking for aliases. An alias can only be the same chiptype.
-  # If an alias is found in the detected list, it is removed from the 
-  # structure, and the data is put in %$datahash. If it is found in the
-  # misdetected list, the entry is modified, and this function aborted.
-  # If it is not found, nothing happens.
-  for ($j = 0; $j < @$new_misdetected_ref; $j++) {
-    if (exists $new_misdetected_ref->[$j]->{address} and 
-        not exists $new_misdetected_ref->[$j]->{isa_addr} and
+  # If an alias is found in the misdetected list, we add the new information
+  # and terminate this function. If it is found in the detected list, we
+  # still have to check whether another chip has claimed this ISA address.
+  # So we remove the old entry from the detected list and put it in datahash.
+
+  # Misdetected alias detection:
+  for ($i = 0; $i < @$new_misdetected_ref; $i++) {
+    if (exists $new_misdetected_ref->[$i]->{i2c_addr} and
+        not exists $new_misdetected_ref->[$i]->{isa_addr} and
         defined $alias_detect and
-        $new_misdetected_ref->[$j]->{chip_type} eq $datahash->{chip_type}) {
-      open FILE,"/dev/i2c-$new_misdetected_ref->[$j]->{devnr}" or 
+        $new_misdetected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
+      open FILE,"/dev/i2c-$new_misdetected_ref->[$i]->{devnr}" or
            print("Can't open ",
-                 "/dev/i2c-$new_misdetected_ref->[$j]->{devnr}?!?\n"),
+                 "/dev/i2c-$new_misdetected_ref->[$i]->{devnr}?!?\n"),
            next;
-      i2c_set_slave_addr \*FILE,$new_misdetected_ref->[$j]->{address} or
+      i2c_set_slave_addr \*FILE,$new_misdetected_ref->[$i]->{address} or
            print("Can't set I2C address for ",
-                 "/dev/i2c-$new_misdetected_ref->[$j]->{devnr}?!?\n"),
+                 "/dev/i2c-$new_misdetected_ref->[$i]->{devnr}?!?\n"),
            next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
-                          $new_misdetected_ref->[$j]->{address})) {
-        $new_misdetected_ref->[$j]->{isa_addr} = $datahash->{isa_addr};
+                          $new_misdetected_ref->[$i]->{i2c_addr})) {
+        $new_misdetected_ref->[$i]->{isa_addr} = $datahash->{isa_addr};
         close FILE;
         return;
       }
@@ -820,53 +844,54 @@ sub add_isa_to_chips_detected
     }
   }
 
-  for ($j = 0; $j < @$new_detected_ref; $j++) {
-    if (exists $new_detected_ref->[$j]->{address} and
-        not exists $new_detected_ref->[$j]->{isa_addr} and
-        $new_detected_ref->[$j]->{chip_type} eq $datahash->{chip_type}) {
-      open FILE,"/dev/i2c-$new_detected_ref->[$j]->{devnr}" or 
+  # Detected alias detection:
+  for ($i = 0; $i < @$new_detected_ref; $i++) {
+    if (exists $new_detected_ref->[$i]->{i2c_addr} and
+        not exists $new_detected_ref->[$i]->{isa_addr} and
+        defined $alias_detect and
+        $new_detected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
+      open FILE,"/dev/i2c-$new_detected_ref->[$i]->{devnr}" or
            print("Can't open ",
-                 "/dev/i2c-$new_detected_ref->[$j]->{devnr}?!?\n"),
+                 "/dev/i2c-$new_detected_ref->[$i]->{devnr}?!?\n"),
            next;
-      i2c_set_slave_addr \*FILE,$new_detected_ref->[$j]->{address} or
+      i2c_set_slave_addr \*FILE,$new_detected_ref->[$i]->{address} or
            print("Can't set I2C address for ",
-                 "/dev/i2c-$new_detected_ref->[$j]->{devnr}?!?\n"),
+                 "/dev/i2c-$new_detected_ref->[$i]->{devnr}?!?\n"),
            next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
-                          $new_detected_ref->[$j]->{address})) {
-        $new_detected_ref->[$j]->{isa_addr} = $datahash->{isa_addr};
-        ($datahash) = splice (@$new_detected_ref, $j, 1);
+                          $new_detected_ref->[$i]->{i2c_addr})) {
+        $new_detected_ref->[$i]->{isa_addr} = $datahash->{isa_addr};
+        ($datahash) = splice (@$new_detected_ref, $i, 1);
         close FILE;
         last;
       }
       close FILE;
     }
   }
-        
-  # At long last, we will insert the new reference, looking out whether
-  # some other chip has already claimed this ISA address.
-  $found_it = 0;
-  LOOP: for ($i = 0; $i < @chips_detected; $i++) {
-    $detected_ref = $chips_detected[$i]->{detected};
-    $misdetected_ref = $chips_detected[$i]->{misdetected};
-    for ($j = 0; $j < @$detected_ref ; $j++) {
-      if (exists $detected_ref->[$j]->{isa_addr} and
-          $detected_ref->[$j]->{isa_addr} == $datahash->{isa_addr}) {
-        if ($detected_ref->[$j]->{confidence} < $datahash->{confidence}) {
-          push @$misdetected_ref, $detected_ref->[$j];
-          splice @$detected_ref, $j, 1;
-          push @$new_detected_ref, $datahash;
-          $found_it = 1;
-          last LOOP;
-        } else {
+
+
+  # Find out whether our new entry should go into the detected or the
+  # misdetected list. We only compare main isa_addr here, of course.
+  foreach $main_entry (@chips_detected) {
+    $detected_ref = $main_entry->{detected};
+    $misdetected_ref = $main_entry->{misdetected};
+    for ($i = 0; $i < @{$main_entry->{detected}}; $i++) {
+      if (exists $detected_ref->[$i]->{isa_addr} and
+          $detected_ref->[$i]->{isa_addr} == $datahash->{isa_addr}) {
+        if ($detected_ref->[$i]->{conf} >= $datahash->{conf}) {
           push @$new_misdetected_ref, $datahash;
-          $found_it = 1;
-          last LOOP;
+        } else {
+          push @$misdetected_ref,$detected_ref->[$i];
+          splice @$detected_ref, $i,1;
+          push @$new_detected_ref, $datahash;
         }
+        return;
       }
     }
   }
-  push @$new_detected_ref, $datahash if not $found_it
+
+  # Nor found? OK, put it in the detected list
+  push @$new_detected_ref, $datahash;
 }
 
 # $_[0]: The number of the adapter to scan
@@ -877,19 +902,28 @@ sub scan_adapter
 {
   my ( $adapter_nr,$adapter_name,$algorithm_name,$adapter_driver, 
        $not_to_scan) = @_;
-  my ($chip, $addr, $conf,@chips,$add_addr);
+  my ($chip, $addr, $conf,@chips,$new_hash,$other_addr);
+
+  # As we modify it, we need a copy
   my @not_to_scan = @$not_to_scan;
+
   open FILE,"/dev/i2c-$adapter_nr" or 
        (print "Can't open /dev/i2c-$adapter_nr ($!)\n"), return;
+
+  # Now scan each address in turn
   foreach $addr (0..0x7f) {
+    # As the not_to_scan list is sorted, we can check it fast
     if (@not_to_scan and $not_to_scan[0] == $addr) {
       shift @not_to_scan;
       next;
     }
+
     i2c_set_slave_addr(\*FILE,$addr) or print("Can't set address to $_?!?\n"), 
                                      next;
+
     next unless i2c_smbus_read_byte(\*FILE) >= 0;
     printf "Client found at address 0x%02x\n",$addr;
+
     foreach $chip (@chip_ids) {
       if (exists $$chip{i2c_addrs} and contains $addr, @{$$chip{i2c_addrs}}) {
         print "Probing for `$$chip{name}'... ";
@@ -898,35 +932,22 @@ sub scan_adapter
                 "    (confidence $conf, driver `$$chip{driver}'";
           if (@chips) {
             print ", other addresses:";
-            my $other_addr;
+            @chips = sort @chips;
             foreach $other_addr (sort @chips) {
               printf(" %02x",$other_addr);
             }
-            printf "\n";
-          } else {
-            print ")\n";
           }
-          add_to_chips_detected $$chip{driver},
-                                { confidence => $conf,
-                                  address => $addr,
-                                  chipname =>  $$chip{name},
-                                  adapter => $adapter_name,
-                                  algorithm => $algorithm_name,
-                                  driver => $adapter_driver,
-                                  devnr => $adapter_nr,
-                                };
-          foreach $add_addr(@chips) {
-            add_to_chips_detected $$chip{driver},
-                                  { confidence => $conf,
-                                    address => $add_addr,
-                                    chipname =>  $$chip{name},
-                                    adapter => $adapter_name,
-                                    algorithm => $algorithm_name,
-                                    driver => $adapter_driver,
-                                    main => $addr,
-                                    devnr => $adapter_nr,
-                                  };
-          }
+          printf "\n";
+          $new_hash = { conf => $conf,
+                        i2c_addr => $addr,
+                        chipname =>  $$chip{name},
+                        i2c_adap => $adapter_name,
+                        i2c_algo => $algorithm_name,
+                        i2c_driver => $adapter_driver,
+                        i2c_devnr => $adapter_nr,
+                      };
+          $new_hash->{i2c_sub_addrs} = \@chips if (@chips);
+          add_i2c_to_chips_detected $$chip{driver}, $new_hash;
         } else {
           print "Failed!\n";
         }
@@ -945,14 +966,14 @@ sub scan_isa_bus
       if ($addr) {
         printf "  Trying address 0x%04x... ", $addr;
       } else {
-        printf "  Trying general detect... ";
+        print "  Trying general detect... ";
       }
       $conf = &{$$chip{isa_detect}} ($addr);
       print("Failed!\n"), next if not defined $conf;
       print "Success!\n";
       printf "    (confidence %d, driver `%s')\n", $conf, $$chip{driver};
       add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver}, 
-                                { confidence => $conf,
+                                { conf => $conf,
                                   isa_addr => $addr,
                                   chipname =>  $$chip{name},
                                 };
@@ -1285,6 +1306,48 @@ sub sis5595_isa_detect
   return (9);
 }
 
+################
+# MAIN PROGRAM #
+################
+
+# $_[0]: reference to a list of chip hashes
+sub print_chips_report 
+{
+  my ($listref) = @_;
+  my $data;
+  
+  foreach $data (@$listref) {
+    my $is_i2c = exists $data->{i2c_addr};
+    my $is_isa = exists $data->{isa_addr};
+    print "  * ";
+    if ($is_i2c) {
+      printf "Bus `%s' (%s)\n", $data->{i2c_adap}, $data->{i2c_algo};
+      printf "    Busdriver `%s', I2C address 0x%02x", 
+             $data->{i2c_driver}, $data->{i2c_addr};
+      if (exists $data->{i2c_sub_addrs}) {
+        print " (and";
+        my $sub_addr;
+        foreach $sub_addr (@{$data->{i2c_sub_addrs}}) {
+          printf " 0x%02x",$sub_addr;
+        }
+        print ")"
+      }
+      print "\n";
+    }
+    if ($is_isa) {
+      print "    " if  $is_i2c;
+      if ($data->{isa_addr}) {
+        printf "ISA bus address 0x%04x (Busdriver `i2c-isa')\n", 
+               $data->{isa_addr};
+      } else {
+        printf "ISA bus, undetermined address (Busdriver `i2c-isa')\n"
+      }
+    }
+    printf "    Chip `%s' (confidence: %d)\n",
+           $data->{chipname},  $data->{conf};
+  }
+}
+
 # $_[0]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
@@ -1504,51 +1567,11 @@ sub main
     }
     if (@{$$chip{detected}}) {
       print "  Detects correctly:\n";
-      foreach $data (@{$$chip{detected}}) {
-        my $is_i2c = exists $data->{address};
-        my $is_isa = exists $data->{isa_addr};
-        print "  * ";
-        printf "Bus `%s' (%s)\n", $data->{adapter}, $data->{algorithm}
-               if $is_i2c;
-        printf "    Busdriver `%s', I2C address 0x%02x", $data->{driver}, 
-               $data->{address} if $is_i2c;
-        printf " (main: 0x%02x)", $data->{main} if (exists $data->{main});
-        print "    " if  $is_i2c and $is_isa;
-        if ($is_isa) {
-          if ($data->{isa_addr}) {
-            printf "ISA bus address 0x%04x (Busdriver `i2c-isa')", 
-                   $data->{isa_addr};
-          } else {
-            printf "ISA bus, undetermined address (Busdriver `i2c-isa')"
-          }
-        }
-        printf "\n    Chip `%s' (confidence: %d)\n",
-               $data->{chipname},  $data->{confidence};
-      }
+      print_chips_report $chip->{detected};
     }
     if (@{$$chip{misdetected}}) {
       print "  Misdetects:\n";
-      foreach $data (@{$$chip{misdetected}}) {
-        my $is_i2c = exists $data->{address};
-        my $is_isa = exists $data->{isa_addr};
-        print "  * ";
-        printf "Bus `%s' (%s)\n", $data->{adapter}, $data->{algorithm}
-               if $is_i2c;
-        printf "    Busdriver `%s', I2C address 0x%02x", $data->{driver}, 
-               $data->{address} if $is_i2c;
-        printf " (main: 0x%02x)", $data->{main} if (exists $data->{main});
-        print "    " if  $is_i2c and $is_isa;
-        if ($is_isa) {
-          if ($data->{isa_addr}) {
-            printf "ISA bus address 0x%04x (Busdriver `i2c-isa')", 
-                   $data->{isa_addr};
-          } else {
-            printf "ISA bus, undetermined address (Busdriver `i2c-isa')"
-          }
-        }
-        printf "\n    Chip `%s' (confidence: %d)\n",
-               $data->{chipname},  $data->{confidence};
-      }
+      print_chips_report $chip->{misdetected};
     }
   }
 }
