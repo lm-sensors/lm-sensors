@@ -363,7 +363,7 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
   }
 #endif
 
-  if (i2c_check_functionality(adapter,I2C_FUNC_SMBUS_BYTE_DATA))
+  if (!i2c_check_functionality(adapter,I2C_FUNC_SMBUS_BYTE_DATA))
     goto ERROR0;
 
   /* We need address registration for the I2C bus too. That is not yet
