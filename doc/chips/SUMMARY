@@ -74,6 +74,7 @@ lm75
 	  (the following chips are detected as an lm75)
 	ds75		1	-	-	-	yes	no
 	ds1775		1	-	-	-	yes	no
+	tcn75		1	-	-	-	yes	no
 	lm77		1	-	-	-	yes	no
 
 lm78
