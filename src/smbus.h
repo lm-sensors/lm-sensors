@@ -184,7 +184,7 @@ extern inline s32 smbus_read_byte(struct i2c_adapter * adapter,u8 addr)
   if (smbus_access(adapter,addr,SMBUS_READ,0,SMBUS_BYTE,&data))
     return -1;
   else
-    return data.byte;
+    return 0x0FF & data.byte;
 }
 
 extern inline s32 smbus_write_byte(struct i2c_adapter * adapter, u8 addr, 
@@ -200,7 +200,7 @@ extern inline s32 smbus_read_byte_data(struct i2c_adapter * adapter,
   if (smbus_access(adapter,addr,SMBUS_READ,command,SMBUS_BYTE_DATA,&data))
     return -1;
   else
-    return data.byte;
+    return 0x0FF & data.byte;
 }
 
 extern inline s32 smbus_write_byte_data(struct i2c_adapter * adapter,
@@ -218,7 +218,7 @@ extern inline s32 smbus_read_word_data(struct i2c_adapter * adapter,
   if (smbus_access(adapter,addr,SMBUS_READ,command,SMBUS_WORD_DATA,&data))
     return -1;
   else
-    return data.word;
+    return 0x0FFFF & data.word;
 }
 
 extern inline s32 smbus_write_word_data(struct i2c_adapter * adapter,
@@ -237,7 +237,7 @@ extern inline s32 smbus_process_call(struct i2c_adapter * adapter,
   if (smbus_access(adapter,addr,SMBUS_WRITE,command,SMBUS_PROC_CALL,&data))
     return -1;
   else
-    return data.word;
+    return 0x0FFFF & data.word;
 }
 
 /* Returns the number of read bytes */
