@@ -29,9 +29,9 @@
     w83697hf	8	2	2	2	0x60	0x5ca3	no	yes(LPC)
 
     For other winbond chips, and for i2c support in the above chips,
-    use w83627hf.c.
+    use w83781d.c.
 
-    Note: automatic ("cruise") fan control for 697 not supported yet.
+    Note: automatic ("cruise") fan control for 697 & 627thf not supported yet.
 */
 
 #include <linux/module.h>
@@ -47,6 +47,7 @@
 #include <asm/io.h>
 #include "version.h"
 #include "sensors_vid.h"
+#include "lm75.h"
 
 static int force_addr;
 MODULE_PARM(force_addr, "i");
@@ -74,8 +75,29 @@ MODULE_PARM_DESC(init, "Set to zero to bypass chip initialization");
 #define	REG	0x2e	/* The register to read/write */
 #define	DEV	0x07	/* Register: Logical device select */
 #define	VAL	0x2f	/* The value to read/write */
-#define PME	0x0b	/* The device with the hardware monitor */
+
+/* logical device numbers for superio_select (below) */
+#define W83627HF_LD_FDC		0x00
+#define W83627HF_LD_PRT		0x01
+#define W83627HF_LD_UART1	0x02
+#define W83627HF_LD_UART2	0x03
+#define W83627HF_LD_KBC		0x05
+#define W83627HF_LD_CIR		0x06 /* w83627hf only */
+#define W83627HF_LD_GAME	0x07
+#define W83627HF_LD_MIDI	0x07
+#define W83627HF_LD_GPIO1	0x07
+#define W83627HF_LD_GPIO5	0x07 /* w83627thf only */
+#define W83627HF_LD_GPIO2	0x08
+#define W83627HF_LD_GPIO3	0x09
+#define W83627HF_LD_GPIO4	0x09 /* w83627thf only */
+#define W83627HF_LD_ACPI	0x0a
+#define W83627HF_LD_HWM		0x0b
+
 #define	DEVID	0x20	/* Register: Device ID */
+
+#define W83627THF_GPIO5_IOSR	0xf3 /* w83627thf only */
+#define W83627THF_GPIO5_DR	0xf4 /* w83627thf only */
+#define W83627THF_GPIO5_INVR	0xf5 /* w83627thf only */
 
 static inline void
 superio_outb(int reg, int val)
@@ -92,10 +114,10 @@ superio_inb(int reg)
 }
 
 static inline void
-superio_select(void)
+superio_select(int ld)
 {
 	outb(DEV, REG);
-	outb(PME, VAL);
+	outb(ld, VAL);
 }
 
 static inline void
@@ -176,11 +198,14 @@ superio_exit(void)
 #define W83781D_REG_PWM2 0x5A	/* We follow the 782d convention here, */
 				/* However 782d is probably wrong. */
 #define W83781D_REG_PWMCLK12 0x5C
-#define W83627THF_REG_PWM1 0x01		/* 697HF too */
-#define W83627THF_REG_PWM2 0x03		/* 697HF too */
-#define W83627THF_REG_PWM3 0x11
-#define W83697HF_REG_PWMCLK1 0x00
-#define W83697HF_REG_PWMCLK2 0x02
+
+#define W83697HF_REG_PWMCLK1		0x00
+#define W83627THF_REG_PWM1		0x01	/* 697HF too */
+#define W83697HF_REG_PWMCLK2		0x02
+#define W83627THF_REG_PWM2		0x03	/* 697HF too */
+#define W83627THF_REG_PWM3		0x11
+#define W83627HF_REG_VRM_OVT_CFG 	0x18	/* w83627thf only */
+
 static const u8 regpwm[] = { W83781D_REG_PWM1, W83781D_REG_PWM2 };
 static const u8 regpwm_thf[] = { W83627THF_REG_PWM1, W83627THF_REG_PWM2,
                                  W83627THF_REG_PWM3 };
@@ -215,15 +240,24 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 			     254);
 }
 
+#define TEMP_MIN (-1280)
+#define TEMP_MAX ( 1270)
+
+/* TEMP: 1/10 degrees C (-128C to +127C)
+   REG: 1C/bit, two's complement */
+static u8 TEMP_TO_REG(int temp)
+{
+        int ntemp = SENSORS_LIMIT(temp, TEMP_MIN, TEMP_MAX);
+        ntemp += (ntemp<0 ? -5 : 5);
+        return (u8)(ntemp / 10);
+}
+                                                                                
+static int TEMP_FROM_REG(u8 reg)
+{
+        return (s8)reg * 10;
+}
+
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
-
-#define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
-                                                 ((val)+5)/10),0,255))
-#define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
-
-#define TEMP_ADD_TO_REG(val)   (SENSORS_LIMIT(((((val) + 2) / 5) << 7),\
-                                              0,0xffff))
-#define TEMP_ADD_FROM_REG(val) (((val) >> 7) * 5)
 
 #define PWM_TO_REG(val) (SENSORS_LIMIT((val),0,255))
 #define BEEPS_TO_REG(val) ((val) & 0xffffff)
@@ -583,7 +617,7 @@ static int w83627hf_find(int *address)
 		return -ENODEV;
 	}
 
-	superio_select();
+	superio_select(W83627HF_LD_HWM);
 	val = (superio_inb(WINB_BASE_REG) << 8) |
 	       superio_inb(WINB_BASE_REG + 1);
 	*address = val & ~(WINB_EXTENT - 1);
@@ -621,7 +655,7 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 	if(force_addr) {
 		printk("w83627hf.o: forcing ISA address 0x%04X\n", address);
 		superio_enter();
-		superio_select();
+		superio_select(W83627HF_LD_HWM);
 		superio_outb(WINB_BASE_REG, address >> 8);
 		superio_outb(WINB_BASE_REG+1, address & 0xff);
 		superio_exit();
@@ -636,7 +670,7 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 	else if(val == W627THF_DEVID)
 		kind = w83627thf;
 		
-	superio_select();
+	superio_select(W83627HF_LD_HWM);
 	if((val = 0x01 & superio_inb(WINB_ACT_REG)) == 0)
 		superio_outb(WINB_ACT_REG, 1);
 	superio_exit();
@@ -779,6 +813,20 @@ static int w83627hf_read_value(struct i2c_client *client, u16 reg)
 	return res;
 }
 
+static int w83627thf_read_gpio5(struct i2c_client *client)
+{
+	int res, inv;
+
+	down(&(((struct w83627hf_data *) (client->data))->lock));
+	superio_enter();
+	superio_select(W83627HF_LD_GPIO5);
+	res = superio_inb(W83627THF_GPIO5_DR);
+	inv = superio_inb(W83627THF_GPIO5_INVR);
+	superio_exit();
+	up(&(((struct w83627hf_data *) (client->data))->lock));
+	return res;
+}
+
 static int w83627hf_write_value(struct i2c_client *client, u16 reg, u16 value)
 {
 	int word_sized;
@@ -841,13 +889,19 @@ static void w83627hf_init_client(struct i2c_client *client)
 	w83627hf_write_value(client, W83781D_REG_I2C_SUBADDR, 0x89);
 	w83627hf_write_value(client, W83781D_REG_I2C_ADDR, force_i2c);
 
-	if (type != w83697hf) {
-		vid = w83627hf_read_value(client, W83781D_REG_VID_FANDIV) & 0x0f;
-		vid |=
-		    (w83627hf_read_value(client, W83781D_REG_CHIPID) & 0x01) << 4;
-		data->vrm = DEFAULT_VRM;
-		vid = vid_from_reg(vid, data->vrm);
+	/* Read VID only once */
+	if (w83627hf == data->type) {
+		int lo = w83627hf_read_value(client, W83781D_REG_VID_FANDIV);
+		int hi = w83627hf_read_value(client, W83781D_REG_CHIPID);
+		data->vid = (lo & 0x0f) | ((hi & 0x01) << 4);
+	} else if (w83627thf == data->type) {
+		data->vid = w83627thf_read_gpio5(client) & 0x1f;
 	}
+
+	/* Convert VID to voltage based on default VRM */
+	data->vrm = DEFAULT_VRM;
+	if (type != w83697hf)
+		vid = vid_from_reg(vid, data->vrm);
 
 	tmp = w83627hf_read_value(client, W83781D_REG_SCFG1);
 	for (i = 1; i <= 3; i++) {
@@ -944,13 +998,8 @@ static void w83627hf_update_client(struct i2c_client *client)
 			data->temp_add_hyst[1] =
 			    w83627hf_read_value(client, W83781D_REG_TEMP3_HYST);
 		}
+
 		i = w83627hf_read_value(client, W83781D_REG_VID_FANDIV);
-		if (data->type != w83697hf) {
-			data->vid = i & 0x0f;
-			data->vid |=
-			    (w83627hf_read_value(client, W83781D_REG_CHIPID) & 0x01)
-			    << 4;
-		}
 		data->fan_div[0] = (i >> 4) & 0x03;
 		data->fan_div[1] = (i >> 6) & 0x03;
 		if (data->type != w83697hf) {
@@ -1070,15 +1119,15 @@ void w83627hf_temp_add(struct i2c_client *client, int operation,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83627hf_update_client(client);
 			results[0] =
-			    TEMP_ADD_FROM_REG(data->temp_add_over[nr]);
+			    LM75_TEMP_FROM_REG(data->temp_add_over[nr]);
 			results[1] =
-			    TEMP_ADD_FROM_REG(data->temp_add_hyst[nr]);
-			results[2] = TEMP_ADD_FROM_REG(data->temp_add[nr]);
+			    LM75_TEMP_FROM_REG(data->temp_add_hyst[nr]);
+			results[2] = LM75_TEMP_FROM_REG(data->temp_add[nr]);
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 				data->temp_add_over[nr] =
-				    TEMP_ADD_TO_REG(results[0]);
+				    LM75_TEMP_TO_REG(results[0]);
 			w83627hf_write_value(client,
 					    nr ? W83781D_REG_TEMP3_OVER :
 					    W83781D_REG_TEMP2_OVER,
@@ -1086,7 +1135,7 @@ void w83627hf_temp_add(struct i2c_client *client, int operation,
 		}
 		if (*nrels_mag >= 2) {
 				data->temp_add_hyst[nr] =
-				    TEMP_ADD_TO_REG(results[1]);
+				    LM75_TEMP_TO_REG(results[1]);
 			w83627hf_write_value(client,
 					    nr ? W83781D_REG_TEMP3_HYST :
 					    W83781D_REG_TEMP2_HYST,
