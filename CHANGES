@@ -18,13 +18,21 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.0 (2001????)
+  NOTE: i2c-2.6.0 MUST BE be compiled AND installed first!!!
+        If your make fails because it can't find <linux/i2c-proc.h>, you
+        forgot this step!!!
+        Also, mkpatch is probably broken right now.
   File doc/FAQ: Updates
   File doc/chips/via686a: Claim support for 686b.
   File sensors.conf.eg: Adjust as99127f -12V calculation
+  File sensors.c: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
+  Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
+  Include file sensors.h: Most contents moved to i2c-proc.h in i2c package
+  Chip Modules (all ISA): Remove #include "i2c-isa.h"
   Module i2c-i801: Chip detection cleanup
   Module lm78: Recognize chipid=0x20
   Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
-  Module sensors: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
+  Module sensors: Disabled, moved to i2c package as i2c-proc.c
   Module via686a: Allow force=9191,address (for A7V/K7V boards)
   Program mkpatch.pl: Fix adm9240 typos, add more chips to Configure.help
   Program sensors: Change reported version from 1.3 to the lm_sensors version.
@@ -32,7 +40,7 @@ ask CVS about it:
   Program sensors-detect: Recognize SMSC Victory66 South Bridge
 
 2.5.5 (20010115)
-  NOTE: i2c 2.5.5 MUST BE be compiled and installed first, UNLESS
+  NOTE: i2c-2.5.5 MUST BE be compiled and installed first, UNLESS
         you have kernel 2.4.0-prerelease or greater.
   Chip modules (all): Update mutex definition (works now for new 2.2 kernels)
   File doc/developers/proc: new

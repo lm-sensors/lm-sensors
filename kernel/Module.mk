@@ -25,7 +25,8 @@ KERNELDIR := $(MODULE_DIR)
 # defined value verbatim into the command-list of rules...
 KERNELTARGETS := 
 ifneq ($(shell if grep -q '^CONFIG_SENSORS=y' $(LINUX)/.config; then echo 1; fi),1)
-KERNELTARGETS += $(MODULE_DIR)/sensors.o
+# sensors.c moved to i2c-proc.c in i2c package
+#KERNELTARGETS += $(MODULE_DIR)/sensors.o
 endif
 
 # Include all dependency files
@@ -34,11 +35,14 @@ INCLUDEFILES += $(KERNELTARGETS:.o=.d)
 all-kernel: $(KERNELTARGETS)
 all :: all-kernel
 
+# Remove sensors.o possibly left from old versions
 install-kernel: all-kernel
 	if [ -n "$(KERNELTARGETS)" ] ; then \
 	  $(MKDIR) $(DESTDIR)$(MODDIR) ; \
 	  $(INSTALL) -o root -g root -m 644 $(KERNELTARGETS) $(DESTDIR)$(MODDIR) ;\
 	fi
+	$(RM) $(DESTDIR)$(MODDIR)/sensors.o
+
 install :: install-kernel 
 
 clean-kernel:

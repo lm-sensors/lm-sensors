@@ -34,7 +34,6 @@
 #include <linux/init.h>
 
 #include "version.h"
-#include "i2c-isa.h"
 
 static void isa_inc_use(struct i2c_adapter *adapter);
 static void isa_dec_use(struct i2c_adapter *adapter);

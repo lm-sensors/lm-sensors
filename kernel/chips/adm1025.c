@@ -33,7 +33,6 @@
 #include <linux/types.h>
 #include <linux/i2c.h>
 #include "version.h"
-#include "i2c-isa.h"
 #include "sensors.h"
 #include <linux/init.h>
 

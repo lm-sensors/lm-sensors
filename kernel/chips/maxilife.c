@@ -63,7 +63,6 @@ static const char *version_str = "2.00 29/2/2000 Fons Rademakers";
 #include <linux/i2c.h>
 #include "version.h"
 #include "sensors.h"
-#include "i2c-isa.h"
 #include <linux/init.h>
 
 
