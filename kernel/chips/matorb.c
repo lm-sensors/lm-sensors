@@ -68,7 +68,6 @@ static int matorb_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
 static void matorb_inc_use (struct i2c_client *client);
 static void matorb_dec_use (struct i2c_client *client);
-static int matorb_read_value(struct i2c_client *client, u8 reg);
 static int matorb_write_value(struct i2c_client *client, u8 reg, u16 value);
 static void matorb_disp(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);

@@ -57,6 +57,33 @@ static int voodoo3_cleanup(void);
 static int voodoo3_setup(void);
 static s32 voodoo3_access(u8 addr, char read_write,
                         u8 command, int size, union smbus_data * data);
+static void Voodoo3_I2CStart(void);
+static void Voodoo3_I2CStop(void);
+static int Voodoo3_I2CAck(void);
+static int Voodoo3_I2CReadByte(void);
+static int Voodoo3_I2CSendByte(unsigned char data);
+static int Voodoo3_BusCheck(void);
+static int Voodoo3_I2CRead_byte(int addr);
+static int Voodoo3_I2CRead_byte_data(int addr,int command);
+static int Voodoo3_I2CRead_word(int addr,int command);
+static int Voodoo3_I2CWrite_byte(int addr,int command);
+static int Voodoo3_I2CWrite_byte_data(int addr,int command,int data);
+static int Voodoo3_I2CWrite_word(int addr,int command,long data);
+static void config_v3(struct pci_dev *dev, int num);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #ifdef MODULE
 extern int init_module(void);
@@ -70,41 +97,41 @@ static unsigned int state=0xcf980020;
 static unsigned char *mem;
 static int v3_num;
 
-inline void outlong(int off,unsigned int dat)
+extern inline void outlong(int off,unsigned int dat)
 {
         *((unsigned int*)(mem+off))=dat;
 }
 
 
-inline unsigned int readlong(int off)
+extern inline unsigned int readlong(int off)
 {
         return *((unsigned int*)(mem+off));
 }
 
-inline void out(void)
+extern inline void out(void)
 {
         outlong(0x78,state);
         udelay(10);
 }
 
-inline void dat(int data)
+extern inline void dat(int data)
 {
   state&=~(1<<25);
   if (data)
     state|=(1<<25);
 }
 
-inline void clkon(void)
+extern inline void clkon(void)
 {
   state|=(1<<24);
 }
 
-inline void clkoff(void)
+extern inline void clkoff(void)
 {
   state&=~(1<<24);
 }
 
-inline int rdat(void)
+extern inline int rdat(void)
 {
         dat(1);
         out();
