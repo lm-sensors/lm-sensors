@@ -429,6 +429,7 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 		temp%d_low -> temp_min%d
 		temp%d -> temp_input%d
 		tcrit%d -> temp_crit%d
+		hyst%d -> temp_hyst%d
 	AND all conversions listed in the matches[] structure below.
 
 	If that fails, returns old /proc feature name and magnitude.
@@ -561,6 +562,11 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	}
 	if(sscanf(name, "tcrit%d%c", &num, &check) == 1) {
 		sprintf(sysname, "temp_crit%d", num);
+		*sysmag = TEMPMAG;
+		return 0;
+	}
+	if(sscanf(name, "hyst%d%c", &num, &check) == 1) {
+		sprintf(sysname, "temp_hyst%d", num);
 		*sysmag = TEMPMAG;
 		return 0;
 	}

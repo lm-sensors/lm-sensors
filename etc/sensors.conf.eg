@@ -1632,23 +1632,13 @@ chip "lm90-*" "adm1032-*"
 #   set tcrit1 75
 #   set tcrit2 85
 
-# change the hysteresis value to fit your needs
-# This is a little bit tricky. Under Linux 2.4, this is a relative value
-# and applies to both critical thresholds. This is a direct representation
-# of the chipset register.
-#   set hyst 5
-# Under Linux 2.6 however, this is an absolute value and applies to
-# tcrit2. Keep in mind that this is still internally represented as a
-# relative, common value (because there's a single register, holding a
-# relative value, in the chipset itself) so it is important to set it
-# *after* setting tcrit2 (i.e. don't change the set lines order).
-#   set hyst 80
-# Tcrit1 hysteresis value will be set automatically, with the same delta.
-# In this example (with tcrit1=75 and tcrit2=85), the internal register
-# would be set to 5, and the hysteresis temperature for tcrit1 would be 70.
-# Note that the internal register cannot hold values greater than 31, so
-# the delta between critical temperatures and respective absolute hysteresis
-# can never exceed this value.
+# change the hysteresis values (to critical limits) to fit your needs
+# note #1: hyst2 will be automatically set with the same delta
+# note #2: the internal register, which stores a single, relative value
+# for both channels, cannot hold values greater than 31, so the delta
+# between critical temperatures and respective absolute hysteresis can
+# never exceed this value
+#   set hyst1 70
 
 chip "vt1211-*" "vt8231-*"
 #
