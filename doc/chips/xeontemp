@@ -1,4 +1,4 @@
-Kernel driver `adm1021.o'
+Kernel driver `xeontemp.o'
 =========================
 
 Status: Complete; tested for most devices except Xeon.
@@ -48,4 +48,10 @@ the adm1021 driver, and the address is one of
 adm1021 driver, temp1 is invalid but temp2 looks correct, then
 it is likely you should use this driver instead.
 
-See the documentation for adm1021 for more information.
+See the adm1021 documentation for more information.
+
+Author/Maintainer
+-----------------
+Mark D. Studebaker (mdsxyz123@yahoo.com).
+Derived from the adm1021 driver.
+Send requests to the sensors@stimpy.netroedge.com mailing list.
