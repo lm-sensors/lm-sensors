@@ -506,6 +506,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	if (!(data = kmalloc(sizeof(struct pc87360_data), GFP_KERNEL))) {
 		return -ENOMEM;
 	}
+	memset(data, 0x00, sizeof(struct pc87360_data));
 
 	new_client = &data->client;
 	new_client->addr = address;
@@ -657,17 +658,20 @@ static void pc87360_update_client(struct i2c_client *client)
 
 		/* Fans */
 		for (i = 0; i < data->fannr; i++) {
-			data->fan_status[i] = pc87360_read_value(data, LD_FAN,
-					      NO_BANK,
-					      PC87360_REG_FAN_STATUS(i));
-			/* Clear bits */
-			pc87360_write_value(data, LD_FAN, NO_BANK,
-					    PC87360_REG_FAN_STATUS(i),
-					    data->fan_status[i] | 0x06);
-			data->fan[i] = pc87360_read_value(data, LD_FAN,
-				       NO_BANK, PC87360_REG_FAN(i));
-			data->fan_min[i] = pc87360_read_value(data, LD_FAN,
-					   NO_BANK, PC87360_REG_FAN_MIN(i));
+			if (FAN_CONFIG_MONITOR(data->fan_conf[0], i)) {
+				data->fan_status[i] = pc87360_read_value(data,
+						      LD_FAN, NO_BANK,
+						      PC87360_REG_FAN_STATUS(i));
+				/* Clear bits */
+				pc87360_write_value(data, LD_FAN, NO_BANK,
+						    PC87360_REG_FAN_STATUS(i),
+						    data->fan_status[i] | 0x06);
+				data->fan[i] = pc87360_read_value(data, LD_FAN,
+					       NO_BANK, PC87360_REG_FAN(i));
+				data->fan_min[i] = pc87360_read_value(data,
+						   LD_FAN, NO_BANK,
+						   PC87360_REG_FAN_MIN(i));
+			}
 			data->pwm[i] = pc87360_read_value(data, LD_FAN,
 				       NO_BANK, PC87360_REG_PWM(i));
 		}
