@@ -2809,6 +2809,47 @@ void print_w83l785ts(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_w83627ehf(const sensors_chip_name *name)
+{
+  char *label;
+  int i, valid;
+
+  for (i = 0; i < 5; i++) {
+    double cur, min, div;
+    if (!sensors_get_label_and_valid(*name, SENSORS_W83627EHF_FAN1+i,
+        &label, &valid)
+     && !sensors_get_feature(*name, SENSORS_W83627EHF_FAN1+i, &cur)
+     && !sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_MIN+i, &min)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%4.0f RPM  (min = %4.0f RPM", cur, min);
+        if (!sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_DIV+i, &div))
+          printf(", div = %1.0f", div);
+        printf(")\n");
+      }
+    } else if (i < 3)
+      printf("ERROR: Can't get FAN%d data!\n", i + 1);
+    free_the_label(&label);
+  }
+
+  for (i = 0; i < 3; i++) {
+    double cur, over, hyst;
+    if (!sensors_get_label_and_valid(*name, SENSORS_W83627EHF_TEMP1+i,
+        &label, &valid)
+     && !sensors_get_feature(*name, SENSORS_W83627EHF_TEMP1+i, &cur)
+     && !sensors_get_feature(*name, SENSORS_W83627EHF_TEMP1_OVER+i, &over)
+     && !sensors_get_feature(*name, SENSORS_W83627EHF_TEMP1_HYST+i, &hyst)) {
+      if (valid) {
+        print_label(label,10);
+        print_temp_info(cur, over, hyst, HYST, i ? 1 : 0, i ? 1 : 0);
+        printf("\n");
+      }
+    } else
+      printf("ERROR: Can't get TEMP%d data!\n", i + 1);
+    free_the_label(&label);
+  }
+}
+
 void print_maxilife(const sensors_chip_name *name)
 {
    char  *label = NULL;

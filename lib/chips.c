@@ -40,6 +40,7 @@
 #define NOMAP SENSORS_NO_MAPPING
 #define R SENSORS_MODE_R
 #define RW SENSORS_MODE_RW
+#define NOSYSCTL 0
 
 static sensors_chip_feature lm78_features[] =
   { 
@@ -1866,6 +1867,76 @@ static sensors_chip_feature w83l785ts_features[] =
     { SENSORS_W83L785TS_TEMP_OVER, "temp_over", SENSORS_W83L785TS_TEMP,
                         SENSORS_W83L785TS_TEMP, R,
                         W83L785TS_SYSCTL_TEMP, VALUE(1), 0 },
+    { 0 }
+  };
+
+/* No support for Linux 2.4 yet (sysctl) */
+static sensors_chip_feature w83627ehf_features[] =
+  {
+    { SENSORS_W83627EHF_FAN1, "fan1", NOMAP, NOMAP,
+                        R, NOSYSCTL, VALUE(2), 0 },
+    { SENSORS_W83627EHF_FAN2, "fan2", NOMAP, NOMAP,
+                        R, NOSYSCTL, VALUE(2), 0 },
+    { SENSORS_W83627EHF_FAN3, "fan3", NOMAP, NOMAP,
+                        R, NOSYSCTL, VALUE(2), 0 },
+    { SENSORS_W83627EHF_FAN4, "fan4", NOMAP, NOMAP,
+                        R, NOSYSCTL, VALUE(2), 0 },
+    { SENSORS_W83627EHF_FAN5, "fan5", NOMAP, NOMAP,
+                        R, NOSYSCTL, VALUE(2), 0 },
+    { SENSORS_W83627EHF_FAN1_MIN, "fan1_min",
+                        SENSORS_W83627EHF_FAN1, SENSORS_W83627EHF_FAN1,
+                        RW, NOSYSCTL, VALUE(1), 0 },
+    { SENSORS_W83627EHF_FAN2_MIN, "fan2_min",
+                        SENSORS_W83627EHF_FAN2, SENSORS_W83627EHF_FAN2,
+                        RW, NOSYSCTL, VALUE(1), 0 },
+    { SENSORS_W83627EHF_FAN3_MIN, "fan3_min",
+                        SENSORS_W83627EHF_FAN3, SENSORS_W83627EHF_FAN3,
+                        RW, NOSYSCTL, VALUE(1), 0 },
+    { SENSORS_W83627EHF_FAN4_MIN, "fan4_min",
+                        SENSORS_W83627EHF_FAN4, SENSORS_W83627EHF_FAN4,
+                        RW, NOSYSCTL, VALUE(1), 0 },
+    { SENSORS_W83627EHF_FAN5_MIN, "fan5_min",
+                        SENSORS_W83627EHF_FAN5, SENSORS_W83627EHF_FAN5,
+                        RW, NOSYSCTL, VALUE(1), 0 },
+    { SENSORS_W83627EHF_FAN1_DIV, "fan1_div",
+                        SENSORS_W83627EHF_FAN1, NOMAP,
+                        R, NOSYSCTL, VALUE(1), 0 },
+    { SENSORS_W83627EHF_FAN2_DIV, "fan2_div",
+                        SENSORS_W83627EHF_FAN2, NOMAP,
+                        R, NOSYSCTL, VALUE(2), 0 },
+    { SENSORS_W83627EHF_FAN3_DIV, "fan3_div",
+                        SENSORS_W83627EHF_FAN3, NOMAP,
+                        R, NOSYSCTL, VALUE(3), 0 },
+    { SENSORS_W83627EHF_FAN4_DIV, "fan4_div",
+                        SENSORS_W83627EHF_FAN4, NOMAP,
+                        R, NOSYSCTL, VALUE(4), 0 },
+    { SENSORS_W83627EHF_FAN5_DIV, "fan5_div",
+                        SENSORS_W83627EHF_FAN5, NOMAP,
+                        R, NOSYSCTL, VALUE(5), 0 },
+    { SENSORS_W83627EHF_TEMP1, "temp1", NOMAP, NOMAP,
+                        R, NOSYSCTL, VALUE(3), 0 },
+    { SENSORS_W83627EHF_TEMP2, "temp2", NOMAP, NOMAP,
+                        R, NOSYSCTL, VALUE(3), 0 },
+    { SENSORS_W83627EHF_TEMP3, "temp3", NOMAP, NOMAP,
+                        R, NOSYSCTL, VALUE(3), 0 },
+    { SENSORS_W83627EHF_TEMP1_OVER, "temp1_over",
+                        SENSORS_W83627EHF_TEMP1, SENSORS_W83627EHF_TEMP1,
+                        RW, NOSYSCTL, VALUE(1), 0 },
+    { SENSORS_W83627EHF_TEMP2_OVER, "temp2_over",
+                        SENSORS_W83627EHF_TEMP2, SENSORS_W83627EHF_TEMP2,
+                        RW, NOSYSCTL, VALUE(1), 1 },
+    { SENSORS_W83627EHF_TEMP3_OVER, "temp3_over",
+                        SENSORS_W83627EHF_TEMP3, SENSORS_W83627EHF_TEMP3,
+                        RW, NOSYSCTL, VALUE(1), 1 },
+    { SENSORS_W83627EHF_TEMP1_HYST, "temp1_hyst",
+                        SENSORS_W83627EHF_TEMP1, SENSORS_W83627EHF_TEMP1,
+                        RW, NOSYSCTL, VALUE(2), 0 },
+    { SENSORS_W83627EHF_TEMP2_HYST, "temp2_hyst",
+                        SENSORS_W83627EHF_TEMP2, SENSORS_W83627EHF_TEMP2,
+                        RW, NOSYSCTL, VALUE(2), 1 },
+    { SENSORS_W83627EHF_TEMP3_HYST, "temp3_hyst",
+                        SENSORS_W83627EHF_TEMP3, SENSORS_W83627EHF_TEMP3,
+                        RW, NOSYSCTL, VALUE(2), 1 },
     { 0 }
   };
 
@@ -5451,6 +5522,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_W83791D_PREFIX, w83791d_features },
  { SENSORS_W83792D_PREFIX, w83792d_features },
  { SENSORS_W83L785TS_PREFIX, w83l785ts_features },
+ { SENSORS_W83627EHF_PREFIX, w83627ehf_features },
  { SENSORS_AS99127F_PREFIX, as99127f_features },
  { SENSORS_ASB100_PREFIX, asb100_features },
  { SENSORS_ADM9240_PREFIX, adm9240_features },
