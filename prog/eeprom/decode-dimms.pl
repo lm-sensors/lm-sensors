@@ -181,7 +181,7 @@ for my $i ( 0 .. $#dimm_list ) {
 			printl $l, "RFU"; 
 		} else { printl $l, "ERROR!"; }
 
-		$l = "Fundemental Memory type";
+		$l = "Fundamental Memory type";
 		if ($bytes[2] == 2) { printl $l, "EDO"; }
 		elsif ($bytes[2] == 4) { printl $l, "SDRAM"; }
 		elsif ($bytes[2] == 7) { printl $l, "DDR"; }
