@@ -1,5 +1,22 @@
-Paramters for modprobe and insmod
-=================================
+Parameters for modprobe and insmod
+==================================
+==================================
+SUMMARY
+
+	[modprobe,insmod] module [parameter...]
+	Parameters:
+		force=bus,address
+		force_addr=address
+		force_[chipname]=bus,address
+		ignore=bus,address
+		ignore_range=bus,startaddress,endaddress
+		probe=bus,address
+		probe_range=bus,startaddress,endaddress
+
+	All arguments are in decimal unless prefixed by "0x".
+
+==================================
+OVERVIEW
 
 All chip drivers have a few modprobe module parameters in common.
 (Insmod can also be used, but we recommend modprobe so that
@@ -8,6 +25,9 @@ parameters can be used when a module is inserted, to give some additional
 information about how it should function. In this case, they tell where
 the module should look for what chips. Usually, you don't need them, and
 if you do, you are often told by sensors-detect which ones you need.
+
+If a module doesn't load with no parameters, you may need to
+add parameters. Check 'dmesg' for clues to what went wrong.
 
 I2C/SMBus adapters are numbered in the order they are inserted. If you want
 to know what number an adapter has, please make sure module `i2c-proc' is 
@@ -26,6 +46,9 @@ are separated by comma's, and may be given as ordinary decimal numbers,
 as octal numbers (by starting them with a `0') or as hexadecimal numbers
 (by starting them with a `0x'). More information can be found by
 entering `man modprobe' or `man insmod'.
+
+==================================
+PARAMETER DETAILS
 
 `force', `force_*', `ignore' and `probe' parameters take pairs of numbers.
 Each first (odd) number is a bus number, each second (even) number is
@@ -61,12 +84,14 @@ specific type of chip is found on a specific address, and the module
 will skip all detection and recognition routines. This can lead to
 very strange results...
 
-An example:
+`force_addr' is a parameter used for PCI sensor adapters.
+It is used to program the base address of the sensor registers.
+This is required if the BIOS does not initialize the base address.
+
+==================================
+EXAMPLE
+
   modprobe lm78 force_lm79=9191,0x390 ignore=0,0x2d,1,0x20 probe_range=-1,0,0x7f
   # ISA address 0x390 contains a LM79
   # Scan all I2C addresses (from 0 to 0x7f) for all I2C adapters
   # But skip address 0x2d on adapter 0, and address 0x20 on adapter 1
-
-`force_addr' is a parameter used for PCI sensor adapters.
-It is used to program the base address of the sensor registers.
-This is required if the BIOS does not initialize the base address.
