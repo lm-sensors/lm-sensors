@@ -24,11 +24,12 @@
     Supports following chips:
 
     Chip	#vin	#fanin	#pwm	#temp	wchipid	vendid	i2c	ISA
-    as99127f	7	3	1?	3	0x30	0x12c3	yes	no
-    asb100 "bach" (type_name = as99127f)	0x30	0x0694	yes	no
+    as99127f	7	3	1?	3	0x31	0x12c3	yes	no
+    as99127f rev.2 (type name = as99127f)	0x31	0x5ca3	yes	no
+    asb100 "bach" (type_name = as99127f)	0x31	0x0694	yes	no
     w83627hf	9	3	2	3	0x20	0x5ca3	yes	yes(LPC)
     w83697hf	8	2	2	2	0x60	0x5ca3	no	yes(LPC)
-    w83781d	7	3	0	3	0x10	0x5ca3	yes	yes
+    w83781d	7	3	0	3	0x10-1	0x5ca3	yes	yes
     w83782d	9	3	2-4	3	0x30	0x5ca3	yes	yes
     w83783s	5-6	3	2	1-2	0x40	0x5ca3	yes	no
     w83791d	10	5	5	3	0x70	0x5ca3	yes	no
@@ -960,7 +961,8 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 			 && (val2 != 0x94))
 		     || ((val1 & 0x80) && (val2 != 0x5c) && (val2 != 0x12)
 			 && (val2 != 0x06)))) goto ERROR1;
-		/* If Winbond SMBus, check address at 0x48. Asus doesn't support */
+		/* If Winbond SMBus, check address at 0x48. Asus doesn't support
+		   except maybe (hopefully) for the as99127f rev.2 */
 		if ((!is_isa) && (((!(val1 & 0x80)) && (val2 == 0xa3)) ||
 				  ((val1 & 0x80) && (val2 == 0x5c)))) {
 			if (w83781d_read_value
@@ -986,21 +988,19 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 			vendid = asus;
 		else
 			goto ERROR1;
-		/* mask off lower bit, not reliable */
 		val1 =
-		    w83781d_read_value(new_client,
-				       W83781D_REG_WCHIPID) & 0xfe;
-		if (val1 == 0x10 && vendid == winbond)
+		    w83781d_read_value(new_client, W83781D_REG_WCHIPID);
+		if ((val1 == 0x10 || val1 == 0x11) && vendid == winbond)
 			kind = w83781d;
 		else if (val1 == 0x30 && vendid == winbond)
 			kind = w83782d;
-		else if (val1 == 0x40 && vendid == winbond && !is_isa)
+		else if (val1 == 0x40 && vendid == winbond && !is_isa && address == 0x2d)
 			kind = w83783s;
 		else if (val1 == 0x20 && vendid == winbond)
 			kind = w83627hf;
-		else if (val1 == 0x70 && vendid == winbond)
+		else if (val1 == 0x70 && vendid == winbond && address >= 0x2c)
 			kind = w83791d;
-		else if (val1 == 0x30 && vendid == asus && !is_isa)
+		else if (val1 == 0x31 && !is_isa && address >= 0x28)
 			kind = as99127f;
 		else if (val1 == 0x60 && vendid == winbond && is_isa)
 			kind = w83697hf;
