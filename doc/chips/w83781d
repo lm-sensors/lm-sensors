@@ -12,7 +12,7 @@ w83783s	5-6	3	2	1-2	0x40	yes	no
 Stability
 ---------
 w83781d: tested, stable
-w83782d: beta tested
+w83782d: beta tested, some minor bugs and things to do.
 w83783s: untested
 
 
@@ -21,7 +21,8 @@ w83783s: untested
 Varies depending on chip type. Most are identical to the lm78 entries.
 See the lm78 documentation for details.
 
-Additional entries:
+Additional entries not in the lm78:
+
 	pwm[1-4]: (782d/783s only)
 	  Controls the speed of the fans with PWM (Pulse Width Modulation)
 	  Valid values:
@@ -35,6 +36,15 @@ Additional entries:
 	       2: 2N3904 Transistor in a diode configuration
 	    3435: Thermistor with Beta = 3435. Beta is a measure
 	          of sensitivity to temperature.
+	  Thermistors with other Betas could in theory be supported
+	  after correspondence with Winbond. See below.
+
+	rt[1-3]: (781d only)
+	  32-byte tables controlling the conversion from
+	  resistance to temperature for thermistors.
+	  For the curious only. Writing to these entries will
+	  probably render temperature sensing insane.
+	  Only set at initialization; not updated every 1.5 seconds.
 
 
 The driver only updates its values each 1.5 seconds; reading it more often
@@ -47,13 +57,11 @@ TO DO:
  782d programmable pins
  783s temp2 (labeled as temp1 in data sheet) at different location
       than 781d/782d, not implemented yet.
- 781d R-T table
- 782d/783s clock speed select
 
 
 NOTES:
 -----
-  783s has no in1 for compatibility with the 781d/782d.
+  783s has no in1 so that in[2-6] are compatible with the 781d/782d.
 
   783s pin is programmable for -5V or temp1; defaults to -5V,
        no control in driver so temp1 doesn't work.
@@ -67,6 +75,9 @@ NOTES:
 
   782d has pwm1-2 for isa, pwm1-4 for i2c. (pwm3-4 share pins with
        the isa pins)
+
+  781d allowable values for fan_div are 1,2,4,8.
+  782d/783s allowable values for fan_div are 1,2,4,8,16,32,64,128.
 
 
 
