@@ -84,12 +84,13 @@ DESTDIR :=
 # This is the prefix that will be used for almost all directories below.
 PREFIX := /usr/local
 
-# This is the directory into which the modules will be installed.
+# This is the main modules directory into which the modules will be installed.
 # The magic invocation will return something like this:
-#   /lib/modules/2.2.15-ac9/misc
+#   /lib/modules/2.2.15-ac9
 #MODDIR := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`/misc
-MODPREF := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`
 #MODPREF := /lib/modules/$(KERNELVERSION)
+#MODPREF := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`
+MODPREF := /lib/modules/`$(CC) -I$(LINUX_HEADERS) -E etc/config.c | grep uts_release |cut -f 2 -d'"'`
 
 # This is the directory where sensors.conf will be installed, if no other
 # configuration file is found
@@ -178,7 +179,8 @@ GREP := grep
 # PROGCPPFLAGS/PROGCFLAGS is to create non-kernel object files (which are linked into executables).
 # ARCPPFLAGS/ARCFLAGS are used to create archive object files (static libraries).
 # LIBCPPFLAGS/LIBCFLAGS are for shared library objects.
-ALL_CPPFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS) -idirafter $(LINUX_HEADERS)
+#ALL_CPPFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS) -idirafter $(LINUX_HEADERS)
+ALL_CPPFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS) -I$(LINUX_HEADERS)
 ALL_CFLAGS := -O2 
 
 ifeq ($(DEBUG),1)
