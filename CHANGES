@@ -18,7 +18,24 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.0 (2004????)
+  File README.thinkpad: Update
+  File doc/chips/lm63: New
+  File kernel/chips/Module.mk: Resync module list with mkpatch
+  Module lm63: New driver for the National Semiconductor LM63
+  Module lm83: Use signed types for temperatures
+               Check limits on register writes
+  Module lm87: Round voltages properly
+               Retry on read errors (David Knierim)
+               Less agressive init (no reset)
+  Module lm90: Use signed types for temperatures
+               Check limits on register writes
   Module lm93: Added module parameter for VID pin input thresholds.
+  Module pc87360: Support secondary Super-I/O address
+  Library: Add lm63 support
+  Program i2cset: Written byte/word can be masked
+  Program sensors: Add lm63 support
+  Program sensors-detect: Improve LM63 detection
+                          Discard IBM Thinkpad detection code
 
 
 2.8.8 (20041007)
@@ -90,6 +107,7 @@ ask CVS about it:
                           Script-wide Perl cleanups
                           Support udev
                           Support W83792D, LM96000
+
 
 2.8.7 (20040611)
   File README.thinkpad: Update 24RF08 status
