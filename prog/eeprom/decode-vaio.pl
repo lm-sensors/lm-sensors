@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Copyright 2002,2003 Jean Delvare <khali@linux-fr.org>
+# Copyright (C) 2002-2004 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -197,18 +197,18 @@ END
 	print("\n");
 }
 
-if ( -r '/proc/sys/dev/sensors/eeprom-i2c-0-57')
+if (-r '/proc/sys/dev/sensors/eeprom-i2c-0-57')
 {
-	if ( -r '/proc/sys/dev/sensors/eeprom-i2c-0-57/data0-15')
+	if (-r '/proc/sys/dev/sensors/eeprom-i2c-0-57/data0-15')
 	{
 		print("Deprecated old interface found.  Please upgrade to lm_sensors 2.6.3 or greater.");
 	}
 	else
 	{
-		vaio_decode('0','57');
+		vaio_decode('0', '57');
 	}
 }
-elsif ( -r '/sys/bus/i2c/devices/0-0057')
+elsif (-r '/sys/bus/i2c/devices/0-0057/eeprom')
 {
 	$sysfs = 1;
 	vaio_decode('0', '57');
