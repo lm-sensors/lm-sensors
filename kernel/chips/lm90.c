@@ -243,7 +243,7 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	int err = 0;
 	const char *type_name = "";
 	const char *client_name = "";
-	u8 reg_config1, reg_convrate;
+	u8 reg_config1=0, reg_convrate=0;
 
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter))
@@ -292,12 +292,13 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	 * are skipped.
 	 */
 
-	reg_config1 = i2c_smbus_read_byte_data(new_client,
-		LM90_REG_R_CONFIG1);
-	reg_convrate = i2c_smbus_read_byte_data(new_client,
-		LM90_REG_R_CONVRATE);
 	if (kind < 0) /* detection */
 	{
+		reg_config1 = i2c_smbus_read_byte_data(new_client,
+			LM90_REG_R_CONFIG1);
+		reg_convrate = i2c_smbus_read_byte_data(new_client,
+			LM90_REG_R_CONVRATE);
+
 		if ((reg_config1 & 0x2A) != 0x00
 		 || reg_convrate > 0x0A)
 		{
@@ -313,21 +314,30 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	{
 		u8 man_id, chip_id;
 
-		man_id = i2c_smbus_read_byte_data(new_client, LM90_REG_R_MAN_ID);
-		chip_id = i2c_smbus_read_byte_data(new_client, LM90_REG_R_CHIP_ID);
+		man_id = i2c_smbus_read_byte_data(new_client,
+			LM90_REG_R_MAN_ID);
+		chip_id = i2c_smbus_read_byte_data(new_client,
+			LM90_REG_R_CHIP_ID);
+		
 		if (man_id == 0x01) /* National Semiconductor */
 		{
 			if (chip_id >= 0x21 && chip_id < 0x30 /* LM90 */
-			 && i2c_smbus_read_byte_data(new_client,
-			    LM90_REG_R_CONFIG2 & 0xF8) == 0x00
-			 && reg_convrate <= 0x09)
+			 && (kind == 0 /* skip detection */
+			  || ((i2c_smbus_read_byte_data(new_client,
+				LM90_REG_R_CONFIG2) & 0xF8) == 0x00
+			   && reg_convrate <= 0x09)))
+			{
 				kind = lm90;
+			}
 		}
 		else if (man_id == 0x41) /* Analog Devices */
 		{
 			if ((chip_id & 0xF0) == 0x40 /* ADM1032 */
-			 && (reg_config1 & 0x3F) == 0x00)
+			 && (kind == 0 /* skip detection */
+			  || (reg_config1 & 0x3F) == 0x00))
+			{
 				kind = adm1032;
+			}
 		}
 	}
 
