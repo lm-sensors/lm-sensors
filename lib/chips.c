@@ -5261,6 +5261,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_DS1621_PREFIX, ds1621_features },
  { SENSORS_ADM1024_PREFIX, adm1024_features },
  { SENSORS_IT87_PREFIX, it87_features },
+ { SENSORS_IT8712_PREFIX, it87_features },
  { SENSORS_FSCPOS_PREFIX, fscpos_features },
  { SENSORS_FSCSCY_PREFIX, fscscy_features },
  { SENSORS_FSCHER_PREFIX, fscher_features },

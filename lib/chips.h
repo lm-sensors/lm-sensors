@@ -1399,6 +1399,7 @@
 /* IT87xx chips */
 
 #define SENSORS_IT87_PREFIX "it87"
+#define SENSORS_IT87_PREFIX "it8712"
 
 #define SENSORS_IT87_IN0 1 /* R */
 #define SENSORS_IT87_IN1 2 /* R */

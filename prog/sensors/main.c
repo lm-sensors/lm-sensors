@@ -406,6 +406,7 @@ struct match matches[] = {
 	{ "maxilife-as", print_maxilife },
 	{ "maxilife-nba", print_maxilife },
 	{ "it87", print_it87 },
+	{ "it8712", print_it87 },
 	{ "ddcmon", print_ddcmon },
 	{ "eeprom", print_eeprom },
 	{ "fscpos", print_fscpos },
