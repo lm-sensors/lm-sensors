@@ -312,11 +312,13 @@ int i2cdev_ioctl (struct inode *inode, struct file *file, unsigned int cmd,
 
       /* This seems unlogical but it is not: if the user wants to read a
          value, we must write that value to user memory! */
-      ver = (data_arg.read_write == SMBUS_WRITE)?VERIFY_READ:VERIFY_WRITE;
+      ver = ((data_arg.read_write == SMBUS_WRITE) && 
+             (data_arg.size != SMBUS_PROC_CALL))?VERIFY_READ:VERIFY_WRITE;
 
       if ((data_arg.size == SMBUS_BYTE_DATA) || (data_arg.size == SMBUS_BYTE))
         datasize = sizeof(data_arg.data->byte);
-      else if (data_arg.size == SMBUS_WORD_DATA)
+      else if ((data_arg.size == SMBUS_WORD_DATA) || 
+               (data_arg.size == SMBUS_PROC_CALL))
         datasize = sizeof(data_arg.data->word);
       else /* size == SMBUS_BLOCK_DATA */
         datasize = sizeof(data_arg.data->block);
@@ -328,17 +330,17 @@ int i2cdev_ioctl (struct inode *inode, struct file *file, unsigned int cmd,
 #endif
         return -EINVAL;
       }
-      if (data_arg.read_write == SMBUS_WRITE) {
+
+      if ((data_arg.size == SMBUS_PROC_CALL) || 
+          (data_arg.read_write == SMBUS_WRITE))
         copy_from_user(&temp,data_arg.data,datasize);
-        return smbus_access(client->adapter,client->addr,data_arg.read_write,
-                            data_arg.command,data_arg.size,&temp);
-      } else {
-        res = smbus_access(client->adapter,client->addr,data_arg.read_write,
-                           data_arg.command,data_arg.size,&temp);
-        if (!res)
-          copy_to_user(data_arg.data,&temp,datasize);
-        return res;
-      }
+      res = smbus_access(client->adapter,client->addr,data_arg.read_write,
+                         data_arg.command,data_arg.size,&temp);
+      if (! res && ((data_arg.size == SMBUS_PROC_CALL) || 
+                    (data_arg.read_write == SMBUS_READ)))
+        copy_to_user(data_arg.data,&temp,datasize);
+      return res;
+
     default:
       return i2c_control(client,cmd,arg);
    }
