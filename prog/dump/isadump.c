@@ -21,12 +21,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <asm/io.h>
 
 
 /* To keep glibc2 happy */
 #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ >= 0
-#include <sys/perm.h>
+#include <sys/io.h>
+#else
+#include <asm/io.h>
 #endif
 
 #ifdef __powerpc__
