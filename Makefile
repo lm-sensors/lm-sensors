@@ -86,6 +86,15 @@ INCLUDEDIR := $(PREFIX)/include
 SYSINCLUDEDIR := $(INCLUDEDIR)/linux
 LIBINCLUDEDIR := $(INCLUDEDIR)/sensors
 
+# You should not need to change this. It is the base directory under which the
+# manual pages will be installed.
+MANDIR := $(PREFIX)/man
+
+# You should not need to change this. It defines the manual owner and group
+# as which manual pages are installed.
+MANOWN := root
+MANGRP := root
+
 # If your /bin/sh is not bash, change the below definition so that make can
 # find bash.
 # SHELL=/usr/bin/bash

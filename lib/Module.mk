@@ -20,6 +20,12 @@
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := lib
 
+# The manual dirs and files
+LIBMAN3DIR := $(MANDIR)/man3
+LIBMAN3FILES := $(MODULE_DIR)/libsensors.3
+LIBMAN5DIR := $(MANDIR)/man5
+LIBMAN5FILES := $(MODULE_DIR)/sensors.conf.5
+
 # The main and minor version of the library
 LIBMAINVER := 0
 LIBMINORVER := 0.1
@@ -77,11 +83,14 @@ all-lib: $(LIBTARGETS)
 all :: all-lib
 
 install-lib: all-lib
-	$(MKDIR) $(LIBDIR) $(LIBINCLUDEDIR)
+	$(MKDIR) $(LIBDIR) $(LIBINCLUDEDIR) $(LIBMAN3DIR) $(LIBMAN5DIR)
 	$(INSTALL) -o root -g root -m 644 $(LIBTARGETS) $(LIBDIR)
 	$(LN) $(LIBSHLIBNAME) $(LIBDIR)/$(LIBSHSONAME)
 	$(LN) $(LIBSHSONAME) $(LIBDIR)/$(LIBSHBASENAME)
 	$(INSTALL) -o root -g root -m 644 $(LIBHEADERFILES) $(LIBINCLUDEDIR)
+	$(INSTALL) -o $(MANOWN) -g $(MANGRP) -m 644 $(LIBMAN3FILES) $(LIBMAN3DIR)
+	$(INSTALL) -o $(MANOWN) -g $(MANGRP) -m 644 $(LIBMAN5FILES) $(LIBMAN5DIR)
+
 install :: install-lib
 
 clean-lib:

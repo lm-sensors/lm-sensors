@@ -1,0 +1,394 @@
+.\" Copyright 1998, 1999 Adrian Baugh <adrian.baugh@keble.ox.ac.uk> and
+.\" Frodo Looijaard <frodol@dds.nl>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" References consulted:
+.\"     sensors.conf.eg by Frodo Looijaard
+.TH sensors.conf 5  "February 8, 1999" "" "Linux Programmer's Manual"
+.SH NAME
+sensors.conf \- libsensors configuration file
+
+.SH DESCRIPTION
+sensors.conf describes how libsensors, and so all programs using it, should
+translate the raw readings from the kernel modules to real\-world values.
+
+.SH SYNTAX
+Comments are introduces by hash marks. A comment continues to the end of the
+line. Empty lines, and lines containing only whitespace or comments are 
+ignored.  Other lines have one of the below forms. There should be whitespace
+between each element, but the amount of whitespace is unimportant. A line
+may be continued on the next line by ending it with a backslash; this does
+not work within a comment,
+.B NAME
+or
+.BR NUMBER .
+
+.RS
+bus 
+.B NAME NAME NAME
+.sp 0
+chip 
+.B NAME\-LIST
+.sp 0
+label 
+.B NAME NAME
+.sp 0
+compute 
+.B NAME EXPR 
+, 
+.B EXPR
+.sp 0
+set 
+.B NAME EXPR
+.RE
+.sp
+A
+.B NAME
+is a string. If it only contains letters, digits and underscores, it does not
+have to quoted; in all other cases, you should use double quotes around it.
+Within quotes, you can use the normal escape\-codes from C.
+
+A
+.B NAME\-LIST
+is one or more
+.B NAME
+items behind each other, separated by whitespace.
+
+A
+.B EXPR
+is of one of the below forms:
+
+.RS
+.B NUMBER
+.sp 0
+.B NAME
+.sp 0
+@
+.sp 0
+.B EXPR 
++
+.B EXPR
+.sp 0
+.B EXPR 
+\- 
+.B EXPR
+.sp 0
+.B EXPR 
+* 
+.B EXPR
+.sp 0
+.B EXPR 
+/ 
+.B EXPR
+.sp 0
+\- 
+.B EXPR
+.sp 0
+( 
+.B EXPR 
+)
+.RE
+
+A
+.B NUMBER
+is a floating\-point number. `10', `10.4' and `.4' are examples of valid
+floating\-point numbers; `10.' or `10E4' are not valid.
+
+.SH SEMANTICS
+
+This section describes the meaning of each statement. Each statement is
+accompanied by an example line. Please ignore line wrap\-arounds.
+
+.SS BUS STATEMENT
+
+.RS
+bus "i2c\-0" "SMBus PIIX4 adapter at e800" "Non\-I2C SMBus adapter"
+.RE
+
+A
+.I bus
+statement binds the description of an I2C or SMBus adapter to a bus number. 
+This makes it possible to refer to an adapter in the configuration file,
+independent of the actual correspondence of bus numbers and actual
+adapters (which may change from moment to moment).
+
+The first argument is the bus number. It is the literal text
+.IR i2c\- ,
+followed by a number. As there is a dash in this argument, it must
+always be quoted.
+
+The second and third arguments are the 
+description texts. They must be exactly match the texts as they appear in
+.IR /proc/bus/i2c ,
+except for trailing spaces, which are removed both from the /proc
+entries and the arguments. The adapter description comes first, followed
+by the algorithm description.
+
+The
+.I bus
+statements may be scattered randomly throughout the configuration file;
+there is no need to place the bus line before the place where its binding
+is referred to. Still, as a matter of good style, we suggest you place
+all
+.I bus
+statements together at the top of your configuration file.
+
+The program
+.I prog/config/grab_busses.sh
+in the source distribution can help you generate these lines.
+
+.SS CHIP STATEMENT
+
+.RS
+chip "lm78\-*" "*\-isa\-*" "*\-i2c\-3"
+.RE
+
+The 
+.I chip
+statement selects for which chips all following configuration
+statements are meant. The chip selection remains valid until the next
+.I chip
+statement. It does not influence the operation of a
+.I bus
+statement.
+
+If a chip matches at least one of the chip descriptions, all following
+configuration lines are examined for it. If it matches none of the
+chip descriptions, every 
+.RI non\- bus
+statement is ignored upto the next
+.I chip
+statement.
+
+A chip description is built from a couple of elements, separated by
+dashes. To complicate matters, sometimes an element can also contain
+dashes. This complicates the parsing algorithm, but is not too confusing
+for humans (we hope!). The chip descriptions are equal to those
+appearing in
+.IR /proc/sys/dev/sensors ,
+but may contain the 
+.I *
+wildcard.
+
+The first element is the name of the chip type. Sometimes a single driver
+implements several chip types, with several names. The driver documentation
+should tell you. You may substitute the wildcard operator
+.I *
+for this element.
+
+The second element is the name of the bus. This is either
+.I isa
+or
+.IR i2c-N ,
+with 
+.I N
+being any number as binded with a 
+.I bus
+statement. You may substitute the wildcard operator
+.I *
+for this element, or only for the number of the I2C bus
+(which means 'any non-ISA bus').
+
+The third element is the hexadecimal address. This is a number between 0 and
+ffff for the ISA bus, and between 0 and 7f for an I2C bus. You may substitute
+the wildcard operator
+.I *
+for this element. 
+
+There are some folding rules for wildcards to make things easier for humans
+to read. Also, you can't specify the address if you wildcard the complete
+second element. The following are all valid chip type specification based
+on 
+.I lm78\-i2c\-10\-5e
+or
+.IR lm78\-isa\-10dd :
+
+.RS
+lm78\-i2c\-10\-5e     
+.sp 0
+lm78\-i2c\-10\-*     
+.sp 0
+lm78\-i2c\-*\-5e    
+.sp 0
+lm78\-i2c\-*\-*    
+.sp 0
+lm78\-isa\-10dd  
+.sp 0
+lm78\-isa\-*    
+.sp 0
+lm78\-*       
+.sp 0
+*\-i2c\-10\-5e
+.sp 0
+*\-i2c\-10-\*
+.sp 0
+*\-i2c\-*\-5e
+.sp 0
+*\-i2c-*\-*
+.sp 0
+*\-isa\-10dd
+.sp 0
+*\-isa\-*
+.sp 0
+*\-*
+.sp 0
+*
+.RE
+
+.SS COMPUTE STATEMENT
+.RS
+compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+.RE
+
+The 
+.I compute
+statement describes how you should translate a feature's raw value to a
+real\-world value, and how you should translate it back to a raw value again.
+
+The first argument is the feature name, which may be the name of a feature
+class (see below). The second is an expression which specifies how a
+raw value must be translated to a real\-world value; `@' stands here for 
+the raw value. The third is an expression that specifies how a real\-world
+value should be translated back to a raw value; `@' stands here for the
+real\-world value.
+
+You may use the name of other features in these expressions; you should be
+careful though to avoid circular references, as this may hang the expression
+evaluator.
+
+If at any moment a translation between a raw and a real\-world value is
+called for, but no 
+.I compute
+statement applies, a one\-on\-one translation is used instead.
+
+The comma is an unfortunate necessity to stop the statement from becoming
+ambiguous.
+
+.SS LABEL STATEMENT
+.RS
+label in3 "+5V"
+.RE
+
+The
+.I label
+statement describes how a feature should be called. Features without a
+.I label
+statement are just called by their feature name. Applications can use this
+to label the readings they present (but they don't have to).
+
+The first argument is the feature name, which may be a feature class (see
+below). The second argument is the feature description.
+
+.SS SET STATEMENT
+.RS
+set in3_min  5 * 0.95
+.RE
+
+The
+.I set
+statement gives an initial value for a feature. Not each feature can be
+given a sensible initial value; valid features are usually min/max limits.
+
+The first argument is the feature name. The second argument is an expression
+which determines the initial value. If there is an applying 
+.I compute
+statement, this value is fed to its third argument to translate it to a
+raw value. 
+
+You may use the name of other features in these expressions; current readings
+are substituted. You should be careful though to avoid circular references, 
+as this may hang the expression evaluator. Also, you can't be sure in which
+order 
+.I set
+statements are evaluated, so this can lead to nasty surprises.
+
+.SH FEATURE CLASSES
+
+There are two kinds of classes, here called
+.I compute
+and
+.I label
+classes, after the statements for which they are defined. Classes are
+defined over features: the kind of values that can be read from or set
+for a specific kind of chip.
+
+Each class has a class name, which is usually the same as its most 
+prominent feature. A 
+.I label
+or
+.I compute
+statement for the class name feature forces the same settings for all other
+class members. A specific statement for a class member feature always
+overrides the general class setting, though. This means that you can't
+override the class name feature explicitely.
+
+A simple example will explain this better. The
+.I fan1
+label class of the 
+.I lm78
+chip contains three members:
+.I fan1
+itself,
+.I fan1_min
+and 
+.IR fan1_div .
+The last feature sets the number by which readings are divided (to give the
+fan less resolution, but a larger field of operation). The following
+line will set the name of all these features to describe the fan:
+.RS
+label fan1 "Processor 1 FAN"
+.RE
+Now we happen to know that, due to the type of fan we use, all readings
+are always off by a factor of two (some fans only return one 'tick' each
+rotation, others return two):
+.RS
+compute fan1 @/2 , @*2
+.RE
+It will be clear that this should be done for the 
+.I fan1_min 
+feature too, but not for the
+.I fan1_div
+feature! Fortunately, the 
+.I fan1
+compute class contains 
+.IR fan1_min ,
+but not 
+.IR fan1_div ,
+so this works out right.
+
+.SH WHICH STATEMENT APPLIES
+
+If more than one statement of the same kind applies at a certain moment,
+the last one in the configuration file is used. So usually, you should
+put more genereal 
+.I chip
+statements at the top, so you can overrule them below.
+
+There is one exception to this rule: if a statement only applies because
+the feature is in the same class as the feature the statement contains,
+and there is anywhere else a statement for this specific class member,
+that one takes always precedence.
+
+.SH "CONFORMING TO"
+lm_sensors-2.x
+.SH SEE ALSO
+sensors.conf(5)
