@@ -58,6 +58,7 @@ start() {
 		/sbin/modprobe $module &>/dev/null
 		i=`expr $i + 1`
 	done
+        $PSENSORS -s
 
 	RETVAL=$?
 	if [ $RETVAL -eq 0 ] && touch /var/lock/subsys/sensors ; then
