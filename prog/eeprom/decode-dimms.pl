@@ -183,9 +183,10 @@ for my $i ( 0 .. $#dimm_list ) {
 
 		$l = "Fundamental Memory type";
 		if ($bytes[2] == 2) { printl $l, "EDO"; }
-		elsif ($bytes[2] == 4) { printl $l, "SDRAM"; }
-		elsif ($bytes[2] == 7) { printl $l, "DDR"; }
-		elsif ($bytes[2] == 17) { printl $l, "Rambus"; }
+		elsif ($bytes[2] == 4) { printl $l, "SDR SDRAM"; }
+		elsif ($bytes[2] == 7) { printl $l, "DDR SDRAM"; }
+		elsif ($bytes[2] == 17) { printl $l, "Rambus [UNSUPPORTED]"; }
+		elsif ($bytes[2] == 1) { printl $l, "Direct Rambus [UNSUPPORTED]"; }
 		else { printl $l, "???"; }
 
 		$l = "Number of Row Address Bits (SDRAM only)";
