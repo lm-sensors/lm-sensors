@@ -16,6 +16,10 @@ Supported chips:
     Prefix 'w83697hf'
     Addresses scanned: ISA address retrieved from Super I/O registers
     Datasheet: Publicly available at the Winbond website
+  * Winbond W83637HF (ISA accesses ONLY)
+    Prefix 'w83637hf'
+    Addresses scanned: ISA address retrieved from Super I/O registers
+    Datasheet: Publicly available at the Winbond website
 
 Authors: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>,
          and Mark Studebaker <mdsxyz123@yahoo.com>
@@ -35,6 +39,8 @@ Module Parameters
   Ditto
 * force_w83697hf:
   Ditto
+* force_w83637hf:
+  Ditto
 * ignore: short array (min = 1, max = 48)
   List of adapter,address pairs not to scan
 * ignore_range: short array (min = 1, max = 48)
@@ -52,7 +58,7 @@ Description
 -----------
 
 This driver implements support for ISA accesses *only* for
-the Winbond W83627HF, W83627THF, and W83697HF Super I/O chips.
+the Winbond W83627HF, W83627THF, W83697HF and W83637HF Super I/O chips.
 We will refer to them collectively as Winbond chips.
 
 This driver supports ISA accesses, which should be more reliable

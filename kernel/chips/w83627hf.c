@@ -26,12 +26,14 @@
     Chip	#vin	#fanin	#pwm	#temp	wchipid	vendid	i2c	ISA
     w83627hf	9	3	2	3	0x20	0x5ca3	no	yes(LPC)
     w83627thf	7	3	3	3	0x90	0x5ca3	no	yes(LPC)
+    w83637hf	7	3	3	3	0x80	0x5ca3	no	yes(LPC)
     w83697hf	8	2	2	2	0x60	0x5ca3	no	yes(LPC)
 
     For other winbond chips, and for i2c support in the above chips,
     use w83781d.c.
 
-    Note: automatic ("cruise") fan control for 697 & 627thf not supported yet.
+    Note: automatic ("cruise") fan control for 697, 637 & 627thf not
+    supported yet.
 */
 
 #include <linux/module.h>
@@ -61,7 +63,7 @@ static unsigned int normal_isa[] = { 0, SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_3(w83627hf, w83627thf, w83697hf);
+SENSORS_INSMOD_4(w83627hf, w83627thf, w83697hf, w83637hf);
 
 static int init = 1;
 MODULE_PARM(init, "i");
@@ -132,6 +134,7 @@ superio_exit(void)
 #define W627_DEVID 0x52
 #define W627THF_DEVID 0x82
 #define W697_DEVID 0x60
+#define W637_DEVID 0x70
 #define WINB_ACT_REG 0x30
 #define WINB_BASE_REG 0x60
 /* Constants specified below */
@@ -189,31 +192,26 @@ superio_exit(void)
 
 #define W83781D_REG_VBAT 0x5D
 
-#define W83781D_REG_PWM1 0x5B	/* 782d and 783s/627hf datasheets disagree */
-				/* on which is which; */
-#define W83781D_REG_PWM2 0x5A	/* We follow the 782d convention here, */
-				/* However 782d is probably wrong. */
-#define W83781D_REG_PWMCLK12 0x5C
+#define W83627HF_REG_PWM1 0x5A
+#define W83627HF_REG_PWM2 0x5B
+#define W83627HF_REG_PWMCLK12 0x5C
 
-#define W83697HF_REG_PWMCLK1		0x00
-#define W83627THF_REG_PWM1		0x01	/* 697HF too */
-#define W83697HF_REG_PWMCLK2		0x02
-#define W83627THF_REG_PWM2		0x03	/* 697HF too */
-#define W83627THF_REG_PWM3		0x11
-#define W83627HF_REG_VRM_OVT_CFG 	0x18	/* w83627thf only */
+#define W83627THF_REG_PWM1		0x01	/* 697HF and 637HF too */
+#define W83627THF_REG_PWM2		0x03	/* 697HF and 637HF too */
+#define W83627THF_REG_PWM3		0x11	/* 637HF too */
 
-static const u8 regpwm[] = { W83781D_REG_PWM1, W83781D_REG_PWM2 };
-static const u8 regpwm_thf[] = { W83627THF_REG_PWM1, W83627THF_REG_PWM2,
-                                 W83627THF_REG_PWM3 };
+#define W83627THF_REG_VRM_OVT_CFG 	0x18	/* 637HF too, unused yet */
+
+static const u8 regpwm_627hf[] = { W83627HF_REG_PWM1, W83627HF_REG_PWM2 };
+static const u8 regpwm[] = { W83627THF_REG_PWM1, W83627THF_REG_PWM2,
+                             W83627THF_REG_PWM3 };
 #define W836X7HF_REG_PWM(type, nr) (((type) == w83627hf) ? \
-                                     regpwm[(nr) - 1] : regpwm_thf[(nr) - 1])
+                                     regpwm_627hf[(nr) - 1] : regpwm[(nr) - 1])
 
 #define W83781D_REG_I2C_ADDR 0x48
 #define W83781D_REG_I2C_SUBADDR 0x4A
 
-/* The following are undocumented in the data sheets however we
-   received the information in an email from Winbond tech support */
-/* Sensor selection - not on 781d */
+/* Sensor selection */
 #define W83781D_REG_SCFG1 0x5D
 static const u8 BIT_SCFG1[] = { 0x02, 0x04, 0x08 };
 #define W83781D_REG_SCFG2 0x59
@@ -306,9 +304,9 @@ struct w83627hf_data {
 	struct i2c_client *lm75;	/* for secondary I2C addresses */
 	/* pointer to array of 2 subclients */
 
-	u8 in[9];		/* Register value - 8 & 9 for 782D only */
-	u8 in_max[9];		/* Register value - 8 & 9 for 782D only */
-	u8 in_min[9];		/* Register value - 8 & 9 for 782D only */
+	u8 in[9];		/* Register value */
+	u8 in_max[9];		/* Register value */
+	u8 in_min[9];		/* Register value */
 	u8 fan[3];		/* Register value */
 	u8 fan_min[3];		/* Register value */
 	u8 temp;
@@ -372,7 +370,7 @@ static int w83627hf_id = 0;
 
 static struct i2c_driver w83627hf_driver = {
 	.owner		= THIS_MODULE,
-	.name		= "W83781D sensor driver",
+	.name		= "W83627HF sensor driver",
 	.id		= I2C_DRIVERID_W83627HF,
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= w83627hf_attach_adapter,
@@ -540,6 +538,7 @@ static ctl_table w83697hf_dir_table_template[] = {
 };
 
 /* no in5 and in6 */
+/* We use this one for W83637HF too */
 static ctl_table w83627thf_dir_table_template[] = {
 	{W83781D_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83627hf_in},
@@ -608,7 +607,7 @@ static int w83627hf_find(int *address)
 
 	superio_enter();
 	val= superio_inb(DEVID);
-	if(val != W627_DEVID && val !=W627THF_DEVID && val != W697_DEVID) {
+	if(val != W627_DEVID && val !=W627THF_DEVID && val != W697_DEVID && val != W637_DEVID) {
 		superio_exit();
 		return -ENODEV;
 	}
@@ -665,6 +664,8 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 		kind = w83697hf;
 	else if(val == W627THF_DEVID)
 		kind = w83627thf;
+	else if(val == W637_DEVID)
+		kind = w83637hf;
 		
 	superio_select(W83627HF_LD_HWM);
 	if((val = 0x01 & superio_inb(WINB_ACT_REG)) == 0)
@@ -700,6 +701,9 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 	} else if (kind == w83697hf) {
 		type_name = "w83697hf";
 		client_name = "W83697HF chip";
+	} else if (kind == w83637hf) {
+		type_name = "w83637hf";
+		client_name = "W83637HF chip";
 	} else {
 		goto ERROR1;
 	}
@@ -726,6 +730,7 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 				   w83697hf_dir_table_template :
 				(kind == w83627hf) ?
 				   w83627hf_dir_table_template :
+				   /* w83627thf table also used for 637 */
 				   w83627thf_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR7;
@@ -886,7 +891,7 @@ static void w83627hf_init_client(struct i2c_client *client)
 	w83627hf_write_value(client, W83781D_REG_I2C_ADDR, force_i2c);
 
 	/* Read VID only once */
-	if (w83627hf == data->type) {
+	if (w83627hf == data->type || w83637hf == data->type) {
 		int lo = w83627hf_read_value(client, W83781D_REG_VID_FANDIV);
 		int hi = w83627hf_read_value(client, W83781D_REG_CHIPID);
 		data->vid = (lo & 0x0f) | ((hi & 0x01) << 4);
@@ -920,10 +925,10 @@ static void w83627hf_init_client(struct i2c_client *client)
 	data->pwmenable[2] = 1;
 
 	if(init) {
-		if (type != w83697hf) {
+		if (type == w83627hf) {
 			/* enable PWM2 control (can't hurt since PWM reg
 		           should have been reset to 0xff) */
-			w83627hf_write_value(client, W83781D_REG_PWMCLK12, 0x19);
+			w83627hf_write_value(client, W83627HF_REG_PWMCLK12, 0x19);
 		}
 		/* enable comparator mode for temp2 and temp3 so
 	           alarm indication will work correctly */
@@ -949,7 +954,8 @@ static void w83627hf_update_client(struct i2c_client *client)
 		for (i = 0; i <= 8; i++) {
 			/* skip missing sensors */
 			if (((data->type == w83697hf) && (i == 1)) ||
-			    ((data->type == w83627thf) && ((i == 4) || (i == 5))))
+			    ((data->type == w83627thf || data->type == w83637hf) &&
+			     (i == 4 || i == 5)))
 				continue;
 			data->in[i] =
 			    w83627hf_read_value(client, W83781D_REG_IN(i));
@@ -968,10 +974,12 @@ static void w83627hf_update_client(struct i2c_client *client)
 					       W83781D_REG_FAN_MIN(i));
 		}
 		for (i = 1; i <= 3; i++) {
-			data->pwm[i - 1] =
-			    w83627hf_read_value(client,
-					       W836X7HF_REG_PWM(data->type, i));
-			if(i == 2 && data->type != w83627thf)
+			u8 tmp = w83627hf_read_value(client,
+				W836X7HF_REG_PWM(data->type, i));
+			if (data->type == w83627thf)
+				tmp &= 0xf0; /* bits 0-3 are reserved  in 627THF */
+			data->pwm[i - 1] = tmp;
+			if(i == 2 && (data->type == w83627hf || data->type == w83697hf))
 				break;
 		}
 
@@ -1295,10 +1303,20 @@ void w83627hf_pwm(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->pwm[nr - 1] = PWM_TO_REG(results[0]);
-			w83627hf_write_value(client,
-			                     W836X7HF_REG_PWM(data->type, nr),
-					     data->pwm[nr - 1]);
+			if (data->type == w83627thf) {
+				/* bits 0-3 are reserved  in 627THF */
+				data->pwm[nr - 1] = PWM_TO_REG(results[0]) & 0xf0;
+				w83627hf_write_value(client,
+						     W836X7HF_REG_PWM(data->type, nr),
+						     data->pwm[nr - 1] |
+						     (w83627hf_read_value(client,
+						      W836X7HF_REG_PWM(data->type, nr)) & 0x0f));
+			} else {
+				data->pwm[nr - 1] = PWM_TO_REG(results[0]);
+				w83627hf_write_value(client,
+						     W836X7HF_REG_PWM(data->type, nr),
+						     data->pwm[nr - 1]);
+			}
 		}
 	}
 }
