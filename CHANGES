@@ -47,6 +47,7 @@ ask CVS about it:
                add it87 sensor type support
   Module lm90: Add ADM1032 support
   Module w83781d: Fix 791d and 627hf detection
+  Program dmidecode: Remove (sensors-detect doesn't need it anymore)
   Program eeprog: New
   Programs i2cdetect, i2cdump, i2cset: add -v (version) option;
                                        support sysfs for i2c bus search
@@ -58,10 +59,12 @@ ask CVS about it:
   Program sensors: Add ADM1032 support; add messages for sysfs
   Program sensors-detect: Prefer Super I/O drivers;
                           Fix W83627HF and W83791D detection; detect CSB6;
-                          Detect ADM1029,30,31,32, Via 8237;
+                          Detect ADM1029, ADM1030, ADM1031;
                           Detect W83637HF, W83697UF;
                           Add it87 sensor type support; add sysfs support
                           Reduce lm80 misdetects; remove PCFxxxx "detection"
+                          Detect VT8237 (KT600)
+                          Use VPD instead of DMI+ACPI for Thinkpad detection
 
 
 2.8.1 (20031005)
