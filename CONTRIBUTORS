@@ -56,3 +56,5 @@ problems.
   Author of the adm1025 driver.
 * Kris Van Hees <aedil@alchar.org>
   Author of the mtp008 chip driver.
+* Ken Bowley <ken@opnix.com>
+  Author of the adm1024 driver

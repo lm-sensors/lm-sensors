@@ -46,7 +46,7 @@ At least the following I2C/SMBus adapters are supported:
 
 At least the following hardware sensor chips are supported:
   Analog Devices ADM1021, ADM1021A, ADM1022,
-                 ADM1023, ADM1025, and ADM9240
+                 ADM1023, ADM1024, ADM1025, and ADM9240
   Asus AS99127F
   Dallas Semiconductor DS75, DS1621, DS1625, DS1775, and DS1780
   Hewlett Packard Maxilife (several revisions including '99 NBA)

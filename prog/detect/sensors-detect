@@ -376,7 +376,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             adm9240_detect adm1021_detect sis5595_isa_detect eeprom_detect
             via686a_isa_detect adm1022_detect ltc1710_detect gl525sm_detect
             lm87_detect ite_detect ite_isa_detect ite_alias_detect
-            ddcmonitor_detect ds1621_detect);
+            ddcmonitor_detect ds1621_detect adm1024_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -559,6 +559,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "adm1025",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { adm1025_detect 0, @_ }
+     },
+     {
+       name => "Analog Devices ADM1024",
+       driver => "adm1024",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { adm1024_detect 0, @_ }
      },
      {
        name => "Analog Devices ADM1021",
@@ -1862,6 +1868,26 @@ sub adm1025_detect
   return unless ($reg == 0x41);
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
   return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xc0) == 0x20;
+  return (8);
+}
+
+# $_[0]: Chip to detect (0 = ADM1024)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, (8) if detected.
+# Registers used:
+#   0x3e: Company ID
+#   0x3f: Revision
+#   0x40: Configuration
+sub adm1024_detect
+{
+  my $reg;
+  my ($chip, $file,$addr) = @_;
+  $reg = i2c_smbus_read_byte_data($file,0x3e);
+  return unless ($reg == 0x41);
+  return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
+  return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xe0) == 0x20;
   return (8);
 }
 

@@ -924,3 +924,16 @@ chip "adm9240-*" "ds1780-*" "lm81-*"
 #   compute "12V" xxx
 #   compute Vccp2 xxx
 #   compute temp xxx
+
+chip "adm1024-*"
+#
+# These settings work for me, adjust for your system
+#
+    label fan1 "CPU1 fan"
+    label fan2 "CPU2 fan"
+    label temp "SYS Temp"
+    label temp1 "CPU2 Temp"
+    label temp2 "CPU1 Temp"
+    ignore "2.5V" # This register is also used for temp2
+    ignore "Vccp1"
+    ignore "Vccp2"

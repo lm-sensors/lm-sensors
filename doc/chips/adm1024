@@ -1,0 +1,12 @@
+Kernel driver `adm1024.o'
+=========================
+
+Status: Complete; Alpha.
+
+Supported chips:
+  * Analog Devices ADM1024
+    Prefix `adm1024'
+    Addresses scanned: I2C 0x2c - 0x2e (inclusive)
+    Datasheet: Publicly available at the Analog Devices website
+
+Author: Ken Bowley <ken@opnix.com>
