@@ -148,10 +148,10 @@ AS99127F PROBLEMS
 -----------------
 The as99127f support was developed without the benefit of a datasheet.
 In most cases it is treated as a w83781d.
-This support is BETA. One user has reported problems with fans stopping.
+This support is BETA. One user has reported problems with fans stopping
+occasionally.
 
 Known problems:
-	- Fans read about 30% low.
 	- -12V readings a little high (-9.5V to -10.5V)
 	- Problems with diode/thermistor settings (supported?)
 	- fan_div register may not really be fan_div.

@@ -22,6 +22,7 @@ ask CVS about it:
   Module w83781d: Improve w83783s support, w83627hf always has 2 pwm
   Module w83781d: Fix sensor2&3 selection, enable VBAT (in8) monitoring
   Module w83781d: Remove as99127f entries for in7-8, pwm3-4, sensor1-3
+  Module w83781d: Fis as99127f fan speed (was 66% too high)
   Module w83781d: Improve beep input checking
   Program i2cdump: Add Winbond-style bank selection
   Program isadump: Add Winbond-style bank selection
