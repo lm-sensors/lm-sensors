@@ -1489,7 +1489,11 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #      I2C bus number, and the I2C address.
 @superio_ids = (
   {
-    enter => [0x87, 0x01, 0x55, 0x55],
+    enter =>
+    {
+      0x2e => [0x87, 0x01, 0x55, 0x55],
+      0x4e => [0x87, 0x01, 0x55, 0xaa],
+    },
     chips =>
     [
       {
@@ -1513,7 +1517,11 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
     ],
   },
   {
-    enter => [],
+    enter =>
+    {
+      0x2e => [],
+      0x4e => [],
+    },
     chips =>
     [
       {
@@ -1601,7 +1609,11 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
     ],
   },
   {
-    enter => [0x55],
+    enter =>
+    {
+      0x2e => [0x55],
+      0x4e => [0x55],
+    },
     exit => [0xaa],
     chips =>
     [
@@ -1655,7 +1667,11 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
     ],
   },
   {
-    enter => [0x87, 0x87],
+    enter =>
+    {
+      0x2e => [0x87, 0x87],
+      0x4e => [0x87, 0x87],
+    },
     exit => [0xaa],
     chips =>
     [
@@ -2609,7 +2625,7 @@ sub scan_superio
   FAMILY: 
   foreach my $family (@superio_ids) {
 # write the password
-    foreach $val (@{$family->{enter}}) {
+    foreach $val (@{$family->{enter}->{$addrreg}}) {
       outb($addrreg, $val);
     }
     foreach my $chip (@{$family->{chips}}) {
