@@ -213,10 +213,11 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 		if (i2c_smbus_read_byte_data(new_client, 0x80) == 'P'
 		 && i2c_smbus_read_byte(new_client) == 'C'
 		 && i2c_smbus_read_byte(new_client) == 'G'
-		 && i2c_smbus_read_byte(new_client) == '-')
+		 && i2c_smbus_read_byte(new_client) == '-') {
 			printk(KERN_INFO "Vaio EEPROM detected, "
 			       "enabling password protection\n");
 			data->nature = NATURE_VAIO;
+		}
 	}
 
 	/* Register a new directory entry with module sensors */
