@@ -100,27 +100,13 @@ static const u16 asb100_reg_temp_hyst[] = {0, 0x3a, 0x153, 0x253, 0x19};
 #define ASB100_REG_I2C_SUBADDR	0x4a
 #define ASB100_REG_PIN		0x4b
 #define ASB100_REG_IRQ		0x4c
-#define ASB100_REG_BEEP_CONFIG	0x4d
 #define ASB100_REG_BANK		0x4e
 #define ASB100_REG_CHIPMAN	0x4f
 
-#define ASB100_REG_BEEP_INTS1	0x56
-#define ASB100_REG_BEEP_INTS2	0x57
 #define ASB100_REG_WCHIPID	0x58
 
 /* bit 7 -> enable, bits 0-3 -> duty cycle */
 #define ASB100_REG_PWM1		0x59
-
-/* <TODO> Does this exist on ASB100? */
-/* The following are undocumented in the data sheets however we
-   received the information in an email from Winbond tech support */
-/* Sensor selection - not on 781d */
-#define ASB100_REG_SCFG1 0x5D
-static const u8 BIT_SCFG1[] = { 0x02, 0x04, 0x08 };
-#define ASB100_REG_SCFG2 0x59
-static const u8 BIT_SCFG2[] = { 0x10, 0x20, 0x40 };
-#define W83781D_DEFAULT_BETA 3435
-/* </TODO> */
 
 /* CONVERSIONS
    Rounding and limit checking is only done on the TO_REG variants. */
@@ -187,22 +173,15 @@ static int ASB100_PWM_FROM_REG(u8 reg)
 }
 
 #define ALARMS_FROM_REG(val) (val)
-#define BEEPS_FROM_REG(val) (val)
-#define BEEPS_TO_REG(val) ((val) & 0xffffff)
-
-#define BEEP_ENABLE_TO_REG(val)   ((val)?1:0)
-#define BEEP_ENABLE_FROM_REG(val) ((val)?1:0)
 
 #define DIV_FROM_REG(val) (1 << (val))
 
-/* <TODO> Support for larger fan divisors? */
 /* FAN DIV: 1, 2, 4, or 8 (defaults to 2)
    REG: 0, 1, 2, or 3 (respectively) (defaults to 1) */
 static u8 DIV_TO_REG(long val)
 {
 	return val==8 ? 3 : val==4 ? 2 : val==1 ? 0 : 1;
 }
-/* </TODO> */
 
 /* For each registered client, we need to keep some data in memory. That
    data is pointed to by client->data. The structure itself is
@@ -231,8 +210,6 @@ struct asb100_data {
 	u8 pwm;			/* Register encoding */
 	u8 vid;			/* Register encoding, combined */
 	u32 alarms;		/* Register encoding, combined */
-	u32 beeps;		/* Register encoding, combined */
-	u8 beep_enable;		/* bitmask */
 	u8 vrm;
 };
 
@@ -259,8 +236,6 @@ static void asb100_vid(struct i2c_client *client, int operation,
 static void asb100_vrm(struct i2c_client *client, int operation,
 		int ctl_name, int *nrels_mag, long *results);
 static void asb100_alarms(struct i2c_client *client, int operation,
-		int ctl_name, int *nrels_mag, long *results);
-static void asb100_beep(struct i2c_client *client, int operation,
 		int ctl_name, int *nrels_mag, long *results);
 static void asb100_fan_div(struct i2c_client *client, int operation,
 		int ctl_name, int *nrels_mag, long *results);
@@ -303,7 +278,6 @@ static struct i2c_driver asb100_driver = {
 
 #define ASB100_SYSCTL_FAN_DIV	2000	/* 1, 2, 4 or 8 */
 #define ASB100_SYSCTL_ALARMS	2001	/* bitvector */
-#define ASB100_SYSCTL_BEEP	2002	/* bitvector */
 
 #define ASB100_ALARM_IN0	0x0001	/* ? */
 #define ASB100_ALARM_IN1	0x0002	/* ? */
@@ -365,8 +339,6 @@ static ctl_table asb100_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &asb100_fan_div},
 	{ASB100_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &asb100_alarms},
-	{ASB100_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &asb100_beep},
 	{ASB100_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &asb100_pwm},
 	{0}
@@ -529,21 +501,6 @@ static int asb100_detect(struct i2c_adapter *adapter, int address,
 			err = -ENODEV;
 			goto ERROR1;
 		}
-
-/* <TODO> this test always fails on first load attempt
-   but it always works after that???  */
-#if 0
-		/* On Winbond chips, 0x48 is the I2C address.
-		   On ASB100, it's always zero */
-		val1 = asb100_read_value(new_client, ASB100_REG_I2C_ADDR);
-		if (val1) {
-			pr_debug("asb100.o: detect failed, nonzero value "
-				"at register 0x48: (0x%02x)\n", val1);
-			err = -ENODEV;
-			goto ERROR1;
-		}
-#endif
-/* </TODO> */
 
 	} /* kind < 0 */
 
@@ -797,12 +754,6 @@ static void asb100_update_client(struct i2c_client *client)
 		data->alarms = asb100_read_value(client, ASB100_REG_ALARM1) +
 			(asb100_read_value(client, ASB100_REG_ALARM2) << 8);
 
-		/* beep */
-		i = asb100_read_value(client, ASB100_REG_BEEP_INTS2);
-		data->beep_enable = i >> 7;
-		data->beeps = ((i & 0x7f) << 8) +
-			asb100_read_value(client, ASB100_REG_BEEP_INTS1);
-
 		data->last_updated = jiffies;
 		data->valid = 1;
 
@@ -982,38 +933,6 @@ void asb100_alarms(struct i2c_client *client, int operation, int ctl_name,
 		asb100_update_client(client);
 		results[0] = ALARMS_FROM_REG(data->alarms);
 		*nrels_mag = 1;
-	}
-}
-
-void asb100_beep(struct i2c_client *client, int operation, int ctl_name,
-		  int *nrels_mag, long *results)
-{
-	struct asb100_data *data = client->data;
-	int val;
-
-	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
-	else if (operation == SENSORS_PROC_REAL_READ) {
-		asb100_update_client(client);
-		results[0] = BEEP_ENABLE_FROM_REG(data->beep_enable);
-		results[1] = BEEPS_FROM_REG(data->beeps);
-		*nrels_mag = 2;
-	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		if (*nrels_mag >= 2) {
-			data->beeps = BEEPS_TO_REG(results[1]);
-			asb100_write_value(client, ASB100_REG_BEEP_INTS1,
-					    data->beeps & 0xff);
-			val = (data->beeps >> 8) & 0x7f;
-		} else if (*nrels_mag >= 1)
-			val =
-			    asb100_read_value(client,
-					       ASB100_REG_BEEP_INTS2) &
-			    0x7f;
-		if (*nrels_mag >= 1) {
-			data->beep_enable = BEEP_ENABLE_TO_REG(results[0]);
-			asb100_write_value(client, ASB100_REG_BEEP_INTS2,
-					    val | data->beep_enable << 7);
-		}
 	}
 }
 
