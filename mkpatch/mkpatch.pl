@@ -106,12 +106,16 @@ sub gen_Documentation_Configure_help
            m@Genesys Logic GL520SM@ or
            m@HP Maxilife@ or
            m@ITE 8705, 8712, Sis950@ or
+           m@Maxim MAX6650, MAX6651@ or
            m@Myson MTP008@ or
            m@National Semiconductors LM75 and compatibles@ or
            m@National Semiconductors LM78@ or
            m@National Semiconductors LM80@ or
-           m@National Semiconductors LM85 and compatibles@ or
+           m@National Semiconductors LM83@ or
+           m@National Semiconductors LM85@ or
            m@National Semiconductors LM87@ or
+           m@National Semiconductors LM90@ or
+           m@National Semiconductors LM92@ or
            m@Silicon Integrated Systems Corp. SiS5595 Sensor@ or
            m@Texas Instruments THMC50 / Analog Devices ADM1022@ or
            m@Via VT82C686A/B@ or
@@ -379,6 +383,15 @@ CONFIG_SENSORS_IT87
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Maxim MAX6650, MAX6651
+CONFIG_SENSORS_MAX6650
+  If you say yes here you get support for the Maxim MAX6650 and
+  MAX6651 sensor chips.  This can also be built as a module.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
 Myson MTP008
 CONFIG_SENSORS_MTP008
   If you say yes here you get support for the Myson MTP008
@@ -421,6 +434,15 @@ CONFIG_SENSORS_LM80
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+National Semiconductor LM83
+CONFIG_SENSORS_LM83
+  If you say yes here you get support for the National Semiconductor
+  LM83 sensor chip.  This can also be built as a module.
+
+  You will also need the latest user-space utilities: you can find
+  them in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
+
 National Semiconductor LM85
 CONFIG_SENSORS_LM85
   If you say yes here you get support for National Semiconductor LM85
@@ -442,6 +464,16 @@ CONFIG_SENSORS_LM87
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
+
+National Semiconductor LM90
+CONFIG_SENSORS_LM90
+  If you say yes here you get support for the National Semiconductor
+  LM90 and Analog Devices ADM1032 sensor chips.  This can also be
+  built as a module.
+
+  You will also need the latest user-space utilities: you can find
+  them in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 National Semiconductor LM92
 CONFIG_SENSORS_LM92
@@ -845,9 +877,12 @@ obj-$(CONFIG_SENSORS_IT87)	+= it87.o
 obj-$(CONFIG_SENSORS_LM75)	+= lm75.o
 obj-$(CONFIG_SENSORS_LM78)	+= lm78.o
 obj-$(CONFIG_SENSORS_LM80)	+= lm80.o
+obj-$(CONFIG_SENSORS_LM83)	+= lm83.o
 obj-$(CONFIG_SENSORS_LM85)	+= lm85.o
 obj-$(CONFIG_SENSORS_LM87)	+= lm87.o
+obj-$(CONFIG_SENSORS_LM90)	+= lm90.o
 obj-$(CONFIG_SENSORS_LM92)	+= lm92.o
+obj-$(CONFIG_SENSORS_MAX6650)	+= max6650.o
 obj-$(CONFIG_SENSORS_MAXILIFE)	+= maxilife.o
 obj-$(CONFIG_SENSORS_MTP008)	+= mtp008.o
 obj-$(CONFIG_SENSORS_PCF8574)	+= pcf8574.o

@@ -35,10 +35,13 @@ kernel/chips/lm75.h		drivers/sensors/lm75.h
 kernel/chips/lm75.c		drivers/sensors/lm75.c
 kernel/chips/lm78.c		drivers/sensors/lm78.c
 kernel/chips/lm80.c		drivers/sensors/lm80.c
+kernel/chips/lm83.c		drivers/sensors/lm83.c
 kernel/chips/lm85.c		drivers/sensors/lm85.c
 kernel/chips/lm87.c		drivers/sensors/lm87.c
+kernel/chips/lm90.c		drivers/sensors/lm90.c
 kernel/chips/lm92.c		drivers/sensors/lm92.c
 kernel/chips/matorb.c		drivers/sensors/matorb.c
+kernel/chips/max6650.c		drivers/sensors/max6650.c
 kernel/chips/maxilife.c		drivers/sensors/maxilife.c
 kernel/chips/mtp008.c		drivers/sensors/mtp008.c
 kernel/chips/pcf8574.c		drivers/sensors/pcf8574.c
