@@ -31,10 +31,13 @@
 #include <linux/i2c.h>
 #include "version.h"
 
+static u32 isa_func(struct i2c_adapter *adapter);
+
 /* This is the actual algorithm we define */
 static struct i2c_algorithm isa_algorithm = {
 	.name		= "ISA bus algorithm",
 	.id		= I2C_ALGO_ISA,
+	.functionality	= isa_func,
 };
 
 /* There can only be one... */
@@ -44,6 +47,12 @@ static struct i2c_adapter isa_adapter = {
 	.id		= I2C_ALGO_ISA | I2C_HW_ISA,
 	.algo		= &isa_algorithm,
 };
+
+/* We can't do a thing... */
+static u32 isa_func(struct i2c_adapter *adapter)
+{
+	return 0;
+}
 
 static int __init i2c_isa_init(void)
 {
