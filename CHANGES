@@ -32,7 +32,8 @@ ask CVS about it:
                    add support for logging loadavg in RRD;
                    fix down-converting raw labels for RRD;
                    update chip support, still behind sensors
-  Program sensors: Add /usr/local/etc to config file path
+  Program sensors: Add /usr/local/etc to config file path;
+                   fix -c and -u flags
   Program sensors-detect: recognize Asus "ASB100 Bach" as AS99127F
 
 2.6.4 (20020719)

@@ -158,7 +158,7 @@ int main (int argc, char *argv[])
   do_sets = 0;
   hide_adapter = 0;
   while (1) {
-    c = getopt_long(argc,argv,"hsvfAcu:",long_opts,NULL);
+    c = getopt_long(argc,argv,"hsvfAc:u",long_opts,NULL);
     if (c == EOF)
       break;
     switch(c) {
