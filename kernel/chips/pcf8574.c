@@ -3,7 +3,7 @@
              monitoring
     Copyright (c) 2000  Frodo Looijaard <frodol@dds.nl>, 
                         Philip Edelbrock <phil@netroedge.com>,
-						Dan Eaton <dan.eaton@rocketlogix.com>
+                        Dan Eaton <dan.eaton@rocketlogix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

@@ -17,10 +17,11 @@ ask CVS about it:
 
 -----------------------
 
-2.5.3 (2000????)
+2.5.3 (20001008)
   NOTE: i2c 2.5.3 MUST BE be compiled and installed first.
   File useful_addresses.html: update
   Library: Add lm87 support
+  Module pcf8574: new
   Module ali-1535: new
   Module ali-15x3: removed force #ifdef.
   Module i2c-i801: support Intel 82801BA (815E chipset)
