@@ -30,7 +30,9 @@ use strict;
 # CONSTANT DECLARATIONS #
 #########################
 
-use vars qw(@pci_adapters @chip_ids);
+use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
+
+@undetectable_adapters = ( "bit-lp", "bit-velle" );
 
 # This is the list of SMBus or I2C adapters we recognize by their PCI
 # signature. This is an easy and fast way to determine which SMBus or I2C
@@ -179,6 +181,22 @@ sub contains
   return 0;
 }
 
+
+###########
+# MODULES #
+###########
+
+use vars qw(@modules_list);
+
+sub initialize_modules_list
+{
+  open INPUTFILE, "/proc/modules" or die "Can't access /proc/modules!";
+  while (<INPUTFILE>) {
+    push @modules_list, /^(\S*)/ ;
+  }
+  close INPUTFILE;
+}
+
 ##############
 # PCI ACCESS #
 ##############
@@ -237,7 +255,7 @@ sub read_proc_pci
   return @pci_list;
 }
 
-sub intialize_proc_pci
+sub initialize_proc_pci
 {
   @pci_list = read_proc_dev_pci;
   @pci_list = read_proc_pci     if not defined @pci_list;
@@ -248,7 +266,23 @@ sub intialize_proc_pci
 #####################
 # ADAPTER DETECTION #
 #####################
-  
+
+sub all_available_adapters
+{
+  my @res = ();
+  my ($module,$adapter);
+  MODULES:
+  foreach $module (@modules_list) {
+    foreach $adapter (@pci_adapters) {
+      if (exists $adapter->{driver} and $module eq $adapter->{driver}) {
+        push @res, $module;
+        next MODULES;
+      }
+    }
+  }
+  return @res;
+}
+
 sub adapter_pci_detection
 {
   my ($device,$try,@res);
@@ -494,8 +528,9 @@ sub i2c_smbus_write_block_data
 # $_[0]: The number of the adapter to scan
 sub scan_adapter
 {
-  my ($chip, $addr, $conf);
-  open FILE,"/dev/i2c-$_[0]" or die "Can't open /dev/i2c-$_[0]";
+  my ($chip, $addr, $conf,@chips);
+  open FILE,"/dev/i2c-$_[0]" or print ("Can't open /dev/i2c-$_[0] ($!)\n"), 
+                                return;
   foreach $addr (0..0x7f) {
     i2c_set_slave_addr(\*FILE,$addr) or print("Can't set address to $_?!?\n"), 
                                      next;
@@ -504,8 +539,14 @@ sub scan_adapter
     foreach $chip (@chip_ids) {
       if (contains $addr, @{$$chip{i2c_addrs}}) {
         print "Probing for $$chip{name}... ";
-        if ($conf = &{$$chip{i2c_detect}} (\*FILE ,$addr)) {
-          printf "Success! (confidence %d)\n", $conf
+        if (($conf,@chips) = &{$$chip{i2c_detect}} (\*FILE ,$addr)) {
+          print "Succes!\n",
+                "    (confidence $conf, driver `$$chip{driver}'";
+          if (@chips) {
+            print ", other addresses: @chips)\n";
+          } else {
+            print ")\n";
+          }
         } else {
           print "Failed!\n" 
         }
@@ -729,9 +770,155 @@ sub adm1021_detect
 # MAIN PROGRAM #
 ################
 
-intialize_proc_pci;
-adapter_pci_detection;
+sub main
+{
+  my (@adapters,$res,$did_adapter_detection,$detect_others,$adapter);
+
+  initialize_proc_pci;
+  initialize_modules_list;
+
+  print " This program will help you to determine which I2C/SMBus modules you ",
+        "need to\n",
+        " load to use lm_sensors most effectively.\n";
+  print " You need to have done a `make install', issued a `depmod -a' and ",
+        "made sure\n",
+        " `/etc/conf.modules' (or `/etc/modules.conf') contains the ",
+        "appropriate\n",
+        " module path before you can use some functions of this utility. ",
+        "Read\n",
+        " doc/modules for more information.\n";
+  print " Also, you need to be `root', or at least have access to the ",
+        "/dev/i2c-* files\n",
+        " for some things. You can use prog/mkdev/mkdev.sh to create these ",
+        "/dev files\n",
+        " if you do not have them already.\n\n";
+
+  print " We can start with probing for (PCI) I2C or SMBus adapters.\n";
+  print " You do not need any special privileges for this.\n";
+  print " Do you want to probe now? (YES/no): ";
+  @adapters = adapter_pci_detection 
+                        if ($did_adapter_detection = not <STDIN> =~ /\s*[Nn]/);
+
+  print "\n";
+
+  if (not $did_adapter_detection) {
+    print " As you skipped adapter detection, we will only scan already ",
+          "loaded adapter\n",
+          " modules. You can still be prompted for non-detectable adapters.\n",
+          " Do you want to? (yes/NO): ";
+    $detect_others = <STDIN> =~ /^\s*[Yy]/;
+  } elsif ($> != 0) {
+    print " As you are not root, we can't load adapter modules. We will only ",
+          "scan\n",
+          " already loaded adapters.\n";
+    $detect_others = 0;
+  } else {
+    print " We will now try to load each adapter module in turn.\n";
+    foreach $adapter (@adapters) {
+      if (contains $adapter, @modules_list) {
+        print "Module `$adapter' already loaded.\n";
+      } else {
+        print "Load `$adapter'? (YES/no): ";
+        unless (<STDIN> =~ /^\s*[Nn]/) {
+          if (system ("modprobe", $adapter)) {
+            print "Loading failed ($!)... skipping.\n";
+          } else {
+            print "Module loaded succesfully.\n";
+          }
+        }
+      }
+    }
+    print " Do you now want to be prompted for non-detectable adapters? ",
+          "(YES/no): ";
+    $detect_others = not <STDIN> =~ /^\s*[Nn]/ ;
+  }
+
+  if ($detect_others) {
+    foreach $adapter (@undetectable_adapters) {
+      print "Load `$adapter'? (YES/no): ";
+      unless (<STDIN> =~ /^\s*[Nn]/) {
+        if (system ("modprobe", $adapter)) {
+          print "Loading failed ($!)... skipping.\n";
+        } else {
+          print "Module loaded succesfully.\n";
+        }
+      }
+    }
+  }
+
+  print " To continue, we need modules `i2c-proc' and `i2c-dev' to be ",
+        "loaded.\n";
+  if (contains "i2c-proc", @modules_list) {
+    print "i2c-proc is already loaded.\n";
+  } else {
+    if ($> != 0) {
+      print " i2c-proc is not loaded, and you are not root. I can't ",
+            "continue.\n";
+      exit;
+    } else {
+      print " i2c-proc is not loaded. May I load it now? (YES/no): ";
+      if (<STDIN> =~ /^\s*[Nn]/) {
+        print " Sorry, in that case I can't continue.\n";
+        exit;
+      } elsif (system "modprobe","i2c-proc") {
+        print " Loading failed ($!), aborting.\n";
+        exit;
+      } else {
+        print " Module loaded succesfully.\n";
+      }
+    }
+  }
+  if (contains "i2c-dev", @modules_list) {
+    print "i2c-dev is already loaded.\n";
+  } else {
+    if ($> != 0) {
+      print " i2c-dev is not loaded. As you are not root, we will just hope ",
+            "you edited\n",
+            " `/etc/conf.modules' (or `/etc/modules.conf') for automatic ",
+            "loading of\n",
+            " this module. If not, you won't be able to open any /dev/i2c-* ",
+            "file.\n";
+    } else {
+      print " i2c-dev is not loaded. Do you want to load it now? (YES/no): ";
+      if (<STDIN> =~ /^\s*[Nn]/) {
+        print " Well, you will know best. We will just hope you edited ",
+              "`/etc/conf.modules'\n",
+              " (or `/etc/modules.conf') for automatic loading of this ",
+              "module. If not,",
+              " you won't be able to open any /dev/i2c-* file.\n";
+      } elsif (system "modprobe","i2c-proc") {
+        print " Loading failed ($!), aborting.\n";
+        exit;
+      } else {
+        print " Module loaded succesfully.\n";
+      }
+    }
+  }
+
+  print " \n We are now going to do the adapter probings. Some adapters may ",
+        "hang halfway\n",
+        " through; we can't really help that. Also, some chips will be double ",
+        "detected;\n",
+        " choose the one with the highest confidence value in that case.\n";
+
+  open INPUTFILE,"/proc/bus/i2c" or die "Couldn't open /proc/bus/i2c?!?";
+  while (<INPUTFILE>) {
+    print "\n";
+    my ($dev_nr,$description) = /^i2c-(\S+)\s+\S+\s+(.*)$/;
+    print "Next adapter: $description\n";
+    print "Do you want to scan it? (YES/no):";
+    scan_adapter $dev_nr unless <STDIN> =~ /^\s*[Nn]/;
+  }
+}
+
+main;
+
+
+      
 
 
 # TEST!
 # scan_adapter 0;
+#}
+
+#
