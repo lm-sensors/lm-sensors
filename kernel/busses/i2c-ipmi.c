@@ -59,11 +59,7 @@ static struct ipmi_addr address = {
 	IPMI_BMC_CHANNEL,
 	{0}
 };	/* send address */
-static struct ipmi_msg message;	/* send message */
-static long msgid;		/* message ID */
 static int interfaces;		/* number of BMC's found */
-static int (*rcv_callback)(struct i2c_client *client, unsigned int cmd,
-                           void *arg);
 
 
 /* Dummy adapter... */
