@@ -160,7 +160,7 @@ static u32 find_i2c(void)
 		
 	if(pcibios_find_device(
 		PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_82C586_3, 0, &VIA_bus, 
-		&VIA_devfn));
+		&VIA_devfn))
 		return 0;
 
 	if ( PCIBIOS_SUCCESSFUL !=

@@ -43,3 +43,5 @@ Here come the changes:
   We needed a function that would return a low, unique identifier for each
   adapter. Putting it anywhere else would have created new, unneeded
   module dependencies.
+
+! bit-mb.c: removed spurious semicolon
