@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.5 (2002????)
+  Library: Fix fan3_div writes for w8378* and it87
   Module dmi_scan: new
   Module i2c-piix4: Refuse to load on IBM systems
   Module lm92: Fix in-kernel initialization
