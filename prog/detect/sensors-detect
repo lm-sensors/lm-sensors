@@ -1204,9 +1204,15 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { lm90_detect 3, @_ },
      },
      {
-       name => "Maxim MAX6657/MAX6658",
+       name => "Maxim MAX6657/MAX6658/MAX6659",
        driver => "to-be-written",
        i2c_addrs => [0x4c],
+       i2c_detect => sub { lm90_detect 4, @_ },
+     },
+     {
+       name => "Maxim MAX6659",
+       driver => "to-be-written",
+       i2c_addrs => [0x4d..0x4e], # 0x4c is handled above
        i2c_detect => sub { lm90_detect 4, @_ },
      },
      {
@@ -2989,16 +2995,17 @@ sub lm83_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = LM90, 1=LM89, 2=LM86, 3=ADM1032, 4=MAX6657/MAX6658,
+#   (0 = LM90, 1=LM89/LM99, 2=LM86, 3=ADM1032, 4=MAX6657/MAX6658/MAX6659,
 #    5 = ADT7461)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, 3, 5, 7 or 8 if detected.
+# Returns: undef if not detected, 3, 6 or 8 if detected.
 #   The Maxim chips have a low confidence value (3)
 #   because the die revision codes are not known.
 # Registers used:
 #   0x03: Configuration
+#   0x04: Conversion rate
 #   0xfe: Manufacturer ID
 #   0xff: Chip ID / die revision
 sub lm90_detect
@@ -3007,38 +3014,45 @@ sub lm90_detect
   my $mid = i2c_smbus_read_byte_data($file, 0xfe);
   my $cid = i2c_smbus_read_byte_data($file, 0xff);
   my $conf = i2c_smbus_read_byte_data($file, 0x03);
+  my $rate = i2c_smbus_read_byte_data($file, 0x04);
 
   if ($chip == 0) {
     return if ($conf & 0x2a) != 0;
+    return if $rate > 0x09;
     return if $mid != 0x01;     # National Semiconductor
     return 8 if $cid == 0x21;   # LM90
-    return 7 if $cid > 0x21 and $cid < 0x30;
+    return 6 if ($cid & 0x0f) == 0x20;
   }
   if ($chip == 1) {
     return if ($conf & 0x2a) != 0;
+    return if $rate > 0x09;
     return if $mid != 0x01;     # National Semiconductor
     return 8 if $addr == 0x4c and $cid == 0x31; # LM89/LM99
     return 8 if $addr == 0x4d and $cid == 0x34; # LM89-1/LM99-1
-    return 5 if $cid > 0x31 and $cid < 0x40;
+    return 6 if ($cid & 0x0f) == 0x30;
   }
   if ($chip == 2) {
     return if ($conf & 0x2a) != 0;
+    return if $rate > 0x09;
     return if $mid != 0x01;     # National Semiconductor
     return 8 if $cid == 0x11;   # LM86
-    return 7 if $cid > 0x11 and $cid < 0x20;
+    return 6 if ($cid & 0xf0) == 0x10;
   }
   if ($chip == 3) {
     return if ($conf & 0x3f) != 0;
+    return if $rate > 0x0a;
     return if $mid != 0x41;     # Analog Devices
     return 8 if ($cid & 0xf0) == 0x40; # ADM1032
   }
   if ($chip == 4) {
     return if ($conf & 0x1f) != 0;
+    return if $rate > 0x09;
     return if $mid != 0x4d;     # Maxim
     return 3;
   }
   if ($chip == 5) {
     return if ($conf & 0x1b) != 0;
+    return if $rate > 0x0a;
     return if $mid != 0x41;     # Analog Devices
     return 8 if $cid == 0x61;   # ADT7461
   }
