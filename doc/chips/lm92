@@ -8,7 +8,9 @@ Supported chips:
     Prefix `lm92'
     Addresses scanned: I2C 0x48 - 0x4b (inclusive)
 
-Author: Abraham vd Merwe <abraham@2d3d.co.za>
+Author: Abraham van der Merwe <abraham@2d3d.co.za>
+
+License: GPL
 
 
 Module Parameters
@@ -19,14 +21,14 @@ Module Parameters
 * force_lm92: short array (min = 1, max = 48)
   List of adapter,address pairs which are unquestionably assumed to contain
   a `lm92' chip
-* ignore: short array (min = 1, max = 48)
-  List of adapter,address pairs not to scan
-* ignore_range: short array (min = 1, max = 48)
-  List of adapter,start-addr,end-addr triples not to scan
 * probe: short array (min = 1, max = 48)
   List of adapter,address pairs to scan additionally
 * probe_range: short array (min = 1, max = 48)
   List of adapter,start-addr,end-addr triples to scan additionally
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
 
 
 Description
@@ -44,6 +46,7 @@ control the thresholds for resetting alarms.
 At the moment the driver controls these sensors in comparator mode and the
 interrupt pins (INT, T_CRIT_A) are ignored.
 
+
 Hardware Configurations
 -----------------------
 
@@ -52,3 +55,24 @@ ensures that alarms will only be triggered if 4 consecutive readings all
 cross the alarm thresholds. You can enable this behaviour by uncommenting
 the #define in the driver source, and then recompile/reinstall.
 
+
+Chip Features
+-------------
+
+Chip 'lm92'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp                  -                     -                       R-     4
+temp_high             temp                  temp                    RW     4
+temp_low              temp                  temp                    RW     4
+temp_crit             temp                  temp                    RW     4
+temp_hyst             temp                  temp                    RW     4
+alarms                -                     -                       R-     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp                  SENSORS_LM92_TEMP                                  temp:1
+temp_high             SENSORS_LM92_TEMP_HIGH                             temp:2
+temp_low              SENSORS_LM92_TEMP_LOW                              temp:3
+temp_crit             SENSORS_LM92_TEMP_CRIT                             temp:4
+temp_hyst             SENSORS_LM92_TEMP_HYST                             temp:5
+alarms                SENSORS_LM92_ALARMS                              alarms:1

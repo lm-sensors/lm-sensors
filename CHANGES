@@ -18,7 +18,12 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.6 (2002????)
-  NOTE: Requires i2c-2.6.6!!!
+  NOTE: Requires i2c-2.6.6 or newer.
+  File doc/busses/i2c-sis645: add license
+  File doc/chips/lm92: add license, add features
+  File doc/chips/maxilife: add license, add parameters, add features
+  File doc/chips/smartbatt: complete rewrite
+  File doc/chips/vt8231: add license, add parameters
   Library: Add support for MC1066; add multiple VRM version support for lm87;
            enhance adm1023 support
   Makefile: Take kernel source location from /lib/modules/x.x.x/build
