@@ -481,7 +481,7 @@ void smsc47m1_pwm(struct i2c_client *client, int operation, int ctl_name,
 
 static int __init sm_smsc47m1_init(void)
 {
-	int res, addr;
+	int addr;
 
 	printk("smsc47m1.o version %s (%s)\n", LM_VERSION, LM_DATE);
 

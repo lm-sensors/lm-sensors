@@ -787,7 +787,7 @@ void sis5595_fan_div(struct i2c_client *client, int operation,
 
 static int __init sm_sis5595_init(void)
 {
-	int res, addr;
+	int addr;
 
 	printk("sis5595.o version %s (%s)\n", LM_VERSION, LM_DATE);
 

@@ -655,13 +655,12 @@ static int w83627hf_find(int *address)
 int w83627hf_detect(struct i2c_adapter *adapter, int address,
 		   unsigned short flags, int kind)
 {
-	int i, val, id;
+	int i, val;
 	struct i2c_client *new_client;
 	struct w83627hf_data *data;
 	int err = 0;
 	const char *type_name = "";
 	const char *client_name = "";
-	enum vendor { winbond, asus } vendid;
 
 	if (!i2c_is_isa_adapter(adapter))
 		return 0;
@@ -796,8 +795,7 @@ static int w83627hf_detach_client(struct i2c_client *client)
    nowhere else be necessary! */
 static int w83627hf_read_value(struct i2c_client *client, u16 reg)
 {
-	int res, word_sized, bank;
-	struct i2c_client *cl;
+	int res, word_sized;
 
 	down(&(((struct w83627hf_data *) (client->data))->lock));
 	word_sized = (((reg & 0xff00) == 0x100)
@@ -831,8 +829,7 @@ static int w83627hf_read_value(struct i2c_client *client, u16 reg)
 
 static int w83627hf_write_value(struct i2c_client *client, u16 reg, u16 value)
 {
-	int word_sized, bank;
-	struct i2c_client *cl;
+	int word_sized;
 
 	down(&(((struct w83627hf_data *) (client->data))->lock));
 	word_sized = (((reg & 0xff00) == 0x100)
@@ -1466,7 +1463,7 @@ void w83627hf_sens(struct i2c_client *client, int operation, int ctl_name,
 
 static int __init sm_w83627hf_init(void)
 {
-	int res, addr;
+	int addr;
 
 	printk(KERN_INFO "w83627hf.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	if (w83627hf_find(&addr)) {

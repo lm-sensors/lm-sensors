@@ -768,7 +768,7 @@ void vt8231_uch(struct i2c_client *client, int operation, int ctl_name,
 
 static int __init sm_vt8231_init(void)
 {
-	int res, addr;
+	int addr;
 
 	printk("vt8231.o version %s (%s)\n", LM_VERSION, LM_DATE);
 

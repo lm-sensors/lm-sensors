@@ -461,8 +461,6 @@ void smbusarp_contents(struct i2c_client *client, int operation,
 
 static int __init sm_smbusarp_init(void)
 {
-	int res;
-
 	printk("smbus-arp.o version %s (%s)\n", LM_VERSION, LM_DATE);
 /* magic force invocation */
 	force_arp[0] = -1;

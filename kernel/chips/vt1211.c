@@ -796,7 +796,7 @@ void vt1211_uch(struct i2c_client *client, int operation, int ctl_name,
 
 static int __init sm_vt1211_init(void)
 {
-	int res, addr;
+	int addr;
 
 	printk("vt1211.o version %s (%s)\n", LM_VERSION, LM_DATE);
 

@@ -487,8 +487,6 @@ void thmc50_analog_out(struct i2c_client *client, int operation,
 
 static int __init sm_thmc50_init(void)
 {
-	int res;
-
 	printk("thmc50.o version %s (%s)\n", LM_VERSION, LM_DATE);
 
 	return i2c_add_driver(&thmc50_driver);
