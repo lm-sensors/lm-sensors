@@ -1,9 +1,10 @@
-.TH ISASET 8 "July 2004"
+.TH ISASET 8 "August 2004"
 .SH "NAME"
 i2cset \- set ISA registers
 
 .SH SYNOPSIS
 .B isaset
+.RB [ -y ]
 .I addrreg
 .I datareg
 .I address
@@ -11,6 +12,7 @@ i2cset \- set ISA registers
 #for I2C-like access
 .br
 .B isaset
+.RB [ -y ]
 .BI "-f " address
 .I value
 #for flat address space
@@ -18,6 +20,17 @@ i2cset \- set ISA registers
 .SH DESCRIPTION
 isaset is a small helper program to set registers visible through the ISA
 bus.
+
+.SH OPTIONS
+.TP
+.B -f
+Enable flat address space mode.
+.TP
+.B -y
+Disable interactive mode. By default, isaset will wait for a confirmation
+from the user before messing with the ISA bus. When this flag is used, it
+will perform the operation directly. This is mainly meant to be used in
+scripts.
 
 .SH OPTIONS (I2C-like access mode)
 Exactly four options must be provided to isaset. \fIaddrreg\fR contains the
@@ -33,7 +46,7 @@ The \fIaddress\fR and \fIvalue\fR parameters are two integers between
 0x00 and 0xFF. isaset will write value \fIvalue\fR to address \fIaddress\fR.
 
 .SH OPTIONS (flat address space mode)
-In flat mode (triggered by the \fB-f\fR flag), exactly two parameters must
+In flat mode, exactly two parameters must
 be provided. \fIaddress\fR contains the ISA address of the register to
 write to; it is an integer between 0x0000 and 0xFFFF. Basically, it is
 the sum of the chip's base address and the chip register's address. isaset

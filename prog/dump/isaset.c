@@ -46,33 +46,41 @@ void help(void)
 {
 	fprintf(stderr,
 	        "Syntax for I2C-like access:\n"
-	        "  isaset ADDRREG DATAREG ADDRESS VALUE\n"
+	        "  isaset [-y] ADDRREG DATAREG ADDRESS VALUE\n"
 	        "Syntax for flat address space:\n"
-	        "  isaset -f ADDRESS VALUE\n");
+	        "  isaset [-y] -f ADDRESS VALUE\n");
 }
 
 int main(int argc, char *argv[])
 {
 	int addrreg, datareg = 0, value, addr = 0;
 	unsigned char res;
-	int flat = 0;
+	int flags = 0;
+	int flat = 0, yes = 0;
 	char *end;
 
-	if (argc < 4) {
+	/* handle (optional) flags first */
+	while (1+flags < argc && argv[1+flags][0] == '-') {
+		switch (argv[1+flags][1]) {
+		case 'f': flat = 1; break;
+		case 'y': yes = 1; break;
+		default:
+			fprintf(stderr, "Warning: Unsupported flag "
+				"\"-%c\"!\n", argv[1+flags][1]);
+			help();
+			exit(1);
+		}
+		flags++;
+	}
+
+	/* verify that the argument count is correct */
+	if ((!flat && argc != 1+flags+4)
+	 || (flat && argc != 1+flags+2)) {
 		help();
 		exit(1);
 	}
 
-	if (!strcmp(argv[1], "-f")) {
-		flat = 1;
-	}
-
-	if (argc != 5-flat) {
-		help();
-		exit(1);
-	}
-
-	addrreg = strtol(argv[1+flat], &end, 0);
+	addrreg = strtol(argv[1+flags], &end, 0);
 	if (*end) {
 		fprintf(stderr, "Error: Invalid address!\n");
 		help();
@@ -87,7 +95,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (!flat) {
-		datareg = strtol(argv[2], &end, 0);
+		datareg = strtol(argv[1+flags+1], &end, 0);
 		if (*end) {
 			fprintf(stderr, "Error: Invalid data register!\n");
 			help();
@@ -100,7 +108,7 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 
-		addr = strtol(argv[3], &end, 0);
+		addr = strtol(argv[1+flags+2], &end, 0);
 		if (*end) {
 			fprintf(stderr, "Error: Invalid address!\n");
 			help();
@@ -114,7 +122,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	value = strtol(argv[4-flat], &end, 0);
+	value = strtol(argv[flat?1+flags+1:1+flags+3], &end, 0);
 	if (*end) {
 		fprintf(stderr, "Error: Invalid value!\n");
 		help();
@@ -133,19 +141,29 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	fprintf(stderr, "WARNING! Running this program can cause "
-	        "system crashes, data loss and worse!\n");
-	if (flat)
-		fprintf(stderr, "I will write value 0x%02x to address "
-		        "0x%04x\n", value, addrreg);
-	else
-		fprintf(stderr, "I will write value 0x%02x to address "
-		        "0x%02x of chip with address register 0x%04x\n"
-		        "and data register 0x%04x.\n",
-		        value, addr, addrreg, datareg);
-	fprintf(stderr, "You have five seconds to reconsider and press "
-	        "CTRL-C!\n\n");
-	sleep(5);
+	if (!yes) {
+		char s[2];
+
+		fprintf(stderr, "WARNING! Running this program can cause "
+		        "system crashes, data loss and worse!\n");
+
+		if (flat)
+			fprintf(stderr, "I will write value 0x%02x to address "
+		                "0x%x.\n", value, addrreg);
+		else
+			fprintf(stderr, "I will write value 0x%02x to address "
+		                "0x%02x of chip with address register 0x%x\n"
+		                "and data register 0x%x.\n",
+		                value, addr, addrreg, datareg);
+
+		fprintf(stderr, "Continue? [Y/n] ");
+		fflush(stderr);
+		fgets(s, 2, stdin);
+		if (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y') {
+			fprintf(stderr, "Aborting on user request.\n");
+			exit(0);
+		}
+	}
 
 #ifndef __powerpc__
 	if (!flat && datareg < 0x400 && addrreg < 0x400) {
@@ -184,11 +202,8 @@ int main(int argc, char *argv[])
 	}
 
 	if (res != value) {
-		fprintf(stderr, "Warning: Data mismatch, wrote 0x%02x, "
-		        "read back 0x%02x\n", value, res);
-	} else {
-		fprintf(stderr, "Value 0x%02x written, readback matched\n",
-		        value);
+		fprintf(stderr, "Data mismatch, wrote 0x%02x, "
+		        "read 0x%02x back.\n", value, res);
 	}
 
 	exit(0);

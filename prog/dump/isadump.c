@@ -59,9 +59,9 @@ void help(void)
 {
 	fprintf(stderr,
 	        "Syntax for I2C-like access:\n"
-	        "  isadump ADDRREG DATAREG [BANK [BANKREG]]\n"
+	        "  isadump [-y] ADDRREG DATAREG [BANK [BANKREG]]\n"
 	        "Syntax for flat address space:\n"
-	        "  isadump -f ADDRESS [RANGE [BANK [BANKREG]]]\n");
+	        "  isadump [-y] -f ADDRESS [RANGE [BANK [BANKREG]]]\n");
 }
 
 int default_bankreg(int flat, int addrreg, int datareg)
@@ -104,19 +104,32 @@ int main(int argc, char *argv[])
 	int bankreg;
 	int oldbank = 0;
 	int i, j, res;
-	int flat = 0;
+	int flags = 0;
+	int flat = 0, yes = 0;
 	char *end;
 
-	if (argc < 3) {
+	/* handle (optional) flags first */
+	while (1+flags < argc && argv[1+flags][0] == '-') {
+		switch (argv[1+flags][1]) {
+		case 'f': flat = 1; break;
+		case 'y': yes = 1; break;
+		default:
+			fprintf(stderr, "Warning: Unsupported flag "
+				"\"-%c\"!\n", argv[1+flags][1]);
+			help();
+			exit(1);
+		}
+		flags++;
+	}
+
+	/* verify that the argument count is correct */
+	if ((!flat && argc < 1+flags+2)
+	 || (flat && argc < 1+flags+1)) {
 		help();
 		exit(1);
 	}
 
-	if (!strcmp(argv[1], "-f")) {
-		flat = 1;
-	}
-
-	addrreg = strtol(argv[1+flat], &end, 0);
+	addrreg = strtol(argv[1+flags], &end, 0);
 	if (*end) {
 		fprintf(stderr, "Error: Invalid address!\n");
 		help();
@@ -130,8 +143,8 @@ int main(int argc, char *argv[])
 	}
 
 	if (flat) {
-		if (argc > 3) {
-			range = strtol(argv[3], &end, 0);
+		if (1+flags+1 < argc) {
+			range = strtol(argv[1+flags+1], &end, 0);
 			if (*end || range <= 0 || range > 0x100
 			 || range & 0xf) {
 				fprintf(stderr, "Error: Invalid range!\n"
@@ -144,7 +157,7 @@ int main(int argc, char *argv[])
 			addrreg &= 0xff00; /* Force alignment */
 		}
 	} else {
-		datareg = strtol(argv[2], &end, 0);
+		datareg = strtol(argv[1+flags+1], &end, 0);
 		if (*end) {
 			fprintf(stderr, "Error: Invalid data register!\n");
 			help();
@@ -160,8 +173,8 @@ int main(int argc, char *argv[])
 
 	bankreg = default_bankreg(flat, addrreg, datareg);
 
-	if (argc > 3+flat) {
-		bank = strtol(argv[3+flat], &end, 0);
+	if (1+flags+2 < argc) {
+		bank = strtol(argv[1+flags+2], &end, 0);
 		if (*end) {
 			fprintf(stderr, "Error: Invalid bank number!\n");
 			help();
@@ -173,8 +186,8 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 
-		if (argc > 4+flat) {
-			bankreg = strtol(argv[4+flat], &end, 0);
+		if (1+flags+3 < argc) {
+			bankreg = strtol(argv[1+flags+3], &end, 0);
 			if (*end) {
 				fprintf(stderr, "Error: Invalid bank "
 				        "register!\n");
@@ -196,20 +209,31 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	fprintf(stderr, "WARNING! Running this program can cause system "
-	        "crashes, data loss and worse!\n");
-	if (flat)
-		fprintf(stderr, "I will probe address range 0x%04x to "
-		        "0x%04x.\n", addrreg, addrreg + range - 1);
-	else
-		fprintf(stderr, "I will probe address register 0x%04x and "
-		        "data register 0x%04x.\n", addrreg, datareg);
-	if (bank>=0) 	
-		fprintf(stderr, "Probing bank %d using bank register "
-		        "0x%02x.\n", bank, bankreg);
-	fprintf(stderr, "You have five seconds to reconsider and press "
-	        "CTRL-C!\n\n");
-	sleep(5);
+	if (!yes) {
+		char s[2];
+
+		fprintf(stderr, "WARNING! Running this program can cause "
+		        "system crashes, data loss and worse!\n");
+
+		if (flat)
+			fprintf(stderr, "I will probe address range 0x%x to "
+			        "0x%x.\n", addrreg, addrreg + range - 1);
+		else
+			fprintf(stderr, "I will probe address register 0x%x "
+			        "and data register 0x%x.\n", addrreg, datareg);
+
+		if (bank>=0) 	
+			fprintf(stderr, "Probing bank %d using bank register "
+			        "0x%02x.\n", bank, bankreg);
+
+		fprintf(stderr, "Continue? [Y/n] ");
+		fflush(stderr);
+		fgets(s, 2, stdin);
+		if (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y') {
+			fprintf(stderr, "Aborting on user request.\n");
+			exit(0);
+		}
+	}
 
 #ifndef __powerpc__
 	if ((datareg < 0x400) && (addrreg < 0x400) && !flat) {

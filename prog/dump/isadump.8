@@ -1,15 +1,17 @@
-.TH ISADUMP 8 "July 2004"
+.TH ISADUMP 8 "August 2004"
 .SH NAME
 isadump \- examine ISA registers
 
 .SH SYNOPSIS
 .B isadump
+.RB [ -y ]
 .I addrreg
 .I datareg
 .RI [ "bank " [ bankreg ]]
 #for I2C-like access
 .br
 .B isadump
+.RB [ -y ]
 .BI "-f " address
 .RI [ "range " [ "bank " [ bankreg ]]]
 #for flat address space
@@ -19,6 +21,17 @@ isadump is a small helper program to examine registers visible through the ISA
 bus. It is intended to probe any chip that lives on the ISA bus working with an
 address register and a data register (I2C-like access) or a flat range (of up
 to 256 bytes).
+
+.SH OPTIONS
+.TP
+.B -f
+Enable flat address space mode.
+.TP
+.B -y
+Disable interactive mode. By default, isadump will wait for a confirmation
+from the user before messing with the ISA bus. When this flag is used, it
+will perform the operation directly. This is mainly meant to be used in
+scripts.
 
 .SH OPTIONS (I2C-like access mode)
 At least two options must be provided to isadump. \fIaddrreg\fR contains the
@@ -39,7 +52,7 @@ for Super-I/O chips). The W83781D datasheet has more information on bank
 selection.
 
 .SH OPTIONS (flat address space mode)
-In flat mode (triggered by the \fB-f\fR flag), only one parameter is
+In flat mode, only one parameter is
 mandatory. \fIaddress\fR contains the ISA address of the chip to probe;
 it is an integer between 0x0000 and 0xFFFF.
 If provided, \fIrange\fR is how many bytes should be read (must be a
