@@ -4694,8 +4694,8 @@ sub max6650_detect
 sub vt1211_i2c_detect
 {
   my ($chip,$file,$addr) = @_;
-  return 0 unless (i2c_smbus_read_byte_data($file,0x48) & 0x7f) == $addr;
-  return 0 unless i2c_smbus_read_byte_data($file,0x3f) == 0xb0;
+  return unless (i2c_smbus_read_byte_data($file,0x48) & 0x7f) == $addr;
+  return unless i2c_smbus_read_byte_data($file,0x3f) == 0xb0;
   return 2;
 }
 
