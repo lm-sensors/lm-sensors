@@ -648,7 +648,7 @@ sub gen_drivers_i2c_Config_in
     tristate '  SiS 5595' CONFIG_I2C_SIS5595
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_ALGOBIT
     tristate '  VIA Technologies, Inc. VT596A/B' CONFIG_I2C_VIAPRO
-    dep_tristate '  Voodoo3 I2C interface' CONFIG_I2C_VOODOO $CONFIG_I2C_ALGOBIT
+    dep_tristate '  Voodoo3 I2C interface' CONFIG_I2C_VOODOO3 $CONFIG_I2C_ALGOBIT
     tristate '  Pseudo ISA adapter (for hardware sensors modules)' CONFIG_I2C_ISA 
   fi
 

@@ -64,7 +64,7 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_VIAPRO=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-viapro.o
 endif
-ifneq ($(shell if grep -q '^CONFIG_I2C_VOODOO=y' $(LINUX)/.config; then echo 1; fi),1)
+ifneq ($(shell if grep -q '^CONFIG_I2C_VOODOO3=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-voodoo3.o
 endif
 
