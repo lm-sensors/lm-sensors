@@ -43,6 +43,15 @@ static void print_long_help(void);
 static void print_version(void);
 static void open_config_file(void);
 static int open_this_config_file(char *filename);
+static void do_a_print(sensors_chip_name name);
+static void do_a_set(sensors_chip_name name);
+static void do_the_real_work(void);
+static const char *sprintf_chip_name(sensors_chip_name name);
+
+#define CHIPS_MAX 20
+sensors_chip_name chips[CHIPS_MAX];
+int chips_count=0;
+int do_sets;
 
 void print_short_help(void)
 {
@@ -51,7 +60,7 @@ void print_short_help(void)
 
 void print_long_help(void)
 {
-  printf("Usage: %s [OPTION]...\n",PROGRAM);
+  printf("Usage: %s [OPTION]... [CHIP]...\n",PROGRAM);
   printf("  -c, --config-file     Specify a config file\n");
   printf("  -h, --help            Display this help text\n");
   printf("  -s, --set             Execute `set' statements too (root only)\n");
@@ -59,6 +68,7 @@ void print_long_help(void)
   printf("\n");
   printf("By default, a list of directories is examined for the config file `sensors.conf'\n");
   printf("Use `-' after `-c' to read the config file from stdin\n");
+  printf("If no chips are specified, all chip info will be printed\n");
 }
 
 void print_version(void)
@@ -119,12 +129,7 @@ int open_this_config_file(char *filename)
 
 int main (int argc, char *argv[])
 {
-  int c,res;
-  int do_sets;
-
-  int chip_nr;
-  const sensors_chip_name *chip;
-  const char *algo,*adap;
+  int c,res,i;
 
   struct option long_opts[] =  {
     { "help", no_argument, NULL, 'h' },
@@ -157,8 +162,26 @@ int main (int argc, char *argv[])
       break;
     default:
       fprintf(stderr,"Internal error while parsing options!\n");
+      exit(1);
     }
   }
+
+  if (optind == argc) {
+    chips[0].prefix = SENSORS_CHIP_NAME_PREFIX_ANY;
+    chips[0].bus = SENSORS_CHIP_NAME_BUS_ANY;
+    chips[0].addr = SENSORS_CHIP_NAME_ADDR_ANY;
+    chips_count = 1;
+  } else 
+    for(i = optind; i < argc; i++) 
+      if ((res = sensors_parse_chip_name(argv[i],chips+chips_count))) {
+        fprintf(stderr,"Parse error in chip name `%s'\n",argv[i]);
+        exit(1);
+      } else if (++chips_count == CHIPS_MAX) {
+        fprintf(stderr,"Too many chips on command line!\n");
+        exit(1);
+      }
+
+
   open_config_file();
 
   if ((res = sensors_init(config_file))) {
@@ -171,42 +194,69 @@ int main (int argc, char *argv[])
     exit(1);
   }
 
-  /* Here comes the real code... */
-
-  if (do_sets) 
-    if ((res = sensors_do_all_sets())) {
-      fprintf(stderr,"%s\n",sensors_strerror(res));
-      exit(1);
-    }
-  
-  for (chip_nr = 0; (chip = sensors_get_detected_chips(&chip_nr));) {
-    if (chip->bus == SENSORS_CHIP_NAME_BUS_ISA)
-      printf("%s-isa-%04x\n",chip->prefix,chip->addr);
-    else
-      printf("%s-i2c-%d-%02x\n",chip->prefix,chip->bus,chip->addr);
-    adap = sensors_get_adapter_name(chip->bus);
-    if (adap)
-      printf("Adapter: %s\n",adap);
-    algo = sensors_get_algorithm_name(chip->bus);
-    if (algo)
-      printf("Algorithm: %s\n",algo);
-    if (!algo || !adap)
-      printf(" ERROR: Can't get adapter or algorithm?!?\n");
-    if (!strcmp(chip->prefix,"lm75"))
-      print_lm75(chip);
-    else if (!strcmp(chip->prefix,"lm78") || !strcmp(chip->prefix,"lm78-j") ||
-             !strcmp(chip->prefix,"lm79"))
-      print_lm78(chip);
-    else if (!strcmp(chip->prefix,"gl518sm-r00") || 
-             !strcmp(chip->prefix,"gl518sm-r80"))
-      print_gl518(chip);
-    else if (!strcmp(chip->prefix,"w83781d"))
-      print_w83781d(chip);
-    else
-      print_unknown_chip(chip);
-    printf("\n");
-  }
+  do_the_real_work();
   exit(0);
 }
 
+void do_the_real_work(void)
+{
+  const sensors_chip_name *chip;
+  int chip_nr,i;
 
+  for (chip_nr = 0; (chip = sensors_get_detected_chips(&chip_nr));)
+    for(i = 0; i < chips_count; i++)
+      if (sensors_match_chip(*chip,chips[i])) {
+        if(do_sets)
+          do_a_set(*chip);
+        else
+          do_a_print(*chip);
+        i = chips_count;
+      }
+}
+
+void do_a_set(sensors_chip_name name)
+{
+  int res;
+  if ((res = sensors_do_chip_sets(name))) 
+    fprintf(stderr,"%s: %s\n",sprintf_chip_name(name),sensors_strerror(res));
+}
+
+const char *sprintf_chip_name(sensors_chip_name name)
+{
+  #define BUF_SIZE 200
+  static char buf[BUF_SIZE];
+
+  if (name.bus == SENSORS_CHIP_NAME_BUS_ISA)
+    snprintf(buf,BUF_SIZE,"%s-isa-%04x",name.prefix,name.addr);
+  else
+    snprintf(buf,BUF_SIZE,"%s-i2c-%d-%02x",name.prefix,name.bus,name.addr);
+  return buf;
+}
+
+void do_a_print(sensors_chip_name name)
+{
+  const char *algo,*adap;
+
+  printf("%s\n",sprintf_chip_name(name));
+  adap = sensors_get_adapter_name(name.bus);
+  if (adap)
+    printf("Adapter: %s\n",adap);
+  algo = sensors_get_algorithm_name(name.bus);
+  if (algo)
+    printf("Algorithm: %s\n",algo);
+  if (!algo || !adap)
+    printf(" ERROR: Can't get adapter or algorithm?!?\n");
+  if (!strcmp(name.prefix,"lm75"))
+    print_lm75(&name);
+  else if (!strcmp(name.prefix,"lm78") || !strcmp(name.prefix,"lm78-j") ||
+           !strcmp(name.prefix,"lm79"))
+    print_lm78(&name);
+  else if (!strcmp(name.prefix,"gl518sm-r00") || 
+           !strcmp(name.prefix,"gl518sm-r80"))
+    print_gl518(&name);
+  else if (!strcmp(name.prefix,"w83781d"))
+    print_w83781d(&name);
+  else
+    print_unknown_chip(&name);
+  printf("\n");
+}

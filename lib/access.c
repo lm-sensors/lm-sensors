@@ -198,7 +198,7 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
       
 /* Set the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
-   on failure. BUGGY! */
+   on failure. */
 int sensors_set_feature(sensors_chip_name name, int feature, double value)
 {
   const sensors_chip_feature *main_feature;
