@@ -508,7 +508,7 @@ static int pc87360_find(u8 *devid, int *address)
 
 		val = superio_inb(ACT);
 		if (!(val & 0x01)) {
-			printk(KERN_INFO "pc87360.o: device 0x%02x not "
+			printk(KERN_INFO "pc87360.o: Device 0x%02x not "
 			       "activated\n", logdev[i]);
 			continue;
 		}
@@ -516,7 +516,7 @@ static int pc87360_find(u8 *devid, int *address)
 		val = (superio_inb(BASE) << 8)
 		    | superio_inb(BASE + 1);
 		if (!val) {
-			printk(KERN_INFO "pc87360.o: base address not set for "
+			printk(KERN_INFO "pc87360.o: Base address not set for "
 			       "device 0x%02x\n", logdev[i]);
 			continue;
 		}
@@ -552,14 +552,11 @@ static int pc87360_find(u8 *devid, int *address)
 					       "thermistors for temperature "
 					       "monitoring\n");
 				}
-
-#ifdef DEBUG
 				if (confreg[3] & 0xE0) {
 					printk(KERN_INFO "pc87360.o: VID "
-					       "inputs routed (mode %d)\n",
-					       	confreg[3] & 0xE0);
+					       "inputs routed (mode %u)\n",
+					       	confreg[3] >> 5);
 				}
-#endif
 			}
 		}
 	}
@@ -589,8 +586,9 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	for (i = 0; i < 3; i++) {
 		if (extra_isa[i]
 		 && check_region(extra_isa[i], PC87360_EXTENT)) {
-			printk(KERN_ERR "pc87360.o: region 0x%x already in "
-			       "use!\n", address);
+			printk(KERN_ERR "pc87360.o: Region 0x%x-0x%x already "
+			       "in use!\n", extra_isa[i],
+			       extra_isa[i]+PC87360_EXTENT-1);
 			return -ENODEV;
 		}
 	}
@@ -666,7 +664,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 		}
 		data->in_vref = (i&0x02) ? 3025 : 2966;
 #ifdef DEBUG
-		printk(KERN_DEBUG "Using %s reference voltage\n",
+		printk(KERN_DEBUG "pc87360.o: Using %s reference voltage\n",
 		       (i&0x02) ? "external" : "internal");
 #endif
 
@@ -1103,7 +1101,10 @@ void pc87360_fan_div(struct i2c_client *client, int operation,
 		for (i = 0; i < data->fannr; i++) {
 			results[i] = FAN_DIV_FROM_REG(data->fan_status[i]);
 		}
-		*nrels_mag = data->fannr;
+		for (; i < 3; i++) {
+			results[i] = 0;
+		}
+		*nrels_mag = 3;
 	}
 }
 
