@@ -4085,7 +4085,7 @@ sub pca9540_detect
 	my ($file, $addr) = @_;
 	my $reg = i2c_smbus_read_byte($file);
 
-	return if ($reg & 0xf7);
+	return if ($reg & 0xfa);
 	return if $reg != i2c_smbus_read_byte($file);
 	return if $reg != i2c_smbus_read_byte($file);
 	return if $reg != i2c_smbus_read_byte($file);
