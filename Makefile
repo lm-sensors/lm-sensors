@@ -253,7 +253,7 @@ user_install::
 all :: user
 install :: all user_install
 	@echo "*** The depmod command below may generate errors. We are aware of the"
-	@echo "*** problem and are working on a solution. You should ignore them for now."
+	@echo "*** problem and are working on a solution."
 ifeq ($(DESTDIR),)
 	-/sbin/depmod -a
 else
