@@ -346,7 +346,7 @@ void eeprom_update_client(struct i2c_client *client)
 #endif
 
 		if (i2c_check_functionality(client->adapter,
-		                            I2C_FUNC_SMBUS_READ_BLOCK_DATA))
+		                            I2C_FUNC_SMBUS_READ_I2C_BLOCK))
 		{
 			for (i=0; i<EEPROM_SIZE; i+=I2C_SMBUS_I2C_BLOCK_MAX)
 				if(i2c_smbus_read_i2c_block_data(client,
