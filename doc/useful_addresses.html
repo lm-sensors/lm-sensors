@@ -56,13 +56,19 @@ I&sup2;C and SMBus implementations</li>
 
 <li>
 <a href="http://www.acerlabs.com">Acer Labs M1533/M1543C</a></li>
-<br>Acer Labs SMBus adapter, integrated with many other functions.
+<br>Acer Labs chipsets include SMBus adapters, integrated with many other functions.
+Password required for datasheets.
 
 <li>
-<a href="http://www.intel.com">Intel PIIX4 (82371AB)</a></li>
+<a href="http://developer.intel.com">Intel PIIX4, i801, i810</a></li>
 <br>Intel SMBus adapter, integrated with many other functions. There are
 <a href="http://developer.intel.com/design/pcisets/datashts/">datasheet
 for most chipsets</a>.
+
+<li>
+<a href="http://www.sis.com.tw/">Silicon Integrated Systems Corp.</a></li>
+<br>SIS5595 <a href="http://www.sis.com.tw/products/products.htm">data
+sheets</a>
 
 <li>
 <a href="http://www.via.com.tw">VIA South Bridge (VT85C586B)</a></li>
@@ -77,47 +83,62 @@ Hardware monitoring chips</li>
 
 <ul>
 <li>
-<a href="http://www.national.com">National Semiconductors</a></li>
-
-<br>LM75/78/79/80 <a href="http://www.national.com/catalog/AnalogTempSensors.html">reference
-sheets</a>.
-<li>
-<a href="http://www.winbond.com.tw">Winbond</a></li>
-
-<br>W83781D, W83782D, W83783S and W83627HF chips. <a href="http://www.winbond.com.tw/produ/perso7.htm">Data
-sheets</a> can be found here for most Winbond chips.
-<li>
 <a href="http://www.analog.com">Analog Devices</a></li>
-
-<br>ADM1021 and ADM9240 <a href="http://products.analog.com/products_html/list_gen_100_2_1.html">reference
+<br>Sensor <a href="http://products.analog.com/products_html/list_gen_100_2_1.html">datax
 sheets</a>
-<li>
-<a href="http://www.linear.com">Linear Technologies</a></li>
 
-<br>LTC1710 <a href="http://www.linear.com/prodinfo/dslist.html">data sheets</a>
+<li>
+<a href="http://www.dalsemi.com">Dallas Semiconductor</a></li>
+<br>DS1780 <a href="http://www.dalsemi.com/Prod_info/Thermal/index.html">data
+sheets</a>
+
 <li>
 <a href="http://www.genesyslogic.com">Genesys Logic</a></li>
-
 <br>GL518SM and GL520SM <a href="http://www.genesyslogic.com/products/hardward/index.html">data
 sheets</a>
+
 <li>
 <a href="http://www.hp.com/">Hewlett Packard</a></li>
-
 <br>HP Maxilife (datasheets only under NDA...)
-<li>
-<a href="http://www.sis.com.tw/">Silicon Integrated Systems Corp.</a></li>
 
-<br>SIS5595 <a href="http://www.sis.com.tw/products/products.htm">data
-sheets</a>
+<li>
+<a href="http://www.linear.com">Linear Technologies</a></li>
+<br>LTC1710 <a href="http://www.linear.com/prodinfo/dslist.html">data sheets</a>
+
 <li>
 <a href="http://www.maxim-ic.com/">Maxim</a></li>
+<br>data sheets
 
-<br>MAX1617 data sheets
 <li>
-<a href="http://www.dalsemi.com">Dallas</a></li>
+<a href="http://www.myson.com.tw/">Myson</a></li>
+<br>data sheets
 
-<br>DS1780 <a href="http://www.dalsemi.com/Prod_info/Thermal/index.html">data
-sheets</a></ul>
+<li>
+<a href="http://www.national.com">National Semiconductor</a></li>
+<br>LM75/78/79/80 <a href="http://www.national.com/catalog/AnalogTempSensors.html">reference
+sheets</a>.
+
+<li>
+<a href="http://www.sis.com.tw/">Silicon Integrated Systems Corp.</a></li>
+<br>SIS5595 <a href="http://www.sis.com.tw/products/products.htm">data
+sheets</a>
+
+<li>
+<a href="http://www.ti.com/">Texas Instruments</a></li>
+<br>data sheets
+
+<li>
+<a href="http://www.via.com.tw">VIA 686A</a></li>
+<br>VIA chip which includes integrated sensors. There is
+a separate <a href="http://www.via.com.tw/support/datasheets.html">section
+with datasheets</a>.
+
+<li>
+<a href="http://www.winbond.com.tw">Winbond</a></li>
+<br>W83781D, W83782D, W83783S and W83627HF chips. <a href="http://www.winbond.com.tw/produ/perso7.htm">Data
+sheets</a> can be found here for most Winbond chips.
+
+</ul>
 
 <li>
 Other protocol information</li>
@@ -137,6 +158,19 @@ Hardware Monitoring Applications using the lm_sensors package</li>
 <a href="http://stimpy.netroedge.com/intranet/tellerstats/">A web-based
 hardware monitor</a></li>
 <br>This is created by Phil Edelbrock, one of our main project contributors
+
+<li>
+<a href="http://krypton.mankato.msus.edu/~turnet1/"> 
+asfatm
+</a></li><br>
+After Step fan and temperature monitor
+
+<li>
+<a href="http://www.ma-scha.de/program.html">
+asftavm
+</a></li><br>
+After Step fan, temperature, and voltage monitor.
+An enhancement of asfatm.
 
 <li>
 <a href="http://www.multiweb.nl/~s.jonker/">GLS</a></li>
@@ -162,6 +196,12 @@ Requires GTK--.
 <br>A comprehensive system monitoring package. Nice desktop app. Recommended.
 
 <li>
+<a href="http://www.coverfire.com/sensor_sweep_applet">
+Sensor Sweep Applet
+</a></li><br>
+A configurable Gnome Panel Applet.
+
+<li>
 <a href="http://voyager2.htmlplanet.com/sensors_srvr.html">Sensors Server</a></li>
 <br> Nice client/server application with a html-embedded Java applet.
 
@@ -169,9 +209,9 @@ Requires GTK--.
 daemon which warns you when your sensor readings reach critical values.
 
 <li>
-<a href="http://users.ox.ac.uk/~kebl0850/wmlm78/">wmlm78/wmsensors homepage</a></li>
+<a href="http://users.ox.ac.uk/~kebl0850/wmlm78/">wmsensors and wmlm78</a></li>
 <br>wmlm78 and wmsensors are graphical extensions of lm_sensors, which
-can be docked in Window Manager.
+can be docked in Window Manager. By Adrian Baugh.
 
 
 
