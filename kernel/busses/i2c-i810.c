@@ -37,11 +37,11 @@
 #include <linux/init.h>
 
 /* PCI defines */
-#ifndef PCI_DEVICE_ID_INTEL_82810
-#define PCI_DEVICE_ID_INTEL_82810 0x7121
+#ifndef PCI_DEVICE_ID_INTEL_82810_IG1
+#define PCI_DEVICE_ID_INTEL_82810_IG1 0x7121
 #endif
-#ifndef PCI_DEVICE_ID_INTEL_82810_DC100
-#define PCI_DEVICE_ID_INTEL_82810_DC100 0x7123
+#ifndef PCI_DEVICE_ID_INTEL_82810_IG3
+#define PCI_DEVICE_ID_INTEL_82810_IG3 0x7123
 #endif
 
 /* GPIO register locations */
@@ -223,7 +223,7 @@ static int i810i2c_setup(void)
 	dev = NULL;
 	do {
 		if ((dev = pci_find_device(PCI_VENDOR_ID_INTEL,
-					   PCI_DEVICE_ID_INTEL_82810,
+					   PCI_DEVICE_ID_INTEL_82810_IG1,
 					   dev))) {
 			if (!num)
 				config_i810(dev);
@@ -234,7 +234,7 @@ static int i810i2c_setup(void)
 	dev = NULL;
 	do {
 		if ((dev = pci_find_device(PCI_VENDOR_ID_INTEL,
-					   PCI_DEVICE_ID_INTEL_82810_DC100,
+					   PCI_DEVICE_ID_INTEL_82810_IG3,
 					   dev))) {
 			if (!num)
 				config_i810(dev);
