@@ -1235,8 +1235,9 @@ chip "lm87-*"
 # driver computations are correct. Therefore they do not need to
 # be overridden here.
 #
-# Note: AIN1 (-12?), AIN2 (-5?) and CPU2_temp require changing
+# Note: AIN1 (-12?), AIN2 (-5?) and temp3 require changing
 # #defines in the driver and recompiling!!!
+# This does not apply to the Linux 2.6 driver.
 #
 # This chip has non-standard entries in lib/chips.c so
 # the feature names are quite different from other chips.
@@ -1250,57 +1251,53 @@ chip "lm87-*"
 #
 # Warning - feature names starting with a number must be enclosed
 # with double quotes.
-#
-# It is unlikely you will need to use the following 6 lines (see above)
-#   label "2.5V" "xxx"
-#   label Vccp1 "xxx"
-#   label "3.3V" "xxx"
-#   label "5V" "xxx"
-#   label "12V" "xxx"
-#   label Vccp2 "xxx"
 
-#   label fan1 "xxx"
-#   label fan2 "xxx"
-#   label temp1 "xxx"
-#   label CPU_Temp "xxx"
-#   label CPU2_Temp "xxx"
-#
-#   set AmbTemp_min xxx
-#   set Vccp1_min xxx
-#   set "3.3V_min" xxx
-#   set "5V_min" xxx
-#   set "12V_min" xxx
-#   set Vccp2_min xxx
-#
-#   set AmbTemp_max xxx
-#   set Vccp1_max xxx
-#   set "3.3V_max" xxx
-#   set "5V_max" xxx
-#   set "12V_max" xxx
-#   set Vccp2_max xxx
-#
-#   set fan1_div xxx
-#   set fan2_div xxx
-#   set fan1_min xxx
-#   set fan2_min xxx
-#   set temp1_min xxx
-#   set temp1_max xxx
-#   set temp2_min xxx
-#   set temp2_max xxx
-#   set temp3_min xxx
-#   set temp3_max xxx
+   label "2.5V"  "+2.5V"
+   label Vccp1   "VCore"
+   label "3.3V"  "+3.3V"
+   label "5V"    "+5V"
+   label "12V"   "+12V"
+#   label Vccp2   "VCore2"
 
-# It is unlikely you will need to use the following 6 lines (see above)
-#   compute "2.5V" xxx
-#   compute Vccp1 xxx
-#   compute "3.3V" xxx
-#   compute "5V" xxx
-#   compute "12V" xxx
-#   compute Vccp2 xxx
+   label fan1 "CPU Fan"
+#   label fan2 "Case Fan"
+   label temp1 "M/B Temp"
+   label CPU_Temp "CPU Temp"
+#   label temp3 "AUX Temp"
 
-#   compute temp1 xxx
-#   compute CPU_Temp xxx
-#   compute CPU2_Temp xxx
+   set Vccp1_min    vid * 0.95
+   set Vccp1_max    vid * 1.05
+   set "3.3V_min"   3.3 * 0.92
+   set "3.3V_max"   3.3 * 1.08
+   set "5V_min"		  5 * 0.92
+   set "5V_max"       5 * 1.08
+   set "12V_min"     12 * 0.90
+   set "12V_max"     12 * 1.10
+
+# These ones are mutually exclusive with temp3. If you have temp3,
+# comment out these lines as they will trigger errors on "sensors -s".
+   set "2.5V_min"   2.5 * 0.92
+   set "2.5V_max"   2.5 * 1.08
+   set Vccp2_min    vid * 0.95
+   set Vccp2_max    vid * 1.05
+
+# Increase fan clock dividers if your fans read 0 RPM while you know
+# they are connected and running.
+#   set fan1_div 4
+#   set fan2_div 4
+
+   set fan1_min 3000
+   set fan2_min 3000
+
+   set temp1_min   5
+   set temp1_max  65
+   set temp2_min   5
+   set temp2_max  70
+
+# Uncomment if you actually have temp3 (which means you don't have 2.5V
+# nor Vccp2, as they are mutually exclusive).
+#   set temp3_min   5
+#   set temp3_max  70
 
 # LM87 AIN1 and AIN2 Section
 # As described above, the driver must be recompiled to use either or
