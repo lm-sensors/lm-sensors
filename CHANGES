@@ -27,6 +27,8 @@ ask CVS about it:
   Module i2c-piix4: Refuse to load on IBM systems
   Module i2c-sis630: new
   Module lm92: Fix in-kernel initialization
+  Module via686a: Remove VT8231 support
+  Module vt8231: new
   Module w83781: recognize Asus "ASB100 Bach" as AS99127F
   Program dmidecode: new
   Programs i2cdetect, i2cdump, i2cset, isadump: Now installed by 'make install'

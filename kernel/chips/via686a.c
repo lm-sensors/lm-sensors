@@ -25,9 +25,8 @@
 */
 
 /*
-    Supports the Via VT82C686A, VT82C686B, and VT8231 south bridges.
+    Supports the Via VT82C686A, VT82C686B south bridges.
     Reports all as a 686A.
-    8231-specific features not yet supported.
     See doc/chips/via686a for details.
     Warning - only supports a single device.
 */
@@ -80,7 +79,7 @@ static unsigned int normal_isa[] = { 0x0000, SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_2(via686a, vt8231);
+SENSORS_INSMOD_1(via686a);
 
 /*
    The Via 686a southbridge has a LM78-like chip integrated on the same IC.
@@ -534,9 +533,7 @@ int via686a_find(int *address)
 	if (!(s_bridge = pci_find_device(PCI_VENDOR_ID_VIA,
 					 PCI_DEVICE_ID_VIA_82C686_4,
 					 NULL)))
-		if (!(s_bridge = pci_find_device(PCI_VENDOR_ID_VIA,
-						 0x8235,
-						 NULL))) return -ENODEV;
+		return -ENODEV;
 
 	if (PCIBIOS_SUCCESSFUL !=
 	    pci_read_config_word(s_bridge, VIA686A_BASE_REG, &val))

@@ -9,11 +9,6 @@ Supported chips:
     Addresses scanned: ISA in PCI-space encoded address
     Datasheet: Sometimes available at the Via site http://www.via.com.tw.
 
-  * Via VT8231  Southbridge Integrated Hardware Monitor
-    Prefix: via686a
-    Addresses scanned: ISA in PCI-space encoded address
-    Datasheet: On request from Via
-
 Authors: Kyösti Mälkki <kmalkki@cc.hut.fi>,
          Mark D. Studebaker <mdsxyz123@yahoo.com>
 	 Bob Dougherty <bobd@stanford.edu>
@@ -35,7 +30,7 @@ Description
 -----------
 
 The driver does not distinguish between the chips and reports
-all as a 686A. Features specific to the 8231 are not yet supported.
+all as a 686A.
 
 The Via 686a southbridge has integrated hardware monitor functionality.
 It also has an I2C bus, but this driver only supports the hardware monitor.
