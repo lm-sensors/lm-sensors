@@ -27,6 +27,7 @@ ask CVS about it:
                    enable if not enabled
   Module i2c-piix4: Refuse to load on IBM systems
   Module i2c-sis630: new
+  Module i2c-sis645: new
   Module lm92: Fix in-kernel initialization
   Module via686a: Remove VT8231 support
   Module vt8231: new

@@ -50,6 +50,7 @@ At least the following I2C/SMBus adapters are supported:
   NVidia nForce
   ServerWorks OSB4, CSB5
   SiS 5595
+  SiS 645
   SMSC Victory66, 74M1xx
   3Dfx Voodoo 3 and Banshee
   VIA Technologies VT82C586B, VT82C596A/B, VT82C686A/B, VT8231,
@@ -59,7 +60,7 @@ At least the following I2C/SMBus adapters are supported:
 At least the following hardware sensor chips are supported:
   Analog Devices ADM1021, ADM1021A, ADM1022,
                  ADM1023, ADM1024, ADM1025, and ADM9240
-  Asus AS99127F
+  Asus AS99127F, ASB100 Bach
   Dallas Semiconductor DS75, DS1621, DS1625, DS1775, and DS1780
   Hewlett Packard Maxilife (several revisions including '99 NBA)
   Fujitsu Siemens Poseidon, Scylla
