@@ -612,13 +612,22 @@ chip "as99127f-*"
 # Asus A7V133, Asus A7M266
     compute temp2 @*2.0, @/2.0
 # Asus CUSL2
-#   compute temp2 (@*60/43)+25,(@-25)*43/60
+#   compute temp2 (@*60/43)+25, (@-25)*43/60
 
 # See comments above if temp3 looks bad. What works for temp2 is likely
 # to work for temp3.
     compute temp3 @*2.0, @/2.0
 
 # ASB100's temp4 isn't supported yet.
+
+# Most Asus boards have temperatures settled like that:
+    label temp1 "M/B Temp"
+    label temp2 "CPU Temp"
+# However, the A7N8X Deluxe rev.2 at least has them swapped:
+#   label temp1 "CPU Temp"
+#   label temp2 "M/B Temp"
+# If you know other boards where they are swapped, let us know and
+# we'll update the list.
 
 # adjust this if your vid is wrong; see doc/vid
 #   set vrm 9.0
