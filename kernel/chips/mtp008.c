@@ -1096,7 +1096,7 @@ void mtp008_sens(struct i2c_client *client, int operation, int ctl_name,
 	u8 tmp;
 	struct mtp008_data *data;
 
-	nr = ctl_name - MTP008_SYSCTL_SENS1;
+	nr = 1 + ctl_name - MTP008_SYSCTL_SENS1;
 	data = client->data;
 
 	switch (operation) {
@@ -1105,7 +1105,7 @@ void mtp008_sens(struct i2c_client *client, int operation, int ctl_name,
 
 		break;
 	case SENSORS_PROC_REAL_READ:
-		results[0] = data->sens[nr];
+		results[0] = data->sens[nr - 1];
 
 		*nrels_mag = 1;
 
@@ -1122,16 +1122,14 @@ void mtp008_sens(struct i2c_client *client, int operation, int ctl_name,
 				case THERMISTOR:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
-						tmp & ~MTP008_CFG_VT1_PII
-					);
-					data->sens[nr] = 2;
+						tmp & ~MTP008_CFG_VT1_PII);
+					data->sens[0] = 2;
 					break;
 				case PIIDIODE:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
-						tmp | MTP008_CFG_VT1_PII
-					);
-					data->sens[nr] = 3;
+						tmp | MTP008_CFG_VT1_PII);
+					data->sens[0] = 3;
 					break;
 				}
 
@@ -1144,23 +1142,20 @@ void mtp008_sens(struct i2c_client *client, int operation, int ctl_name,
 				case VOLTAGE:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
-						tmp | MTP008_CFG_VT2_AIN
-					);
-					data->sens[nr] = 1;
+						tmp | MTP008_CFG_VT2_AIN);
+					data->sens[1] = 1;
 					break;
 				case THERMISTOR:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
-						tmp | MTP008_CFG_VT2_VT
-					);
-					data->sens[nr] = 2;
+						tmp | MTP008_CFG_VT2_VT);
+					data->sens[1] = 2;
 					break;
 				case PIIDIODE:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
-						tmp | MTP008_CFG_VT2_PII
-					);
-					data->sens[nr] = 3;
+						tmp | MTP008_CFG_VT2_PII);
+					data->sens[1] = 3;
 					break;
 				}
 
@@ -1172,16 +1167,14 @@ void mtp008_sens(struct i2c_client *client, int operation, int ctl_name,
 				case VOLTAGE:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
-						tmp & ~MTP008_CFG_VT3_VT
-					);
-					data->sens[nr] = 1;
+						tmp & ~MTP008_CFG_VT3_VT);
+					data->sens[2] = 1;
 					break;
 				case THERMISTOR:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
-						tmp | MTP008_CFG_VT3_VT
-					);
-					data->sens[nr] = 2;
+						tmp | MTP008_CFG_VT3_VT);
+					data->sens[2] = 2;
 					break;
 				}
 
