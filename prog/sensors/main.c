@@ -52,7 +52,7 @@ static const char *sprintf_chip_name(sensors_chip_name name);
 #define CHIPS_MAX 20
 sensors_chip_name chips[CHIPS_MAX];
 int chips_count=0;
-int do_sets, do_unknown, fahrenheit;
+int do_sets, do_unknown, fahrenheit, hide_adapter;
 
 void print_short_help(void)
 {
@@ -65,7 +65,8 @@ void print_long_help(void)
   printf("  -c, --config-file     Specify a config file\n");
   printf("  -h, --help            Display this help text\n");
   printf("  -s, --set             Execute `set' statements too (root only)\n");
-  printf("  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n" );
+  printf("  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n");
+  printf("  -A, --no-adapter      Do not show adapter and algorithm for each chip\n");
   printf("  -u, --unknown         Treat chips as unknown ones (testing only)\n");
   printf("  -v, --version         Display the program version\n");
   printf("\n");
@@ -147,15 +148,17 @@ int main (int argc, char *argv[])
     { "set", no_argument, NULL, 's' },
     { "version", no_argument, NULL, 'v'},
     { "fahrenheit", no_argument, NULL, 'f' },
+    { "no-adapter", no_argument, NULL, 'A' },
     { "config-file", required_argument, NULL, 'c' },
-    { "unknown", required_argument, NULL, 'u' },
+    { "unknown", no_argument, NULL, 'u' },
     { 0,0,0,0 }
   };
 
   do_unknown = 0;
   do_sets = 0;
+  hide_adapter = 0;
   while (1) {
-    c = getopt_long(argc,argv,"hvufsc:",long_opts,NULL);
+    c = getopt_long(argc,argv,"hsvfAcu:",long_opts,NULL);
     if (c == EOF)
       break;
     switch(c) {
@@ -177,6 +180,9 @@ int main (int argc, char *argv[])
       break;
     case 'f':
       fahrenheit = 1;
+      break;
+    case 'A':
+      hide_adapter = 1;
       break;
     case 'u':
       do_unknown = 1;
@@ -279,10 +285,10 @@ void do_a_print(sensors_chip_name name)
 
   printf("%s\n",sprintf_chip_name(name));
   adap = sensors_get_adapter_name(name.bus);
-  if (adap)
+  if (adap && !hide_adapter)
     printf("Adapter: %s\n",adap);
   algo = sensors_get_algorithm_name(name.bus);
-  if (algo)
+  if (algo && !hide_adapter)
     printf("Algorithm: %s\n",algo);
   if (!algo || !adap)
     printf(" ERROR: Can't get adapter or algorithm?!?\n");
