@@ -123,9 +123,6 @@ static struct i2c_algorithm smbus_algorithm = {
   /* functionality */   amd756_func,
 };
 
-/* externalize it */
-#define I2C_HW_SMBUS_AMD756 0x05
-
 static struct i2c_adapter amd756_adapter = {
   "unset",
   I2C_ALGO_SMBUS | I2C_HW_SMBUS_AMD756,
