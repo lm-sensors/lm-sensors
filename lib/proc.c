@@ -121,6 +121,7 @@ int sensors_read_proc_chips(void)
 		if ((f = fopen(n, "r")) != NULL) {
 			char	x[120];
 			fscanf(f, "%[a-zA-z0-9_]", x);
+			fclose(f);
 			/* HACK */ strcat(x, "-*");
 			if ((res = sensors_parse_chip_name(x, &entry.name))) {
 				char	em[NAME_MAX + 20];
@@ -131,8 +132,16 @@ int sensors_read_proc_chips(void)
 			}
 			entry.name.busname = strdup(dirname);
 			sscanf(de->d_name, "%x-%x", &entry.name.bus, &entry.name.addr);
+			/* find out if ISA or not */
+			sprintf(n, "%s/class/i2c-adapter/i2c-%d/device/name",
+			        sysfsmount, entry.name.bus);
+			if ((f = fopen(n, "r")) != NULL) {
+				fgets(x, 5, f);
+				fclose(f);
+				if(!strncmp(x, "ISA ", 4))
+					entry.name.bus = SENSORS_CHIP_NAME_BUS_ISA;
+			}
 			add_proc_chips(&entry);
-			fclose(f);
 		}
 	}
 	closedir(dir);
@@ -192,7 +201,6 @@ int sensors_read_proc_bus(void)
 			strcpy(dirname, n);
 			strcat(n, "/device/name");
 
-printf("opening %s\n", n);
 			if ((f = fopen(n, "r")) != NULL) {
 				char	x[120];
 				fgets(x, 120, f);
@@ -208,7 +216,6 @@ printf("opening %s\n", n);
 					entry.algorithm = "Dummy bus algorithm";
 				} else
 					entry.algorithm = "Unavailable from sysfs";
-printf("adding bus adap %s algo %s number %d\n", entry.adapter, entry.algorithm, entry.number);
 				add_proc_bus(&entry);
 			}
 		}
