@@ -324,7 +324,27 @@ if (@ARGV)
 	my %rprefix = reverse %prefix;
 	foreach my $prefix (@ARGV)
 	{
-		output_data($rprefix{$prefix});
+		if (exists $rprefix{$prefix})
+		{
+			output_data($rprefix{$prefix})
+		}
+		else
+		{
+			my $lines = 0;
+			print "No chip named `$prefix' was found.\n",
+				"Suggestions:\n";
+			foreach my $k (sort keys %rprefix)
+			{
+				if (grep /$prefix/, $k)
+				{
+					print "  $k\n";
+					$lines++;
+				}
+			}
+			print "  (none)\n"
+				unless $lines;
+			print "\n";
+		}
 	}
 }
 else

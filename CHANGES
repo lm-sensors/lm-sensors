@@ -19,11 +19,11 @@ ask CVS about it:
 
 2.6.6 (2002????)
   NOTE: Requires i2c-2.6.6 or newer.
-  File doc/busses/i2c-sis645: add license
-  File doc/chips/lm92: add license, add features
-  File doc/chips/maxilife: add license, add parameters, add features
-  File doc/chips/smartbatt: complete rewrite
-  File doc/chips/vt8231: add license, add parameters
+  File doc/busses/i2c-sis645: Add license
+  File doc/chips/lm92: Add license, features
+  File doc/chips/maxilife: Add license, parameters, features
+  File doc/chips/smartbatt: Complete rewrite
+  File doc/chips/vt8231: Add license, parameters
   Library: Add support for MC1066; add multiple VRM version support for lm87;
            enhance adm1023 support
   Makefile: Take kernel source location from /lib/modules/x.x.x/build
@@ -32,15 +32,18 @@ ask CVS about it:
   Module gl518sm: Iterate allowed only for rev 0x00
   Module i2c-amd756: Configure base address for nForce support;
                      check for uninitialized base address
-  Module i2c-sis630: added support for SiS730
-  Module i2c-sis645: improved support for SiS645/961
-                     added support for SiS645DX/961 and SiS735
+  Module i2c-sis630: Add support for SiS730
+  Module i2c-sis645: Improve support for SiS645/961;
+                     add support for SiS645DX/961 and SiS735
   Module i2c-viapro: VT8233A (new ID 0x3177)
   Module lm87: Add multiple VRM version support
   Module w83781d: Fix in0/in1 initialization
   Module smartbatt: New
   Program dmidecode: Fix read bug
-  Program lm_sensors.init: remove spaces bug, add green/red output
+  Program doc-insmod: Complete rewrite; fix author output
+  Program doc-features: Complete rewrite; handle missing sysctl entries;
+                        handle unknown prefix with suggestion
+  Program lm_sensors.init: Remove spaces bug; add green/red output
   Program mkpatch: Fix dmi_scan module compile
   Program sensors: Add support for MC1066, Rambus Rimms;
                    fix w83781d temp3 alarm; fix gl518sm rev 0x00 recognition

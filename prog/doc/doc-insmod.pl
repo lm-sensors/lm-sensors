@@ -54,7 +54,7 @@ sub print_modinfo
 	
 	my ($author, $license);
 	$author = `$modinfo -a $modname`;
-	$author =~ s/\n\s*/ /mg;
+	$author =~ s/\n\s+/ /mg; # handle multiline authors
 	$author =~ s/^"//;
 	$author =~ s/"$//;
 	if (defined $version and $version >= (2<<16)+(4<<8)+15)
@@ -69,14 +69,18 @@ sub print_modinfo
 		if defined $license;
 	print "\n", "Module Parameters\n", "-----------------\n", "\n";
 
+	my $lines = 0;
 	open OPTIONS, "$modinfo -p $modname |";
 	while (<OPTIONS>)
 	{
 		next unless m/^(parm:\s*)?(\S+) (.+), description "(.*)"$/;
 		print "* $2: $3\n",
 			wrap('  ', '  ', $4), "\n";
+		$lines++;
 	}
 	close OPTIONS;
+	print "(none)\n"
+		unless $lines;
 }
 
 if (@ARGV != 1 or $ARGV[0] =~ /^-/)
