@@ -40,9 +40,7 @@ $ENV{PATH} .= '/sbin:'
 # CONSTANT DECLARATIONS #
 #########################
 
-use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmidecode);
-
-@dmidecode = ( '/usr/local/sbin/dmidecode', '/usr/sbin/dmidecode' );
+use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
 
 @undetectable_adapters = ( 'i2c-elektor', 'i2c-elv', 'i2c-philips-par',
                            'i2c-velleman' );
@@ -3843,112 +3841,12 @@ sub generate_modprobes
 }
 
 # returns:
-# system id string (e.g. 'IBM'), unsafe system
-# '1', safe system
-# 0, could not determine
-sub system_safeness_by_dmi
-{
-  my $opened = 0;
-  foreach my $dmidecode (@dmidecode)
-  {
-    last if (-r $dmidecode && ($opened = open (DMI, "$dmidecode |")));
-  }
-
-  unless ($opened)
-  {
-    print " Could not find dmidecode, which should have been installed with lm_sensors.\n",
-          " Running dmidecode would help us determining your system vendor, which allows\n",
-          " safer operations. Please provide one of the following:\n  ";
-    print join ("\n  ", @dmidecode);
-    print "\n You can still go on, but you are encouraged to fix the problem first.\n\n";
-    return 0;
-  }
-
-  my ($dmitype, $biosversion, $systemvendor);
-  while (<DMI>)
-  {
-    if (m/^\s*DMI type (\d+),/)
-    {
-      $dmitype = $1;
-      next;
-    }
-    next unless defined $dmitype;
-    if ($dmitype == 1 && m/^\s*(Vendor|Manufacturer): (.*)$/)
-    {
-      $systemvendor = $2;
-    }
-    elsif ($dmitype == 0 && m/^\s*Version: (.*)$/)
-    {
-      $biosversion = $1;
-    }
-    last if (defined $biosversion && defined $systemvendor);
-  }
-  close (DMI);
-
-  if (defined $systemvendor && $systemvendor !~ m/^\s*$/)
-  {
-    $systemvendor =~ s/\s*$//;
-    print " System vendor (DMI): $systemvendor\n";
-    if (defined $biosversion && $biosversion !~ m/^\s*$/)
-    {
-      $biosversion =~ s/\s*$//;
-      print " BIOS version (DMI): $biosversion\n";
-    }
-    return 'IBM' if $systemvendor =~ /\bIBM\b/;
-    return '1';
-  }
-
-  return undef;
-}
-
-# returns:
-# system id string (e.g. 'IBM'), unsafe system
-# '1', safe system
-# 0, could not determine
-sub system_safeness_by_acpi
-{
-  my $pos = 0xF0000;
-  my $found = 0;
-  my $oem = '';
-
-  return 0
-    unless open MEM, '/dev/mem';
-  binmode MEM;
-  unless (seek MEM, $pos, SEEK_SET)
-  {
-    close MEM;
-    return 0;
-  }
-  while ($pos <= 0xFFFF0 && !$found)
-  {
-    my $r = read (MEM, my $buf, 16);
-    unless ($r == 16)
-    {
-      close MEM;
-      return 0;
-    }
-    if (substr ($buf, 0, 8) eq 'RSD PTR ')
-    {
-      $oem = substr ($buf, 9, 6);
-      $found++;
-    }
-    $pos += 16;
-  }
-  close MEM;
-
-  return 0 unless $found;
-  print " BIOS vendor (ACPI): $oem\n";
-  return 'IBM' if $oem eq 'IBM   ';
-  return '1';
-}
-
-# returns:
-# system id string (e.g. 'IBM'), unsafe system
-# '1', safe system
-# 0, could not determine
+# 0, could not determine (can't read /dev/mem...)
+# 1, safe system (VPD record not found)
+# bios string (e.g. "INET32WW"), unsafe system 
 # VPD is documented here:
 # http://www.pc.ibm.com/qtechinfo/MIGR-45120.html
-sub system_safeness_by_vpd
+sub vpd_bios_build_id
 {
   my $pos = 0xF0000;
   my $found = 0;
@@ -3984,10 +3882,10 @@ sub system_safeness_by_vpd
   }
   close MEM;
 
-  return '1' unless $found;
-  print " System vendor (VPD): IBM\n";
-  print " BIOS version (VPD): $bbid\n";
-  return 'IBM';
+  return 1 unless $found;
+  print " System vendor: IBM\n";
+  print " BIOS version: $bbid\n";
+  return "$bbid";
 }
 
 # returns:
@@ -4003,66 +3901,20 @@ sub safe_system_vendor
   	return 0;
   }
 
-  # We now have three methods for detecting IBM systems: ACPI, DMI and VPD.
-  # The ACPI and VPD scans are easy and handled internally. The DMI scan,
-  # being more complex, is handled by dmidecode, externally.
-  # Each method can return three status:
-  #  * the system is known to be safe (returns '1');
-  #  * the system is known to be unsafe (returns a string that identifies
-  #    the system, e.g. 'IBM');
-  #  * the method doesn't permit to detect wether the system is safe
-  #    (returns 0).
-  # We then combine both results to come to a conclusion. The rules we
-  # follow are (in order):
-  #  * if all methods return 0, we can't say anything and return 0 (meaning
-  #    "system safeness is unknown");
-  #  * else, if no method returns an identifier string (that is, each method
-  #    returns either 0 or '1'), we assume that the system is safe and
-  #    return 1 (meaning "system is safe");
-  #  * else display an alert message and exit; if only one of the methods
-  #    worked, ask the user to be kind and send us a report.
+  my $vpd_bbid = vpd_bios_build_id();
 
-  my $safeness_acpi = system_safeness_by_acpi();
-  my $safeness_dmi = system_safeness_by_dmi();
-  my $safeness_vpd = system_safeness_by_vpd();
-
-  return 0
-    unless ($safeness_acpi || $safeness_dmi || $safeness_vpd);
-
-  return 1
-    if (!$safeness_acpi || $safeness_acpi eq '1')
-    && (!$safeness_dmi || $safeness_dmi eq '1')
-    && (!$safeness_vpd || $safeness_vpd eq '1');
-
-  my $sysname;
-  # Order matters, we trust VPD more than DMI, and DMI more than ACPI
-  foreach my $safeness ($safeness_vpd, $safeness_dmi, $safeness_acpi)
-  {
-    if ($safeness && $safeness ne '1')
-    {
-      $sysname = $safeness;
-      last;
-    }
-  }
+  return 0 if $vpd_bbid eq '0';
+  return 1 if $vpd_bbid eq '1';
   
-  print " Sorry, we won't let you go on. $sysname systems are known to have\n",
+# This is where we'll be able to differenciate between different
+# IBM systems (safe and unsafe). For now, everyone is blacklisted.
+  
+  print " Sorry, we won't let you go on. IBM systems are known to have\n",
         " serious problems with lm_sensors, resulting in hardware failures.\n",
         " For more information, see README.thinkpad or\n",
-        " http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/README.thinkpad.\n";
-
-  if($safeness_vpd eq '1')
-  {
-    print " We used three different methods to determine your system's vendor,\n",
-          " and the one we believed to be the best failed in your case.\n",
-          " We'd appreciate to have feedback about this.\n",
-          " Please, take some time and contact the lm_sensors mailing\n",
-          " list at <sensors\@stimpy.netroedge.com>.\n",
-          " We need the following information:\n",
-          "  * The brand and model of your system\n",
-          "  * The BIOS vendor (ACPI) displayed above\n",
-          "  * The System vendor (DMI) displayed above\n",
-          " Thanks!\n";
-  }
+        " http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/README.thinkpad.\n",
+        " Not all IBM systems are affected, and we plan to establish a\n",
+        " \"white list\" of safe systems soon. Stay tuned!\n\n";
 
   exit;
 }
