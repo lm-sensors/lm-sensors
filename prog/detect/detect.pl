@@ -77,7 +77,8 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
      }
 );
 
-use subs qw(lm78_detect lm78_isa_detect lm75_detect lm80_detect w83781d_detect
+use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect 
+            lm80_detect w83781d_detect w83781d_alias_detect
             w83781d_isa_detect gl518sm_detect gl520sm_detect adm9240_detect 
             adm1021_detect);
 
@@ -96,6 +97,10 @@ use subs qw(lm78_detect lm78_isa_detect lm75_detect lm80_detect w83781d_detect
 #  isa_detect (optional): For ISA chips, the function to call to detect
 #      this chip. The function should take one parameter: the ISA address
 #      to probe.
+#  alias_detect (optional): For chips which can be both on the ISA and the
+#      I2C bus, a function which detectes whether two entries are the same.
+#      The function should take three parameters: The ISA address, the
+#      I2C bus number, and the I2C address.
 @chip_ids = (
      {
        name => "National Semiconductors LM78",
@@ -104,6 +109,7 @@ use subs qw(lm78_detect lm78_isa_detect lm75_detect lm80_detect w83781d_detect
        i2c_detect => sub { lm78_detect 0, @_},
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect 0, @_ },
+       alias_detect => sub { lm78_alias_detect 0, @_ },
      } ,
      {
        name => "National Semiconductors LM78-J",
@@ -112,6 +118,7 @@ use subs qw(lm78_detect lm78_isa_detect lm75_detect lm80_detect w83781d_detect
        i2c_detect => sub { lm78_detect 1, @_ },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect 1, @_ },
+       alias_detect => sub { lm78_alias_detect 1, @_ },
      } ,
      {
        name => "National Semiconductors LM79",
@@ -120,6 +127,7 @@ use subs qw(lm78_detect lm78_isa_detect lm75_detect lm80_detect w83781d_detect
        i2c_detect => sub { lm78_detect 2, @_ },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect 2, @_ },
+       alias_detect => sub { lm78_alias_detect 2, @_ },
      } ,
      {
        name => "National Semiconductors LM75",
@@ -140,6 +148,7 @@ use subs qw(lm78_detect lm78_isa_detect lm75_detect lm80_detect w83781d_detect
        i2c_detect => sub { w83781d_detect 0, @_},
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect 0, @_ },
+       alias_detect => sub { w83781d_alias_detect 0, @_ },
      } ,
      {
        name => "Winbond W83782D",
@@ -148,6 +157,7 @@ use subs qw(lm78_detect lm78_isa_detect lm75_detect lm80_detect w83781d_detect
        i2c_detect => sub { w83781d_detect 1, @_},
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect 1, @_ },
+       alias_detect => sub { w83781d_alias_detect 1, @_ },
      } ,
      {
        name => "Winbond W83783S",
@@ -156,6 +166,7 @@ use subs qw(lm78_detect lm78_isa_detect lm75_detect lm80_detect w83781d_detect
        i2c_detect => sub { w83781d_detect 2, @_},
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect 2, @_ },
+       alias_detect => sub { w83781d_alias_detect 2, @_ },
      } ,
      {
        name => "Genesys Logic GL518SM Revision 0x00",
@@ -638,6 +649,8 @@ use vars qw(@chips_detected);
 #               in /proc/bus/i2c
 #          with field 'algo' containing an algorithm string as appearing
 #               in /proc/bus/i2c
+#          with field 'devnr', contianing the /dev/i2c-* number of this
+#               adapter;
 #          with field 'driver', containing the driver name for this adapter;
 #          with field 'address', containing the I2C address of the detection;
 #          with field 'confidence', containing the confidence level of this
@@ -658,6 +671,8 @@ use vars qw(@chips_detected);
 #               in /proc/bus/i2c
 #          with field 'algo' containing an algorithm string as appearing
 #               in /proc/bus/i2c
+#          with field 'devnr', contianing the /dev/i2c-* number of this
+#               adapter;
 #          with field 'driver', containing the driver name for this adapter;
 #          with field 'address', containing the I2C address of the detection;
 #          with field 'confidence', containing the confidence level of this
@@ -727,7 +742,7 @@ sub add_to_chips_detected
 
 sub add_isa_to_chips_detected
 {
-  my ($chipdriver,$datahash) = @_;
+  my ($alias_detect,$chipdriver,$datahash) = @_;
   my ($detected_ref,$misdetected_ref, $new_detected_ref,$new_misdetected_ref,
       $i,$j,$found_it);
 
@@ -739,15 +754,45 @@ sub add_isa_to_chips_detected
   if ($i == @chips_detected) {
     push @chips_detected, { driver => $chipdriver,
                             detected => [],
-                            misdetected => [] };
+                            misdetected => [], };
   }
   $new_detected_ref = $chips_detected[$i]->{detected};
   $new_misdetected_ref = $chips_detected[$i]->{misdetected};
-
-  # Now, we are looking for aliases. To be done.
-  # If an alias is found, it is removed from the structure, and the data
-  # is put in %$datahash. If not, nothing happens
   
+  # Now, we are looking for aliases. An alias can only be the same chiptype.
+  # If an alias is found in the detected list, it is removed from the 
+  # structure, and the data is put in %$datahash. If it is found in the
+  # misdetected list, the entry is modified, and this function aborted.
+  # If it is not found, nothing happens.
+  for ($j = 0; $j < @$new_misdetected_ref; $j++) {
+    if (exists $new_misdetected_ref->[$j]->{address} and 
+        not exists $new_misdetected_ref->[$j]->{isa_addr} and
+        defined $alias_detect and
+        $new_misdetected_ref->[$j]->{chip_type} eq $datahash->{chip_type}) {
+      if (&$alias_detect ($datahash->{isa_addr},
+                          $new_misdetected_ref->[$j]->{devnr},
+                          $new_misdetected_ref->[$j]->{address})) {
+        $new_misdetected_ref->[$j] = { %$new_misdetected_ref->[$j],
+                                      isa_addr => $datahash->{isa_addr}};
+        return;
+      }
+    }
+  }
+
+  for ($j = 0; $j < @$new_detected_ref; $j++) {
+    if (exists $new_detected_ref->[$j]->{address} and
+        not exists $new_detected_ref->[$j]->{isa_addr} and
+        $new_detected_ref->[$j]->{chip_type} eq $datahash->{chip_type}) {
+      if (&$alias_detect ($datahash->{isa_addr},
+                          $new_detected_ref->[$j]->{devnr},
+                          $new_detected_ref->[$j]->{address})) {
+        $new_detected_ref->[$j]->{isa_addr} = $datahash->{isa_addr};
+        ($datahash) = splice (@$new_detected_ref, $j, 1);
+        last;
+      }
+    }
+  }
+        
   # At long last, we will insert the new reference, looking out whether
   # some other chip has already claimed this ISA address.
   $found_it = 0;
@@ -790,7 +835,7 @@ sub scan_adapter
     next unless i2c_smbus_read_byte(\*FILE) >= 0;
     printf "Client found at address 0x%02x\n",$addr;
     foreach $chip (@chip_ids) {
-      if (contains $addr, @{$$chip{i2c_addrs}}) {
+      if (exists $$chip{i2c_addrs} and contains $addr, @{$$chip{i2c_addrs}}) {
         print "Probing for $$chip{name}... ";
         if (($conf,@chips) = &{$$chip{i2c_detect}} (\*FILE ,$addr)) {
           print "Success!\n",
@@ -807,6 +852,7 @@ sub scan_adapter
                                   adapter => $adapter_name,
                                   algorithm => $algorithm_name,
                                   driver => $adapter_driver,
+                                  devnr => $adapter_nr,
                                 };
           foreach $add_addr(@chips) {
             add_to_chips_detected $$chip{driver},
@@ -817,6 +863,7 @@ sub scan_adapter
                                     algorithm => $algorithm_name,
                                     driver => $adapter_driver,
                                     main => $addr,
+                                    devnr => $adapter_nr,
                                   };
           }
         } else {
@@ -839,7 +886,7 @@ sub scan_isa_bus
       print("Failed!\n"), next if not defined $conf;
       print "Success!\n";
       printf "    (confidence %d, driver `%s')\n", $conf, $$chip{driver};
-      add_isa_to_chips_detected $$chip{driver}, 
+      add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver}, 
                                 { confidence => $conf,
                                   isa_addr => $addr,
                                   chipname =>  $$chip{name},
@@ -909,6 +956,23 @@ sub lm78_isa_detect
                 ($chip == 1 and $reg == 0x40) or
                 ($chip == 2 and ($reg & 0xfe) == 0xc0);
   return 7;
+}
+
+
+# $_[0]: Chip to detect (0 = LM78, 1 = LM78-J, 2 = LM79)
+# $_[1]: ISA address
+# $_[2]: I2C file handle
+# $_[3]: I2C address
+sub lm78_alias_detect
+{
+  my ($chip,$isa_addr,$file,$i2c_addr) = @_;
+  my $i;
+  my $readproc = sub { isa_read_byte $isa_addr + 5, $isa_addr + 6, @_ };
+  return 0 unless &$readproc(0x48) == $i2c_addr;
+  for ($i = 0x2b; $i <= 0x3d; $i ++) {
+    return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($i);
+  }
+  return 1;
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
@@ -995,6 +1059,22 @@ sub w83781d_detect
   push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;
   push @res, (($reg1 & 0x80) >> 4) + 0x48 unless $reg1 & 0x80;
   return @res;
+}
+
+# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83783S)
+# $_[1]: ISA address
+# $_[2]: I2C file handle
+# $_[3]: I2C address
+sub w83781d_alias_detect
+{
+  my ($chip,$isa_addr,$file,$i2c_addr) = @_;
+  my $i;
+  my $readproc = sub { isa_read_byte $isa_addr + 5, $isa_addr + 6, @_ };
+  return 0 unless &$readproc(0x48) == $i2c_addr;
+  for ($i = 0x2b; $i <= 0x3d; $i ++) {
+    return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($i);
+  }
+  return 1;
 }
 
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83783S)
