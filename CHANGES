@@ -101,7 +101,8 @@ ask CVS about it:
                           Support dmidecode 2.0 and later;
                           Fix "C" format error;
                           Add support for adm1026, 82801EB (ICH5), W83791D;
-                          Add support for w83l785ts, nForce2
+                          Add support for w83l785ts, nForce2;
+                          Fix UTF-8 incompatibility
 
 2.7.0 (20021208)
   NOTE: Requires i2c-2.7.0 or newer.
