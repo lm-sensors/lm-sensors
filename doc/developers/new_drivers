@@ -9,11 +9,17 @@ We are more than happy to help you with any part of the process.
 There are two types of drivers, chip and bus.
 Steps which apply to only one type of driver are noted.
 
+These instructions are for 2.4-kernel-compatible drivers.
+If you wish to write a driver for 2.5 only, email us for information.
 
-* Contact us first.
+---------------------------------------------------------------------
+
+* Check our "New Drivers" page for status!!
+
+* Contact us.
   You are of course free to write your own drivers, but it is smart to
-  check first nobody else is already working on it.
-  Check our "New Drivers" page for information also.
+  check first nobody else is already working on it, in case the
+  New Drivers page is out of date.
   You will also need to ask us to have an ID reserved in
   i2c-id.h in the i2c package.
   Tell us it's OK to put your name on the "New Drivers" page.
@@ -25,7 +31,7 @@ Steps which apply to only one type of driver are noted.
 
 * Write the new driver. 
   For a chip driver, use lm78.c as template. For an SMBus-only adapter, 
-  use i2c-piix4.c. Use i2c-via.c for an I2C-level adapter.
+  use i2c-piix4.c. Use i2c-via.c for an I2C-level adapter ('bit banger').
   Usually, we make all prefixes start with the driver name. This is not
   really necessary, as these symbols will not be exported anyway. But by
   doing this, you are sure you do not shadow any global kernel names.
@@ -45,7 +51,8 @@ Steps which apply to only one type of driver are noted.
   These define the entries in the ctl_table for /proc.
 
 * Meet /proc naming standards in the ctl_table (for chip drivers only).
-  See doc/developers/proc for information.
+  See doc/developers/proc for information. Please do not deviate from
+  this without discussion.
 
 * Add the driver to the Module.mk (the makefile).
   Usually, you can just add it to KERNEL{CHIPS,DRIVERS}TARGETS in the
@@ -53,9 +60,7 @@ Steps which apply to only one type of driver are noted.
   where the comment says to put drivers NOT included in mkpatch.
 
 * Make sure it compiles cleanly.
-  If you compile with 'make WARN=1', you usually get many additional
-  warnings. Please resolve these too, even if you know they are
-  harmless. Do the same with 'make DEBUG=1 WARN=1' if you use debugging
+  Check compilation with 'make DEBUG=1' if you use debugging
   information. Remember, things put between #ifdef DEBUG #endif may never
   stop the driver from functioning; they should just output additional
   information.
@@ -79,8 +84,10 @@ Steps which apply to only one type of driver are noted.
   see also the comments in etc/sensors.conf.eg for help.
   Contact us if you need more assistance.
 
-* Add alarm definitions to kernel/include/sensors.h (for chip drivers only).
-  These define the bits in the 'alarms' entry in /proc.	
+* Be sure that SYSCTL and ALARM definitions in the driver are bracketed
+  by the special comments so that the kernel/include/sensors.h
+  file, which is generated automatically, contains your definitions.
+  (for chip drivers only)
 
 * Add a procedure to prog/sensors/chips.[ch] (for chip drivers only).
   This is a function specific for your driver that
@@ -127,18 +134,13 @@ Checklist for mkpatch support, after the driver is tested and stable:
 * Add .c file to mkpatch/FILES.
 
 * Add makefile entry in mkpatch/mkpatch.pl (2 places - old and new formats).
+  (don't bother with old format, obsolete)
 
 * Add config help to mkpatch/mkpatch.pl.
 
 * Add config entry to mkpatch/Config.in (chip drivers only)
 
 * Add config entry in mkpatch/mkpatch.pl (bus drivers only)
-
-* Add declaration and init. call to kernel/sensors.c (chip drivers only)
-  (verify init function name)
-
-* Add declaration and init. call in mkpatch/mkpatch.pl (bus drivers only)
-  (verify init function name)
 
 * Move .o reference in kernel/[chips,busses]/Module.mk
   from first to second section.
