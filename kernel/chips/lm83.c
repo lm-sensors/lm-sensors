@@ -83,8 +83,11 @@ SENSORS_INSMOD_1(lm83);
  * The LM83 uses signed 8-bit values.
  */
 
-#define TEMP_FROM_REG(val)  (val > 127 ? val-256 : val)
-#define TEMP_TO_REG(val)    (val < 0 ? val+256 : val)
+#define TEMP_FROM_REG(val)  ((val) > 127 ? (val) - 0x100 : (val))
+#define TEMP_TO_REG(val)    ((val) <= -50 ? -50 + 0x100 : \
+                             (val) >= 127 ? 127 : \
+			     (val) >= 0 ? (val) : \
+                             (val) + 0x100)
 
 static const u8 LM83_REG_R_TEMP[] = {
 	LM83_REG_R_LOCAL_TEMP,
@@ -275,6 +278,10 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	 * requested, so both the detection and the identification steps
 	 * are skipped.
 	 */
+
+	/* Default to an LM83 if forced */
+	if (kind == 0)
+		kind = lm83;
 
 	if (kind < 0) /* detection */
 	{
