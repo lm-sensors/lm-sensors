@@ -313,10 +313,14 @@ for $i ( 0 .. $#dimm_list ) {
 		@bytes=split(" ");
 		
 		print "\tManufacturer's JEDEC ID Code:\t\t\t";
-		printf("0x%.4X%.4X%.4X%.4X%.4X%.4X%.4X%.4X\n",$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
+		printf("0x%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X\n",$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
+		print "\t\t\t\t\t\t\t(\"";
+		print pack("cccccccc",
+			$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
+		print "\")\n";
 		
 		print "\tManufacturing Location Code:\t\t\t";
-		printf("0x%.4X\n",$bytes[8]);
+		printf("0x%.2X\n",$bytes[8]);
 		
 		print "\tManufacurer's Part Number:\t\t\t\"";
 # Decode next 16 bytes (80-95)
@@ -327,17 +331,17 @@ for $i ( 0 .. $#dimm_list ) {
 		print "\"\n";
 		
 		print "\tRevision Code:\t\t\t\t\t";
-		printf("0x%.4X%.4X\n",$bytes2[10],$bytes2[11]);
+		printf("0x%.2X%.2X\n",$bytes2[10],$bytes2[11]);
 		
 		print "\tManufacturing Date:\t\t\t\t";
-		printf("0x%.4X%.4X\n",$bytes2[12],$bytes2[13]);
+		printf("0x%.2X%.2X\n",$bytes2[12],$bytes2[13]);
 		
 		print "\tAssembly Serial Number:\t\t\t\t";
 # Decode next 16 bytes (96-111)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data96-111`;
 		@bytes=split(" ");
 		
-		printf("0x%.4X%.4X%.4X%.4X\n",$bytes2[15],$bytes[0],$bytes[1],$bytes[2]);
+		printf("0x%.2X%.2X%.2X%.2X\n",$bytes2[15],$bytes[0],$bytes[1],$bytes[2]);
 # Decode next 16 bytes (112-127)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data112-127`;
 		@bytes=split(" ");
