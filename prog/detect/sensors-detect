@@ -747,7 +747,7 @@ sub find_adapter_driver
   for $adapter (@pci_adapters) {
     return $adapter->{driver} if &{$adapter->{match}} ($_[0],$_[1]);
   }
-  return "?????";
+  return "UNKNOWN";
 }
 
 #############################
@@ -1479,8 +1479,8 @@ sub w83781d_detect
   return if $chip == 4 and  $reg1 != 0x30;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   @res = (8);
-  push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;
-  push @res, (($reg1 & 0x80) >> 4) + 0x48 unless $reg1 & 0x80;
+  push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08 ;
+  push @res, (($reg1 & 0x80) >> 4) + 0x48 unless ($reg1 & 0x80 or $chip == 2);
   return @res;
 }
 
@@ -1932,7 +1932,11 @@ sub generate_modprobes
 
   for ($i = 0; $i < $nr; $i++) {
     foreach $adap (@adapters) {
-      $modprobes .= "modprobe $adap->{driver}\n" if (defined($adap->{nr_later}) and $adap->{nr_later} == $i) and not $modprobes =~ /modprobe $adap->{driver}\n/;
+      if ($adap->{driver} eq "UNKNOWN") {
+        $modprobes .= "# modprobe some unknown, currently loaded adapter(s)";
+      } else {
+        $modprobes .= "modprobe $adap->{driver}\n" if (defined($adap->{nr_later}) and $adap->{nr_later} == $i) and not $modprobes =~ /modprobe $adap->{driver}\n/;
+      }
     }
   }
   $modprobes .= "modprobe i2c-isa\n" if ($isa);
