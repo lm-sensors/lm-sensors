@@ -972,7 +972,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        isa_detect => sub { ite_isa_detect 0, @_ },
      } ,
      {
-       name => "Serial EEPROM (SDRAM DIMM)",
+       name => "Serial EEPROM",
        driver => "eeprom",
        i2c_addrs => [0x50..0x57],
        i2c_detect => sub { eeprom_detect @_ },
@@ -2498,23 +2498,36 @@ sub ite_alias_detect
 # $_[0]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
-# Returns: undef if not detected, (5) if detected.
+# Returns: 8 for a memory eeprom, 6 for a Sony Vaio eeprom,
+#          1 or 2 for an unknown eeprom
 # Registers used:
-#   0x00-0x63: PC-100 Data and Checksum
+#   0-63: PC-100 Data and Checksum
+#   2-5, 128-131: Sony Vaio Data
 sub eeprom_detect
 {
   my ($file,$addr) = @_;
   # Check the checksum for validity (only works for PC-100 DIMMs)
   my $checksum = 0;
-  for (my $i = 0; $i <= 62; $i = $i + 1) {
-    $checksum = $checksum + i2c_smbus_read_byte_data($file,$i);
+  for (my $i = 0; $i <= 62; $i ++) {
+    $checksum += i2c_smbus_read_byte_data($file,$i);
   }
-  $checksum=$checksum & 255;
-  if (i2c_smbus_read_byte_data($file,63) == $checksum) {
-  	return (8);
-  }
+  $checksum &= 255;
+  return 8
+    if (i2c_smbus_read_byte_data($file,63) == $checksum);
   # Even if checksum test fails, it still may be an eeprom
-  return (1);
+  if (i2c_smbus_read_byte_data($file,2) == 0
+   && i2c_smbus_read_byte_data($file,3) == 0
+   && i2c_smbus_read_byte_data($file,4) == 0
+   && i2c_smbus_read_byte_data($file,5) == 0)
+  {
+    return 6 # Sony Vaio
+      if (i2c_smbus_read_byte_data($file,128) == ord 'P'
+       && i2c_smbus_read_byte_data($file,129) == ord 'C'
+       && i2c_smbus_read_byte_data($file,130) == ord 'G'
+       && i2c_smbus_read_byte_data($file,131) == ord '-');
+    return 2;
+  }
+  return 1;
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.

@@ -58,7 +58,8 @@ ask CVS about it:
                    initial support for Sony Vaio eeprom
   Program sensors-detect: Add support for MC1066, smart battery;
                           add ACPI method for IBM system detection;
-						  work with old Perl versions again
+						  work with old Perl versions again;
+						  initial support for Sony Vaio eeprom
   Program sensord: (v0.6.2) Add sanity limits to newly-created RRD.
 
 2.6.5 (20020915)
