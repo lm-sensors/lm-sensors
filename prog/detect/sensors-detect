@@ -756,7 +756,7 @@ sub adapter_pci_detection
       }
     }
   }
-  if (! defined @res) {
+  if (! @res) {
     print ("Sorry, no PCI bus adapters found.\n");
   } else {
     printf ("Probe succesfully concluded.\n");
@@ -1456,7 +1456,7 @@ sub lm80_detect
 {
   my $i;
   my ($file,$addr) = @_;
-  return if (i2c_smbus_read_byte_data($file,$0x02) & 0xc0) != 0;
+  return if (i2c_smbus_read_byte_data($file,0x02) & 0xc0) != 0;
   for ($i = 0x2a; $i <= 0x3d; $i++) {
     my $reg = i2c_smbus_read_byte_data($file,$i);
     return if i2c_smbus_read_byte_data($file,$i+0x40) != $reg;
