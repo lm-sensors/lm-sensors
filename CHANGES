@@ -14,11 +14,13 @@ ask CVS about it:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
 2.5.2 (200007??)
-  Programs: understand /dev/i2c* files (instead of /dev/i2c-*) too.
-  Program sensors-detect: more robustness in case of unknown i2c adapters
+  File sensors.conf.eg: Fix lm80 in8 calculation
   Module w83781d: W83783S no longer crashes on unloading
+  Program sensors-detect: more robustness in case of unknown i2c adapters
+  Program sensors-detect, libsensors: fix eeprom size reporting
   Program sensord: more flexility, support for alarm scanning etc.
   Program sensors: support for ignore setting on sensor alarms.
+  Programs: understand /dev/i2c* files (instead of /dev/i2c-*) too.
 
 2.5.1 (20000618)
   Library: Add adm1025 support

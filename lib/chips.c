@@ -1758,6 +1758,7 @@ static sensors_chip_feature eeprom_features[] =
     { SENSORS_EEPROM_TYPE, "Memory type",
                          SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
                          SENSORS_MODE_R, EEPROM_SYSCTL1, VALUE(3), 0 },
+/* cheat and use the row-address-bits label for the total size in sensors */
     { SENSORS_EEPROM_ROWADDR, "SDRAM Size (MB)",
                          SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
                          SENSORS_MODE_R, EEPROM_SYSCTL1, VALUE(4), 0 },
@@ -1767,6 +1768,9 @@ static sensors_chip_feature eeprom_features[] =
     { SENSORS_EEPROM_NUMROWS, "num rows",
                          SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
                          SENSORS_MODE_R, EEPROM_SYSCTL1, VALUE(6), 0 },
+    { SENSORS_EEPROM_BANKS, "banks",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, EEPROM_SYSCTL2, VALUE(2), 0 },
     { 0 }
   };
 

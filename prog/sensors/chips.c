@@ -1756,7 +1756,7 @@ void print_ddcmon(const sensors_chip_name *name)
 void print_eeprom(const sensors_chip_name *name)
 {
 	char  *label = NULL;
-	double a, b, c;
+	double a, b, c, d;
 	int    valid, i;
 
    if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_TYPE, &label,&valid) &&
@@ -1774,14 +1774,18 @@ void print_eeprom(const sensors_chip_name *name)
    if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_ROWADDR, &label,&valid) &&
        !sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a) &&
        !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b) &&
-       !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c)) {
+       !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c) &&
+       !sensors_get_feature(*name, SENSORS_EEPROM_BANKS, &d)) {
       if (valid) {
          print_label(label, 24);
-	 i = (((int) a) & 0x0f) + (((int) b) & 0x0f) + ((int) c) - 16;
-	 if(i > 0 && i <= 10)
-	         printf("%d\n", 1 << i);
+	 i = (((int) a) & 0x0f) + (((int) b) & 0x0f) - 17;
+	 if(i > 0 && i <= 12 && c <= 8 && d <= 8)
+	         printf("%d\n", (1 << i) * ((int) c) * ((int) d));
 	 else
+{
 	         printf("invalid\n");
+printf("%d %d %d %d\n", (int) a, (int) b, (int) c, (int) d);
+}
       }
    } else
       printf("ERROR: data 2\n");
