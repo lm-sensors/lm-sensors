@@ -526,6 +526,15 @@ chip "w83697hf-*"
     label in7 "V5SB"
     label in8 "VBat"
 
+# Tyan Trinity S2495 KT400 has a few differences. Thanks to Eric Schumann
+# for proving this information.
+#    label in2 "VAgp"
+#    label in5 "+3.3V"
+#    label in6 "Vdimm"
+#    label in7 "VBat"
+#    label in8 "V5SB"
+# You'll also want to comment out the in5 and in6 compute lines right below.
+
     compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
     compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
     compute in5 (5.14 * @) - 14.91  ,  (@ + 14.91) / 5.14
@@ -553,6 +562,18 @@ chip "w83697hf-*"
     set in7_max 5 * 1.05
     set in8_min 3.0 * 0.80
     set in8_max 3.0 * 1.20
+
+# And for Tyan Trinity S2495 KT400:
+#    set in2_min 1.5 * 0.95
+#    set in2_max 1.5 * 1.05
+#    set in5_min 3.3 * 0.95
+#    set in5_max 3.3 * 1.05
+#    set in6_min 2.5 * 0.95
+#    set in6_max 2.5 * 1.05
+#    set in7_min 3.0 * 0.90
+#    set in7_max 3.0 * 1.10
+#    set in8_min 5 * 0.95
+#    set in8_max 5 * 1.05
 
 # set up sensor types (thermistor is default)
 # 1 = PII/Celeron Diode; 2 = 3904 transistor;
