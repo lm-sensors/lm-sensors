@@ -16,6 +16,13 @@ ask CVS about it:
 2.3.1 (199904??)
   All: Now compiles on PPC
   Module i2c-hydra: NEW
+  Module i2c-proc: Buffer overflow removed: `less /proc/bus-i2c-0' now works
+  Module w83781d: Removed deadlock (mutex was not initialized)
+  Documentation: A few glitches removed
+  Makefile: default module installation directory is now 
+            /lib/modules/current/extra/misc
+  Program sensors-detect: PPC Hydra now detected
+  Program sensors: Now prints complete GL518SM information
 
 2.3.0 (19990422)
   All: Many, many changes and improvements
