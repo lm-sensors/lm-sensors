@@ -1161,7 +1161,7 @@ void print_adm1025(const sensors_chip_name *name)
       if (valid) {
         print_label(label,10);
         printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
-             cur,min,max,alarms&ADM1025_ALARM_IN0?"ALARM":"");
+             cur,min,max,alarms&(ADM1025_ALARM_IN0<<(i+(i/4)*4))?"ALARM":"");
       }
     } else
       if (i!=4) /* Chip may have +12V input used for VID instead */
@@ -1177,8 +1177,8 @@ void print_adm1025(const sensors_chip_name *name)
       if (valid) {
         print_label(label,10);
         print_temp_info( cur, max, min, MINMAX, 1, 0);
-        printf(" %s\n", alarms&ADM1025_ALARM_RFAULT?"FAULT":
-                        alarms&ADM1025_ALARM_RTEMP?"ALARM":"");
+        printf(" %s\n", i==0&&(alarms&ADM1025_ALARM_RFAULT)?"FAULT":
+                        alarms&(ADM1025_ALARM_RTEMP>>i)?"ALARM":"");
       }
     } else
       printf("ERROR: Can't get TEMP%d data!\n", i+1);
