@@ -353,6 +353,8 @@ manhtml:
 	$(MKDIR) html
 	cp $(MANPAGES) html
 	cd html ; \
+	export LOGNAME=sensors ; \
+	export HOSTNAME=stimpy.netroedge.com ; \
 	man2html *.[1-8] ; \
 	$(RM) *.[1-8]
 
