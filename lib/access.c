@@ -58,7 +58,7 @@ int sensors_match_chip(sensors_chip_name chip1, sensors_chip_name chip2)
    Note that this visits the list of chips from last to first. Usually,
    you want the match that was latest in the config file. */
 sensors_chip *sensors_for_all_config_chips(sensors_chip_name chip_name, 
-                                           sensors_chip *last)
+                                           const sensors_chip *last)
 {
   int nr,i;
   sensors_chip_name_list chips;
@@ -77,10 +77,11 @@ sensors_chip *sensors_for_all_config_chips(sensors_chip_name chip_name,
 /* Look up a resource in the intern chip list, and return a pointer to it. 
    Do not modify the struct the return value points to! Returns NULL if 
    not found.*/
-sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix, int feature)
+const sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix, 
+                                                      int feature)
 {
   int i,j;
-  sensors_chip_feature *features;
+  const sensors_chip_feature *features;
   for (i = 0; sensors_chip_features_list[i].prefix; i++)
     if (!strcmp(sensors_chip_features_list[i].prefix,prefix)) {
       features = sensors_chip_features_list[i].feature;
@@ -94,11 +95,11 @@ sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix, int feature)
 /* Look up a resource in the intern chip list, and return a pointer to it. 
    Do not modify the struct the return value points to! Returns NULL if 
    not found.*/
-sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
-                                                  const char *feature)
+const sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
+                                                        const char *feature)
 {
   int i,j;
-  sensors_chip_feature *features;
+  const sensors_chip_feature *features;
   for (i = 0; sensors_chip_features_list[i].prefix; i++)
     if (!strcmp(sensors_chip_features_list[i].prefix,prefix)) {
       features = sensors_chip_features_list[i].feature;
@@ -129,8 +130,8 @@ int sensors_chip_name_has_wildcards(sensors_chip_name chip)
    This function will return 0 on success, and <0 on failure.  */
 int sensors_get_label(sensors_chip_name name, int feature, char **result)
 {
-  sensors_chip *chip;
-  sensors_chip_feature *featureptr;
+  const sensors_chip *chip;
+  const sensors_chip_feature *featureptr;
   int i;
 
   if (sensors_chip_name_has_wildcards(name))
@@ -151,13 +152,13 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
 
 /* Read the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
-   on failure.  */
+   on failure. */
 int sensors_get_feature(sensors_chip_name name, int feature, double *result)
 {
-  sensors_chip_feature *main_feature;
-  sensors_chip_feature *alt_feature;
-  sensors_chip *chip;
-  sensors_expr *expr = NULL;
+  const sensors_chip_feature *main_feature;
+  const sensors_chip_feature *alt_feature;
+  const sensors_chip *chip;
+  const sensors_expr *expr = NULL;
   double val;
   int res,i;
   int final_expr=0;
@@ -194,12 +195,12 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
       
 /* Set the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
-   on failure.  */
+   on failure. BUGGY! */
 int sensors_set_feature(sensors_chip_name name, int feature, double value)
 {
-  sensors_chip_feature *featureptr;
-  sensors_chip *chip;
-  sensors_expr *expr = NULL;
+  const sensors_chip_feature *featureptr;
+  const sensors_chip *chip;
+  const sensors_expr *expr = NULL;
   int i,res;
 
   if (sensors_chip_name_has_wildcards(name))
@@ -280,12 +281,12 @@ const sensors_feature_data *sensors_get_all_features (sensors_chip_name name,
   return NULL;
 }
 
-int sensors_eval_expr(sensors_chip_name chipname, sensors_expr *expr,
+int sensors_eval_expr(sensors_chip_name chipname, const sensors_expr *expr,
                       double val, double *result)
 {
   double res1,res2;
   int res;
-  sensors_chip_feature *feature;
+  const sensors_chip_feature *feature;
 
   if (expr->kind == sensors_kind_val) {
     *result = expr->data.val;
@@ -329,5 +330,3 @@ int sensors_eval_expr(sensors_chip_name chipname, sensors_expr *expr,
   }
   return 0;
 }
-
-      

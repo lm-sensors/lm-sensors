@@ -52,7 +52,7 @@ const char *sensors_strerror(int errnum)
 
 void sensors_default_parse_error(const char *err, int lineno)
 {
-  fprintf(stderr,"Line %d: %s\n",lineno,err);
+  fprintf(stderr,"Error: Line %d: %s\n",lineno,err);
 }
 
 void sensors_default_fatal_error(const char *proc, const char *err)

@@ -67,20 +67,24 @@ int sensors_read_proc_chips(void)
   int buflen = BUF_LEN;
   char *bufptr = buf;
   sensors_proc_chips_entry entry;
-  int res;
+  int res,lineno;
 
   if (sysctl(name, 3, bufptr, &buflen, NULL, 0))
     return -SENSORS_ERR_PROC;
 
+  lineno = 1;
   while (buflen >= sizeof(struct sensors_chips_data)) {
     if ((res = 
           sensors_parse_chip_name(((struct sensors_chips_data *) bufptr)->name, 
-                                   &entry.name)))
+                                   &entry.name))) {
+      sensors_parse_error("Parsing /proc/sys/dev/sensors/chips",lineno);
       return res;
+    }
     entry.sysctl = ((struct sensors_chips_data *) bufptr)->sysctl_id;
     add_proc_chips(&entry);
     bufptr += sizeof(struct sensors_chips_data);
     buflen -= sizeof(struct sensors_chips_data);
+    lineno++;
   }
   return 0;
 }
@@ -91,9 +95,12 @@ int sensors_read_proc_bus(void)
   char line[255];
   char *border;
   sensors_bus entry;
+  int lineno;
+
   f = fopen("/proc/bus/i2c","r");
   if (!f)
     return -SENSORS_ERR_PROC;
+  lineno=1;
   while (fgets(line,255,f)) {
     if (strlen(line) > 0)
       line[strlen(line)-1] = '\0';
@@ -117,12 +124,14 @@ int sensors_read_proc_bus(void)
     sensors_strip_of_spaces(entry.algorithm);
     sensors_strip_of_spaces(entry.adapter);
     add_bus(&entry);
+    lineno++;
   }
   fclose(f);
   return 0;
 FAT_ERROR:
   sensors_fatal_error("sensors_read_proc_bus","Allocating entry");
 ERROR:
+  sensors_parse_error("Parsing /proc/bus/i2c",lineno);
   fclose(f);
   return -SENSORS_ERR_PROC;
 }
@@ -142,7 +151,7 @@ int sensors_get_chip_id(sensors_chip_name name)
 int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 {
   int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
-  sensors_chip_feature *the_feature;
+  const sensors_chip_feature *the_feature;
   int buflen = BUF_LEN;
   int mag;
   
@@ -164,7 +173,7 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 int sensors_write_proc(sensors_chip_name name, int feature, double value)
 {
   int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
-  sensors_chip_feature *the_feature;
+  const sensors_chip_feature *the_feature;
   int buflen = BUF_LEN;
   int mag;
  

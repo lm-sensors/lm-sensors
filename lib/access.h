@@ -31,19 +31,19 @@
    Note that this visits the list of chips from last to first. Usually,
    you want the match that was latest in the config file. */
 extern sensors_chip *sensors_for_all_config_chips(sensors_chip_name chip_name,
-                                                  sensors_chip *last);
+                                                  const sensors_chip *last);
 
 /* Look up a resource in the intern chip list, and return a pointer to it.
    Do not modify the struct the return value points to! Returns NULL if
    not found. */
-extern sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix,
-                                                       int feature);
+extern const sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix,
+                                                             int feature);
 
 /* Look up a resource in the intern chip list, and return a pointer to it.
    Do not modify the struct the return value points to! Returns NULL if
    not found.*/
-extern sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
-                                                         const char *feature);
+extern const sensors_chip_feature *sensors_lookup_feature_name
+                                  (const char *prefix, const char *feature);
 
 /* Substitute configuration bus numbers with real-world /proc bus numbers
    in the chips lists */
@@ -55,7 +55,8 @@ extern int sensors_substitute_busses(void);
 extern int sensors_parse_i2cbus_name(const char *name, int *res);
 
 /* Evaluate an expression */
-extern int sensors_eval_expr(sensors_chip_name chipname, sensors_expr *expr,
+extern int sensors_eval_expr(sensors_chip_name chipname, 
+                             const sensors_expr *expr,
                              double val, double *result);
 
 
