@@ -40,7 +40,8 @@ Module Parameters
 Description
 -----------
 
-IMPORTANT: in0, in1, and in2 values (+5, +3, and +12) CANNOT be read
+IMPORTANT: For the revision 0x00 chip, the
+           in0, in1, and in2 values (+5, +3, and +12) CANNOT be read
            unless you use the slow 'iterate' method. Limits will still
            work even when iterate=0. See below. This is a limitation
            of the chip, not the driver.
@@ -96,13 +97,21 @@ will do no harm, but will return 'old' values.
 Iteration Code
 --------------
 
-You can select between three modes to read the vin0-2 inputs with
+IMPORTANT: For the revision 0x00 chip only,
+you may select between three modes to read the vin0-2 inputs with
 the following lines in /etc/sensors.conf:
 
- set iterate 0    Don't read vin0-vin2 inputs.
+ set iterate 0    Don't read in0-in2 inputs.
  set iterate 1    Run the iteration loop, this takes up to 10 seconds.
  set iterate 2    Show the results of the last iteration loop,
                   and start a new loop to run in the background.
+
+You may also set the iteration type with
+'echo n > /proc/sys/dev/sensors/gl518sm-i2c-x-y/iterate'.
+
+If you have a rev 0x80 chip, the in0-in2 inputs are readable.
+In this case, 'iterate' will be read-only and the read value is 3.
+
 
 Chip Features
 -------------

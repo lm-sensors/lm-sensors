@@ -366,11 +366,10 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 		}
 	}
 
+	type_name = "gl518sm";
 	if (kind == gl518sm_r00) {
-		type_name = "gl518sm";
 		client_name = "GL518SM Revision 0x00 chip";
 	} else if (kind == gl518sm_r80) {
-		type_name = "gl518sm";
 		client_name = "GL518SM Revision 0x80 chip";
 	} else {
 #ifdef DEBUG
@@ -414,7 +413,10 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 	data->sysctl_id = i;
 
 	/* Initialize the GL518SM chip */
-	data->iterate = 0;
+	if (kind == gl518sm_r00)
+		data->iterate = 0;
+	else
+		data->iterate = 3;
 	data->iterate_lock = 0;
 	data->quit_thread = 0;
 	data->thread = NULL;
@@ -1046,7 +1048,8 @@ void gl518_iterate(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		results[0] = data->iterate;
 		*nrels_mag = 1;
-	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+	} else if (operation == SENSORS_PROC_REAL_WRITE &&
+	           data->type == gl518sm_r00 ) {
 		if ((*nrels_mag >= 1) && (data->iterate != results[0])) {
 			data->iterate = results[0];
 			for (i = 0; i < 4; i++) {

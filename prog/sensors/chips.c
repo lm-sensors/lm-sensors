@@ -999,7 +999,9 @@ void print_gl518(const sensors_chip_name *name)
   int alarms,beeps,valid;
   int is_r00;
 
-  is_r00 = !strcmp(name->prefix,"gl518sm-r00");
+  cur = 0.0;
+  sensors_get_feature(*name,SENSORS_GL518_ITERATE,&cur); 
+  is_r00 = ((int) (cur + 0.5)) != 3;
   if (!sensors_get_feature(*name,SENSORS_GL518_ALARMS,&cur)) 
     alarms = cur + 0.5;
   else {
