@@ -342,8 +342,6 @@ void pcf8574_read(struct i2c_client *client, int operation,
 void pcf8574_write(struct i2c_client *client, int operation,
 		    int ctl_name, int *nrels_mag, long *results)
 {
-	u8	tmpstatus; 
-
 	struct pcf8574_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
@@ -351,7 +349,7 @@ void pcf8574_write(struct i2c_client *client, int operation,
 		results[0] = data->write; 
 		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		if (*nrels_mag = 1) {
+		if (*nrels_mag == 1) {
 			data->write = results[0];
 			i2c_smbus_write_byte(client, data->write);
 		}
