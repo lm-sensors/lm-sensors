@@ -69,7 +69,7 @@ MODULE_PARM_DESC(checksum,
 
 /* Conversions */
 /* Size of EEPROM in bytes */
-#define EEPROM_SIZE 128
+#define EEPROM_SIZE 256
 
 /* Each client has this additional data */
 struct eeprom_data {
@@ -80,7 +80,9 @@ struct eeprom_data {
 	unsigned long last_updated;	/* In jiffies */
 
 	u8 data[EEPROM_SIZE];	/* Register values */
+#if 0
 	int memtype;
+#endif
 };
 
 #ifdef MODULE
@@ -149,6 +151,22 @@ static ctl_table eeprom_dir_table_template[] = {
 	{EEPROM_SYSCTL7, "data96-111", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &eeprom_contents},
 	{EEPROM_SYSCTL8, "data112-127", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL9, "data128-143", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL10, "data144-159", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL11, "data160-175", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL12, "data176-191", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL13, "data192-207", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL14, "data208-223", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL15, "data224-239", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL16, "data240-255", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &eeprom_contents},
 	{0}
 };
@@ -349,26 +367,52 @@ void eeprom_contents(struct i2c_client *client, int operation,
 	int base = 0;
 	struct eeprom_data *data = client->data;
 
-	if (ctl_name == EEPROM_SYSCTL2) {
-		base = 16;
-	}
-	if (ctl_name == EEPROM_SYSCTL3) {
-		base = 32;
-	}
-	if (ctl_name == EEPROM_SYSCTL4) {
-		base = 48;
-	}
-	if (ctl_name == EEPROM_SYSCTL5) {
-		base = 64;
-	}
-	if (ctl_name == EEPROM_SYSCTL6) {
-		base = 80;
-	}
-	if (ctl_name == EEPROM_SYSCTL7) {
-		base = 96;
-	}
-	if (ctl_name == EEPROM_SYSCTL8) {
-		base = 112;
+	switch (ctl_name) {
+		case EEPROM_SYSCTL2:
+			base = 16;
+			break;
+		case EEPROM_SYSCTL3:
+			base = 32;
+			break;
+		case EEPROM_SYSCTL4:
+			base = 48;
+			break;
+		case EEPROM_SYSCTL5:
+			base = 64;
+			break;
+		case EEPROM_SYSCTL6:
+			base = 80;
+			break;
+		case EEPROM_SYSCTL7:
+			base = 96;
+			break;
+		case EEPROM_SYSCTL8:
+			base = 112;
+			break;
+		case EEPROM_SYSCTL9:
+			base = 128;
+			break;
+		case EEPROM_SYSCTL10:
+			base = 144;
+			break;
+		case EEPROM_SYSCTL11:
+			base = 160;
+			break;
+		case EEPROM_SYSCTL12:
+			base = 176;
+			break;
+		case EEPROM_SYSCTL13:
+			base = 192;
+			break;
+		case EEPROM_SYSCTL14:
+			base = 208;
+			break;
+		case EEPROM_SYSCTL15:
+			base = 224;
+			break;
+		case EEPROM_SYSCTL16:
+			base = 240;
+			break;
 	}
 
 	if (operation == SENSORS_PROC_REAL_INFO)
