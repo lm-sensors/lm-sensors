@@ -224,6 +224,8 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 	/* Now, we do the remaining detection. It is not there, unless you force
 	   the checksum to work out. */
 	if (checksum) {
+		/* prevent 24RF08 corruption */
+		i2c_smbus_write_quick(new_client, 0);
 		cs = 0;
 		for (i = 0; i <= 0x3e; i++)
 			cs += i2c_smbus_read_byte_data(new_client, i);
