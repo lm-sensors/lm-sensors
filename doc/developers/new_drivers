@@ -1,12 +1,18 @@
 These are the steps you should follow to write a new driver and
 submit it to us so that it will be applied cleanly to our package.
 
+Don't be intimidated by the list, it's just here so we don't
+forget anything.
+We are more than happy to help you with any part of the process.
+
+
 * Contact us first.
   You are of course free to write your own drivers, but it is smart to
   check first nobody else is already working on it.
   Check our "New Drivers" page for information also.
   You will also need to ask us to have an ID reserved in
   i2c-id.h in the i2c package.
+  Tell us it's OK to put your name on the "New Drivers" page.
 
 * Write the new driver. 
   For a chip driver, use lm78.c as template. For an SMBus-only adapter, 
@@ -72,10 +78,22 @@ submit it to us so that it will be applied cleanly to our package.
 * Submit the changes to us a patch against CVS.
 
 ---------------------------------------------------------------------
+Checklist for us to do on the webpage:
+
+* Add entry to 'supported drivers' page
+
+* Update entry on 'new drivers' page
+
+---------------------------------------------------------------------
 Checklist for mkpatch support, after the driver is tested and stable:
 
-* Add files to mkpatch/FILES.
+* Add .c file to mkpatch/FILES.
 
 * Add config help to mkpatch/mkpatch.pl.
 
+* Add config entry to mkpatch/Config.in.
+
 * Add initialization call to bottom of kernel/sensors.c.
+
+* Move .o reference in kernel/[chips,busses]/Module.mk
+  from first to second section.
