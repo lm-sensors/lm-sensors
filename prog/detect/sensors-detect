@@ -1015,13 +1015,13 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "IPMI BMC KCS",
-       driver => "to-be-written",
+       driver => "bmcsensors",
        isa_addrs => [ 0x0ca0 ],
        isa_detect => sub { ipmi_kcs_detect @_ },
      },
      {
        name => "IPMI BMC SMIC",
-       driver => "to-be-written",
+       driver => "bmcsensors",
        isa_addrs => [ 0x0ca8 ],
        isa_detect => sub { ipmi_smic_detect @_ },
      },
