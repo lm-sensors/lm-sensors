@@ -248,6 +248,7 @@ static inline u8 DIV_TO_REG(long val, enum chips type)
    dynamically allocated, at the same time when a new w83781d client is
    allocated. */
 struct w83781d_data {
+	struct i2c_client client;
 	struct semaphore lock;
 	int sysctl_id;
 	enum chips type;
@@ -819,14 +820,12 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 	   client structure, even though we cannot fill it completely yet.
 	   But it allows us to access w83781d_{read,write}_value. */
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct w83781d_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct w83781d_data), GFP_KERNEL))) {
 		err = -ENOMEM;
 		goto ERROR0;
 	}
 
-	data = (struct w83781d_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	init_MUTEX(&data->lock);
 	new_client->data = data;
@@ -1089,7 +1088,7 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 	if (is_isa)
 		release_region(address, W83781D_EXTENT);
       ERROR1:
-	kfree(new_client);
+	kfree(data);
       ERROR0:
 	return err;
 }
@@ -1097,9 +1096,9 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 static int w83781d_detach_client(struct i2c_client *client)
 {
 	int err;
+	struct w83781d_data *data = client->data;
 
-	i2c_deregister_entry(((struct w83781d_data *) (client->data))->
-				 sysctl_id);
+	i2c_deregister_entry(data->sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {
 		printk
@@ -1110,18 +1109,12 @@ static int w83781d_detach_client(struct i2c_client *client)
 	if(i2c_is_isa_client(client)) {
 		release_region(client->addr, W83781D_EXTENT);
 	} else {
-		i2c_detach_client(&
-				  (((struct
-				     w83781d_data *) (client->data))->
-				   lm75[0]));
-		if((((struct w83781d_data *) (client->data))->type) != w83783s)
-			i2c_detach_client(&
-				  (((struct
-				     w83781d_data *) (client->data))->
-				   lm75[1]));
-		kfree(((struct w83781d_data *) (client->data))->lm75);
+		i2c_detach_client(&(data->lm75[0]));
+		if (data->type != w83783s)
+			i2c_detach_client(&(data->lm75[1]));
+		kfree(data->lm75);
 	}
-	kfree(client);
+	kfree(data);
 
 	return 0;
 }
