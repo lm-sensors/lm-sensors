@@ -24,7 +24,8 @@ ask CVS about it:
   File sensors.conf.eg: Add vt1211, smsc47m1
   Library: Add multiple VRM version support for adm1025, w83781d;
            fix 'flex scanner jammed' on some systems;
-           add vt1211, smsc47m1
+           add vt1211, smsc47m1, lm92;
+           fix access mode checking
   Makefiles: For 2.4+ kernels, modules now install in
              kernel/drivers/[i2c,sensors] , not misc/ , and
              'make install' removes old versions in misc/ .
@@ -58,7 +59,7 @@ ask CVS about it:
                    not compiled by default
   Program sensors: Recognize DDR SDRAM; add adm1025 VID; add -A
                    (don't display algo. and adap.) option;
-                   add vt1211, smsc47m1
+                   add vt1211, smsc47m1, lm92
   Program sensors-detect: Add VT8231, VT8233A, several S3 devices;
                           add 82801DB, LM85; fix perl warnings;
                           generate /etc/sysconfig/lm_sensors for
