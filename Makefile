@@ -174,7 +174,7 @@ MODCFLAGS += -D__SMP__
 endif
 
 ifeq ($(MODVER),1)
-MODCFLAGS += -DMODVERSIONS -include /usr/include/linux/modversions.h
+MODCFLAGS += -DMODVERSIONS -include $(LINUX_HEADERS)/linux/modversions.h
 endif
 
 .PHONY: all clean install version package dep
