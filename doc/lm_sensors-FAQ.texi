@@ -1,0 +1,1500 @@
+\input texinfo.tex    @c -*-texinfo-*-
+
+@c %**start of header
+@setfilename lm_sensors-FAQ.info
+@include version.texi
+@settitle Sensors FAQ for lm_sensors version @value{VERSION}
+@comment %**end of header
+
+@titlepage
+@center @titlefont{This is the FAQ for the @command{lm_sensors} program, @value{VERSION}}
+@sp 3
+@center Copyright (c) 1998 - 2002
+@sp 1
+@center @email{frodol@@dds.nl, Frodo Looijaard},
+@center @email{phil@@netroedge.com, Philip Edelbrock},
+@center and
+@center @email{mdsxyz123@@yahoo.com, Mark Studebaker}
+@end titlepage
+
+@ifhtml
+Copyright (c) 1998 - 2002@*
+@email{frodol@@dds.nl, Frodo Looijaard},@*
+@email{phil@@netroedge.com, Philip Edelbrock},@*
+and@*
+@email{mdsxyz123@@yahoo.com, Mark Studebaker}@*
+@end ifhtml
+
+@dircategory Utilities
+@direntry
+* lm_sensors-FAQ: (lm_sensors-FAQ)           The lm_sensors FAQ
+@end direntry
+
+@summarycontents
+@contents
+
+@ifnottex
+@node Top
+@top lm_sensors
+
+The lm_sensors package includes a collection of modules for general SMBus
+access and hardware monitoring.  NOTE: this requires special support which
+is not in standard 2.2-vintage kernels.
+
+@end ifnottex
+
+@menu
+* Overview::                PC and Sensor Overview
+* Basics::                  Sensor and Bus Basics
+* Installation::            Installation and Management
+* Problems::                Problems
+* Help::                    How to Ask for Help
+* Contribute::              How to Contribute
+* Version 1 Specifics::     Version 1 Specific Questions
+* Document Revisions::      Revision History of This Document
+@end menu
+
+
+@node Overview, Basics, Top, Top
+@chapter PC and Sensor Overview
+
+@menu
+* Section 1.1::             What sensors are available on my PC? 
+* Section 1.2::             What can a sensor chip like the "LM78" do?
+* Section 1.3::             Where do I find out more about any of these chips?
+@end menu
+
+@node Section 1.1, Section 1.2, , Overview
+@section What sensors are available on my PC?
+
+Most PC's built since late 1997 now come with a
+hardware health monitoring chip. This chip may be accessed via the
+ISA bus or the SMBus, depending on the motherboard.
+
+Some motherboard chipsets, notably the Via 686 and the SiS 5595,
+contain hardware monitor functions.
+
+This FAQ frequently refers to the "LM78". This chip has been
+obsoleted by National Semiconductor. Most motherboards today contain
+a chip with similar functions.
+
+
+@node Section 1.2, Section 1.3, Section 1.1, Overview
+@section What can a sensor chip like the "LM78" do?
+
+The LM78 is a chip made by National Semiconductor which can monitor 7
+voltages (5 positive, 2 negative) from 0 to 4.08V.  The inputs are usually in
+series with voltage dividers which lower the +/- 12V and +/- 5V supplies to
+measurable range.  Therefore, the readings for such inputs need to be
+re-scaled appropriately by software.
+
+The LM78 also has 3 fan speed monitoring inputs, an internal
+temperature sensor, a chassis intrusion sensor, and a couple maskable interrupt
+inputs.  The LM78 can also relay the processor's (P6 or Pent II) VID lines
+which are hardwired and used to indicate to the power regulator (usually on
+the mainboard close to the processor socket/slot) what voltage to supply to
+the processor.
+
+The LM78 can be interfaced to a system via the ISA bus and/or the
+SMBus.
+
+Most other sensor chips have comparable functionality. Each supported
+chip is documented in the @file{doc/chips} directory.
+
+
+@node Section 1.3,  , Section 1.2, Overview
+@section Where do I find out more about any of these chips?
+
+Most semiconductor companies have comprehensive documentation,
+including complete datasheets, on their websites. Analog Devices,
+Dallas Semiconductor, Maxim, and National Semiconductor have the widest selection
+of sensor chips. Their websites are:
+
+@itemize @bullet
+  @item @uref{http://www.analog.com}
+  @item @uref{http://www.dalsemi.com}
+  @item @uref{http://www.maxim-ic.com}
+  @item @uref{http://www.national.com}
+@end itemize
+
+Please see the file @uref{http://www2.lm-sensors.nu/~lm78/useful_addresses.html}
+for links to other companies' websites.
+
+
+
+@node Basics, Installation, Overview, Top
+@chapter Sensor and Bus Basics
+
+@menu
+* Section 2.1::             What sensors are available on my PC? 
+* Section 2.2::             What can a sensor chip like the "LM78" do?
+* Section 2.3::             Where do I find out more about any of these chips?
+* Section 2.4::             What sensors are available on my PC? 
+* Section 2.5::             What can a sensor chip like the "LM78" do?
+* Section 2.6::             Where do I find out more about any of these chips?
+@end menu
+
+
+@node Section 2.1, Section 2.2, , Basics
+@section How are these sensors read?
+
+Sensor chips reside on either the ISA bus, the SMBus, or both.
+See the file @file{doc/chips/SUMMARY} in our package for a list.
+
+To communicate with chips on the ISA bus, the software uses
+simple I/O reads and writes.
+
+To communicate with chips on the SMBus, the software must
+use an SMBus interface device, explained below.
+
+
+@node Section 2.2, Section 2.3, Section 2.1, Basics
+@section What is the SMBus? And the I2C bus?
+
+The SMBus is the "System Management Bus".  More specifically, it is a
+2-wire, low-speed serial communication bus used for basic health monitoring
+and hardware management. It is a specific implementation of the more
+general I2C (pronunciation: I-squared-C) bus. In fact, both I2C devices
+and SMBus devices may be connected to the same (I2C) bus.
+
+The SMBus (or I2C bus) starts at the host controller, used for
+starting transactions on the SMBus.  From the host interface, the
+devices communicated with are the @dfn{slave} devices.  Each slave device has a
+unique 7-bit address which the host uses to refer to that device.
+
+For each supported SMBus host, there is a separate kernel module
+which implements the communication protocol with the host. Some SMBus hosts
+really operate on the SMBus level; these hosts can not cope with pure I2C
+devices. Other hosts are in fact I2C hosts: in this case, we implement
+the SMBus protocol in terms of I2C operations. But these hosts can also
+talk to pure I2C devices.
+
+
+@node Section 2.3, Section 2.4, Section 2.2, Basics
+@section I don't have an ISA bus!
+
+We promise, you do, even if you don't have any old ISA slots.
+The "ISA Bus" exists in your computer even if you don't have ISA slots;
+it is simply a memory-mapped area, 64KB in size (0x0000 - 0xFFFF)
+where many "legacy" functions, such as keyboard and interrupt controllers,
+are found. It isn't necessarily a separate physical bus.
+See the file @file{/proc/ioports} for a list of devices living on
+the "ISA Bus" in your system. If you don't like the term "ISA Bus"
+think "I/O Space".
+
+
+@node Section 2.4, Section 2.5, Section 2.3, Basics
+@section What sensors do processors have?
+
+Most new processors contain a thermal diode on the die itself.
+The electical properties of all diodes and transistors vary
+slightly with temperature. The thermal diode is exceptionally accurate
+because it is directly on the die. Newer temperature sensor chips,
+like the Analog Devices ADM1021 and clones, and the Winbond chips,
+have circuitry for measuring the the electrical properties of
+an external diode and converting this data to a temperature.
+Any sensor chip listed in @file{doc/chips/SUMMARY} in our package which
+has support for more than one temperature supports external temperature sensing.
+
+Older motherboards and processors without this feature generally use
+an LM75 placed close to the processor. This is much less accurate.
+
+The Pentium 2 'boxed' processor usually has an LM75 very close to the
+base of the box. It can be read through the SMBus to report the approximate
+temperature of the processor.  The processor also contains an internal
+temperature sensor (of low accuracy) used as a fail-safe to disable the
+processor in case it gets much too hot (usually around 130 degrees C).  And,
+the Pentium 2 also has a hard-wired signal (VID lines) on it's SEC (single
+edge connector) which indicates what power supply is required to operate the
+processor.
+
+The P6 (Pentium-Pro) may have an LM75 in or just under the socket.
+P6's also have VID lines.
+
+Pentiums and Pentium w/ MMX do not have VID lines, and sometimes have
+LM75's under the sockets (depends on the mainboard, and how 'modern' the
+mainboard is).
+
+The P2 Xeon was the first Intel processor to include the SMBus
+interface on the P2 Xeon SEC.
+
+
+@node Section 2.5, Section 2.6, Section 2.4, Basics
+@section How often are the sensor values updated?
+
+The LM78, and most other sensor chips like it, reads its sensors one
+by one. A complete scanning sweep will take about 1.5 seconds. The LM78 stops
+readings sensors if you try to access it, so if you access it very often
+(by reading sensor values; writing new limits is safe) it will not find the
+time to update its sensor values at all! Fortunately, the kernel module takes
+care not to do this, and only reads new values each 1.5 seconds. If you
+read the values again, you will get the 'old' values again.
+
+
+@node Section 2.6, , Section 2.5, Basics
+@section How are alarms triggered?
+
+It is possible to monitor each sensor and have an alarm go off if
+it crosses some pre-determined limits.  There are two sorts of interrupts
+which can be generated by sensor chips if this happens (it depends a bit on
+the actual chip if both are supported; the LM80, for example, has only
+IRQ interrupts): IRQ interrupts and SMI interrupts.  IRQ stands for
+Interrupt Request and are the interrupt lines you can find in @file{/proc/interrupts}.
+SMI stands for System Management Interrupt, and is a special interrupt which
+puts the processor in a secure environment independent of any other things
+running.  SMI is currently not supported by the Linux kernel.  IRQs are
+supported, of course.
+
+Even if no interrupt is generated, some bits in a status register
+will be set until the register is read the next time. If the alarm condition
+persists after that, the bits will be set on the next scanning sweep, etc.
+
+Most drivers in our package do not support interrupts at this time.
+
+
+
+@node Installation, Problems, Basics, Top
+@chapter Installation and Management
+
+@menu
+* Section 3.1::     Why so many modules, and how do I cope with them?
+* Section 3.2::     How do I know which chips I own?
+* Section 3.3::     Which modules should I insert?
+* Section 3.4::     Do I need the configuration file @file{/etc/sensors.conf}?
+* Section 3.5::     What about the @samp{No such file or directory} warnings
+* Section 3.6::     I get all kinds of weird compilation errors?
+* Section 3.7::     It still does not compile or patch!
+* Section 3.8::     @command{make install} fails on Mandrake kernels
+* Section 3.9::     I get unresolved symbols when I @command{modprobe} modules
+* Section 3.10::    I2C_DRIVERID_ADM1024 undefined (Red Hat especially)
+@end menu
+
+@node Section 3.1, Section 3.2, , Installation
+@section Why so many modules, and how do I cope with them?
+
+We tried to make this package as modular as possible. This makes it
+easy to add new drivers, and unused drivers will take no precious kernel
+space. On the other hand, it can be a bit confusing at first.
+
+Here are two simple guidelines:
+@itemize
+  @item Run @command{sensors-detect} and do what it tells you.
+  @item Always use @command{modprobe}, not @command{insmod}.
+@end itemize
+
+Further information is in @file{doc/modules}.
+
+
+@anchor{How do I know which chips I own}
+@node Section 3.2, Section 3.3, Section 3.1, Installation
+@section How do I know which chips I own?
+
+We have an excellent program that scans all your hardware.
+It is called @file{sensors-detect} and is installed in @file{/usr/local/sbin}
+by @command{make install}. Just execute this script, and it will tell you.
+
+Chip detection in the drivers is fairly good. That means that it is
+usually harmless to insert more chip drivers than you need. However, this
+can still lead to problems, so we do not recommend it.
+
+If sensors-detect didn't find any sensors, either you don't have
+any, or the ones you have, we don't support. (Look at your motherboard
+for candidates, then @pxref{Help})
+
+
+@anchor{Section 3.2.1}
+@subsection What chips are on motherboard XYZ?
+
+    @strong{!!!!!!!!! YES THIS IS THE MOST FREQUENT QUESTION WE GET !!!!!!!!!}
+
+We have no idea. Here is what you should do:
+@enumerate
+  @item Run sensors-detect.
+@end enumerate
+
+If that doesn't work:
+@enumerate 2
+@item Look at your motherboard.
+@item Check the manufacturer's website or ask their support
+@item Check the @uref{http://mbm.livewiredev.com/, Motherboard Monitor} website and the
+@uref{http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/doc/useful_addresses.html, "links"}
+page on @uref{http://www2.lm-sensors.nu/~lm78/, our website} some good cross-references.
+@end enumerate
+
+
+@anchor{Section 3.2.2}
+@subsection Do you support motherboard XYZ?
+
+We don't support boards, we support chips. @xref{Section 3.2.1, What chips are on motherboard XYZ}.
+
+
+@anchor{Section 3.2.3}
+@subsection Do you support chip XYZ?
+
+This we have good answers for.
+@itemize
+@item Sorted by Manufacturer:   @file{README}
+@item Sorted by Manufacturer:   @uref{http://www2.lm-sensors.nu/~lm78/supported.html}
+@item Sorted by Sensor Driver:  @file{doc/chips/SUMMARY}
+@item Newest Driver Status:     @uref{http://www2.lm-sensors.nu/~lm78/newdrivers.html}
+@end itemize
+
+
+@anchor{Section 3.2.4}
+@subsection Anybody working on a driver for chip XYZ?
+
+Newest Driver Status: @uref{http://www2.lm-sensors.nu/~lm78/newdrivers.html}
+
+
+@node Section 3.3, Section 3.4, Section 3.2, Installation
+@section Which modules should I insert?
+
+@command{sensors-detect} will tell you. Take the @command{modprobe} lines it
+recommends and paste them into the appropriate @file{/etc/rc.d/xxxx} file
+to be executed at startup.
+
+You need one module for each sensor chip and bus adapter you own;
+if there are sensor chips on the ISA bus, you also need @file{i2c-isa.o}.
+for each type of chip you own. That's all. On my computer, I could use the
+following lines:
+@itemize
+@item @command{modprobe i2c-isa}
+@item @command{modprobe i2c-piix4}
+@item @command{modprobe lm78}
+@item @command{modprobe lm75}
+@item @command{modprobe i2c-dev}
+@item @command{sensors -s}
+@end itemize
+
+
+@node Section 3.4, Section 3.5, Section 3.3, Installation
+@section Do I need the configuration file @file{/etc/sensors.conf}?
+
+Yes, for any applications that use @file{libsensors,} including the
+@command{sensors} application included in our package.
+It tells libsensors how to translate the values the chip
+measures to real-world values. This is especially important for voltage
+inputs. The default configuration file should usually do the trick.
+It is automatically installed as @file{/etc/sensors.conf}, but it will not
+overwrite any existing file with that name.
+
+
+@anchor{Section 3.4.1}
+@subsection The labels for the voltage and temperature readings in @command{sensors} are incorrect!
+
+Every motherboard is different. You can customize the labels
+in the file @file{/etc/sensors.conf}. That's why it exists!
+The default labelling (in @file{lib/chips.c} and @file{/etc/sensors.conf}) is just
+a template.
+
+
+@anchor{Section 3.4.2}
+@subsection The min and max for the readings in @command{sensors} are incorrect!
+
+You can customize them in the file @file{/etc/sensors.conf}. See above.
+
+
+@anchor{Section 3.4.3}
+@subsection The min and max settings in @file{/etc/sensors.conf} didn't take effect!
+
+You forgot to run @command{sensors -s}. See above.
+
+
+@anchor{Section 3.4.4}
+@subsection One sensor isn't hooked up on my board!
+
+Use an @command{ignore} line in @file{/etc/sensors.conf} so it isn't
+displayed in @command{sensors}.
+
+
+@anchor{Section 3.4.5}
+@subsection I need help with @file{sensors.conf}!
+
+There is detailed help at the top of that file.
+
+
+@anchor{Section 3.4.6}
+@subsection Do you have a database of @file{sensors.conf} entries for specific boards?
+
+No. Good idea though. If you would like to set one up on your website
+send us mail and we will set up a link to it.
+
+
+@node Section 3.5, Section 3.6, Section 3.4, Installation
+@section What about the @samp{No such file or directory} warnings when I compile?
+
+Don't worry about them. The dependency files (which tell which
+files should be recompiled when certain files change) are created
+dynamically. They are not distributed with the package. The @command{make} program
+notices they are not there, and warns about that - and the first thing
+it will do is generate them. So all is well.
+
+
+@node Section 3.6, Section 3.7, Section 3.5, Installation
+@section I get all kinds of weird compilation errors?
+
+Check that the correct i2c header files are used. Depending on
+how you installed, they should be under either @file{/usr/local/include} or
+@file{/usr/src/linux*/include}. Try to edit the @file{Makefile} for the other setting.
+
+
+@anchor{Section 3.6.1}
+@subsection @samp{No rule to make target xxxx needed by xxxx} - how to fix?
+
+@itemize
+@item @xref{Section 3.6, I get all kinds of weird compilation errors}, also try @command{make clean} in @file{lm_sensors}.
+@item If that doesn't work, try @command{make clean} in @file{i2c}.
+@item If that doesn't work, try @command{make clean} in the kernel.
+@item Also make sure @file{/usr/include/linux} points to @file{/usr/src/linux/include/linux}.
+@end itemize
+
+
+@node Section 3.7, Section 3.8, Section 3.6, Installation
+@section It still does not compile or patch!
+
+Have you installed the matching version of the i2c package? Remember,
+compilation is not enough, you also need to install it for the header
+files to be found!
+
+If you want to patch the kernel, you will have to apply the i2c
+patches first!
+
+
+@node Section 3.8, Section 3.9, Section 3.7, Installation
+@section @command{make install} fails on Mandrake kernels
+
+Mandrake uses a non-standard @file{version.h} file which confuses our @file{Makefile}.
+Edit our @file{Makefile} on the @code{MODDIR :=} line to hard-code the module directory.
+
+
+@node Section 3.9, Section 3.10, Section 3.8, Installation
+@section I get unresolved symbols when I @command{modprobe} modules (Red Hat especially)
+
+Example:
+@example
+*** Unresolved symbols in /lib/modules/2.4.5/kernel/drivers/i2c/i2c-i810.o
+i2c_bit_add_bus_R8c3bc60e
+i2c_bit_del_bus_R92b18f49
+@end example
+
+You can also run @command{depmod -a -e} to see all unresolved symbols.
+
+
+These are module versioning problems. Generally you did not compile
+against the kernel you are running. Sometimes the Red Hat source you
+have is not for the kernel you are running.
+You must compile our package against the source for the kernel you
+are running with something like @command{make LINUX=/usr/src/linux-2.4.14}.
+
+
+Try the following to be sure:
+
+@itemize
+@item @command{nm --extern MODULE.o}
+Filter out the kernel symbols, like @code{kmalloc}, @code{printk} etc. and note the
+number code behind them, like @code{printk_R1b7d4074}. If there is no numeric
+code after them, note this too.
+@item @command{grep SYMBOL /proc/ksyms}
+Substitute SYMBOL by the basename of the symbols above, like @code{kmalloc},
+@code{printk} etc. Note the number code behind them, or the lack thereof.
+@item Compare both sets of symbols. Are they the same? If so, the problem
+lies somewhere else. Are they different? If so, you have a module
+versioning problem.
+@end itemize
+
+
+@node Section 3.10, , Section 3.9, Installation
+@section I2C_DRIVERID_ADM1024 undefined (Red Hat especially)
+
+In some versions of Redhat, an RPM is included to provide i2c support.
+However, this RPM does not place the header files in the kernel directory
+structure.  When you update kernels, they may persist.  To get rid of
+these obsolete header files, at a command prompt:
+
+@enumerate
+@item @command{rpm -qa | grep i2c}
+@item Look for @file{kernel-i2c,} or a similar rpm in the output
+@item <as root>
+@command{rpm -ev kernel-i2c} (or the name of the similar package)
+If this complains about dependencies, you can try adding
+@command{--nodeps}, but this *MAY* break something else.  Not likely,
+as you have upgraded kernels, and nothing should be using the
+old i2c stuff anymore anyway.  Just don't use it with abandon.
+@item Try (in the build directory of @file{lm_sensors)}
+@example
+@command{make clean}
+@command{make}
+@end example
+@item @emph{If} you still have problems, you may have to replace the include
+paths in the @file{.c/.h} files with absolute paths to the header files.
+More of a workaround than a real fix, but at least you can get it
+to work.
+@end enumerate
+
+
+@node Problems, Help, Installation, Top
+@chapter Problems
+
+@menu
+* Section 4.1::         My fans report exactly half/double their values?
+* Section 4.2::         Why do my two LM75's report "-48 degrees"?
+* Section 4.3::         Why do I have two Vcore readings?
+* Section 4.4::         How do those ALARMS work?
+* Section 4.5::         My voltage readings seem to drift a bit. What's wrong?
+* Section 4.6::         Some measurements are way out of range. What happened?
+* Section 4.7::         What are VID lines? Why is the VID reading wrong?
+* Section 4.8::         Sensor are only updated each second or so. Why?
+* Section 4.9::         It takes a second before reading sensor results. Why?
+* Section 4.10::        Can I be alerted when an ALARM occurs?
+* Section 4.11::        SMBus transactions on my PIIX4 simply don't work. Why?
+* Section 4.12::        My BIOS reports a higher CPU temperature than you!
+* Section 4.13::        I read strange values from the raw @file{/proc} files!
+* Section 4.14::        How do I set new limits?
+* Section 4.15::        Some sensors are doubly detected?
+* Section 4.16::        I ran sensors-detect, but now I get strange readings?!
+* Section 4.17::        Bad readings from particular chips
+* Section 4.18::        How do I configure two chips (LM87) differently?
+* Section 4.19::        Dmesg says @samp{Upgrade BIOS}! I don't want to!
+* Section 4.20::        Sensors says @samp{Can't access @file{/proc} file}
+* Section 4.21::        Sensors says @samp{No sensors found!}
+* Section 4.22::        Sensors output is not correct!
+* Section 4.23::        What is at I2C address XXX?
+* Section 4.24::        Sensors-detect doesn't work at all
+* Section 4.25::        Sensors says @samp{Error: Line xxx: zzzzzzz}
+* Section 4.26::        Sensors only gives the name, adapter, and algorithm!
+* Section 4.27::        Sensors says @samp{ERROR: Can't get xxxxx data!}
+* Section 4.28::        Sensors doesn't find any sensors, just eeproms.
+* Section 4.29::        Inserting modules hangs my board
+* Section 4.30::        Inserting modules slows down my board
+* Section 4.31::        Problems on particular motherboards
+@end menu
+
+
+@node Section 4.1, Section 4.2, , Problems
+@section My fans report exactly half/double their values compared to the BIOS?
+
+The problem with much of the sensor data is that it is impossible to
+properly interpret some of the readings without knowing what the hardware
+configuration is.  Some fans report one 'tick' each rotation, some report
+two 'ticks' each rotation. It is easy to resolve this through the
+configuration file @file{/etc/sensors.conf}:
+
+@example
+chip lm78-*             # Or whatever chip this relates to
+compute fan1 2*@@,@@/2    # This will double the fan1 reading
+                        # -- or --
+compute fan1 @@/2,2*@@    # This will halve the fan1 reading
+@end example
+
+See @file{doc/fan-divisors} in our package for further information.
+
+
+@anchor{Fans sometimes/always read 0!}
+@subsection Fans sometimes/always read 0!!
+
+You may not have a three-wire fan, which is required.
+
+You may need to increase the 'fan divisor'. See @file{doc/fan-divisors}
+in our package for further information.
+
+
+@anchor{I doubled the fan divisor and the fan still reads 7000}
+@subsection I doubled the fan divisor and the fan still reads 7000!
+
+Believe it or not, doubling the 'fan divisor' will not halve
+the fan reading. You have to add a compute line in @file{/etc/sensors.conf}.
+@xref{Section 4.1, My fans report exactly half/double their values compared to the BIOS},
+and see @file{doc/fan-divisors} in our package for further information.
+
+
+@node Section 4.2, Section 4.3, Section 4.1, Problems
+@section Why do my two LM75's report "-48 degrees"?
+
+For starters, those aren't LM75's.  Your mainboard actually has the
+Winbond W83781D which emulates two LM75's, but many systems which use the
+Winbond chip (such as the Asus P2B) don't have the thermo-resisters connected
+to the chip resulting in these strange -48 degree readings.
+
+If you have an Asus P2B and want more information on adding thermal sensing capability, check out:
+@uref{http://ultimatepc.fsn.net/techinfo/p2bthermistor/p2bthermistor.htm}
+
+In upcoming versions, you will be able to disable non-interesting
+readings.
+
+
+@node Section 4.3, Section 4.4, Section 4.2, Problems
+@section Why do I have two Vcore readings, I have only one processor!
+
+The LM78 has seven voltage sensors. The default way of
+connecting them is used in the configuration file. This includes a VCore2,
+even if you do not have one. You can easily edit the configuration file
+to give it another name, or make this reading disappear using
+an @command{ignore} line.
+
+Note that Vcore2 is often the same as Vcore on motherboards which
+only support one processor. Another possibility is that Vcore2 is not
+connected at all and will not have a valid reading at all.
+A third possibility, is that Vcore2 monitors something
+else, so you should not be too surprised if the values are completely
+different.
+
+
+@node Section 4.4, Section 4.5, Section 4.3, Problems
+@section How do those ALARMS work? The current value is within range but there is still an ALARM warning!
+
+The ALARM indications in @command{sensors} are those reported by the
+sensor chip itself. They are NOT calculated by @command{sensors}. @command{sensors}
+simply reads the ALARM bits and reports them.
+
+An ALARM will go off when a minimum or maximum limit is crossed.
+The ALARM is then latched - that is, it will stay there until the
+chip's registers are next accessed - which will be the next time
+you read these values, but not within (usually) 1.5 seconds since the last
+update.
+
+Reading the registers clears the ALARMS, unless the current
+value is still out of range.
+
+The purpose of this scheme is to tell you if there has been
+a problem and report it to the user. Voltage or temperature spikes
+get detected without having to read the sensor chip hundreds of times
+a second. The implemetation details depend a bit on the kind of chip.
+See the specific chip documentation in @file{doc/chips} and the
+chip datasheet for more information.
+
+
+@node Section 4.5, Section 4.6, Section 4.4, Problems
+@section My voltage readings seem to drift a bit. Is something wrong?
+
+No, probably not. If your motherboard heats up a bit, the sensed
+voltages will drift a bit. If your power supply is loaded (because a disk
+gets going, for example), the voltages may get a bit lower. Heavy
+processor activity, in particular, dramatically increases core voltage
+supply load which will often cause variation in the other supplies.
+As long as they stay within a sensible range (say 5% of the nominal value
+for CPU core voltages, and 10% for other voltages), there is no
+reason to worry.
+
+
+@node Section 4.6, Section 4.7, Section 4.5, Problems
+@section Some measurements are way out of range. What happened?
+
+Each module tries to set limits to sensible values on initialization,
+but a module does not know how a chip is actually connected. This is
+described in the configuration file, which is not read by kernel modules.
+So limits can be strange, if the chip is connected in a non-standard way.
+
+Readings can also be strange; there are several reasons for this.
+Temperature sensors, for example, can simply not be present, even though
+the chip supports them. Also, it can be that the input is used in a
+non-standard way. You can use the configuration file to describe how this
+measurement should be interpreted; see the comments the example file for
+more information.
+
+
+@node Section 4.7, Section 4.8, Section 4.6, Problems
+@section What are VID lines? Why is the VID reading wrong?
+
+These describe the core voltage for your processor. They are
+supported for most processors, however they are not always
+correctly connected to the sensor chip, so the readings may be invalid.
+A reading of 0V, +3.5V or +2.05V is especially suspect.
+If this is the case, add a line @command{ignore vid} to @file{/etc/sensors.conf},
+and change the min and max settings for the Processor Core voltage
+(often in0_min and in0_max) in that file so that they don't depend on vid.
+
+
+@node Section 4.8, Section 4.9, Section 4.7, Problems
+@section I read sensor values several times a second, but they are only updated only each second or so. Why?
+
+If we would read the registers more often, it would not find the
+time to update them. So we only update our readings once each 1.5 seconds
+(the actual delay is chip-specific; for some chips, it may not be needed
+at all).
+
+
+@node Section 4.9, Section 4.10, Section 4.8, Problems
+@section It sometimes seems to take almost a second before I see the sensor reading results. Why?
+
+ISA bus access is fast, but SMBus access is really slow. If you have
+a lot of sensors, it just takes a lot of time to access them. Fortunately,
+this has almost no impact on the system as a whole, as another job can run
+while we are waiting for the transaction to finish.
+
+
+@node Section 4.10, Section 4.11, Section 4.9, Problems
+@section Can I be alerted when an ALARM occurs?
+
+No, you can't; and it may well be never supported.
+
+Almost no mainboard we have encountered have actually connected the
+IRQ-out pin of sensor chips. That means that we could enable IRQ reporting, but
+nothing would happen. Also, even if a motherboard has it connected, it is
+unclear what interrupt number would be triggered. And IRQ lines are a scarce
+facility, which means that almost nobody would be able to use it anyway.
+
+The SMI interrupt is only available on a few types of chips. It is
+really a very obscure way to handle interrupts, and supporting it under Linux
+might be quite hard to do.
+
+Your best bet would be to poll the alarm file with a user-land daemon
+which alerts you if an alarm is raised. I am not aware of any program which
+does the job, though you might want to examine one of the graphical monitor
+programs under X, see @uref{http://www2.lm-sensors.nu/~lm78/useful_addresses.html} for addresses.
+
+
+@node Section 4.11, Section 4.12, Section 4.10, Problems
+@section SMBus transactions on my PIIX4 simply don't work (timeouts happen).  Why?
+
+Some chips which mainboard makers connect to the SMBus are not SMBus
+devices.  An example is the 91xx clock generator chips.  When read, these
+devices can lock up the SMBus until the next hard reboot.  This is because
+they have a similar serial interface (like the I2C), but don't conform to
+Intel's SMBus standard.
+
+Why did they connect these devices to the SMBus if they aren't
+compatible?  Good question! :')  Actually, these devices may support being
+written to, but lock things up when they are read.
+
+
+@node Section 4.12, Section 4.13, Section 4.11, Problems
+@section My BIOS reports a much higher CPU temperature than your modules!
+
+We display the actual temperature of the sensor. This may not be the
+temperature you are interested in, though.  If a sensor should measure
+the CPU temperature, it must be in thermal contact with it.  In practice,
+it is just somewhere near it. Your BIOS may correct for this (by adding,
+for example, thirty degrees to the measured temperature).  The correction
+factor is regrettably different for each mainboard, so we can not do this
+in the module itself. You can do it through the configuration file, though:
+
+@example
+chip lm75-*-49                      # Or whatever chip this relates to
+label temp "Processor"
+compute temp @@*1.2+13,(@@-13)/1.2    # Or whatever formula
+@end example
+
+
+@node Section 4.13, Section 4.14, Section 4.12, Problems
+@section I try to read the raw @file{/proc} files, but the values are strange?!?
+
+Remember, these values do not take the configuration file
+@file{compute} lines in account. This is especially obvious for voltage readings
+(usually called in? or vin?). Use a program linked to libsensors (like
+the provided @command{sensors} program) instead.
+
+
+@node Section 4.14, Section 4.15, Section 4.13, Problems
+@section How do I set new limits?
+
+Change the limit values in @file{/etc/sensors.conf} and then run
+@command{sensors -s}.
+
+
+@anchor{I set new limits and it didnt work}
+@subsection  I set new limits and it didn't work?
+
+You forgot to run @command{sensors -s}. Put it in a @file{/etc/rc.d/...} file
+after the modprobe lines to run at startup.
+
+
+@node Section 4.15, Section 4.16, Section 4.14, Problems
+@section Some sensors are doubly detected?
+
+Yes, this is still a problem. It is partially solved by alias detection
+and confidence values in sensors-detect, but it is really tough.
+
+Double detections can be caused by two things:
+sensors can be detected to both the ISA and the SMBus (and if you have
+loaded the approprate adapter drivers, it will be detected on both), and
+some chips simulate other chips (the Winbond W83781D simulates LM75 chips
+on the SMBus, for example). Remove the offending adapter or chip driver, or
+run sensors-detect and add the @command{ignore=} modprobe parameters it suggests.
+
+
+@node Section 4.16, Section 4.17, Section 4.15, Problems
+@section I ran sensors-detect, but now I get very strange readings?!?
+
+Your SMBus (PIIX4?) is probably crashed or hung. There are some mainboards
+which connect a clock chip to the SMBus. Unfortunately, this clock chip
+hangs the PIIX4 if it is read (it is an I2C device, but not SMBus compatible).
+We have found no way of solving this, except for rebooting your computer.
+Next time when you run sensors-detect, you may want to exclude addresses
+0x69 and/or 0x6a, by entering @kbd{s} when you are asked whether you want to
+scan the PIIX4.
+
+
+@node Section 4.17, Section 4.18, Section 4.16, Problems
+@section Bad readings from particular chips
+
+See below for some particularly troublesome chips.
+Also be sure and check @file{doc/chips/xxxxx} for the particular driver.
+
+
+@anchor{Bad readings from the AS99127F}
+@subsection Bad readings from the AS99127F!
+
+The Asus AS99127F is a modified version of the Winbond W83781D.
+Asus will not release a datasheet. The driver was developed by tedious
+experimentation. We've done the best we can. If you want to make adjustments
+to the readings please edit @file{/etc/sensors.conf.} Please don't ask us to
+fix the driver. Ask Asus to release a datasheet.
+
+
+@anchor{Bad readings from the VIA 686A}
+@subsection Bad readings from the VIA 686A!
+
+The Via 686A datasheet is incomplete.
+Via will not release details. The driver was developed by tedious
+experimentation. We've done the best we can. If you want to make adjustments
+to the readings please edit @file{/etc/sensors.conf.} Please don't ask us to
+fix the driver. Ask Via to release a better datasheet.
+Also, don't forget to @command{modprobe i2c-isa}.
+
+
+@anchor{Bad readings from the MTP008}
+@subsection Bad readings from the MTP008!
+
+The MTP008 has programmable temperature sensor types.
+If your sensor type does not match the default, you will have to change it.
+See @file{doc/chips/mtp008} for details.
+Also, MTP008 chips seem to randomly refuse to respond, for
+unknown reasons. You can see this as 'XX' entries in i2cdump.
+
+
+@anchor{Bad temperature readings from the SIS5595}
+@subsection Bad temperature readings from the SIS5595!
+
+This chip can use multiple thermistor types and there are also
+two different versions of the chip. We are trying to get the driver
+working better and develop formulas for different thermistors
+but we aren't there yet. Sorry.
+Also, many times the chip isn't really a sis5595 but it was
+misidentified. We are working on improving that too.
+
+
+@anchor{Bad readings from a w8378[12]d}
+@subsection Bad readings from a w8378[12]d!
+
+Do you own an ASUS motherboard?  Perhaps your chip is being
+misidentified.  Look on the motherboard (or at
+@uref{http://mbm.livewiredev.com}) for a 'Winbond' or Asus chip.
+Often the real device is an Asus as99127f. If so, the driver can be
+forced to recognize the as99127f with
+@command{force_as99127f=BUS,0x2d} where @code{BUS} is your i2c bus number.
+Cat /proc/bus/i2c to see a list of bus numbers.
+Read the w83781d module documentation (@file{doc/chips/w83781d})
+for more details.
+
+
+@anchor{Bus hangs on Ali 1543 on Asus P5A boards}
+@subsection Bus hangs on Ali 1543 on Asus P5A boards!
+
+The SMBus tends to hang on this board and it seems to get worse
+at higher temperatures. Use ISA accesses to reliably use the w83781d
+monitor chip on this board and use the @command{ignore=1,0x2d} or similar option
+to the w83781d module to prevent i2c accesses.
+
+
+@anchor{Bad readings from LM75}
+@subsection Bad readings from LM75!
+
+The LM75 detection is poor and other hardware is often misdetected
+as an LM75. Figure out what you really have @xref{Section 3.2.1, What chips are on motherboard XYZ}.
+
+
+@anchor{Bad readings from LM78}
+@subsection Bad readings from LM78!
+
+The LM78 is no longer manufactured by National Semiconductor.
+You probably don't have a real LM78 but something similar that we
+do not recogize or support. Figure out what you really have @xref{Section 3.2.1, What chips are on motherboard XYZ}.
+
+
+@anchor{Bad readings from LM80}
+@subsection Bad readings from LM80!
+
+The LM80 detection is poor and other hardware is often misdetected
+as an LM80. Figure out what you really have @xref{Section 3.2.1, What chips are on motherboard XYZ}.
+
+
+@anchor{Bad readings from it87}
+@subsection Bad readings from it87!
+
+The it87 temperature sesnsors are configured, unfortunately,
+in a way different from w83781d. They cannot be configured from
+@file{/etc/sensors.conf}; they must be set at modprobe insertion with
+@command{modprobe it87 temp_type=0xXX}. See @file{doc/chips/it87} for details.
+
+
+@node Section 4.18, Section 4.19, Section 4.17, Problems
+@section How do I configure two chips (LM87) differently?
+
+There is a SuperMicro board with two LM87's on it that are
+not hooked up in the same way, so they need different defaults.
+For example, both CPU temperatures go to one LM87.
+
+Make two different sections in @file{/etc/sensors.conf} as follows:
+@example
+chip "lm87-i2c-*-2c"
+    put configuration for the chip at 0x2c here
+chip "lm87-i2c-*-2d"
+    put configuration for the chip at 0x2d here
+@end example
+
+There is a commented example in @file{sensors.conf.eg} which should
+be helpful.
+
+
+@node Section 4.19, Section 4.20, Section 4.18, Problems
+@section Dmesg says @samp{Upgrade BIOS}! I don't want to!
+
+If the problem is a PCI device is not present in @command{lspci}, the solution
+is complex. For the ALI M7101 device, there is a solution which uses the
+2.4 kernel's @command{hotplug} facility. See @file{prog/hotplug} in our package.
+For other PCI devices, you can try to modify
+the m7101 solution in @file{prog/hotplug}.
+
+
+If dmesg says @samp{try force_addr}, see below. Other drivers generally do not
+support the force_addr parameter. Sorry. Check the documentation
+for your driver in @file{doc/[chips,busses]} and if we don't support it
+you can send us your request.
+
+
+@anchor{Dmesg says use force_addr=0xaddr! What address do I use}
+@subsection Dmesg says @samp{use force_addr=0xaddr}! What address do I use?
+
+If the problem is a PCI device whose base address is not set,
+you may be able to set the address with a force parameter. The via686a
+and sis5595 chip drivers, and some bus drivers, support the command line
+@command{modprobe via686a force_addr=0xADDRESS} where ADDRESS
+is the I/O address. You must select an address that is not in use.
+@command{cat @file{/proc/ioports}} to check (carefully) for conflicts. A high number like
+0xf000 is generally safe.
+
+
+@node Section 4.20, Section 4.21, Section 4.19, Problems
+@section Sensors says @samp{Can't access @file{/proc} file}
+
+@itemize
+@item (release 2.6.0 and later) Did you @command{modprobe i2c-proc}? Check @command{lsmod}.
+@item (release 2.5.5 and earlier) Did you 'modprobe sensors'? Check 'lsmod'.
+@item If you did @command{sensors -s}, did you run it as root?
+@item Do you have @file{/proc} support in your kernel (is @file{/proc} there?)
+@end itemize
+
+
+@node Section 4.21, Section 4.22, Section 4.20, Problems
+@section Sensors says @samp{No sensors found!}
+
+@itemize
+@item Did @command{sensors-detect} find sensors? (If not @pxref{Sensors-detect doesnt find any sensors})
+@item Did you do what @command{sensors-detect} said?
+@item Did you @command{modprobe} your sensor modules?
+@item Did you @command{modprobe} your I2C adapter modules?
+@item Did you @command{modprobe i2c-isa} if you have ISA sensor chips?
+@item Check @command{lsmod}.
+@end itemize
+
+
+@node Section 4.22, Section 4.23, Section 4.21, Problems
+@section Sensors output is not correct!
+
+    What specifically is the trouble?
+@itemize
+@item Labels: @xref{Section 3.4.1, The labels for the voltage and temperature readings in sensors are incorrect}.
+@item Min/max readings: @xref{Section 3.4.2, The min and max for the readings in sensors are incorrect}, and @xref{Section 3.4.3, The min and max settings didnt take effect}.
+@item AS99127F: @xref{Section 4.16, I ran sensors-detect but now I get very strange readings?}.
+@item Via 686A: @xref{Section 4.16, I ran sensors-detect but now I get very strange readings?}.
+@item Other specific chips: @xref{Section 4.16, I ran sensors-detect but now I get very strange readings?}.
+@item No output for a particular sensors chip: @xref{Section 5.3, What to do if it inserts but nothing happens}.
+@item No output at all: @xref{Section 4.21, Sensors says No sensors found}, @xref{Section 5.3, What to do if it inserts but nothing happens}.
+@item Completely bad output for a particular sensor chip: @xref{Section 5.4, What to do if I read only bogus information}.
+@item One particular sensor readings:
+@itemize
+@item Maybe it isn't hooked up? - tell 'sensors' to ignore it. @xref{Section 3.4.4, One sensor isnt hooked up on my board}.
+@item Maybe it is hooked up differently on your motherboard? - adjust @file{sensors.conf} calculation.
+@end itemize
+@end itemize
+
+@node Section 4.23, Section 4.24, Section 4.22, Problems
+@section What is at I2C address XXX?
+
+In general, we don't know. Start by running @command{sensors-detect}.
+If it doesn't recognize it, try running @command{i2cdump}. A partial list
+of manufacturers' IDs are at the bottom of @file{doc/chips/SUMMARY}.
+
+
+@anchor{What is at I2C address 0x69}
+@subsection What is at I2C address 0x69?
+
+A clock chip. Often, accessing these clock chips in the wrong
+way will instantly crash your computer. Sensors-detect carefully
+avoids these chips. If you really really want to play with your clock
+chip you can look at @file{kernel/chips/icspll.c} in our package. But we
+do not recommend it. You have been warned.
+
+
+@anchor{What is at I2C addresses 0x50 - 0x57}
+@subsection What is at I2C addresses 0x50 - 0x57?
+
+EEPROMs on your SDRAM DIMMs. Load the eeprom module to
+look at some basic data in @command{sensors} or use the program
+@command{prog/eeprom/decode-dimms.pl} to get more information than you ever wanted.
+
+
+@anchor{What is at I2C addresses 0x30 - 0x37}
+@subsection What is at I2C addresses 0x30 - 0x37?
+
+These are often 'shadows' of your EEPROMs on your SDRAM DIMMs
+at addresses 0x50 - 0x57. They aren't really there. If you try and
+do a @command{i2cdump} on them you won't get anything. This is probably
+caused by some timing problem on your motherboard or on the DIMMs.
+We don't know the exact cause.
+
+
+@node Section 4.24, Section 4.25, Section 4.23, Problems
+@section Sensors-detect doesn't work at all
+
+It could be many things. What was the problem? @xref{Section 4.31, Problems on particular motherboards}.
+
+
+@anchor{Sensors-detect says "Couldnt open /proc/bus/i2c?!?"}
+@subsection Sensors-detect says "Couldn't open /proc/bus/i2c?!?"
+
+You don't have i2c support in your kernel, or the i2c-core module
+was not loaded and you did not run sensors-detect as root.
+
+
+@anchor{Sensors-detect says "Cant open /dev/i2c[-/]0"}
+@subsection Sensors-detect says "Can't open /dev/i2c[-/]0"
+
+Your @file{/dev/i2c-0,} @file{/dev/i2c0}, or @file{/dev/i2c/0} files do not exist
+or you did not run @command{sensors-detect} as root.
+Run the script @command{prog/mkdev/mkdev.sh} to create the @file{/dev/i2c-x} files.
+Run @command{devfs} in the kernel to get the @file{/dev/i2c/x} files.
+
+
+@anchor{Sensors-detect doesnt find any sensors}
+@subsection Sensors-detect doesn't find any sensors!
+
+Either
+@enumerate
+@item The board doesn't have any sensors.
+@item We don't support the sensors on the board.
+@item The sensors it has are on an I2C bus connected to an I2C bus adapter that we don't support.
+@item You don't have the latest version of lm_sensors.
+@end enumerate
+
+But in any case you should figure out what is on the board:
+@enumerate
+@item Look at your motherboard.
+@item Check the manufacturer's website.
+@item Check the @uref{http://mbm.livewiredev.com/, Motherboard Monitor} website.
+@end enumerate
+
+When you know what chips you have, check the
+@uref{http://www2.lm-sensors.nu/~lm78/newdrivers.html, Newest Driver Status} web page to
+see if support has been added for your chip in a later release or in CVS.
+
+
+@node Section 4.25, Section 4.26, Section 4.24, Problems
+@section Sensors says @samp{Error: Line xxx: zzzzzzz}
+
+These are errors from the libsensors library in
+reading the @file{/etc/sensors.conf} configuration file. Go to that line
+number and fix it. If you have a parse error, perhaps you have
+to put the feature name in double quotes.
+
+
+@node Section 4.26, Section 4.27, Section 4.25, Problems
+@section Sensors only gives the name, adapter, and algorithm for my chip
+
+If @command{sensors} only says this, for example, and doesn't
+provide any actual data at all:
+
+@example
+it87-isa-0290
+Adapter: ISA adapter
+Algorithm: ISA algorithm
+@end example
+
+Your chip is not currently supported by @command{sensors} and so all it
+does is print out that information. Get the latest release
+and be sure you are running the @command{sensors} program it installed
+and not some older @command{sensors}.
+
+
+@node Section 4.27, Section 4.28, Section 4.26, Problems
+@section Sensors says @samp{ERROR: Can't get xxxxx data!}
+
+You have a @command{libsensors/sensors} mismatch. @command{sensors} is unable to
+get a data entry from @file{libsensors}. You probably have an
+old @file{libsensors} in your @file{/etc/ld.so.conf} path.
+Make sure you did (as root) a @command{make install} followed by a @command{ldconfig}.
+Then check the output of @command{ldconfig -v | grep libsensors} to
+verify that there is only ONE @file{libsensors} entry and that it matches
+the @file{libsensors} that was built in the @file{lib/} directory in @file{lm_sensors2}.
+
+
+@node Section 4.28, Section 4.29, Section 4.27, Problems
+@section Sensors doesn't find any sensors, just eeproms.
+
+@xref{Section 4.24, Sensors-detect doesnt work at all}, if @command{sensors-detect} failed to find any sensors.
+
+If @command{sensors-detect} did find sensors, did you insert your modules? For chips on the ISA
+bus, did you insert i2c-isa?
+
+@xref{Section 5.2, What to do if a module wont insert}, if the modules didn't insert,
+also @ref{Section 4.21, Sensors says No sensors found}.
+
+
+@node Section 4.29, Section 4.30, Section 4.28, Problems
+@section Inserting modules hangs my board
+
+There are several possible causes:
+@enumerate
+@item Bus driver problems. Insert the bus driver first, before you have inserted any chip drivers, to verify.
+@item Wrong chip driver. Verify that you have a chip supported by the chip driver, see @ref{Section 3.2.1, What chips are on motherboard XYZ}.
+@item The chip driver is reinitializing the chip, which undoes critical initialization done by the BIOS.  Try the parameter @command{init=0} for the w83781d driver; this is the only driver supporting this parameter.
+@item Some chips on the bus don't like to be probed at all.  After inserting the bus driver (but not the chip drivers), run @command{i2cdetect} on the bus, then @command{i2cdump} on each address responding to @command{i2cdetect}. This may find the culprit.  Do not @command{i2cdump address 0x69}, the clock chip.
+@item The chip driver is incorrectly finding a second chip on the bus and is accessing it. For example, with the Tyan 2688 with a w83781d at 0x29, use @command{modprobe ignore_range=0,0x00,0x28,0,0x2a,0x7f} to prevent access to other addresses. (@command{init=0} also req'd for the Tyan 2688).
+@end enumerate
+
+
+@node Section 4.30, Section 4.31, Section 4.29, Problems
+@section Inserting modules slows down my board
+
+Generally this is caused by an overtemperature alarm output from
+the sensor chip. This triggers hardware on the board which
+automatically slows down the CPU clock. Be sure that your
+temperature limits are above the temperature reading. Put
+the new limits in @file{/etc/sensors.conf} and run @command{sensors -s}.
+
+
+@node Section 4.31, , Section 4.30, Problems
+@section Problems on particular motherboards
+
+The following boards have unique problems and solutions.
+
+
+@anchor{Asus P4B}
+@subsection Asus P4B
+
+See @file{prog/hotplug/README.p4b} if your SMBus master is not found.
+
+
+@anchor{Tyan 2460 2462}
+@subsection Tyan 2460, 2462
+
+See support tickets 805, 765, 781, 812, 813, and 867 for information.
+
+
+@anchor{Tyan 2466}
+@subsection Tyan 2466
+
+See support tickets 941, 840, and 841 for information.
+
+
+@anchor{Tyan 2688}
+@subsection Tyan 2688
+
+For board hangs, see support ticket 721 for information.
+Also @ref{Section 4.29, Inserting modules hangs my board}.
+
+
+@node Help, Contribute, Problems, Top
+@chapter How to Ask for Help
+
+@menu
+* Section 5.1::  What to send us when asking for help
+* Section 5.2::  What to do if a module won't insert?
+* Section 5.3::  What to do if it inserts, but nothing happens?
+* Section 5.4::  What to do if I read only bogus information?
+* Section 5.5::  What to do if you have other problems?
+* Section 5.6::  What if it just works like a charm?
+* Section 5.7::  How do I update a ticket?
+* Section 5.8::  How do I follow up on a ticket?
+@end menu
+
+
+@node Section 5.1, Section 5.2, , Help
+@section What to send us when asking for help
+
+We are always willing to answer questions if things don't work out.
+Please email @email{sensors@@stimpy.netroedge.com}, and not the individual authors,
+unless you have something private to say.
+
+Instead of using email, you can also use the web-based support
+area, at @uref{http://secure.netroedge.com/~lm78/support.html}. You will be helped
+just as fast, and others may profit from the answer too. You will be
+emailed automatically when your question has been answered.
+
+Here's what you should send us:
+
+@itemize
+@item The dmesg or syslog output if applicable
+@item The output of (as root) @command{prog/detect/sensors-detect}
+@item The output of @command{lsmod}
+@item If a PCI chip problem:
+@itemize
+@item The output of @command{lspci -n}
+@end itemize
+@item If an I2C sensor chip problem:
+@itemize
+@item The output of (as root) @command{prog/detect/i2cdetect X}
+where X = the bus number (run @command{i2cdetect} with no arguments to list the busses)
+(please send this only if it's not all @samp{XX})
+@item The output of (as root) @command{prog/dump/i2cdump X 0xXX}
+where XX = the address of each chip you see in the output of @command{i2cdetect}. (run once for each chip)
+(please send this only if it's not all @samp{ff})
+@end itemize
+@item If an ISA sensor chip problem:
+@itemize
+@item The output of (as root) @command{prog/dump/isadump 0x295 0x296} (only if it's not all @samp{XX})
+@end itemize
+@item Part numbers of chips on your motherboard you think are the sensor chips (look at your motherboard)
+@item Motherboard type
+@item Sensors version
+@item Kernel version
+@end itemize
+
+
+@node Section 5.2, Section 5.3, Section 5.1, Help
+@section What to do if a module won't insert?
+
+Did you use @command{modprobe} instead of @command{insmod}??? Don't use insmod.
+
+Were there unresolved symbols? Did you run @command{depmod -a}? Run
+@command{depmod -a -e} to see where the symbol problem is.
+
+ALWAYS inspect the output of @command{dmesg}. That's where the error
+messages come out!!! Don't rely on the generic message from @command{modprobe}.
+If you still can't figure it out, send us the information
+listed above.
+
+
+@node Section 5.3, Section 5.4, Section 5.2, Help
+@section What to do if it inserts, but nothing happens?
+
+For an ISA sensor chip, did you also @command{modprobe i2c-isa}? It must be inserted.
+
+For an I2C sensor chip, did you also @command{modprobe i2c-xxx} where xxx is your
+I2C bus adapter? It must be inserted.
+
+Always inspect the output of @command{dmesg}. That's where the error
+messages come out. If you still can't figure it out, send us the information
+listed above.
+
+
+@node Section 5.4, Section 5.5, Section 5.3, Help
+@section What to do if I read only bogus information?
+
+It may be that this was a mis-detection: the chip may not be
+present. If you are convinced there is something wrong, verify that you
+indeed have the devices on your motherboard that you think you do.
+Look at the motherboard and make sure. If you are still stuck,
+please send us the usual information (@pxref{Help})
+
+
+@node Section 5.5, Section 5.6, Section 5.4, Help
+@section What to do if you have other problems?
+
+Again, send the output listed above.
+
+
+@node Section 5.6, Section 5.7, Section 5.5, Help
+@section What if it just works like a charm?
+
+Drop us a mail if you feel like it, mentioning the mainboard and
+detected chip type. That way, we have some positive feedback, too!
+
+
+@node Section 5.7, Section 5.8, Section 5.6, Help
+@section How do I update a ticket?
+
+You can't. Only developers can. Follow up by emailing us
+at @email{sensors@@stimpy.netroedge.com} and reference your ticket number
+in the subject. Please don't enter a new ticket with
+follow-up information, email us instead. Thanks.
+
+
+@node Section 5.8, , Section 5.7, Help
+@section How do I follow up on a ticket?
+
+Follow up by emailing us at @email{sensors@@stimpy.netroedge.com}
+and reference your ticket number in the subject.
+
+
+@node Contribute, Version 1 Specifics, Help, Top
+@chapter How to Contribute
+
+@menu
+* Section 6.1::  How to write a driver
+* Section 6.2::  How to get CVS access
+* Section 6.3::  How to donate hardware to the project
+* Section 6.4::  How to join the project mailing list
+* Section 6.5::  How to access mailing list archives
+* Section 6.6::  How to submit a patch
+* Section 6.7::  How to REALLY help
+@end menu
+
+
+@node Section 6.1, Section 6.2, , Contribute
+@section How to write a driver
+
+See @file{doc/developers/new_drivers} in our package for instructions.
+
+
+@node Section 6.2, Section 6.3, Section 6.1, Contribute
+@section How to get CVS access
+
+For anonymous CVS read access, see the instructions on our download page.
+Sorry, we don't have automatically generated CVS tarballs.
+
+For write access, run the script @command{doc/developers/genpasswd.pl} in
+our package and follow the instructions. Let us know what part
+of the package you would like to work on.
+
+@node Section 6.3, Section 6.4, Section 6.2, Contribute
+@section How to donate hardware to the project
+
+Send us email @email{sensors@@stimpy.netroedge.com}.
+
+
+@node Section 6.4, Section 6.5, Section 6.3, Contribute
+@section How to join the project mailing list
+
+Send us email @email{sensors@@stimpy.netroedge.com}. Sorry,
+there is no automated subscribe/unsubscribe service.
+
+
+@node Section 6.5, Section 6.6, Section 6.4, Contribute
+@section How to access mailing list archives
+
+The mailing list archive is at: @uref{http://archives.andrew.net.au/lm-sensors}
+Sorry, it only contains messages since October 28, 2001.
+
+
+@node Section 6.6, Section 6.7, Section 6.5, Contribute
+@section How to submit a patch
+
+Check out the latest from CVS, then copy the directory to another
+directory, and make your changes. Generate the diff with
+@command{diff -u2 -r DIR1 DIR2}. Or you can generate the diff in CVS with
+@command{cvs diff -u2}. Send us the patch in an email and tell us what it does.
+
+@node Section 6.7, , Section 6.6, Contribute
+@section How to REALLY help
+
+Believe it or not, what we really need help with are:
+@itemize
+@item Answering email
+@item Answering support tickets
+@item Submitting patches to Linus, etc.
+@item Creating a sensors.conf database
+@item Creating RPM's
+@end itemize
+
+Send us email @email{sensors@@stimpy.netroedge.com} if you can help.
+No experience necessary :)
+
+
+@node Version 1 Specifics, Document Revisions, Contribute, Top
+@chapter Version 1 Specific Questions
+
+@menu
+* Section 7.1::  My mainboard has an SMBus, your code can't find it.  Why?
+* Section 7.2::  The modules won't load, saying 'SMBus not detected'.
+* Section 7.3::  I get a "No sensor data yet (try again in a few moments)" msg.
+* Section 7.4::  On my Dell, a LM80 is detected, but all readings are 0!
+@end menu
+
+
+Note: Version 1 is very very old and is not recommended.
+
+@node Section 7.1, Section 7.2, , Version 1 Specifics
+@section My manufacturer swears that my mainboard has an SMBus, but your code reports that it can't find it.  What's wrong?
+
+Currently, our code only assumes that an SMBus exists if it originates
+from the Intel PIIX4 (82371AB).  If your computer doesn't have one, or if your
+SMBus originates from a different SMBus 'host', then you are out of luck. :'(
+Our experience is, though, that most machines have a PIIX4, and that it is
+where the SMBus is hosted.
+
+Regarding the VIA chip set(s):
+
+Right now, the SMBus code depends on the Intel PIIX4 chip to handle
+SMBus transactions.  The VIA chip set is NOT supported at this time because
+it forces much of the SMBus protocol to be implemented by software.
+
+To implement the SMBus correctly with the VIA chip, it needs to be
+written at a low level to be quick.  A more attractive alternative is to
+use the Bios SMBus interface (not always available nor standard).
+
+
+Version 2 supports the VIA chipset, and will support other chipsets.
+Version 1 never will.
+
+
+@node Section 7.2, Section 7.3, Section 7.1, Version 1 Specifics
+@section The modules won't load, saying 'SMBus not detected'.
+
+This should no longer be an issue in 1.4.10 and later; it will
+continue loading, but it won't support SMBus-connected devices, of course.
+
+
+@node Section 7.3, Section 7.4, Section 7.2, Version 1 Specifics
+@section I try to read @file{/proc/sensors}, and I get a "No sensor data yet (try again in a few moments)" message. Why?
+
+It takes about 1.5 seconds for the LM78 to update all its sensor
+values.  If we would try to read it before it finished that, you would get
+old garbage instead. So you have to wait 1.5 seconds after the module is
+inserted before you can access @file{/proc/sensors}.
+
+Module versions 1.3.7 and later let the process sleep if it tries
+to access sensor data right after insertion time, and do not display this
+message anymore.
+
+
+@node Section 7.4, , Section 7.3, Version 1 Specifics
+@section On my Dell, a LM80 is detected, but all readings are 0!
+
+This is a bug we have only observed on Dell computers. There is
+probably a problem with the way the SMBus is accessed; but it is not yet
+clear whether the problem is in our code or with the Dells.
+
+There are very probably no sensor chips at all on your computer;
+but until somebody contacts Dell about this and tells us the results, we
+can not be sure.
+
+
+@node Document Revisions, , Version 1 Specifics, Top
+@appendix Revision History of This Document
+
+@itemize
+@item Rev 2.9 (CP)  Converted to Gnu texinfo format, 20020910
+@item Rev 2.8 (MDS) Minor updates 20020710, released with lm_sensors 2.6.4
+@item Rev 2.7 (MDS) Minor updates 20020425
+@item Rev 2.6 (MDS) Minor updates 20020115, released with lm_sensors 2.6.3
+@item Rev 2.5 (MDS) Minor updates 20011111, released with lm_sensors 2.6.2
+@item Rev 2.4 (MDS) Minor updates 20010722
+@item Rev 2.3 (MDS) General update, 20010224, released with lm_sensors 2.6.0.
+@item Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 19990920
+@item Rev 2.1 (Frodo) Corrections for lm_sensors 2.2, 19990112
+@item Rev 2.0 (Frodo) Major revision for lm_sensors 2.1, 19981229
+@item Rev 1.10 (Frodo) Modified 3.8, updated some other things, 19980924
+@item Rev 1.9 (Frodo) Added 3.15, 19980906
+@item Rev 1.8 (Frodo) Added 3.14, 19980905
+@item Rev 1.7 (Phil) Added 3.13 and some other minor changes, 19980901
+@item Rev 1.6 (Frodo) Added 4, 4.1, 4.2, 4.3, 4.4, 4.5, 19980901
+@item Rev 1.5 (Frodo) Added 2.3, 2.4, 3.9, 3.10, 3.11, 19980826
+@item Rev 1.4 (Frodo) Added some more Winbond information, and 3.5-3.8, 19980817
+@item Rev 1.3 Added info on the Winbond chip, 19980816
+@item Rev 1.2 Adapation by Frodo Looijaard, 19980810
+@item Rev 1.1 Modifications by Philip Edelbrock, 19980809
+@item Rev 1.0 Written by Philip Edelbrock, 19980803
+@end itemize
+
+@bye

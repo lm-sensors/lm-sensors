@@ -1,0 +1,14 @@
+#
+# quick makefile for the FAQ.
+# So that both the text and html FAQ are accessible on the web
+# (the website points into CVS for the FAQ),
+# they are checked into CVS along with the .texi source.
+# Run 'make' and then check in all 3 files after editing the .texi source.
+#
+all::  lm_sensors-FAQ.html FAQ
+
+%.html: %.texi version.texi
+	makeinfo --html --no-split --number-sections $<
+
+FAQ: lm_sensors-FAQ.texi
+	makeinfo --no-headers --number-sections -o FAQ $<
