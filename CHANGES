@@ -33,8 +33,8 @@ ask CVS about it:
   Modules ds1621, pcf8591: Check for capabilities before using them
                            (Aurelien Jarno)
   Modules pcf8574, pcf8591: Cleanups
+  Modules ddcmon, eeprom: Fix bogus init (Ralf Roesch)
   Module adm1021: Better detection and initialization
-  Module eeprom: Fix bogus init (Ralf Roesch)
   Module pca9540: New driver for the Philips PCA9540
   Module pc87360-fan: New driver for the National Semiconductor PC87360,
                       PC87363 and PC87364 Super I/O chips
