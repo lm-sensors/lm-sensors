@@ -3120,11 +3120,17 @@ sub main
   print $configfile;
   print "#----cut here----\n";
   
-  print "\nDo you want to generate /etc/sysconfig/lm_sensors? (YES/no): ";
+  my $have_sysconfig = -d '/etc/sysconfig';
+  print "\nDo you want to generate /etc/sysconfig/lm_sensors? (".
+    ($have_sysconfig?"YES/no":"yes/NO")."): ";
   if ($> != 0) {
     print "\nAs you are not root, we shall skip this step.\n";
   } else {
-    if (not <STDIN> =~ /^\s*[Nn]/) {
+    if (($have_sysconfig and not <STDIN> =~ /^\s*[Nn]/) or <STDIN> =~ /^\s*[Yy]/) {
+      unless ($have_sysconfig) {
+        mkdir '/etc/sysconfig'
+          or die "Sorry, can't create /etc/sysconfig ($!)?!?";
+      }
       open(SYSCONFIG, ">/etc/sysconfig/lm_sensors")
         or die "Sorry, can't create /etc/sysconfig/lm_sensors ($!)?!?";
       print SYSCONFIG <<'EOT';
