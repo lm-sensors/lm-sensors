@@ -946,7 +946,8 @@ sub scan_adapter
                         i2c_driver => $adapter_driver,
                         i2c_devnr => $adapter_nr,
                       };
-          $new_hash->{i2c_sub_addrs} = \@chips if (@chips);
+          my @chips_copy = @chips, $new_hash->{i2c_sub_addrs} = \@chips_copy 
+                           if (@chips);
           add_i2c_to_chips_detected $$chip{driver}, $new_hash;
         } else {
           print "Failed!\n";
