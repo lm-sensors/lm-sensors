@@ -4,9 +4,9 @@
  * Copyright (c) 2003  Jean Delvare <khali@linux-fr.org>
  *
  * Heavily inspired from the lm78, lm75 and adm1021 drivers. The LM83 is
- * a sensor chip made by National Semiconducor. It reports up to four
+ * a sensor chip made by National Semiconductor. It reports up to four
  * temperatures (its own plus up to three external ones) with a 1 deg
- * resolution and a 3-4 deg precision. Complete datasheet can be obtained
+ * resolution and a 3-4 deg accuracy. Complete datasheet can be obtained
  * from National's website at:
  *   http://www.national.com/pf/LM/LM83.html
  * Since the datasheet omits to give the chip stepping code, I give it
@@ -294,7 +294,6 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 #endif
 			goto ERROR1;
 		}
-	
 	}
 
 	if (kind <= 0) /* identification */
@@ -320,7 +319,8 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	{
 		type_name = "lm83";
 		client_name = "LM83 chip";
-	} else
+	}
+	else
 	{
 		printk("lm83.o: Unknown kind %d.\n", kind);
 		goto ERROR1;
@@ -351,6 +351,7 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	/*
 	 * Register a new directory entry.
 	 */
+
 	if ((err = i2c_register_entry(new_client, type_name,
 	     lm83_dir_table_template)) < 0)
 	{
@@ -364,6 +365,7 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	/*
 	 * Initialize the LM83 chip
 	 */
+
 	lm83_init_client(new_client);
 	return 0;
 
