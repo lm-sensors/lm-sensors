@@ -217,24 +217,17 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->adapter = adapter;
   new_client->driver = &adm1021_driver;
 
-  /* Now, we do the remaining detection. */
-
-  if (kind < 0) {
-    if ((adm1021_read_value(new_client,ADM1021_REG_STATUS) & 0x03) != 0x80)
-      goto ERROR1;
-  }
-
   /* Determine the chip type. */
   
   if (kind <= 0) {
     i = adm1021_read_value(new_client,ADM1021_REG_MAN_ID);
     if (i == 0x41)
-      kind = max1617;
+      kind = adm1021;
     else if ((i== 0x4d) && 
              (adm1021_read_value(new_client,ADM1021_REG_DEV_ID) == 0x01))
       kind = max1617a;
     else 
-      kind = adm1021;
+      kind = max1617;
   }
 
   if (kind == max1617) {
