@@ -802,6 +802,15 @@ chip "gl520sm-*"
 
 # Factors and labels taken from GL520SM datasheet
 
+# The GL520SM has two application modes. In mode 1 it has two thermistor
+# inputs, in mode 2 it has only one and an extra (negative) voltage input.
+# The mode is supposed to be set properly by your BIOS so you should not
+# need to change it. You can force it below if really needed though.
+# Note that this means that you have either temp2 or vin4 but never both
+# at the same time.
+
+# set two_temps 1
+
   label vdd "+5V"
   label vin1 "+3.3V"
   label vin2 "+12V"
@@ -829,7 +838,6 @@ chip "gl520sm-*"
   set vin2_max 13.0
   set vin3_min 2.10
   set vin3_max 2.30
-  set two_temps 1
 
 
 chip "lm80-*"
