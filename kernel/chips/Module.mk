@@ -26,6 +26,7 @@ KERNELCHIPSDIR := $(MODULE_DIR)
 KERNELCHIPSTARGETS := $(MODULE_DIR)/bt869.o $(MODULE_DIR)/gl520sm.o \
                       $(MODULE_DIR)/matorb.o $(MODULE_DIR)/maxilife.o \
                       $(MODULE_DIR)/thmc50.o \
+                      $(MODULE_DIR)/via686a.o \
                       $(MODULE_DIR)/ddcmon.o
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM1021=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1021.o
