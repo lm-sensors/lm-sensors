@@ -36,10 +36,6 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
-MODULE_LICENSE("GPL");
-#endif
-
 /* Chip configuration settings.  These should be set to reflect the
 HARDWARE configuration of your chip.  By default (read: when all of
 these are left commented out), this driver assumes that the
@@ -50,7 +46,7 @@ Set to '1' the appropriate defines, as nessesary:
 
  - External temp sensors 2 (possible second CPU temp)
    This will disable the 2.5V and Vccp2 readings.
-   Ironicly, National decided that you can read the
+   Ironically, National decided that you can read the
    temperature of a second CPU or it's core voltage,
    but not both!  Comment out if FAULT is reported.  */
 
@@ -391,16 +387,16 @@ static ctl_table LM87_dir_table_template[] = {
 
 int lm87_attach_adapter(struct i2c_adapter *adapter)
 {
-   int error;
-   struct i2c_client_address_data  lm87_client_data;
+	int error;
+	struct i2c_client_address_data  lm87_client_data;
 
-   lm87_client_data.normal_i2c       = addr_data.normal_i2c;
-   lm87_client_data.normal_i2c_range = addr_data.normal_i2c_range;
-   lm87_client_data.probe            = addr_data.probe;
-   lm87_client_data.probe_range      = addr_data.probe_range;
-   lm87_client_data.ignore           = addr_data.ignore;
-   lm87_client_data.ignore_range     = addr_data.ignore_range;
-   lm87_client_data.force            = addr_data.forces->force;
+	lm87_client_data.normal_i2c       = addr_data.normal_i2c;
+	lm87_client_data.normal_i2c_range = addr_data.normal_i2c_range;
+	lm87_client_data.probe            = addr_data.probe;
+	lm87_client_data.probe_range      = addr_data.probe_range;
+	lm87_client_data.ignore           = addr_data.ignore;
+	lm87_client_data.ignore_range     = addr_data.ignore_range;
+	lm87_client_data.force            = addr_data.forces->force;
 
 	error = i2c_probe(adapter, &lm87_client_data, lm87_detect);
 	i2c_detect(adapter, &addr_data, lm87_detect);
@@ -448,7 +444,7 @@ static int lm87_detect(struct i2c_adapter *adapter, int address,
 	       goto ERROR1;
 	}
 
-	/* Fill in the remaining client fields and put it into the global list */
+	/* Fill in the remaining client fields and put into the global list */
         type_name = "lm87";
         client_name = "LM87 chip";
 	strcpy(new_client->name, client_name);
@@ -540,7 +536,8 @@ int lm87_write_value(struct i2c_client *client, u8 reg, u8 value)
 /* Called when we have found a new LM87. It should set limits, etc. */
 void lm87_init_client(struct i2c_client *client)
 {
-	long vid;
+	int vid;
+	u8 v;
 
 	/* Reset all except Watchdog values and last conversion values
 	   This sets fan-divs to 2, among others. This makes most other
@@ -587,8 +584,8 @@ void lm87_init_client(struct i2c_client *client)
 	);
 
 	/* Set IN (voltage) initial limits to sane values  +/- 5% */
-	lm87_write_value(client, LM87_REG_IN_MIN(1),182);
-	lm87_write_value(client, LM87_REG_IN_MAX(1),202);
+	lm87_write_value(client, LM87_REG_IN_MIN(0),182);
+	lm87_write_value(client, LM87_REG_IN_MAX(0),202);
 	lm87_write_value(client, LM87_REG_IN_MIN(2),182);
 	lm87_write_value(client, LM87_REG_IN_MAX(2),202);
 	lm87_write_value(client, LM87_REG_IN_MIN(3),182);
@@ -596,25 +593,17 @@ void lm87_init_client(struct i2c_client *client)
 	lm87_write_value(client, LM87_REG_IN_MIN(4),182);
 	lm87_write_value(client, LM87_REG_IN_MAX(4),202);
 
-	/* Set CPU core voltage limits relative to vid readings */
-	vid = (lm87_read_value(client, LM87_REG_VID_FAN_DIV) & 0x0f)
+	/* Set CPU core voltage limits relative to vid readings +/- 5% */
+	v = (lm87_read_value(client, LM87_REG_VID_FAN_DIV) & 0x0f)
 		    | ((lm87_read_value(client, LM87_REG_VID4) & 0x01)
                     << 4 );
-        if ((vid == 0x1f) || (vid == 0x0f)) {
-		vid = 0;
-        } else if (vid > 0x0f) {
-                vid = (1275 - ((vid - 0x10) * 25))/10;
-        } else {
-                vid = 200 - (vid * 5);
-        }
-	lm87_write_value(client, LM87_REG_IN_MIN(0),
-		(u8)(0x0FF & (((1920/270)*(vid*95))/1000) ));
-	lm87_write_value(client, LM87_REG_IN_MAX(0),
-		(u8)(0x0FF & (((1920/270)*(vid*105))/1000) ));
-	lm87_write_value(client, LM87_REG_IN_MIN(5),
-		(u8)(0x0FF & (((1920/270)*(vid*95))/1000) ));
-	lm87_write_value(client, LM87_REG_IN_MAX(5),
-		(u8)(0x0FF & (((1920/270)*(vid*105))/1000) ));
+	vid = VID_FROM_REG(v);
+	v = vid * 95 * 192 / 27000;
+	lm87_write_value(client, LM87_REG_IN_MIN(1), v);
+	lm87_write_value(client, LM87_REG_IN_MIN(5), v);
+	v = vid * 105 * 192 / 27000;
+	lm87_write_value(client, LM87_REG_IN_MAX(1), v);
+	lm87_write_value(client, LM87_REG_IN_MAX(5), v);
 
 	/* Set Temp initial limits to sane values */
 	lm87_write_value(client, LM87_REG_EXT_TEMP_1_HIGH,
@@ -716,8 +705,7 @@ void lm87_update_client(struct i2c_client *client)
 		    << 4;
 		data->alarms =
 		    lm87_read_value(client, LM87_REG_INT1_STAT) +
-		    (lm87_read_value(client, LM87_REG_INT2_STAT) <<
-		     8);
+		    (lm87_read_value(client, LM87_REG_INT2_STAT) << 8);
 		data->analog_out =
 		    lm87_read_value(client, LM87_REG_ANALOG_OUT);
 		data->last_updated = jiffies;
@@ -1067,6 +1055,9 @@ int __init lm87_cleanup(void)
 EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>,

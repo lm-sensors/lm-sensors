@@ -18,19 +18,22 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.3 (2001????)
-  File sensors.conf.eg: Un-ignore it87 in8, temp3, fan3
-  Library: Add PCF8591 and W83697HF support; fix w83* fan_min computes
+  File sensors.conf.eg: Un-ignore it87 in8, temp3, fan3;
+                        add adm1021 section
+  Library: Add PCF8591, W83697HF, ADM1023 support;
+           fix w83* fan_min computes
   Module fscscy: implement min/max for voltages and fans
   Module i2c-amd756: Add support for AMD768
   Module i2c-i810: Add support for 810E
   Module i2c-piix4: Check for uninitialized base address
+  Module lm87: Fix in0, in1, in5 initial limits
   Module pcf8591: new
   Module w83781d: Add W83697HF support
-  Program i2cdump: Add i2c block read capability
+  Program i2cdump: Add i2c block read capability (requires i2c-2.6.3)
   Program init/sensors: New SysV init script
   Program mkpatch.pl: Add support for fscscy, add more help entries
   Program rrd: Install summ_week.cgi
-  Program sensors: Add PCF8591 and W83697HF support,
+  Program sensors: Add PCF8591, W83697HF, ADM1023 support,
                    clean up chassis intrusion prints
   Program sensors-detect: Add several Nvidia chips, add PCF8591, add 810E,
                           fix Via686a and it87 detection,
@@ -38,6 +41,7 @@ ask CVS about it:
                           fix uninitialized values, it87 beats lm78
 
 2.6.2 (20011118)
+  NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
   Chip Modules (all): malloc.h -> slab.h
   Modules (all): Add MODULE_LICENSE("GPL")
   File doc/FAQ: More updates and additions
