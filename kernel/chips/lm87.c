@@ -27,6 +27,7 @@
 #include <linux/i2c.h>
 #include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include <linux/delay.h>
 #include "version.h"
 #include "sensors_vid.h"
 
@@ -468,8 +469,8 @@ static int lm87_detach_client(struct i2c_client *client)
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {
-		printk
-		    ("lm87.o: Client deregistration failed, client not detached.\n");
+		printk(KERN_ERR "lm87.o: Client deregistration failed, "
+		       "client not detached\n");
 		return err;
 	}
 
@@ -478,9 +479,24 @@ static int lm87_detach_client(struct i2c_client *client)
 	return 0;
 }
 
+#define MAX_RETRIES 5
+
 static int lm87_read_value(struct i2c_client *client, u8 reg)
 {
-	return 0xFF & i2c_smbus_read_byte_data(client, reg);
+	int value, i;
+
+	/* Retry in case of read errors */
+	for (i = 1; i <= MAX_RETRIES; i++) {
+		if ((value = i2c_smbus_read_byte_data(client, reg)) >= 0)
+			return value;
+
+		printk(KERN_WARNING "lm87.o: Read byte data failed, "
+		       "address 0x%02x\n", reg);
+		mdelay(i);
+	}
+
+	/* <TODO> what to return in case of error? */
+	return 0;
 }
 
 static int lm87_write_value(struct i2c_client *client, u8 reg, u8 value)
@@ -943,7 +959,7 @@ void lm87_vrm(struct i2c_client *client, int operation, int ctl_name,
 
 static int __init sm_lm87_init(void)
 {
-	printk("lm87.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk(KERN_INFO "lm87.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	return i2c_add_driver(&LM87_driver);
 }
 
