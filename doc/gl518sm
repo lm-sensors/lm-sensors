@@ -1,9 +1,13 @@
 This file documents the gl518sm directories.
 
 There will be one directory created for each detected GL518SM chip. Chips
-can only be connected to the SMBus. Directories are called gl518sm-i2c-?-??,
-where the first question mark equals the I2C bus number, and the I2C
+can only be connected to the SMBus. Directories are called 
+gl518sm-r??-i2c-?-??, where the first two question marks are the revision
+number, the question mark after i2c equals the I2C bus number, and the I2C
 address is at the end.
+At this moment, revisions 0x00 and 0x80 are known and supported. Revision
+0x00 chips can only display the VIN3 value; revision 0x80 can also 
+display the VIN1, VIN2 and VDD values.
 /proc/sys/dev/sensors/chips contains the SYSCTL values for all chip
 directories.
 

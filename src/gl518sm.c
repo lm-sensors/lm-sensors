@@ -41,11 +41,14 @@
 #define GL518_REG_VIN2_LIMIT 0x0a
 #define GL518_REG_VIN3_LIMIT 0x0b
 #define GL518_REG_VDD_LIMIT 0x0c
-#define GL518_REG_VOLT 0x0d
+#define GL518_REG_VIN3 0x0d
 #define GL518_REG_MISC 0x0f
 #define GL518_REG_ALARM 0x10
 #define GL518_REG_MASK 0x11
 #define GL518_REG_INT 0x12
+#define GL518_REG_VIN2 0x13
+#define GL518_REG_VIN1 0x14
+#define GL518_REG_VDD 0x15
 
 
 /* Conversions. Rounding is only done on the TO_REG variants. */
@@ -54,7 +57,7 @@
 
 #define FAN_TO_REG(val,div) (((val)==0?255:\
                              (960000+((val)*(div)))/(2*(val)*(div))) & 0xff)
-#define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:960000/(2*(val)*(div)))
+#define FAN_FROM_REG(val,div) ((val)==0?0:(val)==255?0:960000/(2*(val)*(div)))
 
 #define IN_TO_REG(val) ((((val)*10+8)/19) & 0xff)
 #define IN_FROM_REG(val) (((val)*19)/10)
@@ -98,11 +101,13 @@
 struct gl518_data {
          int sysctl_id;
 
+         u8 revision;
+
          struct semaphore update_lock;
          char valid;                 /* !=0 if following fields are valid */
          unsigned long last_updated; /* In jiffies */
 
-         u8 vin3;                    /* Register value */
+         u8 voltage[4];              /* Register values; [0] = VDD */
          u8 voltage_min[4];          /* Register values; [0] = VDD */
          u8 voltage_max[4];          /* Register values; [0] = VDD */
          u8 fan[2];
@@ -196,6 +201,8 @@ int gl518_attach_adapter(struct i2c_adapter *adapter)
   int address,err,i;
   struct i2c_client *new_client;
   struct gl518_data *data;
+  u8 revision;
+  char name[11];
 
   err = 0;
 
@@ -212,6 +219,10 @@ int gl518_attach_adapter(struct i2c_adapter *adapter)
       continue;
 
     if (i != 0x80)
+      continue;
+
+    revision = smbus_read_byte_data(adapter,address,GL518_REG_REVISION);
+    if ((revision != 0x00) && (revision != 0x80))
       continue;
 
     /* Real detection code goes here */
@@ -243,16 +254,18 @@ int gl518_attach_adapter(struct i2c_adapter *adapter)
     new_client->addr = address;
     new_client->adapter = adapter;
     new_client->driver = &gl518_driver;
-    strcpy(new_client->name,"GL518SM chip");
+    sprintf(new_client->name,"GL518SM chip rev. %02x",revision);
     data->valid = 0;
     data->update_lock = MUTEX;
+    data->revision = revision;
     
     /* Tell i2c-core a new client has arrived */
     if ((err = i2c_attach_client(new_client)))
       goto ERROR2;
     
+    sprintf(name,"gl518-r%02x",revision);
     /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,"gl518",
+    if ((err = sensors_register_entry(new_client,name,
                                       gl518_dir_table_template)) < 0)
       goto ERROR3;
     data->sysctl_id = err;
@@ -286,7 +299,8 @@ int gl518_attach_adapter(struct i2c_adapter *adapter)
                       (IN_TO_REG(GL518_INIT_VDD_MIN) << 8) |
                       IN_TO_REG(GL518_INIT_VDD_MAX));
     /* Clear status register (bit 5=1), start (bit6=1) */
-    gl518_write_value(new_client,GL518_REG_CONF,0x64);
+    gl518_write_value(new_client,GL518_REG_CONF,0x24);
+    gl518_write_value(new_client,GL518_REG_CONF,0x44);
 
     continue;
 /* OK, this is not exactly good programming practice, usually. But it is
@@ -379,7 +393,12 @@ void gl518_update_client(struct i2c_client *client)
     printk("Starting gl518 update\n");
 #endif
 
-    data->vin3 = gl518_read_value(client,GL518_REG_VOLT);
+    if (data->revision != 0x00) {
+      data->voltage[0] = gl518_read_value(client,GL518_REG_VDD);
+      data->voltage[1] = gl518_read_value(client,GL518_REG_VIN1);
+      data->voltage[2] = gl518_read_value(client,GL518_REG_VIN2);
+    }
+    data->voltage[3] = gl518_read_value(client,GL518_REG_VIN3);
 
     val = gl518_read_value(client,GL518_REG_VDD_LIMIT);
     data->voltage_min[0] = val & 0xff;
@@ -457,10 +476,10 @@ void gl518_vin(struct i2c_client *client, int operation, int ctl_name,
     gl518_update_client(client);
     results[0] = IN_FROM_REG(data->voltage_min[nr]);
     results[1] = IN_FROM_REG(data->voltage_max[nr]);
-    if (nr == 3)
-      results[2] = IN_FROM_REG(data->vin3);
-    else
+    if ((data->revision == 0x00) && (nr != 3))
       results[2] = 0;
+    else
+      results[2] = IN_FROM_REG(data->voltage[nr]);
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     regnr=nr==0?GL518_REG_VDD_LIMIT:nr==1?GL518_REG_VIN1_LIMIT:nr==2?

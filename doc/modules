@@ -65,6 +65,9 @@ at all!
 (src) lm75: sensors smbus i2c-core
   LM75 chip driver
 
+(src) gl518sm: sensors smbus i2c-core
+  GL518SM revision 0x00 and 0x80 chip driver
+
 (i2c) algo-bit: i2c-core
   The 'bit' algorithm, used by many i2c adapters
   Module parameters:
