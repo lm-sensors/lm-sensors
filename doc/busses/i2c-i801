@@ -1,10 +1,11 @@
 Kernel driver `i2c-i801.o'
 
 Status: Beta.
-        Block reads/writes untested (not used by any current chip driver).
+        Block reads/writes untested (but not used by any current chip driver).
 
 Supported adapters:
-  * Intel 82801AA and 82801AB (ICH and ICH0 - part of the '810' chipset)
+  * Intel 82801AA and 82801AB (ICH and ICH0 - part of the
+    '810' and '810E' chipsets)
     Datasheet: Publicly available at the Intel website
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
@@ -25,7 +26,7 @@ Description
 
 The ICH (properly known as the 82801AA) and ICH0 (82801AB)
 are Intel chips that are a part of Intel's '810' chipset
-which is designed for Celeron-based PCs.
+for Celeron-based PCs and '810E' chipset for Pentium-based PCs.
 
 The ICH contains up to SEVEN separate PCI functions
 in TWO logical PCI devices.

@@ -28,7 +28,7 @@ and module bit-mb is renamed i2c-via. You have been warned.
 
 At least the following SMBus adapters are supported:
   Intel PIIX4 (used in most Intel chipsets)
-  Intel ICH (used in Intel 810 chipsets for Celeron processors)
+  Intel ICH (used in the Intel 810 and 810E chipsets)
   Acer Labs M1541 and M1543C (used in the Aladdin IV, V and Pro 2 chipsets)
   VIA Technologies 82C586B (used in most VIA chipsets)
   VIA Technologies VT596A/B (used in some more modern VIA chipsets)
