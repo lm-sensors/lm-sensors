@@ -123,7 +123,8 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
 use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect 
             lm80_detect w83781d_detect w83781d_alias_detect
             w83781d_isa_detect gl518sm_detect gl520sm_detect adm9240_detect 
-            adm1021_detect sis5595_isa_detect eeprom_detect ltc1710_detect);
+            adm1021_detect sis5595_isa_detect eeprom_detect
+            adm1022_detect ltc1710_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -131,7 +132,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
 #  driver (optional): The driver name (without .o extension). Omit if none is
 #      written yet.
 #  i2c_addrs (optional): For I2C chips, the range of valid I2C addresses to
-#      probe.
+#      probe. Recommend avoiding 0x69 because of clock chips.
 #  i2c_driver_addrs (optional): For I2C chips, the range of valid I2C
 #      addresses probed by the kernel driver. Strictly optional.
 #  i2c_detect (optional): For I2C chips, the function to call to detect
@@ -152,7 +153,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      {
        name => "National Semiconductor LM78",
        driver => "lm78",
-       i2c_addrs => [0x00..0x7f], 
+       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { lm78_detect 0, @_},
        isa_addrs => [0x290],
@@ -162,7 +163,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      {
        name => "National Semiconductor LM78-J",
        driver => "lm78",
-       i2c_addrs => [0x00..0x7f],
+       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { lm78_detect 1, @_ },
        isa_addrs => [0x290],
@@ -172,7 +173,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      {
        name => "National Semiconductor LM79",
        driver => "lm78",
-       i2c_addrs => [0x00..0x7f],
+       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { lm78_detect 2, @_ },
        isa_addrs => [0x290],
@@ -194,7 +195,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      {
        name => "Winbond W83781D",
        driver => "w83781d",
-       i2c_addrs => [0x00..0x7f], 
+       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_detect => sub { w83781d_detect 0, @_},
        i2c_driver_addrs => [0x20..0x2f], 
        isa_addrs => [0x290],
@@ -204,7 +205,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      {
        name => "Winbond W83782D",
        driver => "w83781d",
-       i2c_addrs => [0x00..0x7f], 
+       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { w83781d_detect 1, @_},
        isa_addrs => [0x290],
@@ -214,14 +215,14 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      {
        name => "Winbond W83783S",
        driver => "w83781d",
-       i2c_addrs => [0x00..0x7f], 
+       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { w83781d_detect 2, @_},
      } ,
      {
        name => "Winbond W83627HF",
        driver => "w83781d",
-       i2c_addrs => [0x00..0x7f], 
+       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { w83781d_detect 3, @_},
        isa_addrs => [0x290],
@@ -287,6 +288,18 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 3, @_ },
+     },
+     {
+       name => "Analog Devices ADM1022",
+# driver to be written
+       i2c_addrs => [0x2c..0x2f],
+       i2c_detect => sub { adm1022_detect 0, @_ },
+     },
+     {
+       name => "Texas Instruments THMC50",
+# driver to be written
+       i2c_addrs => [0x2c..0x2f],
+       i2c_detect => sub { adm1022_detect 1, @_ },
      },
      {
        name => "Silicon Integrated Systems SIS5595",
@@ -1187,7 +1200,7 @@ sub lm78_alias_detect
 # Returns: undef if not detected, (3) if detected.
 # Registers used:
 #   0x01: Configuration
-#   0x02: Hysteris
+#   0x02: Hysteresis
 #   0x03: Overtemperature Shutdown
 # Detection really sucks! It is only based on the fact that the LM75 has only
 # four registers. Any other chip in the valid address range with only four
@@ -1362,7 +1375,7 @@ sub gl520sm_detect
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, (8) if detected.
+# Returns: undef if not detected, (7) if detected.
 # Registers used:
 #   0x3e: Company ID
 #   0x40: Configuration
@@ -1378,6 +1391,29 @@ sub adm9240_detect
                 ($chip == 2 and $reg == 0x01);
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
   return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
+  
+  return (7);
+}
+
+# $_[0]: Chip to detect (0 = ADM1022, 1 = THMC50)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, (8) if detected.
+# Registers used:
+#   0x3e: Company ID
+#   0x3f: Revision
+#   0x40: Configuration
+# Note: Detection overrules a previous LM78 or ADM9240 detection
+sub adm1022_detect
+{
+  my $reg;
+  my ($chip, $file,$addr) = @_;
+  $reg = i2c_smbus_read_byte_data($file,0x3e);
+  return unless ($chip == 0 and $reg == 0x41) or
+                ($chip == 1 and $reg == 0x49);
+  return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
+  return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xc0) == 0xc0;
   
   return (8);
 }
