@@ -4,5 +4,7 @@ CHECKLIST FOR NEW RELEASES
 * Update CHANGES
 * Update lm_sensors.lsm
 * Do a `make package'
-* Do a `cvs commit' (to commit the new version.h)
-* Tag the release using CVS
+* Tag the release using CVS ('cvs tag V#-#-#' from the dist root)
+* Do a `cvs commit' (to commit the new version changes)
+* Move new release to web archive, and pgp sign (& copy to mirrors)
+* Freshmeat announce
