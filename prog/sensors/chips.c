@@ -366,7 +366,7 @@ void print_adm9240(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM9240_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, min, max, HYST );
+      print_temp_info( cur, max, min, HYST );
       printf( " %s\n", alarms & ADM9240_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
@@ -485,7 +485,7 @@ void print_sis5595(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_SIS5595_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, min, max, HYST );
+      print_temp_info( cur, max, min, HYST );
       printf( " %s\n", alarms & SIS5595_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
@@ -607,7 +607,7 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, min, max, HYST );
+      print_temp_info( cur, max, min, HYST );
       printf(" %s\n", alarms & VIA686A_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
@@ -619,7 +619,7 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP2_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, min, max, HYST );
+      print_temp_info( cur, max, min, HYST );
       printf(" %s\n", alarms & VIA686A_ALARM_TEMP2 ? "ALARM" : "" );
     }
   } else
@@ -631,7 +631,7 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP3_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, min, max, HYST );
+      print_temp_info( cur, max, min, HYST );
       printf(" %s\n", alarms & VIA686A_ALARM_TEMP3 ? "ALARM" : "" );
     }
   } else
