@@ -1317,7 +1317,7 @@ static void w83781d_init_client(struct i2c_client *client)
 	}
 #endif				/* W83781D_RT */
 
-	if(init) {
+	if (init && type != as99127f) {
 		w83781d_write_value(client, W83781D_REG_TEMP2_CONFIG, 0x00);
 		if (type != w83783s && type != w83697hf) {
 			w83781d_write_value(client, W83781D_REG_TEMP3_CONFIG,
