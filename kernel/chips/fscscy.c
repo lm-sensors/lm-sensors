@@ -1,7 +1,7 @@
 /*
     fscscy.c - Part of lm_sensors, Linux kernel modules for hardware
              monitoring
-    Copyright (c) 2001 Hermann Jung <hej@odn.de>
+    Copyright (c) 2001 Martin Knoblauch <mkn@teraport.de, knobi@knobisoft.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -84,38 +84,50 @@ SENSORS_INSMOD_1(fscscy);
 #define FSCSCY_REG_WDOG_STATE       0x23
 #define FSCSCY_REG_WDOG_CONTROL     0x21
 
+/*
+** Fan definitions
+**
+** _RPMMIN: Minimum speed. Can be set via interface, but only for three of the fans
+**          FAN1_RPMMIN is wired to Fan 0 (CPU Fans)
+**          FAN4_RPMMIN is wired to Fan 2 (PS Fans ??)
+**          FAN5_RPMMIN is wired to Fan 3 (AUX Fans ??)
+** _ACT:    Actual Fan Speed
+** _STATE:  Fan status register
+** _RIPPLE: Fan speed multiplier
+*/
+
 /* fan 0  */
-#define FSCSCY_REG_FAN0_MIN	0x65
+#define FSCSCY_REG_FAN0_RPMMIN	0x65
 #define FSCSCY_REG_FAN0_ACT	0x6b
 #define FSCSCY_REG_FAN0_STATE	0x62
 #define FSCSCY_REG_FAN0_RIPPLE	0x6f
 
 /* fan 1  */
-#define FSCSCY_REG_FAN1_MIN     FSCSCY_REG_FAN0_MIN
+#define FSCSCY_REG_FAN1_RPMMIN     FSCSCY_REG_FAN0_RPMMIN
 #define FSCSCY_REG_FAN1_ACT     0x6c
 #define FSCSCY_REG_FAN1_STATE   0x61
 #define FSCSCY_REG_FAN1_RIPPLE  0x6f
 
 /* fan 2  */
-#define FSCSCY_REG_FAN2_MIN     0x55
+#define FSCSCY_REG_FAN2_RPMMIN     0x55
 #define FSCSCY_REG_FAN2_ACT     0x0e
 #define FSCSCY_REG_FAN2_STATE   0x0d
 #define FSCSCY_REG_FAN2_RIPPLE  0x0f
 
 /* fan 3  */
-#define FSCSCY_REG_FAN3_MIN     0xa5
+#define FSCSCY_REG_FAN3_RPMMIN     0xa5
 #define FSCSCY_REG_FAN3_ACT     0xab
 #define FSCSCY_REG_FAN3_STATE   0xa2
 #define FSCSCY_REG_FAN3_RIPPLE  0xaf
 
 /* fan 4  */
-#define FSCSCY_REG_FAN4_MIN     FSCSCY_REG_FAN2_MIN
+#define FSCSCY_REG_FAN4_RPMMIN     FSCSCY_REG_FAN2_RPMMIN
 #define FSCSCY_REG_FAN4_ACT	0x5c
 #define FSCSCY_REG_FAN4_STATE   0x52
 #define FSCSCY_REG_FAN4_RIPPLE  0x0f
 
 /* fan 5  */
-#define FSCSCY_REG_FAN5_MIN     FSCSCY_REG_FAN3_MIN
+#define FSCSCY_REG_FAN5_RPMMIN     FSCSCY_REG_FAN3_RPMMIN
 #define FSCSCY_REG_FAN5_ACT     0xbb
 #define FSCSCY_REG_FAN5_STATE   0xb2
 #define FSCSCY_REG_FAN5_RIPPLE  0xbf
@@ -184,6 +196,8 @@ struct fscscy_data {
 	u8  global_control;  /* global control register */
 	u8  watchdog[3];     /* watchdog */
 	u8  volt[3];         /* 12, 5, battery current */ 
+	u8  volt_min[3];     /* minimum voltages over module "lifetime" */
+	u8  volt_max[3];     /* maximum voltages over module "lifetime" */
 	u8  temp_act[4];     /* temperature */
 	u8  temp_status[4];  /* status of temp. sensor */
 	u8  temp_lim[4];     /* limit temperature of temp. sensor */
@@ -191,8 +205,10 @@ struct fscscy_data {
 	u8  temp_max[4];     /* maximum of temp. sensor, this is just calculsted by the module */
 	u8  fan_act[6];      /* fans revolutions per second */
 	u8  fan_status[6];   /* fan status */
-	u8  fan_min[6];      /* fan min value for rps */
+	u8  fan_rpmmin[6];   /* fan min value for rps */
 	u8  fan_ripple[6];   /* divider for rps */
+	u8  fan_min[6];      /* minimum RPM over module "lifetime" */
+	u8  fan_max[6];      /* maximum RPM over module "lifetime" */
 	u8  pciload;	     /* PCILoad value */
 	u8  intr_status;     /* Intrusion Status */
 	u8  intr_control;    /* Intrusion Control */
@@ -460,14 +476,21 @@ void fscscy_init_client(struct i2c_client *client)
 
 	/* read revision from chip */
 	data->revision =  fscscy_read_value(client,FSCSCY_REG_REVISION);
-	/* setup missing fan2_min value */
-	/* data->fan_min[2] = 0xff; */
 
         /* Initialize min/max values from chip */
+	data->fan_min[0]  = data->fan_max[0]  = fscscy_read_value(client, FSCSCY_REG_FAN0_ACT);
+	data->fan_min[1]  = data->fan_max[1]  = fscscy_read_value(client, FSCSCY_REG_FAN1_ACT);
+	data->fan_min[2]  = data->fan_max[2]  = fscscy_read_value(client, FSCSCY_REG_FAN2_ACT);
+	data->fan_min[3]  = data->fan_max[3]  = fscscy_read_value(client, FSCSCY_REG_FAN3_ACT);
+	data->fan_min[4]  = data->fan_max[4]  = fscscy_read_value(client, FSCSCY_REG_FAN4_ACT);
+	data->fan_min[4]  = data->fan_max[5]  = fscscy_read_value(client, FSCSCY_REG_FAN5_ACT);
         data->temp_min[0] = data->temp_max[0] = fscscy_read_value(client, FSCSCY_REG_TEMP0_ACT);
         data->temp_min[1] = data->temp_max[1] = fscscy_read_value(client, FSCSCY_REG_TEMP1_ACT);
         data->temp_min[2] = data->temp_max[2] = fscscy_read_value(client, FSCSCY_REG_TEMP2_ACT);
         data->temp_min[3] = data->temp_max[3] = fscscy_read_value(client, FSCSCY_REG_TEMP3_ACT);
+	data->volt_min[0] = data->volt_max[0] = fscscy_read_value(client, FSCSCY_REG_VOLT_12);
+	data->volt_min[1] = data->volt_max[1] = fscscy_read_value(client, FSCSCY_REG_VOLT_5);
+	data->volt_min[2] = data->volt_max[2] = fscscy_read_value(client, FSCSCY_REG_VOLT_BATT);
 }
 
 void fscscy_update_client(struct i2c_client *client)
@@ -494,7 +517,6 @@ void fscscy_update_client(struct i2c_client *client)
 		data->temp_act[3] = fscscy_read_value(client, FSCSCY_REG_TEMP3_ACT);
 		  if (data->temp_min[3] > data->temp_act[3]) data->temp_min[3] = data->temp_act[3];
 		  if (data->temp_max[3] < data->temp_act[3]) data->temp_max[3] = data->temp_act[3];
-
 		data->temp_status[0] = fscscy_read_value(client, FSCSCY_REG_TEMP0_STATE);
 		data->temp_status[1] = fscscy_read_value(client, FSCSCY_REG_TEMP1_STATE);
 		data->temp_status[2] = fscscy_read_value(client, FSCSCY_REG_TEMP2_STATE);
@@ -505,27 +527,45 @@ void fscscy_update_client(struct i2c_client *client)
 		data->temp_lim[3] = fscscy_read_value(client, FSCSCY_REG_TEMP3_LIM);
 
 		data->volt[0] = fscscy_read_value(client, FSCSCY_REG_VOLT_12);
+		  if (data->volt_min[0] > data->volt[0]) data->volt_min[0] = data->volt[0];
+		  if (data->volt_max[0] < data->volt[0]) data->volt_max[0] = data->volt[0];
 		data->volt[1] = fscscy_read_value(client, FSCSCY_REG_VOLT_5);
+		  if (data->volt_min[1] > data->volt[1]) data->volt_min[1] = data->volt[1];
+		  if (data->volt_max[1] < data->volt[1]) data->volt_max[1] = data->volt[1];
 		data->volt[2] = fscscy_read_value(client, FSCSCY_REG_VOLT_BATT);
+		  if (data->volt_min[2] > data->volt[2]) data->volt_min[2] = data->volt[2];
+		  if (data->volt_max[2] < data->volt[2]) data->volt_max[2] = data->volt[2];
 
 		data->fan_act[0] = fscscy_read_value(client, FSCSCY_REG_FAN0_ACT);
+		  if (data->fan_min[0] > data->fan_act[0]) data->fan_min[0] = data->fan_act[0];
+		  if (data->fan_max[0] < data->fan_act[0]) data->fan_max[0] = data->fan_act[0];
 		data->fan_act[1] = fscscy_read_value(client, FSCSCY_REG_FAN1_ACT);
+		  if (data->fan_min[1] > data->fan_act[1]) data->fan_min[1] = data->fan_act[1];
+		  if (data->fan_max[1] < data->fan_act[1]) data->fan_max[1] = data->fan_act[1];
 		data->fan_act[2] = fscscy_read_value(client, FSCSCY_REG_FAN2_ACT);
+		  if (data->fan_min[2] > data->fan_act[2]) data->fan_min[2] = data->fan_act[2];
+		  if (data->fan_max[2] < data->fan_act[2]) data->fan_max[2] = data->fan_act[2];
 		data->fan_act[3] = fscscy_read_value(client, FSCSCY_REG_FAN3_ACT);
+		  if (data->fan_min[3] > data->fan_act[3]) data->fan_min[3] = data->fan_act[3];
+		  if (data->fan_max[3] < data->fan_act[3]) data->fan_max[3] = data->fan_act[3];
 		data->fan_act[4] = fscscy_read_value(client, FSCSCY_REG_FAN4_ACT);
+		  if (data->fan_min[4] > data->fan_act[4]) data->fan_min[4] = data->fan_act[4];
+		  if (data->fan_max[4] < data->fan_act[4]) data->fan_max[4] = data->fan_act[4];
 		data->fan_act[5] = fscscy_read_value(client, FSCSCY_REG_FAN5_ACT);
+		  if (data->fan_min[5] > data->fan_act[5]) data->fan_min[5] = data->fan_act[5];
+		  if (data->fan_max[5] < data->fan_act[5]) data->fan_max[5] = data->fan_act[5];
 		data->fan_status[0] = fscscy_read_value(client, FSCSCY_REG_FAN0_STATE);
 		data->fan_status[1] = fscscy_read_value(client, FSCSCY_REG_FAN1_STATE);
 		data->fan_status[2] = fscscy_read_value(client, FSCSCY_REG_FAN2_STATE);
 		data->fan_status[3] = fscscy_read_value(client, FSCSCY_REG_FAN3_STATE);
 		data->fan_status[4] = fscscy_read_value(client, FSCSCY_REG_FAN4_STATE);
 		data->fan_status[5] = fscscy_read_value(client, FSCSCY_REG_FAN5_STATE);
-		data->fan_min[0] = fscscy_read_value(client, FSCSCY_REG_FAN0_MIN);
-		data->fan_min[1] = fscscy_read_value(client, FSCSCY_REG_FAN1_MIN);
-		data->fan_min[2] = fscscy_read_value(client, FSCSCY_REG_FAN2_MIN);
-		data->fan_min[3] = fscscy_read_value(client, FSCSCY_REG_FAN3_MIN);
-		data->fan_min[4] = fscscy_read_value(client, FSCSCY_REG_FAN4_MIN);
-		data->fan_min[5] = fscscy_read_value(client, FSCSCY_REG_FAN5_MIN);
+		data->fan_rpmmin[0] = fscscy_read_value(client, FSCSCY_REG_FAN0_RPMMIN);
+		data->fan_rpmmin[1] = fscscy_read_value(client, FSCSCY_REG_FAN1_RPMMIN);
+		data->fan_rpmmin[2] = fscscy_read_value(client, FSCSCY_REG_FAN2_RPMMIN);
+		data->fan_rpmmin[3] = fscscy_read_value(client, FSCSCY_REG_FAN3_RPMMIN);
+		data->fan_rpmmin[4] = fscscy_read_value(client, FSCSCY_REG_FAN4_RPMMIN);
+		data->fan_rpmmin[5] = fscscy_read_value(client, FSCSCY_REG_FAN5_RPMMIN);
 		data->fan_ripple[0] = fscscy_read_value(client, FSCSCY_REG_FAN0_RIPPLE);
 		data->fan_ripple[1] = fscscy_read_value(client, FSCSCY_REG_FAN1_RIPPLE);
 		data->fan_ripple[2] = fscscy_read_value(client, FSCSCY_REG_FAN2_RIPPLE);
@@ -705,12 +745,18 @@ void fscscy_volt(struct i2c_client *client, int operation, int ctl_name,
 		switch(ctl_name) {
 			case FSCSCY_SYSCTL_VOLT0:
 				results[0] = VOLT_FROM_REG(data->volt[0],1420);
+				results[1] = VOLT_FROM_REG(data->volt_min[0],1420);
+				results[2] = VOLT_FROM_REG(data->volt_max[0],1420);
 				break;
 			case FSCSCY_SYSCTL_VOLT1:
 				results[0] = VOLT_FROM_REG(data->volt[1],660);
+				results[1] = VOLT_FROM_REG(data->volt_min[1],660);
+				results[2] = VOLT_FROM_REG(data->volt_max[1],660);
 				break;
 			case FSCSCY_SYSCTL_VOLT2:
 				results[0] = VOLT_FROM_REG(data->volt[2],330);
+				results[1] = VOLT_FROM_REG(data->volt_min[2],330);
+				results[2] = VOLT_FROM_REG(data->volt_max[2],330);
 				break;
 			default:
 				printk("fscscy: ctl_name %d not supported\n",
@@ -718,7 +764,7 @@ void fscscy_volt(struct i2c_client *client, int operation, int ctl_name,
 				*nrels_mag = 0;
 				return;
 		}
-		*nrels_mag = 1;
+		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 			printk("fscscy: writing to chip not supported\n");
 	}
@@ -731,32 +777,32 @@ void fscscy_fan(struct i2c_client *client, int operation, int ctl_name,
 	switch(ctl_name) {
 		case FSCSCY_SYSCTL_FAN0:
 			fscscy_fan_internal(client,operation,ctl_name,nrels_mag,results,
-				0,FSCSCY_REG_FAN0_STATE,FSCSCY_REG_FAN0_MIN,
+				0,FSCSCY_REG_FAN0_STATE,FSCSCY_REG_FAN0_RPMMIN,
 				FSCSCY_REG_FAN0_RIPPLE);
 			break;
 		case FSCSCY_SYSCTL_FAN1:
 			fscscy_fan_internal(client,operation,ctl_name,nrels_mag,results,
-				1,FSCSCY_REG_FAN1_STATE,FSCSCY_REG_FAN1_MIN,
+				1,FSCSCY_REG_FAN1_STATE,FSCSCY_REG_FAN1_RPMMIN,
 				FSCSCY_REG_FAN1_RIPPLE);
 			break;
 		case FSCSCY_SYSCTL_FAN2:
 			fscscy_fan_internal(client,operation,ctl_name,nrels_mag,results,
-				2,FSCSCY_REG_FAN2_STATE,FSCSCY_REG_FAN2_MIN,
+				2,FSCSCY_REG_FAN2_STATE,FSCSCY_REG_FAN2_RPMMIN,
 				FSCSCY_REG_FAN2_RIPPLE);
 			break;
 		case FSCSCY_SYSCTL_FAN3:
 			fscscy_fan_internal(client,operation,ctl_name,nrels_mag,results,
-				3,FSCSCY_REG_FAN3_STATE,FSCSCY_REG_FAN3_MIN,
+				3,FSCSCY_REG_FAN3_STATE,FSCSCY_REG_FAN3_RPMMIN,
 				FSCSCY_REG_FAN3_RIPPLE);
 			break;
 		case FSCSCY_SYSCTL_FAN4:
 			fscscy_fan_internal(client,operation,ctl_name,nrels_mag,results,
-				4,FSCSCY_REG_FAN4_STATE,FSCSCY_REG_FAN4_MIN,
+				4,FSCSCY_REG_FAN4_STATE,FSCSCY_REG_FAN4_RPMMIN,
 				FSCSCY_REG_FAN4_RIPPLE);
 			break;
 		case FSCSCY_SYSCTL_FAN5:
 			fscscy_fan_internal(client,operation,ctl_name,nrels_mag,results,
-				5,FSCSCY_REG_FAN5_STATE,FSCSCY_REG_FAN5_MIN,
+				5,FSCSCY_REG_FAN5_STATE,FSCSCY_REG_FAN5_RPMMIN,
 				FSCSCY_REG_FAN5_RIPPLE);
 			break;
 		default:
@@ -777,28 +823,34 @@ void fscscy_fan_internal(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		fscscy_update_client(client);
 		results[0] = data->fan_status[nr] & 0x0f; /* MKN */
-		results[1] = data->fan_min[nr];
+		results[1] = data->fan_rpmmin[nr];
 		results[2] = data->fan_ripple[nr] & 0x03;
 		results[3] = RPM_FROM_REG(data->fan_act[nr]);
-		*nrels_mag = 4;
+		results[4] = RPM_FROM_REG(data->fan_min[nr]);
+		results[5] = RPM_FROM_REG(data->fan_max[nr]);
+		*nrels_mag = 6;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if(*nrels_mag >= 1) {
-			data->fan_status[nr] = (data->fan_status[nr] & 0x0b) | results[0] & 0x04; /* MKN */
+			data->fan_status[nr] = (data->fan_status[nr] & 0x0b) | (results[0] & 0x04); /* MKN */
 			printk("fscscy: writing value 0x%02x to fan%d_status\n",
 				data->fan_status[nr],nr);
 			fscscy_write_value(client,reg_state,
 				data->fan_status[nr]);
 		}
-		if((*nrels_mag >= 2) && (nr != 2) && (nr != 4)) { /* MIN Speed for Fan 2/4 is not supported */
-			data->fan_min[nr] = results[1];
+		if(*nrels_mag >= 2)  {
+			if((results[1] & 0xff) == 0) {
+				 printk("fscscy: fan%d rpmmin 0 not allowed for safety reasons\n",nr);
+				 return;
+			}
+			data->fan_rpmmin[nr] = results[1];
 			printk("fscscy: writing value 0x%02x to fan%d_min\n",
-				data->fan_min[nr],nr);
+				data->fan_rpmmin[nr],nr);
 			fscscy_write_value(client,reg_min,
-				data->fan_min[nr]);
+				data->fan_rpmmin[nr]);
 		}
 		if(*nrels_mag >= 3) {
 			if((results[2] & 0x03) == 0) {
-				printk("fscscy: fan%d ripple 0 not allowed\n",nr);
+				printk("fscscy: fan%d ripple 0 is nonsense/not allowed\n",nr);
 				return;
 			}
 			data->fan_ripple[nr] = results[2] & 0x03;
@@ -859,7 +911,7 @@ void fscscy_pciload(struct i2c_client *client, int operation, int ctl_name,
 		results[0] = data->pciload;
 		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-			printk("fscscy: writing to chip not supported\n");
+			printk("fscscy: writing PCILOAD to chip not supported\n");
 	}
 }
 
@@ -923,7 +975,7 @@ EXPORT_NO_SYMBOLS;
 #ifdef MODULE
 
 MODULE_AUTHOR
-    ("Hermann Jung <hej@odn.de> based on work from Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
+    ("Martin Knoblauch <mkn@teraport.de> based on work (fscpos) from  Hermann Jung <hej@odn.de>");
 MODULE_DESCRIPTION("fujitsu siemens scylla chip driver");
 
 int init_module(void)
