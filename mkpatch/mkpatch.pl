@@ -602,11 +602,6 @@ obj-$(CONFIG_SENSORS_THMC50)	+= thmc50.o
 obj-$(CONFIG_SENSORS_VIA686A)	+= via686a.o
 obj-$(CONFIG_SENSORS_W83781D)	+= w83781d.o
 
-O_OBJS          := $(filter-out $(export-objs), $(obj-y))
-OX_OBJS         := $(filter     $(export-objs), $(obj-y))
-M_OBJS          := $(sort $(filter-out  $(export-objs), $(obj-m)))
-MX_OBJS         := $(sort $(filter      $(export-objs), $(obj-m)))
-
 include $(TOPDIR)/Rules.make
 
 EOF
