@@ -8,6 +8,7 @@
 
 OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
+           !!! This package is ONLY for 2.4 kernels 2.4.9 or later !!!
            !!! THIS PACKAGE REQUIRES i2c-2.8.0 or later!!!
 
 FOR 2.5 KERNELS, Do not attempt to compile this package.

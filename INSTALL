@@ -3,7 +3,9 @@
 DETAILED INSTALLATION INSTRUCTIONS
 See QUICKSTART for the simple version.
 
-REQUIRES i2c-2.8.0 or later!!!
+This package is ONLY for 2.4 kernels 2.4.9 or later !!!
+
+This package REQUIRES i2c-2.8.0 or later!!!
 
 FOR 2.5 KERNELS, Do not attempt to compile this package.
                  Use the drivers already in the 2.5 kernel development tree.
@@ -11,14 +13,16 @@ FOR 2.5 KERNELS, Do not attempt to compile this package.
 =============================================================================
 These are the installation instruction for the lm_sensors package.
 
-There are two ways in which you can compile and install this package. Each
-has its own strong points. They are:
+There are two ways in which you can compile and install this package.
+Option 1 is much easier and is recommended.
 
  1. Complete separate from kernel compilation
+    (only for 2.4 kernels 2.4.9 or later)
     This will generate a set of modules which can be inserted and removed
     as needed; nothing will be written into the kernel tree;
 
  2. Patching of the kernel
+    (only for 2.4 kernels 2.4.13 or later)
     This will patch your kernel source tree. You must recompile your kernel
     to take advantage of this. But it makes it possible to compile drivers
     into the kernel itself, instead of having to add them as modules.
@@ -44,8 +48,7 @@ NOTE: PLEASE READ THE DOCUMENTATION IN THE DOC SUBDIRECTORY IF YOU GET STUCK!
 Installing the i2c package
 ==========================
 
-Note: as of kernel 2.3.34, the i2c code is integrated into the
-mainstream kernels. Unfortunately, this lm_sensors release REQUIRES
+This lm_sensors release REQUIRES
 i2c-2.8.0 or later, which is not in kernels through 2.4.21.
 Therefore, you must download and install the i2c package with
 the same version number or higher as this lm_sensors package.
@@ -76,8 +79,8 @@ options 2 and 3). Especially if you have in the past placed the header
 files in /usr/local/include, this will probably go wrong. See below on
 how to fix this.
 
-NOTE: option 3 only works with 2.2 and 2.4 (2.4.0 and later) kernels;
-      option 1 and 2 also work with 2.3 kernels.
+NOTE: option 3 only works with 2.4 kernels 2.4.13 or later;
+      option 1 and 2 only work with 2.4 kernels 2.4.9 or later.
 
 
 Mixing old and new, and using beta drivers (compilation option 1)

@@ -10,6 +10,8 @@ This is by far the EASIEST METHOD.
 Other methods are described in INSTALL.
 ------------------------------------------
 
+  * Verify you are running a 2.4 kernel, 2.4.9 or later.
+
   * Make sure you have the kernel tree corresponding to your current
     kernel in /lib/modules/(uname -r)/build.
     Even if the source is there, it may not correspond to your running

@@ -18,12 +18,14 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.8.0 (200307??)
-  NOTE: Requires i2c-2.8.0 or newer.
-  Dropped all kernel 2.2 and 2.3 compatibility; 2.4.9 or later required
+  NOTE: Requires i2c-2.8.0 or newer!!!
+  Dropped all kernel 2.2 and 2.3 compatibility; 2.4.9 or later required;
+                  2.4.13 or later required for mkpatch.
   File i2c-dev.h: Include userspace portion removed from i2c-dev.h in
                   i2c package
   File doc/chips/fscscy: Add watchdog documentation
   File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
+  File sensors.h: Now automatically generated
   Library: Add support for exponents and logarithms for vt1211/vt8235 temps;
            add adm1026, lm83, lm85, w83791d support;
            Advance version to 2.0.0
@@ -94,7 +96,8 @@ ask CVS about it:
   Program mkpatch: Fix vt8231 compile; keep tsunami from menu on non-alpha;
                    Add adm1026,lm85 support;
                    Remove sensors.c file; add sensors_compat.h;
-                   Remove patches to i2c-core.c and drivers/char/mem.c
+                   Remove patches to i2c-core.c and drivers/char/mem.c;
+                   Now works only for kernels 2.4.13 or later
   Program p4b_smbus: Fix 'make install';
                      Install in same place as other modules;
                      Clear correct bits in config word
@@ -108,7 +111,7 @@ ask CVS about it:
                           Add support for adm1026, 82801EB (ICH5), W83791D;
                           Add support for w83l785ts, nForce2;
                           Fix UTF-8 incompatibility;
-                          Better support for lm75 
+                          Better support for lm75;
                           Add support for lm83
 
 2.7.0 (20021208)
