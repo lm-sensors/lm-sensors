@@ -8,7 +8,12 @@ It is included in lm_sensors since 2.8.0, the latest version is always available
 For easy configuration, there's a script named pwmconfig which lets you interactively write your configuration file for fancontrol. Alternatively you can write this file yourself using the information from the configuration section of this document.
 
 Please be careful when using the fan control features of your mainboard, in addition to the risk of burning your CPU, at higher temperatures there will be a higher wearout of your other hardware components, too. So if you plan to use these components in 50 years, _maybe_ you shouldn't use fancontrol/your hardware at all.
-
+Also please keep in mind most fans aren't designed to be powered by a PWMed
+voltage, for more detailed information on this I recommend this app-note:
+http://www.maxim-ic.com/appnotes.cfm/appnote_number/707
+In practice it doesn't seem to be a major issue, the fans will get slightly
+warm, just be sure to have a temperature alarm and/or shutdown call, in case
+some fan fails, because you probably won't hear it anymore ;)
 
 Configuration
 
@@ -50,14 +55,15 @@ The algorithm
 
 fancontrol first reads its configuration, writes it to arrays and loops its main function.
 This function gets the temperatures and fanspeeds from lm_sensors proc files and calculates new speeds depending on temperature changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the new values are written to the pwm outputs.
-Currently the speed increases quadratically with rising temperature. This way you can have quite silent idle computer while having full power available at temperatures at which hardware still lives :)
+Currently the speed increases quadratically with rising temperature. This way you won't hear your fans most of the time at best.
 
 
 Planned features
 
-smoother regulation
-other curve styles
-graphical frontend
+rc-scripts for some gnu/linux-distributions
+smoother regulation (temp interpolation)
+other curve styles (linear, exponential)
+gui for configuration
 
 If you have other wishes or want to contribute something, please let me know:
-marius.reiner@hdev.de
+marius.reiner${AT}hdev.de
