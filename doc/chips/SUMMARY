@@ -214,6 +214,9 @@ pcf8574 & pcf8574a
 pcf8591
 	Quad A/D + one D/A
 
+saa1064
+	4-digit LED-driver
+
 smbus-arp
 	An SMBus 2.0 ARP client
 
