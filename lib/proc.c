@@ -421,8 +421,8 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 		in%d_max -> in_max%d
 		in%d_min -> in_min%d
 		in%d -> in_input%d
-		temp%d_over -> temp_max%d (to be changed after kernel patch)
-		temp%d_hyst -> temp_min%d ("")
+		temp%d_over -> temp_max%d
+		temp%d_hyst -> temp_hyst%d
 		temp%d_max -> temp_max%d
 		temp%d_high -> temp_max%d
 		temp%d_min -> temp_min%d
@@ -458,7 +458,7 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 		{ "remote_temp_low", "temp_min2", TEMPMAG },
 		{ "remote_temp_over", "temp_max2", TEMPMAG },
 		{ "temp", "temp_input1", TEMPMAG },
-		{ "temp_hyst", "temp_min1", TEMPMAG },		/* kernel patch pending for hyst */
+		{ "temp_hyst", "temp_hyst1", TEMPMAG },
 		{ "temp_low", "temp_min1", TEMPMAG },
 		{ "temp_over", "temp_max1", TEMPMAG },
 		{ NULL, NULL }
@@ -530,7 +530,7 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	}
 
 	if(sscanf(name, "temp%d_hys%c%c", &num, &last, &check) == 2 && last == 't') {
-		sprintf(sysname, "temp_min%d", num);	/* kernel patch pending for hyst */
+		sprintf(sysname, "temp_hyst%d", num);
 		*sysmag = TEMPMAG;
 		return 0;
 	}
