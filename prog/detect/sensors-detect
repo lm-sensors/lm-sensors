@@ -1352,12 +1352,20 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        isa_detect => sub { via8231_isa_detect @_ },
      },
      {
-       name => "ITE IT8705F / IT8712F / SiS 950",
+       name => "ITE IT8712F",
        driver => "it87",
-       i2c_addrs => [0x20..0x2f],
+       i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { ite_detect 0, @_ },
        isa_addrs => [0x290],
        isa_detect => sub { ite_isa_detect 0, @_ },
+     } ,
+     {
+       name => "ITE IT8705F / SiS 950",
+       driver => "it87",
+       i2c_addrs => [0x28..0x2f],
+       i2c_detect => sub { ite_detect 1, @_ },
+       isa_addrs => [0x290],
+       isa_detect => sub { ite_isa_detect 1, @_ },
      } ,
      {
        name => "SPD EEPROM",
@@ -2762,7 +2770,7 @@ sub lm78_isa_detect
   return unless ($chip == 0 and ($reg == 0x00 or $reg == 0x20)) or
                 ($chip == 1 and $reg == 0x40) or
                 ($chip == 2 and ($reg & 0xfe) == 0xc0);
-  return 7;
+  return 6;
 }
 
 
@@ -3946,15 +3954,16 @@ sub via8231_isa_detect
   return 9;
 }
 
-# $_[0]: Chip to detect (0 = ..., 1 = ...)
+# $_[0]: Chip to detect (0 = IT8712F, 1 = IT8705F/SiS950)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, 8 if detected (tops LM78).
+# Returns: undef if not detected, 7 or 8 if detected (tops LM78).
 # Registers used:
 #   0x00: Configuration
 #   0x48: Full I2C Address
 #   0x58: Mfr ID
+#   0x5b: Device ID (IT8712F only)
 # Note that this function is always called through a closure, so the
 # arguments are shifted by one place.
 sub ite_detect
@@ -3964,12 +3973,18 @@ sub ite_detect
   return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
   return unless (i2c_smbus_read_byte_data($file,0x00) & 0x80) == 0x00;
   return unless i2c_smbus_read_byte_data($file,0x58) == 0x90;
-  return (8);
+  return if $chip == 0 and i2c_smbus_read_byte_data($file,0x5b) != 0x12;
+  return if $chip == 1 and i2c_smbus_read_byte_data($file,0x5b) == 0x12;
+  return (7 + ($chip == 0));
 }
 
-# $_[0]: Chip to detect (0 = ..., 1 = ...)
+# $_[0]: Chip to detect (0 = IT8712F, 1 = IT8705F/SiS950)
 # $_[1]: Address
-# Returns: undef if not detected, 8 if detected (tops LM78).
+# Returns: undef if not detected, 7 or 8 if detected (tops LM78).
+# Registers used:
+#   0x00: Configuration
+#   0x58: Mfr ID
+#   0x5b: Device ID (IT8712F only)
 # Note: Only address 0x290 is scanned at this moment.
 sub ite_isa_detect
 {
@@ -3986,9 +4001,18 @@ sub ite_isa_detect
   }
   my $readproc = sub { isa_read_byte $addr + 5, $addr + 6, @_ };
   return unless (&$readproc(0x00) & 0x80) == 0x00;
-  my $reg = &$readproc(0x58);
-  return unless ($reg == 0x90);
-  return 8;
+  return unless &$readproc(0x58) == 0x90;
+  return if $chip == 0 and &$readproc(0x5b) != 0x12;
+  return if $chip == 1 and &$readproc(0x5b) == 0x12;
+
+  # Explcitely prevents misdetection of W83627THF
+  if ($chip == 1) {
+    my $val2 = &$readproc(0x4e);
+    $val = &$readproc(0x4f);
+    return if (($val2 & 0x80) && $val == 0x5c)
+           or (!($val2 & 0x80) && $val == 0xa3);
+  }
+  return (7 + ($chip == 0));
 }
 
 
