@@ -3663,7 +3663,7 @@ static sensors_chip_feature ds1621_features[] =
                          R, DS1621_SYSCTL_TEMP, VALUE(3), 1 },
     { SENSORS_DS1621_TEMP_HYST, "temp_hyst", SENSORS_DS1621_TEMP,
                               SENSORS_DS1621_TEMP, RW, 
-                              DS1621_SYSCTL_TEMP, VALUE(2), 1 },
+                              DS1621_SYSCTL_TEMP, VALUE(2), 1, "temp1_min", 3 },
     { SENSORS_DS1621_TEMP_OVER, "temp_over", SENSORS_DS1621_TEMP,
                               SENSORS_DS1621_TEMP, RW, 
                               DS1621_SYSCTL_TEMP, VALUE(1), 1 },
