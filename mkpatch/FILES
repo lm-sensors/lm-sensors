@@ -31,6 +31,7 @@ kernel/chips/fscscy.c		drivers/sensors/fscscy.c
 kernel/chips/gl518sm.c		drivers/sensors/gl518sm.c
 kernel/chips/gl520sm.c		drivers/sensors/gl520sm.c
 kernel/chips/it87.c		drivers/sensors/it87.c
+kernel/chips/lm75.h		drivers/sensors/lm75.h
 kernel/chips/lm75.c		drivers/sensors/lm75.c
 kernel/chips/lm78.c		drivers/sensors/lm78.c
 kernel/chips/lm80.c		drivers/sensors/lm80.c
