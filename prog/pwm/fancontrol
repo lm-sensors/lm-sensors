@@ -37,6 +37,8 @@
 #
 #
 
+echo $$ > /var/run/fancontrol.pid
+
 function LoadConfig {
 	echo "Loading configuration from $1 ..."
 	#grep configuration from file
