@@ -193,8 +193,30 @@ rrdGetSensors_DS
   if (!feature || feature->rrd) {
     struct ds *data = (struct ds *) _data;
     char *ptr = rrdBuff + data->num * RRD_BUFF;
+    const char *min, *max;
     data->argv[data->num ++] = ptr;
-    sprintf (ptr, "DS:%s:GAUGE:%d:U:U", rawLabel, /* number of seconds downtime during which average be used instead of unknown */ 5 * rrdTime);
+    switch (feature->type) { /* arbitrary sanity limits */
+      case DataType_voltage:
+        min="-25";
+        max="25";
+        break;
+      case DataType_rpm:
+        min = "0";
+        max = "12000";
+        break;
+      case DataType_temperature:
+        min = "0";
+        max = "250";
+        break;
+      case DataType_mhz:
+        min = "0";
+        max = "U";
+        break;
+      default:
+        min = max = "U";
+        break;
+    }
+    sprintf (ptr, "DS:%s:GAUGE:%d:%s:%s", rawLabel, /* number of seconds downtime during which average be used instead of unknown */ 5 * rrdTime, min, max);
   }
   return 0;
 }
