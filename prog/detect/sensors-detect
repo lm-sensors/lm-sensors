@@ -2414,7 +2414,7 @@ sub scan_adapter
   binmode FILE;
 
   # Now scan each address in turn
-  foreach $addr (0..0x7f) {
+  foreach $addr (0x04..0x77) {
     # As the not_to_scan list is sorted, we can check it fast
     if (@not_to_scan and $not_to_scan[0] == $addr) {
       shift @not_to_scan;
@@ -4258,15 +4258,23 @@ sub safe_system_vendor
   return 0 if $vpd_bbid eq '0';
   return 1 if $vpd_bbid eq '1';
   
-# This is where we'll be able to differenciate between different
-# IBM systems (safe and unsafe). For now, everyone is blacklisted.
+# This is where we differenciate between IBM systems (safe and unsafe).
+# Default is to reject, white list below.
+
+  my %is_safe =
+  {
+    "2A" => 1,
+  };
+
+  return 1 if defined($is_safe{substr($vpd_bbid, 0, 2)});
   
   print " Sorry, we won't let you go on. IBM systems are known to have\n",
         " serious problems with lm_sensors, resulting in hardware failures.\n",
         " For more information, see README.thinkpad or\n",
         " http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/README.thinkpad.\n",
-        " Not all IBM systems are affected, and we plan to establish a\n",
-        " \"white list\" of safe systems soon. Stay tuned!\n\n";
+        " We are maintaining a \"white list\" of known-to-be-safe systems.\n",
+        " Contact us if you know your system is safe (meaning you have actually\n",
+        " verified it is) and want your system to be added to the list.\n\n";
 
   exit;
 }
