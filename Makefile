@@ -15,6 +15,11 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+# Everything you may want to change is in the top of this file. Usually, you
+# can just use the defaults, fortunately.
+
+# You need a full complement of GNU utilities to run this Makefile succesfully;
+# most notably, you need bash, GNU make, flex and bison.
 
 # Uncomment the third line on SMP systems if the magic invocation fails.
 SMP := $(shell if grep -q '^SMP[[:space:]]*=' /usr/src/linux/Makefile; then echo 1; else echo 0; fi)
@@ -45,16 +50,36 @@ WARN := 0
 DEBUG := 0
 #DEBUG := 1
 
-# This is the directory into which the modules will be installed, if you
-# call 'make install'
+# This is the prefix that will be used for almost all directories below.
+PREFIX := /usr/local
+
+# This is the directory into which the modules will be installed.
 MODDIR := /lib/modules/extra/misc
 
-# This is the directory into which the include files will be installed,
-# if you call 'make install'. If you install it in the directory below,
-# #include <linux/smbus.h>, for example, should work, regardless of the
-# current linux kernel.
-INCLUDEDIR := /usr/local/include/linux
+# You should not need to change this. It is the directory into which the
+# library files (both static and shared) will be installed.
+LIBDIR := $(PREFIX)/lib
 
+# You should not need to change this. It is the directory into which the
+# executable program files will be installed.
+# Note that not all programs in this package are really installed;
+# some are just examples. You can always install them by hand, of
+# course.
+BINDIR := $(PREFIX)/bin
+
+# You should not need to change this. It is the basic directory into which
+# include files will be installed. The actual directory will be 
+# $(INCLUDEDIR)/linux for system include files, and $(INCLUDEDIR)/sensors
+# for library include files. If PREFIX equals the default /usr/local/bin,
+# you will be able to use '#include <linux/sensors.h>' regardless of the
+# current kernel selected.
+INCLUDEDIR := $(PREFIX)/include
+SYSINCLUDEDIR := $(INCLUDEDIR)/linux
+LIBINCLUDEDIR := $(INCLUDEDIR)/sensors
+
+# If your /bin/sh is not bash, change the below definition so that make can
+# find bash.
+# SHELL=/usr/bin/bash
 
 # Below this, nothing should need to be changed.
 
@@ -70,9 +95,9 @@ INCLUDEDIR := /usr/local/include/linux
 # to do this. 
 
 # The subdirectories we need to build things in 
-MODULES := src
+SRCDIRS := src
 ifeq ($(I2C),1)
-MODULES += i2c i2c/detect i2c/drivers i2c/eeprom
+SRCDIRS += i2c i2c/detect i2c/drivers i2c/eeprom
 endif
 
 # Some often-used commands with default options
@@ -81,33 +106,36 @@ RM := rm -f
 CC := gcc
 
 # Determine the default compiler flags
-# CFLAGS is to create in-kernel object files (modules); EXCFLAGS is to create
-# non-kernel object files (which are linked into executables).
-CFLAGS := -D__KERNEL__ -DMODULE -I. -Ii2c -O2 -fomit-frame-pointer -DLM_SENSORS
-EXCFLAGS := -I. -Ii2c -O2 -D LM_SENSORS
+# MODCFLAGS is to create in-kernel object files (modules); PROGFLAGS is to
+# create non-kernel object files (which are linked into executables).
+# ARCFLAGS are used to create archive object files (static libraries), and
+# LIBCFLAGS are for shared library objects.
+CFLAGS := -I. -Ii2c -O2 -D LM_SENSORS
 
 ifeq ($(DEBUG),1)
 CFLAGS += -DDEBUG
-EXCFLAGS += -DDEBUG
-endif
-
-ifeq ($(SMP),1)
-CFLAGS += -D__SMP__
 endif
 
 ifeq ($(WARN),1)
 CFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
           -Wcast-align -Wwrite-strings -Wnested-externs -Winline
-EXCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
-            -Wcast-align -Wwrite-strings -Wnested-externs -Winline
+endif
+
+MODCFLAGS := $(CFLAGS) -D__KERNEL__ -DMODULE -fomit-frame-pointer
+PROGCFLAGS := $(CFLAGS)
+ARCFLAGS := $(CFLAGS)
+LIBCFLAGS := $(CFLAGS) -fpic
+
+ifeq ($(SMP),1)
+MODCFLAGS += -D__SMP__
 endif
 
 ifeq ($(MODVER),1)
-CFLAGS += -DMODVERSIONS -include /usr/include/linux/modversions.h
+MODCFLAGS += -DMODVERSIONS -include /usr/include/linux/modversions.h
 endif
 
 ifeq ($(I2C),1)
-CFLAGS += -DI2C
+MODCFLAGS += -DI2C
 endif
 
 .PHONY: all clean install version package dep
@@ -117,7 +145,7 @@ all::
 
 # Include all makefiles for sub-modules
 INCLUDEFILES := 
-include $(patsubst %,%/Module.mk,$(MODULES))
+include $(patsubst %,%/Module.mk,$(SRCDIRS))
 ifneq ($(MAKECMDGOALS),clean)
 include $(INCLUDEFILES)
 endif
@@ -131,13 +159,6 @@ install :: all
 
 clean::
 	$(RM) lm_sensors-*
-
-# Create a dependency file. Tricky. We sed rule puts dir/file.d and dir/file.c
-# in front of the dependency file rule.
-%.d: %.c
-	$(CC) -M -MG $(CFLAGS) $< | \
-       	sed -e 's@^\(.*\)\.o:@$*.d $*.o Makefile '`dirname $*.d`/Module.mk':@' > $@
-
 
 # This is tricky, but it works like a charm. It needs lots of utilities
 # though: cut, find, gzip, ln, tail and tar.
@@ -160,14 +181,58 @@ version:
 	echo -n 'Version: '; \
 	echo '#define LM_VERSION "'`read VER; echo $$VER`\" >> version.h
 
+
+# Here, we define all implicit rules we want to use.
+
+.SUFFIXES:
+
+# We need to create dependency files. Tricky. We sed rule puts dir/file.d and
+# dir/file.c # in front of the dependency file rule.
+
+# .o files are used for modules
+%.o: %.c
+	$(CC) $(MODCFLAGS) -c $< -o $@
+
+%.d: %.c
+	$(CC) -M -MG $(MODCFLAGS) $< | \
+       	sed -e 's@^\(.*\)\.o:@$*.d $*.o Makefile '`dirname $*.d`/Module.mk':@' > $@
+
+
+
 # .ro files are used for programs (as opposed to modules)
 %.ro: %.c
-	$(CC) $(EXCFLAGS) -c $< -o $@
+	$(CC) $(PROGCFLAGS) -c $< -o $@
+
+%.rd: %.c
+	$(CC) -M -MG $(PROGCFLAGS) $< | \
+       	sed -e 's@^\(.*\)\.o:@$*.rd $*.ro Makefile '`dirname $*.rd`/Module.mk':@' > $@
+
+
+
+# .ao files are used for static archives
+%.ao: %.c
+	$(CC) $(ARCFLAGS) -c $< -o $@
+
+%.ad: %.c
+	$(CC) -M -MG $(ARCFLAGS) $< | \
+       	sed -e 's@^\(.*\)\.o:@$*.ad $*.ao Makefile '`dirname $*.ad`/Module.mk':@' > $@
+
+
+# .lo files are used for shared libraries
+%.lo: %.c
+	$(CC) $(LIBCFLAGS) -c $< -o $@
+
+%.ld: %.c
+	$(CC) -M -MG $(LIBCFLAGS) $< | \
+       	sed -e 's@^\(.*\)\.o:@$*.ld $*.lo Makefile '`dirname $*.ld`/Module.mk':@' > $@
 
 %: %.ro
 	$(CC) $(EXLDFLAGS) -o $@ $^
 
-%.rd: %.c
-	$(CC) -M -MG $(CFLAGS) $< | \
-       	sed -e 's@^\(.*\)\.o:@$*.rd $*.ro Makefile '`dirname $*.rd`/Module.mk':@' > $@
 
+# Flex and Bison
+%c: %y
+	$(BISON) -d $< -o $@
+
+%.c: %.l
+	$(FLEX) -t $< > $@

@@ -26,7 +26,7 @@ I2CDETECTTARGETS := $(MODULE_DIR)/detect
 I2CDETECTSOURCES := $(MODULE_DIR)/detect.c
 
 # Include all dependency files
-INCLUDEFILES += $(I2CDETECTSOURCES:.c=.d)
+INCLUDEFILES += $(I2CDETECTSOURCES:.c=.rd)
 
 all-i2c-detect: $(I2CDETECTTARGETS)
 all :: all-i2c-detect
@@ -34,22 +34,7 @@ all :: all-i2c-detect
 # No install rule
 
 clean-i2c-detect:
-	$(RM) $(I2CDETECTSOURCES:.c=.d) $(I2CDETECTSOURCES:.c=.o) \
+	$(RM) $(I2CDETECTSOURCES:.c=.rd) $(I2CDETECTSOURCES:.c=.ro) \
 	      $(I2CDETECTTARGETS)
 clean :: clean-i2c-detect
-
-# The targets
-$(MODULE_DIR)/detect: $(MODULE_DIR)/detect.o
-
-
-# Oops, we need to use EXCFLAGS instead of CFLAGS... And we have to deal with
-# an executable. Ugly code approaching... :-)
-
-$(I2CDETECTSOURCES:.c=.o):
-	$(CC) $(EXCFLAGS) -c $(@:.o=.c) -o $@
-
-$(I2CDETECTSOURCES:.c=.d):
-	$(CC) -M -MG $(EXCFLAGS) $(@:.d=.c) | \
-	sed -e \
-        's@^\(.*\)\.o:@$@ $(@:.d=.o) Makefile '`dirname $@`/Module.mk':@' > $@
 
