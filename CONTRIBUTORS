@@ -52,3 +52,5 @@ problems.
 * Gerd Knorr <kraxel@cs.tu-berlin.de> (?)
   Designed the i2c structs, which made it possible to use the smbus-is-
   just-an-i2c-extension approach.
+* Chen-Yuan Wu <gwu@esoft.com>
+  Author of the adm1025 driver.

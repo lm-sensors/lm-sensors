@@ -46,6 +46,9 @@ adm1021
 	xeon		1	-	-	-	yes	no
 	  (xeon - no detection - requires force parameter)
 
+adm1025
+	adm1025		2	6	-	-	yes	no
+
 adm9240
 	adm9240		1	6	2	1 dac	yes	no
 	ds1780		1	6	2	1 dac	yes	no

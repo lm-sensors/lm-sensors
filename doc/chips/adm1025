@@ -1,0 +1,12 @@
+Kernel driver `adm1021.o'
+=========================
+
+Status: Complete; Alpha.
+
+Supported chips:
+  * Analog Devices ADM1025
+    Prefix `adm1025'
+    Addresses scanned: I2C 0x2c - 0x2e (inclusive)
+    Datasheet: Publicly available at the Analog Devices website
+
+Author: Chen-Yuan Wu <gwu@esoft.com>
