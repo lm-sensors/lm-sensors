@@ -19,6 +19,11 @@ Supported chips:
     Addresses scanned: I2C 0x48 - 0x4f (inclusive)
     Datasheet: Publicly available at the Dallas Semiconductor website
                http://www.dalsemi.com
+  * Maxim MAX6625, MAX6626
+    Prefix: `lm75'
+    Addresses scanned: I2C 0x48 - 0x4b (inclusive)
+    Datasheet: Publicly available at the Maxim website
+               http://www.maxim-ic.com
   * Microchip (TelCom) TCN75
     Prefix: `lm75'
     Addresses scanned: I2C 0x48 - 0x4f (inclusive)
@@ -64,8 +69,8 @@ will do no harm, but will return 'old' values.
 The LM75 is usually used in combination with LM78-like chips, to measure
 the temperature of the processor(s).
 
-The DS75 and DS1775 are supported as well.
-They are not distinguished from an LM75. While these chips
+The DS75, DS1775, MAX6625, and MAX6626 are supported as well.
+They are not distinguished from an LM75. While most of these chips
 have three additional bits of accuracy (12 vs. 9 for the LM75),
 the additional bits are not supported. Not only that, but these chips will
 not be detected if not in 9-bit precision mode (use the force parameter if
@@ -73,6 +78,10 @@ needed).
 The prefix in the /proc directory is still 'lm75'.
 
 The TCN75 is supported as well, and is not distinguished from an LM75.
+
+The LM75 is essentially an industry standard; there may be other
+LM75 clones not listed here, with or without various enhancements,
+that are supported.
 
 The LM77 is not supported, contrary to what we pretended for a long time.
 Both chips are simply not compatible, value encoding differs.
