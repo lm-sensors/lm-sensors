@@ -43,9 +43,8 @@ SENSORS_INSMOD_1(ds1621);
 
 /* Config register used for detection         */
 /*  7    6    5    4    3    2    1    0      */
-/* |Done|THF |TLF |NVB | 1  | 0  |POL |1SHOT| */
-#define DS1621_REG_CONFIG_MASK 0x0C
-#define DS1621_REG_CONFIG_VAL 0x08
+/* |Done|THF |TLF |NVB | X  | X  |POL |1SHOT| */
+#define DS1621_REG_CONFIG_NVB 0x10
 #define DS1621_REG_CONFIG_POLARITY 0x02
 #define DS1621_REG_CONFIG_1SHOT 0x01
 #define DS1621_REG_CONFIG_DONE 0x80
@@ -165,7 +164,7 @@ static int ds1621_attach_adapter(struct i2c_adapter *adapter)
 int ds1621_detect(struct i2c_adapter *adapter, int address,
 		unsigned short flags, int kind)
 {
-	int i, conf;
+	int i, conf, temp;
 	struct i2c_client *new_client;
 	struct ds1621_data *data;
 	int err = 0;
@@ -203,11 +202,26 @@ int ds1621_detect(struct i2c_adapter *adapter, int address,
 
 	/* Now, we do the remaining detection. It is lousy. */
 	if (kind < 0) {
+		/* The NVB bit should be low if no EEPROM write has been
+		   requested during the latest 10ms, which is highly
+		   improbable in our case. */
 		conf = i2c_smbus_read_byte_data(new_client,
 						DS1621_REG_CONF);
-		if ((conf & DS1621_REG_CONFIG_MASK)
-		    != DS1621_REG_CONFIG_VAL)
+		if (conf & DS1621_REG_CONFIG_NVB)
 			goto ERROR1;
+		/* The 7 lowest bits of a temperature should always be 0. */
+		temp = ds1621_read_value(new_client, 
+					 DS1621_REG_TEMP);
+		if (temp & 0x007f)
+			goto exit_free;
+		temp = ds1621_read_value(new_client, 
+					 DS1621_REG_TEMP_MIN);
+		if (temp & 0x007f)
+			goto exit_free;
+		temp = ds1621_read_value(new_client, 
+					 DS1621_REG_TEMP_MAX);
+		if (temp & 0x007f)
+			goto exit_free;
 	}
 
 	/* Determine the chip type - only one kind supported! */
