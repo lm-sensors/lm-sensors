@@ -648,8 +648,6 @@ chip "w83627thf-*"
 
 chip "as99127f-*"
 
-# Same as above for w83782d except that in5 and in6 negative voltages
-# are computed as in the w83781d.
 # Asus won't release a datasheet so this is guesswork.
 # Thanks to Guntram Blohm, Jack, Ed Harrison, Artur Gawryszczak,
 # Victor G. Marimon and others for their feedback.
@@ -670,10 +668,14 @@ chip "as99127f-*"
 
     compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
     compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
+# AS99127F rev.1 (same as w83781d)
     compute in5 -(240/60.4)*@ ,  -@/(240/60.4)
-# AS99127F
     compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
+# AS99127F rev.2 (same as w83782d)
+#   compute in5 (5.14 * @) - 14.91 , (@ + 14.91) / 5.14
+#   compute in6 (3.14 * @) -  7.71 , (@ +  7.71) / 3.14
 # ASB100 Bach (contributed by Alex van Kaam)
+#   compute in5 -(240/60.4)*@  ,  -@/(240/60.4)
 #   compute in6 -(5/3)*@       ,  -@/(5/3)
 
 # Depending on your motherboard, you have to choose between three formulae
@@ -695,7 +697,7 @@ chip "as99127f-*"
 # to work for temp3.
     compute temp3 @*2.0, @/2.0
 
-# ASB100's temp4 isn't supported yet.
+# ASB100's temp4 isn't supported by the w83781d driver.
 
 # Most Asus boards have temperatures settled like that:
     label temp1 "M/B Temp"
