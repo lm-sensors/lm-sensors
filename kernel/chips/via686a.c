@@ -59,11 +59,11 @@
 #endif
 
 /* If force_addr is set to anything different from 0, we forcibly enable
-   the PIIX4 at the given address. VERY DANGEROUS! */
+   the device at the given address. */
 static int force_addr = 0;
 MODULE_PARM(force_addr, "i");
 MODULE_PARM_DESC(force_addr,
-		 "Initialize the Via686a at the given address");
+		 "Initialize the base address of the sensors");
 
 /* Addresses to scan.
    Note that we can't determine the ISA address until we have initialized
