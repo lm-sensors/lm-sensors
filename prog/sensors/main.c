@@ -184,6 +184,9 @@ int main (int argc, char *argv[])
     else if (!strcmp(chip->prefix,"lm78") || !strcmp(chip->prefix,"lm78-j") ||
              !strcmp(chip->prefix,"lm79"))
       print_lm78(chip);
+    else if (!strcmp(chip->prefix,"gl518sm-r00") || 
+             !strcmp(chip->prefix,"gl518sm-r80"))
+      print_gl518(chip);
     else
       print_unknown_chip(chip);
     printf("\n");

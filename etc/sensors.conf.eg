@@ -1,6 +1,6 @@
 # Hardware sensors configuration file
 
-# This configuration file will be used by all applcations linked to 
+# This configuration file will be used by all applications linked to 
 # libsensors.
 
 # Hash marks introduce comments, which continue until the end of a line
@@ -119,3 +119,11 @@ chip "lm75-i2c-0-*"
 # You should really use the output of /proc/bus/chips to generate bus lines,
 # because one mistyped characted will inhibit the match. Wildcards are not
 # yet supported; spaces at the end are ignored, though.
+
+
+chip "gl518sm-r00-*" "gl518sm-r80-*"
+
+# The below declaration is from the data sheet. We have no idea how these
+# chips are typically used. Please contact us if you own one.
+  label vdd "+5V"
+  compute vdd @ * 2.5, @ / 2.5
