@@ -24,4 +24,5 @@ Cendio Systems 	Asus P3B-F w/ as99127f				5/00
 		Drivers developed: as99127f improvements
 
 Atipa		SuperMicro370DLE w/ Serverworks, LM87		9/00
-		Drivers developed: awaiting Serverworks datasheet
+		Drivers developed: serverworks support added to i2c-piix4;
+                                   lm87 testing and improvements
