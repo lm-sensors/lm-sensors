@@ -143,6 +143,8 @@ struct sensors_chips_data {
 #define W83781D_SYSCTL_FAN2 1102
 #define W83781D_SYSCTL_FAN3 1103
 #define W83781D_SYSCTL_TEMP 1200 /* Degrees Celcius * 10 */
+#define W83781D_SYSCTL_TEMP2 1201 /* Degrees Celcius * 10 */
+#define W83781D_SYSCTL_TEMP3 1202 /* Degrees Celcius * 10 */
 #define W83781D_SYSCTL_VID 1300 /* Volts * 100 */
 #define W83781D_SYSCTL_FAN_DIV 2000 /* 1, 2, 4 or 8 */
 #define W83781D_SYSCTL_ALARMS 2001 /* bitvector */
@@ -172,6 +174,8 @@ struct sensors_chips_data {
 #define GL518_SYSCTL_FAN1 1101     /* RPM */
 #define GL518_SYSCTL_FAN2 1102
 #define GL518_SYSCTL_TEMP 1200     /* Degrees Celcius * 10 */
+#define GL518_SYSCTL_TEMP2 1201     /* Degrees Celcius * 10 */
+#define GL518_SYSCTL_TEMP3 1202     /* Degrees Celcius * 10 */
 #define GL518_SYSCTL_FAN_DIV 2000  /* 1, 2, 4 or 8 */
 #define GL518_SYSCTL_ALARMS 2001   /* bitvector */
 
