@@ -304,9 +304,18 @@ help:
 	@echo 'Note: make dep is automatic'
 
 $(LINUX)/.config:
+	@echo
 	@echo "Error - missing file $(LINUX)/.config !! "
 	@echo "  Verify kernel source is in $(LINUX) and then"
 	@echo "  cd to $(LINUX) and run 'make config' !!"
+	@echo
+	@echo "Exception: if you're using a stock RedHat kernel..."
+	@echo "  (1) Install the appropriate kernel-source RPM."
+	@echo "  (2) Copy the appropriate config..."
+	@echo "      from $(LINUX)/configs/<...>"
+	@echo "      to $(LINUX)/.config"
+	@echo "  (3) Do *NOT* 'make dep' or 'make config'."
+	@echo
 	@exit 1
 
 # Here, we define all implicit rules we want to use.
@@ -321,7 +330,7 @@ $(LINUX)/.config:
 %.o: %.c $(LINUX)/.config
 	$(CC) $(MODCPPFLAGS) $(MODCFLAGS) -c $< -o $@
 
-%.d: %.c
+%.d: %.c $(LINUX)/.config
 	$(CC) -M -MG $(MODCPPFLAGS) $(MODCFLAGS) $< | \
        	$(SED) -e 's@^\(.*\)\.o:@$*.d $*.o: Makefile '`dirname $*.d`/Module.mk' @' > $@
 
