@@ -24,7 +24,7 @@ KERNELBUSSESDIR := $(MODULE_DIR)
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 # These targets are NOT included in 'mkpatch' ...
-KERNELBUSSESTARGETS := $(MODULE_DIR)/i2c-savage4.o
+
 
 # These targets ARE included in 'mkpatch' ...
 ifneq ($(shell if grep -q '^CONFIG_I2C_ALI1535=y' $(LINUX)/.config; then echo 1; fi),1)
@@ -53,6 +53,9 @@ KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-sis5595.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_PIIX4=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-piix4.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_SAVAGE4=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-savage4.o
 endif
 # don't compile unless alpha because of kernel include-file dependencies
 ifeq ($(MACHINE),alpha)

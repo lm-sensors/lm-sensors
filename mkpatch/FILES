@@ -6,6 +6,7 @@ kernel/busses/i2c-i801.c	drivers/i2c/i2c-i801.c
 kernel/busses/i2c-i810.c	drivers/i2c/i2c-i810.c
 kernel/busses/i2c-isa.c		drivers/i2c/i2c-isa.c
 kernel/busses/i2c-piix4.c	drivers/i2c/i2c-piix4.c
+kernel/busses/i2c-savage4.c	drivers/i2c/i2c-savage4.c
 kernel/busses/i2c-sis5595.c	drivers/i2c/i2c-sis5595.c
 kernel/busses/i2c-tsunami.c	drivers/i2c/i2c-tsunami.c
 kernel/busses/i2c-via.c		drivers/i2c/i2c-via.c
@@ -29,12 +30,17 @@ kernel/chips/lm75.c		drivers/sensors/lm75.c
 kernel/chips/lm78.c		drivers/sensors/lm78.c
 kernel/chips/lm80.c		drivers/sensors/lm80.c
 kernel/chips/lm87.c		drivers/sensors/lm87.c
+kernel/chips/lm92.c		drivers/sensors/lm92.c
 kernel/chips/matorb.c		drivers/sensors/matorb.c
 kernel/chips/maxilife.c		drivers/sensors/maxilife.c
 kernel/chips/mtp008.c		drivers/sensors/mtp008.c
+kernel/chips/pcf8574.c		drivers/sensors/pcf8574.c
+kernel/chips/pcf8591.c		drivers/sensors/pcf8591.c
 kernel/chips/sis5595.c		drivers/sensors/sis5595.c
+kernel/chips/smsc47m1.c		drivers/sensors/smsc47m1.c
 kernel/chips/thmc50.c		drivers/sensors/thmc50.c
 kernel/chips/via686a.c		drivers/sensors/via686a.c
+kernel/chips/vt1211.c		drivers/sensors/vt1211.c
 kernel/chips/w83781d.c		drivers/sensors/w83781d.c
 kernel/include/sensors.h	include/linux/sensors.h
 kernel/include/sensors_vid.h	include/linux/sensors_vid.h

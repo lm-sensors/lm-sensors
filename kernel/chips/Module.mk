@@ -24,10 +24,8 @@ KERNELCHIPSDIR := $(MODULE_DIR)
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 # These targets are NOT included in 'mkpatch' ...
-KERNELCHIPSTARGETS := $(MODULE_DIR)/pcf8591.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smbus-arp.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/smsc47m1.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/vt1211.o
+
 
 # These targets ARE included in 'mkpatch', except for LTC1710, which we
 # leave here because it used to be in 'mkpatch' ...
@@ -82,6 +80,9 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM87=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/lm87.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM92=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/lm92.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_LTC1710=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/ltc1710.o
 endif
@@ -97,8 +98,14 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_PCF8574=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/pcf8574.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_PCF8591=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/pcf8591.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_SIS5595=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/sis5595.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_SMSC47M1=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/smsc47m1.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_THMC50=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/thmc50.o
@@ -109,8 +116,8 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_VIA686A=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/via686a.o
 endif
-ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM92=y' $(LINUX)/.config; then echo 1; fi),1)
-KERNELCHIPSTARGETS += $(MODULE_DIR)/lm92.o
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_VT1211=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/vt1211.o
 endif
 
 # Include all dependency files
