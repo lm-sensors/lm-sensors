@@ -50,19 +50,29 @@
 
 #define DRV_NAME "i2c-sis645"
 
-/* SiS645DX north bridge */
+/* SiS645DX north bridge (defined in 2.4.21) */
 #ifndef PCI_DEVICE_ID_SI_646
 #define PCI_DEVICE_ID_SI_646 0x0646
 #endif
 
-/* SiS648 north bridge */
+/* SiS648 north bridge (defined in 2.4.21) */
 #ifndef PCI_DEVICE_ID_SI_648
 #define PCI_DEVICE_ID_SI_648 0x0648
 #endif
 
-/* SiS651 north bridge */
+/* SiS650 north bridge (defined in 2.4.19) */
+#ifndef PCI_DEVICE_ID_SI_650
+#define PCI_DEVICE_ID_SI_650 0x0650
+#endif
+
+/* SiS651 north bridge (defined in 2.4.21)*/
 #ifndef PCI_DEVICE_ID_SI_651
 #define PCI_DEVICE_ID_SI_651 0x0651
+#endif
+
+/* SiS746 north bridge (defined in 2.4.21) */
+#ifndef PCI_DEVICE_ID_SI_746
+#define PCI_DEVICE_ID_SI_746 0x0746
 #endif
 
 /* SiS85C503/5513 (LPC Bridge) */
@@ -85,7 +95,10 @@
 #define PCI_DEVICE_ID_SI_963 0x0963
 #endif
 
+/* SMBus ID */
+#ifndef PCI_DEVICE_ID_SI_SMBUS
 #define PCI_DEVICE_ID_SI_SMBUS 0x16
+#endif
 
 /* base address register in PCI config space */
 #define SIS645_BAR 0x04
