@@ -83,6 +83,7 @@ sub gen_Documentation_Configure_help
            m@Acer Labs ALI 1535@ or
            m@Acer Labs ALI 1533 and 1543C@ or
            m@AMD 756/766/768/8111@ or
+           m@SMBus multiplexing on the Tyan S4882@ or
            m@AMD 8111 SMBus 2.0@ or
            m@Apple Hydra Mac I/O@ or
            m@Intel I801@ or
@@ -164,6 +165,14 @@ CONFIG_I2C_AMD756
   756/766/768/8111 and nVidia nForce mainboard I2C interfaces. This can
   also be built as a module which can be inserted and removed while the
   kernel is running.
+
+SMBus multiplexing on the Tyan S4882
+CONFIG_I2C_AMD756_S4882
+  Enabling this option will add specific SMBus support for the Tyan
+  S4882 motherboard. On this 4-CPU board, the SMBus is multiplexed
+  over 8 different channels, where the various memory module EEPROMs
+  and temperature sensors live. Saying yes here will give you access
+  to these in addition to the trunk.
 
 AMD 8111 SMBus 2.0
 CONFIG_I2C_AMD8111
@@ -876,6 +885,9 @@ sub gen_drivers_i2c_Config_in
     dep_tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 $CONFIG_I2C
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
     dep_tristate '  AMD 756/766/768/8111 and nVidia nForce' CONFIG_I2C_AMD756 $CONFIG_I2C
+    if [ "$CONFIG_I2C_AMD756" != "n" ]; then
+      dep_mbool '  SMBus multiplexing on the Tyan S4882' CONFIG_I2C_AMD756_S4882 $CONFIG_I2C_AMD756
+    fi
     dep_tristate '  AMD 8111 SMBus 2.0' CONFIG_I2C_AMD8111 $CONFIG_I2C
     if [ "$CONFIG_ALPHA" = "y" ]; then
       dep_tristate '  DEC Tsunami I2C interface' CONFIG_I2C_TSUNAMI $CONFIG_I2C_ALGOBIT

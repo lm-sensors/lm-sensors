@@ -1,6 +1,7 @@
 kernel/busses/i2c-ali1535.c	drivers/i2c/i2c-ali1535.c
 kernel/busses/i2c-ali15x3.c	drivers/i2c/i2c-ali15x3.c
 kernel/busses/i2c-amd756.c	drivers/i2c/i2c-amd756.c
+kernel/busses/i2c-amd756-s4882.c	drivers/i2c/i2c-amd756-s4882.c
 kernel/busses/i2c-amd8111.c	drivers/i2c/i2c-amd8111.c
 kernel/busses/i2c-hydra.c	drivers/i2c/i2c-hydra.c
 kernel/busses/i2c-i801.c	drivers/i2c/i2c-i801.c
