@@ -254,7 +254,9 @@ void do_a_print(sensors_chip_name name)
   else if (!strcmp(name.prefix,"gl518sm-r00") || 
            !strcmp(name.prefix,"gl518sm-r80"))
     print_gl518(&name);
-  else if (!strcmp(name.prefix,"w83781d"))
+  else if ((!strcmp(name.prefix,"w83781d")) ||
+           (!strcmp(name.prefix,"w83782d")) ||
+           (!strcmp(name.prefix,"w83783s")))
     print_w83781d(&name);
   else
     print_unknown_chip(&name);
