@@ -3613,7 +3613,8 @@ sub w83781d_isa_detect
   return if $chip == 1 and  $reg1 != 0x30;
   return if $chip == 3 and  $reg1 != 0x20;
   return if $chip == 5 and  $reg1 != 0x60;
-  return if $chip == 9 and  $reg1 != 0xa0;
+  return if $chip == 9 and  $reg1 != 0x88; # Datasheet says 0xA1
+                                           # but seems to be wrong
   return 8;
 }
 
