@@ -710,11 +710,11 @@ void adm9240_fan_div(struct i2c_client *client, int operation, int ctl_name,
     old = adm9240_read_value(client,ADM9240_REG_VID_FAN_DIV);
     if (*nrels_mag >= 2) {
       data->fan_div[1] = DIV_TO_REG(results[1]);
-      old = (old & 0xcf) | (data->fan_div[1] << 6);
+      old = (old & 0x3f) | (data->fan_div[1] << 6);
     }
     if (*nrels_mag >= 1) {
       data->fan_div[0] = DIV_TO_REG(results[0]);
-      old = (old & 0x3f) | (data->fan_div[0] << 4);
+      old = (old & 0xcf) | (data->fan_div[0] << 4);
       adm9240_write_value(client,ADM9240_REG_VID_FAN_DIV,old);
     }
   }
