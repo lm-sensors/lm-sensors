@@ -48,13 +48,21 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 /* Insmod parameters */
 SENSORS_INSMOD_1(ds1621);
 
-/* Many DS1621 constants specified below - most aren't used */
+/* Many DS1621 constants specified below */
 
 /* Config register used for detection         */
 /*  7    6    5    4    3    2    1    0      */
 /* |Done|THF |TLF |NVB | 1  | 0  |POL |1SHOT| */
 #define DS1621_REG_CONFIG_MASK 0x0C
 #define DS1621_REG_CONFIG_VAL 0x08
+#define DS1621_REG_CONFIG_POLARITY 0x02
+#define DS1621_REG_CONFIG_1SHOT 0x01
+#define DS1621_REG_CONFIG_DONE 0x80
+
+/* Note: the done bit is always unset if continuous conversion is in progress.
+         We need to stop the continuous conversion or switch to single shot
+         before this bit becomes available!
+ */
 
 /* The DS1621 registers */
 #define DS1621_REG_TEMP 0xAA /* word, RO */
@@ -76,6 +84,8 @@ SENSORS_INSMOD_1(ds1621);
                                           (((val) + 2) / 5) << 7),0,0xffff))
 #define ALARMS_FROM_REG(val) ((val) & \
                               (DS1621_ALARM_TEMP_HIGH | DS1621_ALARM_TEMP_LOW))
+#define ITEMP_FROM_REG(val) ((((val & 0x7fff) >> 8)) | \
+                            ((val & 0x8000)?-256:0))
 
 /* Initial values */
 #define DS1621_INIT_TEMP_OVER 600
@@ -89,8 +99,11 @@ struct ds1621_data {
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 
-	u16 temp, temp_over, temp_hyst;	/* Register values */
+	u16 temp, temp_over, temp_hyst;	/* Register values, word */
 	u8 conf;			/* Register encoding, combined */
+
+	char enable;	/* !=0 if we're expected to restart the conversion */
+	u8 temp_int, temp_counter, temp_slope;	/* Register values, byte */
 };
 
 #ifdef MODULE
@@ -123,6 +136,10 @@ static void ds1621_alarms(struct i2c_client *client, int operation,
 			  int ctl_name, int *nrels_mag, long *results);
 static void ds1621_enable(struct i2c_client *client, int operation,
 			  int ctl_name, int *nrels_mag, long *results);
+static void ds1621_continuous(struct i2c_client *client, int operation,
+			      int ctl_name, int *nrels_mag, long *results);
+static void ds1621_polarity(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
 static void ds1621_update_client(struct i2c_client *client);
 
 
@@ -144,12 +161,16 @@ static struct i2c_driver ds1621_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table ds1621_dir_table_template[] = {
-	{DS1621_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &ds1621_temp},
+	{DS1621_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ds1621_temp},
 	{DS1621_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ds1621_alarms},
 	{DS1621_SYSCTL_ENABLE, "enable", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ds1621_enable},
+	{DS1621_SYSCTL_CONTINUOUS, "continuous", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ds1621_continuous},
+	{DS1621_SYSCTL_POLARITY, "polarity", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ds1621_polarity},
 	{0}
 };
 
@@ -368,12 +389,26 @@ void ds1621_update_client(struct i2c_client *client)
 #endif
 
 		data->conf = ds1621_read_value(client, DS1621_REG_CONF);
-		/* we should wait for the DONE bit... */
-		data->temp = ds1621_read_value(client, DS1621_REG_TEMP);
+
+		data->temp = ds1621_read_value(client,
+					       DS1621_REG_TEMP);
 		data->temp_over = ds1621_read_value(client,
 		                                    DS1621_REG_TEMP_OVER);
-		data->temp_hyst =
-		    ds1621_read_value(client, DS1621_REG_TEMP_HYST);
+		data->temp_hyst = ds1621_read_value(client,
+						    DS1621_REG_TEMP_HYST);
+
+		/* wait for the DONE bit before reading extended values */
+
+		if (data->conf & DS1621_REG_CONFIG_DONE) {
+			data->temp_counter = ds1621_read_value(client,
+						     DS1621_REG_TEMP_COUNTER);
+			data->temp_slope = ds1621_read_value(client,
+						     DS1621_REG_TEMP_SLOPE);
+			data->temp_int = ITEMP_FROM_REG(data->temp);
+			/* restart the conversion */
+			if (data->enable)
+				ds1621_read_value(client, DS1621_COM_START);
+		}
 
 		/* reset alarms if neccessary */
 		new_conf = data->conf;
@@ -398,12 +433,29 @@ void ds1621_temp(struct i2c_client *client, int operation, int ctl_name,
 {
 	struct ds1621_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 1;
+		if (!(data->conf & DS1621_REG_CONFIG_DONE) ||
+		    (data->temp_counter > data->temp_slope) ||
+		    (data->temp_slope == 0)) {
+			*nrels_mag = 1;
+		} else {
+			*nrels_mag = 2;
+		}
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		ds1621_update_client(client);
-		results[0] = TEMP_FROM_REG(data->temp_over);
-		results[1] = TEMP_FROM_REG(data->temp_hyst);
-		results[2] = TEMP_FROM_REG(data->temp);
+		/* decide wether to calculate more precise temp */
+		if (!(data->conf & DS1621_REG_CONFIG_DONE) ||
+		    (data->temp_counter > data->temp_slope) ||
+		    (data->temp_slope == 0)) {
+			results[0] = TEMP_FROM_REG(data->temp_over);
+			results[1] = TEMP_FROM_REG(data->temp_hyst);
+			results[2] = TEMP_FROM_REG(data->temp);
+		} else {
+			results[0] = TEMP_FROM_REG(data->temp_over)*10;
+			results[1] = TEMP_FROM_REG(data->temp_hyst)*10;
+			results[2] = data->temp_int * 100 - 25 +
+				((data->temp_slope - data->temp_counter) *
+				 100 / data->temp_slope);
+		}
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
@@ -439,19 +491,76 @@ void ds1621_enable(struct i2c_client *client, int operation, int ctl_name,
 	/* sometimes needed to (re)start the continous conversion */
 	/* there is no data to read so this might hang your SMBus! */
 
+	struct ds1621_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		*nrels_mag = 0;
+		ds1621_update_client(client);
+		results[0] = !(data->conf & DS1621_REG_CONFIG_DONE);
+		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			if (results[0]) {
 				ds1621_read_value(client, DS1621_COM_START);
+				data->enable=1;
 			} else {
 				ds1621_read_value(client, DS1621_COM_STOP);
+				data->enable=0;
 			}
 		} else {
 			ds1621_read_value(client, DS1621_COM_START);
+			data->enable=1;
+		}
+	}
+}
+
+void ds1621_continuous(struct i2c_client *client, int operation, int ctl_name,
+		       int *nrels_mag, long *results)
+{
+	struct ds1621_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		ds1621_update_client(client);
+		results[0] = !(data->conf & DS1621_REG_CONFIG_1SHOT);
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		ds1621_update_client(client);
+		if (*nrels_mag >= 1) {
+			if (results[0]) {
+				ds1621_write_value(client, DS1621_REG_CONF,
+						   data->conf & ~DS1621_REG_CONFIG_1SHOT);
+			} else {
+				ds1621_write_value(client, DS1621_REG_CONF,
+						   data->conf | DS1621_REG_CONFIG_1SHOT);
+			}
+		} else {
+			ds1621_write_value(client, DS1621_REG_CONF,
+					   data->conf & ~DS1621_REG_CONFIG_1SHOT);
+		}
+	}
+}
+
+void ds1621_polarity(struct i2c_client *client, int operation, int ctl_name,
+		     int *nrels_mag, long *results)
+{
+	struct ds1621_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		ds1621_update_client(client);
+		results[0] = !(!(data->conf & DS1621_REG_CONFIG_POLARITY));
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		ds1621_update_client(client);
+		if (*nrels_mag >= 1) {
+			if (results[0]) {
+				ds1621_write_value(client, DS1621_REG_CONF,
+						   data->conf | DS1621_REG_CONFIG_POLARITY);
+			} else {
+				ds1621_write_value(client, DS1621_REG_CONF,
+						   data->conf & ~DS1621_REG_CONFIG_POLARITY);
+			}
 		}
 	}
 }
