@@ -26,9 +26,12 @@ ask CVS about it:
   Module i2c-i801: Add 82801CA/CAM support
   Module i2c-piix4: Add Intel 82443MX and SMSC Victory66 support
   Module i2c-viapro: Add Via VT8233 support
+  Module it87: Merge alarm_* /proc entries to alarms
   Module sis5595: Fix support for rev B0
   Module via686a: Make limit initializations reliable
-  Program isadump: Add flat address space support
+  Program isadump: Add flat address space (PCI) support
+  Program mkpatch.pl: Add support for i2c-ali1535, adm1024, ds1621,
+                      fscpos, it87, maxilife, mtp008
   Program sensors-detect: Add ALI1535, Via VT8233,
                           Intel 82443MX and 82801CA/CAM detection,			
                           add ITE 8172G detection (driver in kernel 2.4.10)
