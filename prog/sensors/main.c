@@ -35,8 +35,8 @@
 static char *config_file_name;
 FILE *config_file;
 static const char *config_file_path[] = 
-  { "/etc", "/usr/lib/sensors", "/usr/local/lib/sensors", "/usr/lib",
-    "/usr/local/lib", ".", 0 };
+  { "/etc", "/usr/local/etc", "/usr/lib/sensors", "/usr/local/lib/sensors",
+    "/usr/lib", "/usr/local/lib", ".", 0 };
 
 extern int main(int argc, char *arv[]);
 static void print_short_help(void);
