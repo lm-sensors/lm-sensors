@@ -15,7 +15,7 @@ release:
   lsm@execpc.com with the subject `add' (no quotes).
 - update lm_sensors2/version.h and i2c/kernel/i2c.h, and cvs commit it
 - Tag the release using CVS ('cvs tag V#-#-#' from the dist root)
-- cvs commit
+- remove empty directories (e.g. rmdir `find . -type d`)
 - remove 'CVS' related files/directories
 - tar it up and post it (sign it!)
 
@@ -23,3 +23,5 @@ misc:
 - copy to mirrors
 - announce on Freshmeat
 - clear support area of unanswered tickets
+- Add "-CVS" back to version consts in cvs, and ???? for dates
+- prep CHANGES files for next release
