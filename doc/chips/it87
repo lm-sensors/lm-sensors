@@ -51,6 +51,18 @@ Module Parameters
   bit 5: Temp sensor 3 is thermal resistor
   For each sensor either the diode or resistor bit should be set, not both.
   Default is temp sensor 1 and 3 resistor, 2 diode (value 0x2a)
+  Legal values:
+	sensor1		sensor2		sensor3		value
+	-------		-------		-------		-----
+	diode		diode		diode		0x07
+	diode		diode		thermistor	0x0e
+	diode		thermistor	diode		0x15
+	diode		thermistor	thermistor	0x1c
+	thermistor	diode		diode		0x23
+	thermistor	diode		thermistor	0x2a   ** default
+	thermistor	thermistor	diode		0x31
+	thermistor	thermistor	thermistor	0x38
+
 
 Description
 -----------
