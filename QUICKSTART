@@ -18,6 +18,6 @@ Quickstart:
   * Run `prog/mkdev/mkdev.sh' to create the device files
   * Run `prog/detect/sensors-detect' to detect your hardware, put
     the lines it suggests into /etc/conf.modules or /etc/modules.conf
-    (whichever one exists) and enter the modprobe lines it suggests
+    (whichever one exists) and enter the modprobe lines it suggests.
   * Run `sensors' to see your output.
   * That's all folks!
