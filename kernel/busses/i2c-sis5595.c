@@ -39,6 +39,8 @@
 
 #include <linux/init.h>
 
+/* Length of ISA address segment */
+#define SIS5595_EXTENT 8
 /* SIS5595 SMBus registers */
 #define SMB_STS_LO 0x00
 #define SMB_STS_HI 0x01
@@ -57,6 +59,7 @@
 /* PCI Address Constants */
 #define SMB_INDEX  0x38
 #define SMB_DAT    0x39
+#define SIS5595_ENABLE_REG 0x40
 #define ACPI_BASE  0x90
 
 /* Other settings */
@@ -71,6 +74,13 @@
 #define SIS5595_BLOCK_DATA 0x0A
 
 /* insmod parameters */
+
+/* If force_addr is set to anything different from 0, we forcibly enable
+   the device at the given address. */
+static int force_addr = 0;
+MODULE_PARM(force_addr, "i");
+MODULE_PARM_DESC(force_addr,
+		 "Initialize the base address of the i2c controller");
 
 #ifdef MODULE
 static
@@ -139,15 +149,14 @@ static void sis5595_write(u8 reg, u8 data)
    defined to make the transition easier. */
 int sis5595_setup(void)
 {
-	int error_return = 0;
-
+	u16 a;
+	u8 val;
 	struct pci_dev *SIS5595_dev;
 
 	/* First check whether we can access PCI at all */
 	if (pci_present() == 0) {
 		printk("i2c-sis5595.o: Error: No PCI-bus found!\n");
-		error_return = -ENODEV;
-		goto END;
+		return -ENODEV;
 	}
 
 	/* Look for the SIS5595 */
@@ -156,18 +165,18 @@ int sis5595_setup(void)
 					    PCI_DEVICE_ID_SI_503,
 					    SIS5595_dev))) {
 		printk("i2c-sis5595.o: Error: Can't detect SIS5595!\n");
-		error_return = -ENODEV;
-		goto END;
+		return -ENODEV;
 	}
 
 /* Determine the address of the SMBus areas */
 	pci_read_config_word(SIS5595_dev, ACPI_BASE, &sis5595_base);
-	if(sis5595_base == 0) {
-		printk("i2c-sis5595.o: ACPI base address uninitialized - upgrade BIOS?\n");
-		error_return = -ENODEV;
-		goto END;
+	if(sis5595_base == 0 && force_addr == 0) {
+		printk("i2c-sis5595.o: ACPI base address uninitialized - upgrade BIOS or use force_addr=0xaddr\n");
+		return -ENODEV;
 	}
 
+	if(force_addr)
+		sis5595_base = force_addr & ~(SIS5595_EXTENT - 1);
 #ifdef DEBUG
 	printk("ACPI Base address: %04x\n", sis5595_base);
 #endif
@@ -178,15 +187,45 @@ int sis5595_setup(void)
 		    ("i2c-sis5595.o: SMBus registers 0x%04x-0x%04x already in use!\n",
 		     sis5595_base + SMB_INDEX,
 		     sis5595_base + SMB_INDEX + 1);
-		error_return = -ENODEV;
-		goto END;
+		return -ENODEV;
+	}
+
+	if(force_addr) {
+		printk("i2c-sis5595.o: forcing ISA address 0x%04X\n", sis5595_base);
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_write_config_word(SIS5595_dev, ACPI_BASE, sis5595_base))
+			return -ENODEV;
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_read_config_word(SIS5595_dev, ACPI_BASE, &a))
+			return -ENODEV;
+		if ((a & ~(SIS5595_EXTENT - 1)) != sis5595_base) {
+			/* doesn't work for some chips! */
+			printk("i2c-sis5595.o: force address failed - not supported?\n");
+			return -ENODEV;
+		}
+	}
+
+	if (PCIBIOS_SUCCESSFUL !=
+	    pci_read_config_byte(SIS5595_dev, SIS5595_ENABLE_REG, &val))
+		return -ENODEV;
+	if((val & 0x80) == 0) {
+		printk("sis5595.o: enabling ACPI\n");
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_write_config_byte(SIS5595_dev, SIS5595_ENABLE_REG,
+		                      val | 0x80))
+			return -ENODEV;
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_read_config_byte(SIS5595_dev, SIS5595_ENABLE_REG, &val))
+			return -ENODEV;
+		if((val & 0x80) == 0) {	/* doesn't work for some chips? */
+			printk("sis5595.o: ACPI enable failed - not supported?\n");
+			return -ENODEV;
+		}
 	}
 
 	/* Everything is happy, let's grab the memory and set things up. */
 	request_region(sis5595_base + SMB_INDEX, 2, "sis5595-smbus");
-
-      END:
-	return error_return;
+	return(0);
 }
 
 

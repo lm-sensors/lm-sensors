@@ -36,6 +36,7 @@ ask CVS about it:
   Module adm1021: Fix lm84 and gl523sm support
   Module i2c-i801: Chip detection cleanup
   Module i2c-i810: Fixed i2c_i810_init() not found in patched kernel
+  Module i2c-sis5595: Allow force_addr=0xaddr; enable if not enabled.
   Module lm78: Recognize chipid=0x20
   Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
   Module mtp008: Fix temp initializations;
