@@ -309,21 +309,35 @@ chip "sis5595-*"
 
 #
 # SiS5595 temperature calculation
-# The driver does NOT include a calculation due to the wide
+# The driver currently includes a calculation due to the wide
 # variation in thermistor types on SiS5595 motherboards.
+# The driver currently has a calculation of t = (.83x + 52.12).
+# One user reports the correct formula of t = (.345x - 12).
+# So you want to put a compute line in sensors.conf that has
+# the inverse of the driver formula, and put your formula on top of it.
+# The inverse of the driver formula is x = (1.20t - 62.77)
+# So the final formula is newt = (.345(1.20t - 62.77)) - 12).
+# Put this in the sensors.conf file as
+# compute temp ((.345 * ((1.20 * @) - 62.77)) - 12), ...
+# where ... is the inverse function I leave to you.
+#
 # Look in your 'Vendor.ini' file to see which one is present
 # on your motherboard. Look for the line like:
 #	[Temp1]
 #	     ThermistorType     = NTC-10KC15-1608-1P
-# Uncomment the correct 'compute' line below to match your
-# thermistor type.
+# Fix up a 'compute' line to match your thermistor type.
+# Warning. You still don't have enough information to do this.
 #	     ThermistorType     = NTC-10KC15-1608-1P (10K at 25C; Beta = 3435)
-#	     ThermistorType     = NTC-103KC15-1608-1P
+#   compute temp ((X * ((1.20 * @) - 62.77)) - Y), ...
+#	     ThermistorType     = NTC-103KC15-1608-1P  (??)
+#   compute temp ((X * ((1.20 * @) - 62.77)) - Y), ...
 #	     ThermistorType     = NTC-103AT-2 (10K at 25C; Beta = 3435)
+#   compute temp ((X * ((1.20 * @) - 62.77)) - Y), ...
 #	     ThermistorType     = NTC-103JT   (10K at 25C; Beta = 3435)
+#   compute temp ((X * ((1.20 * @) - 62.77)) - Y), ...
 
 # examples for sis5595 temperature limits;
-# for sis5595, temp_hist is really the low limit, not a hysteresis value
+# for sis5595, temp_hyst is really the low limit, not a hysteresis value
 #    set temp_over 40	
 #    set temp_hyst 37	
 
