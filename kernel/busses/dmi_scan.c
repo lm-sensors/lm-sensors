@@ -15,7 +15,6 @@
 #include <linux/pm.h>
 #include <asm/keyboard.h>
 #include <asm/system.h>
-#include <linux/bootmem.h>
 #include "version.h"
 #include "dmi_scan.h"
 
