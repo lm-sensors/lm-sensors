@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.3 (2001????)
+  File sensors.conf.eg: Un-ignore it87 in8, temp3, fan3
   Library: Add PCF8591 and W83697HF support; fix w83* fan_min computes
   Module i2c-piix4: Check for uninitialized base address
   Module fscscy: implement min/max for voltages and fans
@@ -25,10 +26,9 @@ ask CVS about it:
   Module w83781d: Add W83697HF support
   Program i2cdump: Add i2c block read capability
   Program mkpatch.pl: Add support for fscscy, add more help entries
-  Program sensors: Add PCF8591 and W83697HF support;
-                   add it87 in8 and temp3 labels
+  Program sensors: Add PCF8591 and W83697HF support
   Program sensors-detect: Add several Nvidia chips, add PCF8591,
-                          fix Via 686a detection
+                          fix Via686a and it87 detection
 
 
 2.6.2 (20011118)
