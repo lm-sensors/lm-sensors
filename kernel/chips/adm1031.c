@@ -207,15 +207,16 @@ static int adm1031_id = 0;
 #define TEMP_TO_REG(val)		((val) < 0 ? (((val) - 500) / 1000) : \
 					 (((val) + 500) / 1000))
 
-#define TEMP_FROM_REG(val)		((val) * 1000)
+#define TEMP_FROM_REG(reg)		((reg) * 1000)
 
 #define TEMP_FROM_REG_EXT(val,ext)	(TEMP_FROM_REG(val) + (ext) * 125)
 
-#define FAN_FROM_REG(reg,div)		((reg) ? \
-					 (11250 * 60) / ((reg) * (div)) : 0)
+#define FAN_FROM_REG(reg,div)		((reg) ? 675000 / ((reg) * (div)) : 0)
 
-#define FAN_TO_REG(reg,div)		FAN_FROM_REG(SENSORS_LIMIT(reg, 0, \
-								   65535), div)
+#define FAN_TO_REG(val,div)		((val) <= 0 ? 0 : \
+					 (val) * (div) >= 675000 ? 1 : \
+					 (val) * (div) <= 2647 ? 255 : \
+					 675000 / ((val) * (div)))
 
 #define FAN_DIV_TO_REG(val)		((val) == 8 ? 0xc0 : \
 					 (val) == 4 ? 0x80 : \
