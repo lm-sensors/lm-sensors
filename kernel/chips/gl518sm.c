@@ -36,6 +36,10 @@
 #define __initdata
 #endif
 
+#ifdef __SMP__
+#include <linux/smp_lock.h>
+#endif
+
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {0x2c,0x2d,SENSORS_I2C_END};
 static unsigned short normal_i2c_range[] = {SENSORS_I2C_END};
