@@ -73,34 +73,33 @@ SENSORS_INSMOD_3(lm78,lm78j,lm79);
 #define LM78_REG_I2C_ADDR 0x48
 
 
-/* Conversions. Rounding is only done on the TO_REG variants. */
-#define IN_TO_REG(val)  (((val) * 10 + 8)/16)
+/* Conversions. Rounding and limit checking is only done on the TO_REG 
+   variants. Note that you should be a bit careful with which arguments
+   these macros are called: arguments may be evaluated more than once.
+   Fixing this is just not worth it. */
+#define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 8)/16),0,255))
 #define IN_FROM_REG(val) (((val) *  16) / 10)
 
-static inline unsigned char
-FAN_TO_REG (unsigned rpm, unsigned divisor)
+extern inline u8 FAN_TO_REG(long rpm, int div)
 {
-  unsigned val;
-  
   if (rpm == 0)
-      return 255;
-
-  val = (1350000 + rpm * divisor / 2) / (rpm * divisor);
-  if (val > 255)
-      val = 255;
-  return val;
+    return 255;
+  rpm = SENSORS_LIMIT(rpm,1,1000000);
+  return SENSORS_LIMIT((1350000 + rpm*div/2) / (rpm*div),1,254);
 }
+
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
 
-#define TEMP_TO_REG(val) (((val)<0?(((val)-5)/10)&0xff:((val)+5)/10) & 0xff)
+#define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
+                                                 ((val)+5)/10),0,255))
 #define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            (val)>=0x06?0:205-(val)*5)
 #define ALARMS_FROM_REG(val) (val)
 
-#define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
+#define DIV_FROM_REG(val) (1 << (val))
 
 /* Initial limits. To keep them sane, we use the 'standard' translation as
    specified in the LM78 sheet. Use the config file to set better limits. */

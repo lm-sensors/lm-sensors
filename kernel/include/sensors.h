@@ -280,6 +280,19 @@ extern int sensors_detect(struct i2c_adapter *adapter,
                           struct sensors_address_data *address_data,
                           sensors_found_addr_proc *found_proc);
 
+
+/* This macro is used to scale user-input to sensible values in almost all
+   chip drivers. */
+extern inline int SENSORS_LIMIT(long value, long low, long high)
+{
+  if (value < low)
+    return low;
+  else if (value > high)
+    return high;
+  else
+    return value;
+}
+
 #endif /* def __KERNEL__ */
 
 
