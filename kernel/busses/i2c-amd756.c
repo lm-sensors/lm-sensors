@@ -320,7 +320,7 @@ static struct pci_device_id amd756_ids[] __devinitdata = {
 	{PCI_VENDOR_ID_AMD, 0x740B, PCI_ANY_ID, PCI_ANY_ID, 0, 0, AMD756 },
 	{PCI_VENDOR_ID_AMD, 0x7413, PCI_ANY_ID, PCI_ANY_ID, 0, 0, AMD766 },
 	{PCI_VENDOR_ID_AMD, 0x7443, PCI_ANY_ID, PCI_ANY_ID, 0, 0, AMD768 },
-	{PCI_VENDOR_ID_AMD, 0x746b, PCI_ANY_ID, PCI_ANY_ID, 0, 0, AMD8111 },
+	{PCI_VENDOR_ID_AMD, 0x746B, PCI_ANY_ID, PCI_ANY_ID, 0, 0, AMD8111 },
 	{PCI_VENDOR_ID_NVIDIA, 0x01B4, PCI_ANY_ID, PCI_ANY_ID, 0, 0, NFORCE },
 	{ 0, }
 };
@@ -375,7 +375,7 @@ static int __devinit amd756_probe(struct pci_dev *pdev,
 #endif
 
 	sprintf(amd756_adapter.name,
-		"SMBus AMD75x adapter at %04x", amd756_ioport);
+		"SMBus AMD7xx adapter at %04x", amd756_ioport);
 
 	error = i2c_add_adapter(&amd756_adapter);
 	if (error) {
@@ -398,7 +398,7 @@ static void __devexit amd756_remove(struct pci_dev *dev)
 }
 
 static struct pci_driver amd756_driver = {
-	.name		= "amd75x smbus",
+	.name		= "amd7xx smbus",
 	.id_table	= amd756_ids,
 	.probe		= amd756_probe,
 	.remove		= __devexit_p(amd756_remove),
@@ -418,7 +418,7 @@ static void __exit i2c_amd756_exit(void)
 }
 
 MODULE_AUTHOR("Merlin Hughes <merlin@merlin.org>");
-MODULE_DESCRIPTION("AMD756/766/768/nVidia nForce SMBus driver");
+MODULE_DESCRIPTION("AMD 756/766/768/8111 and nVidia nForce SMBus driver");
 MODULE_LICENSE("GPL");
 
 module_init(i2c_amd756_init)
