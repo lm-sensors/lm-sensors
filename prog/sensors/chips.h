@@ -39,5 +39,6 @@ extern void print_w83781d(const sensors_chip_name *name);
 extern void print_maxilife(const sensors_chip_name *name);
 extern void print_ddcmon(const sensors_chip_name *name);
 extern void print_eeprom(const sensors_chip_name *name);
+extern void print_lm87(const sensors_chip_name *name);
 
 #endif /* def PROG_SENSORS_CHIPS_H */
