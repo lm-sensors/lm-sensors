@@ -39,7 +39,9 @@ COMPILE_KERNEL := 1
 # If you have installed the i2c header at some other place (like 
 # /usr/local/include/linux), set that directory here. Please check this out
 # if you get strange compilation errors; the default Linux i2c headers
-# may be used mistakenly.
+# may be used mistakenly. Note: This should point to the directory
+# *above* the linux/ subdirectory, so to /usr/local/include in the
+# above example.
 I2C_HEADERS=/usr/local/include
 #I2C_HEADERS=$(LINUX_HEADERS)
 
