@@ -98,34 +98,35 @@ user :: all-lib
 install-lib: all-lib
 	$(MKDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(LIBINCLUDEDIR) $(DESTDIR)$(LIBMAN3DIR) $(DESTDIR)$(LIBMAN5DIR)
 	@if [ ! -e "$(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)" ] ; then \
-	     echo '******************************************************************************' ;  \
-	     echo 'Warning: This is the first installation of the $(LIBSHBASENAME)*' ; \
-	     echo '         library files in $(DESTDIR)$(LIBDIR) !!!' ; \
-	     echo '         You must run /sbin/ldconfig to update the library cache or' ; \
-	     echo '         the userspace tools may fail or have unpredictable results !!!' ; \
-	     echo '******************************************************************************' ;  \
+	     echo '******************************************************************************' ; \
+	     echo 'Warning: This is the first installation of the $(LIBSHSONAME)*' ; \
+	     echo '         library files in $(DESTDIR)$(LIBDIR)!' ; \
+	     echo '         You must update the library cache or the userspace tools may fail' ; \
+	     echo '         or have unpredictable results!' ; \
+		 echo '         Run the following command: /sbin/ldconfig' ; \
+	     echo '******************************************************************************' ; \
 	fi
 	$(INSTALL) -o root -g root -m 644 $(LIBTARGETS) $(DESTDIR)$(LIBDIR)
 	$(LN) $(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)
 	$(LN) $(LIBSHSONAME) $(DESTDIR)$(LIBDIR)/$(LIBSHBASENAME)
 	@if [ "$(DESTDIR)$(LIBDIR)" != "/usr/lib" -a "$(DESTDIR)$(LIBDIR)" != "/lib" ] ; then \
-	   if [ -e "/usr/lib/$(LIBSHSONAME)" ] ; then \
-	     echo '******************************************************************************' ;  \
-	     echo 'Warning: You have old $(LIBSHBASENAME)* library files in /usr/lib' ;  \
-	     echo '         and the new library files are in $(DESTDIR)$(LIBDIR) !!!' ; \
-	     echo '         These old files must be removed or the userspace tools' ; \
-	     echo '         will have unpredictable results !!!' ; \
+	   if [ -e "/usr/lib/$(LIBSHSONAME)" -o -e "/usr/lib/$(LIBSHBASENAME)" ] ; then \
+	     echo '******************************************************************************' ; \
+	     echo 'Warning: You have at least one $(LIBSHBASENAME) library file in /usr/lib' ; \
+	     echo '         and the new library files are in $(DESTDIR)$(LIBDIR)!' ; \
+	     echo '         These old files must be removed or the userspace tools may fail' ; \
+	     echo '         or have unpredictable results!' ; \
 	     echo '         Run the following command: rm /usr/lib/$(LIBSHBASENAME)*' ; \
-	     echo '******************************************************************************' ;  \
+	     echo '******************************************************************************' ; \
 	   fi ; \
 	   grep -q '^$(DESTDIR)$(LIBDIR)$$' /etc/ld.so.conf || \
 	   grep -q '^$(DESTDIR)$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
 	   grep -q '[[:space:]:,]$(DESTDIR)$(LIBDIR)$$' /etc/ld.so.conf || \
 	   grep -q '[[:space:]:,]$(DESTDIR)$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
-		( echo '******************************************************************************' ;  \
-		  echo 'Warning: Library directory $(DESTDIR)$(LIBDIR) not in /etc/ld.so.conf !!!' ;  \
-		  echo '         Add it and run /sbin/ldconfig for the userspace tools to work !!!' ; \
-		  echo '******************************************************************************' ) ;  \
+		( echo '******************************************************************************' ; \
+		  echo 'Warning: Library directory $(DESTDIR)$(LIBDIR) is not in /etc/ld.so.conf!' ; \
+		  echo '         Add it and run /sbin/ldconfig for the userspace tools to work.' ; \
+		  echo '******************************************************************************' ) ; \
 	fi
 	$(INSTALL) -o root -g root -m 644 $(LIBHEADERFILES) $(DESTDIR)$(LIBINCLUDEDIR)
 	$(INSTALL) -o $(MANOWN) -g $(MANGRP) -m 644 $(LIBMAN3FILES) $(DESTDIR)$(LIBMAN3DIR)
