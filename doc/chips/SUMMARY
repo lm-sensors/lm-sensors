@@ -26,6 +26,8 @@ Please include the following in your mail:
 	- Part numbers of chips on your motherboard you think are
 	      the sensor chips (look at your motherboard)
 
+See also ../FAQ for assistance.
+
 
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
@@ -70,6 +72,7 @@ ds1621
 
 fscpos
 	fscpos		3	3	3	-	yes	no
+
 fscscy
 	fscscy		4	3	6	-	yes	no
 
@@ -80,11 +83,11 @@ gl518sm
 gl520sm
         gl520sm 	1-2	4-5	2	-	yes	no
 
-gl525sm-to-be-written
-        gl525sm 	2-3	5-6	2-3	1-2 pwm	yes	no
-
 it87
-	it87		3	8	3	-	yes	yes
+	(all are reported as an "it87")
+	it8705		3	8	3	-	yes	yes
+	it8712		3	8	3	-	yes	yes
+	sis950		3	8	3	-	yes	yes
 
 lm75
 	lm75		1	-	-	-	yes	no
@@ -129,7 +132,7 @@ w83781d
 	w83782d		3	9	3	2-4 pwm	yes	yes
 	w83783s		1-2	5-6	3	2 pwm	yes	no
 	w83627hf	3	9	3	2 pwm	yes	yes (LPC)
-	w83697hf	2	6	23	2 pwm	no	yes
+	w83697hf	2	6	2	2 pwm	no	yes
 
 
 
@@ -188,3 +191,7 @@ This may help identify a chip after doing a 'i2cdump [bus] [address]'.
 0x90	ITE (at 0x58)
 0xAC	Myson (at 0x58)
 0xDA	Dallas
+
+
+------------------
+Copyright (c) 2001 The lm_sensors group
