@@ -402,8 +402,8 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      },
      {
        name => "Analog Devices ADM1025",
-#       driver => "xxxxxxx",
-       i2c_addrs => [0x2c..0x2f],
+       driver => "adm1025",
+       i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { adm1025_detect 0, @_ }
      },
      {
@@ -1624,7 +1624,6 @@ sub adm1022_detect
                 ($chip == 1 and $reg == 0x49);
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
   return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xc0) == 0xc0;
-  
   return (8);
 }
 
@@ -1643,10 +1642,9 @@ sub adm1025_detect
   my $reg;
   my ($chip, $file,$addr) = @_;
   $reg = i2c_smbus_read_byte_data($file,0x3e);
-  return unless ($chip == 0 and $reg == 0x41);
+  return unless ($reg == 0x41);
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
   return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xc0) == 0x20;
-  
   return (8);
 }
 
