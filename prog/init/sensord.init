@@ -92,7 +92,7 @@ start()
         daemon sensord -i $interval -l $log_interval
         RETVAL=$?
 
-        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/lm_sensors
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/sensord
 
         echo
         return $RETVAL
@@ -114,7 +114,7 @@ stop()
         echo_status $?
 
         echo
-        [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/lm_sensors
+        [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/sensord
 
         return $RETVAL
 }
@@ -146,10 +146,10 @@ case "$1" in
         reload
         ;;
   condrestart)
-        [ -e /var/lock/subsys/lm_sensors ] && restart || :
+        [ -e /var/lock/subsys/sensord ] && restart || :
         ;;
   *)
-        echo "Usage: sensors {start|stop|restart|reload|condrestart|status}"
+        echo "Usage: sensord {start|stop|restart|reload|condrestart|status}"
         exit 1
         ;;
 esac
