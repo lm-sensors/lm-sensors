@@ -28,6 +28,7 @@ and module bit-mb is renamed i2c-via. You have been warned.
 
 At least the following SMBus adapters are supported:
   Acer Labs M1541 and M1543C (used in the Aladdin IV, V and Pro 2 chipsets)
+  AMD 756
   Apple Hydra (used on some PPC machines)
   Intel ICH (used in the Intel 810 and 810E chipsets)
   Intel PIIX4 (used in most Intel chipsets)
@@ -60,6 +61,17 @@ if you did so before. Even if you have no programming knowledge, you could
 help us by running new modules and reporting on the results and output. 
 If you want to offer more substantial help, this is very welcome too, of
 course.
+
+
+Don't ask us whether we support a particular mainboard; we do not know.
+We *do* know what hardware we support, but usually, it is easier to
+install everything and run sensors-detect. It will tell you what hardware
+you have (and incidentally, what corresponding drivers are needed). You
+could also take a look at http://members.brabant.chello.nl/~a.vankaam/mbm
+(this lists chips found on many mainboard, but regrettable, not the adapters
+on them) or http://web01.fureai.or.jp/~hirobo/project/reserch_project.html
+(yes, it is japanese; you want the ninth column, and it again lists only
+chips, not adapters).
 
 
 SMBus, also known as System Management Bus, is a protocol for communicating
@@ -96,7 +108,7 @@ for you. But please try to read the documentation and FAQ first before you ask
 any questions!
 
 The latest version of this package can always be found on our homepage:
-http://www.netroedge.com/~lm78. Pre-release  versions can be retrieved
+http://www.netroedge.com/~lm78. Pre-release versions can be retrieved
 through anonymous CVS; see doc/cvs for more information.
 
 This whole package is copyright (c) 1998, 1999 by Frodo Looijaard and 

@@ -128,10 +128,12 @@ int sensors_chip_name_has_wildcards(sensors_chip_name chip)
     return 0;
 }
 
+#include <stdio.h>
+
 /* Look up the label which belongs to this chip. Note that chip should not
    contain wildcard values! *result is newly allocated (free it yourself).
    This function will return 0 on success, and <0 on failure.  */
-int sensors_get_label(sensors_chip_name name, int feature, char **result)
+int sensors_get_label1(sensors_chip_name name, int feature, char **result)
 {
   const sensors_chip *chip;
   const sensors_chip_feature *featureptr;
@@ -153,10 +155,17 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
   return 0;
 }
 
+int sensors_get_label(sensors_chip_name name, int feature, char **result)
+{
+	int res=sensors_get_label1(name,feature,result);
+	if (res) fprintf(stderr,"\nerror get_label: %d\n",res);
+	return res;
+}
+
 /* Read the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
-int sensors_get_feature(sensors_chip_name name, int feature, double *result)
+int sensors_get_feature1(sensors_chip_name name, int feature, double *result)
 {
   const sensors_chip_feature *main_feature;
   const sensors_chip_feature *alt_feature;
@@ -196,6 +205,13 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
   return 0;
 }
       
+int sensors_get_feature(sensors_chip_name name, int feature, double *result)
+{
+	int res=sensors_get_feature1(name,feature,result);
+	if (res) fprintf(stderr,"\nerror get_feature: %d\n",res);
+	return res;
+}
+
 /* Set the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
