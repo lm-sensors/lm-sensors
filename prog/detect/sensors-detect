@@ -629,6 +629,7 @@ $IOCTL_I2C_TENBIT = 0x0704;
 $IOCTL_I2C_SMBUS = 0x0720;
 
 
+
 use vars qw($SMBUS_READ $SMBUS_WRITE $SMBUS_QUICK $SMBUS_BYTE $SMBUS_BYTE_DATA 
             $SMBUS_WORD_DATA $SMBUS_PROC_CALL $SMBUS_BLOCK_DATA);
 
@@ -1837,8 +1838,9 @@ sub main
   my ($inp,@not_to_scan,$inp2);
   open INPUTFILE,"/proc/bus/i2c" or die "Couldn't open /proc/bus/i2c?!?";
   while (<INPUTFILE>) {
+    my ($dev_nr,$type,$adap,$algo) = /^i2c-(\S+)\s+(\S+)\s+(.*?)\s*\t\s*(.*?)\s+$/;
+    next if ($type eq "dummy");
     print "\n";
-    my ($dev_nr,$adap,$algo) = /^i2c-(\S+)\s+\S+\s+(.*?)\s*\t\s*(.*?)\s+$/;
     print "Next adapter: $adap ($algo)\n";
     print "Do you want to scan it? (YES/no/selectively): ";
     
