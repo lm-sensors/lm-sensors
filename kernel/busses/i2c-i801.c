@@ -591,8 +591,10 @@ static u32 i801_func(struct i2c_adapter *adapter)
 	                 I2C_FUNC_SMBUS_HWPEC_CALC
 	               : 0)
 #endif
+#if 0
 	     | (isich5 ? I2C_FUNC_SMBUS_READ_I2C_BLOCK
 	               : 0)
+#endif
 	    ;
 }
 
