@@ -611,7 +611,7 @@ chip "as99127f-*"
 #   compute temp2 (@*30/43)+25, (@-25)*43/30
 # Asus A7V133, Asus A7M266
     compute temp2 @*2.0, @/2.0
-# Asus CUSL2
+# Asus CUSL2, Asus CUV266-DLS
 #   compute temp2 (@*60/43)+25, (@-25)*43/60
 
 # See comments above if temp3 looks bad. What works for temp2 is likely
