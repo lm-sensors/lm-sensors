@@ -69,7 +69,80 @@ void print_lm75(const sensors_chip_name *name)
            cur,over,hyst);
   } else
     printf("ERROR: Can't get temperature data!\n");
-  free(label);
+  free_the_label(&label);
+}
+
+void print_adm1021(const sensors_chip_name *name)
+{
+  char *label;
+  double cur,hyst,over;
+  int alarms,i;
+
+  if (!sensors_get_feature(*name,SENSORS_LM78_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  if (!sensors_get_label(*name,SENSORS_ADM1021_TEMP,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM1021_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM1021_TEMP_HYST,&hyst) &&
+      !sensors_get_feature(*name,SENSORS_ADM1021_TEMP_OVER,&over))  {
+    print_label(label,10);
+    printf("%4.0f C (limit: %4.0f C, hysteresis: %4.0f C)    ",
+           cur,over,hyst);
+    if (alarms & (ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW)) {
+      printf("ALARM (");
+      i = 0;
+      if (alarms & ADM1021_ALARM_TEMP_LOW) {
+        printf("LOW");
+        i++;
+      }
+      if (alarms & ADM1021_ALARM_TEMP_HIGH)
+        printf("%sHIGH",i?",":"");
+      printf(")\n");
+    }
+  } else
+    printf("ERROR: Can't get temperature data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_ADM1021_REMOTE_TEMP,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM1021_REMOTE_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM1021_REMOTE_TEMP_HYST,&hyst) &&
+      !sensors_get_feature(*name,SENSORS_ADM1021_REMOTE_TEMP_OVER,&over))  {
+    print_label(label,10);
+    printf("%4.0f C (limit: %4.0f C, hysteresis: %4.0f C)    ",
+           cur,over,hyst);
+    if (alarms & (ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW |
+                  ADM1021_ALARM_RTEMP_NA)) {
+      printf("ALARM (");
+      i = 0;
+      if (alarms & ADM1021_ALARM_RTEMP_NA) {
+        printf("N/A");
+        i++;
+      }
+      if (alarms & ADM1021_ALARM_RTEMP_LOW) {
+        printf("%sLOW",i?",":"");
+        i++;
+      }
+      if (alarms & ADM1021_ALARM_RTEMP_HIGH)
+        printf("%sHIGH",i?",":"");
+      printf(")\n");
+    }
+  } else
+    printf("ERROR: Can't get temperature data!\n");
+  free_the_label(&label);
+
+  if (!strcmp(name->prefix,"adm1021")) {
+    if (!sensors_get_label(*name,SENSORS_ADM1021_DIE_CODE,&label) &&
+        !sensors_get_feature(*name,SENSORS_ADM1021_DIE_CODE,&cur)) {
+      print_label(label,10);
+      printf("%4.0f\n",cur);
+    } else
+      printf("ERROR: Can't get die-code data!\n");
+    free_the_label(&label);
+  }
 }
 
 void print_lm78(const sensors_chip_name *name)
@@ -380,33 +453,6 @@ void print_gl518(const sensors_chip_name *name)
   } else
     printf("ERROR: Can't get BEEP data!\n");
   free_the_label(&label);
-}
-
-void print_unknown_chip(const sensors_chip_name *name)
-{
-  int a,b;
-  const sensors_feature_data *data;
-  char *label;
-  double val;
- 
-  a=b=0;
-  while((data=sensors_get_all_features(*name,&a,&b))) {
-    if (sensors_get_label(*name,data->number,&label)) {
-      printf("ERROR: Can't get feature `%s' data!",data->name);
-      continue;
-    }
-    if (data->mode & SENSORS_MODE_R) {
-      if(sensors_get_feature(*name,data->number,&val)) {
-        printf("ERROR: Can't get feature `%s' data!",data->name);
-        continue;
-      }
-      if (data->mapping != SENSORS_NO_MAPPING)
-        printf("  %s: %.2f (%s)\n",label,val,data->name);
-      else
-        printf("%s: %.2f (%s)\n",label,val,data->name);
-    } else 
-      printf("(%s)",label);
-  }
 }
 
 void print_lm80(const sensors_chip_name *name)
@@ -1009,3 +1055,31 @@ void print_maxilife(const sensors_chip_name *name)
       printf("ERROR: Can't get VID4 data!\n");
    free_the_label(&label);
 }
+
+void print_unknown_chip(const sensors_chip_name *name)
+{
+  int a,b;
+  const sensors_feature_data *data;
+  char *label;
+  double val;
+ 
+  a=b=0;
+  while((data=sensors_get_all_features(*name,&a,&b))) {
+    if (sensors_get_label(*name,data->number,&label)) {
+      printf("ERROR: Can't get feature `%s' data!",data->name);
+      continue;
+    }
+    if (data->mode & SENSORS_MODE_R) {
+      if(sensors_get_feature(*name,data->number,&val)) {
+        printf("ERROR: Can't get feature `%s' data!",data->name);
+        continue;
+      }
+      if (data->mapping != SENSORS_NO_MAPPING)
+        printf("  %s: %.2f (%s)\n",label,val,data->name);
+      else
+        printf("%s: %.2f (%s)\n",label,val,data->name);
+    } else 
+      printf("(%s)",label);
+  }
+}
+
