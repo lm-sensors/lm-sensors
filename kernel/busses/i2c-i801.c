@@ -1,7 +1,7 @@
 /*
     i801.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
-    Copyright (c) 1998 - 2001  Frodo Looijaard <frodol@dds.nl>,
+    Copyright (c) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>, and Mark D. Studebaker
     <mdsxyz123@yahoo.com>
 
@@ -183,7 +183,7 @@ int i801_setup(void)
 
 	/* First check whether we can access PCI at all */
 	if (pci_present() == 0) {
-		printk("i2c-i801.o: Error: No PCI-bus found!\n");
+		printk(KERN_WARNING "i2c-i801.o: Error: No PCI-bus found!\n");
 		error_return = -ENODEV;
 		goto END;
 	}
@@ -203,7 +203,7 @@ int i801_setup(void)
 
 	if (I801_dev == NULL) {
 		printk
-		    ("i2c-i801.o: Error: Can't detect I801, function 3!\n");
+		    (KERN_WARNING "i2c-i801.o: Error: Can't detect I801, function 3!\n");
 		error_return = -ENODEV;
 		goto END;
 	}
@@ -219,7 +219,7 @@ int i801_setup(void)
 
 	if (check_region(i801_smba, 8)) {
 		printk
-		    ("i2c-i801.o: I801_smb region 0x%x already in use!\n",
+		    (KERN_ERR "i2c-i801.o: I801_smb region 0x%x already in use!\n",
 		     i801_smba);
 		error_return = -ENODEV;
 		goto END;
@@ -233,7 +233,7 @@ int i801_setup(void)
 		pci_write_config_word(I801_dev, SMBBA, i801_smba);
 		pci_write_config_byte(I801_dev, SMBHSTCFG, temp | 0x01);
 		printk
-		    ("i2c-i801.o: WARNING: I801 SMBus interface set to new "
+		    (KERN_WARNING "i2c-i801.o: WARNING: I801 SMBus interface set to new "
 		     "address %04x!\n", i801_smba);
 	} else if ((temp & 1) == 0) {
 		if (force) {
@@ -246,11 +246,11 @@ int i801_setup(void)
 			pci_write_config_byte(I801_dev, SMBHSTCFG,
 					      temp | 1);
 			printk
-			    ("i2c-i801.o: WARNING: I801 SMBus interface has been FORCEFULLY "
+			    (KERN_WARNING "i2c-i801.o: WARNING: I801 SMBus interface has been FORCEFULLY "
 			     "ENABLED!\n");
 		} else {
 			printk
-			    ("SMBUS: Error: Host SMBus controller not enabled!\n");
+			    (KERN_ERR "SMBUS: Error: Host SMBus controller not enabled!\n");
 			error_return = -ENODEV;
 			goto END;
 		}
@@ -264,14 +264,14 @@ int i801_setup(void)
 #ifdef DEBUG
 	if (temp & 0x02)
 		printk
-		    ("i2c-i801.o: I801 using Interrupt SMI# for SMBus.\n");
+		    (KERN_DEBUG "i2c-i801.o: I801 using Interrupt SMI# for SMBus.\n");
 	else
 		printk
-		    ("i2c-i801.o: I801 using PCI Interrupt for SMBus.\n");
+		    (KERN_DEBUG "i2c-i801.o: I801 using PCI Interrupt for SMBus.\n");
 
 	pci_read_config_byte(I801_dev, SMBREV, &temp);
-	printk("i2c-i801.o: SMBREV = 0x%X\n", temp);
-	printk("i2c-i801.o: I801_smba = 0x%X\n", i801_smba);
+	printk(KERN_DEBUG "i2c-i801.o: SMBREV = 0x%X\n", temp);
+	printk(KERN_DEBUG "i2c-i801.o: I801_smba = 0x%X\n", i801_smba);
 #endif				/* DEBUG */
 
       END:
@@ -295,7 +295,7 @@ int i801_transaction(void)
 
 #ifdef DEBUG
 	printk
-	    ("i2c-i801.o: Transaction (pre): CNT=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, "
+	    (KERN_DEBUG "i2c-i801.o: Transaction (pre): CNT=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, "
 	     "DAT1=%02x\n", inb_p(SMBHSTCNT), inb_p(SMBHSTCMD),
 	     inb_p(SMBHSTADD), inb_p(SMBHSTDAT0), inb_p(SMBHSTDAT1));
 #endif
@@ -304,18 +304,18 @@ int i801_transaction(void)
 	/* 0x1f = Failed, Bus_Err, Dev_Err, Intr, Host_Busy */
 	if ((temp = (0x1f & inb_p(SMBHSTSTS))) != 0x00) {
 #ifdef DEBUG
-		printk("i2c-i801.o: SMBus busy (%02x). Resetting... \n",
+		printk(KERN_DEBUG "i2c-i801.o: SMBus busy (%02x). Resetting... \n",
 		       temp);
 #endif
 		outb_p(temp, SMBHSTSTS);
 		if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-			printk("i2c-i801.o: Failed! (%02x)\n", temp);
+			printk(KERN_DEBUG "i2c-i801.o: Failed! (%02x)\n", temp);
 #endif
 			return -1;
 		} else {
 #ifdef DEBUG
-			printk("i2c-i801.o: Successfull!\n");
+			printk(KERN_DEBUG "i2c-i801.o: Successfull!\n");
 #endif
 		}
 	}
@@ -332,7 +332,7 @@ int i801_transaction(void)
 	/* If the SMBus is still busy, we give up */
 	if (timeout >= MAX_TIMEOUT) {
 #ifdef DEBUG
-		printk("i2c-i801.o: SMBus Timeout!\n");
+		printk(KERN_DEBUG "i2c-i801.o: SMBus Timeout!\n");
 		result = -1;
 #endif
 	}
@@ -340,14 +340,14 @@ int i801_transaction(void)
 	if (temp & 0x10) {
 		result = -1;
 #ifdef DEBUG
-		printk("i2c-i801.o: Error: Failed bus transaction\n");
+		printk(KERN_DEBUG "i2c-i801.o: Error: Failed bus transaction\n");
 #endif
 	}
 
 	if (temp & 0x08) {
 		result = -1;
 		printk
-		    ("i2c-i801.o: Bus collision! SMBus may be locked until next hard\n"
+		    (KERN_ERR "i2c-i801.o: Bus collision! SMBus may be locked until next hard\n"
 		     "reset. (sorry!)\n");
 		/* Clock stops and slave is stuck in mid-transmission */
 	}
@@ -355,7 +355,7 @@ int i801_transaction(void)
 	if (temp & 0x04) {
 		result = -1;
 #ifdef DEBUG
-		printk("i2c-i801.o: Error: no response!\n");
+		printk(KERN_DEBUG "i2c-i801.o: Error: no response!\n");
 #endif
 	}
 
@@ -365,13 +365,13 @@ int i801_transaction(void)
 	if ((temp = (0x1f & inb_p(SMBHSTSTS))) != 0x00) {
 #ifdef DEBUG
 		printk
-		    ("i2c-i801.o: Failed reset at end of transaction (%02x)\n",
+		    (KERN_DEBUG "i2c-i801.o: Failed reset at end of transaction (%02x)\n",
 		     temp);
 #endif
 	}
 #ifdef DEBUG
 	printk
-	    ("i2c-i801.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
+	    (KERN_DEBUG "i2c-i801.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
 	     "DAT0=%02x, DAT1=%02x\n", inb_p(SMBHSTCNT), inb_p(SMBHSTCMD),
 	     inb_p(SMBHSTADD), inb_p(SMBHSTDAT0), inb_p(SMBHSTDAT1));
 #endif
@@ -424,8 +424,8 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 
 #ifdef DEBUG
 		printk
-		    ("i2c-i801.o: Transaction (pre): CNT=%02x, CMD=%02x, ADD=%02x, "
-		     "DAT0=%02x, BLKDAT=%02x\n", inb_p(SMBHSTCNT),
+		    (KERN_DEBUG "i2c-i801.o: Block (pre %d): CNT=%02x, CMD=%02x, ADD=%02x, "
+		     "DAT0=%02x, BLKDAT=%02x\n", i, inb_p(SMBHSTCNT),
 		     inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
 		     inb_p(SMBBLKDAT));
 #endif
@@ -444,13 +444,13 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		if (temp & errmask) {
 #ifdef DEBUG
 			printk
-			    ("i2c-i801.o: SMBus busy (%02x). Resetting... \n",
+			    (KERN_DEBUG "i2c-i801.o: SMBus busy (%02x). Resetting... \n",
 			     temp);
 #endif
 			outb_p(temp, SMBHSTSTS);
 			if (((temp = inb_p(SMBHSTSTS)) & errmask) != 0x00) {
 				printk
-				    ("i2c-i801.o: Reset failed! (%02x)\n",
+				    (KERN_ERR "i2c-i801.o: Reset failed! (%02x)\n",
 				     temp);
 				result = -1;
                                 goto END;
@@ -478,7 +478,7 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		if (timeout >= MAX_TIMEOUT) {
 			result = -1;
 #ifdef DEBUG
-			printk("i2c-i801.o: SMBus Timeout!\n");
+			printk(KERN_DEBUG "i2c-i801.o: SMBus Timeout!\n");
 #endif
 		}
 
@@ -486,18 +486,18 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 			result = -1;
 #ifdef DEBUG
 			printk
-			    ("i2c-i801.o: Error: Failed bus transaction\n");
+			    (KERN_DEBUG "i2c-i801.o: Error: Failed bus transaction\n");
 #endif
 		} else if (temp & 0x08) {
 			result = -1;
 			printk
-			    ("i2c-i801.o: Bus collision! SMBus may be locked until next hard"
+			    (KERN_ERR "i2c-i801.o: Bus collision! SMBus may be locked until next hard"
 			     " reset. (sorry!)\n");
 			/* Clock stops and slave is stuck in mid-transmission */
 		} else if (temp & 0x04) {
 			result = -1;
 #ifdef DEBUG
-			printk("i2c-i801.o: Error: no response!\n");
+			printk(KERN_DEBUG "i2c-i801.o: Error: no response!\n");
 #endif
 		}
 
@@ -522,14 +522,14 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		if ((temp = (0x1e & inb_p(SMBHSTSTS))) != 0x00) {
 #ifdef DEBUG
 			printk
-			    ("i2c-i801.o: Failed reset at end of transaction (%02x)\n",
+			    (KERN_DEBUG "i2c-i801.o: Failed reset at end of transaction (%02x)\n",
 			     temp);
 #endif
 		}
 #ifdef DEBUG
 		printk
-		    ("i2c-i801.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
-		     "DAT0=%02x, BLKDAT=%02x\n", inb_p(SMBHSTCNT),
+		    (KERN_DEBUG "i2c-i801.o: Block (post %d): CNT=%02x, CMD=%02x, ADD=%02x, "
+		     "DAT0=%02x, BLKDAT=%02x\n", i, inb_p(SMBHSTCNT),
 		     inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
 		     inb_p(SMBBLKDAT));
 #endif
@@ -555,7 +555,7 @@ s32 i801_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 
 	switch (size) {
 	case I2C_SMBUS_PROC_CALL:
-		printk("i2c-i801.o: I2C_SMBUS_PROC_CALL not supported!\n");
+		printk(KERN_ERR "i2c-i801.o: I2C_SMBUS_PROC_CALL not supported!\n");
 		return -1;
 	case I2C_SMBUS_QUICK:
 		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
@@ -643,19 +643,19 @@ u32 i801_func(struct i2c_adapter *adapter)
 int __init i2c_i801_init(void)
 {
 	int res;
-	printk("i2c-i801.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk(KERN_INFO "i2c-i801.o version %s (%s)\n", LM_VERSION, LM_DATE);
 #ifdef DEBUG
 /* PE- It might be good to make this a permanent part of the code! */
 	if (i801_initialized) {
 		printk
-		    ("i2c-i801.o: Oops, i801_init called a second time!\n");
+		    (KERN_DEBUG "i2c-i801.o: Oops, i801_init called a second time!\n");
 		return -EBUSY;
 	}
 #endif
 	i801_initialized = 0;
 	if ((res = i801_setup())) {
 		printk
-		    ("i2c-i801.o: I801 not detected, module not inserted.\n");
+		    (KERN_WARNING "i2c-i801.o: I801 not detected, module not inserted.\n");
 		i801_cleanup();
 		return res;
 	}
@@ -664,12 +664,12 @@ int __init i2c_i801_init(void)
 		i801_smba);
 	if ((res = i2c_add_adapter(&i801_adapter))) {
 		printk
-		    ("i2c-i801.o: Adapter registration failed, module not inserted.\n");
+		    (KERN_ERR "i2c-i801.o: Adapter registration failed, module not inserted.\n");
 		i801_cleanup();
 		return res;
 	}
 	i801_initialized++;
-	printk("i2c-i801.o: I801 bus detected and initialized\n");
+	printk(KERN_INFO "i2c-i801.o: I801 bus detected and initialized\n");
 	return 0;
 }
 
@@ -679,7 +679,7 @@ int __init i801_cleanup(void)
 	if (i801_initialized >= 2) {
 		if ((res = i2c_del_adapter(&i801_adapter))) {
 			printk
-			    ("i2c-i801.o: i2c_del_adapter failed, module not removed\n");
+			    (KERN_ERR "i2c-i801.o: i2c_del_adapter failed, module not removed\n");
 			return res;
 		} else
 			i801_initialized--;
