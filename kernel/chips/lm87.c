@@ -48,7 +48,7 @@
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
-static unsigned short normal_i2c_range[] = { 0x2c, 0x2f, SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x2c, 0x2e, SENSORS_I2C_END };
 static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
@@ -753,7 +753,8 @@ void lm87_fan(struct i2c_client *client, int operation, int ctl_name,
 			data->fan_min[nr-1] = FAN_TO_REG(results[0],
 						   DIV_FROM_REG
 						   (data->fan_div[nr-1]));
-			lm87_write_value(client, LM87_REG_FAN2_AIN2_LIMIT,
+			lm87_write_value(client, (nr == 2) ?
+			   LM87_REG_FAN2_AIN2_LIMIT : LM87_REG_FAN1_AIN1_LIMIT,
 					    data->fan_min[nr-1]);
 		}
 	}
