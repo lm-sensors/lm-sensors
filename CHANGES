@@ -19,16 +19,33 @@ ask CVS about it:
 
 2.8.0 (2003????)
   NOTE: Requires i2c-2.8.0 or newer.
-  Dropped all kernel 2.2 and 2.3 compatibility
+  Dropped all kernel 2.2 and 2.3 compatibility; 2.4.9 or later required
   File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
-  Library: Add support for exponents and logarithms for vt1211/vt8235 temps
+  Library: Add support for exponents and logarithms for vt1211/vt8235 temps;
+           add lm85 support
   Makefiles: Generate warnings if new library won't be found by ld.so;
              Modules now install in kernel/drivers/i2c/[busses,chips]
+  Modules (all): Cleanups including
+		- Add #include <i2c-proc.h>
+		- C99 initializers
+		- Remove #ifdef MODULE
+		- Remove #ifndef THIS_MODULE
+		- Remove #ifndef MODULE_LICENSE
+		- Remove #include "sensors.h", copy SYSCTL defs to module
+		- Remove argument in i2c_register_entry()
+		- Remove dummy xxx_command() definition
+		- Remove EXPORT_NO_SYMBOLS
+		- Remove init_MUTEX #define
+		- Remove xxx_inc_use() and xxx_dec_use() functions
+		- Use module_init() and module_exit()
+		- Update to new i2c_driver struct definition
   Module adm1021: Set alarm on failed reads and report old value;
                   merge changes from kernel 2.5.54
+  Module bmcsensors: Fix compile when DEBUG=1
   Modules ddcmon, eeprom: Use i2c block reads if possible;
                           better error handling
   Module lm75: merge changes from kernel 2.5.54
+  Module lm85: New
   Module i2c-amd756: merge changes from kernel 2.5.54
   Module i2c-amd8111: merge changes from kernel 2.5.54
   Module i2c-i810.c: Fix for some chips
@@ -40,6 +57,7 @@ ask CVS about it:
   Program lm_sensors.init: Call sensors -s in start()
   Program mkpatch: Fix vt8231 compile; keep tsunami from menu on non-alpha
   Program pwmtest: New
+  Program sensors: add lm85 support
   Program sensors-detect: Add super i/o detection (smsc47m1, vt1211,
                           w83627hf, w83697hf)
 
