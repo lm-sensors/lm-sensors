@@ -3882,9 +3882,13 @@ sub vpd_bios_build_id
     seek (MEM, -32, SEEK_CUR);
     my $len;
     if (substr($buf, 0, 5) eq "\xAA\x55VPD"
-     && ord(substr($buf, 5, 1)) >= 0x30
-     && unpack('%8C*', substr($buf, 0x0D, 0x30-0x0D)) == 0)
+     && ord(substr($buf, 5, 1)) >= 0x30)
     {
+      if (unpack('%8C*', substr($buf, 0x0D, 0x30-0x0D)) != 0)
+      {
+        printf " Bad VPD checksum (0x%02X)! Please report.\n",
+                ord(substr($buf, 0x2F, 1));
+      }
       $bbid = substr($buf, 13, 9);
       $bbid =~ s/[\x00 ]*$//; # right trim
       $found++;
