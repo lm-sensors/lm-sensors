@@ -91,6 +91,7 @@ static u8 reserved[] =
 #define ARP_MAX_DEVICES 8
 struct arp_device {
 	int status;
+	u8 udid[UDID_LENGTH];
 	u8 dev_cap;
 	u8 dev_ver;
 	u16 dev_vid;
@@ -152,21 +153,21 @@ static struct i2c_driver smbusarp_driver = {
 };
 
 static ctl_table smbusarp_dir_table_template[] = {
-	{ARP_SYSCTL1, "0", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{ARP_SYSCTL1, "0", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &smbusarp_contents},
-	{ARP_SYSCTL2, "1", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{ARP_SYSCTL2, "1", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &smbusarp_contents},
-	{ARP_SYSCTL3, "2", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{ARP_SYSCTL3, "2", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &smbusarp_contents},
-	{ARP_SYSCTL4, "3", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{ARP_SYSCTL4, "3", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &smbusarp_contents},
-	{ARP_SYSCTL5, "4", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{ARP_SYSCTL5, "4", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &smbusarp_contents},
-	{ARP_SYSCTL6, "5", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{ARP_SYSCTL6, "5", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &smbusarp_contents},
-	{ARP_SYSCTL7, "6", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{ARP_SYSCTL7, "6", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &smbusarp_contents},
-	{ARP_SYSCTL8, "7", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{ARP_SYSCTL8, "7", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &smbusarp_contents},
 	{0}
 };
@@ -387,6 +388,9 @@ int smbusarp_init_client(struct i2c_client *client)
 			}
 
 		}
+		/* store things both ways */
+		for(i = 0; i < UDID_LENGTH; i++)
+			data->dev[newdev].udid[i] = blk[i];
 		data->dev[newdev].saddr = addr;
 		data->dev[newdev].status = ARP_BUSY;
 		data->dev[newdev].dev_cap = blk[0];
@@ -424,12 +428,15 @@ int smbusarp_init_client(struct i2c_client *client)
 }
 
 
+/* reassign address on writex */
 void smbusarp_contents(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results)
 {
 	int nr = ctl_name - ARP_SYSCTL1;
 	struct arp_data *data = client->data;
-
+	int ret;
+	u8 save;
+	u8 a;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
@@ -449,9 +456,34 @@ void smbusarp_contents(struct i2c_client *client, int operation,
 			*nrels_mag = 0;
 		}
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		printk(KERN_WARNING "smbus-arp.o: No writes supported!\n");
+		a = results[0];
+		if(*nrels_mag >= 1 &&
+		   a >= 0 &&
+		   a < SMBUS_ADDRESS_SIZE &&
+		   data->dev[nr].status == ARP_BUSY &&
+		   data->address_pool[a] == ARP_FREE) {
+			save = data->dev[nr].udid[16];
+			data->dev[nr].udid[16] = a << 1;
+			ret = i2c_smbus_write_block_data(client, ARP_ASSIGN_ADDR,
+                                 UDID_LENGTH, data->dev[nr].udid);
+			if(ret) {
+				data->dev[nr].udid[16] = save;
+#ifdef DEBUG
+				printk(KERN_DEBUG "smbus-arp Bad response, address 0x%02x not assigned\n", a);
+#endif
+			} else {
+				data->dev[nr].saddr = a;
+				data->address_pool[a] = ARP_BUSY;
+#ifdef DEBUG
+				printk(KERN_DEBUG "smbus-arp Assigned address 0x%02x\n", a);
+#endif
+			}
+		} else {
+			printk(KERN_WARNING "smbus-arp Bad address 0x%02x\n", a);
+		}
 	}
 }
+
 int __init sensors_smbusarp_init(void)
 {
 	int res;
