@@ -73,6 +73,8 @@ sub restorefans();
 sub calc(@);
 sub UpdateFanSpeeds();
 
+END { restorefans(); }
+
 our $opt_d;
 getopts('d');
 
@@ -296,8 +298,6 @@ sub pwmenable($)
 ################################################################ 
 sub restorefans()
 {
-   my $sigtype = shift;
-
    $SIG{TERM} = 'IGNORE';
    $SIG{HUP}  = 'IGNORE';
    $SIG{INT}  = 'IGNORE';
