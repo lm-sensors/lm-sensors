@@ -486,7 +486,7 @@ static void lm90_update_client(struct i2c_client *client)
 				i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_TEMPL);
 #ifdef DEBUG
 			oldh = /* actually newer */
-				i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_TEMPH;
+				i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_TEMPH);
 			if (newh != oldh)
 				printk("lm90.o: Remote temperature may be wrong.\n");
 #endif
