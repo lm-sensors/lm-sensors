@@ -21,7 +21,7 @@ CONTENTS
 2.5 How often are the sensor values updated?
 2.6 How are alarms triggered?
 
-3 Installation and Management
+3. Installation and Management
 3.1 Why so many modules, and how do I cope with them?
 3.2 How do I know which chips I own?
   3.2A What chips are on motherboard XYZ?
@@ -41,7 +41,7 @@ CONTENTS
 3.7 It still does not compile or patch
 3.8 'make install' fails on Mandrake kernels
 
-4 Problems
+4. Problems
 4.1 Why do my fans report exactly half/double their values by your code
 compared to the BIOS? 
 4.2 Why do my two LM75's report "-48 degrees"?
@@ -71,6 +71,8 @@ sensor reading results. Why?
   4.17D Bad temperature readings from the SIS5595!
   4.17E Bad readings from a w8378[12]d!
   4.17F Bus hangs on Ali 1543 on Asus P5A boards!
+  4.17G Bad readings from LM75!
+  4.17H Bad readings from LM80!
 4.18 How do I configure two chips (LM87) differently?
 4.19 Dmesg says Upgrade BIOS! I don't want to!
 4.20 Sensors says 'Can't access /proc file'
@@ -86,18 +88,25 @@ sensor reading results. Why?
   4.24C Sensors-detect doesn't find any sensors
 4.25 Sensors says 'Error: Line xxx: zzzzzzz'
 
-5 How to Ask for Help  
+5. How to Ask for Help  
 5.1 What to do if a module won't insert?
 5.2 What to do if it inserts, but nothing happens?
 5.3 What to do if I read only bogus information?
 5.4 What to do if you have other problems?
 5.5 What if it just works like a charm?
 
-6 Version 1 specific questions
-6.1 My manufacturer swears that my mainboard has an SMBus, but your code 
+6. How to Contribute
+6.1 How to write a driver
+6.2 How to get CVS access
+6.3 How to donate hardware to the project
+6.4 How to join the project mailing list
+6.5 How to (not) access mailing list archives
+
+7. Version 1 specific questions
+7.1 My manufacturer swears that my mainboard has an SMBus, but your code 
 reports that it can't find it.  What's wrong? 
-6.2 The modules won't load, saying 'SMBus not detected'.
-6.3 I try to read /proc/sensors, and I get a "No sensor data yet (try again in 
+7.2 The modules won't load, saying 'SMBus not detected'.
+7.3 I try to read /proc/sensors, and I get a "No sensor data yet (try again in 
 a few moments)" message. Why?
 
 -------------------------------------------------------------
@@ -674,6 +683,18 @@ monitor chip on this board and use the 'ignore=1,0x2d' or similar option
 to the w83781d module to prevent i2c accesses.
 
 
+4.17G Bad readings from LM75!
+
+    The LM75 detection is poor and other hardware is often misdetected
+as an LM75. Figure out what you really have (see 4.24C).
+
+
+4.17H Bad readings from LM80!
+
+    The LM75 detection is poor and other hardware is often misdetected
+as an LM75. Figure out what you really have (see 4.24C).
+
+
 4.18 How do I configure two chips (LM87) differently?
 
     There is a SuperMicro board with two LM87's on it that are
@@ -805,6 +826,7 @@ Run devfs in the kernel to get the /dev/i2c/x files.
 	3) Check the Motherboard Monitor website
 	   (see useful_addresses.html) for a good cross-reference.
 
+
 4.25 Sensors says 'Error: Line xxx: zzzzzzz'
 
     These are errors from the libsensors library in
@@ -888,13 +910,43 @@ please send us the usual information (see section 5).
 detected chip type. That way, we have some positive feedback, too!
 
 
+6. How to Contribute
+--------------------
 
-6 Version 1 specific questions
+6.1 How to write a driver
+
+    See doc/developers/new_drivers in our package for instructions.
+
+
+6.2 How to get CVS access
+
+    For anonymous CVS read access, see the instructions on our download page.
+    For write access, run the script doc/developers/genpasswd.pl in
+    our package and follow the instructions. Let us know what part
+    of the package you would like to work on.
+
+
+6.3 How to donate hardware to the project
+
+    Send us email <sensors@stimpy.netroedge.com>.
+
+
+6.4 How to join the project mailing list
+
+    Send us email <sensors@stimpy.netroedge.com>. Sorry, no automated
+    subscribe/unsubscribe service.
+
+6.5 How to (not) access mailing list archives
+
+    Sorry, there is no archive.
+
+
+7. Version 1 specific questions
 ------------------------------
 
 Note: Version 1 is very very old and is not recommended.
 
-6.1 My manufacturer swears that my mainboard has an SMBus, but your code 
+7.1 My manufacturer swears that my mainboard has an SMBus, but your code 
 reports that it can't find it.  What's wrong? 
 
     Currently, our code only assumes that an SMBus exists if it originates 
@@ -915,13 +967,13 @@ use the Bios SMBus interface (not always available nor standard).
 Version 1 never will.
 
 
-6.2 The modules won't load, saying 'SMBus not detected'.
+7.2 The modules won't load, saying 'SMBus not detected'.
 
     This should no longer be an issue in 1.4.10 and later; it will
 continue loading, but it won't support SMBus-connected devices, of course.
 
 
-6.3 I try to read /proc/sensors, and I get a "No sensor data yet (try again in 
+7.3 I try to read /proc/sensors, and I get a "No sensor data yet (try again in 
 a few moments)" message. Why?
 
     It takes about 1.5 seconds for the LM78 to update all its sensor 
@@ -933,7 +985,7 @@ to access sensor data right after insertion time, and do not display this
 message anymore.
 
 
-6.4 On my Dell, a LM80 is detected, but all readings are 0!
+7.4 On my Dell, a LM80 is detected, but all readings are 0!
 
     This is a bug we have only observed on Dell computers. There is
 probably a problem with the way the SMBus is accessed; but it is not yet
@@ -946,6 +998,7 @@ can not be sure.
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
 
+Rev 2.4 (MDS) Minor updates 20010929
 Rev 2.4 (MDS) Minor updates 20010722
 Rev 2.3 (MDS) General update, 20010224, released with lm_sensors 2.6.0.
 Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 19990920
