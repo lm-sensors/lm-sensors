@@ -18,12 +18,15 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.8.6 (2004????)
+  File README.thinkpad: Update status
   File doc/chips/pca9540: New
+  File doc/chips/pc87360-fan: New
   File etc/sensors.conf.eg: Update pcf8591 default configuration
   Library: Switch to new sysfs naming standard
            Fix gcc 3.3 warnings (Philipp Thomas)
            Support 2.6 ds1621 and pcf8591
            Change pcf8591 magnitudes
+           Support pc87360-fan
   Makefile: Install shared library 755
   Man pages i2cdump.8, i2cset.8, isadump.8: New (Debian team)
   Man pages i2cdetect.8, sensors-detect.8: New (Debian team)
@@ -33,6 +36,8 @@ ask CVS about it:
   Module adm1021: Better detection and initialization
   Module eeprom: Fix bogus init (Ralf Roesch)
   Module pca9540: New driver for the Philips PCA9540
+  Module pc87360-fan: New driver for the National Semiconductor PC87360,
+                      PC87363 and PC87364 Super I/O chips
   Module smsc47m1: Support the LPC47B27x
   Programs i2cdetect, i2cdump, i2cset: Fix incorrect bus names if possible
   Program i2cdetect: Skip special addresses by default
@@ -40,6 +45,7 @@ ask CVS about it:
   Program sensors: Print the degree symbol in the terminal's current locale
                    (Aurelien Jarno)
                    Update pcf8591 print to support 2.6 driver
+                   Support pc87360-fan
   Program sensors-detect: Support Maxim MAX6900, ALi M5879, Philips PCA9540
                           Improved SiS chips support
                           Add a white list of IBM systems
@@ -47,6 +53,10 @@ ask CVS about it:
                           Fix smart battery detection
                           Add smart battery charger and manager detection
                           Rework adm1021 and clones detection
+                          The PC87360, PC87363 and PC87364 Super I/O chips
+						  now have a (preliminary) driver
+                          Rework Super I/O detection
+                          Better support of devfs
   Program sensors-detect-stat.pl: New
 
 
