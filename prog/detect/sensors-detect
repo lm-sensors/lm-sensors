@@ -124,7 +124,8 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x740b,
        func => 3,
        procid => "AMD-756 Athlon ACPI",
-# driver to be written
+       driver => "i2c-amd756",
+       match => sub { $_[0] =~ /^SMBus AMD756 adapter at [0-9,a-f]{4}/ },
      },
 );
 
