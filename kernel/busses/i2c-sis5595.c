@@ -40,8 +40,14 @@
 	5598		0008		5597/5598
 	 630		0008		0630
 	 645		0008		0645
+	 646		0008		0646
+	 648		0008		0648
+	 650		0008		0650
+	 651		0008		0651
 	 730		0008		0730
 	 735		0008		0735
+	 745		0008		0745
+	 746		0008		0746
 */
 
 /* TO DO: 
@@ -73,8 +79,14 @@ static int blacklist[] = {
 			PCI_DEVICE_ID_SI_5597,
 			PCI_DEVICE_ID_SI_5598,
 			0x645,
+			0x646,
+			0x648,
+			0x650,
+			0x651,
 			0x735,
-                          0 };
+			0x745,
+			0x746,
+			0 };
 
 /* Length of ISA address segment */
 #define SIS5595_EXTENT 8
@@ -437,6 +449,8 @@ static int __devinit sis5595_probe(struct pci_dev *dev, const struct pci_device_
 	sprintf(sis5595_adapter.name, "SMBus SIS5595 adapter at %04x",
 		sis5595_base + SMB_INDEX);
 	i2c_add_adapter(&sis5595_adapter);
+
+	return 0;
 }
 
 static void __devexit sis5595_remove(struct pci_dev *dev)
