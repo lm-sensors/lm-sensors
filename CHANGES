@@ -17,6 +17,10 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
+2.8.1 (2003????)
+  Program sensors: Rewrite and enhance eeprom support
+  Program sensors-detect: Add support for PCF8574, PCF8574A, SAA1064
+
 2.8.0 (20030714)
   NOTE: Requires i2c-2.8.0 or newer!!!
   Dropped all kernel 2.2 and 2.3 compatibility; 2.4.9 or later required;
