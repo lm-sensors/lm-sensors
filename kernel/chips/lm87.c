@@ -153,9 +153,6 @@ SENSORS_INSMOD_1(lm87);
    these macros are called: arguments may be evaluated more than once.
    Fixing this is just not worth it. */
 
-#define IN_TO_REG(val,nr) (SENSORS_LIMIT(((val) & 0xff),0,255))
-#define IN_FROM_REG(val,nr) (val)
-
 static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
@@ -168,32 +165,17 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define FAN_FROM_REG(val,div) ((val)==0?-1:\
                                (val)==255?0:1350000/((div)*(val)))
 
-#define TEMP_FROM_REG(temp)  (temp * 10)
+#define TEMP_FROM_REG(val) ((val)*10)
 
-#define TEMP_LIMIT_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
-
-#define TEMP_LIMIT_TO_REG(val) SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
-                                                      ((val)+5)/10),0,255)
-#if 0
-#define TEMP_FROM_REG(temp) \
-   ((temp)<256?((((temp)&0x1fe) >> 1) * 10)      + ((temp) & 1) * 5:  \
-               ((((temp)&0x1fe) >> 1) -255) * 10 - ((temp) & 1) * 5)  \
-
-#define TEMP_LIMIT_FROM_REG(val) (val)
-
-#define TEMP_LIMIT_TO_REG(val) SENSORS_LIMIT((val),0,255)
-#endif
-
-
-#define ALARMS_FROM_REG(val) (val)
+#define TEMP_LIMIT_TO_REG(val) SENSORS_LIMIT(((val)<0?(val)-5:\
+                                              (val)+5)/10,-128,127)
 
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==1?0:((val)==8?3:((val)==4?2:1)))
 
-/* For each registered LM87, we need to keep some data in memory. That
-   data is pointed to by LM87_list[NR]->data. The structure itself is
-   dynamically allocated, at the same time when a new LM87 client is
-   allocated. */
+/* For each registered LM87, we need to keep some data in memory. The
+   structure is dynamically allocated whenever a new LM87 client is
+   found. */
 struct lm87_data {
 	struct i2c_client client;
 	int sysctl_id;
@@ -218,9 +200,9 @@ struct lm87_data {
 	u8  fan2;		/* Register value */
 	u8  fan2_min;		/* Register value */
 	u8  fan2_div;		/* Register encoding, shifted right */
-	int ext2_temp;		/* Temp, shifted right */
-	int ext_temp;           /* Temp, shifted right */
-	int int_temp;		/* Temp, shifted right */
+	s8  ext2_temp;		/* Register value */
+	s8  ext_temp;		/* Register value */
+	s8  int_temp;		/* Register value */
 	u8  ext_temp_max;       /* Register value */
 	u8  ext_temp_min;       /* Register value */
 	u8  ext2_temp_max; 	/* Register value */
@@ -289,9 +271,9 @@ static struct i2c_driver LM87_driver = {
 #define LM87_SYSCTL_AIN2       1007
 #define LM87_SYSCTL_FAN1       1102
 #define LM87_SYSCTL_FAN2       1103
-#define LM87_SYSCTL_TEMP1  1250 /* Degrees Celcius * 100 */
-#define LM87_SYSCTL_TEMP2   1251 /* Degrees Celcius * 100 */
-#define LM87_SYSCTL_TEMP3   1252 /* Degrees Celcius * 100 */
+#define LM87_SYSCTL_TEMP1      1250 /* Degrees Celcius * 10 */
+#define LM87_SYSCTL_TEMP2      1251 /* Degrees Celcius * 10 */
+#define LM87_SYSCTL_TEMP3      1252 /* Degrees Celcius * 10 */
 #define LM87_SYSCTL_FAN_DIV    2000 /* 1, 2, 4 or 8 */
 #define LM87_SYSCTL_ALARMS     2001 /* bitvector */
 #define LM87_SYSCTL_ANALOG_OUT 2002
@@ -673,23 +655,20 @@ void lm87_in(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm87_update_client(client);
-		results[0] =
-		    ((long)data->in_min[nr] * scales[nr]) / 192;
-		results[1] =
-		    ((long)data->in_max[nr] * scales[nr]) / 192;
-		results[2] =
-		    ((long)data->in[nr] * scales[nr]) / 192;
+		results[0] = (data->in_min[nr] * scales[nr] + 96) / 192;
+		results[1] = (data->in_max[nr] * scales[nr] + 96) / 192;
+		results[2] = (data->in[nr] * scales[nr] + 96) / 192;
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->in_min[nr] =
-			    (results[0] * 192) / scales[nr];
+			data->in_min[nr] = (results[0] * 192 + scales[nr] / 2)
+					 / scales[nr];
 			lm87_write_value(client, LM87_REG_IN_MIN(nr),
 					    data->in_min[nr]);
 		}
 		if (*nrels_mag >= 2) {
-			data->in_max[nr] =
-			    (results[1] * 192) / scales[nr];
+			data->in_max[nr] = (results[1] * 192 + scales[nr] / 2)
+					 / scales[nr];
 			lm87_write_value(client, LM87_REG_IN_MAX(nr),
 					    data->in_max[nr]);
 		}
@@ -798,20 +777,20 @@ void lm87_temp(struct i2c_client *client, int operation, int ctl_name,
 	   /* find out which temp. is being requested */
 	   if (ctl_name == LM87_SYSCTL_TEMP3) 
 	   {
-		results[0] = TEMP_LIMIT_FROM_REG(data->ext2_temp_max);
-		results[1] = TEMP_LIMIT_FROM_REG(data->ext2_temp_min);
+		results[0] = TEMP_FROM_REG(data->ext2_temp_max);
+		results[1] = TEMP_FROM_REG(data->ext2_temp_min);
 		results[2] = TEMP_FROM_REG(data->ext2_temp);
 	   }
 	   else if(ctl_name == LM87_SYSCTL_TEMP2)
 	   {
-		results[0] = TEMP_LIMIT_FROM_REG(data->ext_temp_max);
-		results[1] = TEMP_LIMIT_FROM_REG(data->ext_temp_min);
+		results[0] = TEMP_FROM_REG(data->ext_temp_max);
+		results[1] = TEMP_FROM_REG(data->ext_temp_min);
 		results[2] = TEMP_FROM_REG(data->ext_temp);
 	   }
 	   else if(ctl_name == LM87_SYSCTL_TEMP1)
 	   {
-		results[0] = TEMP_LIMIT_FROM_REG(data->int_temp_max);
-		results[1] = TEMP_LIMIT_FROM_REG(data->int_temp_min);
+		results[0] = TEMP_FROM_REG(data->int_temp_max);
+		results[1] = TEMP_FROM_REG(data->int_temp_min);
 		results[2] = TEMP_FROM_REG(data->int_temp);
 	   }
 	   *nrels_mag = 3;
@@ -861,7 +840,7 @@ void lm87_alarms(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm87_update_client(client);
-		results[0] = ALARMS_FROM_REG(data->alarms);
+		results[0] = data->alarms;
 		*nrels_mag = 1;
 	}
 }
