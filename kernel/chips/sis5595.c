@@ -2,8 +2,9 @@
     sis5595.c - Part of lm_sensors, Linux kernel modules
                 for hardware monitoring
                 
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>,
-                        Kyösti Mälkki <kmalkki@cc.hut.fi> 
+    Copyright (c) 1998 - 2001 Frodo Looijaard <frodol@dds.nl>,
+                        Kyösti Mälkki <kmalkki@cc.hut.fi>, and
+			Mark D. Studebaker <mdsxyz123@yahoo.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +66,9 @@ SENSORS_INSMOD_1(sis5595);
 
 /* Length of ISA address segment */
 #define SIS5595_EXTENT 8
+/* PCI Config Registers */
 #define SIS5595_BASE_REG 0x68
+#define SIS5595_PIN_REG 0x7A
 #define SIS5595_ENABLE_REG 0x7B
 
 /* Where are the ISA address/data registers relative to the base address */
@@ -80,15 +83,17 @@ SENSORS_INSMOD_1(sis5595);
 #define SIS5595_REG_FAN_MIN(nr) (0x3a + (nr))
 #define SIS5595_REG_FAN(nr) (0x27 + (nr))
 
-#define SIS5595_REG_TEMP 0x27
-#define SIS5595_REG_TEMP_OVER 0x39
-#define SIS5595_REG_TEMP_HYST 0x3a
-
-#define SIS5595_REG_ALARM1 0x41
-
-#define SIS5595_REG_FANDIV 0x47
+/* TEMP pin is shared with IN4, configured in PCI register 0x7A. */
+/* The registers are the same as well. */
+/* OVER and HYST are really MAX and MIN. */
+#define SIS5595_REG_TEMP 	SIS5595_REG_IN(4)
+#define SIS5595_REG_TEMP_OVER	SIS5595_REG_IN_MAX(4)
+#define SIS5595_REG_TEMP_HYST	SIS5595_REG_IN_MIN(4)
 
 #define SIS5595_REG_CONFIG 0x40
+#define SIS5595_REG_ALARM1 0x41
+#define SIS5595_REG_ALARM2 0x42
+#define SIS5595_REG_FANDIV 0x47
 
 /* Conversions. Rounding and limit checking is only done on the TO_REG
    variants. Note that you should be a bit careful with which arguments
@@ -124,6 +129,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define SIS5595_INIT_IN_1 (((500)   * 100)/168)
 #define SIS5595_INIT_IN_2 330
 #define SIS5595_INIT_IN_3 250
+#define SIS5595_INIT_IN_4 250
 
 #define SIS5595_INIT_IN_PERCENTAGE 10
 
@@ -143,12 +149,16 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
         (SIS5595_INIT_IN_3 - SIS5595_INIT_IN_3 * SIS5595_INIT_IN_PERCENTAGE / 100)
 #define SIS5595_INIT_IN_MAX_3 \
         (SIS5595_INIT_IN_3 + SIS5595_INIT_IN_3 * SIS5595_INIT_IN_PERCENTAGE / 100)
+#define SIS5595_INIT_IN_MIN_4 \
+        (SIS5595_INIT_IN_4 - SIS5595_INIT_IN_4 * SIS5595_INIT_IN_PERCENTAGE / 100)
+#define SIS5595_INIT_IN_MAX_4 \
+        (SIS5595_INIT_IN_4 + SIS5595_INIT_IN_4 * SIS5595_INIT_IN_PERCENTAGE / 100)
 
 #define SIS5595_INIT_FAN_MIN_1 3000
 #define SIS5595_INIT_FAN_MIN_2 3000
 
 #define SIS5595_INIT_TEMP_OVER 600
-#define SIS5595_INIT_TEMP_HYST 500
+#define SIS5595_INIT_TEMP_HYST 100
 
 #ifdef MODULE
 extern int init_module(void);
@@ -170,6 +180,7 @@ struct sis5595_data {
 	struct semaphore update_lock;
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
+	char maxins;		/* == 3 if temp enabled, otherwise == 4 */
 
 	u8 in[4];		/* Register value */
 	u8 in_max[4];		/* Register value */
@@ -180,9 +191,10 @@ struct sis5595_data {
 	u8 temp_over;		/* Register value */
 	u8 temp_hyst;		/* Register value */
 	u8 fan_div[2];		/* Register encoding, shifted right */
-	u8 alarms;		/* Register encoding, combined */
+	u16 alarms;		/* Register encoding, combined */
 };
 
+static struct pci_dev *s_bridge;	/* pointer to the (only) sis5595 */
 
 #ifdef MODULE
 static
@@ -253,6 +265,8 @@ static ctl_table sis5595_dir_table_template[] = {
 	 &sensors_sysctl_real, NULL, &sis5595_in},
 	{SIS5595_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &sis5595_in},
+	{SIS5595_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &sis5595_in},
 	{SIS5595_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &sis5595_fan},
 	{SIS5595_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
@@ -275,7 +289,6 @@ int sis5595_attach_adapter(struct i2c_adapter *adapter)
 /* Locate SiS bridge and correct base address for SIS5595 */
 int sis5595_find_sis(int *address)
 {
-	struct pci_dev *s_bridge;
 	u16 val;
 	char c;
 
@@ -315,8 +328,9 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 	struct i2c_client *new_client;
 	struct sis5595_data *data;
 	int err = 0;
-	const char *type_name = "";
-	const char *client_name = "";
+	const char *type_name = "sis5595";
+	const char *client_name = "SIS5595 chip";
+	char val;
 
 	/* Make sure we are probing the ISA bus!!  */
 	if (!i2c_is_isa_adapter(adapter)) {
@@ -325,46 +339,16 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 		return 0;
 	}
 
-	if (check_region(address, SIS5595_EXTENT))
-		goto ERROR0;
-
-	/* If this is the address as indicated by the SIS5595 chipset, we don't
-	   do any futher probing */
-	if ((kind < 0) && (address == normal_isa[0]))
-		kind = 0;
-
-	/* Probe whether there is anything available on this address. */
-	if (kind < 0) {
-#define REALLY_SLOW_IO
-		/* We need the timeouts for at least some LM78-like chips. But only
-		   if we read 'undefined' registers. */
-		i = inb_p(address + 1);
-		if (inb_p(address + 2) != i)
-			goto ERROR0;
-		if (inb_p(address + 3) != i)
-			goto ERROR0;
-		if (inb_p(address + 7) != i)
-			goto ERROR0;
-#undef REALLY_SLOW_IO
-
-		/* Let's just hope nothing breaks here */
-		i = inb_p(address + 5) & 0x7f;
-		outb_p(~i & 0x7f, address + 5);
-		if ((inb_p(address + 5) & 0x7f) != (~i & 0x7f)) {
-			outb_p(i, address + 5);
-			return 0;
-		}
+	if (check_region(address, SIS5595_EXTENT)) {
+		printk("sis5595.o: region 0x%x already in use!\n",
+		       address);
+		return -ENODEV;
 	}
-
-	/* OK. For now, we presume we have a valid client. We now create the
-	   client structure, even though we cannot fill it completely yet.
-	   But it allows us to access sis5595_{read,write}_value. */
 
 	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
 				   sizeof(struct sis5595_data),
 				   GFP_KERNEL))) {
-		err = -ENOMEM;
-		goto ERROR0;
+		return -ENOMEM;
 	}
 
 	data = (struct sis5595_data *) (new_client + 1);
@@ -375,30 +359,16 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 	new_client->driver = &sis5595_driver;
 	new_client->flags = 0;
 
-	/* Now, we do the remaining detection. */
-
-	if (kind < 0) {
-		if (sis5595_read_value(new_client, SIS5595_REG_CONFIG) &
-		    0x80) goto ERROR1;
-	}
-
-	/* Determine the chip type. */
-	if (kind <= 0)
-		kind = sis5595;
-
-	if (kind == sis5595) {
-		type_name = "sis5595";
-		client_name = "SIS5595 chip";
-	} else {
-#ifdef DEBUG
-		printk("sis5595.o: Internal error: unknown kind (%d)?!?",
-		       kind);
-#endif
-		goto ERROR1;
-	}
-
 	/* Reserve the ISA region */
 	request_region(address, SIS5595_EXTENT, type_name);
+
+	pci_read_config_byte(s_bridge, SIS5595_PIN_REG, &val);
+	if(val & 0x80)
+		/* 3 voltages, 1 temp */
+		data->maxins = 3;
+	else
+		/* 4 voltages, no temps */
+		data->maxins = 4;
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
@@ -425,16 +395,11 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 	sis5595_init_client(new_client);
 	return 0;
 
-/* OK, this is not exactly good programming practice, usually. But it is
-   very code-efficient in this case. */
-
       ERROR4:
 	i2c_detach_client(new_client);
       ERROR3:
 	release_region(address, SIS5595_EXTENT);
-      ERROR1:
 	kfree(new_client);
-      ERROR0:
 	return err;
 }
 
@@ -463,7 +428,6 @@ int sis5595_command(struct i2c_client *client, unsigned int cmd, void *arg)
 	return 0;
 }
 
-/* Nothing here yet */
 void sis5595_inc_use(struct i2c_client *client)
 {
 #ifdef MODULE
@@ -471,7 +435,6 @@ void sis5595_inc_use(struct i2c_client *client)
 #endif
 }
 
-/* Nothing here yet */
 void sis5595_dec_use(struct i2c_client *client)
 {
 #ifdef MODULE
@@ -480,7 +443,7 @@ void sis5595_dec_use(struct i2c_client *client)
 }
 
 
-/* The SMBus locks itself, but ISA access must be locked explicitly! 
+/* ISA access must be locked explicitly.
    There are some ugly typecasts here, but the good news is - they should
    nowhere else be necessary! */
 int sis5595_read_value(struct i2c_client *client, u8 reg)
@@ -506,6 +469,8 @@ int sis5595_write_value(struct i2c_client *client, u8 reg, u8 value)
 /* Called when we have found a new SIS5595. It should set limits, etc. */
 void sis5595_init_client(struct i2c_client *client)
 {
+	struct sis5595_data *data = client->data;
+
 	/* Reset all except Watchdog values and last conversion values
 	   This sets fan-divs to 2, among others */
 	sis5595_write_value(client, SIS5595_REG_CONFIG, 0x80);
@@ -530,10 +495,17 @@ void sis5595_init_client(struct i2c_client *client)
 			    FAN_TO_REG(SIS5595_INIT_FAN_MIN_1, 2));
 	sis5595_write_value(client, SIS5595_REG_FAN_MIN(2),
 			    FAN_TO_REG(SIS5595_INIT_FAN_MIN_2, 2));
-	sis5595_write_value(client, SIS5595_REG_TEMP_OVER,
-			    TEMP_TO_REG(SIS5595_INIT_TEMP_OVER));
-	sis5595_write_value(client, SIS5595_REG_TEMP_HYST,
-			    TEMP_TO_REG(SIS5595_INIT_TEMP_HYST));
+	if(data->maxins == 4) {
+		sis5595_write_value(client, SIS5595_REG_IN_MIN(4),
+				    IN_TO_REG(SIS5595_INIT_IN_MIN_4));
+		sis5595_write_value(client, SIS5595_REG_IN_MAX(4),
+				    IN_TO_REG(SIS5595_INIT_IN_MAX_4));
+	} else {
+		sis5595_write_value(client, SIS5595_REG_TEMP_OVER,
+				    TEMP_TO_REG(SIS5595_INIT_TEMP_OVER));
+		sis5595_write_value(client, SIS5595_REG_TEMP_HYST,
+				    TEMP_TO_REG(SIS5595_INIT_TEMP_HYST));
+	}
 
 	/* Start monitoring */
 	sis5595_write_value(client, SIS5595_REG_CONFIG,
@@ -552,10 +524,7 @@ void sis5595_update_client(struct i2c_client *client)
 	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
 	    (jiffies < data->last_updated) || !data->valid) {
 
-#ifdef DEBUG
-		printk("Starting sis5595 update\n");
-#endif
-		for (i = 0; i <= 3; i++) {
+		for (i = 0; i <= data->maxins; i++) {
 			data->in[i] =
 			    sis5595_read_value(client, SIS5595_REG_IN(i));
 			data->in_min[i] =
@@ -572,16 +541,20 @@ void sis5595_update_client(struct i2c_client *client)
 			    sis5595_read_value(client,
 					       SIS5595_REG_FAN_MIN(i));
 		}
-		data->temp = sis5595_read_value(client, SIS5595_REG_TEMP);
-		data->temp_over =
-		    sis5595_read_value(client, SIS5595_REG_TEMP_OVER);
-		data->temp_hyst =
-		    sis5595_read_value(client, SIS5595_REG_TEMP_HYST);
+		if(data->maxins == 3) {
+			data->temp =
+			    sis5595_read_value(client, SIS5595_REG_TEMP);
+			data->temp_over =
+			    sis5595_read_value(client, SIS5595_REG_TEMP_OVER);
+			data->temp_hyst =
+			    sis5595_read_value(client, SIS5595_REG_TEMP_HYST);
+		}
 		i = sis5595_read_value(client, SIS5595_REG_FANDIV);
 		data->fan_div[0] = (i >> 4) & 0x03;
 		data->fan_div[1] = i >> 6;
 		data->alarms =
-		    sis5595_read_value(client, SIS5595_REG_ALARM1);
+		    sis5595_read_value(client, SIS5595_REG_ALARM1) |
+		    (sis5595_read_value(client, SIS5595_REG_ALARM2) << 8);
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -603,6 +576,8 @@ void sis5595_update_client(struct i2c_client *client)
    large enough (by checking the incoming value of *nrels). This is not very
    good practice, but as long as you put less than about 5 values in results,
    you can assume it is large enough. */
+
+/* Return 0 for in4 and disallow writes if pin used for temp */
 void sis5595_in(struct i2c_client *client, int operation, int ctl_name,
 		int *nrels_mag, long *results)
 {
@@ -612,21 +587,29 @@ void sis5595_in(struct i2c_client *client, int operation, int ctl_name,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		sis5595_update_client(client);
-		results[0] = IN_FROM_REG(data->in_min[nr]);
-		results[1] = IN_FROM_REG(data->in_max[nr]);
-		results[2] = IN_FROM_REG(data->in[nr]);
+		if(nr <= 3 || data->maxins == 4) {
+			sis5595_update_client(client);
+			results[0] = IN_FROM_REG(data->in_min[nr]);
+			results[1] = IN_FROM_REG(data->in_max[nr]);
+			results[2] = IN_FROM_REG(data->in[nr]);
+		} else {
+			results[0] = 0;
+			results[1] = 0;
+			results[2] = 0;
+		}
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		if (*nrels_mag >= 1) {
-			data->in_min[nr] = IN_TO_REG(results[0]);
-			sis5595_write_value(client, SIS5595_REG_IN_MIN(nr),
-					    data->in_min[nr]);
-		}
-		if (*nrels_mag >= 2) {
-			data->in_max[nr] = IN_TO_REG(results[1]);
-			sis5595_write_value(client, SIS5595_REG_IN_MAX(nr),
-					    data->in_max[nr]);
+		if(nr <= 3 || data->maxins == 4) {
+			if (*nrels_mag >= 1) {
+				data->in_min[nr] = IN_TO_REG(results[0]);
+				sis5595_write_value(client,
+				    SIS5595_REG_IN_MIN(nr), data->in_min[nr]);
+			}
+			if (*nrels_mag >= 2) {
+				data->in_max[nr] = IN_TO_REG(results[1]);
+				sis5595_write_value(client,
+				    SIS5595_REG_IN_MAX(nr), data->in_max[nr]);
+			}
 		}
 	}
 }
@@ -663,6 +646,7 @@ void sis5595_fan(struct i2c_client *client, int operation, int ctl_name,
 }
 
 
+/* Return 0 for temp and disallow writes if pin used for in4 */
 void sis5595_temp(struct i2c_client *client, int operation, int ctl_name,
 		  int *nrels_mag, long *results)
 {
@@ -670,21 +654,29 @@ void sis5595_temp(struct i2c_client *client, int operation, int ctl_name,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 1;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		sis5595_update_client(client);
-		results[0] = TEMP_FROM_REG(data->temp_over);
-		results[1] = TEMP_FROM_REG(data->temp_hyst);
-		results[2] = TEMP_FROM_REG(data->temp);
+		if(data->maxins == 3) {
+			sis5595_update_client(client);
+			results[0] = TEMP_FROM_REG(data->temp_over);
+			results[1] = TEMP_FROM_REG(data->temp_hyst);
+			results[2] = TEMP_FROM_REG(data->temp);
+		} else {
+			results[0] = 0;
+			results[1] = 0;
+			results[2] = 0;
+		}
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		if (*nrels_mag >= 1) {
-			data->temp_over = TEMP_TO_REG(results[0]);
-			sis5595_write_value(client, SIS5595_REG_TEMP_OVER,
-					    data->temp_over);
-		}
-		if (*nrels_mag >= 2) {
-			data->temp_hyst = TEMP_TO_REG(results[1]);
-			sis5595_write_value(client, SIS5595_REG_TEMP_HYST,
-					    data->temp_hyst);
+		if(data->maxins == 3) {
+			if (*nrels_mag >= 1) {
+				data->temp_over = TEMP_TO_REG(results[0]);
+				sis5595_write_value(client,
+				    SIS5595_REG_TEMP_OVER, data->temp_over);
+			}
+			if (*nrels_mag >= 2) {
+				data->temp_hyst = TEMP_TO_REG(results[1]);
+				sis5595_write_value(client,
+				    SIS5595_REG_TEMP_HYST, data->temp_hyst);
+			}
 		}
 	}
 }

@@ -32,7 +32,7 @@ ask CVS about it:
   File sensors.c: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
   Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
   Include file sensors.h: Most contents moved to i2c-proc.h in i2c package
-  Library: Fix/standardize some lm87 and mtp008 entries
+  Library: Fix/standardize some lm87 and mtp008 entries, add sis5595 in4
   Chip Modules (all ISA): Remove #include "i2c-isa.h"
   Module adm1021: Fix lm84 and gl523sm support
   Module i2c-i801: Chip detection cleanup
@@ -42,6 +42,7 @@ ask CVS about it:
   Module mtp008: Fix temp initializations;
                  Save BIOS pin configuration of temps and fans
   Module sensors: Disabled, moved to i2c package as i2c-proc.c
+  Module sis5595: Fix temp, add in4.
   Module via686a: Allow force=9191,address (for A7V/K7V boards)
   Module w83781d: Don't reinitialize as99127f chip; this may cause fan/temp
                   reading changes
