@@ -1,7 +1,7 @@
 Kernel driver `pc87360.o'
 =========================
 
-Status: Beta, somewhat tested.
+Status: Beta, PC87366 well tested, other chips untested.
 
 Supported chips:
   * National Semiconductor PC87360, PC87363, PC87364, PC87365 and PC87366
@@ -16,6 +16,7 @@ Supported chips:
 Authors: Jean Delvare <khali@linux-fr.org>
 
 Thanks to Sandeep Mehta, Tonko de Rooy and Daniel Ceregatti for testing.
+Thanks to Rudolf Marek for helping me investigate conversion issues.
 
 
 Module Parameters
@@ -41,6 +42,9 @@ hardware monitoring chipsets, not only controling and monitoring three fans,
 but also monitoring eleven voltage inputs and two (PC87365) or six
 (PC87366) remote temperatures.
 
+The driver assumes that no more than one chip is present, and the standard
+Super I/O address is used (0x2E/0x2F).
+
 
 Fan Monitoring
 --------------
@@ -51,8 +55,12 @@ A different alarm is triggered if the fan speed is too low to be measured.
 It is suggested to increase the fan divider (which is really a clock
 divider) in this case.
 
-Fan readings are affected by a programmable clock divider (1, 2, 4 or 8).
-By changing the divider, you give the readings more range or accuracy.
+Fan readings are affected by a programmable clock divider, giving the
+readings more range or accuracy. Usually, users have to learn how it works,
+but this driver implements dynamic clock divider selection, so you don't
+have to care no more.
+
+For reference, here are a few values about clock dividers:
 
                 slowest         accuracy        highest
                 measurable      around 3000     accurate
@@ -69,11 +77,12 @@ For the curious, here is how the values above were computed:
 The clock speed for the PC87360 family is 480 kHz. I arbitrarily chose 100
 RPM as the lowest acceptable accuracy.
 
-Note that not all RPM values can be represented. This is not only true for
-the measured speeds, but also for the programmable low limits, so don't be
-surprised if you try to set, say, fan1_min to 2900 and it finaly reads
-2909. Likewise, if you try to set fan1_min to 0, it'll be set to the
-lowest representable RPM value (depending on the divider).
+As mentioned above, you don't have to care about this no more.
+
+Note that not all RPM values can be represented, even when the best clock
+divider is selected. This is not only true for the measured speeds, but
+also for the programmable low limits, so don't be surprised if you try to
+set, say, fan1_min to 2900 and it finaly reads 2909.
 
 
 Fan Control
@@ -102,12 +111,11 @@ The first two temperature channels are external. The third one (PC87366
 only) is internal.
 
 The PC87366 has three additional temperature channels, based on
-thermistors (as opposed to thermal diodes for the first temperature
+thermistors (as opposed to thermal diodes for the first three temperature
 channels). For technical reasons, these channels are held by the VLM
 (voltage level monitor) logical device, not the TMS (temperature
-measurement) one. The formula to convert the measured voltage into a
-temperature isn't known, so the driver doesn't handle these temperature
-channels at all yet.
+measurement) one. As a consequence, these temperatures are exported as
+voltages, and converted into temperatures in user-space.
 
 
 Voltage Monitoring
@@ -121,7 +129,9 @@ well as the values of the resistors used for division is left to the
 motherboard manufacturers, so you will have to document yourself and edit
 sensors.conf accordingly. National Semiconductor has a document with
 recommended resistor values for some voltages, but this still leaves much
-room for per motherboard specificities, unfortunately.
+room for per motherboard specificities, unfortunately. Even worse,
+motherboard manufacturers don't seem to care about National Semiconductor's
+recommendations.
 
 Each voltage measured has associated low and high limit, each of which
 triggers an alarm when crossed.
@@ -148,9 +158,6 @@ sampling rate), so the effect is attenuated, but still present.
 
 Limitations
 -----------
-
-There are a few unimplemented configuration options at the moment. We'll
-add them if someone needs them.
 
 The datasheets suggests that some values (fan mins, fan dividers)
 shouldn't be changed once the monitoring has started, but we ignore that
