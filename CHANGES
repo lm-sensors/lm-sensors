@@ -18,35 +18,25 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.8.1 (2003????)
-  File sensors.conf.eg: Improved adm1035 section
+  NOTE: Requires i2c-2.8.1 or newer!
+  File sensors.conf.eg: Improved adm1025 section
+                        Default temp labels for as99127f
+  File doc/chips/SUMMARY: Add SMSC manufacturer ID
   File doc/chips/adm1025: Add decent documentation (almost new)
   File doc/chips/lm83: Known motherboards list update
   Library: Change adm1025 names (hyst/over become low/high)
            Swap adm1025 temp1 and temp2 to match the driver's order
            Advance version to 2.0.1
-  Modules (various): Fix includes for compilation on Alpha.
-  Module saa1064: New.
-  Program decode-dimms.pl: Add Direct Rambus (DRDRAM)
-                           Mark Rambus as unsupported
-  Program decode-edid.pl: New
-                          Interfaces between our eeprom module and
-                          parse-edid from the read-edid project
-  Program sensord: Add support for IT87 (Mike Black)
-                   Change ADM1025 support to match the changes made to
-                   the library
-  Program sensors: Rewrite and enhance EEPROM support
-                   Change ADM1025 support to match the changes made to
-                   the library
-				   Add DRDRAM support to print_eeprom
-  Program sensors-detect: Add support for PCF8574, PCF8574A, SAA1064;
-                          Add support for LM82, LM86, LM89;
-                          Improved W83781D family detection;
-                          Add support for AS19927F rev.2, ASB100 Bach
-                          Add support for Asus Mozart-2 (3 types)
-                          Add support for NE1619
+  Makefile: Move LINUX_HEADERS from ALL_CPPFLAGS to MODCPPFLAGS
+  Modules (various): Fix includes for compilation on Alpha
+                     Use the new i2c_delay function instead of the various
+                     do_pause functions
+  Module i2c-ali15x3: Fix resource leak (Daniele Bellucci)
+  Module i2c-nforce2: Cleanups
   Module i2c-sis630: Fix detection
                      Add block data read/write support
   Module i2c-sis645: Detection method change/bugfix
+  Module i2c-viapro: Prevent buffer overrun (Sergey Vlasov)
   Module adm1025: Major driver update
                   Add support for Philips NE1619
                   Simplify the driver a lot (unified voltages, unified
@@ -60,8 +50,35 @@ ask CVS about it:
                  Add half a dozen new features
                  Add checksum parameter (same as for the eeprom module)
                  Fix monitor limits
+  Module eeprom: Ignore Sony Vaio EEPROMs with a password set
+  Module lm78: Fix a fan_div/fan_lin bug
+  Module saa1064: New
   Module w83781d: Enhance chip detection
-  
+  Program decode-dimms.pl: Add Direct Rambus (DRDRAM)
+                           Mark Rambus as unsupported
+  Program decode-edid.pl: New
+                          Interfaces between our eeprom module and
+                          parse-edid from the read-edid project
+  Program sensord: Add support for IT87 (Mike Black)
+                   Change ADM1025 support to match the changes made to
+                   the library
+  Program sensors: Rewrite and enhance EEPROM support
+                   Change ADM1025 support to match the changes made to
+                   the library
+                   Add DRDRAM support to print_eeprom
+                   Exit(1) on /proc write failure (Malte Starostik)
+  Program sensors-detect: Add support for PCF8574, PCF8574A, SAA1064
+                          Add support for LM82, LM86, LM89
+                          Improved W83781D family detection
+                          Add support for AS19927F rev.2, ASB100 Bach
+                          Add support for Asus Mozart-2 (3 types)
+                          Add support for NE1619
+                          Make sure /sbin is in the user's path
+                          Fix EEPROM detection
+                          Automatic module.conf and /dev/i2c* detection
+                          Improve LM82 and LM83 detection
+                          Handle "to-be-written" cleanly
+                          
 
 
 2.8.0 (20030714)
