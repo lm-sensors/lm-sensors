@@ -23,3 +23,7 @@ it will try to enable it. THIS IS VERY DANGEROUS! If the BIOS did not
 set up a correct address for this module, you could get in big trouble
 (read: crashes, data corruption, etc.). Try this only as a last resort
 (try BIOS updates first, for example), and backup first!
+
+The PIIX4E is just an new version of the PIIX4; it is supported as well. The
+PIIX/PIIX3 does not implement an SMBus or I2C bus, so you can't use this
+driver on those mainboards.
