@@ -202,7 +202,7 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 	}
 
 	data = (struct eeprom_data *) (new_client + 1);
-	memset(data, 0xff, EEPROM_SIZE);
+	memset(data->data, 0xff, EEPROM_SIZE);
 	new_client->addr = address;
 	new_client->data = data;
 	new_client->adapter = adapter;
