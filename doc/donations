@@ -1,0 +1,27 @@
+The lm_sensors team gratefully acknowledges the following donations.
+
+Drivers are very difficult to develop without actual hardware.
+Generally, the work goes quickly once we have the hardware.
+
+If you would like to make a donation, please contact us at
+sensors@stimpy.netroedge.com.
+
+
+
+
+Donation from	Donation and subsequent development work	Approx. date
+-------------	----------------------------------------	------------
+AMD		various sensor evaluation boards		2000
+		Drivers developed: various
+
+TI		i810 motherboard w/ 366 Celeron			7/99	
+		Drivers developed: i801, i810, w83627hf
+
+SiS		SiS 540/630 motherboard w/ 5595			1/00	
+		Drivers developed: sis5595 improvements
+
+Cendio Systems 	Asus P3B-F w/ as99127f				5/00
+		Drivers developed: as99127f improvements
+
+Atipa		SuperMicro370DLE w/ Serverworks, LM87		9/00
+		Drivers developed: awaiting Serverworks datasheet
