@@ -22,6 +22,8 @@
 
 /*
    Changes:
+   18.09.2002
+	Added SIS730 as supported
    24.08.2002
    	Fixed the typo in sis630_access (Thanks to Mark M. Hoffman)
 	Changed sis630_transaction. Now it's 2x faster (Thanks to Mark M. Hoffman)
