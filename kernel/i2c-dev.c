@@ -349,7 +349,7 @@ int i2cdev_open (struct inode *inode, struct file *file)
   unsigned int minor = MINOR(inode->i_rdev);
   struct i2c_client *client;
 
-  if (! i2cdev_clients[minor]) {
+  if ((minor >= I2CDEV_CLIENTS_MAX) || ! (i2cdev_clients[minor])) {
 #ifdef DEBUG
     printk("i2c-dev.o: Trying to open unattached adapter i2c-%d\n",minor);
 #endif
