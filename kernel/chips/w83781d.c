@@ -27,6 +27,7 @@
     w83781d	7	3	0	3	0x10	yes	yes
     w83782d	9	3	2-4	3	0x30	yes	yes
     w83783s	5-6	3	2	1-2	0x40	yes	no
+    w83782d	9	3	2-4	3	0x20	yes	yes (LPC)
 
 */
 
@@ -61,7 +62,7 @@ static unsigned int normal_isa[] = {0x0290,SENSORS_ISA_END};
 static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
 
 /* Insmod parameters */
-SENSORS_INSMOD_3(w83781d,w83782d,w83783s);
+SENSORS_INSMOD_4(w83781d,w83782d,w83783s,w83627hf);
 
 /* Many W83781D constants specified below */
 
@@ -735,6 +736,8 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
       kind = w83782d;
     else if (val1 == 0x40)
       kind = w83783s;
+    else if (val1 == 0x20)
+      kind = w83627hf;
     else {
       if (kind == 0) 
         printk("w83781d.o: Ignoring 'force' parameter for unknown chip at"
@@ -752,6 +755,9 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
   } else if (kind == w83783s) {
     type_name = "w83783s";
     client_name = "W83783S chip";
+  } else if (kind == w83627hf) {
+    type_name = "w83627hf";
+    client_name = "W83627HF chip";
   } else {
 #ifdef DEBUG
     printk("w83781d.o: Internal error: unknown kind (%d)?!?",kind);
