@@ -3355,7 +3355,7 @@ void print_lm92 (const sensors_chip_name *name)
 		!sensors_get_feature (*name,SENSORS_LM92_TEMP_HYST,temp + 4)) {
 		if (valid) {
 			print_label (label,10);
-			print_temp_info (temp[0],temp[1],temp[2],temp[3],temp[4]);
+			lm92_print_temp (temp[0],temp[1],temp[2],temp[3],temp[4]);
 			if (alarms) {
 				printf (" ALARMS (");
 
