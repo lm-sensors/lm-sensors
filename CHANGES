@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.8.5 (2004030X)
+2.8.5 (20040305)
   File doc/chips/SUMMARY: Update
   File etc/sensors.conf.eg: Epox 8K3A tweaks. (Kronos)
   Makefiles hotplug and rrd: Remove -o and -g arguments to install
