@@ -40,6 +40,7 @@
 #  -f, --format            print nice html output
 #  -b, --bodyonly          don't printhtml header
 #                          (useful for postprocessing the output)
+#  -c, --checksum          decode completely even if checksum fails
 #  -h, --help              display this usage summary
 #
 # References: 
