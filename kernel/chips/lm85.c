@@ -114,6 +114,7 @@ SENSORS_INSMOD_5(lm85b, lm85c, adm1027, adt7463, emc6d100);
 #define LM85_VERSTEP_LM85B 0x62
 #define LM85_VERSTEP_ADM1027 0x60
 #define LM85_VERSTEP_ADT7463 0x62
+#define LM85_VERSTEP_ADT7463C 0x6A
 #define LM85_VERSTEP_EMC6D100_A0 0x60
 #define LM85_VERSTEP_EMC6D100_A1 0x61
 
@@ -781,11 +782,18 @@ int lm85_detect(struct i2c_adapter *adapter, int address,
 			    " Defaulting to Generic LM85.\n", verstep );
 			kind = any_chip ;
 		} else if( company == LM85_COMPANY_ANALOG_DEV
+		    && verstep == LM85_VERSTEP_ADM1027 ) {
+			kind = adm1027 ;
+		} else if( company == LM85_COMPANY_ANALOG_DEV
+		    && (verstep == LM85_VERSTEP_ADT7463
+			 || verstep == LM85_VERSTEP_ADT7463C) ) {
+			kind = adt7463 ;
+		} else if( company == LM85_COMPANY_ANALOG_DEV
 		    && (verstep & LM85_VERSTEP_VMASK) == LM85_VERSTEP_GENERIC) {
-			if (verstep >= LM85_VERSTEP_ADT7463)
-				kind = adt7463;
-			else
-				kind = adm1027;
+			printk("lm85: Detected Analog Devices chip\n");
+			printk("lm85: Unrecgonized version/stepping 0x%02x"
+			    " Defaulting to Generic LM85.\n", verstep );
+			kind = any_chip ;
 		} else if( company == LM85_COMPANY_SMSC
 		    && (verstep == LM85_VERSTEP_EMC6D100_A0
 			 || verstep == LM85_VERSTEP_EMC6D100_A1) ) {
