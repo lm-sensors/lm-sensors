@@ -19,7 +19,8 @@ ask CVS about it:
 
 2.6.2 (2001????)
   Module via686a: Make limit initializations reliable
-  Program sensors-detect: Add ALI1535 detection
+  Program sensors-detect: Add ALI1535 detection,
+                          add Via VT8233 detection (no driver yet)
 
 2.6.1 (20010830)
   File BUGS: Updated
