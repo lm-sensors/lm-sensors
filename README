@@ -18,14 +18,13 @@ WARNING! If you downloaded this package through our CVS archive, you walk
 the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
 
-WARNING! You also need the i2c package OR i2c support in your kernel.
-Even if your kernel does contain i2c support,
-you may need to patch your kernel with an updated i2c package,
+WARNING! You also need the latest i2c package,
+EVEN IF your kernel does contain i2c support!!!!!!!!!,
 unless i2c came bundled with lm_sensors.
 
 Kernels 2.3.34 and later, and all 2.4.x kernels, contain the
-new I2C package; however, you may still need to download and install
-the latest I2C version if lm_sensors does not compile.
+I2C package; however, you will still need to download and install
+the latest I2C version if you want lm_sensors to compile.
 
 See the lm_sensors download page for guidance:
   http://www.netroedge.com/~lm78/download.html
@@ -126,7 +125,7 @@ The latest version of this package can always be found on our homepage:
 http://www.netroedge.com/~lm78. Pre-release versions can be retrieved
 through anonymous CVS; see doc/cvs for more information.
 
-This whole package is copyright (c) 1998 - 2001 by Frodo Looijaard and 
+This whole package is copyright (c) 1998 - 2001 by Frodo Looijaard and
 Philip Edelbrock, except for a few drivers written by
 other people. See the individual files for more exact copyright information.  
 This package may be distributed according to the GNU General Public License 
