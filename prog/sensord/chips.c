@@ -958,6 +958,51 @@ static const ChipDescriptor maxilife_chip = {
   maxilife_names, maxilife_features, SENSORS_MAXI_CG_ALARMS, 0
 };
 
+/** ASB100 **/
+
+static const char *asb100_names[] = {
+        SENSORS_ASB100_PREFIX, NULL
+};
+
+static const FeatureDescriptor asb100_features[] = {
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_ASB100_IN0, SENSORS_ASB100_IN0_MIN, SENSORS_ASB100_IN0_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_ASB100_IN1, SENSORS_ASB100_IN1_MIN, SENSORS_ASB100_IN1_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_ASB100_IN2, SENSORS_ASB100_IN2_MIN, SENSORS_ASB100_IN2_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_ASB100_IN3, SENSORS_ASB100_IN3_MIN, SENSORS_ASB100_IN3_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_ASB100_IN4, SENSORS_ASB100_IN4_MIN, SENSORS_ASB100_IN4_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_ASB100_IN5, SENSORS_ASB100_IN5_MIN, SENSORS_ASB100_IN5_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_ASB100_IN6, SENSORS_ASB100_IN6_MIN, SENSORS_ASB100_IN6_MAX, -1 } },
+
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_ASB100_FAN1, SENSORS_ASB100_FAN1_MIN, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_ASB100_FAN2, SENSORS_ASB100_FAN2_MIN, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_ASB100_FAN3, SENSORS_ASB100_FAN3_MIN, -1 } },
+
+  { fmtTemps_1_0, rrdF1, DataType_temperature, 0, 0,
+    { SENSORS_ASB100_TEMP1, SENSORS_ASB100_TEMP1_HYST, SENSORS_ASB100_TEMP1_OVER, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, 0, 0,
+    { SENSORS_ASB100_TEMP2, SENSORS_ASB100_TEMP2_HYST, SENSORS_ASB100_TEMP2_OVER, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, 0, 0,
+    { SENSORS_ASB100_TEMP3, SENSORS_ASB100_TEMP3_HYST, SENSORS_ASB100_TEMP3_OVER, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, 0, 0,
+    { SENSORS_ASB100_TEMP4, SENSORS_ASB100_TEMP4_HYST, SENSORS_ASB100_TEMP4_OVER, -1 } },
+
+  { NULL }
+};
+
+static const ChipDescriptor asb100_chip = {
+  asb100_names, asb100_features, 0, 0
+};
+
 /** EEPROM **/
 
 static const char *
@@ -1026,5 +1071,6 @@ const ChipDescriptor * const knownChips[] = {
   &w83783s_chip,
   &w83697hf_chip,
   &it87_chip,
+  &asb100_chip,
   NULL
 };
