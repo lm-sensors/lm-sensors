@@ -46,7 +46,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-MODULE_LICENSE("GPL");
+#define DRV_NAME "i2c-sis645"
 
 /* PCI identifiers */
 
@@ -89,7 +89,7 @@ MODULE_LICENSE("GPL");
 #define PCI_DEVICE_ID_SI_SMBUS 0x16
 
 /* base address register in PCI config space */
-#define BASE_IO_REG 0x04
+#define SIS645_BAR 0x04
 
 /* SiS645 SMBus registers */
 #define SMB_STS      0x00
@@ -120,14 +120,10 @@ MODULE_LICENSE("GPL");
 #define SIS645_PROC_CALL  0x04
 #define SIS645_BLOCK_DATA 0x05
 
-static int sis645_enable_smbus(struct pci_dev *dev);
-static int sis645_build_dev(struct pci_dev **smbus_dev,
-			    struct pci_dev *bridge_dev);
-
 static void sis645_do_pause(unsigned int amount);
 static int sis645_transaction(int size);
 
-
+static struct i2c_adapter sis645_adapter;
 
 static unsigned short sis645_smbus_base = 0;
 
@@ -145,14 +141,14 @@ static void sis645_write(u8 reg, u8 data)
 
 /* Turns on SMBus device if it is not; return 0 iff successful
  */
-static int sis645_enable_smbus(struct pci_dev *dev)
+static int __devinit sis645_enable_smbus(struct pci_dev *dev)
 {
 	u8 val = 0;
 
 	pci_read_config_byte(dev, 0x77, &val);
 
 #ifdef DEBUG
-	printk("i2c-sis645.o: Config byte was 0x%02x.\n", val);
+	printk(KERN_DEBUG DRV_NAME ": Config byte was 0x%02x.\n", val);
 #endif
 
 	pci_write_config_byte(dev, 0x77, val & ~0x10);
@@ -161,7 +157,7 @@ static int sis645_enable_smbus(struct pci_dev *dev)
 
 	if (val & 0x10) {
 #ifdef DEBUG
-		printk("i2c-sis645.o: Error: Config byte stuck!\n");
+		printk(KERN_DEBUG DRV_NAME ": Config byte stuck!\n");
 #endif
 		return -1;
 	}
@@ -171,7 +167,7 @@ static int sis645_enable_smbus(struct pci_dev *dev)
 
 /* Builds the basic pci_dev for SiS645 SMBus
  */
-static int sis645_build_dev(struct pci_dev **smbus_dev,
+static int __devinit sis645_build_dev(struct pci_dev **smbus_dev,
 			    struct pci_dev *bridge_dev)
 {
 	struct pci_dev temp_dev;
@@ -190,14 +186,14 @@ static int sis645_build_dev(struct pci_dev **smbus_dev,
 	/* query to make sure */
 	ret = pci_read_config_word(&temp_dev, PCI_VENDOR_ID, &vid);
 	if (ret || PCI_VENDOR_ID_SI != vid) {
-		printk("i2c-sis645.o: Couldn't find SMBus device!\n");
+		printk(KERN_ERR DRV_NAME ": Couldn't find SMBus device!\n");
 		return ret;
 	}
 	temp_dev.vendor = vid;
 
 	ret = pci_read_config_word(&temp_dev, PCI_DEVICE_ID, &did);
 	if (ret || PCI_DEVICE_ID_SI_SMBUS != did) {
-		printk("i2c-sis645.o: Couldn't find SMBus device!\n");
+		printk(KERN_ERR DRV_NAME ": Couldn't find SMBus device!\n");
 		return ret;
 	}
 	temp_dev.device = did;
@@ -205,7 +201,7 @@ static int sis645_build_dev(struct pci_dev **smbus_dev,
 	/* ok, we've got it... request some memory and finish it off */
 	*smbus_dev = kmalloc(sizeof(**smbus_dev), GFP_ATOMIC);
 	if (NULL == *smbus_dev) {
-		printk("i2c-sis645.o: Error: Out of memory!\n");
+		printk(KERN_ERR DRV_NAME ": Out of memory!\n");
 		return -ENOMEM;
 	}
 
@@ -213,7 +209,7 @@ static int sis645_build_dev(struct pci_dev **smbus_dev,
 	
 	ret = pci_setup_device(*smbus_dev);
 	if (ret) {
-		printk("i2c-sis645.o: pci_setup_device failed (0x%08x)\n",ret);
+		printk(KERN_ERR DRV_NAME ": pci_setup_device failed (0x%08x)\n",ret);
 	}
 	return ret;
 }
@@ -222,31 +218,28 @@ static int sis645_build_dev(struct pci_dev **smbus_dev,
 
 /* Detect whether a SiS645 can be found, and initialize it, where necessary.
  */
-static int sis645_setup(void)
+static int __devinit sis645_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
-	struct pci_dev *SIS645_ISA_dev;
 	struct pci_dev *SIS645_SMBUS_dev;
 	int ret;
 	u16 ww = 0;
 
-	if (pci_present() == 0) {
-		printk("i2c-sis645.o: Error: No PCI-bus found!\n");
-		return -ENODEV;
+	if (sis645_smbus_base) {
+		printk(KERN_ERR DRV_NAME ": Only one device supported.\n");
+		return -EBUSY;
 	}
 
-	if (SIS645_ISA_dev = pci_find_device(PCI_VENDOR_ID_SI,
-			PCI_DEVICE_ID_SI_961, NULL)) {
-		printk("i2c-sis645.o: Found SiS961 south bridge.\n");
-	}
+	switch (dev->device) {
+	case PCI_DEVICE_ID_SI_961:
+		printk(KERN_INFO DRV_NAME ": Found SiS961 south bridge.\n");
+		break;
 
-	else if (SIS645_ISA_dev = pci_find_device(PCI_VENDOR_ID_SI,
-			PCI_DEVICE_ID_SI_962, NULL)) {
-		printk("i2c-sis645.o: Found SiS962 [MuTIOL Media IO].\n");
-        }
+	case PCI_DEVICE_ID_SI_962:
+		printk(KERN_INFO DRV_NAME ": Found SiS962 [MuTIOL Media IO].\n");
+        	break;
 
-	else if (SIS645_ISA_dev = pci_find_device(PCI_VENDOR_ID_SI,
-			PCI_DEVICE_ID_SI_503, NULL)) {
-		printk("i2c-sis645.o: Found SiS south bridge in compatability mode(?)\n");
+	case PCI_DEVICE_ID_SI_503:
+		printk(KERN_INFO DRV_NAME ": Found SiS south bridge in compatability mode(?)\n");
 
 		/* look for known compatible north bridges */
 		if ((NULL == pci_find_device(PCI_VENDOR_ID_SI, 
@@ -259,38 +252,38 @@ static int sis645_setup(void)
 				PCI_DEVICE_ID_SI_650, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
 				PCI_DEVICE_ID_SI_735, NULL))) {
-			printk("i2c-sis645.o: Error: Can't find suitable host bridge!\n");
+			printk(KERN_ERR DRV_NAME ": Can't find suitable host bridge!\n");
 			return -ENODEV;
 		}
-	}
+		break ;
 
-	else {
-		printk("i2c-sis645.o: Error: Can't find suitable south bridge!\n");
+	default:
+		printk(KERN_ERR DRV_NAME ": Can't find suitable south bridge!\n");
 		return -ENODEV;
 	}
 
 	if (!(SIS645_SMBUS_dev = pci_find_device(PCI_VENDOR_ID_SI,
 			PCI_DEVICE_ID_SI_SMBUS, NULL))) {
 
-		printk("i2c-sis645.o: "
+		printk(KERN_INFO DRV_NAME ": "
 			"Attempting to enable SiS645 SMBus device\n");
 
 #ifndef CONFIG_HOTPLUG
-		printk("i2c-sis645.o: "
+		printk(KERN_INFO DRV_NAME ": "
 			"Requires kernel >= 2.4 with CONFIG_HOTPLUG, sorry!\n");
 		return -ENODEV;
 
 #else /* CONFIG_HOTPLUG */
-		if (ret = sis645_enable_smbus(SIS645_ISA_dev)) {
+		if (ret = sis645_enable_smbus(dev)) {
 			return ret;
 		}
 
-		if (ret = sis645_build_dev(&SIS645_SMBUS_dev, SIS645_ISA_dev)) {
+		if (ret = sis645_build_dev(&SIS645_SMBUS_dev, dev)) {
 			return ret;
 		}
 
 		if (ret = pci_enable_device(SIS645_SMBUS_dev)) {
-			printk("i2c-sis645.o: Can't pci_enable SMBus device!"
+			printk(KERN_ERR DRV_NAME ": Can't pci_enable SMBus device!"
 				" (0x%08x)\n", ret);
 			return ret;
 		}
@@ -303,29 +296,30 @@ static int sis645_setup(void)
 
 	pci_read_config_word(SIS645_SMBUS_dev, PCI_CLASS_DEVICE, &ww);
 	if (PCI_CLASS_SERIAL_SMBUS != ww) {
-		printk("i2c-sis645.o: Error: Unsupported device class 0x%04x!\n", ww);
+		printk(KERN_ERR DRV_NAME ": Unsupported device class 0x%04x!\n", ww);
 		return -ENODEV;
 	}
 
 	/* get the IO base address */
-	sis645_smbus_base = SIS645_SMBUS_dev->resource[BASE_IO_REG].start;
+	sis645_smbus_base = pci_resource_start(SIS645_SMBUS_dev, SIS645_BAR);
 	if (!sis645_smbus_base) {
-		printk("i2c-sis645.o: SiS645 SMBus base address not initialized!\n");
+		printk(KERN_ERR DRV_NAME ": SiS645 SMBus base address not initialized!\n");
 		return -EINVAL;
 	}
-	printk("i2c-sis645.o: SiS645 SMBus base address: 0x%04x\n", sis645_smbus_base);
+	printk(KERN_INFO DRV_NAME ": SiS645 SMBus base address: 0x%04x\n", sis645_smbus_base);
 
 	/* Everything is happy, let's grab the memory and set things up. */
 	if (!request_region(sis645_smbus_base, SIS645_SMB_IOREGION, "sis645-smbus")) {
-		printk
-		    ("i2c-sis645.o: SMBus registers 0x%04x-0x%04x already in use!\n",
+		printk(KERN_ERR DRV_NAME ": SMBus registers 0x%04x-0x%04x already in use!\n",
 		     sis645_smbus_base, sis645_smbus_base + SIS645_SMB_IOREGION - 1);
 		return -EINVAL;
 	}
 
+	sprintf(sis645_adapter.name, "SMBus SiS645 adapter at 0x%04x", sis645_smbus_base);
+	i2c_add_adapter(&sis645_adapter);
+
 	return(0);
 }
-
 
 /* Internally used pause function */
 static void sis645_do_pause(unsigned int amount)
@@ -346,7 +340,7 @@ static int sis645_transaction(int size)
 	/* Make sure the SMBus host is ready to start transmitting */
 	if (((temp = sis645_read(SMB_CNT)) & 0x03) != 0x00) {
 #ifdef DEBUG
-		printk("i2c-sis645.o: SMBus busy (0x%02x). Resetting...\n",
+		printk(KERN_DEBUG DRV_NAME ": SMBus busy (0x%02x). Resetting...\n",
 				temp);
 #endif
 
@@ -356,12 +350,12 @@ static int sis645_transaction(int size)
 		/* check it again */
 		if (((temp = sis645_read(SMB_CNT)) & 0x03) != 0x00) {
 #ifdef DEBUG
-			printk("i2c-sis645.o: Failed! (0x%02x)\n", temp);
+			printk(KERN_DEBUG DRV_NAME ": Failed! (0x%02x)\n", temp);
 #endif
 			return -1;
 		} else {
 #ifdef DEBUG
-			printk("i2c-sis645.o: Successful!\n");
+			printk(KERN_DEBUG DRV_NAME ": Successful!\n");
 #endif
 		}
 	}
@@ -384,14 +378,14 @@ static int sis645_transaction(int size)
 
 	/* If the SMBus is still busy, we give up */
 	if (timeout >= MAX_TIMEOUT) {
-		printk("i2c-sis645.o: SMBus Timeout! (0x%02x)\n",temp);
+		printk(KERN_DEBUG DRV_NAME ": SMBus Timeout! (0x%02x)\n",temp);
 		result = -1;
 	}
 
 	/* device error - probably missing ACK */
 	if (temp & 0x02) {
 #ifdef DEBUG
-		printk("i2c-sis645.o: Error: Failed bus transaction!\n");
+		printk(KERN_DEBUG DRV_NAME ": Failed bus transaction!\n");
 #endif
 		result = -1;
 	}
@@ -399,7 +393,7 @@ static int sis645_transaction(int size)
 	/* bus collision */
 	if (temp & 0x04) {
 #ifdef DEBUG
-		printk("i2c-sis645.o: Error: Bus collision!\n");
+		printk(KERN_DEBUG DRV_NAME ": Bus collision!\n");
 #endif
 		result = -1;
 	}
@@ -408,7 +402,7 @@ static int sis645_transaction(int size)
 	sis645_write(SMB_STS, temp);
 	if (temp = sis645_read(SMB_STS)) {
 #ifdef DEBUG
-		printk("i2c-sis645.o: Failed reset at end of transaction!"
+		printk(KERN_DEBUG DRV_NAME ": Failed reset at end of transaction!"
 				" (0x%02x)\n", temp);
 #endif
 	}
@@ -456,12 +450,12 @@ s32 sis645_access(struct i2c_adapter * adap, u16 addr,
 
 	case I2C_SMBUS_BLOCK_DATA:
 		/* TO DO: */
-		printk("sis645.o: SMBus block not implemented!\n");
+		printk(KERN_INFO DRV_NAME ": SMBus block not implemented!\n");
 		return -1;
 		break;
 
 	default:
-		printk("sis645.o: unsupported I2C size\n");
+		printk(KERN_INFO DRV_NAME ": Unsupported I2C size\n");
 		return -1;
 		break;
 	}
@@ -522,19 +516,6 @@ static struct pci_device_id sis645_ids[] __devinitdata = {
 	{ 0, }
 };
 
-static int __devinit sis645_probe(struct pci_dev *dev, const struct pci_device_id *id)
-{
-
-	if (sis645_setup()) {
-		printk ("i2c-sis645.o: SiS645 not detected, module not inserted.\n");
-
-		return -ENODEV;
-	}
-	
-	sprintf(sis645_adapter.name, "SMBus SiS645 adapter at 0x%04x", sis645_smbus_base);
-	i2c_add_adapter(&sis645_adapter);
-}
-
 static void __devexit sis645_remove(struct pci_dev *dev)
 {
 	i2c_del_adapter(&sis645_adapter);
@@ -550,7 +531,7 @@ static struct pci_driver sis645_driver = {
 
 static int __init i2c_sis645_init(void)
 {
-	printk("i2c-sis645.o: version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk(KERN_INFO DRV_NAME ".o version %s (%s)\n", LM_VERSION, LM_DATE);
 	return pci_module_init(&sis645_driver);
 }
 
@@ -565,6 +546,7 @@ static void __exit i2c_sis645_exit(void)
 
 MODULE_AUTHOR("Mark M. Hoffman <mhoffman@lightlink.com>");
 MODULE_DESCRIPTION("SiS645 SMBus driver");
+MODULE_LICENSE("GPL");
 
 /* Register initialization functions using helper macros */
 module_init(i2c_sis645_init);
