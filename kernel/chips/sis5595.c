@@ -478,7 +478,6 @@ int sis5595_read_value(struct i2c_client *client, u8 reg)
 {
     int res;
     
-    down((struct semaphore *) (client->data));
     down(& (((struct sis5595_data *) (client->data)) -> lock));
     outb_p(reg,client->addr + SIS5595_ADDR_REG_OFFSET);
     res = inb_p(client->addr + SIS5595_DATA_REG_OFFSET);
