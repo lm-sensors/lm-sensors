@@ -31,6 +31,7 @@
 #include "version.h"
 
 
+static u32 i2c_ipmi_func(struct i2c_adapter *adapter);
 static int bmcclient_i2c_send_message(struct i2c_adapter *, char *, int);
 
 /* I2C Data */

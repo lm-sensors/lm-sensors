@@ -31,6 +31,7 @@
 #include "version.h"
 
 
+static u32 i2c_ipmb_func(struct i2c_adapter *adapter);
 int ipmb_access(struct i2c_adapter *adap,struct i2c_msg msgs[], 
 	                   int num);
 
