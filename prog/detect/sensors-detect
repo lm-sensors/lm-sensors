@@ -771,7 +771,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             fscscy_detect pcf8591_detect arp_detect ipmi_kcs_detect
             ipmi_smic_detect via8231_isa_detect lm85_detect smartbatt_detect
             adm1026_detect w83l785ts_detect lm83_detect lm90_detect
-            saa1064_detect w83l784r_detect);
+            saa1064_detect w83l784r_detect mozart_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -922,6 +922,24 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "w83781d",
        i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { w83781d_detect 6, @_},
+     } ,
+     {
+       name => "Asus ASM58 Mozart-2",
+       driver => "to-be-written",
+       i2c_addrs => [0x77],
+       i2c_detect => sub { mozart_detect 0, @_},
+     } ,
+     {
+       name => "Asus AS2K129R Mozart-2",
+       driver => "to-be-written",
+       i2c_addrs => [0x77],
+       i2c_detect => sub { mozart_detect 1, @_},
+     } ,
+     {
+       name => "Asus Mozart-2",
+       driver => "to-be-written",
+       i2c_addrs => [0x77],
+       i2c_detect => sub { mozart_detect 2, @_},
      } ,
      {
        name => "Winbond W83L784R/AR",
@@ -2541,7 +2559,7 @@ sub lm87_detect
 #   0x4a: I2C addresses of emulated LM75 chips
 #   0x4e: Vendor ID byte selection, and bank selection
 #   0x4f: Vendor ID
-#   0x58: Device ID (only when in bank 0); ignore LSB.
+#   0x58: Device ID (only when in bank 0)
 # Note: Fails if the W8378xD is not in bank 0!
 # Note: Detection overrules a previous LM78 detection
 # Note: Asus chips do not have their I2C address at register 0x48?
@@ -2584,6 +2602,32 @@ sub w83781d_detect
   push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08 ;
   push @res, (($reg1 & 0x70) >> 4) + 0x48 unless ($reg1 & 0x80 or $chip == 2);
   return @res;
+}
+
+# $_[0]: Chip to detect (0 = ASM58, 1 = AS2K129R, 2 = ???)
+# $_[1]: A reference to the file descriptor to access this chip
+# $_[2]: Address (unused)
+# Returns: undef if not detected, 5 if detected
+# Registers used:
+#   0x4e: Vendor ID high byte
+#   0x4f: Vendor ID low byte
+#   0x58: Device ID
+# Note: The values were given by Alex van Kaam, we don't have datasheets
+#       to confirm.
+sub mozart_detect
+{
+  my ($vid,$dev);
+  my ($chip,$file,$addr) = @_;
+
+  $vid = (i2c_smbus_read_byte_data($file,0x4e) << 8)
+       +  i2c_smbus_read_byte_data($file,0x4f);
+  $dev = i2c_smbus_read_byte_data($file,0x58);
+
+  return if ($chip == 0) and ($dev != 0x56 || $vid != 0x9436);
+  return if ($chip == 1) and ($dev != 0x56 || $vid != 0x9406);
+  return if ($chip == 2) and ($dev != 0x10 || $vid != 0x5ca3);
+
+  return 5;
 }
 
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 2 = W83783S, 3 = W83627HF)
