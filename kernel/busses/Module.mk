@@ -25,6 +25,9 @@ KERNELBUSSESDIR := $(MODULE_DIR)
 # defined value verbatim into the command-list of rules...
 # These targets are NOT included in 'mkpatch' ...
 KERNELBUSSESTARGETS :=
+ifeq ($(shell if grep -q '^CONFIG_IPMI_HANDLER=' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ipmi.o
+endif
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-sis630.o
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-sis645.o
 
