@@ -31,7 +31,8 @@ sub read_proc_dev_pci
 # This function returns a reference to an array of hashes. Each hash has some
 # PCI information. The important fields here are 'bus', 'slot', 'func' (they
 # uniquely identify a PCI device in a computer) and 'desc' (a functional
-# description of the PCI device).
+# description of the PCI device). If this is an 'unknown device', the
+# vendid and devid fields are set instead.
 sub read_proc_pci
 {
   my @pci_list;
@@ -40,7 +41,12 @@ sub read_proc_pci
     my $record = {};
     if (($record->{bus},$record->{slot},$record->{func}) = 
         /^\s*Bus\s*(\S)+\s*,\s*device\s*(\S+)\s*,\s*function\s*(\S+)\s*:\s*$/) {
-      $record->{desc} = <INPUTFILE>;
+      my $desc = <INPUTFILE>;
+      unless (($desc =~ /Unknown device/) and
+              (($record->{vendid},$record->{devid}) = 
+                         /^\s*Vendor id=(\S+)\.\s*Device id=(\S+)\.$/)) {
+        $record->{desc} = $desc;
+      }
       push @pci_list,$record;
     }
   }
@@ -70,14 +76,12 @@ sub adapter_pci_detection
        devid  => 0x0008,
        func => 0,
        procid => "Silicon Integrated Systems 85C503",
-       driver => "UNIMPLEMENTED"
      } ,
      {
        vendid => 0x10b9,
-       devid => 0x7107,
+       devid => 0x7101,
        funcid => 0,
-       procid => "Acer Labs M1533 Aladdin IV",
-       driver => "UNIMPLEMENTED"
+       procid => "Acer Labs M7101",
      }
   );
 
@@ -96,15 +100,15 @@ sub adapter_pci_detection
 
   foreach $device (@$pci_list_ref) {
     foreach $try (@pci_adapters) {
-      if ((! $old_pci_interface and
-             ($try->{vendid} == $device->{vendid} and
-              $try->{devid} == $device->{devid} and
-              $try->{func} == $device->{func}) 
-           ) or 
-          ($old_pci_interface and
-             ($device->{desc} =~ /$try->{procid}/ and
-              $try->{func} == $device->{func}))) {
-        printf "Use driver `%s' for device %02x:%02x.%x: %s\n",$try->{driver},
+      if ((defined($device->{vendid}) and 
+           $try->{vendid} == $device->{vendid} and
+           $try->{devid} == $device->{devid} and
+           $try->{func} == $device->{func}) or
+          (! defined($device->{vendid}) and
+           $device->{desc} =~ /$try->{procid}/ and
+           $try->{func} == $device->{func})) {
+        printf "Use driver `%s' for device %02x:%02x.%x: %s\n",
+               $try->{driver}?$try->{driver}:"<To Be Written>",
                $device->{bus},$device->{slot},$device->{func},$try->{procid};
         push @res,$try->{driver};
       }
