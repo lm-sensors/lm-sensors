@@ -78,7 +78,10 @@ See the datasheets for details.
 
 Each sensor has its own high and low limits, plus a critical limit.
 Additionally, there is a relative hysteresis value common to both critical
-values.
+values. To make life easier to user-space applications, two absolute values
+are exported, one for each channel, but these values are of course linked.
+Only the local hysteresis can be set from user-space, and the same delta
+applies to the remote hysteresis.
 
 The lm90 driver will not update its values more frequently than every
 other second; reading them more often will do no harm, but will return
@@ -99,7 +102,8 @@ temp2_high            temp2                 temp2                   RW     1
 temp2_low             temp2                 temp2                   RW     1
 tcrit1                temp1                 temp1                   RW     0
 tcrit2                temp2                 temp2                   RW     0
-hyst                  -                     -                       RW     0
+hyst1                 tcrit1                tcrit1                  RW     0
+hyst2                 tcrit2                tcrit2                  R-     0
 alarms                -                     -                       R-     0
 
 LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
@@ -111,7 +115,8 @@ temp2_high            SENSORS_LM90_REMOTE_HIGH                          temp2:1
 temp2_low             SENSORS_LM90_REMOTE_LOW                           temp2:2
 tcrit1                SENSORS_LM90_LOCAL_TCRIT                         tcrit1:1
 tcrit2                SENSORS_LM90_REMOTE_TCRIT                        tcrit2:1
-hyst                  SENSORS_LM90_TCRIT_HYST                            hyst:1
+hyst1                 SENSORS_LM90_LOCAL_TCRIT_HYST                     hyst1:1
+hyst2                 SENSORS_LM90_REMOTE_TCRIT_HYST                    hyst2:1
 alarms                SENSORS_LM90_ALARMS                              alarms:1
 
 Chip 'adm1032'
@@ -125,7 +130,8 @@ temp2_high            temp2                 temp2                   RW     1
 temp2_low             temp2                 temp2                   RW     1
 tcrit1                temp1                 temp1                   RW     0
 tcrit2                temp2                 temp2                   RW     0
-hyst                  -                     -                       RW     0
+hyst1                 tcrit1                tcrit1                  RW     0
+hyst2                 tcrit2                tcrit2                  R-     0
 alarms                -                     -                       R-     0
 
 LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
@@ -137,5 +143,6 @@ temp2_high            SENSORS_LM90_REMOTE_HIGH                          temp2:1
 temp2_low             SENSORS_LM90_REMOTE_LOW                           temp2:2
 tcrit1                SENSORS_LM90_LOCAL_TCRIT                         tcrit1:1
 tcrit2                SENSORS_LM90_REMOTE_TCRIT                        tcrit2:1
-hyst                  SENSORS_LM90_TCRIT_HYST                            hyst:1
+hyst1                 SENSORS_LM90_LOCAL_TCRIT_HYST                     hyst1:1
+hyst2                 SENSORS_LM90_REMOTE_TCRIT_HYST                    hyst2:1
 alarms                SENSORS_LM90_ALARMS                              alarms:1
