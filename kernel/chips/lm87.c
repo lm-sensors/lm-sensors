@@ -247,9 +247,9 @@ struct lm87_data {
 	u8  in[6];		/* Register value */
 	u8  in_max[6];		/* Register value */
 	u8  in_min[6];		/* Register value */
-	u8  fan;		/* Register value */
-	u8  fan_min;		/* Register value */
-	u8  fan_div;		/* Register encoding, shifted right */
+	u8  fan[2];		/* Register value */
+	u8  fan_min[2];		/* Register value */
+	u8  fan_div[2];		/* Register encoding, shifted right */
 	int front_amb_temp;	/* Temp, shifted right */
 	int cpu_temp;           /* Temp, shifted right */
 	int int_temp;		/* Temp, shifted right */
@@ -614,9 +614,13 @@ void lm87_update_client(struct i2c_client *client)
 	            }
 		}
 
-		data->fan =
+		data->fan[0] =
+		    lm87_read_value(client, LM87_REG_FAN1_AIN1);
+		data->fan_min[0] =
+		    lm87_read_value(client, LM87_REG_FAN1_AIN1_LIMIT);
+		data->fan[1] =
 		    lm87_read_value(client, LM87_REG_FAN2_AIN2);
-		data->fan_min =
+		data->fan_min[1] =
 		    lm87_read_value(client, LM87_REG_FAN2_AIN2_LIMIT);
 
 		data->front_amb_temp =
@@ -642,7 +646,8 @@ void lm87_update_client(struct i2c_client *client)
 		    lm87_read_value(client, LM87_REG_INT_TEMP_LOW);
 
 		i = lm87_read_value(client, LM87_REG_VID_FAN_DIV);
-		data->fan_div = (i >> 4) & 0x03;
+		data->fan_div[0] = (i >> 4) & 0x03;
+		data->fan_div[1] = (i >> 6) & 0x03;
 		data->vid = i & 0x0f;
 		data->vid |=
 		    (lm87_read_value(client, LM87_REG_VID4) & 0x01)
@@ -732,27 +737,24 @@ void lm87_fan(struct i2c_client *client, int operation, int ctl_name,
 		 int *nrels_mag, long *results)
 {
 	struct lm87_data *data = client->data;
-/*
-  need to fix this function to handle both fans
-	int nr = ctl_name - LM87_SYSCTL_FAN + 1;
-*/
+	int nr = ctl_name - LM87_SYSCTL_FAN1 + 1;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm87_update_client(client);
-		results[0] = FAN_FROM_REG(data->fan_min,
-					  DIV_FROM_REG(data->fan_div));
-		results[1] = FAN_FROM_REG(data->fan, 
-		                         DIV_FROM_REG(data->fan_div));
+		results[0] = FAN_FROM_REG(data->fan_min[nr-1],
+					  DIV_FROM_REG(data->fan_div[nr-1]));
+		results[1] = FAN_FROM_REG(data->fan[nr-1], 
+		                          DIV_FROM_REG(data->fan_div[nr-1]));
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 0) {
-			data->fan_min = FAN_TO_REG(results[0],
+			data->fan_min[nr-1] = FAN_TO_REG(results[0],
 						   DIV_FROM_REG
-						   (data->fan_div));
+						   (data->fan_div[nr-1]));
 			lm87_write_value(client, LM87_REG_FAN2_AIN2_LIMIT,
-					    data->fan_min);
+					    data->fan_min[nr-1]);
 		}
 	}
 }
@@ -852,17 +854,18 @@ void lm87_fan_div(struct i2c_client *client, int operation,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm87_update_client(client);
-		results[0] = DIV_FROM_REG(data->fan_div);
-		*nrels_mag = 1;
+		results[0] = DIV_FROM_REG(data->fan_div[0]);
+		results[1] = DIV_FROM_REG(data->fan_div[1]);
+		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		old = lm87_read_value(client, LM87_REG_VID_FAN_DIV);
 		if (*nrels_mag >= 2) {
-			data->fan_div = DIV_TO_REG(results[1]);
-			old = (old & 0x3f) | (data->fan_div << 6);
+			data->fan_div[1] = DIV_TO_REG(results[1]);
+			old = (old & 0x3f) | (data->fan_div[1] << 6);
 		}
 		if (*nrels_mag >= 1) {
-			data->fan_div = DIV_TO_REG(results[0]);
-			old = (old & 0xcf) | (data->fan_div << 4);
+			data->fan_div[0] = DIV_TO_REG(results[0]);
+			old = (old & 0xcf) | (data->fan_div[0] << 4);
 			lm87_write_value(client, LM87_REG_VID_FAN_DIV, old);
 		}
 	}
