@@ -71,7 +71,14 @@ sub adapter_pci_detection
        func => 0,
        procid => "Silicon Integrated Systems 85C503",
        driver => "UNIMPLEMENTED"
-     } 
+     } ,
+     {
+       vendid => 0x10b9,
+       devid => 0x7107,
+       funcid => 0,
+       procid => "Acer Labs M1533 Aladdin IV",
+       driver => "UNIMPLEMENTED"
+     }
   );
 
   my $pci_list_ref = read_proc_dev_pci;
