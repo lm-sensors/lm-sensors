@@ -1655,7 +1655,7 @@ sub sis5595_isa_detect
   my ($adapter,$try,$local_try);
   my $found = 0;
   foreach $local_try (@pci_adapters) {
-    if ($local_try->{procid} eq "Silicon Integrated Systems 85C503") {
+    if ($local_try->{procid} eq "Silicon Integrated Systems SIS5595") {
       $try = $local_try;
       $found = 1;
       last;
