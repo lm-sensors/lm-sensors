@@ -90,7 +90,6 @@ SENSORS_INSMOD_3(w83781d,w83782d,w83783s);
 #define W83781D_REG_TEMP 0x27
 #define W83781D_REG_TEMP_OVER 0x39
 #define W83781D_REG_TEMP_HYST 0x3A
-#define W83781D_REG_TEMP_CONFIG 0x52
 #define W83781D_REG_BANK 0x4E
 
 #define W83781D_REG_CONFIG 0x40
@@ -1095,7 +1094,6 @@ void w83781d_init_client(struct i2c_client *client)
                       TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
   w83781d_write_value(client,W83781D_REG_TEMP_HYST,
                       TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
-  w83781d_write_value(client,W83781D_REG_TEMP_CONFIG,0x00);
 
   w83781d_write_value(client,W83781D_REG_TEMP2_OVER,
                       TEMP_ADD_TO_REG(W83781D_INIT_TEMP2_OVER));

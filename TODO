@@ -3,6 +3,7 @@ Many, many things. Most notably:
 KERNEL MODULES
 ==============
 
+* Check for kernel 2.0.8 warnings
 * Increase use count of adapter driver if directory of chip is entered
 * maxilife.c: Introduce new insmod variables
 * maxilife.c: Round REG_TO_VID correctly
@@ -60,3 +61,10 @@ PROGRAMS
 
 * Sensors program needs to print a + before lm75 temperatures
 * Sensors program needs to be extended for many new chips
+
+OTHERS
+======
+
+* Examine watchdog-4.3 or later of meskes@debian.org (Michael Meskes)
+  tsx-11.mit.edu /pub/linux/sources/sbin or 
+  sunsite.unc.edu /pub/linux/system/daemons/watchdog
