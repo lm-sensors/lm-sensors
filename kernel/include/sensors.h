@@ -377,6 +377,7 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
 #define I2C_DRIVERID_VIA686A 1019
 #define I2C_DRIVERID_ADM1025 1020
 #define I2C_DRIVERID_LM87 1021
+#define I2C_DRIVERID_PCF8574 1022
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -750,4 +751,7 @@ struct sensors_chips_data {
 #define LM87_ALARM_INT_TEMP 0x0010
 #define LM87_ALARM_CHAS     0x1000
 
+#define PCF8574_SYSCTL_STAT 1000
+
 #endif				/* def SENSORS_SENSORS_H */
+
