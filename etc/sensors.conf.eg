@@ -498,10 +498,11 @@ chip "via686a-*"
 # improve.
 
 # On the Tyan S1598, the 2.5V sensor reads 0 and is not displayed in the BIOS.
-# Also, Linas Vepstas <linas@linas.org> reports that this sensor shows
-# nothing of interest on the Abit KA7 (Athalon), and is also not displayed 
-# in the BIOS.  So, if you have either of these boards may want to uncomment 
-# the 'ignore 2.5V' line below.
+# Linas Vepstas <linas@linas.org> reports that this sensor shows nothing of
+# interest on the Abit KA7 (Athalon), and is also not displayed in the BIOS.
+# Likewise, Johannes Drechsel-Burkhard <jdb@chello.at> reports that this 
+# sensor is unavailable in the BIOS of his MSI K7T Pro.  So, if you have one
+# of these boards may want to uncomment the 'ignore 2.5V' line below.
 
     label "2.0V" "CPU core"
     label "2.5V" "+2.5V"
@@ -519,6 +520,9 @@ chip "via686a-*"
 # correlate with temp changes, but the conversion factor may be quite 
 # different from temp1 & temp2 (as noted above, VIA has not provided
 # conversion info).  So, you may wish to 'ignore temp3'. 
+
+# Johannes Drechsel-Burkhard <jdb@chello.at> notes that on his MSI K7T Pro,
+# temp1 is the CPU temp and temp2 is the SYS temp.  
 
     label temp1 "SYS Temp"
     label temp2 "CPU Temp"
