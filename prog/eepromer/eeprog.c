@@ -90,7 +90,7 @@ int confirm_action()
 	"\n"
 	"__________________________________WARNING_______________________________\n"
 	"Erroneously writing to a system EEPROM (like DIMM SPD modules) can break your\n"
-	"system.  It will NOT boot any more so you'll not be able to fix it.\n"
+	"system.  It will NOT boot anymore so you'll not be able to fix it.\n"
 	"\n"
 	"Reading from 8bit EEPROMs (like that in your DIMM) without using the -8 switch\n"
 	"can also UNEXPECTEDLY write to them, so be sure to use the -8 command param when\n"
