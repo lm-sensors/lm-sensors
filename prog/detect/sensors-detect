@@ -2541,7 +2541,7 @@ sub lm83_detect
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, 3, 7 or 8 if detected.
-#   The Analog Devices and Maxim chips have a low confidence value (3)
+#   The Maxim chips have a low confidence value (3)
 #   because the die revision codes are not known.
 # Registers used:
 #   0x03: Configuration
@@ -2575,7 +2575,7 @@ sub lm90_detect
   if ($chip == 3) {
     return if ($conf & 0x3f) != 0;
 	return if $mid != 0x41;     # Analog Devices
-	return 3;
+	return 8 if ($cid & 0xf0) == 0x40; # ADM1032
   }
   if ($chip == 4) {
     return if ($conf & 0x1f) != 0;
