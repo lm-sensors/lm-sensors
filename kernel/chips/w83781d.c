@@ -24,7 +24,7 @@
     Supports following chips:
 
     Chip	#vin	#fanin	#pwm	#temp	wchipid	vendid	i2c	ISA
-    as99127f	7	3	1?	3	0x31	0x12c3	yes	no
+    as99127f	7	3	0	3	0x31	0x12c3	yes	no
     as99127f rev.2 (type name = as99127f)	0x31	0x5ca3	yes	no
     w83627hf	9	3	2	3	0x21	0x5ca3	yes	yes(LPC)
     w83697hf	8	2	2	2	0x60	0x5ca3	no	yes(LPC)
@@ -442,10 +442,6 @@ static ctl_table as99127f_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &w83781d_alarms},
 	{W83781D_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_beep},
-	{W83781D_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &w83781d_pwm},
-	{W83781D_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &w83781d_pwm},
 	{0}
 };
 
@@ -1062,6 +1058,10 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 	}
 	data->sysctl_id = i;
 
+	/* Only PWM2 can be disabled */
+	for(i = 0; i < 4; i++)
+		data->pwmenable[i] = 1;
+
 	/* Initialize the chip */
 	w83781d_init_client(new_client);
 	return 0;
@@ -1379,9 +1379,6 @@ static void w83781d_init_client(struct i2c_client *client)
 			if (!(i & 0x40))
 				w83781d_write_value(client, W83781D_REG_IRQ,
 						    i | 0x40);
-
-			for(i = 0; i < 3; i++)
-				data->pwmenable[i] = 1;
 		}
 	}
 
@@ -1442,20 +1439,22 @@ static void w83781d_update_client(struct i2c_client *client)
                                               W83781D_REG_FAN_MIN(i));
                        if (data->type != w83791d && i == 3) break;
                }
-               if (data->type != w83781d) {
+               if (data->type != w83781d && data->type != as99127f) {
                        for (i = 1; i <= 4; i++) {
                                data->pwm[i - 1] =
                                    w83781d_read_value(client,
 				             W83781D_REG_PWM(data->type, i));
                                if (((data->type == w83783s)
                                     || (data->type == w83627hf)
-                                    || (data->type == as99127f)
                                     || (data->type == w83697hf)
                                     || ((data->type == w83782d)
                                        && i2c_is_isa_client(client)))
                                    && i == 2)
                                        break;
                        }
+			/* Only PWM2 can be disabled */
+			data->pwmenable[1] = (w83781d_read_value(client,
+					      W83781D_REG_PWMCLK12) & 0x08) >> 3;
                }
 
                data->temp = w83781d_read_value(client, W83781D_REG_TEMP);

@@ -188,7 +188,8 @@ Known problems:
 AS99127F PROBLEMS
 -----------------
 The as99127f support was developed without the benefit of a datasheet.
-In most cases it is treated as a w83781d.
+In most cases it is treated as a w83781d (although revision 2 of the
+AS9917F looks more like a w83782d).
 This support will be BETA until a datasheet is released.
 One user has reported problems with fans stopping
 occasionally.
@@ -199,13 +200,9 @@ disable, not enable. This may be changed in the future.
 
 Known problems:
 	- Problems with diode/thermistor settings (supported?)
-	- fan_div register may not really be fan_div.
 	- One user reports fans stopping under high server load.
-	- Some as99127f chips are misidentified as a w83781d or w83782d.
-	  This is caused by the chip having the wrong WCHIPID register
-	  value, so there is no fix. The workaround is to use the
-          force_as99127f parameter.
-	  (modprobe w83781d force_as99127f=BUS,0x2d where BUS is your i2c bus number)
+	- Revision 2 seems to have 2 PWM registers but we don't know
+	  how to handle them. More details below.
 
 These will not be fixed unless we get a datasheet.
 If you have problems, please lobby Asus to release a datasheet.
@@ -524,13 +521,13 @@ See the lm78 documentation for details.
 
 Additional entries not in the lm78:
 
-	pwm[1-4]: (not on w83781d)
+	pwm[1-4]: (not on w83781d nor as99127f)
 	  Controls the speed of the fans with PWM (Pulse Width Modulation)
 	  Valid values:
 	    0 - 255. 255 = max speed.
         Second value is PWM enable 0/1.
 
-	sensor[1-3]: (not on w83781d)
+	sensor[1-3]: (not on w83781d nor as99127f)
 	  Controls the sensor type. To change to a different
 	  sensor type, for example, do 'echo 2 > sensor1'.
 	  Valid values:
@@ -541,7 +538,7 @@ Additional entries not in the lm78:
 	  Thermistors with other Betas could in theory be supported
 	  after correspondence with Winbond. See below.
 
-	rt[1-3]: (781d only)
+	rt[1-3]: (w83781d only)
 	  32-byte tables controlling the conversion from
 	  resistance to temperature for thermistors.
 	  For the curious only. Writing to these entries will
@@ -580,8 +577,6 @@ NOTES:
 
 Data sheet updates:
 ------------------
-	- Mask off lower bit of all ID registers.
-
 	- PWM clock registers:
 
 		000: master /  512
@@ -739,3 +734,49 @@ in3=r(0x23)*0.016*1.68
 in4=r(0x24)*0.016*4
 in5=255
 in6=255
+
+
+# PWM
+
+Additional info about PWM on the AS99127F (may apply to other Asus
+chips as well) by Jean Delvare as of 2004-04-09:
+
+AS99127F revision 2 seems to have two PWM registers at 0x59 and 0x5A,
+and a temperature sensor type selector at 0x5B (which basically means
+that they swapped registers 0x59 and 0x5B when you compare with Winbond
+chips).
+Revision 1 of the chip also has the temperature sensor type selector at
+0x5B, but PWM registers have no effect.
+
+We don't know exactly how the temperature sensor type selection works.
+Looks like bits 1-0 are for temp1, bits 3-2 for temp2 and bits 5-4 for
+temp3, although it is possible that only the most significant bit matters
+each time. So far, values other than 0 always broke the readings.
+
+PWM registers seem to be split in two parts: bit 7 is a mode selector,
+while the other bits seem to define a value or threshold.
+
+When bit 7 is clear, bits 6-0 seem to hold a threshold value. If the value
+is below a given limit, the fan runs at low speed. If the value is above
+the limit, the fan runs at full speed. We have no clue as to what the limit
+represents. Note that there seem to be some inertia in this mode, speed
+changes may need some time to trigger. Also, an hysteresis mechanism is
+suspected since walking through all the values increasingly and then
+decreasingly led to slighlty different limits.
+
+When bit 7 is set, bits 3-0 seem to hold a threshold value, while bits 6-4
+would not be significant. If the value is below a given limit, the fan runs
+at full speed, while if it is above the limit it runs at low speed (so this
+is the contrary of the other mode, in a way). Here again, we don't know
+what the limit is supposed to represent.
+
+One remarkable thing is that the fans would only have two or three
+different speeds (transitional states left apart), not a whole range as
+you usually get with PWM.
+
+As a conclusion, you can write 0x00 or 0x8F to the PWM registers to make
+fans run at low speed, and 0x7F or 0x80 to make them run at full speed.
+
+Please contact us if you can figure out how it is supposed to work. As
+long as we don't know more, the w83781d driver doesn't handle PWM on
+AS99127F chips at all.
