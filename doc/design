@@ -4,6 +4,8 @@ distribute it, as long as you recognize me as the author, and mark any
 changes you make as being your own, and distribute this notice with it.
 
 Document version 1.0, 19981101.
+                 1.1, 19981111.
+                 1.2, 19981118.
 
 
 Object oriented approach
@@ -130,6 +132,7 @@ Unites SMBus adapters and ISA adapters.
 smbus.o
 Main SMBus handling
 Unites I2C adapters and SMBus hosts (like the PIIX4)
+Defines smbus_algorithm
 
   piix4.o
   SMBus adapter driver for the PIIX4 SMBus host.
@@ -331,9 +334,13 @@ means there must be some way of selecting which of the many possible adapters
 is in fact *the* SMBus. For now, I will ignore this problem. Later on,
 we can add a hook somewhere in the i2c module to help us decide this.
 
+This module consists in fact of two separate parts: first of all, it extends
+all i2c structs to accomodate the new smbus fields. Second, it defines a
+new algorithm (smbus_algorithm), that will be used by all non-i2c adapters.
 
-A driver, client and adapter
--------------------
+
+A driver, client and algorithm
+------------------------------
 
 We will not need to extend i2c_driver, i2c_client or i2c_adapter. This means
 that struct smbus_driver is exactly the same as struct i2c_driver, and 
@@ -346,30 +353,34 @@ partially supported by the i2c module. We will ignore this issue for
 now.
 
 
-An algorithm
+An adapter
 ------------
 
-struct smbus_algorithm {
+struct smbus_adapter {
   char name[32];
   unsigned int id;
-  int (* master_xfer) (struct smbus_adapter *adap, struct smbus_msg msgs[],
-                       int num);
-  int (* slave_send) (struct smbus_adapter *,char *, int);
-  int (* slave_recv) (struct smbus_adapter *,char *, int);
-  int (* algo_control) (struct smbus_adapter *, unsigned int, unsigned long);
-  int (* client_register) (struct smbus_client *);
-  int (* client_unregister) (struct smbus_client *);
+  struct smbus_algorithm *algo;
+  void *data;
+#ifdef SPINLOCK
+  spinlock_t lock;
+  unsigned long lockflags;
+#else
+  struct semaphore lock;
+#endif
+  unsigned int flags;
+  struct smbus_client *clients[I2C_CLIENT_MAX];
+  int client_count;
+  int timeout;
+  int retries;
 
-  int (* smbus_access) (struct smbus_adapter *, __u8 addr, char read_write,
+  /* Here ended i2c_algorithm */
+  s32 (* smbus_access) (__u8 addr, char read_write,
                         __u8 command, int size, union smbus_data * data);
 }
 
-
 A description of the above struct:
-  smbus_access: A function to access the SMBus. If the algorithm describes
-      a i2c bus, it will use master_xfer to simulate this operation. In
-      case of a PIIX4, master_xfer, slave_send and slave_recv will not be
-      implemented.
+  smbus_access: A function to access the SMBus. It is only used for non-i2c
+      smbus adapters.
 
 
 Access functions

@@ -18,22 +18,20 @@
 # Note that MODULE_DIR (the directory in which this file resides) is a
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
-MODULE_DIR := i2c
+MODULE_DIR := src
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-I2CTARGETS := $(MODULE_DIR)/i2c-core.o  $(MODULE_DIR)/algo-bit.o \
-              $(MODULE_DIR)/i2c-dev.o   $(MODULE_DIR)/bit-lp.o \
-              $(MODULE_DIR)/bit-velle.o $(MODULE_DIR)/bit-mb.o
+SRCTARGETS := $(MODULE_DIR)/smbus.o 
 
 # Include all dependency files
-include $(I2CTARGETS:.o=.d)
+include $(SRCTARGETS:.o=.d)
 
-all :: $(I2CTARGETS)
+all :: $(SRCTARGETS)
 
-install :: 
+install ::
 	$(MKDIR) $(MODDIR)
-	install -o root -g root -m 644 $(I2CTARGETS) $(MODDIR)
+	install -o root -g root -m 644 $(SRCTARGETS) $(MODDIR)
 
 clean ::
-	$(RM) $(I2CTARGETS) $(I2CTARGETS:.o=.d)
+	$(RM) $(SRCTARGETS) $(SRCTARGETS:.o=.d)

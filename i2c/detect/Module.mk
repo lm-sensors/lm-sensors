@@ -18,22 +18,36 @@
 # Note that MODULE_DIR (the directory in which this file resides) is a
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
-MODULE_DIR := i2c
+MODULE_DIR := i2c/detect
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-I2CTARGETS := $(MODULE_DIR)/i2c-core.o  $(MODULE_DIR)/algo-bit.o \
-              $(MODULE_DIR)/i2c-dev.o   $(MODULE_DIR)/bit-lp.o \
-              $(MODULE_DIR)/bit-velle.o $(MODULE_DIR)/bit-mb.o
+I2CDETECTTARGETS := $(MODULE_DIR)/detect
+I2CDETECTSOURCES := $(MODULE_DIR)/detect.c
 
 # Include all dependency files
-include $(I2CTARGETS:.o=.d)
+include $(I2CDETECTSOURCES:.c=.d)
 
-all :: $(I2CTARGETS)
+all :: $(I2CDETECTTARGETS)
 
-install :: 
-	$(MKDIR) $(MODDIR)
-	install -o root -g root -m 644 $(I2CTARGETS) $(MODDIR)
+# No install rule
 
 clean ::
-	$(RM) $(I2CTARGETS) $(I2CTARGETS:.o=.d)
+	$(RM) $(I2CDETECTSOURCES:.c=.d) $(I2CDETECTSOURCES:.c=.o) \
+	      $(I2CDETECTTARGETS)
+
+# The targets
+$(MODULE_DIR)/detect: $(MODULE_DIR)/detect.o
+
+
+# Oops, we need to use EXCFLAGS instead of CFLAGS... And we have to deal with
+# an executable. Ugly code approaching... :-)
+
+$(I2CDETECTSOURCES:.c=.o):
+	$(CC) $(EXCFLAGS) -c $(@:.o=.c) -o $@
+
+$(I2CDETECTSOURCES:.c=.d):
+	$(CC) -M -MG $(EXCFLAGS) $(@:.d=.c) | \
+	sed -e \
+        's@^\(.*\)\.o:@$@ $(@:.d=.o) Makefile '`dirname $@`/Module.mk':@' > $@
+

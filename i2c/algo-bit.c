@@ -17,7 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-static char alg_rcsid[] = "$Id: algo-bit.c,v 1.1 1998/11/02 20:29:27 frodo Exp $";
+static char alg_rcsid[] = "$Id: algo-bit.c,v 1.2 1998/11/03 03:48:44 phil Exp $";
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -638,10 +638,6 @@ MODULE_PARM_DESC(bit_test, "Test the lines of the bus to see if it is stuck");
 MODULE_PARM_DESC(bit_scan, "Scan for active chips on the bus");
 MODULE_PARM_DESC(i2c_debug,"debug level - 0 off; 1 normal; 2,3 more verbose; 9 bit-protocol");
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0))
-EXPORT_SYMBOL(i2c_bit_add_bus);
-EXPORT_SYMBOL(i2c_bit_del_bus);
-#endif
 
 int init_module(void) 
 {

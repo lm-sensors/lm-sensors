@@ -1,0 +1,5 @@
+Many, many things. Most notably:
+
+* Write s32 smbus_access_i2c in smbus.c
+* Check out whether we can use the dev interface for smbus (like i2c)
+* Write all other modules

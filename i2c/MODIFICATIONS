@@ -1,0 +1,33 @@
+This is a list of modifications between the stock i2c code as distributed
+by Simon Vogl, and the code included in and beneath this directory. None
+of these changes are important; you can still use a self-compiled version
+of the i2c code and not compile the version in here.
+
+* rscid declarations are changed
+  This is an unfortunate interaction between our CVS server and Simon's
+  RCS (CVS?) server. As these ids do not seem to be accessed anywhere,
+  there should be no change in the final object code
+
+* Log entries are added
+  Another RCS/CVS side effect. Our logs are sometimes put in the source
+  code. As they are just comments, they will do no harm.
+
+* EXPORT_SYMBOL declarations removed
+  They only work if you use the Linux source tree Makefiles. As we want to
+  use our own Makefile, we have removed them. This should have almost no
+  influence on the resulting object code; a few more functions may be
+  exported, but this should do no harm.
+
+* bit-mb: Linux 2.0.x fixes
+  Some small changes to make this file compile with 2.0 kernels. These
+  changes will probably be included in the next i2c version.
+
+* New file: Module.mk
+  The Makefile fragment we use to compile the files in this directory.
+
+* New file: MODIFICATIONS
+  The file you are reading right now.
+
+* Removed files: object files and executables
+  Everywhere, remakeable files are removed, to keep the source distribution
+  small and lean.

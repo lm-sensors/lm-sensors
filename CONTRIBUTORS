@@ -1,0 +1,26 @@
+This package could not have been created without the help of many, many people.
+The most notable contributors are listed below.
+
+* Alexander Larsson <alla@lysator.liu.se>
+  Wrote the original lm78 module; lm_sensors version 1 was no more than an
+  extension of this module. He still likes to keep an eye on current
+  developments, but is usually too busy with other things to do much work
+  on them
+* Philip Edelbrock <phil@netroedge.com>
+  Took up the development of the Alex' lm78 module. Responsible for most
+  SMBus code, and many, many other things. He is still one of the main
+  developers of the current package.
+* Frodo Looijaard <frodol@dds.nl>
+  Took up the development of Alex' lm78 module. Large pieces of code were
+  written by him. Designed lm_sensors version 2.
+* William Morgan <wmorgan@cmu.edu>
+  Helped with some patches in lm_sensors version 1. He provided us with
+  the original CVS archive, and even managed to explain to us how to use
+  it.
+
+* Simon Vogl <simon@tk.uni-linz.ac.at>
+  Wrote the new i2c kernel driver. This driver is indispensable for the
+  workings of lm_sensors version 2.
+* Gerd Knorr <kraxel@cs.tu-berlin.de> (?)
+  Designed the i2c structs, which made it possible to use the smbus-is-
+  just-an-i2c-extension approach.

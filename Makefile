@@ -1,3 +1,21 @@
+#  Makefile - Makefile for a Linux module for reading sensor data.
+#  Copyright (c) 1998  Frodo Looijaard <frodol@dds.nl>
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
 # Uncomment the third line on SMP systems if the magic invocation fails.
 SMP := $(shell if grep -q '^SMP[[:space:]]*=' /usr/src/linux/Makefile; then echo 1; else echo 0; fi)
 #SMP := 0
@@ -12,6 +30,8 @@ MODVER := $(shell if cat /usr/include/linux/config.h /usr/include/linux/autoconf
 # Uncomment the second line if you do not want to compile the included
 # i2c modules. WARNING! If the i2c module version does not match the 
 # smbus/sensor module versions, you will get into severe problems.
+# If you want to use a self-compiled version of the i2c modules, make
+# sure <linux/i2c.h> contains the *correct* i2c header file!
 I2C := 1
 #I2C := 0
 
@@ -45,17 +65,21 @@ INCLUDEDIR := /usr/local/include/linux
 # to do this. 
 
 # The subdirectories we need to build things in 
-MODULES :=
+MODULES := src
 ifeq ($(I2C),1)
-MODULES += i2c
+MODULES += i2c i2c/detect i2c/drivers i2c/eeprom
 endif
 
 # Some often-used commands with default options
 MKDIR := mkdir -p
 RM := rm -f
+CC := gcc
 
 # Determine the default compiler flags
-CFLAGS := -D__KERNEL__ -DMODULE -I. -O2 -fomit-frame-pointer
+# CFLAGS is to create in-kernel object files (modules); EXCFLAGS is to create
+# non-kernel object files (which are linked into executables).
+CFLAGS := -D__KERNEL__ -DMODULE -I. -Ii2c -O2 -fomit-frame-pointer
+EXCFLAGS := -I. -O2 -Ii2c
 
 ifeq ($(SMP),1)
 CFLAGS += -D__SMP__
@@ -64,13 +88,19 @@ endif
 ifeq ($(WARN),1)
 CFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
           -Wcast-align -Wwrite-strings -Wnested-externs -Winline
+EXCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
+            -Wcast-align -Wwrite-strings -Wnested-externs -Winline
 endif
 
 ifeq ($(MODVER),1)
 CFLAGS += -DMODVERSIONS -include /usr/include/linux/modversions.h
 endif
 
-.PHONY: all clean install version package
+ifeq ($(I2C),1)
+CFLAGS += -DI2C
+endif
+
+.PHONY: all clean install version package dep
 
 # Make all the default rule
 all::
@@ -78,18 +108,21 @@ all::
 # Include all makefiles for sub-modules
 include $(patsubst %,%/Module.mk,$(MODULES))
 
+# Making the dependency files - done automatically!
+dep:
 
-all::
+all ::
 
-install::
+install :: all
 
 clean::
 	$(RM) lm_sensors-*
 
-# Create a dependency file. Tricky.
+# Create a dependency file. Tricky. We sed rule puts dir/file.d and dir/file.c
+# in front of the dependency file rule.
 %.d: %.c
-	gcc -M -MG $(CFLAGS) $< | \
-	sed -e 's@ /[^ ]*@@g' -e 's@^\(.*\)\.o:@\1.d \1.o:@' > $@
+	$(CC) -M -MG $(CFLAGS) $< | \
+       	sed -e 's@^\(.*\)\.o:@$*.d $*.o Makefile '`dirname $*.d`/Module.mk':@' > $@
 	
 
 # This is tricky, but it works like a charm. It needs lots of utilities
