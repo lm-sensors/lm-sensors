@@ -18,9 +18,12 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.0 (2004????)
+  NOTE: Requires i2c-2.9.0 or newer!
   File README.thinkpad: Update
   File doc/chips/lm63: New
   File kernel/chips/Module.mk: Resync module list with mkpatch
+  Modules (all bus drivers): Remove owner from i2c_adapter; restore inc_use
+                             and dec_use removed in release 2.8.0
   Module bmcsensors: Support function 1/x
   Module i2c-amd756: Display the real bus name
   Module i2c-amd756-s4882: New; SMBus multiplexing on the Tyan S4882
