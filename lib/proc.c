@@ -607,6 +607,6 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	"alarms", "beep_enable", "vrm", "fan%d_div"
 */
 	strcpy(sysname, name);
-	*sysmag = (feature->scaling==0?0:3);
+	*sysmag = feature->scaling;
 	return 0;
 }
