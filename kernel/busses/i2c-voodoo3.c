@@ -65,18 +65,7 @@ MODULE_LICENSE("GPL");
 
 static void config_v3(struct pci_dev *dev);
 
-
-static unsigned char *mem;
-
-static inline void outlong(unsigned int dat)
-{
-	*((unsigned int *) (mem + REG)) = dat;
-}
-
-static inline unsigned int readlong(void)
-{
-	return *((unsigned int *) (mem + REG));
-}
+static unsigned long ioaddr;
 
 /* The voo GPIO registers don't have individual masks for each bit
    so we always have to read before writing. */
@@ -84,25 +73,25 @@ static inline unsigned int readlong(void)
 static void bit_vooi2c_setscl(void *data, int val)
 {
 	unsigned int r;
-	r = readlong();
+	r = readl(ioaddr + REG);
 	if(val)
 		r |= I2C_SCL_OUT;
 	else
 		r &= ~I2C_SCL_OUT;
-	outlong(r);
-	readlong();	/* flush posted write */
+	writel(r, ioaddr + REG);
+	readl(ioaddr + REG);	/* flush posted write */
 }
 
 static void bit_vooi2c_setsda(void *data, int val)
 {
 	unsigned int r;
-	r = readlong();
+	r = readl(ioaddr + REG);
 	if(val)
 		r |= I2C_SDA_OUT;
 	else
 		r &= ~I2C_SDA_OUT;
-	outlong(r);
-	readlong();	/* flush posted write */
+	writel(r, ioaddr + REG);
+	readl(ioaddr + REG);	/* flush posted write */
 }
 
 /* The GPIO pins are open drain, so the pins always remain outputs.
@@ -111,46 +100,46 @@ static void bit_vooi2c_setsda(void *data, int val)
 
 static int bit_vooi2c_getscl(void *data)
 {
-	return (0 != (readlong() & I2C_SCL_IN));
+	return (0 != (readl(ioaddr + REG) & I2C_SCL_IN));
 }
 
 static int bit_vooi2c_getsda(void *data)
 {
-	return (0 != (readlong() & I2C_SDA_IN));
+	return (0 != (readl(ioaddr + REG) & I2C_SDA_IN));
 }
 
 static void bit_vooddc_setscl(void *data, int val)
 {
 	unsigned int r;
-	r = readlong();
+	r = readl(ioaddr + REG);
 	if(val)
 		r |= DDC_SCL_OUT;
 	else
 		r &= ~DDC_SCL_OUT;
-	outlong(r);
-	readlong();	/* flush posted write */
+	writel(r, ioaddr + REG);
+	readl(ioaddr + REG);	/* flush posted write */
 }
 
 static void bit_vooddc_setsda(void *data, int val)
 {
 	unsigned int r;
-	r = readlong();
+	r = readl(ioaddr + REG);
 	if(val)
 		r |= DDC_SDA_OUT;
 	else
 		r &= ~DDC_SDA_OUT;
-	outlong(r);
-	readlong();	/* flush posted write */
+	writel(r, ioaddr + REG);
+	readl(ioaddr + REG);	/* flush posted write */
 }
 
 static int bit_vooddc_getscl(void *data)
 {
-	return (0 != (readlong() & DDC_SCL_IN));
+	return (0 != (readl(ioaddr + REG) & DDC_SCL_IN));
 }
 
 static int bit_vooddc_getsda(void *data)
 {
-	return (0 != (readlong() & DDC_SDA_IN));
+	return (0 != (readl(ioaddr + REG) & DDC_SDA_IN));
 }
 
 
@@ -163,11 +152,11 @@ void config_v3(struct pci_dev *dev)
 	/* map Voodoo3 memory */
 	cadr = dev->resource[0].start;
 	cadr &= PCI_BASE_ADDRESS_MEM_MASK;
-	mem = ioremap_nocache(cadr, 0x1000);
-	if(mem) {
-		*((unsigned int *) (mem + REG2)) = 0x8160;
-		*((unsigned int *) (mem + REG)) = 0xcffc0020;
-		printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%p\n", mem);
+	ioaddr = (unsigned long)ioremap_nocache(cadr, 0x1000);
+	if(ioaddr) {
+		writel(0x8160, ioaddr + REG2);
+		writel(0xcffc0020, ioaddr + REG);
+		printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%lx\n", ioaddr);
 	}
 }
 
@@ -279,7 +268,7 @@ static void __exit i2c_voodoo3_exit(void)
 	pci_unregister_driver(&voodoo3_driver);
 */
 	voodoo3_remove(NULL);
-	iounmap(mem);
+	iounmap((void *)ioaddr);
 }
 
 

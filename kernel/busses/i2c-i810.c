@@ -81,33 +81,23 @@ MODULE_LICENSE("GPL");
 static void config_i810(struct pci_dev *dev);
 
 
-static unsigned char *mem;
-
-static inline void outlong(unsigned int dat, int off)
-{
-	*((unsigned int *) (mem + off)) = dat;
-}
-
-static inline unsigned int readlong(int off)
-{
-	return *((unsigned int *) (mem + off));
-}
+static unsigned long ioaddr;
 
 /* The i810 GPIO registers have individual masks for each bit
    so we never have to read before writing. Nice. */
 
 static void bit_i810i2c_setscl(void *data, int val)
 {
-	outlong((val ? SCL_VAL_OUT : 0) | SCL_DIR | SCL_DIR_MASK | SCL_VAL_MASK,
-	     I810_GPIOB);
-	readlong(I810_GPIOB);	/* flush posted write */
+	writel((val ? SCL_VAL_OUT : 0) | SCL_DIR | SCL_DIR_MASK | SCL_VAL_MASK,
+	     ioaddr + I810_GPIOB);
+	readl(ioaddr + I810_GPIOB);	/* flush posted write */
 }
 
 static void bit_i810i2c_setsda(void *data, int val)
 {
- 	outlong((val ? SDA_VAL_OUT : 0) | SDA_DIR | SDA_DIR_MASK | SDA_VAL_MASK,
-	     I810_GPIOB);
-	readlong(I810_GPIOB);	/* flush posted write */
+ 	writel((val ? SDA_VAL_OUT : 0) | SDA_DIR | SDA_DIR_MASK | SDA_VAL_MASK,
+	     ioaddr + I810_GPIOB);
+	readl(ioaddr + I810_GPIOB);	/* flush posted write */
 }
 
 /* The GPIO pins are open drain, so the pins could always remain outputs.
@@ -122,44 +112,44 @@ static void bit_i810i2c_setsda(void *data, int val)
 
 static int bit_i810i2c_getscl(void *data)
 {
-	outlong(SCL_DIR_MASK, I810_GPIOB);
-	outlong(0, I810_GPIOB);
-	return (0 != (readlong(I810_GPIOB) & SCL_VAL_IN));
+	writel(SCL_DIR_MASK, ioaddr + I810_GPIOB);
+	writel(0, ioaddr + I810_GPIOB);
+	return (0 != (readl(ioaddr + I810_GPIOB) & SCL_VAL_IN));
 }
 
 static int bit_i810i2c_getsda(void *data)
 {
-	outlong(SDA_DIR_MASK, I810_GPIOB);
-	outlong(0, I810_GPIOB);
-	return (0 != (readlong(I810_GPIOB) & SDA_VAL_IN));
+	writel(SDA_DIR_MASK, ioaddr + I810_GPIOB);
+	writel(0, ioaddr + I810_GPIOB);
+	return (0 != (readl(ioaddr + I810_GPIOB) & SDA_VAL_IN));
 }
 
 static void bit_i810ddc_setscl(void *data, int val)
 {
-	outlong((val ? SCL_VAL_OUT : 0) | SCL_DIR | SCL_DIR_MASK | SCL_VAL_MASK,
-	     I810_GPIOA);
-	readlong(I810_GPIOA);	/* flush posted write */
+	writel((val ? SCL_VAL_OUT : 0) | SCL_DIR | SCL_DIR_MASK | SCL_VAL_MASK,
+	     ioaddr + I810_GPIOA);
+	readl(ioaddr + I810_GPIOA);	/* flush posted write */
 }
 
 static void bit_i810ddc_setsda(void *data, int val)
 {
- 	outlong((val ? SDA_VAL_OUT : 0) | SDA_DIR | SDA_DIR_MASK | SDA_VAL_MASK,
-	     I810_GPIOA);
-	readlong(I810_GPIOA);	/* flush posted write */
+ 	writel((val ? SDA_VAL_OUT : 0) | SDA_DIR | SDA_DIR_MASK | SDA_VAL_MASK,
+	     ioaddr + I810_GPIOA);
+	readl(ioaddr + I810_GPIOA);	/* flush posted write */
 }
 
 static int bit_i810ddc_getscl(void *data)
 {
-	outlong(SCL_DIR_MASK, I810_GPIOA);
-	outlong(0, I810_GPIOA);
-	return (0 != (readlong(I810_GPIOA) & SCL_VAL_IN));
+	writel(SCL_DIR_MASK, ioaddr + I810_GPIOA);
+	writel(0, ioaddr + I810_GPIOA);
+	return (0 != (readl(ioaddr + I810_GPIOA) & SCL_VAL_IN));
 }
 
 static int bit_i810ddc_getsda(void *data)
 {
-	outlong(SDA_DIR_MASK, I810_GPIOA);
-	outlong(0, I810_GPIOA);
-	return (0 != (readlong(I810_GPIOA) & SDA_VAL_IN));
+	writel(SDA_DIR_MASK, ioaddr + I810_GPIOA);
+	writel(0, ioaddr + I810_GPIOA);
+	return (0 != (readl(ioaddr + I810_GPIOA) & SDA_VAL_IN));
 }
 
 
@@ -172,8 +162,8 @@ void config_i810(struct pci_dev *dev)
 	cadr = dev->resource[1].start;
 	cadr += I810_IOCONTROL_OFFSET;
 	cadr &= PCI_BASE_ADDRESS_MEM_MASK;
-	mem = ioremap_nocache(cadr, 0x1000);
-	if(mem) {
+	ioaddr = (unsigned long)ioremap_nocache(cadr, 0x1000);
+	if(ioaddr) {
 		bit_i810i2c_setscl(NULL, 1);
 		bit_i810i2c_setsda(NULL, 1);
 		bit_i810ddc_setscl(NULL, 1);
@@ -308,7 +298,7 @@ static void __exit i2c_i810_exit(void)
 	pci_unregister_driver(&i810_driver);
 */
 	i810_remove(NULL);
-	iounmap(mem);
+	iounmap((void *)ioaddr);
 }
 
 MODULE_AUTHOR
