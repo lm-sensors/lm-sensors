@@ -690,11 +690,11 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
     data = (struct w83781d_data *) (((struct isa_client *) new_client) + 1);
     new_client->addr = 0;
     ((struct isa_client *) new_client)->isa_addr = address;
-    data->lock = MUTEX;
   } else {
     data = (struct w83781d_data *) (((struct i2c_client *) new_client) + 1);
     new_client->addr = address;
   }
+  data->lock = MUTEX;
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &w83781d_driver;
