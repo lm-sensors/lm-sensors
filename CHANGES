@@ -13,11 +13,15 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
-2.5.0 (200001??)
+2.5.0 (200003??)
   Dropped all kernel 2.0 and 2.1 compatibility
   Module i2c-i810: new
   Module i2c-amd756: fixed region request
   Module ddcmon: new
+  Module via686a: new
+  Library: Support for ddcmon and via686a
+  Program sensors-detect: Support for ddcmon and via686a
+  Program sensors: Support for eeprom, ddcmon and via686a
 
 2.4.5 (20000116)
   Introduced DESTDIR installation prefix
