@@ -854,6 +854,48 @@ static sensors_chip_feature lm90_features[] =
   };
 
 
+static sensors_chip_feature lm63_features[] =
+  {
+    { SENSORS_LM63_LOCAL_TEMP, "temp1",
+      NOMAP, NOMAP,
+      R, LM63_SYSCTL_TEMP1, VALUE(2), 0 },
+    { SENSORS_LM63_LOCAL_HIGH, "temp1_high",
+      SENSORS_LM63_LOCAL_TEMP, SENSORS_LM63_LOCAL_TEMP,
+      RW, LM63_SYSCTL_TEMP1, VALUE(1), 0 },
+    { SENSORS_LM63_REMOTE_TEMP, "temp2",
+      NOMAP, NOMAP,
+      R, LM63_SYSCTL_TEMP2, VALUE(3), 3 },
+    { SENSORS_LM63_REMOTE_HIGH, "temp2_high",
+      SENSORS_LM63_REMOTE_TEMP, SENSORS_LM63_REMOTE_TEMP,
+      RW, LM63_SYSCTL_TEMP2, VALUE(1), 3 },
+    { SENSORS_LM63_REMOTE_LOW, "temp2_low",
+      SENSORS_LM63_REMOTE_TEMP, SENSORS_LM63_REMOTE_TEMP,
+      RW, LM63_SYSCTL_TEMP2, VALUE(2), 3 },
+    { SENSORS_LM63_REMOTE_TCRIT, "temp2_crit",
+      SENSORS_LM63_REMOTE_TEMP, SENSORS_LM63_REMOTE_TEMP,
+      R, LM63_SYSCTL_TEMP2_TCRIT, VALUE(1), 0 },
+    { SENSORS_LM63_REMOTE_TCRIT_HYST, "temp2_crit_hyst",
+      SENSORS_LM63_REMOTE_TEMP, SENSORS_LM63_REMOTE_TEMP,
+      RW, LM63_SYSCTL_TEMP2_TCRIT_HYST, VALUE(1), 0 },
+    { SENSORS_LM63_ALARMS, "alarms",
+      NOMAP, NOMAP,
+      R, LM63_SYSCTL_ALARMS, VALUE(1), 0 },
+    { SENSORS_LM63_FAN_LOW, "fan1_min",
+      SENSORS_LM63_FAN, SENSORS_LM63_FAN,
+      RW, LM63_SYSCTL_FAN1, VALUE(1), 0 },
+    { SENSORS_LM63_FAN, "fan1",
+      NOMAP, NOMAP,
+      R, LM63_SYSCTL_FAN1, VALUE(2), 0 },
+    { SENSORS_LM63_PWM, "pwm1",
+      NOMAP, NOMAP,
+      RW, LM63_SYSCTL_PWM1, VALUE(1), 0 },
+    { SENSORS_LM63_PWM_ENABLE, "pwm1_enable",
+      SENSORS_LM63_PWM, NOMAP,
+      RW, LM63_SYSCTL_PWM1, VALUE(2), 0 },
+    { 0 }
+  };
+
+
 static sensors_chip_feature w83781d_features[] =
   { 
     { SENSORS_W83781D_IN0, "in0", NOMAP, NOMAP, 
@@ -5288,6 +5330,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_LM99_PREFIX, lm90_features },
  { SENSORS_LM86_PREFIX, lm90_features },
  { SENSORS_MAX6657_PREFIX, lm90_features },
+ { SENSORS_LM63_PREFIX, lm63_features },
  { SENSORS_MAX1619_PREFIX, max1619_features },
  { SENSORS_XEONTEMP_PREFIX, xeontemp_features },
  { SENSORS_MAX6650_PREFIX, max6650_features },

@@ -495,6 +495,23 @@
 #define SENSORS_LM90_REMOTE_TCRIT_HYST 80 /* R, see driver source */
 #define SENSORS_LM90_ALARMS 81 /* R */
 
+/* LM63 chips */
+
+#define SENSORS_LM63_PREFIX "lm63"
+
+#define SENSORS_LM63_LOCAL_TEMP			51 /* R  */
+#define SENSORS_LM63_LOCAL_HIGH			52 /* RW */
+#define SENSORS_LM63_REMOTE_TEMP		57 /* R  */
+#define SENSORS_LM63_REMOTE_HIGH		58 /* RW */
+#define SENSORS_LM63_REMOTE_LOW			59 /* RW */
+#define SENSORS_LM63_REMOTE_TCRIT		60 /* R  */
+#define SENSORS_LM63_REMOTE_TCRIT_HYST		80 /* RW */
+#define SENSORS_LM63_ALARMS			81 /* R  */
+#define SENSORS_LM63_FAN			84 /* R  */
+#define SENSORS_LM63_FAN_LOW			85 /* RW */
+#define SENSORS_LM63_PWM			87 /* RW */
+#define SENSORS_LM63_PWM_ENABLE			88 /* RW */
+
 /* Winbond W83781D chips */
 
 #define SENSORS_W83781D_PREFIX "w83781d"
