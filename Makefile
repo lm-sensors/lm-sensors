@@ -208,8 +208,8 @@ package: version clean
 	find $$lmpackage/ -type f | grep -v ^$$lmpackage/$$lmpackage$$ | \
 	                            grep -v ^$$lmpackage/$$lmpackage.tar$$ | \
 	                            grep -v ^$$lmpackage/$$ | \
-	                            grep -v CVS | \
-	                            grep -v ^$$lmpackage/.# | \
+	                            grep -v /CVS | \
+	                            grep -v /\\.# | \
 	                            tar rvf $$lmpackage.tar -T -; \
         gzip -9 $$lmpackage.tar ;\
         $(RM) $$lmpackage.tar $$lmpackage
