@@ -28,9 +28,11 @@
 #include <linux/malloc.h>
 #include "compat.h"
 #include "i2c.h"
+#include "smbus.h"
 #include "isa.h"
 #include "sensors.h"
 #include "version.h"
+#include "i2c-dev.h"
 
 #ifdef MODULE
 extern int init_module(void);
@@ -144,6 +146,13 @@ int i2cdev_lseek (struct inode *inode, struct file *file, off_t offset,
                   int origin)
 #endif
 {
+#ifdef DEBUG
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,56))
+   struct inode *inode = file->f_dentry->d_inode;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,70)) */
+  printk("i2c_dev,o: i2c-%d lseek to %ld bytes relative to %d.\n",
+         MINOR(inode->i_rdev),offset,origin);
+#endif /* DEBUG */
   return -ESPIPE;
 }
 
@@ -161,17 +170,23 @@ static int i2cdev_read(struct inode *inode, struct file *file, char *buf,
   char *tmp;
   int ret;
 
-  struct i2c_client *client = (struct i2c_client *)file->private_data;
+#ifdef DEBUG
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,70))
+   struct inode *inode = file->f_dentry->d_inode;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,70)) */
+#endif /* DEBUG */
 
-#ifdef  DEBUG
-  printk("i2cdev_read: i2c%d reading %d bytes from %d.\n",minor,count,
-         client->addr);
-#endif
+  struct i2c_client *client = (struct i2c_client *)file->private_data;
 
   /* copy user space data to kernel space. */
   tmp = kmalloc(count,GFP_KERNEL);
   if (tmp==NULL)
      return -ENOMEM;
+
+#ifdef DEBUG
+  printk("i2c_dev,o: i2c-%d reading %d bytes.\n",MINOR(inode->i_rdev),count);
+#endif
+
   ret = i2c_master_recv(client,tmp,count);
   copy_to_user(buf,tmp,count);
   kfree(tmp);
@@ -193,6 +208,12 @@ static int i2cdev_write(struct inode *inode, struct file *file,
   char *tmp;
   struct i2c_client *client = (struct i2c_client *)file->private_data;
 
+#ifdef DEBUG
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,70))
+   struct inode *inode = file->f_dentry->d_inode;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,70)) */
+#endif /* DEBUG */
+
   /* copy user space data to kernel space. */
   tmp = kmalloc(count,GFP_KERNEL);
   if (tmp==NULL)
@@ -200,14 +221,127 @@ static int i2cdev_write(struct inode *inode, struct file *file,
   copy_from_user(tmp,buf,count);
 
 #ifdef DEBUG
-  printk("i2c_write: i2c%d writing %d bytes.\n",minor,count);
+  printk("i2c_dev,o: i2c-%d writing %d bytes.\n",MINOR(inode->i_rdev),count);
 #endif
   ret = i2c_master_send(client,tmp,count);
   kfree(tmp);
   return ret;
 }
 
-  
+int i2cdev_ioctl (struct inode *inode, struct file *file, unsigned int cmd, 
+                  unsigned long arg)
+{
+  struct i2c_client *client = (struct i2c_client *)file->private_data;
+  struct i2c_smbus_data *data_arg;
+  union smbus_data temp;
+  int ver,datasize,res;
+
+#ifdef DEBUG
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,70))
+   struct inode *inode = file->f_dentry->d_inode;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,70)) */
+  printk("i2c_dev.o: i2c-%d ioctl, cmd: 0x%x, arg: %lx.\n", 
+         MINOR(inode->i_rdev),cmd, arg);
+#endif /* DEBUG */
+
+  switch ( cmd ) {
+    case I2C_SLAVE:
+      if (arg > 0x7f)
+        return -EINVAL;
+      client->addr = arg;
+      return 0;
+    case I2C_TENBIT:
+      printk("i2c-dev.o: ioctl I2C_TENBIT not (yet) supported!\n");
+      return -EINVAL;
+    case I2C_SMBUS:
+      if (! (data_arg = (struct i2c_smbus_data *) arg)) {
+#ifdef DEBUG
+        printk("i2c-dev.o: NULL argument pointer in ioctl I2C_SMBUS.\n");
+#endif
+        return -EINVAL;
+      }
+      if (verify_area(VERIFY_READ,data_arg,sizeof(struct i2c_smbus_data))) {
+#ifdef DEBUG
+        printk("i2c-dev.o: invalid argument pointer (%p) "
+               "in IOCTL I2C_SMBUS.\n", data_arg);
+#endif
+        return -EINVAL;
+      }
+      if ((data_arg->size != SMBUS_BYTE) && 
+          (data_arg->size != SMBUS_QUICK) &&
+          (data_arg->size != SMBUS_BYTE_DATA) && 
+          (data_arg->size != SMBUS_WORD_DATA) &&
+          (data_arg->size != SMBUS_PROC_CALL) &&
+          (data_arg->size != SMBUS_BLOCK_DATA)) {
+#ifdef DEBUG
+        printk("i2c-dev.o: size out of range (%x) in ioctl I2C_SMBUS.\n",
+               data_arg->size);
+#endif
+        return -EINVAL;
+      }
+      /* Note that SMBUS_READ and SMBUS_WRITE are 0 and 1, so the check is
+         valid if size==SMBUS_QUICK too. */
+      if ((data_arg->read_write != SMBUS_READ) && 
+          (data_arg->read_write != SMBUS_WRITE)) {
+#ifdef DEBUG
+        printk("i2c-dev.o: read_write out of range (%x) in ioctl I2C_SMBUS.\n",
+               data_arg->read_write);
+#endif
+        return -EINVAL;
+      }
+
+      /* Note that command values are always valid! */
+
+      if ((data_arg->size == SMBUS_QUICK) ||
+          ((data_arg->size == SMBUS_BYTE) && 
+           (data_arg->read_write == SMBUS_WRITE)))
+        /* These are special: we do not use data */
+        return smbus_access(client->adapter, client->addr, 
+                            data_arg->read_write, data_arg->command,
+                            data_arg->size, NULL);
+
+      if (data_arg->data == NULL) {
+#ifdef DEBUG
+        printk("i2c-dev.o: data is NULL pointer in ioctl I2C_SMBUS.\n");
+#endif
+        return -EINVAL;
+      }
+
+      /* This seems unlogical but it is not: if the user wants to read a
+         value, we must write that value to user memory! */
+      ver = (data_arg->read_write == SMBUS_WRITE)?VERIFY_READ:VERIFY_WRITE;
+
+      if ((data_arg->size == SMBUS_BYTE_DATA) || (data_arg->size == SMBUS_BYTE))
+        datasize = sizeof(data_arg->data->byte);
+      else if (data_arg->size == SMBUS_WORD_DATA)
+        datasize = sizeof(data_arg->data->word);
+      else /* size == SMBUS_BLOCK_DATA */
+        datasize = sizeof(data_arg->data->block);
+
+      if (verify_area(ver,data_arg->data,datasize)) {
+#ifdef DEBUG
+        printk("i2c-dev.o: invalid pointer data (%p) in ioctl I2C_SMBUS.\n",
+               data_arg->data);
+#endif
+        return -EINVAL;
+      }
+      if (data_arg->read_write == SMBUS_WRITE) {
+        copy_from_user(&temp,data_arg->data,datasize);
+        return smbus_access(client->adapter,client->addr,data_arg->read_write,
+                            data_arg->command,data_arg->size,&temp);
+      } else {
+        res = smbus_access(client->adapter,client->addr,data_arg->read_write,
+                           data_arg->command,data_arg->size,&temp);
+        if (!res)
+          copy_to_user(data_arg->data,&temp,datasize);
+        return res;
+      }
+    default:
+      return i2c_control(client,cmd,arg);
+   }
+  return 0;
+}
+
 int i2cdev_open (struct inode *inode, struct file *file)
 {
   unsigned int minor = MINOR(inode->i_rdev);
@@ -215,7 +349,7 @@ int i2cdev_open (struct inode *inode, struct file *file)
 
   if (! i2cdev_clients[minor]) {
 #ifdef DEBUG
-    printk("i2cdev: trying to open unattached adapter i2c-%d\n",minor);
+    printk("i2c-dev.o: Trying to open unattached adapter i2c-%d\n",minor);
 #endif
     return -ENODEV;
   }
@@ -231,7 +365,7 @@ int i2cdev_open (struct inode *inode, struct file *file)
   MOD_INC_USE_COUNT;
 
 #ifdef DEBUG
-  printk("i2cdev_open: i2c-%d\n",minor);
+  printk("i2c-dev.o: opened i2c-%d\n",minor);
 #endif
   return 0;
 }
@@ -245,7 +379,7 @@ static void i2cdev_release (struct inode *inode, struct file *file)
    kfree(file->private_data);
    file->private_data=NULL;
 #ifdef DEBUG
-   printk("i2c_close: i2c-%d\n", MINOR(inode->i_rdev));
+   printk("i2c-dev.o: Closed: i2c-%d\n", MINOR(inode->i_rdev));
 #endif
   MOD_DEC_USE_COUNT;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,31))
@@ -259,20 +393,22 @@ int i2cdev_attach_adapter(struct i2c_adapter *adap)
   struct i2c_client *client;
 
   if ((i = i2c_adapter_id(adap)) < 0) {
-    printk("i2cdev_attach_adapter: unknown adapter?!?\n");
+    printk("i2c-dev.o: Unknown adapter to attach?!?\n");
     return -ENODEV;
   }
   if (i >= I2CDEV_CLIENTS_MAX) {
-    printk("i2cdev_attach_adapter: adapter number too large?!? (%d)\n",i);
+    printk("i2c-dev.o: Adapter number to attach too large?!? (%d)\n",i);
     return -ENODEV;
   }
   if (i2cdev_clients[i]) {
-    printk("i2cdev_attach_adapter: adapter already in use?!? (%d)\n",i);
+    printk("i2c-dev.o: Adapter to attach already in use?!? (%d)\n",i);
     return -EBUSY;
   }
   if (i2c_is_isa_adapter(adap)) {
-    printk("i2cdev_attach_adapter: Can't open ISA adapter!\n");
-    return -ENODEV;
+#ifdef DEBUG
+    printk("i2c-dev.o: Can't open ISA adapter!\n");
+#endif
+    return 0;
   }
 
   if (! (client = (struct i2c_client *)kmalloc(sizeof(struct i2c_client), 
@@ -281,12 +417,12 @@ int i2cdev_attach_adapter(struct i2c_adapter *adap)
   memcpy(client,&i2cdev_client_template,sizeof(struct i2c_client));
   client->adapter = adap;
   if ((res =  i2c_attach_client(client))) {
-    printk("i2cdev_attach_adapter: attaching client failed.\n");
+    printk("i2c-dev.o: Attaching client failed.\n");
     kfree(client);
     return res;
   }
   i2cdev_clients[i] = client;
-  printk("i2cdev: registered '%s' as minor %d\n",adap->name,i);
+  printk("i2cdev.o: Registered '%s' as minor %d\n",adap->name,i);
   return 0;
 }
 
@@ -296,20 +432,20 @@ int i2cdev_detach_client(struct i2c_client *client)
   int i,res;
 
   if ((i = i2c_adapter_id(adap)) < 0) {
-    printk("i2cdev_detach_adapter: unknown adapter?!?\n");
+    printk("i2c-dev.o: Detaching unknown adapter?!?\n");
     return -ENODEV;
   }
   if (i >= I2CDEV_CLIENTS_MAX) {
-    printk("i2cdev_detach_adapter: adapter number too large?!? (%d)\n",i);
+    printk("i2c-dev.o: Adapter number to detach too large?!? (%d)\n",i);
     return -ENODEV;
   }
   if (!i2cdev_clients[i]) {
-    printk("i2cdev_detach_adapter: adapter not in use?!? (%d)\n",i);
+    printk("i2c-dev.o: Adapter to detach not in use?!? (%d)\n",i);
     return -ENODEV;
   }
 
   if ((res =  i2c_detach_client(client))) {
-    printk("i2cdev_detach_adapter: detaching client failed.\n");
+    printk("i2c-dev.o: detaching client %d failed.\n",i);
     return res;
   }
 
@@ -317,7 +453,7 @@ int i2cdev_detach_client(struct i2c_client *client)
   i2cdev_clients[i] = NULL;
 
 #ifdef DEBUG
-  printk("i2c(char): adapter unregistered: %s\n",adap->name);
+  printk("i2c-dev.o: Adapter unregistered: %s\n",adap->name);
 #endif
   return 0;
 }

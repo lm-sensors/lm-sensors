@@ -1,5 +1,6 @@
 Many, many things. Most notably:
 
+* Check for block read/writes in smbus-on-i2c emulation code
 * Merge newest Simon Vogl archive
 * Merge man-pages
 * Rename some public kernel header files

@@ -23,8 +23,10 @@
 
 #ifdef LM_SENSORS
 #include "i2c.h"
+#include "smbus.h"
 #else /* ndef LM_SENSORS */
 #include <linux/i2c.h>
+#include <linux/smbus.h>
 #endif /* def LM_SENSORS */
 
 /* Some IOCTL commands are defined in <linux/i2c.h> */
@@ -34,11 +36,15 @@
 
 /* This is the structure as used in the I2C_SMBUS ioctl call */
 struct i2c_smbus_data {
-  char read_write,
-  u8 command,
-  int size,
-  union smbus_data data
+  char read_write;
+  u8 command;
+  int size;
+  union smbus_data *data;
 };
+
+#ifndef __KERNEL__
+
+#include <linux/ioctl.h>
 
 extern inline s32 i2c_smbus_access(int file, char read_write, u8 command, 
                                    int size, union smbus_data *data)
@@ -49,12 +55,8 @@ extern inline s32 i2c_smbus_access(int file, char read_write, u8 command,
   args.read_write = read_write;
   args.command = command;
   args.size = size;
-  if (data)
-    memcpy(&args.data,data,sizeof(union smbus_data));
-  res = ioctl(f,I2C_SMBUS,&args);
-  if (data)
-    memcpy(data,&args,sizeof(union smbus_data));
-  return res;
+  args.data = data;
+  return ioctl(file,I2C_SMBUS,&args);
 }
 
 
@@ -146,5 +148,7 @@ extern inline s32 i2c_smbus_write_block_data(int file, u8 command, u8 length,
   data.block[0] = length;
   return i2c_smbus_access(file,SMBUS_WRITE,command,SMBUS_BLOCK_DATA,&data);
 }
+
+#endif /* ndef __KERNEL__ */
 
 #endif
