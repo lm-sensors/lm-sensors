@@ -99,7 +99,7 @@ struct i2c_client bmc_client = {
 
 static int bmcsensors_initialized;
 
-#define MAX_SDR_ENTRIES 50
+#define MAX_SDR_ENTRIES 100
 #define SDR_LIMITS 8
 #define SDR_MAX_ID_LENGTH 16
 #define SDR_MAX_UNPACKED_ID_LENGTH ((SDR_MAX_ID_LENGTH * 4 / 3) + 2)
