@@ -1229,7 +1229,7 @@ static void lm93_update_client_min(struct lm93_data *data,
 	ptr = &data->block1;
 	for (i = 0, ptr = &data->block1; i < 8; i++) {
 		*(ptr + i) =
-			lm93_read_word(client, LM93_REG_HOST_ERROR_1 + i);
+			lm93_read_byte(client, LM93_REG_HOST_ERROR_1 + i);
 	}
 
 	lm93_update_client_common(data, client);
