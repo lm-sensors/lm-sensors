@@ -1,7 +1,7 @@
 /*
  * lm90.c - Part of lm_sensors, Linux kernel modules for hardware
  *          monitoring
- * Copyright (c) 2003  Jean Delvare <khali@linux-fr.org>
+ * Copyright (C) 2003  Jean Delvare <khali@linux-fr.org>
  *
  * Based on the lm83 driver. The LM90 is a sensor chip made by National
  * Semiconductor. It reports up to two temperatures (its own plus up to
@@ -98,7 +98,7 @@ SENSORS_INSMOD_2(lm90, adm1032);
 #define LM90_REG_W_TCRIT_HYST    0x21
 
 /*
- * Conversions, initial values and various macros
+ * Conversions and various macros
  * The LM90 uses signed 8-bit values for the local temperatures,
  * and signed 11-bit values for the remote temperatures (except
  * T_CRIT). The 11-bit conversion formulas may not round negative
@@ -138,7 +138,7 @@ static void lm90_alarms(struct i2c_client *client, int operation,
 /*
  * Driver data (common to all clients)
  */
- 
+
 static struct i2c_driver lm90_driver = {
 	.owner          = THIS_MODULE,
 	.name           = "LM90/ADM1032 sensor driver",
@@ -229,7 +229,6 @@ static int lm90_attach_adapter(struct i2c_adapter *adapter)
  * The following function does more than just detection. If detection
  * succeeds, it also registers the new chip.
  */
-
 static int lm90_detect(struct i2c_adapter *adapter, int address,
 	unsigned short flags, int kind)
 {
@@ -298,7 +297,7 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 		 || reg_convrate > 0x0A)
 		{
 #ifdef DEBUG
-			printk("lm90.o: Detection failed at 0x%02x.\n",
+			printk(KERN_DEBUG "lm90.o: Detection failed at 0x%02x.\n",
 				address);
 #endif
 			goto ERROR1;
@@ -413,7 +412,7 @@ static void lm90_init_client(struct i2c_client *client)
 	u8 config;
 
 	/*
-	 * Starts the conversions.
+	 * Start the conversions.
 	 */
 
 	i2c_smbus_write_byte_data(client, LM90_REG_W_CONVRATE,

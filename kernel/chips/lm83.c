@@ -79,7 +79,7 @@ SENSORS_INSMOD_1(lm83);
 #define LM83_REG_W_TCRIT         0x5A
 
 /*
- * Conversions, initial values and various macros
+ * Conversions and various macros
  * The LM83 uses signed 8-bit values.
  */
 
@@ -285,7 +285,7 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 		      & 0x41) != 0x00))
 		{
 #ifdef DEBUG
-			printk("lm83.o: LM83 detection failed at 0x%02x.\n",
+			printk(KERN_DEBUG "lm83.o: Detection failed at 0x%02x.\n",
 				address);
 #endif
 			goto ERROR1;
@@ -412,6 +412,7 @@ static void lm83_update_client(struct i2c_client *client)
 		data->alarms =
 			i2c_smbus_read_byte_data(client, LM83_REG_R_STATUS1) +
 			(i2c_smbus_read_byte_data(client, LM83_REG_R_STATUS2) << 8);
+
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
