@@ -67,7 +67,7 @@ static inline int vid_from_reg(int val, int vrm)
 		else
 			vid = 18625 - (val & 0x1f) * 250;
 		if(val & 0x20)
-			vid += 125;
+			vid -= 125;
 		vid /= 10;	/* only return 3 dec. places for now */
 		return vid;
 
