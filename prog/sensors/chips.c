@@ -241,10 +241,15 @@ void print_gl518(const sensors_chip_name *name)
      actual readings! We hardcode this, as this is the easiest way. */
   if (is_r00) {
     if (!sensors_get_label(*name,SENSORS_GL518R00_VDD,&label) &&
+        !sensors_get_feature(*name,SENSORS_GL518R00_VDD,&cur) &&
         !sensors_get_feature(*name,SENSORS_GL518R00_VDD_MIN,&min) &&
         !sensors_get_feature(*name,SENSORS_GL518R00_VDD_MAX,&max)) {
       print_label(label,10);
-      printf("(n/a)     (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
+      if (cur == 0.0)
+        printf("(n/a)     ");
+      else
+        printf("%+6.2f V  ",cur);
+      printf(  "(min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
              min,max,alarms&GL518_ALARM_VDD?"ALARM":"     ",
              beeps&GL518_ALARM_VDD?"(beep)":"");
     } else
@@ -252,20 +257,30 @@ void print_gl518(const sensors_chip_name *name)
     free_the_label(&label);
 
     if (!sensors_get_label(*name,SENSORS_GL518R00_VIN1,&label) &&
+        !sensors_get_feature(*name,SENSORS_GL518R00_VIN1,&cur) &&
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN1_MIN,&min) &&
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN1_MAX,&max)) {
       print_label(label,10);
-      printf("(n/a)     (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
+      if (cur == 0.0)
+        printf("(n/a)     ");
+      else
+        printf("%+6.2f V  ",cur);
+      printf("(min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
              min,max,alarms&GL518_ALARM_VIN1?"ALARM":"     ",
              beeps&GL518_ALARM_VIN1?"(beep)":"");
     } else
       printf("ERROR: Can't get VIN1 data!\n");
     free_the_label(&label);
     if (!sensors_get_label(*name,SENSORS_GL518R00_VIN2,&label) &&
+        !sensors_get_feature(*name,SENSORS_GL518R00_VIN2,&cur) &&
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN2_MIN,&min) &&
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN2_MAX,&max)) {
       print_label(label,10);
-      printf("(n/a)     (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
+      if (cur == 0.0)
+        printf("(n/a)     ");
+      else
+        printf("%+6.2f V  ",cur);
+      printf("(min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
              min,max,alarms&GL518_ALARM_VIN2?"ALARM":"     ",
              beeps&GL518_ALARM_VIN2?"(beep)":"");
     } else
