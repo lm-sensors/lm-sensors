@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
  
   fprintf(stderr,"  WARNING! This program can confuse your I2C bus, "
           "cause data loss and worse!\n");
-  fprintf(stderr,"  I will probe file %s, address %x, mode %s\n",
+  fprintf(stderr,"  I will probe file %s, address 0x%x, mode %s\n",
           filename,address,size == SMBUS_BYTE_DATA?"byte":"word");
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
   sleep(5);

@@ -33,6 +33,10 @@ enter at the insmod command, in the configuration file. The syntax is
 as follows:
   options i2c-core debug=2
 
+Finally, it is possible to auto-load the i2c-dev module if a /dev/i2c-*
+file is accessed. You need the following line in the configuration file:
+  alias char-major-89 i2c-dev
+
 With the above, the managing of all those modules is suddenly no problem
 at all!
 
@@ -44,6 +48,9 @@ at all!
 
 (src) i2c-proc: i2c-core
   Creates /proc/bus/i2c* files.
+
+(src) i2c-dev: smbus i2c-core
+  Grants access to /dev/i2c-* files
 
 (src) smbus: i2c-core
   SMBus emulation on i2c busses. Base algorithm, on which SMBus-only adapters
