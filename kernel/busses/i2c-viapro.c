@@ -1,8 +1,9 @@
 /*
     i2c-viapro.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>, 
-    Philip Edelbrock <phil@netroedge.com>, Kyösti Mälkki <kmalkki@cc.hut.fi>
+    Copyright (c) 1998 - 2001  Frodo Looijaard <frodol@dds.nl>, 
+    Philip Edelbrock <phil@netroedge.com>, Kyösti Mälkki <kmalkki@cc.hut.fi>,
+    Mark D. Studebaker <mdsxyz123@yahoo.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +20,14 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* Note: we assume there can only be one VT596A/B, with one SMBus interface */
+/*
+   Supports Via devices:
+	82C596A/B (0x3050)
+	82C596B (0x3051)
+	82C686A/B
+	8233
+   Note: we assume there can only be one device, with one SMBus interface.
+*/
 
 #include <linux/version.h>
 #include <linux/module.h>
@@ -35,14 +43,38 @@
 #include <linux/init.h>
 
 #ifndef PCI_DEVICE_ID_VIA_82C596_3
-#define PCI_DEVICE_ID_VIA_82C596_3 0x3050
+#define PCI_DEVICE_ID_VIA_82C596_3 	0x3050
 #endif
 #ifndef PCI_DEVICE_ID_VIA_82C596B_3
 #define PCI_DEVICE_ID_VIA_82C596B_3	0x3051
 #endif
 #ifndef PCI_DEVICE_ID_VIA_82C686_4
-#define PCI_DEVICE_ID_VIA_82C686_4 0x3057
+#define PCI_DEVICE_ID_VIA_82C686_4 	0x3057
 #endif
+#ifndef PCI_DEVICE_ID_VIA_8233_0
+#define PCI_DEVICE_ID_VIA_8233_0	0x3074
+#endif
+
+#define SMBBA1	    0x90
+#define SMBBA2      0x80
+#define SMBBA3      0xD0
+
+struct sd {
+	const unsigned short dev;
+	const unsigned char base;
+	const unsigned char hstcfg;
+	const char *name;
+};
+
+static struct sd supported[] = {
+	{PCI_DEVICE_ID_VIA_82C596_3, SMBBA1, 0xD2, "VT82C596A/B"},
+	{PCI_DEVICE_ID_VIA_82C596B_3, SMBBA1, 0xD2, "VT82C596B"},
+	{PCI_DEVICE_ID_VIA_82C686_4, SMBBA1, 0xD2, "VT82C686A/B"},
+	{PCI_DEVICE_ID_VIA_8233_0, SMBBA3, 0xD2, "VT8233"},
+	{0, 0, 0, NULL}
+};
+
+static struct sd *num = supported;
 
 /* SMBus address offsets */
 #define SMBHSTSTS (0 + vt596_smba)
@@ -63,12 +95,8 @@
 /* SMBus data in configuration space can be found in two places,
    We try to select the better one*/
 
-static unsigned short smb_cf_base;
 static unsigned short smb_cf_hstcfg;
 
-#define SMBBA1	    0x90
-#define SMBBA2      0x80
-#define SMBBA       (smb_cf_base)
 #define SMBHSTCFG   (smb_cf_hstcfg)
 #define SMBSLVC     (SMBHSTCFG+1)
 #define SMBSHDW1    (SMBHSTCFG+2)
@@ -92,14 +120,14 @@ static unsigned short smb_cf_hstcfg;
    VT596. DANGEROUS! */
 static int force = 0;
 MODULE_PARM(force, "i");
-MODULE_PARM_DESC(force, "Forcibly enable the VT82C596 SMBus. DANGEROUS!");
+MODULE_PARM_DESC(force, "Forcibly enable the SMBus. DANGEROUS!");
 
 /* If force_addr is set to anything different from 0, we forcibly enable
    the VT596 at the given address. VERY DANGEROUS! */
 static int force_addr = 0;
 MODULE_PARM(force_addr, "i");
 MODULE_PARM_DESC(force_addr,
-		 "Forcibly enable the VT82C596 SMBus at the given address. "
+		 "Forcibly enable the SMBus at the given address. "
 		 "EXTREMELY DANGEROUS!");
 
 #ifdef MODULE
@@ -150,75 +178,56 @@ static int __initdata vt596_initialized;
 static unsigned short vt596_smba = 0;
 
 
-/* Detect whether a VT596 can be found, and initialize it, where necessary.
-   Note the differences between kernels with the old PCI BIOS interface and
-   newer kernels with the real PCI interface. In compat.h some things are
-   defined to make the transition easier. */
+/* Detect whether a compatible device can be found, and initialize it. */
 int vt596_setup(void)
 {
-	int error_return = 0;
 	unsigned char temp;
 
-	struct pci_dev *VT596_dev;
+	struct pci_dev *VT596_dev = NULL;
 
 	/* First check whether we can access PCI at all */
-	if (pci_present() == 0) {
-		printk("i2c-viapro.o: Error: No PCI-bus found!\n");
-		error_return = -ENODEV;
-		goto END;
-	}
+	if (pci_present() == 0)
+		return(-ENODEV);
 
-	/* Look for the VT596 function 3   _or_  VT686 function 4 */
-	VT596_dev = NULL;
-	VT596_dev = pci_find_device(PCI_VENDOR_ID_VIA,
-				    PCI_DEVICE_ID_VIA_82C596_3, VT596_dev);
-	if (VT596_dev == NULL)
-		VT596_dev = pci_find_device(PCI_VENDOR_ID_VIA,
-					    PCI_DEVICE_ID_VIA_82C686_4,
-					    VT596_dev);
+	/* Look for a supported device/function */
+	do {
+		if((VT596_dev = pci_find_device(PCI_VENDOR_ID_VIA, num->dev,
+					        VT596_dev)))
+			break;
+	} while ((++num)->dev);
 
 	if (VT596_dev == NULL)
-		VT596_dev = pci_find_device(PCI_VENDOR_ID_VIA,
-					    PCI_DEVICE_ID_VIA_82C596B_3,
-					    VT596_dev);
-
-	if (VT596_dev == NULL) {
-		printk
-		    ("i2c-viapro.o: Error: Can't detect vt82c596 or vt82c686");
-		error_return = -ENODEV;
-		goto END;
-	}
-
-/* Determine the configuration space registers for the SMBus areas */
-	if ((!pci_read_config_word(VT596_dev, SMBBA1, &vt596_smba))
-	    && (vt596_smba & 0x1)) {
-		smb_cf_base = SMBBA1;
-		smb_cf_hstcfg = 0xD2;
-	} else if ((!pci_read_config_word(VT596_dev, SMBBA2, &vt596_smba))
-		   && (vt596_smba & 0x1)) {
-		smb_cf_base = SMBBA2;
-		smb_cf_hstcfg = 0x84;
-	} else {
-		printk
-		    ("i2c-viapro.o: Cannot configure SMBus I/O Base address\n");
-		error_return = -ENODEV;
-		goto END;
-	}
+		return(-ENODEV);
+	printk("i2c-viapro.o: Found Via %s device\n", num->name);
 
 /* Determine the address of the SMBus areas */
+	smb_cf_hstcfg = num->hstcfg;
 	if (force_addr) {
-		vt596_smba = force_addr & 0xfff0;
+		vt596_smba = force_addr;
 		force = 0;
 	} else {
-		vt596_smba &= 0xfff0;
+		if ((pci_read_config_word(VT596_dev, num->base, &vt596_smba))
+		    || !(vt596_smba & 0x1)) {
+			/* try 2nd address and config reg. for 596 */
+			if((num->dev == PCI_DEVICE_ID_VIA_82C596_3) &&
+			   (!pci_read_config_word(VT596_dev, SMBBA2, &vt596_smba)) &&
+			   (vt596_smba & 0x1))
+				smb_cf_hstcfg = 0x84;
+			else
+				goto FAIL;
+		} else {
+FAIL:
+			printk
+			    ("i2c-viapro.o: Cannot configure SMBus I/O Base address\n");
+			return(-ENODEV);
+		}
 	}
+	vt596_smba &= 0xfff0;
 
 	if (check_region(vt596_smba, 8)) {
-		printk
-		    ("i2c-viapro.o: vt82c596_smb region 0x%x already in use!\n",
-		     vt596_smba);
-		error_return = -ENODEV;
-		goto END;
+		printk("i2c-viapro.o: SMB region 0x%x already in use!\n",
+		        vt596_smba);
+		return(-ENODEV);
 	}
 
 	pci_read_config_byte(VT596_dev, SMBHSTCFG, &temp);
@@ -226,11 +235,11 @@ int vt596_setup(void)
    sure, we disable the VT596 first. */
 	if (force_addr) {
 		pci_write_config_byte(VT596_dev, SMBHSTCFG, temp & 0xfe);
-		pci_write_config_word(VT596_dev, SMBBA, vt596_smba);
+		pci_write_config_word(VT596_dev, num->base, vt596_smba);
 		pci_write_config_byte(VT596_dev, SMBHSTCFG, temp | 0x01);
 		printk
-		    ("i2c-viapro.o: WARNING: VT596 SMBus interface set to new "
-		     "address %04x!\n", vt596_smba);
+		    ("i2c-viapro.o: WARNING: SMBus interface set to new "
+		     "address 0x%04x!\n", vt596_smba);
 	} else if ((temp & 1) == 0) {
 		if (force) {
 /* NOTE: This assumes I/O space and other allocations WERE
@@ -245,8 +254,7 @@ int vt596_setup(void)
 		} else {
 			printk
 			    ("SMBUS: Error: Host SMBus controller not enabled!\n");
-			error_return = -ENODEV;
-			goto END;
+			return(-ENODEV);
 		}
 	}
 
@@ -268,8 +276,7 @@ int vt596_setup(void)
 	printk("i2c-viapro.o: VT596_smba = 0x%X\n", vt596_smba);
 #endif				/* DEBUG */
 
-      END:
-	return error_return;
+	return(0);
 }
 
 
@@ -297,13 +304,13 @@ int vt596_transaction(void)
 	/* Make sure the SMBus host is ready to start transmitting */
 	if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-		printk("i2c-viapro.o: SMBus busy (%02x). Resetting... \n",
+		printk("i2c-viapro.o: SMBus busy (0x%02x). Resetting... \n",
 		       temp);
 #endif
 		outb_p(temp, SMBHSTSTS);
 		if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-			printk("i2c-viapro.o: Failed! (%02x)\n", temp);
+			printk("i2c-viapro.o: Failed! (0x%02x)\n", temp);
 #endif
 			return -1;
 		} else {
@@ -498,12 +505,12 @@ int __init i2c_vt596_init(void)
 	vt596_initialized = 0;
 	if ((res = vt596_setup())) {
 		printk
-		    ("i2c-viapro.o: vt82c596 not detected, module not inserted.\n");
+		    ("i2c-viapro.o: Can't detect vt82c596 or compatible device, module not inserted.\n");
 		vt596_cleanup();
 		return res;
 	}
 	vt596_initialized++;
-	sprintf(vt596_adapter.name, "SMBus vt82c596 adapter at %04x",
+	sprintf(vt596_adapter.name, "SMBus Via Pro adapter at %04x",
 		vt596_smba);
 	if ((res = i2c_add_adapter(&vt596_adapter))) {
 		printk
@@ -512,7 +519,7 @@ int __init i2c_vt596_init(void)
 		return res;
 	}
 	vt596_initialized++;
-	printk("i2c-viapro.o: vt82c596 bus detected and initialized\n");
+	printk("i2c-viapro.o: Via Pro SMBus detected and initialized\n");
 	return 0;
 }
 

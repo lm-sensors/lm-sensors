@@ -43,7 +43,7 @@ At least the following I2C/SMBus adapters are supported:
   SiS 5595
   SMSC Victory66
   3Dfx Voodoo 3 and Banshee
-  VIA Technologies VT82C586B, VT82C596A/B, and VT82C686A/B
+  VIA Technologies VT82C586B, VT82C596A/B, VT82C686A/B, and VT8233
 
 
 At least the following hardware sensor chips are supported:
