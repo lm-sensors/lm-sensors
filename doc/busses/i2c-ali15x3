@@ -1,41 +1,41 @@
-Kernel driver `i2c-ali5x3.o'
+Kernel driver `i2c-ali15x3.o'
 
-Status: Complete and tested.
-        Block reads/writes untested (not used by any current chip driver).
+Status: Complete and tested; block reads/writes untested (not used by any
+        current chip driver)
 
 Supported adapters:
-  * Acer Labs, Inc. ALI 1533 and 1543C
+  * Acer Labs, Inc. ALI 1533 and 1543C (south bridge)
     Datasheet: Available at the Acer Labs website (password required)
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
-	<phil@netroedge.com>, and Mark D. Studebaker <mdsxyz123@yahoo.com>
+        <phil@netroedge.com>, and Mark D. Studebaker <mdsxyz123@yahoo.com>
+
+License: GPL
 
 
 Module Parameters
 -----------------
 
-force_addr=0xaddr	Set the I/O base address. Useful for boards
-			that don't set the address in the BIOS. Does not do a
-			PCI force; the device must still be present in lspci.
-			Don't use this unless the driver complains that the
-			base address is not set.
-			Example: 'modprobe i2c-ali15x3 force_addr=0xe800'
+* force_addr: int
+  Initialize the base address of the i2c controller
+
+
+Notes
+-----
+
+The force_addr parameter is useful for boards that don't set the address
+in the BIOS. Does not do a PCI force; the device must still be present
+in lspci. Don't use this unless the driver complains that the
+base address is not set.
+Example: 'modprobe i2c-ali15x3 force_addr=0xe800'
+
+SMBus periodically hangs on ASUS P5A motherboards and can only be
+cleared by a power cycle. Cause unknown (see Issues below).
 
 
 Description
 -----------
 
-
-Stability
----------
-Complete and tested.
-SMBus periodically hangs on ASUS P5A motherboards and can only be
-cleared by a power cycle. Cause unknown (see Issues below).
-Block reads/writes untested (not used by any existing sensor driver).
-
-
-Supported Devices
------------------
 This is the driver for the SMB Host controller on
 Acer Labs Inc. (ALI) M1541 and M1543C South Bridges.
 
@@ -119,6 +119,7 @@ by accessing the W83781D on the ISA bus only.
 
 Hot Plug Modules
 ----------------
+
 There are EXPERIMENTAL "hotplug" modules which will enable the
 m7101 device if it is not enabled on your motherboard.
 Use these at your own risk. Read the README file carefully.
@@ -130,3 +131,5 @@ m7101 Version 0.1 for 2.2 and early 2.3 kernels:
 m7101 Version 0.2 for 2.4 and later 2.3 kernels:
 	In the directory prog/hotplug in this package.
 	Must be built separately.
+
+

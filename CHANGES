@@ -19,6 +19,8 @@ ask CVS about it:
 
 2.6.6 (2002????)
   NOTE: Requires i2c-2.6.6 or newer.
+  File doc/busses/i2c-ali1535: Add license, miscellaneous changes
+  File doc/busses/i2c-ali15x3: Add license, miscellaneous changes
   File doc/busses/i2c-sis645: Add license
   File doc/chips/lm92: Add license, features
   File doc/chips/maxilife: Add license, parameters, features
