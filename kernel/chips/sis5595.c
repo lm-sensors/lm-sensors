@@ -165,13 +165,9 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif				/* MODULE */
 
-/* This module may seem overly long and complicated. In fact, it is not so
-   bad. Quite a lot of bookkeeping is done. A real driver can often cut
-   some corners. */
-
-/* For each registered SIS5595, we need to keep some data in memory. That
+/* For the SIS5595, we need to keep some data in memory. That
    data is pointed to by sis5595_list[NR]->data. The structure itself is
-   dynamically allocated, at the same time when a new sis5595 client is
+   dynamically allocated, at the time when the new sis5595 client is
    allocated. */
 struct sis5595_data {
 	struct semaphore lock;
@@ -182,14 +178,14 @@ struct sis5595_data {
 	unsigned long last_updated;	/* In jiffies */
 	char maxins;		/* == 3 if temp enabled, otherwise == 4 */
 
-	u8 in[4];		/* Register value */
-	u8 in_max[4];		/* Register value */
-	u8 in_min[4];		/* Register value */
+	u8 in[5];		/* Register value */
+	u8 in_max[5];		/* Register value */
+	u8 in_min[5];		/* Register value */
 	u8 fan[2];		/* Register value */
 	u8 fan_min[2];		/* Register value */
 	u8 temp;		/* Register value */
-	u8 temp_over;		/* Register value */
-	u8 temp_hyst;		/* Register value */
+	u8 temp_over;		/* Register value  - really max */
+	u8 temp_hyst;		/* Register value  - really min */
 	u8 fan_div[2];		/* Register encoding, shifted right */
 	u16 alarms;		/* Register encoding, combined */
 };
@@ -340,8 +336,7 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 	}
 
 	if (check_region(address, SIS5595_EXTENT)) {
-		printk("sis5595.o: region 0x%x already in use!\n",
-		       address);
+		printk("sis5595.o: region 0x%x already in use!\n", address);
 		return -ENODEV;
 	}
 
@@ -625,19 +620,16 @@ void sis5595_fan(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		sis5595_update_client(client);
 		results[0] = FAN_FROM_REG(data->fan_min[nr - 1],
-					  DIV_FROM_REG(data->
-						       fan_div[nr - 1]));
-		results[1] =
-		    FAN_FROM_REG(data->fan[nr - 1],
-				 DIV_FROM_REG(data->fan_div[nr - 1]));
+					  DIV_FROM_REG(data->fan_div[nr - 1]));
+		results[1] = FAN_FROM_REG(data->fan[nr - 1],
+					  DIV_FROM_REG(data->fan_div[nr - 1]));
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			data->fan_min[nr - 1] = FAN_TO_REG(results[0],
 							   DIV_FROM_REG
 							   (data->
-							    fan_div[nr -
-								    1]));
+							    fan_div[nr-1]));
 			sis5595_write_value(client,
 					    SIS5595_REG_FAN_MIN(nr),
 					    data->fan_min[nr - 1]);
@@ -716,8 +708,7 @@ void sis5595_fan_div(struct i2c_client *client, int operation,
 		if (*nrels_mag >= 1) {
 			data->fan_div[0] = DIV_TO_REG(results[0]);
 			old = (old & 0xcf) | (data->fan_div[0] << 4);
-			sis5595_write_value(client, SIS5595_REG_FANDIV,
-					    old);
+			sis5595_write_value(client, SIS5595_REG_FANDIV, old);
 		}
 	}
 }
