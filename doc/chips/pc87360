@@ -39,7 +39,7 @@ is triggered if the rotation speed has dropped below a programmable limit.
 Fan readings can be divided by a programmable divider (1, 2, 4 or 8) to give
 the readings more range or accuracy. Not all RPM values can accurately be
 represented, so some rounding is done. With a divider of 2, the lowest
-representable value is around 1900 RPM. See doc/fan-divisors for details.
+representable value is around 950 RPM. See doc/fan-divisors for details.
 
 A different alarm is also triggered if the fan speed is too low to be
 measured. It is suggested to increase the fan divisor in this case.
@@ -66,7 +66,8 @@ miss once-only alarms.
 Limitations
 -----------
 
-The voltages and temperatures are read-only at the moment.
+There are a few unimplemented configuration options at the moment. We'll
+add them if someone needs them.
 
 The datasheets suggests that some values (fan mins, fan divisors)
 shouldn't be changed once the monitoring has started, but we ignore that
