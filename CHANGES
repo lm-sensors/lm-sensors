@@ -25,6 +25,7 @@ ask CVS about it:
   Module i2c-i801: Check for uninitialized base address;
                    enable if not enabled
   Module i2c-piix4: Refuse to load on IBM systems
+  Module i2c-sis630: new
   Module lm92: Fix in-kernel initialization
   Module w83781: recognize Asus "ASB100 Bach" as AS99127F
   Program dmidecode: new
