@@ -78,7 +78,7 @@
 #define pci_write_config_byte_united(device,bus,dev,com,res) \
                             pci_write_config_byte(device,com,res)
 #define pci_write_config_word_united(device,bus,dev,com,res) \
-                            pci_write_config_byte(device,com,res)
+                            pci_write_config_word(device,com,res)
 #endif
 
 /* I hope this is always correct, even for the PPC, but I really think so.
