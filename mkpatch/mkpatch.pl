@@ -424,9 +424,9 @@ CONFIG_SENSORS_MTP008
 National Semiconductor LM75 and compatibles
 CONFIG_SENSORS_LM75 
   If you say yes here you get support for National Semiconductor LM75
-  sensor chips and clones: Dallas Semi DS75 and DS1775, TelCon
-  TCN75, and National Semi LM77. This can also be built as a module which
-  can be inserted and removed while the kernel is running.
+  sensor chips and clones: Dallas Semi DS75 and DS1775, and TelCon
+  TCN75. This can also be built as a module which can be inserted and
+  removed while the kernel is running.
 
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 

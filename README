@@ -95,7 +95,7 @@ At least the following hardware sensor chips are supported:
         MAX6633, MAX6634, MAX6635
   Microchip TC1068, TCM1617, TCN75
   Myson MTP008
-  National Semiconductor LM75, LM76, LM77, LM78, LM78-J, LM79,
+  National Semiconductor LM75, LM76, LM78, LM78-J, LM79,
                          LM80, LM81, LM83, LM84, LM85, LM87,
                          LM89, LM90, LM92, LM99, PC87360,
                          PC87363, PC87364, PC87365, PC87366

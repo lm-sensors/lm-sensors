@@ -94,8 +94,6 @@ KERNEL MODULES
   something completely different from the description at page 25.
 * gl518sm: Assume that new values are close to old values, so start with
   trying to use a small range near the old values (already partially done)
-* lm77: Add detection in lm75.c and sensors-detect to distinguish from
-  an lm75. Add support for the two new registers.
 * Add MTP006F chip: http://www.myson.com/Pcd/MTP006/Mtp006.pdf
   gfiala@s.netic.de (Guido Fiala) has one on his mainboard
 
