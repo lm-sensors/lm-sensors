@@ -25,6 +25,10 @@ Please do not send mail to the author or the sensors group asking for
 a datasheet or ideas on how to convince Asus.
 See doc/chips/w83781d for more information.
 
+Also, many as99127f chips are misidentified as w83781d or w83782d chips.
+If so, you can fix this by forcing the driver:
+modprobe w83781d force_as99127f=BUS,0x2d where BUS is your bus number
+(cat /proc/bus/i2c to identify your bus number).
 
 ================================
 i2c/smbus lockup (i2c-piix4 and i2c-ali15x3 drivers)
@@ -56,8 +60,14 @@ not meeting the i2c specifications.
 ================================
 sis5595 (sis5595 and i2c-sis5595 drivers)
 
-Writing the base addresses (using the force_addr=0x.... parameter to modprobe)
-does not work for some machines (dmesg message is "force address failed").
+These drivers latch on to many non-sis5595 chips which
+do not support sensors, i2c bus, or both.
+This is because SiS uses the same PCI ID for several different chips.
+This will have to be fixed by us to recognize these other chips.
+
+Right now, the driver tries
+writing the base addresses (using the force_addr=0x.... parameter to modprobe),
+it does not work for some machines (dmesg message is "force address failed").
 Either some chips do not support sensors, or there is some undocumented
 lock bit for the base address registers.
 
