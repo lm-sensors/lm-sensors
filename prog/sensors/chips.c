@@ -2853,12 +2853,57 @@ void print_ddcmon(const sensors_chip_name *name)
  * (Khali, 2003-07-17) Almost entierly rewritten. Reindented for clarity,
  * simplified at some places, added support for EDID EEPROMs (well,
  * redirection more than support).
+ * (Khali, 2003-08-09) Rewrote Sony Vaio EEPROMs detection, and move it
+ * to the top. This should prevent such EEPROMs from being accidentally
+ * detected as valid memory modules.
  */
 void print_eeprom(const sensors_chip_name *name)
 {
 	char *label = NULL;
 	double a, b, c, d;
 	int valid, i, type;
+
+	/* handle Sony Vaio EEPROMs first */
+	if (name->addr == 0x57) {
+ 		char buffer[33];
+
+		/* first make sure it is a Sony Vaio EEPROM */
+		if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_NAME, &label, &valid)
+		 && valid) {
+			for (i = 0; i < 4; i++) /* stop at first zero */
+	            if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a))
+					buffer[i] = (char) a;
+			if (strncmp(buffer, "PCG-", 4) == 0)
+			{
+				/* must be a real Sony Vaio EEPROM */
+				memset(buffer + 4, '\0', 29);
+				for (a = 1; i < 32 && a != 0; i++) /* stop at first zero */
+	            	if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a)
+					 && a != 0)
+						buffer[i] = (char) a;
+				print_label(label, 24);
+				printf("%s\n", buffer);
+				free_the_label(&label);
+
+				memset(buffer, '\0', i);
+				if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_SERIAL, &label, &valid)
+				 && valid) {
+					for (i = 0, a = 1; i < 32 && a != 0; i++) /* stop at first zero */
+						if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_SERIAL+i, &a)
+						 && a != 0)
+							buffer[i] = (char) a;
+					print_label(label, 24);
+					printf("%s\n", buffer);
+				} else
+					printf("ERROR: data Vaio 3\n");
+				free_the_label(&label);
+
+				return;
+			}
+		} else
+			printf("ERROR: data Vaio 2\n");
+		free_the_label(&label);
+	}
 
 	if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_TYPE, &label, &valid)
 	 && !sensors_get_feature(*name, SENSORS_EEPROM_TYPE, &a)) {
@@ -2885,7 +2930,6 @@ void print_eeprom(const sensors_chip_name *name)
 					print_label(label, 24);
 					printf("RAMBUS RIMM\n");
 					break;
-				case 0:   /* Sony Vaio EEPROM? */
 				case 255: /* EDID EEPROM? */
 					break;
 				default:
@@ -2904,50 +2948,6 @@ void print_eeprom(const sensors_chip_name *name)
 	}
 	free_the_label(&label);
 
-	if (type == 0) { /* Sony Vaio EEPROM */
- 		char buffer[33];
-
-		/* first make sure it is a Sony Vaio EEPROM */
-		if (!sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a)
-		 && !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b)
-		 && !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c)) {
-			if (((int) a) != 0 || ((int) b) != 0 || ((int) c) != 0) {
-				printf("Unknown EEPROM type (0).\n");
-				return;
-			}
-		} else {
-			printf("ERROR: data Vaio 1\n");
-			return;
-		}
-
-		/* must be a real Sony Vaio EEPROM */
-		memset(buffer, '\0', 33);
-		if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_NAME, &label, &valid)
-		 && valid) {
-			for (i = 0, a = 1; i < 32 && a != 0; i++) /* stop at first zero */
-	            if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a)
-				 && a != 0)
-					buffer[i] = (char) a;
-			print_label(label, 24);
-			printf("%s\n", buffer);
-		} else
-			printf("ERROR: data Vaio 2\n");
-		free_the_label(&label);
-		memset(buffer, '\0', 33);
-		if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_SERIAL, &label, &valid)
-		 && valid) {
-			for (i = 0, a = 1; i < 32 && a != 0; i++) /* stop at first zero */
-				if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_SERIAL+i, &a)
-				 && a != 0)
-					buffer[i] = (char) a;
-			print_label(label, 24);
-			printf("%s\n", buffer);
-		} else
-			printf("ERROR: data Vaio 3\n");
-		free_the_label(&label);
-		return;
-	}
-
 	if (type == 255) { /* EDID EEPROM */
 		/* make sure it is an EDID EEPROM */
 		if (!sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a)
@@ -2957,7 +2957,7 @@ void print_eeprom(const sensors_chip_name *name)
 			if (((int) a) != 255 || ((int) b) != 255 || ((int) c) != 255
 			 || ((int) d) != 0)
 				printf("Unknown EEPROM type (255).\n");
-			else
+			else if (name->addr == 0x50)
 				/* must be a real EDID EEPROM */
 				printf("Either use the ddcmon driver instead of the eeprom driver,\n"
 				 "or run the decode-edid script.\n");
