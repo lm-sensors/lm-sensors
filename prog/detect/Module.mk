@@ -21,6 +21,9 @@
 MODULE_DIR := prog/detect
 PROGDETECTDIR := $(MODULE_DIR)
 
+PROGDETECTMAN8DIR := $(MANDIR)/man8
+PROGDETECTMAN8FILES := $(MODULE_DIR)/i2cdetect.8 $(MODULE_DIR)/sensors-detect.8
+
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 PROGDETECTTARGETS := $(MODULE_DIR)/i2cdetect
@@ -39,8 +42,9 @@ $(MODULE_DIR)/i2cdetect: $(MODULE_DIR)/i2cdetect.ro prog/dump/i2cbusses.ro
 	$(CC) $(EXLDFLAGS) -o $@ $^
 
 install-prog-detect: all-prog-detect
-	$(MKDIR) $(DESTDIR)$(SBINDIR)
+	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGDETECTMAN8DIR)
 	$(INSTALL) -m 755 $(PROGDETECTSBININSTALL) $(DESTDIR)$(SBINDIR)
+	$(INSTALL) -m 644 $(PROGDETECTMAN8FILES) $(DESTDIR)$(PROGDETECTMAN8DIR)
 user_install :: install-prog-detect
 
 clean-prog-detect:
