@@ -322,3 +322,52 @@ chip "lm80-*"
     set in5_max -12 * 1.05
     set in6_min -5 * 0.95
     set in6_max -5 * 1.05
+
+
+chip "maxilife-cg-*" "maxilife-co-*" "maxilife-as-*"
+
+   label fan1  "HDD Fan"
+   label fan2  "PCI Fan"
+   label fan3  "CPU Fan"
+   
+   label temp2 "PCI Temp"
+   label temp4 "HDD Temp"
+   label temp5 "CPU Temp"
+
+   label vid1  "V+12"
+
+# vid1 need to be scaled by 6.337 other voltages 
+# require no scaling
+
+   compute vid1 6.337*@ , @/6.337
+
+
+chip "maxilife-cg-*"
+
+#   invalid temp1
+   label temp3  "BX Temp"
+   
+   label vid2   "Vcpu1"
+   label vid3   "Vcpu2"
+#   invalid vid4
+
+
+chip "maxilife-co-*"
+
+   label temp1  "CPU 1 Temp"
+   label temp3  "CPU 2 Temp"
+   
+   label vid2   "Vcpu1"
+   label vid3   "Vcpu2"
+   label vid4   "VcacheL2"
+
+
+chip "maxilife-as-*"
+
+#   invalid temp1
+#   invalid temp3
+
+   label vid2   "Vcpu"
+#   invalid vid3
+#   invalid vid4
+

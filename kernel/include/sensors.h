@@ -285,6 +285,7 @@ extern int sensors_detect(struct i2c_adapter *adapter,
 #define I2C_DRIVERID_LTC1710 1010
 #define I2C_DRIVERID_SIS5595 1011
 #define I2C_DRIVERID_ICSPLL 1012
+#define I2C_DRIVERID_MAXILIFE 1012
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -451,6 +452,34 @@ struct sensors_chips_data {
 #define LM80_ALARM_CHAS 0x1000
 #define LM80_ALARM_BTI 0x0200
 #define LM80_ALARM_INT_IN 0x0080
+
+#define MAXI_SYSCTL_FAN1   1101    /* Rotations/min */
+#define MAXI_SYSCTL_FAN2   1102    /* Rotations/min */
+#define MAXI_SYSCTL_FAN3   1103    /* Rotations/min */
+#define MAXI_SYSCTL_TEMP1  1201    /* Degrees Celcius */
+#define MAXI_SYSCTL_TEMP2  1202    /* Degrees Celcius */
+#define MAXI_SYSCTL_TEMP3  1203    /* Degrees Celcius */
+#define MAXI_SYSCTL_TEMP4  1204    /* Degrees Celcius */
+#define MAXI_SYSCTL_TEMP5  1205    /* Degrees Celcius */
+#define MAXI_SYSCTL_PLL    1301    /* MHz */
+#define MAXI_SYSCTL_VID1   1401    /* Volts / 6.337 */
+#define MAXI_SYSCTL_VID2   1402    /* Volts */
+#define MAXI_SYSCTL_VID3   1403    /* Volts */
+#define MAXI_SYSCTL_VID4   1404    /* Volts */
+#define MAXI_SYSCTL_ALARMS 2001    /* Bitvector (see below) */
+
+#define MAXI_ALARM_VID4      0x0001
+#define MAXI_ALARM_TEMP2     0x0002
+#define MAXI_ALARM_VID1      0x0004
+#define MAXI_ALARM_VID2      0x0008
+#define MAXI_ALARM_VID3      0x0010
+#define MAXI_ALARM_PLL       0x0080
+#define MAXI_ALARM_TEMP4     0x0100
+#define MAXI_ALARM_TEMP5     0x0200
+#define MAXI_ALARM_FAN1      0x1000
+#define MAXI_ALARM_FAN2      0x2000
+#define MAXI_ALARM_FAN3      0x4000
+
 
 #define ICSPLL_SYSCTL1 1000
 #endif /* def SENSORS_SENSORS_H */

@@ -752,3 +752,198 @@ void print_w83781d(const sensors_chip_name *name)
     printf("ERROR: Can't get BEEP data!\n");
   free_the_label(&label);
 }
+
+void print_maxilife(const sensors_chip_name *name)
+{
+   char  *label = NULL;
+   double cur, min, max;
+   int    alarms;
+
+   if (!sensors_get_feature(*name, SENSORS_MAXI_ALARMS, &cur)) 
+      alarms = cur + 0.5;
+   else {
+      printf("ERROR: Can't get alarm data!\n");
+      alarms = 0;
+   }
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_TEMP1, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP1, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP1_MAX, &max) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP1_HYST, &min)) {
+      if (cur || max || min) {
+         print_label(label, 12);
+         printf("%+3.1f C     (limit = %+3.1f C, hysteresis = %+3.1f C)\n",
+                cur, max, min);
+      }
+   } else
+      printf("ERROR: Can't get TEMP1 data!\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_TEMP2, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP2, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP2_MAX, &max) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP2_HYST, &min)) {
+      if (cur || max || min) {
+         print_label(label, 12);
+         printf("%+3.1f C     (limit = %+3.1f C, hysteresis = %+3.1f C) %s\n",
+                cur, max, min, alarms&MAXI_ALARM_TEMP2 ? "ALARM" : "");
+      }
+   } else
+      printf("ERROR: Can't get TEMP2 data!\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_TEMP3, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP3, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP3_MAX, &max) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP3_HYST, &min)) {
+      if (cur || max || min) {
+         print_label(label, 12);
+         printf("%+3.1f C     (limit = %+3.1f C, hysteresis = %+3.1f C)\n",
+                cur, max, min);
+      }
+   } else
+      printf("ERROR: Can't get TEMP3 data!\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_TEMP4, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP4, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP4_MAX, &max) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP4_HYST, &min)) {
+      if (cur || max || min) {
+         print_label(label, 12);
+         printf("%+3.1f C     (limit = %+3.1f C, hysteresis = %+3.1f C) %s\n",
+                cur, max, min, alarms&MAXI_ALARM_TEMP4 ? "ALARM" : "");
+      }
+   } else
+      printf("ERROR: Can't get TEMP4 data!\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_TEMP5, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP5, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP5_MAX, &max) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_TEMP5_HYST, &min)) {
+      if (cur || max || min) {
+         print_label(label, 12);
+         printf("%+3.1f C     (limit = %+3.1f C, hysteresis = %+3.1f C) %s\n",
+                cur, max, min, alarms&MAXI_ALARM_TEMP5 ? "ALARM" : "");
+      }
+   } else
+      printf("ERROR: Can't get TEMP5 data!\n");
+   free_the_label(&label);
+   
+   if (!sensors_get_label(*name, SENSORS_MAXI_FAN1, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_FAN1, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_FAN1_MIN, &min) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_FAN1_DIV, &max)) {
+      if (cur || min || max) {
+         print_label(label, 12);
+         if (cur < 0)
+            printf("  OFF       (min = %4.0f RPM, div = %1.0f)      %s\n",
+                   min/max, max, alarms&MAXI_ALARM_FAN1 ? "ALARM" : "");
+         else
+            printf("%5.0f RPM   (min = %4.0f RPM, div = %1.0f)      %s\n",
+                   cur/max, min/max, max, alarms&MAXI_ALARM_FAN1 ? "ALARM" : "");
+      }
+   } else
+      printf("ERROR: Can't get FAN1 data!\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_FAN2, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_FAN2, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_FAN2_MIN, &min) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_FAN2_DIV, &max)) {
+      if (cur || min || max) {
+         print_label(label, 12);
+         if (cur < 0)
+            printf("  OFF       (min = %4.0f RPM, div = %1.0f)      %s\n",
+                   min/max, max, alarms&MAXI_ALARM_FAN2 ? "ALARM" : "");
+         else
+            printf("%5.0f RPM   (min = %4.0f RPM, div = %1.0f)      %s\n",
+                   cur/max, min/max, max, alarms&MAXI_ALARM_FAN2 ? "ALARM" : "");
+      }
+   } else
+      printf("ERROR: Can't get FAN2 data!\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_FAN3, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_FAN3, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_FAN3_MIN, &min) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_FAN3_DIV, &max)) {
+      if (cur || min || max) {
+         print_label(label, 12);
+         if (cur < 0)
+            printf("  OFF       (min = %4.0f RPM, div = %1.0f)      %s\n",
+                   min/max, max, alarms&MAXI_ALARM_FAN3 ? "ALARM" : "");
+         else
+            printf("%5.0f RPM   (min = %4.0f RPM, div = %1.0f)      %s\n",
+                   cur/max, min/max, max, alarms&MAXI_ALARM_FAN3 ? "ALARM" : "");
+      }
+   } else
+      printf("ERROR: Can't get FAN3 data!\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_PLL, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_PLL, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_PLL_MIN, &min) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_PLL_MAX, &max)) {
+      if (cur || min || max) {
+         print_label(label, 12);
+         printf("%4.2f MHz   (min = %4.2f MHz, max = %4.2f MHz) %s\n",
+                cur, min, max, alarms&MAXI_ALARM_PLL ? "ALARM" : "");
+      }
+   } else
+      printf("ERROR: Can't get PLL data!\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_VID1, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID1, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID1_MIN, &min) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID1_MAX, &max)) {
+      if (cur || min || max) {
+         print_label(label, 12);
+         printf("%+6.2f V    (min = %+6.2f V, max = %+6.2f V)   %s\n",
+                cur, min, max, alarms&MAXI_ALARM_VID1 ? "ALARM" : "");
+      }
+   } else
+      printf("ERROR: Can't get VID1 data!\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_VID2, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID2, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID2_MIN, &min) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID2_MAX, &max)) {
+      if (cur || min || max) {
+         print_label(label, 12);
+         printf("%+6.2f V    (min = %+6.2f V, max = %+6.2f V)   %s\n",
+                cur, min, max, alarms&MAXI_ALARM_VID2 ? "ALARM" : "");
+      }
+   } else
+      printf("ERROR: Can't get VID2 data!\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_VID3, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID3, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID3_MIN, &min) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID3_MAX, &max)) {
+      if (cur || min || max) {
+         print_label(label, 12);
+         printf("%+6.2f V    (min = %+6.2f V, max = %+6.2f V)   %s\n",
+                cur, min, max, alarms&MAXI_ALARM_VID3 ? "ALARM" : "");
+      }
+   } else
+      printf("ERROR: Can't get VID3 data!\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label(*name, SENSORS_MAXI_VID4, &label) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID4, &cur) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID4_MIN, &min) &&
+       !sensors_get_feature(*name, SENSORS_MAXI_VID4_MAX, &max)) {
+      if (cur || min || max) {
+         print_label(label, 12);
+         printf("%+6.2f V    (min = %+6.2f V, max = %+6.2f V)   %s\n",
+                cur, min, max, alarms&MAXI_ALARM_VID4 ? "ALARM" : "");
+      }
+   } else
+      printf("ERROR: Can't get VID4 data!\n");
+   free_the_label(&label);
+}

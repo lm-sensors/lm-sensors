@@ -505,4 +505,52 @@
 #define SENSORS_SIS5595_FAN3_DIV 73 /* R (yes, really! */
 #define SENSORS_SIS5595_ALARMS 81 /* R */
 
+
+/* HP MaxiLife chips */
+
+#define SENSORS_MAXI_CG_PREFIX "maxilife-cg"
+#define SENSORS_MAXI_CO_PREFIX "maxilife-co"
+#define SENSORS_MAXI_AS_PREFIX "maxilife-as"
+
+#define SENSORS_MAXI_FAN1 1 /* R */
+#define SENSORS_MAXI_FAN2 2 /* R */
+#define SENSORS_MAXI_FAN3 3 /* R */
+#define SENSORS_MAXI_FAN1_MIN 11 /* RW */
+#define SENSORS_MAXI_FAN2_MIN 12 /* RW */
+#define SENSORS_MAXI_FAN3_MIN 13 /* RW */
+#define SENSORS_MAXI_FAN1_DIV 14 /* R */
+#define SENSORS_MAXI_FAN2_DIV 15 /* R */
+#define SENSORS_MAXI_FAN3_DIV 16 /* R */
+#define SENSORS_MAXI_TEMP1 21 /* R */
+#define SENSORS_MAXI_TEMP2 22 /* R */
+#define SENSORS_MAXI_TEMP3 23 /* R */
+#define SENSORS_MAXI_TEMP4 24 /* R */
+#define SENSORS_MAXI_TEMP5 25 /* R */
+#define SENSORS_MAXI_TEMP1_MAX 31 /* R */
+#define SENSORS_MAXI_TEMP2_MAX 32 /* R */
+#define SENSORS_MAXI_TEMP3_MAX 33 /* R */
+#define SENSORS_MAXI_TEMP4_MAX 34 /* R */
+#define SENSORS_MAXI_TEMP5_MAX 35 /* R */
+#define SENSORS_MAXI_TEMP1_HYST 41 /* R */
+#define SENSORS_MAXI_TEMP2_HYST 42 /* R */
+#define SENSORS_MAXI_TEMP3_HYST 43 /* R */
+#define SENSORS_MAXI_TEMP4_HYST 44 /* R */
+#define SENSORS_MAXI_TEMP5_HYST 45 /* R */
+#define SENSORS_MAXI_PLL 51 /* R */
+#define SENSORS_MAXI_PLL_MIN 52 /* RW */
+#define SENSORS_MAXI_PLL_MAX 53 /* RW */
+#define SENSORS_MAXI_VID1 61 /* R */
+#define SENSORS_MAXI_VID2 62 /* R */
+#define SENSORS_MAXI_VID3 63 /* R */
+#define SENSORS_MAXI_VID4 64 /* R */
+#define SENSORS_MAXI_VID1_MIN 71 /* RW */
+#define SENSORS_MAXI_VID2_MIN 72 /* RW */
+#define SENSORS_MAXI_VID3_MIN 73 /* RW */
+#define SENSORS_MAXI_VID4_MIN 74 /* RW */
+#define SENSORS_MAXI_VID1_MAX 81 /* RW */
+#define SENSORS_MAXI_VID2_MAX 82 /* RW */
+#define SENSORS_MAXI_VID3_MAX 83 /* RW */
+#define SENSORS_MAXI_VID4_MAX 84 /* RW */
+#define SENSORS_MAXI_ALARMS 91 /* R */
+
 #endif /* def LIB_SENSORS_CHIPS_H */
