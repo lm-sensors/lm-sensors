@@ -2048,7 +2048,7 @@ static sensors_chip_feature eeprom_features[] =
                          SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
                          SENSORS_MODE_R, EEPROM_SYSCTL1, VALUE(3), 0 },
 /* cheat and use the row-address-bits label for the total size in sensors */
-    { SENSORS_EEPROM_ROWADDR, "SDRAM Size (MB)",
+    { SENSORS_EEPROM_ROWADDR, "Memory size (MB)",
                          SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
                          SENSORS_MODE_R, EEPROM_SYSCTL1, VALUE(4), 0 },
     { SENSORS_EEPROM_COLADDR, "col",
