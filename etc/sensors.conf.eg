@@ -473,3 +473,33 @@ chip "maxilife-as-*"
 #   invalid vid3
 #   invalid vid4
 
+
+chip "via686a-*"
+
+# These seem right for my Tyan S1598:
+    label "2.0V" "CPU core"
+    ignore "2.5V"
+    label "3.3V" "I/O"
+    label "5.0V" "+5V"
+    label "12V" "+12V"
+
+    label fan1  "CPU Fan"
+    label fan2  "P/S Fan"
+
+    label temp1 "SYS Temp"
+    label temp2 "CPU Temp"
+    label temp3 "SBr Temp"
+
+# Set some limits:
+ 
+    set in0_min 2.1
+    set in0_max 2.5
+    set in1_min 2.5*0.95
+    set in1_max 2.5*1.05
+    set in2_min 3.3*0.90
+    set in2_max 3.3*1.10
+    set in3_min 5.0*0.95
+    set in3_max 5.0*1.05
+    set in4_min 12*0.95
+    set in4_max 12*1.05
+ 
