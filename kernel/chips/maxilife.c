@@ -1,7 +1,7 @@
 /*
     maxilife.c - Part of lm_sensors, Linux kernel modules for hardware
                  monitoring
-    Copyright (c) 1999  Fons Rademakers <Fons.Rademakers@cern.ch> 
+    Copyright (c) 1999-2000 Fons Rademakers <Fons.Rademakers@cern.ch> 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,9 +33,22 @@
    insmod maxilife.o maxi_version=0 | 1 | 2
    
    maxi_version=0 is the default
+   
+   This version of MaxiLife is called MaxiLife'98 and has been
+   succeeded by MaxiLife'99, see below.
+   
+   The new version of the driver also supports MaxiLife NBA (New BIOS
+   Architecture). This new MaxiLife controller provides a much cleaner
+   machine independent abstraction layer to the MaxiLife controller.
+   Instead of accessing directly registers (different for each revision)
+   one now accesses the sensors via unique mailbox tokens that do not
+   change between revisions. Also the quantities are already in physical
+   units (degrees, rpms, voltages, etc.) and don't need special conversion
+   formulas. This new MaxiLife is available on the new 2000 machines,
+   like the Kayak XU800 and XM600. This hardware is also autodetected.
 */
 
-static const char *version_str = "1.00 25/2/99 Fons Rademakers";
+static const char *version_str = "2.00 29/2/2000 Fons Rademakers";
 
 
 #include <linux/version.h>
@@ -64,10 +77,28 @@ static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 
 
 #undef AUTODETECT		/* try to autodetect MaxiLife version */
+/*#define AUTODETECT*/
 #define NOWRITE			/* don't allow writing to MaxiLife registers */
 
+#ifdef AUTODETECT
+#include <linux/vmalloc.h>
+#include <linux/ctype.h>
+#endif
 
-/* The MaxiLife registers */
+/* Addresses to scan */
+static unsigned short normal_i2c[] = { SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x10, 0x14, SENSORS_I2C_END };
+static unsigned int normal_isa[] = { SENSORS_ISA_END };
+static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
+
+/* Insmod parameters */
+SENSORS_INSMOD_1(maxilife);
+
+/* Macro definitions */
+#define LOW(MyWord) ((u8) (MyWord))
+#define HIGH(MyWord) ((u8) (((u16)(MyWord) >> 8) & 0xFF))
+
+/*----------------- MaxiLife'98 registers and conversion formulas ------------*/
 #define MAXI_REG_TEMP(nr)      (0x60 + (nr))
 
 #define MAXI_REG_FAN(nr)       (0x65 + (nr))
@@ -88,7 +119,6 @@ static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 #define MAXI_REG_DIAG_RT2      0x2d
 
 #define MAXI_REG_BIOS_CTRL     0x2a
-#define MAXI_REG_LED_STATE     0x96
 
 /* Conversions. Rounding and limit checking is only done on the TO_REG
    variants. Note that you should be a bit careful with which arguments
@@ -97,7 +127,7 @@ static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 
 			       /* 0xfe: fan off, 0xff: stopped (alarm) */
 			       /* 19531 / val * 60 == 1171860 / val */
-#define FAN_FROM_REG(val)      ((val)==0xfe ? -1 : (val)==0xff ? 0 : \
+#define FAN_FROM_REG(val)      ((val)==0xfe ? 0 : (val)==0xff ? -1 : \
                                 (val)==0x00 ? -1 : (1171860 / (val)))
 
 extern inline u8 FAN_TO_REG(long rpm)
@@ -118,6 +148,96 @@ extern inline u8 FAN_TO_REG(long rpm)
                                               0,255))
 #define ALARMS_FROM_REG(val)   (val)
 
+/*----------------- MaxiLife'99 mailbox and token definitions ----------------*/
+/* MaxiLife mailbox data register map */
+#define MAXI_REG_MBX_STATUS    0x5a
+#define MAXI_REG_MBX_CMD       0x5b
+#define MAXI_REG_MBX_TOKEN_H   0x5c
+#define MAXI_REG_MBX_TOKEN_L   0x5d
+#define MAXI_REG_MBX_DATA      0x60
+
+/* Mailbox status register definition */
+#define MAXI_STAT_IDLE         0xff
+#define MAXI_STAT_OK           0x00
+#define MAXI_STAT_BUSY         0x0b
+/* other values not used */
+
+/* Mailbox command register opcodes */
+#define MAXI_CMD_READ          0x02
+#define MAXI_CMD_WRITE         0x03
+/* other values not used */
+
+/* MaxiLife NBA Hardware monitoring tokens */
+
+/* Alarm tokens (0x1xxx) */
+#define MAXI_TOK_ALARM(nr)    (0x1000 + (nr))
+#define MAXI_TOK_ALARM_EVENT   0x1000
+#define MAXI_TOK_ALARM_FAN     0x1001
+#define MAXI_TOK_ALARM_TEMP    0x1002
+#define MAXI_TOK_ALARM_VID     0x1003	/* voltages */
+#define MAXI_TOK_ALARM_AVID    0x1004	/* additional voltages */
+#define MAXI_TOK_ALARM_PWR     0x1101	/* power supply glitch */
+
+/* Fan status tokens (0x20xx) */
+#define MAXI_TOK_FAN(nr)      (0x2000 + (nr))
+#define MAXI_TOK_FAN_CPU       0x2000
+#define MAXI_TOK_FAN_PCI       0x2001
+#define MAXI_TOK_FAN_HDD       0x2002	/* hard disk bay fan */
+#define MAXI_TOK_FAN_SINK      0x2003	/* heatsink */
+
+/* Temperature status tokens (0x21xx) */
+#define MAXI_TOK_TEMP(nr)     (0x2100 + (nr))
+#define MAXI_TOK_TEMP_CPU1     0x2100
+#define MAXI_TOK_TEMP_CPU2     0x2101
+#define MAXI_TOK_TEMP_PCI      0x2102	/* PCI/ambient temp */
+#define MAXI_TOK_TEMP_HDD      0x2103	/* hard disk bay temp */
+#define MAXI_TOK_TEMP_MEM      0x2104	/* mother board temp */
+#define MAXI_TOK_TEMP_CPU      0x2105	/* CPU reference temp */
+
+/* Voltage status tokens (0x22xx) */
+#define MAXI_TOK_VID(nr)      (0x2200 + (nr))
+#define MAXI_TOK_VID_12        0x2200	/* +12 volt */
+#define MAXI_TOK_VID_CPU1      0x2201	/* cpu 1 voltage */
+#define MAXI_TOK_VID_CPU2      0x2202	/* cpu 2 voltage */
+#define MAXI_TOK_VID_L2        0x2203	/* level 2 cache voltage */
+#define MAXI_TOK_VID_M12       0x2204	/* -12 volt */
+
+/* Additive voltage status tokens (0x23xx) */
+#define MAXI_TOK_AVID(nr)     (0x2300 + (nr))
+#define MAXI_TOK_AVID_15       0x2300	/* 1.5 volt */
+#define MAXI_TOK_AVID_18       0x2301	/* 1.8 volt */
+#define MAXI_TOK_AVID_25       0x2302	/* 2.5 volt */
+#define MAXI_TOK_AVID_33       0x2303	/* 3.3 volt */
+#define MAXI_TOK_AVID_5        0x2304	/* 5 volt */
+#define MAXI_TOK_AVID_M5       0x2305	/* -5 volt */
+#define MAXI_TOK_AVID_BAT      0x2306	/* battery voltage */
+
+/* Threshold tokens (0x3xxx) */
+#define MAXI_TOK_MIN(token)    ((token) + 0x1000)
+#define MAXI_TOK_MAX(token)    ((token) + 0x1800)
+
+/* LCD Panel (0x4xxx) */
+#define MAXI_TOK_LCD(nr)      (0x4000 + (nr))
+#define MAXI_TOK_LCD_LINE1     0x4000
+#define MAXI_TOK_LCD_LINE2     0x4001
+#define MAXI_TOK_LCD_LINE3     0x4002
+#define MAXI_TOK_LCD_LINE4     0x4003
+
+			       /* 0xfe: fan off, 0xff: stopped (alarm) */
+			       /* or not available */
+#define FAN99_FROM_REG(val)    ((val)==0xfe ? 0 : (val)==0xff ? -1 : ((val)*39))
+
+			       /* when no CPU2 temp is 127 (0x7f) */
+#define TEMP99_FROM_REG(val)   ((val)==0x7f ? -1 : (val)==0xff ? -1 : (val))
+
+#define VID99_FROM_REG(nr,val) ((val)==0xff ? 0 : \
+                                (nr)==1 ? ((val) * 608) : \
+                                (nr)==2 ? ((val) * 160) : \
+                                (nr)==3 ? ((val) * 160) : \
+                                (nr)==4 ? (val) /* no formula spcified */ : \
+                                (nr)==5 ? ((val) * 823 - 149140) : 0)
+
+
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
@@ -127,9 +247,11 @@ extern int cleanup_module(void);
      Cristal/Geronimo: HP KAYAK XU/XAs
                        (Dual Pentium II Slot 1, Deschutes/Klamath)
      Cognac: HP KAYAK XU (Dual Xeon [Slot 2] 400/450 Mhz)
-     Ashaki: HP KAYAK XA (Pentium II Slot 1, monoprocessor) */
+     Ashaki: HP KAYAK XA (Pentium II Slot 1, monoprocessor)
+     NBA:    New BIOS Architecture, Kayak XU800, XM600, ... */
 
-enum maxi_type { cristal, cognac, ashaki };
+enum maxi_type { cristal, cognac, ashaki, nba };
+enum sensor_type { fan, temp, vid, pll, lcd, alarm };
 
 /* For each registered MaxiLife controller, we need to keep some data in
    memory. That data is pointed to by maxi_list[NR]->data. The structure
@@ -145,19 +267,20 @@ struct maxi_data {
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 
-	u8 fan[3];		/* Register value */
-	u8 fan_min[3];		/* Register value */
-	u8 fan_speed[3];	/* Register value */
-	u8 fan_div[3];		/* Static value */
-	u8 temp[5];		/* Register value */
-	u8 temp_max[5];		/* Static value */
-	u8 temp_hyst[5];	/* Static value */
+	u8 fan[4];		/* Register value */
+	u8 fan_min[4];		/* Register value */
+	u8 fan_speed[4];	/* Register value */
+	u8 fan_div[4];		/* Static value */
+	u8 temp[6];		/* Register value */
+	u8 temp_max[6];		/* Static value */
+	u8 temp_hyst[6];	/* Static value */
 	u8 pll;			/* Register value */
 	u8 pll_min;		/* Register value */
 	u8 pll_max;		/* register value */
-	u8 vid[4];		/* Register value */
-	u8 vid_min[4];		/* Register value */
-	u8 vid_max[4];		/* Register value */
+	u8 vid[5];		/* Register value */
+	u8 vid_min[5];		/* Register value */
+	u8 vid_max[5];		/* Register value */
+	u8 lcd[4][17];		/* Four LCD lines */
 	u16 alarms;		/* Register encoding, combined */
 };
 
@@ -171,38 +294,44 @@ int __init sensors_maxi_init(void);
 static int __init maxi_cleanup(void);
 
 static int maxi_attach_adapter(struct i2c_adapter *adapter);
-static int maxi_detect_smbus(struct i2c_adapter *adapter);
+static int maxi_detect(struct i2c_adapter *adapter, int address,
+		       unsigned short flags, int kind);
 static int maxi_detach_client(struct i2c_client *client);
-static int maxi_detach_smbus(struct i2c_client *client);
-static int maxi_new_client(struct i2c_adapter *adapter,
-			   struct i2c_client *new_client);
-static void maxi_remove_client(struct i2c_client *client);
 static int maxi_command(struct i2c_client *client, unsigned int cmd,
 			void *arg);
 static void maxi_inc_use(struct i2c_client *client);
 static void maxi_dec_use(struct i2c_client *client);
 
 static int maxi_read_value(struct i2c_client *client, u8 register);
-#ifndef NOWRITE
+static int maxi_read_token(struct i2c_client *client, u16 token);
 static int maxi_write_value(struct i2c_client *client, u8 register,
 			    u8 value);
-#endif
+static int maxi_write_token_loop(struct i2c_client *client, u16 token,
+				 u8 len, u8 * values);
+
 static void maxi_update_client(struct i2c_client *client);
+static void maxi99_update_client(struct i2c_client *client,
+				 enum sensor_type sensor, int which);
 static void maxi_init_client(struct i2c_client *client);
 
 static void maxi_fan(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results);
+static void maxi99_fan(struct i2c_client *client, int operation,
+		       int ctl_name, int *nrels_mag, long *results);
 static void maxi_temp(struct i2c_client *client, int operation,
 		      int ctl_name, int *nrels_mag, long *results);
+static void maxi99_temp(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
 static void maxi_pll(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results);
 static void maxi_vid(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results);
+static void maxi99_vid(struct i2c_client *client, int operation,
+		       int ctl_name, int *nrels_mag, long *results);
+static void maxi_lcd(struct i2c_client *client, int operation,
+		     int ctl_name, int *nrels_mag, long *results);
 static void maxi_alarms(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
-
-
-static int maxi_id = 0;
 
 /* The driver. I choose to use type i2c_driver, as at is identical to
    the smbus_driver. */
@@ -219,6 +348,8 @@ static struct i2c_driver maxi_driver = {
 
 /* Used by maxi_init/cleanup */
 static int __initdata maxi_initialized = 0;
+
+static int maxi_id = 0;
 
 /* Default firmware version. Use module option "maxi_version"
    to set desired version. Auto detect is not yet working */
@@ -237,6 +368,8 @@ static ctl_table maxi_dir_table_template[] = {
 	 &sensors_sysctl_real, NULL, &maxi_fan},
 	{MAXI_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &maxi_fan},
+	{MAXI_SYSCTL_FAN4, "fan4", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &maxi_fan},
 	{MAXI_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &maxi_temp},
 	{MAXI_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
@@ -246,6 +379,8 @@ static ctl_table maxi_dir_table_template[] = {
 	{MAXI_SYSCTL_TEMP4, "temp4", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &maxi_temp},
 	{MAXI_SYSCTL_TEMP5, "temp5", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &maxi_temp},
+	{MAXI_SYSCTL_TEMP6, "temp6", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &maxi_temp},
 	{MAXI_SYSCTL_PLL, "pll", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &maxi_pll},
@@ -257,6 +392,16 @@ static ctl_table maxi_dir_table_template[] = {
 	 &sensors_sysctl_real, NULL, &maxi_vid},
 	{MAXI_SYSCTL_VID4, "vid4", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &maxi_vid},
+	{MAXI_SYSCTL_VID5, "vid5", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &maxi_vid},
+	{MAXI_SYSCTL_LCD1, "lcd1", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &maxi_lcd},
+	{MAXI_SYSCTL_LCD2, "lcd2", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &maxi_lcd},
+	{MAXI_SYSCTL_LCD3, "lcd3", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &maxi_lcd},
+	{MAXI_SYSCTL_LCD4, "lcd4", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &maxi_lcd},
 	{MAXI_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &maxi_alarms},
 	{0}
@@ -268,75 +413,142 @@ static ctl_table maxi_dir_table_template[] = {
     - when a new adapter is inserted (and maxi_driver is still present) */
 int maxi_attach_adapter(struct i2c_adapter *adapter)
 {
-	if (i2c_is_isa_adapter(adapter))
-		return 0;
-	else
-		return maxi_detect_smbus(adapter);
+	return sensors_detect(adapter, &addr_data, maxi_detect);
 }
 
-/* This function is called whenever a client should be removed:
-    - maxi_driver is removed (when this module is unloaded)
-    - when an adapter is removed which has a maxi client (and maxi_driver
-      is still present). */
-int maxi_detach_client(struct i2c_client *client)
+/* This function is called by sensors_detect */
+int maxi_detect(struct i2c_adapter *adapter, int address,
+		unsigned short flags, int kind)
 {
-	return maxi_detach_smbus(client);
-}
-
-int maxi_detect_smbus(struct i2c_adapter *adapter)
-{
-#ifdef AUTODETECT
-	u8 biosctl;
-#endif
-	int address, err;
 	struct i2c_client *new_client;
+	struct maxi_data *data;
 	enum maxi_type type;
+	int i, j, err = 0;
 	const char *type_name, *client_name;
-
-	/* OK, this is no detection. I know. It will do for now, though. */
-	err = 0;
 
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
 		goto ERROR0;
 
-	for (address = 0x10; (!err) && (address <= 0x14); address++) {
+	/* OK. For now, we presume we have a valid client. We now create the
+	   client structure, even though we cannot fill it completely yet.
+	   But it allows us to access maxi_{read,write}_value. */
+	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
+				   sizeof(struct maxi_data),
+				   GFP_KERNEL))) {
+		err = -ENOMEM;
+		goto ERROR0;
+	}
 
-		/* Later on, we will keep a list of registered addresses for each
-		   adapter, and check whether they are used here */
+	/* Fill the new client structure with data */
+	data = (struct maxi_data *) (new_client + 1);
+	new_client->addr = address;
+	new_client->data = data;
+	new_client->adapter = adapter;
+	new_client->driver = &maxi_driver;
+	new_client->flags = 0;
 
-		/* Allocate space for a new client structure. To counter memory
-		   fragmentation somewhat, we only do one kmalloc. */
-		if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-					   sizeof(struct maxi_data),
-					   GFP_KERNEL))) {
-			err = -ENOMEM;
-			continue;
-		}
-
-		/* Fill the new client structure with data */
-		new_client->data = (struct maxi_data *) (new_client + 1);
-		new_client->addr = address;
-		new_client->flags = 0;
-
+	/* Now we do the remaining detection. */
+	if (kind < 0) {
 		if (i2c_smbus_read_byte_data
-		    (new_client, MAXI_REG_LED_STATE) < 0)
+		    (new_client, MAXI_REG_MBX_STATUS) < 0)
 			goto ERROR2;
+	}
 
-#ifdef AUTODETECT
-		/* The right way to get the platform info is to read the firmware
-		   revision from serial EEPROM (addr=0x54), at offset 0x0045.
-		   This is a string as:
-		   "CG 00.04" -> Cristal [XU] / Geronimo [XAs]
-		   "CO 00.03" -> Cognac [XU]
-		   "AS 00.01" -> Ashaki [XA] */
-		biosctl =
+	/* Determine the chip type - only one kind supported */
+	if (kind <= 0)
+		kind = maxilife;
+
+	if (kind == maxilife) {
+		/* Detect if the machine has a MaxiLife NBA controller.
+		   The right way to perform this check is to do a read/modify/write
+		   on register MbxStatus (5A):
+		   - Read 5A (value 0 for non-NBA firmware, FF (MbxIdle on NBA-firmware)
+		   - Write 55 on 5A, then read back 5A
+		   Non-NBA firmware: value is 55 (reg 5A is a standard writable reg)
+		   NBA firmaware: value is FF (write-protect on MbxStatus active) */
+		int stat;
+		i2c_smbus_write_byte_data(new_client, MAXI_REG_MBX_STATUS,
+					  0x55);
+		stat =
 		    i2c_smbus_read_byte_data(new_client,
-					     MAXI_REG_BIOS_CTRL);
-		i2c_smbus_write_byte_data(new_client, MAXI_REG_BIOS_CTRL,
-					  biosctl | 4);
-		err = eeprom_read_byte_data(adapter, 0x54, 0x45);
-		i2c_smbus_write_byte_data(new_client, MAXI_REG_BIOS_CTRL,
-					  biosctl);
+					     MAXI_REG_MBX_STATUS);
+
+		/*if (stat == MAXI_STAT_IDLE || stat == MAXI_STAT_OK) */
+		if (stat != 0x55)
+			maxi_version = nba;
+#ifdef AUTODETECT
+		else {
+			/* The right way to get the platform info is to read the firmware
+			   revision from serial EEPROM (addr=0x54), at offset 0x0045.
+			   This is a string as:
+			   "CG 00.04" -> Cristal [XU] / Geronimo [XAs]
+			   "CO 00.03" -> Cognac [XU]
+			   "AS 00.01" -> Ashaki [XA] */
+#if 0
+			int biosctl;
+			biosctl =
+			    i2c_smbus_read_byte_data(new_client,
+						     MAXI_REG_BIOS_CTRL);
+			i2c_smbus_write_byte_data(new_client,
+						  MAXI_REG_BIOS_CTRL,
+						  biosctl | 4);
+			err = eeprom_read_byte_data(adapter, 0x54, 0x45);
+			i2c_smbus_write_byte_data(new_client,
+						  MAXI_REG_BIOS_CTRL,
+						  biosctl);
+#endif
+			int i;
+			char *biosmem, *bm;
+			bm = biosmem = ioremap(0xe0000, 0x20000);
+			if (biosmem) {
+				printk("begin of bios search\n");
+				for (i = 0; i < 0x20000; i++) {
+					if (*bm == 'C') {
+						char *s = bm;
+						while (s && isprint(*s)) {
+							printk("%c", *s);
+							s++;
+						}
+						printk("\n");
+						if (!strncmp
+						    (bm, "CG 00.04", 8)) {
+							maxi_version =
+							    cristal;
+							printk
+							    ("maxilife: found MaxiLife Rev CG 00.04\n");
+							break;
+						}
+						if (!strncmp
+						    (bm, "CO 00.03", 8)) {
+							maxi_version =
+							    cognac;
+							printk
+							    ("maxilife: found MaxiLife Rev CO 00.03\n");
+							break;
+						}
+					}
+					if (*bm == 'A' && *(bm + 1) == 'S') {
+						char *s = bm;
+						while (s && isprint(*s)) {
+							printk("%c", *s);
+							s++;
+						}
+						printk("\n");
+						if (!strncmp
+						    (bm, "AS 00.01", 8)) {
+							maxi_version =
+							    ashaki;
+							printk
+							    ("maxilife: found MaxiLife Rev AS 00.01\n");
+							break;
+						}
+					}
+					bm++;
+				}
+				printk("end of bios search\n");
+			} else
+				printk("could not map bios memory\n");
+		}
 #endif
 
 		if (maxi_version == cristal) {
@@ -357,8 +569,13 @@ int maxi_detect_smbus(struct i2c_adapter *adapter)
 			client_name = "HP MaxiLife Rev AS 00.01";
 			printk
 			    ("maxilife: HP KAYAK XA (Pentium II Slot 1, monoprocessor)\n");
+		} else if (maxi_version == nba) {
+			type = nba;
+			type_name = "maxilife-nba";
+			client_name = "HP MaxiLife NBA";
+			printk("maxilife: HP KAYAK XU800/XM600\n");
 		} else {
-#if AUTODETECT
+#ifdef AUTODETECT
 			printk
 			    ("maxilife: Warning: probed non-maxilife chip?!? (%x)\n",
 			     err);
@@ -369,42 +586,54 @@ int maxi_detect_smbus(struct i2c_adapter *adapter)
 #endif
 			goto ERROR2;
 		}
-
-		strcpy(new_client->name, client_name);
-		((struct maxi_data *) (new_client->data))->type = type;
-		if ((err = maxi_new_client(adapter, new_client)))
-			goto ERROR2;
-
-		/* Tell i2c-core a new client has arrived */
-		if ((err = i2c_attach_client(new_client)))
-			goto ERROR3;
-
-		/* Register a new directory entry with module sensors */
-		if ((err = sensors_register_entry(new_client, type_name,
-						  maxi_dir_table_template,
-						  THIS_MODULE)) < 0)
-			goto ERROR4;
-		((struct maxi_data *) (new_client->data))->sysctl_id = err;
-		err = 0;
-
-		/* Initialize the MaxiLife chip */
-		maxi_init_client(new_client);
-		continue;
-
-		/* OK, this is not exactly good programming practice, usually.
-		   But it is very code-efficient in this case. */
-	      ERROR4:
-		i2c_detach_client(new_client);
-	      ERROR3:
-		maxi_remove_client(new_client);
-	      ERROR2:
-		kfree(new_client);
 	}
+
+	/* Fill in the remaining client fields and put it into the global list */
+	strcpy(new_client->name, client_name);
+	((struct maxi_data *) (new_client->data))->type = type;
+
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 17; j++)
+			
+			    ((struct maxi_data *) (new_client->data))->
+			    lcd[i][j] = (u8) 0;
+
+	new_client->id = maxi_id++;
+
+	data->valid = 0;
+	init_MUTEX(&data->lock);
+	init_MUTEX(&data->update_lock);
+
+	/* Tell i2c-core that a new client has arrived */
+	if ((err = i2c_attach_client(new_client)))
+		goto ERROR2;
+
+	/* Register a new directory entry with module sensors */
+	if ((err = sensors_register_entry(new_client, type_name,
+					  maxi_dir_table_template,
+					  THIS_MODULE)) < 0)
+		goto ERROR4;
+	data->sysctl_id = err;
+
+	/* Initialize the MaxiLife chip */
+	maxi_init_client(new_client);
+	return 0;
+
+	/* OK, this is not exactly good programming practice, usually.
+	   But it is very code-efficient in this case. */
+      ERROR4:
+	i2c_detach_client(new_client);
+      ERROR2:
+	kfree(new_client);
       ERROR0:
 	return err;
 }
 
-int maxi_detach_smbus(struct i2c_client *client)
+/* This function is called whenever a client should be removed:
+    - maxi_driver is removed (when this module is unloaded)
+    - when an adapter is removed which has a maxi client (and maxi_driver
+      is still present). */
+int maxi_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -416,30 +645,8 @@ int maxi_detach_smbus(struct i2c_client *client)
 		    ("maxilife: Client deregistration failed, client not detached.\n");
 		return err;
 	}
-	maxi_remove_client(client);
 	kfree(client);
 	return 0;
-}
-
-/* Find a free slot, and initialize most of the fields */
-int maxi_new_client(struct i2c_adapter *adapter,
-		    struct i2c_client *new_client)
-{
-	struct maxi_data *data;
-
-	new_client->id = maxi_id++;
-	new_client->adapter = adapter;
-	new_client->driver = &maxi_driver;
-	data = new_client->data;
-	data->valid = 0;
-	init_MUTEX(&data->lock);
-	init_MUTEX(&data->update_lock);
-	return 0;
-}
-
-/* Inverse of maxi_new_client */
-void maxi_remove_client(struct i2c_client *client)
-{
 }
 
 /* No commands defined yet */
@@ -465,30 +672,172 @@ void maxi_dec_use(struct i2c_client *client)
 }
 
 
-/* Read byte from specified register. */
+/* Read byte from specified register (-1 in case of error, value otherwise). */
 int maxi_read_value(struct i2c_client *client, u8 reg)
 {
 	return i2c_smbus_read_byte_data(client, reg);
 }
 
-#ifndef NOWRITE
-/* Write byte to specified register. */
+/* Read the byte value for a MaxiLife token (-1 in case of error, value otherwise */
+int maxi_read_token(struct i2c_client *client, u16 token)
+{
+	u8 lowToken, highToken;
+	int error, value;
+
+	lowToken = LOW(token);
+	highToken = HIGH(token);
+
+	/* Set mailbox status register to idle state. */
+	error =
+	    i2c_smbus_write_byte_data(client, MAXI_REG_MBX_STATUS,
+				      MAXI_STAT_IDLE);
+	if (error < 0)
+		return error;
+
+	/* Check for mailbox idle state. */
+	error = i2c_smbus_read_byte_data(client, MAXI_REG_MBX_STATUS);
+	if (error != MAXI_STAT_IDLE)
+		return -1;
+
+	/* Write the most significant byte of the token we want to read. */
+	error =
+	    i2c_smbus_write_byte_data(client, MAXI_REG_MBX_TOKEN_H,
+				      highToken);
+	if (error < 0)
+		return error;
+
+	/* Write the least significant byte of the token we want to read. */
+	error =
+	    i2c_smbus_write_byte_data(client, MAXI_REG_MBX_TOKEN_L,
+				      lowToken);
+	if (error < 0)
+		return error;
+
+	/* Write the read token opcode to the mailbox. */
+	error =
+	    i2c_smbus_write_byte_data(client, MAXI_REG_MBX_CMD,
+				      MAXI_CMD_READ);
+	if (error < 0)
+		return error;
+
+	/* Check for transaction completion */
+	do {
+		error =
+		    i2c_smbus_read_byte_data(client, MAXI_REG_MBX_STATUS);
+	} while (error == MAXI_STAT_BUSY);
+	if (error != MAXI_STAT_OK)
+		return -1;
+
+	/* Read the value of the token. */
+	value = i2c_smbus_read_byte_data(client, MAXI_REG_MBX_DATA);
+	if (value == -1)
+		return -1;
+
+	/* set mailbox status to idle to complete transaction. */
+	error =
+	    i2c_smbus_write_byte_data(client, MAXI_REG_MBX_STATUS,
+				      MAXI_STAT_IDLE);
+	if (error < 0)
+		return error;
+
+	return value;
+}
+
+/* Write byte to specified register (-1 in case of error, 0 otherwise). */
 int maxi_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
-#endif
+
+/* Write a set of len byte values to MaxiLife token (-1 in case of error, 0 otherwise). */
+int maxi_write_token_loop(struct i2c_client *client, u16 token, u8 len,
+			  u8 * values)
+{
+	u8 lowToken, highToken, bCounter;
+	int error;
+
+	lowToken = LOW(token);
+	highToken = HIGH(token);
+
+	/* Set mailbox status register to idle state. */
+	error =
+	    i2c_smbus_write_byte_data(client, MAXI_REG_MBX_STATUS,
+				      MAXI_STAT_IDLE);
+	if (error < 0)
+		return error;
+
+	/* Check for mailbox idle state. */
+	error = i2c_smbus_read_byte_data(client, MAXI_REG_MBX_STATUS);
+	if (error != MAXI_STAT_IDLE)
+		return -1;
+
+	for (bCounter = 0; (bCounter < len && bCounter < 32); bCounter++) {
+		error =
+		    i2c_smbus_write_byte_data(client,
+					      (u8) (MAXI_REG_MBX_DATA +
+						    bCounter),
+					      values[bCounter]);
+		if (error < 0)
+			return error;
+	}
+
+	/* Write the most significant byte of the token we want to read. */
+	error =
+	    i2c_smbus_write_byte_data(client, MAXI_REG_MBX_TOKEN_H,
+				      highToken);
+	if (error < 0)
+		return error;
+
+	/* Write the least significant byte of the token we want to read. */
+	error =
+	    i2c_smbus_write_byte_data(client, MAXI_REG_MBX_TOKEN_L,
+				      lowToken);
+	if (error < 0)
+		return error;
+
+	/* Write the write token opcode to the mailbox. */
+	error =
+	    i2c_smbus_write_byte_data(client, MAXI_REG_MBX_CMD,
+				      MAXI_CMD_WRITE);
+	if (error < 0)
+		return error;
+
+	/* Check for transaction completion */
+	do {
+		error =
+		    i2c_smbus_read_byte_data(client, MAXI_REG_MBX_STATUS);
+	} while (error == MAXI_STAT_BUSY);
+	if (error != MAXI_STAT_OK)
+		return -1;
+
+	/* set mailbox status to idle to complete transaction. */
+	return i2c_smbus_write_byte_data(client, MAXI_REG_MBX_STATUS,
+					 MAXI_STAT_IDLE);
+}
 
 /* Called when we have found a new MaxiLife. It should set limits, etc. */
 void maxi_init_client(struct i2c_client *client)
 {
-	/* start with default settings */
+	struct maxi_data *data = client->data;
+
+	if (data->type == nba) {
+		strcpy(data->lcd[2], " Linux MaxiLife");
+		maxi_write_token_loop(client, MAXI_TOK_LCD(2),
+				      strlen(data->lcd[2]) + 1,
+				      data->lcd[2]);
+	}
 }
 
 void maxi_update_client(struct i2c_client *client)
 {
 	struct maxi_data *data = client->data;
 	int i;
+
+	if (data->type == nba) {
+		printk
+		    ("maxi_update_client should never be called by nba\n");
+		return;
+	}
 
 	down(&data->update_lock);
 
@@ -547,6 +896,9 @@ void maxi_update_client(struct i2c_client *client)
 		default:
 			printk("maxilife: Unknown MaxiLife chip\n");
 		}
+		data->temp[5] = 0;	/* only used by MaxiLife'99 */
+		data->temp_max[5] = 0;
+		data->temp_hyst[5] = 0;
 
 		for (i = 0; i < 3; i++) {
 			data->fan[i] =
@@ -563,6 +915,10 @@ void maxi_update_client(struct i2c_client *client)
 				    maxi_read_value(client,
 						    MAXI_REG_FAN_MIN(i));
 		}
+		data->fan[3] = 0xff;	/* only used by MaxiLife'99 */
+		data->fan_speed[3] = 0;
+		data->fan_div[3] = 4;	/* avoid possible /0 */
+		data->fan_min[3] = 0;
 
 		data->pll = maxi_read_value(client, MAXI_REG_PLL);
 		data->pll_min = maxi_read_value(client, MAXI_REG_PLL_MIN);
@@ -598,10 +954,131 @@ void maxi_update_client(struct i2c_client *client)
 		default:
 			printk("maxilife: Unknown MaxiLife chip\n");
 		}
+		data->vid[4] = 0;	/* only used by MaxliLife'99 */
+		data->vid_min[4] = 0;
+		data->vid_max[4] = 0;
 
 		data->alarms = maxi_read_value(client, MAXI_REG_DIAG_RT1) +
 		    (maxi_read_value(client, MAXI_REG_DIAG_RT2) << 8);
+
 		data->last_updated = jiffies;
+		data->valid = 1;
+	}
+
+	up(&data->update_lock);
+}
+
+void maxi99_update_client(struct i2c_client *client,
+			  enum sensor_type sensor, int which)
+{
+	static last_updated[6][6];	/* sensor, which */
+	struct maxi_data *data = client->data;
+	int i;
+
+	down(&data->update_lock);
+
+	/*maxi_write_token_loop(client, MAXI_TOK_LCD_LINE3, 13, "Linux 2.2.13"); */
+
+	if ((jiffies - last_updated[sensor][which] > 2 * HZ) ||
+	    (jiffies < last_updated[sensor][which]
+	     || !last_updated[sensor][which])) {
+
+		int tmp, i;
+
+		switch (sensor) {
+		case fan:
+			for (i = 0; i < 4; i++) {
+				if (i == which) {
+					tmp =
+					    maxi_read_token(client,
+							    MAXI_TOK_FAN
+							    (i));
+					data->fan[i] =
+					    maxi_read_token(client,
+							    MAXI_TOK_FAN
+							    (i));
+					data->fan_speed[i] =
+					    maxi_read_token(client,
+							    MAXI_TOK_MAX
+							    (MAXI_TOK_FAN
+							     (i)));
+					data->fan_div[i] = 1;
+					data->fan_min[i] = 0;
+				}
+			}
+			break;
+
+		case temp:
+			for (i = 0; i < 6; i++) {
+				if (i == which) {
+					data->temp[i] =
+					    maxi_read_token(client,
+							    MAXI_TOK_TEMP
+							    (i));
+					data->temp_max[i] =
+					    maxi_read_token(client,
+							    MAXI_TOK_MAX
+							    (MAXI_TOK_TEMP
+							     (i)));
+					data->temp_hyst[i] =
+					    data->temp_max[i] - 5;
+				}
+			}
+			break;
+
+		case vid:
+			for (i = 0; i < 5; i++) {
+				if (i == which) {
+					data->vid[i] =
+					    maxi_read_token(client,
+							    MAXI_TOK_VID
+							    (i));
+					data->vid_min[i] =
+					    maxi_read_token(client,
+							    MAXI_TOK_MIN
+							    (MAXI_TOK_VID
+							     (i)));
+					data->vid_max[i] =
+					    maxi_read_token(client,
+							    MAXI_TOK_MAX
+							    (MAXI_TOK_VID
+							     (i)));
+				}
+			}
+			break;
+
+		case pll:
+			data->pll = 0;
+			data->pll_min = 0;
+			data->pll_max = 0;
+			break;
+
+		case alarm:
+			data->alarms =
+			    (maxi_read_token(client, MAXI_TOK_ALARM_EVENT)
+			     << 8);
+			if (data->alarms)
+				data->alarms +=
+				    data->alarms ==
+				    (1 << 8) ? maxi_read_token(client,
+							       MAXI_TOK_ALARM_FAN)
+				    : data->alarms ==
+				    (2 << 8) ? maxi_read_token(client,
+							       MAXI_TOK_ALARM_VID)
+				    : data->alarms ==
+				    (4 << 8) ? maxi_read_token(client,
+							       MAXI_TOK_ALARM_TEMP)
+				    : data->alarms ==
+				    (8 << 8) ? maxi_read_token(client,
+							       MAXI_TOK_ALARM_FAN)
+				    : 0;
+			break;
+
+		default:
+			printk("maxilife: Unknown sensor type\n");
+		}
+
+		last_updated[sensor][which] = jiffies;
 		data->valid = 1;
 	}
 
@@ -625,7 +1102,15 @@ void maxi_fan(struct i2c_client *client, int operation, int ctl_name,
 	      int *nrels_mag, long *results)
 {
 	struct maxi_data *data = client->data;
-	int nr = ctl_name - MAXI_SYSCTL_FAN1 + 1;
+	int nr;
+
+	if (data->type == nba) {
+		maxi99_fan(client, operation, ctl_name, nrels_mag,
+			   results);
+		return;
+	}
+
+	nr = ctl_name - MAXI_SYSCTL_FAN1 + 1;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
@@ -646,11 +1131,47 @@ void maxi_fan(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
+void maxi99_fan(struct i2c_client *client, int operation, int ctl_name,
+		int *nrels_mag, long *results)
+{
+	struct maxi_data *data = client->data;
+	int nr;
+
+	nr = ctl_name - MAXI_SYSCTL_FAN1 + 1;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		maxi99_update_client(client, fan, nr - 1);
+		results[0] = FAN99_FROM_REG(data->fan_min[nr - 1]);	/* min rpm */
+		results[1] = data->fan_div[nr - 1];	/* divisor */
+		results[2] = FAN99_FROM_REG(data->fan[nr - 1]);	/* rpm */
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+#ifndef NOWRITE
+		/* still to do */
+		if (*nrels_mag >= 1) {
+			data->fan_min[nr - 1] = FAN_TO_REG(results[0]);
+			maxi_write_value(client, MAXI_REG_FAN_MIN(nr),
+					 data->fan_min[nr - 1]);
+		}
+#endif
+	}
+}
+
 void maxi_temp(struct i2c_client *client, int operation, int ctl_name,
 	       int *nrels_mag, long *results)
 {
 	struct maxi_data *data = client->data;
-	int nr = ctl_name - MAXI_SYSCTL_TEMP1 + 1;
+	int nr;
+
+	if (data->type == nba) {
+		maxi99_temp(client, operation, ctl_name, nrels_mag,
+			    results);
+		return;
+	}
+
+	nr = ctl_name - MAXI_SYSCTL_TEMP1 + 1;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 1;
@@ -665,6 +1186,27 @@ void maxi_temp(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
+void maxi99_temp(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct maxi_data *data = client->data;
+	int nr;
+
+	nr = ctl_name - MAXI_SYSCTL_TEMP1 + 1;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		maxi99_update_client(client, temp, nr - 1);
+		results[0] = TEMP99_FROM_REG(data->temp_max[nr - 1]);
+		results[1] = TEMP99_FROM_REG(data->temp_hyst[nr - 1]);
+		results[2] = TEMP99_FROM_REG(data->temp[nr - 1]);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		/* temperature range can not be changed */
+	}
+}
+
 void maxi_pll(struct i2c_client *client, int operation, int ctl_name,
 	      int *nrels_mag, long *results)
 {
@@ -673,7 +1215,10 @@ void maxi_pll(struct i2c_client *client, int operation, int ctl_name,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		maxi_update_client(client);
+		if (data->type == nba)
+			maxi99_update_client(client, pll, 0);
+		else
+			maxi_update_client(client);
 		results[0] = PLL_FROM_REG(data->pll_min);
 		results[1] = PLL_FROM_REG(data->pll_max);
 		results[2] = PLL_FROM_REG(data->pll);
@@ -698,7 +1243,15 @@ void maxi_vid(struct i2c_client *client, int operation, int ctl_name,
 	      int *nrels_mag, long *results)
 {
 	struct maxi_data *data = client->data;
-	int nr = ctl_name - MAXI_SYSCTL_VID1 + 1;
+	int nr;
+
+	if (data->type == nba) {
+		maxi99_vid(client, operation, ctl_name, nrels_mag,
+			   results);
+		return;
+	}
+
+	nr = ctl_name - MAXI_SYSCTL_VID1 + 1;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 4;
@@ -724,6 +1277,93 @@ void maxi_vid(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
+void maxi99_vid(struct i2c_client *client, int operation, int ctl_name,
+		int *nrels_mag, long *results)
+{
+	struct maxi_data *data = client->data;
+	int nr = ctl_name - MAXI_SYSCTL_VID1 + 1;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 4;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		maxi99_update_client(client, vid, nr - 1);
+		results[0] = VID99_FROM_REG(nr, data->vid_min[nr - 1]);
+		results[1] = VID99_FROM_REG(nr, data->vid_max[nr - 1]);
+		results[2] = VID99_FROM_REG(nr, data->vid[nr - 1]);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+#ifndef NOWRITE
+		/* still to do */
+		if (*nrels_mag >= 1) {
+			data->vid_min[nr - 1] = VID_TO_REG(results[0]);
+			maxi_write_value(client, MAXI_REG_VID_MIN(nr),
+					 data->vid_min[nr - 1]);
+		}
+		if (*nrels_mag >= 2) {
+			data->vid_max[nr - 1] = VID_TO_REG(results[1]);
+			maxi_write_value(client, MAXI_REG_VID_MAX(nr),
+					 data->vid_max[nr - 1]);
+		}
+#endif
+	}
+}
+
+void maxi_lcd(struct i2c_client *client, int operation, int ctl_name,
+	      int *nrels_mag, long *results)
+{
+	/* Allows writing and reading from LCD display */
+
+	struct maxi_data *data = client->data;
+	int nr;
+
+	if (data->type != nba)
+		return;
+
+	nr = ctl_name - MAXI_SYSCTL_LCD1 + 1;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		results[0] = *((long *) &data->lcd[nr - 1][0]);
+		results[1] = *((long *) &data->lcd[nr - 1][4]);
+		results[2] = *((long *) &data->lcd[nr - 1][8]);
+		results[3] = *((long *) &data->lcd[nr - 1][12]);
+		*nrels_mag = 4;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		/* 
+		   Writing a string to line 3 of the LCD can be done like:
+		   echo -n "Linux MaxiLife" | od -A n -l > \
+		   /proc/sys/dev/sensors/maxilife-nba-i2c-0-14/lcd3
+		 */
+		if (*nrels_mag >= 1)
+			*((long *) &data->lcd[nr - 1][0]) = results[0];
+		if (*nrels_mag >= 2)
+			*((long *) &data->lcd[nr - 1][4]) = results[1];
+		if (*nrels_mag >= 3)
+			*((long *) &data->lcd[nr - 1][8]) = results[2];
+		if (*nrels_mag >= 4)
+			*((long *) &data->lcd[nr - 1][12]) = results[3];
+		maxi_write_token_loop(client, MAXI_TOK_LCD(nr - 1),
+				      strlen(data->lcd[nr - 1]) + 1,
+				      data->lcd[nr - 1]);
+#if 0
+		if (*nrels_mag >= 1)
+			printk("nr=%d, result[0] = %.4s\n", nr,
+			       (char *) &results[0]);
+		if (*nrels_mag >= 2)
+			printk("nr=%d, result[1] = %.4s\n", nr,
+			       (char *) &results[1]);
+		if (*nrels_mag >= 3)
+			printk("nr=%d, result[2] = %.4s\n", nr,
+			       (char *) &results[2]);
+		if (*nrels_mag >= 4)
+			printk("nr=%d, result[3] = %.4s\n", nr,
+			       (char *) &results[3]);
+#endif
+	}
+
+}
+
 void maxi_alarms(struct i2c_client *client, int operation, int ctl_name,
 		 int *nrels_mag, long *results)
 {
@@ -732,7 +1372,10 @@ void maxi_alarms(struct i2c_client *client, int operation, int ctl_name,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		maxi_update_client(client);
+		if (data->type == nba)
+			maxi99_update_client(client, alarm, 0);
+		else
+			maxi_update_client(client);
 		results[0] = ALARMS_FROM_REG(data->alarms);
 		*nrels_mag = 1;
 	}

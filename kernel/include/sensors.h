@@ -597,16 +597,23 @@ struct sensors_chips_data {
 #define MAXI_SYSCTL_FAN1   1101	/* Rotations/min */
 #define MAXI_SYSCTL_FAN2   1102	/* Rotations/min */
 #define MAXI_SYSCTL_FAN3   1103	/* Rotations/min */
+#define MAXI_SYSCTL_FAN4   1104	/* Rotations/min */
 #define MAXI_SYSCTL_TEMP1  1201	/* Degrees Celcius */
 #define MAXI_SYSCTL_TEMP2  1202	/* Degrees Celcius */
 #define MAXI_SYSCTL_TEMP3  1203	/* Degrees Celcius */
 #define MAXI_SYSCTL_TEMP4  1204	/* Degrees Celcius */
 #define MAXI_SYSCTL_TEMP5  1205	/* Degrees Celcius */
+#define MAXI_SYSCTL_TEMP6  1206	/* Degrees Celcius */
 #define MAXI_SYSCTL_PLL    1301	/* MHz */
-#define MAXI_SYSCTL_VID1   1401	/* Volts / 6.337 */
+#define MAXI_SYSCTL_VID1   1401	/* Volts / 6.337, for nba just Volts */
 #define MAXI_SYSCTL_VID2   1402	/* Volts */
 #define MAXI_SYSCTL_VID3   1403	/* Volts */
 #define MAXI_SYSCTL_VID4   1404	/* Volts */
+#define MAXI_SYSCTL_VID5   1405	/* Volts */
+#define MAXI_SYSCTL_LCD1   1501	/* Line 1 of LCD */
+#define MAXI_SYSCTL_LCD2   1502	/* Line 2 of LCD */
+#define MAXI_SYSCTL_LCD3   1503	/* Line 3 of LCD */
+#define MAXI_SYSCTL_LCD4   1504	/* Line 4 of LCD */
 #define MAXI_SYSCTL_ALARMS 2001	/* Bitvector (see below) */
 
 #define MAXI_ALARM_VID4      0x0001
@@ -620,6 +627,11 @@ struct sensors_chips_data {
 #define MAXI_ALARM_FAN1      0x1000
 #define MAXI_ALARM_FAN2      0x2000
 #define MAXI_ALARM_FAN3      0x4000
+
+#define MAXI_ALARM_FAN       0x0100	/* To be used with  MaxiLife'99 */
+#define MAXI_ALARM_VID       0x0200	/* The MSB specifies which sensor */
+#define MAXI_ALARM_TEMP      0x0400	/* in the alarm group failed, i.e.: */
+#define MAXI_ALARM_VADD      0x0800	/* 0x0402 = TEMP2 failed = CPU2 temp */
 
 #define SIS5595_SYSCTL_IN0 1000	/* Volts * 100 */
 #define SIS5595_SYSCTL_IN1 1001
