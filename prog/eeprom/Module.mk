@@ -18,7 +18,8 @@
 MODULE_DIR := prog/eeprom
 PROGEEPROMDIR := $(MODULE_DIR)
 
-PROGEEPROMTARGETS := $(MODULE_DIR)/decode-dimms.pl \
+PROGEEPROMTARGETS := $(MODULE_DIR)/ddcmon \
+                     $(MODULE_DIR)/decode-dimms.pl \
                      $(MODULE_DIR)/decode-edid.pl \
                      $(MODULE_DIR)/decode-vaio.pl
 
