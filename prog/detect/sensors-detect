@@ -100,8 +100,9 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        vendid => 0x1039,
        devid  => 0x0008,
        func => 0,
-       procid => "Silicon Integrated Systems 85C503",
-       match => sub { 0 },
+       procid => "Silicon Integrated Systems SIS5595",
+       driver => "i2c-sis5595",
+       match => sub {  $_[0] =~ /^SMBus SIS5595 adapter at [0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x10b9,

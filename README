@@ -32,6 +32,7 @@ At least the following SMBus adapters are supported:
   Apple Hydra (used on some PPC machines)
   Intel ICH (used in the Intel 810 and 810E chipsets)
   Intel PIIX4 (used in most Intel chipsets)
+  SiS 5595 (used in many SiS chipsets)
   VIA Technologies 82C586B (used in most VIA chipsets)
   VIA Technologies VT596A/B (used in some more modern VIA chipsets)
 
