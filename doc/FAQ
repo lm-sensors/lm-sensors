@@ -1,21 +1,3 @@
-START-INFO-DIR-ENTRY
-* lm_sensors-FAQ: (lm_sensors-FAQ)           The lm_sensors FAQ
-END-INFO-DIR-ENTRY
-
-Short Contents
-**************
-
-lm_sensors
-1 PC and Sensor Overview
-2 Sensor and Bus Basics
-3 Installation and Management
-4 Problems
-5 How to Ask for Help
-6 How to Contribute
-7 Version 1 Specific Questions
-Appendix A Revision History of This Document
-
-
 Table of Contents
 *****************
 
@@ -92,7 +74,7 @@ lm_sensors
   4.18 How do I configure two chips (LM87) differently?
   4.19 Dmesg says `Upgrade BIOS'! I don't want to!
     4.19.1 Dmesg says `use force_addr=0xaddr'! What address do I use?
-  4.20 Sensors says `Can't access `/proc' file'
+  4.20 Sensors says `Can't access procfs/sysfs file'
   4.21 Sensors says `No sensors found!'
   4.22 Sensors output is not correct!
   4.23 What is at I2C address XXX?
@@ -952,8 +934,8 @@ address. You must select an address that is not in use.  `cat
 `/proc/ioports'' to check (carefully) for conflicts. A high number like
 0xf000 is generally safe.
 
-4.20 Sensors says `Can't access `/proc' file'
-=============================================
+4.20 Sensors says `Can't access procfs/sysfs file'
+==================================================
 
    * (release 2.6.0 and later) Did you `modprobe i2c-proc'? Check
      `lsmod'.
@@ -1524,3 +1506,4 @@ Appendix A Revision History of This Document
    * Rev 1.1 Modifications by Philip Edelbrock, 19980809
 
    * Rev 1.0 Written by Philip Edelbrock, 19980803
+
