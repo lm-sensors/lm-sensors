@@ -107,7 +107,7 @@ static DECLARE_MUTEX (mutex);
 
 /* addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
-static unsigned short normal_i2c_range[] = { 0x48, 0x4b, SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x48, 0x4f, SENSORS_I2C_END };
 static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
@@ -231,6 +231,35 @@ static void lm92_alarms (struct i2c_client *client,int operation,int ctl_name,in
 	}
 }
 
+static int max6635_check(struct i2c_client *client)
+{
+	int i;
+	u16 temp_low, temp_high, temp_hyst, temp_crit;
+	u8 conf;
+
+	temp_low = i2c_smbus_read_word_data(client, LM92_REG_TRIP_LOW);
+	temp_high = i2c_smbus_read_word_data(client, LM92_REG_TRIP_HIGH);
+	temp_hyst = i2c_smbus_read_word_data(client, LM92_REG_TRIP_HYSTERESIS);
+	temp_crit = i2c_smbus_read_word_data(client, LM92_REG_TRIP_CRITICAL);
+	
+	if ((temp_low & 0x7f00) || (temp_high & 0x7f00)
+	 || (temp_hyst & 0x7f00) || (temp_crit & 0x7f00))
+		return 0;
+
+	conf = i2c_smbus_read_byte_data(client, LM92_REG_CONFIGURATION);
+
+	for (i=0; i<128; i+=16) {
+		if (temp_low != i2c_smbus_read_word_data(client, LM92_REG_TRIP_LOW + i)
+		 || temp_high != i2c_smbus_read_word_data(client, LM92_REG_TRIP_HIGH + i)
+		 || temp_hyst != i2c_smbus_read_word_data(client, LM92_REG_TRIP_HYSTERESIS + i)
+		 || temp_crit != i2c_smbus_read_word_data(client, LM92_REG_TRIP_CRITICAL + i)
+		 || conf != i2c_smbus_read_byte_data(client, LM92_REG_CONFIGURATION + i))
+			return 0;
+	}
+	
+	return 1;
+}
+
 static int lm92_init_client (struct i2c_client *client)
 {
 	lm92_t *data = (lm92_t *) client->data;
@@ -294,11 +323,18 @@ static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short f
 		return (-ERESTARTSYS);
 	}
 
-	if ((kind < 0 && lm92_read16 (client,LM92_REG_MANUFACTURER,&manufacturer) < 0) ||
-		manufacturer != LM92_MANUFACTURER_ID) {
-		kfree (client);
-		up (&mutex);
-		return (-ENODEV);
+	if (kind < 0) {
+		/* Is it an lm92? */
+		if (address < 0x4c
+		 && (lm92_read16(client,LM92_REG_MANUFACTURER,&manufacturer) < 0
+		  || manufacturer != LM92_MANUFACTURER_ID)) {
+		  	/* Is it a MAX6635/MAX6635/MAX6635? */
+			if (!max6635_check(client)) {
+				kfree (client);
+				up (&mutex);
+				return (-ENODEV);
+			}
+		}
 	}
 
 	if ((result = i2c_attach_client (client))) {

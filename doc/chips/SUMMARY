@@ -135,7 +135,13 @@ lm90
 	adm1032		2	-	-	-	yes	no
 
 lm92
+	(all are reported as an "lm92")
 	lm92		1	-	-	-	yes	no
+	max6633		1	-	-	-	yes	no
+	max6634		1	-	-	-	yes	no
+	max6635		1	-	-	-	yes	no
+	(lm76 needs force parameter)
+	lm76		1	-	-	-	yes	no
 
 maxilife
 	maxilife-as	5	4	3	-	yes	no
