@@ -43,7 +43,7 @@ extern void (*sensors_parse_error) (const char *err, int lineno);
 /* This function is called when an immediately fatal error (like no
    memory left) is detected. Give it a new value, and your own function
    is called instead of the default (which prints to stderr and ends
-   the program). */
+   the program). Never let it return! */
 extern void (*sensors_fatal_error) (const char *proc, const char *err);
 
 

@@ -279,4 +279,55 @@ const sensors_feature_data *sensors_get_all_features (sensors_chip_name name,
     }
   return NULL;
 }
+
+int sensors_eval_expr(sensors_chip_name chipname, sensors_expr *expr,
+                      double val, double *result)
+{
+  double res1,res2;
+  int res;
+  sensors_chip_feature *feature;
+
+  if (expr->kind == sensors_kind_val) {
+    *result = expr->data.val;
+    return 0;
+  }
+  if (expr->kind == sensors_kind_source) {
+    *result = val;
+    return 0;
+  }
+  if (expr->kind == sensors_kind_var) {
+    if (! (feature = sensors_lookup_feature_name(chipname.prefix,
+                                                expr->data.var)))
+      return SENSORS_ERR_NO_ENTRY;
+    if (! (res = sensors_get_feature(chipname,feature->number,result)))
+      return res;
+    return 0;
+  }
+  if ((res = sensors_eval_expr(chipname,expr->data.subexpr.sub1,val,&res1)))
+    return res;
+  if (expr->data.subexpr.sub2 &&
+      (res = sensors_eval_expr(chipname,expr->data.subexpr.sub2,val,&res2)))
+    return res;
+  switch(expr->data.subexpr.op) {
+  case sensors_add:
+    *result = res1 + res2;
+    return 0;
+  case sensors_sub:
+    *result = res1 - res2;
+    return 0;
+  case sensors_multiply:
+    *result = res1 * res2;
+    return 0;
+  case sensors_divide:
+    if (res2 == 0.0)
+      return -SENSORS_ERR_DIV_ZERO;
+    *result = res1 / res2;
+    return 0;
+  case sensors_negate:
+    *result = -res1;
+    return 0;
+  }
+  return 0;
+}
+
       

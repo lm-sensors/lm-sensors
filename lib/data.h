@@ -26,14 +26,18 @@
    for the representation of the config file data and the /proc/...
    data. */
 
+/* Kinds of expression operators recognized */
 typedef enum sensors_operation { 
   sensors_add, sensors_sub, sensors_multiply, sensors_divide, 
   sensors_negate } sensors_operation;
 
+/* An expression can have several forms */
 typedef enum sensors_expr_kind {
   sensors_kind_val, sensors_kind_source, sensors_kind_var, 
   sensors_kind_sub } sensors_expr_kind;
 
+/* An expression. It is either a floating point value, a variable name,
+   an operation on subexpressions, or the special value 'sub' } */
 struct sensors_expr;
 
 typedef struct sensors_subexpr {
@@ -50,20 +54,24 @@ typedef struct sensors_expr {
     sensors_subexpr subexpr;
   } data;
 } sensors_expr;
-    
 
+/* Config file label declaration: a feature name, combined with the label
+   value */
 typedef struct sensors_label {
   char *name;
   char *value;
   int lineno;
 } sensors_label;
 
+/* Config file set declaration: a feature name, combined with an expression */
 typedef struct sensors_set {
   char *name;
   sensors_expr *value;
   int lineno;
 } sensors_set;
 
+/* Config file compute declaration: a feature name, combined with two 
+   expressions */
 typedef struct sensors_compute {
   char *name;
   sensors_expr *from_proc;
@@ -71,12 +79,14 @@ typedef struct sensors_compute {
   int lineno;
 } sensors_compute;
 
+/* A list of chip names, used to represent a config file chips declaration */
 typedef struct sensors_chip_name_list {
   sensors_chip_name *fits;
   int fits_count;
   int fits_max;
 } sensors_chip_name_list;
 
+/* A config file chip block */
 typedef struct sensors_chip {
   sensors_chip_name_list chips;
   sensors_label *labels;
@@ -91,9 +101,8 @@ typedef struct sensors_chip {
   int lineno;
 } sensors_chip;
 
-typedef enum sensors_bus_type {sensors_i2c, sensors_isa, 
-                               sensors_smbus } sensors_bus_type;
-
+/* Config file bus declaration: the i2c bus number, combined with adapter
+   and algorithm names */
 typedef struct sensors_bus {
   int number;
   char *adapter;
@@ -101,11 +110,46 @@ typedef struct sensors_bus {
   int lineno;
 } sensors_bus;
 
+/* /proc/sys/dev/sensors/chips line representation */
 typedef struct sensors_proc_chips_entry {
   int sysctl;
   sensors_chip_name name;
 } sensors_proc_chips_entry;
 
+/* Internal data about a single chip feature.
+   name is the string name used to refer to this feature (both in config
+    files and through user functions);
+   number is the internal feature number, used in many functions to refer
+     to this feature
+   logical_mapping is either SENSORS_NO_MAPPING is this is feature is the
+     main element of category; or it is the number of a feature with which
+     this feature is logically grouped (a group could be fan, fan_max and
+     fan_div)
+   compute_mapping is like logical_mapping, only it refers to another
+     feature whose compute line will be inherited (a group could be fan and
+     fan_max, but not fan_div)
+    mode is SENSORS_MODE_NO_RW, SENSORS_MODE_R, SENSORS_MODE_W or
+      SENSORS_MODE_RW, for unaccessible, readable, writable, and both readable
+      and writable.
+    sysctl is the SYSCTL id of the file the value can be found in;
+    offset is the (byte) offset of the place this feature can be found;
+    Divide the read value by 10**scaling to get the real value */
+typedef struct sensors_chip_feature {
+  int number;
+  const char *name;
+  int logical_mapping;
+  int compute_mapping;
+  int mode;
+  int sysctl;
+  int offset;
+  int scaling;
+} sensors_chip_feature;
+
+/* Internal data about all features of a type of chip */
+typedef struct sensors_chip_features {
+  const char *prefix;
+  struct sensors_chip_feature *feature;
+} sensors_chip_features;
 
 extern sensors_chip *sensors_config_chips;
 extern int sensors_config_chips_count;
@@ -123,12 +167,6 @@ extern sensors_bus *sensors_proc_bus;
 extern int sensors_proc_bus_count;
 extern int sensors_proc_bus_max;
 
-/* Parse an i2c bus name into its components. Returns 0 on succes, a value from
-   error.h on failure. */
-extern int sensors_parse_i2cbus_name(const char *name, int *res);
-
-extern int sensors_eval_expr(sensors_chip_name chipname, sensors_expr *expr,
-                             double val, double *result);
-
+extern sensors_chip_features sensors_chip_features_list[];
 
 #endif /* def LIB_SENSORS_DATA_H */

@@ -23,24 +23,6 @@
 #include "sensors.h"
 #include "data.h"
 
-typedef struct sensors_chip_feature {
-  int number;
-  const char *name;
-  int logical_mapping;
-  int compute_mapping;
-  int mode;
-  int sysctl;
-  int offset;
-  int scaling;
-} sensors_chip_feature;
-
-typedef struct sensors_chip_features {
-  const char *prefix;
-  struct sensors_chip_feature *feature;
-} sensors_chip_features;
-
-extern sensors_chip_features sensors_chip_features_list[];
-
 /* Returns, one by one, a pointer to all sensor_chip structs of the
    config file which match with the given chip name. Last should be
    the value returned by the last call, or NULL if this is the first
@@ -66,5 +48,15 @@ extern sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
 /* Substitute configuration bus numbers with real-world /proc bus numbers
    in the chips lists */
 extern int sensors_substitute_busses(void);
+
+
+/* Parse an i2c bus name into its components. Returns 0 on succes, a value from
+   error.h on failure. */
+extern int sensors_parse_i2cbus_name(const char *name, int *res);
+
+/* Evaluate an expression */
+extern int sensors_eval_expr(sensors_chip_name chipname, sensors_expr *expr,
+                             double val, double *result);
+
 
 #endif /* def LIB_SENSORS_ACCESS_H */

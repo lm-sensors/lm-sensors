@@ -24,9 +24,7 @@
 #include "proc.h"
 #include "error.h"
 #include "access.h"
-
-extern int sensors_yyparse(void);
-extern FILE *sensors_yyin;
+#include "conf.h"
 
 static void free_proc_chips_entry(sensors_proc_chips_entry entry);
 static void free_chip_name(sensors_chip_name name);

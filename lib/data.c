@@ -23,7 +23,6 @@
 #include "error.h"
 #include "data.h"
 #include "sensors.h"
-#include "access.h"
 
 sensors_chip *sensors_config_chips = NULL;
 int sensors_config_chips_count = 0;
@@ -201,57 +200,6 @@ int sensors_parse_i2cbus_name(const char *name, int *res)
 }
 
 
-int sensors_eval_expr(sensors_chip_name chipname, sensors_expr *expr,
-                      double val, double *result)
-{
-  double res1,res2;
-  int res;
-  sensors_chip_feature *feature;
-
-  if (expr->kind == sensors_kind_val) {
-    *result = expr->data.val;
-    return 0;
-  }
-  if (expr->kind == sensors_kind_source) {
-    *result = val;
-    return 0;
-  }
-  if (expr->kind == sensors_kind_var) {
-    /* We should check the kind of variable here! */
-    if (! (feature = sensors_lookup_feature_name(chipname.prefix,
-                                                expr->data.var)))
-      return SENSORS_ERR_NO_ENTRY;
-    if (! (res = sensors_get_feature(chipname,feature->number,result)))
-      return res;
-    return 0;
-  }
-  if ((res = sensors_eval_expr(chipname,expr->data.subexpr.sub1,val,&res1)))
-    return res;
-  if (expr->data.subexpr.sub2 && 
-      (res = sensors_eval_expr(chipname,expr->data.subexpr.sub2,val,&res2)))
-    return res;
-  switch(expr->data.subexpr.op) {
-  case sensors_add:
-    *result = res1 + res2;
-    return 0;
-  case sensors_sub:
-    *result = res1 - res2;
-    return 0;
-  case sensors_multiply:
-    *result = res1 * res2;
-    return 0;
-  case sensors_divide:
-    if (res2 == 0.0)
-      return -SENSORS_ERR_DIV_ZERO;
-    *result = res1 / res2;
-    return 0;
-  case sensors_negate:
-    *result = -res1;
-    return 0;
-  }
-  return 0;
-}
-
 int sensors_substitute_chip(sensors_chip_name *name,int lineno)
 {
   int i,j;
@@ -273,7 +221,7 @@ int sensors_substitute_chip(sensors_chip_name *name,int lineno)
       break;
   }
 
-  /* Well, if we did not find anything, j - sensors_proc_bus_count; so if
+  /* Well, if we did not find anything, j = sensors_proc_bus_count; so if
      we set this chip's bus number to j, it will never be matched. Good. */
   name->bus = j;
   return 0;
