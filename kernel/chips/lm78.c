@@ -769,11 +769,15 @@ void lm78_alarms(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
+/* Note: we save and restore the fan minimum here, because its value is
+   determined in part by the fan divisor.  This follows the principle of
+   least surprise: the user doesn't expect the fan minimum to change just
+   because the divisor changed. */
 void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
 		  int *nrels_mag, long *results)
 {
 	struct lm78_data *data = client->data;
-	int old;
+	int old, min;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
@@ -786,12 +790,24 @@ void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		old = lm78_read_value(client, LM78_REG_VID_FANDIV);
 		if (*nrels_mag >= 2) {
+			min = FAN_FROM_REG(data->fan_min[1], 
+					DIV_FROM_REG(data->fan_div[1]));
 			data->fan_div[1] = DIV_TO_REG(results[1]);
 			old = (old & 0x3f) | (data->fan_div[1] << 6);
+			data->fan_min[1] = FAN_TO_REG(min,
+					DIV_FROM_REG(data->fan_div[1]));
+			lm78_write_value(client, LM78_REG_FAN_MIN(2),
+					data->fan_min[1]);
 		}
 		if (*nrels_mag >= 1) {
+			min = FAN_FROM_REG(data->fan_min[0],
+					DIV_FROM_REG(data->fan_div[0]));
 			data->fan_div[0] = DIV_TO_REG(results[0]);
 			old = (old & 0xcf) | (data->fan_div[0] << 4);
+			data->fan_min[0] = FAN_TO_REG(min,
+					DIV_FROM_REG(data->fan_div[0]));
+			lm78_write_value(client, LM78_REG_FAN_MIN(1),
+					data->fan_min[0]);
 			lm78_write_value(client, LM78_REG_VID_FANDIV, old);
 		}
 	}
