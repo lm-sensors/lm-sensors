@@ -2501,7 +2501,8 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_LM84_PREFIX, adm1021_features },
 		/* Cheat on GL523 for now - no separate #defines */
  { SENSORS_GL523_PREFIX, adm1021_features },
-		/* Cheat on THMC10 for now - no separate #defines */
+		/* Cheat on 1023,THMC10 for now - no separate #defines */
+ { SENSORS_ADM1023_PREFIX, adm1021_features },
  { SENSORS_THMC10_PREFIX, adm1021_features },
  { SENSORS_SIS5595_PREFIX, sis5595_features },
  { SENSORS_MAXI_CG_PREFIX, maxi_cg_features },

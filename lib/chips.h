@@ -169,7 +169,8 @@
 /* ADM1021 chips. */
 
 #define SENSORS_ADM1021_PREFIX "adm1021"
-/* Cheat on LM84,GL523,THMC10 for now - no separate #defines */
+/* Cheat on LM84,GL523,THMC10,1023 for now - no separate #defines */
+#define SENSORS_ADM1023_PREFIX "adm1023"
 #define SENSORS_LM84_PREFIX "lm84"
 #define SENSORS_GL523_PREFIX "gl523"
 #define SENSORS_THMC10_PREFIX "thmc10"
