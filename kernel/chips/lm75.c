@@ -177,15 +177,17 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
   new_client->flags = 0;
 
   /* Now, we do the remaining detection. It is lousy. */
-  cur = i2c_smbus_read_word_data(new_client,0);
-  conf = i2c_smbus_read_byte_data(new_client,1);
-  hyst = i2c_smbus_read_word_data(new_client,2);
-  os = i2c_smbus_read_word_data(new_client,3);
-  for (i = 0; i <= 0x1f; i++) 
-    if ((i2c_smbus_read_byte_data(new_client,i*8+1) != conf) ||
-        (i2c_smbus_read_word_data(new_client,i*8+2) != hyst) ||
-        (i2c_smbus_read_word_data(new_client,i*8+3) != os))
-      goto ERROR1;
+  if (kind < 0) {
+    cur = i2c_smbus_read_word_data(new_client,0);
+    conf = i2c_smbus_read_byte_data(new_client,1);
+    hyst = i2c_smbus_read_word_data(new_client,2);
+    os = i2c_smbus_read_word_data(new_client,3);
+    for (i = 0; i <= 0x1f; i++) 
+      if ((i2c_smbus_read_byte_data(new_client,i*8+1) != conf) ||
+          (i2c_smbus_read_word_data(new_client,i*8+2) != hyst) ||
+          (i2c_smbus_read_word_data(new_client,i*8+3) != os))
+        goto ERROR1;
+  }
   
   /* Determine the chip type - only one kind supported! */
   if (kind <= 0)
