@@ -109,7 +109,7 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e };
 #define VIA686A_TEMP_MODE_MASK 0x3F
 #define VIA686A_TEMP_MODE_CONTINUOUS (0x00)
 
-/* Conversions. Rounding and limit checking is only done on the TO_REG
+/* Conversions. Limit checking is only done on the TO_REG
    variants. */
 
 /********* VOLTAGE CONVERSIONS (Bob Dougherty) ********/
@@ -128,22 +128,22 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e };
 static inline u8 IN_TO_REG(long val, int inNum)
 {
 	/* To avoid floating point, we multiply constants by 10 (100 for +12V).
-	   Rounding is done (1205000 is actually 1330000 - 125000).
+	   Rounding is done (120500 is actually 133000 - 12500).
 	   Remember that val is expressed in 0.01V/bit, which is why we divide
 	   by an additional 1000 (10000 for +12V): 100 for val and 10 (100)
 	   for the constants. */
 	if (inNum <= 1)
 		return (u8)
-		    SENSORS_LIMIT((val * 21024 - 1205000) / 250000, 0, 255);
+		    SENSORS_LIMIT((val * 21024 - 120500) / 25000, 0, 255);
 	else if (inNum == 2)
 		return (u8)
-		    SENSORS_LIMIT((val * 15737 - 1205000) / 250000, 0, 255);
+		    SENSORS_LIMIT((val * 15737 - 120500) / 25000, 0, 255);
 	else if (inNum == 3)
 		return (u8)
-		    SENSORS_LIMIT((val * 10108 - 1205000) / 250000, 0, 255);
+		    SENSORS_LIMIT((val * 10108 - 120500) / 25000, 0, 255);
 	else
 		return (u8)
-		    SENSORS_LIMIT((val * 41714 - 12050000) / 2500000, 0, 255);
+		    SENSORS_LIMIT((val * 41714 - 1205000) / 250000, 0, 255);
 }
 
 static inline long IN_FROM_REG(u8 val, int inNum)
