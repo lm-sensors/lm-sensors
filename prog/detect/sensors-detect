@@ -155,13 +155,24 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        procid => "Silicon Integrated Systems SIS730 (To be written - Do not use 5595 drivers)",
        match => sub { $_[0] =~ /dontmatchthis/ },
      } ,
+#
+# Both Ali chips below have same PCI ID. Can't be helped. Only one should load.
+#
      {
        vendid => 0x10b9,
        devid => 0x7101,
        funcid => 0,
-       procid => "Acer Labs M7101",
+       procid => "Acer Labs 1533/1543",
        driver => "i2c-ali15x3",
-       match => sub { $_[0] =~ /^SMBus ALI15X3 adapter at [0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SMBus ALI15X3 adapter at/ },
+     },
+     {
+       vendid => 0x10b9,
+       devid => 0x7101,
+       funcid => 0,
+       procid => "Acer Labs 1535",
+       driver => "i2c-ali1535",
+       match => sub { $_[0] =~ /^SMBus ALI1535 adapter at/ },
      },
      { 
        vendid => 0x106b,
