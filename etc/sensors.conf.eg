@@ -2150,3 +2150,38 @@ chip "pc87366-*"
    set fan1_min 2000
    set fan2_min 2000
    set fan3_min 2000
+
+
+chip "adm1030-*"
+
+   label temp1 "SYS Temp"
+   label temp2 "CPU Temp"
+   label temp1_crit "SYS Crit"
+   label temp2_crit "CPU Crit"
+
+   set temp1_max 50000
+   set temp2_max 65000
+
+   label fan1 "CPU Fan"
+
+   set fan1_min 2000
+
+
+chip "adm1031-*"
+
+   label temp1 "SYS Temp"
+   label temp2 "CPU Temp"
+   label temp3 "AUX Temp"
+   label temp1_crit "SYS Crit"
+   label temp2_crit "CPU Crit"
+   label temp3_crit "AUX Crit"
+
+   set temp1_max 50000
+   set temp2_max 65000
+   set temp3_max 65000
+
+   label fan1 "CPU Fan"
+   label fan2 "Case Fan"
+
+   set fan1_min 2000
+   set fan2_min 2000

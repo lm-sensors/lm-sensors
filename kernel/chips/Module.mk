@@ -25,6 +25,7 @@ KERNELCHIPSDIR := $(MODULE_DIR)
 # defined value verbatim into the command-list of rules...
 # These targets are NOT included in 'mkpatch' ...
 KERNELCHIPSTARGETS :=
+KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1031.o
 ifeq ($(shell if grep -q '^CONFIG_IPMI_HANDLER=' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/bmcsensors.o
 endif

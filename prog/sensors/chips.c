@@ -4726,6 +4726,99 @@ void print_lm90(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+
+void print_adm1031(const sensors_chip_name *name)
+{
+  char *label;
+  double cur, high, low, crit, div;
+  int valid, alarms, i;
+  int is_1031 = !strncmp("adm1031", name->prefix, 7);
+
+  if (!sensors_get_feature(*name, SENSORS_ADM1031_ALARMS, &cur))
+      alarms = cur;
+  else {
+      printf("ERROR: Can't get alarm data!\n");
+      alarms = 0;
+  }
+  
+  for(i=0; i<(is_1031?2:1);i++) {
+      if (!sensors_get_label_and_valid(*name, SENSORS_ADM1031_FAN1+i*10,
+				       &label, &valid)
+	  && !sensors_get_feature(*name, SENSORS_ADM1031_FAN1+i*10, &cur)
+	  && !sensors_get_feature(*name, SENSORS_ADM1031_FAN1_MIN+i*10, &low)
+	  && !sensors_get_feature(*name, SENSORS_ADM1031_FAN1_DIV+i*10, &div)) {
+	  if (valid) {
+	      print_label(label, 10);
+	      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)", cur, low, div);
+	      printf(" %s\n",
+		     alarms&(ADM1031_ALARM_FAN1_FLT<<(i*8))?"FAN_FAULT":
+		     alarms&((ADM1031_ALARM_FAN1_MIN<<(i*8)))?"ALARM":"");
+	  }
+      } else
+	  printf("ERROR: Can't get fan%d data!\n", i+1);
+      free_the_label(&label);
+  }
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_ADM1031_TEMP1,
+				   &label, &valid)
+      && !sensors_get_feature(*name, SENSORS_ADM1031_TEMP1, &cur)
+      && !sensors_get_feature(*name, SENSORS_ADM1031_TEMP1_MIN, &low)
+      && !sensors_get_feature(*name, SENSORS_ADM1031_TEMP1_MAX, &high)
+      && !sensors_get_feature(*name, SENSORS_ADM1031_TEMP1_CRIT, &crit)) {
+      if (valid) {
+	  print_label(label, 10);
+	  print_temp_info(cur, high, low, MINMAX, 1, 0);
+	  printf(" %s\n",
+		 alarms&(ADM1031_ALARM_TEMP1_HIGH|ADM1031_ALARM_TEMP1_LOW)?"ALARM":"");
+      }
+  } else
+      printf("ERROR: Can't get temp1 temperature data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name, SENSORS_ADM1031_TEMP1_CRIT,
+				   &label, &valid)
+      && !sensors_get_feature(*name, SENSORS_ADM1031_TEMP1_CRIT, &cur)) {
+      if (valid) {
+	  print_label(label, 10);
+	  print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+	  printf(" %s\n",
+		 alarms&ADM1031_ALARM_TEMP1_CRIT?"CRITICAL":"");
+      }
+  } else
+      printf("ERROR: Can't get temp1 temperature data!\n");
+  free_the_label(&label);
+  
+  for (i=0; i < (is_1031 ? 2 : 1); i++) {
+      if (!sensors_get_label_and_valid(*name, SENSORS_ADM1031_TEMP2+i*10,
+				       &label, &valid)
+	  && !sensors_get_feature(*name, SENSORS_ADM1031_TEMP2+i*10, &cur)
+	  && !sensors_get_feature(*name, SENSORS_ADM1031_TEMP2_MIN+i*10, &low)
+	  && !sensors_get_feature(*name, SENSORS_ADM1031_TEMP2_MAX+i*10, &high)) {
+	  if (valid) {
+	      print_label(label, 10);
+	      print_temp_info(cur, high, low, MINMAX, 1, 0);
+	      printf(" %s\n",
+		     alarms&((ADM1031_ALARM_TEMP2_DIODE<<(i*8)))?"DISCONNECT":
+		     alarms&((ADM1031_ALARM_TEMP2_HIGH<<(i*8))|
+		      	     (ADM1031_ALARM_TEMP2_LOW<<(i*8)))?"ALARM":"");
+	  }
+      } else
+	  printf("ERROR: Can't get temp%d temperature data!\n", i+2);
+      free_the_label(&label);
+      if (!sensors_get_label_and_valid(*name, SENSORS_ADM1031_TEMP2_CRIT+i*10,
+				       &label, &valid)
+	  && !sensors_get_feature(*name, SENSORS_ADM1031_TEMP2_CRIT+i*10, &cur)) {
+	  if (valid) {
+	      print_label(label, 10);
+	      print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+	      printf(" %s\n",
+		     alarms&((ADM1031_ALARM_TEMP2_CRIT<<(i*8)))?"CRITICAL":"");
+	  }
+      } else
+	  printf("ERROR: Can't get temp%d crit temperature data!\n", i+2);
+      free_the_label(&label);
+  }
+}
+
 void print_xeontemp(const sensors_chip_name *name)
 {
   char *label;

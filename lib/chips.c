@@ -360,6 +360,119 @@ static sensors_chip_feature adm1023_features[] =
     { 0 }
   };
 
+
+static sensors_chip_feature adm1030_features[] =
+  {
+    { SENSORS_ADM1031_TEMP1, "temp1",
+                              NOMAP, NOMAP,
+                              R, ADM1031_SYSCTL_TEMP1, VALUE(4), 3 },
+    { SENSORS_ADM1031_TEMP1_MAX, "temp1_max",
+                              SENSORS_ADM1031_TEMP1, SENSORS_ADM1031_TEMP1,
+                              RW, ADM1031_SYSCTL_TEMP1, VALUE(1), 3 },
+    { SENSORS_ADM1031_TEMP1_MIN, "temp1_min",
+                              SENSORS_ADM1031_TEMP1, SENSORS_ADM1031_TEMP1,
+                              RW, ADM1031_SYSCTL_TEMP1, VALUE(2), 3 },
+    { SENSORS_ADM1031_TEMP1_CRIT, "temp1_crit", SENSORS_ADM1031_TEMP1,
+                              SENSORS_ADM1031_TEMP1,
+                              RW, ADM1031_SYSCTL_TEMP1, VALUE(3), 3 },
+
+    { SENSORS_ADM1031_TEMP2, "temp2",
+                              NOMAP, NOMAP,
+                              R, ADM1031_SYSCTL_TEMP2, VALUE(4), 3 },
+    { SENSORS_ADM1031_TEMP2_MAX, "temp2_max",
+                              SENSORS_ADM1031_TEMP2, SENSORS_ADM1031_TEMP2,
+                              RW, ADM1031_SYSCTL_TEMP2, VALUE(1), 3 },
+    { SENSORS_ADM1031_TEMP2_MIN, "temp2_min",
+                              SENSORS_ADM1031_TEMP2, SENSORS_ADM1031_TEMP2,
+                              RW, ADM1031_SYSCTL_TEMP2, VALUE(2), 3 },
+    { SENSORS_ADM1031_TEMP2_CRIT, "temp2_crit",
+                              SENSORS_ADM1031_TEMP2, SENSORS_ADM1031_TEMP2,
+                              RW, ADM1031_SYSCTL_TEMP2, VALUE(3), 3 },
+
+    { SENSORS_ADM1031_FAN1, "fan1",
+                              NOMAP, NOMAP,
+                              R, ADM1031_SYSCTL_FAN1, VALUE(2), 0 },
+    { SENSORS_ADM1031_FAN1_MIN, "fan1_min",
+                              SENSORS_ADM1031_FAN1, SENSORS_ADM1031_FAN1, RW, 
+                              ADM1031_SYSCTL_FAN1, VALUE(1), 0 },
+    { SENSORS_ADM1031_FAN1_DIV, "fan1_div",
+                              SENSORS_ADM1031_FAN1, NOMAP,
+                              RW, ADM1031_SYSCTL_FAN_DIV, VALUE(1), 0 },
+
+    { SENSORS_ADM1031_ALARMS, "alarms",
+                              NOMAP, NOMAP,
+                              R, ADM1031_SYSCTL_ALARMS, VALUE(1), 0 },
+    { 0 }
+  };
+
+
+static sensors_chip_feature adm1031_features[] =
+  {
+    { SENSORS_ADM1031_TEMP1, "temp1",
+                              NOMAP, NOMAP,
+                              R, ADM1031_SYSCTL_TEMP1, VALUE(4), 3 },
+    { SENSORS_ADM1031_TEMP1_MAX, "temp1_max",
+                              SENSORS_ADM1031_TEMP1, SENSORS_ADM1031_TEMP1,
+                              RW, ADM1031_SYSCTL_TEMP1, VALUE(1), 3 },
+    { SENSORS_ADM1031_TEMP1_MIN, "temp1_min",
+                              SENSORS_ADM1031_TEMP1, SENSORS_ADM1031_TEMP1,
+                              RW, ADM1031_SYSCTL_TEMP1, VALUE(2), 3 },
+    { SENSORS_ADM1031_TEMP1_CRIT, "temp1_crit",
+                              SENSORS_ADM1031_TEMP1, SENSORS_ADM1031_TEMP1,
+                              RW, ADM1031_SYSCTL_TEMP1, VALUE(3), 3 },
+
+    { SENSORS_ADM1031_TEMP2, "temp2",
+                              NOMAP, NOMAP,
+                              R, ADM1031_SYSCTL_TEMP2, VALUE(4), 3 },
+    { SENSORS_ADM1031_TEMP2_MAX, "temp2_max",
+                              SENSORS_ADM1031_TEMP2, SENSORS_ADM1031_TEMP2,
+                              RW, ADM1031_SYSCTL_TEMP2, VALUE(1), 3 },
+    { SENSORS_ADM1031_TEMP2_MIN, "temp2_min",
+                              SENSORS_ADM1031_TEMP2, SENSORS_ADM1031_TEMP2,
+                              RW, ADM1031_SYSCTL_TEMP2, VALUE(2), 3 },
+    { SENSORS_ADM1031_TEMP2_CRIT, "temp2_crit",
+                              SENSORS_ADM1031_TEMP2, SENSORS_ADM1031_TEMP2,
+                              RW, ADM1031_SYSCTL_TEMP2, VALUE(3), 3 },
+
+    { SENSORS_ADM1031_TEMP3, "temp3",
+                              NOMAP, NOMAP,
+                              R, ADM1031_SYSCTL_TEMP3, VALUE(4), 3 },
+    { SENSORS_ADM1031_TEMP3_MAX, "temp3_max",
+                              SENSORS_ADM1031_TEMP3, SENSORS_ADM1031_TEMP3,
+                              RW, ADM1031_SYSCTL_TEMP3, VALUE(1), 3 },
+    { SENSORS_ADM1031_TEMP3_MIN, "temp3_min",
+                              SENSORS_ADM1031_TEMP3, SENSORS_ADM1031_TEMP3,
+                              RW, ADM1031_SYSCTL_TEMP3, VALUE(2), 3 },
+    { SENSORS_ADM1031_TEMP3_CRIT, "temp3_crit",
+                              SENSORS_ADM1031_TEMP3, SENSORS_ADM1031_TEMP3,
+                              RW, ADM1031_SYSCTL_TEMP3, VALUE(3), 3 },
+
+    { SENSORS_ADM1031_FAN1, "fan1",
+                              NOMAP, NOMAP,
+                              R, ADM1031_SYSCTL_FAN1, VALUE(2), 0 },
+    { SENSORS_ADM1031_FAN1_MIN, "fan1_min",
+                              SENSORS_ADM1031_FAN1, SENSORS_ADM1031_FAN1,
+                              RW, ADM1031_SYSCTL_FAN1, VALUE(1), 0 },
+    { SENSORS_ADM1031_FAN1_DIV, "fan1_div",
+                              SENSORS_ADM1031_FAN1, NOMAP,
+                              RW, ADM1031_SYSCTL_FAN_DIV, VALUE(1), 0 },
+
+    { SENSORS_ADM1031_FAN2, "fan2",
+                              NOMAP, NOMAP,
+                              R, ADM1031_SYSCTL_FAN2, VALUE(2), 0 },
+    { SENSORS_ADM1031_FAN2_MIN, "fan2_min",
+                              SENSORS_ADM1031_FAN2, SENSORS_ADM1031_FAN2,
+                              RW, ADM1031_SYSCTL_FAN2, VALUE(1), 0 },
+    { SENSORS_ADM1031_FAN2_DIV, "fan2_div",
+                              SENSORS_ADM1031_FAN2, NOMAP,
+                              RW, ADM1031_SYSCTL_FAN_DIV, VALUE(2), 0 },
+
+    { SENSORS_ADM1031_ALARMS, "alarms",
+                              NOMAP, NOMAP,
+                              R, ADM1031_SYSCTL_ALARMS, VALUE(1), 0 },
+    { 0 }
+  };
+
 static sensors_chip_feature max1617_features[] =
   {
     { SENSORS_MAX1617_TEMP, "temp", NOMAP, NOMAP,
@@ -5100,5 +5213,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_MAX1619_PREFIX, max1619_features },
  { SENSORS_XEONTEMP_PREFIX, xeontemp_features },
  { SENSORS_MAX6650_PREFIX, max6650_features },
+ { SENSORS_ADM1030_PREFIX, adm1030_features },
+ { SENSORS_ADM1031_PREFIX, adm1031_features },
  { 0 }
 };

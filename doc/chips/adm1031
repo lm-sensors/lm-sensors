@@ -1,0 +1,109 @@
+Kernel driver `adm1031.o'
+=========================
+
+Status: Driver supports basic temp and fan readings, min/max/crit settings 
+	    alarms. This driver does not support auto fan control.
+
+Supported chips: 
+  * Analog Devices ADM1030
+    Prefix: `adm1030'
+    Addresses scanned: I2C 0x2c to 0x2e
+    Datasheet: Publicly available at the Analog Devices website
+               http://products.analog.com/products/info.asp?product=ADM1030
+
+  * Analog Devices ADM1031
+    Prefix: `adm1031'
+    Addresses scanned: I2C 0x2c to 0x2e
+    Datasheet: Publicly available at the Analog Devices website
+               http://products.analog.com/products/info.asp?product=ADM1031
+
+
+Author: Alexandre d'Alton <alex@alexdalton.org>
+
+License: GPL
+
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_adm1030: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `adm1030' chip
+* force_adm1031: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `adm1031' chip
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+
+
+Description
+-----------
+
+ADM1030 and ADM1031 are digital temperature sensors and fan controllers.
+They sense their own temperature as well as the temperature of up to one
+(ADM1030) or two (ADM1031) external diodes.
+
+All temperature values are given in degrees Celcius. Resolution
+is 0.5 degree for the local temperature, 0.125 degree for the remote
+temperatures.
+
+Each temperature channel has its own high and low limits, plus a critical
+limit.
+
+The ADM1030 monitors a single fan speed, while the ADM1031 monitors up to
+two. Each fan channel has its own low speed limit.
+
+
+Chip Features
+-------------
+
+Chip 'adm1030'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp1                 -                     -                       R-     3
+temp1_high            temp1                 temp1                   RW     3
+temp1_low             temp1                 temp1                   RW     3
+temp1_crit            temp1                 temp1                   RW     3
+temp2                 -                     -                       R-     3
+temp2_high            temp2                 temp2                   RW     3
+temp2_low             temp2                 temp2                   RW     3
+temp2_crit            temp2                 temp2                   RW     3
+
+fan1_input            -                     -                       R-     0
+fan1_min              fan1                  fan1                    RW     0
+fan1_div              fan1                  -                       RW     0
+
+alarms                -                     -                       R-     0
+
+Chip 'adm1031'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp1                 -                     -                       R-     3
+temp1_high            temp1                 temp1                   RW     3
+temp1_low             temp1                 temp1                   RW     3
+temp1_crit            temp1                 temp1                   RW     3
+temp2                 -                     -                       R-     3
+temp2_high            temp2                 temp2                   RW     3
+temp2_low             temp2                 temp2                   RW     3
+temp2_crit            temp2                 temp2                   RW     3
+temp3                 -                     -                       R-     3
+temp3_high            temp3                 temp3                   RW     3
+temp3_low             temp3                 temp3                   RW     3
+temp3_crit            temp3                 temp3                   RW     3
+
+fan1_input            -                     -                       R-     0
+fan1_min              fan1                  fan1                    RW     0
+fan1_div              fan1                  -                       RW     0
+fan2_input            -                     -                       R-     0
+fan2_min              fan2                  fan2                    RW     0
+fan2_div              fan2                  -                       RW     0
+
+alarms                -                     -                       R-     0
