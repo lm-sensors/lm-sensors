@@ -18,7 +18,7 @@ all: $(OBJS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 install: all
-	install -o root -g root -m 644 $(OBJS) /lib/modules/$(VER)/misc
+	install -o root -g root -m 644 $(OBJS) /lib/modules/$(VER)/kernel/drivers/i2c/busses
 
 clean:
 	rm -f $(OBJS)

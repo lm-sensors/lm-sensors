@@ -43,18 +43,16 @@ OBJS = p4b_smbus.o
 
 all: $(OBJS)
 
-install:
-	$(MAKE)
-	install -d /lib/modules/$(KERNELVERSION)/kernel/drivers/char
-	install -c p4bsmbus.o /lib/modules/$(KERNELVERSION)/kernel/drivers/char
+install: all
+	install -d /lib/modules/$(KERNELVERSION)/kernel/drivers/i2c/busses
+	install -c p4b_smbus.o /lib/modules/$(KERNELVERSION)/kernel/drivers/i2c/busses
 #	test ! -x /dev/watchdog || mknod -m 600 /dev/watchdog c 10 130
 #	test ! -x /dev/temperature || mknod -m 600 /dev/temperature c 10 131
 
-inst:
-	$(MAKE)
+inst: all
 	rmmod p4b_smbus
-	install -d /lib/modules/$(KERNELVERSION)/kernel/drivers/char
-	install -c p4b_smbus.o /lib/modules/$(KERNEL)/kernel/drivers/char
+	install -d /lib/modules/$(KERNELVERSION)/kernel/drivers/i2c/busses
+	install -c p4b_smbus.o /lib/modules/$(KERNEL)/kernel/drivers/i2c/busses
 	depmod -a
 #	modprobe p4b_smbus
 
