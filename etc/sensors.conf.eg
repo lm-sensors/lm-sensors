@@ -1149,6 +1149,21 @@ chip "adm1025-*" "ne1619-*"
     label in4 "+12V"
     label in5 "VCC"
 
+# Tolerate a 5% deviance for CPU power-supply
+    set in1_min vid * 0.95
+    set in1_max vid * 1.05
+# Tolerate a 10% deviance for other voltages
+    set in0_min 2.5 * 0.90
+    set in0_max 2.5 * 1.10
+    set in2_min 3.3 * 0.90
+    set in2_max 3.3 * 1.10
+    set in3_min 5.0 * 0.90
+    set in3_max 5.0 * 1.10
+    set in4_min 12 * 0.90
+    set in4_max 12 * 1.10
+    set in5_min 3.3 * 0.90
+    set in5_max 3.3 * 1.10
+
 # Depending on how your chipset is hardwired, you may or may not have
 # +12V readings (will show as 0.0V if you don't have it).
 #   ignore in4
@@ -1157,15 +1172,17 @@ chip "adm1025-*" "ne1619-*"
 # redundant with +3.3V so you may want to hide it.
 #   ignore in5
 
-    label temp1 "CPU Temp"
-    label temp2 "M/B Temp"
-
-# adjust this if your vid is wrong; see doc/vid
+# Adjust this if your vid is wrong; see doc/vid
     set vrm 9.0
 
-# Tolerate a 5% deviance for CPU power-supply (default is 10%)
-    set in1_min vid * 0.95
-    set in1_max vid * 1.05
+# Temperatures
+    label temp1 "CPU Temp"
+    label temp2 "M/B Temp"
+    set temp1_low 10
+    set temp1_high 60
+    set temp2_low 10
+    set temp2_high 45
+
 
 chip "lm87-*"
 #
