@@ -365,6 +365,7 @@ rrdUpdate
       } else {
         sprintf (rrdBuff + strlen (rrdBuff), ":%f", value * 10.0);
       }
+      fclose (loadavg);
     }
   }
   if (!ret) {

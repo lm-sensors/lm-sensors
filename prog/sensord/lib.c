@@ -32,7 +32,7 @@
 #include "lib/error.h"
 
 static const char *sensorsCfgPaths[] = {
-  "/etc", "/usr/lib/sensors", "/usr/local/lib/sensors", "/usr/lib", "/usr/local/lib", NULL
+  "/etc", "/usr/local/etc", "/usr/lib/sensors", "/usr/local/lib/sensors", "/usr/lib", "/usr/local/lib", NULL
 };
 
 #define CFG_PATH_LEN 4096
