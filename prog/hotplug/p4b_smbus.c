@@ -248,7 +248,9 @@ void cleanup_module()
 EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
+#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
+#endif
 MODULE_AUTHOR("Ilja Rauhut <IljaRauhut@web.de>, "
               "Burkhard Kohl <bku@buks.ipn.de>, "
 	      "Frank Bauer <frank.bauer@nikocity.de>, "
