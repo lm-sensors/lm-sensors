@@ -24,13 +24,17 @@ ask CVS about it:
   File etc/sensors.conf.eg: Change it87 hyst to low
                             Fix w83697hf supposed to have temp3
                             Limits initialization for adm1025/ne1619
+                            Handle fscher voltage conversions
   Library: Better 2.6 eeprom support
            Change it87 hyst to low
            Add 2.6 gl518sm, fscher support
+           Fix 2.6 negative voltages handling
+           Temporary fix to w83l785ts mappings
   Module adm1025: Separate prefix for NE1619
   Module adm1026: Remove use of temporary ID
                   Define addresses as a range
   Module bmcsensors: Fix reservations
+  Module fscher: Externalize voltage conversions
   Module eeprom: Remove memtype
   Module i2c-piix4: Fix resource release error
                     Various cleanups
@@ -44,7 +48,9 @@ ask CVS about it:
                    Fix output to UTF-8 terms (Marcel Sebek)
                    Simplify gl518sm print
                    Do not ignore errors in FSC chips prints
+                   Fix w83l785ts print
   Program sensors-detect: Fix PATH issues
+                          Correctly point to the fscher driver
   
 
 2.8.3 (20040115)
