@@ -25,6 +25,10 @@ NOTE: PLEASE READ THE DOCUMENTATION IN THE DOC SUBDIRECTORY IF YOU GET STUCK!
 Installing the i2c package
 ==========================
 
+Note: as of kernel 2.3.34, the new i2c code is integrated into the
+mainstream kernels. You can skip this whole step if you use kernel
+2.3.34 or later.
+
 As of version 2.4.0 of lm_sensors, all i2c components are distributed in
 a separate package. There are install instructions in that package. If
 you want to use compilation option 2 (patching the kernel) for lm_sensors,
