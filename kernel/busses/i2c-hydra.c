@@ -33,6 +33,12 @@
 
 #include "i2c.h"
 #include "algo-bit.h"
+#include "compat.h"
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))
+#include <linux/bios32.h>
+#endif
+
 
 /* PCI device */
 #define VENDOR		PCI_VENDOR_ID_APPLE
@@ -128,19 +134,35 @@ struct bit_adapter bit_hydra_ops = {
 
 static int find_hydra(void)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
 	struct pci_dev *dev;
+#else
+	unsigned char bus, devfn;
+	int res;
+#endif
+	unsigned int base_addr;
 
 	if (!pci_present())
 		return -ENODEV;
 		
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
 	dev = pci_find_device(VENDOR, DEVICE, NULL);
-		
 	if (!dev) {
+#else
+	res = pcibios_find_device(VENDOR,DEVICE,0,&bus, &devfn);
+	if (res) {
+#endif
 		printk("Hydra not found\n");
 		return -ENODEV;
 	}
 
-	hydra_base = (unsigned long)ioremap(dev->base_address[0], 0x100);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
+	base_addr = dev->base_address[0];
+#else
+	pcibios_read_config_dword(bus, devfn,PCI_BASE_ADDRESS_0,&base_addr);
+#endif
+	hydra_base = (unsigned long)ioremap(base_addr, 0x100);
 
 	return 0;
 }

@@ -81,5 +81,12 @@
                             pci_write_config_byte(device,com,res)
 #endif
 
+/* I hope this is always correct, even for the PPC, but I really think so.
+   And yes, the kernel version is exactly correct */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0))
+#include <linux/mm.h>
+#define ioremap vremap
+#define iounmap vfree
+#endif
 
 #endif /* SENSORS_COMPAT_H */
