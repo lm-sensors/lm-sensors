@@ -38,6 +38,7 @@ ask CVS about it:
   Program sensors: Add support for MC1066, Rambus Rimms;
                    fix w83781d temp3 alarm
   Program sensors-detect: Add support for MC1066
+  Program sensord: (v0.6.2) Add sanity limits to newly-created RRD.
 
 2.6.5 (20020915)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
@@ -62,7 +63,7 @@ ask CVS about it:
                    add dmi_scan
   Program p4b_smbus: Fix compile for SMP and MODVERSIONS; fix PCI ID problem
   Program lm_sensors.init: fix stop()
-  Program sensord: Add /usr/local/etc to config file path;
+  Program sensord: (v0.6.1) Add /usr/local/etc to config file path;
                    add support for logging loadavg in RRD;
                    fix down-converting raw labels for RRD;
                    update chip support, still behind sensors
