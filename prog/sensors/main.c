@@ -32,7 +32,7 @@
 #define VERSION LM_VERSION
 #define DEFAULT_CONFIG_FILE_NAME "sensors.conf"
 
-static char *config_file_name;
+static char *config_file_name = NULL;
 FILE *config_file;
 static const char *config_file_path[] = 
   { "/etc", "/usr/local/etc", "/usr/lib/sensors", "/usr/local/lib/sensors",
@@ -103,7 +103,7 @@ void open_config_file(void)
   } else if (config_file_name && index(config_file_name,'/')) {
     if ((res = open_this_config_file(config_file_name))) {
       fprintf(stderr,"Could not locate or open config file\n");
-      fprintf(stderr,"%s: %s\n",config_file_name,strerror(res));
+      fprintf(stderr,"%s: %s\n",config_file_name,strerror(-res));
       exit(1);
     }
   }
@@ -111,7 +111,7 @@ void open_config_file(void)
     if (config_file_name)
       filename = config_file_name;
     else
-      filename = strdup(DEFAULT_CONFIG_FILE_NAME);
+      filename = DEFAULT_CONFIG_FILE_NAME;
     for (i = 0; config_file_path[i]; i++) {
       if ((snprintf(buffer,MAX_FILENAME_LEN,
                    "%s/%s",config_file_path[i],filename)) < 1) {
@@ -137,7 +137,16 @@ int open_this_config_file(char *filename)
     return -errno;
   return 0;
 }
+
+void close_config_file(void)
+{
+  if (fclose(config_file)) {
+    fprintf(stderr,"Could not close config file\n");
+    fprintf(stderr,"%s: %s\n",config_file_name,strerror(errno));
+  }
   
+  free(config_file_name);
+}
 
 int main (int argc, char *argv[])
 {
@@ -222,13 +231,17 @@ int main (int argc, char *argv[])
     exit(1);
   }
 
+  close_config_file();
+
   if(do_the_real_work(&error)) {
+    sensors_cleanup();
     exit(error);
   } else {
     if(chips[0].prefix == SENSORS_CHIP_NAME_PREFIX_ANY)
 	    fprintf(stderr,"No sensors found!\n");
     else
 	    fprintf(stderr,"Specified sensor(s) not found!\n");
+    sensors_cleanup();
     exit(1);
   }
 }
