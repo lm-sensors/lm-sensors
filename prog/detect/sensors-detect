@@ -778,7 +778,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             lm75_detect lm80_detect w83781d_detect w83781d_alias_detect
             adm1025_detect w83781d_isa_detect gl518sm_detect gl520sm_detect
             adm9240_detect adm1021_detect sis5595_isa_detect eeprom_detect
-            via686a_isa_detect adm1022_detect ltc1710_detect gl525sm_detect
+            via686a_isa_detect adm1022_detect gl525sm_detect
             lm87_detect ite_detect ite_isa_detect ite_alias_detect
             ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect
             fscscy_detect arp_detect ipmi_kcs_detect
@@ -1253,18 +1253,13 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_addrs => [0x57],
        i2c_detect => sub { eeprom_detect 1, @_ },
      },
-     {
-       name => "SPD EEPROM with Software Write-Protect",
-       driver => "eeprom",
-       i2c_addrs => [0x50..0x57],
-       i2c_detect => sub { eeprom_detect 2, @_ },
-     },
-     {
-       name => "LTC1710",
-       driver => "ltc1710",
-       i2c_addrs => [0x58..0x5a],
-       i2c_detect => sub { ltc1710_detect @_ },
-     },
+# Disabled by default (potentially dangerous)
+#     {
+#       name => "SPD EEPROM with Software Write-Protect",
+#       driver => "eeprom",
+#       i2c_addrs => [0x50..0x57],
+#       i2c_detect => sub { eeprom_detect 2, @_ },
+#     },
      {
        name => "DDC monitor",
        driver => "ddcmon",
@@ -2122,6 +2117,29 @@ sub i2c_smbus_write_block_data
   return 0;
 }
 
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Address
+# Returns: 1 on successful probing, 0 else.
+# This function is meant to prevent AT24RF08 corruption and write-only
+# chips locks. This is done by choosing the best probing method depending
+# on the address range.
+sub i2c_probe
+{
+  my ($file, $addr) = @_;
+  my $data = [];
+  if (($addr >= 0x50 && $addr <= 0x5F)
+   || ($addr >= 0x30 && $addr <= 0x37)) {
+    # This covers all EEPROMs we know of, including page protection addresses.
+    # Note that some page protection addresses will not reveal themselves with
+    # this, because they ack on write only, but this is probably better since
+    # some EEPROMs write-protect themselves permanently on almost any write to
+    # their page protection address.
+    return i2c_smbus_access($file, $SMBUS_READ, 0, $SMBUS_BYTE, $data);
+  } else {
+    return i2c_smbus_access($file, $SMBUS_WRITE, 0, $SMBUS_QUICK, $data);
+  }
+}
+
 ####################
 # ADAPTER SCANNING #
 ####################
@@ -2400,12 +2418,8 @@ sub scan_adapter
     i2c_set_slave_addr(\*FILE,$addr) or 
         printf("Client at address 0x%02x can not be probed - unload all client drivers first!\n",$addr), next;
 
-    next unless i2c_smbus_write_quick(\*FILE,$SMBUS_WRITE) >= 0;
+    next unless i2c_probe(\*FILE, $addr);
     printf "Client found at address 0x%02x\n",$addr;
-    # Prevent 24RF08 corruption
-    if($addr >= 0x54 and $addr <= 0x57) {
-        i2c_smbus_write_quick(\*FILE,$SMBUS_WRITE);
-    }
 
     foreach $chip (@chip_ids) {
       if (exists $$chip{i2c_addrs} and contains $addr, @{$$chip{i2c_addrs}}) {
@@ -3686,12 +3700,13 @@ sub ite_alias_detect
   return 1;
 }
 
-# $_[0]: Chip to detect (0 = SPD EEPROM, 1 = Sony Vaio EEPROM
+# $_[0]: Chip to detect (0 = SPD EEPROM, 1 = Sony Vaio EEPROM,
 #                        2 = SPD EEPROM with Software Write Protect)
 # $_[1]: A reference to the file descriptor to access this chip
 # $_[2]: Address
-# Returns: 8 for a memory eeprom, 4 to 9 for a Sony Vaio eeprom,
-#          1 for an unknown eeprom
+# Returns: 8 for a memory eeprom (9 if write-protect register found),
+#          4 to 9 for a Sony Vaio eeprom,
+#          1 for an unknown eeprom (2 if write-protect register found)
 # Registers used:
 #   0-63: SPD Data and Checksum
 #   0x80-0x83: Sony Vaio Data ("PCG-")
@@ -3720,7 +3735,8 @@ sub eeprom_detect
 	}
   }	
   if ($chip == 2) {
-	# check for 'shadow' write-protect register at 0x30-37
+	# check for 'shadow' write-protect register at 0x30-0x37
+	# could be dangerous
 	i2c_set_slave_addr($file,$addr - 0x20);
 	if(i2c_smbus_write_quick($file,$SMBUS_WRITE) >= 0 &&
 	   i2c_smbus_read_byte_data($file,0x80) == -1) {
@@ -3759,16 +3775,6 @@ sub eeprom_detect
     return $vaioconf;
   }
   return;
-}
-
-# $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
-# $_[1]: Address
-# Returns: undef if not detected, (1) if detected.
-# Detection is impossible!
-sub ltc1710_detect
-{
-  return (1);
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
@@ -4446,23 +4452,14 @@ sub safe_system_vendor
   return 0 if $vpd_bbid eq '0';
   return 1 if $vpd_bbid eq '1';
   
-# This is where we differenciate between IBM systems (safe and unsafe).
-# Default is to reject, white list below.
-
-  my %is_safe =
-  {
-    "2A" => 1,
-  };
-
-  return 1 if defined($is_safe{substr($vpd_bbid, 0, 2)});
-  
-  print " Sorry, we won't let you go on. IBM systems are known to have\n",
-        " serious problems with lm_sensors, resulting in hardware failures.\n",
-        " For more information, see README.thinkpad or\n",
-        " http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/README.thinkpad.\n",
-        " We are maintaining a \"white list\" of known-to-be-safe systems.\n",
-        " Contact us if you know your system is safe (meaning you have actually\n",
-        " verified it is) and want your system to be added to the list.\n\n";
+  print "Sorry, we won't let you go on. IBM systems are known to have\n".
+        "serious problems with lm_sensors, resulting in hardware failures.\n".
+        "For more information, see README.thinkpad or\n".
+        "http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/README.thinkpad.\n\n".
+        "We will be progressively updating our user-space tools so as to prevent\n".
+        "the problem from occuring. Some kernel drivers will need updates too.\n".
+        "This lock will be removed once everything is fixed and believed to be\n".
+        "safe.\n\n";
 
   exit;
 }
