@@ -470,7 +470,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             adm9240_detect adm1021_detect sis5595_isa_detect eeprom_detect
             via686a_isa_detect adm1022_detect ltc1710_detect gl525sm_detect
             lm87_detect ite_detect ite_isa_detect ite_alias_detect
-            ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect);
+            ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect fscscy_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -751,6 +751,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "fscpos",
        i2c_addrs => [0x73],
        i2c_detect => sub { fscpos_detect @_ },
+     },
+     {
+       name => "FSC Scylla chip",
+       driver => "fscscy",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fscscy_detect @_ },
      },
 );
 
@@ -2235,7 +2241,7 @@ FAILURE:
 # $_[1]: Address
 # Returns: undef if not detected, (8) if detected.
 # Registers used:
-#   0x00-0x02: Identification
+#   0x00-0x02: Identification ('P','E','G' -> Pegasus ? :-)
 sub fscpos_detect
 {
   my ($file,$addr) = @_;
@@ -2247,6 +2253,28 @@ sub fscpos_detect
   	return;
   }
   if (i2c_smbus_read_byte_data($file,0x02) != 0x47) {
+  	return;
+  }
+  return (8);
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, (8) if detected.
+# Registers used:
+#   0x00-0x02: Identification ('S','C','Y')
+sub fscscy_detect
+{
+  my ($file,$addr) = @_;
+  # check the first 3 registers
+  if (i2c_smbus_read_byte_data($file,0x00) != 0x53) {
+  	return;
+  }
+  if (i2c_smbus_read_byte_data($file,0x01) != 0x43) {
+  	return;
+  }
+  if (i2c_smbus_read_byte_data($file,0x02) != 0x59) {
   	return;
   }
   return (8);
