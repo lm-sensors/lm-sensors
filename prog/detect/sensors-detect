@@ -3004,7 +3004,9 @@ sub safe_system_vendor
     $safeness_dmi:$safeness_acpi;
 
   print " Sorry, we won't let you go on. $safeness systems are known to have\n",
-        " serious problems with lm_sensors, resulting in hardware failures.\n";
+        " serious problems with lm_sensors, resulting in hardware failures.\n",
+        " For more information, see README.thinkpad or\n",
+        " http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/README.thinkpad.\n";
 
   if($safeness_acpi eq '1' || $safeness_dmi eq '1')
   {
