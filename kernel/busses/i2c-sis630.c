@@ -63,10 +63,6 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifndef I2C_HW_SMBUS_SIS630
-#define I2C_HW_SMBUS_SIS630	0x08
-#endif
-
 #ifndef PCI_VENDOR_ID_SI
 #define PCI_VENDOR_ID_SI	0x1039
 #endif

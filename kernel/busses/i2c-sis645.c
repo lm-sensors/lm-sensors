@@ -50,11 +50,6 @@
 MODULE_LICENSE("GPL");
 #endif
 
-/* I2C identifier */
-#ifndef I2C_HW_SMBUS_SIS645
-#define I2C_HW_SMBUS_SIS645 0x09
-#endif
-
 /* PCI identifiers */
 
 /* SiS645 north bridge */
