@@ -501,6 +501,8 @@ int getsysname(const sensors_chip_feature *feature, char *sysname,
 			*sysmag = feature->sysscaling;
 		else
 			*sysmag = feature->scaling;
+		if(feature->altsysname != NULL)
+			strcpy(altsysname, feature->altsysname);
 		return 0;
 	}
 

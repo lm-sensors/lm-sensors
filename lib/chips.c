@@ -807,7 +807,8 @@ static sensors_chip_feature lm83_features[] =
                               SENSORS_LM83_REMOTE3_TEMP, RW, 
                               LM83_SYSCTL_REMOTE3_TEMP, VALUE(1), 0 },
     { SENSORS_LM83_TCRIT, "tcrit", NOMAP, NOMAP,
-                         RW, LM83_SYSCTL_TCRIT, VALUE(1), 0 },
+                         RW, LM83_SYSCTL_TCRIT, VALUE(1), 0,
+                         "temp3_crit", 3, "temp_crit" },
     { SENSORS_LM83_ALARMS, "alarms", NOMAP, NOMAP,
                          R, LM83_SYSCTL_ALARMS, VALUE(1), 0 },
     { 0 }
