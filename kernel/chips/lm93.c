@@ -485,6 +485,7 @@ static void lm93_update_client_common(struct lm93_data *data,
 		struct i2c_client *client)
 {
 	int i;
+	u8 *ptr;
 
 	/* temp1 - temp4: limits */
 	for (i = 0; i < 4; i++) {
@@ -544,6 +545,10 @@ static void lm93_update_client_common(struct lm93_data *data,
 	data->sfc2 = lm93_read_byte(client, LM93_REG_SFC2);
 	data->sf_tach_to_pwm = lm93_read_byte(client,
 			LM93_REG_SF_TACH_TO_PWM);
+
+	/* write back alarm values to clear */
+	for (i = 0, ptr = (u8 *)(&data->block1); i < 8; i++)
+		lm93_write_byte(client, LM93_REG_HOST_ERROR_1 + i, *(ptr + i));
 }
 
 /* update routine which uses SMBus block data commands */
