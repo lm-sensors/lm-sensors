@@ -770,7 +770,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect
             fscscy_detect pcf8591_detect arp_detect ipmi_kcs_detect
             ipmi_smic_detect via8231_isa_detect lm85_detect smartbatt_detect
-            adm1026_detect w83l785ts_detect);
+            adm1026_detect w83l785ts_detect lm83_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1038,9 +1038,9 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "National Semiconductor LM83",
-       driver => "to-be-written",
+       driver => "lm83",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect 7, @_ },
+       i2c_detect => sub { lm83_detect 0, @_ },
      },
      {
        name => "Analog Devices ADM1022",
@@ -2359,6 +2359,25 @@ sub lm80_detect
     return if i2c_smbus_read_byte_data($file,$i+0xc0) != $reg;
   }
   return (3);
+}
+
+# $_[0]: Chip to detect
+#   (0 = LM83)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, 6 or 8 if detected.
+# Registers used:
+#   0x04: Company ID of LM84
+#   0xfe: Manufacturer ID
+sub lm83_detect
+{
+  my $reg;
+  my ($chip, $file,$addr) = @_;
+  return if $chip == 0 and i2c_smbus_read_byte_data($file,0xfe) != 0x01;
+  return 8
+  	if i2c_smbus_read_byte_data($file,0x04) == 0x00;
+  return 6;
 }
 
 # $_[0]: Vendor to check for
