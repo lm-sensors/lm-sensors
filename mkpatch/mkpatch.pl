@@ -353,7 +353,7 @@ sub gen_drivers_Makefile
     if (m@^mod-subdirs\s*:=@) {
       $new_style = 1;
     }
-    if ((! $new_style and m@^ALL_SUB_DIRS\s*:=@) or m@^nid0subdirs\s*:=@) {
+    if ((! $new_style and m@^ALL_SUB_DIRS\s*:=@) or m@^mod-subdirs\s*:=@) {
       $pr1 = 1;
       $sensors_present = 0;
       while (m@\\$@) {
