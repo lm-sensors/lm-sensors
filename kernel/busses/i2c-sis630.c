@@ -21,6 +21,8 @@
 
 /*
    Changes:
+   19.11.2002
+	Fixed logic by restoring of Host Master Clock
    24.09.2002
 	Fixed typo in sis630_access
 	Fixed logical error by restoring of Host Master Clock
@@ -36,11 +38,6 @@
 	Changed sis630_transaction. Now it's 2x faster (Thanks to Mark M. Hoffman)
 */
 
-/*
-   TODO:
-     Implement block data write/read
-     Test on 2.2 kernel
-*/
 /*
    Status: beta
 
@@ -243,7 +240,7 @@ int sis630_transaction(int size) {
 	if (high_clock > 0)
 		sis630_write(SMB_CNT, 0x20);
 	else
-		sis630_write(SMB_CNT, 0x00);
+		sis630_write(SMB_CNT, (oldclock & ~0x40));
 
 	/* clear all sticky bits */
 	temp = sis630_read(SMB_STS);
@@ -291,16 +288,12 @@ int sis630_transaction(int size) {
 	printk(KERN_DEBUG "i2c-sis630.o: SMB_CNT before clock restore 0x%02x\n", sis630_read(SMB_CNT));
 #endif
 
-	/* restore old Host Master Clock */
-	switch(oldclock & 0x20) {
-		case 1:
-			sis630_write(SMB_CNT, sis630_read(SMB_CNT) | 0x20);
-			break;
-		case 0:
-			oldclock = sis630_read(SMB_CNT) & ~0x20;
-			sis630_write(SMB_CNT,oldclock);
-			break;
-	}
+	/*
+	* restore old Host Master Clock if high_clock is set
+	* and oldclock was not 56KHz
+	*/
+	if (high_clock > 0 && !(oldclock & 0x20))
+		sis630_write(SMB_CNT,(sis630_read(SMB_CNT) & ~0x20));
 
 #ifdef DEBUG
 	printk(KERN_DEBUG "i2c-sis630.o: SMB_CNT after clock restore 0x%02x\n", sis630_read(SMB_CNT));
