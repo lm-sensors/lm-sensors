@@ -406,6 +406,7 @@ static void bmcsensors_build_proc_table()
 	bmc_data.sysctl_id = i;
 
 	bmcsensors_init_client(&bmc_client);
+	printk(KERN_INFO "bmcsensors.o: %d reservations cancelled\n", errorcount);
 	printk(KERN_INFO "bmcsensors.o: registered %d temp, %d volt, %d current, %d fan sensors\n",
 			temps, volts, currs, fans);
 	bmcsensors_update_client(&bmc_client);
@@ -650,11 +651,15 @@ static void bmcsensors_msg_handler(struct ipmi_recv_msg *msg,
 {
 	if(state == STATE_SDR && msg->msg.data[0] == 0xc5) {
 		/* )(*&@(*&#@$ reservation cancelled, get new resid */
-		if(errorcount++ > 200) {
+		if(++errorcount > 1000) {
 			printk(KERN_ERR
 			       "bmcsensors.o: Too many reservations cancelled, giving up\n");
 			state = STATE_DONE;
 		} else {
+#ifdef DEBUG
+			printk(KERN_ERR
+			       "bmcsensors.o: resid 0x%04x cancelled, getting new one\n", resid);
+#endif
 			bmcsensors_reserve_sdr();
 			state = STATE_UNCANCEL;
 		}
@@ -922,7 +927,7 @@ void bmcsensors_all(struct i2c_client *client, int operation, int ctl_name,
 			if(sdrd[i].lim2 >= 0) {
 				results[1] = convert_value(sdrd[i].limits[sdrd[i].lim2], i);
 				if(sdrd[i].lim2 == 6) /* pos. threshold */
-					results[1] = results[2] - results[1];
+					results[1] = results[0] - results[1];
 			} else
 				results[1] = 0;
 			*nrels_mag = 3;
