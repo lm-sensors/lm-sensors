@@ -3479,6 +3479,8 @@ sub adm1022_detect
 #   0x3e: Company ID
 #   0x3f: Revision
 #   0x40: Configuration
+#   0x41: Status 1
+#   0x42: Status 2
 # Note: Detection overrules a previous LM78 or ADM9240 detection
 sub adm1025_detect
 {
@@ -3490,6 +3492,8 @@ sub adm1025_detect
   return if ($chip == 1) and ($reg != 0xA1);
 
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
+  return unless (i2c_smbus_read_byte_data($file,0x41) & 0xC0) == 0x00;
+  return unless (i2c_smbus_read_byte_data($file,0x42) & 0xBC) == 0x00;
   return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xf0) == 0x20;
 
   return (8);
