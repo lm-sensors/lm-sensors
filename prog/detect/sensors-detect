@@ -199,7 +199,13 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        name => "Analog Devices ADM9240",
        driver => "adm9240",
        i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { adm9240_detect @_ }
+       i2c_detect => sub { adm9240_detect 0, @_ }
+     },
+     {
+       name => "Dallas Semiconductor DS1780",
+       driver => "adm9240",
+       i2c_addrs => [0x2c..0x2f],
+       i2c_detect => sub { adm9240_detect 1, @_ }
      },
      {
        name => "Analog Devices ADM1021",
@@ -1275,10 +1281,11 @@ sub gl520sm_detect
   return (5);
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
+# $_[0]: Chip to detect (0 = ADM9240, 1 = DS1780)
+# $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
-# $_[1]: Address
-# Returns: undef if not detected, (5) if detected.
+# $_[2]: Address
+# Returns: undef if not detected, (8) if detected.
 # Registers used:
 #   0x3e: Company ID
 #   0x40: Configuration
@@ -1286,8 +1293,11 @@ sub gl520sm_detect
 # Note: Detection overrules a previous LM78 detection
 sub adm9240_detect
 {
-  my ($file,$addr) = @_;
-  return unless i2c_smbus_read_byte_data($file,0x3e) == 0x23;
+  my $reg;
+  my ($chip, $file,$addr) = @_;
+  $reg = i2c_smbus_read_byte_data($file,0x3e);
+  return unless ($chip == 0 and $reg == 0x23) or
+                ($chip == 1 and $reg == 0xda);
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
   return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
   

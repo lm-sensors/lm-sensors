@@ -20,7 +20,7 @@
 */
 
 /* 
-	A couple notes about the ADM2940:
+	A couple notes about the ADM9240:
 
 * It claims to be 'LM7x' register compatible.  This must be in reference
   to only the LM78, because it is missing stuff to emulate LM75's as well. 
@@ -79,7 +79,7 @@
 #define ADM9240_REG_TEMP 0x27
 #define ADM9240_REG_FAN1 0x28
 #define ADM9240_REG_FAN2 0x29
-#define ADM9240_REG_COMPANY_ID 0x3E  /* Should always read 0x23 */
+#define ADM9240_REG_COMPANY_ID 0x3E  /* 0x23 for ADM9240; 0xDA for DS1780 */
 #define ADM9240_REG_DIE_REV 0x3F
 /* These are read/write */
 #define ADM9240_REG_2_5V_HIGH 0x2B
@@ -319,13 +319,13 @@ int adm9240_attach_adapter(struct i2c_adapter *adapter)
 {
   int address,err,temp;
   struct i2c_client *new_client;
-  const char *type_name,*client_name;
+  char *type_name,*client_name;
 
   err = 0;
   /* Make sure we aren't probing the ISA bus!! */
   if (i2c_is_isa_adapter(adapter)) return 0;
   
-  /* The address of the ADM2940 must at least start somewhere in
+  /* The address of the ADM9240 must at least start somewhere in
      0x2C to 0x2F, but can be changed to be anyelse after that. 
      (But, why??) */
   for (address = 0x2C; (! err) && (address <= 0x2f); address ++) {
@@ -333,13 +333,22 @@ int adm9240_attach_adapter(struct i2c_adapter *adapter)
     /* Later on, we will keep a list of registered addresses for each
        adapter, and check whether they are used here */
 
-    if (smbus_read_byte_data(adapter,address,ADM9240_REG_COMPANY_ID) != 0x23) 
+    temp = smbus_read_byte_data(adapter,address,ADM9240_REG_COMPANY_ID);
+    if (temp == 0x23)  {
+      type_name = "adm9240";
+      client_name = "ADM9240 chip";
+    } else if (temp == 0xDA)	
+      type_name = "ds1780";
+      client_name = "DS1780 chip";
+    }
+    if (temp == 0x23 || temp == 0xDA)  {
+      temp=smbus_read_byte_data(adapter,address,ADM9240_REG_DIE_REV);
+      printk("adm9240.o: %s detected with die rev.: 0x%X\n",
+              client_name, temp);
+    }
+    else	
       continue;
 
-    temp=smbus_read_byte_data(adapter,address,ADM9240_REG_DIE_REV);
-    printk("adm9240.o: ADM9240 detected with die rev.: 0x%X\n",temp);
-    type_name = "adm9240";
-    client_name = "ADM9240 chip";
 
 
     /* Allocate space for a new client structure. To counter memory

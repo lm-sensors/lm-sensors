@@ -1,3 +1,13 @@
+adm9240 driver
+--------------
+Supports the Analog Devices ADM9240 and the Dallas Semiconductor DS1780.
+These chips are apparently identical except for the manufacturer ID
+register.
+The proc directory will be adm9240-i2c-x-xx for the adm9240 and
+ds1780-i2c-x-xx for the ds1780.
+
+-----------------------------------------------------------------------
+
 This file documents the adm9240 directories for the Analog Devices
 ADM9240 hardware health monitoring chip found on some Intel mainboards
 (and others?).
@@ -51,7 +61,7 @@ Within each ADM9240 directory, you can find the following files:
   third not.
   If accessed through sysctl, this is a list of longs.
 * 2.5V, Vccp1, 3.3V, 5V, 12V, and Vccp2 (ADM9240_SYSCTL_IN[0-5] in the
-order shown)
+  order shown)
   A list of three numbers. The first is the minimum limit, the second is the
   maximum limit, and the third is the current value.  Note that
   minimum means 'closest to zero'; so if the normal value equals -10, a
@@ -64,18 +74,18 @@ order shown)
   times 100.
 * temp
   A list of three numbers. The first number is the Overtemperature Shutdown
-  value; the second is the Hysteris value and the third number is the
+  value; the second is the Hysteresis value and the third number is the
   current value. The first two values can be modified. All values are in
-  degrees Celcius. An alarm is issued when the temperature first gets above
+  degrees Celsius. An alarm is issued when the temperature first gets above
   the Overtemperature Shutdown value; no more alarms are issued until the
-  temperature gets below the Hysteris value, at which moment another alarm
+  temperature gets below the Hysteresis value, at which moment another alarm
   is issued, and the state is reset. A more useful behaviour can be found
-  by setting the Hysteris value to +127 degrees Celcius; in this case, 
+  by setting the Hysteresis value to +127 degrees Celsius; in this case, 
   alarms are issued during all the time when the actual temperature is 
   above the Overtemperature Shutdown value.
   The first two numbers can be changed, the third not.
   If accessed through sysctl, this is a list of longs, each being the
-  temperature in degrees Celcius times 10.
+  temperature in degrees Celsius times 10.
 * vid
   The core voltage value (the voltage level your processor should work with),
   in volts. This is the value IN0 and IN1 are initialized to. If unconnected,
@@ -86,11 +96,11 @@ order shown)
    This is feature is specific to the ADM9240.  It is a DAC voltage
    control register for the Analog-Out pin.  Valid values are from 255
    to 0 (with 255 being the highest voltage, and 0 the lowest).  From
-   the docs: "TheADM9240 has a single analog output from an unsigned
+   the docs: "The ADM9240 has a single analog output from an unsigned
    8-bit DAC which produces 0 V - 1.25 V."
 
-The data for each ADM9240 is updated each 1.5 seconds, but only if it is actually
-read.
+The data for each ADM9240 is updated each 1.5 seconds,
+but only if it is actually read.
 
 Note: Much of this documentation is copied from the LM78 documenation
 (the device from which most featuers of the ADM9240 is modelled from).
@@ -98,3 +108,5 @@ The maintainer of the ADM9240 is Philip Edelbrock
 <phil@netroedge.com>; please forward corrections, suggestions, etc.
 to him.  For further technical information on this chip, I suggest
 getting the Acrobat PDF documentation from www.analog.com.
+
+Dallas documentation is at http://www.dalsemi.com.
