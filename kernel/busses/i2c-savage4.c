@@ -1,5 +1,5 @@
 /*
-    voodoo3.c - Part of lm_sensors, Linux kernel modules for hardware
+    i2c-savage4.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>,
@@ -24,8 +24,11 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* This interfaces to the I2C bus of the Voodoo3 to gain access to
-    the BT869 and possibly other I2C devices. */
+/* This interfaces to the I2C bus of the Savage4 to gain access to
+   the BT869 and possibly other I2C devices. The DDC bus is not
+   yet supported because its register is not memory-mapped.
+   However we leave the DDC code here, commented out, to make
+   it easier to add later. */
 
 #include <linux/version.h>
 #include <linux/module.h>
@@ -83,12 +86,12 @@ static
 #else
 extern
 #endif
-int __init i2c_voodoo3_init(void);
-static int __init voodoo3_cleanup(void);
-static int voodoo3_setup(void);
-static void config_v3(struct pci_dev *dev);
-static void voodoo3_inc(struct i2c_adapter *adapter);
-static void voodoo3_dec(struct i2c_adapter *adapter);
+int __init i2c_savage4_init(void);
+static int __init savage4_cleanup(void);
+static int savage4_setup(void);
+static void config_s4(struct pci_dev *dev);
+static void savage4_inc(struct i2c_adapter *adapter);
+static void savage4_dec(struct i2c_adapter *adapter);
 
 #ifdef MODULE
 extern int init_module(void);
@@ -96,7 +99,7 @@ extern int cleanup_module(void);
 #endif				/* MODULE */
 
 
-static int __initdata voodoo3_initialized;
+static int __initdata savage4_initialized;
 static unsigned char *mem;
 
 extern inline void outlong(unsigned int dat)
@@ -109,10 +112,10 @@ extern inline unsigned int readlong(void)
 	return *((unsigned int *) (mem + REG));
 }
 
-/* The voo GPIO registers don't have individual masks for each bit
+/* The sav GPIO registers don't have individual masks for each bit
    so we always have to read before writing. */
 
-static void bit_vooi2c_setscl(void *data, int val)
+static void bit_savi2c_setscl(void *data, int val)
 {
 	unsigned int r;
 	r = readlong();
@@ -123,7 +126,7 @@ static void bit_vooi2c_setscl(void *data, int val)
 	outlong(r);
 }
 
-static void bit_vooi2c_setsda(void *data, int val)
+static void bit_savi2c_setsda(void *data, int val)
 {
 	unsigned int r;
 	r = readlong();
@@ -138,17 +141,17 @@ static void bit_vooi2c_setsda(void *data, int val)
    We rely on the i2c-algo-bit routines to set the pins high before
    reading the input from other chips. */
 
-static int bit_vooi2c_getscl(void *data)
+static int bit_savi2c_getscl(void *data)
 {
 	return (0 != (readlong() & I2C_SCL_IN));
 }
 
-static int bit_vooi2c_getsda(void *data)
+static int bit_savi2c_getsda(void *data)
 {
 	return (0 != (readlong() & I2C_SDA_IN));
 }
 
-/*static void bit_vooddc_setscl(void *data, int val)
+/*static void bit_savddc_setscl(void *data, int val)
 {
 	unsigned int r;
 	r = readlong();
@@ -159,7 +162,7 @@ static int bit_vooi2c_getsda(void *data)
 	outlong(r);
 }
 
-static void bit_vooddc_setsda(void *data, int val)
+static void bit_savddc_setsda(void *data, int val)
 {
 	unsigned int r;
 	r = readlong();
@@ -170,63 +173,63 @@ static void bit_vooddc_setsda(void *data, int val)
 	outlong(r);
 }
 
-static int bit_vooddc_getscl(void *data)
+static int bit_savddc_getscl(void *data)
 {
 	return (0 != (readlong() & DDC_SCL_IN));
 }
 
-static int bit_vooddc_getsda(void *data)
+static int bit_savddc_getsda(void *data)
 {
 	return (0 != (readlong() & DDC_SDA_IN));
 }
 */
-static struct i2c_algo_bit_data voo_i2c_bit_data = {
+static struct i2c_algo_bit_data sav_i2c_bit_data = {
 	NULL,
-	bit_vooi2c_setsda,
-	bit_vooi2c_setscl,
-	bit_vooi2c_getsda,
-	bit_vooi2c_getscl,
+	bit_savi2c_setsda,
+	bit_savi2c_setscl,
+	bit_savi2c_getsda,
+	bit_savi2c_getscl,
 	CYCLE_DELAY, CYCLE_DELAY, TIMEOUT
 };
 
-static struct i2c_adapter voodoo3_i2c_adapter = {
-	"I2C Voodoo3/Banshee adapter",
+static struct i2c_adapter savage4_i2c_adapter = {
+	"I2C Savage4 adapter",
 	I2C_HW_B_VOO,
 	NULL,
-	&voo_i2c_bit_data,
-	voodoo3_inc,
-	voodoo3_dec,
+	&sav_i2c_bit_data,
+	savage4_inc,
+	savage4_dec,
 	NULL,
 	NULL,
 };
 /*
-static struct i2c_algo_bit_data voo_ddc_bit_data = {
+static struct i2c_algo_bit_data sav_ddc_bit_data = {
 	NULL,
-	bit_vooddc_setsda,
-	bit_vooddc_setscl,
-	bit_vooddc_getsda,
-	bit_vooddc_getscl,
+	bit_savddc_setsda,
+	bit_savddc_setscl,
+	bit_savddc_getsda,
+	bit_savddc_getscl,
 	CYCLE_DELAY, CYCLE_DELAY, TIMEOUT
 };
 
-static struct i2c_adapter voodoo3_ddc_adapter = {
+static struct i2c_adapter savage4_ddc_adapter = {
 	"DDC Voodoo3/Banshee adapter",
 	I2C_HW_B_VOO,
 	NULL,
-	&voo_ddc_bit_data,
-	voodoo3_inc,
-	voodoo3_dec,
+	&sav_ddc_bit_data,
+	savage4_inc,
+	savage4_dec,
 	NULL,
 	NULL,
 };
 */
 /* Configures the chip */
 
-void config_v3(struct pci_dev *dev)
+void config_s4(struct pci_dev *dev)
 {
 	unsigned int cadr;
 
-	/* map Voodoo3 memory */
+	/* map memory */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,13)
 	cadr = dev->resource[0].start;
 #else
@@ -237,26 +240,25 @@ void config_v3(struct pci_dev *dev)
 
 //	*((unsigned int *) (mem + REG2)) = 0x8160;
 	*((unsigned int *) (mem + REG)) = 0x00000020;
-	printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%p\n", mem);
+	printk("i2c-savage4: Using Savage4 at 0x%p\n", mem);
 }
 
-/* Detect whether a Voodoo3 or a Banshee can be found,
-   and initialize it. */
-static int voodoo3_setup(void)
+/* Detect chip and initialize it. */
+static int savage4_setup(void)
 {
 	struct pci_dev *dev;
-	int v3_num;
+	int s4_num;
 
-	v3_num = 0;
+	s4_num = 0;
 
 	dev = NULL;
 	do {
 		if ((dev = pci_find_device(PCI_VENDOR_ID_S3,
 					   PCI_CHIP_SAVAGE4,
 					   dev))) {
-			if (!v3_num)
-				config_v3(dev);
-			v3_num++;
+			if (!s4_num)
+				config_s4(dev);
+			s4_num++;
 		}
 	} while (dev);
 
@@ -265,84 +267,84 @@ static int voodoo3_setup(void)
 		if ((dev = pci_find_device(PCI_VENDOR_ID_S3,
 					   PCI_CHIP_SAVAGE2000,
 					   dev))) {
-			if (!v3_num)
-				config_v3(dev);
-			v3_num++;
+			if (!s4_num)
+				config_s4(dev);
+			s4_num++;
 		}
 	} while (dev);
 
-	if (v3_num > 0) {
-		printk("i2c-voodoo3: %d Banshee/Voodoo3 found.\n", v3_num);
-		if (v3_num > 1)
-			printk("i2c-voodoo3: warning: only 1 supported.\n");
+	if (s4_num > 0) {
+		printk("i2c-savage4: %d Savage4 found.\n", s4_num);
+		if (s4_num > 1)
+			printk("i2c-savage4: warning: only 1 supported.\n");
 		return 0;
 	} else {
-		printk("i2c-voodoo3: No Voodoo3 found.\n");
+		printk("i2c-savage4: No Savage4 found.\n");
 		return -ENODEV;
 	}
 }
 
-void voodoo3_inc(struct i2c_adapter *adapter)
+void savage4_inc(struct i2c_adapter *adapter)
 {
 	MOD_INC_USE_COUNT;
 }
 
-void voodoo3_dec(struct i2c_adapter *adapter)
+void savage4_dec(struct i2c_adapter *adapter)
 {
 	MOD_DEC_USE_COUNT;
 }
 
-int __init i2c_voodoo3_init(void)
+int __init i2c_savage4_init(void)
 {
 	int res;
-	printk("i2c-voodoo3.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	voodoo3_initialized = 0;
-	if ((res = voodoo3_setup())) {
+	printk("i2c-savage4.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	savage4_initialized = 0;
+	if ((res = savage4_setup())) {
 		printk
-		    ("i2c-voodoo3.o: Voodoo3 not detected, module not inserted.\n");
-		voodoo3_cleanup();
+		    ("i2c-savage4.o: Savage4 not detected, module not inserted.\n");
+		savage4_cleanup();
 		return res;
 	}
-	if ((res = i2c_bit_add_bus(&voodoo3_i2c_adapter))) {
-		printk("i2c-voodoo3.o: I2C adapter registration failed\n");
+	if ((res = i2c_bit_add_bus(&savage4_i2c_adapter))) {
+		printk("i2c-savage4.o: I2C adapter registration failed\n");
 	} else {
-		printk("i2c-voodoo3.o: I2C bus initialized\n");
-		voodoo3_initialized |= INIT2;
+		printk("i2c-savage4.o: I2C bus initialized\n");
+		savage4_initialized |= INIT2;
 	}
 /*
-	if ((res = i2c_bit_add_bus(&voodoo3_ddc_adapter))) {
-		printk("i2c-voodoo3.o: DDC adapter registration failed\n");
+	if ((res = i2c_bit_add_bus(&savage4_ddc_adapter))) {
+		printk("i2c-savage4.o: DDC adapter registration failed\n");
 	} else {
-		printk("i2c-voodoo3.o: DDC bus initialized\n");
-		voodoo3_initialized |= INIT3;
+		printk("i2c-savage4.o: DDC bus initialized\n");
+		savage4_initialized |= INIT3;
 	}
 */
-	if(!(voodoo3_initialized & (INIT2 /* | INIT3 */ ))) {
-		printk("i2c-voodoo3.o: Both registrations failed, module not inserted\n");
-		voodoo3_cleanup();
+	if(!(savage4_initialized & (INIT2 /* | INIT3 */ ))) {
+		printk("i2c-savage4.o: Both registrations failed, module not inserted\n");
+		savage4_cleanup();
 		return res;
 	}
 	return 0;
 }
 
-int __init voodoo3_cleanup(void)
+int __init savage4_cleanup(void)
 {
 	int res;
 
 	iounmap(mem);
 /*
-	if (voodoo3_initialized & INIT3) {
-		if ((res = i2c_bit_del_bus(&voodoo3_ddc_adapter))) {
+	if (savage4_initialized & INIT3) {
+		if ((res = i2c_bit_del_bus(&savage4_ddc_adapter))) {
 			printk
-			    ("i2c-voodoo3.o: i2c_bit_del_bus failed, module not removed\n");
+			    ("i2c-savage4.o: i2c_bit_del_bus failed, module not removed\n");
 			return res;
 		}
 	}
 */
-	if (voodoo3_initialized & INIT2) {
-		if ((res = i2c_bit_del_bus(&voodoo3_i2c_adapter))) {
+	if (savage4_initialized & INIT2) {
+		if ((res = i2c_bit_del_bus(&savage4_i2c_adapter))) {
 			printk
-			    ("i2c-voodoo3.o: i2c_bit_del_bus failed, module not removed\n");
+			    ("i2c-savage4.o: i2c_bit_del_bus failed, module not removed\n");
 			return res;
 		}
 	}
@@ -355,17 +357,17 @@ EXPORT_NO_SYMBOLS;
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, Ralph Metzler <rjkm@thp.uni-koeln.de>, and Mark D. Studebaker <mdsxyz123@yahoo.com>");
-MODULE_DESCRIPTION("Voodoo3 I2C/SMBus driver");
+MODULE_DESCRIPTION("Savage4 I2C/SMBus driver");
 
 
 int init_module(void)
 {
-	return i2c_voodoo3_init();
+	return i2c_savage4_init();
 }
 
 int cleanup_module(void)
 {
-	return voodoo3_cleanup();
+	return savage4_cleanup();
 }
 
 #endif				/* MODULE */
