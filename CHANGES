@@ -26,6 +26,8 @@ ask CVS about it:
              kernel/drivers/[i2c,sensors] , not misc/ , and
              removes old versions in misc/ .
              Use $CFLAGS and $CPPFLAGS if defined.
+  Module i2c-amd756: Add nVidia nForce support; fix block read length;
+                     reliability improvements
   Module i2c-savage4: new
   Module i2c-viapro: Add support for VT8233A (0x3147)
   Module w83781d: Add multiple VRM version support

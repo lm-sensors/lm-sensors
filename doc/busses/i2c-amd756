@@ -8,6 +8,9 @@ Supported adapters:
   * AMD 768
     Datasheets: Publicly available on AMD website
 
+  * nVidia nForce
+    Datasheet: Unavailable
+
 
 Module Parameters
 -----------------

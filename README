@@ -44,6 +44,7 @@ At least the following I2C/SMBus adapters are supported:
   Intel PIIX4 (used in many Intel chipsets)
   Intel I810/I815 GMCH
   Intel 82443MX (440MX)
+  NVidia nForce
   ServerWorks OSB4, CSB5
   SiS 5595
   SMSC Victory66

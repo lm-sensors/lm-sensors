@@ -45,21 +45,11 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
-MODULE_LICENSE("GPL");
-#endif
-
 #ifndef PCI_DEVICE_ID_AMD_756
 #define PCI_DEVICE_ID_AMD_756 0x740B
 #endif
 #ifndef PCI_DEVICE_ID_AMD_766
 #define PCI_DEVICE_ID_AMD_766 0x7413
-#endif
-#ifndef PCI_DEVICE_ID_AMD_768
-#define PCI_DEVICE_ID_AMD_768 0x7443
-#endif
-#ifndef PCI_VENDOR_ID_NVIDIA
-#define PCI_VENDOR_ID_NVIDIA 0x10DE
 #endif
 #ifndef PCI_DEVICE_ID_NVIDIA_NFORCE_SMBUS
 #define PCI_DEVICE_ID_NVIDIA_NFORCE_SMBUS 0x01B4
@@ -76,8 +66,8 @@ struct sd {
 static struct sd supported[] = {
     {PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_756, 3, "AMD756", 1},
     {PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_766, 3, "AMD766", 1},
-    {PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_768, 3, "AMD768", 1},
-    {PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_NFORCE_SMBUS, 1, "nVidia nForce", 0},
+    {PCI_VENDOR_ID_AMD, 0x7443, 3, "AMD768", 1},
+    {PCI_VENDOR_ID_NVIDIA, 0x01B4, 1, "nVidia nForce", 0},
     {0, 0, 0}
 };
 
@@ -533,6 +523,10 @@ EXPORT_NO_SYMBOLS;
 
 MODULE_AUTHOR("Merlin Hughes <merlin@merlin.org>");
 MODULE_DESCRIPTION("AMD756/766 SMBus driver");
+
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 int init_module(void)
 {
