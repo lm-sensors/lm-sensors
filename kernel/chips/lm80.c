@@ -257,6 +257,10 @@ int lm80_attach_adapter(struct i2c_adapter *adapter)
 
   /* OK, this is no detection. I know. It will do for now, though.  */
   err = 0;
+  
+  /* Make sure we aren't probing the ISA bus!! */
+  if (i2c_is_isa_adapter(adapter)) return 0;
+  
   for (address = 0x20; (! err) && (address <= 0x2f); address ++) {
 
     /* Later on, we will keep a list of registered addresses for each

@@ -24,6 +24,7 @@
 #include "smbus.h"
 #include "sensors.h"
 #include "i2c.h"
+#include "i2c-isa.h"
 #include "version.h"
 
 /* Many constants specified below */
@@ -130,7 +131,9 @@ int eeprom_attach_adapter(struct i2c_adapter *adapter)
   struct eeprom_data *data;
 
   err = 0;
-
+  /* Make sure we aren't probing the ISA bus!! */
+  if (i2c_is_isa_adapter(adapter)) return 0;
+  
   /* OK, this is no detection. I know. It will do for now, though.  */
 
   /* Set err only if a global error would make registering other clients

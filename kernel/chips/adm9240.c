@@ -311,6 +311,9 @@ int adm9240_attach_adapter(struct i2c_adapter *adapter)
   const char *type_name,*client_name;
 
   err = 0;
+  /* Make sure we aren't probing the ISA bus!! */
+  if (i2c_is_isa_adapter(adapter)) return 0;
+  
   /* The address of the ADM2940 must at least start somewhere in
      0x2C to 0x2F, but can be changed to be anyelse after that. 
      (But, why??) */
