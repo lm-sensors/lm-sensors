@@ -1,0 +1,37 @@
+If you aren't getting the expected readings on your fans,
+try the following:
+
+- Do you get a fan reading in the BIOS or in DOS?
+  If not, you may not have a fan with a tachometer output.
+  Look and see. Fans with tachometer outputs have THREE wires.
+
+- Try experimenting with the fan divisor settings:
+
+
+Fan Divisor	Minimum RPM	Maximum RPM
+
+  1		5314		1350000
+  2		2657		 675000
+  4		1328		 337500
+  8		 664		 168750
+ 16		 332		  84375
+ 32		 166		  42187
+ 64		  83		  21093
+128		  41		  10546
+
+
+Pick a divisor so that the nominal RPM is about 50%
+above the minimum. This is a good compromise between
+margin and accuracy.
+
+If you have a 0 RPM reading some or all of the time,
+increase the divisor until you get good readings.
+
+If you have a nominal reading less than 1.25 times the
+minimum, increase the divisor to give you margin
+so that you will not get spurious alarms.
+
+If you have a nominal reading more than 3 times the
+minimum, decrease the divisor to provide better
+accuracy.
+
