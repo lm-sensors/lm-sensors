@@ -541,10 +541,12 @@ chip "as99127f-*"
 # thermal diode (Pentium Coppermine, and above), and "temp2 @*2.0, @/2.0" 
 # is correct for Athlon/Duron boards, which use a thermistor in the 
 # socket."
-# Intel systems (e.g. Asus CUV4X, Asus A7V8X)
+# Asus CUV4X, Asus A7V8X
 #   compute temp2 (@*30/43)+25, (@-25)*43/30
-# AMD systems (e.g. Asus A7V133/133-C)
+# Asus A7V133
     compute temp2 @*2.0, @/2.0
+# Asus CUSL2
+    compute temp2 (@*60/43)+25,(@-25)*43/60
 
     compute temp3 @*2.0, @/2.0
 
