@@ -101,6 +101,16 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e };
 #define VIA686A_REG_ALARM2 0x42
 #define VIA686A_REG_FANDIV 0x47
 #define VIA686A_REG_CONFIG 0x40
+// The following register sets temp interrupt mode (bits 1-0 for temp1, 
+// 3-2 for temp2, 5-4 for temp3).  Modes are:
+//    00 interrupt stays as long as value is out-of-range
+//    01 interrupt is cleared once register is read (default)
+//    10 comparator mode- like 00, but ignores hysteresis
+//    11 same as 00
+#define VIA686A_REG_TEMP_MODE 0x4b
+// We'll just assume that you want to set all 3 simulataneously:
+#define VIA686A_TEMP_MODE_MASK 0x3F
+#define VIA686A_TEMP_MODE_CONTINUOUS (0x00)
 
 /* Conversions. Rounding and limit checking is only done on the TO_REG
    variants. */
@@ -673,6 +683,11 @@ void via686a_init_client(struct i2c_client *client)
 
 	/* Start monitoring */
 	via686a_write_value(client, VIA686A_REG_CONFIG, 0x01);
+
+	/* Cofigure temp interrupt mode for continuous-interrupt operation */
+	via686a_write_value(client, VIA686A_REG_TEMP_MODE, 
+			    via686a_read_value(client, VIA686A_REG_TEMP_MODE) &
+			    !VIA686A_TEMP_MODE_MASK | VIA686A_TEMP_MODE_CONTINUOUS);
 }
 
 void via686a_update_client(struct i2c_client *client)
