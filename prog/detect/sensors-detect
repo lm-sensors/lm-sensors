@@ -1497,6 +1497,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	logdev => 0x09,
       },
       {
+	name => "Nat. Semi. PC87373 Super IO Fan Sensors",
+	driver => "to-be-written",
+	devid => 0xf3,
+	logdev => 0x09,
+      },
+      {
 	name => "Nat. Semi. PC8741x Super IO",
 	driver => "not-a-sensor",
 	devid => 0xee,
