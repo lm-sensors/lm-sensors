@@ -1,9 +1,10 @@
 /*
     LM87.c - Part of lm_sensors, Linux kernel modules for hardware
              monitoring
-    Copyright (c) 1999  Frodo Looijaard <frodol@dds.nl>
-    Philip Edelbrock <phil@netroedge.com>, and
-    Dan Eaton of Rocket Logix <Dan.Eaton@rocketlogix.com>
+    Copyright (c) 2000  Frodo Looijaard <frodol@dds.nl>
+                        Philip Edelbrock <phil@netroedge.com>
+			Stephen Rousset <stephen.rousset@rocketlogix.com>
+			Dan Eaton <dan.eaton@rocketlogix.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -169,12 +170,12 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
                            205-(val)*5)
 
 /* Initial limits */
-#define LM87_INIT_IN_0 192
-#define LM87_INIT_IN_1 192
-#define LM87_INIT_IN_2 192
-#define LM87_INIT_IN_3 192
-#define LM87_INIT_IN_4 192
-#define LM87_INIT_IN_5 192
+#define LM87_INIT_IN_0 190
+#define LM87_INIT_IN_1 190
+#define LM87_INIT_IN_2 190
+#define LM87_INIT_IN_3 190
+#define LM87_INIT_IN_4 190
+#define LM87_INIT_IN_5 190
 
 #define LM87_INIT_IN_PERCENTAGE 10
 
@@ -359,7 +360,21 @@ static ctl_table LM87_dir_table_template[] = {
 
 int LM87_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, LM87_detect);
+   int error;
+   struct i2c_client_address_data  lm87_client_data;
+
+   lm87_client_data.normal_i2c       = addr_data.normal_i2c;
+   lm87_client_data.normal_i2c_range = addr_data.normal_i2c_range;
+   lm87_client_data.probe            = addr_data.probe;
+   lm87_client_data.probe_range      = addr_data.probe_range;
+   lm87_client_data.ignore           = addr_data.ignore;
+   lm87_client_data.ignore_range     = addr_data.ignore_range;
+   lm87_client_data.force            = addr_data.forces->force;
+
+	error = i2c_probe(adapter, &lm87_client_data, LM87_detect);
+	sensors_detect(adapter, &addr_data, LM87_detect);
+
+        return error;
 }
 
 static int LM87_detect(struct i2c_adapter *adapter, int address,
@@ -569,17 +584,19 @@ void LM87_update_client(struct i2c_client *client)
 		     * to look at one threshold.
 		     */
 		    if (i == 0) {
-			data->in[i] = LM87_read_value(client, LM87_REG_FAN1_AIN1);
+			data->in[i] = 
+                            LM87_read_value(client, LM87_REG_FAN1_AIN1);
 			data->in_min[i] = 0;
-			data->in_max[i] = LM87_read_value(client, LM87_REG_FAN1_AIN1_LIMIT);
+			data->in_max[i] = 
+                            LM87_read_value(client, LM87_REG_FAN1_AIN1_LIMIT);
 		    }
 		    else {
-			data->in[i] =
+			data->in[i] = 
 			    LM87_read_value(client, LM87_REG_IN(i));
-			data->in_min[i] =
+			data->in_min[i] = 
 			    LM87_read_value(client,
 					       LM87_REG_IN_MIN(i));
-			data->in_max[i] =
+			data->in_max[i] = 
 			    LM87_read_value(client,
 					       LM87_REG_IN_MAX(i));
 	            }
@@ -894,7 +911,8 @@ EXPORT_NO_SYMBOLS;
 #ifdef MODULE
 
 MODULE_AUTHOR
-("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
+    ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, 
+      and Stephen Rousset <stephen.rousset@rocketlogix.com>");
 MODULE_DESCRIPTION("LM87 driver");
 
 int init_module(void)
