@@ -19,6 +19,8 @@ ask CVS about it:
 
 2.6.5 (2002????)
   Module i2c-piix4: Refuse to load on IBM systems
+  Program mkpatch: Add Config.in entries for, lm92,
+                   pcf8574, pcf8591, smsc47m1, vt1211
   Program sensors: Add /usr/local/etc to config file path
 
 2.6.4 (20020719)

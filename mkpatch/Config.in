@@ -28,9 +28,12 @@ if [ "$CONFIG_I2C_PROC" = "m" -o "$CONFIG_I2C_PROC" = "y" ] ; then
     dep_tristate '  National Semiconductors LM78' CONFIG_SENSORS_LM78 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductors LM80' CONFIG_SENSORS_LM80 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductors LM87' CONFIG_SENSORS_LM87 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  National Semiconductors LM92' CONFIG_SENSORS_LM92 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Silicon Integrated Systems Corp. SiS5595' CONFIG_SENSORS_SIS5595 $CONFIG_I2C $CONFIG_I2C_PROC $CONFIG_I2C_ISA
+    dep_tristate '  SMSC47M1xx Integrated Sensors' CONFIG_SENSORS_SMSC47M1 $CONFIG_I2C $CONFIG_I2C_PROC $CONFIG_I2C_ISA
     dep_tristate '  Texas Instruments THMC50 and compatibles' CONFIG_SENSORS_THMC50 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  VIA 686a Integrated Hardware Monitor' CONFIG_SENSORS_VIA686A $CONFIG_I2C $CONFIG_I2C_PROC $CONFIG_I2C_ISA
+    dep_tristate '  VIA VT1211 Integrated Sensors' CONFIG_SENSORS_VT1211 $CONFIG_I2C $CONFIG_I2C_PROC $CONFIG_I2C_ISA
     dep_tristate '  Winbond W83781D, W83782D, W83783S, W83627HF, Asus AS99127F' CONFIG_SENSORS_W83781D $CONFIG_I2C $CONFIG_I2C_PROC
     bool 'Other I2C devices' CONFIG_SENSORS_OTHER 
     if [ "$CONFIG_SENSORS_OTHER" = "y" ] ; then
@@ -38,6 +41,8 @@ if [ "$CONFIG_I2C_PROC" = "m" -o "$CONFIG_I2C_PROC" = "y" ] ; then
       dep_tristate '  DDC Monitor EDID EEPROM' CONFIG_SENSORS_DDCMON $CONFIG_I2C $CONFIG_I2C_PROC
       dep_tristate '  EEprom (DIMM) reader ' CONFIG_SENSORS_EEPROM $CONFIG_I2C $CONFIG_I2C_PROC
       dep_tristate '  Matrix-Orbital LCD Displays' CONFIG_SENSORS_MATORB $CONFIG_I2C $CONFIG_I2C_PROC
+      dep_tristate '  Philips PCF8574 Parallel I/O' CONFIG_SENSORS_PCF8574 $CONFIG_I2C $CONFIG_I2C_PROC
+      dep_tristate '  Philips PCF8591 D/A and A/D' CONFIG_SENSORS_PCF8591 $CONFIG_I2C $CONFIG_I2C_PROC
     fi
   fi
   endmenu
