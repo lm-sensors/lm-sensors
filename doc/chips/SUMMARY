@@ -165,6 +165,7 @@ w83781d
 	w83781d		3	7	3	-	yes	yes
 	w83782d		3	9	3	2-4 pwm	yes	yes
 	w83783s		1-2	5-6	3	2 pwm	yes	no
+	w83791d		3	10	5	5 pwm	yes	no
 	w83627hf	3	9	3	2 pwm	yes	yes (LPC)
 	w83697hf	2	6	2	2 pwm	no	yes
 

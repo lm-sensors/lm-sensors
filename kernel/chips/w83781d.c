@@ -1,7 +1,7 @@
 /*
     w83781d.c - Part of lm_sensors, Linux kernel modules for hardware
                 monitoring
-    Copyright (c) 1998 - 2001  Frodo Looijaard <frodol@dds.nl>,
+    Copyright (c) 1998 - 2003  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>,
     and Mark Studebaker <mdsxyz123@yahoo.com>
 
@@ -26,11 +26,12 @@
     Chip	#vin	#fanin	#pwm	#temp	wchipid	vendid	i2c	ISA
     as99127f	7	3	1?	3	0x30	0x12c3	yes	no
     asb100 "bach" (type_name = as99127f)	0x30	0x0694	yes	no
-    w83781d	7	3	0	3	0x10	0x5ca3	yes	yes
     w83627hf	9	3	2	3	0x20	0x5ca3	yes	yes(LPC)
+    w83697hf	8	2	2	2	0x60	0x5ca3	no	yes(LPC)
+    w83781d	7	3	0	3	0x10	0x5ca3	yes	yes
     w83782d	9	3	2-4	3	0x30	0x5ca3	yes	yes
     w83783s	5-6	3	2	1-2	0x40	0x5ca3	yes	no
-    w83697hf	8	2	2	2	0x60	0x5ca3	no	yes(LPC)
+    w83791d	10	5	5	3	0x70	0x5ca3	yes	no
 
 */
 

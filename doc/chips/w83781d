@@ -4,6 +4,7 @@ Kernel driver `w83781d.o'
 Status: W83781D support is complete and well-tested.
         W83782D support is complete and well-tested.
         W83783S support is complete but has not been well-tested.
+        W83791D support is BETA.
         W83627HF support is complete but has not been well-tested.
         W83697HF support is complete but has not been well-tested.
         AS99127F support is BETA and has known problems due to lack of a
@@ -22,6 +23,10 @@ Supported chips:
     Datasheet: Publicly available at the Winbond website
   * Winbond W83783S
     Prefix 'w83783s'
+    Addresses scanned: I2C 0x20 - 0x2f (inclusive)
+    Datasheet: Publicly available at the Winbond website
+  * Winbond W83791D
+    Prefix 'w83791d'
     Addresses scanned: I2C 0x20 - 0x2f (inclusive)
     Datasheet: Publicly available at the Winbond website
   * Winbond W83627HF
@@ -58,6 +63,8 @@ Module Parameters
 * force_w83782d:
   Ditto
 * force_w83783s:
+  Ditto
+* force_w83791d:
   Ditto
 * force_w83627hf:
   Ditto
