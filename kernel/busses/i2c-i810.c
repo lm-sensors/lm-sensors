@@ -91,7 +91,7 @@ static
 #else
 extern
 #endif
-int __init i2c_i810i2c_init(void);
+int __init i2c_i810_init(void);
 static int __init i810i2c_cleanup(void);
 static int i810i2c_setup(void);
 static void config_i810(struct pci_dev *dev);
@@ -267,7 +267,7 @@ void i810_dec(struct i2c_adapter *adapter)
 	MOD_DEC_USE_COUNT;
 }
 
-int __init i2c_i810i2c_init(void)
+int __init i2c_i810_init(void)
 {
 	int res;
 	printk("i2c-i810.o version %s (%s)\n", LM_VERSION, LM_DATE);
@@ -333,7 +333,7 @@ MODULE_DESCRIPTION("I810/I815 I2C/DDC driver");
 
 int init_module(void)
 {
-	return i2c_i810i2c_init();
+	return i2c_i810_init();
 }
 
 int cleanup_module(void)

@@ -32,6 +32,7 @@ ask CVS about it:
   Library: Fix/standardize some lm87 and mtp008 entries
   Chip Modules (all ISA): Remove #include "i2c-isa.h"
   Module i2c-i801: Chip detection cleanup
+  Module i2c-i810: Fixed i2c_i810_init() not found in patched kernel
   Module lm78: Recognize chipid=0x20
   Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
   Module mtp008: Fix temp2 max initialization
