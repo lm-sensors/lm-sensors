@@ -458,7 +458,6 @@ void smbusarp_contents(struct i2c_client *client, int operation,
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		a = results[0];
 		if(*nrels_mag >= 1 &&
-		   a >= 0 &&
 		   a < SMBUS_ADDRESS_SIZE &&
 		   data->dev[nr].status == ARP_BUSY &&
 		   data->address_pool[a] == ARP_FREE) {
