@@ -773,7 +773,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             via686a_isa_detect adm1022_detect ltc1710_detect gl525sm_detect
             lm87_detect ite_detect ite_isa_detect ite_alias_detect
             ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect
-            fscscy_detect pcf8591_detect arp_detect ipmi_kcs_detect
+            fscscy_detect arp_detect ipmi_kcs_detect
             ipmi_smic_detect via8231_isa_detect lm85_detect smartbatt_detect
             adm1026_detect w83l785ts_detect lm83_detect lm90_detect
             saa1064_detect w83l784r_detect mozart_detect max6650_detect
@@ -1212,24 +1212,6 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "to-be-written",
        i2c_addrs => [0x73],
        i2c_detect => sub { fscher_detect @_ },
-     },
-     {
-       name => "Philips Semiconductors PCF8591",
-       driver => "pcf8591",
-       i2c_addrs => [0x48..0x4f],
-       i2c_detect => sub { pcf8591_detect 0, @_ },
-     },
-     {
-       name => "Philips Semiconductors PCF8574",
-       driver => "pcf8574",
-       i2c_addrs => [0x20..0x27],
-       i2c_detect => sub { pcf8591_detect 1, @_ },
-     },
-     {
-       name => "Philips Semiconductors PCF8574A",
-       driver => "pcf8574",
-       i2c_addrs => [0x38..0x3f],
-       i2c_detect => sub { pcf8591_detect 2, @_ },
      },
      {
        name => "Philips Semiconductors SAA1064",
@@ -3364,17 +3346,6 @@ sub fscher_detect
   	return;
   }
   return (8);
-}
-
-# $_[0]: Chip to detect (0 = PCF8591, 1 = PCF8574, 2 = PCF8574A).
-# $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
-# $_[2]: Address
-# Returns: 1
-# Detection is impossible...
-sub pcf8591_detect
-{
-  return (1);
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
