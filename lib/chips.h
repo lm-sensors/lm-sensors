@@ -966,6 +966,7 @@
 /* ADM1025 chip */
 
 #define SENSORS_ADM1025_PREFIX "adm1025"
+#define SENSORS_NE1619_PREFIX "ne1619"
 
 #define SENSORS_ADM1025_IN0 1 /* R */
 #define SENSORS_ADM1025_IN1 2 /* R */

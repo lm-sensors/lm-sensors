@@ -2,7 +2,7 @@
     adm1025.c - Part of lm_sensors, Linux kernel modules for hardware
                monitoring
     Copyright (c) 2000 Chen-Yuan Wu <gwu@esoft.com>
-    Copyright (c) 2003 Jean Delvare <khali@linux-fr.org>
+    Copyright (c) 2003-2004 Jean Delvare <khali@linux-fr.org>
 
     Based on the adm9240 driver.
 
@@ -47,7 +47,7 @@ static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_1(adm1025);
+SENSORS_INSMOD_2(adm1025, ne1619);
 
 /* Many ADM1025 constants specified below */
 
@@ -291,24 +291,34 @@ static int adm1025_detect(struct i2c_adapter *adapter, int address,
 
 	/* Determine the chip type. */
 	if (kind <= 0) {
-		i = i2c_smbus_read_byte_data(new_client, ADM1025_REG_COMPANY_ID);
-		if (((i2c_smbus_read_byte_data(new_client, ADM1025_REG_DIE_REV) & 0xf0) == 0x20)
-		 && ((i == 0x41)   /* ADM1025 */
-		  || (i == 0xA1))) /* NE1619 */
-			kind = adm1025;
-		else {
-			if (kind == 0)
-				printk
-				    ("adm1025.o: Ignoring 'force' parameter for unknown chip at "
-				     "adapter %d, address 0x%02x\n",
-				     i2c_adapter_id(adapter), address);
-			goto ERROR1;
+		u8 man_id, chip_id;
+		
+		man_id = i2c_smbus_read_byte_data(new_client,
+			 ADM1025_REG_COMPANY_ID);
+		chip_id = i2c_smbus_read_byte_data(new_client,
+			  ADM1025_REG_DIE_REV);
+		
+		if (man_id == 0x41) { /* Analog Devices */
+			if ((chip_id & 0xF0) == 0x20) /* ADM1025 */
+				kind = adm1025;
+		} else if (man_id == 0xA1) { /* Philips */
+			if (address != 0x2E
+			 && (chip_id & 0xF0) == 0x20) /* NE1619 */
+				kind = ne1619;
 		}
+	}
+
+	if (kind <= 0) { /* Identification failed */
+		printk("adm1025.o: Unsupported chip.\n");
+		goto ERROR1;
 	}
 
 	if (kind == adm1025) {
 		type_name = "adm1025";
 		client_name = "ADM1025 chip";
+	} else if (kind == ne1619) {
+		type_name = "ne1619";
+		client_name = "NE1619 chip";		
 	} else {
 #ifdef DEBUG
 		printk("adm1025.o: Internal error: unknown kind (%d)?!?",

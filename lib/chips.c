@@ -4812,6 +4812,7 @@ sensors_chip_features sensors_chip_features_list[] =
 		/* Cheat on ADM1022 for now - no separate #defines */
  { SENSORS_ADM1022_PREFIX, thmc50_features },
  { SENSORS_ADM1025_PREFIX, adm1025_features },
+ { SENSORS_NE1619_PREFIX, adm1025_features },
  { SENSORS_ADM1026_PREFIX, adm1026_features },
  { SENSORS_VIA686A_PREFIX, via686a_features },
  { SENSORS_DDCMON_PREFIX, ddcmon_features },

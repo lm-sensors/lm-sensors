@@ -1131,7 +1131,7 @@ chip "mtp008-*"
 #    set temp2_hyst 47
 #    ignore temp3
 
-chip "adm1025-*"
+chip "adm1025-*" "ne1619-*"
 
 # The ADM1025 has integrated scaling resistors, rather
 # than external resistors common to most sensor devices.

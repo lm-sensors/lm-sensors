@@ -9,15 +9,14 @@ Supported chips:
     Addresses scanned: I2C 0x2c - 0x2e (inclusive)
     Datasheet: Publicly available at the Analog Devices website
   * Philips NE1619
-    Prefix `adm1025'
-    Addresses scanned: I2C 0x2c - 0x2e (inclusive)
+    Prefix `ne1619'
+    Addresses scanned: I2C 0x2c - 0x2d (inclusive)
     Datasheet: Publicly available at the Philips website
 
 The NE1619 presents some differences with the original ADM1025:
-  * Only two possible addresses (0x2c - 0x2d), although we don't care.
+  * Only two possible addresses (0x2c - 0x2d).
   * No temperature offset register, but we don't use it anyway.
   * No INT mode for pin 16. We don't play with it anyway.
-No separate prefix was added for the NE1619, it just wasn't worth it.
 
 Author: Chen-Yuan Wu <gwu@esoft.com> and Jean Delvare <khali@linux-fr.org>
 
@@ -32,6 +31,9 @@ Module Parameters
 * force_adm1025: short array (min = 1, max = 48)
   List of adapter,address pairs which are unquestionably assumed to contain
   a `adm1025' chip
+* force_ne1619: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `ne1619' chip
 * probe: short array (min = 1, max = 48)
   List of adapter,address pairs to scan additionally
 * probe_range: short array (min = 1, max = 48)
@@ -72,7 +74,7 @@ a module parameter to force modes.
 Chip Features
 -------------
 
-Chip 'adm1025'
+Chips 'adm1025' and 'ne1619'
 
 LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
 in0                   -                     -                       R-     2
