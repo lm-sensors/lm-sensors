@@ -385,6 +385,7 @@ chip "sis5595-*"
 #    set temp_over 40
 #    set temp_hyst 37
 
+
 chip "w83782d-*" "w83627hf-*"
 
 # Same as above for w83781d except that in5 and in6 are computed differently.
@@ -568,6 +569,81 @@ chip "w83697hf-*"
 #    set temp2_hyst 47
 #    set temp3_over 52
 #    set temp3_hyst 47
+
+
+chip "w83627thf-*"
+
+# Rather than an internal inverting op amp, the 627thf uses standard positive
+# inputs and the negative voltages are level shifted by a 3.6V reference
+# (same as 82d/83s).
+# The math is convoluted, so we hope that your motherboard
+# uses the recommended resistor values.
+# Note that in1 (+12V) is the usual in4, and in4 (-12V) is the usual in5.
+# Data sheet is obviously wrong for in4, the usual formula should work.
+# No in5 nor in6.
+
+    label in0 "VCore"
+    label in1 "+12V"
+    label in2 "+3.3V"
+    label in3 "+5V"
+    label in4 "-12V"
+    label in7 "V5SB"
+    label in8 "VBat"
+
+# Mori Hiroyuki reported to need this (P4P800)
+#   compute in0 @/2, @*2
+
+    compute in1 ((28/10)+1)*@, @/((28/10)+1)
+    compute in3 ((34/51)+1)*@, @/((34/51)+1)
+    compute in4 (5.14*@)-14.91, (@+14.91)/5.14
+    compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+
+# adjust this if your vid is wrong; see doc/vid
+#   set vrm 9.0
+
+# set limits to  5% for the critical voltages
+# set limits to 10% for the non-critical voltages
+# set limits to 20% for the battery voltage
+# if your vid is wrong, you'll need to adjust in0_min and in0_max
+
+    set in0_min vid * 0.95
+    set in0_max vid * 1.05
+    set in1_min 12 * 0.90
+    set in1_max 12 * 1.10
+    set in2_min 3.3 * 0.95
+    set in2_max 3.3 * 1.05
+    set in3_min 5.0 * 0.95
+    set in3_max 5.0 * 1.05
+    set in4_min -12 * 0.90
+    set in4_max -12 * 1.10
+    set in7_min 5 * 0.95
+    set in7_max 5 * 1.05
+    set in8_min 3.0 * 0.80
+    set in8_max 3.0 * 1.20
+
+# set up sensor types (thermistor is default)
+# 1 = PII/Celeron Diode; 2 = 3904 transistor;
+# 3435 = thermistor with Beta = 3435
+# If temperature changes very little, try 1 or 2.
+#   set sensor1 1
+#   set sensor2 2
+#   set sensor3 3435
+
+    label temp1 "M/B Temp"
+    label temp2 "CPU Temp"
+#   ignore temp3
+
+# examples for temperature limits
+#    set temp1_over 40
+#    set temp1_hyst 37
+#    set temp2_over 52
+#    set temp2_hyst 47
+#    set temp3_over 52
+#    set temp3_hyst 47
+
+#   ignore fan1
+    label fan2 "CPU Fan"
+#   ignore fan3
 
 
 chip "as99127f-*"
