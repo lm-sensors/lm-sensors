@@ -175,6 +175,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters @dmidecode);
        devid  => 0x5597,
        func => 0,
        procid => "Silicon Integrated Systems SIS5581/5582/5597/5598 (To be written - Do not use 5595 drivers)",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /dontmatchthis/ },
      } ,
      {
@@ -182,6 +183,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters @dmidecode);
        devid  => 0x5598,
        func => 0,
        procid => "Silicon Integrated Systems SIS5598 (To be written - Do not use 5595 drivers)",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /dontmatchthis/ },
      } ,
      {
@@ -189,6 +191,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters @dmidecode);
        devid  => 0x0540,
        func => 0,
        procid => "Silicon Integrated Systems SIS540 (To be written - Do not use 5595 drivers)",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /dontmatchthis/ },
      } ,
      {
@@ -204,6 +207,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters @dmidecode);
        devid  => 0x0730,
        func => 0,
        procid => "Silicon Integrated Systems SIS730 (To be written - Do not use 5595 drivers)",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /dontmatchthis/ },
      } ,
 #
@@ -1715,8 +1719,12 @@ sub scan_adapter
     i2c_set_slave_addr(\*FILE,$addr) or 
         printf("Client at address 0x%02x can not be probed - unload all client drivers first!\n",$addr), next;
 
-    next unless i2c_smbus_write_quick(\*FILE,$SMBUS_READ) >= 0;
+    next unless i2c_smbus_write_quick(\*FILE,$SMBUS_WRITE) >= 0;
     printf "Client found at address 0x%02x\n",$addr;
+    # Prevent 24RF08 corruption
+    if($addr >= 0x54 and $addr <= 0x57) {
+        i2c_smbus_write_quick(\*FILE,$SMBUS_WRITE);
+    }
 
     foreach $chip (@chip_ids) {
       if (exists $$chip{i2c_addrs} and contains $addr, @{$$chip{i2c_addrs}}) {
