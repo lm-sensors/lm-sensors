@@ -28,7 +28,17 @@
 
 void help(void)
 {
+  FILE *fptr;
+  char s[100];
+
   fprintf(stderr,"Syntax: i2cdetect I2CBUS\n");
+  fprintf(stderr,"  I2CBUS is an integer\n");
+  if((fptr = fopen("/proc/bus/i2c", "r"))) {
+    fprintf(stderr,"  Installed I2C busses:\n");
+    while(fgets(s, 100, fptr))
+      fprintf(stderr, "    %s", s);	
+    fclose(fptr);
+  }
 }
 
 int main(int argc, char *argv[])
