@@ -244,7 +244,7 @@ void print_gl518(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_GL518R00_VDD_MIN,&min) &&
         !sensors_get_feature(*name,SENSORS_GL518R00_VDD_MAX,&max)) {
       print_label(label,10);
-      printf("          (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
+      printf("(n/a)     (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
              min,max,alarms&GL518_ALARM_VDD?"ALARM":"     ",
              beeps&GL518_ALARM_VDD?"(beep)":"");
     } else
@@ -255,7 +255,7 @@ void print_gl518(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN1_MIN,&min) &&
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN1_MAX,&max)) {
       print_label(label,10);
-      printf("          (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
+      printf("(n/a)     (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
              min,max,alarms&GL518_ALARM_VIN1?"ALARM":"     ",
              beeps&GL518_ALARM_VIN1?"(beep)":"");
     } else
@@ -265,7 +265,7 @@ void print_gl518(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN2_MIN,&min) &&
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN2_MAX,&max)) {
       print_label(label,10);
-      printf("          (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
+      printf("(n/a)     (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
              min,max,alarms&GL518_ALARM_VIN2?"ALARM":"     ",
              beeps&GL518_ALARM_VIN2?"(beep)":"");
     } else
@@ -345,8 +345,8 @@ void print_gl518(const sensors_chip_name *name)
 
   if (!sensors_get_label(*name,SENSORS_GL518R00_TEMP,&label) &&
       !sensors_get_feature(*name,SENSORS_GL518R00_TEMP,&cur) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_TEMP_HYST,&min) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_TEMP_OVER,&max)) {
+      !sensors_get_feature(*name,SENSORS_GL518R00_TEMP_OVER,&max) &&
+      !sensors_get_feature(*name,SENSORS_GL518R00_TEMP_HYST,&min)) {
     print_label(label,10);
     printf("%+3.0f C     (limit = %+3.0f C,  hysteris = %+3.0f C) %s  %s\n",
            cur,max,min, alarms&GL518_ALARM_TEMP?"ALARM":"     ",

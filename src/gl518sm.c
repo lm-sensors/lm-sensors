@@ -81,10 +81,10 @@
 #define GL518_INIT_FAN_MIN_2 3000
 
 /* What are sane values for these?!? */
-#define GL518_INIT_VIN_1 3000
-#define GL518_INIT_VIN_2 3000
-#define GL518_INIT_VIN_3 3000
-#define GL518_INIT_VDD 3000
+#define GL518_INIT_VIN_1 300
+#define GL518_INIT_VIN_2 300
+#define GL518_INIT_VIN_3 300
+#define GL518_INIT_VDD 300
 
 #define GL518_INIT_PERCENTAGE 10
 
@@ -304,17 +304,17 @@ int gl518_attach_adapter(struct i2c_adapter *adapter)
                       (FAN_TO_REG(GL518_INIT_FAN_MIN_1,2) << 8) |
                       FAN_TO_REG(GL518_INIT_FAN_MIN_2,2));
     gl518_write_value(new_client,GL518_REG_VIN1_LIMIT,
-                      (IN_TO_REG(GL518_INIT_VIN_MIN_1) << 8) |
-                      IN_TO_REG(GL518_INIT_VIN_MAX_1));
+                      (IN_TO_REG(GL518_INIT_VIN_MAX_1) << 8) |
+                      IN_TO_REG(GL518_INIT_VIN_MIN_1));
     gl518_write_value(new_client,GL518_REG_VIN2_LIMIT,
-                      (IN_TO_REG(GL518_INIT_VIN_MIN_2) << 8) |
-                      IN_TO_REG(GL518_INIT_VIN_MAX_2));
+                      (IN_TO_REG(GL518_INIT_VIN_MAX_2) << 8) |
+                      IN_TO_REG(GL518_INIT_VIN_MIN_2));
     gl518_write_value(new_client,GL518_REG_VIN3_LIMIT,
-                      (IN_TO_REG(GL518_INIT_VIN_MIN_3) << 8) |
-                      IN_TO_REG(GL518_INIT_VIN_MAX_3));
+                      (IN_TO_REG(GL518_INIT_VIN_MAX_3) << 8) |
+                      IN_TO_REG(GL518_INIT_VIN_MIN_3));
     gl518_write_value(new_client,GL518_REG_VDD_LIMIT,
-                      (IN_TO_REG(GL518_INIT_VDD_MIN) << 8) |
-                      IN_TO_REG(GL518_INIT_VDD_MAX));
+                      (IN_TO_REG(GL518_INIT_VDD_MAX) << 8) |
+                      IN_TO_REG(GL518_INIT_VDD_MIN));
     /* Clear status register (bit 5=1), start (bit6=1) */
     gl518_write_value(new_client,GL518_REG_CONF,0x24);
     gl518_write_value(new_client,GL518_REG_CONF,0x44);

@@ -22,7 +22,7 @@ MODULE_DIR := lib
 
 # The main and minor version of the library
 LIBMAINVER := 0
-LIBMINORVER := 0.0
+LIBMINORVER := 0.1
 LIBVER := $(LIBMAINVER).$(LIBMINORVER)
 
 # The static lib name, the shared lib name, and the internal ('so') name of
@@ -42,7 +42,7 @@ LIBCSOURCES := $(MODULE_DIR)/data.c $(MODULE_DIR)/general.c \
 LIBOTHEROBJECTS := $(MODULE_DIR)/conf-parse.o $(MODULE_DIR)/conf-lex.o
 LIBSHOBJECTS := $(LIBCSOURCES:.c=.lo) $(LIBOTHEROBJECTS:.o=.lo)
 LIBSTOBJECTS := $(LIBCSOURCES:.c=.ao) $(LIBOTHEROBJECTS:.o=.ao)
-LIBEXTRACLEAN := $(MODULE_DIR)/conf-parse.h
+LIBEXTRACLEAN := $(MODULE_DIR)/conf-parse.h $(MODULE_DIR)/libsensors.so*
 
 LIBHEADERFILES := $(MODULE_DIR)/error.h $(MODULE_DIR)/sensors.h
 
@@ -88,4 +88,5 @@ clean-lib:
 	$(RM) $(LIBTARGETS) $(LIBSHOBJECTS) $(LIBSTOBJECTS)
 	$(RM) $(LIBSHOBJECTS:.lo=.ld) $(LIBSTOBJECTS:.ao=.ad)
 	$(RM) $(LIBOTHEROBJECTS:.o=.c) $(LIBEXTRACLEAN)
+	$(RM) 
 clean :: clean-lib
