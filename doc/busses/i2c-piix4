@@ -18,7 +18,7 @@ Bus and device numbers may differ, but the function number must be identical
 an entry, you have a PIIX4 SMBus controller.
 
 On some computers (most notably, some Dells), the SMBus is disabled by
-default. If you compile the piix4 module with '-DFORCE_PIIX4_ENABLE',
+default. If you compile the i2c-piix4 module with '-DFORCE_PIIX4_ENABLE',
 it will try to enable it. THIS IS VERY DANGEROUS! If the BIOS did not
 set up a correct address for this module, you could get in big trouble
 (read: crashes, data corruption, etc.). Try this only as a last resort
