@@ -3,13 +3,14 @@ Many, many things. Most notably:
 I2C CODE CHANGES
 ================
 
-* Check what happens if the ISA bus is selected by a force parameter;
-  I think the _detect procedures are called?!?
 * Update all documentation
 
 KERNEL MODULES
 ==============
 
+* ALL: cleanup_module is void; check also that cleaning up is done
+  properly, now we know that the module will be unloaded whatever we
+  do.
 * LM78 detection: Tom Webster has proven that the reset bit in the 
   id register can be one (strange!)
 * maxilife.c: Introduce new insmod variables
