@@ -25,8 +25,8 @@
 MODULE_DIR := prog/sensord
 PROGSENSORDDIR := $(MODULE_DIR)
 
-PROGSENSORDMAN1DIR := $(MANDIR)/man8
-PROGSENSORDMAN1FILES := $(MODULE_DIR)/sensord.8
+PROGSENSORDMAN8DIR := $(MANDIR)/man8
+PROGSENSORDMAN8FILES := $(MODULE_DIR)/sensord.8
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
@@ -44,9 +44,9 @@ all-prog-sensord: $(PROGSENSORDTARGETS)
 user :: all-prog-sensord
 
 install-prog-sensord: all-prog-sensord
-	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGSENSORDMAN1DIR)
+	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGSENSORDMAN8DIR)
 	$(INSTALL) -m 755 $(PROGSENSORDTARGETS) $(DESTDIR)$(SBINDIR)
-	$(INSTALL) -m 644 $(PROGSENSORDMAN1FILES) $(DESTDIR)$(PROGSENSORDMAN1DIR)
+	$(INSTALL) -m 644 $(PROGSENSORDMAN8FILES) $(DESTDIR)$(PROGSENSORDMAN8DIR)
 user_install :: install-prog-sensord
 
 clean-prog-sensord:
