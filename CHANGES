@@ -23,6 +23,8 @@ ask CVS about it:
   Module fscher: Rename fanN_min to pwmN (Reinhard Nissl)
   Module i2c-amd756: Don't register driver to avoid driver conflicts.
                      (Daniel Rune Jensen)
+  Module it87: Better temperature sensor types handling (Takeru Komoriya)
+               Fix reset=1 (Takeru Komoriya)
   Module lm80: Code cleanups
   Module vt1211: Fix bitmask in uch_config read and write; remove in6 and temp1
   Module vt8231: Fix bitmask in uch_config read and write; remove in6 and temp1
@@ -39,6 +41,7 @@ ask CVS about it:
   Modules (all chips): Get rid of useless headers
   Program decode-edid.pl: Add sysfs support
   Program sensors: Add w83637hf support
+                   Add support for Shuttle Ethernet EEPROMs
   Program sensors-detect: Add heuristics to the LM80 detection function
                           Add support for W83L785R, improve W83L784R/AR
                           Add GeForce FX 5600 as supported by rivatv
@@ -48,6 +51,7 @@ ask CVS about it:
            Add 2.6 lm80 support
            Add w83637hf support
            Remove in6 and temp1 from vt1211 and vt8231
+           Add support for Shuttle Ethernet EEPROMs
 
 
 2.8.4 (20040207)
