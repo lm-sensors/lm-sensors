@@ -168,7 +168,7 @@ static int smartbatt_attach_adapter(struct i2c_adapter *adapter)
 int smartbatt_detect(struct i2c_adapter *adapter, int address,
 		unsigned short flags, int kind)
 {
-	int i, cur, conf, hyst, os;
+	int i;
 	struct i2c_client *new_client;
 	struct smartbatt_data *data;
 	int err = 0;

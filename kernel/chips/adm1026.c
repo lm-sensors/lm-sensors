@@ -341,15 +341,6 @@ struct adm1026_data {
 	u8 config3;		/* Register value */
 };
 
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_adm1026_init(void);
-static int __init adm1026_cleanup(void);
-
 static int adm1026_attach_adapter(struct i2c_adapter *adapter);
 static int adm1026_detect(struct i2c_adapter *adapter, int address,
 			unsigned short flags, int kind);

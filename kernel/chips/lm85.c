@@ -413,15 +413,6 @@ struct lm85_data {
 	struct lm85_zone zone[3];
 };
 
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_lm85_init(void);
-static int __init lm85_cleanup(void);
-
 static int lm85_attach_adapter(struct i2c_adapter *adapter);
 static int lm85_detect(struct i2c_adapter *adapter, int address,
 			unsigned short flags, int kind);
