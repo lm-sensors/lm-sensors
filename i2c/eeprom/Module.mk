@@ -26,7 +26,7 @@ I2CEEPROMTARGETS := $(MODULE_DIR)/eeprom
 I2CEEPROMSOURCES := $(MODULE_DIR)/eeprom.c
 
 # Include all dependency files
-include $(I2CEEPROMSOURCES:.c=.d)
+INCLUDEFILES += $(I2CEEPROMSOURCES:.c=.d)
 
 all :: $(I2CEEPROMTARGETS)
 

@@ -26,6 +26,7 @@
 #include <asm/semaphore.h>
 #endif
 
+#include "version.h"
 #include "smbus.h"
 
 static s32 smbus_access_i2c (struct smbus_adapter * adapter, u8 addr,
@@ -201,10 +202,11 @@ int smbus_detach_client(struct smbus_client *client)
 int smbus_init(void)
 {
   int res;
+  printk("smbus.o version %s (%s)\n",LM_VERSION,LM_DATE);
   if ((res = smbus_add_algorithm(&smbus_algorithm)))
     printk("Module smbus.o not inserted!\n");
   else
-    printk("smbus.o initialized");
+    printk("smbus.o initialized\n");
   return res;
 }
 

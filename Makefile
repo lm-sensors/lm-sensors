@@ -40,6 +40,11 @@ I2C := 1
 WARN := 0
 #WARN := 1
 
+# Uncomment the second line if you want to get (loads of) debug information.
+# Not recommended, unless you are actually debugging the code
+DEBUG := 0
+#DEBUG := 1
+
 # This is the directory into which the modules will be installed, if you
 # call 'make install'
 MODDIR := /lib/modules/extra/misc
@@ -106,10 +111,14 @@ endif
 all::
 
 # Include all makefiles for sub-modules
+INCLUDEFILES := 
 include $(patsubst %,%/Module.mk,$(MODULES))
+ifneq ($(MAKECMDGOALS),clean)
+include $(INCLUDEFILES)
+endif
 
 # Making the dependency files - done automatically!
-dep:
+dep : 
 
 all ::
 

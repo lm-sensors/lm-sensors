@@ -26,7 +26,7 @@ I2CDETECTTARGETS := $(MODULE_DIR)/detect
 I2CDETECTSOURCES := $(MODULE_DIR)/detect.c
 
 # Include all dependency files
-include $(I2CDETECTSOURCES:.c=.d)
+INCLUDEFILES += $(I2CDETECTSOURCES:.c=.d)
 
 all :: $(I2CDETECTTARGETS)
 

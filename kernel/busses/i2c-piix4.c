@@ -20,6 +20,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include "smbus.h"
+#include "version.h"
 
 static int piix4_init(void);
 static int piix4_cleanup(void);
@@ -39,6 +40,7 @@ static int piix4_initialized;
    Return -ENODEV if not found. */
 int piix4_setup(void)
 {
+  return -ENODEV;
   /* TO BE WRITTEN! */
 }
 
@@ -53,15 +55,16 @@ s32 piix4_access(u8 addr, char read_write,
 int piix4_init(void)
 {
   int res;
+  printk("piix4.o version %s (%s)\n",LM_VERSION,LM_DATE);
 #ifdef DEBUG
   if (piix4_initialized) {
-    printk("piix4.o: Oops, piix4_init called a second time!");
+    printk("piix4.o: Oops, piix4_init called a second time!\n");
     return -EBUSY;
   }
 #endif
   piix4_initialized = 0;
   if ((res = piix4_setup())) {
-    printk("piix4.o: PIIX4 not detected, module not inserted");
+    printk("piix4.o: PIIX4 not detected, module not inserted\n");
     piix4_cleanup();
     return res;
   }
@@ -71,12 +74,12 @@ int piix4_init(void)
   piix4_adapter.algo = &smbus_algorithm;
   piix4_adapter.smbus_access = &piix4_access;
   if ((res = smbus_add_adapter(&piix4_adapter))) {
-    printk("piix4.o: smbus_add_adapter failed, module not inserted");
+    printk("piix4.o: smbus_add_adapter failed, module not inserted\n");
     piix4_cleanup();
     return res;
   }
   piix4_initialized++;
-  printk("piix4.o: PIIX4 bus detected and initialized");
+  printk("piix4.o: PIIX4 bus detected and initialized\n");
   return 0;
 }
 

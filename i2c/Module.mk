@@ -27,7 +27,7 @@ I2CTARGETS := $(MODULE_DIR)/i2c-core.o  $(MODULE_DIR)/algo-bit.o \
               $(MODULE_DIR)/bit-velle.o $(MODULE_DIR)/bit-mb.o
 
 # Include all dependency files
-include $(I2CTARGETS:.o=.d)
+INCLUDEFILES += $(I2CTARGETS:.o=.d)
 
 all :: $(I2CTARGETS)
 

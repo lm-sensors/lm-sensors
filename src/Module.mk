@@ -25,7 +25,7 @@ MODULE_DIR := src
 SRCTARGETS := $(MODULE_DIR)/smbus.o $(MODULE_DIR)/piix4.o
 
 # Include all dependency files
-include $(SRCTARGETS:.o=.d)
+INCLUDEFILES += $(SRCTARGETS:.o=.d)
 
 all :: $(SRCTARGETS)
 

@@ -25,7 +25,7 @@ MODULE_DIR := i2c/drivers
 I2CDRIVERTARGETS := $(MODULE_DIR)/eeprom.o  
 
 # Include all dependency files
-include $(I2CDRIVERTARGETS:.o=.d)
+INCLUDEFILES += $(I2CDRIVERTARGETS:.o=.d)
 
 all :: $(I2CDRIVERTARGETS)
 
