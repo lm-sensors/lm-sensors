@@ -656,6 +656,19 @@ void print_sis5595(const sensors_chip_name *name)
   } else
     printf("ERROR: Can't get IN3 data!\n");
   free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_SIS5595_IN4,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN4,&cur) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN4_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN4_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+             cur,min,max,alarms&SIS5595_ALARM_IN4?"ALARM":"");
+    }
+  } else
+  /* No error if IN4 is missing as it will happen with 2.6 kernels when 
+     the chip is configured in 4 voltage + 1 temperature sensors. */
+  free_the_label(&label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_SIS5595_FAN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_SIS5595_FAN1,&cur) &&
@@ -692,7 +705,8 @@ void print_sis5595(const sensors_chip_name *name)
       printf( " %s\n", alarms & SIS5595_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
-    printf("ERROR: Can't get TEMP data!\n");
+  /* No error if TEMP is missing as it will happen with 2.6 kernels when 
+     the chip is configured in 5 voltage sensors mode. */
   free_the_label(&label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_SIS5595_ALARMS,&label,&valid)
