@@ -1388,7 +1388,7 @@ chip "adm1024-*"
     ignore "Vccp2"
 
 
-chip "it87-*"
+chip "it87-*" "it8712-*"
 
 # The values below have been tested on Asus CUSI, CUM motherboards.
 
@@ -1405,7 +1405,7 @@ chip "it87-*"
     label in8 "VBat"
 
     # vid is not monitored by IT8705F
-    # and is not supported by driver at this time
+    # comment out if you have IT8712
     ignore  vid
 
 # Incubus Saturnus reports that the IT87 chip on Asus A7V8X-X seems
