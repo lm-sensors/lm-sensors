@@ -529,7 +529,7 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.0f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
+      printf("%+3.1f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
              cur,max,min, alarms&VIA686A_ALARM_TEMP?"ALARM":"");
     }
   } else
@@ -541,7 +541,7 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP2_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.0f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
+      printf("%+3.1f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
              cur,max,min, alarms&VIA686A_ALARM_TEMP2?"ALARM":"");
     }
   } else
@@ -553,7 +553,7 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP3_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.0f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
+      printf("%+3.1f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
              cur,max,min, alarms&VIA686A_ALARM_TEMP3?"ALARM":"");
     }
   } else
