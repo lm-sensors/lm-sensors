@@ -1,24 +1,24 @@
 Kernel driver `pcf8574.o'
-========================
+=========================
 
-Status: Status: Complete;
+Status: Complete
 
 Supported chips:
   * Philips PCF8574
     Prefix: `pcf8574'
     Addresses scanned: I2C 0x20 - 0x27 (inclusive)
-    Datasheet: Publicly available at the Philips Semiconductor website
+    Datasheet: Publicly available at the Philips Semiconductors website
                http://semiconductors.philips.com/
 
  * Philips PCF8574A
     Prefix: `pcf8574a'
     Addresses scanned: I2C 0x38 - 0x3f (inclusive)
-    Datasheet: Publicly available at the Philips Semiconductor website
+    Datasheet: Publicly available at the Philips Semiconductors website
                http://semiconductors.philips.com/
 
-
-Authors: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, 
-and Dan Eaton <dan.eaton@rocketlogix.com>
+Authors: Frodo Looijaard <frodol@dds.nl>,
+         Philip Edelbrock <phil@netroedge.com>,
+         and Dan Eaton <dan.eaton@rocketlogix.com>
 
 Module Parameters
 -----------------
@@ -28,6 +28,9 @@ Module Parameters
 * force_pcf8574: short array (min = 1, max = 48)
   List of adapter,address pairs which are unquestionably assumed to
   contain a `pcf8574' chip
+* force_pcf8574a: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to
+  contain a `pcf8574a' chip
 * ignore: short array (min = 1, max = 48)
   List of adapter,address pairs not to scan
 * ignore_range: short array (min = 1, max = 48)
