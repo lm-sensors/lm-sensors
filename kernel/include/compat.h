@@ -40,7 +40,7 @@
 #define MODULE_PARM(no,param)
 #endif
 #ifndef MODULE_PARM_DESC
-#define MODULE_PARM_DES(no,description)
+#define MODULE_PARM_DESC(no,description)
 #endif
 #endif /* def MODULE */
 
