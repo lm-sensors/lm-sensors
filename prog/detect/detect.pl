@@ -69,41 +69,48 @@ use vars qw(@pci_adapters @chip_ids);
      }
 );
 
+use subs qw(lm78_detect lm75_detect lm80_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have a name (Full Chip Name), an array i2c_addrs (Valid
 # I2C Addresses; may be omitted if this is a pure ISA chip), an array 
-# isa_addrs (Valid ISA Addresses; may be omitted if this is a pure I2C chip)
-# ,...
+# isa_addrs (Valid ISA Addresses; may be omitted if this is a pure I2C chip),
+# i2c_detect (I2C Detetction Routine, may be omitted if this is a pure ISA
+# chip), ...
 # If no driver is written yet, omit the driver (Driver Name) field.
 @chip_ids = (
      {
        name => "National Semiconductors LM78",
        driver => "lm78",
-       i2c_addrs => (0x00..0x7f), 
+       i2c_addrs => [0x00..0x7f], 
+       i2c_detect => sub { lm78_detect 0, @_},
        isa_addrs => (0x290),  # Theoretically anyway, but this will do
      } ,
      {
        name => "National Semiconductors LM78-J",
        driver => "lm78",
-       i2c_addrs => (0x00..0x7f),
+       i2c_addrs => [0x00..0x7f],
+       i2c_detect => sub { lm78_detect 1, @_ },
        isa_addrs => (0x290),  # Theoretically anyway, but this will do
      } ,
      {
        name => "National Semiconductors LM79",
        driver => "lm78",
-       i2c_addrs => (0x00..0x7f),
+       i2c_addrs => [0x00..0x7f],
+       i2c_detect => sub { lm78_detect 2, @_ },
        isa_addrs => (0x290),  # Theoretically anyway, but this will do
      } ,
      {
        name => "National Semiconductors LM75",
        driver => "lm75",
-       i2c_addrs => (0x48..0x4f),
+       i2c_addrs => [0x48..0x4f],
+       i2c_detect => sub { lm75_detect @_},
      } ,
      {
        name => "National Semiconductors LM80",
        driver => "lm80",
-       i2c_addrs => (0x28..0x2f),
+       i2c_addrs => [0x28..0x2f],
+       i2c_detect => sub { lm80_detect @_} ,
      }
 );
 
@@ -117,6 +124,17 @@ sub swap_bytes
   return (($_[0] & 0xff00) >> 8) + (($_[0] & 0x00ff) << 7)
 }
 
+# $_[0] is the sought value
+# @_[1..] is the list to seek in
+# Returns: 0 on failure, 1 if found.
+sub contains
+{
+  my $sought = shift;
+  foreach (@_) {
+    return 1 if $sought eq $_;
+  }
+  return 0;
+}
 
 ##############
 # PCI ACCESS #
@@ -433,26 +451,109 @@ sub i2c_smbus_write_block_data
 # $_[0]: The number of the adapter to scan
 sub scan_adapter
 {
-  open FILE,"/dev/i2c-".$_[0] or die "Can't open /dev/i2c-".$_[0];
-  foreach (0..0x7f) {
-    i2c_set_slave_addr(\*FILE,$_) or print("Can't set address to $_?!?\n"), 
+  my ($chip, $addr, $conf);
+  open FILE,"/dev/i2c-$_[0]" or die "Can't open /dev/i2c-$_[0]";
+  foreach $addr (0..0x7f) {
+    i2c_set_slave_addr(\*FILE,$addr) or print("Can't set address to $_?!?\n"), 
                                      next;
-    printf ("Client found at address 0x%02x\n",$_) 
-                                  if i2c_smbus_read_byte(\*FILE) >= 0;
+    next unless i2c_smbus_read_byte(\*FILE) >= 0;
+    printf "Client found at address 0x%02x\n",$addr;
+    foreach $chip (@chip_ids) {
+      if (contains $addr, @{$$chip{i2c_addrs}}) {
+        print "Probing for $$chip{name}... ";
+        if ($conf = &{$$chip{i2c_detect}} (\*FILE ,$addr)) {
+          printf "Success! (confidence %d)\n", $conf
+        } else {
+          print "Failed!\n" 
+        }
+      }
+    }
   }
 }
+
 
 ##################
 # CHIP DETECTION #
 ##################
 
-# $_[0]: 0 for ISA, 1 for I2C
+# Each function returns a confidence value. The higher this value, the more
+# sure we are about this chip.
+
+# If there are devices which get confused if they are only read from, then
+# this program will surely confuse them. But we guarantee never to write to
+# any of these devices.
+
+
+# $_[0]: Chip to detect (0 = LM78, 1 = LM78-J, 2 = LM79)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: 0 if not detected, 7 if detected.
+# Registers used:
+#   0x48: Full I2C Address
+#   0x49: Device ID
+sub lm78_detect
+{
+  my $reg;
+  my ($chip,$file,$addr) = @_;
+  return 0 unless i2c_smbus_read_byte_data($file,0x48) == $addr;
+  $reg = i2c_smbus_read_byte_data($file,0x49);
+  return 0 unless ($chip == 0 and $reg == 0x00) or
+                  ($chip == 1 and $reg == 0x40) or
+                  ($chip == 2 and $reg & 0xfe == 0xc0);
+  return 7;
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
-# $_[2]: For I2C, a reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was aleady done.
-#sub lm78_detect
-#{
-#  $@lm78_read = 
+# Returns: 0 if not detected, 3 if detected.
+# Registers used:
+#   0x01: Configuration
+#   0x02: Hysteris
+#   0x03: Overtemperature Shutdown
+# Detection really sucks! It is only based on the fact that the LM75 has only
+# four registers. Any other chip in the valid address range with only four
+# registers will be detected too.
+# Note that register $00 may change, so we can't use the modulo trick on it.
+sub lm75_detect
+{
+  my $i;
+  my ($file,$addr) = @_;
+  my $conf = i2c_smbus_read_byte_data($file,0x01);
+  my $hyst = i2c_smbus_read_word_data($file,0x02);
+  my $os = i2c_smbus_read_word_data($file,0x03);
+  for ($i = 0x00; $i <= 0xff; $i += 4) {
+    return 0 if i2c_smbus_read_byte_data($file,$i + 0x01) != $conf;
+    return 0 if i2c_smbus_read_word_data($file,$i + 0x02) != $hyst;
+    return 0 if i2c_smbus_read_word_data($file,$i + 0x03) != $os;
+  }
+  return 3;
+}
+  
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: 0 if not detected, 3 if detected.
+# Registers used:
+# Registers used:
+#   0x02: Interrupt state register
+# How to detect this beast? 
+sub lm80_detect
+{
+  my $i;
+  my ($file,$addr) = @_;
+  return 0 if i2c_smbus_read_byte_data($file,$0x02) & 0xc0 != 0;
+  for ($i = 0x2a; $i <= 0x3d; $i++) {
+    my $reg = i2c_smbus_read_byte_data($file,$i);
+    return 0 if i2c_smbus_read_byte_data($file,$i+0x40) != $reg;
+    return 0 if i2c_smbus_read_byte_data($file,$i+0x80) != $reg;
+    return 0 if i2c_smbus_read_byte_data($file,$i+0xc0) != $reg;
+  }
+  return 3;
+}
+  
 
 ################
 # MAIN PROGRAM #
@@ -463,4 +564,4 @@ adapter_pci_detection;
 
 
 # TEST!
-#scan_adapter 0;
+# scan_adapter 0;
