@@ -46,14 +46,14 @@ void help(void)
 {
 	fprintf(stderr,
 	        "Syntax for I2C-like access:\n"
-	        "  isaset [-y] ADDRREG DATAREG ADDRESS VALUE\n"
+	        "  isaset [-y] ADDRREG DATAREG ADDRESS VALUE [MASK]\n"
 	        "Syntax for flat address space:\n"
-	        "  isaset [-y] -f ADDRESS VALUE\n");
+	        "  isaset [-y] -f ADDRESS VALUE [MASK]\n");
 }
 
 int main(int argc, char *argv[])
 {
-	int addrreg, datareg = 0, value, addr = 0;
+	int addrreg, datareg = 0, value, addr = 0, vmask = 0;
 	unsigned char res;
 	int flags = 0;
 	int flat = 0, yes = 0;
@@ -74,8 +74,8 @@ int main(int argc, char *argv[])
 	}
 
 	/* verify that the argument count is correct */
-	if ((!flat && argc != 1+flags+4)
-	 || (flat && argc != 1+flags+2)) {
+	if ((!flat && (argc < 1+flags+4 || argc > 1+flags+5))
+	 || (flat && (argc < 1+flags+2 || argc > 1+flags+3))) {
 		help();
 		exit(1);
 	}
@@ -122,7 +122,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	value = strtol(argv[flat?1+flags+1:1+flags+3], &end, 0);
+	/* rest is the same for both modes so we cheat on flags */
+	if (!flat)
+		flags += 2;
+
+	value = strtol(argv[flags+2], &end, 0);
 	if (*end) {
 		fprintf(stderr, "Error: Invalid value!\n");
 		help();
@@ -133,6 +137,21 @@ int main(int argc, char *argv[])
 			"(0x00-0xff)!\n");
 		help();
 		exit(1);
+	}
+
+	if (flags+3 < argc) {
+		vmask = strtol(argv[flags+3], &end, 0);
+		if (*end) {
+			fprintf(stderr, "Error: Invalid mask!\n");
+			help();
+			exit(1);
+		}
+		if (vmask < 0 || vmask > 0xff) {
+			fprintf(stderr, "Error: Mask out of range "
+				"(0x00-0xff)!\n");
+			help();
+			exit(1);
+		}
 	}
 
 	if (getuid()) {
@@ -148,13 +167,15 @@ int main(int argc, char *argv[])
 		        "system crashes, data loss and worse!\n");
 
 		if (flat)
-			fprintf(stderr, "I will write value 0x%02x to address "
-		                "0x%x.\n", value, addrreg);
+			fprintf(stderr, "I will write value 0x%02x%s to address "
+		                "0x%x.\n", value, vmask ? " (masked)" : "",
+			        addrreg);
 		else
-			fprintf(stderr, "I will write value 0x%02x to address "
+			fprintf(stderr, "I will write value 0x%02x%s to address "
 		                "0x%02x of chip with address register 0x%x\n"
 		                "and data register 0x%x.\n",
-		                value, addr, addrreg, datareg);
+		                value, vmask ? " (masked)" : "", addr,
+			        addrreg, datareg);
 
 		fprintf(stderr, "Continue? [Y/n] ");
 		fflush(stderr);
@@ -185,19 +206,53 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	/* write */
-	if (flat) {
-		outb(value, addrreg);
-	} else {	
-		outb(addr, addrreg);
-		outb(value, datareg);
+	if (vmask) {
+		int oldvalue;
+
+		if (flat) {
+			oldvalue = inb(addrreg);
+		} else {	
+			outb(addr, addrreg);
+			oldvalue = inb(datareg);
+		}
+
+		if (oldvalue < 0) {
+			fprintf(stderr, "Error: Failed to read old value\n");
+			exit(1);
+		}
+
+		value = (value & vmask) | (oldvalue & ~vmask);
+
+		if (!yes) {
+			char s[2];
+			
+			fprintf(stderr, "Old value 0x%02x, write mask "
+				"0x%02x: Will write 0x%02x to %s "
+				"0x%02x\n", oldvalue, vmask, value,
+				flat ? "address" : "register",
+				flat ? addrreg : addr);
+
+			fprintf(stderr, "Continue? [Y/n] ");
+			fflush(stderr);
+			fgets(s, 2, stdin);
+			if (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y') {
+				fprintf(stderr, "Aborting on user request.\n");
+				exit(0);
+			}
+		}
 	}
 
-	/* readback */
+	/* do the real thing */
 	if (flat) {
+		/* write */
+		outb(value, addrreg);
+		/* readback */
 		res = inb(addrreg);
 	} else {	
+		/* write */
 		outb(addr, addrreg);
+		outb(value, datareg);
+		/* readback */
 		res = inb(datareg);
 	}
 
