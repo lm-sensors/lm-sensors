@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.8.0 (2003????)
+2.8.0 (200307??)
   NOTE: Requires i2c-2.8.0 or newer.
   Dropped all kernel 2.2 and 2.3 compatibility; 2.4.9 or later required
   File i2c-dev.h: Include userspace portion removed from i2c-dev.h in
@@ -35,7 +35,9 @@ ask CVS about it:
              Automatically generate kernel/include/sensors.h;
              Remove old gzipped modules; remove old misc directory if empty;
              Remove pre-2.4 installation method;
-             -Wall now the default
+             -Wall now the default;
+             Add new targets user, user_install, and help;
+             Run depmod after module installation
   Modules (all): Cleanups including
 		- Add #include <i2c-proc.h>
 		- C99 initializers
@@ -92,7 +94,9 @@ ask CVS about it:
                    Add adm1026,lm85 support;
                    Remove sensors.c file; add sensors_compat.h;
                    Remove patches to i2c-core.c and drivers/char/mem.c
-  Program p4b_smbus: Fix 'make install', install in same place as other modules
+  Program p4b_smbus: Fix 'make install';
+                     Install in same place as other modules;
+                     Clear correct bits in config word
   Program pwmconfig, pwmtest: New
   Program sensors: add adm1026, lm85, w83791d support
   Program sensors-detect: Add super i/o detection (smsc47m1, vt1211,
