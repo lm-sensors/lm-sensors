@@ -14,18 +14,20 @@ $temp=`echo  "254 88" > /proc/sys/dev/sensors/matorb*/disp`;
 # Turn off the blinking cursor
 $temp=`echo  "254 84" > /proc/sys/dev/sensors/matorb*/disp`;
 
-$line=1;
+$linenum=1;
 
 while (<STDIN>) {
 # Reset the position of the cursor to the next line
-$temp=`echo "254 71 1 $line" > /proc/sys/dev/sensors/matorb*/disp`;
+$temp=`echo "254 71 1 $linenum" > /proc/sys/dev/sensors/matorb*/disp`;
  if (/^(.{1,20})/) {
   $_=$1;
+  $line="";
   while (/(.)/gc) {
    $temp=ord($1);
-   $temp=`echo "$temp" > /proc/sys/dev/sensors/matorb*/disp`;
+   $line="$line $temp";
   }
+  $temp=`echo "$line" > /proc/sys/dev/sensors/matorb*/disp`;
  }
- $line= $line + 1;
- if ($line > 4) { exit; }
+ $linenum+=1;
+ if ($linenum > 4) { exit; }
 }
