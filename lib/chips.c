@@ -668,6 +668,32 @@ static sensors_chip_feature lm80_features[] =
   };
 
 
+static sensors_chip_feature lm83_features[] =
+  {
+    { SENSORS_LM83_LOCAL_TEMP, "local_temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, LM83_SYSCTL_LOCAL_TEMP, VALUE(2), 1 },
+    { SENSORS_LM83_LOCAL_HIGH, "local_temp_high", SENSORS_LM83_LOCAL_TEMP,
+                              SENSORS_LM83_LOCAL_TEMP, SENSORS_MODE_RW, 
+                              LM83_SYSCTL_LOCAL_TEMP, VALUE(1), 1 },
+    { SENSORS_LM83_REMOTE1_TEMP, "remote1_temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, LM83_SYSCTL_REMOTE1_TEMP, VALUE(2), 1 },
+    { SENSORS_LM83_REMOTE1_HIGH, "remote1_temp_high", SENSORS_LM83_REMOTE1_TEMP,
+                              SENSORS_LM83_REMOTE1_TEMP, SENSORS_MODE_RW, 
+                              LM83_SYSCTL_REMOTE1_TEMP, VALUE(1), 1 },
+    { SENSORS_LM83_REMOTE2_TEMP, "remote2_temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, LM83_SYSCTL_REMOTE2_TEMP, VALUE(2), 1 },
+    { SENSORS_LM83_REMOTE2_HIGH, "remote2_temp_high", SENSORS_LM83_REMOTE2_TEMP,
+                              SENSORS_LM83_REMOTE2_TEMP, SENSORS_MODE_RW, 
+                              LM83_SYSCTL_REMOTE2_TEMP, VALUE(1), 1 },
+    { SENSORS_LM83_REMOTE3_TEMP, "remote3_temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, LM83_SYSCTL_REMOTE3_TEMP, VALUE(2), 1 },
+    { SENSORS_LM83_REMOTE3_HIGH, "remote3_temp_high", SENSORS_LM83_REMOTE3_TEMP,
+                              SENSORS_LM83_REMOTE3_TEMP, SENSORS_MODE_RW, 
+                              LM83_SYSCTL_REMOTE3_TEMP, VALUE(1), 1 },
+    { 0 }
+  };
+
+
 static sensors_chip_feature w83781d_features[] =
   { 
     { SENSORS_W83781D_IN0, "in0", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING, 
@@ -4304,5 +4330,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_LM85C_PREFIX, lm85_features },
  { SENSORS_ADM1027_PREFIX, adm1027_features },
  { SENSORS_ADT7463_PREFIX, adm1027_features },
+ { SENSORS_LM83_PREFIX, lm83_features },
  { 0 }
 };
