@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.5.5 (2000????)
+  Chip modules (all): Update mutex
   File sensors.conf.eg: Add mtp008 entries
   Library: Add mtp008 support
   Module adm1021: Add support for adm1021a / adm1023
@@ -28,7 +29,7 @@ ask CVS about it:
   Module pcf8574: change update time to 5 seconds
   Module w83781d: fix beep setting via /proc
   Program mkpatch.pl: more fixes
-  Program sensors: Add mtp008 support
+  Program sensors: Add mtp008 support, add -f (Fahrenheit) option
   Program sensors-detect: Add mtp008 detection
 
 2.5.4 (20001012)
