@@ -6,8 +6,7 @@ changes you make as being your own, and distribute this notice with it.
 Document version 1.0, 19981101.
                  1.1, 19981111.
                  1.2, 19981118.
-
---> Never, ever change the driver struct with this technique! 
+                 1.3, 19981126.
 
 
 Object oriented approach
@@ -15,10 +14,9 @@ Object oriented approach
 
 The i2c module structs contain callback functions and data fields. In the
 i2c module, these structures are only referenced by pointers. This makes
-is easy to extend these structs to contain additional information or
+it easy to extend these structs to contain additional information or
 callback functions. For those familiar with object oriented languages,
-you can see the smbus structures as an object extension of the i2c
-structures, and the sensors structures are an extenstion of the smbus
+you can see the smbus and isa structures as an object extension of the i2c
 structures.
 
 To make this clearer, I will show in an example how this is done. Note
@@ -35,7 +33,7 @@ struct i2c_adapter {
 
 We have a plain data field (name), a call-back function which needs one
 parameter (a pointer to a i2c_client struct), and a data field which is
-a pointer to the next adapater.
+a pointer to the next adapter.
 
 Now we want to extend this structure. We need another data field,
 containing a number of flags. We will call this new structure smbus_adapter.
@@ -97,54 +95,71 @@ We have to thank Simon Vogl and Gerd Knorr for the way they implemented
 their i2c module. Any other way would have made this approach impossible,
 and basing anything upon their module much more difficult.
 
+Limitations
+-----------
+
+Extending the adapter and algorithm structures in this way is quite safe.
+They are only allocated on places where the code knows that they are
+'special'. Extending the driver or client structures depending on a
+specific adapter/algorithm type is *very* *dangerous*. A driver/client
+module would need to be aware of every special adapter/algorithm in
+order to allocate itself! For the ISA bus, it has to be aware of this
+anyway, so it is safe to do; on other places, think twice first!
+
 
 Module overview
 ===============
 
 All in all, lots of modules will be stacked on each other. Too bad, but
 that is the only way to cleanly implement everything. Note that in a
-specific situation, only a few modules may need to be loaded. sensor.o,
+specific situation, only a few modules may need to be loaded. isa.o,
 for example, does not depend on smbus.o (in the sense that you can load
 sensor.o without loading smbus.o). A specific bus driver, though, will
 depend on many of them.
 
 Generally:
-  sensor.o depends on nothing
-  smbus.o depends on nothing
+  isa.o depends on nothing (actually, on i2c.o, to keep the code small)
+  smbus.o depends on nothing (actually, on i2c.o, to keep the code small)
   i2c.o depends on nothing.
 
-  isa.o depends only on sensor.o
   A non-i2c SMBus bus driver depends only on smbus.o
   A i2c bus driver depends only on i2c.o
 
-  A sensor chip driver depends at least on sensor.o, and possibly on smbus.o
+  A sensor chip driver depends either on isa.o or smbus.o, or both.
   A SMBus chip driver depends only on smbus.o
   A I2C chip driver depends only on i2c.o
 
+We may need a sensor.o module, to act as a central point for sensor
+modules. At this moment, it seems not really necessary, but this may
+change.
 
-sensor.o
-Main sensors handling
-Unites SMBus adapters and ISA adapters.
+We will need an enhanced i2c-dev.o module, to add SMBus access to I2C
+/dev entries.
 
-  isa.o
-  Implements the ISA adapter driver for sensor.o. This may prove to be so
-  closely integrated that it can better be made part of sensor.o
-  
+
+isa.o
+ISA bus handling.
+Encapsulates ISA bus access within the i2c structures.
+Unites I2C adapters and the ISA bus.
+Defines variables isa_algorithm and isa_adapter.
 
 smbus.o
-Main SMBus handling
-Unites I2C adapters and SMBus hosts (like the PIIX4)
-Defines smbus_algorithm
+Main SMBus handling.
+Encapsulates SMBus access within the smbus structures.
+Unites I2C adapters and SMBus hosts (like the PIIX4).
+Emulates SMBus access on pure I2C adapters.
+Defines variable smbus_algorithm.
 
   piix4.o
   SMBus adapter driver for the PIIX4 SMBus host.
+  Defines variable piix4_adapter (based on smbus_algorithm).
 
-  ????.o
-  Adapter driver for another SMBus host
+  FOO.o
+  Adapter driver for FOO SMBus host
+  Defines variable FOO_adapter (based on smbus_algorithm).
 
-
-i2c.o               
-Main i2c handling
+i2c-core.o (From Simon Vogl)
+Main i2c handling.
 
   ????.o
   I2C adapter driver
@@ -153,10 +168,11 @@ Main i2c handling
 
 A chip driver (typically defined in its own module) can be hooked on all
 these levels:
-  * If it is a sensor chip, it should be hooked to sensor.o
-  * An SMBus chip should be hooked to smbus.o
+  * If it is a sensor chip, it should be hooked to isa.o or smbus.o
+  * A pure ISA chip should be hooked to isa.o
+  * A pure SMBus chip should be hooked to smbus.o
   * An I2C chip should be hooked to i2c.o
-It can be difficult to decide whether a specific chip should be hoooked to
+It can be difficult to decide whether a specific chip should be hooked to
 smbus.o or i2c.o. A good deciding question is, 'could it be connected to
 a PIIX4?'
 
@@ -191,7 +207,9 @@ dynamically allocated).
 A description of the above struct:
   name: The name of this driver
   id: A unique driver identifier
-  flags: Flags to set certain kinds of behaviour (not used right now)
+  flags: Flags to set certain kinds of behaviour. Most notably, DF_NOTIFY
+    will notify the driver when a new i2c bus is detected, so it can
+    try to detect chips on it.
   attach_adapter: A call-back function which is called if a new adapter (bus)
     is found. This allows us to do our detection stuff on the new adapter,
     and register new clients.
@@ -317,8 +335,37 @@ Communicate with another master as if the normal master is a common slave
 device.
 
 
-There are several other functions, to register things for example, that
-are less important to us.
+Administration functions
+------------------------
+
+int i2c_add_algorithm(struct i2c_algorithm *);
+int i2c_del_algorithm(struct i2c_algorithm *);
+
+The i2c_{add,del}_algorithm functions must be called whenever a new module
+is inserted with this driver in it, by the module initialization function.
+
+
+int i2c_add_adapter(struct i2c_adapter *);
+int i2c_del_adapter(struct i2c_adapter *);
+
+The i2c_{add,del}_adapter functions must be called if you have detected
+a specific bus. It triggers driver->attach_adapter (add, for each driver
+present) or driver->detach_client (del, for each registered client on
+this adapter).
+
+
+int i2c_add_driver(struct i2c_driver *);
+int i2c_del_driver(struct i2c_driver *);
+
+The i2c_{add,del}_driver functions must be called whenever a new module is
+inserted with a chip driver in it, by the module initialization function.
+
+
+int i2c_attach_client(struct i2c_client *);
+int i2c_detach_client(struct i2c_client *);
+
+The i2c_{attach,detach}_client functions must be called if you have detected
+a single chip.
 
 
 Module smbus.o
@@ -336,9 +383,12 @@ means there must be some way of selecting which of the many possible adapters
 is in fact *the* SMBus. For now, I will ignore this problem. Later on,
 we can add a hook somewhere in the i2c module to help us decide this.
 
-This module consists in fact of two separate parts: first of all, it extends
+This module consists in fact of three separate parts: first of all, it extends
 all i2c structs to accomodate the new smbus fields. Second, it defines a
 new algorithm (smbus_algorithm), that will be used by all non-i2c adapters.
+Finally, it implements a new access function that sends or receives SMBus
+commands; these are either translated into I2C commands or sent to the
+SMBus driver.
 
 
 A driver, client and algorithm
@@ -375,7 +425,7 @@ struct smbus_adapter {
   int timeout;
   int retries;
 
-  /* Here ended i2c_algorithm */
+  /* Here ended i2c_adapter */
   s32 (* smbus_access) (__u8 addr, char read_write,
                         __u8 command, int size, union smbus_data * data);
 }
@@ -395,89 +445,64 @@ they might not be defined (for the PIIX4, for example). Instead, use the
 following general access function, or one of the easier functions based
 on it:
 
-int smbus_access (struct smbus_adapter *, __u8 addr, char read_write,
+int smbus_access (struct i2c_adapter *, __u8 addr, char read_write,
                   __u8 command, int size, union smbus_data * data);
 
-There will be specific SMBus registration functions too, like the i2c
-ones. 
+There are specific SMBus registration functions too, like the i2c ones. 
+They are fully compatiable with each other; just substitute 'smbus' for
+'i2c' everywhere in the i2c description.
+
+int i2c_is_smbus_client(struct i2c_client *);
+int i2c_is_smbus_adapter(struct i2c_adapter *);
+
+Decide whether this client, or adapter, is (on) a non-I2C SMBus. Usually
+not needed, but it is nice anyway to be able to decide this.
 
 
-Module sensors.o
-================
+Module isa.o
+============
 
-This module acts as a coordinations point between specific sensor modules
-(which each support a certain kind of sensor). We need this module to unite
-SMBus access and ISA access. 
+This module implements a new algorithm and a specific adapter for the
+(single) ISA bus in your computer. This makes writing drivers for chips
+that can be both on ISA and SMBus much easier.
+
+Note that this module does *not* in any way depend on smbus.o (previous
+versions of this document still assumed it would be build upon it; this
+is no longer true).
 
 
-A driver or adapter
--------------------
+A driver, adapter or algorithm
+------------------------------
 
-We will not need to extend smbus_driver or smbus_adapter. This means that
-struct sensor_driver is exactly the same as struct smbus_driver, and struct
-sensor_adapter is the same as struct smbus_adapter. We *will* define the
-sensor_* variants, and use them within this module, so it should be easy to
-extend them after all.
-
-Note that a driver can be for a chip on either the ISA bus or the
-I2C/SMBus. If a specific chip can be on both, you must check variable
-client->adapter->algorithm->on_isa to determine which bus you need to access.
+We will not need to extend i2c_driver, i2c_adapter or i2c_algorithm. This
+means that struct isa_driver is exactly the same as struct i2c_driver,
+struct isa_adapter is the same as struct i2c_adapter and struct isa_algorithm
+is the same as struct isa_driver. We *will* define the isa_* variants, and
+use them within this module, so it should be easy to extend them after all.
 
 
 A client
 --------
 
-struct sensor_client {
+struct isa_client {
   char name[32];
   int id;
   unsigned int flags;
   unsigned char addr;
-  struct sensor_adapter *adapter;
-  struct sensor_driver *driver;
+  struct isa_adapter *adapter;
+  struct isa_driver *driver;
   void *data;
 
-  unsigned int full_address;
+  unsigned int isa_addr;
 }
 
 A client is a specific sensor chip. Its operation is controlled by a driver
 (which describes a type of sensor chip), and it is connected to an adapter
-(a bus, either a I2C/SMBus or the ISA bus).
+(a bus, the (single) ISA bus here).
 
 A description of the above struct:
-  full_address: The full client address. ISA addresses and 10-bit SMBus
-    addresses do not fit in the i2c-compatible addr field, so we needed
-    a new field.
-
-
-
-An algorithm
-------------
-
-struct sensor_algorithm {
-  char name[32];
-  unsigned int id;
-  int (* master_xfer) (struct sensor_adapter *adap, struct smbus_msg msgs[],
-                       int num);
-  int (* slave_send) (struct sensor_adapter *,char *, int);
-  int (* slave_recv) (struct sensor_adapter *,char *, int);
-  int (* algo_control) (struct sensor_adapter *, unsigned int, unsigned long);
-  int (* client_register) (struct sensor_client *);
-  int (* client_unregister) (struct sensor_client *);
-
-  int (* smbus_access) (struct sensor_adapter *, __u8 addr, char read_write,
-                        __u8 command, int size, union smbus_data * data);
-  int isa_bus;
-}
-
-A description of the above struct:
-  isa_bus: 0 if this structure describes SMBus access, 1 if it describes
-    ISA access.
-
-In case of the ISA bus, the master_xfer, slave_send, slave_recv and
-smbus_access hooks will be NULL, because these functions make no sense.
-It is regrettably not easy to create an access abstraction in which both
-ISA bus access and SMBus access are united. See below for examples how
-you can solve this problem.
+  isa_addr: ISA addresses do not fit in the i2c-compatible addr field, so
+    we needed a new field.
 
 
 Access functions
@@ -485,26 +510,39 @@ Access functions
 
 All these functions are defined extern.
 
+In case of the ISA bus, the master_xfer, slave_send and slave_recv hooks
+will be NULL, because these functions make no sense. It is regrettably
+not easy to create an access abstraction in which both ISA bus access
+and SMBus access are united. See below for examples how you can solve
+this problem.
+
 The most imporant additional access function:
 
-  int is_on_isa (struct sensor_client *);
+int i2c_is_isa_client(struct i2c_client *);
+int i2c_is_isa_adapter(struct i2c_adapter *);
 
-This function tells us whether a specific client is connected to the ISA
-bus or to the SMBus. This is important, because it determines whether we
-can use the SMBus access routines.
+Decide whether this client, or adapter, is (on) the ISA bus. This is
+important, because it determines whether we can use the SMBus access
+routines.
 
 As an example, I will here implement our old LM78 access function:
 
-u8 lm78_read_value(struct sensor_client *client, u8 register)
+/* The SMBus locks itself, but ISA access must be locked explicitely!
+   We ignore the LM78 BUSY flag at this moment - it could lead to deadlocks,
+   would slow down the LM78 access and should not be necessary.
+   There are some ugly typecasts here, but the good new is - they should
+   nowhere else be necessary! */
+int lm78_read_value(struct i2c_client *client, u8 reg)
 {
-  if (is_on_isa(client)) {
-    /* Ignore the check for LM78_BUSY to keep things simple here; the best
-       place to put this semaphore struct would be in client->data */
-    outb_p(register,client->address + LM78_ADDR_REG_OFFSET);
-    return inb_p(client->address + LM78_DATA_REG_OFFSET);
-  } else 
-    return smbus_read_byte_data(client,register);
-    /* This is a standard function based on smbus_access */
+  int res;
+  if (i2c_is_isa_client(client)) {
+    down((struct semaphore *) (client->data));
+    outb_p(reg,(((struct isa_client *) client)->isa_addr) +
+               LM78_ADDR_REG_OFFSET);
+    res = inb_p((((struct isa_client *) client)->isa_addr) +
+                LM78_DATA_REG_OFFSET);
+    up((struct semaphore *) (client->data));
+    return res;
+  } else
+    return smbus_read_byte_data(client->adapter,client->addr, reg);
 }
-
-
