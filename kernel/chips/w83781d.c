@@ -3,7 +3,7 @@
                 monitoring
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>,
-    and Mark Studebaker <mds@eng.paradyne.com>
+    and Mark Studebaker <mdsxyz123@yahoo.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1145,7 +1145,7 @@ void w83781d_init_client(struct i2c_client *client)
                       IN_TO_REG(W83781D_INIT_IN_MIN_4));
   w83781d_write_value(client,W83781D_REG_IN_MAX(4),
                       IN_TO_REG(W83781D_INIT_IN_MAX_4));
-  if (type == w83781d) {
+  if (type == w83781d || type == as99127f) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(5),
                         IN_TO_REG(W83781D_INIT_IN_MIN_5));
     w83781d_write_value(client,W83781D_REG_IN_MAX(5),
@@ -1156,7 +1156,7 @@ void w83781d_init_client(struct i2c_client *client)
     w83781d_write_value(client,W83781D_REG_IN_MAX(5),
                         IN_TO_REG(W83782D_INIT_IN_MAX_5));
   }
-  if (type == w83781d) {
+  if (type == w83781d || type == as99127f) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(6),
                         IN_TO_REG(W83781D_INIT_IN_MIN_6));
     w83781d_write_value(client,W83781D_REG_IN_MAX(6),
@@ -1644,7 +1644,7 @@ EXPORT_NO_SYMBOLS;
 #ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge
-.com>, and Mark Studebaker <mds@eng.paradyne.com>");
+.com>, and Mark Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("W83781D driver");
 
 int init_module(void)
