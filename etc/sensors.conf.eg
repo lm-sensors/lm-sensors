@@ -343,7 +343,7 @@ chip "sis5595-*"
 #    set temp_over 40	
 #    set temp_hyst 37	
 
-chip "w83782d-*" "w83783s-*" "w83627hf-*" "w83697hf-*"
+chip "w83782d-*" "w83783s-*" "w83627hf-*"
 
 # Same as above for w83781d except that in5 and in6 are computed differently.
 # Rather than an internal inverting op amp, the 82d/83s use standard positive
@@ -375,6 +375,70 @@ chip "w83782d-*" "w83783s-*" "w83627hf-*" "w83697hf-*"
     set in0_max vid*1.05
     set in1_min vid*0.95
     set in1_max vid*1.05
+    set in2_min 3.3 * 0.95
+    set in2_max 3.3 * 1.05
+    set in3_min 5.0 * 0.95
+    set in3_max 5.0 * 1.05
+    set in4_min 12 * 0.90
+    set in4_max 12 * 1.10
+    set in5_min -12 * 0.90
+    set in5_max -12 * 1.10
+    set in6_min -5 * 0.95
+    set in6_max -5 * 1.05
+    set in7_min 5 * 0.95
+    set in7_max 5 * 1.05
+    set in8_min 3.0 * 0.80
+    set in8_max 3.0 * 1.20
+
+# set up sensor types (thermistor is default)
+# 1 = PII/Celeron Diode; 2 = 3904 transistor;
+# 3435 = thermistor with Beta = 3435
+# If temperature changes very little, try 1 or 2.
+#   set sensor1 1
+#   set sensor2 2
+#   set sensor3 3435
+
+# examples for temperature limits
+#    set temp1_over 40	
+#    set temp1_hyst 37	
+#    set temp2_over 52	
+#    set temp2_hyst 47	
+#    set temp3_over 52	
+#    set temp3_hyst 47	
+
+
+chip "w83697hf-*"
+
+# Same as above for w83781d except that in5 and in6 are computed differently.
+# Rather than an internal inverting op amp, the 82d/83s use standard positive
+# inputs and the negative voltages are level shifted by a 3.6V reference.
+# The math is convoluted, so we hope that your motherboard
+# uses the recommended resistor values.
+
+# no in1 on this chip.
+
+    label in0 "VCore"
+    label in2 "+3.3V"
+    label in3 "+5V"
+    label in4 "+12V"
+    label in5 "-12V"
+    label in6 "-5V"
+    label in7 "V5SB"
+    label in8 "VBat"
+
+    compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+    compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
+    compute in5 (5.14 * @) - 14.91  ,  (@ + 14.91) / 5.14
+    compute in6 (3.14 * @) -  7.71  ,  (@ +  7.71) / 3.14
+    compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+
+# 697HF does not have VID inputs so you MUST set your core
+# voltage limits below. Currently set for 1.8V core.
+#               vvv
+
+    set in0_min 1.8 * 0.95
+    set in0_max 1.8 * 1.05
+
     set in2_min 3.3 * 0.95
     set in2_max 3.3 * 1.05
     set in3_min 5.0 * 0.95
