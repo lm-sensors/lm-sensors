@@ -28,7 +28,7 @@ LIBMAN5FILES := $(MODULE_DIR)/sensors.conf.5
 
 # The main and minor version of the library
 LIBMAINVER := 0
-LIBMINORVER := 0.1
+LIBMINORVER := 0.2
 LIBVER := $(LIBMAINVER).$(LIBMINORVER)
 
 # The static lib name, the shared lib name, and the internal ('so') name of
@@ -50,7 +50,8 @@ LIBSHOBJECTS := $(LIBCSOURCES:.c=.lo) $(LIBOTHEROBJECTS:.o=.lo)
 LIBSTOBJECTS := $(LIBCSOURCES:.c=.ao) $(LIBOTHEROBJECTS:.o=.ao)
 LIBEXTRACLEAN := $(MODULE_DIR)/conf-parse.h $(MODULE_DIR)/libsensors.so*
 
-LIBHEADERFILES := $(MODULE_DIR)/error.h $(MODULE_DIR)/sensors.h
+LIBHEADERFILES := $(MODULE_DIR)/error.h $(MODULE_DIR)/sensors.h \
+                  $(MODULE_DIR)/chips.h
 
 # How to create the shared library
 $(MODULE_DIR)/$(LIBSHLIBNAME): $(LIBSHOBJECTS)
