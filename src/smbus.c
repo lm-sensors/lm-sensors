@@ -19,6 +19,13 @@
 
 #include <linux/module.h>
 #include <linux/kernel.h>
+
+#ifdef SPINLOCK
+#include <asm/spinlock.h>
+#else
+#include <asm/semaphore.h>
+#endif
+
 #include "smbus.h"
 
 static s32 smbus_access_i2c (struct smbus_adapter * adapter, u8 addr,
@@ -57,14 +64,28 @@ struct smbus_algorithm smbus_algorithm = {
 
 /* OK, so you want to access a bus using the SMBus protocols. Well, it either
    is registered as a SMBus-only adapter (like the PIIX4), or we need to
-   simulate the SMBus commands using the i2c access routines. */
+   simulate the SMBus commands using the i2c access routines. 
+   We do all locking here, so you can ignore that in the adapter-specific
+   smbus_accesss routine. */
 s32 smbus_access (struct smbus_adapter * adapter, u8 addr, char read_write,
                   u8 command, int size, union smbus_data * data)
 {
+  int res;
+#ifdef SPINLOCK
+  spin_lock_irqsave(&adapter->lock,adapter->lockflags);
+#else
+  down(&adapter->lock);
+#endif
   if (adapter->id & ALGO_SMBUS) 
-    return adapter->smbus_access(addr,read_write,command,size,data);
+    res = adapter->smbus_access(addr,read_write,command,size,data);
   else
-    return smbus_access_i2c(adapter,addr,read_write,command,size,data);
+    res = smbus_access_i2c(adapter,addr,read_write,command,size,data);
+#ifdef SPINLOCK
+  spin_unlock_irqrestore(&adapter->lock,adapter->lockflags);
+#else
+  up(&adapter->lock);
+#endif
+  return res;
 }
   
 /* Simulate a SMBus command using the i2c protocol 

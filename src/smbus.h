@@ -109,9 +109,9 @@ struct smbus_adapter {
   int timeout;
   int retries;
 
-  /* Here ended i2c_algorithm */
-  s32 (* smbus_access) (__u8 addr, char read_write,
-                        __u8 command, int size, union smbus_data * data);
+  /* Here ended i2c_adapter */
+  s32 (* smbus_access) (u8 addr, char read_write,
+                        u8 command, int size, union smbus_data * data);
 };
 
 /* We need to mark SMBus algorithms in the algorithm structure. 
@@ -121,11 +121,14 @@ struct smbus_adapter {
    this flag is set! */
 #define ALGO_SMBUS 0x40000
 
+/* SMBus Adapter ids */
+#define SMBUS_PIIX4 1
+
 /* This union is used within smbus_access routines */
 union smbus_data { 
-        __u8 byte;
-        __u16 word;
-        __u8 block[32];
+        u8 byte;
+        u16 word;
+        u8 block[32];
 };
 
 /* smbus_access read or write markers */
