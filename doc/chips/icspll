@@ -1,0 +1,34 @@
+This is a clock chip reader.
+
+*** ALPHA - It may hang your SMBus or crash your entire system. ***
+
+It is not clear if it will work at all due to incompatibilities
+between the way block reads work on the SMBus and the I2C bus.
+(These are systems with a piix4 or an ali15x3 chip).
+
+However because of a lack of block read support in the I2C package,
+it won't work with native I2C systems either.
+
+If you try this, please report your clock chip, your SMBus chip
+(piix4 or ali15x3), and the results of
+'cat /proc/sys/dev/sensors/icspll-i2c-*-69/reg0-6' to
+lm78@stimpy.netroedge.com.
+
+--------------------
+
+Supports Integrated Circuit Systems (ICS)
+and PhaseLink Labs (PLL) I2C clock generators
+at address 0x69.
+
+    Supported chips (preliminary):
+	ICS:
+	  9148-02, 9148B-04, 9148-08, 9150-01, 9150-04, 9150-11
+	PLL:
+	  52C64-05, 52C64-25, 52C65-02, 52C66-01, 52C66-03, 52C66-10,
+	  52C66-11, 52C66-28, 52C66-29, 52C66-31, 52C66-38, 52C66-39,
+	  52C68-02, 52C68-04, 52C69-13, 52C69-15
+
+
+These chips have 7 registers.
+They will appear as 7 values when you cat
+/proc/sys/dev/sensors/icspll-i2c-*-69/reg0-6.
