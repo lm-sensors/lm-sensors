@@ -437,7 +437,7 @@ keywest_xfer(	struct i2c_adapter *adap,
 			u8 isr = wait_interrupt(iface);
 			handle_interrupt(iface, isr);
 		}
-#else /* POLLED_MODE */88
+#else /* POLLED_MODE */
 		DBG("using interrupt mode...\n");
 		wait_for_completion(&iface->complete);	
 #endif /* POLLED_MODE */	
