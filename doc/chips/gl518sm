@@ -45,6 +45,10 @@ IMPORTANT: For the revision 0x00 chip, the
            unless you use the slow 'iterate' method. Limits will still
            work even when iterate=0. See below. This is a limitation
            of the chip, not the driver.
+           Note that the 'iterate' method was trimmed while porting the
+           driver to Linux 2.6 as we considered it too ugly for the thin
+           benefit.
+	   
 
 This driver supports the Genesys Logic GL518SM chip. There are at least
 two revision of this chip, which we call revision 0x00 and 0x80. Revision
@@ -111,6 +115,9 @@ You may also set the iteration type with
 
 If you have a rev 0x80 chip, the in0-in2 inputs are readable.
 In this case, 'iterate' will be read-only and the read value is 3.
+
+This does NOT apply to the Linux 2.6 kernel driver, where the 'iteration'
+code was dropped for being too ugly.
 
 
 Chip Features

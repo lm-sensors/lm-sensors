@@ -786,7 +786,10 @@ chip "gl518sm-*"
 
 # IMPORTANT: in0, in1, and in2 values (+5, +3, and +12) CANNOT be read
 #            unless you use the slow 'iterate' method. Limits will still
-#            work even when iterate=0. See ../doc/chips/gl518sm.
+#            work even when iterate=0. See doc/chips/gl518sm.
+#            Note that the 'iterate' method was trimmed while porting the
+#            driver to Linux 2.6 as we considered it too ugly for the thin
+#            benefit.
 #
 # Factors and labels taken from GL518SM datasheet, they seem to give
 # reasonable values with EISCA connected Fan78
@@ -809,8 +812,11 @@ chip "gl518sm-*"
   set vin2_max 13.0
   set vin3_min 2.10
   set vin3_max 2.30
-  set fan1_off 0
-  set fan2_min 0
+#  set fan1_off 0
+#  set fan2_min 0
+
+# Do NOT uncomment the following line with the Linux 2.6 kernel driver,
+# as it'll raise an error.
 # set iterate 2
 
 
