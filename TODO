@@ -1,9 +1,12 @@
-Many, many things. Most notably:
+LM-Sensors TODO list
+Contact us if you have comments or wish to help.
+------------------------------------------------
 
 I2C CODE CHANGES
 ================
 
-* Update all documentation
+See TODO in the i2c package.
+
 
 KERNEL MODULES
 ==============
@@ -31,8 +34,6 @@ KERNEL MODULES
   in Simon Vogl's i2c modules.
 * Better general locking, or at least a once-over to check no race-conditions
   remain. This is part of the SMP-safeness, and can better be done at once.
-* Test SIS5595(/91/98) sensor support and SMBus support
-  Thomas Dickel <Thomas.Dickel@mni.fh-giessen.de> owns one SIS5595.
 * adm9240: check whether the current voltage computations are correct.
   Probably not, as they are different from the datasheet specifications.
   Also check for the supported dallas chip.
@@ -46,6 +47,7 @@ KERNEL MODULES
   gfiala@s.netic.de (Guido Fiala) has one on his mainboard
 * Figure out what chips are appearing at 0x08 and 0x30
 
+
 LIBRARY
 =======
 
@@ -56,11 +58,13 @@ LIBRARY
 * Some adm9240 labels start with a digit; change this, it leads to confusing
   syntax in the conf file (they have to be quoted)
 
+
 PROGRAMS
 ========
 
 * Sensors program needs to print a + before lm75 temperatures
 * Sensors program needs to be extended for many new chips
+
 
 OTHERS
 ======
@@ -68,5 +72,4 @@ OTHERS
 * Examine watchdog-4.3 or later of meskes@debian.org (Michael Meskes)
   tsx-11.mit.edu /pub/linux/sources/sbin or 
   sunsite.unc.edu /pub/linux/system/daemons/watchdog
-* Add experimental drivers
 
