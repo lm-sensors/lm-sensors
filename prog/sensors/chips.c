@@ -53,6 +53,7 @@ inline float deg_ctof( float cel )
 #define HYST 0
 #define MINMAX 1
 #define MAXONLY 2
+#define CRIT 3
 /* minmax = 0 for limit/hysteresis, 1 for max/min, 2 for max only;
    curprec and limitprec are # of digits after decimal point
    for the current temp and the limits */
@@ -80,6 +81,11 @@ void print_temp_info(float n_cur, float n_over, float n_hyst,
 	printf( "%+6.*f%s  (limit = %+*.*f%s)                      ",
 	    curprec, n_cur, degv,
 	    limitprec + 4, limitprec, n_over, degv);
+   else if(minmax == CRIT)
+	printf( "%+6.*f%s  (limit = %+*.*f%s, critical = %+*.*f%s)  ",
+	    curprec, n_cur, degv,
+	    limitprec + 4, limitprec, n_over, degv,
+	    limitprec + 4, limitprec, n_hyst, degv);
    else /* HYST */
 	printf( "%+6.*f%s  (limit = %+*.*f%s, hysteresis = %+*.*f%s)",
 	    curprec, n_cur, degv,
@@ -4297,16 +4303,30 @@ void print_adm1026(const sensors_chip_name *name)
 void print_lm83(const sensors_chip_name *name)
 {
   char *label;
-  double cur,high;
-  int valid;
+  double cur,high,crit;
+  int valid,alarms;
+
+  if (!sensors_get_feature(*name,SENSORS_LM83_ALARMS,&cur))
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  if (sensors_get_feature(*name,SENSORS_LM83_TCRIT,&crit)) {
+    printf("ERROR: Can't get tcrit data!\n");
+    crit = 127;
+  }
 
   if (!sensors_get_label_and_valid(*name,SENSORS_LM83_LOCAL_TEMP,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_LM83_LOCAL_TEMP,&cur) &&
       !sensors_get_feature(*name,SENSORS_LM83_LOCAL_HIGH,&high))  {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, high, 0, MAXONLY, 0, 0);
-      printf( "\n" );
+      print_temp_info( cur, high, crit, CRIT, 0, 0);
+      printf(" %s\n",
+      	alarms&LM83_ALARM_LOCAL_CRIT?"CRITICAL":
+      	alarms&LM83_ALARM_LOCAL_HIGH?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get local temperature data!\n");
@@ -4317,8 +4337,11 @@ void print_lm83(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM83_REMOTE1_HIGH,&high))  {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, high, 0, MAXONLY, 0, 0);
-      printf( "\n" );
+      print_temp_info( cur, high, crit, CRIT, 0, 0);
+      printf(" %s\n",
+      	alarms&LM83_ALARM_REMOTE1_OPEN?"DISCONNECT":
+      	alarms&LM83_ALARM_REMOTE1_CRIT?"CRITICAL":
+      	alarms&LM83_ALARM_REMOTE1_HIGH?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get remote temperature 1 data!\n");
@@ -4329,8 +4352,11 @@ void print_lm83(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM83_REMOTE2_HIGH,&high))  {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, high, 0, MAXONLY, 0, 0);
-      printf( "\n" );
+      print_temp_info( cur, high, crit, CRIT, 0, 0);
+      printf(" %s\n",
+      	alarms&LM83_ALARM_REMOTE2_OPEN?"DISCONNECT":
+      	alarms&LM83_ALARM_REMOTE2_CRIT?"CRITICAL":
+      	alarms&LM83_ALARM_REMOTE2_HIGH?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get remote temperature 2 data!\n");
@@ -4341,8 +4367,11 @@ void print_lm83(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM83_REMOTE3_HIGH,&high))  {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, high, 0, MAXONLY, 0, 0);
-      printf( "\n" );
+      print_temp_info( cur, high, crit, CRIT, 0, 0);
+      printf(" %s\n",
+      	alarms&LM83_ALARM_REMOTE3_OPEN?"DISCONNECT":
+      	alarms&LM83_ALARM_REMOTE3_CRIT?"CRITICAL":
+      	alarms&LM83_ALARM_REMOTE3_HIGH?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get remote temperature 3 data!\n");
