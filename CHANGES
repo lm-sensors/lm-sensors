@@ -25,13 +25,17 @@ ask CVS about it:
   File doc/chips/fscscy: Add watchdog documentation
   File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
   Library: Add support for exponents and logarithms for vt1211/vt8235 temps;
-           add adm1026, lm85, w83791d support
+           add adm1026, lm85, w83791d support;
+           Advance version to 2.0.0
   Makefiles: Generate warnings if new library won't be found by ld.so;
              Modules now install in kernel/drivers/i2c/[busses,chips];
              Ensure that headers in /usr/local/include are used first;
              Don't use /usr/include headers for modules;
              Handle multiple UTS_RELEASE definitions in linux/version.h;
-             Automatically generate kernel/include/sensors.h
+             Automatically generate kernel/include/sensors.h;
+             Remove old gzipped modules; remove old misc directory if empty;
+             Remove pre-2.4 installation method;
+             -Wall now the default
   Modules (all): Cleanups including
 		- Add #include <i2c-proc.h>
 		- C99 initializers
@@ -58,31 +62,41 @@ ask CVS about it:
   Module gl520sm: Fix temperature over/hyst writes
   Module lm75: merge changes from kernel 2.5.54
   Module lm85: New
-  Module i2c-amd756: merge changes from kernel 2.5.54
+  Module i2c-ali1535: Check for invalid transaction
+  Module i2c-ali15x3: Check for invalid transaction
+  Module i2c-amd756: merge changes from kernel 2.5.54;
+                     check for invalid transaction
   Module i2c-amd8111: merge changes from kernel 2.5.54
   Module i2c-i801: Add support for 82801EB (ICH5)
   Module i2c-i810: Fix for some chips
   Module i2c-nforce2: New
-  Module i2c-sis645: Add support for SiS651, SiS961, SiS745
+  Module i2c-piix4: Check for invalid transaction
+  Module i2c-sis5595: Check for invalid transaction; add more blacklist IDs
+  Module i2c-sis645: Add support for SiS651, SiS961, SiS745, SiS746
+  Module i2c-viapro: Check for invalid transaction
   Modules mtp008, smsc47m1, vt1211, vt8231, w83781d: Standardize and improve
           pwm and pwm enable support; update docs
+  Module smbus-arp: Check adapter for HW or SW PEC support;
+                    add reset option
   Module w83781d: Add support for w83791d
   Module w83627hf: New
   Program decode-dimms.pl: Recognize DDR and Rambus
   Program eeprom: Fix writes for small eeproms
   Program eeprom, eepromer: Use local i2c-dev.h for build
+  Program fancontrol: New
   Program lm_sensors.init: Call sensors -s in start()
   Program mkpatch: Fix vt8231 compile; keep tsunami from menu on non-alpha;
                    add adm1026,lm85 support
   Program p4b_smbus: Fix 'make install', install in same place as other modules
-  Program pwmtest: New
+  Program pwmconfig, pwmtest: New
   Program sensors: add adm1026, lm85, w83791d support
   Program sensors-detect: Add super i/o detection (smsc47m1, vt1211,
-                          w83627hf, w83697hf);
-                          Add support for SiS651, SiS961, SiS745, nForce2;
+                          w83627hf, w83627thf, w83697hf);
+                          Add support for SiS651, SiS961, SiS745, SiS746;
                           Support dmidecode 2.0 and later;
                           Fix "C" format error;
-                          Add support for adm1026, 82801EB (ICH5)
+                          Add support for adm1026, 82801EB (ICH5), W83791D;
+                          Add support for w83l785ts, nForce2
 
 2.7.0 (20021208)
   NOTE: Requires i2c-2.7.0 or newer.
