@@ -266,6 +266,100 @@ void print_adm9240(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_sis5595(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur,min,max,fdiv;
+  int alarms;
+
+  if (!sensors_get_feature(*name,SENSORS_SIS5595_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  if (!sensors_get_label(*name,SENSORS_SIS5595_IN0,&label) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN0,&cur) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN0_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN0_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&SIS5595_ALARM_IN0?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN0 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_SIS5595_IN1,&label) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN1_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN1_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&SIS5595_ALARM_IN1?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_SIS5595_IN2,&label) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN2_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN2_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&SIS5595_ALARM_IN2?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN2 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_SIS5595_IN3,&label) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN3_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_IN3_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&SIS5595_ALARM_IN3?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN3 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_SIS5595_FAN1,&label) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_FAN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_FAN1_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_FAN1_MIN,&min)) {
+    print_label(label,10);
+    printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+           cur,min,fdiv, alarms&SIS5595_ALARM_FAN1?"ALARM":"");
+  } else
+    printf("ERROR: Can't get FAN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_SIS5595_FAN2,&label) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_FAN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_FAN2_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_FAN2_MIN,&min)) {
+    print_label(label,10);
+    printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+           cur,min,fdiv, alarms&SIS5595_ALARM_FAN2?"ALARM":"");
+  } else
+    printf("ERROR: Can't get FAN2 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_SIS5595_TEMP,&label) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_TEMP_HYST,&min) &&
+      !sensors_get_feature(*name,SENSORS_SIS5595_TEMP_OVER,&max)) {
+    print_label(label,10);
+    printf("%+3.0f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
+           cur,max,min, alarms&SIS5595_ALARM_TEMP?"ALARM":"");
+  } else
+    printf("ERROR: Can't get TEMP data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_SIS5595_ALARMS,&label)) {
+    print_label(label,10);
+    printf("Board temperature input (usually LM75 chips) %s\n",
+           alarms & SIS5595_ALARM_BTI?"ALARM":"     ");
+  }
+  free_the_label(&label);
+}
+
 void print_lm78(const sensors_chip_name *name)
 {
   char *label = NULL;
