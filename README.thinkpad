@@ -8,9 +8,18 @@ causes the Thinkpad to corrupt it's eeprom.  Unless you know otherwise, we
 suggest that users avoid installing I2C/Lm_sensors support on IBM Thinkpads
 until it becomes known what exactly is causing the corruption.
 
+Though you may disagree about whose fault this is, fact is that seemingly
+the Thinkpad can become corrupted even when only reading information from
+the i2c/SMBus. Be assured that we never, ever write any information to
+the bus while scanning(*), and that no halfway sane client implementation
+should change its internal state, not to mention overwrite system-critical
+information.
+
 For more information, see:
 
 http://www.linux-thinkpad.org/
 
+(*) Actually, we do write some information to the bus, but only as specified
+    in the i2c/SMBus protocol to select a certain chip address and to
+    start/stop i2c transactions.
 
-3/20/01
