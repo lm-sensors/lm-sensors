@@ -36,7 +36,6 @@
 #include <linux/ioport.h>
 #include <linux/i2c.h>
 #include "version.h"
-#include "compat.h"
 
 #include <linux/init.h>
 
@@ -160,8 +159,7 @@ int amd756_setup(void)
 /* Determine the address of the SMBus areas */
 
   /* Technically it is a dword but... */
-  pci_read_config_word_united(AMD756_dev, AMD756_bus, AMD756_devfn,
-                              SMBBA, &amd756_smba);
+  pci_read_config_word(AMD756_dev, SMBBA, &amd756_smba);
   amd756_smba &= 0xfff0;
 
   if (check_region(amd756_smba, 8)) {
@@ -170,8 +168,7 @@ int amd756_setup(void)
     goto END;
   }
 
-  pci_read_config_byte_united(AMD756_dev, AMD756_bus, AMD756_devfn,
-                              SMBGCFG, &temp);
+  pci_read_config_byte(AMD756_dev, SMBGCFG, &temp);
 
   if ((temp & 128) == 0) {
     printk("SMBUS: Error: Host SMBus controller I/O not enabled!\n");     
@@ -193,8 +190,7 @@ int amd756_setup(void)
             "of date)!\n");
   */
 
-  pci_read_config_byte_united(AMD756_dev, AMD756_bus, AMD756_devfn, SMBREV, 
-                              &temp);
+  pci_read_config_byte(AMD756_dev, SMBREV, &temp);
   printk("i2c-amd756.o: SMBREV = 0x%X\n",temp);
   printk("i2c-amd756.o: AMD756_smba = 0x%X\n",amd756_smba);
 #endif /* DEBUG */

@@ -36,7 +36,6 @@
 #include <linux/ioport.h>
 #include <linux/i2c.h>
 #include "version.h"
-#include "compat.h"
 
 #include <linux/init.h>
 
@@ -160,8 +159,7 @@ int sis5595_setup(void)
   } 
 
 /* Determine the address of the SMBus areas */
-  pci_read_config_word_united(SIS5595_dev, SIS5595_bus ,SIS5595_devfn,
-                                ACPI_BASE,&sis5595_base);
+  pci_read_config_word(SIS5595_dev, ACPI_BASE,&sis5595_base);
 #ifdef DEBUG
   printk("ACPI Base address: %04x\n",sis5595_base);
 #endif

@@ -34,7 +34,6 @@
 
 #include <linux/i2c.h>
 #include <linux/i2c-algo-bit.h>
-#include "compat.h"
 
 #include <linux/init.h>
 

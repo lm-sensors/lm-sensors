@@ -45,9 +45,15 @@
 #include "version.h"
 #include "i2c-isa.h"
 #include "sensors.h"
-#include "compat.h"
-
 #include <linux/init.h>
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1))
+#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,13)
+#define THIS_MODULE NULL
+#endif
 
 /* RT Table support #defined so we can take it out if it gets bothersome */
 #define W83781D_RT 1

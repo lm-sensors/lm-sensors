@@ -30,7 +30,6 @@
 
 #include <linux/i2c.h>
 
-#include "compat.h"
 
 #include <linux/init.h>
 

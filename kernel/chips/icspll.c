@@ -38,6 +38,14 @@
 #include <linux/init.h>
 
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1))
+#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,13)
+#define THIS_MODULE NULL
+#endif
+
 /* Many constants specified below */
 
 #define ICSPLL_SIZE 7

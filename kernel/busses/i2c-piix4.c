@@ -31,7 +31,6 @@
 #include <linux/ioport.h>
 #include <linux/i2c.h>
 #include "version.h"
-#include "compat.h"
 
 #include <linux/init.h>
 
@@ -168,8 +167,7 @@ int piix4_setup(void)
     force = 0;
   } else {
 
-    pci_read_config_word_united(PIIX4_dev, PIIX4_bus ,PIIX4_devfn,
-                                SMBBA,&piix4_smba);
+    pci_read_config_word(PIIX4_dev, SMBBA,&piix4_smba);
     piix4_smba &= 0xfff0;
   }
 
@@ -179,17 +177,13 @@ int piix4_setup(void)
     goto END;
   }
 
-  pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
-                              SMBHSTCFG, &temp);
+  pci_read_config_byte(PIIX4_dev, SMBHSTCFG, &temp);
 /* If force_addr is set, we program the new address here. Just to make
    sure, we disable the PIIX4 first. */
   if (force_addr) {
-    pci_write_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
-                                SMBHSTCFG, temp & 0xfe);
-    pci_write_config_word_united(PIIX4_dev, PIIX4_bus ,PIIX4_devfn,
-                                 SMBBA,piix4_smba);
-    pci_write_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
-                                SMBHSTCFG, temp | 0x01);
+    pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp & 0xfe);
+    pci_write_config_word(PIIX4_dev, SMBBA,piix4_smba);
+    pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp | 0x01);
     printk("i2c-piix4.o: WARNING: PIIX4 SMBus interface set to new "
            "address %04x!\n",piix4_smba);
   } else if ((temp & 1) == 0) {
@@ -200,8 +194,7 @@ int piix4_setup(void)
    done by the Bios!  Don't complain if your hardware does weird 
    things after enabling this. :') Check for Bios updates before
    resorting to this.  */
-      pci_write_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
-                                       SMBHSTCFG, temp | 1);
+      pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp | 1);
       printk("i2c-piix4.o: WARNING: PIIX4 SMBus interface has been FORCEFULLY "
              "ENABLED!\n");
     } else {
@@ -223,8 +216,7 @@ int piix4_setup(void)
      printk("i2c-piix4.o: PIIX4: Illegal Interrupt configuration (or code out "
             "of date)!\n");
 
-  pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn, SMBREV, 
-                              &temp);
+  pci_read_config_byte(PIIX4_dev, SMBREV, &temp);
   printk("i2c-piix4.o: SMBREV = 0x%X\n",temp);
   printk("i2c-piix4.o: PIIX4_smba = 0x%X\n",piix4_smba);
 #endif /* DEBUG */

@@ -40,7 +40,6 @@
 #include <linux/delay.h>
 #include <linux/i2c.h>
 #include "version.h"
-#include "compat.h"
 
 #include <linux/init.h>
 

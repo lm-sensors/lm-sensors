@@ -34,9 +34,16 @@
 #include "version.h"
 #include "i2c-isa.h"
 #include "sensors.h"
-#include "compat.h"
-
 #include <linux/init.h>
+
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1))
+#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,13)
+#define THIS_MODULE NULL
+#endif
 
 /* Addresses to scan.
    Note that we can't determine the ISA address until we have initialized
@@ -278,8 +285,7 @@ int sis5595_find_sis(int *address)
 
 
   if ( PCIBIOS_SUCCESSFUL !=
-	pci_read_config_word_united(s_bridge, SIS_bus, SIS_devfn, 
-                                    SIS5595_BASE_REG, &val))
+	pci_read_config_word(s_bridge, SIS5595_BASE_REG, &val))
     return -ENODEV;
 		
   *address = (val & 0xfff8);

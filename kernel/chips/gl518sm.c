@@ -27,12 +27,19 @@
 #include "sensors.h"
 #include "i2c-isa.h"
 #include "version.h"
-#include "compat.h"
 
 #include <linux/init.h>
 
 #ifdef __SMP__
 #include <linux/smp_lock.h>
+#endif
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1))
+#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,13)
+#define THIS_MODULE NULL
 #endif
 
 /* Addresses to scan */

@@ -26,12 +26,12 @@
 #include <linux/sysctl.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
+#include <asm/uaccess.h>
 
 #include "version.h"
 #include <linux/i2c.h>
 #include "i2c-isa.h"
 #include "sensors.h"
-#include "compat.h"
 
 #include <linux/init.h>
 
@@ -40,6 +40,10 @@ extern int init_module(void);
 extern int cleanup_module(void);
 static int sensors_cleanup(void);
 #endif /* MODULE */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,13)
+#define THIS_MODULE NULL
+#endif
 
 static int sensors_create_name(char **name, const char *prefix,
                                struct i2c_adapter * adapter, int addr);
@@ -299,7 +303,7 @@ int sensors_sysctl_chips (ctl_table *table, int *name, int nlen, void *oldval,
   int i,oldlen,nrels,maxels;
   struct ctl_table *client_tbl;
 
-  if (oldval && oldlenp && ! get_user_data(oldlen,oldlenp) && oldlen) {
+  if (oldval && oldlenp && ! get_user(oldlen,oldlenp) && oldlen) {
     maxels = oldlen / sizeof(struct sensors_chips_data);
     nrels = 0;
     for (i = 0; (i < SENSORS_ENTRY_MAX) && (nrels < maxels); i++)
@@ -391,7 +395,7 @@ int sensors_sysctl_real (ctl_table *table, int *name, int nlen, void *oldval,
   struct i2c_client *client = table -> extra2;
 
   /* Check if we need to output the old values */
-  if (oldval && oldlenp && ! get_user_data(oldlen,oldlenp) && oldlen) {
+  if (oldval && oldlenp && ! get_user(oldlen,oldlenp) && oldlen) {
     callback(client,SENSORS_PROC_REAL_READ,table->ctl_name,&nrels,results);
 
     /* Note the rounding factor! */
@@ -444,7 +448,7 @@ void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
   while (bufsize && (*nrels < maxels)) {
 
     /* Skip spaces at the start */
-    while (bufsize && ! get_user_data(nextchar,(char *) buffer) && 
+    while (bufsize && ! get_user(nextchar,(char *) buffer) && 
            isspace((int) nextchar)) {
       bufsize --;
       ((char *) buffer)++;
@@ -460,14 +464,14 @@ void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
     mag = magnitude;
 
     /* Check for a minus */
-    if (! get_user_data(nextchar,(char *) buffer) && (nextchar == '-')) {
+    if (! get_user(nextchar,(char *) buffer) && (nextchar == '-')) {
       min=1;
       bufsize--;
       ((char *) buffer)++;
     }
 
     /* Digits before a decimal dot */
-    while (bufsize && !get_user_data(nextchar,(char *) buffer) && 
+    while (bufsize && !get_user(nextchar,(char *) buffer) && 
            isdigit((int) nextchar)) {
       res = res * 10 + nextchar - '0';
       bufsize--;
@@ -487,7 +491,7 @@ void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
   
       /* Read digits while they are significant */
       while(bufsize && (mag > 0) && 
-            !get_user_data(nextchar,(char *) buffer) &&
+            !get_user(nextchar,(char *) buffer) &&
             isdigit((int) nextchar)) {
         res = res * 10 + nextchar - '0';
         mag--;
@@ -502,7 +506,7 @@ void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
     }
 
     /* Skip everything until we hit whitespace */
-    while(bufsize && !get_user_data(nextchar,(char *) buffer) &&
+    while(bufsize && !get_user(nextchar,(char *) buffer) &&
           isspace ((int) nextchar)) {
       bufsize --;
       ((char *) buffer) ++;

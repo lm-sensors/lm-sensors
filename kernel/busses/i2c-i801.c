@@ -35,9 +35,16 @@
 #include <linux/stddef.h>
 #include <linux/sched.h>
 #include <linux/ioport.h>
+#include <linux/init.h>
 #include <linux/i2c.h>
 #include "version.h"
-#include "compat.h"
+
+#ifndef PCI_DEVICE_ID_INTEL_82801AA_3
+#define PCI_DEVICE_ID_INTEL_82801AA_3   0x2413
+#endif
+#ifndef PCI_DEVICE_ID_INTEL_82801AB_3
+#define PCI_DEVICE_ID_INTEL_82801AB_3   0x2423
+#endif
 
 /* I801 SMBus address offsets */
 #define SMBHSTSTS (0 + i801_smba)
@@ -168,8 +175,7 @@ int i801_setup(void)
     i801_smba = force_addr & 0xfff0;
     force = 0;
   } else {
-    pci_read_config_word_united(I801_dev, I801_bus ,I801_devfn,
-                                SMBBA,&i801_smba);
+    pci_read_config_word(I801_dev, SMBBA,&i801_smba);
     i801_smba &= 0xfff0;
   }
 
@@ -179,17 +185,13 @@ int i801_setup(void)
     goto END;
   }
 
-  pci_read_config_byte_united(I801_dev, I801_bus, I801_devfn,
-                              SMBHSTCFG, &temp);
+  pci_read_config_byte(I801_dev, SMBHSTCFG, &temp);
 /* If force_addr is set, we program the new address here. Just to make
    sure, we disable the I801 first. */
   if (force_addr) {
-    pci_write_config_byte_united(I801_dev, I801_bus, I801_devfn,
-                                SMBHSTCFG, temp & 0xfe);
-    pci_write_config_word_united(I801_dev, I801_bus ,I801_devfn,
-                                 SMBBA,i801_smba);
-    pci_write_config_byte_united(I801_dev, I801_bus, I801_devfn,
-                                SMBHSTCFG, temp | 0x01);
+    pci_write_config_byte(I801_dev, SMBHSTCFG, temp & 0xfe);
+    pci_write_config_word(I801_dev, SMBBA,i801_smba);
+    pci_write_config_byte(I801_dev, SMBHSTCFG, temp | 0x01);
     printk("i2c-i801.o: WARNING: I801 SMBus interface set to new "
            "address %04x!\n",i801_smba);
   } else if ((temp & 1) == 0) {
@@ -200,8 +202,7 @@ int i801_setup(void)
    done by the Bios!  Don't complain if your hardware does weird 
    things after enabling this. :') Check for Bios updates before
    resorting to this.  */
-      pci_write_config_byte_united(I801_dev, I801_bus, I801_devfn,
-                                       SMBHSTCFG, temp | 1);
+      pci_write_config_byte(I801_dev, SMBHSTCFG, temp | 1);
       printk("i2c-i801.o: WARNING: I801 SMBus interface has been FORCEFULLY "
              "ENABLED!\n");
     } else {
@@ -222,8 +223,7 @@ int i801_setup(void)
   else 
      printk("i2c-i801.o: I801 using PCI Interrupt for SMBus.\n");
 
-  pci_read_config_byte_united(I801_dev, I801_bus, I801_devfn, SMBREV, 
-                              &temp);
+  pci_read_config_byte(I801_dev, SMBREV, &temp);
   printk("i2c-i801.o: SMBREV = 0x%X\n",temp);
   printk("i2c-i801.o: I801_smba = 0x%X\n",i801_smba);
 #endif /* DEBUG */

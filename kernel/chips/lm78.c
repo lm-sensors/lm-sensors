@@ -31,9 +31,15 @@
 #include "version.h"
 #include "i2c-isa.h"
 #include "sensors.h"
-#include "compat.h"
-
 #include <linux/init.h>
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1))
+#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,13)
+#define THIS_MODULE NULL
+#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {SENSORS_I2C_END};

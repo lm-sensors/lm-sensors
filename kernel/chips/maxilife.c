@@ -51,9 +51,16 @@ static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 #include "version.h"
 #include "sensors.h"
 #include "i2c-isa.h"
-#include "compat.h"
-
 #include <linux/init.h>
+
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1))
+#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,13)
+#define THIS_MODULE NULL
+#endif
 
 
 #undef AUTODETECT          /* try to autodetect MaxiLife version */

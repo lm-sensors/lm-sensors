@@ -31,7 +31,6 @@
 #include <linux/ioport.h>
 #include <linux/i2c.h>
 #include "version.h"
-#include "compat.h"
 
 #include <linux/init.h>
 
@@ -180,12 +179,10 @@ int vt596_setup(void)
   } 
 
 /* Determine the configuration space registers for the SMBus areas */
-  if ((! pci_read_config_word_united(VT596_dev, VT596_bus ,VT596_devfn,
-                       SMBBA1, &vt596_smba)) && (vt596_smba & 0x1)) {
+  if ((! pci_read_config_word(VT596_dev, SMBBA1, &vt596_smba)) && (vt596_smba & 0x1)) {
     smb_cf_base = SMBBA1;
     smb_cf_hstcfg = 0xD2;
-  } else if ((! pci_read_config_word_united(VT596_dev, VT596_bus ,VT596_devfn,
-                       SMBBA2, &vt596_smba)) && (vt596_smba & 0x1)) {
+  } else if ((! pci_read_config_word(VT596_dev, SMBBA2, &vt596_smba)) && (vt596_smba & 0x1)) {
     smb_cf_base = SMBBA2;
     smb_cf_hstcfg = 0x84;
   } else {
@@ -208,17 +205,13 @@ int vt596_setup(void)
     goto END;
   }
 
-  pci_read_config_byte_united(VT596_dev, VT596_bus, VT596_devfn,
-                              SMBHSTCFG, &temp);
+  pci_read_config_byte(VT596_dev, SMBHSTCFG, &temp);
 /* If force_addr is set, we program the new address here. Just to make
    sure, we disable the VT596 first. */
   if (force_addr) {
-    pci_write_config_byte_united(VT596_dev, VT596_bus, VT596_devfn,
-                                SMBHSTCFG, temp & 0xfe);
-    pci_write_config_word_united(VT596_dev, VT596_bus ,VT596_devfn,
-                                 SMBBA,vt596_smba);
-    pci_write_config_byte_united(VT596_dev, VT596_bus, VT596_devfn,
-                                SMBHSTCFG, temp | 0x01);
+    pci_write_config_byte(VT596_dev, SMBHSTCFG, temp & 0xfe);
+    pci_write_config_word(VT596_dev, SMBBA,vt596_smba);
+    pci_write_config_byte(VT596_dev, SMBHSTCFG, temp | 0x01);
     printk("i2c-viapro.o: WARNING: VT596 SMBus interface set to new "
            "address %04x!\n",vt596_smba);
   } else if ((temp & 1) == 0) {
@@ -227,8 +220,7 @@ int vt596_setup(void)
    done by the Bios!  Don't complain if your hardware does weird 
    things after enabling this. :') Check for Bios updates before
    resorting to this.  */
-      pci_write_config_byte_united(VT596_dev, VT596_bus, VT596_devfn,
-                                       SMBHSTCFG, temp | 1);
+      pci_write_config_byte(VT596_dev, SMBHSTCFG, temp | 1);
       printk("i2c-viapro.o: WARNING: SMBus interface has been FORCEFULLY "
              "ENABLED!\n");
     } else {
@@ -250,8 +242,7 @@ int vt596_setup(void)
      printk("i2c-viapro.o: Illegal Interrupt configuration (or code out "
             "of date)!\n");
 
-  pci_read_config_byte_united(VT596_dev, VT596_bus, VT596_devfn, SMBREV, 
-                              &temp);
+  pci_read_config_byte(VT596_dev, SMBREV, &temp);
   printk("i2c-viapro.o: SMBREV = 0x%X\n",temp);
   printk("i2c-viapro.o: VT596_smba = 0x%X\n",vt596_smba);
 #endif /* DEBUG */

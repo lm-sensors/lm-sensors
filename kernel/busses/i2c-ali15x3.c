@@ -70,7 +70,6 @@
 #include <linux/ioport.h>
 #include <linux/i2c.h>
 #include "version.h"
-#include "compat.h"
 
 #include <linux/init.h>
 
@@ -215,18 +214,15 @@ int ali15x3_setup(void)
    if the lock bits are 1, but in fact the address registers
    are zero unless you clear the lock bits.
 */
-  pci_read_config_byte_united(ALI15X3_dev, ALI15X3_bus ,ALI15X3_devfn,
-                              SMBATPC, &temp);
+  pci_read_config_byte(ALI15X3_dev, SMBATPC, &temp);
   if(temp & ALI15X3_LOCK)
   {   
     temp &= ~ALI15X3_LOCK;
-    pci_write_config_byte_united(ALI15X3_dev, ALI15X3_bus ,ALI15X3_devfn,
-                                 SMBATPC, temp);
+    pci_write_config_byte(ALI15X3_dev, SMBATPC, temp);
   }
 
 /* Determine the address of the SMBus area */
-  pci_read_config_word_united(ALI15X3_dev, ALI15X3_bus ,ALI15X3_devfn,
-                              SMBBA,&ali15x3_smba);
+  pci_read_config_word(ALI15X3_dev, SMBBA,&ali15x3_smba);
   ali15x3_smba &= (0xffff & ~ (ALI15X3_SMB_IOSIZE - 1));
   if(ali15x3_smba == 0) {
     printk("i2c-ali15x3.o: ALI15X3_smb region uninitialized - upgrade BIOS?\n");
@@ -245,8 +241,7 @@ int ali15x3_setup(void)
     goto END;
 
 /* check if whole device is enabled */
-    pci_read_config_byte_united(ALI15X3_dev, ALI15X3_bus ,ALI15X3_devfn,
-                                SMBCOM, &temp);
+    pci_read_config_byte(ALI15X3_dev, SMBCOM, &temp);
   if ((temp & 1) == 0) {
     printk("SMBUS: Error: SMB device not enabled - upgrade BIOS?\n");     
     error_return=-ENODEV;
@@ -254,8 +249,7 @@ int ali15x3_setup(void)
   }
 
 /* Is SMB Host controller enabled? */
-  pci_read_config_byte_united(ALI15X3_dev, ALI15X3_bus, ALI15X3_devfn,
-                              SMBHSTCFG, &temp);
+  pci_read_config_byte(ALI15X3_dev, SMBHSTCFG, &temp);
 #ifdef FORCE_ALI15X3_ENABLE
 /* This should never need to be done.
    NOTE: This assumes I/O space and other allocations WERE
@@ -263,8 +257,7 @@ int ali15x3_setup(void)
    things after enabling this. :') Check for Bios updates before
    resorting to this.  */
   if ((temp & 1) == 0) {
-    pci_write_config_byte_united(ALI15X3_dev, ALI15X3_bus, ALI15X3_devfn,
-                                     SMBHSTCFG, temp | 1);
+    pci_write_config_byte(ALI15X3_dev, SMBHSTCFG, temp | 1);
     printk("i2c-ali15x3.o: WARNING: ALI15X3 SMBus interface has been FORCEFULLY "
            "ENABLED!!\n");
   }
@@ -277,8 +270,7 @@ int ali15x3_setup(void)
 #endif /* FORCE_ALI15X3_ENABLE */
 
 /* set SMB clock to 74KHz as recommended in data sheet */
-  pci_write_config_byte_united(ALI15X3_dev, ALI15X3_bus ,ALI15X3_devfn,
-                               SMBCLK, 0x20);
+  pci_write_config_byte(ALI15X3_dev, SMBCLK, 0x20);
 
   /* Everything is happy, let's grab the memory and set things up. */
   request_region(ali15x3_smba, ALI15X3_SMB_IOSIZE, "ali15x3-smb");       
@@ -291,8 +283,7 @@ int ali15x3_setup(void)
   if ((....... & 0x0F) == 1)
      printk("i2c-ali15x3.o: ALI15X3 using Interrupt 9 for SMBus.\n");
 */
-  pci_read_config_byte_united(ALI15X3_dev, ALI15X3_bus, ALI15X3_devfn, SMBREV, 
-                              &temp);
+  pci_read_config_byte(ALI15X3_dev,  SMBREV, &temp);
   printk("i2c-ali15x3.o: SMBREV = 0x%X\n",temp);
   printk("i2c-ali15x3.o: ALI15X3_smba = 0x%X\n",ali15x3_smba);
 #endif /* DEBUG */
