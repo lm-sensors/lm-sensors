@@ -29,6 +29,13 @@ init (int):
    2: Forcibly enable all voltage and temperature channels, except in9
    3: Forcibly enable all voltage and temperature channels, including in9
 
+Note that this parameter has no effect for the PC87360, PC87363 and PC87364
+chips.
+
+Also note that for the PC87366, initialization levels 2 and 3 don't enable
+all temperature channels, because some of them share pins with each other,
+so they can't be used at the same time.
+
 
 Description
 -----------
@@ -116,6 +123,14 @@ channels). For technical reasons, these channels are held by the VLM
 (voltage level monitor) logical device, not the TMS (temperature
 measurement) one. As a consequence, these temperatures are exported as
 voltages, and converted into temperatures in user-space.
+
+Note that these three additional channels share their pins with the
+external thermal diode channels, so you (physically) can't use them all at
+the same time. Although it should be possible to mix the two sensor types,
+the documents from National Semiconductor suggest that motherboard
+manufacturers should choose one type and stick to it. So you will more
+likely have either channels 1 to 3 (thermal diodes) or 3 to 6 (internal
+thermal diode, and thermistors).
 
 
 Voltage Monitoring
