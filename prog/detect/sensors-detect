@@ -779,7 +779,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             saa1064_detect w83l784r_detect mozart_detect max6650_detect
             fscher_detect adm1029_detect adm1031_detect max6900_detect
             m5879_detect pca9540_detect smartbatt_mgr_detect
-            smartbatt_chgr_detect adt7467_detect);
+            smartbatt_chgr_detect adt7467_detect lm92_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1146,6 +1146,24 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "to-be-written",
        i2c_addrs => [0x4c],
        i2c_detect => sub { lm90_detect 4, @_ },
+     },
+     {
+       name => "National Semiconductor LM92",
+       driver => "lm92",
+       i2c_addrs => [0x48..0x4b],
+       i2c_detect => sub { lm92_detect 0, @_ },
+     },
+     {
+       name => "National Semiconductor LM76",
+       driver => "lm92",
+       i2c_addrs => [0x48..0x4b],
+       i2c_detect => sub { lm92_detect 1, @_ },
+     },
+     {
+       name => "Maxim MAX6633/MAX6634/MAX6635",
+       driver => "lm92",
+       i2c_addrs => [0x40..0x4f],
+       i2c_detect => sub { lm92_detect 2, @_ },
      },
      {
        name => "Analog Devices ADT7461",
@@ -2653,7 +2671,7 @@ sub lm78_alias_detect
 #       make sense);
 #   3 means that the configuration register passes the test;
 # Registers used:
-#   0x01: Temperature
+#   0x00: Temperature
 #   0x01: Configuration
 #   0x02: Hysteresis
 #   0x03: Overtemperature Shutdown
@@ -2696,6 +2714,55 @@ sub lm75_detect
     if (($cur&0x00ff) <= 125 || ($cur&0x00ff) >= 201)
        and ($hyst&0x00ff) <= 125 and ($os&0x00ff) <= 125 and $hyst<$os;
   return 3;
+}
+
+# $_[0]: Chip to detect (0 = LM92, 1 = LM76, 2 = MAX6633/MAX6634/MAX6635)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, 2 or 4 if detected;
+# Registers used:
+#   0x01: Configuration (National Semiconductor only)
+#   0x02: Hysteresis
+#   0x03: Critical Temp
+#   0x04: Low Limit
+#   0x05: High Limit
+#   0x07: Manufacturer ID (LM92 only)
+# One detection step is based on the fact that the LM92 and clones have a
+# limited number of registers, which cycle modulo 16 address values.
+# Note that register 0x00 may change, so we can't use the modulo trick on it.
+sub lm92_detect
+{
+  my ($chip, $file, $addr) = @_;
+
+  my $cur = i2c_smbus_read_word_data($file, 0x00);
+  my $conf = i2c_smbus_read_byte_data($file, 0x01);
+  my $hyst = i2c_smbus_read_word_data($file, 0x02);
+  my $crit = i2c_smbus_read_word_data($file, 0x03);
+  my $low = i2c_smbus_read_word_data($file, 0x04);
+  my $high = i2c_smbus_read_word_data($file, 0x05);
+
+  return if $chip == 0
+        and i2c_smbus_read_word_data($file, 0x07) != 0x0180;
+  
+  return if ($chip == 0 || $chip == 1)
+        and ($conf & 0xE0);
+
+  for (my $i = 0; $i < 8; $i++) {
+    return if i2c_smbus_read_byte_data($file, $i*16+0x01) != $conf;
+    return if i2c_smbus_read_word_data($file, $i*16+0x02) != $hyst;
+    return if i2c_smbus_read_word_data($file, $i*16+0x03) != $crit;
+    return if i2c_smbus_read_word_data($file, $i*16+0x04) != $low;
+    return if i2c_smbus_read_word_data($file, $i*16+0x05) != $high;
+  }
+  
+  foreach my $temp ($hyst, $crit, $low, $high) {
+    return if $chip == 2 and ($temp & 0x7F00);
+    return if $chip != 2 and ($temp & 0x0700);
+  }
+
+  return 4 if $chip == 0;
+  return 2;
 }
   
 # $_[0]: A reference to the file descriptor to access this chip.
