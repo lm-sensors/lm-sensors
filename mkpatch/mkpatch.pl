@@ -583,7 +583,7 @@ EOF
       $_ = <INPUT>;
       redo MAIN;
     }
-    $right_place = 1 if (m@lp_init\(\);@);
+    $right_place = 1 if (m@lp_m68k_init\(\);@);
     if ($right_place and not $done and
         m@CONFIG_SENSORS@) {
       $_ = <INPUT> while not m@#endif@;
