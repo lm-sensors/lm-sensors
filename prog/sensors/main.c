@@ -376,6 +376,10 @@ void do_a_print(sensors_chip_name name)
     print_adm1026(&name);
   else if (!strcmp(name.prefix,"lm83"))
     print_lm83(&name);
+  else if (!strcmp(name.prefix,"lm90"))
+    print_lm90(&name);
+  else if (!strcmp(name.prefix,"xeontemp"))
+    print_xeontemp(&name);
   else
     print_unknown_chip(&name);
   printf("\n");

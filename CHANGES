@@ -60,6 +60,7 @@ ask CVS about it:
   Module lm90: New
   Module saa1064: New
   Module w83781d: Enhance chip detection
+  Module xeontemp: New
   Program decode-dimms.pl: Add Direct Rambus (DRDRAM)
                            Mark Rambus as unsupported
   Program decode-edid.pl: New

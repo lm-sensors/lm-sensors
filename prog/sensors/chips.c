@@ -4467,6 +4467,50 @@ void print_lm90(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_xeontemp(const sensors_chip_name *name)
+{
+  char *label;
+  double cur,hyst,over;
+  int alarms,i,valid;
+
+  if (!sensors_get_feature(*name,SENSORS_XEONTEMP_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_XEONTEMP_REMOTE_TEMP,
+                                   &label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_XEONTEMP_REMOTE_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_XEONTEMP_REMOTE_TEMP_HYST,&hyst) &&
+      !sensors_get_feature(*name,SENSORS_XEONTEMP_REMOTE_TEMP_OVER,&over))  {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, over, hyst, MINMAX, 0, 0);
+      if (alarms & (XEONTEMP_ALARM_RTEMP_HIGH | XEONTEMP_ALARM_RTEMP_LOW |
+                    XEONTEMP_ALARM_RTEMP_NA)) {
+        printf("ALARM (");
+        i = 0;
+          if (alarms & XEONTEMP_ALARM_RTEMP_NA) {
+          printf("N/A");
+          i++;
+        }
+        if (alarms & XEONTEMP_ALARM_RTEMP_LOW) {
+          printf("%sLOW",i?",":"");
+          i++;
+        }
+        if (alarms & XEONTEMP_ALARM_RTEMP_HIGH)
+          printf("%sHIGH",i?",":"");
+        printf(")");
+      }
+      printf("\n");
+    }
+  } else
+    printf("ERROR: Can't get temperature data!\n");
+  free_the_label(&label);
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;

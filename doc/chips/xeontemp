@@ -1,0 +1,51 @@
+Kernel driver `adm1021.o'
+=========================
+
+Status: Complete; tested for most devices except Xeon.
+
+Supported chips:
+  * Intel Xeon and other processors
+    Prefix `xeontemp'
+    Addresses scanned: I2C 0x18, 0x1a, 0x29, 0x2b, 0x4c, 0x4e
+    Datasheet: Publicly available at the Intel website
+
+Authors: Frodo Looijaard <frodol@dds.nl>,Philip Edelbrock
+        <phil@netroedge.com>, and Mark D. Studebaker (mdsxyz123@yahoo.com)
+
+License: GPL
+
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_xeontemp: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `xeontemp' chip
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* read_only: int
+  Don't set any values, read only mode
+
+
+Description
+-----------
+
+Xeon and other Intel processors with an embedded i2c temperature
+sensor look very similar to an adm1021.
+The Xeon has only one sensor where the adm1021 has two.
+Not all Xeon processors have this feature.
+If you have an Intel processor, and sensors-detect recommended
+the adm1021 driver, and the address is one of
+0x18, 0x1a, 0x29, 0x2b, 0x4c, or 0x4e, and when using the
+adm1021 driver, temp1 is invalid but temp2 looks correct, then
+it is likely you should use this driver instead.
+
+See the documentation for adm1021 for more information.

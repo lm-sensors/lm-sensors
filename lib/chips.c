@@ -4424,6 +4424,25 @@ static sensors_chip_feature bmc_features[] =
     { 0 }
   };
 
+static sensors_chip_feature xeontemp_features[] =
+  {
+    { SENSORS_XEONTEMP_REMOTE_TEMP, "temp", SENSORS_NO_MAPPING, 
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R, 
+                              XEONTEMP_SYSCTL_REMOTE_TEMP, VALUE(3), 0 },
+    { SENSORS_XEONTEMP_REMOTE_TEMP_HYST, "temp_low", 
+                              SENSORS_XEONTEMP_REMOTE_TEMP,
+                              SENSORS_XEONTEMP_REMOTE_TEMP, SENSORS_MODE_RW, 
+                              XEONTEMP_SYSCTL_REMOTE_TEMP, VALUE(2), 0 },
+    { SENSORS_XEONTEMP_REMOTE_TEMP_OVER, "temp_over", 
+                              SENSORS_XEONTEMP_REMOTE_TEMP,
+                              SENSORS_XEONTEMP_REMOTE_TEMP, SENSORS_MODE_RW,
+                              XEONTEMP_SYSCTL_REMOTE_TEMP, VALUE(1), 0 },
+    { SENSORS_XEONTEMP_ALARMS, "alarms", SENSORS_NO_MAPPING,
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                              XEONTEMP_SYSCTL_ALARMS, VALUE(1), 0 },
+    { 0 }
+  };
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -4491,5 +4510,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_ADT7463_PREFIX, adm1027_features },
  { SENSORS_LM83_PREFIX, lm83_features },
  { SENSORS_LM90_PREFIX, lm90_features },
+ { SENSORS_XEONTEMP_PREFIX, xeontemp_features },
  { 0 }
 };
