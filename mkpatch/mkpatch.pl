@@ -107,17 +107,19 @@ sub gen_Documentation_Configure_help
            m@Genesys Logic GL518SM@ or
            m@Genesys Logic GL520SM@ or
            m@HP Maxilife@ or
+           m@Intel Xeon Thermal Sensor@ or
            m@ITE 8705, 8712, Sis950@ or
            m@Maxim MAX6650, MAX6651@ or
            m@Myson MTP008@ or
-           m@National Semiconductors LM75 and compatibles@ or
-           m@National Semiconductors LM78@ or
-           m@National Semiconductors LM80@ or
-           m@National Semiconductors LM83@ or
-           m@National Semiconductors LM85@ or
-           m@National Semiconductors LM87@ or
-           m@National Semiconductors LM90@ or
-           m@National Semiconductors LM92@ or
+           m@National Semiconductor LM75 and compatibles@ or
+           m@National Semiconductor LM78@ or
+           m@National Semiconductor LM80@ or
+           m@National Semiconductor LM83@ or
+           m@National Semiconductor LM85@ or
+           m@National Semiconductor LM87@ or
+           m@National Semiconductor LM90@ or
+           m@National Semiconductor LM92@ or
+           m@National Semiconductor PC8736x@ or
            m@Silicon Integrated Systems Corp. SiS5595 Sensor@ or
            m@Texas Instruments THMC50 / Analog Devices ADM1022@ or
            m@Via VT82C686A/B@ or
@@ -272,13 +274,12 @@ CONFIG_I2C_ISA
   http://www.lm-sensors.nu
 
 Analog Devices ADM1021 and compatibles
-CONFIG_SENSORS_ADM1021 
+CONFIG_SENSORS_ADM1021
   If you say yes here you get support for Analog Devices ADM1021 
   and ADM1023 sensor chips and clones: Maxim MAX1617 and MAX1617A,
-  Genesys Logic GL523SM, National Semi LM84, TI THMC10, Onsemi MC1066
-  and the XEON processor built-in sensor. This can also 
-  be built as a module which can be inserted and removed while the 
-  kernel is running.
+  Genesys Logic GL523SM, National Semi LM84, TI THMC10 and Onsemi
+  MC1066. This can also be built as a module which can be inserted
+  and removed while the kernel is running.
 
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
@@ -394,6 +395,16 @@ CONFIG_SENSORS_MAXILIFE
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Intel Xeon Thermal Sensor
+CONFIG_SENSORS_XEONTEMP
+  If you say yes here you get support for the Intel Xeon processor
+  built-in thermal sensor. This can also be built as a module which
+  can be inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu/
+
 ITE 8705, 8712, Sis950
 CONFIG_SENSORS_IT87
   If you say yes here you get support for the ITE 8705 and 8712 and
@@ -505,6 +516,18 @@ CONFIG_SENSORS_LM92
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
+
+National Semiconductor PC8736x Sensors
+CONFIG_SENSORS_PC87360
+  If you say yes here you get support for the integrated hardware
+  monitoring in the National Semicoductor PC87360, PC87363, PC87364,
+  PC87365 and PC87366 Super I/O chips. This can also be built as a
+  module which can be inserted and removed while the kernel is
+  running.
+
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu/
 
 Philips PCF8574
 CONFIG_SENSORS_PCF8574
@@ -924,6 +947,7 @@ obj-$(CONFIG_SENSORS_LM92)	+= lm92.o
 obj-$(CONFIG_SENSORS_MAX6650)	+= max6650.o
 obj-$(CONFIG_SENSORS_MAXILIFE)	+= maxilife.o
 obj-$(CONFIG_SENSORS_MTP008)	+= mtp008.o
+obj-$(CONFIG_SENSORS_PC87360)	+= pc87360.o
 obj-$(CONFIG_SENSORS_PCF8574)	+= pcf8574.o
 obj-$(CONFIG_SENSORS_PCF8591)	+= pcf8591.o
 obj-$(CONFIG_SENSORS_SIS5595)	+= sis5595.o
@@ -935,6 +959,7 @@ obj-$(CONFIG_SENSORS_VT8231)	+= vt8231.o
 obj-$(CONFIG_SENSORS_W83781D)	+= w83781d.o
 obj-$(CONFIG_SENSORS_W83627HF)	+= w83627hf.o
 obj-$(CONFIG_SENSORS_W83L785TS)	+= w83l785ts.o
+obj-$(CONFIG_SENSORS_XEONTEMP)	+= xeontemp.o
 
 include $(TOPDIR)/Rules.make
 

@@ -44,6 +44,7 @@ kernel/chips/matorb.c		drivers/sensors/matorb.c
 kernel/chips/max6650.c		drivers/sensors/max6650.c
 kernel/chips/maxilife.c		drivers/sensors/maxilife.c
 kernel/chips/mtp008.c		drivers/sensors/mtp008.c
+kernel/chips/pc87360.c		drivers/sensors/pc87360.c
 kernel/chips/pcf8574.c		drivers/sensors/pcf8574.c
 kernel/chips/pcf8591.c		drivers/sensors/pcf8591.c
 kernel/chips/sis5595.c		drivers/sensors/sis5595.c
@@ -54,7 +55,8 @@ kernel/chips/vt1211.c		drivers/sensors/vt1211.c
 kernel/chips/vt8231.c		drivers/sensors/vt8231.c
 kernel/chips/w83781d.c		drivers/sensors/w83781d.c
 kernel/chips/w83627hf.c		drivers/sensors/w83627hf.c
-kernel/chips/w83l785ts.c		drivers/sensors/w83l785ts.c
+kernel/chips/w83l785ts.c	drivers/sensors/w83l785ts.c
+kernel/chips/xeontemp.c		drivers/sensors/xeontemp.c
 kernel/include/sensors_compat.h	include/linux/sensors_compat.h
 kernel/include/sensors_vid.h	include/linux/sensors_vid.h
 mkpatch/Config.in		drivers/sensors/Config.in
