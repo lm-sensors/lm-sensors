@@ -151,6 +151,7 @@ readKnownChip
     if (label)
       free (label);
   }
+  return ret;
 }
 
 static int
