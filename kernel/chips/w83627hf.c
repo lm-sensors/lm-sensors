@@ -93,9 +93,9 @@ MODULE_PARM_DESC(init, "Set to zero to bypass chip initialization");
 
 #define	DEVID	0x20	/* Register: Device ID */
 
+#define W83627THF_GPIO5_EN	0x30 /* w83627thf only */
 #define W83627THF_GPIO5_IOSR	0xf3 /* w83627thf only */
 #define W83627THF_GPIO5_DR	0xf4 /* w83627thf only */
-#define W83627THF_GPIO5_INVR	0xf5 /* w83627thf only */
 
 static inline void
 superio_outb(int reg, int val)
@@ -804,15 +804,36 @@ static int w83627hf_read_value(struct i2c_client *client, u16 reg)
 
 static int w83627thf_read_gpio5(struct i2c_client *client)
 {
-	int res, inv;
+	int res = 0xff, sel;
 
-	down(&(((struct w83627hf_data *) (client->data))->lock));
 	superio_enter();
 	superio_select(W83627HF_LD_GPIO5);
-	res = superio_inb(W83627THF_GPIO5_DR);
-	inv = superio_inb(W83627THF_GPIO5_INVR);
+
+	/* Make sure these GPIO pins are enabled */
+	if (!(superio_inb(W83627THF_GPIO5_EN) & (1<<3))) {
+#ifdef DEBUG
+		printk(KERN_DEBUG "w83627hf: GPIO5 disabled, no VID "
+		       "function\n");
+#endif
+		goto exit;
+	}
+
+	/* Make sure the pins are configured for input
+	   There must be at least five (VRM 9), and possibly 6 (VRM 10) */
+	sel = superio_inb(W83627THF_GPIO5_IOSR);
+	if ((sel & 0x1f) != 0x1f) {
+#ifdef DEBUG
+		printk(KERN_DEBUG "w83627hf: GPIO5 not configured for "
+		       "VID function\n");
+#endif
+		goto exit;
+	}
+
+	printk(KERN_INFO "w83627hf: Reading VID from GPIO5\n");
+	res = superio_inb(W83627THF_GPIO5_DR) & sel;
+
+exit:
 	superio_exit();
-	up(&(((struct w83627hf_data *) (client->data))->lock));
 	return res;
 }
 
@@ -869,7 +890,7 @@ static void w83627hf_init_client(struct i2c_client *client)
 		int hi = w83627hf_read_value(client, W83781D_REG_CHIPID);
 		data->vid = (lo & 0x0f) | ((hi & 0x01) << 4);
 	} else if (w83627thf == data->type) {
-		data->vid = w83627thf_read_gpio5(client) & 0x1f;
+		data->vid = w83627thf_read_gpio5(client) & 0x3f;
 	}
 
 	/* Read VRM & OVT Config only once */
