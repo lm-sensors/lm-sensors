@@ -1293,8 +1293,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #  actreg (optional): The activation register within the logical device
 #  actmask (optional): The activation bit in the activation register
 #  basereg: The I/O base register within the logical device
-#  exitreg: The register to write the exit value to
-#  exit: The value to write to the exit register to exit
+#  exitseq: Sequence of addr,val pairs which exits config modem
 #  alias_detect (optional): For chips which can be both on the ISA and the
 #      I2C bus, a function which detectes whether two entries are the same.
 #      The function should take three parameters: The ISA address, the
@@ -1305,19 +1304,34 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #	driver => "it87",
 #	addrreg => 0x2e,
 #	datareg => 0x2f,
-#	enter => [0x55, 0x01, 0x55, 0x55].
+#	enter => [0x55, 0x01, 0x55, 0x55],
 # code doesn't handle multiple devid regs yet
-#	devidreg => [0x20, 0x21],
-#	devid => [0x87, 0x05],
+#	devidreg => 0x20,
+#	devid => 0x8705,
 #	logdevreg => 0x07,
 #	logdev => 0x04,
 #	actreg => 0x30,
 #	actmask => 0x01,
 #	basereg => 0x60,
-# exit is writing 0x01 to reg 0x02. - not compatible with other superio chips
-#	exitreg => 0x02,
-#	exit => 0x01,
+# exit is writing 0x01(?) to reg 0x02. - not compatible with other superio chips
+#       exitseq => [0x2e, 0xaa, 0x2e, 0x02, 0x2f, 0x01],
 #     }, 
+     {
+       name => "ITE 8712F Super IO Sensors",
+       driver => "it87",
+       addrreg => 0x2e,
+       datareg => 0x2f,
+       enter => [0x87, 0x01, 0x55, 0x55],
+       devidreg => 0x20,
+       devid => 0x8712,
+       logdevreg => 0x07,
+       logdev => 0x04,
+       actreg => 0x30,
+       actmask => 0x01,
+       basereg => 0x60,
+# exit is writing 0x02 to reg 0x02. - not compatible with other superio chips
+       exitseq => [0x2e, 0xaa, 0x2e, 0x02, 0x2f, 0x02],
+     },
 # Nat'l untested
 #     {
 #	name => "Nat. Semi. PC87366 Super I/O Sensors",
@@ -1333,8 +1347,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #	actmask => 0x01,
 #	basereg => 0x60,
 # exit is writing 0x01 to reg 0x02. - not compatible with other superio chips
-#	exitreg => ?? none req'd??
-#	exit => ??
+#	exitseq => ??,
 #     }, 
      {
 	name => "SMSC 47M10x Super IO Fan Sensors",
@@ -1350,7 +1363,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x20,
 	actmask => 0x01,
 	basereg => 0x60,
-	exit => 0xaa,
+	exitseq => [0x2e, 0xaa],
      }, 
      {
 	name => "SMSC 47M14x Super IO Fan Sensors",
@@ -1366,7 +1379,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x20,
 	actmask => 0x01,
 	basereg => 0x60,
-	exit => 0xaa,
+	exitseq => [0x2e, 0xaa],
      }, 
      {
 	name => "VT1211 Super IO Sensors",
@@ -1382,7 +1395,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exit => 0xaa,
+	exitseq => [0x2e, 0xaa],
      }, 
      {
 	name => "Winbond W83627HF Super IO Sensors",
@@ -1398,7 +1411,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exit => 0xaa,
+	exitseq => [0x2e, 0xaa],
      }, 
      {
 	name => "Winbond W83627THF Super IO Sensors",
@@ -1430,7 +1443,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exit => 0xaa,
+	exitseq => [0x2e, 0xaa],
      }, 
      {
 	name => "Winbond W83697HF Super IO Sensors",
@@ -1462,7 +1475,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exit => 0xaa,
+	exitseq => [0x2e, 0xaa],
      }, 
 );
 
@@ -2345,6 +2358,10 @@ sub scan_superio
 # check the device ID
     outb($$chip{addrreg}, $$chip{devidreg});
     $val = inb($$chip{datareg});
+    if($$chip{devid}>0xff) {
+      outb($$chip{addrreg}, $$chip{devidreg} + 1);
+      $val = ($val << 8) | inb($$chip{datareg});
+    }
     if($val == $$chip{devid}) {
       print "  Success...";
 # switch to the sensor logical device
@@ -2384,7 +2401,9 @@ sub scan_superio
         printf "  Failed! (0x%02x)\n", $val;
       }
     }
-    outb($$chip{exitreg}, $$chip{exit});
+    while ($addr = shift(@{$$chip{exitseq}})) {
+      outb($addr, shift(@{$$chip{exitseq}}));
+    }
   }
 }
 

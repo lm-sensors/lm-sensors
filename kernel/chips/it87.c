@@ -63,6 +63,61 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 SENSORS_INSMOD_4(it87, it8705, it8712, sis950);
 
 
+#define	REG	0x2e	/* The register to read/write */
+#define	DEV	0x07	/* Register: Logical device select */
+#define	VAL	0x2f	/* The value to read/write */
+#define PME	0x04	/* The device with the fan registers in it */
+#define	DEVID	0x20	/* Register: Device ID */
+
+static inline void
+superio_outb(int reg, int val)
+{
+	outb(reg, REG);
+	outb(val, VAL);
+}
+
+static inline int
+superio_inb(int reg)
+{
+	outb(reg, REG);
+	return inb(VAL);
+}
+
+static inline void
+superio_select(void)
+{
+	outb(DEV, REG);
+	outb(PME, VAL);
+}
+
+static inline void
+superio_enter(void)
+{
+	outb(0x87, REG);
+	outb(0x01, REG);
+	outb(0x55, REG);
+	outb(0x55, REG);
+}
+
+static inline void
+superio_exit(void)
+{
+	/* safety precaution in case we put some other super IO chip
+	   in config mode by accident */
+	outb(0xAA, REG); 
+
+	/* documented exit sequence */
+	outb(0x02, REG);
+	outb(0x02, VAL);
+}
+
+/* just IT8712F for now - this should be extended to support the other
+   chips as well */
+#define IT87_DEVID_MATCH(id) ((id) == 0x8712)
+
+#define IT87_ACT_REG  0x30
+#define IT87_BASE_REG 0x60
+
 /* Update battery voltage after every reading if true */
 static int update_vbat = 0;
 
@@ -210,6 +265,7 @@ struct it87_data {
 
 
 static int it87_attach_adapter(struct i2c_adapter *adapter);
+static int it87_find(int *address);
 static int it87_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int it87_detach_client(struct i2c_client *client);
@@ -384,6 +440,29 @@ static ctl_table it87_dir_table_template[] = {
 static int it87_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, it87_detect);
+}
+
+static int it87_find(int *address)
+{
+	u16 val;
+
+	superio_enter();
+	val = (superio_inb(DEVID) << 8) |
+	       superio_inb(DEVID + 1);
+	if (!IT87_DEVID_MATCH(val)) {
+		superio_exit();
+		return -ENODEV;
+	}
+
+	superio_select();
+	val = (superio_inb(IT87_BASE_REG) << 8) |
+	       superio_inb(IT87_BASE_REG + 1);
+	superio_exit();
+	*address = val & ~(IT87_EXTENT - 1);
+	if (*address == 0) {
+		return -ENODEV;
+	}
+	return 0;
 }
 
 /* This function is called by i2c_detect */
@@ -1036,7 +1115,12 @@ void it87_sens(struct i2c_client *client, int operation, int ctl_name,
 
 static int __init sm_it87_init(void)
 {
+	int addr;
+
 	printk("it87.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	if (!it87_find(&addr)) {
+		normal_isa[0] = addr;
+	}
 	return i2c_add_driver(&it87_driver);
 }
 
