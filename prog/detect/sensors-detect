@@ -1216,6 +1216,7 @@ sub w83781d_alias_detect
 sub w83781d_isa_detect
 {
   my ($chip,$addr) = @_ ;
+  my ($reg1,$reg2);
   my $val = inb ($addr + 1);
   return if inb ($addr + 2) != $val or inb ($addr + 3) != $val or
             inb ($addr + 7) != $val;
