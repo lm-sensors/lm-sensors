@@ -1386,17 +1386,22 @@ Send us email <sensors@stimpy.netroedge.com>.
 
 Send us email <sensors@stimpy.netroedge.com>. Sorry, there is no
 automated subscribe/unsubscribe service yet (but we're seriously
-thinking of switching to majordomo).  Please note that you do NOT need
-to be subscribed to the list in order to post. If you simply need help
-as a user, post your detailed problem and questions directly. Don't
-worry, you'll be CC'd on all replies.
+thinking of switching to majordomo).  Therefore there may be some delay
+before your request is processed.  Please note that you do NOT need to
+be subscribed to the list in order to post. If you simply need help as
+a user, post your detailed problem and questions directly. Don't worry,
+you'll be CC'd on all replies.
 
 6.5 How to access mailing list archives
 =======================================
 
 The mailing list archive is at:
-`http://archives.andrew.net.au/lm-sensors' Sorry, it only contains
-messages since October 28, 2001.
+`http://archives.andrew.net.au/lm-sensors'.  It contains messages since
+October 28, 2001.  There is another mailing list archive at:
+`http://news.gmane.org/gmane.linux.drivers.sensors'.  It contains
+messages since December 31, 2004.  This archive may also be accessed
+via a news reader: `nntp://news.gmane.org/gmane.linux.drivers.sensors'
+and RSS: `http://rss.gmane.org/gmane.linux.drivers.sensors'.
 
 6.6 How to submit a patch
 =========================

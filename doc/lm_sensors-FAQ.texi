@@ -9,7 +9,7 @@
 @titlepage
 @center @titlefont{This is the FAQ for the @command{lm_sensors} program, @value{VERSION}}
 @sp 3
-@center Copyright (C) 1998 - 2004
+@center Copyright (C) 1998 - 2005
 @sp 1
 @center Frodo Looijaard,
 @center @email{phil..at..netroedge.com, Philip Edelbrock},
@@ -18,7 +18,7 @@
 @end titlepage
 
 @ifhtml
-Copyright (C) 1998 - 2004@*
+Copyright (C) 1998 - 2005@*
 Frodo Looijaard,@*
 @email{phil..at..netroedge.com, Philip Edelbrock},@*
 and@*
@@ -1441,6 +1441,7 @@ Send us email @email{sensors@@stimpy.netroedge.com}.
 Send us email @email{sensors@@stimpy.netroedge.com}. Sorry,
 there is no automated subscribe/unsubscribe service yet
 (but we're seriously thinking of switching to majordomo).
+Therefore there may be some delay before your request is processed.
 Please note that you do NOT need to be subscribed to the list
 in order to post. If you simply need help as a user, post your
 detailed problem and questions directly. Don't worry, you'll be
@@ -1450,8 +1451,15 @@ CC'd on all replies.
 @node Section 6.5, Section 6.6, Section 6.4, Contribute
 @section How to access mailing list archives
 
-The mailing list archive is at: @uref{http://archives.andrew.net.au/lm-sensors}
-Sorry, it only contains messages since October 28, 2001.
+The mailing list archive is at: @uref{http://archives.andrew.net.au/lm-sensors}.
+It contains messages since October 28, 2001.
+There is another mailing list archive at:
+@uref{http://news.gmane.org/gmane.linux.drivers.sensors}.
+It contains messages since December 31, 2004.
+This archive may also be accessed via a news reader:
+@uref{nntp://news.gmane.org/gmane.linux.drivers.sensors}
+and RSS:
+@uref{http://rss.gmane.org/gmane.linux.drivers.sensors}.
 
 
 @node Section 6.6, Section 6.7, Section 6.5, Contribute
