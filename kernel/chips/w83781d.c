@@ -141,11 +141,14 @@ MODULE_PARM_DESC(init, "Set to zero to bypass chip initialization");
 #define W83781D_REG_PWMCLK12 0x5C
 #define W83781D_REG_PWMCLK34 0x45C
 
-#define W83791D_REG_PWM1 0x88	/* 782d and 783s/627hf datasheets disagree */
-				/* on which is which; */
-#define W83791D_REG_PWM2 0x89	/* We follow the 782d convention here, */
-				/* However 782d is probably wrong. */
-#define W83791D_REG_PWM3 0x98
+#define W83791D_REG_PWM1 0x81
+#define W83791D_REG_PWM2 0x83
+#define W83791D_REG_PWM3 0x94
+
+#define W83627HF_REG_PWM1 0x01
+#define W83627HF_REG_PWM2 0x03
+#define W83627HF_REG_PWMCLK1 0x00
+#define W83627HF_REG_PWMCLK2 0x02
 
 static const u8 regpwm[] = { W83781D_REG_PWM1, W83781D_REG_PWM2,
 	W83781D_REG_PWM3, W83781D_REG_PWM4
@@ -155,8 +158,11 @@ static const u8 regpwm_w83791d[] = { W83791D_REG_PWM1, W83791D_REG_PWM2,
                                    W83791D_REG_PWM3
 };
         
-#define W83781D_REG_PWM(nr) (regpwm[(nr) - 1])
-#define W83791D_REG_PWM(nr) (regpwm_w83791d[(nr) - 1])
+#define W83781D_REG_PWM(type, nr) (((type) == w83791d) ? \
+                                         regpwm_w83791d[(nr) - 1] : \
+                                   ((type) == w83697hf) ? \
+                                         (((nr) * 2) - 1) : \
+                                         regpwm[(nr) - 1])
 
 #define W83781D_REG_I2C_ADDR 0x48
 #define W83781D_REG_I2C_SUBADDR 0x4A
@@ -1682,7 +1688,7 @@ static void w83781d_update_client(struct i2c_client *client)
                        for (i = 1; i <= 4; i++) {
                                data->pwm[i - 1] =
                                    w83781d_read_value(client,
-                                                      W83781D_REG_PWM(i));
+				             W83781D_REG_PWM(data->type, i));
                                if (((data->type == w83783s)
                                     || (data->type == w83627hf)
                                     || (data->type == as99127f)
@@ -1737,7 +1743,8 @@ static void w83781d_update_client(struct i2c_client *client)
                    w83781d_read_value(client,
                                       W83781D_REG_ALARM1) +
                    (w83781d_read_value(client, W83781D_REG_ALARM2) << 8);
-               if ((data->type == w83782d) || (data->type == w83627hf)) {
+               if ((data->type == w83782d) || (data->type == w83627hf) ||
+		   (data->type == w83697hf)) {
                        data->alarms |=
                            w83781d_read_value(client,
                                               W83781D_REG_ALARM3) << 16;
@@ -2079,7 +2086,8 @@ void w83781d_pwm(struct i2c_client *client, int operation, int ctl_name,
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			data->pwm[nr - 1] = PWM_TO_REG(results[0]);
-			w83781d_write_value(client, W83781D_REG_PWM(nr),
+			w83781d_write_value(client,
+			                    W83781D_REG_PWM(data->type, nr),
 					    data->pwm[nr - 1]);
 		}
 		/* only PWM2 can be enabled/disabled */
