@@ -4683,8 +4683,9 @@ void print_lm63(const sensors_chip_name *name)
       printf("%4.0f RPM  (min = %4.0f RPM) %s\n", cur, low,
 	alarms&LM63_ALARM_FAN_LOW?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get remote tcrit data!\n");
+  }
+  /* No error if fan files are missing as it will happen with 2.6
+     kernels when the tachometer pin is used as an alarm output. */
   free_the_label(&label);
 }
 
