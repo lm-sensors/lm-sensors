@@ -826,13 +826,13 @@ sub add_isa_to_chips_detected
         not exists $new_misdetected_ref->[$i]->{isa_addr} and
         defined $alias_detect and
         $new_misdetected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
-      open FILE,"/dev/i2c-$new_misdetected_ref->[$i]->{devnr}" or
+      open FILE,"/dev/i2c-$new_misdetected_ref->[$i]->{i2c_devnr}" or
            print("Can't open ",
-                 "/dev/i2c-$new_misdetected_ref->[$i]->{devnr}?!?\n"),
+                 "/dev/i2c-$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
       i2c_set_slave_addr \*FILE,$new_misdetected_ref->[$i]->{address} or
            print("Can't set I2C address for ",
-                 "/dev/i2c-$new_misdetected_ref->[$i]->{devnr}?!?\n"),
+                 "/dev/i2c-$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_misdetected_ref->[$i]->{i2c_addr})) {
@@ -850,13 +850,13 @@ sub add_isa_to_chips_detected
         not exists $new_detected_ref->[$i]->{isa_addr} and
         defined $alias_detect and
         $new_detected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
-      open FILE,"/dev/i2c-$new_detected_ref->[$i]->{devnr}" or
+      open FILE,"/dev/i2c-$new_detected_ref->[$i]->{i2c_devnr}" or
            print("Can't open ",
-                 "/dev/i2c-$new_detected_ref->[$i]->{devnr}?!?\n"),
+                 "/dev/i2c-$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
       i2c_set_slave_addr \*FILE,$new_detected_ref->[$i]->{address} or
            print("Can't set I2C address for ",
-                 "/dev/i2c-$new_detected_ref->[$i]->{devnr}?!?\n"),
+                 "/dev/i2c-$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_detected_ref->[$i]->{i2c_addr})) {
