@@ -2463,6 +2463,7 @@ sub lm75_detect
   my $i;
   my ($file,$addr) = @_;
   my $cur = i2c_smbus_read_word_data($file,0x00);
+  my $cur_varies = 0;
   my $conf = i2c_smbus_read_byte_data($file,0x01);
   my $hyst = i2c_smbus_read_word_data($file,0x02);
   my $os = i2c_smbus_read_word_data($file,0x03);
@@ -2470,6 +2471,9 @@ sub lm75_detect
     return if i2c_smbus_read_byte_data($file,($i * 0x08) + 0x01) != $conf;
     return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x02) != $hyst;
     return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x03) != $os;
+	$cur_varies = 1
+      if (! $cur_varies) and
+        i2c_smbus_read_word_data($file,($i * 0x08)) != $cur;
   }
   # Default power up state (from specs)
   return 6
@@ -2477,9 +2481,10 @@ sub lm75_detect
   # Default state as seen on the Asus TX97-E
   return 5
     if $conf == 0 and ($hyst&0x80ff) == 0x002d and ($os&0x80ff) == 0x0034;
-  # All bytes have the same value, obviously a misdetection.
+  # All registers hold the same value, obviously a misdetection
   return
-    if (($conf<<8)|$conf) == $cur and $cur == $hyst && $cur == $os;
+    if (! $cur_varies) and $conf == ($cur&0xff) and $cur == $hyst
+      and $cur == $os;
   # Unused bits in conf register
   return
     if ($conf&0xe0) != 0;
