@@ -1072,6 +1072,7 @@ chip "it87-*"
     label in5 "-12V"
     label in6 "-5V"
     label in7 "Stdby"
+    label in8 "VBat"
 
     set in0_min 1.5 * 0.95
     set in0_max 1.5 * 1.05
@@ -1089,8 +1090,11 @@ chip "it87-*"
     set in6_max -5 * 1.05
     set in7_min 5 * 0.95
     set in7_max 5 * 1.05
+    set in8_min 3.0 * 0.80
+    set in8_max 3.0 * 1.20
 
-    # vid not monitored by IT8705F
+    # vid is not monitored by IT8705F
+    # and is not supported by driver at this time
     ignore  vid
 
 # For this family of chips the negative voltage equation is different from
@@ -1126,7 +1130,10 @@ chip "it87-*"
     set   temp2_over  45
     set   temp2_hyst  25
 
-    ignore temp3
+#   ignore temp3
+    label temp3       "Temp3"
+    set   temp3_over  45
+    set   temp3_hyst  25
 
 # Fans
 
