@@ -67,9 +67,9 @@
 #define IN_TO_REG(val)  (((val) * 10 + 8)/16)
 #define IN_FROM_REG(val) (((val) *  16) / 10)
 
-#define FAN_TO_REG(val,div) ((val)==0?255:((1350000+(val))/\
-                            ((val)*2*(div))) & 0xff)
-#define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*2*(div)))
+#define FAN_TO_REG(val,div) ((val)==0?255:((1350000+(val)*(div)/2)/\
+                            ((val)*(div))) & 0xff)
+#define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
 
 #define TEMP_TO_REG(val) (((val)<0?(((val)-5)/10)&0xff:((val)+5)/10) & 0xff)
 #define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
@@ -173,7 +173,7 @@ struct lm78_data {
          u8 temp;                    /* Register value */
          u8 temp_over;               /* Register value */
          u8 temp_hyst;               /* Register value */
-         u8 fan_div[2];              /* Register encoding, shifted right */
+         u8 fan_div[3];              /* Register encoding, shifted right */
          u8 vid;                     /* Register encoding, combined */
          u16 alarms;                 /* Register encoding, combined */
 };
@@ -726,6 +726,8 @@ void lm78_update_client(struct i2c_client *client)
                    (lm78_read_value(client,LM78_REG_ALARM2) << 8);
     data->last_updated = jiffies;
     data->valid = 1;
+
+    data->fan_div[2] = 1;
   }
 
   up(&data->update_lock);
@@ -782,9 +784,9 @@ void lm78_fan(struct i2c_client *client, int operation, int ctl_name,
   else if (operation == SENSORS_PROC_REAL_READ) {
     lm78_update_client(client);
     results[0] = FAN_FROM_REG(data->fan_min[nr-1],
-                 DIV_FROM_REG(data->fan_min[nr-1]));
+                 DIV_FROM_REG(data->fan_div[nr-1]));
     results[1] = FAN_FROM_REG(data->fan[nr-1],
-                 DIV_FROM_REG(data->fan_min[nr-1]));
+                 DIV_FROM_REG(data->fan_div[nr-1]));
     *nrels_mag = 2;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {

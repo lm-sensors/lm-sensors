@@ -66,9 +66,9 @@
 #define IN_FROM_REG(val,nr) (val)
 
 #define FAN_TO_REG(val,div) ((val)==0?255:\
-                             ((1350000+(val)*(div))/((val)*(div)*2)) & 0xff)
+                             ((1350000+(val)*(div)/2)/((val)*(div))) & 0xff)
 #define FAN_FROM_REG(val,div) ((val)==0?-1:\
-                               (val)==255?0:1350000/((div)*(val)*2))
+                               (val)==255?0:1350000/((div)*(val)))
 
 #define TEMP_FROM_REG(val) lm80_temp_from_reg(val)
 
