@@ -23,7 +23,9 @@ ask CVS about it:
                            parse-edid from the read-edid project.
   Program sensors: Rewrite and enhance eeprom support
   Program sensors-detect: Add support for PCF8574, PCF8574A, SAA1064;
-                          Add support for LM82, LM86, LM89
+                          Add support for LM82, LM86, LM89;
+                          Improved W83781D family detection;
+                          Add support for AS19927F rev.2, ASB100 Bach
   Module: i2c-sis645.c: Detection method change/bugfix
 
 2.8.0 (20030714)
