@@ -89,6 +89,15 @@ KERNEL MODULES
 LIBRARY
 =======
 
+* Easier use of /proc and libsensors without knowing the chip type
+  At the moment a programmer wishing to use the lm_sensors package needs to know
+  what chips are supported and needs to add all those chips into his package.
+  If you were to add a field or function to your structures to the effect of
+  sensor-function a programmer could use the package a lot more simply.
+  For values you could do something like -
+    enum sensor-type { volt, fan, temp, volt_min, volt_max, fan_div, fan_min,
+    temp_over, temp_hyst }
+
 * reload does not work (Bison/Flex problem?).
 * Some library routines are pretty inefficient right now.
 * Library should be split in more separate files, for better linking
