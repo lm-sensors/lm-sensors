@@ -1885,7 +1885,9 @@ static sensors_chip_feature adm1025_features[] =
                          SENSORS_ADM1025_TEMP2, SENSORS_MODE_RW, 
                          ADM1025_SYSCTL_RTEMP, VALUE(1), 1 },
     { SENSORS_ADM1025_VID, "vid", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
-                         SENSORS_MODE_R, ADM1025_SYSCTL_VID, VALUE(1), 2 },
+                         SENSORS_MODE_R, ADM1025_SYSCTL_VID, VALUE(1), 3 },
+    { SENSORS_ADM1025_VRM, "vrm", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, ADM1025_SYSCTL_VRM, VALUE(1), 1 },
     { SENSORS_ADM1025_ALARMS, "alarms", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING, 
                          SENSORS_MODE_R, ADM1025_SYSCTL_ALARMS, VALUE(1), 0 },
     { 0 }

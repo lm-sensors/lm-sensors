@@ -21,13 +21,15 @@ ask CVS about it:
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
   File doc/vid: New
   File include/sensors_vid.h: New
-  Library: Add multiple VRM version support for w83781d
+  Library: Add multiple VRM version support for adm1025, w83781d
   Makefiles: For 2.4+ kernels, modules now install in
              kernel/drivers/[i2c,sensors] , not misc/ , and
              removes old versions in misc/ .
              Use $CFLAGS and $CPPFLAGS if defined.
+  Module adm1025: Add multiple VID version support
   Module i2c-amd756: Add nVidia nForce support; fix block read length;
                      reliability improvements
+  Module i2c-i801: Add support for 82801DB (ICH4)
   Module i2c-savage4: new
   Module i2c-viapro: Add support for VT8231 (0x8235), VT8233A (0x3147)
   Module via686a: Add support for VT8231 sensors
@@ -37,9 +39,9 @@ ask CVS about it:
   Program rrd: Fix swapped CPU and MB temps in summ_week.cgi
   Program sensord: Major update, now requires rrd source;
                    not compiled by default
-  Program sensors: Recognize DDR SDRAM
+  Program sensors: Recognize DDR SDRAM; add adm1025 VID
   Program sensors-detect: Add VT8231, VT8233A, several S3 devices;
-                          fix perl warnings
+                          add 82801DB; fix perl warnings
 
 2.6.3 (20020322)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.

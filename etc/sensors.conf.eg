@@ -378,6 +378,9 @@ chip "w83782d-*" "w83783s-*" "w83627hf-*"
     compute in6 (3.14 * @) -  7.71  ,  (@ +  7.71) / 3.14
     compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
 
+# adjust this if your vid is wrong; see doc/vid
+#   set vrm 9.0
+
 # set limits to  5% for the critical voltages
 # set limits to 10% for the non-critical voltages
 # set limits to 20% for the battery voltage
@@ -503,6 +506,9 @@ chip "as99127f-*"
     compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
 
     compute temp2 (@*30/43)+25, (@-25)*43/30
+
+# adjust this if your vid is wrong; see doc/vid
+#   set vrm 9.0
 
 # set limits to  5% for the critical voltages
 # set limits to 10% for the non-critical voltages
@@ -921,11 +927,18 @@ chip "mtp008-*"
 #    ignore temp3
 
 chip "adm1025-*"
-
-# These are as advised in the data sheet
-
+#
+# The ADM1025 has integrated scaling resistors, rather
+# than external resistors common to most sensor devices.
+# These apply to the first 6 voltage inputs in0-in5
+# (+2.5, VCore, +3.3, +5, 12, VCC). As the scaling is fixed inside
+# the chip for these inputs, it is fairly certain that the
+# motherboard connections match these labels, and that the
+# driver computations are correct. Therefore they do not need to
+# be overridden here.
+#
     label in0 "+2.5V"
-    label in1 "VCCP"
+    label in1 "VCore"
     label in2 "+3.3V"
     label in3 "+5V"
     label in4 "+12V"
@@ -934,9 +947,14 @@ chip "adm1025-*"
     label temp1 "SYS Temp"
     label temp2 "CPU Temp"
 
+# adjust this if your vid is wrong; see doc/vid
+    set vrm 9.0
+    set in1_min vid * 0.95
+    set in1_max vid * 1.05
+
 chip "lm87-*"
 #
-# The LM87 is unique in having integrated scaling resistors, rather
+# The LM87 has integrated scaling resistors, rather
 # than external resistors common to most sensor devices.
 # These apply to the first 6 voltage inputs in0-in5
 # (+2.5, Vccp1, +3.3, +5, 12, +Vccp2). As the scaling is fixed inside

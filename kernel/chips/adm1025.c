@@ -34,6 +34,7 @@
 #include <linux/i2c.h>
 #include "version.h"
 #include "sensors.h"
+#include "sensors_vid.h"
 #include <linux/init.h>
 
 #ifdef MODULE_LICENSE
@@ -116,9 +117,6 @@ SENSORS_INSMOD_1(adm1025);
 
 #define ALARMS_FROM_REG(val) (val)
 
-#define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
-                           205-(val)*5)
-
 /* Initial limits */
 #define ADM1025_INIT_IN_0 190
 #define ADM1025_INIT_IN_1 190
@@ -188,6 +186,7 @@ struct adm1025_data {
 	u16 alarms;		/* Register encoding, combined */
 	u8 analog_out;		/* Register value */
 	u8 vid;			/* Register value combined */
+	u8 vrm;
 };
 
 
@@ -227,6 +226,8 @@ static void adm1025_alarms(struct i2c_client *client, int operation,
 			       int ctl_name, int *nrels_mag,
 			       long *results);*/
 static void adm1025_vid(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+static void adm1025_vrm(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
 /* I choose here for semi-static ADM1025 allocation. Complete dynamic
@@ -277,6 +278,8 @@ static ctl_table adm1025_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &adm1025_analog_out},*/
 	{ADM1025_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &adm1025_vid},
+	{ADM1025_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1025_vrm},
 	{0}
 };
 
@@ -449,6 +452,9 @@ int adm1025_write_value(struct i2c_client *client, u8 reg, u8 value)
 /* Called when we have found a new ADM1025. It should set limits, etc. */
 void adm1025_init_client(struct i2c_client *client)
 {
+	struct adm1025_data *data = client->data;
+
+	data->vrm = DEFAULT_VRM;
 	/* Reset all except Watchdog values and last conversion values
 	   This sets fan-divs to 2, among others. This makes most other
 	   initializations unnecessary */
@@ -694,11 +700,26 @@ void adm1025_vid(struct i2c_client *client, int operation, int ctl_name,
 	struct adm1025_data *data = client->data;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 2;
+		*nrels_mag = 3;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		adm1025_update_client(client);
-		results[0] = VID_FROM_REG(data->vid);
+		results[0] = vid_from_reg(data->vid, data->vrm);
 		*nrels_mag = 1;
+	}
+}
+
+void adm1025_vrm(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct adm1025_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		results[0] = data->vrm;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1)
+			data->vrm = results[0];
 	}
 }
 
