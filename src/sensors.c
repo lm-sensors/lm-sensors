@@ -215,7 +215,7 @@ void sensors_fill_inode(struct inode *inode, int fill)
     MOD_DEC_USE_COUNT;
 }
 
-/* Monitor access for /proc/sys/dev/sensors/* directories; make unloading
+/* Monitor access for /proc/sys/dev/sensors/ directories; make unloading
    the corresponding module impossible if some process still uses it or
    some file in it */
 void sensors_dir_fill_inode(struct inode *inode, int fill)

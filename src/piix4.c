@@ -284,6 +284,12 @@ int piix4_transaction(void)
     printk("piix4.o: Failed reset at end of transaction (%02x)\n",temp);
 #endif
   }
+#ifdef DEBUG
+  printk("piix4.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
+         "DAT0=%02x, DAT1=%02x\n",
+         inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
+         inb_p(SMBHSTDAT1));
+#endif
   return result;
 }
 
@@ -293,12 +299,6 @@ s32 piix4_access(u8 addr, char read_write,
 {
   int i,len;
 
-#ifdef DEBUG
-  printk("piix4.o: Transaction (pre): CNT=%02x, CMD=%02x, ADD=%02x, "
-         "DAT0=%02x, DAT1=%02x\n",
-         inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
-         inb_p(SMBHSTDAT1));
-#endif
   switch(size) {
     case SMBUS_PROC_CALL:
       printk("piix4.o: SMBUS_PROC_CALL not supported!\n");
@@ -376,12 +376,6 @@ s32 piix4_access(u8 addr, char read_write,
         data->block[i] = inb_p(SMBBLKDAT);
       break;
   }
-#ifdef DEBUG
-  printk("piix4.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
-         "DAT0=%02x, DAT1=%02x\n",
-         inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
-         inb_p(SMBHSTDAT1));
-#endif
   return 0;
 }
 
