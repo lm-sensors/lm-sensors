@@ -20,6 +20,7 @@ ask CVS about it:
 2.7.1 (2003????)
   File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
   Library: Add support for exponents and logarithms for vt1211/vt8235
+  Makefile: Generate warnings if new library won't be found by ld.so
   Module i2c-i810.c: Fix for some chips
   Module w83627hf: New
   Program mkpatch: Fix vt8231 compile; keep tsunami from menu on non-alpha
