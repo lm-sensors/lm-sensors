@@ -14,7 +14,7 @@ OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 FOR 2.6/2.5 KERNELS, Use only the userspace tools in this package!
 Build and install them with 'make user' and 'make user_install'.
 The kernel modules in this package will not compile for 2.6/2.5;
-use the drivers already in the 2.5 kernel development tree.
+use the drivers already in the 2.6 kernel.
 
 =============================================================================
 
@@ -67,13 +67,13 @@ At least the following I2C/SMBus adapters are supported:
   AMD 8111 SMBus 2.0
   Apple Hydra (used on some PPC machines)
   DEC 21272/21274 (Tsunami/Typhoon - on Alpha boards)
-  Intel I801 ICH/ICH0/ICH2/ICH3/ICH4/ICH5
+  Intel I801 ICH/ICH0/ICH2/ICH3/ICH4/ICH5/ICH6 (82801xx), 6300ESB
   Intel PIIX4 (used in many Intel chipsets)
   Intel I810/I815 GMCH
   Intel 82443MX (440MX)
   NVidia nForce
   ServerWorks OSB4, CSB5
-  SiS 5595, 630, 645, 730
+  SiS 5595, 630, 645, 655, 730
   SMSC Victory66
   3Dfx Voodoo 3 and Banshee
   VIA Technologies VT82C586B, VT82C596A/B, VT82C686A/B, VT8231,
@@ -91,19 +91,21 @@ At least the following hardware sensor chips are supported:
   Genesys Logic GL518SM (rev 00, 80), GL520SM, GL523SM
   Intel Xeon processor embedded sensors
   ITE IT8705F, IT8712F embedded sensors
-  Maxim MAX1617, MAX1617A, MAX6650 and MAX6651
+  Maxim MAX1617, MAX1617A, MAX1619, MAX6650, MAX6651,
+        MAX6633, MAX6634, MAX6635
   Microchip TC1068, TCM1617, TCN75
   Myson MTP008
-  National Semiconductor LM75, LM77, LM78, LM78-J, LM79,
+  National Semiconductor LM75, LM76, LM77, LM78, LM78-J, LM79,
                          LM80, LM81, LM83, LM84, LM85, LM87,
-                         and LM92
+                         LM88, LM89, LM90, LM92, PC87360,
+                         and PC87363-PC87366
   Philips NE1617, NE1617A
   SiS 5595, 950 embedded sensors
   SMSC 47M1xx embedded sensors, EMC6D100, EMC6D101
   TI THMC10 and THMC50
   VIA Technologies VT1211 and VT82C686A/B embedded sensors
   Winbond W83781D, W83782D, W83783S, W83791D,
-          W83627HF, W83627THF, and W83697HF
+          W83627HF, W83627THF, W83637HF, and W83697HF
 
 
 We also support some miscellaneous chips:
@@ -118,7 +120,8 @@ We also support some miscellaneous chips:
   Philips Semiconductors SAA1064
 
 
-See our New Drivers page http://www.lm-sensors.nu/~lm78/newdrivers.html
+The list above may be out of date;
+see our New Drivers page http://www.lm-sensors.nu/~lm78/newdrivers.html
 for the latest information on supported devices.
 
 
