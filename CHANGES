@@ -13,7 +13,7 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
-2.3.0 (19990424)
+2.3.0 (19990422)
   All: Many, many changes and improvements
   All: Many small bugs and problems removed
   Modules: New insmod parameters
@@ -25,6 +25,9 @@ ask CVS about it:
   Program sensors-detect: NEW
   Library: All chips now supported
   Documentation: Very much improved
+
+2.2.2 (199903??)
+  Just some minor updates and bug fixes.
 
 2.2.1 (19990218)
   All: Removed compile warnings
