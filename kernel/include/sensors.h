@@ -373,6 +373,7 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
 #define I2C_DRIVERID_MATORB 1015
 #define I2C_DRIVERID_GL520 1016
 #define I2C_DRIVERID_THMC50 1017
+#define I2C_DRIVERID_DDCMON 1018
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -655,6 +656,12 @@ struct sensors_chips_data {
 #define THMC50_SYSCTL_INTER_MASK 1203
 #define THMC50_SYSCTL_DIE_CODE 1204
 #define THMC50_SYSCTL_ANALOG_OUT 1205
+
+#define DDCMON_SYSCTL_ID 1010
+#define DDCMON_SYSCTL_SIZE 1011
+#define DDCMON_SYSCTL_SYNC 1012
+#define DDCMON_SYSCTL_TIMINGS 1013
+#define DDCMON_SYSCTL_SERIAL 1014
 
 
 #endif				/* def SENSORS_SENSORS_H */
