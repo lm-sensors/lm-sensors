@@ -297,7 +297,7 @@ static void bmcsensors_select_thresholds(struct sdrdata * sd)
 	}
 
 	/* swap lim1/lim2 if m < 0 or function is 1/x (but not both!) */
-	if(m < 0 && sd->linear != 7 || m >= 0 && sd->linear == 7) {
+	if(sd->m < 0 && sd->linear != 7 || sd->m >= 0 && sd->linear == 7) {
 		tmp = sd->lim1;
 		sd->lim1 = sd->lim2;
 		sd->lim2 = tmp;
