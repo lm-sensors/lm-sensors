@@ -63,6 +63,22 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        driver => "i2c-via",
        match => sub { $_[0] =~ /^VIA i2c/ },
      } ,
+     { 
+       vendid => 0x1106,
+       devid  => 0x3050,
+       func => 3,
+       procid => "VIA Technologies VT 82C596 Apollo ACPI",
+       driver => "i2c-viapro",
+       match => sub { $_[0] =~ /^SMBus vt82c596 adapter at [0-9,a-f]{4}/ },
+     } ,
+     { 
+       vendid => 0x1106,
+       devid  => 0x3057,
+       func => 4,
+       procid => "VIA Technologies VT 82C686 Apollo ACPI",
+       driver => "i2c-viapro",
+       match => sub { $_[0] =~ /^SMBus vt82c596 adapter at [0-9,a-f]{4}/ },
+     } ,
      {
        vendid => 0x1039,
        devid  => 0x0008,
@@ -200,6 +216,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      },
      {
        name => "Genesys Logic GL520SM",
+       driver => "gl520sm",
        i2c_addrs => [0x2c, 0x2d],
        i2c_detect => sub { gl520sm_detect @_} ,
      },

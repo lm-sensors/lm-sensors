@@ -293,9 +293,8 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
 /* The maximum length of the prefix */
 #define SENSORS_PREFIX_MAX 20
 
-/* Driver IDs */
-#define I2C_DRIVERID_I2CDEV 1000
-#define I2C_DRIVERID_I2CPROC 1001
+/* IDs --   Use DRIVERIDs 1000-1999 for sensors. 
+   Other drivers define the id in linux/i2c.h     */
 #define I2C_DRIVERID_LM78 1002
 #define I2C_DRIVERID_LM75 1003
 #define I2C_DRIVERID_GL518 1004

@@ -455,6 +455,7 @@ void gl518_init_client(struct i2c_client *client)
 int gl518_detach_client(struct i2c_client *client)
 {
   int err,i;
+  struct gl518_data *data = client->data;
 
   sensors_deregister_entry(((struct gl518_data *)(client->data))->sysctl_id);
 
@@ -471,6 +472,11 @@ int gl518_detach_client(struct i2c_client *client)
     return -ENOENT;
   }
   gl518_list[i] = NULL;
+  
+  if (data->thread) {
+    data->quit_thread = 1;
+    wake_up_interruptible(&data->wq);
+  }
 
   kfree(client);
 

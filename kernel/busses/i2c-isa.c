@@ -105,15 +105,9 @@ int __init i2c_isa_init(void)
   }
 #endif
   isa_initialized = 0;
-  if ((res = i2c_add_algorithm(&isa_algorithm))) {
-    printk("i2c-isa.o: Algorithm registration failed, module not inserted.\n");
-    isa_cleanup();
-    return res;
-  }
-  isa_initialized++;
   if ((res = i2c_add_adapter(&isa_adapter))) {
     printk("i2c-isa.o: Adapter registration failed, "
-           "module isa.o is not inserted\n.");
+           "module i2c-isa.o is not inserted\n.");
     isa_cleanup();
     return res;
   }
@@ -125,18 +119,10 @@ int __init i2c_isa_init(void)
 int __init isa_cleanup(void)
 {
   int res;
-  if (isa_initialized >= 2)
+  if (isa_initialized >= 1)
   {
     if ((res = i2c_del_adapter(&isa_adapter))) {
       printk("i2c-isa.o: Adapter deregistration failed, module not removed.\n");
-      return res;
-    } else
-      isa_initialized--;
-  }
-  if (isa_initialized >= 1)
-  {
-    if ((res = i2c_del_algorithm(&isa_algorithm))) {
-      printk("i2c-isa.o: Algorithm deregistration failed, module not removed.\n");
       return res;
     } else
       isa_initialized--;

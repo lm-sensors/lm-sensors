@@ -1,5 +1,5 @@
 /*
-    i2c-via2.c - Part of lm_sensors, Linux kernel modules for hardware
+    i2c-viapro.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>, 
     Philip Edelbrock <phil@netroedge.com>, Kyösti Mälkki <kmalkki@cc.hut.fi>
@@ -171,7 +171,7 @@ int vt596_setup(void)
 
   /* First check whether we can access PCI at all */
   if (pci_present() == 0) {
-    printk("i2c-via2.o: Error: No PCI-bus found!\n");
+    printk("i2c-viapro.o: Error: No PCI-bus found!\n");
     error_return=-ENODEV;
     goto END;
   }
@@ -204,7 +204,7 @@ int vt596_setup(void)
 
   if (res) {
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
-    printk("i2c-via2.o: Error: Can't detect vt82c596 or vt82c686");
+    printk("i2c-viapro.o: Error: Can't detect vt82c596 or vt82c686");
     error_return=-ENODEV;
     goto END;
   } 
@@ -219,7 +219,7 @@ int vt596_setup(void)
     smb_cf_base = SMBBA2;
     smb_cf_hstcfg = 0x84;
   } else {
-    printk("i2c-via2.o: Cannot configure SMBus I/O Base address\n");
+    printk("i2c-viapro.o: Cannot configure SMBus I/O Base address\n");
     error_return=-ENODEV;
     goto END;
   }
@@ -233,7 +233,7 @@ int vt596_setup(void)
   }
 
   if (check_region(vt596_smba, 8)) {
-    printk("i2c-via2.o: vt82c596_smb region 0x%x already in use!\n", vt596_smba);
+    printk("i2c-viapro.o: vt82c596_smb region 0x%x already in use!\n", vt596_smba);
     error_return=-ENODEV;
     goto END;
   }
@@ -249,7 +249,7 @@ int vt596_setup(void)
                                  SMBBA,vt596_smba);
     pci_write_config_byte_united(VT596_dev, VT596_bus, VT596_devfn,
                                 SMBHSTCFG, temp | 0x01);
-    printk("i2c-via2.o: WARNING: VT596 SMBus interface set to new "
+    printk("i2c-viapro.o: WARNING: VT596 SMBus interface set to new "
            "address %04x!\n",vt596_smba);
   } else if ((temp & 1) == 0) {
     if (force) {
@@ -259,7 +259,7 @@ int vt596_setup(void)
    resorting to this.  */
       pci_write_config_byte_united(VT596_dev, VT596_bus, VT596_devfn,
                                        SMBHSTCFG, temp | 1);
-      printk("i2c-via2.o: WARNING: SMBus interface has been FORCEFULLY "
+      printk("i2c-viapro.o: WARNING: SMBus interface has been FORCEFULLY "
              "ENABLED!\n");
     } else {
       printk("SMBUS: Error: Host SMBus controller not enabled!\n");     
@@ -273,17 +273,17 @@ int vt596_setup(void)
 
 #ifdef DEBUG
   if ((temp & 0x0E) == 8)
-     printk("i2c-via2.o: using Interrupt 9 for SMBus.\n");
+     printk("i2c-viapro.o: using Interrupt 9 for SMBus.\n");
   else if ((temp & 0x0E) == 0)
-     printk("i2c-via2.o: using Interrupt SMI# for SMBus.\n");
+     printk("i2c-viapro.o: using Interrupt SMI# for SMBus.\n");
   else 
-     printk("i2c-via2.o: Illegal Interrupt configuration (or code out "
+     printk("i2c-viapro.o: Illegal Interrupt configuration (or code out "
             "of date)!\n");
 
   pci_read_config_byte_united(VT596_dev, VT596_bus, VT596_devfn, SMBREV, 
                               &temp);
-  printk("i2c-via2.o: SMBREV = 0x%X\n",temp);
-  printk("i2c-via2.o: VT596_smba = 0x%X\n",vt596_smba);
+  printk("i2c-viapro.o: SMBREV = 0x%X\n",temp);
+  printk("i2c-viapro.o: VT596_smba = 0x%X\n",vt596_smba);
 #endif /* DEBUG */
 
 END:
@@ -306,7 +306,7 @@ int vt596_transaction(void)
   int timeout=0;
 
 #ifdef DEBUG
-  printk("i2c-via2.o: Transaction (pre): CNT=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, "
+  printk("i2c-viapro.o: Transaction (pre): CNT=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, "
          "DAT1=%02x\n",
          inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
          inb_p(SMBHSTDAT1));
@@ -315,17 +315,17 @@ int vt596_transaction(void)
   /* Make sure the SMBus host is ready to start transmitting */
   if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-    printk("i2c-via2.o: SMBus busy (%02x). Resetting... \n",temp);
+    printk("i2c-viapro.o: SMBus busy (%02x). Resetting... \n",temp);
 #endif
     outb_p(temp, SMBHSTSTS);
     if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-      printk("i2c-via2.o: Failed! (%02x)\n",temp);
+      printk("i2c-viapro.o: Failed! (%02x)\n",temp);
 #endif
       return -1;
     } else {
 #ifdef DEBUG
-      printk("i2c-via2.o: Successfull!\n");
+      printk("i2c-viapro.o: Successfull!\n");
 #endif
     }
   }
@@ -343,7 +343,7 @@ int vt596_transaction(void)
   /* If the SMBus is still busy, we give up */
   if (timeout >= MAX_TIMEOUT) {
 #ifdef DEBUG
-    printk("i2c-via2.o: SMBus Timeout!\n"); 
+    printk("i2c-viapro.o: SMBus Timeout!\n"); 
     result = -1;
 #endif
   }
@@ -351,13 +351,13 @@ int vt596_transaction(void)
   if (temp & 0x10) {
     result = -1;
 #ifdef DEBUG
-    printk("i2c-via2.o: Error: Failed bus transaction\n");
+    printk("i2c-viapro.o: Error: Failed bus transaction\n");
 #endif
   }
 
   if (temp & 0x08) {
     result = -1;
-    printk("i2c-via2.o: Bus collision! SMBus may be locked until next hard
+    printk("i2c-viapro.o: Bus collision! SMBus may be locked until next hard
            reset. (sorry!)\n");
     /* Clock stops and slave is stuck in mid-transmission */
   }
@@ -365,7 +365,7 @@ int vt596_transaction(void)
   if (temp & 0x04) {
     result = -1;
 #ifdef DEBUG
-    printk("i2c-via2.o: Error: no response!\n");
+    printk("i2c-viapro.o: Error: no response!\n");
 #endif
   }
 
@@ -374,11 +374,11 @@ int vt596_transaction(void)
 
   if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-    printk("i2c-via2.o: Failed reset at end of transaction (%02x)\n",temp);
+    printk("i2c-viapro.o: Failed reset at end of transaction (%02x)\n",temp);
 #endif
   }
 #ifdef DEBUG
-  printk("i2c-via2.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
+  printk("i2c-viapro.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
          "DAT0=%02x, DAT1=%02x\n",
          inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
          inb_p(SMBHSTDAT1));
@@ -394,7 +394,7 @@ s32 vt596_access(struct i2c_adapter *adap, u8 addr, char read_write,
 
   switch(size) {
     case I2C_SMBUS_PROC_CALL:
-      printk("i2c-via2.o: I2C_SMBUS_PROC_CALL not supported!\n");
+      printk("i2c-viapro.o: I2C_SMBUS_PROC_CALL not supported!\n");
       return -1;
     case I2C_SMBUS_QUICK:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
@@ -490,25 +490,25 @@ int __init i2c_vt596_init(void)
 #ifdef DEBUG
 /* PE- It might be good to make this a permanent part of the code! */
   if (vt596_initialized) {
-    printk("i2c-via2.o: Oops, vt596_init called a second time!\n");
+    printk("i2c-viapro.o: Oops, vt596_init called a second time!\n");
     return -EBUSY;
   }
 #endif
   vt596_initialized = 0;
   if ((res = vt596_setup())) {
-    printk("i2c-via2.o: vt82c596 not detected, module not inserted.\n");
+    printk("i2c-viapro.o: vt82c596 not detected, module not inserted.\n");
     vt596_cleanup();
     return res;
   }
   vt596_initialized ++;
   sprintf(vt596_adapter.name,"SMBus vt82c596 adapter at %04x",vt596_smba);
   if ((res = i2c_add_adapter(&vt596_adapter))) {
-    printk("i2c-via2.o: Adapter registration failed, module not inserted.\n");
+    printk("i2c-viapro.o: Adapter registration failed, module not inserted.\n");
     vt596_cleanup();
     return res;
   }
   vt596_initialized++;
-  printk("i2c-via2.o: vt82c596 bus detected and initialized\n");
+  printk("i2c-viapro.o: vt82c596 bus detected and initialized\n");
   return 0;
 }
 
@@ -518,7 +518,7 @@ int __init vt596_cleanup(void)
   if (vt596_initialized >= 2)
   {
     if ((res = i2c_del_adapter(&vt596_adapter))) {
-      printk("i2c-via2.o: i2c_del_adapter failed, module not removed\n");
+      printk("i2c-viapro.o: i2c_del_adapter failed, module not removed\n");
       return res;
     } else
       vt596_initialized--;
