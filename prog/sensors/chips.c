@@ -3983,7 +3983,7 @@ void print_adm1026(const sensors_chip_name *name)
 {
   char *label = NULL;
   double cur,min,max;
-  long alarms, gpio;
+  long alarms;
   int valid, i;
 
   if (!sensors_get_feature(*name,SENSORS_ADM1026_ALARMS,&cur)) {
