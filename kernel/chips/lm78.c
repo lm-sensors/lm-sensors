@@ -809,7 +809,7 @@ void lm78_vid(struct i2c_client *client, int operation, int ctl_name,
 {
   struct lm78_data *data = client->data;
   if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
+    *nrels_mag = 2;
   else if (operation == SENSORS_PROC_REAL_READ) {
     lm78_update_client(client);
     results[0] = VID_FROM_REG(data->vid);

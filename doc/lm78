@@ -1,0 +1,88 @@
+This file documents the lm78 directories.
+
+There will be one directory created for each detected LM78, LM78-J or LM79
+chip. Each chip can both be on the ISA bus and the SMBus. Directories
+are called things like lm78-isa-0290, lm78-j-i2c-3-4e or lm79-isa-0280.
+/proc/sys/dev/sensors/chips contains the SYSCTL values for all chip
+directories.
+
+Within each LM78 directory, you can find the following files:
+* alarms (LM78_SYSCTL_ALARMS)
+  A number which indicates which alarms are on. An alarm gets triggered when
+  some limit has been crossed. Even if the cause of the alarm is over, it
+  stays triggered until it has been read at least once. Because the LM78
+  values are updated at most once every 1.5 seconds, this means the alarm
+  can be read several times before it is erased.
+  This file can not be written to.
+  The number is the logical OR of the following components:
+  - LM78_ALARM_IN[0-6]
+    Gets triggered when the corresponding in value is higher or lower than
+    its limits
+  - LM78_ALARM_FAN[1-3]
+    Gets triggered when the corresponding fan value is lower than its limit
+  - LM78_ALARM_TEMP
+    Gets triggered when the temp value has crossed its limits. See the 
+    description under temp.
+  - LM78_ALARM_BTI
+    Gets triggered if some other chip which is connected to it has crossed
+    its limits. Usually, it is connected to all LM75 chips; if at least one
+    crosses its limits, this bit gets set.
+  - LM78_ALARM_CHAS
+    Gets triggered if someone opens your computer case (if connected at all).
+  - LM78_ALARM_FIFO
+    Gets triggered if something is very wrong with our LM78 driver. Ignore.
+  - LM78_ALARM_SMI_IN
+    Gets triggered if some other chip has triggered a SMI interrupt. Can be
+    ignored.
+  If accessed through sysctl, this value is a long.
+* fan[1-3] (LM78_SYSCTL_FAN[1-3])
+  A list of two numbers. The first is the minimum fan rotation limit; the
+  second is the current fan rotation speed. Both are in RPM (rotation per
+  minute). An alarm is triggered if the rotation speed drops below the
+  limit. The first value can be changed. Not all RPM values can accurately
+  be represented, so some rounding is done.
+  If accessed through sysctl, this is a list of longs.
+* fan_div (LM78_SYSCTL_FAN_DIV)
+  A list of three numbers, one for each fan. Each number can be either 1, 2,
+  4 or 8. It is the internal scaling factor used for the FAN rotations. If
+  you change this number, the FAN readings get more or less detailed, but
+  the range in which they can be read too. Higher numbers give better 
+  resolution, but less range. The first two numbers can be changed, the
+  third not.
+  If accessed through sysctl, this is a list of longs.
+* in[0-6] (LM78_SYSCTL_IN[0-6])
+  A list of three numbers. The first is the minimum limit, the second is the
+  maximum limit, and the third is the current value. If you have a weird
+  mainboard, all values may be off because some other scaling factor has
+  to be used; user-space programs should compensate for this. Note that
+  minimum means 'closest to zero'; so if the normal value equals -10, a
+  minimum could equal -9, and a maximum -11. IN0 and IN1 reflect core
+  voltages; they are by default set from the vid values, or set to 2.80V
+  if the vid lines seem to be unconnected. IN2 should equal +3.30V,
+  IN3 +5.00V, IN4 +12.00V, IN5 -12.00V and IN6 -5V. Not all voltage values
+  can be accurately represented, so some rounding is done.
+  The first two numbers can be changed, the third not.
+  If accessed through sysctl, this is a list of longs, each being the voltage
+  times 100.
+* temp
+  A list of three numbers. The first number is the Overtemperature Shutdown
+  value; the second is the Hysteris value and the third number is the
+  current value. The first two values can be modified. All values are in
+  degrees Celcius. An alarm is issued when the temperature first gets above
+  the Overtemperature Shutdown value; no more alarms are issued until the
+  temperature gets below the Hysteris value, at which moment another alarm
+  is issued, and the state is reset. A more useful behaviour can be found
+  by setting the Hysteris value to +127 degrees Celcius; in this case, 
+  alarms are issued during all the time when the actual temperature is 
+  above the Overtemperature Shutdown value.
+  The first two numbers can be changed, the third not.
+  If accessed through sysctl, this is a list of longs.
+* vid
+  The core voltage value (the voltage level your processor should work with),
+  in volts. This is the value IN0 and IN1 are initialized to. If unconnected,
+  it usually reads 3.50V.
+  This number can not be changed.
+  If accessed through sysctl, this is a long, being the voltage times 100.
+
+The data for each LM78 is updated each 1.5 seconds, but only if it is actually
+read.

@@ -37,8 +37,8 @@
 #define TEMP_TO_REG(val)   (((((val) + 2) / 5) << 7) & 0xff80)
 
 /* Initial values */
-#define LM75_INIT_TEMP_OS 50
-#define LM75_INIT_TEMP_HYST 60
+#define LM75_INIT_TEMP_OS 60
+#define LM75_INIT_TEMP_HYST 50
 
 /* Each client has this additional data */
 struct lm75_data {

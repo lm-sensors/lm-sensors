@@ -105,6 +105,22 @@ extern void sensors_deregister_entry(int id);
 #define LM78_SYSCTL_FAN_DIV 2000 /* 1, 2, 4 or 8 */
 #define LM78_SYSCTL_ALARMS 2001 /* bitvector */
 
+#define LM78_ALARM_IN0 0x0001
+#define LM78_ALARM_IN1 0x0002
+#define LM78_ALARM_IN2 0x0004
+#define LM78_ALARM_IN3 0x0008
+#define LM78_ALARM_IN4 0x0100
+#define LM78_ALARM_IN5 0x0200
+#define LM78_ALARM_IN6 0x0400
+#define LM78_ALARM_FAN1 0x0040
+#define LM78_ALARM_FAN2 0x0080
+#define LM78_ALARM_FAN3 0x0800
+#define LM78_ALARM_TEMP 0x0010
+#define LM78_ALARM_BTI 0x0020
+#define LM78_ALARM_CHAS 0x1000
+#define LM78_ALARM_FIFO 0x2000
+#define LM78_ALARM_SMI_IN 0x4000
+
 #define LM75_SYSCTL_TEMP 1200 /* Degrees Celcius * 10 */
 
 #endif /* def SENSORS_SENSORS_H */
