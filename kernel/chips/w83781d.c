@@ -398,7 +398,55 @@ static ctl_table w83781d_dir_table_template[] = {
   { 0 }
 };
 
-static ctl_table w83782d_dir_table_template[] = {
+/* without pwm3-4 */
+static ctl_table w83782d_isa_dir_table_template[] = {
+  { W83781D_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_in },
+  { W83781D_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_in },
+  { W83781D_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_in },
+  { W83781D_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_in },
+  { W83781D_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_in },
+  { W83781D_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_in },
+  { W83781D_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_in },
+  { W83781D_SYSCTL_IN7, "in7", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_in },
+  { W83781D_SYSCTL_IN8, "in8", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_in },
+  { W83781D_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_fan },
+  { W83781D_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_fan },
+  { W83781D_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_fan },
+  { W83781D_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_temp },
+  { W83781D_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_temp_add },
+  { W83781D_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_temp_add },
+  { W83781D_SYSCTL_VID, "vid", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_vid },
+  { W83781D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_fan_div },
+  { W83781D_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_alarms },
+  { W83781D_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_beep },
+  { W83781D_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_pwm },
+  { W83781D_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_pwm },
+  { 0 }
+};
+
+/* with pwm3-4 */
+static ctl_table w83782d_i2c_dir_table_template[] = {
   { W83781D_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_in },
   { W83781D_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
@@ -594,7 +642,7 @@ int w83781d_detect_isa(struct isa_adapter *adapter)
     /* Register a new directory entry with module sensors */
     if ((err = sensors_register_entry((struct i2c_client *) new_client,
                                       type_name,
-                                      (wchipid == W83782D_WCHIPID) ? w83782d_dir_table_template :
+                                      (wchipid == W83782D_WCHIPID) ? w83782d_isa_dir_table_template :
                                       w83781d_dir_table_template)) < 0)
       goto ERROR4;
     ((struct w83781d_data *) (new_client->data)) -> sysctl_id = err;
@@ -715,7 +763,7 @@ int w83781d_detect_smbus(struct i2c_adapter *adapter)
     /* Register a new directory entry with module sensors */
     if ((err = sensors_register_entry(new_client,type_name,
                                       (wchipid == W83783S_WCHIPID) ? w83783s_dir_table_template : 
-                                      ((wchipid == W83782D_WCHIPID) ? w83782d_dir_table_template :
+                                      ((wchipid == W83782D_WCHIPID) ? w83782d_i2c_dir_table_template :
                                       w83781d_dir_table_template))) < 0)
       goto ERROR4;
     ((struct w83781d_data *) (new_client->data))->sysctl_id = err;
@@ -1056,7 +1104,9 @@ void w83781d_update_client(struct i2c_client *client)
     if(data->wchipid != W83781D_WCHIPID) {
       for (i = 1; i <= 4; i++) {
         data->pwm[i-1] = w83781d_read_value(client,W83781D_REG_PWM(i));
-        if(data->wchipid == W83783S_WCHIPID  &&  i == 2)
+        if((data->wchipid == W83783S_WCHIPID ||
+           (data->wchipid == W83782D_WCHIPID && i2c_is_isa_client(client)))
+          &&  i == 2)
           break;
       }
     }
