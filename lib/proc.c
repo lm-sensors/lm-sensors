@@ -65,6 +65,8 @@ char sysfsmount[NAME_MAX];
                                        &sensors_proc_bus_max,\
                                        sizeof(struct sensors_bus))
 
+int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag);
+
 /* This reads /proc/sys/dev/sensors/chips into memory */
 int sensors_read_proc_chips(void)
 {
@@ -291,17 +293,11 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 	if(foundsysfs) {
 		strcpy(n, name.busname);
 		strcat(n, "/");
-		if(the_feature->sysname != NULL)
-			strcat(n, the_feature->sysname);
-		else
-			strcat(n, the_feature->name);
+		/* use rindex to append sysname to n */
+		getsysname(the_feature, rindex(n, '\0'), &mag);
 		if ((f = fopen(n, "r")) != NULL) {
 			fscanf(f, "%lf", value);
 			fclose(f);
-			if(the_feature->sysscaling)
-				mag = the_feature->sysscaling;
-			else
-				mag = the_feature->scaling;
 			for (; mag > 0; mag --)
 				*value /= 10.0;
 	//		fprintf(stderr, "Feature %s value %lf scale %d offset %d\n",
@@ -340,15 +336,9 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 	if(foundsysfs) {
 		strcpy(n, name.busname);
 		strcat(n, "/");
-		if(the_feature->sysname != NULL)
-			strcat(n, the_feature->sysname);
-		else
-			strcat(n, the_feature->name);
+		/* use rindex to append sysname to n */
+		getsysname(the_feature, rindex(n, '\0'), &mag);
 		if ((f = fopen(n, "w")) != NULL) {
-			if(the_feature->sysscaling)
-				mag = the_feature->sysscaling;
-			else
-				mag = the_feature->scaling;
 			for (; mag > 0; mag --)
 				value *= 10.0;
 			fprintf(f, "%d", (int) value);
@@ -369,5 +359,168 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 		if (sysctl(sysctl_name, 4, NULL, 0, buf, buflen))
 			return -SENSORS_ERR_PROC;
 	}
+	return 0;
+}
+
+#define CURRMAG 3
+#define FANMAG 0
+#define INMAG 3
+#define TEMPMAG 3
+
+/*
+	Returns the sysfs name and magnitude for a given feature.
+	First looks for a sysfs name and magnitude in the feature structure.
+	These should be added in chips.c for all non-standard feature names.
+        If that fails, converts common /proc feature names
+	to their sysfs equivalent, and uses common sysfs magnitude.
+	If that fails, returns old /proc feature name and magnitude.
+
+	References: doc/developers/proc in the lm_sensors package;
+	            Documentation/i2c/sysfs_interface in the kernel
+*/
+int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
+{
+	const char * name = feature->name;
+	char last;
+	char check; /* used to verify end of string */
+	int num;
+	
+struct match {
+	const char * name, * sysname;
+	const int sysmag;
+};
+
+struct match *m;
+
+struct match matches[] = {
+	{ "beeps", "beep_mask", 0 },
+	{ "pwm", "pwm1", 0 },
+	{ "rempte_temp", "temp_input1", TEMPMAG },
+	{ "remote_temp_hyst", "temp_hyst1", TEMPMAG },
+	{ "remote_temp_low", "temp_min1", TEMPMAG },
+	{ "remote_temp_over", "temp_max1", TEMPMAG },
+	{ "temp", "temp_input0", TEMPMAG },
+	{ "temp_hyst", "temp_hyst0", TEMPMAG },
+	{ "temp_low", "temp_min0", TEMPMAG },
+	{ "temp_over", "temp_max0", TEMPMAG },
+	{ NULL, NULL }
+};
+
+
+/* use override in feature structure if present */
+	if(feature->sysname != NULL) {
+		strcpy(sysname, feature->sysname);
+		if(feature->sysscaling)
+			*sysmag = feature->sysscaling;
+		else
+			*sysmag = feature->scaling;
+		return 0;
+	}
+
+/* check for constant mappings */
+	for(m = matches; m->name != NULL; m++) {
+		if(!strcmp(m->name, name)) {
+			strcpy(sysname, m->sysname);
+			*sysmag = m->sysmag;
+			return 0;
+		}
+	}
+
+/* convert common /proc names to common sysfs names */
+	if(sscanf(name, "fan%d_di%c%c", &num, &last, &check) == 2 && last == 'v') {
+		sprintf(sysname, "fan_div%d", num);
+		*sysmag = FANMAG;
+		return 0;
+	}
+	if(sscanf(name, "fan%d_mi%c%c", &num, &last, &check) == 2 && last == 'n') {
+		sprintf(sysname, "fan_min%d", num);
+		*sysmag = FANMAG;
+		return 0;
+	}
+	if(sscanf(name, "fan%d%c", &num, &check) == 1) {
+		sprintf(sysname, "fan_input%d", num);
+		*sysmag = FANMAG;
+		return 0;
+	}
+
+	if(sscanf(name, "in%d_mi%c%c", &num, &last, &check) == 2 && last == 'n') {
+		sprintf(sysname, "in_min%d", num);
+		*sysmag = INMAG;
+		return 0;
+	}
+	if(sscanf(name, "in%d_ma%c%c", &num, &last, &check) == 2 && last == 'x') {
+		sprintf(sysname, "in_max%d", num);
+		*sysmag = INMAG;
+		return 0;
+	}
+	if(sscanf(name, "in%d%c", &num, &check) == 1) {
+		sprintf(sysname, "in_input%d", num);
+		*sysmag = INMAG;
+		return 0;
+	}
+
+	if(sscanf(name, "pwm%d%c", &num, &check) == 1) {
+		strcpy(sysname, name);
+		*sysmag = 0;
+		return 0;
+	}
+
+	if(sscanf(name, "sensor%d%c", &num, &check) == 1) {
+		strcpy(sysname, name);
+		*sysmag = 0;
+		return 0;
+	}
+
+	if(sscanf(name, "temp%d_hys%c%c", &num, &last, &check) == 2 && last == 't') {
+		sprintf(sysname, "temp_min%d", num);
+		*sysmag = TEMPMAG;
+		return 0;
+	}
+	if(sscanf(name, "temp%d_ove%c%c", &num, &last, &check) == 2 && last == 'r') {
+		sprintf(sysname, "temp_max%d", num);
+		*sysmag = TEMPMAG;
+		return 0;
+	}
+	if(sscanf(name, "temp%d_mi%c%c", &num, &last, &check) == 2 && last == 'n') {
+		sprintf(sysname, "temp_min%d", num);
+		*sysmag = TEMPMAG;
+		return 0;
+	}
+	if(sscanf(name, "temp%d_ma%c%c", &num, &last, &check) == 2 && last == 'x') {
+		sprintf(sysname, "temp_max%d", num);
+		*sysmag = TEMPMAG;
+		return 0;
+	}
+	if(sscanf(name, "temp%d%c", &num, &check) == 1) {
+		sprintf(sysname, "temp_input%d", num);
+		*sysmag = TEMPMAG;
+		return 0;
+	}
+
+/* bmcsensors only, not yet in kernel */
+/*
+	if(sscanf(name, "curr%d_mi%c%c", &num, &last, &check) == 2 && last == 'n') {
+		sprintf(sysname, "curr_min%d", num);
+		*sysmag = CURRMAG;
+		return 0;
+	}
+	if(sscanf(name, "curr%d_ma%c%c", &num, &last, &check) == 2 && last == 'x') {
+		sprintf(sysname, "curr_max%d", num);
+		*sysmag = CURRMAG;
+		return 0;
+	}
+	if(sscanf(name, "curr%d%c", &num, &check) == 1) {
+		sprintf(sysname, "curr_input%d", num);
+		*sysmag = CURRMAG;
+		return 0;
+	}
+*/
+
+/* give up, use old name (probably won't work though...) */
+/* known to be the same:
+	"alarms", "beep_enable", "vid", "vrm"
+*/
+	strcpy(sysname, name);
+	*sysmag = feature->scaling;
 	return 0;
 }
