@@ -1,0 +1,7 @@
+This driver is for the LM80.
+
+It is quite similar to the LM78, except that it is I2C bus only
+and has two fan inputs instead of three.
+
+For further information, see document lm78.
+

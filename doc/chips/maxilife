@@ -1,0 +1,26 @@
+The is the driver for the HP MaxiLife Health monitoring system
+as used in the line of HP Kayak Workstation PC's.
+
+The driver supports the following MaxiLife firmware versions:
+
+0) HP KAYAK XU/XAs (Dual Pentium II Slot 1, Deschutes/Klamath)
+1) HP KAYAK XU (Dual Xeon [Slot 2] 400/450 Mhz)
+2) HP KAYAK XA (Pentium II Slot 1, monoprocessor)
+
+Currently firmware auto detection is not implemented. To use the
+driver load it with the correct option for you Kayak. For example:
+
+insmod maxilife.o maxi_version=0 | 1 | 2
+
+maxi_version=0 is the default
+
+
+The lm75's are indeed accessable in the regular way via the lm75 module.
+They worked out of the box. However, I don't use the "raw" lm75 info.
+MaxiLife takes care of reading out the lm75's and converts the values to
+temperatures. Compared to some of the other monitoring controllers MaxiLife
+is quite advanced. It takes care of a lot of issues, like setting ranges,
+raising alarms, etc. Machines with MaxiLife also have a little LCD display
+on their front (lcd is at address 0x54). The idea is that later versions
+of the driver will write health info on the lcd (a bit like lcdproc).
+
