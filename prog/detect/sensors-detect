@@ -4621,78 +4621,6 @@ sub generate_modprobes
   
 }
 
-# returns:
-# 0, could not determine (can't read /dev/mem...)
-# 1, safe system (VPD record not found)
-# bios string (e.g. "INET32WW"), unsafe system 
-# VPD is documented here:
-# http://www.pc.ibm.com/qtechinfo/MIGR-45120.html
-sub vpd_bios_build_id
-{
-  my $pos = 0xF0000;
-  my $found = 0;
-  my $bbid;
-
-  open(local *MEM, '/dev/mem') || return 0;
-  binmode MEM;
-  seek MEM, $pos, SEEK_SET || return 0;
-  while ($pos <= 0xFFFD0 && !$found)
-  {
-    my $r = read(MEM, my $buf, 48);
-    return 0 unless ($r == 48);
-    seek (MEM, -32, SEEK_CUR);
-    my $len;
-    if (substr($buf, 0, 5) eq "\xAA\x55VPD"
-     && ord(substr($buf, 5, 1)) >= 0x30)
-    {
-      if (unpack('%8C*', substr($buf, 0x0D, 0x30-0x0D)) != 0)
-      {
-        printf " Bad VPD checksum (0x%02X)! Please report.\n",
-                ord(substr($buf, 0x2F, 1));
-      }
-      $bbid = substr($buf, 13, 9);
-      $bbid =~ s/[\x00 ]*$//; # right trim
-      $found++;
-    }
-    $pos += 16;
-  }
-
-  return 1 unless $found;
-  print " System vendor: IBM\n";
-  print " BIOS version: $bbid\n";
-  return "$bbid";
-}
-
-# returns:
-# 1 : the system is known to be safe
-# 0 : the system safeness is unknown
-# If the system is know to be unsafe (i.e. for now, IBM systems), never
-#   return.
-sub safe_system_vendor
-{
-  if ($> != 0)
-  {
-  	print " As you are not root, we can't determine your system vendor.\n";
-  	return 0;
-  }
-
-  my $vpd_bbid = vpd_bios_build_id();
-
-  return 0 if $vpd_bbid eq '0';
-  return 1 if $vpd_bbid eq '1';
-  
-  print "Sorry, we won't let you go on. IBM systems are known to have\n".
-        "serious problems with lm_sensors, resulting in hardware failures.\n".
-        "For more information, see README.thinkpad or\n".
-        "http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/README.thinkpad.\n\n".
-        "We will be progressively updating our user-space tools so as to prevent\n".
-        "the problem from occuring. Some kernel drivers will need updates too.\n".
-        "This lock will be removed once everything is fixed and believed to be\n".
-        "safe.\n\n";
-
-  exit;
-}
-
 sub main
 {
   my (@adapters,$res,$did_adapter_detection,$adapter);
@@ -4712,16 +4640,6 @@ sub main
         "seem a bit confusing, but they will still work.\n\n";
   print "It is generally safe and recommended to accept the default answers to all\n",
         "questions, unless you know what you're doing.\n\n";
-
-  unless (safe_system_vendor ())
-  {
-    print " IF THIS IS AN IBM THINKPAD, PRESS CTRL-C NOW!\n";
-    print " IBM Thinkpads have a severely broken i2c/SMBus implementation, ";
-    print "just scanning\n";
-    print " the bus will break your Thinkpad forever!\n";
-    print " If this is a non-Thinkpad IBM, we still suggest you press CTRL+C. We have\n";
-    print " had users reporting system breakage on other IBM systems as well.\n\n";
-  }
 
   print " We can start with probing for (PCI) I2C or SMBus adapters.\n";
   print " You do not need any special privileges for this.\n";
