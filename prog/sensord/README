@@ -6,4 +6,4 @@ Compile this program by making lm_sensors with the following argument:
 
 The RRD (Round Robin Database) development headers and libraries are
 REQUIRED. Get this package from:
-  http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool
+  http://people.ee.ethz.ch/~oetiker/webtools/rrdtool/

@@ -24,7 +24,7 @@
  * RRD is the Round Robin Database
  * 
  * Get this package from:
- *   http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool
+ *   http://people.ee.ethz.ch/~oetiker/webtools/rrdtool/
  *
  * For compilation you need the development libraries;
  * for execution you need the runtime libraries; for

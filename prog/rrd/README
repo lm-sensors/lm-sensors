@@ -6,7 +6,7 @@ graphs of sensor data.
 
 The RRD (Round Robin Database) package is REQUIRED.
 Get this package from
-         http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool
+         http://people.ee.ethz.ch/~oetiker/webtools/rrdtool/
 
 A web server with CGI support is required.
 

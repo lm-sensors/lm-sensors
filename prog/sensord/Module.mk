@@ -17,7 +17,7 @@
 
 # The round robin database (RRD) development headers and libraries are
 # REQUIRED. Get this package from:
-#   http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool
+#   http://people.ee.ethz.ch/~oetiker/webtools/rrdtool/
 
 # Note that MODULE_DIR (the directory in which this file resides) is a
 # 'simply expanded variable'. That means that its value is substituted
