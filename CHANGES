@@ -20,9 +20,12 @@ ask CVS about it:
 2.9.0 (2004????)
   NOTE: Requires i2c-2.9.0 or newer!
   File README.thinkpad: Update
+  File doc/chips/it87: Cleanups
   File doc/chips/lm63: New
   File etc/sensors.conf.eg: Set via686a voltage limits
   File kernel/chips/Module.mk: Resync module list with mkpatch
+  File kernel/include/sensors_compat.h: Define __devexit_p if missing
+                                        (kernels 2.4.16 and older)
   Modules (all bus drivers): Remove owner from i2c_adapter; restore inc_use
                              and dec_use removed in release 2.8.0
   Modules (all chip drivers): Remove owner from i2c_driver; pass
@@ -34,6 +37,7 @@ ask CVS about it:
                    Add PEC support for ICH6
                    Add support for ICH7
   Module i2c-ipmb: Remove from build since it doesn't work
+  Module i2c-nforce2: Support the nForce3 (Pro150 and 250Gb)
   Module icspll: Fix compilation
   Module lm63: New driver for the National Semiconductor LM63
   Module lm83: Use signed types for temperatures
@@ -57,6 +61,8 @@ ask CVS about it:
   Programs i2cset, isaset: Written byte/word can be masked
   Program decode-vaio.pl: Find eeproms on non-0 i2c bus too
   Program mkpatch: Include i2c-amd756-s4882
+  Program pwmconfig: Handle new (well, back to old) pwm files names for
+                     Linux 2.6.10 and up
   Program sensord: Do not scale load average (Aurelien Jarno)
   Program sensors: Add lm63, lpc47b397 support
                    Support DDR2 memory module EEPROMs (Rudolf Marek)
@@ -66,6 +72,7 @@ ask CVS about it:
   Program sensors-detect: Improve LM63 detection
                           Discard IBM Thinkpad detection code
                           Add PCA9556, LPC47B397, ICH7 detection
+                          Fix W83792D detection, add W83791SD detection
 
 
 2.8.8 (20041007)
