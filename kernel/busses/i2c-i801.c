@@ -26,15 +26,18 @@
     82801AB		2423           
     82801BA		2443           
     82801CA/CAM		2483           
-    82801DB		24C3   (32 byte buffer and HW PEC not yet supported)
+    82801DB		24C3   (HW PEC supported, 32 byte buffer not supported)
 
     This driver supports several versions of Intel's I/O Controller Hubs (ICH).
     For SMBus support, they are similar to the PIIX4 and are part
     of Intel's '810' and other chipsets.
     See the doc/busses/i2c-i801 file for details.
+    I2C Block Read is not supported.
 */
 
 /* Note: we assume there can only be one I801, with one SMBus interface */
+
+/* #define DEBUG 1 */
 
 #include <linux/version.h>
 #include <linux/module.h>
@@ -143,7 +146,7 @@ static s32 i801_access(struct i2c_adapter *adap, u16 addr,
 static void i801_do_pause(unsigned int amount);
 static int i801_transaction(void);
 static int i801_block_transaction(union i2c_smbus_data *data,
-				  char read_write, int i2c_enable);
+				  char read_write, int command);
 static void i801_inc(struct i2c_adapter *adapter);
 static void i801_dec(struct i2c_adapter *adapter);
 static u32 i801_func(struct i2c_adapter *adapter);
@@ -236,6 +239,8 @@ int i801_setup(void)
 	}
 
 	pci_read_config_byte(I801_dev, SMBHSTCFG, &temp);
+	temp &= ~SMBHSTCFG_I2C_EN;	/* SMBus timing */
+	pci_write_config_byte(I801_dev, SMBHSTCFG, temp);
 /* If force_addr is set, we program the new address here. Just to make
    sure, we disable the I801 first. */
 	if (force_addr) {
@@ -264,8 +269,6 @@ int i801_setup(void)
 		}
 	}
 
-	/* note: we assumed that the BIOS picked SMBus or I2C Bus timing
-	   appropriately (bit 2 in SMBHSTCFG) */
 	request_region(i801_smba, (isich4 ? 16 : 8), "i801-smbus");
 
 #ifdef DEBUG
@@ -418,6 +421,10 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		len = 32;	/* max for reads */
 	}
 
+	if(isich4 && command != I2C_SMBUS_I2C_BLOCK_DATA) {
+		/* set 32 byte buffer */
+	}
+
 	for (i = 1; i <= len; i++) {
 		if (i == len && read_write == I2C_SMBUS_READ)
 			smbcmd = I801_BLOCK_LAST;
@@ -469,7 +476,7 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		}
 
 		if (i == 1) {
-#ifdef HAVE_PEC
+#if 0 /* #ifdef HAVE_PEC (now using HW PEC) */
 			if(isich4 && command == I2C_SMBUS_BLOCK_DATA_PEC) {
 				if(read_write == I2C_SMBUS_WRITE)
 					outb_p(data->block[len + 1], SMBPEC);
@@ -544,6 +551,7 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		if (result < 0)
 			goto END;
 	}
+
 #ifdef HAVE_PEC
 	if(isich4 && command == I2C_SMBUS_BLOCK_DATA_PEC) {
 		/* wait for INTR bit as advised by Intel */
@@ -557,9 +565,11 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		if (timeout >= MAX_TIMEOUT) {
 			printk(KERN_DEBUG "i2c-i801.o: PEC Timeout!\n");
 		}
+#if 0 /* now using HW PEC */
 		if(read_write == I2C_SMBUS_READ) {
 			data->block[len + 1] = inb_p(SMBPEC);
 		}
+#endif
 		outb_p(temp, SMBHSTSTS); 
 	}
 #endif
@@ -577,19 +587,27 @@ s32 i801_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 		char read_write, u8 command, int size,
 		union i2c_smbus_data * data)
 {
+	int hwpec = 0;
+	int block = 0;
+	int ret, xact;
+
+#ifdef HAVE_PEC
+	if(isich4)
+		hwpec = (flags & I2C_CLIENT_PEC) != 0;
+#endif
 
 	switch (size) {
 	case I2C_SMBUS_QUICK:
 		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
 		       SMBHSTADD);
-		size = I801_QUICK;
+		xact = I801_QUICK;
 		break;
 	case I2C_SMBUS_BYTE:
 		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
 		       SMBHSTADD);
 		if (read_write == I2C_SMBUS_WRITE)
 			outb_p(command, SMBHSTCMD);
-		size = I801_BYTE;
+		xact = I801_BYTE;
 		break;
 	case I2C_SMBUS_BYTE_DATA:
 		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
@@ -597,7 +615,7 @@ s32 i801_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 		outb_p(command, SMBHSTCMD);
 		if (read_write == I2C_SMBUS_WRITE)
 			outb_p(data->byte, SMBHSTDAT0);
-		size = I801_BYTE_DATA;
+		xact = I801_BYTE_DATA;
 		break;
 	case I2C_SMBUS_WORD_DATA:
 		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
@@ -607,37 +625,62 @@ s32 i801_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 			outb_p(data->word & 0xff, SMBHSTDAT0);
 			outb_p((data->word & 0xff00) >> 8, SMBHSTDAT1);
 		}
-		size = I801_WORD_DATA;
+		xact = I801_WORD_DATA;
 		break;
 	case I2C_SMBUS_BLOCK_DATA:
 	case I2C_SMBUS_I2C_BLOCK_DATA:
 #ifdef HAVE_PEC
 	case I2C_SMBUS_BLOCK_DATA_PEC:
+		if(hwpec && size == I2C_SMBUS_BLOCK_DATA)
+			size = I2C_SMBUS_BLOCK_DATA_PEC;
 #endif
 		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
 		       SMBHSTADD);
 		outb_p(command, SMBHSTCMD);
-		return i801_block_transaction(data, read_write, size);
+		block = 1;
+		break;
 	case I2C_SMBUS_PROC_CALL:
 	default:
 		printk(KERN_ERR "i2c-i801.o: Unsupported transaction %d\n", size);
 		return -1;
 	}
 
-	/* 'size' is really the transaction type */
-	outb_p(size | ENABLE_INT9, SMBHSTCNT);
+#ifdef HAVE_PEC
+	if(isich4 && hwpec) {
+		if(size != I2C_SMBUS_QUICK &&
+		   size != I2C_SMBUS_I2C_BLOCK_DATA) {
+			if(!block)
+				xact |= I801_PEC_EN;	/* enable PEC */
+			if(read_write == I2C_SMBUS_WRITE)
+				outb_p(1, SMBAUXCTL);	/* append HW PEC */
+		}
+	}
+#endif
+	if(block)
+		ret = i801_block_transaction(data, read_write, size);
+	else {
+		outb_p(xact | ENABLE_INT9, SMBHSTCNT);
+		ret = i801_transaction();
+	}
 
-	if (i801_transaction())	/* Error in transaction */
+#ifdef HAVE_PEC
+	if(isich4 && hwpec) {
+		if(read_write == I2C_SMBUS_WRITE &&
+		   size != I2C_SMBUS_QUICK &&
+		   size != I2C_SMBUS_I2C_BLOCK_DATA)
+			outb_p(0, SMBAUXCTL);
+	}
+#endif
+
+	if(block)
+		return ret;
+	if(ret)
 		return -1;
-
-	if ((read_write == I2C_SMBUS_WRITE) || (size == I801_QUICK))
+	if ((read_write == I2C_SMBUS_WRITE) || (xact == I801_QUICK))
 		return 0;
 
-
-	switch (size) {
+	switch (xact & 0x7f) {
 	case I801_BYTE:	/* Result put in SMBHSTDAT0 */
-		data->byte = inb_p(SMBHSTDAT0);
-		break;
 	case I801_BYTE_DATA:
 		data->byte = inb_p(SMBHSTDAT0);
 		break;
@@ -662,7 +705,13 @@ u32 i801_func(struct i2c_adapter *adapter)
 {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
 	    I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA |
-	    I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_WRITE_I2C_BLOCK;
+	    I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_WRITE_I2C_BLOCK
+#ifdef HAVE_PEC
+	     | (isich4 ? I2C_FUNC_SMBUS_BLOCK_DATA_PEC |
+	                 I2C_FUNC_SMBUS_HWPEC_CALC
+	               : 0)
+#endif
+	    ;
 }
 
 int __init i2c_i801_init(void)
