@@ -1844,7 +1844,7 @@ use vars qw(%modules_list);
 
 sub initialize_modules_list
 {
-  open INPUTFILE, "/proc/modules" or die "Can't access /proc/modules!";
+  open INPUTFILE, "/proc/modules" or return;
   while (<INPUTFILE>) {
     tr/_/-/;
     $modules_list{$1} = 1 if m/^(\S*)/;
