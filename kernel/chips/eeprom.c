@@ -286,7 +286,7 @@ void eeprom_update_client(struct i2c_client *client)
 #endif   	
    }
     for (i=0;i<EEPROM_SIZE;i++) {
-      data->data[i] = (u8)smbus_read_byte(client->adapter,client->addr);
+         data->data[i] = (u8)smbus_read_byte(client->adapter,client->addr);
     }
     
     data->last_updated = jiffies;
