@@ -1388,7 +1388,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #     },
      {
        name => "DDC monitor",
-       driver => "ddcmon",
+       driver => "eeprom",
        i2c_addrs => [0x50],
        i2c_detect => sub { ddcmonitor_detect @_ },
      },
@@ -4127,25 +4127,22 @@ sub eeprom_detect
 #   0x00..0x07: DDC signature
 #   0x08..0x7E: checksumed area
 #   0x7F:       checksum
-### commented out additional location checks for now - don't work?
 sub ddcmonitor_detect
 {
   my ($file,$addr) = @_;
   my $i;
-###  for ($i = 0; $i < 8; $i ++) {
-###    i2c_set_slave_addr \*FILE,$addr+$i or goto FAILURE;
-    i2c_smbus_read_byte_data($file,0x00) == 0x00 or goto FAILURE;
-    i2c_smbus_read_byte_data($file,0x01) == 0xFF or goto FAILURE;
-    i2c_smbus_read_byte_data($file,0x02) == 0xFF or goto FAILURE;
-    i2c_smbus_read_byte_data($file,0x03) == 0xFF or goto FAILURE;
-    i2c_smbus_read_byte_data($file,0x04) == 0xFF or goto FAILURE;
-    i2c_smbus_read_byte_data($file,0x05) == 0xFF or goto FAILURE;
-    i2c_smbus_read_byte_data($file,0x06) == 0xFF or goto FAILURE;
-    i2c_smbus_read_byte_data($file,0x07) == 0x00 or goto FAILURE;
-###  }
-###  i2c_set_slave_addr \*FILE,$addr or return;
-  # Check the checksum for validity. We should do this for all addresses,
-  # but it would be too slow.
+
+  return unless
+    i2c_smbus_read_byte_data($file,0x00) == 0x00 and
+    i2c_smbus_read_byte_data($file,0x01) == 0xFF and
+    i2c_smbus_read_byte_data($file,0x02) == 0xFF and
+    i2c_smbus_read_byte_data($file,0x03) == 0xFF and
+    i2c_smbus_read_byte_data($file,0x04) == 0xFF and
+    i2c_smbus_read_byte_data($file,0x05) == 0xFF and
+    i2c_smbus_read_byte_data($file,0x06) == 0xFF and
+    i2c_smbus_read_byte_data($file,0x07) == 0x00;
+
+  # Check the checksum for validity.
   my $checksum = 0;
   for ($i = 0; $i <= 127; $i = $i + 1) {
     $checksum = $checksum + i2c_smbus_read_byte_data($file,$i);
@@ -4156,9 +4153,6 @@ sub ddcmonitor_detect
     return (2,$addr+1,$addr+2,$addr+3,$addr+4,$addr+5,$addr+6,$addr+7);
   }
   return (8,$addr+1,$addr+2,$addr+3,$addr+4,$addr+5,$addr+6,$addr+7);
-FAILURE:
-  i2c_set_slave_addr \*FILE,$addr;
-  return;
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
