@@ -376,7 +376,7 @@ static u8 lm93_read_byte(struct i2c_client *client, u8 reg)
 		} else {
 			printk(KERN_WARNING "lm93.o: read byte data failed, "
 				"address 0x%02x.\n", reg);
-			mdelay(i);
+			mdelay(i + 3);
 		}
 
 	}
@@ -411,7 +411,7 @@ static u16 lm93_read_word(struct i2c_client *client, u8 reg)
 		} else {
 			printk(KERN_WARNING "lm93.o: read word data failed, "
 				"address 0x%02x.\n", reg);
-			mdelay(i);
+			mdelay(i + 3);
 		}
 
 	}
@@ -456,7 +456,7 @@ static void lm93_read_block(struct i2c_client *client, u8 fbn, u8 *values)
 			printk(KERN_WARNING "lm93.o: block read data failed, "
 				"command 0x%02x.\n", 
 				lm93_block_read_cmds[fbn].cmd);
-			mdelay(1);
+			mdelay(i + 3);
 		}
 	}
 
