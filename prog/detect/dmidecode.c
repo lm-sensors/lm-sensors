@@ -644,7 +644,14 @@ static void dmi_table(int fd, u32 base, int len, int num)
 	struct dmi_header *dm;
 	u8 *data;
 	int i=0;
+	int r=0, r2=0;
 		
+	if(len==0)
+	{
+		fputs("dmi: no data\n", stderr);
+		return;
+	}
+	
 	if(buf==NULL)
 	{
 		perror("dmi: malloc");
@@ -655,7 +662,9 @@ static void dmi_table(int fd, u32 base, int len, int num)
 		perror("dmi: lseek");
 		return;
 	}
-	if(read(fd, buf, len)!=len)
+	while(r2!=len && (r=read(fd, buf+r2, len-r2))!=0)
+		r2+=r;
+	if(r==0)
 	{
 		perror("dmi: read");
 		return;
