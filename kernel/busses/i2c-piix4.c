@@ -96,7 +96,7 @@ static
 #else
 extern
 #endif
-       int __init piix4_init(void);
+       int __init i2c_piix4_init(void);
 static int __init piix4_cleanup(void);
 static int piix4_setup(void);
 static s32 piix4_access(struct i2c_adapter *adap, u8 addr, char read_write,

@@ -112,7 +112,7 @@ CONFIG_I2C_MAINBOARD
   http://www.lm-sensors.nu
 
 Acer Labs ALI 1533 and 1543C
-CONFIG_I2C_ALI5X3
+CONFIG_I2C_ALI15X3
   If you say yes to this option, support will be included for the Acer
   Labs ALI 1533 and 1543C mainboard I2C interfaces. This can also be 
   built as a module which can be inserted and removed while the kernel
@@ -484,7 +484,7 @@ sub gen_drivers_i2c_Config_in
       print OUTPUT << 'EOF';
   bool 'I2C mainboard interfaces' CONFIG_I2C_MAINBOARD 
   if [ "$CONFIG_I2C_MAINBOARD" = "y" ]; then
-    dep_tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI5X3 $CONFIG_I2C_MAINBOARD
+    dep_tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 $CONFIG_I2C_MAINBOARD
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_MAINBOARD
     dep_tristate '  Intel 82371AB PIIX4(E)' CONFIG_I2C_PIIX4 $CONFIG_I2C_MAINBOARD
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_MAINBOARD
@@ -523,11 +523,11 @@ sub gen_drivers_i2c_Makefile
         last if m@sensors code ends here@;
       }
       print OUTPUT << 'EOF';
-ifeq ($(CONFIG_I2C_ALI5X3),y)
-  L_OBJS += i2c-ali5x3.o
+ifeq ($(CONFIG_I2C_ALI15X3),y)
+  L_OBJS += i2c-ali15x3.o
 else 
-  ifeq ($(CONFIG_I2C_ALI5X3),m)
-    M_OBJS += i2c-ali5x3.o
+  ifeq ($(CONFIG_I2C_ALI15X3),m)
+    M_OBJS += i2c-ali15x3.o
   endif
 endif
 
@@ -597,8 +597,8 @@ sub gen_drivers_i2c_i2c_core_c
       }
       if ($patch_nr == 1) {
         print OUTPUT << 'EOF';
-#ifdef CONFIG_I2C_ALI5X3
-	extern int i2c_ali5x3_init(void);
+#ifdef CONFIG_I2C_ALI15X3
+	extern int i2c_ali15x3_init(void);
 #endif
 #ifdef CONFIG_I2C_HYDRA
 	extern int i2c_hydra_init(void);
@@ -615,8 +615,8 @@ sub gen_drivers_i2c_i2c_core_c
 EOF
       } elsif ($patch_nr == 2) {
       print OUTPUT << 'EOF';
-#ifdef CONFIG_I2C_ALI5X3
-	i2c_ali5x3_init();
+#ifdef CONFIG_I2C_ALI15X3
+	i2c_ali15x3_init();
 #endif
 #ifdef CONFIG_I2C_HYDRA
 	i2c_hydra_init();
