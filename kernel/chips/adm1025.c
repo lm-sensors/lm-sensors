@@ -103,12 +103,12 @@ SENSORS_INSMOD_2(adm1025, ne1619);
    variants. Note that you should be a bit careful with which arguments
    these macros are called: arguments may be evaluated more than once.
    Fixing this is just not worth it. */
-#define IN_TO_REG(val) (SENSORS_LIMIT(((val) & 0xff),0,255))
+#define IN_TO_REG(val) SENSORS_LIMIT(val, 0, 255)
 #define IN_FROM_REG(val) (val)
 
 #define TEMP_FROM_REG(val) (((val)>=0x80?(val)-0x100:(val))*10)
 #define TEMP_TO_REG(val) SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
-                                                 ((val)+5)/10),0,255)
+                                                 ((val)+5)/10),-128,127)
 
 #define ALARMS_FROM_REG(val) (val)
 
@@ -132,7 +132,6 @@ struct adm1025_data {
 	u8 temp_high[2];        /* Register value */
 	u8 temp_low[2];         /* Register value */
 	u16 alarms;             /* Register encoding, combined */
-	u8 analog_out;          /* Register value */
 	u8 vid;                 /* Register value combined */
 	u8 vrm;
 };
@@ -275,7 +274,12 @@ static int adm1025_detect(struct i2c_adapter *adapter, int address,
 	/* Now, we do the remaining detection. */
 
 	if (kind < 0) {
-		if((i2c_smbus_read_byte_data(new_client,ADM1025_REG_CONFIG) & 0x80) != 0x00)
+		if ((i2c_smbus_read_byte_data(new_client,
+		     ADM1025_REG_CONFIG) & 0x80) != 0x00
+		 || (i2c_smbus_read_byte_data(new_client,
+		     ADM1025_REG_STATUS1) & 0xC0) != 0x00
+		 || (i2c_smbus_read_byte_data(new_client,
+		     ADM1025_REG_STATUS2) & 0xBC) != 0x00)
 			goto ERROR1;
 	}
 
@@ -377,8 +381,32 @@ static void adm1025_init_client(struct i2c_client *client)
 {
 	struct adm1025_data *data = client->data;
 	u8 reg;
+	int i;
 
-	data->vrm = DEFAULT_VRM;
+	data->vrm = 82;
+
+	/* Set high limits
+	   Usually we avoid setting limits on driver init, but it happens
+	   that the ADM1025 comes with stupid default limits (all registers
+	   set to 0). In case the chip has not gone through any limit
+	   setting yet, we better set the high limits to the max so that
+	   no alarm triggers. */
+	for (i=0; i<6; i++) {
+		reg = i2c_smbus_read_byte_data(client,
+					       ADM1025_REG_IN_MAX(i));
+		if (reg == 0)
+			i2c_smbus_write_byte_data(client,
+						  ADM1025_REG_IN_MAX(i),
+						  0xFF);
+	}
+	for (i=0; i<2; i++) {
+		reg = i2c_smbus_read_byte_data(client,
+					       ADM1025_REG_TEMP_HIGH(i));
+		if (reg == 0)
+			i2c_smbus_write_byte_data(client,
+						  ADM1025_REG_TEMP_HIGH(i),
+						  0x7F);
+	}
 
 	/* Start monitoring */
 	reg = i2c_smbus_read_byte_data(client, ADM1025_REG_CONFIG);
@@ -401,15 +429,15 @@ static void adm1025_update_client(struct i2c_client *client)
 		/* Voltages */
 		for (nr = 0; nr < 6; nr++) {
 			data->in[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_IN(nr));
-/*			data->in_min[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_IN_MIN(nr));
-			data->in_max[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_IN_MAX(nr));*/
+			data->in_min[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_IN_MIN(nr));
+			data->in_max[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_IN_MAX(nr));
 		}
 
 		/* Temperatures */
 		for (nr = 0; nr < 2; nr++) {
 			data->temp[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_TEMP(nr));
-/*			data->temp_high[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_TEMP_HIGH(nr));
-			data->temp_low[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_TEMP_LOW(nr));*/
+			data->temp_high[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_TEMP_HIGH(nr));
+			data->temp_low[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_TEMP_LOW(nr));
 		}
 
 		/* VID */
