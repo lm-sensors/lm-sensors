@@ -1,5 +1,6 @@
 =============================================================================
-          FOR INSTALLATION INSTRUCTIONS SEE THE 'INSTALL' FILE
+     FOR QUICK INSTALLATION INSTRUCTIONS SEE THE 'QUICKSTART' FILE.
+     FOR FULL INSTALLATION INSTRUCTIONS SEE THE 'INSTALL' FILE.
 =============================================================================
 
 OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
@@ -114,14 +115,14 @@ tries to figure out what hardware is available on your system.
 The developers of this package can be reached through the email address
 <sensors@stimpy.netroedge.com>. Do not hesitate to mail us if you have 
 questions, suggestions, problems, want to contribute, or just want to 
-report it works for you. But please try to read the documentation and\
-FAQ first before you ask any questions!
+report it works for you. But please try to read the documentation and
+FAQ before you ask any questions!
 
 The latest version of this package can always be found on our homepage:
 http://www.netroedge.com/~lm78. Pre-release versions can be retrieved
 through anonymous CVS; see doc/cvs for more information.
 
-This whole package is copyright (c) 1998 - 2000 by Frodo Looijaard and 
+This whole package is copyright (c) 1998 - 2001 by Frodo Looijaard and 
 Philip Edelbrock, except for a few drivers written by
 other people. See the individual files for more exact copyright information.  
 This package may be distributed according to the GNU General Public License 
