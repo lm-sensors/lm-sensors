@@ -21,21 +21,19 @@
 
 /* Supports VIA VT1211 Super I/O sensors via ISA (LPC) accesses only. */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
-#include "sensors_vid.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
-
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
+#include "sensors_vid.h"
 
 static int force_addr = 0;
 MODULE_PARM(force_addr, "i");
@@ -209,8 +207,6 @@ static int vt1211_attach_adapter(struct i2c_adapter *adapter);
 static int vt1211_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int vt1211_detach_client(struct i2c_client *client);
-static int vt1211_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 
 static inline int vt_rdval(struct i2c_client *client, u8 register);
 static inline void vt1211_write_value(struct i2c_client *client, u8 register,
@@ -248,8 +244,53 @@ static struct i2c_driver vt1211_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= vt1211_attach_adapter,
 	.detach_client	= vt1211_detach_client,
-	.command	= vt1211_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+#define VT1211_SYSCTL_IN0 1000
+#define VT1211_SYSCTL_IN1 1001
+#define VT1211_SYSCTL_IN2 1002
+#define VT1211_SYSCTL_IN3 1003
+#define VT1211_SYSCTL_IN4 1004
+#define VT1211_SYSCTL_IN5 1005
+#define VT1211_SYSCTL_IN6 1006
+#define VT1211_SYSCTL_FAN1 1101
+#define VT1211_SYSCTL_FAN2 1102
+#define VT1211_SYSCTL_TEMP 1200
+#define VT1211_SYSCTL_TEMP2 1201
+#define VT1211_SYSCTL_TEMP3 1202
+#define VT1211_SYSCTL_TEMP4 1203
+#define VT1211_SYSCTL_TEMP5 1204
+#define VT1211_SYSCTL_TEMP6 1205
+#define VT1211_SYSCTL_TEMP7 1206
+#define VT1211_SYSCTL_VID	1300
+#define VT1211_SYSCTL_PWM1	1401
+#define VT1211_SYSCTL_PWM2	1402
+#define VT1211_SYSCTL_VRM	1600
+#define VT1211_SYSCTL_UCH	1700
+#define VT1211_SYSCTL_FAN_DIV 2000
+#define VT1211_SYSCTL_ALARMS 2001
+
+#define VT1211_ALARM_IN1 0x01
+#define VT1211_ALARM_IN2 0x02
+#define VT1211_ALARM_IN5 0x04
+#define VT1211_ALARM_IN3 0x08
+#define VT1211_ALARM_TEMP 0x10
+#define VT1211_ALARM_FAN1 0x40
+#define VT1211_ALARM_FAN2 0x80
+#define VT1211_ALARM_IN4 0x100
+#define VT1211_ALARM_IN6 0x200
+#define VT1211_ALARM_TEMP2 0x800
+#define VT1211_ALARM_CHAS 0x1000
+#define VT1211_ALARM_TEMP3 0x8000
+/* duplicates */
+#define VT1211_ALARM_IN0 VT1211_ALARM_TEMP
+#define VT1211_ALARM_TEMP4 VT1211_ALARM_IN1
+#define VT1211_ALARM_TEMP5 VT1211_ALARM_IN2
+#define VT1211_ALARM_TEMP6 VT1211_ALARM_IN3
+#define VT1211_ALARM_TEMP7 VT1211_ALARM_IN4
+
+/* -- SENSORS SYSCTL END -- */
 
 static ctl_table vt1211_dir_table_template[] = {
 	{VT1211_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
@@ -395,8 +436,7 @@ int vt1211_detect(struct i2c_adapter *adapter, int address,
 
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
-					vt1211_dir_table_template,
-					THIS_MODULE)) < 0) {
+					vt1211_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -431,12 +471,6 @@ static int vt1211_detach_client(struct i2c_client *client)
 
 	return 0;
 }
-
-static int vt1211_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
 
 static inline int vt_rdval(struct i2c_client *client, u8 reg)
 {

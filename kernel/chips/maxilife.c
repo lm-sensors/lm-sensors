@@ -51,19 +51,18 @@
 static const char *version_str = "2.00 29/2/2000 Fons Rademakers";
 
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -275,8 +274,6 @@ static int maxi_attach_adapter(struct i2c_adapter *adapter);
 static int maxi_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int maxi_detach_client(struct i2c_client *client);
-static int maxi_command(struct i2c_client *client, unsigned int cmd,
-			void *arg);
 
 static int maxi_read_value(struct i2c_client *client, u8 register);
 static int maxi_read_token(struct i2c_client *client, u16 token);
@@ -320,7 +317,6 @@ static struct i2c_driver maxi_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= maxi_attach_adapter,
 	.detach_client	= maxi_detach_client,
-	.command	= maxi_command,
 };
 
 static int maxi_id = 0;
@@ -330,6 +326,49 @@ static int maxi_id = 0;
 static int maxi_version = cristal;
 
 /* The /proc/sys entries */
+
+/* -- SENSORS SYSCTL START -- */
+#define MAXI_SYSCTL_FAN1   1101	/* Rotations/min */
+#define MAXI_SYSCTL_FAN2   1102	/* Rotations/min */
+#define MAXI_SYSCTL_FAN3   1103	/* Rotations/min */
+#define MAXI_SYSCTL_FAN4   1104	/* Rotations/min */
+#define MAXI_SYSCTL_TEMP1  1201	/* Degrees Celcius */
+#define MAXI_SYSCTL_TEMP2  1202	/* Degrees Celcius */
+#define MAXI_SYSCTL_TEMP3  1203	/* Degrees Celcius */
+#define MAXI_SYSCTL_TEMP4  1204	/* Degrees Celcius */
+#define MAXI_SYSCTL_TEMP5  1205	/* Degrees Celcius */
+#define MAXI_SYSCTL_TEMP6  1206	/* Degrees Celcius */
+#define MAXI_SYSCTL_PLL    1301	/* MHz */
+#define MAXI_SYSCTL_VID1   1401	/* Volts / 6.337, for nba just Volts */
+#define MAXI_SYSCTL_VID2   1402	/* Volts */
+#define MAXI_SYSCTL_VID3   1403	/* Volts */
+#define MAXI_SYSCTL_VID4   1404	/* Volts */
+#define MAXI_SYSCTL_VID5   1405	/* Volts */
+#define MAXI_SYSCTL_LCD1   1501	/* Line 1 of LCD */
+#define MAXI_SYSCTL_LCD2   1502	/* Line 2 of LCD */
+#define MAXI_SYSCTL_LCD3   1503	/* Line 3 of LCD */
+#define MAXI_SYSCTL_LCD4   1504	/* Line 4 of LCD */
+#define MAXI_SYSCTL_ALARMS 2001	/* Bitvector (see below) */
+
+#define MAXI_ALARM_VID4      0x0001
+#define MAXI_ALARM_TEMP2     0x0002
+#define MAXI_ALARM_VID1      0x0004
+#define MAXI_ALARM_VID2      0x0008
+#define MAXI_ALARM_VID3      0x0010
+#define MAXI_ALARM_PLL       0x0080
+#define MAXI_ALARM_TEMP4     0x0100
+#define MAXI_ALARM_TEMP5     0x0200
+#define MAXI_ALARM_FAN1      0x1000
+#define MAXI_ALARM_FAN2      0x2000
+#define MAXI_ALARM_FAN3      0x4000
+
+#define MAXI_ALARM_FAN       0x0100	/* To be used with  MaxiLife'99 */
+#define MAXI_ALARM_VID       0x0200	/* The MSB specifies which sensor */
+#define MAXI_ALARM_TEMP      0x0400	/* in the alarm group failed, i.e.: */
+#define MAXI_ALARM_VADD      0x0800	/* 0x0402 = TEMP2 failed = CPU2 temp */
+
+/* -- SENSORS SYSCTL END -- */
+
 /* These files are created for each detected MaxiLife processor.
    This is just a template; though at first sight, you might think we
    could use a statically allocated list, we need some way to get back
@@ -583,8 +622,7 @@ int maxi_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((err = i2c_register_entry(new_client, type_name,
-					  maxi_dir_table_template,
-					  THIS_MODULE)) < 0)
+					  maxi_dir_table_template)) < 0)
 		goto ERROR4;
 	data->sysctl_id = err;
 
@@ -619,12 +657,6 @@ static int maxi_detach_client(struct i2c_client *client)
 		return err;
 	}
 	kfree(client);
-	return 0;
-}
-
-/* No commands defined yet */
-static int maxi_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

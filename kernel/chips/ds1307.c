@@ -17,17 +17,14 @@
  */
 
 #include <linux/config.h>
-#include <linux/version.h>
 #include <linux/module.h>
-
 #include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/slab.h>
 #include <linux/init.h>
 #include <linux/i2c.h>
-
+#include <linux/i2c-proc.h>
 #include <asm/semaphore.h>
-
 #include "ds1307.h"
 
 #define BCD_TO_BIN(x) (((x) & 15) + ((x) >> 4) * 10)

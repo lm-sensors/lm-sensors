@@ -18,14 +18,12 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
-
+#include "version.h"
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -89,8 +87,6 @@ static int pcf8591_attach_adapter(struct i2c_adapter *adapter);
 static int pcf8591_detect(struct i2c_adapter *adapter, int address,
                           unsigned short flags, int kind);
 static int pcf8591_detach_client(struct i2c_client *client);
-static int pcf8591_command(struct i2c_client *client, unsigned int cmd,
-                           void *arg);
 
 static void pcf8591_update_client(struct i2c_client *client);
 static void pcf8591_init_client(struct i2c_client *client);
@@ -113,12 +109,22 @@ static struct i2c_driver pcf8591_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= pcf8591_attach_adapter,
 	.detach_client	= pcf8591_detach_client,
-	.command	= pcf8591_command,
 };
 
 static int pcf8591_id = 0;
 
 /* The /proc/sys entries */
+
+/* -- SENSORS SYSCTL START -- */
+#define PCF8591_SYSCTL_AIN_CONF 1000      /* Analog input configuration */
+#define PCF8591_SYSCTL_CH0 1001           /* Input channel 1 */
+#define PCF8591_SYSCTL_CH1 1002           /* Input channel 2 */
+#define PCF8591_SYSCTL_CH2 1003           /* Input channel 3 */
+#define PCF8591_SYSCTL_CH3 1004           /* Input channel 4 */
+#define PCF8591_SYSCTL_AOUT_ENABLE 1005   /* Analog output enable flag */
+#define PCF8591_SYSCTL_AOUT 1006          /* Analog output */
+/* -- SENSORS SYSCTL END -- */
+
 /* These files are created for each detected PCF8591. This is just a template;
    though at first sight, you might think we could use a statically
    allocated list, we need some way to get back to the parent - which
@@ -224,8 +230,7 @@ int pcf8591_detect(struct i2c_adapter *adapter, int address,
         /* Register a new directory entry with module sensors */
         if ((i = i2c_register_entry(new_client,
                                         type_name,
-                                        pcf8591_dir_table_template,
-                                        THIS_MODULE)) < 0) {
+                                        pcf8591_dir_table_template)) < 0) {
                 err = i;
                 goto ERROR4;
         }
@@ -251,11 +256,6 @@ static int pcf8591_detach_client(struct i2c_client *client)
 {
         int err;
 
-#ifdef MODULE
-        if (MOD_IN_USE)
-                return -EBUSY;
-#endif
-
         i2c_deregister_entry(((struct pcf8591_data *) (client->data))->
                                  sysctl_id);
 
@@ -269,13 +269,6 @@ static int pcf8591_detach_client(struct i2c_client *client)
 
         return 0;
 }
-
-/* No commands defined yet */
-static int pcf8591_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-        return 0;
-}
-
 
 /* Called when we have found a new PCF8591. */
 static void pcf8591_init_client(struct i2c_client *client)

@@ -31,19 +31,18 @@
     type at module load time.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -224,8 +223,6 @@ static int it87_attach_adapter(struct i2c_adapter *adapter);
 static int it87_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int it87_detach_client(struct i2c_client *client);
-static int it87_command(struct i2c_client *client, unsigned int cmd,
-			void *arg);
 
 static int it87_read_value(struct i2c_client *client, u8 register);
 static int it87_write_value(struct i2c_client *client, u8 register,
@@ -254,12 +251,49 @@ static struct i2c_driver it87_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= it87_attach_adapter,
 	.detach_client	= it87_detach_client,
-	.command	= it87_command,
 };
 
 static int it87_id = 0;
 
 /* The /proc/sys entries */
+
+/* -- SENSORS SYSCTL START -- */
+#define IT87_SYSCTL_IN0 1000    /* Volts * 100 */
+#define IT87_SYSCTL_IN1 1001
+#define IT87_SYSCTL_IN2 1002
+#define IT87_SYSCTL_IN3 1003
+#define IT87_SYSCTL_IN4 1004
+#define IT87_SYSCTL_IN5 1005
+#define IT87_SYSCTL_IN6 1006
+#define IT87_SYSCTL_IN7 1007
+#define IT87_SYSCTL_IN8 1008
+#define IT87_SYSCTL_FAN1 1101   /* Rotations/min */
+#define IT87_SYSCTL_FAN2 1102
+#define IT87_SYSCTL_FAN3 1103
+#define IT87_SYSCTL_TEMP1 1200  /* Degrees Celcius * 10 */
+#define IT87_SYSCTL_TEMP2 1201  /* Degrees Celcius * 10 */
+#define IT87_SYSCTL_TEMP3 1202  /* Degrees Celcius * 10 */
+#define IT87_SYSCTL_VID 1300    /* Volts * 100 */
+#define IT87_SYSCTL_FAN_DIV 2000        /* 1, 2, 4 or 8 */
+#define IT87_SYSCTL_ALARMS 2004    /* bitvector */
+
+#define IT87_ALARM_IN0 0x000100
+#define IT87_ALARM_IN1 0x000200
+#define IT87_ALARM_IN2 0x000400
+#define IT87_ALARM_IN3 0x000800
+#define IT87_ALARM_IN4 0x001000
+#define IT87_ALARM_IN5 0x002000
+#define IT87_ALARM_IN6 0x004000
+#define IT87_ALARM_IN7 0x008000
+#define IT87_ALARM_FAN1 0x0001
+#define IT87_ALARM_FAN2 0x0002
+#define IT87_ALARM_FAN3 0x0004
+#define IT87_ALARM_TEMP1 0x00010000
+#define IT87_ALARM_TEMP2 0x00020000
+#define IT87_ALARM_TEMP3 0x00040000
+
+/* -- SENSORS SYSCTL END -- */
+
 /* These files are created for each detected IT87. This is just a template;
    though at first sight, you might think we could use a statically
    allocated list, we need some way to get back to the parent - which
@@ -443,8 +477,7 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client,
 				    type_name,
-				    it87_dir_table_template,
-				    THIS_MODULE)) < 0) {
+				    it87_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -487,13 +520,6 @@ static int it87_detach_client(struct i2c_client *client)
 
 	return 0;
 }
-
-/* No commands defined yet */
-static int it87_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
 
 /* The SMBus locks itself, but ISA access must be locked explicitely! 
    We don't want to lock the whole ISA bus, so we lock each client

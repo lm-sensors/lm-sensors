@@ -48,17 +48,16 @@
    Note: we assume there can only be one device, with one SMBus interface.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
-#include <asm/io.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
 #include <linux/stddef.h>
 #include <linux/sched.h>
 #include <linux/ioport.h>
 #include <linux/i2c.h>
-#include "version.h"
 #include <linux/init.h>
+#include <asm/io.h>
+#include "version.h"
 
 #ifndef PCI_VENDOR_ID_SI
 #define PCI_VENDOR_ID_SI	0x1039

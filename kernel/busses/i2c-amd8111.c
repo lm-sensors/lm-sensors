@@ -8,10 +8,8 @@
  * the Free Software Foundation version 2.
  */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/pci.h>
-#include <asm/io.h>
 #include <linux/kernel.h>
 #include <linux/stddef.h>
 #include <linux/sched.h>
@@ -19,6 +17,7 @@
 #include <linux/init.h>
 #include <linux/i2c.h>
 #include <linux/delay.h>
+#include <asm/io.h>
 #include "version.h"
 
 #ifndef I2C_HW_SMBUS_AMD8111

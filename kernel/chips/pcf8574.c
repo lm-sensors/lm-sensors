@@ -38,13 +38,12 @@
 */
 
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -79,8 +78,6 @@ static int pcf8574_attach_adapter(struct i2c_adapter *adapter);
 static int pcf8574_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int pcf8574_detach_client(struct i2c_client *client);
-static int pcf8574_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 
 static void pcf8574_read(struct i2c_client *client, int operation,
 			               int ctl_name, int *nrels_mag, long *results);
@@ -97,8 +94,14 @@ static struct i2c_driver pcf8574_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= pcf8574_attach_adapter,
 	.detach_client	= pcf8574_detach_client,
-	.command	= pcf8574_command,
 };
+
+
+/* -- SENSORS SYSCTL START -- */
+#define PCF8574_SYSCTL_READ     1000
+#define PCF8574_SYSCTL_WRITE    1001
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected PCF8574. This is just a template;
    though at first sight, you might think we could use a statically
@@ -203,8 +206,7 @@ int pcf8574_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					pcf8574_dir_table_template,
-					THIS_MODULE)) < 0) {
+					pcf8574_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -244,12 +246,6 @@ static int pcf8574_detach_client(struct i2c_client *client)
 
 	return 0;
 
-}
-
-/* No commands defined yet */
-static int pcf8574_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
 }
 
 /* Called when we have found a new PCF8574. */

@@ -23,13 +23,12 @@
 
 #define DEBUG 1
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -81,8 +80,6 @@ static int bt869_detect(struct i2c_adapter *adapter, int address,
 			unsigned short flags, int kind);
 static void bt869_init_client(struct i2c_client *client);
 static int bt869_detach_client(struct i2c_client *client);
-static int bt869_command(struct i2c_client *client, unsigned int cmd,
-			 void *arg);
 static int bt869_read_value(struct i2c_client *client, u8 reg);
 static int bt869_write_value(struct i2c_client *client, u8 reg, u16 value);
 static void bt869_write_values(struct i2c_client *client, u16 *values);
@@ -111,8 +108,18 @@ static struct i2c_driver bt869_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= bt869_attach_adapter,
 	.detach_client	= bt869_detach_client,
-	.command	= bt869_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+#define BT869_SYSCTL_STATUS 1000
+#define BT869_SYSCTL_NTSC   1001
+#define BT869_SYSCTL_HALF   1002
+#define BT869_SYSCTL_RES    1003
+#define BT869_SYSCTL_COLORBARS    1004
+#define BT869_SYSCTL_DEPTH  1005
+#define BT869_SYSCTL_SVIDEO 1006
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected bt869. This is just a template;
    though at first sight, you might think we could use a statically
@@ -544,8 +551,7 @@ int bt869_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					bt869_dir_table_template,
-					THIS_MODULE)) < 0) {
+					bt869_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -581,13 +587,6 @@ static int bt869_detach_client(struct i2c_client *client)
 
 	kfree(client);
 
-	return 0;
-}
-
-
-/* No commands defined yet */
-static int bt869_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

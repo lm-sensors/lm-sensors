@@ -19,12 +19,11 @@
 */
 
 #include <linux/module.h>
-#include <linux/version.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include "version.h"
 
 #define DEBUG 1
 
@@ -116,8 +115,6 @@ static int smbusarp_attach_adapter(struct i2c_adapter *adapter);
 static int smbusarp_detect(struct i2c_adapter *adapter, int address,
 			 unsigned short flags, int kind);
 static int smbusarp_detach_client(struct i2c_client *client);
-static int smbusarp_command(struct i2c_client *client, unsigned int cmd,
-			  void *arg);
 
 static int smbusarp_init_client(struct i2c_client *client);
 static void smbusarp_contents(struct i2c_client *client, int operation,
@@ -130,8 +127,19 @@ static struct i2c_driver smbusarp_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= smbusarp_attach_adapter,
 	.detach_client	= smbusarp_detach_client,
-	.command	= smbusarp_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+#define ARP_SYSCTL1 1000
+#define ARP_SYSCTL2 1001
+#define ARP_SYSCTL3 1002
+#define ARP_SYSCTL4 1003
+#define ARP_SYSCTL5 1004
+#define ARP_SYSCTL6 1005
+#define ARP_SYSCTL7 1006
+#define ARP_SYSCTL8 1007
+
+/* -- SENSORS SYSCTL END -- */
 
 static ctl_table smbusarp_dir_table_template[] = {
 	{ARP_SYSCTL1, "0", NULL, 0, 0644, NULL, &i2c_proc_real,
@@ -203,8 +211,7 @@ int smbusarp_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR1;
 
 	if ((i = i2c_register_entry(new_client, type_name,
-					smbusarp_dir_table_template,
-					THIS_MODULE)) < 0) {
+					smbusarp_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -234,12 +241,6 @@ static int smbusarp_detach_client(struct i2c_client *client)
 
 	kfree(client);
 
-	return 0;
-}
-
-
-static int smbusarp_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

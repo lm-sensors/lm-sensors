@@ -19,14 +19,12 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
-
+#include "version.h"
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -118,8 +116,6 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static void adm1021_init_client(struct i2c_client *client);
 static int adm1021_detach_client(struct i2c_client *client);
-static int adm1021_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 static int adm1021_read_value(struct i2c_client *client, u8 reg);
 static int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg, u8 mask);
 static int adm1021_write_value(struct i2c_client *client, u8 reg,
@@ -147,8 +143,22 @@ static struct i2c_driver adm1021_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= adm1021_attach_adapter,
 	.detach_client	= adm1021_detach_client,
-	.command	= adm1021_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+
+#define ADM1021_SYSCTL_TEMP 1200
+#define ADM1021_SYSCTL_REMOTE_TEMP 1201
+#define ADM1021_SYSCTL_DIE_CODE 1202
+#define ADM1021_SYSCTL_ALARMS 1203
+
+#define ADM1021_ALARM_TEMP_HIGH 0x40
+#define ADM1021_ALARM_TEMP_LOW 0x20
+#define ADM1021_ALARM_RTEMP_HIGH 0x10
+#define ADM1021_ALARM_RTEMP_LOW 0x08
+#define ADM1021_ALARM_RTEMP_NA 0x04
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected adm1021. This is just a template;
    though at first sight, you might think we could use a statically
@@ -310,13 +320,9 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 		goto error3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = i2c_register_entry(new_client,
-					type_name,
-					data->type ==
-					adm1021 ?
-					adm1021_dir_table_template :
-					adm1021_max_dir_table_template,
-					THIS_MODULE)) < 0) {
+	if ((i = i2c_register_entry(new_client,	type_name,
+					data->type == adm1021 ? adm1021_dir_table_template :
+					adm1021_max_dir_table_template)) < 0) {
 		err = i;
 		goto error4;
 	}
@@ -370,13 +376,6 @@ static int adm1021_detach_client(struct i2c_client *client)
 
 	return 0;
 
-}
-
-
-/* No commands defined yet */
-static int adm1021_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
 }
 
 

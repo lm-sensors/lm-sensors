@@ -18,10 +18,39 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef SENSORS_NSENSORS_H
-#define SENSORS_NSENSORS_H
+#ifndef LIB_SENSORS_H
+#define LIB_SENSORS_H
 
-#include <linux/i2c-proc.h>
+/* In spite of current location in CVS, this file is intended 
+   to be included from userland utilities only. --km */
+
+/* From linux/i2c-proc.h */
+
+/* Sysctl IDs */
+#ifdef DEV_HWMON
+#define DEV_SENSORS DEV_HWMON
+#else				/* ndef DEV_HWMOM */
+#define DEV_SENSORS 2		/* The id of the lm_sensors directory within the
+				   dev table */
+#endif				/* def DEV_HWMON */
+
+/* The maximum length of the prefix */
+#define SENSORS_PREFIX_MAX 20
+
+#define SENSORS_CHIPS 1
+struct i2c_chips_data {
+	int sysctl_id;
+	char name[SENSORS_PREFIX_MAX + 13];
+};
+
+
+/* This file should be automatically generated from the sysctl enumerations
+   found in chips/*.c. At release time, diff againts previous release to make
+   sure we maintain binary compatibility of userland utilities that include
+   this file. --km */
+
+   
+/* I think we should remove the chip prefix on entries below. --km */
 
 #define LM78_SYSCTL_IN0 1000	/* Volts * 100 */
 #define LM78_SYSCTL_IN1 1001
@@ -690,4 +719,4 @@
 #define BMC_SYSCTL_ALARMS 5000
 
 
-#endif				/* def SENSORS_SENSORS_H */
+#endif				/* def LIB_SENSORS_H */

@@ -22,13 +22,12 @@
 
 #define DEBUG 1
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -59,8 +58,6 @@ static int matorb_detect(struct i2c_adapter *adapter, int address,
 			 unsigned short flags, int kind);
 static void matorb_init_client(struct i2c_client *client);
 static int matorb_detach_client(struct i2c_client *client);
-static int matorb_command(struct i2c_client *client, unsigned int cmd,
-			  void *arg);
 
 static int matorb_write_value(struct i2c_client *client, u8 reg,
 			      u16 value);
@@ -77,8 +74,11 @@ static struct i2c_driver matorb_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= matorb_attach_adapter,
 	.detach_client	= matorb_detach_client,
-	.command	= matorb_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+#define MATORB_SYSCTL_DISP 1000
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected MATORB. This is just a template;
    though at first sight, you might think we could use a statically
@@ -159,8 +159,7 @@ int matorb_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					matorb_dir_table_template,
-					THIS_MODULE)) < 0) {
+					matorb_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -195,13 +194,6 @@ static int matorb_detach_client(struct i2c_client *client)
 
 	kfree(client);
 
-	return 0;
-}
-
-
-/* No commands defined yet */
-static int matorb_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

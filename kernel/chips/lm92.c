@@ -18,9 +18,7 @@
  */
 
 #include <linux/config.h>
-#include <linux/version.h>
 #include <linux/module.h>
-
 #include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/slab.h>
@@ -29,14 +27,11 @@
 #include <linux/i2c-proc.h>
 #include <linux/proc_fs.h>
 #include <linux/sysctl.h>
-
 #include <asm/semaphore.h>
+#include "version.h"
 
 /* if defined, 4 faults must occur consecutively to set alarm flags */
 /* #define ENABLE_FAULT_QUEUE */
-
-#include "version.h"
-#include "sensors.h"
 
 #define LM92_REG_TEMPERATURE		0x00	/* ro, 16-bit	*/
 #define LM92_REG_CONFIGURATION		0x01	/* rw, 8-bit	*/
@@ -62,6 +57,21 @@
 
 static void lm92_temp (struct i2c_client *client,int operation,int ctl_name,int *nrels_mag,long *results);
 static void lm92_alarms (struct i2c_client *client,int operation,int ctl_name,int *nrels_mag,long *results);
+
+/* -- SENSORS SYSCTL START -- */
+#define LM92_SYSCTL_ALARMS		2001	/* high, low, critical */
+#define LM92_SYSCTL_TEMP		1200	/* high, low, critical, hysterisis, input */
+
+#define LM92_ALARM_TEMP_HIGH	0x01
+#define LM92_ALARM_TEMP_LOW		0x02
+#define LM92_ALARM_TEMP_CRIT	0x04
+#define LM92_TEMP_HIGH			0x08
+#define LM92_TEMP_LOW			0x10
+#define LM92_TEMP_CRIT			0x20
+#define LM92_TEMP_HYST			0x40
+#define LM92_TEMP_INPUT			0x80
+
+/* -- SENSORS SYSCTL END -- */
 
 static ctl_table lm92_dir_table[] = {
 	{LM92_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &i2c_proc_real,
@@ -295,7 +305,7 @@ static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short f
 		return (result);
 	}
 
-	if ((result = i2c_register_entry (client,client->name,lm92_dir_table,THIS_MODULE)) < 0) {
+	if ((result = i2c_register_entry (client,client->name,lm92_dir_table)) < 0) {
 		i2c_detach_client (client);
 		kfree (client);
 		up (&mutex);
@@ -351,11 +361,6 @@ static int lm92_detach_client (struct i2c_client *client)
 	return (0);
 }
 
-static int lm92_command (struct i2c_client *client,unsigned int cmd,void *arg)
-{
-	return (0);
-}
-
 
 static struct i2c_driver lm92_driver = {
 	.owner		= THIS_MODULE,
@@ -364,7 +369,6 @@ static struct i2c_driver lm92_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= lm92_attach_adapter,
 	.detach_client	= lm92_detach_client,
-	.command	= lm92_command,
 };
 
 static int __init sm_lm92_init(void)

@@ -32,15 +32,15 @@
 #include <linux/module.h>
 #include <linux/config.h>
 #include <linux/pci.h>
-#include <asm/io.h>
 #include <linux/kernel.h>
 #include <linux/stddef.h>
 #include <linux/sched.h>
 #include <linux/ioport.h>
 #include <linux/i2c.h>
-#include "version.h"
 #include <linux/init.h>
 #include <linux/apm_bios.h>
+#include <asm/io.h>
+#include "version.h"
 #include "dmi_scan.h"
 
 /* Note: We assume all devices are identical

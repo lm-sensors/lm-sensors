@@ -60,19 +60,16 @@
 
 /* Note: we assume there can only be one ALI15X3, with one SMBus interface */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/pci.h>
-#include <asm/io.h>
 #include <linux/kernel.h>
 #include <linux/stddef.h>
 #include <linux/sched.h>
 #include <linux/ioport.h>
 #include <linux/i2c.h>
-#include "version.h"
 #include <linux/init.h>
-
-MODULE_LICENSE("GPL");
+#include <asm/io.h>
+#include "version.h"
 
 /* ALI15X3 SMBus address offsets */
 #define SMBHSTSTS (0 + ali15x3_smba)
@@ -586,6 +583,7 @@ static void __exit i2c_ali15x3_exit(void)
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, and Mark D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("ALI15X3 SMBus driver");
+MODULE_LICENSE("GPL");
 
 module_init(i2c_ali15x3_init);
 module_exit(i2c_ali15x3_exit);

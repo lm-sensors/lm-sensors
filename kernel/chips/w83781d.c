@@ -34,20 +34,16 @@
 
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
-#include <linux/proc_fs.h>
-#include <linux/ioport.h>
-#include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
-#include "sensors_vid.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
+#include "sensors_vid.h"
 
 /* RT Table support #defined so we can take it out if it gets bothersome */
 #define W83781D_RT 1
@@ -370,8 +366,6 @@ static int w83781d_attach_adapter(struct i2c_adapter *adapter);
 static int w83781d_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int w83781d_detach_client(struct i2c_client *client);
-static int w83781d_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 
 static int w83781d_read_value(struct i2c_client *client, u16 register);
 static int w83781d_write_value(struct i2c_client *client, u16 register,
@@ -417,10 +411,62 @@ static struct i2c_driver w83781d_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= w83781d_attach_adapter,
 	.detach_client	= w83781d_detach_client,
-	.command	= w83781d_command,
 };
 
 /* The /proc/sys entries */
+/* -- SENSORS SYSCTL START -- */
+
+#define W83781D_SYSCTL_IN0 1000	/* Volts * 100 */
+#define W83781D_SYSCTL_IN1 1001
+#define W83781D_SYSCTL_IN2 1002
+#define W83781D_SYSCTL_IN3 1003
+#define W83781D_SYSCTL_IN4 1004
+#define W83781D_SYSCTL_IN5 1005
+#define W83781D_SYSCTL_IN6 1006
+#define W83781D_SYSCTL_IN7 1007
+#define W83781D_SYSCTL_IN8 1008
+#define W83781D_SYSCTL_FAN1 1101	/* Rotations/min */
+#define W83781D_SYSCTL_FAN2 1102
+#define W83781D_SYSCTL_FAN3 1103
+#define W83781D_SYSCTL_TEMP1 1200	/* Degrees Celcius * 10 */
+#define W83781D_SYSCTL_TEMP2 1201	/* Degrees Celcius * 10 */
+#define W83781D_SYSCTL_TEMP3 1202	/* Degrees Celcius * 10 */
+#define W83781D_SYSCTL_VID 1300		/* Volts * 1000 */
+#define W83781D_SYSCTL_VRM 1301
+#define W83781D_SYSCTL_PWM1 1401
+#define W83781D_SYSCTL_PWM2 1402
+#define W83781D_SYSCTL_PWM3 1403
+#define W83781D_SYSCTL_PWM4 1404
+#define W83781D_SYSCTL_SENS1 1501	/* 1, 2, or Beta (3000-5000) */
+#define W83781D_SYSCTL_SENS2 1502
+#define W83781D_SYSCTL_SENS3 1503
+#define W83781D_SYSCTL_RT1   1601	/* 32-entry table */
+#define W83781D_SYSCTL_RT2   1602	/* 32-entry table */
+#define W83781D_SYSCTL_RT3   1603	/* 32-entry table */
+#define W83781D_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
+#define W83781D_SYSCTL_ALARMS 2001	/* bitvector */
+#define W83781D_SYSCTL_BEEP 2002	/* bitvector */
+
+#define W83781D_ALARM_IN0 0x0001
+#define W83781D_ALARM_IN1 0x0002
+#define W83781D_ALARM_IN2 0x0004
+#define W83781D_ALARM_IN3 0x0008
+#define W83781D_ALARM_IN4 0x0100
+#define W83781D_ALARM_IN5 0x0200
+#define W83781D_ALARM_IN6 0x0400
+#define W83782D_ALARM_IN7 0x10000
+#define W83782D_ALARM_IN8 0x20000
+#define W83781D_ALARM_FAN1 0x0040
+#define W83781D_ALARM_FAN2 0x0080
+#define W83781D_ALARM_FAN3 0x0800
+#define W83781D_ALARM_TEMP1 0x0010
+#define W83781D_ALARM_TEMP23 0x0020	/* 781D only */
+#define W83781D_ALARM_TEMP2 0x0020	/* 782D/783S */
+#define W83781D_ALARM_TEMP3 0x2000	/* 782D only */
+#define W83781D_ALARM_CHAS 0x1000
+
+/* -- SENSORS SYSCTL END -- */
+
 /* These files are created for each detected chip. This is just a template;
    though at first sight, you might think we could use a statically
    allocated list, we need some way to get back to the parent - which
@@ -733,8 +779,8 @@ static int w83781d_attach_adapter(struct i2c_adapter *adapter)
 	return i2c_detect(adapter, &addr_data, w83781d_detect);
 }
 
-int w83781d_detect(struct i2c_adapter *adapter, int address,
-		   unsigned short flags, int kind)
+static int w83781d_detect(struct i2c_adapter *adapter, int address,
+                  unsigned short flags, int kind)
 {
 	int i, val1 = 0, val2, id;
 	struct i2c_client *new_client;
@@ -750,10 +796,11 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 					I2C_FUNC_SMBUS_BYTE_DATA)) goto
 		    ERROR0;
 
-	if (is_isa) {
-		if (check_region(address, W83781D_EXTENT))
-			goto ERROR0;
-	}
+       if (is_isa) {
+               if (!request_region(address, W83781D_EXTENT, "w83781d"))
+                       goto ERROR0;
+               release_region(address, W83781D_EXTENT);
+       }
 
 	/* Probe whether there is anything available on this address. Already
 	   done for SMBus clients */
@@ -997,8 +1044,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 					   w83697hf_dir_table_template :
 					(is_isa || kind == w83627hf) ?
 					   w83782d_isa_dir_table_template :
-					   w83782d_i2c_dir_table_template,
-					THIS_MODULE)) < 0) {
+					   w83782d_i2c_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR7;
 	}
@@ -1069,14 +1115,7 @@ static int w83781d_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-/* No commands defined yet */
-static int w83781d_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
-
-static u16 swap_bytes(u16 val)
+static inline u16 swap_bytes(u16 val)
 {
 	return (val >> 8) | (val << 8);
 }
@@ -1438,125 +1477,114 @@ static void w83781d_init_client(struct i2c_client *client)
 
 static void w83781d_update_client(struct i2c_client *client)
 {
-	struct w83781d_data *data = client->data;
-	int i, j;
+       struct w83781d_data *data = client->data;
+       int i;
 
-	down(&data->update_lock);
+       down(&data->update_lock);
 
-	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
-	    (jiffies < data->last_updated) || !data->valid) {
+       if (time_after(jiffies - data->last_updated, HZ + HZ / 2) ||
+           time_before(jiffies, data->last_updated) || !data->valid) {
+               pr_debug(KERN_DEBUG "Starting device update\n");
 
-#ifdef DEBUG
-		printk(KERN_DEBUG "Starting device update\n");
-#endif
-		for (i = 0; i <= 8; i++) {
-			if ((data->type == w83783s || data->type == w83697hf)
-			    && (i == 1))
-				continue;	/* 783S has no in1 */
-			data->in[i] =
-			    w83781d_read_value(client, W83781D_REG_IN(i));
-			data->in_min[i] =
-			    w83781d_read_value(client,
-					       W83781D_REG_IN_MIN(i));
-			data->in_max[i] =
-			    w83781d_read_value(client,
-					       W83781D_REG_IN_MAX(i));
-			if ((data->type != w83782d) && (data->type != w83697hf)
-			    && (data->type != w83627hf) && (i == 6))
-				break;
-		}
-		/* PWM2 pin shared with FAN3 */
-		j = w83781d_read_value(client, W83781D_REG_BEEP_CONFIG) & 0x10;
-		data->pwmenable[1] = (!j) &&
-		  (w83781d_read_value(client, W83781D_REG_PWMCLK12) & 0x08);
-		for (i = 1; i <= 3; i++) {
-			if(i == 3 && !j) {
-				data->fan[2] = 255;
-				data->fan_min[2] = 255;
-				break;
-			}
-			data->fan[i - 1] =
-			    w83781d_read_value(client, W83781D_REG_FAN(i));
-			data->fan_min[i - 1] =
-			    w83781d_read_value(client,
-					       W83781D_REG_FAN_MIN(i));
-		}
-		if (data->type != w83781d) {
-			for (i = 1; i <= 4; i++) {
-				data->pwm[i - 1] =
-				    w83781d_read_value(client,
-						       W83781D_REG_PWM(i));
-				if (((data->type == w83783s)
-				     || (data->type == w83627hf)
-				     || (data->type == as99127f)
-				     || (data->type == w83697hf)
-				     || ((data->type == w83782d)
-				        && i2c_is_isa_client(client)))
-				    && i == 2)
-					break;
-			}
-		}
+               for (i = 0; i <= 8; i++) {
+                       if ((data->type == w83783s || data->type == w83697hf)
+                           && (i == 1))
+                               continue;       /* 783S has no in1 */
+                       data->in[i] =
+                           w83781d_read_value(client, W83781D_REG_IN(i));
+                       data->in_min[i] =
+                           w83781d_read_value(client,
+                                              W83781D_REG_IN_MIN(i));
+                       data->in_max[i] =
+                           w83781d_read_value(client,
+                                              W83781D_REG_IN_MAX(i));
+                       if ((data->type != w83782d) && (data->type != w83697hf)
+                           && (data->type != w83627hf) && (i == 6))
+                               break;
+               }
+               for (i = 1; i <= 3; i++) {
+                       data->fan[i - 1] =
+                           w83781d_read_value(client, W83781D_REG_FAN(i));
+                       data->fan_min[i - 1] =
+                           w83781d_read_value(client,
+                                              W83781D_REG_FAN_MIN(i));
+               }
+               if (data->type != w83781d) {
+                       for (i = 1; i <= 4; i++) {
+                               data->pwm[i - 1] =
+                                   w83781d_read_value(client,
+                                                      W83781D_REG_PWM(i));
+                               if (((data->type == w83783s)
+                                    || (data->type == w83627hf)
+                                    || (data->type == as99127f)
+                                    || (data->type == w83697hf)
+                                    || ((data->type == w83782d)
+                                       && i2c_is_isa_client(client)))
+                                   && i == 2)
+                                       break;
+                       }
+               }
 
-		data->temp = w83781d_read_value(client, W83781D_REG_TEMP);
-		data->temp_over =
-		    w83781d_read_value(client, W83781D_REG_TEMP_OVER);
-		data->temp_hyst =
-		    w83781d_read_value(client, W83781D_REG_TEMP_HYST);
-		data->temp_add[0] =
-		    w83781d_read_value(client, W83781D_REG_TEMP2);
-		data->temp_add_over[0] =
-		    w83781d_read_value(client, W83781D_REG_TEMP2_OVER);
-		data->temp_add_hyst[0] =
-		    w83781d_read_value(client, W83781D_REG_TEMP2_HYST);
-		if (data->type != w83783s && data->type != w83697hf) {
-			data->temp_add[1] =
-			    w83781d_read_value(client, W83781D_REG_TEMP3);
-			data->temp_add_over[1] =
-			    w83781d_read_value(client, W83781D_REG_TEMP3_OVER);
-			data->temp_add_hyst[1] =
-			    w83781d_read_value(client, W83781D_REG_TEMP3_HYST);
-		}
-		i = w83781d_read_value(client, W83781D_REG_VID_FANDIV);
-		if (data->type != w83697hf) {
-			data->vid = i & 0x0f;
-			data->vid |=
-			    (w83781d_read_value(client, W83781D_REG_CHIPID) & 0x01)
-			    << 4;
-		}
-		data->fan_div[0] = (i >> 4) & 0x03;
-		data->fan_div[1] = (i >> 6) & 0x03;
-		if (data->type != w83697hf) {
-			data->fan_div[2] = (w83781d_read_value(client,
-					       W83781D_REG_PIN) >> 6) & 0x03;
-		}
-		if ((data->type != w83781d) && (data->type != as99127f)) {
-			i = w83781d_read_value(client, W83781D_REG_VBAT);
-			data->fan_div[0] |= (i >> 3) & 0x04;
-			data->fan_div[1] |= (i >> 4) & 0x04;
-			if (data->type != w83697hf)
-				data->fan_div[2] |= (i >> 5) & 0x04;
-		}
-		data->alarms =
-		    w83781d_read_value(client,
-				       W83781D_REG_ALARM1) +
-		    (w83781d_read_value(client, W83781D_REG_ALARM2) << 8);
-		if ((data->type == w83782d) || (data->type == w83627hf)) {
-			data->alarms |=
-			    w83781d_read_value(client,
-					       W83781D_REG_ALARM3) << 16;
-		}
-		i = w83781d_read_value(client, W83781D_REG_BEEP_INTS2);
-		data->beep_enable = i >> 7;
-		data->beeps = ((i & 0x7f) << 8) +
-		    w83781d_read_value(client, W83781D_REG_BEEP_INTS1);
-		if ((data->type != w83781d) && (data->type != as99127f)) {
-			data->beeps |=
-			    w83781d_read_value(client,
-					       W83781D_REG_BEEP_INTS3) << 16;
-		}
-		data->last_updated = jiffies;
-		data->valid = 1;
-	}
+               data->temp = w83781d_read_value(client, W83781D_REG_TEMP);
+               data->temp_over =
+                   w83781d_read_value(client, W83781D_REG_TEMP_OVER);
+               data->temp_hyst =
+                   w83781d_read_value(client, W83781D_REG_TEMP_HYST);
+               data->temp_add[0] =
+                   w83781d_read_value(client, W83781D_REG_TEMP2);
+               data->temp_add_over[0] =
+                   w83781d_read_value(client, W83781D_REG_TEMP2_OVER);
+               data->temp_add_hyst[0] =
+                   w83781d_read_value(client, W83781D_REG_TEMP2_HYST);
+               if (data->type != w83783s && data->type != w83697hf) {
+                       data->temp_add[1] =
+                           w83781d_read_value(client, W83781D_REG_TEMP3);
+                       data->temp_add_over[1] =
+                           w83781d_read_value(client, W83781D_REG_TEMP3_OVER);
+                       data->temp_add_hyst[1] =
+                           w83781d_read_value(client, W83781D_REG_TEMP3_HYST);
+               }
+               i = w83781d_read_value(client, W83781D_REG_VID_FANDIV);
+               if (data->type != w83697hf) {
+                       data->vid = i & 0x0f;
+                       data->vid |=
+                           (w83781d_read_value(client, W83781D_REG_CHIPID) & 0x01)
+                           << 4;
+               }
+               data->fan_div[0] = (i >> 4) & 0x03;
+               data->fan_div[1] = (i >> 6) & 0x03;
+               if (data->type != w83697hf) {
+                       data->fan_div[2] = (w83781d_read_value(client,
+                                              W83781D_REG_PIN) >> 6) & 0x03;
+               }
+               if ((data->type != w83781d) && (data->type != as99127f)) {
+                       i = w83781d_read_value(client, W83781D_REG_VBAT);
+                       data->fan_div[0] |= (i >> 3) & 0x04;
+                       data->fan_div[1] |= (i >> 4) & 0x04;
+                       if (data->type != w83697hf)
+                               data->fan_div[2] |= (i >> 5) & 0x04;
+               }
+               data->alarms =
+                   w83781d_read_value(client,
+                                      W83781D_REG_ALARM1) +
+                   (w83781d_read_value(client, W83781D_REG_ALARM2) << 8);
+               if ((data->type == w83782d) || (data->type == w83627hf)) {
+                       data->alarms |=
+                           w83781d_read_value(client,
+                                              W83781D_REG_ALARM3) << 16;
+               }
+               i = w83781d_read_value(client, W83781D_REG_BEEP_INTS2);
+               data->beep_enable = i >> 7;
+               data->beeps = ((i & 0x7f) << 8) +
+                   w83781d_read_value(client, W83781D_REG_BEEP_INTS1);
+               if ((data->type != w83781d) && (data->type != as99127f)) {
+                       data->beeps |=
+                           w83781d_read_value(client,
+                                              W83781D_REG_BEEP_INTS3) << 16;
+               }
+               data->last_updated = jiffies;
+               data->valid = 1;
+       }
 
 	up(&data->update_lock);
 }
@@ -1575,8 +1603,8 @@ static void w83781d_update_client(struct i2c_client *client)
    large enough (by checking the incoming value of *nrels). This is not very
    good practice, but as long as you put less than about 5 values in results,
    you can assume it is large enough. */
-void w83781d_in(struct i2c_client *client, int operation, int ctl_name,
-		int *nrels_mag, long *results)
+static void w83781d_in(struct i2c_client *client, int operation, int ctl_name,
+               int *nrels_mag, long *results)
 {
 	struct w83781d_data *data = client->data;
 	int nr = ctl_name - W83781D_SYSCTL_IN0;
@@ -1974,8 +2002,8 @@ void w83781d_sens(struct i2c_client *client, int operation, int ctl_name,
 }
 
 #ifdef W83781D_RT
-void w83781d_rt(struct i2c_client *client, int operation, int ctl_name,
-		int *nrels_mag, long *results)
+static void w83781d_rt(struct i2c_client *client, int operation, int ctl_name,
+               int *nrels_mag, long *results)
 {
 	struct w83781d_data *data = client->data;
 	int nr = 1 + ctl_name - W83781D_SYSCTL_RT1;

@@ -19,20 +19,18 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
-
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
 
 static int force_addr = 0;
 MODULE_PARM(force_addr, "i");
@@ -142,8 +140,6 @@ static int smsc47m1_attach_adapter(struct i2c_adapter *adapter);
 static int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int smsc47m1_detach_client(struct i2c_client *client);
-static int smsc47m1_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 
 static int smsc47m1_read_value(struct i2c_client *client, u8 register);
 static int smsc47m1_write_value(struct i2c_client *client, u8 register,
@@ -171,8 +167,20 @@ static struct i2c_driver smsc47m1_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= smsc47m1_attach_adapter,
 	.detach_client	= smsc47m1_detach_client,
-	.command	= smsc47m1_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+#define SMSC47M1_SYSCTL_FAN1 1101   /* Rotations/min */
+#define SMSC47M1_SYSCTL_FAN2 1102
+#define SMSC47M1_SYSCTL_PWM1 1401
+#define SMSC47M1_SYSCTL_PWM2 1402
+#define SMSC47M1_SYSCTL_FAN_DIV 2000        /* 1, 2, 4 or 8 */
+#define SMSC47M1_SYSCTL_ALARMS 2004    /* bitvector */
+
+#define SMSC47M1_ALARM_FAN1 0x0001
+#define SMSC47M1_ALARM_FAN2 0x0002
+
+/* -- SENSORS SYSCTL END -- */
 
 static ctl_table smsc47m1_dir_table_template[] = {
 	{SMSC47M1_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
@@ -277,8 +285,7 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
-					smsc47m1_dir_table_template,
-					THIS_MODULE)) < 0) {
+					smsc47m1_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -311,11 +318,6 @@ static int smsc47m1_detach_client(struct i2c_client *client)
 	release_region(client->addr, SMSC_EXTENT);
 	kfree(client);
 
-	return 0;
-}
-
-static int smsc47m1_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

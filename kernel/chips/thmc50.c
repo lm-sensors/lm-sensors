@@ -21,13 +21,12 @@
 
 #define DEBUG 1
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -94,8 +93,6 @@ static int thmc50_detect(struct i2c_adapter *adapter, int address,
 			 unsigned short flags, int kind);
 static void thmc50_init_client(struct i2c_client *client);
 static int thmc50_detach_client(struct i2c_client *client);
-static int thmc50_command(struct i2c_client *client, unsigned int cmd,
-			  void *arg);
 
 static int thmc50_read_value(struct i2c_client *client, u8 reg);
 static int thmc50_write_value(struct i2c_client *client, u8 reg,
@@ -124,8 +121,18 @@ static struct i2c_driver thmc50_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= thmc50_attach_adapter,
 	.detach_client	= thmc50_detach_client,
-	.command	= thmc50_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+
+#define THMC50_SYSCTL_TEMP 1200	/* Degrees Celcius */
+#define THMC50_SYSCTL_REMOTE_TEMP 1201	/* Degrees Celcius */
+#define THMC50_SYSCTL_INTER 1202
+#define THMC50_SYSCTL_INTER_MASK 1203
+#define THMC50_SYSCTL_DIE_CODE 1204
+#define THMC50_SYSCTL_ANALOG_OUT 1205
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected THMC50. This is just a template;
    though at first sight, you might think we could use a statically
@@ -243,8 +250,7 @@ int thmc50_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					thmc50_dir_table_template,
-					THIS_MODULE)) < 0) {
+					thmc50_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -280,13 +286,6 @@ static int thmc50_detach_client(struct i2c_client *client)
 
 	kfree(client);
 
-	return 0;
-}
-
-
-/* No commands defined yet */
-static int thmc50_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

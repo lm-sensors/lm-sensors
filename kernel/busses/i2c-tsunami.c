@@ -29,15 +29,14 @@
 	Order Number: DS-0025-TE
 */ 
 
-#include <linux/version.h>
 #include <linux/module.h>
+#include <linux/i2c.h>
+#include <linux/i2c-algo-bit.h>
+#include <linux/init.h>
 #include <asm/io.h>
 #include <asm/hwrpb.h>
 #include <asm/core_tsunami.h>
-#include <linux/i2c.h>
-#include <linux/i2c-algo-bit.h>
 #include "version.h"
-#include <linux/init.h>
 
 MODULE_LICENSE("GPL");
 

@@ -21,12 +21,11 @@
 */
 
 #include <linux/module.h>
-#include <linux/version.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -73,8 +72,6 @@ static int ddcmon_attach_adapter(struct i2c_adapter *adapter);
 static int ddcmon_detect(struct i2c_adapter *adapter, int address,
 			 unsigned short flags, int kind);
 static int ddcmon_detach_client(struct i2c_client *client);
-static int ddcmon_command(struct i2c_client *client, unsigned int cmd,
-			  void *arg);
 
 static void ddcmon_idcall(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
@@ -97,8 +94,16 @@ static struct i2c_driver ddcmon_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= ddcmon_attach_adapter,
 	.detach_client	= ddcmon_detach_client,
-	.command	= ddcmon_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+#define DDCMON_SYSCTL_ID 1010
+#define DDCMON_SYSCTL_SIZE 1011
+#define DDCMON_SYSCTL_SYNC 1012
+#define DDCMON_SYSCTL_TIMINGS 1013
+#define DDCMON_SYSCTL_SERIAL 1014
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected DDCMON. This is just a template;
    though at first sight, you might think we could use a statically
@@ -188,8 +193,7 @@ int ddcmon_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					ddcmon_dir_table_template,
-					THIS_MODULE)) < 0) {
+					ddcmon_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -218,12 +222,6 @@ static int ddcmon_detach_client(struct i2c_client *client)
 		return err;
 	}
 	kfree(client);
-	return 0;
-}
-
-/* No commands defined yet */
-static int ddcmon_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

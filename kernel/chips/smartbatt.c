@@ -24,14 +24,12 @@
 	   Copyright (C) 2000 Hypercore Software Design, Ltd.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
-
+#include "version.h"
 
 
 /* Addresses to scan */
@@ -96,8 +94,6 @@ static int smartbatt_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static void smartbatt_init_client(struct i2c_client *client);
 static int smartbatt_detach_client(struct i2c_client *client);
-static int smartbatt_command(struct i2c_client *client, unsigned int cmd,
-			void *arg);
 
 static u16 swap_bytes(u16 val);
 static int sb_read(struct i2c_client *client, u8 reg);
@@ -127,8 +123,18 @@ static struct i2c_driver smartbatt_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= smartbatt_attach_adapter,
 	.detach_client	= smartbatt_detach_client,
-	.command	= smartbatt_command,
 };
+
+
+/* -- SENSORS SYSCTL START -- */
+#define SMARTBATT_SYSCTL_I 1001
+#define SMARTBATT_SYSCTL_V 1002
+#define SMARTBATT_SYSCTL_TEMP 1003
+#define SMARTBATT_SYSCTL_TIME 1004
+#define SMARTBATT_SYSCTL_ALARMS 1005
+#define SMARTBATT_SYSCTL_CHARGE 1006
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected SMARTBATT. This is just a template;
    though at first sight, you might think we could use a statically
@@ -222,8 +228,7 @@ int smartbatt_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					smartbatt_dir_table_template,
-					THIS_MODULE)) < 0) {
+					smartbatt_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -248,12 +253,6 @@ static int smartbatt_detach_client(struct i2c_client *client)
 {
 	int err;
 
-#ifdef MODULE
-	if (MOD_IN_USE)
-		return -EBUSY;
-#endif
-
-
 	i2c_deregister_entry(((struct smartbatt_data *) (client->data))->
 				 sysctl_id);
 
@@ -265,13 +264,6 @@ static int smartbatt_detach_client(struct i2c_client *client)
 
 	kfree(client);
 
-	return 0;
-}
-
-
-/* No commands defined yet */
-static int smartbatt_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

@@ -45,20 +45,19 @@
 	 735		0008		0735
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
 #include <linux/pci.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -255,8 +254,6 @@ static int sis5595_attach_adapter(struct i2c_adapter *adapter);
 static int sis5595_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int sis5595_detach_client(struct i2c_client *client);
-static int sis5595_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 
 static int sis5595_read_value(struct i2c_client *client, u8 register);
 static int sis5595_write_value(struct i2c_client *client, u8 register,
@@ -288,10 +285,34 @@ static struct i2c_driver sis5595_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= sis5595_attach_adapter,
 	.detach_client	= sis5595_detach_client,
-	.command	= sis5595_command,
 };
 
 /* The /proc/sys entries */
+
+/* -- SENSORS SYSCTL START -- */
+#define SIS5595_SYSCTL_IN0 1000	/* Volts * 100 */
+#define SIS5595_SYSCTL_IN1 1001
+#define SIS5595_SYSCTL_IN2 1002
+#define SIS5595_SYSCTL_IN3 1003
+#define SIS5595_SYSCTL_IN4 1004
+#define SIS5595_SYSCTL_FAN1 1101	/* Rotations/min */
+#define SIS5595_SYSCTL_FAN2 1102
+#define SIS5595_SYSCTL_TEMP 1200	/* Degrees Celcius * 10 */
+#define SIS5595_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
+#define SIS5595_SYSCTL_ALARMS 2001	/* bitvector */
+
+#define SIS5595_ALARM_IN0 0x01
+#define SIS5595_ALARM_IN1 0x02
+#define SIS5595_ALARM_IN2 0x04
+#define SIS5595_ALARM_IN3 0x08
+#define SIS5595_ALARM_BTI 0x20
+#define SIS5595_ALARM_FAN1 0x40
+#define SIS5595_ALARM_FAN2 0x80
+#define SIS5595_ALARM_IN4  0x8000
+#define SIS5595_ALARM_TEMP 0x8000
+
+/* -- SENSORS SYSCTL END -- */
+
 /* These files are created for each detected SIS5595. This is just a template;
    though at first sight, you might think we could use a statically
    allocated list, we need some way to get back to the parent - which
@@ -467,8 +488,7 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
-					sis5595_dir_table_template,
-					THIS_MODULE)) < 0) {
+					sis5595_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -504,13 +524,6 @@ static int sis5595_detach_client(struct i2c_client *client)
 
 	return 0;
 }
-
-/* No commands defined yet */
-static int sis5595_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
 
 
 /* ISA access must be locked explicitly.

@@ -21,13 +21,12 @@
 
 /* Supports DS1621. See doc/chips/ds1621 for details */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -103,8 +102,6 @@ static int ds1621_detect(struct i2c_adapter *adapter, int address,
 			 unsigned short flags, int kind);
 static void ds1621_init_client(struct i2c_client *client);
 static int ds1621_detach_client(struct i2c_client *client);
-static int ds1621_command(struct i2c_client *client, unsigned int cmd,
-			  void *arg);
 
 static u16 swap_bytes(u16 val);
 static int ds1621_read_value(struct i2c_client *client, u8 reg);
@@ -130,8 +127,18 @@ static struct i2c_driver ds1621_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= ds1621_attach_adapter,
 	.detach_client	= ds1621_detach_client,
-	.command	= ds1621_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+#define DS1621_SYSCTL_TEMP 1200	/* Degrees Celcius * 10 */
+#define DS1621_SYSCTL_ALARMS 2001	/* bitvector */
+#define DS1621_ALARM_TEMP_HIGH 0x40
+#define DS1621_ALARM_TEMP_LOW 0x20
+#define DS1621_SYSCTL_ENABLE 2002
+#define DS1621_SYSCTL_CONTINUOUS 2003
+#define DS1621_SYSCTL_POLARITY 2004
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected DS1621. This is just a template;
    though at first sight, you might think we could use a statically
@@ -237,8 +244,7 @@ int ds1621_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					ds1621_dir_table_template,
-					THIS_MODULE)) < 0) {
+					ds1621_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -263,12 +269,6 @@ static int ds1621_detach_client(struct i2c_client *client)
 {
 	int err;
 
-#ifdef MODULE
-	if (MOD_IN_USE)
-		return -EBUSY;
-#endif
-
-
 	i2c_deregister_entry(((struct ds1621_data *) (client->data))->
 				 sysctl_id);
 
@@ -280,13 +280,6 @@ static int ds1621_detach_client(struct i2c_client *client)
 
 	kfree(client);
 
-	return 0;
-}
-
-
-/* No commands defined yet */
-static int ds1621_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

@@ -23,19 +23,18 @@
 
 /* Supports the Analog Devices ADM1024. See doc/chips/adm1024 for details */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -231,8 +230,6 @@ static int adm1024_attach_adapter(struct i2c_adapter *adapter);
 static int adm1024_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int adm1024_detach_client(struct i2c_client *client);
-static int adm1024_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 
 static int adm1024_read_value(struct i2c_client *client, u8 register);
 static int adm1024_write_value(struct i2c_client *client, u8 register,
@@ -273,10 +270,42 @@ static struct i2c_driver adm1024_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= adm1024_attach_adapter,
 	.detach_client	= adm1024_detach_client,
-	.command	= adm1024_command,
 };
 
 /* The /proc/sys entries */
+/* -- SENSORS SYSCTL START -- */
+
+#define ADM1024_SYSCTL_IN0 1000	/* Volts * 100 */
+#define ADM1024_SYSCTL_IN1 1001
+#define ADM1024_SYSCTL_IN2 1002
+#define ADM1024_SYSCTL_IN3 1003
+#define ADM1024_SYSCTL_IN4 1004
+#define ADM1024_SYSCTL_IN5 1005
+#define ADM1024_SYSCTL_FAN1 1101	/* Rotations/min */
+#define ADM1024_SYSCTL_FAN2 1102
+#define ADM1024_SYSCTL_TEMP 1250	/* Degrees Celcius * 100 */
+#define ADM1024_SYSCTL_TEMP1 1290	/* Degrees Celcius */
+#define ADM1024_SYSCTL_TEMP2 1295	/* Degrees Celcius */
+#define ADM1024_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
+#define ADM1024_SYSCTL_ALARMS 2001	/* bitvector */
+#define ADM1024_SYSCTL_ANALOG_OUT 2002
+#define ADM1024_SYSCTL_VID 2003
+
+#define ADM1024_ALARM_IN0 0x0001
+#define ADM1024_ALARM_IN1 0x0002
+#define ADM1024_ALARM_IN2 0x0004
+#define ADM1024_ALARM_IN3 0x0008
+#define ADM1024_ALARM_IN4 0x0100
+#define ADM1024_ALARM_IN5 0x0200
+#define ADM1024_ALARM_FAN1 0x0040
+#define ADM1024_ALARM_FAN2 0x0080
+#define ADM1024_ALARM_TEMP 0x0010
+#define ADM1024_ALARM_TEMP1 0x0020
+#define ADM1024_ALARM_TEMP2 0x0001
+#define ADM1024_ALARM_CHAS 0x1000
+
+/* -- SENSORS SYSCTL END -- */
+
 /* These files are created for each detected ADM1024. This is just a template;
    though at first sight, you might think we could use a statically
    allocated list, we need some way to get back to the parent - which
@@ -410,8 +439,7 @@ static int adm1024_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client,
 					type_name,
-					adm1024_dir_table_template,
-					THIS_MODULE)) < 0) {
+					adm1024_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -451,13 +479,6 @@ static int adm1024_detach_client(struct i2c_client *client)
 	return 0;
 
 }
-
-/* No commands defined yet */
-static int adm1024_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
 
 static int adm1024_read_value(struct i2c_client *client, u8 reg)
 {

@@ -25,20 +25,18 @@
     and Philip Edelbrock <phil@netroedge.com>
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
-
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { 0x73, SENSORS_I2C_END };
@@ -144,8 +142,6 @@ static int fscpos_attach_adapter(struct i2c_adapter *adapter);
 static int fscpos_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int fscpos_detach_client(struct i2c_client *client);
-static int fscpos_command(struct i2c_client *client, unsigned int cmd,
-			void *arg);
 
 static int fscpos_read_value(struct i2c_client *client, u8 register);
 static int fscpos_write_value(struct i2c_client *client, u8 register,
@@ -177,10 +173,24 @@ static struct i2c_driver fscpos_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= fscpos_attach_adapter,
 	.detach_client	= fscpos_detach_client,
-	.command	= fscpos_command,
 };
 
-/* The /proc/sys entries */
+/* -- SENSORS SYSCTL START -- */
+#define FSCPOS_SYSCTL_VOLT0    1000       /* 12 volt supply */
+#define FSCPOS_SYSCTL_VOLT1    1001       /* 5 volt supply */
+#define FSCPOS_SYSCTL_VOLT2    1002       /* batterie voltage*/
+#define FSCPOS_SYSCTL_FAN0     1101       /* state, min, ripple, actual value fan 0 */
+#define FSCPOS_SYSCTL_FAN1     1102       /* state, min, ripple, actual value fan 1 */
+#define FSCPOS_SYSCTL_FAN2     1103       /* state, min, ripple, actual value fan 2 */
+#define FSCPOS_SYSCTL_TEMP0    1201       /* state and value of sensor 0, cpu die */
+#define FSCPOS_SYSCTL_TEMP1    1202       /* state and value of sensor 1, motherboard */
+#define FSCPOS_SYSCTL_TEMP2    1203       /* state and value of sensor 2, chassis */
+#define FSCPOS_SYSCTL_REV     2000        /* Revision */
+#define FSCPOS_SYSCTL_EVENT   2001        /* global event status */
+#define FSCPOS_SYSCTL_CONTROL 2002        /* global control byte */
+#define FSCPOS_SYSCTL_WDOG     2003       /* state, min, ripple, actual value fan 2 */
+/* -- SENSORS SYSCTL END -- */
+
 /* These files are created for each detected FSCPOS. This is just a template;
    though at first sight, you might think we could use a statically
    allocated list, we need some way to get back to the parent - which
@@ -288,8 +298,7 @@ int fscpos_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					fscpos_dir_table_template,
-					THIS_MODULE)) < 0) {
+					fscpos_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -326,13 +335,6 @@ static int fscpos_detach_client(struct i2c_client *client)
 
 	return 0;
 }
-
-/* No commands defined yet */
-static int fscpos_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
 
 static int fscpos_read_value(struct i2c_client *client, u8 reg)
 {

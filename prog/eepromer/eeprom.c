@@ -9,7 +9,7 @@ Of course the program is provided without warranty of any kind.
 #include <fcntl.h>
 #include <string.h>
 #include <time.h>
-#include <linux/i2c-dev.h>
+#include "i2c-dev.h"
 
 /*
   this program can read 24C16 (and probably smaller ones, too)

@@ -19,19 +19,18 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
+#include <linux/i2c-proc.h>
 #include <linux/ipmi.h>
-#include "version.h"
-#include "sensors.h"
 #include <linux/init.h>
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
 
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
 static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
@@ -130,6 +129,16 @@ struct sdrdata {
 };
 static struct sdrdata sdrd[MAX_SDR_ENTRIES];
 static int sdrd_count;
+
+
+/* -- SENSORS SYSCTL START -- */
+#define BMC_SYSCTL_IN1 1000
+#define BMC_SYSCTL_TEMP1 1100
+#define BMC_SYSCTL_CURR1 1200
+#define BMC_SYSCTL_FAN1 1300
+#define BMC_SYSCTL_ALARMS 5000
+
+/* -- SENSORS SYSCTL END -- */
 
 #define MAX_PROC_ENTRIES (MAX_SDR_ENTRIES + 5)
 #define MAX_PROCNAME_SIZE 8
@@ -376,8 +385,7 @@ static void bmcsensors_build_proc_table()
 	bmcsensors_dir_table[sdrd_count].ctl_name = 0;
 
 	if ((i = i2c_register_entry(&bmc_client, "bmc",
-				    bmcsensors_dir_table,
-				    THIS_MODULE)) < 0) {
+				    bmcsensors_dir_table) < 0) {
 		printk(KERN_INFO "bmcsensors.o: i2c registration failed.\n");
 		kfree(bmcsensors_dir_table);
 		kfree(bmcsensors_proc_name_pool);

@@ -41,13 +41,12 @@
 */
 
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -82,8 +81,6 @@ static int ltc1710_attach_adapter(struct i2c_adapter *adapter);
 static int ltc1710_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int ltc1710_detach_client(struct i2c_client *client);
-static int ltc1710_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 
 static void ltc1710_switch1(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
@@ -100,8 +97,14 @@ static struct i2c_driver ltc1710_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= ltc1710_attach_adapter,
 	.detach_client	= ltc1710_detach_client,
-	.command	= ltc1710_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+
+#define LTC1710_SYSCTL_SWITCH_1 1000
+#define LTC1710_SYSCTL_SWITCH_2 1001
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected LTC1710. This is just a template;
    though at first sight, you might think we could use a statically
@@ -197,8 +200,7 @@ int ltc1710_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					ltc1710_dir_table_template,
-					THIS_MODULE)) < 0) {
+					ltc1710_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -237,13 +239,6 @@ static int ltc1710_detach_client(struct i2c_client *client)
 	return 0;
 
 }
-
-/* No commands defined yet */
-static int ltc1710_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
 
 static void ltc1710_update_client(struct i2c_client *client)
 {

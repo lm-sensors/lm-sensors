@@ -18,19 +18,18 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -275,8 +274,6 @@ static int mtp008_attach_adapter(struct i2c_adapter *adapter);
 static int mtp008_detect(struct i2c_adapter *adapter, int address,
 			 unsigned short flags, int kind);
 static int mtp008_detach_client(struct i2c_client *client);
-static int mtp008_command(struct i2c_client *client, unsigned int cmd,
-			  void *arg);
 
 static int mtp008_read_value(struct i2c_client *client, u8 register);
 static int mtp008_write_value(struct i2c_client *client, u8 register, u8 value);
@@ -315,8 +312,48 @@ static struct i2c_driver mtp008_driver =
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= mtp008_attach_adapter,
 	.detach_client	= mtp008_detach_client,
-	.command	= mtp008_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+#define MTP008_SYSCTL_IN0	1000	/* Volts * 100 */
+#define MTP008_SYSCTL_IN1	1001
+#define MTP008_SYSCTL_IN2	1002
+#define MTP008_SYSCTL_IN3	1003
+#define MTP008_SYSCTL_IN4	1004
+#define MTP008_SYSCTL_IN5	1005
+#define MTP008_SYSCTL_IN6	1006
+#define MTP008_SYSCTL_FAN1	1101	/* Rotations/min */
+#define MTP008_SYSCTL_FAN2	1102
+#define MTP008_SYSCTL_FAN3	1103
+#define MTP008_SYSCTL_TEMP1	1200	/* Degrees Celcius * 10 */
+#define MTP008_SYSCTL_TEMP2	1201	/* Degrees Celcius * 10 */
+#define MTP008_SYSCTL_TEMP3	1202	/* Degrees Celcius * 10 */
+#define MTP008_SYSCTL_VID	1300	/* Volts * 100 */
+#define MTP008_SYSCTL_PWM1	1401
+#define MTP008_SYSCTL_PWM2	1402
+#define MTP008_SYSCTL_PWM3	1403
+#define MTP008_SYSCTL_SENS1	1501	/* 1, 2, or Beta (3000-5000) */
+#define MTP008_SYSCTL_SENS2	1502
+#define MTP008_SYSCTL_SENS3	1503
+#define MTP008_SYSCTL_FAN_DIV	2000	/* 1, 2, 4 or 8 */
+#define MTP008_SYSCTL_ALARMS	2001	/* bitvector */
+#define MTP008_SYSCTL_BEEP	2002	/* bitvector */
+
+#define MTP008_ALARM_IN0	0x0001
+#define MTP008_ALARM_IN1	0x0002
+#define MTP008_ALARM_IN2	0x0004
+#define MTP008_ALARM_IN3	0x0008
+#define MTP008_ALARM_IN4	0x0100
+#define MTP008_ALARM_IN5	0x0200
+#define MTP008_ALARM_IN6	0x0400
+#define MTP008_ALARM_FAN1	0x0040
+#define MTP008_ALARM_FAN2	0x0080
+#define MTP008_ALARM_FAN3	0x0800
+#define MTP008_ALARM_TEMP1	0x0010
+#define MTP008_ALARM_TEMP2	0x0100
+#define MTP008_ALARM_TEMP3	0x0200
+
+/* -- SENSORS SYSCTL END -- */
 
 /* The /proc/sys entries */
 /* These files are created for each detected chip. This is just a template;
@@ -458,8 +495,7 @@ int mtp008_detect(struct i2c_adapter *adapter, int address,
 	 * Register a new directory entry with the sensors module.
 	 */
 	if ((sysid = i2c_register_entry(new_client, type_name,
-					    mtp008_dir_table_template,
-					    THIS_MODULE)) < 0) {
+					    mtp008_dir_table_template)) < 0) {
 		err = sysid;
 		goto ERROR2;
 	}
@@ -498,12 +534,6 @@ static int mtp008_detach_client(struct i2c_client *client)
 	}
 	kfree(client);
 
-	return 0;
-}
-
-/* No commands defined yet */
-static int mtp008_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

@@ -21,15 +21,14 @@
 */
 
 #include <linux/module.h>
-#include <linux/version.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
 #ifdef __SMP__
 #include <linux/smp_lock.h>
 #endif
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -179,8 +178,6 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 			unsigned short flags, int kind);
 static void gl518_init_client(struct i2c_client *client);
 static int gl518_detach_client(struct i2c_client *client);
-static int gl518_command(struct i2c_client *client, unsigned int cmd,
-			 void *arg);
 
 static u16 swap_bytes(u16 val);
 static int gl518_read_value(struct i2c_client *client, u8 reg);
@@ -215,8 +212,32 @@ static struct i2c_driver gl518_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= gl518_attach_adapter,
 	.detach_client	= gl518_detach_client,
-	.command	= gl518_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+
+#define GL518_SYSCTL_VDD  1000	/* Volts * 100 */
+#define GL518_SYSCTL_VIN1 1001
+#define GL518_SYSCTL_VIN2 1002
+#define GL518_SYSCTL_VIN3 1003
+#define GL518_SYSCTL_FAN1 1101	/* RPM */
+#define GL518_SYSCTL_FAN2 1102
+#define GL518_SYSCTL_TEMP 1200	/* Degrees Celcius * 10 */
+#define GL518_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
+#define GL518_SYSCTL_ALARMS 2001	/* bitvector */
+#define GL518_SYSCTL_BEEP 2002	/* bitvector */
+#define GL518_SYSCTL_FAN1OFF 2003
+#define GL518_SYSCTL_ITERATE 2004
+
+#define GL518_ALARM_VDD 0x01
+#define GL518_ALARM_VIN1 0x02
+#define GL518_ALARM_VIN2 0x04
+#define GL518_ALARM_VIN3 0x08
+#define GL518_ALARM_TEMP 0x10
+#define GL518_ALARM_FAN1 0x20
+#define GL518_ALARM_FAN2 0x40
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected GL518. This is just a template;
    though at first sight, you might think we could use a statically
@@ -370,8 +391,7 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
-					gl518_dir_table_template,
-					THIS_MODULE)) < 0) {
+					gl518_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -477,13 +497,6 @@ static int gl518_detach_client(struct i2c_client *client)
 
 	kfree(client);
 
-	return 0;
-}
-
-
-/* No commands defined yet */
-static int gl518_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

@@ -31,20 +31,19 @@
     use w83627hf.c.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
-#include "sensors_vid.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
+#include "sensors_vid.h"
 
 
 #ifndef I2C_DRIVERID_W83627HF
@@ -411,8 +410,6 @@ static int w83627hf_attach_adapter(struct i2c_adapter *adapter);
 static int w83627hf_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int w83627hf_detach_client(struct i2c_client *client);
-static int w83627hf_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 
 static int w83627hf_read_value(struct i2c_client *client, u16 register);
 static int w83627hf_write_value(struct i2c_client *client, u16 register,
@@ -453,10 +450,63 @@ static struct i2c_driver w83627hf_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= w83627hf_attach_adapter,
 	.detach_client	= w83627hf_detach_client,
-	.command	= w83627hf_command,
 };
 
 /* The /proc/sys entries */
+
+/* -- SENSORS SYSCTL START -- */
+
+#define W83781D_SYSCTL_IN0 1000	/* Volts * 100 */
+#define W83781D_SYSCTL_IN1 1001
+#define W83781D_SYSCTL_IN2 1002
+#define W83781D_SYSCTL_IN3 1003
+#define W83781D_SYSCTL_IN4 1004
+#define W83781D_SYSCTL_IN5 1005
+#define W83781D_SYSCTL_IN6 1006
+#define W83781D_SYSCTL_IN7 1007
+#define W83781D_SYSCTL_IN8 1008
+#define W83781D_SYSCTL_FAN1 1101	/* Rotations/min */
+#define W83781D_SYSCTL_FAN2 1102
+#define W83781D_SYSCTL_FAN3 1103
+#define W83781D_SYSCTL_TEMP1 1200	/* Degrees Celcius * 10 */
+#define W83781D_SYSCTL_TEMP2 1201	/* Degrees Celcius * 10 */
+#define W83781D_SYSCTL_TEMP3 1202	/* Degrees Celcius * 10 */
+#define W83781D_SYSCTL_VID 1300		/* Volts * 1000 */
+#define W83781D_SYSCTL_VRM 1301
+#define W83781D_SYSCTL_PWM1 1401
+#define W83781D_SYSCTL_PWM2 1402
+#define W83781D_SYSCTL_PWM3 1403
+#define W83781D_SYSCTL_PWM4 1404
+#define W83781D_SYSCTL_SENS1 1501	/* 1, 2, or Beta (3000-5000) */
+#define W83781D_SYSCTL_SENS2 1502
+#define W83781D_SYSCTL_SENS3 1503
+#define W83781D_SYSCTL_RT1   1601	/* 32-entry table */
+#define W83781D_SYSCTL_RT2   1602	/* 32-entry table */
+#define W83781D_SYSCTL_RT3   1603	/* 32-entry table */
+#define W83781D_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
+#define W83781D_SYSCTL_ALARMS 2001	/* bitvector */
+#define W83781D_SYSCTL_BEEP 2002	/* bitvector */
+
+#define W83781D_ALARM_IN0 0x0001
+#define W83781D_ALARM_IN1 0x0002
+#define W83781D_ALARM_IN2 0x0004
+#define W83781D_ALARM_IN3 0x0008
+#define W83781D_ALARM_IN4 0x0100
+#define W83781D_ALARM_IN5 0x0200
+#define W83781D_ALARM_IN6 0x0400
+#define W83782D_ALARM_IN7 0x10000
+#define W83782D_ALARM_IN8 0x20000
+#define W83781D_ALARM_FAN1 0x0040
+#define W83781D_ALARM_FAN2 0x0080
+#define W83781D_ALARM_FAN3 0x0800
+#define W83781D_ALARM_TEMP1 0x0010
+#define W83781D_ALARM_TEMP23 0x0020	/* 781D only */
+#define W83781D_ALARM_TEMP2 0x0020	/* 782D/783S */
+#define W83781D_ALARM_TEMP3 0x2000	/* 782D only */
+#define W83781D_ALARM_CHAS 0x1000
+
+/* -- SENSORS SYSCTL END -- */
+
 /* These files are created for each detected chip. This is just a template;
    though at first sight, you might think we could use a statically
    allocated list, we need some way to get back to the parent - which
@@ -690,8 +740,7 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 				type_name,
 				(kind == w83697hf) ?
 				   w83697hf_dir_table_template :
-				   w83782d_isa_dir_table_template ,
-				THIS_MODULE)) < 0) {
+				   w83782d_isa_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR7;
 	}
@@ -730,12 +779,6 @@ static int w83627hf_detach_client(struct i2c_client *client)
 	release_region(client->addr, WINB_EXTENT);
 	kfree(client);
 
-	return 0;
-}
-
-/* No commands defined yet */
-static int w83627hf_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

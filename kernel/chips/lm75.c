@@ -18,15 +18,12 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
-
-
+#include "version.h"
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -72,8 +69,6 @@ static int lm75_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static void lm75_init_client(struct i2c_client *client);
 static int lm75_detach_client(struct i2c_client *client);
-static int lm75_command(struct i2c_client *client, unsigned int cmd,
-			void *arg);
 
 static u16 swap_bytes(u16 val);
 static int lm75_read_value(struct i2c_client *client, u8 reg);
@@ -91,8 +86,13 @@ static struct i2c_driver lm75_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= lm75_attach_adapter,
 	.detach_client	= lm75_detach_client,
-	.command	= lm75_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+
+#define LM75_SYSCTL_TEMP 1200	/* Degrees Celcius * 10 */
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected LM75. This is just a template;
    though at first sight, you might think we could use a statically
@@ -197,8 +197,7 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					lm75_dir_table_template,
-					THIS_MODULE)) < 0) {
+					lm75_dir_table_template)) < 0) {
 		err = i;
 		goto error4;
 	}
@@ -228,12 +227,6 @@ static int lm75_detach_client(struct i2c_client *client)
 	kfree(client);
 	return 0;
 }
-
-static int lm75_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
 
 static u16 swap_bytes(u16 val)
 {

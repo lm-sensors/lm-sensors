@@ -39,16 +39,15 @@
 
 /* #define DEBUG 1 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/pci.h>
-#include <asm/io.h>
 #include <linux/kernel.h>
 #include <linux/stddef.h>
 #include <linux/sched.h>
 #include <linux/ioport.h>
 #include <linux/init.h>
 #include <linux/i2c.h>
+#include <asm/io.h>
 #include "version.h"
 
 MODULE_LICENSE("GPL");

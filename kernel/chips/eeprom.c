@@ -20,12 +20,11 @@
 */
 
 #include <linux/module.h>
-#include <linux/version.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -79,8 +78,6 @@ static int eeprom_attach_adapter(struct i2c_adapter *adapter);
 static int eeprom_detect(struct i2c_adapter *adapter, int address,
 			 unsigned short flags, int kind);
 static int eeprom_detach_client(struct i2c_client *client);
-static int eeprom_command(struct i2c_client *client, unsigned int cmd,
-			  void *arg);
 
 #if 0
 static int eeprom_write_value(struct i2c_client *client, u8 reg,
@@ -100,8 +97,28 @@ static struct i2c_driver eeprom_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= eeprom_attach_adapter,
 	.detach_client	= eeprom_detach_client,
-	.command	= eeprom_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+
+#define EEPROM_SYSCTL1 1000
+#define EEPROM_SYSCTL2 1001
+#define EEPROM_SYSCTL3 1002
+#define EEPROM_SYSCTL4 1003
+#define EEPROM_SYSCTL5 1004
+#define EEPROM_SYSCTL6 1005
+#define EEPROM_SYSCTL7 1006
+#define EEPROM_SYSCTL8 1007
+#define EEPROM_SYSCTL9 1008
+#define EEPROM_SYSCTL10 1009
+#define EEPROM_SYSCTL11 1010
+#define EEPROM_SYSCTL12 1011
+#define EEPROM_SYSCTL13 1012
+#define EEPROM_SYSCTL14 1013
+#define EEPROM_SYSCTL15 1014
+#define EEPROM_SYSCTL16 1015
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected EEPROM. This is just a template;
    though at first sight, you might think we could use a statically
@@ -234,8 +251,7 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					eeprom_dir_table_template,
-					THIS_MODULE)) < 0) {
+					eeprom_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -270,13 +286,6 @@ static int eeprom_detach_client(struct i2c_client *client)
 
 	kfree(client);
 
-	return 0;
-}
-
-
-/* No commands defined yet */
-static int eeprom_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

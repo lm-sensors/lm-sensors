@@ -11,8 +11,8 @@
 #include <linux/init.h>
 #include <linux/apm_bios.h>
 #include <linux/slab.h>
-#include <asm/io.h>
 #include <linux/pm.h>
+#include <asm/io.h>
 #include <asm/keyboard.h>
 #include <asm/system.h>
 #include "version.h"

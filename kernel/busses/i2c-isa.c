@@ -24,27 +24,17 @@
    the SMBus and the ISA bus very much easier. See lm78.c for an example
    of this. */
 
-#include <linux/version.h>
+#include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
+#include <linux/errno.h>
 #include <linux/i2c.h>
-#include <linux/init.h>
 #include "version.h"
-
-MODULE_LICENSE("GPL");
-
-
-/* We can't do a thing... */
-static u32 isa_func(struct i2c_adapter *adapter)
-{
-	return 0;
-}
 
 /* This is the actual algorithm we define */
 static struct i2c_algorithm isa_algorithm = {
 	.name		= "ISA bus algorithm",
 	.id		= I2C_ALGO_ISA,
-	.functionality  = isa_func,
 };
 
 /* There can only be one... */
@@ -61,16 +51,14 @@ static int __init i2c_isa_init(void)
 	return i2c_add_adapter(&isa_adapter);
 }
 
-
 static void __exit i2c_isa_exit(void)
 {
 	i2c_del_adapter(&isa_adapter);
 }
 
-
-
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>");
 MODULE_DESCRIPTION("ISA bus access through i2c");
+MODULE_LICENSE("GPL");
 
 module_init(i2c_isa_init);
 module_exit(i2c_isa_exit);

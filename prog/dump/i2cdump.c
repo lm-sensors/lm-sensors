@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <linux/i2c-dev.h>
+#include "i2c-dev.h"
 
 /*
    We don't use this #define but it was put into i2c.h at the same time as

@@ -25,10 +25,6 @@ KERNELINCLUDEFILES :=
 ifneq ($(shell if grep -q '^CONFIG_SENSORS=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELINCLUDEFILES += $(MODULE_DIR)/sensors.h
 endif
-# No longer used, part of <linux/i2c.h>
-#ifneq ($(shell if grep -q '^CONFIG_I2C_ISA=y' $(LINUX)/.config; then echo 1; fi),1)
-#KERNELINCLUDEFILES += $(MODULE_DIR)/i2c-isa.h
-#endif
 
 install-all-kernel-include:
 	if [ -n "$(KERNELINCLUDEFILES)" ] ; then \

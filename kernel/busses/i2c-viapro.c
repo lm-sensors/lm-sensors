@@ -32,17 +32,16 @@
    Note: we assume there can only be one device, with one SMBus interface.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/pci.h>
-#include <asm/io.h>
 #include <linux/kernel.h>
 #include <linux/stddef.h>
 #include <linux/sched.h>
 #include <linux/ioport.h>
 #include <linux/i2c.h>
-#include "version.h"
 #include <linux/init.h>
+#include <asm/io.h>
+#include "version.h"
 
 #ifndef PCI_DEVICE_ID_VIA_82C596_3
 #define PCI_DEVICE_ID_VIA_82C596_3 	0x3050

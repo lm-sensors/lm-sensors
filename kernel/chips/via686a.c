@@ -30,23 +30,16 @@
     See doc/chips/via686a for details.
     Warning - only supports a single device.
 */
-#include <linux/version.h>
+
 #include <linux/module.h>
 #include <linux/slab.h>
-#include <linux/proc_fs.h>
-#include <linux/ioport.h>
-#include <linux/sysctl.h>
 #include <linux/pci.h>
-#include <asm/errno.h>
-#include <asm/io.h>
-#include <linux/types.h>
 #include <linux/delay.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
-
-MODULE_LICENSE("GPL");
+#include <asm/io.h>
+#include "version.h"
 
 #ifndef PCI_DEVICE_ID_VIA_82C686_4
 #define PCI_DEVICE_ID_VIA_82C686_4 0x3057
@@ -116,7 +109,7 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e };
 //    10 comparator mode- like 00, but ignores hysteresis
 //    11 same as 00
 #define VIA686A_REG_TEMP_MODE 0x4b
-// We'll just assume that you want to set all 3 simulataneously:
+// We'll just assume that you want to set all 3 simultaneously:
 #define VIA686A_TEMP_MODE_MASK 0x3F
 #define VIA686A_TEMP_MODE_CONTINUOUS (0x00)
 
@@ -406,15 +399,12 @@ static int via686a_attach_adapter(struct i2c_adapter *adapter);
 static int via686a_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int via686a_detach_client(struct i2c_client *client);
-static int via686a_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 
 static int via686a_read_value(struct i2c_client *client, u8 register);
 static void via686a_write_value(struct i2c_client *client, u8 register,
 				u8 value);
 static void via686a_update_client(struct i2c_client *client);
 static void via686a_init_client(struct i2c_client *client);
-static int via686a_find(int *address);
 
 
 static void via686a_in(struct i2c_client *client, int operation,
@@ -439,10 +429,40 @@ static struct i2c_driver via686a_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= via686a_attach_adapter,
 	.detach_client	= via686a_detach_client,
-	.command	= via686a_command,
 };
 
+
+
 /* The /proc/sys entries */
+
+/* -- SENSORS SYSCTL START -- */
+#define VIA686A_SYSCTL_IN0 1000
+#define VIA686A_SYSCTL_IN1 1001
+#define VIA686A_SYSCTL_IN2 1002
+#define VIA686A_SYSCTL_IN3 1003
+#define VIA686A_SYSCTL_IN4 1004
+#define VIA686A_SYSCTL_FAN1 1101
+#define VIA686A_SYSCTL_FAN2 1102
+#define VIA686A_SYSCTL_TEMP 1200
+#define VIA686A_SYSCTL_TEMP2 1201
+#define VIA686A_SYSCTL_TEMP3 1202
+#define VIA686A_SYSCTL_FAN_DIV 2000
+#define VIA686A_SYSCTL_ALARMS 2001
+
+#define VIA686A_ALARM_IN0 0x01
+#define VIA686A_ALARM_IN1 0x02
+#define VIA686A_ALARM_IN2 0x04
+#define VIA686A_ALARM_IN3 0x08
+#define VIA686A_ALARM_TEMP 0x10
+#define VIA686A_ALARM_FAN1 0x40
+#define VIA686A_ALARM_FAN2 0x80
+#define VIA686A_ALARM_IN4 0x100
+#define VIA686A_ALARM_TEMP2 0x800
+#define VIA686A_ALARM_CHAS 0x1000
+#define VIA686A_ALARM_TEMP3 0x8000
+
+/* -- SENSORS SYSCTL END -- */
+
 /* These files are created for each detected VIA686A. This is just a template;
    though at first sight, you might think we could use a statically
    allocated list, we need some way to get back to the parent - which
@@ -595,8 +615,7 @@ int via686a_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
-					via686a_dir_table_template,
-					THIS_MODULE)) < 0) {
+					via686a_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -633,13 +652,6 @@ static int via686a_detach_client(struct i2c_client *client)
 
 	return 0;
 }
-
-/* No commands defined yet */
-static int via686a_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
 
 /* Called when we have found a new VIA686A. Set limits, etc. */
 static void via686a_init_client(struct i2c_client *client)
@@ -703,8 +715,8 @@ static void via686a_update_client(struct i2c_client *client)
 
 	down(&data->update_lock);
 
-	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
-	    (jiffies < data->last_updated) || !data->valid) {
+       if (time_after(jiffies - data->last_updated, HZ + HZ / 2) ||
+           time_before(jiffies, data->last_updated) || !data->valid) {
 
 		for (i = 0; i <= 4; i++) {
 			data->in[i] =
@@ -774,8 +786,8 @@ static void via686a_update_client(struct i2c_client *client)
    large enough (by checking the incoming value of *nrels). This is not very
    good practice, but as long as you put less than about 5 values in results,
    you can assume it is large enough. */
-void via686a_in(struct i2c_client *client, int operation, int ctl_name,
-		int *nrels_mag, long *results)
+static void via686a_in(struct i2c_client *client, int operation, int ctl_name,
+               int *nrels_mag, long *results)
 {
 	struct via686a_data *data = client->data;
 	int nr = ctl_name - VIA686A_SYSCTL_IN0;
@@ -901,31 +913,66 @@ void via686a_fan_div(struct i2c_client *client, int operation,
 	}
 }
 
+
+static struct pci_device_id via686a_pci_ids[] __devinitdata = {
+       {PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_82C686_4, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+       { 0, }
+};
+
+static int __devinit via686a_pci_probe(struct pci_dev *dev,
+                                      const struct pci_device_id *id)
+{
+       u16 val;
+       int addr = 0;
+
+       if (PCIBIOS_SUCCESSFUL !=
+           pci_read_config_word(dev, VIA686A_BASE_REG, &val))
+               return -ENODEV;
+
+       addr = val & ~(VIA686A_EXTENT - 1);
+       if (addr == 0 && force_addr == 0) {
+               printk("via686a.o: base address not set - upgrade BIOS or use force_addr=0xaddr\n");
+               return -ENODEV;
+       }
+       if (force_addr)
+               addr = force_addr;      /* so detect will get called */
+
+       if (!addr) {
+               printk("via686a.o: No Via 686A sensors found.\n");
+               return -ENODEV;
+       }
+       normal_isa[0] = addr;
+       s_bridge = dev;
+       return i2c_add_driver(&via686a_driver);
+}
+
+static void __devexit via686a_pci_remove(struct pci_dev *dev)
+{
+       i2c_del_driver(&via686a_driver);
+}
+
+static struct pci_driver via686a_pci_driver = {
+       .name		= "via686a",
+       .id_table	= via686a_pci_ids,
+       .probe		= via686a_pci_probe,
+       .remove		= __devexit_p(via686a_pci_remove),
+};
+
 static int __init sm_via686a_init(void)
 {
-	int res, addr;
-
-	printk("via686a.o version %s (%s)\n", LM_VERSION, LM_DATE);
-
-	if (via686a_find(&addr)) {
-		printk("via686a.o: No Via 686A sensors found.\n");
-		return -ENODEV;
-	}
-	normal_isa[0] = addr;
-
-	return i2c_add_driver(&via686a_driver);
+       return pci_module_init(&via686a_pci_driver);
 }
 
 static void __exit sm_via686a_exit(void)
 {
-	i2c_del_driver(&via686a_driver);
+       pci_unregister_driver(&via686a_pci_driver);
 }
 
-
-
-MODULE_AUTHOR
-    ("Kyösti Mälkki <kmalkki@cc.hut.fi>, Mark Studebaker <mdsxyz123@yahoo.com>, Bob Dougherty <bobd@stanford.edu>");
+MODULE_AUTHOR("Kyösti Mälkki <kmalkki@cc.hut.fi>, "
+              "Mark Studebaker <mdsxyz123@yahoo.com> "
+             "and Bob Dougherty <bobd@stanford.edu>");
 MODULE_DESCRIPTION("VIA 686A Sensor device");
+MODULE_LICENSE("GPL");
 
 module_init(sm_via686a_init);
 module_exit(sm_via686a_exit);

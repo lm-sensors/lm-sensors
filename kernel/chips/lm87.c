@@ -22,20 +22,19 @@
 */
 
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
-#include "sensors_vid.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
+#include "sensors_vid.h"
 
 /* Chip configuration settings.  These should be set to reflect the
 HARDWARE configuration of your chip.  By default (read: when all of
@@ -250,8 +249,6 @@ static int lm87_attach_adapter(struct i2c_adapter *adapter);
 static int lm87_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int lm87_detach_client(struct i2c_client *client);
-static int lm87_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 
 static int lm87_read_value(struct i2c_client *client, u8 register);
 static int lm87_write_value(struct i2c_client *client, u8 register,
@@ -294,8 +291,47 @@ static struct i2c_driver LM87_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= lm87_attach_adapter,
 	.detach_client	= lm87_detach_client,
-	.command	= lm87_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+#define LM87_SYSCTL_IN0        1000 /* Volts * 100 */
+#define LM87_SYSCTL_IN1        1001
+#define LM87_SYSCTL_IN2        1002
+#define LM87_SYSCTL_IN3        1003
+#define LM87_SYSCTL_IN4        1004
+#define LM87_SYSCTL_IN5        1005
+#define LM87_SYSCTL_AIN1       1006
+#define LM87_SYSCTL_AIN2       1007
+#define LM87_SYSCTL_FAN1       1102
+#define LM87_SYSCTL_FAN2       1103
+#define LM87_SYSCTL_TEMP1  1250 /* Degrees Celcius * 100 */
+#define LM87_SYSCTL_TEMP2   1251 /* Degrees Celcius * 100 */
+#define LM87_SYSCTL_TEMP3   1252 /* Degrees Celcius * 100 */
+#define LM87_SYSCTL_FAN_DIV    2000 /* 1, 2, 4 or 8 */
+#define LM87_SYSCTL_ALARMS     2001 /* bitvector */
+#define LM87_SYSCTL_ANALOG_OUT 2002
+#define LM87_SYSCTL_VID        2003
+#define LM87_SYSCTL_VRM        2004
+
+#define LM87_ALARM_IN0          0x0001
+#define LM87_ALARM_IN1          0x0002
+#define LM87_ALARM_IN2          0x0004
+#define LM87_ALARM_IN3          0x0008
+#define LM87_ALARM_TEMP1        0x0010
+#define LM87_ALARM_TEMP2        0x0020
+#define LM87_ALARM_TEMP3        0x0020 /* same?? */
+#define LM87_ALARM_FAN1         0x0040
+#define LM87_ALARM_FAN2         0x0080
+#define LM87_ALARM_IN4          0x0100
+#define LM87_ALARM_IN5          0x0200
+#define LM87_ALARM_RESERVED1    0x0400
+#define LM87_ALARM_RESERVED2    0x0800
+#define LM87_ALARM_CHAS         0x1000
+#define LM87_ALARM_THERM_SIG    0x2000
+#define LM87_ALARM_TEMP2_FAULT  0x4000
+#define LM87_ALARM_TEMP3_FAULT 0x08000
+
+/* -- SENSORS SYSCTL END -- */
 
 /* The /proc/sys entries */
 /* These files are created for each detected LM87. This is just a template;
@@ -437,8 +473,7 @@ static int lm87_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client,
 					type_name,
-					LM87_dir_table_template,
-					THIS_MODULE)) < 0) {
+					LM87_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -478,13 +513,6 @@ static int lm87_detach_client(struct i2c_client *client)
 	return 0;
 
 }
-
-/* No commands defined yet */
-static int lm87_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
 
 static int lm87_read_value(struct i2c_client *client, u8 reg)
 {

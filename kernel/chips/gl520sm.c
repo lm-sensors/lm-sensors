@@ -20,13 +20,12 @@
 
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
-#include "sensors.h"
-#include "version.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include "version.h"
 
 MODULE_LICENSE("GPL");
 
@@ -179,8 +178,6 @@ static int gl520_detect(struct i2c_adapter *adapter, int address,
 			unsigned short flags, int kind);
 static void gl520_init_client(struct i2c_client *client);
 static int gl520_detach_client(struct i2c_client *client);
-static int gl520_command(struct i2c_client *client, unsigned int cmd,
-			 void *arg);
 
 static u16 swap_bytes(u16 val);
 static int gl520_read_value(struct i2c_client *client, u8 reg);
@@ -214,8 +211,36 @@ static struct i2c_driver gl520_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= gl520_attach_adapter,
 	.detach_client	= gl520_detach_client,
-	.command	= gl520_command,
 };
+/* -- SENSORS SYSCTL START -- */
+
+#define GL520_SYSCTL_VDD  1000	/* Volts * 100 */
+#define GL520_SYSCTL_VIN1 1001
+#define GL520_SYSCTL_VIN2 1002
+#define GL520_SYSCTL_VIN3 1003
+#define GL520_SYSCTL_VIN4 1004
+#define GL520_SYSCTL_FAN1 1101	/* RPM */
+#define GL520_SYSCTL_FAN2 1102
+#define GL520_SYSCTL_TEMP1 1200	/* Degrees Celcius * 10 */
+#define GL520_SYSCTL_TEMP2 1201	/* Degrees Celcius * 10 */
+#define GL520_SYSCTL_VID 1300
+#define GL520_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
+#define GL520_SYSCTL_ALARMS 2001	/* bitvector */
+#define GL520_SYSCTL_BEEP 2002	/* bitvector */
+#define GL520_SYSCTL_FAN1OFF 2003
+#define GL520_SYSCTL_CONFIG 2004
+
+#define GL520_ALARM_VDD 0x01
+#define GL520_ALARM_VIN1 0x02
+#define GL520_ALARM_VIN2 0x04
+#define GL520_ALARM_VIN3 0x08
+#define GL520_ALARM_TEMP1 0x10
+#define GL520_ALARM_FAN1 0x20
+#define GL520_ALARM_FAN2 0x40
+#define GL520_ALARM_TEMP2 0x80
+#define GL520_ALARM_VIN4 0x80
+
+/* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected GL520. This is just a template;
    though at first sight, you might think we could use a statically
@@ -347,8 +372,7 @@ static int gl520_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client,
 					type_name,
-					gl520_dir_table_template,
-					THIS_MODULE)) < 0) {
+					gl520_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -436,13 +460,6 @@ static int gl520_detach_client(struct i2c_client *client)
 
 	kfree(client);
 
-	return 0;
-}
-
-
-/* No commands defined yet */
-static int gl520_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

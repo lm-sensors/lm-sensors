@@ -37,9 +37,7 @@
 
 #define DEFAULT_VRM	82
 
-static int vid_from_reg(int val, int vrm);
-
-static int vid_from_reg(int val, int vrm)
+static inline int vid_from_reg(int val, int vrm)
 {
 	switch(vrm) {
 

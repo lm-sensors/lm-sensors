@@ -21,21 +21,20 @@
 
 /* Supports VIA VT8231 Super I/O embedded sensors */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
 #include <linux/pci.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
-#include "version.h"
-#include "sensors.h"
-#include "sensors_vid.h"
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include <asm/errno.h>
+#include <asm/io.h>
+#include "version.h"
+#include "sensors_vid.h"
 
 
 static int force_addr = 0;
@@ -167,8 +166,6 @@ static int vt8231_attach_adapter(struct i2c_adapter *adapter);
 static int vt8231_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int vt8231_detach_client(struct i2c_client *client);
-static int vt8231_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
 
 static inline int vt_rdval(struct i2c_client *client, u8 register);
 static inline void vt8231_write_value(struct i2c_client *client, u8 register,
@@ -206,8 +203,53 @@ static struct i2c_driver vt8231_driver = {
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= vt8231_attach_adapter,
 	.detach_client	= vt8231_detach_client,
-	.command	= vt8231_command,
 };
+
+/* -- SENSORS SYSCTL START -- */
+#define VT8231_SYSCTL_IN0 1000
+#define VT8231_SYSCTL_IN1 1001
+#define VT8231_SYSCTL_IN2 1002
+#define VT8231_SYSCTL_IN3 1003
+#define VT8231_SYSCTL_IN4 1004
+#define VT8231_SYSCTL_IN5 1005
+#define VT8231_SYSCTL_IN6 1006
+#define VT8231_SYSCTL_FAN1 1101
+#define VT8231_SYSCTL_FAN2 1102
+#define VT8231_SYSCTL_TEMP 1200
+#define VT8231_SYSCTL_TEMP2 1201
+#define VT8231_SYSCTL_TEMP3 1202
+#define VT8231_SYSCTL_TEMP4 1203
+#define VT8231_SYSCTL_TEMP5 1204
+#define VT8231_SYSCTL_TEMP6 1205
+#define VT8231_SYSCTL_TEMP7 1206
+#define VT8231_SYSCTL_VID	1300
+#define VT8231_SYSCTL_PWM1	1401
+#define VT8231_SYSCTL_PWM2	1402
+#define VT8231_SYSCTL_VRM	1600
+#define VT8231_SYSCTL_UCH	1700
+#define VT8231_SYSCTL_FAN_DIV 2000
+#define VT8231_SYSCTL_ALARMS 2001
+
+#define VT8231_ALARM_IN1 0x01
+#define VT8231_ALARM_IN2 0x02
+#define VT8231_ALARM_IN5 0x04
+#define VT8231_ALARM_IN3 0x08
+#define VT8231_ALARM_TEMP 0x10
+#define VT8231_ALARM_FAN1 0x40
+#define VT8231_ALARM_FAN2 0x80
+#define VT8231_ALARM_IN4 0x100
+#define VT8231_ALARM_IN6 0x200
+#define VT8231_ALARM_TEMP2 0x800
+#define VT8231_ALARM_CHAS 0x1000
+#define VT8231_ALARM_TEMP3 0x8000
+/* duplicates */
+#define VT8231_ALARM_IN0 VT8231_ALARM_TEMP
+#define VT8231_ALARM_TEMP4 VT8231_ALARM_IN1
+#define VT8231_ALARM_TEMP5 VT8231_ALARM_IN2
+#define VT8231_ALARM_TEMP6 VT8231_ALARM_IN3
+#define VT8231_ALARM_TEMP7 VT8231_ALARM_IN4
+
+/* -- SENSORS SYSCTL END -- */
 
 static ctl_table vt8231_dir_table_template[] = {
 	{VT8231_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
@@ -364,8 +406,7 @@ int vt8231_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
-					vt8231_dir_table_template,
-					THIS_MODULE)) < 0) {
+					vt8231_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
@@ -399,11 +440,6 @@ static int vt8231_detach_client(struct i2c_client *client)
 	release_region(client->addr, VIA686A_EXTENT);
 	kfree(client);
 
-	return 0;
-}
-
-static int vt8231_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
 	return 0;
 }
 

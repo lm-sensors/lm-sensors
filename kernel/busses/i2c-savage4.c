@@ -31,14 +31,13 @@
    it easier to add later.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/pci.h>
-#include <asm/io.h>
 #include <linux/i2c.h>
 #include <linux/i2c-algo-bit.h>
-#include "version.h"
 #include <linux/init.h>
+#include <asm/io.h>
+#include "version.h"
 
 /* 3DFX defines */
 /* #define PCI_VENDOR_ID_S3		0x5333 */

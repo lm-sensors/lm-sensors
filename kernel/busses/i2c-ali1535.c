@@ -53,24 +53,18 @@
 
 /* Note: we assume there can only be one ALI1535, with one SMBus interface */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/pci.h>
-#include <asm/io.h>
-#include <asm/semaphore.h>
 #include <linux/kernel.h>
 #include <linux/stddef.h>
 #include <linux/sched.h>
 #include <linux/ioport.h>
 #include <linux/i2c.h>
-#include "version.h"
 #include <linux/init.h>
+#include <asm/io.h>
+#include <asm/semaphore.h>
+#include "version.h"
 
-MODULE_LICENSE("GPL");
-
-#ifndef DECLARE_MUTEX
-#define DECLARE_MUTEX(name)  struct semaphore name = MUTEX
-#endif /* def DECLARE_MUTEX */
 
 /* ALI1535 SMBus address offsets */
 #define SMBHSTSTS (0 + ali1535_smba)
@@ -622,6 +616,7 @@ MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, "
      "Mark D. Studebaker <mdsxyz123@yahoo.com> and Dan Eaton <dan.eaton@rocketlogix.com>");
 MODULE_DESCRIPTION("ALI1535 SMBus driver");
+MODULE_LICENSE("GPL");
 
 module_init(i2c_ali1535_init);
 module_exit(i2c_ali1535_exit);
