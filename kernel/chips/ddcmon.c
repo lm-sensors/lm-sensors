@@ -279,15 +279,23 @@ void ddcmon_update_client(struct i2c_client *client)
 
 	if ((jiffies - data->last_updated > 300 * HZ) ||
 	    (jiffies < data->last_updated) || !data->valid) {
-		if (i2c_smbus_write_byte(client, 0)) {
+		if (i2c_check_functionality(client->adapter,
+		                            I2C_FUNC_SMBUS_READ_BLOCK_DATA))
+		{
+			for (i=0; i<DDCMON_SIZE; i+=I2C_SMBUS_I2C_BLOCK_MAX)
+				if(i2c_smbus_read_i2c_block_data(client,
+				                           i, data->data + i)
+				                    != I2C_SMBUS_I2C_BLOCK_MAX)
+					break;
+		} else {
+			if (i2c_smbus_write_byte(client, 0)) {
 #ifdef DEBUG
-			printk("ddcmon read start has failed!\n");
+				printk("ddcmon read start has failed!\n");
 #endif
+			}
+			for (i = 0; i < DDCMON_SIZE; i++)
+				data->data[i] = (u8) i2c_smbus_read_byte(client);
 		}
-		for (i = 0; i < DDCMON_SIZE; i++) {
-			data->data[i] = (u8) i2c_smbus_read_byte(client);
-		}
-
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}

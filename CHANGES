@@ -23,6 +23,7 @@ ask CVS about it:
   Library: Add support for exponents and logarithms for vt1211/vt8235 temps
   Makefile: Generate warnings if new library won't be found by ld.so
   Module adm1021: Ignore failed reads and report old value
+  Modules ddcmon, eeprom: Use i2c block reads if possible
   Module i2c-i810.c: Fix for some chips
   Modules mtp008, smsc47m1, vt1211, vt8231, w83781d: Standardize and improve
           pwm and pwm enable support; update docs
