@@ -256,7 +256,7 @@ do
 	echo
 		if [ "$pwmactivecount" = "0" ]
 		then
-			echo "No correlations were detected, there is either no fan connected to the output of $i, or the connected fan has no rpm-signal connected to one of the tested fan sensors. (Note: not all motherboards have the pwm outputs connected to the fan connectors, check out the hardware database on http://www.almico.com/speedfan.php)"
+			echo "No correlations were detected, there is either no fan connected to the output of $i, or the connected fan has no rpm-signal connected to one of the tested fan sensors. (Note: not all motherboards have the pwm outputs connected to the fan connectors, check out the hardware database on http://www.almico.com/forumindex.php)"
 			echo
 			echo -n "  Did you see/hear a fan stopping during the above test (y)?"
 			read X
