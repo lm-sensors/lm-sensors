@@ -204,18 +204,18 @@ static void lm78_update_client(struct i2c_client *client);
 static void lm78_init_client(struct i2c_client *client);
 
 
-void lm78_in(struct i2c_client *client, int operation, int ctl_name,
-             int *nrels_mag, long *results);
-void lm78_fan(struct i2c_client *client, int operation, int ctl_name,
-              int *nrels_mag, long *results);
-void lm78_temp(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results);
-void lm78_vid(struct i2c_client *client, int operation, int ctl_name,
-              int *nrels_mag, long *results);
-void lm78_alarms(struct i2c_client *client, int operation, int ctl_name,
-                 int *nrels_mag, long *results);
-void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
-                  int *nrels_mag, long *results);
+static void lm78_in(struct i2c_client *client, int operation, int ctl_name,
+                    int *nrels_mag, long *results);
+static void lm78_fan(struct i2c_client *client, int operation, int ctl_name,
+                     int *nrels_mag, long *results);
+static void lm78_temp(struct i2c_client *client, int operation, int ctl_name,
+                      int *nrels_mag, long *results);
+static void lm78_vid(struct i2c_client *client, int operation, int ctl_name,
+                     int *nrels_mag, long *results);
+static void lm78_alarms(struct i2c_client *client, int operation, int ctl_name,
+                        int *nrels_mag, long *results);
+static void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
+                         int *nrels_mag, long *results);
 
 /* I choose here for semi-static LM78 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably

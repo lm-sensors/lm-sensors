@@ -59,7 +59,7 @@ extern int cleanup_module(void);
 static int lm75_init(void);
 static int lm75_cleanup(void);
 static int lm75_attach_adapter(struct i2c_adapter *adapter);
-int lm75_detach_client(struct i2c_client *client);
+static int lm75_detach_client(struct i2c_client *client);
 static int lm75_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
 static void lm75_inc_use (struct i2c_client *client);
@@ -69,6 +69,7 @@ static int lm75_read_value(struct i2c_client *client, u8 reg);
 static int lm75_write_value(struct i2c_client *client, u8 reg, u16 value);
 static void lm75_temp(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
+static void lm75_update_client(struct i2c_client *client);
 
 
 /* This is the driver that will be inserted */
