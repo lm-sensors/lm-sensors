@@ -52,8 +52,8 @@
 #endif
 
 /* I2C addresses to scan */
-static unsigned short normal_i2c[] = { SENSORS_I2C_END };
-static unsigned short normal_i2c_range[] = { 0x28, 0x2f, SENSORS_I2C_END };
+static unsigned short normal_i2c[] = { 0x2d, SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
 
 /* ISA addresses to scan (none) */
 static unsigned int normal_isa[] = { SENSORS_ISA_END };
