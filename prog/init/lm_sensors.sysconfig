@@ -31,8 +31,8 @@
 # #----cut here----
 #
 # Here is my module list
-MODULE_1=i2c-matroxfb
-MODULE_2=i2c-isa
-MODULE_3=ddcmon
-MODULE_4=w83781d
-MODULE_5=via686a
+MODULE_0=i2c-matroxfb
+MODULE_1=i2c-isa
+MODULE_2=ddcmon
+MODULE_3=w83781d
+MODULE_4=via686a

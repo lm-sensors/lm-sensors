@@ -3128,7 +3128,7 @@ sub main
 #
 # The format of this file is a shell script that simply defines the modules
 # in order as normal variables with the special names:
-#    MODULE_1, MODULE_2, MODULE_3, etc.
+#    MODULE_0, MODULE_1, MODULE_2, etc.
 #
 # List the modules that are to be loaded for your system
 #
