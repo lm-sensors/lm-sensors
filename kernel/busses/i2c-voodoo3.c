@@ -55,8 +55,8 @@
 static int voodoo3_init(void);
 static int voodoo3_cleanup(void);
 static int voodoo3_setup(void);
-static s32 voodoo3_access(u8 addr, char read_write,
-                        u8 command, int size, union smbus_data * data);
+static s32 voodoo3_access(struct i2c_adapter *adap, u8 addr, char read_write,
+                        u8 command, int size, union i2c_smbus_data * data);
 static void Voodoo3_I2CStart(void);
 static void Voodoo3_I2CStop(void);
 static int Voodoo3_I2CAck(void);
@@ -70,6 +70,8 @@ static int Voodoo3_I2CWrite_byte(int addr,int command);
 static int Voodoo3_I2CWrite_byte_data(int addr,int command,int data);
 static int Voodoo3_I2CWrite_word(int addr,int command,long data);
 static void config_v3(struct pci_dev *dev, int num);
+static void voodoo3_inc(struct i2c_adapter *adapter);
+static void voodoo3_dec(struct i2c_adapter *adapter);
 
 
 
@@ -90,7 +92,27 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static struct smbus_adapter voodoo3_adapter;
+static struct i2c_algorithm smbus_algorithm = {
+  /* name */		"Non-I2C SMBus adapter",
+  /* id */		I2C_ALGO_SMBUS,
+  /* master_xfer */	NULL,
+  /* smbus_access */    &voodoo3_access,
+  /* slave_send */	NULL,
+  /* slave_rcv */	NULL,
+  /* algo_control */	NULL,
+};
+
+static struct i2c_adapter voodoo3_adapter = {
+ "unset",
+ I2C_ALGO_SMBUS | I2C_HW_SMBUS_VOODOO3,
+ &smbus_algorithm,
+ NULL,
+ voodoo3_inc,
+ voodoo3_dec,
+ NULL,
+ NULL,
+};
+
 static int voodoo3_initialized;
 static unsigned short voodoo3_smba = 0;
 static unsigned int state=0xcf980020;
@@ -451,42 +473,42 @@ static int voodoo3_setup(void)
 
 
 /* Return -1 on error. See smbus.h for more information */
-s32 voodoo3_access(u8 addr, char read_write,
-                 u8 command, int size, union smbus_data * data)
+s32 voodoo3_access(struct i2c_adapter *adap, u8 addr, char read_write,
+                 u8 command, int size, union i2c_smbus_data * data)
 {
 int temp=0;
 
   if (Voodoo3_BusCheck()) return -1;
 
-  if ((read_write != SMBUS_READ) && (read_write != SMBUS_WRITE)) {
+  if ((read_write != I2C_SMBUS_READ) && (read_write != I2C_SMBUS_WRITE)) {
 	printk("i2c-voodoo3: Unknown read_write command! (0x%X)\n",read_write);
 	return -1;
   }
   addr=((addr & 0x7f) << 1) | (read_write & 0x01);
   switch(size) {
-    case SMBUS_QUICK:
+    case I2C_SMBUS_QUICK:
     	Voodoo3_I2CStart();
 	if (Voodoo3_I2CSendByte(addr)) { 
 #ifdef DEBUG
 	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
 #endif
 	  return -1; }
-    case SMBUS_BYTE:
-    	if (read_write == SMBUS_READ) { temp=Voodoo3_I2CRead_byte(addr); data->byte=temp;
+    case I2C_SMBUS_BYTE:
+    	if (read_write == I2C_SMBUS_READ) { temp=Voodoo3_I2CRead_byte(addr); data->byte=temp;
 	} else { temp=Voodoo3_I2CWrite_byte(addr,command); }
 	goto TESTACK;
-    case SMBUS_BYTE_DATA:
-    	if (read_write == SMBUS_READ) { temp=Voodoo3_I2CRead_byte_data(addr,command); data->byte=temp;
+    case I2C_SMBUS_BYTE_DATA:
+    	if (read_write == I2C_SMBUS_READ) { temp=Voodoo3_I2CRead_byte_data(addr,command); data->byte=temp;
 	} else { temp=Voodoo3_I2CWrite_byte_data(addr,command,data->byte); }
 	goto TESTACK;
-    case SMBUS_WORD_DATA:
-    	if (read_write == SMBUS_READ) { temp=Voodoo3_I2CRead_word(addr,command); data->word=temp;
+    case I2C_SMBUS_WORD_DATA:
+    	if (read_write == I2C_SMBUS_READ) { temp=Voodoo3_I2CRead_word(addr,command); data->word=temp;
 	} else { temp=Voodoo3_I2CWrite_word(addr,command,data->word); }
 	goto TESTACK;
-    case SMBUS_PROC_CALL:
+    case I2C_SMBUS_PROC_CALL:
 	printk("i2c-voodoo3: Proc call not supported.\n");
 	return -1;
-    case SMBUS_BLOCK_DATA:
+    case I2C_SMBUS_BLOCK_DATA:
 	printk("i2c-voodoo3: Block transfers not supported yet.\n");
 	return -1;
   }
@@ -500,6 +522,16 @@ TESTACK: if (temp < 0) {
 	return 0;
 }
 
+void voodoo3_inc(struct i2c_adapter *adapter)
+{
+	MOD_INC_USE_COUNT;
+}
+
+void voodoo3_dec(struct i2c_adapter *adapter)
+{
+
+	MOD_DEC_USE_COUNT;
+}
 
 int voodoo3_init(void)
 {
@@ -520,10 +552,7 @@ int voodoo3_init(void)
   }
   voodoo3_initialized ++;
   sprintf(voodoo3_adapter.name,"SMBus Voodoo3 adapter at %04x",voodoo3_smba);
-  voodoo3_adapter.id = ALGO_SMBUS | SMBUS_VOODOO3;
-  voodoo3_adapter.algo = &smbus_algorithm;
-  voodoo3_adapter.smbus_access = &voodoo3_access;
-  if ((res = smbus_add_adapter(&voodoo3_adapter))) {
+  if ((res = i2c_add_adapter(&voodoo3_adapter))) {
     printk("i2c-voodoo3.o: Adapter registration failed, module not inserted.\n");
     voodoo3_cleanup();
     return res;
@@ -540,8 +569,8 @@ int voodoo3_cleanup(void)
   iounmap(mem);
   if (voodoo3_initialized >= 2)
   {
-    if ((res = smbus_del_adapter(&voodoo3_adapter))) {
-      printk("i2c-voodoo3.o: smbus_del_adapter failed, module not removed\n");
+    if ((res = i2c_del_adapter(&voodoo3_adapter))) {
+      printk("i2c-voodoo3.o: i2c_del_adapter failed, module not removed\n");
       return res;
     } else
       voodoo3_initialized--;

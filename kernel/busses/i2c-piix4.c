@@ -88,17 +88,39 @@ MODULE_PARM_DESC(force_addr,"Forcibly enable the PIIX4 at the given address. "
 static int piix4_init(void);
 static int piix4_cleanup(void);
 static int piix4_setup(void);
-static s32 piix4_access(u8 addr, char read_write,
-                        u8 command, int size, union smbus_data * data);
+static s32 piix4_access(struct i2c_adapter *adap, u8 addr, char read_write,
+                        u8 command, int size, union i2c_smbus_data * data);
 static void piix4_do_pause( unsigned int amount );
 static int piix4_transaction(void);
+static void piix4_inc(struct i2c_adapter *adapter);
+static void piix4_dec(struct i2c_adapter *adapter);
 
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static struct smbus_adapter piix4_adapter;
+static struct i2c_algorithm smbus_algorithm = {
+  /* name */		"Non-I2C SMBus adapter",
+  /* id */		I2C_ALGO_SMBUS,
+  /* master_xfer */	NULL,
+  /* smbus_access */    piix4_access,
+  /* slave_send */	NULL,
+  /* slave_rcv */	NULL,
+  /* algo_control */	NULL,
+};
+
+static struct i2c_adapter piix4_adapter = {
+  "unset",
+  I2C_ALGO_SMBUS | I2C_HW_SMBUS_PIIX4,
+  &smbus_algorithm,
+  NULL,
+  piix4_inc,
+  piix4_dec,
+  NULL,
+  NULL,
+};
+
 static int piix4_initialized;
 static unsigned short piix4_smba = 0;
 
@@ -317,45 +339,45 @@ int piix4_transaction(void)
 }
 
 /* Return -1 on error. See smbus.h for more information */
-s32 piix4_access(u8 addr, char read_write,
-                 u8 command, int size, union smbus_data * data)
+s32 piix4_access(struct i2c_adapter *adap, u8 addr, char read_write,
+                 u8 command, int size, union i2c_smbus_data * data)
 {
   int i,len;
 
   switch(size) {
-    case SMBUS_PROC_CALL:
-      printk("i2c-piix4.o: SMBUS_PROC_CALL not supported!\n");
+    case I2C_SMBUS_PROC_CALL:
+      printk("i2c-piix4.o: I2C_SMBUS_PROC_CALL not supported!\n");
       return -1;
-    case SMBUS_QUICK:
+    case I2C_SMBUS_QUICK:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
       size = PIIX4_QUICK;
       break;
-    case SMBUS_BYTE:
+    case I2C_SMBUS_BYTE:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
-      if (read_write == SMBUS_WRITE)
+      if (read_write == I2C_SMBUS_WRITE)
         outb_p(command, SMBHSTCMD);
       size = PIIX4_BYTE;
       break;
-    case SMBUS_BYTE_DATA:
+    case I2C_SMBUS_BYTE_DATA:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
       outb_p(command, SMBHSTCMD);
-      if (read_write == SMBUS_WRITE)
+      if (read_write == I2C_SMBUS_WRITE)
         outb_p(data->byte,SMBHSTDAT0);
       size = PIIX4_BYTE_DATA;
       break;
-    case SMBUS_WORD_DATA:
+    case I2C_SMBUS_WORD_DATA:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
       outb_p(command, SMBHSTCMD);
-      if (read_write == SMBUS_WRITE) {
+      if (read_write == I2C_SMBUS_WRITE) {
         outb_p(data->word & 0xff,SMBHSTDAT0);
         outb_p((data->word & 0xff00) >> 8,SMBHSTDAT1);
       }
       size = PIIX4_WORD_DATA;
       break;
-    case SMBUS_BLOCK_DATA:
+    case I2C_SMBUS_BLOCK_DATA:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
       outb_p(command, SMBHSTCMD);
-      if (read_write == SMBUS_WRITE) {
+      if (read_write == I2C_SMBUS_WRITE) {
         len = data->block[0];
         if (len < 0) 
           len = 0;
@@ -375,7 +397,7 @@ s32 piix4_access(u8 addr, char read_write,
   if (piix4_transaction()) /* Error in transaction */ 
     return -1; 
   
-  if ((read_write == SMBUS_WRITE) || (size == PIIX4_QUICK))
+  if ((read_write == I2C_SMBUS_WRITE) || (size == PIIX4_QUICK))
     return 0;
   
 
@@ -402,6 +424,16 @@ s32 piix4_access(u8 addr, char read_write,
   return 0;
 }
 
+void piix4_inc(struct i2c_adapter *adapter)
+{
+	MOD_INC_USE_COUNT;
+}
+
+void piix4_dec(struct i2c_adapter *adapter)
+{
+
+	MOD_DEC_USE_COUNT;
+}
 
 int piix4_init(void)
 {
@@ -422,10 +454,7 @@ int piix4_init(void)
   }
   piix4_initialized ++;
   sprintf(piix4_adapter.name,"SMBus PIIX4 adapter at %04x",piix4_smba);
-  piix4_adapter.id = ALGO_SMBUS | SMBUS_PIIX4;
-  piix4_adapter.algo = &smbus_algorithm;
-  piix4_adapter.smbus_access = &piix4_access;
-  if ((res = smbus_add_adapter(&piix4_adapter))) {
+  if ((res = i2c_add_adapter(&piix4_adapter))) {
     printk("i2c-piix4.o: Adapter registration failed, module not inserted.\n");
     piix4_cleanup();
     return res;
@@ -440,8 +469,8 @@ int piix4_cleanup(void)
   int res;
   if (piix4_initialized >= 2)
   {
-    if ((res = smbus_del_adapter(&piix4_adapter))) {
-      printk("i2c-piix4.o: smbus_del_adapter failed, module not removed\n");
+    if ((res = i2c_del_adapter(&piix4_adapter))) {
+      printk("i2c-piix4.o: i2c_del_adapter failed, module not removed\n");
       return res;
     } else
       piix4_initialized--;

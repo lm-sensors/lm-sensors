@@ -86,30 +86,36 @@ static int bit_via_getsda(void *data)
   return (0 != (inb(I2C_IN) & I2C_SDA) );
 }
 
-static int bit_via_reg(struct i2c_client *client)
+static void bit_via_inc(struct i2c_adapter *adapter)
 {
-	return 0;
+	MOD_INC_USE_COUNT;
 }
 
-static int bit_via_unreg(struct i2c_client *client)
+static void bit_via_dec(struct i2c_adapter *adapter)
 {
-	return 0;
+	MOD_DEC_USE_COUNT;
 }
-
 
 /* ------------------------------------------------------------------------ */
 
-static struct bit_adapter bit_via_ops = {
-	"VIA i2c",
-	HW_B_VIA,
+static struct i2c_algo_bit_data bit_data = {
 	NULL,
 	bit_via_setsda,
 	bit_via_setscl,
 	bit_via_getsda,
 	bit_via_getscl,
-	bit_via_reg,
-	bit_via_unreg,
 	5, 5, 100,	/*waits, timeout */
+};
+
+static struct i2c_adapter bit_via_ops = {
+	"VIA i2c",
+	I2C_HW_B_VIA,
+	NULL,
+	&bit_data,
+	bit_via_inc,
+	bit_via_dec,
+	NULL,
+	NULL,
 };
 
 
@@ -216,12 +222,12 @@ static int init_i2c_via(void)
 	}
 			
 	if (i2c_bit_add_bus(&bit_via_ops) == 0) {
-		printk("Via i2c: Module succesfully loaded\n");
+		printk("i2c-via.o: Module succesfully loaded\n");
 		return 0;
 	} else {
 		outb(inb(I2C_DIR)&~(I2C_SDA|I2C_SCL), I2C_DIR);	
 		release_region(I2C_DIR, IOSPACE);
-		printk("Via i2c: Algo-bit error, couldn't register bus\n");
+		printk("i2c-via.o: Algo-bit error, couldn't register bus\n");
 		return -ENODEV;
 	}
 }

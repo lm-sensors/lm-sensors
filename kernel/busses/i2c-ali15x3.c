@@ -146,17 +146,39 @@
 static int ali15x3_init(void);
 static int ali15x3_cleanup(void);
 static int ali15x3_setup(void);
-static s32 ali15x3_access(u8 addr, char read_write,
-                        u8 command, int size, union smbus_data * data);
+static s32 ali15x3_access(struct i2c_adapter *adap, u8 addr, char read_write,
+                        u8 command, int size, union i2c_smbus_data * data);
 static void ali15x3_do_pause( unsigned int amount );
 static int ali15x3_transaction(void);
+static void ali15x3_inc(struct i2c_adapter *adapter);
+static void ali15x3_dec(struct i2c_adapter *adapter);
 
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static struct smbus_adapter ali15x3_adapter;
+static struct i2c_algorithm smbus_algorithm = {
+  /* name */		"Non-I2C SMBus adapter",
+  /* id */		I2C_ALGO_SMBUS,
+  /* master_xfer */	NULL,
+  /* smbus_access */    ali15x3_access,
+  /* slave_send */	NULL,
+  /* slave_rcv */	NULL,
+  /* algo_control */	NULL,
+};
+
+static struct i2c_adapter ali15x3_adapter = {
+  "unset",
+  I2C_ALGO_SMBUS | I2C_HW_SMBUS_ALI15X3,
+  &smbus_algorithm,
+  NULL,
+  ali15x3_inc,
+  ali15x3_dec,
+  NULL,
+  NULL,
+};
+
 static int ali15x3_initialized;
 #ifdef MAP_ACPI
 static unsigned short ali15x3_acpia = 0;
@@ -457,8 +479,8 @@ int ali15x3_transaction(void)
 }
 
 /* Return -1 on error. See smbus.h for more information */
-s32 ali15x3_access(u8 addr, char read_write,
-                 u8 command, int size, union smbus_data * data)
+s32 ali15x3_access(struct i2c_adapter *adap, u8 addr, char read_write,
+                 u8 command, int size, union i2c_smbus_data * data)
 {
   int i,len;
   int temp;
@@ -478,39 +500,39 @@ s32 ali15x3_access(u8 addr, char read_write,
   }
 
   switch(size) {
-    case SMBUS_PROC_CALL:
-      printk("i2c-ali15x3.o: SMBUS_PROC_CALL not supported!\n");
+    case I2C_SMBUS_PROC_CALL:
+      printk("i2c-ali15x3.o: I2C_SMBUS_PROC_CALL not supported!\n");
       return -1;
-    case SMBUS_QUICK:
+    case I2C_SMBUS_QUICK:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
       size = ALI15X3_QUICK;
       break;
-    case SMBUS_BYTE:
+    case I2C_SMBUS_BYTE:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
-      if (read_write == SMBUS_WRITE)
+      if (read_write == I2C_SMBUS_WRITE)
         outb_p(command, SMBHSTCMD);
       size = ALI15X3_BYTE;
       break;
-    case SMBUS_BYTE_DATA:
+    case I2C_SMBUS_BYTE_DATA:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
       outb_p(command, SMBHSTCMD);
-      if (read_write == SMBUS_WRITE)
+      if (read_write == I2C_SMBUS_WRITE)
         outb_p(data->byte,SMBHSTDAT0);
       size = ALI15X3_BYTE_DATA;
       break;
-    case SMBUS_WORD_DATA:
+    case I2C_SMBUS_WORD_DATA:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
       outb_p(command, SMBHSTCMD);
-      if (read_write == SMBUS_WRITE) {
+      if (read_write == I2C_SMBUS_WRITE) {
         outb_p(data->word & 0xff,SMBHSTDAT0);
         outb_p((data->word & 0xff00) >> 8,SMBHSTDAT1);
       }
       size = ALI15X3_WORD_DATA;
       break;
-    case SMBUS_BLOCK_DATA:
+    case I2C_SMBUS_BLOCK_DATA:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
       outb_p(command, SMBHSTCMD);
-      if (read_write == SMBUS_WRITE) {
+      if (read_write == I2C_SMBUS_WRITE) {
         len = data->block[0];
         if (len < 0) {
           len = 0;
@@ -534,7 +556,7 @@ s32 ali15x3_access(u8 addr, char read_write,
   if (ali15x3_transaction()) /* Error in transaction */ 
     return -1; 
   
-  if ((read_write == SMBUS_WRITE) || (size == ALI15X3_QUICK))
+  if ((read_write == I2C_SMBUS_WRITE) || (size == ALI15X3_QUICK))
     return 0;
   
 
@@ -565,6 +587,16 @@ s32 ali15x3_access(u8 addr, char read_write,
   return 0;
 }
 
+void ali15x3_inc(struct i2c_adapter *adapter)
+{
+	MOD_INC_USE_COUNT;
+}
+
+void ali15x3_dec(struct i2c_adapter *adapter)
+{
+
+	MOD_DEC_USE_COUNT;
+}
 
 int ali15x3_init(void)
 {
@@ -588,10 +620,7 @@ int ali15x3_init(void)
   sprintf(ali15x3_adapter.name,"ACPI ALI15X3 at %04x",ali15x3_acpia);
 #endif
   sprintf(ali15x3_adapter.name,"SMBus ALI15X3 adapter at %04x",ali15x3_smba);
-  ali15x3_adapter.id = ALGO_SMBUS | SMBUS_PIIX4;
-  ali15x3_adapter.algo = &smbus_algorithm;
-  ali15x3_adapter.smbus_access = &ali15x3_access;
-  if ((res = smbus_add_adapter(&ali15x3_adapter))) {
+  if ((res = i2c_add_adapter(&ali15x3_adapter))) {
     printk("i2c-ali15x3.o: Adapter registration failed, module not inserted.\n");
     ali15x3_cleanup();
     return res;
@@ -606,8 +635,8 @@ int ali15x3_cleanup(void)
   int res;
   if (ali15x3_initialized >= 2)
   {
-    if ((res = smbus_del_adapter(&ali15x3_adapter))) {
-      printk("i2c-ali15x3.o: smbus_del_adapter failed, module not removed\n");
+    if ((res = i2c_del_adapter(&ali15x3_adapter))) {
+      printk("i2c-ali15x3.o: i2c_del_adapter failed, module not removed\n");
       return res;
     } else
       ali15x3_initialized--;

@@ -103,32 +103,36 @@ static int bit_hydra_getsda(void *data)
 	return (pdregr() & HYDRA_SDAT) != 0;
 }
 
-static int bit_hydra_reg(struct i2c_client *client)
+static void bit_hydra_inc(struct i2c_adapter *adap)
 {
 	MOD_INC_USE_COUNT;
-	return 0;
 }
 
-static int bit_hydra_unreg(struct i2c_client *client)
+static void bit_hydra_dec(struct i2c_adapter *adap)
 {
 	MOD_DEC_USE_COUNT;
-	return 0;
 }
-
 
 /* ------------------------------------------------------------------------ */
 
-struct bit_adapter bit_hydra_ops = {
-	"Hydra i2c",
-	HW_B_HYDRA,
+struct i2c_algo_bit_data bit_hydra_data = {
 	NULL,
 	bit_hydra_setsda,
 	bit_hydra_setscl,
 	bit_hydra_getsda,
 	bit_hydra_getscl,
-	bit_hydra_reg,
-	bit_hydra_unreg,
 	5, 5, 100,	/*waits, timeout */
+};
+
+struct i2c_adapter bit_hydra_ops = {
+	"Hydra i2c",
+	I2C_HW_B_HYDRA,
+	NULL,
+	&bit_hydra_data,
+	bit_hydra_inc,
+	bit_hydra_dec,
+	NULL,
+	NULL,
 };
 
 
