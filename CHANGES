@@ -33,7 +33,7 @@ ask CVS about it:
   Program mkpatch: Add Config.in entries for, lm92,
                    pcf8574, pcf8591, smsc47m1, vt1211;
                    add dmi_scan
-  Program p4b_smbus: Fix compile for SMP and MODVERSIONS
+  Program p4b_smbus: Fix compile for SMP and MODVERSIONS; fix PCI ID problem
   Program sensord: Add /usr/local/etc to config file path;
                    add support for logging loadavg in RRD;
                    fix down-converting raw labels for RRD;

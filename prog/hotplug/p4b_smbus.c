@@ -86,17 +86,11 @@ rmm    from lm_sensors-2.3.3:
  * some shorter definitions for the ICHx PCI device IDs
  */
 
-#define ICH2 PCI_DEVICE_ID_INTEL_82801BA_0
-#define ICH2_SMBUS PCI_DEVICE_ID_INTEL_82801BA_3
+#define ICH4 0x2440
+#define ICH2_SMBUS 0x2443
 
-
-#ifndef PCI_DEVICE_ID_INTEL_82801DB_0
-#define PCI_DEVICE_ID_INTEL_82801DB_0 0x24c0
-#define PCI_DEVICE_ID_INTEL_82801DB_3 0x24c3
-#endif
-
-#define ICH4 PCI_DEVICE_ID_INTEL_82801DB_0
-#define ICH4_SMBUS PCI_DEVICE_ID_INTEL_82801DB_3
+#define ICH4 0x24c0
+#define ICH4_SMBUS 0x24c3
 
 /* status, used to indicate that io space needs to be freed */
 static struct pci_dev *i801smbus = NULL;
