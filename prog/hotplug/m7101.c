@@ -79,7 +79,7 @@
 #include <linux/stddef.h>
 #include <linux/ioport.h>
 #include <linux/errno.h>
-#include <linux/malloc.h>
+#include <linux/slab.h>
 #include <asm/types.h>
 
 /* 
