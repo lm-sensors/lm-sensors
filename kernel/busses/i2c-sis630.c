@@ -321,8 +321,19 @@ u32 sis630_func(struct i2c_adapter *adapter) {
 		I2C_FUNC_SMBUS_WORD_DATA | I2C_FUNC_SMBUS_PROC_CALL;
 }
 
-int sis630_setup(struct pci_dev *sis630_dev) {
+int sis630_setup(struct pci_dev *dummy) {
 	unsigned char b;
+	struct pci_dev *sis630_dev = NULL;
+
+        /*
+	   We need ISA brigde and not pci device passed in.
+        */
+	if (!(sis630_dev = pci_find_device(PCI_VENDOR_ID_SI,
+                                            PCI_DEVICE_ID_SI_503,
+                                            sis630_dev))) {
+            printk(KERN_ERR "i2c-sis630.o: Error: Can't detect 85C503/5513 ISA bridge!\n");
+            return -ENODEV;
+        }
 
 	/*
 	   Enable ACPI first , so we can accsess reg 74-75
@@ -333,7 +344,8 @@ int sis630_setup(struct pci_dev *sis630_dev) {
 		printk(KERN_ERR "i2c-sis630.o: Error: Can't read bios ctl reg\n");
 		return -ENODEV;
 	}
-	/* if ACPI already anbled , do nothing */
+
+	/* if ACPI already enabled , do nothing */
 	if (!(b & 0x80) &&
 	    PCIBIOS_SUCCESSFUL !=
 	    pci_write_config_byte(sis630_dev,SIS630_BIOS_CTL_REG,b|0x80)) {
