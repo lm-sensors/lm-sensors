@@ -107,6 +107,8 @@ CC := gcc
 BISON := bison
 FLEX := flex
 AR := ar
+INSTALL := install
+LN := ln -sfn
 
 # Determine the default compiler flags
 # MODCFLAGS is to create in-kernel object files (modules); PROGFLAGS is to

@@ -44,7 +44,7 @@ LIBHEADERFILES := $(MODULE_DIR)/error.h
 
 # How to create the shared library
 $(MODULE_DIR)/$(LIBSHLIBNAME): $(LIBSHOBJECTS)
-	$(CC) -shared -Wl,-soname,$(LIBSONAME) -o $@ $^ -lc
+	$(CC) -shared -Wl,-soname,$(LIBSHSONAME) -o $@ $^ -lc
 
 # And the static library
 $(MODULE_DIR)/$(LIBSTLIBNAME): $(LIBSTOBJECTS)
@@ -66,10 +66,10 @@ all :: all-lib
 
 install-lib:
 	$(MKDIR) $(LIBDIR) $(LIBINCLUDEDIR)
-	install -o root -g root -m 644 $(LIBTARGETS) $(LIBDIR)
+	$(INSTALL) -o root -g root -m 644 $(LIBTARGETS) $(LIBDIR)
 	$(LN) $(LIBSHLIBNAME) $(LIBDIR)/$(LIBSHSONAME)
 	$(LN) $(LIBSHSONAME) $(LIBDIR)/$(LIBSHBASENAME)
-	install -o root -g root -m 644 $(LIBHEADERFILES) $(LIBINCLUDEDIR)
+	$(INSTALL) -o root -g root -m 644 $(LIBHEADERFILES) $(LIBINCLUDEDIR)
 install :: install-lib
 
 clean-lib:

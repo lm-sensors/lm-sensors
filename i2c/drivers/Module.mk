@@ -30,10 +30,7 @@ INCLUDEFILES += $(I2CDRIVERTARGETS:.o=.d)
 all-i2c-drivers: $(I2CDRIVERTARGETS)
 all :: all-i2c-drivers
 
-install-i2c-drivers:
-	$(MKDIR) $(MODDIR)
-	install -o root -g root -m 644 $(I2CDRIVERTARGETS) $(MODDIR)
-install :: install-i2c-drivers
+# No install rule: Our own eeprom.o driver is better :-)
 
 clean-i2c-drivers:
 	$(RM) $(I2CDRIVERTARGETS) $(I2CDRIVERTARGETS:.o=.d)
