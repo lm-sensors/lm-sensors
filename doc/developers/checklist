@@ -16,17 +16,9 @@ release:
   lsm@execpc.com with the subject `add' (no quotes).
 - update lm_sensors2/version.h, and cvs commit it
 - Tag the release using CVS ('cvs tag V#-#-#' from the dist root)
-- cp lm_sensors2/README.package README
+- cvs commit
 - remove 'CVS' related files/directories
 - tar it up and post it (sign it!)
-
-kernel patch (repeat with latest 2.2.x and 2.3.x kernels):
-- untar a virgin kernel
-- mkpatch against i2c, and apply it
-- mkpatch against lm_sensors2
-- put the patches in a lm_sensors-2.x.x-kernel-2.x.x.patches dir
-- cp ../lm_sensors.../lm_sensors2/README.patches ./README
-- tar and post it (sign it!)
 
 misc:
 - copy to mirrors
