@@ -798,7 +798,7 @@ sub read_proc_dev_pci
     ($dfn,$vend,$record->{irq},$record->{base_addr0},$record->{base_addr1},
           $record->{base_addr2},$record->{base_addr3},$record->{base_addr4},
           $record->{base_addr5},$record->{rom_base_addr}) = 
-          map { oct "0x$_" } split;
+          map { oct "0x$_" } (split) [0..9];
     $record->{bus} = $dfn >> 8;
     $record->{slot} = ($dfn & 0xf8) >> 3;
     $record->{func} = $dfn & 0x07;
