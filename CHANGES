@@ -37,11 +37,13 @@ ask CVS about it:
            Change from sensors_* to i2c_* globals for new i2c-proc.[ch]
   Chip Modules (all ISA): Remove #include "i2c-isa.h"
   Chip Modules (all): Change from sensors_* to i2c_* globals for new i2c-proc.[ch]
+  Makefiles: enhance to support Alpha architecture
   Module adm1021: Fix lm84 and gl523sm support
   Module adm1024: new
   Module i2c-i801: Chip detection cleanup
   Module i2c-i810: Fixed i2c_i810_init() not found in patched kernel
   Module i2c-sis5595: Allow force_addr=0xaddr; enable if not enabled.
+  Module i2c-tsunami: New
   Module i2c-via: Ensure i2c bus is tristated correctly.
   Module lm78: Recognize chipid=0x20
   Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
@@ -57,8 +59,10 @@ ask CVS about it:
                   reading changes
   Programs i2cdetect, i2cdump: add devfs /dev/i2c/x support
   Program i2cset: new
-  Program mkpatch.pl: Fix adm9240 typos, add more chips to Configure.help,
-                      remove ltc1710
+  Program isadump: fix for Alpha arch. compiles
+  Program mkpatch.pl: Fix adm9240 typos; Add more chips to Configure.help;
+                      Remove ltc1710; Fix i2c_sis5595 typo;
+                      Support kernel 2.4.5 makefile change
   Program sens_update_rrd: new
   Program sensord: Add -d (debug) and -p (pid-file) options
   Program sensors: Change reported version from 1.3 to the lm_sensors version;

@@ -119,6 +119,8 @@ MANDIR := $(PREFIX)/man
 MANOWN := root
 MANGRP := root
 
+MACHINE := $(shell uname -m)
+
 ##################################################
 # Below this, nothing should need to be changed. #
 ##################################################
@@ -173,6 +175,10 @@ MODCFLAGS := $(MODCFLAGS) -DEXPORT_SYMTAB
 PROGCFLAGS := $(CFLAGS)
 ARCFLAGS := $(CFLAGS)
 LIBCFLAGS := $(CFLAGS) -fpic
+
+ifeq ($(MACHINE),alpha)
+MODCFLAGS += -ffixed-8
+endif
 
 ifeq ($(SMP),1)
 MODCFLAGS += -D__SMP__

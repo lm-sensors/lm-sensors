@@ -58,3 +58,5 @@ problems.
   Author of the mtp008 chip driver.
 * Ken Bowley <ken@opnix.com>
   Author of the adm1024 driver
+* Oleg I. Vdovikin <vdovikin@jscc.ru>
+  Author of the DEC Tsunami bus driver.
