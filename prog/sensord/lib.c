@@ -79,7 +79,7 @@ loadConfig
   if (!strcmp (cfgPath, "-")) {
     if (!reload) {
       if ((ret = sensors_init (stdin))) {
-        if (ret == SENSORS_ERR_PROC)
+        if (ret == -SENSORS_ERR_PROC)
           sensorLog (LOG_ERR, "Error reading /proc; modules probably not loaded");
         else
           sensorLog (LOG_ERR, "Error %d loading sensors configuration file: <stdin>", ret);
@@ -96,7 +96,7 @@ loadConfig
       sensorLog (LOG_ERR, "Error opening sensors configuration file: %s", cfgPath);
       ret = 11;
     } else if ((ret = sensors_init (cfg))) {
-      if (ret == SENSORS_ERR_PROC)
+      if (ret == -SENSORS_ERR_PROC)
         sensorLog (LOG_ERR, "Error reading /proc; modules probably not loaded");
       else
         sensorLog (LOG_ERR, "Error %d loading sensors configuration file: %s", ret, cfgPath);
