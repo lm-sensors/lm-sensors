@@ -799,6 +799,10 @@ sub add_isa_to_chips_detected
            print("Can't open ",
                  "/dev/i2c-$new_misdetected_ref->[$j]->{devnr}?!?\n"),
            next;
+      i2c_set_slave_addr \*FILE,$new_misdetected_ref->[$j]->{address} or
+           print("Can't set I2C address for ",
+                 "/dev/i2c-$new_misdetected_ref->[$j]->{devnr}?!?\n"),
+           next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_misdetected_ref->[$j]->{address})) {
         $new_misdetected_ref->[$j]->{isa_addr} = $datahash->{isa_addr};
@@ -814,6 +818,10 @@ sub add_isa_to_chips_detected
         $new_detected_ref->[$j]->{chip_type} eq $datahash->{chip_type}) {
       open FILE,"/dev/i2c-$new_detected_ref->[$j]->{devnr}" or 
            print("Can't open ",
+                 "/dev/i2c-$new_detected_ref->[$j]->{devnr}?!?\n"),
+           next;
+      i2c_set_slave_addr \*FILE,$new_detected_ref->[$j]->{address} or
+           print("Can't set I2C address for ",
                  "/dev/i2c-$new_detected_ref->[$j]->{devnr}?!?\n"),
            next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
