@@ -1,7 +1,6 @@
 /*
-    SIS 630 SMBUS access implementation based on i2c-sis5595.
-
-    Status: beta
+    sis630.c - Part of lm_sensors, Linux kernel modules for hardware
+              monitoring
 
     Copyright (c) 2002 Alexander Malysh <amalysh@web.de>
 
@@ -22,11 +21,14 @@
 
 /*
    Changes:
+   24.09.2002
+	Fixed typo in sis630_access
+	Fixed logical error by restoring of Host Master Clock
    21.09.2002
 	Added high_clock module option.If this option is set 
 	used Host Master Clock 56KHz (default 14KHz).For now we are save old Host 
 	Master Clock and after transaction completed restore (otherwise
-	it's confuse BIOS and hung Laptop).
+	it's confuse BIOS and hung Machine).
    18.09.2002
 	Added SIS730 as supported
    24.08.2002
@@ -37,10 +39,11 @@
 /*
    TODO:
      Implement block data write/read
-     Check SMBALT# : why it can't be cleared ????
      Test on 2.2 kernel
 */
 /*
+   Status: beta
+
    Supports:
 	SIS 630
 	SIS 730
@@ -236,6 +239,10 @@ int sis630_transaction(int size) {
 	/* save old clock, so we can prevent machine to hung */
 	oldclock = sis630_read(SMB_CNT);
 
+#ifdef DEBUG
+	printk(KERN_DEBUG "i2c-sis630.o: saved clock 0x%02x\n", oldclock);
+#endif
+
 	/* disable timeout interrupt , set Host Master Clock to 56KHz if requested */
 	if (high_clock > 0)
 		sis630_write(SMB_CNT, 0x20);
@@ -284,17 +291,24 @@ int sis630_transaction(int size) {
         /* clear all status "sticky" bits */
 	sis630_write(SMB_STS, temp);
 
+#ifdef DEBUG
+	printk(KERN_DEBUG "i2c-sis630.o: SMB_CNT before clock restore 0x%02x\n", sis630_read(SMB_CNT));
+#endif
+
 	/* restore old Host Master Clock */
-	if (!(oldclock & 0x20)) {
-#ifdef DEBUG
-		printk(KERN_DEBUG "i2c-sis630.o: SMB_CNT before clock restore 0x%02x\n", sis630_read(SMB_CNT));
-#endif
-		oldclock = sis630_read(SMB_CNT) & ~0x20;
-		sis630_write(SMB_CNT,oldclock);
-#ifdef DEBUG
-		printk(KERN_DEBUG "i2c-sis630.o: SMB_CNT after clock restore 0x%02x\n", sis630_read(SMB_CNT));
-#endif
+	switch(oldclock & 0x20) {
+		case 1:
+			sis630_write(SMB_CNT, sis630_read(SMB_CNT) | 0x20);
+			break;
+		case 0:
+			oldclock = sis630_read(SMB_CNT) & ~0x20;
+			sis630_write(SMB_CNT,oldclock);
+			break;
 	}
+
+#ifdef DEBUG
+	printk(KERN_DEBUG "i2c-sis630.o: SMB_CNT after clock restore 0x%02x\n", sis630_read(SMB_CNT));
+#endif
 
         return result;
 }
@@ -349,8 +363,8 @@ s32 sis630_access(struct i2c_adapter * adap, u16 addr,
 	if (sis630_transaction(size))
 		return -1;
 
-        if ((size != I2C_SMBUS_PROC_CALL) &&
-		((read_write == I2C_SMBUS_WRITE) || (size == I2C_SMBUS_QUICK))) {
+        if ((size != SIS630_PCALL) &&
+		((read_write == I2C_SMBUS_WRITE) || (size == SIS630_QUICK))) {
                 return 0;
 	}
 
@@ -469,7 +483,7 @@ int __init i2c_sis630_init(void) {
 
 	sis630_initialized = 0;
 	if ((res = sis630_setup())) {
-		printk(KERN_ERR "i2c-sis630.o: SIS630 compatible bus not detected, module not inserted.\n");
+		printk(KERN_ERR "i2c-sis630.o: SIS630 comp. bus not detected, module not inserted.\n");
 		i2c_sis630_cleanup();
 		return res;
 	}
@@ -483,7 +497,7 @@ int __init i2c_sis630_init(void) {
 		return res;
 	}
 	sis630_initialized++;
-	printk(KERN_INFO "i2c-sis630.o: SIS630 compatible bus detected and initialized\n");
+	printk(KERN_INFO "i2c-sis630.o: SIS630 comp. bus detected and initialized\n");
 
 	return 0;
 }
