@@ -230,4 +230,42 @@
 #define SENSORS_GL518R80_BEEP_ENABLE 82 /* RW */
 #define SENSORS_GL518R80_BEEPS 83 /* RW */
 
+
+/* LM80 chips */
+
+#define SENSORS_LM80_PREFIX "lm80"
+
+#define SENSORS_LM80_IN0 1 /* R */
+#define SENSORS_LM80_IN1 2 /* R */
+#define SENSORS_LM80_IN2 3 /* R */
+#define SENSORS_LM80_IN3 4 /* R */
+#define SENSORS_LM80_IN4 5 /* R */
+#define SENSORS_LM80_IN5 6 /* R */
+#define SENSORS_LM80_IN6 7 /* R */
+#define SENSORS_LM80_IN0_MIN 11 /* RW */
+#define SENSORS_LM80_IN1_MIN 12 /* RW */
+#define SENSORS_LM80_IN2_MIN 13 /* RW */
+#define SENSORS_LM80_IN3_MIN 14 /* RW */
+#define SENSORS_LM80_IN4_MIN 15 /* RW */
+#define SENSORS_LM80_IN5_MIN 16 /* RW */
+#define SENSORS_LM80_IN6_MIN 17 /* RW */
+#define SENSORS_LM80_IN0_MAX 21 /* RW */
+#define SENSORS_LM80_IN1_MAX 22 /* RW */
+#define SENSORS_LM80_IN2_MAX 23 /* RW */
+#define SENSORS_LM80_IN3_MAX 24 /* RW */
+#define SENSORS_LM80_IN4_MAX 25 /* R */
+#define SENSORS_LM80_IN5_MAX 26 /* R */
+#define SENSORS_LM80_IN6_MAX 27 /* R */
+#define SENSORS_LM80_FAN1 31 /* R */
+#define SENSORS_LM80_FAN2 32 /* R */
+#define SENSORS_LM80_FAN1_MIN 41 /* RW */
+#define SENSORS_LM80_FAN2_MIN 42 /* RW */
+#define SENSORS_LM80_TEMP 51 /* R */
+#define SENSORS_LM80_TEMP_HOT_HYST 52 /* RW */
+#define SENSORS_LM80_TEMP_HOT_MAX 53 /* RW */
+#define SENSORS_LM80_TEMP_OS_HYST 54 /* RW */
+#define SENSORS_LM80_TEMP_OS_MAX 55 /* RW */
+#define SENSORS_LM80_FAN1_DIV 71 /* RW */
+#define SENSORS_LM80_FAN2_DIV 72 /* RW */
+#define SENSORS_LM80_ALARMS 81 /* R */
 #endif /* def LIB_SENSORS_CHIPS_H */
