@@ -1106,14 +1106,15 @@ void pc87365_in(struct i2c_client *client, int operation, int ctl_name,
 		pc87360_update_client(client);
 		results[0] = IN_FROM_REG(data->in_min[nr], data->in_vref);
 		results[1] = IN_FROM_REG(data->in_max[nr], data->in_vref);
-		results[2] = IN_FROM_REG(data->in[nr], data->in_vref);
 		if (nr < 11) {
 			*nrels_mag = 3;
 		} else {
-			results[3] = IN_FROM_REG(data->in_crit[nr-11],
+			results[2] = IN_FROM_REG(data->in_crit[nr-11],
 						 data->in_vref);
 			*nrels_mag = 4;
 		}
+		results[(*nrels_mag)-1] = IN_FROM_REG(data->in[nr],
+						      data->in_vref);
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
@@ -1131,7 +1132,7 @@ void pc87365_in(struct i2c_client *client, int operation, int ctl_name,
 					    data->in_max[nr]);
 		}
 		if (*nrels_mag >= 3 && nr > 11) {
-			data->in_crit[nr-11] = IN_TO_REG(results[3],
+			data->in_crit[nr-11] = IN_TO_REG(results[2],
 							 data->in_vref);
 			pc87360_write_value(data, LD_IN, nr,
 					    PC87365_REG_TEMP_CRIT,
