@@ -1,0 +1,76 @@
+.\" Copyright 1999 Frodo Looijaard <frodol@dds.nl>
+.\" sensors is distributed under the GPL
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.TH sensors 1  "February 8, 1999" "" "Linux Programmer's Manual"
+.SH NAME
+sensors \- printing sensors information
+.SH SYNOPSIS
+.B sensors [
+.I options
+.B ] [
+.I chips
+.B ]
+
+.SH DESCRIPTION
+.B sensors
+is used to show the current readings of all sensor chips, and to set all limits
+as specified in the configuration file.
+
+.B sensors
+knows about certain chips, and outputs nicely formatted readings for them; but
+it can also display the information of unknown chips, as long as 
+.I libsensors
+knows about them.
+
+.SH OPTIONS
+.IP "-c config-file"
+Specify a configuration file. If no file is specified, the name `sensors.conf'
+is used. If the name does not contain a directory slash, or this parameter
+is not present, the following path is examined:
+.BR /etc ,
+.BR /usr/lib/sensors ,
+.BR /usr/local/lib/sensors ,
+.BR /usr/lib ,
+.BR /usr/local/lib ,
+.B .
+.IP -h
+Prints a help text
+.IP -s
+Evaluates all `set' statements in the configuration file. You must probably
+be `root' to do this. If this parameter is not specified, no `set' statement
+is evaluated.
+.IP -v
+Returns the program version.
+.SH FILES
+.I /etc/sensors.conf
+.RS
+The system wide configuration file. See
+.BR sensors.conf (5)
+for further details.
+,RE
+.SH "CONFORMING TO"
+lm_sensors-2.x
+.SH SEE ALSO
+sensors.conf(5)
+
+

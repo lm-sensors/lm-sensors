@@ -20,6 +20,9 @@
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := prog/sensors
 
+PROGSENSORSMAN1DIR := $(MANDIR)/man1
+PROGSENSORSMAN1FILES := $(MODULE_DIR)/sensors.1
+
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 PROGSENSORSTARGETS := $(MODULE_DIR)/sensors
@@ -36,8 +39,9 @@ all-prog-sensors: $(PROGSENSORSTARGETS)
 all :: all-prog-sensors
 
 install-prog-sensors: all-prog-sensors
-	mkdir -p $(BINDIR)
+	mkdir -p $(BINDIR) $(PROGSENSORSMAN1DIR)
 	$(INSTALL) -o root -g root -m 755 $(PROGSENSORSTARGETS) $(BINDIR)
+	$(INSTALL) -o $(MANOWN) -g $(MANGRP) -m 644 $(PROGSENSORSMAN1FILES) $(PROGSENSORSMAN1DIR)
 install :: install-prog-sensors
 
 clean-prog-sensors:
