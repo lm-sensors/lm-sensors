@@ -157,10 +157,10 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
    ((temp)<256?((((temp)&0x1fe) >> 1) * 10)      + ((temp) & 1) * 5:  \
                ((((temp)&0x1fe) >> 1) -255) * 10 - ((temp) & 1) * 5)  \
 
-#define TEMP_LIMIT_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*100)
+#define TEMP_LIMIT_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
 
-#define TEMP_LIMIT_TO_REG(val) SENSORS_LIMIT(((val)<0?(((val)-50)/100):\
-                                                      ((val)+50)/100), \
+#define TEMP_LIMIT_TO_REG(val) SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
+                                                      ((val)+5)/10), \
                                              0,255)
 
 #define ALARMS_FROM_REG(val) (val) 
