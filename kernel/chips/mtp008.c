@@ -726,6 +726,7 @@ void mtp008_update_client(struct i2c_client *client)
 		 */
 		inp = mtp008_read_value(client, MTP008_REG_PIN_CTRL2);
 		mtp008_getsensortype(data, inp);
+		data->pwmenable = inp;
 
 		/*
 		 * Read the PWM registers if enabled.
@@ -740,10 +741,10 @@ void mtp008_update_client(struct i2c_client *client)
 		}
 
 		/*
-		 * Read the fan sensors. Skip 3 if PWM3 enabled.
+		 * Read the fan sensors. Skip 3 if PWM1 enabled.
 		 */
 		for (i = 1; i <= 3; i++) {
-			if(i == 3 && PWMENABLE_FROM_REG(3, inp)) {
+			if(i == 3 && PWMENABLE_FROM_REG(1, inp)) {
 				data->fan[2] = 0;
 				data->fan_min[2] = 0;
 			} else {
@@ -1079,12 +1080,20 @@ void mtp008_pwm(struct i2c_client *client, int operation, int ctl_name,
 		mtp008_update_client(client);
 
 		results[0] = PWM_FROM_REG(data->pwm[nr]);
-
-		*nrels_mag = 1;
+		results[1] = PWMENABLE_FROM_REG(nr + 1, data->pwmenable);
+		*nrels_mag = 2;
 
 		break;
 	case SENSORS_PROC_REAL_WRITE:
 		if (*nrels_mag >= 1) {
+			if (*nrels_mag >= 2) {
+				if(results[1])
+					data->pwmenable |= 0x10 << nr;
+				else
+					data->pwmenable &= ~(0x10 << nr);
+				mtp008_write_value(client, MTP008_REG_PIN_CTRL2,
+					           data->pwmenable);
+			}
 			data->pwm[nr] = PWM_TO_REG(results[0]);
 			mtp008_write_value(client, MTP008_REG_PWM_CTRL(nr),
 					   data->pwm[nr]);

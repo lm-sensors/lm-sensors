@@ -51,6 +51,10 @@
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
 #endif
 
+#ifndef I2C_DRIVERID_W83627HF
+#define I2C_DRIVERID_W83627HF 1038
+#endif
+
 #ifndef THIS_MODULE
 #define THIS_MODULE NULL
 #endif
@@ -59,7 +63,7 @@ static int force_addr;
 MODULE_PARM(force_addr, "i");
 MODULE_PARM_DESC(force_addr,
 		 "Initialize the base address of the sensors");
-static int force_i2c = 0x29;
+static int force_i2c = 0x1f;
 MODULE_PARM(force_i2c, "i");
 MODULE_PARM_DESC(force_i2c,
 		 "Initialize the i2c address of the sensors");
@@ -404,7 +408,8 @@ struct w83627hf_data {
 	u32 alarms;		/* Register encoding, combined */
 	u32 beeps;		/* Register encoding, combined */
 	u8 beep_enable;		/* Boolean */
-	u8 pwm[4];		/* Register value */
+	u8 pwm[2];		/* Register value */
+	u8 pwmenable[2];	/* bool */
 	u16 sens[3];		/* 782D/783S only.
 				   1 = pentium diode; 2 = 3904 diode;
 				   3000-5000 = thermistor beta.
@@ -465,7 +470,7 @@ static int w83627hf_id = 0;
 
 static struct i2c_driver w83627hf_driver = {
 	/* name */ "W83781D sensor driver",
-	/* id */ I2C_DRIVERID_W83781D,
+	/* id */ I2C_DRIVERID_W83627HF,
 	/* flags */ I2C_DF_NOTIFY,
 	/* attach_adapter */ &w83627hf_attach_adapter,
 	/* detach_client */ &w83627hf_detach_client,
@@ -726,9 +731,6 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
    very code-efficient in this case. */
 
       ERROR7:
-      ERROR6:
-      ERROR5:
-      ERROR4:
 	i2c_detach_client(new_client);
       ERROR3:
 	release_region(address, WINB_EXTENT);
@@ -904,6 +906,9 @@ void w83627hf_init_client(struct i2c_client *client)
 		if ((type == w83697hf) && (i == 2))
 			break;
 	}
+
+	data->pwmenable[0] = 1;
+	data->pwmenable[1] = 1;
 
 	if(init) {
 		w83627hf_write_value(client, W83781D_REG_IN_MIN(0),
@@ -1375,7 +1380,8 @@ void w83627hf_pwm(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83627hf_update_client(client);
 		results[0] = data->pwm[nr - 1];
-		*nrels_mag = 1;
+		results[1] = data->pwmenable[nr - 1];
+		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			data->pwm[nr - 1] = PWM_TO_REG(results[0]);

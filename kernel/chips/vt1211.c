@@ -163,8 +163,8 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e, 0x2c, 0x2e, 0x30, 0x32 };
 
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
-#define PWM_FROM_REG(val) (((val) * 1005) / 2550)
-#define PWM_TO_REG(val) SENSORS_LIMIT((((val) * 2555) / 1000), 0, 255)
+#define PWM_FROM_REG(val) (val)
+#define PWM_TO_REG(val) SENSORS_LIMIT((val), 0, 255)
 
 #define TEMP_FROM_REG(val) ((val)*10)
 #define TEMP_FROM_REG10(val) (((val)*10)/4)

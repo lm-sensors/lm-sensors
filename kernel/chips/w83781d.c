@@ -367,6 +367,7 @@ struct w83781d_data {
 	u32 beeps;		/* Register encoding, combined */
 	u8 beep_enable;		/* Boolean */
 	u8 pwm[4];		/* Register value */
+	u8 pwmenable[4];	/* bool */
 	u16 sens[3];		/* 782D/783S only.
 				   1 = pentium diode; 2 = 3904 diode;
 				   3000-5000 = thermistor beta.
@@ -1275,20 +1276,22 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 void w83781d_init_client(struct i2c_client *client)
 {
 	struct w83781d_data *data = client->data;
-	int vid = 0, i;
+	int vid = 0, i, p;
 	int type = data->type;
 	u8 tmp;
 
 	if(init && type != as99127f) { /* this resets registers we don't have
 			                  documentation for on the as99127f */
-		/* save this register */
+		/* save these registers */
 		i = w83781d_read_value(client, W83781D_REG_BEEP_CONFIG);
+		p = w83781d_read_value(client, W83781D_REG_PWMCLK12);
 		/* Reset all except Watchdog values and last conversion values
 		   This sets fan-divs to 2, among others */
 		w83781d_write_value(client, W83781D_REG_CONFIG, 0x80);
-		/* Restore the register and disable power-on abnormal beep.
+		/* Restore the registers and disable power-on abnormal beep.
 		   This saves FAN 1/2/3 input/output values set by BIOS. */
 		w83781d_write_value(client, W83781D_REG_BEEP_CONFIG, i | 0x80);
+		w83781d_write_value(client, W83781D_REG_PWMCLK12, p);
 		/* Disable master beep-enable (reset turns it on).
 		   Individual beeps should be reset to off but for some reason
 		   disabling this bit helps some people not get beeped */
@@ -1459,12 +1462,11 @@ void w83781d_init_client(struct i2c_client *client)
 					    0x00);
 		}
 		if (type != w83781d) {
-			/* enable PWM2 control (can't hurt since PWM reg
-		           should have been reset to 0xff) */
-			w83781d_write_value(client, W83781D_REG_PWMCLK12, 0x19);
 			/* enable comparator mode for temp2 and temp3 so
 		           alarm indication will work correctly */
 			w83781d_write_value(client, W83781D_REG_IRQ, 0x41);
+			for(i = 0; i < 3; i++)
+				data->pwmenable[i] = 1;
 		}
 	}
 
@@ -1478,7 +1480,7 @@ void w83781d_init_client(struct i2c_client *client)
 void w83781d_update_client(struct i2c_client *client)
 {
 	struct w83781d_data *data = client->data;
-	int i;
+	int i, j;
 
 	down(&data->update_lock);
 
@@ -1504,7 +1506,16 @@ void w83781d_update_client(struct i2c_client *client)
 			    && (data->type != w83627hf) && (i == 6))
 				break;
 		}
+		/* PWM2 pin shared with FAN3 */
+		j = w83781d_read_value(client, W83781D_REG_BEEP_CONFIG) & 0x10;
+		data->pwmenable[1] = (!j) &&
+		  (w83781d_read_value(client, W83781D_REG_PWMCLK12) & 0x08);
 		for (i = 1; i <= 3; i++) {
+			if(i == 3 && !j) {
+				data->fan[2] = 255;
+				data->fan_min[2] = 255;
+				break;
+			}
 			data->fan[i - 1] =
 			    w83781d_read_value(client, W83781D_REG_FAN(i));
 			data->fan_min[i - 1] =
@@ -1899,18 +1910,42 @@ void w83781d_pwm(struct i2c_client *client, int operation, int ctl_name,
 {
 	struct w83781d_data *data = client->data;
 	int nr = 1 + ctl_name - W83781D_SYSCTL_PWM1;
+	int j, k;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83781d_update_client(client);
 		results[0] = PWM_FROM_REG(data->pwm[nr - 1]);
-		*nrels_mag = 1;
+		results[1] = data->pwmenable[nr - 1];
+		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			data->pwm[nr - 1] = PWM_TO_REG(results[0]);
 			w83781d_write_value(client, W83781D_REG_PWM(nr),
 					    data->pwm[nr - 1]);
+		}
+		/* only PWM2 can be enabled/disabled */
+		if (*nrels_mag >= 2 && nr == 2) {
+			j = w83781d_read_value(client, W83781D_REG_PWMCLK12);
+			k = w83781d_read_value(client, W83781D_REG_BEEP_CONFIG);
+			if(results[1]) {
+				if(!(j & 0x08))
+					w83781d_write_value(client,
+					     W83781D_REG_PWMCLK12, j | 0x08);
+				if(k & 0x10)
+					w83781d_write_value(client,
+					     W83781D_REG_BEEP_CONFIG, k & 0xef);
+				data->pwmenable[1] = 1;
+			} else {
+				if(j & 0x08)
+					w83781d_write_value(client,
+					     W83781D_REG_PWMCLK12, j & 0xf7);
+				if(!(k & 0x10))
+					w83781d_write_value(client,
+					     W83781D_REG_BEEP_CONFIG, j | 0x10);
+				data->pwmenable[1] = 0;
+			}
 		}
 	}
 }
