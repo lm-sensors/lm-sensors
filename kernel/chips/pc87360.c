@@ -22,12 +22,12 @@
  *
  *  Supports the following chips:
  *
- *  Chip	#vin	#fan	#pwm	#temp	devid
- *  PC87360	-	2	2	-	0xE1
- *  PC87363	-	2	2	-	0xE8
- *  PC87364	-	3	3	-	0xE4
- *  PC87365	11	3	3	2	0xE5
- *  PC87366	11	3	3	3	0xE9
+ *  Chip        #vin    #fan    #pwm    #temp   devid
+ *  PC87360     -       2       2       -       0xE1
+ *  PC87363     -       2       2       -       0xE8
+ *  PC87364     -       3       3       -       0xE4
+ *  PC87365     11      3       3       2       0xE5
+ *  PC87366     11      3       3       3       0xE9
  */
 
 #include <linux/module.h>
@@ -609,6 +609,12 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 #endif
 	}
 
+	/* Fan clock dividers may be needed before any data is read */
+	for (i = 0; i < data->fannr; i++) {
+		data->fan_status[i] = pc87360_read_value(data, LD_FAN,
+				      NO_BANK, PC87360_REG_FAN_STATUS(i));
+	}
+
 	if (init > 0)
 		pc87360_init_client(new_client);
 
@@ -791,22 +797,28 @@ static void pc87360_update_client(struct i2c_client *client)
 							    data->fan_min[i]);
 #ifdef DEBUG
 					printk(KERN_DEBUG "pc87360.o: Increasing "
-					       "clock divider for fan %d\n", i+1);
+					       "clock divider to %d for fan %d\n",
+					       FAN_DIV_FROM_REG(data->fan_status[i]),
+					       i+1);
 #endif
 				} else
 				/* Decrease clock divider if possible */
 				if ((data->fan_status[i] & 0x60) != 0x00
 				 && !(data->fan_status[i] & 0x04)
-				 && (data->fan[i] & 0xC0) == 0x00) {
+				 && data->fan[i] <= 0x50) {
 					data->fan_status[i] -= 0x20;
-					data->fan_min[i] <<= 1;
+					data->fan_min[i] = (data->fan_min[i] & 0x80)
+							   ? 255 :
+							   (data->fan_min[i] << 1);
 					data->fan[i] <<= 1;
 					pc87360_write_value(data, LD_FAN, NO_BANK,
 							    PC87360_REG_FAN_MIN(i),
 							    data->fan_min[i]);
 #ifdef DEBUG
 					printk(KERN_DEBUG "pc87360.o: Decreasing "
-					       "clock divider for fan %d\n", i+1);
+					       "clock divider to %d for fan %d\n",
+					       FAN_DIV_FROM_REG(data->fan_status[i]),
+					       i+1);
 #endif
 				}
 				/* Clear bits and write new divider */
@@ -979,6 +991,8 @@ void pc87360_pwm(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 2;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (nr >= data->fannr)
+			return;
 		if (*nrels_mag >= 1)
 		{
 #ifdef DEBUG
