@@ -108,7 +108,7 @@ of /etc/sensors.conf.
 	   set sensor2 3
 	   set sensor3 3
 If you set a sensor to 0, you'll also want to ignore its value:
-	   ignore sensorN
+	   ignore tempN
 
 The fan speed control features can be enabled by setting the bits 0-2 of
 the fan_ctl register to 1. (Note: bits 6-4 of this register must be set to
