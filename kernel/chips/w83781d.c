@@ -426,9 +426,13 @@ static struct i2c_driver w83781d_driver = {
 #define W83781D_SYSCTL_IN6 1006
 #define W83781D_SYSCTL_IN7 1007
 #define W83781D_SYSCTL_IN8 1008
+#define W83781D_SYSCTL_IN9 1009
 #define W83781D_SYSCTL_FAN1 1101	/* Rotations/min */
 #define W83781D_SYSCTL_FAN2 1102
 #define W83781D_SYSCTL_FAN3 1103
+#define W83781D_SYSCTL_FAN4 1104
+#define W83781D_SYSCTL_FAN5 1105
+
 #define W83781D_SYSCTL_TEMP1 1200	/* Degrees Celcius * 10 */
 #define W83781D_SYSCTL_TEMP2 1201	/* Degrees Celcius * 10 */
 #define W83781D_SYSCTL_TEMP3 1202	/* Degrees Celcius * 10 */
