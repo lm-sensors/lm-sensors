@@ -1460,9 +1460,10 @@ sub main
         print "    " if  $is_i2c and $is_isa;
         if ($is_isa) {
           if ($data->{isa_addr}) {
-            printf "ISA bus address 0x%04x", $data->{isa_addr};
+            printf "ISA bus address 0x%04x (Busdriver `i2c-isa')", 
+                   $data->{isa_addr};
           } else {
-            printf "ISA bus, undetermined address"
+            printf "ISA bus, undetermined address (Busdriver `i2c-isa')"
           }
         }
         printf "\n    Chip `%s' (confidence: %d)\n",

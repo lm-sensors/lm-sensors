@@ -1,6 +1,7 @@
 Many, many things. Most notably:
 
 * bit-lp increases module count stupidly
+* Segfault if too high /dev/i2c-* file accessed
 * Library: reload does not work (Bison/Flex problem?)
 * Create wait-queues for bus locking instead of pure semaphores, to make
   it more interactive
@@ -33,10 +34,7 @@ Many, many things. Most notably:
 * How to make drivers detect thing *not*; for example, if a Winbond is 
   present, the LM75 driver should not try to access its simulated
   LM75 chips.
-* Write a userland detection program for busses (clients are less important;
-  but perhaps needed too).
 * Some library routines are pretty inefficient right now
 * Test SIS5595(/91/98) sensor support. Write generic i2c support. 
   Thomas Dickel <Thomas.Dickel@mni.fh-giessen.de> owns one SIS5595.
   The sensor data must be added to lib/chips
-* Extend detect script to detect chips too.
