@@ -120,10 +120,15 @@ SHELL (default: /bin/sh)
 LINUX default: /usr/src/linux
   The location of your kernel tree.
 COMPILE_KERNEL
-  This determines whether only the user-space utilities are needed (0) 
-  or also the kernel modules (1). This is usually determined by checking
-  whether the kernel was already patched to include the kernel modules, 
-  but that is not really foolprool.
+  Determine whether you want to consider the kernel modules for compilation
+  at all. By default, compilation option 1 will only compile and install
+  those modules which are not built into the kernel.
+  If some modules are built into your kernel, and this package is much 
+  newer, you may find you can not insert the newly compiled modules. 
+  Sorry.
+  You may want to set this to 0 if you have just patched and compiled
+  your kernel using the same version of this package, and just want to
+  compile the user-space tools.
 I2C_HEADERS default: /usr/local/include
   This lists where the i2c headers are found. If you used compilation
   option 1 for the i2c package, the default will be right. If you used
