@@ -699,20 +699,43 @@ sub main
 
 #ifdef MODULE
 #include <linux/module.h>
+#endif /* def MODULE */
 #ifndef MODULE_AUTHOR
-#define MODULE_AUTHOR(whatever)
+#define MODULE_AUTHOR(noone)
 #endif
 #ifndef MODULE_DESCRIPTION
-#define MODULE_DESCRIPTION(whatever)
+#define MODULE_DESCRIPTION(none)
 #endif
+#ifndef MODULE_PARM
+#define MODULE_PARM(no,param)
+#endif
+#ifndef MODULE_PARM_DESC
+#define MODULE_PARM_DESC(no,description)
 #endif /* def MODULE */
 
 EOF
+
         if (`grep KERNEL_VERSION "$package_root/$package_file"`) {
           print OUTPUT << 'EOF';
 #include <linux/version.h>
 #ifndef KERNEL_VERSION
 #define KERNEL_VERSION(a,b,c) (((a) << 16) | ((b) << 8) | (c))
+#endif
+
+EOF
+        }
+	if (`grep EXPORT_NO_SYMBOLS "$package_root/$package_file"`) {
+	  print OUTPUT << 'EOF';
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0)
+#define EXPORT_NO_SYMBOLS
+#endif
+
+EOF
+        }
+	if (`grep EXPORT_SYMBOL "$package_root/$package_file"`) {
+	  print OUTPUT << 'EOF';
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0)
+#define EXPORT_SYMBOL(noexport)
 #endif
 
 EOF
@@ -772,7 +795,7 @@ EOF
 
 EOF
         }
-        if (`grep 'ioremap\|iounmap' "$package_root/$package_file"`) {
+        if (`grep 'ioremap\\|iounmap' "$package_root/$package_file"`) {
           print OUTPUT  << 'EOF';
 /* I hope this is always correct, even for the PPC, but I really think so.
    And yes, the kernel version is exactly correct */
@@ -837,7 +860,7 @@ EOF
 #endif
 EOF
         }
-	if (`grep 'PCI_DEVICE_ID_INTEL_82801AA_3\|PCI_DEVICE_ID_INTEL_82801AB_3' "$package_root/$package_file"`) {
+	if (`grep 'PCI_DEVICE_ID_INTEL_82801AA_3\\|PCI_DEVICE_ID_INTEL_82801AB_3' "$package_root/$package_file"`) {
 	  print OUTPUT << 'EOF';
 #ifndef PCI_DEVICE_ID_INTEL_82801AA_3
 #define PCI_DEVICE_ID_INTEL_82801AA_3  0x2413

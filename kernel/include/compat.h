@@ -31,12 +31,23 @@
 #ifdef MODULE
 #include <linux/module.h>
 #ifndef MODULE_AUTHOR
-#define MODULE_AUTHOR(whatever)
+#define MODULE_AUTHOR(noone)
 #endif
 #ifndef MODULE_DESCRIPTION
-#define MODULE_DESCRIPTION(whatever)
+#define MODULE_DESCRIPTION(none)
+#endif
+#ifndef MODULE_PARM
+#define MODULE_PARM(no,param)
+#endif
+#ifndef MODULE_PARM_DESC
+#define MODULE_PARM_DES(no,description)
 #endif
 #endif /* def MODULE */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0)
+#define EXPORT_SYMBOL(noexport)
+#define EXPORT_NO_SYMBOLS
+#endif
 
 /* copy_from/to_usr is called memcpy_from/to_fs in 2.0 kernels 
    get_user was redefined in 2.1 kernels to use two arguments, and returns

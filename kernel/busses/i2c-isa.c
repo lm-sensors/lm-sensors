@@ -29,6 +29,8 @@
 
 #include <linux/i2c.h>
 
+#include "compat.h"
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
 #else
