@@ -2748,6 +2748,10 @@ void print_ddcmon(const sensors_chip_name *name)
    } else
       printf("ERROR: data 13\n");
    free_the_label(&label);
+
+   printf("Note that the ddcmon driver is deprecated and will be deleted soon.\n");
+   printf("Please use the eeprom driver and the ddcmon and/or decode-edid.pl\n"
+          "scripts instead.\n");
 }
 
 /*
@@ -2897,8 +2901,7 @@ void print_eeprom(const sensors_chip_name *name)
 				printf("Unknown EEPROM type (255).\n");
 			else if (name->addr == 0x50)
 				/* must be an EDID EEPROM */
-				printf("Either use the ddcmon driver instead of the eeprom driver,\n"
-				 "or run the decode-edid.pl script.\n");
+				printf("Use the ddcmon and/or decode-edid.pl scripts.\n");
 		} else
 			printf("ERROR: data EDID\n");
 		return;
