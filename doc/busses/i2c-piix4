@@ -5,6 +5,8 @@ Status: Complete and well-tested
 Supported adapters:
   * Intel 82371AB PIIX4 and PIIX4E
     Datasheet: Publicly available at the Intel website
+  * ServerWorks southbridges
+    Datasheet: only available via NDA from ServerWorks
 
 Author: Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock
         <phil@netroedge.com>
@@ -57,3 +59,5 @@ SURE ABOUT WHAT YOU ARE DOING!
 The PIIX4E is just an new version of the PIIX4; it is supported as well. The
 PIIX/PIIX3 does not implement an SMBus or I2C bus, so you can't use this
 driver on those mainboards.
+
+The ServerWorks Southbridge is identical to the PIIX4 in I2C support.

@@ -17,9 +17,6 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.5.6 (2000????)
-  mkpatch now adds many more modules
-
 2.5.5 (2000????)
   NOTE: i2c 2.5.5 MUST BE be compiled and installed first.
   Chip modules (all): Update mutex definition (works now for new 2.2 kernels)
@@ -34,13 +31,13 @@ ask CVS about it:
   Module ds1621: new
   Module i2c-ali1535: Enhance error checking and recovery; add mutex
   Module i2c-i810: Add "dummy write" before reads per Intel prog. ref.
-  Module i2c-osb4: new
+  Module i2c-piix4: add support for ServerWorks southbridge OSB4
   Module lm87: update voltage calculations
   Module mtp008: new
   Module pcf8574: change update time to 5 seconds
   Modules sis5595, i2c-sis5595: Check for uninitialized base addresses
   Module w83781d: fix beep setting via /proc
-  Program mkpatch.pl: more fixes
+  Program mkpatch.pl: more fixes; now adds many more modules
   Program sensors: Add ds1621, mtp008 support; add -f (Fahrenheit) option;
                    add adm1025 temp2; report temp limits correctly as
                    min/max or limit/hysteresis; print message if no
