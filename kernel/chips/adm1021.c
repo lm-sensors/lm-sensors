@@ -35,7 +35,7 @@ static unsigned int normal_isa[] = {SENSORS_ISA_END};
 static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
 
 /* Insmod parameters */
-SENSORS_INSMOD_2(adm1021,max1617);
+SENSORS_INSMOD_3(adm1021,max1617,max1617a);
 
 /* adm1021 constants specified below */
 
@@ -44,8 +44,9 @@ SENSORS_INSMOD_2(adm1021,max1617);
 #define ADM1021_REG_TEMP 0x00
 #define ADM1021_REG_REMOTE_TEMP 0x01
 #define ADM1021_REG_STATUS 0x02
-#define ADM1021_REG_DEVICE_ID 0x0FE  /* should always read 0x41 */
-#define ADM1021_REG_DIE_CODE 0x0FF
+#define ADM1021_REG_MAN_ID 0x0FE  /* should always read 0x41 */
+#define ADM1021_REG_DEV_ID 0x0FF /* ADM1021 */
+#define ADM1021_REG_DIE_CODE 0x0FF /* MAX1617A */
 /* These use different addresses for reading/writing */
 #define ADM1021_REG_CONFIG_R 0x03
 #define ADM1021_REG_CONFIG_W 0x09
@@ -211,9 +212,12 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind)
   /* Determine the chip type. */
   
   if (kind <= 0) {
-    i = adm1021_read_value(new_client,ADM1021_REG_DEVICE_ID);
+    i = adm1021_read_value(new_client,ADM1021_REG_MAN_ID);
     if (i == 0x41)
       kind = max1617;
+    else if ((i== 0x4d) && 
+             (adm1021_read_value(new_client,ADM1021_REG_DEV_ID) == 0x01))
+      kind = max1617a;
     else 
       kind = adm1021;
   }
@@ -221,6 +225,9 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind)
   if (kind == max1617) {
     type_name = "max1617";
     client_name = "MAX1617 chip";
+  } else if (kind == max1617a) {
+    type_name = "max1617a";
+    client_name = "MAX1617A chip";
   } else if (kind == adm1021) {
     type_name = "adm1021";
     client_name = "ADM1021 chip";
