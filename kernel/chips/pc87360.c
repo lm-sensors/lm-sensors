@@ -1131,7 +1131,7 @@ void pc87365_in(struct i2c_client *client, int operation, int ctl_name,
 					    PC87365_REG_IN_MAX,
 					    data->in_max[nr]);
 		}
-		if (*nrels_mag >= 3 && nr > 11) {
+		if (*nrels_mag >= 3 && nr >= 11) {
 			data->in_crit[nr-11] = IN_TO_REG(results[2],
 							 data->in_vref);
 			pc87360_write_value(data, LD_IN, nr,
