@@ -168,6 +168,10 @@
 
 #define W83781D_INIT_TEMP_OVER 600
 #define W83781D_INIT_TEMP_HYST 500
+#define W83781D_INIT_TEMP2_OVER 600
+#define W83781D_INIT_TEMP2_HYST 500
+#define W83781D_INIT_TEMP3_OVER 600
+#define W83781D_INIT_TEMP3_HYST 500
 
 #ifdef MODULE
 extern int init_module(void);
@@ -644,9 +648,9 @@ int w83781d_read_value(struct i2c_client *client, u16 reg)
 {
   int res,word_sized;
 
-  word_sized = (reg & 0x0ff) && (((reg && 0x00ff) == 0x50) || 
-                                 ((reg && 0x00ff) == 0x53) || 
-                                 ((reg && 0x00ff) == 0x55));
+  word_sized = (reg & 0xff00) && (((reg & 0x00ff) == 0x50) || 
+                                  ((reg & 0x00ff) == 0x53) || 
+                                  ((reg & 0x00ff) == 0x55));
   down((struct semaphore *) (client->data));
   if (i2c_is_isa_client(client)) {
     if (reg & 0xff00) {
@@ -696,9 +700,9 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 {
   int word_sized;
 
-  word_sized = (reg & 0x0ff) && (((reg && 0x00ff) == 0x50) || 
-                                 ((reg && 0x00ff) == 0x53) || 
-                                 ((reg && 0x00ff) == 0x55));
+  word_sized = (reg & 0xff00) && (((reg & 0x00ff) == 0x50) || 
+                                  ((reg & 0x00ff) == 0x53) || 
+                                  ((reg & 0x00ff) == 0x55));
   down((struct semaphore *) (client->data));
   if (i2c_is_isa_client(client)) {
     if (reg & 0xff00) {
@@ -794,15 +798,15 @@ void w83781d_init_client(struct i2c_client *client)
   w83781d_write_value(client,W83781D_REG_TEMP_CONFIG,0x00);
 
   w83781d_write_value(client,W83781D_REG_TEMP2_OVER,
-                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP_OVER));
+                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP2_OVER));
   w83781d_write_value(client,W83781D_REG_TEMP2_HYST,
-                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP_HYST));
+                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP2_HYST));
   w83781d_write_value(client,W83781D_REG_TEMP2_CONFIG,0x00);
 
   w83781d_write_value(client,W83781D_REG_TEMP3_OVER,
-                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP_OVER));
+                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP3_OVER));
   w83781d_write_value(client,W83781D_REG_TEMP3_HYST,
-                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP_HYST));
+                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP3_HYST));
   w83781d_write_value(client,W83781D_REG_TEMP3_CONFIG,0x00);
 
   /* Start monitoring */
