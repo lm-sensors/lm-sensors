@@ -40,10 +40,6 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifndef I2C_HW_B_SAVG
-#define I2C_HW_B_SAVG	0x0d
-#endif
-
 /* 3DFX defines */
 /* #define PCI_VENDOR_ID_S3		0x5333 */
 #define PCI_CHIP_SAVAGE3D	0x8A20
