@@ -394,7 +394,13 @@ int i2cproc_attach_adapter(struct i2c_adapter *adapter)
   proc_entry->mode = S_IRUGO | S_IFREG;
   proc_entry->nlink = 1;
   proc_entry->ops = &i2cproc_inode_operations;
-  strcpy((char *) proc_entry->name,name);
+
+  /* Nasty stuff to keep GCC satisfied */
+  { 
+    char *procname;
+    (const char *) procname  = proc_entry->name;
+    strcpy (procname,name);
+  }
 
   if ((res = proc_register_dynamic(&proc_bus_dir, proc_entry))) {
     printk("i2c-proc.o: Could not create %s.\n",name);

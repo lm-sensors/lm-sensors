@@ -178,7 +178,7 @@ int ali15x3_setup(void)
   struct pci_dev *ALI15X3_dev;
 #else
   unsigned char ALI15X3_bus, ALI15X3_devfn = 0;
-  int i,res;
+  int res;
 #endif
 
   /* First check whether we can access PCI at all */
