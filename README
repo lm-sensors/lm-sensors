@@ -7,6 +7,10 @@ WARNING! If you downloaded this package through our CVS archive, you walk
 the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
 
+WARNING! The default module installation directory changed since version
+2.2.1. If you don't change the directory in /etc/modules.conf (or
+/etc/conf.modules), modprobe will probably load the wrong ones.
+
 WARNING! Some things have changed since version 2.1.2. Most notably,
 module piix4 is renamed i2c-piix4, module isa is renamed i2c-isa,
 and module bit-mb is renamed i2c-via. You have been warned.
