@@ -34,6 +34,18 @@
 
 #include <linux/init.h>
 
+/* Note: Since the ServerWorks OSB4 SMBus host interface is identical
+         to the Intel PIIX4's, we only mention it during detection.   */
+
+#ifndef PCI_DEVICE_ID_SERVERWORKS_OSB4
+#define PCI_DEVICE_ID_SERVERWORKS_OSB4 0x0200
+#endif
+
+#ifndef PCI_VENDOR_ID_SERVERWORKS
+#define PCI_VENDOR_ID_SERVERWORKS 0x01166
+#endif
+
+
 /* PIIX4 SMBus address offsets */
 #define SMBHSTSTS (0 + piix4_smba)
 #define SMBHSLVSTS (1 + piix4_smba)
@@ -129,7 +141,7 @@ static struct i2c_adapter piix4_adapter = {
 
 static int __initdata piix4_initialized;
 static unsigned short piix4_smba = 0;
-
+static kind = 0;
 
 /* Detect whether a PIIX4 can be found, and initialize it, where necessary.
    Note the differences between kernels with the old PCI BIOS interface and
@@ -149,20 +161,26 @@ int piix4_setup(void)
 		goto END;
 	}
 
-	/* Look for the PIIX4, function 3 */
-	/* Note: we keep on searching until we have found 'function 3' */
+	/* Look for the PIIX4, function 3 or Serverworks PSB4 func 0          */
+	/* Note: we keep on searching until we have found the proper function */
 	PIIX4_dev = NULL;
-	do
+	PIIX4_dev = pci_find_device(PCI_VENDOR_ID_SERVERWORKS,
+				    PCI_DEVICE_ID_SERVERWORKS_OSB4,
+				    PIIX4_dev);
+	while (PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 0));
+	if (PIIX4_dev == NULL) {
 		PIIX4_dev = pci_find_device(PCI_VENDOR_ID_INTEL,
 					    PCI_DEVICE_ID_INTEL_82371AB_3,
 					    PIIX4_dev);
-	while (PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 3));
-	if (PIIX4_dev == NULL) {
-		printk
-		    ("i2c-piix4.o: Error: Can't detect PIIX4, function 3!\n");
-		error_return = -ENODEV;
-		goto END;
-	}
+		while (PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 3));
+		if (PIIX4_dev == NULL) {
+		 printk
+		  ("i2c-piix4.o: Error: Can't detect PIIX4 function 3 nor OSB4 function 0!\n");
+		 error_return = -ENODEV;
+		 goto END;
+		} else { kind=1; /* Intel PIIX4 found */ }
+	} else { kind=2; /* Serverworks OSB4 found */ }
+
 
 /* Determine the address of the SMBus areas */
 	if (force_addr) {
@@ -214,7 +232,7 @@ int piix4_setup(void)
 	}
 
 	/* Everything is happy, let's grab the memory and set things up. */
-	request_region(piix4_smba, 8, "piix4-smbus");
+	request_region(piix4_smba, 8, kind==1?"piix4-smbus":"osb4-smbus");
 
 #ifdef DEBUG
 	if ((temp & 0x0E) == 8)
@@ -450,15 +468,12 @@ u32 piix4_func(struct i2c_adapter *adapter)
 int __init i2c_piix4_init(void)
 {
 	int res;
-	printk("i2c-piix4.o version %s (%s)\n", LM_VERSION, LM_DATE);
-#ifdef DEBUG
-/* PE- It might be good to make this a permanent part of the code! */
+	printk("piix4.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	if (piix4_initialized) {
 		printk
 		    ("i2c-piix4.o: Oops, piix4_init called a second time!\n");
 		return -EBUSY;
 	}
-#endif
 	piix4_initialized = 0;
 	if ((res = piix4_setup())) {
 		printk
@@ -467,7 +482,7 @@ int __init i2c_piix4_init(void)
 		return res;
 	}
 	piix4_initialized++;
-	sprintf(piix4_adapter.name, "SMBus PIIX4 adapter at %04x",
+	sprintf(piix4_adapter.name, kind==1?"SMBus PIIX4 adapter at %04x":"SMBus OSB4 adapter at %04x",
 		piix4_smba);
 	if ((res = i2c_add_adapter(&piix4_adapter))) {
 		printk
