@@ -485,7 +485,7 @@ u32 piix4_func(struct i2c_adapter *adapter)
 int __init i2c_piix4_init(void)
 {
 	int res;
-	printk("piix4.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk("i2c-piix4.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	if (piix4_initialized) {
 		printk
 		    ("i2c-piix4.o: Oops, piix4_init called a second time!\n");
