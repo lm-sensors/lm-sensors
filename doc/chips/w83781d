@@ -781,7 +781,7 @@ Please contact us if you can figure out how it is supposed to work. As
 long as we don't know more, the w83781d driver doesn't handle PWM on
 AS99127F chips at all.
 
-Additional info about PWM on the AS99127F by Marcansoft:
+Additional info about PWM on the AS99127F rev.1 by Hector Martin:
 
 I've been fiddling around with the (in)famous 0x59 register and
 found out the following values do work as a form of coarse pwm:
