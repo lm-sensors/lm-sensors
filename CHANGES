@@ -18,8 +18,10 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.1 (2001????)
+  File BUGS: Updated
   File doc/chips/adm1021: Claim support for Philips NE1617, NE1617A
   Module i2c-ali15x3: Allow force_addr=0xaddr; enable if not enabled.
+  Module i2c-i801: Fix 82801BA detection broken by kernel 2.4.6
   Module adm1025: Fixed temp2 min/max writes
   Module w83781d: Fix fan speed for as99127f (broken by 2.6.0)
   Program sensors-detect: Fix ADM1024 and ADM1025 detection.

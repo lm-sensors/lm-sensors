@@ -47,13 +47,13 @@
 #ifndef PCI_DEVICE_ID_INTEL_82801AB_3
 #define PCI_DEVICE_ID_INTEL_82801AB_3   0x2423
 #endif
-#ifndef PCI_DEVICE_ID_INTEL_82801BA_3
-#define PCI_DEVICE_ID_INTEL_82801BA_3   0x2443
+#ifndef PCI_DEVICE_ID_INTEL_82801BA_2
+#define PCI_DEVICE_ID_INTEL_82801BA_2   0x2443
 #endif
 
 static int supported[] = {PCI_DEVICE_ID_INTEL_82801AA_3,
                           PCI_DEVICE_ID_INTEL_82801AB_3,
-                          PCI_DEVICE_ID_INTEL_82801BA_3,
+                          PCI_DEVICE_ID_INTEL_82801BA_2,
                           0 };
 
 /* I801 SMBus address offsets */
