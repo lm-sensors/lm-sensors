@@ -1,7 +1,13 @@
-# Uncomment the second line on SMP systems if the magic invocation fails.
+# Uncomment the third line on SMP systems if the magic invocation fails.
+SMP := $(shell if grep -q '^SMP[[:space:]]*=' /usr/src/linux/Makefile; then echo 1; else echo 0; fi)
 #SMP := 0
 #SMP := 1
-SMP := $(shell if grep -q '^SMP[[:space:]]*=' /usr/src/linux/Makefile; then echo 1; else echo 0; fi)
+
+# Uncomment the second or third line if the magic invocation fails.
+# We need to know whether CONFIG_MODVERSIONS is defined.
+MODVER := $(shell if cat /usr/include/linux/config.h /usr/include/linux/autoconf.h 2>/dev/null | grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_MODVERSIONS[[:space:]]*1'; then echo 1; else echo 0; fi)
+#MODVER := 0
+#MODVER := 1
 
 # Uncomment the second line if you do not want to compile the included
 # i2c modules. WARNING! If the i2c module version does not match the 
@@ -58,6 +64,10 @@ endif
 ifeq ($(WARN),1)
 CFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
           -Wcast-align -Wwrite-strings -Wnested-externs -Winline
+endif
+
+ifeq ($(MODVER),1)
+CFLAGS += -DMODVERSIONS -include /usr/include/linux/modversions.h
 endif
 
 .PHONY: all clean install version package

@@ -14,7 +14,7 @@ all :: $(TARGETS)
 
 install :: $(TARGETS)
 	$(MKDIR) $(MODDIR)
-	install -o root -g root -m 644 $(MODDIR) $(TARGETS)
+	install -o root -g root -m 644 $(TARGETS) $(MODDIR)
 
 clean ::
 	$(RM) $(TARGETS) $(TARGETS:.o=.d)
