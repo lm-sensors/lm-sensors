@@ -27,23 +27,22 @@
 		  read still untested
 */
 
+#include <linux/module.h>
+#include <linux/config.h>
 #include <linux/version.h>
 #include <linux/kernel.h>
 #include <linux/ioport.h>
-#include <linux/module.h>
 #include <linux/pci.h>
-#include <asm/io.h>
 #include <linux/types.h>
 #include <linux/delay.h>
-
 #include <linux/i2c.h>
-
 #include <linux/init.h>
 #include <linux/mm.h>
 
+#include <asm/io.h>
 #include <asm/prom.h>
-#include <asm/feature.h>
-#include <linux/nvram.h>
+#include <asm/machdep.h>
+#include <asm/pmac_feature.h>
 
 /* The Tumbler audio equalizer can be really slow sometimes */
 #define POLL_SANITY 10000
@@ -567,29 +566,21 @@ static int find_keywest(void)
 	return 0;
 }
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init i2c_keywest_init(void)
+static int __init
+i2c_keywest_init(void)
 {
 	return find_keywest();
 }
 
-EXPORT_NO_SYMBOLS;
-
-#ifdef MODULE
-MODULE_AUTHOR("Philip Edelbrock <phil@netroedge.com");
-MODULE_DESCRIPTION("I2C driver for Apple's Keywest");
-
-int init_module(void)
-{
-	return i2c_keywest_init();
-}
-
-void cleanup_module(void)
+static void __exit
+i2c_keywest_cleanup(void)
 {
 	cleanup(&ifaces);
 }
-#endif
+
+module_init(i2c_keywest_init);
+module_exit(i2c_keywest_cleanup);
+
+MODULE_AUTHOR("Philip Edelbrock <phil@netroedge.com");
+MODULE_DESCRIPTION("I2C driver for Apple's Keywest");
+EXPORT_NO_SYMBOLS;
