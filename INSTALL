@@ -9,7 +9,8 @@ has its own strong points. They are:
     This will patch your kernel source tree. You must recompile your kernel
     to take advantage of this. But it makes it possible to compile drivers
     into the kernel itself, instead of having to add them as modules.
-    YOU WILL STILL HAVE TO COMPILE THIS PACKAGE TO GET THE USERLAND UTILITIES!
+    AFTER YOU COMPILED AND INSTALLED YOUR KERNEL, YOU WILL STILL HAVE TO 
+    COMPILE THIS PACKAGE TO GET THE USERLAND UTILITIES!
 
 Each of these ways will be described below in detail.
 

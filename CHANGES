@@ -13,6 +13,11 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
+2.4.0 (19990920)
+  Too much to list. 
+  i2c and smbus parts are split off to a separate i2c package.
+  New drivers and other stuff.
+
 2.3.4 (19990616)
   Module matorb: driver for Matrix-Orbital Displays (small LCD and VFDs)
   All: Now compiles against kernel 2.0.x (again ;)

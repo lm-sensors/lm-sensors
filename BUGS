@@ -59,4 +59,4 @@ Kernel i2c conflict
 
 An older version of the i2c modules is distributed in 2.2 and late 2.1
 kernels. If you try to use it at the same moment as our i2c modules, you
-may get into trouble. There is no nice solution for this yet.
+may get into trouble. This should be fixed for lm_sensors-2.4.0 and newer.

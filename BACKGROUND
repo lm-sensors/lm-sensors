@@ -6,7 +6,8 @@ understand what you are seeing happen.
 When you want to communicate with a piece of hardware, you need a kernel
 driver (well, that is not quite true, but it is in most cases the only
 way to do it safely). In the past, this meant you had to patch the kernel
-and recompile it. These days, you can use kernel modules.
+and recompile it. These days, you can use kernel modules. We support both
+approaches.
 
 We have chooses for a very modular (no pun intended) setup. There are a
 few general-purpose base kernel modules, which you always need. In 
