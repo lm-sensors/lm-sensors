@@ -448,7 +448,7 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
     /* Later on, we will keep a list of registered addresses for each
        adapter, and check whether they are used here */
 
-    if (smbus_read_byte_data(adapter,address,LM78_REG_CONFIG) == 0xff) 
+    if (smbus_read_byte_data(adapter,address,LM78_REG_CONFIG) < 0) 
       continue;
 
     /* Real detection code goes here */
@@ -464,6 +464,11 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
       type_name = "lm78-j";
       client_name = "LM78-J chip";
     } else if (err == 0x80) {
+      type = lm79;
+      type_name = "lm79";
+      client_name = "LM79 chip";
+    } else if (err == 0x02) {
+      printk("lm78.o: Warning: Winbond W83781D detected (treated as a LM79)\n");
       type = lm79;
       type_name = "lm79";
       client_name = "LM79 chip";
