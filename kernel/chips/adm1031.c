@@ -202,8 +202,6 @@ static struct i2c_driver adm1031_driver = {
 	.detach_client	= adm1031_detach_client,
 };
 
-static int adm1031_id = 0;
-
 #define TEMP_TO_REG(val)		((val) < 0 ? (((val) - 500) / 1000) : \
 					 (((val) + 500) / 1000))
 
@@ -285,8 +283,6 @@ adm1031_detect(struct i2c_adapter *adapter, int address,
 	data->chip_type = kind;
 
 	strcpy(new_client->name, client_name);
-
-	new_client->id = adm1031_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

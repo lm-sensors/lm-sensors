@@ -192,8 +192,6 @@ static ctl_table ddcmon_dir_table_template[] = {
 	{0}
 };
 
-static int ddcmon_id = 0;
-
 static int ddcmon_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, ddcmon_detect);
@@ -259,8 +257,6 @@ int ddcmon_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fill in the remaining client fields and put it in the global list */
 	strcpy(new_client->name, client_name);
-
-	new_client->id = ddcmon_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

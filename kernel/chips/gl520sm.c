@@ -245,8 +245,6 @@ static ctl_table gl520_dir_table_template[] = {
 	{0}
 };
 
-static int gl520_id = 0;
-
 static int gl520_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, gl520_detect);
@@ -319,8 +317,6 @@ static int gl520_detect(struct i2c_adapter *adapter, int address,
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
 	data->type = kind;
-
-	new_client->id = gl520_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

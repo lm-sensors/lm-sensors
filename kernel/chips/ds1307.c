@@ -86,7 +86,6 @@ static int ds1307_attach (struct i2c_adapter *adapter,int addr,unsigned short fl
 		return (-ENOMEM);
 
 	strcpy (client->name,ds1307.name);
-	client->id = ds1307.id;
 	client->flags = I2C_CLIENT_ALLOW_USE | I2C_CLIENT_ALLOW_MULTIPLE_USE;
 	client->addr = addr;
 	client->adapter = adapter;

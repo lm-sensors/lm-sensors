@@ -143,8 +143,6 @@ static ctl_table xeontemp_dir_table_template[] = {
 	{0}
 };
 
-static int xeontemp_id = 0;
-
 static int xeontemp_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, xeontemp_detect);
@@ -200,8 +198,6 @@ static int xeontemp_detect(struct i2c_adapter *adapter, int address,
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
 	data->type = kind;
-
-	new_client->id = xeontemp_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

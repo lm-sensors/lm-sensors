@@ -299,7 +299,6 @@ static int lm92_init_client (struct i2c_client *client)
 
 static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short flags,int kind)
 {
-	static int id = 0;
 	struct i2c_client *client;
 	lm92_t *data;
 	int result = 0;
@@ -349,8 +348,6 @@ static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short f
 	if ((result = lm92_init_client (client)) < 0) {
 		goto ERROR4;
 	}
-
-	client->id = id++;
 
 	up (&mutex);
 

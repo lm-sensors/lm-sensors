@@ -312,8 +312,6 @@ static struct i2c_driver maxi_driver = {
 	.detach_client	= maxi_detach_client,
 };
 
-static int maxi_id = 0;
-
 /* Default firmware version. Use module option "maxi_version"
    to set desired version. Auto detect is not yet working */
 static int maxi_version = cristal;
@@ -600,8 +598,6 @@ int maxi_detect(struct i2c_adapter *adapter, int address,
 		for (j = 0; j < 17; j++)
 			    ((struct maxi_data *) (new_client->data))->
 			    lcd[i][j] = (u8) 0;
-
-	new_client->id = maxi_id++;
 
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);

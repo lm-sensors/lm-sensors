@@ -104,7 +104,6 @@ static ctl_table icspll_dir_table_template[] = {
 /* holding place for data - block read could be as much as 32 */
 static u8 tempdata[MAXBLOCK_SIZE];
 
-static int icspll_id = 0;
 static int icspll_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, icspll_detect);
@@ -141,7 +140,6 @@ int icspll_detect(struct i2c_adapter *adapter, int address,
 	/* Fill the new client structure with data */
 	new_client = &data->client;
 	new_client->data = data;
-	new_client->id = icspll_id++;
 	new_client->addr = address;
 	new_client->adapter = adapter;
 	new_client->driver = &icspll_driver;

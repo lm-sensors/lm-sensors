@@ -210,8 +210,6 @@ static void adm1024_analog_out(struct i2c_client *client, int operation,
 static void adm1024_vid(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
-static int adm1024_id = 0;
-
 static struct i2c_driver adm1024_driver = {
 	.name		= "ADM1024 sensor driver",
 	.id		= I2C_DRIVERID_ADM1024,
@@ -373,8 +371,6 @@ static int adm1024_detect(struct i2c_adapter *adapter, int address,
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
 	data->type = kind;
-
-	new_client->id = adm1024_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

@@ -345,7 +345,6 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR2;
 	}
 	gl518_list[i] = new_client;
-	new_client->id = i;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

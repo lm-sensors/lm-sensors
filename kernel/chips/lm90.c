@@ -253,12 +253,6 @@ static ctl_table lm90_dir_table_template[] =
 };
 
 /*
- * Internal variables
- */
-
-static int lm90_id = 0;
-
-/*
  * Real code
  */
 
@@ -434,7 +428,6 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	 */
 
 	strcpy(new_client->name, client_name);
-	new_client->id = lm90_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

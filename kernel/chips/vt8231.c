@@ -191,8 +191,6 @@ static void vt8231_uch(struct i2c_client *client, int operation,
 static void vt8231_temp(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
-static int vt8231_id = 0;
-
 static struct i2c_driver vt8231_driver = {
 	.name		= "VT8231 sensors driver",
 	.id		= I2C_DRIVERID_VT8231,
@@ -391,8 +389,6 @@ int vt8231_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fill in the remaining client fields and put into the global list */
 	strcpy(new_client->name, "Via 8231 Integrated Sensors");
-
-	new_client->id = vt8231_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

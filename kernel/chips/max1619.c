@@ -161,12 +161,6 @@ static ctl_table max1619_dir_table_template[] =
 };
 
 /*
- * Internal variables
- */
-
-static int max1619_id = 0;
-
-/*
  * Real code
  */
 
@@ -287,7 +281,6 @@ static int max1619_detect(struct i2c_adapter *adapter, int address,
 	 */
 
 	strcpy(new_client->name, client_name);
-	new_client->id = max1619_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

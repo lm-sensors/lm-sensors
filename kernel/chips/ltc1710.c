@@ -119,8 +119,6 @@ static ctl_table ltc1710_dir_table_template[] = {
 	{0}
 };
 
-static int ltc1710_id = 0;
-
 static int ltc1710_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, ltc1710_detect);
@@ -184,8 +182,6 @@ int ltc1710_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
-
-	new_client->id = ltc1710_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

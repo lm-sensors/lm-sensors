@@ -154,8 +154,6 @@ static void lm80_alarms(struct i2c_client *client, int operation,
 static void lm80_fan_div(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
 
-static int lm80_id = 0;
-
 static struct i2c_driver lm80_driver = {
 	.name		= "LM80 sensor driver",
 	.id		= I2C_DRIVERID_LM80,
@@ -302,8 +300,6 @@ int lm80_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
-
-	new_client->id = lm80_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

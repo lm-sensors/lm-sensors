@@ -160,8 +160,6 @@ static void smsc47m1_fan_div(struct i2c_client *client, int operation,
 static void smsc47m1_pwm(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
-static int smsc47m1_id = 0;
-
 static struct i2c_driver smsc47m1_driver = {
 	.name		= "SMSC 47M1xx fan monitor",
 	.id		= I2C_DRIVERID_SMSC47M1,
@@ -274,8 +272,6 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 
 	request_region(address, SMSC_EXTENT, "smsc47m1-fans");
 	strcpy(new_client->name, client_name);
-
-	new_client->id = smsc47m1_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

@@ -217,8 +217,6 @@ static void fscscy_pciload(struct i2c_client *client, int operation,
 static void fscscy_intrusion(struct i2c_client *client, int operation,
 		      	int ctl_name, int *nrels_mag, long *results);
 
-static int fscscy_id = 0;
-
 static struct i2c_driver fscscy_driver = {
 	.name		= "FSCSCY sensor driver",
 	.id		= I2C_DRIVERID_FSCSCY,
@@ -358,8 +356,6 @@ int fscscy_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
-
-	new_client->id = fscscy_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

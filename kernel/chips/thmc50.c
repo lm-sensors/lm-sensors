@@ -152,8 +152,6 @@ static ctl_table thmc50_dir_table_template[] = {
 };
 
 
-static int thmc50_id = 0;
-
 static int thmc50_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, thmc50_detect);
@@ -231,8 +229,6 @@ int thmc50_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
-
-	new_client->id = thmc50_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

@@ -325,8 +325,6 @@ static void w83781d_rt(struct i2c_client *client, int operation,
 		       int ctl_name, int *nrels_mag, long *results);
 #endif
 
-static int w83781d_id = 0;
-
 static struct i2c_driver w83781d_driver = {
 	.name		= "W83781D sensor driver",
 	.id		= I2C_DRIVERID_W83781D,
@@ -938,8 +936,6 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
 	data->type = kind;
-
-	new_client->id = w83781d_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 
@@ -1007,7 +1003,6 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 			data->lm75[i].driver = &w83781d_driver;
 			data->lm75[i].flags = 0;
 			strcpy(data->lm75[i].name, client_name);
-			data->lm75[i].id = w83781d_id++;
 			if ((err = i2c_attach_client(&(data->lm75[i])))) {
 				printk(KERN_ERR "w83781d.o: Subclient %d registration at address 0x%x failed.\n",
 				       i, data->lm75[i].addr);

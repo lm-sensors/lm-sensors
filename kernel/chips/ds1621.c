@@ -153,8 +153,6 @@ static ctl_table ds1621_dir_table_template[] = {
 	{0}
 };
 
-static int ds1621_id = 0;
-
 static int ds1621_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, ds1621_detect);
@@ -241,8 +239,6 @@ int ds1621_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fill in remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
-
-	new_client->id = ds1621_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

@@ -467,8 +467,6 @@ static u16 registers_720_480[] =
     };
 
 
-int bt869_id = 0;
-
 static int bt869_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, bt869_detect);
@@ -537,8 +535,6 @@ int bt869_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
-
-	new_client->id = bt869_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

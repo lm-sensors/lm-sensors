@@ -218,8 +218,6 @@ static void sis5595_alarms(struct i2c_client *client, int operation,
 static void sis5595_fan_div(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 
-static int sis5595_id = 0;
-
 /* The driver. I choose to use type i2c_driver, as at is identical to both
    smbus_driver and isa_driver, and clients could be of either kind */
 static struct i2c_driver sis5595_driver = {
@@ -417,8 +415,6 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
-
-	new_client->id = sis5595_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

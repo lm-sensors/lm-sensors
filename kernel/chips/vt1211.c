@@ -232,8 +232,6 @@ static void vt1211_uch(struct i2c_client *client, int operation,
 static void vt1211_temp(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
-static int vt1211_id = 0;
-
 static struct i2c_driver vt1211_driver = {
 	.name		= "VT1211 sensors driver",
 	.id		= I2C_DRIVERID_VT1211,
@@ -423,8 +421,6 @@ int vt1211_detect(struct i2c_adapter *adapter, int address,
 
 	request_region(address, VT1211_EXTENT, "vt1211-sensors");
 	strcpy(new_client->name, client_name);
-
-	new_client->id = vt1211_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

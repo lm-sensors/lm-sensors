@@ -252,8 +252,6 @@ static void mtp008_sens(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 static void mtp008_getsensortype(struct mtp008_data *data, u8 inp);
 
-static int mtp008_id = 0;
-
 static struct i2c_driver mtp008_driver =
 {
 	.name		= "MTP008 sensor driver",
@@ -428,8 +426,6 @@ int mtp008_detect(struct i2c_adapter *adapter, int address,
 	client_name = "MTP008 chip";
 	strcpy(new_client->name, client_name);
 	data->type = kind;
-
-	new_client->id = mtp008_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

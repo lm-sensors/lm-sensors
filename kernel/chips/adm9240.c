@@ -208,8 +208,6 @@ static void adm9240_analog_out(struct i2c_client *client, int operation,
 static void adm9240_vid(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
-static int adm9240_id = 0;
-
 static struct i2c_driver adm9240_driver = {
 	.name		= "ADM9240 sensor driver",
 	.id		= I2C_DRIVERID_ADM9240,
@@ -370,8 +368,6 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
 	data->type = kind;
-
-	new_client->id = adm9240_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

@@ -109,8 +109,6 @@ static struct i2c_driver pcf8591_driver = {
 	.detach_client	= pcf8591_detach_client,
 };
 
-static int pcf8591_id = 0;
-
 /* The /proc/sys entries */
 
 /* -- SENSORS SYSCTL START -- */
@@ -207,8 +205,6 @@ int pcf8591_detect(struct i2c_adapter *adapter, int address,
 
         /* Fill in the remaining client fields and put it into the global list */
         strcpy(new_client->name, client_name);
-
-        new_client->id = pcf8591_id++;
         data->valid = 0;
         init_MUTEX(&data->update_lock);
 

@@ -94,8 +94,6 @@ static ctl_table lm75_dir_table_template[] = {
 	{0}
 };
 
-static int lm75_id = 0;
-
 static int lm75_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, lm75_detect);
@@ -192,8 +190,6 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
-
-	new_client->id = lm75_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

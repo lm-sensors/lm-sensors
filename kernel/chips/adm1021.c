@@ -177,8 +177,6 @@ static ctl_table adm1021_max_dir_table_template[] = {
 	{0}
 };
 
-static int adm1021_id = 0;
-
 static int adm1021_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, adm1021_detect);
@@ -290,8 +288,6 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
 	data->type = kind;
-
-	new_client->id = adm1021_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

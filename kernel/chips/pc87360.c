@@ -266,8 +266,6 @@ void pc87365_temp(struct i2c_client *client, int operation, int ctl_name,
 void pc87365_temp_status(struct i2c_client *client, int operation, int ctl_name,
 			 int *nrels_mag, long *results);
 
-static int pc87360_id = 0;
-
 static struct i2c_driver pc87360_driver = {
 	.name		= "PC8736x hardware monitor",
 	.flags		= I2C_DF_NOTIFY,
@@ -639,8 +637,6 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 		}
 	}
 	strcpy(new_client->name, client_name);
-
-	new_client->id = pc87360_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

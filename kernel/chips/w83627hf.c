@@ -356,8 +356,6 @@ static void w83627hf_pwm(struct i2c_client *client, int operation,
 static void w83627hf_sens(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
 
-static int w83627hf_id = 0;
-
 static struct i2c_driver w83627hf_driver = {
 	.name		= "W83627HF sensor driver",
 	.id		= I2C_DRIVERID_W83627HF,
@@ -700,7 +698,6 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
 	data->type = kind;
-	new_client->id = w83627hf_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

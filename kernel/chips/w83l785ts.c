@@ -139,12 +139,6 @@ static ctl_table w83l785ts_dir_table_template[] =
 };
 
 /*
- * Internal variables
- */
-
-static int w83l785ts_id = 0;
-
-/*
  * Real code
  */
 
@@ -250,7 +244,6 @@ static int w83l785ts_detect(struct i2c_adapter *adapter, int address,
 	 */
 
 	strcpy(new_client->name, client_name);
-	new_client->id = w83l785ts_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

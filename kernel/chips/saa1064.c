@@ -183,8 +183,6 @@ static ctl_table saa1064_dir_table_template[] = {
 	{0}
 };
 
-static int saa1064_id = 0;
-
 static int saa1064_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, saa1064_detect);
@@ -245,8 +243,6 @@ static int saa1064_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
-
-	new_client->id = saa1064_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

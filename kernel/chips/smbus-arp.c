@@ -166,8 +166,6 @@ static ctl_table smbusarp_dir_table_template[] = {
 	{0}
 };
 
-static int smbusarp_id = 0;
-
 static int smbusarp_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, smbusarp_detect);
@@ -209,8 +207,6 @@ int smbusarp_detect(struct i2c_adapter *adapter, int address,
 	client_name = "SMBUS ARP client";
 
 	strcpy(new_client->name, client_name);
-
-	new_client->id = smbusarp_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 

@@ -201,12 +201,6 @@ static ctl_table lm83_dir_table_template[] =
 };
 
 /*
- * Internal variables
- */
-
-static int lm83_id = 0;
-
-/*
  * Real code
  */
 
@@ -333,7 +327,6 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	 */
 
 	strcpy(new_client->name, client_name);
-	new_client->id = lm83_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 
