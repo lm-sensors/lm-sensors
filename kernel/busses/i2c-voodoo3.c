@@ -418,7 +418,9 @@ void config_v3(struct pci_dev *dev, int num)
         unsigned int cadr;
 
         /* map Voodoo3 memory */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,13)
+        cadr = dev->resource[0].start;
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54)
         cadr = dev->base_address[0];
 #else
         pcibios_read_config_dword(dev->bus->number, dev->devfn,

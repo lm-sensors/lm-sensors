@@ -155,7 +155,7 @@ static int find_hydra(void)
 	if (!pci_present())
 		return -ENODEV;
 		
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54)
 	dev = pci_find_device(VENDOR, DEVICE, NULL);
 	if (!dev) {
 #else
@@ -167,7 +167,9 @@ static int find_hydra(void)
 	}
 
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,13)
+	base_addr = dev->resource[0].start;
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
 	base_addr = dev->base_address[0];
 #else
 	pcibios_read_config_dword(bus, devfn,PCI_BASE_ADDRESS_0,&base_addr);

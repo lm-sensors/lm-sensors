@@ -191,7 +191,7 @@ int thmc50_detect(struct i2c_adapter *adapter, int address, int kind)
   const char *type_name,*client_name;
 
 #ifdef DEBUG
-   printk("thmc50.o: Probing for THMC50 at 0x%2.X on bus %d\n",address,adapter->id);
+   printk("thmc50.o: Probing for THMC50 at 0x%2X on bus %d\n",address,adapter->id);
 #endif
 
   /* Make sure we aren't probing the ISA bus!! This is just a safety check
