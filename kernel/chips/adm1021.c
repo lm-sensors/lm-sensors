@@ -174,7 +174,7 @@ int adm1021_attach_adapter(struct i2c_adapter *adapter)
     /* Verify device is 1021 by checked special DEVICE_ID 
        register (I wish all SMBus chips had this..)       */
     /* The MAX1617 does not have it, regrettably. */
-    if (smbus_read_byte_data(adapter,address,adm1021_REG_DEVICE_ID) != 0x41){
+    if (smbus_read_byte_data(adapter,address,adm1021_REG_DEVICE_ID) == 0x41){
 	type = adm1021;
         type_name = "adm1021";
         client_name = "ADM1021 chip";
