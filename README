@@ -1,6 +1,7 @@
 =============================================================================
      FOR QUICK INSTALLATION INSTRUCTIONS SEE THE 'QUICKSTART' FILE.
      FOR FULL INSTALLATION INSTRUCTIONS SEE THE 'INSTALL' FILE.
+     FOR THE FAQ SEE THE 'doc/FAQ' FILE.
 =============================================================================
 
 OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
@@ -18,13 +19,12 @@ the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
 
 WARNING! Many things have changed since version 2.4.0. Most importantly,
-you need the i2c package.  It should have come bundled with lm_sensors,
+you need the i2c package.  It may have come bundled with lm_sensors,
 but you may need to download it separately at:
   http://www.netroedge.com/~lm78
-Users of kernel 2.3.34 and later (and also all soon to be 2.4.x) kernels
-will be happy to know that the new I2C implementation has been included 
-in the kernel; you may still need to patch it with the latest version 
-if lm_sensors does not compile.
+Kernels 2.3.34 and later, and all 2.4.x kernels, contain the
+new I2C package; however, you may still need to download and install
+the latest I2C version if lm_sensors does not compile.
 
 
 At least the following I2C/SMBus adapters are supported:
@@ -66,9 +66,9 @@ We also support some miscellaneous chips:
   DDC Monitor embedded EEPROMs
 
 
-We could use some testers of hardware. If you own a specific monitoring
-chip or I2C bus, and are willing to help us out, please contact us - even
-if you did so before. Even if you have no programming knowledge, you could
+We always appreciate testers. If you own a specific monitoring
+chip listed on our 'new drivers' page, and are willing to help us out,
+please contact us. Even if you have no programming knowledge, you could
 help us by running new modules and reporting on the results and output. 
 If you want to offer more substantial help, this is very welcome too, of
 course.
