@@ -47,7 +47,7 @@
 [ -e /proc/sys/dev/sensors ] || exit 0
 
 # If sensors was not already running, unload the module...
-[ -e /var/lock/subsys/sensors ] || /sbin/modprobe -r i2c-proc &>/dev/null
+[ -e /var/lock/subsys/lm_sensors ] || /sbin/modprobe -r i2c-proc &>/dev/null
 
 CONFIG=/etc/sysconfig/lm_sensors
 PSENSORS=/usr/local/bin/sensors
@@ -106,7 +106,7 @@ start() {
         $PSENSORS -s
 
 	RETVAL=$?
-	if [ $RETVAL -eq 0 ] && touch /var/lock/subsys/sensors ; then
+	if [ $RETVAL -eq 0 ] && touch /var/lock/subsys/lm_sensors ; then
 	    rc_status -v
 	else
 	    rc_status -v
@@ -127,7 +127,7 @@ stop() {
 	/sbin/modprobe -r i2c-proc &>/dev/null
 
 	RETVAL=$?
-	if [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/sensors ; then
+	if [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/lm_sensors ; then
 	    rc_status -v
 	else
 	    rc_status -v
@@ -146,7 +146,7 @@ restart() {
 }
 
 condrestart() {
-	[ -e /var/lock/subsys/sensors ] && restart || :
+	[ -e /var/lock/subsys/lm_sensors ] && restart || :
 }
 
 # See how we were called.
