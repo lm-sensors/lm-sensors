@@ -45,8 +45,8 @@ static void print_version(void);
 static void open_config_file(void);
 static int open_this_config_file(char *filename);
 static void do_a_print(sensors_chip_name name);
-static void do_a_set(sensors_chip_name name);
-static int do_the_real_work(void);
+static int do_a_set(sensors_chip_name name);
+static int do_the_real_work(int *error);
 static const char *sprintf_chip_name(sensors_chip_name name);
 
 #define CHIPS_MAX 20
@@ -141,7 +141,7 @@ int open_this_config_file(char *filename)
 
 int main (int argc, char *argv[])
 {
-  int c,res,i;
+  int c,res,i,error;
 
   struct option long_opts[] =  {
     { "help", no_argument, NULL, 'h' },
@@ -221,8 +221,8 @@ int main (int argc, char *argv[])
     exit(1);
   }
 
-  if(do_the_real_work()) {
-    exit(0);
+  if(do_the_real_work(&error)) {
+    exit(error);
   } else {
     if(chips[0].prefix == SENSORS_CHIP_NAME_PREFIX_ANY)
 	    fprintf(stderr,"No sensors found!\n");
@@ -233,18 +233,20 @@ int main (int argc, char *argv[])
 }
 
 /* returns number of chips found */
-int do_the_real_work(void)
+int do_the_real_work(int *error)
 {
   const sensors_chip_name *chip;
   int chip_nr,i;
   int cnt = 0;
 
+  *error = 0;
   for (chip_nr = 0; (chip = sensors_get_detected_chips(&chip_nr));)
     for(i = 0; i < chips_count; i++)
       if (sensors_match_chip(*chip,chips[i])) {
-        if(do_sets)
-          do_a_set(*chip);
-        else
+        if(do_sets) {
+          if (do_a_set(*chip))
+            *error = 1;
+        } else
           do_a_print(*chip);
         i = chips_count;
 	cnt++;
@@ -252,7 +254,8 @@ int do_the_real_work(void)
    return(cnt);
 }
 
-void do_a_set(sensors_chip_name name)
+/* returns 1 on error */
+int do_a_set(sensors_chip_name name)
 {
   int res;
   if ((res = sensors_do_chip_sets(name))) {
@@ -260,11 +263,13 @@ void do_a_set(sensors_chip_name name)
       fprintf(stderr,"%s: %s for writing;\n",sprintf_chip_name(name),
               sensors_strerror(res));
       fprintf(stderr,"Run as root?\n");
+      return(1);
     } else {
       fprintf(stderr,"%s: %s\n",sprintf_chip_name(name),
               sensors_strerror(res));
     }
   }
+  return(0);
 }
 
 const char *sprintf_chip_name(sensors_chip_name name)
