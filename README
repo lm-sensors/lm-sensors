@@ -1,4 +1,4 @@
-=============================================================================
+&=============================================================================
 
      FOR QUICK INSTALLATION INSTRUCTIONS SEE THE 'QUICKSTART' FILE.
      FOR FULL INSTALLATION INSTRUCTIONS SEE THE 'INSTALL' FILE.
@@ -68,13 +68,13 @@ At least the following I2C/SMBus adapters are supported:
   SMSC Victory66
   3Dfx Voodoo 3 and Banshee
   VIA Technologies VT82C586B, VT82C596A/B, VT82C686A/B, VT8231,
-                   VT8233, VT8233A, and VT8235.
+                   VT8233, VT8233A, VT8235 and VT8237
 
 
 At least the following hardware sensor chips are supported:
   Analog Devices ADM1021, ADM1021A, ADM1022, ADM1023, ADM1024,
                  ADM1025, ADM1026, ADM1027, ADM1030, ADM1031,
-                 ADM1032, ADM9240 and ADT7463
+                 ADM1032, ADM9240, ADT7461 and ADT7463
   Asus AS99127F, ASB100 Bach
   Dallas Semiconductor DS75, DS1621, DS1625, DS1775, and DS1780
   Hewlett Packard Maxilife (several revisions including '99 NBA)
@@ -83,7 +83,7 @@ At least the following hardware sensor chips are supported:
   Intel Xeon processor embedded sensors
   ITE IT8705F, IT8712F embedded sensors
   Maxim MAX1617, MAX1617A, MAX1619, MAX6650, MAX6651,
-        MAX6633, MAX6634, MAX6635
+        MAX6633, MAX6634, MAX6635, MAX6657, MAX6658
   Microchip TC1068, TCM1617, TCN75
   Myson MTP008
   National Semiconductor LM75, LM76, LM78, LM78-J, LM79,
@@ -92,10 +92,10 @@ At least the following hardware sensor chips are supported:
                          PC87363, PC87364, PC87365, PC87366
   Philips NE1617, NE1617A, NE1619
   SiS 5595, 950 embedded sensors
-  SMSC 47M1xx embedded sensors, EMC6D100, EMC6D101
+  SMSC 47M1xx embedded sensors, EMC6D100, EMC6D101, EMC6D102
   TI THMC10 and THMC50
   VIA Technologies VT1211, VT8231 and VT82C686A/B embedded sensors
-  Winbond W83781D, W83782D, W83783S, W83791D,
+  Winbond W83781D, W83782D, W83783S, W83791D, W83792D,
           W83627HF, W83627THF, W83637HF, and W83697HF
 
 
