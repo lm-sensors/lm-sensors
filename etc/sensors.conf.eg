@@ -1411,14 +1411,14 @@ chip "it87-*" "it8705-*" "it8712-*"
 
     label temp1       "M/B Temp"
     set   temp1_over  40
-    set   temp1_hyst  20
+    set   temp1_low   15
     label temp2       "CPU Temp"
     set   temp2_over  45
-    set   temp2_hyst  25
+    set   temp2_low   15
 #   ignore temp3
     label temp3       "Temp3"
     set   temp3_over  45
-    set   temp3_hyst  25
+    set   temp3_low   15
 
 # The A7V8X-X has temperatures inverted, and needs a conversion for
 # CPU temp. Thanks to Preben Randhol for the formula.
