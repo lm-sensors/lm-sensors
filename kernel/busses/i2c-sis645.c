@@ -372,7 +372,7 @@ static int sis645_transaction(int size)
 #endif
 
 		/* kill the transaction */
-		sis645_write(SMB_HOST_CNT, 0x02);
+		sis645_write(SMB_HOST_CNT, 0x20);
 
 		/* check it again */
 		if (((temp = sis645_read(SMB_CNT)) & 0x03) != 0x00) {
