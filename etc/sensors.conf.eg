@@ -1320,20 +1320,23 @@ chip "it87-*" "it8705-*" "it8712-*"
 # you probably need to change the sensor type. This must be done
 # with 'modprobe it87 temp_type=0xXX', you can't fix it in this file.
 # See ../doc/chips/it87 for details and valid 'XX' values!!!
-# Also, note that on some motherboards (Asus A7V8X-X for example), temp1 is
-# the CPU temp and temp2 is the MB temp. On that same motherboard, temp3
-# should be ignored since it is not used.
 #
-    label temp1       "Temp1/MB"
+    label temp1       "M/B Temp"
     set   temp1_over  40
     set   temp1_hyst  20
-    label temp2       "Temp2/CPU"
+    label temp2       "CPU Temp"
     set   temp2_over  45
     set   temp2_hyst  25
 #   ignore temp3
     label temp3       "Temp3"
     set   temp3_over  45
     set   temp3_hyst  25
+
+# The A7V8X-X has temperatures inverted, and needs a conversion for
+# CPU temp. Thanks to Preben Randhol for the formula.
+#   label temp1       "CPU Temp"
+#   label temp2       "M/B Temp"
+#   compute temp1     (-15.096+1.4893*@), (@+15.096)/1.4893
 
 # Fans
     set fan1_min 0
