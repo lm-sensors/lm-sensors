@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
           res += res2;
         }
 #else
-        fprintf(stderr, "Error: I2C block read unimplemented\n");
+        fprintf(stderr, "Error: I2C block read unsupported in i2c-core\n");
         exit(1);
 #endif
       }
@@ -293,18 +293,31 @@ int main(int argc, char *argv[])
         block[i] = -1;
     }
 
-    printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
+    printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f    0123456789abcdef\n");
     for (i = 0; i < 256; i+=16) {
       printf("%02x: ",i);
       for(j = 0; j < 16; j++) {
-        if(size == I2C_SMBUS_BYTE_DATA)
+        if(size == I2C_SMBUS_BYTE_DATA) {
           res = i2c_smbus_read_byte_data(file,i+j);
-        else
+          block[i+j] = res;
+        } else
           res = block[i+j];
         if (res < 0)
           printf("XX ");
         else
           printf("%02x ",res & 0xff);
+      }
+      printf("   ");
+      for(j = 0; j < 16; j++) {
+        res = block[i+j];
+        if (res < 0)
+          printf("X");
+        else if (((res & 0xff) == 0x00) || ((res & 0xff) == 0xff))
+          printf(".");
+        else if (((res & 0xff) < 32) || ((res & 0xff) >= 127))
+          printf("?");
+        else
+          printf("%c",res & 0xff);
       }
       printf("\n");
     }
