@@ -63,16 +63,24 @@
 
 static u16 pm_io_base;
 
+/*
+   It does not appear from the datasheet that the GPIO pins are
+   open drain. So a we set a low value by setting the direction to
+   output and a high value by setting the direction to input and
+   relying on the required I2C pullup. The data value is initialized
+   to 0 in i2c_via_init() and never changed.
+*/
+
 static void bit_via_setscl(void *data, int state)
 {
-	outb(state ? inb(I2C_OUT) | I2C_SCL : inb(I2C_OUT) & ~I2C_SCL,
-	     I2C_OUT);
+	outb(state ? inb(I2C_DIR) & ~I2C_SCL : inb(I2C_DIR) | I2C_SCL,
+	     I2C_DIR);
 }
 
 static void bit_via_setsda(void *data, int state)
 {
-	outb(state ? inb(I2C_OUT) | I2C_SDA : inb(I2C_OUT) & ~I2C_SDA,
-	     I2C_OUT);
+	outb(state ? inb(I2C_DIR) & ~I2C_SDA : inb(I2C_DIR) | I2C_SDA,
+	     I2C_DIR);
 }
 
 static int bit_via_getscl(void *data)
@@ -179,15 +187,14 @@ int __init i2c_via_init(void)
 		return -EBUSY;
 	} else {
 		request_region(I2C_DIR, IOSPACE, IOTEXT);
-		outb(inb(I2C_DIR) | I2C_SDA | I2C_SCL, I2C_DIR);
-		outb(inb(I2C_OUT) | I2C_SDA | I2C_SCL, I2C_OUT);
+		outb(inb(I2C_DIR) & ~(I2C_SDA | I2C_SCL), I2C_DIR);
+		outb(inb(I2C_OUT) & ~(I2C_SDA | I2C_SCL), I2C_OUT);
 	}
 
 	if (i2c_bit_add_bus(&bit_via_ops) == 0) {
 		printk("i2c-via.o: Module succesfully loaded\n");
 		return 0;
 	} else {
-		outb(inb(I2C_DIR) & ~(I2C_SDA | I2C_SCL), I2C_DIR);
 		release_region(I2C_DIR, IOSPACE);
 		printk
 		    ("i2c-via.o: Algo-bit error, couldn't register bus\n");
