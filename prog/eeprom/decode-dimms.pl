@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 #
 # Copyright 1998, 1999 Philip Edelbrock <phil@netroedge.com>
 # modified by Christian Zuckschwerdt <zany@triq.net>
@@ -22,8 +22,14 @@
 #  html output (selectable by commandline switches)
 # Version 0.6  2000-09-16  Christian Zuckschwerdt <zany@triq.net>
 #  updated according to SPD Spec Rev 1.2B
-#  see http://developer.intel.com/
-#             technology/memory/pc133sdram/spec/Spdsd12b.htm
+#  see http://developer.intel.com/technology/memory/pc133sdram/spec/Spdsd12b.htm
+# Version 0.7  2002-11-08  Jean Delvare <khali@linux-fr.org>
+#  pass -w and use strict
+#  valid HTML 3.2 output (--format mode)
+#  miscellaneous formatting enhancements and bug fixes
+#  clearer HTML output (original patch by Nick Kurshev <nickols_k@mail.ru>)
+#  stop decoding on checksum error by default (--checksum option forces)
+#
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
 #
@@ -45,12 +51,37 @@
 # http://www.jedec.org
 #
 
+use strict;
+use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck);
+
 sub printl ($$) # print a line w/ label and value
 {
    my ($label, $value) = @_;
    if ($opt_html) {
-       $value =~ s%\n%<br>%sg;
+       $label =~ s/</\&lt;/sg;
+       $label =~ s/>/\&gt;/sg;
+       $label =~ s/\n/<br>\n/sg;
+       $value =~ s/</\&lt;/sg;
+       $value =~ s/>/\&gt;/sg;
+       $value =~ s/\n/<br>\n/sg;
        print "<tr><td valign=top>$label</td><td>$value</td></tr>\n";
+   } else {
+       $value =~ s%\n%\n\t\t%sg;
+       print "$label\t$value\n";
+   }
+}
+
+sub printl2 ($$) # print a line w/ label and value (outside a table)
+{
+   my ($label, $value) = @_;
+   if ($opt_html) {
+       $label =~ s/</\&lt;/sg;
+       $label =~ s/>/\&gt;/sg;
+       $label =~ s/\n/<br>\n/sg;
+       $value =~ s/</\&lt;/sg;
+       $value =~ s/>/\&gt;/sg;
+       $value =~ s/\n/<br>\n/sg;
+       print "$label: $value\n";
    } else {
        $value =~ s%\n%\n\t\t%sg;
        print "$label\t$value\n";
@@ -61,6 +92,9 @@ sub prints ($) # print seperator w/ given text
 {
    my ($label) = @_;
    if ($opt_html) {
+       $label =~ s/</\&lt;/sg;
+       $label =~ s/>/\&gt;/sg;
+       $label =~ s/\n/<br>\n/sg;
        print "<tr><td align=center colspan=2><b>$label</b></td></tr>\n";
    } else {
        print "\n---=== $label ===---\n";
@@ -71,7 +105,9 @@ sub printh ($) # print header w/ given text
 {
    my ($label) = @_;
    if ($opt_html) {
-       $label =~ s%\n%<br>%sg;
+       $label =~ s/</\&lt;/sg;
+       $label =~ s/>/\&gt;/sg;
+       $label =~ s/\n/<br>\n/sg;
        print "<h1>$label</h1>\n";
    } else {
 	print "\n$label\n";
@@ -80,56 +116,64 @@ sub printh ($) # print header w/ given text
 
 for (@ARGV) {
     if (/-h/) {
-	print "Usage: $0 [-f|-b|-h]
-
-  -f, --format            print nice html output
-  -b, --bodyonly          don't printhtml header
-                          (useful for postprocessing the output)
-  -h, --help              display this usage summary
-";
-	exit;
+		print "Usage: $0 [-f|-b|-h]\n\n",
+			"  -f, --format            print nice html output\n",
+			"  -b, --bodyonly          don't printhtml header\n",
+			"                          (useful for postprocessing the output)\n",
+			"  -c, --checksum          decode completely even if checksum fails\n",
+			"  -h, --help              display this usage summary\n";
+		exit;
     }
     $opt_html = 1 if (/-f/);
     $opt_bodyonly = 1 if (/-b/);
+    $opt_igncheck = 1 if (/-c/);
 }
-$opt_body = $opt_html and not $opt_bodyonly;
+$opt_body = $opt_html && ! $opt_bodyonly;
 
-print "<html><head></head><body>\n" if $opt_body;
+if ($opt_body)
+{
+	print "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n",
+	      "<html><head>\n",
+		  "\t<meta HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=iso-8859-1\">\n",
+		  "\t<title>PC DIMM Serial Presence Detect Tester/Decoder Output</title>\n",
+		  "</head><body>\n";
+}
 
 printh '
 PC DIMM Serial Presence Detect Tester/Decoder
-Written by Philip Edelbrock.  Copyright 1998, 1999.
-Modified by Christian Zuckschwerdt <zany@triq.net>
-Version 2.6.3
+By Philip Edelbrock, Christian Zuckschwerdt and others
+Version 2.6.6
 ';
 
-print "<table border=1>\n" if $opt_html;
 
-$dimm_count=0;
+my $dimm_count=0;
 $_=`ls /proc/sys/dev/sensors/`;
-@dimm_list=split();
+my @dimm_list=split();
 
-for $i ( 0 .. $#dimm_list ) {
+for my $i ( 0 .. $#dimm_list ) {
 	$_=$dimm_list[$i];
 	if (/^eeprom-/) {
-		$dimm_checksum=0;
-		$dimm_count=$dimm_count + 1;
+		my $dimm_checksum=0;
+		$dimm_count += 1;
 		
-		printl "Decoding EEPROM", "/proc/sys/dev/sensors/$dimm_list[$i]";
+		print "<b><u><br><br>" if $opt_html;
+		printl2 "Decoding EEPROM" , " /proc/sys/dev/sensors/$dimm_list[$i]";
+		print "</u></b>" if $opt_html;
+		print "<table border=1>\n" if $opt_html;
 		if (/^[^-]+-[^-]+-[^-]+-([^-]+)$/) {
-			$dimm_num=$1 - 49;
+			my $dimm_num=$1 - 49;
 			printl "Guessing DIMM is in", "bank $dimm_num";
 		}
 # Decode first 16 bytes
 		prints "The Following is Required Data and is Applicable to all DIMM Types";
 
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/00`;
-		@bytes=split(" ");
-		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
+		my @bytes=split(" ");
+		for my $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
 		
 		printl "# of bytes written to SDRAM EEPROM",$bytes[0];
 
-		$l = "Total number of bytes in EEPROM";
+		my $l = "Total number of bytes in EEPROM";
 		if ($bytes[1] <= 13) {
 			printl $l, 2**$bytes[1];
 		} elsif ($bytes[1] == 0) {
@@ -161,7 +205,7 @@ for $i ( 0 .. $#dimm_list ) {
 
 		$l = "Data Width (SDRAM only)";
 		if ($bytes[7] > 1) { printl $l, "Undefined!" } else {
-			$temp=($bytes[7]*256) + $bytes[6];
+			my $temp=($bytes[7]*256) + $bytes[6];
 			printl $l, $temp; }
 
 		$l = "Module Interface Signal Levels";
@@ -174,7 +218,7 @@ for $i ( 0 .. $#dimm_list ) {
 		else { printl $l, "Undefined!";}
 		
 		$l = "Cycle Time (SDRAM) highest CAS latency";
-		$temp=($bytes[9] >> 4) + ($bytes[9] & 0xf) * 0.1;
+		my $temp=($bytes[9] >> 4) + ($bytes[9] & 0xf) * 0.1;
 		printl $l, "${temp}ns";
 		
 		$l = "Access Time (SDRAM)";
@@ -228,7 +272,7 @@ for $i ( 0 .. $#dimm_list ) {
 # Decode next 16 bytes
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/10`;
 		@bytes=split(" ");
-		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j]; }
+		for my $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j]; }
 		
 		$l = "Burst lengths supported";
 		$temp="";
@@ -379,7 +423,7 @@ for $i ( 0 .. $#dimm_list ) {
 # Decode next 16 bytes (32-47)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/20`;
 		@bytes=split(" ");
-		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
+		for my $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
 		
 		prints "The Following are Proposed and Apply to SDRAM DIMMs";
 		
@@ -403,13 +447,16 @@ for $i ( 0 .. $#dimm_list ) {
 # Decode next 16 bytes (48-63)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/30`;
 		@bytes=split(" ");
-		for $j ( 0 .. 14 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
+		for my $j ( 0 .. 14 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
 
 		printl "SPD Revision code ", sprintf("%x", $bytes[14]);
 		$l = "EEPROM Checksum of bytes 0-62";
-		$temp = sprintf("0x%.2X (verses calculated: 0x%.2X)\n",$bytes[15],$dimm_checksum & 255);
-		printl $l, $temp;
+		$dimm_checksum &= 0xff;
+		printl $l, ($bytes[15]==$dimm_checksum?
+			sprintf("OK (0x%.2X)",$bytes[15]):
+			sprintf("Bad (found 0x%.2X, calculated 0x%.2X)\n",$bytes[15],$dimm_checksum));
 
+		if($bytes[15]==$dimm_checksum || $opt_igncheck) {
 # Decode next 16 bytes (64-79)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/40`;
 		@bytes=split(" ");
@@ -417,7 +464,7 @@ for $i ( 0 .. $#dimm_list ) {
 		$l = "Manufacturer's JEDEC ID Code";
 		$temp = sprintf("0x%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X\n",$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
 		printl $l, $temp;
-		$temp = pack("cccccccc",
+		$temp = pack("c8",
 			$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
 		printl $l, "(\"$temp\")";
 		
@@ -425,20 +472,20 @@ for $i ( 0 .. $#dimm_list ) {
 		$temp = sprintf("0x%.2X\n",$bytes[8]);
 		printl $l, $temp;
 		
-		$l = "Manufacurer's Part Number:\"";
+		$l = "Manufacurer's Part Number";
 # Decode next 16 bytes (80-95)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/50`;
-		@bytes2=split(" ");
-		$temp = pack("cccccccccccccccccc",$bytes[9],$bytes[10],$bytes[11],$bytes[12],$bytes[13],$bytes[14],$bytes[15],
-			$bytes2[0],$bytes2[1],$bytes2[2],$bytes2[3],$bytes2[4],$bytes2[5],$bytes2[6],$bytes2[7],$bytes2[8],$bytes2[9]);
+		my @bytes2 = split ' ';
+		$temp = pack("c18",$bytes[9],$bytes[10],$bytes[11],$bytes[12],$bytes[13],$bytes[14],$bytes[15],
+			$bytes2[0],$bytes2[1],$bytes2[2],$bytes2[3],$bytes2[4],$bytes2[5],$bytes2[6],$bytes2[7],$bytes2[8],$bytes2[9],$bytes2[10]);
 		printl $l, $temp;
 		
 		$l = "Revision Code";
-		$temp = sprintf("0x%.2X%.2X\n",$bytes2[10],$bytes2[11]);
+		$temp = sprintf("0x%.2X%.2X\n",$bytes2[11],$bytes2[12]);
 		printl $l, $temp;
 		
 		$l = "Manufacturing Date";
-		$temp = sprintf("0x%.2X%.2X\n",$bytes2[12],$bytes2[13]);
+		$temp = sprintf("0x%.2X%.2X\n",$bytes2[13],$bytes2[14]);
 		printl $l, $temp;
 		
 		$l = "Assembly Serial Number";
@@ -470,12 +517,13 @@ for $i ( 0 .. $#dimm_list ) {
 		if ($bytes[15] > 175) { $temp .= "Double Sided DIMM\n"; }
 		else { $temp .= "Single Sided DIMM\n";}
 		printl $l, $temp;
+		}
 		
-		
+		print "</table>\n" if $opt_html;
 	}
 }
-printl "Number of SDRAM DIMMs detected and decoded", $dimm_count;
+print '<br><br>' if $opt_html;
+printl2 "Number of SDRAM DIMMs detected and decoded", $dimm_count;
 
-print "</table>\n" if $opt_html;
 print "</body></html>\n" if $opt_body;
 print "\nTry '$0 --format' for html output.\n" unless $opt_html;
