@@ -105,9 +105,9 @@ gl520sm
         gl520sm 	1-2	4-5	2	-	yes	no
 
 it87
-	(all are reported as an "it87")
-	it8705		3	8	3	3 pwm	yes	yes
 	it8712		3	8	3	3 pwm	yes	yes
+	(the following are reported as an "it87")
+	it8705		3	8	3	3 pwm	yes	yes
 	sis950		3	8	3	3 pwm	yes	yes
 
 lm63

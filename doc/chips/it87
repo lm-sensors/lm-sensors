@@ -5,18 +5,16 @@ Status: Complete, stable
 
 Supported chips:
   * IT8705F
-    ISA 0x290
+    Addresses scanned: I2C 0x28 - 0x2f (inclusive), ISA autodetected
     Datasheet: Publicly available at the ITE website
                http://www.ite.com.tw
-  * IT8712F (untested)
-    Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
+  * IT8712F
+    Addresses scanned: I2C 0x28 - 0x2f (inclusive), ISA autodetected
     Datasheet: Publicly available at the ITE website
                http://www.ite.com.tw
   * Sis950   [clone of IT8705F]
-    ISA 0x290
-    Datasheet: Publicly available at the SIS website
-	Appears to no longer be available on SIS website, found at
-	http://ic.doma.kiev.ua/pdf/chip/sio.htm
+    Addresses scanned: ISA 0x290
+    Datasheet: No longer publicly available
 
 Author: Christophe Gauthron <chrisg@0-in.com>
 
@@ -49,16 +47,13 @@ Module Parameters
 Description
 -----------
 
-This driver implements support for the IT8705F chip.
-This chip is also known as SIS 950.
-
-This driver also supports IT8712F, which adds SmBus access, and a Vid
-input, used to report the Vcore voltage of the Pentium processor.
+This driver implements support for the IT8705F, IT8712F and SiS950 chips.
 
 These chips are 'Super I/O chips', supporting floppy disks, infrared ports,
 joysticks and other miscellaneous stuff. For hardware monitoring,
 they include an 'environmnent controller' with 3 temperature sensors,
 3 fan rotation speed sensors, 8 voltage sensors, and associated alarms.
+The IT8712F additionally features VID inputs.
 
 Temperatures are measured in degrees Celcius. An alarm is triggered once
 when the Overtemperature Shutdown limit is crossed; it is triggered again
