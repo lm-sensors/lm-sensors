@@ -19,9 +19,10 @@ ask CVS about it:
 2.8.2 (???)
   File sensors.conf.eg: Change lm75 scaling back to 1
   Library: Fix bmcsensors scaling, increase number of sensors;
-           Add w83627thf support; Advance version to 2.0.2;
+           Add w83627thf support; Advance version to 3.0.0;
            Add hermes, ADM1032, ASB100 support;
-           Add it87 sensor type support
+           Add it87 sensor type support;
+           Add sysfs support for kernel 2.6
   Makefiles: Install fancontrol, pwmconfig, decode-*.pl;
              Fail if no kernel .config file exists
   Module asb100: New
@@ -34,7 +35,7 @@ ask CVS about it:
   Module lm90: Add ADM1032 support
   Module w83781d: Fix 791d and 627hf detection
   Program pwmconfig: Handle multiple fans controlled by a single pwm
-  Program sensors: Add ADM1032 support
+  Program sensors: Add ADM1032 support; add messages for sysfs
   Program sensors-detect: Prefer Super I/O drivers;
                           Fix W83627HF and W83791D detection; detect CSB6;
                           Detect ADM1029,30,31,32;
