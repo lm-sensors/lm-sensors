@@ -19,6 +19,7 @@
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := prog/sensors
+PROGSENSORSDIR := $(MODULE_DIR)
 
 PROGSENSORSMAN1DIR := $(MANDIR)/man1
 PROGSENSORSMAN1FILES := $(MODULE_DIR)/sensors.1
@@ -45,6 +46,6 @@ install-prog-sensors: all-prog-sensors
 install :: install-prog-sensors
 
 clean-prog-sensors:
-	$(RM) $(PROGSENSORSSOURCES:.c=.rd) $(PROGSENSORSSOURCES:.c=.ro) \
-	      $(PROGSENSORSTARGETS)
+	$(RM) $(PROGSENSORSDIR)/*.rd $(PROGSENSORSDIR)/*.ro 
+	$(RM) $(PROGSENSORSTARGETS)
 clean :: clean-prog-sensors

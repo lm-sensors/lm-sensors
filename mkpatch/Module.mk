@@ -18,27 +18,9 @@
 # Note that MODULE_DIR (the directory in which this file resides) is a
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
-MODULE_DIR := prog/detect
-PROGDETECTDIR := $(MODULE_DIR)
+MODULE_DIR := mkpatch
+MKPATCHDIR := $(MODULE_DIR)
 
-# Regrettably, even 'simply expanded variables' will not put their currently
-# defined value verbatim into the command-list of rules...
-PROGDETECTTARGETS := $(MODULE_DIR)/i2cdetect
-PROGDETECTSOURCES := $(MODULE_DIR)/i2cdetect.c
-PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect
-
-# Include all dependency files. We use '.rd' to indicate this will create
-# executables.
-INCLUDEFILES += $(PROGDETECTSOURCES:.c=.rd)
-
-all-prog-detect: $(PROGDETECTTARGETS)
-all :: all-prog-detect
-
-install-prog-detect: all-prog-detect
-	mkdir -p $(SBINDIR)
-	$(INSTALL) -o root -g root -m 755 $(PROGDETECTSBININSTALL) $(SBINDIR)
-install :: install-prog-detect
-
-clean-prog-detect:
-	$(RM) $(PROGDETECTDIR)/*.rd $(PROGDETECTDIR)/*.ro $(PROGDETECTTARGETS)
-clean :: clean-prog-detect
+clean-mkpatch:
+	$(RM) $(MKPATCHDIR)/.temp
+clean :: clean-mkpatch

@@ -19,6 +19,7 @@
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := kernel/chips
+KERNELCHIPSDIR := $(MODULE_DIR)
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
@@ -68,5 +69,5 @@ install-kernel-chips: all-kernel-chips
 install :: install-kernel-chips
 
 clean-kernel-chips:
-	$(RM) $(KERNELCHIPSTARGETS) $(KERNELCHIPSTARGETS:.o=.d)
+	$(RM) $(KERNELCHIPSDIR)/*.o $(KERNELCHIPSDIR)/*.d
 clean :: clean-kernel-chips

@@ -19,6 +19,7 @@
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := kernel/include
+KERNELINCLUDEDIR := $(MODULE_DIR)
 
 KERNELINCLUDEFILES := 
 ifneq ($(shell if grep -q '^CONFIG_SENSORS=y' $(LINUX)/.config; then echo 1; fi),1)
@@ -35,6 +36,6 @@ install-all-kernel-include:
 install :: install-all-kernel-include
 
 clean-all-kernel-include:
-	$(RM) $(KERNELINCLUDEFILES:.h=.h.install)
+	$(RM) $(KERNELINCLUDEDIR)/*.h.install
 
 clean :: clean-all-kernel-include

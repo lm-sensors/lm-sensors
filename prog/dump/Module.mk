@@ -19,6 +19,7 @@
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := prog/dump
+PROGDUMPDIR := $(MODULE_DIR)
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
@@ -33,6 +34,5 @@ all-prog-dump: $(PROGDUMPTARGETS)
 all :: all-prog-dump
 
 clean-prog-dump:
-	$(RM) $(PROGDUMPSOURCES:.c=.rd) $(PROGDUMPSOURCES:.c=.ro) \
-	      $(PROGDUMPTARGETS)
+	$(RM) $(PROGDUMPDIR)/*.rd $(PROGDUMPDIR)/*.ro $(PROGDUMPTARGETS)
 clean :: clean-prog-dump

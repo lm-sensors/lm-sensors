@@ -19,6 +19,7 @@
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := kernel
+KERNELDIR := $(MODULE_DIR)
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
@@ -39,5 +40,5 @@ install-kernel: all-kernel
 install :: install-kernel
 
 clean-kernel:
-	$(RM) $(KERNELTARGETS) $(KERNELTARGETS:.o=.d)
+	$(RM) $(KERNELDIR)/*.o $(KERNELDIR)/*.d
 clean :: clean-kernel

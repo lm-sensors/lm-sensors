@@ -129,7 +129,7 @@ MANGRP := root
 # to do this. 
 
 # The subdirectories we need to build things in 
-SRCDIRS := 
+SRCDIRS := mkpatch
 ifeq ($(COMPILE_KERNEL),1)
 SRCDIRS += kernel kernel/busses kernel/chips kernel/include
 endif

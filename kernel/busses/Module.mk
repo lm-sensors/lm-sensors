@@ -19,6 +19,7 @@
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := kernel/busses
+KERNELBUSSESDIR := $(MODULE_DIR)
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
@@ -53,5 +54,5 @@ install-kernel-busses: all-kernel-busses
 install :: install-kernel-busses
 
 clean-kernel-busses:
-	$(RM) $(KERNELBUSSESTARGETS) $(KERNELBUSSESTARGETS:.o=.d)
+	$(RM) $(KERNELBUSSESDIR)/*.o $(KERNELBUSSESDIR)/*.d
 clean :: clean-kernel-busses

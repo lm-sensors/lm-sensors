@@ -19,6 +19,7 @@
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := lib
+LIBDIR := $(MODULE_DIR)
 
 # The manual dirs and files
 LIBMAN3DIR := $(MANDIR)/man3
@@ -48,7 +49,8 @@ LIBCSOURCES := $(MODULE_DIR)/data.c $(MODULE_DIR)/general.c \
 LIBOTHEROBJECTS := $(MODULE_DIR)/conf-parse.o $(MODULE_DIR)/conf-lex.o
 LIBSHOBJECTS := $(LIBCSOURCES:.c=.lo) $(LIBOTHEROBJECTS:.o=.lo)
 LIBSTOBJECTS := $(LIBCSOURCES:.c=.ao) $(LIBOTHEROBJECTS:.o=.ao)
-LIBEXTRACLEAN := $(MODULE_DIR)/conf-parse.h $(MODULE_DIR)/libsensors.so*
+LIBEXTRACLEAN := $(MODULE_DIR)/conf-parse.h $(MODULE_DIR)/conf-parse.c \
+                 $(MODULE_DIR)/conf-lex.c
 
 LIBHEADERFILES := $(MODULE_DIR)/error.h $(MODULE_DIR)/sensors.h \
                   $(MODULE_DIR)/chips.h
@@ -95,7 +97,7 @@ install-lib: all-lib
 install :: install-lib
 
 clean-lib:
-	$(RM) $(LIBTARGETS) $(LIBSHOBJECTS) $(LIBSTOBJECTS)
-	$(RM) $(LIBSHOBJECTS:.lo=.ld) $(LIBSTOBJECTS:.ao=.ad)
-	$(RM) $(LIBOTHEROBJECTS:.o=.c) $(LIBEXTRACLEAN)
+	$(RM) $(LIBDIR)/*.ld $(LIBDIR)/*.ad
+	$(RM) $(LIBDIR)/*.lo $(LIBDIR)/*.ao
+	$(RM) $(LIBTARGETS) $(LIBEXTRACLEAN)
 clean :: clean-lib
