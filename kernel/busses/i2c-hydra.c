@@ -112,7 +112,7 @@ static void bit_hydra_dec(struct i2c_adapter *adap)
 
 /* ------------------------------------------------------------------------ */
 
-struct i2c_algo_bit_data bit_hydra_data = {
+static struct i2c_algo_bit_data bit_hydra_data = {
 	NULL,
 	bit_hydra_setsda,
 	bit_hydra_setscl,
@@ -121,7 +121,7 @@ struct i2c_algo_bit_data bit_hydra_data = {
 	5, 5, 100,		/*waits, timeout */
 };
 
-struct i2c_adapter bit_hydra_ops = {
+static struct i2c_adapter bit_hydra_ops = {
 	"Hydra i2c",
 	I2C_HW_B_HYDRA,
 	NULL,
