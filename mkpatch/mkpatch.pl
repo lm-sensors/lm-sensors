@@ -977,7 +977,7 @@ sub gen_drivers_i2c_i2c_core_c
 	extern int i2c_via_init(void);
 #endif
 #ifdef CONFIG_I2C_VIAPRO
-	extern int i2c_viapro_init(void);
+	extern int i2c_vt596_init(void);
 #endif
 #ifdef CONFIG_I2C_VOODOO3
 	extern int i2c_voodoo3_init(void);
@@ -1010,7 +1010,7 @@ EOF
 	i2c_via_init();
 #endif
 #ifdef CONFIG_I2C_VIAPRO
-	i2c_viapro_init();
+	i2c_vt596_init();
 #endif
 #ifdef CONFIG_I2C_VOODOO3
 	i2c_voodoo3_init();
