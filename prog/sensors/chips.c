@@ -2853,7 +2853,7 @@ void print_eeprom(const sensors_chip_name *name)
 		/* first make sure it is a Sony Vaio EEPROM */
 		if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_NAME, &label, &valid)
 		 && valid) {
-			for (i = 0; i < 4; i++) /* stop at first zero */
+			for (i = 0; i < 4; i++)
 	            if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a))
 					buffer[i] = (char) a;
 			if (strncmp(buffer, "PCG-", 4) == 0)
