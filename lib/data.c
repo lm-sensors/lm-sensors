@@ -66,6 +66,8 @@ int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res)
   char *name = strdup(orig_name);
   int i;
 
+  if (! name)
+    sensors_fatal_error("sensors_parse_chip_name","Allocating new name");
   /* First split name in upto four pieces. */
   if ((part4 = strrchr(name,'-')))
     *part4++ = '\0';
@@ -155,8 +157,8 @@ DONE2:
     
   if (!strcmp(name,"*"))
     res->prefix = SENSORS_CHIP_NAME_PREFIX_ANY;
-  else
-    res->prefix = strdup(name);
+  else if (! (res->prefix = strdup(name)))
+    sensors_fatal_error("sensors_parse_chip_name","Allocating new name");
   goto SUCCES;
 
 SUCCES:

@@ -141,10 +141,12 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
   for (chip = NULL; (chip = sensors_for_all_config_chips(name,chip));)
     for (i = 0; i < chip->labels_count; i++)
       if (!strcmp(featureptr->name, chip->labels[i].name)) {
-        *result = strdup(chip->labels[i].name);
+        if (! (*result = strdup(chip->labels[i].name)))
+          sensors_fatal_error("sensors_get_label","Allocating label text");
         return 0;
       }
-  *result = strdup(featureptr->name);
+  if (! (*result = strdup(featureptr->name)))
+    sensors_fatal_error("sensors_get_label","Allocating label text");
   return 0;
 }
 

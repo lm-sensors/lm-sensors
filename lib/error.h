@@ -27,11 +27,12 @@
 #define SENSORS_ERR_DIV_ZERO 5  /* Divide by zero */
 #define SENSORS_ERR_CHIP_NAME 6 /* Can't parse chip name */
 #define SENSORS_ERR_BUS_NAME 7  /* Can't parse bus name */
+#define SENSORS_ERR_PARSE 8     /* General parse error */
 
 /* This function returns a pointer to a string which describes the error.
    errnum may be negative (the corresponding positive error is returned).
    You may not modify the result! */
-extern char *sensors_strerror(int errnum);
+extern const char *sensors_strerror(int errnum);
 
 /* This function is called when a parse error is detected. Give it a new
    value, and your own function is called instead of the default (which

@@ -41,7 +41,7 @@ static const char *errorlist[] =
 
 #define ERROR_LIST_LEN (sizeof(errorlist) / sizeof(char *))
 
-char *sensors_strerror(int errnum)
+const char *sensors_strerror(int errnum)
 {
   if (errnum < 0)
     errnum = -errnum;

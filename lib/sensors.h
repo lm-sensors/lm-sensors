@@ -34,6 +34,14 @@ typedef struct sensors_chip_name {
   int addr;
 } sensors_chip_name;
 
+/* (Re)load the configuration file and the detected chips list. */
+extern int sensors_init(void);
+
+/* Strictly optional clean-up function: You can't access anything after
+   this, until the next sensors_init() call! */
+extern void sensors_cleanup(void);
+
+
 /* Parse a chip name to the internal representation. Return 0 on succes, <0
    on error. */
 extern int sensors_parse_chip_name(const char *orig_name,

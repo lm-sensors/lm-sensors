@@ -36,7 +36,8 @@ LIBTARGETS := $(MODULE_DIR)/$(LIBSTLIBNAME) $(MODULE_DIR)/$(LIBSHLIBNAME)
 
 LIBCSOURCES := $(MODULE_DIR)/data.c $(MODULE_DIR)/general.c \
                $(MODULE_DIR)/error.c $(MODULE_DIR)/chips.c \
-               $(MODULE_DIR)/proc.c $(MODULE_DIR)/access.c
+               $(MODULE_DIR)/proc.c $(MODULE_DIR)/access.c \
+               $(MODULE_DIR)/init.c
 LIBOTHEROBJECTS := $(MODULE_DIR)/conf-parse.o $(MODULE_DIR)/conf-lex.o
 LIBSHOBJECTS := $(LIBCSOURCES:.c=.lo) $(LIBOTHEROBJECTS:.o=.lo)
 LIBSTOBJECTS := $(LIBCSOURCES:.c=.ao) $(LIBOTHEROBJECTS:.o=.ao)
