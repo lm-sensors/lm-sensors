@@ -1,8 +1,9 @@
 /*
     i801.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl> and
-    Philip Edelbrock <phil@netroedge.com>
+    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>,
+    Philip Edelbrock <phil@netroedge.com>, and Mark D. Studebaker
+    <mdsxyz123@yahoo.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,9 +21,10 @@
 */
 
 /*
-    This driver supports the Intel 82801AA and 82801AB
+    This driver supports the Intel 82801AA, 82801AB, and 82801BA
     I/O Controller Hubs (ICH). They are similar to the PIIX4 and are part
-    of Intel's '810' chipset. See the doc/busses/i2c-i801 file for details.
+    of Intel's '810' and other chipsets.
+    See the doc/busses/i2c-i801 file for details.
 */
 
 /* Note: we assume there can only be one I801, with one SMBus interface */
@@ -44,6 +46,9 @@
 #endif
 #ifndef PCI_DEVICE_ID_INTEL_82801AB_3
 #define PCI_DEVICE_ID_INTEL_82801AB_3   0x2423
+#endif
+#ifndef PCI_DEVICE_ID_INTEL_82801BA_3
+#define PCI_DEVICE_ID_INTEL_82801BA_3   0x2443
 #endif
 
 /* I801 SMBus address offsets */
@@ -164,8 +169,15 @@ int i801_setup(void)
 	if (I801_dev == NULL) {
 		do
 			I801_dev = pci_find_device(PCI_VENDOR_ID_INTEL,
-						   PCI_DEVICE_ID_INTEL_82801AB_3,
-						   I801_dev);
+					   PCI_DEVICE_ID_INTEL_82801AB_3,
+					   I801_dev);
+		while (I801_dev && (PCI_FUNC(I801_dev->devfn) != 3));
+	}
+	if (I801_dev == NULL) {
+		do
+			I801_dev = pci_find_device(PCI_VENDOR_ID_INTEL,
+					   PCI_DEVICE_ID_INTEL_82801BA_3,
+					   I801_dev);
 		while (I801_dev && (PCI_FUNC(I801_dev->devfn) != 3));
 	}
 	if (I801_dev == NULL) {

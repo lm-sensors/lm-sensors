@@ -1,12 +1,13 @@
 Kernel driver `i2c-i801.o'
 
-Status: Beta.
+Status: Tested and stable.
         Block reads/writes untested (but not used by any current chip driver).
 
 Supported adapters:
   * Intel 82801AA and 82801AB (ICH and ICH0 - part of the
     '810' and '810E' chipsets)
-    Datasheet: Publicly available at the Intel website
+  * Intel 82801BA (ICH2 - part of the '815E' chipset)
+    Datasheets: Publicly available at the Intel website
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
         <phil@netroedge.com>, and Mark Studebaker <mdsxyz123@yahoo.com>
@@ -24,11 +25,12 @@ Module Parameters
 Description
 -----------
 
-The ICH (properly known as the 82801AA) and ICH0 (82801AB)
-are Intel chips that are a part of Intel's '810' chipset
-for Celeron-based PCs and '810E' chipset for Pentium-based PCs.
+The ICH (properly known as the 82801AA), ICH0 (82801AB),
+and ICH2 (82801BA) are Intel chips that are a part of
+Intel's '810' chipset for Celeron-based PCs,
+'810E' chipset for Pentium-based PCs, and newer '815E' chipset.
 
-The ICH contains up to SEVEN separate PCI functions
+The ICH chips contain about SEVEN separate PCI functions
 in TWO logical PCI devices.
 An output of lspci will show something similar to the following:
 
@@ -44,7 +46,7 @@ Class 0c05 is SMBus Serial Controller.
 The ICH chips are quite similar to Intel's PIIX4 chip,
 at least in the SMBus controller.
 
-See the file i2c-piix4 for details.
+See the file i2c-piix4 for some additional information.
 
 
 **********************

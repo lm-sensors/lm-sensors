@@ -14,8 +14,10 @@ ask CVS about it:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
 2.5.3 (2000????)
+  Module i2c-i801: support Intel 82801BA (815E chipset)
   Programs i2cdetect, i2cdump: Improve error reporting
   Program sensors: new switch -u (--unknown)
+  Program sensors-detect: detect Intel 82801BA (815E chipset)
 
 2.5.2 (20000709)
   File sensors.conf.eg: Fix lm80 in8 calculation
