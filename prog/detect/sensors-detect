@@ -1318,7 +1318,21 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #      I2C bus number, and the I2C address.
 @superio_ids = (
      {
-	name => "ITE 8705 Super IO Sensors",
+	name => "ITE 8702F Super IO Sensors",
+	driver => "to-be-written",
+	addrreg => 0x2e,
+	datareg => 0x2f,
+	enter => [0x87, 0x01, 0x55, 0x55],
+	devidreg => 0x20,
+	devid => 0x8702,
+	logdevreg => 0x07,
+	logdev => 0x04,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+     }, 
+     {
+	name => "ITE 8705F Super IO Sensors",
 	driver => "it87",
 	addrreg => 0x2e,
 	datareg => 0x2f,
@@ -1330,7 +1344,6 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exitseq => [0x2e, 0x02, 0x2f, 0x02, 0x2e, 0xaa],
      }, 
      {
 	name => "ITE 8712F Super IO Sensors",
@@ -1345,10 +1358,79 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exitseq => [0x2e, 0x02, 0x2f, 0x02, 0x2e, 0xaa],
      },
      {
-	name => "Nat. Semi. PC87366 Super I/O Sensors",
+	name => "Nat. Semi. PC87351 Super IO Fan Sensors",
+	driver => "to-be-written",
+	addrreg => 0x2e,
+	datareg => 0x2f,
+	enter => [],
+	devidreg => 0x20,
+	devid => 0xe2,
+	logdevreg => 0x07,
+	logdev => 0x08,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+     }, 
+     {
+	name => "Nat. Semi. PC87360 Super IO Fan Sensors",
+	driver => "to-be-written",
+	addrreg => 0x2e,
+	datareg => 0x2f,
+	enter => [],
+	devidreg => 0x20,
+	devid => 0xe1,
+	logdevreg => 0x07,
+	logdev => 0x09,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+     }, 
+     {
+	name => "Nat. Semi. PC87363 Super IO Fan Sensors",
+	driver => "to-be-written",
+	addrreg => 0x2e,
+	datareg => 0x2f,
+	enter => [],
+	devidreg => 0x20,
+	devid => 0xe8,
+	logdevreg => 0x07,
+	logdev => 0x09,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+     }, 
+     {
+	name => "Nat. Semi. PC87364 Super IO Fan Sensors",
+	driver => "to-be-written",
+	addrreg => 0x2e,
+	datareg => 0x2f,
+	enter => [],
+	devidreg => 0x20,
+	devid => 0xe4,
+	logdevreg => 0x07,
+	logdev => 0x09,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+     }, 
+     {
+	name => "Nat. Semi. PC87365 Super IO Sensors",
+	driver => "to-be-written",
+	addrreg => 0x2e,
+	datareg => 0x2f,
+	enter => [],
+	devidreg => 0x20,
+	devid => 0xe5,
+	logdevreg => 0x07,
+	logdev => 0x09, # fans; voltages at 0x0d; temps at 0x0e
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+     }, 
+     {
+	name => "Nat. Semi. PC87366 Super IO Sensors",
 	driver => "to-be-written",
 	addrreg => 0x2e,
 	datareg => 0x2f,
@@ -1360,10 +1442,38 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exitseq => [0x2e, 0x02, 0x2f, 0x02, 0x2e, 0xaa],
      }, 
      {
-	name => "SMSC 47M10x Super IO Fan Sensors",
+	name => "Nat. Semi. PC87372 Super IO Fan Sensors",
+	driver => "to-be-written",
+	addrreg => 0x2e,
+	datareg => 0x2f,
+	enter => [],
+	devidreg => 0x20,
+	devid => 0xf0,
+	logdevreg => 0x07,
+	logdev => 0x09,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+     }, 
+     {
+	name => "SMSC 47B27x Super IO Fan Sensors",
+	driver => "to-be-written",
+	addrreg => 0x2e,
+	datareg => 0x2f,
+	enter => [0x55],
+	devidreg => 0x20,
+	devid => 0x59,
+	logdevreg => 0x07,
+	logdev => 0x0a,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+	exit => [0xaa],
+     }, 
+     {
+	name => "SMSC 47M10x/13x Super IO Fan Sensors",
 	driver => "smsc47m1",
 	addrreg => 0x2e,
 	datareg => 0x2f,
@@ -1372,10 +1482,10 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	devid => 0x59,
 	logdevreg => 0x07,
 	logdev => 0x0a,
-	actreg => 0x20,
+	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exitseq => [0x2e, 0x02, 0x2f, 0x02, 0x2e, 0xaa],
+	exit => [0xaa],
      }, 
      {
 	name => "SMSC 47M14x Super IO Fan Sensors",
@@ -1387,10 +1497,25 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	devid => 0x5f,
 	logdevreg => 0x07,
 	logdev => 0x0a,
-	actreg => 0x20,
+	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exitseq => [0x2e, 0x02, 0x2f, 0x02, 0x2e, 0xaa],
+	exit => [0xaa],
+     }, 
+     {
+	name => "SMSC 47M15x/192 Super IO Fan Sensors",
+	driver => "to-be-written",
+	addrreg => 0x2e,
+	datareg => 0x2f,
+	enter => [0x55],
+	devidreg => 0x20,
+	devid => 0x60,
+	logdevreg => 0x07,
+	logdev => 0x0a,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+	exit => [0xaa],
      }, 
      {
 	name => "VT1211 Super IO Sensors",
@@ -1405,7 +1530,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exitseq => [0x2e, 0x02, 0x2f, 0x02, 0x2e, 0xaa],
+	exit => [0xaa],
      }, 
      {
 	name => "Winbond W83627HF Super IO Sensors",
@@ -1420,7 +1545,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exitseq => [0x2e, 0x02, 0x2f, 0x02, 0x2e, 0xaa],
+	exit => [0xaa],
      }, 
      {
 	name => "Winbond W83627THF Super IO Sensors",
@@ -1435,7 +1560,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exitseq => [0x2e, 0x02, 0x2f, 0x02, 0x2e, 0xaa],
+	exit => [0xaa],
      }, 
      {
 	name => "Winbond W83637HF Super IO Sensors",
@@ -1450,7 +1575,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exitseq => [0x2e, 0x02, 0x2f, 0x02, 0x2e, 0xaa],
+	exit => [0xaa],
      }, 
      {
 	name => "Winbond W83697HF Super IO Sensors",
@@ -1465,7 +1590,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exitseq => [0x2e, 0x02, 0x2f, 0x02, 0x2e, 0xaa],
+	exit => [0xaa],
      }, 
      {
 	name => "Winbond W83697UF Super IO PWM",
@@ -1480,7 +1605,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exitseq => [0x2e, 0x02, 0x2f, 0x02, 0x2e, 0xaa],
+	exit => [0xaa],
      }, 
 );
 
@@ -2353,12 +2478,20 @@ sub scan_isa_bus
 
 sub exit_superio
 {
-  my $chip = shift;
-  my $addr;  
-
-  while (defined($addr = shift(@{$$chip{exitseq}}))) {
-    outb($addr, shift(@{$$chip{exitseq}}));
+  # If an exit sequence exists, use it
+  if (defined($_[0])) {
+    my $chip = shift;
+    if (defined ($$chip{exit})) {
+      foreach my $byte (@{$$chip{exit}}) {
+	outb(0x2e, $byte);
+      }
+      return;
+    }
   }
+
+  # Else return to "Wait For Key" state (PNP-ISA spec)
+  outb(0x2e, 0x02);
+  outb(0x2f, 0x02);
 }
 
 sub scan_superio
@@ -2409,14 +2542,15 @@ sub scan_superio
                      };
       add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver},
                                             $new_hash;
+      exit_superio($chip);
     } else {
-      if($val == 0xff) {	
+      if($val == 0xff || $val == 0xffff) {	
         print "  Failed!\n";
       } else {
         printf "  Failed! (0x%02x)\n", $val;
       }
+      exit_superio();
     }
-    exit_superio($chip);
   }
 }
 
