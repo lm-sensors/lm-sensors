@@ -101,13 +101,13 @@ extern inline long TEMP_FROM_REG(u16 temp)
 {
   long res;
 
-  temp= temp >> 4;
+  temp = temp >> 4;
   if (temp < 0x0800) {
         res = (625 * (long)temp);
   } else {
         res = ((long)temp - 0x01000) * 625;
   }
-  return res;
+  return res / 100;
 }
 
 #define TEMP_LIMIT_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*100)
@@ -585,13 +585,13 @@ void lm80_temp(struct i2c_client *client, int operation, int ctl_name,
 {
   struct lm80_data *data = client->data;
   if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 4;
+    *nrels_mag = 2;
   else if (operation == SENSORS_PROC_REAL_READ) {
     lm80_update_client(client);
-    results[0] = TEMP_LIMIT_FROM_REG(data->temp_hot_max) * 10000;
-    results[1] = TEMP_LIMIT_FROM_REG(data->temp_hot_hyst) * 10000;
-    results[2] = TEMP_LIMIT_FROM_REG(data->temp_os_max) * 10000;
-    results[3] = TEMP_LIMIT_FROM_REG(data->temp_os_hyst) * 10000;
+    results[0] = TEMP_LIMIT_FROM_REG(data->temp_hot_max);
+    results[1] = TEMP_LIMIT_FROM_REG(data->temp_hot_hyst);
+    results[2] = TEMP_LIMIT_FROM_REG(data->temp_os_max);
+    results[3] = TEMP_LIMIT_FROM_REG(data->temp_os_hyst);
     results[4] = TEMP_FROM_REG(data->temp);
     *nrels_mag = 5;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
