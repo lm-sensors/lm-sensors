@@ -465,9 +465,9 @@ function TestMinStop {
 function SaveConfig {
 	echo
 	echo "Saving configuration to $FCCONFIG..."
-	egrep -v '(INTERVAL|FCTEMPS|FCFANS|MAXTEMP|MINTEMP|MINSTART|MINSTOP)' /etc/fancontrol >/tmp/fancontrol
+	egrep -v '(INTERVAL|FCTEMPS|FCFANS|MAXTEMP|MINTEMP|MINSTART|MINSTOP)' $FCCONFIG >/tmp/fancontrol
 	echo -e "INTERVAL=$INTERVAL\nFCTEMPS=$FCTEMPS\nFCFANS=$FCFANS\nMINTEMP=$MINTEMP\nMAXTEMP=$MAXTEMP\nMINSTART=$MINSTART\nMINSTOP=$MINSTOP" >>/tmp/fancontrol
-	mv /tmp/fancontrol /etc/fancontrol
+	mv /tmp/fancontrol $FCCONFIG
 	#check if file was written correctly
 	echo 'Configuration saved'
 }
