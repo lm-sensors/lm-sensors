@@ -386,6 +386,7 @@ struct match matches[] = {
 	{ "adm1032", print_lm90 },
 	{ "xeontemp", print_xeontemp },
 	{ "max6650", print_max6650 },
+	{ "asb100", print_asb100 },
 	{ NULL, NULL }
 };
 

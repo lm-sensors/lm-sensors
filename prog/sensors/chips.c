@@ -4699,6 +4699,156 @@ void print_max6650(const sensors_chip_name *name)
   }
 }
 
+/* print_asb100_in()
+ *   where in, in_min, and in_max are sensors feature IDs
+ */
+static void print_asb100_in(const sensors_chip_name *name, int alarm,
+	int in, int in_min, int in_max)
+{
+  char *label = NULL;
+  double cur, min, max;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name,in,&label,&valid) &&
+      !sensors_get_feature(*name,in,&cur) &&
+      !sensors_get_feature(*name,in_min,&min) &&
+      !sensors_get_feature(*name,in_max,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s\n",
+           cur, min, max, alarm ? "ALARM" : "");
+    }
+  } else
+    printf("ERROR: Can't get IN data! (0x%04x)\n", in);
+  free_the_label(&label);
+}
+
+#define PRINT_ASB100_IN(num, name, alarms) \
+	print_asb100_in((name), ((alarms) & ASB100_ALARM_IN##num), \
+		(SENSORS_ASB100_IN##num), \
+		(SENSORS_ASB100_IN##num##_MIN), \
+		(SENSORS_ASB100_IN##num##_MAX))
+
+/* print_asb100_fan()
+ *   where fan, fan_div, and fan_min are sensors feature IDs
+ */
+static void print_asb100_fan(const sensors_chip_name *name, int alarm,
+	int fan, int fan_div, int fan_min)
+{
+  char *label = NULL;
+  double cur, div, min;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name,fan,&label,&valid) &&
+      !sensors_get_feature(*name,fan,&cur) &&
+      !sensors_get_feature(*name,fan_div,&div) &&
+      !sensors_get_feature(*name,fan_min,&min)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)              %s\n",
+           cur, min, div, alarm ? "ALARM" : "");
+    }
+  } else
+    printf("ERROR: Can't get FAN data! (0x%04x)\n", fan);
+  free_the_label(&label);
+}
+
+#define PRINT_ASB100_FAN(num, name, alarms) \
+	print_asb100_fan((name), ((alarms) & ASB100_ALARM_FAN##num), \
+		(SENSORS_ASB100_FAN##num), \
+		(SENSORS_ASB100_FAN##num##_DIV), \
+		(SENSORS_ASB100_FAN##num##_MIN))
+
+/* print_asb100_temp()
+ * where temp, temp_max, and temp_hyst are sensors feature IDs
+ */
+static void print_asb100_temp(const sensors_chip_name *name, int alarm,
+	int temp, int temp_max, int temp_hyst)
+{
+  char *label = NULL;
+  double cur, max, hyst;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name,temp,&label,&valid) &&
+      !sensors_get_feature(*name,temp,&cur) &&
+      !sensors_get_feature(*name,temp_max,&max) &&
+      !sensors_get_feature(*name,temp_hyst,&hyst)) {
+    if (valid) {
+      print_label(label,10);
+      if (hyst == 127)
+	print_temp_info(cur, max, 0, MAXONLY, 0, 0);
+      else
+	print_temp_info(cur, max, hyst, HYST, 0, 0);
+
+      printf(" %s\n", alarm ? "ALARM" : "");
+    }
+  } else
+    printf("ERROR: Can't get TEMP data! (0x%04x)\n", temp);
+
+  free_the_label(&label);
+}
+
+#ifndef ASB100_ALARM_TEMP4 
+#define ASB100_ALARM_TEMP4 0
+#endif
+
+#define PRINT_ASB100_TEMP(num, name, alarms) \
+	print_asb100_temp((name), ((alarms) & ASB100_ALARM_TEMP##num), \
+		(SENSORS_ASB100_TEMP##num), \
+		(SENSORS_ASB100_TEMP##num##_OVER), \
+		(SENSORS_ASB100_TEMP##num##_HYST))
+
+
+void print_asb100(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur;
+  int valid, alarms = 0;
+
+  if (!sensors_get_feature(*name,SENSORS_ASB100_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else
+    printf("ERROR: Can't get alarm data!\n");
+
+  PRINT_ASB100_IN(0, name, alarms);
+  PRINT_ASB100_IN(1, name, alarms);
+  PRINT_ASB100_IN(2, name, alarms);
+  PRINT_ASB100_IN(3, name, alarms);
+  PRINT_ASB100_IN(4, name, alarms);
+  PRINT_ASB100_IN(5, name, alarms);
+  PRINT_ASB100_IN(6, name, alarms);
+
+  PRINT_ASB100_FAN(1, name, alarms);
+  PRINT_ASB100_FAN(2, name, alarms);
+  PRINT_ASB100_FAN(3, name, alarms);
+
+  PRINT_ASB100_TEMP(1, name, alarms);
+  PRINT_ASB100_TEMP(2, name, alarms);
+  PRINT_ASB100_TEMP(3, name, alarms);
+  PRINT_ASB100_TEMP(4, name, alarms);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_ASB100_VID,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_ASB100_VID,&cur)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+5.3f V\n",cur);
+    }
+  } else {
+    printf("ERROR: Can't get VID data!\n");
+  }
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_ASB100_ALARMS,&label,&valid)) {
+    print_label(label,10);
+    if (alarms & ASB100_ALARM_CHAS)
+      printf("Chassis intrusion detection                      ALARM\n");
+    else
+      printf("\n");
+  }
+  free_the_label(&label);
+
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;
