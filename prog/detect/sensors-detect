@@ -3520,7 +3520,7 @@ sub generate_modprobes
   foreach $chip (@chips_detected) {
     next if not @{$chip->{detected}};
     if ($chip->{driver} eq "to-be-written") {
-      $modprobes .= "#modprobe missing driver for $chip->{detected}[0]{chipname}\n";
+      $modprobes .= "# no driver for $chip->{detected}[0]{chipname} yet, ask us for one!\n";
     } else {
       $modprobes .= "modprobe $chip->{driver}\n";
     }
