@@ -17,10 +17,17 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.6.6 (????????)
+2.6.6 (2002????)
+  NOTE: Requires i2c-2.6.6!!!
+  Library: Add support for MC1066
+  Module adm1021: Add support for MC1066
+  Module dmi_scan: Rename symbol duplicated in kernel
+  Module i2c-sis630: added support for SiS730
   Module i2c-sis645: improved support for SiS645/961
                      added support for SiS645DX/961 and SiS735
-  Module i2c-sis630: added support for SiS730
+  Program mkpatch: Fix dmi_scan module compile
+  Program sensors: Add support for MC1066
+  Program sensors-detect: Add support for MC1066
 
 2.6.5 (20020915)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
