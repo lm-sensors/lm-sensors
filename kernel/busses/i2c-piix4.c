@@ -187,10 +187,16 @@ static int piix4_setup(struct pci_dev *PIIX4_dev, const struct pci_device_id *id
 
 	/* Some BIOS will set up the chipset incorrectly and leave a register
 	   in an undefined state (causing I2C to act very strangely). */
-	if (fix_hstcfg && (temp & 0x02)) {
-		printk("Worked around buggy BIOS (I2C)\n");
-		temp &= 0xfd;
-		pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp);
+	if (temp & 0x02) {
+		if (fix_hstcfg) {
+			printk(KERN_INFO "i2c-piix4.o: Working around buggy BIOS (I2C)\n");
+			temp &= 0xfd;
+			pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp);
+		} else {
+			printk(KERN_INFO "i2c-piix4.o: Unusual config register value "
+			       "(0x%02x)\n", temp);
+			printk(KERN_INFO "i2c-piix4.o: Please report!\n");
+		}
 	}
 
 /* If force_addr is set, we program the new address here. Just to make
