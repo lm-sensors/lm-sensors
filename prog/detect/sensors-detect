@@ -1309,7 +1309,7 @@ sub inb
 # Returns: -1 on failure, 0 on success.
 sub outb
 {
-  my $towrite = pack "C", $_[1];
+  my $towrite = pack("C", $_[1] & 0x7f);
   sysseek IOPORTS, $_[0], 0 or return -1;
   my $nrchars = syswrite IOPORTS, $towrite, 1;
   return -1 if not defined $nrchars or $nrchars != 1;
