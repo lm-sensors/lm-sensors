@@ -247,8 +247,7 @@ static int i810i2c_setup(void)
 		if ((dev = pci_find_device(PCI_VENDOR_ID_INTEL,
 					   *num++, dev))) {
 			config_i810(dev);
-			printk(KERN_INFO
-			       "i2c-i810.o: i810/i815 found.\n");
+			printk("i2c-i810.o: i810/i815 found.\n");
 			return 0;
 		}
 	} while (*num != 0);

@@ -262,14 +262,12 @@ static int voodoo3_setup(void)
 	} while (dev);
 
 	if (v3_num > 0) {
-		printk(KERN_INFO
-		       "i2c-voodoo3: %d Banshee/Voodoo3 found.\n", v3_num);
+		printk("i2c-voodoo3: %d Banshee/Voodoo3 found.\n", v3_num);
 		if (v3_num > 1)
-			printk(KERN_INFO
-			       "i2c-voodoo3: warning: only 1 supported.\n");
+			printk("i2c-voodoo3: warning: only 1 supported.\n");
 		return 0;
 	} else {
-		printk(KERN_INFO "i2c-voodoo3: No Voodoo3 found.\n");
+		printk("i2c-voodoo3: No Voodoo3 found.\n");
 		return -ENODEV;
 	}
 }
