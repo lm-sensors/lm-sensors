@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.1 (2005????)
+  File doc/chips/mic74: New
   Library: Add support for 2.6 fscpos driver (Stefan Ott)
            Fix sis5595 in4 (Aurelien Jarno)
            Add support for 2.6 gl520sm driver (Maarten Deprez)
@@ -27,16 +28,21 @@ ask CVS about it:
   Module ds1621: Fix detection (Aurelien Jarno)
   Module eeprom: Discard SPD-centric checksum module parameter
                  Cleanup detection function (backport from Linux 2.6)
+  Module i2c-i801: Temporarily disable broken I2C block read
+  Module i2c-ipmi: Fix bogus return in a middle of a function (Sergio
+                   Gelato)
   Module it87: Improve Super-I/O detection
                Limit I2C address range
                Support VID on the IT8712F
   Module lm90: Fix MAX6657, MAX6658 and MAX6659 detection
   Module mic74: New
   Module w83781d: Revert AS99127F temp2 and temp3 computation change
+                  Skip final initialization step for AS99127F chips
   Module w83627hf: Support secondary Super-I/O address
                    Enable temp2 and temp3 if they are disabled
   Program ddcmon: New; user-space replacement for the ddcmon driver
   Program eeprog: Fix missing first char in ascii mode (J. A. McMahan Jr.)
+  Program isadump: Handle Super-I/O keys
   Program lm_sensors.init: Cleanups (Axel Thimm)
   Program mkpatch: Add adm1031, fscher, lm63, lm93 and max1619
   Program pwmconfig: Secure the creation of temporary files (Aurelien Jarno)
@@ -45,10 +51,15 @@ ask CVS about it:
                    Support sis5595 in4 (Aurelien Jarno)
                    Support w83627thf.
   Program sensors: Display sis5595 in4 (Aurelien Jarno)
+                   No errors on missing pc87360 fans
+                   Add gl520sm support (Maarten Deprez)
+                   Improve vt1211 error/ignore handling (Michael Carland)
   Program sensors-detect: Fix MAX6657, MAX6658 and MAX6659 detection
                           Improve IT8705F and IT8712F detection
                           Improve udev detection
                           Fix DS1621 detection
+                          Add W83627EHF detection
+                          Add ATI SMBus detection
 
 2.9.0 (20041228)
   NOTE: Requires i2c-2.9.0 or newer!
