@@ -79,6 +79,9 @@ DESTDIR :=
 # This is the prefix that will be used for almost all directories below.
 PREFIX := /usr/local
 
+# Your C compiler
+CC := gcc
+
 # This is the main modules directory into which the modules will be installed.
 # The magic invocation will return something like this:
 #   /lib/modules/2.2.15-ac9
@@ -162,7 +165,6 @@ SRCDIRS += lib prog/detect prog/dump prog/eeprom prog/pwm \
 MKDIR := mkdir -p
 RMDIR := rmdir
 RM := rm -f
-CC := gcc
 BISON := bison
 FLEX := flex
 AR := ar
