@@ -151,7 +151,7 @@ int i2cdev_lseek (struct inode *inode, struct file *file, off_t offset,
    struct inode *inode = file->f_dentry->d_inode;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,70)) */
   printk("i2c_dev,o: i2c-%d lseek to %ld bytes relative to %d.\n",
-         MINOR(inode->i_rdev),offset,origin);
+         MINOR(inode->i_rdev),(long) offset,origin);
 #endif /* DEBUG */
   return -ESPIPE;
 }
@@ -237,9 +237,6 @@ int i2cdev_ioctl (struct inode *inode, struct file *file, unsigned int cmd,
   int ver,datasize,res;
 
 #ifdef DEBUG
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,70))
-   struct inode *inode = file->f_dentry->d_inode;
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,70)) */
   printk("i2c_dev.o: i2c-%d ioctl, cmd: 0x%x, arg: %lx.\n", 
          MINOR(inode->i_rdev),cmd, arg);
 #endif /* DEBUG */
