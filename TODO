@@ -35,7 +35,7 @@ Many, many things. Most notably:
 * Write a userland detection program for busses (clients are less important;
   but perhaps needed too).
 * Some library routines are pretty inefficient right now
-* Write SIS5591/95/98 adapter support 
-  Thomas Dickel <Thomas.Dickel@mni.fh-giessen.de> owns one.
+* Test SIS5595(/91/98) sensor support. Write generic i2c support. 
+  Thomas Dickel <Thomas.Dickel@mni.fh-giessen.de> owns one SIS5595.
 * Write Acer Labs Aladdin V southbridge (M1543C) support
   Mark Studebaker <mds@blazer.eng.paradyne.com> is working on it.

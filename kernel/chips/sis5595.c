@@ -357,12 +357,12 @@ int lm78_detect_isa(struct isa_adapter *adapter)
             address, address + LM78_EXTENT);
     return err;
   }
-
+/*
   printk("sis5595.o: lm78 io base at 0x%4x\n", address);
-	
+*/	
   type = lm78;
-  type_name = "SiS 5595 Sensor";
-  client_name = "SiS 5595";
+  type_name = "sis5595";
+  client_name = "SiS 5595 Sensor";
 
   request_region(address, LM78_EXTENT, type_name);
 

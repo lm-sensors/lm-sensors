@@ -130,7 +130,7 @@
 
 #### Here begins the real configuration file
 
-chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*"
+chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*" "sis5595-*"
 
 # These are as advised in the LM78 and LM79 data sheets, and used on almost
 # any mainboard we have seen.

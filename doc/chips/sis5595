@@ -1,0 +1,7 @@
+
+This driver is for the SiS 5595 southbridge.
+This is called sis5595-isa-* in /proc/sys/dev/sensors/chips
+
+It has an integrated LM78 connected on ISA bus, so for any
+sensor related information, read document lm78.
+
