@@ -1955,10 +1955,25 @@ sub initialize_conf
   close INPUTFILE;
 
   my $use_udev = 0;
-  if (-e '/dev/.udev.tdb' || -f '/dev/.udev' || -d '/dev/.udevdb') {
-    $use_udev = 1;
-    $dev_i2c = '/dev/i2c-';
-  } 
+  if (open(*INPUTFILE, '/etc/udev/udev.conf')) {
+    while (<INPUTFILE>) {
+      if (m/^\s*udev_db\s*=\s*\"([^"]*)\"/ || m/^\s*udev_db\s*=\s*(\S+)/) {
+        if (-e $1) {
+          $use_udev = 1;
+          $dev_i2c = '/dev/i2c-';
+        }
+        last;
+      }
+    }
+    close INPUTFILE;
+  } else {
+    # Try some known default udev db locations, just in case
+    if (-e '/dev/.udev.tdb' || -e '/dev/.udev'
+     || -e '/dev/.udevdb' || -e '/dev/.udevdb') {
+      $use_udev = 1;
+      $dev_i2c = '/dev/i2c-';
+    }
+  }
 
   if (-f '/etc/modules.conf') {
     $modules_conf = '/etc/modules.conf';
