@@ -48,7 +48,6 @@
 #include <linux/i2c.h>
 #include "version.h"
 
-#define DEBUG 1
 #ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
 #endif
