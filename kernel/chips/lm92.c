@@ -35,6 +35,7 @@
 /* if defined, 4 faults must occur consecutively to set alarm flags */
 /* #define ENABLE_FAULT_QUEUE */
 
+#include "version.h"
 #include "sensors.h"
 
 #define LM92_REG_TEMPERATURE		0x00	/* ro, 16-bit	*/
@@ -57,13 +58,13 @@
 
 #define CELSIUS(x) ((x) * 16)
 
-#define ENTRY(name,proc,callback)			\
+#define ENTRY(name,proc,perm,callback)		\
 	{										\
 		ctl_name:		name,				\
 		procname:		proc,				\
 		data:			NULL,				\
 		maxlen:			0,					\
-		mode:			0644,				\
+		mode:			perm,				\
 		child:			NULL,				\
 		proc_handler:	&i2c_proc_real,		\
 		strategy:		&i2c_sysctl_real,	\
@@ -98,7 +99,7 @@ static DECLARE_MUTEX (mutex);
 
 /* addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
-static unsigned short normal_i2c_range[] = { 0x48, 0x49, 0x4a, 0x4b, SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x48, 0x4b, SENSORS_I2C_END };
 static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
@@ -261,8 +262,8 @@ static int lm92_init_client (struct i2c_client *client)
 static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short flags,int kind)
 {
 	static ctl_table dir_table[] = {
-		ENTRY (LM92_SYSCTL_TEMP,"temp",&lm92_temp),
-		ENTRY (LM92_SYSCTL_ALARMS,"alarms",&lm92_alarms),
+		ENTRY (LM92_SYSCTL_TEMP,"temp",0644,&lm92_temp),
+		ENTRY (LM92_SYSCTL_ALARMS,"alarms",0444,&lm92_alarms),
 		{ 0 }
 	};
 	static int id = 0;
@@ -396,7 +397,7 @@ static int __init lm92_init (void)
 	if ((result = i2c_add_driver (&lm92_driver)))
 		return (result);
 
-	printk ("National Semiconductor LM92 Temperature Sensor (V0.01)\n");
+	printk ("lm92.o version %s (%s)\n",LM_VERSION,LM_DATE);
 
 	return (0);
 }
@@ -410,7 +411,10 @@ EXPORT_NO_SYMBOLS;
 
 MODULE_AUTHOR ("Abraham van der Merwe <abraham@2d3d.co.za>");
 MODULE_DESCRIPTION ("Linux support for LM92 Temperature Sensor");
+
+#ifdef MODULE_LICENSE
 MODULE_LICENSE ("GPL");
+#endif	/* #ifdef MODULE_LICENSE */
 
 module_init (lm92_init);
 module_exit (lm92_exit);
