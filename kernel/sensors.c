@@ -47,10 +47,10 @@ static int sensors_cleanup(void);
 
 static int sensors_create_name(char **name, const char *prefix,
 			       struct i2c_adapter *adapter, int addr);
-static void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
-				long *results, int magnitude);
-static void sensors_write_reals(int nrels, void *buffer, int *bufsize,
-				long *results, int magnitude);
+static int sensors_parse_reals(int *nrels, void *buffer, int bufsize,
+			       long *results, int magnitude);
+static int sensors_write_reals(int nrels, void *buffer, int *bufsize,
+			       long *results, int magnitude);
 static int sensors_proc_chips(ctl_table * ctl, int write,
 			      struct file *filp, void *buffer,
 			      size_t * lenp);
@@ -293,7 +293,7 @@ int sensors_proc_chips(ctl_table * ctl, int write, struct file *filp,
 				    client_tbl->procname);
 			if (buflen + curbufsize > *lenp)
 				buflen = *lenp - curbufsize;
-			copy_to_user(buffer, BUF, buflen);
+			copy_to_user_ret(buffer, BUF, buflen,-EFAULT);
 			curbufsize += buflen;
 			(char *) buffer += buflen;
 		}
@@ -307,10 +307,11 @@ int sensors_sysctl_chips(ctl_table * table, int *name, int nlen,
 			 size_t newlen, void **context)
 {
 	struct sensors_chips_data data;
-	int i, oldlen, nrels, maxels;
+	int i, oldlen, nrels, maxels,ret=0;
 	struct ctl_table *client_tbl;
 
-	if (oldval && oldlenp && !get_user(oldlen, oldlenp) && oldlen) {
+	if (oldval && oldlenp && !((ret = get_user(oldlen, oldlenp))) && 
+	    oldlen) {
 		maxels = oldlen / sizeof(struct sensors_chips_data);
 		nrels = 0;
 		for (i = 0; (i < SENSORS_ENTRY_MAX) && (nrels < maxels);
@@ -321,17 +322,18 @@ int sensors_sysctl_chips(ctl_table * table, int *name, int nlen,
 				    child;
 				data.sysctl_id = client_tbl->ctl_name;
 				strcpy(data.name, client_tbl->procname);
-				copy_to_user(oldval, &data,
+				copy_to_user_ret(oldval, &data,
 					     sizeof(struct
-						    sensors_chips_data));
+						    sensors_chips_data),
+				                    -EFAULT);
 				(char *) oldval +=
 				    sizeof(struct sensors_chips_data);
 				nrels++;
 			}
 		oldlen = nrels * sizeof(struct sensors_chips_data);
-		put_user(oldlen, oldlenp);
+		put_user_ret(oldlen, oldlenp,-EFAULT);
 	}
-	return 0;
+	return ret;
 }
 
 
@@ -360,6 +362,7 @@ int sensors_proc_real(ctl_table * ctl, int write, struct file *filp,
 	long results[MAX_RESULTS];
 	sensors_real_callback callback = ctl->extra1;
 	struct i2c_client *client = ctl->extra2;
+	int res;
 
 	/* If buffer is size 0, or we try to read when not at the start, we
 	   return nothing. Note that I think writing when not at the start
@@ -376,7 +379,9 @@ int sensors_proc_real(ctl_table * ctl, int write, struct file *filp,
 
 	if (write) {
 		/* Read the complete input into results, converting to longs */
-		sensors_parse_reals(&nrels, buffer, *lenp, results, mag);
+		res = sensors_parse_reals(&nrels, buffer, *lenp, results, mag);
+		if (res)
+			return res;
 
 		if (!nrels)
 			return 0;
@@ -393,7 +398,9 @@ int sensors_proc_real(ctl_table * ctl, int write, struct file *filp,
 			 &nrels, results);
 
 		/* And write them to buffer, converting to reals */
-		sensors_write_reals(nrels, buffer, lenp, results, mag);
+		res = sensors_write_reals(nrels, buffer, lenp, results, mag);
+		if (res)
+			return res;
 		filp->f_pos += *lenp;
 		return 0;
 	}
@@ -406,12 +413,12 @@ int sensors_sysctl_real(ctl_table * table, int *name, int nlen,
 			size_t newlen, void **context)
 {
 	long results[MAX_RESULTS];
-	int oldlen, nrels = MAX_RESULTS;
+	int oldlen, nrels = MAX_RESULTS,ret=0;
 	sensors_real_callback callback = table->extra1;
 	struct i2c_client *client = table->extra2;
 
 	/* Check if we need to output the old values */
-	if (oldval && oldlenp && !get_user(oldlen, oldlenp) && oldlen) {
+	if (oldval && oldlenp && !((ret=get_user(oldlen, oldlenp))) && oldlen) {
 		callback(client, SENSORS_PROC_REAL_READ, table->ctl_name,
 			 &nrels, results);
 
@@ -419,21 +426,21 @@ int sensors_sysctl_real(ctl_table * table, int *name, int nlen,
 		if (nrels * sizeof(long) < oldlen)
 			oldlen = nrels * sizeof(long);
 		oldlen = (oldlen / sizeof(long)) * sizeof(long);
-		copy_to_user(oldval, results, oldlen);
-		put_user(oldlen, oldlenp);
+		copy_to_user_ret(oldval, results, oldlen,-EFAULT);
+		put_user_ret(oldlen, oldlenp,-EFAULT);
 	}
 
 	if (newval && newlen) {
 		/* Note the rounding factor! */
 		newlen -= newlen % sizeof(long);
 		nrels = newlen / sizeof(long);
-		copy_from_user(results, newval, newlen);
+		copy_from_user_ret(results, newval, newlen,-EFAULT);
 
 		/* Get the new values back to the client */
 		callback(client, SENSORS_PROC_REAL_WRITE, table->ctl_name,
 			 &nrels, results);
 	}
-	return 0;
+	return ret;
 }
 
 
@@ -453,11 +460,11 @@ int sensors_sysctl_real(ctl_table * table, int *name, int nlen,
    WARNING! This is tricky code. I have tested it, but there may still be
             hidden bugs in it, even leading to crashes and things!
 */
-void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
+int sensors_parse_reals(int *nrels, void *buffer, int bufsize,
 			 long *results, int magnitude)
 {
 	int maxels, min, mag;
-	long res;
+	long res,ret=0;
 	char nextchar = 0;
 
 	maxels = *nrels;
@@ -466,15 +473,18 @@ void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
 	while (bufsize && (*nrels < maxels)) {
 
 		/* Skip spaces at the start */
-		while (bufsize && !get_user(nextchar, (char *) buffer) &&
+		while (bufsize && 
+		       !((ret=get_user(nextchar, (char *) buffer))) &&
 		       isspace((int) nextchar)) {
 			bufsize--;
 			((char *) buffer)++;
 		}
 
+		if (ret)
+			return -EFAULT;	
 		/* Well, we may be done now */
 		if (!bufsize)
-			return;
+			return 0;
 
 		/* New defaults for our result */
 		min = 0;
@@ -482,20 +492,25 @@ void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
 		mag = magnitude;
 
 		/* Check for a minus */
-		if (!get_user(nextchar, (char *) buffer)
+		if (!((ret=get_user(nextchar, (char *) buffer)))
 		    && (nextchar == '-')) {
 			min = 1;
 			bufsize--;
 			((char *) buffer)++;
 		}
+		if (ret)
+			return -EFAULT;
 
 		/* Digits before a decimal dot */
-		while (bufsize && !get_user(nextchar, (char *) buffer) &&
+		while (bufsize && 
+		       !((ret=get_user(nextchar, (char *) buffer))) &&
 		       isdigit((int) nextchar)) {
 			res = res * 10 + nextchar - '0';
 			bufsize--;
 			((char *) buffer)++;
 		}
+		if (ret)
+			return -EFAULT;
 
 		/* If mag < 0, we must actually divide here! */
 		while (mag < 0) {
@@ -510,13 +525,15 @@ void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
 
 			/* Read digits while they are significant */
 			while (bufsize && (mag > 0) &&
-			       !get_user(nextchar, (char *) buffer) &&
+			       !((ret=get_user(nextchar, (char *) buffer))) &&
 			       isdigit((int) nextchar)) {
 				res = res * 10 + nextchar - '0';
 				mag--;
 				bufsize--;
 				((char *) buffer)++;
 			}
+			if (ret)
+				return -EFAULT;
 		}
 		/* If we are out of data, but mag > 0, we need to scale here */
 		while (mag > 0) {
@@ -525,11 +542,14 @@ void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
 		}
 
 		/* Skip everything until we hit whitespace */
-		while (bufsize && !get_user(nextchar, (char *) buffer) &&
+		while (bufsize && 
+		       !((ret=get_user(nextchar, (char *) buffer))) &&
 		       isspace((int) nextchar)) {
 			bufsize--;
 			((char *) buffer)++;
 		}
+		if (ret)
+			return -EFAULT;
 
 		/* Put res in results */
 		results[*nrels] = (min ? -1 : 1) * res;
@@ -538,14 +558,14 @@ void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
 
 	/* Well, there may be more in the buffer, but we need no more data. 
 	   Ignore anything that is left. */
-	return;
+	return 0;
 }
 
-void sensors_write_reals(int nrels, void *buffer, int *bufsize,
+int sensors_write_reals(int nrels, void *buffer, int *bufsize,
 			 long *results, int magnitude)
 {
 #define BUFLEN 20
-	char BUF[BUFLEN + 1];	/* An individual representation should fit in here! */
+	char BUF[BUFLEN + 1];	/* An individual representation should fit! */
 	char printfstr[10];
 	int nr = 0;
 	int buflen, mag, times;
@@ -555,18 +575,17 @@ void sensors_write_reals(int nrels, void *buffer, int *bufsize,
 		mag = magnitude;
 
 		if (nr != 0) {
-			put_user(' ', (char *) buffer);
+			put_user_ret(' ', (char *) buffer,-EFAULT);
 			curbufsize++;
 			((char *) buffer)++;
 		}
 
 		/* Fill BUF with the representation of the next string */
 		if (mag <= 0) {
-
 			buflen = sprintf(BUF, "%ld", results[nr]);
 			if (buflen < 0) {	/* Oops, a sprintf error! */
 				*bufsize = 0;
-				return;
+				return -EINVAL;
 			}
 			while ((mag < 0) && (buflen < BUFLEN)) {
 				BUF[buflen++] = '0';
@@ -589,24 +608,25 @@ void sensors_write_reals(int nrels, void *buffer, int *bufsize,
 				    abs(results[nr]) % times);
 			if (buflen < 0) {	/* Oops, a sprintf error! */
 				*bufsize = 0;
-				return;
+				return -EINVAL;
 			}
 		}
 
 		/* Now copy it to the user-space buffer */
 		if (buflen + curbufsize > *bufsize)
 			buflen = *bufsize - curbufsize;
-		copy_to_user(buffer, BUF, buflen);
+		copy_to_user_ret(buffer, BUF, buflen,-EFAULT);
 		curbufsize += buflen;
 		(char *) buffer += buflen;
 
 		nr++;
 	}
 	if (curbufsize < *bufsize) {
-		put_user('\n', (char *) buffer);
+		put_user_ret('\n', (char *) buffer,-EFAULT);
 		curbufsize++;
 	}
 	*bufsize = curbufsize;
+	return 0;
 }
 
 
