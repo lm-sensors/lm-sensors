@@ -27,30 +27,40 @@
 #include "i2c-isa.h"
 #include "version.h"
 
+/* Addresses to scan */
+static unsigned short normal_i2c[] = {SENSORS_I2C_END};
+static unsigned short normal_i2c_range[] = {0x18,0x1a,0x29,0x2b,
+                                            0x4c,0x4e,SENSORS_I2C_END};
+static unsigned int normal_isa[] = {SENSORS_ISA_END};
+static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+
+/* Insmod parameters */
+SENSORS_INSMOD_2(adm1021,max1617);
+
 /* adm1021 constants specified below */
 
 /* The adm1021 registers */
 /* Read-only */
-#define adm1021_REG_TEMP 0x00
-#define adm1021_REG_REMOTE_TEMP 0x01
-#define adm1021_REG_STATUS 0x02
-#define adm1021_REG_DEVICE_ID 0x0FE  /* should always read 0x41 */
-#define adm1021_REG_DIE_CODE 0x0FF
+#define ADM1021_REG_TEMP 0x00
+#define ADM1021_REG_REMOTE_TEMP 0x01
+#define ADM1021_REG_STATUS 0x02
+#define ADM1021_REG_DEVICE_ID 0x0FE  /* should always read 0x41 */
+#define ADM1021_REG_DIE_CODE 0x0FF
 /* These use different addresses for reading/writing */
-#define adm1021_REG_CONFIG_R 0x03
-#define adm1021_REG_CONFIG_W 0x09
-#define adm1021_REG_CONV_RATE_R 0x04
-#define adm1021_REG_CONV_RATE_W 0x0A
-#define adm1021_REG_TOS_R 0x05
-#define adm1021_REG_TOS_W 0x0B
-#define adm1021_REG_REMOTE_TOS_R 0x07
-#define adm1021_REG_REMOTE_TOS_W 0x0D
-#define adm1021_REG_THYST_R 0x06
-#define adm1021_REG_THYST_W 0x0C
-#define adm1021_REG_REMOTE_THYST_R 0x08
-#define adm1021_REG_REMOTE_THYST_W 0x0E
+#define ADM1021_REG_CONFIG_R 0x03
+#define ADM1021_REG_CONFIG_W 0x09
+#define ADM1021_REG_CONV_RATE_R 0x04
+#define ADM1021_REG_CONV_RATE_W 0x0A
+#define ADM1021_REG_TOS_R 0x05
+#define ADM1021_REG_TOS_W 0x0B
+#define ADM1021_REG_REMOTE_TOS_R 0x07
+#define ADM1021_REG_REMOTE_TOS_W 0x0D
+#define ADM1021_REG_THYST_R 0x06
+#define ADM1021_REG_THYST_W 0x0C
+#define ADM1021_REG_REMOTE_THYST_R 0x08
+#define ADM1021_REG_REMOTE_THYST_W 0x0E
 /* write-only */
-#define adm1021_REG_ONESHOT 0x0F
+#define ADM1021_REG_ONESHOT 0x0F
 
 
 /* Conversions  note: 1021 uses normal integer signed-byte format*/
@@ -68,13 +78,10 @@ clearing it.  Weird, ey?   --Phil  */
 #define adm1021_INIT_REMOTE_TOS 60
 #define adm1021_INIT_REMOTE_THYST 20
 
-/* Types of chips supported */
-enum adm1021_type { adm1021, max1617 };
-
 /* Each client has this additional data */
 struct adm1021_data {
          int sysctl_id;
-	 enum adm1021_type type;
+	 enum chips type;
 
          struct semaphore update_lock;
          char valid;                 /* !=0 if following fields are valid */
@@ -92,6 +99,8 @@ extern int cleanup_module(void);
 static int adm1021_init(void);
 static int adm1021_cleanup(void);
 static int adm1021_attach_adapter(struct i2c_adapter *adapter);
+static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind);
+static void adm1021_init_client(struct i2c_client *client);
 static int adm1021_detach_client(struct i2c_client *client);
 static int adm1021_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
@@ -145,128 +154,155 @@ static int adm1021_initialized = 0;
 /* I choose here for semi-static allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
-#define MAX_adm1021_NR 9
-static struct i2c_client *adm1021_list[MAX_adm1021_NR];
-
+#define MAX_ADM1021_NR 9
+static struct i2c_client *adm1021_list[MAX_ADM1021_NR];
 
 int adm1021_attach_adapter(struct i2c_adapter *adapter)
 {
-  int address,err,i,temp;
+  return sensors_detect(adapter,&addr_data,adm1021_detect);
+}
+
+static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind)
+{ 
+  int i;
   struct i2c_client *new_client;
   struct adm1021_data *data;
-  enum adm1021_type type;
-  const char *type_name;
-  const char *client_name;
+  int err=0;
+  const char *type_name = "";
+  const char *client_name = "";
 
-  err = 0;
-  /* Make sure we aren't probing the ISA bus!! */
-  if (i2c_is_isa_adapter(adapter)) return 0;
+  /* Make sure we aren't probing the ISA bus!! This is just a safety check
+     at this moment; sensors_detect really won't call us. */
+#ifdef DEBUG
+  if (i2c_is_isa_adapter(adapter)) {
+    printk("adm1021.o: adm1021_detect called for an ISA bus adapter?!?\n");
+    return 0;
+  }
+#endif
 
-  /* Set err only if a global error would make registering other clients
-     impossible too (like out-of-memory). */
-  for (address = 0x18; (! err) && (address <= 0x54); address ++) {
-    /* Legal addresses: 0x18,19,20,  29,30,31,  52,53,54
-	(Notice the two jumps) */
-    if (address==0x21) { address=0x28; continue;}
-    if (address==0x32) { address=0x51; continue;}
-    /* Later on, we will keep a list of registered addresses for each
-       adapter, and check whether they are used here */
-    
-    /* Verify device is 1021 by checked special DEVICE_ID 
-       register (I wish all SMBus chips had this..)       */
-    /* The MAX1617 does not have it, regrettably. */
-    temp=smbus_read_byte_data(adapter,address,adm1021_REG_DEVICE_ID);
-    if (temp == -1) continue;
-    if (temp == 0x41){
-	type = adm1021;
-        type_name = "adm1021";
-        client_name = "ADM1021 chip";
-       } else { 
-        type = max1617;
-        type_name = "max1617";
-        client_name = "MAX1617 chip";
-    }
 
-    /* Allocate space for a new client structure */
-    if (! (new_client =  kmalloc(sizeof(struct i2c_client) +
-                                sizeof(struct adm1021_data),
+  /* We need address registration for the I2C bus too. That is not yet
+     implemented. */
+
+  /* OK. For now, we presume we have a valid client. We now create the
+     client structure, even though we cannot fill it completely yet.
+     But it allows us to access adm1021_{read,write}_value. */
+
+  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
+                               sizeof(struct adm1021_data),
                                GFP_KERNEL))) {
-      err = -ENOMEM;
-      continue;
-    }
+    err = -ENOMEM;
+    goto ERROR0;
+  }
 
-    /* Find a place in our global list */
-    for (i = 0; i < MAX_adm1021_NR; i++)
-      if (! adm1021_list[i])
-         break;
-    if (i == MAX_adm1021_NR) {
-      err = -ENOMEM;
-      printk("adm1021.o: No empty slots left, recompile and heighten "
-             "MAX_adm1021_NR!\n");
+  data = (struct adm1021_data *) (new_client + 1);
+  new_client->addr = address;
+  new_client->data = data;
+  new_client->adapter = adapter;
+  new_client->driver = &adm1021_driver;
+
+  /* Now, we do the remaining detection. */
+
+  if (kind < 0) {
+    if ((adm1021_read_value(new_client,ADM1021_REG_STATUS) & 0x03) != 0x80)
       goto ERROR1;
-    }
-    adm1021_list[i] = new_client;
-    
-    /* Fill the new client structure with data */
-    data = (struct adm1021_data *) (new_client + 1);
-    new_client->data = data;
-    new_client->id = i;
-    new_client->addr = address;
-    new_client->adapter = adapter;
-    new_client->driver = &adm1021_driver;
-    strcpy(new_client->name,client_name);
-    data->type = type;
-    data->valid = 0;
-    data->update_lock = MUTEX;
-    
-    /* Tell i2c-core a new client has arrived */
-    if ((err = i2c_attach_client(new_client)))
-      goto ERROR2;
-    
-    /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,type_name,
-                                      adm1021_dir_table_template)) < 0)
-      goto ERROR3;
-    data->sysctl_id = err;
-    err = 0;
+  }
 
-    /* Initialize the adm1021 chip */
-    adm1021_write_value(new_client,adm1021_REG_TOS_W,
-                     TEMP_TO_REG(adm1021_INIT_TOS));
-    adm1021_write_value(new_client,adm1021_REG_THYST_W,
-                     TEMP_TO_REG(adm1021_INIT_THYST));
-    adm1021_write_value(new_client,adm1021_REG_REMOTE_TOS_W,
-                     TEMP_TO_REG(adm1021_INIT_REMOTE_TOS));
-    adm1021_write_value(new_client,adm1021_REG_REMOTE_THYST_W,
-                     TEMP_TO_REG(adm1021_INIT_REMOTE_THYST));
-    adm1021_write_value(new_client,adm1021_REG_CONFIG_W,0);  /* Enable ADC and disable suspend mode */
-     /* Set Conversion rate to 1/sec (this can be tinkered with) */
-    adm1021_write_value(new_client,adm1021_REG_CONV_RATE_W,0x04); 
-    
-    continue;
+  /* Determine the chip type. */
+  
+  if (kind <= 0) {
+    i = adm1021_read_value(new_client,ADM1021_REG_DEVICE_ID);
+    if (i == 0x41)
+      kind = max1617;
+    else 
+      kind = adm1021;
+  }
+
+  if (kind == max1617) {
+    type_name = "max1617";
+    client_name = "MAX1617 chip";
+  } else if (kind == adm1021) {
+    type_name = "adm1021";
+    client_name = "ADM1021 chip";
+  } else {
+#ifdef DEBUG
+    printk("adm1021.o: Internal error: unknown kind (%d)?!?",kind);
+#endif
+    goto ERROR1;
+  }
+
+  /* Fill in the remaining client fields and put it into the global list */
+  strcpy(new_client->name,client_name);
+  data->type = kind;
+
+  for(i = 0; i < MAX_ADM1021_NR; i++)
+    if (! adm1021_list[i])
+      break;
+  if (i == MAX_ADM1021_NR) {
+    printk("adm1021.o: No empty slots left, recompile and heighten "
+           "MAX_ADM1021_NR!\n");
+    err = -ENOMEM;
+    goto ERROR2;
+  }
+  adm1021_list[i] = new_client;
+  new_client->id = i;
+  data->valid = 0;
+  data->update_lock = MUTEX;
+
+  /* Tell the I2C layer a new client has arrived */
+  if ((err = i2c_attach_client(new_client)))
+    goto ERROR3;
+
+  /* Register a new directory entry with module sensors */
+  if ((i = sensors_register_entry((struct i2c_client *) new_client,
+                                  type_name,
+                                  adm1021_dir_table_template)) < 0) {
+    err = i;
+    goto ERROR4;
+  }
+  data->sysctl_id = i;
+
+  /* Initialize the ADM1021 chip */
+  adm1021_init_client((struct i2c_client *) new_client);
+  return 0;
+
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
+ERROR4:
+  i2c_detach_client(new_client);
 ERROR3:
-    i2c_detach_client(new_client);
+  for (i = 0; i < MAX_ADM1021_NR; i++)
+    if (new_client == adm1021_list[i])
+      adm1021_list[i] = NULL;
 ERROR2:
-    adm1021_list[i] = NULL;
 ERROR1:
-    kfree(new_client);
-  }
+  kfree(new_client);
+ERROR0:
   return err;
+}
+
+void adm1021_init_client(struct i2c_client *client)
+{
+  /* Initialize the adm1021 chip */
+  adm1021_write_value(client,ADM1021_REG_TOS_W,
+                   TEMP_TO_REG(adm1021_INIT_TOS));
+  adm1021_write_value(client,ADM1021_REG_THYST_W,
+                   TEMP_TO_REG(adm1021_INIT_THYST));
+  adm1021_write_value(client,ADM1021_REG_REMOTE_TOS_W,
+                   TEMP_TO_REG(adm1021_INIT_REMOTE_TOS));
+  adm1021_write_value(client,ADM1021_REG_REMOTE_THYST_W,
+                   TEMP_TO_REG(adm1021_INIT_REMOTE_THYST));
+  /* Enable ADC and disable suspend mode */
+  adm1021_write_value(client,ADM1021_REG_CONFIG_W,0);  
+  /* Set Conversion rate to 1/sec (this can be tinkered with) */
+  adm1021_write_value(client,ADM1021_REG_CONV_RATE_W,0x04); 
 }
 
 int adm1021_detach_client(struct i2c_client *client)
 {
+
   int err,i;
-  for (i = 0; i < MAX_adm1021_NR; i++)
-    if (client == adm1021_list[i])
-      break;
-  if ((i == MAX_adm1021_NR)) {
-    printk("adm1021.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
 
   sensors_deregister_entry(((struct adm1021_data *)(client->data))->sysctl_id);
 
@@ -275,9 +311,19 @@ int adm1021_detach_client(struct i2c_client *client)
     return err;
   }
 
+  for (i = 0; i < MAX_ADM1021_NR; i++)
+    if (client == adm1021_list[i])
+      break;
+  if ((i == MAX_ADM1021_NR)) {
+    printk("adm1021.o: Client to detach not found.\n");
+    return -ENOENT;
+  }
   adm1021_list[i] = NULL;
+
   kfree(client);
+
   return 0;
+
 }
 
 
@@ -325,14 +371,14 @@ void adm1021_update_client(struct i2c_client *client)
     printk("Starting adm1021 update\n");
 #endif
 
-    data->temp = adm1021_read_value(client,adm1021_REG_TEMP);
-    data->temp_os = adm1021_read_value(client,adm1021_REG_TOS_R);
-    data->temp_hyst = adm1021_read_value(client,adm1021_REG_THYST_R);
-    data->remote_temp = adm1021_read_value(client,adm1021_REG_REMOTE_TEMP);
-    data->remote_temp_os = adm1021_read_value(client,adm1021_REG_REMOTE_TOS_R);
-    data->remote_temp_hyst = adm1021_read_value(client,adm1021_REG_REMOTE_THYST_R);
-    data->die_code = adm1021_read_value(client,adm1021_REG_DIE_CODE);
-    data->status = adm1021_read_value(client,adm1021_REG_STATUS);
+    data->temp = adm1021_read_value(client,ADM1021_REG_TEMP);
+    data->temp_os = adm1021_read_value(client,ADM1021_REG_TOS_R);
+    data->temp_hyst = adm1021_read_value(client,ADM1021_REG_THYST_R);
+    data->remote_temp = adm1021_read_value(client,ADM1021_REG_REMOTE_TEMP);
+    data->remote_temp_os = adm1021_read_value(client,ADM1021_REG_REMOTE_TOS_R);
+    data->remote_temp_hyst = adm1021_read_value(client,ADM1021_REG_REMOTE_THYST_R);
+    data->die_code = adm1021_read_value(client,ADM1021_REG_DIE_CODE);
+    data->status = adm1021_read_value(client,ADM1021_REG_STATUS);
     data->last_updated = jiffies;
     data->valid = 1;
   }
@@ -356,11 +402,11 @@ void adm1021_temp(struct i2c_client *client, int operation, int ctl_name,
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       data->temp_os = TEMP_TO_REG(results[0]);
-      adm1021_write_value(client,adm1021_REG_TOS_W,data->temp_os);
+      adm1021_write_value(client,ADM1021_REG_TOS_W,data->temp_os);
     }
     if (*nrels_mag >= 2) {
       data->temp_hyst = TEMP_TO_REG(results[1]);
-      adm1021_write_value(client,adm1021_REG_THYST_W,data->temp_hyst);
+      adm1021_write_value(client,ADM1021_REG_THYST_W,data->temp_hyst);
     }
   }
 }
@@ -380,11 +426,11 @@ void adm1021_remote_temp(struct i2c_client *client, int operation, int ctl_name,
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       data->remote_temp_os = TEMP_TO_REG(results[0]);
-      adm1021_write_value(client,adm1021_REG_REMOTE_TOS_W,data->remote_temp_os);
+      adm1021_write_value(client,ADM1021_REG_REMOTE_TOS_W,data->remote_temp_os);
     }
     if (*nrels_mag >= 2) {
       data->remote_temp_hyst = TEMP_TO_REG(results[1]);
-      adm1021_write_value(client,adm1021_REG_REMOTE_THYST_W,data->remote_temp_hyst);
+      adm1021_write_value(client,ADM1021_REG_REMOTE_THYST_W,data->remote_temp_hyst);
     }
   }
 }
