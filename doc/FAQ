@@ -95,13 +95,15 @@ sensor reading results. Why?
 5.3 What to do if I read only bogus information?
 5.4 What to do if you have other problems?
 5.5 What if it just works like a charm?
+5.6 How do I update a ticket?
+5.7 How do I follow up on a ticket?
 
 6. How to Contribute
 6.1 How to write a driver
 6.2 How to get CVS access
 6.3 How to donate hardware to the project
 6.4 How to join the project mailing list
-6.5 How to (not) access mailing list archives
+6.5 How to access mailing list archives
 6.6 How to submit a patch
 
 7. Version 1 specific questions
@@ -940,6 +942,20 @@ please send us the usual information (see section 5).
 detected chip type. That way, we have some positive feedback, too!
 
 
+5.6 How do I update a ticket?
+
+    You can't. Only developers can. Follow up by emailing us
+at sensors@stimpy.netroedge.com and reference your ticket number
+in the subject. Please don't enter a new ticket with
+follow-up information, email us instead. Thanks.
+
+
+5.7 How do I follow up on a ticket?
+
+    Follow up by emailing us at sensors@stimpy.netroedge.com
+and reference your ticket number in the subject.
+
+
 6. How to Contribute
 --------------------
 
@@ -964,13 +980,15 @@ detected chip type. That way, we have some positive feedback, too!
 
 6.4 How to join the project mailing list
 
-    Send us email <sensors@stimpy.netroedge.com>. Sorry, no automated
-    subscribe/unsubscribe service.
+    Send us email <sensors@stimpy.netroedge.com>. Sorry,
+there is no automated subscribe/unsubscribe service.
 
 
-6.5 How to (not) access mailing list archives
+6.5 How to access mailing list archives
 
-    Sorry, there is no archive.
+    The mailing list archive is at:
+          http://archives.andrew.net.au/lm-sensors
+    Sorry, it only contains messages since October 28, 2001.
 
 
 6.6 How to submit a patch
@@ -1038,7 +1056,7 @@ can not be sure.
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
 
-Rev 2.4 (MDS) Minor updates 20011030
+Rev 2.5 (MDS) Minor updates 20011111
 Rev 2.4 (MDS) Minor updates 20010722
 Rev 2.3 (MDS) General update, 20010224, released with lm_sensors 2.6.0.
 Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 19990920
