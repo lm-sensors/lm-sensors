@@ -27,7 +27,6 @@
 #include "lib/chips.h"
 #include "kernel/include/sensors.h"
 
-static char *spacestr(int n);
 static void print_label(const char *label, int space);
 static void free_the_label(char **label);
 static void print_temp_info(float, float, float, int, int, int);
@@ -35,16 +34,6 @@ static inline float deg_ctof( float );
 
 extern int fahrenheit;
 extern char degstr[5];
-
-char *spacestr(int n)
-{
-  static char buf[80];
-  int i;
-  for (i = 0; i < n; i++)
-    buf[i]=' ';
-  buf[n] = '\0';
-  return buf;
-}
 
 inline float deg_ctof( float cel )
 {
@@ -104,9 +93,9 @@ void print_label(const char *label, int space)
 {
   int len=strlen(label)+1;
   if (len > space)
-    printf("%s:\n%s",label,spacestr(space));
+    printf("%s:\n%*s", label, space, "");
   else
-    printf("%s:%s",label,spacestr(space - len));
+    printf("%s:%*s", label, space - len, "");
 }
 
 void free_the_label(char **label)
