@@ -499,10 +499,11 @@ chip "via686a-*"
 
 # On the Tyan S1598, the 2.5V sensor reads 0 and is not displayed in the BIOS.
 # Linas Vepstas <linas@linas.org> reports that this sensor shows nothing of
-# interest on the Abit KA7 (Athalon), and is also not displayed in the BIOS.
+# interest on the Abit KA7 (Athlon), and is also not displayed in the BIOS.
 # Likewise, Johannes Drechsel-Burkhard <jdb@chello.at> reports that this 
-# sensor is unavailable in the BIOS of his MSI K7T Pro.  So, if you have one
-# of these boards may want to uncomment the 'ignore 2.5V' line below.
+# sensor is unavailable in the BIOS of his MSI K7T Pro (Thunderbird).  So, 
+# if you have one of these boards you may want to uncomment the 'ignore 2.5V' 
+# line below.
 
     label "2.0V" "CPU core"
     label "2.5V" "+2.5V"
