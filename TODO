@@ -11,6 +11,7 @@ See TODO in the i2c package.
 KERNEL MODULES
 ==============
 
+* Design a standard /proc interface for chips with automatic fan control
 * Add string function in sensors.o
 * ALL: cleanup_module is void; check also that cleaning up is done
   properly, now we know that the module will be unloaded whatever we
@@ -45,7 +46,6 @@ KERNEL MODULES
   an lm75. Add support for the two new registers.
 * Add MTP006F chip: http://www.myson.com/Pcd/MTP006/Mtp006.pdf
   gfiala@s.netic.de (Guido Fiala) has one on his mainboard
-* Figure out what chips are appearing at 0x08 and 0x30
 
 
 LIBRARY
