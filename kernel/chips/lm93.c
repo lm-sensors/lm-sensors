@@ -839,7 +839,7 @@ static unsigned LM93_ALARMS_FROM_REG(struct block1_t b1)
 	unsigned result;
 	result  = b1.host_status_2;
 	result |= b1.host_status_3 << 8;
-	result |= (b1.fan_status & 0x04) << 16;
+	result |= (b1.fan_status & 0x0f) << 16;
 	result |= (b1.p1_prochot_status & 0x80) << 13;
 	result |= (b1.p2_prochot_status & 0x80) << 14;
 	result |= (b1.host_status_4 & 0xfc) << 20;
