@@ -109,8 +109,8 @@ s32 smbus_access_i2c(struct i2c_adapter * adapter, u8 addr, char read_write,
      need to use only one message; when reading, we need two. We initialize
      most things with sane defaults, to keep the code below somewhat
      simpler. */
-  char msgbuf0[33];
-  char msgbuf1[33];
+  unsigned char msgbuf0[33];
+  unsigned char msgbuf1[33];
   int num = read_write == SMBUS_READ?2:1;
   struct i2c_msg msg[2] = { { addr, 0, 1, msgbuf0 }, 
                             { addr, I2C_M_RD, 0, msgbuf1 }
