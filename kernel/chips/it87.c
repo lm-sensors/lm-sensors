@@ -175,7 +175,7 @@ static int reset_it87 = 0;
 #define IT87_REG_CHIPID        0x58
 
 /* sensor pin types */
-#define INVALID		0
+#define UNUSED		0
 #define THERMISTOR	2
 #define PIIDIODE	3
 
@@ -761,7 +761,7 @@ static void it87_update_client(struct i2c_client *client)
 			else if(tmp2 == 0x08)
 				data->sens[i] = THERMISTOR;
 			else
-				data->sens[i] = INVALID;
+				data->sens[i] = UNUSED;
 		}
 
 		data->last_updated = jiffies;
@@ -1065,11 +1065,14 @@ void it87_sens(struct i2c_client *client, int operation, int ctl_name,
 				tmp &= ~ val1;
 				tmp |= val2;
 				break;
+			case UNUSED:
+				tmp &= ~ val1;
+				tmp &= ~ val2;
+				break;
 			default:
-				printk
-				    (KERN_ERR
-				     "it87.o: Invalid sensor type %ld; must be 2 (thermistor) or 3 (diode)\n",
-				     results[0]);
+				printk(KERN_ERR "it87.o: Invalid sensor type %ld; "
+				       "must be 0 (unused), 2 (thermistor) "
+				       "or 3 (diode)\n", results[0]);
 				return;
 			}
 			it87_write_value(client,
