@@ -609,7 +609,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 #endif
 	}
 
-	if (init >= 0)
+	if (init > 0)
 		pc87360_init_client(new_client);
 
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
@@ -723,6 +723,34 @@ static void pc87360_init_client(struct i2c_client *client)
 						    PC87365_REG_TEMP_STATUS,
 						    0xCF);
 			}
+		}
+	}
+
+	if (data->innr) {
+		reg = pc87360_read_value(data, LD_IN, NO_BANK,
+					 PC87365_REG_IN_CONFIG);
+		if (reg & 0x01) {
+#ifdef DEBUG
+			printk(KERN_DEBUG "pc87360.o: Forcibly "
+			       "enabling monitoring (VLM)\n");
+#endif
+			pc87360_write_value(data, LD_IN, NO_BANK,
+					    PC87365_REG_IN_CONFIG,
+					    reg & 0xFE);
+		}
+	}
+
+	if (data->tempnr) {
+		reg = pc87360_read_value(data, LD_TEMP, NO_BANK,
+					 PC87365_REG_TEMP_CONFIG);
+		if (reg & 0x01) {
+#ifdef DEBUG
+			printk(KERN_DEBUG "pc87360.o: Forcibly "
+			       "enabling monitoring (TMS)\n");
+#endif
+			pc87360_write_value(data, LD_TEMP, NO_BANK,
+					    PC87365_REG_TEMP_CONFIG,
+					    reg & 0xFE);
 		}
 	}
 }
