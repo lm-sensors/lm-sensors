@@ -19,6 +19,7 @@ ask CVS about it:
   Module i2c-i801: add i2c block write support, fix smbus block bugs
                    (requires i2c 2.5.3 package)
   Module i2c-i810: support Intel 82815
+  Module w83781d: limit fan divisors to 8 max. for as99127f
   Program i2cdump: Add smbus block read support
   Programs i2cdetect, i2cdump: Improve error reporting
   Program sensors: new switch -u (--unknown)

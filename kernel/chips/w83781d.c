@@ -208,7 +208,8 @@ extern inline u8 AS_FAN_TO_REG(long rpm, int div)
 extern inline u8 DIV_TO_REG(long val, enum chips type)
 {
 	int i;
-	val = SENSORS_LIMIT(val, 1, ((type == w83781d) ? 8 : 128)) >> 1;
+	val = SENSORS_LIMIT(val, 1,
+		((type == w83781d || type == as99127f) ? 8 : 128)) >> 1;
 	for (i = 0; i < 6; i++) {
 		if (val == 0)
 			break;
@@ -1457,7 +1458,7 @@ void w83781d_update_client(struct i2c_client *client)
 		data->fan_div[2] = (w83781d_read_value(client,
 						       W83781D_REG_PIN) >>
 				    6) & 0x03;
-		if (data->type != w83781d) {
+		if ((data->type != w83781d) && (data->type != as99127f)) {
 			i = w83781d_read_value(client, W83781D_REG_VBAT);
 			data->fan_div[0] |= (i >> 3) & 0x04;
 			data->fan_div[1] |= (i >> 4) & 0x04;
@@ -1733,7 +1734,8 @@ void w83781d_fan_div(struct i2c_client *client, int operation,
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		old = w83781d_read_value(client, W83781D_REG_VID_FANDIV);
-		if (data->type != w83781d) {
+		/* w83781d and as99127f don't have extended divisor bits */
+		if ((data->type != w83781d) && data->type != as99127f) {
 			old3 =
 			    w83781d_read_value(client, W83781D_REG_VBAT);
 		}
@@ -1742,10 +1744,10 @@ void w83781d_fan_div(struct i2c_client *client, int operation,
 			    DIV_TO_REG(results[2], data->type);
 			old2 = w83781d_read_value(client, W83781D_REG_PIN);
 			old2 =
-			    (old2 & 0x3f) | ((data->fan_div[2] & 0x03) <<
-					     6);
+			    (old2 & 0x3f) | ((data->fan_div[2] & 0x03) << 6);
 			w83781d_write_value(client, W83781D_REG_PIN, old2);
-			if (data->type != w83781d) {
+			if ((data->type != w83781d) &&
+			    (data->type != as99127f)) {
 				old3 =
 				    (old3 & 0x7f) |
 				    ((data->fan_div[2] & 0x04) << 5);
@@ -1755,9 +1757,9 @@ void w83781d_fan_div(struct i2c_client *client, int operation,
 			data->fan_div[1] =
 			    DIV_TO_REG(results[1], data->type);
 			old =
-			    (old & 0x3f) | ((data->fan_div[1] & 0x03) <<
-					    6);
-			if (data->type != w83781d) {
+			    (old & 0x3f) | ((data->fan_div[1] & 0x03) << 6);
+			if ((data->type != w83781d) &&
+			    (data->type != as99127f)) {
 				old3 =
 				    (old3 & 0xbf) |
 				    ((data->fan_div[1] & 0x04) << 4);
@@ -1767,11 +1769,11 @@ void w83781d_fan_div(struct i2c_client *client, int operation,
 			data->fan_div[0] =
 			    DIV_TO_REG(results[0], data->type);
 			old =
-			    (old & 0xcf) | ((data->fan_div[0] & 0x03) <<
-					    4);
+			    (old & 0xcf) | ((data->fan_div[0] & 0x03) << 4);
 			w83781d_write_value(client, W83781D_REG_VID_FANDIV,
 					    old);
-			if (data->type != w83781d) {
+			if ((data->type != w83781d) &&
+			    (data->type != as99127f)) {
 				old3 =
 				    (old3 & 0xdf) |
 				    ((data->fan_div[0] & 0x04) << 3);
