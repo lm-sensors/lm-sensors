@@ -1,7 +1,7 @@
 /*
     chips.c - Part of sensors, a user-space program for hardware monitoring
-    Copyright (c) 1998, 1999, 2001  Frodo Looijaard <frodol@dds.nl>
-    and Mark D. Studebaker <mdsxyz123@yahoo.com>
+    Copyright (c) 1998-2003 Frodo Looijaard <frodol@dds.nl>, Mark D.
+    Studebaker <mdsxyz123@yahoo.com> and the lm_sensors team
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -2705,114 +2705,140 @@ void print_ddcmon(const sensors_chip_name *name)
 
 }
 
+/*
+ * (Khali, 2003-07-17) Almost entierly rewritten. Reindented for clarity,
+ * simplified at some places, added support for EDID EEPROMs (well,
+ * redirection more than support).
+ */
 void print_eeprom(const sensors_chip_name *name)
 {
-	char  *label = NULL;
+	char *label = NULL;
 	double a, b, c, d;
-	int    valid, i, rambus=0, vaio=0;
+	int valid, i, type;
 
-   if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_TYPE, &label,&valid) &&
-       !sensors_get_feature(*name, SENSORS_EEPROM_TYPE, &a)) {
-      if (valid) {
-	if(((int) a) == 4) {
-           print_label(label, 24);
-	   printf("SDRAM DIMM SPD\n");
-	} else if(((int) a) == 7) {
-           print_label(label, 24);
-	   printf("DDR SDRAM DIMM SPD\n");
-	} else if(((int) a) == 17) {
-           print_label(label, 24);
-	   printf("RAMBUS RIMM SPD\n");
-	   rambus = 1;
-	} else if(((int) a) == 0) {
-	   vaio = 1;
+	if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_TYPE, &label, &valid)
+	 && !sensors_get_feature(*name, SENSORS_EEPROM_TYPE, &a)) {
+		if (valid) {
+			type = (int) a;
+			switch (type) {
+				case 4:
+					print_label(label, 24);
+					printf("SDRAM DIMM SPD\n");
+					break;
+				case 7:
+					print_label(label, 24);
+					printf("DDR SDRAM DIMM SPD\n");
+					break;
+				case 17:
+					print_label(label, 24);
+					printf("RAMBUS RIMM SPD\n");
+					break;
+				case 0:   /* Sony Vaio EEPROM? */
+				case 255: /* EDID EEPROM? */
+					break;
+				default:
+					printf("Unknown EEPROM type (%d)\n", type);
+					free_the_label(&label);
+					return;
+			}
+		} else {
+			free_the_label(&label);
+			return;
+		}
 	} else {
-	   free_the_label(&label);
-           return;
+		free_the_label(&label);
+		printf("ERROR: data 1\n");
+		return;
 	}
-      }
-   } else
-      printf("ERROR: data 1\n");
-   free_the_label(&label);
-   
-   if(vaio) {
-      /* first make sure it is a Vaio EEPROM (could still be some ddcmon) */
-      if(!sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a) &&
-       !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b) &&
-       !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c)) {
-      	if(((int) a) != 0 || ((int) b) != 0 || ((int) c) !=0) {
-	   /* not a memory chip nor a Vaio EEPROM, so leave */
-	   return;
+	free_the_label(&label);
+
+	if (type == 0) { /* Sony Vaio EEPROM */
+ 		char buffer[33];
+
+		/* first make sure it is a Sony Vaio EEPROM */
+		if (!sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a)
+		 && !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b)
+		 && !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c)) {
+			if (((int) a) != 0 || ((int) b) != 0 || ((int) c) != 0) {
+				printf("Unknown EEPROM type (0).\n");
+				return;
+			}
+		} else {
+			printf("ERROR: data Vaio 1\n");
+			return;
+		}
+
+		/* must be a real Sony Vaio EEPROM */
+		memset(buffer, '\0', 33);
+		if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_NAME, &label, &valid)
+		 && valid) {
+			for (i = 0, a = 1; i < 32 && a != 0; i++) /* stop at first zero */
+	            if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a)
+				 && a != 0)
+					buffer[i] = (char) a;
+			print_label(label, 24);
+			printf("%s\n", buffer);
+		} else
+			printf("ERROR: data Vaio 2\n");
+		free_the_label(&label);
+		memset(buffer, '\0', 33);
+		if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_SERIAL, &label, &valid)
+		 && valid) {
+			for (i = 0, a = 1; i < 32 && a != 0; i++) /* stop at first zero */
+				if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_SERIAL+i, &a)
+				 && a != 0)
+					buffer[i] = (char) a;
+			print_label(label, 24);
+			printf("%s\n", buffer);
+		} else
+			printf("ERROR: data Vaio 3\n");
+		free_the_label(&label);
+		return;
 	}
-      } else {
-        printf("ERROR: data Vaio 2\n");
-	return;
-      }
-   }
 
-   if(vaio) {
-      char buffer[33];
-      memset(buffer, '\0', 33);
-      
-      if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_NAME, &label,&valid) &&
-          valid) {
-	 a=1;
-	 for(i=0; i<32 && a!=0; i++)
-            if(!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a) && a!=0)
-	       buffer[i]=(char)a;
-	 print_label(label, 24);
-	 printf("%s\n", buffer);
-      } else
-         printf("ERROR: data Vaio 1\n");
-      free_the_label(&label);
+	if (type == 255) { /* EDID EEPROM */
+		/* make sure it is an EDID EEPROM */
+		if (!sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a)
+		 && !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b)
+		 && !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c)
+		 && !sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME, &d)) {
+			if (((int) a) != 255 || ((int) b) != 255 || ((int) c) != 255
+			 || ((int) d) != 0)
+				printf("Unknown EEPROM type (255).\n");
+			else
+				/* must be a real EDID EEPROM */
+				printf("Either use the ddcmon driver instead of the eeprom driver,\n"
+				 "or run the decode-edid script.\n");
+		} else
+			printf("ERROR: data EDID\n");
+		return;
+	}
 
-      if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_SERIAL, &label,&valid) &&
-          valid) {
-	 a=1;
-	 for(i=0; i<32 && a!=0; i++) /* stop at first zero */
-            if(!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_SERIAL+i, &a) && a!=0)
-	       buffer[i]=(char)a;
-	 print_label(label, 24);
-	 printf("%s\n", buffer);
-      } else
-         printf("ERROR: data Vaio 3\n");
-      free_the_label(&label);
-
-      return;
-   }
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_ROWADDR, &label,&valid) &&
-       !sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a) &&
-       !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b) &&
-       !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c) &&
-       !sensors_get_feature(*name, SENSORS_EEPROM_BANKS, &d)) {
-      if (valid) {
-         print_label(label, 24);
-	 if(rambus) {	
-	     i = (((int) a) & 0x0f) + ((((int) a) & 0xf0) >> 4) +
-		 (((int) c) & 0x07) - 13;
-	     if(i > 0 && i <= 12)
-	         printf("%d\n", (1 << i));
-	     else
-	     {
-	 	printf("invalid\n");
-		printf("%d %d %d %d\n", (int) a, (int) b, (int) c, (int) d);
-	     }
-	 } else {
-	     i = (((int) a) & 0x0f) + (((int) b) & 0x0f) - 17;
-	     if(i > 0 && i <= 12 && c <= 8 && d <= 8)
-	         printf("%d\n", (1 << i) * ((int) c) * ((int) d));
-	     else
-	     {
-	 	printf("invalid\n");
-		printf("%d %d %d %d\n", (int) a, (int) b, (int) c, (int) d);
-	     }
-         }
-      }
-   } else
-      printf("ERROR: data 2\n");
-   free_the_label(&label);
-
+	/* regular memory chips */
+	if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_ROWADDR, &label, &valid)
+	 && !sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a)
+	 && !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b)
+	 && !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c)
+	 && !sensors_get_feature(*name, SENSORS_EEPROM_BANKS, &d)
+	 && valid) {
+	 	int k = 0; /* multiplier, 0 if invalid */
+		print_label(label, 24);
+		if (type == 17) { /* RAMBUS */
+			i = (((int) a) & 0x0f) + (((int) a) >> 4) + (((int) c) & 0x07) - 13;
+			k = 1;
+		} else { /* SDRAM */
+			i = (((int) a) & 0x0f) + (((int) b) & 0x0f) - 17;
+			if (((int) c) <= 8 && ((int) d) <= 8)
+				k = ((int) c) * ((int) d);
+		}
+		if(i > 0 && i <= 12 && k > 0)
+			printf("%d\n", (1 << i) * k);
+		else
+			printf("invalid (%d %d %d %d)\n",
+				(int) a, (int) b, (int) c, (int) d);
+	} else
+		printf("ERROR: data 2\n");
+	free_the_label(&label);
 }
 
 void print_it87(const sensors_chip_name *name)
