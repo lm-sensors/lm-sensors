@@ -137,7 +137,6 @@
                                         /*  -> Read  = 1               */
 #define	ALI1535_SMBIO_EN	0x04	/* SMB I/O Space enable        */
 
-static int ali1535_transaction(void);
 
 static unsigned short ali1535_smba = 0;
 DECLARE_MUTEX(i2c_ali1535_sem);
@@ -222,160 +221,32 @@ int ali1535_setup(struct pci_dev *ALI1535_dev)
 }
 
 
-/* Another internally used function */
-int ali1535_transaction(void)
+#define MAX_TIMEOUT_HEROS		100
+#define MAX_TIMEOUT_BLOCK_HEROS	500
+#define MAX_TRY_HEROS			3
+
+/* believe it or not this is the delay technique recommended by ALI */
+static void ali1535_delay_loop(void)
 {
-	int temp;
-	int result = 0;
-	int timeout = 0;
+	int i;
 
-#ifdef DEBUG
-	printk
-	    ("i2c-ali1535.o: Transaction (pre): STS=%02x, TYP=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, "
-	     "DAT1=%02x\n", inb_p(SMBHSTSTS), inb_p(SMBHSTTYP),
-	     inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
-	     inb_p(SMBHSTDAT1));
-#endif
+	for(i=0;i<30;i++)
+		outb_p(0,0xEB);
+}
 
-	/* get status */
-	temp = inb_p(SMBHSTSTS);
+static int ali1535_wait_for_status(int count,int status)
+{
+	int i;
+	int dat;
 
-	/* Make sure the SMBus host is ready to start transmitting */
-	/* Check the busy bit first */
-	if (temp & ALI1535_STS_BUSY) {
-/*
-   If the host controller is still busy, it may have timed out in the previous transaction,
-   resulting in a "SMBus Timeout" printk.
-   I've tried the following to reset a stuck busy bit.
-	1. Reset the controller with an KILL command.
-	   (this doesn't seem to clear the controller if an external device is hung)
-	2. Reset the controller and the other SMBus devices with a T_OUT command.
-	   (this clears the host busy bit if an external device is hung,
-	   but it comes back upon a new access to a device)
-	3. Disable and reenable the controller in SMBHSTCFG
-   Worst case, nothing seems to work except power reset.
-*/
-/* Abort - reset the host controller */
-/*
-#ifdef DEBUG
-    printk("i2c-ali1535.o: Resetting host controller to clear busy condition\n",temp);
-#endif
-    outb_p(ALI1535_KILL, SMBHSTTYP);
-    temp = inb_p(SMBHSTSTS);
-    if (temp & ALI1535_STS_BUSY) {
-*/
-
-/*
-   Try resetting entire SMB bus, including other devices -
-   This may not work either - it clears the BUSY bit but
-   then the BUSY bit may come back on when you try and use the chip again.
-   If that's the case you are stuck.
-*/
-		printk
-		    ("i2c-ali1535.o: Resetting entire SMB Bus to clear busy condition (%02x)\n",
-		     temp);
-		outb_p(ALI1535_T_OUT, SMBHSTTYP);
-		temp = inb_p(SMBHSTSTS);
-	}
-/*
-  }
-*/
-
-	/* now check the error bits and the busy bit */
-	if (temp & (ALI1535_STS_ERR | ALI1535_STS_BUSY)) {
-		/* do a clear-on-write */
-		outb_p(0xFF, SMBHSTSTS);
-		if ((temp = inb_p(SMBHSTSTS)) &
-		    (ALI1535_STS_ERR | ALI1535_STS_BUSY)) {
-			/* this is probably going to be correctable only by a power reset
-			   as one of the bits now appears to be stuck */
-			/* This may be a bus or device with electrical problems. */
-			printk
-			    ("i2c-ali1535.o: SMBus reset failed! (0x%02x) - controller or device on bus is probably hung\n",
-			     temp);
-			return -1;
-		}
-	} else {
-		/* check and clear done bit */
-		if (temp & ALI1535_STS_DONE) {
-			outb_p(temp, SMBHSTSTS);
-		}
+	for (i = 0; i < count; i++) {
+		ali1535_delay_loop();
+		dat = inb_p(SMBHSTSTS);
+		if (dat == status)
+			break;
 	}
 
-	/* start the transaction by writing anything to the start register */
-	outb_p(0xFF, SMBHSTPORT);
-
-	/* We will always wait for a fraction of a second! */
-	timeout = 0;
-	do {
-		i2c_delay(1);
-		temp = inb_p(SMBHSTSTS);
-	} while (((temp & ALI1535_STS_BUSY) && !(temp & ALI1535_STS_IDLE))
-		 && (timeout++ < MAX_TIMEOUT));
-
-	/* If the SMBus is still busy, we give up */
-	if (timeout >= MAX_TIMEOUT) {
-		result = -1;
-		printk("i2c-ali1535.o: SMBus Timeout!\n");
-	}
-
-	if (temp & ALI1535_STS_FAIL) {
-		result = -1;
-#ifdef DEBUG
-		printk("i2c-ali1535.o: Error: Failed bus transaction\n");
-#endif
-	}
-
-/*
-  Unfortunately the ALI SMB controller maps "no response" and "bus collision"
-  into a single bit. No reponse is the usual case so don't do a printk.
-  This means that bus collisions go unreported.
-*/
-	if (temp & ALI1535_STS_BUSERR) {
-		result = -1;
-#ifdef DEBUG
-		printk
-		    ("i2c-ali1535.o: Error: no response or bus collision ADD=%02x\n",
-		     inb_p(SMBHSTADD));
-#endif
-	}
-
-/* haven't ever seen this */
-	if (temp & ALI1535_STS_DEV) {
-		result = -1;
-		printk("i2c-ali1535.o: Error: device error\n");
-	}
-
-/* 
-   check to see if the "command complete" indication is set
- */
-	if (!(temp & ALI1535_STS_DONE)) {
-		result = -1;
-		printk("i2c-ali1535.o: Error: command never completed\n");
-	}
-#ifdef DEBUG
-	printk
-	    ("i2c-ali1535.o: Transaction (post): STS=%02x, TYP=%02x, CMD=%02x, ADD=%02x, "
-	     "DAT0=%02x, DAT1=%02x\n", inb_p(SMBHSTSTS), inb_p(SMBHSTTYP),
-	     inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
-	     inb_p(SMBHSTDAT1));
-#endif
-
-/* 
-    take consequent actions for error conditions
- */
-        if (!(temp & ALI1535_STS_DONE)) {
-	  /* issue "kill" to reset host controller */
-	  outb_p(ALI1535_KILL,SMBHSTTYP);
-	  outb_p(0xFF,SMBHSTSTS);
-	}	  
-	else if (temp & ALI1535_STS_ERR) {
-	  /* issue "timeout" to reset all devices on bus */
-	  outb_p(ALI1535_T_OUT,SMBHSTTYP);
-	  outb_p(0xFF,SMBHSTSTS);
-	}
-        
-	return result;
+	return i == count ? 1 : 0;
 }
 
 /* Return -1 on error. */
@@ -384,68 +255,88 @@ s32 ali1535_access(struct i2c_adapter * adap, u16 addr,
 		   int size, union i2c_smbus_data * data)
 {
 	int i, len;
-	int temp;
-	int timeout;
 	s32 result = 0;
+	int timeout = 0;
+	int oldsize = size;
 
 	down(&i2c_ali1535_sem);
-/* make sure SMBus is idle */
-	temp = inb_p(SMBHSTSTS);
-	for (timeout = 0;
-	     (timeout < MAX_TIMEOUT) && !(temp & ALI1535_STS_IDLE);
-	     timeout++) {
-		i2c_delay(1);
-		temp = inb_p(SMBHSTSTS);
-	}
-	if (timeout >= MAX_TIMEOUT) {
-		printk("i2c-ali1535.o: Idle wait Timeout! STS=0x%02x\n",
-		       temp);
+
+repeat:
+	if(timeout++ > MAX_TRY_HEROS) {
+		result = -1;
+		goto EXIT;
 	}
 
-/* clear status register (clear-on-write) */
+	/* clear status */
 	outb_p(0xFF, SMBHSTSTS);
+
+	if (ali1535_wait_for_status(MAX_TIMEOUT_HEROS,ALI1535_STS_IDLE))
+		goto repeat;
+
+	outb_p(ALI1535_KILL,SMBHSTTYP);
+
+	if (ali1535_wait_for_status(MAX_TIMEOUT_HEROS,ALI1535_STS_FAIL))
+		goto repeat;
+
+	/* clear status */
+	outb_p(0xFF, SMBHSTSTS);
+
+	if (ali1535_wait_for_status(MAX_TIMEOUT_HEROS,ALI1535_STS_IDLE))
+		goto repeat;
 
 	switch (size) {
 	case I2C_SMBUS_QUICK:
-		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
-		       SMBHSTADD);
+		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
+		ali1535_delay_loop();
 		size = ALI1535_QUICK;
-                outb_p(size, SMBHSTTYP);	/* output command */
-                break;
+		outb_p(size, SMBHSTTYP);	/* output command */
+		ali1535_delay_loop();
+		break;
 	case I2C_SMBUS_BYTE:
-		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
-		       SMBHSTADD);
+		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
+		ali1535_delay_loop();
 		size = ALI1535_BYTE;
-                outb_p(size, SMBHSTTYP);	/* output command */
-		if (read_write == I2C_SMBUS_WRITE)
+		outb_p(size, SMBHSTTYP);	/* output command */
+		ali1535_delay_loop();
+		if (read_write == I2C_SMBUS_WRITE) {
 			outb_p(command, SMBHSTCMD);
+			ali1535_delay_loop();
+		}
 		break;
 	case I2C_SMBUS_BYTE_DATA:
-		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
-		       SMBHSTADD);
+		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
+		ali1535_delay_loop();
 		size = ALI1535_BYTE_DATA;
-                outb_p(size, SMBHSTTYP);	/* output command */
+		outb_p(size, SMBHSTTYP);	/* output command */
+		ali1535_delay_loop();
 		outb_p(command, SMBHSTCMD);
-		if (read_write == I2C_SMBUS_WRITE)
+		ali1535_delay_loop();
+		if (read_write == I2C_SMBUS_WRITE) {
 			outb_p(data->byte, SMBHSTDAT0);
+			ali1535_delay_loop();
+		}
 		break;
 	case I2C_SMBUS_WORD_DATA:
-		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
-		       SMBHSTADD);
+		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
+		ali1535_delay_loop();
 		size = ALI1535_WORD_DATA;
-                outb_p(size, SMBHSTTYP);	/* output command */
+		outb_p(size, SMBHSTTYP);	/* output command */
 		outb_p(command, SMBHSTCMD);
+		ali1535_delay_loop();
 		if (read_write == I2C_SMBUS_WRITE) {
 			outb_p(data->word & 0xff, SMBHSTDAT0);
+			ali1535_delay_loop();
 			outb_p((data->word & 0xff00) >> 8, SMBHSTDAT1);
+			ali1535_delay_loop();
 		}
 		break;
 	case I2C_SMBUS_BLOCK_DATA:
-		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
-		       SMBHSTADD);
+		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
+		ali1535_delay_loop();
 		size = ALI1535_BLOCK_DATA;
-                outb_p(size, SMBHSTTYP);	/* output command */
+		outb_p(size, SMBHSTTYP);	/* output command */
 		outb_p(command, SMBHSTCMD);
+		ali1535_delay_loop();
 		if (read_write == I2C_SMBUS_WRITE) {
 			len = data->block[0];
 			if (len < 0) {
@@ -457,9 +348,19 @@ s32 ali1535_access(struct i2c_adapter * adap, u16 addr,
 				data->block[0] = len;
 			}
 			outb_p(len, SMBHSTDAT0);
-			outb_p(inb_p(SMBHSTTYP) | ALI1535_BLOCK_CLR, SMBHSTTYP);	/* Reset SMBBLKDAT */
-			for (i = 1; i <= len; i++)
+			ali1535_delay_loop();
+			{
+				int val;
+
+				val = inb_p(SMBHSTTYP) | ALI1535_BLOCK_CLR;
+				ali1535_delay_loop();
+				outb_p(val, SMBHSTTYP);	/* Reset SMBBLKDAT */
+				ali1535_delay_loop();
+			}
+			for (i = 1; i <= len; i++) {
 				outb_p(data->block[i], SMBBLKDAT);
+				ali1535_delay_loop();
+			}
 		}
 		break;
 	default:
@@ -469,36 +370,62 @@ s32 ali1535_access(struct i2c_adapter * adap, u16 addr,
 		goto EXIT;
 	}
 
-	if (ali1535_transaction())	/* Error in transaction */
-	  {
-		result = -1;
-		goto EXIT;
-          }
+	/* start the transaction */
+	outb_p(0xFF, SMBHSTPORT);
+	ali1535_delay_loop();
 
-	if ((read_write == I2C_SMBUS_WRITE) || (size == ALI1535_QUICK))
-	  {
+	if (ali1535_wait_for_status(size == ALI1535_BLOCK_DATA ?
+                                            MAX_TIMEOUT_BLOCK_HEROS :
+                                            MAX_TIMEOUT_HEROS ,
+                                       ALI1535_STS_IDLE | ALI1535_STS_DONE)) {
+		size = oldsize;
+		goto repeat;
+	}
+
+	/* clear status */
+	outb_p(0xFF, SMBHSTSTS);
+	ali1535_delay_loop();
+	
+	if(inb_p(SMBHSTSTS) != ALI1535_STS_IDLE) {
+		size = oldsize;
+		goto repeat;
+	}
+
+	if ((read_write == I2C_SMBUS_WRITE) || (size == ALI1535_QUICK)) {
 		result = 0;
 		goto EXIT;
-          }
+        }
 
 	switch (size) {
 	case ALI1535_BYTE:	/* Result put in SMBHSTDAT0 */
 		data->byte = inb_p(SMBHSTDAT0);
+		ali1535_delay_loop();
 		break;
 	case ALI1535_BYTE_DATA:
 		data->byte = inb_p(SMBHSTDAT0);
+		ali1535_delay_loop();
 		break;
 	case ALI1535_WORD_DATA:
 		data->word = inb_p(SMBHSTDAT0) + (inb_p(SMBHSTDAT1) << 8);
+		ali1535_delay_loop();
 		break;
 	case ALI1535_BLOCK_DATA:
 		len = inb_p(SMBHSTDAT0);
+		ali1535_delay_loop();
 		if (len > 32)
 			len = 32;
 		data->block[0] = len;
-		outb_p(inb_p(SMBHSTTYP) | ALI1535_BLOCK_CLR, SMBHSTTYP);	/* Reset SMBBLKDAT */
+		{
+			int val;
+
+			val = inb_p(SMBHSTTYP) | ALI1535_BLOCK_CLR;
+			ali1535_delay_loop();
+			outb_p(val, SMBHSTTYP);	/* Reset SMBBLKDAT */
+			ali1535_delay_loop();
+		}
 		for (i = 1; i <= data->block[0]; i++) {
 			data->block[i] = inb_p(SMBBLKDAT);
+			ali1535_delay_loop();
 #ifdef DEBUG
 			printk
 			    ("i2c-ali1535.o: Blk: len=%d, i=%d, data=%02x\n",
