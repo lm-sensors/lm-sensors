@@ -1782,11 +1782,21 @@ sub print_chips_report
 }
 
 # $_[0]: 1 if ISA bus is prefered, 0 for SMBus
+# We build here an array adapters, indexed on the number the adapter has
+# at this moment (we assume only loaded adapters are interesting at all;
+# everything that got scanned also got loaded). Each entry is a reference
+# to a hash containing:
+#  driver: Name of the adapter driver
+#  nr_now: Number of the bus now
+#  nr_later: Number of the bus when the modprobes are done (not included if the
+#        driver should not be loaded)
+# A second array, called 
 sub generate_modprobes
 {
   my ($prefer_isa) = @_;
 
-  my ($chip,$detection,%adapters,$nr,$i,@optionlist,@probelist);
+  my ($chip,$detection,$nr,$i,@optionlist,@probelist,$driver,$isa,$adap);
+  my @adapters;
   my $modprobes = "";
   my $configfile = "";
 
@@ -1794,27 +1804,43 @@ sub generate_modprobes
   $configfile .= "# I2C module options\n";
   $configfile .= "alias char-major-89 i2c-dev\n";
 
-  # Collect all adapters
+  # Collect all loaded adapters
+  open INPUTFILE,"/proc/bus/i2c" or die "Couldn't open /proc/bus/i2c?!?";
+  while (<INPUTFILE>) {
+    my ($dev_nr,$type,$adap,$algo) = /^i2c-(\S+)\s+(\S+)\s+(.*?)\s*\t\s*(.*?)\s+$/;
+    next if ($type eq "dummy");
+    $adapters[$dev_nr]->{driver} = find_adapter_driver($adap,$algo);
+  }
+  close INPUTFILE;
+
+  # Collect all adapters used
   $nr = 0;
+  $isa = 0;
   $modprobes .= "# I2C adapter drivers\n";
   foreach $chip (@chips_detected) {
     foreach $detection (@{$chip->{detected}}) {
-      %adapters->{$detection->{i2c_driver}} = $nr ++
-            if exists $detection->{i2c_driver} and 
-               not exists %adapters->{$detection->{i2c_driver}} and
-               not (exists $detection->{isa_addr} and $prefer_isa);
-      %adapters->{"i2c-isa"} = $nr ++ 
-            if exists $detection->{isa_addr} and 
-               not exists %adapters->{"i2c-isa"} and
-               not (exists $detection->{i2c_driver} and not $prefer_isa);
+      # If there is more than one bus detected by a driver, they are
+      # still all added. So we number them in the correct order
+      if (exists $detection->{i2c_driver} and
+          not exists $adapters[$detection->{i2c_devnr}]->{nr} and 
+          not (exists $detection->{isa_addr} and $prefer_isa)) {
+         foreach $adap (@adapters) {
+           $adap->{nr_later} = $nr++ if $adap->{driver} eq $detection->{i2c_driver};
+         }
+      }
+      if (exists $detection->{isa_addr} and
+          not (exists $detection->{i2c_driver} and not $prefer_isa)) {
+           $isa=1;
+      }
     }
   }
-  for ($i = 0; $i < $nr; $i ++) {
-    foreach $detection (keys %adapters) {
-      $modprobes .= "modprobe $detection\n", last 
-                 if $adapters{$detection} == $i;
+
+  for ($i = 0; $i < $nr; $i++) {
+    foreach $adap (@adapters) {
+      $modprobes .= "modprobe $adap->{driver}\n" if (defined($adap->{nr_later}) and $adap->{nr_later} == $i);
     }
   }
+  $modprobes .= "modprobe i2c-isa\n" if ($isa);
 
   # Now determine the chip probe lines
   $modprobes .= "# I2C chip drivers\n";
@@ -1824,38 +1850,35 @@ sub generate_modprobes
     @optionlist = ();
     @probelist = ();
 
-    # Handle detects out-of-range
+    # Handle detects at addresses normally not probed
     foreach $detection (@{$chip->{detected}}) {
-      push @probelist, %adapters->{$detection->{i2c_driver}},
+      push @probelist, $adapters[$detection->{i2c_devnr}]->{nr_later},
                        $detection->{i2c_addr}
-           if exists $detection->{i2c_driver} and
-              exists %adapters->{$detection->{i2c_driver}} and
+           if exists $detection->{i2c_addr} and
               exists $detection->{i2c_extra};
       push @probelist, -1, $detection->{isa_addr}
            if exists $detection->{isa_addr} and
-              exists %adapters->{"i2c-isa"} and
               exists $detection->{isa_extra};
     }
 
     # Handle misdetects
     foreach $detection (@{$chip->{misdetected}}) {
-      push @optionlist, %adapters->{$detection->{i2c_driver}},
+      push @optionlist, $adapters[$detection->{i2c_devnr}]->{nr_later},
                        $detection->{i2c_addr}
-           if exists $detection->{i2c_driver} and
-              exists %adapters->{$detection->{i2c_driver}};
+           if exists $detection->{i2c_addr} and
+              exists $adapters[$detection->{i2c_devnr}]->{nr_later};
       push @optionlist, -1, $detection->{isa_addr}
-           if exists $detection->{isa_addr} and
-              exists %adapters->{"i2c-isa"};
+           if exists $detection->{isa_addr} and $isa;
     }
 
     # Handle aliases
     foreach $detection (@{$chip->{detected}}) {
       if (exists $detection->{i2c_driver} and 
           exists $detection->{isa_addr} and
-          exists %adapters->{$detection->{i2c_driver}} and
-          exists %adapters->{"i2c-isa"}) {
+          exists $adapters[$detection->{i2c_devnr}]->{nr_later} and
+          $isa) {
         if ($prefer_isa) {
-          push @optionlist,%adapters->{$detection->{i2c_driver}},
+          push @optionlist,$adapters[$detection->{i2c_devnr}]->{nr_later},
                            $detection->{i2c_addr};
         } else {
           push @optionlist, -1, $detection->{isa_addr}
