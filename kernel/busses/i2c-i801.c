@@ -51,6 +51,11 @@
 #include "version.h"
 #include "sensors_compat.h"
 
+/* 82801DB is undefined before kernel 2.4.19 */
+#ifndef PCI_DEVICE_ID_INTEL_82801DB_3
+#define PCI_DEVICE_ID_INTEL_82801DB_3      0x24c3
+#endif
+
 #ifdef I2C_FUNC_SMBUS_BLOCK_DATA_PEC
 #define HAVE_PEC
 #endif

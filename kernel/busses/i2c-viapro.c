@@ -399,6 +399,11 @@ static void __devexit vt596_remove(struct pci_dev *pdev)
 	release_region(vt596_smba, 8);
 }
 
+/* 8233A is undefined before kernel 2.4.19 */
+#ifndef PCI_DEVICE_ID_VIA_8233A
+#define PCI_DEVICE_ID_VIA_8233A	0x3147
+#endif
+/* 8235 is undefined before kernel 2.4.20 */
 #ifndef PCI_DEVICE_ID_VIA_8235
 #define PCI_DEVICE_ID_VIA_8235	0x3177
 #endif
