@@ -73,6 +73,11 @@
 #define PCI_DEVICE_ID_SI_962 0x0962
 #endif
 
+/* SiS963 south bridge */
+#ifndef PCI_DEVICE_ID_SI_963
+#define PCI_DEVICE_ID_SI_963 0x0963
+#endif
+
 #define PCI_DEVICE_ID_SI_SMBUS 0x16
 
 /* base address register in PCI config space */
@@ -223,6 +228,10 @@ static int __devinit sis645_probe(struct pci_dev *dev, const struct pci_device_i
 
 	case PCI_DEVICE_ID_SI_962:
 		printk(KERN_INFO DRV_NAME ": Found SiS962 [MuTIOL Media IO].\n");
+        	break;
+
+	case PCI_DEVICE_ID_SI_963:
+		printk(KERN_INFO DRV_NAME ": Found SiS963 [MuTIOL Media IO].\n");
         	break;
 
 	case PCI_DEVICE_ID_SI_503:
