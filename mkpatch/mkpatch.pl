@@ -79,7 +79,8 @@ sub gen_Documentation_Configure_help
     if (m@I2C mainboard interfaces@ or
            m@Acer Labs ALI 1535@ or
            m@Acer Labs ALI 1533 and 1543C@ or
-           m@AMD 756/766@ or
+           m@AMD 756/766/768/8111@ or
+           m@AMD 8111 SMBus 2.0@ or
            m@Apple Hydra Mac I/O@ or
            m@Intel I801@ or
            m@Intel I810/I815 based Mainboard@ or
@@ -142,10 +143,17 @@ CONFIG_I2C_ALI15X3
   built as a module which can be inserted and removed while the kernel
   is running.
 
-AMD 756/766/768
+AMD 756/766/768/8111
 CONFIG_I2C_AMD756
   If you say yes to this option, support will be included for the AMD
-  756/766/768 mainboard I2C interfaces. This can also be 
+  756/766/768/8111 mainboard I2C interfaces. This can also be 
+  built as a module which can be inserted and removed while the kernel
+  is running.
+
+AMD 8111 SMBus 2.0
+CONFIG_I2C_AMD8111
+  If you say yes to this option, support will be included for the AMD
+  8111 mainboard SMBus 2.0 interface. This can also be 
   built as a module which can be inserted and removed while the kernel
   is running.
 
@@ -800,7 +808,8 @@ sub gen_drivers_i2c_Config_in
     dep_tristate '  Acer Labs ALI 1535' CONFIG_I2C_ALI1535 $CONFIG_I2C
     dep_tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 $CONFIG_I2C
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
-    dep_tristate '  AMD 756/766/768' CONFIG_I2C_AMD756 $CONFIG_I2C
+    dep_tristate '  AMD 756/766/768/8111' CONFIG_I2C_AMD756 $CONFIG_I2C
+    dep_tristate '  AMD 8111 SMBus 2.0' CONFIG_I2C_AMD8111 $CONFIG_I2C
     dep_tristate '  DEC Tsunami I2C interface' CONFIG_I2C_TSUNAMI $CONFIG_I2C_ALGOBIT $CONFIG_ALPHA
     dep_tristate '  Intel 82801AA, AB, BA, DB' CONFIG_I2C_I801 $CONFIG_I2C
     dep_tristate '  Intel i810AA/AB/E and i815' CONFIG_I2C_I810 $CONFIG_I2C_ALGOBIT
@@ -1172,6 +1181,7 @@ sub gen_drivers_i2c_Makefile
 obj-$(CONFIG_I2C_ALI1535)		+= i2c-ali1535.o
 obj-$(CONFIG_I2C_ALI15X3)		+= i2c-ali15x3.o
 obj-$(CONFIG_I2C_AMD756)		+= i2c-amd756.o
+obj-$(CONFIG_I2C_AMD8111)		+= i2c-amd8111.o
 obj-$(CONFIG_I2C_HYDRA)			+= i2c-hydra.o
 obj-$(CONFIG_I2C_I801)			+= i2c-i801.o
 obj-$(CONFIG_I2C_I810)			+= i2c-i810.o
@@ -1210,6 +1220,14 @@ ifeq ($(CONFIG_I2C_AMD756),y)
 else 
   ifeq ($(CONFIG_I2C_AMD756),m)
     M_OBJS += i2c-amd756.o
+  endif
+endif
+
+ifeq ($(CONFIG_I2C_AMD8111),y)
+  L_OBJS += i2c-amd8111.o
+else 
+  ifeq ($(CONFIG_I2C_AMD8111),m)
+    M_OBJS += i2c-amd8111.o
   endif
 endif
 
@@ -1363,6 +1381,9 @@ sub gen_drivers_i2c_i2c_core_c
 #ifdef CONFIG_I2C_AMD756
 	extern int i2c_amd756_init(void);
 #endif
+#ifdef CONFIG_I2C_AMD8111
+	extern int i2c_amd8111_init(void);
+#endif
 #ifdef CONFIG_I2C_HYDRA
 	extern int i2c_hydra_init(void);
 #endif
@@ -1413,6 +1434,9 @@ EOF
 #endif
 #ifdef CONFIG_I2C_AMD756
 	i2c_amd756_init();
+#endif
+#ifdef CONFIG_I2C_AMD8111
+	i2c_amd8111_init();
 #endif
 #ifdef CONFIG_I2C_HYDRA
 	i2c_hydra_init();

@@ -45,8 +45,3 @@ Notes
 Note that for the 8111, there are two SMBus adapters. The SMBus 2.0 adapter is
 supported by this driver, and the SMBus 1.0 adapter is supported
 by the i2c-amd756 driver.
-
-The 8111 used with the AMD Hammer. While the module should work either with
-CONFIG_X86 or CONFIG_X86_64, it will only be compiled with CONFIG_X86_64
-(as it was the easiest way to prevent compilation in 2.2 kernels).
-If you would like to compile it for CONFIG_X86, modify kernel/busses/Module.mk.

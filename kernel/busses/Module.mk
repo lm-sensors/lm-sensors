@@ -40,11 +40,8 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_AMD756=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-amd756.o
 endif
-# Should also work for CONFIG_X86 but this is the easiest way to prevent compilation in 2.2 kernels...
-ifeq ($(shell if grep -q '^CONFIG_X86_64=' $(LINUX)/.config; then echo 1; fi),1)
 ifneq ($(shell if grep -q '^CONFIG_I2C_AMD8111=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-amd8111.o
-endif
 endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_HYDRA=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-hydra.o
