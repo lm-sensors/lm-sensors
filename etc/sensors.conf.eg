@@ -320,6 +320,14 @@ chip "w83782d-*" "w83783s-*" "w83627hf-*"
 #   set sensor2 2
 #   set sensor3 3435
 
+# examples for temperature limits
+#    set temp1_over 40	
+#    set temp1_hyst 37	
+#    set temp2_over 52	
+#    set temp2_hyst 47	
+#    set temp3_over 52	
+#    set temp3_hyst 47	
+
 
 chip "as99127f-*"
 
@@ -361,6 +369,14 @@ chip "as99127f-*"
     set in5_max -12 * 1.10
     set in6_min -5 * 0.95
     set in6_max -5 * 1.05
+
+# examples for temperature limits
+#    set temp1_over 40	
+#    set temp1_hyst 37	
+#    set temp2_over 52	
+#    set temp2_hyst 47	
+#    set temp3_over 52	
+#    set temp3_hyst 47	
 
 
 chip "gl518sm-*"
@@ -481,6 +497,14 @@ chip "lm80-*"
     set in5_max -12 * 0.95
     set in6_min -5 * 1.05
     set in6_max -5 * 0.95
+
+# examples for temperature limits
+#    set temp1_over 40	
+#    set temp1_hyst 37	
+#    set temp2_over 52	
+#    set temp2_hyst 47	
+#    set temp3_over 52	
+#    set temp3_hyst 47	
 
 chip "maxilife-cg-*" "maxilife-co-*" "maxilife-as-*"
 
@@ -669,6 +693,14 @@ chip "mtp008-*"
     compute in2 @ * 38 / 10,		@ * 10 / 38
     compute in5 (@ * 36 - 118.61) / 7,	(118.61 + 7 * @) / 36
 
+# examples for temperature limits
+#    set temp1_over 40	
+#    set temp1_hyst 37	
+#    set temp2_over 52	
+#    set temp2_hyst 47	
+#    set temp3_over 52	
+#    set temp3_hyst 47	
+
 chip "adm1025-*"
 
 # These are as advised in the data sheet
@@ -682,3 +714,67 @@ chip "adm1025-*"
 
     label temp1 "SYS Temp"
     label temp2 "CPU Temp"
+
+chip "lm87-*"
+#
+# This chip has non-standard entries in lib/chips.c so
+# the feature names are quite different from other chips.
+# For this chip, libsensors anticipates the correct labeling.
+# This is great if it's correct but makes it a little more
+# difficult if you want to change it.
+# This may not have been a good idea, so it may be changed in the future.
+# Here is an entry with everything commented out so you can
+# uncomment the appropriate line if you want to change it.
+#
+#   label 2.5V "xxx"
+#   label Vccp1 "xxx"
+#   label 3.3V "xxx"
+#   label 5V "xxx"
+#   label 12V "xxx"
+#   label Vccp2 "xxx"
+#   label AIN1 "xxx"
+#   label AIN2 "xxx"
+#   label fan1 "xxx"
+#   label fan2 "xxx"
+#   label temp1 "xxx"
+#   label CPU_Temp "xxx"
+#   label CPU2_Temp "xxx"
+#
+#   set AmbTemp_min xxx
+#   set Vccp1_min xxx
+#   set 3.3V_min xxx
+#   set 5V_min xxx
+#   set 12V_min xxx
+#   set Vccp2_min xxx
+#   set AIN1_min xxx
+#   set AIN2_min xxx
+#   set AmbTemp_max xxx
+#   set Vccp1_max xxx
+#   set 3.3V_max xxx
+#   set 5V_max xxx
+#   set 12V_max xxx
+#   set Vccp2_max xxx
+#   set AIN1_max xxx
+#   set AIN2_max xxx
+#   set fan1_min xxx
+#   set fan2_min xxx
+#   set temp1_min xxx
+#   set temp1_max xxx
+#   set temp2_min xxx
+#   set temp2_max xxx
+#   set temp3_min xxx
+#   set temp3_max xxx
+#   set fan1_div xxx
+#   set fan2_div xxx
+
+#   compute 2.5V xxx
+#   compute Vccp1 xxx
+#   compute 3.3V xxx
+#   compute 5V xxx
+#   compute 12V xxx
+#   compute Vccp2 xxx
+#   compute AIN1 xxx
+#   compute AIN2 xxx
+#   compute temp1 xxx
+#   compute CPU_Temp xxx
+#   compute CPU2_Temp xxx

@@ -25,7 +25,7 @@ ask CVS about it:
   File doc/FAQ: Updates
   File doc/chips/via686a: Claim support for 686b.
   File sensors.conf.eg: Adjust as99127f in5 (-12V) and temp2 calculations
-  File sensors.conf.eg: Enhance help comments in file
+  File sensors.conf.eg: Add lm87 template; enhance help comments in file
   File sensors.c: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
   Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
   Include file sensors.h: Most contents moved to i2c-proc.h in i2c package
