@@ -18,11 +18,15 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.3 (2002????)
+  File doc/chips/it87: add more temp_type help
   File sensors.conf.eg: Un-ignore it87 in8, temp3, fan3;
-                        add adm1021 section; add lm87 AIN[1,2] template
+                        add adm1021 section; add lm87 AIN[1,2] template;
+                        swap negative voltage limits for 782d,783s,627hf,
+                        697hf,it87; add more it87 help
   Library: Add PCF8591, W83697HF, ADM1023 support;
            fix w83* fan_min computes
   Module adm1024: Add MODULE_LICENSE("GPL")
+  Module bt869: Add s-video out and DVD resolution support
   Module fscscy: implement min/max for voltages and fans
   Module i2c-amd756: Add support for AMD768
   Module i2c-i810: Add support for 810E
