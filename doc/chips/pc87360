@@ -151,6 +151,12 @@ recommendations.
 Each voltage measured has associated low and high limit, each of which
 triggers an alarm when crossed.
 
+When available, VID inputs are used to provide the nominal CPU Core voltage.
+The driver will default to VRM 9.0, but this can be changed from user-space.
+The chipsets can handle two sets of VID inputs (on dual-CPU systems), but
+the driver will only export one for now. This may change later if there is
+a need.
+
 
 General Remarks
 ---------------

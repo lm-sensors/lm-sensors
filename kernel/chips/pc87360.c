@@ -41,6 +41,7 @@
 #include <linux/init.h>
 #include <asm/io.h>
 #include "version.h"
+#include "sensors_vid.h"
 
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
 static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
@@ -49,7 +50,7 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 static struct i2c_force_data forces[] = {{NULL}};
 static u8 devid;
 static unsigned int extra_isa[] = { 0x0000, 0x0000, 0x0000 };
-static u8 confreg[3];
+static u8 confreg[4];
 
 enum chips { any_chip, pc87360, pc87363, pc87364, pc87365, pc87366 };
 static struct i2c_address_data addr_data = {
@@ -168,6 +169,7 @@ static inline u8 PWM_TO_REG(int val, int inv)
 #define PC87365_REG_IN_STATUS		0x0A
 #define PC87365_REG_IN_ALARMS1		0x00
 #define PC87365_REG_IN_ALARMS2		0x01
+#define PC87365_REG_VID			0x06
 
 #define IN_FROM_REG(val,ref)		(((val) * (ref) + 128) / 256)
 #define IN_TO_REG(val,ref)		((val)<0 ? 0 : \
@@ -215,6 +217,9 @@ struct pc87360_data {
 	u8 in_crit[3];		/* Register value */
 	u8 in_status[14];	/* Register value */
 	u16 in_alarms;		/* Register values, combined, masked */
+	u8 vid_conf;		/* Configuration register value */
+	u8 vrm;
+	u8 vid;			/* Register value */
 
 	u8 temp[3];		/* Register value */
 	u8 temp_min[3];		/* Register value */
@@ -255,6 +260,10 @@ void pc87365_in(struct i2c_client *client, int operation, int ctl_name,
 		int *nrels_mag, long *results);
 void pc87365_in_status(struct i2c_client *client, int operation, int ctl_name,
 		       int *nrels_mag, long *results);
+void pc87365_vid(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results);
+void pc87365_vrm(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results);
 
 void pc87365_temp(struct i2c_client *client, int operation, int ctl_name,
 		  int *nrels_mag, long *results);
@@ -318,6 +327,9 @@ static struct i2c_driver pc87360_driver = {
 #define PC87365_SYSCTL_TEMP4_STATUS	2311 /* not for PC87365 */
 #define PC87365_SYSCTL_TEMP5_STATUS	2312 /* not for PC87365 */
 #define PC87365_SYSCTL_TEMP6_STATUS	2313 /* not for PC87365 */
+
+#define PC87365_SYSCTL_VID		2400
+#define PC87365_SYSCTL_VRM		2401
 
 #define PC87365_STATUS_IN_MIN		0x02
 #define PC87365_STATUS_IN_MAX		0x04
@@ -451,6 +463,10 @@ static ctl_table pc87365_dir_table_template[] = { /* PC87366 too */
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_in_status},
 	{PC87365_SYSCTL_TEMP6_STATUS, "temp6_status", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_in_status},
+	{PC87365_SYSCTL_VID, "vid", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_vid},
+	{PC87365_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_vrm},
 	{0}
 };
 
@@ -525,16 +541,25 @@ static int pc87360_find(u8 *devid, int *address)
 		} else if (i==1) { /* Voltages */
 			/* Are we using thermistors? */
 			if (*devid == 0xE9) { /* PC87366 */
-				/* This register is not logical-device
-				   specific, just that we won't need it if we
-				   don't use the VLM device */
+				/* These registers are not logical-device
+				   specific, just that we won't need them if
+				   we don't use the VLM device */
 				confreg[2] = superio_inb(0x2B);
+				confreg[3] = superio_inb(0x25);
 
 				if (confreg[2] & 0x40) {
 					printk(KERN_INFO "pc87360.o: Using "
 					       "thermistors for temperature "
 					       "monitoring\n");
 				}
+
+#ifdef DEBUG
+				if (confreg[3] & 0xE0) {
+					printk(KERN_INFO "pc87360.o: VID "
+					       "inputs routed (mode %d)\n",
+					       	confreg[3] & 0xE0);
+				}
+#endif
 			}
 		}
 	}
@@ -644,6 +669,9 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 		printk(KERN_DEBUG "Using %s reference voltage\n",
 		       (i&0x02) ? "external" : "internal");
 #endif
+
+		data->vid_conf = confreg[3];
+		data->vrm = 90;
 	}
 
 	/* Fan clock dividers may be needed before any data is read */
@@ -960,6 +988,9 @@ static void pc87360_update_client(struct i2c_client *client)
 					| ((pc87360_read_value(data, LD_IN,
 					    NO_BANK, PC87365_REG_IN_ALARMS2)
 					    & 0x07) << 8);
+			data->vid = (data->vid_conf & 0xE0) ?
+				    pc87360_read_value(data, LD_IN,
+				    NO_BANK, PC87365_REG_VID) : 0x1F;
 		}
 
 		/* Temperatures */
@@ -1178,6 +1209,34 @@ void pc87365_in_status(struct i2c_client *client, int operation, int ctl_name,
 		pc87360_update_client(client);
 		results[0] = data->in_status[nr];
 		*nrels_mag = 1;
+	}
+}
+
+void pc87365_vid(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct pc87360_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 3;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		pc87360_update_client(client);
+		results[0] = vid_from_reg(data->vid & 0x1f, data->vrm);
+		*nrels_mag = 1;
+	}
+}
+
+void pc87365_vrm(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct pc87360_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		results[0] = data->vrm;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1)
+			data->vrm = results[0];
 	}
 }
 

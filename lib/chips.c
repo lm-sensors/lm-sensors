@@ -4617,6 +4617,10 @@ static sensors_chip_feature pc87365_features[] =
                 NOMAP, R, PC87365_SYSCTL_TEMP5_STATUS, VALUE(1), 0 },
     { SENSORS_PC87360_TEMP6_STATUS, "temp6_status", SENSORS_PC87360_TEMP6,
                 NOMAP, R, PC87365_SYSCTL_TEMP6_STATUS, VALUE(1), 0 },
+    { SENSORS_PC87360_VID, "vid", NOMAP, NOMAP, 
+                R, PC87365_SYSCTL_VID, VALUE(1), 3 },
+    { SENSORS_PC87360_VRM, "vrm", NOMAP, NOMAP, 
+                RW, PC87365_SYSCTL_VRM, VALUE(1), 1 },
     { 0 }
   };
 

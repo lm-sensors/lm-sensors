@@ -2069,6 +2069,9 @@ chip "pc87366-*"
 
 # Voltage inputs
 
+# Set VRM version (default 9.0)
+#   set vrm     9.0
+
    label in7   "Vsb"
    label in8   "Vdd"
    label in9   "Vbat"
