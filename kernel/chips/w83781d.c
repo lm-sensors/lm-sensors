@@ -29,7 +29,7 @@
     w83627hf	9	3	2	3	0x20	0x5ca3	yes	yes(LPC)
     w83782d	9	3	2-4	3	0x30	0x5ca3	yes	yes
     w83783s	5-6	3	2	1-2	0x40	0x5ca3	yes	no
-    w83697hf	6	2	2	2	0x60	0x5ca3	no	yes(LPC)
+    w83697hf	8	2	2	2	0x60	0x5ca3	no	yes(LPC)
 
 */
 
@@ -690,7 +690,7 @@ static ctl_table w83783s_dir_table_template[] = {
 	{0}
 };
 
-/* similar to w83783s but no fan3, no vid */
+/* similar to w83782d but no fan3, no vid */
 static ctl_table w83697hf_dir_table_template[] = {
 	{W83781D_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_in},
@@ -704,6 +704,10 @@ static ctl_table w83697hf_dir_table_template[] = {
 	{W83781D_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_in},
 	{W83781D_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_in},
+	{W83781D_SYSCTL_IN7, "in7", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_in},
+	{W83781D_SYSCTL_IN8, "in8", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_in},
 	{W83781D_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_fan},
@@ -1352,7 +1356,8 @@ void w83781d_init_client(struct i2c_client *client)
 			w83781d_write_value(client, W83781D_REG_IN_MAX(6),
 					    IN_TO_REG(W83782D_INIT_IN_MAX_6));
 		}
-		if ((type == w83782d) || (type == w83627hf)) {
+		if ((type == w83782d) || (type == w83627hf) ||
+		    (type == w83697hf)) {
 			w83781d_write_value(client, W83781D_REG_IN_MIN(7),
 					    IN_TO_REG(W83781D_INIT_IN_MIN_7));
 			w83781d_write_value(client, W83781D_REG_IN_MAX(7),
@@ -1453,7 +1458,7 @@ void w83781d_update_client(struct i2c_client *client)
 			data->in_max[i] =
 			    w83781d_read_value(client,
 					       W83781D_REG_IN_MAX(i));
-			if ((data->type != w83782d)
+			if ((data->type != w83782d) && (data->type != w83697hf)
 			    && (data->type != w83627hf) && (i == 6))
 				break;
 		}

@@ -1919,7 +1919,7 @@ void print_w83781d(const sensors_chip_name *name)
   } else
     printf("ERROR: Can't get IN5 data!\n");
   free_the_label(&label);
-  if ((!is83s) && (!is697hf)) {
+  if (1) {
     if (!sensors_get_label_and_valid(*name,SENSORS_W83781D_IN6,&label,&valid) &&
         !sensors_get_feature(*name,SENSORS_W83781D_IN6,&cur) &&
         !sensors_get_feature(*name,SENSORS_W83781D_IN6_MIN,&min) &&
@@ -1934,7 +1934,7 @@ void print_w83781d(const sensors_chip_name *name)
       printf("ERROR: Can't get IN6 data!\n");
     free_the_label(&label);
   }
-  if (is82d) {
+  if (is82d || is697hf) {
     if (!sensors_get_label_and_valid(*name,SENSORS_W83782D_IN7,&label,&valid) &&
         !sensors_get_feature(*name,SENSORS_W83782D_IN7,&cur) &&
         !sensors_get_feature(*name,SENSORS_W83782D_IN7_MIN,&min) &&
