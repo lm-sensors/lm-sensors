@@ -2,7 +2,7 @@
 
 #
 #    sensors-detect - Detect PCI bus and chips
-#    Copyright (c) 1998 - 2001  Frodo Looijaard <frodol@dds.nl>
+#    Copyright (c) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -547,6 +547,78 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        procid => "ITE 8172G MIPS/SH4 Support Chip",
        driver => "i2c-adap-ite",
        match => sub { $_[0] =~ /^ITE IIC adapter/ },
+     } , 
+     { 
+       vendid => 0x5333,
+       devid  => 0x8A20,
+       func => 0,
+       procid => "S3 Savage 3D",
+       match => sub { $_[0] =~ /^dontmatchthis/ },
+     } , 
+     { 
+       vendid => 0x5333,
+       devid  => 0x8A21,
+       func => 0,
+       procid => "S3 Savage 3D MV",
+       match => sub { $_[0] =~ /^dontmatchthis/ },
+     } , 
+     { 
+       vendid => 0x5333,
+       devid  => 0x8A22,
+       func => 0,
+       procid => "S3 Savage 4",
+       driver => "i2c-savage4",
+       match => sub { $_[0] =~ /Savage4 adapter/ },
+     } , 
+     { 
+       vendid => 0x5333,
+       devid  => 0x9102,
+       func => 0,
+       procid => "S3 Savage 2000",
+       driver => "i2c-savage4",
+       match => sub { $_[0] =~ /Savage4 adapter/ },
+     } , 
+     { 
+       vendid => 0x5333,
+       devid  => 0x8A25,
+       func => 0,
+       procid => "S3 ProSavage PM",
+       match => sub { $_[0] =~ /^dontmatchthis/ },
+     } , 
+     { 
+       vendid => 0x5333,
+       devid  => 0x8A26,
+       func => 0,
+       procid => "S3 ProSavage KM",
+       match => sub { $_[0] =~ /^dontmatchthis/ },
+     } , 
+     { 
+       vendid => 0x5333,
+       devid  => 0x8C10,
+       func => 0,
+       procid => "S3 Savage MX MV",
+       match => sub { $_[0] =~ /^dontmatchthis/ },
+     } , 
+     { 
+       vendid => 0x5333,
+       devid  => 0x8C11,
+       func => 0,
+       procid => "S3 Savage MX",
+       match => sub { $_[0] =~ /^dontmatchthis/ },
+     } , 
+     { 
+       vendid => 0x5333,
+       devid  => 0x8C12,
+       func => 0,
+       procid => "S3 Savage IX MV",
+       match => sub { $_[0] =~ /^dontmatchthis/ },
+     } , 
+     { 
+       vendid => 0x5333,
+       devid  => 0x8C13,
+       func => 0,
+       procid => "S3 Savage IX",
+       match => sub { $_[0] =~ /^dontmatchthis/ },
      } , 
 );
 
