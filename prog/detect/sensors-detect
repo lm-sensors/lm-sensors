@@ -3718,22 +3718,22 @@ sub main
   my $use_isa = not <STDIN> =~ /\s*[Ss]/;
      
   my ($modprobes,$configfile) = generate_modprobes $use_isa;
-  print "\nWARNING! If you have some things built into your kernel, the \n",
-        "below list will contain too many modules. Skip the appropriate ones!";
-  print "\nTo load everything that is needed, add this to some /etc/rc* ",
-        "file:\n\n";
-  print "#----cut here----\n";
-  print $modprobes;
-  print "# Next 2 lines are optional\n",
-        "sleep 3\n",
-        "/usr/local/bin/sensors -s\n";
-  print "#----cut here----\n";
-  print "\nTo make the sensors modules behave correctly, add these lines to ",
-        "either\n",
+  print "\nTo make the sensors modules behave correctly, add these lines to either\n",
         "/etc/modules.conf or /etc/conf.modules:\n\n";
   print "#----cut here----\n";
   print $configfile;
   print "#----cut here----\n";
+  print "\nTo load everything that is needed, add this to some /etc/rc* ",
+        "file:\n\n";
+  print "#----cut here----\n";
+  print $modprobes;
+  print "# sleep 2 # optional\n",
+        "/usr/local/bin/sensors -s # recommended\n";
+  print "#----cut here----\n";
+  print "\nWARNING! If you have some things built into your kernel, the list above\n",
+        "will contain too many modules. Skip the appropriate ones! You really should\n",
+        "try these commands right now to make sure everything is working properly.\n",
+        "Monitoring programs won't work until it's done.\n";
   
   my $have_sysconfig = -d '/etc/sysconfig';
   print "\nDo you want to generate /etc/sysconfig/lm_sensors? (".
