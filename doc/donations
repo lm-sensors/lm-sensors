@@ -38,9 +38,10 @@ Cendio Systems 	Asus P3B-F w/ AS99127F				2000-05
 Atipa		SuperMicro 370DLE w/ Serverworks, LM87		2000-09
 		Drivers developed: serverworks support added	Jean Delvare
 		to i2c-piix4; lm87 testing and improvements
+		(on-board NIC broken)
 
 Fujitsu		Complete system for general project support	2001-11
-Siemens								Phil (broken)
+Siemens		(broken)					Phil
 Computers
 
 HardData Ltd.	Tyan 2466 w/ 1G Duron; W83627HF and W83782D	2002-05
