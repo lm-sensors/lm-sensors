@@ -1097,6 +1097,73 @@ static sensors_chip_feature as99127f_features[] =
     { 0 }
   };
 
+/* macro for LM93 voltage in/min/max entries */
+#define SENSORS_LM93_IN_MIN_MAX(nr) \
+	{ SENSORS_LM93_IN##nr, "in" #nr, NOMAP, \
+		NOMAP, R, LM93_SYSCTL_IN##nr, \
+		VALUE(3), 2}, \
+	{ SENSORS_LM93_IN##nr##_MIN, "in" #nr "_min", SENSORS_LM93_IN##nr, \
+		SENSORS_LM93_IN##nr, RW, LM93_SYSCTL_IN##nr, \
+                VALUE(1), 2 }, \
+        { SENSORS_LM93_IN##nr##_MAX, "in" #nr "_max", SENSORS_LM93_IN##nr, \
+		SENSORS_LM93_IN##nr, RW, LM93_SYSCTL_IN##nr, \
+                VALUE(2), 2 }
+
+/* macro for LM93 fan/min entries */
+#define SENSORS_LM93_FAN_MIN(nr) \
+	{ SENSORS_LM93_FAN##nr, "fan" #nr, NOMAP, \
+		NOMAP, R, LM93_SYSCTL_FAN##nr, \
+		VALUE(2), 0 }, \
+	{ SENSORS_LM93_FAN##nr##_MIN, "fan" #nr "_min", \
+		SENSORS_LM93_FAN##nr, SENSORS_LM93_FAN##nr, \
+		RW, LM93_SYSCTL_FAN##nr, VALUE(1), 0 }
+
+/* macro for LM93 temp/min/max entries */
+#define SENSORS_LM93_TEMP_MIN_MAX(nr) \
+	{ SENSORS_LM93_TEMP##nr, "temp" #nr, NOMAP, \
+		NOMAP, R, LM93_SYSCTL_TEMP##nr, \
+		VALUE(3), 1 }, \
+	{ SENSORS_LM93_TEMP##nr##_MAX, "temp" #nr "_max", \
+		SENSORS_LM93_TEMP##nr, SENSORS_LM93_TEMP##nr, \
+		RW, LM93_SYSCTL_TEMP##nr, VALUE(1), 1 }, \
+	{ SENSORS_LM93_TEMP##nr##_MIN, "temp" #nr "_min", \
+		SENSORS_LM93_TEMP##nr, SENSORS_LM93_TEMP##nr, \
+		RW, LM93_SYSCTL_TEMP##nr, VALUE(2), 1 }
+
+/* macro for LM93 VID entries */
+#define SENSORS_LM93_VID(nr) \
+	{ SENSORS_LM93_VID##nr, "vid" #nr, NOMAP, NOMAP, R, \
+		 LM93_SYSCTL_VID##nr, VALUE(1), 3 }
+
+static sensors_chip_feature lm93_features[] = {
+	SENSORS_LM93_IN_MIN_MAX(1),
+	SENSORS_LM93_IN_MIN_MAX(2),
+	SENSORS_LM93_IN_MIN_MAX(3),
+	SENSORS_LM93_IN_MIN_MAX(4),
+	SENSORS_LM93_IN_MIN_MAX(5),
+	SENSORS_LM93_IN_MIN_MAX(6),
+	SENSORS_LM93_IN_MIN_MAX(7),
+	SENSORS_LM93_IN_MIN_MAX(8),
+	SENSORS_LM93_IN_MIN_MAX(9),
+	SENSORS_LM93_IN_MIN_MAX(10),
+	SENSORS_LM93_IN_MIN_MAX(11),
+	SENSORS_LM93_IN_MIN_MAX(12),
+	SENSORS_LM93_IN_MIN_MAX(13),
+	SENSORS_LM93_IN_MIN_MAX(14),
+	SENSORS_LM93_IN_MIN_MAX(15),
+	SENSORS_LM93_IN_MIN_MAX(16),
+	SENSORS_LM93_FAN_MIN(1),
+	SENSORS_LM93_FAN_MIN(2),
+	SENSORS_LM93_FAN_MIN(3),
+	SENSORS_LM93_FAN_MIN(4),
+	SENSORS_LM93_TEMP_MIN_MAX(1),
+	SENSORS_LM93_TEMP_MIN_MAX(2),
+	SENSORS_LM93_TEMP_MIN_MAX(3),
+	SENSORS_LM93_VID(1),
+	SENSORS_LM93_VID(2),
+	{ 0 }
+};
+
 /* macro for ASB100 Bach voltage in/min/max entries */
 #define SENSORS_ASB100_IN_MIN_MAX(nr) \
 	{ SENSORS_ASB100_IN##nr, "in" #nr, NOMAP, \
@@ -5221,5 +5288,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_MAX6650_PREFIX, max6650_features },
  { SENSORS_ADM1030_PREFIX, adm1030_features },
  { SENSORS_ADM1031_PREFIX, adm1031_features },
+ { SENSORS_LM93_PREFIX, lm93_features },
  { 0 }
 };
