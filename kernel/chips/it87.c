@@ -2,8 +2,8 @@
     it87.c - Part of lm_sensors, Linux kernel modules for hardware
              monitoring.
 
-    Supports: IT8705F  Super I/O chip w/LPC interface
-              IT8712F  Super I/O chup w/LPC interface & SMbus
+    Supports: IT8705F  Super I/O chip w/LPC interface & SMBus
+              IT8712F  Super I/O chip w/LPC interface & SMBus
               Sis950   A clone of the IT8705F
 
     Copyright (c) 2001 Chris Gauthron <chrisg@0-in.com> 
@@ -51,12 +51,12 @@ MODULE_LICENSE("GPL");
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
-static unsigned short normal_i2c_range[] = { 0x20, 0x2f, SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x28, 0x2f, SENSORS_I2C_END };
 static unsigned int normal_isa[] = { 0x0290, SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_4(it87, it8705, it8712, sis950);
+SENSORS_INSMOD_2(it87, it8712);
 
 
 #define	REG	0x2e	/* The register to read/write */
@@ -170,6 +170,7 @@ static int reset = 0;
 #define IT87_REG_TEMP_ENABLE   0x51
 
 #define IT87_REG_CHIPID        0x58
+#define IT87_REG_CHIPID2       0x5b /* IT8712F only */
 
 /* sensor pin types */
 #define UNUSED		0
@@ -528,6 +529,9 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 		i = it87_read_value(new_client, IT87_REG_CHIPID);
 		if (i == 0x90) {
 			kind = it87;
+			i = it87_read_value(new_client, IT87_REG_CHIPID2);
+			if (i == 0x12)
+				kind = it8712;
 		}
 		else {
 			if (kind == 0)
@@ -542,10 +546,10 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 	if (kind == it87) {
 		type_name = "it87";
 		client_name = "IT87 chip";
-	} /* else if (kind == it8712) {
+	} else if (kind == it8712) {
 		type_name = "it8712";
-		client_name = "IT87-J chip";
-	} */ else {
+		client_name = "IT8712 chip";
+	} else {
 #ifdef DEBUG
 		printk("it87.o: Internal error: unknown kind (%d)?!?",
 		       kind);
@@ -741,11 +745,11 @@ static void it87_update_client(struct i2c_client *client)
 		}
 
 		/* The 8705 does not have VID capability */
-		/*if (data->type == it8712) {
+		if (data->type == it8712) {
 			data->vid = it87_read_value(client, IT87_REG_VID);
 			data->vid &= 0x1f;
 		}
-		else */ {
+		else  {
 			data->vid = 0x1f;
 		}
 
