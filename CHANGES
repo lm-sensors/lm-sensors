@@ -18,9 +18,10 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.5.5 (2001????)
->>>>>>> 1.80
-  NOTE: i2c 2.5.5 MUST BE be compiled and installed first.
-  mkpatch only works with 2.2 and 2.4 kernels anymore
+  NOTE: i2c 2.5.5 MUST BE be compiled and installed first, UNLESS
+        you have kernel 2.4.0-prerelease or greater.
+  Program mkpatch.pl: only works with 2.2 and 2.4 kernels anymore
+  Program mkpatch.pl: more fixes; now adds many more modules
   Chip modules (all): Update mutex definition (works now for new 2.2 kernels)
   File sensors.conf.eg: Add mtp008 entries, adm1025 entries
   Library: Add ds1621, mtp008 support
@@ -39,7 +40,6 @@ ask CVS about it:
   Module pcf8574: change update time to 5 seconds
   Modules sis5595, i2c-sis5595: Check for uninitialized base addresses
   Module w83781d: fix beep setting via /proc
-  Program mkpatch.pl: more fixes; now adds many more modules
   Program sensors: Add ds1621, mtp008 support; add -f (Fahrenheit) option;
                    add adm1025 temp2; report temp limits correctly as
                    min/max or limit/hysteresis; print message if no
