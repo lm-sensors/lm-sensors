@@ -296,6 +296,12 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	} else if (kind == thmc10) {
 		type_name = "thmc10";
 		client_name = "THMC10 chip";
+	} else if (kind == lm84) {
+		type_name = "lm84";
+		client_name = "LM84 chip";
+	} else if (kind == gl523sm) {
+		type_name = "gl523sm";
+		client_name = "GL523SM chip";
 	} else {
 #ifdef DEBUG
 		printk("adm1021.o: Internal error: unknown kind (%d)?!?",
