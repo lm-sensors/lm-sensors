@@ -27,6 +27,8 @@ problems.
 * Adrian Baugh <adrian.baugh@keble.ox.ac.uk>
   Author of wmsensors (get it at http://users.ox.ac.uk/~kebl0850/wmlm78);
   he also tested lots of things, and helped us out on several occasions.
+* Fons Rademakers <Fons.Rademakers@cern.ch>
+  Author of the maxilife module (which could only be written under NDA)
 
 * Simon Vogl <simon@tk.uni-linz.ac.at>
   Wrote the new i2c kernel driver. This driver is indispensable for the
