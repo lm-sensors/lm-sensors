@@ -28,7 +28,7 @@
 #include "chips.h"
 
 #define PROGRAM "sensors"
-#define VERSION "1.2"
+#define VERSION "1.3"
 #define DEFAULT_CONFIG_FILE_NAME "sensors.conf"
 
 static char *config_file_name;
@@ -51,7 +51,7 @@ static const char *sprintf_chip_name(sensors_chip_name name);
 #define CHIPS_MAX 20
 sensors_chip_name chips[CHIPS_MAX];
 int chips_count=0;
-int do_sets;
+int do_sets, do_unknown;
 
 void print_short_help(void)
 {
@@ -64,6 +64,7 @@ void print_long_help(void)
   printf("  -c, --config-file     Specify a config file\n");
   printf("  -h, --help            Display this help text\n");
   printf("  -s, --set             Execute `set' statements too (root only)\n");
+  printf("  -u, --unknown         Treat chips as unknown one (testing only)\n");
   printf("  -v, --version         Display the program version\n");
   printf("\n");
   printf("By default, a list of directories is examined for the config file `sensors.conf'\n");
@@ -136,12 +137,14 @@ int main (int argc, char *argv[])
     { "set", no_argument, NULL, 's' },
     { "version", no_argument, NULL, 'v'},
     { "config-file", required_argument, NULL, 'c' },
+    { "unknown", required_argument, NULL, 'u' },
     { 0,0,0,0 }
   };
 
+  do_unknown = 0;
   do_sets = 0;
   while (1) {
-    c = getopt_long(argc,argv,"hvsc:",long_opts,NULL);
+    c = getopt_long(argc,argv,"hvusc:",long_opts,NULL);
     if (c == EOF)
       break;
     switch(c) {
@@ -160,6 +163,9 @@ int main (int argc, char *argv[])
       break;
     case 's':
       do_sets = 1;
+      break;
+    case 'u':
+      do_unknown = 1;
       break;
     default:
       fprintf(stderr,"Internal error while parsing options!\n");
@@ -247,7 +253,9 @@ void do_a_print(sensors_chip_name name)
     printf("Algorithm: %s\n",algo);
   if (!algo || !adap)
     printf(" ERROR: Can't get adapter or algorithm?!?\n");
-  if (!strcmp(name.prefix,"lm75"))
+  if (do_unknown)
+    print_unknown_chip(&name);
+  else if (!strcmp(name.prefix,"lm75"))
     print_lm75(&name);
   else if (!strcmp(name.prefix,"adm1021") || !strcmp(name.prefix,"max1617") ||
            !strcmp(name.prefix,"max1617a") || !strcmp(name.prefix, "thmc10") ||
