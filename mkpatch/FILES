@@ -6,6 +6,7 @@ kernel/busses/i2c-i810.c	drivers/i2c/i2c-i810.c
 kernel/busses/i2c-isa.c		drivers/i2c/i2c-isa.c
 kernel/busses/i2c-piix4.c	drivers/i2c/i2c-piix4.c
 kernel/busses/i2c-sis5595.c	drivers/i2c/i2c-sis5595.c
+kernel/busses/i2c-tsunami.c	drivers/i2c/i2c-tsunami.c
 kernel/busses/i2c-via.c		drivers/i2c/i2c-via.c
 kernel/busses/i2c-viapro.c	drivers/i2c/i2c-viapro.c
 kernel/busses/i2c-voodoo3.c	drivers/i2c/i2c-voodoo3.c

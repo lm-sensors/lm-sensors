@@ -186,6 +186,13 @@ CONFIG_I2C_VOODOO3
   built as a module which can be inserted and removed while the kernel
   is running.
 
+DEC Tsunami 21272
+CONFIG_I2C_TSUNAMI
+  If you say yes to this option, support will be included for the DEC
+  Tsunami chipset I2C adapter. Requires the Alpha architecture;
+  do not enable otherwise. This can also be built as a module which
+  can be inserted and removed while the kernel is running.
+
 Pseudo ISA adapter (for hardware sensors modules)
 CONFIG_I2C_ISA
   This provides support for accessing some hardware sensor chips over
@@ -634,6 +641,7 @@ sub gen_drivers_i2c_Config_in
     tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
     tristate '  AMD 756' CONFIG_I2C_AMD756
+    dep_tristate '  DEC Tsunami I2C interface' CONFIG_I2C_TSUNAMI $CONFIG_I2C_ALGOBIT
     tristate '  Intel 82801AA, 82801AB and 82801BA' CONFIG_I2C_I801
     tristate '  Intel i810AA, i810AB and i815' CONFIG_I2C_I810
     tristate '  Intel 82371AB PIIX4(E)' CONFIG_I2C_PIIX4
@@ -898,6 +906,7 @@ obj-$(CONFIG_I2C_I810)			+= i2c-i810.o
 obj-$(CONFIG_I2C_ISA)			+= i2c-isa.o
 obj-$(CONFIG_I2C_PIIX4)			+= i2c-piix4.o
 obj-$(CONFIG_I2C_SIS5595)		+= i2c-sis5595.o
+obj-$(CONFIG_I2C_TSUNAMI)		+= i2c-tsunami.o
 obj-$(CONFIG_I2C_VIA)			+= i2c-via.o
 obj-$(CONFIG_I2C_VIAPRO)		+= i2c-viapro.o
 obj-$(CONFIG_I2C_VOODOO3)		+= i2c-voodoo3.o
@@ -965,6 +974,14 @@ ifeq ($(CONFIG_I2C_SIS5595),y)
 else 
   ifeq ($(CONFIG_I2C_SIS5595),m)
     M_OBJS += i2c-sis5595.o
+  endif
+endif
+
+ifeq ($(CONFIG_I2C_TSUNAMI),y)
+  L_OBJS += i2c-tsunami.o
+else 
+  ifeq ($(CONFIG_I2C_TSUNAMI),m)
+    M_OBJS += i2c-tsunami.o
   endif
 endif
 
@@ -1053,6 +1070,9 @@ sub gen_drivers_i2c_i2c_core_c
 #ifdef CONFIG_I2C_SIS5595
 	extern int i2c_sis5595_init(void);
 #endif
+#ifdef CONFIG_I2C_TSUNAMI
+	extern int i2c_tsunami_init(void);
+#endif
 #ifdef CONFIG_I2C_VIA
 	extern int i2c_via_init(void);
 #endif
@@ -1085,6 +1105,9 @@ EOF
 #endif
 #ifdef CONFIG_I2C_SIS5595
 	i2c_sis5595_init();
+#endif
+#ifdef CONFIG_I2C_TSUNAMI
+	i2c_tsunami_init();
 #endif
 #ifdef CONFIG_I2C_VIA
 	i2c_via_init();
