@@ -1,31 +1,49 @@
-This file tries to document how the `mkpatch' program works.
-The file in copyright (c) 1999 by Frodo Looijaard
+This file documents how the `mkpatch' program works.
+------------------------------------------------------------
+
+QUICKSTART
+----------
+	mkpatch/mkpatch.pl . /usr/src/linux > /tmp/patch
+	cd /usr/src/linux
+	patch -p1 < /tmp/patch
+
+
+USAGE
+-----
 
 mkpatch compares the newest lm_sensors sources with what is found in a kernel,
-and generates a set of diffs. These diffs can be amplied to that kernel,
-after which the kernel is synchronised with the current lm_sensors sources.
+and generates a set of diffs. These diffs can be applied to that kernel,
+after which the kernel is synchronized with the current lm_sensors sources.
 
-You should always run mkpatch against a kernel tree that has been patched
-for the newest I2C sources.
+You should generally run mkpatch against a kernel tree that has been patched
+with the newest I2C sources. Check the lm_sensors "Download" page for
+information on dependencies between lm_sensors and i2c versions.
 
 mkpatch needs two arguments. The first is the root of the lm_sensors package,
 the second is the root of Linux kernel tree. For example:
   cd /tmp/lm_sensors-2.4.0
   mkpatch/mkpatch . /usr/src/linux
+
 The patch file is written to stdout; any errors are written to stderr.
 So you will want to capture the output:
   mkpatch/mkpatch . /usr/src/linux > /tmp/lm_sensors-diffs
+
 Later on, you will want to apply the diffs:
-  cd /usr/src/linuc
+  cd /usr/src/linux
   patch -p1 -E < /tmp/lm_sensors-diffs
+
 Of course, this can be combined:
   mkpatch/mkpatch . /usr/src/linux | patch -d /usr/src/linux -p1 -E
+
+
+IMPLEMENTATION DETAILS
+----------------------
 
 mkpatch uses several files in the mkpatch subdirectory. The location of
 these files is hardcoded in the program, but all other files used are
 specified in these files, and can easily be changed. Used files are:
   FILES
-    a list of files that will be considered by mkpatch. Each line contains
+    A list of files that will be considered by mkpatch. Each line contains
     two filenames, separated by whitespace. The first is the name and
     location (relative to the lm_sensors package root) of the lm_sensors 
     file, the second is the name and location (relative to the kernel root) of 
@@ -58,3 +76,7 @@ files were already present in the kernel, but had to be patched. Because
 they can change between kernel versions, I had to scan them by hand to
 find where the new code should be inserted. Each file has documented
 what actually happens.
+
+
+------------
+This file is Copyright (c) 1999 by Frodo Looijaard
