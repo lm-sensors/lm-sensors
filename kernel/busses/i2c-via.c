@@ -199,7 +199,7 @@ static int find_via(void)
 }
 #endif
 
-int init_i2c_via()
+int init_i2c_via(void)
 {
 	if (find_via() < 0) {
 		printk("Error while reading PCI configuration\n");

@@ -251,7 +251,7 @@ int ali15x3_setup(void)
 #ifdef MAP_ACPI
   if (check_region(ali15x3_acpia, ALI15X3_ACPI_IOSIZE)) {
     printk("ali15x3.o: ALI15X3_acpi region 0x%x already in use!\n", ali15x3_acpia);
-    printk("ali15x3.o: If conflicting ACPI software is installed, undefine MAP_ACPI and recompile!\n", ali15x3_acpia);
+    printk("ali15x3.o: If conflicting ACPI software is installed, undefine MAP_ACPI and recompile!\n");
     error_return=-ENODEV;
   }
 #endif
@@ -380,7 +380,7 @@ int ali15x3_transaction(void)
    then the BUSY bit may come back on when you try and use the chip again.
    If that's the case you are stuck.
 */
-       printk("ali15x3.o: Resetting entire SMB Bus to clear busy condition\n",temp);
+       printk("ali15x3.o: Resetting entire SMB Bus to clear busy condition (%02x)\n",temp);
        outb_p(ALI15X3_T_OUT, SMBHSTCNT);
        temp = inb_p(SMBHSTSTS);
      }

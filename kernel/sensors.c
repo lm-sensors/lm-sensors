@@ -191,11 +191,14 @@ int sensors_register_entry(struct i2c_client *client ,const char *prefix,
 void sensors_deregister_entry(int id)
 {
   ctl_table *table;
+  char *temp;
   id -= 256;
   if (sensors_entries[id]) {
     table = sensors_entries[id]->ctl_table;
     unregister_sysctl_table(sensors_entries[id]);
-    kfree((void *) (table[4].procname));
+    /* Below two-step kfree is needed to keep gcc happy about const points */
+    (const char *) temp = table[4].procname;
+    kfree(temp);
     kfree(table);
     sensors_entries[id] = NULL;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))

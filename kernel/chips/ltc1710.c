@@ -80,7 +80,6 @@ static int ltc1710_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
 static void ltc1710_inc_use (struct i2c_client *client);
 static void ltc1710_dec_use (struct i2c_client *client);
-static u16 swap_bytes(u16 val);
 static void ltc1710_switch1(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
 static void ltc1710_switch2(struct i2c_client *client, int operation, int ctl_name,

@@ -67,10 +67,9 @@ static int eeprom_command(struct i2c_client *client, unsigned int cmd,
 static void eeprom_inc_use (struct i2c_client *client);
 static void eeprom_dec_use (struct i2c_client *client);
 
-static u16 swap_bytes(u16 val);
-
-static int eeprom_read_value(struct i2c_client *client, u8 reg);
+#if 0
 static int eeprom_write_value(struct i2c_client *client, u8 reg, u16 value);
+#endif
 
 static void eeprom_contents(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
@@ -252,22 +251,18 @@ void eeprom_dec_use (struct i2c_client *client)
 #endif
 }
 
-u16 swap_bytes(u16 val)
-{
-  return (val >> 8) | (val << 8);
-}
-
-/* No swapping needed here! */
+#if 0
+/* No writes yet (PAE) */
 int eeprom_write_value(struct i2c_client *client, u8 reg, u16 value)
-{/*
+{
   if (reg == EEPROM_REG_CONF)
     return smbus_write_byte_data(client->adapter,client->addr,reg,value);
   else
     return smbus_write_word_data(client->adapter,client->addr,reg,value); */
     
-    /* No writes yet (PAE) */
     return 0;
 }
+#endif
 
 void eeprom_update_client(struct i2c_client *client)
 {

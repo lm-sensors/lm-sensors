@@ -346,7 +346,7 @@ int lm78_detect_isa(struct isa_adapter *adapter)
 
   /* OK, this is detection. */
 
-  if (err=find_sis(&address)) {
+  if ((err=find_sis(&address))) {
     printk("SiS 5595 southbridge not found\n");
     return err;
   } 
