@@ -43,6 +43,7 @@ adm1021
 	max1617a	2	-	-	-	yes	no
 	thmc10		2	-	-	-	yes	no
 	xeon		1	-	-	-	yes	no
+	(xeon - no detection - requires force parameter)
 
 adm9240
 	adm9240		1	6	2	1 dac	yes	no
@@ -50,11 +51,14 @@ adm9240
 	lm81		1	6	2	1 dac	yes	no
 
 gl518sm
-        gl518sm (r00)	1	1/4	2	-	yes	no
+        gl518sm (r00)	1	1-4	2	-	yes	no
         gl518sm (r80)	1	4	2	-	yes	no
 
 gl520sm
-        gl520sm 	2/1	4/5	2	-	yes	no
+        gl520sm 	1-2	4-5	2	-	yes	no
+
+gl523sm-to-be-written
+        gl523sm 	2-3	5-6	2-3	1-2 pwm	yes	no
 
 lm75
 	lm75		1	-	-	-	yes	no
@@ -122,7 +126,7 @@ Many SMBus chips have a company ID at location 0x3E or 0xFE.
 Here is a partial list.
 This may help identify a chip after doing a 'i2cdump [bus] [address] b'.
 
-0x00	National
+0x00	National (on LM84)
 0x01	National
 0x23	AMD
 0x41	AMD
