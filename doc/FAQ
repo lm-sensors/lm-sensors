@@ -249,6 +249,8 @@ how you installed, they should be under either /usr/local/include or
 	Have you installed a recent version of the i2c package? Remember,
 compilation is not enough, you also need to install it for the header
 files to be found!
+	If you want to patch the kernel, you will have to apply the i2c
+patches first!
 
 
 4 Problems
