@@ -1,7 +1,40 @@
-Some quick notes about the eeprom.o module and decode_dimms.pl.
+Kernel driver `eeprom.o'
+========================
 
-EEPROM Module
--------------
+Status: Complete and well-tested
+
+Supported chips:
+  * Any EEPROM chip in the designated address range
+    Prefix `eeprom'
+    Addresses scanned: I2C 0x50 - 0x57 (inclusive)
+    Datasheet: Publicly available from Intel
+
+Author: Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock
+        <phil@netroedge.com>
+
+
+Module Parameters
+-----------------
+
+* checksum: int
+  Only accept eeproms whose checksum is correct
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_eeprom: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `eeprom' chip
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+
+
+Description
+-----------
 
 This is a simple EEPROM module meant to enable reading the first 128 bytes
 of an EEPROM (on a SDRAM DIMM).  This module will probably need to be at
@@ -74,10 +107,3 @@ you will get a strange "decode_dimms.pl: no such file or directory" error.
 
 Also note that the script assumes that _all_ the eeproms belong to DIMMs,
 which may not be the case.
-
-
-------------------------------------------------------------------------
-** PDF is available from Intel or our web site (spdsd12a.pdf):
-http://www.netroedge.com/~lm78
-
-"eeprom" doc created Dec. 14, 1998 by Philip Edelbrock
