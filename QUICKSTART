@@ -15,13 +15,17 @@ Other methods are described in INSTALL.
     compile your own from a 'vanilla' tree (get one from
     ftp://ftp.kernel/org/pub/linux/kernel/).
 
+  * Verify that your i2c support in the kernel is configured as
+    modules or is disabled. If it is compiled-in, you obviously
+    cannot replace it with modules.
+
   * Download, build, and install the latest i2c package.
-    This is necessary for lm_sensors 2.6.0 with ALL KERNELS.
+    This is necessary for lm_sensors 2.6.1 with ALL KERNELS.
     Quickstart for i2c: make; make install; depmod -a
 
   * Do `make'.
     The warnings about .d files at the start are harmless.
-    If you have compile problems, you probably should not have skipped step 2.
+    If you have compile problems, you probably should not have skipped step 3.
     Go back and install the latest i2c package.
     If you still have compile problems, you probably should not
     have skipped step 1.
