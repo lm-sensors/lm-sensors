@@ -35,7 +35,7 @@
 
 #define LM92_REG_TEMPERATURE		0x00	/* ro, 16-bit	*/
 #define LM92_REG_CONFIGURATION		0x01	/* rw, 8-bit	*/
-#define LM92_REG_TRIP_HYSTERISIS	0x02	/* rw, 16-bit	*/
+#define LM92_REG_TRIP_HYSTERESIS	0x02	/* rw, 16-bit	*/
 #define LM92_REG_TRIP_CRITICAL		0x03	/* rw, 16-bit	*/
 #define LM92_REG_TRIP_LOW			0x04	/* rw, 16-bit	*/
 #define LM92_REG_TRIP_HIGH			0x05	/* rw, 16-bit	*/
@@ -145,7 +145,7 @@ static int lm92_read (struct i2c_client *client)
 
 	if ((jiffies - data->timestamp) > HZ) {
 		if (lm92_read16 (client,LM92_REG_TEMPERATURE,value) < 0 ||
-			lm92_read16 (client,LM92_REG_TRIP_HYSTERISIS,value + 1) < 0 ||
+			lm92_read16 (client,LM92_REG_TRIP_HYSTERESIS,value + 1) < 0 ||
 			lm92_read16 (client,LM92_REG_TRIP_CRITICAL,value + 2) < 0 ||
 			lm92_read16 (client,LM92_REG_TRIP_LOW,value + 3) < 0 ||
 			lm92_read16 (client,LM92_REG_TRIP_HIGH,value + 4) < 0)
@@ -176,7 +176,7 @@ static int lm92_write (struct i2c_client *client)
 	LIMIT (data->temp.low);
 	LIMIT (data->temp.high);
 
-	if (lm92_write16 (client,LM92_REG_TRIP_HYSTERISIS,((s16) data->temp.hyst << 3)) < 0 ||
+	if (lm92_write16 (client,LM92_REG_TRIP_HYSTERESIS,((s16) data->temp.hyst << 3)) < 0 ||
 		lm92_write16 (client,LM92_REG_TRIP_CRITICAL,((s16) data->temp.crit << 3)) < 0 ||
 		lm92_write16 (client,LM92_REG_TRIP_LOW,((s16) data->temp.low << 3)) < 0 ||
 		lm92_write16 (client,LM92_REG_TRIP_HIGH,((s16) data->temp.high << 3)) < 0)
