@@ -108,7 +108,7 @@ static void eeprom_dec_use(struct i2c_client *client);
 
 #if 0
 static int eeprom_write_value(struct i2c_client *client, u8 reg,
-			      u16 value);
+			      u8 value);
 #endif
 
 static void eeprom_contents(struct i2c_client *client, int operation,
@@ -305,13 +305,9 @@ void eeprom_dec_use(struct i2c_client *client)
 
 #if 0
 /* No writes yet (PAE) */
-int eeprom_write_value(struct i2c_client *client, u8 reg, u16 value)
+int eeprom_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
-	if (reg == EEPROM_REG_CONF)
-		return i2c_smbus_write_byte_data(client, reg, value);
-	else
-		return i2c_smbus_write_word_data(client, reg, value);
-	*/return 0;
+	return i2c_smbus_write_byte_data(client, reg, value);
 }
 #endif
 
