@@ -1,6 +1,8 @@
 Many, many things. Most notably:
 
-* 2.1 kernel tests; at this moment, only 2.0 compiles have been tried.
+* Change the i2c modules to keep the namespace clean (EXPORT_SYMBOL does not
+  work for us; many static declarations need to be added; better ask Simon
+  Vogl first)
 * Make it SMP-safe: there are no spinlocks yet. They are needed at many
   places, probably (everywhere where global vars are accessed).
 * Extend sensors.c with a file /proc/sys/dev/sensors/chips, which lists
@@ -10,6 +12,8 @@ Many, many things. Most notably:
 * Write piix4_* in piix4.c
 * Make lm78.c detect 'double hits', (same chip connected to both SMBus and
   ISA).
+* Better lm78 detection; insmod-time paramters to set addresses (difficult,
+  because of all i2c busses!).
 * Check whether some lm78 functionality is chip-generic and can be moved to
   sensors.c.
 * Rename i2c-proc.c to i2c-user.c, and extend it with /dev entries;

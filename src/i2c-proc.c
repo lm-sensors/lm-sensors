@@ -40,31 +40,18 @@ static int i2cproc_command(struct i2c_client *client, unsigned int cmd,
                            void *arg);
 static void i2cproc_inc_use(struct i2c_client *client);
 static void i2cproc_dec_use(struct i2c_client *client);
-static int i2cproc_bus_read(struct inode * inode, struct file * file,char * buf,
-                            int count);
-
-/* To implement the dynamic /proc/bus/i2c-? files, we need our own 
-   implementation of the read hook */
-static struct file_operations i2cproc_operations = {
-        NULL,
-        i2cproc_bus_read,
-};
-
-static struct inode_operations i2cproc_inode_operations = {
-        &i2cproc_operations
-};
-
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
 
-static int i2proc_bus_read(char *buf, char **start, off_t offset, int len,
+static ssize_t i2cproc_bus_read(struct file * file, char * buf,size_t count, 
+                                loff_t *ppos);
+static int read_bus_i2c(char *buf, char **start, off_t offset, int len,
                            int *eof , void *private);
-ssize_t array_read(struct file * file, char * buf,size_t count, loff_t *ppos);
 
 #else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
 
-int i2cproc_bus_read(struct inode * inode, struct file * file,char * buf,
-                     int count);
+static int i2cproc_bus_read(struct inode * inode, struct file * file,
+                            char * buf, int count);
 static int read_bus_i2c(char *buf, char **start, off_t offset, int len,
                         int unused);
 
@@ -99,6 +86,18 @@ static struct proc_dir_entry proc_bus_i2c_dir =
 static struct proc_dir_entry *i2cproc_proc_entries[I2C_ADAP_MAX];
 
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
+
+/* To implement the dynamic /proc/bus/i2c-? files, we need our own 
+   implementation of the read hook */
+static struct file_operations i2cproc_operations = {
+        NULL,
+        i2cproc_bus_read,
+};
+
+static struct inode_operations i2cproc_inode_operations = {
+        &i2cproc_operations
+};
+
 
 /* Used by init/cleanup */
 static int i2cproc_initialized;
@@ -202,10 +201,7 @@ int i2cproc_cleanup(void)
   }
   if (i2cproc_initialized >= 1) {
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
-    if ((res = remove_proc_entry("i2c",proc_bus))) {
-      printk("i2c-proc.o: could not delete /proc/bus/i2c, module not removed.");
-      return res;
-    }
+    remove_proc_entry("i2c",proc_bus);
     i2cproc_initialized -= 2;
 #else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
     if (i2cproc_initialized >= 2) {
@@ -252,7 +248,8 @@ int read_bus_i2c(char *buf, char **start, off_t offset, int len, int unused)
 
 /* This function generates the output for /proc/bus/i2c-? */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
-ssize_t i2cproc_read(struct file * file, char * buf,size_t count, loff_t *ppos)
+ssize_t i2cproc_bus_read(struct file * file, char * buf,size_t count, 
+                         loff_t *ppos)
 {
   struct inode * inode = file->f_dentry->d_inode;
 #else (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29))
@@ -290,7 +287,7 @@ int i2cproc_bus_read(struct inode * inode, struct file * file,char * buf,
       len = len - file->f_pos;
       if (len < 0) 
         len = 0;
-      memcpy_tofs(buf,kbuf+file->f_pos,len);
+      copy_to_user (buf,kbuf+file->f_pos,len);
       file->f_pos += len;
       kfree(kbuf);
       return len;
@@ -346,8 +343,7 @@ int i2cproc_attach_adapter(struct i2c_adapter *adapter)
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
   proc_entry = create_proc_entry(name,0,proc_bus);
-  if (! proc_entry)
-  else {
+  if (! proc_entry) {
     printk("i2c-proc.o: Could not create /proc/bus/%s\n",name);
     kfree(client);
     return -ENOENT;
@@ -398,11 +394,7 @@ int i2cproc_detach_client(struct i2c_client *client)
     if (client->adapter == i2cproc_adapters[i]) {
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
       sprintf(name,"i2c-%d",i);
-      if ((res = remove_proc_entry(name,proc_bus))) {
-        printk("i2c-proc.o: Deregistration of /proc entry failed, "
-               "client not detached.\n");
-        return res;
-      }
+      remove_proc_entry(name,proc_bus);
 #else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
       if ((res = proc_unregister(&proc_bus_dir,
                                  i2cproc_proc_entries[i]->low_ino))) {

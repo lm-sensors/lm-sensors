@@ -27,8 +27,7 @@
 #include <linux/types.h>
 #include <linux/version.h>
 
-/* When exactly was the new pci interface introduced? */
-#if LINUX_VERSION_CODE < 0x020100
+#if LINUX_VERSION_CODE < 0x020136 /* 2.1.54 */
 #include <linux/bios32.h>
 #endif
 
@@ -128,7 +127,7 @@ static void bit_mb_exit(void)
 }
 
 /* When exactly was the new pci interface introduced? */
-#if LINUX_VERSION_CODE >= 0x020100
+#if LINUX_VERSION_CODE >= 0x020136 /* 2.1.54 */
 
 static u32 find_i2c(void)
 {

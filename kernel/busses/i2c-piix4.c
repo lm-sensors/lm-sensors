@@ -17,8 +17,11 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/* Note: New PCI (non-BIOS) interface introduced in 2.1.54! */
+
 #include <linux/module.h>
 #include <linux/kernel.h>
+#include <linux/stddef.h>
 #include "smbus.h"
 #include "version.h"
 
