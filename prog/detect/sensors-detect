@@ -3719,7 +3719,8 @@ sub generate_modprobes
   $configfile .= "alias char-major-89 i2c-dev\n";
 
   # Collect all loaded adapters
-  open INPUTFILE,"/proc/bus/i2c" or die "Couldn't open /proc/bus/i2c?!?";
+  # i2cdetect -l either cats /proc/bus/i2c or scans sysfs for the same information
+  open INPUTFILE,"i2cdetect -l |" or die "Couldn't find i2cdetect program!!";
   while (<INPUTFILE>) {
     my ($dev_nr,$type,$adap,$algo) = /^i2c-(\S+)\s+(\S+)\s+(.*?)\s*\t\s*(.*?)\s+$/;
     next if ($type eq "dummy");
@@ -4181,7 +4182,8 @@ sub main
         " includes address 0x69 (clock chip).\n";
 
   my ($inp,@not_to_scan,$inp2);
-  open INPUTFILE,"/proc/bus/i2c" or die "Couldn't open /proc/bus/i2c?!?";
+  # i2cdetect -l either cats /proc/bus/i2c or scans sysfs for the same information
+  open INPUTFILE,"i2cdetect -l |" or die "Couldn't find i2cdetect program!!";
   while (<INPUTFILE>) {
     my ($dev_nr,$type,$adap,$algo) = /^i2c-(\S+)\s+(\S+)\s+(.*?)\s*\t\s*(.*?)\s+$/;
     next if ($type eq "dummy");
