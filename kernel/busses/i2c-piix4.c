@@ -100,6 +100,11 @@ MODULE_PARM_DESC(force_addr,
 		 "Forcibly enable the PIIX4 at the given address. "
 		 "EXTREMELY DANGEROUS!");
 
+static int fix_hstcfg = 0;
+MODULE_PARM(fix_hstcfg, "i");
+MODULE_PARM_DESC(fix_hstcfg,
+		 "Fix config register. Needed on some boards (Force CPCI735).");
+
 static int piix4_transaction(void);
 
 
@@ -182,7 +187,7 @@ static int piix4_setup(struct pci_dev *PIIX4_dev, const struct pci_device_id *id
 
 	/* Some BIOS will set up the chipset incorrectly and leave a register
 	   in an undefined state (causing I2C to act very strangely). */
-	if (temp & 0x02) {
+	if (fix_hstcfg && (temp & 0x02)) {
 		printk("Worked around buggy BIOS (I2C)\n");
 		temp &= 0xfd;
 		pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp);

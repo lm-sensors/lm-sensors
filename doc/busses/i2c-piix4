@@ -7,7 +7,7 @@ Supported adapters:
   * Intel 82371AB PIIX4 and PIIX4E
   * Intel 82443MX (440MX)
     Datasheet: Publicly available at the Intel website
-  * ServerWorks OSB4 and CSB5 southbridges
+  * ServerWorks OSB4, CSB5  and CSB6 southbridges
     Datasheet: Only available via NDA from ServerWorks
   * Standard Microsystems (SMSC) SLC90E66 (Victory66) southbridge
     Datasheet: Publicly available at the SMSC website http://www.smsc.com
@@ -23,6 +23,8 @@ Module Parameters
   Forcibly enable the PIIX4. DANGEROUS!
 * force_addr: int
   Forcibly enable the PIIX4 at the given address. EXTREMELY DANGEROUS!
+* fix_hstcfg: int
+  Fix config register. Needed on some boards (Force CPCI735).
 
 
 Description
@@ -66,3 +68,8 @@ driver on those mainboards.
 
 The ServerWorks Southbridges, the Intel 440MX,
 and the Victory766 are identical to the PIIX4 in I2C/SMBus support.
+
+A few OSB4 southbridges are known to be misconfigured by the BIOS. In this
+case, you have you use the fix_hstcfg module parameter. Do not use it
+unless you know you have to, because in some cases it also breaks
+configuration on southbridges that don't need it.
