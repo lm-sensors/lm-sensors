@@ -169,6 +169,10 @@
 /* ADM1021 chips. */
 
 #define SENSORS_ADM1021_PREFIX "adm1021"
+/* Cheat on LM84,GL523,THMC10 for now - no separate #defines */
+#define SENSORS_LM84_PREFIX "lm84"
+#define SENSORS_GL523_PREFIX "gl523"
+#define SENSORS_THMC10_PREFIX "thmc10"
 
 #define SENSORS_ADM1021_TEMP 51 /* R */
 #define SENSORS_ADM1021_TEMP_HYST 52 /* RW */
@@ -476,6 +480,8 @@
 /* Analog Devices ADM9240 chips */
 
 #define SENSORS_ADM9240_PREFIX "adm9240"
+/* Cheat on LM81 for now - no separate #defines */
+#define SENSORS_LM81_PREFIX "lm81"
 
 #define SENSORS_ADM9240_IN0 1 /* R */
 #define SENSORS_ADM9240_IN1 2 /* R */
@@ -699,5 +705,22 @@
 #define SENSORS_MAXI_AS_VID3_MAX 83 /* RW */
 #define SENSORS_MAXI_AS_VID4_MAX 84 /* RW */
 #define SENSORS_MAXI_AS_ALARMS 91 /* R */
+
+/* THMC50/ADM1022 chips */
+
+#define SENSORS_THMC50_PREFIX "thmc50"
+/* Cheat on LM84,GL523,THMC10 for now - no separate #defines */
+#define SENSORS_ADM1022_PREFIX "adm1022"
+
+#define SENSORS_THMC50_TEMP 51 /* R */
+#define SENSORS_THMC50_TEMP_HYST 52 /* RW */
+#define SENSORS_THMC50_TEMP_OVER 53 /* RW */
+#define SENSORS_THMC50_REMOTE_TEMP 54 /* R */
+#define SENSORS_THMC50_REMOTE_TEMP_HYST 55 /* RW */
+#define SENSORS_THMC50_REMOTE_TEMP_OVER 56 /* RW */
+#define SENSORS_THMC50_ANALOG_OUT 71 /* RW */
+#define SENSORS_THMC50_INTER 81 /* R */
+#define SENSORS_THMC50_INTER_MASK 82 /* RW */
+#define SENSORS_THMC50_DIE_CODE 90 /* R */
 
 #endif /* def LIB_SENSORS_CHIPS_H */

@@ -1522,6 +1522,43 @@ static sensors_chip_feature maxi_as_features[] =
     { 0 }
   };
 
+static sensors_chip_feature thmc50_features[] =
+  {
+    { SENSORS_THMC50_TEMP, "temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                              SENSORS_MODE_R, THMC50_SYSCTL_TEMP, VALUE(3), 
+                              0 },
+    { SENSORS_THMC50_TEMP_HYST, "temp_hyst", SENSORS_THMC50_TEMP,
+                              SENSORS_THMC50_TEMP, SENSORS_MODE_RW, 
+                              THMC50_SYSCTL_TEMP, VALUE(2), 0 },
+    { SENSORS_THMC50_TEMP_OVER, "temp_over", SENSORS_THMC50_TEMP,
+                              SENSORS_THMC50_TEMP, SENSORS_MODE_RW,
+                              THMC50_SYSCTL_TEMP, VALUE(1), 0 },
+    { SENSORS_THMC50_REMOTE_TEMP, "remote_temp", SENSORS_NO_MAPPING, 
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R, 
+                              THMC50_SYSCTL_REMOTE_TEMP, VALUE(3), 0 },
+    { SENSORS_THMC50_REMOTE_TEMP_HYST, "remote_temp_hyst", 
+                              SENSORS_THMC50_REMOTE_TEMP,
+                              SENSORS_THMC50_REMOTE_TEMP, SENSORS_MODE_RW, 
+                              THMC50_SYSCTL_REMOTE_TEMP, VALUE(2), 0 },
+    { SENSORS_THMC50_REMOTE_TEMP_OVER, "remote_temp_over", 
+                              SENSORS_THMC50_REMOTE_TEMP,
+                              SENSORS_THMC50_REMOTE_TEMP, SENSORS_MODE_RW,
+                              THMC50_SYSCTL_REMOTE_TEMP, VALUE(1), 0 },
+    { SENSORS_THMC50_INTER_MASK, "analog output", SENSORS_NO_MAPPING,
+                              SENSORS_NO_MAPPING, SENSORS_MODE_RW,
+                              THMC50_SYSCTL_ANALOG_OUT, VALUE(1), 0 },
+    { SENSORS_THMC50_INTER, "interrupts", SENSORS_NO_MAPPING,
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                              THMC50_SYSCTL_INTER, VALUE(1), 0 },
+    { SENSORS_THMC50_INTER_MASK, "interrupt mask", SENSORS_NO_MAPPING,
+                              SENSORS_NO_MAPPING, SENSORS_MODE_RW,
+                              THMC50_SYSCTL_INTER_MASK, VALUE(1), 0 },
+    { SENSORS_THMC50_DIE_CODE, "die_code", SENSORS_NO_MAPPING,
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                              THMC50_SYSCTL_DIE_CODE, VALUE(1), 0 },
+    { 0 }
+  };
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -1534,19 +1571,30 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_W83781D_PREFIX, w83781d_features },
  { SENSORS_W83782D_PREFIX, w83782d_features },
  { SENSORS_W83783S_PREFIX, w83783s_features },
-		/* Cheat on 627HF for now - no separate #defines */
+		/* Cheat on 83627HF for now - no separate #defines */
  { SENSORS_W83627HF_PREFIX, w83782d_features },
-		/* Cheat on1627HF for now - no separate #defines */
+		/* Cheat on 991627HF for now - no separate #defines */
  { SENSORS_AS99127F_PREFIX, w83782d_features },
  { SENSORS_ADM9240_PREFIX, adm9240_features },
+		/* Cheat on LM81 for now - no separate #defines */
+ { SENSORS_LM81_PREFIX, adm9240_features },
  { SENSORS_DS1780_PREFIX, ds1780_features },
  { SENSORS_ADM1021_PREFIX, adm1021_features },
  { SENSORS_MAX1617_PREFIX, max1617_features },
  { SENSORS_MAX1617A_PREFIX, max1617a_features },
+		/* Cheat on LM84 for now - no separate #defines */
+ { SENSORS_LM84_PREFIX, adm1021_features },
+		/* Cheat on GL523 for now - no separate #defines */
+ { SENSORS_GL523_PREFIX, adm1021_features },
+		/* Cheat on THMC10 for now - no separate #defines */
+ { SENSORS_THMC10_PREFIX, adm1021_features },
  { SENSORS_SIS5595_PREFIX, sis5595_features },
  { SENSORS_MAXI_CG_PREFIX, maxi_cg_features },
  { SENSORS_MAXI_CO_PREFIX, maxi_co_features },
  { SENSORS_MAXI_AS_PREFIX, maxi_as_features },
+ { SENSORS_THMC50_PREFIX, thmc50_features },
+		/* Cheat on ADM1022 for now - no separate #defines */
+ { SENSORS_ADM1022_PREFIX, thmc50_features },
  { 0 }
 };
 
