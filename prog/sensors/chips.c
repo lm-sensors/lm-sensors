@@ -1008,7 +1008,7 @@ void print_adm1025(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1025_TEMP1_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.2f C (hot:limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
+      printf("%+3.0f C   (limit = %+3.0f C, hysteresis = %+3.0f C) %s\n",
            cur,max,min, alarms&ADM1025_ALARM_TEMP?"ALARM":"");
     }
   } else
