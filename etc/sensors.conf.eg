@@ -1339,3 +1339,65 @@ chip "adm1021-*" "adm1023-*" "max1617-*" "max1617a-*" "thmc10-*" "lm84-*" "gl523
 #   set temp_over		70
 #   set remote_temp_low		40
 #   set remote_temp_over	70
+
+chip "vt1211-*"
+
+    label in0 "unused"
+    label in1 "+2.5V"
+    label in2 "VCore1"
+    label in3 "+5V"
+    label in4 "+12V"
+    label in5 "+3.3V"
+    label in6 "VCore2"
+
+    label temp1 "1211 Temp"
+    label temp2 "MB Temp"
+    label temp3 "Proc Temp"
+
+#
+#   All voltage calculations have the form
+#       ((@ * 100) - 3) / (K * 95.8), (@ * K * 0.958) + .03 
+#   where K = R2 / (R1 + R2).
+#   Use the following K values based on input voltage:
+#	voltage		K
+#	2.5		0.8333
+#	3.3		0.6296
+#	3.5 (Vcore)	0.5952
+#	5.0		0.4167
+#	12.0		0.1754
+#
+    compute in0 ((@ * 100) - 3) / (0.5952 * 95.8), (@ * 0.5952 * 0.958) + .03 
+    compute in1 ((@ * 100) - 3) / (0.8333 * 95.8), (@ * 0.8333 * 0.958) + .03 
+    compute in2 ((@ * 100) - 3) / (0.5952 * 95.8), (@ * 0.5952 * 0.958) + .03 
+    compute in3 ((@ * 100) - 3) / (0.4167 * 95.8), (@ * 0.4167 * 0.958) + .03 
+    compute in4 ((@ * 100) - 3) / (0.1754 * 95.8), (@ * 0.1754 * 0.958) + .03 
+    compute in5 ((@ * 100) - 3) / (0.6296 * 95.8), (@ * 0.6296 * 0.958) + .03 
+    compute in6 ((@ * 100) - 3) / (0.5952 * 95.8), (@ * 0.5952 * 0.958) + .03 
+
+    set in1_min 2.5 * 0.95
+    set in1_max 2.5 * 1.05
+    set in1_min 2.5 * 0.95
+    set in1_max 2.5 * 1.05
+    set in2_min 2.0 * 0.97
+    set in2_max 2.0 * 1.03
+    set in3_min 5.0 * 0.95
+    set in3_max 5.0 * 1.05
+    set in4_min 12.0 * 0.90
+    set in4_max 12.0 * 1.10
+    set in5_min 3.3 * 0.95
+    set in5_max 3.3 * 1.05
+    set in6_min 2.0 * 0.97
+    set in6_max 2.0 * 1.03
+
+    compute temp1  (@ - 65) / 0.9686,  (@ * 0.9686) + 65
+    compute temp3  (@ - 65) / 0.9686,  (@ * 0.9686) + 65
+
+    set temp1_hyst 40
+    set temp1_over 45
+    set temp2_hyst 55
+    set temp2_over 60
+    set temp3_hyst 60
+    set temp3_over 65
+
+    set fan1_min 3000
+    set fan2_min 3000
