@@ -76,6 +76,12 @@ readings and the accuracy of the readings.
 
 The actual formula is RPM = (60 * 22500) / (count * divisor)
 
+The readings are most accurate when the fan speed is low
+(i.e., close to the minimum possible RPM reading).
+As fan speed gets closer to the maximum possible RPM reading,
+the reading becomes quite inaccurate. Fortunately, most computer
+fans do not approach 1,000,000 RPM !
+
 
 Fan readings 2X too high
 ------------------------
@@ -96,4 +102,4 @@ section of /etc/sensors.conf:
 
 
 ------------------
-Copyright (c) 2000,2001 Mark D. Studebaker <mdsxyz123@yahoo.com>
+Copyright (c) 2000-2004 Mark D. Studebaker
