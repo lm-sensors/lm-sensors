@@ -36,8 +36,8 @@
 # interesting information, such as video modes and refresh rates.
 #
 # Note that this script does almost nothing by itself. It simply converts
-# what it finds in /proc to binary data to feed the parse-edid script.
-# The parse-edid script was written by John Fremlin and is available at
+# what it finds in /proc to binary data to feed the parse-edid program.
+# The parse-edid program was written by John Fremlin and is available at
 # the following address:
 #   http://john.fremlin.de/programs/linux/read-edid/
 
