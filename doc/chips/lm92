@@ -1,0 +1,54 @@
+Kernel driver `lm92.o'
+======================
+
+Status: Complete and somewhat tested
+
+Supported chips:
+  * National Semiconductors LM92
+    Prefix `lm92'
+    Addresses scanned: I2C 0x48 - 0x4b (inclusive)
+
+Author: Abraham vd Merwe <abraham@2d3d.co.za>
+
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_lm92: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `lm92' chip
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+
+
+Description
+-----------
+
+This driver implements support for the National Semiconductors LM92
+temperature sensor.
+
+Each LM92 temperature sensor supports a single temperature sensor.
+Temperatures are exported to proc in degrees celsius * 10000 (in other
+words temperatures are accurate to 4 decimal places). There are alarms
+for high, low, and critical thresholds. There's also an hysterisis to
+control the thresholds for resetting alarms.
+
+At the moment the driver controls these sensors in comparator mode and the
+interrupt pins (INT, T_CRIT_A) are ignored.
+
+Hardware Configurations
+-----------------------
+
+The only thing that can be changed is enabling of the fault queue. Doing so
+ensures that alarms will only be triggered if 4 consecutive readings all
+cross the alarm thresholds. You can enable this behaviour by uncommenting
+the #define in the driver source, and then recompile/reinstall.
+
