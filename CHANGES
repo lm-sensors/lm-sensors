@@ -20,6 +20,7 @@ ask CVS about it:
 2.8.7 (2004xxxx)
   File doc/lm_sensors-FAQ.texi: Update 4.27.
   File doc/chips/pc87360-fan: Renamed to pc87360
+                              Big update
   File doc/chips/w83781d: Update AS99127F documentation
   File etc/sensors.conf.eg: Add comments about BP6 voltages
                             Add comment on Asus A7V8X-X VCore
@@ -28,6 +29,7 @@ ask CVS about it:
                             New lm99 section
                             Add section for LM85-like chips
                             Preliminary pc87366 section
+                            Add comment on GL520SM application modes
   Library: Fix 2.6 VRM
            Fix 2.6 hyst temp for 2.6 (lm75, lm78 and gl518sm)
            Fully support the PC87360 family
@@ -40,6 +42,9 @@ ask CVS about it:
   Modules dmi_scan, i2c-piix4: Move IBM detection into dmi_scan
   Modules w83781d.c, smartbatt.c, lm75.c, gl520sm.c, gl518sm.c, ds1621.c,
           asb100.c, lm92.c: Use swab16
+  Module gl520sm: Less agressive initialization process
+                  Fix temp1 limits being unsettable in application
+                  Ensure that temp2 and in4 are not used at the same time
   Module i2c-sis645: Add support for SiS655
   Module lm90: Support LM99 and LM89 
   Module lm92: Support MAX6633, MAX6634, MAX6635 and LM76
@@ -53,21 +58,34 @@ ask CVS about it:
                       Fix fan speed computation
                       Retrieve fans configuration from Super-I/O space
                       Export pwm_enable (read-only)
+                      Honor pwm invert bits
                       Clear fan alarms after we read them
+                      Do not read fan data when monitoring is disabled
+                      Do not include SENSORS_INSMOD stuff
+                      New module parameter: init
+  Module smsc47m1: Lock on reads and writes
   Module thmc50: Fix address range
   Module via686a: Fix voltage roundings
                   Simplify temperature conversions
   Module w83781d: Drop PWM support for as99127f
+                  Invert AS99127F beep bits in driver rather than user-space
+  Programs pwmconfig, fancontrol: Switch to new sysfs naming scheme
   Program i2cdetect: Adapt probing method to address
                      Add -q and -r flags to force probing methods
+                     Allow probing range selection
   Program isadump: Major improvements
   Program isaset: New
   Program mkpatch: Patch dmi_scan.c in kernel instead of adding our own
                    module
                    Include i2c-nforce2
+  Program sensord: New --rrd-no-average parameter
+                   Syncronize time slots with rrd
+                   Fix W83781D temp3 alarm (Aurelien Jarno)
   Program sensors: Fully support the PC87360 family
                    Fix lm80 temperature alarms
                    Support the lm99
+                   Do not invert AS99127F beep bits anymore
+                   Fix W83781D temp3 alarm (Aurelien Jarno)
   Program sensors-detect: Rework Super I/O detection
                           Support SiS655/SiS96x
                           Support ADT7461 and ADT7467
@@ -83,6 +101,7 @@ ask CVS about it:
                           0x50-0x5F
                           Improve LM89 and LM99 support
                           Support GeForce FX 5900 video cards
+                          Fix devfs misdetection (Aurelien Jarno)
 
 
 2.8.6 (20040405)
