@@ -35,7 +35,7 @@ int sensors_match_chip(sensors_chip_name chip1, sensors_chip_name chip2)
 {
   if ((chip1.prefix != SENSORS_CHIP_NAME_PREFIX_ANY) &&
       (chip2.prefix != SENSORS_CHIP_NAME_PREFIX_ANY) &&
-      strcmp(chip1.prefix,chip2.prefix))
+      strcasecmp(chip1.prefix,chip2.prefix))
     return 0;
   if ((chip1.bus != SENSORS_CHIP_NAME_BUS_ANY) && 
       (chip2.bus != SENSORS_CHIP_NAME_BUS_ANY) &&
@@ -87,7 +87,7 @@ const sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix,
   int i,j;
   const sensors_chip_feature *features;
   for (i = 0; sensors_chip_features_list[i].prefix; i++)
-    if (!strcmp(sensors_chip_features_list[i].prefix,prefix)) {
+    if (!strcasecmp(sensors_chip_features_list[i].prefix,prefix)) {
       features = sensors_chip_features_list[i].feature;
       for (j=0;  features[j].name; j++) 
         if (features[j].number == feature)
@@ -105,10 +105,10 @@ const sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
   int i,j;
   const sensors_chip_feature *features;
   for (i = 0; sensors_chip_features_list[i].prefix; i++)
-    if (!strcmp(sensors_chip_features_list[i].prefix,prefix)) {
+    if (!strcasecmp(sensors_chip_features_list[i].prefix,prefix)) {
       features = sensors_chip_features_list[i].feature;
       for (j=0;  features[j].name; j++) 
-        if (!strcmp(features[j].name,feature))
+        if (!strcasecmp(features[j].name,feature))
           return features + j;
     }
   return NULL;
@@ -120,6 +120,14 @@ const sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
    if there are wildcards. */
 int sensors_chip_name_has_wildcards(sensors_chip_name chip)
 {
+  extern int foundsysfs;
+
+  if(foundsysfs) {
+    if (chip.prefix == SENSORS_CHIP_NAME_PREFIX_ANY)
+      return 1;
+    else
+      return 0;
+  }     
   if ((chip.prefix == SENSORS_CHIP_NAME_PREFIX_ANY) ||
       (chip.bus == SENSORS_CHIP_NAME_BUS_ANY) ||
       (chip.bus == SENSORS_CHIP_NAME_BUS_ANY_I2C) ||
@@ -154,14 +162,14 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
     return -SENSORS_ERR_NO_ENTRY;
   for (chip = NULL; (chip = sensors_for_all_config_chips(name,chip));)
     for (i = 0; i < chip->labels_count; i++)
-      if (!strcmp(featureptr->name, chip->labels[i].name)) {
+      if (!strcasecmp(featureptr->name, chip->labels[i].name)) {
         if (*result)
           free(*result);
         if (! (*result = strdup(chip->labels[i].value)))
           sensors_fatal_error("sensors_get_label","Allocating label text");
         return 0; /* Exact match always overrules! */
       } else if (alt_featureptr && 
-                 !strcmp(alt_featureptr->name, chip->labels[i].name)) {
+                 !strcasecmp(alt_featureptr->name, chip->labels[i].name)) {
         if (*result)
           free(*result);
         if (! (*result = strdup(chip->labels[i].value)))
@@ -192,10 +200,10 @@ int sensors_get_ignored(sensors_chip_name name, int feature)
     return -SENSORS_ERR_NO_ENTRY;
   for (chip = NULL; (chip = sensors_for_all_config_chips(name,chip));)
     for (i = 0; i < chip->ignores_count; i++)
-      if (!strcmp(featureptr->name, chip->ignores[i].name))
+      if (!strcasecmp(featureptr->name, chip->ignores[i].name))
         return 0; /* Exact match always overrules! */
       else if (alt_featureptr &&
-               !strcmp(alt_featureptr->name, chip->ignores[i].name))
+               !strcasecmp(alt_featureptr->name, chip->ignores[i].name))
         res = 0;
   return res;
 }
@@ -227,11 +235,11 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
     return -SENSORS_ERR_ACCESS_R;
   for (chip = NULL; !expr && (chip = sensors_for_all_config_chips(name,chip));)
     for (i = 0; !final_expr && (i < chip->computes_count); i++) {
-      if (!strcmp(main_feature->name,chip->computes[i].name)) {
+      if (!strcasecmp(main_feature->name,chip->computes[i].name)) {
         expr = chip->computes[i].from_proc;
         final_expr = 1;
       } else if (alt_feature && 
-                 !strcmp(alt_feature->name,chip->computes[i].name))
+                 !strcasecmp(alt_feature->name,chip->computes[i].name))
         expr = chip->computes[i].from_proc;
     }
   if (sensors_read_proc(name,feature,&val))
@@ -270,11 +278,11 @@ int sensors_set_feature(sensors_chip_name name, int feature, double value)
     return -SENSORS_ERR_ACCESS_W;
   for (chip = NULL; !expr && (chip = sensors_for_all_config_chips(name,chip));)
     for (i = 0; !final_expr && (i < chip->computes_count); i++)
-      if (!strcmp(main_feature->name,chip->computes[i].name)) {
+      if (!strcasecmp(main_feature->name,chip->computes[i].name)) {
         expr = chip->computes->to_proc;
         final_expr = 1;
       } else if (alt_feature && 
-                 !strcmp(alt_feature->name,chip->computes[i].name))
+                 !strcasecmp(alt_feature->name,chip->computes[i].name))
         expr = chip->computes[i].to_proc;
 
   to_write = value;
@@ -296,7 +304,11 @@ const sensors_chip_name *sensors_get_detected_chips (int *nr)
 
 const char *sensors_get_adapter_name(int bus_nr)
 {
+  extern int foundsysfs;
   int i;
+
+  if(foundsysfs)
+    return "Unavailable from sysfs";
   if (bus_nr == SENSORS_CHIP_NAME_BUS_ISA)
     return "ISA adapter";
   if (bus_nr == SENSORS_CHIP_NAME_BUS_DUMMY)
@@ -309,7 +321,11 @@ const char *sensors_get_adapter_name(int bus_nr)
 
 const char *sensors_get_algorithm_name(int bus_nr)
 {
+  extern int foundsysfs;
   int i;
+
+  if(foundsysfs)
+    return "Unavailable from sysfs";
   if (bus_nr == SENSORS_CHIP_NAME_BUS_ISA)
     return "ISA algorithm";
   if (bus_nr == SENSORS_CHIP_NAME_BUS_DUMMY)
@@ -328,7 +344,7 @@ const sensors_feature_data *sensors_get_all_features (sensors_chip_name name,
   int i;
 
   for (i = 0; sensors_chip_features_list[i].prefix; i++)
-    if (!strcmp(sensors_chip_features_list[i].prefix,name.prefix)) {
+    if (!strcasecmp(sensors_chip_features_list[i].prefix,name.prefix)) {
       feature_list=sensors_chip_features_list[i].feature;
       if (!*nr1 && !*nr2) { /* Return the first entry */
         if (!feature_list[0].name) /* The list may be empty */

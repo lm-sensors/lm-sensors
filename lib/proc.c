@@ -38,14 +38,17 @@
 static char buf[BUF_LEN];
 
 sensors_proc_chips_entry *sensors_proc_chips;
-int sensors_proc_chips_count;
-int sensors_proc_chips_max;
+int sensors_proc_chips_count, sensors_proc_chips_max;
+int sensors_sys_chips_count, sensors_sys_chips_max;
 
+sensors_bus *sensors_sys_bus;
+int sensors_sys_bus_count, sensors_sys_bus_max;
 sensors_bus *sensors_proc_bus;
-int sensors_proc_bus_count;
-int sensors_proc_bus_max;
+int sensors_proc_bus_count, sensors_proc_bus_max;
 
 static int sensors_get_chip_id(sensors_chip_name name);
+
+int foundsysfs=0;
 
 #define add_proc_chips(el) sensors_add_array_el(el,\
                                        (void **) &sensors_proc_chips,\
@@ -53,20 +56,87 @@ static int sensors_get_chip_id(sensors_chip_name name);
                                        &sensors_proc_chips_max,\
                                        sizeof(struct sensors_proc_chips_entry))
 
-#define add_bus(el) sensors_add_array_el(el,\
+#define add_proc_bus(el) sensors_add_array_el(el,\
                                        (void **) &sensors_proc_bus,\
                                        &sensors_proc_bus_count,\
                                        &sensors_proc_bus_max,\
                                        sizeof(struct sensors_bus))
 
+#include <limits.h>
+#include <dirent.h>
 /* This reads /proc/sys/dev/sensors/chips into memory */
 int sensors_read_proc_chips(void)
 {
-  int name[3] = { CTL_DEV, DEV_SENSORS, SENSORS_CHIPS };
-  int buflen = BUF_LEN;
-  char *bufptr = buf;
-  sensors_proc_chips_entry entry;
-  int res,lineno;
+	struct dirent *de;
+	DIR *dir;
+	FILE *f;
+	char dev[NAME_MAX], fstype[NAME_MAX], sysfs[NAME_MAX], n[NAME_MAX];
+	char dirname[NAME_MAX];
+	int res;
+
+	int name[3] = { CTL_DEV, DEV_SENSORS, SENSORS_CHIPS };
+	int buflen = BUF_LEN;
+	char *bufptr = buf;
+	sensors_proc_chips_entry entry;
+	int lineno;
+
+	/* First figure out where sysfs was mounted */
+	if ((f = fopen("/proc/mounts", "r")) == NULL)
+		goto proc;
+	while (fgets(n, NAME_MAX, f)) {
+		sscanf(n, "%[^ ] %[^ ] %[^ ] %*s\n", dev, sysfs, fstype);
+		if (strcasecmp(fstype, "sysfs") == 0) {
+			foundsysfs++;
+			break;
+		}
+	}
+	fclose(f);
+	if (! foundsysfs)
+		goto proc;
+	strcat(sysfs, "/bus/i2c/devices");
+
+	/* Then read from it */
+	dir = opendir(sysfs);		/* Might just be "/sys/bus/i2c/devices" */
+	if (! dir)
+		goto proc;
+
+	while ((de = readdir(dir)) != NULL) {
+		if (de->d_name[0] == '.' && de->d_name[1] == '\0')
+			continue;
+		if (de->d_name[0] == '.' && de->d_name[1] == '.' && de->d_name[2] == '\0')
+			continue;
+/*
+		if (de->d_type != DT_DIR && de->d_type != DT_LNK)
+			continue;
+*/
+
+		strcpy(n, sysfs);
+		strcat(n, "/");
+		strcat(n, de->d_name);
+		strcpy(dirname, n);
+		strcat(n, "/name");
+
+		if ((f = fopen(n, "r")) != NULL) {
+			char	x[120];
+			fscanf(f, "%[a-zA-z0-9_]", &x);
+			/* HACK */ strcat(x, "-*");
+			if ((res = sensors_parse_chip_name(x, &entry.name))) {
+				char	em[NAME_MAX + 20];
+				strcpy(em, "Parsing ");
+				strcat(em, n);
+				sensors_parse_error(em, 0);
+				return res;
+			}
+			entry.name.busname = strdup(dirname);
+			sscanf(de->d_name, "%x-%x", &entry.name.bus, &entry.name.addr);
+			add_proc_chips(&entry);
+			fclose(f);
+		}
+	}
+	closedir(dir);
+	return 0;
+
+proc:
 
   if (sysctl(name, 3, bufptr, &buflen, NULL, 0))
     return -SENSORS_ERR_PROC;
@@ -90,11 +160,22 @@ int sensors_read_proc_chips(void)
 
 int sensors_read_proc_bus(void)
 {
-  FILE *f;
-  char line[255];
-  char *border;
-  sensors_bus entry;
-  int lineno;
+	FILE *f;
+	char line[255];
+	char *border;
+	sensors_bus entry;
+	int lineno;
+
+	if(foundsysfs) {
+		/* I don't have a clue what to read here. */
+		entry.adapter = 0;	/* ?? */
+		entry.algorithm = 0;	/* ?? */
+		entry.number = SENSORS_CHIP_NAME_BUS_ISA;
+		add_proc_bus(&entry);
+		entry.number = SENSORS_CHIP_NAME_BUS_DUMMY;
+		add_proc_bus(&entry);
+		return 0;
+	}
 
   f = fopen("/proc/bus/i2c","r");
   if (!f)
@@ -122,7 +203,7 @@ int sensors_read_proc_bus(void)
       goto ERROR;
     sensors_strip_of_spaces(entry.algorithm);
     sensors_strip_of_spaces(entry.adapter);
-    add_bus(&entry);
+    add_proc_bus(&entry);
     lineno++;
   }
   fclose(f);
@@ -149,24 +230,51 @@ int sensors_get_chip_id(sensors_chip_name name)
 /* This reads a feature /proc file */
 int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 {
-  int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
-  const sensors_chip_feature *the_feature;
-  int buflen = BUF_LEN;
-  int mag;
-  
-  if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
-    return sysctl_name[2];
-  if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
-    return -SENSORS_ERR_NO_ENTRY;
-  sysctl_name[3] = the_feature->sysctl;
-  if (sysctl(sysctl_name, 4, buf, &buflen, NULL, 0))
-    return -SENSORS_ERR_PROC;
-  *value = *((long *) (buf + the_feature->offset));
-  for (mag = the_feature->scaling; mag > 0; mag --)
-    *value /= 10.0;
-  for (; mag < 0; mag ++)
-    *value *= 10.0;
-  return 0;
+	int				sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
+	const sensors_chip_feature	*the_feature;
+	int				buflen = BUF_LEN;
+	int				mag;
+	char				n[NAME_MAX];
+	FILE				*f;
+
+	if(!foundsysfs)
+		if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
+			return sysctl_name[2];
+	if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
+		return -SENSORS_ERR_NO_ENTRY;
+	if(foundsysfs) {
+		strcpy(n, name.busname);
+		strcat(n, "/");
+		if(the_feature->sysname != NULL)
+			strcat(n, the_feature->sysname);
+		else
+			strcat(n, the_feature->name);
+		if ((f = fopen(n, "r")) != NULL) {
+			fscanf(f, "%lf", value);
+			fclose(f);
+			if(the_feature->sysscaling)
+				mag = the_feature->sysscaling;
+			else
+				mag = the_feature->scaling;
+			for (; mag > 0; mag --)
+				*value /= 10.0;
+	//		fprintf(stderr, "Feature %s value %lf scale %d offset %d\n",
+	//			the_feature->name, *value,
+	//			the_feature->scaling, the_feature->offset);
+			return 0;
+		} else
+			return -SENSORS_ERR_PROC;
+	} else {
+		sysctl_name[3] = the_feature->sysctl;
+		if (sysctl(sysctl_name, 4, buf, &buflen, NULL, 0))
+			return -SENSORS_ERR_PROC;
+		*value = *((long *) (buf + the_feature->offset));
+		for (mag = the_feature->scaling; mag > 0; mag --)
+			*value /= 10.0;
+		for (; mag < 0; mag ++)
+			*value *= 10.0;
+	}
+	return 0;
 }
   
 int sensors_write_proc(sensors_chip_name name, int feature, double value)
