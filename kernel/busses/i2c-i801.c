@@ -80,6 +80,11 @@
 #define PCI_DEVICE_ID_INTEL_ICH6_16	0x266a
 #endif
 
+/* ICH7 is undefined */
+#ifndef PCI_DEVICE_ID_INTEL_ICH7_17
+#define PCI_DEVICE_ID_INTEL_ICH7_17	0x27da
+#endif
+
 #ifdef I2C_FUNC_SMBUS_BLOCK_DATA_PEC
 #define HAVE_PEC
 #endif
@@ -156,7 +161,7 @@ static int i801_setup(struct pci_dev *dev)
 	    dev->device == PCI_DEVICE_ID_INTEL_82801EB_3 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_ESB_4 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_ICH6_16 ||
-	    dev->device == 0x27da)
+	    dev->device == PCI_DEVICE_ID_INTEL_ICH7_17)
 		isich4 = 1;
 	else
 		isich4 = 0;
@@ -657,7 +662,7 @@ static struct pci_device_id i801_ids[] __devinitdata = {
   	},
 	{
 		.vendor =	PCI_VENDOR_ID_INTEL,
-		.device =	0x27da,	/* ICH7 */
+		.device =	PCI_DEVICE_ID_INTEL_ICH7_17,
 		.subvendor =	PCI_ANY_ID,
 		.subdevice =	PCI_ANY_ID,
 	},
