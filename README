@@ -57,6 +57,7 @@ At least the following hardware sensor chips are supported:
   Myson MTP008
   National Semiconductor LM75, LM77, LM78, LM78-J, LM79,
                          LM80, LM81, LM84, and LM87
+  Philips NE1617, NE1617A
   SiS 5595, 950 embedded sensors
   TelCom TCN75
   TI THMC10 and THMC50

@@ -46,8 +46,11 @@ adm1021
 	max1617		2	-	-	-	yes	no
 	max1617a	2	-	-	-	yes	no
 	thmc10		2	-	-	-	yes	no
-	xeon		1	-	-	-	yes	no
 	  (xeon - no detection - requires force_adm1021 parameter)
+	xeon		1	-	-	-	yes	no
+	  (the following chips are detected as a max1617)
+	ne1617		2	-	-	-	yes	no
+	ne1617a		2	-	-	-	yes	no
 
 adm1024
 	adm1024		3	6	-	1 dac	yes	no
