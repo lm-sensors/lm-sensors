@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.7.0 (200212??)
+2.7.0 (20021208)
   NOTE: Requires i2c-2.7.0 or newer.
   File doc/busses/i2c-ali1535: Add license, miscellaneous changes
   File doc/busses/i2c-ali15x3: Add license, miscellaneous changes
