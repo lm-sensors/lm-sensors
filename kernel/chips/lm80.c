@@ -224,8 +224,6 @@ static void lm80_fan_div(struct i2c_client *client, int operation, int ctl_name,
 #define MAX_LM80_NR 4
 static struct i2c_client *lm80_list[MAX_LM80_NR];
 
-/* The driver. I choose to use type i2c_driver, as at is identical to both
-   smbus_driver and isa_driver, and clients could be of either kind */
 static struct i2c_driver lm80_driver = {
   /* name */		"LM80 sensor driver",
   /* id */		I2C_DRIVERID_LM80,

@@ -231,8 +231,6 @@ static void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
 #define MAX_LM78_NR 8
 static struct i2c_client *lm78_list[MAX_LM78_NR];
 
-/* The driver. I choose to use type i2c_driver, as at is identical to both
-   smbus_driver and isa_driver, and clients could be of either kind */
 static struct i2c_driver lm78_driver = {
   /* name */		"LM78(-J) and LM79 sensor driver",
   /* id */		I2C_DRIVERID_LM78,
@@ -344,7 +342,7 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
      client structure, even though we cannot fill it completely yet.
      But it allows us to access lm78_{read,write}_value. */
 
-  if (! (new_client = kmalloc((is_isa?sizeof(struct isa_client):
+  if (! (new_client = kmalloc((is_isa?sizeof(struct i2c_client):
                                       sizeof(struct i2c_client)) + 
                               sizeof(struct lm78_data),
                               GFP_KERNEL))) {
@@ -352,15 +350,10 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
     goto ERROR0;
   }
 
-  if (is_isa) {
-    data = (struct lm78_data *) (((struct isa_client *) new_client) + 1);
-    new_client->addr = 0;
-    ((struct isa_client *) new_client)->isa_addr = address;
+  data = (struct lm78_data *) (((struct i2c_client *) new_client) + 1);
+  if (is_isa) 
     init_MUTEX(&data->lock);
-  } else {
-    data = (struct lm78_data *) (((struct i2c_client *) new_client) + 1);
-    new_client->addr = address;
-  }
+  new_client->addr = address;
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &lm78_driver;
@@ -485,7 +478,7 @@ int lm78_detach_client(struct i2c_client *client)
   lm78_list[i] = NULL;
 
   if i2c_is_isa_client(client)
-    release_region(((struct isa_client *)client)->isa_addr,LM78_EXTENT);
+    release_region(client->addr,LM78_EXTENT);
   kfree(client);
 
   return 0;
@@ -526,9 +519,9 @@ int lm78_read_value(struct i2c_client *client, u8 reg)
   int res;
   if (i2c_is_isa_client(client)) {
     down(& (((struct lm78_data *) (client->data)) -> lock));
-    outb_p(reg,(((struct isa_client *) client)->isa_addr) + 
+    outb_p(reg,client->addr + 
                LM78_ADDR_REG_OFFSET);
-    res = inb_p((((struct isa_client *) client)->isa_addr) + 
+    res = inb_p(client->addr + 
                 LM78_DATA_REG_OFFSET);
     up( & (((struct lm78_data *) (client->data)) -> lock));
     return res;
@@ -547,8 +540,8 @@ int lm78_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
   if (i2c_is_isa_client(client)) {
     down(&(((struct lm78_data *) (client->data)) -> lock));
-    outb_p(reg,((struct isa_client *) client)->isa_addr + LM78_ADDR_REG_OFFSET);
-    outb_p(value,((struct isa_client *) client)->isa_addr + LM78_DATA_REG_OFFSET);
+    outb_p(reg,client->addr + LM78_ADDR_REG_OFFSET);
+    outb_p(value,client->addr + LM78_DATA_REG_OFFSET);
     up(&(((struct lm78_data *) (client->data)) -> lock));
     return 0;
   } else

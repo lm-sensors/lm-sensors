@@ -347,16 +347,15 @@ int sis5595_detect(struct i2c_adapter *adapter, int address, int kind)
      client structure, even though we cannot fill it completely yet.
      But it allows us to access sis5595_{read,write}_value. */
 
-  if (! (new_client = kmalloc(sizeof(struct isa_client) +
+  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
                               sizeof(struct sis5595_data),
                               GFP_KERNEL))) {
     err = -ENOMEM;
     goto ERROR0;
   }
 
-  data = (struct sis5595_data *) (((struct isa_client *) new_client) + 1);
-  new_client->addr = 0;
-  ((struct isa_client *) new_client)->isa_addr = address;
+  data = (struct sis5595_data *) (new_client + 1);
+  new_client->addr = address;
   init_MUTEX(&data->lock);
   new_client->data = data;
   new_client->adapter = adapter;
@@ -457,7 +456,7 @@ int sis5595_detach_client(struct i2c_client *client)
   }
   sis5595_list[i] = NULL;
 
-  release_region(((struct isa_client *)client)->isa_addr,SIS5595_EXTENT);
+  release_region(client->addr,SIS5595_EXTENT);
   kfree(client);
 
   return 0;
@@ -495,10 +494,8 @@ int sis5595_read_value(struct i2c_client *client, u8 reg)
     
     down((struct semaphore *) (client->data));
     down(& (((struct sis5595_data *) (client->data)) -> lock));
-    outb_p(reg,(((struct isa_client *) client)->isa_addr) + 
-               SIS5595_ADDR_REG_OFFSET);
-    res = inb_p((((struct isa_client *) client)->isa_addr) + 
-                SIS5595_DATA_REG_OFFSET);
+    outb_p(reg,client->addr + SIS5595_ADDR_REG_OFFSET);
+    res = inb_p(client->addr + SIS5595_DATA_REG_OFFSET);
     up( & (((struct sis5595_data *) (client->data)) -> lock));
     return res;
 }
@@ -509,8 +506,8 @@ int sis5595_read_value(struct i2c_client *client, u8 reg)
 int sis5595_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
     down(& (((struct sis5595_data *) (client->data)) -> lock));
-    outb_p(reg,((struct isa_client *) client)->isa_addr + SIS5595_ADDR_REG_OFFSET);
-    outb_p(value,((struct isa_client *) client)->isa_addr + SIS5595_DATA_REG_OFFSET);
+    outb_p(reg,client->addr + SIS5595_ADDR_REG_OFFSET);
+    outb_p(value,client->addr + SIS5595_DATA_REG_OFFSET);
     up( & (((struct sis5595_data *) (client->data)) -> lock));
     return 0;
 }

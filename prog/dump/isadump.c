@@ -24,7 +24,7 @@
 
 
 /* To keep glibc2 happy */
-#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ == 0
+#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ >= 0
 #include <sys/perm.h>
 #endif
 

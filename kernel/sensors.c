@@ -128,8 +128,6 @@ int sensors_register_entry(struct i2c_client *client ,const char *prefix,
   struct ctl_table_header *new_header;
 
   if ((res = sensors_create_name(&name,prefix,client->adapter,
-                                 i2c_is_isa_client(client)?
-                                 ((struct isa_client *) client)->isa_addr:
                                  client->addr)))
     return res;
 

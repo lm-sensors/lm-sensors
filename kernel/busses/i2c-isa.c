@@ -27,26 +27,13 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 
-#include "compat.h"
-
 #include <linux/i2c.h>
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,0,19)
-#include <linux/sched.h>
-#else
-#include <asm/semaphore.h>
-#endif
 
 #include "version.h"
 #include "i2c-isa.h"
 
-static int isa_master_xfer (struct isa_adapter *adap,
-                            struct i2c_msg msgs[], int num);
-static int isa_slave_send (struct isa_adapter *adap, char *data, int len);
-static int isa_slave_recv (struct isa_adapter *adap, char *data, int len);
-static int isa_algo_control (struct isa_adapter *adap, unsigned int cmd,
-                             unsigned long arg);
-static int isa_client_register (struct isa_client *client);
-static int isa_client_unregister (struct isa_client *client);
+static void isa_inc_use (struct i2c_adapter *adapter);
+static void isa_dec_use (struct i2c_adapter *adapter);
 
 static int isa_init(void);
 static int isa_cleanup(void);
@@ -57,81 +44,48 @@ extern int cleanup_module(void);
 #endif /* MODULE */
 
 /* This is the actual algorithm we define */
-static struct isa_algorithm isa_algorithm = {
-  /* name */            "ISA bus adapter",
-  /* id */              ALGO_ISA,
-  /* master_xfer */     &isa_master_xfer,
-  /* slave_send */      &isa_slave_send,
-  /* slave_rcv */       &isa_slave_recv,
-  /* algo_control */    &isa_algo_control,
-  /* client_register */ &isa_client_register,
-  /* client_unregister*/&isa_client_unregister
+static struct i2c_algorithm isa_algorithm = {
+  /* name */            "ISA bus algorithm",
+  /* id */              I2C_ALGO_ISA,
+  /* master_xfer */     NULL,
+  /* slave_send */      NULL,
+  /* slave_rcv */       NULL,
+  /* algo_control */    NULL,
 };
 
 /* There can only be one... */
-static struct isa_adapter isa_adapter;
+static struct i2c_adapter isa_adapter = {
+  /* name */            "ISA main adapter",
+  /* id */		I2C_ALGO_ISA | I2C_HW_ISA,
+  /* algorithm */       &isa_algorithm,
+  /* algo_data */       NULL,
+  /* inc_use */         &isa_inc_use,
+  /* dec_use */         &isa_dec_use,
+  /* data */            NULL,
+  /* Other fields not initialized */
+};
 
 /* Used in isa_init/cleanup */
 static int isa_initialized;
 
-/* Algorithm master_xfer call-back implementation. Can't do that... */
-int isa_master_xfer (struct isa_adapter *adap, struct i2c_msg msgs[],
-                     int num)
+void isa_inc_use (struct i2c_adapter *adapter)
 {
-#ifdef DEBUG
-  printk("i2c-isa.o: isa_master_xfer called for adapter `%s' "
-         "(no i2c level access possible!)\n",
-         adap->name);
+#ifdef MODULE
+  MOD_INC_USE_COUNT;
 #endif
-  return -1;
 }
 
-/* Algorithm slave_send call-back implementation. Can't do that... */
-int isa_slave_send (struct isa_adapter *adap, char *data, int len)
+void isa_dec_use (struct i2c_adapter *adapter)
 {
-#ifdef DEBUG
-  printk("i2c-isa.o: isa_slave_send called for adapter `%s' "
-         "(no i2c level access possible!)\n",
-         adap->name);
+#ifdef MODULE
+  MOD_DEC_USE_COUNT;
 #endif
-  return -1;
-}
-
-/* Algorithm slave_recv call-back implementation. Can't do that... */
-int isa_slave_recv (struct isa_adapter *adap, char *data, int len)
-{
-#ifdef DEBUG
-  printk("i2c-isa.o: isa_slave_recv called for adapter `%s' "
-         "(no i2c level access possible!)\n",
-         adap->name);
-#endif
-  return -1;
-}
-
-/* Here we can put additional calls to modify the workings of the algorithm.
-   But right now, there is no need for that. */
-int isa_algo_control (struct isa_adapter *adap, unsigned int cmd,
-                       unsigned long arg)
-{
-  return 0;
-}
-
-/* Ehm... This is called when a client is registered to an adapter. We could
-   do all kinds of neat stuff here like, ehm - returning success? */
-int isa_client_register (struct isa_client *client)
-{
-  return 0;
-}
-
-int isa_client_unregister (struct isa_client *client)
-{
-  return 0;
 }
 
 int isa_init(void)
 {
   int res;
-  printk("isa.o version %s (%s)\n",LM_VERSION,LM_DATE);
+  printk("i2c-isa.o version %s (%s)\n",LM_VERSION,LM_DATE);
 #ifdef DEBUG
   if (isa_initialized) {
     printk("i2c-isa.o: Oops, isa_init called a second time!\n");
@@ -139,16 +93,13 @@ int isa_init(void)
   }
 #endif
   isa_initialized = 0;
-  if ((res = isa_add_algorithm(&isa_algorithm))) {
+  if ((res = i2c_add_algorithm(&isa_algorithm))) {
     printk("i2c-isa.o: Algorithm registration failed, module not inserted.\n");
     isa_cleanup();
     return res;
   }
   isa_initialized++;
-  strcpy(isa_adapter.name,"ISA main adapter");
-  isa_adapter.id = ALGO_ISA | ISA_MAIN;
-  isa_adapter.algo = &isa_algorithm;
-  if ((res = isa_add_adapter(&isa_adapter))) {
+  if ((res = i2c_add_adapter(&isa_adapter))) {
     printk("i2c-isa.o: Adapter registration failed, "
            "module isa.o is not inserted\n.");
     isa_cleanup();
@@ -164,7 +115,7 @@ int isa_cleanup(void)
   int res;
   if (isa_initialized >= 2)
   {
-    if ((res = isa_del_adapter(&isa_adapter))) {
+    if ((res = i2c_del_adapter(&isa_adapter))) {
       printk("i2c-isa.o: Adapter deregistration failed, module not removed.\n");
       return res;
     } else
@@ -172,7 +123,7 @@ int isa_cleanup(void)
   }
   if (isa_initialized >= 1)
   {
-    if ((res = isa_del_algorithm(&isa_algorithm))) {
+    if ((res = i2c_del_algorithm(&isa_algorithm))) {
       printk("i2c-isa.o: Algorithm deregistration failed, module not removed.\n");
       return res;
     } else

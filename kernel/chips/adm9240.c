@@ -271,8 +271,6 @@ static void adm9240_vid(struct i2c_client *client, int operation, int ctl_name,
 #define MAX_ADM9240_NR 4
 static struct i2c_client *adm9240_list[MAX_ADM9240_NR];
 
-/* The driver. I choose to use type i2c_driver, as at is identical to both
-   smbus_driver and isa_driver, and clients could be of either kind */
 static struct i2c_driver adm9240_driver = {
   /* name */		"ADM9240 sensor driver",
   /* id */		I2C_DRIVERID_ADM9240,

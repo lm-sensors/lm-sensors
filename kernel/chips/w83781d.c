@@ -397,8 +397,6 @@ static void w83781d_rt(struct i2c_client *client, int operation,
 #define MAX_W83781D_NR 8
 static struct i2c_client *w83781d_list[MAX_W83781D_NR];
 
-/* The driver. I choose to use type i2c_driver, as at is identical to both
-   smbus_driver and isa_driver, and clients could be of either kind */
 static struct i2c_driver w83781d_driver = {
   /* name */		"W83781D sensor driver",
   /* id */		I2C_DRIVERID_W83781D,
@@ -676,22 +674,15 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
      client structure, even though we cannot fill it completely yet.
      But it allows us to access w83781d_{read,write}_value. */
 
-  if (! (new_client = kmalloc((is_isa?sizeof(struct isa_client):
-                                      sizeof(struct i2c_client)) +
+  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
                               sizeof(struct w83781d_data),
                               GFP_KERNEL))) {
     err = -ENOMEM;
     goto ERROR0;
   }
 
-  if (is_isa) {
-    data = (struct w83781d_data *) (((struct isa_client *) new_client) + 1);
-    new_client->addr = 0;
-    ((struct isa_client *) new_client)->isa_addr = address;
-  } else {
-    data = (struct w83781d_data *) (((struct i2c_client *) new_client) + 1);
-    new_client->addr = address;
-  }
+  data = (struct w83781d_data *) (((struct i2c_client *) new_client) + 1);
+  new_client->addr = address;
   init_MUTEX(&data->lock);
   new_client->data = data;
   new_client->adapter = adapter;
@@ -837,7 +828,7 @@ int w83781d_detach_client(struct i2c_client *client)
   w83781d_list[i] = NULL;
 
   if i2c_is_isa_client(client)
-    release_region(((struct isa_client *)client)->isa_addr,W83781D_EXTENT);
+    release_region(client->addr,W83781D_EXTENT);
   kfree(client);
 
   return 0;
@@ -880,26 +871,18 @@ int w83781d_read_value(struct i2c_client *client, u16 reg)
   down(& (((struct w83781d_data *) (client->data)) -> lock));
   if (i2c_is_isa_client(client)) {
     if (reg & 0xff00) {
-      outb_p(W83781D_REG_BANK,(((struct isa_client *) client)->isa_addr) +
-                              W83781D_ADDR_REG_OFFSET);
-      outb_p(reg >> 8,(((struct isa_client *) client)->isa_addr) +
-                      W83781D_DATA_REG_OFFSET);
+      outb_p(W83781D_REG_BANK,client->addr + W83781D_ADDR_REG_OFFSET);
+      outb_p(reg >> 8,client->addr + W83781D_DATA_REG_OFFSET);
     }
-    outb_p(reg & 0xff,(((struct isa_client *) client)->isa_addr) +
-                      W83781D_ADDR_REG_OFFSET);
-    res = inb_p((((struct isa_client *) client)->isa_addr) +
-                W83781D_DATA_REG_OFFSET);
+    outb_p(reg & 0xff,client->addr + W83781D_ADDR_REG_OFFSET);
+    res = inb_p(client->addr + W83781D_DATA_REG_OFFSET);
     if (word_sized) {
-      outb_p((reg & 0xff)+1,(((struct isa_client *) client)->isa_addr) +
-                        W83781D_ADDR_REG_OFFSET);
-      res = (res << 8) + inb_p((((struct isa_client *) client)->isa_addr) +
-                         W83781D_DATA_REG_OFFSET);
+      outb_p((reg & 0xff)+1,client->addr + W83781D_ADDR_REG_OFFSET);
+      res = (res << 8) + inb_p(client->addr + W83781D_DATA_REG_OFFSET);
     }
     if (reg & 0xff00) {
-      outb_p(W83781D_REG_BANK,(((struct isa_client *) client)->isa_addr) +
-                              W83781D_ADDR_REG_OFFSET);
-      outb_p(0,(((struct isa_client *) client)->isa_addr) +
-               W83781D_DATA_REG_OFFSET);
+      outb_p(W83781D_REG_BANK,client->addr + W83781D_ADDR_REG_OFFSET);
+      outb_p(0,client->addr + W83781D_DATA_REG_OFFSET);
     }
   } else {
     if (reg & 0xff00)
@@ -933,26 +916,18 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
   down( & (((struct w83781d_data *) (client->data)) -> lock));
   if (i2c_is_isa_client(client)) {
     if (reg & 0xff00) {
-      outb_p(W83781D_REG_BANK,(((struct isa_client *) client)->isa_addr) +
-                              W83781D_ADDR_REG_OFFSET);
-      outb_p(reg >> 8,(((struct isa_client *) client)->isa_addr) +
-                      W83781D_DATA_REG_OFFSET);
+      outb_p(W83781D_REG_BANK,client->addr + W83781D_ADDR_REG_OFFSET);
+      outb_p(reg >> 8,client->addr + W83781D_DATA_REG_OFFSET);
     }
-    outb_p(reg & 0xff,(((struct isa_client *) client)->isa_addr) +
-                      W83781D_ADDR_REG_OFFSET);
+    outb_p(reg & 0xff,client->addr + W83781D_ADDR_REG_OFFSET);
     if (word_sized) {
-      outb_p(value >> 8,(((struct isa_client *) client)->isa_addr) +
-                        W83781D_DATA_REG_OFFSET);
-      outb_p((reg & 0xff)+1,(((struct isa_client *) client)->isa_addr) +
-                        W83781D_ADDR_REG_OFFSET);
+      outb_p(value >> 8,client->addr + W83781D_DATA_REG_OFFSET);
+      outb_p((reg & 0xff)+1,client->addr + W83781D_ADDR_REG_OFFSET);
     }
-    outb_p(value &0xff,(((struct isa_client *) client)->isa_addr) +
-                       W83781D_DATA_REG_OFFSET);
+    outb_p(value &0xff,client->addr + W83781D_DATA_REG_OFFSET);
     if (reg & 0xff00) {
-      outb_p(W83781D_REG_BANK,(((struct isa_client *) client)->isa_addr) +
-                              W83781D_ADDR_REG_OFFSET);
-      outb_p(0,(((struct isa_client *) client)->isa_addr) +
-               W83781D_DATA_REG_OFFSET);
+      outb_p(W83781D_REG_BANK,client->addr + W83781D_ADDR_REG_OFFSET);
+      outb_p(0,client->addr + W83781D_DATA_REG_OFFSET);
     }
   } else {
     if (reg & 0xff00)
