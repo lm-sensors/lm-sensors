@@ -45,6 +45,7 @@ static unsigned int normal_isa[] = { 0x0000, SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 static u8 devid;
 static unsigned int extra_isa[] = { 0x0000, 0x0000, 0x0000 };
+static u16 fanconf[2];
 
 SENSORS_INSMOD_5(pc87360, pc87363, pc87364, pc87365, pc87366);
 
@@ -105,6 +106,15 @@ static inline void superio_exit(void)
 					 (val)==1?0x00:0x20)
 #define FAN_STATUS_FROM_REG(val)	((val) & 0x07)
 
+#define FAN_CONFIG_MONITOR(val,nr)	(((val) >> (2 + nr * 3)) & 1)
+#define FAN_CONFIG_CONTROL(val,nr)	(((val) >> (3 + nr * 3)) & 1)
+#define FAN_CONFIG_INVERT(val,nr)	(((val) >> (4 + nr * 3)) & 1)
+
+#define PWM_FROM_REG(val,inv)		((inv) ? 255 - (val) : (val))
+#define PWM_TO_REG(val,inv)		(((val) < 0) ? ((inv) ? 255 : 0) : \
+					 ((val) > 255) ? ((inv) ? 0 : 255) : \
+					 (inv) ? 255 - (val) : (val))
+
 /*
  * Voltage registers and conversions
  */
@@ -134,13 +144,13 @@ static inline void superio_exit(void)
 #define PC87365_REG_TEMP		0x0B
 #define PC87365_REG_TEMP_MIN		0x0D
 #define PC87365_REG_TEMP_MAX		0x0C
-#define PC87365_REG_TEMP_CRIT		0x0D
+#define PC87365_REG_TEMP_CRIT		0x0E
 #define PC87365_REG_TEMP_STATUS		0x0A
 #define PC87365_REG_TEMP_ALARMS		0x00
 
-#define TEMP_FROM_REG(val)		((val)&0x80 ? (val) : (val) - 128)
-#define TEMP_TO_REG(val)		((val)<-128?0x80:(val)>127?0x7F: \
-					 (val)<0?(val)+0x80:(val))
+#define TEMP_FROM_REG(val)		((val)&0x80 ? (val) - 0x100 : (val))
+#define TEMP_TO_REG(val)		((val)<-55 ? 201 : (val)>127 ? 0x7F : \
+					 (val)<0 ? (val) + 0x100 : (val))
 #define TEMP_STATUS_FROM_REG(val)	((val) & 0xFF)
 
 struct pc87360_data {
@@ -159,6 +169,7 @@ struct pc87360_data {
 	u8 fan_min[3];		/* Register value */
 	u8 fan_status[3];	/* Register value */
 	u8 pwm[3];		/* Register value */
+	u16 fan_conf[2];	/* Configuration register values, combined */
 
 	u8 in[11];		/* Register value */
 	u8 in_min[11];		/* Register value */
@@ -437,20 +448,20 @@ static int pc87360_find(u8 *devid, int *address)
 
 		address[i] = val;
 
-#ifdef DEBUG
 		if (i==0) { /* Fans */
-			val = superio_inb(0x70)
-			    | (superio_inb(0x71) << 8);
+			fanconf[0] = superio_inb(0x70)
+				   | (superio_inb(0x71) << 8);
 			
+#ifdef DEBUG
 			printk(KERN_DEBUG "pc87360.o: Fan 1: mon=%d "
-			       "ctrl=%d inv=%d\n", (val>>2)&1, (val>>3)&1,
-			       (val>>4)&1);
+			       "ctrl=%d inv=%d\n", (fanconf[0]>>2)&1,
+			       (fanconf[0]>>3)&1, (fanconf[0]>>4)&1);
 			printk(KERN_DEBUG "pc87360.o: Fan 2: mon=%d "
-			       "ctrl=%d inv=%d\n", (val>>5)&1, (val>>6)&1,
-			       (val>>7)&1);
+			       "ctrl=%d inv=%d\n", (fanconf[0]>>5)&1,
+			       (fanconf[0]>>6)&1, (fanconf[0]>>7)&1);
 			printk(KERN_DEBUG "pc87360.o: Fan 3: mon=%d "
-			       "ctrl=%d inv=%d\n", (val>>8)&1, (val>>9)&1,
-			       (val>>10)&1);
+			       "ctrl=%d inv=%d\n", (fanconf[0]>>8)&1,
+			       (fanconf[0]>>9)&1, (fanconf[0]>>10)&1);
 		}
 #endif
 	}
@@ -524,6 +535,9 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 		data->tempnr = extra_isa[2] ? 3 : 0;
 		break;
 	}
+
+	/* Retrieve the fans configuration from Super-I/O space */
+	data->fan_conf[0] = fanconf[0];
 
 	for (i = 0; i < 3; i++) {
 		if ((data->address[i] = extra_isa[i])) {
@@ -770,13 +784,16 @@ void pc87360_pwm(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		pc87360_update_client(client);
-		results[0] = data->pwm[nr];
-		*nrels_mag = 1;
+		results[0] = PWM_FROM_REG(data->pwm[nr],
+			     FAN_CONFIG_INVERT(data->fan_conf[0], nr));
+		results[1] = FAN_CONFIG_CONTROL(data->fan_conf[0], nr);
+		*nrels_mag = 2;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1)
 		{
-			data->pwm[nr] = SENSORS_LIMIT(results[0], 0, 255);
+			data->pwm[nr] = PWM_TO_REG(results[0],
+					FAN_CONFIG_INVERT(data->fan_conf[0], nr));
 			pc87360_write_value(data, 0, PC87360_REG_PWM(nr),
 					    data->pwm[nr]);
 		}
