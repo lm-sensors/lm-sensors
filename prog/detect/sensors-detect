@@ -4814,7 +4814,23 @@ sub generate_modprobes
     } elsif ($chip->{driver} eq "use-isa-instead") {
       $modprobes .= "# no I2C driver for $chip->{detected}[0]{chipname} use ISA driver instead\n";
     } elsif ($chip->{driver} ne "not-a-sensor") {
-      $modprobes .= "modprobe $chip->{driver}\n";
+       open(local *INPUTFILE, "modprobe -l $chip->{driver} 2>/dev/null |");
+       local $_;
+       my $modulefound = 0;
+       while (<INPUTFILE>) {
+         if(m@/@) {
+           $modulefound = 1;
+           last;
+         }
+       }
+       close INPUTFILE;
+       #check return value from modprobe in case modprobe -l isn't supported
+       if((($? >> 8) == 0) && ! $modulefound) {
+         $modprobes .= "# Warning: the required module $chip->{driver} is not currently installed on your system.\n";
+         $modprobes .= "# For status of 2.6 kernel ports see http://secure.netroedge.com/~lm78/supported.html\n";
+         $modprobes .= "# If driver is built-in to the kernel, or unavailable, comment out the following line.\n";
+       }
+       $modprobes .= "modprobe $chip->{driver}\n";
     }
 
     # Handle detects at addresses normally not probed
