@@ -40,10 +40,12 @@ ask CVS about it:
   Program eeprom: new
   Program i2cdump: Add smbus block command specification
   Program mkpatch: Install new sensors_vid.h
+  Program p4b_smbus: Add support for ICH4
   Program rrd: Fix swapped CPU and MB temps in summ_week.cgi
   Program sensord: Major update, now requires rrd source;
                    not compiled by default
-  Program sensors: Recognize DDR SDRAM; add adm1025 VID
+  Program sensors: Recognize DDR SDRAM; add adm1025 VID; add -A
+                   (don't display algo. and adap.) option
   Program sensors-detect: Add VT8231, VT8233A, several S3 devices;
                           add 82801DB; fix perl warnings
 
