@@ -26,6 +26,7 @@
     82801AB		2423           
     82801BA		2443           
     82801CA/CAM		2483           
+    82801DB		24C3           
 
     This driver supports several versions of Intel's I/O Controller Hubs (ICH).
     For SMBus support, they are similar to the PIIX4 and are part
@@ -61,11 +62,13 @@ MODULE_LICENSE("GPL");
 #define PCI_DEVICE_ID_INTEL_82801BA_2   0x2443
 #endif
 #define PCI_DEVICE_ID_INTEL_82801CA_SMBUS	0x2483
+#define PCI_DEVICE_ID_INTEL_82801DB_SMBUS	0x24C3
 
 static int supported[] = {PCI_DEVICE_ID_INTEL_82801AA_3,
                           PCI_DEVICE_ID_INTEL_82801AB_3,
                           PCI_DEVICE_ID_INTEL_82801BA_2,
 			  PCI_DEVICE_ID_INTEL_82801CA_SMBUS,
+			  PCI_DEVICE_ID_INTEL_82801DB_SMBUS,
                           0 };
 
 /* I801 SMBus address offsets */

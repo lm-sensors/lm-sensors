@@ -8,6 +8,7 @@ Supported adapters:
     '810' and '810E' chipsets)
   * Intel 82801BA (ICH2 - part of the '815E' chipset)
   * Intel 82801CA/CAM (ICH3)
+  * Intel 82801DB (ICH4)
     Datasheets: Publicly available at the Intel website
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
