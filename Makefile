@@ -185,7 +185,7 @@ SED := sed
 # PROGCPPFLAGS/PROGCFLAGS is to create non-kernel object files (which are linked into executables).
 # ARCPPFLAGS/ARCFLAGS are used to create archive object files (static libraries).
 # LIBCPPFLAGS/LIBCFLAGS are for shared library objects.
-ALL_CPPFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS) -I$(LINUX_HEADERS)
+ALL_CPPFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS)
 ALL_CFLAGS := -Wall -O2 
 
 ifeq ($(DEBUG),1)
@@ -225,7 +225,7 @@ endif
 # from user space headers.
 kbuild_2_4_nostdinc := -nostdinc $(shell LC_ALL=C $(CC) -print-search-dirs | sed -ne 's/install: \(.*\)/-I \1include/gp')
 
-MODCPPFLAGS += -D__KERNEL__ -DMODULE -DEXPORT_SYMTAB -fomit-frame-pointer $(ALL_CPPFLAGS) $(kbuild_2_4_nostdinc)
+MODCPPFLAGS += -D__KERNEL__ -DMODULE -DEXPORT_SYMTAB -fomit-frame-pointer $(ALL_CPPFLAGS) -I$(LINUX_HEADERS) $(kbuild_2_4_nostdinc)
 MODCFLAGS += $(ALL_CFLAGS)
 PROGCPPFLAGS := $(ALL_CPPFLAGS)
 PROGCFLAGS := $(ALL_CFLAGS)
