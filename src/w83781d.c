@@ -65,6 +65,10 @@
 #define W83781D_REG_ALARM1 0x41
 #define W83781D_REG_ALARM2 0x42
 
+#define W83781D_REG_BEEP_CONFIG 0x4D
+#define W83781D_REG_BEEP_INTS1 0x56
+#define W83781D_REG_BEEP_INTS2 0x57
+
 #define W83781D_REG_VID_FANDIV 0x47
 
 #define W83781D_REG_CHIPID 0x58
@@ -181,6 +185,7 @@ struct w83781d_data {
          u8 fan_div[2];              /* Register encoding, shifted right */
          u8 vid;                     /* Register encoding, combined */
          u16 alarms;                 /* Register encoding, combined */
+         u8 beep[3];                    /* Register value of config and interrupt masks */
 };
 
 
@@ -223,6 +228,8 @@ static void w83781d_vid(struct i2c_client *client, int operation, int ctl_name,
                      int *nrels_mag, long *results);
 static void w83781d_alarms(struct i2c_client *client, int operation, int ctl_name,
                         int *nrels_mag, long *results);
+static void w83781d_beep(struct i2c_client *client, int operation, int ctl_name,
+                      int *nrels_mag, long *results);
 static void w83781d_fan_div(struct i2c_client *client, int operation, int ctl_name,
                          int *nrels_mag, long *results);
 
@@ -287,6 +294,8 @@ static ctl_table w83781d_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &w83781d_fan_div },
   { W83781D_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_alarms },
+  { W83781D_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_beep },
   { 0 }
 };
 
@@ -724,6 +733,9 @@ void w83781d_update_client(struct i2c_client *client)
     data->fan_div[1] = i >> 6;
     data->alarms = w83781d_read_value(client,W83781D_REG_ALARM1) +
                    (w83781d_read_value(client,W83781D_REG_ALARM2) >> 8);
+    data->beep[0] = w83781d_read_value(client,W83781D_REG_BEEP_CONFIG);
+    data->beep[1] = w83781d_read_value(client,W83781D_REG_BEEP_INTS1);
+    data->beep[2] = w83781d_read_value(client,W83781D_REG_BEEP_INTS2);
     data->last_updated = jiffies;
     data->valid = 1;
   }
@@ -845,7 +857,6 @@ void w83781d_temp(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-/* Change back! */
 
 void w83781d_temp1(struct i2c_client *client, int operation, int ctl_name,
                int *nrels_mag, long *results) {
@@ -891,6 +902,28 @@ void w83781d_alarms(struct i2c_client *client, int operation, int ctl_name,
     w83781d_update_client(client);
     results[0] = ALARMS_FROM_REG(data->alarms);
     *nrels_mag = 1;
+  }
+}
+
+void w83781d_beep(struct i2c_client *client, int operation, int ctl_name,
+                 int *nrels_mag, long *results)
+{
+  struct w83781d_data *data = client->data;
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    w83781d_update_client(client);
+    results[0] = data->beep[0];
+    results[1] = data->beep[1];
+    results[2] = data->beep[2];
+    *nrels_mag = 3;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    data->beep[0] = results[0];
+    w83781d_write_value(client,W83781D_REG_BEEP_CONFIG,data->beep[0]);
+    data->beep[1] = results[1];
+    w83781d_write_value(client,W83781D_REG_BEEP_INTS1,data->beep[1]);
+    data->beep[2] = results[2];
+    w83781d_write_value(client,W83781D_REG_BEEP_INTS2,data->beep[2]);
   }
 }
 

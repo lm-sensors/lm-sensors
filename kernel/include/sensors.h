@@ -148,6 +148,7 @@ struct sensors_chips_data {
 #define W83781D_SYSCTL_VID 1300 /* Volts * 100 */
 #define W83781D_SYSCTL_FAN_DIV 2000 /* 1, 2, 4 or 8 */
 #define W83781D_SYSCTL_ALARMS 2001 /* bitvector */
+#define W83781D_SYSCTL_BEEP 2002 /* bitvector */
 
 #define W83781D_ALARM_IN0 0x0001
 #define W83781D_ALARM_IN1 0x0002
