@@ -36,6 +36,11 @@ If you see something like this:
 00:00.0 Host bridge: Silicon Integrated Systems [SiS] 630 Host (rev 31)
 00:01.0 ISA bridge: Silicon Integrated Systems [SiS] 85C503/5513
 
+or like this:
+
+00:00.0 Host bridge: Silicon Integrated Systems [SiS] 730 Host (rev 02)
+00:01.0 ISA bridge: Silicon Integrated Systems [SiS] 85C503/5513
+
 in your 'lspci' output , then this driver is for your chipset.
 
 Note: kernel versions later than 2.4.18 not tested.
