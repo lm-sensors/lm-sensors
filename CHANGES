@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.5 (2002????)
+  File sensors.conf.eg: Fix temp[23] for as99127f
   Library: Fix fan3_div writes for w8378* and it87
   Module dmi_scan: new
   Module ds1621: Fix enable/disable

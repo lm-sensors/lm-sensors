@@ -5,10 +5,10 @@
 #                                                                        #
 #    PLEASE READ THIS HELPFUL HINT!!!                                    #
 #                                                                        #
-#	The 'set' lines (generally for min and max values)               #
-#	do not take effect until you run 'sensors -s' as root !!!        #
-#	We suggest you put 'sensors -s' in a /etc/rc.d/... file          #
-#	to be run at boot time after the modules are inserted !!!        #
+#       The 'set' lines (generally for min and max values)               #
+#       do not take effect until you run 'sensors -s' as root !!!        #
+#       We suggest you put 'sensors -s' in a /etc/rc.d/... file          #
+#       to be run at boot time after the modules are inserted !!!        #
 #                                                                        #
 ##########################################################################
 #
@@ -505,7 +505,11 @@ chip "as99127f-*"
     compute in5 -(240/60.4)*@ ,  -@/(240/60.4)
     compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
 
-    compute temp2 (@*30/43)+25, (@-25)*43/30
+# for at least Asus A7V133/133-C
+    compute temp2 @*2.0, @/2.0
+    compute temp3 @*2.0, @/2.0
+# does anyone know a board for which the following is correct?
+#   compute temp2 (@*30/43)+25, (@-25)*43/30
 
 # adjust this if your vid is wrong; see doc/vid
 #   set vrm 9.0
