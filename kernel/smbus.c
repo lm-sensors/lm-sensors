@@ -185,7 +185,7 @@ s32 smbus_access_i2c(struct i2c_adapter * adapter, u8 addr, char read_write,
       break;
     case SMBUS_WORD_DATA: 
     case SMBUS_PROC_CALL:
-      data->word = msgbuf1[0] + (msgbuf1[1] << 8);
+      data->word = msgbuf1[0] | (msgbuf1[1] << 8);
       break;
   }
   return 0;
