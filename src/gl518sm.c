@@ -264,7 +264,7 @@ int gl518_attach_adapter(struct i2c_adapter *adapter)
     if ((err = i2c_attach_client(new_client)))
       goto ERROR2;
     
-    sprintf(name,"gl518-r%02x",revision);
+    sprintf(name,"gl518sm-r%02x",revision);
     /* Register a new directory entry with module sensors */
     if ((err = sensors_register_entry(new_client,name,
                                       gl518_dir_table_template)) < 0)

@@ -19,6 +19,10 @@ Here come the changes:
   Some small changes to make this file compile with 2.0 kernels. These
   changes will probably be included in the next i2c version.
 
+* algo-bit.c, i2c-core.c: Debugging level turned down
+  The default debugging level was 1, which created a lot of noise in
+  the kernel message logs (dmesg)
+
 * New file: Module.mk
   The Makefile fragment we use to compile the files in this directory.
 

@@ -57,7 +57,7 @@ struct i2c_driver *drivers[I2C_DRIVER_MAX];
 int driver_count;
 
 /**** debug level */
-int i2c_debug=1;
+int i2c_debug=0;
 
 /* ---------------------------------------------------    
  * registering functions 

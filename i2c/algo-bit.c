@@ -70,7 +70,7 @@ static char alg_rcsid[] = "$Id: algo-bit.c,v 1.7 1998/09/28 06:45:38 i2c Exp i2c
 
 /* module parameters:
  */
-int i2c_debug=1;
+int i2c_debug=0;
 int bit_test=0;	/* see if the line-setting functions work	*/
 int bit_scan=0;	/* have a look at what's hanging 'round		*/
 
