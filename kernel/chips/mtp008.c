@@ -256,7 +256,6 @@ static int mtp008_id = 0;
 
 static struct i2c_driver mtp008_driver =
 {
-	.owner		= THIS_MODULE,
 	.name		= "MTP008 sensor driver",
 	.id		= I2C_DRIVERID_MTP008,
 	.flags		= I2C_DF_NOTIFY,

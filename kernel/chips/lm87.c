@@ -253,7 +253,6 @@ static void lm87_vrm(struct i2c_client *client, int operation,
 static int lm87_id = 0;
 
 static struct i2c_driver LM87_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "LM87 sensor driver",
 	.id		= I2C_DRIVERID_LM87,
 	.flags		= I2C_DF_NOTIFY,

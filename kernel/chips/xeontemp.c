@@ -112,7 +112,6 @@ static int read_only = 0;
 
 /* This is the driver that will be inserted */
 static struct i2c_driver xeontemp_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "Xeon temp sensor driver",
 	.id		= I2C_DRIVERID_XEONTEMP,
 	.flags		= I2C_DF_NOTIFY,

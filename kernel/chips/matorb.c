@@ -69,7 +69,6 @@ static void matorb_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver matorb_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "Matrix Orbital LCD driver",
 	.id		= I2C_DRIVERID_MATORB,
 	.flags		= I2C_DF_NOTIFY,

@@ -102,7 +102,6 @@ static void pcf8591_aout(struct i2c_client *client, int operation,
 
 /* This is the driver that will be inserted */
 static struct i2c_driver pcf8591_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "PCF8591 sensor chip driver",
 	.id		= I2C_DRIVERID_PCF8591,
 	.flags		= I2C_DF_NOTIFY,

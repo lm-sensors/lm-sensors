@@ -213,7 +213,6 @@ static void adm1024_vid(struct i2c_client *client, int operation,
 static int adm1024_id = 0;
 
 static struct i2c_driver adm1024_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "ADM1024 sensor driver",
 	.id		= I2C_DRIVERID_ADM1024,
 	.flags		= I2C_DF_NOTIFY,

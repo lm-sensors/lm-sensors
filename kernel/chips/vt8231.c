@@ -194,7 +194,6 @@ static void vt8231_temp(struct i2c_client *client, int operation,
 static int vt8231_id = 0;
 
 static struct i2c_driver vt8231_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "VT8231 sensors driver",
 	.id		= I2C_DRIVERID_VT8231,
 	.flags		= I2C_DF_NOTIFY,

@@ -385,7 +385,6 @@ static void adm1026_afc(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver adm1026_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "ADM1026 compatible sensor driver",
 	.id		= I2C_DRIVERID_ADM1026,
 	.flags		= I2C_DF_NOTIFY,

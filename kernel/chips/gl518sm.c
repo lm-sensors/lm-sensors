@@ -174,7 +174,6 @@ static void gl518_iterate(struct i2c_client *client, int operation,
 
 /* This is the driver that will be inserted */
 static struct i2c_driver gl518_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "GL518SM sensor chip driver",
 	.id		= I2C_DRIVERID_GL518,
 	.flags		= I2C_DF_NOTIFY,

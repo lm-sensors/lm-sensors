@@ -117,7 +117,6 @@ static void ds1621_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver ds1621_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "DS1621 sensor driver",
 	.id		= I2C_DRIVERID_DS1621,
 	.flags		= I2C_DF_NOTIFY,

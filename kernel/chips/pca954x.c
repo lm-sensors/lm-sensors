@@ -161,7 +161,6 @@ static int pca954x_xfer(struct i2c_adapter *adap,
 
 /* This is the driver that will be inserted */
 static struct i2c_driver pca954x_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "PCA954X I2C mux/switch driver",
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= pca954x_attach_adapter,

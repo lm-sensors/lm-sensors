@@ -151,7 +151,6 @@ static void saa1064_init_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver saa1064_driver = {
-	.owner          = THIS_MODULE,
 	.name           = "SAA1064 sensor chip driver",
 	.id             = I2C_DRIVERID_SAA1064,
 	.flags          = I2C_DF_NOTIFY,

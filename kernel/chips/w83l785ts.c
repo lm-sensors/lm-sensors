@@ -96,7 +96,6 @@ static void w83l785ts_temp(struct i2c_client *client, int operation, int
  */
  
 static struct i2c_driver w83l785ts_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "W83L785S-S sensor driver",
 	.id		= I2C_DRIVERID_W83L785TS,
 	.flags		= I2C_DF_NOTIFY,

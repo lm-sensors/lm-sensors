@@ -276,7 +276,6 @@ static void it87_sens(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver it87_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "IT87xx sensor driver",
 	.id		= I2C_DRIVERID_IT87,
 	.flags		= I2C_DF_NOTIFY,

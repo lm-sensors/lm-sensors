@@ -102,7 +102,6 @@ static void max1619_alarms(struct i2c_client *client, int operation,
  */
 
 static struct i2c_driver max1619_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "MAX1619 sensor driver",
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= max1619_attach_adapter,

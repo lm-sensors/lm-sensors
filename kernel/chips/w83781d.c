@@ -332,7 +332,6 @@ static void w83781d_rt(struct i2c_client *client, int operation,
 static int w83781d_id = 0;
 
 static struct i2c_driver w83781d_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "W83781D sensor driver",
 	.id		= I2C_DRIVERID_W83781D,
 	.flags		= I2C_DF_NOTIFY,

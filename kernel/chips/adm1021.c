@@ -128,7 +128,6 @@ static int read_only = 0;
 
 /* This is the driver that will be inserted */
 static struct i2c_driver adm1021_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "ADM1021, MAX1617 sensor driver",
 	.id		= I2C_DRIVERID_ADM1021,
 	.flags		= I2C_DF_NOTIFY,

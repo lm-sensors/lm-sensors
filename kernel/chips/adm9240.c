@@ -211,7 +211,6 @@ static void adm9240_vid(struct i2c_client *client, int operation,
 static int adm9240_id = 0;
 
 static struct i2c_driver adm9240_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "ADM9240 sensor driver",
 	.id		= I2C_DRIVERID_ADM9240,
 	.flags		= I2C_DF_NOTIFY,

@@ -151,7 +151,6 @@ static void lm63_pwm(struct i2c_client *client, int operation,
  */
 
 static struct i2c_driver lm63_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "LM63 sensor driver",
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= lm63_attach_adapter,

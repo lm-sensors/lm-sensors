@@ -114,7 +114,6 @@ static int max6650_read(struct i2c_client *client, u8 reg);
 
 
 static struct i2c_driver max6650_driver = {
-    .owner          = THIS_MODULE,
     .name           = "MAX6650/1 sensor driver",
     .id             = I2C_DRIVERID_MAX6650,
     .flags          = I2C_DF_NOTIFY,

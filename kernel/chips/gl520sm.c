@@ -170,7 +170,6 @@ static void gl520_config(struct i2c_client *client, int operation,
 
 /* This is the driver that will be inserted */
 static struct i2c_driver gl520_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "GL520SM sensor chip driver",
 	.id		= I2C_DRIVERID_GL520,
 	.flags		= I2C_DF_NOTIFY,

@@ -167,7 +167,6 @@ static void lm78_fan_div(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver lm78_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "LM78(-J) and LM79 sensor driver",
 	.id		= I2C_DRIVERID_LM78,
 	.flags		= I2C_DF_NOTIFY,

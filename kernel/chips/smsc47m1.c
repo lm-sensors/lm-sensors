@@ -163,7 +163,6 @@ static void smsc47m1_pwm(struct i2c_client *client, int operation,
 static int smsc47m1_id = 0;
 
 static struct i2c_driver smsc47m1_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "SMSC 47M1xx fan monitor",
 	.id		= I2C_DRIVERID_SMSC47M1,
 	.flags		= I2C_DF_NOTIFY,

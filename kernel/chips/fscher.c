@@ -163,7 +163,6 @@ static void fscher_wdog(struct i2c_client *client, int operation,
 static int fscher_id = 0;
 
 static struct i2c_driver fscher_driver = {
-  .owner		= THIS_MODULE,
   .name		        = "FSCHER sensor driver",
   .id		        = I2C_DRIVERID_FSCHER,
   .flags		= I2C_DF_NOTIFY,

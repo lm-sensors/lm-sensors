@@ -359,7 +359,6 @@ static void w83627hf_sens(struct i2c_client *client, int operation,
 static int w83627hf_id = 0;
 
 static struct i2c_driver w83627hf_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "W83627HF sensor driver",
 	.id		= I2C_DRIVERID_W83627HF,
 	.flags		= I2C_DF_NOTIFY,

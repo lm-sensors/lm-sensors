@@ -82,7 +82,6 @@ static void bmcsensors_get_sdr(u16 resid, u16 record, u8 offset);
 static void bmcsensors_get_reading(struct i2c_client *client, int i);
 
 static struct i2c_driver bmcsensors_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "BMC Sensors driver",
 	.id		= I2C_DRIVERID_BMCSENSORS,
 	.flags		= I2C_DF_NOTIFY,

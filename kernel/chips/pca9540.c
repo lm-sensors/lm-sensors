@@ -67,7 +67,6 @@ static void pca9540_channel(struct i2c_client *client, int operation,
 
 /* This is the driver that will be inserted */
 static struct i2c_driver pca9540_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "PCA9540 chip driver",
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= pca9540_attach_adapter,

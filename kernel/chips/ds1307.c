@@ -315,7 +315,6 @@ static int ds1307_command (struct i2c_client *client,unsigned int cmd,void *arg)
 
 
 static struct i2c_driver ds1307 = {
-	.owner		= THIS_MODULE,
 	.name		= "ds1307",
 	.id		= I2C_DRIVERID_DS1307,
 	.flags		= I2C_DF_NOTIFY,

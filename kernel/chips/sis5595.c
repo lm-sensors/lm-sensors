@@ -223,7 +223,6 @@ static int sis5595_id = 0;
 /* The driver. I choose to use type i2c_driver, as at is identical to both
    smbus_driver and isa_driver, and clients could be of either kind */
 static struct i2c_driver sis5595_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "SiS 5595",
 	.id		= I2C_DRIVERID_SIS5595,
 	.flags		= I2C_DF_NOTIFY,

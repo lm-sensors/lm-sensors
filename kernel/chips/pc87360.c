@@ -269,7 +269,6 @@ void pc87365_temp_status(struct i2c_client *client, int operation, int ctl_name,
 static int pc87360_id = 0;
 
 static struct i2c_driver pc87360_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "PC8736x hardware monitor",
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= pc87360_attach_adapter,

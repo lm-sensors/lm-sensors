@@ -196,7 +196,6 @@ static void adm1031_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver adm1031_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "ADM1031/ADM1030 sensor driver",
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= adm1031_attach_adapter,

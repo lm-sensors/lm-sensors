@@ -176,7 +176,6 @@ static void lm90_alarms(struct i2c_client *client, int operation,
  */
 
 static struct i2c_driver lm90_driver = {
-	.owner          = THIS_MODULE,
 	.name           = "LM90/ADM1032 sensor driver",
 	.id             = I2C_DRIVERID_LM90,
 	.flags          = I2C_DF_NOTIFY,

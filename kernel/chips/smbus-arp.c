@@ -127,7 +127,6 @@ static void smbusarp_contents(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver smbusarp_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "SMBUS ARP",
 	.id		= I2C_DRIVERID_ARP,
 	.flags		= I2C_DF_NOTIFY,

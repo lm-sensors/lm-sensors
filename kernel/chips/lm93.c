@@ -2323,7 +2323,6 @@ static int lm93_detach_client(struct i2c_client *client)
 }
 
 static struct i2c_driver lm93_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "LM93 sensor driver",
 	.id		= I2C_DRIVERID_LM93,
 	.flags		= I2C_DF_NOTIFY,

@@ -306,7 +306,6 @@ static void maxi_alarms(struct i2c_client *client, int operation,
 /* The driver. I choose to use type i2c_driver, as at is identical to
    the smbus_driver. */
 static struct i2c_driver maxi_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "HP MaxiLife driver",
 	.id		= I2C_DRIVERID_MAXILIFE,
 	.flags		= I2C_DF_NOTIFY,

@@ -162,7 +162,6 @@ static void fscpos_wdog(struct i2c_client *client, int operation,
 static int fscpos_id = 0;
 
 static struct i2c_driver fscpos_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "FSCPOS sensor driver",
 	.id		= I2C_DRIVERID_FSCPOS,
 	.flags		= I2C_DF_NOTIFY,

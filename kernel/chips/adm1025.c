@@ -159,7 +159,6 @@ static void adm1025_vrm(struct i2c_client *client, int operation,
 static int adm1025_id = 0;
 
 static struct i2c_driver adm1025_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "ADM1025 sensor driver",
 	.id		= I2C_DRIVERID_ADM1025,
 	.flags		= I2C_DF_NOTIFY,

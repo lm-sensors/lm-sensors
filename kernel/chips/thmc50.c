@@ -112,7 +112,6 @@ static void thmc50_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver thmc50_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "THMC50 sensor chip driver",
 	.id		= I2C_DRIVERID_THMC50,
 	.flags		= I2C_DF_NOTIFY,

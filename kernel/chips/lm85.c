@@ -479,7 +479,6 @@ static void emc6d100_in(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver lm85_driver = {
-	.owner		= THIS_MODULE,
 	.name		=  "LM85 compatible sensor driver",
 	.id		= I2C_DRIVERID_LM85,
 	.flags		= I2C_DF_NOTIFY,

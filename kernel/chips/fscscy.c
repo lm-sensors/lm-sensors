@@ -220,7 +220,6 @@ static void fscscy_intrusion(struct i2c_client *client, int operation,
 static int fscscy_id = 0;
 
 static struct i2c_driver fscscy_driver = {
-	.owner		= THIS_MODULE,
 	.name		= "FSCSCY sensor driver",
 	.id		= I2C_DRIVERID_FSCSCY,
 	.flags		= I2C_DF_NOTIFY,
