@@ -1036,7 +1036,7 @@ sub lm78_detect
 
 # $_[0]: Chip to detect (0 = LM78, 1 = LM78-J, 2 = LM79)
 # $_[1]: Address
-# Returns: undef if not detected, (7) if detected.
+# Returns: undef if not detected, 7 if detected.
 # Note: Only address 0x290 is scanned at this moment.
 sub lm78_isa_detect
 {
@@ -1289,10 +1289,11 @@ sub adm1021_detect
 sub sis5595_isa_detect
 {
   my ($addr) = @_;
-  my ($adapter,$try);
+  my ($adapter,$try,$local_try);
   my $found = 0;
-  foreach $try (@pci_adapters) {
-    if ($try->{procid} eq "Silicon Integrated Systems 85C503") {
+  foreach $local_try (@pci_adapters) {
+    if ($local_try->{procid} eq "Silicon Integrated Systems 85C503") {
+      $try = $local_try;
       $found = 1;
       last;
     }
@@ -1301,7 +1302,7 @@ sub sis5595_isa_detect
 
   $found = 0;
   foreach $adapter (@pci_list) {
-    if ((defined($try->{vendid}) and 
+    if ((defined($adapter->{vendid}) and 
          $try->{vendid} == $adapter->{vendid} and
          $try->{devid} == $adapter->{devid} and
          $try->{func} == $adapter->{func}) or
@@ -1314,7 +1315,29 @@ sub sis5595_isa_detect
   }
   return if not $found;
 
-  return (9);
+  return 9;
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, (5) if detected.
+# Registers used:
+#   0x00-0x63: PC-100 Data and Checksum
+sub eeprom_detect
+{
+  my ($file,$addr) = @_;
+  # Check the checksum for validity (only works for PC-100 DIMMs)
+  my $checksum = 0;
+  for (my $i = 0; $i <= 62; $i = $i + 1) {
+    $checksum = $checksum + i2c_smbus_read_byte_data($file,$i);
+  }
+  $checksum=$checksum & 255;
+  if (i2c_smbus_read_byte_data($file,63) == $checksum) {
+  	return (8);
+  }
+  # Even if checksum test fails, it still may be an eeprom
+  return (1);
 }
 
 ################
@@ -1359,31 +1382,62 @@ sub print_chips_report
   }
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
-# $_[1]: Address
-# Returns: undef if not detected, (5) if detected.
-# Registers used:
-#   0x00-0x63: PC-100 Data and Checksum
-sub eeprom_detect
+sub generate_modprobes
 {
-  my ($file,$addr) = @_;
-  # Check the checksum for validity (only works for PC-100 DIMMs)
-  my $checksum = 0;
-  for (my $i = 0; $i <= 62; $i = $i + 1) {
-    $checksum = $checksum + i2c_smbus_read_byte_data($file,$i);
-  }
-  $checksum=$checksum & 255;
-  if (i2c_smbus_read_byte_data($file,63) == $checksum) {
-  	return (8);
-  }
-  # Even if checksum test fails, it still may be an eeprom
-  return (1);
-}
+  my ($chip,$detection,%adapters,$nr,@optionlist);
+  my $modprobes = "";
+  my $configfile = "";
 
-################
-# MAIN PROGRAM #
-################
+  # These are always needed
+  $modprobes .= "# General I2C modules\n";
+  $modprobes .= "modprobe i2c-proc\n";
+  $configfile .= "# I2C module options\n";
+  $configfile .= "alias char-major-89 i2c-dev\n";
+
+  # Collect all adapters
+  $nr = 0;
+  $modprobes .= "# I2C adapter drivers\n";
+  foreach $chip (@chips_detected) {
+    foreach $detection (@{$chip->{detected}}) {
+      %adapters->{$detection->{i2c_driver}} = $nr ++
+            if exists $detection->{i2c_driver} and 
+               not exists %adapters->{$detection->{i2c_driver}};
+      %adapters->{"i2c-isa"} = $nr ++ 
+            if exists $detection->{isa_addr} and 
+               not exists %adapters->{"i2c-isa"};
+    }
+  }
+  foreach $detection (keys %adapters) {
+    $modprobes .= "modprobe $detection\n";
+  }
+
+  # Now determine the chip probe lines
+  $modprobes .= "# I2C chip drivers\n";
+  foreach $chip (@chips_detected) {
+    next if not @{$chip->{detected}};
+    $modprobes .= "modprobe $chip->{driver}\n";
+    @optionlist = ();
+    foreach $detection (@{$chip->{misdetected}}) {
+      push @optionlist, %adapters->{$detection->{i2c_driver}},
+                       $detection->{i2c_addr}
+           if exists $detection->{i2c_driver} and
+              exists %adapters->{$detection->{i2c_driver}};
+      push @optionlist, -1, $detection->{isa_addr}
+           if exists $detection->{isa_addr} and
+              exists %adapters->{"i2c-isa"};
+    }
+    next if not @optionlist;
+    $configfile .= "options $chip->{driver}";
+    $configfile .= sprintf " ignore=0x%02x",shift @optionlist 
+                if @optionlist;
+    $configfile .= sprintf ",0x%02x",shift @optionlist 
+                while @optionlist;
+    $configfile .= "\n";
+  }
+
+  return ($modprobes,$configfile);
+  
+}
 
 sub main
 {
@@ -1585,6 +1639,20 @@ sub main
       print_chips_report $chip->{misdetected};
     }
   }
+
+  my ($modprobes,$configfile) = generate_modprobes;
+  print "\n\nTo load everything that is needed, add this to some /etc/rc* ",
+        "file:\n\n";
+  print "#----cut here----\n";
+  print $modprobes;
+  print "#----cut here----\n";
+  print "\nTo make the sensors modules behave correctly, add these lines to ",
+        "either\n",
+        "/etc/modules.conf or /etc/conf.modules:\n\n";
+  print "#----cut here----\n";
+  print $configfile;
+  print "#----cut here----\n";
+  
 }
 
 main;
