@@ -16,6 +16,11 @@ Supported chips:
     Prefix `maxilife-cg'
     Addresses scanned: I2C 0x10 - 0x14 (inclusive)
     Datasheet: Only available under NDA
+  * Hewlett Packard NBA (New BIOS Architecture) for newer machines,
+        for example Kayak XU800 and XM600.
+    Prefix `maxilife-nba'
+    Addresses scanned: I2C 0x10 - 0x14 (inclusive)
+    Datasheet: Only available under NDA
     
 Author: Fons Rademakers <Fons.Rademakers@cern.ch>
 
@@ -55,6 +60,11 @@ is quite advanced. It takes care of a lot of issues, like setting ranges,
 raising alarms, etc. Machines with MaxiLife also have a little LCD display
 on their front (lcd is at address 0x54). The idea is that later versions
 of the driver will write health info on the lcd (a bit like lcdproc).
+
+
+Note
+----
+sensors-detect does not support recognition of the maxilife chips.
 
 
 Chip Features
