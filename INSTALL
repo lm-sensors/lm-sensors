@@ -127,9 +127,9 @@ patched by your distribution.
 Separate from kernel compilation (compilation option 1)
 =======================================================
 
-This will compile and install the complete i2c package. Though nothing is
-written to your kernel tree, a proper tree is still needed for this. See
-earlier for what a proper kernel tree is.
+This will compile and install the complete lm_sensors package. Though 
+nothing is written to your kernel tree, a proper tree is still needed 
+for this. See earlier for what a proper kernel tree is.
 
 At the top of the Makefile are a couple of configuration variables that
 you may want to change. As far as possible, the Makefile tries to figure

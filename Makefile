@@ -19,7 +19,7 @@
 # can just use the defaults, fortunately.
 
 # You need a full complement of GNU utilities to run this Makefile succesfully;
-# most notably, you need bash, GNU make, flex and bison.
+# most notably, you need bash, GNU make, flex (>= 2.5.1) and bison.
 
 # If your /bin/sh is not bash, change the below definition so that make can
 # find bash. Or you can hope your sh-like shell understands all scripts.
