@@ -19,6 +19,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#define DEBUG 1
+
 #include <linux/module.h>
 #include <linux/malloc.h>
 #include <linux/i2c.h>
@@ -143,11 +145,15 @@ int thmc50_attach_adapter(struct i2c_adapter *adapter)
 /* This function is called by sensors_detect */
 int thmc50_detect(struct i2c_adapter *adapter, int address, int kind)
 {
-  int company;
+  int company,i;
   struct i2c_client *new_client;
   struct thmc50_data *data;
   int err=0;
   const char *type_name,*client_name;
+
+#ifdef DEBUG
+   printk("Probing for THMC50 at 0x%2.X on bus %d\n",address,adapter->id);
+#endif
 
   /* Make sure we aren't probing the ISA bus!! This is just a safety check
      at this moment; sensors_detect really won't call us. */
@@ -179,8 +185,6 @@ int thmc50_detect(struct i2c_adapter *adapter, int address, int kind)
 
   /* Now, we do the remaining detection. */
   company = i2c_smbus_read_byte_data(adapter,address,0x3E);
-   = i2c_smbus_read_word_data(adapter,address,2);
-  os = i2c_smbus_read_word_data(adapter,address,3);
 
   if (company != 0x4E)
 	goto ERROR1;
