@@ -20,10 +20,21 @@
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := kernel/include
 
-KERNELINCLUDEHEADERFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/isa.h \
-                            $(MODULE_DIR)/smbus.h $(MODULE_DIR)/i2c-dev.h
+KERNELINCLUDEFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/isa.h \
+                      $(MODULE_DIR)/smbus.h $(MODULE_DIR)/i2c-dev.h
 
 install-all-kernel-include:
 	$(MKDIR) $(SYSINCLUDEDIR)
-	$(INSTALL) -o root -g root -m 644 $(SRCHEADERFILES) $(SYSINCLUDEDIR)
+	for file in $(KERNELINCLUDEFILES) ; do \
+	  $(RM) $$file.install; \
+	  $(GREP) -v '/\* TBD \*/' $$file > $$file.install; \
+	  $(INSTALL) -o root -g root -m 644 $$file.install \
+                    $(SYSINCLUDEDIR)/`basename $$file`; \
+	  $(RM) $$file.install; \
+	done
 install :: install-all-kernel-include
+
+clean-all-kernel-include:
+	$(RM) $(KERNELINCLUDEFILES:.h=.h.install)
+
+clean :: clean-all-kernel-include

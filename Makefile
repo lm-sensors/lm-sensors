@@ -119,6 +119,7 @@ FLEX := flex
 AR := ar
 INSTALL := install
 LN := ln -sfn
+GREP := grep
 
 # Determine the default compiler flags
 # MODCFLAGS is to create in-kernel object files (modules); PROGFLAGS is to

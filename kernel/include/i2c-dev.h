@@ -18,16 +18,21 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/* Important note: */						/* TBD */
+/* Lines like these, with the 'TBD' remark (To Be Deleted) */	/* TBD */
+/* WILL BE DELETED when this file is installed. */		/* TBD */
+/* This allows us to get rid of the ugly LM_SENSORS define */   /* TBD */
+
 #ifndef SENSORS_I2C_DEV_H
 #define SENSORS_I2C_DEV_H
 
-#ifdef LM_SENSORS
-#include "i2c.h"
-#include "smbus.h"
-#else /* ndef LM_SENSORS */
+#ifdef LM_SENSORS					/* TBD */
+#include "i2c.h"					/* TBD */
+#include "smbus.h"					/* TBD */
+#else /* ndef LM_SENSORS */				/* TBD */
 #include <linux/i2c.h>
 #include <linux/smbus.h>
-#endif /* def LM_SENSORS */
+#endif /* def LM_SENSORS */				/* TBD */
 
 #include <linux/types.h>
 

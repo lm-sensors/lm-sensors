@@ -18,6 +18,12 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/* Important note: */                                           /* TBD */
+/* Lines like these, with the 'TBD' remark (To Be Deleted) */   /* TBD */
+/* WILL BE DELETED when this file is installed. */              /* TBD */
+/* This allows us to get rid of the ugly LM_SENSORS define */   /* TBD */
+
+
 #ifndef SENSORS_SENSORS_H
 #define SENSORS_SENSORS_H
 

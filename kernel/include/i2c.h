@@ -18,7 +18,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
 /* This is a stub files, that either includes <linux/i2c.h> (the kernel
    header) or "i2c/i2c.h" (the header in the i2c directory). */
 
