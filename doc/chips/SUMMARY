@@ -10,14 +10,26 @@ manufacturer's web site.
 To determine what chips you have in your system,
 run prog/detect/sensors-detect.
 
-If your sensor chip is not detected or supported by this package,
+If your sensor chip is not detected by sensors-detect
+or supported by this package,
 please send mail to lm78@stimpy.netroedge.com.
 
----------------------------------------------------------------------
----------------------------------------------------------------------
+Please include the following in your mail:
+	- The output of (as root) 'prog/detect/sensors-detect'
+	- The output of (as root) 'prog/detect/i2cdetect 1'
+ 	      (assuming your smbus adapter is on bus 1 -
+	      check the output of 'cat /proc/bus/i2c' to make sure).
+	- The output of (as root) 'prog/dump/i2cdump 1 0xXX b'
+	      XX = the address of the chip you see in the output of i2cdetect.
+	- Part numbers of chips on your motherboard you think are
+	      the sensor chips.
 
-SENSOR CHIPS
--------------
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+SUPPORTED SENSOR CHIPS
+----------------------
 
 			Included Sensors	Controls Busses	
 			----------------------	-------  -----------
@@ -29,6 +41,10 @@ adm1021
 	max1617a	2	-	-	-	yes	no
 	thmc10		2	-	-	-	yes	no
 	xeon		1	-	-	-	yes	no
+
+adm1022 (to-be-written)
+	adm1022		3	2	-	1 dac	yes	no
+	thmc50		3	2	-	1 dac	yes	no
 
 adm9240
 	adm9240		1	6	2	1 dac	yes	no
@@ -70,8 +86,8 @@ w83781d
 
 
 
-NON-SENSOR CHIPS
-----------------
+SUPPORTED NON-SENSOR CHIPS
+--------------------------
 
 Driver  Chips
 ------  -----
@@ -91,3 +107,22 @@ ltc1710
 
 matorb
 	Matrox Orbital LCD displays
+
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+COMPANY ID LIST
+---------------
+
+Many SMBus chips have a company ID at location 0x3E or 0xFE.
+
+Here is a partial list.
+
+0x01	National
+0x23	AMD
+0x41	AMD
+0x49	TI
+0x4D	Maxim
+0x5CA3	Winbond (at 0x4F)
+0xDA	Dallas
