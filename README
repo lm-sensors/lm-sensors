@@ -6,12 +6,17 @@ OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
 This is the completely rewritten version of lm_sensors, a collection of
 modules for general SMBus access and hardware monitoring. There are quite
-a few changes compared with 1.x.y versions; read doc/version-2 for the
-most interesting ones.
+a few changes compared with 1.x.y versions; they are now officially
+unsupported.
 
 WARNING! If you downloaded this package through our CVS archive, you walk
 the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
+
+WARNING! Many things have changed sinse version 2.4.0. Most importantly,
+you will need to download the i2c package separately. You can find it
+at the same place as where you downloaded lm_sensors: 
+  http://www.netroedge.com/~lm78
 
 WARNING! The default module installation directory changed since version
 2.2.1. If you don't change the directory in /etc/modules.conf (or
@@ -26,6 +31,8 @@ At least the following SMBus adapters are supported:
   Intel ICH (used in Intel 810 chipsets for Celeron processors)
   Acer Labs M1541 and M1543C (used in the Aladdin IV, V and Pro 2 chipsets)
   VIA Technologies 82C586B (used in most VIA chipsets)
+  VIA Technologies VT596A/B (used in some more modern VIA chipsets)
+  Apple Hydra (used on some PPC machines)
 
 At least the following hardware sensor chips are supported:
   National Semicoductor LM75, LM78, LM78-J, LM79. LM80, and LM81

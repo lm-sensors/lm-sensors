@@ -43,6 +43,7 @@ COMPILE_KERNEL := $(shell if test -d $(LINUX)/drivers/sensors ; \
 # if you get strange compilation errors; the default Linux i2c headers
 # may be used mistakenly.
 I2C_HEADERS=/usr/local/include
+#I2C_HEADERS=$(LINUX_HEADERS)
 
 # Uncomment the third line on SMP systems if the magic invocation fails. It
 # is a bit complicated because SMP configuration changed around kernel 2.1.130
