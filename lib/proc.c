@@ -599,7 +599,7 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	}
 	if(sscanf(name, "temp%d_stat%c%c", &num, &last, &check) == 2 && last == 'e') {
 		sprintf(sysname, "temp_status%d", num);
-		*sysmag = TEMPMAG;
+		*sysmag = 0;
 		return 0;
 	}
 	if(sscanf(name, "tcrit%d%c", &num, &check) == 1) {
