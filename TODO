@@ -43,6 +43,8 @@ LIBRARY
 * Some library routines are pretty inefficient right now.
 * Library should be split in more separate files, for better linking
   behaviour.
+* Some adm9240 labels start with a digit; change this, it leads to confusing
+  syntax in the conf file (they have to be quoted)
 
 PROGRAMS
 ========
