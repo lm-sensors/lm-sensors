@@ -1,0 +1,81 @@
+Kernel driver `saa1064.o'
+========================
+
+Status: Testing;
+
+Supported chips:
+  * Philips SAA1064
+    Prefix: `saa1064'
+    Addresses scanned: I2C 0x38 - 0x3b (inclusive)
+    Datasheet: Publicly available at the Philips Semiconductor website
+               http://semiconductors.philips.com/
+               http://www.philipslogic.com/products/i2c/pdf/saa1064.pdf
+
+
+Author: Sascha Volkenandt <sascha@akv-soft.de>
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_saa1064: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to
+  contain a `saa1064' chip
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+
+
+Description
+-----------
+The SAA1064 is a 4-digit LED driver chip for the I2C bus produced by Philips 
+Semiconductors. It is designed to provide a byte I2C interface to up to 4 
+separate 4-digit displays (16 digits).
+
+This device has eight write-only registers, five are used for a control byte
+and the four digit values.
+
+For more informations see the datasheet.
+
+
+Accessing SAA1064 via /proc interface
+-------------------------------------
+
+On detection (i.e. insmod, modprobe et al.), directories are being
+created for each detected SAA1064:
+
+/proc/sys/dev/sensors/saa1064-<0>-<1>/
+where <0> is the bus the chip was detected on (e. g. i2c-0)
+and <1> the chip address ([38..3b]): 
+./saa1064-i2c-0-38/
+
+Inside these directories, there are four files each:
+bright, test, disp and refresh
+
+The bright, test and disp files are read-write. 
+
+Writing bright sets the output current to the LEDs connected to the
+chip and thus the brightness. Range is from 0 to 7 (inclusive). Reading
+gives you the last known value.
+
+Writing test sets the segment test mode (all LEDs lit regardless of 
+the digit values) on/off (values 0/1). Reading gives you the last 
+known value.
+
+Writing up to four values to disp sets the digits. Each value represents 
+one segment, while each bit represents one LED of the segment (seven bars 
+and one dot usually). Reading gives you the last known value.
+
+The refresh file is read-only. You can't read anything from it, but 
+reading it will trigger a refresh in case a power-loss has occurred since
+the last refresh.
+
+On module initialization the chip is configured for segment test (test=1), 
+full brightness (bright=7), all digit values zeroed.
+
