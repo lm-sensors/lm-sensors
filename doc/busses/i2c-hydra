@@ -4,7 +4,8 @@ Status: Complete and somewhat tested
 
 Supported adapters:
   * Apple `Hydra' Mac I/O
-    Datasheet: Publicly available (?)
+    Datasheet: Was publicly available from the Apple website, now seems to
+               have disappeared?!?
 
 Author: Geert Uytterhoeven <geert@linux-m68k.org>
 

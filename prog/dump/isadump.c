@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
   sleep(5);
 
 #ifndef __powerpc__
-  if ((datareg < 0x400) && (datareg < 0x400)) {
+  if ((datareg < 0x400) && (addrreg < 0x400)) {
     if(ioperm(datareg,1,1)) {
       fprintf(stderr,"Error: Could not ioperm() data register!\n");
       exit(1);
