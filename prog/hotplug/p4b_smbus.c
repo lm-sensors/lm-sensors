@@ -102,7 +102,7 @@ static unsigned long i801smbus_lock_flags = 0;
 
 /* 
  * Checks whether SMBus is enabled and turns it on in case they are not. 
- * It's done by clearing Bit 8 and 4 in i801 config space F2h, PCI-Device 0x8086:0x2440(ICH2)/0x24c0(ICH4)
+ * It's done by clearing Bit 8 and 3 in i801 config space F2h, PCI-Device 0x8086:0x2440(ICH2)/0x24c0(ICH4)
  */
 static int
 i801smbus_enable(struct pci_dev *dev){
@@ -111,7 +111,7 @@ i801smbus_enable(struct pci_dev *dev){
 	pci_read_config_word(dev, 0xF2, &val);
 	DBG("i801smbus: i801smbus config byte reading 0x%X.\n", val);
 	if (val & 0x008) {
-		pci_write_config_word(dev, 0xF2, val & 0x77);
+		pci_write_config_word(dev, 0xF2, val & 0xfef7);
 		pci_read_config_word(dev, 0xF2, &val);
 		if(val & 0x008) 
 		  {
