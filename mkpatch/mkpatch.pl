@@ -142,10 +142,10 @@ CONFIG_I2C_ALI15X3
   built as a module which can be inserted and removed while the kernel
   is running.
 
-AMD 756/766
+AMD 756/766/768
 CONFIG_I2C_AMD756
   If you say yes to this option, support will be included for the AMD
-  756/766 mainboard I2C interfaces. This can also be 
+  756/766/768 mainboard I2C interfaces. This can also be 
   built as a module which can be inserted and removed while the kernel
   is running.
 
@@ -735,10 +735,10 @@ sub gen_drivers_i2c_Config_in
     tristate '  Acer Labs ALI 1535' CONFIG_I2C_ALI1535 
     tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
-    tristate '  AMD 756/766' CONFIG_I2C_AMD756
+    tristate '  AMD 756/766/768' CONFIG_I2C_AMD756
     dep_tristate '  DEC Tsunami I2C interface' CONFIG_I2C_TSUNAMI $CONFIG_I2C_ALGOBIT
     tristate '  Intel 82801AA, 82801AB and 82801BA' CONFIG_I2C_I801
-    dep_tristate '  Intel i810AA, i810AB and i815' CONFIG_I2C_I810 $CONFIG_I2C_ALGOBIT
+    dep_tristate '  Intel i810AA/AB/E and i815' CONFIG_I2C_I810 $CONFIG_I2C_ALGOBIT
     tristate '  Intel 82371AB PIIX4(E), 443MX, ServerWorks OSB4/CSB5, SMSC Victory66' CONFIG_I2C_PIIX4
     tristate '  SiS 5595' CONFIG_I2C_SIS5595
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_ALGOBIT
