@@ -1,3 +1,21 @@
+START-INFO-DIR-ENTRY
+* lm_sensors-FAQ: (lm_sensors-FAQ)           The lm_sensors FAQ
+END-INFO-DIR-ENTRY
+
+Short Contents
+**************
+
+lm_sensors
+1 PC and Sensor Overview
+2 Sensor and Bus Basics
+3 Installation and Management
+4 Problems
+5 How to Ask for Help
+6 How to Contribute
+7 Version 1 Specific Questions
+Appendix A Revision History of This Document
+
+
 Table of Contents
 *****************
 
@@ -937,15 +955,17 @@ address. You must select an address that is not in use.  `cat
 4.20 Sensors says `Can't access procfs/sysfs file'
 ==================================================
 
-   * (release 2.6.0 and later) Did you `modprobe i2c-proc'? Check
-     `lsmod'.
+   * (Linux 2.6) Did you `modprobe i2c_sensor'? Check `lsmod'.
 
-   * (release 2.5.5 and earlier) Did you 'modprobe sensors'? Check
-     'lsmod'.
+   * (Linux 2.4) Did you `modprobe i2c-proc'? Check `lsmod'.
 
    * If you did `sensors -s', did you run it as root?
 
-   * Do you have `/proc' support in your kernel (is `/proc' there?)
+   * (Linux 2.6) Do you have sysfs support in your kernel (is `/sys'
+     there and populated)?
+
+   * (Linux 2.4) Do you have procfs support in your kernel (is `/proc'
+     there and populated)?
 
 4.21 Sensors says `No sensors found!'
 =====================================
@@ -1506,4 +1526,3 @@ Appendix A Revision History of This Document
    * Rev 1.1 Modifications by Philip Edelbrock, 19980809
 
    * Rev 1.0 Written by Philip Edelbrock, 19980803
-

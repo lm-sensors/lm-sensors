@@ -980,10 +980,11 @@ is the I/O address. You must select an address that is not in use.
 @section Sensors says @samp{Can't access procfs/sysfs file}
 
 @itemize
-@item (release 2.6.0 and later) Did you @command{modprobe i2c-proc}? Check @command{lsmod}.
-@item (release 2.5.5 and earlier) Did you 'modprobe sensors'? Check 'lsmod'.
+@item (Linux 2.6) Did you @command{modprobe i2c_sensor}? Check @command{lsmod}.
+@item (Linux 2.4) Did you @command{modprobe i2c-proc}? Check @command{lsmod}.
 @item If you did @command{sensors -s}, did you run it as root?
-@item Do you have @file{/proc} support in your kernel (is @file{/proc} there?)
+@item (Linux 2.6) Do you have sysfs support in your kernel (is @file{/sys} there and populated)?
+@item (Linux 2.4) Do you have procfs support in your kernel (is @file{/proc} there and populated)?
 @end itemize
 
 
