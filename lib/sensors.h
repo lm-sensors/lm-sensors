@@ -30,6 +30,10 @@
 #define SENSORS_CHIP_NAME_BUS_ANY_I2C -3
 #define SENSORS_CHIP_NAME_ADDR_ANY -1
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /* A chip name is encoded is in this structure */
 typedef struct sensors_chip_name {
   char *prefix;
@@ -136,5 +140,9 @@ typedef struct sensors_feature_data {
    data structures. */
 extern const sensors_feature_data *sensors_get_all_features 
              (sensors_chip_name name, int *nr1,int *nr2);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* def LIB_SENSORS_ERROR_H */

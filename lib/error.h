@@ -29,6 +29,11 @@
 #define SENSORS_ERR_BUS_NAME 7  /* Can't parse bus name */
 #define SENSORS_ERR_PARSE 8     /* General parse error */
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
 /* This function returns a pointer to a string which describes the error.
    errnum may be negative (the corresponding positive error is returned).
    You may not modify the result! */
@@ -46,5 +51,8 @@ extern void (*sensors_parse_error) (const char *err, int lineno);
    the program). Never let it return! */
 extern void (*sensors_fatal_error) (const char *proc, const char *err);
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* def LIB_SENSORS_ERROR_H */

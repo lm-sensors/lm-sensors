@@ -8,6 +8,7 @@ I2C CODE CHANGES
 KERNEL MODULES
 ==============
 
+* Add string function in sensors.o
 * ALL: cleanup_module is void; check also that cleaning up is done
   properly, now we know that the module will be unloaded whatever we
   do.
