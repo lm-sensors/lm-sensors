@@ -4469,7 +4469,9 @@ sub print_chips_report
         printf "ISA bus address 0x%04x (Busdriver `i2c-isa')\n", 
                $data->{isa_addr};
       } else {
-        printf "ISA bus, undetermined address (Busdriver `i2c-isa')\n"
+        print "ISA bus, undetermined address (Busdriver `i2c-isa')\n".
+              "Hint: Try forcing the chip address. Consult the documentation\n".
+              "of particular chip for details and address value.\n";
       }
     }
     printf "    Chip `%s' (confidence: %d)\n",
