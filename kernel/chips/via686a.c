@@ -330,10 +330,9 @@ static inline long TEMP_FROM_REG10(u16 val)
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 
-/* For the VIA686A, we need to keep some data in memory. That
-   data is pointed to by via686a_list[NR]->data. The structure itself is
-   dynamically allocated, at the same time when a new via686a client is
-   allocated. */
+/* For the VIA686A, we need to keep some data in memory.
+   The structure is dynamically allocated, at the same time when a new
+   via686a client is allocated. */
 struct via686a_data {
 	struct semaphore lock;
 	int sysctl_id;
