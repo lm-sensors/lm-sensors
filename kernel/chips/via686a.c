@@ -93,53 +93,62 @@ static const u8 reghyst[] = {0x3a, 0x3e, 0x1e};
 #define VIA686A_REG_TEMP(nr)		(regtemp[(nr) - 1])
 #define VIA686A_REG_TEMP_OVER(nr)	(regover[(nr) - 1])
 #define VIA686A_REG_TEMP_HYST(nr)	(reghyst[(nr) - 1])
-#define VIA686A_REG_TEMP_LOW1	0x4b
-#define VIA686A_REG_TEMP_LOW23	0x49
+#define VIA686A_REG_TEMP_LOW1	0x4b // bits 7-6
+#define VIA686A_REG_TEMP_LOW23	0x49 // 2 = bits 5-4, 3 = bits 7-6
 
 #define VIA686A_REG_ALARM1 0x41
 #define VIA686A_REG_ALARM2 0x42
 #define VIA686A_REG_FANDIV 0x47
 #define VIA686A_REG_CONFIG 0x40
 
-#define ROUND_INT(val) ((val)<0?((val)-0.5):((val)+0.5))
-
 /* Conversions. Rounding and limit checking is only done on the TO_REG
    variants. */
 
 /********* VOLTAGE CONVERSIONS (Bob Dougherty) ********/
 // From HWMon.cpp (Copyright 1998-2000 Jonathan Teh Soon Yew):
-// voltagefactor[0]=1.25/2628;		// Vccp
-// voltagefactor[1]=1.25/2628;		// +2.5V
-// voltagefactor[2]=1.67/2628;		// +3.3V
-// voltagefactor[3]=2.6/2628;		// +5V
-// voltagefactor[4]=6.3/2628;		// +12V
+// voltagefactor[0]=1.25/2628; (2628/1.25=2102.4)   // Vccp
+// voltagefactor[1]=1.25/2628; (2628/1.25=2102.4)   // +2.5V
+// voltagefactor[2]=1.67/2628; (2628/1.67=1573.7)   // +3.3V
+// voltagefactor[3]=2.6/2628;  (2628/2.60=1010.8)   // +5V
+// voltagefactor[4]=6.3/2628;  (2628/6.30=417.14)   // +12V
 // in[i]=(data[i+2]*25.0+133)*voltagefactor[i];
+// That is:
+// volts = (25*regVal+133)*factor
+// regVal = (volts/factor-133)/25
 // 
 // These get us close, but they don't completely agree with what my BIOS says-
 // they are all a bit low.
 extern inline u8 IN_TO_REG(long val, int inNum)
 {
-  // there's an extra /100 hidden in the conversion factors here
+  // to avoid floating point, we multiply everything by 100.
+  // val is guaranteed to be positive, so we can achieve the effect of rounding
+  // by adding 0.5.  Or, to avoid fp math, we do (...*10+5)/10.
+  // (note that the *10 is hidden in the /250 rather than /2500
+  // At the end, we need to /100 because we *100 everything and we need
+  // to /10 because of the rounding thing, so we /1000
   if (inNum<=1)
-    return (u8)SENSORS_LIMIT(ROUND_INT(0.04*(val/0.047565-133)),0,255);
+    return (u8)SENSORS_LIMIT(((val*210240-13300)/250+5)/1000,0,255);
   else if (inNum==2)
-    return (u8)SENSORS_LIMIT(ROUND_INT(0.04*(val/0.063546-133)),0,255);
+    return (u8)SENSORS_LIMIT(((val*157370-13300)/250+5)/1000,0,255);
   else if (inNum==3)
-    return (u8)SENSORS_LIMIT(ROUND_INT(0.04*(val/0.098935-133)),0,255);
+    return (u8)SENSORS_LIMIT(((val*101080-13300)/250+5)/1000,0,255);
   else 
-    return (u8)SENSORS_LIMIT(ROUND_INT(0.04*(val/0.23973-133)),0,255);
+    return (u8)SENSORS_LIMIT(((val*41714-13300)/250+5)/1000,0,255);
 }
 extern inline long IN_FROM_REG(u8 val, int inNum)
 {
-   // use 2500.0 instead of 25.0 because we nneed to multiply val by 100
+  // to avoid floating point, we multiply everything by 100.
+  // val is guaranteed to be positive, so we can achieve the effect of rounding
+  // by adding 0.5.  Or, to avoid fp math, we do (...*10+5)/10.
+  // Since we need to scale up by 100 anyway, we don't need to /100 at the end.
   if (inNum<=1) 
-    return (long)ROUND_INT((2500.0*val+133)*0.00047565);
+    return (long)(((250000*val+13300)/210240*10+5)/10); // was 210240, 205240 works better
   else if (inNum==2)
-    return (long)ROUND_INT((2500.0*val+133)*0.00063546);
+    return (long)(((250000*val+13300)/157370*10+5)/10); // was 157370, 154370 works better
   else if (inNum==3)
-    return (long)ROUND_INT((2500.0*val+133)*0.00098935);
+    return (long)(((250000*val+13300)/101080*10+5)/10);
   else 
-    return (long)ROUND_INT((2500.0*val+133)*0.0023973);
+    return (long)(((250000*val+13300)/41714*10+5)/10);
 }
 
 extern inline u8 FAN_TO_REG(long rpm, int div)
@@ -147,8 +156,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 	if (rpm == 0)
 		return 255;
 	rpm = SENSORS_LIMIT(rpm, 1, 1000000);
-	return SENSORS_LIMIT((1350000 + rpm * div / 2) / (rpm * div), 1,
-			     254);
+	return SENSORS_LIMIT((1350000 + rpm * div / 2) / (rpm * div), 1, 254);
 }
 
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
@@ -167,59 +175,66 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 // BIOS tells me).  Here's the fifth-order fit to the 10-bit data:
 // temp = 6.500371171990e-09*val^5 +-4.006529810457e-06*val^4 +9.830610857874e-04*val^3 +
 // -1.187047495730e-01*val^2 +8.700574403605e+00*val +-2.836026823804e+02
-// 
-// Alas, neither work well because of precision limits in our math (?!?), so
-// I came up with a pretty good piecewise-2nd-order:
-// 
-// For 8-bit readings:
-//   0-59: -0.00831398*val*val + 1.46882437*val - 63.66742250
-//   60:179: 0.00056874*val*val + 0.29665581*val - 23.7538571
-//   180-255: 0.01275451*val*val - 4.39034916*val + 428.14343750
-// 
-// For 10-bit readings:
-//   0-283: -0.00051962*val*val + 0.36720609*val - 63.6674225
-//   284:763: 0.00004141*val*val + 0.06853503*val + -22.48959243
-//   764-1023: 0.00087626*val*val + -1.23656143*val + 488.97355989
-// 
-// To convert the other way (temp to 8-bit reg val): 
-//   <0: 0.01864022*val*val + 2.12242751*val + 290.16637347
-//   0-55: -0.00714790*val*val + 2.60844692*val + 70.67197155
-//   >55: -0.00991559*val*val + 2.48774551*val + 85.21011594
+//
+// None of the elegant function-fit solutions will work because we aren't allowed 
+// to use floating point in the kernel, so we'll do boring-old look-up table stuff.
+// Here are the unofficial data (provided by Alex van Kaam <darkside@chello.nl>).
+// Note that t is the temp at via register values 12-240 (8-bit), 48-960 (10-bit).
+static const u8 tempLUT[] = {-50,-49,-47,-45,-43,-41,-39,-38,-37,-35,-34,-33,-32,-31,\
+-30,-29,-28,-27,-26,-25,-24,-24,-23,-22,-21,-20,-20,-19,-18,-17,-17,-16,-15,-15,-14,\
+-14,-13,-12,-12,-11,-11,-10,-9,-9,-8,-8,-7,-7,-6,-6,-5,-5,-4,-4,-3,-3,-2,-2,-1,-1,0,0,\
+1,1,1,3,3,3,4,4,4,5,5,5,6,6,7,7,8,8,9,9,9,10,10,11,11,12,12,12,13,13,13,14,14,15,15,16,\
+16,16,17,17,18,18,19,19,20,20,21,21,21,22,22,22,23,23,24,24,25,25,26,26,26,27,27,27,28,\
+28,29,29,30,30,30,31,31,32,32,33,33,34,34,35,35,35,36,36,37,37,38,38,39,39,40,40,41,41,\
+42,42,43,43,44,44,45,45,46,46,47,48,48,49,49,50,51,51,52,52,53,53,54,55,55,56,57,57,58,\
+59,59,60,61,62,62,63,64,65,66,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,83,84,85,\
+86,88,89,91,92,94,96,97,99,101,103,105,107,109,110};
+
+// Here's the reverse LUT.  I got it by doing a 6-th order poly fit to the data and then
+// solving for each temp value from -50 to 110.  (n=161)
+static const u16 viaLUT[] = {12,12,13,14,14,15,16,16,17,18,18,19,20,20,21,22,23,23,24,\
+25,26,27,28,29,30,31,32,33,35,36,37,39,40,41,43,45,46,48,49,51,53,55,57,59,60,62,64,66,\
+69,71,73,75,77,79,82,84,86,88,91,93,95,98,100,103,105,107,110,112,115,117,119,122,124,\
+126,129,131,134,136,138,140,143,145,147,150,152,154,156,158,160,162,164,166,168,170,\
+172,174,176,178,180,182,183,185,187,188,190,192,193,195,196,198,199,200,202,203,204,\
+205,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,222,223,224,225,\
+226,226,227,228,228,229,230,230,231,232,232,233,233,234,235,235,236,236,237,237,238,\
+238,239,239,240};
 
 // Converting temps to register values
 extern inline u8 TEMP_TO_REG(long val)
 {
-  val /= 10;
-  if (val<0x00) // val<0
-    return (u8)SENSORS_LIMIT(ROUND_INT(0.01864022*val*val + 2.12242751*val + 72.54159337),0,255);
-  else if (val<0x37) // val<55
-    return (u8)SENSORS_LIMIT(ROUND_INT(-0.00714790*val*val + 2.60844692*val + 70.67197155),0,255);
-  else
-    return (u8)SENSORS_LIMIT(ROUND_INT(-0.00991559*val*val + 2.48774551*val + 85.21011594),0,255);
-
+  // No interpolation here.
+  if (val<=-500) return (u8)SENSORS_LIMIT(viaLUT[0],0,255);
+  if (val>=1100) return (u8)SENSORS_LIMIT(viaLUT[160],0,255);
+  // the +5 effective rounds it off properly
+  return (u8)SENSORS_LIMIT(viaLUT[(val+5)/10+50],0,255);
 }
 
 /* for 8-bit temperature hyst and over registers */
 extern inline long TEMP_FROM_REG(u8 val)
 {
-  if (val<0x47) // val<71
-    return (long)ROUND_INT(10.0*(-0.00831398*val*val + 1.46882437*val - 63.66742250));
-  else if (val<0xbf) // val<191
-    return (long)ROUND_INT(10.0*(0.00056874*val*val + 0.29665581*val - 23.7538571));
-  else
-    return (long)ROUND_INT(10.0*(0.01275451*val*val - 4.39034916*val + 428.14343750));
+  // the LUT starts at 12 (not 0) and ends at 240 (not 255), so that's why we do what we do here.
+  return (long)(tempLUT[(val<11)?(0):((val>240)?(228):(val-12))]*10);
 }
 
 /* for 10-bit temperature readings */
 extern inline long TEMP_FROM_REG10(u16 val)
 {
-  if (val<0x011c)  // val<284
-    return (long)ROUND_INT(10.0*(-0.00051962*val*val + 0.36720609*val - 63.6674225));
-  else if (val<0x02fc) //val<764
-    return (long)ROUND_INT(10.0*(0.00004141*val*val + 0.06853503*val + -22.48959243));
-  else
-    return (long)ROUND_INT(10.0*(0.00087626*val*val + -1.23656143*val + 488.97355989));
- 
+  u16 eightBits = val>>2;
+  u16 twoBits = val&3;
+
+  if (val<=48) return (long)tempLUT[0]*10;     // via8bit<=12
+  if (val>=960) return (long)tempLUT[228]*10; // via8bit>=240
+  
+  if (twoBits==0) 
+    return (long)tempLUT[eightBits-12]*10;
+  else {
+    // do some interpolation by multipying the lower and uppers bounds by 25, 50 or 75 
+    // (depending on which it's closer to), then /100.  But since we need to *10 anyway, we only /10
+    // ***FIX THIS*** we should properly round this off
+    return (long)(((25*(4-twoBits))*tempLUT[eightBits-12] + (25*twoBits)*tempLUT[eightBits-11])/10);
+  }
 }
 
 #define ALARMS_FROM_REG(val) (val)
@@ -571,7 +586,7 @@ void via686a_init_client(struct i2c_client *client)
 			    FAN_TO_REG(VIA686A_INIT_FAN_MIN, 2));
 	via686a_write_value(client, VIA686A_REG_FAN_MIN(2),
 			    FAN_TO_REG(VIA686A_INIT_FAN_MIN, 2));
-	for(i = 1; i < 3; i++) {
+	for(i = 1; i <= 3; i++) {
 		via686a_write_value(client, VIA686A_REG_TEMP_OVER(i),
 				    TEMP_TO_REG(VIA686A_INIT_TEMP_OVER));
 		via686a_write_value(client, VIA686A_REG_TEMP_HYST(i),
@@ -614,7 +629,11 @@ void via686a_update_client(struct i2c_client *client)
 			data->temp_hyst[i - 1] = via686a_read_value(client,
 			                         VIA686A_REG_TEMP_HYST(i));
 		}
-		/* add in lower 2 bits */
+		/* add in lower 2 bits 
+		   temp1 uses bits 7-6 of VIA686A_REG_TEMP_LOW1
+		   temp2 uses bits 5-4 of VIA686A_REG_TEMP_LOW23
+		   temp3 uses bits 7-6 of VIA686A_REG_TEMP_LOW23
+		*/
 		data->temp[0] |= (via686a_read_value(client,
 			           VIA686A_REG_TEMP_LOW1) & 0xc0) >> 6;
 		data->temp[1] |= (via686a_read_value(client,
