@@ -6,6 +6,8 @@
  *      2-July-2001 Matt Domsch <Matt_Domsch@dell.com>
  *      Additional structures displayed per SMBIOS 2.3.1 spec
  *
+ *	8/3/02 Enhanced and incorporated in lm_sensors 2.6.5
+ *
  *	Licensed under the GNU Public license. If you want to use it in with
  *	another license just ask.
  */
@@ -29,6 +31,7 @@ dump_raw_data(void *data, unsigned int length)
 	unsigned int length_printed = 0;
 	const unsigned char maxcolumn = 16;
 	while (length_printed < length) {
+		printf("\t");
 		b1 = buffer1;
 		b2 = buffer2;
 		for (column = 0;
@@ -427,6 +430,179 @@ static char *dmi_onboard_type(u8 code)
 	return onboard_type[code];
 }
 
+static char *dmi_mgmt_dev_type(u8 code)
+{
+	static char *type[]={
+		"",
+		"Other",
+		"Unknown",
+		"LM75",
+		"LM78",
+		"LM79",
+		"LM80",
+		"LM81",
+		"ADM9240",
+		"DS1780",
+		"MAX1617",
+		"GL518SM",
+		"W83781D",
+		"HT82H791",
+	};
+	code &= 0x80;
+	if (code > 0x0d)
+		return "";
+	return type[code];
+}
+
+static char *dmi_mgmt_addr_type(u8 code)
+{
+	static char *type[]={
+		"",
+		"Other",
+		"Unknown",
+		"I/O",
+		"Memory",
+		"SMBus",
+	};
+	code &= 0x80;
+	if (code > 5)
+		return "";
+	return type[code];
+}
+
+static char *dmi_fan_type(u8 code)
+{
+	static char *type[]={
+		"",
+		"Other",
+		"Unknown",
+		"Fan",
+		"Centrifugal Blower",
+		"Chip Fan",
+		"Cabinet Fan",
+		"Power Supply Fan",
+		"Heat Pipe",
+		"Integrated Refrigeration",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"Active Cooling",
+		"Passive Cooling",
+	};
+	code &= 0x80;
+	if (code > 0x11)
+		return "";
+	return type[code];
+}
+
+static char *dmi_volt_loc(u8 code)
+{
+	static char *type[]={
+		"",
+		"Other",
+		"Unknown",
+		"Processor",
+		"Disk",
+		"Peripheral Bay",
+		"System Management Module",
+		"Motherboard",
+		"Memory Module",
+		"Processor Module",
+		"Power Unit",
+		"Add-in Card",
+	};
+	code &= 0x80;
+	if (code > 0x0b)
+		return "";
+	return type[code];
+}
+
+static char *dmi_temp_loc(u8 code)
+{
+	static char *type[]={
+		"Front Panel Board",
+		"Back Panel Board",
+		"Power System Board",
+		"Drive Back Plane",
+	};
+	code &= 0x80;
+	if (code <= 0x0b)
+		return dmi_volt_loc(code);
+	return type[code - 0x0c];
+}
+
+static char *dmi_status(u8 code)
+{
+	static char *type[]={
+		"",
+		"Other",
+		"Unknown",
+		"OK",
+		"Non-critical",
+		"Critical",
+		"Non-recoverable",
+	};
+	code &= 0x80;
+	if (code > 6)
+		return "";
+	return type[code];
+}
+
+/* 3 dec. places */
+static char *dmi_millivolt(u8 *data, int index)
+{
+	static char buffer[20];
+	short int d;
+
+	if (data[index+1] == 0x80 && data[index] == 0)
+		return "Unknown";
+	d = data[index+1] << 8 | data[index];
+	sprintf(buffer, "%0.3f", d / 1000.0);
+	return buffer;
+}
+
+/* 2 dec. places */
+static char *dmi_accuracy(u8 *data, int index)
+{
+	static char buffer[20];
+	short int d;
+
+	if (data[index+1] == 0x80 && data[index] == 0)
+		return "Unknown";
+	d = data[index+1] << 8 | data[index];
+	sprintf(buffer, "%0.2f", d / 100.0);
+	return buffer;
+}
+
+/* 1 dec. place */
+static char *dmi_temp(u8 *data, int index)
+{
+	static char buffer[20];
+	short int d;
+
+	if (data[index+1] == 0x80 && data[index] == 0)
+		return "Unknown";
+	d = data[index+1] << 8 | data[index];
+	sprintf(buffer, "%0.1f", d / 10.0);
+	return buffer;
+}
+
+/* 0 dec. place */
+static char *dmi_speed(u8 *data, int index)
+{
+	static char buffer[20];
+	short int d;
+
+	if (data[index+1] == 0x80 && data[index] == 0)
+		return "Unknown";
+	d = data[index+1] << 8 | data[index];
+	sprintf(buffer, "%d", d);
+	return buffer;
+}
+
 		
 static void dmi_table(int fd, u32 base, int len, int num)
 {
@@ -706,21 +882,21 @@ static void dmi_table(int fd, u32 base, int len, int num)
 			break;
 			
 			
-			case 15:
-				printf("\tEvent Log\n");
-				printf("\t\tLog Area: %d bytes.\n",
-					data[5]<<8|data[4]);
-				printf("\t\tLog Header At: %d.\n",
-					data[7]<<8|data[6]);
-				printf("\t\tLog Data At: %d.\n",
-					data[9]<<8|data[8]);
-				printf("\t\tLog Type: %d.\n",
-					data[10]);
-				if(data[11]&(1<<0))
-					printf("\t\tLog Valid: Yes.\n");
-				if(data[11]&(1<<1))
-					printf("\t\t**Log Is Full**.\n");
-				break;
+		case 15:
+			printf("\tEvent Log\n");
+			printf("\t\tLog Area: %d bytes.\n",
+				data[5]<<8|data[4]);
+			printf("\t\tLog Header At: %d.\n",
+				data[7]<<8|data[6]);
+			printf("\t\tLog Data At: %d.\n",
+				data[9]<<8|data[8]);
+			printf("\t\tLog Type: %d.\n",
+				data[10]);
+			if(data[11]&(1<<0))
+				printf("\t\tLog Valid: Yes.\n");
+			if(data[11]&(1<<1))
+				printf("\t\t**Log Is Full**.\n");
+			break;
 			
 		case 16:
 			printf("\tPhysical Memory Array\n");
@@ -737,14 +913,157 @@ static void dmi_table(int fd, u32 base, int len, int num)
 		case 20:
 			printf("\tMemory Device Mapped Address\n");
 			break;
+		case 21:
+			printf("\tBuilt-In Pointing Device\n");
+			break;
+		case 22:
+			printf("\tPortable Battery\n");
+			printf("\t\tLocation: %s\n",
+					dmi_string(dm, data[4]));
+			printf("\t\tManufacturer: %s\n",
+					dmi_string(dm, data[5]));
+			printf("\t\tManufacture Date: %s\n",
+					dmi_string(dm, data[6]));
+			printf("\t\tSerial Number: %s\n",
+					dmi_string(dm, data[7]));
+			printf("\t\tName: %s\n",
+					dmi_string(dm, data[8]));
+				break;
+
+		case 23:
+			printf("\tSystem Reset\n");
+			break;
 		case 24:
 			printf("\tHardware Security\n");
 			break;
 		case 25:
 			printf("\tSystem Power Controls\n");
 			break;
+		case 26:
+			printf("\tVoltage Sensor\n");
+			printf("\t\tDescription: %s\n",
+					dmi_string(dm, data[4]));
+			printf("\t\tDevice Location: %s\n",
+			       dmi_volt_loc(data[5] & 0x1f));
+			printf("\t\tDevice Status: %s\n",
+			       dmi_status(data[5] >> 5));
+			printf("\t\tMaximum Value: %s\n",
+			        dmi_millivolt(data, 6));
+			printf("\t\tMinimum Value: %s\n",
+			        dmi_millivolt(data, 8));
+			printf("\t\tResolution:    %s\n",
+			        dmi_millivolt(data, 10));
+			printf("\t\tTolerance:     %s\n",
+			        dmi_millivolt(data, 12));
+			printf("\t\tAccuracy:      %s\n",
+			        dmi_accuracy(data, 14));
+			if(dm->length > 0x14)
+				printf("\t\tNominal Value: %s\n",
+				        dmi_millivolt(data, 0x14));
+			break;
+		case 27:
+			printf("\tCooling Device\n");
+			printf("\t\tDevice Type: %s\n",
+			       dmi_fan_type(data[5] & 0x1f));
+			printf("\t\tDevice Status: %s\n",
+			       dmi_status(data[5] >> 5));
+			if(dm->length > 0x0c)
+				printf("\t\tNominal Speed: %s\n",
+				        dmi_speed(data, 0x0c));
+			break;
+		case 28:
+			printf("\tTemperature Sensor\n");
+			printf("\t\tDescription: %s\n",
+					dmi_string(dm, data[4]));
+			printf("\t\tDevice Location: %s\n",
+			       dmi_temp_loc(data[5] & 0x1f));
+			printf("\t\tDevice Status: %s\n",
+			       dmi_status(data[5] >> 5));
+			printf("\t\tMaximum Value: %s\n",
+			        dmi_temp(data, 6));
+			printf("\t\tMinimum Value: %s\n",
+			        dmi_temp(data, 8));
+			printf("\t\tResolution:    %s\n",
+			        dmi_temp(data, 10));
+			printf("\t\tTolerance:     %s\n",
+			        dmi_temp(data, 12));
+			printf("\t\tAccuracy:      %s\n",
+			        dmi_accuracy(data, 14));
+			if(dm->length > 0x14)
+				printf("\t\tNominal Value: %s\n",
+				        dmi_temp(data, 0x14));
+			break;
+		case 29:
+			printf("\tCurrent Sensor\n");
+			printf("\t\tDescription: %s\n",
+					dmi_string(dm, data[4]));
+			printf("\t\tDevice Location: %s\n",
+			       dmi_volt_loc(data[5] & 0x1f));
+			printf("\t\tDevice Status: %s\n",
+			       dmi_status(data[5] >> 5));
+			printf("\t\tMaximum Value: %s\n",
+			        dmi_millivolt(data, 6));
+			printf("\t\tMinimum Value: %s\n",
+			        dmi_millivolt(data, 8));
+			printf("\t\tResolution:    %s\n",
+			        dmi_millivolt(data, 10));
+			printf("\t\tTolerance:     %s\n",
+			        dmi_millivolt(data, 12));
+			printf("\t\tAccuracy:      %s\n",
+			        dmi_accuracy(data, 14));
+			if(dm->length > 0x14)
+				printf("\t\tNominal Value: %s\n",
+				        dmi_millivolt(data, 0x14));
+			break;
+		case 30:
+			printf("\tOut-of-Band Remote Access\n");
+			break;
+		case 31:
+			printf("\tBoot Integrity Services Entry Point\n");
+			break;
 		case 32:
 			printf("\tSystem Boot Information\n");
+			break;
+		case 33:
+			printf("\t64-bit Memory Error Information\n");
+			break;
+		case 34:
+			printf("\tManagement Device\n");
+			printf("\t\tDescription: %s\n",
+					dmi_string(dm, data[4]));
+			printf("\t\tDevice Type: %s\n",
+			       dmi_mgmt_dev_type(data[5]));
+			printf("\t\tAddress Type: %s\n",
+			       dmi_mgmt_addr_type(data[6]));
+			break;
+		case 35:
+			printf("\tManagement Device Component\n");
+			printf("\t\tDescription: %s\n",
+					dmi_string(dm, data[4]));
+			printf("\t\tDevice Handle   : 0x%02x%02x\n",
+			       data[6], data[5]);
+			printf("\t\tComponent Handle: 0x%02x%02x\n",
+			       data[8], data[7]);
+			printf("\t\tThreshold Handle: 0x%02x%02x\n",
+			       data[10], data[9]);
+			break;
+		case 36:
+			printf("\tManagement Device Threshold Data\n");
+			if (dm->length > 4) 
+				dump_raw_data(data+4, dm->length-4);
+			break;
+		case 37:
+			printf("\tMemory Channeln");
+			break;
+		case 38:
+			printf("\tIPMI Device\n");
+			if (dm->length > 4) 
+				dump_raw_data(data+4, dm->length-4);
+			break;
+		case 39:
+			printf("\tPower Supply\n");
+			if (dm->length > 4) 
+				dump_raw_data(data+4, dm->length-4);
 			break;
 		case 126:
 			printf("\tInactive\n");
