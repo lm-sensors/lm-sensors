@@ -62,6 +62,10 @@
 #define PCI_DEVICE_ID_SI_651 0x0651
 #endif
 
+/* SiS85C503/5513 (LPC Bridge) */
+#ifndef PCI_DEVICE_ID_SI_LPC
+#define PCI_DEVICE_ID_SI_LPC 0x0018
+#endif
 
 /* SiS961 south bridge */
 #ifndef PCI_DEVICE_ID_SI_961
@@ -235,6 +239,7 @@ static int __devinit sis645_probe(struct pci_dev *dev, const struct pci_device_i
         	break;
 
 	case PCI_DEVICE_ID_SI_503:
+	case PCI_DEVICE_ID_SI_LPC:
 		printk(KERN_INFO DRV_NAME ": Found SiS south bridge in compatability mode(?)\n");
 
 		/* look for known compatible north bridges */
@@ -249,7 +254,9 @@ static int __devinit sis645_probe(struct pci_dev *dev, const struct pci_device_i
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
 				PCI_DEVICE_ID_SI_651, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
-				PCI_DEVICE_ID_SI_735, NULL))) {
+				PCI_DEVICE_ID_SI_735, NULL))
+			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
+				PCI_DEVICE_ID_SI_745, NULL))) {
 			printk(KERN_ERR DRV_NAME ": Can't find suitable host bridge!\n");
 			return -ENODEV;
 		}
@@ -508,8 +515,10 @@ static struct pci_device_id sis645_ids[] __devinitdata = {
 
 	/* look for these south bridges */
 	{ PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_503, PCI_ANY_ID, PCI_ANY_ID, },
+	{ PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_LPC, PCI_ANY_ID, PCI_ANY_ID, },
 	{ PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_961, PCI_ANY_ID, PCI_ANY_ID, },
 	{ PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_962, PCI_ANY_ID, PCI_ANY_ID, },
+	{ PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_963, PCI_ANY_ID, PCI_ANY_ID, },
 
 	{ 0, }
 };
