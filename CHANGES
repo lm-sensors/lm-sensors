@@ -21,6 +21,7 @@ ask CVS about it:
   Program sensors: Rewrite and enhance eeprom support
   Program sensors-detect: Add support for PCF8574, PCF8574A, SAA1064;
                           Add support for LM82, LM86, LM89
+  Module: i2c-sis645.c: Detection method change/bugfix
 
 2.8.0 (20030714)
   NOTE: Requires i2c-2.8.0 or newer!!!
@@ -85,7 +86,8 @@ ask CVS about it:
   Module i2c-nforce2: New
   Module i2c-piix4: Check for invalid transaction
   Module i2c-sis5595: Check for invalid transaction; add more blacklist IDs
-  Module i2c-sis645: Add support for SiS651, SiS961, SiS745, SiS746
+  Module i2c-sis645: Add support for SiS648, SiS651, SiS745, and SiS746
+	north bridges; SiS962 and SiS963 south bridges
   Module i2c-viapro: Check for invalid transaction
   Modules mtp008, smsc47m1, vt1211, vt8231, w83781d: Standardize and improve
           pwm and pwm enable support; update docs
