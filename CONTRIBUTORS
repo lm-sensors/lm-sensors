@@ -76,4 +76,5 @@ problems.
   Added Asus ASB100 Bach support to the w83781d driver.
 * Alexander Malysh <amalysh@web.de>
   Author of the i2c-sis630 bus driver.
+  Added Onsemi MC1066 support to the adm1021 driver.
 

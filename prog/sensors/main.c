@@ -301,7 +301,7 @@ void do_a_print(sensors_chip_name name)
   else if (!strcmp(name.prefix,"adm1021") || !strcmp(name.prefix,"max1617") ||
            !strcmp(name.prefix,"max1617a") || !strcmp(name.prefix, "thmc10") ||
            !strcmp(name.prefix,"lm84") || !strcmp(name.prefix, "gl523") ||
-	   !strcmp(name.prefix, "adm1023"))
+	   !strcmp(name.prefix, "adm1023") || !strcmp(name.prefix, "mc1066"))
     print_adm1021(&name);
   else if (!strcmp(name.prefix,"adm9240") ||
            !strcmp(name.prefix,"ds1780") ||

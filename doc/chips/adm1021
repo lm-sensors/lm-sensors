@@ -45,6 +45,10 @@ Supported chips:
     Prefix `thmc10'
     Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
     Datasheet: Publicly available at the TI website
+  * Onsemi MC1066
+    Prefix `mc1066'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Datasheet: Publicly available at the Onsemi website
 
 
 Author: Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock
@@ -73,6 +77,9 @@ Module Parameters
   List of adapter,address pairs to scan additionally
 * probe_range: short array (min = 1, max = 48)
   List of adapter,start-addr,end-addr triples to scan additionally
+* read_only: int (0 = disable, 1 = enable , default 0)
+  Read only mode.This is useful for Laptop's if BIOS managed Thermal Zone (Fan on/off).
+  Otherwise it confuse BIOS by writing any limit register's.
 
 
 Description
@@ -203,6 +210,27 @@ Chip `max1617a'
    remote_temp_low       SENSORS_MAX1617A_REMOTE_TEMP_HYST        remote_temp:2
   remote_temp_over       SENSORS_MAX1617A_REMOTE_TEMP_OVER        remote_temp:1
             alarms                 SENSORS_MAX1617A_ALARMS             alarms:1
+
+
+Chip `mc1066'
+             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
+              temp               NONE               NONE     R     0
+          temp_low               temp               temp     RW    0
+         temp_over               temp               temp     RW    0
+       remote_temp               NONE               NONE     R     0
+   remote_temp_low        remote_temp        remote_temp     RW    0
+  remote_temp_over        remote_temp        remote_temp     RW    0
+            alarms               NONE               NONE     R     0
+
+             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
+              temp                    SENSORS_MAX1617_TEMP               temp:3
+          temp_low               SENSORS_MAX1617_TEMP_HYST               temp:2
+         temp_over               SENSORS_MAX1617_TEMP_OVER               temp:1
+       remote_temp             SENSORS_MAX1617_REMOTE_TEMP        remote_temp:3
+   remote_temp_low        SENSORS_MAX1617_REMOTE_TEMP_HYST        remote_temp:2
+  remote_temp_over        SENSORS_MAX1617_REMOTE_TEMP_OVER        remote_temp:1
+            alarms                  SENSORS_MAX1617_ALARMS             alarms:1
+
 
 
 

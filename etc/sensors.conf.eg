@@ -1337,7 +1337,7 @@ chip "pcf8591-*"
    label  aout        "Output"
    set    aout        0
 
-chip "adm1021-*" "adm1023-*" "max1617-*" "max1617a-*" "thmc10-*" "lm84-*" "gl523sm-*"
+chip "adm1021-*" "adm1023-*" "max1617-*" "max1617a-*" "thmc10-*" "lm84-*" "gl523sm-*" "mc1066-*"
 
    label temp 		"Board"
    label remote_temp	"CPU"

@@ -49,7 +49,7 @@ static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_7(adm1021, adm1023, max1617, max1617a, thmc10, lm84, gl523sm);
+SENSORS_INSMOD_8(adm1021, adm1023, max1617, max1617a, thmc10, lm84, gl523sm, mc1066);
 
 /* adm1021 constants specified below */
 
@@ -58,7 +58,7 @@ SENSORS_INSMOD_7(adm1021, adm1023, max1617, max1617a, thmc10, lm84, gl523sm);
 #define ADM1021_REG_TEMP 0x00
 #define ADM1021_REG_REMOTE_TEMP 0x01
 #define ADM1021_REG_STATUS 0x02
-#define ADM1021_REG_MAN_ID 0x0FE	/* 0x41 = AMD, 0x49 = TI, 0x4D = Maxim, 0x23 = Genesys */
+#define ADM1021_REG_MAN_ID 0x0FE	/* 0x41 = AMD, 0x49 = TI, 0x4D = Maxim, 0x23 = Genesys , 0x54 = Onsemi*/
 #define ADM1021_REG_DEV_ID 0x0FF	/* ADM1021 = 0x0X, ADM1023 = 0x3X */
 #define ADM1021_REG_DIE_CODE 0x0FF	/* MAX1617A */
 /* These use different addresses for reading/writing */
@@ -154,6 +154,9 @@ static void adm1021_alarms(struct i2c_client *client, int operation,
 static void adm1021_die_code(struct i2c_client *client, int operation,
 			     int ctl_name, int *nrels_mag, long *results);
 static void adm1021_update_client(struct i2c_client *client);
+
+/* (amalysh) read only mode, otherwise any limit's writing confuse BIOS */
+static int read_only = 0;
 
 
 /* This is the driver that will be inserted */
@@ -280,6 +283,8 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 		    if (adm1021_read_value
 			(new_client, ADM1021_REG_CONV_RATE_R) == 0x00)
 			kind = lm84;
+		else if (i == 0x54)
+			kind = mc1066;
 		else
 			kind = max1617;
 	}
@@ -305,6 +310,9 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	} else if (kind == gl523sm) {
 		type_name = "gl523sm";
 		client_name = "GL523SM chip";
+	} else if (kind == mc1066) {
+		type_name = "mc1066";
+		client_name = "MC1066 chip";
 	} else {
 #ifdef DEBUG
 		printk("adm1021.o: Internal error: unknown kind (%d)?!?",
@@ -420,6 +428,9 @@ int adm1021_read_value(struct i2c_client *client, u8 reg)
 
 int adm1021_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
+	if (read_only > 0)
+		return 0;
+
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
@@ -640,6 +651,9 @@ EXPORT_NO_SYMBOLS;
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("adm1021 driver");
+
+MODULE_PARM(read_only, "i");
+MODULE_PARM_DESC(read_only, "Don't set any values, read only mode");
 
 int init_module(void)
 {

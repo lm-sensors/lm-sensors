@@ -2994,6 +2994,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_DS1780_PREFIX, ds1780_features },
  { SENSORS_ADM1021_PREFIX, adm1021_features },
  { SENSORS_MAX1617_PREFIX, max1617_features },
+ { SENSORS_MC1066_PREFIX, max1617_features },
  { SENSORS_MAX1617A_PREFIX, max1617a_features },
 		/* Cheat on LM84 for now - no separate #defines */
  { SENSORS_LM84_PREFIX, adm1021_features },
