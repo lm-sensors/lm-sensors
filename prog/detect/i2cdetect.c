@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
   char *end;
   int i,j,res,i2cbus,file;
   char filename[20];
+  long funcs;
   
 
   if (argc < 2) {
@@ -59,6 +60,19 @@ int main(int argc, char *argv[])
   if ((file = open(filename,O_RDWR)) < 0) {
     fprintf(stderr,"Error: Could not open file `%s': %s\n",filename,
             strerror(errno));
+    exit(1);
+  }
+
+  if (ioctl(file,I2C_FUNCS,&funcs) < 0) {
+    fprintf(stderr,
+            "Error: Could not get the adapter functionality maxtrix: %s\n",
+            strerror(errno));
+    exit(1);
+  }
+  if (! (funcs & I2C_FUNC_SMBUS_QUICK)) {
+    fprintf(stderr,
+            "Error: Can't use SMBus Quick Write command "
+            "on this bus (ISA bus?)\n");
     exit(1);
   }
   
