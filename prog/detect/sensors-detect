@@ -3716,12 +3716,15 @@ sub eeprom_detect
 	i2c_set_slave_addr($file,$addr - 0x20);
 	if(i2c_smbus_write_quick($file,$SMBUS_WRITE) >= 0 &&
 	   i2c_smbus_read_byte_data($file,0x80) == -1) {
+		i2c_set_slave_addr($file,$addr);
 		if($checksum == 0) {
 			return (9, $addr - 0x20);
 		} else {
 			return (2, $addr - 0x20);
 		}
 	}
+	i2c_set_slave_addr($file,$addr);
+	return;
   }
 
   # Look for a Sony Vaio EEPROM ($chip == 1)
