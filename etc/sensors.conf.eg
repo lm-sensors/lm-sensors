@@ -196,6 +196,50 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*" "sis5595-*"
     set in6_max -5 * 1.05
 
 
+chip "w83782d-*" "w83783s-*"
+
+# Same as above for w83781d except that in5 and in6 are computed differently.
+# Rather than an internal inverting op amp, the 82d/83s use standard positive
+# inputs and the negative voltages are level shifted by a 3.6V reference.
+# The math is convoluted, hope that your motherboard uses the recommended
+# resistor values.
+
+    label in0 "VCore 1"
+    label in1 "VCore 2"
+    label in2 "+3.3V"
+    label in3 "+5V"
+    label in4 "+12V"
+    label in5 "-12V"
+    label in6 "-5V"
+    label in7 "V5SB"
+    label in8 "VBat"
+
+    compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+    compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
+    compute in5 (5.14 * @) - 14.91  ,  (@ + 14.91) / 5.14
+    compute in6 (3.14 * @) -  7.71  ,  (@ +  7.71) / 3.14
+    compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+
+    set in0_min vid*0.95
+    set in0_max vid*1.05
+    set in1_min vid*0.95
+    set in1_max vid*1.05
+    set in2_min 3.3 * 0.95
+    set in2_max 3.3 * 1.05
+    set in3_min 5.0 * 0.95
+    set in3_max 5.0 * 1.05
+    set in4_min 12 * 0.95
+    set in4_max 12 * 1.05
+    set in5_min -12 * 0.95
+    set in5_max -12 * 1.05
+    set in6_min -5 * 0.95
+    set in6_max -5 * 1.05
+    set in7_min 5 * 0.95
+    set in7_max 5 * 1.05
+    set in8_min 3.3 * 0.95
+    set in8_max 3.3 * 1.05
+
+
 chip "gl518sm-r00-*" "gl518sm-r80-*"
 
 # Factors and labels taken from GL518SM datasheet, they seem to give
