@@ -1,20 +1,34 @@
-.TH I2CSET 8 "July 2004"
+.TH I2CSET 8 "August 2004"
 .SH "NAME"
 i2cset \- set I2C registers
 
 .SH SYNOPSIS
 .B i2cset
+.RB [ -y ]
 .I i2cbus
 .I chip-address
 .I data-address
 .I value
 .RI [ mode ]
+.br
+.B i2cset
+.B -V
 
 .SH DESCRIPTION
 i2cset is a small helper program to set registers visible through the I2C
 bus.
 
 .SH OPTIONS
+.TP
+.B -v, -V
+Display the version and exit.
+.TP
+.B -y
+Disable interactive mode. By default, isaset will wait for a confirmation
+from the user before messing with the ISA bus. When this flag is used, it
+will perform the operation directly. This is mainly meant to be used in
+scripts.
+.PP
 There are four required options to i2cset. \fIi2cbus\fR indicates the number
 of the I2C bus to be scanned.  This number should correspond to one of
 the busses listed by \fIi2cdetect -l\fR. \fIchip-address\fR specifies the

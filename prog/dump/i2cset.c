@@ -32,8 +32,9 @@ void help(void) __attribute__ ((noreturn));
 
 void help(void)
 {
-	fprintf(stderr, "Syntax: i2cset I2CBUS CHIP-ADDRESS DATA-ADDRESS "
-	        "VALUE [MODE]\n");
+	fprintf(stderr, "Syntax: i2cset [-y] I2CBUS CHIP-ADDRESS DATA-ADDRESS "
+	        "VALUE [MODE]\n"
+		"        i2cset -V\n");
 	fprintf(stderr, "  MODE is 'b[yte]' or 'w[ord]' (default b)\n");
 	fprintf(stderr, "  I2CBUS is an integer\n");
 	print_i2c_busses(0);
@@ -48,45 +49,61 @@ int main(int argc, char *argv[])
 	int e1;
 	char filename[20];
 	long funcs;
+	int flags = 0;
+	int yes = 0, version = 0;
 
-	if (argc >= 2 && (!strcmp(argv[1], "-v") || !strcmp(argv[1], "-V"))) {
+	/* handle (optional) flags first */
+	while (1+flags < argc && argv[1+flags][0] == '-') {
+		switch (argv[1+flags][1]) {
+		case 'V': version = 1; break;
+		case 'y': yes = 1; break;
+		default:
+			fprintf(stderr, "Warning: Unsupported flag "
+				"\"-%c\"!\n", argv[1+flags][1]);
+			help();
+			exit(1);
+		}
+		flags++;
+	}
+
+	if (version) {
 		fprintf(stderr, "i2cset version %s\n", LM_VERSION);
 		exit(1);
 	}
 
-	if (argc < 5)
+	if (argc + flags < 5)
 		help();
 
-	i2cbus = strtol(argv[1], &end, 0);
+	i2cbus = strtol(argv[flags+1], &end, 0);
 	if (*end || i2cbus < 0 || i2cbus > 0x3f) {
 		fprintf(stderr, "Error: I2CBUS argument invalid!\n");
 		help();
 	}
 
-	address = strtol(argv[2], &end, 0);
+	address = strtol(argv[flags+2], &end, 0);
 	if (*end || address < 0 || address > 0x7f) {
 		fprintf(stderr, "Error: Chip address invalid!\n");
 		help();
 	}
 
-	daddress = strtol(argv[3], &end, 0);
+	daddress = strtol(argv[flags+3], &end, 0);
 	if (*end || daddress < 0 || daddress > 0xff) {
 		fprintf(stderr, "Error: Data address invalid!\n");
 		help();
 	}
 
-	value = strtol(argv[4], &end, 0);
+	value = strtol(argv[flags+4], &end, 0);
 	if (*end) {
 		fprintf(stderr, "Error: Data value invalid!\n");
 		help();
 	}
 
-	if (argc < 6) {
+	if (argc < flags + 6) {
 		fprintf(stderr, "No size specified (using byte-data access)\n");
 		size = I2C_SMBUS_BYTE_DATA;
-	} else if (!strcmp(argv[5], "b"))
+	} else if (!strcmp(argv[flags+5], "b"))
 		size = I2C_SMBUS_BYTE_DATA;
-	else if (!strcmp(argv[5], "w"))
+	else if (!strcmp(argv[flags+5], "w"))
 		size = I2C_SMBUS_WORD_DATA;
 	else {
 		fprintf(stderr, "Error: Invalid mode!\n");
@@ -138,26 +155,34 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	fprintf(stderr, "WARNING! This program can confuse your I2C bus, "
-	        "cause data loss and worse!\n");
-	if (address >= 0x50 && address <= 0x57) {
-		fprintf(stderr, "DANGEROUS!! Writing to a serial EEPROM on "
-		        "a memory DIMM\nmay render your memory USELESS and "
-		        "make your system UNBOOTABLE!!!\nAre you SURE that "
-		        "you want to write to the chip at address 0x%02x? "
-		        "(y/N) ", address);
-		res = getchar();
-		if (res != 'y' && res != 'Y')
-			exit(1);
-	}
+	if (!yes) {
+		char s[2];
+		int dont = 0;
 
-	fprintf(stderr, "I will write to device file %s, chip address 0x%02x, "
-	        "data address\n0x%02x, data 0x%02x, mode %s.\n", filename,
-	        address, daddress, value, size == I2C_SMBUS_BYTE_DATA ?
-	        "byte" : "word");
-	fprintf(stderr, "You have five seconds to reconsider and press "
-	        "CTRL-C!\n\n");
-	sleep(5);
+		fprintf(stderr, "WARNING! This program can confuse your I2C "
+		        "bus, cause data loss and worse!\n");
+
+		if (address >= 0x50 && address <= 0x57) {
+			fprintf(stderr, "DANGEROUS! Writing to a serial "
+			        "EEPROM on a memory DIMM\nmay render your "
+			        "memory USELESS and make your system "
+			        "UNBOOTABLE!\n");
+			dont = 1;
+		}
+
+		fprintf(stderr, "I will write to device file %s, chip address "
+		        "0x%02x, data address\n0x%02x, data 0x%02x, mode "
+		        "%s.\n", filename, address, daddress, value,
+			size == I2C_SMBUS_BYTE_DATA ? "byte" : "word");
+
+		fprintf(stderr, "Continue? [%s] ", dont ? "y/N" : "Y/n");
+		fflush(stderr);
+		fgets(s, 2, stdin);
+		if ((s[0] != '\n' || dont) && s[0] != 'y' && s[0] != 'Y') {
+			fprintf(stderr, "Aborting on user request.\n");
+			exit(0);
+		}
+	}
 
 	e1 = 0;
 	if (size == I2C_SMBUS_WORD_DATA) {
