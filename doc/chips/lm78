@@ -47,7 +47,7 @@ Module Parameters
 Description
 -----------
 
-This driver implements support for the National Semiconductor LM78, LM78-J
+This driver implements support for the National Semiconductors LM78, LM78-J
 and LM79. They are described as `Microprocessor System Hardware Monitors'.
 
 There is almost no difference between the three supported chips. Functionally, 
@@ -55,7 +55,7 @@ the LM78 and LM78-J are exactly identical. The LM79 has one more VID line,
 which is used to report the lower voltages newer Pentium processors use.
 From here on, LM7* means either of these three types.
 
-The LM7* implements one temperatur sensor, three FAN rotation speed sensors,
+The LM7* implements one temperature sensor, three FAN rotation speed sensors,
 seven voltage sensors, VID lines, alarms, and some miscellaneous stuff.
 
 Temperatures are measured in degrees Celcius. An alarm is triggered once

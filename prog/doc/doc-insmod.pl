@@ -21,25 +21,25 @@
 
 # Use the following patch (apply by hand) if modinfo does not seem to terminate:
 #
-# *** /tmp/modutils-2.1.121/insmod/modinfo.c      Mon Sep 14 20:55:28 1998
-# --- modutils-2.1.121/insmod/modinfo.c   Wed Apr 14 20:54:38 1999
-# ***************
-# *** 457,462 ****
-#    error_file = "modinfo";
-#  
-#!   while (optind < argc)
-#      show_module_info(argv[optind], fmtstr, do_parameters);
-#  
-#    return 0;
-#--- 457,464 ----
-#    error_file = "modinfo";
-#  
-#!   while (optind < argc) {
-#      show_module_info(argv[optind], fmtstr, do_parameters);
-#+     optind ++;
-#+   }
-#  
-#    return 0;
+#  *** /tmp/modutils-2.1.121/insmod/modinfo.c      Mon Sep 14 20:55:28 1998
+#  --- modutils-2.1.121/insmod/modinfo.c   Wed Apr 14 20:54:38 1999
+#  ***************
+#  *** 457,462 ****
+#     error_file = "modinfo";
+#   
+# !   while (optind < argc)
+#       show_module_info(argv[optind], fmtstr, do_parameters);
+#   
+#     return 0;
+# --- 457,464 ----
+#     error_file = "modinfo";
+#   
+# !   while (optind < argc) {
+#       show_module_info(argv[optind], fmtstr, do_parameters);
+# +     optind ++;
+# +   }
+#   
+#     return 0;
 
 
 use strict;
@@ -51,7 +51,7 @@ sub print_info
 {
   my ($modname) = @_;
   my (@lines,$line,$option,$type,$desc);
-  print "Author: ", `modinfo -a $modname`, "\n\n";
+  print "Author: ", wrap("Author: ","        ",`modinfo -a $modname`), "\n\n";
   print "Module Parameters\n";
   print "-----------------\n";
   print "\n";

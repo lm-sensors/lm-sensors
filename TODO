@@ -8,6 +8,11 @@ KERNEL MODULES
 * maxilife.c: Round REG_TO_VID correctly
 * icspll.c: Rewrite. The current implementation simply can't work at all.
   It needs i2c-level access (too bad for SMBus-only adapters).
+* w83781d: Some features are still unsupported for the W8378[23]. For
+  example, the new fan_divs (register 0x5d) and the extended beeps
+  (bank 4 register 0x53). Also, alarms seem to give strange results
+  sometimes, and there are some other minor problems, as indicated by
+  Jonathan Bradshaw <jonathan@NrgUp.Com>
 * Create wait-queues for bus locking instead of pure semaphores in the i2c
   base modules, to make it more interactive (right now one process can 
   monopolize the entire adapter)
@@ -33,6 +38,8 @@ KERNEL MODULES
 * adm9240: check whether the current voltage computations are correct.
   Probably not, as they are different from the datasheet specifications.
   Also check for the supported dallas chip.
+* lm80: Check how OS alarms work. At page 17 of the sheet, it tells
+  something completely different from the description at page 25.
 
 LIBRARY
 =======
