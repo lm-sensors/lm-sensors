@@ -324,13 +324,17 @@ static int smsc47m1_read_value(struct i2c_client *client, u8 reg)
 {
 	int res;
 
+	down(&(((struct smsc47m1_data *) (client->data))->lock));
 	res = inb_p(client->addr + reg);
+	up(&(((struct smsc47m1_data *) (client->data))->lock));
 	return res;
 }
 
 static int smsc47m1_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
+	down(&(((struct smsc47m1_data *) (client->data))->lock));
 	outb_p(value, client->addr + reg);
+	up(&(((struct smsc47m1_data *) (client->data))->lock));
 	return 0;
 }
 
