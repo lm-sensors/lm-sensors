@@ -23,6 +23,7 @@
 #include "data.h"
 #include "proc.h"
 #include "error.h"
+#include "access.h"
 
 extern int sensors_yyparse(void);
 extern FILE *sensors_yyin;

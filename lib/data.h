@@ -31,7 +31,8 @@ typedef enum sensors_operation {
   sensors_negate } sensors_operation;
 
 typedef enum sensors_expr_kind {
-  sensors_kind_val, sensors_kind_var, sensors_kind_sub } sensors_expr_kind;
+  sensors_kind_val, sensors_kind_source, sensors_kind_var, 
+  sensors_kind_sub } sensors_expr_kind;
 
 struct sensors_expr;
 
@@ -126,7 +127,8 @@ extern int sensors_proc_bus_max;
    error.h on failure. */
 extern int sensors_parse_i2cbus_name(const char *name, int *res);
 
-extern int sensors_eval_expr(sensors_expr *expr, double val, double *result);
+extern int sensors_eval_expr(sensors_chip_name chipname, sensors_expr *expr,
+                             double val, double *result);
 
 
 #endif /* def LIB_SENSORS_DATA_H */

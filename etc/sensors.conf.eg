@@ -46,7 +46,8 @@ chip "lm78-*" "lm78-j-*" "lm79-*"
 # A compute line describes how to scale a certain feature. There are
 # two expressions in it: the first describes how the /proc value must
 # be translated to a user value, the second how a user value must be
-# translated to a /proc value. 'val' is the value to operate on.
+# translated to a /proc value. '@' is the value to operate on. You may
+# refer to other readable features (like '2 * vid').
 
 # Like for the label statement, there are logical groups here. They are
 # sometimes a bit different, though. For example, fan1_div is in the
@@ -69,10 +70,10 @@ chip "lm78-*" "lm78-j-*" "lm79-*"
 # in6   -5.0    100      60     +3.00
 
 # These would lead to these declarations:
-# compute in3 ((6.8/10)+1)*val ,  val/((6.8/10)+1)
-# compute in4 ((30/10)+1)*val  ,  val/((30/10)+1)
-# compute in5 -(240/60)*val    ,  -val/(240/60)
-# compute in6 -(100/60)*val    ,  -val/(100/60)
+# compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+# compute in4 ((30/10)+1)*@  ,  @/((30/10)+1)
+# compute in5 -(240/60)*@    ,  -@/(240/60)
+# compute in6 -(100/60)*@    ,  -@/(100/60)
 
 # On almost any mainboard we have seen, the Winbond compute values lead to
 # much better results, though. 
@@ -83,10 +84,10 @@ chip "lm78-*" "lm78-j-*" "lm79-*"
 # in6   -5.0     90.9    60.4   +3.00
 
 # These leads to these declarations:
-  compute in3 ((6.8/10)+1)*val ,  val/((6.8/10)+1)
-  compute in4 ((28/10)+1)*val  ,  val/((28/10)+1)
-  compute in5 -(210/60.4)*val  ,  -val/(210/60.4)
-  compute in6 -(90.9/60.4)*val ,  -val/(90.9/60.4)
+  compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+  compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
+  compute in5 -(210/60.4)*@  ,  -@/(210/60.4)
+  compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
 
 # Set statements set things like limits. Complete expressions can be
 # used. Not everything can sensibly be set: setting 'in0', for example,

@@ -187,7 +187,7 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
     return -SENSORS_ERR_PROC;
   if (! expr)
     *result = val;
-  else if ((res = sensors_eval_expr(expr,val,result)))
+  else if ((res = sensors_eval_expr(name,expr,val,result)))
     return res;
   return 0;
 }
@@ -213,7 +213,7 @@ int sensors_set_feature(sensors_chip_name name, int feature, double value)
       if (!strcmp(featureptr->name,chip->computes->name))
         expr = chip->computes->to_proc;
   if (expr)
-    if ((res = sensors_eval_expr(expr,value,&value)))
+    if ((res = sensors_eval_expr(name,expr,value,&value)))
       return res;
   if (sensors_write_proc(name,feature,value))
     return -SENSORS_ERR_PROC;

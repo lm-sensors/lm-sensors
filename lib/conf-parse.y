@@ -211,6 +211,10 @@ expression:	  FLOAT
 		    $$->data.var = $1;
 		    $$->kind = sensors_kind_var;
 		  }
+		| '@'
+		  { $$ = malloc_expr();
+		    $$->kind = sensors_kind_source;
+		  }
 		| expression '+' expression
 		  { $$ = malloc_expr(); 
 		    $$->kind = sensors_kind_sub;

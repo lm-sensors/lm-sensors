@@ -23,6 +23,7 @@
 #include "error.h"
 #include "data.h"
 #include "sensors.h"
+#include "access.h"
 
 sensors_chip *sensors_config_chips = NULL;
 int sensors_config_chips_count = 0;
@@ -200,24 +201,34 @@ int sensors_parse_i2cbus_name(const char *name, int *res)
 }
 
 
-int sensors_eval_expr(sensors_expr *expr, double val, double *result)
+int sensors_eval_expr(sensors_chip_name chipname, sensors_expr *expr,
+                      double val, double *result)
 {
   double res1,res2;
   int res;
+  sensors_chip_feature *feature;
 
   if (expr->kind == sensors_kind_val) {
     *result = expr->data.val;
     return 0;
   }
-  if (expr->kind == sensors_kind_var) {
-    /* We should check the kind of variable here! */
+  if (expr->kind == sensors_kind_source) {
     *result = val;
     return 0;
   }
-  if ((res = sensors_eval_expr(expr->data.subexpr.sub1,val,&res1)))
+  if (expr->kind == sensors_kind_var) {
+    /* We should check the kind of variable here! */
+    if (! (feature = sensors_lookup_feature_name(chipname.prefix,
+                                                expr->data.var)))
+      return SENSORS_ERR_NO_ENTRY;
+    if (! (res = sensors_get_feature(chipname,feature->number,result)))
+      return res;
+    return 0;
+  }
+  if ((res = sensors_eval_expr(chipname,expr->data.subexpr.sub1,val,&res1)))
     return res;
   if (expr->data.subexpr.sub2 && 
-      (res = sensors_eval_expr(expr->data.subexpr.sub2,val,&res2)))
+      (res = sensors_eval_expr(chipname,expr->data.subexpr.sub2,val,&res2)))
     return res;
   switch(expr->data.subexpr.op) {
   case sensors_add:
