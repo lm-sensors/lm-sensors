@@ -424,7 +424,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `Makefile' failed.\n".
-      "Contact the authors please!" if $pr1 == 0;
+      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -502,7 +502,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `drivers/Makefile' failed.\n".
-      "Contact the authors please!" if $pr1 == 0 or $pr2 == 0;
+      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 == 0 or $pr2 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -541,7 +541,7 @@ sub gen_drivers_char_Config_in
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `drivers/Makefile' failed.\n".
-      "Contact the authors please!" if $pr1 == 0;
+      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
  
@@ -606,7 +606,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `drivers/char/mem.c' failed.\n".
-      "Contact the authors please!" if $pr1 == 0 or $pr2 == 0;
+      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 == 0 or $pr2 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -659,7 +659,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `drivers/i2c/Config.in' failed.\n".
-      "Contact the authors please!" if $pr1 != 1;
+      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 != 1;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -1017,7 +1017,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `drivers/i2c/Makefile' failed.\n".
-      "Contact the authors please!" if $pr1 != 1;
+      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 != 1;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -1130,7 +1130,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `drivers/i2c/i2c-core.c' failed.\n".
-      "Contact the authors please!" if $patch_nr != 3;
+      "See our home page http://www.lm-sensors.nu for assistance!" if $patch_nr != 3;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -1173,7 +1173,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `MAINTAINERS' failed.\n".
-      "Contact the authors please!" if $done == 0;
+      "See our home page http://www.lm-sensors.nu for assistance!" if $done == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
