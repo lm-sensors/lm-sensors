@@ -1,0 +1,16 @@
+
+****  WARNING: IBM Thinkpad users should not install I2C/Lm_sensors!  ****
+
+There have been some reports that the eeprom and/or firmware of IBM
+Thinkpads have been corrupted after installing I2C/Lm_sensors. It's not
+clear why and what specific action (most likely scanning/probing for chips)
+causes the Thinkpad to corrupt it's eeprom.  Unless you know otherwise, we
+suggest that users avoid installing I2C/Lm_sensors support on IBM Thinkpads
+until it becomes known what exactly is causing the corruption.
+
+For more information, see:
+
+http://www.linux-thinkpad.org/
+
+
+3/20/01
