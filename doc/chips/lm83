@@ -1,7 +1,7 @@
 Kernel driver `lm83.o'
 =====================
 
-Status: Incomplete and untested
+Status: Complete and lightly tested
 
 Supported chips: 
   * National Semiconductor LM83
@@ -49,17 +49,21 @@ will be reported instead of four.
 Alarms and critical temperature (common to all four temperature readings)
 are not handled by this driver yet, but should be someday.
 
-The LM83 is only found on a handful of motherboards. An unconfirmed list
-follows. If you can confirm or infirm the fact that any of these
-motherboards do actually have an LM83, please contact us.
-Note that the LM90 can easily be misdetected as a LM83.
+The LM83 is only found on a handful of motherboards. Both a confirmed
+list and an unconfirmed list follow. If you can confirm or infirm the
+fact that any of these motherboards do actually have an LM83, please
+contact us. Note that the LM90 can easily be misdetected as a LM83.
 
+Confirmed motherboards:
+    SBS         P014
+
+Unconfirmed motherboards:
     Gigabyte    GA-8IK1100
     Iwill       MPX2
     Soltek      SL-75DRV5
 
-Note that the driver is untested so far. We really want testers! If you
-want to help, please contact us.
+The driver has been successfully tested by Magnus Forsström, who I'd
+like to thank here. More testers will be of course welcome.
 
 The fact that the LM83 is only scarcely used can be easily explained.
 Most motherboards come with more than just temperature sensors for
@@ -76,14 +80,26 @@ sense is on SMP systems, such as the above-mentioned Iwill MPX2,
 because you want an additional temperature sensor for each additional
 CPU.
 
+On the SBS P014, this is different, since the LM83 is the only hardware
+monitoring chipset. One temperature sensor is used for the motherboard
+(actually measuring the LM83's own temperature), one is used for the
+CPU. The two other sensors must be used to measure the temperature of
+two other points of the motherboard. We suspect these points to be the
+north and south bridges, but this couldn't be confirmed.
+
 All temperature values are given in degrees Celcius. Local temperature
 is given within a range of 0 to +85 degrees. Remote temperatures are
 given within a range of 0 to +125 degrees. Resolution is 1.0 degree,
 accuracy is guaranteed to 3.0 degrees (see the datasheet for more
 details).
 
-Each sensor has its own high limit. There is no hysteresis mechanism as
-found on most recent temperature sensors.
+Each sensor has its own high limit, but the critical limit is common to
+all four sensors. There is no hysteresis mechanism as found on most
+recent temperature sensors.
+
+The lm83 driver will not update its values more frequently than every
+other second; reading them more often will do no harm, but will return
+'old' values.
 
 
 Chip Features
@@ -100,6 +116,8 @@ temp3                 -                     -                       R-     0
 temp3_high            temp3                 temp3                   RW     0
 temp4                 -                     -                       R-     0
 temp4_high            temp4                 temp4                   RW     0
+tcrit                 -                     -                       RW     0
+alarms                -                     -                       R-     0
 
 LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
 temp1                 SENSORS_LM83_LOCAL_TEMP                           temp1:2
@@ -110,3 +128,5 @@ temp3                 SENSORS_LM83_REMOTE2_TEMP                         temp3:2
 temp3_high            SENSORS_LM83_REMOTE2_HIGH                         temp3:1
 temp4                 SENSORS_LM83_REMOTE3_TEMP                         temp4:2
 temp4_high            SENSORS_LM83_REMOTE3_HIGH                         temp4:1
+tcrit                 SENSORS_LM83_TCRIT                                tcrit:1
+alarms                SENSORS_LM83_ALARMS                              alarms:1
