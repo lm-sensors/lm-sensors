@@ -33,6 +33,7 @@
 #include <linux/init.h>
 #include <asm/io.h>
 #include <asm/system.h>
+#include <asm/param.h>	/* for HZ */
 
 MODULE_LICENSE("GPL");
 

@@ -30,6 +30,7 @@
 #include <linux/i2c-algo-bit.h>
 #include <linux/init.h>
 #include <asm/io.h>
+#include <asm/param.h>	/* for HZ */
 #include "version.h"
 
 /* Power management registers */

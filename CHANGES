@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.8.1 (2003????)
+  Modules (various): Fix includes for compilation on Alpha.
   Module saa1064: New.
   Program decode-edid.pl : New. Interfaces between our eeprom module and
                            parse-edid from the read-edid project.
