@@ -1586,9 +1586,9 @@ chip "fscher-*"
     label temp3       "Temp3/AUX"
 
 # Fans
-    label fan1        "Fan1/CPU"
-    label fan2        "Fan2/AUX"
-    label fan3        "Fan3/PS"
+    label fan1        "Fan1/PS"
+    label fan2        "Fan2/CPU"
+    label fan3        "Fan3/AUX"
 
 # Voltage
     label in0         "+12V"
