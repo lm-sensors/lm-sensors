@@ -272,7 +272,12 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*" "sis5595-*"
     set in6_min -5 * 0.95
     set in6_max -5 * 1.05
 
-# examples for temperature limits
+# examples for lm78, lm78j, lm79, sis5595 temperature limits;
+# for sis5595, temp_hist is really the low limit, not a hysteresis value
+#    set temp_over 40	
+#    set temp_hyst 37	
+
+# examples for w83781d temperature limits
 #    set temp1_over 40	
 #    set temp1_hyst 37	
 #    set temp2_over 52	
