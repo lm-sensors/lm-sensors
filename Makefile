@@ -178,7 +178,7 @@ GREP := grep
 # PROGCPPFLAGS/PROGCFLAGS is to create non-kernel object files (which are linked into executables).
 # ARCPPFLAGS/ARCFLAGS are used to create archive object files (static libraries).
 # LIBCPPFLAGS/LIBCFLAGS are for shared library objects.
-ALL_CPPFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS) -I$(LINUX_HEADERS)
+ALL_CPPFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS) -idirafter $(LINUX_HEADERS)
 ALL_CFLAGS := -O2 
 
 ifeq ($(DEBUG),1)
