@@ -34,7 +34,7 @@ SUPPORTED SENSOR CHIPS
 
 			Included Sensors	Controls Busses	
 			----------------------	-------  -----------
-Driver  Chips		#temp	#vin	#fanin	pwm/dac	i2c	ISA
+Driver  Chips		#temp	#vin	#fanin	pwm/dac	I2C	ISA
 ---------------------------------------------------------------------
 adm1021
 	adm1021		2	-	-	-	yes	no
@@ -80,11 +80,14 @@ maxilife
 	maxilife-cg	5	4	3	-	yes	no
 
 sis5595
-	sis5595 	1	7	3	-	no	yes
+	sis5595 	1	4	2	-	no	yes
 
 thmc50
 	adm1022		3	2	-	1 dac	yes	no
 	thmc50		3	2	-	1 dac	yes	no
+
+via686a
+	via686a 	3	5	2	-	no	yes
 
 w83781d
 	as99127f	3	9	3	2-4 pwm	yes	no
@@ -104,6 +107,9 @@ Driver  Chips
 
 bt869
 	bt869 video modulator chip
+
+ddcmon
+	DDC-compliant monitor integrated eeproms - reads locations only
 
 eeprom
 	Memory SPD (serial presence detect) eeproms - reads locations only
