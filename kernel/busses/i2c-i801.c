@@ -100,6 +100,12 @@ MODULE_PARM_DESC(force_addr,
 		 "Forcibly enable the I801 at the given address. "
 		 "EXTREMELY DANGEROUS!");
 
+#ifdef MODULE
+static
+#else
+extern
+#endif
+int __init i2c_i801_init(void);
 static int __init i801_cleanup(void);
 static int i801_setup(void);
 static s32 i801_access(struct i2c_adapter *adap, u16 addr,
