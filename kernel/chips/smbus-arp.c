@@ -353,17 +353,17 @@ int smbusarp_init_client(struct i2c_client *client)
 		}
 
 		/* check device slave addr */ 		
-		addr = blk[17];
+		addr = blk[16];
 		if(addr != 0xFF) {
 			addr >>= 1;
 			if(blk[0] & 0xC0) {
 				if(data->address_pool[addr] == ARP_FREE) {
 #ifdef DEBUG
-					printk(KERN_DEBUG "             Free Non-fixed Address 0x%02x\n", addr);
+					printk(KERN_DEBUG "             Requested free Non-fixed Address 0x%02x\n", addr);
 #endif
 				} else {
 #ifdef DEBUG
-					printk(KERN_DEBUG "             Taken Non-fixed Address 0x%02x\n", addr);
+					printk(KERN_DEBUG "             Requested busy Non-fixed Address 0x%02x\n", addr);
 #endif
 					if((addr =
 					    choose_addr(data->address_pool)) ==
