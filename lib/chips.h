@@ -817,4 +817,41 @@
 #define SENSORS_EEPROM_NUMROWS 14
 #define SENSORS_EEPROM_BANKS 15
 
+
+/* Analog Devices LM87 chips */
+
+#define SENSORS_LM87_PREFIX "LM87"
+
+#define SENSORS_LM87_IN0              1 /* R */
+#define SENSORS_LM87_IN1              2 /* R */
+#define SENSORS_LM87_IN2              3 /* R */
+#define SENSORS_LM87_IN3              4 /* R */
+#define SENSORS_LM87_IN4              5 /* R */
+#define SENSORS_LM87_IN5              6 /* R */
+#define SENSORS_LM87_IN0_MIN         11 /* RW */
+#define SENSORS_LM87_IN1_MIN         12 /* RW */
+#define SENSORS_LM87_IN2_MIN         13 /* RW */
+#define SENSORS_LM87_IN3_MIN         14 /* RW */
+#define SENSORS_LM87_IN4_MIN         15 /* RW */
+#define SENSORS_LM87_IN5_MIN         16 /* RW */
+#define SENSORS_LM87_IN0_MAX         21 /* RW */
+#define SENSORS_LM87_IN1_MAX         22 /* RW */
+#define SENSORS_LM87_IN2_MAX         23 /* RW */
+#define SENSORS_LM87_IN3_MAX         24 /* RW */
+#define SENSORS_LM87_IN4_MAX         25 /* RW */
+#define SENSORS_LM87_IN5_MAX         26 /* RW */
+#define SENSORS_LM87_FAN1_AIN1       31 /* R */
+#define SENSORS_LM87_FAN2_AIN2       32 /* R */
+#define SENSORS_LM87_FAN1_AIN1_LIMIT 41 /* RW */
+#define SENSORS_LM87_FAN2_AIN2_LIMIT 42 /* RW */
+#define SENSORS_LM87_FRONT_TEMP      51 /* R */
+#define SENSORS_LM87_CPU_TEMP        52 /* R */
+#define SENSORS_LM87_INT_TEMP        53 /* R */
+#define SENSORS_LM87_INT_TEMP_HYST   54 /* RW */
+#define SENSORS_LM87_INT_TEMP_OVER   55 /* RW */
+#define SENSORS_LM87_VID             61 /* R */
+#define SENSORS_LM87_FAN_DIV         71 /* RW */
+#define SENSORS_LM87_ALARMS          81 /* R */
+#define SENSORS_LM87_ANALOG_OUT      82 /* RW */
+
 #endif /* def LIB_SENSORS_CHIPS_H */

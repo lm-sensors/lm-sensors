@@ -376,6 +376,7 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
 #define I2C_DRIVERID_DDCMON 1018
 #define I2C_DRIVERID_VIA686A 1019
 #define I2C_DRIVERID_ADM1025 1020
+#define I2C_DRIVERID_LM87 1021
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -723,5 +724,30 @@ struct sensors_chips_data {
 #define DDCMON_SYSCTL_TIMINGS 1013
 #define DDCMON_SYSCTL_SERIAL 1014
 
+#define LM87_SYSCTL_IN0        1000 /* Volts * 100 */
+#define LM87_SYSCTL_IN1        1001
+#define LM87_SYSCTL_IN2        1002
+#define LM87_SYSCTL_IN3        1003
+#define LM87_SYSCTL_IN4        1004
+#define LM87_SYSCTL_IN5        1005
+#define LM87_SYSCTL_FAN        1102
+#define LM87_SYSCTL_FRNT_TEMP  1250 /* Degrees Celcius * 100 */
+#define LM87_SYSCTL_CPU_TEMP   1251 /* Degrees Celcius * 100 */
+#define LM87_SYSCTL_INT_TEMP   1252 /* Degrees Celcius * 100 */
+#define LM87_SYSCTL_FAN_DIV    2000 /* 1, 2, 4 or 8 */
+#define LM87_SYSCTL_ALARMS     2001 /* bitvector */
+#define LM87_SYSCTL_ANALOG_OUT 2002
+#define LM87_SYSCTL_VID        2003
+
+#define LM87_ALARM_IN0      0x0001
+#define LM87_ALARM_IN1      0x0002
+#define LM87_ALARM_IN2      0x0004
+#define LM87_ALARM_IN3      0x0008
+#define LM87_ALARM_IN4      0x0100
+#define LM87_ALARM_IN5      0x0200
+#define LM87_ALARM_AMB_TEMP 0x0040
+#define LM87_ALARM_FAN2     0x0080
+#define LM87_ALARM_INT_TEMP 0x0010
+#define LM87_ALARM_CHAS     0x1000
 
 #endif				/* def SENSORS_SENSORS_H */
