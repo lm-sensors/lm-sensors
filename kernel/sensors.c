@@ -911,7 +911,7 @@ int cleanup_module(void)
 #ifdef CONFIG_SENSORS_ADM1021
 extern int sensors_adm1021_init(void);
 #endif
-#ifdef CONFIG_SENSORS_ADM9024
+#ifdef CONFIG_SENSORS_ADM9240
 extern int sensors_adm9024_init(void);
 #endif
 #ifdef CONFIG_SENSORS_GL518SM
