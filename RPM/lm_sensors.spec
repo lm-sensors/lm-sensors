@@ -30,12 +30,11 @@
 %define I2C_HEADERS %{prefix}/include
 
 #Define your kernel version here.
-%define kversion 2.2.14
+%define kversion %(uname -r)
 %define mversion %{kversion}
-#Another example for the above: %define kversion 2.2.14-SMP
 
 %define name lm_sensors
-%define ver 2.5.0
+%define ver 2.8.3
 Summary: Hardware Health Monitoring Tools
 Name: %{name}
 Version: %{ver}
@@ -118,6 +117,8 @@ make install DESTDIR=$RPM_BUILD_ROOT PREFIX=%{prefix}
 cp -a $RPM_BUILD_ROOT/etc/sensors.conf $RPM_BUILD_ROOT/etc/sensors.ex
 
 %post
+#Add %{prefix}/lib to the ldconfig.
+grep "{%prefix}/lib" /etc/ld.so.conf || echo "%{prefix}/lib" >> /etc/ld.so.conf
 ldconfig || /bin/true
 echo "please run \`%{prefix}/sbin/sensors-detect' to configure the sensors."
 
@@ -146,10 +147,14 @@ depmod -a || /bin/true
 
 %files drivers
 %dir /lib/modules/%{mversion}
-%dir /lib/modules/%{mversion}/misc
-/lib/modules/%{mversion}/misc/*
+%dir /lib/modules/%{mversion}/kernel/drivers/i2c/
+/lib/modules/%{mversion}/kernel/drivers/i2c/*
+%dir /lib/modules/%{mversion}/kernel/drivers/i2c/busses
+/lib/modules/%{mversion}/kernel/drivers/i2c/busses/*
+%dir /lib/modules/%{mversion}/kernel/drivers/i2c/chips
+/lib/modules/%{mversion}/kernel/drivers/i2c/chips/*
 %dir %{prefix}/include/linux
-%{prefix}/include/linux/*.h
+%{prefix}/include/linux/sensors.h
 %doc doc/busses doc/chips doc/developers doc/kernel
 
 %files devel
