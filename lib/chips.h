@@ -456,7 +456,8 @@
 #define SENSORS_LM90_REMOTE_HIGH 58 /* RW */
 #define SENSORS_LM90_REMOTE_LOW 59 /* RW */
 #define SENSORS_LM90_REMOTE_TCRIT 60 /* RW */
-#define SENSORS_LM90_TCRIT_HYST 79 /* RW */
+#define SENSORS_LM90_LOCAL_TCRIT_HYST 79 /* RW */
+#define SENSORS_LM90_REMOTE_TCRIT_HYST 80 /* R, see driver source */
 #define SENSORS_LM90_ALARMS 81 /* R */
 
 /* Winbond W83781D chips */

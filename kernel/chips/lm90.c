@@ -130,7 +130,9 @@ static void lm90_local_tcrit(struct i2c_client *client, int operation,
 	int ctl_name, int *nrels_mag, long *results);
 static void lm90_remote_tcrit(struct i2c_client *client, int operation,
 	int ctl_name, int *nrels_mag, long *results);
-static void lm90_hyst(struct i2c_client *client, int operation,
+static void lm90_local_hyst(struct i2c_client *client, int operation,
+	int ctl_name, int *nrels_mag, long *results);
+static void lm90_remote_hyst(struct i2c_client *client, int operation,
 	int ctl_name, int *nrels_mag, long *results);
 static void lm90_alarms(struct i2c_client *client, int operation,
 	int ctl_name, int *nrels_mag, long *results);
@@ -164,7 +166,7 @@ struct lm90_data
 	u8 local_temp, local_high, local_low;
 	u16 remote_temp, remote_high, remote_low; /* combined */
 	u8 local_crit, remote_crit;
-	u8 hyst;
+	u8 hyst; /* linked to two sysctl files (hyst1 RW, hyst2 RO) */
 	u16 alarms; /* bitvector, combined */
 };
 
@@ -179,7 +181,8 @@ struct lm90_data
 #define LM90_SYSCTL_REMOTE_TEMP   1201
 #define LM90_SYSCTL_LOCAL_TCRIT   1204
 #define LM90_SYSCTL_REMOTE_TCRIT  1205
-#define LM90_SYSCTL_HYST          1207
+#define LM90_SYSCTL_LOCAL_HYST    1207
+#define LM90_SYSCTL_REMOTE_HYST   1208
 #define LM90_SYSCTL_ALARMS        1210
 
 #define LM90_ALARM_LOCAL_HIGH     0x40
@@ -203,8 +206,10 @@ static ctl_table lm90_dir_table_template[] =
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_local_tcrit},
 	{LM90_SYSCTL_REMOTE_TCRIT, "tcrit2", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_remote_tcrit},
-	{LM90_SYSCTL_HYST, "hyst", NULL, 0, 0644, NULL,
-	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_hyst},
+	{LM90_SYSCTL_LOCAL_HYST, "hyst1", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_local_hyst},
+	{LM90_SYSCTL_REMOTE_HYST, "hyst2", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_remote_hyst},
 	{LM90_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_alarms},
 	{0}
@@ -633,7 +638,22 @@ static void lm90_remote_tcrit(struct i2c_client *client, int operation,
 	}
 }
 
-static void lm90_hyst(struct i2c_client *client, int operation,
+/*
+ * One quick note about hysteresis. Internally, the hysteresis value
+ * is held in a single register by the LM90, as a relative value.
+ * This relative value applies to both the local critical temperature
+ * and the remote critical temperature. Since all temperatures exported
+ * through procfs have to be absolute, we have to do some conversions.
+ * The solution retained here is to export two absolute values, one for
+ * each critical temperature. In order not to confuse the users too
+ * much, only one file is writable. Would we fail to do so, users
+ * would probably attempt to write to both files, as if they were
+ * independant, and since they aren't, they wouldn't understand why
+ * setting one affects the other one (and would probably claim there's
+ * a bug in the driver).
+ */
+
+static void lm90_local_hyst(struct i2c_client *client, int operation,
 	int ctl_name, int *nrels_mag, long *results)
 {
 	struct lm90_data *data = client->data;
@@ -643,17 +663,34 @@ static void lm90_hyst(struct i2c_client *client, int operation,
 	else if (operation == SENSORS_PROC_REAL_READ)
 	{
 		lm90_update_client(client);
-		results[0] = TEMP1_FROM_REG(data->hyst);
+		results[0] = TEMP1_FROM_REG(data->local_crit) -
+			TEMP1_FROM_REG(data->hyst);
 		*nrels_mag = 1;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE)
 	{
 		if (*nrels_mag >= 1)
 		{
-			data->hyst = HYST_TO_REG(results[0]);
+			data->hyst = HYST_TO_REG(data->local_crit - results[0]);
 			i2c_smbus_write_byte_data(client, LM90_REG_W_TCRIT_HYST,
 				data->hyst);
 		}
+	}
+}
+
+static void lm90_remote_hyst(struct i2c_client *client, int operation,
+	int ctl_name, int *nrels_mag, long *results)
+{
+	struct lm90_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0; /* magnitude */
+	else if (operation == SENSORS_PROC_REAL_READ)
+	{
+		lm90_update_client(client);
+		results[0] = TEMP1_FROM_REG(data->remote_crit) -
+			TEMP1_FROM_REG(data->hyst);
+		*nrels_mag = 1;
 	}
 }
 

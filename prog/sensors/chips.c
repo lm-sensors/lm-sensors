@@ -4579,36 +4579,13 @@ void print_lm90(const sensors_chip_name *name)
     printf("ERROR: Can't get remote temperature data!\n");
   free_the_label(&label);
 
-  /* 2.6 tweak:
-   * In 2.4 there is only one, relative hyst value, (default 10).
-   * In 2.6 there are two, absolute values.
-   * The library will link hyst (2.4) to temp_hyst2 (2.6) and we have
-   * to compute the relative value from temp_hyst2 and temp_crit2.
-   * We detect that using the following rules:
-   *  - if hyst is not in the range 0..31, it is absolute (2.6);
-   *  - if hyst exceeds tcrit1 or tcrit2, it is absolute (2.6);
-   *  - if hyst is greater than it would be if considered absolute,
-   *    it is absolute (heuristic);
-   *  - else it is relative (2.4).
-   * Also note that the use of low and high right below is
-   * arbitrary, only to reuse previously defined variables, at the
-   * admitted cost of a lower readability.
-   */
-  if (!sensors_get_feature(*name, SENSORS_LM90_TCRIT_HYST, &hyst)
-   && !sensors_get_feature(*name, SENSORS_LM90_LOCAL_TCRIT, &low)
-   && !sensors_get_feature(*name, SENSORS_LM90_REMOTE_TCRIT, &high)) {
-    if (hyst<=-0.5 || hyst>=31.5 || hyst>low || hyst>high || hyst>high-hyst)
-      hyst = high-hyst;
-  } else {
-    printf("ERROR: Can't get hyst data!\n");
-    hyst = 10;
-  }
-
   if (!sensors_get_label_and_valid(*name, SENSORS_LM90_LOCAL_TCRIT,
-      &label, &valid)) {
+      &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_LM90_LOCAL_TCRIT, &high)
+   && !sensors_get_feature(*name, SENSORS_LM90_LOCAL_TCRIT_HYST, &hyst)) {
     if (valid) {
       print_label(label, 10);
-      print_temp_info(low, low-hyst, 0, HYSTONLY, 0, 0);
+      print_temp_info(high, hyst, 0, HYSTONLY, 0, 0);
       printf("\n");
     }
   } else
@@ -4616,10 +4593,12 @@ void print_lm90(const sensors_chip_name *name)
   free_the_label(&label);
 
   if (!sensors_get_label_and_valid(*name, SENSORS_LM90_REMOTE_TCRIT,
-      &label, &valid)) {
+      &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_LM90_REMOTE_TCRIT, &high)
+   && !sensors_get_feature(*name, SENSORS_LM90_REMOTE_TCRIT_HYST, &hyst)) {
     if (valid) {
       print_label(label, 10);
-      print_temp_info(high, high-hyst, 0, HYSTONLY, 0, 0);
+      print_temp_info(high, hyst, 0, HYSTONLY, 0, 0);
       printf("\n");
     }
   } else
