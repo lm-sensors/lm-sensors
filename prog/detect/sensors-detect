@@ -1822,7 +1822,7 @@ sub generate_modprobes
       # If there is more than one bus detected by a driver, they are
       # still all added. So we number them in the correct order
       if (exists $detection->{i2c_driver} and
-          not exists $adapters[$detection->{i2c_devnr}]->{nr} and 
+          not exists $adapters[$detection->{i2c_devnr}]->{nr_later} and 
           not (exists $detection->{isa_addr} and $prefer_isa)) {
          foreach $adap (@adapters) {
            $adap->{nr_later} = $nr++ if $adap->{driver} eq $detection->{i2c_driver};
@@ -1837,7 +1837,7 @@ sub generate_modprobes
 
   for ($i = 0; $i < $nr; $i++) {
     foreach $adap (@adapters) {
-      $modprobes .= "modprobe $adap->{driver}\n" if (defined($adap->{nr_later}) and $adap->{nr_later} == $i);
+      $modprobes .= "modprobe $adap->{driver}\n" if (defined($adap->{nr_later}) and $adap->{nr_later} == $i) and not $modprobes =~ /modprobe $adap->{driver}\n/;
     }
   }
   $modprobes .= "modprobe i2c-isa\n" if ($isa);
