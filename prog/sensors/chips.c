@@ -4280,6 +4280,8 @@ void print_pc87366(const sensors_chip_name *name)
     if (valid) {
       print_label(label, 10);
       print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+      if (alarms&(1<<1))
+        printf("ALARM");
       printf("\n");
     }
   } else
@@ -4293,7 +4295,7 @@ void print_pc87366(const sensors_chip_name *name)
     if (valid) {
       print_label(label, 10);
       print_temp_info(cur, max, min, MINMAX, 0, 0);
-      if (alarms&(1<<1))
+      if (alarms&(1<<2))
         printf("ALARM");
       printf("\n");
     }
@@ -4306,6 +4308,8 @@ void print_pc87366(const sensors_chip_name *name)
     if (valid) {
       print_label(label, 10);
       print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+      if (alarms&(1<<3))
+        printf("ALARM");
       printf("\n");
     }
   } else
@@ -4320,7 +4324,7 @@ void print_pc87366(const sensors_chip_name *name)
       if (valid) {
         print_label(label, 10);
         print_temp_info(cur, max, min, MINMAX, 0, 0);
-        if (alarms&(1<<2))
+        if (alarms&(1<<4))
           printf("ALARM");
         printf("\n");
       }
@@ -4333,6 +4337,8 @@ void print_pc87366(const sensors_chip_name *name)
       if (valid) {
         print_label(label, 10);
         print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+        if (alarms&(1<<5))
+          printf("ALARM");
         printf("\n");
       }
     } else
