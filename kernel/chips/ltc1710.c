@@ -49,6 +49,14 @@
 #include "i2c-isa.h"
 #include "version.h"
 
+/* Addresses to scan */
+static unsigned short normal_i2c[] = {SENSORS_I2C_END};
+static unsigned short normal_i2c_range[] = {0x58,0x5a,SENSORS_I2C_END};
+static unsigned int normal_isa[] = {SENSORS_ISA_END};
+static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+
+/* Insmod parameters */
+SENSORS_INSMOD_1(ltc1710);
 
 /* The LTC1710 registers */
 
@@ -76,6 +84,7 @@ extern int cleanup_module(void);
 static int ltc1710_init(void);
 static int ltc1710_cleanup(void);
 static int ltc1710_attach_adapter(struct i2c_adapter *adapter);
+static int ltc1710_detect(struct i2c_adapter *adapter, int address, int kind);
 static int ltc1710_detach_client(struct i2c_client *client);
 static int ltc1710_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
@@ -116,103 +125,123 @@ static ctl_table ltc1710_dir_table_template[] = {
 /* Used by init/cleanup */
 static int ltc1710_initialized = 0;
 
-/* I choose here for semi-static LM78 allocation. Complete dynamic
+/* I choose here for semi-static LTC1710 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
 #define MAX_LTC1710_NR 3
 static struct i2c_client *ltc1710_list[MAX_LTC1710_NR];
 
-
 int ltc1710_attach_adapter(struct i2c_adapter *adapter)
 {
-  int address,err,i;
+  return sensors_detect(adapter,&addr_data,ltc1710_detect);
+}
+
+/* This function is called by sensors_detect */
+int ltc1710_detect(struct i2c_adapter *adapter, int address, int kind)
+{
+  int i;
   struct i2c_client *new_client;
   struct ltc1710_data *data;
+  int err=0;
+  const char *type_name,*client_name;
 
-  err = 0;
-  /* Make sure we aren't probing the ISA bus!! */
-  if (i2c_is_isa_adapter(adapter)) return 0;
+  /* Make sure we aren't probing the ISA bus!! This is just a safety check
+     at this moment; sensors_detect really won't call us. */
+#ifdef DEBUG
+  if (i2c_is_isa_adapter(adapter)) {
+    printk("ltc1710.o: ltc1710_detect called for an ISA bus adapter?!?\n");
+    return 0;
+  }
+#endif
 
-  /* OK, this is no detection. I know. It will do for now, though.  */
+  /* Here, we have to do the address registration check for the I2C bus.
+     But that is not yet implemented. */
 
-  /* Set err only if a global error would make registering other clients
-     impossible too (like out-of-memory). */
-  for (address = 0x58; (! err) && (address <= 0x5A); address ++) {
+  /* OK. For now, we presume we have a valid client. We now create the
+     client structure, even though we cannot fill it completely yet.
+     But it allows us to access ltc1710_{read,write}_value. */
+  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
+                              sizeof(struct ltc1710_data),
+                              GFP_KERNEL))) {
+    err = -ENOMEM;
+    goto ERROR0;
+  }
 
-    /* Later on, we will keep a list of registered addresses for each
-       adapter, and check whether they are used here */
-    
-    /* We must do a write to test because a read fails! */
-    if (smbus_write_byte(adapter,address,0) < 0)
-      continue;
+  data = (struct ltc1710_data *) (((struct i2c_client *) new_client) + 1);
+  new_client->addr = address;
+  new_client->data = data;
+  new_client->adapter = adapter;
+  new_client->driver = &ltc1710_driver;
 
-    /* There is no real detection possible, the device is too simple. */
+  /* Now, we would do the remaining detection. But the LTC1710 is plainly
+     impossible to detect! Stupid chip. */
 
-    /* Allocate space for a new client structure */
-    if (! (new_client =  kmalloc(sizeof(struct i2c_client) +
-                                sizeof(struct ltc1710_data),
-                               GFP_KERNEL))) {
-      err = -ENOMEM;
-      continue;
-    }
+  /* Determine the chip type - only one kind supported! */
+  if (kind <= 0)
+    kind = ltc1710;
 
-    /* Find a place in our global list */
-    for (i = 0; i < MAX_LTC1710_NR; i++)
-      if (! ltc1710_list[i])
-         break;
-    if (i == MAX_LTC1710_NR) {
-      err = -ENOMEM;
-      printk("ltc1710.o: No empty slots left, recompile and heighten "
-             "MAX_LTC1710_NR!\n");
-      goto ERROR1;
-    }
-    ltc1710_list[i] = new_client;
-    
-    /* Fill the new client structure with data */
-    data = (struct ltc1710_data *) (new_client + 1);
-    new_client->data = data;
-    new_client->id = i;
-    new_client->addr = address;
-    new_client->adapter = adapter;
-    new_client->driver = &ltc1710_driver;
-    strcpy(new_client->name,"LTC1710 chip");
-    data->valid = 0;
-    data->update_lock = MUTEX;
-    
-    /* Tell i2c-core a new client has arrived */
-    if ((err = i2c_attach_client(new_client)))
-      goto ERROR2;
-    
-    /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,"ltc1710",
-                                      ltc1710_dir_table_template)) < 0)
-      goto ERROR3;
-    data->sysctl_id = err;
-    err = 0;
-    continue;
+  if (kind == ltc1710) {
+    type_name = "ltc1710";
+    client_name = "LTC1710 chip";
+  } else {
+#ifdef DEBUG
+    printk("ltc1710.o: Internal error: unknown kind (%d)?!?",kind);
+#endif
+    goto ERROR1;
+  }
+
+  /* Fill in the remaining client fields and put it into the global list */
+  strcpy(new_client->name,client_name);
+
+  /* Find a place in our global list */
+  for (i = 0; i < MAX_LTC1710_NR; i++)
+    if (! ltc1710_list[i])
+       break;
+  if (i == MAX_LTC1710_NR) {
+    err = -ENOMEM;
+    printk("ltc1710.o: No empty slots left, recompile and heighten "
+           "MAX_LTC1710_NR!\n");
+    goto ERROR2;
+  }
+  ltc1710_list[i] = new_client;
+  new_client->id = i;
+  data->valid = 0;
+  data->update_lock = MUTEX;
+
+  /* Tell the I2C layer a new client has arrived */
+  if ((err = i2c_attach_client(new_client)))
+    goto ERROR3;
+
+  /* Register a new directory entry with module sensors */
+  if ((i = sensors_register_entry(new_client,type_name,
+                                  ltc1710_dir_table_template)) < 0) {
+    err = i;
+    goto ERROR4;
+  }
+  data->sysctl_id = i;
+
+  return 0;
+
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
+ERROR4:
+  i2c_detach_client(new_client);
 ERROR3:
-    i2c_detach_client(new_client);
+  for (i = 0; i < MAX_LTC1710_NR; i++)
+    if (new_client == ltc1710_list[i])
+      ltc1710_list[i] = NULL;
 ERROR2:
-    ltc1710_list[i] = NULL;
 ERROR1:
-    kfree(new_client);
-  }
+  kfree(new_client);
+ERROR0:
   return err;
 }
+
 
 int ltc1710_detach_client(struct i2c_client *client)
 {
   int err,i;
-  for (i = 0; i < MAX_LTC1710_NR; i++)
-    if (client == ltc1710_list[i])
-      break;
-  if ((i == MAX_LTC1710_NR)) {
-    printk("ltc1710.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
 
   sensors_deregister_entry(((struct ltc1710_data *)(client->data))->sysctl_id);
 
@@ -221,11 +250,20 @@ int ltc1710_detach_client(struct i2c_client *client)
     return err;
   }
 
+  for (i = 0; i < MAX_LTC1710_NR; i++)
+    if (client == ltc1710_list[i])
+      break;
+  if ((i == MAX_LTC1710_NR)) {
+    printk("ltc1710.o: Client to detach not found.\n");
+    return -ENOENT;
+  }
   ltc1710_list[i] = NULL;
-  kfree(client);
-  return 0;
-}
 
+  kfree(client);
+
+  return 0;
+
+}
 
 /* No commands defined yet */
 int ltc1710_command(struct i2c_client *client, unsigned int cmd, void *arg)
