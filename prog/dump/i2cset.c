@@ -34,9 +34,9 @@ void help(void)
 {
 	fprintf(stderr, "Syntax: i2cset [-y] I2CBUS CHIP-ADDRESS DATA-ADDRESS "
 	        "VALUE [MODE]\n"
-		"        i2cset -V\n");
-	fprintf(stderr, "  MODE is 'b[yte]' or 'w[ord]' (default b)\n");
-	fprintf(stderr, "  I2CBUS is an integer\n");
+	        "        i2cset -V\n"
+	        "  MODE is 'b[yte]' or 'w[ord]' (default b)\n"
+	        "  I2CBUS is an integer\n");
 	print_i2c_busses(0);
 	exit(1);
 }
