@@ -423,6 +423,7 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 		fan%d_div -> fan_div%d
 		fan%d_min -> fan_min%d
 		fan%d_state -> fan_status%d
+		fan%d_ripple -> fan_ripple%d
 		fan%d -> fan_input%d
 		in%d_max -> in_max%d
 		in%d_min -> in_min%d
@@ -498,7 +499,7 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 /* convert common /proc names to common sysfs names */
 	if(sscanf(name, "fan%d_di%c%c", &num, &last, &check) == 2 && last == 'v') {
 		sprintf(sysname, "fan_div%d", num);
-		*sysmag = FANMAG;
+		*sysmag = 0;
 		return 0;
 	}
 	if(sscanf(name, "fan%d_mi%c%c", &num, &last, &check) == 2 && last == 'n') {
@@ -508,7 +509,12 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	}
 	if(sscanf(name, "fan%d_stat%c%c", &num, &last, &check) == 2 && last == 'e') {
 		sprintf(sysname, "fan_status%d", num);
-		*sysmag = FANMAG;
+		*sysmag = 0;
+		return 0;
+	}
+	if(sscanf(name, "fan%d_rippl%c%c", &num, &last, &check) == 2 && last == 'e') {
+		sprintf(sysname, "fan_ripple%d", num);
+		*sysmag = 0;
 		return 0;
 	}
 	if(sscanf(name, "fan%d%c", &num, &check) == 1) {
