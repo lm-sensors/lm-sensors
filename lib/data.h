@@ -137,12 +137,19 @@ typedef struct sensors_proc_chips_entry {
    compute_mapping is like logical_mapping, only it refers to another
      feature whose compute line will be inherited (a group could be fan and
      fan_max, but not fan_div)
-    mode is SENSORS_MODE_NO_RW, SENSORS_MODE_R, SENSORS_MODE_W or
+   mode is SENSORS_MODE_NO_RW, SENSORS_MODE_R, SENSORS_MODE_W or
      SENSORS_MODE_RW, for unaccessible, readable, writable, and both readable
      and writable.
-    sysctl is the SYSCTL id of the file the value can be found in;
-     offset is the (byte) offset of the place this feature can be found;
-     Divide the read value by 10**scaling to get the real value */
+   sysctl is the SYSCTL id of the file the value can be found in.
+   offset is the (byte) offset of the place this feature can be found.
+   scaling is the number of decimal points to scale by.
+     This scaling is performed on the raw sysctl value, NOT the value
+     seen in /proc. Therefore the scaling value must be the same as
+     the value returned in nrels_mag by the SENSORS_PROC_REAL_INFO
+     operation in the chip drivers.
+     Divide the read value by 10**scaling to get the real value.
+     Scaling can be positive or negative but negative values aren't
+     very useful because the driver can scale that direction itself. */
 typedef struct sensors_chip_feature {
   int number;
   const char *name;
