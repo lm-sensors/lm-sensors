@@ -2900,17 +2900,37 @@ sub system_safeness_by_dmi
     return 0;
   }
 
-  my $line;
-  while (defined ($line = <DMI>) && $line !~ m/^\s*System Information/) {}
-  while (defined ($line = <DMI>) && $line !~ m/^\s*Vendor:/) {}
+  my ($dmitype, $biosversion, $systemvendor);
+  while (<DMI>)
+  {
+    if (m/^\s*DMI type (\d+),/)
+    {
+      $dmitype = $1;
+      next;
+    }
+    next unless defined $dmitype;
+    if ($dmitype == 1 && m/^\s*Vendor: (.*)$/)
+    {
+      $systemvendor = $1;
+    }
+    elsif ($dmitype == 0 && m/^\s*Version: (.*)$/)
+    {
+      $biosversion = $1;
+    }
+    last if (defined $biosversion && defined $systemvendor);
+  }
   close (DMI);
 
-  if ((defined $line) && ($line =~ m/^\s*Vendor: (.*)$/) && ($1 !~ /^\s*$/))
+  if (defined $systemvendor && $systemvendor !~ m/^\s*$/)
   {
-    my $vendor = $1;
-  	$vendor =~ s/\s*$//;
-  	print " System vendor (DMI): $vendor\n";
-    return 'IBM' if $vendor =~ /\bIBM\b/;
+    $systemvendor =~ s/\s*$//;
+    print " System vendor (DMI): $systemvendor\n";
+    if (defined $biosversion && $biosversion !~ m/^\s*$/)
+    {
+      $biosversion =~ s/\s*$//;
+      print " BIOS version (DMI): $biosversion\n";
+    }
+    return 'IBM' if $systemvendor =~ /\bIBM\b/;
     return '1';
   }
 
