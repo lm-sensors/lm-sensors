@@ -41,7 +41,6 @@
 #include <linux/apm_bios.h>
 #include <asm/io.h>
 #include "version.h"
-#include "dmi_scan.h"
 
 
 struct sd {
@@ -116,25 +115,11 @@ static unsigned short piix4_smba = 0;
 /*
  * Get DMI information.
  */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,34)
-void dmi_scan_mach(void);
-#endif
 
 static int __devinit ibm_dmi_probe(void)
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,34)
 	extern int is_unsafe_smbus;
 	return is_unsafe_smbus;
-#else
-#define IBM_SIGNATURE		"IBM"
-	dmi_scan_mach();
-	if(dmi_ident[DMI_SYS_VENDOR] == NULL)
-		return 0;
-	if(strncmp(dmi_ident[DMI_SYS_VENDOR], IBM_SIGNATURE,
-	           strlen(IBM_SIGNATURE)) == 0)
-		return 1;
-	return 0;
-#endif
 }
 #endif
 

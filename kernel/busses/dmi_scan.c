@@ -16,13 +16,29 @@
 #include <asm/keyboard.h>
 #include <asm/system.h>
 #include "version.h"
-#include "dmi_scan.h"
+
+int is_unsafe_smbus;
+EXPORT_SYMBOL(is_unsafe_smbus);
 
 struct dmi_header
 {
 	u8	type;
 	u8	length;
 	u16	handle;
+};
+
+enum
+{
+	DMI_BIOS_VENDOR,
+	DMI_BIOS_VERSION,
+	DMI_BIOS_DATE,
+	DMI_SYS_VENDOR,
+	DMI_PRODUCT_NAME,
+	DMI_PRODUCT_VERSION,
+	DMI_BOARD_VENDOR,
+	DMI_BOARD_NAME,
+	DMI_BOARD_VERSION,
+	DMI_STRING_MAX
 };
 
 #define dmi_printk(x)
@@ -211,7 +227,7 @@ static void __init dmi_decode(struct dmi_header *dm)
 	}
 }
 
-void __init dmi_scan_mach(void)
+int __init dmi_scan_mach(void)
 {
 	int err;
 	printk("dmi_scan.o version %s (%s)\n", LM_VERSION, LM_DATE);
@@ -220,9 +236,14 @@ void __init dmi_scan_mach(void)
 		printk("dmi_scan.o: SM BIOS not found\n");
 	else
 		printk("dmi_scan.o: SM BIOS found\n");
+
+	if(dmi_ident[DMI_SYS_VENDOR] != NULL
+	&& strncmp(dmi_ident[DMI_SYS_VENDOR], "IBM", 3) == 0)
+		is_unsafe_smbus = 1;
+	return 0;
 }
 
 MODULE_DESCRIPTION("SM BIOS DMI Scanner");
 MODULE_LICENSE("GPL");
-EXPORT_SYMBOL(dmi_ident);
-EXPORT_SYMBOL(dmi_scan_mach);
+
+module_init(dmi_scan_mach);
