@@ -344,6 +344,7 @@ void do_a_print(sensors_chip_name name)
            (!strcmp(name.prefix,"w83782d")) ||
            (!strcmp(name.prefix,"w83783s")) ||
            (!strcmp(name.prefix,"w83627hf")) ||
+           (!strcmp(name.prefix,"w83627thf")) ||
            (!strcmp(name.prefix,"w83697hf")) ||
            (!strcmp(name.prefix,"w83791d")) ||
            (!strcmp(name.prefix,"as99127f")))
