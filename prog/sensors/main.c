@@ -335,6 +335,8 @@ void do_a_print(sensors_chip_name name)
     print_eeprom(&name);
   else if (!strcmp(name.prefix,"fscpos"))
     print_fscpos(&name);
+  else if (!strcmp(name.prefix,"fscscy"))
+    print_fscscy(&name);
   else
     print_unknown_chip(&name);
   printf("\n");

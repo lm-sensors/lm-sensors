@@ -43,5 +43,6 @@ extern void print_eeprom(const sensors_chip_name *name);
 extern void print_lm87(const sensors_chip_name *name);
 extern void print_it87(const sensors_chip_name *name);
 extern void print_fscpos(const sensors_chip_name *name);
+extern void print_fscscy(const sensors_chip_name *name);
 
 #endif /* def PROG_SENSORS_CHIPS_H */
