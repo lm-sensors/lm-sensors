@@ -35,8 +35,8 @@ all-kernel: $(KERNELTARGETS)
 all :: all-kernel
 
 install-kernel: all-kernel
-	$(MKDIR) $(DESTDIR)$(MODDIR)
-	if [ -n "$(DESTDIR)$(MODDIR)" ] ; then \
+	if [ -n "$(KERNELTARGETS)" ] ; then \
+	  $(MKDIR) $(DESTDIR)$(MODDIR) ; \
 	  $(INSTALL) -o root -g root -m 644 $(KERNELTARGETS) $(DESTDIR)$(MODDIR) ;\
 	fi
 install :: install-kernel 
