@@ -57,7 +57,7 @@ SENSORS_INSMOD_1(lm75);
    variants. Note that you should be a bit careful with which arguments
    these macros are called: arguments may be evaluated more than once.
    Fixing this is just not worth it. */
-#define TEMP_FROM_REG(val) (((val) >> 7) * 5)
+#define TEMP_FROM_REG(val) ((((val & 0x7fff) >> 7) * 5) | ((val & 0x8000)?-256:0))
 #define TEMP_TO_REG(val)   (SENSORS_LIMIT(((((val) + 2) / 5) << 7),0,0xffff))
 
 /* Initial values */
