@@ -1340,7 +1340,7 @@ sub any_list_match
 
 sub initialize_ioports
 {
-  sysopen (IOPORTS, "/dev/port", O_RDWR|O_BINARY)
+  sysopen (IOPORTS, "/dev/port", O_RDWR)
     or die "/dev/port: $!\n";
   binmode (IOPORTS, ':raw');
 }
