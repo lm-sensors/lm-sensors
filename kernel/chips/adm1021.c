@@ -67,9 +67,13 @@ clearing it.  Weird, ey?   --Phil  */
 #define adm1021_INIT_REMOTE_TOS 60
 #define adm1021_INIT_REMOTE_THYST 20
 
+/* Types of chips supported */
+enum adm1021_type { adm1021, max1617 };
+
 /* Each client has this additional data */
 struct adm1021_data {
          int sysctl_id;
+	 enum adm1021_type type;
 
          struct semaphore update_lock;
          char valid;                 /* !=0 if following fields are valid */
@@ -92,7 +96,6 @@ static int adm1021_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
 static void adm1021_inc_use (struct i2c_client *client);
 static void adm1021_dec_use (struct i2c_client *client);
-static u16 swap_bytes(u16 val);
 static int adm1021_read_value(struct i2c_client *client, u8 reg);
 static int adm1021_write_value(struct i2c_client *client, u8 reg, u16 value);
 static void adm1021_temp(struct i2c_client *client, int operation, int ctl_name,
@@ -108,7 +111,7 @@ static void adm1021_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver adm1021_driver = {
-  /* name */            "adm1021 sensor chip driver",
+  /* name */            "adm1021, MAX1617 sensor driver",
   /* id */              I2C_DRIVERID_ADM1021,
   /* flags */           DF_NOTIFY,
   /* attach_adapter */  &adm1021_attach_adapter,
@@ -150,6 +153,9 @@ int adm1021_attach_adapter(struct i2c_adapter *adapter)
   int address,err,i;
   struct i2c_client *new_client;
   struct adm1021_data *data;
+  enum adm1021_type type;
+  const char *type_name;
+  const char *client_name;
 
   err = 0;
 
@@ -167,10 +173,15 @@ int adm1021_attach_adapter(struct i2c_adapter *adapter)
     
     /* Verify device is 1021 by checked special DEVICE_ID 
        register (I wish all SMBus chips had this..)       */
+    /* The MAX1617 does not have it, regrettably. */
     if (smbus_read_byte_data(adapter,address,adm1021_REG_DEVICE_ID) != 0x41){
-    	continue;
+	type = adm1021;
+        type_name = "adm1021";
+        client_name = "ADM1021 chip";
        } else { 
-         printk("dm1021.o: Device found and passed detection.\n"); 
+        type = max1617;
+        type_name = "max1617";
+        client_name = "MAX1617 chip";
     }
       /* continue; */
 
@@ -201,7 +212,8 @@ int adm1021_attach_adapter(struct i2c_adapter *adapter)
     new_client->addr = address;
     new_client->adapter = adapter;
     new_client->driver = &adm1021_driver;
-    strcpy(new_client->name,"adm1021 chip");
+    strcpy(new_client->name,client_name);
+    data->type = type;
     data->valid = 0;
     data->update_lock = MUTEX;
     
@@ -210,7 +222,7 @@ int adm1021_attach_adapter(struct i2c_adapter *adapter)
       goto ERROR2;
     
     /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,"adm1021",
+    if ((err = sensors_register_entry(new_client,type_name,
                                       adm1021_dir_table_template)) < 0)
       goto ERROR3;
     data->sysctl_id = err;
@@ -285,11 +297,6 @@ void adm1021_dec_use (struct i2c_client *client)
 #ifdef MODULE
   MOD_DEC_USE_COUNT;
 #endif
-}
-
-u16 swap_bytes(u16 val)
-{
-  return (val >> 8) | (val << 8);
 }
 
 /* All registers are byte-sized */

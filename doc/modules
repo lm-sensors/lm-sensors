@@ -83,7 +83,7 @@ at all!
   GL518SM revision 0x00 and 0x80 chip driver
 
 (src/chips) adm1021: sensors smbus i2c-core
-  ADM1021 chip driver 
+  ADM1021 and MAX1617 chip driver 
 
 (src/chips) adm9240: sensors smbus i2c-core
   ADM9240 chip driver

@@ -1,15 +1,17 @@
 This file documents the adm1021 directories for the Analog Devices ADM1021
-temperature sensor chip.
+and MAX1617 temperature sensor chip. Note that this last chip should be
+fully compatible; it is not yet well-tested, though.
 
-There will be one directory created for each detected ADm1021 chip. As
+There will be one directory created for each detected ADM1021 chip. As
 ADM1021 chips can only be on a SMBus, they will be called adm1021-i2c-?-??, with
 the first question mark being the number of the i2c bus (see /proc/bus/i2c
 for a list of them, if i2c-proc is loaded), and the SMBus (I2C) address
 of the chip at the end. An ADM1021 is uniquely characterised with these
-two numbers. /proc/sys/dev/sensors/chips contains the SYSCTL values for
+two numbers. Likewise, for each MAX1617 chip, a directory max1617-i2c-?-??
+will be created.  /proc/sys/dev/sensors/chips contains the SYSCTL values for
 all chip directories.
 
-Within each LM75 directory, you can find the following files:
+Within each ADM1021 or MAX1617  directory, you can find the following files:
 * die_code (ADM1021_SYSCTL_DIE_CODE)
   Silicon die (mask) revision code.  This driver was written using a sample
   device of die code 3.  Normally this kind of information isn't reported
@@ -17,16 +19,18 @@ Within each LM75 directory, you can find the following files:
   would hurt.
 * status (ADM1021_SYSCTL_STATUS)
   This is an intergral number composed of 8-bits, which indicate the
-  different alarms and conversion status's of the adm1021.  Here is what
+  different alarms and conversion status's of the chip.  Here is what
   each bit indicates:
-  7 BUSY 1 When ADC Converting.
-  6 LHIGH# 1 When Local High Temp Limit Tripped.
-  5 LLOW# 1 When Local Low Temp Limit Tripped.
-  4 RHIGH# 1 When Remote High Temp Limit Tripped.
-  3 RLOW# 1 When Remote Low Temp Limit Tripped.
-  2 OPEN# 1 When Remote Sensor Open-Circuit. (i.e., no connected remote sensor)
-  1-0 Reserved.
-Note: # - These flags stay high until the status register is read or they are reset by POR.
+    7 BUSY 1 When ADC Converting.
+    6 LHIGH# 1 When Local High Temp Limit Tripped.
+    5 LLOW# 1 When Local Low Temp Limit Tripped.
+    4 RHIGH# 1 When Remote High Temp Limit Tripped.
+    3 RLOW# 1 When Remote Low Temp Limit Tripped.
+    2 OPEN# 1 When Remote Sensor Open-Circuit. (i.e., no connected remote 
+            sensor)
+    1-0 Reserved.
+  Note: # - These flags stay high until the status register is read or they 
+            are reset by POR.
 * temp (ADM1021_SYSCTL_TEMP)
   A list of three numbers. The first number is the Overtemperature Shutdown
   value, the second number is Low limit value, and the third number is the
@@ -54,10 +58,10 @@ Note: # - These flags stay high until the status register is read or they are re
   the base to the collector.  From the docs: "Transistors such as 2N3904,
   2N3906 or equivalents in SOT-23 package are suitable to use."
 
-The data for each ADM1021 is updated each 1.5 seconds, but only if it is actually
-read.  And, any alarms triggered between reads which always be present in
-the next read just after the alarm was triggered (regardless if the alarm
-situation has been resolved or not).
+The data for each chip is updated each 1.5 seconds, but only if it is 
+actually read.  And, any alarms triggered between reads which always be 
+present in the next read just after the alarm was triggered (regardless if 
+the alarm situation has been resolved or not).
 
 This driver was written and is maintained by Philip Edelbrock
 <phil@netroedge.com>.  Please send corrections/comments to him.  For

@@ -23,6 +23,7 @@ At least the following hardware sensor chips are supported:
   Analog Devices ADM1021 and ADM9240
   SiS Southbridge (integrated in the chipset; the I2C adapter will also be
     supported in the near future)
+  Maxtor MAX1617
 
 We could use some testers of hardware. If you own a specific monitoring
 chip or I2C bus, and are willing to help us out, please contact us - even
