@@ -25,7 +25,7 @@
 
     Chip	#vin	#fanin	#pwm	#temp	wchipid	vendid	i2c	ISA
     w83627hf	9	3	2	3	0x20	0x5ca3	no	yes(LPC)
-    w83627thf	9	2	?	3	??	0x5ca3	no	yes(LPC)
+    w83627thf	7	3	3	3	0x90	0x5ca3	no	yes(LPC)
     w83697hf	8	2	2	2	0x60	0x5ca3	no	yes(LPC)
 
     For other winbond chips, and for i2c support in the above chips,
@@ -64,7 +64,7 @@ static unsigned int normal_isa[] = { 0, SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_2(w83627hf, w83697hf);
+SENSORS_INSMOD_3(w83627hf, w83627thf, w83697hf);
 
 static int init = 1;
 MODULE_PARM(init, "i");
@@ -176,13 +176,16 @@ superio_exit(void)
 #define W83781D_REG_PWM2 0x5A	/* We follow the 782d convention here, */
 				/* However 782d is probably wrong. */
 #define W83781D_REG_PWMCLK12 0x5C
-#define W83627HF_REG_PWM1 0x01
-#define W83627HF_REG_PWM2 0x03
-#define W83627HF_REG_PWMCLK1 0x00
-#define W83627HF_REG_PWMCLK2 0x02
+#define W83627THF_REG_PWM1 0x01		/* 697HF too */
+#define W83627THF_REG_PWM2 0x03		/* 697HF too */
+#define W83627THF_REG_PWM3 0x11
+#define W83697HF_REG_PWMCLK1 0x00
+#define W83697HF_REG_PWMCLK2 0x02
 static const u8 regpwm[] = { W83781D_REG_PWM1, W83781D_REG_PWM2 };
+static const u8 regpwm_thf[] = { W83627THF_REG_PWM1, W83627THF_REG_PWM2,
+                                 W83627THF_REG_PWM3 };
 #define W836X7HF_REG_PWM(type, nr) (((type) == w83627hf) ? \
-                                     regpwm[(nr) - 1] : (((nr) * 2) - 1))
+                                     regpwm[(nr) - 1] : regpwm_thf[(nr) - 1])
 
 #define W83781D_REG_I2C_ADDR 0x48
 #define W83781D_REG_I2C_SUBADDR 0x4A
@@ -387,8 +390,8 @@ struct w83627hf_data {
 	u32 alarms;		/* Register encoding, combined */
 	u32 beeps;		/* Register encoding, combined */
 	u8 beep_enable;		/* Boolean */
-	u8 pwm[2];		/* Register value */
-	u8 pwmenable[2];	/* bool */
+	u8 pwm[3];		/* Register value */
+	u8 pwmenable[3];	/* bool */
 	u16 sens[3];		/* 782D/783S only.
 				   1 = pentium diode; 2 = 3904 diode;
 				   3000-5000 = thermistor beta.
@@ -472,13 +475,9 @@ static struct i2c_driver w83627hf_driver = {
 #define W83781D_SYSCTL_PWM1 1401
 #define W83781D_SYSCTL_PWM2 1402
 #define W83781D_SYSCTL_PWM3 1403
-#define W83781D_SYSCTL_PWM4 1404
 #define W83781D_SYSCTL_SENS1 1501	/* 1, 2, or Beta (3000-5000) */
 #define W83781D_SYSCTL_SENS2 1502
 #define W83781D_SYSCTL_SENS3 1503
-#define W83781D_SYSCTL_RT1   1601	/* 32-entry table */
-#define W83781D_SYSCTL_RT2   1602	/* 32-entry table */
-#define W83781D_SYSCTL_RT3   1603	/* 32-entry table */
 #define W83781D_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
 #define W83781D_SYSCTL_ALARMS 2001	/* bitvector */
 #define W83781D_SYSCTL_BEEP 2002	/* bitvector */
@@ -608,6 +607,59 @@ static ctl_table w83697hf_dir_table_template[] = {
 	{0}
 };
 
+/* no in5 and in6 */
+static ctl_table w83627thf_dir_table_template[] = {
+	{W83781D_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_in},
+	{W83781D_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_in},
+	{W83781D_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_in},
+	{W83781D_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_in},
+	{W83781D_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_in},
+	{W83781D_SYSCTL_IN7, "in7", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_in},
+	{W83781D_SYSCTL_IN8, "in8", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_in},
+	{W83781D_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_fan},
+	{W83781D_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_fan},
+	{W83781D_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_fan},
+	{W83781D_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_temp},
+	{W83781D_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_temp_add},
+	{W83781D_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_temp_add},
+	{W83781D_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_vid},
+	{W83781D_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_vrm},
+	{W83781D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_fan_div},
+	{W83781D_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_alarms},
+	{W83781D_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_beep},
+	{W83781D_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_pwm},
+	{W83781D_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_pwm},
+	{W83781D_SYSCTL_PWM3, "pwm3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_pwm},
+	{W83781D_SYSCTL_SENS1, "sensor1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_sens},
+	{W83781D_SYSCTL_SENS2, "sensor2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_sens},
+	{W83781D_SYSCTL_SENS3, "sensor3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627hf_sens},
+	{0}
+};
+
 
 /* This function is called when:
      * w83627hf_driver is inserted (when this module is loaded), for each
@@ -680,7 +732,7 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 	else if(val == W697_DEVID)
 		kind = w83697hf;
 	else if(val == W627THF_DEVID)
-		kind = w83627hf;
+		kind = w83627thf;
 		
 	superio_select();
 	if((val = 0x01 & superio_inb(WINB_ACT_REG)) == 0)
@@ -710,6 +762,9 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 	if (kind == w83627hf) {
 		type_name = "w83627hf";
 		client_name = "W83627HF chip";
+	} else if (kind == w83627thf) {
+		type_name = "w83627thf";
+		client_name = "W83627THF chip";
 	} else if (kind == w83697hf) {
 		type_name = "w83697hf";
 		client_name = "W83697HF chip";
@@ -737,7 +792,9 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 				type_name,
 				(kind == w83697hf) ?
 				   w83697hf_dir_table_template :
-				   w83627hf_dir_table_template)) < 0) {
+				(kind == w83627hf) ?
+				   w83627hf_dir_table_template :
+				   w83627thf_dir_table_template)) < 0) {
 		err = i;
 		goto ERROR7;
 	}
@@ -908,6 +965,7 @@ static void w83627hf_init_client(struct i2c_client *client)
 
 	data->pwmenable[0] = 1;
 	data->pwmenable[1] = 1;
+	data->pwmenable[2] = 1;
 
 	if(init) {
 		w83627hf_write_value(client, W83781D_REG_IN_MIN(0),
@@ -933,14 +991,16 @@ static void w83627hf_init_client(struct i2c_client *client)
 				    IN_TO_REG(W83781D_INIT_IN_MIN_4));
 		w83627hf_write_value(client, W83781D_REG_IN_MAX(4),
 				    IN_TO_REG(W83781D_INIT_IN_MAX_4));
-		w83627hf_write_value(client, W83781D_REG_IN_MIN(5),
-				    IN_TO_REG(W83782D_INIT_IN_MIN_5));
-		w83627hf_write_value(client, W83781D_REG_IN_MAX(5),
-				    IN_TO_REG(W83782D_INIT_IN_MAX_5));
-		w83627hf_write_value(client, W83781D_REG_IN_MIN(6),
-				    IN_TO_REG(W83782D_INIT_IN_MIN_6));
-		w83627hf_write_value(client, W83781D_REG_IN_MAX(6),
-				    IN_TO_REG(W83782D_INIT_IN_MAX_6));
+		if (type != w83627thf) {
+			w83627hf_write_value(client, W83781D_REG_IN_MIN(5),
+					    IN_TO_REG(W83782D_INIT_IN_MIN_5));
+			w83627hf_write_value(client, W83781D_REG_IN_MAX(5),
+					    IN_TO_REG(W83782D_INIT_IN_MAX_5));
+			w83627hf_write_value(client, W83781D_REG_IN_MIN(6),
+					    IN_TO_REG(W83782D_INIT_IN_MIN_6));
+			w83627hf_write_value(client, W83781D_REG_IN_MAX(6),
+					    IN_TO_REG(W83782D_INIT_IN_MAX_6));
+		}
 		w83627hf_write_value(client, W83781D_REG_IN_MIN(7),
 				    IN_TO_REG(W83781D_INIT_IN_MIN_7));
 		w83627hf_write_value(client, W83781D_REG_IN_MAX(7),
@@ -1008,9 +1068,10 @@ static void w83627hf_update_client(struct i2c_client *client)
 	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
 	    (jiffies < data->last_updated) || !data->valid) {
 		for (i = 0; i <= 8; i++) {
-			if ((data->type == w83697hf)
-			    && (i == 1))
-				continue;	/* 697 has no in1 */
+			/* skip missing sensors */
+			if (((data->type == w83697hf) && (i == 1)) ||
+			    ((data->type == w83627thf) && ((i == 4) || (i == 5))))
+				continue;
 			data->in[i] =
 			    w83627hf_read_value(client, W83781D_REG_IN(i));
 			data->in_min[i] =
@@ -1019,9 +1080,6 @@ static void w83627hf_update_client(struct i2c_client *client)
 			data->in_max[i] =
 			    w83627hf_read_value(client,
 					       W83781D_REG_IN_MAX(i));
-			if ((data->type != w83697hf)
-			    && (data->type != w83627hf) && (i == 6))
-				break;
 		}
 		for (i = 1; i <= 3; i++) {
 			data->fan[i - 1] =
@@ -1030,10 +1088,12 @@ static void w83627hf_update_client(struct i2c_client *client)
 			    w83627hf_read_value(client,
 					       W83781D_REG_FAN_MIN(i));
 		}
-		for (i = 1; i <= 2; i++) {
+		for (i = 1; i <= 3; i++) {
 			data->pwm[i - 1] =
 			    w83627hf_read_value(client,
 					       W836X7HF_REG_PWM(data->type, i));
+			if(i == 2 && data->type != w83627thf)
+				break;
 		}
 
 		data->temp = w83627hf_read_value(client, W83781D_REG_TEMP);
@@ -1089,20 +1149,6 @@ static void w83627hf_update_client(struct i2c_client *client)
 	up(&data->update_lock);
 }
 
-
-/* The next few functions are the call-back functions of the /proc/sys and
-   sysctl files. Which function is used is defined in the ctl_table in
-   the extra1 field.
-   Each function must return the magnitude (power of 10 to divide the date
-   with) if it is called with operation==SENSORS_PROC_REAL_INFO. It must
-   put a maximum of *nrels elements in results reflecting the data of this
-   file, and set *nrels to the number it actually put in it, if operation==
-   SENSORS_PROC_REAL_READ. Finally, it must get upto *nrels elements from
-   results and write them to the chip, if operations==SENSORS_PROC_REAL_WRITE.
-   Note that on SENSORS_PROC_REAL_READ, I do not check whether results is
-   large enough (by checking the incoming value of *nrels). This is not very
-   good practice, but as long as you put less than about 5 values in results,
-   you can assume it is large enough. */
 void w83627hf_in(struct i2c_client *client, int operation, int ctl_name,
 		int *nrels_mag, long *results)
 {
@@ -1318,7 +1364,7 @@ void w83627hf_fan_div(struct i2c_client *client, int operation,
 		}
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		old = w83627hf_read_value(client, W83781D_REG_VID_FANDIV);
-		/* w83627hf and as99127f don't have extended divisor bits */
+		/* w83627hf doesn't have extended divisor bits */
 			old3 =
 			    w83627hf_read_value(client, W83781D_REG_VBAT);
 		if (*nrels_mag >= 3 && data->type != w83697hf) {
