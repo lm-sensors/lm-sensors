@@ -19,6 +19,8 @@ ask CVS about it:
   Module i2c-amd756: fixed region request
   Module ddcmon: new
   Module via686a: new
+  Module i2c-voodoo3: Converted to use i2c-algo-bit layer
+  Module w83781d: Doesn't change pin settings at initialization
   Library: Support for ddcmon and via686a
   Program sensors-detect: Support for ddcmon and via686a
   Program sensors: Support for eeprom, ddcmon and via686a
