@@ -318,19 +318,21 @@ static void ddcmon_update_client(struct i2c_client *client)
 			for (i=0; i<DDCMON_SIZE; i+=I2C_SMBUS_I2C_BLOCK_MAX)
 				if (i2c_smbus_read_i2c_block_data(client,
 				                           i, data->data + i)
-				                    != I2C_SMBUS_I2C_BLOCK_MAX)
+				                    != I2C_SMBUS_I2C_BLOCK_MAX) {
+					printk(KERN_WARNING "ddcmon.o: block read fail at 0x%.2x!\n", i);
 					goto DONE;
+				}
 		} else {
 			if (i2c_smbus_write_byte(client, 0)) {
-#ifdef DEBUG
-				printk("ddcmon read start has failed!\n");
-#endif
+				printk(KERN_WARNING "ddcmon.o: read start fail at 0!\n");
 				goto DONE;
 			}
 			for (i = 0; i < DDCMON_SIZE; i++) {
 				j = i2c_smbus_read_byte(client);
-				if (j < 0)
+				if (j < 0) {
+					printk(KERN_WARNING "eeprom.o: read fail at 0x%.2x!\n", i);
 					goto DONE;
+				}
 				data->data[i] = (u8) j;
 			}
 		}

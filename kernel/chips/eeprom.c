@@ -335,19 +335,21 @@ static void eeprom_update_client(struct i2c_client *client, u8 slice)
 			                            i += I2C_SMBUS_I2C_BLOCK_MAX)
 				if (i2c_smbus_read_i2c_block_data(client,
 				                           i, data->data + i)
-				                    != I2C_SMBUS_I2C_BLOCK_MAX)
+				                    != I2C_SMBUS_I2C_BLOCK_MAX) {
+					printk(KERN_WARNING "eeprom.o: block read fail at 0x%.2x!\n", i);
 					goto DONE;
+				}
 		} else {
 			if (i2c_smbus_write_byte(client, slice << 5)) {
-#ifdef DEBUG
-				printk("eeprom read start has failed!\n");
-#endif
+				printk(KERN_WARNING "eeprom.o: read start fail at 0x%.2x!\n", slice << 5);
 				goto DONE;
 			}
 			for (i = slice << 5; i < (slice + 1) << 5; i++) {
 				j = i2c_smbus_read_byte(client);
-				if (j < 0)
+				if (j < 0) {
+					printk(KERN_WARNING "eeprom.o: read fail at 0x%.2x!\n", i);
 					goto DONE;
+				}
 				data->data[i] = (u8) j;
 			}
 		}
