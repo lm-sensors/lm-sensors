@@ -26,7 +26,7 @@ SRCTARGETS := $(MODULE_DIR)/smbus.o $(MODULE_DIR)/piix4.o $(MODULE_DIR)/isa.o \
               $(MODULE_DIR)/lm78.o $(MODULE_DIR)/sensors.o  \
               $(MODULE_DIR)/i2c-proc.o $(MODULE_DIR)/lm75.o \
               $(MODULE_DIR)/i2c-proc.o $(MODULE_DIR)/gl518sm.o \
-              $(MODULE_DIR)/eeprom.o $(MODULE_DIR)/w83781d.o
+              $(MODULE_DIR)/eeprom.o $(MODULE_DIR)/w83781d.o 
 
 SRCHEADERFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/isa.h \
                $(MODULE_DIR)/smbus.h
