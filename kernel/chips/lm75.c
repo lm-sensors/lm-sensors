@@ -255,8 +255,12 @@ static int lm75_write_value(struct i2c_client *client, u8 reg, u16 value)
 
 static void lm75_init_client(struct i2c_client *client)
 {
-	/* Initialize the LM75 chip */
-	lm75_write_value(client, LM75_REG_CONF, 0);
+	int i;
+
+	/* Set comparator mode if not in that mode */
+	i = lm75_read_value(client, LM75_REG_CONF);
+	if(i >= 0 && ((u8) i) & 0x02)
+		lm75_write_value(client, LM75_REG_CONF, ((u8) i) & 0xfd);
 }
 
 static void lm75_update_client(struct i2c_client *client)
