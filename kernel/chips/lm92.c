@@ -199,7 +199,7 @@ static void lm92_temp (struct i2c_client *client,int operation,int ctl_name,int 
 			data->temp.hyst = PROC_TO_NATIVE (results[3]);
 			lm92_write (client);
 		} else if (operation == SENSORS_PROC_REAL_INFO) {
-			*nrels_mag = 0;
+			*nrels_mag = 4;
 		}
 
 		up (&mutex);
@@ -213,10 +213,8 @@ static void lm92_alarms (struct i2c_client *client,int operation,int ctl_name,in
 
 		if (operation == SENSORS_PROC_REAL_READ) {
 			lm92_read (client);
-			results[0] = data->alarms.high;
-			results[1] = data->alarms.low;
-			results[2] = data->alarms.crit;
-			*nrels_mag = 3;
+			results[0] = data->alarms.high || (data->alarms.low << 1) || (data->alarms.crit << 2);
+			*nrels_mag = 1;
 		} else if (operation == SENSORS_PROC_REAL_INFO) {
 			*nrels_mag = 0;
 		}
