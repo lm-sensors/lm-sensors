@@ -35,6 +35,7 @@
 
 #include "i2c.h"
 #include "algo-bit.h"
+#include "compat.h"
 
 /* PCI device */
 #define VENDOR		PCI_VENDOR_ID_VIA
