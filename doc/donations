@@ -35,12 +35,13 @@ HardData Ltd.	Tyan 2466 w/ 1G Duron; W83627HF and W83782D	5/02
 		DDR recognition
 
 Intel		SMBus 2.0 system				6/02
-		Drivers developed: SMBus 2.0; ADM1025 improvements;
-		82801 improvements; SMSC47M1xx driver
+		Drivers developed: SMBus 2.0 support in i2c-core and
+		i2c-i801; ADM1025 improvements; 82801 improvements;
+		smsc47m1 driver
 
 Via		8231 and two 8233 motherboards			6/02
 		Drivers developed: VT8231 support in via686a;
 		vt1211; VT8233A and VT8231 support in i2c-viapro
 
 HP		IPMI system					10/02
-		Drivers developed: IPMI
+		Drivers developed: bmcsensors, i2c-ipmi
