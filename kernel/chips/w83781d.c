@@ -989,7 +989,7 @@ void w83781d_init_client(struct i2c_client *client)
       if(!(tmp & BIT_SCFG1[i-1])) {
         data->sens[i-1] = W83781D_DEFAULT_BETA;
       } else {
-        if(w83781d_read_value(client,W83781D_REG_TEMP) & BIT_SCFG2[i-1])
+        if(w83781d_read_value(client,W83781D_REG_SCFG2) & BIT_SCFG2[i-1])
           data->sens[i-1] = 1;
         else
           data->sens[i-1] = 2;
@@ -1456,14 +1456,14 @@ void w83781d_sens(struct i2c_client *client, int operation, int ctl_name,
       switch(results[0]) {
         case 1:                         /* PII/Celeron diode */
           tmp = w83781d_read_value(client,W83781D_REG_SCFG1);
-          w83781d_write_value(client,W83781D_REG_SCFG1, tmp | BIT_SCFG2[nr-1]);
+          w83781d_write_value(client,W83781D_REG_SCFG1, tmp | BIT_SCFG1[nr-1]);
           tmp = w83781d_read_value(client,W83781D_REG_SCFG2);
           w83781d_write_value(client,W83781D_REG_SCFG2, tmp | BIT_SCFG2[nr-1]);
           data->sens[nr-1] = results[0];
           break;
         case 2:                         /* 3904 */
           tmp = w83781d_read_value(client,W83781D_REG_SCFG1);
-          w83781d_write_value(client,W83781D_REG_SCFG1, tmp | BIT_SCFG2[nr-1]);
+          w83781d_write_value(client,W83781D_REG_SCFG1, tmp | BIT_SCFG1[nr-1]);
           tmp = w83781d_read_value(client,W83781D_REG_SCFG2);
           w83781d_write_value(client,W83781D_REG_SCFG2,
                               tmp & ~BIT_SCFG2[nr-1]);
@@ -1472,7 +1472,7 @@ void w83781d_sens(struct i2c_client *client, int operation, int ctl_name,
         case W83781D_DEFAULT_BETA:      /* thermistor */
           tmp = w83781d_read_value(client,W83781D_REG_SCFG1);
           w83781d_write_value(client,W83781D_REG_SCFG1,
-                              tmp & ~BIT_SCFG2[nr-1]);
+                              tmp & ~BIT_SCFG1[nr-1]);
           data->sens[nr-1] = results[0];
           break;
         default:
