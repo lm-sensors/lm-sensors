@@ -31,8 +31,12 @@ ask CVS about it:
   Module adm1025: Fixed temp2 min/max writes
   Module ds1621: Add 12-bit precision mode
   Module it87: Enable all alarms, add in8 support, add sensor type selection
+  Module sensors: Don't initialize i2c-proc (moved to i2c-core);
+                  remove support for module
   Module sis5595: Recognize unsupported chips and refuse to load
   Module w83781d: Fix fan speed for as99127f (broken by 2.6.0)
+  Program mkpatch.pl: Fix dependencies on i2c-proc; disallow compilation
+                      of sensors.c as a module in kernel
   Program sensors: it87 updates
   Program sensors-detect: Fix ADM1024 and ADM1025 detection;
                           recognize unsupported SiS chips;

@@ -18,28 +18,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/* Not configurable as a module */
 
 #include <linux/init.h>
-
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-
-
-int init_module(void)
-{
-	return 0;
-}
-
-int cleanup_module(void)
-{
-	return 0;
-}
-
-#else				/* ndef MODULE */
 
 #ifdef CONFIG_SENSORS_ADM1021
 extern int sensors_adm1021_init(void);
@@ -104,7 +85,6 @@ extern int sensors_it87_init(void);
 
 int __init sensors_init_all(void)
 {
-	sensors_init();
 #ifdef CONFIG_SENSORS_ADM1021
 	sensors_adm1021_init();
 #endif
@@ -167,5 +147,3 @@ int __init sensors_init_all(void)
 #endif
 	return 0;
 }
-
-#endif				/* MODULE */
