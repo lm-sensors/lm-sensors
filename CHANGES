@@ -25,6 +25,7 @@ ask CVS about it:
   Module adm1021: Add support for adm1021a / adm1023
   Module adm1025: Add support for remote temp; rename /proc entries to
                   in[0-5] and temp[1-2]; fix negative temp readings
+  Module adm9240: Rename /proc entries to in[0-5]
   Module ddcmon: allow force and force_ddcmon parameters
   Module ds1621: new
   Module i2c-ali1535: Enhance error checking and recovery; add mutex

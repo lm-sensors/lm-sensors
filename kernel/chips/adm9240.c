@@ -316,17 +316,17 @@ static int __initdata adm9240_initialized = 0;
    is done through one of the 'extra' fields which are initialized 
    when a new copy is allocated. */
 static ctl_table adm9240_dir_table_template[] = {
-	{ADM9240_SYSCTL_IN0, "2.5V", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM9240_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm9240_in},
-	{ADM9240_SYSCTL_IN1, "Vccp1", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM9240_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm9240_in},
-	{ADM9240_SYSCTL_IN2, "3.3V", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM9240_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm9240_in},
-	{ADM9240_SYSCTL_IN3, "5V", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM9240_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm9240_in},
-	{ADM9240_SYSCTL_IN4, "12V", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM9240_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm9240_in},
-	{ADM9240_SYSCTL_IN5, "Vccp2", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM9240_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm9240_in},
 	{ADM9240_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm9240_fan},
