@@ -30,51 +30,21 @@
 #include <linux/ipmi.h>
 #include "version.h"
 
-static void i2c_ipmb_inc_use(struct i2c_adapter *adapter);
-static void i2c_ipmb_dec_use(struct i2c_adapter *adapter);
-static u32 i2c_ipmb_func(struct i2c_adapter *adapter);
+
 int ipmb_access(struct i2c_adapter *adap,struct i2c_msg msgs[], 
 	                   int num);
 
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init i2c_ipmb_init(void);
-static int __init i2c_ipmb_cleanup(void);
-
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
 
 /* I2C Data */
 static struct i2c_algorithm i2c_ipmb_algorithm = {
 	.name = "IPMB algorithm",
 	.id = I2C_ALGO_IPMB,
 	.master_xfer = ipmb_access,
-	.smbus_xfer = NULL,
-	.slave_send = NULL,
-	.slave_recv = NULL,
-	.algo_control = NULL,
 	.functionality = i2c_ipmb_func,
 };
 
 #define MAX_IPMB_ADAPTERS 8
 static struct i2c_adapter i2c_ipmb_adapter[MAX_IPMB_ADAPTERS];
-/*
-static struct i2c_adapter i2c_ipmb_adapter = {
-	.name = "IPMB adapter",
-	.id = I2C_ALGO_SMBUS | I2C_HW_IPMB,
-	.algo = &i2c_ipmb_algorithm,
-	.algo_data = NULL,
-	.inc_use = &i2c_ipmb_inc_use,
-	.dec_use = &i2c_ipmb_dec_use,
-	.data = NULL,
-};
-*/
 
 /* IPMI Data */
 #define IPMI_IPMB_CHANNEL	0
@@ -240,7 +210,8 @@ static void ipmb_rcv_channel_info(struct ipmi_msg *msg)
 	                  channel, type, protocol);
 }
 /*
-	if ((rv = i2c_add_adapter(&i2c_ipmb_adapter))) {
+	return i2c_add_adapter(&i2c_ipmb_adapter);
+	if (error) {
 		printk(KERN_ERR "i2c-ipmb.o: Adapter registration failed, "
 		       "module i2c-ipmb.o is not inserted\n.");
 		return;
@@ -313,20 +284,6 @@ int ipmb_access(struct i2c_adapter *adap,struct i2c_msg msgs[],
 
 }
 
-void i2c_ipmb_inc_use(struct i2c_adapter *adapter)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void i2c_ipmb_dec_use(struct i2c_adapter *adapter)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
 static u32 i2c_ipmb_func(struct i2c_adapter *adapter)
 {
 	return 0; /* fixme */
@@ -385,7 +342,7 @@ static struct ipmi_smi_watcher smi_watcher =
 	.smi_gone = ipmb_smi_gone
 };
 
-int __init i2c_ipmb_init(void)
+static int __init i2c_ipmb_init(void)
 {
 	int rv;
 
@@ -402,28 +359,16 @@ int __init i2c_ipmb_init(void)
 	return 0;
 }
 
-int __init ipmi_cleanup(void)
+
+static void __exit i2c_ipmi_exit(void)
 {
 	ipmi_smi_watcher_unregister(&smi_watcher);
 	ipmb_smi_gone(0);
-	return 0;
 }
 
-#ifdef MODULE
 MODULE_AUTHOR("M. D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("IPMB-BMC access through i2c");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-int init_module(void)
-{
-	return i2c_ipmb_init();
-}
-
-int cleanup_module(void)
-{
-	return ipmi_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(i2c_ipmb_init);
+module_exit(i2c_ipmi_exit);

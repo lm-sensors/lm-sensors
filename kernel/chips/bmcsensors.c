@@ -40,11 +40,6 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 SENSORS_INSMOD_1(bmcsensors);
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 struct bmcsensors_data {
 	struct semaphore lock;
 	int sysctl_id;
@@ -56,13 +51,6 @@ struct bmcsensors_data {
 	u8 alarms;
 };
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_bmcsensors_init(void);
-static int __init bmcsensors_cleanup(void);
 
 static int bmcsensors_attach_adapter(struct i2c_adapter *adapter);
 static int bmcsensors_detect(struct i2c_adapter *adapter, int address,
@@ -70,8 +58,6 @@ static int bmcsensors_detect(struct i2c_adapter *adapter, int address,
 static int bmcsensors_detach_client(struct i2c_client *client);
 static int bmcsensors_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void bmcsensors_inc_use(struct i2c_client *client);
-static void bmcsensors_dec_use(struct i2c_client *client);
 
 static void bmcsensors_update_client(struct i2c_client *client);
 static int bmcsensors_find(int *address);
@@ -92,14 +78,13 @@ static void bmcsensors_get_reading(struct i2c_client *client, int i);
 static int bmcsensors_id = 0;
 
 static struct i2c_driver bmcsensors_driver = {
-	/* name */ "BMC Sensors driver",
-	/* id */ I2C_DRIVERID_BMCSENSORS,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &bmcsensors_attach_adapter,
-	/* detach_client */ &bmcsensors_detach_client,
-	/* command */ &bmcsensors_command,
-	/* inc_use */ &bmcsensors_inc_use,
-	/* dec_use */ &bmcsensors_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "BMC Sensors driver",
+	.id		= I2C_DRIVERID_BMCSENSORS,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= bmcsensors_attach_adapter,
+	.detach_client	= bmcsensors_detach_client,
+	.command	= bmcsensors_command,
 };
 
 static struct bmcsensors_data bmc_data;
@@ -113,9 +98,6 @@ struct i2c_client bmc_client = {
 	& bmc_data,
 	0
 };
-
-static bmcsensors_initialized;
-
 
 #define MAX_SDR_ENTRIES 50
 #define SDR_LIMITS 8
@@ -806,19 +788,6 @@ static int bmcsensors_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-static void bmcsensors_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-static void bmcsensors_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
 
 static void bmc_do_pause(unsigned int amount)
 {
@@ -972,56 +941,22 @@ static void bmcsensors_alarms(struct i2c_client *client, int operation, int ctl_
 #endif
 }
 
-static int __init sensors_bmcsensors_init(void)
+static int __init sm_bmcsensors_init(void)
 {
-	int res, addr;
-
 	printk(KERN_INFO "bmcsensors.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	bmcsensors_initialized = 0;
-
-	if ((res = i2c_add_driver(&bmcsensors_driver))) {
-		printk(KERN_ERR
-		   "bmcsensors.o: Driver registration failed, module not inserted.\n");
-		bmcsensors_cleanup();
-		return res;
-	}
-	bmcsensors_initialized = 1;
-	return 0;
+	return i2c_add_driver(&bmcsensors_driver);
 }
 
-static int __init bmcsensors_cleanup(void)
+static void __exit sm_bmcsensors_exit(void)
 {
-	int res;
-
-	if (bmcsensors_initialized >= 1) {
-		if ((res = i2c_del_driver(&bmcsensors_driver))) {
-			printk(KERN_WARNING
-			    "bmcsensors.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		bmcsensors_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&bmcsensors_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Mark D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("IPMI BMC sensors");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-int init_module(void)
-{
-	return sensors_bmcsensors_init();
-}
-
-int cleanup_module(void)
-{
-	return bmcsensors_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_bmcsensors_init);
+module_exit(sm_bmcsensors_exit);

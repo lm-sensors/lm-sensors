@@ -356,62 +356,36 @@ static int lm92_command (struct i2c_client *client,unsigned int cmd,void *arg)
 	return (0);
 }
 
-static void lm92_inc_use (struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif	/* #ifdef MODULE */
-}
-
-static void lm92_dec_use (struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif	/* #ifdef MODULE */
-}
 
 static struct i2c_driver lm92_driver = {
-	name:			"lm92",
-	id:				I2C_DRIVERID_LM92,
-	flags:			I2C_DF_NOTIFY,
-	attach_adapter:	lm92_attach_adapter,
-	detach_client:	lm92_detach_client,
-	command:		lm92_command,
-	inc_use:		lm92_inc_use,
-	dec_use:		lm92_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "lm92",
+	.id		= I2C_DRIVERID_LM92,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= lm92_attach_adapter,
+	.detach_client	= lm92_detach_client,
+	.command	= lm92_command,
 };
 
-int __init sensors_lm92_init (void)
+static int __init sm_lm92_init(void)
 {
-	int result;
-
-	if ((result = i2c_add_driver (&lm92_driver)))
-		return (result);
-
 	printk ("lm92.o version %s (%s)\n",LM_VERSION,LM_DATE);
-
-	return (0);
+	return i2c_add_driver(&lm92_driver);
 }
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0))
-#undef __exit
-#define __exit
-#endif	/* #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)) */
 
-static void __exit sensors_lm92_exit (void)
+static void __exit sm_lm92_exit(void)
 {
-	i2c_del_driver (&lm92_driver);
+	i2c_del_driver(&lm92_driver);
 }
 
-EXPORT_NO_SYMBOLS;
+
 
 MODULE_AUTHOR ("Abraham van der Merwe <abraham@2d3d.co.za>");
 MODULE_DESCRIPTION ("Linux support for LM92 Temperature Sensor");
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE ("GPL");
-#endif	/* #ifdef MODULE_LICENSE */
 
-module_init (sensors_lm92_init);
-module_exit (sensors_lm92_exit);
+module_init(sm_lm92_init);
+module_exit(sm_lm92_exit);
 

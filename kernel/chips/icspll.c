@@ -37,19 +37,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
-
 
 /* Addresses to scan */
 #define ADDRESS 0x69
@@ -74,27 +62,12 @@ struct icspll_data {
 	int memtype;
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_icspll_init(void);
-static int __init icspll_cleanup(void);
-
 static int icspll_attach_adapter(struct i2c_adapter *adapter);
 static int icspll_detach_client(struct i2c_client *client);
 static int icspll_command(struct i2c_client *client, unsigned int cmd,
 			  void *arg);
 static int icspll_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
-static void icspll_inc_use(struct i2c_client *client);
-static void icspll_dec_use(struct i2c_client *client);
 
 #if 0
 static int icspll_write_value(struct i2c_client *client, u8 reg,
@@ -108,14 +81,13 @@ static void icspll_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver icspll_driver = {
-	/* name */ "Clock chip reader",
-	/* id */ I2C_DRIVERID_ICSPLL,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &icspll_attach_adapter,
-	/* detach_client */ &icspll_detach_client,
-	/* command */ &icspll_command,
-	/* inc_use */ &icspll_inc_use,
-	/* dec_use */ &icspll_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "Clock chip reader",
+	.id		= I2C_DRIVERID_ICSPLL,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= icspll_attach_adapter,
+	.detach_client	= icspll_detach_client,
+	.command	= icspll_command,
 };
 
 /* These files are created for each detected ICSPLL. This is just a template;
@@ -132,11 +104,8 @@ static ctl_table icspll_dir_table_template[] = {
 /* holding place for data - block read could be as much as 32 */
 static u8 tempdata[MAXBLOCK_SIZE];
 
-/* Used by init/cleanup */
-static int __initdata icspll_initialized = 0;
-
 static int icspll_id = 0;
-int icspll_attach_adapter(struct i2c_adapter *adapter)
+static int icspll_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, icspll_detect);
 }
@@ -215,7 +184,7 @@ int icspll_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int icspll_detach_client(struct i2c_client *client)
+static int icspll_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -234,35 +203,22 @@ int icspll_detach_client(struct i2c_client *client)
 
 
 /* No commands defined yet */
-int icspll_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int icspll_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void icspll_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void icspll_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
 
 #if 0
 /* No writes yet (PAE) */
-int icspll_write_value(struct i2c_client *client, u8 reg, u16 value)
+static int icspll_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
 	return i2c_smbus_write_block_data(client->adapter, client->addr,
 					  reg, value);
 }
 #endif
 
-void icspll_update_client(struct i2c_client *client)
+static void icspll_update_client(struct i2c_client *client)
 {
 	struct icspll_data *data = client->data;
 	int i, len;
@@ -320,54 +276,22 @@ void icspll_contents(struct i2c_client *client, int operation,
 	}
 }
 
-int __init sensors_icspll_init(void)
+static int __init sm_icspll_init(void)
 {
-	int res;
-
 	printk("icspll.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	icspll_initialized = 0;
-	if ((res = i2c_add_driver(&icspll_driver))) {
-		printk
-		    ("icspll.o: Driver registration failed, module not inserted.\n");
-		icspll_cleanup();
-		return res;
-	}
-	icspll_initialized++;
-	return 0;
+	return i2c_add_driver(&icspll_driver);
 }
 
-int __init icspll_cleanup(void)
+static void __exit sm_icspll_exit(void)
 {
-	int res;
-
-	if (icspll_initialized >= 1) {
-		if ((res = i2c_del_driver(&icspll_driver))) {
-			printk
-			    ("icspll.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-	} else
-		icspll_initialized--;
-
-	return 0;
+	i2c_del_driver(&icspll_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, and Mark Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("ICSPLL driver");
 
-int init_module(void)
-{
-	return sensors_icspll_init();
-}
-
-int cleanup_module(void)
-{
-	return icspll_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_icspll_init);
+module_exit(sm_icspll_exit);

@@ -37,18 +37,7 @@
 #include "sensors_vid.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -157,11 +146,6 @@ SENSORS_INSMOD_1(adm1025);
 #define ADM1025_INIT_TEMP_MAX 600
 #define ADM1025_INIT_TEMP_MIN 0
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /* For each registered ADM1025, we need to keep some data in memory. That
    data is pointed to by adm1025_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new adm1025 client is
@@ -190,23 +174,12 @@ struct adm1025_data {
 };
 
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_adm1025_init(void);
-static int __init adm1025_cleanup(void);
-
 static int adm1025_attach_adapter(struct i2c_adapter *adapter);
 static int adm1025_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int adm1025_detach_client(struct i2c_client *client);
 static int adm1025_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void adm1025_inc_use(struct i2c_client *client);
-static void adm1025_dec_use(struct i2c_client *client);
-
 static int adm1025_read_value(struct i2c_client *client, u8 register);
 static int adm1025_write_value(struct i2c_client *client, u8 register,
 			       u8 value);
@@ -236,18 +209,14 @@ static void adm1025_vrm(struct i2c_client *client, int operation,
 static int adm1025_id = 0;
 
 static struct i2c_driver adm1025_driver = {
-	/* name */ "ADM1025 sensor driver",
-	/* id */ I2C_DRIVERID_ADM1025,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &adm1025_attach_adapter,
-	/* detach_client */ &adm1025_detach_client,
-	/* command */ &adm1025_command,
-	/* inc_use */ &adm1025_inc_use,
-	/* dec_use */ &adm1025_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "ADM1025 sensor driver",
+	.id		= I2C_DRIVERID_ADM1025,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= adm1025_attach_adapter,
+	.detach_client	= adm1025_detach_client,
+	.command	= adm1025_command,
 };
-
-/* Used by adm1025_init/cleanup */
-static int __initdata adm1025_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected ADM1025. This is just a template;
@@ -283,7 +252,7 @@ static ctl_table adm1025_dir_table_template[] = {
 	{0}
 };
 
-int adm1025_attach_adapter(struct i2c_adapter *adapter)
+static int adm1025_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, adm1025_detect);
 }
@@ -400,7 +369,7 @@ static int adm1025_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int adm1025_detach_client(struct i2c_client *client)
+static int adm1025_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -420,37 +389,24 @@ int adm1025_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int adm1025_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int adm1025_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void adm1025_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-void adm1025_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-int adm1025_read_value(struct i2c_client *client, u8 reg)
+static int adm1025_read_value(struct i2c_client *client, u8 reg)
 {
 	return 0xFF & i2c_smbus_read_byte_data(client, reg);
 }
 
-int adm1025_write_value(struct i2c_client *client, u8 reg, u8 value)
+static int adm1025_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
 /* Called when we have found a new ADM1025. It should set limits, etc. */
-void adm1025_init_client(struct i2c_client *client)
+static void adm1025_init_client(struct i2c_client *client)
 {
 	struct adm1025_data *data = client->data;
 
@@ -498,7 +454,7 @@ void adm1025_init_client(struct i2c_client *client)
 	adm1025_write_value(client, ADM1025_REG_CONFIG, 0x01);
 }
 
-void adm1025_update_client(struct i2c_client *client)
+static void adm1025_update_client(struct i2c_client *client)
 {
 	struct adm1025_data *data = client->data;
 	u8 i;
@@ -723,54 +679,22 @@ void adm1025_vrm(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_adm1025_init(void)
+static int __init sm_adm1025_init(void)
 {
-	int res;
-
 	printk("adm1025.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	adm1025_initialized = 0;
-
-	if ((res = i2c_add_driver(&adm1025_driver))) {
-		printk
-		    ("adm1025.o: Driver registration failed, module not inserted.\n");
-		adm1025_cleanup();
-		return res;
-	}
-	adm1025_initialized++;
-	return 0;
+	return i2c_add_driver(&adm1025_driver);
 }
 
-int __init adm1025_cleanup(void)
+static void __exit sm_adm1025_exit(void)
 {
-	int res;
-
-	if (adm1025_initialized >= 1) {
-		if ((res = i2c_del_driver(&adm1025_driver))) {
-			printk
-			    ("adm1025.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		adm1025_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&adm1025_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("ADM1025 driver");
 
-int init_module(void)
-{
-	return sensors_adm1025_init();
-}
-
-int cleanup_module(void)
-{
-	return adm1025_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_adm1025_init);
+module_exit(sm_adm1025_exit);

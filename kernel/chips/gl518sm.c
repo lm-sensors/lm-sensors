@@ -31,18 +31,7 @@
 #include <linux/smp_lock.h>
 #endif
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { 0x2c, 0x2d, SENSORS_I2C_END };
@@ -92,7 +81,7 @@ SENSORS_INSMOD_2(gl518sm_r00, gl518sm_r80);
                                         0,255))
 #define TEMP_FROM_REG(val) (((val) - 119) * 10)
 
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 255;
@@ -163,11 +152,7 @@ struct gl518_data {
 	int iterate_lock;
 	int quit_thread;
 	struct task_struct *thread;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1)
 	wait_queue_head_t wq;
-#else
-	struct wait_queue *wq;
-#endif
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 	unsigned long last_updated_v00;
@@ -189,18 +174,6 @@ struct gl518_data {
 	u8 iterate;		/* Voltage iteration mode */
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_gl518sm_init(void);
-static int __init gl518_cleanup(void);
 static int gl518_attach_adapter(struct i2c_adapter *adapter);
 static int gl518_detect(struct i2c_adapter *adapter, int address,
 			unsigned short flags, int kind);
@@ -208,17 +181,13 @@ static void gl518_init_client(struct i2c_client *client);
 static int gl518_detach_client(struct i2c_client *client);
 static int gl518_command(struct i2c_client *client, unsigned int cmd,
 			 void *arg);
-static void gl518_inc_use(struct i2c_client *client);
-static void gl518_dec_use(struct i2c_client *client);
+
 static u16 swap_bytes(u16 val);
 static int gl518_read_value(struct i2c_client *client, u8 reg);
 static int gl518_write_value(struct i2c_client *client, u8 reg, u16 value);
 static void gl518_update_client(struct i2c_client *client);
 
 static void gl518_update_client_rev00(struct i2c_client *client);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,68)
-static int gl518_update_thread(void *data);
-#endif
 static void gl518_update_iterate(struct i2c_client *client);
 
 static void gl518_vin(struct i2c_client *client, int operation,
@@ -240,14 +209,13 @@ static void gl518_iterate(struct i2c_client *client, int operation,
 
 /* This is the driver that will be inserted */
 static struct i2c_driver gl518_driver = {
-	/* name */ "GL518SM sensor chip driver",
-	/* id */ I2C_DRIVERID_GL518,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &gl518_attach_adapter,
-	/* detach_client */ &gl518_detach_client,
-	/* command */ &gl518_command,
-	/* inc_use */ &gl518_inc_use,
-	/* dec_use */ &gl518_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "GL518SM sensor chip driver",
+	.id		= I2C_DRIVERID_GL518,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= gl518_attach_adapter,
+	.detach_client	= gl518_detach_client,
+	.command	= gl518_command,
 };
 
 /* These files are created for each detected GL518. This is just a template;
@@ -283,16 +251,13 @@ static ctl_table gl518_dir_table_template[] = {
 	{0}
 };
 
-/* Used by init/cleanup */
-static int __initdata gl518_initialized = 0;
-
 /* I choose here for semi-static GL518SM allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
 #define MAX_GL518_NR 4
 static struct i2c_client *gl518_list[MAX_GL518_NR];
 
-int gl518_attach_adapter(struct i2c_adapter *adapter)
+static int gl518_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, gl518_detect);
 }
@@ -443,7 +408,7 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 
 
 /* Called when we have found a new GL518SM. It should set limits, etc. */
-void gl518_init_client(struct i2c_client *client)
+static void gl518_init_client(struct i2c_client *client)
 {
 	/* Power-on defaults (bit 7=1) */
 	gl518_write_value(client, GL518_REG_CONF, 0x80);
@@ -482,7 +447,7 @@ void gl518_init_client(struct i2c_client *client)
 	gl518_write_value(client, GL518_REG_CONF, 0x44);
 }
 
-int gl518_detach_client(struct i2c_client *client)
+static int gl518_detach_client(struct i2c_client *client)
 {
 	int err, i;
 	struct gl518_data *data = client->data;
@@ -517,28 +482,13 @@ int gl518_detach_client(struct i2c_client *client)
 
 
 /* No commands defined yet */
-int gl518_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int gl518_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-/* Nothing here yet */
-void gl518_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-/* Nothing here yet */
-void gl518_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-u16 swap_bytes(u16 val)
+static u16 swap_bytes(u16 val)
 {
 	return (val >> 8) | (val << 8);
 }
@@ -546,7 +496,7 @@ u16 swap_bytes(u16 val)
 /* Registers 0x07 to 0x0c are word-sized, others are byte-sized 
    GL518 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
-int gl518_read_value(struct i2c_client *client, u8 reg)
+static int gl518_read_value(struct i2c_client *client, u8 reg)
 {
 	if ((reg >= 0x07) && (reg <= 0x0c))
 		return swap_bytes(i2c_smbus_read_word_data(client, reg));
@@ -557,7 +507,7 @@ int gl518_read_value(struct i2c_client *client, u8 reg)
 /* Registers 0x07 to 0x0c are word-sized, others are byte-sized 
    GL518 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
-int gl518_write_value(struct i2c_client *client, u8 reg, u16 value)
+static int gl518_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
 	if ((reg >= 0x07) && (reg <= 0x0c))
 		return i2c_smbus_write_word_data(client, reg,
@@ -566,7 +516,7 @@ int gl518_write_value(struct i2c_client *client, u8 reg, u16 value)
 		return i2c_smbus_write_byte_data(client, reg, value);
 }
 
-void gl518_update_client(struct i2c_client *client)
+static void gl518_update_client(struct i2c_client *client)
 {
 	struct gl518_data *data = client->data;
 	int val;
@@ -645,7 +595,7 @@ void gl518_update_client(struct i2c_client *client)
 /* Here we decide how to run the iteration code.
    When called, we trigger the iteration and report the last
    measured voltage. No delay for user apps */
-void gl518_update_client_rev00(struct i2c_client *client)
+static void gl518_update_client_rev00(struct i2c_client *client)
 {
 	struct gl518_data *data = client->data;
 	int i;
@@ -672,7 +622,7 @@ void gl518_update_client_rev00(struct i2c_client *client)
 	}
 }
 
-int gl518_update_thread(void *c)
+static int gl518_update_thread(void *c)
 {
 	struct i2c_client *client = c;
 	struct gl518_data *data = client->data;
@@ -687,11 +637,7 @@ int gl518_update_thread(void *c)
 	current->fs->umask = 0;
 	strcpy(current->comm, "gl518sm");
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1)
 	init_waitqueue_head(&(data->wq));
-#else
-	data->wq = NULL;
-#endif
 	data->thread = current;
 
 #ifdef __SMP__
@@ -719,7 +665,7 @@ int gl518_update_thread(void *c)
    comparisons for the GL518SM rev 00 that lacks support for direct
    reading of these values.   Values are kept in iter_voltage   */
 
-void gl518_update_iterate(struct i2c_client *client)
+static void gl518_update_iterate(struct i2c_client *client)
 {
 	struct gl518_data *data = client->data;
 	int i, j, loop_more = 1, min[3], max[3], delta[3];
@@ -1062,11 +1008,7 @@ void gl518_iterate(struct i2c_client *client, int operation, int ctl_name,
 				data->quit_thread = 1;
 				wake_up_interruptible(&data->wq);
 			} else if ((data->iterate == 2) && (!data->thread)) {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1)
 				init_waitqueue_head(&(data->wq));
-#else
-				data->wq = NULL;
-#endif
 				kernel_thread(gl518_update_thread,
 					      (void *) client, 0);
 			}
@@ -1074,54 +1016,22 @@ void gl518_iterate(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_gl518sm_init(void)
+static int __init sm_gl518sm_init(void)
 {
-	int res;
-
 	printk("gl518sm.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	gl518_initialized = 0;
-	if ((res = i2c_add_driver(&gl518_driver))) {
-		printk
-		    ("gl518sm.o: Driver registration failed, module not inserted.\n");
-		gl518_cleanup();
-		return res;
-	}
-	gl518_initialized++;
-	return 0;
+	return i2c_add_driver(&gl518_driver);
 }
 
-int __init gl518_cleanup(void)
+static void __exit sm_gl518sm_exit(void)
 {
-	int res;
-
-	if (gl518_initialized >= 1) {
-		if ((res = i2c_del_driver(&gl518_driver))) {
-			printk
-			    ("gl518.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		gl518_initialized--;
-	}
-
-	return 0;
+	i2c_del_driver(&gl518_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Kyösti Mälkki <kmalkki@cc.hut.fi>");
 MODULE_DESCRIPTION("GL518SM driver");
 
-int init_module(void)
-{
-	return sensors_gl518sm_init();
-}
-
-int cleanup_module(void)
-{
-	return gl518_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_gl518sm_init);
+module_exit(sm_gl518sm_exit);

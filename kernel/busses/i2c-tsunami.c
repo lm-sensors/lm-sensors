@@ -39,9 +39,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
 /* Memory Presence Detect Register (MPD-RW) bits 
    with except of reserved RAZ bits */
@@ -51,28 +49,13 @@ MODULE_LICENSE("GPL");
 #define MPD_DS	0x2	/* Data send - Must be a 1 to receive - WO */
 #define MPD_CKS	0x1	/* Clock send - WO */
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init i2c_tsunami_init(void);
-static int __init i2c_tsunami_cleanup(void);
-static void i2c_tsunami_inc(struct i2c_adapter *adapter);
-static void i2c_tsunami_dec(struct i2c_adapter *adapter);
-
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-extern inline void writempd(unsigned long value)
+static inline void writempd(unsigned long value)
 {
 	TSUNAMI_cchip->mpd.csr = value;
 	mb();
 }
 
-extern inline unsigned long readmpd(void)
+static inline unsigned long readmpd(void)
 {
 	return TSUNAMI_cchip->mpd.csr;
 }
@@ -118,7 +101,7 @@ static int bit_tsunami_getsda(void *data)
 }
 
 static struct i2c_algo_bit_data tsunami_i2c_bit_data = {
-	NULL,
+	
 	bit_tsunami_setsda,
 	bit_tsunami_setscl,
 	bit_tsunami_getsda,
@@ -127,29 +110,22 @@ static struct i2c_algo_bit_data tsunami_i2c_bit_data = {
 };
 
 static struct i2c_adapter tsunami_i2c_adapter = {
-	"I2C Tsunami/Typhoon adapter",
-	I2C_HW_B_TSUNA,
-	NULL,
-	&tsunami_i2c_bit_data,
-	i2c_tsunami_inc,
-	i2c_tsunami_dec,
-	NULL,
-	NULL,
+	.owner		= THIS_MODULE,
+	.name		= "I2C Tsunami/Typhoon adapter",
+	.id		= I2C_HW_B_TSUNA,
+	.algo_data		= &tsunami_i2c_bit_data,
 };
 
-void i2c_tsunami_inc(struct i2c_adapter *adapter)
-{
-	MOD_INC_USE_COUNT;
-}
 
-void i2c_tsunami_dec(struct i2c_adapter *adapter)
-{
-	MOD_DEC_USE_COUNT;
-}
+static struct pci_driver tsunami_driver = {
+	.name		= "tsunami smbus",
+	.id_table	= tsunami_ids,
+	.probe		= tsunami_probe,
+	.remove		= __devexit_p(tsunami_remove),
+};
 
-int __init i2c_tsunami_init(void)
+static int __init i2c_tsunami_init(void)
 {
-	int res;
 	printk("i2c-tsunami.o version %s (%s)\n", LM_VERSION, LM_DATE);
 
 	if (hwrpb->sys_type != ST_DEC_TSUNAMI) {
@@ -158,43 +134,19 @@ int __init i2c_tsunami_init(void)
 	} else {
 		printk("i2c-tsunami.o: using Cchip MPD at 0x%lx.\n", &TSUNAMI_cchip->mpd);
 	}
-	
-	if ((res = i2c_bit_add_bus(&tsunami_i2c_adapter))) {
-		printk("i2c-tsunami.o: I2C adapter registration failed\n");
-	} else {
-		printk("i2c-tsunami.o: I2C bus initialized\n");
-	}
-
-	return res;
+	i2c_bit_add_bus(&tsunami_i2c_adapter);
 }
 
-int __init i2c_tsunami_cleanup(void)
+
+static void __exit i2c_tsunami_exit(void)
 {
-	int res;
-
-	if ((res = i2c_bit_del_bus(&tsunami_i2c_adapter))) {
-		printk("i2c-tsunami.o: i2c_bit_del_bus failed, module not removed\n");
-		return res;
-	}
-
-	return 0;
+	i2c_bit_del_bus(&tsunami_i2c_adapter);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Oleg I. Vdovikin <vdovikin@jscc.ru>");
 MODULE_DESCRIPTION("Tsunami I2C/SMBus driver");
 
-int init_module(void)
-{
-	return i2c_tsunami_init();
-}
-
-int cleanup_module(void)
-{
-	return i2c_tsunami_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(i2c_tsunami_init);
+module_exit(i2c_tsunami_exit);

@@ -32,18 +32,7 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {SENSORS_I2C_END};
@@ -131,7 +120,7 @@ SENSORS_INSMOD_1(mtp008);
  * and the rpm is therefore:
  *      rpm = 1350000 / (count * div)
  */
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 255;
@@ -250,11 +239,6 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define MTP008_INIT_TEMP2_OVER	700			/* 70 Celsius */
 #define MTP008_INIT_TEMP2_HYST	500			/* 50 Celsius */
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /*
  * For each registered MTP008, we need to keep some data in memory.  The
  * structure itself is dynamically allocated, at the same time when a new
@@ -287,21 +271,12 @@ struct mtp008_data {
 	u8 pwmenable;				/* Register 0x57 value */
 };
 
-#ifdef MODULE
-static int __init sensors_mtp008_init(void);
-#else
-extern int __init sensors_mtp008_init(void);
-#endif
-static int __init mtp008_cleanup(void);
-
 static int mtp008_attach_adapter(struct i2c_adapter *adapter);
 static int mtp008_detect(struct i2c_adapter *adapter, int address,
 			 unsigned short flags, int kind);
 static int mtp008_detach_client(struct i2c_client *client);
 static int mtp008_command(struct i2c_client *client, unsigned int cmd,
 			  void *arg);
-static void mtp008_inc_use(struct i2c_client *client);
-static void mtp008_dec_use(struct i2c_client *client);
 
 static int mtp008_read_value(struct i2c_client *client, u8 register);
 static int mtp008_write_value(struct i2c_client *client, u8 register, u8 value);
@@ -334,18 +309,14 @@ static int mtp008_id = 0;
 
 static struct i2c_driver mtp008_driver =
 {
-    /* name */			"MTP008 sensor driver",
-    /* id */			I2C_DRIVERID_MTP008,
-    /* flags */			I2C_DF_NOTIFY,
-    /* attach_adapter */	&mtp008_attach_adapter,
-    /* detach_client */		&mtp008_detach_client,
-    /* command */		&mtp008_command,
-    /* inc_use */		&mtp008_inc_use,
-    /* dec_use */		&mtp008_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "MTP008 sensor driver",
+	.id		= I2C_DRIVERID_MTP008,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= mtp008_attach_adapter,
+	.detach_client	= mtp008_detach_client,
+	.command	= mtp008_command,
 };
-
-/* Used by mtp008_init/cleanup */
-static int __initdata mtp008_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected chip. This is just a template;
@@ -409,7 +380,7 @@ static ctl_table mtp008_dir_table_template[] =
  * mtp008_driver is inserted (when this module is loaded), for each available
  * adapter when a new adapter is inserted (and mtp008_driver is still present)
  */
-int mtp008_attach_adapter(struct i2c_adapter *adapter)
+static int mtp008_attach_adapter(struct i2c_adapter *adapter)
 {
 	struct i2c_client_address_data mtp008_addr_data;
 
@@ -513,7 +484,7 @@ int mtp008_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int mtp008_detach_client(struct i2c_client *client)
+static int mtp008_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -531,37 +502,24 @@ int mtp008_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int mtp008_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int mtp008_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void mtp008_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-void mtp008_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-int mtp008_read_value(struct i2c_client *client, u8 reg)
+static int mtp008_read_value(struct i2c_client *client, u8 reg)
 {
 	return i2c_smbus_read_byte_data(client, reg) & 0xff;
 }
 
-int mtp008_write_value(struct i2c_client *client, u8 reg, u8 value)
+static int mtp008_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
 /* Called when we have found a new MTP008. It should set limits, etc. */
-void mtp008_init_client(struct i2c_client *client)
+static void mtp008_init_client(struct i2c_client *client)
 {
 	int vid;
 	u8 save1, save2;
@@ -651,7 +609,7 @@ void mtp008_init_client(struct i2c_client *client)
 	);
 }
 
-void mtp008_update_client(struct i2c_client *client)
+static void mtp008_update_client(struct i2c_client *client)
 {
 	int i;
 	u8 inp;
@@ -761,7 +719,7 @@ void mtp008_update_client(struct i2c_client *client)
 	up(&data->update_lock);
 }
 
-void mtp008_getsensortype(struct mtp008_data *data, u8 inp)
+static void mtp008_getsensortype(struct mtp008_data *data, u8 inp)
 {
 	inp &= 0x0f;
 	data->sens[0] = (inp >> 3) + 2;			/* 2 or 3 */
@@ -1201,56 +1159,23 @@ void mtp008_sens(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_mtp008_init(void)
+static int __init sm_mtp008_init(void)
 {
-	int res;
-
 	printk("mtp008.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	mtp008_initialized = 0;
-
-	if ((res = i2c_add_driver(&mtp008_driver))) {
-		printk("mtp008.o: Driver registration failed, "
-		       "module not inserted.\n");
-		mtp008_cleanup();
-		return res;
-	}
-	mtp008_initialized++;
-
-	return 0;
+	return i2c_add_driver(&mtp008_driver);
 }
 
-int __init mtp008_cleanup(void)
+static void __exit sm_mtp008_exit(void)
 {
-	int res;
-
-	if (mtp008_initialized >= 1) {
-		if ((res = i2c_del_driver(&mtp008_driver))) {
-			printk("mtp008.o: Driver deregistration failed, "
-			       "module not removed.\n");
-			return res;
-		}
-		mtp008_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&mtp008_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, "
 	      "Philip Edelbrock <phil@netroedge.com>, "
 	      "and Kris Van Hees <aedil@alchar.org>");
 MODULE_DESCRIPTION("MTP008 driver");
 
-int init_module(void)
-{
-	return sensors_mtp008_init();
-}
-
-int cleanup_module(void)
-{
-	return mtp008_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_mtp008_init);
+module_exit(sm_mtp008_exit);

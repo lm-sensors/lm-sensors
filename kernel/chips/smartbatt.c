@@ -33,14 +33,6 @@
 #include <linux/init.h>
 
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { 0x0b, SENSORS_I2C_END };
@@ -99,18 +91,6 @@ struct smartbatt_data {
 	u16 relchg, abschg;		/* Register values */
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_smartbatt_init(void);
-static int __init smartbatt_cleanup(void);
 static int smartbatt_attach_adapter(struct i2c_adapter *adapter);
 static int smartbatt_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
@@ -118,8 +98,7 @@ static void smartbatt_init_client(struct i2c_client *client);
 static int smartbatt_detach_client(struct i2c_client *client);
 static int smartbatt_command(struct i2c_client *client, unsigned int cmd,
 			void *arg);
-static void smartbatt_inc_use(struct i2c_client *client);
-static void smartbatt_dec_use(struct i2c_client *client);
+
 static u16 swap_bytes(u16 val);
 static int sb_read(struct i2c_client *client, u8 reg);
 #if 0
@@ -142,14 +121,13 @@ static void smartbatt_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver smartbatt_driver = {
-	/* name */ "Smart Battery chip driver",
-	/* id */ I2C_DRIVERID_SMARTBATT,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &smartbatt_attach_adapter,
-	/* detach_client */ &smartbatt_detach_client,
-	/* command */ &smartbatt_command,
-	/* inc_use */ &smartbatt_inc_use,
-	/* dec_use */ &smartbatt_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "Smart Battery chip driver",
+	.id		= I2C_DRIVERID_SMARTBATT,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= smartbatt_attach_adapter,
+	.detach_client	= smartbatt_detach_client,
+	.command	= smartbatt_command,
 };
 
 /* These files are created for each detected SMARTBATT. This is just a template;
@@ -173,12 +151,9 @@ static ctl_table smartbatt_dir_table_template[] = {
 	{0}
 };
 
-/* Used by init/cleanup */
-static int __initdata smartbatt_initialized = 0;
-
 static int smartbatt_id = 0;
 
-int smartbatt_attach_adapter(struct i2c_adapter *adapter)
+static int smartbatt_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, smartbatt_detect);
 }
@@ -269,7 +244,7 @@ int smartbatt_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int smartbatt_detach_client(struct i2c_client *client)
+static int smartbatt_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -295,39 +270,24 @@ int smartbatt_detach_client(struct i2c_client *client)
 
 
 /* No commands defined yet */
-int smartbatt_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int smartbatt_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-/* Nothing here yet */
-void smartbatt_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-/* Nothing here yet */
-void smartbatt_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-u16 swap_bytes(u16 val)
+static u16 swap_bytes(u16 val)
 {
 	return (val >> 8) | (val << 8);
 }
 
-int sb_read(struct i2c_client *client, u8 reg)
+static int sb_read(struct i2c_client *client, u8 reg)
 {
 	return swap_bytes(i2c_smbus_read_word_data(client, reg));
 }
 
 #if 0
-int smartbatt_write_value(struct i2c_client *client, u8 reg, u16 value)
+static int smartbatt_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
 	return i2c_smbus_write_word_data(client, reg, swap_bytes(value));
 }
@@ -338,7 +298,7 @@ int smartbatt_write_value(struct i2c_client *client, u8 reg, u16 value)
    all we could do is print this out at startup if we wanted.
 */
 int
-battery_info(int fd, struct battery_info *info)
+static battery_info(int fd, struct battery_info *info)
 {
   int n;
   int val;
@@ -377,12 +337,12 @@ battery_info(int fd, struct battery_info *info)
 }
 #endif
 
-void smartbatt_init_client(struct i2c_client *client)
+static void smartbatt_init_client(struct i2c_client *client)
 {
 
 }
 
-void smartbatt_update_client(struct i2c_client *client)
+static void smartbatt_update_client(struct i2c_client *client)
 {
 	struct smartbatt_data *data = client->data;
 
@@ -492,51 +452,22 @@ void smartbatt_charge(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_smartbatt_init(void)
+static int __init sm_smartbatt_init(void)
 {
-	int res;
-
 	printk("smartbatt.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	smartbatt_initialized = 0;
-	if ((res = i2c_add_driver(&smartbatt_driver))) {
-		printk
-		    ("smartbatt.o: Driver registration failed, module not inserted.\n");
-		smartbatt_cleanup();
-		return res;
-	}
-	smartbatt_initialized++;
-	return 0;
+	return i2c_add_driver(&smartbatt_driver);
 }
 
-int __init smartbatt_cleanup(void)
+static void __exit sm_smartbatt_exit(void)
 {
-	int res;
-
-	if (smartbatt_initialized >= 1) {
-		if ((res = i2c_del_driver(&smartbatt_driver)))
-			return res;
-		smartbatt_initialized--;
-	}
-
-	return 0;
+	i2c_del_driver(&smartbatt_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
+
 MODULE_AUTHOR("M. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("Smart Battery driver");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-int init_module(void)
-{
-	return sensors_smartbatt_init();
-}
-
-int cleanup_module(void)
-{
-	return smartbatt_cleanup();
-}
-#endif				/* MODULE */
+module_init(sm_smartbatt_init);
+module_exit(sm_smartbatt_exit);

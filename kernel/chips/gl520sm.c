@@ -28,18 +28,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { 0x2c, 0x2d, SENSORS_I2C_END };
@@ -94,7 +83,7 @@ That's why _TEMP2 and _VIN4 access the same register
                                         0,255))
 #define TEMP_FROM_REG(val) (((val) - 130) * 10)
 
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 255;
@@ -185,18 +174,6 @@ struct gl520_data {
 	u8 two_temps;		/* Boolean */
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_gl520_init(void);
-static int __init gl520_cleanup(void);
 static int gl520_attach_adapter(struct i2c_adapter *adapter);
 static int gl520_detect(struct i2c_adapter *adapter, int address,
 			unsigned short flags, int kind);
@@ -204,8 +181,7 @@ static void gl520_init_client(struct i2c_client *client);
 static int gl520_detach_client(struct i2c_client *client);
 static int gl520_command(struct i2c_client *client, unsigned int cmd,
 			 void *arg);
-static void gl520_inc_use(struct i2c_client *client);
-static void gl520_dec_use(struct i2c_client *client);
+
 static u16 swap_bytes(u16 val);
 static int gl520_read_value(struct i2c_client *client, u8 reg);
 static int gl520_write_value(struct i2c_client *client, u8 reg, u16 value);
@@ -232,14 +208,13 @@ static void gl520_config(struct i2c_client *client, int operation,
 
 /* This is the driver that will be inserted */
 static struct i2c_driver gl520_driver = {
-	/* name */ "GL520SM sensor chip driver",
-	/* id */ I2C_DRIVERID_GL520,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &gl520_attach_adapter,
-	/* detach_client */ &gl520_detach_client,
-	/* command */ &gl520_command,
-	/* inc_use */ &gl520_inc_use,
-	/* dec_use */ &gl520_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "GL520SM sensor chip driver",
+	.id		= I2C_DRIVERID_GL520,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= gl520_attach_adapter,
+	.detach_client	= gl520_detach_client,
+	.command	= gl520_command,
 };
 
 /* These files are created for each detected GL520. This is just a template;
@@ -281,15 +256,12 @@ static ctl_table gl520_dir_table_template[] = {
 	{0}
 };
 
-/* Used by init/cleanup */
-static int __initdata gl520_initialized = 0;
-
 /* I choose here for semi-static GL520SM allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
 static int gl520_id = 0;
 
-int gl520_attach_adapter(struct i2c_adapter *adapter)
+static int gl520_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, gl520_detect);
 }
@@ -402,7 +374,7 @@ static int gl520_detect(struct i2c_adapter *adapter, int address,
 
 
 /* Called when we have found a new GL520SM. It should set limits, etc. */
-void gl520_init_client(struct i2c_client *client)
+static void gl520_init_client(struct i2c_client *client)
 {
 	/* Power-on defaults (bit 7=1) */
 	gl520_write_value(client, GL520_REG_CONF, 0x80);
@@ -449,7 +421,7 @@ void gl520_init_client(struct i2c_client *client)
 	gl520_write_value(client, GL520_REG_CONF, 0x44);
 }
 
-int gl520_detach_client(struct i2c_client *client)
+static int gl520_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -469,28 +441,13 @@ int gl520_detach_client(struct i2c_client *client)
 
 
 /* No commands defined yet */
-int gl520_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int gl520_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-/* Nothing here yet */
-void gl520_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-/* Nothing here yet */
-void gl520_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-u16 swap_bytes(u16 val)
+static u16 swap_bytes(u16 val)
 {
 	return (val >> 8) | (val << 8);
 }
@@ -498,7 +455,7 @@ u16 swap_bytes(u16 val)
 /* Registers 0x07 to 0x0c are word-sized, others are byte-sized 
    GL520 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
-int gl520_read_value(struct i2c_client *client, u8 reg)
+static int gl520_read_value(struct i2c_client *client, u8 reg)
 {
 	if ((reg >= 0x07) && (reg <= 0x0c))
 		return swap_bytes(i2c_smbus_read_word_data(client, reg));
@@ -509,7 +466,7 @@ int gl520_read_value(struct i2c_client *client, u8 reg)
 /* Registers 0x07 to 0x0c are word-sized, others are byte-sized 
    GL520 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
-int gl520_write_value(struct i2c_client *client, u8 reg, u16 value)
+static int gl520_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
 	if ((reg >= 0x07) && (reg <= 0x0c))
 		return i2c_smbus_write_word_data(client, reg,
@@ -518,7 +475,7 @@ int gl520_write_value(struct i2c_client *client, u8 reg, u16 value)
 		return i2c_smbus_write_byte_data(client, reg, value);
 }
 
-void gl520_update_client(struct i2c_client *client)
+static void gl520_update_client(struct i2c_client *client)
 {
 	struct gl520_data *data = client->data;
 	int val;
@@ -874,54 +831,22 @@ void gl520_config(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_gl520_init(void)
+static int __init sm_gl520sm_init(void)
 {
-	int res;
-
 	printk("gl520sm.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	gl520_initialized = 0;
-	if ((res = i2c_add_driver(&gl520_driver))) {
-		printk
-		    ("gl520sm.o: Driver registration failed, module not inserted.\n");
-		gl520_cleanup();
-		return res;
-	}
-	gl520_initialized++;
-	return 0;
+	return i2c_add_driver(&gl520_driver);
 }
 
-int __init gl520_cleanup(void)
+static void __exit sm_gl520sm_exit(void)
 {
-	int res;
-
-	if (gl520_initialized >= 1) {
-		if ((res = i2c_del_driver(&gl520_driver))) {
-			printk
-			    ("gl520.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		gl520_initialized--;
-	}
-
-	return 0;
+	i2c_del_driver(&gl520_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Kyösti Mälkki <kmalkki@cc.hut.fi>");
 MODULE_DESCRIPTION("GL520SM driver");
 
-int init_module(void)
-{
-	return sensors_gl520_init();
-}
-
-int cleanup_module(void)
-{
-	return gl520_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_gl520sm_init);
+module_exit(sm_gl520sm_exit);

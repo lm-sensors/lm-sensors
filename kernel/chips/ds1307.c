@@ -315,62 +315,35 @@ static int ds1307_command (struct i2c_client *client,unsigned int cmd,void *arg)
 	return (-EINVAL);
 }
 
-static void ds1307_inc_use (struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif	/* #ifdef MODULE */
-}
-
-static void ds1307_dec_use (struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif	/* #ifdef MODULE */
-}
 
 static struct i2c_driver ds1307 = {
-	name:			"ds1307",
-	id:				I2C_DRIVERID_DS1307,
-	flags:			I2C_DF_NOTIFY,
-	attach_adapter:	ds1307_attach_adapter,
-	detach_client:	ds1307_detach_client,
-	command:		ds1307_command,
-	inc_use:		ds1307_inc_use,
-	dec_use:		ds1307_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "ds1307",
+	.id		= I2C_DRIVERID_DS1307,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= ds1307_attach_adapter,
+	.detach_client	= ds1307_detach_client,
+	.command	= ds1307_command,
 };
 
-static int __init ds1307_init (void)
+static int __init sm_ds1307_init(void)
 {
-	int result;
-
-	if ((result = i2c_add_driver (&ds1307)))
-		return (result);
-
 	printk ("Dallas Semiconductor DS1307 Real-Time Clock driver (V0.03)\n");
-
-	return (0);
+	return i2c_add_driver(&ds1307);
 }
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0))
-#undef __exit
-#define __exit
-#endif	/* #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)) */
-
-static void __exit ds1307_exit (void)
+static void __exit sm_ds1307_exit(void)
 {
-	i2c_del_driver (&ds1307);
+	i2c_del_driver(&ds1307);
 }
 
-EXPORT_NO_SYMBOLS;
+
 
 MODULE_AUTHOR ("Abraham van der Merwe <abraham@2d3d.co.za>");
 MODULE_DESCRIPTION ("Linux support for DS1307 Real-Time Clock");
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE ("GPL");
-#endif	/* #ifdef MODULE_LICENSE */
 
-module_init (ds1307_init);
-module_exit (ds1307_exit);
+module_init(sm_ds1307_init);
+module_exit(sm_ds1307_exit);
 

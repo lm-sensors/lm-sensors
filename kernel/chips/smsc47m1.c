@@ -33,14 +33,6 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 static int force_addr = 0;
 MODULE_PARM(force_addr, "i");
@@ -109,7 +101,7 @@ superio_exit(void)
 #define SMSC47M1_REG_FAN(nr) (0x58 + (nr))
 #define SMSC47M1_REG_FAN_MIN(nr) (0x5a + (nr))
 
-extern inline u8 MIN_TO_REG(long rpm, int div)
+static inline u8 MIN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 0;
@@ -130,11 +122,6 @@ extern inline u8 MIN_TO_REG(long rpm, int div)
 #define SMSC47M1_INIT_FAN_MIN_1 3000
 #define SMSC47M1_INIT_FAN_MIN_2 3000
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 struct smsc47m1_data {
 	struct semaphore lock;
 	int sysctl_id;
@@ -150,13 +137,6 @@ struct smsc47m1_data {
 	u8 pwm[2];		/* Register value (bit 7 is enable) */
 };
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_smsc47m1_init(void);
-static int __init smsc47m1_cleanup(void);
 
 static int smsc47m1_attach_adapter(struct i2c_adapter *adapter);
 static int smsc47m1_detect(struct i2c_adapter *adapter, int address,
@@ -164,8 +144,6 @@ static int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 static int smsc47m1_detach_client(struct i2c_client *client);
 static int smsc47m1_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void smsc47m1_inc_use(struct i2c_client *client);
-static void smsc47m1_dec_use(struct i2c_client *client);
 
 static int smsc47m1_read_value(struct i2c_client *client, u8 register);
 static int smsc47m1_write_value(struct i2c_client *client, u8 register,
@@ -187,17 +165,14 @@ static void smsc47m1_pwm(struct i2c_client *client, int operation,
 static int smsc47m1_id = 0;
 
 static struct i2c_driver smsc47m1_driver = {
-	/* name */ "SMSC47M1xx fan driver",
-	/* id */ I2C_DRIVERID_SMSC47M1,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &smsc47m1_attach_adapter,
-	/* detach_client */ &smsc47m1_detach_client,
-	/* command */ &smsc47m1_command,
-	/* inc_use */ &smsc47m1_inc_use,
-	/* dec_use */ &smsc47m1_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "SMSC47M1xx fan driver",
+	.id		= I2C_DRIVERID_SMSC47M1,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= smsc47m1_attach_adapter,
+	.detach_client	= smsc47m1_detach_client,
+	.command	= smsc47m1_command,
 };
-
-static int __initdata smsc47m1_initialized = 0;
 
 static ctl_table smsc47m1_dir_table_template[] = {
 	{SMSC47M1_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
@@ -215,12 +190,12 @@ static ctl_table smsc47m1_dir_table_template[] = {
 	{0}
 };
 
-int smsc47m1_attach_adapter(struct i2c_adapter *adapter)
+static int smsc47m1_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, smsc47m1_detect);
 }
 
-int smsc47m1_find(int *address)
+static int smsc47m1_find(int *address)
 {
 	u16 val;
 
@@ -320,7 +295,7 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int smsc47m1_detach_client(struct i2c_client *client)
+static int smsc47m1_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -339,26 +314,12 @@ int smsc47m1_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-int smsc47m1_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int smsc47m1_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void smsc47m1_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void smsc47m1_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-int smsc47m1_read_value(struct i2c_client *client, u8 reg)
+static int smsc47m1_read_value(struct i2c_client *client, u8 reg)
 {
 	int res;
 
@@ -366,13 +327,13 @@ int smsc47m1_read_value(struct i2c_client *client, u8 reg)
 	return res;
 }
 
-int smsc47m1_write_value(struct i2c_client *client, u8 reg, u8 value)
+static int smsc47m1_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	outb_p(value, client->addr + reg);
 	return 0;
 }
 
-void smsc47m1_init_client(struct i2c_client *client)
+static void smsc47m1_init_client(struct i2c_client *client)
 {
 	/* configure pins for tach function */
 	smsc47m1_write_value(client, SMSC47M1_REG_TPIN1, 0x05);
@@ -383,7 +344,7 @@ void smsc47m1_init_client(struct i2c_client *client)
 			    MIN_TO_REG(SMSC47M1_INIT_FAN_MIN_2, 2));
 }
 
-void smsc47m1_update_client(struct i2c_client *client)
+static void smsc47m1_update_client(struct i2c_client *client)
 {
 	struct smsc47m1_data *data = client->data;
 	int i;
@@ -516,12 +477,11 @@ void smsc47m1_pwm(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_smsc47m1_init(void)
+static int __init sm_smsc47m1_init(void)
 {
 	int res, addr;
 
 	printk("smsc47m1.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	smsc47m1_initialized = 0;
 
 	if (smsc47m1_find(&addr)) {
 		printk("smsc47m1.o: SMSC47M1xx not detected, module not inserted.\n");
@@ -529,49 +489,19 @@ int __init sensors_smsc47m1_init(void)
 	}
 	normal_isa[0] = addr;
 
-	if ((res = i2c_add_driver(&smsc47m1_driver))) {
-		printk
-		    ("smsc47m1.o: Driver registration failed, module not inserted.\n");
-		smsc47m1_cleanup();
-		return res;
-	}
-	smsc47m1_initialized++;
-	return 0;
+	return i2c_add_driver(&smsc47m1_driver);
 }
 
-int __init smsc47m1_cleanup(void)
+static void __exit sm_smsc47m1_exit(void)
 {
-	int res;
-
-	if (smsc47m1_initialized >= 1) {
-		if ((res = i2c_del_driver(&smsc47m1_driver))) {
-			printk
-			    ("smsc47m1.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		smsc47m1_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&smsc47m1_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Mark D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("SMSC47M110x Fan sensors");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-int init_module(void)
-{
-	return sensors_smsc47m1_init();
-}
-
-int cleanup_module(void)
-{
-	return smsc47m1_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_smsc47m1_init);
+module_exit(sm_smsc47m1_exit);

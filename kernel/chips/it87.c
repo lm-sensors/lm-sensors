@@ -45,18 +45,7 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -126,7 +115,7 @@ static int temp_type = 0x2a;
 #define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 8)/16),0,255))
 #define IN_FROM_REG(val) (((val) *  16) / 10)
 
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 255;
@@ -204,11 +193,6 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define IT87_INIT_TEMP_HIGH_3 600 
 #define IT87_INIT_TEMP_LOW_3  200
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /* For each registered IT87, we need to keep some data in memory. That
    data is pointed to by it87_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new it87 client is
@@ -236,22 +220,12 @@ struct it87_data {
 };
 
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_it87_init(void);
-static int __init it87_cleanup(void);
-
 static int it87_attach_adapter(struct i2c_adapter *adapter);
 static int it87_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int it87_detach_client(struct i2c_client *client);
 static int it87_command(struct i2c_client *client, unsigned int cmd,
 			void *arg);
-static void it87_inc_use(struct i2c_client *client);
-static void it87_dec_use(struct i2c_client *client);
 
 static int it87_read_value(struct i2c_client *client, u8 register);
 static int it87_write_value(struct i2c_client *client, u8 register,
@@ -274,18 +248,14 @@ static void it87_fan_div(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver it87_driver = {
-	/* name */ "IT87xx sensor driver",
-	/* id */ I2C_DRIVERID_IT87,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &it87_attach_adapter,
-	/* detach_client */ &it87_detach_client,
-	/* command */ &it87_command,
-	/* inc_use */ &it87_inc_use,
-	/* dec_use */ &it87_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "IT87xx sensor driver",
+	.id		= I2C_DRIVERID_IT87,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= it87_attach_adapter,
+	.detach_client	= it87_detach_client,
+	.command	= it87_command,
 };
-
-/* Used by it87_init/cleanup */
-static int __initdata it87_initialized = 0;
 
 static int it87_id = 0;
 
@@ -340,7 +310,7 @@ static ctl_table it87_dir_table_template[] = {
      * it87_driver is inserted (when this module is loaded), for each
        available adapter
      * when a new adapter is inserted (and it87_driver is still present) */
-int it87_attach_adapter(struct i2c_adapter *adapter)
+static int it87_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, it87_detect);
 }
@@ -498,7 +468,7 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int it87_detach_client(struct i2c_client *client)
+static int it87_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -519,25 +489,9 @@ int it87_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int it87_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int it87_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
-}
-
-/* Nothing here yet */
-void it87_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-/* Nothing here yet */
-void it87_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
 }
 
 
@@ -548,7 +502,7 @@ void it87_dec_use(struct i2c_client *client)
    would slow down the IT87 access and should not be necessary. 
    There are some ugly typecasts here, but the good new is - they should
    nowhere else be necessary! */
-int it87_read_value(struct i2c_client *client, u8 reg)
+static int it87_read_value(struct i2c_client *client, u8 reg)
 {
 	int res;
 	if (i2c_is_isa_client(client)) {
@@ -568,7 +522,7 @@ int it87_read_value(struct i2c_client *client, u8 reg)
    would slow down the IT87 access and should not be necessary. 
    There are some ugly typecasts here, but the good new is - they should
    nowhere else be necessary! */
-int it87_write_value(struct i2c_client *client, u8 reg, u8 value)
+static int it87_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	if (i2c_is_isa_client(client)) {
 		down(&(((struct it87_data *) (client->data))->lock));
@@ -581,7 +535,7 @@ int it87_write_value(struct i2c_client *client, u8 reg, u8 value)
 }
 
 /* Called when we have found a new IT87. It should set limits, etc. */
-void it87_init_client(struct i2c_client *client)
+static void it87_init_client(struct i2c_client *client)
 {
 	/* Reset all except Watchdog values and last conversion values
 	   This sets fan-divs to 2, among others */
@@ -657,7 +611,7 @@ void it87_init_client(struct i2c_client *client)
 			 | (update_vbat ? 0x41 : 0x01));
 }
 
-void it87_update_client(struct i2c_client *client)
+static void it87_update_client(struct i2c_client *client)
 {
 	struct it87_data *data = client->data;
 	int i;
@@ -884,41 +838,18 @@ void it87_fan_div(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_it87_init(void)
+static int __init sm_it87_init(void)
 {
-	int res;
-
 	printk("it87.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	it87_initialized = 0;
-
-	if ((res = i2c_add_driver(&it87_driver))) {
-		printk
-		    ("it87.o: Driver registration failed, module not inserted.\n");
-		it87_cleanup();
-		return res;
-	}
-	it87_initialized++;
-	return 0;
+	return i2c_add_driver(&it87_driver);
 }
 
-int __init it87_cleanup(void)
+static void __exit sm_it87_exit(void)
 {
-	int res;
-
-	if (it87_initialized >= 1) {
-		if ((res = i2c_del_driver(&it87_driver))) {
-			printk
-			    ("it87.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		it87_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&it87_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Chris Gauthron <chrisg@0-in.com>");
 MODULE_DESCRIPTION("IT8705F, IT8712F, Sis950 driver");
@@ -927,14 +858,5 @@ MODULE_PARM_DESC(update_vbat, "Update vbat if set else return powerup value");
 MODULE_PARM(temp_type, "i");
 MODULE_PARM_DESC(temp_type, "Temperature sensor type, normally leave unset");
 
-int init_module(void)
-{
-	return sensors_it87_init();
-}
-
-int cleanup_module(void)
-{
-	return it87_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_it87_init);
+module_exit(sm_it87_exit);

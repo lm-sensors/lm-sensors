@@ -27,18 +27,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -85,18 +74,6 @@ struct eeprom_data {
 #endif
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_eeprom_init(void);
-static int __init eeprom_cleanup(void);
 
 static int eeprom_attach_adapter(struct i2c_adapter *adapter);
 static int eeprom_detect(struct i2c_adapter *adapter, int address,
@@ -104,9 +81,6 @@ static int eeprom_detect(struct i2c_adapter *adapter, int address,
 static int eeprom_detach_client(struct i2c_client *client);
 static int eeprom_command(struct i2c_client *client, unsigned int cmd,
 			  void *arg);
-
-static void eeprom_inc_use(struct i2c_client *client);
-static void eeprom_dec_use(struct i2c_client *client);
 
 #if 0
 static int eeprom_write_value(struct i2c_client *client, u8 reg,
@@ -120,14 +94,13 @@ static void eeprom_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver eeprom_driver = {
-	/* name */ "EEPROM READER",
-	/* id */ I2C_DRIVERID_EEPROM,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &eeprom_attach_adapter,
-	/* detach_client */ &eeprom_detach_client,
-	/* command */ &eeprom_command,
-	/* inc_use */ &eeprom_inc_use,
-	/* dec_use */ &eeprom_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "EEPROM READER",
+	.id		= I2C_DRIVERID_EEPROM,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= eeprom_attach_adapter,
+	.detach_client	= eeprom_detach_client,
+	.command	= eeprom_command,
 };
 
 /* These files are created for each detected EEPROM. This is just a template;
@@ -171,12 +144,9 @@ static ctl_table eeprom_dir_table_template[] = {
 	{0}
 };
 
-/* Used by init/cleanup */
-static int __initdata eeprom_initialized = 0;
-
 static int eeprom_id = 0;
 
-int eeprom_attach_adapter(struct i2c_adapter *adapter)
+static int eeprom_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, eeprom_detect);
 }
@@ -285,7 +255,7 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int eeprom_detach_client(struct i2c_client *client)
+static int eeprom_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -305,34 +275,21 @@ int eeprom_detach_client(struct i2c_client *client)
 
 
 /* No commands defined yet */
-int eeprom_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int eeprom_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void eeprom_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void eeprom_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
 
 #if 0
 /* No writes yet (PAE) */
-int eeprom_write_value(struct i2c_client *client, u8 reg, u8 value)
+static int eeprom_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 #endif
 
-void eeprom_update_client(struct i2c_client *client)
+static void eeprom_update_client(struct i2c_client *client)
 {
 	struct eeprom_data *data = client->data;
 	int i, j;
@@ -454,54 +411,22 @@ void eeprom_contents(struct i2c_client *client, int operation,
 	}
 }
 
-int __init sensors_eeprom_init(void)
+static int __init sm_eeprom_init(void)
 {
-	int res;
-
 	printk("eeprom.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	eeprom_initialized = 0;
-	if ((res = i2c_add_driver(&eeprom_driver))) {
-		printk
-		    ("eeprom.o: Driver registration failed, module not inserted.\n");
-		eeprom_cleanup();
-		return res;
-	}
-	eeprom_initialized++;
-	return 0;
+	return i2c_add_driver(&eeprom_driver);
 }
 
-int __init eeprom_cleanup(void)
+static void __exit sm_eeprom_exit(void)
 {
-	int res;
-
-	if (eeprom_initialized >= 1) {
-		if ((res = i2c_del_driver(&eeprom_driver))) {
-			printk
-			    ("eeprom.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-	} else
-		eeprom_initialized--;
-
-	return 0;
+	i2c_del_driver(&eeprom_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("EEPROM driver");
 
-int init_module(void)
-{
-	return sensors_eeprom_init();
-}
-
-int cleanup_module(void)
-{
-	return eeprom_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_eeprom_init);
+module_exit(sm_eeprom_exit);

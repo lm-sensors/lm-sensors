@@ -28,18 +28,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { 0x50, SENSORS_I2C_END };
@@ -79,18 +68,6 @@ struct ddcmon_data {
 	int memtype;
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_ddcmon_init(void);
-static int __init ddcmon_cleanup(void);
 
 static int ddcmon_attach_adapter(struct i2c_adapter *adapter);
 static int ddcmon_detect(struct i2c_adapter *adapter, int address,
@@ -98,9 +75,6 @@ static int ddcmon_detect(struct i2c_adapter *adapter, int address,
 static int ddcmon_detach_client(struct i2c_client *client);
 static int ddcmon_command(struct i2c_client *client, unsigned int cmd,
 			  void *arg);
-
-static void ddcmon_inc_use(struct i2c_client *client);
-static void ddcmon_dec_use(struct i2c_client *client);
 
 static void ddcmon_idcall(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
@@ -117,14 +91,13 @@ static void ddcmon_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver ddcmon_driver = {
-	/* name */ "DDCMON READER",
-	/* id */ I2C_DRIVERID_DDCMON,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &ddcmon_attach_adapter,
-	/* detach_client */ &ddcmon_detach_client,
-	/* command */ &ddcmon_command,
-	/* inc_use */ &ddcmon_inc_use,
-	/* dec_use */ &ddcmon_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "DDCMON READER",
+	.id		= I2C_DRIVERID_DDCMON,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= ddcmon_attach_adapter,
+	.detach_client	= ddcmon_detach_client,
+	.command	= ddcmon_command,
 };
 
 /* These files are created for each detected DDCMON. This is just a template;
@@ -146,12 +119,9 @@ static ctl_table ddcmon_dir_table_template[] = {
 	{0}
 };
 
-/* Used by init/cleanup */
-static int __initdata ddcmon_initialized = 0;
-
 static int ddcmon_id = 0;
 
-int ddcmon_attach_adapter(struct i2c_adapter *adapter)
+static int ddcmon_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, ddcmon_detect);
 }
@@ -236,7 +206,7 @@ int ddcmon_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int ddcmon_detach_client(struct i2c_client *client)
+static int ddcmon_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -252,26 +222,12 @@ int ddcmon_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int ddcmon_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int ddcmon_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void ddcmon_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void ddcmon_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-void ddcmon_update_client(struct i2c_client *client)
+static void ddcmon_update_client(struct i2c_client *client)
 {
 	struct ddcmon_data *data = client->data;
 	int i, j;
@@ -403,54 +359,23 @@ void ddcmon_serial(struct i2c_client *client, int operation,
 	}
 }
 
-int __init sensors_ddcmon_init(void)
+static int __init sm_ddcmon_init(void)
 {
-	int res;
-
 	printk("ddcmon.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	ddcmon_initialized = 0;
-	if ((res = i2c_add_driver(&ddcmon_driver))) {
-		printk
-		    ("ddcmon.o: Driver registration failed, module not inserted.\n");
-		ddcmon_cleanup();
-		return res;
-	}
-	ddcmon_initialized++;
-	return 0;
+	return i2c_add_driver(&ddcmon_driver);
 }
 
-int __init ddcmon_cleanup(void)
+static void __exit sm_ddcmon_exit(void)
 {
-	int res;
-
-	if (ddcmon_initialized >= 1) {
-		if ((res = i2c_del_driver(&ddcmon_driver))) {
-			printk
-			    ("ddcmon.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-	} else
-		ddcmon_initialized--;
-	return 0;
+	i2c_del_driver(&ddcmon_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, "
 	      "Philip Edelbrock <phil@netroedge .com>, "
 	      "and Mark Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("DDCMON driver");
 
-int init_module(void)
-{
-	return sensors_ddcmon_init();
-}
-
-int cleanup_module(void)
-{
-	return ddcmon_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_ddcmon_init);
+module_exit(sm_ddcmon_exit);

@@ -46,9 +46,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
 /* PCI identifiers */
 
@@ -111,47 +109,15 @@ MODULE_LICENSE("GPL");
 #define SIS645_PROC_CALL  0x04
 #define SIS645_BLOCK_DATA 0x05
 
-
-static int __init sis645_init(void);
-static void sis645_cleanup(void);
-
 static int sis645_enable_smbus(struct pci_dev *dev);
 static int sis645_build_dev(struct pci_dev **smbus_dev,
 			    struct pci_dev *bridge_dev);
-static int sis645_setup(void);
-static s32 sis645_access(struct i2c_adapter *adap, u16 addr,
-			  unsigned short flags, char read_write,
-			  u8 command, int size,
-			  union i2c_smbus_data *data);
+
 static void sis645_do_pause(unsigned int amount);
 static int sis645_transaction(int size);
-static void sis645_inc(struct i2c_adapter *adapter);
-static void sis645_dec(struct i2c_adapter *adapter);
-static u32 sis645_func(struct i2c_adapter *adapter);
 
-static struct i2c_algorithm smbus_algorithm = {
-	/* name */ "Non-I2C SMBus adapter",
-	/* id */ I2C_ALGO_SMBUS,
-	/* master_xfer */ NULL,
-	/* smbus_access */ sis645_access,
-	/* slave_send */ NULL,
-	/* slave_rcv */ NULL,
-	/* algo_control */ NULL,
-	/* functionality */ sis645_func,
-};
 
-static struct i2c_adapter sis645_adapter = {
-	"unset",
-	I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS645,
-	&smbus_algorithm,
-	NULL,
-	sis645_inc,
-	sis645_dec,
-	NULL,
-	NULL,
-};
 
-static int sis645_initialized;
 static unsigned short sis645_smbus_base = 0;
 
 static u8 sis645_read(u8 reg)
@@ -324,11 +290,7 @@ static int sis645_setup(void)
 	}
 
 	/* get the IO base address */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,13)
 	sis645_smbus_base = SIS645_SMBUS_dev->resource[BASE_IO_REG].start;
-#else
-	sis645_smbus_base = SIS645_SMBUS_dev->base_address[BASE_IO_REG];
-#endif
 	if (!sis645_smbus_base) {
 		printk("i2c-sis645.o: SiS645 SMBus base address not initialized!\n");
 		return -EINVAL;
@@ -336,22 +298,12 @@ static int sis645_setup(void)
 	printk("i2c-sis645.o: SiS645 SMBus base address: 0x%04x\n", sis645_smbus_base);
 
 	/* Everything is happy, let's grab the memory and set things up. */
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,3,14)
 	if (!request_region(sis645_smbus_base, SIS645_SMB_IOREGION, "sis645-smbus")) {
 		printk
 		    ("i2c-sis645.o: SMBus registers 0x%04x-0x%04x already in use!\n",
 		     sis645_smbus_base, sis645_smbus_base + SIS645_SMB_IOREGION - 1);
 		return -EINVAL;
 	}
-#else
-	if (check_region(sis645_smbus_base, SIS645_SMB_IOREGION) < 0) {
-		printk
-		    ("i2c-sis645.o: SMBus registers 0x%04x-0x%04x already in use!\n",
-		     sis645_smbus_base, sis645_smbus_base + SIS645_SMB_IOREGION - 1);
-		return -EINVAL;
-	}
-	request_region(sis645_smbus_base, SIS645_SMB_IOREGION, "sis645-smbus");
-#endif
 
 	return(0);
 }
@@ -518,15 +470,6 @@ s32 sis645_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
-static void sis645_inc(struct i2c_adapter *adapter)
-{
-	MOD_INC_USE_COUNT;
-}
-
-static void sis645_dec(struct i2c_adapter *adapter)
-{
-	MOD_DEC_USE_COUNT;
-}
 
 static u32 sis645_func(struct i2c_adapter *adapter)
 {
@@ -535,62 +478,70 @@ static u32 sis645_func(struct i2c_adapter *adapter)
 	    I2C_FUNC_SMBUS_PROC_CALL;
 }
 
-static int __init sis645_init(void)
+
+static struct i2c_algorithm smbus_algorithm = {
+	.name		= "Non-I2C SMBus adapter",
+	.id		= I2C_ALGO_SMBUS,
+	.smbus_xfer	= sis645_access,
+	.functionality	= sis645_func,
+};
+
+static struct i2c_adapter sis645_adapter = {
+	.owner		= THIS_MODULE,
+	.name		= "unset",
+	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS645,
+	.algo		= &smbus_algorithm,
+};
+
+
+static struct pci_device_id sis645_ids[] __devinitdata = {
+	{ 0, }
+};
+
+static int __devinit sis645_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
-	int res;
-	printk("i2c-sis645.o: version %s (%s)\n", LM_VERSION, LM_DATE);
 
-	if (sis645_initialized) {
-		printk("i2c-sis645.o: Oops, sis645_init called a second time!\n");
-		return -EBUSY;
-	}
-
-	sis645_initialized = 0;
-	if ((res = sis645_setup())) {
+	if (sis645_setup()) {
 		printk ("i2c-sis645.o: SiS645 not detected, module not inserted.\n");
-		sis645_cleanup();
-		return res;
-	}
 
-	sis645_initialized++;
+		return -ENODEV;
+	}
+	
 	sprintf(sis645_adapter.name, "SMBus SiS645 adapter at 0x%04x", sis645_smbus_base);
-	if ((res = i2c_add_adapter(&sis645_adapter))) {
-		printk ("i2c-sis645.o: Adapter registration failed, module not inserted.\n");
-		sis645_cleanup();
-		return res;
-	}
-
-	sis645_initialized++;
-	printk("i2c-sis645.o: SiS645 bus detected and initialized.\n");
-	return 0;
+	i2c_add_adapter(&sis645_adapter);
 }
 
-static void sis645_cleanup(void)
+static void __devexit sis645_remove(struct pci_dev *dev)
 {
-	int res;
-	if (sis645_initialized >= 2) {
-		if ((res = i2c_del_adapter(&sis645_adapter))) {
-			printk("i2c-sis645.o: i2c_del_adapter failed, module not removed\n");
-			return;
-		} else
-			sis645_initialized--;
-	}
-	if (sis645_initialized >= 1) {
-		release_region(sis645_smbus_base, SIS645_SMB_IOREGION);
-		sis645_initialized--;
-	}
-	return;
+	i2c_del_adapter(&sis645_adapter);
 }
 
-EXPORT_NO_SYMBOLS;
 
-/* Register initialization functions using helper macros */
-module_init(sis645_init);
-module_exit(sis645_cleanup);
+static struct pci_driver sis645_driver = {
+	.name		= "sis645 smbus",
+	.id_table	= sis645_ids,
+	.probe		= sis645_probe,
+	.remove		= __devexit_p(sis645_remove),
+};
 
-#ifdef MODULE
+static int __init i2c_sis645_init(void)
+{
+	printk("i2c-sis645.o: version %s (%s)\n", LM_VERSION, LM_DATE);
+	return pci_module_init(&sis645_driver);
+}
+
+
+static void __exit i2c_sis645_exit(void)
+{
+	pci_unregister_driver(&sis645_driver);
+	release_region(sis645_smbus_base, SIS645_SMB_IOREGION);
+}
+
+
 
 MODULE_AUTHOR("Mark M. Hoffman <mhoffman@lightlink.com>");
 MODULE_DESCRIPTION("SiS645 SMBus driver");
 
-#endif
+/* Register initialization functions using helper macros */
+module_init(i2c_sis645_init);
+module_exit(i2c_sis645_exit);

@@ -31,67 +31,8 @@
 #include <linux/init.h>
 #include "version.h"
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-static void isa_inc_use(struct i2c_adapter *adapter);
-static void isa_dec_use(struct i2c_adapter *adapter);
-static u32 isa_func(struct i2c_adapter *adapter);
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init i2c_isa_init(void);
-static int __init isa_cleanup(void);
-
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-/* This is the actual algorithm we define */
-static struct i2c_algorithm isa_algorithm = {
-	/* name */ "ISA bus algorithm",
-	/* id */ I2C_ALGO_ISA,
-	/* master_xfer */ NULL,
-	/* smbus_access */ NULL,
-	/* slave_send */ NULL,
-	/* slave_rcv */ NULL,
-	/* algo_control */ NULL,
-	/* functionality */ &isa_func,
-};
-
-/* There can only be one... */
-static struct i2c_adapter isa_adapter = {
-	/* name */ "ISA main adapter",
-	/* id */ I2C_ALGO_ISA | I2C_HW_ISA,
-	/* algorithm */ &isa_algorithm,
-	/* algo_data */ NULL,
-	/* inc_use */ &isa_inc_use,
-	/* dec_use */ &isa_dec_use,
-	/* data */ NULL,
-	/* Other fields not initialized */
-};
-
-/* Used in isa_init/cleanup */
-static int __initdata isa_initialized;
-
-void isa_inc_use(struct i2c_adapter *adapter)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void isa_dec_use(struct i2c_adapter *adapter)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
 
 /* We can't do a thing... */
 static u32 isa_func(struct i2c_adapter *adapter)
@@ -99,58 +40,37 @@ static u32 isa_func(struct i2c_adapter *adapter)
 	return 0;
 }
 
-int __init i2c_isa_init(void)
+/* This is the actual algorithm we define */
+static struct i2c_algorithm isa_algorithm = {
+	.name		= "ISA bus algorithm",
+	.id		= I2C_ALGO_ISA,
+	.functionality  = isa_func,
+};
+
+/* There can only be one... */
+static struct i2c_adapter isa_adapter = {
+	.owner		= THIS_MODULE,
+	.name		= "ISA main adapter",
+	.id		= I2C_ALGO_ISA | I2C_HW_ISA,
+	.algo		= &isa_algorithm,
+};
+
+static int __init i2c_isa_init(void)
 {
-	int res;
 	printk("i2c-isa.o version %s (%s)\n", LM_VERSION, LM_DATE);
-#ifdef DEBUG
-	if (isa_initialized) {
-		printk
-		    ("i2c-isa.o: Oops, isa_init called a second time!\n");
-		return -EBUSY;
-	}
-#endif
-	isa_initialized = 0;
-	if ((res = i2c_add_adapter(&isa_adapter))) {
-		printk("i2c-isa.o: Adapter registration failed, "
-		       "module i2c-isa.o is not inserted\n.");
-		isa_cleanup();
-		return res;
-	}
-	isa_initialized++;
-	printk("i2c-isa.o: ISA bus access for i2c modules initialized.\n");
-	return 0;
+	return i2c_add_adapter(&isa_adapter);
 }
 
-int __init isa_cleanup(void)
+
+static void __exit i2c_isa_exit(void)
 {
-	int res;
-	if (isa_initialized >= 1) {
-		if ((res = i2c_del_adapter(&isa_adapter))) {
-			printk
-			    ("i2c-isa.o: Adapter deregistration failed, module not removed.\n");
-			return res;
-		} else
-			isa_initialized--;
-	}
-	return 0;
+	i2c_del_adapter(&isa_adapter);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>");
 MODULE_DESCRIPTION("ISA bus access through i2c");
 
-int init_module(void)
-{
-	return i2c_isa_init();
-}
-
-int cleanup_module(void)
-{
-	return isa_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(i2c_isa_init);
+module_exit(i2c_isa_exit);

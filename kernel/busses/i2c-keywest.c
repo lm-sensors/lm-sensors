@@ -76,7 +76,7 @@ MODULE_DESCRIPTION("I2C driver for Apple's Keywest");
 MODULE_LICENSE("GPL");
 MODULE_PARM(probe, "i");
 MODULE_PARM(debug, "i");
-EXPORT_NO_SYMBOLS;
+
 
 int probe = 0;
 int debug = 0;
@@ -415,35 +415,24 @@ keywest_func(struct i2c_adapter * adapter)
 	       I2C_FUNC_SMBUS_BLOCK_DATA;
 }
 
-static void
-keywest_inc(struct i2c_adapter *adapter)
-{
-	MOD_INC_USE_COUNT;
-}
-
-static void
-keywest_dec(struct i2c_adapter *adapter)
-{
-	MOD_DEC_USE_COUNT;
-}
 
 /* For now, we only handle combined mode (smbus) */
 static struct i2c_algorithm keywest_algorithm = {
-	name:		"Keywest i2c",
-	id:		I2C_ALGO_SMBUS,
-	smbus_xfer:	keywest_smbus_xfer,
-	master_xfer:	keywest_xfer,
-	functionality:	keywest_func,
+	.name		= "Keywest i2c",
+	.id		= I2C_ALGO_SMBUS,
+	.smbus_xfer	= keywest_smbus_xfer,
+	.master_xfer	= keywest_xfer,
+	.functionality	= keywest_func,
 };
 
 
-static int
+static int __init
 create_iface(struct device_node* np)
 {
 	unsigned long steps, *psteps, *prate;
 	unsigned bsteps, tsize, i, nchan, addroffset;
 	struct keywest_iface* iface;
-	int rc;
+	int error;
 
 	psteps = (unsigned long *)get_property(np, "AAPL,address-step", NULL);
 	steps = psteps ? (*psteps) : 0x10;
@@ -518,8 +507,8 @@ create_iface(struct device_node* np)
 	write_reg(reg_isr, KW_I2C_IRQ_MASK);
 
 	/* Request chip interrupt */	
-	rc = request_irq(iface->irq, keywest_irq, 0, "keywest i2c", iface);
-	if (rc) {
+	error = request_irq(iface->irq, keywest_irq, 0, "keywest i2c", iface);
+	if (error) {
 		printk(KERN_ERR "i2c-keywest: can't get IRQ %d !\n", iface->irq);
 		iounmap((void *)iface->base);
 		kfree(iface);
@@ -536,14 +525,12 @@ create_iface(struct device_node* np)
 		chan->adapter.id = I2C_ALGO_SMBUS;
 		chan->adapter.algo = &keywest_algorithm;
 		chan->adapter.algo_data = NULL;
-		chan->adapter.inc_use = keywest_inc;
-		chan->adapter.dec_use = keywest_dec;
 		chan->adapter.client_register = NULL;
 		chan->adapter.client_unregister = NULL;
 		chan->adapter.data = chan;
 
-		rc = i2c_add_adapter(&chan->adapter);
-		if (rc) {
+		error = i2c_add_adapter(&chan->adapter);
+		if (error) {
 			printk("i2c-keywest.c: Adapter %s registration failed\n",
 				chan->adapter.name);
 			chan->adapter.data = NULL;
@@ -567,10 +554,10 @@ create_iface(struct device_node* np)
 	return 0;
 }
 
-static void
+static void __exit
 dispose_iface(struct keywest_iface *iface)
 {
-	int i, rc;
+	int i, error;
 	
 	ifaces = iface->next;
 
@@ -593,39 +580,37 @@ dispose_iface(struct keywest_iface *iface)
 		struct keywest_chan* chan = &iface->channels[i];
 		if (!chan->adapter.data)
 			continue;
-		rc = i2c_del_adapter(&chan->adapter);
+		i2c_del_adapter(&chan->adapter);
 		chan->adapter.data = NULL;
 		/* We aren't that prepared to deal with this... */
-		if (rc)
+		if (error)
 			printk("i2c-keywest.c: i2c_del_adapter failed, that's bad !\n");
 	}
 	iounmap((void *)iface->base);
 	kfree(iface);
 }
 
-static int __init
-i2c_keywest_init(void)
+static int __init i2c_keywest_init(void)
 {
 	struct device_node *np;
-	int rc = -ENODEV;
+	int error = -ENODEV;
 	
 	np = find_compatible_devices("i2c", "keywest");
 	while (np != 0) {
 		if (np->n_addrs >= 1 && np->n_intrs >= 1)
-			rc = create_iface(np);
+			error = create_iface(np);
 		np = np->next;
 	}
 	if (ifaces)
-		rc = 0;
-	return rc;
+		error = 0;
+	return error;
 }
 
-static void __exit
-i2c_keywest_cleanup(void)
+static void __exit i2c_keywest_exit(void)
 {
 	while(ifaces)
 		dispose_iface(ifaces);
 }
 
 module_init(i2c_keywest_init);
-module_exit(i2c_keywest_cleanup);
+module_exit(i2c_keywest_exit);

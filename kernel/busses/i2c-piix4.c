@@ -135,51 +135,10 @@ MODULE_PARM_DESC(force_addr,
 		 "Forcibly enable the PIIX4 at the given address. "
 		 "EXTREMELY DANGEROUS!");
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init i2c_piix4_init(void);
-static int __init piix4_cleanup(void);
-static int piix4_setup(void);
-static s32 piix4_access(struct i2c_adapter *adap, u16 addr,
-			unsigned short flags, char read_write,
-			u8 command, int size, union i2c_smbus_data *data);
 static void piix4_do_pause(unsigned int amount);
 static int piix4_transaction(void);
-static void piix4_inc(struct i2c_adapter *adapter);
-static void piix4_dec(struct i2c_adapter *adapter);
-static u32 piix4_func(struct i2c_adapter *adapter);
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
 
-static struct i2c_algorithm smbus_algorithm = {
-	/* name */ "Non-I2C SMBus adapter",
-	/* id */ I2C_ALGO_SMBUS,
-	/* master_xfer */ NULL,
-	/* smbus_access */ piix4_access,
-	/* slave_send */ NULL,
-	/* slave_rcv */ NULL,
-	/* algo_control */ NULL,
-	/* functionality */ piix4_func,
-};
-
-static struct i2c_adapter piix4_adapter = {
-	"unset",
-	I2C_ALGO_SMBUS | I2C_HW_SMBUS_PIIX4,
-	&smbus_algorithm,
-	NULL,
-	piix4_inc,
-	piix4_dec,
-	NULL,
-	NULL,
-};
-
-static int __initdata piix4_initialized;
 static unsigned short piix4_smba = 0;
 
 #ifdef CONFIG_X86
@@ -189,6 +148,7 @@ static unsigned short piix4_smba = 0;
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,34)
 void dmi_scan_mach(void);
 #endif
+
 static int __init ibm_dmi_probe(void)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,34)
@@ -520,16 +480,6 @@ s32 piix4_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
-void piix4_inc(struct i2c_adapter *adapter)
-{
-	MOD_INC_USE_COUNT;
-}
-
-void piix4_dec(struct i2c_adapter *adapter)
-{
-
-	MOD_DEC_USE_COUNT;
-}
 
 u32 piix4_func(struct i2c_adapter *adapter)
 {
@@ -538,72 +488,67 @@ u32 piix4_func(struct i2c_adapter *adapter)
 	    I2C_FUNC_SMBUS_BLOCK_DATA;
 }
 
-int __init i2c_piix4_init(void)
+static struct i2c_algorithm smbus_algorithm = {
+	.name		= "Non-I2C SMBus adapter",
+	.id		= I2C_ALGO_SMBUS,
+	.smbus_xfer	= piix4_access,
+	.functionality	= piix4_func,
+};
+
+static struct i2c_adapter piix4_adapter = {
+	.owner		= THIS_MODULE,
+	.name		= "unset",
+	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_PIIX4,
+	.algo		= &smbus_algorithm,
+};
+
+
+
+static struct pci_device_id piix4_ids[] __devinitdata = {
+	{ 0, }
+};
+
+static int __devinit piix4_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
-	int res;
-	printk("i2c-piix4.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	if (piix4_initialized) {
-		printk
-		    (KERN_ERR "i2c-piix4.o: Oops, piix4_init called a second time!\n");
-		return -EBUSY;
-	}
-	piix4_initialized = 0;
-	if ((res = piix4_setup())) {
-		printk(KERN_ERR "i2c-piix4.o: Module insertion failed.\n");
-		piix4_cleanup();
-		return res;
-	}
-	piix4_initialized++;
+
 	sprintf(piix4_adapter.name, "SMBus PIIX4 adapter at %04x",
 		piix4_smba);
-	if ((res = i2c_add_adapter(&piix4_adapter))) {
-		printk
-		    (KERN_ERR "i2c-piix4.o: Adapter registration failed, module not inserted.\n");
-		piix4_cleanup();
-		return res;
-	}
-	piix4_initialized++;
-	printk(KERN_ERR "i2c-piix4.o: SMBus detected and initialized\n");
-	return 0;
+
+	i2c_add_adapter(&piix4_adapter);
 }
 
-int __init piix4_cleanup(void)
+static void __devexit piix4_remove(struct pci_dev *dev)
 {
-	int res;
-	if (piix4_initialized >= 2) {
-		if ((res = i2c_del_adapter(&piix4_adapter))) {
-			printk
-			    (KERN_ERR "i2c-piix4.o: i2c_del_adapter failed, module not removed\n");
-			return res;
-		} else
-			piix4_initialized--;
-	}
-	if (piix4_initialized >= 1) {
-		release_region(piix4_smba, 8);
-		piix4_initialized--;
-	}
-	return 0;
+	i2c_del_adapter(&piix4_adapter);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
+static struct pci_driver piix4_driver = {
+	.name		= "piix4 smbus",
+	.id_table	= piix4_ids,
+	.probe		= piix4_probe,
+	.remove		= __devexit_p(piix4_remove),
+};
+
+static int __init i2c_piix4_init(void)
+{
+	printk("i2c-piix4.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	return pci_module_init(&piix4_driver);
+}
+
+
+static void __exit i2c_piix4_exit(void)
+{
+	pci_unregister_driver(&piix4_driver);
+	release_region(piix4_smba, 8);
+}
+
+
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("PIIX4 SMBus driver");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-int init_module(void)
-{
-	return i2c_piix4_init();
-}
-
-int cleanup_module(void)
-{
-	return piix4_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(i2c_piix4_init);
+module_exit(i2c_piix4_exit);

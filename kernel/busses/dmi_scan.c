@@ -229,21 +229,7 @@ void __init dmi_scan_mach(void)
 		printk("dmi_scan.o: SM BIOS found\n");
 }
 
-#ifdef MODULE
 MODULE_DESCRIPTION("SM BIOS DMI Scanner");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 EXPORT_SYMBOL(dmi_ident);
 EXPORT_SYMBOL(dmi_scan_mach);
-int init_module(void)
-{
-	return 0;
-}
-
-int cleanup_module(void)
-{
-	return 0;
-}
-
-#endif

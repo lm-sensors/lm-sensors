@@ -36,14 +36,6 @@
 #include "sensors_vid.h"
 #include <linux/init.h>
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 static int force_addr = 0;
 MODULE_PARM(force_addr, "i");
@@ -177,7 +169,7 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e, 0x2c, 0x2e, 0x30, 0x32 };
 /********* FAN RPM CONVERSIONS ********/
 /* But this chip saturates back at 0, not at 255 like all the other chips.
    So, 0 means 0 RPM */
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 0;
@@ -187,11 +179,6 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 
 #define MIN_TO_REG(a,b) FAN_TO_REG(a,b)
 #define FAN_FROM_REG(val,div) ((val)==0?0:(val)==255?0:1310720/((val)*(div)))
-
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
 
 struct vt1211_data {
 	struct semaphore lock;
@@ -218,22 +205,12 @@ struct vt1211_data {
 	u8 uch_config;
 };
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_vt1211_init(void);
-static int __init vt1211_cleanup(void);
-
 static int vt1211_attach_adapter(struct i2c_adapter *adapter);
 static int vt1211_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int vt1211_detach_client(struct i2c_client *client);
 static int vt1211_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void vt1211_inc_use(struct i2c_client *client);
-static void vt1211_dec_use(struct i2c_client *client);
 
 static inline int vt_rdval(struct i2c_client *client, u8 register);
 static inline void vt1211_write_value(struct i2c_client *client, u8 register,
@@ -265,17 +242,14 @@ static void vt1211_temp(struct i2c_client *client, int operation,
 static int vt1211_id = 0;
 
 static struct i2c_driver vt1211_driver = {
-	/* name */ "VT1211 sensors driver",
-	/* id */ I2C_DRIVERID_VT1211,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &vt1211_attach_adapter,
-	/* detach_client */ &vt1211_detach_client,
-	/* command */ &vt1211_command,
-	/* inc_use */ &vt1211_inc_use,
-	/* dec_use */ &vt1211_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "VT1211 sensors driver",
+	.id		= I2C_DRIVERID_VT1211,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= vt1211_attach_adapter,
+	.detach_client	= vt1211_detach_client,
+	.command	= vt1211_command,
 };
-
-static int __initdata vt1211_initialized = 0;
 
 static ctl_table vt1211_dir_table_template[] = {
 	{VT1211_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
@@ -327,12 +301,12 @@ static ctl_table vt1211_dir_table_template[] = {
 	{0}
 };
 
-int vt1211_attach_adapter(struct i2c_adapter *adapter)
+static int vt1211_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, vt1211_detect);
 }
 
-int vt1211_find(int *address)
+static int vt1211_find(int *address)
 {
 	u16 val;
 
@@ -439,7 +413,7 @@ int vt1211_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int vt1211_detach_client(struct i2c_client *client)
+static int vt1211_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -458,24 +432,11 @@ int vt1211_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-int vt1211_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int vt1211_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void vt1211_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void vt1211_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
 
 static inline int vt_rdval(struct i2c_client *client, u8 reg)
 {
@@ -487,7 +448,7 @@ static inline void vt1211_write_value(struct i2c_client *client, u8 reg, u8 valu
 	outb_p(value, client->addr + reg);
 }
 
-void vt1211_init_client(struct i2c_client *client)
+static void vt1211_init_client(struct i2c_client *client)
 {
 	struct vt1211_data *data = client->data;
 
@@ -497,7 +458,7 @@ void vt1211_init_client(struct i2c_client *client)
 	vt1211_write_value(client, VT1211_REG_TEMP2_CONFIG, 0);
 }
 
-void vt1211_update_client(struct i2c_client *client)
+static void vt1211_update_client(struct i2c_client *client)
 {
 	struct vt1211_data *data = client->data;
 	int i, j;
@@ -799,12 +760,11 @@ void vt1211_uch(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_vt1211_init(void)
+static int __init sm_vt1211_init(void)
 {
 	int res, addr;
 
 	printk("vt1211.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	vt1211_initialized = 0;
 
 	if (vt1211_find(&addr)) {
 		printk("vt1211.o: VT1211 not detected, module not inserted.\n");
@@ -812,49 +772,19 @@ int __init sensors_vt1211_init(void)
 	}
 	normal_isa[0] = addr;
 
-	if ((res = i2c_add_driver(&vt1211_driver))) {
-		printk
-		    ("vt1211.o: Driver registration failed, module not inserted.\n");
-		vt1211_cleanup();
-		return res;
-	}
-	vt1211_initialized++;
-	return 0;
+	return i2c_add_driver(&vt1211_driver);
 }
 
-int __init vt1211_cleanup(void)
+static void __exit sm_vt1211_exit(void)
 {
-	int res;
-
-	if (vt1211_initialized >= 1) {
-		if ((res = i2c_del_driver(&vt1211_driver))) {
-			printk
-			    ("vt1211.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		vt1211_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&vt1211_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Mark D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("VT1211 sensors");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-int init_module(void)
-{
-	return sensors_vt1211_init();
-}
-
-int cleanup_module(void)
-{
-	return vt1211_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_vt1211_init);
+module_exit(sm_vt1211_exit);

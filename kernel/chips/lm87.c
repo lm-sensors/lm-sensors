@@ -71,14 +71,6 @@ Set to '1' the appropriate defines, as nessesary:
    them insmod params, but it would be too much work. ;') */
 
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -171,7 +163,7 @@ SENSORS_INSMOD_1(lm87);
 #define IN_TO_REG(val,nr) (SENSORS_LIMIT(((val) & 0xff),0,255))
 #define IN_FROM_REG(val,nr) (val)
 
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 255;
@@ -211,11 +203,6 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define LM87_INIT_EXT_TEMP_MIN 100
 #define LM87_INIT_INT_TEMP_MAX 600
 #define LM87_INIT_INT_TEMP_MIN 100
-
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
 
 /* For each registered LM87, we need to keep some data in memory. That
    data is pointed to by LM87_list[NR]->data. The structure itself is
@@ -259,22 +246,12 @@ struct lm87_data {
 	u8  vrm;		/* VRM version * 10 */
 };
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_lm87_init(void);
-static int __init lm87_cleanup(void);
-
 static int lm87_attach_adapter(struct i2c_adapter *adapter);
 static int lm87_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int lm87_detach_client(struct i2c_client *client);
 static int lm87_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void lm87_inc_use(struct i2c_client *client);
-static void lm87_dec_use(struct i2c_client *client);
 
 static int lm87_read_value(struct i2c_client *client, u8 register);
 static int lm87_write_value(struct i2c_client *client, u8 register,
@@ -311,18 +288,14 @@ static void lm87_vrm(struct i2c_client *client, int operation,
 static int lm87_id = 0;
 
 static struct i2c_driver LM87_driver = {
-	/* name */          "LM87 sensor driver",
-	/* id */             I2C_DRIVERID_LM87,
-	/* flags */          I2C_DF_NOTIFY,
-	/* attach_adapter */ &lm87_attach_adapter,
-	/* detach_client */  &lm87_detach_client,
-	/* command */        &lm87_command,
-	/* inc_use */        &lm87_inc_use,
-	/* dec_use */        &lm87_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "LM87 sensor driver",
+	.id		= I2C_DRIVERID_LM87,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= lm87_attach_adapter,
+	.detach_client	= lm87_detach_client,
+	.command	= lm87_command,
 };
-
-/* Used by LM87_init/cleanup */
-static int __initdata lm87_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected LM87. This is just a template;
@@ -388,7 +361,7 @@ static ctl_table LM87_dir_table_template[] = {
 	{0}
 };
 
-int lm87_attach_adapter(struct i2c_adapter *adapter)
+static int lm87_attach_adapter(struct i2c_adapter *adapter)
 {
 	int error;
 	struct i2c_client_address_data  lm87_client_data;
@@ -487,7 +460,7 @@ static int lm87_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int lm87_detach_client(struct i2c_client *client)
+static int lm87_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -507,37 +480,24 @@ int lm87_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int lm87_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int lm87_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void lm87_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-void lm87_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-int lm87_read_value(struct i2c_client *client, u8 reg)
+static int lm87_read_value(struct i2c_client *client, u8 reg)
 {
 	return 0xFF & i2c_smbus_read_byte_data(client, reg);
 }
 
-int lm87_write_value(struct i2c_client *client, u8 reg, u8 value)
+static int lm87_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
 /* Called when we have found a new LM87. It should set limits, etc. */
-void lm87_init_client(struct i2c_client *client)
+static void lm87_init_client(struct i2c_client *client)
 {
 	struct lm87_data *data = client->data;
 	int vid;
@@ -640,7 +600,7 @@ void lm87_init_client(struct i2c_client *client)
 	lm87_write_value(client, LM87_REG_CONFIG, 0x01);
 }
 
-void lm87_update_client(struct i2c_client *client)
+static void lm87_update_client(struct i2c_client *client)
 {
 	struct lm87_data *data = client->data;
 	int i;
@@ -1041,44 +1001,20 @@ void lm87_vrm(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_lm87_init(void)
+static int __init sm_lm87_init(void)
 {
-	int res;
-
 	printk("lm87.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	lm87_initialized = 0;
-
-	if ((res = i2c_add_driver(&LM87_driver))) {
-		printk
-		    ("lm87.o: Driver registration failed, module not inserted.\n");
-		lm87_cleanup();
-		return res;
-	}
-	lm87_initialized++;
-	return 0;
+	return i2c_add_driver(&LM87_driver);
 }
 
-int __init lm87_cleanup(void)
+static void __exit sm_lm87_exit(void)
 {
-	int res;
-
-	if (lm87_initialized >= 1) {
-		if ((res = i2c_del_driver(&LM87_driver))) {
-			printk
-			    ("lm87.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		lm87_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&LM87_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
-#ifdef MODULE_LICENSE
+
 MODULE_LICENSE("GPL");
-#endif
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, "
@@ -1086,14 +1022,5 @@ MODULE_AUTHOR
 
 MODULE_DESCRIPTION("LM87 driver");
 
-int init_module(void)
-{
-	return sensors_lm87_init();
-}
-
-int cleanup_module(void)
-{
-	return lm87_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_lm87_init);
+module_exit(sm_lm87_exit);

@@ -75,33 +75,19 @@
 #define CYCLE_DELAY	10
 #define TIMEOUT		(HZ / 2)
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init i2c_savage4_init(void);
-static int __init savage4_cleanup(void);
-static int savage4_setup(void);
+
 static void config_s4(struct pci_dev *dev);
-static void savage4_inc(struct i2c_adapter *adapter);
-static void savage4_dec(struct i2c_adapter *adapter);
-
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
 
 
-static int __initdata savage4_initialized;
+
 static unsigned char *mem;
 
-extern inline void outlong(unsigned int dat)
+static inline void outlong(unsigned int dat)
 {
 	*((unsigned int *) (mem + REG)) = dat;
 }
 
-extern inline unsigned int readlong(void)
+static inline unsigned int readlong(void)
 {
 	return *((unsigned int *) (mem + REG));
 }
@@ -147,78 +133,6 @@ static int bit_savi2c_getsda(void *data)
 	return (0 != (readlong() & I2C_SDA_IN));
 }
 
-/*static void bit_savddc_setscl(void *data, int val)
-{
-	unsigned int r;
-	r = readlong();
-	if(val)
-		r |= DDC_SCL_OUT;
-	else
-		r &= ~DDC_SCL_OUT;
-	outlong(r);
-}
-
-static void bit_savddc_setsda(void *data, int val)
-{
-	unsigned int r;
-	r = readlong();
-	if(val)
-		r |= DDC_SDA_OUT;
-	else
-		r &= ~DDC_SDA_OUT;
-	outlong(r);
-}
-
-static int bit_savddc_getscl(void *data)
-{
-	return (0 != (readlong() & DDC_SCL_IN));
-}
-
-static int bit_savddc_getsda(void *data)
-{
-	return (0 != (readlong() & DDC_SDA_IN));
-}
-*/
-static struct i2c_algo_bit_data sav_i2c_bit_data = {
-	NULL,
-	bit_savi2c_setsda,
-	bit_savi2c_setscl,
-	bit_savi2c_getsda,
-	bit_savi2c_getscl,
-	CYCLE_DELAY, CYCLE_DELAY, TIMEOUT
-};
-
-static struct i2c_adapter savage4_i2c_adapter = {
-	"I2C Savage4 adapter",
-	I2C_HW_B_SAVG,
-	NULL,
-	&sav_i2c_bit_data,
-	savage4_inc,
-	savage4_dec,
-	NULL,
-	NULL,
-};
-/*
-static struct i2c_algo_bit_data sav_ddc_bit_data = {
-	NULL,
-	bit_savddc_setsda,
-	bit_savddc_setscl,
-	bit_savddc_getsda,
-	bit_savddc_getscl,
-	CYCLE_DELAY, CYCLE_DELAY, TIMEOUT
-};
-
-static struct i2c_adapter savage4_ddc_adapter = {
-	"DDC Voodoo3/Banshee adapter",
-	I2C_HW_B_VOO,
-	NULL,
-	&sav_ddc_bit_data,
-	savage4_inc,
-	savage4_dec,
-	NULL,
-	NULL,
-};
-*/
 /* Configures the chip */
 
 void config_s4(struct pci_dev *dev)
@@ -226,11 +140,7 @@ void config_s4(struct pci_dev *dev)
 	unsigned int cadr;
 
 	/* map memory */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,13)
 	cadr = dev->resource[0].start;
-#else
-	cadr = dev->base_address[0];
-#endif
 	cadr &= PCI_BASE_ADDRESS_MEM_MASK;
 	mem = ioremap_nocache(cadr, 0x0080000);
 	if(mem) {
@@ -240,136 +150,71 @@ void config_s4(struct pci_dev *dev)
 	}
 }
 
-/* Detect chip and initialize it. */
-static int savage4_setup(void)
+
+static struct i2c_algo_bit_data sav_i2c_bit_data = {
+	.setsda		= bit_savi2c_setsda,
+	.setscl		= bit_savi2c_setscl,
+	.getsda		= bit_savi2c_getsda,
+	.getscl		= bit_savi2c_getscl,
+	.udelay		= CYCLE_DELAY,
+	.mdelay		= CYCLE_DELAY,
+	.timeout	= TIMEOUT
+};
+
+static struct i2c_adapter savage4_i2c_adapter = {
+	.owner		= THIS_MODULE,
+	.name		= "I2C Savage4 adapter",
+	.id		= I2C_HW_B_SAVG,
+	.algo_data	= &sav_i2c_bit_data,
+};
+
+#if 0
+PCI_VENDOR_ID_S3, PCI_CHIP_SAVAGE4,
+PCI_VENDOR_ID_S3, PCI_CHIP_SAVAGE2000,
+#endif
+
+static struct pci_device_id savage4_ids[] __devinitdata = {
+	{ 0, }
+};
+
+static int __devinit savage4_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
-	struct pci_dev *dev;
-	int s4_num;
-
-	s4_num = 0;
-
-	dev = NULL;
-	do {
-		if ((dev = pci_find_device(PCI_VENDOR_ID_S3,
-					   PCI_CHIP_SAVAGE4,
-					   dev))) {
-			if (!s4_num)
-				config_s4(dev);
-			s4_num++;
-		}
-	} while (dev);
-
-	dev = NULL;
-	do {
-		if ((dev = pci_find_device(PCI_VENDOR_ID_S3,
-					   PCI_CHIP_SAVAGE2000,
-					   dev))) {
-			if (!s4_num)
-				config_s4(dev);
-			s4_num++;
-		}
-	} while (dev);
-
-	if (s4_num > 0) {
-		if(!mem)
-			return -ENOMEM;
-		printk("i2c-savage4: %d Savage4 found.\n", s4_num);
-		if (s4_num > 1)
-			printk("i2c-savage4: warning: only 1 supported.\n");
-		return 0;
-	} else {
-		printk("i2c-savage4: No Savage4 found.\n");
-		return -ENODEV;
-	}
+	config_s4(dev);
+	return i2c_bit_add_bus(&savage4_i2c_adapter);
 }
 
-void savage4_inc(struct i2c_adapter *adapter)
+static void __devexit savage4_remove(struct pci_dev *dev)
 {
-	MOD_INC_USE_COUNT;
+	i2c_bit_del_bus(&savage4_i2c_adapter);
 }
 
-void savage4_dec(struct i2c_adapter *adapter)
-{
-	MOD_DEC_USE_COUNT;
-}
 
-int __init i2c_savage4_init(void)
+static struct pci_driver savage4_driver = {
+	.name		= "savage4 smbus",
+	.id_table	= savage4_ids,
+	.probe		= savage4_probe,
+	.remove		= __devexit_p(savage4_remove),
+};
+
+static int __init i2c_savage4_init(void)
 {
-	int res;
 	printk("i2c-savage4.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	savage4_initialized = 0;
-	if ((res = savage4_setup())) {
-		printk
-		    ("i2c-savage4.o: Savage4 not detected, module not inserted.\n");
-		savage4_cleanup();
-		return res;
-	}
-	if ((res = i2c_bit_add_bus(&savage4_i2c_adapter))) {
-		printk("i2c-savage4.o: I2C adapter registration failed\n");
-	} else {
-		printk("i2c-savage4.o: I2C bus initialized\n");
-		savage4_initialized |= INIT2;
-	}
-/*
-	if ((res = i2c_bit_add_bus(&savage4_ddc_adapter))) {
-		printk("i2c-savage4.o: DDC adapter registration failed\n");
-	} else {
-		printk("i2c-savage4.o: DDC bus initialized\n");
-		savage4_initialized |= INIT3;
-	}
-*/
-	if(!(savage4_initialized & (INIT2 /* | INIT3 */ ))) {
-		printk("i2c-savage4.o: Both registrations failed, module not inserted\n");
-		savage4_cleanup();
-		return res;
-	}
-	return 0;
+	return pci_module_init(&savage4_driver);
 }
 
-int __init savage4_cleanup(void)
+
+static void __exit i2c_savage4_exit(void)
 {
-	int res;
-
+	pci_unregister_driver(&savage4_driver);
 	iounmap(mem);
-/*
-	if (savage4_initialized & INIT3) {
-		if ((res = i2c_bit_del_bus(&savage4_ddc_adapter))) {
-			printk
-			    ("i2c-savage4.o: i2c_bit_del_bus failed, module not removed\n");
-			return res;
-		}
-	}
-*/
-	if (savage4_initialized & INIT2) {
-		if ((res = i2c_bit_del_bus(&savage4_i2c_adapter))) {
-			printk
-			    ("i2c-savage4.o: i2c_bit_del_bus failed, module not removed\n");
-			return res;
-		}
-	}
-	return 0;
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, Ralph Metzler <rjkm@thp.uni-koeln.de>, and Mark D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("Savage4 I2C/SMBus driver");
-
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-int init_module(void)
-{
-	return i2c_savage4_init();
-}
-
-int cleanup_module(void)
-{
-	return savage4_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(i2c_savage4_init);
+module_exit(i2c_savage4_exit);

@@ -51,9 +51,7 @@
 #include <linux/i2c.h>
 #include "version.h"
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
 #ifdef I2C_FUNC_SMBUS_BLOCK_DATA_PEC
 #define HAVE_PEC
@@ -127,53 +125,18 @@ MODULE_PARM_DESC(force_addr,
 		 "Forcibly enable the I801 at the given address. "
 		 "EXTREMELY DANGEROUS!");
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init i2c_i801_init(void);
-static int __init i801_cleanup(void);
-static int i801_setup(void);
-static s32 i801_access(struct i2c_adapter *adap, u16 addr,
-		       unsigned short flags, char read_write,
-		       u8 command, int size, union i2c_smbus_data *data);
+
+
+
+
 static void i801_do_pause(unsigned int amount);
 static int i801_transaction(void);
 static int i801_block_transaction(union i2c_smbus_data *data,
 				  char read_write, int command);
-static void i801_inc(struct i2c_adapter *adapter);
-static void i801_dec(struct i2c_adapter *adapter);
-static u32 i801_func(struct i2c_adapter *adapter);
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
 
-static struct i2c_algorithm smbus_algorithm = {
-	/* name */ "Non-I2C SMBus adapter",
-	/* id */ I2C_ALGO_SMBUS,
-	/* master_xfer */ NULL,
-	/* smbus_xfer */ i801_access,
-	/* slave_send */ NULL,
-	/* slave_rcv */ NULL,
-	/* algo_control */ NULL,
-	/* functionality */ i801_func,
-};
 
-static struct i2c_adapter i801_adapter = {
-	"unset",
-	I2C_ALGO_SMBUS | I2C_HW_SMBUS_I801,
-	&smbus_algorithm,
-	NULL,
-	i801_inc,
-	i801_dec,
-	NULL,
-	NULL,
-};
 
-static int __initdata i801_initialized;
 static unsigned short i801_smba = 0;
 static struct pci_dev *I801_dev = NULL;
 static int isich4 = 0;
@@ -670,15 +633,6 @@ s32 i801_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 	return 0;
 }
 
-void i801_inc(struct i2c_adapter *adapter)
-{
-	MOD_INC_USE_COUNT;
-}
-
-void i801_dec(struct i2c_adapter *adapter)
-{
-	MOD_DEC_USE_COUNT;
-}
 
 u32 i801_func(struct i2c_adapter *adapter)
 {
@@ -693,73 +647,70 @@ u32 i801_func(struct i2c_adapter *adapter)
 	    ;
 }
 
-int __init i2c_i801_init(void)
+static struct i2c_algorithm smbus_algorithm = {
+	.name		= "Non-I2C SMBus adapter",
+	.id		= I2C_ALGO_SMBUS,
+	.smbus_xfer	= i801_access,
+	.functionality	= i801_func,
+};
+
+static struct i2c_adapter i801_adapter = {
+	.owner		= THIS_MODULE,
+	.name		= "unset",
+	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_I801,
+	.algo		= &smbus_algorithm,
+};
+
+
+
+static struct pci_device_id i801_ids[] __devinitdata = {
+	{ 0, }
+};
+
+static int __devinit i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
-	int res;
-	printk(KERN_INFO "i2c-i801.o version %s (%s)\n", LM_VERSION, LM_DATE);
-#ifdef DEBUG
-/* PE- It might be good to make this a permanent part of the code! */
-	if (i801_initialized) {
-		printk
-		    (KERN_DEBUG "i2c-i801.o: Oops, i801_init called a second time!\n");
-		return -EBUSY;
-	}
-#endif
-	i801_initialized = 0;
-	if ((res = i801_setup())) {
+
+	if (i801_setup()) {
 		printk
 		    (KERN_WARNING "i2c-i801.o: I801 not detected, module not inserted.\n");
-		i801_cleanup();
-		return res;
+		return -ENODEV;
 	}
-	i801_initialized++;
+
 	sprintf(i801_adapter.name, "SMBus I801 adapter at %04x",
 		i801_smba);
-	if ((res = i2c_add_adapter(&i801_adapter))) {
-		printk
-		    (KERN_ERR "i2c-i801.o: Adapter registration failed, module not inserted.\n");
-		i801_cleanup();
-		return res;
-	}
-	i801_initialized++;
-	printk(KERN_INFO "i2c-i801.o: I801 bus detected and initialized\n");
-	return 0;
+	i2c_add_adapter(&i801_adapter);
 }
 
-int __init i801_cleanup(void)
+static void __devexit i801_remove(struct pci_dev *dev)
 {
-	int res;
-	if (i801_initialized >= 2) {
-		if ((res = i2c_del_adapter(&i801_adapter))) {
-			printk
-			    (KERN_ERR "i2c-i801.o: i2c_del_adapter failed, module not removed\n");
-			return res;
-		} else
-			i801_initialized--;
-	}
-	if (i801_initialized >= 1) {
-		release_region(i801_smba, (isich4 ? 16 : 8));
-		i801_initialized--;
-	}
-	return 0;
+	i2c_del_adapter(&i801_adapter);
 }
 
-EXPORT_NO_SYMBOLS;
+static struct pci_driver i801_driver = {
+	.name		= "i801 smbus",
+	.id_table	= i801_ids,
+	.probe		= i801_probe,
+	.remove		= __devexit_p(i801_remove),
+};
 
-#ifdef MODULE
+static int __init i2c_i801_init(void)
+{
+	printk(KERN_INFO "i2c-i801.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	return pci_module_init(&i801_driver);
+}
+
+
+static void __exit i2c_i801_exit(void)
+{
+	pci_unregister_driver(&i801_driver);
+	release_region(i801_smba, (isich4 ? 16 : 8));
+}
+
+
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, and Mark D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("I801 SMBus driver");
 
-int init_module(void)
-{
-	return i2c_i801_init();
-}
-
-int cleanup_module(void)
-{
-	return i801_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(i2c_i801_init);
+module_exit(i2c_i801_exit);

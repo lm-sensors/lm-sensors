@@ -72,9 +72,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
 /* ALI15X3 SMBus address offsets */
 #define SMBHSTSTS (0 + ali15x3_smba)
@@ -135,52 +133,10 @@ MODULE_PARM(force_addr, "i");
 MODULE_PARM_DESC(force_addr,
 		 "Initialize the base address of the i2c controller");
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init i2c_ali15x3_init(void);
-static int __init ali15x3_cleanup(void);
-static int ali15x3_setup(void);
-static s32 ali15x3_access(struct i2c_adapter *adap, u16 addr,
-			  unsigned short flags, char read_write,
-			  u8 command, int size,
-			  union i2c_smbus_data *data);
+
 static void ali15x3_do_pause(unsigned int amount);
 static int ali15x3_transaction(void);
-static void ali15x3_inc(struct i2c_adapter *adapter);
-static void ali15x3_dec(struct i2c_adapter *adapter);
-static u32 ali15x3_func(struct i2c_adapter *adapter);
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-static struct i2c_algorithm smbus_algorithm = {
-	/* name */ "Non-I2C SMBus adapter",
-	/* id */ I2C_ALGO_SMBUS,
-	/* master_xfer */ NULL,
-	/* smbus_access */ ali15x3_access,
-	/* slave_send */ NULL,
-	/* slave_rcv */ NULL,
-	/* algo_control */ NULL,
-	/* functionality */ ali15x3_func,
-};
-
-static struct i2c_adapter ali15x3_adapter = {
-	"unset",
-	I2C_ALGO_SMBUS | I2C_HW_SMBUS_ALI15X3,
-	&smbus_algorithm,
-	NULL,
-	ali15x3_inc,
-	ali15x3_dec,
-	NULL,
-	NULL,
-};
-
-static int __initdata ali15x3_initialized;
 static unsigned short ali15x3_smba = 0;
 static int locked=0;
 
@@ -558,16 +514,6 @@ s32 ali15x3_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
-void ali15x3_inc(struct i2c_adapter *adapter)
-{
-	MOD_INC_USE_COUNT;
-}
-
-void ali15x3_dec(struct i2c_adapter *adapter)
-{
-
-	MOD_DEC_USE_COUNT;
-}
 
 u32 ali15x3_func(struct i2c_adapter *adapter)
 {
@@ -576,74 +522,70 @@ u32 ali15x3_func(struct i2c_adapter *adapter)
 	    I2C_FUNC_SMBUS_BLOCK_DATA;
 }
 
-int __init i2c_ali15x3_init(void)
+static struct i2c_algorithm smbus_algorithm = {
+	.name		= "Non-I2C SMBus adapter",
+	.id		= I2C_ALGO_SMBUS,
+	.smbus_xfer	= ali15x3_access,
+	.functionality	= ali15x3_func,
+};
+
+static struct i2c_adapter ali15x3_adapter = {
+	.owner		= THIS_MODULE,
+	.name		= "unset",
+	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_ALI15X3,
+	.algo		= &smbus_algorithm,
+};
+
+
+
+static struct pci_device_id ali15x3_ids[] __devinitdata = {
+	{ 0, }
+};
+
+static int __devinit ali15x3_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
-	int res;
-	printk("i2c-ali15x3.o version %s (%s)\n", LM_VERSION, LM_DATE);
-#ifdef DEBUG
-/* PE- It might be good to make this a permanent part of the code! */
-	if (ali15x3_initialized) {
-		printk
-		    ("i2c-ali15x3.o: Oops, ali15x3_init called a second time!\n");
-		return -EBUSY;
-	}
-#endif
-	ali15x3_initialized = 0;
-	if ((res = ali15x3_setup())) {
+	if (ali15x3_setup()) {
 		printk
 		    ("i2c-ali15x3.o: ALI15X3 not detected, module not inserted.\n");
-		ali15x3_cleanup();
-		return res;
+
+		return -ENODEV;
 	}
-	ali15x3_initialized++;
+
 	sprintf(ali15x3_adapter.name, "SMBus ALI15X3 adapter at %04x",
 		ali15x3_smba);
-	if ((res = i2c_add_adapter(&ali15x3_adapter))) {
-		printk
-		    ("i2c-ali15x3.o: Adapter registration failed, module not inserted.\n");
-		ali15x3_cleanup();
-		return res;
-	}
-	ali15x3_initialized++;
-	printk
-	    ("i2c-ali15x3.o: ALI15X3 SMBus Controller detected and initialized\n");
-	return 0;
+	i2c_add_adapter(&ali15x3_adapter);
 }
 
-int __init ali15x3_cleanup(void)
+static void __devexit ali15x3_remove(struct pci_dev *dev)
 {
-	int res;
-	if (ali15x3_initialized >= 2) {
-		if ((res = i2c_del_adapter(&ali15x3_adapter))) {
-			printk
-			    ("i2c-ali15x3.o: i2c_del_adapter failed, module not removed\n");
-			return res;
-		} else
-			ali15x3_initialized--;
-	}
-	if (ali15x3_initialized >= 1) {
-		release_region(ali15x3_smba, ALI15X3_SMB_IOSIZE);
-		ali15x3_initialized--;
-	}
-	return 0;
+	i2c_del_adapter(&ali15x3_adapter);
 }
 
-EXPORT_NO_SYMBOLS;
+static struct pci_driver ali15x3_driver = {
+	.name		= "ali15x3 smbus",
+	.id_table	= ali15x3_ids,
+	.probe		= ali15x3_probe,
+	.remove		= __devexit_p(ali15x3_remove),
+};
 
-#ifdef MODULE
+static int __init i2c_ali15x3_init(void)
+{
+	printk("i2c-ali15x3.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	return pci_module_init(&ali15x3_driver);
+}
+
+
+static void __exit i2c_ali15x3_exit(void)
+{
+	pci_unregister_driver(&ali15x3_driver);
+	release_region(ali15x3_smba, ALI15X3_SMB_IOSIZE);
+}
+
+
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, and Mark D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("ALI15X3 SMBus driver");
 
-int init_module(void)
-{
-	return i2c_ali15x3_init();
-}
-
-int cleanup_module(void)
-{
-	return ali15x3_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(i2c_ali15x3_init);
+module_exit(i2c_ali15x3_exit);

@@ -137,52 +137,15 @@ MODULE_PARM_DESC(force, "Forcibly enable the SIS630. DANGEROUS!");
 MODULE_PARM(high_clock, "i");
 MODULE_PARM_DESC(high_clock, "Set Host Master Clock to 56KHz (default 14KHz).");
 
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init i2c_sis630_init(void);
-static int __init i2c_sis630_cleanup(void);
-static int sis630_setup(void);
-static s32 sis630_access(struct i2c_adapter *adap, u16 addr,
-			  unsigned short flags, char read_write,
-			  u8 command, int size,
-			  union i2c_smbus_data *data);
 static void sis630_do_pause(unsigned int amount);
 static int sis630_transaction(int size);
-static void sis630_inc(struct i2c_adapter *adapter);
-static void sis630_dec(struct i2c_adapter *adapter);
-static u32 sis630_func(struct i2c_adapter *adapter);
+
 static u8 sis630_read(u8 reg);
 static void sis630_write(u8 reg, u8 data);
 
 
-static struct i2c_algorithm smbus_algorithm = {
-	/* name */ "Non-I2C SMBus adapter",
-	/* id */ I2C_ALGO_SMBUS,
-	/* master_xfer */ NULL,
-	/* smbus_access */ sis630_access,
-	/* slave_send */ NULL,
-	/* slave_rcv */ NULL,
-	/* algo_control */ NULL,
-	/* functionality */ sis630_func,
-};
-
-static struct i2c_adapter sis630_adapter = {
-	"unset",
-	I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS630,
-	&smbus_algorithm,
-	NULL,
-	sis630_inc,
-	sis630_dec,
-	NULL,
-	NULL,
-};
-
 static unsigned short acpi_base = 0;
-static int __initdata sis630_initialized;
+
 
 u8 sis630_read(u8 reg) {
 	return inb(acpi_base + reg);
@@ -305,7 +268,8 @@ int sis630_transaction(int size) {
 /* Return -1 on error. */
 s32 sis630_access(struct i2c_adapter * adap, u16 addr,
 		   unsigned short flags, char read_write,
-		   u8 command, int size, union i2c_smbus_data * data) {
+		   u8 command, int size, union i2c_smbus_data * data)
+{
 
 	switch (size) {
 		case I2C_SMBUS_QUICK:
@@ -374,13 +338,6 @@ s32 sis630_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
-void sis630_inc(struct i2c_adapter *adapter) {
-	MOD_INC_USE_COUNT;
-}
-
-void sis630_dec(struct i2c_adapter *adapter) {
-	MOD_DEC_USE_COUNT;
-}
 
 u32 sis630_func(struct i2c_adapter *adapter) {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE | I2C_FUNC_SMBUS_BYTE_DATA |
@@ -452,88 +409,82 @@ int sis630_setup(void) {
 #endif
 
 	/* Everything is happy, let's grab the memory and set things up. */
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,3,14)
 	if (!request_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION, "sis630-smbus")){
 		printk(KERN_ERR "i2c-sis630.o: SMBus registers 0x%04x-0x%04x "
 			"already in use!\n",acpi_base + SMB_STS, acpi_base + SMB_SAA);
 		return -ENODEV;
 	}
-#else
-	if (check_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION) < 0){
-		printk(KERN_ERR "i2c-sis630.o: SMBus registers 0x%04x-0x%04x "
-			"already in use!\n",acpi_base + SMB_STS, acpi_base + SMB_SAA);
+
+	return 0;
+}
+
+
+static struct i2c_algorithm smbus_algorithm = {
+	.name		= "Non-I2C SMBus adapter",
+	.id		= I2C_ALGO_SMBUS,
+	.smbus_xfer	= sis630_access,
+	.functionality	= sis630_func,
+};
+
+static struct i2c_adapter sis630_adapter = {
+	.owner		= THIS_MODULE,
+	.name		= "unset",
+	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS630,
+	.algo		= &smbus_algorithm,
+};
+
+
+static struct pci_device_id sis630_ids[] __devinitdata = {
+	{ 0, }
+};
+
+static int __devinit sis630_probe(struct pci_dev *dev, const struct pci_device_id *id)
+{
+
+	if (sis630_setup()) {
+		printk(KERN_ERR "i2c-sis630.o: SIS630 comp. bus not detected, module not inserted.\n");
+
 		return -ENODEV;
 	}
-	request_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION, "sis630-smbus");
-#endif
 
-	return 0;
-}
-
-int __init i2c_sis630_init(void) {
-	int res;
-	printk("i2c-sis630.o version %s (%s)\n", LM_VERSION, LM_DATE);
-
-	if (sis630_initialized) {
-		printk(KERN_ERR "i2c-sis630.o: Oops, sis630_init called a second time!\n");
-		return -EBUSY;
-	}
-
-	sis630_initialized = 0;
-	if ((res = sis630_setup())) {
-		printk(KERN_ERR "i2c-sis630.o: SIS630 comp. bus not detected, module not inserted.\n");
-		i2c_sis630_cleanup();
-		return res;
-	}
-	sis630_initialized++;
 	sprintf(sis630_adapter.name, "SMBus SIS630 adapter at %04x",
 		acpi_base + SMB_STS);
-	if ((res = i2c_add_adapter(&sis630_adapter))) {
-		printk(KERN_ERR "i2c-sis630.o: Adapter registration failed, "
-			"module not inserted.\n");
-		i2c_sis630_cleanup();
-		return res;
-	}
-	sis630_initialized++;
-	printk(KERN_INFO "i2c-sis630.o: SIS630 comp. bus detected and initialized\n");
-
-	return 0;
+	i2c_add_adapter(&sis630_adapter);
 }
 
-int __init i2c_sis630_cleanup(void) {
-	int res;
-	if (sis630_initialized >= 2) {
-		if ((res = i2c_del_adapter(&sis630_adapter))) {
-			printk(KERN_ERR "i2c-sis630.o: i2c_del_adapter failed, module not"
-				"removed\n");
-			return res;
-		} else
-			sis630_initialized--;
-	}
-	if (sis630_initialized >= 1) {
-		release_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION);
-		sis630_initialized--;
-	}
-	return 0;
+static void __devexit sis630_remove(struct pci_dev *dev)
+{
+	i2c_del_adapter(&sis630_adapter);
 }
 
 
-EXPORT_NO_SYMBOLS;
+static struct pci_driver sis630_driver = {
+	.name		= "sis630 smbus",
+	.id_table	= sis630_ids,
+	.probe		= sis630_probe,
+	.remove		= __devexit_p(sis630_remove),
+};
 
-#ifdef MODULE_LICENSE
+static int __init i2c_sis630_init(void)
+{
+	printk("i2c-sis630.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	return pci_module_init(&sis630_driver);
+}
+
+
+static void __exit i2c_sis630_exit(void)
+{
+	pci_unregister_driver(&sis630_driver);
+	release_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION);
+}
+
+
+
+
 MODULE_LICENSE("GPL");
-#endif
 
-#ifdef MODULE
 MODULE_AUTHOR("Alexander Malysh <amalysh@web.de>");
 MODULE_DESCRIPTION("SIS630 SMBus driver");
 
-int init_module(void) {
-	return i2c_sis630_init();
-}
-
-int cleanup_module(void) {
-	return i2c_sis630_cleanup();
-}
-
-#endif	/* MODULE */
+module_init(i2c_sis630_init);
+module_exit(i2c_sis630_exit);

@@ -26,14 +26,6 @@
 #include "version.h"
 #include <linux/init.h>
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -78,12 +70,6 @@ SENSORS_INSMOD_1(pcf8591);
 #define REG_TO_SIGNED(reg) (reg & 0x80)?(reg - 256):(reg)
                           /* Convert signed 8 bit value to signed value */
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif
-
-
 
 struct pcf8591_data {
         struct semaphore lock;
@@ -99,21 +85,12 @@ struct pcf8591_data {
         u8 aout;
 };
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_pcf8591_init(void);
-static int __init pcf8591_cleanup(void);
 static int pcf8591_attach_adapter(struct i2c_adapter *adapter);
 static int pcf8591_detect(struct i2c_adapter *adapter, int address,
                           unsigned short flags, int kind);
 static int pcf8591_detach_client(struct i2c_client *client);
 static int pcf8591_command(struct i2c_client *client, unsigned int cmd,
                            void *arg);
-static void pcf8591_inc_use(struct i2c_client *client);
-static void pcf8591_dec_use(struct i2c_client *client);
 
 static void pcf8591_update_client(struct i2c_client *client);
 static void pcf8591_init_client(struct i2c_client *client);
@@ -130,21 +107,16 @@ static void pcf8591_aout(struct i2c_client *client, int operation,
 
 /* This is the driver that will be inserted */
 static struct i2c_driver pcf8591_driver = {
-        /* name */ "PCF8591 sensor chip driver",
-        /* id */ I2C_DRIVERID_PCF8591,
-        /* flags */ I2C_DF_NOTIFY,
-        /* attach_adapter */ &pcf8591_attach_adapter,
-        /* detach_client */ &pcf8591_detach_client,
-        /* command */ &pcf8591_command,
-        /* inc_use */ &pcf8591_inc_use,
-        /* dec_use */ &pcf8591_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "PCF8591 sensor chip driver",
+	.id		= I2C_DRIVERID_PCF8591,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= pcf8591_attach_adapter,
+	.detach_client	= pcf8591_detach_client,
+	.command	= pcf8591_command,
 };
 
-/* Used by lm78_init/cleanup */
-static int __initdata pcf8591_initialized = 0;
-
 static int pcf8591_id = 0;
-
 
 /* The /proc/sys entries */
 /* These files are created for each detected PCF8591. This is just a template;
@@ -175,7 +147,7 @@ static ctl_table pcf8591_dir_table_template[] = {
      * pcf8591_driver is inserted (when this module is loaded), for each
        available adapter
      * when a new adapter is inserted (and pcf8591_driver is still present) */
-int pcf8591_attach_adapter(struct i2c_adapter *adapter)
+static int pcf8591_attach_adapter(struct i2c_adapter *adapter)
 {
         return i2c_detect(adapter, &addr_data, pcf8591_detect);
 }
@@ -275,7 +247,7 @@ int pcf8591_detect(struct i2c_adapter *adapter, int address,
         return err;
 }
 
-int pcf8591_detach_client(struct i2c_client *client)
+static int pcf8591_detach_client(struct i2c_client *client)
 {
         int err;
 
@@ -299,29 +271,14 @@ int pcf8591_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int pcf8591_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int pcf8591_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
         return 0;
 }
 
-/* Nothing here yet */
-void pcf8591_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-        MOD_INC_USE_COUNT;
-#endif
-}
-
-/* Nothing here yet */
-void pcf8591_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-        MOD_DEC_USE_COUNT;
-#endif
-}
 
 /* Called when we have found a new PCF8591. */
-void pcf8591_init_client(struct i2c_client *client)
+static void pcf8591_init_client(struct i2c_client *client)
 {
         struct pcf8591_data *data = client->data;
         data->control_byte = PCF8591_INIT_CONTROL_BYTE;
@@ -330,7 +287,7 @@ void pcf8591_init_client(struct i2c_client *client)
         i2c_smbus_write_byte_data(client, data->control_byte, data->aout);
 }
 
-void pcf8591_update_client(struct i2c_client *client)
+static void pcf8591_update_client(struct i2c_client *client)
 {
         struct pcf8591_data *data = client->data;
 
@@ -487,60 +444,22 @@ void pcf8591_aout(struct i2c_client *client, int operation, int ctl_name,
         }
 }
 
-int __init sensors_pcf8591_init(void)
+static int __init sm_pcf8591_init(void)
 {
-        int res;
-
         printk(KERN_INFO "pcf8591.o version %s (%s)\n", LM_VERSION, LM_DATE);
-        pcf8591_initialized = 0;
-
-        if ((res = i2c_add_driver(&pcf8591_driver))) {
-                printk
-                    (KERN_ERR "pcf8591.o: Driver registration failed, module not inserted.\n");
-                pcf8591_cleanup();
-                return res;
-        }
-        pcf8591_initialized++;
-        return 0;
+	return i2c_add_driver(&pcf8591_driver);
 }
 
-int __init pcf8591_cleanup(void)
+static void __exit sm_pcf8591_exit(void)
 {
-        int res;
-
-        if (pcf8591_initialized >= 1) {
-                if ((res = i2c_del_driver(&pcf8591_driver))) {
-                        printk
-                            (KERN_ERR "pcf8591.o: Driver deregistration failed, module not removed.\n");
-                        return res;
-                }
-                pcf8591_initialized--;
-        }
-        return 0;
+        i2c_del_driver(&pcf8591_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Aurelien Jarno <aurelien@aurel32.net>");
 MODULE_DESCRIPTION("PCF8591 driver");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-int init_module(void)
-{
-        return sensors_pcf8591_init();
-}
-
-int cleanup_module(void)
-{
-        return pcf8591_cleanup();
-}
-
-#endif                          /* MODULE */
-
-
-
-
+module_init(sm_pcf8591_init);
+module_exit(sm_pcf8591_exit);

@@ -49,15 +49,6 @@
 #include "sensors_vid.h"
 #include <linux/init.h>
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
-
 /* RT Table support #defined so we can take it out if it gets bothersome */
 #define W83781D_RT 1
 
@@ -169,7 +160,7 @@ static const u8 BIT_SCFG2[] = { 0x10, 0x20, 0x40 };
 #define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 8)/16),0,255))
 #define IN_FROM_REG(val) (((val) * 16) / 10)
 
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 255;
@@ -203,7 +194,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 
 #define DIV_FROM_REG(val) (1 << (val))
 
-extern inline u8 DIV_TO_REG(long val, enum chips type)
+static inline u8 DIV_TO_REG(long val, enum chips type)
 {
 	int i;
 	val = SENSORS_LIMIT(val, 1,
@@ -314,11 +305,6 @@ extern inline u8 DIV_TO_REG(long val, enum chips type)
 #define W83781D_INIT_TEMP3_OVER 600
 #define W83781D_INIT_TEMP3_HYST 500
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /* There are some complications in a module like this. First off, W83781D chips
    may be both present on the SMBus and the ISA bus, and we have to handle
    those cases separately at some places. Second, there might be several
@@ -380,22 +366,12 @@ struct w83781d_data {
 };
 
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_w83781d_init(void);
-static int __init w83781d_cleanup(void);
-
 static int w83781d_attach_adapter(struct i2c_adapter *adapter);
 static int w83781d_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int w83781d_detach_client(struct i2c_client *client);
 static int w83781d_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void w83781d_inc_use(struct i2c_client *client);
-static void w83781d_dec_use(struct i2c_client *client);
 
 static int w83781d_read_value(struct i2c_client *client, u16 register);
 static int w83781d_write_value(struct i2c_client *client, u16 register,
@@ -435,18 +411,14 @@ static u16 swap_bytes(u16 val);
 static int w83781d_id = 0;
 
 static struct i2c_driver w83781d_driver = {
-	/* name */ "W83781D sensor driver",
-	/* id */ I2C_DRIVERID_W83781D,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &w83781d_attach_adapter,
-	/* detach_client */ &w83781d_detach_client,
-	/* command */ &w83781d_command,
-	/* inc_use */ &w83781d_inc_use,
-	/* dec_use */ &w83781d_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "W83781D sensor driver",
+	.id		= I2C_DRIVERID_W83781D,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= w83781d_attach_adapter,
+	.detach_client	= w83781d_detach_client,
+	.command	= w83781d_command,
 };
-
-/* Used by w83781d_init/cleanup */
-static int __initdata w83781d_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected chip. This is just a template;
@@ -756,7 +728,7 @@ static ctl_table w83697hf_dir_table_template[] = {
      * w83781d_driver is inserted (when this module is loaded), for each
        available adapter
      * when a new adapter is inserted (and w83781d_driver is still present) */
-int w83781d_attach_adapter(struct i2c_adapter *adapter)
+static int w83781d_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, w83781d_detect);
 }
@@ -1065,7 +1037,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int w83781d_detach_client(struct i2c_client *client)
+static int w83781d_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -1098,26 +1070,13 @@ int w83781d_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int w83781d_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int w83781d_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void w83781d_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-void w83781d_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-u16 swap_bytes(u16 val)
+static u16 swap_bytes(u16 val)
 {
 	return (val >> 8) | (val << 8);
 }
@@ -1128,7 +1087,7 @@ u16 swap_bytes(u16 val)
    would slow down the W83781D access and should not be necessary. 
    There are some ugly typecasts here, but the good news is - they should
    nowhere else be necessary! */
-int w83781d_read_value(struct i2c_client *client, u16 reg)
+static int w83781d_read_value(struct i2c_client *client, u16 reg)
 {
 	int res, word_sized, bank;
 	struct i2c_client *cl;
@@ -1204,7 +1163,7 @@ int w83781d_read_value(struct i2c_client *client, u16 reg)
 	return res;
 }
 
-int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
+static int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 {
 	int word_sized, bank;
 	struct i2c_client *cl;
@@ -1273,7 +1232,7 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 }
 
 /* Called when we have found a new W83781D. It should set limits, etc. */
-void w83781d_init_client(struct i2c_client *client)
+static void w83781d_init_client(struct i2c_client *client)
 {
 	struct w83781d_data *data = client->data;
 	int vid = 0, i, p;
@@ -1477,7 +1436,7 @@ void w83781d_init_client(struct i2c_client *client)
 			    | 0x01);
 }
 
-void w83781d_update_client(struct i2c_client *client)
+static void w83781d_update_client(struct i2c_client *client)
 {
 	struct w83781d_data *data = client->data;
 	int i, j;
@@ -2043,59 +2002,24 @@ void w83781d_rt(struct i2c_client *client, int operation, int ctl_name,
 }
 #endif
 
-int __init sensors_w83781d_init(void)
+static int __init sm_w83781d_init(void)
 {
-	int res;
-
 	printk(KERN_INFO "w83781d.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	w83781d_initialized = 0;
-
-	if ((res = i2c_add_driver(&w83781d_driver))) {
-		printk
-		    (KERN_ERR "w83781d.o: Driver registration failed, module not inserted.\n");
-		w83781d_cleanup();
-		return res;
-	}
-	w83781d_initialized++;
-	return 0;
+	return i2c_add_driver(&w83781d_driver);
 }
 
-int __init w83781d_cleanup(void)
+static void __exit sm_w83781d_exit(void)
 {
-	int res;
-
-	if (w83781d_initialized >= 1) {
-		if ((res = i2c_del_driver(&w83781d_driver))) {
-			printk
-			    (KERN_ERR "w83781d.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		w83781d_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&w83781d_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, "
 	      "Philip Edelbrock <phil@netroedge.com>, "
 	      "and Mark Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("W83781D driver");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-
-int init_module(void)
-{
-	return sensors_w83781d_init();
-}
-
-int cleanup_module(void)
-{
-	return w83781d_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_w83781d_init);
+module_exit(sm_w83781d_exit);

@@ -320,15 +320,6 @@ s32 amd8111_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 	return 0;
 }
 
-void amd8111_inc(struct i2c_adapter *adapter)
-{
-	MOD_INC_USE_COUNT;
-}
-
-void amd8111_dec(struct i2c_adapter *adapter)
-{
-	MOD_DEC_USE_COUNT;
-}
 
 u32 amd8111_func(struct i2c_adapter *adapter)
 {
@@ -345,9 +336,16 @@ static struct i2c_algorithm smbus_algorithm = {
 	.functionality = amd8111_func,
 };
 
+
+static struct pci_device_id amd8111_ids[] __devinitdata = {
+	{ 0x1022, 0x746a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ 0, }
+};
+
 static int __devinit amd8111_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
 	struct amd_smbus *smbus;
+	int error;
 
 	if (~pci_resource_flags(dev, 0) & IORESOURCE_IO)
 		return -1;
@@ -366,14 +364,14 @@ static int __devinit amd8111_probe(struct pci_dev *dev, const struct pci_device_
 		return -1;
 	}
 
+	smbus->adapter.owner = THIS_MODULE;
 	sprintf(smbus->adapter.name, "SMBus2 AMD8111 adapter at %04x", smbus->base);
 	smbus->adapter.id = I2C_ALGO_SMBUS | I2C_HW_SMBUS_AMD8111;
 	smbus->adapter.algo = &smbus_algorithm;
 	smbus->adapter.algo_data = smbus;
-	smbus->adapter.inc_use = amd8111_inc;
-	smbus->adapter.dec_use = amd8111_dec;
 
-	if (i2c_add_adapter(&smbus->adapter)) {
+	error = i2c_add_adapter(&smbus->adapter);
+	if (error) {
 		printk(KERN_WARNING "i2c-amd8111.c: Failed to register adapter.\n");
 		release_region(smbus->base, smbus->size);
 		kfree(smbus);
@@ -386,39 +384,33 @@ static int __devinit amd8111_probe(struct pci_dev *dev, const struct pci_device_
 	return 0;
 }
 
+
 static void __devexit amd8111_remove(struct pci_dev *dev)
 {
 	struct amd_smbus *smbus = (void*) pci_get_drvdata(dev);
-	if (i2c_del_adapter(&smbus->adapter)) {
-		printk(KERN_WARNING "i2c-amd8111.c: Failed to unregister adapter.\n");
-		return;
-	}
+	i2c_del_adapter(&smbus->adapter);
 	release_region(smbus->base, smbus->size);
 	kfree(smbus);
 }
 
-static struct pci_device_id amd8111_id_table[] __devinitdata =
-{{ 0x1022, 0x746a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
- { 0 }};
-
-
 static struct pci_driver amd8111_driver = {
-	.name = "amd8111 smbus 2.0",
-	.id_table = amd8111_id_table,
-	.probe = amd8111_probe,
-	.remove = __devexit_p(amd8111_remove),
+	.name		= "amd8111 smbus 2.0",
+	.id_table	= amd8111_ids,
+	.probe		= amd8111_probe,
+	.remove		= __devexit_p(amd8111_remove),
 };
 
-int __init amd8111_init(void)
+static int __init i2c_amd8111_init(void)
 {
 	printk(KERN_INFO "i2c-amd8111.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	return pci_module_init(&amd8111_driver);
 }
 
-void __exit amd8111_exit(void)
+
+static void __exit i2c_amd8111_exit(void)
 {
 	pci_unregister_driver(&amd8111_driver);
 }
 
-module_init(amd8111_init);
-module_exit(amd8111_exit);
+module_init(i2c_amd8111_init);
+module_exit(i2c_amd8111_exit);

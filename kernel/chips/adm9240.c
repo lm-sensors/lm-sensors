@@ -62,18 +62,7 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -148,7 +137,7 @@ SENSORS_INSMOD_3(adm9240, ds1780, lm81);
 #define IN_TO_REG(val,nr) (SENSORS_LIMIT(((val) & 0xff),0,255))
 #define IN_FROM_REG(val,nr) (val)
 
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 255;
@@ -221,11 +210,6 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define ADM9240_INIT_TEMP_HOT_MAX 700
 #define ADM9240_INIT_TEMP_HOT_HYST 600
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /* For each registered ADM9240, we need to keep some data in memory. That
    data is pointed to by adm9240_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new adm9240 client is
@@ -253,22 +237,12 @@ struct adm9240_data {
 };
 
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_adm9240_init(void);
-static int __init adm9240_cleanup(void);
-
 static int adm9240_attach_adapter(struct i2c_adapter *adapter);
 static int adm9240_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int adm9240_detach_client(struct i2c_client *client);
 static int adm9240_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void adm9240_inc_use(struct i2c_client *client);
-static void adm9240_dec_use(struct i2c_client *client);
 
 static int adm9240_read_value(struct i2c_client *client, u8 register);
 static int adm9240_write_value(struct i2c_client *client, u8 register,
@@ -299,18 +273,14 @@ static void adm9240_vid(struct i2c_client *client, int operation,
 static int adm9240_id = 0;
 
 static struct i2c_driver adm9240_driver = {
-	/* name */ "ADM9240 sensor driver",
-	/* id */ I2C_DRIVERID_ADM9240,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &adm9240_attach_adapter,
-	/* detach_client */ &adm9240_detach_client,
-	/* command */ &adm9240_command,
-	/* inc_use */ &adm9240_inc_use,
-	/* dec_use */ &adm9240_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "ADM9240 sensor driver",
+	.id		= I2C_DRIVERID_ADM9240,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= adm9240_attach_adapter,
+	.detach_client	= adm9240_detach_client,
+	.command	= adm9240_command,
 };
-
-/* Used by adm9240_init/cleanup */
-static int __initdata adm9240_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected ADM9240. This is just a template;
@@ -348,7 +318,7 @@ static ctl_table adm9240_dir_table_template[] = {
 	{0}
 };
 
-int adm9240_attach_adapter(struct i2c_adapter *adapter)
+static int adm9240_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, adm9240_detect);
 }
@@ -480,7 +450,7 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int adm9240_detach_client(struct i2c_client *client)
+static int adm9240_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -500,37 +470,24 @@ int adm9240_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int adm9240_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int adm9240_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void adm9240_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-void adm9240_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-int adm9240_read_value(struct i2c_client *client, u8 reg)
+static int adm9240_read_value(struct i2c_client *client, u8 reg)
 {
 	return 0xFF & i2c_smbus_read_byte_data(client, reg);
 }
 
-int adm9240_write_value(struct i2c_client *client, u8 reg, u8 value)
+static int adm9240_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
 /* Called when we have found a new ADM9240. It should set limits, etc. */
-void adm9240_init_client(struct i2c_client *client)
+static void adm9240_init_client(struct i2c_client *client)
 {
 	/* Reset all except Watchdog values and last conversion values
 	   This sets fan-divs to 2, among others. This makes most other
@@ -575,7 +532,7 @@ void adm9240_init_client(struct i2c_client *client)
 	adm9240_write_value(client, ADM9240_REG_CONFIG, 0x01);
 }
 
-void adm9240_update_client(struct i2c_client *client)
+static void adm9240_update_client(struct i2c_client *client)
 {
 	struct adm9240_data *data = client->data;
 	u8 i;
@@ -824,54 +781,22 @@ void adm9240_vid(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_adm9240_init(void)
+static int __init sm_adm9240_init(void)
 {
-	int res;
-
 	printk("adm9240.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	adm9240_initialized = 0;
-
-	if ((res = i2c_add_driver(&adm9240_driver))) {
-		printk
-		    ("adm9240.o: Driver registration failed, module not inserted.\n");
-		adm9240_cleanup();
-		return res;
-	}
-	adm9240_initialized++;
-	return 0;
+	return i2c_add_driver(&adm9240_driver);
 }
 
-int __init adm9240_cleanup(void)
+static void __exit sm_adm9240_exit(void)
 {
-	int res;
-
-	if (adm9240_initialized >= 1) {
-		if ((res = i2c_del_driver(&adm9240_driver))) {
-			printk
-			    ("adm9240.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		adm9240_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&adm9240_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("ADM9240 driver");
 
-int init_module(void)
-{
-	return sensors_adm9240_init();
-}
-
-int cleanup_module(void)
-{
-	return adm9240_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_adm9240_init);
+module_exit(sm_adm9240_exit);

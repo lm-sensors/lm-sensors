@@ -30,45 +30,22 @@
 #include <linux/ipmi.h>
 #include "version.h"
 
-static void i2c_ipmi_inc_use(struct i2c_adapter *adapter);
-static void i2c_ipmi_dec_use(struct i2c_adapter *adapter);
-static u32 i2c_ipmi_func(struct i2c_adapter *adapter);
+
 static int bmcclient_i2c_send_message(struct i2c_adapter *, char *, int);
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init i2c_ipmi_init(void);
-static int __init i2c_ipmi_cleanup(void);
-
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
 
 /* I2C Data */
 static struct i2c_algorithm i2c_ipmi_algorithm = {
 	.name = "IPMI algorithm",
 	.id = I2C_ALGO_IPMI,
-	.master_xfer = NULL,
-	.smbus_xfer = NULL,
 	.slave_send = &bmcclient_i2c_send_message,
-	.slave_recv = NULL,
-	.algo_control = NULL,
 	.functionality = &i2c_ipmi_func,
 };
 
 static struct i2c_adapter i2c_ipmi_adapter = {
-	.name = "IPMI adapter",
-	.id = I2C_ALGO_IPMI | I2C_HW_IPMI,
-	.algo = &i2c_ipmi_algorithm,
-	.algo_data = NULL,
-	.inc_use = &i2c_ipmi_inc_use,
-	.dec_use = &i2c_ipmi_dec_use,
-	.data = NULL,
-	/* Other fields not initialized */
+	.owner		= THIS_MODULE,
+	.name		= "IPMI adapter",
+	.id		= I2C_ALGO_IPMI | I2C_HW_IPMI,
+	.algo		= &i2c_ipmi_algorithm,
 };
 
 /* IPMI Data */
@@ -87,19 +64,6 @@ static int interfaces;		/* number of BMC's found */
 static int (*rcv_callback)(struct i2c_client *client, unsigned int cmd,
                            void *arg);
 
-void i2c_ipmi_inc_use(struct i2c_adapter *adapter)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void i2c_ipmi_dec_use(struct i2c_adapter *adapter)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
 
 /* Dummy adapter... */
 static u32 i2c_ipmi_func(struct i2c_adapter *adapter)
@@ -189,8 +153,7 @@ static struct ipmi_user_hndl ipmi_hndlrs =
 /* callback for each BMC found */
 static void ipmi_register_bmc(int ipmi_intf)
 {
-	unsigned long flags;
-	int rv;
+	int error;
 
 	if(interfaces > 0) {	/* 1 max for now */
 		printk(KERN_INFO
@@ -199,13 +162,14 @@ static void ipmi_register_bmc(int ipmi_intf)
 		return;
 	}
 
-	rv = ipmi_create_user(ipmi_intf, &ipmi_hndlrs, NULL, &i2c_ipmi_user);
-	if (rv < 0) {
+	error = ipmi_create_user(ipmi_intf, &ipmi_hndlrs, NULL, &i2c_ipmi_user);
+	if (error < 0) {
 		printk(KERN_ERR "i2c-ipmi.o: Unable to register with ipmi\n");
 		return;
 	}
 
-	if ((rv = i2c_add_adapter(&i2c_ipmi_adapter))) {
+	return i2c_add_adapter(&i2c_ipmi_adapter);
+	if (error) {
 		printk(KERN_ERR "i2c-ipmi.o: Adapter registration failed, "
 		       "module i2c-ipmi.o is not inserted\n.");
 		return;
@@ -239,7 +203,7 @@ static struct ipmi_smi_watcher smi_watcher =
 	.smi_gone = ipmi_smi_gone
 };
 
-int __init i2c_ipmi_init(void)
+static int __init i2c_ipmi_init(void)
 {
 	int rv;
 
@@ -256,28 +220,16 @@ int __init i2c_ipmi_init(void)
 	return 0;
 }
 
-int __init ipmi_cleanup(void)
+
+static void __exit i2c_ipmi_exit(void)
 {
 	ipmi_smi_watcher_unregister(&smi_watcher);
 	ipmi_smi_gone(0);
-	return 0;
 }
 
-#ifdef MODULE
 MODULE_AUTHOR("M. D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("IPMI-BMC access through i2c");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-int init_module(void)
-{
-	return i2c_ipmi_init();
-}
-
-int cleanup_module(void)
-{
-	return ipmi_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(i2c_ipmi_init);
+module_exit(i2c_ipmi_exit);

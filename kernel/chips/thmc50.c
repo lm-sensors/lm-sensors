@@ -29,18 +29,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -100,18 +89,6 @@ struct thmc50_data {
 	    inter, inter_mask, die_code, analog_out;	/* Register values */
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_thmc50_init(void);
-static int __init thmc50_cleanup(void);
 static int thmc50_attach_adapter(struct i2c_adapter *adapter);
 static int thmc50_detect(struct i2c_adapter *adapter, int address,
 			 unsigned short flags, int kind);
@@ -119,8 +96,7 @@ static void thmc50_init_client(struct i2c_client *client);
 static int thmc50_detach_client(struct i2c_client *client);
 static int thmc50_command(struct i2c_client *client, unsigned int cmd,
 			  void *arg);
-static void thmc50_inc_use(struct i2c_client *client);
-static void thmc50_dec_use(struct i2c_client *client);
+
 static int thmc50_read_value(struct i2c_client *client, u8 reg);
 static int thmc50_write_value(struct i2c_client *client, u8 reg,
 			      u16 value);
@@ -142,14 +118,13 @@ static void thmc50_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver thmc50_driver = {
-	/* name */ "THMC50 sensor chip driver",
-	/* id */ I2C_DRIVERID_THMC50,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &thmc50_attach_adapter,
-	/* detach_client */ &thmc50_detach_client,
-	/* command */ &thmc50_command,
-	/* inc_use */ &thmc50_inc_use,
-	/* dec_use */ &thmc50_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "THMC50 sensor chip driver",
+	.id		= I2C_DRIVERID_THMC50,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= thmc50_attach_adapter,
+	.detach_client	= thmc50_detach_client,
+	.command	= thmc50_command,
 };
 
 /* These files are created for each detected THMC50. This is just a template;
@@ -173,12 +148,10 @@ static ctl_table thmc50_dir_table_template[] = {
 	{0}
 };
 
-/* Used by init/cleanup */
-static int __initdata thmc50_initialized = 0;
 
 static int thmc50_id = 0;
 
-int thmc50_attach_adapter(struct i2c_adapter *adapter)
+static int thmc50_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, thmc50_detect);
 }
@@ -292,7 +265,7 @@ int thmc50_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int thmc50_detach_client(struct i2c_client *client)
+static int thmc50_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -312,29 +285,16 @@ int thmc50_detach_client(struct i2c_client *client)
 
 
 /* No commands defined yet */
-int thmc50_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int thmc50_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void thmc50_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void thmc50_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
 
 /* All registers are word-sized, except for the configuration register.
    THMC50 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
-int thmc50_read_value(struct i2c_client *client, u8 reg)
+static int thmc50_read_value(struct i2c_client *client, u8 reg)
 {
 	return i2c_smbus_read_byte_data(client, reg);
 }
@@ -342,12 +302,12 @@ int thmc50_read_value(struct i2c_client *client, u8 reg)
 /* All registers are word-sized, except for the configuration register.
    THMC50 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
-int thmc50_write_value(struct i2c_client *client, u8 reg, u16 value)
+static int thmc50_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
-void thmc50_init_client(struct i2c_client *client)
+static void thmc50_init_client(struct i2c_client *client)
 {
 	/* Initialize the THMC50 chip */
 	thmc50_write_value(client, THMC50_REG_TEMP_OS,
@@ -357,7 +317,7 @@ void thmc50_init_client(struct i2c_client *client)
 	thmc50_write_value(client, THMC50_REG_CONF, 1);
 }
 
-void thmc50_update_client(struct i2c_client *client)
+static void thmc50_update_client(struct i2c_client *client)
 {
 	struct thmc50_data *data = client->data;
 
@@ -526,54 +486,25 @@ void thmc50_analog_out(struct i2c_client *client, int operation,
 
 
 
-int __init sensors_thmc50_init(void)
+static int __init sm_thmc50_init(void)
 {
 	int res;
 
 	printk("thmc50.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	thmc50_initialized = 0;
-	if ((res = i2c_add_driver(&thmc50_driver))) {
-		printk
-		    ("thmc50.o: Driver registration failed, module not inserted.\n");
-		thmc50_cleanup();
-		return res;
-	}
-	thmc50_initialized++;
-	return 0;
+
+	return i2c_add_driver(&thmc50_driver);
 }
 
-int __init thmc50_cleanup(void)
+static void __exit sm_thmc50_exit(void)
 {
-	int res;
-
-	if (thmc50_initialized >= 1) {
-		if ((res = i2c_del_driver(&thmc50_driver))) {
-			printk
-			    ("thmc50.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		thmc50_initialized--;
-	}
-
-	return 0;
+	i2c_del_driver(&thmc50_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("THMC50 driver");
 
-int init_module(void)
-{
-	return sensors_thmc50_init();
-}
-
-int cleanup_module(void)
-{
-	return thmc50_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_thmc50_init);
+module_exit(sm_thmc50_exit);

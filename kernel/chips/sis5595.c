@@ -60,18 +60,7 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* If force_addr is set to anything different from 0, we forcibly enable
    the device at the given address. */
@@ -174,7 +163,7 @@ static int blacklist[] = {
 #define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 8)/16),0,255))
 #define IN_FROM_REG(val) (((val) *  16) / 10)
 
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 255;
@@ -234,11 +223,6 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define SIS5595_INIT_TEMP_OVER 600
 #define SIS5595_INIT_TEMP_HYST 100
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /* For the SIS5595, we need to keep some data in memory. That
    data is pointed to by sis5595_list[NR]->data. The structure itself is
    dynamically allocated, at the time when the new sis5595 client is
@@ -267,22 +251,12 @@ struct sis5595_data {
 
 static struct pci_dev *s_bridge;	/* pointer to the (only) sis5595 */
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_sis5595_init(void);
-static int __init sis5595_cleanup(void);
-
 static int sis5595_attach_adapter(struct i2c_adapter *adapter);
 static int sis5595_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int sis5595_detach_client(struct i2c_client *client);
 static int sis5595_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void sis5595_inc_use(struct i2c_client *client);
-static void sis5595_dec_use(struct i2c_client *client);
 
 static int sis5595_read_value(struct i2c_client *client, u8 register);
 static int sis5595_write_value(struct i2c_client *client, u8 register,
@@ -308,18 +282,14 @@ static int sis5595_id = 0;
 /* The driver. I choose to use type i2c_driver, as at is identical to both
    smbus_driver and isa_driver, and clients could be of either kind */
 static struct i2c_driver sis5595_driver = {
-	/* name */ "SiS 5595",
-	/* id */ I2C_DRIVERID_SIS5595,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &sis5595_attach_adapter,
-	/* detach_client */ &sis5595_detach_client,
-	/* command */ &sis5595_command,
-	/* inc_use */ &sis5595_inc_use,
-	/* dec_use */ &sis5595_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "SiS 5595",
+	.id		= I2C_DRIVERID_SIS5595,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= sis5595_attach_adapter,
+	.detach_client	= sis5595_detach_client,
+	.command	= sis5595_command,
 };
-
-/* Used by sis5595_init/cleanup */
-static int __initdata sis5595_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected SIS5595. This is just a template;
@@ -352,13 +322,13 @@ static ctl_table sis5595_dir_table_template[] = {
 };
 
 /* This is called when the module is loaded */
-int sis5595_attach_adapter(struct i2c_adapter *adapter)
+static int sis5595_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, sis5595_detect);
 }
 
 /* Locate SiS bridge and correct base address for SIS5595 */
-int sis5595_find_sis(int *address)
+static int sis5595_find_sis(int *address)
 {
 	u16 val;
 	int *i;
@@ -516,7 +486,7 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int sis5595_detach_client(struct i2c_client *client)
+static int sis5595_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -536,30 +506,17 @@ int sis5595_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int sis5595_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int sis5595_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void sis5595_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void sis5595_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
 
 
 /* ISA access must be locked explicitly.
    There are some ugly typecasts here, but the good news is - they should
    nowhere else be necessary! */
-int sis5595_read_value(struct i2c_client *client, u8 reg)
+static int sis5595_read_value(struct i2c_client *client, u8 reg)
 {
 	int res;
 
@@ -570,7 +527,7 @@ int sis5595_read_value(struct i2c_client *client, u8 reg)
 	return res;
 }
 
-int sis5595_write_value(struct i2c_client *client, u8 reg, u8 value)
+static int sis5595_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	down(&(((struct sis5595_data *) (client->data))->lock));
 	outb_p(reg, client->addr + SIS5595_ADDR_REG_OFFSET);
@@ -580,7 +537,7 @@ int sis5595_write_value(struct i2c_client *client, u8 reg, u8 value)
 }
 
 /* Called when we have found a new SIS5595. It should set limits, etc. */
-void sis5595_init_client(struct i2c_client *client)
+static void sis5595_init_client(struct i2c_client *client)
 {
 	struct sis5595_data *data = client->data;
 
@@ -627,7 +584,7 @@ void sis5595_init_client(struct i2c_client *client)
 
 }
 
-void sis5595_update_client(struct i2c_client *client)
+static void sis5595_update_client(struct i2c_client *client)
 {
 	struct sis5595_data *data = client->data;
 	int i;
@@ -831,12 +788,11 @@ void sis5595_fan_div(struct i2c_client *client, int operation,
 	}
 }
 
-int __init sensors_sis5595_init(void)
+static int __init sm_sis5595_init(void)
 {
 	int res, addr;
 
 	printk("sis5595.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	sis5595_initialized = 0;
 
 	if (sis5595_find_sis(&addr)) {
 		printk("sis5595.o: SIS5595 not detected, module not inserted.\n");
@@ -844,46 +800,18 @@ int __init sensors_sis5595_init(void)
 	}
 	normal_isa[0] = addr;
 
-	if ((res = i2c_add_driver(&sis5595_driver))) {
-		printk
-		    ("sis5595.o: Driver registration failed, module not inserted.\n");
-		sis5595_cleanup();
-		return res;
-	}
-	sis5595_initialized++;
-	return 0;
+	return i2c_add_driver(&sis5595_driver);
 }
 
-int __init sis5595_cleanup(void)
+static void __exit sm_sis5595_exit(void)
 {
-	int res;
-
-	if (sis5595_initialized >= 1) {
-		if ((res = i2c_del_driver(&sis5595_driver))) {
-			printk
-			    ("sis5595.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		sis5595_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&sis5595_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Kyösti Mälkki <kmalkki@cc.hut.fi>");
 MODULE_DESCRIPTION("SiS 5595 Sensor device");
 
-int init_module(void)
-{
-	return sensors_sis5595_init();
-}
-
-int cleanup_module(void)
-{
-	return sis5595_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_sis5595_init);
+module_exit(sm_sis5595_exit);

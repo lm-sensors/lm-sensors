@@ -32,18 +32,7 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -92,7 +81,7 @@ SENSORS_INSMOD_3(lm78, lm78j, lm79);
 #define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 8)/16),0,255))
 #define IN_FROM_REG(val) (((val) *  16) / 10)
 
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 255;
@@ -162,11 +151,6 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define LM78_INIT_TEMP_OVER 600
 #define LM78_INIT_TEMP_HYST 500
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /* There are some complications in a module like this. First off, LM78 chips
    may be both present on the SMBus and the ISA bus, and we have to handle
    those cases separately at some places. Second, there might be several
@@ -209,22 +193,12 @@ struct lm78_data {
 };
 
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_lm78_init(void);
-static int __init lm78_cleanup(void);
-
 static int lm78_attach_adapter(struct i2c_adapter *adapter);
 static int lm78_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int lm78_detach_client(struct i2c_client *client);
 static int lm78_command(struct i2c_client *client, unsigned int cmd,
 			void *arg);
-static void lm78_inc_use(struct i2c_client *client);
-static void lm78_dec_use(struct i2c_client *client);
 
 static int lm78_read_value(struct i2c_client *client, u8 register);
 static int lm78_write_value(struct i2c_client *client, u8 register,
@@ -247,18 +221,14 @@ static void lm78_fan_div(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver lm78_driver = {
-	/* name */ "LM78(-J) and LM79 sensor driver",
-	/* id */ I2C_DRIVERID_LM78,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &lm78_attach_adapter,
-	/* detach_client */ &lm78_detach_client,
-	/* command */ &lm78_command,
-	/* inc_use */ &lm78_inc_use,
-	/* dec_use */ &lm78_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "LM78(-J) and LM79 sensor driver",
+	.id		= I2C_DRIVERID_LM78,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= lm78_attach_adapter,
+	.detach_client	= lm78_detach_client,
+	.command	= lm78_command,
 };
-
-/* Used by lm78_init/cleanup */
-static int __initdata lm78_initialized = 0;
 
 static int lm78_id = 0;
 
@@ -305,7 +275,7 @@ static ctl_table lm78_dir_table_template[] = {
      * lm78_driver is inserted (when this module is loaded), for each
        available adapter
      * when a new adapter is inserted (and lm78_driver is still present) */
-int lm78_attach_adapter(struct i2c_adapter *adapter)
+static int lm78_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, lm78_detect);
 }
@@ -469,7 +439,7 @@ int lm78_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int lm78_detach_client(struct i2c_client *client)
+static int lm78_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -490,26 +460,11 @@ int lm78_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int lm78_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int lm78_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-/* Nothing here yet */
-void lm78_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-/* Nothing here yet */
-void lm78_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
 
 
 /* The SMBus locks itself, but ISA access must be locked explicitely! 
@@ -519,7 +474,7 @@ void lm78_dec_use(struct i2c_client *client)
    would slow down the LM78 access and should not be necessary. 
    There are some ugly typecasts here, but the good new is - they should
    nowhere else be necessary! */
-int lm78_read_value(struct i2c_client *client, u8 reg)
+static int lm78_read_value(struct i2c_client *client, u8 reg)
 {
 	int res;
 	if (i2c_is_isa_client(client)) {
@@ -539,7 +494,7 @@ int lm78_read_value(struct i2c_client *client, u8 reg)
    would slow down the LM78 access and should not be necessary. 
    There are some ugly typecasts here, but the good new is - they should
    nowhere else be necessary! */
-int lm78_write_value(struct i2c_client *client, u8 reg, u8 value)
+static int lm78_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	if (i2c_is_isa_client(client)) {
 		down(&(((struct lm78_data *) (client->data))->lock));
@@ -552,7 +507,7 @@ int lm78_write_value(struct i2c_client *client, u8 reg, u8 value)
 }
 
 /* Called when we have found a new LM78. It should set limits, etc. */
-void lm78_init_client(struct i2c_client *client)
+static void lm78_init_client(struct i2c_client *client)
 {
 	int vid;
 
@@ -614,7 +569,7 @@ void lm78_init_client(struct i2c_client *client)
 
 }
 
-void lm78_update_client(struct i2c_client *client)
+static void lm78_update_client(struct i2c_client *client)
 {
 	struct lm78_data *data = client->data;
 	int i;
@@ -820,53 +775,21 @@ void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_lm78_init(void)
+static int __init sm_lm78_init(void)
 {
-	int res;
-
 	printk("lm78.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	lm78_initialized = 0;
-
-	if ((res = i2c_add_driver(&lm78_driver))) {
-		printk
-		    ("lm78.o: Driver registration failed, module not inserted.\n");
-		lm78_cleanup();
-		return res;
-	}
-	lm78_initialized++;
-	return 0;
+	return i2c_add_driver(&lm78_driver);
 }
 
-int __init lm78_cleanup(void)
+static void __exit sm_lm78_exit(void)
 {
-	int res;
-
-	if (lm78_initialized >= 1) {
-		if ((res = i2c_del_driver(&lm78_driver))) {
-			printk
-			    ("lm78.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		lm78_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&lm78_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>");
 MODULE_DESCRIPTION("LM78, LM78-J and LM79 driver");
 
-int init_module(void)
-{
-	return sensors_lm78_init();
-}
-
-int cleanup_module(void)
-{
-	return lm78_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_lm78_init);
+module_exit(sm_lm78_exit);

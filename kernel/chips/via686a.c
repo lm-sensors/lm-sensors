@@ -46,22 +46,12 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
 #ifndef PCI_DEVICE_ID_VIA_82C686_4
 #define PCI_DEVICE_ID_VIA_82C686_4 0x3057
 #endif
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* If force_addr is set to anything different from 0, we forcibly enable
    the device at the given address. */
@@ -149,7 +139,7 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e };
 // 
 // These get us close, but they don't completely agree with what my BIOS 
 // says- they are all a bit low.  But, it all we have to go on...
-extern inline u8 IN_TO_REG(long val, int inNum)
+static inline u8 IN_TO_REG(long val, int inNum)
 {
 	// to avoid floating point, we multiply everything by 100.
 	// val is guaranteed to be positive, so we can achieve the effect of 
@@ -174,7 +164,7 @@ extern inline u8 IN_TO_REG(long val, int inNum)
 					  / 1000, 0, 255);
 }
 
-extern inline long IN_FROM_REG(u8 val, int inNum)
+static inline long IN_FROM_REG(u8 val, int inNum)
 {
 	// to avoid floating point, we multiply everything by 100.
 	// val is guaranteed to be positive, so we can achieve the effect of
@@ -194,7 +184,7 @@ extern inline long IN_FROM_REG(u8 val, int inNum)
 // Higher register values = slower fans (the fan's strobe gates a counter).
 // But this chip saturates back at 0, not at 255 like all the other chips.
 // So, 0 means 0 RPM
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 0;
@@ -302,7 +292,7 @@ static const u8 viaLUT[] =
 // No interpolation here.  Just check the limits and go.
 // The +5 effectively rounds off properly and the +50 is because 
 // the temps start at -50
-extern inline u8 TEMP_TO_REG(long val)
+static inline u8 TEMP_TO_REG(long val)
 {
 	return (u8)
 	    SENSORS_LIMIT(viaLUT[((val <= -500) ? 0 : (val >= 1100) ? 160 : 
@@ -317,7 +307,7 @@ extern inline u8 TEMP_TO_REG(long val)
 /* for 10-bit temperature readings */
 // You might _think_ this is too long to inline, but's it's really only
 // called once...
-extern inline long TEMP_FROM_REG10(u16 val)
+static inline long TEMP_FROM_REG10(u16 val)
 {
 	// the temp values are already *10, so we don't need to do that.
 	long temp;
@@ -386,11 +376,6 @@ extern inline long TEMP_FROM_REG10(u16 val)
 #define VIA686A_INIT_TEMP_OVER 600
 #define VIA686A_INIT_TEMP_HYST 500
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /* For the VIA686A, we need to keep some data in memory. That
    data is pointed to by via686a_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new via686a client is
@@ -417,22 +402,12 @@ struct via686a_data {
 
 static struct pci_dev *s_bridge;	/* pointer to the (only) via686a */
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_via686a_init(void);
-static int __init via686a_cleanup(void);
-
 static int via686a_attach_adapter(struct i2c_adapter *adapter);
 static int via686a_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int via686a_detach_client(struct i2c_client *client);
 static int via686a_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void via686a_inc_use(struct i2c_client *client);
-static void via686a_dec_use(struct i2c_client *client);
 
 static int via686a_read_value(struct i2c_client *client, u8 register);
 static void via686a_write_value(struct i2c_client *client, u8 register,
@@ -458,18 +433,14 @@ static int via686a_id = 0;
 /* The driver. I choose to use type i2c_driver, as at is identical to both
    smbus_driver and isa_driver, and clients could be of either kind */
 static struct i2c_driver via686a_driver = {
-	/* name */ "VIA 686A",
-	/* id */ I2C_DRIVERID_VIA686A,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &via686a_attach_adapter,
-	/* detach_client */ &via686a_detach_client,
-	/* command */ &via686a_command,
-	/* inc_use */ &via686a_inc_use,
-	/* dec_use */ &via686a_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "VIA 686A",
+	.id		= I2C_DRIVERID_VIA686A,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= via686a_attach_adapter,
+	.detach_client	= via686a_detach_client,
+	.command	= via686a_command,
 };
-
-/* Used by via686a_init/cleanup */
-static int __initdata via686a_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected VIA686A. This is just a template;
@@ -517,13 +488,13 @@ static inline void via686a_write_value(struct i2c_client *client, u8 reg,
 }
 
 /* This is called when the module is loaded */
-int via686a_attach_adapter(struct i2c_adapter *adapter)
+static int via686a_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, via686a_detect);
 }
 
 /* Locate chip and get correct base address */
-int via686a_find(int *address)
+static int via686a_find(int *address)
 {
 	u16 val;
 
@@ -644,7 +615,7 @@ int via686a_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int via686a_detach_client(struct i2c_client *client)
+static int via686a_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -664,23 +635,14 @@ int via686a_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int via686a_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int via686a_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void via686a_inc_use(struct i2c_client *client)
-{
-	MOD_INC_USE_COUNT;
-}
-
-void via686a_dec_use(struct i2c_client *client)
-{
-	MOD_DEC_USE_COUNT;
-}
 
 /* Called when we have found a new VIA686A. Set limits, etc. */
-void via686a_init_client(struct i2c_client *client)
+static void via686a_init_client(struct i2c_client *client)
 {
 	int i;
 
@@ -734,7 +696,7 @@ void via686a_init_client(struct i2c_client *client)
 			    !(VIA686A_TEMP_MODE_MASK | VIA686A_TEMP_MODE_CONTINUOUS));
 }
 
-void via686a_update_client(struct i2c_client *client)
+static void via686a_update_client(struct i2c_client *client)
 {
 	struct via686a_data *data = client->data;
 	int i;
@@ -939,12 +901,11 @@ void via686a_fan_div(struct i2c_client *client, int operation,
 	}
 }
 
-int __init sensors_via686a_init(void)
+static int __init sm_via686a_init(void)
 {
 	int res, addr;
 
 	printk("via686a.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	via686a_initialized = 0;
 
 	if (via686a_find(&addr)) {
 		printk("via686a.o: No Via 686A sensors found.\n");
@@ -952,46 +913,19 @@ int __init sensors_via686a_init(void)
 	}
 	normal_isa[0] = addr;
 
-	if ((res = i2c_add_driver(&via686a_driver))) {
-		printk("via686a.o: Driver registration failed.\n");
-		via686a_cleanup();
-		return res;
-	}
-	via686a_initialized++;
-	return 0;
+	return i2c_add_driver(&via686a_driver);
 }
 
-int __init via686a_cleanup(void)
+static void __exit sm_via686a_exit(void)
 {
-	int res;
-
-	if (via686a_initialized >= 1) {
-		if ((res = i2c_del_driver(&via686a_driver))) {
-			printk
-			    ("via686a.o: Driver deregistration failed.\n");
-			return res;
-		}
-		via686a_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&via686a_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Kyösti Mälkki <kmalkki@cc.hut.fi>, Mark Studebaker <mdsxyz123@yahoo.com>, Bob Dougherty <bobd@stanford.edu>");
 MODULE_DESCRIPTION("VIA 686A Sensor device");
 
-int init_module(void)
-{
-	return sensors_via686a_init();
-}
-
-int cleanup_module(void)
-{
-	return via686a_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_via686a_init);
+module_exit(sm_via686a_exit);

@@ -65,19 +65,7 @@ static const char *version_str = "2.00 29/2/2000 Fons Rademakers";
 #include "sensors.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
-
 
 #undef AUTODETECT		/* try to autodetect MaxiLife version */
 /*#define AUTODETECT*/
@@ -133,7 +121,7 @@ SENSORS_INSMOD_1(maxilife);
 #define FAN_FROM_REG(val)      ((val)==0xfe ? 0 : (val)==0xff ? -1 : \
                                 (val)==0x00 ? -1 : (1171860 / (val)))
 
-extern inline u8 FAN_TO_REG(long rpm)
+static inline u8 FAN_TO_REG(long rpm)
 {
 	if (rpm == 0)
 		return 255;
@@ -241,11 +229,6 @@ extern inline u8 FAN_TO_REG(long rpm)
                                 (nr)==5 ? ((val) * 823 - 149140) : 0)
 
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /* The following product codenames apply:
      Cristal/Geronimo: HP KAYAK XU/XAs
                        (Dual Pentium II Slot 1, Deschutes/Klamath)
@@ -288,22 +271,12 @@ struct maxi_data {
 };
 
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_maxi_init(void);
-static int __init maxi_cleanup(void);
-
 static int maxi_attach_adapter(struct i2c_adapter *adapter);
 static int maxi_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int maxi_detach_client(struct i2c_client *client);
 static int maxi_command(struct i2c_client *client, unsigned int cmd,
 			void *arg);
-static void maxi_inc_use(struct i2c_client *client);
-static void maxi_dec_use(struct i2c_client *client);
 
 static int maxi_read_value(struct i2c_client *client, u8 register);
 static int maxi_read_token(struct i2c_client *client, u16 token);
@@ -341,18 +314,14 @@ static void maxi_alarms(struct i2c_client *client, int operation,
 /* The driver. I choose to use type i2c_driver, as at is identical to
    the smbus_driver. */
 static struct i2c_driver maxi_driver = {
-	/* name */ "HP MaxiLife driver",
-	/* id */ I2C_DRIVERID_MAXILIFE,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &maxi_attach_adapter,
-	/* detach_client */ &maxi_detach_client,
-	/* command */ &maxi_command,
-	/* inc_use */ &maxi_inc_use,
-	/* dec_use */ &maxi_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "HP MaxiLife driver",
+	.id		= I2C_DRIVERID_MAXILIFE,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= maxi_attach_adapter,
+	.detach_client	= maxi_detach_client,
+	.command	= maxi_command,
 };
-
-/* Used by maxi_init/cleanup */
-static int __initdata maxi_initialized = 0;
 
 static int maxi_id = 0;
 
@@ -416,7 +385,7 @@ static ctl_table maxi_dir_table_template[] = {
     - maxi_driver is inserted (when this module is loaded), for each
       available adapter
     - when a new adapter is inserted (and maxi_driver is still present) */
-int maxi_attach_adapter(struct i2c_adapter *adapter)
+static int maxi_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, maxi_detect);
 }
@@ -637,7 +606,7 @@ int maxi_detect(struct i2c_adapter *adapter, int address,
     - maxi_driver is removed (when this module is unloaded)
     - when an adapter is removed which has a maxi client (and maxi_driver
       is still present). */
-int maxi_detach_client(struct i2c_client *client)
+static int maxi_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -654,36 +623,19 @@ int maxi_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int maxi_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int maxi_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-/* Nothing here yet */
-void maxi_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-/* Nothing here yet */
-void maxi_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-
 /* Read byte from specified register (-1 in case of error, value otherwise). */
-int maxi_read_value(struct i2c_client *client, u8 reg)
+static int maxi_read_value(struct i2c_client *client, u8 reg)
 {
 	return i2c_smbus_read_byte_data(client, reg);
 }
 
 /* Read the byte value for a MaxiLife token (-1 in case of error, value otherwise */
-int maxi_read_token(struct i2c_client *client, u16 token)
+static int maxi_read_token(struct i2c_client *client, u16 token)
 {
 	u8 lowToken, highToken;
 	int error, value;
@@ -749,7 +701,7 @@ int maxi_read_token(struct i2c_client *client, u16 token)
 
 #ifndef NOWRITE
 /* Write byte to specified register (-1 in case of error, 0 otherwise). */
-int maxi_write_value(struct i2c_client *client, u8 reg, u8 value)
+static int maxi_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
@@ -822,7 +774,7 @@ int maxi_write_token_loop(struct i2c_client *client, u16 token, u8 len,
 }
 
 /* Called when we have found a new MaxiLife. It should set limits, etc. */
-void maxi_init_client(struct i2c_client *client)
+static void maxi_init_client(struct i2c_client *client)
 {
 	struct maxi_data *data = client->data;
 
@@ -834,7 +786,7 @@ void maxi_init_client(struct i2c_client *client)
 	}
 }
 
-void maxi_update_client(struct i2c_client *client)
+static void maxi_update_client(struct i2c_client *client)
 {
 	struct maxi_data *data = client->data;
 	int i;
@@ -1386,56 +1338,24 @@ void maxi_alarms(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_maxi_init(void)
+static int __init sm_maxilife_init(void)
 {
-	int res;
-
 	printk("maxilife: Version %s (lm_sensors %s (%s))\n", version_str,
 	       LM_VERSION, LM_DATE);
-	maxi_initialized = 0;
-
-	if ((res = i2c_add_driver(&maxi_driver))) {
-		printk
-		    ("maxilife: Driver registration failed, module not inserted.\n");
-		maxi_cleanup();
-		return res;
-	}
-	maxi_initialized++;
-	return 0;
+	return i2c_add_driver(&maxi_driver);
 }
 
-int __init maxi_cleanup(void)
+static void __exit sm_maxilife_exit(void)
 {
-	int res;
-
-	if (maxi_initialized >= 1) {
-		if ((res = i2c_del_driver(&maxi_driver))) {
-			printk
-			    ("maxilife: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		maxi_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&maxi_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Fons Rademakers <Fons.Rademakers@cern.ch>");
 MODULE_DESCRIPTION("HP MaxiLife driver");
 MODULE_PARM(maxi_version, "i");
 MODULE_PARM_DESC(maxi_version, "MaxiLife firmware version");
 
-int init_module(void)
-{
-	return sensors_maxi_init();
-}
-
-int cleanup_module(void)
-{
-	return maxi_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_maxilife_init);
+module_exit(sm_maxilife_exit);

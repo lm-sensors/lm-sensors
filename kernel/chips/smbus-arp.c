@@ -36,10 +36,6 @@
 #define I2C_DRIVERID_ARP        902    /* SMBus ARP Client              */
 #endif
 
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
-
 /* Addresses to scan */
 #define	ARP_ADDRESS	0x61
 static unsigned short normal_i2c[] = { ARP_ADDRESS, SENSORS_I2C_END };
@@ -115,18 +111,6 @@ struct arp_data {
 	struct arp_device dev[ARP_MAX_DEVICES];
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_smbusarp_init(void);
-static int __init smbusarp_cleanup(void);
 
 static int smbusarp_attach_adapter(struct i2c_adapter *adapter);
 static int smbusarp_detect(struct i2c_adapter *adapter, int address,
@@ -135,21 +119,18 @@ static int smbusarp_detach_client(struct i2c_client *client);
 static int smbusarp_command(struct i2c_client *client, unsigned int cmd,
 			  void *arg);
 
-static void smbusarp_inc_use(struct i2c_client *client);
-static void smbusarp_dec_use(struct i2c_client *client);
 static int smbusarp_init_client(struct i2c_client *client);
 static void smbusarp_contents(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver smbusarp_driver = {
-	/* name */ "SMBUS ARP",
-	/* id */ I2C_DRIVERID_ARP,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &smbusarp_attach_adapter,
-	/* detach_client */ &smbusarp_detach_client,
-	/* command */ &smbusarp_command,
-	/* inc_use */ &smbusarp_inc_use,
-	/* dec_use */ &smbusarp_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "SMBUS ARP",
+	.id		= I2C_DRIVERID_ARP,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= smbusarp_attach_adapter,
+	.detach_client	= smbusarp_detach_client,
+	.command	= smbusarp_command,
 };
 
 static ctl_table smbusarp_dir_table_template[] = {
@@ -172,12 +153,9 @@ static ctl_table smbusarp_dir_table_template[] = {
 	{0}
 };
 
-/* Used by init/cleanup */
-static int __initdata smbusarp_initialized = 0;
-
 static int smbusarp_id = 0;
 
-int smbusarp_attach_adapter(struct i2c_adapter *adapter)
+static int smbusarp_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, smbusarp_detect);
 }
@@ -241,7 +219,7 @@ int smbusarp_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int smbusarp_detach_client(struct i2c_client *client)
+static int smbusarp_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -260,27 +238,13 @@ int smbusarp_detach_client(struct i2c_client *client)
 }
 
 
-int smbusarp_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int smbusarp_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void smbusarp_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-void smbusarp_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-
-u8 choose_addr(u8 * pool)
+static u8 choose_addr(u8 * pool)
 {
 	int i;
 
@@ -291,7 +255,7 @@ u8 choose_addr(u8 * pool)
 	return 0xff;
 }
 
-int smbusarp_init_client(struct i2c_client *client)
+static int smbusarp_init_client(struct i2c_client *client)
 {
 	int ret = -1;
 #ifdef I2C_PEC_SUPPORTED
@@ -483,7 +447,7 @@ void smbusarp_contents(struct i2c_client *client, int operation,
 	}
 }
 
-int __init sensors_smbusarp_init(void)
+static int __init sm_smbusarp_init(void)
 {
 	int res;
 
@@ -491,50 +455,19 @@ int __init sensors_smbusarp_init(void)
 /* magic force invocation */
 	force_arp[0] = -1;
 	force_arp[1] = ARP_ADDRESS;
-	smbusarp_initialized = 0;
-	if ((res = i2c_add_driver(&smbusarp_driver))) {
-		printk
-		    (KERN_ERR "smbus-arp.o: Driver registration failed, module not inserted.\n");
-		smbusarp_cleanup();
-		return res;
-	}
-	smbusarp_initialized++;
-	return 0;
+	return i2c_add_driver(&smbusarp_driver);
 }
 
-int __init smbusarp_cleanup(void)
+static void __exit sm_smbusarp_exit(void)
 {
-	int res;
-
-	if (smbusarp_initialized >= 1) {
-		if ((res = i2c_del_driver(&smbusarp_driver))) {
-			printk
-			    (KERN_ERR "smbus-arp.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-	} else
-		smbusarp_initialized--;
-
-	return 0;
+	i2c_del_driver(&smbusarp_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
+
 MODULE_AUTHOR("Mark D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("SMBUS ARP Driver");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-int init_module(void)
-{
-	return sensors_smbusarp_init();
-}
-
-int cleanup_module(void)
-{
-	return smbusarp_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_smbusarp_init);
+module_exit(sm_smbusarp_exit);

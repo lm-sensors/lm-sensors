@@ -46,18 +46,11 @@
 #include "sensors_vid.h"
 #include <linux/init.h>
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
 
 #ifndef I2C_DRIVERID_W83627HF
 #define I2C_DRIVERID_W83627HF 1038
 #endif
 
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 static int force_addr;
 MODULE_PARM(force_addr, "i");
@@ -219,7 +212,7 @@ static const u8 BIT_SCFG2[] = { 0x10, 0x20, 0x40 };
 #define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 8)/16),0,255))
 #define IN_FROM_REG(val) (((val) * 16) / 10)
 
-extern inline u8 FAN_TO_REG(long rpm, int div)
+static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
 		return 255;
@@ -246,7 +239,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 
 #define DIV_FROM_REG(val) (1 << (val))
 
-extern inline u8 DIV_TO_REG(long val)
+static inline u8 DIV_TO_REG(long val)
 {
 	int i;
 	val = SENSORS_LIMIT(val, 1, 128) >> 1;
@@ -356,11 +349,6 @@ extern inline u8 DIV_TO_REG(long val)
 #define W83781D_INIT_TEMP3_OVER 600
 #define W83781D_INIT_TEMP3_HYST 500
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /* There are some complications in a module like this. First off, W83781D chips
    may be both present on the SMBus and the ISA bus, and we have to handle
    those cases separately at some places. Second, there might be several
@@ -419,22 +407,12 @@ struct w83627hf_data {
 };
 
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_w83627hf_init(void);
-static int __init w83627hf_cleanup(void);
-
 static int w83627hf_attach_adapter(struct i2c_adapter *adapter);
 static int w83627hf_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int w83627hf_detach_client(struct i2c_client *client);
 static int w83627hf_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void w83627hf_inc_use(struct i2c_client *client);
-static void w83627hf_dec_use(struct i2c_client *client);
 
 static int w83627hf_read_value(struct i2c_client *client, u16 register);
 static int w83627hf_write_value(struct i2c_client *client, u16 register,
@@ -469,18 +447,14 @@ static void w83627hf_sens(struct i2c_client *client, int operation,
 static int w83627hf_id = 0;
 
 static struct i2c_driver w83627hf_driver = {
-	/* name */ "W83781D sensor driver",
-	/* id */ I2C_DRIVERID_W83627HF,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &w83627hf_attach_adapter,
-	/* detach_client */ &w83627hf_detach_client,
-	/* command */ &w83627hf_command,
-	/* inc_use */ &w83627hf_inc_use,
-	/* dec_use */ &w83627hf_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "W83781D sensor driver",
+	.id		= I2C_DRIVERID_W83627HF,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= w83627hf_attach_adapter,
+	.detach_client	= w83627hf_detach_client,
+	.command	= w83627hf_command,
 };
-
-/* Used by w83627hf_init/cleanup */
-static int __initdata w83627hf_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected chip. This is just a template;
@@ -594,12 +568,12 @@ static ctl_table w83697hf_dir_table_template[] = {
      * w83627hf_driver is inserted (when this module is loaded), for each
        available adapter
      * when a new adapter is inserted (and w83627hf_driver is still present) */
-int w83627hf_attach_adapter(struct i2c_adapter *adapter)
+static int w83627hf_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, w83627hf_detect);
 }
 
-int w83627hf_find(int *address)
+static int w83627hf_find(int *address)
 {
 	u16 val;
 
@@ -740,7 +714,7 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int w83627hf_detach_client(struct i2c_client *client)
+static int w83627hf_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -760,24 +734,11 @@ int w83627hf_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int w83627hf_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int w83627hf_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void w83627hf_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void w83627hf_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
 
 /*
    ISA access must always be locked explicitly! 
@@ -785,7 +746,7 @@ void w83627hf_dec_use(struct i2c_client *client)
    would slow down the W83781D access and should not be necessary. 
    There are some ugly typecasts here, but the good news is - they should
    nowhere else be necessary! */
-int w83627hf_read_value(struct i2c_client *client, u16 reg)
+static int w83627hf_read_value(struct i2c_client *client, u16 reg)
 {
 	int res, word_sized, bank;
 	struct i2c_client *cl;
@@ -820,7 +781,7 @@ int w83627hf_read_value(struct i2c_client *client, u16 reg)
 	return res;
 }
 
-int w83627hf_write_value(struct i2c_client *client, u16 reg, u16 value)
+static int w83627hf_write_value(struct i2c_client *client, u16 reg, u16 value)
 {
 	int word_sized, bank;
 	struct i2c_client *cl;
@@ -855,7 +816,7 @@ int w83627hf_write_value(struct i2c_client *client, u16 reg, u16 value)
 }
 
 /* Called when we have found a new W83781D. It should set limits, etc. */
-void w83627hf_init_client(struct i2c_client *client)
+static void w83627hf_init_client(struct i2c_client *client)
 {
 	struct w83627hf_data *data = client->data;
 	int vid = 0, i;
@@ -1001,7 +962,7 @@ void w83627hf_init_client(struct i2c_client *client)
 			    | 0x01);
 }
 
-void w83627hf_update_client(struct i2c_client *client)
+static void w83627hf_update_client(struct i2c_client *client)
 {
 	struct w83627hf_data *data = client->data;
 	int i;
@@ -1455,7 +1416,7 @@ void w83627hf_sens(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_w83627hf_init(void)
+static int __init sm_w83627hf_init(void)
 {
 	int res, addr;
 
@@ -1466,52 +1427,21 @@ int __init sensors_w83627hf_init(void)
 	}
 	normal_isa[0] = addr;
 
-	w83627hf_initialized = 0;
-
-	if ((res = i2c_add_driver(&w83627hf_driver))) {
-		printk
-		    (KERN_ERR "w83627hf.o: Driver registration failed, module not inserted.\n");
-		w83627hf_cleanup();
-		return res;
-	}
-	w83627hf_initialized++;
-	return 0;
+	return i2c_add_driver(&w83627hf_driver);
 }
 
-int __init w83627hf_cleanup(void)
+static void __exit sm_w83627hf_exit(void)
 {
-	int res;
-
-	if (w83627hf_initialized >= 1) {
-		if ((res = i2c_del_driver(&w83627hf_driver))) {
-			return res;
-		}
-		w83627hf_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&w83627hf_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, "
 	      "Philip Edelbrock <phil@netroedge.com>, "
 	      "and Mark Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("W83627HF driver");
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-
-int init_module(void)
-{
-	return sensors_w83627hf_init();
-}
-
-int cleanup_module(void)
-{
-	return w83627hf_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_w83627hf_init);
+module_exit(sm_w83627hf_exit);

@@ -33,18 +33,7 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -90,7 +79,7 @@ SENSORS_INSMOD_1(lm80);
 #define IN_TO_REG(val,nr) (SENSORS_LIMIT((val),0,255))
 #define IN_FROM_REG(val,nr) (val)
 
-extern inline unsigned char FAN_TO_REG(unsigned rpm, unsigned div)
+static inline unsigned char FAN_TO_REG(unsigned rpm, unsigned div)
 {
 	if (rpm == 0)
 		return 255;
@@ -102,7 +91,7 @@ extern inline unsigned char FAN_TO_REG(unsigned rpm, unsigned div)
 #define FAN_FROM_REG(val,div) ((val)==0?-1:\
                                (val)==255?0:1350000/((div)*(val)))
 
-extern inline long TEMP_FROM_REG(u16 temp)
+static inline long TEMP_FROM_REG(u16 temp)
 {
 	long res;
 
@@ -174,10 +163,6 @@ extern inline long TEMP_FROM_REG(u16 temp)
 #define LM80_INIT_TEMP_HOT_MAX 700
 #define LM80_INIT_TEMP_HOT_HYST 600
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
 
 /* For each registered LM80, we need to keep some data in memory. That
    data is pointed to by lm80_list[NR]->data. The structure itself is
@@ -205,13 +190,6 @@ struct lm80_data {
 };
 
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_lm80_init(void);
-static int __init lm80_cleanup(void);
 
 static int lm80_attach_adapter(struct i2c_adapter *adapter);
 static int lm80_detect(struct i2c_adapter *adapter, int address,
@@ -219,8 +197,6 @@ static int lm80_detect(struct i2c_adapter *adapter, int address,
 static int lm80_detach_client(struct i2c_client *client);
 static int lm80_command(struct i2c_client *client, unsigned int cmd,
 			void *arg);
-static void lm80_inc_use(struct i2c_client *client);
-static void lm80_dec_use(struct i2c_client *client);
 
 static int lm80_read_value(struct i2c_client *client, u8 register);
 static int lm80_write_value(struct i2c_client *client, u8 register,
@@ -243,18 +219,14 @@ static void lm80_fan_div(struct i2c_client *client, int operation,
 static int lm80_id = 0;
 
 static struct i2c_driver lm80_driver = {
-	/* name */ "LM80 sensor driver",
-	/* id */ I2C_DRIVERID_LM80,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &lm80_attach_adapter,
-	/* detach_client */ &lm80_detach_client,
-	/* command */ &lm80_command,
-	/* inc_use */ &lm80_inc_use,
-	/* dec_use */ &lm80_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "LM80 sensor driver",
+	.id		= I2C_DRIVERID_LM80,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= lm80_attach_adapter,
+	.detach_client	= lm80_detach_client,
+	.command	= lm80_command,
 };
-
-/* Used by lm80_init/cleanup */
-static int __initdata lm80_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected LM80. This is just a template;
@@ -290,7 +262,7 @@ static ctl_table lm80_dir_table_template[] = {
 	{0}
 };
 
-int lm80_attach_adapter(struct i2c_adapter *adapter)
+static int lm80_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, lm80_detect);
 }
@@ -395,7 +367,7 @@ int lm80_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int lm80_detach_client(struct i2c_client *client)
+static int lm80_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -414,38 +386,24 @@ int lm80_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int lm80_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int lm80_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void lm80_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-void lm80_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-
-int lm80_read_value(struct i2c_client *client, u8 reg)
+static int lm80_read_value(struct i2c_client *client, u8 reg)
 {
 	return i2c_smbus_read_byte_data(client, reg);
 }
 
-int lm80_write_value(struct i2c_client *client, u8 reg, u8 value)
+static int lm80_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
 /* Called when we have found a new LM80. It should set limits, etc. */
-void lm80_init_client(struct i2c_client *client)
+static void lm80_init_client(struct i2c_client *client)
 {
 	/* Reset all except Watchdog values and last conversion values
 	   This sets fan-divs to 2, among others. This makes most other
@@ -499,7 +457,7 @@ void lm80_init_client(struct i2c_client *client)
 	lm80_write_value(client, LM80_REG_CONFIG, 0x01);
 }
 
-void lm80_update_client(struct i2c_client *client)
+static void lm80_update_client(struct i2c_client *client)
 {
 	struct lm80_data *data = client->data;
 	int i;
@@ -707,54 +665,22 @@ void lm80_fan_div(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_lm80_init(void)
+static int __init sm_lm80_init(void)
 {
-	int res;
-
-	printk("lm80.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	lm80_initialized = 0;
-
-	if ((res = i2c_add_driver(&lm80_driver))) {
-		printk
-		    ("lm80.o: Driver registration failed, module not inserted.\n");
-		lm80_cleanup();
-		return res;
-	}
-	lm80_initialized++;
-	return 0;
+ 	printk("lm80.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	return i2c_add_driver(&lm80_driver);
 }
 
-int __init lm80_cleanup(void)
+static void __exit sm_lm80_exit(void)
 {
-	int res;
-
-	if (lm80_initialized >= 1) {
-		if ((res = i2c_del_driver(&lm80_driver))) {
-			printk
-			    ("lm80.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		lm80_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&lm80_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("LM80 driver");
 
-int init_module(void)
-{
-	return sensors_lm80_init();
-}
-
-int cleanup_module(void)
-{
-	return lm80_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_lm80_init);
+module_exit(sm_lm80_exit);

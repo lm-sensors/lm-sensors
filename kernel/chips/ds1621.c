@@ -29,18 +29,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -109,18 +98,6 @@ struct ds1621_data {
 	u8 temp_int, temp_counter, temp_slope;	/* Register values, byte */
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_ds1621_init(void);
-static int __init ds1621_cleanup(void);
 static int ds1621_attach_adapter(struct i2c_adapter *adapter);
 static int ds1621_detect(struct i2c_adapter *adapter, int address,
 			 unsigned short flags, int kind);
@@ -128,8 +105,7 @@ static void ds1621_init_client(struct i2c_client *client);
 static int ds1621_detach_client(struct i2c_client *client);
 static int ds1621_command(struct i2c_client *client, unsigned int cmd,
 			  void *arg);
-static void ds1621_inc_use(struct i2c_client *client);
-static void ds1621_dec_use(struct i2c_client *client);
+
 static u16 swap_bytes(u16 val);
 static int ds1621_read_value(struct i2c_client *client, u8 reg);
 static int ds1621_write_value(struct i2c_client *client, u8 reg, u16 value);
@@ -148,14 +124,13 @@ static void ds1621_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver ds1621_driver = {
-	/* name */ "DS1621 sensor driver",
-	/* id */ I2C_DRIVERID_DS1621,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &ds1621_attach_adapter,
-	/* detach_client */ &ds1621_detach_client,
-	/* command */ &ds1621_command,
-	/* inc_use */ &ds1621_inc_use,
-	/* dec_use */ &ds1621_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "DS1621 sensor driver",
+	.id		= I2C_DRIVERID_DS1621,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= ds1621_attach_adapter,
+	.detach_client	= ds1621_detach_client,
+	.command	= ds1621_command,
 };
 
 /* These files are created for each detected DS1621. This is just a template;
@@ -177,12 +152,9 @@ static ctl_table ds1621_dir_table_template[] = {
 	{0}
 };
 
-/* Used by init/cleanup */
-static int __initdata ds1621_initialized = 0;
-
 static int ds1621_id = 0;
 
-int ds1621_attach_adapter(struct i2c_adapter *adapter)
+static int ds1621_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, ds1621_detect);
 }
@@ -287,7 +259,7 @@ int ds1621_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int ds1621_detach_client(struct i2c_client *client)
+static int ds1621_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -313,28 +285,13 @@ int ds1621_detach_client(struct i2c_client *client)
 
 
 /* No commands defined yet */
-int ds1621_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int ds1621_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-/* Nothing here yet */
-void ds1621_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-/* Nothing here yet */
-void ds1621_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-u16 swap_bytes(u16 val)
+static u16 swap_bytes(u16 val)
 {
 	return (val >> 8) | (val << 8);
 }
@@ -342,7 +299,7 @@ u16 swap_bytes(u16 val)
 /* All registers are word-sized, except for the configuration register.
    DS1621 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
-int ds1621_read_value(struct i2c_client *client, u8 reg)
+static int ds1621_read_value(struct i2c_client *client, u8 reg)
 {
 	if ((reg == DS1621_REG_CONF) || (reg == DS1621_REG_TEMP_COUNTER)
 	    || (reg == DS1621_REG_TEMP_SLOPE))
@@ -354,7 +311,7 @@ int ds1621_read_value(struct i2c_client *client, u8 reg)
 /* All registers are word-sized, except for the configuration register.
    DS1621 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
-int ds1621_write_value(struct i2c_client *client, u8 reg, u16 value)
+static int ds1621_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
 	if ( (reg == DS1621_COM_START) || (reg == DS1621_COM_STOP) )
 		return i2c_smbus_write_byte(client, reg);
@@ -367,7 +324,7 @@ int ds1621_write_value(struct i2c_client *client, u8 reg, u16 value)
 						 swap_bytes(value));
 }
 
-void ds1621_init_client(struct i2c_client *client)
+static void ds1621_init_client(struct i2c_client *client)
 {
 	int reg;
 
@@ -382,7 +339,7 @@ void ds1621_init_client(struct i2c_client *client)
 		ds1621_write_value(client, DS1621_REG_CONF, reg & 0xfe);
 }
 
-void ds1621_update_client(struct i2c_client *client)
+static void ds1621_update_client(struct i2c_client *client)
 {
 	struct ds1621_data *data = client->data;
 	u8 new_conf;
@@ -573,53 +530,21 @@ void ds1621_polarity(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_ds1621_init(void)
+static int __init sm_ds1621_init(void)
 {
-	int res;
-
 	printk("ds1621.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	ds1621_initialized = 0;
-	if ((res = i2c_add_driver(&ds1621_driver))) {
-		printk
-	    ("ds1621.o: Driver registration failed, module not inserted.\n");
-		ds1621_cleanup();
-		return res;
-	}
-	ds1621_initialized++;
-	return 0;
+	return i2c_add_driver(&ds1621_driver);
 }
 
-int __init ds1621_cleanup(void)
+static void __exit sm_ds1621_exit(void)
 {
-	int res;
-
-	if (ds1621_initialized >= 1) {
-		if ((res = i2c_del_driver(&ds1621_driver))) {
-			printk
-			    ("ds1621.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		ds1621_initialized--;
-	}
-
-	return 0;
+	i2c_del_driver(&ds1621_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR("Christian W. Zuckschwerdt <zany@triq.net>");
 MODULE_DESCRIPTION("DS1621 driver");
 
-int init_module(void)
-{
-	return sensors_ds1621_init();
-}
-
-int cleanup_module(void)
-{
-	return ds1621_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_ds1621_init);
+module_exit(sm_ds1621_exit);

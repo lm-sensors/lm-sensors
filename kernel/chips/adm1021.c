@@ -120,8 +120,6 @@ static void adm1021_init_client(struct i2c_client *client);
 static int adm1021_detach_client(struct i2c_client *client);
 static int adm1021_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void adm1021_inc_use(struct i2c_client *client);
-static void adm1021_dec_use(struct i2c_client *client);
 static int adm1021_read_value(struct i2c_client *client, u8 reg);
 static int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg, u8 mask);
 static int adm1021_write_value(struct i2c_client *client, u8 reg,
@@ -143,14 +141,13 @@ static int read_only = 0;
 
 /* This is the driver that will be inserted */
 static struct i2c_driver adm1021_driver = {
+	.owner		= THIS_MODULE,
 	.name		= "ADM1021, MAX1617 sensor driver",
 	.id		= I2C_DRIVERID_ADM1021,
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= adm1021_attach_adapter,
 	.detach_client	= adm1021_detach_client,
 	.command	= adm1021_command,
-	.inc_use	= adm1021_inc_use,
-	.dec_use	= adm1021_dec_use
 };
 
 /* These files are created for each detected adm1021. This is just a template;
@@ -185,7 +182,7 @@ static ctl_table adm1021_max_dir_table_template[] = {
    take more memory than the datastructure takes now. */
 static int adm1021_id = 0;
 
-int adm1021_attach_adapter(struct i2c_adapter *adapter)
+static int adm1021_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, adm1021_detect);
 }
@@ -338,7 +335,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-void adm1021_init_client(struct i2c_client *client)
+static void adm1021_init_client(struct i2c_client *client)
 {
 	/* Initialize the adm1021 chip */
 	adm1021_write_value(client, ADM1021_REG_TOS_W,
@@ -355,7 +352,7 @@ void adm1021_init_client(struct i2c_client *client)
 	adm1021_write_value(client, ADM1021_REG_CONV_RATE_W, 0x04);
 }
 
-int adm1021_detach_client(struct i2c_client *client)
+static int adm1021_detach_client(struct i2c_client *client)
 {
 
 	int err;
@@ -377,33 +374,20 @@ int adm1021_detach_client(struct i2c_client *client)
 
 
 /* No commands defined yet */
-int adm1021_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int adm1021_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-void adm1021_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void adm1021_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
 
 /* All registers are byte-sized */
-int adm1021_read_value(struct i2c_client *client, u8 reg)
+static int adm1021_read_value(struct i2c_client *client, u8 reg)
 {
 	return i2c_smbus_read_byte_data(client, reg);
 }
 
 /* only update value if read succeeded; set fail bit if failed */
-int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg, u8 mask)
+static int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg, u8 mask)
 {
 	int i;
 	struct adm1021_data *data = client->data;
@@ -417,7 +401,7 @@ int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg, u8 mask)
 	return 0;
 }
 
-int adm1021_write_value(struct i2c_client *client, u8 reg, u16 value)
+static int adm1021_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
 	if (read_only > 0)
 		return 0;
@@ -425,7 +409,7 @@ int adm1021_write_value(struct i2c_client *client, u8 reg, u16 value)
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
-void adm1021_update_client(struct i2c_client *client)
+static void adm1021_update_client(struct i2c_client *client)
 {
 	struct adm1021_data *data = client->data;
 
@@ -613,13 +597,13 @@ void adm1021_alarms(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-static int __init sensors_adm1021_init(void)
+static int __init sm_adm1021_init(void)
 {
 	printk(KERN_INFO "adm1021.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	return i2c_add_driver(&adm1021_driver);
 }
 
-static void __exit sensors_adm1021_exit(void)
+static void __exit sm_adm1021_exit(void)
 {
 	i2c_del_driver(&adm1021_driver);
 }
@@ -632,5 +616,5 @@ MODULE_LICENSE("GPL");
 MODULE_PARM(read_only, "i");
 MODULE_PARM_DESC(read_only, "Don't set any values, read only mode");
 
-module_init(sensors_adm1021_init)
-module_exit(sensors_adm1021_exit)
+module_init(sm_adm1021_init)
+module_exit(sm_adm1021_exit)

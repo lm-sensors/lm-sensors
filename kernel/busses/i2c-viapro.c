@@ -135,51 +135,15 @@ MODULE_PARM_DESC(force_addr,
 		 "Forcibly enable the SMBus at the given address. "
 		 "EXTREMELY DANGEROUS!");
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init i2c_vt596_init(void);
-static int __init vt596_cleanup(void);
-static int vt596_setup(void);
-static s32 vt596_access(struct i2c_adapter *adap, u16 addr,
-			unsigned short flags, char read_write,
-			u8 command, int size, union i2c_smbus_data *data);
+
+
+
+
 static void vt596_do_pause(unsigned int amount);
 static int vt596_transaction(void);
-static void vt596_inc(struct i2c_adapter *adapter);
-static void vt596_dec(struct i2c_adapter *adapter);
-static u32 vt596_func(struct i2c_adapter *adapter);
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
 
-static struct i2c_algorithm smbus_algorithm = {
-	/* name */ "Non-I2C SMBus adapter",
-	/* id */ I2C_ALGO_SMBUS,
-	/* master_xfer */ NULL,
-	/* smbus_access */ vt596_access,
-	/* slave_send */ NULL,
-	/* slave_rcv */ NULL,
-	/* algo_control */ NULL,
-	/* functionality */ vt596_func,
-};
 
-static struct i2c_adapter vt596_adapter = {
-	"unset",
-	I2C_ALGO_SMBUS | I2C_HW_SMBUS_VIA2,
-	&smbus_algorithm,
-	NULL,
-	vt596_inc,
-	vt596_dec,
-	NULL,
-	NULL,
-};
-
-static int __initdata vt596_initialized;
 static unsigned short vt596_smba = 0;
 
 
@@ -481,16 +445,6 @@ s32 vt596_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 	return 0;
 }
 
-void vt596_inc(struct i2c_adapter *adapter)
-{
-	MOD_INC_USE_COUNT;
-}
-
-void vt596_dec(struct i2c_adapter *adapter)
-{
-
-	MOD_DEC_USE_COUNT;
-}
 
 u32 vt596_func(struct i2c_adapter *adapter)
 {
@@ -499,77 +453,73 @@ u32 vt596_func(struct i2c_adapter *adapter)
 	    I2C_FUNC_SMBUS_BLOCK_DATA;
 }
 
-int __init i2c_vt596_init(void)
+
+static struct i2c_algorithm smbus_algorithm = {
+	.name		= "Non-I2C SMBus adapter",
+	.id		= I2C_ALGO_SMBUS,
+	.smbus_xfer	= vt596_access,
+	.functionality	= vt596_func,
+};
+
+static struct i2c_adapter vt596_adapter = {
+	.owner		= THIS_MODULE,
+	.name		= "unset",
+	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_VIA2,
+	.algo		= &smbus_algorithm,
+};
+
+
+static struct pci_device_id vt596_ids[] __devinitdata = {
+	{ 0, }
+};
+
+static int __devinit vt596_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
-	int res;
-	printk("i2c-viapro.o version %s (%s)\n", LM_VERSION, LM_DATE);
-#ifdef DEBUG
-/* PE- It might be good to make this a permanent part of the code! */
-	if (vt596_initialized) {
-		printk
-		    ("i2c-viapro.o: Oops, vt596_init called a second time!\n");
-		return -EBUSY;
-	}
-#endif
-	vt596_initialized = 0;
-	if ((res = vt596_setup())) {
+
+	if (vt596_setup()) {
 		printk
 		    ("i2c-viapro.o: Can't detect vt82c596 or compatible device, module not inserted.\n");
-		vt596_cleanup();
-		return res;
+
+		return -ENODEV;
 	}
-	vt596_initialized++;
+
 	sprintf(vt596_adapter.name, "SMBus Via Pro adapter at %04x",
 		vt596_smba);
-	if ((res = i2c_add_adapter(&vt596_adapter))) {
-		printk
-		    ("i2c-viapro.o: Adapter registration failed, module not inserted.\n");
-		vt596_cleanup();
-		return res;
-	}
-	vt596_initialized++;
-	printk("i2c-viapro.o: Via Pro SMBus detected and initialized\n");
-	return 0;
+	i2c_add_adapter(&vt596_adapter);
 }
 
-int __init vt596_cleanup(void)
+static void __devexit vt596_remove(struct pci_dev *dev)
 {
-	int res;
-	if (vt596_initialized >= 2) {
-		if ((res = i2c_del_adapter(&vt596_adapter))) {
-			printk
-			    ("i2c-viapro.o: i2c_del_adapter failed, module not removed\n");
-			return res;
-		} else
-			vt596_initialized--;
-	}
-	if (vt596_initialized >= 1) {
-		release_region(vt596_smba, 8);
-		vt596_initialized--;
-	}
-	return 0;
+	i2c_del_adapter(&vt596_adapter);
 }
 
-EXPORT_NO_SYMBOLS;
+static struct pci_driver vt596_driver = {
+	.name		= "vt596 smbus",
+	.id_table	= vt596_ids,
+	.probe		= vt596_probe,
+	.remove		= __devexit_p(vt596_remove),
+};
 
-#ifdef MODULE
+static int __init i2c_vt596_init(void)
+{
+	printk("i2c-viapro.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	return pci_module_init(&vt596_driver);
+}
+
+
+static void __exit i2c_vt596_exit(void)
+{
+	pci_unregister_driver(&vt596_driver);
+	release_region(vt596_smba, 8);
+}
+
+
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("vt82c596 SMBus driver");
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
-int init_module(void)
-{
-	return i2c_vt596_init();
-}
-
-int cleanup_module(void)
-{
-	return vt596_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(i2c_vt596_init);
+module_exit(i2c_vt596_exit);

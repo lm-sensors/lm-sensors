@@ -49,18 +49,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -89,26 +78,13 @@ struct ltc1710_data {
 	u8 status;		/* Register values */
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_ltc1710_init(void);
-static int __init ltc1710_cleanup(void);
 static int ltc1710_attach_adapter(struct i2c_adapter *adapter);
 static int ltc1710_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int ltc1710_detach_client(struct i2c_client *client);
 static int ltc1710_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
-static void ltc1710_inc_use(struct i2c_client *client);
-static void ltc1710_dec_use(struct i2c_client *client);
+
 static void ltc1710_switch1(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 static void ltc1710_switch2(struct i2c_client *client, int operation,
@@ -118,14 +94,13 @@ static void ltc1710_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver ltc1710_driver = {
-	/* name */ "LTC1710 sensor chip driver",
-	/* id */ I2C_DRIVERID_LTC1710,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &ltc1710_attach_adapter,
-	/* detach_client */ &ltc1710_detach_client,
-	/* command */ &ltc1710_command,
-	/* inc_use */ &ltc1710_inc_use,
-	/* dec_use */ &ltc1710_dec_use
+	.owner		= THIS_MODULE,
+	.name		= "LTC1710 sensor chip driver",
+	.id		= I2C_DRIVERID_LTC1710,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= ltc1710_attach_adapter,
+	.detach_client	= ltc1710_detach_client,
+	.command	= ltc1710_command,
 };
 
 /* These files are created for each detected LTC1710. This is just a template;
@@ -141,15 +116,12 @@ static ctl_table ltc1710_dir_table_template[] = {
 	{0}
 };
 
-/* Used by init/cleanup */
-static int __initdata ltc1710_initialized = 0;
-
 /* I choose here for semi-static LTC1710 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
 static int ltc1710_id = 0;
 
-int ltc1710_attach_adapter(struct i2c_adapter *adapter)
+static int ltc1710_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, ltc1710_detect);
 }
@@ -247,7 +219,7 @@ int ltc1710_detect(struct i2c_adapter *adapter, int address,
 }
 
 
-int ltc1710_detach_client(struct i2c_client *client)
+static int ltc1710_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -267,29 +239,13 @@ int ltc1710_detach_client(struct i2c_client *client)
 }
 
 /* No commands defined yet */
-int ltc1710_command(struct i2c_client *client, unsigned int cmd, void *arg)
+static int ltc1710_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
 }
 
-/* Nothing here yet */
-void ltc1710_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
 
-/* Nothing here yet */
-void ltc1710_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
-}
-
-
-void ltc1710_update_client(struct i2c_client *client)
+static void ltc1710_update_client(struct i2c_client *client)
 {
 	struct ltc1710_data *data = client->data;
 
@@ -349,54 +305,22 @@ void ltc1710_switch2(struct i2c_client *client, int operation,
 	}
 }
 
-int __init sensors_ltc1710_init(void)
+static int __init sm_ltc1710_init(void)
 {
-	int res;
-
 	printk("ltc1710.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	ltc1710_initialized = 0;
-	if ((res = i2c_add_driver(&ltc1710_driver))) {
-		printk
-		    ("ltc1710.o: Driver registration failed, module not inserted.\n");
-		ltc1710_cleanup();
-		return res;
-	}
-	ltc1710_initialized++;
-	return 0;
+	return i2c_add_driver(&ltc1710_driver);
 }
 
-int __init ltc1710_cleanup(void)
+static void __exit sm_ltc1710_exit(void)
 {
-	int res;
-
-	if (ltc1710_initialized >= 1) {
-		if ((res = i2c_del_driver(&ltc1710_driver))) {
-			printk
-			    ("ltc1710.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		ltc1710_initialized--;
-	}
-
-	return 0;
+	i2c_del_driver(&ltc1710_driver);
 }
 
-EXPORT_NO_SYMBOLS;
 
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("LTC1710 driver");
 
-int init_module(void)
-{
-	return sensors_ltc1710_init();
-}
-
-int cleanup_module(void)
-{
-	return ltc1710_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_ltc1710_init);
+module_exit(sm_ltc1710_exit);

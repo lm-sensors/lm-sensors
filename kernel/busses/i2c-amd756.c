@@ -203,6 +203,7 @@ static int amd756_transaction(void)
 }
 
 /* Return -1 on error. */
+
 static s32 amd756_access(struct i2c_adapter * adap, u16 addr,
 		  unsigned short flags, char read_write,
 		  u8 command, int size, union i2c_smbus_data * data)
@@ -297,17 +298,6 @@ static s32 amd756_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
-void amd756_inc(struct i2c_adapter *adapter)
-{
-	MOD_INC_USE_COUNT;
-}
-
-void amd756_dec(struct i2c_adapter *adapter)
-{
-
-	MOD_DEC_USE_COUNT;
-}
-
 static u32 amd756_func(struct i2c_adapter *adapter)
 {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
@@ -323,11 +313,10 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter amd756_adapter = {
+	.owner		= THIS_MODULE,
 	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_AMD756,
 	.algo		= &smbus_algorithm,
-	.inc_use	= amd756_inc,
-	.dec_use	= amd756_dec,
 };
 
 enum chiptype { AMD756, AMD766, AMD768, NFORCE };
@@ -405,10 +394,10 @@ static int __devinit amd756_probe(struct pci_dev *pdev,
 	return error;
 }
 
+
 static void __devexit amd756_remove(struct pci_dev *dev)
 {
 	i2c_del_adapter(&amd756_adapter);
-	release_region(amd756_ioport, SMB_IOSIZE);
 }
 
 static struct pci_driver amd756_driver = {
@@ -418,20 +407,22 @@ static struct pci_driver amd756_driver = {
 	.remove		= __devexit_p(amd756_remove),
 };
 
-static int __init amd756_init(void)
+static int __init i2c_amd756_init(void)
 {
 	printk(KERN_INFO "i2c-amd756.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	return pci_module_init(&amd756_driver);
 }
 
-static void __exit amd756_exit(void)
+
+static void __exit i2c_amd756_exit(void)
 {
 	pci_unregister_driver(&amd756_driver);
+	release_region(amd756_ioport, SMB_IOSIZE);
 }
 
 MODULE_AUTHOR("Merlin Hughes <merlin@merlin.org>");
 MODULE_DESCRIPTION("AMD756/766/768/nVidia nForce SMBus driver");
 MODULE_LICENSE("GPL");
 
-module_init(amd756_init)
-module_exit(amd756_exit)
+module_init(i2c_amd756_init)
+module_exit(i2c_amd756_exit)
