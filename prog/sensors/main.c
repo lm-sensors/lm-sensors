@@ -328,6 +328,9 @@ int do_a_set(sensors_chip_name name)
               sensors_strerror(res));
       fprintf(stderr,"Run as root?\n");
       return 1;
+    } else if (res == -SENSORS_ERR_ACCESS_W) {
+      fprintf(stderr, "%s: At least one \"set\" statement failed\n",
+              sprintf_chip_name(name));
     } else {
       fprintf(stderr,"%s: %s\n",sprintf_chip_name(name),
               sensors_strerror(res));

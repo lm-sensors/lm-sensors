@@ -425,8 +425,8 @@ int sensors_do_this_chip_sets(sensors_chip_name name)
 {
   sensors_chip *chip;
   double value;
-  int err,i,j;
-  int res = 0;
+  int i, j;
+  int err = 0, res;
   const sensors_chip_feature *feature;
   int *feature_list = NULL;
   int feature_count = 0;
@@ -464,7 +464,7 @@ int sensors_do_this_chip_sets(sensors_chip_name name)
       }
     }
   free(feature_list);
-  return res;
+  return err;
 }
 
 /* Execute all set statements for this particular chip. The chip may contain
