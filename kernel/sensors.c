@@ -199,7 +199,7 @@ void sensors_deregister_entry(int id)
     kfree(table);
     sensors_entries[id] = NULL;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
-    sensors_clients[id-256] = NULL;
+    sensors_clients[id] = NULL;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
   }
 }
