@@ -2,10 +2,6 @@ Many, many things. Most notably:
 
 * At least the bit-lp and bit-velle modules do no detection on loading;
   ask Simon whether this is possible to add.
-* Check whether the FAN count divisors in the lm78 module are correct
-  (probably not!); correct gl518sm changed-fan_div_but_did_not_update_fans
-* Wouldn't it be better to display all natural voltages for the LM78 chip,
-  and do *all* conversions through a user program?
 * kmalloc with GFP_KERNEL can cause a context switch! Check whether this is
   safe everywhere it is used.
 * Support 10-bit addresses. At this moment, they are supported nowhere, except
@@ -26,8 +22,7 @@ Many, many things. Most notably:
 * Write all other drivers
 * How to make drivers detect thing *not*; for example, if a Winbond is 
   present, the LM75 driver should not try to access its simulated
-  LM75 chips (in this case, simply disable them - but what if the LM75
-  driver was loaded first?).
+  LM75 chips.
 * Write a userland-library for SMBus/i2c access (through the /dev interface)
 * Write a userland detection program for busses (clients are less important;
   but perhaps needed too).
