@@ -27,7 +27,7 @@
 
 #include "i2c.h"
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1))
+#if LINUX_VERSION_CODE < 0x020301
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
 #endif
  
