@@ -37,8 +37,8 @@
 #define TEMP_TO_REG(val)   (((((val) + 2) / 5) << 7) & 0xff80)
 
 /* Initial values */
-#define LM75_INIT_TEMP_OS 60
-#define LM75_INIT_TEMP_HYST 50
+#define LM75_INIT_TEMP_OS 600
+#define LM75_INIT_TEMP_HYST 500
 
 /* Each client has this additional data */
 struct lm75_data {
@@ -170,8 +170,10 @@ int lm75_attach_adapter(struct i2c_adapter *adapter)
     err = 0;
 
     /* Initialize the LM75 chip */
-    lm75_write_value(new_client,LM75_REG_TEMP_OS,LM75_INIT_TEMP_OS);
-    lm75_write_value(new_client,LM75_REG_TEMP_HYST,LM75_INIT_TEMP_HYST);
+    lm75_write_value(new_client,LM75_REG_TEMP_OS,
+                     TEMP_TO_REG(LM75_INIT_TEMP_OS));
+    lm75_write_value(new_client,LM75_REG_TEMP_HYST,
+                     TEMP_TO_REG(LM75_INIT_TEMP_HYST));
     lm75_write_value(new_client,LM75_REG_CONF,0);
 
     continue;

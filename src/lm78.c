@@ -63,18 +63,17 @@
 #define LM78_REG_CHIPID 0x49
 
 
-/* Conversions */
+/* Conversions. Rounding is only done on the TO_REG variants. */
 static int lm78_in_conv[7] = {10000, 10000, 10000, 16892, 38000, 
                               -34768, -15050 };
 #define IN_TO_REG(val,nr) (((((val) * 100000 / lm78_in_conv[nr]) + 8) / 16) \
                            & 0xff)
 #define IN_FROM_REG(val,nr) (((val) *  16 * lm78_in_conv[nr]) / 100000)
 
-#define FAN_TO_REG(val) ((((val)==0)?255:((1350000+(val))/((val)*2))) & 0xff)
-#define FAN_FROM_REG(val) (((val)==0)?-1:\
-                           ((val)==255)?0:(1350000 + (val))/((val)*2))
+#define FAN_TO_REG(val) ((val)==0?255:((1350000+(val))/((val)*2)) & 0xff)
+#define FAN_FROM_REG(val) ((val)==0?-1:(val)==255?0:1350000/((val)*2))
 
-#define TEMP_TO_REG(val) (((val)<0?(val/10)&0xff:(val/10)) & 0xff)
+#define TEMP_TO_REG(val) (((val)<0?(((val)-5)/10)&0xff:((val)+5)/10) & 0xff)
 #define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\

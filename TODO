@@ -1,5 +1,9 @@
 Many, many things. Most notably:
 
+* Check whether the FAN count divisors in the lm78 module are correct
+  (probably not!)
+* Wouldn't it be better to display all natural voltages for the LM78 chip,
+  and do *all* conversions through a user program?
 * kmalloc with GFP_KERNEL can cause a context switch! Check whether this is
   safe everywhere it is used.
 * Support 10-bit addresses. At this moment, they are supported nowhere, except
