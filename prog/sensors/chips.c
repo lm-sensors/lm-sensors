@@ -4543,7 +4543,7 @@ void print_max6650(const sensors_chip_name *name)
       printf("configured %4.0f RPM, actual %4.0f RPM.\n", speed, tach);
     }
   } else
-    printf("ERROR: Can't get %s data!\n", tach_list[i].name);
+    printf("ERROR: Can't get %s data!\n", tach_list[0].name);
   free_the_label(&label);
   
   /* Just display the measured speed for the other three, uncontrolled fans */
