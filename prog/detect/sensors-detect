@@ -77,37 +77,43 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
      }
 );
 
-use subs qw(lm78_detect lm75_detect lm80_detect w83781d_detect
-            gl518sm_detect gl520sm_detect adm9240_detect adm1021_detect);
+use subs qw(lm78_detect lm78_isa_detect lm75_detect lm80_detect w83781d_detect
+            w83781d_isa_detect gl518sm_detect gl520sm_detect adm9240_detect 
+            adm1021_detect);
 
 # This is a list of all recognized chips. 
-# Each entry must have a name (Full Chip Name), an array i2c_addrs (Valid
-# I2C Addresses; may be omitted if this is a pure ISA chip), an array 
-# isa_addrs (Valid ISA Addresses; may be omitted if this is a pure I2C chip),
-# i2c_detect (I2C Detetction Routine, may be omitted if this is a pure ISA
-# chip), ...
-# If no driver is written yet, omit the driver (Driver Name) field.
+# Each entry must have the following fields:
+#  name: The full chip name
+#  driver (optional): The driver name (without .o extension). Omit if none is
+#      written yet.
+#  i2c_addrs (optional): For I2C chips, the range of valid I2C addresses to
+#      probe.
+#  i2c_detect (optional): For I2C chips, the function to call to detect
+#      this chip. The function should take two parameters: an open file
+#      descriptor to access the bus, and the I2C address to probe.
+#  isa_detect (optional): For ISA chips, the function to call to detect
+#      this chip. The function should take no parameters.
 @chip_ids = (
      {
        name => "National Semiconductors LM78",
        driver => "lm78",
        i2c_addrs => [0x00..0x7f], 
        i2c_detect => sub { lm78_detect 0, @_},
-       isa_addrs => [0x290],  # Theoretically anyway, but this will do
+       isa_detect => sub { lm78_isa_detect 0 },
      } ,
      {
        name => "National Semiconductors LM78-J",
        driver => "lm78",
        i2c_addrs => [0x00..0x7f],
        i2c_detect => sub { lm78_detect 1, @_ },
-       isa_addrs => [0x290],  # Theoretically anyway, but this will do
+       isa_detect => sub { lm78_isa_detect 1 },
      } ,
      {
        name => "National Semiconductors LM79",
        driver => "lm78",
        i2c_addrs => [0x00..0x7f],
        i2c_detect => sub { lm78_detect 2, @_ },
-       isa_addrs => [0x290],  # Theoretically anyway, but this will do
+       isa_detect => sub { lm78_isa_detect 2 },
      } ,
      {
        name => "National Semiconductors LM75",
@@ -126,21 +132,21 @@ use subs qw(lm78_detect lm75_detect lm80_detect w83781d_detect
        driver => "w83781d",
        i2c_addrs => [0x00..0x7f], 
        i2c_detect => sub { w83781d_detect 0, @_},
-       isa_addrs => [0x290],  # Theoretically anyway, but this will do
+       isa_detect => sub { w83781d_isa_detect 0 },
      } ,
      {
        name => "Winbond W83782D",
        driver => "w83781d",
        i2c_addrs => [0x00..0x7f], 
        i2c_detect => sub { w83781d_detect 1, @_},
-       isa_addrs => [0x290],  # Theoretically anyway, but this will do
+       isa_detect => sub { w83781d_isa_detect 1 },
      } ,
      {
        name => "Winbond W83783S",
        driver => "w83781d",
        i2c_addrs => [0x00..0x7f], 
        i2c_detect => sub { w83781d_detect 2, @_},
-       isa_addrs => [0x290],  # Theoretically anyway, but this will do
+       isa_detect => sub { w83781d_isa_detect 2 },
      } ,
      {
        name => "Genesys Logic GL518SM Revision 0x00",
@@ -233,6 +239,27 @@ sub outb
   my $nrchars = syswrite IOPORTS, $towrite, 1;
   return -1 if not defined $nrchars or $nrchars != 1;
   return 0;
+}
+
+# $_[0]: Address register
+# $_[1]: Data register
+# $_[2]: Register to read
+# Returns: read value
+sub isa_read_byte
+{
+  outb $_[0],$_[2];
+  return inb $_[1];
+}
+
+# $_[0]: Address register
+# $_[1]: Data register
+# $_[2]: Register to write
+# $_[3}: Value to write
+# Returns: nothing
+sub isa_write_byte
+{
+  outb $_[0],$_[2];
+  outb $_[1],$_[3];
 }
 
 ###########
@@ -775,6 +802,26 @@ sub lm78_detect
   return (7);
 }
 
+# $_[0]: Chip to detect (0 = LM78, 1 = LM78-J, 2 = LM79)
+# Returns: undef if not detected, (7) if detected.
+# Note: Only address 0x290 is scanned at this moment.
+sub lm78_isa_detect
+{
+  my ($chip) = @_ ;
+  my $addr;
+  foreach $addr (0x290) {
+    my $val = inb ($addr + 1);
+    next if inb ($addr + 2) != $val or inb ($addr + 3) != $val or 
+            inb ($addr + 7) != $val;
+    my $readproc = sub { isa_read_addr ($addr + 5, $addr + 6) };
+    next unless (&$readproc(0x40) & 0x80) == 0x00;
+    my $reg = &$readproc($0x49);
+    next unless ($chip == 0 and $reg == 0x00) or
+                  ($chip == 1 and $reg == 0x40) or
+                  ($chip == 2 and ($reg & 0xfe) == 0xc0);
+  }
+}
+
 # $_[0]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
@@ -849,7 +896,7 @@ sub w83781d_detect
   $reg2 = i2c_smbus_read_byte_data($file,0x4f);
   return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
                 (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
-  return if ($reg1 & 0x07) == 0x00;
+  return unless ($reg1 & 0x07) == 0x00;
   $reg1 = i2c_smbus_read_byte_data($file,0x58);
   return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
   return if $chip == 1 and  $reg1 != 0x30;
@@ -859,6 +906,30 @@ sub w83781d_detect
   push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;
   push @res, (($reg1 & 0x80) >> 4) + 0x48 unless $reg1 & 0x80;
   return @res;
+}
+
+# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83783S)
+# Returns: undef if not detected, (8) if detected.
+# Note: Only address 0x290 is scanned at this moment.
+sub w83781d_isa_detect
+{
+  my ($chip) = @_ ;
+  my ($addr,$reg1,$reg2);
+  foreach $addr (0x290) {
+    my $val = inb ($addr + 1);
+    next if inb ($addr + 2) != $val or inb ($addr + 3) != $val or 
+            inb ($addr + 7) != $val;
+    my $read_proc = sub { isa_read_addr ($addr + 5, $addr + 6) };
+    $reg1 = &$read_proc(0x4e);
+    $reg2 = &$read_proc(0x4f);
+    next unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
+                  (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
+    next unless ($reg1 & 0x07) == 0x00;
+    $reg1 = &$read_proc(0x58);
+    next if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
+    next if $chip == 1 and  $reg1 != 0x30;
+    next if $chip == 2 and  $reg1 != 0x40;
+  }
 }
 
 # $_[0]: Chip to detect (0 = Revision 0x00, 1 = Revision 0x80)
