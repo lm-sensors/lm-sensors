@@ -779,9 +779,9 @@ static void pc87360_update_client(struct i2c_client *client)
 				data->fan_min[i] = pc87360_read_value(data,
 						   LD_FAN, NO_BANK,
 						   PC87360_REG_FAN_MIN(i));
-				/* Change clock divider if needed */
+				/* Increase clock divider if needed */
 				if ((data->fan_status[i] & 0x60) != 0x60
-				 && (data->fan_status[i] & 0x04
+				 && ((data->fan_status[i] & 0x04)
 				  || (data->fan[i] & 0xE0) == 0xE0)) {
 					data->fan_status[i] += 0x20;
 					data->fan_min[i] >>= 1;
@@ -790,11 +790,13 @@ static void pc87360_update_client(struct i2c_client *client)
 							    PC87360_REG_FAN_MIN(i),
 							    data->fan_min[i]);
 #ifdef DEBUG
-					printk(KERN_DEBUG "pc87366.o: Increasing "
+					printk(KERN_DEBUG "pc87360.o: Increasing "
 					       "clock divider for fan %d\n", i+1);
 #endif
 				} else
+				/* Decrease clock divider if possible */
 				if ((data->fan_status[i] & 0x60) != 0x00
+				 && !(data->fan_status[i] & 0x04)
 				 && (data->fan[i] & 0xC0) == 0x00) {
 					data->fan_status[i] -= 0x20;
 					data->fan_min[i] <<= 1;
@@ -803,7 +805,7 @@ static void pc87360_update_client(struct i2c_client *client)
 							    PC87360_REG_FAN_MIN(i),
 							    data->fan_min[i]);
 #ifdef DEBUG
-					printk(KERN_DEBUG "pc87366.o: Decreasing "
+					printk(KERN_DEBUG "pc87360.o: Decreasing "
 					       "clock divider for fan %d\n", i+1);
 #endif
 				}
