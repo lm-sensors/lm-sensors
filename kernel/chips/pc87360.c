@@ -78,9 +78,6 @@ MODULE_PARM_DESC(init,
  * Super-I/O registers and operations
  */
 
-#define REG	0x2e	/* The register to read/write */
-#define VAL	0x2f	/* The value to read/write */
-
 #define DEV	0x07	/* Register: Logical device select */
 #define DEVID	0x20	/* Register: Device ID */
 #define ACT	0x30	/* Register: Device activation */
@@ -95,22 +92,22 @@ static const u8 logdev[3] = { FSCM, VLM, TMS };
 #define LD_IN		1
 #define LD_TEMP		2
 
-static inline void superio_outb(int reg, int val)
+static inline void superio_outb(int sioaddr, int reg, int val)
 {
-	outb(reg, REG);
-	outb(val, VAL);
+	outb(reg, sioaddr);
+	outb(val, sioaddr+1);
 }
 
-static inline int superio_inb(int reg)
+static inline int superio_inb(int sioaddr, int reg)
 {
-	outb(reg, REG);
-	return inb(VAL);
+	outb(reg, sioaddr);
+	return inb(sioaddr+1);
 }
 
-static inline void superio_exit(void)
+static inline void superio_exit(int sioaddr)
 {
-	outb(0x02, REG);
-	outb(0x02, VAL);
+	outb(0x02, sioaddr);
+	outb(0x02, sioaddr+1);
 }
 
 /*
@@ -241,7 +238,6 @@ static void pc87360_write_value(struct pc87360_data *data, u8 ldi, u8 bank,
 				u8 reg, u8 value);
 static void pc87360_init_client(struct i2c_client *client, int use_thermistors);
 static void pc87360_update_client(struct i2c_client *client);
-static int pc87360_find(u8 *devid, int *address);
 
 
 void pc87365_alarms(struct i2c_client *client, int operation, int ctl_name,
@@ -475,7 +471,7 @@ static int pc87360_attach_adapter(struct i2c_adapter *adapter)
 	return i2c_detect(adapter, &addr_data, pc87360_detect);
 }
 
-static int pc87360_find(u8 *devid, int *address)
+static int pc87360_find(int sioaddr, u8 *devid, int *address)
 {
 	u16 val;
 	int i;
@@ -484,7 +480,7 @@ static int pc87360_find(u8 *devid, int *address)
 	/* No superio_enter */
 
 	/* Identify device */
-	val = superio_inb(DEVID);
+	val = superio_inb(sioaddr, DEVID);
 	switch (val) {
 	case 0xE1: /* PC87360 */
 	case 0xE8: /* PC87363 */
@@ -496,7 +492,7 @@ static int pc87360_find(u8 *devid, int *address)
 		nrdev = 3;
 		break;
 	default:
-		superio_exit();
+		superio_exit(sioaddr);
 		return -ENODEV;
 	}
 	/* Remember the device id */
@@ -504,17 +500,17 @@ static int pc87360_find(u8 *devid, int *address)
 
 	for (i = 0; i < nrdev; i++) {
 		/* select logical device */
-		superio_outb(DEV, logdev[i]);
+		superio_outb(sioaddr, DEV, logdev[i]);
 
-		val = superio_inb(ACT);
+		val = superio_inb(sioaddr, ACT);
 		if (!(val & 0x01)) {
 			printk(KERN_INFO "pc87360.o: Device 0x%02x not "
 			       "activated\n", logdev[i]);
 			continue;
 		}
 
-		val = (superio_inb(BASE) << 8)
-		    | superio_inb(BASE + 1);
+		val = (superio_inb(sioaddr, BASE) << 8)
+		    | superio_inb(sioaddr, BASE + 1);
 		if (!val) {
 			printk(KERN_INFO "pc87360.o: Base address not set for "
 			       "device 0x%02x\n", logdev[i]);
@@ -524,8 +520,8 @@ static int pc87360_find(u8 *devid, int *address)
 		address[i] = val;
 
 		if (i==0) { /* Fans */
-			confreg[0] = superio_inb(0xF0);
-			confreg[1] = superio_inb(0xF1);
+			confreg[0] = superio_inb(sioaddr, 0xF0);
+			confreg[1] = superio_inb(sioaddr, 0xF1);
 			
 #ifdef DEBUG
 			printk(KERN_DEBUG "pc87360.o: Fan 1: mon=%d "
@@ -544,8 +540,8 @@ static int pc87360_find(u8 *devid, int *address)
 				/* These registers are not logical-device
 				   specific, just that we won't need them if
 				   we don't use the VLM device */
-				confreg[2] = superio_inb(0x2B);
-				confreg[3] = superio_inb(0x25);
+				confreg[2] = superio_inb(sioaddr, 0x2B);
+				confreg[3] = superio_inb(sioaddr, 0x25);
 
 				if (confreg[2] & 0x40) {
 					printk(KERN_INFO "pc87360.o: Using "
@@ -561,7 +557,7 @@ static int pc87360_find(u8 *devid, int *address)
 		}
 	}
 
-	superio_exit();
+	superio_exit(sioaddr);
 	return 0;
 }
 
@@ -1318,7 +1314,8 @@ static int __init pc87360_init(void)
 
 	printk(KERN_INFO "pc87360.o version %s (%s)\n", LM_VERSION, LM_DATE);
 
-	if (pc87360_find(&devid, extra_isa)) {
+	if (pc87360_find(0x2e, &devid, extra_isa)
+	 && pc87360_find(0x4e, &devid, extra_isa)) {
 		printk(KERN_WARNING "pc87360.o: PC8736x not detected, "
 		       "module not inserted.\n");
 		return -ENODEV;
