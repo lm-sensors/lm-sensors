@@ -117,16 +117,49 @@ CONFIG_I2C_ALI15X3
   built as a module which can be inserted and removed while the kernel
   is running.
 
+AMD 756
+CONFIG_I2C_AMD756
+  If you say yes to this option, support will be included for the AMD
+  756 mainboard I2C interfaces. This can also be 
+  built as a module which can be inserted and removed while the kernel
+  is running.
+
 Apple Hydra Mac I/O
 CONFIG_I2C_HYDRA
   If you say yes to this option, support will be included for the 
   Hydra mainboard I2C interface. This can also be built as a module 
   which can be inserted and removed while the kernel is running.
 
-Intel 82371AB PIIX4(E)
+Intel I801
+CONFIG_I2C_I801
+  If you say yes to this option, support will be included for the 
+  Intel I801 mainboard I2C interfaces. "I810" mainboard sensor chips are
+  generally located on the I801's I2C bus. This can also be
+  built as a module which can be inserted and removed while the kernel
+  is running.
+
+Intel I810
+CONFIG_I2C_I810
+  If you say yes to this option, support will be included for the 
+  Intel I810 mainboard I2C interfaces. The I2C busses on the I810
+  are generally used only for video devices. For "810" mainboard sensor
+  chips, use the I801 I2C driver instead. This can also be
+  built as a module which can be inserted and removed while the kernel
+  is running.
+
+Intel 82371AB PIIX4(E) / ServerWorks OSB4
 CONFIG_I2C_PIIX4
   If you say yes to this option, support will be included for the 
-  Intel PIIX4 and PIIX4E mainboard I2C interfaces. This can also be
+  Intel PIIX4 and PIIX4E and Serverworks OSB4 mainboard
+  I2C interfaces. This can also be
+  built as a module which can be inserted and removed while the kernel
+  is running.
+
+Silicon Integrated Systems Corp. SiS5595
+CONFIG_I2C_SIS5595
+  If you say yes to this option, support will be included for the 
+  SiS5595 mainboard I2C interfaces. For integrated sensors on the
+  Sis5595, use CONFIG_SENSORS_SIS5595. This can also be
   built as a module which can be inserted and removed while the kernel
   is running.
 
@@ -136,6 +169,23 @@ CONFIG_I2C_VIA
   Technologies I2C adapter found on some motherboards. This can also 
   be built as a module which can be inserted and removed while the 
   kernel is running.
+
+VIA Technologies, Inc. VT82C596, 596B, 686A/B
+CONFIG_I2C_VIAPRO
+  If you say yes to this option, support will be included for the VIA
+  Technologies I2C adapter on these chips. For integrated sensors on the
+  Via 686A/B, use CONFIG_SENSORS_VIA686A. This can also be
+  be built as a module which can be inserted and removed while the 
+  kernel is running.
+
+3DFX Banshee / Voodoo3
+CONFIG_I2C_VOODOO3
+  If you say yes to this option, support will be included for the 
+  3DFX Banshee and Voodoo3 I2C interfaces. The I2C busses on the these
+  chips are generally used only for video devices.
+  This can also be
+  built as a module which can be inserted and removed while the kernel
+  is running.
 
 Pseudo ISA adapter (for hardware sensors modules)
 CONFIG_I2C_ISA
@@ -151,10 +201,21 @@ CONFIG_I2C_ISA
 Analog Devices ADM1021 and compatibles
 CONFIG_SENSORS_ADM1021 
   If you say yes here you get support for Analog Devices ADM1021 
-  sensor chips and clones: the Maxim MAX1617 and MAX1617A, the
-  TI THMC10 and the XEON processor built-in sensor. This can also 
+  and ADM1023 sensor chips and clones: Maxim MAX1617 and MAX1617A,
+  Genesys Logic GL523SM, National Semi LM84, TI THMC10,
+  and the XEON processor built-in sensor. This can also 
   be built as a module which can be inserted and removed while the 
   kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+Analog Devices ADM1025
+CONFIG_SENSORS_ADM1025
+  If you say yes here you get support for Analog Devices ADM1025 sensor
+  chips.  This can also be built as a module which can be inserted and
+  removed while the kernel is running.
 
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
@@ -163,8 +224,8 @@ CONFIG_SENSORS_ADM1021
 Analog Devices ADM9240 and compatibles
 CONFIG_SENSORS_ADM9240
   If you say yes here you get support for Analog Devices ADM9240 
-  sensor chips and clones: the Dallas Semiconductors DS1780 and
-  the National Semiconductors LM81. This can also be built as a 
+  sensor chips and clones: the Dallas Semiconductor DS1780 and
+  the National Semiconductor LM81. This can also be built as a 
   module which can be inserted and removed while the kernel is
   running.
 
@@ -182,17 +243,28 @@ CONFIG_SENSORS_GL518SM
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-National Semiconductors LM75
-CONFIG_SENSORS_LM75 
-  If you say yes here you get support for National Semiconductor LM75
-  sensor chips. This can also be built as a module which can be
-  inserted and removed while the kernel is running.
+Genesys Logic GL520SM
+CONFIG_SENSORS_GL520SM
+  If you say yes here you get support for Genesys Logic GL518SM sensor
+  chips.  This can also be built as a module which can be inserted and
+  removed while the kernel is running.
 
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-National Semiconductors LM78
+National Semiconductor LM75 and compatibles
+CONFIG_SENSORS_LM75 
+  If you say yes here you get support for National Semiconductor LM75
+  sensor chips and clones: Dallas Semi DS75 and DS1775, TelCon
+  TCN75, and National Semi LM77. This can also be built as a module which
+  can be inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+National Semiconductor LM78
 CONFIG_SENSORS_LM78
   If you say yes here you get support for National Semiconductor LM78
   sensor chips family: the LM78-J and LM79. Many clone chips will
@@ -204,7 +276,7 @@ CONFIG_SENSORS_LM78
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-National Semiconductors LM80
+National Semiconductor LM80
 CONFIG_SENSORS_LM80
   If you say yes here you get support for National Semiconductor LM80
   sensor chips. This can also be built as a module which can be 
@@ -214,20 +286,52 @@ CONFIG_SENSORS_LM80
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+National Semiconductor LM87
+CONFIG_SENSORS_LM87
+  If you say yes here you get support for National Semiconductor LM87
+  sensor chips. This can also be built as a module which can be 
+  inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
 Silicon Integrated Systems Corp. SiS5595
 CONFIG_SENSORS_SIS5595
-  If you say yes here you get support for Silicon Integrated Systems 
-  Corp.  SiS5595 sensor chips. This can also be built as a module 
+  If you say yes here you get support for the integrated sensors in 
+  SiS5595 South Bridges. This can also be built as a module 
   which can be inserted and removed while the kernel is running.
 
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-Winbond W83781D, W83782D and W83783S
+Texas Instruments THMC50 / Analog Devices ADM1022
+CONFIG_SENSORS_THMC50
+  If you say yes here you get support for Texas Instruments THMC50
+  sensor chips and clones: the Analog Devices ADM1022.
+  This can also be built as a module which
+  can be inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+Via VT82C686A/B
+CONFIG_SENSORS_VIA686A
+  If you say yes here you get support for the integrated sensors in 
+  Via 686A/B South Bridges. This can also be built as a module 
+  which can be inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+Winbond W83781D, W83782D, W83783S, W83627HF, AS99127F
 CONFIG_SENSORS_W83781D
   If you say yes here you get support for the Winbond W8378x series 
-  of sensor chips: the W83781D, W83782D, W83783S and W83682HF. This 
+  of sensor chips: the W83781D, W83782D, W83783S and W83682HF,
+  and the similar Asus AS99127F. This
   can also be built as a module which can be inserted and removed
   while the kernel is running.
 
