@@ -630,7 +630,7 @@ void mtp008_init_client(struct i2c_client *client)
 			   FAN_TO_REG(MTP008_INIT_FAN_MIN_1, 2));
 	mtp008_write_value(client, MTP008_REG_FAN_MIN(2),
 			   FAN_TO_REG(MTP008_INIT_FAN_MIN_2, 2));
-	mtp008_write_value(client, MTP008_REG_FAN_MIN(2),
+	mtp008_write_value(client, MTP008_REG_FAN_MIN(3),
 			   FAN_TO_REG(MTP008_INIT_FAN_MIN_3, 2));
 
 	/*
