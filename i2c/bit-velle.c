@@ -130,13 +130,11 @@ void bit_velle_exit(void)
 
 int bit_velle_reg(struct i2c_client *client)
 {
-	MOD_INC_USE_COUNT;
 	return 0;
 }
 
 int bit_velle_unreg(struct i2c_client *client)
 {
-	MOD_DEC_USE_COUNT;
 	return 0;
 }
 

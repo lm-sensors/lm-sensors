@@ -118,13 +118,11 @@ void bit_lp_exit(void)
 
 int bit_lp_reg(struct i2c_client *client)
 {
-	MOD_INC_USE_COUNT;
 	return 0;
 }
 
 int bit_lp_unreg(struct i2c_client *client)
 {
-	MOD_DEC_USE_COUNT;
 	return 0;
 }
 

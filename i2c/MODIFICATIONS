@@ -15,6 +15,9 @@ Here come the changes:
 
 * Algo-bit now scans the bus before registering the adapter.
 
+* Bit-lp and bit-velle don't increase module usage counts
+  when clients register.
+
 ! Renamed #define HW_B_MB to HW_B_VIA in i2c.h
 
 ! Added '#include <linux/page.h>' to i2c.h, to make it compile with 2.2 

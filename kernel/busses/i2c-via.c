@@ -87,13 +87,11 @@ static int bit_via_getsda(void *data)
 
 static int bit_via_reg(struct i2c_client *client)
 {
-	MOD_INC_USE_COUNT;
 	return 0;
 }
 
 static int bit_via_unreg(struct i2c_client *client)
 {
-	MOD_DEC_USE_COUNT;
 	return 0;
 }
 
