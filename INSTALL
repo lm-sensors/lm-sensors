@@ -88,6 +88,9 @@ behaviour (probably leading to crashes).
 If you do a 'make install', remember to do a 'depmod -a' and a 'ldconfig'
 to make sure the new modules and shared libraries are recognized.
 
+Do no worry about the 'No such file or directory' warnings when you compile
+the package the first time. They are harmless.
+
 
 TESTING AND RUNNING
 ===================
