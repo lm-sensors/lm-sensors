@@ -242,8 +242,8 @@ u16 swap_bytes(u16 val)
 }
 
 /* All registers are word-sized, except for the configuration register.
-   For some reason, we must swap the low and high byte, but only on 
-   reading words?!? */
+   LM75 uses a high-byte first convention, which is exactly opposite to
+   the usual practice. */
 int lm75_read_value(struct i2c_client *client, u8 reg)
 {
   if (reg == LM75_REG_CONF)
@@ -252,13 +252,16 @@ int lm75_read_value(struct i2c_client *client, u8 reg)
     return swap_bytes(smbus_read_word_data(client->adapter,client->addr,reg));
 }
 
-/* No swapping needed here! */
+/* All registers are word-sized, except for the configuration register.
+   LM75 uses a high-byte first convention, which is exactly opposite to
+   the usual practice. */
 int lm75_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
   if (reg == LM75_REG_CONF)
     return smbus_write_byte_data(client->adapter,client->addr,reg,value);
   else
-    return smbus_write_word_data(client->adapter,client->addr,reg,value);
+    return smbus_write_word_data(client->adapter,client->addr,reg,
+           swap_bytes(value));
 }
 
 void lm75_update_client(struct i2c_client *client)

@@ -1,7 +1,7 @@
 Many, many things. Most notably:
 
 * Check whether the FAN count divisors in the lm78 module are correct
-  (probably not!)
+  (probably not!); correct gl518sm changed-fan_div_but_did_not_update_fans
 * Wouldn't it be better to display all natural voltages for the LM78 chip,
   and do *all* conversions through a user program?
 * kmalloc with GFP_KERNEL can cause a context switch! Check whether this is
