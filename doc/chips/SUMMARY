@@ -18,12 +18,13 @@ Please include the following in your mail:
 	- The output of (as root) 'prog/detect/sensors-detect'
 	- The output of (as root) 'prog/detect/i2cdetect 1'
  	      (assuming your smbus adapter is on bus 1 -
-	      check the output of 'cat /proc/bus/i2c' to make sure).
-	- The output of (as root) 'prog/dump/i2cdump 1 0xXX b'
+	      run 'i2cdetect' with no arguments to list the busses).
+	- The output of (as root) 'prog/dump/i2cdump X 0xXX'
+	      X = the bus number
 	      XX = the address of each chip you see in the output
 	      of i2cdetect. (run once for each chip)
 	- Part numbers of chips on your motherboard you think are
-	      the sensor chips.
+	      the sensor chips (look at your motherboard)
 
 
 -----------------------------------------------------------------------------
@@ -154,7 +155,7 @@ COMPANY ID LIST
 Many SMBus chips have a company ID at location 0x3E or 0xFE.
 
 Here is a partial list.
-This may help identify a chip after doing a 'i2cdump [bus] [address] b'.
+This may help identify a chip after doing a 'i2cdump [bus] [address]'.
 
 0x00	National (on LM84)
 0x01	National
@@ -165,4 +166,5 @@ This may help identify a chip after doing a 'i2cdump [bus] [address] b'.
 0x4D	Maxim
 0x5CA3	Winbond (at 0x4F)
 0x90	ITE (at 0x58)
+0xAC	Myson (at 0x58)
 0xDA	Dallas
