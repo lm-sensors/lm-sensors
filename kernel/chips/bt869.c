@@ -30,7 +30,8 @@
 #include "version.h"
 #include <linux/init.h>
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1))
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
+    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
 #endif
 

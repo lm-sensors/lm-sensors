@@ -18,7 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.5.5 (2000????)
-  Chip modules (all): Update mutex
+  Chip modules (all): Update mutex definition (works now for new 2.2 kernels)
   File sensors.conf.eg: Add mtp008 entries
   Library: Add mtp008 support
   Module adm1021: Add support for adm1021a / adm1023
