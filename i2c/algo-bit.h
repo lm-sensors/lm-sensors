@@ -1,5 +1,5 @@
 #ifndef ALGO_BIT_H
-#define AGLO_BIT_H 1
+#define ALGO_BIT_H 1
 
 /* --- Defines for bit-adapters ---------------------------------------	*/
 #include "i2c.h"
