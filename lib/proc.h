@@ -23,6 +23,9 @@
 /* Read /proc/sys/dev/sensors/chips */
 extern int sensors_read_proc_chips(void);
 
+/* Read /proc/bus/i2c */
+extern int sensors_read_proc_bus(void);
+
 /* Read a value out of a /proc file */
 extern int sensors_read_proc(sensors_chip_name name, int feature, 
                              double *value);

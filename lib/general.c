@@ -74,3 +74,11 @@ void sensors_add_array_els(const void *els, int nr_els, void **list,
   memcpy(((char *)*list) + *num_el * el_size, els, el_size * nr_els);
   *num_el += nr_els;
 }
+
+/* Strip a string of all terminating spaces */
+void sensors_strip_of_spaces(char *name)
+{
+  int i;
+  for (i = strlen(name)-1; (i>=0) && (name[i] == ' '); i--);
+  name[i+1] = '\0';
+}

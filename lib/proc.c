@@ -95,6 +95,8 @@ int sensors_read_proc_bus(void)
   if (!f)
     return -SENSORS_ERR_PROC;
   while (fgets(line,255,f)) {
+    if (strlen(line) > 0)
+      line[strlen(line)-1] = '\0';
     if (! (border = rindex(line,'\t')))
       goto ERROR;
     if (! (entry.algorithm = strdup(border+1)))
@@ -112,6 +114,8 @@ int sensors_read_proc_bus(void)
       goto ERROR;
     if (sensors_parse_i2cbus_name(line,&entry.number))
       goto ERROR;
+    sensors_strip_of_spaces(entry.algorithm);
+    sensors_strip_of_spaces(entry.adapter);
     add_bus(&entry);
   }
   fclose(f);

@@ -70,4 +70,8 @@ extern sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix,
 extern sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
                                                          const char *feature);
 
+/* Substitute configuration bus numbers with real-world /proc bus numbers
+   in the chips lists */
+extern int sensors_substitute_busses(void);
+
 #endif /* def LIB_SENSORS_ACCESS_H */

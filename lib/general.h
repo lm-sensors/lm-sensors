@@ -33,4 +33,7 @@ extern void sensors_add_array_el(const void *el, void **list, int *num_el,
 extern void sensors_add_array_els(const void *els, int nr_els, void **list,
                                   int *num_el, int *max_el, int el_size);
 
+/* Strip a string of all terminating spaces */
+extern void sensors_strip_of_spaces(char *name);
+
 #endif /* LIB_SENSORS_GENERAL */

@@ -32,6 +32,7 @@ sensors_bus *sensors_config_busses = NULL;
 int sensors_config_busses_count = 0;
 int sensors_config_busses_max = 0;
 
+static int sensors_substitute_chip(sensors_chip_name *name,int lineno);
 
 /* Wow, this must be one of the ugliest functions I have ever written.
    The idea is that it parses a chip name. These are valid names:
@@ -239,5 +240,50 @@ int sensors_eval_expr(sensors_expr *expr, double val, double *result)
   }
   return 0;
 }
+
+int sensors_substitute_chip(sensors_chip_name *name,int lineno)
+{
+  int i,j;
+  for (i = 0; i < sensors_config_busses_count; i++)
+    if (sensors_config_busses[i].number == name->bus)
+      break;
+
+  if (i == sensors_config_busses_count) {
+    sensors_parse_error("Undeclared i2c bus referenced",lineno);
+    name->bus = sensors_proc_bus_count;
+    return -SENSORS_ERR_BUS_NAME;
+  }
+
+  for (j = 0; j < sensors_proc_bus_count; j++) {
+    if (!strcmp(sensors_config_busses[i].adapter,
+                sensors_proc_bus[j].adapter) &&
+        !strcmp(sensors_config_busses[i].algorithm,
+                sensors_proc_bus[j].algorithm)) 
+      break;
+  }
+
+  /* Well, if we did not find anything, j - sensors_proc_bus_count; so if
+     we set this chip's bus number to j, it will never be matched. Good. */
+  name->bus = j;
+  return 0;
+}
+
       
+int sensors_substitute_busses(void)
+{
+  int err,i,j,lineno;
+  sensors_chip_name_list *chips;
+  int res=0;
   
+  for(i = 0; i < sensors_config_chips_count; i++) {
+    lineno = sensors_config_chips[i].lineno;
+    chips = &sensors_config_chips[i].chips;
+    for(j = 0; j < chips->fits_count; j++)
+      if ((chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ISA) &&
+          (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY) &&
+          (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY_I2C))
+        if ((err = sensors_substitute_chip(chips->fits+j, lineno)))
+          res = err;
+  }
+  return res;
+}

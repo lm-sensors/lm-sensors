@@ -261,11 +261,13 @@ i2cbus_name:	  NAME
 ;
 
 adapter_name:	  NAME
-		  { $$ = $1; }
+		  { sensors_strip_of_spaces($1);
+		    $$ = $1; }
 ;
 
 algorithm_name:	  NAME
-		  { $$ = $1; }
+		  { sensors_strip_of_spaces($1);
+		    $$ = $1; }
 ;
 
 function_name:	  NAME

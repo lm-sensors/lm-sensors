@@ -36,7 +36,8 @@ extern const char *sensors_strerror(int errnum);
 
 /* This function is called when a parse error is detected. Give it a new
    value, and your own function is called instead of the default (which
-   prints to stderr). */
+   prints to stderr). This function may terminate the program, but it
+   usually outputs an error and returns. */
 extern void (*sensors_parse_error) (const char *err, int lineno);
 
 /* This function is called when an immediately fatal error (like no
