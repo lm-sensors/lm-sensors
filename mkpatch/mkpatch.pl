@@ -116,10 +116,10 @@ CONFIG_I2C_ALI15X3
   built as a module which can be inserted and removed while the kernel
   is running.
 
-AMD 756
+AMD 756/766
 CONFIG_I2C_AMD756
   If you say yes to this option, support will be included for the AMD
-  756 mainboard I2C interfaces. This can also be 
+  756/766 mainboard I2C interfaces. This can also be 
   built as a module which can be inserted and removed while the kernel
   is running.
 
@@ -137,19 +137,19 @@ CONFIG_I2C_I801
   built as a module which can be inserted and removed while the kernel
   is running.
 
-Intel I810
+Intel I810/I815
 CONFIG_I2C_I810
   If you say yes to this option, support will be included for the 
-  Intel I810 mainboard I2C interfaces. The I2C busses on the I810
+  Intel I810/I815 mainboard I2C interfaces. The I2C busses these chips
   are generally used only for video devices. For "810" mainboard sensor
   chips, use the I801 I2C driver instead. This can also be
   built as a module which can be inserted and removed while the kernel
   is running.
 
-Intel 82371AB PIIX4(E) / ServerWorks OSB4
+Intel 82371AB PIIX4(E) / ServerWorks OSB4 and CSB5
 CONFIG_I2C_PIIX4
   If you say yes to this option, support will be included for the 
-  Intel PIIX4 and PIIX4E and Serverworks OSB4 mainboard
+  Intel PIIX4 and PIIX4E and Serverworks OSB4/CSB5 mainboard
   I2C interfaces. This can also be
   built as a module which can be inserted and removed while the kernel
   is running.
@@ -640,16 +640,16 @@ sub gen_drivers_i2c_Config_in
   if [ "$CONFIG_I2C_MAINBOARD" = "y" ]; then
     tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
-    tristate '  AMD 756' CONFIG_I2C_AMD756
+    tristate '  AMD 756/766' CONFIG_I2C_AMD756
     dep_tristate '  DEC Tsunami I2C interface' CONFIG_I2C_TSUNAMI $CONFIG_I2C_ALGOBIT
     tristate '  Intel 82801AA, 82801AB and 82801BA' CONFIG_I2C_I801
-    tristate '  Intel i810AA, i810AB and i815' CONFIG_I2C_I810
-    tristate '  Intel 82371AB PIIX4(E)' CONFIG_I2C_PIIX4
+    dep_tristate '  Intel i810AA, i810AB and i815' CONFIG_I2C_I810 $CONFIG_I2C_ALGOBIT
+    tristate '  Intel 82371AB PIIX4(E), ServerWorks OSB4/CSB5' CONFIG_I2C_PIIX4
     tristate '  SiS 5595' CONFIG_I2C_SIS5595
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_ALGOBIT
     tristate '  VIA Technologies, Inc. VT596A/B' CONFIG_I2C_VIAPRO
     dep_tristate '  Voodoo3 I2C interface' CONFIG_I2C_VOODOO3 $CONFIG_I2C_ALGOBIT
-    tristate '  Pseudo ISA adapter (for hardware sensors modules)' CONFIG_I2C_ISA 
+    tristate '  Pseudo ISA adapter (for some hardware sensors)' CONFIG_I2C_ISA 
   fi
 
 EOF
