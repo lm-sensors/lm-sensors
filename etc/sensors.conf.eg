@@ -2083,10 +2083,6 @@ chip "pc87366-*"
    label temp3       "S-IO Temp"
    label temp3_crit  "S-IO Crit"
 
-# On some systems, thermistors are used instead of these thermal diodes
-#   ignore temp1
-#   ignore temp2
-
    set temp1_min    0
    set temp1_max   70
    set temp1_crit  85
@@ -2098,6 +2094,15 @@ chip "pc87366-*"
    set temp3_crit  85
 
 # Thermistors
+# On some systems, thermistors are used instead of thermal diodes.
+# Note that these are the same pins used differently, so you really
+# can't have them all on a given system.
+#   ignore temp1
+#   ignore temp2
+   ignore temp4
+   ignore temp5
+   ignore temp6
+
 # 3435 is the thermistor beta.
 # This assumes that the thermistor forms a resistor divider with a resistor
 # equal to its nominal value at 25 degres Celcius. If not, change the values.
@@ -2111,15 +2116,15 @@ chip "pc87366-*"
    compute temp6  3435 / (` (1 / (1 - @ / in10) - 1) + 3435 / 298.15) - 273.15, \
                   in10 * (1 - 1 / (1 + (^ (3435 / (273.15 + @) - 3435 / 298.15))))
 
-   set temp4_min    0
-   set temp4_max   70
-   set temp4_crit  85
-   set temp5_min    0
-   set temp5_max   70
-   set temp5_crit  85
-   set temp6_min    0
-   set temp6_max   70
-   set temp6_crit  85
+#   set temp4_min    0
+#   set temp4_max   70
+#   set temp4_crit  85
+#   set temp5_min    0
+#   set temp5_max   70
+#   set temp5_crit  85
+#   set temp6_min    0
+#   set temp6_max   70
+#   set temp6_crit  85
 
 # Fan inputs
 
