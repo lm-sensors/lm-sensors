@@ -32,7 +32,7 @@ sensord \- Sensor information logging daemon.
 .SH DESCRIPTION
 .B Sensord
 is a daemon that records in a log file the readings of all sensor chips at
-an interval of five minutes, or as configured on the command line.
+an interval of thirty minutes, or as configured on the command line.
 
 .B Sensord
 knows about certain chips, and outputs nicely formatted readings for them; but
@@ -52,7 +52,7 @@ is not present, the following paths are examined:
 .BR /usr/local/lib .
 .IP "-i interval"
 Specifies the interval, in seconds, between sensor readings. The default
-is 300 seconds (5 minutes).
+is 1800 seconds (30 minutes).
 .IP "-l log-file"
 Specify the log file to which to append. If no file is specified, the
 default log file `/var/log/sensors' is created. Note that this file is
@@ -82,6 +82,24 @@ being started. Typically, this is achieved with an entry in
 `/etc/rc.d/...' containing
 .BR modprobe (1)
 commands to load the required modules before starting the daemon.
+.SH WARNING
+On a typical system with one sensor chip, expect about 1KB per sensor
+entry in the log file. This works out at about 1.5MB per month. You
+must rotate the sensor log files, using something like
+.BR logrotate (8)
+or equivalent. You might, for example, create `/etc/logrotate.d/sensord'
+containing:
+.IP
+.nf
+  # Sample logrotate.d entry
+  /var/log/sensors {
+      missingok
+      postrotate
+          /usr/sbin/killall -HUP sensord
+      endscript
+  }
+.fi
+.PP
 .SH BUGS
 .B Sensord
 does not currently support reading alarm events from sensor devices.
