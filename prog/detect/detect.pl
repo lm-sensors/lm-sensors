@@ -19,6 +19,7 @@
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+# TODO: Better handling of chips with several addresses
 
 # A Perl wizard really ought to look upon this; the PCI and I2C stuff should
 # each be put in a separate file, using modules and packages. That is beyond
@@ -806,6 +807,7 @@ sub add_isa_to_chips_detected
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_misdetected_ref->[$j]->{address})) {
         $new_misdetected_ref->[$j]->{isa_addr} = $datahash->{isa_addr};
+        close FILE;
         return;
       }
       close FILE;
@@ -828,6 +830,7 @@ sub add_isa_to_chips_detected
                           $new_detected_ref->[$j]->{address})) {
         $new_detected_ref->[$j]->{isa_addr} = $datahash->{isa_addr};
         ($datahash) = splice (@$new_detected_ref, $j, 1);
+        close FILE;
         last;
       }
       close FILE;
@@ -1498,10 +1501,23 @@ sub main
     if (@{$$chip{misdetected}}) {
       print "  Misdetects:\n";
       foreach $data (@{$$chip{misdetected}}) {
-        printf "  * Bus `%s' (%s)\n", $data->{adapter}, $data->{algorithm};
+        my $is_i2c = exists $data->{address};
+        my $is_isa = exists $data->{isa_addr};
+        print "  * ";
+        printf "Bus `%s' (%s)\n", $data->{adapter}, $data->{algorithm}
+               if $is_i2c;
         printf "    Busdriver `%s', I2C address 0x%02x", $data->{driver}, 
-               $data->{address};
-        printf "(main: 0x%02x", $data->{main} if (exists $data->{main});
+               $data->{address} if $is_i2c;
+        printf " (main: 0x%02x)", $data->{main} if (exists $data->{main});
+        print "    " if  $is_i2c and $is_isa;
+        if ($is_isa) {
+          if ($data->{isa_addr}) {
+            printf "ISA bus address 0x%04x (Busdriver `i2c-isa')", 
+                   $data->{isa_addr};
+          } else {
+            printf "ISA bus, undetermined address (Busdriver `i2c-isa')"
+          }
+        }
         printf "\n    Chip `%s' (confidence: %d)\n",
                $data->{chipname},  $data->{confidence};
       }
