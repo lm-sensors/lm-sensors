@@ -130,13 +130,14 @@ static void ipmb_i2c_bmc_send_message(int id, struct ipmi_msg * msg)
 /* this is for sending commands like master w/r */
 static void ipmb_i2c_ipmb_send_message(int id, struct ipmi_msg * msg)
 {
-	address.channel = IPMI_IPMB_CHANNEL;
 /*
-	address.channel = IPMI_BMC_CHANNEL;
+	address.channel = IPMI_IPMB_CHANNEL;
 */
+	address.channel = IPMI_BMC_CHANNEL;
 	ipmb_i2c_send_message((struct ipmi_addr *) &address, id, msg);
 }
 
+#if 0
 /* not used */
 /* this is for an smi message, not for things like master w/r */
 static void ipmb_i2c_ipmb_send_smi(int addr, int id, struct ipmi_msg * msg)
@@ -170,11 +171,13 @@ static void ipmb_get_channel_info(int channel)
 	tx_msg_data[0] = channel;
 	ipmb_i2c_bmc_send_message(msgid++, &tx_message);
 }
+#endif /* 0 */
 
 /* Compose and send a "Master W/R" message */
 static void ipmb_master_wr(int bus, u8 addr, u8 rdcount,
                            u8 wrcount, u8 *wrdata)
 {
+	printk(KERN_INFO "i2c-ipmb.o: trying bus %d ...\n", bus);
 	tx_message.netfn = IPMI_NETFN_APP;
 	tx_message.cmd = IPMI_MASTER_WR;	
 	tx_message.data_len = 3 + wrcount;
@@ -200,9 +203,11 @@ int xbus;
 static void ipmb_get_all_channel_info(void)
 
 {
+#if 0
 	if(ipmi_version_major > 1 ||
 	   (ipmi_version_major == 1 && ipmi_version_minor >= 5))
 		ipmb_get_channel_info(0);
+#endif
 /*
 	else
 		scan SDR's for type 14
@@ -246,13 +251,12 @@ static void ipmb_rcv_channel_info(struct ipmi_msg *msg)
 */
 static void ipmb_rcv_master_resp(struct ipmi_msg *msg)
 {
-	printk(KERN_INFO "i2c-ipmb.o: bus %d good?\n",
-	                  xbus);
 	if(++xbus > 0x0f)
 		return;
 	ipmb_master_wr(xbus, 0x2d, 1, 1, "\0");
 }
 
+#if 0
 /* not used */
 static void ipmb_rcv_channel_enable(struct ipmi_msg *msg)
 {
@@ -266,6 +270,7 @@ static void ipmb_rcv_channel_enable(struct ipmi_msg *msg)
 			return;
 	ipmb_enable_channel_rcv(xchan, 2);
 }
+#endif /* 0 */
 
 static void ipmb_i2c_msg_handler(struct ipmi_recv_msg *msg,
 				  void            *handler_data)
@@ -274,8 +279,8 @@ static void ipmb_i2c_msg_handler(struct ipmi_recv_msg *msg,
 	int client = (msg->msgid >> 24) & 0xf;
 
 	if (msg->msg.data[0] != 0)
-		printk(KERN_WARNING "IPMI BMC response: Error 0x%x on cmd 0x%x/0x%x\n",
-		       msg->msg.data[0], msg->msg.netfn, msg->msg.cmd);
+		printk(KERN_WARNING "i2c-ipmb.o: Error 0x%x on cmd 0x%x/0x%x\n",
+		       msg->msg.data[0], msg->msg.netfn & 0xfe, msg->msg.cmd);
 /*
 	else
 */
