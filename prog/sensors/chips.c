@@ -2140,8 +2140,8 @@ void print_w83781d(const sensors_chip_name *name)
           (!strcmp(name->prefix,"w83627thf"));
   is83s = !strcmp(name->prefix,"w83783s");
   is627thf = !strcmp(name->prefix,"w83627thf");
-  is697hf = (!strcmp(name->prefix,"w83697hf")) ||
-          (!strcmp(name->prefix,"w83627thf"));
+  is697hf  = !strcmp(name->prefix,"w83697hf");
+
   if (!sensors_get_feature(*name,SENSORS_W83781D_ALARMS,&cur)) 
     alarms = cur + 0.5;
   else {
@@ -2254,7 +2254,7 @@ void print_w83781d(const sensors_chip_name *name)
       printf("ERROR: Can't get IN6 data!\n");
     free_the_label(&label);
   } /* !is627thf */
-  if (is82d || is697hf) {
+  if (is82d || is697hf || is627thf) {
     if (!sensors_get_label_and_valid(*name,SENSORS_W83782D_IN7,&label,&valid) &&
         !sensors_get_feature(*name,SENSORS_W83782D_IN7,&cur) &&
         !sensors_get_feature(*name,SENSORS_W83782D_IN7_MIN,&min) &&
