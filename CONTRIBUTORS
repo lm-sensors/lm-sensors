@@ -20,6 +20,8 @@ problems.
   Helped with some patches in lm_sensors version 1. He provided us with
   the original CVS archive, and even managed to explain to us how to use
   it.
+* Kyösti Mälkki <kmalkki@cc.hut.fi>
+  Author of the i2c-via driver.
 
 * Simon Vogl <simon@tk.uni-linz.ac.at>
   Wrote the new i2c kernel driver. This driver is indispensable for the

@@ -14,3 +14,7 @@ because it makes it impossible to remove the module.
 Alan Cox (alan@lxorguk.ukuu.org.uk), the maintainer of 2.0 kernels, has
 said he will consider patches that backport this 2.1 feature; perhaps it
 will be in 2.0.37. Until then, be careful when you unload modules.
+
+Module cdrom.o in all 2.2 kernels conflicts with our sensors.o module. Patches
+to correct this are being created. At this moment, make sure cdrom.o never
+gets unloaded, or you will almost certainly receive an Oops!
