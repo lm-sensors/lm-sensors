@@ -126,9 +126,9 @@ int main(int argc, char *argv[])
   }
 
   sprintf(filename1,"/dev/i2c-%d",i2cbus);
-  sprintf(filename2,"/dev/i2c-%d",i2cbus);
+  sprintf(filename2,"/dev/i2c%d",i2cbus);
   if ((file = open(filename1,O_RDWR)) < 0) {
-    if ((file = open(filename1,O_RDWR)) < 0) {
+    if ((file = open(filename2,O_RDWR)) < 0) {
       fprintf(stderr,"Error: Could not open file `%s' or `%s': %s\n",filename1,
               filename2,strerror(errno));
       exit(1);
