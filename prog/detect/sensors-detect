@@ -403,6 +403,14 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        driver => "i2c-piix4",
        match => sub { $_[0] =~ /^SMBus SMSC adapter at / },
      } , 
+     { 
+       vendid => 0x1166,
+       devid  => 0x0201,
+       func => 0,
+       procid => "ServerWorks South Bridge",
+       driver => "i2c-piix4",
+       match => sub { $_[0] =~ /^SMBus CSB5 adapter at / },
+     } , 
 );
 
 use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect

@@ -41,6 +41,10 @@
 #define PCI_DEVICE_ID_SERVERWORKS_OSB4 0x0200
 #endif
 
+#ifndef PCI_DEVICE_ID_SERVERWORKS_CSB5
+#define PCI_DEVICE_ID_SERVERWORKS_CSB5 0x0201
+#endif
+
 #ifndef PCI_VENDOR_ID_SERVERWORKS
 #define PCI_VENDOR_ID_SERVERWORKS 0x01166
 #endif
@@ -168,6 +172,13 @@ int piix4_setup(void)
 				    PCI_DEVICE_ID_SERVERWORKS_OSB4,
 				    PIIX4_dev);
 	while (PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 0));
+	/* Check for a CSB5 */
+	if (PIIX4_dev == NULL) {
+		PIIX4_dev = pci_find_device(PCI_VENDOR_ID_SERVERWORKS,
+				    PCI_DEVICE_ID_SERVERWORKS_CSB5,
+				    PIIX4_dev);
+		while (PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 0));
+	}
 	if (PIIX4_dev == NULL) {
 		PIIX4_dev = pci_find_device(PCI_VENDOR_ID_INTEL,
 					    PCI_DEVICE_ID_INTEL_82371AB_3,
