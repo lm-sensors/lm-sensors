@@ -3,6 +3,8 @@ M7101 - SMBus Support for ALi M15x3 based motherboards.
 --------------------------------------------------------
 Quick Start (2.4 kernels only):
 
+	Verify that hotplug is enabled in your kernel (general setup)
+		and reconfigure/rebuild/reinstall kernel if not
 	"lspci" to verify that 7101 device is not present
 	"make"
 	(as root) "make install"
