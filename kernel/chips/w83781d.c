@@ -762,7 +762,7 @@ int w83781d_attach_adapter(struct i2c_adapter *adapter)
 int w83781d_detect(struct i2c_adapter *adapter, int address,
 		   unsigned short flags, int kind)
 {
-	int i, val1, val2, id;
+	int i, val1 = 0, val2, id;
 	struct i2c_client *new_client;
 	struct w83781d_data *data;
 	int err = 0;
@@ -1273,7 +1273,7 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 void w83781d_init_client(struct i2c_client *client)
 {
 	struct w83781d_data *data = client->data;
-	int vid, i;
+	int vid = 0, i;
 	int type = data->type;
 	u8 tmp;
 
