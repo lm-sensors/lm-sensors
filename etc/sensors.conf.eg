@@ -4,7 +4,7 @@
 # HELPFUL HINT:                                                          #
 #	The 'set' lines (generally for min and max values)               #
 #	do not take effect until you run 'sensors -s' as root !!!        #
-#	We suggest you put 'sensors -s' in a /etc/rc.d/... file       #
+#	We suggest you put 'sensors -s' in a /etc/rc.d/... file          #
 #	to be run at boot time after the modules are inserted !!!        #
 ##########################################################################
 #
@@ -604,3 +604,17 @@ chip "mtp008-*"
 
     compute in2 @ * 38 / 10,		@ * 10 / 38
     compute in5 (@ * 36 - 118.61) / 7,	(118.61 + 7 * @) / 36
+
+chip "adm1025-*"
+
+# These are as advised in the data sheet
+
+    label in0 "+2.5V"
+    label in1 "VCCP"
+    label in2 "+3.3V"
+    label in3 "+5V"
+    label in4 "+12V"
+    label in5 "VCC"
+
+    label temp1 "SYS Temp"
+    label temp2 "CPU Temp"
