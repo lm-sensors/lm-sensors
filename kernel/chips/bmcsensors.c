@@ -607,7 +607,7 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 	switch(state) {
 		case STATE_INIT:
 		case STATE_RESERVE:
-			resid = (((u16)msg->data[2]) << 8) || msg->data[1];
+			resid = (((u16)msg->data[2]) << 8) | msg->data[1];
 #ifdef DEBUG
 			printk(KERN_DEBUG "bmcsensors.o: Got first resid 0x%.4x\n", resid);
 #endif
@@ -625,7 +625,7 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 			break;
 
 		case STATE_UNCANCEL:
-			resid = (((u16)msg->data[2]) << 8) || msg->data[1];
+			resid = (((u16)msg->data[2]) << 8) | msg->data[1];
 #ifdef DEBUG
 			printk(KERN_DEBUG "bmcsensors.o: Got new resid 0x%.4x\n", resid);
 #endif

@@ -24,6 +24,8 @@ ask CVS about it:
   File etc/sensors.conf.eg: Change it87 hyst to low
   Library: Better 2.6 eeprom support
            Change it87 hyst to low
+  Module bmcsensors: Fix reservations
+  Module eeprom: Remove memtype
   Program decode-vaio.pl: Add sysfs support
   Program mkpatch: Add max6650, lm83, lm90, asb100 and w83l785ts
                    Drop linux 2.2 support
@@ -50,6 +52,7 @@ ask CVS about it:
   Program fancontrol: Improvements, fixes, support 2.6 kernels
   Program mkpatch: Add lm75.h
   Program pwmconfig: Improvements, fixes, support 2.6 kernels
+  Program sensors: Add ASB100 support
   Program sensors-detect: Add 8712 Super I/O detection;
                           add W83L785TS detection
 
