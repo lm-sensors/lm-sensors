@@ -2922,10 +2922,15 @@ sub lm77_detect
     or (($low >> 12) != 0 && ($low >> 12) != 0xf)
     or (($high >> 12) != 0 && ($high >> 12) != 0xf);
 
+  $cur /= 16;
+  $hyst /= 16;
+  $os /= 16;
+  $high /= 16;
+  $low /= 16;
 
   # Most probable value ranges
   return 6 if $cur <= 100 and $hyst <= 40
-    and ($os >= 20 && $os <= 127) and ($high >= 20 && $os <= 127);
+    and ($os >= 20 && $os <= 127) and ($high >= 20 && $high <= 127);
   return 3;
 }
 
