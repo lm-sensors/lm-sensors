@@ -1175,6 +1175,181 @@ void print_gl518(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_gl520(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur,min,max;
+  int alarms,beeps,valid;
+  int two_temps = 0;
+
+  if (!sensors_get_feature(*name,SENSORS_GL520_ALARMS,&cur))
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get ALARMS data!\n");
+    alarms = 0;
+  }
+  if (!sensors_get_feature(*name,SENSORS_GL520_BEEPS,&cur)) 
+    beeps = cur + 0.5;
+  else {
+    printf("ERROR: Can't get BEEPS data!\n");
+    beeps = 0;
+  }
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_GL520_VID,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VID,&cur)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V\n",cur);
+    }
+  } else
+    printf("ERROR: Can't get VID data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_GL520_VDD,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VDD,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VDD_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VDD_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  ",cur);
+      printf(  "(min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
+             min,max,alarms&GL520_ALARM_VDD?"ALARM":"     ",
+             beeps&GL520_ALARM_VDD?"(beep)":"");
+    }
+  } else
+    printf("ERROR: Can't get VDD data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_GL520_VIN1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN1_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN1_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  ",cur);
+      printf("(min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
+             min,max,alarms&GL520_ALARM_VIN1?"ALARM":"     ",
+             beeps&GL520_ALARM_VIN1?"(beep)":"");
+    }
+  } else
+    printf("ERROR: Can't get VIN1 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_GL520_VIN2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN2_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN2_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  ",cur);
+      printf("(min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
+             min,max,alarms&GL520_ALARM_VIN2?"ALARM":"     ",
+             beeps&GL520_ALARM_VIN2?"(beep)":"");
+    }
+  } else
+    printf("ERROR: Can't get VIN2 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_GL520_VIN3,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN3_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN3_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
+             cur,min,max,alarms&GL520_ALARM_VIN3?"ALARM":"     ",
+             beeps&GL520_ALARM_VIN3?"(beep)":"");
+     }
+  } else
+    printf("ERROR: Can't get VIN3 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_GL520_VIN4,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN4,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN4_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_GL520_VIN4_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
+             cur,min,max,alarms&GL520_ALARM_VIN4?"ALARM":"     ",
+             beeps&GL520_ALARM_VIN4?"(beep)":"");
+     }
+  } else
+    two_temps = 1;
+  free_the_label(&label);
+  
+  if (!sensors_get_label_and_valid(*name,SENSORS_GL520_FAN1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_GL520_FAN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL520_FAN1_DIV,&max) &&
+      !sensors_get_feature(*name,SENSORS_GL520_FAN1_MIN,&min)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s  %s\n",
+             cur,min,max, alarms&GL520_ALARM_FAN1?"ALARM":"     ",
+             beeps&GL520_ALARM_FAN1?"(beep)":"");
+    }
+  } else
+    printf("ERROR: Can't get FAN1 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_GL520_FAN2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_GL520_FAN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL520_FAN2_DIV,&max) &&
+      !sensors_get_feature(*name,SENSORS_GL520_FAN2_MIN,&min)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s  %s\n",
+             cur,min,max, alarms&GL520_ALARM_FAN2?"ALARM":"     ",
+             beeps&GL520_ALARM_FAN2?"(beep)":"");
+    }
+  } else
+    printf("ERROR: Can't get FAN2 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_GL520_TEMP1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_GL520_TEMP1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL520_TEMP1_OVER,&max) &&
+      !sensors_get_feature(*name,SENSORS_GL520_TEMP1_HYST,&min)) {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, max, min, HYST, 1, 0);
+      printf("%s  %s\n", alarms&GL520_ALARM_TEMP1?"ALARM":"     ",
+             beeps&GL520_ALARM_TEMP1?"(beep)":"");
+    }
+  } else
+    printf("ERROR: Can't get TEMP1 data!\n");
+  free_the_label(&label);
+
+  if (two_temps) {
+    if (!sensors_get_label_and_valid(*name,SENSORS_GL520_TEMP2,&label,&valid) &&
+	!sensors_get_feature(*name,SENSORS_GL520_TEMP2,&cur) &&
+	!sensors_get_feature(*name,SENSORS_GL520_TEMP2_OVER,&max) &&
+	!sensors_get_feature(*name,SENSORS_GL520_TEMP2_HYST,&min)) {
+      if (valid) {
+	print_label(label,10);
+	print_temp_info( cur, max, min, HYST, 1, 0);
+	printf("%s  %s\n", alarms&GL520_ALARM_TEMP2?"ALARM":"     ",
+	       beeps&GL520_ALARM_TEMP2?"(beep)":"");
+      }
+    } else 
+      printf("ERROR: Can't get TEMP2 or VIN4 data!\n");
+    free_the_label(&label);
+  }
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_GL520_BEEP_ENABLE,&label,&valid)
+      && valid) {
+    if (!sensors_get_feature(*name,SENSORS_GL520_BEEP_ENABLE,&cur)) {
+      print_label(label,10);
+      if (cur < 0.5) 
+        printf("Sound alarm disabled\n");
+      else
+        printf("Sound alarm enabled\n");
+    } else
+      printf("ERROR: Can't get BEEP ENABLE data!\n");
+  }
+  free_the_label(&label);
+}
+
 void print_adm1025(const sensors_chip_name *name)
 {
   char *label = NULL;
