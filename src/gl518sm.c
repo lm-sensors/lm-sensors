@@ -559,7 +559,7 @@ void gl518_fan_div(struct i2c_client *client, int operation, int ctl_name,
       old = (old & 0x3f) | (data->fan_div[1] << 6);
     }
     if (*nrels_mag >= 1) {
-      data->fan_div[1] = DIV_TO_REG(results[0]);
+      data->fan_div[0] = DIV_TO_REG(results[0]);
       old = (old & 0xcf) | (data->fan_div[0] << 4);
       gl518_write_value(client,GL518_REG_MISC,old);
     }
