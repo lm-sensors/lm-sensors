@@ -45,6 +45,11 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 /* Insmod parameters */
 SENSORS_INSMOD_1(arp);
 
+static int reset;
+MODULE_PARM(reset, "i");
+MODULE_PARM_DESC(reset,
+		 "Send an ARP Reset Device message to each bus");
+
 /* ARP Commands */
 #define	ARP_PREPARE	0x01
 #define	ARP_RESET_DEV	0x02
@@ -178,7 +183,11 @@ int smbusarp_detect(struct i2c_adapter *adapter, int address,
 	int err = 0;
 	const char *type_name, *client_name;
 
-	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BLOCK_DATA))
+	/* must support block data w/ HW PEC or SW PEC */
+	if ((!i2c_check_functionality(adapter,
+	        I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_HWPEC_CALC)) &&
+	    (!i2c_check_functionality(adapter,
+	        I2C_FUNC_SMBUS_BLOCK_DATA_PEC)))
 		return(0);
 
 	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
@@ -284,6 +293,8 @@ static int smbusarp_init_client(struct i2c_client *client)
 			data->address_pool[client->adapter->clients[i]->addr] =
 			                                   ARP_BUSY;
 
+	if(reset)
+		i2c_smbus_write_byte(client, ARP_RESET_DEV);
 	ret = i2c_smbus_write_byte(client, ARP_PREPARE);
 	if(ret < 0) {
 #ifdef DEBUG
