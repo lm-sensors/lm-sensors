@@ -360,7 +360,7 @@ int w83781d_detach_client(struct i2c_client *client)
    it. */
 int w83781d_detect_isa(struct isa_adapter *adapter)
 {
-  int address,err;
+  int address,err,temp;
   struct isa_client *new_client;
   const char *type_name;
   const char *client_name;
@@ -390,23 +390,22 @@ int w83781d_detect_isa(struct isa_adapter *adapter)
        to a lot of problems if there is no Winbond present! */
     outb_p(W83781D_REG_BANK,address + W83781D_ADDR_REG_OFFSET);
     outb_p(0x00,address + W83781D_DATA_REG_OFFSET);
-
-/*    outb_p(W83781D_REG_WCHIPID,address + W83781D_ADDR_REG_OFFSET);
-    err = inb_p(address + W83781D_DATA_REG_OFFSET) & 0xfe;
-
-    if (err != 0x20) {
-*/
-      printk("w83781d.o: Winbond W83781D detected (ISA addr=0x%X)\n",address);
-      type_name = "w83781d";
-      client_name = "Winbond W83781D chip";
-/*
-    } else {
+    
+    /* Detection -- To bad we can't do this before setting to bank 0 */
+    outb_p(W83781D_REG_CHIPMAN,address + W83781D_ADDR_REG_OFFSET);
+    temp=inb_p(address + W83781D_DATA_REG_OFFSET);
  #ifdef DEBUG
-     printk("83781d.o: Winbond W83781D not detected (ISA)\n");
+    printk("w83781d.o: Detect byte: 0x%X\n",temp);
  #endif
-     continue;
+    if (temp != 0x0A3) {
+ #ifdef DEBUG
+        printk("83781d.o: Winbond W83781D detection failed (ISA at 0x%X)\n",address);
+ #endif
+    	continue;
     }
-*/
+    printk("w83781d.o: Winbond W83781D detected (ISA addr=0x%X)\n",address);
+    type_name = "w83781d";
+    client_name = "Winbond W83781D chip";
 
     request_region(address, W83781D_EXTENT, type_name);
 
@@ -502,20 +501,22 @@ int w83781d_detect_smbus(struct i2c_adapter *adapter)
 
     smbus_write_byte_data(adapter,address,W83781D_REG_BANK,0x00);
 
-/*    err = smbus_read_byte_data(adapter,address,W83781D_REG_WCHIPID);
-    
-    if (err == 0x20) {
-*/
+    err = smbus_read_byte_data(adapter,address,W83781D_REG_CHIPMAN);
+ #ifdef DEBUG
+    printk("w83781d.o: Detect byte: 0x%X\n",err);
+ #endif
+    if (err == 0x0A3) {
       printk("w83781d.o: Winbond W83781D detected (SMBus addr 0x%X)\n",address);
       type_name = "w83781d";
       client_name = "Winbond W83781D chip";
-/*    } else {
+      err=0;
+    } else {
  #ifdef DEBUG
-     printk("83781d.o: Winbond W83781D not detected (SMBus/I2C)\n");
+     printk("83781d.o: Winbond W83781D detection failed (SMBus/I2C at 0x%X)\n",address);
  #endif
      continue;
     }
-*/
+
 
     /* Allocate space for a new client structure. To counter memory
        ragmentation somewhat, we only do one kmalloc. */
@@ -626,7 +627,6 @@ int w83781d_command(struct i2c_client *client, unsigned int cmd, void *arg)
   return 0;
 }
 
-/* Nothing here yet */
 void w83781d_inc_use (struct i2c_client *client)
 {
 #ifdef MODULE
@@ -634,7 +634,6 @@ void w83781d_inc_use (struct i2c_client *client)
 #endif
 }
 
-/* Nothing here yet */
 void w83781d_dec_use (struct i2c_client *client)
 {
 #ifdef MODULE
@@ -853,7 +852,7 @@ void w83781d_update_client(struct i2c_client *client)
     data->temp_add_hyst[1] = w83781d_read_value(client,W83781D_REG_TEMP3_HYST);
     i = w83781d_read_value(client,W83781D_REG_VID_FANDIV);
     data->vid = i & 0x0f;
-    data->vid |= (w83781d_read_value(client,W83781D_REG_CHIPID) & 0x01) >> 4;
+    data->vid |= (w83781d_read_value(client,W83781D_REG_CHIPID) & 0x01) << 4;
     data->fan_div[0] = (i >> 4) & 0x03;
     data->fan_div[1] = i >> 6;
     data->fan_div[2] = (w83781d_read_value(client,W83781D_REG_PIN) >> 6) & 0x03;
