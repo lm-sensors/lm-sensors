@@ -23,8 +23,9 @@
 	Typical usage:
 	isadump 0x295 0x296		Basic winbond dump using address/data registers
 	isadump 0x295 0x296 2		Winbond dump, bank 2
-	isadump 0x2e 0x2f 0x09 0x07	Super-I/O, logical device 9
+	isadump 0x2e 0x2f 0x09		Super-I/O, logical device 9
 	isadump -f 0x5000		Flat address space dump like for Via 686a
+	isadump -f 0xecf0 0x10 1	PC87366, temperature channel 2
 */
 
 #include <stdio.h>
@@ -56,13 +57,51 @@ char hexchar(int i)
 
 void help(void)
 {
-  fprintf(stderr,"Syntax: isadump ADDRREG DATAREG [BANK [BANKREG]]\n");
-  fprintf(stderr,"        isadump -f ADDRESS (for flat address space)\n");
+	fprintf(stderr,
+	        "Syntax for I2C-like access:\n"
+	        "  isadump ADDRREG DATAREG [BANK [BANKREG]]\n"
+	        "Syntax for flat address space:\n"
+	        "  isadump -f ADDRESS [RANGE [BANK [BANKREG]]]\n");
+}
+
+int default_bankreg(int flat, int addrreg, int datareg)
+{
+	if (flat) {
+		return 0x09; /* Works for National Semiconductor
+		                Super-IO chips */
+	}
+
+	if ((addrreg == 0x2e && datareg == 0x2f)
+	 || (addrreg == 0x4e && datareg == 0x4f)) {
+		return 0x07; /* Works for all Super-I/O chips */
+	}
+	
+	return 0x4e; /* Works for Winbond ISA chips, default */
+}
+
+int set_bank(int flat, int addrreg, int datareg, int bank, int bankreg)
+{
+	int oldbank;
+
+	if (flat) {
+		oldbank = inb(addrreg+bankreg);
+		outb(bank, addrreg+bankreg);
+	} else {
+		outb(bankreg, addrreg);
+		oldbank = inb(datareg);
+		outb(bank, datareg);
+	}
+
+	return oldbank;
 }
 
 int main(int argc, char *argv[])
 {
-  int addrreg, datareg = 0, bank = -1, bankreg = 0x4E;
+  int addrreg;        /* addess in flat mode */
+  int datareg = 0;    /* unused in flat mode */
+  int range = 256;    /* can be changed only in flat mode */
+  int bank = -1;      /* -1 means no bank operation */
+  int bankreg;
   int oldbank = 0;
   int i,j,res;
   int flat = 0;
@@ -73,44 +112,53 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  if(strcmp(argv[1], "-f")) {
-    addrreg = strtol(argv[1],&end,0);
-  } else {
-    if(argc != 3) {
-      help();
-      exit(1);
-    }
+  if (!strcmp(argv[1], "-f")) {
     flat = 1;
-    addrreg = strtol(argv[2],&end,0) & 0xff00;
   }
+
+  addrreg = strtol(argv[1+flat], &end, 0);
   if (*end) {
     fprintf(stderr,"Error: Invalid address!\n");
     help();
     exit(1);
   }
-  if ((addrreg < 0) || (addrreg > 0xffff)) {
-    fprintf(stderr,"Error: Address out of range!\n");
+  if (addrreg < 0 || addrreg > (flat?0xffff:0x3fff)) {
+    fprintf(stderr, "Error: Address out of range (0x0000-0x%04x)!\n",
+            flat?0xffff:0x3fff);
     help();
     exit(1);
   }
 
-  if(flat)
-    goto START;
-
-  datareg = strtol(argv[2],&end,0);
-  if (*end) {
-    fprintf(stderr,"Error: Invalid data register!\n");
-    help();
-    exit(1);
+  if (flat) {
+    if (argc > 3) {
+      range = strtol(argv[3], &end, 0);
+      if (*end || range <= 0 || range > 0x100 || range & 0xf) {
+        fprintf(stderr, "Error: Invalid range!\n"
+                "Hint: Must be a multiple of 16 no greater than 256.\n");
+        help();
+        exit(1);
+      }
+    } else {
+      addrreg &= 0xff00; /* Force alignment */
+    }
+  } else {
+    datareg = strtol(argv[2], &end, 0);
+    if (*end) {
+      fprintf(stderr, "Error: Invalid data register!\n");
+      help();
+      exit(1);
+    }
+    if (datareg < 0 || datareg > 0x3fff) {
+      fprintf(stderr, "Error: Data register out of range (0x0000-0x3fff)!\n");
+      help();
+      exit(1);
+    }
   }
-  if ((datareg < 0) || (datareg > 0xffff)) {
-    fprintf(stderr,"Error: Data register out of range!\n");
-    help();
-    exit(1);
-  }
 
-  if(argc > 3) {
-    bank = strtol(argv[3],&end,0);
+  bankreg = default_bankreg(flat, addrreg, datareg);
+
+  if(argc > 3+flat) {
+    bank = strtol(argv[3+flat],&end,0);
     if (*end) {
       fprintf(stderr,"Error: Invalid bank number!\n");
       help();
@@ -122,22 +170,22 @@ int main(int argc, char *argv[])
       exit(1);
     }
 
-    if(argc > 4) {
-      bankreg = strtol(argv[4],&end,0);
+    if(argc > 4+flat) {
+      bankreg = strtol(argv[4+flat],&end,0);
       if (*end) {
         fprintf(stderr,"Error: Invalid bank register!\n");
         help();
         exit(1);
       }
-      if ((bankreg < 0) || (bankreg > 0xff)) {
-        fprintf(stderr,"Error: bank out of range (0-0xff)!\n");
+      if (bankreg < 0 || bankreg >= range) {
+        fprintf(stderr,
+                "Error: bank out of range (0x00-0x%02x)!\n",
+                range-1);
         help();
         exit(1);
       }
     }
   }
-
-START:
 
   if (getuid()) {
     fprintf(stderr,"Error: Can only be run as root (or make it suid root)\n");
@@ -148,7 +196,7 @@ START:
           "data loss and worse!\n");
   if(flat)
 	fprintf(stderr,"  I will probe address range 0x%04x to "
-                 "0x%04x.\n",addrreg, addrreg + 0xff);
+                 "0x%04x.\n", addrreg, addrreg + range - 1);
   else
 	fprintf(stderr,"  I will probe address register 0x%04x and "
                  "data register 0x%04x.\n",addrreg,datareg);
@@ -176,14 +224,11 @@ START:
   }
 #endif
 
-  if(bank>=0) {
-    outb(bankreg,addrreg);
-    oldbank=inb(datareg);
-    outb(bank,datareg);
-  }
+  if (bank >= 0)
+    oldbank = set_bank(flat, addrreg, datareg, bank, bankreg);
 
   printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
-  for (i = 0; i < 256; i+=16) {
+  for (i = 0; i < range; i += 16) {
     printf("%c0: ",hexchar(i/16));
     for(j = 0; j < 16; j++) {
 	if(flat) {
@@ -196,9 +241,10 @@ START:
     }
     printf("\n");
   }
-  if(bank>=0) {
-    outb(bankreg,addrreg);
-    outb(oldbank,datareg); /* restore original value */
-  }
+
+  /* Restore the original bank value */
+  if (bank >= 0)
+    set_bank(flat, addrreg, datareg, oldbank, bankreg);
+
   exit(0);
 }
