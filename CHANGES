@@ -15,6 +15,7 @@ ask CVS about it:
 
 2.5.1 (2000????)
   Module w83781d: Improve w83783s support
+  Module via686a: Enable sensors if not enabled by BIOS
   Program sensors-detect: Fix i801 detection
 
 2.5.0 (20000312)
