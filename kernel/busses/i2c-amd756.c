@@ -107,6 +107,7 @@ static s32 amd756_access(struct i2c_adapter *adap, u16 addr,
 			 unsigned short flags, char read_write,
 			 u8 command, int size, union i2c_smbus_data *data);
 static void amd756_do_pause(unsigned int amount);
+static void amd756_abort(void);
 static int amd756_transaction(void);
 static void amd756_inc(struct i2c_adapter *adapter);
 static void amd756_dec(struct i2c_adapter *adapter);
