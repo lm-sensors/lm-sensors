@@ -560,5 +560,6 @@ struct sensors_chips_data {
 #define BT869_SYSCTL_HALF   1002
 #define BT869_SYSCTL_RES    1003
 #define BT869_SYSCTL_COLORBARS    1004
+#define BT869_SYSCTL_DEPTH  1005
 
 #endif /* def SENSORS_SENSORS_H */

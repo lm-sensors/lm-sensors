@@ -67,6 +67,7 @@ struct bt869_data {
          u16 res[2]; /* Resolution XxY */
          u8 ntsc; /* 1=NTSC, 0=PAL */
          u8 half; /* go half res */
+         u8 depth; /* screen depth */
          u8 colorbars; /* turn on/off colorbar calibration screen */
 };
 
@@ -97,6 +98,8 @@ static void bt869_res(struct i2c_client *client, int operation, int ctl_name,
 static void bt869_half(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
 static void bt869_colorbars(struct i2c_client *client, int operation, int ctl_name,
+                      int *nrels_mag, long *results);
+static void bt869_depth(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
 static void bt869_update_client(struct i2c_client *client);
 
@@ -129,6 +132,8 @@ static ctl_table bt869_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &bt869_half },
   { BT869_SYSCTL_COLORBARS, "colorbars", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &bt869_colorbars },
+  { BT869_SYSCTL_DEPTH, "depth", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &bt869_depth },
   { 0 }
 };
 
@@ -330,7 +335,7 @@ void bt869_init_client(struct i2c_client *client)
   struct bt869_data *data = client->data;
   
     /* Initialize the bt869 chip */
-    bt869_write_value(client,0x0ba,0x80); 
+    bt869_write_value(client,0x0ba,0x80);
  //   bt869_write_value(client,0x0D6, 0x00);
     /* Be a slave to the clock on the Voodoo3 */
     bt869_write_value(client,0xa0,0x80);
@@ -338,11 +343,14 @@ void bt869_init_client(struct i2c_client *client)
     /* depth =16bpp */
     bt869_write_value(client,0x0C6, 0x001);
     bt869_write_value(client,0xC4,1);
+    /* Flicker free enable and config */
+    bt869_write_value(client,0xC8,0);
     data->res[0]=640;
     data->res[1]=480;
     data->ntsc=1;
     data->half=0;
     data->colorbars=0;
+    data->depth=16;
     
 }
 
@@ -374,7 +382,13 @@ void bt869_update_client(struct i2c_client *client)
       data->res[0] = 640;
       data->res[1] = 480;
     }
-//    bt869_write_value(client,0xD4,data->half<<6);
+    if ((data->depth!=24) && (data->depth!=16))
+      data->depth=16;
+    if (data->depth==16)
+      bt869_write_value(client,0x0C6, 0x001);
+    if (data->depth==24)
+      bt869_write_value(client,0x0C6, 0x000);
+    bt869_write_value(client,0xD4,data->half<<6);
     /* Be a slave to the clock on the Voodoo3 */
     bt869_write_value(client,0xba,0x20);
     /* depth =16bpp */
@@ -487,6 +501,24 @@ void bt869_colorbars(struct i2c_client *client, int operation, int ctl_name,
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       data->colorbars = (results[0] > 0);
+      bt869_update_client(client);
+    }
+  }
+}
+
+void bt869_depth(struct i2c_client *client, int operation, int ctl_name,
+               int *nrels_mag, long *results)
+{
+  struct bt869_data *data = client->data;
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    bt869_update_client(client);
+    results[0] = data->depth;
+    *nrels_mag = 1;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 1) {
+      data->depth = results[0];
       bt869_update_client(client);
     }
   }
