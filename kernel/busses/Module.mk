@@ -25,6 +25,8 @@ MODULE_DIR := kernel/busses
 KERNELBUSSESTARGETS := $(MODULE_DIR)/i2c-piix4.o $(MODULE_DIR)/i2c-isa.o \
 		       $(MODULE_DIR)/i2c-via.o
 
+KERNELBUSSESOLD := bit-via.o bit-mb.o isa.o piix4.o
+
 # Include all dependency files
 INCLUDEFILES += $(KERNELBUSSESTARGETS:.o=.d)
 
@@ -32,6 +34,7 @@ all-kernel-busses: $(KERNELBUSSESTARGETS)
 all :: all-kernel-busses
 
 install-kernel-busses: all-kernel-busses
+	$(RM) $(addprefix $(MODDIR)/,$(KERNELBUSSESOLD))
 	$(MKDIR) $(MODDIR) 
 	$(INSTALL) -o root -g root -m 644 $(KERNELBUSSESTARGETS) $(MODDIR)
 install :: install-kernel-busses
