@@ -294,12 +294,13 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
   int err=0;
   const char *type_name = "";
   const char *client_name = "";
+  int is_isa = i2c_is_isa_adapter(adapter);
 
 
   if (kind < 0) {
   /* We need address registration for the I2C bus too. That is not yet
      implemented. */
-    if (i2c_is_isa_adapter(adapter)) {
+    if (is_isa) {
 
 #define REALLY_SLOW_IO
       /* We need the timeouts for at least some LM78-like chips. But only
@@ -329,16 +330,15 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
      client structure, even though we cannot fill it completely yet.
      But it allows us to access lm78_{read,write}_value. */
 
-  if (! (new_client = kmalloc((i2c_is_isa_adapter(adapter)?
-                                      sizeof(struct isa_client):
+  if (! (new_client = kmalloc((is_isa?sizeof(struct isa_client):
                                       sizeof(struct i2c_client)) + 
-                               sizeof(struct lm78_data),
+                              sizeof(struct lm78_data),
                               GFP_KERNEL))) {
     err = -ENOMEM;
     goto ERROR0;
   }
 
-  if (i2c_is_isa_adapter(adapter)) {
+  if (is_isa) {
     data = (struct lm78_data *) (((struct isa_client *) new_client) + 1);
     new_client->addr = 0;
     ((struct isa_client *) new_client)->isa_addr = address;
@@ -356,32 +356,37 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
   if (kind < 0) {
     if (lm78_read_value(new_client,LM78_REG_CONFIG) & 0x80)
       goto ERROR1;
-    if (!i2c_is_isa_adapter(adapter) && 
-        (lm78_read_value(new_client,LM78_REG_I2C_ADDR) != address))
+    if (!is_isa && (lm78_read_value(new_client,LM78_REG_I2C_ADDR) != address))
       goto ERROR1;
   }
     
   /* Determine the chip type. */
   if (kind <= 0) {
     i = lm78_read_value(new_client,LM78_REG_CHIPID);
-    if (i == 0x00) {
+    if (i == 0x00)
       kind = lm78;
-      type_name = "lm78";
-      client_name = "LM78 chip";
-    } else if (i == 0x40) {
+    else if (i == 0x40)
       kind = lm78j;
-      type_name = "lm78-j";
-      client_name = "LM78-J chip";
-    } else if ((i & 0xfe) == 0xc0) {
+    else if ((i & 0xfe) == 0xc0)
       kind = lm79;
-      type_name = "lm79";
-      client_name = "LM79 chip";
-    } else
+    else
       goto ERROR1;
   }
 
+  if (kind == lm78) {
+    type_name = "lm78";
+    client_name = "LM78 chip";
+  } else if (kind == lm78j) {
+    type_name = "lm78-j";
+    client_name = "LM78-J chip";
+  } else if (kind == lm79) {
+    type_name = "lm79";
+    client_name = "LM79 chip";
+  } else
+    goto ERROR1;
+
   /* Reserve the ISA region */
-  if i2c_is_isa_adapter(adapter)
+  if (is_isa)
     request_region(address, LM78_EXTENT, type_name);
 
   /* Fill in the remaining client fields and put it into the global list */
@@ -429,7 +434,7 @@ ERROR3:
     if (new_client == lm78_list[i]) 
       lm78_list[i] = NULL;
 ERROR2:
-  if i2c_is_isa_adapter(adapter)
+  if (is_isa)
     release_region(address,LM78_EXTENT);
 ERROR1:
   kfree(new_client);

@@ -588,12 +588,11 @@ int sensors_detect(struct i2c_adapter *adapter,
 {
   int addr,i,found,j,err;
   struct sensors_force_data *this_force;
-  int adapter_id = i2c_is_isa_adapter(adapter)?SENSORS_ISA_BUS:
-                                               i2c_adapter_id(adapter);
+  int is_isa = i2c_is_isa_adapter(adapter);
+  int adapter_id = is_isa?SENSORS_ISA_BUS:i2c_adapter_id(adapter);
 
-printk("IGNORE: %04hx %04hx %04hx %04hx %04hx %04hx\n",address_data->ignore[0],address_data->ignore[1],address_data->ignore[2],address_data->ignore[3],address_data->ignore[4],address_data->ignore[5]);
   for (addr = 0x00; 
-       addr <= (i2c_is_isa_adapter(adapter)?0xffff:0x7f); 
+       addr <= (is_isa?0xffff:0x7f); 
        addr ++) {
 
     /* If it is in one of the force entries, we don't do any detection
@@ -604,9 +603,9 @@ printk("IGNORE: %04hx %04hx %04hx %04hx %04hx %04hx\n",address_data->ignore[0],a
          i++) {
       for (j = 0; 
            !found && (this_force->force[j] != SENSORS_I2C_END) ; 
-           i += 2) {
+           j += 2) {
         if (((adapter_id == this_force->force[j]) || 
-             (this_force->force[j] == SENSORS_ANY_I2C_BUS)) &&
+             ((this_force->force[j] == SENSORS_ANY_I2C_BUS) && !is_isa)) &&
             (addr == this_force->force[j+1])) {
           if ((err = found_proc(adapter,addr,this_force->kind)))
             return err;
@@ -623,7 +622,7 @@ printk("IGNORE: %04hx %04hx %04hx %04hx %04hx %04hx\n",address_data->ignore[0],a
          !found && (address_data->ignore[i] != SENSORS_I2C_END); 
          i += 2) {
       if (((adapter_id == address_data->ignore[i]) || 
-           (address_data->ignore[i] == SENSORS_ANY_I2C_BUS)) &&
+           ((address_data->ignore[i] == SENSORS_ANY_I2C_BUS) && !is_isa)) &&
           (addr == address_data->ignore[i+1])) {
         found = 1;
       }
@@ -632,7 +631,7 @@ printk("IGNORE: %04hx %04hx %04hx %04hx %04hx %04hx\n",address_data->ignore[0],a
          !found && (address_data->ignore_range[i] != SENSORS_I2C_END);
          i += 3) {
       if (((adapter_id == address_data->ignore_range[i]) ||
-           (address_data->ignore_range[i] == SENSORS_ANY_I2C_BUS)) &&
+           ((address_data->ignore_range[i]==SENSORS_ANY_I2C_BUS) & !is_isa)) &&
           (addr >= address_data->ignore_range[i+1]) &&
           (addr <= address_data->ignore_range[i+2]))
         found = 1;
@@ -642,7 +641,7 @@ printk("IGNORE: %04hx %04hx %04hx %04hx %04hx %04hx\n",address_data->ignore[0],a
 
     /* Now, we will do a detection, but only if it is in the normal or 
        probe entries */
-    if (i2c_is_isa_adapter(adapter)) {
+    if (is_isa) {
       for (i = 0;
            !found && (address_data->normal_isa[i] != SENSORS_ISA_END);
            i += 1) {
@@ -680,7 +679,7 @@ printk("IGNORE: %04hx %04hx %04hx %04hx %04hx %04hx\n",address_data->ignore[0],a
          !found && (address_data->probe[i] != SENSORS_I2C_END);
          i += 2) {
       if (((adapter_id == address_data->probe[i]) ||
-           (address_data->probe[i] == SENSORS_ANY_I2C_BUS)) &&
+           ((address_data->probe[i] == SENSORS_ANY_I2C_BUS) & !is_isa)) &&
           (addr == address_data->probe[i+1])) {
         found = 1;
       }
@@ -688,7 +687,7 @@ printk("IGNORE: %04hx %04hx %04hx %04hx %04hx %04hx\n",address_data->ignore[0],a
          !found && (address_data->probe_range[i] != SENSORS_I2C_END);
          i += 3) {
       if (((adapter_id == address_data->probe_range[i]) ||
-           (address_data->probe_range[i] == SENSORS_ANY_I2C_BUS)) &&
+           ((address_data->probe_range[i] == SENSORS_ANY_I2C_BUS) & !is_isa)) &&
           (addr >= address_data->probe_range[i+1]) &&
           (addr <= address_data->probe_range[i+2])) 
         found = 1;
@@ -699,8 +698,7 @@ printk("IGNORE: %04hx %04hx %04hx %04hx %04hx %04hx\n",address_data->ignore[0],a
 
     /* OK, so we really should examine this address. First check
        whether there is some client here at all! */
-    if (i2c_is_isa_adapter(adapter) || 
-        (smbus_read_byte(adapter,addr) >= 0))
+    if (is_isa || (smbus_read_byte(adapter,addr) >= 0))
       if ((err = found_proc(adapter,addr,-1)))
         return err;
   }
