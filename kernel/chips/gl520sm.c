@@ -596,14 +596,14 @@ void gl520_temp(struct i2c_client *client, int operation, int ctl_name,
 		regnr =
 		    nr == 0 ? GL520_REG_TEMP1_OVER : GL520_REG_TEMP2_OVER;
 		if (*nrels_mag >= 1) {
-			data->temp_over[nr] = TEMP_TO_REG(results[nr]);
+			data->temp_over[nr] = TEMP_TO_REG(results[0]);
 			gl520_write_value(client, regnr,
 					  data->temp_over[nr]);
 		}
 		regnr =
 		    nr == 0 ? GL520_REG_TEMP1_HYST : GL520_REG_TEMP2_HYST;
 		if (*nrels_mag >= 2) {
-			data->temp_hyst[nr] = TEMP_TO_REG(results[nr]);
+			data->temp_hyst[nr] = TEMP_TO_REG(results[1]);
 			gl520_write_value(client, regnr,
 					  data->temp_hyst[nr]);
 		}
