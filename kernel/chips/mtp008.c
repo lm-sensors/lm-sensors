@@ -955,17 +955,17 @@ void mtp008_fan_div(struct i2c_client *client, int operation,
 			data->fan_div[2] = DIV_TO_REG(results[2]);
 			val = mtp008_read_value(client, MTP008_REG_PIN_CTRL1);
 			val = (val & 0x3f) | (data->fan_div[2] & 0x03) << 6;
-
 			mtp008_write_value(client, MTP008_REG_PIN_CTRL1, val);
 		}
-		if (*nrels_mag >= 2) {
-			data->fan_div[1] = DIV_TO_REG(results[1]);
+		if (*nrels_mag >= 1) {
 			val = mtp008_read_value(client, MTP008_REG_VID_FANDIV);
-			val = (val & 0x3f) | (data->fan_div[1] & 0x03) << 6;
-		}
-		if (*nrels_mag >= 2) {
-			val = (val & 0xcf) | (data->fan_div[1] & 0x03) << 4;
-
+			if (*nrels_mag >= 2) {
+				data->fan_div[1] = DIV_TO_REG(results[1]);
+				val = (val & 0x3f) |
+				      (data->fan_div[1] & 0x03) << 6;
+			}
+			data->fan_div[0] = DIV_TO_REG(results[0]);
+			val = (val & 0xcf) | (data->fan_div[0] & 0x03) << 4;
 			mtp008_write_value(client, MTP008_REG_VID_FANDIV, val);
 		}
 	}
