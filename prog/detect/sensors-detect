@@ -445,6 +445,14 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        driver => "i2c-piix4",
        match => sub { $_[0] =~ /^SMBus PIIX4 adapter at / },
      } , 
+     { 
+       vendid => 0x1283,
+       devid  => 0x8172,
+       func => 0,
+       procid => "ITE 8172G MIPS/SH4 Support Chip",
+       driver => "i2c-adap-ite",
+       match => sub { $_[0] =~ /^ITE IIC adapter/ },
+     } , 
 );
 
 use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
