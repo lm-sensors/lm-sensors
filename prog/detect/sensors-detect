@@ -35,7 +35,7 @@ use POSIX;
 # CONSTANT DECLARATIONS #
 #########################
 
-use vars qw(@pci_adapters @chip_ids @undetectable_adapters @dmidecode);
+use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmidecode);
 
 @dmidecode = ( '/usr/local/sbin/dmidecode', '/usr/sbin/dmidecode' );
 
@@ -1049,6 +1049,111 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
 );
 
+# This is a list of all recognized superio chips. 
+# Each entry must have the following fields:
+#  name: The full chip name
+#  driver: The driver name (without .o extension). Put in something like
+#      "Unwritten: <drivername>" if it is not yet available.
+#  addrreg: The address register
+#  datareg: The data register
+#  enter: The password sequence to write to the address register
+#  devidreg: The device ID register(s)
+#  devid: The device ID(s) we have to match (base device)
+#  logdevreg: The logical device register
+#  logdev: The logical device containing the sensors
+#  actreg (optional): The activation register within the logical device
+#  actmask (optional): The activation bit in the activation register
+#  basereg: The I/O base register within the logical device
+#  exitreg: The register to write the exit value to
+#  exit: The value to write to the exit register to exit
+#  alias_detect (optional): For chips which can be both on the ISA and the
+#      I2C bus, a function which detectes whether two entries are the same.
+#      The function should take three parameters: The ISA address, the
+#      I2C bus number, and the I2C address.
+@superio_ids = (
+#     {
+#	name => "ITE 8705 Super IO Sensors",
+#	driver => "it87",
+#	addrreg => 0x2e,
+#	datareg => 0x2f,
+#	enter => [0x55, 0x01, 0x55, 0x55].
+# code doesn't handle multiple devid regs yet
+#	devidreg => [0x20, 0x21],
+#	devid => [0x87, 0x05],
+#	logdevreg => 0x07,
+#	logdev => 0x04,
+#	actreg => 0x30,
+#	actmask => 0x01,
+#	basereg => 0x60,
+# exit is writing 0x01 to reg 0x02. - not compatible with other superio chips
+#	exitreg => 0x02,
+#	exit => 0x01,
+#     }, 
+     {
+	name => "SMSC 47M1xx Super IO Fan Sensors",
+	driver => "smsc47m1",
+	addrreg => 0x2e,
+	exitreg => 0x2e,
+	datareg => 0x2f,
+	enter => [0x55],
+	devidreg => 0x20,
+	devid => 0x59,
+	logdevreg => 0x07,
+	logdev => 0x0a,
+	actreg => 0x20,
+	actmask => 0x01,
+	basereg => 0x60,
+	exit => 0xaa,
+     }, 
+     {
+	name => "VT1211 Super IO Sensors",
+	driver => "vt1211",
+	addrreg => 0x2e,
+	exitreg => 0x2e,
+	datareg => 0x2f,
+	enter => [0x87, 0x87],
+	devidreg => 0x20,
+	devid => 0x3c,
+	logdevreg => 0x07,
+	logdev => 0x0b,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+	exit => 0xaa,
+     }, 
+     {
+	name => "Winbond W83627HF Super IO Sensors",
+	driver => "w83781d",
+	addrreg => 0x2e,
+	exitreg => 0x2e,
+	datareg => 0x2f,
+	enter => [0x87, 0x87],
+	devidreg => 0x20,
+	devid => 0x52,
+	logdevreg => 0x07,
+	logdev => 0x0b,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+	exit => 0xaa,
+     }, 
+     {
+	name => "Winbond W83697HF Super IO Sensors",
+	driver => "w83781d",
+	addrreg => 0x2e,
+	exitreg => 0x2e,
+	datareg => 0x2f,
+	enter => [0x87, 0x87],
+	devidreg => 0x20,
+	devid => 0x60,
+	logdevreg => 0x07,
+	logdev => 0x0b,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
+	exit => 0xaa,
+     }, 
+);
 
 #######################
 # AUXILIARY FUNCTIONS #
@@ -1864,6 +1969,57 @@ sub scan_isa_bus
                         $new_hash->{i2c_adap},$new_hash->{i2c_addr};
       }
     }
+  }
+}
+
+sub scan_superio
+{
+  my ($chip,$val,$addr,$conf);
+  foreach $chip (@superio_ids) {
+    print "Probing for `$$chip{name}'\n";
+# write the password
+    foreach $val (@{$$chip{enter}}) {
+      outb($$chip{addrreg}, $val);
+    }
+# check the device ID
+    outb($$chip{addrreg}, $$chip{devidreg});
+    $val = inb($$chip{datareg});
+    if($val == $$chip{devid}) {
+      print "  Success...";
+# switch to the sensor logical device
+      outb($$chip{addrreg}, $$chip{logdevreg});
+      outb($$chip{datareg}, $$chip{logdev});
+# check the activation register
+      if(exists $$chip{actreg}) {
+	outb($$chip{addrreg}, $$chip{actreg});
+	$val = inb($$chip{datareg});
+	if(!($val & $$chip{actmask})) {
+	  print " but not activated, module may not find\n";
+	  outb($$chip{exitreg}, $$chip{exit});
+	  next;
+	}
+      }
+# Get the IO base register
+      outb($$chip{addrreg}, $$chip{basereg});
+      $addr = inb($$chip{datareg});
+      outb($$chip{addrreg}, $$chip{basereg} + 1);
+      $addr = ($addr << 8) | inb($$chip{datareg});
+      if($addr == 0) {
+	print " but not activated, module may not find\n";
+	outb($$chip{addrreg}, $$chip{exit});
+	next;
+      }	        
+      printf " found at address 0x%04x\n", $addr;
+      my $new_hash = { conf => 8,
+                       isa_addr => $addr,
+                       chipname =>  $$chip{name}
+                     };
+      add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver},
+                                            $new_hash;
+    } else {
+      print "  Failed!\n";
+    }
+    outb($$chip{exitreg}, $$chip{exit});
   }
 }
 
@@ -3221,6 +3377,21 @@ sub main
     }
   }
 
+  print "\n Some Super I/O chips may also contain sensors. Super I/O probes ",
+        "are\n",
+        " typically a bit more dangerous, as we have to write to I/O ports ",
+        "to do\n",
+        " this. ";
+  if ($> != 0) {
+    print "As you are not root, we shall skip this step.\n";
+  } else {
+    print " Do you want to scan for Super I/O sensors? (YES/no): ";
+    if (not <STDIN> =~ /^\s*[Nn]/) {
+      initialize_ioports or die "Sorry, can't access /dev/port ($!)?!?";
+      scan_superio;
+    }
+  }
+
   if(! @chips_detected) {
     print "\n Sorry, no chips were detected.\n",
         " Either your sensors are not supported, or they are\n",
@@ -3281,6 +3452,9 @@ sub main
         "file:\n\n";
   print "#----cut here----\n";
   print $modprobes;
+  print "# Next 2 lines are optional\n",
+        "sleep 3\n",
+        "sensors -s\n";
   print "#----cut here----\n";
   print "\nTo make the sensors modules behave correctly, add these lines to ",
         "either\n",

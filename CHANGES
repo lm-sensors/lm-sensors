@@ -17,6 +17,12 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
+2.7.1 (2003????)
+  File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
+  Library: Add support for exponents and logarithms for vt1211/vt8235
+  Program sensors-detect: Add super i/o detection (smsc47m1, vt1211,
+                          w83627hf, w83697hf)
+
 2.7.0 (20021208)
   NOTE: Requires i2c-2.7.0 or newer.
   File doc/busses/i2c-ali1535: Add license, miscellaneous changes
