@@ -199,8 +199,11 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 // Kaam <darkside@chello.nl>) a bit better.  It also give more reasonable 
 // numbers on my machine (ie. they agree with what my BIOS tells me).  
 // Here's the fifth-order fit to the 8-bit data:
-// temp = 1.625093e-09*val^5 - 1.001632e-06*val^4 + 2.457653e-04*val^3 - 
-//        2.967619e-02*val^2 + 2.175144e+00*val - 7.090067e+0.
+// temp = 1.625093e-10*val^5 - 1.001632e-07*val^4 + 2.457653e-05*val^3 - 
+//        2.967619e-03*val^2 + 2.175144e-01*val - 7.090067e+0.
+//
+// (2000-10-25- RFD: thanks to Uwe Andersen <uandersen@mayah.com> for 
+// finding my typos in this formula!)
 //
 // Alas, none of the elegant function-fit solutions will work because we 
 // aren't allowed to use floating point in the kernel and doing it with 
