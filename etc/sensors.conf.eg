@@ -269,6 +269,7 @@ chip "as99127f-*"
 # Same as above for w83782d except that in5 and in6 negative voltages
 # are computed as in the w83781d.
 # Asus won't release a datasheet so this is guesswork.
+# New in5 and temp2 calculations courtesy Guntram Blohm.
 
     label in0 "VCore 1"
     label in1 "VCore 2"
@@ -280,10 +281,10 @@ chip "as99127f-*"
 
     compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
     compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
-# Old calculation was about 15% low. Still guesswork - no datasheet!
-#    compute in5 -(210/60.4)*@  ,  -@/(210/60.4)
-    compute in5 -4*@  ,  -@/4
+    compute in5 -(240/60.4)*@ ,  -@/(240/60.4)
     compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
+
+    compute temp2 (@*30/43)+25, (@-25)*43/30
 
 # set limits to  5% for the critical voltages
 # set limits to 10% for the non-critical voltages

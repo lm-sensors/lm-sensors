@@ -24,7 +24,7 @@ ask CVS about it:
         Also, mkpatch is probably broken right now.
   File doc/FAQ: Updates
   File doc/chips/via686a: Claim support for 686b.
-  File sensors.conf.eg: Adjust as99127f -12V calculation
+  File sensors.conf.eg: Adjust as99127f in5 (-12V) and temp2 calculations
   File sensors.c: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
   Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
   Include file sensors.h: Most contents moved to i2c-proc.h in i2c package
