@@ -26,7 +26,8 @@ ask CVS about it:
   File doc/chips/via686a: Claim support for 686b.
   File sensors.conf.eg: Adjust as99127f in5 (-12V) and temp2 calculations;
                         Add lm87, adm9240, ds1780, lm81 templates;
-                        Enhance help comments in file
+                        Enhance help comments in file;
+                        Add Tyan S2510 dual-MTP008 example.
   File sensors.c: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
   Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
   Include file sensors.h: Most contents moved to i2c-proc.h in i2c package
@@ -40,6 +41,8 @@ ask CVS about it:
                  Save BIOS pin configuration of temps and fans
   Module sensors: Disabled, moved to i2c package as i2c-proc.c
   Module via686a: Allow force=9191,address (for A7V/K7V boards)
+  Module w83781d: Don't reinitialize as99127f chip; this may cause fan/temp
+                  reading changes
   Program mkpatch.pl: Fix adm9240 typos, add more chips to Configure.help
   Program sensord: Add -d (debug) and -p (pid-file) options
   Program sensors: Change reported version from 1.3 to the lm_sensors version;

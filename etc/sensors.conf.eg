@@ -688,8 +688,9 @@ chip "via686a-*"
 
 chip "mtp008-*"
     
-# The values below should be correct if you own a Tyan S1834D motherboard.  If
-# not, please contact us, so we can figure out better readings.
+# The values below should be correct if you own a Tyan S1834D motherboard.
+# If not, please contact us, so we can figure out better readings.
+# FOR TYAN S2510 SEE END OF THIS SECTION.
 
 # For positive voltages outside the 0..4.09V range (in2..in4), two resistors
 # are used, with the following formula (R1,R2: resistor values, Vs: read
@@ -713,9 +714,9 @@ chip "mtp008-*"
     label in5 "-12V"
     label in6 "Vtt"
 
-    label fan1 "CPUFAN1"
-    label fan2 "CPUFAN2"
-    label fan3 "CPUFAN3"
+    label fan1 "CPU1 Fan"
+    label fan2 "CPU2 Fan"
+    label fan3 "fan3"
 
     label temp1 "CPU1 Temp"
     label temp2 "CPU2 Temp"
@@ -732,6 +733,53 @@ chip "mtp008-*"
 #    set temp3_over 52	
 #    set temp3_hyst 47	
 
+# End of standard mtp008 configuration
+
+# TYAN S2510 INFORMATION
+# This motherboard has two mtp008's which are hooked up differently,
+# so they must be configured separately.
+# For this motherboard, COMMENT OUT the above mtp008 section and
+# UNCOMMENT the following two sections.
+#
+#chip mtp008-i2c-*-2c
+#    label in0 "VCore1"
+#    set in0_min 1.60
+#    set in0_max 1.80
+#    label in1 "+3.3V"
+#    label in2 "+12V"
+#    label in3 "Vcore2"
+#    set in3_min 1.60
+#    set in3_max 1.80
+#    ignore in4
+#    label in5 "-12V"
+#    label in6 "Vtt"
+#    label fan1 "CPU1 Fan"
+#    label fan2 "CPU2 Fan"
+#    label fan3 "fan3"
+#    label temp1 "CPU1 Temp"
+#    label temp2 "CPU2 Temp"
+#    ignore temp3
+#    compute in2 @ * 38 / 10,		@ * 10 / 38
+#    compute in5 (@ * 36 - 118.61) / 7,	(118.61 + 7 * @) / 36
+#
+#chip mtp008-i2c-*-2e
+#    ignore in0
+#    label in1 "+3.3V"
+#    ignore in2
+#    label in3 "+5V"
+#    set in3_min 4.50
+#    set in3_max 5.50
+#    ignore in4
+#    label in5 "+3.3V"
+#    ignore in6
+#    label fan1 "fan4"
+#    label fan2 "fan5"
+#    label fan3 "fan6"
+#    ignore temp1
+#    label temp2 "MB Temp"
+#    set temp2_over 52	
+#    set temp2_hyst 47	
+#    ignore temp3
 
 chip "adm1025-*"
 

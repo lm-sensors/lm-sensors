@@ -1,7 +1,7 @@
 Kernel driver `mtp008.o'
 =========================
 
-Status: Complete; Alpha.
+Status: Complete; Beta.
         This chip is quite configurable and many settings cannot
         be done through the driver. Hopefully the BIOS settings will
 	be correct for most motherboards.
@@ -38,6 +38,10 @@ AIN5 is hooked up to the -12V sensing circuit.
 
 Other Tyan motherboards (the 2510 Thunder and the Tiger 200) appear to
 have different configurations.
+
+For the 2510, which has two MTP008 chips, each with a different
+configuration, follow the instructions in the mtp008 section of
+etc/sensors.conf.eg to configure 'sensors' correctly.
 
 The PWM outputs are configurable but not via the driver.
 The Fan input types (2 wire or 3 wire) are configurable but
