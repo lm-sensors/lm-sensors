@@ -28,6 +28,15 @@
 #include "version.h"
 #include "compat.h"
 
+/* Addresses to scan */
+static unsigned short normal_i2c[] = {0x4c,0x4d,SENSORS_I2C_END};
+static unsigned short normal_i2c_range[] = {SENSORS_I2C_END};
+static unsigned int normal_isa[] = {SENSORS_ISA_END};
+static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+
+/* Insmod parameters */
+SENSORS_INSMOD_2(gl518sm_r00,gl518sm_r80);
+
 /* Defining this will enable debug messages for the voltage iteration
    code used with rev 0 ICs */
 #undef DEBUG_VIN
@@ -131,8 +140,7 @@ FAN_TO_REG (unsigned rpm, unsigned divisor)
 /* Each client has this additional data */
 struct gl518_data {
          int sysctl_id;
-
-         u8 revision;
+         enum chips type;
 
          struct semaphore update_lock;
          char valid;                 /* !=0 if following fields are valid */
@@ -166,6 +174,8 @@ MODULE_PARM(readall,"i");
 static int gl518_init(void);
 static int gl518_cleanup(void);
 static int gl518_attach_adapter(struct i2c_adapter *adapter);
+static int gl518_detect(struct i2c_adapter *adapter, int address, int kind);
+static void gl518_init_client(struct i2c_client *client);
 static int gl518_detach_client(struct i2c_client *client);
 static int gl518_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
@@ -234,146 +244,186 @@ static ctl_table gl518_dir_table_template[] = {
 /* Used by init/cleanup */
 static int gl518_initialized = 0;
 
-/* I choose here for semi-static LM78 allocation. Complete dynamic
+/* I choose here for semi-static GL518SM allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
 #define MAX_GL518_NR 4
 static struct i2c_client *gl518_list[MAX_GL518_NR];
 
-
 int gl518_attach_adapter(struct i2c_adapter *adapter)
 {
-  int address,err,i;
+  return sensors_detect(adapter,&addr_data,gl518_detect);
+}
+
+static int gl518_detect(struct i2c_adapter *adapter, int address, int kind)
+{ 
+  int i;
   struct i2c_client *new_client;
   struct gl518_data *data;
-  u8 revision;
-  char name[11];
+  int err=0;
+  const char *type_name = "";
+  const char *client_name = "";
 
-  err = 0;
+  /* Make sure we aren't probing the ISA bus!! This is just a safety check
+     at this moment; sensors_detect really won't call us. */
+#ifdef DEBUG
+  if (i2c_is_isa_adapter(adapter)) {
+    printk("gl518sm.o: gl518sm_detect called for an ISA bus adapter?!?\n");
+    return 0;
+  }
+#endif
 
-  /* OK, this is no detection. I know. It will do for now, though.  */
 
-  /* Set err only if a global error would make registering other clients
-     impossible too (like out-of-memory). */
-  for (address = 0x2c; (! err) && (address <= 0x2d); address ++) {
+  /* We need address registration for the I2C bus too. That is not yet
+     implemented. */
 
-    /* Later on, we will keep a list of registered addresses for each
-       adapter, and check whether they are used here */
-    
-    if ((i = smbus_read_byte_data(adapter,address,GL518_REG_CHIP_ID)) < 0)
-      continue;
+  /* OK. For now, we presume we have a valid client. We now create the
+     client structure, even though we cannot fill it completely yet.
+     But it allows us to access gl518sm_{read,write}_value. */
 
-    if (i != 0x80)
-      continue;
-
-    revision = smbus_read_byte_data(adapter,address,GL518_REG_REVISION);
-    if ((revision != 0x00) && (revision != 0x80))
-      continue;
-
-    /* Real detection code goes here */
-
-    /* Allocate space for a new client structure */
-    if (! (new_client =  kmalloc(sizeof(struct i2c_client) +
-                                sizeof(struct gl518_data),
+  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
+                               sizeof(struct gl518_data),
                                GFP_KERNEL))) {
-      err = -ENOMEM;
-      continue;
-    }
+    err = -ENOMEM;
+    goto ERROR0;
+  }
 
-    /* Find a place in our global list */
-    for (i = 0; i < MAX_GL518_NR; i++)
-      if (! gl518_list[i])
-         break;
-    if (i == MAX_GL518_NR) {
-      err = -ENOMEM;
-      printk("gl518sm.o: No empty slots left, recompile and heighten "
-             "MAX_GL518_NR!\n");
+  data = (struct gl518_data *) (new_client + 1);
+  new_client->addr = address;
+  new_client->data = data;
+  new_client->adapter = adapter;
+  new_client->driver = &gl518_driver;
+
+  /* Now, we do the remaining detection. */
+
+  if (kind < 0) {
+    if ((gl518_read_value(new_client,GL518_REG_CHIP_ID) != 0x80) ||
+        (gl518_read_value(new_client,GL518_REG_CONF) & 0x80))
+      goto ERROR1;
+  }
+  
+  if (kind <= 0) {
+    i = gl518_read_value(new_client,GL518_REG_REVISION);
+    if (i == 0x00)
+      kind = gl518sm_r00;
+    else if (i == 0x80)
+      kind = gl518sm_r80;
+    else {
+      if (kind == 0)
+        printk("gl518sm.o: Ignoring 'force' parameter for unknown chip at "
+               "adapter %d, address 0x%02x\n",i2c_adapter_id(adapter),address);
       goto ERROR1;
     }
-    gl518_list[i] = new_client;
-    
-    /* Fill the new client structure with data */
-    data = (struct gl518_data *) (new_client + 1);
-    new_client->data = data;
-    new_client->id = i;
-    new_client->addr = address;
-    new_client->adapter = adapter;
-    new_client->driver = &gl518_driver;
-    sprintf(new_client->name,"GL518SM chip rev. %02x",revision);
-    data->valid = 0;
-    data->update_lock = MUTEX;
-    data->revision = revision;
-    
-    /* Tell i2c-core a new client has arrived */
-    if ((err = i2c_attach_client(new_client)))
-      goto ERROR2;
-    
-    sprintf(name,"gl518sm-r%02x",revision);
-    /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,name,
-                                      gl518_dir_table_template)) < 0)
-      goto ERROR3;
-    data->sysctl_id = err;
-    err = 0;
+  }
 
-    /* Initialize the GL518SM chip */
-    /* Power-on defaults (bit 7=1) */
-    gl518_write_value(new_client,GL518_REG_CONF,0x80); 
-    /* No noisy output (bit 2=1), Comparator mode (bit 3=0), two fans (bit4=0),
-       standby mode (bit6=0) */
-    gl518_write_value(new_client,GL518_REG_CONF,0x04); 
-    /* Never interrupts */
-    gl518_write_value(new_client,GL518_REG_MASK,0x00);
-    
-    gl518_write_value(new_client,GL518_REG_TEMP_HYST,
-                      TEMP_TO_REG(GL518_INIT_TEMP_HYST));
-    gl518_write_value(new_client,GL518_REG_TEMP_OVER,
-                      TEMP_TO_REG(GL518_INIT_TEMP_OVER));
-    gl518_write_value(new_client,GL518_REG_MISC,(DIV_TO_REG(2) << 6) | 
-                                                (DIV_TO_REG(2) << 4));
-    gl518_write_value(new_client,GL518_REG_FAN_LIMIT,
-                      (FAN_TO_REG(GL518_INIT_FAN_MIN_1,2) << 8) |
-                      FAN_TO_REG(GL518_INIT_FAN_MIN_2,2));
-    gl518_write_value(new_client,GL518_REG_VIN1_LIMIT,
-                      (IN_TO_REG(GL518_INIT_VIN_MAX_1) << 8) |
-                      IN_TO_REG(GL518_INIT_VIN_MIN_1));
-    gl518_write_value(new_client,GL518_REG_VIN2_LIMIT,
-                      (IN_TO_REG(GL518_INIT_VIN_MAX_2) << 8) |
-                      IN_TO_REG(GL518_INIT_VIN_MIN_2));
-    gl518_write_value(new_client,GL518_REG_VIN3_LIMIT,
-                      (IN_TO_REG(GL518_INIT_VIN_MAX_3) << 8) |
-                      IN_TO_REG(GL518_INIT_VIN_MIN_3));
-    gl518_write_value(new_client,GL518_REG_VDD_LIMIT,
-                      (VDD_TO_REG(GL518_INIT_VDD_MAX) << 8) |
-                      VDD_TO_REG(GL518_INIT_VDD_MIN));
-    /* Clear status register (bit 5=1), start (bit6=1) */
-    gl518_write_value(new_client,GL518_REG_CONF,0x24);
-    gl518_write_value(new_client,GL518_REG_CONF,0x44);
+  if (kind == gl518sm_r00) {
+    type_name = "gl518sm-r00";
+    client_name = "GL518SM Revision 0x00 chip";
+  } else if (kind == gl518sm_r80) {
+    type_name = "gl518sm-r80";
+    client_name = "GL518SM Revision 0x80 chip";
+  } else {
+#ifdef DEBUG
+    printk("gl518sm.o: Internal error: unknown kind (%d)?!?",kind);
+#endif
+    goto ERROR1;
+  }
 
-    continue;
+  /* Fill in the remaining client fields and put it into the global list */
+  strcpy(new_client->name,client_name);
+  data->type = kind;
+
+  for(i = 0; i < MAX_GL518_NR; i++)
+    if (! gl518_list[i])
+      break;
+  if (i == MAX_GL518_NR) {
+    printk("gl518sm.o: No empty slots left, recompile and heighten "
+           "MAX_GL518_NR!\n");
+    err = -ENOMEM;
+    goto ERROR2;
+  }
+  gl518_list[i] = new_client;
+  new_client->id = i;
+  data->valid = 0;
+  data->update_lock = MUTEX;
+
+  /* Tell the I2C layer a new client has arrived */
+  if ((err = i2c_attach_client(new_client)))
+    goto ERROR3;
+
+  /* Register a new directory entry with module sensors */
+  if ((i = sensors_register_entry((struct i2c_client *) new_client,
+                                  type_name,
+                                  gl518_dir_table_template)) < 0) {
+    err = i;
+    goto ERROR4;
+  }
+  data->sysctl_id = i;
+
+  /* Initialize the GL518SM chip */
+  gl518_init_client((struct i2c_client *) new_client);
+  return 0;
+
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
+ERROR4:
+  i2c_detach_client(new_client);
 ERROR3:
-    i2c_detach_client(new_client);
+  for (i = 0; i < MAX_GL518_NR; i++)
+    if (new_client == gl518_list[i])
+      gl518_list[i] = NULL;
 ERROR2:
-    gl518_list[i] = NULL;
 ERROR1:
-    kfree(new_client);
-  }
+  kfree(new_client);
+ERROR0:
   return err;
+}
+
+
+/* Called when we have found a new GL518SM. It should set limits, etc. */
+void gl518_init_client(struct i2c_client *client)
+{
+  /* Power-on defaults (bit 7=1) */
+  gl518_write_value(client,GL518_REG_CONF,0x80); 
+
+  /* No noisy output (bit 2=1), Comparator mode (bit 3=0), two fans (bit4=0),
+     standby mode (bit6=0) */
+  gl518_write_value(client,GL518_REG_CONF,0x04); 
+
+  /* Never interrupts */
+  gl518_write_value(client,GL518_REG_MASK,0x00);
+    
+  gl518_write_value(client,GL518_REG_TEMP_HYST,
+                    TEMP_TO_REG(GL518_INIT_TEMP_HYST));
+  gl518_write_value(client,GL518_REG_TEMP_OVER,
+                    TEMP_TO_REG(GL518_INIT_TEMP_OVER));
+  gl518_write_value(client,GL518_REG_MISC,(DIV_TO_REG(2) << 6) | 
+                                              (DIV_TO_REG(2) << 4));
+  gl518_write_value(client,GL518_REG_FAN_LIMIT,
+                    (FAN_TO_REG(GL518_INIT_FAN_MIN_1,2) << 8) |
+                    FAN_TO_REG(GL518_INIT_FAN_MIN_2,2));
+  gl518_write_value(client,GL518_REG_VIN1_LIMIT,
+                    (IN_TO_REG(GL518_INIT_VIN_MAX_1) << 8) |
+                    IN_TO_REG(GL518_INIT_VIN_MIN_1));
+  gl518_write_value(client,GL518_REG_VIN2_LIMIT,
+                    (IN_TO_REG(GL518_INIT_VIN_MAX_2) << 8) |
+                    IN_TO_REG(GL518_INIT_VIN_MIN_2));
+  gl518_write_value(client,GL518_REG_VIN3_LIMIT,
+                    (IN_TO_REG(GL518_INIT_VIN_MAX_3) << 8) |
+                    IN_TO_REG(GL518_INIT_VIN_MIN_3));
+  gl518_write_value(client,GL518_REG_VDD_LIMIT,
+                    (VDD_TO_REG(GL518_INIT_VDD_MAX) << 8) |
+                    VDD_TO_REG(GL518_INIT_VDD_MIN));
+
+  /* Clear status register (bit 5=1), start (bit6=1) */
+  gl518_write_value(client,GL518_REG_CONF,0x24);
+  gl518_write_value(client,GL518_REG_CONF,0x44);
 }
 
 int gl518_detach_client(struct i2c_client *client)
 {
   int err,i;
-  for (i = 0; i < MAX_GL518_NR; i++)
-    if (client == gl518_list[i])
-      break;
-  if ((i == MAX_GL518_NR)) {
-    printk("gl518sm.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
 
   sensors_deregister_entry(((struct gl518_data *)(client->data))->sysctl_id);
 
@@ -382,8 +432,17 @@ int gl518_detach_client(struct i2c_client *client)
     return err;
   }
 
+  for (i = 0; i < MAX_GL518_NR; i++)
+    if (client == gl518_list[i])
+      break;
+  if ((i == MAX_GL518_NR)) {
+    printk("gl518sm.o: Client to detach not found.\n");
+    return -ENOENT;
+  }
   gl518_list[i] = NULL;
+
   kfree(client);
+
   return 0;
 }
 
@@ -468,7 +527,7 @@ void gl518_update_client(struct i2c_client *client)
     data->voltage_min[3] = val & 0xff;
     data->voltage_max[3] = (val >> 8) & 0xff;
 
-    if (data->revision != 0x00) {
+    if (data->type != gl518sm_r00) {
       data->voltage[0] = gl518_read_value(client,GL518_REG_VDD);
       data->voltage[1] = gl518_read_value(client,GL518_REG_VIN1);
       data->voltage[2] = gl518_read_value(client,GL518_REG_VIN2);
@@ -581,7 +640,7 @@ void gl518_update_client_rev00(struct i2c_client *client)
     if ((j & 4) == 0) max[2]--;
 
 #ifdef DEBUG_VIN
-  if (data->revision) {
+  if (data->type == gl518sm_r00) {
      printk("Avdd: Meter: %3d, Search: %3d, Diff: %3d mV\n",
      	     data->voltage[0], max[0], (max[0] - data->voltage[0]) * 23);
      printk("Vin1: Meter: %3d, Search: %3d, Diff: %3d mV\n",
@@ -651,7 +710,7 @@ void gl518_vin(struct i2c_client *client, int operation, int ctl_name,
   else if (operation == SENSORS_PROC_REAL_READ) {
     gl518_update_client(client);
 #ifndef DEBUG_VIN    
-    if ((data->revision == 0x00) && (nr != 3) && readall)
+    if ((data->type == gl518sm_r00) && (nr != 3) && readall)
        /* only update VDD, VIN1, VIN2 voltages */
        gl518_update_client_rev00(client);
 #else
