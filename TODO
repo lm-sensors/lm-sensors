@@ -1,8 +1,10 @@
 Many, many things. Most notably:
 
+* CHeck CDROM insert-remove error of Matt Mueller
 * Create wait-queues for bus locking instead of pure semaphores, to make
   it more interactive
 * Check for block read/writes in smbus-on-i2c emulation code
+* Add proc-call SMBus command to i2c-dev
 * Merge newest Simon Vogl archive
 * Merge man-pages
 * Rename some public kernel header files
