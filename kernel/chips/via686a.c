@@ -336,7 +336,7 @@ int via686a_detect(struct i2c_adapter *adapter, int address,
 	struct i2c_client *new_client;
 	struct via686a_data *data;
 	int err = 0;
-	const char *type_name = "via686a sensors";
+	const char *type_name = "via686a";
 
 	/* Make sure we are probing the ISA bus!!  */
 	if (!i2c_is_isa_adapter(adapter)) {
