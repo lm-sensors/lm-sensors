@@ -4237,6 +4237,8 @@ sub main
   print "If you have patched your kernel and have some drivers built in, you can\n",
         "safely answer NO if asked to load some modules. In this case, things may\n",
         "seem a bit confusing, but they will still work.\n\n";
+  print "It is generally safe and recommended to accept the default answers to all\n",
+        "questions, unless you know what you're doing.\n\n";
 
   unless (safe_system_vendor ())
   {
