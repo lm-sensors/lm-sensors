@@ -22,15 +22,28 @@ ask CVS about it:
   File doc/chips/it87: Change hyst to low
   File doc/chips/w83l785ts: New
   File etc/sensors.conf.eg: Change it87 hyst to low
+                            Fix w83697hf supposed to have temp3
+                            Limits initialization for adm1025/ne1619
   Library: Better 2.6 eeprom support
            Change it87 hyst to low
+           Add 2.6 gl518sm, fscher support
+  Module adm1025: Separate prefix for NE1619
+  Module adm1026: Remove use of temporary ID
+                  Define addresses as a range
   Module bmcsensors: Fix reservations
   Module eeprom: Remove memtype
+  Module i2c-piix4: Fix resource release error
+                    Various cleanups
   Program decode-vaio.pl: Add sysfs support
   Program mkpatch: Add max6650, lm83, lm90, asb100 and w83l785ts
                    Drop linux 2.2 support
                    Add w83627hf
   Program sensors: Do not show algorithm by default
+                   Cleanup temperature unit display code
+                   Cleanup label spacing code
+                   Fix output to UTF-8 terms (Marcel Sebek)
+                   Simplify gl518sm print
+                   Do not ignore errors in FSC chips prints
   Program sensors-detect: Fix PATH issues
   
 
