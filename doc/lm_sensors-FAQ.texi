@@ -1496,7 +1496,7 @@ can not be sure.
 @appendix Revision History of This Document
 
 @itemize
-@item Rev 2.9 (CP)  Converted to Gnu texinfo format, 20020910
+@item Rev 2.9 (CP) Converted to Gnu texinfo format, 20020910
 @item Rev 2.8 (MDS) Minor updates 20020710, released with lm_sensors 2.6.4
 @item Rev 2.7 (MDS) Minor updates 20020425
 @item Rev 2.6 (MDS) Minor updates 20020115, released with lm_sensors 2.6.3

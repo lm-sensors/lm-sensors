@@ -1,3 +1,21 @@
+START-INFO-DIR-ENTRY
+* lm_sensors-FAQ: (lm_sensors-FAQ)           The lm_sensors FAQ
+END-INFO-DIR-ENTRY
+
+Short Contents
+**************
+
+lm_sensors
+1 PC and Sensor Overview
+2 Sensor and Bus Basics
+3 Installation and Management
+4 Problems
+5 How to Ask for Help
+6 How to Contribute
+7 Version 1 Specific Questions
+Appendix A Revision History of This Document
+
+
 Table of Contents
 *****************
 
@@ -1434,7 +1452,7 @@ can not be sure.
 Appendix A Revision History of This Document
 ********************************************
 
-   * Rev 2.9 (CP)  Converted to Gnu texinfo format, 20020910
+   * Rev 2.9 (CP) Converted to Gnu texinfo format, 20020910
 
    * Rev 2.8 (MDS) Minor updates 20020710, released with lm_sensors
      2.6.4
@@ -1480,4 +1498,3 @@ Appendix A Revision History of This Document
    * Rev 1.1 Modifications by Philip Edelbrock, 19980809
 
    * Rev 1.0 Written by Philip Edelbrock, 19980803
-
