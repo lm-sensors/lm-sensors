@@ -369,15 +369,17 @@ int ds1621_write_value(struct i2c_client *client, u8 reg, u16 value)
 
 void ds1621_init_client(struct i2c_client *client)
 {
+	int reg;
+
 	/* Initialize the DS1621 chip */
 	ds1621_write_value(client, DS1621_REG_TEMP_OVER,
 			 TEMP_TO_REG(DS1621_INIT_TEMP_OVER));
 	ds1621_write_value(client, DS1621_REG_TEMP_HYST,
 			 TEMP_TO_REG(DS1621_INIT_TEMP_HYST));
-	ds1621_write_value(client, DS1621_REG_CONF, 0);
-
-	/* perhaps we should start the continous conversion? For now */
-	/* you got to do that yourself using the "enable" in proc */
+	reg = ds1621_read_value(client, DS1621_REG_CONF);
+	/* start the continous conversion */
+	if(reg & 0x01)
+		ds1621_write_value(client, DS1621_REG_CONF, reg & 0xfe);
 }
 
 void ds1621_update_client(struct i2c_client *client)
