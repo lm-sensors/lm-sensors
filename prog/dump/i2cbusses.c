@@ -1,7 +1,7 @@
 /*
-    i2cbusses: print the installed i2c busses.
-                  Part of user-space programs to access for I2C 
-                  devices.
+    i2cbusses: Print the installed i2c busses for both 2.4 and 2.6 kernels.
+               Part of user-space programs to access for I2C 
+               devices.
     Copyright (c) 1999-2003  Frodo Looijaard <frodol@dds.nl> and
                              Mark D. Studebaker <mdsxyz123@yahoo.com>
 
@@ -45,21 +45,20 @@ void print_i2c_busses()
 
 	/* look in /proc/bus/i2c */
 	if((fptr = fopen("/proc/bus/i2c", "r"))) {
-		fprintf(stderr,"  Installed I2C busses:\n");
 		while(fgets(s, 100, fptr)) {
+			if(count++ == 0)
+				fprintf(stderr,"  Installed I2C busses:\n");
 			fprintf(stderr, "    %s", s);	
-			count++;
 		}
 		fclose(fptr);
-		if(count == 0)
-			fprintf(stderr,"  Warning - no I2C busses found!\n");
-		return;
+		goto done;
 	}
 
 	/* look in sysfs */
 	/* First figure out where sysfs was mounted */
-	if ((f = fopen("/proc/mounts", "r")) == NULL)
-		return;
+	if ((f = fopen("/proc/mounts", "r")) == NULL) {
+		goto done;
+	}
 	while (fgets(n, NAME_MAX, f)) {
 		sscanf(n, "%[^ ] %[^ ] %[^ ] %*s\n", dev, sysfs, fstype);
 		if (strcasecmp(fstype, "sysfs") == 0) {
@@ -68,13 +67,13 @@ void print_i2c_busses()
 		}
 	}
 	fclose(f);
-	if (! foundsysfs)
-		return;
+	if (! foundsysfs) {
+		goto done;
+	}
 	strcat(sysfs, "/class/i2c-adapter");
 	dir = opendir(sysfs);
 	if (! dir)
-		return;
-        fprintf(stderr,"  Installed I2C busses:\n");
+		goto done;
 	while ((de = readdir(dir)) != NULL) {
 		if (!strcmp(de->d_name, "."))
 			continue;
@@ -85,23 +84,28 @@ void print_i2c_busses()
 
 		if ((f = fopen(n, "r")) != NULL) {
 			char	x[120];
+
 			fgets(x, 120, f);
 			fclose(f);
 			if((border = index(x, '\n')) != NULL)
 				*border = 0;
+			if(count++ == 0)
+				fprintf(stderr,"  Installed I2C busses:\n");
+			/* match 2.4 /proc/bus/i2c format as closely as possible */
 			if(!strncmp(x, "ISA ", 4))
 				fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
 				        "dummy", x, "ISA bus algorithm");
-			else if(!sscanf(de->d_name, "i2c-%x", &tmp))
+			else if(!sscanf(de->d_name, "i2c-%d", &tmp))
 				fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
 				        "dummy", x, "Dummy bus algorithm");
 			else
 				fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
 				        "unknown", x, "Algorithm unavailable");
-			count++;
 		}
 	}
 	closedir(dir);
+
+done:
 	if(count == 0)
-		fprintf(stderr,"  Warning - no I2C busses found!\n");
+		fprintf(stderr,"Error: No I2C busses found!\n");
 }
