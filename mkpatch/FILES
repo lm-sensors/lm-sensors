@@ -1,0 +1,17 @@
+kernel/busses/i2c-ali15x3.c	drivers/i2c/i2c-ali15x3.c
+kernel/busses/i2c-hydra.c	drivers/i2c/i2c-hydra.c
+kernel/busses/i2c-isa.c		drivers/i2c/i2c-isa.c
+kernel/busses/i2c-piix4.c	drivers/i2c/i2c-piix4.c
+kernel/busses/i2c-via.c		drivers/i2c/i2c-via.c
+kernel/sensors.c		drivers/sensors/sensors.c
+kernel/chips/adm1021.c		drivers/sensors/adm1021.c
+kernel/chips/adm9024.c		drivers/sensors/adm9024.c
+kernel/chips/gl518sm.c		drivers/sensors/gl518sm.c
+kernel/chips/lm75.c		drivers/sensors/lm75.c
+kernel/chips/lm78.c		drivers/sensors/lm78.c
+kernel/chips/lm80.c		drivers/sensors/lm80.c
+kernel/chips/ltc1710.c		drivers/sensors/ltc1710.c
+kernel/chips/sis5595.c		drivers/sensors/sis5595.c
+kernel/chips/w83781d.c		drivers/sensors/w83781d.c
+kernel/include/i2c-isa.h	include/linux/i2c-isa.h
+kernel/include/sensors.h	include/linux/sensors.h

@@ -1,0 +1,25 @@
+#
+# Character device configuration
+#
+mainmenu_option next_comment
+comment 'Hardware sensors support'
+
+dep_tristate 'Hardware sensors support' CONFIG_SENSORS $CONFIG_I2C
+
+if [ "$CONFIG_SENSORS" != "n" ]; then
+  dep_tristate '  Analog Devices ADM1021 and compatibles' CONFIG_SENSORS_ADM1021 $CONFIG_SENSORS
+  dep_tristate '  Analog Devices ADM9240 and compatibles' CONFIG_SENSORS_ADM9240 $CONFIG_SENSORS
+  dep_tristate '  Genesys Logic GL518SM' CONFIG_SENSORS_GL518SM $CONFIG_SENSORS
+  dep_tristate '  National Semiconductors LM75' CONFIG_SENSORS_LM75 $CONFIG_SENSORS
+  dep_tristate '  National Semiconductors LM78' CONFIG_SENSORS_LM78 $CONFIG_SENSORS
+  dep_tristate '  National Semiconductors LM80' CONFIG_SENSORS_LM80 $CONFIG_SENSORS
+  dep_tristate '  Silicon Integrated Systems Corp. SiS5595' CONFIG_SENSORS_SIS5595 $CONFIG_SENSORS
+  dep_tristate '  Western Digital W83781D, W83782D and W83783S' CONFIG_SENSORS_W83781D $CONFIG_SENSORS
+  dep_bool '  Other I2C devices' CONFIG_SENSORS_OTHER CONFIG_SENSORS
+  if [ "$CONFIG_SENSORS_OTHER" = "y" ] ; then
+    dep_tristate '  EEprom (DIMM) reader ' CONFIG_SENSORS_EEPROM $CONFIG_SENSORS_OTHER
+    dep_tristate ' Linear Technologies LTC1710 ' CONFIG_SENSORS_LTC1710 $CONFIG_SENSORS_OTHER
+  fi
+fi
+
+endmenu

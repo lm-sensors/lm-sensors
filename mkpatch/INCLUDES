@@ -1,0 +1,2 @@
+"i2c-isa.h"		<linux/i2c-isa.h>
+"sensors.h"		<linux/sensors.h>
