@@ -3,9 +3,11 @@ Kernel driver `i2c-nforce2.o'
 Status: Beta, although no problems found during one month usage with hwsensor
 
 Supported adapters:
-    * nVidia nForce2 SMBus PCI interface (10de:0064, included in nForce2 MCP)
+    * nVidia nForce2 SMBus PCI interface
       Datasheet: not publically available, but seems to be similar to the
                  AMD-8111 SMBus 2.0 adapter.
+    * nVidia nForce3 SMBus PCI interface
+    * nVidia nForce4 SMBus PCI interface
 
 Author: Hans-Frieder Vogt <hfvogt@arcor.de>
 
@@ -19,7 +21,8 @@ None.
 Description
 -----------
 
-i2c-nforce2 is a driver for the SMBuses included in the nVidia nForce2 MCP.
+i2c-nforce2 is a driver for the SMBuses included in the nVidia nForce2,
+nForce3 and nForce4 MCP.
 
 If your 'lspci -v' listing shows something like the following,
 
@@ -30,6 +33,8 @@ If your 'lspci -v' listing shows something like the following,
         Capabilities: <available only to root>
 
 then this driver should support the SMBuses of your motherboard.
+
+See the driver code for the exact list of supported PCI devices.
 
 
 Notes
