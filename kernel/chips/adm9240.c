@@ -334,20 +334,17 @@ int adm9240_attach_adapter(struct i2c_adapter *adapter)
        adapter, and check whether they are used here */
 
     temp = smbus_read_byte_data(adapter,address,ADM9240_REG_COMPANY_ID);
-    if (temp == 0x23)  {
+    if (temp == 0x23) {
       type_name = "adm9240";
       client_name = "ADM9240 chip";
     } else if (temp == 0xDA) {  
       type_name = "ds1780";
       client_name = "DS1780 chip";
-    }
-    if (temp == 0x23 || temp == 0xDA)  {
-      temp=smbus_read_byte_data(adapter,address,ADM9240_REG_DIE_REV);
-      printk("adm9240.o: %s detected with die rev.: 0x%X\n",
-              client_name, temp);
-    }
-    else	
+    } else	
       continue;
+    temp=smbus_read_byte_data(adapter,address,ADM9240_REG_DIE_REV);
+    printk("adm9240.o: %s detected with die rev.: 0x%X\n",
+            client_name, temp);
 
 
 
