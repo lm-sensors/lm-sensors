@@ -2354,3 +2354,25 @@ chip "lm92-*"
 # and critical limits.
 #   set temp_hyst 70 # Linux 2.6
 #   set temp_hyst 58 # Linux 2.4
+
+
+# Winbond W83627EHF configuration originally contributed by Leon Moonen
+# This is for an Asus P5P800.
+chip "w83627ehf-*"
+# Fans
+   label fan1      "Case Fan"
+   label fan2      "CPU Fan"
+#  ignore fan3
+#  ignore fan4
+   set fan1_min    1200
+   set fan2_min    1700
+
+# Temperatures
+   label temp1     "Sys Temp"
+   label temp2     "CPU Temp"
+#  ignore temp3
+   set temp1_over  45
+   set temp1_hyst  40
+   set temp2_over  45
+   set temp2_hyst  40
+
