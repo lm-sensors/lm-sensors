@@ -114,39 +114,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            205-(val)*5)
 
-/* Initial values */
-#define GL520_INIT_TEMP_OVER 600
-#define GL520_INIT_TEMP_HYST 500
-#define GL520_INIT_FAN_MIN_1 3000
-#define GL520_INIT_FAN_MIN_2 3000
-
-/* These are somewhat sane */
-#define GL520_INIT_VIN_1 330	/* 3.3 V */
-#define GL520_INIT_VIN_2 286	/* 12 V */
-#define GL520_INIT_VIN_3 260	/* Vcore */
-#define GL520_INIT_VIN_4 160	/* -12 V */
-#define GL520_INIT_VDD 500	/* 5 V */
-
-#define GL520_INIT_PERCENTAGE 10
-
-#define GL520_INIT_VIN_MIN_1 \
-        (GL520_INIT_VIN_1 - GL520_INIT_VIN_1 * GL520_INIT_PERCENTAGE / 100)
-#define GL520_INIT_VIN_MAX_1 \
-        (GL520_INIT_VIN_1 + GL520_INIT_VIN_1 * GL520_INIT_PERCENTAGE / 100)
-#define GL520_INIT_VIN_MIN_2 \
-        (GL520_INIT_VIN_2 - GL520_INIT_VIN_2 * GL520_INIT_PERCENTAGE / 100)
-#define GL520_INIT_VIN_MAX_2 \
-        (GL520_INIT_VIN_2 + GL520_INIT_VIN_2 * GL520_INIT_PERCENTAGE / 100)
-#define GL520_INIT_VIN_MIN_3 \
-        (GL520_INIT_VIN_3 - GL520_INIT_VIN_3 * GL520_INIT_PERCENTAGE / 100)
-#define GL520_INIT_VIN_MAX_3 \
-        (GL520_INIT_VIN_3 + GL520_INIT_VIN_3 * GL520_INIT_PERCENTAGE / 100)
-#define GL520_INIT_VDD_MIN \
-        (GL520_INIT_VDD - GL520_INIT_VDD * GL520_INIT_PERCENTAGE / 100)
-#define GL520_INIT_VDD_MAX \
-        (GL520_INIT_VDD + GL520_INIT_VDD * GL520_INIT_PERCENTAGE / 100)
-
-
 /* Each client has this additional data */
 struct gl520_data {
 	int sysctl_id;
@@ -409,36 +376,6 @@ static void gl520_init_client(struct i2c_client *client)
 
 	/* Never interrupts */
 	gl520_write_value(client, GL520_REG_MASK, 0x00);
-
-	gl520_write_value(client, GL520_REG_TEMP1_HYST,
-			  TEMP_TO_REG(GL520_INIT_TEMP_HYST));
-	gl520_write_value(client, GL520_REG_TEMP1_OVER,
-			  TEMP_TO_REG(GL520_INIT_TEMP_OVER));
-
-	/* We set Temp2, but not Vin4. */
-	gl520_write_value(client, GL520_REG_TEMP2_HYST,
-			  TEMP_TO_REG(GL520_INIT_TEMP_HYST));
-	gl520_write_value(client, GL520_REG_TEMP2_OVER,
-			  TEMP_TO_REG(GL520_INIT_TEMP_OVER));
-
-	gl520_write_value(client, GL520_REG_MISC, (DIV_TO_REG(2) << 6) |
-			  (DIV_TO_REG(2) << 4));
-	gl520_write_value(client, GL520_REG_FAN_LIMIT,
-			  (FAN_TO_REG(GL520_INIT_FAN_MIN_1, 2) << 8) |
-			  FAN_TO_REG(GL520_INIT_FAN_MIN_2, 2));
-
-	gl520_write_value(client, GL520_REG_VIN1_LIMIT,
-			  (IN_TO_REG(GL520_INIT_VIN_MAX_1) << 8) |
-			  IN_TO_REG(GL520_INIT_VIN_MIN_1));
-	gl520_write_value(client, GL520_REG_VIN2_LIMIT,
-			  (IN_TO_REG(GL520_INIT_VIN_MAX_2) << 8) |
-			  IN_TO_REG(GL520_INIT_VIN_MIN_2));
-	gl520_write_value(client, GL520_REG_VIN3_LIMIT,
-			  (IN_TO_REG(GL520_INIT_VIN_MAX_3) << 8) |
-			  IN_TO_REG(GL520_INIT_VIN_MIN_3));
-	gl520_write_value(client, GL520_REG_VDD_LIMIT,
-			  (VDD_TO_REG(GL520_INIT_VDD_MAX) << 8) |
-			  VDD_TO_REG(GL520_INIT_VDD_MIN));
 
 	/* Clear status register (bit 5=1), start (bit6=1) */
 	gl520_write_value(client, GL520_REG_CONF, 0x24);

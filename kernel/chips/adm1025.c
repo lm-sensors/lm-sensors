@@ -118,14 +118,6 @@ SENSORS_INSMOD_1(adm1025);
 
 #define ALARMS_FROM_REG(val) (val)
 
-/* Initial limits (10% deviation) */
-#define ADM1025_INIT_IN 192
-#define ADM1025_INIT_IN_MIN ((ADM1025_INIT_IN *  9 + 5) / 10)
-#define ADM1025_INIT_IN_MAX ((ADM1025_INIT_IN * 11 + 5) / 10)
-
-#define ADM1025_INIT_TEMP_HIGH 650
-#define ADM1025_INIT_TEMP_LOW 50
-
 /* For each registered ADM1025, we need to keep some data in memory. That
    data is pointed to by adm1025_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new adm1025 client is
@@ -395,21 +387,6 @@ static void adm1025_init_client(struct i2c_client *client)
 	   change the bits 1-6 of the configuration register, since
 	   they hold data we want to preserve. */
 	reg = i2c_smbus_read_byte_data(client, ADM1025_REG_CONFIG);
-	i2c_smbus_write_byte_data(client, ADM1025_REG_CONFIG, 0x80);
-
-	for (nr = 0; nr < 6; nr++) {
-		i2c_smbus_write_byte_data(client, ADM1025_REG_IN_MIN(nr),
-				    data->in_min[nr] = IN_TO_REG(ADM1025_INIT_IN_MIN));
-		i2c_smbus_write_byte_data(client, ADM1025_REG_IN_MAX(nr),
-				    data->in_max[nr] = IN_TO_REG(ADM1025_INIT_IN_MAX));
-	}
-
-	for (nr = 0; nr < 2; nr++) {
-		i2c_smbus_write_byte_data(client, ADM1025_REG_TEMP_HIGH(nr),
-			    	data->temp_high[nr]=TEMP_TO_REG(ADM1025_INIT_TEMP_HIGH));
-		i2c_smbus_write_byte_data(client, ADM1025_REG_RTEMP_LOW,
-			    	data->temp_low[nr]=TEMP_TO_REG(ADM1025_INIT_TEMP_LOW));
-	}
 
 	/* Restore configuration and start monitoring */
 	i2c_smbus_write_byte_data(client, ADM1025_REG_CONFIG, (reg|0x01)&0x7F);

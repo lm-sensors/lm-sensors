@@ -78,10 +78,6 @@ SENSORS_INSMOD_1(ds1621);
 #define ITEMP_FROM_REG(val) ((((val & 0x7fff) >> 8)) | \
                             ((val & 0x8000)?-256:0))
 
-/* Initial values */
-#define DS1621_INIT_TEMP_OVER 600
-#define DS1621_INIT_TEMP_HYST 0 /* 500 would cause an alarm at room temp. */
-
 /* Each client has this additional data */
 struct ds1621_data {
 	int sysctl_id;
@@ -321,11 +317,6 @@ static void ds1621_init_client(struct i2c_client *client)
 {
 	int reg;
 
-	/* Initialize the DS1621 chip */
-	ds1621_write_value(client, DS1621_REG_TEMP_OVER,
-			 TEMP_TO_REG(DS1621_INIT_TEMP_OVER));
-	ds1621_write_value(client, DS1621_REG_TEMP_HYST,
-			 TEMP_TO_REG(DS1621_INIT_TEMP_HYST));
 	reg = ds1621_read_value(client, DS1621_REG_CONF);
 	/* start the continous conversion */
 	if(reg & 0x01)

@@ -84,17 +84,6 @@ SENSORS_INSMOD_8(adm1021, adm1023, max1617, max1617a, thmc10, lm84, gl523sm, mc1
 #define TEMP_FROM_REG(val) (val > 127 ? val-256 : val)
 #define TEMP_TO_REG(val)   (SENSORS_LIMIT((val < 0 ? val+256 : val),0,255))
 
-/* Initial values */
-
-/* Note: Eventhough I left the low and high limits named os and hyst, 
-they don't quite work like a thermostat the way the LM75 does.  I.e., 
-a lower temp than THYST actuall triggers an alarm instead of 
-clearing it.  Weird, ey?   --Phil  */
-#define adm1021_INIT_TOS 60
-#define adm1021_INIT_THYST 20
-#define adm1021_INIT_REMOTE_TOS 60
-#define adm1021_INIT_REMOTE_THYST 20
-
 /* Each client has this additional data */
 struct adm1021_data {
 	int sysctl_id;
@@ -344,15 +333,6 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 
 static void adm1021_init_client(struct i2c_client *client)
 {
-	/* Initialize the adm1021 chip */
-	adm1021_write_value(client, ADM1021_REG_TOS_W,
-			    TEMP_TO_REG(adm1021_INIT_TOS));
-	adm1021_write_value(client, ADM1021_REG_THYST_W,
-			    TEMP_TO_REG(adm1021_INIT_THYST));
-	adm1021_write_value(client, ADM1021_REG_REMOTE_TOS_W,
-			    TEMP_TO_REG(adm1021_INIT_REMOTE_TOS));
-	adm1021_write_value(client, ADM1021_REG_REMOTE_THYST_W,
-			    TEMP_TO_REG(adm1021_INIT_REMOTE_THYST));
 	/* Enable ADC and disable suspend mode */
 	adm1021_write_value(client, ADM1021_REG_CONFIG_W, 0);
 	/* Set Conversion rate to 1/sec (this can be tinkered with) */

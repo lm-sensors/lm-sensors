@@ -149,49 +149,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            205-(val)*5)
 
-/* Initial limits */
-#define ADM1024_INIT_IN_0 190
-#define ADM1024_INIT_IN_1 190
-#define ADM1024_INIT_IN_2 190
-#define ADM1024_INIT_IN_3 190
-#define ADM1024_INIT_IN_4 190
-#define ADM1024_INIT_IN_5 190
-
-#define ADM1024_INIT_IN_PERCENTAGE 10
-
-#define ADM1024_INIT_IN_MIN_0 \
-        (ADM1024_INIT_IN_0 - ADM1024_INIT_IN_0 * ADM1024_INIT_IN_PERCENTAGE / 100)
-#define ADM1024_INIT_IN_MAX_0 \
-        (ADM1024_INIT_IN_0 + ADM1024_INIT_IN_0 * ADM1024_INIT_IN_PERCENTAGE / 100)
-#define ADM1024_INIT_IN_MIN_1 \
-        (ADM1024_INIT_IN_1 - ADM1024_INIT_IN_1 * ADM1024_INIT_IN_PERCENTAGE / 100)
-#define ADM1024_INIT_IN_MAX_1 \
-        (ADM1024_INIT_IN_1 + ADM1024_INIT_IN_1 * ADM1024_INIT_IN_PERCENTAGE / 100)
-#define ADM1024_INIT_IN_MIN_2 \
-        (ADM1024_INIT_IN_2 - ADM1024_INIT_IN_2 * ADM1024_INIT_IN_PERCENTAGE / 100)
-#define ADM1024_INIT_IN_MAX_2 \
-        (ADM1024_INIT_IN_2 + ADM1024_INIT_IN_2 * ADM1024_INIT_IN_PERCENTAGE / 100)
-#define ADM1024_INIT_IN_MIN_3 \
-        (ADM1024_INIT_IN_3 - ADM1024_INIT_IN_3 * ADM1024_INIT_IN_PERCENTAGE / 100)
-#define ADM1024_INIT_IN_MAX_3 \
-        (ADM1024_INIT_IN_3 + ADM1024_INIT_IN_3 * ADM1024_INIT_IN_PERCENTAGE / 100)
-#define ADM1024_INIT_IN_MIN_4 \
-        (ADM1024_INIT_IN_4 - ADM1024_INIT_IN_4 * ADM1024_INIT_IN_PERCENTAGE / 100)
-#define ADM1024_INIT_IN_MAX_4 \
-        (ADM1024_INIT_IN_4 + ADM1024_INIT_IN_4 * ADM1024_INIT_IN_PERCENTAGE / 100)
-#define ADM1024_INIT_IN_MIN_5 \
-        (ADM1024_INIT_IN_5 - ADM1024_INIT_IN_5 * ADM1024_INIT_IN_PERCENTAGE / 100)
-#define ADM1024_INIT_IN_MAX_5 \
-        (ADM1024_INIT_IN_5 + ADM1024_INIT_IN_5 * ADM1024_INIT_IN_PERCENTAGE / 100)
-
-#define ADM1024_INIT_FAN_MIN_1 3000
-#define ADM1024_INIT_FAN_MIN_2 3000
-
-#define ADM1024_INIT_TEMP_OS_MAX 600
-#define ADM1024_INIT_TEMP_OS_HYST 500
-#define ADM1024_INIT_TEMP_HOT_MAX 700
-#define ADM1024_INIT_TEMP_HOT_HYST 600
-
 /* For each registered ADM1024, we need to keep some data in memory. That
    data is pointed to by adm1024_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new adm1024 client is
@@ -490,56 +447,8 @@ static int adm1024_write_value(struct i2c_client *client, u8 reg, u8 value)
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
-/* Called when we have found a new ADM1024. It should set limits, etc. */
 static void adm1024_init_client(struct i2c_client *client)
 {
-	/* Reset all except Watchdog values and last conversion values
-	   This sets fan-divs to 2, among others. This makes most other
-	   initializations unnecessary */
-	adm1024_write_value(client, ADM1024_REG_CONFIG, 0x80);
-
-	adm1024_write_value(client, ADM1024_REG_IN_MIN(0),
-			    IN_TO_REG(ADM1024_INIT_IN_MIN_0, 0));
-	adm1024_write_value(client, ADM1024_REG_IN_MAX(0),
-			    IN_TO_REG(ADM1024_INIT_IN_MAX_0, 0));
-	adm1024_write_value(client, ADM1024_REG_IN_MIN(1),
-			    IN_TO_REG(ADM1024_INIT_IN_MIN_1, 1));
-	adm1024_write_value(client, ADM1024_REG_IN_MAX(1),
-			    IN_TO_REG(ADM1024_INIT_IN_MAX_1, 1));
-	adm1024_write_value(client, ADM1024_REG_IN_MIN(2),
-			    IN_TO_REG(ADM1024_INIT_IN_MIN_2, 2));
-	adm1024_write_value(client, ADM1024_REG_IN_MAX(2),
-			    IN_TO_REG(ADM1024_INIT_IN_MAX_2, 2));
-	adm1024_write_value(client, ADM1024_REG_IN_MIN(3),
-			    IN_TO_REG(ADM1024_INIT_IN_MIN_3, 3));
-	adm1024_write_value(client, ADM1024_REG_IN_MAX(3),
-			    IN_TO_REG(ADM1024_INIT_IN_MAX_3, 3));
-	adm1024_write_value(client, ADM1024_REG_IN_MIN(4),
-			    IN_TO_REG(ADM1024_INIT_IN_MIN_4, 4));
-	adm1024_write_value(client, ADM1024_REG_IN_MAX(4),
-			    IN_TO_REG(ADM1024_INIT_IN_MAX_4, 4));
-	adm1024_write_value(client, ADM1024_REG_IN_MIN(5),
-			    IN_TO_REG(ADM1024_INIT_IN_MIN_5, 5));
-	adm1024_write_value(client, ADM1024_REG_IN_MAX(5),
-			    IN_TO_REG(ADM1024_INIT_IN_MAX_5, 5));
-	adm1024_write_value(client, ADM1024_REG_FAN1_MIN,
-			    FAN_TO_REG(ADM1024_INIT_FAN_MIN_1, 2));
-	adm1024_write_value(client, ADM1024_REG_FAN2_MIN,
-			    FAN_TO_REG(ADM1024_INIT_FAN_MIN_2, 2));
-	adm1024_write_value(client, ADM1024_REG_TOS,
-			    TEMP_LIMIT_TO_REG(ADM1024_INIT_TEMP_OS_MAX));
-	adm1024_write_value(client, ADM1024_REG_THYST,
-			    TEMP_LIMIT_TO_REG(ADM1024_INIT_TEMP_OS_HYST));
-	adm1024_write_value(client, ADM1024_REG_EXT_TEMP1_HIGH,
-			    TEMP_LIMIT_TO_REG(ADM1024_INIT_TEMP_OS_MAX));
-	adm1024_write_value(client, ADM1024_REG_EXT_TEMP1_LOW,
-			    TEMP_LIMIT_TO_REG(ADM1024_INIT_TEMP_OS_HYST));
-	adm1024_write_value(client, ADM1024_REG_2_5V_HIGH,
-			    TEMP_LIMIT_TO_REG(ADM1024_INIT_TEMP_OS_MAX));
-	adm1024_write_value(client, ADM1024_REG_2_5V_LOW,
-			    TEMP_LIMIT_TO_REG(ADM1024_INIT_TEMP_OS_HYST));
-	adm1024_write_value(client, ADM1024_REG_TEMP_CONFIG, 0x00);
-
 	/* Enable temperature channel 2 */
 	adm1024_write_value(client, ADM1024_REG_CHANNEL_MODE, adm1024_read_value(client, ADM1024_REG_CHANNEL_MODE) | 0x04);
 

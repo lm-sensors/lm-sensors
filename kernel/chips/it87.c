@@ -176,73 +176,6 @@ extern inline u8 DIV_TO_REG(long val)
 /*#define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)*/
 #define DIV_FROM_REG(val) (1 << (val))
 
-/* Initial limits. Use the config file to set better limits. */
-#define IT87_INIT_IN_0 170
-#define IT87_INIT_IN_1 250
-#define IT87_INIT_IN_2 (330 / 2)
-#define IT87_INIT_IN_3 (((500)   * 100)/168)
-#define IT87_INIT_IN_4 (((1200)  * 10)/38)
-#define IT87_INIT_IN_5 (((1200)  * 10)/72)
-#define IT87_INIT_IN_6 (((500)   * 10)/56)
-#define IT87_INIT_IN_7 (((500)   * 100)/168)
-
-#define IT87_INIT_IN_PERCENTAGE 10
-
-#define IT87_INIT_IN_MIN_0 \
-        (IT87_INIT_IN_0 - IT87_INIT_IN_0 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MAX_0 \
-        (IT87_INIT_IN_0 + IT87_INIT_IN_0 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MIN_1 \
-        (IT87_INIT_IN_1 - IT87_INIT_IN_1 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MAX_1 \
-        (IT87_INIT_IN_1 + IT87_INIT_IN_1 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MIN_2 \
-        (IT87_INIT_IN_2 - IT87_INIT_IN_2 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MAX_2 \
-        (IT87_INIT_IN_2 + IT87_INIT_IN_2 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MIN_3 \
-        (IT87_INIT_IN_3 - IT87_INIT_IN_3 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MAX_3 \
-        (IT87_INIT_IN_3 + IT87_INIT_IN_3 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MIN_4 \
-        (IT87_INIT_IN_4 - IT87_INIT_IN_4 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MAX_4 \
-        (IT87_INIT_IN_4 + IT87_INIT_IN_4 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MIN_5 \
-        (IT87_INIT_IN_5 - IT87_INIT_IN_5 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MAX_5 \
-        (IT87_INIT_IN_5 + IT87_INIT_IN_5 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MIN_6 \
-        (IT87_INIT_IN_6 - IT87_INIT_IN_6 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MAX_6 \
-        (IT87_INIT_IN_6 + IT87_INIT_IN_6 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MIN_7 \
-        (IT87_INIT_IN_7 - IT87_INIT_IN_7 * IT87_INIT_IN_PERCENTAGE / 100)
-#define IT87_INIT_IN_MAX_7 \
-        (IT87_INIT_IN_7 + IT87_INIT_IN_7 * IT87_INIT_IN_PERCENTAGE / 100)
-
-#define IT87_INIT_FAN_MIN_1 3000
-#define IT87_INIT_FAN_MIN_2 3000
-#define IT87_INIT_FAN_MIN_3 3000
-
-#define IT87_INIT_TEMP_HIGH_1 600
-#define IT87_INIT_TEMP_LOW_1  540
-#define IT87_INIT_TEMP_HIGH_2 600
-#define IT87_INIT_TEMP_LOW_2  200
-#define IT87_INIT_TEMP_HIGH_3 600
-#define IT87_INIT_TEMP_LOW_3  200
-
-#define IT87_INIT_PWR_TL_OFF  160
-#define IT87_INIT_PWR_TL_LOW  160
-#define IT87_INIT_PWR_TL_MED  480
-#define IT87_INIT_PWR_TL_HI   540
-#define IT87_INIT_PWR_TL_OVR  580
-
-#define IT87_INIT_PWR_LOW     3
-#define IT87_INIT_PWR_MED     4
-#define IT87_INIT_PWR_HI      9
-
-
 /* For each registered IT87, we need to keep some data in memory. That
    data is pointed to by it87_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new it87 client is
@@ -677,57 +610,6 @@ static void it87_init_client(struct i2c_client *client)
 		if( reset_it87 ) {
 			it87_write_value(client, IT87_REG_CONFIG, 0x80);
 		}
-		it87_write_value(client, IT87_REG_VIN_MIN(0),
-				IN_TO_REG(IT87_INIT_IN_MIN_0));
-		it87_write_value(client, IT87_REG_VIN_MAX(0),
-				IN_TO_REG(IT87_INIT_IN_MAX_0));
-		it87_write_value(client, IT87_REG_VIN_MIN(1),
-				IN_TO_REG(IT87_INIT_IN_MIN_1));
-		it87_write_value(client, IT87_REG_VIN_MAX(1),
-				IN_TO_REG(IT87_INIT_IN_MAX_1));
-		it87_write_value(client, IT87_REG_VIN_MIN(2),
-				IN_TO_REG(IT87_INIT_IN_MIN_2));
-		it87_write_value(client, IT87_REG_VIN_MAX(2),
-				IN_TO_REG(IT87_INIT_IN_MAX_2));
-		it87_write_value(client, IT87_REG_VIN_MIN(3),
-				IN_TO_REG(IT87_INIT_IN_MIN_3));
-		it87_write_value(client, IT87_REG_VIN_MAX(3),
-				IN_TO_REG(IT87_INIT_IN_MAX_3));
-		it87_write_value(client, IT87_REG_VIN_MIN(4),
-				IN_TO_REG(IT87_INIT_IN_MIN_4));
-		it87_write_value(client, IT87_REG_VIN_MAX(4),
-				IN_TO_REG(IT87_INIT_IN_MAX_4));
-		it87_write_value(client, IT87_REG_VIN_MIN(5),
-				IN_TO_REG(IT87_INIT_IN_MIN_5));
-		it87_write_value(client, IT87_REG_VIN_MAX(5),
-				IN_TO_REG(IT87_INIT_IN_MAX_5));
-		it87_write_value(client, IT87_REG_VIN_MIN(6),
-				IN_TO_REG(IT87_INIT_IN_MIN_6));
-		it87_write_value(client, IT87_REG_VIN_MAX(6),
-				IN_TO_REG(IT87_INIT_IN_MAX_6));
-		it87_write_value(client, IT87_REG_VIN_MIN(7),
-				IN_TO_REG(IT87_INIT_IN_MIN_7));
-		it87_write_value(client, IT87_REG_VIN_MAX(7),
-				IN_TO_REG(IT87_INIT_IN_MAX_7));
-		/* Note: Battery voltage does not have limit registers */
-		it87_write_value(client, IT87_REG_FAN_MIN(1),
-				FAN_TO_REG(IT87_INIT_FAN_MIN_1, 2));
-		it87_write_value(client, IT87_REG_FAN_MIN(2),
-				FAN_TO_REG(IT87_INIT_FAN_MIN_2, 2));
-		it87_write_value(client, IT87_REG_FAN_MIN(3),
-				FAN_TO_REG(IT87_INIT_FAN_MIN_3, 2));
-		it87_write_value(client, IT87_REG_TEMP_HIGH(1),
-				TEMP_TO_REG(IT87_INIT_TEMP_HIGH_1));
-		it87_write_value(client, IT87_REG_TEMP_LOW(1),
-				TEMP_TO_REG(IT87_INIT_TEMP_LOW_1));
-		it87_write_value(client, IT87_REG_TEMP_HIGH(2),
-				TEMP_TO_REG(IT87_INIT_TEMP_HIGH_2));
-		it87_write_value(client, IT87_REG_TEMP_LOW(2),
-				TEMP_TO_REG(IT87_INIT_TEMP_LOW_2));
-		it87_write_value(client, IT87_REG_TEMP_HIGH(3),
-				TEMP_TO_REG(IT87_INIT_TEMP_HIGH_3));
-		it87_write_value(client, IT87_REG_TEMP_LOW(3),
-				TEMP_TO_REG(IT87_INIT_TEMP_LOW_3));
 
 		/* Enable voltage monitors */
 		it87_write_value(client, IT87_REG_VIN_ENABLE, 0xff);
