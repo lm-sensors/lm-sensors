@@ -519,13 +519,20 @@ chip "as99127f-*"
 # Same as above for w83782d except that in5 and in6 negative voltages
 # are computed as in the w83781d.
 # Asus won't release a datasheet so this is guesswork.
-# New in5 and temp2 calculations courtesy Guntram Blohm.
+# Thanks to Guntram Blohm, Jack, Ed Harrison, Artur Gawryszczak,
+# Victor G. Marimon and others for their feedback.
 
+# Dual power plane
     label in0 "VCore 1"
     label in1 "VCore 2"
+# Single power plane (A7V133, A7M266)
+#   label in0 "VCore"
+#   ignore in1
+
     label in2 "+3.3V"
     label in3 "+5V"
     label in4 "+12V"
+# These last two may not make sense on all motherboards.
     label in5 "-12V"
     label in6 "-5V"
 
@@ -534,20 +541,23 @@ chip "as99127f-*"
     compute in5 -(240/60.4)*@ ,  -@/(240/60.4)
     compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
 
-# Depending on your motherboard, you have to choose between two formulae
+# Depending on your motherboard, you have to choose between three formulae
 # for temp2. Quoting Artur Gawryszczak:
 # "I guess, that the formula "temp2 (@*30/43)+25, (@-25)*43/30" is correct
 # for those Asus motherboards, which get CPU temperature from internal 
 # thermal diode (Pentium Coppermine, and above), and "temp2 @*2.0, @/2.0" 
 # is correct for Athlon/Duron boards, which use a thermistor in the 
 # socket."
+# The third formula was found and reported by Victor G. Marimon.
 # Asus CUV4X, Asus A7V8X
 #   compute temp2 (@*30/43)+25, (@-25)*43/30
-# Asus A7V133
+# Asus A7V133, Asus A7M266
     compute temp2 @*2.0, @/2.0
 # Asus CUSL2
-    compute temp2 (@*60/43)+25,(@-25)*43/60
+#   compute temp2 (@*60/43)+25,(@-25)*43/60
 
+# See comments above if temp3 looks bad. What works for temp2 is likely
+# to work for temp3.
     compute temp3 @*2.0, @/2.0
 
 # adjust this if your vid is wrong; see doc/vid
