@@ -556,5 +556,8 @@ struct sensors_chips_data {
 #define ICSPLL_SYSCTL1 1000
 
 #define BT869_SYSCTL_STATUS 1000
+#define BT869_SYSCTL_NTSC   1001
+#define BT869_SYSCTL_HALF   1002
+#define BT869_SYSCTL_RES    1003
 
 #endif /* def SENSORS_SENSORS_H */

@@ -63,7 +63,10 @@ struct bt869_data {
          char valid;                 /* !=0 if following fields are valid */
          unsigned long last_updated; /* In jiffies */
 
-         u16 status[3]; /* Register values */
+         u8 status[3]; /* Register values */
+         u16 res[2]; /* Resolution XxY */
+         u8 ntsc; /* Resolution XxY */
+         u8 half; /* Resolution XxY */
 };
 
 #ifdef MODULE
@@ -86,6 +89,12 @@ static int bt869_read_value(struct i2c_client *client, u8 reg);
 static int bt869_write_value(struct i2c_client *client, u8 reg, u16 value);
 static void bt869_status(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
+static void bt869_ntsc(struct i2c_client *client, int operation, int ctl_name,
+                      int *nrels_mag, long *results);
+static void bt869_res(struct i2c_client *client, int operation, int ctl_name,
+                      int *nrels_mag, long *results);
+static void bt869_half(struct i2c_client *client, int operation, int ctl_name,
+                      int *nrels_mag, long *results);
 static void bt869_update_client(struct i2c_client *client);
 
 
@@ -107,8 +116,14 @@ static struct i2c_driver bt869_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table bt869_dir_table_template[] = {
-  { BT869_SYSCTL_STATUS, "status", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { BT869_SYSCTL_STATUS, "status", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &bt869_status },
+  { BT869_SYSCTL_NTSC, "ntsc", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &bt869_ntsc },
+  { BT869_SYSCTL_RES, "res", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &bt869_res },
+  { BT869_SYSCTL_HALF, "half", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &bt869_half },
   { 0 }
 };
 
@@ -171,7 +186,7 @@ printk("bt869.o:  probing address %d .\n",address);
 	new_client->addr,0xC4,0);         /* set status bank 0 */
   cur = smbus_read_byte_data(adapter,address,0);
   printk("bt869.o: address 0x%X testing-->0x%X\n",address,cur);
-  if (cur != 0x22)
+  if ((cur | 0x20) != 0x22)
       goto ERROR1;
       
   /* Determine the chip type */
@@ -307,8 +322,19 @@ int bt869_write_value(struct i2c_client *client, u8 reg, u16 value)
 
 void bt869_init_client(struct i2c_client *client)
 {
+  struct bt869_data *data = client->data;
+  
     /* Initialize the bt869 chip */
-    bt869_write_value(client,0xC4,0);
+    bt869_write_value(client,0x06C,0x80); 
+    bt869_write_value(client,0x0ba,0x80); 
+    bt869_write_value(client,0x0D6, 0x80);
+    /* depth =16bpp */
+    bt869_write_value(client,0x0C6, 0x001);
+    bt869_write_value(client,0xC4,1);
+    data->res[0]=640;
+    data->res[1]=480;
+    data->ntsc=1;
+    data->half=0;
     
     /* Todo: setup the proper modes */
 }
@@ -326,13 +352,26 @@ void bt869_update_client(struct i2c_client *client)
     printk("Starting bt869 update\n");
 #endif
 
-    bt869_write_value(client,0xC4,0);
+/* Set values of device */
+    if ((data->res[0] == 640) && (data->res[1] == 480)) {
+      bt869_write_value(client,0xD6,(0 + (! data->ntsc))<<2);
+    } else if ((data->res[0] == 800) && (data->res[1] == 600)) {
+      bt869_write_value(client,0xD6,(2 + (! data->ntsc))<<2);
+    } else {
+      bt869_write_value(client,0xD6,(0 + (! data->ntsc))<<2);
+      printk("bt869.o:  Warning: arbitrary resolutions not supported yet.  Using 640x480.\n");
+    }
+    bt869_write_value(client,0xD4,data->half);
+    
+    
+/* Get status */
+    bt869_write_value(client,0xC4,1);
     data->status[0] = bt869_read_value(client,1);
-    bt869_write_value(client,0xC4,0x40);
+    bt869_write_value(client,0xC4,0x41);
     data->status[1] = bt869_read_value(client,1);
-    bt869_write_value(client,0xC4,0x80);
+    bt869_write_value(client,0xC4,0x81);
     data->status[2] = bt869_read_value(client,1);
-    bt869_write_value(client,0xC4,0x0C0);
+    bt869_write_value(client,0xC4,0x0C1);
     data->last_updated = jiffies;
     data->valid = 1;
   }
@@ -354,13 +393,64 @@ void bt869_status(struct i2c_client *client, int operation, int ctl_name,
     results[2] = data->status[2];
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
+	printk("bt869.o: Warning: write was requested on read-only proc file: status\n");
+  }
+}
+
+
+void bt869_ntsc(struct i2c_client *client, int operation, int ctl_name,
+               int *nrels_mag, long *results)
+{
+  struct bt869_data *data = client->data;
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    bt869_update_client(client);
+    results[0] = data->ntsc;
+    *nrels_mag = 1;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
- //     data->temp_os = TEMP_TO_REG(results[0]);
-//      bt869_write_value(client,bt869_REG_TEMP_OS,data->temp_os);
+      data->ntsc = (results[0] > 0);
+    }
+  }
+}
+
+
+void bt869_res(struct i2c_client *client, int operation, int ctl_name,
+               int *nrels_mag, long *results)
+{
+  struct bt869_data *data = client->data;
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    bt869_update_client(client);
+    results[0] = data->res[0];
+    results[1] = data->res[1];
+    *nrels_mag = 2;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 1) {
+      data->res[0] = results[0];
     }
     if (*nrels_mag >= 2) {
-//      data->temp_os = TEMP_TO_REG(results[1]);
-//      bt869_write_value(client,bt869_REG_TEMP_HYST,data->temp_os);
+      data->res[1] = results[1];
+    }
+  }
+}
+
+
+void bt869_half(struct i2c_client *client, int operation, int ctl_name,
+               int *nrels_mag, long *results)
+{
+  struct bt869_data *data = client->data;
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    bt869_update_client(client);
+    results[0] = data->half;
+    *nrels_mag = 1;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 1) {
+      data->half = (results[0] > 0);
     }
   }
 }
