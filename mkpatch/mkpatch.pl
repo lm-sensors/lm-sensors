@@ -397,7 +397,7 @@ DRIVERS-$(CONFIG_SENSORS) += drivers/sensors/sensors.a
 EOF
       $pr1 = 1;
     }
-    if ($type == 2 and m@^DRIVERS \+= \$\(DRIVERS-y\)@) {
+    if ($type == 2 and m@^DRIVERS .*= \$\(DRIVERS-y\)@) {
       print OUTPUT <<'EOF';
 DRIVERS-$(CONFIG_SENSORS) += drivers/sensors/sensor.o
 EOF
