@@ -26,6 +26,7 @@
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
 #include <linux/pci.h>
+#include <linux/version.h>
 #if LINUX_VERSION_CODE < 0x020136 /* 2.1.54 */
 #include <linux/bios32.h>
 #endif
