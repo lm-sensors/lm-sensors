@@ -213,11 +213,11 @@ static int ali15x3_setup(struct pci_dev *ALI15X3_dev)
 	  1533 ISA Bridge device, NOT in the 7101 device.
 	  Don't bother with finding the 1533 device and reading the register.
 	if ((....... & 0x0F) == 1)
-		dev_dbg(&ALI15X3_dev, "ALI15X3 using Interrupt 9 for SMBus.\n");
+		dev_dbg(ALI15X3_dev, "ALI15X3 using Interrupt 9 for SMBus.\n");
 	*/
 	pci_read_config_byte(ALI15X3_dev, SMBREV, &temp);
-	dev_dbg(&ALI15X3_dev, "SMBREV = 0x%X\n", temp);
-	dev_dbg(&ALI15X3_dev, "iALI15X3_smba = 0x%X\n", ali15x3_smba);
+	dev_dbg(ALI15X3_dev, "SMBREV = 0x%X\n", temp);
+	dev_dbg(ALI15X3_dev, "iALI15X3_smba = 0x%X\n", ali15x3_smba);
 
 	return 0;
 }
@@ -236,7 +236,7 @@ static int ali15x3_transaction(struct i2c_adapter *adap)
 	int result = 0;
 	int timeout = 0;
 
-	dev_dbg(&adap, "Transaction (pre): STS=%02x, CNT=%02x, CMD=%02x, "
+	dev_dbg(adap, "Transaction (pre): STS=%02x, CNT=%02x, CMD=%02x, "
 		"ADD=%02x, DAT0=%02x, DAT1=%02x\n", inb_p(SMBHSTSTS),
 		inb_p(SMBHSTCNT), inb_p(SMBHSTCMD), inb_p(SMBHSTADD),
 		inb_p(SMBHSTDAT0), inb_p(SMBHSTDAT1));
@@ -314,7 +314,7 @@ static int ali15x3_transaction(struct i2c_adapter *adap)
 
 	if (temp & ALI15X3_STS_TERM) {
 		result = -1;
-		dev_dbg(&adap, "Error: Failed bus transaction\n");
+		dev_dbg(adap, "Error: Failed bus transaction\n");
 	}
 
 	/*
@@ -325,7 +325,7 @@ static int ali15x3_transaction(struct i2c_adapter *adap)
 	*/
 	if (temp & ALI15X3_STS_COLL) {
 		result = -1;
-		dev_dbg(&adap,
+		dev_dbg(adap,
 			"Error: no response or bus collision ADD=%02x\n",
 			inb_p(SMBHSTADD));
 	}
@@ -335,7 +335,7 @@ static int ali15x3_transaction(struct i2c_adapter *adap)
 		result = -1;
 		dev_err(adap, "Error: device error\n");
 	}
-	dev_dbg(&adap, "Transaction (post): STS=%02x, CNT=%02x, CMD=%02x, "
+	dev_dbg(adap, "Transaction (post): STS=%02x, CNT=%02x, CMD=%02x, "
 		"ADD=%02x, DAT0=%02x, DAT1=%02x\n", inb_p(SMBHSTSTS),
 		inb_p(SMBHSTCNT), inb_p(SMBHSTCMD), inb_p(SMBHSTADD),
 		inb_p(SMBHSTDAT0), inb_p(SMBHSTDAT1));
@@ -451,7 +451,7 @@ static s32 ali15x3_access(struct i2c_adapter * adap, u16 addr,
 		outb_p(inb_p(SMBHSTCNT) | ALI15X3_BLOCK_CLR, SMBHSTCNT);
 		for (i = 1; i <= data->block[0]; i++) {
 			data->block[i] = inb_p(SMBBLKDAT);
-			dev_dbg(&adap, "Blk: len=%d, i=%d, data=%02x\n",
+			dev_dbg(adap, "Blk: len=%d, i=%d, data=%02x\n",
 				len, i, data->block[i]);
 		}
 		break;
