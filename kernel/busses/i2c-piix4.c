@@ -51,18 +51,6 @@ struct sd {
 	const char *name;
 };
 
-/* Note: We assume all devices are identical
-         to the Intel PIIX4; we only mention it during detection.   */
-
-static struct sd supported[] = {
-	{PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371AB_3, 3, "PIIX4"},
-	{PCI_VENDOR_ID_SERVERWORKS, PCI_DEVICE_ID_SERVERWORKS_OSB4, 0, "OSB4"},
-	{PCI_VENDOR_ID_SERVERWORKS, PCI_DEVICE_ID_SERVERWORKS_CSB5, 0, "CSB5"},
-	{PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82443MX_3, 3, "440MX"},
-	{PCI_VENDOR_ID_EFAR, PCI_DEVICE_ID_EFAR_SLC90E66_3, 0, "Victory66"},
-	{0, 0, 0, NULL}
-};
-
 /* PIIX4 SMBus address offsets */
 #define SMBHSTSTS (0 + piix4_smba)
 #define SMBHSLVSTS (1 + piix4_smba)
@@ -148,37 +136,16 @@ static int __init ibm_dmi_probe(void)
    Note the differences between kernels with the old PCI BIOS interface and
    newer kernels with the real PCI interface. In compat.h some things are
    defined to make the transition easier. */
-int piix4_setup(void)
+static int piix4_setup(struct pci_dev *PIIX4_dev, const struct pci_device_id *id)
 {
 	int error_return = 0;
 	unsigned char temp;
-	struct sd *num = supported;
-	struct pci_dev *PIIX4_dev = NULL;
 
-	if (pci_present() == 0) {
-		error_return = -ENODEV;
-		goto END;
-	}
+	/* match up the function */
+	if (PCI_FUNC(PIIX4_dev->devfn) != id->driver_data)
+		return -ENODEV;
 
-	/* Look for a supported device/function */
-	do {
-		if((PIIX4_dev = pci_find_device(num->mfr, num->dev,
-					        PIIX4_dev))) {
-			if(PCI_FUNC(PIIX4_dev->devfn) != num->fn)
-				continue;
-			break;
-		}
-		PIIX4_dev = NULL;
-		num++;
-	} while (num->mfr);
-
-	if (PIIX4_dev == NULL) {
-		printk
-		  (KERN_ERR "i2c-piix4.o: Error: Can't detect PIIX4 or compatible device!\n");
-		 error_return = -ENODEV;
-		 goto END;
-	}
-	printk(KERN_INFO "i2c-piix4.o: Found %s device\n", num->name);
+	printk(KERN_INFO "Found %s device\n", PIIX4_dev->name);
 
 #ifdef CONFIG_X86
 	if(ibm_dmi_probe()) {
@@ -479,19 +446,59 @@ static struct i2c_adapter piix4_adapter = {
 	.algo		= &smbus_algorithm,
 };
 
-
-
 static struct pci_device_id piix4_ids[] __devinitdata = {
+	{
+		.vendor =	PCI_VENDOR_ID_INTEL,
+		.device =	PCI_DEVICE_ID_INTEL_82371AB_3,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+		.driver_data =	3
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_SERVERWORKS,
+		.device =	PCI_DEVICE_ID_SERVERWORKS_OSB4,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+		.driver_data =	0,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_SERVERWORKS,
+		.device =	PCI_DEVICE_ID_SERVERWORKS_CSB5,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+		.driver_data =	0,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_INTEL,
+		.device =	PCI_DEVICE_ID_INTEL_82443MX_3,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+		.driver_data =	3,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_EFAR,
+		.device =	PCI_DEVICE_ID_EFAR_SLC90E66_3,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+		.driver_data =	0,
+	},
 	{ 0, }
 };
 
 static int __devinit piix4_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
+	int retval;
+
+	retval = piix4_setup(dev, id);
+	if (retval)
+		return retval;
 
 	sprintf(piix4_adapter.name, "SMBus PIIX4 adapter at %04x",
 		piix4_smba);
 
-	i2c_add_adapter(&piix4_adapter);
+	retval = i2c_add_adapter(&piix4_adapter);
+
+	return retval;
 }
 
 static void __devexit piix4_remove(struct pci_dev *dev)
@@ -519,8 +526,6 @@ static void __exit i2c_piix4_exit(void)
 	pci_unregister_driver(&piix4_driver);
 	release_region(piix4_smba, 8);
 }
-
-
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
