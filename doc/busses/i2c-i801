@@ -54,8 +54,9 @@ See the file i2c-piix4 for some additional information.
 I2C Block Read Support
 ----------------------
 
-The devices support a special 2-byte address I2C block read.
-The driver and the kernel i2c protocol stack do not yet
+The devices support a special 3-byte address (command code
+plus 2 more bytes) I2C block read.
+The driver and the kernel i2c protocol stack do not
 support this.
 
 
@@ -69,13 +70,13 @@ Feature		Kernel		Driver
 Slave mode	no		no
 Host notify	no		no
 Block PEC	yes		yes
-Hardware PEC	yes		no
+Hardware PEC	yes		yes
 
 
 Other ICH4 Features
 -------------------
 
-The following additional ICH4 features are not yet supported:
+The following additional ICH4 features are also supported:
 
 32 Byte buffer
 

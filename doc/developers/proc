@@ -95,7 +95,7 @@ in[0-8]   3	Voltage min, max, and input value.
 			in8	varies
 
 pwm[1-3]  1- 2	Pulse width modulation fan control.
-		Integer 0 - 255, read/write.
+		Integer 0 - 100, read/write.
 		Corresponds to the fans 1-3.
 		Second value, if present, is an enable (0 or 1)
 
