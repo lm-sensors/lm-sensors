@@ -246,13 +246,13 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        name => "Genesys Logic GL520SM",
        driver => "gl520sm",
        i2c_addrs => [0x2c, 0x2d],
-       i2c_detect => sub { gl520sm_detect, @_} ,
+       i2c_detect => sub { gl520sm_detect @_} ,
      },
      {
        name => "Genesys Logic GL525SM",
 #        driver => "xxxxxxx",
        i2c_addrs => [0x2d],
-       i2c_detect => sub { gl525sm_detect, @_} ,
+       i2c_detect => sub { gl525sm_detect @_} ,
      },
      {
        name => "Analog Devices ADM9240",
