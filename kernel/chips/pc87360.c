@@ -201,6 +201,7 @@ static int pc87360_read_value(struct pc87360_data *data, u8 ldi, u8 bank,
 			      u8 reg);
 static void pc87360_write_value(struct pc87360_data *data, u8 ldi, u8 bank,
 				u8 reg, u8 value);
+static void pc87360_init_client(struct i2c_client *client);
 static void pc87360_update_client(struct i2c_client *client);
 static int pc87360_find(u8 *devid, int *address);
 
@@ -572,6 +573,8 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 #endif
 	}
 
+	pc87360_init_client(new_client);
+
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 				    type_name, template)) < 0) {
 		err = i;
@@ -641,6 +644,64 @@ static void pc87360_write_value(struct pc87360_data *data, u8 ldi, u8 bank,
 	}
 	outb_p(value, data->address[ldi] + reg);
 	up(&(data->lock));
+}
+
+static void pc87360_init_client(struct i2c_client *client)
+{
+	struct pc87360_data *data = client->data;
+	u8 reg;
+
+	if (data->innr >= 10) {
+		/* Forcibly enable in7 (Vsb) */
+		reg = pc87360_read_value(data, LD_IN, 7,
+					 PC87365_REG_IN_STATUS);
+		if (!(reg & 0x01)) {
+#ifdef DEBUG
+			printk(KERN_DEBUG "pc87360.o: Forcibly enabling "
+			       "in7 (Vsb)\n");
+#endif
+			pc87360_write_value(data, LD_IN, 7,
+					    PC87365_REG_IN_STATUS,
+					    (reg & 0x68) | 0x87);
+		}
+		/* Forcibly enable in8 (Vdd) */
+		reg = pc87360_read_value(data, LD_IN, 8,
+					 PC87365_REG_IN_STATUS);
+		if (!(reg & 0x01)) {
+			pc87360_write_value(data, LD_IN, 8,
+					    PC87365_REG_IN_STATUS,
+					    (reg & 0x68) | 0x87);
+#ifdef DEBUG
+			printk(KERN_DEBUG "pc87360.o: Forcibly enabling "
+			       "in8 (Vdd)\n");
+#endif
+		}
+		/* Forcibly enable in10 (AVdd) */
+		reg = pc87360_read_value(data, LD_IN, 10,
+					 PC87365_REG_IN_STATUS);
+		if (!(reg & 0x01)) {
+			pc87360_write_value(data, LD_IN, 10,
+					    PC87365_REG_IN_STATUS,
+					    (reg & 0x68) | 0x87);
+#ifdef DEBUG
+			printk(KERN_DEBUG "pc87360.o: Forcibly enabling "
+			       "in10 (AVdd)\n");
+#endif
+		}
+	}
+	if (data->tempnr >= 3) {
+		/* Forcibly enable temp3 (PC87366 temperature) */
+		reg = pc87360_read_value(data, LD_TEMP, 2,
+					 PC87365_REG_TEMP_STATUS);
+		if (!(reg & 0x01)) {
+			pc87360_write_value(data, LD_TEMP, 2,
+					    PC87365_REG_TEMP_STATUS, 0xCF);
+#ifdef DEBUG
+			printk(KERN_DEBUG "pc87360.o: Forcibly enabling "
+			       "temp3 (PC87366 temperature)\n");
+#endif
+		}
+	}
 }
 
 static void pc87360_update_client(struct i2c_client *client)
