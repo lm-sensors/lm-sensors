@@ -23,29 +23,23 @@ KERNELCHIPSDIR := $(MODULE_DIR)
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-# These targets are NOT included in 'mkpatch' ...
+
+# These targets are NOT included in 'mkpatch'
 KERNELCHIPSTARGETS :=
 KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1031.o
 ifeq ($(shell if grep -q '^CONFIG_IPMI_HANDLER=' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/bmcsensors.o
 endif
 KERNELCHIPSTARGETS += $(MODULE_DIR)/ds1307.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/lm83.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/lm90.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/lm93.o
+KERNELCHIPSTARGETS += $(MODULE_DIR)/ltc1710.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/max1619.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/max6650.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/saa1064.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smartbatt.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smbus-arp.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/vt8231.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/w83627hf.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/w83l785ts.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/xeontemp.o
 
 
-# These targets ARE included in 'mkpatch', except for LTC1710, which we
-# leave here because it used to be in 'mkpatch' ...
+# These targets ARE included in 'mkpatch'
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM1021=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1021.o
 endif
@@ -103,20 +97,26 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM80=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/lm80.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM83=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/lm83.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM85=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/lm85.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM87=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/lm87.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM90=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/lm90.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM92=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/lm92.o
 endif
-ifneq ($(shell if grep -q '^CONFIG_SENSORS_LTC1710=y' $(LINUX)/.config; then echo 1; fi),1)
-KERNELCHIPSTARGETS += $(MODULE_DIR)/ltc1710.o
-endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_MATORB=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/matorb.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_MAX6650=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/max6650.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_MAXILIFE=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/maxilife.o
@@ -153,6 +153,18 @@ KERNELCHIPSTARGETS += $(MODULE_DIR)/via686a.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_VT1211=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/vt1211.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_VT8231=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/vt8231.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_W83627HF=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/w83627hf.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_W83L785TS=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/w83l785ts.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_XEONTEMP=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/xeontemp.o
 endif
 
 # Include all dependency files
