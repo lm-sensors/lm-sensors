@@ -3072,7 +3072,7 @@ sub main
         print "Load `$adapter' (say NO if built into your kernel)? (YES/no): ";
         unless (<STDIN> =~ /^\s*[Nn]/) {
           if (system ("modprobe", $adapter)) {
-            print "Loading failed ($!)... skipping.\n";
+            print "Loading failed... skipping.\n";
             if ($adapter eq "i2c-riva") {
               print "** Note: i2c-riva module is available at \n";
               print "** http://drama.obuda.kando.hu/~fero/cgi-bin/rivatv.shtml\n"; 
@@ -3093,7 +3093,7 @@ sub main
       print "Load `$adapter' (say NO if built into your kernel)? (YES/no): ";
       unless (<STDIN> =~ /^\s*[Nn]/) {
         if (system ("modprobe", $adapter)) {
-          print "Loading failed ($!)... skipping.\n";
+          print "Loading failed... skipping.\n";
         } else {
           print "Module loaded succesfully.\n";
         }
@@ -3124,7 +3124,7 @@ sub main
               "have it built-in\n",
               " into your kernel)\n";
       } elsif (system "modprobe","i2c-dev") {
-        print " Loading failed ($!), expect problems later on.\n";
+        print " Loading failed, expect problems later on.\n";
       } else {
         print " Module loaded succesfully.\n";
       }
