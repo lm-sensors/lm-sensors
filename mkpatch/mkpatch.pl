@@ -306,7 +306,7 @@ EOF
     }
     if ($type == 2 and m@^DRIVERS \+= \$\(DRIVERS-y\)@) {
       print OUTPUT <<'EOF';
-DRIVERS-$(CONFIG_SENSORS) += drivers/sensors/sensors.o
+DRIVERS-$(CONFIG_SENSORS) += drivers/sensors/sensor.o
 EOF
       $pr1 = 1;
     }
@@ -560,7 +560,7 @@ sub gen_drivers_sensors_Makefile
 #
 
 MOD_LIST_NAME := SENSORS_MODULES
-O_TARGET := sensors.o
+O_TARGET := sensor.o
 
 export-objs	:= sensors.o
 
