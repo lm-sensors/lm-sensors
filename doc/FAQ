@@ -52,7 +52,7 @@ is still an ALARM warning!
 4.5 My voltage readings seem to drift a bit. Is something wrong with my power
 supply?
 4.6 Some measurements are way out of range. What happened?
-4.7 What are VID lines?
+4.7 What are VID lines? Why is the VID reading wrong?
 4.8 I read sensor values several times a second, but they are only
 updated only each second or so. Why?
 4.9 It sometimes seems to take almost a second before I see the
@@ -538,12 +538,15 @@ measurement should be interpreted; see the comments the example file for
 more information.
 
 
-4.7 What are VID lines?
+4.7 What are VID lines? Why is the VID reading wrong?
 
-    These describe the voltage your processors use. This is supported
-for most processors, however they are not always
-correctly connected to the sensor chip, so the readings may be out of
-range. A value of +3.5 V is especially suspect.
+    These describe the core voltage for your processor. They are
+supported for most processors, however they are not always
+correctly connected to the sensor chip, so the readings may be invalid.
+A reading of 0V, +3.5V or +2.05V is especially suspect.
+If this is the case, add a line 'ignore vid' to /etc/sensors.conf,
+and change the min and max settings for the Processor Core voltage
+(often in0_min and in0_max) in that file so that they don't depend on vid.
 
 
 4.8 I read sensor values several times a second, but they are only
@@ -1056,7 +1059,8 @@ can not be sure.
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
 
-Rev 2.5 (MDS) Minor updates 20011111
+Rev 2.6 (MDS) Minor updates 20011127
+Rev 2.5 (MDS) Minor updates 20011111, released with lm_sensors 2.6.2
 Rev 2.4 (MDS) Minor updates 20010722
 Rev 2.3 (MDS) General update, 20010224, released with lm_sensors 2.6.0.
 Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 19990920
