@@ -923,7 +923,8 @@ sub add_i2c_to_chips_detected
         @entry_addrs = ($detected_ref->[$i]->{i2c_addr});
         push @entry_addrs, @{$detected_ref->[$i]->{i2c_sub_addrs}}
              if exists $detected_ref->[$i]->{i2c_sub_addrs};
-        if (any_list_match \@entry_addrs, \@hash_addrs) {
+        if ($detected_ref->[$i]->{i2c_devnr} == $datahash->{i2c_devnr} and
+            any_list_match \@entry_addrs, \@hash_addrs) {
           push @$misdetected_ref,$detected_ref->[$i];
           splice @$detected_ref, $i, 1;
         }
