@@ -79,6 +79,12 @@ typedef struct sensors_compute {
   int lineno;
 } sensors_compute;
 
+/* Config file ignore declaration: a feature name */
+typedef struct sensors_ignore {
+  char *name;
+  int lineno;
+} sensors_ignore;
+
 /* A list of chip names, used to represent a config file chips declaration */
 typedef struct sensors_chip_name_list {
   sensors_chip_name *fits;
@@ -98,6 +104,9 @@ typedef struct sensors_chip {
   sensors_compute *computes;
   int computes_count;
   int computes_max;
+  sensors_ignore *ignores;
+  int ignores_count;
+  int ignores_max;
   int lineno;
 } sensors_chip;
 

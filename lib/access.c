@@ -130,27 +130,73 @@ int sensors_chip_name_has_wildcards(sensors_chip_name chip)
 
 /* Look up the label which belongs to this chip. Note that chip should not
    contain wildcard values! *result is newly allocated (free it yourself).
-   This function will return 0 on success, and <0 on failure.  */
+   This function will return 0 on success, and <0 on failure.  
+   Changed behaviour as of libsensors.so.1: now we actually take notice
+   of the logical class, as documented, but not done before! */
 int sensors_get_label(sensors_chip_name name, int feature, char **result)
 {
   const sensors_chip *chip;
   const sensors_chip_feature *featureptr;
+  const sensors_chip_feature *alt_featureptr;
   int i;
 
+  *result=NULL;
   if (sensors_chip_name_has_wildcards(name))
     return -SENSORS_ERR_WILDCARDS;
   if (! (featureptr = sensors_lookup_feature_nr(name.prefix,feature)))
     return -SENSORS_ERR_NO_ENTRY;
+  if (featureptr->logical_mapping == SENSORS_NO_MAPPING)
+    alt_featureptr = NULL;
+  else if (! (alt_featureptr =
+                   sensors_lookup_feature_nr(name.prefix,
+                                             featureptr->logical_mapping)))
+    return -SENSORS_ERR_NO_ENTRY;
   for (chip = NULL; (chip = sensors_for_all_config_chips(name,chip));)
     for (i = 0; i < chip->labels_count; i++)
       if (!strcmp(featureptr->name, chip->labels[i].name)) {
+        if (*result)
+          free(*result);
         if (! (*result = strdup(chip->labels[i].value)))
           sensors_fatal_error("sensors_get_label","Allocating label text");
-        return 0;
+        return 0; /* Exact match always overrules! */
+      } else if (alt_featureptr && 
+                 !strcmp(alt_featureptr->name, chip->labels[i].name)) {
+        if (*result)
+          free(*result);
+        if (! (*result = strdup(chip->labels[i].value)))
+          sensors_fatal_error("sensors_get_label","Allocating label text");
       }
   if (! (*result = strdup(featureptr->name)))
     sensors_fatal_error("sensors_get_label","Allocating label text");
   return 0;
+}
+
+int sensors_get_ignored(sensors_chip_name name, int feature)
+{
+  const sensors_chip *chip;
+  const sensors_chip_feature *featureptr;
+  const sensors_chip_feature *alt_featureptr;
+  int i,res;
+
+  res = 1; /* Default: valid */
+  if (sensors_chip_name_has_wildcards(name))
+    return -SENSORS_ERR_WILDCARDS;
+  if (! (featureptr = sensors_lookup_feature_nr(name.prefix,feature)))
+    return -SENSORS_ERR_NO_ENTRY;
+  if (featureptr->logical_mapping == SENSORS_NO_MAPPING)
+    alt_featureptr = NULL;
+  else if (! (alt_featureptr =
+                   sensors_lookup_feature_nr(name.prefix,
+                                             featureptr->logical_mapping)))
+    return -SENSORS_ERR_NO_ENTRY;
+  for (chip = NULL; (chip = sensors_for_all_config_chips(name,chip));)
+    for (i = 0; i < chip->ignores_count; i++)
+      if (!strcmp(featureptr->name, chip->ignores[i].name))
+        return 0; /* Exact match always overrules! */
+      else if (alt_featureptr &&
+               !strcmp(alt_featureptr->name, chip->ignores[i].name))
+        res = 0;
+  return res;
 }
 
 /* Read the value of a feature of a certain chip. Note that chip should not

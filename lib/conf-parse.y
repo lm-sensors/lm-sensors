@@ -60,6 +60,11 @@ static sensors_chip *current_chip = NULL;
                                           &current_chip->computes_count,\
                                           &current_chip->computes_max,\
                                           sizeof(sensors_compute));
+#define ignore_add_el(el) sensors_add_array_el(el,\
+                                          (void **) &current_chip->ignores,\
+                                          &current_chip->ignores_count,\
+                                          &current_chip->ignores_max,\
+                                          sizeof(sensors_ignore));
 #define chip_add_el(el) sensors_add_array_el(el,\
                                        (void **) &sensors_config_chips,\
                                        &sensors_config_chips_count,\
@@ -105,6 +110,7 @@ static sensors_chip *current_chip = NULL;
 %token <line> SET
 %token <line> CHIP
 %token <line> COMPUTE
+%token <line> IGNORE
 %token <value> FLOAT
 %token <name> NAME
 %token <nothing> ERROR
@@ -131,6 +137,7 @@ line:	  bus_statement EOL
 	| set_statement EOL
 	| chip_statement EOL
 	| compute_statement EOL
+	| ignore_statement EOL
 	| error	EOL
 ;
 
@@ -175,15 +182,25 @@ compute_statement:	  COMPUTE function_name expression ',' expression
 			  }
 ;
 
+ignore_statement:	IGNORE function_name
+			{ sensors_ignore new_el;
+			  check_current_chip();
+			  new_el.lineno = $1;
+			  new_el.name = $2;
+			  ignore_add_el(&new_el);
+			}
+
 chip_statement:	  CHIP chip_name_list
 		  { sensors_chip new_el;
 		    new_el.lineno = $1;
 		    new_el.labels = NULL;
 		    new_el.sets = NULL;
 		    new_el.computes = NULL;
+		    new_el.ignores = NULL;
 		    new_el.labels_count = new_el.labels_max = 0;
 		    new_el.sets_count = new_el.sets_max = 0;
 		    new_el.computes_count = new_el.computes_max = 0;
+		    new_el.ignores_count = new_el.ignores_max = 0;
 		    new_el.chips = $2;
 		    chip_add_el(&new_el);
 		    current_chip = sensors_config_chips + 

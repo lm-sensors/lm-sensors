@@ -124,6 +124,11 @@ OCTESC		(1[0-7]{0,2})|([2-7][0-7]?)|(0[1-7][0-7]?)|(00[1-7])
 		  BEGIN(MIDDLE);
 		  return CHIP;
 		}
+<INITIAL>"ignore" {
+		  sensors_yylval.line = sensors_yylineno;
+		  BEGIN(MIDDLE);
+		  return IGNORE;
+		}
 
  /* Anything else at the beginning of a line is an error */
 <INITIAL>.	{

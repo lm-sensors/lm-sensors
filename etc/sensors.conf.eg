@@ -14,7 +14,7 @@
 # quotes operate like those in C.
 
 # A 'chip' line specifies what the following 'label', 'compute', 'set' and 
-# (not yet implemented) 'valid' lines refer to. In this case, until the
+# 'ignore' lines refer to. In this case, until the
 # next 'chip' line, everything refers to all lm78, lm78-j and lm79
 # chips. Other examples are *-isa-* for everything on the ISA bus, and
 # lm78-j-i2c-*-4e for all lm78-j chips on address 0x4e of any I2C bus.
@@ -101,10 +101,11 @@
 #set in0_max vid*1.05
 #set in0_min vid*0.95
 
-# Invalid statements tell certain features are not wanted. User programs can
+# Ignore statements tell certain features are not wanted. User programs can
 # still read them if they really want, though; this is just an advisory
 # marking. 'in0' would also invalidate 'in0_max' and 'in0_min'.
-# The invalid keyword is not yet recognized by the parser.
+#
+#ignore in0
 
 
 # There is one other feature: the 'bus' statement. An example is below.

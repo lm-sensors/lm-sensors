@@ -57,6 +57,9 @@ compute
 , 
 .B EXPR
 .sp 0
+ignore
+.B NAME
+.sp 0
 set 
 .B NAME EXPR
 .RE
@@ -239,7 +242,7 @@ lm78\-*
 .sp 0
 *\-i2c\-10\-5e
 .sp 0
-*\-i2c\-10-\*
+*\-i2c\-10\-*
 .sp 0
 *\-i2c\-*\-5e
 .sp 0
@@ -282,6 +285,20 @@ statement applies, a one\-on\-one translation is used instead.
 
 The comma is an unfortunate necessity to stop the statement from becoming
 ambiguous.
+
+.SS IGNORE STATEMENT
+.RS
+ignore fan1
+.RE
+
+The 
+.I ignore
+statement is a hint that a specific feature should be ignored - probably
+because it returns bogus values (for example, because a fan or temperature
+sensor is not connected).
+
+The only argument is the feature name, which may be a feature class;
+in that case the label class is used (see below).
 
 .SS LABEL STATEMENT
 .RS

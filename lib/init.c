@@ -33,6 +33,7 @@ static void free_chip(sensors_chip chip);
 static void free_label(sensors_label label);
 static void free_set(sensors_set set);
 static void free_compute(sensors_compute compute);
+static void free_ignore(sensors_ignore ignore);
 static void free_expr(sensors_expr *expr);
 
 int sensors_init(FILE *input)
@@ -114,6 +115,11 @@ void free_chip(sensors_chip chip)
     free_compute(chip.computes[i]);
   free(chip.computes);
   chip.computes_count = chip.computes_max = 0;
+
+  for (i = 0; i < chip.ignores_count; i++)
+    free_ignore(chip.ignores[i]);
+  free(chip.ignores);
+  chip.ignores_count = chip.ignores_max = 0;
 }
 
 void free_label(sensors_label label)
@@ -133,6 +139,11 @@ void free_compute(sensors_compute compute)
   free(compute.name);
   free_expr(compute.from_proc);
   free_expr(compute.to_proc);
+}
+
+void free_ignore(sensors_ignore ignore)
+{
+  free(ignore.name);
 }
 
 void free_expr(sensors_expr *expr)
