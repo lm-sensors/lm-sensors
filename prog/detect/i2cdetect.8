@@ -1,12 +1,16 @@
-.TH I2CDETECT 8 "July 2004"
+.TH I2CDETECT 8 "September 2004"
 .SH NAME
 i2cdetect \- detect I2C chips
 
 .SH SYNOPSIS
 .B i2cdetect
-.RI [ -f ]
+.RI [ -y ]
+.RI [ -a ]
 .RI [ -q | -r ]
 .I i2cbus
+.br
+.B i2cdetect
+.I -V
 .br
 .B i2cdetect
 .I -l
@@ -22,7 +26,13 @@ This program can confuse your I2C bus, cause data loss and worse!
 
 .SH OPTIONS
 .TP
-.B "\-f"
+.B "\-y"
+Disable interactive mode. By default, i2cdetect will wait for a confirmation
+from the user before messing with the I2C bus. When this flag is used, it
+will perform the operation directly. This is mainly meant to be used in
+scripts.
+.TP
+.B "\-a"
 Force scanning of non-regular addresses. Not recommended.
 .TP
 .B "\-q"
@@ -36,6 +46,9 @@ Use SMBus "read byte" commands for probing (by default, the command
 used is the one believed to be the safest for each address). 
 Not recommended. This is known to lock SMBus on various write-only
 chips (most notably clock chips at address 0x69).
+.TP
+.B "\-V"
+Display the version and exit.
 .TP
 .B "\-l"
 Output a list of installed busses.

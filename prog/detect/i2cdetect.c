@@ -35,15 +35,17 @@
 void help(void)
 {
 	fprintf(stderr,
-	        "Syntax: i2cdetect [-f] [-q|-r] I2CBUS [FIRST LAST]\n"
+	        "Syntax: i2cdetect [-y] [-a] [-q|-r] I2CBUS [FIRST LAST]\n"
+	        "        i2cdetect -l\n"
+	        "        i2cdetect -V\n"
 	        "  I2CBUS is an integer\n"
-	        "  With -f, scans all addresses (NOT RECOMMENDED)\n"
+	        "  With -a, probe all addresses (NOT RECOMMENDED)\n"
 	        "  With -q, uses only quick write commands for probing (NOT "
-		"RECOMMENDED)\n"
+	        "RECOMMENDED)\n"
 	        "  With -r, uses only read byte commands for probing (NOT "
-		"RECOMMENDED)\n"
+	        "RECOMMENDED)\n"
 	        "  If provided, FIRST and LAST limit the probing range.\n"
-	        "  i2cdetect -l lists installed busses only\n");
+	        "  With -l, lists installed busses only\n");
 }
 
 int scan_i2c_bus(int file, const int mode, const int first, const int last)
@@ -111,74 +113,82 @@ int scan_i2c_bus(int file, const int mode, const int first, const int last)
 int main(int argc, char *argv[])
 {
 	char *end;
-	int i = 1, i2cbus = -1, file, res;
+	int i2cbus, file, res;
 	char filename[20];
 	long funcs;
 	int mode = MODE_AUTO;
 	int first = 0x03, last = 0x77;
+	int flags = 0;
+	int yes = 0, version = 0, list = 0;
 
-	while(i2cbus == -1) {
-		if (i >= argc) {
-			fprintf(stderr, "Error: No i2c-bus specified!\n");
-			help();
-			exit(1);
-		}
-
-		if(!strcasecmp(argv[i], "-v")) {
-			fprintf(stderr, "i2cdetect version %s\n", LM_VERSION);
-			exit(0);
-		}
-
-		if(!strcmp(argv[i], "-l")) {
-			print_i2c_busses(1);
-			exit(0);
-		}
-
-		if(!strcmp(argv[i], "-f")) {
-			first = 0x00;
-			last = 0x7F;
-			i++;
-		} else
-		if(!strcmp(argv[i], "-q")) {
-			if (mode != MODE_AUTO) {
-				fprintf(stderr, "Error: Different modes "
-				        "specified!\n");
-				exit(1);
-			}
-			mode = MODE_QUICK;
-			i++;
-		} else
-		if(!strcmp(argv[i], "-r")) {
-			if (mode != MODE_AUTO) {
+	/* handle (optional) flags first */
+	while (1+flags < argc && argv[1+flags][0] == '-') {
+		switch (argv[1+flags][1]) {
+		case 'V': version = 1; break;
+		case 'y': yes = 1; break;
+		case 'l': list = 1; break;
+		case 'r': 
+			if (mode == MODE_QUICK) {
 				fprintf(stderr, "Error: Different modes "
 				        "specified!\n");
 				exit(1);
 			}
 			mode = MODE_READ;
-			i++;
-		} else {
-			i2cbus = strtol(argv[i],&end,0);
-			if (*end) {
-				fprintf(stderr, "Error: I2CBUS argument not a "
-				        "number!\n");
-				help();
+			break;
+		case 'q':
+			if (mode == MODE_READ) {
+				fprintf(stderr, "Error: Different modes "
+				        "specified!\n");
 				exit(1);
 			}
-			if ((i2cbus < 0) || (i2cbus > 0xff)) {
-				fprintf(stderr, "Error: I2CBUS argument out "
-				        "of range (0-255)!\n");
-				help();
-				exit(1);
-			}
-			i++;
+			mode = MODE_QUICK;
+			break;
+		case 'a':
+			first = 0x00;
+			last = 0x7F;
+			break;
+		default:
+			fprintf(stderr, "Warning: Unsupported flag "
+				"\"-%c\"!\n", argv[1+flags][1]);
+			help();
+			exit(1);
 		}
+		flags++;
+	}
+
+	if (version) {
+		fprintf(stderr, "i2cdetect version %s\n", LM_VERSION);
+		exit(0);
+	}
+
+	if (list) {
+		print_i2c_busses(1);
+		exit(0);
+	}
+
+	if (argc < flags + 2) {
+		fprintf(stderr, "Error: No i2c-bus specified!\n");
+		help();
+		exit(1);
+	}
+	i2cbus = strtol(argv[flags+1], &end, 0);
+	if (*end) {
+		fprintf(stderr, "Error: I2CBUS argument not a number!\n");
+		help();
+		exit(1);
+	}
+	if ((i2cbus < 0) || (i2cbus > 0xff)) {
+		fprintf(stderr, "Error: I2CBUS argument out of range "
+		        "(0-255)!\n");
+		help();
+		exit(1);
 	}
 
 	/* read address range if present */
-	if (i+2 == argc) {
+	if (argc == flags + 4) {
 		int tmp;
 
-		tmp = strtol(argv[i], &end, 0);
+		tmp = strtol(argv[flags+2], &end, 0);
 		if (*end) {
 			fprintf(stderr, "Error: FIRST argment not a "
 			        "number!\n");
@@ -193,7 +203,7 @@ int main(int argc, char *argv[])
 		}
 		first = tmp;
 
-		tmp = strtol(argv[i+1], &end, 0);
+		tmp = strtol(argv[flags+3], &end, 0);
 		if (*end) {
 			fprintf(stderr, "Error: LAST argment not a "
 			        "number!\n");
@@ -207,7 +217,7 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 		last = tmp;
-	} else if (i != argc) {
+	} else if (argc != flags + 2) {
 		help();
 		exit(1);
 	}
@@ -217,7 +227,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (ioctl(file,I2C_FUNCS,&funcs) < 0) {
+	if (ioctl(file, I2C_FUNCS, &funcs) < 0) {
 		fprintf(stderr, "Error: Could not get the adapter "
 		        "functionality matrix: %s\n", strerror(errno));
 		close(file);
@@ -236,16 +246,26 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	fprintf(stderr, "  WARNING! This program can confuse your I2C bus, "
-	        "cause data loss and worse!\n");
-	fprintf(stderr, "  I will probe file %s%s.\n", filename,
-	        mode==MODE_QUICK?" using quick write commands":
-	        mode==MODE_READ?" using read byte commands":"");
-	fprintf(stderr, "  I will probe address range 0x%02x-0x%02x.\n",
-	        first, last);
-	fprintf(stderr, "  You have five seconds to reconsider and press "
-	        "CTRL-C!\n\n");
-	sleep(5);
+	if (!yes) {
+		char s[2];
+
+		fprintf(stderr, "WARNING! This program can confuse your I2C "
+		        "bus, cause data loss and worse!\n");
+
+		fprintf(stderr, "I will probe file %s%s.\n", filename,
+		        mode==MODE_QUICK?" using quick write commands":
+		        mode==MODE_READ?" using read byte commands":"");
+		fprintf(stderr, "I will probe address range 0x%02x-0x%02x.\n",
+		        first, last);
+
+		fprintf(stderr, "Continue? [Y/n] ");
+		fflush(stderr);
+		fgets(s, 2, stdin);
+		if (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y') {
+			fprintf(stderr, "Aborting on user request.\n");
+			exit(0);
+		}
+	}
 
 	res = scan_i2c_bus(file, mode, first, last);
 
