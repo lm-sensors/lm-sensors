@@ -17,6 +17,9 @@ ask CVS about it:
 
 -----------------------
 
+2.5.4 or 2.6.0 (2000????)
+  Program m7101: moved to CVS tree, updated for 2.4.0 kernels
+
 2.5.3 (20001008)
   NOTE: i2c 2.5.3 MUST BE be compiled and installed first.
   File useful_addresses.html: update
