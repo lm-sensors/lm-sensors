@@ -63,22 +63,22 @@
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))
 #define pci_present pcibios_present
 #define pci_read_config_byte_united(device,bus,dev,com,res) \
-                            pcibios_read_config_byte(bus,dev,com,res);
+                            pcibios_read_config_byte(bus,dev,com,res)
 #define pci_read_config_word_united(device,bus,dev,com,res) \
-                            pcibios_read_config_word(bus,dev,com,res);
+                            pcibios_read_config_word(bus,dev,com,res)
 #define pci_write_config_byte_united(device,bus,dev,com,res) \
-                            pcibios_write_config_byte(bus,dev,com,res);
+                            pcibios_write_config_byte(bus,dev,com,res)
 #define pci_write_config_word_united(device,bus,dev,com,res) \
-                            pcibios_write_config_word(bus,dev,com,res);
+                            pcibios_write_config_word(bus,dev,com,res)
 #else
 #define pci_read_config_byte_united(device,bus,dev,com,res) \
-                            pci_read_config_byte(device,com,res);
+                            pci_read_config_byte(device,com,res)
 #define pci_read_config_word_united(device,bus,dev,com,res) \
-                            pci_read_config_word(device,com,res);
+                            pci_read_config_word(device,com,res)
 #define pci_write_config_byte_united(device,bus,dev,com,res) \
-                            pci_write_config_byte(device,com,res);
+                            pci_write_config_byte(device,com,res)
 #define pci_write_config_word_united(device,bus,dev,com,res) \
-                            pci_write_config_byte(device,com,res);
+                            pci_write_config_byte(device,com,res)
 #endif
 
 

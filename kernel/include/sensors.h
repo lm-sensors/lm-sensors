@@ -501,6 +501,24 @@ struct sensors_chips_data {
 #define MAXI_ALARM_FAN2      0x2000
 #define MAXI_ALARM_FAN3      0x4000
 
+#define SIS5595_SYSCTL_IN0 1000  /* Volts * 100 */
+#define SIS5595_SYSCTL_IN1 1001
+#define SIS5595_SYSCTL_IN2 1002
+#define SIS5595_SYSCTL_IN3 1003
+#define SIS5595_SYSCTL_FAN1 1101 /* Rotations/min */
+#define SIS5595_SYSCTL_FAN2 1102
+#define SIS5595_SYSCTL_TEMP 1200 /* Degrees Celcius * 10 */
+#define SIS5595_SYSCTL_FAN_DIV 2000 /* 1, 2, 4 or 8 */
+#define SIS5595_SYSCTL_ALARMS 2001 /* bitvector */
+
+#define SIS5595_ALARM_IN0 0x01
+#define SIS5595_ALARM_IN1 0x02
+#define SIS5595_ALARM_IN2 0x04
+#define SIS5595_ALARM_IN3 0x08
+#define SIS5595_ALARM_TEMP 0x10
+#define SIS5595_ALARM_BTI 0x20
+#define SIS5595_ALARM_FAN1 0x40
+#define SIS5595_ALARM_FAN2 0x80
 
 #define ICSPLL_SYSCTL1 1000
 #endif /* def SENSORS_SENSORS_H */
