@@ -46,6 +46,10 @@
 #include "version.h"
 #include "sensors_vid.h"
 
+#ifndef I2C_DRIVERID_ADM1026
+#define I2C_DRIVERID_ADM1026	1048
+#endif
+
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
 static unsigned short normal_i2c_range[] = { 0x2c, 0x2e, SENSORS_I2C_END };
