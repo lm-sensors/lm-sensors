@@ -774,15 +774,43 @@ static void pc87360_update_client(struct i2c_client *client)
 				data->fan_status[i] = pc87360_read_value(data,
 						      LD_FAN, NO_BANK,
 						      PC87360_REG_FAN_STATUS(i));
-				/* Clear bits */
-				pc87360_write_value(data, LD_FAN, NO_BANK,
-						    PC87360_REG_FAN_STATUS(i),
-						    data->fan_status[i] | 0x06);
 				data->fan[i] = pc87360_read_value(data, LD_FAN,
 					       NO_BANK, PC87360_REG_FAN(i));
 				data->fan_min[i] = pc87360_read_value(data,
 						   LD_FAN, NO_BANK,
 						   PC87360_REG_FAN_MIN(i));
+				/* Change clock divider if needed */
+				if ((data->fan_status[i] & 0x60) != 0x60
+				 && (data->fan_status[i] & 0x04
+				  || (data->fan[i] & 0xE0) == 0xE0)) {
+					data->fan_status[i] += 0x20;
+					data->fan_min[i] >>= 1;
+					data->fan[i] >>= 1;
+					pc87360_write_value(data, LD_FAN, NO_BANK,
+							    PC87360_REG_FAN_MIN(i),
+							    data->fan_min[i]);
+#ifdef DEBUG
+					printk(KERN_DEBUG "pc87366.o: Increasing "
+					       "clock divider for fan %d\n", i+1);
+#endif
+				} else
+				if ((data->fan_status[i] & 0x60) != 0x00
+				 && (data->fan[i] & 0xC0) == 0x00) {
+					data->fan_status[i] -= 0x20;
+					data->fan_min[i] <<= 1;
+					data->fan[i] <<= 1;
+					pc87360_write_value(data, LD_FAN, NO_BANK,
+							    PC87360_REG_FAN_MIN(i),
+							    data->fan_min[i]);
+#ifdef DEBUG
+					printk(KERN_DEBUG "pc87366.o: Decreasing "
+					       "clock divider for fan %d\n", i+1);
+#endif
+				}
+				/* Clear bits and write new divider */
+				pc87360_write_value(data, LD_FAN, NO_BANK,
+						    PC87360_REG_FAN_STATUS(i),
+						    data->fan_status[i]);
 			}
 			data->pwm[i] = pc87360_read_value(data, LD_FAN,
 				       NO_BANK, PC87360_REG_PWM(i));
@@ -795,7 +823,7 @@ static void pc87360_update_client(struct i2c_client *client)
 			/* Clear bits */
 			pc87360_write_value(data, LD_IN, i,
 					    PC87365_REG_IN_STATUS,
-					    data->in_status[i] | 0x86);
+					    data->in_status[i]);
 			if (data->in_status[i] & 0x01) {
 				data->in[i] = pc87360_read_value(data, LD_IN,
 					      i, PC87365_REG_IN);
@@ -823,7 +851,7 @@ static void pc87360_update_client(struct i2c_client *client)
 			/* Clear bits */
 			pc87360_write_value(data, LD_TEMP, i,
 					    PC87365_REG_TEMP_STATUS,
-					    data->temp_status[i] | 0xCE);
+					    data->temp_status[i]);
 			if (data->temp_status[i] & 0x01) {
 				data->temp[i] = pc87360_read_value(data,
 						LD_TEMP, i,
