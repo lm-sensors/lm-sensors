@@ -29,7 +29,7 @@ ask CVS about it:
   File sensors.c: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
   Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
   Include file sensors.h: Most contents moved to i2c-proc.h in i2c package
-  Library: Fix some lm87 entries
+  Library: Fix/standardize some lm87 and mtp008 entries
   Chip Modules (all ISA): Remove #include "i2c-isa.h"
   Module i2c-i801: Chip detection cleanup
   Module lm78: Recognize chipid=0x20
@@ -38,6 +38,7 @@ ask CVS about it:
   Module sensors: Disabled, moved to i2c package as i2c-proc.c
   Module via686a: Allow force=9191,address (for A7V/K7V boards)
   Program mkpatch.pl: Fix adm9240 typos, add more chips to Configure.help
+  Program sensord: Add -d (debug) and -p (pid-file) options
   Program sensors: Change reported version from 1.3 to the lm_sensors version.
   Program sensors-detect: Recognize lm78 with chipid=0x20
   Program sensors-detect: Recognize SMSC Victory66 South Bridge
