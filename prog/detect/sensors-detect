@@ -1612,7 +1612,7 @@ sub initialize_conf
 
   if (-c '/dev/i2c-0') {
     $dev_i2c = '/dev/i2c-';
-  } elsif (-c '/dev/i2c/0') {
+  } elsif (-d '/dev/i2c') { # devfs
     $dev_i2c = '/dev/i2c/';
   } elsif (-c '/dev/i2c0') {
     $dev_i2c = '/dev/i2c';
