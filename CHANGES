@@ -21,13 +21,17 @@ ask CVS about it:
   Library: Add support for 2.6 fscpos driver (Stefan Ott)
   Module bmcsensors: Fix compile error
   Module ds1621: Fix detection (Aurelien Jarno)
+  Module eeprom: Discard SPD-centric checksum module parameter
+                 Cleanup detection function (backport from Linux 2.6)
   Module it87: Improve Super-I/O detection
                Limit I2C address range
                Support VID on the IT8712F
   Module lm90: Fix MAX6657, MAX6658 and MAX6659 detection
+  Module w83781d: Revert AS99127F temp2 and temp3 computation change
   Program ddcmon: New; user-space replacement for the ddcmon driver
   Program eeprog: Fix missing first char in ascii mode (J. A. McMahan Jr.)
   Program lm_sensors.init: Cleanups (Axel Thimm)
+  Program mkpatch: Add adm1031, fscher, lm63, lm93 and max1619
   Program sensord: Fix erroneous error message (Aurelien Jarno)
   Program sensors-detect: Fix MAX6657, MAX6658 and MAX6659 detection
                           Improve IT8705F and IT8712F detection
