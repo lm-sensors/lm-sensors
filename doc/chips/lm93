@@ -19,7 +19,8 @@ Module Parameters
 * init: integer
   Set to zero to disable some initializations (default is 1)
 * disable_block: integer
-  Set to non-zero to disable SMBus block data transactions (default is 0)
+  A "0" allows SMBus block data transactions if the host supports them.  A "1"
+  disables SMBus block data transactions.  The default is 0.
 * vccp_limit_type: integer array (2)
   Configures in7 and in8 limit type, where 0 means absolute and non-zero
   means relative.  "Relative" here refers to "Dynamic Vccp Monitoring using
@@ -86,11 +87,35 @@ most recent complete time interval.  The third value is something like a
 Note that this third value is calculated by the chip itself.  All values
 range from 0-255 where 0 indicates no throttling, and 255 indicates > 99.6%.
 
+The monitoring intervals for the two #PROCHOT signals is also configurable.
+These intervals can be found in the /proc file prochot_interval.  There are
+two values in this file: one each for #P1_PROCHOT and #P2_PROCHOT, res-
+pectively.  Selecting a value not in this list will cause the driver to
+use the next largest interval.  The available intervals are:
+
+#PROCHOT intervals: 0.73, 1.46, 2.9, 5.8, 11.7, 23.3, 46.6, 93.2, 186, 372
+
 It is possible to configure the LM93 to logically short the two #PROCHOT
 signals.  I.e. when #P1_PROCHOT is asserted, the LM93 will automatically
 assert #P2_PROCHOT, and vice-versa.  This mode is enabled by writing a 
 non-zero integer to the /proc file prochot_short.
 
+The LM93 can also override the #PROCHOT pins by driving a PWM signal onto
+one or both of them.  When overridden, the signal has a period of 3.56 mS,
+a minimum pulse width of 5 clocks (at 22.5kHz => 6.25% duty cycle), and
+a maximum pulse width of 80 clocks (at 22.5kHz => 99.88% duty cycle).
+
+The /proc file prochot_override has three values.  The first two are boolean
+integers which enable/disable the override funtion for #P1_PROCHOT and 
+#P2_PROCHOT, the third value is 0-15 where 0 indicates minimum duty cycle
+and 15 indicates maximum.
+
+#VRD_HOT:
+
+The LM93 can monitor two #VRD_HOT signals. The results are found in the
+/proc files vrdhot1 and vrdhot2. There is one value per file: a boolean for
+which 1 indicates #VRD_HOT is asserted and 0 indicates it is negated. These
+files are read-only.
 
 Smart Tach Mode:
 
@@ -104,7 +129,38 @@ Smart Tach Mode:
 
 Smart tach mode is enabled by the driver by writing 1 or 2 (associating the
 the fan tachometer with a pwm) to the /proc file fan<n>_smart_tach.  A zero
-will disable the function for that fan.
+will disable the function for that fan.  Note that Smart tach mode cannot be
+enabled if the PWM output frequency is 22500 Hz (see below).
+
+Manual PWM:
+
+The LM93 has a fixed or override mode for the two PWM outputs (although, there
+are still some conditions that will override even this mode - see section
+15.10.6 of the datasheet for details.)  The /proc files pwm1 and pwm2 are
+used to enable and control this mode.  The first value of the file is an 
+integer (0-255) where 0 is 0% duty cycle, and 255 is 100%.  The second value
+is a boolean integer where 0 disables and 1 enables the manual control mode.
+Note that the duty cycle values are constrained by the hardware. Selecting
+a value which is not available will cause the driver to use the next largest
+value.  Also note: when manual PWM mode is disabled, the first value of the
+/proc files indicates the current duty cycle chosen by the h/w.
+
+PWM Output Frequency:
+
+The LM93 supports several different frequencies for the PWM output channels.
+The /proc files pwm1_freq and pwm2_freq are used to select the frequency. The
+frequency values are constrained by the hardware.  Selecting a value which is
+not available will cause the driver to use the next largest value.  Also note
+that this parameter has implications for the Smart Tach Mode (see above).
+
+PWM Output Frequencies: 12, 36, 48, 60, 72, 84, 96, 22500 (h/w default)
+
+GPIO Pins:
+
+The LM93 can monitor the logic level of four dedicated GPIO pins as well as the
+four tach input pins.  GPIO0-GPIO3 correspond to (fan) tach 1-4, respectively.
+All eight GPIOs are read by reading the bitmask in the /proc file gpio.  The
+LSB is GPIO0, and the MSB is GPIO7.
 
 LM93 Unique /proc Files
 -----------------------
@@ -116,7 +172,15 @@ LM93 Unique /proc Files
 
 	prochot_short		enable or disable logical #PROCHOT pin short
 
+	prochot_override	force #PROCHOT assertion as PWM
+
+	prochot_interval	#PROCHOT PWM sampling interval
+
+	vrdhot<n>		0 means negated, 1 means asserted
+
 	fan<n>_smart_tach	enable or disable smart tach mode
+
+	gpio			input state of 8 GPIO pins; read-only
 
 
 Sample Configuration File
