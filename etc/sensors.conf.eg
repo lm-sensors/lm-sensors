@@ -2025,3 +2025,35 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
    set temp2_max 35
    set temp3_min 10
    set temp3_max 35
+
+chip "pc87366-*"
+
+# Voltage inputs
+
+   label in7   "Vsb"
+   label in8   "Vdd"
+   label in9   "Vbat"
+   label in10  "AVdd"
+
+   compute in7   @*2, @/2
+   compute in8   @*2, @/2
+   compute in10  @*2, @/2
+
+# Temperature inputs
+
+   label temp1       "CPU0 Temp"
+   label temp1_crit  "CPU0 Crit"
+   label temp2       "CPU1 Temp"
+   label temp2_crit  "CPU1 Crit"
+   label temp3       "S-IO Temp"
+   label temp3_crit  "S-IO Crit"
+
+# On some systems, thermistors are used instead of these thermal diodes
+# (thermistors are not yet supported by the driver)
+#   ignore temp1
+#   ignore temp2
+
+# Fan inputs
+
+# Ignore fans you don't have
+#   ignore fan3
