@@ -29,6 +29,21 @@
 */
 
 /*
+    AMD Opteron processors don't follow the Intel VRM spec.
+    I'm going to "make up" 2.4 as the VRM spec for the Opterons.
+    No good reason just a mnemonic for the 24x Opteron processor
+    series
+
+    Opteron VID encoding is:
+
+       00000  =  1.550 V
+       00001  =  1.525 V
+        . . . .
+       11110  =  0.800 V
+       11111  =  0.000 V (off)
+ */
+
+/*
     Legal val values 00 - 1F.
     vrm is the Intel VRM document version.
     Note: vrm version is scaled by 10 and the return value is scaled by 1000
@@ -40,6 +55,9 @@
 static inline int vid_from_reg(int val, int vrm)
 {
 	switch(vrm) {
+
+	case 24:		/* Opteron processor */
+		return(val == 0x1f ? 0 : 1550 - val * 25);
 
 	case 91:		/* VRM 9.1 */
 	case 90:		/* VRM 9.0 */

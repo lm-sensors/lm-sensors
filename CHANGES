@@ -24,7 +24,8 @@ ask CVS about it:
   Library: Add support for exponents and logarithms for vt1211/vt8235 temps;
            add lm85 support
   Makefiles: Generate warnings if new library won't be found by ld.so;
-             Modules now install in kernel/drivers/i2c/[busses,chips]
+             Modules now install in kernel/drivers/i2c/[busses,chips];
+             Ensure that headers in /usr/local/include are used first
   Modules (all): Cleanups including
 		- Add #include <i2c-proc.h>
 		- C99 initializers
@@ -39,11 +40,13 @@ ask CVS about it:
 		- Remove xxx_inc_use() and xxx_dec_use() functions
 		- Use module_init() and module_exit()
 		- Update to new i2c_driver struct definition
+  Modules (several): Add support for AMD Opteron VRM (VID) encoding
   Module adm1021: Set alarm on failed reads and report old value;
                   merge changes from kernel 2.5.54
   Module bmcsensors: Fix compile when DEBUG=1
   Modules ddcmon, eeprom: Use i2c block reads if possible;
                           better error handling
+  Module gl520sm: Fix temperature over/hyst writes
   Module lm75: merge changes from kernel 2.5.54
   Module lm85: New
   Module i2c-amd756: merge changes from kernel 2.5.54
