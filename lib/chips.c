@@ -2892,6 +2892,10 @@ static sensors_chip_feature eeprom_features[] =
     { SENSORS_EEPROM_VAIO_SERIAL+31, "serial32",
                          SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
                          SENSORS_MODE_R, EEPROM_SYSCTL14, VALUE(16), 0 },
+/* for monitor's edid */
+    { SENSORS_EEPROM_EDID_HEADER, "EDID header",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, EEPROM_SYSCTL1, VALUE(1), 0 },
     { 0 }
   };
 

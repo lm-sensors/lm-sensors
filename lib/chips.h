@@ -1194,6 +1194,9 @@
 #define SENSORS_EEPROM_VAIO_SERIAL 160
 /* 161 to 191: reserved, do not use! */
 
+#define SENSORS_EEPROM_EDID_HEADER 32
+/* 33 to 39: reserved, do not use! */
+
 /* Analog Devices LM87 chips */
 
 #define SENSORS_LM87_PREFIX "lm87"

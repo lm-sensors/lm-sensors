@@ -2965,14 +2965,14 @@ void print_eeprom(const sensors_chip_name *name)
 		if (!sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a)
 		 && !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b)
 		 && !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c)
-		 && !sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME, &d)) {
+		 && !sensors_get_feature(*name, SENSORS_EEPROM_EDID_HEADER, &d)) {
 			if (((int) a) != 255 || ((int) b) != 255 || ((int) c) != 255
 			 || ((int) d) != 0)
 				printf("Unknown EEPROM type (255).\n");
 			else if (name->addr == 0x50)
-				/* must be a real EDID EEPROM */
+				/* must be an EDID EEPROM */
 				printf("Either use the ddcmon driver instead of the eeprom driver,\n"
-				 "or run the decode-edid script.\n");
+				 "or run the decode-edid.pl script.\n");
 		} else
 			printf("ERROR: data EDID\n");
 		return;
