@@ -854,4 +854,51 @@
 #define SENSORS_LM87_ALARMS          81 /* R */
 #define SENSORS_LM87_ANALOG_OUT      82 /* RW */
 
+/* Myson MTP008 chips */
+
+#define SENSORS_MTP008_PREFIX		"mtp008"
+
+#define SENSORS_MTP008_IN0              1 /* R */
+#define SENSORS_MTP008_IN1              2 /* R */
+#define SENSORS_MTP008_IN2              3 /* R */
+#define SENSORS_MTP008_IN3              4 /* R */
+#define SENSORS_MTP008_IN4              5 /* R */
+#define SENSORS_MTP008_IN5              6 /* R */
+#define SENSORS_MTP008_IN6              7 /* R */
+#define SENSORS_MTP008_IN0_MIN         11 /* RW */
+#define SENSORS_MTP008_IN1_MIN         12 /* RW */
+#define SENSORS_MTP008_IN2_MIN         13 /* RW */
+#define SENSORS_MTP008_IN3_MIN         14 /* RW */
+#define SENSORS_MTP008_IN4_MIN         15 /* RW */
+#define SENSORS_MTP008_IN5_MIN         16 /* RW */
+#define SENSORS_MTP008_IN6_MIN         17 /* RW */
+#define SENSORS_MTP008_IN0_MAX         21 /* RW */
+#define SENSORS_MTP008_IN1_MAX         22 /* RW */
+#define SENSORS_MTP008_IN2_MAX         23 /* RW */
+#define SENSORS_MTP008_IN3_MAX         24 /* RW */
+#define SENSORS_MTP008_IN4_MAX         25 /* RW */
+#define SENSORS_MTP008_IN5_MAX         26 /* RW */
+#define SENSORS_MTP008_IN6_MAX         27 /* RW */
+#define SENSORS_MTP008_FAN1            31 /* R */
+#define SENSORS_MTP008_FAN2            32 /* R */
+#define SENSORS_MTP008_FAN3            33 /* R */
+#define SENSORS_MTP008_FAN1_MIN        41 /* RW */
+#define SENSORS_MTP008_FAN2_MIN        42 /* RW */
+#define SENSORS_MTP008_FAN3_MIN        43 /* RW */
+#define SENSORS_MTP008_TEMP1           51 /* R */
+#define SENSORS_MTP008_TEMP2           52 /* R */
+#define SENSORS_MTP008_TEMP3           53 /* R */
+#define SENSORS_MTP008_TEMP1_OVER      54 /* RW */
+#define SENSORS_MTP008_TEMP1_HYST      55 /* RW */
+#define SENSORS_MTP008_TEMP2_OVER      56 /* RW */
+#define SENSORS_MTP008_TEMP2_HYST      57 /* RW */
+#define SENSORS_MTP008_TEMP3_OVER      58 /* RW */
+#define SENSORS_MTP008_TEMP3_HYST      59 /* RW */
+#define SENSORS_MTP008_VID             61 /* R */
+#define SENSORS_MTP008_FAN1_DIV        71 /* RW */
+#define SENSORS_MTP008_FAN2_DIV        72 /* RW */
+#define SENSORS_MTP008_FAN3_DIV        73 /* RW */
+#define SENSORS_MTP008_ALARMS          81 /* R */
+#define SENSORS_MTP008_BEEP            82 /* RW */
+
 #endif /* def LIB_SENSORS_CHIPS_H */

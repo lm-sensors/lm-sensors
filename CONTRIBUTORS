@@ -54,3 +54,5 @@ problems.
   just-an-i2c-extension approach.
 * Chen-Yuan Wu <gwu@esoft.com>
   Author of the adm1025 driver.
+* Kris Van Hees <aedil@alchar.org>
+  Author of the mtp008 chip driver.

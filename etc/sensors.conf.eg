@@ -566,3 +566,41 @@ chip "via686a-*"
   #compute "3.3V" 1.02*@  ,  @/1.02
   #compute "5.0V" 1.009*@  ,  @/1.009
   #compute "12V" 1.04*@ ,  @/1.04
+
+chip "mtp008-*"
+    
+# The values below should be correct if you own a Tyan S1834D motherboard.  If
+# not, please contact us, so we can figure out better readings.
+
+# For positive voltages outside the 0..4.09V range (in2..in4), two resistors
+# are used, with the following formula (R1,R2: resistor values, Vs: read
+# voltage, Vin: pin voltage)
+#   Vin = Vs * (R2 / (R1 + R2))
+# For negative voltages (in5) two resistors are used, with the following
+# formula (R3,R4: resistor values, Vs: read voltage, Vin: pin voltage)
+#   Vin = ((4.096 - Vs) * (R3 / (R3 + R4))) + Vs
+
+# Here are the official MTP008 data sheet values:
+#       Vs      R1,R3   R2,R4    Vin
+#      +12.0    28000   10000   +3.16
+#      -12.0   232000   56000   +0.96
+#       -5.0   120000   56000   +1.20
+
+    label in0 "VCore1"
+    label in1 "+3.3V"
+    label in2 "+12V"
+    label in3 "Vcore2"
+    ignore in4
+    label in5 "-12V"
+    label in6 "Vtt"
+
+    label fan1 "CPUFAN1"
+    label fan2 "CPUFAN2"
+    label fan3 "CPUFAN3"
+
+    label temp1 "CPU1 Temp"
+    label temp2 "CPU2 Temp"
+    ignore temp3
+
+    compute in2 @ * 38 / 10,		@ * 10 / 38
+    compute in5 (@ * 36 - 118.61) / 7,	(118.61 + 7 * @) / 36

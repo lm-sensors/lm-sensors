@@ -354,12 +354,13 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
      } , 
 );
 
-use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect 
-            lm80_detect w83781d_detect w83781d_alias_detect adm1025_detect
-            w83781d_isa_detect gl518sm_detect gl520sm_detect adm9240_detect 
-            adm1021_detect sis5595_isa_detect eeprom_detect via686a_isa_detect
-            adm1022_detect ltc1710_detect gl525sm_detect lm87_detect
-	    ite_detect ite_isa_detect ite_alias_detect ddcmonitor_detect);
+use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
+            lm75_detect lm80_detect w83781d_detect w83781d_alias_detect
+            adm1025_detect w83781d_isa_detect gl518sm_detect gl520sm_detect
+            adm9240_detect adm1021_detect sis5595_isa_detect eeprom_detect
+            via686a_isa_detect adm1022_detect ltc1710_detect gl525sm_detect
+            lm87_detect ite_detect ite_isa_detect ite_alias_detect
+            ddcmonitor_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -385,6 +386,12 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
 #      The function should take three parameters: The ISA address, the
 #      I2C bus number, and the I2C address.
 @chip_ids = (
+     {
+       name => "Myson MTP008",
+       driver => "mtp008",
+       i2c_addrs => [0x2c..0x2e], 
+       i2c_detect => sub { mtp008_detect @_},
+     } ,
      {
        name => "National Semiconductor LM78",
        driver => "lm78",
@@ -1452,6 +1459,18 @@ sub scan_isa_bus
 # any of these devices.
 
 
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, (7) if detected.
+# Registers used: 0x58
+sub mtp008_detect
+{
+  my ($file,$addr) = @_;
+  return if (i2c_smbus_read_byte_data($file,0x58)) != 0xac;
+  return (8);
+}
+  
 # $_[0]: Chip to detect (0 = LM78, 1 = LM78-J, 2 = LM79)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
