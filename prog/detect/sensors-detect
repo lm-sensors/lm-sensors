@@ -852,13 +852,16 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             fscher_detect adm1029_detect adm1031_detect max6900_detect
             m5879_detect pca9540_detect smartbatt_mgr_detect
             smartbatt_chgr_detect adt7467_detect lm92_detect max1619_detect
-            lm93_detect lm77_detect lm63_detect pca9556_detect);
+            lm93_detect lm77_detect lm63_detect pca9556_detect
+            w83791sd_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
 #  name: The full chip name
 #  driver: The driver name (without .o extension). Put in exactly
-#      "to-be-written" if it is not yet available.
+#      "to-be-written" if it is not yet available. Put in exactly
+#      "not-a-sensor" if it is not a hardware monitoring chip and
+#      there is no known driver for it.
 #  i2c_addrs (optional): For I2C chips, the range of valid I2C addresses to
 #      probe. Recommend avoiding 0x69 because of clock chips.
 #  i2c_driver_addrs (optional): For I2C chips, the range of valid I2C
@@ -1000,6 +1003,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "to-be-written",
        i2c_addrs => [0x2c..0x2f],
        i2c_detect => sub { w83781d_detect 8, @_},
+     },
+     {
+       name => "Winbond W83791SD",
+       driver => "not-a-sensor",
+       i2c_addrs => [0x2c..0x2f],
+       i2c_detect => sub { w83791sd_detect @_ },
      },
      {
        name => "Winbond W83627HF",
@@ -3396,7 +3405,7 @@ sub w83781d_detect
   return if $chip == 5 and  $reg1 != 0x31;
   return if $chip == 6 and  $reg1 != 0x31;
   return if $chip == 7 and  $reg1 != 0x71;
-  return if $chip == 8 and  $reg1 != 0x72;
+  return if $chip == 7 and  $reg1 != 0x7a;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   @res = (8);
   @res = (7) # Asus chips were always seen at 0x2d
@@ -3404,6 +3413,38 @@ sub w83781d_detect
   push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;
   push @res, (($reg1 & 0x70) >> 4) + 0x48 unless ($reg1 & 0x80 or $chip == 2);
   return @res;
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, 3 if detected
+# Registers used:
+#   0x48: Full I2C Address
+#   0x4e: Vendor ID byte selection
+#   0x4f: Vendor ID
+#   0x58: Device ID
+# Note that the datasheet was useless and this detection routine
+# is based on dumps we received from users. Also, the W83781SD is *NOT*
+# a hardware monitoring chip as far as we know, but we still want to
+# detect it so that people won't keep reporting it as an unknown chip
+# we should investigate about.
+sub w83791sd_detect
+{
+  my ($file, $addr) = @_;
+  my ($reg1, $reg2);
+
+  return unless (i2c_smbus_read_byte_data($file, 0x48) == $addr);
+
+  $reg1 = i2c_smbus_read_byte_data($file, 0x4e);
+  $reg2 = i2c_smbus_read_byte_data($file, 0x4f);
+  return unless (!($reg1 & 0x80) && $reg2 == 0xa3)
+             || (($reg1 & 0x80) && $reg2 == 0x5c);
+
+  $reg1 = i2c_smbus_read_byte_data($file, 0x58);
+  return unless $reg1 == 0x72;
+
+  return 3;
 }
 
 # $_[0]: Chip to detect (0 = ASM58, 1 = AS2K129R, 2 = ???)
@@ -4619,7 +4660,7 @@ sub generate_modprobes
     next if not @{$chip->{detected}};
     if ($chip->{driver} eq "to-be-written") {
       $modprobes .= "# no driver for $chip->{detected}[0]{chipname} yet\n";
-    } else {
+    } elsif ($chip->{driver} ne "not-a-sensor") {
       $modprobes .= "modprobe $chip->{driver}\n";
     }
 
