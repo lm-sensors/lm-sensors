@@ -28,7 +28,7 @@ Supported chips:
 
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>,
-        and Mark Studebaker <mds@eng.paradyne.com>
+        and Mark Studebaker <mdsxyz123@yahoo.com>
 
 
 Module Parameters
@@ -572,5 +572,5 @@ register in Bank0.CR51 of W83781D.
 Author/Maintainer
 -----------------
 Original 781D support: Frodo and Phil (lm78@stimpy.netroedge.com)
-782D/783S support added by: Mark D. Studebaker (mds@eng.paradyne.com)
+782D/783S support added by: Mark D. Studebaker (mdsxyz123@yahoo.com)
 Send requests to the lm78@stimpy.netroedge.com mailing list.

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 # Copyright 1998, 1999 Philip Edelbrock <phil@netroedge.com>
-# and Mark Studebaker <mds@eng.paradyne.com>
+# and Mark Studebaker <mdsxyz123@yahoo.com>
 #
 # Version 0.1
 #
