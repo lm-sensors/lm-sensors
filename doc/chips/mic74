@@ -1,0 +1,57 @@
+Kernel driver `mic74.o'
+=========================
+
+Status: Beta
+
+Supported chips:
+  * Micrel MIC74
+    Prefix: `mic74'
+    Addresses scanned: I2C 0x20 - 0x27 (inclusive)
+    Datasheet: Publicly available at the Micrel website
+               http://www.micrel.com/
+
+Authors: zebo25
+         mds (cleanups and this doc)
+
+Module Parameters
+-----------------
+
+
+Description
+-----------
+The MIC74 is an 8-bit I/O expander for the I2C bus.
+Semiconductors. It is designed to provide a byte I2C interface to up to 8 
+separate devices.
+
+This device consists of a quasi-bidirectionnal port. Each of the eight I/Os
+can be independently used as an input or output.
+
+The driver does not initialize the ports, they will be at their
+power-up defaults, or however the BIOS programmed them.
+
+For more information see the datasheet.
+
+
+Accessing MIC74 via /proc interface
+-------------------------------------
+
+! Be careful !
+The chip is plainly impossible to detect ! Stupid chip.
+So every chip with adress in the interval [20..27] could be
+detected as an MIC74 or a PCF8574. Don't load both drivers.
+If you have other chips in this address
+range, the workaround is to load this module after the one
+for your others chips.
+
+On detection, directories are created for each detected chip:
+
+	/proc/sys/dev/sensors/mic74-<0>-<1>/
+	where <0> is the bus the chip was detected on (e. g. i2c-0)
+	and <1> the chip address [20..27]: 
+	./mic74-i2c-0-27/
+
+Inside these directories, there are seven files each,
+one for each of the seven registers in the device.
+
+At this point you really need the datasheet.
+It should be self-explanatory which file is for which register.
