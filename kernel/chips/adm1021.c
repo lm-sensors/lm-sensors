@@ -128,7 +128,7 @@ static void adm1021_update_client(struct i2c_client *client);
 static struct i2c_driver adm1021_driver = {
   /* name */            "adm1021, MAX1617 sensor driver",
   /* id */              I2C_DRIVERID_ADM1021,
-  /* flags */           DF_NOTIFY,
+  /* flags */           I2C_DF_NOTIFY,
   /* attach_adapter */  &adm1021_attach_adapter,
   /* detach_client */   &adm1021_detach_client,
   /* command */         &adm1021_command,
@@ -373,12 +373,12 @@ void adm1021_dec_use (struct i2c_client *client)
 /* All registers are byte-sized */
 int adm1021_read_value(struct i2c_client *client, u8 reg)
 {
-    return smbus_read_byte_data(client->adapter,client->addr,reg);
+    return i2c_smbus_read_byte_data(client->adapter,client->addr,reg);
 }
 
 int adm1021_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
-    return smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
 }
 
 void adm1021_update_client(struct i2c_client *client)

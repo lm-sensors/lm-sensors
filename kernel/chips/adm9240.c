@@ -276,7 +276,7 @@ static struct i2c_client *adm9240_list[MAX_ADM9240_NR];
 static struct i2c_driver adm9240_driver = {
   /* name */		"ADM9240 sensor driver",
   /* id */		I2C_DRIVERID_ADM9240,
-  /* flags */		DF_NOTIFY,
+  /* flags */		I2C_DF_NOTIFY,
   /* attach_adapter */  &adm9240_attach_adapter,
   /* detach_client */	&adm9240_detach_client,
   /* command */		&adm9240_command,
@@ -501,12 +501,12 @@ void adm9240_dec_use (struct i2c_client *client)
  
 int adm9240_read_value(struct i2c_client *client, u8 reg)
 {
-  return 0xFF & smbus_read_byte_data(client->adapter,client->addr, reg);
+  return 0xFF & i2c_smbus_read_byte_data(client->adapter,client->addr, reg);
 }
 
 int adm9240_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
-  return smbus_write_byte_data(client->adapter, client->addr, reg,value);
+  return i2c_smbus_write_byte_data(client->adapter, client->addr, reg,value);
 }
 
 /* Called when we have found a new ADM9240. It should set limits, etc. */

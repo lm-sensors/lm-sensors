@@ -99,7 +99,7 @@ static void eeprom_update_client(struct i2c_client *client);
 static struct i2c_driver eeprom_driver = {
   /* name */            "EEPROM READER",
   /* id */              I2C_DRIVERID_EEPROM,
-  /* flags */           DF_NOTIFY,
+  /* flags */           I2C_DF_NOTIFY,
   /* attach_adapter */  &eeprom_attach_adapter,
   /* detach_client */   &eeprom_detach_client,
   /* command */         &eeprom_command,
@@ -188,9 +188,9 @@ int eeprom_detect(struct i2c_adapter *adapter, int address, int kind)
   if (checksum) {
     cs = 0;
     for (i = 0; i <= 0x3e; i++)
-      cs += smbus_read_byte_data(adapter,address,i);
+      cs += i2c_smbus_read_byte_data(adapter,address,i);
     cs &= 0xff;
-    if (smbus_read_byte_data(adapter,address,EEPROM_REG_CHECKSUM) != cs)
+    if (i2c_smbus_read_byte_data(adapter,address,EEPROM_REG_CHECKSUM) != cs)
       goto ERROR1;
   }
   
@@ -307,9 +307,9 @@ void eeprom_dec_use (struct i2c_client *client)
 int eeprom_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
   if (reg == EEPROM_REG_CONF)
-    return smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
   else
-    return smbus_write_word_data(client->adapter,client->addr,reg,value); */
+    return i2c_smbus_write_word_data(client->adapter,client->addr,reg,value); */
     
     return 0;
 }
@@ -329,13 +329,13 @@ void eeprom_update_client(struct i2c_client *client)
     printk("Starting eeprom update\n");
 #endif
 
-   if (smbus_write_byte(client->adapter,client->addr,0)) {
+   if (i2c_smbus_write_byte(client->adapter,client->addr,0)) {
 #ifdef DEBUG
     printk("eeprom read start has failed!\n");
 #endif   	
    }
     for (i=0;i<EEPROM_SIZE;i++) {
-         data->data[i] = (u8)smbus_read_byte(client->adapter,client->addr);
+         data->data[i] = (u8)i2c_smbus_read_byte(client->adapter,client->addr);
     }
     
     data->last_updated = jiffies;

@@ -236,7 +236,7 @@ static struct i2c_client *lm78_list[MAX_LM78_NR];
 static struct i2c_driver lm78_driver = {
   /* name */		"LM78(-J) and LM79 sensor driver",
   /* id */		I2C_DRIVERID_LM78,
-  /* flags */		DF_NOTIFY,
+  /* flags */		I2C_DF_NOTIFY,
   /* attach_adapter */  &lm78_attach_adapter,
   /* detach_client */	&lm78_detach_client,
   /* command */		&lm78_command,
@@ -533,7 +533,7 @@ int lm78_read_value(struct i2c_client *client, u8 reg)
     up( & (((struct lm78_data *) (client->data)) -> lock));
     return res;
   } else
-    return smbus_read_byte_data(client->adapter,client->addr, reg);
+    return i2c_smbus_read_byte_data(client->adapter,client->addr, reg);
 }
 
 /* The SMBus locks itself, but ISA access muse be locked explicitely! 
@@ -552,7 +552,7 @@ int lm78_write_value(struct i2c_client *client, u8 reg, u8 value)
     up(&(((struct lm78_data *) (client->data)) -> lock));
     return 0;
   } else
-    return smbus_write_byte_data(client->adapter, client->addr, reg,value);
+    return i2c_smbus_write_byte_data(client->adapter, client->addr, reg,value);
 }
 
 /* Called when we have found a new LM78. It should set limits, etc. */

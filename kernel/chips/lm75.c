@@ -92,7 +92,7 @@ static void lm75_update_client(struct i2c_client *client);
 static struct i2c_driver lm75_driver = {
   /* name */            "LM75 sensor chip driver",
   /* id */              I2C_DRIVERID_LM75,
-  /* flags */           DF_NOTIFY,
+  /* flags */           I2C_DF_NOTIFY,
   /* attach_adapter */  &lm75_attach_adapter,
   /* detach_client */   &lm75_detach_client,
   /* command */         &lm75_command,
@@ -164,14 +164,14 @@ int lm75_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->driver = &lm75_driver;
 
   /* Now, we do the remaining detection. It is lousy. */
-  cur = smbus_read_word_data(adapter,address,0);
-  conf = smbus_read_byte_data(adapter,address,1);
-  hyst = smbus_read_word_data(adapter,address,2);
-  os = smbus_read_word_data(adapter,address,3);
+  cur = i2c_smbus_read_word_data(adapter,address,0);
+  conf = i2c_smbus_read_byte_data(adapter,address,1);
+  hyst = i2c_smbus_read_word_data(adapter,address,2);
+  os = i2c_smbus_read_word_data(adapter,address,3);
   for (i = 0; i <= 0x1f; i++) 
-    if ((smbus_read_byte_data(adapter,address,i*8+1) != conf) ||
-        (smbus_read_word_data(adapter,address,i*8+2) != hyst) ||
-        (smbus_read_word_data(adapter,address,i*8+3) != os))
+    if ((i2c_smbus_read_byte_data(adapter,address,i*8+1) != conf) ||
+        (i2c_smbus_read_word_data(adapter,address,i*8+2) != hyst) ||
+        (i2c_smbus_read_word_data(adapter,address,i*8+3) != os))
       goto ERROR1;
   
   /* Determine the chip type - only one kind supported! */
@@ -296,9 +296,9 @@ u16 swap_bytes(u16 val)
 int lm75_read_value(struct i2c_client *client, u8 reg)
 {
   if (reg == LM75_REG_CONF)
-    return smbus_read_byte_data(client->adapter,client->addr,reg);
+    return i2c_smbus_read_byte_data(client->adapter,client->addr,reg);
   else
-    return swap_bytes(smbus_read_word_data(client->adapter,client->addr,reg));
+    return swap_bytes(i2c_smbus_read_word_data(client->adapter,client->addr,reg));
 }
 
 /* All registers are word-sized, except for the configuration register.
@@ -307,9 +307,9 @@ int lm75_read_value(struct i2c_client *client, u8 reg)
 int lm75_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
   if (reg == LM75_REG_CONF)
-    return smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
   else
-    return smbus_write_word_data(client->adapter,client->addr,reg,
+    return i2c_smbus_write_word_data(client->adapter,client->addr,reg,
            swap_bytes(value));
 }
 

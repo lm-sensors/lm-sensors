@@ -77,7 +77,7 @@ static void matorb_update_client(struct i2c_client *client);
 static struct i2c_driver matorb_driver = {
   /* name */            "Matrix Orbital LCD driver",
   /* id */              I2C_DRIVERID_MATORB,
-  /* flags */           DF_NOTIFY,
+  /* flags */           I2C_DF_NOTIFY,
   /* attach_adapter */  &matorb_attach_adapter,
   /* detach_client */   &matorb_detach_client,
   /* command */         &matorb_command,
@@ -150,7 +150,7 @@ int matorb_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->driver = &matorb_driver;
 
   /* Now, we do the remaining detection. It is lousy. */
-  cur = smbus_write_byte_data(adapter,address,0x0FE, 0x58); /* clear screen */
+  cur = i2c_smbus_write_byte_data(adapter,address,0x0FE, 0x58); /* clear screen */
   
   printk("matorb.o: debug detect 0x%X\n",cur);
   
@@ -266,9 +266,9 @@ int matorb_read_value(struct i2c_client *client, u8 reg)
 int matorb_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
   if (reg==0) {
-    return smbus_write_byte(client->adapter,client->addr,value);
+    return i2c_smbus_write_byte(client->adapter,client->addr,value);
   } else {
-    return smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
   }
 }
 

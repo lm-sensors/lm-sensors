@@ -101,7 +101,7 @@ static void ltc1710_update_client(struct i2c_client *client);
 static struct i2c_driver ltc1710_driver = {
   /* name */            "LTC1710 sensor chip driver",
   /* id */              I2C_DRIVERID_LTC1710,
-  /* flags */           DF_NOTIFY,
+  /* flags */           I2C_DF_NOTIFY,
   /* attach_adapter */  &ltc1710_attach_adapter,
   /* detach_client */   &ltc1710_detach_client,
   /* command */         &ltc1710_command,
@@ -301,7 +301,7 @@ void ltc1710_update_client(struct i2c_client *client)
     printk("Starting ltc1710 update\n");
 #endif
 
-    /* data->status = smbus_read_byte(client->adapter,client->addr); 
+    /* data->status = i2c_smbus_read_byte(client->adapter,client->addr); 
     	Unfortunately, reads always fail!  */
     data->last_updated = jiffies;
     data->valid = 1;
@@ -324,7 +324,7 @@ void ltc1710_switch1(struct i2c_client *client, int operation, int ctl_name,
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       data->status = (data->status & 2) | results[0];
-      smbus_write_byte(client->adapter,client->addr,data->status);
+      i2c_smbus_write_byte(client->adapter,client->addr,data->status);
     }
   }
 }
@@ -342,7 +342,7 @@ void ltc1710_switch2(struct i2c_client *client, int operation, int ctl_name,
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       data->status = (data->status & 1) | (results[0] << 1);
-      smbus_write_byte(client->adapter,client->addr,data->status);
+      i2c_smbus_write_byte(client->adapter,client->addr,data->status);
     }
   }
 }

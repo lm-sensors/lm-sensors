@@ -215,7 +215,7 @@ static struct i2c_client *sis5595_list[MAX_SIS5595_NR];
 static struct i2c_driver sis5595_driver = {
   /* name */		"SiS 5595",
   /* id */		I2C_DRIVERID_SIS5595,
-  /* flags */		DF_NOTIFY,
+  /* flags */		I2C_DF_NOTIFY,
   /* attach_adapter */  &sis5595_attach_adapter,
   /* detach_client */	&sis5595_detach_client,
   /* command */		&sis5595_command,

@@ -81,7 +81,7 @@ static void icspll_update_client(struct i2c_client *client);
 static struct i2c_driver icspll_driver = {
   /* name */            "ICS/PLL clock reader",
   /* id */              I2C_DRIVERID_ICSPLL,
-  /* flags */           DF_NOTIFY,
+  /* flags */           I2C_DF_NOTIFY,
   /* attach_adapter */  &icspll_attach_adapter,
   /* detach_client */   &icspll_detach_client,
   /* command */         &icspll_command,
@@ -137,7 +137,7 @@ int icspll_attach_adapter(struct i2c_adapter *adapter)
        adapter, and check whether they are used here */
     
     /* these chips only support block transfers so use that for detection */
-    if(smbus_read_block_data(adapter, address, 0x00, tempdata) < 0) {
+    if(i2c_smbus_read_block_data(adapter, address, 0x00, tempdata) < 0) {
 #ifdef DEBUG
       printk("icspll.o: No icspll found at: 0x%X\n",address);
 #endif
@@ -254,7 +254,7 @@ void icspll_dec_use (struct i2c_client *client)
 /* No writes yet (PAE) */
 int icspll_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
-  return smbus_write_block_data(client->adapter,client->addr,reg,value);
+  return i2c_smbus_write_block_data(client->adapter,client->addr,reg,value);
 }
 #endif
 
@@ -268,7 +268,7 @@ void icspll_update_client(struct i2c_client *client)
   if ((jiffies - data->last_updated > HZ+HZ/2 ) ||
       (jiffies < data->last_updated) || ! data->valid) {
 
-    len = smbus_read_block_data(client->adapter, client->addr, 0x00, tempdata);
+    len = i2c_smbus_read_block_data(client->adapter, client->addr, 0x00, tempdata);
 #ifdef DEBUG
     printk("icspll.o: read returned %d values\n", len);
 #endif

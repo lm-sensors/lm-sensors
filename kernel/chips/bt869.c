@@ -107,7 +107,7 @@ static void bt869_update_client(struct i2c_client *client);
 static struct i2c_driver bt869_driver = {
   /* name */            "BT869 video-output chip driver",
   /* id */              I2C_DRIVERID_BT869,
-  /* flags */           DF_NOTIFY,
+  /* flags */           I2C_DF_NOTIFY,
   /* attach_adapter */  &bt869_attach_adapter,
   /* detach_client */   &bt869_detach_client,
   /* command */         &bt869_command,
@@ -191,9 +191,9 @@ printk("bt869.o:  probing address %d .\n",address);
   new_client->driver = &bt869_driver;
 
   /* Now, we do the remaining detection. It is lousy. */
-  smbus_write_byte_data(new_client->adapter,
+  i2c_smbus_write_byte_data(new_client->adapter,
 	new_client->addr,0xC4,0);         /* set status bank 0 */
-  cur = smbus_read_byte(adapter,address);
+  cur = i2c_smbus_read_byte(adapter,address);
   printk("bt869.o: address 0x%X testing-->0x%X\n",address,cur);
   if ((cur | 0x20) != 0x22)
       goto ERROR1;
@@ -313,7 +313,7 @@ void bt869_dec_use (struct i2c_client *client)
    the usual practice. */
 int bt869_read_value(struct i2c_client *client, u8 reg)
 {
-    return smbus_read_byte(client->adapter,client->addr);
+    return i2c_smbus_read_byte(client->adapter,client->addr);
 }
 
 /* All registers are byte-sized.
@@ -321,7 +321,7 @@ int bt869_read_value(struct i2c_client *client, u8 reg)
    the usual practice. */
 int bt869_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
-    return smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
 }
 
 void bt869_init_client(struct i2c_client *client)

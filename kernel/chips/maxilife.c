@@ -196,7 +196,7 @@ static struct i2c_client *maxi_list[MAX_MAXI_NR];
 static struct i2c_driver maxi_driver = {
   /* name */		"HP MaxiLife driver",
   /* id */		I2C_DRIVERID_MAXILIFE,
-  /* flags */		DF_NOTIFY,
+  /* flags */		I2C_DF_NOTIFY,
   /* attach_adapter */  &maxi_attach_adapter,
   /* detach_client */	&maxi_detach_client,
   /* command */		&maxi_command,
@@ -284,7 +284,7 @@ int maxi_detect_smbus(struct i2c_adapter *adapter)
       /* Later on, we will keep a list of registered addresses for each
          adapter, and check whether they are used here */
 
-      if (smbus_read_byte_data(adapter, address, MAXI_REG_LED_STATE) < 0) 
+      if (i2c_smbus_read_byte_data(adapter, address, MAXI_REG_LED_STATE) < 0) 
          continue;
 
 #ifdef AUTODETECT
@@ -294,10 +294,10 @@ int maxi_detect_smbus(struct i2c_adapter *adapter)
            "CG 00.04" -> Cristal [XU] / Geronimo [XAs]
            "CO 00.03" -> Cognac [XU]
            "AS 00.01" -> Ashaki [XA] */
-      biosctl = smbus_read_byte_data(adapter, address, MAXI_REG_BIOS_CTRL);
-      smbus_write_byte_data(adapter, address, MAXI_REG_BIOS_CTRL, biosctl|4);
+      biosctl = i2c_smbus_read_byte_data(adapter, address, MAXI_REG_BIOS_CTRL);
+      i2c_smbus_write_byte_data(adapter, address, MAXI_REG_BIOS_CTRL, biosctl|4);
       err = eeprom_read_byte_data(adapter, 0x54, 0x45);
-      smbus_write_byte_data(adapter, address, MAXI_REG_BIOS_CTRL, biosctl);
+      i2c_smbus_write_byte_data(adapter, address, MAXI_REG_BIOS_CTRL, biosctl);
 #endif
 
       if (maxi_version == cristal) {
@@ -454,14 +454,14 @@ void maxi_dec_use (struct i2c_client *client)
 /* Read byte from specified register. */
 int maxi_read_value(struct i2c_client *client, u8 reg)
 {
-   return smbus_read_byte_data(client->adapter, client->addr, reg);
+   return i2c_smbus_read_byte_data(client->adapter, client->addr, reg);
 }
 
 #ifndef NOWRITE
 /* Write byte to specified register. */ 
 int maxi_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
-   return smbus_write_byte_data(client->adapter, client->addr, reg, value);
+   return i2c_smbus_write_byte_data(client->adapter, client->addr, reg, value);
 }
 #endif
 

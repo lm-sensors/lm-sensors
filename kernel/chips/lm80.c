@@ -229,7 +229,7 @@ static struct i2c_client *lm80_list[MAX_LM80_NR];
 static struct i2c_driver lm80_driver = {
   /* name */		"LM80 sensor driver",
   /* id */		I2C_DRIVERID_LM80,
-  /* flags */		DF_NOTIFY,
+  /* flags */		I2C_DF_NOTIFY,
   /* attach_adapter */  &lm80_attach_adapter,
   /* detach_client */	&lm80_detach_client,
   /* command */		&lm80_command,
@@ -319,10 +319,10 @@ int lm80_detect(struct i2c_adapter *adapter, int address, int kind)
   if (lm80_read_value(new_client,LM80_REG_ALARM2) & 0xc0)
     goto ERROR1;
   for (i = 0x2a; i <= 0x3d; i++) {
-    cur = smbus_read_byte_data(adapter,address,i);
-    if ((smbus_read_byte_data(adapter,address,i+0x40) != cur) ||
-        (smbus_read_byte_data(adapter,address,i+0x80) != cur) ||
-        (smbus_read_byte_data(adapter,address,i+0xc0) != cur))
+    cur = i2c_smbus_read_byte_data(adapter,address,i);
+    if ((i2c_smbus_read_byte_data(adapter,address,i+0x40) != cur) ||
+        (i2c_smbus_read_byte_data(adapter,address,i+0x80) != cur) ||
+        (i2c_smbus_read_byte_data(adapter,address,i+0xc0) != cur))
       goto ERROR1;
   }
 
@@ -436,12 +436,12 @@ void lm80_dec_use (struct i2c_client *client)
 
 int lm80_read_value(struct i2c_client *client, u8 reg)
 {
-  return smbus_read_byte_data(client->adapter,client->addr, reg);
+  return i2c_smbus_read_byte_data(client->adapter,client->addr, reg);
 }
 
 int lm80_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
-  return smbus_write_byte_data(client->adapter, client->addr, reg,value);
+  return i2c_smbus_write_byte_data(client->adapter, client->addr, reg,value);
 }
 
 /* Called when we have found a new LM80. It should set limits, etc. */

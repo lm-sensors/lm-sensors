@@ -402,7 +402,7 @@ static struct i2c_client *w83781d_list[MAX_W83781D_NR];
 static struct i2c_driver w83781d_driver = {
   /* name */		"W83781D sensor driver",
   /* id */		I2C_DRIVERID_W83781D,
-  /* flags */		DF_NOTIFY,
+  /* flags */		I2C_DF_NOTIFY,
   /* attach_adapter */  &w83781d_attach_adapter,
   /* detach_client */	&w83781d_detach_client,
   /* command */		&w83781d_command,
@@ -903,14 +903,14 @@ int w83781d_read_value(struct i2c_client *client, u16 reg)
     }
   } else {
     if (reg & 0xff00)
-      smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,
+      i2c_smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,
                             reg >> 8);
-    res = smbus_read_byte_data(client->adapter,client->addr, reg);
+    res = i2c_smbus_read_byte_data(client->adapter,client->addr, reg);
     if (word_sized)
-      res = (res << 8) + smbus_read_byte_data(client->adapter,client->addr, 
+      res = (res << 8) + i2c_smbus_read_byte_data(client->adapter,client->addr, 
                                               reg);
     if (reg & 0xff00)
-      smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,0);
+      i2c_smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,0);
   }
   up( & (((struct w83781d_data *) (client->data)) -> lock));
   return res;
@@ -956,15 +956,15 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
     }
   } else {
     if (reg & 0xff00)
-      smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,
+      i2c_smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,
                             reg >> 8);
     if (word_sized) {
-       smbus_write_byte_data(client->adapter,client->addr, reg, value >> 8);
-       smbus_write_byte_data(client->adapter,client->addr, reg+1, value &0xff);
+       i2c_smbus_write_byte_data(client->adapter,client->addr, reg, value >> 8);
+       i2c_smbus_write_byte_data(client->adapter,client->addr, reg+1, value &0xff);
     } else
-      smbus_write_byte_data(client->adapter,client->addr, reg, value &0xff);
+      i2c_smbus_write_byte_data(client->adapter,client->addr, reg, value &0xff);
     if (reg & 0xff00)
-      smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,0);
+      i2c_smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,0);
   }
   up( & (((struct w83781d_data *) (client->data)) -> lock));
   return 0;

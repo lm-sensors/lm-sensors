@@ -211,7 +211,7 @@ static void gl518_iterate(struct i2c_client *client, int operation,
 static struct i2c_driver gl518_driver = {
   /* name */            "GL518SM sensor chip driver",
   /* id */              I2C_DRIVERID_GL518,
-  /* flags */           DF_NOTIFY,
+  /* flags */           I2C_DF_NOTIFY,
   /* attach_adapter */  &gl518_attach_adapter,
   /* detach_client */   &gl518_detach_client,
   /* command */         &gl518_command,
@@ -496,9 +496,9 @@ u16 swap_bytes(u16 val)
 int gl518_read_value(struct i2c_client *client, u8 reg)
 {
   if ((reg >= 0x07) && (reg <= 0x0c)) 
-    return swap_bytes(smbus_read_word_data(client->adapter,client->addr,reg));
+    return swap_bytes(i2c_smbus_read_word_data(client->adapter,client->addr,reg));
   else
-    return smbus_read_byte_data(client->adapter,client->addr,reg);
+    return i2c_smbus_read_byte_data(client->adapter,client->addr,reg);
 }
 
 /* Registers 0x07 to 0x0c are word-sized, others are byte-sized 
@@ -507,10 +507,10 @@ int gl518_read_value(struct i2c_client *client, u8 reg)
 int gl518_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
   if ((reg >= 0x07) && (reg <= 0x0c)) 
-    return smbus_write_word_data(client->adapter,client->addr,reg,
+    return i2c_smbus_write_word_data(client->adapter,client->addr,reg,
                                  swap_bytes(value));
   else
-    return smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
 }
 
 void gl518_update_client(struct i2c_client *client)
