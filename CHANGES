@@ -13,6 +13,9 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
+2.3.2 (1999050?)
+  Module i2c-hydra: Now compiles on 2.0.x kernels
+
 2.3.1 (19990501)
   All: Now compiles on PPC
   Module i2c-hydra: NEW
