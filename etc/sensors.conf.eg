@@ -741,7 +741,7 @@ chip "mtp008-*"
 # For this motherboard, COMMENT OUT the above mtp008 section and
 # UNCOMMENT the following two sections.
 #
-#chip mtp008-i2c-*-2c
+#chip "mtp008-i2c-*-2c"
 #    label in0 "VCore1"
 #    set in0_min 1.60
 #    set in0_max 1.80
@@ -762,7 +762,7 @@ chip "mtp008-*"
 #    compute in2 @ * 38 / 10,		@ * 10 / 38
 #    compute in5 (@ * 36 - 118.61) / 7,	(118.61 + 7 * @) / 36
 #
-#chip mtp008-i2c-*-2e
+#chip "mtp008-i2c-*-2e"
 #    ignore in0
 #    label in1 "+3.3V"
 #    ignore in2
