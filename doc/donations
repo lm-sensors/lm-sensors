@@ -29,3 +29,6 @@ Atipa		SuperMicro370DLE w/ Serverworks, LM87		9/00
 
 Fujitsu Siemens Computers	Complete system for		11/01
 				general project suupport
+
+HardData Ltd.	Tyan 2466 w/ 1G Duron; W83627HF and W73782D	5/02
+		Drivers developed: Tyan 2466 initialization
