@@ -37,9 +37,6 @@
 
 static char *config_file_name = NULL;
 FILE *config_file;
-static const char *config_file_path[] = 
-  { "/etc", "/usr/local/etc", "/usr/lib/sensors", "/usr/local/lib/sensors",
-    "/usr/lib", "/usr/local/lib", ".", 0 };
 extern const char *libsensors_version;
 
 extern int main(int argc, char *arv[]);
@@ -68,7 +65,7 @@ void print_short_help(void)
 void print_long_help(void)
 {
   printf("Usage: %s [OPTION]... [CHIP]...\n",PROGRAM);
-  printf("  -c, --config-file     Specify a config file\n");
+  printf("  -c, --config-file     Specify a config file (default: " ETCDIR "/" DEFAULT_CONFIG_FILE_NAME ")\n");
   printf("  -h, --help            Display this help text\n");
   printf("  -s, --set             Execute `set' statements too (root only)\n");
   printf("  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n");
@@ -78,7 +75,6 @@ void print_long_help(void)
   printf("  -u, --unknown         Treat chips as unknown ones (testing only)\n");
   printf("  -v, --version         Display the program version\n");
   printf("\n");
-  printf("By default, a list of directories is examined for config file `sensors.conf'.\n");
   printf("Use `-' after `-c' to read the config file from stdin.\n");
   printf("If no chips are specified, all chip info will be printed.\n");
   printf("Example chip names:\n");
@@ -103,7 +99,7 @@ void open_config_file(void)
 #define MAX_FILENAME_LEN 1024
   char *filename;
   char buffer[MAX_FILENAME_LEN];
-  int res,i;
+  int res;
 
   if (config_file_name && !strcmp(config_file_name,"-")) {
     config_file = stdin;
@@ -120,18 +116,16 @@ void open_config_file(void)
       filename = config_file_name;
     else
       filename = DEFAULT_CONFIG_FILE_NAME;
-    for (i = 0; config_file_path[i]; i++) {
-      if ((snprintf(buffer,MAX_FILENAME_LEN,
-                   "%s/%s",config_file_path[i],filename)) < 1) {
-        fprintf(stderr,
-                "open_config_file: ridiculous long config file name!\n");
-        exit(1);
-      }
-      if (!open_this_config_file(buffer)) {
-        free(config_file_name);
-        config_file_name = strdup(buffer);
-        return;
-      }
+    if ((snprintf(buffer,MAX_FILENAME_LEN,
+                  "%s/%s", ETCDIR, filename)) < 1) {
+      fprintf(stderr,
+              "open_config_file: ridiculous long config file name!\n");
+      exit(1);
+    }
+    if (!open_this_config_file(buffer)) {
+      free(config_file_name);
+      config_file_name = strdup(buffer);
+      return;
     }
     fprintf(stderr,"Could not locate or open config file!\n");
     exit(1);
