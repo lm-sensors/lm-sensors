@@ -18,9 +18,13 @@ ask CVS about it:
 -----------------------
 
 2.5.5 (2000????)
+  File sensors.conf.eg: Add mtp008 entries
+  Library: Add mtp008 support
   Module adm1021: Add support for adm1021a / adm1023
   Module mtp008: new
   Program mkpatch.pl: more fixes
+  Program sensors: Add mtp008 support
+  Program sensors-detect: Add mtp008 detection
 
 2.5.4 (20001012)
   Module i2c-viapro: Add support for Via 596B (0x3051)
@@ -67,6 +71,7 @@ ask CVS about it:
   Library: Add adm1025 support
   Module adm1025: new
   Module ddcmon: Fixed bus scan which could hang SMBus
+  Module i2c-keywest: new
   Module maxilife: Add support for Maxilife '99 (NBA)
   Module via686a: Enable sensors if not enabled by BIOS
   Module w83781d: Improve w83783s support, w83627hf always has 2 pwm

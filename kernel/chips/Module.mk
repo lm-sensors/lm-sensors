@@ -29,7 +29,8 @@ KERNELCHIPSTARGETS := $(MODULE_DIR)/bt869.o $(MODULE_DIR)/gl520sm.o \
                       $(MODULE_DIR)/via686a.o \
                       $(MODULE_DIR)/ddcmon.o \
                       $(MODULE_DIR)/adm1025.o \
-                      $(MODULE_DIR)/lm87.o
+                      $(MODULE_DIR)/lm87.o \
+                      $(MODULE_DIR)/mtp008.o
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM1021=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1021.o
 endif
