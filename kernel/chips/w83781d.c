@@ -174,6 +174,10 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
                                               0,0xffff))
 #define TEMP_ADD_FROM_REG(val) (((val) >> 7) * 5)
 
+#define AS99127_TEMP_ADD_TO_REG(val) (SENSORS_LIMIT((((((val) + 2)*4)/10) \
+                                               << 7),0,0xffff))
+#define AS99127_TEMP_ADD_FROM_REG(val) ((((val) >> 7) * 10) / 4)
+
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            205-(val)*5)
 #define ALARMS_FROM_REG(val) (val)
@@ -1189,17 +1193,31 @@ void w83781d_init_client(struct i2c_client *client)
   w83781d_write_value(client,W83781D_REG_TEMP_HYST,
                       TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
 
-  w83781d_write_value(client,W83781D_REG_TEMP2_OVER,
-                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP2_OVER));
-  w83781d_write_value(client,W83781D_REG_TEMP2_HYST,
-                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP2_HYST));
+  if (type == as99127f) {
+    w83781d_write_value(client,W83781D_REG_TEMP2_OVER,
+                        AS99127_TEMP_ADD_TO_REG(W83781D_INIT_TEMP2_OVER));
+    w83781d_write_value(client,W83781D_REG_TEMP2_HYST,
+                        AS99127_TEMP_ADD_TO_REG(W83781D_INIT_TEMP2_HYST));
+  } else {
+    w83781d_write_value(client,W83781D_REG_TEMP2_OVER,
+                        TEMP_ADD_TO_REG(W83781D_INIT_TEMP2_OVER));
+    w83781d_write_value(client,W83781D_REG_TEMP2_HYST,
+                        TEMP_ADD_TO_REG(W83781D_INIT_TEMP2_HYST));
+  }
   w83781d_write_value(client,W83781D_REG_TEMP2_CONFIG,0x00);
 
-  if (type != w83783s) {
+  if (type == as99127f) {
+    w83781d_write_value(client,W83781D_REG_TEMP3_OVER,
+                        AS99127_TEMP_ADD_TO_REG(W83781D_INIT_TEMP3_OVER));
+    w83781d_write_value(client,W83781D_REG_TEMP3_HYST,
+                        AS99127_TEMP_ADD_TO_REG(W83781D_INIT_TEMP3_HYST));
+  } else if (type != w83783s) {
     w83781d_write_value(client,W83781D_REG_TEMP3_OVER,
                         TEMP_ADD_TO_REG(W83781D_INIT_TEMP3_OVER));
     w83781d_write_value(client,W83781D_REG_TEMP3_HYST,
                         TEMP_ADD_TO_REG(W83781D_INIT_TEMP3_HYST));
+  }
+  if (type != w83783s) {
     w83781d_write_value(client,W83781D_REG_TEMP3_CONFIG,0x00);
   }
 
@@ -1386,19 +1404,31 @@ void w83781d_temp_add(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 1;
   else if (operation == SENSORS_PROC_REAL_READ) {
     w83781d_update_client(client);
-    results[0] = TEMP_ADD_FROM_REG(data->temp_add_over[nr]);
-    results[1] = TEMP_ADD_FROM_REG(data->temp_add_hyst[nr]);
-    results[2] = TEMP_ADD_FROM_REG(data->temp_add[nr]);
+    if(data->type == as99127f) {
+      results[0] = AS99127_TEMP_ADD_FROM_REG(data->temp_add_over[nr]);
+      results[1] = AS99127_TEMP_ADD_FROM_REG(data->temp_add_hyst[nr]);
+      results[2] = AS99127_TEMP_ADD_FROM_REG(data->temp_add[nr]);
+    } else {
+      results[0] = TEMP_ADD_FROM_REG(data->temp_add_over[nr]);
+      results[1] = TEMP_ADD_FROM_REG(data->temp_add_hyst[nr]);
+      results[2] = TEMP_ADD_FROM_REG(data->temp_add[nr]);
+    }
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
-      data->temp_add_over[nr] = TEMP_ADD_TO_REG(results[0]);
+      if(data->type == as99127f)
+        data->temp_add_over[nr] = AS99127_TEMP_ADD_TO_REG(results[0]);
+      else
+        data->temp_add_over[nr] = TEMP_ADD_TO_REG(results[0]);
       w83781d_write_value(client,
                           nr?W83781D_REG_TEMP3_OVER:W83781D_REG_TEMP2_OVER,
                           data->temp_add_over[nr]);
     }
     if (*nrels_mag >= 2) {
-      data->temp_add_hyst[nr] = TEMP_ADD_TO_REG(results[1]);
+      if(data->type == as99127f)
+        data->temp_add_hyst[nr] = AS99127_TEMP_ADD_TO_REG(results[1]);
+      else
+        data->temp_add_hyst[nr] = TEMP_ADD_TO_REG(results[1]);
       w83781d_write_value(client,
                           nr?W83781D_REG_TEMP3_HYST:W83781D_REG_TEMP2_HYST,
                           data->temp_add_hyst[nr]);
