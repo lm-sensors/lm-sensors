@@ -77,7 +77,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        procid => "Acer Labs M7101",
        driver => "i2c-ali15x3",
        match => sub { $_[0] =~ /^SMBus ALI15X3 adapter at [0-9,a-f]{4}/ },
-     }
+     },
      { 
        vendid => 0x106b,
        devid  => 0x000e,
