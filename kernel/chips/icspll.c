@@ -38,6 +38,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -63,7 +64,12 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int __init icspll_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_icspll_init(void);
 static int __init icspll_cleanup(void);
 
 static int icspll_attach_adapter(struct i2c_adapter *adapter);
@@ -110,7 +116,7 @@ static ctl_table icspll_dir_table_template[] = {
 static u8 tempdata[MAXBLOCK_SIZE];
 
 /* Used by init/cleanup */
-static int __init icspll_initialized = 0;
+static int __initdata icspll_initialized = 0;
 
 /* I choose here for semi-static allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -319,7 +325,7 @@ void icspll_contents(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init icspll_init(void)
+int __init sensors_icspll_init(void)
 {
   int res;
 
@@ -358,7 +364,7 @@ MODULE_DESCRIPTION("ICSPLL driver");
 
 int init_module(void)
 {
-  return icspll_init();
+  return sensors_icspll_init();
 }
 
 int cleanup_module(void)

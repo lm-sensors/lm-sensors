@@ -63,6 +63,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -238,7 +239,12 @@ struct adm9240_data {
 };
 
 
-static int __init adm9240_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_adm9240_init(void);
 static int __init adm9240_cleanup(void);
 
 static int adm9240_attach_adapter(struct i2c_adapter *adapter);
@@ -288,7 +294,7 @@ static struct i2c_driver adm9240_driver = {
 };
 
 /* Used by adm9240_init/cleanup */
-static int __init adm9240_initialized = 0;
+static int __initdata adm9240_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected ADM9240. This is just a template;
@@ -753,7 +759,7 @@ void adm9240_vid(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init adm9240_init(void)
+int __init sensors_adm9240_init(void)
 {
   int res;
 
@@ -792,7 +798,7 @@ MODULE_DESCRIPTION("ADM9240 driver");
 
 int init_module(void)
 {
-  return adm9240_init();
+  return sensors_adm9240_init();
 }
 
 int cleanup_module(void)

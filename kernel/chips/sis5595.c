@@ -42,6 +42,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -182,7 +183,12 @@ struct sis5595_data {
 };
 
 
-static int __init sis5595_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_sis5595_init(void);
 static int __init sis5595_cleanup(void);
 
 static int sis5595_attach_adapter(struct i2c_adapter *adapter);
@@ -231,7 +237,7 @@ static struct i2c_driver sis5595_driver = {
 };
 
 /* Used by sis5595_init/cleanup */
-static int __init sis5595_initialized = 0;
+static int __initdata sis5595_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected SIS5595. This is just a template;
@@ -712,7 +718,7 @@ void sis5595_fan_div(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init sis5595_init(void)
+int __init sensors_sis5595_init(void)
 {
   int res,addr;
 
@@ -757,7 +763,7 @@ MODULE_DESCRIPTION("SiS 5595 Sensor device");
 
 int init_module(void)
 {
-  return sis5595_init();
+  return sensors_sis5595_init();
 }
 
 int cleanup_module(void)

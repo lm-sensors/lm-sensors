@@ -32,6 +32,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 /* Addresses to scan */
@@ -174,7 +175,12 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int __init gl518_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_gl518_init(void);
 static int __init gl518_cleanup(void);
 static int gl518_attach_adapter(struct i2c_adapter *adapter);
 static int gl518_detect(struct i2c_adapter *adapter, int address, int kind);
@@ -254,7 +260,7 @@ static ctl_table gl518_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int __init gl518_initialized = 0;
+static int __initdata gl518_initialized = 0;
 
 /* I choose here for semi-static GL518SM allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -903,7 +909,7 @@ void gl518_iterate(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init gl518_init(void)
+int __init sensors_gl518_init(void)
 {
   int res;
 
@@ -942,7 +948,7 @@ MODULE_DESCRIPTION("GL518SM driver");
 
 int init_module(void)
 {
-  return gl518_init();
+  return sensors_gl518_init();
 }
 
 int cleanup_module(void)

@@ -40,6 +40,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -107,7 +108,12 @@ MODULE_PARM(force_addr,"i");
 MODULE_PARM_DESC(force_addr,"Forcibly enable the VT82C596 SMBus at the given address. "
                             "EXTREMELY DANGEROUS!");
 
-static int __init vt596_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init i2c_vt596_init(void);
 static int __init vt596_cleanup(void);
 static int vt596_setup(void);
 static s32 vt596_access(struct i2c_adapter *adap, u8 addr, char read_write,
@@ -143,7 +149,7 @@ static struct i2c_adapter vt596_adapter = {
   NULL,
 };
 
-static int __init vt596_initialized;
+static int __initdata vt596_initialized;
 static unsigned short vt596_smba = 0;
 
 
@@ -477,7 +483,7 @@ void vt596_dec(struct i2c_adapter *adapter)
 	MOD_DEC_USE_COUNT;
 }
 
-int __init vt596_init(void)
+int __init i2c_vt596_init(void)
 {
   int res;
   printk("via2.o version %s (%s)\n",LM_VERSION,LM_DATE);
@@ -534,7 +540,7 @@ MODULE_DESCRIPTION("vt82c596 SMBus driver");
 
 int init_module(void)
 {
-  return vt596_init();
+  return i2c_vt596_init();
 }
 
 int cleanup_module(void)

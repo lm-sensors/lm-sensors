@@ -37,6 +37,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 #include <linux/i2c.h>
@@ -210,7 +211,12 @@ static int find_via(void)
 }
 #endif
 
-static int __init init_i2c_via(void)
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init i2c_init_i2c_via(void)
 {
 	if (find_via() < 0) {
 		printk("Error while reading PCI configuration\n");
@@ -246,7 +252,7 @@ MODULE_DESCRIPTION("i2c for Via vt82c586b southbridge");
 
 int init_module(void) 
 {
-	return init_i2c_via();
+	return i2c_init_i2c_via();
 }
 
 void cleanup_module(void) 

@@ -40,6 +40,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 /* PIIX4 SMBus address offsets */
@@ -90,7 +91,12 @@ MODULE_PARM(force_addr,"i");
 MODULE_PARM_DESC(force_addr,"Forcibly enable the PIIX4 at the given address. "
                             "EXTREMELY DANGEROUS!");
 
-static int __init piix4_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init piix4_init(void);
 static int __init piix4_cleanup(void);
 static int piix4_setup(void);
 static s32 piix4_access(struct i2c_adapter *adap, u8 addr, char read_write,
@@ -126,7 +132,7 @@ static struct i2c_adapter piix4_adapter = {
   NULL,
 };
 
-static int __init piix4_initialized;
+static int __initdata piix4_initialized;
 static unsigned short piix4_smba = 0;
 
 
@@ -440,7 +446,7 @@ void piix4_dec(struct i2c_adapter *adapter)
 	MOD_DEC_USE_COUNT;
 }
 
-int __init piix4_init(void)
+int __init i2c_piix4_init(void)
 {
   int res;
   printk("piix4.o version %s (%s)\n",LM_VERSION,LM_DATE);
@@ -496,7 +502,7 @@ MODULE_DESCRIPTION("PIIX4 SMBus driver");
 
 int init_module(void)
 {
-  return piix4_init();
+  return i2c_piix4_init();
 }
 
 int cleanup_module(void)

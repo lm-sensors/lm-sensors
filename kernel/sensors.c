@@ -791,5 +791,74 @@ int cleanup_module(void)
   return sensors_cleanup();
 }
 
+#else /* ndef MODULE */
+
+#ifdef CONFIG_SENSORS_ADM1021
+	extern int sensors_adm1021_init(void);
+#endif
+#ifdef CONFIG_SENSORS_ADM9024
+	extern int sensors_adm9024_init(void);
+#endif
+#ifdef CONFIG_SENSORS_GL518SM
+	extern int sensors_gl518sm_init(void);
+#endif
+#ifdef CONFIG_SENSORS_LM75
+	extern int sensors_lm75_init(void);
+#endif
+#ifdef CONFIG_SENSORS_LM78
+	extern int sensors_lm78_init(void);
+#endif
+#ifdef CONFIG_SENSORS_LM80
+	extern int sensors_lm80_init(void);
+#endif
+#ifdef CONFIG_SENSORS_SIS5595
+	extern int sensors_sis5595_init(void);
+#endif
+#ifdef CONFIG_SENSORS_W83781D
+	extern int sensors_w83781d_init(void);
+#endif
+#ifdef CONFIG_SENSORS_EEPROM
+	extern int sensors_eeprom_init(void);
+#endif
+#ifdef CONFIG_SENSORS_LTC1710
+	extern int sensors_ltc1710_init(void);
+#endif
+
+int __init sensors_init_all(void)
+{
+	sensors_init();
+#ifdef CONFIG_SENSORS_ADM1021
+	sensors_adm1021_init();
+#endif
+#ifdef CONFIG_SENSORS_ADM9024
+	sensors_adm9024_init();
+#endif
+#ifdef CONFIG_SENSORS_GL518SM
+	sensors_gl518sm_init();
+#endif
+#ifdef CONFIG_SENSORS_LM75
+	sensors_lm75_init();
+#endif
+#ifdef CONFIG_SENSORS_LM78
+	sensors_lm78_init();
+#endif
+#ifdef CONFIG_SENSORS_LM80
+	sensors_lm80_init();
+#endif
+#ifdef CONFIG_SENSORS_SIS5595
+	sensors_sis5595_init();
+#endif
+#ifdef CONFIG_SENSORS_W83781D
+	sensors_w83781d_init();
+#endif
+#ifdef CONFIG_SENSORS_EEPROM
+	sensors_eeprom_init();
+#endif
+#ifdef CONFIG_SENSORS_LTC1710
+	sensors_ltc1710_init();
+#endif
+	return 0;
+}
+
 #endif /* MODULE */
 

@@ -31,6 +31,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -81,7 +82,12 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int __init eeprom_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_eeprom_init(void);
 static int __init eeprom_cleanup(void);
 
 static int eeprom_attach_adapter(struct i2c_adapter *adapter);
@@ -140,7 +146,7 @@ static ctl_table eeprom_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int __init eeprom_initialized = 0;
+static int __initdata eeprom_initialized = 0;
 
 /* I choose here for semi-static LM78 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -390,7 +396,7 @@ void eeprom_contents(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init eeprom_init(void)
+int __init sensors_eeprom_init(void)
 {
   int res;
 
@@ -429,7 +435,7 @@ MODULE_DESCRIPTION("EEPROM driver");
 
 int init_module(void)
 {
-  return eeprom_init();
+  return sensors_eeprom_init();
 }
 
 int cleanup_module(void)

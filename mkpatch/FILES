@@ -13,5 +13,8 @@ kernel/chips/lm80.c		drivers/sensors/lm80.c
 kernel/chips/ltc1710.c		drivers/sensors/ltc1710.c
 kernel/chips/sis5595.c		drivers/sensors/sis5595.c
 kernel/chips/w83781d.c		drivers/sensors/w83781d.c
+kernel/chips/eeprom.c		drivers/sensors/eeprom.c
 kernel/include/i2c-isa.h	include/linux/i2c-isa.h
 kernel/include/sensors.h	include/linux/sensors.h
+mkpatch/Makefile		drivers/sensors/Makefile
+mkpatch/Config.in		drivers/sensors/Config.in

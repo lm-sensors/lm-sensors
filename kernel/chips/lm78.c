@@ -36,6 +36,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -202,7 +203,12 @@ struct lm78_data {
 };
 
 
-static int __init lm78_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_lm78_init(void);
 static int __init lm78_cleanup(void);
 
 static int lm78_attach_adapter(struct i2c_adapter *adapter);
@@ -250,7 +256,7 @@ static struct i2c_driver lm78_driver = {
 };
 
 /* Used by lm78_init/cleanup */
-static int __init lm78_initialized = 0;
+static int __initdata lm78_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected LM78. This is just a template;
@@ -787,7 +793,7 @@ void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init lm78_init(void)
+int __init sensors_lm78_init(void)
 {
   int res;
 
@@ -826,7 +832,7 @@ MODULE_DESCRIPTION("LM78, LM78-J and LM79 driver");
 
 int init_module(void)
 {
-  return lm78_init();
+  return sensors_lm78_init();
 }
 
 int cleanup_module(void)

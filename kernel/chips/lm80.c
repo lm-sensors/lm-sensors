@@ -37,6 +37,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -197,7 +198,7 @@ struct lm80_data {
 };
 
 
-static int __init lm80_init(void);
+static int __init sensors_lm80_init(void);
 static int __init lm80_cleanup(void);
 
 static int lm80_attach_adapter(struct i2c_adapter *adapter);
@@ -243,7 +244,7 @@ static struct i2c_driver lm80_driver = {
 };
 
 /* Used by lm80_init/cleanup */
-static int __init lm80_initialized = 0;
+static int __initdata lm80_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected LM80. This is just a template;
@@ -671,7 +672,7 @@ void lm80_fan_div(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init lm80_init(void)
+int __init sensors_lm80_init(void)
 {
   int res;
 
@@ -710,7 +711,7 @@ MODULE_DESCRIPTION("LM80 driver");
 
 int init_module(void)
 {
-  return lm80_init();
+  return sensors_lm80_init();
 }
 
 int cleanup_module(void)

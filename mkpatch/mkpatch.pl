@@ -141,7 +141,7 @@ sub gen_drivers_char_Config_in
   while(<INPUT>) {
     if (m@source drivers/i2c/Config.in@) {
       print OUTPUT;
-      print OUTPUT 'source drivers/sensors/Config.in';
+      print OUTPUT "source drivers/sensors/Config.in\n";
       $_ = <INPUT>;
     }
     if (m@sensors@) {
@@ -224,15 +224,17 @@ sub gen_drivers_i2c_Config_in
     if (m@CONFIG_I2C_MAINBOARD@) {
       $_ = <INPUT> while not m@^  fi$@;
       $_ = <INPUT>;
+      $_ = <INPUT> if m@^$@;
     }
-    if (m@CONFIG_I2C_CHARDEV@) {
+    if (m@^fi@) {
       print OUTPUT << 'EOF'
-  dep_bool 'I2C mainboard interfaces' CONFIG_I2C_SMBUS $CONFIG_I2C
+  bool 'I2C mainboard interfaces' CONFIG_I2C_MAINBOARD 
   if [ "$CONFIG_I2C_MAINBOARD" = "y" ]; then
     dep_tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI5X3 $CONFIG_I2C_MAINBOARD
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_MAINBOARD
     dep_tristate '  Intel 82371AB PIIX4(E)' CONFIG_I2C_PIIX4 $CONFIG_I2C_MAINBOARD
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_MAINBOARD
+    dep_tristate '  Pseudo ISA adapter (for hardware sensors modules)' CONFIG_I2C_ISA $CONFIG_I2C_MAINBOARD
   fi
 
 EOF
@@ -257,8 +259,8 @@ sub gen_drivers_i2c_Makefile
   open OUTPUT,">$package_root/mkpatch/.temp"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
-    while (m@CONFIG_I2C_ALI5X4@ or m@CONFIG_I2C_HYDRA@ or m@CONFIG_I2C_PIIX$@ or
-        m@CONFIG_I2C_VIA@) {
+    while (m@CONFIG_I2C_ALI5X3@ or m@CONFIG_I2C_HYDRA@ or m@CONFIG_I2C_PIIX4@ or
+        m@CONFIG_I2C_VIA@ or m@CONFIG_I2C_ISA@) {
       $_ = <INPUT> while not m@^endif@;
       $_ = <INPUT>;
       $_ = <INPUT> if m@^$@;
@@ -266,7 +268,7 @@ sub gen_drivers_i2c_Makefile
     if (m@Rules.make@) {
       print OUTPUT << 'EOF'
 ifeq ($(CONFIG_I2C_ALI5X3),y)
-  L_OBJS += i2c-ali5x3.c
+  L_OBJS += i2c-ali5x3.o
 else 
   ifeq ($(CONFIG_I2C_ALI5X3),m)
     M_OBJS += i2c-ali5x3.o
@@ -274,7 +276,7 @@ else
 endif
 
 ifeq ($(CONFIG_I2C_HYDRA),y)
-  L_OBJS += i2c-hydra.c
+  L_OBJS += i2c-hydra.o
 else 
   ifeq ($(CONFIG_I2C_HYDRA),m)
     M_OBJS += i2c-hydra.o
@@ -282,7 +284,7 @@ else
 endif
 
 ifeq ($(CONFIG_I2C_PIIX4),y)
-  L_OBJS += i2c-piix4.c
+  L_OBJS += i2c-piix4.o
 else 
   ifeq ($(CONFIG_I2C_PIIX4),m)
     M_OBJS += i2c-piix4.o
@@ -290,10 +292,18 @@ else
 endif
 
 ifeq ($(CONFIG_I2C_VIA),y)
-  L_OBJS += i2c-via.c
+  L_OBJS += i2c-via.o
 else 
   ifeq ($(CONFIG_I2C_VIA),m)
     M_OBJS += i2c-via.o
+  endif
+endif
+
+ifeq ($(CONFIG_I2C_ISA),y)
+  L_OBJS += i2c-isa.o
+else 
+  ifeq ($(CONFIG_I2C_ISA),m)
+    M_OBJS += i2c-isa.o
   endif
 endif
 
@@ -306,12 +316,75 @@ EOF
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
+sub gen_drivers_i2c_i2c_core_c
+{
+  my ($package_root,$kernel_root) = @_;
+  my $kernel_file = "drivers/i2c/i2c-core.c";
+  my $package_file = "mkpatch/.temp";
+  my $right_place = 0;
+
+  open INPUT,"$kernel_root/$kernel_file"
+        or die "Can't open `$kernel_root/$kernel_file'";
+  open OUTPUT,">$package_root/mkpatch/.temp"
+        or die "Can't open $package_root/$package_file";
+  while(<INPUT>) {
+    while (m@CONFIG_I2C_ALI5X3@ or m@CONFIG_I2C_HYDRA@ or m@CONFIG_I2C_PIIX4@ or
+        m@CONFIG_I2C_VIA@ or m@CONFIG_I2C_ISA@) {
+      $_ = <INPUT> while not m@#endif@;
+      $_ = <INPUT>;
+    }
+    if (m@^int __init i2c_init_all@) {
+      $right_place = 1;
+      print OUTPUT << 'EOF';
+#ifdef CONFIG_I2C_ALI5X3
+	extern int i2c_ali5x3_init(void);
+#endif
+#ifdef CONFIG_I2C_HYDRA
+	extern int i2c_hydra_init(void);
+#endif
+#ifdef CONFIG_I2C_PIIX4
+	extern int i2c_piix4_init(void);
+#endif
+#ifdef CONFIG_I2C_VIA
+	extern int i2c_via_init(void);
+#endif
+#ifdef CONFIG_I2C_ISA
+	extern int i2c_isa_init(void);
+#endif
+EOF
+    }
+    if ($right_place and m@return 0;@) {
+      print OUTPUT << 'EOF';
+#ifdef CONFIG_I2C_ALI5X3
+	i2c_ali5x3_init();
+#endif
+#ifdef CONFIG_I2C_HYDRA
+	i2c_hydra_init();
+#endif
+#ifdef CONFIG_I2C_PIIX4
+	i2c_piix4_init();
+#endif
+#ifdef CONFIG_I2C_VIA
+	i2c_via_init();
+#endif
+#ifdef CONFIG_I2C_ISA
+	i2c_isa_init();
+#endif
+EOF
+    }
+    print OUTPUT;
+  }
+  close INPUT;
+  close OUTPUT;
+  print_diff $package_root,$kernel_root,$kernel_file,$package_file;
+}
 
 
 sub main
 {
   my ($package_root,$kernel_root,%files,%includes,$package_file,$kernel_file);
   my ($diff_command,$dummy,$data0,$data1,$sedscript,$version_string);
+  my $temp_file=".temp";
 
   # --> Read the command-lineo
   $package_root = $ARGV[0];
@@ -348,26 +421,16 @@ sub main
  
   # --> Start generating
   foreach $package_file (sort keys %files) {
-    $kernel_file = $files{$package_file};
-    $diff_command = "diff -u2 ";
-    if ( -f "$kernel_root/$kernel_file") {
-      $diff_command .= "$kernel_root/$kernel_file";
-    } else {
-      $diff_command .= "/dev/null";
-    }
-    $diff_command .= " $package_root/$package_file";
-    open INPUT, "$diff_command|";
-    $dummy = <INPUT>;
-    $dummy = <INPUT>;
-    print "--- linux-old/$kernel_file\t".`date`;
-    print "+++ linux/$kernel_file\t".`date`;
-    
+    open INPUT,"$package_root/$package_file" 
+          or die "Can't open `$package_root/$package_file'";
+    open OUTPUT,">$package_root/mkpatch/$temp_file"
+          or die "Can't open `$package_root/$temp_file'";
     while (<INPUT>) {
       eval $sedscript;
       if (m@#\s*include\s*"version.h"@) {
-        print $version_string;
+        print OUTPUT $version_string;
       } elsif (m@#\s*include\s*"compat.h"@) {
-        print << 'EOF';
+        print OUTPUT << 'EOF';
 
 /* --> COMPATIBILITY SECTION FOR OLD (2.0, 2.1) KERNELS */
 
@@ -383,7 +446,7 @@ sub main
 
 EOF
         if (`grep KERNEL_VERSION "$package_root/$package_file"`) {
-          print << 'EOF';
+          print OUTPUT << 'EOF';
 #include <linux/version.h>
 #ifndef KERNEL_VERSION
 #define KERNEL_VERSION(a,b,c) (((a) << 16) | ((b) << 8) | (c))
@@ -391,8 +454,8 @@ EOF
 
 EOF
         }
-        if (`grep 'copy_from_user\|copy_to_user\|get_user_data' "$package_root/$package_file"`) {
-          print << 'EOF';
+        if (`grep 'copy_from_user\\|copy_to_user\\|get_user_data' "$package_root/$package_file"`) {
+          print OUTPUT << 'EOF';
 /* copy_from/to_usr is called memcpy_from/to_fs in 2.0 kernels 
    get_user was redefined in 2.1 kernels to use two arguments, and returns
    an error code */
@@ -408,7 +471,7 @@ EOF
 EOF
         }
         if (`grep 'schedule_timeout' "$package_root/$package_file"`) {
-          print << 'EOF';
+          print OUTPUT << 'EOF';
 /* Add a scheduling fix for the new code in kernel 2.1.127 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,127))
 #define schedule_timeout(x) ( current->timeout = jiffies + (x), schedule() )
@@ -417,7 +480,7 @@ EOF
 EOF
         }
         if (`grep 'pci_' "$package_root/$package_file"`) {
-          print << 'EOF';
+          print OUTPUT << 'EOF';
 /* If the new PCI interface is not present, fall back on the old PCI BIOS
    interface. We also define some things to unite both interfaces. Not
    very nice, but it works like a charm. 
@@ -447,7 +510,7 @@ EOF
 EOF
         }
         if (`grep 'ioremap\|iounmap' "$package_root/$package_file"`) {
-          print << 'EOF';
+          print OUTPUT  << 'EOF';
 /* I hope this is always correct, even for the PPC, but I really think so.
    And yes, the kernel version is exactly correct */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0))
@@ -459,7 +522,7 @@ EOF
 EOF
         }
         if (`grep 'init_MUTEX' "$package_root/$package_file"`) {
-          print << 'EOF';
+          print OUTPUT << 'EOF';
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1))
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
 #endif
@@ -467,7 +530,7 @@ EOF
 
         }
         if (`grep 'PCI_DEVICE_ID_VIA_82C586_3' "$package_root/$package_file"`) {
-          print << 'EOF';
+          print OUTPUT << 'EOF';
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,0,34))
 #define PCI_DEVICE_ID_VIA_82C586_3  0x3040
 #endif
@@ -475,40 +538,60 @@ EOF
 
         }
         if (`grep 'PCI_DEVICE_ID_AL_M7101' "$package_root/$package_file"`) {
-          print << 'EOF';
+          print OUTPUT << 'EOF';
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,0,34))
 #define PCI_DEVICE_ID_AL_M7101 0x7101
 #endif
 EOF
         }
         if (`grep 'PCI_DEVICE_ID_INTEL_82371AB_3' "$package_root/$package_file"`) {
-          print << 'EOF';
+          print OUTPUT << 'EOF';
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,0,31))
 #define PCI_DEVICE_ID_INTEL_82371AB_3  0x7113
 #endif
 EOF
         }
         if (`grep 'PCI_VENDOR_ID_APPLE' "$package_root/$package_file"`) {
-          print << 'EOF';
+          print OUTPUT << 'EOF';
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,0,31))
 #define PCI_VENDOR_ID_APPLE            0x106b
 #endif
 EOF
         }
         if (`grep 'PCI_DEVICE_ID_APPLE_HYDRA' "$package_root/$package_file"`) {
-          print << 'EOF';
+          print OUTPUT << 'EOF';
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,0,31))
 #define PCI_DEVICE_ID_APPLE_HYDRA      0x000e
 #endif
 EOF
         }
-        print << 'EOF';
+        print OUTPUT << 'EOF';
 /* --> END OF COMPATIBILITY SECTION */
 
 EOF
       } else {
-        print;
+        print OUTPUT;
       }
+    }
+    close INPUT;
+    close OUTPUT;
+
+    $kernel_file = $files{$package_file};
+    $diff_command = "diff -u2 ";
+    if ( -f "$kernel_root/$kernel_file") {
+      $diff_command .= "$kernel_root/$kernel_file";
+    } else {
+      $diff_command .= "/dev/null";
+    }
+    $diff_command .= " $package_root/mkpatch/$temp_file";
+    open INPUT, "$diff_command|";
+    $dummy = <INPUT>;
+    $dummy = <INPUT>;
+    print "--- linux-old/$kernel_file\t".`date`;
+    print "+++ linux/$kernel_file\t".`date`;
+    
+    while (<INPUT>) {
+      print;
     }
     close INPUT;
   }
@@ -519,6 +602,7 @@ EOF
   gen_drivers_char_mem_c $package_root, $kernel_root;
   gen_drivers_i2c_Config_in $package_root, $kernel_root;
   gen_drivers_i2c_Makefile $package_root, $kernel_root;
+  gen_drivers_i2c_i2c_core_c $package_root, $kernel_root;
 }
 
 main;

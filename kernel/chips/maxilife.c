@@ -55,6 +55,7 @@ static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -158,7 +159,12 @@ struct maxi_data {
 };
 
 
-static int __init maxi_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_maxi_init(void);
 static int __init maxi_cleanup(void);
 
 static int  maxi_attach_adapter(struct i2c_adapter *adapter);
@@ -212,7 +218,7 @@ static struct i2c_driver maxi_driver = {
 };
 
 /* Used by maxi_init/cleanup */
-static int __init maxi_initialized = 0;
+static int __initdata maxi_initialized = 0;
 
 /* Default firmware version. Use module option "maxi_version"
    to set desired version. Auto detect is not yet working */
@@ -716,7 +722,7 @@ void maxi_alarms(struct i2c_client *client, int operation, int ctl_name,
    }
 }
 
-int __init maxi_init(void)
+int __init sensors_maxi_init(void)
 {
    int res;
 
@@ -758,7 +764,7 @@ MODULE_PARM_DESC(maxi_version, "MaxiLife firmware version");
 
 int init_module(void)
 {
-   return maxi_init();
+   return sensors_maxi_init();
 }
 
 int cleanup_module(void)

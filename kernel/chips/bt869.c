@@ -32,6 +32,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -82,7 +83,12 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int __init bt869_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_bt869_init(void);
 static int __init bt869_cleanup(void);
 static int bt869_attach_adapter(struct i2c_adapter *adapter);
 static int bt869_detect(struct i2c_adapter *adapter, int address, int kind);
@@ -143,7 +149,7 @@ static ctl_table bt869_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int __init bt869_initialized = 0;
+static int __initdata bt869_initialized = 0;
 
 /* I choose here for semi-static bt869 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -524,7 +530,7 @@ void bt869_depth(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init bt869_init(void)
+int __init sensors_bt869_init(void)
 {
   int res;
 
@@ -563,7 +569,7 @@ MODULE_DESCRIPTION("bt869 driver");
 
 int init_module(void)
 {
-  return bt869_init();
+  return sensors_bt869_init();
 }
 
 int cleanup_module(void)

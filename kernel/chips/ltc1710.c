@@ -53,6 +53,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -88,7 +89,12 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int __init ltc1710_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_ltc1710_init(void);
 static int __init ltc1710_cleanup(void);
 static int ltc1710_attach_adapter(struct i2c_adapter *adapter);
 static int ltc1710_detect(struct i2c_adapter *adapter, int address, int kind);
@@ -130,7 +136,7 @@ static ctl_table ltc1710_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int __init ltc1710_initialized = 0;
+static int __initdata ltc1710_initialized = 0;
 
 /* I choose here for semi-static LTC1710 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -354,7 +360,7 @@ void ltc1710_switch2(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init ltc1710_init(void)
+int __init sensors_ltc1710_init(void)
 {
   int res;
 
@@ -393,7 +399,7 @@ MODULE_DESCRIPTION("LTC1710 driver");
 
 int init_module(void)
 {
-  return ltc1710_init();
+  return sensors_ltc1710_init();
 }
 
 int cleanup_module(void)

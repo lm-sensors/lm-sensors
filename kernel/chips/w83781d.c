@@ -48,6 +48,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 /* RT Table support #defined so we can take it out if it gets bothersome */
@@ -354,7 +355,12 @@ struct w83781d_data {
 };
 
 
-static int __init w83781d_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_w83781d_init(void);
 static int __init w83781d_cleanup(void);
 
 static int w83781d_attach_adapter(struct i2c_adapter *adapter);
@@ -415,7 +421,7 @@ static struct i2c_driver w83781d_driver = {
 };
 
 /* Used by w83781d_init/cleanup */
-static int __init w83781d_initialized = 0;
+static int __initdata w83781d_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected W83781D. This is just a template;
@@ -1485,7 +1491,7 @@ void w83781d_rt(struct i2c_client *client, int operation, int ctl_name,
 }
 #endif
 
-int __init w83781d_init(void)
+int __init sensors_w83781d_init(void)
 {
   int res;
 
@@ -1525,7 +1531,7 @@ MODULE_DESCRIPTION("W83781D driver");
 
 int init_module(void)
 {
-  return w83781d_init();
+  return sensors_w83781d_init();
 }
 
 int cleanup_module(void)

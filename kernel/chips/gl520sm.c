@@ -32,6 +32,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -178,7 +179,12 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int __init gl520_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_gl520_init(void);
 static int __init gl520_cleanup(void);
 static int gl520_attach_adapter(struct i2c_adapter *adapter);
 static int gl520_detect(struct i2c_adapter *adapter, int address, int kind);
@@ -264,7 +270,7 @@ static ctl_table gl520_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int __init gl520_initialized = 0;
+static int __initdata gl520_initialized = 0;
 
 /* I choose here for semi-static GL520SM allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -791,7 +797,7 @@ void gl520_config(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init gl520_init(void)
+int __init sensors_gl520_init(void)
 {
   int res;
 
@@ -830,7 +836,7 @@ MODULE_DESCRIPTION("GL520SM driver");
 
 int init_module(void)
 {
-  return gl520_init();
+  return sensors_gl520_init();
 }
 
 int cleanup_module(void)

@@ -86,6 +86,7 @@
 #include <linux/init.h>
 #else
 #define __init 
+#define __initdata 
 #endif
 
 /* undefine this if separate ACPI software is accessing the
@@ -149,7 +150,12 @@
 #define ALI15X3_STS_ERR		0xE0	/* all the bad error bits */
 
 
-static int __init ali15x3_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init i2c_ali15x3_init(void);
 static int __init ali15x3_cleanup(void);
 static int ali15x3_setup(void);
 static s32 ali15x3_access(struct i2c_adapter *adap, u8 addr, char read_write,
@@ -185,7 +191,7 @@ static struct i2c_adapter ali15x3_adapter = {
   NULL,
 };
 
-static int __init ali15x3_initialized;
+static int __initdata ali15x3_initialized;
 #ifdef MAP_ACPI
 static unsigned short ali15x3_acpia = 0;
 #endif
@@ -604,7 +610,7 @@ void ali15x3_dec(struct i2c_adapter *adapter)
 	MOD_DEC_USE_COUNT;
 }
 
-int __init ali15x3_init(void)
+int __init i2c_ali15x3_init(void)
 {
   int res;
   printk("ali15x3.o version %s (%s)\n",LM_VERSION,LM_DATE);
@@ -666,7 +672,7 @@ MODULE_DESCRIPTION("ALI15X3 SMBus driver");
 
 int init_module(void)
 {
-  return ali15x3_init();
+  return i2c_ali15x3_init();
 }
 
 int cleanup_module(void)

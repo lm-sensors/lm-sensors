@@ -30,6 +30,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -77,7 +78,12 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int __init lm75_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_lm75_init(void);
 static int __init lm75_cleanup(void);
 static int lm75_attach_adapter(struct i2c_adapter *adapter);
 static int lm75_detect(struct i2c_adapter *adapter, int address, int kind);
@@ -119,7 +125,7 @@ static ctl_table lm75_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int __init lm75_initialized = 0;
+static int __initdata lm75_initialized = 0;
 
 /* I choose here for semi-static LM75 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -378,7 +384,7 @@ void lm75_temp(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int __init lm75_init(void)
+int __init sensors_lm75_init(void)
 {
   int res;
 
@@ -417,7 +423,7 @@ MODULE_DESCRIPTION("LM75 driver");
 
 int init_module(void)
 {
-  return lm75_init();
+  return sensors_lm75_init();
 }
 
 int cleanup_module(void)

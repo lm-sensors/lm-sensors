@@ -33,6 +33,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 #include "version.h"
@@ -41,7 +42,12 @@
 static void isa_inc_use (struct i2c_adapter *adapter);
 static void isa_dec_use (struct i2c_adapter *adapter);
 
-static int __init isa_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init i2c_isa_init(void);
 static int __init isa_cleanup(void);
 
 #ifdef MODULE
@@ -72,7 +78,7 @@ static struct i2c_adapter isa_adapter = {
 };
 
 /* Used in isa_init/cleanup */
-static int __init isa_initialized;
+static int __initdata isa_initialized;
 
 void isa_inc_use (struct i2c_adapter *adapter)
 {
@@ -88,7 +94,7 @@ void isa_dec_use (struct i2c_adapter *adapter)
 #endif
 }
 
-int __init isa_init(void)
+int __init i2c_isa_init(void)
 {
   int res;
   printk("i2c-isa.o version %s (%s)\n",LM_VERSION,LM_DATE);
@@ -147,7 +153,7 @@ MODULE_DESCRIPTION("ISA bus access through i2c");
 
 int init_module(void)
 {
-  return isa_init();
+  return i2c_isa_init();
 }
 
 int cleanup_module(void)

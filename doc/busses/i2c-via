@@ -1,4 +1,4 @@
-Kernel driver `i2c-piix4.o'
+Kernel driver `i2c-via.o'
 
 Status: Complete and well-tested
 

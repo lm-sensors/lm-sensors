@@ -34,6 +34,7 @@
 #include <linux/init.h>
 #else
 #define __init
+#define __initdata
 #endif
 
 
@@ -64,7 +65,12 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int __init matorb_init(void);
+#ifdef MODULE
+static
+#else
+extern
+#endif
+       int __init sensors_matorb_init(void);
 static int __init matorb_cleanup(void);
 static int matorb_attach_adapter(struct i2c_adapter *adapter);
 static int matorb_detect(struct i2c_adapter *adapter, int address, int kind);
@@ -104,7 +110,7 @@ static ctl_table matorb_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int __init matorb_initialized = 0;
+static int __initdata matorb_initialized = 0;
 
 /* I choose here for semi-static MATORB allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -324,7 +330,7 @@ int i;
   }
 }
 
-int __init matorb_init(void)
+int __init sensors_matorb_init(void)
 {
   int res;
 
@@ -363,7 +369,7 @@ MODULE_DESCRIPTION("MATORB driver");
 
 int init_module(void)
 {
-  return matorb_init();
+  return sensors_matorb_init();
 }
 
 int cleanup_module(void)
