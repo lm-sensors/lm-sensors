@@ -2,8 +2,6 @@ Many, many things. Most notably:
 
 * Sensors program needs to print a + before lm75 temperatures
 * Timer chips - block read problems?
-* LM78 detection: bit 5 reg 0x49 may be one?!?
-* Segfault if too high /dev/i2c-* file accessed
 * Library: reload does not work (Bison/Flex problem?)
 * Create wait-queues for bus locking instead of pure semaphores, to make
   it more interactive
