@@ -223,7 +223,7 @@ endif
 # This magic is from the kernel Makefile.
 # Extra cflags for kbuild 2.4.  The default is to forbid includes by kernel code
 # from user space headers.
-kbuild_2_4_nostdinc := -nostdinc $(shell $(CC) -print-search-dirs | sed -ne 's/install: \(.*\)/-I \1include/gp')
+kbuild_2_4_nostdinc := -nostdinc $(shell LC_ALL=C $(CC) -print-search-dirs | sed -ne 's/install: \(.*\)/-I \1include/gp')
 
 MODCPPFLAGS += -D__KERNEL__ -DMODULE -DEXPORT_SYMTAB -fomit-frame-pointer $(ALL_CPPFLAGS) $(kbuild_2_4_nostdinc)
 MODCFLAGS += $(ALL_CFLAGS)
