@@ -13,7 +13,7 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
-2.1.2 (199801??)
+2.1.2 (19980116)
   Modules lm80.o, w83781d.o: fan-related Segmentation fault corrected
   Module gl518sm.o: yet more bug fixes. It should at long last be usable now
   Documentation in doc/kernel: NEW
