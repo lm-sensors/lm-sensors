@@ -6,7 +6,7 @@ Status: W83781D support is complete and well-tested.
         W83783S support is complete but has not been well-tested.
         W83627HF support is complete but has not been well-tested.
         AS99127F support is BETA and has known problems due to lack of a
-		 chip datasheet. See below.
+		 chip datasheet. SEE BELOW.
 
 Supported chips:
   * Winbond W83781D
@@ -31,8 +31,8 @@ Supported chips:
     Datasheet: Unavailable from Asus
 
 
-Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>,
-        and Mark Studebaker <mdsxyz123@yahoo.com>
+Authors: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>,
+         and Mark Studebaker <mdsxyz123@yahoo.com>
 
 
 Module Parameters
@@ -43,12 +43,14 @@ Module Parameters
 * force_w83781d: short array (min = 1, max = 48)
   List of adapter,address pairs which are unquestionably assumed to contain
   a `w83781d' chip
-* force_w83782d: short array (min = 1, max = 48)
-  List of adapter,address pairs which are unquestionably assumed to contain
-  a `w83782d' chip
-* force_w83783s: short array (min = 1, max = 48)
-  List of adapter,address pairs which are unquestionably assumed to contain
-  a `w83783s' chip
+* force_w83782d:
+  Ditto
+* force_w83783s:
+  Ditto
+* force_w83627hf:
+  Ditto
+* force_as99127f:
+  Ditto
 * ignore: short array (min = 1, max = 48)
   List of adapter,address pairs not to scan
 * ignore_range: short array (min = 1, max = 48)
@@ -140,29 +142,50 @@ hardware registers are read whenever any data is read (unless it is less
 than 1.5 seconds since the last update). This means that you can easily
 miss once-only alarms.
 
-The W8378* only updates its values each 1.5 seconds; reading it more often
+The chips only update values each 1.5 seconds; reading them more often
 will do no harm, but will return 'old' values.
+
+
+W8378* PROBLEMS
+-----------------
+Known problems:
+	- Some chips are misidentified.
+	  This is caused by the chip having the wrong WCHIPID register
+	  value, so there is no fix. The workaround is to use the
+          force_CHIP parameter.
+	  (modprobe w83781d force_CHIP=BUS,0x2d where CHIP is the chip name
+	   and BUS is your i2c bus number)
 
 
 AS99127F PROBLEMS
 -----------------
 The as99127f support was developed without the benefit of a datasheet.
 In most cases it is treated as a w83781d.
-This support is BETA. One user has reported problems with fans stopping
+This support will be BETA until a datasheet is released.
+One user has reported problems with fans stopping
 occasionally.
-
-Known problems:
-	- -12V readings a little high (-9.5V to -10.5V)
-	- Problems with diode/thermistor settings (supported?)
-	- fan_div register may not really be fan_div.
-	- One user reports fans stopping under high server load.
-
-These will not be fixed unless we get a datasheet.
-If you have problems, please lobby Asus to release a datasheet.
 
 Note that the individual beep bits are inverted from the other chips.
 That is, in the second entry in the 'beep' file, a '1' bit means
-disable, not enable.
+disable, not enable. This may be changed in the future.
+
+Known problems:
+	- Problems with diode/thermistor settings (supported?)
+	- fan_div register may not really be fan_div.
+	- One user reports fans stopping under high server load.
+	- Some as99127f chips are misidentified as a w83781d or w83782d.
+	  This is caused by the chip having the wrong WCHIPID register
+	  value, so there is no fix. The workaround is to use the
+          force_as99127f parameter.
+	  (modprobe w83781d force_as99127f=BUS,0x2d where BUS is your i2c bus number)
+
+These will not be fixed unless we get a datasheet.
+If you have problems, please lobby Asus to release a datasheet.
+Unfortunately several others have without success.
+Please do not send mail to us asking for better as99127f support.
+We have done the best we can without a datasheet.
+Please do not send mail to the author or the sensors group asking for
+a datasheet or ideas on how to convince Asus. We can't help.
 
 
 Chip Features
