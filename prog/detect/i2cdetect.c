@@ -37,12 +37,15 @@ void print_i2c_busses(int);
 
 void help(void)
 {
-	fprintf(stderr,"Syntax: i2cdetect [-f] [-q|-r] I2CBUS\n");
-	fprintf(stderr,"  I2CBUS is an integer\n");
-	fprintf(stderr,"  With -f, scans all addresses (NOT RECOMMENDED)\n");
-	fprintf(stderr,"  With -q, uses only quick write commands for probing (NOT RECOMMENDED)\n");
-	fprintf(stderr,"  With -r, uses only read byte commands for probing (NOT RECOMMENDED)\n");
-	fprintf(stderr,"  i2cdetect -l lists installed busses only\n");
+	fprintf(stderr,
+	        "Syntax: i2cdetect [-f] [-q|-r] I2CBUS [FIRST LAST]\n"
+	        "  I2CBUS is an integer\n"
+	        "  With -f, scans all addresses (NOT RECOMMENDED)\n"
+	        "  With -q, uses only quick write commands for probing (NOT RECOMMENDED)\n"
+	        "  With -r, uses only read byte commands for probing (NOT RECOMMENDED)\n"
+	        "  If provided, FIRST and LAST limit the probing range.\n"
+	        "  i2cdetect -l lists installed busses only\n");
+
 	print_i2c_busses(0);
 }
 
@@ -106,9 +109,9 @@ int scan_i2c_bus(int file, const int mode, const int first, const int last)
 			default:
 				if ((i+j >= 0x30 && i+j <= 0x37)
 				 || (i+j >= 0x50 && i+j <= 0x5F))
-					res = i2c_smbus_write_quick(file, I2C_SMBUS_WRITE);
-				else
 					res = i2c_smbus_read_byte(file);
+				else
+					res = i2c_smbus_write_quick(file, I2C_SMBUS_WRITE);
 			}
 
 			if (res < 0)
@@ -128,8 +131,8 @@ int main(int argc, char *argv[])
   int i = 1, i2cbus = -1, file, res;
   char filename[20];
   long funcs;
-  int force = 0;
   int mode = MODE_AUTO;
+  int first = 0x03, last = 0x77;
   
 
   while(i2cbus == -1) {
@@ -150,7 +153,8 @@ int main(int argc, char *argv[])
     }
 
     if(!strcmp(argv[i], "-f")) {
-      force = 1;
+      first = 0x00;
+      last = 0x7F;
       i++;
     } else
     if(!strcmp(argv[i], "-q")) {
@@ -176,11 +180,53 @@ int main(int argc, char *argv[])
         exit(1);
       }
       if ((i2cbus < 0) || (i2cbus > 0xff)) {
-        fprintf(stderr,"Error: I2CBUS argument out of range!\n");
+        fprintf(stderr,
+                "Error: I2CBUS argument out of range (0-255)!\n");
         help();
         exit(1);
       }
+      i++;
     }
+  }
+
+  /* read address range if present */
+  if (i+2 == argc) {
+    int tmp;
+  
+    tmp = strtol(argv[i], &end, 0);
+    if (*end) {
+      fprintf(stderr,
+              "Error: FIRST argment not a number!\n");
+      help();
+      exit(1);
+    }
+    if (tmp < first || tmp > last) {
+      fprintf(stderr,
+              "Error: FIRST argument out of range (0x%02x-0x%02x)!\n",
+              first, last);
+      help();
+      exit(1);
+    }
+    first = tmp;
+
+    tmp = strtol(argv[i+1], &end, 0);
+    if (*end) {
+      fprintf(stderr,
+              "Error: LAST argment not a number!\n");
+      help();
+      exit(1);
+    }
+    if (tmp < first || tmp > last) {
+      fprintf(stderr,
+              "Error: LAST argument out of range (0x%02x-0x%02x)!\n",
+              first, last);
+      help();
+      exit(1);
+    }
+    last = tmp;
+  } else if (i != argc) {
+    help();
+    exit(1);
   }
 
   file = open_i2c_dev(i2cbus, filename);
@@ -221,16 +267,15 @@ int main(int argc, char *argv[])
   
   fprintf(stderr,"  WARNING! This program can confuse your I2C bus, "
           "cause data loss and worse!\n");
-  fprintf(stderr,"  I will probe file %s%s\n", filename,
+  fprintf(stderr, "  I will probe file %s%s.\n", filename,
           mode==MODE_QUICK?" using quick write commands":
           mode==MODE_READ?" using read byte commands":"");
+  fprintf(stderr, "  I will probe address range 0x%02x-0x%02x.\n",
+          first, last);
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
   sleep(5);
 
-  if (force)
-    res = scan_i2c_bus(file, mode, 0x00, 0x7F);
-  else
-    res = scan_i2c_bus(file, mode, 0x03, 0x77);
+  res = scan_i2c_bus(file, mode, first, last);
 
   close(file);
 
