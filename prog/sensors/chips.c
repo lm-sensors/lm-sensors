@@ -2425,7 +2425,7 @@ void print_eeprom(const sensors_chip_name *name)
 {
 	char  *label = NULL;
 	double a, b, c, d;
-	int    valid, i;
+	int    valid, i, rambus=0;
 
    if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_TYPE, &label,&valid) &&
        !sensors_get_feature(*name, SENSORS_EEPROM_TYPE, &a)) {
@@ -2436,6 +2436,10 @@ void print_eeprom(const sensors_chip_name *name)
 	} else if(((int) a) == 7) {
            print_label(label, 24);
 	   printf("DDR SDRAM DIMM SPD\n");
+	} else if(((int) a) == 17) {
+           print_label(label, 24);
+	   printf("RAMBUS RIMM SPD\n");
+	   rambus = 1;
 	} else
 	      return;
       }
@@ -2450,14 +2454,26 @@ void print_eeprom(const sensors_chip_name *name)
        !sensors_get_feature(*name, SENSORS_EEPROM_BANKS, &d)) {
       if (valid) {
          print_label(label, 24);
-	 i = (((int) a) & 0x0f) + (((int) b) & 0x0f) - 17;
-	 if(i > 0 && i <= 12 && c <= 8 && d <= 8)
+	 if(rambus) {	
+	     i = (((int) a) & 0x0f) + ((((int) a) & 0xf0) >> 4) +
+		 (((int) c) & 0x07) - 13;
+	     if(i > 0 && i <= 12)
+	         printf("%d\n", (1 << i));
+	     else
+	     {
+	 	printf("invalid\n");
+		printf("%d %d %d %d\n", (int) a, (int) b, (int) c, (int) d);
+	     }
+	 } else {
+	     i = (((int) a) & 0x0f) + (((int) b) & 0x0f) - 17;
+	     if(i > 0 && i <= 12 && c <= 8 && d <= 8)
 	         printf("%d\n", (1 << i) * ((int) c) * ((int) d));
-	 else
-{
-	         printf("invalid\n");
-printf("%d %d %d %d\n", (int) a, (int) b, (int) c, (int) d);
-}
+	     else
+	     {
+	 	printf("invalid\n");
+		printf("%d %d %d %d\n", (int) a, (int) b, (int) c, (int) d);
+	     }
+         }
       }
    } else
       printf("ERROR: data 2\n");
