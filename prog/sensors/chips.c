@@ -3243,7 +3243,7 @@ void print_fscpos(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN1_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x02)
+	if((int) state & 0x04)
 	  printf("\tfaulty\n");
 	else
 	  printf("\t%6.0f RPM \n",fan);
@@ -3257,7 +3257,7 @@ void print_fscpos(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN2_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x02)
+	if((int) state & 0x04)
 	  printf("\tfaulty\n");
 	else
 	  printf("\t%6.0f RPM \n",fan);
@@ -3271,7 +3271,7 @@ void print_fscpos(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN3_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x02)
+	if((int) state & 0x04)
 	  printf("\tfaulty\n");
 	else
 	  printf("\t%6.0f RPM \n",fan);
@@ -3557,7 +3557,7 @@ void print_fscher(const sensors_chip_name *name)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN1_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-      if((int) state & 0x02)
+      if((int) state & 0x04)
         printf("\tfaulty\n");
       else
         printf("\t%6.0f RPM \n",fan);
@@ -3571,7 +3571,7 @@ void print_fscher(const sensors_chip_name *name)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN2_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-      if((int) state & 0x02)
+      if((int) state & 0x04)
         printf("\tfaulty\n");
       else
         printf("\t%6.0f RPM \n",fan);
@@ -3585,7 +3585,7 @@ void print_fscher(const sensors_chip_name *name)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN3_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-      if((int) state & 0x02)
+      if((int) state & 0x04)
         printf("\tfaulty\n");
       else
         printf("\t%6.0f RPM \n",fan);
