@@ -133,19 +133,19 @@ void Voodoo3_I2CStop(void)
 
 int Voodoo3_I2CAck(int ack)
 {
-  dat(ack);
+/*  dat(ack);
   out();
-  clkon();
-  out();
+  clkon();/
+  out(); testing PAE */
   ack=rdat();
   clkoff();
   out();
   return ack;
 }
 
-unsigned char Voodoo3_I2CReadByte(int ack)
+int Voodoo3_I2CReadByte(int ack)
 {
-  int i;
+  int i,temp;
   unsigned char data=0;
 
   clkoff();
@@ -158,8 +158,15 @@ unsigned char Voodoo3_I2CReadByte(int ack)
     clkoff();
     out();
   }
-  Voodoo3_I2CAck(ack);
-  return data;
+  temp=Voodoo3_I2CAck(ack);
+#ifdef DEBUG
+  printk("i2c-voodoo3: ack -->0x%X!\n",temp);
+#endif
+  if (! temp)
+   return data;
+  else {
+   return -1;
+  }
 }
 
 int Voodoo3_I2CSendByte(unsigned char data)
@@ -183,10 +190,9 @@ int Voodoo3_I2CSendByte(unsigned char data)
 
 /* Note, this is actually a byte read and not a byte_data read */
 /* I.e., the command value is dumped.                          */
-unsigned char Voodoo3_I2CRead(int adr,int command)
+int Voodoo3_I2CRead(int adr,int command)
 {
-        int i,j;
-        unsigned char dat;
+        int i,j,dat;
 
         Voodoo3_I2CStart();
         Voodoo3_I2CSendByte(adr);
@@ -260,11 +266,22 @@ static int voodoo3_setup(void)
 s32 voodoo3_access(u8 addr, char read_write,
                  u8 command, int size, union smbus_data * data)
 {
+int temp;
+
   if ((size == SMBUS_BYTE_DATA) || (size == SMBUS_BYTE)) {
         addr=((addr & 0x7f) << 1) | (read_write & 0x01);
   	if (read_write == SMBUS_READ) {
-	  data->byte=Voodoo3_I2CRead(addr,command); 
-printk("i2c-voodoo3: access returning 0x%X\n",data->byte);
+    	  temp=Voodoo3_I2CRead(addr,command);
+	  if (temp < 0) {
+#ifdef DEBUG
+		printk("i2c-voodoo3: no device at 0x%X\n",addr);
+#endif
+		return -1;
+	  }
+	  data->byte=temp; 
+#ifdef DEBUG
+		printk("i2c-voodoo3: access returning 0x%X\n",data->byte);
+#endif
 	} else {
 	  Voodoo3_I2CWrite(addr,command,data->byte);
 	}
@@ -326,7 +343,7 @@ int voodoo3_cleanup(void)
 
 #ifdef MODULE
 
-MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com> and Ralph");
+MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com> and Ralph Metzler <rjkm@thp.uni-koeln.de>");
 MODULE_DESCRIPTION("Voodoo3 I2C/SMBus driver");
 
 int init_module(void)
