@@ -109,6 +109,9 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_VIA686A=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/via686a.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM92=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/lm92.o
+endif
 
 # Include all dependency files
 INCLUDEFILES += $(KERNELCHIPSTARGETS:.o=.d)
