@@ -22,9 +22,11 @@ ask CVS about it:
            Add w83627thf support; Advance version to 3.0.0;
            Add hermes, ADM1032, ASB100 support;
            Add it87 sensor type support;
-           Add sysfs support for kernel 2.6
+           Add sysfs support for kernel 2.6;
+           Fix memory leaks
   Makefiles: Install fancontrol, pwmconfig, decode-*.pl;
-             Fail if no kernel .config file exists
+             Fail if no kernel .config file exists;
+             Don't build module dependencies for user and user_install
   Modules adm1021, adm1024, adm1025, adm9240, ds1621, gl518sm, gl520sm,
           it87, lm75, lm78, lm80, lm83, lm87, lm90, mtp008, sis5595,
           smsc47m1, thmc50, via686a, w83627hf, w83781d:
@@ -40,13 +42,16 @@ ask CVS about it:
   Module w83781d: Fix 791d and 627hf detection
   Programs i2cdetect, i2cdump, i2cset: add -v (version) option;
                                        support sysfs for i2c bus search
+  Program mkpatch: Cleanups
   Program pwmconfig: Handle multiple fans controlled by a single pwm
+  Program sensord: Remove ddcmon support
   Program sensors: Add ADM1032 support; add messages for sysfs
   Program sensors-detect: Prefer Super I/O drivers;
                           Fix W83627HF and W83791D detection; detect CSB6;
                           Detect ADM1029,30,31,32;
                           Detect W83637HF, W83697UF;
-                          Add it87 sensor type support
+                          Add it87 sensor type support;
+                          Reduce lm80 misdetects; remove PCFxxxx "detection"
 
 
 2.8.1 (20031005)
