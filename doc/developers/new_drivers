@@ -5,6 +5,8 @@ submit it to us so that it will be applied cleanly to our package.
   You are of course free to write your own drivers, but it is smart to
   check first nobody else is already working on it.
   Check our "New Drivers" page for information also.
+  You will also need to ask us to have an ID reserved in
+  i2c-id.h in the i2c package.
 
 * Write the new driver. 
   For a chip driver, use lm78.c as template. For an SMBus-only adapter, 
@@ -20,7 +22,7 @@ submit it to us so that it will be applied cleanly to our package.
   See Documentation/CodingStyle in the kernel source.
   Be sure and use 8 column tabs.
 
-* Add the driver to the Makefile.
+* Add the driver to the Module.mk (makefile)
   Usually, you can just add it to KERNEL{CHIPS,DRIVERS}TARGETS in the
   Module.mk file in the directory itself.
 
@@ -45,14 +47,14 @@ submit it to us so that it will be applied cleanly to our package.
   This is a perl script that automatically detects what chips and adapters
   are present. Contact Frodo if you need help.
 
-* Add chip information to lib/chips.{c,h} for chip drivers
+* Add chip information to lib/chips.{c,h} (for chip drivers only)
   Until you have done this, the chip will be invisible for user-level
   programs. Again, contact Frodo if you need help with this.
 
-* Add entries to etc/sensors.conf.eg
+* Add entries to etc/sensors.conf.eg (for chip drivers only)
   If needed, you can set defaults here.
 
-* Add a dedicated procedure to prog/sensors/chips.[ch]
+* Add a dedicated procedure to prog/sensors/chips.[ch] (for chip drivers only)
   This makes the included sensors program pretty-print your chip information.
 
 * Add the name of the device to the README file.
