@@ -180,7 +180,7 @@ static void ipmi_register_bmc(int ipmi_intf)
 		return;
 	}
 
-	return i2c_add_adapter(&i2c_ipmi_adapter);
+	error = i2c_add_adapter(&i2c_ipmi_adapter);
 	if (error) {
 		printk(KERN_ERR "i2c-ipmi.o: Adapter registration failed, "
 		       "module i2c-ipmi.o is not inserted\n.");
