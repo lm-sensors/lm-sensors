@@ -43,6 +43,7 @@ sensor reading results. Why?
 4.13 I try to read the raw /proc files, but the values are strange?!?
 4.14 How do I set new limits?
 4.15 Some sensors are doubly detected?
+4.16 I ran sensors-detect, but now I get very strange readings?!?
 
 5 How to ask for help: 
 5.1 What to do if it won't insert? 
@@ -197,26 +198,14 @@ boot-time.
 
 3.2 How do I know which chips I own?
 
-	At the moment this is written (just before version 2.1.0 is released),
-the adapter (SMBus host) detection is quite good, but the chip detection
-is quite worthless (I wrote it myself, so I am allowed to say this :-)).
-	As always, the best way to do this is to read the documentation, in
-this case, your mainboard manual (I hope you ever got one; if not, go
-complain to your salesperson). Usually, it tells you what adapter and chips
-are present.
-	If you really have no idea what is supported on your mainboard, you
-will have to experiment. First, try to find out your adapter. First try
-the piix4.o module; if it does not load, try the bit-mb.o (VIA) module.
-You can type 'dmesg' to see what happened. Also, insert the isa.o module;
-it may be enough, even if no other module loads succesfully.
-	Now, the chips. Try the drivers one by one (lm78.o, lm80.o, lm75.o,
-gl518sm.o and w83781d.o at this moment). Type 'sensors' to determine whether
-the read values make any sense. Remove modules if you are convinced that
-the values are bogus. Also, see some of the driver-specific questions below.
-	There will be an automatic detection program in later versions of
-this package; it is only partially  implemented yet. Look for it in the
-prog/detect directory. For 2.2.0, it will only be able to detect the bus
-type, not the chip type.
+	By now, chip detection is fairly good. That means that it is 
+relatively harmless to insert more chip drivers than you need. This approach
+can still lead to problems, though.
+	In the past, you had to muddle your way through and just tried
+several drivers. But starting with 2.3.0, we have an excellent program
+that scans all your hardware. It is called 'sensors-detect' and is
+installed when you call 'make install'. Just execute this script, and
+it will tell you exactly what you want to know.
 
 
 3.3 Which modules should I insert?
@@ -409,9 +398,19 @@ but it is really tough. Double detections can be caused by two things:
 sensors can be detected to both the ISA and the SMBus (and if you have
 loaded the approprate adapter drivers, it will be detected on both), and
 some chips simulate other chips (the Winbond W83781D simulates LM75 chips
-on the SMBus, for example). Remove the offending adapter or chip driver,
-or live with it for now.
+on the SMBus, for example). Remove the offending adapter or chip driver, or
+run sensors-detect and add the insmod parameters it suggests.
 
+
+4.16 I ran sensors-detect, but now I get very strange readings?!?
+
+	Your SMBus (PIIX4?) is probably crashed. There are some mainboards
+which connect a clock chip to the SMBus. Unfortunately, this clock chip
+hangs the PIIX4 if it is read (it is an I2C device, but not SMBus compatible).
+We have found no way of solving this, except for rebooting your computer.
+Next time when you run sensors-detect, you may want to exclude addresses
+0x69 and/or 0x6a, by entering 's' when you are asked whether you want to
+scan the PIIX4.
 
 5 How to ask for help:
 

@@ -7,9 +7,11 @@ this package.
   file. It read /proc/bus/i2c (or the file specified on the command-line),
   and prints to stdout `bus' statements reflecting the currently detected
   adapters.
-* prog/detect/dectect.pl (written in Perl, not installed)
-  This program tries to detect the available SMBus adapters. In time, it will
-  also scan each adapter for supported devices (chips).
+* prog/detect/sensors-detect (written in Perl, installed by 'make install')
+  This program tries to detect the available SMBus adapters and the chips
+  connected to them and/or the ISA bus. It also generates modprobe lines
+  and module options. This program is interactive and will ask you about
+  all information it needs.
 * prog/detect/i2cdetect (written in C, not installed)
   This program scans your complete I2C or SMBus adapter for connected devices.
   Not all devices can be detected in this way, though; and it may hang your
@@ -17,8 +19,17 @@ this package.
     ./i2cdetect 0
   Here the '0' stands for i2c-0 (check /proc/bus/i2c to find out which bus
   you need).
-* prog/doc/doc-features (written in C, not installed)
-  This program is/will be used to help us generate chip driver documentation.
+* prog/doc/doc-features.pl (written in Perl, not installed)
+  This program is used to help us generate driver documentation; it scans
+  some C source programs to do this. Syntax:
+    ./doc-features.pl BASE [PREFIX...]
+  BASE is the path to the base directory of the lm_sensors tree
+  PREFIX is one of more prefixes of chips you want documented; if left out,
+  all chips are documented.
+* prog/doc/doc-insmod.pl (written in Perl, not installed)
+  This program is used to help us generate driver documentation; it reads
+  all module information and outputs insmod parameter information. Syntax:
+    ./doc-insmod.pl DRIVER
 * prog/dump/i2cdump (written in C, not installed)
   This program helps to dump the registers of a I2C device that understands
   the 'byte data' or 'word data' SMBus protocols. Usual syntax:

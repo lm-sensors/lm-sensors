@@ -18,3 +18,6 @@ package. Some of the more important ones:
   how all sensor readings are to be interpreted.
 * All code has been completely rewritten.
 * Many new drivers
+
+By now (version 2.3.0) so many things have changed that we do not even try
+to keep the above list up-to-date. Just don't use version 1 anymore.
