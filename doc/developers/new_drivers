@@ -38,9 +38,11 @@ If you wish to write a driver for 2.5 only, email us for information.
   Usually, we make all prefixes start with the driver name. This is not
   really necessary, as these symbols will not be exported anyway. But by
   doing this, you are sure you do not shadow any global kernel names.
-  Remember that you want to output the direct measurements done by the
-  chip. If these sensor values need scaling, this should be done through
-  the configuration file.
+
+* A quick note about conversions. The conversions which are specified
+  in the sensor chip datasheet and which *cannot* vary from one board to
+  the next are performed by the driver. If other conversions are
+  necessary, they are performed in user-space.
 
 * Meet Kernel coding standards.
   See Documentation/CodingStyle in the kernel source.
