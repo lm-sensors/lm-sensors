@@ -413,6 +413,21 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 	These should be added in chips.c for all non-standard feature names.
         If that fails, converts common /proc feature names
 	to their sysfs equivalent, and uses common sysfs magnitude.
+	Common magnitudes are #defined above.
+	Common conversions are as follows:
+		fan%d_div -> fan_div%d
+		fan%d_min -> fan_min%d
+		fan%d -> fan_input%d
+		in%d_max -> in_max%d
+		in%d_min -> in_min%d
+		in%d -> in_input%d
+		temp%d_over -> temp_max%d (to be changed after kernel patch)
+		temp%d_hyst -> temp_min%d ("")
+		temp%d_max -> temp_max%d
+		temp%d_min -> temp_min%d
+		temp%d -> temp_input%d
+	AND all conversions listed in the matches[] structure below.
+
 	If that fails, returns old /proc feature name and magnitude.
 
 	References: doc/developers/proc in the lm_sensors package;
