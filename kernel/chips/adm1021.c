@@ -331,7 +331,8 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 static void adm1021_init_client(struct i2c_client *client)
 {
 	/* Enable ADC and disable suspend mode */
-	adm1021_write_value(client, ADM1021_REG_CONFIG_W, 0);
+	adm1021_write_value(client, ADM1021_REG_CONFIG_W,
+		adm1021_read_value(client, ADM1021_REG_CONFIG_R) & 0xBF);
 	/* Set Conversion rate to 1/sec (this can be tinkered with) */
 	adm1021_write_value(client, ADM1021_REG_CONV_RATE_W, 0x04);
 }
