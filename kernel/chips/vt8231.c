@@ -87,8 +87,8 @@ SENSORS_INSMOD_1(vt8231);
 */
 
 /* ins numbered 0-6 */
-#define VT8231_REG_IN_MAX(nr) ((nr)==0 ? 0x3d : 0x2b + (((nr)+1) * 2))
-#define VT8231_REG_IN_MIN(nr) ((nr)==0 ? 0x3e : 0x2c + (((nr)+1) * 2))
+#define VT8231_REG_IN_MAX(nr) ((nr)==0 ? 0x3d : 0x29 + ((nr) * 2))
+#define VT8231_REG_IN_MIN(nr) ((nr)==0 ? 0x3e : 0x2a + ((nr) * 2))
 #define VT8231_REG_IN(nr)     (0x21 + (nr))
 
 /* fans numbered 1-2 */
@@ -119,8 +119,8 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e, 0x2c, 0x2e, 0x30, 0x32 };
 /* temps 1-7; voltages 0-6 */
 #define ISTEMP(i, ch_config) ((i) == 1 ? 1 : \
 			      (i) == 3 ? 1 : \
-			      (i) == 2 ? (ch_config) & 0x01 : \
-			      ((ch_config) >> ((i)-1)) & 0x01)
+			      (i) == 2 ? ((ch_config) >> 1) & 0x01 : \
+			                 ((ch_config) >> ((i)-1)) & 0x01)
 #define ISVOLT(i, ch_config) ((i) > 4 ? 1 : !(((ch_config) >> ((i)+2)) & 0x01))
 
 #define DIV_FROM_REG(val) (1 << (val))
