@@ -22,17 +22,22 @@ MODULE_DIR := prog/dump
 PROGDUMPDIR := $(MODULE_DIR)
 
 PROGDUMPMAN8DIR := $(MANDIR)/man8
-PROGDUMPMAN8FILES := $(MODULE_DIR)/isadump.8 $(MODULE_DIR)/i2cdump.8 \
-		     $(MODULE_DIR)/i2cset.8
+PROGDUMPMAN8FILES := $(MODULE_DIR)/i2cdump.8 $(MODULE_DIR)/i2cset.8
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-PROGDUMPTARGETS := $(MODULE_DIR)/isadump $(MODULE_DIR)/i2cdump \
-		   $(MODULE_DIR)/i2cset
-PROGDUMPSOURCES := $(MODULE_DIR)/isadump.c  $(MODULE_DIR)/i2cdump.c \
-		   $(MODULE_DIR)/i2cset.c $(MODULE_DIR)/i2cbusses.c
-PROGDUMPBININSTALL := $(MODULE_DIR)/isadump $(MODULE_DIR)/i2cdump \
-		   $(MODULE_DIR)/i2cset
+PROGDUMPTARGETS := $(MODULE_DIR)/i2cdump $(MODULE_DIR)/i2cset
+PROGDUMPSOURCES := $(MODULE_DIR)/i2cdump.c $(MODULE_DIR)/i2cset.c \
+		   $(MODULE_DIR)/i2cbusses.c
+PROGDUMPBININSTALL := $(MODULE_DIR)/i2cdump $(MODULE_DIR)/i2cset
+
+# Only build isadump on x86 machines.
+ifneq (,$(findstring $(MACHINE), i386 i486 i586 i686 x86_64))
+PROGDUMPMAN8FILES += $(MODULE_DIR)/isadump.8
+PROGDUMPTARGETS += $(MODULE_DIR)/isadump
+PROGDUMPSOURCES += $(MODULE_DIR)/isadump.c
+PROGDUMPBININSTALL += $(MODULE_DIR)/isadump
+endif
 
 # Include all dependency files. We use '.rd' to indicate this will create
 # executables.
