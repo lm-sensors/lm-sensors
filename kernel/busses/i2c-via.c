@@ -81,6 +81,19 @@ static int bit_via_getsda(void *data)
 	return (0 != (inb(I2C_IN) & I2C_SDA));
 }
 
+static void bit_via_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void bit_via_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
 
 static struct i2c_algo_bit_data bit_data = {
 	.setsda		= bit_via_setsda,
@@ -93,10 +106,11 @@ static struct i2c_algo_bit_data bit_data = {
 };
 
 static struct i2c_adapter vt586b_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "VIA i2c",
 	.id		= I2C_HW_B_VIA,
 	.algo_data	= &bit_data,
+	.inc_use	= bit_via_inc,
+	.dec_use	= bit_via_dec,
 };
 
 

@@ -160,6 +160,20 @@ void config_v3(struct pci_dev *dev)
 	}
 }
 
+static void voodoo3_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+void voodoo3_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
+
 static struct i2c_algo_bit_data voo_i2c_bit_data = {
 	.setsda		= bit_vooi2c_setsda,
 	.setscl		= bit_vooi2c_setscl,
@@ -171,10 +185,11 @@ static struct i2c_algo_bit_data voo_i2c_bit_data = {
 };
 
 static struct i2c_adapter voodoo3_i2c_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "I2C Voodoo3/Banshee adapter",
 	.id		= I2C_HW_B_VOO,
-	.algo_data		= &voo_i2c_bit_data,
+	.algo_data	= &voo_i2c_bit_data,
+	.inc_use	= voodoo3_inc,
+	.dec_use	= voodoo3_dec,
 };
 
 static struct i2c_algo_bit_data voo_ddc_bit_data = {
@@ -188,10 +203,11 @@ static struct i2c_algo_bit_data voo_ddc_bit_data = {
 };
 
 static struct i2c_adapter voodoo3_ddc_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "DDC Voodoo3/Banshee adapter",
 	.id		= I2C_HW_B_VOO,
 	.algo_data	= &voo_ddc_bit_data,
+	.inc_use	= voodoo3_inc,
+	.dec_use	= voodoo3_dec,
 };
 
 

@@ -394,6 +394,19 @@ s32 sis5595_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
+static void sis5595_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void sis5595_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
 
 u32 sis5595_func(struct i2c_adapter *adapter)
 {
@@ -411,10 +424,11 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter sis5595_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS5595,
 	.algo		= &smbus_algorithm,
+	.inc_use	= sis5595_inc,
+	.dec_use	= sis5595_dec,
 };
 
 

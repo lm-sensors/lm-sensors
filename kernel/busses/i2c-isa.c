@@ -40,12 +40,27 @@ static struct i2c_algorithm isa_algorithm = {
 	.functionality	= isa_func,
 };
 
+static void isa_inc_use(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void isa_dec_use(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
+
 /* There can only be one... */
 static struct i2c_adapter isa_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "ISA main adapter",
 	.id		= I2C_ALGO_ISA | I2C_HW_ISA,
 	.algo		= &isa_algorithm,
+	.inc_use	= isa_inc_use,
+	.dec_use	= isa_dec_use,
 };
 
 /* We can't do a thing... */

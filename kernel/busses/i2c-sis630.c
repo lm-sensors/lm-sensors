@@ -383,6 +383,20 @@ static s32 sis630_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
+static void sis630_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void sis630_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
+
 
 static u32 sis630_func(struct i2c_adapter *adapter) {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE | I2C_FUNC_SMBUS_BYTE_DATA |
@@ -455,10 +469,11 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter sis630_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS630,
 	.algo		= &smbus_algorithm,
+	.inc_use	= sis630_inc,
+	.dec_use	= sis630_dec,
 };
 
 

@@ -136,6 +136,19 @@ void config_s4(struct pci_dev *dev)
 	}
 }
 
+static void savage4_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void savage4_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
 
 static struct i2c_algo_bit_data sav_i2c_bit_data = {
 	.setsda		= bit_savi2c_setsda,
@@ -148,10 +161,11 @@ static struct i2c_algo_bit_data sav_i2c_bit_data = {
 };
 
 static struct i2c_adapter savage4_i2c_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "I2C Savage4 adapter",
 	.id		= I2C_HW_B_SAVG,
 	.algo_data	= &sav_i2c_bit_data,
+	.inc_use	= savage4_inc,
+	.dec_use	= savage4_dec,
 };
 
 static struct pci_device_id savage4_ids[] __devinitdata = {

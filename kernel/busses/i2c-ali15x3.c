@@ -454,6 +454,20 @@ static s32 ali15x3_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
+static void ali15x3_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void ali15x3_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
+
 static u32 ali15x3_func(struct i2c_adapter *adapter)
 {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
@@ -469,10 +483,11 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter ali15x3_adapter = {
-	.owner		= THIS_MODULE,
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_ALI15X3,
 	.algo		= &smbus_algorithm,
-	.name	= "unset",
+	.name		= "unset",
+	.inc_use	= ali15x3_inc,
+	.dec_use	= ali15x3_dec,
 };
 
 static struct pci_device_id ali15x3_ids[] __devinitdata = {

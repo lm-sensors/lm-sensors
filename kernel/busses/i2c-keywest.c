@@ -414,6 +414,21 @@ keywest_func(struct i2c_adapter * adapter)
 	       I2C_FUNC_SMBUS_BLOCK_DATA;
 }
 
+static void
+keywest_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void
+keywest_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
 
 /* For now, we only handle combined mode (smbus) */
 static struct i2c_algorithm keywest_algorithm = {
@@ -524,6 +539,8 @@ create_iface(struct device_node* np)
 		chan->adapter.id = I2C_ALGO_SMBUS;
 		chan->adapter.algo = &keywest_algorithm;
 		chan->adapter.algo_data = NULL;
+		chan->adapter.inc_use = keywest_inc;
+		chan->adapter.dec_use = keywest_dec;
 		chan->adapter.client_register = NULL;
 		chan->adapter.client_unregister = NULL;
 		chan->adapter.data = chan;

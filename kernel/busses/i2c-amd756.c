@@ -294,6 +294,20 @@ static s32 amd756_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
+static void amd756_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void amd756_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
+
 static u32 amd756_func(struct i2c_adapter *adapter)
 {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
@@ -309,10 +323,11 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 struct i2c_adapter amd756_smbus = {
-	.owner		= THIS_MODULE,
 	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_AMD756,
 	.algo		= &smbus_algorithm,
+	.inc_use	= amd756_inc,
+	.dec_use	= amd756_dec,
 };
 
 enum chiptype { AMD756, AMD766, AMD768, NFORCE, AMD8111 };

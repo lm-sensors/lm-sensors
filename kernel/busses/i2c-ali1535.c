@@ -511,6 +511,19 @@ EXIT:
 	return result;
 }
 
+static void ali1535_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void ali1535_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
 
 u32 ali1535_func(struct i2c_adapter *adapter)
 {
@@ -527,10 +540,11 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter ali1535_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_ALI1535,
 	.algo		= &smbus_algorithm,
+	.inc_use	= ali1535_inc,
+	.dec_use	= ali1535_dec,
 };
 
 

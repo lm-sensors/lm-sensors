@@ -34,6 +34,20 @@
 static u32 i2c_ipmi_func(struct i2c_adapter *adapter);
 static int bmcclient_i2c_send_message(struct i2c_adapter *, char *, int);
 
+static void i2c_ipmi_inc_use(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void i2c_ipmi_dec_use(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
+
 /* I2C Data */
 static struct i2c_algorithm i2c_ipmi_algorithm = {
 	.name = "IPMI algorithm",
@@ -43,10 +57,11 @@ static struct i2c_algorithm i2c_ipmi_algorithm = {
 };
 
 static struct i2c_adapter i2c_ipmi_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "IPMI adapter",
 	.id		= I2C_ALGO_IPMI | I2C_HW_IPMI,
 	.algo		= &i2c_ipmi_algorithm,
+	.inc_use	= &i2c_ipmi_inc_use,
+	.dec_use	= &i2c_ipmi_dec_use,
 };
 
 /* IPMI Data */

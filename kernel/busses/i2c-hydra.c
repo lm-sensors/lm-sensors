@@ -99,6 +99,20 @@ static int bit_hydra_getsda(void *data)
 	return (pdregr() & HYDRA_SDAT) != 0;
 }
 
+static void bit_hydra_inc(struct i2c_adapter *adap)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void bit_hydra_dec(struct i2c_adapter *adap)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
+
 /* ------------------------------------------------------------------------ */
 
 static struct i2c_algo_bit_data bit_hydra_data = {
@@ -112,10 +126,11 @@ static struct i2c_algo_bit_data bit_hydra_data = {
 };
 
 static struct i2c_adapter bit_hydra_ops = {
-	.owner		= THIS_MODULE,
 	.name		= "Hydra i2c",
 	.id		= I2C_HW_B_HYDRA,
-	.algo_data		= &bit_hydra_data,
+	.algo_data	= &bit_hydra_data,
+	.inc_use	= bit_hydra_inc,
+	.dec_use	= bit_hydra_dec,
 };
 
 static struct pci_device_id hydra_ids[] __devinitdata = {

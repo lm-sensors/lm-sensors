@@ -527,6 +527,19 @@ static s32 i801_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
+static void i801_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void i801_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
 
 static u32 i801_func(struct i2c_adapter *adapter)
 {
@@ -549,10 +562,11 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter i801_adapter = {
-	.owner		= THIS_MODULE,
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_I801,
 	.algo		= &smbus_algorithm,
-	.name	= "unset",
+	.name		= "unset",
+	.inc_use	= i801_inc,
+	.dec_use	= i801_dec,
 };
 
 static struct pci_device_id i801_ids[] __devinitdata = {

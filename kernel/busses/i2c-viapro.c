@@ -275,6 +275,20 @@ static s32 vt596_access(struct i2c_adapter *adap, u16 addr,
 	return 0;
 }
 
+static void vt596_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void vt596_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
+
 static u32 vt596_func(struct i2c_adapter *adapter)
 {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
@@ -290,10 +304,11 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter vt596_adapter = {
-	.owner		= THIS_MODULE,
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_VIA2,
 	.algo		= &smbus_algorithm,
-	.name	= "unset",
+	.name		= "unset",
+	.inc_use	= vt596_inc,
+	.dec_use	= vt596_dec,
 };
 
 static int __devinit vt596_probe(struct pci_dev *pdev,

@@ -294,6 +294,19 @@ u32 nforce2_func(struct i2c_adapter *adapter)
 	    I2C_FUNC_SMBUS_BLOCK_DATA */;
 }
 
+static void nforce2_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void nforce2_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
 
 static struct pci_device_id nforce2_ids[] = {
 	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_NFORCE2_SMBUS,
@@ -322,16 +335,12 @@ static int __devinit nforce2_probe_smb (struct pci_dev *dev, int reg, struct nfo
 		return -1;
 	}
 
-	/* TODO: find a better way to find out whether this file is compiled
-	 * with i2c 2.7.0 of earlier
-	 */
-#ifdef I2C_HW_SMBUS_AMD8111
-	smbus->adapter.owner = THIS_MODULE;
-#endif
 	sprintf(smbus->adapter.name, "SMBus nForce2 adapter at %04x", smbus->base);
 	smbus->adapter.id = I2C_ALGO_SMBUS | I2C_HW_SMBUS_NFORCE2;
 	smbus->adapter.algo = &smbus_algorithm;
 	smbus->adapter.algo_data = smbus;
+	smbus->adapter.inc_use = nforce2_inc;
+	smbus->adapter.dec_use = nforce2_dec;
 
 	error = i2c_add_adapter(&smbus->adapter);
 	if (error) {

@@ -419,6 +419,19 @@ s32 piix4_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
+static void piix4_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void piix4_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
 
 u32 piix4_func(struct i2c_adapter *adapter)
 {
@@ -435,10 +448,11 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter piix4_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_PIIX4,
 	.algo		= &smbus_algorithm,
+	.inc_use	= piix4_inc,
+	.dec_use	= piix4_dec,
 };
 
 #ifndef PCI_DEVICE_ID_SERVERWORKS_CSB6

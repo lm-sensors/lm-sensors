@@ -171,6 +171,19 @@ void config_i810(struct pci_dev *dev)
 	}
 }
 
+static void i810_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void i810_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
 
 static struct i2c_algo_bit_data i810_i2c_bit_data = {
 	.setsda		= bit_i810i2c_setsda,
@@ -183,10 +196,11 @@ static struct i2c_algo_bit_data i810_i2c_bit_data = {
 };
 
 static struct i2c_adapter i810_i2c_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "I810/I815 I2C Adapter",
 	.id		= I2C_HW_B_I810,
 	.algo_data	= &i810_i2c_bit_data,
+	.inc_use	= i810_inc,
+	.dec_use	= i810_dec,
 };
 
 static struct i2c_algo_bit_data i810_ddc_bit_data = {
@@ -200,10 +214,11 @@ static struct i2c_algo_bit_data i810_ddc_bit_data = {
 };
 
 static struct i2c_adapter i810_ddc_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "I810/I815 DDC Adapter",
 	.id		= I2C_HW_B_I810,
 	.algo_data	= &i810_ddc_bit_data,
+	.inc_use	= i810_inc,
+	.dec_use	= i810_dec,
 };
 
 

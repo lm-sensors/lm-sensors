@@ -99,6 +99,20 @@ static int bit_tsunami_getsda(void *data)
 	return (0 != (readmpd() & MPD_DR));
 }
 
+static void i2c_tsunami_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void i2c_tsunami_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
+
 static struct i2c_algo_bit_data tsunami_i2c_bit_data = {
 	.setsda		= bit_tsunami_setsda,
 	.setscl		= bit_tsunami_setscl,
@@ -110,10 +124,11 @@ static struct i2c_algo_bit_data tsunami_i2c_bit_data = {
 };
 
 static struct i2c_adapter tsunami_i2c_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "I2C Tsunami/Typhoon adapter",
 	.id		= I2C_HW_B_TSUNA,
 	.algo_data	= &tsunami_i2c_bit_data,
+	.inc_use	= i2c_tsunami_inc,
+	.dec_use	= i2c_tsunami_dec,
 };
 
 

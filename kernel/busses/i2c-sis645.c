@@ -459,6 +459,20 @@ static s32 sis645_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
+static void sis645_inc(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+static void sis645_dec(struct i2c_adapter *adapter)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
+
 static u32 sis645_func(struct i2c_adapter *adapter)
 {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
@@ -474,10 +488,11 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter sis645_adapter = {
-	.owner		= THIS_MODULE,
 	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS645,
 	.algo		= &smbus_algorithm,
+	.inc_use	= sis645_inc,
+	.dec_use	= sis645_dec,
 };
 
 static struct pci_device_id sis645_ids[] __devinitdata = {
