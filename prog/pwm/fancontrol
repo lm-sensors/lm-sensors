@@ -2,23 +2,23 @@
 #
 # Simple script implementing a temperature dependent fan speed control
 #
-# Version 0.6
+# Version 0.61
 #
 # Usage: fancontrol [CONFIGFILE]
 #
 # Dependencies:
-#   bash, awk, egrep, sed, lm-sensors :)
+#   bash, awk, egrep, sed, lm_sensors :)
 #
-# Please send me any comments/suggestions to: marius.reiner@hdev.de Thanks!
+# Please send any questions, comments or success stories to
+# marius.reiner@hdev.de
+# Thanks!
 #
 # The latest version of this script is available at:
 # http://www.hdev.de/fancontrol/fancontrol.html
+# or in the CVS version of lm_sensors
 #
-# Please be careful when using the fan control features of your mainboard, in
-# addition to the risk of burning your CPU, at higher temperatures there will
-# be a higher wearout of your other hardware components, too. So if you plan to
-# use these components in 20 years, maybe you shouldn't use fancontrol/your
-# hardware at all.
+# For configuration instructions and warnings please see fancontrol.txt, which
+# can be found in the doc/ directory or at the website mentioned above.
 #
 #
 #    Copyright 2003 Marius Reiner <marius.reiner@hdev.de>
