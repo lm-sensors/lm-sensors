@@ -1,142 +1,221 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<HTML>
-<HEAD>
-<TITLE>I&#178C, SMBus and hardware monitoring references</TITLE>
-</HEAD>
-<BODY>
-<H1>I&#178C, SMBus and hardware monitoring references</H1>
-This document contains all kinds of useful references to I&#178C and SMBus
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.6 [en] (X11; I; Linux 2.4.0-test5 i586) [Netscape]">
+   <title>I&sup2;C, SMBus and hardware monitoring references</title>
+</head>
+<body>
+
+<h1>
+I&sup2;C, SMBus and hardware monitoring references</h1>
+This document contains all kinds of useful references to I&sup2;C and SMBus
 documents and implementations, and to hardware sensors documentation and
 implementations. Please report any other references you have found!
-<UL>
-<LI>I&#178C
-<UL>
-<LI>
-<A HREF="http://www.geocities.com/SiliconValley/9504/mic_b000.htm">General
-overview</A>
-<LI>
-<A HREF="http://kar10.kar.elf.stuba.sk/~balogh/MM/i2c/i2cindex.htm">I&#178C
-FAQ</A>
-<LI>
-<A HREF="http://ftp.philipsmcu.com">Philips, the I&#178C developers</A>
-<BR>This site contains many example programs</BR>
-<LI>
-<A HREF="http://www.tk.uni-linz.ac.at/~simon/private/i2c/v4l">Simon Vogl's
-I&#178C Linux kernel module</A>
-<LI>
-<A HREF="news://goesser.tk.uni-linz.ac.at/linux.i2c">Simon's I&#178C 
-newsgroup</A>
-</UL>
-<LI>SMBus
-<UL>
-<LI><A HREF="http://www.sbs-forum.org/specs/index.html">SMBus specification
-documents</A>
-</UL>
-<LI>I&#178C and SMBus implementations
-<UL>
-<LI><A HREF="http://www.intel.com">Intel PIIX4 (82371AB)</A>
-<BR>Intel SMBus adapter, integrated with many other functions. There
-are <A HREF="http://developer.intel.com/design/pcisets/datashts/">datasheet
-for most chipsets</A>.
-<LI><A HREF="http://www.via.com.tw">VIA South Bridge (VT85C586B)</A>
-<BR>VIA I&#178C adapter, integrated with many other functions. There is
-a separate <A HREF="http://www.via.com.tw/support/datasheets.html">section
-with datasheets</A>.
-<LI><A HREF="http://www.acerlabs.com">Acer Labs M1533/M1543C</A>
-<BR>Acer Labs SMBus adapter, integrated with many other functions.
-</UL>
-<LI>Hardware monitoring chips
-<UL>
-<LI><A HREF="http://www.national.com">National Semiconductors</A>
-<BR>LM75/78/79/80 
-<A HREF="http://www.national.com/catalog/AnalogTempSensors.html">reference
-sheets</A>.
-<LI><A HREF="http://www.winbond.com.tw">Winbond</A>
-<BR>W83781D, W83782D, W83783S and W83627HF chips. 
-<A HREF="http://www.winbond.com.tw/produ/perso7.htm">Data sheets</A> can
-not be found online for the W83627HF chip.
-<LI><A HREF="http://www.analog.com">Analog Devices</A>
-<BR>ADM1021 and ADM9240 
-<A HREF="http://products.analog.com/products_html/list_gen_100_2_1.html">reference 
-sheets</A>
-<LI><A HREF="http://www.linear.com">Linear Technologies</A>
-<BR>LTC1710 <A HREF="http://www.linear.com/prodinfo/dslist.html">data sheets</A>
-<LI><A HREF="http://www.genesyslogic.com">Genesys Logic</A>
-<BR>GL518SM and GL520SM 
-<A HREF="http://www.genesyslogic.com/products/hardward/index.html">data
-sheets</A>
-<LI><A HREF="http://www.hp.com/">Hewlett Packard</A>
-<BR>HP Maxilife (datasheets only under NDA...)
-<LI><A HREF="http://www.sis.com.tw/">Silicon Integrated Systems Corp.</A>
-<BR>SIS5595 <A HREF="http://www.sis.com.tw/products/products.htm">data
-sheets</A>
-<LI><A HREF="http://www.maxim-ic.com/">Maxim</A>
-<BR>MAX1617 data sheets
-<LI><A HREF="http://www.dalsemi.com">Dallas</A>
-<BR>DS1780 
-<A HREF="http://www.dalsemi.com/Prod_info/Thermal/index.html">data sheets</A>
-</UL>
-<LI>Other protocol information
-<UL>
-<LI><A HREF="http://developer.intel.com/design/servers/ipmi/">IPMI
-documentation</A>
-<BR>Intelligent Platform Management Interface, a standard for hardware
-monitor chip reading
-</UL>
-<LI>Hardware Monitoring Applications using the lm_sensors package
-<UL>
-<LI><A HREF="http://www.gedanken.demon.co.uk/procmeter3">Procmeter
-</A>
-<BR>A comprehensive system monitoring package. Nice desktop app. Recommended.
-<LI><A HREF="http://stimpy.netroedge.com/intranet/tellerstats/">A web-based
-hardware monitor</A>
-<BR>This is created by Phil Edelbrock, one of our main project contributors
-<LI><A HREF="http://users.ox.ac.uk/~kebl0850/wmlm78/">wmlm78/wmsensors homepage</A><br>
-wmlm78 and wmsensors are graphical extensions of lm_sensors, which can be docked in Window
-Manager.
-<LI><A HREF="http://www.brendy.addr.com/linux/klm/klm_home.html">klm</A>
-<BR>Brendon Humphrey's KDE display program for lm_sensors.
-<LI><A HREF="http://www.sjc.nl/Programs/GLS/">GLS</A>
-<BR>Stijn Jonker's program to make nice graphs of the lm_sensors output. Recommended. Requires mysql package.
-</UL>
-<LI>Other Hardware monitoring implementations (not using lm_sensors)
-<UL>
-<LI><A HREF="http://www.netroedge.com/~lm78">The official lm_sensors
-homepage</A>
-<LI><A HREF="http://www.lysator.liu.se/~alla/files/lm78_stuff/">Alexander
-Larsson's lm78 module</A>
-<BR>This is the original module lm_sensors is based upon
-<LI><A HREF="http://www.tu-chemnitz.de/~ronsc/tree/2_Projects/0_c++/lm78/index.html">Ronald Schmidt's lm78 module</A>
-<LI><A HREF="ftp://ftp.vu.union.edu/pub/users/hagopiar/">Beowulf project lm78
-module</A>
-<BR>Written by Erik Hendriks. This 
-<A HREF="http://beowulf.gsfc.nasa.gov/software/">Nasa site</A> may have a
-newer version. There is also <A HREF="http://smile.cpe.ku.ac.th">SCMS
-Cluster Management</A> for Beowulf clusters available, which supports the
+<ul>
+<li>
+I&sup2;C</li>
+
+<ul>
+<li>
+<a href="http://www.geocities.com/SiliconValley/9504/mic_b000.htm">General
+overview</a></li>
+
+<li>
+<a href="http://kar10.kar.elf.stuba.sk/~balogh/MM/i2c/i2cindex.htm">I&sup2;C
+FAQ</a></li>
+
+<li>
+<a href="http://ftp.philipsmcu.com">Philips, the I&sup2;C developers</a></li>
+
+<br>This site contains many example programs
+<li>
+<a href="http://www.tk.uni-linz.ac.at/~simon/private/i2c/v4l">Simon Vogl's
+I&sup2;C Linux kernel module</a></li>
+
+<li>
+<a href="news://goesser.tk.uni-linz.ac.at/linux.i2c">Simon's I&sup2;C newsgroup</a></li>
+</ul>
+
+<li>
+SMBus</li>
+
+<ul>
+<li>
+<a href="http://www.sbs-forum.org/specs/index.html">SMBus specification
+documents</a></li>
+</ul>
+
+<li>
+I&sup2;C and SMBus implementations</li>
+
+<ul>
+<li>
+<a href="http://www.intel.com">Intel PIIX4 (82371AB)</a></li>
+
+<br>Intel SMBus adapter, integrated with many other functions. There are
+<a href="http://developer.intel.com/design/pcisets/datashts/">datasheet
+for most chipsets</a>.
+<li>
+<a href="http://www.via.com.tw">VIA South Bridge (VT85C586B)</a></li>
+
+<br>VIA I&sup2;C adapter, integrated with many other functions. There is
+a separate <a href="http://www.via.com.tw/support/datasheets.html">section
+with datasheets</a>.
+<li>
+<a href="http://www.acerlabs.com">Acer Labs M1533/M1543C</a></li>
+
+<br>Acer Labs SMBus adapter, integrated with many other functions.</ul>
+
+<li>
+Hardware monitoring chips</li>
+
+<ul>
+<li>
+<a href="http://www.national.com">National Semiconductors</a></li>
+
+<br>LM75/78/79/80 <a href="http://www.national.com/catalog/AnalogTempSensors.html">reference
+sheets</a>.
+<li>
+<a href="http://www.winbond.com.tw">Winbond</a></li>
+
+<br>W83781D, W83782D, W83783S and W83627HF chips. <a href="http://www.winbond.com.tw/produ/perso7.htm">Data
+sheets</a> can be found here for most Winbond chips.
+<li>
+<a href="http://www.analog.com">Analog Devices</a></li>
+
+<br>ADM1021 and ADM9240 <a href="http://products.analog.com/products_html/list_gen_100_2_1.html">reference
+sheets</a>
+<li>
+<a href="http://www.linear.com">Linear Technologies</a></li>
+
+<br>LTC1710 <a href="http://www.linear.com/prodinfo/dslist.html">data sheets</a>
+<li>
+<a href="http://www.genesyslogic.com">Genesys Logic</a></li>
+
+<br>GL518SM and GL520SM <a href="http://www.genesyslogic.com/products/hardward/index.html">data
+sheets</a>
+<li>
+<a href="http://www.hp.com/">Hewlett Packard</a></li>
+
+<br>HP Maxilife (datasheets only under NDA...)
+<li>
+<a href="http://www.sis.com.tw/">Silicon Integrated Systems Corp.</a></li>
+
+<br>SIS5595 <a href="http://www.sis.com.tw/products/products.htm">data
+sheets</a>
+<li>
+<a href="http://www.maxim-ic.com/">Maxim</a></li>
+
+<br>MAX1617 data sheets
+<li>
+<a href="http://www.dalsemi.com">Dallas</a></li>
+
+<br>DS1780 <a href="http://www.dalsemi.com/Prod_info/Thermal/index.html">data
+sheets</a></ul>
+
+<li>
+Other protocol information</li>
+
+<ul>
+<li>
+<a href="http://developer.intel.com/design/servers/ipmi/">IPMI documentation</a></li>
+
+<br>Intelligent Platform Management Interface, a standard for hardware
+monitor chip reading</ul>
+
+<li>
+Hardware Monitoring Applications using the lm_sensors package</li>
+
+<ul>
+<li>
+<a href="http://www.gedanken.demon.co.uk/procmeter3">Procmeter</a></li>
+
+<br>A comprehensive system monitoring package. Nice desktop app. Recommended.
+<li>
+<a href="http://stimpy.netroedge.com/intranet/tellerstats/">A web-based
+hardware monitor</a></li>
+
+<br>This is created by Phil Edelbrock, one of our main project contributors
+<li>
+<a href="http://users.ox.ac.uk/~kebl0850/wmlm78/">wmlm78/wmsensors homepage</a></li>
+
+<br>wmlm78 and wmsensors are graphical extensions of lm_sensors, which
+can be docked in Window Manager.
+<li>
+<a href="http://www.brendy.addr.com/linux/klm/klm_home.html">klm</a></li>
+
+<br>Brendon Humphrey's KDE display program for lm_sensors.
+<li>
+<a href="http://voyager2.htmlplanet.com/sensors_srvr.html">Sensors Server</a></li>
+<br> Nice client/server application with a html-embedded Java applet.
+<li>
+<a href="http://www.multiweb.nl/~s.jonker/">GLS</a></li>
+
+<br>Stijn Jonker's program to make nice graphs of the lm_sensors output.
+Recommended. Requires mysql package.</ul>
+
+<li>
+Other Hardware monitoring implementations (not using lm_sensors)</li>
+
+<ul>
+<li>
+<a href="http://www.lysator.liu.se/~alla/files/lm78_stuff/">Alexander Larsson's
+lm78 module</a></li>
+
+<br>This is the original module lm_sensors is based upon
+<li>
+<a href="http://www.tu-chemnitz.de/~ronsc/tree/2_Projects/0_c++/lm78/index.html">Ronald
+Schmidt's lm78 module</a></li>
+
+<li>
+<a href="ftp://ftp.vu.union.edu/pub/users/hagopiar/">Beowulf project lm78
+module</a></li>
+
+<br>Written by Erik Hendriks. This <a href="http://beowulf.gsfc.nasa.gov/software/">Nasa
+site</a> may have a newer version. There is also <a href="http://smile.cpe.ku.ac.th">SCMS
+Cluster Management</a> for Beowulf clusters available, which supports the
 LM78 through the above kernel module.
-<LI><A HREF="http://pweb.uunet.de/ganzfix.duew/">txwd, another lm78 module</A>
-<LI><A HREF="http://wwwcip.rus.uni-stuttgart.de/~phy10296/index.html">Andr&aacute;s
-Major's LM75 module, and graphical monitor for it</A>
-</UL>
-<LI>Other useful tools
-<UL>
-<LI><A HREF="http://users.ev1.net/~redelm/">CPUBURN </A>
-<BR>CPU-heating program to stress-test marginally-cooled systems and test lm_sensors.
-</UL>
-<LI>Other things
-<UL>
-<LI><A HREF="http://www.tip.net.au/~millerp/rmch/recu-make-cons-harm.html">Recursive
-Make considered Harmful</A>
-<BR>A paper on which the version 2 Makefile is based
-<LI><A HREF="http://www.3dhardware.net/features/thermistor/">Building a
-temperature sensor using a thermistor</A>
-An article on the <A HREF="http://www.3dhardware.net">3D Hardware</A> site.
-<LI><A HREF="http://www.thermometrics.com/htmldocs/ntcapp.htm"> 
-NTC Thermistor Guide</A>
-<BR>A comprehensive description of the physics and mathematics
-of NTC Thermistors</A>
+<li>
+<a href="http://pweb.uunet.de/ganzfix.duew/">txwd, another lm78 module</a></li>
+
+<li>
+<a href="http://wwwcip.rus.uni-stuttgart.de/~phy10296/index.html">Andr&aacute;s
+Major's LM75 module, and graphical monitor for it</a></li>
+
 <LI><A HREF="http://www.egroups.com/files/solarisonintel/Drivers/">Solaris drivers for the LM78</A>
-</UL>
-</UL>
-</BODY>
-</HTML>
+</ul>
+
+<li>
+Other useful tools</li>
+
+<ul>
+<li>
+<a href="http://users.ev1.net/~redelm/">CPUBURN</a></li>
+
+<br>CPU-heating program to stress-test marginally-cooled systems and test
+lm_sensors.</ul>
+
+<li>
+Other things</li>
+
+<ul>
+<li>
+<a href="http://www.tip.net.au/~millerp/rmch/recu-make-cons-harm.html">Recursive
+Make considered Harmful</a></li>
+
+<br>A paper on which the version 2 Makefile is based
+<li>
+<a href="http://www.3dhardware.net/features/thermistor/">Building a temperature
+sensor using a thermistor</a> An article on the <a href="http://www.3dhardware.net">3D
+Hardware</a> site.</li>
+
+<li>
+<a href="http://www.thermometrics.com/assets/images/ntcnotes.pdf">NTC Thermistor
+Guide</a></li>
+
+<br>A comprehensive description of the physics and mathematics of NTC Thermistors</ul>
+</ul>
+
+</body>
+</html>
