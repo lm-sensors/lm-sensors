@@ -24,7 +24,7 @@ problems.
   Author of the i2c-via and i2c-viapro host drivers. Sis5595 hack.
   Extended support for GL518SM and GL520SM sensors.
 * Mark D. Studebaker <mdsxyz123@yahoo.com>
-  Author of the i2c-ali15x3 bus driver and the i2c-i810 bus driver.
+  Author of the i2c-ali15x3, i2c-i801, and i2c-i810 bus drivers.
   Added w83782d, w83783s, w83627hf, and as99127f support to the w83781d driver.
   Added max1617, thmc10, gl523sm, and lm84 support to the adm1021 driver.
   Added lm81 support to the adm9240 driver.
@@ -41,7 +41,6 @@ problems.
   Author of the AMD756 module and sensord.
 * Constantine Gavrilov <const-g@xpert.com>
   Created and maintains the RPM files
-
 * Simon Vogl <simon@tk.uni-linz.ac.at>
   Wrote the new i2c kernel driver. This driver is indispensable for the
   workings of lm_sensors version 2.

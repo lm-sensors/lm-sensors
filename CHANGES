@@ -15,6 +15,9 @@ ask CVS about it:
 
 2.5.0 (200001??)
   Dropped all kernel 2.0 and 2.1 compatibility
+  Module i2c-i810: new
+  Module i2c-amd756: fixed region request
+  Module ddcmon: new
 
 2.4.5 (20000116)
   Introduced DESTDIR installation prefix

@@ -1,0 +1,62 @@
+Kernel driver `i2c-i810.o'
+
+Status: 'Beta', still under development and testing
+
+Supported adapters:
+  * Intel 82810 and 82810-DC100 (GMCH)
+
+Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
+        <phil@netroedge.com>,
+        Kyösti Mälkki <kmalkki@cc.hut.fi>,
+	and Mark D. Studebaker <mdsxyz123@yahoo.com>
+
+Main contact: Mark Studebaker <mdsxyz123@yahoo.com>
+
+
+Module Parameters
+-----------------
+(none)
+
+
+Description
+-----------
+WARNING: If you have an '810' motherboard, your standard I2C
+temperature sensors are most likely on the 801's I2C bus.
+You want the i2c-i801.o driver for those.
+
+Now for the i2c-i810...
+
+The GMCH chip contains two I2C interfaces.
+
+The first interface is used for DDC (Data Display Channel)
+which is a serial channel through the VGA monitor connector
+to a DDC-compliant monitor. This interface is defined by the
+Video Electronics Standards Association (VESA). The standards
+are available for purchase at http://www.vesa.org .
+
+The second interface is a general-purpose I2C bus.
+It may be connected to a TV-out chip such as the BT869 or possibly
+to a digital flat-panel display.
+
+Stability
+---------
+Seems to be stable on the test machine, but needs more testing on other
+machines.
+
+Supported Devices
+-----------------
+Specifically, this driver was written and tested on the '3dfx Voodoo3 AGP
+3000' which has a tv-out feature (s-video or composite).  According to the
+docs and discussions, this code should work for any Voodoo3 based cards as
+well as Voodoo Banshee based cards.  The DDC interface has been tested
+on a Voodoo Banshee card.
+	
+Features
+--------
+Both busses use the i2c-algo-bit driver for 'bit banging' and support
+for specific transactions is provided by i2c-algo-bit.
+
+Issues
+------
+If you enable bus testing in i2c-algo-bit (insmod i2c-algo-bit bit_test=1),
+the test may fail and the i2c-i810 driver won't be inserted.

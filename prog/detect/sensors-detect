@@ -224,6 +224,22 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        driver => "i2c-voodoo3",
        match  => sub { $_[0] =~ /Banshee adapter/ },
      },
+     { 
+       vendid => 0x8086,
+       devid  => 0x7121,
+       func => 0,
+       procid => "Intel 82810 GMCH",
+       driver => "i2c-i810",
+       match => sub { $_[0] =~ /^I810/ },
+     } , 
+     { 
+       vendid => 0x8086,
+       devid  => 0x7123,
+       func => 0,
+       procid => "Intel 82810-DC100 GMCH",
+       driver => "i2c-i810",
+       match => sub { $_[0] =~ /^I810/ },
+     } , 
 );
 
 use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect 
