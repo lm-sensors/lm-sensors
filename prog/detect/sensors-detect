@@ -1503,7 +1503,7 @@ sub lm78_detect
   return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
   $reg = i2c_smbus_read_byte_data($file,0x49);
-  return unless ($chip == 0 and $reg == 0x00) or
+  return unless ($chip == 0 and ($reg == 0x00 or $reg == 0x20)) or
                     ($chip == 1 and $reg == 0x40) or
                     ($chip == 2 and ($reg & 0xfe) == 0xc0);
   return (7);
@@ -1529,7 +1529,7 @@ sub lm78_isa_detect
   my $readproc = sub { isa_read_byte $addr + 5, $addr + 6, @_ };
   return unless (&$readproc(0x40) & 0x80) == 0x00;
   my $reg = &$readproc(0x49);
-  return unless ($chip == 0 and $reg == 0x00) or
+  return unless ($chip == 0 and ($reg == 0x00 or $reg == 0x20)) or
                 ($chip == 1 and $reg == 0x40) or
                 ($chip == 2 and ($reg & 0xfe) == 0xc0);
   return 7;

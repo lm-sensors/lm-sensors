@@ -389,7 +389,7 @@ int lm78_detect(struct i2c_adapter *adapter, int address,
 	/* Determine the chip type. */
 	if (kind <= 0) {
 		i = lm78_read_value(new_client, LM78_REG_CHIPID);
-		if (i == 0x00)
+		if (i == 0x00 || i == 0x20)
 			kind = lm78;
 		else if (i == 0x40)
 			kind = lm78j;
