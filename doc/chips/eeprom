@@ -15,7 +15,8 @@ Supported chips:
                 Philips (www.semiconductor.philips.com),
                 Rohm (www.rohm.com),
                 ST (www.st.com),	
-                Xicor (www.xicor.com)		
+                Xicor (www.xicor.com),  	
+                and others.
 
         Chip     Size (bits)    Address
         24C01     1K            0x50 (shadows at 0x51 - 0x57)
@@ -27,8 +28,13 @@ Supported chips:
                                 0x53, 0x55, 0x56, 0x57)
         24C16    16K            0x50 (additional data at 0x51 - 0x57)
 	Sony      2K            0x57
+
+        Atmel     34C02B  2K    0x50 - 0x57, SW write protect at 0x30-37
+        Catalyst  34FC02  2K    0x50 - 0x57, SW write protect at 0x30-37
+        Catalyst  34RC02  2K    0x50 - 0x57, SW write protect at 0x30-37
+        Fairchild 34W02   2K    0x50 - 0x57, SW write protect at 0x30-37
         Microchip 24AA52  2K    0x50 - 0x57, SW write protect at 0x30-37
-        ST M34C02         2K    0x50 - 0x57, SW write protect at 0x30-37
+        ST        M34C02  2K    0x50 - 0x57, SW write protect at 0x30-37
 
 
 Author: Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock
@@ -60,15 +66,17 @@ Description
 
 This is a simple EEPROM module meant to enable reading the first 256 bytes
 of an EEPROM (on a SDRAM DIMM for example). However, it will access serial
-EEPROMs on any I2C adapter. This module will probably need to be
-expanded.  A /dev file interface would probably be more effective. 
+EEPROMs on any I2C adapter. The supported devices are generically
+called 24Cxx, and are listed above; however the numbering
+for these industry-standard devices may vary by manufacturer.
+
 This module was a programming exercise to get used to the new project
 organization laid out by Frodo, but it should be at least completely
 effective for decoding the contents of EEPROMs on DIMMs. 
 
-DIMMS will typically contain a 24C01A or 24C02. The other devices
-will not be found on a DIMM because they respond to more than one
-address.
+DIMMS will typically contain a 24C01A or 24C02, or the 34C02 variants.
+The other devices will not be found on a DIMM because
+they respond to more than one address.
 
 DDC Monitors may contain any device. Often a 24C01, which responds
 to all 8 addresses, is found. See the 'ddcmon' driver which has
@@ -80,7 +88,7 @@ eeprom.
 Recent Sony Vaio laptops have an EEPROM at 0x57. We couldn't get the
 specification, so it is guess work and far from being complete.
 
-The Microchip 24AA52/24LCS52 and the ST M34C02 support an additional
+The Microchip 24AA52/24LCS52, ST M34C02, and others support an additional
 software write protect register at 0x30 - 0x37 (0x20 less than the
 memory location). The chip responds to "write quick" detection at this
 address but does not respond to byte reads.
