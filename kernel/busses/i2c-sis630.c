@@ -1,8 +1,8 @@
 /*
-    sis630.c - Part of lm_sensors, Linux kernel modules for hardware
+    i2c-sis630.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
 
-    Copyright (c) 2002 Alexander Malysh <amalysh@web.de>
+    Copyright (c) 2002,2003 Alexander Malysh <amalysh@web.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,21 +21,21 @@
 
 /*
    Changes:
-   19.11.2002
-	Fixed logic by restoring of Host Master Clock
+   24.08.2002
+   	Fixed the typo in sis630_access (Thanks to Mark M. Hoffman)
+	Changed sis630_transaction.(Thanks to Mark M. Hoffman)
+   18.09.2002
+	Added SIS730 as supported
+   21.09.2002
+	Added high_clock module option.If this option is set
+	used Host Master Clock 56KHz (default 14KHz).For now we are save old Host
+	Master Clock and after transaction completed restore (otherwise
+	it's confuse BIOS and hung Machine).
    24.09.2002
 	Fixed typo in sis630_access
 	Fixed logical error by restoring of Host Master Clock
-   21.09.2002
-	Added high_clock module option.If this option is set 
-	used Host Master Clock 56KHz (default 14KHz).For now we are save old Host 
-	Master Clock and after transaction completed restore (otherwise
-	it's confuse BIOS and hung Machine).
-   18.09.2002
-	Added SIS730 as supported
-   24.08.2002
-   	Fixed the typo in sis630_access (Thanks to Mark M. Hoffman)
-	Changed sis630_transaction. Now it's 2x faster (Thanks to Mark M. Hoffman)
+   31.07.2003
+   	Added block data read/write support.
 */
 
 /*
@@ -59,12 +59,12 @@
 #include <asm/io.h>
 #include "version.h"
 
-struct sd {
-	const unsigned short mfr;
-	const unsigned short dev;
-	const unsigned char fn;
-	const char *name;
-};
+
+#ifdef DEBUG
+#define DBG(x...) printk(KERN_DEBUG "i2c-sis630.o: " x)
+#else
+#define DBG(x...)
+#endif
 
 /* SIS630 SMBus registers */
 #define SMB_STS     0x80 /* status */
@@ -103,84 +103,67 @@ struct sd {
 
 /* insmod parameters */
 
-/* If force is set to anything different from 0, we forcibly enable the
-   SIS630. DANGEROUS! */
 static int high_clock = 0;
-/*
-static int force = 0;
-MODULE_PARM(force, "i");
-MODULE_PARM_DESC(force, "Forcibly enable the SIS630. DANGEROUS!");
-*/
 MODULE_PARM(high_clock, "i");
 MODULE_PARM_DESC(high_clock, "Set Host Master Clock to 56KHz (default 14KHz).");
 
-static void sis630_do_pause(unsigned int amount);
-static int sis630_transaction(int size);
-
-static u8 sis630_read(u8 reg);
-static void sis630_write(u8 reg, u8 data);
+#if 0
+/* If force is set to anything different from 0, we forcibly enable the
+   SIS630. DANGEROUS! */
+static int force = 0;
+MODULE_PARM(force, "i");
+MODULE_PARM_DESC(force, "Forcibly enable the SIS630. DANGEROUS!");
+#endif
 
 
 static unsigned short acpi_base = 0;
 
 
-u8 sis630_read(u8 reg) {
+static inline u8 sis630_read(u8 reg) {
 	return inb(acpi_base + reg);
 }
 
-void sis630_write(u8 reg, u8 data) {
+static inline void sis630_write(u8 reg, u8 data) {
 	outb(data, acpi_base + reg);
 }
 
 /* Internally used pause function */
-void sis630_do_pause(unsigned int amount)
+static void sis630_do_pause(unsigned int amount)
 {
 	current->state = TASK_INTERRUPTIBLE;
 	schedule_timeout(amount);
 }
 
-int sis630_transaction(int size) {
+
+static int sis630_transaction_start(int size, u8 *oldclock) {
         int temp;
-        int result = 0;
-        int timeout = 0;
-	u8 oldclock;
 
         /*
 	  Make sure the SMBus host is ready to start transmitting.
 	*/
 	if ((temp = sis630_read(SMB_CNT) & 0x03) != 0x00) {
-#ifdef DEBUG
-                printk(KERN_DEBUG "i2c-sis630.o: SMBus busy (%02x). "
-			"Resetting...\n",temp);
-#endif
+                DBG("SMBus busy (%02x).Resetting...\n",temp);
 		/* kill smbus transaction */
 		sis630_write(SMBHOST_CNT, 0x20);
 
 		if ((temp = sis630_read(SMB_CNT) & 0x03) != 0x00) {
-#ifdef DEBUG
-                        printk(KERN_DEBUG "i2c-sis630.o: Failed! (%02x)\n",
-				temp);
-#endif
+                        DBG("Failed! (%02x)\n", temp);
 			return -1;
                 } else {
-#ifdef DEBUG
-                        printk(KERN_DEBUG "i2c-sis630.o: Successfull!\n");
-#endif
+                        DBG("Successfull!\n");
 		}
         }
 
-	/* save old clock, so we can prevent machine to hung */
-	oldclock = sis630_read(SMB_CNT);
+	/* save old clock, so we can prevent machine for hung */
+	*oldclock = sis630_read(SMB_CNT);
 
-#ifdef DEBUG
-	printk(KERN_DEBUG "i2c-sis630.o: saved clock 0x%02x\n", oldclock);
-#endif
+	DBG("saved clock 0x%02x\n", *oldclock);
 
 	/* disable timeout interrupt , set Host Master Clock to 56KHz if requested */
 	if (high_clock > 0)
 		sis630_write(SMB_CNT, 0x20);
 	else
-		sis630_write(SMB_CNT, (oldclock & ~0x40));
+		sis630_write(SMB_CNT, (*oldclock & ~0x40));
 
 	/* clear all sticky bits */
 	temp = sis630_read(SMB_STS);
@@ -189,44 +172,52 @@ int sis630_transaction(int size) {
 	/* start the transaction by setting bit 4 and size */
 	sis630_write(SMBHOST_CNT,0x10 | (size & 0x07));
 
+	return 0;
+}
+
+static int sis630_transaction_wait(int size) {
+        int temp, result = 0, timeout = 0;
+
         /* We will always wait for a fraction of a second! */
         do {
                 sis630_do_pause(1);
                 temp = sis630_read(SMB_STS);
+		/* check if block transmitted */
+		if (size == SIS630_BLOCK_DATA && (temp & 0x10))
+		    break;
         } while (!(temp & 0x0e) && (timeout++ < MAX_TIMEOUT));
 
         /* If the SMBus is still busy, we give up */
         if (timeout >= MAX_TIMEOUT) {
-#ifdef DEBUG
-                printk(KERN_DEBUG "i2c-sis630.o: SMBus Timeout!\n");
-#endif
+                DBG("SMBus Timeout!\n");
 		result = -1;
         }
 
         if (temp & 0x02) {
                 result = -1;
-#ifdef DEBUG
-                printk(KERN_DEBUG "i2c-sis630.o: Error: Failed bus "
-			"transaction\n");
-#endif
+                DBG("Error: Failed bus transaction\n");
 	}
 
         if (temp & 0x04) {
                 result = -1;
-                printk(KERN_ERR "i2c-sis630.o: Bus collision! "
-			"SMBus may be locked until next hard reset (or not...)\n");
-		/* 
+                printk(KERN_ERR "i2c-sis630.o: Bus collision!\n");
+		/*
 		   TBD: Datasheet say:
-		   	the software should clear this bit and restart SMBUS operation
+		   	the software should clear this bit and restart SMBUS operation.
+			Should we do it or user start request again?
 		*/
         }
+
+	return result;
+}
+
+static void sis630_transaction_end(u8 oldclock) {
+        int temp = 0;
 
         /* clear all status "sticky" bits */
 	sis630_write(SMB_STS, temp);
 
-#ifdef DEBUG
-	printk(KERN_DEBUG "i2c-sis630.o: SMB_CNT before clock restore 0x%02x\n", sis630_read(SMB_CNT));
-#endif
+	DBG("SMB_CNT before clock restore 0x%02x\n", sis630_read(SMB_CNT));
 
 	/*
 	* restore old Host Master Clock if high_clock is set
@@ -235,15 +226,98 @@ int sis630_transaction(int size) {
 	if (high_clock > 0 && !(oldclock & 0x20))
 		sis630_write(SMB_CNT,(sis630_read(SMB_CNT) & ~0x20));
 
-#ifdef DEBUG
-	printk(KERN_DEBUG "i2c-sis630.o: SMB_CNT after clock restore 0x%02x\n", sis630_read(SMB_CNT));
-#endif
+	DBG("SMB_CNT after clock restore 0x%02x\n", sis630_read(SMB_CNT));
+}
+
+static int sis630_transaction(int size) {
+        int result = 0;
+	u8 oldclock = 0;
+
+	if (!(result = sis630_transaction_start(size, &oldclock))) {
+		result = sis630_transaction_wait(size);
+		sis630_transaction_end(oldclock);
+	}
 
         return result;
 }
 
+static int sis630_block_data(union i2c_smbus_data * data, int read_write) {
+	int i, len = 0, rc = 0;
+	u8 oldclock = 0;
+
+	if (read_write == I2C_SMBUS_WRITE) {
+		len = data->block[0];
+		if (len < 0)
+			len = 0;
+		else if (len > 32)
+			len = 32;
+		sis630_write(SMB_COUNT, len);
+		for (i=1; i <= len; i++) {
+			DBG("set data 0x%02x\n", data->block[i]);
+			/* set data */
+			sis630_write(SMB_BYTE+(i-1)%8, data->block[i]);
+			if (i==8 || (len<8 && i==len)) {
+				DBG("start trans len=%d i=%d\n",len ,i);
+				/* first transaction */
+				if (sis630_transaction_start(SIS630_BLOCK_DATA, &oldclock))
+					return -1;
+			}
+			else if ((i-1)%8 == 7 || i==len) {
+				DBG("trans_wait len=%d i=%d\n",len,i);
+				if (i>8) {
+					DBG("clear smbary_sts len=%d i=%d\n",len,i);
+					/*
+					   If this is not first transaction,
+					   we must clear sticky bit.
+					   clear SMBARY_STS
+					*/
+					sis630_write(SMB_STS,0x10);
+				}
+				if (sis630_transaction_wait(SIS630_BLOCK_DATA)) {
+					DBG("trans_wait failed\n");
+					rc = -1;
+					break;
+				}
+
+			}
+		}
+	}
+	else { /* read request */
+		data->block[0] = len = 0;
+		if (sis630_transaction_start(SIS630_BLOCK_DATA, &oldclock)) {
+			return -1;
+		}
+		do {
+			if (sis630_transaction_wait(SIS630_BLOCK_DATA)) {
+				DBG("trans_wait failed\n");
+				rc = -1;
+				break;
+			}
+			/* if this first transaction then read byte count */
+			if (len == 0)
+				data->block[0] = sis630_read(SMB_COUNT);
+
+			DBG("block data read len=0x%x\n", data->block[0]);
+
+			for (i=0; i < 8 && len < data->block[0]; i++,len++) {
+				DBG("read i=%d len=%d\n", i, len);
+				data->block[len+1] = sis630_read(SMB_BYTE+i);
+			}
+
+			DBG("clear smbary_sts len=%d i=%d\n",len,i);
+
+			/* clear SMBARY_STS */
+			sis630_write(SMB_STS,0x10);
+		} while(len < data->block[0]);
+	}
+
+	sis630_transaction_end(oldclock);
+
+	return rc;
+}
+
 /* Return -1 on error. */
-s32 sis630_access(struct i2c_adapter * adap, u16 addr,
+static s32 sis630_access(struct i2c_adapter * adap, u16 addr,
 		   unsigned short flags, char read_write,
 		   u8 command, int size, union i2c_smbus_data * data)
 {
@@ -277,12 +351,10 @@ s32 sis630_access(struct i2c_adapter * adap, u16 addr,
 			size = (size == I2C_SMBUS_PROC_CALL ? SIS630_PCALL : SIS630_WORD_DATA);
 			break;
 		case I2C_SMBUS_BLOCK_DATA:
-/* it's not implemented yet, but comming soon */
-#if 0
 			sis630_write(SMB_ADDR,((addr & 0x7f) << 1) | (read_write & 0x01));
 			sis630_write(SMB_CMD, command);
 			size = SIS630_BLOCK_DATA;
-#endif
+			return sis630_block_data(data, read_write);
 		default:
 			printk("Unsupported I2C size\n");
 			return -1;
@@ -316,12 +388,13 @@ s32 sis630_access(struct i2c_adapter * adap, u16 addr,
 }
 
 
-u32 sis630_func(struct i2c_adapter *adapter) {
+static u32 sis630_func(struct i2c_adapter *adapter) {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE | I2C_FUNC_SMBUS_BYTE_DATA |
-		I2C_FUNC_SMBUS_WORD_DATA | I2C_FUNC_SMBUS_PROC_CALL;
+		I2C_FUNC_SMBUS_WORD_DATA | I2C_FUNC_SMBUS_PROC_CALL |
+		I2C_FUNC_SMBUS_BLOCK_DATA;
 }
 
-int sis630_setup(struct pci_dev *dummy) {
+static int sis630_setup(struct pci_dev *dummy) {
 	unsigned char b;
 	struct pci_dev *sis630_dev = NULL;
 
@@ -359,9 +432,7 @@ int sis630_setup(struct pci_dev *dummy) {
 		return -ENODEV;
 	}
 
-#ifdef DEBUG
-	printk(KERN_DEBUG "i2c-sis630.o: ACPI base at 0x%04x\n", acpi_base);
-#endif
+	DBG("ACPI base at 0x%04x\n", acpi_base);
 
 	/* Everything is happy, let's grab the memory and set things up. */
 	if (!request_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION, "sis630-smbus")){
@@ -416,6 +487,7 @@ static int __devinit sis630_probe(struct pci_dev *dev, const struct pci_device_i
 
 	sprintf(sis630_adapter.name, "SMBus SIS630 adapter at %04x",
 		acpi_base + SMB_STS);
+
 	return i2c_add_adapter(&sis630_adapter);
 }
 
