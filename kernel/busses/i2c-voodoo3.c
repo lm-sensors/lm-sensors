@@ -23,6 +23,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#define DEBUG 1
+
 /* This interfaces to the I2C bus of the Voodoo3 to gain access to
     the BT869 and possibly other I2C devices. */
 
@@ -111,11 +113,14 @@ inline int rdat(void)
         return((readlong(0x78)&(1<<27) )!=0 );
 }
 
+/* Changing the Data line while clock is 'on' (high) is a
+   no-no, except for a start or stop.  */
+   
 void Voodoo3_I2CStart(void)
 {
-  dat(0);
-  clkon();
+  clkon(); /* in theory, clk is already on */
   out();
+  dat(0);
   out();
   clkoff();
   out();
@@ -155,6 +160,8 @@ int Voodoo3_I2CReadByte()
   int i,temp;
   unsigned char data=0;
 
+  clkoff();
+  out();
   for (i=7; i>=0; i--) {
     out();
     clkon();
@@ -177,6 +184,8 @@ int Voodoo3_I2CSendByte(unsigned char data)
 {
   int i,temp;
 
+  clkoff();
+  out();
   for (i=7; i>=0; i--) {
     dat(temp=data&(1<<i));
     out();
