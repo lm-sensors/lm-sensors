@@ -193,7 +193,7 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
 
 #define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
-                                                 ((val)+5)/10),0,255))
+                                                 ((val)+5)/10),-127,127))
 #define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
@@ -210,7 +210,6 @@ extern inline u8 DIV_TO_REG(long val)
 	}
 	return 1;
 }
-/*#define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)*/
 #define DIV_FROM_REG(val) (1 << (val))
 
 /* For each registered IT87, we need to keep some data in memory. That
