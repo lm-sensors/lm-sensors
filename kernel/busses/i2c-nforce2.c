@@ -145,7 +145,8 @@ s32 nforce2_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 		union i2c_smbus_data * data)
 {
 	struct nforce2_smbus *smbus = adap->algo_data;
-	unsigned char protocol, len, pec, temp;
+	unsigned char protocol, pec, temp;
+	unsigned char len = 0; /* to keep the compiler quiet */
 	int timeout = 0;
 	int i;
 
@@ -276,12 +277,12 @@ s32 nforce2_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 			break;
 
 		case I2C_SMBUS_WORD_DATA:
-		case I2C_SMBUS_PROC_CALL:
+		/* case I2C_SMBUS_PROC_CALL: not supported */
 			data->word = inb_p(NVIDIA_SMB_DATA) | (inb_p(NVIDIA_SMB_DATA+1) << 8);
 			break;
 
 		case I2C_SMBUS_BLOCK_DATA:
-		case I2C_SMBUS_BLOCK_PROC_CALL:
+		/* case I2C_SMBUS_BLOCK_PROC_CALL: not supported */
 			len = inb_p(NVIDIA_SMB_BCNT);
 			len = min_t(u8, len, 32);
 		case I2C_SMBUS_I2C_BLOCK_DATA:
