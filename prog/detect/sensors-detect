@@ -2102,7 +2102,11 @@ sub scan_superio
       add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver},
                                             $new_hash;
     } else {
-      print "  Failed!\n";
+      if($val == 0xff) {	
+        print "  Failed!\n";
+      } else {
+        printf "  Failed! (0x%02x)\n", $val;
+      }
     }
     outb($$chip{exitreg}, $$chip{exit});
   }
