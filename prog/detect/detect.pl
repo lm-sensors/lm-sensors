@@ -211,16 +211,10 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        isa_detect => sub { sis5595_isa_detect @_ },
      },
      {
-       name => "Serial EEPROM",
+       name => "Serial EEPROM (PC-100 DIMM)",
        driver => "eeprom",
        i2c_addrs => [0x50..0x57],
-       i2c_detect => sub { eeprom_detect 0,@_ },
-     },
-     {
-       name => "Serial EEPROM on PC-100 DIMM",
-       driver => "eeprom",
-       i2c_addrs => [0x50..0x57],
-       i2c_detect => sub { eeprom_detect 1,@_ },
+       i2c_detect => sub { eeprom_detect @_ },
      }
 );
 
@@ -1299,7 +1293,7 @@ sub sis5595_isa_detect
 #   0x00-0x63: PC-100 Data and Checksum
 sub eeprom_detect
 {
-  my ($chip,$file,$addr) = @_;
+  my ($file,$addr) = @_;
   # Check the checksum for validity (only works for PC-100 DIMMs)
   my $checksum = 0;
   for (my $i = 0; $i <= 62; $i = $i + 1) {
@@ -1310,11 +1304,7 @@ sub eeprom_detect
   	return (8);
   }
   # Even if checksum test fails, it still may be an eeprom
-  if ($chip == 0) {
-	return (1);
-  } else {
-  	return;
-  }
+  return (1);
 }
 
 ################
