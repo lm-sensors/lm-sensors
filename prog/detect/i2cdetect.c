@@ -28,13 +28,19 @@
 #include "i2c-dev.h"
 #include "version.h"
 
+#define MODE_AUTO	0
+#define MODE_QUICK	1
+#define MODE_READ	2
+
 void print_i2c_busses(int);
 
 void help(void)
 {
-	fprintf(stderr,"Syntax: i2cdetect [-f] I2CBUS\n");
+	fprintf(stderr,"Syntax: i2cdetect [-f] [-q|-r] I2CBUS\n");
 	fprintf(stderr,"  I2CBUS is an integer\n");
 	fprintf(stderr,"  With -f, scans all addresses (NOT RECOMMENDED)\n");
+	fprintf(stderr,"  With -q, uses only quick write commands for probing (NOT RECOMMENDED)\n");
+	fprintf(stderr,"  With -r, uses only read byte commands for probing (NOT RECOMMENDED)\n");
 	fprintf(stderr,"  i2cdetect -l lists installed busses only\n");
 	print_i2c_busses(0);
 }
@@ -42,7 +48,7 @@ void help(void)
 int main(int argc, char *argv[])
 {
   char *end;
-  int i,j,res,i2cbus,file;
+  int i=1,j,res,i2cbus=-1,file;
   int e1, e2, e3;
   char filename1[20];
   char filename2[20];
@@ -50,45 +56,59 @@ int main(int argc, char *argv[])
   char *filename;
   long funcs;
   int force = 0;
+  int mode = MODE_AUTO;
   
 
-  if (argc < 2) {
-    fprintf(stderr,"Error: No i2c-bus specified!\n");
-    help();
-    exit(1);
-  }
-
-  if((!strcmp(argv[1], "-v")) || (!strcmp(argv[1], "-V"))) {
-    fprintf(stderr,"i2cdetect version %s\n", LM_VERSION);
-    exit(0);
-  }
-
-  if(!strcmp(argv[1], "-l")) {
-    print_i2c_busses(1);
-    exit(0);
-  }
-
-  if(!strcmp(argv[1], "-f")) {
-    force = 1;
-    if (argc < 3) {
+  while(i2cbus == -1) {
+    if (i >= argc) {
       fprintf(stderr,"Error: No i2c-bus specified!\n");
       help();
       exit(1);
     }
-  }
 
-  i2cbus = strtol(argv[force?2:1],&end,0);
-  if (*end) {
-    fprintf(stderr,"Error: I2CBUS argument not a number!\n");
-    help();
-    exit(1);
-  }
-  if ((i2cbus < 0) || (i2cbus > 0xff)) {
-    fprintf(stderr,"Error: I2CBUS argument out of range!\n");
-    help();
-    exit(1);
-  }
+    if(!strcasecmp(argv[i], "-v")) {
+      fprintf(stderr,"i2cdetect version %s\n", LM_VERSION);
+      exit(0);
+    }
 
+    if(!strcmp(argv[i], "-l")) {
+      print_i2c_busses(1);
+      exit(0);
+    }
+
+    if(!strcmp(argv[i], "-f")) {
+      force = 1;
+      i++;
+    } else
+    if(!strcmp(argv[i], "-q")) {
+      if (mode != MODE_AUTO) {
+        fprintf(stderr,"Error: Different modes specified!\n");
+        exit(1);
+      }
+      mode = MODE_QUICK;
+      i++;
+    } else
+    if(!strcmp(argv[i], "-r")) {
+      if (mode != MODE_AUTO) {
+        fprintf(stderr,"Error: Different modes specified!\n");
+        exit(1);
+      }
+      mode = MODE_READ;
+      i++;
+    } else {
+      i2cbus = strtol(argv[i],&end,0);
+      if (*end) {
+        fprintf(stderr,"Error: I2CBUS argument not a number!\n");
+        help();
+        exit(1);
+      }
+      if ((i2cbus < 0) || (i2cbus > 0xff)) {
+        fprintf(stderr,"Error: I2CBUS argument out of range!\n");
+        help();
+        exit(1);
+      }
+    }
+  }
 /*
  * Try all three variants and give the correct error message
  * upon failure
@@ -140,18 +160,29 @@ int main(int argc, char *argv[])
     fprintf(stderr,
             "Error: Could not get the adapter functionality matrix: %s\n",
             strerror(errno));
+    close(file);
     exit(1);
   }
-  if (! (funcs & I2C_FUNC_SMBUS_QUICK)) {
+  if (mode != MODE_READ && !(funcs & I2C_FUNC_SMBUS_QUICK)) {
     fprintf(stderr,
             "Error: Can't use SMBus Quick Write command "
             "on this bus (ISA bus?)\n");
+    close(file);
+    exit(1);
+  }
+  if (mode != MODE_QUICK && !(funcs & I2C_FUNC_SMBUS_READ_BYTE)) {
+    fprintf(stderr,
+            "Error: Can't use SMBus Read Byte command "
+            "on this bus (ISA bus?)\n");
+    close(file);
     exit(1);
   }
   
   fprintf(stderr,"  WARNING! This program can confuse your I2C bus, "
           "cause data loss and worse!\n");
-  fprintf(stderr,"  I will probe file %s\n", filename);
+  fprintf(stderr,"  I will probe file %s%s\n", filename,
+          mode==MODE_QUICK?" using quick write commands":
+          mode==MODE_READ?" using read byte commands":"");
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
   sleep(5);
 
@@ -170,11 +201,30 @@ int main(int argc, char *argv[])
         } else {
           fprintf(stderr,"Error: Could not set address to %02x: %s\n",i+j,
                   strerror(errno));
+          close(file);
           exit(1);
         }
       }
 
-      res = i2c_smbus_write_quick(file, I2C_SMBUS_WRITE);
+      switch(mode) {
+      case MODE_QUICK:
+        /* This is known to corrupt the Atmel AT24RF08 EEPROM */
+        res = i2c_smbus_write_quick(file, I2C_SMBUS_WRITE);
+        break;
+      case MODE_READ:
+        /* This is known to lock SMBus on various write-only chips
+           (mainly clock chips) */
+        res = i2c_smbus_read_byte(file);
+        break;
+      default:
+        if((i+j>=0x30 && i+j<=0x37)
+        || (i+j>=0x50 && i+j<=0x5F)) {
+          res = i2c_smbus_write_quick(file, I2C_SMBUS_WRITE);
+        } else {
+          res = i2c_smbus_read_byte(file);
+        }
+      }
+
       if (res < 0)
         printf("XX ");
       else
@@ -182,5 +232,6 @@ int main(int argc, char *argv[])
     }
     printf("\n");
   }
+  close(file);
   exit(0);
 }

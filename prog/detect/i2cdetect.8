@@ -5,6 +5,7 @@ i2cdetect \- detect I\u2\dC chips
 .SH SYNOPSIS
 .B i2cdetect
 .RI [ -f ]
+.RI [ -q | -r ]
 .I i2cbus
 .br
 .B i2cdetect
@@ -23,6 +24,18 @@ This program can confuse your I\u2\dC bus, cause data loss and worse!
 .TP
 .B "\-f"
 Force scanning of non-regular addresses. Not recommended.
+.TP
+.B "\-q"
+Use SMBus "quick write" commands for probing (by default, the command
+used is the one believed to be the safest for each address). 
+Not recommended. This is known to corrupt the Atmel AT24RF08 EEPROM
+found on many IBM Thinkpad laptops.
+.TP
+.B "\-r"
+Use SMBus "read byte" commands for probing (by default, the command
+used is the one believed to be the safest for each address). 
+Not recommended. This is known to lock SMBus on various write-only
+chips (most notably clock chips at address 0x69).
 .TP
 .B "\-l"
 Output a list of installed busses.
