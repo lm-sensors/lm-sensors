@@ -175,6 +175,7 @@ static inline u8 PWM_TO_REG(int val, int inv)
  * Temperature registers and conversions
  */
 
+#define PC87365_REG_TEMP_CONFIG		0x08
 #define PC87365_REG_TEMP		0x0B
 #define PC87365_REG_TEMP_MIN		0x0D
 #define PC87365_REG_TEMP_MAX		0x0C
@@ -591,10 +592,16 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	if ((err = i2c_attach_client(new_client)))
 		goto ERROR1;
 
-	/* Use the correct reference voltage */
+	/* Use the correct reference voltage
+	   Unless both the VLM and the TMS logical devices agree to
+	   use an external Vref, the internal one is used. */
 	if (data->innr) {
 		i = pc87360_read_value(data, LD_IN, NO_BANK,
 				       PC87365_REG_IN_CONFIG);
+		if (data->tempnr) {
+		 	i &= pc87360_read_value(data, LD_TEMP, NO_BANK,
+						PC87365_REG_TEMP_CONFIG);
+		}
 		data->in_vref = (i&0x02) ? 303 : 297;
 #ifdef DEBUG
 		printk(KERN_DEBUG "Using %s reference voltage\n",
