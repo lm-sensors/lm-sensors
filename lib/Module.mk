@@ -33,7 +33,7 @@ LIBMAN5FILES := $(MODULE_DIR)/sensors.conf.5
 # the public header files - in this case they are error.h, sensors.h,
 # chips.h.
 LIBMAINVER := 3
-LIBMINORVER := 0.7
+LIBMINORVER := 0.8
 LIBVER := $(LIBMAINVER).$(LIBMINORVER)
 
 # The static lib name, the shared lib name, and the internal ('so') name of
