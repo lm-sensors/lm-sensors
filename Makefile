@@ -150,8 +150,14 @@ MACHINE := $(shell uname -m)
 # to do this. 
 
 # The subdirectories we need to build things in 
-SRCDIRS := mkpatch
-SRCDIRS += kernel kernel/busses kernel/chips kernel/include
+SRCDIRS :=
+ifneq ($(MAKECMDGOALS),user)
+ifneq ($(MAKECMDGOALS),user_install)
+SRCDIRS += mkpatch
+SRCDIRS += kernel kernel/busses kernel/chips
+endif
+endif
+SRCDIRS += kernel/include
 SRCDIRS += lib prog/detect prog/dump prog/eeprom prog/pwm \
            prog/sensors prog/xeon ${PROG_EXTRA:%=prog/%} etc
 
@@ -164,7 +170,7 @@ BISON := bison
 FLEX := flex
 AR := ar
 INSTALL := install
-LN := ln -sfn
+LN := ln -sf
 GREP := grep
 AWK := awk
 SED := sed

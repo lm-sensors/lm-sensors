@@ -20,6 +20,7 @@
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := kernel/include
 KERNELINCLUDEDIR := $(MODULE_DIR)
+KERNELCHIPSDIR := kernel/chips
 
 KERNELINCLUDEFILES := $(MODULE_DIR)/i2c-dev.h $(MODULE_DIR)/sensors.h
 
