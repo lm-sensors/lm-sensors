@@ -1751,3 +1751,78 @@ chip "smsc47m1-*"
     set fan1_min 3000
     set fan2_min 3000
 
+#
+# This example was tested vs. Asus P4S333
+#
+chip "asb100-*"
+    set vrm 9.0
+
+    label in0 "VCore 1"
+    set in0_min vid * 0.95
+    set in0_max vid * 1.05
+
+    label in1 "VCore 2"
+    ignore in1
+    set in1_min vid * 0.95
+    set in1_max vid * 1.05
+
+    label in2 "+3.3V"
+    set in2_min 3.3 * 0.95
+    set in2_max 3.3 * 1.05
+
+    label in3 "+5V"
+    compute in3 1.68 * @ ,  @ / 1.68
+    set in3_min 5.0 * 0.95
+    set in3_max 5.0 * 1.05
+
+    label in4 "+12V"
+    compute in4 3.8 * @ , @ / 3.8
+    set in4_min 12  * 0.90
+    set in4_max 12  * 1.10
+
+    label in5 "-12V (reserved)"
+    #ignore in5
+    compute in5 -@ * 3.97 ,  -@ / 3.97
+    set in5_max -12 * 0.90
+    set in5_min -12 * 1.10
+
+    label in6 "-5V (reserved)"
+    #ignore in6
+    compute in6 -@ * 1.666 , -@ / 1.666
+    set in6_max -5  * 0.95
+    set in6_min -5  * 1.05
+
+    label temp1 "M/B Temp"
+    set temp1_over 45
+    set temp1_hyst 40
+
+    label temp2 "CPU Temp (Intel)"
+    #ignore temp2
+    set temp2_over 60
+    set temp2_hyst 50
+
+    # PWRTMP connector on P4S333, for external sensor
+    label temp3 "Power Temp"
+    #ignore temp3
+    set temp3_over 45
+    set temp3_hyst 40
+
+
+    # Used for Athlon diode, ignore for P4S333
+    label temp4 "CPU Temp (AMD)"
+    set temp4_over 60
+    set temp4_hyst 50
+    #ignore temp4
+
+    label fan1 "CPU Fan"
+    set fan1_div 4
+    set fan1_min 2000
+
+    label fan2 "Chassis Fan"
+    set fan2_div 2
+    set fan2_min 4000
+
+    label fan3 "Power Fan"
+    set fan3_div 2
+    set fan3_min 4000
+
