@@ -31,6 +31,11 @@ use strict;
 use Fcntl;
 use POSIX;
 
+# Just in case a root user doesn't have /sbin in his/her path for some reason
+# (was seen once)
+$ENV{PATH} .= '/sbin:'
+	unless $ENV{PATH} =~ m,(^|:)/sbin/?(:|$),;
+
 #########################
 # CONSTANT DECLARATIONS #
 #########################
