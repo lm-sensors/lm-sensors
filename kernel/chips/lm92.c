@@ -60,20 +60,16 @@
 #define NATIVE_TO_PROC(x) ((x) * 625)
 #define CELSIUS(x) ((x) * 16)
 
-#define ENTRY(name,proc,perm,callback)		\
-	{										\
-		ctl_name:		name,				\
-		procname:		proc,				\
-		data:			NULL,				\
-		maxlen:			0,					\
-		mode:			perm,				\
-		child:			NULL,				\
-		proc_handler:	&i2c_proc_real,		\
-		strategy:		&i2c_sysctl_real,	\
-		de:				NULL,				\
-		extra1:			callback,			\
-		extra2:			NULL				\
-	}
+static void lm92_temp (struct i2c_client *client,int operation,int ctl_name,int *nrels_mag,long *results);
+static void lm92_alarms (struct i2c_client *client,int operation,int ctl_name,int *nrels_mag,long *results);
+
+static ctl_table lm92_dir_table[] = {
+	{LM92_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm92_temp, NULL},
+	{LM92_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm92_alarms, NULL},
+	{0}
+};
 
 /* NOTE: all temperatures are degrees centigrade * 16 */
 typedef struct {
@@ -261,11 +257,6 @@ static int lm92_init_client (struct i2c_client *client)
 
 static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short flags,int kind)
 {
-	static ctl_table dir_table[] = {
-		ENTRY (LM92_SYSCTL_TEMP,"temp",0644,&lm92_temp),
-		ENTRY (LM92_SYSCTL_ALARMS,"alarms",0444,&lm92_alarms),
-		{ 0 }
-	};
 	static int id = 0;
 	struct i2c_client *client;
 	lm92_t *data;
@@ -304,7 +295,7 @@ static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short f
 		return (result);
 	}
 
-	if ((result = i2c_register_entry (client,client->name,dir_table,THIS_MODULE)) < 0) {
+	if ((result = i2c_register_entry (client,client->name,lm92_dir_table,THIS_MODULE)) < 0) {
 		i2c_detach_client (client);
 		kfree (client);
 		up (&mutex);
