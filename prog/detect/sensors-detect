@@ -4385,6 +4385,7 @@ sub generate_modprobes
           not exists $adapters[$detection->{i2c_devnr}]->{nr_later} and 
           not (exists $detection->{isa_addr} and $prefer_isa)) {
          foreach $adap (@adapters) {
+           next unless exists $adap->{driver};
            $adap->{nr_later} = $nr++ if $adap->{driver} eq $detection->{i2c_driver};
          }
       }
@@ -4397,15 +4398,18 @@ sub generate_modprobes
 
   for ($i = 0; $i < $nr; $i++) {
     foreach $adap (@adapters) {
+      next unless exists $adap->{nr_later} and $adap->{nr_later} == $i;
       if ($adap->{driver} eq "UNKNOWN") {
-        $modprobes .= "# modprobe unknown adapter ".$adap->{adapname}." using ". $adap->{algoname}."\n";
+        $modprobes .= "# modprobe unknown adapter ".$adap->{adapname}."\n";
       } elsif ($adap->{driver} eq "DISABLED") {
-        $modprobes .= "# modprobe disabled adapter ".$adap->{adapname}." using ". $adap->{algoname}."\n";
+        $modprobes .= "# modprobe disabled adapter ".$adap->{adapname}."\n";
       } elsif ($adap->{driver} eq "to-be-written") {
-        $modprobes .= "# no driver available for adapter ".$adap->{adapname}." using ". $adap->{algoname}."\n";
+        $modprobes .= "# no driver available for adapter ".$adap->{adapname}."\n";
       } else {
-        $modprobes .= "modprobe $adap->{driver}\n" if (defined($adap->{nr_later}) and $adap->{nr_later} == $i) and not $modprobes =~ /modprobe $adap->{driver}\n/;
+        $modprobes .= "modprobe $adap->{driver}\n"
+          unless $modprobes =~ /modprobe $adap->{driver}\n/;
       }
+      last;
     }
   }
   $modprobes .= "modprobe i2c-isa\n" if ($isa);
