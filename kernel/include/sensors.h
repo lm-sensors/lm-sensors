@@ -605,6 +605,11 @@ struct sensors_chips_data {
 #define MATORB_SYSCTL_DISP 1000
 
 #define THMC50_SYSCTL_TEMP 1200 /* Degrees Celcius */
+#define THMC50_SYSCTL_REMOTE_TEMP 1201 /* Degrees Celcius */
+#define THMC50_SYSCTL_INTER 1202
+#define THMC50_SYSCTL_INTER_MASK 1203
+#define THMC50_SYSCTL_DIE_CODE 1204
+#define THMC50_SYSCTL_ANALOG_OUT 1205
 
 
 #endif /* def SENSORS_SENSORS_H */
