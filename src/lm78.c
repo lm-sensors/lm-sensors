@@ -720,7 +720,7 @@ void lm78_update_client(struct i2c_client *client)
     data->fan_div[0] = (i >> 4) & 0x03;
     data->fan_div[1] = i >> 6;
     data->alarms = lm78_read_value(client,LM78_REG_ALARM1) +
-                   (lm78_read_value(client,LM78_REG_ALARM2) >> 8);
+                   (lm78_read_value(client,LM78_REG_ALARM2) << 8);
     data->last_updated = jiffies;
     data->valid = 1;
   }

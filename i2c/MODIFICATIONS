@@ -20,8 +20,8 @@ Here come the changes:
   changes will probably be included in the next i2c version.
 
 * algo-bit.c, i2c-core.c: Debugging level turned down
-  The default debugging level was 1, which created a lot of noise in
-  the kernel message logs (dmesg)
+  The transfer functions are now on debug level 2, to keep the noise within
+  acceptable limits.
 
 * New file: Module.mk
   The Makefile fragment we use to compile the files in this directory.

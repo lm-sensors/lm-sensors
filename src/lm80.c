@@ -37,19 +37,12 @@
 
 /* Many LM80 constants specified below */
 
-/* Length of ISA address segment */
-#define LM80_EXTENT 8
-
-/* Where are the ISA address/data registers relative to the base address */
-#define LM80_ADDR_REG_OFFSET 5
-#define LM80_DATA_REG_OFFSET 6
-
 /* The LM80 registers */
-#define LM80_REG_IN_MAX(nr) (0x2b + (nr) * 2)
-#define LM80_REG_IN_MIN(nr) (0x2c + (nr) * 2)
+#define LM80_REG_IN_MAX(nr) (0x2a + (nr) * 2)
+#define LM80_REG_IN_MIN(nr) (0x2b + (nr) * 2)
 #define LM80_REG_IN(nr) (0x20 + (nr))
 
-#define LM80_REG_FAN_MIN(nr) (0x3a + (nr))
+#define LM80_REG_FAN_MIN(nr) (0x3b + (nr))
 #define LM80_REG_FAN(nr) (0x27 + (nr))
 
 #define LM80_REG_TEMP 0x27
@@ -66,8 +59,6 @@
 
 
 /* Conversions. Rounding is only done on the TO_REG variants. */
-static int lm80_in_conv[7] = {10000, 10000, 10000, 16892, 38000, 
-                              -34768, -15050 };
 #define IN_TO_REG(val,nr) (((((val) * 100000 / lm80_in_conv[nr]) + 8) / 16) \
                            & 0xff)
 #define IN_FROM_REG(val,nr) (((val) *  16 * lm80_in_conv[nr]) / 100000)

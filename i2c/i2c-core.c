@@ -57,7 +57,7 @@ struct i2c_driver *drivers[I2C_DRIVER_MAX];
 int driver_count;
 
 /**** debug level */
-int i2c_debug=0;
+int i2c_debug=1;
 
 /* ---------------------------------------------------    
  * registering functions 
@@ -336,7 +336,7 @@ int i2c_transfer(struct i2c_adapter * adap, struct i2c_msg msgs[],int num)
 {
 	int ret;
 
-	DEB(printk("master_xfer: %s with %d msgs.\n",adap->name,num));
+	DEB2(printk("master_xfer: %s with %d msgs.\n",adap->name,num));
 
 	I2C_LOCK(adap);
 	ret = adap->algo->master_xfer(adap,msgs,num);
@@ -355,7 +355,7 @@ int i2c_master_send(struct i2c_client *client,const char *buf ,int count)
 	msg.len = count;
 	(const char *)msg.buf = buf;
 
-	DEB(printk("master_send: writing %d bytes on %s.\n",
+	DEB2(printk("master_send: writing %d bytes on %s.\n",
 		count,client->adapter->name));
 
 	I2C_LOCK(adap);
@@ -379,7 +379,7 @@ int i2c_master_recv(struct i2c_client *client, char *buf ,int count)
 	msg.len = count;
 	msg.buf = buf;
 
-	DEB(printk("master_recv: reading %d bytes on %s.\n",
+	DEB2(printk("master_recv: reading %d bytes on %s.\n",
 		count,client->adapter->name));
 
 	I2C_LOCK(adap);
