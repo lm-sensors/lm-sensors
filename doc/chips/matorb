@@ -1,0 +1,97 @@
+Kernel driver `matorb.o'
+=======================
+
+Status: 'Beta', but it's so simple that it may be in its final state
+
+Supported devices: 
+  * Matrix-Orbital (www.matrix-orbital.com) displays.  Developed and
+    	tested on the LCD2041V, but should work with all their displays.
+    Prefix: `matorb'
+    Addresses scanned: I2C 0x2E
+    Datasheet: Publicly available at the Matrix-Orbital web site
+    (www.matrix-orbital.com)
+
+Author: Frodo Looijaard <frodol@dds.nl>, and Philip Edelbrock
+	<phil@netroege.com>
+
+Main Contact: Philip Edelbrock <phil@netroedge.com>
+
+Module Parameters
+-----------------
+(I'm not positive about these, so don't take this as granite)
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_matorb: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `bt869' chip
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+
+
+Description
+-----------
+This driver provides access to the Matrix-Orbital display devices.  These
+devices are usually in the form of a small LCD (20x4 is typical) screen
+which is mounted in a carrier which is then mounted into a 5.25" drive bay
+of a computer.
+
+This driver allows the user to send any data to the display to control or
+display anything which the display supports.
+
+For more information on the displays or of particular features/command sets
+go to:
+
+http://www.matrix-orbital.com
+
+
+Use
+---
+To use, just redirect the base-10 ordinal value of bytes (or chars) to the
+display.  For example, to clear the screen and write a simple message, you
+could do this:
+
+# To clear the screen, send byte 0xFE and the char 'X' (ordinal 88)
+echo "254 88" > /proc/sys/dev/sensors/matorb*/disp
+
+# To display "hi there"
+echo "hi there" \
+  | perl -e '$_=<STDIN>; while (/(.)/gc) { print ord($1)," "; }' \
+  > /proc/sys/dev/sensors/matorb*/disp
+
+I've written a simple sample program (in Perl) to display a full screen
+of text (which is fed in on standard-input) to the display.  It is in the
+prog/matorb folder of this project.
+
+I think the displays are very attractive and add a neat sort of 'status'
+display to things like servers.  It would be very simple to either 
+make a script daemon (or modify the healthd provided in this project)
+to display a current status of health info (voltages, fans, temps, etc.)
+on the display.  Let's see Windoze do *THAT*! :')
+ 
+
+Issues
+------
+Redirecting too long of a string (32 ordinals seem to be the max) to 'disp'
+seems to cause problems.  Keep things in small chunks (like lines).
+
+Built in functions (screen clearing, etc.) were initially planned to be
+added as other device files (other than just 'disp'), but these functions
+are just as easily done by sending the command sequences to disp (as shown
+above when clearing the screen).  This also ensures that the driver will
+be compatible with all the displays.
+
+Detection is very poor (as of this writing, anyway).  It looks for a device
+at 0x2E and asumes it is a display.  Unfortunately, the 'beta' firmware
+the Matrix-Orbital people gave me doesn't have good detection abilities to
+it (it ignores reads... it used to lock up the bus on reads, so at least
+it doesn't do that any more! :').  If they provide an easy way to 'sense'
+that it is a display (and what kind it is?) then I will add support for it.
+
+Let me know if you have problems which you can't figure out 
+(phil@netroedge.com).
