@@ -176,7 +176,7 @@ int icspll_attach_adapter(struct i2c_adapter *adapter)
     new_client->driver = &icspll_driver;
     strcpy(new_client->name,"ICSPLL chip");
     data->valid = 0;
-    data->update_lock = MUTEX;
+    init_MUTEX(&data->update_lock);
 /* fill data structure so unknown registers are 0xFF */
     data->data[0] = ICSPLL_SIZE;
     for(i = 1; i <= ICSPLL_SIZE; i++)

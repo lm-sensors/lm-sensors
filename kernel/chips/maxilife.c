@@ -415,8 +415,8 @@ int maxi_new_client(struct i2c_adapter *adapter,
    new_client->driver = &maxi_driver;
    data = new_client->data;
    data->valid = 0;
-   data->lock = MUTEX;
-   data->update_lock = MUTEX;
+   init_MUTEX(&data->lock);
+   init_MUTEX(&data->update_lock);
    return 0;
 }
 

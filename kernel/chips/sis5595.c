@@ -358,7 +358,7 @@ int sis5595_detect(struct i2c_adapter *adapter, int address, int kind)
   data = (struct sis5595_data *) (((struct isa_client *) new_client) + 1);
   new_client->addr = 0;
   ((struct isa_client *) new_client)->isa_addr = address;
-  data->lock = MUTEX;
+  init_MUTEX(&data->lock);
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &sis5595_driver;
@@ -402,7 +402,7 @@ int sis5595_detect(struct i2c_adapter *adapter, int address, int kind)
   sis5595_list[i] = new_client;
   new_client->id = i;
   data->valid = 0;
-  data->update_lock = MUTEX;
+  init_MUTEX(&data->update_lock);
 
   /* Tell the I2C layer a new client has arrived */
   if ((err = i2c_attach_client(new_client)))

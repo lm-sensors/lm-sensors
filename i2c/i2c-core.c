@@ -26,6 +26,10 @@
 #include <linux/malloc.h>
 
 #include "i2c.h"
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1))
+#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
+#endif
  
 /* ----- global defines ---------------------------------------------------- */
 
@@ -138,7 +142,7 @@ int i2c_add_adapter(struct i2c_adapter *adap)
 #ifdef I2C_SPINLOCK
 	adap->lock = (spinlock_t)SPIN_LOCK_UNLOCKED;
 #else
-	adap->lock = MUTEX;
+	init_MUTEX(&adap->lock);
 #endif
 
 	/* inform drivers of new adapters */

@@ -89,4 +89,8 @@
 #define iounmap vfree
 #endif
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1))
+#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
+#endif
+
 #endif /* SENSORS_COMPAT_H */

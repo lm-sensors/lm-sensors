@@ -26,6 +26,7 @@
 #include "i2c.h"
 #include "i2c-isa.h"
 #include "version.h"
+#include "compat.h"
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {SENSORS_I2C_END};
@@ -224,7 +225,7 @@ int eeprom_detect(struct i2c_adapter *adapter, int address, int kind)
   eeprom_list[i] = new_client;
   new_client->id = i;
   data->valid = 0;
-  data->update_lock = MUTEX;
+  init_MUTEX(&data->update_lock);
 
   /* Tell the I2C layer a new client has arrived */
   if ((err = i2c_attach_client(new_client)))

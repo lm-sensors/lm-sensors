@@ -357,7 +357,7 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
     data = (struct lm78_data *) (((struct isa_client *) new_client) + 1);
     new_client->addr = 0;
     ((struct isa_client *) new_client)->isa_addr = address;
-    data->lock = MUTEX;
+    init_MUTEX(&data->lock);
   } else {
     data = (struct lm78_data *) (((struct i2c_client *) new_client) + 1);
     new_client->addr = address;
@@ -428,7 +428,7 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
   lm78_list[i] = new_client;
   new_client->id = i;
   data->valid = 0;
-  data->update_lock = MUTEX;
+  init_MUTEX(&data->update_lock);
 
   /* Tell the I2C layer a new client has arrived */
   if ((err = i2c_attach_client(new_client)))

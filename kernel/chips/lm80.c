@@ -357,7 +357,7 @@ int lm80_detect(struct i2c_adapter *adapter, int address, int kind)
   lm80_list[i] = new_client;
   new_client->id = i;
   data->valid = 0;
-  data->update_lock = MUTEX;
+  init_MUTEX(&data->update_lock);
 
   /* Tell the I2C layer a new client has arrived */
   if ((err = i2c_attach_client(new_client)))

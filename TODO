@@ -3,6 +3,9 @@ Many, many things. Most notably:
 KERNEL MODULES
 ==============
 
+* linux/Documentation/devices.txt lists i2c0, i2c1 etc. instead of i2c-0, i2c-1
+* LM78 detection: Tom Webster has proven that the reset bit in the 
+  id register can be one (strange!)
 * Check for kernel 2.0.8 warnings
 * Increase use count of adapter driver if directory of chip is entered
 * maxilife.c: Introduce new insmod variables

@@ -17,6 +17,8 @@ Here come the changes:
 
 ! Fixed i2c_probe bug
 
+! Changed to init_MUTEX and a compatibility line in i2c-core.c
+
 * Algo-bit now scans the bus before registering the adapter.
 
 * Bit-lp and bit-velle don't increase module usage counts
