@@ -2023,8 +2023,10 @@ sub w83781d_detect
                   (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
   }
   if ($chip == 4) {
-    return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xc3) or 
-                  (($reg1 & 0x80) == 0x80 and $reg2 == 0x12);
+    return unless (($reg1 & 0x80) == 0x00 and
+			($reg2 == 0xc3 or $reg2 == 0x94)) or 
+                  (($reg1 & 0x80) == 0x80 and
+			($reg2 == 0x12 or $reg2 == 0x06));
   }
   return unless ($reg1 & 0x07) == 0x00;
   $reg1 = i2c_smbus_read_byte_data($file,0x58) & 0xfe;
