@@ -771,7 +771,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             fscscy_detect pcf8591_detect arp_detect ipmi_kcs_detect
             ipmi_smic_detect via8231_isa_detect lm85_detect smartbatt_detect
             adm1026_detect w83l785ts_detect lm83_detect lm90_detect
-            saa1064_detect);
+            saa1064_detect w83l784r_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -887,13 +887,13 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
        name => "Winbond W83783S",
        driver => "w83781d",
-       i2c_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x2d],
        i2c_detect => sub { w83781d_detect 2, @_},
      } ,
      {
        name => "Winbond W83791D",
        driver => "w83781d",
-       i2c_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x2c..0x2f],
        i2c_detect => sub { w83781d_detect 7, @_},
      } ,
      {
@@ -906,16 +906,28 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        alias_detect => sub { w83781d_alias_detect 3, @_ },
      } ,
      {
-       name => "Asus AS99127F",
+       name => "Asus AS99127F (rev.1)",
        driver => "w83781d",
-       i2c_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { w83781d_detect 4, @_},
+     } ,
+     {
+       name => "Asus AS99127F (rev.2)",
+       driver => "w83781d",
+       i2c_addrs => [0x28..0x2f],
+       i2c_detect => sub { w83781d_detect 5, @_},
+     } ,
+     {
+       name => "Asus ASB100 Bach",
+       driver => "w83781d",
+       i2c_addrs => [0x28..0x2f],
+       i2c_detect => sub { w83781d_detect 6, @_},
      } ,
      {
        name => "Winbond W83L784R/AR",
        driver => "to-be-written",
-       i2c_addrs => [0x20..0x2f], 
-       i2c_detect => sub { w83781d_detect 6, @_},
+       i2c_addrs => [0x2d],
+       i2c_detect => sub { w83l784r_detect 0, @_},
      } ,
      {
        name => "Winbond W83L785TS",
@@ -2511,8 +2523,8 @@ sub lm87_detect
 }
   
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 2 = W83783S,
-#                        3 = W83627HF, 4 = AS99127F, 6 = W83L784R/AR
-#                        7 = W83791D
+#                        3 = W83627HF, 4 = AS99127F (rev.1),
+#                        5 = AS99127F (rev.2), 6 = ASB100, 7 = W83791D
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -2526,38 +2538,45 @@ sub lm87_detect
 #   0x58: Device ID (only when in bank 0); ignore LSB.
 # Note: Fails if the W8378xD is not in bank 0!
 # Note: Detection overrules a previous LM78 detection
-# Note: AS99127F address register 0x48 not supported?
+# Note: Asus chips do not have their I2C address at register 0x48?
+#       AS99127F rev.1 has 0x00, confirmation wanted for rev.2 and
+#       ASB100.
 sub w83781d_detect
 {
   my ($reg1,$reg2,@res);
   my ($chip,$file,$addr) = @_;
+
   return unless (i2c_smbus_read_byte_data($file,0x48) == $addr)
-    or ($chip == 4) or ($chip == 6);
+    or ($chip >= 4 && $chip <= 6);
+
   $reg1 = i2c_smbus_read_byte_data($file,0x4e);
   $reg2 = i2c_smbus_read_byte_data($file,0x4f);
-  if ($chip != 4) {
+  if ($chip == 4) { # Asus AS99127F (rev.1)
+    return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xc3) or 
+                  (($reg1 & 0x80) == 0x80 and $reg2 == 0x12);
+  } elsif ($chip == 6) { # Asus ASB100
+    return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0x94) or 
+                  (($reg1 & 0x80) == 0x80 and $reg2 == 0x06);
+  } else { # Winbond and Asus AS99127F (rev.2)
     return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
                   (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
   }
-  if ($chip == 4) {
-    return unless (($reg1 & 0x80) == 0x00 and
-			($reg2 == 0xc3 or $reg2 == 0x94)) or 
-                  (($reg1 & 0x80) == 0x80 and
-			($reg2 == 0x12 or $reg2 == 0x06));
-  }
+
   return unless ($reg1 & 0x07) == 0x00;
-  $reg1 = i2c_smbus_read_byte_data($file,0x58) & 0xfe;
-  return if $chip == 0 and  $reg1 != 0x10;
+
+  $reg1 = i2c_smbus_read_byte_data($file,0x58);
+  return if $chip == 0 and ($reg1 != 0x10 && $reg1 != 0x11);
   return if $chip == 1 and  $reg1 != 0x30;
   return if $chip == 2 and  $reg1 != 0x40;
   return if $chip == 3 and  $reg1 != 0x20;
-  return if $chip == 4 and  $reg1 != 0x30;
-  return if $chip == 6 and  $reg1 != 0x50;
+  return if $chip == 4 and  $reg1 != 0x31;
+  return if $chip == 5 and  $reg1 != 0x31;
+  return if $chip == 6 and  $reg1 != 0x31;
   return if $chip == 7 and  $reg1 != 0x70;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   @res = (8);
   push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08 ;
-  push @res, (($reg1 & 0x80) >> 4) + 0x48 unless ($reg1 & 0x80 or $chip == 2);
+  push @res, (($reg1 & 0x70) >> 4) + 0x48 unless ($reg1 & 0x80 or $chip == 2);
   return @res;
 }
 
@@ -3194,7 +3213,36 @@ sub ipmi_smic_detect
   return (4);
 }
 
-# $_[0]: Chip to detect (0 = ..., 1 = ...)
+# $_[0]: Chip to detect (0 = W83L784R/AR)
+# $_[1]: A reference to the file descriptor to access this chip.
+# $_[2]: Address
+# Returns: undef if not detected, 8 if detected
+# Registers used:
+#   0x4a: Full I2C Address
+#   0x4b: I2C addresses of emulated LM75 chips
+#   0x4c: Winbond Vendor ID (Low Byte)
+#   0x4d: Winbond Vendor ID (High Byte)
+#   0x4e: Chip ID
+# Note that this function is always called through a closure, so the
+# arguments are shifted by one place.
+sub w83l784r_detect
+{
+  my ($reg,@res);
+  my ($chip,$file,$addr) = @_;
+
+  return unless i2c_smbus_read_byte_data($file,0x4a) == $addr;
+  return unless i2c_smbus_read_byte_data($file,0x4c) == 0xa3;
+  return unless i2c_smbus_read_byte_data($file,0x4d) == 0x5c;
+  return unless i2c_smbus_read_byte_data($file,0x4e) == 0x50;
+
+  $reg = i2c_smbus_read_byte_data($file,0x4b);
+  @res = (8);
+  push @res, ($reg & 0x07) + 0x48 unless $reg & 0x08 ;
+  push @res, (($reg & 0x70) >> 4) + 0x48 unless $reg & 0x80;
+  return @res;
+}
+
+# $_[0]: Chip to detect (0 = W83L785TS-S)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
