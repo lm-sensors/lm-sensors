@@ -189,6 +189,18 @@ CONFIG_I2C_SIS5595
   built as a module which can be inserted and removed while the kernel
   is running.
 
+Silicon Integrated Systems Corp. SiS630/730 based Mainboard
+CONFIG_I2C_SIS630
+  If you say yes to this option, support will be included for the SiS 630
+  and 730 mainboard I2C interfaces. This can also be built as a module 
+  which can be inserted and removed while the kernel is running.
+
+Silicon Integrated Systems Corp. SiS645/961,645DX/961,735 based Mainboard
+CONFIG_I2C_SIS645
+  If you say yes to this option, support will be included for the SiS 645/961,
+  645DX/961 and 735 mainboard I2C interfaces. This can also be built as a module
+  which can be inserted and removed while the kernel is running.
+
 VIA Technologies, Inc. VT82C586B
 CONFIG_I2C_VIA
   If you say yes to this option, support will be included for the VIA
@@ -235,7 +247,7 @@ Analog Devices ADM1021 and compatibles
 CONFIG_SENSORS_ADM1021 
   If you say yes here you get support for Analog Devices ADM1021 
   and ADM1023 sensor chips and clones: Maxim MAX1617 and MAX1617A,
-  Genesys Logic GL523SM, National Semi LM84, TI THMC10,
+  Genesys Logic GL523SM, National Semi LM84, TI THMC10, Onsemi MC1066
   and the XEON processor built-in sensor. This can also 
   be built as a module which can be inserted and removed while the 
   kernel is running.
@@ -794,6 +806,8 @@ sub gen_drivers_i2c_Config_in
     dep_tristate '  Intel i810AA/AB/E and i815' CONFIG_I2C_I810 $CONFIG_I2C_ALGOBIT
     dep_tristate '  Intel 82371AB PIIX4(E), 443MX, ServerWorks OSB4/CSB5, SMSC Victory66' CONFIG_I2C_PIIX4 $CONFIG_I2C
     dep_tristate '  SiS 5595' CONFIG_I2C_SIS5595 $CONFIG_I2C
+    dep_tristate '  SiS 630/730' CONFIG_I2C_SIS630 $CONFIG_I2C
+    dep_tristate '  SiS 645/961,645DX/961,735' CONFIG_I2C_SIS645 $CONFIG_I2C $CONFIG_HOTPLUG
     dep_tristate '  Savage 4' CONFIG_I2C_SAVAGE4 $CONFIG_I2C_ALGOBIT
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_ALGOBIT
     dep_tristate '  VIA Technologies, Inc. VT596A/B, 686A/B, 8231, 8233, 8233A, 8235' CONFIG_I2C_VIAPRO $CONFIG_I2C
@@ -1164,6 +1178,8 @@ obj-$(CONFIG_I2C_I810)			+= i2c-i810.o
 obj-$(CONFIG_I2C_ISA)			+= i2c-isa.o
 obj-$(CONFIG_I2C_PIIX4)			+= i2c-piix4.o dmi_scan.o
 obj-$(CONFIG_I2C_SIS5595)		+= i2c-sis5595.o
+obj-$(CONFIG_I2C_SIS630)		+= i2c-sis630.o
+obj-$(CONFIG_I2C_SIS645)		+= i2c-sis645.o
 obj-$(CONFIG_I2C_SAVAGE4)		+= i2c-savage4.o
 obj-$(CONFIG_I2C_TSUNAMI)		+= i2c-tsunami.o
 obj-$(CONFIG_I2C_VIA)			+= i2c-via.o
@@ -1242,6 +1258,22 @@ ifeq ($(CONFIG_I2C_SIS5595),y)
 else 
   ifeq ($(CONFIG_I2C_SIS5595),m)
     M_OBJS += i2c-sis5595.o
+  endif
+endif
+
+ifeq ($(CONFIG_I2C_SIS630),y)
+  L_OBJS += i2c-sis630.o
+else 
+  ifeq ($(CONFIG_I2C_SIS630),m)
+    M_OBJS += i2c-sis630.o
+  endif
+endif
+
+ifeq ($(CONFIG_I2C_SIS645),y)
+  L_OBJS += i2c-sis645.o
+else 
+  ifeq ($(CONFIG_I2C_SIS645),m)
+    M_OBJS += i2c-sis645.o
   endif
 endif
 
@@ -1349,6 +1381,12 @@ sub gen_drivers_i2c_i2c_core_c
 #ifdef CONFIG_I2C_SIS5595
 	extern int i2c_sis5595_init(void);
 #endif
+#ifdef CONFIG_I2C_SIS630
+	extern int i2c_sis630_init(void);
+#endif
+#ifdef CONFIG_I2C_SIS645
+	extern int sis645_init(void);
+#endif
 #ifdef CONFIG_I2C_SAVAGE4
 	extern int i2c_savage4_init(void);
 #endif
@@ -1390,6 +1428,12 @@ EOF
 #endif
 #ifdef CONFIG_I2C_SIS5595
 	i2c_sis5595_init();
+#endif
+#ifdef CONFIG_I2C_SIS630
+	i2c_sis630_init();
+#endif
+#ifdef CONFIG_I2C_SIS645
+	sis645_init();
 #endif
 #ifdef CONFIG_I2C_SAVAGE4
 	i2c_savage4_init();

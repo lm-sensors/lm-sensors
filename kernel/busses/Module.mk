@@ -29,10 +29,13 @@ ifeq ($(shell if grep -q '^CONFIG_IPMI_HANDLER=' $(LINUX)/.config; then echo 1; 
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ipmb.o
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ipmi.o
 endif
-KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-sis630.o
-KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-sis645.o
-
 # These targets ARE included in 'mkpatch' ...
+ifneq ($(shell if grep -q '^CONFIG_I2C_SIS630=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-sis630.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_SIS645=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-sis645.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_ALI1535=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ali1535.o
 endif

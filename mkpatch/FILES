@@ -15,6 +15,8 @@ kernel/busses/i2c-tsunami.c	drivers/i2c/i2c-tsunami.c
 kernel/busses/i2c-via.c		drivers/i2c/i2c-via.c
 kernel/busses/i2c-viapro.c	drivers/i2c/i2c-viapro.c
 kernel/busses/i2c-voodoo3.c	drivers/i2c/i2c-voodoo3.c
+kernel/busses/i2c-sis630.c	drivers/i2c/i2c-sis630.c
+kernel/busses/i2c-sis645.c	drivers/i2c/i2c-sis645.c
 kernel/sensors.c		drivers/sensors/sensors.c
 kernel/chips/adm1021.c		drivers/sensors/adm1021.c
 kernel/chips/adm1024.c		drivers/sensors/adm1024.c
