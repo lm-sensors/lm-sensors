@@ -1345,7 +1345,8 @@ and reference your ticket number in the subject.
 * Section 6.5::  How to access mailing list archives
 * Section 6.6::  How to submit a patch
 * Section 6.7::  How to REALLY help
-* Section 6.8::  How to block spam on the project mailing list
+* Section 6.8::  How to get release announcements
+* Section 6.9::  How to block spam on the project mailing list
 @end menu
 
 
@@ -1414,7 +1415,16 @@ Send us email @email{sensors@@stimpy.netroedge.com} if you can help.
 No experience necessary :)
 
 
-@node Section 6.8, , Section 6.7, Contribute
+@node Section 6.8, Section 6.9, Section 6.7, Contribute
+@section How to get release announcements
+
+We don't have a separate release announcement mailing list;
+however, we put all our releases on freshmeat: @uref{http://freshmeat.net}
+and you can register on our freshmeat project page  @uref{http://freshmeat.net/projects/lm_sensors}
+to 'subscribe to new releases' and then freshmeat
+will email you announcement.
+
+@node Section 6.9, , Section 6.8, Contribute
 @section How to block spam on the project mailing list
 
 Sorry, we know the spam is a hassle.  It would be nice to have a 

@@ -1,28 +1,47 @@
-<html lang="en"><head>
+<html lang="en">
+<head>
 <title>Sensors FAQ for lm_sensors version 2.9</title>
 <meta http-equiv="Content-Type" content="text/html">
 <meta name=description content="Sensors FAQ for lm_sensors version 2.9">
-<meta name=generator content="makeinfo 4.0">
-<link href="http://texinfo.org/" rel=generator-home>
-</head><body>
-
-<p>C<p>opyright (c) 1998 - 2002<br>
+<meta name=generator content="makeinfo 4.2">
+<link href="http://www.gnu.org/software/texinfo/" rel=generator-home>
+</head>
+<body>
+<h1>Sensors FAQ for lm_sensors version 2.9</h1>
+Copyright (c) 1998 - 2002<br>
 <a href="mailto:frodol@dds.nl">Frodo Looijaard</a>,<br>
 <a href="mailto:phil@netroedge.com">Philip Edelbrock</a>,<br>
 and<br>
 <a href="mailto:mdsxyz123@yahoo.com">Mark Studebaker</a><br>
 
 
-<h1>Table of Contents</h1>
+<h2>Short Contents</h2>
 <ul>
-<li><a href="#Top">lm_sensors</a>
-<li><a href="#Overview">1 PC and Sensor Overview</a>
+<li><a href="#toc_Top">lm_sensors</a>
+<li><a href="#toc_Overview">1 PC and Sensor Overview</a>
+<li><a href="#toc_Basics">2 Sensor and Bus Basics</a>
+<li><a href="#toc_Installation">3 Installation and Management</a>
+<li><a href="#toc_Problems">4 Problems</a>
+<li><a href="#toc_Help">5 How to Ask for Help</a>
+<li><a href="#toc_Contribute">6 How to Contribute</a>
+<li><a href="#toc_Version%201%20Specifics">7 Version 1 Specific Questions</a>
+<li><a href="#toc_Document%20Revisions">Appendix A Revision History of This Document</a>
+</ul>
+
+
+<h2>Table of Contents</h2>
+<ul>
+<li><a name="toc_Top"></a>
+    <a href="#Top">lm_sensors</a>
+<li><a name="toc_Overview"></a>
+    <a href="#Overview">1 PC and Sensor Overview</a>
 <ul>
 <li><a href="#Section%201.1">1.1 What sensors are available on my PC?</a>
 <li><a href="#Section%201.2">1.2 What can a sensor chip like the "LM78" do?</a>
 <li><a href="#Section%201.3">1.3 Where do I find out more about any of these chips?</a>
 </ul>
-<li><a href="#Basics">2 Sensor and Bus Basics</a>
+<li><a name="toc_Basics"></a>
+    <a href="#Basics">2 Sensor and Bus Basics</a>
 <ul>
 <li><a href="#Section%202.1">2.1 How are these sensors read?</a>
 <li><a href="#Section%202.2">2.2 What is the SMBus? And the I2C bus?</a>
@@ -31,7 +50,8 @@ and<br>
 <li><a href="#Section%202.5">2.5 How often are the sensor values updated?</a>
 <li><a href="#Section%202.6">2.6 How are alarms triggered?</a>
 </ul>
-<li><a href="#Installation">3 Installation and Management</a>
+<li><a name="toc_Installation"></a>
+    <a href="#Installation">3 Installation and Management</a>
 <ul>
 <li><a href="#Section%203.1">3.1 Why so many modules, and how do I cope with them?</a>
 <li><a href="#Section%203.2">3.2 How do I know which chips I own?</a>
@@ -61,7 +81,8 @@ and<br>
 <li><a href="#Section%203.9">3.9 I get unresolved symbols when I <code>modprobe</code> modules (Red Hat especially)</a>
 <li><a href="#Section%203.10">3.10 I2C_DRIVERID_ADM1024 undefined (Red Hat especially)</a>
 </ul>
-<li><a href="#Problems">4 Problems</a>
+<li><a name="toc_Problems"></a>
+    <a href="#Problems">4 Problems</a>
 <ul>
 <li><a href="#Section%204.1">4.1 My fans report exactly half/double their values compared to the BIOS?</a>
 <ul>
@@ -134,7 +155,8 @@ and<br>
 </ul>
 <li><a href="#Section%204.32">4.32 Problems on particular systems</a>
 </ul>
-<li><a href="#Help">5 How to Ask for Help</a>
+<li><a name="toc_Help"></a>
+    <a href="#Help">5 How to Ask for Help</a>
 <ul>
 <li><a href="#Section%205.1">5.1 What to send us when asking for help</a>
 <li><a href="#Section%205.2">5.2 What to do if a module won't insert?</a>
@@ -145,7 +167,8 @@ and<br>
 <li><a href="#Section%205.7">5.7 How do I update a ticket?</a>
 <li><a href="#Section%205.8">5.8 How do I follow up on a ticket?</a>
 </ul>
-<li><a href="#Contribute">6 How to Contribute</a>
+<li><a name="toc_Contribute"></a>
+    <a href="#Contribute">6 How to Contribute</a>
 <ul>
 <li><a href="#Section%206.1">6.1 How to write a driver</a>
 <li><a href="#Section%206.2">6.2 How to get CVS access</a>
@@ -154,63 +177,66 @@ and<br>
 <li><a href="#Section%206.5">6.5 How to access mailing list archives</a>
 <li><a href="#Section%206.6">6.6 How to submit a patch</a>
 <li><a href="#Section%206.7">6.7 How to REALLY help</a>
-<li><a href="#Section%206.8">6.8 How to block spam on the project mailing list</a>
+<li><a href="#Section%206.8">6.8 How to get release announcements</a>
+<li><a href="#Section%206.9">6.9 How to block spam on the project mailing list</a>
 </ul>
-<li><a href="#Version%201%20Specifics">7 Version 1 Specific Questions</a>
+<li><a name="toc_Version%201%20Specifics"></a>
+    <a href="#Version%201%20Specifics">7 Version 1 Specific Questions</a>
 <ul>
 <li><a href="#Section%207.1">7.1 My manufacturer swears that my mainboard has an SMBus, but your code reports that it can't find it.  What's wrong?</a>
 <li><a href="#Section%207.2">7.2 The modules won't load, saying 'SMBus not detected'.</a>
 <li><a href="#Section%207.3">7.3 I try to read <code>/proc/sensors</code>, and I get a "No sensor data yet (try again in a few moments)" message. Why?</a>
 <li><a href="#Section%207.4">7.4 On my Dell, a LM80 is detected, but all readings are 0!</a>
 </ul>
-<li><a href="#Document%20Revisions">Appendix A Revision History of This Document</a>
+<li><a name="toc_Document%20Revisions"></a>
+    <a href="#Document%20Revisions">Appendix A Revision History of This Document</a>
 </ul>
 
 <p><hr>
 Node:<a name="Top">Top</a>,
-Next:<a rel=next href="#Overview">Overview</a>,
-Up:<a rel=up href="#(dir)">(dir)</a>
+Next:<a rel=next accesskey=n href="#Overview">Overview</a>,
+Up:<a rel=up accesskey=u href="#dir">(dir)</a>
 <br>
 
-<h1>lm_sensors</h1>
+<h2>lm_sensors</h2>
 
 <p>The lm_sensors package includes a collection of modules for general SMBus
 access and hardware monitoring.  NOTE: this requires special support which
 is not in standard 2.2-vintage kernels.
 
 <ul>
-<li><a href="#Overview">Overview</a>:                 PC and Sensor Overview
-<li><a href="#Basics">Basics</a>:                   Sensor and Bus Basics
-<li><a href="#Installation">Installation</a>:             Installation and Management
-<li><a href="#Problems">Problems</a>:                 Problems
-<li><a href="#Help">Help</a>:                     How to Ask for Help
-<li><a href="#Contribute">Contribute</a>:               How to Contribute
-<li><a href="#Version%201%20Specifics">Version 1 Specifics</a>:      Version 1 Specific Questions
-<li><a href="#Document%20Revisions">Document Revisions</a>:       Revision History of This Document
+<li><a accesskey=1 href="#Overview">Overview</a>:                 PC and Sensor Overview
+<li><a accesskey=2 href="#Basics">Basics</a>:                   Sensor and Bus Basics
+<li><a accesskey=3 href="#Installation">Installation</a>:             Installation and Management
+<li><a accesskey=4 href="#Problems">Problems</a>:                 Problems
+<li><a accesskey=5 href="#Help">Help</a>:                     How to Ask for Help
+<li><a accesskey=6 href="#Contribute">Contribute</a>:               How to Contribute
+<li><a accesskey=7 href="#Version%201%20Specifics">Version 1 Specifics</a>:      Version 1 Specific Questions
+<li><a accesskey=8 href="#Document%20Revisions">Document Revisions</a>:       Revision History of This Document
 </ul>
 
 <p><hr>
 Node:<a name="Overview">Overview</a>,
-Next:<a rel=next href="#Basics">Basics</a>,
-Previous:<a rel=previous href="#Top">Top</a>,
-Up:<a rel=up href="#Top">Top</a>
+Next:<a rel=next accesskey=n href="#Basics">Basics</a>,
+Previous:<a rel=previous accesskey=p href="#Top">Top</a>,
+Up:<a rel=up accesskey=u href="#Top">Top</a>
 <br>
 
-<h1>1 PC and Sensor Overview</h1>
+<h2>1 PC and Sensor Overview</h2>
 
 <ul>
-<li><a href="#Section%201.1">Section 1.1</a>:              What sensors are available on my PC? 
-<li><a href="#Section%201.2">Section 1.2</a>:              What can a sensor chip like the "LM78" do? 
-<li><a href="#Section%201.3">Section 1.3</a>:              Where do I find out more about any of these chips? 
+<li><a accesskey=1 href="#Section%201.1">Section 1.1</a>:              What sensors are available on my PC? 
+<li><a accesskey=2 href="#Section%201.2">Section 1.2</a>:              What can a sensor chip like the "LM78" do? 
+<li><a accesskey=3 href="#Section%201.3">Section 1.3</a>:              Where do I find out more about any of these chips? 
 </ul>
 
 <p><hr>
 Node:<a name="Section%201.1">Section 1.1</a>,
-Next:<a rel=next href="#Section%201.2">Section 1.2</a>,
-Up:<a rel=up href="#Overview">Overview</a>
+Next:<a rel=next accesskey=n href="#Section%201.2">Section 1.2</a>,
+Up:<a rel=up accesskey=u href="#Overview">Overview</a>
 <br>
 
-<h2>1.1 What sensors are available on my PC?</h2>
+<h3>1.1 What sensors are available on my PC?</h3>
 
 <p>Most PC's built since late 1997 now come with a
 hardware health monitoring chip. This chip may be accessed via the
@@ -225,12 +251,12 @@ a chip with similar functions.
 
 <p><hr>
 Node:<a name="Section%201.2">Section 1.2</a>,
-Next:<a rel=next href="#Section%201.3">Section 1.3</a>,
-Previous:<a rel=previous href="#Section%201.1">Section 1.1</a>,
-Up:<a rel=up href="#Overview">Overview</a>
+Next:<a rel=next accesskey=n href="#Section%201.3">Section 1.3</a>,
+Previous:<a rel=previous accesskey=p href="#Section%201.1">Section 1.1</a>,
+Up:<a rel=up accesskey=u href="#Overview">Overview</a>
 <br>
 
-<h2>1.2 What can a sensor chip like the "LM78" do?</h2>
+<h3>1.2 What can a sensor chip like the "LM78" do?</h3>
 
 <p>The LM78 is a chip made by National Semiconductor which can monitor 7
 voltages (5 positive, 2 negative) from 0 to 4.08V.  The inputs are usually in
@@ -253,11 +279,11 @@ chip is documented in the <code>doc/chips</code> directory.
 
 <p><hr>
 Node:<a name="Section%201.3">Section 1.3</a>,
-Previous:<a rel=previous href="#Section%201.2">Section 1.2</a>,
-Up:<a rel=up href="#Overview">Overview</a>
+Previous:<a rel=previous accesskey=p href="#Section%201.2">Section 1.2</a>,
+Up:<a rel=up accesskey=u href="#Overview">Overview</a>
 <br>
 
-<h2>1.3 Where do I find out more about any of these chips?</h2>
+<h3>1.3 Where do I find out more about any of these chips?</h3>
 
 <p>Most semiconductor companies have comprehensive documentation,
 including complete datasheets, on their websites. Analog Devices,
@@ -276,29 +302,29 @@ for links to other companies' websites.
 
 <p><hr>
 Node:<a name="Basics">Basics</a>,
-Next:<a rel=next href="#Installation">Installation</a>,
-Previous:<a rel=previous href="#Overview">Overview</a>,
-Up:<a rel=up href="#Top">Top</a>
+Next:<a rel=next accesskey=n href="#Installation">Installation</a>,
+Previous:<a rel=previous accesskey=p href="#Overview">Overview</a>,
+Up:<a rel=up accesskey=u href="#Top">Top</a>
 <br>
 
-<h1>2 Sensor and Bus Basics</h1>
+<h2>2 Sensor and Bus Basics</h2>
 
 <ul>
-<li><a href="#Section%202.1">Section 2.1</a>:              What sensors are available on my PC? 
-<li><a href="#Section%202.2">Section 2.2</a>:              What can a sensor chip like the "LM78" do? 
-<li><a href="#Section%202.3">Section 2.3</a>:              Where do I find out more about any of these chips? 
-<li><a href="#Section%202.4">Section 2.4</a>:              What sensors are available on my PC? 
-<li><a href="#Section%202.5">Section 2.5</a>:              What can a sensor chip like the "LM78" do? 
-<li><a href="#Section%202.6">Section 2.6</a>:              Where do I find out more about any of these chips? 
+<li><a accesskey=1 href="#Section%202.1">Section 2.1</a>:              What sensors are available on my PC? 
+<li><a accesskey=2 href="#Section%202.2">Section 2.2</a>:              What can a sensor chip like the "LM78" do? 
+<li><a accesskey=3 href="#Section%202.3">Section 2.3</a>:              Where do I find out more about any of these chips? 
+<li><a accesskey=4 href="#Section%202.4">Section 2.4</a>:              What sensors are available on my PC? 
+<li><a accesskey=5 href="#Section%202.5">Section 2.5</a>:              What can a sensor chip like the "LM78" do? 
+<li><a accesskey=6 href="#Section%202.6">Section 2.6</a>:              Where do I find out more about any of these chips? 
 </ul>
 
 <p><hr>
 Node:<a name="Section%202.1">Section 2.1</a>,
-Next:<a rel=next href="#Section%202.2">Section 2.2</a>,
-Up:<a rel=up href="#Basics">Basics</a>
+Next:<a rel=next accesskey=n href="#Section%202.2">Section 2.2</a>,
+Up:<a rel=up accesskey=u href="#Basics">Basics</a>
 <br>
 
-<h2>2.1 How are these sensors read?</h2>
+<h3>2.1 How are these sensors read?</h3>
 
 <p>Sensor chips reside on either the ISA bus, the SMBus, or both. 
 See the file <code>doc/chips/SUMMARY</code> in our package for a list.
@@ -311,12 +337,12 @@ use an SMBus interface device, explained below.
 
 <p><hr>
 Node:<a name="Section%202.2">Section 2.2</a>,
-Next:<a rel=next href="#Section%202.3">Section 2.3</a>,
-Previous:<a rel=previous href="#Section%202.1">Section 2.1</a>,
-Up:<a rel=up href="#Basics">Basics</a>
+Next:<a rel=next accesskey=n href="#Section%202.3">Section 2.3</a>,
+Previous:<a rel=previous accesskey=p href="#Section%202.1">Section 2.1</a>,
+Up:<a rel=up accesskey=u href="#Basics">Basics</a>
 <br>
 
-<h2>2.2 What is the SMBus? And the I2C bus?</h2>
+<h3>2.2 What is the SMBus? And the I2C bus?</h3>
 
 <p>The SMBus is the "System Management Bus".  More specifically, it is a
 2-wire, low-speed serial communication bus used for basic health monitoring
@@ -338,12 +364,12 @@ talk to pure I2C devices.
 
 <p><hr>
 Node:<a name="Section%202.3">Section 2.3</a>,
-Next:<a rel=next href="#Section%202.4">Section 2.4</a>,
-Previous:<a rel=previous href="#Section%202.2">Section 2.2</a>,
-Up:<a rel=up href="#Basics">Basics</a>
+Next:<a rel=next accesskey=n href="#Section%202.4">Section 2.4</a>,
+Previous:<a rel=previous accesskey=p href="#Section%202.2">Section 2.2</a>,
+Up:<a rel=up accesskey=u href="#Basics">Basics</a>
 <br>
 
-<h2>2.3 I don't have an ISA bus!</h2>
+<h3>2.3 I don't have an ISA bus!</h3>
 
 <p>We promise, you do, even if you don't have any old ISA slots. 
 The "ISA Bus" exists in your computer even if you don't have ISA slots;
@@ -356,12 +382,12 @@ think "I/O Space".
 
 <p><hr>
 Node:<a name="Section%202.4">Section 2.4</a>,
-Next:<a rel=next href="#Section%202.5">Section 2.5</a>,
-Previous:<a rel=previous href="#Section%202.3">Section 2.3</a>,
-Up:<a rel=up href="#Basics">Basics</a>
+Next:<a rel=next accesskey=n href="#Section%202.5">Section 2.5</a>,
+Previous:<a rel=previous accesskey=p href="#Section%202.3">Section 2.3</a>,
+Up:<a rel=up accesskey=u href="#Basics">Basics</a>
 <br>
 
-<h2>2.4 What sensors do processors have?</h2>
+<h3>2.4 What sensors do processors have?</h3>
 
 <p>Most new processors contain a thermal diode on the die itself. 
 The electical properties of all diodes and transistors vary
@@ -397,12 +423,12 @@ interface on the P2 Xeon SEC.
 
 <p><hr>
 Node:<a name="Section%202.5">Section 2.5</a>,
-Next:<a rel=next href="#Section%202.6">Section 2.6</a>,
-Previous:<a rel=previous href="#Section%202.4">Section 2.4</a>,
-Up:<a rel=up href="#Basics">Basics</a>
+Next:<a rel=next accesskey=n href="#Section%202.6">Section 2.6</a>,
+Previous:<a rel=previous accesskey=p href="#Section%202.4">Section 2.4</a>,
+Up:<a rel=up accesskey=u href="#Basics">Basics</a>
 <br>
 
-<h2>2.5 How often are the sensor values updated?</h2>
+<h3>2.5 How often are the sensor values updated?</h3>
 
 <p>The LM78, and most other sensor chips like it, reads its sensors one
 by one. A complete scanning sweep will take about 1.5 seconds. The LM78 stops
@@ -414,11 +440,11 @@ read the values again, you will get the 'old' values again.
 
 <p><hr>
 Node:<a name="Section%202.6">Section 2.6</a>,
-Previous:<a rel=previous href="#Section%202.5">Section 2.5</a>,
-Up:<a rel=up href="#Basics">Basics</a>
+Previous:<a rel=previous accesskey=p href="#Section%202.5">Section 2.5</a>,
+Up:<a rel=up accesskey=u href="#Basics">Basics</a>
 <br>
 
-<h2>2.6 How are alarms triggered?</h2>
+<h3>2.6 How are alarms triggered?</h3>
 
 <p>It is possible to monitor each sensor and have an alarm go off if
 it crosses some pre-determined limits.  There are two sorts of interrupts
@@ -439,33 +465,33 @@ persists after that, the bits will be set on the next scanning sweep, etc.
 
 <p><hr>
 Node:<a name="Installation">Installation</a>,
-Next:<a rel=next href="#Problems">Problems</a>,
-Previous:<a rel=previous href="#Basics">Basics</a>,
-Up:<a rel=up href="#Top">Top</a>
+Next:<a rel=next accesskey=n href="#Problems">Problems</a>,
+Previous:<a rel=previous accesskey=p href="#Basics">Basics</a>,
+Up:<a rel=up accesskey=u href="#Top">Top</a>
 <br>
 
-<h1>3 Installation and Management</h1>
+<h2>3 Installation and Management</h2>
 
 <ul>
-<li><a href="#Section%203.1">Section 3.1</a>:      Why so many modules, and how do I cope with them? 
-<li><a href="#Section%203.2">Section 3.2</a>:      How do I know which chips I own? 
-<li><a href="#Section%203.3">Section 3.3</a>:      Which modules should I insert? 
-<li><a href="#Section%203.4">Section 3.4</a>:      Do I need the configuration file <code>/etc/sensors.conf</code>? 
-<li><a href="#Section%203.5">Section 3.5</a>:      What about the <code>No such file or directory</code> warnings
-<li><a href="#Section%203.6">Section 3.6</a>:      I get all kinds of weird compilation errors? 
-<li><a href="#Section%203.7">Section 3.7</a>:      It still does not compile or patch! 
-<li><a href="#Section%203.8">Section 3.8</a>:      <code>make install</code> fails on Mandrake kernels
-<li><a href="#Section%203.9">Section 3.9</a>:      I get unresolved symbols when I <code>modprobe</code> modules
+<li><a accesskey=1 href="#Section%203.1">Section 3.1</a>:      Why so many modules, and how do I cope with them? 
+<li><a accesskey=2 href="#Section%203.2">Section 3.2</a>:      How do I know which chips I own? 
+<li><a accesskey=3 href="#Section%203.3">Section 3.3</a>:      Which modules should I insert? 
+<li><a accesskey=4 href="#Section%203.4">Section 3.4</a>:      Do I need the configuration file <code>/etc/sensors.conf</code>? 
+<li><a accesskey=5 href="#Section%203.5">Section 3.5</a>:      What about the <code>No such file or directory</code> warnings
+<li><a accesskey=6 href="#Section%203.6">Section 3.6</a>:      I get all kinds of weird compilation errors? 
+<li><a accesskey=7 href="#Section%203.7">Section 3.7</a>:      It still does not compile or patch! 
+<li><a accesskey=8 href="#Section%203.8">Section 3.8</a>:      <code>make install</code> fails on Mandrake kernels
+<li><a accesskey=9 href="#Section%203.9">Section 3.9</a>:      I get unresolved symbols when I <code>modprobe</code> modules
 <li><a href="#Section%203.10">Section 3.10</a>:     I2C_DRIVERID_ADM1024 undefined (Red Hat especially)
 </ul>
 
 <p><hr>
 Node:<a name="Section%203.1">Section 3.1</a>,
-Next:<a rel=next href="#Section%203.2">Section 3.2</a>,
-Up:<a rel=up href="#Installation">Installation</a>
+Next:<a rel=next accesskey=n href="#Section%203.2">Section 3.2</a>,
+Up:<a rel=up accesskey=u href="#Installation">Installation</a>
 <br>
 
-<h2>3.1 Why so many modules, and how do I cope with them?</h2>
+<h3>3.1 Why so many modules, and how do I cope with them?</h3>
 
 <p>We tried to make this package as modular as possible. This makes it
 easy to add new drivers, and unused drivers will take no precious kernel
@@ -482,12 +508,12 @@ space. On the other hand, it can be a bit confusing at first.
 <p><a name="How%20do%20I%20know%20which%20chips%20I%20own"></a>
 <p><hr>
 Node:<a name="Section%203.2">Section 3.2</a>,
-Next:<a rel=next href="#Section%203.3">Section 3.3</a>,
-Previous:<a rel=previous href="#Section%203.1">Section 3.1</a>,
-Up:<a rel=up href="#Installation">Installation</a>
+Next:<a rel=next accesskey=n href="#Section%203.3">Section 3.3</a>,
+Previous:<a rel=previous accesskey=p href="#Section%203.1">Section 3.1</a>,
+Up:<a rel=up accesskey=u href="#Installation">Installation</a>
 <br>
 
-<h2>3.2 How do I know which chips I own?</h2>
+<h3>3.2 How do I know which chips I own?</h3>
 
 <p>We have an excellent program that scans all your hardware. 
 It is called <code>sensors-detect</code> and is installed in <code>/usr/local/sbin</code>
@@ -503,7 +529,7 @@ for candidates, then see <a href="#Help">Help</a>)
 
 <p><a name="Section%203.2.1"></a>
 
-<h3>3.2.1 What chips are on motherboard XYZ?</h3>
+<h4>3.2.1 What chips are on motherboard XYZ?</h4>
 
 <p><strong>!!!!!!!!! YES THIS IS THE MOST FREQUENT QUESTION WE GET !!!!!!!!!</strong>
 
@@ -523,13 +549,13 @@ page on <a href="http://www2.lm-sensors.nu/~lm78/">our website</a> some good cro
 
 <p><a name="Section%203.2.2"></a>
 
-<h3>3.2.2 Do you support motherboard XYZ?</h3>
+<h4>3.2.2 Do you support motherboard XYZ?</h4>
 
 <p>We don't support boards, we support chips. See <a href="#Section%203.2.1">What chips are on motherboard XYZ</a>.
 
 <p><a name="Section%203.2.3"></a>
 
-<h3>3.2.3 Do you support chip XYZ?</h3>
+<h4>3.2.3 Do you support chip XYZ?</h4>
 
 <p>This we have good answers for.
 <ul>
@@ -541,18 +567,18 @@ page on <a href="http://www2.lm-sensors.nu/~lm78/">our website</a> some good cro
 
 <p><a name="Section%203.2.4"></a>
 
-<h3>3.2.4 Anybody working on a driver for chip XYZ?</h3>
+<h4>3.2.4 Anybody working on a driver for chip XYZ?</h4>
 
 <p>Newest Driver Status: <a href="http://www2.lm-sensors.nu/~lm78/newdrivers.html">http://www2.lm-sensors.nu/~lm78/newdrivers.html</a>
 
 <p><hr>
 Node:<a name="Section%203.3">Section 3.3</a>,
-Next:<a rel=next href="#Section%203.4">Section 3.4</a>,
-Previous:<a rel=previous href="#Section%203.2">Section 3.2</a>,
-Up:<a rel=up href="#Installation">Installation</a>
+Next:<a rel=next accesskey=n href="#Section%203.4">Section 3.4</a>,
+Previous:<a rel=previous accesskey=p href="#Section%203.2">Section 3.2</a>,
+Up:<a rel=up accesskey=u href="#Installation">Installation</a>
 <br>
 
-<h2>3.3 Which modules should I insert?</h2>
+<h3>3.3 Which modules should I insert?</h3>
 
 <p><code>sensors-detect</code> will tell you. Take the <code>modprobe</code> lines it
 recommends and paste them into the appropriate <code>/etc/rc.d/xxxx</code> file
@@ -573,12 +599,12 @@ following lines:
 
 <p><hr>
 Node:<a name="Section%203.4">Section 3.4</a>,
-Next:<a rel=next href="#Section%203.5">Section 3.5</a>,
-Previous:<a rel=previous href="#Section%203.3">Section 3.3</a>,
-Up:<a rel=up href="#Installation">Installation</a>
+Next:<a rel=next accesskey=n href="#Section%203.5">Section 3.5</a>,
+Previous:<a rel=previous accesskey=p href="#Section%203.3">Section 3.3</a>,
+Up:<a rel=up accesskey=u href="#Installation">Installation</a>
 <br>
 
-<h2>3.4 Do I need the configuration file <code>/etc/sensors.conf</code>?</h2>
+<h3>3.4 Do I need the configuration file <code>/etc/sensors.conf</code>?</h3>
 
 <p>Yes, for any applications that use <code>libsensors,</code> including the
 <code>sensors</code> application included in our package. 
@@ -590,7 +616,7 @@ overwrite any existing file with that name.
 
 <p><a name="Section%203.4.1"></a>
 
-<h3>3.4.1 The labels for the voltage and temperature readings in <code>sensors</code> are incorrect!</h3>
+<h4>3.4.1 The labels for the voltage and temperature readings in <code>sensors</code> are incorrect!</h4>
 
 <p>Every motherboard is different. You can customize the labels
 in the file <code>/etc/sensors.conf</code>. That's why it exists! 
@@ -599,44 +625,44 @@ a template.
 
 <p><a name="Section%203.4.2"></a>
 
-<h3>3.4.2 The min and max for the readings in <code>sensors</code> are incorrect!</h3>
+<h4>3.4.2 The min and max for the readings in <code>sensors</code> are incorrect!</h4>
 
 <p>You can customize them in the file <code>/etc/sensors.conf</code>. See above.
 
 <p><a name="Section%203.4.3"></a>
 
-<h3>3.4.3 The min and max settings in <code>/etc/sensors.conf</code> didn't take effect!</h3>
+<h4>3.4.3 The min and max settings in <code>/etc/sensors.conf</code> didn't take effect!</h4>
 
 <p>You forgot to run <code>sensors -s</code>. See above.
 
 <p><a name="Section%203.4.4"></a>
 
-<h3>3.4.4 One sensor isn't hooked up on my board!</h3>
+<h4>3.4.4 One sensor isn't hooked up on my board!</h4>
 
 <p>Use an <code>ignore</code> line in <code>/etc/sensors.conf</code> so it isn't
 displayed in <code>sensors</code>.
 
 <p><a name="Section%203.4.5"></a>
 
-<h3>3.4.5 I need help with <code>sensors.conf</code>!</h3>
+<h4>3.4.5 I need help with <code>sensors.conf</code>!</h4>
 
 <p>There is detailed help at the top of that file.
 
 <p><a name="Section%203.4.6"></a>
 
-<h3>3.4.6 Do you have a database of <code>sensors.conf</code> entries for specific boards?</h3>
+<h4>3.4.6 Do you have a database of <code>sensors.conf</code> entries for specific boards?</h4>
 
 <p>No. Good idea though. If you would like to set one up on your website
 send us mail and we will set up a link to it.
 
 <p><hr>
 Node:<a name="Section%203.5">Section 3.5</a>,
-Next:<a rel=next href="#Section%203.6">Section 3.6</a>,
-Previous:<a rel=previous href="#Section%203.4">Section 3.4</a>,
-Up:<a rel=up href="#Installation">Installation</a>
+Next:<a rel=next accesskey=n href="#Section%203.6">Section 3.6</a>,
+Previous:<a rel=previous accesskey=p href="#Section%203.4">Section 3.4</a>,
+Up:<a rel=up accesskey=u href="#Installation">Installation</a>
 <br>
 
-<h2>3.5 What about the <code>No such file or directory</code> warnings when I compile?</h2>
+<h3>3.5 What about the <code>No such file or directory</code> warnings when I compile?</h3>
 
 <p>Don't worry about them. The dependency files (which tell which
 files should be recompiled when certain files change) are created
@@ -646,12 +672,12 @@ it will do is generate them. So all is well.
 
 <p><hr>
 Node:<a name="Section%203.6">Section 3.6</a>,
-Next:<a rel=next href="#Section%203.7">Section 3.7</a>,
-Previous:<a rel=previous href="#Section%203.5">Section 3.5</a>,
-Up:<a rel=up href="#Installation">Installation</a>
+Next:<a rel=next accesskey=n href="#Section%203.7">Section 3.7</a>,
+Previous:<a rel=previous accesskey=p href="#Section%203.5">Section 3.5</a>,
+Up:<a rel=up accesskey=u href="#Installation">Installation</a>
 <br>
 
-<h2>3.6 I get all kinds of weird compilation errors?</h2>
+<h3>3.6 I get all kinds of weird compilation errors?</h3>
 
 <p>Check that the correct i2c header files are used. Depending on
 how you installed, they should be under either <code>/usr/local/include</code> or
@@ -659,7 +685,7 @@ how you installed, they should be under either <code>/usr/local/include</code> o
 
 <p><a name="Section%203.6.1"></a>
 
-<h3>3.6.1 <code>No rule to make target xxxx needed by xxxx</code> - how to fix?</h3>
+<h4>3.6.1 <code>No rule to make target xxxx needed by xxxx</code> - how to fix?</h4>
 
 <ul>
 <li>See <a href="#Section%203.6">I get all kinds of weird compilation errors</a>, also try <code>make clean</code> in <code>lm_sensors</code>. 
@@ -670,12 +696,12 @@ how you installed, they should be under either <code>/usr/local/include</code> o
 
 <p><hr>
 Node:<a name="Section%203.7">Section 3.7</a>,
-Next:<a rel=next href="#Section%203.8">Section 3.8</a>,
-Previous:<a rel=previous href="#Section%203.6">Section 3.6</a>,
-Up:<a rel=up href="#Installation">Installation</a>
+Next:<a rel=next accesskey=n href="#Section%203.8">Section 3.8</a>,
+Previous:<a rel=previous accesskey=p href="#Section%203.6">Section 3.6</a>,
+Up:<a rel=up accesskey=u href="#Installation">Installation</a>
 <br>
 
-<h2>3.7 It still does not compile or patch!</h2>
+<h3>3.7 It still does not compile or patch!</h3>
 
 <p>Have you installed the matching version of the i2c package? Remember,
 compilation is not enough, you also need to install it for the header
@@ -686,27 +712,27 @@ patches first!
 
 <p><hr>
 Node:<a name="Section%203.8">Section 3.8</a>,
-Next:<a rel=next href="#Section%203.9">Section 3.9</a>,
-Previous:<a rel=previous href="#Section%203.7">Section 3.7</a>,
-Up:<a rel=up href="#Installation">Installation</a>
+Next:<a rel=next accesskey=n href="#Section%203.9">Section 3.9</a>,
+Previous:<a rel=previous accesskey=p href="#Section%203.7">Section 3.7</a>,
+Up:<a rel=up accesskey=u href="#Installation">Installation</a>
 <br>
 
-<h2>3.8 <code>make install</code> fails on Mandrake kernels</h2>
+<h3>3.8 <code>make install</code> fails on Mandrake kernels</h3>
 
 <p>Mandrake uses a non-standard <code>version.h</code> file which confuses our <code>Makefile</code>. 
 Edit our <code>Makefile</code> on the <code>MODDIR :=</code> line to hard-code the module directory.
 
 <p><hr>
 Node:<a name="Section%203.9">Section 3.9</a>,
-Next:<a rel=next href="#Section%203.10">Section 3.10</a>,
-Previous:<a rel=previous href="#Section%203.8">Section 3.8</a>,
-Up:<a rel=up href="#Installation">Installation</a>
+Next:<a rel=next accesskey=n href="#Section%203.10">Section 3.10</a>,
+Previous:<a rel=previous accesskey=p href="#Section%203.8">Section 3.8</a>,
+Up:<a rel=up accesskey=u href="#Installation">Installation</a>
 <br>
 
-<h2>3.9 I get unresolved symbols when I <code>modprobe</code> modules (Red Hat especially)</h2>
+<h3>3.9 I get unresolved symbols when I <code>modprobe</code> modules (Red Hat especially)</h3>
 
 <p>Example:
-<pre>*** Unresolved symbols in /lib/modules/2.4.5/kernel/drivers/i2c/i2c-i810.o
+<br><pre>*** Unresolved symbols in /lib/modules/2.4.5/kernel/drivers/i2c/i2c-i810.o
 i2c_bit_add_bus_R8c3bc60e
 i2c_bit_del_bus_R92b18f49
 </pre>
@@ -736,11 +762,11 @@ versioning problem.
 
 <p><hr>
 Node:<a name="Section%203.10">Section 3.10</a>,
-Previous:<a rel=previous href="#Section%203.9">Section 3.9</a>,
-Up:<a rel=up href="#Installation">Installation</a>
+Previous:<a rel=previous accesskey=p href="#Section%203.9">Section 3.9</a>,
+Up:<a rel=up accesskey=u href="#Installation">Installation</a>
 <br>
 
-<h2>3.10 I2C_DRIVERID_ADM1024 undefined (Red Hat especially)</h2>
+<h3>3.10 I2C_DRIVERID_ADM1024 undefined (Red Hat especially)</h3>
 
 <p>In some versions of Redhat, an RPM is included to provide i2c support. 
 However, this RPM does not place the header files in the kernel directory
@@ -757,7 +783,7 @@ If this complains about dependencies, you can try adding
 as you have upgraded kernels, and nothing should be using the
 old i2c stuff anymore anyway.  Just don't use it with abandon. 
 <li>Try (in the build directory of <code>lm_sensors)</code>
-<pre><code>make clean</code>
+<br><pre><code>make clean</code>
 <code>make</code>
 </pre>
 <li><em>If</em> you still have problems, you may have to replace the include
@@ -768,23 +794,23 @@ to work.
 
 <p><hr>
 Node:<a name="Problems">Problems</a>,
-Next:<a rel=next href="#Help">Help</a>,
-Previous:<a rel=previous href="#Installation">Installation</a>,
-Up:<a rel=up href="#Top">Top</a>
+Next:<a rel=next accesskey=n href="#Help">Help</a>,
+Previous:<a rel=previous accesskey=p href="#Installation">Installation</a>,
+Up:<a rel=up accesskey=u href="#Top">Top</a>
 <br>
 
-<h1>4 Problems</h1>
+<h2>4 Problems</h2>
 
 <ul>
-<li><a href="#Section%204.1">Section 4.1</a>:          My fans report exactly half/double their values? 
-<li><a href="#Section%204.2">Section 4.2</a>:          Why do my two LM75's report "-48 degrees"? 
-<li><a href="#Section%204.3">Section 4.3</a>:          Why do I have two Vcore readings? 
-<li><a href="#Section%204.4">Section 4.4</a>:          How do those ALARMS work? 
-<li><a href="#Section%204.5">Section 4.5</a>:          My voltage readings seem to drift a bit. What's wrong? 
-<li><a href="#Section%204.6">Section 4.6</a>:          Some measurements are way out of range. What happened? 
-<li><a href="#Section%204.7">Section 4.7</a>:          What are VID lines? Why is the VID reading wrong? 
-<li><a href="#Section%204.8">Section 4.8</a>:          Sensor are only updated each second or so. Why? 
-<li><a href="#Section%204.9">Section 4.9</a>:          It takes a second before reading sensor results. Why? 
+<li><a accesskey=1 href="#Section%204.1">Section 4.1</a>:          My fans report exactly half/double their values? 
+<li><a accesskey=2 href="#Section%204.2">Section 4.2</a>:          Why do my two LM75's report "-48 degrees"? 
+<li><a accesskey=3 href="#Section%204.3">Section 4.3</a>:          Why do I have two Vcore readings? 
+<li><a accesskey=4 href="#Section%204.4">Section 4.4</a>:          How do those ALARMS work? 
+<li><a accesskey=5 href="#Section%204.5">Section 4.5</a>:          My voltage readings seem to drift a bit. What's wrong? 
+<li><a accesskey=6 href="#Section%204.6">Section 4.6</a>:          Some measurements are way out of range. What happened? 
+<li><a accesskey=7 href="#Section%204.7">Section 4.7</a>:          What are VID lines? Why is the VID reading wrong? 
+<li><a accesskey=8 href="#Section%204.8">Section 4.8</a>:          Sensor are only updated each second or so. Why? 
+<li><a accesskey=9 href="#Section%204.9">Section 4.9</a>:          It takes a second before reading sensor results. Why? 
 <li><a href="#Section%204.10">Section 4.10</a>:         Can I be alerted when an ALARM occurs? 
 <li><a href="#Section%204.11">Section 4.11</a>:         SMBus transactions on my PIIX4 simply don't work. Why? 
 <li><a href="#Section%204.12">Section 4.12</a>:         My BIOS reports a higher CPU temperature than you! 
@@ -812,11 +838,11 @@ Up:<a rel=up href="#Top">Top</a>
 
 <p><hr>
 Node:<a name="Section%204.1">Section 4.1</a>,
-Next:<a rel=next href="#Section%204.2">Section 4.2</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.2">Section 4.2</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.1 My fans report exactly half/double their values compared to the BIOS?</h2>
+<h3>4.1 My fans report exactly half/double their values compared to the BIOS?</h3>
 
 <p>The problem with much of the sensor data is that it is impossible to
 properly interpret some of the readings without knowing what the hardware
@@ -824,7 +850,7 @@ configuration is.  Some fans report one 'tick' each rotation, some report
 two 'ticks' each rotation. It is easy to resolve this through the
 configuration file <code>/etc/sensors.conf</code>:
 
-<pre>chip lm78-*             # Or whatever chip this relates to
+<br><pre>chip lm78-*             # Or whatever chip this relates to
 compute fan1 2*@,@/2    # This will double the fan1 reading
                         # -- or --
 compute fan1 @/2,2*@    # This will halve the fan1 reading
@@ -834,7 +860,7 @@ compute fan1 @/2,2*@    # This will halve the fan1 reading
 
 <p><a name="Fans%20sometimes%2falways%20read%200!"></a>
 
-<h3>4.1.1 Fans sometimes/always read 0!!</h3>
+<h4>4.1.1 Fans sometimes/always read 0!!</h4>
 
 <p>You may not have a three-wire fan, which is required.
 
@@ -843,7 +869,7 @@ in our package for further information.
 
 <p><a name="I%20doubled%20the%20fan%20divisor%20and%20the%20fan%20still%20reads%207000"></a>
 
-<h3>4.1.2 I doubled the fan divisor and the fan still reads 7000!</h3>
+<h4>4.1.2 I doubled the fan divisor and the fan still reads 7000!</h4>
 
 <p>Believe it or not, doubling the 'fan divisor' will not halve
 the fan reading. You have to add a compute line in <code>/etc/sensors.conf</code>. 
@@ -852,12 +878,12 @@ and see <code>doc/fan-divisors</code> in our package for further information.
 
 <p><hr>
 Node:<a name="Section%204.2">Section 4.2</a>,
-Next:<a rel=next href="#Section%204.3">Section 4.3</a>,
-Previous:<a rel=previous href="#Section%204.1">Section 4.1</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.3">Section 4.3</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.1">Section 4.1</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.2 Why do my two LM75's report "-48 degrees"?</h2>
+<h3>4.2 Why do my two LM75's report "-48 degrees"?</h3>
 
 <p>For starters, those aren't LM75's.  Your mainboard actually has the
 Winbond W83781D which emulates two LM75's, but many systems which use the
@@ -872,12 +898,12 @@ readings.
 
 <p><hr>
 Node:<a name="Section%204.3">Section 4.3</a>,
-Next:<a rel=next href="#Section%204.4">Section 4.4</a>,
-Previous:<a rel=previous href="#Section%204.2">Section 4.2</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.4">Section 4.4</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.2">Section 4.2</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.3 Why do I have two Vcore readings, I have only one processor!</h2>
+<h3>4.3 Why do I have two Vcore readings, I have only one processor!</h3>
 
 <p>The LM78 has seven voltage sensors. The default way of
 connecting them is used in the configuration file. This includes a VCore2,
@@ -894,12 +920,12 @@ different.
 
 <p><hr>
 Node:<a name="Section%204.4">Section 4.4</a>,
-Next:<a rel=next href="#Section%204.5">Section 4.5</a>,
-Previous:<a rel=previous href="#Section%204.3">Section 4.3</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.5">Section 4.5</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.3">Section 4.3</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.4 How do those ALARMS work? The current value is within range but there is still an ALARM warning!</h2>
+<h3>4.4 How do those ALARMS work? The current value is within range but there is still an ALARM warning!</h3>
 
 <p>The ALARM indications in <code>sensors</code> are those reported by the
 sensor chip itself. They are NOT calculated by <code>sensors</code>. <code>sensors</code>
@@ -923,12 +949,12 @@ chip datasheet for more information.
 
 <p><hr>
 Node:<a name="Section%204.5">Section 4.5</a>,
-Next:<a rel=next href="#Section%204.6">Section 4.6</a>,
-Previous:<a rel=previous href="#Section%204.4">Section 4.4</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.6">Section 4.6</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.4">Section 4.4</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.5 My voltage readings seem to drift a bit. Is something wrong?</h2>
+<h3>4.5 My voltage readings seem to drift a bit. Is something wrong?</h3>
 
 <p>No, probably not. If your motherboard heats up a bit, the sensed
 voltages will drift a bit. If your power supply is loaded (because a disk
@@ -941,12 +967,12 @@ reason to worry.
 
 <p><hr>
 Node:<a name="Section%204.6">Section 4.6</a>,
-Next:<a rel=next href="#Section%204.7">Section 4.7</a>,
-Previous:<a rel=previous href="#Section%204.5">Section 4.5</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.7">Section 4.7</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.5">Section 4.5</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.6 Some measurements are way out of range. What happened?</h2>
+<h3>4.6 Some measurements are way out of range. What happened?</h3>
 
 <p>Each module tries to set limits to sensible values on initialization,
 but a module does not know how a chip is actually connected. This is
@@ -962,12 +988,12 @@ more information.
 
 <p><hr>
 Node:<a name="Section%204.7">Section 4.7</a>,
-Next:<a rel=next href="#Section%204.8">Section 4.8</a>,
-Previous:<a rel=previous href="#Section%204.6">Section 4.6</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.8">Section 4.8</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.6">Section 4.6</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.7 What are VID lines? Why is the VID reading wrong?</h2>
+<h3>4.7 What are VID lines? Why is the VID reading wrong?</h3>
 
 <p>These describe the core voltage for your processor. They are
 supported for most processors, however they are not always
@@ -979,12 +1005,12 @@ and change the min and max settings for the Processor Core voltage
 
 <p><hr>
 Node:<a name="Section%204.8">Section 4.8</a>,
-Next:<a rel=next href="#Section%204.9">Section 4.9</a>,
-Previous:<a rel=previous href="#Section%204.7">Section 4.7</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.9">Section 4.9</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.7">Section 4.7</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.8 I read sensor values several times a second, but they are only updated only each second or so. Why?</h2>
+<h3>4.8 I read sensor values several times a second, but they are only updated only each second or so. Why?</h3>
 
 <p>If we would read the registers more often, it would not find the
 time to update them. So we only update our readings once each 1.5 seconds
@@ -993,12 +1019,12 @@ at all).
 
 <p><hr>
 Node:<a name="Section%204.9">Section 4.9</a>,
-Next:<a rel=next href="#Section%204.10">Section 4.10</a>,
-Previous:<a rel=previous href="#Section%204.8">Section 4.8</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.10">Section 4.10</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.8">Section 4.8</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.9 It sometimes seems to take almost a second before I see the sensor reading results. Why?</h2>
+<h3>4.9 It sometimes seems to take almost a second before I see the sensor reading results. Why?</h3>
 
 <p>ISA bus access is fast, but SMBus access is really slow. If you have
 a lot of sensors, it just takes a lot of time to access them. Fortunately,
@@ -1007,12 +1033,12 @@ while we are waiting for the transaction to finish.
 
 <p><hr>
 Node:<a name="Section%204.10">Section 4.10</a>,
-Next:<a rel=next href="#Section%204.11">Section 4.11</a>,
-Previous:<a rel=previous href="#Section%204.9">Section 4.9</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.11">Section 4.11</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.9">Section 4.9</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.10 Can I be alerted when an ALARM occurs?</h2>
+<h3>4.10 Can I be alerted when an ALARM occurs?</h3>
 
 <p>No, you can't; and it may well be never supported.
 
@@ -1033,12 +1059,12 @@ programs under X, see <a href="http://www2.lm-sensors.nu/~lm78/useful_addresses.
 
 <p><hr>
 Node:<a name="Section%204.11">Section 4.11</a>,
-Next:<a rel=next href="#Section%204.12">Section 4.12</a>,
-Previous:<a rel=previous href="#Section%204.10">Section 4.10</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.12">Section 4.12</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.10">Section 4.10</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.11 SMBus transactions on my PIIX4 simply don't work (timeouts happen).  Why?</h2>
+<h3>4.11 SMBus transactions on my PIIX4 simply don't work (timeouts happen).  Why?</h3>
 
 <p>Some chips which mainboard makers connect to the SMBus are not SMBus
 devices.  An example is the 91xx clock generator chips.  When read, these
@@ -1052,12 +1078,12 @@ written to, but lock things up when they are read.
 
 <p><hr>
 Node:<a name="Section%204.12">Section 4.12</a>,
-Next:<a rel=next href="#Section%204.13">Section 4.13</a>,
-Previous:<a rel=previous href="#Section%204.11">Section 4.11</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.13">Section 4.13</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.11">Section 4.11</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.12 My BIOS reports a much higher CPU temperature than your modules!</h2>
+<h3>4.12 My BIOS reports a much higher CPU temperature than your modules!</h3>
 
 <p>We display the actual temperature of the sensor. This may not be the
 temperature you are interested in, though.  If a sensor should measure
@@ -1067,19 +1093,19 @@ for example, thirty degrees to the measured temperature).  The correction
 factor is regrettably different for each mainboard, so we can not do this
 in the module itself. You can do it through the configuration file, though:
 
-<pre>chip lm75-*-49                      # Or whatever chip this relates to
+<br><pre>chip lm75-*-49                      # Or whatever chip this relates to
 label temp "Processor"
 compute temp @*1.2+13,(@-13)/1.2    # Or whatever formula
 </pre>
 
 <p><hr>
 Node:<a name="Section%204.13">Section 4.13</a>,
-Next:<a rel=next href="#Section%204.14">Section 4.14</a>,
-Previous:<a rel=previous href="#Section%204.12">Section 4.12</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.14">Section 4.14</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.12">Section 4.12</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.13 I try to read the raw <code>/proc</code> files, but the values are strange?!?</h2>
+<h3>4.13 I try to read the raw <code>/proc</code> files, but the values are strange?!?</h3>
 
 <p>Remember, these values do not take the configuration file
 <code>compute</code> lines in account. This is especially obvious for voltage readings
@@ -1088,31 +1114,31 @@ the provided <code>sensors</code> program) instead.
 
 <p><hr>
 Node:<a name="Section%204.14">Section 4.14</a>,
-Next:<a rel=next href="#Section%204.15">Section 4.15</a>,
-Previous:<a rel=previous href="#Section%204.13">Section 4.13</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.15">Section 4.15</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.13">Section 4.13</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.14 How do I set new limits?</h2>
+<h3>4.14 How do I set new limits?</h3>
 
 <p>Change the limit values in <code>/etc/sensors.conf</code> and then run
 <code>sensors -s</code>.
 
 <p><a name="I%20set%20new%20limits%20and%20it%20didnt%20work"></a>
 
-<h3>4.14.1 I set new limits and it didn't work?</h3>
+<h4>4.14.1 I set new limits and it didn't work?</h4>
 
 <p>You forgot to run <code>sensors -s</code>. Put it in a <code>/etc/rc.d/...</code> file
 after the modprobe lines to run at startup.
 
 <p><hr>
 Node:<a name="Section%204.15">Section 4.15</a>,
-Next:<a rel=next href="#Section%204.16">Section 4.16</a>,
-Previous:<a rel=previous href="#Section%204.14">Section 4.14</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.16">Section 4.16</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.14">Section 4.14</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.15 Some sensors are doubly detected?</h2>
+<h3>4.15 Some sensors are doubly detected?</h3>
 
 <p>Yes, this is still a problem. It is partially solved by alias detection
 and confidence values in sensors-detect, but it is really tough.
@@ -1126,12 +1152,12 @@ run sensors-detect and add the <code>ignore=</code> modprobe parameters it sugge
 
 <p><hr>
 Node:<a name="Section%204.16">Section 4.16</a>,
-Next:<a rel=next href="#Section%204.17">Section 4.17</a>,
-Previous:<a rel=previous href="#Section%204.15">Section 4.15</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.17">Section 4.17</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.15">Section 4.15</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.16 I ran sensors-detect, but now I get very strange readings?!?</h2>
+<h3>4.16 I ran sensors-detect, but now I get very strange readings?!?</h3>
 
 <p>Your SMBus (PIIX4?) is probably crashed or hung. There are some mainboards
 which connect a clock chip to the SMBus. Unfortunately, this clock chip
@@ -1143,19 +1169,19 @@ scan the PIIX4.
 
 <p><hr>
 Node:<a name="Section%204.17">Section 4.17</a>,
-Next:<a rel=next href="#Section%204.18">Section 4.18</a>,
-Previous:<a rel=previous href="#Section%204.16">Section 4.16</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.18">Section 4.18</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.16">Section 4.16</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.17 Bad readings from particular chips</h2>
+<h3>4.17 Bad readings from particular chips</h3>
 
 <p>See below for some particularly troublesome chips. 
 Also be sure and check <code>doc/chips/xxxxx</code> for the particular driver.
 
 <p><a name="Bad%20readings%20from%20the%20AS99127F"></a>
 
-<h3>4.17.1 Bad readings from the AS99127F!</h3>
+<h4>4.17.1 Bad readings from the AS99127F!</h4>
 
 <p>The Asus AS99127F is a modified version of the Winbond W83781D. 
 Asus will not release a datasheet. The driver was developed by tedious
@@ -1165,7 +1191,7 @@ fix the driver. Ask Asus to release a datasheet.
 
 <p><a name="Bad%20readings%20from%20the%20VIA%20686A"></a>
 
-<h3>4.17.2 Bad readings from the VIA 686A!</h3>
+<h4>4.17.2 Bad readings from the VIA 686A!</h4>
 
 <p>The Via 686A datasheet is incomplete. 
 Via will not release details. The driver was developed by tedious
@@ -1176,7 +1202,7 @@ Also, don't forget to <code>modprobe i2c-isa</code>.
 
 <p><a name="Bad%20readings%20from%20the%20MTP008"></a>
 
-<h3>4.17.3 Bad readings from the MTP008!</h3>
+<h4>4.17.3 Bad readings from the MTP008!</h4>
 
 <p>The MTP008 has programmable temperature sensor types. 
 If your sensor type does not match the default, you will have to change it. 
@@ -1186,7 +1212,7 @@ unknown reasons. You can see this as 'XX' entries in i2cdump.
 
 <p><a name="Bad%20temperature%20readings%20from%20the%20SIS5595"></a>
 
-<h3>4.17.4 Bad temperature readings from the SIS5595!</h3>
+<h4>4.17.4 Bad temperature readings from the SIS5595!</h4>
 
 <p>This chip can use multiple thermistor types and there are also
 two different versions of the chip. We are trying to get the driver
@@ -1197,7 +1223,7 @@ misidentified. We are working on improving that too.
 
 <p><a name="Bad%20readings%20from%20a%20w8378%5b12%5dd"></a>
 
-<h3>4.17.5 Bad readings from a w8378[12]d!</h3>
+<h4>4.17.5 Bad readings from a w8378[12]d!</h4>
 
 <p>Do you own an ASUS motherboard?  Perhaps your chip is being
 misidentified.  Look on the motherboard (or at
@@ -1211,7 +1237,7 @@ for more details.
 
 <p><a name="Bus%20hangs%20on%20Ali%201543%20on%20Asus%20P5A%20boards"></a>
 
-<h3>4.17.6 Bus hangs on Ali 1543 on Asus P5A boards!</h3>
+<h4>4.17.6 Bus hangs on Ali 1543 on Asus P5A boards!</h4>
 
 <p>The SMBus tends to hang on this board and it seems to get worse
 at higher temperatures. Use ISA accesses to reliably use the w83781d
@@ -1220,14 +1246,14 @@ to the w83781d module to prevent i2c accesses.
 
 <p><a name="Bad%20readings%20from%20LM75"></a>
 
-<h3>4.17.7 Bad readings from LM75!</h3>
+<h4>4.17.7 Bad readings from LM75!</h4>
 
 <p>The LM75 detection is poor and other hardware is often misdetected
 as an LM75. Figure out what you really have See <a href="#Section%203.2.1">What chips are on motherboard XYZ</a>.
 
 <p><a name="Bad%20readings%20from%20LM78"></a>
 
-<h3>4.17.8 Bad readings from LM78!</h3>
+<h4>4.17.8 Bad readings from LM78!</h4>
 
 <p>The LM78 is no longer manufactured by National Semiconductor. 
 You probably don't have a real LM78 but something similar that we
@@ -1235,14 +1261,14 @@ do not recogize or support. Figure out what you really have See <a href="#Sectio
 
 <p><a name="Bad%20readings%20from%20LM80"></a>
 
-<h3>4.17.9 Bad readings from LM80!</h3>
+<h4>4.17.9 Bad readings from LM80!</h4>
 
 <p>The LM80 detection is poor and other hardware is often misdetected
 as an LM80. Figure out what you really have See <a href="#Section%203.2.1">What chips are on motherboard XYZ</a>.
 
 <p><a name="Bad%20readings%20from%20it87"></a>
 
-<h3>4.17.10 Bad readings from it87!</h3>
+<h4>4.17.10 Bad readings from it87!</h4>
 
 <p>The it87 temperature sesnsors are configured, unfortunately,
 in a way different from w83781d. They cannot be configured from
@@ -1251,19 +1277,19 @@ in a way different from w83781d. They cannot be configured from
 
 <p><hr>
 Node:<a name="Section%204.18">Section 4.18</a>,
-Next:<a rel=next href="#Section%204.19">Section 4.19</a>,
-Previous:<a rel=previous href="#Section%204.17">Section 4.17</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.19">Section 4.19</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.17">Section 4.17</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.18 How do I configure two chips (LM87) differently?</h2>
+<h3>4.18 How do I configure two chips (LM87) differently?</h3>
 
 <p>There is a SuperMicro board with two LM87's on it that are
 not hooked up in the same way, so they need different defaults. 
 For example, both CPU temperatures go to one LM87.
 
 <p>Make two different sections in <code>/etc/sensors.conf</code> as follows:
-<pre>chip "lm87-i2c-*-2c"
+<br><pre>chip "lm87-i2c-*-2c"
     put configuration for the chip at 0x2c here
 chip "lm87-i2c-*-2d"
     put configuration for the chip at 0x2d here
@@ -1274,12 +1300,12 @@ be helpful.
 
 <p><hr>
 Node:<a name="Section%204.19">Section 4.19</a>,
-Next:<a rel=next href="#Section%204.20">Section 4.20</a>,
-Previous:<a rel=previous href="#Section%204.18">Section 4.18</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.20">Section 4.20</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.18">Section 4.18</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.19 Dmesg says <code>Upgrade BIOS</code>! I don't want to!</h2>
+<h3>4.19 Dmesg says <code>Upgrade BIOS</code>! I don't want to!</h3>
 
 <p>If the problem is a PCI device is not present in <code>lspci</code>, the solution
 is complex. For the ALI M7101 device, there is a solution which uses the
@@ -1294,7 +1320,7 @@ you can send us your request.
 
 <p><a name="Dmesg%20says%20use%20force_addr%3d0xaddr!%20What%20address%20do%20I%20use"></a>
 
-<h3>4.19.1 Dmesg says <code>use force_addr=0xaddr</code>! What address do I use?</h3>
+<h4>4.19.1 Dmesg says <code>use force_addr=0xaddr</code>! What address do I use?</h4>
 
 <p>If the problem is a PCI device whose base address is not set,
 you may be able to set the address with a force parameter. The via686a
@@ -1306,12 +1332,12 @@ is the I/O address. You must select an address that is not in use.
 
 <p><hr>
 Node:<a name="Section%204.20">Section 4.20</a>,
-Next:<a rel=next href="#Section%204.21">Section 4.21</a>,
-Previous:<a rel=previous href="#Section%204.19">Section 4.19</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.21">Section 4.21</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.19">Section 4.19</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.20 Sensors says <code>Can't access <code>/proc</code> file</code></h2>
+<h3>4.20 Sensors says <code>Can't access <code>/proc</code> file</code></h3>
 
 <ul>
 <li>(release 2.6.0 and later) Did you <code>modprobe i2c-proc</code>? Check <code>lsmod</code>. 
@@ -1322,12 +1348,12 @@ Up:<a rel=up href="#Problems">Problems</a>
 
 <p><hr>
 Node:<a name="Section%204.21">Section 4.21</a>,
-Next:<a rel=next href="#Section%204.22">Section 4.22</a>,
-Previous:<a rel=previous href="#Section%204.20">Section 4.20</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.22">Section 4.22</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.20">Section 4.20</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.21 Sensors says <code>No sensors found!</code></h2>
+<h3>4.21 Sensors says <code>No sensors found!</code></h3>
 
 <ul>
 <li>Did <code>sensors-detect</code> find sensors? (If not see <a href="#Sensors-detect%20doesnt%20find%20any%20sensors">Sensors-detect doesnt find any sensors</a>)
@@ -1340,12 +1366,12 @@ Up:<a rel=up href="#Problems">Problems</a>
 
 <p><hr>
 Node:<a name="Section%204.22">Section 4.22</a>,
-Next:<a rel=next href="#Section%204.23">Section 4.23</a>,
-Previous:<a rel=previous href="#Section%204.21">Section 4.21</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.23">Section 4.23</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.21">Section 4.21</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.22 Sensors output is not correct!</h2>
+<h3>4.22 Sensors output is not correct!</h3>
 
 <p>What specifically is the trouble?
 <ul>
@@ -1366,12 +1392,12 @@ Up:<a rel=up href="#Problems">Problems</a>
 
 <p><hr>
 Node:<a name="Section%204.23">Section 4.23</a>,
-Next:<a rel=next href="#Section%204.24">Section 4.24</a>,
-Previous:<a rel=previous href="#Section%204.22">Section 4.22</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.24">Section 4.24</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.22">Section 4.22</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.23 What is at I2C address XXX?</h2>
+<h3>4.23 What is at I2C address XXX?</h3>
 
 <p>In general, we don't know. Start by running <code>sensors-detect</code>. 
 If it doesn't recognize it, try running <code>i2cdump</code>. A partial list
@@ -1379,7 +1405,7 @@ of manufacturers' IDs are at the bottom of <code>doc/chips/SUMMARY</code>.
 
 <p><a name="What%20is%20at%20I2C%20address%200x69"></a>
 
-<h3>4.23.1 What is at I2C address 0x69?</h3>
+<h4>4.23.1 What is at I2C address 0x69?</h4>
 
 <p>A clock chip. Often, accessing these clock chips in the wrong
 way will instantly crash your computer. Sensors-detect carefully
@@ -1389,7 +1415,7 @@ do not recommend it. You have been warned.
 
 <p><a name="What%20is%20at%20I2C%20addresses%200x50%20-%200x57"></a>
 
-<h3>4.23.2 What is at I2C addresses 0x50 - 0x57?</h3>
+<h4>4.23.2 What is at I2C addresses 0x50 - 0x57?</h4>
 
 <p>EEPROMs on your SDRAM DIMMs. Load the eeprom module to
 look at some basic data in <code>sensors</code> or use the program
@@ -1397,7 +1423,7 @@ look at some basic data in <code>sensors</code> or use the program
 
 <p><a name="What%20is%20at%20I2C%20addresses%200x30%20-%200x37"></a>
 
-<h3>4.23.3 What is at I2C addresses 0x30 - 0x37?</h3>
+<h4>4.23.3 What is at I2C addresses 0x30 - 0x37?</h4>
 
 <p>These are often 'shadows' of your EEPROMs on your SDRAM DIMMs
 at addresses 0x50 - 0x57. They aren't really there. If you try and
@@ -1407,25 +1433,25 @@ We don't know the exact cause.
 
 <p><hr>
 Node:<a name="Section%204.24">Section 4.24</a>,
-Next:<a rel=next href="#Section%204.25">Section 4.25</a>,
-Previous:<a rel=previous href="#Section%204.23">Section 4.23</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.25">Section 4.25</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.23">Section 4.23</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.24 Sensors-detect doesn't work at all</h2>
+<h3>4.24 Sensors-detect doesn't work at all</h3>
 
 <p>It could be many things. What was the problem? See <a href="#Section%204.31">Problems on particular motherboards</a>.
 
 <p><a name="Sensors-detect%20says%20%22Couldnt%20open%20%2fproc%2fbus%2fi2c%3f!%3f%22"></a>
 
-<h3>4.24.1 Sensors-detect says "Couldn't open /proc/bus/i2c?!?"</h3>
+<h4>4.24.1 Sensors-detect says "Couldn't open /proc/bus/i2c?!?"</h4>
 
 <p>You don't have i2c support in your kernel, or the i2c-core module
 was not loaded and you did not run sensors-detect as root.
 
 <p><a name="Sensors-detect%20says%20%22Cant%20open%20%2fdev%2fi2c%5b-%2f%5d0%22"></a>
 
-<h3>4.24.2 Sensors-detect says "Can't open /dev/i2c[-/]0"</h3>
+<h4>4.24.2 Sensors-detect says "Can't open /dev/i2c[-/]0"</h4>
 
 <p>Your <code>/dev/i2c-0,</code> <code>/dev/i2c0</code>, or <code>/dev/i2c/0</code> files do not exist
 or you did not run <code>sensors-detect</code> as root. 
@@ -1434,7 +1460,7 @@ Run <code>devfs</code> in the kernel to get the <code>/dev/i2c/x</code> files.
 
 <p><a name="Sensors-detect%20doesnt%20find%20any%20sensors"></a>
 
-<h3>4.24.3 Sensors-detect doesn't find any sensors!</h3>
+<h4>4.24.3 Sensors-detect doesn't find any sensors!</h4>
 
 <p>Either
 <ol type=1 start=1>
@@ -1457,12 +1483,12 @@ see if support has been added for your chip in a later release or in CVS.
 
 <p><hr>
 Node:<a name="Section%204.25">Section 4.25</a>,
-Next:<a rel=next href="#Section%204.26">Section 4.26</a>,
-Previous:<a rel=previous href="#Section%204.24">Section 4.24</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.26">Section 4.26</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.24">Section 4.24</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.25 Sensors says <code>Error: Line xxx: zzzzzzz</code></h2>
+<h3>4.25 Sensors says <code>Error: Line xxx: zzzzzzz</code></h3>
 
 <p>These are errors from the libsensors library in
 reading the <code>/etc/sensors.conf</code> configuration file. Go to that line
@@ -1471,17 +1497,17 @@ to put the feature name in double quotes.
 
 <p><hr>
 Node:<a name="Section%204.26">Section 4.26</a>,
-Next:<a rel=next href="#Section%204.27">Section 4.27</a>,
-Previous:<a rel=previous href="#Section%204.25">Section 4.25</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.27">Section 4.27</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.25">Section 4.25</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.26 Sensors only gives the name, adapter, and algorithm for my chip</h2>
+<h3>4.26 Sensors only gives the name, adapter, and algorithm for my chip</h3>
 
 <p>If <code>sensors</code> only says this, for example, and doesn't
 provide any actual data at all:
 
-<pre>it87-isa-0290
+<br><pre>it87-isa-0290
 Adapter: ISA adapter
 Algorithm: ISA algorithm
 </pre>
@@ -1493,12 +1519,12 @@ and not some older <code>sensors</code>.
 
 <p><hr>
 Node:<a name="Section%204.27">Section 4.27</a>,
-Next:<a rel=next href="#Section%204.28">Section 4.28</a>,
-Previous:<a rel=previous href="#Section%204.26">Section 4.26</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.28">Section 4.28</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.26">Section 4.26</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.27 Sensors says <code>ERROR: Can't get xxxxx data!</code></h2>
+<h3>4.27 Sensors says <code>ERROR: Can't get xxxxx data!</code></h3>
 
 <p>You have a <code>libsensors/sensors</code> mismatch. <code>sensors</code> is unable to
 get a data entry from <code>libsensors</code>. You probably have an
@@ -1510,12 +1536,12 @@ the <code>libsensors</code> that was built in the <code>lib/</code> directory in
 
 <p><hr>
 Node:<a name="Section%204.28">Section 4.28</a>,
-Next:<a rel=next href="#Section%204.29">Section 4.29</a>,
-Previous:<a rel=previous href="#Section%204.27">Section 4.27</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.29">Section 4.29</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.27">Section 4.27</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.28 Sensors doesn't find any sensors, just eeproms.</h2>
+<h3>4.28 Sensors doesn't find any sensors, just eeproms.</h3>
 
 <p>See <a href="#Section%204.24">Sensors-detect doesnt work at all</a>, if <code>sensors-detect</code> failed to find any sensors.
 
@@ -1527,12 +1553,12 @@ also <a href="#Section%204.21">Sensors says No sensors found</a>.
 
 <p><hr>
 Node:<a name="Section%204.29">Section 4.29</a>,
-Next:<a rel=next href="#Section%204.30">Section 4.30</a>,
-Previous:<a rel=previous href="#Section%204.28">Section 4.28</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.30">Section 4.30</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.28">Section 4.28</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.29 Inserting modules hangs my board</h2>
+<h3>4.29 Inserting modules hangs my board</h3>
 
 <p>There are several possible causes:
 <ol type=1 start=1>
@@ -1545,12 +1571,12 @@ Up:<a rel=up href="#Problems">Problems</a>
 
 <p><hr>
 Node:<a name="Section%204.30">Section 4.30</a>,
-Next:<a rel=next href="#Section%204.31">Section 4.31</a>,
-Previous:<a rel=previous href="#Section%204.29">Section 4.29</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.31">Section 4.31</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.29">Section 4.29</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.30 Inserting modules slows down my board</h2>
+<h3>4.30 Inserting modules slows down my board</h3>
 
 <p>Generally this is caused by an overtemperature alarm output from
 the sensor chip. This triggers hardware on the board which
@@ -1560,77 +1586,77 @@ the new limits in <code>/etc/sensors.conf</code> and run <code>sensors -s</code>
 
 <p><hr>
 Node:<a name="Section%204.31">Section 4.31</a>,
-Next:<a rel=next href="#Section%204.32">Section 4.32</a>,
-Previous:<a rel=previous href="#Section%204.30">Section 4.30</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Next:<a rel=next accesskey=n href="#Section%204.32">Section 4.32</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.30">Section 4.30</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.31 Problems on particular motherboards</h2>
+<h3>4.31 Problems on particular motherboards</h3>
 
 <p>The following boards have unique problems and solutions.
 
 <p><a name="Asus%20P4B"></a>
 
-<h3>4.31.1 Asus P4B</h3>
+<h4>4.31.1 Asus P4B</h4>
 
 <p>See <code>prog/hotplug/README.p4b</code> if your SMBus master is not found.
 
 <p><a name="Tyan%202460%202462"></a>
 
-<h3>4.31.2 Tyan 2460, 2462</h3>
+<h4>4.31.2 Tyan 2460, 2462</h4>
 
 <p>See support tickets 805, 765, 781, 812, 813, and 867 for information.
 
 <p><a name="Tyan%202466"></a>
 
-<h3>4.31.3 Tyan 2466</h3>
+<h4>4.31.3 Tyan 2466</h4>
 
 <p>See support tickets 941, 840, and 841 for information.
 
 <p><a name="Tyan%202688"></a>
 
-<h3>4.31.4 Tyan 2688</h3>
+<h4>4.31.4 Tyan 2688</h4>
 
 <p>For board hangs, see support ticket 721 for information. 
 Also <a href="#Section%204.29">Inserting modules hangs my board</a>.
 
 <p><hr>
 Node:<a name="Section%204.32">Section 4.32</a>,
-Previous:<a rel=previous href="#Section%204.31">Section 4.31</a>,
-Up:<a rel=up href="#Problems">Problems</a>
+Previous:<a rel=previous accesskey=p href="#Section%204.31">Section 4.31</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
 
-<h2>4.32 Problems on particular systems</h2>
+<h3>4.32 Problems on particular systems</h3>
 
 <p>For IBM systems, see <code>README.thinkpad</code>.
 
 <p><hr>
 Node:<a name="Help">Help</a>,
-Next:<a rel=next href="#Contribute">Contribute</a>,
-Previous:<a rel=previous href="#Problems">Problems</a>,
-Up:<a rel=up href="#Top">Top</a>
+Next:<a rel=next accesskey=n href="#Contribute">Contribute</a>,
+Previous:<a rel=previous accesskey=p href="#Problems">Problems</a>,
+Up:<a rel=up accesskey=u href="#Top">Top</a>
 <br>
 
-<h1>5 How to Ask for Help</h1>
+<h2>5 How to Ask for Help</h2>
 
 <ul>
-<li><a href="#Section%205.1">Section 5.1</a>:   What to send us when asking for help
-<li><a href="#Section%205.2">Section 5.2</a>:   What to do if a module won't insert? 
-<li><a href="#Section%205.3">Section 5.3</a>:   What to do if it inserts, but nothing happens? 
-<li><a href="#Section%205.4">Section 5.4</a>:   What to do if I read only bogus information? 
-<li><a href="#Section%205.5">Section 5.5</a>:   What to do if you have other problems? 
-<li><a href="#Section%205.6">Section 5.6</a>:   What if it just works like a charm? 
-<li><a href="#Section%205.7">Section 5.7</a>:   How do I update a ticket? 
-<li><a href="#Section%205.8">Section 5.8</a>:   How do I follow up on a ticket? 
+<li><a accesskey=1 href="#Section%205.1">Section 5.1</a>:   What to send us when asking for help
+<li><a accesskey=2 href="#Section%205.2">Section 5.2</a>:   What to do if a module won't insert? 
+<li><a accesskey=3 href="#Section%205.3">Section 5.3</a>:   What to do if it inserts, but nothing happens? 
+<li><a accesskey=4 href="#Section%205.4">Section 5.4</a>:   What to do if I read only bogus information? 
+<li><a accesskey=5 href="#Section%205.5">Section 5.5</a>:   What to do if you have other problems? 
+<li><a accesskey=6 href="#Section%205.6">Section 5.6</a>:   What if it just works like a charm? 
+<li><a accesskey=7 href="#Section%205.7">Section 5.7</a>:   How do I update a ticket? 
+<li><a accesskey=8 href="#Section%205.8">Section 5.8</a>:   How do I follow up on a ticket? 
 </ul>
 
 <p><hr>
 Node:<a name="Section%205.1">Section 5.1</a>,
-Next:<a rel=next href="#Section%205.2">Section 5.2</a>,
-Up:<a rel=up href="#Help">Help</a>
+Next:<a rel=next accesskey=n href="#Section%205.2">Section 5.2</a>,
+Up:<a rel=up accesskey=u href="#Help">Help</a>
 <br>
 
-<h2>5.1 What to send us when asking for help</h2>
+<h3>5.1 What to send us when asking for help</h3>
 
 <p>We are always willing to answer questions if things don't work out. 
 Please email <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a>, and not the individual authors,
@@ -1672,12 +1698,12 @@ where XX = the address of each chip you see in the output of <code>i2cdetect</co
 
 <p><hr>
 Node:<a name="Section%205.2">Section 5.2</a>,
-Next:<a rel=next href="#Section%205.3">Section 5.3</a>,
-Previous:<a rel=previous href="#Section%205.1">Section 5.1</a>,
-Up:<a rel=up href="#Help">Help</a>
+Next:<a rel=next accesskey=n href="#Section%205.3">Section 5.3</a>,
+Previous:<a rel=previous accesskey=p href="#Section%205.1">Section 5.1</a>,
+Up:<a rel=up accesskey=u href="#Help">Help</a>
 <br>
 
-<h2>5.2 What to do if a module won't insert?</h2>
+<h3>5.2 What to do if a module won't insert?</h3>
 
 <p>Did you use <code>modprobe</code> instead of <code>insmod</code>??? Don't use insmod.
 
@@ -1691,12 +1717,12 @@ listed above.
 
 <p><hr>
 Node:<a name="Section%205.3">Section 5.3</a>,
-Next:<a rel=next href="#Section%205.4">Section 5.4</a>,
-Previous:<a rel=previous href="#Section%205.2">Section 5.2</a>,
-Up:<a rel=up href="#Help">Help</a>
+Next:<a rel=next accesskey=n href="#Section%205.4">Section 5.4</a>,
+Previous:<a rel=previous accesskey=p href="#Section%205.2">Section 5.2</a>,
+Up:<a rel=up accesskey=u href="#Help">Help</a>
 <br>
 
-<h2>5.3 What to do if it inserts, but nothing happens?</h2>
+<h3>5.3 What to do if it inserts, but nothing happens?</h3>
 
 <p>For an ISA sensor chip, did you also <code>modprobe i2c-isa</code>? It must be inserted.
 
@@ -1709,12 +1735,12 @@ listed above.
 
 <p><hr>
 Node:<a name="Section%205.4">Section 5.4</a>,
-Next:<a rel=next href="#Section%205.5">Section 5.5</a>,
-Previous:<a rel=previous href="#Section%205.3">Section 5.3</a>,
-Up:<a rel=up href="#Help">Help</a>
+Next:<a rel=next accesskey=n href="#Section%205.5">Section 5.5</a>,
+Previous:<a rel=previous accesskey=p href="#Section%205.3">Section 5.3</a>,
+Up:<a rel=up accesskey=u href="#Help">Help</a>
 <br>
 
-<h2>5.4 What to do if I read only bogus information?</h2>
+<h3>5.4 What to do if I read only bogus information?</h3>
 
 <p>It may be that this was a mis-detection: the chip may not be
 present. If you are convinced there is something wrong, verify that you
@@ -1724,35 +1750,35 @@ please send us the usual information (see <a href="#Help">Help</a>)
 
 <p><hr>
 Node:<a name="Section%205.5">Section 5.5</a>,
-Next:<a rel=next href="#Section%205.6">Section 5.6</a>,
-Previous:<a rel=previous href="#Section%205.4">Section 5.4</a>,
-Up:<a rel=up href="#Help">Help</a>
+Next:<a rel=next accesskey=n href="#Section%205.6">Section 5.6</a>,
+Previous:<a rel=previous accesskey=p href="#Section%205.4">Section 5.4</a>,
+Up:<a rel=up accesskey=u href="#Help">Help</a>
 <br>
 
-<h2>5.5 What to do if you have other problems?</h2>
+<h3>5.5 What to do if you have other problems?</h3>
 
 <p>Again, send the output listed above.
 
 <p><hr>
 Node:<a name="Section%205.6">Section 5.6</a>,
-Next:<a rel=next href="#Section%205.7">Section 5.7</a>,
-Previous:<a rel=previous href="#Section%205.5">Section 5.5</a>,
-Up:<a rel=up href="#Help">Help</a>
+Next:<a rel=next accesskey=n href="#Section%205.7">Section 5.7</a>,
+Previous:<a rel=previous accesskey=p href="#Section%205.5">Section 5.5</a>,
+Up:<a rel=up accesskey=u href="#Help">Help</a>
 <br>
 
-<h2>5.6 What if it just works like a charm?</h2>
+<h3>5.6 What if it just works like a charm?</h3>
 
 <p>Drop us a mail if you feel like it, mentioning the mainboard and
 detected chip type. That way, we have some positive feedback, too!
 
 <p><hr>
 Node:<a name="Section%205.7">Section 5.7</a>,
-Next:<a rel=next href="#Section%205.8">Section 5.8</a>,
-Previous:<a rel=previous href="#Section%205.6">Section 5.6</a>,
-Up:<a rel=up href="#Help">Help</a>
+Next:<a rel=next accesskey=n href="#Section%205.8">Section 5.8</a>,
+Previous:<a rel=previous accesskey=p href="#Section%205.6">Section 5.6</a>,
+Up:<a rel=up accesskey=u href="#Help">Help</a>
 <br>
 
-<h2>5.7 How do I update a ticket?</h2>
+<h3>5.7 How do I update a ticket?</h3>
 
 <p>You can't. Only developers can. Follow up by emailing us
 at <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a> and reference your ticket number
@@ -1761,53 +1787,54 @@ follow-up information, email us instead. Thanks.
 
 <p><hr>
 Node:<a name="Section%205.8">Section 5.8</a>,
-Previous:<a rel=previous href="#Section%205.7">Section 5.7</a>,
-Up:<a rel=up href="#Help">Help</a>
+Previous:<a rel=previous accesskey=p href="#Section%205.7">Section 5.7</a>,
+Up:<a rel=up accesskey=u href="#Help">Help</a>
 <br>
 
-<h2>5.8 How do I follow up on a ticket?</h2>
+<h3>5.8 How do I follow up on a ticket?</h3>
 
 <p>Follow up by emailing us at <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a>
 and reference your ticket number in the subject.
 
 <p><hr>
 Node:<a name="Contribute">Contribute</a>,
-Next:<a rel=next href="#Version%201%20Specifics">Version 1 Specifics</a>,
-Previous:<a rel=previous href="#Help">Help</a>,
-Up:<a rel=up href="#Top">Top</a>
+Next:<a rel=next accesskey=n href="#Version%201%20Specifics">Version 1 Specifics</a>,
+Previous:<a rel=previous accesskey=p href="#Help">Help</a>,
+Up:<a rel=up accesskey=u href="#Top">Top</a>
 <br>
 
-<h1>6 How to Contribute</h1>
+<h2>6 How to Contribute</h2>
 
 <ul>
-<li><a href="#Section%206.1">Section 6.1</a>:   How to write a driver
-<li><a href="#Section%206.2">Section 6.2</a>:   How to get CVS access
-<li><a href="#Section%206.3">Section 6.3</a>:   How to donate hardware to the project
-<li><a href="#Section%206.4">Section 6.4</a>:   How to join the project mailing list
-<li><a href="#Section%206.5">Section 6.5</a>:   How to access mailing list archives
-<li><a href="#Section%206.6">Section 6.6</a>:   How to submit a patch
-<li><a href="#Section%206.7">Section 6.7</a>:   How to REALLY help
-<li><a href="#Section%206.8">Section 6.8</a>:   How to block spam on the project mailing list
+<li><a accesskey=1 href="#Section%206.1">Section 6.1</a>:   How to write a driver
+<li><a accesskey=2 href="#Section%206.2">Section 6.2</a>:   How to get CVS access
+<li><a accesskey=3 href="#Section%206.3">Section 6.3</a>:   How to donate hardware to the project
+<li><a accesskey=4 href="#Section%206.4">Section 6.4</a>:   How to join the project mailing list
+<li><a accesskey=5 href="#Section%206.5">Section 6.5</a>:   How to access mailing list archives
+<li><a accesskey=6 href="#Section%206.6">Section 6.6</a>:   How to submit a patch
+<li><a accesskey=7 href="#Section%206.7">Section 6.7</a>:   How to REALLY help
+<li><a accesskey=8 href="#Section%206.8">Section 6.8</a>:   How to get release announcements
+<li><a accesskey=9 href="#Section%206.9">Section 6.9</a>:   How to block spam on the project mailing list
 </ul>
 
 <p><hr>
 Node:<a name="Section%206.1">Section 6.1</a>,
-Next:<a rel=next href="#Section%206.2">Section 6.2</a>,
-Up:<a rel=up href="#Contribute">Contribute</a>
+Next:<a rel=next accesskey=n href="#Section%206.2">Section 6.2</a>,
+Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
 <br>
 
-<h2>6.1 How to write a driver</h2>
+<h3>6.1 How to write a driver</h3>
 
 <p>See <code>doc/developers/new_drivers</code> in our package for instructions.
 
 <p><hr>
 Node:<a name="Section%206.2">Section 6.2</a>,
-Next:<a rel=next href="#Section%206.3">Section 6.3</a>,
-Previous:<a rel=previous href="#Section%206.1">Section 6.1</a>,
-Up:<a rel=up href="#Contribute">Contribute</a>
+Next:<a rel=next accesskey=n href="#Section%206.3">Section 6.3</a>,
+Previous:<a rel=previous accesskey=p href="#Section%206.1">Section 6.1</a>,
+Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
 <br>
 
-<h2>6.2 How to get CVS access</h2>
+<h3>6.2 How to get CVS access</h3>
 
 <p>For anonymous CVS read access, see the instructions on our download page. 
 Sorry, we don't have automatically generated CVS tarballs.
@@ -1818,23 +1845,23 @@ of the package you would like to work on.
 
 <p><hr>
 Node:<a name="Section%206.3">Section 6.3</a>,
-Next:<a rel=next href="#Section%206.4">Section 6.4</a>,
-Previous:<a rel=previous href="#Section%206.2">Section 6.2</a>,
-Up:<a rel=up href="#Contribute">Contribute</a>
+Next:<a rel=next accesskey=n href="#Section%206.4">Section 6.4</a>,
+Previous:<a rel=previous accesskey=p href="#Section%206.2">Section 6.2</a>,
+Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
 <br>
 
-<h2>6.3 How to donate hardware to the project</h2>
+<h3>6.3 How to donate hardware to the project</h3>
 
 <p>Send us email <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a>.
 
 <p><hr>
 Node:<a name="Section%206.4">Section 6.4</a>,
-Next:<a rel=next href="#Section%206.5">Section 6.5</a>,
-Previous:<a rel=previous href="#Section%206.3">Section 6.3</a>,
-Up:<a rel=up href="#Contribute">Contribute</a>
+Next:<a rel=next accesskey=n href="#Section%206.5">Section 6.5</a>,
+Previous:<a rel=previous accesskey=p href="#Section%206.3">Section 6.3</a>,
+Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
 <br>
 
-<h2>6.4 How to join the project mailing list</h2>
+<h3>6.4 How to join the project mailing list</h3>
 
 <p>Send us email <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a>. Sorry,
 there is no automated subscribe/unsubscribe service yet
@@ -1846,24 +1873,24 @@ CC'd on all replies.
 
 <p><hr>
 Node:<a name="Section%206.5">Section 6.5</a>,
-Next:<a rel=next href="#Section%206.6">Section 6.6</a>,
-Previous:<a rel=previous href="#Section%206.4">Section 6.4</a>,
-Up:<a rel=up href="#Contribute">Contribute</a>
+Next:<a rel=next accesskey=n href="#Section%206.6">Section 6.6</a>,
+Previous:<a rel=previous accesskey=p href="#Section%206.4">Section 6.4</a>,
+Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
 <br>
 
-<h2>6.5 How to access mailing list archives</h2>
+<h3>6.5 How to access mailing list archives</h3>
 
 <p>The mailing list archive is at: <a href="http://archives.andrew.net.au/lm-sensors">http://archives.andrew.net.au/lm-sensors</a>
 Sorry, it only contains messages since October 28, 2001.
 
 <p><hr>
 Node:<a name="Section%206.6">Section 6.6</a>,
-Next:<a rel=next href="#Section%206.7">Section 6.7</a>,
-Previous:<a rel=previous href="#Section%206.5">Section 6.5</a>,
-Up:<a rel=up href="#Contribute">Contribute</a>
+Next:<a rel=next accesskey=n href="#Section%206.7">Section 6.7</a>,
+Previous:<a rel=previous accesskey=p href="#Section%206.5">Section 6.5</a>,
+Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
 <br>
 
-<h2>6.6 How to submit a patch</h2>
+<h3>6.6 How to submit a patch</h3>
 
 <p>Check out the latest from CVS, then copy the directory to another
 directory, and make your changes. Generate the diff with
@@ -1872,12 +1899,12 @@ directory, and make your changes. Generate the diff with
 
 <p><hr>
 Node:<a name="Section%206.7">Section 6.7</a>,
-Next:<a rel=next href="#Section%206.8">Section 6.8</a>,
-Previous:<a rel=previous href="#Section%206.6">Section 6.6</a>,
-Up:<a rel=up href="#Contribute">Contribute</a>
+Next:<a rel=next accesskey=n href="#Section%206.8">Section 6.8</a>,
+Previous:<a rel=previous accesskey=p href="#Section%206.6">Section 6.6</a>,
+Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
 <br>
 
-<h2>6.7 How to REALLY help</h2>
+<h3>6.7 How to REALLY help</h3>
 
 <p>Believe it or not, what we really need help with are:
 <ul>
@@ -1893,11 +1920,26 @@ No experience necessary :)
 
 <p><hr>
 Node:<a name="Section%206.8">Section 6.8</a>,
-Previous:<a rel=previous href="#Section%206.7">Section 6.7</a>,
-Up:<a rel=up href="#Contribute">Contribute</a>
+Next:<a rel=next accesskey=n href="#Section%206.9">Section 6.9</a>,
+Previous:<a rel=previous accesskey=p href="#Section%206.7">Section 6.7</a>,
+Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
 <br>
 
-<h2>6.8 How to block spam on the project mailing list</h2>
+<h3>6.8 How to get release announcements</h3>
+
+<p>We don't have a separate release announcement mailing list;
+however, we put all our releases on freshmeat: <a href="http://freshmeat.net">http://freshmeat.net</a>
+and you can register on our freshmeat project page  <a href="http://freshmeat.net/projects/lm_sensors">http://freshmeat.net/projects/lm_sensors</a>
+to 'subscribe to new releases' and then freshmeat
+will email you announcement.
+
+<p><hr>
+Node:<a name="Section%206.9">Section 6.9</a>,
+Previous:<a rel=previous accesskey=p href="#Section%206.8">Section 6.8</a>,
+Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
+<br>
+
+<h3>6.9 How to block spam on the project mailing list</h3>
 
 <p>Sorry, we know the spam is a hassle.  It would be nice to have a
 moderator who can screen everything, but that takes too much time and
@@ -1911,29 +1953,29 @@ versa), but it seems to be about 95% accurate in our experience.
 
 <p><hr>
 Node:<a name="Version%201%20Specifics">Version 1 Specifics</a>,
-Next:<a rel=next href="#Document%20Revisions">Document Revisions</a>,
-Previous:<a rel=previous href="#Contribute">Contribute</a>,
-Up:<a rel=up href="#Top">Top</a>
+Next:<a rel=next accesskey=n href="#Document%20Revisions">Document Revisions</a>,
+Previous:<a rel=previous accesskey=p href="#Contribute">Contribute</a>,
+Up:<a rel=up accesskey=u href="#Top">Top</a>
 <br>
 
-<h1>7 Version 1 Specific Questions</h1>
+<h2>7 Version 1 Specific Questions</h2>
 
 <ul>
-<li><a href="#Section%207.1">Section 7.1</a>:   My mainboard has an SMBus, your code can't find it.  Why? 
-<li><a href="#Section%207.2">Section 7.2</a>:   The modules won't load, saying 'SMBus not detected'. 
-<li><a href="#Section%207.3">Section 7.3</a>:   I get a "No sensor data yet (try again in a few moments)" msg. 
-<li><a href="#Section%207.4">Section 7.4</a>:   On my Dell, a LM80 is detected, but all readings are 0! 
+<li><a accesskey=1 href="#Section%207.1">Section 7.1</a>:   My mainboard has an SMBus, your code can't find it.  Why? 
+<li><a accesskey=2 href="#Section%207.2">Section 7.2</a>:   The modules won't load, saying 'SMBus not detected'. 
+<li><a accesskey=3 href="#Section%207.3">Section 7.3</a>:   I get a "No sensor data yet (try again in a few moments)" msg. 
+<li><a accesskey=4 href="#Section%207.4">Section 7.4</a>:   On my Dell, a LM80 is detected, but all readings are 0! 
 </ul>
 
 <p>Note: Version 1 is very very old and is not recommended.
 
 <p><hr>
 Node:<a name="Section%207.1">Section 7.1</a>,
-Next:<a rel=next href="#Section%207.2">Section 7.2</a>,
-Up:<a rel=up href="#Version%201%20Specifics">Version 1 Specifics</a>
+Next:<a rel=next accesskey=n href="#Section%207.2">Section 7.2</a>,
+Up:<a rel=up accesskey=u href="#Version%201%20Specifics">Version 1 Specifics</a>
 <br>
 
-<h2>7.1 My manufacturer swears that my mainboard has an SMBus, but your code reports that it can't find it.  What's wrong?</h2>
+<h3>7.1 My manufacturer swears that my mainboard has an SMBus, but your code reports that it can't find it.  What's wrong?</h3>
 
 <p>Currently, our code only assumes that an SMBus exists if it originates
 from the Intel PIIX4 (82371AB).  If your computer doesn't have one, or if your
@@ -1956,24 +1998,24 @@ Version 1 never will.
 
 <p><hr>
 Node:<a name="Section%207.2">Section 7.2</a>,
-Next:<a rel=next href="#Section%207.3">Section 7.3</a>,
-Previous:<a rel=previous href="#Section%207.1">Section 7.1</a>,
-Up:<a rel=up href="#Version%201%20Specifics">Version 1 Specifics</a>
+Next:<a rel=next accesskey=n href="#Section%207.3">Section 7.3</a>,
+Previous:<a rel=previous accesskey=p href="#Section%207.1">Section 7.1</a>,
+Up:<a rel=up accesskey=u href="#Version%201%20Specifics">Version 1 Specifics</a>
 <br>
 
-<h2>7.2 The modules won't load, saying 'SMBus not detected'.</h2>
+<h3>7.2 The modules won't load, saying 'SMBus not detected'.</h3>
 
 <p>This should no longer be an issue in 1.4.10 and later; it will
 continue loading, but it won't support SMBus-connected devices, of course.
 
 <p><hr>
 Node:<a name="Section%207.3">Section 7.3</a>,
-Next:<a rel=next href="#Section%207.4">Section 7.4</a>,
-Previous:<a rel=previous href="#Section%207.2">Section 7.2</a>,
-Up:<a rel=up href="#Version%201%20Specifics">Version 1 Specifics</a>
+Next:<a rel=next accesskey=n href="#Section%207.4">Section 7.4</a>,
+Previous:<a rel=previous accesskey=p href="#Section%207.2">Section 7.2</a>,
+Up:<a rel=up accesskey=u href="#Version%201%20Specifics">Version 1 Specifics</a>
 <br>
 
-<h2>7.3 I try to read <code>/proc/sensors</code>, and I get a "No sensor data yet (try again in a few moments)" message. Why?</h2>
+<h3>7.3 I try to read <code>/proc/sensors</code>, and I get a "No sensor data yet (try again in a few moments)" message. Why?</h3>
 
 <p>It takes about 1.5 seconds for the LM78 to update all its sensor
 values.  If we would try to read it before it finished that, you would get
@@ -1986,11 +2028,11 @@ message anymore.
 
 <p><hr>
 Node:<a name="Section%207.4">Section 7.4</a>,
-Previous:<a rel=previous href="#Section%207.3">Section 7.3</a>,
-Up:<a rel=up href="#Version%201%20Specifics">Version 1 Specifics</a>
+Previous:<a rel=previous accesskey=p href="#Section%207.3">Section 7.3</a>,
+Up:<a rel=up accesskey=u href="#Version%201%20Specifics">Version 1 Specifics</a>
 <br>
 
-<h2>7.4 On my Dell, a LM80 is detected, but all readings are 0!</h2>
+<h3>7.4 On my Dell, a LM80 is detected, but all readings are 0!</h3>
 
 <p>This is a bug we have only observed on Dell computers. There is
 probably a problem with the way the SMBus is accessed; but it is not yet
@@ -2002,11 +2044,11 @@ can not be sure.
 
 <p><hr>
 Node:<a name="Document%20Revisions">Document Revisions</a>,
-Previous:<a rel=previous href="#Version%201%20Specifics">Version 1 Specifics</a>,
-Up:<a rel=up href="#Top">Top</a>
+Previous:<a rel=previous accesskey=p href="#Version%201%20Specifics">Version 1 Specifics</a>,
+Up:<a rel=up accesskey=u href="#Top">Top</a>
 <br>
 
-<h1>Appendix A Revision History of This Document</h1>
+<h2>Appendix A Revision History of This Document</h2>
 
 <ul>
 <li>Rev 2.9 (CP) Converted to Gnu texinfo format, 20020910
@@ -2033,4 +2075,3 @@ Up:<a rel=up href="#Top">Top</a>
 </ul>
 
 </body></html>
-

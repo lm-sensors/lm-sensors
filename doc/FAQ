@@ -1,3 +1,21 @@
+START-INFO-DIR-ENTRY
+* lm_sensors-FAQ: (lm_sensors-FAQ)           The lm_sensors FAQ
+END-INFO-DIR-ENTRY
+
+Short Contents
+**************
+
+lm_sensors
+1 PC and Sensor Overview
+2 Sensor and Bus Basics
+3 Installation and Management
+4 Problems
+5 How to Ask for Help
+6 How to Contribute
+7 Version 1 Specific Questions
+Appendix A Revision History of This Document
+
+
 Table of Contents
 *****************
 
@@ -116,7 +134,8 @@ lm_sensors
   6.5 How to access mailing list archives
   6.6 How to submit a patch
   6.7 How to REALLY help
-  6.8 How to block spam on the project mailing list
+  6.8 How to get release announcements
+  6.9 How to block spam on the project mailing list
 
 7 Version 1 Specific Questions
   7.1 My manufacturer swears that my mainboard has an SMBus, but your code reports that it can't find it.  What's wrong?
@@ -1364,7 +1383,16 @@ Send us the patch in an email and tell us what it does.
    Send us email <sensors@stimpy.netroedge.com> if you can help.  No
 experience necessary :)
 
-6.8 How to block spam on the project mailing list
+6.8 How to get release announcements
+====================================
+
+   We don't have a separate release announcement mailing list; however,
+we put all our releases on freshmeat: `http://freshmeat.net' and you
+can register on our freshmeat project page
+`http://freshmeat.net/projects/lm_sensors' to 'subscribe to new
+releases' and then freshmeat will email you announcement.
+
+6.9 How to block spam on the project mailing list
 =================================================
 
    Sorry, we know the spam is a hassle.  It would be nice to have a
@@ -1484,4 +1512,3 @@ Appendix A Revision History of This Document
    * Rev 1.1 Modifications by Philip Edelbrock, 19980809
 
    * Rev 1.0 Written by Philip Edelbrock, 19980803
-
