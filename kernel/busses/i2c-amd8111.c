@@ -198,7 +198,7 @@ s32 amd8111_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 
 		case I2C_SMBUS_BYTE:
 			if (read_write == I2C_SMBUS_WRITE)
-				amd_ec_write(smbus, AMD_SMB_DATA, data->byte);
+				amd_ec_write(smbus, AMD_SMB_CMD, command);
 			protocol |= AMD_SMB_PRTCL_BYTE;
 			break;
 
