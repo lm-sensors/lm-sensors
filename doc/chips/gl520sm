@@ -18,12 +18,6 @@ Module Parameters
 
 * force: short array (min = 1, max = 48)
   List of adapter,address pairs to boldly assume to be present
-* force_gl518sm_r00: short array (min = 1, max = 48)
-  List of adapter,address pairs which are unquestionably assumed to contain
-  a `gl518sm_r00' chip
-* force_gl518sm_r80: short array (min = 1, max = 48)
-  List of adapter,address pairs which are unquestionably assumed to contain
-  a `gl518sm_r80' chip
 * ignore: short array (min = 1, max = 48)
   List of adapter,address pairs not to scan
 * ignore_range: short array (min = 1, max = 48)

@@ -21,7 +21,8 @@ problems.
   the original CVS archive, and even managed to explain to us how to use
   it.
 * Kyösti Mälkki <kmalkki@cc.hut.fi>
-  Author of the i2c-via and sis5595 drivers.
+  Author of the i2c-via and i2c-viapro host drivers. Sis5595 hack.
+  Extended support for GL518SM and GL520SM sensors.
 * Mark D. Studebaker <mds@eng.paradyne.com>
   Author of the i2c-ali15x3 bus driver and the i2c-i810 bus driver.
   Added w83782d, w83783s, and w83627hf support to the w83781d driver.
