@@ -978,7 +978,7 @@ static sensors_chip_feature as99127f_features[] =
                          W83781D_SYSCTL_TEMP3, VALUE(2), 1, "temp_min3", 2 },
     { SENSORS_W83782D_TEMP3_OVER, "temp3_over", SENSORS_W83782D_TEMP3,
                          SENSORS_W83782D_TEMP3, RW, 
-                         W83781D_SYSCTL_TEMP3, VALUE(1), 1, "temp_min3", 2 },
+                         W83781D_SYSCTL_TEMP3, VALUE(1), 1, "temp_max3", 2 },
     { SENSORS_W83782D_VID, "vid", NOMAP, NOMAP,
                          R, W83781D_SYSCTL_VID, VALUE(1), 3 },
     { SENSORS_W83782D_VRM, "vrm", NOMAP, NOMAP,
