@@ -714,15 +714,19 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
   if (kind < 0) {
     if (w83781d_read_value(new_client,W83781D_REG_CONFIG) & 0x80)
       goto ERROR1;
-    if (!is_isa && 
-        (w83781d_read_value(new_client,W83781D_REG_I2C_ADDR) != address))
-      goto ERROR1;
     val1 = w83781d_read_value(new_client,W83781D_REG_BANK);
     val2 = w83781d_read_value(new_client,W83781D_REG_CHIPMAN);
+    /* Check for Winbond or Asus ID if in bank 0 */
     if (!(val1 & 0x07) &&
-        ((!(val1 & 0x80) && (val2 != 0xa3)) ||
-         ((val1 & 0x80) && (val2 != 0x5c))))
+        ((!(val1 & 0x80) && (val2 != 0xa3) && (val2 != 0xc3)) ||
+         ((val1 & 0x80) && (val2 != 0x5c) && (val2 != 0x12))))
       goto ERROR1;
+    /* If Winbond SMBus, check address at 0x48. Asus doesn't support */
+    if ((!is_isa) && ((!(val1 & 0x80) && (val2 == 0xa3)) ||
+                     ((val1 & 0x80) && (val2 == 0x5c)))) {
+      if (w83781d_read_value(new_client,W83781D_REG_I2C_ADDR) != address)
+        goto ERROR1;
+    }
   }
 
   /* We have either had a force parameter, or we have already detected the

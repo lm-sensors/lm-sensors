@@ -1286,14 +1286,16 @@ sub lm80_detect
 #   0x58: Device ID (only when in bank 0); ignore LSB.
 # Note: Fails if the W8378xD is not in bank 0!
 # Note: Detection overrules a previous LM78 detection
+# Note: AS99127F address register 0x48 not supported?
 sub w83781d_detect
 {
   my ($reg1,$reg2,@res);
   my ($chip,$file,$addr) = @_;
-  return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
+  return unless (i2c_smbus_read_byte_data($file,0x48) == $addr)
+    and ($chip < 4);
   $reg1 = i2c_smbus_read_byte_data($file,0x4e);
   $reg2 = i2c_smbus_read_byte_data($file,0x4f);
-  if ($chip < 3) {
+  if ($chip < 4) {
     return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
                   (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
   }
