@@ -157,6 +157,7 @@ static inline u8 PWM_TO_REG(int val, int inv)
  * Voltage registers and conversions
  */
 
+#define PC87365_REG_IN_CONVRATE		0x07
 #define PC87365_REG_IN_CONFIG		0x08
 #define PC87365_REG_IN			0x0B
 #define PC87365_REG_IN_MIN		0x0D
@@ -662,8 +663,8 @@ static int pc87360_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-/* ldi is the logical device index:
-   bank is for voltages and temperatures only. */
+/* ldi is the logical device index
+   bank is for voltages and temperatures only */
 static int pc87360_read_value(struct pc87360_data *data, u8 ldi, u8 bank,
 			      u8 reg)
 {
@@ -696,6 +697,20 @@ static void pc87360_init_client(struct i2c_client *client)
 	const u8 init_in[11] = { 2, 2, 2, 2, 2, 2, 2, 1, 1, 3, 1 };
 	const u8 init_temp[3] = { 2, 2, 1 };
 	u8 reg;
+
+	if (init >= 3) {
+		reg = pc87360_read_value(data, LD_IN, NO_BANK,
+					 PC87365_REG_IN_CONVRATE);
+		if (reg & 0x06) {
+#ifdef DEBUG
+			printk(KERN_DEBUG "pc87360.o: Setting "
+			       "VLM conversion period to 1 second\n");
+#endif		
+			pc87360_write_value(data, LD_IN, NO_BANK,
+					    PC87365_REG_IN_CONVRATE,
+					    (reg & 0xF8) | 0x01);
+		}
+	}
 
 	for (i=0; i<data->innr; i++) {
 		if (init >= init_in[i]) {
