@@ -128,6 +128,8 @@ int read_from_eeprom(struct eeprom *e, int addr, int size, int hex)
 	i = 1;
 	if(hex)
 		printf("\n %.4x|  %.2x ", addr, ch);
+	else
+		putchar(ch);
 	while(--size)
 	{
 		die_if((ch = eeprom_read_current_byte(e)) < 0, "read error");
