@@ -121,6 +121,9 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_MTP008=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/mtp008.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_PCA9540=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/pca9540.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_PCF8574=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/pcf8574.o
 endif
