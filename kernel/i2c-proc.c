@@ -259,10 +259,11 @@ int read_bus_i2c(char *buf, char **start, off_t offset, int len, int unused)
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
 {
   int i;
-  len = 0;
-  for (i = 0; i < I2C_ADAP_MAX; i++)
+  int nr = 0;
+  /* Note that it is safe to write a `little' beyond len. Yes, really. */
+  for (i = 0; (i < I2C_ADAP_MAX) && (nr < len); i++)
     if (i2cproc_adapters[i])
-      len += sprintf(buf+len, "i2c-%d\t%s\t%-32s\t%-32s\n",
+      nr += sprintf(buf+nr, "i2c-%d\t%s\t%-32s\t%-32s\n",
                      i2c_adapter_id(i2cproc_adapters[i]),
                      i2c_is_smbus_adapter(i2cproc_adapters[i])?"smbus":
 #ifdef DEBUG
@@ -271,7 +272,7 @@ int read_bus_i2c(char *buf, char **start, off_t offset, int len, int unused)
                        "i2c",
                      i2cproc_adapters[i]->name,
                      i2cproc_adapters[i]->algo->name);
-  return len;
+  return nr;
 }
 
 /* This function generates the output for /proc/bus/i2c-? */
@@ -295,7 +296,9 @@ int i2cproc_bus_read(struct inode * inode, struct file * file,char * buf,
     count = 4000;
   for (i = 0; i < I2C_ADAP_MAX; i++)
     if (i2cproc_inodes[i] == inode->i_ino) {
-      if (! (kbuf = kmalloc(count,GFP_KERNEL)))
+      /* We need a bit of slack in the kernel buffer; this makes the
+         sprintf safe. */
+      if (! (kbuf = kmalloc(count + 80,GFP_KERNEL)))
         return -ENOMEM;
       for (j = 0; j < I2C_CLIENT_MAX; j++)
         if ((client = i2cproc_adapters[i]->clients[j]))
