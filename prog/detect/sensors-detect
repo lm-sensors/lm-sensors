@@ -210,7 +210,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
        func => 0,
        procid => "Silicon Integrated Systems 85C503/5513 (LPC Bridge)",
        driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SMBus SiS645 adapter at 0x[0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x1039,
@@ -250,7 +250,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
        func => 0,
        procid => "Silicon Integrated Systems SIS645",
        driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SMBus SiS645 adapter at 0x[0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x1039,
@@ -258,7 +258,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
        func => 0,
        procid => "Silicon Integrated Systems SIS645DX",
        driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SMBus SiS645 adapter at 0x[0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x1039,
@@ -266,7 +266,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
        func => 0,
        procid => "Silicon Integrated Systems SIS648",
        driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SMBus SiS645 adapter at 0x[0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x1039,
@@ -274,7 +274,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
        func => 0,
        procid => "Silicon Integrated Systems SIS650",
        driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SMBus SiS645 adapter at 0x[0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x1039,
@@ -282,7 +282,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
        func => 0,
        procid => "Silicon Integrated Systems SIS651",
        driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SMBus SiS645 adapter at 0x[0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x1039,
@@ -290,7 +290,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
        func => 0,
        procid => "Silicon Integrated Systems SIS735",
        driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SMBus SiS645 adapter at 0x[0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x1039,
@@ -298,7 +298,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
        func => 0,
        procid => "Silicon Integrated Systems SIS745",
        driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SMBus SiS645 adapter at 0x[0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x1039,
@@ -306,7 +306,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
        func => 0,
        procid => "Silicon Integrated Systems SIS746",
        driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SMBus SiS645 adapter at 0x[0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x1039,
