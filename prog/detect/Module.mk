@@ -25,7 +25,8 @@ PROGDETECTDIR := $(MODULE_DIR)
 # defined value verbatim into the command-list of rules...
 PROGDETECTTARGETS := $(MODULE_DIR)/i2cdetect $(MODULE_DIR)/dmidecode
 PROGDETECTSOURCES := $(MODULE_DIR)/i2cdetect.c $(MODULE_DIR)/dmidecode.c
-PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect
+PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect \
+                         $(MODULE_DIR)/i2cdetect $(MODULE_DIR)/dmidecode
 
 # Include all dependency files. We use '.rd' to indicate this will create
 # executables.

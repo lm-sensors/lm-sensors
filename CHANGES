@@ -22,6 +22,7 @@ ask CVS about it:
   Module i2c-piix4: Refuse to load on IBM systems
   Module lm92: Fix in-kernel initialization
   Program dmidecode: new
+  Programs i2cdetect, i2cdump, i2cset, isadump: Now installed by 'make install'
   Program mkpatch: Add Config.in entries for, lm92,
                    pcf8574, pcf8591, smsc47m1, vt1211;
                    add dmi_scan

@@ -27,6 +27,8 @@ PROGDUMPTARGETS := $(MODULE_DIR)/isadump $(MODULE_DIR)/i2cdump \
 		   $(MODULE_DIR)/i2cset
 PROGDUMPSOURCES := $(MODULE_DIR)/isadump.c  $(MODULE_DIR)/i2cdump.c \
 		   $(MODULE_DIR)/i2cset.c
+PROGDUMPBININSTALL := $(MODULE_DIR)/isadump $(MODULE_DIR)/i2cdump \
+		   $(MODULE_DIR)/i2cset
 
 # Include all dependency files. We use '.rd' to indicate this will create
 # executables.
@@ -34,6 +36,11 @@ INCLUDEFILES += $(PROGDUMPSOURCES:.c=.rd)
 
 all-prog-dump: $(PROGDUMPTARGETS)
 all :: all-prog-dump
+
+install-prog-dump: all-prog-dump
+	mkdir -p $(DESTDIR)$(SBINDIR)
+	$(INSTALL) -o root -g root -m 755 $(PROGDUMPBININSTALL) $(DESTDIR)$(SBINDIR)
+install :: install-prog-dump
 
 clean-prog-dump:
 	$(RM) $(PROGDUMPDIR)/*.rd $(PROGDUMPDIR)/*.ro $(PROGDUMPTARGETS)
