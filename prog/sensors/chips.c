@@ -1299,8 +1299,7 @@ void print_lm87(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&LM87_ALARM_IN0?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN0 data!\n");
+  }
   free_the_label(&label);
   if (!sensors_get_label_and_valid(*name,SENSORS_LM87_IN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_LM87_IN1,&cur) &&
@@ -1323,8 +1322,7 @@ void print_lm87(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&LM87_ALARM_IN2?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN2 data!\n");
+  }
   free_the_label(&label);
   if (!sensors_get_label_and_valid(*name,SENSORS_LM87_IN3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_LM87_IN3,&cur) &&
@@ -1359,8 +1357,7 @@ void print_lm87(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&LM87_ALARM_IN5?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN5 data!\n");
+  }
   free_the_label(&label);
   if (!sensors_get_label_and_valid(*name,SENSORS_LM87_AIN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_LM87_AIN1,&cur) &&
@@ -1371,8 +1368,7 @@ void print_lm87(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&LM87_ALARM_FAN1?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get AIN1 data!\n");
+  }
   free_the_label(&label);
   if (!sensors_get_label_and_valid(*name,SENSORS_LM87_AIN2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_LM87_AIN2,&cur) &&
@@ -1383,8 +1379,7 @@ void print_lm87(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&LM87_ALARM_FAN2?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get AIN2 data!\n");
+  }
   free_the_label(&label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_LM87_FAN1,&label,&valid) &&
@@ -1396,8 +1391,7 @@ void print_lm87(const sensors_chip_name *name)
       printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
              cur,min,fdiv, alarms&LM87_ALARM_FAN1?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get FAN1 data!\n");
+  }
   free_the_label(&label);
   if (!sensors_get_label_and_valid(*name,SENSORS_LM87_FAN2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_LM87_FAN2,&cur) &&
@@ -1408,8 +1402,7 @@ void print_lm87(const sensors_chip_name *name)
       printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
              cur,min,fdiv, alarms&LM87_ALARM_FAN2 ?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get FAN2 data!\n");
+  }
   free_the_label(&label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_LM87_TEMP1,&label,&valid) &&
@@ -1450,8 +1443,7 @@ void print_lm87(const sensors_chip_name *name)
       printf(" %s%s\n", alarms&LM87_ALARM_TEMP3?"ALARM":"",
       	alarms&LM87_ALARM_TEMP3_FAULT?" FAULT":"");
     }
-  } else
-    printf("ERROR: Can't get TEMP3 data!\n");
+  }
   free_the_label(&label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_LM87_VID,&label,&valid) &&

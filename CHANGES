@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.5.5 (2000????)
+2.5.5 (2001????)
   NOTE: i2c 2.5.5 MUST BE be compiled and installed first.
   Chip modules (all): Update mutex definition (works now for new 2.2 kernels)
   File sensors.conf.eg: Add mtp008 entries, adm1025 entries
@@ -41,7 +41,7 @@ ask CVS about it:
   Program sensors: Add ds1621, mtp008 support; add -f (Fahrenheit) option;
                    add adm1025 temp2; report temp limits correctly as
                    min/max or limit/hysteresis; print message if no
-                   sensors are found.
+                   sensors are found. Removed false errors from lm87 reads.
   Program sensors-detect: Add ds1621, mtp008 detection;
                           add ServerWorks detection
 

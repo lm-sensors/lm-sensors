@@ -38,10 +38,11 @@
 #include <linux/init.h>
 
 
-/*  Chip configuration settings.  These should be set to reflect
-the HARDWARE configuration of your chip.  By default (read: when all 
-of these are left zero), this driver assumes that the configuration
-is the same as National's defaults for the Channel Mode register.
+/* Chip configuration settings.  These should be set to reflect the
+HARDWARE configuration of your chip.  By default (read: when all of
+these are left commented out), this driver assumes that the
+configuration is the same as National's defaults for the Channel Mode
+register.
 
 Set to '1' the appropriate defines, as nessesary:
 
@@ -821,12 +822,10 @@ void LM87_ain(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-
 void LM87_fan(struct i2c_client *client, int operation, int ctl_name,
 		 int *nrels_mag, long *results)
 {
 	struct LM87_data *data = client->data;
-	int nr = ctl_name - LM87_SYSCTL_FAN1;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
