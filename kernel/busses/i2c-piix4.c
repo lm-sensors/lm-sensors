@@ -200,7 +200,7 @@ int piix4_setup(void)
   }
 
   /* Everything is happy, let's grab the memory and set things up. */
-  request_region(piix4_smba, 8, "piix4");       
+  request_region(piix4_smba, 8, "piix4-smbus");       
 
 #ifdef DEBUG
   if ((temp & 0x0E) == 8)

@@ -54,7 +54,7 @@
 
 /* io-region reservation */
 #define IOSPACE		0x06
-#define IOTEXT		"VIA i2c"
+#define IOTEXT		"via-i2c"
 
 /* ----- global defines -----------------------------------------------	*/
 #define DEB(x) x	/* silicon revision, io addresses	 	*/
