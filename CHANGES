@@ -29,7 +29,9 @@ ask CVS about it:
            Swap adm1025 temp1 and temp2 to match the driver's order
            Advance version to 2.0.1
            Update lm83 support
-           Add support for the lm90
+           Add support for lm90, xeontemp, max6650
+           Add separate messages for read and write errors
+           Add missing message for parse error
   Makefile: Move LINUX_HEADERS from ALL_CPPFLAGS to MODCPPFLAGS
   Modules (various): Fix includes for compilation on Alpha
                      Use the new i2c_delay function instead of the various
@@ -60,7 +62,11 @@ ask CVS about it:
   Module lm90: New
   Module max6650: New
   Module saa1064: New
-  Module w83781d: Enhance chip detection
+  Module smsc47m1: Add support for 47M142
+  Module w83627hf: Fix 697HF PWM; fix 697HF VBAT and V5SB alarms;
+                   enhance w83627thf support
+  Module w83781d: Enhance chip detection; clean up error returns;
+                  fix 697HF and 791D PWM; fix 697HF VBAT and V5SB alarms
   Module xeontemp: New
   Program decode-dimms.pl: Add Direct Rambus (DRDRAM)
                            Mark Rambus as unsupported
@@ -76,7 +82,7 @@ ask CVS about it:
                    made to the library
                    Add DRDRAM support to print_eeprom
                    Exit(1) on /proc write failure (Malte Starostik)
-                   Add LM90 support
+                   Add LM90, MAX6650 support
   Program sensors-detect: Add support for PCF8574, PCF8574A, SAA1064
                           Add support for LM82, LM86, LM89
                           Improved W83781D family detection
@@ -88,6 +94,7 @@ ask CVS about it:
                           Automatic module.conf and /dev/i2c* detection
                           Improve LM82 and LM83 detection
                           Handle "to-be-written" cleanly
+                          Add detection for 47M14x Super I/O
                           
 2.8.0 (20030714)
   NOTE: Requires i2c-2.8.0 or newer!!!
