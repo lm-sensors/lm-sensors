@@ -29,6 +29,8 @@ ask CVS about it:
   Program decode-vaio.pl: Add sysfs support
   Program mkpatch: Add max6650, lm83, lm90, asb100 and w83l785ts
                    Drop linux 2.2 support
+                   Add w83627hf
+  Program sensors: Do not show algorithm by default
   Program sensors-detect: Fix PATH issues
   
 
