@@ -1473,13 +1473,14 @@ void print_lm85(const sensors_chip_name *name)
   char *label = NULL;
   double cur, min, max;
   int alarms, alarm_mask, valid;
-  int is85, is1027;
+  int is85, is1027, is6d100;
 
   is85 = !strcmp(name->prefix,"lm85")
          || !strcmp(name->prefix,"lm85b")
          || !strcmp(name->prefix,"lm85c") ;
   is1027 = !strcmp(name->prefix,"adm1027")
            || !strcmp(name->prefix,"adt7463") ;
+  is6d100 = !strcmp(name->prefix,"emc6d100") ;
 
   if (!sensors_get_feature(*name,SENSORS_LM85_ALARMS,&cur)) 
     alarms = cur + 0.5;
@@ -1569,6 +1570,45 @@ void print_lm85(const sensors_chip_name *name)
   } else
     printf("ERROR: Can't get IN4 data!\n");
   free_the_label(&label);
+
+  if( is6d100 ) {
+    if (!sensors_get_label_and_valid(*name,SENSORS_LM85_IN5,&label,&valid) &&
+        !sensors_get_feature(*name,SENSORS_LM85_IN5,&cur) &&
+        !sensors_get_feature(*name,SENSORS_LM85_IN5_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_LM85_IN5_MAX,&max)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+             cur,min,max,alarms&LM85_ALARM_IN5?"ALARM":"");
+      }
+    } else
+      printf("ERROR: Can't get IN5 data!\n");
+    free_the_label(&label);
+    if (!sensors_get_label_and_valid(*name,SENSORS_LM85_IN6,&label,&valid) &&
+        !sensors_get_feature(*name,SENSORS_LM85_IN6,&cur) &&
+        !sensors_get_feature(*name,SENSORS_LM85_IN6_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_LM85_IN6_MAX,&max)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+             cur,min,max,alarms&LM85_ALARM_IN6?"ALARM":"");
+      }
+    } else
+      printf("ERROR: Can't get IN6 data!\n");
+    free_the_label(&label);
+    if (!sensors_get_label_and_valid(*name,SENSORS_LM85_IN7,&label,&valid) &&
+        !sensors_get_feature(*name,SENSORS_LM85_IN7,&cur) &&
+        !sensors_get_feature(*name,SENSORS_LM85_IN7_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_LM85_IN7_MAX,&max)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+             cur,min,max,alarms&LM85_ALARM_IN7?"ALARM":"");
+      }
+    } else
+      printf("ERROR: Can't get IN7 data!\n");
+    free_the_label(&label);
+  }
 
   if (!sensors_get_label_and_valid(*name,SENSORS_LM85_FAN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_LM85_FAN1,&cur) &&

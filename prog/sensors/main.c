@@ -324,7 +324,8 @@ void do_a_print(sensors_chip_name name)
            !strcmp(name.prefix,"lm85b") ||
            !strcmp(name.prefix,"lm85c") ||
            !strcmp(name.prefix,"adm1027") ||
-           !strcmp(name.prefix,"adt7463") )
+           !strcmp(name.prefix,"adt7463") ||
+           !strcmp(name.prefix,"emc6d100") )
     print_lm85(&name);
   else if (!strcmp(name.prefix,"lm87"))
     print_lm87(&name);

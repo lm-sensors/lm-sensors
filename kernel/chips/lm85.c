@@ -52,6 +52,7 @@
                  Cleaned up some compiler warnings.
                  Fixed problem with Operating Point and THERM counting
     2003-03-21   Initial support for EMC6D100 and EMC6D101 chips
+    2003-06-30   Add support for EMC6D100 extra voltage inputs.
 */
 
 #include <linux/version.h>
@@ -80,7 +81,7 @@ static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_6(lm85b, lm85c, adm1027, adt7463, emc6d100, emc6d101);
+SENSORS_INSMOD_5(lm85b, lm85c, adm1027, adt7463, emc6d100);
 
 /* Many LM85 constants specified below */
 
@@ -113,11 +114,15 @@ SENSORS_INSMOD_6(lm85b, lm85c, adm1027, adt7463, emc6d100, emc6d101);
 #define LM85_COMPANY_NATIONAL 0x01
 #define LM85_COMPANY_ANALOG_DEV 0x41
 #define LM85_COMPANY_SMSC 0x5c
+#define LM85_VERSTEP_VMASK 0xf0
+#define LM85_VERSTEP_SMASK 0x0f
 #define LM85_VERSTEP_GENERIC 0x60
 #define LM85_VERSTEP_LM85C 0x60
 #define LM85_VERSTEP_LM85B 0x62
 #define LM85_VERSTEP_ADM1027 0x60
 #define LM85_VERSTEP_ADT7463 0x62
+#define LM85_VERSTEP_EMC6D100_A0 0x60
+#define LM85_VERSTEP_EMC6D100_A1 0x61
 
 #define LM85_REG_CONFIG 0x40
 
@@ -156,6 +161,15 @@ SENSORS_INSMOD_6(lm85b, lm85c, adm1027, adt7463, emc6d100, emc6d101);
 #define ADT7463_REG_THERM_LIMIT 0x7A
 #define ADT7463_REG_CONFIG4 0x7D
 
+#define EMC6D100_REG_SFR  0x7c
+#define EMC6D100_REG_ALARM3  0x7d
+#define EMC6D100_REG_CONF  0x7f
+#define EMC6D100_REG_INT_EN  0x80
+/* IN5, IN6 and IN7 */
+#define EMC6D100_REG_IN(nr)  (0x70 + ((nr)-5))
+#define EMC6D100_REG_IN_MIN(nr) (0x73 + ((nr)-5) * 2)
+#define EMC6D100_REG_IN_MAX(nr) (0x74 + ((nr)-5) * 2)
+
 /* Conversions. Rounding and limit checking is only done on the TO_REG 
    variants. Note that you should be a bit careful with which arguments
    these macros are called: arguments may be evaluated more than once.
@@ -168,7 +182,8 @@ SENSORS_INSMOD_6(lm85b, lm85c, adm1027, adt7463, emc6d100, emc6d101);
 
 /* IN are scaled acording to built-in resistors */
 static int lm85_scaling[] = {  /* .001 Volts */
-		2500, 2250, 3300, 5000, 12000
+		2500, 2250, 3300, 5000, 12000,
+		3300, 1500, 1800,	/* EMC6D100 */
 	};
 #define SCALE(val,from,to) (((val)*(to) + ((from)/2))/(from))
 #define INS_TO_REG(n,val)  (SENSORS_LIMIT(SCALE(val,lm85_scaling[n],192),0,255))
@@ -384,9 +399,9 @@ struct lm85_data {
 	unsigned long last_reading;	/* In jiffies */
 	unsigned long last_config;	/* In jiffies */
 
-	u8 in[5];		/* Register value */
-	u8 in_max[5];		/* Register value */
-	u8 in_min[5];		/* Register value */
+	u8 in[8];		/* Register value */
+	u8 in_max[8];		/* Register value */
+	u8 in_min[8];		/* Register value */
 	s8 temp[3];		/* Register value */
 	s8 temp_min[3];		/* Register value */
 	s8 temp_max[3];		/* Register value */
@@ -407,8 +422,8 @@ struct lm85_data {
 	long therm_total;	/* Cummulative therm count */
 	long therm_ovfl;	/* Count of therm overflows */
 	u8 therm_limit;		/* Register value */
-	u16 alarms;		/* Register encoding, combined */
-	u16 alarm_mask;		/* Register encoding, combined */
+	u32 alarms;		/* Register encoding, combined */
+	u32 alarm_mask;		/* Register encoding, combined */
 	struct lm85_autofan autofan[3];
 	struct lm85_zone zone[3];
 };
@@ -463,6 +478,9 @@ static void adm1027_alarm_mask(struct i2c_client *client, int operation,
 static void adt7463_tmin_ctl(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 static void adt7463_therm_signal(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+
+static void emc6d100_in(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver lm85_driver = {
@@ -528,6 +546,11 @@ static int lm85_id = 0;
 #define ADT7463_SYSCTL_TMIN_CTL3       1302
 #define ADT7463_SYSCTL_THERM_SIGNAL    1303
 
+/* SMSC variant of the LM85 */
+#define EMC6D100_SYSCTL_IN5            1400
+#define EMC6D100_SYSCTL_IN6            1401
+#define EMC6D100_SYSCTL_IN7            1402
+
 #define LM85_ALARM_IN0          0x0001
 #define LM85_ALARM_IN1          0x0002
 #define LM85_ALARM_IN2          0x0004
@@ -544,6 +567,9 @@ static int lm85_id = 0;
 #define LM85_ALARM_FAN4         0x2000
 #define LM85_ALARM_TEMP1_FAULT  0x4000
 #define LM85_ALARM_TEMP3_FAULT 0x08000
+#define LM85_ALARM_IN6         0x10000
+#define LM85_ALARM_IN7         0x20000
+#define LM85_ALARM_IN5         0x40000
 /* -- SENSORS SYSCTL END -- */
 
 /* The /proc/sys entries */
@@ -663,12 +689,22 @@ static ctl_table adt7463_specific[] = {
 };
 #define CTLTBL_ADT7463 (sizeof(adt7463_specific)/sizeof(adt7463_specific[0]))
 
+static ctl_table emc6d100_specific[] = {
+	{EMC6D100_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
+		&i2c_sysctl_real, NULL, &emc6d100_in},
+	{EMC6D100_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &i2c_proc_real,
+		&i2c_sysctl_real, NULL, &emc6d100_in},
+	{EMC6D100_SYSCTL_IN7, "in7", NULL, 0, 0644, NULL, &i2c_proc_real,
+		&i2c_sysctl_real, NULL, &emc6d100_in},
+};
+#define CTLTBL_EMC6D100 (sizeof(emc6d100_specific)/sizeof(emc6d100_specific[0]))
+
 
 #define MAX2(a,b) ((a)>(b)?(a):(b))
 #define MAX3(a,b,c) ((a)>(b)?MAX2((a),(c)):MAX2((b),(c)))
 #define MAX4(a,b,c,d) ((a)>(b)?MAX3((a),(c),(d)):MAX3((b),(c),(d)))
 
-#define CTLTBL_MAX (CTLTBL_COMMON + MAX2(CTLTBL_LM85, CTLTBL_ADM1027+CTLTBL_ADT7463))
+#define CTLTBL_MAX (CTLTBL_COMMON + MAX3(CTLTBL_LM85, CTLTBL_ADM1027+CTLTBL_ADT7463, CTLTBL_EMC6D100))
 
 /* This function is called when:
      * lm85_driver is inserted (when this module is loaded), for each
@@ -747,9 +783,10 @@ int lm85_detect(struct i2c_adapter *adapter, int address,
 		    && verstep == LM85_VERSTEP_LM85B ) {
 			kind = lm85b ;
 		} else if( company == LM85_COMPANY_NATIONAL
-		    && (verstep & 0xf0) == LM85_VERSTEP_GENERIC ) {
+		    && (verstep & LM85_VERSTEP_VMASK) == LM85_VERSTEP_GENERIC) {
+			printk("lm85: Detected National Semiconductor chip\n");
 			printk("lm85: Unrecgonized version/stepping 0x%02x"
-			    " Defaulting to LM85.\n", verstep );
+			    " Defaulting to Generic LM85.\n", verstep );
 			kind = any_chip ;
 		} else if( company == LM85_COMPANY_ANALOG_DEV
 		    && verstep == LM85_VERSTEP_ADM1027 ) {
@@ -758,16 +795,29 @@ int lm85_detect(struct i2c_adapter *adapter, int address,
 		    && verstep == LM85_VERSTEP_ADT7463 ) {
 			kind = adt7463 ;
 		} else if( company == LM85_COMPANY_ANALOG_DEV
-		    && (verstep & 0xf0) == LM85_VERSTEP_GENERIC ) {
+		    && (verstep & LM85_VERSTEP_VMASK) == LM85_VERSTEP_GENERIC) {
+			printk("lm85: Detected Analog Devices chip\n");
 			printk("lm85: Unrecgonized version/stepping 0x%02x"
-			    " Defaulting to ADM1027.\n", verstep );
-			kind = adm1027 ;
+			    " Defaulting to Generic LM85.\n", verstep );
+			kind = any_chip ;
 		} else if( company == LM85_COMPANY_SMSC
-		    && (verstep & 0xf0) == LM85_VERSTEP_GENERIC ) {
-			printk("lm85: Your EMC6D10x has version/stepping 0x%02x"
-			    " Please notify lm_sensors team.\n", verstep );
-			kind = emc6d101 ;
-		} else if( kind == 0 && (verstep & 0xf0) == 0x60) {
+		    && (verstep == LM85_VERSTEP_EMC6D100_A0
+			 || verstep == LM85_VERSTEP_EMC6D100_A1) ) {
+			/* Unfortunately, we can't tell a '100 from a '101
+			 *   from the registers.  Since a '101 is a '100
+			 *   in a package with fewer pins and therefore no
+			 *   3.3V, 1.5V or 1.8V inputs, perhaps if those
+			 *   inputs read 0, then it's a '101.
+			 */
+			kind = emc6d100 ;
+		} else if( company == LM85_COMPANY_SMSC
+		    && (verstep & LM85_VERSTEP_VMASK) == LM85_VERSTEP_GENERIC) {
+			printk("lm85: Detected SMSC chip\n");
+			printk("lm85: Unrecognized version/stepping 0x%02x"
+			    " Defaulting to Generic LM85.\n", verstep );
+			kind = any_chip ;
+		} else if( kind == any_chip
+		    && (verstep & LM85_VERSTEP_VMASK) == LM85_VERSTEP_GENERIC) {
 			printk("lm85: Generic LM85 Version 6 detected\n");
 			/* Leave kind as "any_chip" */
 		} else {
@@ -775,7 +825,7 @@ int lm85_detect(struct i2c_adapter *adapter, int address,
 			printk("lm85: Autodetection failed\n");
 #endif
 			/* Not an LM85 ... */
-			if( kind == 0 ) {  /* User used force=x,y */
+			if( kind == any_chip ) {  /* User used force=x,y */
 			    printk("lm85: Generic LM85 Version 6 not"
 				" found at %d,0x%02x. Try force_lm85c.\n",
 				i2c_adapter_id(adapter), address );
@@ -821,12 +871,8 @@ int lm85_detect(struct i2c_adapter *adapter, int address,
 	case emc6d100 :
 		type_name = "emc6d100";
 		strcpy(new_client->name, "SMSC EMC6D100");
-		template_used = 0 ;
-		break ;
-	case emc6d101 :
-		type_name = "emc6d101";
-		strcpy(new_client->name, "SMSC EMC6D101");
-		template_used = 0 ;
+		memcpy(template, emc6d100_specific, sizeof(emc6d100_specific));
+		template_used = CTLTBL_EMC6D100 ;
 		break ;
 	default :
 		printk("lm85: Internal error, invalid kind (%d)!", kind);
@@ -923,15 +969,15 @@ int lm85_read_value(struct i2c_client *client, u16 reg)
 	case ADM1027_REG_EXTEND_ADC :  /* Read ADC1 and ADC2 */
 		reg &= 0xff ;  /* Pseudo words have address + 0x0100 */
 		res = i2c_smbus_read_byte_data(client, reg) & 0xff ;
-		res |= i2c_smbus_read_byte_data(client, reg+1) << 8 ;
+		res |= (i2c_smbus_read_byte_data(client, reg+1) & 0xff) << 8 ;
 		break ;
 	case ADT7463_REG_TMIN_CTL :  /* Read WORD MSB, LSB */
 		reg &= 0xff ;  /* Pseudo words have address + 0x0100 */
-		res = i2c_smbus_read_byte_data(client, reg) << 8 ;
+		res = (i2c_smbus_read_byte_data(client, reg) & 0xff) << 8 ;
 		res |= i2c_smbus_read_byte_data(client, reg+1) & 0xff ;
 		break ;
 	default:	/* Read BYTE data */
-		res = i2c_smbus_read_byte_data(client, reg & 0xff);
+		res = i2c_smbus_read_byte_data(client, reg & 0xff) & 0xff ;
 		break ;
 	}
 
@@ -1034,6 +1080,8 @@ void lm85_init_client(struct i2c_client *client)
 		}
 	};
 
+	/* FIXME?  Display EMC6D100 config info? */
+
 	/* WE INTENTIONALLY make no changes to the limits,
 	 *   offsets, pwms, fans and zones.  If they were
 	 *   configured, we don't want to mess with them.
@@ -1101,6 +1149,8 @@ void lm85_update_client(struct i2c_client *client)
 			    lm85_read_value(client, LM85_REG_PWM(i));
 		}
 
+		data->alarms = lm85_read_value(client, LM85_REG_ALARM);
+
 		switch( ((struct lm85_data *)(client->data))->type ) {
 		case adt7463 :
 			/* REG_THERM code duplicated in therm_signal() */
@@ -1112,10 +1162,19 @@ void lm85_update_client(struct i2c_client *client)
 				++data->therm_ovfl ;
 			}
 			break ;
+		case emc6d100 :
+			/* Three more voltage sensors */
+			for (i = 5; i <= 7; ++i) {
+			    data->in[i] =
+				lm85_read_value(client, EMC6D100_REG_IN(i));
+			}
+			/* More alarm bits */
+			data->alarms |=
+			    lm85_read_value(client, EMC6D100_REG_ALARM3) << 16;
+
+			break ;
 		default : break ; /* no warnings */
 		}
-
-		data->alarms = lm85_read_value(client, LM85_REG_ALARM);
 
 		data->last_reading = jiffies ;
 	};  /* last_reading */
@@ -1209,6 +1268,14 @@ void lm85_update_client(struct i2c_client *client)
 				ADM1027_REG_FAN_PPR );
 			data->alarm_mask = lm85_read_value(client,
 				ADM1027_REG_INTMASK );
+			break ;
+		case emc6d100 :
+			for (i = 5; i <= 7; ++i) {
+			    data->in_min[i] =
+				lm85_read_value(client, EMC6D100_REG_IN_MIN(i));
+			    data->in_max[i] =
+				lm85_read_value(client, EMC6D100_REG_IN_MAX(i));
+			}
 			break ;
 		default : break ; /* no warnings */
 		}
@@ -1921,6 +1988,41 @@ void adt7463_therm_signal(struct i2c_client *client, int operation,
 		up(&data->update_lock);
 	}
 }
+
+
+void emc6d100_in(struct i2c_client *client, int operation, int ctl_name,
+	     int *nrels_mag, long *results)
+{
+	struct lm85_data *data = client->data;
+	int nr = ctl_name - EMC6D100_SYSCTL_IN5 +5;
+
+	if (nr < 5 || nr > 7)
+		return ;  /* ERROR */
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 3;  /* 1.000 */
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		lm85_update_client(client);
+		results[0] = INS_FROM_REG(nr,data->in_min[nr]);
+		results[1] = INS_FROM_REG(nr,data->in_max[nr]);
+		results[2] = INS_FROM_REG(nr,data->in[nr]);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		down(&data->update_lock);
+		if (*nrels_mag > 1) {
+			data->in_max[nr] = INS_TO_REG(nr,results[1]);
+			lm85_write_value(client, EMC6D100_REG_IN_MAX(nr),
+					 data->in_max[nr]);
+		}
+		if (*nrels_mag > 0) {
+			data->in_min[nr] = INS_TO_REG(nr,results[0]);
+			lm85_write_value(client, EMC6D100_REG_IN_MIN(nr),
+					 data->in_min[nr]);
+		}
+		up(&data->update_lock);
+	}
+}
+
 
 static int __init sm_lm85_init(void)
 {
