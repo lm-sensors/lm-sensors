@@ -47,17 +47,20 @@
 # It seems that if present, the EEPROM is always at 0x57.
 #
 # Models tested so far:
-#   PCG-GR214EP : OK
-#   PCG-F403 : No EEPROM
-#   PCG-Z600LEK : No EEPROM
-#   PCG-Z600NE : No EEPROM
-#   PCG-F707 : No EEPROM
-#   PCG-GRX570 : OK
-#   PCG-GRX316G : OK
+#   PCG-F403     : No EEPROM
+#   PCG-F707     : No EEPROM
+#   PCG-GR114EK  : OK
+#   PCG-GR114SK  : OK
+#   PCG-GR214EP  : OK
+#   PCG-GRX316G  : OK
+#   PCG-GRX570   : OK
+#   PCG-Z600LEK  : No EEPROM
+#   PCG-Z600NE   : No EEPROM
 # Any feedback appreciated anyway.
 #
 # Thanks to Werner Heuser, Carsten Blume, Christian Gennerat, Joe Wreschnig,
-# Xavier Roche, Sebastien Lefevre and Philippe H. for their precious help.
+# Xavier Roche, Sebastien Lefevre, Philippe H., Lars Heer and Steve Dobson
+# for their precious help.
 #
 
 use strict;
