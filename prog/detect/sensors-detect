@@ -1241,7 +1241,7 @@ sub scan_adapter
 
   open FILE,"/dev/i2c-$adapter_nr" or 
     open FILE,"/dev/i2c$adapter_nr" or 
-       (print "Can't open /dev/i2c[-]$adapter_nr ($!)\n"), return;
+       (print "Can't open /dev/i2c[-]$adapter_nr\n"), return;
 
   # Now scan each address in turn
   foreach $addr (0..0x7f) {
