@@ -10,7 +10,7 @@ Stability
 ---------
 Complete and tested on the author's system.
 Untested by others.
-SMBus hangs on author's system when accessing W83781D,
+SMBus sometimes hangs on author's system when accessing W83781D,
 cause unknown (see Issues below).
 
 
@@ -50,12 +50,19 @@ on the PCI bus. An output of lspci will show something similar
 to the following:
 
   00:02.0 USB Controller: Acer Laboratories Inc. M5237 (rev 03)
-  00:03.0 Bridge: Acer Laboratories Inc. M7101
+  00:03.0 Bridge: Acer Laboratories Inc. M7101      <= THIS IS THE ONE WE NEED
   00:07.0 ISA bridge: Acer Laboratories Inc. M1533 (rev c3)
   00:0f.0 IDE interface: Acer Laboratories Inc. M5229 (rev c1)
 
-If you have a 1533 or 1543C on the board but not in the lspci
-listing, check your BIOS settings.
+** IMPORTANT **
+** If you have a 1533 or 1543C on the board and you get
+** "ali15x3.o: Error: Can't detect ali15x3!"
+** then run lspci.
+** If you see the 1533 and 5229 devices but NOT the 7101 device,
+** then you MUST enable ACPI, the PMU, SMB, or something similar
+** in the BIOS. If you can't figure out how to enable the
+** 7101 device in the BIOS, you have to upgrade your BIOS.
+** The driver won't work if it can't find the 7101 device.
 
 The SMB controller is part of the 7101 device, which is an
 ACPI-compliant Power Management Unit (PMU).
