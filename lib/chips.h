@@ -247,7 +247,7 @@
 #define SENSORS_GL520_VIN1 2 /* R */
 #define SENSORS_GL520_VIN2 3 /* R */
 #define SENSORS_GL520_VIN3 4 /* R */
-#define SENSORS_GL520_VIN4 4 /* R */
+#define SENSORS_GL520_VIN4 5 /* R */
 #define SENSORS_GL520_VDD_MIN 11 /* RW */
 #define SENSORS_GL520_VIN1_MIN 12 /* RW */
 #define SENSORS_GL520_VIN2_MIN 13 /* RW */
