@@ -30,8 +30,11 @@ adm9240
 	ds1780		1	6	5	1 dac	yes	no
 
 gl518sm
-        gl518sm-r00	1	1/4	2	-	yes	no
-        gl518sm-r80	1	4	2	-	yes	no
+        gl518sm (r00)	1	1/4	2	-	yes	no
+        gl518sm (r80)	1	4	2	-	yes	no
+
+gl520sm
+        gl520sm 	2/1	4/5	2	-	yes	no
 
 lm75
 	lm75		1	-	-	-	yes	no

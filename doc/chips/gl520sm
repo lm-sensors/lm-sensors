@@ -1,15 +1,11 @@
-Kernel driver `gl518sm.o'
+Kernel driver `gl520sm.o'
 =========================
 
-Status: Complete and well-tested
+Status: Complete but experimental
 
 Supported chips:
-  * Genesys Logic GL518SM release 0x00
-    Prefix `gl518sm'
-    Addresses scanned: I2C 0x2c and 0x2d
-    Datasheet: Not openly available
-  * Genesys Logic GL518SM release 0x80
-    Prefix `gl518sm'
+  * Genesys Logic GL520SM release 0x00
+    Prefix `gl520sm'
     Addresses scanned: I2C 0x2c and 0x2d
     Datasheet: Not openly available
 
@@ -40,23 +36,23 @@ Module Parameters
 Description
 -----------
 
-This driver supports the Genesys Logic GL518SM chip. There are at least
-two revision of this chip, which we call revision 0x00 and 0x80. Revision
-0x80 chips support the reading of voltages directly, 0x00 only for VIN3.
+This driver supports the Genesys Logic GL520SM chip.
 
-The GL518SM implements one temperature sensor, two FAN rotation speed
-sensors, and four voltage sensors. It can report alarms through the
-computer speakers.
+The GL520SM implements one temperature sensor, two FAN rotation speed
+sensors, four voltage sensors and the cpu VID lines. In addition, one input
+can be configured as either a temperature or voltage sensor.
+The sensor can report alarms through the computer speakers.
 
 Temperatures are measured in degrees Celcius. An alarm goes off while the
 temperature is above the over temperature limit, and has not yet dropped
 below the hysteris limit. The alarm always reflects the current situation.
-Measurements are guaranteed between -10 degrees and +110 degrees, with
+Measurements are guaranteed between 0 degrees and +110 degrees, with
 a resolution of +-3 degrees.
 
 FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
 triggered if the rotation speed has dropped below a programmable limit.
-In case when you have selected to turn Fan1 off, no Fan1 alarm is triggered.
+In case when you have selected to turn Fan1 off, no Fan1 alarm is triggered
+if measured temperature is below 'over temperature' limit.
 
 FAN readings can be divided by a programmable divider (1, 2, 4 or 8) to give
 the readings more range or accuracy. This is important because some FANs
@@ -70,9 +66,7 @@ maximum limit. Note that minimum in this case always means 'closest to
 zero'; this is important for negative voltage measurements. The VDD input
 measures voltages between 0.000 and 5.865 volt, with a resolution of 0.023
 volt. The other inputs measure voltages between 0.000 and 4.845 volt, with a
-resolution of 0.019 volt. Note that revision 0x00 chips do not support
-reading the current voltage of any input except for VIN3; limit setting and
-alarms work fine, though. There is code to compute them by iterating.
+resolution of 0.019 volt.
 
 When an alarm goes off, you can be warned by a beeping signal through
 your computer speaker. It is possible to enable all beeping globally,
@@ -85,80 +79,75 @@ implementation, all hardware registers are read whenever any data is read
 (unless it is less than 1.5 seconds since the last update). This means that 
 you can easily miss once-only alarms.
 
-The GL518SM only updates its values each 1.5 seconds; reading it more often
+The GL520SM only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
-
-Iteration Code
---------------
-
-You can select between three modes to read the vin0-2 inputs with
-the following lines in /etc/sensors.conf:
-
- set iterate 0    Don't read vin0-vin2 inputs.
- set iterate 1    Run the iteration loop, this takes up to 10 seconds.
- set iterate 2    Show the results of the last iteration loop,
-                  and start a new loop to run in the background.
 
 Chip Features
 -------------
 
-Chip `gl518sm'
+Chip `gl520sm'
              LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
                vdd               NONE               NONE     R     2
               vin1               NONE               NONE     R     2
               vin2               NONE               NONE     R     2
               vin3               NONE               NONE     R     2
+              vin4               NONE               NONE     R     2
            vdd_min                vdd                vdd     RW    2
           vin1_min               vin1               vin1     RW    2
           vin2_min               vin2               vin2     RW    2
           vin3_min               vin3               vin3     RW    2
+          vin4_min               vin4               vin4     RW    2
            vdd_max                vdd                vdd     RW    2
           vin1_max               vin1               vin1     RW    2
           vin2_max               vin2               vin2     RW    2
           vin3_max               vin3               vin3     RW    2
+          vin4_max               vin4               vin4     RW    2
               fan1               NONE               NONE     R     0
               fan2               NONE               NONE     R     0
           fan1_min               fan1               fan1     RW    0
           fan2_min               fan2               fan2     RW    0
-              temp               NONE               NONE     R     1
-         temp_hyst               temp               temp     RW    1
-         temp_over               temp               temp     RW    1
+             temp1               NONE               NONE     R     1
+             temp2               NONE               NONE     R     1
+        temp_hyst1              temp1              temp1     RW    1
+        temp_hyst2              temp2              temp2     RW    1
+        temp_over1              temp1              temp1     RW    1
+        temp_over2              temp2              temp2     RW    1
           fan1_div               fan1               NONE     RW    0
           fan2_div               fan2               NONE     RW    0
             alarms               NONE               NONE     R     0
        beep_enable             alarms               NONE     RW    0
              beeps             alarms             alarms     RW    0
-          fan1_off               NONE               NONE     RW    0
-      fan1_off_pin               NONE               NONE     RW    0
-           iterate               NONE               NONE     RW    0
-
+         two_temps               NONE               NONE     RW    0
 
              LABEL                        FEATURE SYMBOL        SYSCTL FILE:NR
-               vdd                    SENSORS_GL518_VDD                vdd:3
-              vin1                   SENSORS_GL518_VIN1               vin1:3
-              vin2                   SENSORS_GL518_VIN2               vin2:3
-              vin3                   SENSORS_GL518_VIN3               vin3:3
-           vdd_min                SENSORS_GL518_VDD_MIN                vdd:1
-          vin1_min               SENSORS_GL518_VIN1_MIN               vin1:1
-          vin2_min               SENSORS_GL518_VIN2_MIN               vin2:1
-          vin3_min               SENSORS_GL518_VIN3_MIN               vin3:1
-           vdd_max                SENSORS_GL518_VDD_MAX                vdd:2
-          vin1_max               SENSORS_GL518_VIN1_MAX               vin1:2
-          vin2_max               SENSORS_GL518_VIN2_MAX               vin2:2
-          vin3_max               SENSORS_GL518_VIN3_MAX               vin3:2
-              fan1                   SENSORS_GL518_FAN1               fan1:2
-              fan2                   SENSORS_GL518_FAN2               fan2:2
-          fan1_min               SENSORS_GL518_FAN1_MIN               fan1:1
-          fan2_min               SENSORS_GL518_FAN2_MIN               fan2:1
-              temp                   SENSORS_GL518_TEMP               temp:3
-         temp_hyst              SENSORS_GL518_TEMP_HYST               temp:2
-         temp_over              SENSORS_GL518_TEMP_OVER               temp:1
-          fan1_div               SENSORS_GL518_FAN1_DIV            fan_div:1
-          fan2_div               SENSORS_GL518_FAN2_DIV            fan_div:2
-            alarms                 SENSORS_GL518_ALARMS             alarms:1
-       beep_enable            SENSORS_GL518_BEEP_ENABLE               beep:1
-             beeps                  SENSORS_GL518_BEEPS               beep:2
-          fan1_off                SENSORS_GL518_FAN1OFF            fan1off:1
-      fan1_off_pin                SENSORS_GL518_FAN1PIN            fan1off:2
-           iterate                SENSORS_GL518_ITERATE            iterate:1
-
+               vdd                    SENSORS_GL520_VDD                vdd:3
+              vin1                   SENSORS_GL520_VIN1               vin1:3
+              vin2                   SENSORS_GL520_VIN2               vin2:3
+              vin3                   SENSORS_GL520_VIN3               vin3:3
+              vin4                   SENSORS_GL520_VIN4               vin3:3
+           vdd_min                SENSORS_GL520_VDD_MIN                vdd:1
+          vin1_min               SENSORS_GL520_VIN1_MIN               vin1:1
+          vin2_min               SENSORS_GL520_VIN2_MIN               vin2:1
+          vin3_min               SENSORS_GL520_VIN3_MIN               vin3:1
+          vin4_min               SENSORS_GL520_VIN4_MIN               vin3:1
+           vdd_max                SENSORS_GL520_VDD_MAX                vdd:2
+          vin1_max               SENSORS_GL520_VIN1_MAX               vin1:2
+          vin2_max               SENSORS_GL520_VIN2_MAX               vin2:2
+          vin3_max               SENSORS_GL520_VIN3_MAX               vin3:2
+          vin4_max               SENSORS_GL520_VIN4_MAX               vin3:2
+              fan1                   SENSORS_GL520_FAN1               fan1:2
+              fan2                   SENSORS_GL520_FAN2               fan2:2
+          fan1_min               SENSORS_GL520_FAN1_MIN               fan1:1
+          fan2_min               SENSORS_GL520_FAN2_MIN               fan2:1
+             temp1                  SENSORS_GL520_TEMP1              temp1:3
+             temp2                  SENSORS_GL520_TEMP2              temp2:3
+        temp_hyst1             SENSORS_GL520_TEMP1_HYST              temp1:2
+        temp_hyst2             SENSORS_GL520_TEMP2_HYST              temp2:2
+        temp_over1             SENSORS_GL520_TEMP1_OVER              temp1:1
+        temp_over2             SENSORS_GL520_TEMP2_OVER              temp2:1
+          fan1_div               SENSORS_GL520_FAN1_DIV            fan_div:1
+          fan2_div               SENSORS_GL520_FAN2_DIV            fan_div:2
+            alarms                 SENSORS_GL520_ALARMS             alarms:1
+       beep_enable            SENSORS_GL520_BEEP_ENABLE               beep:1
+             beeps                  SENSORS_GL520_BEEPS               beep:2
+         two_temps               SENSORS_GL520_TWOTEMPS             config:1
