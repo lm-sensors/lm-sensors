@@ -108,6 +108,9 @@ lm80
 lm87
         lm87	 	2-3	6-8	0-2	1 pwm	yes	no
 
+lm92
+	lm92		1	-	-	-	yes	no
+
 maxilife
 	maxilife-as	5	4	3	-	yes	no
 	maxilife-co	5	4	3	-	yes	no
@@ -155,6 +158,9 @@ bt869
 
 ddcmon
 	DDC-compliant monitor integrated eeproms - reads locations only
+
+ds1307
+	real-time clock
 
 eeprom
 	Memory SPD (serial presence detect) eeproms - reads locations only
