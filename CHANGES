@@ -23,6 +23,7 @@ ask CVS about it:
   File sensors.conf.eg: Add mtp008 entries, adm1025 entries
   Library: Add ds1621, mtp008 support
   Module adm1021: Add support for adm1021a / adm1023
+  Modules adm1021, thmc50: Rename /proc entries to temp[1-2]
   Module adm1025: Add support for remote temp; rename /proc entries to
                   in[0-5] and temp[1-2]; fix negative temp readings
   Module adm9240: Rename /proc entries to in[0-5]
@@ -42,7 +43,7 @@ ask CVS about it:
                    min/max or limit/hysteresis; print message if no
                    sensors are found.
   Program sensors-detect: Add ds1621, mtp008 detection;
-                          add ServerWorks detection (no driver yet)
+                          add ServerWorks detection
 
 2.5.4 (20001012)
   Module i2c-viapro: Add support for Via 596B (0x3051)

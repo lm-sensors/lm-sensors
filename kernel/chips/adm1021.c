@@ -172,9 +172,9 @@ static struct i2c_driver adm1021_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table adm1021_dir_table_template[] = {
-	{ADM1021_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM1021_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1021_temp},
-	{ADM1021_SYSCTL_REMOTE_TEMP, "remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM1021_SYSCTL_REMOTE_TEMP, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1021_remote_temp},
 	{ADM1021_SYSCTL_DIE_CODE, "die_code", NULL, 0, 0444, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1021_die_code},
@@ -184,9 +184,9 @@ static ctl_table adm1021_dir_table_template[] = {
 };
 
 static ctl_table adm1021_max_dir_table_template[] = {
-	{ADM1021_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM1021_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1021_temp},
-	{ADM1021_SYSCTL_REMOTE_TEMP, "remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM1021_SYSCTL_REMOTE_TEMP, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1021_remote_temp},
 	{ADM1021_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1021_alarms},

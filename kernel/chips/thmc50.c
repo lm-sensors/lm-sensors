@@ -156,9 +156,9 @@ static struct i2c_driver thmc50_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table thmc50_dir_table_template[] = {
-	{THMC50_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{THMC50_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &thmc50_temp},
-	{THMC50_SYSCTL_REMOTE_TEMP, "remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{THMC50_SYSCTL_REMOTE_TEMP, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &thmc50_remote_temp},
 	{THMC50_SYSCTL_INTER, "inter", NULL, 0, 0444, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &thmc50_inter},
