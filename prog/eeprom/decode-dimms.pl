@@ -100,7 +100,7 @@ printh '
 PC DIMM Serial Presence Detect Tester/Decoder
 Written by Philip Edelbrock.  Copyright 1998, 1999.
 Modified by Christian Zuckschwerdt <zany@triq.net>
-Version 0.6
+Version 2.6.3
 ';
 
 print "<table border=1>\n" if $opt_html;
@@ -123,7 +123,7 @@ for $i ( 0 .. $#dimm_list ) {
 # Decode first 16 bytes
 		prints "The Following is Required Data and is Applicable to all DIMM Types";
 
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data0-15`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/00`;
 		@bytes=split(" ");
 		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
 		
@@ -226,7 +226,7 @@ for $i ( 0 .. $#dimm_list ) {
 		prints "The Following Apply to SDRAM DIMMs ONLY";
 		
 # Decode next 16 bytes
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data16-31`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/10`;
 		@bytes=split(" ");
 		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j]; }
 		
@@ -377,7 +377,7 @@ for $i ( 0 .. $#dimm_list ) {
 		
 		
 # Decode next 16 bytes (32-47)
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data32-47`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/20`;
 		@bytes=split(" ");
 		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
 		
@@ -401,7 +401,7 @@ for $i ( 0 .. $#dimm_list ) {
 
 # That's it for the lower part of an SDRAM EEPROM's memory!
 # Decode next 16 bytes (48-63)
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data48-63`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/30`;
 		@bytes=split(" ");
 		for $j ( 0 .. 14 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
 
@@ -411,7 +411,7 @@ for $i ( 0 .. $#dimm_list ) {
 		printl $l, $temp;
 
 # Decode next 16 bytes (64-79)
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data64-79`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/40`;
 		@bytes=split(" ");
 		
 		$l = "Manufacturer's JEDEC ID Code";
@@ -427,7 +427,7 @@ for $i ( 0 .. $#dimm_list ) {
 		
 		$l = "Manufacurer's Part Number:\"";
 # Decode next 16 bytes (80-95)
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data80-95`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/50`;
 		@bytes2=split(" ");
 		$temp = pack("cccccccccccccccccc",$bytes[9],$bytes[10],$bytes[11],$bytes[12],$bytes[13],$bytes[14],$bytes[15],
 			$bytes2[0],$bytes2[1],$bytes2[2],$bytes2[3],$bytes2[4],$bytes2[5],$bytes2[6],$bytes2[7],$bytes2[8],$bytes2[9]);
@@ -443,12 +443,12 @@ for $i ( 0 .. $#dimm_list ) {
 		
 		$l = "Assembly Serial Number";
 # Decode next 16 bytes (96-111)
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data96-111`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/60`;
 		@bytes=split(" ");
 		
 		$temp = sprintf("0x%.2X%.2X%.2X%.2X\n",$bytes2[15],$bytes[0],$bytes[1],$bytes[2]);
 # Decode next 16 bytes (112-127)
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data112-127`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/70`;
 		@bytes=split(" ");
 		
 		$l = "Intel Specification for Frequency";

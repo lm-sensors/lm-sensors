@@ -33,7 +33,7 @@
 
 print "Xeon Processor Information ROM Decoder\n";
 print "Written by Philip Edelbrock and Mark Studebaker.  Copyright 1998, 1999.\n";
-print "Version 0.1\n\n";
+print "Version 2.6.3\n\n";
 
 $dimm_count=0;
 $_=`ls /proc/sys/dev/sensors/`;
@@ -52,7 +52,7 @@ for $i ( 0 .. $#dimm_list ) {
 # Decode first 16 bytes
 		print "\t\t----=== Xeon ROM Header Data ===----\n";
 
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data0-15`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/00`;
 		@bytes=split(" ");
 		
 		printf("\tData Format Revision: \t\t\t\t0x%.4X\n", $bytes[0]);
@@ -73,7 +73,7 @@ for $i ( 0 .. $#dimm_list ) {
 		print "\t\t----=== Xeon ROM Processor Data ===----\n";
 		
 # Decode next 16 bytes
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data16-31`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/10`;
 		@bbytes=split(" ");
 	      	print "\tS-spec/QDF Number:\t\t\t\t\"";
 		print pack("cccccc",$bytes[14],$bytes[15],$bbytes[0],
@@ -102,7 +102,7 @@ for $i ( 0 .. $#dimm_list ) {
 		print "\n";
 		
 # Decode next 16 bytes (32-47)
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data32-47`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/20`;
 		@bytes=split(" ");
 		print "\tCore Voltage ID (mV):\t\t\t\t";
 		print ($bbytes[15] << 4) + $bytes[0];
@@ -132,7 +132,7 @@ for $i ( 0 .. $#dimm_list ) {
 		print "\n";
 
 # Decode next 16 bytes (48-63)
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data48-63`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/30`;
 		@bytes=split(" ");
 
 		printf("\tCache/Tag Stepping ID:\t\t\t\t0x%.2X\n",
@@ -155,7 +155,7 @@ for $i ( 0 .. $#dimm_list ) {
 		$byte15=$byte[15];
 
 # Decode next 16 bytes (64-79)
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data64-79`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/40`;
 		@bytes=split(" ");
 
 	      	print "\tProcessor BOM ID:\t\t\t\t\"";
@@ -166,7 +166,7 @@ for $i ( 0 .. $#dimm_list ) {
 		print "\"\n";
 
 # Decode next 16 bytes (80-95)
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data80-95`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/50`;
 		@bbytes=split(" ");
 		printf("\tProcessor Electronic Signature: \t\t0x%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X\n",
 			$bytes[13],$bytes[14],$bytes[15],$bbytes[0],
@@ -176,7 +176,7 @@ for $i ( 0 .. $#dimm_list ) {
 # Not used...   
 
 # Decode next 16 bytes (112-127)
-		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data112-127`;
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/70`;
 		@bytes=split(" ");
 		
 		print "\t\t----=== Xeon Thermal Reference Data ===----\n";
