@@ -206,7 +206,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      {
        name => "Silicon Integrated Systems SIS5595",
        driver => "sis5595",
-       isa_addrs => [ "Undetermined" ],
+       isa_addrs => [ 0 ],
        isa_detect => sub { sis5595_isa_detect @_ },
      }
 );
@@ -795,13 +795,17 @@ sub add_isa_to_chips_detected
         not exists $new_misdetected_ref->[$j]->{isa_addr} and
         defined $alias_detect and
         $new_misdetected_ref->[$j]->{chip_type} eq $datahash->{chip_type}) {
-      if (&$alias_detect ($datahash->{isa_addr},
-                          $new_misdetected_ref->[$j]->{devnr},
+      my $file = open FILE,"/dev/i2c-$new_misdetected_ref->[$j]->{devnr}" or 
+                 print("Can't open ",
+                       "/dev/i2c-$new_misdetected_ref->[$j]->{devnr}?!?\n"),
+                 next;
+      if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_misdetected_ref->[$j]->{address})) {
         $new_misdetected_ref->[$j] = { %$new_misdetected_ref->[$j],
                                       isa_addr => $datahash->{isa_addr}};
         return;
       }
+      close FILE;
     }
   }
 
@@ -809,8 +813,11 @@ sub add_isa_to_chips_detected
     if (exists $new_detected_ref->[$j]->{address} and
         not exists $new_detected_ref->[$j]->{isa_addr} and
         $new_detected_ref->[$j]->{chip_type} eq $datahash->{chip_type}) {
-      if (&$alias_detect ($datahash->{isa_addr},
-                          $new_detected_ref->[$j]->{devnr},
+      my $file = open FILE,"/dev/i2c-$new_detected_ref->[$j]->{devnr}" or 
+                 print("Can't open ",
+                       "/dev/i2c-$new_detected_ref->[$j]->{devnr}?!?\n"),
+                 next;
+      if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_detected_ref->[$j]->{address})) {
         $new_detected_ref->[$j]->{isa_addr} = $datahash->{isa_addr};
         ($datahash) = splice (@$new_detected_ref, $j, 1);
@@ -856,7 +863,7 @@ sub scan_adapter
   my ($chip, $addr, $conf,@chips,$add_addr);
   my @not_to_scan = @$not_to_scan;
   open FILE,"/dev/i2c-$adapter_nr" or 
-       print ("Can't open /dev/i2c-$adapter_nr ($!)\n"), return;
+       (print "Can't open /dev/i2c-$adapter_nr ($!)\n"), return;
   foreach $addr (0..0x7f) {
     if (@not_to_scan and $not_to_scan[0] == $addr) {
       shift @not_to_scan;
@@ -913,7 +920,11 @@ sub scan_isa_bus
     next if not exists $$chip{isa_addrs} or not exists $$chip{isa_detect};
     print "Probing for `$$chip{name}'\n";
     foreach $addr (@{$$chip{isa_addrs}}) {
-      printf "  Trying address 0x%04x... ", $addr;
+      if ($addr) {
+        printf "  Trying address 0x%04x... ", $addr;
+      } else {
+        printf "  Trying general detect... ";
+      }
       $conf = &{$$chip{isa_detect}} ($addr);
       print("Failed!\n"), next if not defined $conf;
       print "Success!\n";
@@ -1225,7 +1236,7 @@ sub sis5595_isa_detect
   my ($addr) = @_;
   my ($adapter,$try);
   my $found = 0;
-  foreach $try (@pci_list) {
+  foreach $try (@pci_adapters) {
     if ($try->{procid} eq "Silicon Integrated Systems 85C503") {
       $found = 1;
       last;
@@ -1234,8 +1245,8 @@ sub sis5595_isa_detect
   return if not $found;
 
   $found = 0;
-  foreach $adapter (@pci_adapters) {
-    if ((defined($adapter->{vendid}) and 
+  foreach $adapter (@pci_list) {
+    if ((defined($try->{vendid}) and 
          $try->{vendid} == $adapter->{vendid} and
          $try->{devid} == $adapter->{devid} and
          $try->{func} == $adapter->{func}) or
