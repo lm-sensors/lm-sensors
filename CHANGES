@@ -101,7 +101,7 @@ ask CVS about it:
   Program p4b_smbus: Fix 'make install';
                      Install in same place as other modules;
                      Clear correct bits in config word
-  Program pwmconfig, pwmtest: New
+  Program pwmconfig: New
   Program sensors: add adm1026, lm85, w83791d support
   Program sensors-detect: Add super i/o detection (smsc47m1, vt1211,
                           w83627hf, w83627thf, w83697hf);
