@@ -919,6 +919,10 @@ MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("ADM1024 driver");
 
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
+
 int init_module(void)
 {
 	return sensors_adm1024_init();
