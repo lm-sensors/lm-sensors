@@ -215,9 +215,8 @@ static s32 amd756_access(struct i2c_adapter * adap, u16 addr,
 	case I2C_SMBUS_BYTE:
 		outw_p(((addr & 0x7f) << 1) | (read_write & 0x01),
 		       SMB_HOST_ADDRESS);
-		/* TODO: Why only during write? */
 		if (read_write == I2C_SMBUS_WRITE)
-			outb_p(command, SMB_HOST_COMMAND);
+			outb_p(command, SMB_HOST_DATA);
 		size = AMD756_BYTE;
 		break;
 	case I2C_SMBUS_BYTE_DATA:
