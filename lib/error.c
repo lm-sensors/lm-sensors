@@ -37,7 +37,10 @@ static const char *errorlist[] =
    /* SENSORS_ERR_PROC      */ "Can't access /proc file",
    /* SENSORS_ERR_DIV_ZERO  */ "Divide by zero",
    /* SENSORS_ERR_CHIP_NAME */ "Can't parse chip name",
-   /* SENSORS_ERR_BUS_NAME  */ "Can't parse bus name"
+   /* SENSORS_ERR_BUS_NAME  */ "Can't parse bus name",
+   /* SENSORS_ERR_PARSE     */ "General parse error",
+   /* SENSORS_ERR_ACCESS_W  */ "Can't write",
+   /* SENSORS_ERR_ACCESS_R  */ "Can't read"
  };
 
 #define ERROR_LIST_LEN (sizeof(errorlist) / sizeof(char *))

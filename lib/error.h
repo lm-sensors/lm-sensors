@@ -28,6 +28,8 @@
 #define SENSORS_ERR_CHIP_NAME 6 /* Can't parse chip name */
 #define SENSORS_ERR_BUS_NAME 7  /* Can't parse bus name */
 #define SENSORS_ERR_PARSE 8     /* General parse error */
+#define SENSORS_ERR_ACCESS_W 9    /* Can't write */
+#define SENSORS_ERR_ACCESS_R 10    /* Can't read */
 
 #ifdef __cplusplus
 extern "C" {

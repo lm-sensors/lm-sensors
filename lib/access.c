@@ -224,7 +224,7 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
                                              main_feature->compute_mapping)))
     return -SENSORS_ERR_NO_ENTRY;
   if (! (main_feature->mode & SENSORS_MODE_R))
-    return -SENSORS_ERR_ACCESS;
+    return -SENSORS_ERR_ACCESS_R;
   for (chip = NULL; !expr && (chip = sensors_for_all_config_chips(name,chip));)
     for (i = 0; !final_expr && (i < chip->computes_count); i++) {
       if (!strcmp(main_feature->name,chip->computes[i].name)) {
@@ -267,7 +267,7 @@ int sensors_set_feature(sensors_chip_name name, int feature, double value)
                                              main_feature->compute_mapping)))
     return -SENSORS_ERR_NO_ENTRY;
   if (! (main_feature->mode & SENSORS_MODE_W))
-    return -SENSORS_ERR_ACCESS;
+    return -SENSORS_ERR_ACCESS_W;
   for (chip = NULL; !expr && (chip = sensors_for_all_config_chips(name,chip));)
     for (i = 0; !final_expr && (i < chip->computes_count); i++)
       if (!strcmp(main_feature->name,chip->computes[i].name)) {
