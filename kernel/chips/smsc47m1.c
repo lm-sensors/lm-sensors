@@ -123,9 +123,6 @@ static inline u8 MIN_TO_REG(long rpm, int div)
 #define PWM_FROM_REG(val) ((((val) & 0x7f) * 1005) / 640)
 #define PWM_TO_REG(val) SENSORS_LIMIT((((val) * 645) / 1000), 0, 63)
 
-#define SMSC47M1_INIT_FAN_MIN_1 3000
-#define SMSC47M1_INIT_FAN_MIN_2 3000
-
 struct smsc47m1_data {
 	struct semaphore lock;
 	int sysctl_id;
@@ -346,10 +343,6 @@ static void smsc47m1_init_client(struct i2c_client *client)
 	/* configure pins for tach function */
 	smsc47m1_write_value(client, SMSC47M1_REG_TPIN1, 0x05);
 	smsc47m1_write_value(client, SMSC47M1_REG_TPIN2, 0x05);
-	smsc47m1_write_value(client, SMSC47M1_REG_FAN_MIN(1),
-			    MIN_TO_REG(SMSC47M1_INIT_FAN_MIN_1, 2));
-	smsc47m1_write_value(client, SMSC47M1_REG_FAN_MIN(2),
-			    MIN_TO_REG(SMSC47M1_INIT_FAN_MIN_2, 2));
 }
 
 static void smsc47m1_update_client(struct i2c_client *client)

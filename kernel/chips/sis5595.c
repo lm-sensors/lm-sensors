@@ -169,43 +169,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 
-/* Initial limits. To keep them sane, we use the 'standard' translation as
-   specified in the SIS5595 sheet. Use the config file to set better limits. */
-#define SIS5595_INIT_IN_0 (((1200)  * 10)/38)
-#define SIS5595_INIT_IN_1 (((500)   * 100)/168)
-#define SIS5595_INIT_IN_2 330
-#define SIS5595_INIT_IN_3 250
-#define SIS5595_INIT_IN_4 250
-
-#define SIS5595_INIT_IN_PERCENTAGE 10
-
-#define SIS5595_INIT_IN_MIN_0 \
-        (SIS5595_INIT_IN_0 - SIS5595_INIT_IN_0 * SIS5595_INIT_IN_PERCENTAGE / 100)
-#define SIS5595_INIT_IN_MAX_0 \
-        (SIS5595_INIT_IN_0 + SIS5595_INIT_IN_0 * SIS5595_INIT_IN_PERCENTAGE / 100)
-#define SIS5595_INIT_IN_MIN_1 \
-        (SIS5595_INIT_IN_1 - SIS5595_INIT_IN_1 * SIS5595_INIT_IN_PERCENTAGE / 100)
-#define SIS5595_INIT_IN_MAX_1 \
-        (SIS5595_INIT_IN_1 + SIS5595_INIT_IN_1 * SIS5595_INIT_IN_PERCENTAGE / 100)
-#define SIS5595_INIT_IN_MIN_2 \
-        (SIS5595_INIT_IN_2 - SIS5595_INIT_IN_2 * SIS5595_INIT_IN_PERCENTAGE / 100)
-#define SIS5595_INIT_IN_MAX_2 \
-        (SIS5595_INIT_IN_2 + SIS5595_INIT_IN_2 * SIS5595_INIT_IN_PERCENTAGE / 100)
-#define SIS5595_INIT_IN_MIN_3 \
-        (SIS5595_INIT_IN_3 - SIS5595_INIT_IN_3 * SIS5595_INIT_IN_PERCENTAGE / 100)
-#define SIS5595_INIT_IN_MAX_3 \
-        (SIS5595_INIT_IN_3 + SIS5595_INIT_IN_3 * SIS5595_INIT_IN_PERCENTAGE / 100)
-#define SIS5595_INIT_IN_MIN_4 \
-        (SIS5595_INIT_IN_4 - SIS5595_INIT_IN_4 * SIS5595_INIT_IN_PERCENTAGE / 100)
-#define SIS5595_INIT_IN_MAX_4 \
-        (SIS5595_INIT_IN_4 + SIS5595_INIT_IN_4 * SIS5595_INIT_IN_PERCENTAGE / 100)
-
-#define SIS5595_INIT_FAN_MIN_1 3000
-#define SIS5595_INIT_FAN_MIN_2 3000
-
-#define SIS5595_INIT_TEMP_OVER 600
-#define SIS5595_INIT_TEMP_HYST 100
-
 /* For the SIS5595, we need to keep some data in memory. That
    data is pointed to by sis5595_list[NR]->data. The structure itself is
    dynamically allocated, at the time when the new sis5595 client is
@@ -541,38 +504,6 @@ static void sis5595_init_client(struct i2c_client *client)
 	/* Reset all except Watchdog values and last conversion values
 	   This sets fan-divs to 2, among others */
 	sis5595_write_value(client, SIS5595_REG_CONFIG, 0x80);
-
-	sis5595_write_value(client, SIS5595_REG_IN_MIN(0),
-			    IN_TO_REG(SIS5595_INIT_IN_MIN_0));
-	sis5595_write_value(client, SIS5595_REG_IN_MAX(0),
-			    IN_TO_REG(SIS5595_INIT_IN_MAX_0));
-	sis5595_write_value(client, SIS5595_REG_IN_MIN(1),
-			    IN_TO_REG(SIS5595_INIT_IN_MIN_1));
-	sis5595_write_value(client, SIS5595_REG_IN_MAX(1),
-			    IN_TO_REG(SIS5595_INIT_IN_MAX_1));
-	sis5595_write_value(client, SIS5595_REG_IN_MIN(2),
-			    IN_TO_REG(SIS5595_INIT_IN_MIN_2));
-	sis5595_write_value(client, SIS5595_REG_IN_MAX(2),
-			    IN_TO_REG(SIS5595_INIT_IN_MAX_2));
-	sis5595_write_value(client, SIS5595_REG_IN_MIN(3),
-			    IN_TO_REG(SIS5595_INIT_IN_MIN_3));
-	sis5595_write_value(client, SIS5595_REG_IN_MAX(3),
-			    IN_TO_REG(SIS5595_INIT_IN_MAX_3));
-	sis5595_write_value(client, SIS5595_REG_FAN_MIN(1),
-			    FAN_TO_REG(SIS5595_INIT_FAN_MIN_1, 2));
-	sis5595_write_value(client, SIS5595_REG_FAN_MIN(2),
-			    FAN_TO_REG(SIS5595_INIT_FAN_MIN_2, 2));
-	if(data->maxins == 4) {
-		sis5595_write_value(client, SIS5595_REG_IN_MIN(4),
-				    IN_TO_REG(SIS5595_INIT_IN_MIN_4));
-		sis5595_write_value(client, SIS5595_REG_IN_MAX(4),
-				    IN_TO_REG(SIS5595_INIT_IN_MAX_4));
-	} else {
-		sis5595_write_value(client, SIS5595_REG_TEMP_OVER,
-				    TEMP_TO_REG(SIS5595_INIT_TEMP_OVER));
-		sis5595_write_value(client, SIS5595_REG_TEMP_HYST,
-				    TEMP_TO_REG(SIS5595_INIT_TEMP_HYST));
-	}
 
 	/* Start monitoring */
 	sis5595_write_value(client, SIS5595_REG_CONFIG,

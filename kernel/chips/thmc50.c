@@ -71,10 +71,6 @@ SENSORS_INSMOD_1(thmc50);
 #define TEMP_FROM_REG(val) ((val>127)?val - 0x0100:val)
 #define TEMP_TO_REG(val)   ((val<0)?0x0100+val:val)
 
-/* Initial values */
-#define THMC50_INIT_TEMP_OS 60
-#define THMC50_INIT_TEMP_HYST 50
-
 /* Each client has this additional data */
 struct thmc50_data {
 	int sysctl_id;
@@ -308,11 +304,6 @@ static int thmc50_write_value(struct i2c_client *client, u8 reg, u16 value)
 
 static void thmc50_init_client(struct i2c_client *client)
 {
-	/* Initialize the THMC50 chip */
-	thmc50_write_value(client, THMC50_REG_TEMP_OS,
-			   TEMP_TO_REG(THMC50_INIT_TEMP_OS));
-	thmc50_write_value(client, THMC50_REG_TEMP_HYST,
-			   TEMP_TO_REG(THMC50_INIT_TEMP_HYST));
 	thmc50_write_value(client, THMC50_REG_CONF, 1);
 }
 

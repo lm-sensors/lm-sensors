@@ -193,51 +193,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define PWM_TO_REG(val)		(val)
 #define PWMENABLE_FROM_REG(nr, val)	(((val) >> ((nr) + 3)) & 1)
 
-/* Initial limits */
-#define MTP008_INIT_IN_0	(vid)				/* VCore 1 */
-#define MTP008_INIT_IN_1	330				/* +3.3V */
-#define MTP008_INIT_IN_2	(1200 * 10 / 38)		/* +12V */
-#define MTP008_INIT_IN_3	(vid)				/* VCore 2 */
-#define MTP008_INIT_IN_5	((11861 + 7 * (-1200)) / 36)	/* -12V */
-#define MTP008_INIT_IN_6	150				/* Vtt */
-
-#define MTP008_INIT_IN_PCT	10
-
-#define MTP008_INIT_IN_MIN_0	(MTP008_INIT_IN_0 -			      \
-				 MTP008_INIT_IN_0 * MTP008_INIT_IN_PCT / 100)
-#define MTP008_INIT_IN_MAX_0	(MTP008_INIT_IN_0 +			      \
-				 MTP008_INIT_IN_0 * MTP008_INIT_IN_PCT / 100)
-#define MTP008_INIT_IN_MIN_1	(MTP008_INIT_IN_1 -			      \
-				 MTP008_INIT_IN_1 * MTP008_INIT_IN_PCT / 100)
-#define MTP008_INIT_IN_MAX_1	(MTP008_INIT_IN_1 +			      \
-				 MTP008_INIT_IN_1 * MTP008_INIT_IN_PCT / 100)
-#define MTP008_INIT_IN_MIN_2	(MTP008_INIT_IN_2 -			      \
-				 MTP008_INIT_IN_2 * MTP008_INIT_IN_PCT / 100)
-#define MTP008_INIT_IN_MAX_2	(MTP008_INIT_IN_2 +			      \
-				 MTP008_INIT_IN_2 * MTP008_INIT_IN_PCT / 100)
-#define MTP008_INIT_IN_MIN_3	(MTP008_INIT_IN_3 -			      \
-				 MTP008_INIT_IN_3 * MTP008_INIT_IN_PCT / 100)
-#define MTP008_INIT_IN_MAX_3	(MTP008_INIT_IN_3 +			      \
-				 MTP008_INIT_IN_3 * MTP008_INIT_IN_PCT / 100)
-
-#define MTP008_INIT_IN_MIN_5	(MTP008_INIT_IN_5 -			      \
-				 MTP008_INIT_IN_5 * MTP008_INIT_IN_PCT / 100)
-#define MTP008_INIT_IN_MAX_5	(MTP008_INIT_IN_5 +			      \
-				 MTP008_INIT_IN_5 * MTP008_INIT_IN_PCT / 100)
-#define MTP008_INIT_IN_MIN_6	(MTP008_INIT_IN_6 -			      \
-				 MTP008_INIT_IN_6 * MTP008_INIT_IN_PCT / 100)
-#define MTP008_INIT_IN_MAX_6	(MTP008_INIT_IN_6 +			      \
-				 MTP008_INIT_IN_6 * MTP008_INIT_IN_PCT / 100)
-
-#define MTP008_INIT_FAN_MIN_1	3000
-#define MTP008_INIT_FAN_MIN_2	3000
-#define MTP008_INIT_FAN_MIN_3	3000
-
-#define MTP008_INIT_TEMP_OVER	700			/* 70 Celsius */
-#define MTP008_INIT_TEMP_HYST	500			/* 50 Celsius */
-#define MTP008_INIT_TEMP2_OVER	700			/* 70 Celsius */
-#define MTP008_INIT_TEMP2_HYST	500			/* 50 Celsius */
-
 /*
  * For each registered MTP008, we need to keep some data in memory.  The
  * structure itself is dynamically allocated, at the same time when a new
@@ -551,7 +506,6 @@ static int mtp008_write_value(struct i2c_client *client, u8 reg, u8 value)
 /* Called when we have found a new MTP008. It should set limits, etc. */
 static void mtp008_init_client(struct i2c_client *client)
 {
-	int vid;
 	u8 save1, save2;
 	struct mtp008_data *data;
 
@@ -570,65 +524,6 @@ static void mtp008_init_client(struct i2c_client *client)
 
 	mtp008_getsensortype(data, save2);
 
-	/*
-	 * Retrieve the VID setting (needed for the default limits).
-	 */
-	vid = mtp008_read_value(client, MTP008_REG_VID_FANDIV) & 0x0f;
-	vid |= (mtp008_read_value(client, MTP008_REG_RESET_VID4) & 0x01) << 4;
-	vid = VID_FROM_REG(vid);
-
-	/*
-	 * Set the default limits.
-	 *
-	 * Setting temp sensors is done as follows:
-	 *
-	 *          Register 0x57: 0 0 0 0 x x x x
-	 *                                 | \ / +-- AIN5/VT3
-	 *                                 |  +----- AIN4/VT2/PII
-	 *                                 +-------- VT1/PII
-	 */
-
-	mtp008_write_value(client, MTP008_REG_IN_MAX(0),
-			   IN_TO_REG(MTP008_INIT_IN_MAX_0));
-	mtp008_write_value(client, MTP008_REG_IN_MIN(0),
-			   IN_TO_REG(MTP008_INIT_IN_MIN_0));
-	mtp008_write_value(client, MTP008_REG_IN_MAX(1),
-			   IN_TO_REG(MTP008_INIT_IN_MAX_1));
-	mtp008_write_value(client, MTP008_REG_IN_MIN(1),
-			   IN_TO_REG(MTP008_INIT_IN_MIN_1));
-	mtp008_write_value(client, MTP008_REG_IN_MAX(2),
-			   IN_TO_REG(MTP008_INIT_IN_MAX_2));
-	mtp008_write_value(client, MTP008_REG_IN_MIN(2),
-			   IN_TO_REG(MTP008_INIT_IN_MIN_2));
-	mtp008_write_value(client, MTP008_REG_IN_MAX(3),
-			   IN_TO_REG(MTP008_INIT_IN_MAX_3));
-	mtp008_write_value(client, MTP008_REG_IN_MIN(3),
-			   IN_TO_REG(MTP008_INIT_IN_MIN_3));
-
-	mtp008_write_value(client, MTP008_REG_IN_MAX(5),
-			   IN_TO_REG(MTP008_INIT_IN_MAX_5));
-	mtp008_write_value(client, MTP008_REG_IN_MIN(5),
-			   IN_TO_REG(MTP008_INIT_IN_MIN_5));
-	mtp008_write_value(client, MTP008_REG_IN_MAX(6),
-			   IN_TO_REG(MTP008_INIT_IN_MAX_6));
-	mtp008_write_value(client, MTP008_REG_IN_MIN(6),
-			   IN_TO_REG(MTP008_INIT_IN_MIN_6));
-
-	mtp008_write_value(client, MTP008_REG_TEMP_MAX,
-			   TEMP_TO_REG(MTP008_INIT_TEMP_OVER));
-	mtp008_write_value(client, MTP008_REG_TEMP_MIN,
-			   TEMP_TO_REG(MTP008_INIT_TEMP_HYST));
-	mtp008_write_value(client, MTP008_REG_IN_MAX(4),
-			   TEMP_TO_REG(MTP008_INIT_TEMP2_OVER));
-	mtp008_write_value(client, MTP008_REG_IN_MIN(4),
-			   TEMP_TO_REG(MTP008_INIT_TEMP2_HYST));
-
-	mtp008_write_value(client, MTP008_REG_FAN_MIN(1),
-			   FAN_TO_REG(MTP008_INIT_FAN_MIN_1, 2));
-	mtp008_write_value(client, MTP008_REG_FAN_MIN(2),
-			   FAN_TO_REG(MTP008_INIT_FAN_MIN_2, 2));
-	mtp008_write_value(client, MTP008_REG_FAN_MIN(3),
-			   FAN_TO_REG(MTP008_INIT_FAN_MIN_3, 2));
 
 	/*
 	 * Start monitoring.
