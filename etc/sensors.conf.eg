@@ -1494,6 +1494,26 @@ chip "lm83-*"
 # should be higher than each of the high limits above
 #   set tcrit 85
 
+chip "lm90-*"
+
+   label temp1 "M/B Temp"
+   label temp2 "CPU Temp"
+
+# change high and low limits to fit your needs
+#   set temp1_low  10
+#   set temp1_high 55
+#   set temp2_low  10
+#   set temp2_high 66
+
+# change critical limits to fit your needs
+# should be higher than the corresponding high limit above
+#   set tcrit1 75
+#   set tcrit2 85
+
+# change the hysteresis value to fit your needs
+# relative value, applies to both critical thresholds
+#   set hyst 5
+
 chip "vt1211-*" "vt8231-*"
 #
 # temp1 and in6 are not implemented in vt1211 / vt8231
