@@ -4284,14 +4284,20 @@ sub w83l785ts_detect
 #   alarm enable register (0x08) - top 3 bits
 #   alarm status register (0x0A) - top 3 bits
 #   tachometer count time register (0x16) - top 6 bits
+# Additionally, not all values are possible for lower 3 bits of
+# the configuration register.
 sub max6650_detect
 {
   my ($chip, $file) = @_;
+
+  my $conf = i2c_smbus_read_byte_data($file,0x02);
+  
   return if i2c_smbus_read_byte_data($file,0x16) & 0xFC;
   return if i2c_smbus_read_byte_data($file,0x0A) & 0xE0;
   return if i2c_smbus_read_byte_data($file,0x08) & 0xE0;
   return if i2c_smbus_read_byte_data($file,0x14) & 0xE0;
-  return if i2c_smbus_read_byte_data($file,0x02) & 0xC0;
+  return if ($conf & 0xC0) or ($conf & 0x07) > 4;
+
   return 4;
 }
 
