@@ -213,15 +213,15 @@ int ds1621_detect(struct i2c_adapter *adapter, int address,
 		temp = ds1621_read_value(new_client, 
 					 DS1621_REG_TEMP);
 		if (temp & 0x007f)
-			goto exit_free;
+			goto ERROR1;
 		temp = ds1621_read_value(new_client, 
-					 DS1621_REG_TEMP_MIN);
+					 DS1621_REG_TEMP_HYST);
 		if (temp & 0x007f)
-			goto exit_free;
+			goto ERROR1;
 		temp = ds1621_read_value(new_client, 
-					 DS1621_REG_TEMP_MAX);
+					 DS1621_REG_TEMP_OVER);
 		if (temp & 0x007f)
-			goto exit_free;
+			goto ERROR1;
 	}
 
 	/* Determine the chip type - only one kind supported! */
