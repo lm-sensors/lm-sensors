@@ -36,17 +36,23 @@ fi
 
 if [ $WITHSYS == "0" ]; then
 	# If sensors isn't supported by the kernel, try loading the module...
-	[ -e /proc/sys/dev/sensors ] || /sbin/modprobe i2c-proc &>/dev/null
+	[ -e /proc/sys/dev/sensors ] || /sbin/modprobe i2c-proc >/dev/null 2>&1
 
 	# Don't bother if /proc/sensors still doesn't exist, kernel doesn't have
 	# support for sensors.
 	[ -e /proc/sys/dev/sensors ] || exit 0
 
 	# If sensors was not already running, unload the module...
-	[ -e /var/lock/subsys/lm_sensors ] || /sbin/modprobe -r i2c-proc &>/dev/null
+	[ -e /var/lock/subsys/lm_sensors ] || /sbin/modprobe -r i2c-proc >/dev/null 2>&1
 fi
 
 CONFIG=/etc/sysconfig/lm_sensors
+[ -r "$CONFIG" ] || exit 0
+grep '^MODULE_' $CONFIG >/dev/null 2>&1 || exit 0
+
+# Load config file
+. "$CONFIG"
+
 PSENSORS=/usr/local/bin/sensors
 
 if [ ! -x $PSENSORS ]; then
@@ -57,17 +63,17 @@ fi
 . /etc/init.d/functions
 
 RETVAL=0
+prog="lm_sensors"
 
 start() {
-	echo -n $"Starting up sensors: "
-	test -r "$CONFIG" && . "$CONFIG"
+	echo -n "Starting $prog: loading module "
 
 	modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
 	i=0
 	while [ $i -lt $modules ] ; do
 		module=`eval echo '$'MODULE_$i`
-		echo starting module __${module}__
-		/sbin/modprobe $module &>/dev/null
+		echo -n "${module} "
+		/sbin/modprobe $module >/dev/null 2>&1
 		i=`expr $i + 1`
 	done
 	$PSENSORS -s
@@ -83,19 +89,18 @@ start() {
 }
 
 stop() {
-	echo -n $"Shutting down sensors: "
-	test -r "$CONFIG" && . "$CONFIG"
+	echo -n "Stopping $prog: "
 
 	modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
 	i=`expr $modules`
 	while [ $i -ge 0 ] ; do
 		module=`eval echo '$'MODULE_$i`
-		/sbin/modprobe -r $module &>/dev/null
+		/sbin/modprobe -r $module >/dev/null 2>&1
 		i=`expr $i - 1`
 	done
 
 	if [ $WITHSYS == "0" ]; then
-		/sbin/modprobe -r i2c-proc &>/dev/null
+		/sbin/modprobe -r i2c-proc >/dev/null 2>&1
 	fi
 
 	RETVAL=$?
@@ -141,7 +146,7 @@ case "$1" in
 	condrestart
 	;;
   *)
-	echo "Usage: sensors.init {start|stop|status|restart|reload|condrestart}"
+	echo "Usage: $0 {start|stop|status|restart|reload|condrestart}"
 	exit 1
 esac
 
