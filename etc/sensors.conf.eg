@@ -1464,7 +1464,21 @@ chip "vt1211-*" "vt8231-*"
     set fan1_min 3000
     set fan2_min 3000
 
+chip "bmc-*"
+#
+# You should not need compute lines here, the driver will
+# do all the conversions.
+# For label lines, copy from syslog/dmesg when the bmcsensors
+# module is inserted.
+#
+# for example:
+# label temp1 "Ambient Temp"
+
+
+
+#
 chip "smsc47m1-*"
 
     set fan1_min 3000
     set fan2_min 3000
+
