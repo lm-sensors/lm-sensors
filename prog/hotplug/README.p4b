@@ -13,6 +13,10 @@ with the German support and learned that: "We do not want the users to be
 irritated by just another PCI Device in the Win98 device manager."
 Really funny :-).
 
+NOTE: We have a report that as of kernel 2.4.23, the kernel activates
+the SMBus PCI device, so that this module is not required.
+
+
 What does the module do?
 ------------------------
 (Note: the following instructions assume the ICH2. For the ICH4,
