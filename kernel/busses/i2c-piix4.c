@@ -187,7 +187,7 @@ static unsigned short piix4_smba = 0;
  * Get DMI information.
  */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,34)
-void dmi_scan_machine(void);
+void dmi_scan_mach(void);
 #endif
 static int __init ibm_dmi_probe(void)
 {
@@ -196,7 +196,7 @@ static int __init ibm_dmi_probe(void)
 	return is_unsafe_smbus;
 #else
 #define IBM_SIGNATURE		"IBM"
-	dmi_scan_machine();
+	dmi_scan_mach();
 	if(dmi_ident[DMI_SYS_VENDOR] == NULL)
 		return 0;
 	if(strncmp(dmi_ident[DMI_SYS_VENDOR], IBM_SIGNATURE,

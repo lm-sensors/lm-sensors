@@ -220,7 +220,7 @@ static void __init dmi_decode(struct dmi_header *dm)
 	}
 }
 
-void __init dmi_scan_machine(void)
+void __init dmi_scan_mach(void)
 {
 	int err;
 	printk("dmi_scan.o version %s (%s)\n", LM_VERSION, LM_DATE);
@@ -237,7 +237,7 @@ MODULE_DESCRIPTION("SM BIOS DMI Scanner");
 MODULE_LICENSE("GPL");
 #endif
 EXPORT_SYMBOL(dmi_ident);
-EXPORT_SYMBOL(dmi_scan_machine);
+EXPORT_SYMBOL(dmi_scan_mach);
 int init_module(void)
 {
 	return 0;
