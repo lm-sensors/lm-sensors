@@ -64,31 +64,13 @@
 #include <asm/io.h>
 #include <linux/types.h>
 #include <linux/i2c.h>
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
 #include "version.h"
-#include "sensors.h"
 #include "sensors_vid.h"
 
-#ifdef MODULE_LICENSE
-MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
-
 #ifndef I2C_DRIVERID_LM85
-/* i2c-id.h hasn't been updated to assign us an ID.
- * So...  Use a local ID from 0xf000 to 0xffff as
- *    documented in i2c-id.h
- * But, for the record, LM85 was assigned I2C ID 0x1039 around Jan 2003.
- */
-#define I2C_DRIVERID_LM85  (0xf185)
+#define I2C_DRIVERID_LM85  1039
 #endif
 
 /* Addresses to scan */
@@ -454,11 +436,6 @@ static int lm85_attach_adapter(struct i2c_adapter *adapter);
 static int lm85_detect(struct i2c_adapter *adapter, int address,
 			unsigned short flags, int kind);
 static int lm85_detach_client(struct i2c_client *client);
-static int lm85_command(struct i2c_client *client, unsigned int cmd,
-			void *arg);
-static void lm85_inc_use(struct i2c_client *client);
-static void lm85_dec_use(struct i2c_client *client);
-
 static int lm85_read_value(struct i2c_client *client, u16 register);
 static int lm85_write_value(struct i2c_client *client, u16 register, int value);
 static void lm85_update_client(struct i2c_client *client);
@@ -508,15 +485,82 @@ static void adt7463_therm_signal(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver lm85_driver = {
-	/* name */ "LM85 compatible sensor driver",
-	/* id */ I2C_DRIVERID_LM85,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &lm85_attach_adapter,
-	/* detach_client */ &lm85_detach_client,
-	/* command */ &lm85_command,
-	/* inc_use */ &lm85_inc_use,
-	/* dec_use */ &lm85_dec_use
+	.owner		= THIS_MODULE,
+	.name		=  "LM85 compatible sensor driver",
+	.id		= I2C_DRIVERID_LM85,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= &lm85_attach_adapter,
+	.detach_client	= &lm85_detach_client,
 };
+
+/* -- SENSORS SYSCTL START -- */
+/* Common parameters */
+#define LM85_SYSCTL_IN0                1000
+#define LM85_SYSCTL_IN1                1001
+#define LM85_SYSCTL_IN2                1002
+#define LM85_SYSCTL_IN3                1003
+#define LM85_SYSCTL_IN4                1004
+#define LM85_SYSCTL_FAN1               1005
+#define LM85_SYSCTL_FAN2               1006
+#define LM85_SYSCTL_FAN3               1007
+#define LM85_SYSCTL_FAN4               1008
+#define LM85_SYSCTL_TEMP1              1009
+#define LM85_SYSCTL_TEMP2              1010
+#define LM85_SYSCTL_TEMP3              1011
+#define LM85_SYSCTL_VID                1012
+#define LM85_SYSCTL_ALARMS             1013
+#define LM85_SYSCTL_PWM1               1014
+#define LM85_SYSCTL_PWM2               1015
+#define LM85_SYSCTL_PWM3               1016
+#define LM85_SYSCTL_VRM                1017
+#define LM85_SYSCTL_PWM_CFG1           1019
+#define LM85_SYSCTL_PWM_CFG2           1020
+#define LM85_SYSCTL_PWM_CFG3           1021
+#define LM85_SYSCTL_PWM_ZONE1          1022
+#define LM85_SYSCTL_PWM_ZONE2          1023
+#define LM85_SYSCTL_PWM_ZONE3          1024
+#define LM85_SYSCTL_ZONE1              1025
+#define LM85_SYSCTL_ZONE2              1026
+#define LM85_SYSCTL_ZONE3              1027
+#define LM85_SYSCTL_SMOOTH1            1028
+#define LM85_SYSCTL_SMOOTH2            1029
+#define LM85_SYSCTL_SMOOTH3            1030
+
+/* Vendor specific values */
+#define LM85_SYSCTL_SPINUP_CTL         1100
+#define LM85_SYSCTL_TACH_MODE          1101
+
+/* Analog Devices variant of the LM85 */
+#define ADM1027_SYSCTL_TACH_MODE       1200
+#define ADM1027_SYSCTL_TEMP_OFFSET1    1201
+#define ADM1027_SYSCTL_TEMP_OFFSET2    1202
+#define ADM1027_SYSCTL_TEMP_OFFSET3    1203
+#define ADM1027_SYSCTL_FAN_PPR         1204
+#define ADM1027_SYSCTL_ALARM_MASK      1205
+
+/* Analog Devices variant of the LM85/ADM1027 */
+#define ADT7463_SYSCTL_TMIN_CTL1       1300
+#define ADT7463_SYSCTL_TMIN_CTL2       1301
+#define ADT7463_SYSCTL_TMIN_CTL3       1302
+#define ADT7463_SYSCTL_THERM_SIGNAL    1303
+
+#define LM85_ALARM_IN0          0x0001
+#define LM85_ALARM_IN1          0x0002
+#define LM85_ALARM_IN2          0x0004
+#define LM85_ALARM_IN3          0x0008
+#define LM85_ALARM_TEMP1        0x0010
+#define LM85_ALARM_TEMP2        0x0020
+#define LM85_ALARM_TEMP3        0x0040
+#define LM85_ALARM_ALARM2       0x0080
+#define LM85_ALARM_IN4          0x0100
+#define LM85_ALARM_RESERVED     0x0200
+#define LM85_ALARM_FAN1         0x0400
+#define LM85_ALARM_FAN2         0x0800
+#define LM85_ALARM_FAN3         0x1000
+#define LM85_ALARM_FAN4         0x2000
+#define LM85_ALARM_TEMP1_FAULT  0x4000
+#define LM85_ALARM_TEMP3_FAULT 0x08000
+/* -- SENSORS SYSCTL END -- */
 
 /* Unique ID assigned to each LM85 detected */
 static int lm85_id = 0;
@@ -827,8 +871,7 @@ int lm85_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client,
 					type_name,
-					template,
-					THIS_MODULE)) < 0) {
+					template)) < 0) {
 		err = i;
 		goto ERROR2;
 	}
@@ -863,25 +906,6 @@ int lm85_detach_client(struct i2c_client *client)
 
 	return 0;
 }
-
-/* No commands defined yet */
-int lm85_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
-/* Nothing here yet */
-void lm85_inc_use(struct i2c_client *client)
-{
-	MOD_INC_USE_COUNT;
-}
-
-/* Nothing here yet */
-void lm85_dec_use(struct i2c_client *client)
-{
-	MOD_DEC_USE_COUNT;
-}
-
 
 int lm85_read_value(struct i2c_client *client, u16 reg)
 {
