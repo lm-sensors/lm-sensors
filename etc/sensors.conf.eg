@@ -1398,11 +1398,10 @@ chip "it87-*" "it8705-*" "it8712-*"
 #    ignore fan2
 #    ignore fan3
 
-chip "fscpos-*"
 
-#
-#    values for the fujitsu siemens poseidon chip
-#
+chip "fscpos-*"
+# Fujitsu-Siemens Poseidon chip
+
 # Temperature
 
     label temp1       "Temp1/CPU"
@@ -1421,11 +1420,10 @@ chip "fscpos-*"
     label volt5       "+5V"
     label voltbatt    "+3.3V"
 
-chip "fscscy-*"
 
-#
-#    values for the fujitsu siemens Scylla chip
-#
+chip "fscscy-*"
+# Fujitsu-Siemens Scylla chip
+
 # Temperature
 
     label temp1       "Temp1/CPU0"
@@ -1447,6 +1445,28 @@ chip "fscscy-*"
     label volt12      "+12V"
     label volt5       "+5V"
     label voltbatt    "+3.3V"
+
+
+chip "fscher-*"
+# Fujitsu-Siemens Hermes chip
+
+# Temperature
+
+    label temp1       "Temp1/CPU"
+    label temp2       "Temp2/MB"
+    label temp3       "Temp3/AUX"
+
+# Fans
+
+    label fan1        "Fan1/CPU"
+    label fan2        "Fan2/AUX"
+    label fan3        "Fan3/PS"
+
+# Voltage
+
+    label in0         "+12V"
+    label in1         "+5V"
+    label in2         "Battery"
 
 
 chip "pcf8591-*"

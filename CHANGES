@@ -22,7 +22,8 @@ ask CVS about it:
   Makefiles: Install burntest, fancontrol, pwmconfig, decode-*.pl
   Module bmcsensors: Fix voltage scaling, voltage and fan limits
   Module i2c-piix4: Add support for CSB6
-  Module i2c-sis630: sync with 2.6.0-X driver version. 
+  Module i2c-sis630: Sync with 2.6.0-X driver version
+  Module fscher: New (Fujitsu-Siemens Hermes driver)
   Program sensors-detect: Prefer Super I/O drivers;
                           Fix w83627hf detection; detect CSB6
 

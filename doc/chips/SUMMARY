@@ -80,6 +80,9 @@ ds1621
 	  (the following chip is detected as a ds1621)
 	ds1625		1	-	-	-	yes	no
 
+fscher
+	fscher		3	3	3	-	yes	no
+
 fscpos
 	fscpos		3	3	3	-	yes	no
 
@@ -125,6 +128,9 @@ lm85
 
 lm87
         lm87	 	2-3	6-8	0-2	1 pwm	yes	no
+
+lm90
+	lm90		2	-	-	-	yes	no
 
 lm92
 	lm92		1	-	-	-	yes	no

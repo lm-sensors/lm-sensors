@@ -73,7 +73,7 @@ At least the following hardware sensor chips are supported:
   Asus AS99127F, ASB100 Bach
   Dallas Semiconductor DS75, DS1621, DS1625, DS1775, and DS1780
   Hewlett Packard Maxilife (several revisions including '99 NBA)
-  Fujitsu Siemens Poseidon, Scylla
+  Fujitsu Siemens Poseidon, Scylla, Hermes
   Genesys Logic GL518SM (rev 00, 80), GL520SM, GL523SM
   Intel Xeon processor embedded sensors
   ITE IT8705F, IT8712F embedded sensors
