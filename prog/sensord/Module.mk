@@ -40,9 +40,9 @@ all-prog-sensord: $(PROGSENSORDTARGETS)
 all :: all-prog-sensord
 
 install-prog-sensord: all-prog-sensord
-	mkdir -p $(SBINDIR) $(PROGSENSORDMAN1DIR)
-	$(INSTALL) -o root -g root -m 755 $(PROGSENSORDTARGETS) $(SBINDIR)
-	$(INSTALL) -o $(MANOWN) -g $(MANGRP) -m 644 $(PROGSENSORDMAN1FILES) $(PROGSENSORDMAN1DIR)
+	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGSENSORDMAN1DIR)
+	$(INSTALL) -o root -g root -m 755 $(PROGSENSORDTARGETS) $(DESTDIR)$(SBINDIR)
+	$(INSTALL) -o $(MANOWN) -g $(MANGRP) -m 644 $(PROGSENSORDMAN1FILES) $(DESTDIR)$(PROGSENSORDMAN1DIR)
 # install :: install-prog-sensord
 
 clean-prog-sensord:

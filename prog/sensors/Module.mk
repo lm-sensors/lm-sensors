@@ -40,9 +40,9 @@ all-prog-sensors: $(PROGSENSORSTARGETS)
 all :: all-prog-sensors
 
 install-prog-sensors: all-prog-sensors
-	mkdir -p $(BINDIR) $(PROGSENSORSMAN1DIR)
-	$(INSTALL) -o root -g root -m 755 $(PROGSENSORSTARGETS) $(BINDIR)
-	$(INSTALL) -o $(MANOWN) -g $(MANGRP) -m 644 $(PROGSENSORSMAN1FILES) $(PROGSENSORSMAN1DIR)
+	mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(PROGSENSORSMAN1DIR)
+	$(INSTALL) -o root -g root -m 755 $(PROGSENSORSTARGETS) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -o $(MANOWN) -g $(MANGRP) -m 644 $(PROGSENSORSMAN1FILES) $(DESTDIR)$(PROGSENSORSMAN1DIR)
 install :: install-prog-sensors
 
 clean-prog-sensors:

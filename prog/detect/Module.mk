@@ -35,8 +35,8 @@ all-prog-detect: $(PROGDETECTTARGETS)
 all :: all-prog-detect
 
 install-prog-detect: all-prog-detect
-	mkdir -p $(SBINDIR)
-	$(INSTALL) -o root -g root -m 755 $(PROGDETECTSBININSTALL) $(SBINDIR)
+	mkdir -p $(DESTDIR)$(SBINDIR)
+	$(INSTALL) -o root -g root -m 755 $(PROGDETECTSBININSTALL) $(DESTDIR)$(SBINDIR)
 install :: install-prog-detect
 
 clean-prog-detect:

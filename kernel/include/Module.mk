@@ -30,8 +30,8 @@ KERNELINCLUDEFILES += $(MODULE_DIR)/i2c-isa.h
 endif
 
 install-all-kernel-include:
-	$(MKDIR) $(SYSINCLUDEDIR)
-	$(INSTALL) -o root -g root -m 644 $(KERNELINCLUDEFILES) $(SYSINCLUDEDIR)
+	$(MKDIR) $(DESTDIR)$(SYSINCLUDEDIR)
+	$(INSTALL) -o root -g root -m 644 $(KERNELINCLUDEFILES) $(DESTDIR)$(SYSINCLUDEDIR)
 
 install :: install-all-kernel-include
 

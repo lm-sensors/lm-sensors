@@ -51,9 +51,9 @@ all-kernel-busses: $(KERNELBUSSESTARGETS)
 all :: all-kernel-busses
 
 install-kernel-busses: all-kernel-busses
-	$(MKDIR) $(MODDIR) 
-	if [ -n "$(MODDIR)" ] ; then \
-	  $(INSTALL) -o root -g root -m 644 $(KERNELBUSSESTARGETS) $(MODDIR) ; \
+	$(MKDIR) $(DESTDIR)$(MODDIR) 
+	if [ -n "$(DESTDIR)$(MODDIR)" ] ; then \
+	  $(INSTALL) -o root -g root -m 644 $(KERNELBUSSESTARGETS) $(DESTDIR)$(MODDIR) ; \
 	fi
 
 install :: install-kernel-busses

@@ -68,6 +68,10 @@ WARN := 0
 DEBUG := 0
 #DEBUG := 1
 
+# If you want to install at some other place then at from which you will run
+# everything, set DESTDIR to the extra prefix.
+DESTDIR :=
+
 # This is the prefix that will be used for almost all directories below.
 PREFIX := /usr/local
 

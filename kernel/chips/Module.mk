@@ -64,9 +64,9 @@ all-kernel-chips: $(KERNELCHIPSTARGETS)
 all :: all-kernel-chips
 
 install-kernel-chips: all-kernel-chips
-	$(MKDIR) $(MODDIR) 
-	if [ -n "$(MODDIR)" ] ; then \
-	  $(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(MODDIR) ;\
+	$(MKDIR) $(DESTDIR)$(MODDIR) 
+	if [ -n "$(DESTDIR)$(MODDIR)" ] ; then \
+	  $(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(DESTDIR)$(MODDIR) ;\
 	fi
 
 install :: install-kernel-chips
