@@ -16,11 +16,12 @@ ask CVS about it:
 2.5.0 (200003??)
   Dropped all kernel 2.0 and 2.1 compatibility
   Module i2c-i810: new
-  Module i2c-amd756: fixed region request
   Module ddcmon: new
   Module via686a: new
+  Module i2c-amd756: fixed region request
   Module i2c-voodoo3: Converted to use i2c-algo-bit layer
-  Module w83781d: Doesn't change pin settings at initialization
+  Module w83781d: Don't change pin settings at initialization;
+                  also fix chip detection.
   Library: Support for ddcmon and via686a
   Program sensors-detect: Support for ddcmon and via686a
   Program sensors: Support for eeprom, ddcmon and via686a
