@@ -850,8 +850,8 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
                                   type_name,
                                   kind == w83781d?w83781d_dir_table_template:
                                   kind == w83783s?w83783s_dir_table_template:
-                                  is_isa?w83782d_i2c_dir_table_template:
-                                         w83782d_isa_dir_table_template,
+                                  is_isa?w83782d_isa_dir_table_template:
+                                         w83782d_i2c_dir_table_template,
 			  	  THIS_MODULE)) < 0) {
     err = i;
     goto ERROR7;
