@@ -67,5 +67,5 @@ problems.
 * Aurelien Jarno <aurelien@aurel32.net>
   Author of the pcf8591 driver.
 * Abraham vd Merwe <abraham@2d3d.co.za>
-  Author of the LM92 driver.
+  Author of the LM92 and DS1307 drivers.
 

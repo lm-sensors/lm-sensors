@@ -19,7 +19,8 @@ ask CVS about it:
 
 2.6.4 (2002????)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
-  Module lm92: new
+  Module lm92: New
+  Module ds1307: New
   File doc/vid: New
   File include/sensors_vid.h: New
   File sensors.conf.eg: Add vt1211
