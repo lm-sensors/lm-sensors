@@ -1,7 +1,7 @@
 /*
     i2cdetect.c - Part of i2cdetect, a user-space program to scan for I2C 
                   devices.
-    Copyright (c) 1999-2001  Frodo Looijaard <frodol@dds.nl> and
+    Copyright (c) 1999-2004  Frodo Looijaard <frodol@dds.nl> and
                              Mark D. Studebaker <mdsxyz123@yahoo.com>
 
     This program is free software; you can redistribute it and/or modify
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 
   if (ioctl(file,I2C_FUNCS,&funcs) < 0) {
     fprintf(stderr,
-            "Error: Could not get the adapter functionality maxtrix: %s\n",
+            "Error: Could not get the adapter functionality matrix: %s\n",
             strerror(errno));
     exit(1);
   }
