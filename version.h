@@ -1,2 +1,2 @@
-#define LM_DATE "19990217"
-#define LM_VERSION "2.2.1"
+#define LM_DATE "19990218"
+#define LM_VERSION "2.2.2"
