@@ -49,6 +49,7 @@
 #include <asm/io.h>
 #include "version.h"
 #include "sensors_vid.h"
+#include "lm75.h"
 
 /* I2C addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -170,26 +171,6 @@ static u8 TEMP_TO_REG(int temp)
 static int TEMP_FROM_REG(u8 reg)
 {
 	return (s8)reg * 10;
-}
-
-/* These constants are a guess, consistent w/ LM75 */
-#define LM75_TEMP_MIN (-550)
-#define LM75_TEMP_MAX (1250)
-
-/* TEMP: 1/10 degrees C (-55C to 125C)
-   REG: (0.5C/bit, two's complement) << 7 */
-static u16 LM75_TEMP_TO_REG(int temp)
-{
-	int ntemp = SENSORS_LIMIT(temp, LM75_TEMP_MIN, LM75_TEMP_MAX);
-	ntemp += (ntemp<0 ? -2 : 2);
-	return (u16)((ntemp / 5) << 7);
-}
-
-static int LM75_TEMP_FROM_REG(u16 reg)
-{
-	/* use integer division instead of equivalent right shift 
-	   in order to guarantee arithmetic shift */
-	return ((s16)reg / 128) * 5;
 }
 
 /* PWM: 0 - 255 per sensors documentation
