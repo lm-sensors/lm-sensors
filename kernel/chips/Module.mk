@@ -27,7 +27,8 @@ KERNELCHIPSTARGETS := $(MODULE_DIR)/adm1021.o $(MODULE_DIR)/adm9240.o \
         	      $(MODULE_DIR)/lm75.o $(MODULE_DIR)/lm78.o \
         	      $(MODULE_DIR)/lm80.o $(MODULE_DIR)/ltc1710.o \
         	      $(MODULE_DIR)/w83781d.o $(MODULE_DIR)/sis5595.o \
-        	      $(MODULE_DIR)/maxilife.o $(MODULE_DIR)/bt869.o
+        	      $(MODULE_DIR)/maxilife.o $(MODULE_DIR)/bt869.o \
+		      $(MODULE_DIR)/matorb.o
 
 # Include all dependency files
 INCLUDEFILES += $(KERNELCHIPSTARGETS:.o=.d)

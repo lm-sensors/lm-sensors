@@ -315,6 +315,7 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
 #define I2C_DRIVERID_ICSPLL 1012
 #define I2C_DRIVERID_BT869 1013
 #define I2C_DRIVERID_MAXILIFE 1014
+#define I2C_DRIVERID_MATORB 1015
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -561,5 +562,7 @@ struct sensors_chips_data {
 #define BT869_SYSCTL_RES    1003
 #define BT869_SYSCTL_COLORBARS    1004
 #define BT869_SYSCTL_DEPTH  1005
+
+#define MATORB_SYSCTL_DISP 1000
 
 #endif /* def SENSORS_SENSORS_H */
