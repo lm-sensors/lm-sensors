@@ -22,6 +22,8 @@ ask CVS about it:
   File doc/chips/lm63: New
   File kernel/chips/Module.mk: Resync module list with mkpatch
   Module bmcsensors: Support function 1/x
+  Module i2c-amd756: Display the real bus name
+  Module i2c-amd756-s4882: New; SMBus multiplexing on the Tyan S4882
   Module i2c-ipmb: Remove from build since it doesn't work
   Module lm63: New driver for the National Semiconductor LM63
   Module lm83: Use signed types for temperatures
@@ -32,13 +34,21 @@ ask CVS about it:
   Module lm90: Use signed types for temperatures
                Check limits on register writes
   Module lm93: Added module parameter for VID pin input thresholds.
+               Fix typo in dynamic VID alarms
+               Adds a couple log messages for failed transactions (David
+               Knierim)
+               Fix compilation breaking C99-ism (Axel Thimm)
   Module pc87360: Support secondary Super-I/O address
   Module smsc47m1: Add support for 47M15x and 47M192 (fans only)
   Library: Add lm63 support
-  Program i2cset: Written byte/word can be masked
+  Programs i2cset, isaset: Written byte/word can be masked
+  Program mkpatch: Include i2c-amd756-s4882
+  Program sensord: Do not scale load average (Aurelien Jarno)
   Program sensors: Add lm63 support
+                   Support DDR2 memory module EEPROMs (Rudolf Marek)
   Program sensors-detect: Improve LM63 detection
                           Discard IBM Thinkpad detection code
+                          Add PCA9556 detection
 
 
 2.8.8 (20041007)
