@@ -510,12 +510,14 @@ void gl518_fan(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     gl518_update_client(client);
-    results[0] = FAN_FROM_REG(data->fan_min[nr],data->fan_div[nr]);
-    results[1] = FAN_FROM_REG(data->fan[nr],data->fan_div[nr]);
+    results[0] = FAN_FROM_REG(data->fan_min[nr],
+                 DIV_FROM_REG(data->fan_div[nr]));
+    results[1] = FAN_FROM_REG(data->fan[nr],DIV_FROM_REG(data->fan_div[nr]));
     *nrels_mag = 2;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
-      data->fan_min[nr] = FAN_TO_REG(results[0],data->fan_div[nr]);
+      data->fan_min[nr] = FAN_TO_REG(results[0],
+                                     DIV_FROM_REG(data->fan_div[nr]));
       old = gl518_read_value(client,GL518_REG_FAN_LIMIT);
       if (nr == 0)
         old = (old & 0x00ff) | (data->fan_min[nr] << 8);
