@@ -1489,6 +1489,11 @@ chip "lm83-*"
 #   set temp3_high 65
 #   set temp4_high 60
 
+# change critical limit to fit your needs
+# only one limit for all four temperatures
+# should be higher than each of the high limits above
+#   set tcrit 85
+
 chip "vt1211-*" "vt8231-*"
 #
 # temp1 and in6 are not implemented in vt1211 / vt8231
