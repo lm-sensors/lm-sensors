@@ -32,8 +32,7 @@ PC87364 chip has monitoring and PWM control for a third fan.
 The National Semiconductor PC87365 and PC87366 Super I/O chips are complete
 hardware monitoring chipsets, not only controling and monitoring three fans,
 but also monitoring eleven voltage inputs and two (PC87365) or three
-(PC87366) remote temperatures. For now, the driver doesn't handle these
-features and treat these two chips as PC87364.
+(PC87366) remote temperatures.
 
 Fan rotation speeds are reported in RPM (revolutions per minute). An alarm
 is triggered if the rotation speed has dropped below a programmable limit.
@@ -47,6 +46,15 @@ measured. It is suggested to increase the fan divisor in this case.
 
 PWM values are from 0 to 255.
 
+Temperatures are reported in degrees Celcius. Each temperature measured has
+associated low limit, high limit and overtemperature limit, each of which
+triggers an alarm when crossed.
+
+Voltages are reported relatively to a relative voltage, either internal or
+external. Some of them are divided by two internally, you will have to
+compensate in sensors.conf. Each voltage measured has associated low and
+high limit, each of which triggers an alarm when crossed.
+
 If an alarm triggers, it will remain triggered until the hardware register
 is read at least once. This means that the cause for the alarm may 
 already have disappeared!  Note that in the current implementation, all
@@ -58,7 +66,7 @@ miss once-only alarms.
 Limitations
 -----------
 
-This driver only supports fans at the moment.
+The voltages and temperatures are read-only at the moment.
 
 The datasheets suggests that some values (fan mins, fan divisors)
 shouldn't be changed once the monitoring has started, but we ignore that
