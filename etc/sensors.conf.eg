@@ -1118,6 +1118,8 @@ chip "it87-*"
 #    ignore fan2
 #    ignore fan3
 
+chip "fscpos-*"
+
 #
 #    values for the fujitsu siemens poseidon chip
 #
@@ -1135,6 +1137,6 @@ chip "it87-*"
 
 # Voltage
  
-    label volt12      "12 V"
-    label volt5       " 5 V"
-    label voltbatt    " 3.3 V"
+    label volt12      "+12V"
+    label volt5       "+5V"
+    label voltbatt    "+3.3V"
