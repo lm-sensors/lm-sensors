@@ -944,10 +944,12 @@ void w83781d_init_client(struct i2c_client *client)
                       IN_TO_REG(W83781D_INIT_IN_MIN_0,0));
   w83781d_write_value(client,W83781D_REG_IN_MAX(0),
                       IN_TO_REG(W83781D_INIT_IN_MAX_0,0));
-  w83781d_write_value(client,W83781D_REG_IN_MIN(1),
-                      IN_TO_REG(W83781D_INIT_IN_MIN_1,1));
-  w83781d_write_value(client,W83781D_REG_IN_MAX(1),
-                      IN_TO_REG(W83781D_INIT_IN_MAX_1,1));
+  if(wchipid != W83783S_WCHIPID) {
+    w83781d_write_value(client,W83781D_REG_IN_MIN(1),
+                        IN_TO_REG(W83781D_INIT_IN_MIN_1,1));
+    w83781d_write_value(client,W83781D_REG_IN_MAX(1),
+                        IN_TO_REG(W83781D_INIT_IN_MAX_1,1));
+  }
   w83781d_write_value(client,W83781D_REG_IN_MIN(2),
                       IN_TO_REG(W83781D_INIT_IN_MIN_2,2));
   w83781d_write_value(client,W83781D_REG_IN_MAX(2),
@@ -976,7 +978,7 @@ void w83781d_init_client(struct i2c_client *client)
                         IN_TO_REG(W83781D_INIT_IN_MIN_6,6));
     w83781d_write_value(client,W83781D_REG_IN_MAX(6),
                         IN_TO_REG(W83781D_INIT_IN_MAX_6,6));
-  } else if(wchipid == W83782D_WCHIPID) {
+  } else {
     w83781d_write_value(client,W83781D_REG_IN_MIN(6),
                         IN_TO_REG(W83782D_INIT_IN_MIN_6,6));
     w83781d_write_value(client,W83781D_REG_IN_MAX(6),
