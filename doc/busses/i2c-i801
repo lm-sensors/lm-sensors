@@ -1,0 +1,37 @@
+Kernel driver `i2c-i801.o'
+
+Status: Beta
+
+Supported adapters:
+  * Intel 82801AA and 82801AB (ICH and ICH0 - part of the '810' chipset)
+    Datasheet: Publicly available at the Intel website
+
+Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
+        <phil@netroedge.com>, and Mark Studebaker <mds@eng.paradyne.com>
+
+
+Module Parameters
+-----------------
+
+* force: int
+  Forcibly enable the ICH. DANGEROUS!
+* force_addr: int
+  Forcibly enable the ICH at the given address. EXTREMELY DANGEROUS!
+
+
+Description
+-----------
+
+The ICH (properly known as the 82801AA) and ICH0 (82801AB)
+are Intel chips that are a part of Intel's '810' chipset
+which is designed for Celeron-based PCs.
+
+They are quite similar to Intel's PIIX4 chip, at least in the
+SMBus controller.
+
+See the file i2c-piix4 for details.
+
+
+**********************
+The lm_sensors project gratefully acknowledges the support of
+Texas Instruments in the development of this driver.
