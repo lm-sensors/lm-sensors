@@ -1,0 +1,105 @@
+ALI 1533 / 1543C SMB driver
+
+
+Author/Maintainer
+-----------------
+Mark D. Studebaker (mds@eng.paradyne.com)
+
+
+Stability
+---------
+Complete and tested on the author's system.
+Untested by others.
+SMBus hangs on author's system when accessing W83781D,
+cause unknown (see Issues below).
+
+
+Supported Devices
+-----------------
+This is the driver for the SMB Host controller on
+Acer Labs Inc. (ALI) M1541 and M1543C South Bridges.
+
+The M1543C is a South bridge for desktop systems.
+The M1541 is a South bridge for portable systems.
+They are part of the following ALI chipsets:
+   "Aladdin Pro 2": Includes the M1621 Slot 1 North bridge
+   with AGP and 100MHz CPU Front Side bus
+
+   "Aladdin V": Includes the M1541 Socket 7 North bridge
+   with AGP and 100MHz CPU Front Side bus
+   Some Aladdin V motherboards:
+	Asus P5A
+	Atrend ATC-5220
+	BCM/GVC VP1541
+	Biostar M5ALA
+	Gigabyte GA-5AX
+	Iwill XA100 Plus
+	Micronics C200
+	Microstar (MSI) MS-5169
+
+   "Aladdin IV": Includes the M1541 Socket 7 North bridge
+   with host bus up to 83.3 MHz.
+
+For an overview of these chips see http://www.acerlabs.com
+At this time the full data sheets on the web site are password protected,
+however if you contact the ALI office in San Jose
+they may give you the password.
+
+The M1533/M1543C devices appear as FOUR separate devices
+on the PCI bus. An output of lspci will show something similar
+to the following:
+
+  00:02.0 USB Controller: Acer Laboratories Inc. M5237 (rev 03)
+  00:03.0 Bridge: Acer Laboratories Inc. M7101
+  00:07.0 ISA bridge: Acer Laboratories Inc. M1533 (rev c3)
+  00:0f.0 IDE interface: Acer Laboratories Inc. M5229 (rev c1)
+
+If you have a 1533 or 1543C on the board but not in the lspci
+listing, check your BIOS settings.
+
+The SMB controller is part of the 7101 device, which is an
+ACPI-compliant Power Management Unit (PMU).
+
+The whole 7101 device has to be enabled for the SMB to work.
+You can't just enable the SMB alone.
+The SMB and the ACPI have separate I/O spaces.
+So we have to make sure that both the SMB and the ACPI
+are mapped and enabled.
+
+
+Features
+--------
+This driver controls the SMB Host only.
+The SMB Slave controller on the M15X3 is not enabled.
+This driver does not use interrupts.
+
+
+Issues
+------
+This driver requests the I/O space both for the SMB and the ACPI
+registers, just to be safe. It doesn't actually use the ACPI region.
+It will therefore conflict with separate software
+that accesses the ACPI registers?
+To fix this, undefine MAP_ACPI.
+
+On the author's ASUS P5A, the W83781D chip is on both the
+ISA and the SMBus.
+
+On the author's ASUS P5A, the W83781D chip hangs the whole
+bus and this can only be resolved by powering off the computer.
+The chip does not hang if an external device is attached
+to the SMBus. There may be electrical problems on this board.
+The EEPROM on the DRAM DIMM is accessible on the SMBus and
+it does not hang the bus.
+
+
+External Device Connection for ASUS P5A
+---------------------------------------
+On the author's ASUS P5A board,
+the SMBus connector is between the 4th and 5th PCI
+connector. The pinouts are:
+	1. Clock
+	2. no pin
+	3. Ground
+	4. Data
+	5. +5V
