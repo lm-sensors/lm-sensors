@@ -2,8 +2,9 @@
     voodoo3.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>,
-    Philip Edelbrock <phil@netroedge.com> and 
-    Ralph Metzler <rjkm@thp.uni-koeln.de>
+    Philip Edelbrock <phil@netroedge.com>,
+    Ralph Metzler <rjkm@thp.uni-koeln.de>, and
+    Mark D. Studebaker <mdsxyz123@yahoo.com>
     
     Based on code written by Ralph Metzler <rjkm@thp.uni-koeln.de> and
     Simon Vogl
@@ -59,6 +60,9 @@
 #ifndef PCI_DEVICE_ID_3DFX_VOODOO3
 #define PCI_DEVICE_ID_3DFX_VOODOO3 0x05
 #endif
+#ifndef PCI_DEVICE_ID_3DFX_BANSHEE
+#define PCI_DEVICE_ID_3DFX_BANSHEE 0x03
+#endif
 
 #ifdef MODULE
 static
@@ -83,7 +87,22 @@ static int Voodoo3_I2CRead_word(int addr,int command);
 static int Voodoo3_I2CWrite_byte(int addr,int command);
 static int Voodoo3_I2CWrite_byte_data(int addr,int command,int data);
 static int Voodoo3_I2CWrite_word(int addr,int command,long data);
-static void config_v3(struct pci_dev *dev, int num);
+static s32 voodoo3_ddc_access(struct i2c_adapter *adap, u16 addr, 
+                          unsigned short flags, char read_write,
+                          u8 command, int size, union i2c_smbus_data * data);
+static void Voodoo3_DDCStart(void);
+static void Voodoo3_DDCStop(void);
+static int Voodoo3_DDCAck(int ackit);
+static int Voodoo3_DDCReadByte(int ackit);
+static int Voodoo3_DDCSendByte(unsigned char data);
+static int Voodoo3_DDCBusCheck(void);
+static int Voodoo3_DDCRead_byte(int addr);
+static int Voodoo3_DDCRead_byte_data(int addr,int command);
+static int Voodoo3_DDCRead_word(int addr,int command);
+static int Voodoo3_DDCWrite_byte(int addr,int command);
+static int Voodoo3_DDCWrite_byte_data(int addr,int command,int data);
+static int Voodoo3_DDCWrite_word(int addr,int command,long data);
+static void config_v3(struct pci_dev *dev);
 static void voodoo3_inc(struct i2c_adapter *adapter);
 static void voodoo3_dec(struct i2c_adapter *adapter);
 static u32 voodoo3_func(struct i2c_adapter *adapter);
@@ -104,7 +123,7 @@ static struct i2c_algorithm smbus_algorithm = {
   /* functionality */   voodoo3_func,
 };
 
-static struct i2c_adapter voodoo3_adapter = {
+static struct i2c_adapter voodoo3_i2c_adapter = {
  "unset",
  I2C_ALGO_SMBUS | I2C_HW_SMBUS_VOODOO3,
  &smbus_algorithm,
@@ -115,9 +134,31 @@ static struct i2c_adapter voodoo3_adapter = {
  NULL,
 };
 
+static struct i2c_algorithm ddc_algorithm = {
+  /* name */		"DDC I2C adapter",
+  /* id */		I2C_ALGO_SMBUS,
+  /* master_xfer */	NULL,
+  /* smbus_access */    &voodoo3_ddc_access,
+  /* slave_send */	NULL,
+  /* slave_rcv */	NULL,
+  /* algo_control */	NULL,
+  /* functionality */   voodoo3_func,
+};
+
+static struct i2c_adapter voodoo3_ddc_adapter = {
+ "unset",
+ I2C_ALGO_SMBUS | I2C_HW_SMBUS_VOODOO3,
+ &ddc_algorithm,
+ NULL,
+ voodoo3_inc,
+ voodoo3_dec,
+ NULL,
+ NULL,
+};
+
 static int __initdata voodoo3_initialized;
 static unsigned short voodoo3_smba = 0;
-static unsigned int state=0xcf980020;
+static unsigned int state=0xcffc0020;
 static unsigned char *mem;
 static int v3_num;
 
@@ -125,7 +166,6 @@ extern inline void outlong(int off,unsigned int dat)
 {
         *((unsigned int*)(mem+off))=dat;
 }
-
 
 extern inline unsigned int readlong(int off)
 {
@@ -137,6 +177,8 @@ extern inline void out(void)
         outlong(0x78,state);
         udelay(10);
 }
+
+/* For I2C BUS */
 
 extern inline void dat(int data)
 {
@@ -161,6 +203,34 @@ extern inline int rdat(void)
         out();
         return((readlong(0x78)&(1<<27) )!=0 );
 }
+
+/* For DDC BUS */
+
+extern inline void ddc_dat(int data)
+{
+  state&=~(1<<20);
+  if (data)
+    state|=(1<<20);
+}
+
+extern inline void ddc_clkon(void)
+{
+  state|=(1<<19);
+}
+
+extern inline void ddc_clkoff(void)
+{
+  state&=~(1<<19);
+}
+
+extern inline int ddc_rdat(void)
+{
+        ddc_dat(1);
+        out();
+        return((readlong(0x78)&(1<<22) )!=0 );
+}
+
+/* For I2C BUS */
 
 /* Changing the Data line while clock is 'on' (high) is a
    no-no, except for a start or stop.  */
@@ -195,7 +265,7 @@ void Voodoo3_I2CStop(void)
 
 int Voodoo3_I2CAck(int ackit)
 {
-int ack;
+int ack=0;
 
   out();
   clkon();
@@ -259,6 +329,98 @@ int Voodoo3_BusCheck(void) {
   }
   return 0;
 }
+
+/* For DDC BUS */
+
+void Voodoo3_DDCStart(void)
+{
+  ddc_clkon(); /* in theory, clk is already on */
+  out();
+  out();
+  out();
+  out();
+  ddc_dat(0);
+  out();
+  ddc_clkoff();
+  out();
+}
+
+void Voodoo3_DDCStop(void)
+{
+  ddc_dat(0);
+  out();
+  ddc_clkon();
+  out();
+  ddc_dat(1);
+  out();
+  ddc_clkoff();
+  out();
+  out();
+  ddc_clkon();
+  out();
+}
+
+int Voodoo3_DDCAck(int ackit)
+{
+int ack=0;
+
+  out();
+  ddc_clkon();
+  if (!ackit) {
+   ack=ddc_rdat();
+  } else { ddc_dat(0); }
+  out();
+  ddc_clkoff();
+  out();
+  return ack;
+}
+
+int Voodoo3_DDCReadByte(int ackit)
+{
+  int i,temp;
+  unsigned char data=0;
+
+  for (i=7; i>=0; i--) {
+    out();
+    ddc_clkon();
+    data|=(ddc_rdat()<<i);
+    out();
+    ddc_clkoff();
+    out();
+  }
+  temp=Voodoo3_DDCAck(ackit);
+  return data;
+}
+
+int Voodoo3_DDCSendByte(unsigned char data)
+{
+  int i,temp;
+
+  for (i=7; i>=0; i--) {
+    ddc_dat(temp=data&(1<<i));
+    out();
+    ddc_clkon();
+    out();
+    out();
+    ddc_clkoff();
+    out();
+  }
+  temp=Voodoo3_DDCAck(0);
+  return temp;
+}
+
+
+int Voodoo3_DDCBusCheck(void) {
+/* Check the bus to see if it is in use */
+
+  if (! ddc_rdat()) {
+    printk("i2c-voodoo3: I2C bus in use or hung!  Try again later.\n");
+    return 1;
+  }
+  return 0;
+}
+
+/* For I2C Bus */
 
 int Voodoo3_I2CRead_byte(int addr)
 {
@@ -412,7 +574,106 @@ ENDWRITE3: Voodoo3_I2CStop();
 	return result;
 }
 
-void config_v3(struct pci_dev *dev, int num)
+/* For DDC Bus */
+
+int Voodoo3_DDCRead_byte(int addr)
+{
+        int this_dat=0;
+
+        Voodoo3_DDCStart();
+        if (Voodoo3_DDCSendByte(addr)) { 
+	  this_dat=-1;
+	  goto ENDREAD1; }
+        this_dat=Voodoo3_DDCReadByte(0);
+ENDREAD1: Voodoo3_DDCStop();
+        return this_dat;
+}
+
+int Voodoo3_DDCRead_byte_data(int addr,int command)
+{
+        int this_dat=0;
+
+        Voodoo3_DDCStart();
+        if (Voodoo3_DDCSendByte(addr)) { 
+	  this_dat=-1;
+	  goto ENDREAD2; }
+        if (!Voodoo3_DDCSendByte(command)) { 
+	  this_dat=-1;
+	  goto ENDREAD2; }
+        this_dat=Voodoo3_DDCReadByte(0);
+ENDREAD2: Voodoo3_DDCStop();
+        return this_dat;
+}
+
+int Voodoo3_DDCRead_word(int addr,int command)
+{
+        int this_dat=0;
+
+        Voodoo3_DDCStart();
+        if (Voodoo3_DDCSendByte(addr)) { 
+	  this_dat=-1;
+	  goto ENDREAD3; }
+        this_dat=Voodoo3_DDCReadByte(1);
+        this_dat|=(Voodoo3_DDCReadByte(0)<<8);
+ENDREAD3: Voodoo3_DDCStop();
+        return this_dat;
+}
+
+int Voodoo3_DDCWrite_byte(int addr,int command)
+{
+int result=0;
+
+        Voodoo3_DDCStart();
+        if (Voodoo3_DDCSendByte(addr)) { 
+	  result=-1;
+	  goto ENDWRITE1; }
+        if (Voodoo3_DDCSendByte(command)) {
+	  result=-1; }
+ENDWRITE1: Voodoo3_DDCStop();
+	return result;
+}
+
+int Voodoo3_DDCWrite_byte_data(int addr,int command,int data)
+{
+int result=0;
+
+        Voodoo3_DDCStart();
+        if (Voodoo3_DDCSendByte(addr)) { 
+	  result=-1;
+	  goto ENDWRITE2; }
+        if (Voodoo3_DDCSendByte(command)) {
+	  result=-1;
+	  goto ENDWRITE2; }
+        if (Voodoo3_DDCSendByte(data)) {
+	result=-1; }
+ENDWRITE2: Voodoo3_DDCStop();
+	return result;
+}
+
+
+int Voodoo3_DDCWrite_word(int addr,int command,long data)
+{
+int result=0;
+
+        Voodoo3_DDCStart();
+        if (Voodoo3_DDCSendByte(addr)) { 
+	  result=-1;
+	  goto ENDWRITE3; }
+        if (Voodoo3_DDCSendByte(command)) {
+	  result=-1;
+	  goto ENDWRITE3; }
+        if (Voodoo3_DDCSendByte(data & 0x0FF)) {
+	result=-1; 
+	goto ENDWRITE3; }
+        if (Voodoo3_DDCSendByte((data &0x0FF00)>>8)) {
+	result=-1; }
+ENDWRITE3: Voodoo3_DDCStop();
+	return result;
+}
+
+/* Configures the chip */
+
+void config_v3(struct pci_dev *dev)
 {
         unsigned int cadr;
 
@@ -429,7 +690,7 @@ void config_v3(struct pci_dev *dev, int num)
         mem=ioremap(cadr, 0x1000);
         
         *((unsigned int *)(mem+0x70))=0x8160;
-        *((unsigned int *)(mem+0x78))=0xcf980020;
+        *((unsigned int *)(mem+0x78))=0xcffc0020;
 	printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%p\n",mem);
 }
 
@@ -447,30 +708,41 @@ static int voodoo3_setup(void)
 
 	dev = NULL;
 	do {
-		dev = pci_find_device(PCI_VENDOR_ID_3DFX,
-		                           PCI_DEVICE_ID_3DFX_VOODOO3,dev);
-		if(dev && !v3_num) {
-			config_v3(dev,v3_num++);
-		} else
+		if((dev = pci_find_device(PCI_VENDOR_ID_3DFX,
+		                           PCI_DEVICE_ID_3DFX_VOODOO3,dev))) {
+			if(!v3_num)
+				config_v3(dev);
 			v3_num++;
+		}
+	} while(dev);
+
+	dev = NULL;
+	do {
+		if((dev = pci_find_device(PCI_VENDOR_ID_3DFX,
+		                           PCI_DEVICE_ID_3DFX_BANSHEE,dev))) {
+			if(!v3_num)
+				config_v3(dev);
+			v3_num++;
+		}
 	} while(dev);
 
         if(v3_num > 0) {
                 printk(KERN_INFO "i2c-voodoo3: %d Banshee/Voodoo3(s) found.\n", v3_num);
 		return 0;
         } else {
-                printk(KERN_INFO "v3tv: No Voodoo3 found.\n");
+                printk(KERN_INFO "i2c-voodoo3: No Voodoo3 found.\n");
         	return -ENODEV;
 	}
 }
 
+/* For I2C BUS */
 
 /* Return -1 on error. See smbus.h for more information */
 s32 voodoo3_access(struct i2c_adapter *adap, u16 addr, 
                    unsigned short flags, char read_write,
                    u8 command, int size, union i2c_smbus_data * data)
 {
-int temp=0;
+  int temp=0;
 
   if (Voodoo3_BusCheck()) return -1;
 
@@ -516,6 +788,53 @@ TESTACK: if (temp < 0) {
 	return 0;
 }
 
+/* For DDC BUS */
+
+/* Return -1 on error. See smbus.h for more information */
+s32 voodoo3_ddc_access(struct i2c_adapter *adap, u16 addr, 
+                   unsigned short flags, char read_write,
+                   u8 command, int size, union i2c_smbus_data * data)
+{
+  int temp=0;
+
+  if (Voodoo3_DDCBusCheck()) return -1;
+
+  if ((read_write != I2C_SMBUS_READ) && (read_write != I2C_SMBUS_WRITE)) {
+	printk("i2c-voodoo3: Unknown read_write command! (0x%X)\n",read_write);
+	return -1;
+  }
+  addr=((addr & 0x7f) << 1) | (read_write & 0x01);
+  switch(size) {
+    case I2C_SMBUS_QUICK:
+    	Voodoo3_DDCStart();
+	if (Voodoo3_DDCSendByte(addr)) { 
+	  return -1; }
+    case I2C_SMBUS_BYTE:
+    	if (read_write == I2C_SMBUS_READ) { temp=Voodoo3_DDCRead_byte(addr); data->byte=temp;
+	} else { temp=Voodoo3_DDCWrite_byte(addr,command); }
+	goto TESTACK;
+    case I2C_SMBUS_BYTE_DATA:
+    	if (read_write == I2C_SMBUS_READ) { temp=Voodoo3_DDCRead_byte_data(addr,command); data->byte=temp;
+	} else { temp=Voodoo3_DDCWrite_byte_data(addr,command,data->byte); }
+	goto TESTACK;
+    case I2C_SMBUS_WORD_DATA:
+    	if (read_write == I2C_SMBUS_READ) { temp=Voodoo3_DDCRead_word(addr,command); data->word=temp;
+	} else { temp=Voodoo3_DDCWrite_word(addr,command,data->word); }
+	goto TESTACK;
+    case I2C_SMBUS_PROC_CALL:
+	printk("i2c-voodoo3: Proc call not supported.\n");
+	return -1;
+    case I2C_SMBUS_BLOCK_DATA:
+	printk("i2c-voodoo3: Block transfers not supported yet.\n");
+	return -1;
+  }
+
+TESTACK: if (temp < 0) {
+		return -1;
+	  }
+	return 0;
+}
+
 void voodoo3_inc(struct i2c_adapter *adapter)
 {
 	MOD_INC_USE_COUNT;
@@ -551,14 +870,21 @@ int __init i2c_voodoo3_init(void)
     return res;
   }
   voodoo3_initialized ++;
-  sprintf(voodoo3_adapter.name,"SMBus Voodoo3 adapter at %04x",voodoo3_smba);
-  if ((res = i2c_add_adapter(&voodoo3_adapter))) {
+  sprintf(voodoo3_i2c_adapter.name,"SMBus Voodoo3 adapter at %04x",voodoo3_smba);
+  if ((res = i2c_add_adapter(&voodoo3_i2c_adapter))) {
+    printk("i2c-voodoo3.o: Adapter registration failed, module not inserted.\n");
+    voodoo3_cleanup();
+    return res;
+  }
+  voodoo3_initialized ++;
+  sprintf(voodoo3_ddc_adapter.name,"DDC Voodoo3 adapter at %04x",voodoo3_smba);
+  if ((res = i2c_add_adapter(&voodoo3_ddc_adapter))) {
     printk("i2c-voodoo3.o: Adapter registration failed, module not inserted.\n");
     voodoo3_cleanup();
     return res;
   }
   voodoo3_initialized++;
-  printk("i2c-voodoo3.o: Voodoo3 I2C bus detected and initialized\n");
+  printk("i2c-voodoo3.o: Voodoo3 I2C and DDC busses detected and initialized\n");
   return 0;
 }
 
@@ -567,9 +893,17 @@ int __init voodoo3_cleanup(void)
   int res;
   
   iounmap(mem);
+  if (voodoo3_initialized >= 3)
+  {
+    if ((res = i2c_del_adapter(&voodoo3_ddc_adapter))) {
+      printk("i2c-voodoo3.o: i2c_del_adapter failed, module not removed\n");
+      return res;
+    } else
+      voodoo3_initialized--;
+  }
   if (voodoo3_initialized >= 2)
   {
-    if ((res = i2c_del_adapter(&voodoo3_adapter))) {
+    if ((res = i2c_del_adapter(&voodoo3_i2c_adapter))) {
       printk("i2c-voodoo3.o: i2c_del_adapter failed, module not removed\n");
       return res;
     } else
@@ -585,7 +919,7 @@ EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 
-MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com> and Ralph Metzler <rjkm@thp.uni-koeln.de>");
+MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, Ralph Metzler <rjkm@thp.uni-koeln.de>, and Mark D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("Voodoo3 I2C/SMBus driver");
 
 
