@@ -366,9 +366,11 @@
 
 /* Winbond W83782D chips */
 /* Cheat on 627HF for now - no separate #defines */
+/* Cheat on 127F for now - no separate #defines */
 
 #define SENSORS_W83782D_PREFIX "w83782d"
 #define SENSORS_W83627HF_PREFIX "w83627hf"
+#define SENSORS_AS99127F_PREFIX "as99127f"
 
 #define SENSORS_W83782D_IN0 1 /* R */
 #define SENSORS_W83782D_IN1 2 /* R */

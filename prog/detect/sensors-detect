@@ -231,6 +231,13 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        alias_detect => sub { w83781d_alias_detect 3, @_ },
      } ,
      {
+       name => "Asus AS99127F",
+       driver => "w83781d",
+       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
+       i2c_driver_addrs => [0x20..0x2f], 
+       i2c_detect => sub { w83781d_detect 4, @_},
+     } ,
+     {
        name => "Genesys Logic GL518SM Revision 0x00",
        driver => "gl518sm",
        i2c_addrs => [0x2c, 0x2d],
@@ -1264,7 +1271,8 @@ sub lm80_detect
   return (3);
 }
   
-# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 2 = W83783S, 3 = W83627HF)
+# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 2 = W83783S,
+#                        3 = W83627HF, 4 = AS99127F)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -1275,8 +1283,7 @@ sub lm80_detect
 #   0x4a: I2C addresses of emulated LM75 chips
 #   0x4e: Vendor ID byte selection, and bank selection
 #   0x4f: Vendor ID
-#   0x58: Device ID (only when in bank 0); both 0x10 and 0x11 is seen for
-#         W83781D though Winbond documents 0x10 only.
+#   0x58: Device ID (only when in bank 0); ignore LSB.
 # Note: Fails if the W8378xD is not in bank 0!
 # Note: Detection overrules a previous LM78 detection
 sub w83781d_detect
@@ -1286,14 +1293,21 @@ sub w83781d_detect
   return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
   $reg1 = i2c_smbus_read_byte_data($file,0x4e);
   $reg2 = i2c_smbus_read_byte_data($file,0x4f);
-  return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
-                (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
+  if ($chip < 3) {
+    return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
+                  (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
+  }
+  if ($chip == 4) {
+    return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xc3) or 
+                  (($reg1 & 0x80) == 0x80 and $reg2 == 0x12);
+  }
   return unless ($reg1 & 0x07) == 0x00;
   $reg1 = i2c_smbus_read_byte_data($file,0x58) & 0xfe;
   return if $chip == 0 and  $reg1 != 0x10;
   return if $chip == 1 and  $reg1 != 0x30;
   return if $chip == 2 and  $reg1 != 0x40;
   return if $chip == 3 and  $reg1 != 0x20;
+  return if $chip == 4 and  $reg1 != 0x20;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   @res = (8);
   push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;

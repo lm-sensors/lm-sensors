@@ -268,7 +268,8 @@ void do_a_print(sensors_chip_name name)
   else if ((!strcmp(name.prefix,"w83781d")) ||
            (!strcmp(name.prefix,"w83782d")) ||
            (!strcmp(name.prefix,"w83783s")) ||
-           (!strcmp(name.prefix,"w83627hf")))
+           (!strcmp(name.prefix,"w83627hf")) ||
+           (!strcmp(name.prefix,"as99127f")))
     print_w83781d(&name);
   else if (!strcmp(name.prefix,"maxilife-cg") ||
            !strcmp(name.prefix,"maxilife-co") ||

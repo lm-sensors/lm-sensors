@@ -27,25 +27,27 @@ module piix4 is renamed i2c-piix4, module isa is renamed i2c-isa,
 and module bit-mb is renamed i2c-via. You have been warned.
 
 At least the following SMBus adapters are supported:
-  Intel PIIX4 (used in most Intel chipsets)
-  Intel ICH (used in the Intel 810 and 810E chipsets)
   Acer Labs M1541 and M1543C (used in the Aladdin IV, V and Pro 2 chipsets)
+  Apple Hydra (used on some PPC machines)
+  Intel ICH (used in the Intel 810 and 810E chipsets)
+  Intel PIIX4 (used in most Intel chipsets)
   VIA Technologies 82C586B (used in most VIA chipsets)
   VIA Technologies VT596A/B (used in some more modern VIA chipsets)
-  Apple Hydra (used on some PPC machines)
 
 At least the following hardware sensor chips are supported:
-  National Semicoductor LM75, LM77, LM78, LM78-J, LM79. LM80, LM81, and LM84
-  Winbond W83781D, W83782D, W83783S, and W83627HF
-  Genesys Logic GL518SM (rev 00, 80), GL520SM, GL523SM
   Analog Devices ADM1021, ADM1022, and ADM9240
-  SiS Southbridge (integrated in the chipset; the I2C adapter will also be
-    supported in the near future)
-  Maxim MAX1617 and MAX1617A
+  Asus AS99127F
   Dallas Semiconductor DS1780
   Hewlett Packard Maxilife (several revisions)
+  Genesys Logic GL518SM (rev 00, 80), GL520SM, GL523SM
   Intel Xeon processor embedded sensors
+  Maxim MAX1617 and MAX1617A
+  National Semicoductor LM75, LM77, LM78, LM78-J, LM79. LM80, LM81, and LM84
+  SiS Southbridge (integrated in the chipset; the I2C adapter will also be
+    supported in the near future)
   TI THMC10 and THMC50
+  Winbond W83781D, W83782D, W83783S, and W83627HF
+
 
 We also support some miscellaneous chips:
   Linear Technologies LTC1710

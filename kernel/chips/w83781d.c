@@ -23,11 +23,12 @@
 /*
     Supports following chips:
 
-    Chip	#vin	#fanin	#pwm	#temp	wchipid	i2c	ISA
-    w83781d	7	3	0	3	0x10	yes	yes
-    w83627hf	9	3	2-4	3	0x20	yes	yes (LPC)
-    w83782d	9	3	2-4	3	0x30	yes	yes
-    w83783s	5-6	3	2	1-2	0x40	yes	no
+    Chip	#vin	#fanin	#pwm	#temp	wchipid	vendid	i2c	ISA
+    as99127f	9	3	2-4	3	0x20	0x12c3	yes	no
+    w83781d	7	3	0	3	0x10	0x5ca3	yes	yes
+    w83627hf	9	3	2-4	3	0x20	0x5ca3	yes	yes (LPC)
+    w83782d	9	3	2-4	3	0x30	0x5ca3	yes	yes
+    w83783s	5-6	3	2	1-2	0x40	0x5ca3	yes	no
 
 */
 
@@ -62,7 +63,7 @@ static unsigned int normal_isa[] = {0x0290,SENSORS_ISA_END};
 static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
 
 /* Insmod parameters */
-SENSORS_INSMOD_4(w83781d,w83782d,w83783s,w83627hf);
+SENSORS_INSMOD_5(w83781d,w83782d,w83783s,w83627hf,as99127f);
 
 /* Many W83781D constants specified below */
 
@@ -646,6 +647,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
   const char *type_name = "";
   const char *client_name = "";
   int is_isa = i2c_is_isa_adapter(adapter);
+  enum vendor {winbond, asus} vendid;
 
   if (!is_isa && ! i2c_check_functionality(adapter,I2C_FUNC_SMBUS_BYTE_DATA))
     goto ERROR0;
@@ -724,22 +726,32 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
   }
 
   /* We have either had a force parameter, or we have already detected the
-     Winbond. Put it now into bank 0 */
+     Winbond. Put it now into bank 0 and Vendor ID High Byte */
   w83781d_write_value(new_client,W83781D_REG_BANK,
-                      w83781d_read_value(new_client,W83781D_REG_BANK) & 0xf8);
+                      (w83781d_read_value(new_client,W83781D_REG_BANK) & 0x78) | 0x80);
 
   /* Determine the chip type. */
   if (kind <= 0) {
+    /* get vendor ID */
+    val2 = w83781d_read_value(new_client,W83781D_REG_CHIPMAN);
+    if (val2 == 0x5c)
+      vendid = winbond;
+    else if (val2 == 0x12)
+      vendid = asus;
+    else
+      goto ERROR1;
     /* mask off lower bit, not reliable */
     val1 = w83781d_read_value(new_client,W83781D_REG_WCHIPID) & 0xfe;
-    if (val1 == 0x10)
+    if (val1 == 0x10 && vendid == winbond)
       kind = w83781d;
-    else if (val1 == 0x30)
+    else if (val1 == 0x30 && vendid == winbond)
       kind = w83782d;
-    else if (val1 == 0x40)
+    else if (val1 == 0x40 && vendid == winbond && !is_isa)
       kind = w83783s;
-    else if (val1 == 0x20)
+    else if (val1 == 0x20 && vendid == winbond)
       kind = w83627hf;
+    else if (val1 == 0x20 && vendid == asus && !is_isa)
+      kind = as99127f;
     else {
       if (kind == 0) 
         printk("w83781d.o: Ignoring 'force' parameter for unknown chip at"
@@ -760,6 +772,9 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
   } else if (kind == w83627hf) {
     type_name = "w83627hf";
     client_name = "W83627HF chip";
+  } else if (kind == as99127f) {
+    type_name = "as99127f";
+    client_name = "AS99127F chip";
   } else {
 #ifdef DEBUG
     printk("w83781d.o: Internal error: unknown kind (%d)?!?",kind);
@@ -1043,7 +1058,7 @@ void w83781d_init_client(struct i2c_client *client)
     w83781d_write_value(client,W83781D_REG_IN_MAX(6),
                         IN_TO_REG(W83782D_INIT_IN_MAX_6));
   }
-  if ((type == w83782d) || (type == w83627hf)) {
+  if ((type == w83782d) || (type == w83627hf) || (type == as99127f)) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(7),
                         IN_TO_REG(W83781D_INIT_IN_MIN_7));
     w83781d_write_value(client,W83781D_REG_IN_MAX(7),
@@ -1104,7 +1119,8 @@ void w83781d_update_client(struct i2c_client *client)
       data->in[i]     = w83781d_read_value(client,W83781D_REG_IN(i));
       data->in_min[i] = w83781d_read_value(client,W83781D_REG_IN_MIN(i));
       data->in_max[i] = w83781d_read_value(client,W83781D_REG_IN_MAX(i));
-      if((data->type != w83782d) && (data->type != w83627hf) && (i == 6))
+      if((data->type != w83782d) && (data->type != w83627hf) &&
+         (data->type != as99127f) && (i == 6))
         break;
     }
     for (i = 1; i <= 3; i++) {
@@ -1115,8 +1131,8 @@ void w83781d_update_client(struct i2c_client *client)
       for (i = 1; i <= 4; i++) {
         data->pwm[i-1] = w83781d_read_value(client,W83781D_REG_PWM(i));
         if(((data->type == w83783s) ||
-           (((data->type == w83782d) || (data->type == w83627hf)) &&
-            i2c_is_isa_client(client)))
+           (((data->type == w83782d) || (data->type == w83627hf) ||
+             data->type == as99127f) && i2c_is_isa_client(client)))
           &&  i == 2)
           break;
       }
@@ -1146,7 +1162,7 @@ void w83781d_update_client(struct i2c_client *client)
     }
     data->alarms = w83781d_read_value(client,W83781D_REG_ALARM1) +
                    (w83781d_read_value(client,W83781D_REG_ALARM2) << 8);
-    if ((data->type == w83782d) || (data->type == w83627hf)) {
+    if ((data->type == w83782d) || (data->type == w83627hf) || data->type == as99127f) {
       data->alarms |= w83781d_read_value(client,W83781D_REG_ALARM3) << 16;
     }
     i = w83781d_read_value(client,W83781D_REG_BEEP_INTS2);

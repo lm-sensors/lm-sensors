@@ -25,8 +25,8 @@ problems.
   Extended support for GL518SM and GL520SM sensors.
 * Mark D. Studebaker <mds@eng.paradyne.com>
   Author of the i2c-ali15x3 bus driver and the i2c-i810 bus driver.
-  Added w83782d, w83783s, and w83627hf support to the w83781d driver.
-  Added max1617 and thmc10 support to the adm1021 driver.
+  Added w83782d, w83783s, w83627hf, and as99127f support to the w83781d driver.
+  Added max1617, thmc10, gl523sm, and lm84 support to the adm1021 driver.
   Added lm81 support to the adm9240 driver.
   Author of the decode-xeon.pl xeon EEPROM decoder.
 * Geert Uytterhoeven <geert@linux-m68k.org>
