@@ -1,6 +1,6 @@
 Begin3
 Title: lm_sensors
-Version: 2.1.0
+Version: 2.3.0
 Entered-date: 29DEC98
 Description: Hardware health monitoring package for Linux. It consists of 
              kernel modules to access sensor chips and SMBus hardware,
@@ -14,6 +14,7 @@ Description: Hardware health monitoring package for Linux. It consists of
 Keywords: kernel module SMBus sensors LM78 health
 Author: frodol@dds.nl (Frodo Looijaard)
         phil@netroedge.com (Philip Edelbrock)
-Primary-site: http://www.netroedge.com/~lm78
+	... and other great contributors
+Primary-site: http://www.lm-sensors.nu/
 Copying-policy: GPL
 End
