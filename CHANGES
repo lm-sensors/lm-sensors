@@ -38,6 +38,7 @@ ask CVS about it:
   Module i2c-nforce2: Fix byte writes
   Module i2c-piix4: Add support for CSB6
   Module i2c-sis630: Sync with 2.6.0-X driver version
+  Module i2c-viapro: Add support for KT600
   Module it87: Add pwm and "smart guardian" support;
                add it87 sensor type support
   Module lm90: Add ADM1032 support
