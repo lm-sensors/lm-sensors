@@ -40,34 +40,40 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
 # Each entry must have a vindid (Vendor ID), devid (Device ID), func (PCI
 # Function) and procid (string as appears in /proc/pci; see linux/driver/pci,
 # either pci.c or oldproc.c). If no driver is written yet, omit the 
-# driver (Driver Name) field.
+# driver (Driver Name) field. The match (Match Description) field should
+# contain a function which returns zero if its first parameter matches
+# the text as it would appear in /proc/bus/i2c.
 @pci_adapters = ( 
      { 
        vendid => 0x8086,
        devid  => 0x7113,
        func => 3,
        procid => "Intel 82371AB PIIX4 ACPI",
-       driver => "i2c-piix4"
+       driver => "i2c-piix4",
+       match => sub { $_[0] =~ /^SMBus PIIX4 adapter at [0-9,a-f]{4}/ },
      } , 
      { 
        vendid => 0x1106,
        devid  => 0x3040,
        func => 3,
        procid => "VIA Technologies VT 82C586B Apollo ACPI",
-       driver => "i2c-via"
+       driver => "i2c-via",
+       match => sub { $_[0] =~ /^VIA i2c/ },
      } ,
      {
        vendid => 0x1039,
        devid  => 0x0008,
        func => 0,
        procid => "Silicon Integrated Systems 85C503",
+       match => sub { 0 },
      } ,
      {
        vendid => 0x10b9,
        devid => 0x7101,
        funcid => 0,
        procid => "Acer Labs M7101",
-       driver => "i2c-ali15x3"
+       driver => "i2c-ali15x3",
+       match => sub { $_[0] =~ /^SMBus ALI15X3 adapter at [0-9,a-f]{4}/ },
      }
 );
 
@@ -137,7 +143,7 @@ use subs qw(lm78_detect lm75_detect lm80_detect w83781d_detect
      {
        name => "Genesys Logic GL520SM",
        i2c_addrs => [0x4c, 0x4d],
-       i2c_detect => sub { gl520sm_detect 1, @_} ,
+       i2c_detect => sub { gl520sm_detect @_} ,
      },
      {
        name => "Analog Devices ADM9240",
@@ -310,6 +316,16 @@ sub adapter_pci_detection
     printf ("Probe succesfully concluded.\n");
   }
   return @res;
+}
+
+# $_[0]: Description as found in /proc/bus/i2c
+sub find_adapter_driver
+{
+  my $adapter;
+  for $adapter (@pci_adapters) {
+    return $adapter->{driver} if &{$adapter->{match}} ($_[0]);
+  }
+  return "?????";
 }
 
 #############################
@@ -525,17 +541,104 @@ sub i2c_smbus_write_block_data
 # ADAPTER SCANNING #
 ####################
 
+use vars qw(@chips_detected);
+
+# We will build a complicated structure @chips_detected here, being:
+# A list of
+#  references to hashes
+#    with field 'driver', being a string with the driver name for this chip;
+#    with field 'detected'
+#      being a reference to a list of
+#        references to hashes
+#          with field 'description' containing an adapter string as appearing
+#               in /proc/bus/i2c
+#          with field 'driver', containing the driver name for this adapter;
+#          with field 'address', containing the I2C address of the detection;
+#          with field 'confidence', containing the confidence level of this
+#               detection
+#          with field 'chipname", containing the chip name
+#          
+#    with field 'misdetected'
+#      being a reference to a list of
+#        references to hashes
+#          with field 'description' containing an adapter string as appearing
+#               in /proc/bus/i2c
+#          with field 'driver', containing the driver name for this adapter;
+#          with field 'address', containing the I2C address of the detection;
+#          with field 'confidence', containing the confidence level of this
+#               detection
+#          with field 'chipname", containing the chip name
+
+# $_[0]: chip driver
+# $_[1]: reference to data hash
+sub add_to_chips_detected
+{
+  my ($chipdriver,$datahash,$detected_ref,$misdetected_ref,
+      $new_detected_ref,$new_misdetected_ref) = @_;
+  my ($i,$j,$found_it);
+  for ($i = 0; $i < @chips_detected; $i++) {
+    last if ($chips_detected[$i]->{driver} eq $chipdriver);
+  }
+  if ($i == @chips_detected) {
+    push @chips_detected, { driver => $chipdriver,
+                            detected => [],
+                            misdetected => [] };
+  }
+
+  $new_detected_ref = $chips_detected[$i]->{detected};
+  $new_misdetected_ref = $chips_detected[$i]->{misdetected};
+
+  # This is tricky, mostly because of the datastructures involved. We walk
+  # through all previous detections for this address. If the to-be-inserted
+  # detection matches an item in it, we look at the confidence values.
+  # If the to-be-inserted detections's confidence is greater, we delegate
+  # the previous detection to the misdetections, and replace it with this
+  # detection. If it is equal or less, we add the to-be-inserted detection
+  # to the misdetections. As soon as a match is found, we break. If no
+  # matches are found at all, add the to-be-inserted detection with the
+  # detections.
+  $found_it = 0;
+  LOOP: for ($i = 0; $i < @chips_detected; $i++) {
+    $detected_ref = $chips_detected[$i]->{detected};
+    $misdetected_ref = $chips_detected[$i]->{misdetected};
+    for ($j = 0; $j < @$detected_ref ; $j++) {
+      if ($detected_ref->[$j]->{driver} eq $datahash->{driver} and
+          $detected_ref->[$j]->{description} eq $datahash->{description} and
+          $detected_ref->[$j]->{address} eq $datahash->{address}) {
+        if ($detected_ref->[$j]->{confidence} > $datahash->{confidence}) {
+          push @$misdetected_ref, $detected_ref->[$j];
+          splice @$detected_ref, $j, 1;
+          push @$new_detected_ref, $datahash;
+          $found_it = 1;
+          last LOOP;
+        } else {
+          push @$new_misdetected_ref, $datahash;
+          $found_it = 1;
+          last LOOP;
+        }
+      }
+    }
+  }
+  push @$new_detected_ref, $datahash if not $found_it
+}
+
 # $_[0]: The number of the adapter to scan
+# $_[1]: The name of the adapter, as appearing in /proc/bus/i2c
+# $_[2]: The driver of the adapter
 sub scan_adapter
 {
+  my ( $adapter_nr,$adapter_name,$adapter_driver) = @_;
   my ($chip, $addr, $conf,@chips);
-  open FILE,"/dev/i2c-$_[0]" or print ("Can't open /dev/i2c-$_[0] ($!)\n"), 
-                                return;
+  open FILE,"/dev/i2c-$adapter_nr" or 
+       print ("Can't open /dev/i2c-$adapter_nr ($!)\n"), return;
   foreach $addr (0..0x7f) {
     i2c_set_slave_addr(\*FILE,$addr) or print("Can't set address to $_?!?\n"), 
                                      next;
     next unless i2c_smbus_read_byte(\*FILE) >= 0;
     printf "Client found at address 0x%02x\n",$addr;
+    my @detection_list = ();
+    my $highest_conf = 0;
+    my $double_conf = 0;
     foreach $chip (@chip_ids) {
       if (contains $addr, @{$$chip{i2c_addrs}}) {
         print "Probing for $$chip{name}... ";
@@ -547,8 +650,15 @@ sub scan_adapter
           } else {
             print ")\n";
           }
+          add_to_chips_detected $$chip{driver},
+                                { confidence => $conf,
+                                  address => $addr,
+                                  chipname =>  $$chip{name},
+                                  description => $adapter_name,
+                                  driver => $adapter_driver,
+                                };
         } else {
-          print "Failed!\n" 
+          print "Failed!\n";
         }
       }
     }
@@ -886,7 +996,7 @@ sub main
               " (or `/etc/modules.conf') for automatic loading of this ",
               "module. If not,",
               " you won't be able to open any /dev/i2c-* file.\n";
-      } elsif (system "modprobe","i2c-proc") {
+      } elsif (system "modprobe","i2c-dev") {
         print " Loading failed ($!), aborting.\n";
         exit;
       } else {
@@ -905,20 +1015,51 @@ sub main
   while (<INPUTFILE>) {
     print "\n";
     my ($dev_nr,$description) = /^i2c-(\S+)\s+\S+\s+(.*)$/;
+    $description =~ s/\t/ /;
     print "Next adapter: $description\n";
-    print "Do you want to scan it? (YES/no):";
-    scan_adapter $dev_nr unless <STDIN> =~ /^\s*[Nn]/;
+    print "Do you want to scan it? (YES/no): ";
+    scan_adapter $dev_nr, $description, find_adapter_driver($description)
+                                              unless <STDIN> =~ /^\s*[Nn]/;
+  }
+
+  print "\n Now follows a summary of the probes I have just done.\n";
+  my ($chip,$data);
+  foreach $chip (@chips_detected) {
+    print "\nDriver `$$chip{driver}' ";
+    if (@{$$chip{detected}}) {
+      if (@{$$chip{misdetected}}) {
+        print "(should be inserted but causes problems):\n";
+      } else {
+        print "(should be inserted):\n";
+      }
+    } else {
+      if (@{$$chip{misdetected}}) {
+        print "(may not be inserted):\n";
+      } else {
+        print "(should not be inserted, but is harmless):\n";
+      }
+    }
+    if (@{$$chip{detected}}) {
+      print " Detects correctly:\n";
+      foreach $data (@{$$chip{detected}}) {
+        printf "  * Bus `%s'\n".
+               "    Busdriver `%s', I2C address 0x%02x\n".
+               "    Chip `%s' (confidence: %d)\n",
+               $data->{description}, $data->{driver}, $data->{address},
+               $data->{chipname}, $data->{address}, $data->{confidence};
+      }
+    }
+    if (@{$$chip{misdetected}}) {
+      print "  Misdetects:\n";
+      foreach $data (@{$$chip{misdetected}}) {
+        printf "  * Bus: %s\n".
+               "    Busdriver `%s', I2C address 0x%02x\n".
+               "    Chip `%s' (confidence: %d)\n",
+               $data->{description}, $data->{driver}, $data->{address},
+               $data->{chipname}, $data->{address}, $data->{confidence};
+      }
+    }
   }
 }
 
 main;
-
-
-      
-
-
-# TEST!
-# scan_adapter 0;
-#}
-
-#

@@ -1,6 +1,7 @@
 Many, many things. Most notably:
 
-* Check CDROM insert-remove error of Matt Mueller
+* bit-lp increases module count stupidly
+* Library: reload does not work (Bison/Flex problem?)
 * Create wait-queues for bus locking instead of pure semaphores, to make
   it more interactive
 * Check for block read/writes in smbus-on-i2c emulation code
