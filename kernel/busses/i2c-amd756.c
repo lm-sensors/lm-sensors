@@ -79,7 +79,7 @@ static int supported[] = {PCI_DEVICE_ID_AMD_756,
 #define SMBREV    0x008
 
 /* Other settings */
-#define MAX_TIMEOUT 500
+#define MAX_TIMEOUT 100
 
 /* AMD756 constants */
 #define AMD756_QUICK        0x00
@@ -144,12 +144,10 @@ static unsigned short amd756_smba = 0;
    defined to make the transition easier. */
 int amd756_setup(void)
 {
-	int error_return = 0;
 	unsigned char temp;
 	int *num = supported;
 	struct pci_dev *AMD756_dev = NULL;
 
-	/* First check whether we can access PCI at all */
 	if (pci_present() == 0) {
 		printk("i2c-amd756.o: Error: No PCI-bus found!\n");
 		return(-ENODEV);
@@ -177,7 +175,7 @@ int amd756_setup(void)
 	pci_read_config_byte(AMD756_dev, SMBGCFG, &temp);
 	if ((temp & 128) == 0) {
 		printk
-		    ("SMBUS: Error: Host SMBus controller I/O not enabled!\n");
+		  ("i2c-amd756.o: Error: SMBus controller I/O not enabled!\n");
 		return(-ENODEV);
 	}
 
@@ -189,7 +187,7 @@ int amd756_setup(void)
 
 	if (check_region(amd756_smba, SMB_IOSIZE)) {
 		printk
-		    ("i2c-amd756.o: AMD756_smb region 0x%x already in use!\n",
+		    ("i2c-amd756.o: SMB region 0x%x already in use!\n",
 		     amd756_smba);
 		return(-ENODEV);
 	}
@@ -198,16 +196,6 @@ int amd756_setup(void)
 	request_region(amd756_smba, SMB_IOSIZE, "amd756-smbus");
 
 #ifdef DEBUG
-	/*
-	   if ((temp & 0x0E) == 8)
-	   printk("i2c-amd756.o: AMD756 using Interrupt 9 for SMBus.\n");
-	   else if ((temp & 0x0E) == 0)
-	   printk("i2c-amd756.o: AMD756 using Interrupt SMI# for SMBus.\n");
-	   else 
-	   printk("i2c-amd756.o: AMD756: Illegal Interrupt configuration (or code out "
-	   "of date)!\n");
-	 */
-
 	pci_read_config_byte(AMD756_dev, SMBREV, &temp);
 	printk("i2c-amd756.o: SMBREV = 0x%X\n", temp);
 	printk("i2c-amd756.o: AMD756_smba = 0x%X\n", amd756_smba);
@@ -235,6 +223,7 @@ void amd756_do_pause(unsigned int amount)
 #define GS_HST_STS (1 << 3)
 #define GS_HCYC_STS (1 << 4)
 #define GS_TO_STS (1 << 5)
+#define GS_SMB_STS (1 << 11)
 
 #define GS_CLEAR_STS (GS_ABRT_STS | GS_COL_STS | GS_PRERR_STS | \
   GS_HCYC_STS | GS_TO_STS )
@@ -242,7 +231,6 @@ void amd756_do_pause(unsigned int amount)
 #define GE_CYC_TYPE_MASK (7)
 #define GE_HOST_STC (1 << 3)
 
-/* Another internally used function */
 int amd756_transaction(void)
 {
 	int temp;
@@ -257,30 +245,26 @@ int amd756_transaction(void)
 #endif
 
 	/* Make sure the SMBus host is ready to start transmitting */
-	/* TODO: What about SM_BSY? */
-	if (((temp = inw_p(SMB_GLOBAL_STATUS)) & GS_HST_STS) != 0x00) {
+	if ((temp = inw_p(SMB_GLOBAL_STATUS)) & (GS_HST_STS | GS_SMB_STS)) {
 #ifdef DEBUG
 		printk
-		    ("i2c-amd756.o: SMBus busy (%04x). Resetting (NOT)... \n",
-		     temp);
+		    ("i2c-amd756.o: SMBus busy (%04x). Waiting... \n", temp);
 #endif
-		/* TODO: How to reset the AMD?
-		   outb_p(temp, SMBHSTSTS);
-		 */
-		if (((temp = inw_p(SMB_GLOBAL_STATUS)) & GS_HST_STS) !=
-		    0x00) {
-#ifdef DEBUG
-			printk("i2c-amd756.o: Failed! (%04x)\n", temp);
-#endif
-			return -1;
-		} else {
-#ifdef DEBUG
-			printk("i2c-amd756.o: Successfull!\n");
-#endif
+		do {
+			amd756_do_pause(1);
+			temp = inw_p(SMB_GLOBAL_STATUS);
+		} while ((temp & (GS_HST_STS | GS_SMB_STS)) &&
+		         (timeout++ < MAX_TIMEOUT));
+		/* If the SMBus is still busy, we give up */
+		if (timeout >= MAX_TIMEOUT) {
+			printk("i2c-amd756.o: Busy wait timeout! (%04x)\n",
+			       temp);
+			return(-1);
 		}
+		timeout = 0;
 	}
 
-	/* start the transaction by setting bit 6 */
+	/* start the transaction by setting the start bit */
 	outw_p(inw(SMB_GLOBAL_ENABLE) | GE_HOST_STC, SMB_GLOBAL_ENABLE);
 
 	/* We will always wait for a fraction of a second! */
@@ -291,16 +275,14 @@ int amd756_transaction(void)
 
 	/* If the SMBus is still busy, we give up */
 	if (timeout >= MAX_TIMEOUT) {
-#ifdef DEBUG
-		printk("i2c-amd756.o: SMBus explicit timeout!\n");
-		result = -1;
-#endif
+		printk("i2c-amd756.o: Completion timeout!\n");
+		return(-1);
 	}
 
 	if (temp & GS_PRERR_STS) {
 		result = -1;
 #ifdef DEBUG
-		printk("i2c-amd756.o: SMBus Protocol error!\n");
+		printk("i2c-amd756.o: SMBus Protocol error (no response)!\n");
 #endif
 	}
 
@@ -324,14 +306,12 @@ int amd756_transaction(void)
 
 	outw_p(GS_CLEAR_STS, SMB_GLOBAL_STATUS);
 
-	if (((temp = inw_p(SMB_GLOBAL_STATUS)) & GS_CLEAR_STS) != 0x00) {
 #ifdef DEBUG
+	if (((temp = inw_p(SMB_GLOBAL_STATUS)) & GS_CLEAR_STS) != 0x00) {
 		printk
 		    ("i2c-amd756.o: Failed reset at end of transaction (%04x)\n",
 		     temp);
-#endif
 	}
-#ifdef DEBUG
 	printk
 	    ("i2c-amd756.o: Transaction (post): GS=%04x, GE=%04x, ADD=%04x, DAT=%04x\n",
 	     inw_p(SMB_GLOBAL_STATUS), inw_p(SMB_GLOBAL_ENABLE),
