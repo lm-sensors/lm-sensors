@@ -40,8 +40,8 @@ problems.
   Contributed conversion factor data for the via686a driver.
 * Geert Uytterhoeven <geert@linux-m68k.org>
   Author of the i2c-hydra driver.
-* Adrian Baugh <adrian.baugh@keble.ox.ac.uk>
-  Author of wmsensors (get it at http://users.ox.ac.uk/~kebl0850/wmlm78);
+* Adrian Baugh (http://www.adrianbaugh.org.uk/)
+  Original author of wmsensors;
   he also tested lots of things, and helped us out on several occasions.
 * Fons Rademakers <Fons.Rademakers@cern.ch>
   Author of the maxilife module (which could only be written under NDA)
