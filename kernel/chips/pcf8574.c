@@ -285,7 +285,7 @@ void pcf8574_update_client(struct i2c_client *client)
 
 	down(&data->update_lock);
 
-	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
+	if ((jiffies - data->last_updated > 5*HZ) ||
 	    (jiffies < data->last_updated) || !data->valid) {
 
 #ifdef DEBUG
