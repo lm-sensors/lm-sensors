@@ -11,7 +11,7 @@ Use eepromer for large eeproms with two-byte addresses:
 	See README.eepromer for details.
 
 Use eeprog for either small or large eeproms.
-	Use the -8 switch for small eeproms.
+	Use the -16 switch for large eeproms.
 	It works on both i2c and smbus bus adapters.
 	See README.eeprog for details.
 
