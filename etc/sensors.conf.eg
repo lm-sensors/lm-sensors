@@ -2159,8 +2159,10 @@ chip "adm1030-*"
    label temp1_crit "SYS Crit"
    label temp2_crit "CPU Crit"
 
-   set temp1_max 50000
-   set temp2_max 65000
+   set temp1_max  60
+   set temp2_max  70
+   set temp1_crit 85
+   set temp2_crit 85
 
    label fan1 "CPU Fan"
 
@@ -2176,9 +2178,12 @@ chip "adm1031-*"
    label temp2_crit "CPU Crit"
    label temp3_crit "AUX Crit"
 
-   set temp1_max 50000
-   set temp2_max 65000
-   set temp3_max 65000
+   set temp1_max  60
+   set temp2_max  70
+   set temp3_max  70
+   set temp1_crit 85
+   set temp2_crit 85
+   set temp3_crit 85
 
    label fan1 "CPU Fan"
    label fan2 "Case Fan"
