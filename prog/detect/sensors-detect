@@ -2486,24 +2486,35 @@ sub lm80_detect
 # $_[2]: Address
 # Returns: undef if not detected, 5 to 8 if detected.
 # Registers used:
+#   0x02: Status 1
 #   0x03: Configuration
 #   0x04: Company ID of LM84
+#   0x35: Status 2
 #   0xfe: Manufacturer ID
 #   0xff: Chip ID / die revision
 # We can use the LM84 Company ID register because the LM83 and the LM82 are
 # compatible with the LM84.
-# We give a lower confidence to the LM83 because it has no known Die Revision
-# so far.
+# The LM83 chip ID is missing from the datasheet and was contributed by
+# Magnus Forsstrom.
 sub lm83_detect
 {
   my ($chip, $file) = @_;
-  return if $chip == 0 and i2c_smbus_read_byte_data($file,0xfe) != 0x01;
-  return if $chip == 1 and i2c_smbus_read_byte_data($file,0xfe) != 0x01
-                        || i2c_smbus_read_byte_data($file,0xff) != 0x01;
-  return if (i2c_smbus_read_byte_data($file,0x03) & 0x41) != 0;
-  return (7 + ($chip != 0))
-  	if i2c_smbus_read_byte_data($file,0x04) == 0x00;
-  return (5 + ($chip != 0));
+  return if i2c_smbus_read_byte_data($file,0xfe) != 0x01;
+  return if $chip == 0 and i2c_smbus_read_byte_data($file,0xff) != 0x03;
+  return if $chip == 1 and i2c_smbus_read_byte_data($file,0xff) != 0x01;
+
+  my $confidence = 4;
+  $confidence++
+    if (i2c_smbus_read_byte_data($file,0x02) & 0xa8) == 0x00;
+  $confidence++
+    if (i2c_smbus_read_byte_data($file,0x03) & 0x41) == 0x00;
+  $confidence++
+    if i2c_smbus_read_byte_data($file,0x04) == 0x00;
+  $confidence++
+    if $chip == 0
+    && (i2c_smbus_read_byte_data($file,0x35) & 0x48) == 0x00;
+
+  return $confidence;
 }
 
 # $_[0]: Chip to detect
@@ -3470,6 +3481,8 @@ sub generate_modprobes
         $modprobes .= "# modprobe unknown adapter ".$adap->{adapname}." using ". $adap->{algoname}."\n";
       } elsif ($adap->{driver} eq "DISABLED") {
         $modprobes .= "# modprobe disabled adapter ".$adap->{adapname}." using ". $adap->{algoname}."\n";
+      } elsif ($adap->{driver} eq "to-be-written") {
+        $modprobes .= "# no driver available for adapter ".$adap->{adapname}." using ". $adap->{algoname}."\n";
       } else {
         $modprobes .= "modprobe $adap->{driver}\n" if (defined($adap->{nr_later}) and $adap->{nr_later} == $i) and not $modprobes =~ /modprobe $adap->{driver}\n/;
       }
@@ -3481,7 +3494,11 @@ sub generate_modprobes
   $modprobes .= "# I2C chip drivers\n";
   foreach $chip (@chips_detected) {
     next if not @{$chip->{detected}};
-    $modprobes .= "modprobe $chip->{driver}\n";
+    if ($chip->{driver} eq "to-be-written") {
+      $modprobes .= "#modprobe missing driver for $chip->{detected}[0]{chipname}\n";
+    } else {
+      $modprobes .= "modprobe $chip->{driver}\n";
+    }
     @optionlist = ();
     @probelist = ();
 
