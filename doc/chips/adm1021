@@ -1,7 +1,7 @@
 Kernel driver `adm1021.o'
 =========================
 
-Status: Complete; tested for most devices.
+Status: Complete; tested for most devices except Xeon.
 
 Supported chips:
   * Analog Devices ADM1021
@@ -13,9 +13,10 @@ Supported chips:
     Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
     Datasheet:
   * Intel Xeon Processor
-    Prefix - any other - requires 'force' parameter - see MODPARMS file
+    Prefix - any other - requires 'force_adm1021' parameter - see MODPARMS file
     Addresses scanned: none
     Datasheet: Publicly available at Intel website
+    Status: Alpha, untested.
   * Maxim MAX1617
     Prefix `max1617'
     Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
@@ -88,10 +89,21 @@ If an alarm triggers, it will remain triggered until the hardware register
 is read at least once. This means that the cause for the alarm may
 already have disappeared!
 
-This driver  only updates its values each 1.5 seconds; reading it more often
+This driver only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values. It is possible to make 
 ADM1021-clones do faster measurements, but there is really no good reason
 for that.
+
+
+Xeon support
+------------
+The Xeon support is untested.
+The Xeon has only one sensor where the other devices have two.
+Use 'force_adm1021=BUS,ADDRESS' as a modprobe parameter.
+ADDRESS can only be 0x18, 0x1a, 0x29, 0x2b, 0x4c, or 0x4e.
+The driver will report two temperatures but one will be invalid.
+It is not clear if all Xeon processors have this feature.
+Please report results.
 
 
 Chip Features

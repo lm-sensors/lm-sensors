@@ -47,7 +47,7 @@ adm1021
 	max1617a	2	-	-	-	yes	no
 	thmc10		2	-	-	-	yes	no
 	xeon		1	-	-	-	yes	no
-	  (xeon - no detection - requires force parameter)
+	  (xeon - no detection - requires force_adm1021 parameter)
 
 adm1025
 	adm1025		2	6	-	-	yes	no
