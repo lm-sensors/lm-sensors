@@ -1974,7 +1974,8 @@ sub add_i2c_to_chips_detected
 {
   my ($chipdriver,$datahash) = @_;
   my ($i,$new_detected_ref,$new_misdetected_ref,$detected_ref,$misdetected_ref,
-      $main_entry,$detected_entry,$put_in_detected,@hash_addrs,@entry_addrs);
+      $main_entry,$detected_entry,$put_in_detected,@hash_addrs,@entry_addrs,
+      $do_not_add);
 
   # First determine where the hash has to be added.
   for ($i = 0; $i < @chips_detected; $i++) {
@@ -1995,6 +1996,7 @@ sub add_i2c_to_chips_detected
   push @hash_addrs, @{$datahash->{i2c_sub_addrs}}
        if exists $datahash->{i2c_sub_addrs};
   $put_in_detected = 1;
+  $do_not_add = 0;
   FIND_LOOP:
   foreach $main_entry (@chips_detected) {
     foreach $detected_entry (@{$main_entry->{detected}}) {
@@ -2006,6 +2008,9 @@ sub add_i2c_to_chips_detected
         if ($detected_entry->{conf} >= $datahash->{conf}) {
           $put_in_detected = 0;
         }
+        if ($chipdriver eq $main_entry->{driver}) {
+          $do_not_add = 1;
+        }
         last FIND_LOOP;
       }
     }
@@ -2016,6 +2021,10 @@ sub add_i2c_to_chips_detected
     # match at least in one main or sub address. This may not be the
     # best idea to do, as it may remove detections without replacing
     # them with second-best ones. Too bad.
+    # (Khali 2003-09-13) If the driver is the same, the "misdetected"
+    # entry is simply deleted; failing to do so cause the configuration
+    # lines generated later to look very confusing (the driver will
+    # be told to ignore valid addresses).
     @hash_addrs = ($datahash->{i2c_addr});
     push @hash_addrs, @{$datahash->{i2c_sub_addrs}} 
          if exists $datahash->{i2c_sub_addrs};
@@ -2028,7 +2037,8 @@ sub add_i2c_to_chips_detected
              if exists $detected_ref->[$i]->{i2c_sub_addrs};
         if ($detected_ref->[$i]->{i2c_devnr} == $datahash->{i2c_devnr} and
             any_list_match \@entry_addrs, \@hash_addrs) {
-          push @$misdetected_ref,$detected_ref->[$i];
+          push @$misdetected_ref,$detected_ref->[$i]
+            unless $chipdriver eq $main_entry->{driver};
           splice @$detected_ref, $i, 1;
         }
       }
@@ -2038,7 +2048,8 @@ sub add_i2c_to_chips_detected
     push @$new_detected_ref, $datahash;
   } else {
     # No hard work here 
-    push @$new_misdetected_ref, $datahash;
+    push @$new_misdetected_ref, $datahash
+      unless $do_not_add;
   }
 }
 
