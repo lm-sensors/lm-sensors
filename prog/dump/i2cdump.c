@@ -1,6 +1,6 @@
 /*
     i2cdump.c - Part of i2cdump, a user-space program to dump I2C registers
-    Copyright (c) 2000  Frodo Looijaard <frodol@dds.nl>, and
+    Copyright (c) 2002  Frodo Looijaard <frodol@dds.nl>, and
     Mark D. Studebaker <mdsxyz123@yahoo.com>
 
     This program is free software; you can redistribute it and/or modify
@@ -37,6 +37,9 @@
 #define USE_I2C_BLOCK 0
 #endif
 
+#ifdef I2C_FUNC_SMBUS_BLOCK_DATA_PEC
+#define HAVE_PEC 1
+#endif
 
 void help(void)
 {
@@ -45,6 +48,7 @@ void help(void)
 
   fprintf(stderr,"Syntax: i2cdump I2CBUS ADDRESS [MODE] [BANK [BANKREG]]\n");
   fprintf(stderr,"  MODE is 'b[yte]', 'w[ord]', 's[mbusblock], or 'i[2cblock]' (default b)\n");
+  fprintf(stderr,"  Append MODE with 'p' for PEC checking\n");
   fprintf(stderr,"  I2CBUS is an integer\n");
   fprintf(stderr,"  ADDRESS is an integer 0x00 - 0x7f\n");
   fprintf(stderr,"  BANK and BANKREG are for byte and word accesses (default bank 0, reg 0x4e)\n");
@@ -70,6 +74,7 @@ int main(int argc, char *argv[])
   long funcs;
   unsigned char cblock[256];  
   int block[256];  
+  int pec = 0;
 
   if (argc < 2) {
     fprintf(stderr,"Error: No i2c-bus specified!\n");
@@ -105,15 +110,18 @@ int main(int argc, char *argv[])
   }
 
   if (argc < 4) {
-    fprintf(stderr,"Warning: no size specified (using byte-data access)\n");
+    fprintf(stderr,"No size specified (using byte-data access)\n");
     size = I2C_SMBUS_BYTE_DATA;
-  } else if (!strcmp(argv[3],"b"))
+  } else if (!strncmp(argv[3],"b",1)) {
     size = I2C_SMBUS_BYTE_DATA;
-  else if (!strcmp(argv[3],"w"))
+    pec = argv[3][1] == 'p';
+  } else if (!strncmp(argv[3],"w",1)) {
     size = I2C_SMBUS_WORD_DATA;
-  else if (!strcmp(argv[3],"s"))
+    pec = argv[3][1] == 'p';
+  } else if (!strncmp(argv[3],"s",1)) {
     size = I2C_SMBUS_BLOCK_DATA;
-  else if (!strcmp(argv[3],"i"))
+    pec = argv[3][1] == 'p';
+  } else if (!strcmp(argv[3],"i"))
     size = I2C_SMBUS_I2C_BLOCK_DATA;
   else {
     fprintf(stderr,"Error: Invalid mode!\n");
@@ -213,27 +221,60 @@ int main(int argc, char *argv[])
 
   switch(size) {
      case I2C_SMBUS_BYTE_DATA:
-	if (! (funcs & I2C_FUNC_SMBUS_READ_BYTE_DATA)) {
-	   fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
-	   fprintf(stderr, " does not have byte read capability\n");
-	   exit(1);
-	}       
+#ifdef HAVE_PEC
+	if(pec) {
+	  if (! (funcs & I2C_FUNC_SMBUS_READ_BYTE_DATA_PEC)) {
+	     fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	     fprintf(stderr, " does not have byte read w/ PEC capability\n");
+	     exit(1);
+	  }       
+	} else
+#endif
+	{
+	  if (! (funcs & I2C_FUNC_SMBUS_READ_BYTE_DATA)) {
+	     fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	     fprintf(stderr, " does not have byte read capability\n");
+	     exit(1);
+	  }       
+	}
 	break;
 
      case I2C_SMBUS_WORD_DATA:
-	if (! (funcs & I2C_FUNC_SMBUS_READ_WORD_DATA)) {
-	   fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
-	   fprintf(stderr, " does not have word read capability\n");
-	   exit(1);
-	}       
+#ifdef HAVE_PEC
+	if(pec) {
+	  if (! (funcs & I2C_FUNC_SMBUS_READ_WORD_DATA_PEC)) {
+	     fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	     fprintf(stderr, " does not have word read w/ PEC capability\n");
+	     exit(1);
+	  }       
+	} else
+#endif
+	{
+	  if (! (funcs & I2C_FUNC_SMBUS_READ_WORD_DATA)) {
+	     fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	     fprintf(stderr, " does not have word read capability\n");
+	     exit(1);
+	  }       
+	}
 	break;
 
      case I2C_SMBUS_BLOCK_DATA:
-	if (! (funcs & I2C_FUNC_SMBUS_READ_BLOCK_DATA)) {
-	   fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
-	   fprintf(stderr, " does not have smbus block read capability\n");
-	   exit(1);
-	}       
+#ifdef HAVE_PEC
+	if(pec) {
+	  if (! (funcs & I2C_FUNC_SMBUS_READ_BLOCK_DATA_PEC)) {
+	     fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	     fprintf(stderr, " does not have smbus block read capability\n");
+	     exit(1);
+	  }       
+	} else
+#endif
+	{
+	  if (! (funcs & I2C_FUNC_SMBUS_READ_BLOCK_DATA)) {
+	     fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	     fprintf(stderr, " does not have smbus block read w/ PEC capability\n");
+	     exit(1);
+	  }       
+	}
 	break;
 
      case I2C_SMBUS_I2C_BLOCK_DATA:
@@ -253,18 +294,33 @@ int main(int argc, char *argv[])
     exit(1);
   }
  
+  if(pec) {
+#ifdef HAVE_PEC
+    if (ioctl(file,I2C_PEC, 1) < 0) {
+      fprintf(stderr,"Error: Could not set PEC: %s\n", strerror(errno));
+      exit(1);
+    }
+#else
+    fprintf(stderr,"Error: PEC not supported in your kernel\n");
+    exit(1);
+#endif
+  }
+
   fprintf(stderr,"  WARNING! This program can confuse your I2C bus, "
           "cause data loss and worse!\n");
   fprintf(stderr,"  I will probe file %s, address 0x%x, mode %s\n",
           filename,address,size == I2C_SMBUS_BLOCK_DATA ? "smbus block" :
                            size == I2C_SMBUS_I2C_BLOCK_DATA ? "i2c block" :
                            size == I2C_SMBUS_BYTE_DATA ? "byte" : "word");
-  if(bank) 	
+  if(pec)
+    fprintf(stderr,"  with PEC checking.\n", bank);
+  if(bank) { 	
     if(size == I2C_SMBUS_BLOCK_DATA)
       fprintf(stderr,"  Using command 0x%02x.\n", bank);
     else
       fprintf(stderr,"  Probing bank %d using bank register 0x%02x.\n",
               bank, bankreg);
+  }
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
   sleep(5);
 
