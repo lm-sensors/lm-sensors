@@ -115,6 +115,7 @@ lm_sensors
     4.31.3 Tyan 2466
     4.31.4 Tyan 2688
   4.32 Problems on particular systems
+  4.33 Problems on 2.6 kernels
 
 5 How to Ask for Help
   5.1 What to send us when asking for help
@@ -1210,6 +1211,15 @@ Inserting modules hangs my board: Section 4.29.
 
    For IBM systems, see `README.thinkpad'.
 
+4.33 Problems on 2.6 kernels
+============================
+
+   Not all drivers have been ported to 2.6. If your favorite driver is
+not in 2.6, the reason is that nobody has ported it.  Please don't
+bother asking us why it is not in 2.6.  If you would like to port the
+driver, see the file Documentation/i2c/porting-clients in the 2.6
+kernel tree for help, then send us the ported driver when you are done.
+
 5 How to Ask for Help
 *********************
 
@@ -1465,6 +1475,8 @@ can not be sure.
 
 Appendix A Revision History of This Document
 ********************************************
+
+   * Rev 2.10 (MDS) Various updates, 20040103
 
    * Rev 2.9 (CP) Converted to Gnu texinfo format, 20020910
 

@@ -1,13 +1,13 @@
 <html lang="en">
 <head>
-<title>Sensors FAQ for lm_sensors version 2.9</title>
+<title>Sensors FAQ for lm_sensors version 2.10</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name=description content="Sensors FAQ for lm_sensors version 2.9">
+<meta name=description content="Sensors FAQ for lm_sensors version 2.10">
 <meta name=generator content="makeinfo 4.2">
 <link href="http://www.gnu.org/software/texinfo/" rel=generator-home>
 </head>
 <body>
-<h1>Sensors FAQ for lm_sensors version 2.9</h1>
+<h1>Sensors FAQ for lm_sensors version 2.10</h1>
 Copyright (c) 1998 - 2002<br>
 <a href="mailto:frodol@dds.nl">Frodo Looijaard</a>,<br>
 <a href="mailto:phil@netroedge.com">Philip Edelbrock</a>,<br>
@@ -154,6 +154,7 @@ and<br>
 <li><a href="#Section%204.31">4.31.4 Tyan 2688</a>
 </ul>
 <li><a href="#Section%204.32">4.32 Problems on particular systems</a>
+<li><a href="#Section%204.33">4.33 Problems on 2.6 kernels</a>
 </ul>
 <li><a name="toc_Help"></a>
     <a href="#Help">5 How to Ask for Help</a>
@@ -834,6 +835,7 @@ Up:<a rel=up accesskey=u href="#Top">Top</a>
 <li><a href="#Section%204.30">Section 4.30</a>:         Inserting modules slows down my board
 <li><a href="#Section%204.31">Section 4.31</a>:         Problems on particular motherboards
 <li><a href="#Section%204.32">Section 4.32</a>:         Problems on particular systems
+<li><a href="#Section%204.33">Section 4.33</a>:         Problems on 2.6 kernels
 </ul>
 
 <p><hr>
@@ -1622,6 +1624,7 @@ Also <a href="#Section%204.29">Inserting modules hangs my board</a>.
 
 <p><hr>
 Node:<a name="Section%204.32">Section 4.32</a>,
+Next:<a rel=next accesskey=n href="#Section%204.33">Section 4.33</a>,
 Previous:<a rel=previous accesskey=p href="#Section%204.31">Section 4.31</a>,
 Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <br>
@@ -1629,6 +1632,21 @@ Up:<a rel=up accesskey=u href="#Problems">Problems</a>
 <h3>4.32 Problems on particular systems</h3>
 
 <p>For IBM systems, see <code>README.thinkpad</code>.
+
+<p><hr>
+Node:<a name="Section%204.33">Section 4.33</a>,
+Previous:<a rel=previous accesskey=p href="#Section%204.32">Section 4.32</a>,
+Up:<a rel=up accesskey=u href="#Problems">Problems</a>
+<br>
+
+<h3>4.33 Problems on 2.6 kernels</h3>
+
+<p>Not all drivers have been ported to 2.6. If your favorite driver is not
+in 2.6, the reason is that nobody has ported it. 
+Please don't bother asking us why it is not in 2.6. 
+If you would like to port the driver, see the file
+Documentation/i2c/porting-clients in the 2.6 kernel tree for help,
+then send us the ported driver when you are done.
 
 <p><hr>
 Node:<a name="Help">Help</a>,
@@ -2051,6 +2069,7 @@ Up:<a rel=up accesskey=u href="#Top">Top</a>
 <h2>Appendix A Revision History of This Document</h2>
 
 <ul>
+<li>Rev 2.10 (MDS) Various updates, 20040103
 <li>Rev 2.9 (CP) Converted to Gnu texinfo format, 20020910
 <li>Rev 2.8 (MDS) Minor updates 20020710, released with lm_sensors 2.6.4
 <li>Rev 2.7 (MDS) Minor updates 20020425

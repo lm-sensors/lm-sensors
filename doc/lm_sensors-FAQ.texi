@@ -9,7 +9,7 @@
 @titlepage
 @center @titlefont{This is the FAQ for the @command{lm_sensors} program, @value{VERSION}}
 @sp 3
-@center Copyright (c) 1998 - 2002
+@center Copyright (c) 1998 - 2004
 @sp 1
 @center @email{frodol@@dds.nl, Frodo Looijaard},
 @center @email{phil@@netroedge.com, Philip Edelbrock},
@@ -568,6 +568,7 @@ to work.
 * Section 4.30::        Inserting modules slows down my board
 * Section 4.31::        Problems on particular motherboards
 * Section 4.32::        Problems on particular systems
+* Section 4.33::        Problems on 2.6 kernels
 @end menu
 
 
@@ -1205,10 +1206,21 @@ For board hangs, see support ticket 721 for information.
 Also @ref{Section 4.29, Inserting modules hangs my board}.
 
 
-@node Section 4.32, , Section 4.31, Problems
+@node Section 4.32, Section 4.33, Section 4.31, Problems
 @section Problems on particular systems
 
 For IBM systems, see @file{README.thinkpad}.
+
+
+@node Section 4.33, , Section 4.32, Problems
+@section Problems on 2.6 kernels
+
+Not all drivers have been ported to 2.6. If your favorite driver is not
+in 2.6, the reason is that nobody has ported it.
+Please don't bother asking us why it is not in 2.6.
+If you would like to port the driver, see the file
+Documentation/i2c/porting-clients in the 2.6 kernel tree for help,
+then send us the ported driver when you are done.
 
 
 @node Help, Contribute, Problems, Top
@@ -1511,6 +1523,7 @@ can not be sure.
 @appendix Revision History of This Document
 
 @itemize
+@item Rev 2.10 (MDS) Various updates, 20040103
 @item Rev 2.9 (CP) Converted to Gnu texinfo format, 20020910
 @item Rev 2.8 (MDS) Minor updates 20020710, released with lm_sensors 2.6.4
 @item Rev 2.7 (MDS) Minor updates 20020425
