@@ -70,6 +70,9 @@ database; the default is to log all readings every five minutes
 a round-robin database is configured.
 
 The time is specified as before; e.g., `5m'.
+.IP "-T, --rrd-no-average"
+Specify that the round-robin database should not be averaged.
+
 .IP "-r, --rrd-file file"
 Specify a round-robin database into which to log all sensor readings;
 e.g., `/var/log/sensord.rrd'. This database will be created if it does

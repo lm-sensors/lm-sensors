@@ -256,7 +256,7 @@ rrdInit
         ret = -num;
       } else {
         sprintf (stepBuff, "%d", rrdTime);
-        sprintf (rraBuff, "RRA:AVERAGE:%f:%d:%d", 0.5 /* fraction of non-unknown samples needed per entry */, 1 /* samples per entry */, 7 * 24 * 60 * 60 / rrdTime /* 1 week */);
+        sprintf (rraBuff, "RRA:%s:%f:%d:%d", rrdNoAverage?"LAST":"AVERAGE", 0.5 /* fraction of non-unknown samples needed per entry */, 1 /* samples per entry */, 7 * 24 * 60 * 60 / rrdTime /* 1 week */);
         argc += num;
         argv[argc ++] = rraBuff;
         argv[argc] = NULL;

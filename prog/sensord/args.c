@@ -39,6 +39,7 @@ const char *cgiDir = NULL;
 int scanTime = 60;
 int logTime = 30 * 60;
 int rrdTime = 5 * 60;
+int rrdNoAverage = 0;
 int syslogFacility = LOG_LOCAL4;
 int doScan = 0;
 int doSet = 0;
@@ -98,6 +99,7 @@ static const char *daemonSyntax =
   "  -i, --interval <time>     -- interval between scanning alarms (default 60s)\n"
   "  -l, --log-interval <time> -- interval between logging sensors (default 30m)\n"
   "  -t, --rrd-interval <time> -- interval between updating RRD file (default 5m)\n"
+  "  -T, --rrd-no-average      -- switch RRD in non-average mode\n"
   "  -r, --rrd-file <file>     -- RRD file (default <none>)\n"
   "  -c, --config-file <file>  -- configuration file (default sensors.conf)\n"
   "  -p, --pid-file <file>     -- PID file (default /var/run/sensord.pid)\n"
@@ -135,12 +137,13 @@ static const char *appSyntax =
   "\n"
   "If no chips are specified, all chip info will be printed.\n";
 
-static const char *daemonShortOptions = "i:l:t:f:r:c:p:advhg:";
+static const char *daemonShortOptions = "i:l:t:Tf:r:c:p:advhg:";
 
 static const struct option daemonLongOptions[] = {
   { "interval", required_argument, NULL, 'i' },
   { "log-interval", required_argument, NULL, 'l' },
   { "rrd-interval", required_argument, NULL, 't' },
+  { "rrd-no-average", no_argument, NULL, 'T' },
   { "syslog-facility", required_argument, NULL, 'f' },
   { "rrd-file", required_argument, NULL, 'r' },
   { "config-file", required_argument, NULL, 'c' },
@@ -190,6 +193,9 @@ parseArgs
       case 't':
         if ((rrdTime = parseTime (optarg)) < 0)
           return -1;
+        break;
+      case 'T':
+        rrdNoAverage = 1;
         break;
       case 'f':
         if ((syslogFacility = parseFacility (optarg)) < 0)

@@ -36,6 +36,7 @@ extern const char *cgiDir;
 extern int scanTime;
 extern int logTime;
 extern int rrdTime;
+extern int rrdNoAverage;
 extern int syslogFacility;
 extern int doScan;
 extern int doSet;

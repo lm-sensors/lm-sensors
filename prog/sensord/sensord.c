@@ -28,6 +28,7 @@
 #include <signal.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -75,7 +76,12 @@ static int
 sensord
 (void) {
   int ret = 0;
-  int scanValue = 0, logValue = 0, rrdValue = 0;
+  int scanValue = 0, logValue = 0;
+  /*
+   * First RRD update at next RRD timeslot to prevent failures due
+   * one timeslot updated twice on restart for example.
+   */
+  int rrdValue = rrdTime - time(NULL) % rrdTime;
 
   sensorLog (LOG_INFO, "sensord started");
 
@@ -93,7 +99,11 @@ sensord
     }
     if ((ret == 0) && rrdTime && rrdFile && (rrdValue <= 0)) {
       ret = rrdUpdate ();
-      rrdValue += rrdTime;
+      /*
+       * The amount of time to wait is computed using the same method as
+       * in RRD instead of simply adding the interval.
+       */
+      rrdValue = rrdTime - time(NULL) % rrdTime;
     }
     if (!done && (ret == 0)) {
       int a = logTime ? logValue : INT_MAX;
