@@ -152,6 +152,8 @@ lm90
 	(max6658 and max6659 are detected as a max6657)
 	max6658		2	-	-	-	yes	no
 	max6659		2	-	-	-	yes	no
+	(adt7461 only works in ADM1032 compatibility mode)
+	adt7461		2	-	-	-	yes	no
 
 lm92
 	(all are reported as an "lm92")
