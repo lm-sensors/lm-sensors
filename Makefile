@@ -263,12 +263,21 @@ user_install::
 	@echo "***    to fit your needs again."
 all :: user
 install :: all user_install
+ifeq ($(DESTDIR),)
 	@echo "*** The depmod command below may generate errors. We are aware of the"
 	@echo "*** problem and are working on a solution."
-ifeq ($(DESTDIR),)
 	-/sbin/depmod -a
 else
-	-/sbin/depmod -a -b $(DESTDIR)
+	@echo "*** This is a \`staged' install using \"$(DESTDIR)\" as prefix."
+	@echo "***"
+	@echo "*** Once the modules have been moved to their final destination"
+	@echo "*** you must run the command \"/sbin/depmod -a\"."
+	@echo "***"
+	@echo "*** Alternatively, if you build a package (e.g. rpm), include the"
+	@echo "*** command \"/sbin/depmod -a\" in the post-(un)install procedure."
+	@echo "***"
+	@echo "*** The depmod command mentioned above may generate errors. We are"
+	@echo "*** aware of the problem and are working on a solution."
 endif
 
 clean::
