@@ -228,8 +228,14 @@ do
 		then
 			echo "    It appears that fan $j"
 			echo "    is controlled by pwm $i"
-			let pwmactivecount=1
-			pwmactive="$i ${pwmactive}"
+#
+# a PWM can control more than one fan....
+#
+			if [ $pwmactivecount -eq 0 ]
+			then
+				let pwmactivecount=1
+				pwmactive="$i ${pwmactive}"
+			fi
 			sleep $DELAY
 			if [ $? -ne 0 ]
 			then
