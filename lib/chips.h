@@ -329,6 +329,8 @@
 #define SENSORS_LM83_REMOTE2_HIGH 58 /* RW */
 #define SENSORS_LM83_REMOTE3_TEMP 60 /* R */
 #define SENSORS_LM83_REMOTE3_HIGH 61 /* RW */
+#define SENSORS_LM83_TCRIT 80 /* RW */
+#define SENSORS_LM83_ALARMS 81 /* R */
 
 /* LM85 chips */
 

@@ -690,6 +690,10 @@ static sensors_chip_feature lm83_features[] =
     { SENSORS_LM83_REMOTE3_HIGH, "temp4_high", SENSORS_LM83_REMOTE3_TEMP,
                               SENSORS_LM83_REMOTE3_TEMP, SENSORS_MODE_RW, 
                               LM83_SYSCTL_REMOTE3_TEMP, VALUE(1), 0 },
+    { SENSORS_LM83_TCRIT, "tcrit", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_RW, LM83_SYSCTL_TCRIT, VALUE(1), 0 },
+    { SENSORS_LM83_ALARMS, "alarms", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, LM83_SYSCTL_ALARMS, VALUE(1), 0 },
     { 0 }
   };
 
