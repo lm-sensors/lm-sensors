@@ -178,6 +178,14 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        driver => "i2c-viapro",
        match => sub { $_[0] =~ /^SMBus Via Pro adapter at/ },
      } ,
+     {
+       vendid => 0x1106,
+       devid  => 0x3227,
+       func => 0,
+       procid => "VIA Technologies VT8237 South Bridge",
+       driver => "i2c-viapro",
+       match => sub { $_[0] =~ /^SMBus Via Pro adapter at/ },
+     } ,
      { 
        vendid => 0x1106,
        devid  => 0x8235,
