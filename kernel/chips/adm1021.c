@@ -44,8 +44,9 @@ SENSORS_INSMOD_8(adm1021, adm1023, max1617, max1617a, thmc10, lm84, gl523sm, mc1
 #define ADM1021_REG_TEMP 0x00
 #define ADM1021_REG_REMOTE_TEMP 0x01
 #define ADM1021_REG_STATUS 0x02
-#define ADM1021_REG_MAN_ID 0x0FE	/* 0x41 = AMD, 0x49 = TI, 0x4D = Maxim, 0x23 = Genesys , 0x54 = Onsemi*/
-#define ADM1021_REG_DEV_ID 0x0FF	/* ADM1021 = 0x0X, ADM1023 = 0x3X */
+#define ADM1021_REG_MAN_ID 0x0FE	/* 0x41 = Analog Devices, 0x49 = TI,
+                                       0x4D = Maxim, 0x23 = Genesys , 0x54 = Onsemi*/
+#define ADM1021_REG_DEV_ID 0x0FF	/* ADM1021 = 0x0X, ADM1021A/ADM1023 = 0x3X */
 #define ADM1021_REG_DIE_CODE 0x0FF	/* MAX1617A */
 /* These use different addresses for reading/writing */
 #define ADM1021_REG_CONFIG_R 0x03
