@@ -94,8 +94,8 @@
 # refer to other readable features (like '2 * vid').
 #
 # The following operators are valid: + - * / ( ) ^ `
-# ^ is e**x and ` is ln(x) (valid in library version 1.4.0 /
-# lm_sensors 2.7.1 or higher)
+# ^ is e**x and ` is ln(x) (valid in library version 2.0.0 /
+# lm_sensors 2.8.0 or higher)
 #
 # Like for the label statement, there are logical groups here. They are
 # sometimes a bit different, though. For example, fan1_div is in the
@@ -315,8 +315,9 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*"
 
 chip "lm75-*"
 
-# For the Asus TX97-E. If it doesn't work for you, feel free to complain.
-    compute temp @*2.0, @/2.0
+# Most boards don't need scaling. Following is
+# for the Asus TX97-E. If it doesn't work for you, feel free to complain.
+#   compute temp @*2.0, @/2.0
 
 # Examples for temperature limits
 #    set temp_over 70	
