@@ -198,6 +198,7 @@
 # This is a library dependency.
 # A 'set fan1_div' statement must go before a 'set fan1_min' statement,
 # because the driver uses the divisor in calculating the minimum.
+# Also, one should set vrm prior to using vid in any formula.
 #
 #
 # BUS LINES
@@ -1039,16 +1040,16 @@ chip "mtp008-*"
 #    ignore temp3
 
 chip "adm1025-*"
-#
+
 # The ADM1025 has integrated scaling resistors, rather
 # than external resistors common to most sensor devices.
-# These apply to the first 6 voltage inputs in0-in5
-# (+2.5, VCore, +3.3, +5, 12, VCC). As the scaling is fixed inside
+# These apply to the 6 voltage inputs in0-in5 (+2.5V, VCore,
+# +3.3V, +5V, +12V, VCC). As the scaling is fixed inside
 # the chip for these inputs, it is fairly certain that the
 # motherboard connections match these labels, and that the
 # driver computations are correct. Therefore they do not need to
 # be overridden here.
-#
+
     label in0 "+2.5V"
     label in1 "VCore"
     label in2 "+3.3V"
@@ -1056,13 +1057,21 @@ chip "adm1025-*"
     label in4 "+12V"
     label in5 "VCC"
 
-    label temp1 "SYS Temp"
-    label temp2 "CPU Temp"
+# Depending on how your chipset is hardwired, you may or may not have
+# +12V readings (will show as 0.0V if you don't have it).
+#   ignore in4
 
-# temp minimums should be renamed from _hyst to _min!!!
+# VCC is the power-supply voltage of the ADM1025 chipset, generally
+# redundant with +3.3V so you may want to hide it.
+#   ignore in5
+
+    label temp1 "CPU Temp"
+    label temp2 "M/B Temp"
 
 # adjust this if your vid is wrong; see doc/vid
     set vrm 9.0
+
+# Tolerate a 5% deviance for CPU power-supply (default is 10%)
     set in1_min vid * 0.95
     set in1_max vid * 1.05
 
