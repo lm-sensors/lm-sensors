@@ -74,7 +74,6 @@ static void bmcsensors_inc_use(struct i2c_client *client);
 static void bmcsensors_dec_use(struct i2c_client *client);
 
 static void bmcsensors_update_client(struct i2c_client *client);
-static void bmcsensors_init_client(struct i2c_client *client);
 static int bmcsensors_find(int *address);
 static void bmcsensors_reserve_sdr(void);
 
@@ -405,11 +404,15 @@ static void bmcsensors_build_proc_table()
 	bmcsensors_initialized = 3;
 	bmc_data.sysctl_id = i;
 
-	bmcsensors_init_client(&bmc_client);
 	printk(KERN_INFO "bmcsensors.o: %d reservations cancelled\n", errorcount);
 	printk(KERN_INFO "bmcsensors.o: registered %d temp, %d volt, %d current, %d fan sensors\n",
 			temps, volts, currs, fans);
-	bmcsensors_update_client(&bmc_client);
+/*
+	This completes the initialization. The first userspace read
+	of a /proc value will force the first
+	bmcsensors_update_client() which starts the
+	reading of the sensors themselves via IPMI messages.
+*/
 }
 
 
@@ -590,12 +593,11 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 	if(nextrecord == 0xFFFF) {
 		if(sdrd_count == 0) {
 			printk(KERN_INFO "bmcsensors.o: No recognized sensors found.\n");
-			rstate = STATE_DONE;
 			/* unregister?? */
 		} else {
 			bmcsensors_build_proc_table();
-			rstate = STATE_READING;
 		}
+		rstate = STATE_DONE;
 	} else {
 		bmcsensors_get_sdr(0, nextrecord, 0);
 	}
@@ -610,8 +612,8 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 		case STATE_INIT:
 		case STATE_RESERVE:
 			resid = (((u16)msg->data[2]) << 8) || msg->data[1];
-#if 1
-			printk(KERN_INFO "bmcsensors.o: Got first resid 0x%.4x\n", resid);
+#ifdef DEBUG
+			printk(KERN_DEBUG "bmcsensors.o: Got first resid 0x%.4x\n", resid);
 #endif
 			bmcsensors_get_sdr(0, 0, 0);
 			state = STATE_SDR;
@@ -628,8 +630,8 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 
 		case STATE_UNCANCEL:
 			resid = (((u16)msg->data[2]) << 8) || msg->data[1];
-#if 1
-			printk(KERN_INFO "bmcsensors.o: Got new resid 0x%.4x\n", resid);
+#ifdef DEBUG
+			printk(KERN_DEBUG "bmcsensors.o: Got new resid 0x%.4x\n", resid);
 #endif
 			rx_msg_data_offset = 0;
 			bmcsensors_get_sdr(0, nextrecord, 0);
@@ -651,13 +653,13 @@ static void bmcsensors_msg_handler(struct ipmi_recv_msg *msg,
 {
 	if(state == STATE_SDR && msg->msg.data[0] == 0xc5) {
 		/* )(*&@(*&#@$ reservation cancelled, get new resid */
-		if(++errorcount > 1000) {
+		if(++errorcount > 275) {
 			printk(KERN_ERR
 			       "bmcsensors.o: Too many reservations cancelled, giving up\n");
 			state = STATE_DONE;
 		} else {
-#if 1
-			printk(KERN_ERR
+#ifdef DEBUG
+			printk(KERN_DEBUG
 			       "bmcsensors.o: resid 0x%04x cancelled, getting new one\n", resid);
 #endif
 			bmcsensors_reserve_sdr();
@@ -707,8 +709,8 @@ static void bmcsensors_reserve_sdr(void)
 /* Componse and send a "get SDR" message */
 static void bmcsensors_get_sdr(u16 res_id, u16 record, u8 offset)
 {
-#if 1
-	printk(KERN_INFO "bmcsensors.o: Get SDR 0x%x 0x%x 0x%x\n",
+#ifdef DEBUG
+	printk(KERN_DEBUG "bmcsensors.o: Get SDR 0x%x 0x%x 0x%x\n",
 		       res_id, record, offset);
 #endif
 	tx_message.netfn = IPMI_NETFN_STORAGE;
@@ -818,30 +820,40 @@ static void bmcsensors_dec_use(struct i2c_client *client)
 #endif
 }
 
-static void bmcsensors_init_client(struct i2c_client *client)
+static void bmc_do_pause(unsigned int amount)
 {
-/*******************************************/
-
-
-
+	current->state = TASK_INTERRUPTIBLE;
+	schedule_timeout(amount);
 }
 
 static void bmcsensors_update_client(struct i2c_client *client)
 {
 	struct bmcsensors_data *data = client->data;
-	int i;
+	int j = 0;
 
 /*
 	down(&data->update_lock);
 */
 
+	/* if within 3 seconds you get old data */
 	if ((jiffies - data->last_updated > 3 * HZ) ||
 	    (jiffies < data->last_updated) || !data->valid) {
 		/* don't start an update cycle if one already in progress */
 		if(state != STATE_READING) {
 			state = STATE_READING;
+#ifdef DEBUG
+			printk(KERN_DEBUG "bmcsensors.o: starting update\n", j);
+#endif
 			bmcsensors_get_reading(client, 0);
 		}
+		/* wait 4 seconds max */
+		while(state == STATE_READING && j++ < 100)
+			bmc_do_pause(HZ / 25);
+#ifdef DEBUG
+		printk("bmcsensors.o: update complete; j = %d\n", j);
+#endif
+		data->last_updated = jiffies;
+		data->valid = 1;
 	}
 
 /*
@@ -909,7 +921,6 @@ static void bmcsensors_all(struct i2c_client *client, int operation, int ctl_nam
 {
 	int i;
 	struct bmcsensors_data *data = client->data;
-	int nr = ctl_name - BMC_SYSCTL_TEMP1 + 1;
 
 	if((i = find_sdrd(ctl_name)) < 0) {
 		*nrels_mag = 0;
