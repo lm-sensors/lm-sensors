@@ -61,8 +61,10 @@ sensor reading results. Why?
   4.14A  I set new limits and it didn't work?
 4.15 Some sensors are doubly detected?
 4.16 I ran sensors-detect, but now I get very strange readings?!?
-4.17 Bad readings from the AS99127F!
-4.18 Bad readings from the VIA 686A!
+4.17 Bad readings from the particular chips
+  4.17A Bad readings from the AS99127F!
+  4.17B Bad readings from the VIA 686A!
+  4.17C Bad readings from the MTP008!
 4.19 Dmesg says Upgrade BIOS! I don't want to!
 4.20 Sensors says 'Can't access /proc file'
 4.21 Sensors says 'No sensors found!'
@@ -71,6 +73,10 @@ sensor reading results. Why?
   4.23A What is at I2C address 0x69?
   4.23B What is at I2C addresses 0x50 - 0x57?
   4.23C What is at I2C addresses 0x30 - 0x37?
+4.24 Sensors-detect doesn't work at all
+  4.24A Sensors-detect says "Couldn't open /proc/bus/i2c?!?"
+  4.24B Sensors-detect says "Can't open /dev/i2c[-]0"
+  4.24C Sensors-detect doesn't find any sensors
 
 5 How to Ask for Help  
 5.1 What to do if a module won't insert?
@@ -269,10 +275,13 @@ for candidates, then go to section 5.
 
 3.2A What chips are on motherboard XYZ?
 
-    We have no idea. Check the manufacturer's website.
-    Run sensors-detect.
-The Motherboard Monitor website (see useful_addresses.html) has a good
-cross-reference.
+    We have no idea. Here is what you should do:
+	1) Run sensors-detect.
+    If that doesn't work:
+	2) Look at your motherboard.
+	3) Check the manufacturer's website.
+	4) Check the Motherboard Monitor website
+	   (see useful_addresses.html) for a good cross-reference.
 
 
 3.2B Do you support motherboard XYZ?
@@ -572,7 +581,13 @@ Next time when you run sensors-detect, you may want to exclude addresses
 scan the PIIX4.
 
 
-4.17 Bad readings from the AS99127F!
+4.17 Bad readings from particular chips
+
+    See below for some particularly troublesome chips.
+Also be sure and check doc/chips/xxxxx for the particular driver.
+
+
+4.17A Bad readings from the AS99127F!
 
     The Asus AS99127F is a modified version of the Winbond W83781D.
 Asus will not release a datasheet. The driver was developed by tedious
@@ -581,13 +596,20 @@ to the readings please edit /etc/sensors.conf. Please don't ask us to
 fix the driver. Ask Asus to release a datasheet.
 
 
-4.18 Bad readings from the VIA 686A!
+4.17B Bad readings from the VIA 686A!
 
     The Via 686A datasheet is incomplete.
 Via will not release details. The driver was developed by tedious
 experimentation. We've done the best we can. If you want to make adjustments
 to the readings please edit /etc/sensors.conf. Please don't ask us to
 fix the driver. Ask Via to release a better datasheet.
+
+
+4.17C Bad readings from the MTP008!
+
+    The MTP008 has programmable temperature sensor types.
+If your sensor type does not match the default, you will have to change it.
+See doc/chips/mtp008 for details.
 
 
 4.19 Dmesg says Upgrade BIOS! I don't want to!
@@ -611,12 +633,13 @@ support the force parameter. Sorry. You can send us your request.
 
 4.21 Sensors says 'No sensors found!'
 
-    Did sensors-detect find sensors?
+    Did sensors-detect find sensors? (If not see 4.23C)
     Did you do what sensors-detect said?
     Did you 'modprobe' your sensor modules?
     Did you 'modprobe' your I2C adapter modules?
     Did you 'modprobe i2c-isa' if you have ISA sensor chips?
     Check 'lsmod'.
+
 
 
 4.22 Sensors output is not correct!
@@ -667,6 +690,36 @@ do a 'i2cdump' on them you won't get anything. This is probably
 caused by some timing problem on your motherboard or on the DIMMs.x
 We don't know the exact cause.
 
+
+4.24 Sensors-detect doesn't work at all
+
+    It could be many things. What was the problem? See below.
+
+4.24A Sensors-detect says "Couldn't open /proc/bus/i2c?!?"
+
+    You don't have i2c support in your kernel, or the i2c-core module
+was not loaded and you did not run sensors-detect as root.
+
+
+4.24B Sensors-detect says "Can't open /dev/i2c[-]0"
+
+    Your /dev/i2c-0 or /dev/i2c0 (either will work) files do not exist
+(run the script prog/mkdev/mkdev.sh to create them), or you did not
+run sensors-detect as root.
+
+
+4.24C Sensors-detect doesn't find any sensors!
+
+    Either
+	1) The board doesn't have any sensors.
+	2) We don't support the sensors on the board.
+	3) The sensors it has are on an I2C bus connected to an
+	   I2C bus adapter that we don't support.
+    But in any case you should figure out what is on the board:
+	1) Look at your motherboard.
+	2) Check the manufacturer's website.
+	3) Check the Motherboard Monitor website
+	   (see useful_addresses.html) for a good cross-reference.
 
 
 5 How to ask for help
@@ -801,7 +854,7 @@ can not be sure.
 
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
-Rev 2.3 (MDS) General update, 20010127
+Rev 2.3 (MDS) General update, 20010219
 Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 19990920
 Rev 2.1 (Frodo) Corrections for lm_sensors 2.2, 19990112
 Rev 2.0 (Frodo) Major revision for lm_sensors 2.1, 19981229
