@@ -2410,10 +2410,14 @@ void print_eeprom(const sensors_chip_name *name)
    if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_TYPE, &label,&valid) &&
        !sensors_get_feature(*name, SENSORS_EEPROM_TYPE, &a)) {
       if (valid) {
-	if(((int) a) != 4)	
-	    return;
-         print_label(label, 24);
-	 printf("SDRAM DIMM SPD\n");
+	if(((int) a) == 4) {
+           print_label(label, 24);
+	   printf("SDRAM DIMM SPD\n");
+	} else if(((int) a) == 7) {
+           print_label(label, 24);
+	   printf("DDR SDRAM DIMM SPD\n");
+	} else
+	      return;
       }
    } else
       printf("ERROR: data 1\n");
