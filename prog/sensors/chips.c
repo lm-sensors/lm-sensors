@@ -3252,7 +3252,7 @@ void print_fscpos(const sensors_chip_name *name)
 {
   char *label = NULL;
   double voltage, temp,state,fan,min_rpm;
- int valid;
+  int valid;
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_TEMP1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP1,&temp) &&
@@ -3260,36 +3260,42 @@ void print_fscpos(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x01)
-	      printf("\t%+6.2f C \n",temp);
+	  printf("\t%+6.2f C \n",temp);
 	else
-		printf("\tfailed\n");
+      	  printf("\tfailed\n");
     }
-  }
+  } else
+    printf("ERROR: Can't get TEMP1 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_TEMP2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP2,&temp) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP2_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x01)
-	      printf("\t%+6.2f C \n",temp);
+	  printf("\t%+6.2f C \n",temp);
 	else
-		printf("\tfailed\n");
+	  printf("\tfailed\n");
     }
-  }
+  } else
+    printf("ERROR: Can't get TEMP2 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_TEMP3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP3,&temp) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP3_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x01)
-	      printf("\t%+6.2f C \n",temp);
+	  printf("\t%+6.2f C \n",temp);
 	else
-		printf("\tfailed\n");
+	  printf("\tfailed\n");
     }
-  }
+  } else
+    printf("ERROR: Can't get TEMP3 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_FAN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN1,&fan) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN1_MIN,&min_rpm) &&
@@ -3297,14 +3303,16 @@ void print_fscpos(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
-		printf("\tfaulty\n");
+	  printf("\tfaulty\n");
 	else if (fan < min_rpm)
-		printf("\t%6.0f RPM (not present or faulty)\n",fan);
+	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
-	      printf("\t%6.0f RPM \n",fan);
+	  printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN1 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_FAN2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN2,&fan) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN2_MIN,&min_rpm) &&
@@ -3312,49 +3320,58 @@ void print_fscpos(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
-		printf("\tfaulty\n");
+	  printf("\tfaulty\n");
 	else if (fan < min_rpm)
-		printf("\t%6.0f RPM (not present or faulty)\n",fan);
+	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
-	      printf("\t%6.0f RPM \n",fan);
+	  printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN2 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_FAN3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN3,&fan) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN3_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
-		printf("\tfaulty\n");
+	  printf("\tfaulty\n");
 	else
-	      printf("\t%6.0f RPM \n",fan);
+	  printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN3 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_VOLTAGE1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_VOLTAGE1,&voltage)) {
     if (valid) {
       print_label(label,10);
       printf("\t%+6.2f V\n",voltage);
     }
-  }
+  } else
+    printf("ERROR: Can't get IN0 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_VOLTAGE2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_VOLTAGE2,&voltage)) {
     if (valid) {
       print_label(label,10);
       printf("\t%+6.2f V\n",voltage);
     }
-  }
+  } else
+    printf("ERROR: Can't get IN1 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_VOLTAGE3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_VOLTAGE3,&voltage)) {
     if (valid) {
       print_label(label,10);
       printf("\t%+6.2f V\n",voltage);
     }
-  }
+  } else
+    printf("ERROR: Can't get IN2 data!\n");
   free_the_label(&label);
 }
 
@@ -3362,7 +3379,7 @@ void print_fscscy(const sensors_chip_name *name)
 {
   char *label = NULL;
   double voltage, temp, tempmin, tempmax, templim, state,fan,min_rpm;
- int valid;
+  int valid;
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_TEMP1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_TEMP1,&temp) &&
@@ -3373,13 +3390,15 @@ void print_fscscy(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x01)
-	      printf("\t%+6.2f C (Min = %+6.2f C, Max = %+6.2f C, Lim = %+6.2f C)\n",
+	  printf("\t%+6.2f C (Min = %+6.2f C, Max = %+6.2f C, Lim = %+6.2f C)\n",
 		temp,tempmin,tempmax,templim);
 	else
-		printf("\tfailed\n");
+	  printf("\tfailed\n");
     }
-  }
+  } else
+    printf("ERROR: Can't get TEMP1 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_TEMP2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_TEMP2,&temp) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_TEMP2_LIM,&templim) &&
@@ -3389,13 +3408,15 @@ void print_fscscy(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x01)
-	      printf("\t%+6.2f C (Min = %+6.2f C, Max = %+6.2f C, Lim = %+6.2f C)\n",
+	  printf("\t%+6.2f C (Min = %+6.2f C, Max = %+6.2f C, Lim = %+6.2f C)\n",
 		temp,tempmin,tempmax,templim);
 	else
-		printf("\tfailed\n");
+	  printf("\tfailed\n");
     }
-  }
+  } else
+    printf("ERROR: Can't get TEMP2 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_TEMP3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_TEMP3,&temp) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_TEMP3_LIM,&templim) &&
@@ -3405,13 +3426,15 @@ void print_fscscy(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x01)
-	      printf("\t%+6.2f C (Min = %+6.2f C, Max = %+6.2f C, Lim = %+6.2f C)\n",
+	  printf("\t%+6.2f C (Min = %+6.2f C, Max = %+6.2f C, Lim = %+6.2f C)\n",
 		temp,tempmin,tempmax,templim);
 	else
-		printf("\tfailed\n");
+	  printf("\tfailed\n");
     }
-  }
+  } else
+    printf("ERROR: Can't get TEMP3 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_TEMP4,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_TEMP4,&temp) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_TEMP4_LIM,&templim) &&
@@ -3421,13 +3444,15 @@ void print_fscscy(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x01)
-	      printf("\t%+6.2f C (Min = %+6.2f C, Max = %+6.2f C, Lim = %+6.2f C)\n",
+	  printf("\t%+6.2f C (Min = %+6.2f C, Max = %+6.2f C, Lim = %+6.2f C)\n",
 		temp,tempmin,tempmax,templim);
 	else
-		printf("\tfailed\n");
+	  printf("\tfailed\n");
     }
-  }
+  } else
+    printf("ERROR: Can't get TEMP4 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN1,&fan) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN1_MIN,&min_rpm) &&
@@ -3435,14 +3460,16 @@ void print_fscscy(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
-		printf("\tfaulty\n");
+	  printf("\tfaulty\n");
 	else if (fan < min_rpm)
-		printf("\t%6.0f RPM (not present or faulty)\n",fan);
+	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
-	      printf("\t%6.0f RPM \n",fan);
+	  printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN1 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN2,&fan) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN2_MIN,&min_rpm) &&
@@ -3450,14 +3477,16 @@ void print_fscscy(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
-		printf("\tfaulty\n");
+	  printf("\tfaulty\n");
 	else if (fan < min_rpm)
-		printf("\t%6.0f RPM (not present or faulty)\n",fan);
+	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
-	      printf("\t%6.0f RPM \n",fan);
+	  printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN2 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN3,&fan) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN3_MIN,&min_rpm) &&
@@ -3465,14 +3494,16 @@ void print_fscscy(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
-		printf("\tfaulty\n");
+	  printf("\tfaulty\n");
 	else if (fan < min_rpm)
-		printf("\t%6.0f RPM (not present or faulty)\n",fan);
+	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
-	      printf("\t%6.0f RPM \n",fan);
+	  printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN3 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN4,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN4,&fan) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN4_MIN,&min_rpm) &&
@@ -3480,14 +3511,16 @@ void print_fscscy(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
-		printf("\tfaulty\n");
+	  printf("\tfaulty\n");
 	else if (fan < min_rpm)
-		printf("\t%6.0f RPM (not present or faulty)\n",fan);
+	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
-	      printf("\t%6.0f RPM \n",fan);
+	  printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN4 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN5,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN5,&fan) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN5_MIN,&min_rpm) &&
@@ -3495,14 +3528,16 @@ void print_fscscy(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
-		printf("\tfaulty\n");
+	  printf("\tfaulty\n");
 	else if (fan < min_rpm)
-		printf("\t%6.0f RPM (not present or faulty)\n",fan);
+	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
-	      printf("\t%6.0f RPM \n",fan);
+	  printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN5 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN6,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN6,&fan) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN6_MIN,&min_rpm) &&
@@ -3510,37 +3545,44 @@ void print_fscscy(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
-		printf("\tfaulty\n");
+	  printf("\tfaulty\n");
 	else if (fan < min_rpm)
-		printf("\t%6.0f RPM (not present or faulty)\n",fan);
+	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
-	      printf("\t%6.0f RPM \n",fan);
+	  printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN6 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_VOLTAGE1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_VOLTAGE1,&voltage)) {
     if (valid) {
       print_label(label,10);
       printf("\t%+6.2f V\n",voltage);
     }
-  }
+  } else
+    printf("ERROR: Can't get IN0 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_VOLTAGE2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_VOLTAGE2,&voltage)) {
     if (valid) {
       print_label(label,10);
       printf("\t%+6.2f V\n",voltage);
     }
-  }
+  } else
+    printf("ERROR: Can't get IN1 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_VOLTAGE3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_VOLTAGE3,&voltage)) {
     if (valid) {
       print_label(label,10);
       printf("\t%+6.2f V\n",voltage);
     }
-  }
+  } else
+    printf("ERROR: Can't get IN2 data!\n");
   free_the_label(&label);
 }
 
@@ -3560,8 +3602,10 @@ void print_fscher(const sensors_chip_name *name)
       else
         printf("\tfailed\n");
     }
-  }
+  } else
+    printf("ERROR: Can't get TEMP1 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_TEMP2,&label,&valid)
       && !sensors_get_feature(*name,SENSORS_FSCHER_TEMP2,&temp)
       && !sensors_get_feature(*name,SENSORS_FSCHER_TEMP2_STATE,&state)) { 
@@ -3572,8 +3616,10 @@ void print_fscher(const sensors_chip_name *name)
       else
         printf("\tfailed\n");
     }
-  }
+  } else
+    printf("ERROR: Can't get TEMP2 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_TEMP3,&label,&valid)
       && !sensors_get_feature(*name,SENSORS_FSCHER_TEMP3,&temp)
       && !sensors_get_feature(*name,SENSORS_FSCHER_TEMP3_STATE,&state)) { 
@@ -3584,8 +3630,10 @@ void print_fscher(const sensors_chip_name *name)
       else
         printf("\tfailed\n");
     }
-  }
+  } else
+    printf("ERROR: Can't get TEMP3 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_FAN1,&label,&valid)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN1,&fan)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN1_MIN,&min_rpm)
@@ -3599,8 +3647,10 @@ void print_fscher(const sensors_chip_name *name)
       else
         printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN1 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_FAN2,&label,&valid)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN2,&fan)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN2_MIN,&min_rpm)
@@ -3614,8 +3664,10 @@ void print_fscher(const sensors_chip_name *name)
       else
         printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN2 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_FAN3,&label,&valid)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN3,&fan)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN3_MIN,&min_rpm)
@@ -3629,31 +3681,38 @@ void print_fscher(const sensors_chip_name *name)
       else
         printf("\t%6.0f RPM \n",fan);
     }
-  }
+  } else
+    printf("ERROR: Can't get FAN3 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_VOLTAGE1,&label,&valid)
       && !sensors_get_feature(*name,SENSORS_FSCHER_VOLTAGE1,&voltage)) {
     if (valid) {
       print_label(label,10);
       printf("\t%+6.2f V\n",voltage);
     }
-  }
+  } else
+    printf("ERROR: Can't get IN0 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_VOLTAGE2,&label,&valid)
       && !sensors_get_feature(*name,SENSORS_FSCHER_VOLTAGE2,&voltage)) {
     if (valid) {
       print_label(label,10);
       printf("\t%+6.2f V\n",voltage);
     }
-  }
+  } else
+    printf("ERROR: Can't get IN1 data!\n");
   free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_VOLTAGE3,&label,&valid)
       && !sensors_get_feature(*name,SENSORS_FSCHER_VOLTAGE3,&voltage)) {
     if (valid) {
       print_label(label,10);
       printf("\t%+6.2f V\n",voltage);
     }
-  }
+  } else
+    printf("ERROR: Can't get IN2 data!\n");
   free_the_label(&label);
 }
 
