@@ -836,7 +836,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             fscher_detect adm1029_detect adm1031_detect max6900_detect
             m5879_detect pca9540_detect smartbatt_mgr_detect
             smartbatt_chgr_detect adt7467_detect lm92_detect max1619_detect
-            lm93_detect lm77_detect);
+            lm93_detect lm77_detect lm63_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1236,9 +1236,9 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "National Semiconductor LM63",
-       driver => "lm90",
+       driver => "lm63",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect 6, @_ },
+       i2c_detect => sub { lm63_detect @_ },
      },
      {
        name => "National Semiconductor LM92",
@@ -3059,7 +3059,7 @@ sub lm83_detect
 
 # $_[0]: Chip to detect
 #   (0 = LM90, 1=LM89/LM99, 2=LM86, 3=ADM1032, 4=MAX6657/MAX6658/MAX6659,
-#    5 = ADT7461, 6 = LM63)
+#    5 = ADT7461)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -3119,13 +3119,42 @@ sub lm90_detect
     return if $mid != 0x41;     # Analog Devices
     return 8 if $cid == 0x61;   # ADT7461
   }
-  if ($chip == 6) {
-    return if ($conf & 0x18) != 0;
-    return if $rate > 0x09;
-    return if $mid != 0x01;     # National Semiconductor
-    return 8 if $cid == 0x41;   # LM63
-  }
   return;
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address (unused)
+# Returns: undef if not detected, 8 if detected.
+# Registers used:
+#   0xfe: Manufacturer ID
+#   0xff: Chip ID / die revision
+#   0x03: Configuration (two unused bits)
+#   0x16: Alert mask (three unused bits)
+#   0x03-0x0e: Mirrored registers (five pairs)
+sub lm63_detect
+{
+  my ($file, $addr) = @_;
+
+  my $mid = i2c_smbus_read_byte_data($file, 0xfe);
+  my $cid = i2c_smbus_read_byte_data($file, 0xff);
+  return if $mid != 0x01    # National Semiconductor
+         || $cid != 0x41;   # LM63
+
+  my $conf = i2c_smbus_read_byte_data($file, 0x03);
+  my $mask = i2c_smbus_read_byte_data($file, 0x16);
+  return if ($conf & 0x18) != 0x00
+         || ($mask & 0xa4) != 0xa4;
+
+  # For compatibility with the LM86, some registers are mirrored
+  # to alternative locations
+  return if $conf != i2c_smbus_read_byte_data($file, 0x09);
+  foreach my $i (0x04, 0x05, 0x07, 0x08) {
+    return if i2c_smbus_read_byte_data($file, $i)
+           != i2c_smbus_read_byte_data($file, $i+6);
+  }
+
+  return 8;
 }
 
 # $_[0]: Chip to detect
