@@ -1,8 +1,12 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 #
-#    doc-insmod.pl - Generate documentation about insmod parameters.
+#    doc-insmod.pl - Generate module parameters documentation
 #    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+#    Copyright (c) 2002  Jean Delvare <khali@linux-fr.org>
+#
+#    Known to work with Linux modutils 2.3.10-pre1, 2.4.6, 2.4.15, 2.4.16
+#    and 2.4.19.
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,59 +23,67 @@
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-# Use the following patch (apply by hand) if modinfo does not seem to terminate:
-#
-#  *** /tmp/modutils-2.1.121/insmod/modinfo.c      Mon Sep 14 20:55:28 1998
-#  --- modutils-2.1.121/insmod/modinfo.c   Wed Apr 14 20:54:38 1999
-#  ***************
-#  *** 457,462 ****
-#     error_file = "modinfo";
-#   
-# !   while (optind < argc)
-#       show_module_info(argv[optind], fmtstr, do_parameters);
-#   
-#     return 0;
-# --- 457,464 ----
-#     error_file = "modinfo";
-#   
-# !   while (optind < argc) {
-#       show_module_info(argv[optind], fmtstr, do_parameters);
-# +     optind ++;
-# +   }
-#   
-#     return 0;
-
 
 use strict;
-
 use Text::Wrap;
+use vars qw($modinfo);
 
-# @_[0]: name and path of the kernel module
-sub print_info
+$modinfo = 'modinfo';
+$ENV{PATH} = '/sbin';
+
+sub get_modinfo_version
 {
-  my ($modname) = @_;
-  my (@lines,$line,$option,$type,$desc);
-  print wrap("Author: ","        ",`modinfo -a $modname`), "\n\n";
-  print "Module Parameters\n";
-  print "-----------------\n";
-  print "\n";
-  open OPTIONS,"modinfo -p $modname|";
-  @lines = <OPTIONS>;
-  close OPTIONS;
-  foreach $line ( sort { $a cmp $b } @lines ) {
-    ($option,$type,$desc) = $line =~ /^(\S+) (.+), description "(.*)"$/;
-    print "* $option: $type\n";
-    print wrap("  ","  ",$desc),"\n";
-  }
+	my $line = `$modinfo -V`;
+	
+	return undef unless $line =~ m/\b(\d+)\.(\d+)\.(\d+)/;
+	return ($1<<16)+($2<<8)+$3;
 }
 
-if (@ARGV != 1 or @ARGV[0] =~ /^-/) {
-  print STDERR "Syntax: doc-insmod.pl MODULE\n";
-  print STDERR "MODULE should be the full path to a module name.\n";
-  print STDERR "This program is only tested with modutils-2,1.121.\n";
-  print STDERR "If it does not seem to terminate, you need to patch modinfo. ".
-               "Examine the source\n".
-               "code of doc-modules.pl to find the patch.\n";
-  exit 0;
+# @_[0]: name or full path of the kernel module
+sub print_modinfo
+{
+	my $modname = shift;
+	my $version = get_modinfo_version();
+	
+	unless ($modname =~ m/^([\w\d.\/-]+)$/)
+	{
+		print STDERR "Invalid module name.\n";
+		return;
+	}
+	$modname = $1;
+	
+	my ($author, $license);
+	$author = `$modinfo -a $modname`;
+	$author =~ s/\n\s*/ /mg;
+	$author =~ s/^"//;
+	$author =~ s/"$//;
+	if (defined $version and $version >= (2<<16)+(4<<8)+15)
+	{
+		$license = `$modinfo -l $modname`;
+		$license =~ s/^"//;
+		$license =~ s/"$//;
+	}
+	
+	print wrap('Author: ', '        ', $author), "\n";
+	print wrap('License: ', '         ', $license), "\n"
+		if defined $license;
+	print "\n", "Module Parameters\n", "-----------------\n", "\n";
+
+	open OPTIONS, "$modinfo -p $modname |";
+	while (<OPTIONS>)
+	{
+		next unless m/^(parm:\s*)?(\S+) (.+), description "(.*)"$/;
+		print "* $2: $3\n",
+			wrap('  ', '  ', $4), "\n";
+	}
+	close OPTIONS;
 }
-print_info @ARGV
+
+if (@ARGV != 1 or $ARGV[0] =~ /^-/)
+{
+	print "Usage: $0 MODULE\n",
+		"  MODULE is a module name or the full path to a module file.\n";
+	exit 0;
+}
+
+print_modinfo($ARGV[0]);
