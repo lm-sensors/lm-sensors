@@ -3409,8 +3409,8 @@ sub adm1021_detect
   }
 
   # Extra checks for MAX1617 and LM84, since those are often misdetected
-  # We verify 6 assertions and discard the chip if too many (2 for the
-  # MAX1617, 4 for the LM84) fail. Not that these checks are not done
+  # We verify several assertions (6 for the MAX1617, 4 for the LM84) and
+  # discard the chip if any fail. Note that these checks are not done
   # by the adm1021 driver.
   if ($chip == 2 || $chip == 5)
   {
@@ -3425,35 +3425,20 @@ sub adm1021_detect
     return if $lte == $rte and $lte == $lhi and $lte == $rhi
            and $lte == $llo and $lte == $rlo;
 
-    # Increase the misdetect value each time a temperature doesn't
-    # match reasonable expectations
-    my $misdetect = 0;
     # Negative temperatures
-    $misdetect++ if ($lte & 0x80);
-    $misdetect++ if ($rte & 0x80);
+    return if ($lte & 0x80) or ($rte & 0x80);
     # Negative high limits
-    if ($lhi & 0x80)
-    {
-      $misdetect++;
-      $lhi-=256;
-    }
-    if ($rhi & 0x80)
-    {
-      $misdetect++;
-      $rhi-=256;
-    }
+    return if ($lhi & 0x80) or ($rhi & 0x80);
     # Low limits over high limits
     if ($chip != 5) # LM84 doesn't have low limits
     {
       $llo-=256 if ($llo & 0x80);
       $rlo-=256 if ($rlo & 0x80);
-      $misdetect++ if $llo > $lhi;
-      $misdetect++ if $rlo > $rhi;
+      return if ($llo > $lhi) or ($rlo > $rhi);
     }
-    return if $misdetect > 2;
   }
 
-  return 3 if $chip == 2;
+  return 3 if ($chip == 2) or ($chip == 5);
   return 7 if $chip <= 3;
   return 5;
 }
