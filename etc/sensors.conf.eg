@@ -1150,6 +1150,12 @@ chip "it87-*" "it8705-*" "it8712-*"
     compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
 
 # Temperature
+#
+# Important - if your temperature readings are completely whacky
+# you probably need to change the sensor type. This must be done
+# with 'modprobe it87 temp_type=0xXX', you can't fix it in this file.
+# See ../doc/chips/it87 for details and valid 'XX' values!!!
+#
     label temp1       "Temp1/MB"
     set   temp1_over  40
     set   temp1_hyst  20
