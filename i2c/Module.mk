@@ -7,6 +7,9 @@ TARGETS := $(MODULE_DIR)/i2c-core.o  $(MODULE_DIR)/algo-bit.o \
            $(MODULE_DIR)/i2c-dev.o   $(MODULE_DIR)/bit-lp.o \
            $(MODULE_DIR)/bit-velle.o $(MODULE_DIR)/bit-mb.o
 
+# Include all dependency files
+include $(TARGETS:.o=.d)
+
 all :: $(TARGETS)
 
 install :: $(TARGETS)
@@ -14,4 +17,4 @@ install :: $(TARGETS)
 	install -o root -g root -m 644 $(MODDIR) $(TARGETS)
 
 clean ::
-	$(RM) $(TARGETS) 
+	$(RM) $(TARGETS) $(TARGETS:.o=.d)

@@ -62,6 +62,9 @@ endif
 
 .PHONY: all clean install version package
 
+# Make all the default rule
+all::
+
 # Include all makefiles for sub-modules
 include $(patsubst %,%/Module.mk,$(MODULES))
 
@@ -72,6 +75,12 @@ install::
 
 clean::
 	$(RM) lm_sensors-*
+
+# Create a dependency file. Tricky.
+%.d: %.c
+	gcc -M -MG $(CFLAGS) $< | \
+	sed -e 's@ /[^ ]*@@g' -e 's@^\(.*\)\.o:@\1.d \1.o:@' > $@
+	
 
 # This is tricky, but it works like a charm. It needs lots of utilities
 # though: cut, find, gzip, ln, tail and tar.
