@@ -1630,11 +1630,27 @@ chip "pcf8591-*"
 # Analog inputs
 
    ignore ain_conf
-   set    ain_conf    0
+# Since Linux 2.6, input configuration is set as module parameter,
+# so the line below is for older kernels only.
+#  set    ain_conf    0
+
+# You may discard ch2 and ch3 if you don't use them (depends on the input
+# configuration)
+#  ignore ch2
+#  ignore ch3
+
    label  ch0         "Chan. 0"
    label  ch1         "Chan. 1"
    label  ch2         "Chan. 2"
    label  ch3         "Chan. 3"
+
+# The driver assumes Vref = 2.56V and Agnd = 0V. If it doesn't match
+# your hardware, you have to use compute lines. The example below is
+# correct for Vref = 5.0V and Agnd = 0V.
+#  compute ch0 (@ * 500 / 256), (@ * 256 / 500)
+#  compute ch1 (@ * 500 / 256), (@ * 256 / 500)
+#  compute ch2 (@ * 500 / 256), (@ * 256 / 500)
+#  compute ch3 (@ * 500 / 256), (@ * 256 / 500)
 
 # Analog output
 
