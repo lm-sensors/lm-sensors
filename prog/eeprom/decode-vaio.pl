@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Copyright 2002 Jean Delvare <khali@linux-fr.org>
+# Copyright 2002,2003 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -61,8 +61,8 @@
 # Any feedback appreciated anyway.
 #
 # Thanks to Werner Heuser, Carsten Blume, Christian Gennerat, Joe Wreschnig,
-# Xavier Roche, Sebastien Lefevre, Lars Heer and Steve Dobson and others
-# for their precious help.
+# Xavier Roche, Sebastien Lefevre, Lars Heer, Steve Dobson and others for
+# their precious help.
 #
 
 use strict;
@@ -143,7 +143,7 @@ sub vaio_decode
 BEGIN
 {
 	print("Sony Vaio EEPROM Decoder\n");
-	print("Written by Jean Delvare.  Copyright 2002.\n");
+	print("Written by Jean Delvare.  Copyright 2002,2003.\n");
 	print("Version 1.0\n\n");
 }
 
