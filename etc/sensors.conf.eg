@@ -1146,3 +1146,31 @@ chip "fscpos-*"
     label volt12      "+12V"
     label volt5       "+5V"
     label voltbatt    "+3.3V"
+
+chip "fscscy-*"
+
+#
+#    values for the fujitsu siemens Scylla chip
+#
+# Temperature
+
+    label temp1       "Temp1/CPU0"
+    label temp2       "Temp2/CPU1"
+    label temp3       "Temp3/MB"
+    label temp4       "Temp4/AUX"
+
+# Fans
+
+    label  fan1       "Fan1/CPU0"
+    label  fan2       "Fan2/CPU0"
+    label  fan3       "Fan3"
+    label  fan4       "Fan4"
+    label  fan5       "Fan5"
+    label  fan6       "Fan6"
+
+# Voltage
+
+    label volt12      "+12V"
+    label volt5       "+5V"
+    label voltbatt    "+3.3V"
+
