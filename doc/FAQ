@@ -1,8 +1,9 @@
 Sensors FAQ for lm_sensors version 2
 ------------------------------------
 
-    Copyright (c) 1998, 1999, 2000, 2001  Frodo Looijaard <frodol@dds.nl>,
-    Philip Edelbrock <phil@netroedge.com>, and Mark Studebaker <mdsxyz123@yahoo.com>
+    Copyright (c) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>,
+    Philip Edelbrock <phil@netroedge.com>, and
+    Mark Studebaker <mdsxyz123@yahoo.com>
 
 ------------------------------------------------------------------------------------
 
@@ -45,21 +46,20 @@ CONTENTS
 3.10 I2C_DRIVERID_ADM1024 undefined (Red Hat especially)
 
 4. Problems
-4.1 Why do my fans report exactly half/double their values compared to the BIOS? 
+4.1 My fans report exactly half/double their values compared to the BIOS? 
   4.1A Fans sometimes / always read 0!!
   4.1B I doubled the fan divisor and the fan still reads 7000!
 4.2 Why do my two LM75's report "-48 degrees"?
 4.3 Why do I have two Vcore readings, I have only one processor!
 4.4 How do those ALARMS work? The current value is within range but there
-is still an ALARM warning!
-4.5 My voltage readings seem to drift a bit. Is something wrong with my power
-supply?
+    is still an ALARM warning!
+4.5 My voltage readings seem to drift a bit. Is something wrong?
 4.6 Some measurements are way out of range. What happened?
 4.7 What are VID lines? Why is the VID reading wrong?
 4.8 I read sensor values several times a second, but they are only
-updated only each second or so. Why?
+    updated only each second or so. Why?
 4.9 It sometimes seems to take almost a second before I see the
-sensor reading results. Why?
+    sensor reading results. Why?
 4.10 Can I be alerted when an ALARM occurs?
 4.11 SMBus transactions on my PIIX4 simply don't work (timeouts happen).  Why?
 4.12 My BIOS reports a much higher CPU temperature than your modules!
@@ -78,8 +78,10 @@ sensor reading results. Why?
   4.17G Bad readings from LM75!
   4.17H Bad readings from LM78!
   4.17I Bad readings from LM80!
+  4.17J Bad readings from it87!
 4.18 How do I configure two chips (LM87) differently?
 4.19 Dmesg says Upgrade BIOS! I don't want to!
+  4.19A Dmesg says use force_addr=0xaddr! What address do I use?
 4.20 Sensors says 'Can't access /proc file'
 4.21 Sensors says 'No sensors found!'
 4.22 Sensors output is not correct!
@@ -93,6 +95,9 @@ sensor reading results. Why?
   4.24C Sensors-detect doesn't find any sensors
 4.25 Sensors says 'Error: Line xxx: zzzzzzz'
 4.26 Sensors only gives the name, adapter, and algorithm for my chip
+4.27 Sensors says 'ERROR: Can't get xxxxx data!'
+4.28 Sensors doesn't find any sensors, just eeproms
+4.29 Inserting modules hangs my board
 
 5. How to Ask for Help  
 5.1 What to do if a module won't insert?
@@ -271,7 +276,7 @@ supported, of course.
     Even if no interrupt is generated, some bits in a status register
 will be set until the register is read the next time. If the alarm condition
 persists after that, the bits will be set on the next scanning sweep, etc.
-    At this moment, interrupts are not supported.
+    Most drivers in our package do not support interrupts at this time.
 
 
 
@@ -492,7 +497,7 @@ these obsolete header files, at a command prompt:
 4 Problems
 ----------
 
-4.1 Why do my fans report exactly half/double their values compared to the BIOS? 
+4.1 My fans report exactly half/double their values compared to the BIOS? 
 
     The problem with much of the sensor data is that it is impossible to 
 properly interpret some of the readings without knowing what the hardware 
@@ -504,6 +509,8 @@ configuration file /etc/sensors.conf:
     compute fan1 2*@,@/2      # This will double the fan1 reading
                               # -- or --
     compute fan1 @/2,2*@      # This will halve the fan1 reading
+
+See doc/fan-divisors in our package for further information.
 
 
 4.1A Fans sometimes / always read 0!!
@@ -539,8 +546,8 @@ readings.
     The LM78 has seven voltage sensors. The default way of
 connecting them is used in the configuration file. This includes a VCore2,
 even if you do not have one. You can easily edit the configuration file
-to give it another name, or (in upcoming versions) to make this reading
-disappear.
+to give it another name, or make this reading disappear using
+an 'ignore' line.
     Note that Vcore2 is often the same as Vcore on motherboards which
 only support one processor. Another possibility is that Vcore2 is not
 connected at all and will not have a valid reading at all.
@@ -553,7 +560,8 @@ different.
 is still an ALARM warning!
 
     The ALARM indications in 'sensors' are those reported by the
-sensor chip itself. They are NOT calculated by 'sensors'.
+sensor chip itself. They are NOT calculated by 'sensors'. 'sensors
+simply reads the ALARM bits and reports them.
     An ALARM will go off when a minimum or maximum limit is crossed.
 The ALARM is then latched - that is, it will stay there until the
 chip's registers are next accessed - which will be the next time
@@ -569,13 +577,15 @@ See the specific chip documentation in doc/chips and the
 chip datasheet for more information.
 
 
-4.5 My voltage readings seem to drift a bit. Is something wrong with my power
-supply?
+4.5 My voltage readings seem to drift a bit. Is something wrong?
 
     No, probably not. If your motherboard heats up a bit, the sensed
 voltages will drift a bit. If your power supply is loaded (because a disk
-gets going, for example), the voltages may get a bit lower. As long as they
-stay within a sensible range (say 10% of the expected value), there is no
+gets going, for example), the voltages may get a bit lower. Heavy
+processor activity, in particular, dramatically increases core voltage
+supply load which will often cause variation in the other supplies.
+As long as they stay within a sensible range (say 5% of the nominal value
+for CPU core voltages, and 10% for other voltages), there is no
 reason to worry.
 
 
@@ -793,6 +803,14 @@ do not recogize or support. Figure out what you really have (see 3.2A).
 as an LM80. Figure out what you really have (see 3.2A).
 
 
+4.17J Bad readings from it87!
+
+    The it87 temperature sesnsors are configured, unfortunately,
+in a way different from w83781d. They cannot be configured from
+/etc/sensors.conf; they must be set at modprobe insertion with
+'modprobe it87 temp_type=0xXX'. See doc/chips/it87 for details.
+
+
 4.18 How do I configure two chips (LM87) differently?
 
     There is a SuperMicro board with two LM87's on it that are
@@ -816,15 +834,22 @@ is complex. For the ALI M7101 device, there is a solution which uses the
 2.4 kernel's 'hotplug' facility. See prog/hotplug in our package.
 For other PCI devices, you can try to modify
 the m7101 solution in prog/hotplug.
+
+    If dmesg says try force_addr, see below. Other drivers generally do not
+support the force_addr parameter. Sorry. Check the documentation
+for your driver in doc/[chips,busses] and if we don't suupport it
+you can send us your request.
+
+
+4.19A Dmesg says use force_addr=0xaddr! What address do I use?
+
     If the problem is a PCI device whose base address is not set,
 you may be able to set the address with a force parameter. The via686a
 and sis5595 chip drivers, and some bus drivers, support the command line
 'modprobe via686a force_addr=0xADDRESS' where ADDRESS
-is the I/O address (cat /proc/ioports to verify you don't have
-a conflict). Other drivers generally do not
-support the force_addr parameter. Sorry. Check the documentation
-for your driver in doc/[chips,busses] and if we don't suupport it
-you can send us your request.
+is the I/O address. You must select an address that is not in use.
+Cat /proc/ioports to check (carefully) for conflicts. A high number like
+0xf000 is generally safe.
 
 
 4.20 Sensors says 'Can't access /proc file'
@@ -952,6 +977,50 @@ Run devfs in the kernel to get the /dev/i2c/x files.
     and not some older 'sensors'.
 
 
+4.27 Sensors says 'ERROR: Can't get xxxxx data!'
+
+    You have a libsensors/sensors mismatch. 'sensors' is unable to
+    get a data entry from libsensors. You probably have an
+    old libsensors in your /etc/ld.so.conf path.
+    Make sure you did (as root) a 'make install' followed by a 'ldconfig'.
+    Then check the output of 'ldconfig -v | grep libsensors' to
+    verify that there is only ONE libsensors entry and that it matches
+    the libsensors that was built in the lib/ directory in lm_sensors2. 
+
+
+4.28 Sensors doesn't find any sensors, just eeproms.
+
+    Did sensors-detect find any sensors? If not see #4.24C.
+    If it did, did you insert your modules? For chips on the ISA
+    bus, did you insert i2c-isa?
+    If the modules didn't insert see #5.1 below.
+    See also #4.21.
+
+
+4.29 Inserting modules hangs my board
+
+    There are several possible causes:
+	1) Bus driver problems. Insert the bus driver first, before
+	   you have inserted any chip drivers, to verify.
+	2) Wrong chip driver. Verify that you have a chip supported
+	   by the chip driver (see #3.2A)
+	3) The chip driver is reinitializing the chip, which
+	   undoes critical initialization done by the BIOS.
+	   Try the parameter "init=0" for the w83781d driver;
+	   this is the only driver supporting this parameter.
+	4) Some chip on the bus doesn't like to be probed at all.
+	   After inserting the bus driver (but not the chip drivers),
+	   run i2cdetect on the bus, then i2cdump on each address
+	   responding to i2cdetect. This may find the culprit.
+	   Do not i2cdump address 0x69, the clock chip.
+	5) The chip driver is incorrectly finding a second chip
+	   on the bus and is accessing it. For example, with the
+	   Tyan 2688 with a w83781d at 0x29, use
+	   'modprobe ignore_range=0,0x00,0x28,0,0x2a,0x7f'
+	   to prevent access to other addresses. (init=0 also req'd
+	   for the Tyan 2688).
+
+
 5 How to ask for help
 ---------------------
 
@@ -974,11 +1043,14 @@ emailed automatically when your question has been answered.
         * The output of (as root) 'prog/detect/i2cdetect X'
               X = the bus number
               (run 'i2cdetect' with no arguments to list the busses)
+              (only if it's not all 'XX')
         * The output of (as root) 'prog/dump/i2cdump X 0xXX'
               XX = the address of each chip you see in the output
               of i2cdetect. (run once for each chip)
+              (only if it's not all 'ff')
     - If an ISA sensor chip problem:
         * The output of (as root) 'prog/dump/isadump 0x295 0x296'
+          (only if it's not all 'XX')
     - Part numbers of chips on your motherboard you think are
           the sensor chips (look at your motherboard)
     - Motherboard type
@@ -1088,7 +1160,7 @@ there is no automated subscribe/unsubscribe service.
      Believe it or not, what we really need help with are:
 	- Answering email
 	- Answering support tickets
-	- Submitting patches to Linux, etc.
+	- Submitting patches to Linus, etc.
 	- Creating a sensors.conf database
 	- Creating RPM's
 
@@ -1153,7 +1225,8 @@ can not be sure.
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
 
-Rev 2.6 (MDS) Minor updates 20020115
+Rev 2.7 (MDS) Minor updates 20020413
+Rev 2.6 (MDS) Minor updates 20020115, released with lm_sensors 2.6.3
 Rev 2.5 (MDS) Minor updates 20011111, released with lm_sensors 2.6.2
 Rev 2.4 (MDS) Minor updates 20010722
 Rev 2.3 (MDS) General update, 20010224, released with lm_sensors 2.6.0.
