@@ -252,7 +252,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      } ,
      {
        name => "National Semiconductor LM78-J",
-       driver => "",
+       driver => "lm78",
        i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { lm78_detect 1, @_ },
@@ -437,7 +437,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      {
        name => "DDC monitor",
        driver => "ddc-none-available-yet",
-       i2c_addrs => [0x50..0x57],
+       i2c_addrs => [0x50],
        i2c_detect => sub { ddcmonitor_detect @_ },
      },
 );
