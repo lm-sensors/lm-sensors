@@ -26,6 +26,8 @@
 #include <fcntl.h>
 #include "i2c-dev.h"
 
+void help(void) __attribute__ ((noreturn));
+
 void help(void)
 {
   FILE *fptr;
