@@ -346,6 +346,11 @@ int lm78_detect_isa(struct isa_adapter *adapter)
       type = lm79;
       type_name = "lm79";
       client_name = "LM79 chip";
+    } else if (err == 0x02) {
+      printk("lm78.o: Warning: Winbond W83781D detected (treated as a LM79)\n");
+      type = lm79;
+      type_name = "lm79";
+      client_name = "LM79 chip";
     } else {
 #ifdef DEBUG
       printk("lm78.o: warning: probed non-lm78 chip?!? (%x)\n",err);
