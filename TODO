@@ -4,8 +4,8 @@ Many, many things. Most notably:
 * Create wait-queues for bus locking instead of pure semaphores, to make
   it more interactive
 * Check for block read/writes in smbus-on-i2c emulation code
-* Merge man-pages
-* Fans give overflow if small values are written to them.
+* Fans give overflow if small values are written to them in /proc; other 
+  features may too.
 * At least the bit-lp and bit-velle modules do no detection on loading;
   ask Simon whether this is possible to add.
 * kmalloc with GFP_KERNEL can cause a context switch! Check whether this is
@@ -37,5 +37,5 @@ Many, many things. Most notably:
 * Some library routines are pretty inefficient right now
 * Test SIS5595(/91/98) sensor support. Write generic i2c support. 
   Thomas Dickel <Thomas.Dickel@mni.fh-giessen.de> owns one SIS5595.
-* Write Acer Labs Aladdin V southbridge (M1543C) support
-  Mark Studebaker <mds@blazer.eng.paradyne.com> is working on it.
+  The sensor data must be added to lib/chips
+* Extend detect script to detect chips too.

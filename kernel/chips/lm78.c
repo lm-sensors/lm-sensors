@@ -317,11 +317,6 @@ int lm78_detect_isa(struct isa_adapter *adapter)
     if (check_region(address, LM78_EXTENT))
       continue;
 
-    /* Awful, but true: unused port addresses should return 0xff */
-    if ((inb_p(address + 1) != 0xff) || (inb_p(address + 2) != 0xff) ||
-       (inb_p(address + 3) != 0xff) || (inb_p(address + 7) != 0xff))
-      continue;
-    
     if (inb_p(address + LM78_ADDR_REG_OFFSET) == 0xff) {
       outb_p(0x00,address + LM78_ADDR_REG_OFFSET);
       if (inb_p(address + LM78_ADDR_REG_OFFSET) == 0xff)

@@ -372,11 +372,6 @@ int w83781d_detect_isa(struct isa_adapter *adapter)
     if (check_region(address, W83781D_EXTENT))
       continue;
 
-    /* Awful, but true: unused port addresses should return 0xff */
-    if ((inb_p(address + 1) != 0xff) || (inb_p(address + 2) != 0xff) ||
-       (inb_p(address + 3) != 0xff) || (inb_p(address + 7) != 0xff))
-      continue;
-    
     if (inb_p(address + W83781D_ADDR_REG_OFFSET) == 0xff) {
       outb_p(0x00,address + W83781D_ADDR_REG_OFFSET);
       if (inb_p(address + W83781D_ADDR_REG_OFFSET) == 0xff)
