@@ -689,7 +689,6 @@ int adm1026_detect(struct i2c_adapter *adapter, int address,
 				" found at %d,0x%02x. Try force_adm1026.\n",
 				i2c_adapter_id(adapter), address );
 			}
-			err = 0 ;
 			goto ERROR1;
 		}
 	}
