@@ -216,8 +216,9 @@ int main (int argc, char *argv[])
     fprintf(stderr,"%s\n",sensors_strerror(res));
     if (res == -SENSORS_ERR_PROC)
       fprintf(stderr,
-              "/proc/sys/dev/sensors/chips or /proc/bus/i2c unreadable;\n"
-              "Make sure you have done 'modprobe i2c-proc'!\n");
+              "Unable to find i2c bus information;\n"
+              "For 2.6 kernels, make sure you have mounted sysfs!\n"
+              "For older kernels, make sure you have done 'modprobe i2c-proc'!\n");
     exit(1);
   }
 
