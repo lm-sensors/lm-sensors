@@ -666,6 +666,50 @@ EOF
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
+# Generate the diffs for the list of MAINTAINERS
+# $_[0]: i2c package root (like /tmp/i2c)
+# $_[1]: Linux kernel tree (like /usr/src/linux)
+sub gen_MAINTAINERS
+{
+  my ($package_root,$kernel_root) = @_;
+  my $kernel_file = "MAINTAINERS";
+  my $package_file = $temp;
+  my $done = 0;
+
+  open INPUT,"$kernel_root/$kernel_file"
+        or die "Can't open `$kernel_root/$kernel_file'";
+  open OUTPUT,">$package_root/$package_file"
+        or die "Can't open $package_root/$package_file";
+  MAIN: while(<INPUT>) {
+    if (m@SENSORS DRIVERS@) {
+       $_=<INPUT> while not m@^$@;
+       $_=<INPUT>;
+       redo MAIN;
+    }
+    if (not $done and (m@SGI VISUAL WORKSTATION 320 AND 540@)) {
+      print OUTPUT <<'EOF';
+SENSORS DRIVERS
+P:      Frodo Looijaard
+M:      frodol@dds.nl
+P:	Philip Edelbrock
+M:	phil@netroedge.com
+L:      lm78@stimpy.netroedge.com
+W:      http://www.lm-sensors.nu/
+S:      Maintained
+
+EOF
+      $done = 1;
+    }
+    print OUTPUT;
+  }
+  close INPUT;
+  close OUTPUT;
+  die "Automatic patch generation for `MAINTAINERS' failed.\n".
+      "Contact the authors please!" if $done == 0;
+  print_diff $package_root,$kernel_root,$kernel_file,$package_file;
+}
+
+
 # Main function
 sub main
 {
@@ -929,6 +973,7 @@ EOF
   gen_drivers_i2c_Makefile $package_root, $kernel_root;
   gen_drivers_i2c_i2c_core_c $package_root, $kernel_root;
   gen_Documentation_Configure_help $package_root, $kernel_root;
+  gen_MAINTAINERS $package_root, $kernel_root;
 }
 
 main;
