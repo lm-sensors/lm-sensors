@@ -629,7 +629,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        func => 1,
        procid => "nVidia Corporation nForce2 SMBus (MCP)",
        driver => "i2c-nforce2",
-       match => sub { $_[0] =~ /^SMBus nVidia nForce2 adapter at / },
+       match => sub { $_[0] =~ /^SMBus nForce2 adapter at / },
      } , 
      { 
        vendid => 0x1166,
