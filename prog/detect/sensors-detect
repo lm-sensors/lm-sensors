@@ -943,14 +943,15 @@ sub add_i2c_to_chips_detected
 # $_[0]: alias detection function
 # $_[1]: chip driver
 # $_[2]: reference to data hash
-# Returns: Nothing
+# Returns: 0 if it is not an alias, datahash reference if it is.
 sub add_isa_to_chips_detected
 {
   my ($alias_detect,$chipdriver,$datahash) = @_;
   my ($i,$new_detected_ref,$new_misdetected_ref,$detected_ref,$misdetected_ref,
-      $main_entry);
+      $main_entry,$isalias);
 
   # First determine where the hash has to be added.
+  $isalias=0;
   for ($i = 0; $i < @chips_detected; $i++) {
     last if ($chips_detected[$i]->{driver} eq $chipdriver);
   }
@@ -988,7 +989,7 @@ sub add_isa_to_chips_detected
         $new_misdetected_ref->[$i]->{isa_extra} = $datahash->{isa_extra} 
                if exists $datahash->{isa_extra};
         close FILE;
-        return;
+        return $new_misdetected_ref->[$i]; 
       }
       close FILE;
     }
@@ -1015,6 +1016,7 @@ sub add_isa_to_chips_detected
                if exists $datahash->{isa_extra};
         ($datahash) = splice (@$new_detected_ref, $i, 1);
         close FILE;
+        $isalias=1;
         last;
       }
       close FILE;
@@ -1037,13 +1039,22 @@ sub add_isa_to_chips_detected
           splice @$detected_ref, $i,1;
           push @$new_detected_ref, $datahash;
         }
-        return;
+        if ($isalias) {
+          return $datahash;
+        } else {
+          return 0;
+        }
       }
     }
   }
 
   # Not found? OK, put it in the detected list
   push @$new_detected_ref, $datahash;
+  if ($isalias) {
+    return $datahash;
+  } else {
+    return 0;
+  }
 }
 
 # $_[0]: The number of the adapter to scan
@@ -1138,7 +1149,12 @@ sub scan_isa_bus
       $new_hash->{isa_extra} = 0 
              if exists $chip->{isa_driver_addrs} and
                 not contains ($addr, @{$chip->{isa_driver_addrs}});
-      add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver},$new_hash;
+      $new_hash = add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver},
+                                            $new_hash;
+      if ($new_hash) {
+        printf "    Alias of the chip on I2C bus `%s', address 0x%04x",
+                        $new_hash->i2c_adap,$new_hash->i2c_addr;
+      }
     }
   }
 }
