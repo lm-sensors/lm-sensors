@@ -158,12 +158,12 @@ CONFIG_I2C_ALI15X3
   built as a module which can be inserted and removed while the kernel
   is running.
 
-AMD 756/766/768/8111
+AMD 756/766/768/8111 and nVidia nForce
 CONFIG_I2C_AMD756
   If you say yes to this option, support will be included for the AMD
-  756/766/768/8111 mainboard I2C interfaces. This can also be 
-  built as a module which can be inserted and removed while the kernel
-  is running.
+  756/766/768/8111 and nVidia nForce mainboard I2C interfaces. This can
+  also be built as a module which can be inserted and removed while the
+  kernel is running.
 
 AMD 8111 SMBus 2.0
 CONFIG_I2C_AMD8111
@@ -875,7 +875,7 @@ sub gen_drivers_i2c_Config_in
     dep_tristate '  Acer Labs ALI 1535' CONFIG_I2C_ALI1535 $CONFIG_I2C
     dep_tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 $CONFIG_I2C
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
-    dep_tristate '  AMD 756/766/768/8111' CONFIG_I2C_AMD756 $CONFIG_I2C
+    dep_tristate '  AMD 756/766/768/8111 and nVidia nForce' CONFIG_I2C_AMD756 $CONFIG_I2C
     dep_tristate '  AMD 8111 SMBus 2.0' CONFIG_I2C_AMD8111 $CONFIG_I2C
     if [ "$CONFIG_ALPHA" = "y" ]; then
       dep_tristate '  DEC Tsunami I2C interface' CONFIG_I2C_TSUNAMI $CONFIG_I2C_ALGOBIT
