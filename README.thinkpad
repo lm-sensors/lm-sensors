@@ -14,16 +14,16 @@ an additional "access protection page" at address 0x5c.
 This is an unusual eeprom that contains a RFID (Radio Frequency ID)
 port for wireless access, and elaborate access protection mechanisms.
 The 24RF08 gets confused (presumably due to a state machine flaw) by
-'quick write 0' (*) probes our package uses for detection.
-This is in violation of the I2C specification. This corruption
+the 'quick write 0' (*) probes our package uses for detection.
+This behavior is in violation of the I2C specification. This corruption
 mechanism has never been reported to us on any other eeprom,
 Atmel or otherwise.
 
 We have made several changes in release 2.6.5 to minimize the
 chance of corruption:
 
-1) Sensors-detect now accesses DMI information in the BIOS to identify
-   the system manufacturer. If the system manufacturer is IBM,
+1) Sensors-detect now accesses ACPI and DMI information in the BIOS to
+   identify the system manufacturer. If the system manufacturer is IBM,
    sensors-detect will print a message and exit.
 
 2) The sequence of probes in sensors-detect has been changed so that
@@ -48,7 +48,7 @@ chance of corruption:
    module is loaded with checksum=1, which is not the default.
 
 Even with these changes, we still DO NOT RECOMMEND INSTALLING
-lm_sensors 2.6.5 on IBM Thinkpads, because:
+lm_sensors 2.6.5 or later on IBM Thinkpads, because:
 
 1) While these changes will dramatically reduce the chance of 24RF08
    corruption, these changes have not been heavily tested.
@@ -61,8 +61,8 @@ lm_sensors 2.6.5 on IBM Thinkpads, because:
    controller. So lm_sensors isn't useful on Thinkpads anyway.
 
 
-As described above, our 2.6.5 release "blacklists" all IBM systems.
-Our next step is to refine the system detection so that only
+As described above, our 2.6.5 and later releases "blacklists" all IBM
+systems. Our next step is to refine the system detection so that only
 those models containing 24RF08's are blacklisted. We are working
 with IBM on a method of querying the MTM (Machine Type and Model)
 and comparing the MTM with a list of 24RF08-containing systems.
@@ -70,6 +70,11 @@ After this change (which will be documented in our CHANGES file
 and this document), users of IBM systems without the
 24RF08 and the proprietary Embedded Controller should be
 able to safely use lm_sensors.
+
+We would very much like to support IBM systems which contain
+non-proprietary sensor devices. Unfortunately, until we have
+a reliable identification method implemented, we must
+blacklist all IBM systems to minimize the chance of eeprom corruption.
 
 We do not have any reports of 24RF08 eeproms on non-IBM systems.
 If there are any such systems with 24RF08 eeproms, these changes will
