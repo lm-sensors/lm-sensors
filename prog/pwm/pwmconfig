@@ -83,6 +83,7 @@ then
 	exit 1
 fi
 
+# $1 = pwm file name
 function pwmdisable()
 {
 	if [ "$SYSFS" = "1" ]
@@ -98,6 +99,7 @@ function pwmdisable()
 	fi
 }
 
+# $1 = pwm file name
 function pwmenable()
 {
 	if [ "$SYSFS" = "1" ]
@@ -112,6 +114,7 @@ function pwmenable()
 	fi
 }
 
+# $1 = pwm file name; $2 = pwm value 0-255
 function pwmset()
 {
 	echo $2 > $1
@@ -290,6 +293,9 @@ do
 			then
 				let pwmactivecount=1
 				pwmactive="$i ${pwmactive}"
+				fanactive="$j ${fanactive}"
+			else
+				fanactive="$j+${fanactive}" #not supported yet by fancontrol
 			fi
 			sleep $DELAY
 			if [ $? -ne 0 ]
@@ -394,6 +400,7 @@ function LoadConfig {
 	echo "Loading configuration from $1 ..."
 	INTERVAL=`egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g'`
 	FCTEMPS=`egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS=//g'`
+	FCFANS=`egrep '^FCFANS=.*$' $1 | sed -e 's/FCFANS=//g'`
 	MINTEMP=`egrep '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP=//g'`
 	MAXTEMP=`egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP=//g'`
 	MINSTART=`egrep '^MINSTART=.*$' $1 | sed -e 's/MINSTART=//g'`
@@ -451,8 +458,8 @@ function TestMinStop {
 function SaveConfig {
 	echo
 	echo "Saving configuration to $FCCONFIG..."
-	egrep -v '(INTERVAL|FCTEMPS|MAXTEMP|MINTEMP|MINSTART|MINSTOP)' /etc/fancontrol >/tmp/fancontrol
-	echo -e "INTERVAL=$INTERVAL\nFCTEMPS=$FCTEMPS\nMINTEMP=$MINTEMP\nMAXTEMP=$MAXTEMP\nMINSTART=$MINSTART\nMINSTOP=$MINSTOP" >>/tmp/fancontrol
+	egrep -v '(INTERVAL|FCTEMPS|FCFANS|MAXTEMP|MINTEMP|MINSTART|MINSTOP)' /etc/fancontrol >/tmp/fancontrol
+	echo -e "INTERVAL=$INTERVAL\nFCTEMPS=$FCTEMPS\nFCFANS=$FCFANS\nMINTEMP=$MINTEMP\nMAXTEMP=$MAXTEMP\nMINSTART=$MINSTART\nMINSTOP=$MINSTOP" >>/tmp/fancontrol
 	mv /tmp/fancontrol /etc/fancontrol
 	#check if file was written correctly
 	echo 'Configuration saved'
@@ -492,6 +499,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			echo
 			echo "Settings of ${pwmo}:"
 			echo "  Depends on `echo $FCTEMPS |sed -e 's/ /\n/g' |egrep \"${pwmo}\" |sed -e 's/.*=//g'`"
+			echo "  Controls `echo $FCFANS |sed -e 's/ /\n/g' |egrep \"${pwmo}\" |sed -e 's/.*=//g'`"
 			echo "  MINTEMP=`echo $MINTEMP |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
 			echo "  MAXTEMP=`echo $MAXTEMP |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
 			echo "  MINSTART=`echo $MINSTART |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
@@ -513,6 +521,8 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			fi
 			echo "$j	$S"
 		done
+		FAN=`echo $fanactive|cut -d' ' -f$REPLY`
+	       	FCFANS="`echo $FCFANS | sed -e "s/${pwmsed}[^ ]* *//g\"` ${pwms}=$FAN"
 		echo
 		echo "Select a temperature sensor as source for ${pwms}:"
 		select tempss in $TEMPS "None (Do not affect this PWM output)"; do

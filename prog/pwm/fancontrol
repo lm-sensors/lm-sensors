@@ -2,7 +2,7 @@
 #
 # Simple script implementing a temperature dependent fan speed control
 #
-# Version 0.61
+# Version 0.62
 #
 # Usage: fancontrol [CONFIGFILE]
 #
@@ -39,7 +39,8 @@
 #
 #
 
-DEBUG=1
+#DEBUG=1
+MAX=255
 
 echo $$ > /var/run/fancontrol.pid
 
@@ -48,6 +49,7 @@ function LoadConfig {
 	# grep configuration from file
 	INTERVAL=`egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g'`
 	FCTEMPS=`egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS=//g'`
+	FCFANS=`egrep '^FCFANS=.*$' $1 | sed -e 's/FCFANS=//g'`
 	MINTEMP=`egrep '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP=//g'`
 	MAXTEMP=`egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP=//g'`
 	MINSTART=`egrep '^MINSTART=.*$' $1 | sed -e 's/MINSTART=//g'`
@@ -71,6 +73,7 @@ function LoadConfig {
 	do
 		AFCPWM[$fcvcount]=`echo $fcv |cut -d'=' -f1`
 		AFCTEMP[$fcvcount]=`echo $fcv |cut -d'=' -f2`
+		AFCFAN[$fcvcount]=`echo $FCFANS |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
 		AFCMINTEMP[$fcvcount]=`echo $MINTEMP |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
 		AFCMAXTEMP[$fcvcount]=`echo $MAXTEMP |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
 		AFCMINSTART[$fcvcount]=`echo $MINSTART |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
@@ -78,6 +81,7 @@ function LoadConfig {
 		echo
 		echo "Settings for ${AFCPWM[$fcvcount]}:"
 		echo "  Depends on ${AFCTEMP[$fcvcount]}"
+		echo "  Controls ${AFCFAN[$fcvcount]}"
 		echo "  MINTEMP=${AFCMINTEMP[$fcvcount]}"
 		echo "  MAXTEMP=${AFCMAXTEMP[$fcvcount]}"
 		echo "  MINSTART=${AFCMINSTART[$fcvcount]}"
@@ -94,12 +98,67 @@ else
 	LoadConfig /etc/fancontrol
 fi
 
-cd /proc/sys/dev/sensors/
-
-if (( $? != 0 )) ; then 
-  echo "Directory /proc/sys/dev/sensors/ does not exist, did you load the necessary kernel modules?"
-  exit 1
+DIR=/proc/sys/dev/sensors
+SDIR=/sys/bus/i2c/devices
+if [ ! -d $DIR ]
+then
+	if [ ! -d $SDIR ]
+	then
+		echo $0: 'No sensors found! (did you load the necessary modules?)'
+		exit 1
+	else
+		SYSFS=1
+		DIR=$SDIR
+	fi	
 fi
+cd $DIR
+
+# $1 = pwm file name
+function pwmdisable()
+{
+	if [ "$SYSFS" = "1" ]
+	then
+		echo $MAX > $1
+		ENABLE=${1/pwm/pwm_enable}
+		if [ -f $ENABLE ]
+		then
+			echo 0 > $ENABLE
+		fi
+	else
+		echo $MAX 0 > $1
+	fi
+}
+
+# $1 = pwm file name
+function pwmenable()
+{
+	if [ "$SYSFS" = "1" ]
+	then
+		ENABLE=${1/pwm/pwm_enable}
+		if [ -f $ENABLE ]
+		then
+			echo 1 > $ENABLE
+		fi
+	else
+		echo $MAX 1 > $1
+	fi
+}
+
+function restorefans()
+{
+	echo 'Aborting, restoring fans...'
+	let fcvcount=0
+	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
+	do
+		pwmo=${AFCPWM[$fcvcount]}
+		pwmdisable $pwmo
+		fcvcount=$fcvcount+1
+	done
+	echo 'Verify fans have returned to full speed'
+	exit 1
+}
+
+trap restorefans SIGHUP SIGINT SIGQUIT
 
 # function doing all the math
 function calc () {
@@ -114,25 +173,53 @@ function UpdateFanSpeeds {
 		#hopefully shorter vars will improve readability:
 		pwmo=${AFCPWM[$fcvcount]}
 		tsens=${AFCTEMP[$fcvcount]}
+		fan=${AFCFAN[$fcvcount]}
 		mint=${AFCMINTEMP[$fcvcount]}
 		maxt=${AFCMAXTEMP[$fcvcount]}
 		minsa=${AFCMINSTART[$fcvcount]}
 		minso=${AFCMINSTOP[$fcvcount]}
 		
-		tval=`cat ${tsens} |cut -d' ' -f3 |cut -d'.' -f1`
-		pwmpval=`cat ${pwmo} | cut -d' ' -f1`
+		tval=`cat ${tsens}`
+		if [ $? -ne 0 ]
+		then
+			echo "Error reading temperature from $DIR/$tsens"
+			restorefans
+		fi
+		tval=`echo ${tval} |cut -d' ' -f3 |cut -d'.' -f1`
+		if [ "$SYSFS" = "1" ]
+		then
+			let tval="$tval / 1000"
+		fi
+
+		pwmpval=`cat ${pwmo}`
+		if [ $? -ne 0 ]
+		then
+			echo "Error reading PWM value from $DIR/$pwmo"
+			restorefans
+		fi
+		pwmpval=`echo ${pwmpval} | cut -d' ' -f1`
+		
+		fanval=`cat ${fan}`
+		if [ $? -ne 0 ]
+		then
+			echo "Error reading Fan value from $DIR/$fan"
+			restorefans
+		fi
+		fanval=`echo ${fanval} | cut -d' ' -f2`
 		
 		# debug info
 		if [ "$DEBUG" != "" ]
 		then
 			echo "pwmo=$pwmo"
 			echo "tsens=$tsens"
+			echo "fan=$fan"
 			echo "mint=$mint"
 			echo "maxt=$maxt"
 			echo "minsa=$minsa"
 			echo "minso=$minso"
 			echo "tval=$tval"
 			echo "pwmpval=$pwmpval"
+			echo "fanval=$fanval"
 		fi
 		
 		if (( $tval <= $mint ))
@@ -142,13 +229,18 @@ function UpdateFanSpeeds {
 		else 
 		  # calculate the new value from temperature and settings
 		  pwmval=`calc "(((${tval}-${mint})/(${maxt}-${mint}))^2*(255-${minso})+${minso})" |cut -d'.' -f1`
-		  if [ $pwmpval -eq 0 ]
+		  if [ $pwmpval -eq 0 -o $fanval -eq 0 ]
 		  then # if fan was stopped start it using a safe value
 		  	echo $minsa > $pwmo
 			sleep 1
 		  fi
 		fi
 		echo $pwmval > $pwmo # write new value to pwm output
+		if [ $? -ne 0 ]
+		then
+			echo "Error writing PWM value to $DIR/$pwmo"
+			restorefans
+		fi
 		if [ "$DEBUG" != "" ]
 		then
 			echo "new pwmval=$pwmval"
@@ -156,6 +248,22 @@ function UpdateFanSpeeds {
 		fcvcount=$fcvcount+1
 	done
 }
+
+echo 'Enabling PWM on fans...'
+let fcvcount=0
+while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
+do
+	pwmo=${AFCPWM[$fcvcount]}
+	pwmenable $pwmo
+	if [ $? -ne 0 ]
+	then
+		echo "Error enabling PWM on $DIR/$pwmo"
+		restorefans
+	fi
+	fcvcount=$fcvcount+1
+done
+
+echo 'Starting automatic fan control...'
 
 # main loop calling the main function at specified intervals
 while true
