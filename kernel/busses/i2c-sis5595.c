@@ -162,6 +162,12 @@ int sis5595_setup(void)
 
 /* Determine the address of the SMBus areas */
 	pci_read_config_word(SIS5595_dev, ACPI_BASE, &sis5595_base);
+	if(sis5595_base == 0) {
+		printk("i2c-sis5595.o: ACPI base address uninitialized - upgrade BIOS?\n");
+		error_return = -ENODEV;
+		goto END;
+	}
+
 #ifdef DEBUG
 	printk("ACPI Base address: %04x\n", sis5595_base);
 #endif
@@ -169,7 +175,7 @@ int sis5595_setup(void)
 	 * interfere with ACPI :-(  */
 	if (check_region(sis5595_base + SMB_INDEX, 2)) {
 		printk
-		    ("i2c-sis5595.o: SMBus registers 0x%4x-0x%4x already in use!\n",
+		    ("i2c-sis5595.o: SMBus registers 0x%04x-0x%04x already in use!\n",
 		     sis5595_base + SMB_INDEX,
 		     sis5595_base + SMB_INDEX + 1);
 		error_return = -ENODEV;
@@ -373,7 +379,7 @@ u32 sis5595_func(struct i2c_adapter *adapter)
 int __init i2c_sis5595_init(void)
 {
 	int res;
-	printk("sis5595.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk("i2c-sis5595.o version %s (%s)\n", LM_VERSION, LM_DATE);
 #ifdef DEBUG
 /* PE- It might be good to make this a permanent part of the code! */
 	if (sis5595_initialized) {

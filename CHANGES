@@ -31,6 +31,7 @@ ask CVS about it:
   Module lm87: update voltage calculations
   Module mtp008: new
   Module pcf8574: change update time to 5 seconds
+  Modules sis5595, i2c-sis5595: Check for uninitialized base addresses
   Module w83781d: fix beep setting via /proc
   Program mkpatch.pl: more fixes
   Program sensors: Add ds1621, mtp008 support; add -f (Fahrenheit) option;

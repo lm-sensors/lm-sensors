@@ -67,6 +67,7 @@ SENSORS_INSMOD_1(sis5595);
 /* Length of ISA address segment */
 #define SIS5595_EXTENT 8
 #define SIS5595_BASE_REG 0x68
+#define SIS5595_ENABLE_REG 0x7B
 
 /* Where are the ISA address/data registers relative to the base address */
 #define SIS5595_ADDR_REG_OFFSET 5
@@ -277,15 +278,14 @@ int sis5595_find_sis(int *address)
 {
 	struct pci_dev *s_bridge;
 	u16 val;
+	char c;
 
 	if (!pci_present())
 		return -ENODEV;
 
-	if (!
-	    (s_bridge =
-	     pci_find_device(PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_503,
+	if (!(s_bridge =
+	      pci_find_device(PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_503,
 			     NULL)))
-
 		return -ENODEV;
 
 
@@ -294,6 +294,18 @@ int sis5595_find_sis(int *address)
 		return -ENODEV;
 
 	*address = (val & 0xfff8);
+	if(*address == 0) {
+		printk("sis5595.o: Sensor base address uninitialized - upgrade BIOS?\n");
+		return -ENODEV;
+	}
+
+	if (PCIBIOS_SUCCESSFUL !=
+	    pci_read_config_byte(s_bridge, SIS5595_ENABLE_REG, &c))
+		return -ENODEV;
+	if((c & 0x80) == 0) {
+		printk("sis5595.o: Sensors not enabled - upgrade BIOS?\n");
+		return -ENODEV;
+	}
 	return 0;
 }
 
@@ -469,8 +481,8 @@ void sis5595_dec_use(struct i2c_client *client)
 }
 
 
-/* The SMBus locks itself, but ISA access must be locked explicitely! 
-   There are some ugly typecasts here, but the good new is - they should
+/* The SMBus locks itself, but ISA access must be locked explicitly! 
+   There are some ugly typecasts here, but the good news is - they should
    nowhere else be necessary! */
 int sis5595_read_value(struct i2c_client *client, u8 reg)
 {
@@ -483,9 +495,6 @@ int sis5595_read_value(struct i2c_client *client, u8 reg)
 	return res;
 }
 
-/* The SMBus locks itself, but ISA access muse be locked explicitely! 
-   There are some ugly typecasts here, but the good new is - they should
-   nowhere else be necessary! */
 int sis5595_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	down(&(((struct sis5595_data *) (client->data))->lock));
@@ -730,11 +739,10 @@ int __init sensors_sis5595_init(void)
 	sis5595_initialized = 0;
 
 	if (sis5595_find_sis(&addr)) {
-		normal_isa[0] = SENSORS_ISA_END;
-		printk
-		    ("sis5595.o: Warning: No SIS5595 southbridge found!\n");
-	} else
-		normal_isa[0] = addr;
+		printk("sis5595.o: SIS5595 not detected, module not inserted.\n");
+		return -ENODEV;
+	}
+	normal_isa[0] = addr;
 
 	if ((res = i2c_add_driver(&sis5595_driver))) {
 		printk
