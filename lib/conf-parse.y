@@ -28,6 +28,7 @@
 #include "general.h"
 #include "error.h"
 #include "conf.h"
+#include "access.h"
 
 /* These two functions are defined in conf-lex.l */
 extern int sensors_yylex(void);

@@ -133,6 +133,10 @@ CFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
           -Wcast-align -Wwrite-strings -Wnested-externs -Winline
 endif
 
+ifeq ($(I2C),1)
+CFLAGS += -DI2C
+endif
+
 MODCFLAGS := $(CFLAGS) -D__KERNEL__ -DMODULE -fomit-frame-pointer
 PROGCFLAGS := $(CFLAGS)
 ARCFLAGS := $(CFLAGS)
@@ -144,10 +148,6 @@ endif
 
 ifeq ($(MODVER),1)
 MODCFLAGS += -DMODVERSIONS -include /usr/include/linux/modversions.h
-endif
-
-ifeq ($(I2C),1)
-MODCFLAGS += -DI2C
 endif
 
 .PHONY: all clean install version package dep

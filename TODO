@@ -1,5 +1,7 @@
 Many, many things. Most notably:
 
+* Create wait-queues for bus locking instead of pure semaphores, to make
+  it more interactive
 * Check for block read/writes in smbus-on-i2c emulation code
 * Merge newest Simon Vogl archive
 * Merge man-pages

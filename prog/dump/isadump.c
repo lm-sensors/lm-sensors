@@ -22,6 +22,11 @@
 #include <unistd.h>
 #include <asm/io.h>
 
+/* To keep glibc2 happy */
+#ifdef __GLIBC__
+#include <sys/perm.h>
+#endif
+
 char hexchar(int i)
 {
   if ((i >= 0) && (i <= 9))
