@@ -770,7 +770,8 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect
             fscscy_detect pcf8591_detect arp_detect ipmi_kcs_detect
             ipmi_smic_detect via8231_isa_detect lm85_detect smartbatt_detect
-            adm1026_detect w83l785ts_detect lm83_detect lm90_detect);
+            adm1026_detect w83l785ts_detect lm83_detect lm90_detect
+            saa1064_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1126,7 +1127,25 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        name => "Philips Semiconductors PCF8591",
        driver => "pcf8591",
        i2c_addrs => [0x48..0x4f],
-       i2c_detect => sub { pcf8591_detect @_},
+       i2c_detect => sub { pcf8591_detect 0, @_ },
+     },
+     {
+       name => "Philips Semiconductors PCF8574",
+       driver => "pcf8574",
+       i2c_addrs => [0x20..0x27],
+       i2c_detect => sub { pcf8591_detect 1, @_ },
+     },
+     {
+       name => "Philips Semiconductors PCF8574A",
+       driver => "pcf8574",
+       i2c_addrs => [0x38..0x3f],
+       i2c_detect => sub { pcf8591_detect 2, @_ },
+     },
+     {
+       name => "Philips Semiconductors SAA1064",
+       driver => "saa1064",
+       i2c_addrs => [0x38..0x3b],
+       i2c_detect => sub { saa1064_detect @_ },
      },
      {
        name => "SMBus 2.0 ARP-Capable Device",
@@ -3053,14 +3072,38 @@ sub fscscy_detect
   return (8);
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
+# $_[0]: Chip to detect (0 = PCF8591, 1 = PCF8574, 2 = PCF8574A).
+# $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
-# $_[1]: Address
+# $_[2]: Address
 # Returns: 1
 # Detection is impossible...
 sub pcf8591_detect
 {
   return (1);
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, 4 or 7 if detected
+# Detection is based on the fact that the SAA1064 has only one readable
+# register, and thus ignores the read address. This register can have value
+# 0x80 (first read since power-up) or 0x00.
+sub saa1064_detect
+{
+	my ($file,$addr) = @_;
+	my $status = i2c_smbus_read_byte_data ($file, 0x00);
+
+	return if ($status & 0x7f) != 0x00;
+
+	for (my $i=0 ; $i<256; $i++) {
+		return if i2c_smbus_read_byte_data ($file, $i) != 0x00;
+	}
+
+	return 7
+		if $status == 0x80;
+	return 4;
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
