@@ -1188,18 +1188,21 @@ void w83781d_init_client(struct i2c_client *client)
 	int type = data->type;
 	u8 tmp;
 
-	/* save this register */
-	i = w83781d_read_value(client, W83781D_REG_BEEP_CONFIG);
-	/* Reset all except Watchdog values and last conversion values
-	   This sets fan-divs to 2, among others */
-	w83781d_write_value(client, W83781D_REG_CONFIG, 0x80);
-	/* Restore the register and disable power-on abnormal beep.
-	   This saves FAN 1/2/3 input/output values set by BIOS. */
-	w83781d_write_value(client, W83781D_REG_BEEP_CONFIG, i | 0x80);
-	/* Disable master beep-enable (reset turns it on).
-	   Individual beeps should be reset to off but for some reason
-	   disabling this bit helps some people not get beeped */
-	w83781d_write_value(client, W83781D_REG_BEEP_INTS2, 0);
+	if(type != as99127f) { /* this resets registers we don't have
+			          documentation for on the as99127f */
+		/* save this register */
+		i = w83781d_read_value(client, W83781D_REG_BEEP_CONFIG);
+		/* Reset all except Watchdog values and last conversion values
+		   This sets fan-divs to 2, among others */
+		w83781d_write_value(client, W83781D_REG_CONFIG, 0x80);
+		/* Restore the register and disable power-on abnormal beep.
+		   This saves FAN 1/2/3 input/output values set by BIOS. */
+		w83781d_write_value(client, W83781D_REG_BEEP_CONFIG, i | 0x80);
+		/* Disable master beep-enable (reset turns it on).
+		   Individual beeps should be reset to off but for some reason
+		   disabling this bit helps some people not get beeped */
+		w83781d_write_value(client, W83781D_REG_BEEP_INTS2, 0);
+	}
 
 	vid = w83781d_read_value(client, W83781D_REG_VID_FANDIV) & 0x0f;
 	vid |=
