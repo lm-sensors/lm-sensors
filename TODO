@@ -3,11 +3,11 @@ Many, many things. Most notably:
 I2C CODE CHANGES
 ================
 
-* Test all modules
 * Add code and supporting files to compile modules into the main kernel
 * Write a mkpatch script, as in the i2c tree
 * Check what happens if the ISA bus is selected by a force parameter;
   I think the _detect procedures are called?!?
+* Update all documentation
 
 KERNEL MODULES
 ==============
