@@ -251,7 +251,7 @@ static int voodoo3_setup(void)
 
 	dev = NULL;
 	do {
-		if ((dev = pci_find_device(PCI_VENDOR_ID_S3
+		if ((dev = pci_find_device(PCI_VENDOR_ID_S3,
 					   PCI_CHIP_SAVAGE4,
 					   dev))) {
 			if (!v3_num)
@@ -309,13 +309,15 @@ int __init i2c_voodoo3_init(void)
 		printk("i2c-voodoo3.o: I2C bus initialized\n");
 		voodoo3_initialized |= INIT2;
 	}
+/*
 	if ((res = i2c_bit_add_bus(&voodoo3_ddc_adapter))) {
 		printk("i2c-voodoo3.o: DDC adapter registration failed\n");
 	} else {
 		printk("i2c-voodoo3.o: DDC bus initialized\n");
 		voodoo3_initialized |= INIT3;
 	}
-	if(!(voodoo3_initialized & (INIT2 | INIT3))) {
+*/
+	if(!(voodoo3_initialized & (INIT2 /* | INIT3 */ ))) {
 		printk("i2c-voodoo3.o: Both registrations failed, module not inserted\n");
 		voodoo3_cleanup();
 		return res;
@@ -328,6 +330,7 @@ int __init voodoo3_cleanup(void)
 	int res;
 
 	iounmap(mem);
+/*
 	if (voodoo3_initialized & INIT3) {
 		if ((res = i2c_bit_del_bus(&voodoo3_ddc_adapter))) {
 			printk
@@ -335,6 +338,7 @@ int __init voodoo3_cleanup(void)
 			return res;
 		}
 	}
+*/
 	if (voodoo3_initialized & INIT2) {
 		if ((res = i2c_bit_del_bus(&voodoo3_i2c_adapter))) {
 			printk
