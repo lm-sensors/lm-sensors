@@ -48,7 +48,7 @@
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
-static unsigned short normal_i2c_range[] = { 0x2c, 0x2f, SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x2c, 0x2e, SENSORS_I2C_END };
 static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
@@ -522,7 +522,9 @@ void adm1025_update_client(struct i2c_client *client)
 		}
 		data->temp =
 		    adm1025_read_value(client, ADM1025_REG_TEMP);
-		    printk("The temp is %2x\n",data->temp);
+#ifdef DEBUG
+		printk("The temp is %2x\n",data->temp);
+#endif
 		data->temp_max =
 		    adm1025_read_value(client, ADM1025_REG_TEMP_HIGH);
 		data->temp_min =
