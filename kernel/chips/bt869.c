@@ -193,7 +193,7 @@ printk("bt869.o:  probing address %d .\n",address);
   /* Now, we do the remaining detection. It is lousy. */
   smbus_write_byte_data(new_client->adapter,
 	new_client->addr,0xC4,0);         /* set status bank 0 */
-  cur = smbus_read_byte_data(adapter,address,0);
+  cur = smbus_read_byte(adapter,address);
   printk("bt869.o: address 0x%X testing-->0x%X\n",address,cur);
   if ((cur | 0x20) != 0x22)
       goto ERROR1;

@@ -211,9 +211,7 @@ int Voodoo3_BusCheck(void) {
   return 0;
 }
 
-/* Note, this is actually a byte read and not a byte_data read */
-/* I.e., the command value is dumped.                          */
-int Voodoo3_I2CRead(int addr,int command)
+int Voodoo3_I2CRead_byte(int addr)
 {
         int dat=0;
 
@@ -223,16 +221,61 @@ int Voodoo3_I2CRead(int addr,int command)
 	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
 #endif
 	  dat=-1;
-	  goto ENDREAD; }
+	  goto ENDREAD1; }
         dat=Voodoo3_I2CReadByte();
-ENDREAD: Voodoo3_I2CStop();
+ENDREAD1: Voodoo3_I2CStop();
+#ifdef DEBUG
+	printk("i2c-voodoo3: Byte read at addr:0x%X result:0x%X\n",addr,dat);
+#endif
+        return dat;
+}
+
+int Voodoo3_I2CRead_byte_data(int addr,int command)
+{
+        int dat=0;
+
+        Voodoo3_I2CStart();
+        if (Voodoo3_I2CSendByte(addr)) { 
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
+#endif
+	  dat=-1;
+	  goto ENDREAD2; }
+        if (Voodoo3_I2CSendByte(command)) { 
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
+#endif
+	  dat=-1;
+	  goto ENDREAD2; }
+        dat=Voodoo3_I2CReadByte();
+ENDREAD2: Voodoo3_I2CStop();
 #ifdef DEBUG
 	printk("i2c-voodoo3: Byte read at addr:0x%X (command:0x%X) result:0x%X\n",addr,command,dat);
 #endif
         return dat;
 }
 
-int Voodoo3_I2CWrite(int addr,int command,int data)
+int Voodoo3_I2CRead_word(int addr,int command)
+{
+        int dat=0;
+
+        Voodoo3_I2CStart();
+        if (Voodoo3_I2CSendByte(addr)) { 
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
+#endif
+	  dat=-1;
+	  goto ENDREAD3; }
+        dat=Voodoo3_I2CReadByte();
+        dat|=(Voodoo3_I2CReadByte()<<8);
+ENDREAD3: Voodoo3_I2CStop();
+#ifdef DEBUG
+	printk("i2c-voodoo3: Word read at addr:0x%X (command:0x%X) result:0x%X\n",addr,command,dat);
+#endif
+        return dat;
+}
+
+int Voodoo3_I2CWrite_byte(int addr,int command)
 {
 int result=0;
 
@@ -242,22 +285,80 @@ int result=0;
 	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
 #endif
 	  result=-1;
-	  goto ENDWRITE; }
+	  goto ENDWRITE1; }
+        if (Voodoo3_I2CSendByte(command)) {
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on command WriteByte to addr 0x%X\n",addr);
+#endif
+	  result=-1; }
+ENDWRITE1: Voodoo3_I2CStop();
+#ifdef DEBUG
+	printk("i2c-voodoo3: Byte write at addr:0x%X command:0x%X\n",addr,command);
+#endif
+	return result;
+}
+
+int Voodoo3_I2CWrite_byte_data(int addr,int command,int data)
+{
+int result=0;
+
+        Voodoo3_I2CStart();
+        if (Voodoo3_I2CSendByte(addr)) { 
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
+#endif
+	  result=-1;
+	  goto ENDWRITE2; }
         if (Voodoo3_I2CSendByte(command)) {
 #ifdef DEBUG
 	  printk("i2c-voodoo3: No Ack on command WriteByte to addr 0x%X\n",addr);
 #endif
 	  result=-1;
-	  goto ENDWRITE; }
+	  goto ENDWRITE2; }
         if (Voodoo3_I2CSendByte(data)) {
 #ifdef DEBUG
 	  printk("i2c-voodoo3: No Ack on data WriteByte to addr 0x%X\n",addr);
 #endif
- 	}
-	result=-1;
-ENDWRITE: Voodoo3_I2CStop();
+	result=-1; }
+ENDWRITE2: Voodoo3_I2CStop();
 #ifdef DEBUG
 	printk("i2c-voodoo3: Byte write at addr:0x%X command:0x%X data:0x%X\n",addr,command,data);
+#endif
+	return result;
+}
+
+
+int Voodoo3_I2CWrite_word(int addr,int command,long data)
+{
+int result=0;
+
+        Voodoo3_I2CStart();
+        if (Voodoo3_I2CSendByte(addr)) { 
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
+#endif
+	  result=-1;
+	  goto ENDWRITE3; }
+        if (Voodoo3_I2CSendByte(command)) {
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on command WriteByte to addr 0x%X\n",addr);
+#endif
+	  result=-1;
+	  goto ENDWRITE3; }
+        if (Voodoo3_I2CSendByte(data & 0x0FF)) {
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on data WriteByte to addr 0x%X\n",addr);
+#endif
+	result=-1; 
+	goto ENDWRITE3; }
+        if (Voodoo3_I2CSendByte((data &0x0FF00)>>8)) {
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on data WriteByte to addr 0x%X\n",addr);
+#endif
+	result=-1; }
+ENDWRITE3: Voodoo3_I2CStop();
+#ifdef DEBUG
+	printk("i2c-voodoo3: Word write at addr:0x%X command:0x%X data:0x%X\n",addr,command,data);
 #endif
 	return result;
 }
@@ -322,25 +423,46 @@ int temp;
 
   if (Voodoo3_BusCheck()) return -1;
 
-  if ((size == SMBUS_BYTE_DATA) || (size == SMBUS_BYTE)) {
-        addr=((addr & 0x7f) << 1) | (read_write & 0x01);
-  	if (read_write == SMBUS_READ) {
-    	  temp=Voodoo3_I2CRead(addr,command);
-	  if (temp < 0) {
+  if ((read_write != SMBUS_READ) && (read_write != SMBUS_WRITE)) {
+	printk("i2c-voodoo3: Unknown read_write command! (0x%X)\n",read_write);
+	return -1;
+  }
+  addr=((addr & 0x7f) << 1) | (read_write & 0x01);
+  switch(size) {
+    case SMBUS_QUICK:
+    	Voodoo3_I2CStart();
+	if (Voodoo3_I2CSendByte(addr)) { 
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
+#endif
+	  return -1; }
+    case SMBUS_BYTE:
+    	if (read_write == SMBUS_READ) { temp=Voodoo3_I2CRead_byte(addr); data->byte=temp;
+	} else { temp=Voodoo3_I2CWrite_byte(addr,command); }
+	goto TESTACK;
+    case SMBUS_BYTE_DATA:
+    	if (read_write == SMBUS_READ) { temp=Voodoo3_I2CRead_byte_data(addr,command); data->byte=temp;
+	} else { temp=Voodoo3_I2CWrite_byte_data(addr,command,data->byte); }
+	goto TESTACK;
+    case SMBUS_WORD_DATA:
+    	if (read_write == SMBUS_READ) { temp=Voodoo3_I2CRead_word(addr,command); data->word=temp;
+	} else { temp=Voodoo3_I2CWrite_word(addr,command,data->word); }
+	goto TESTACK;
+    case SMBUS_PROC_CALL:
+	printk("i2c-voodoo3: Proc call not supported.\n");
+	return -1;
+    case SMBUS_BLOCK_DATA:
+	printk("i2c-voodoo3: Block transfers not supported yet.\n");
+	return -1;
+  }
+
+TESTACK: if (temp < 0) {
 #ifdef DEBUG
 		printk("i2c-voodoo3: no device at 0x%X\n",addr);
 #endif
 		return -1;
 	  }
-	  data->byte=temp; 
-#ifdef DEBUG
-		printk("i2c-voodoo3: access returning 0x%X\n",data->byte);
-#endif
-	} else {
-	  return Voodoo3_I2CWrite(addr,command,data->byte);
-	}
-  	return 0;
-  } else { return -1; } /* The rest isn't implemented yet */
+	return 0;
 }
 
 
