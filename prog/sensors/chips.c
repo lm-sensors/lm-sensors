@@ -4387,7 +4387,7 @@ void print_lm83(const sensors_chip_name *name)
 void print_lm90(const sensors_chip_name *name)
 {
   char *label;
-  double cur, high, low, crit;
+  double cur, high, low;
   int valid, alarms;
 
   if (!sensors_get_feature(*name, SENSORS_LM90_ALARMS, &cur))
@@ -4395,11 +4395,6 @@ void print_lm90(const sensors_chip_name *name)
   else {
     printf("ERROR: Can't get alarm data!\n");
     alarms = 0;
-  }
-
-  if (sensors_get_feature(*name, SENSORS_LM90_LOCAL_TCRIT, &crit)) {
-    printf("ERROR: Can't get local tcrit data!\n");
-    crit = 127;
   }
 
   if (!sensors_get_label_and_valid(*name, SENSORS_LM90_LOCAL_TEMP,
@@ -4418,11 +4413,6 @@ void print_lm90(const sensors_chip_name *name)
     printf("ERROR: Can't get local temperature data!\n");
   free_the_label(&label);
 
-  if (sensors_get_feature(*name, SENSORS_LM90_REMOTE_TCRIT, &crit)) {
-    printf("ERROR: Can't get remote tcrit data!\n");
-    crit = 127;
-  }
-
   if (!sensors_get_label_and_valid(*name, SENSORS_LM90_REMOTE_TEMP,
       &label, &valid)
    && !sensors_get_feature(*name, SENSORS_LM90_REMOTE_TEMP, &cur)
@@ -4440,12 +4430,37 @@ void print_lm90(const sensors_chip_name *name)
     printf("ERROR: Can't get remote temperature data!\n");
   free_the_label(&label);
 
+  if (!sensors_get_label_and_valid(*name, SENSORS_LM90_LOCAL_TCRIT,
+      &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_LM90_LOCAL_TCRIT, &cur)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+      printf("\n");
+    }
+  } else
+    printf("ERROR: Can't get local tcrit data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_LM90_REMOTE_TCRIT,
+      &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_LM90_REMOTE_TCRIT, &cur)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+      printf("\n");
+    }
+  } else
+    printf("ERROR: Can't get remote tcrit data!\n");
+  free_the_label(&label);
+
   if (!sensors_get_label_and_valid(*name, SENSORS_LM90_TCRIT_HYST,
       &label, &valid)
    && !sensors_get_feature(*name, SENSORS_LM90_TCRIT_HYST, &cur)) {
     if (valid) {
       print_label(label, 10);
       print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+      printf("\n");
     }
   } else
     printf("ERROR: Can't get hysteresis data!\n");
