@@ -2,7 +2,8 @@
 
 #
 #    sensors-detect - Detect PCI bus and chips
-#    Copyright (c) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
+#    Copyright (C) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
+#    Copyright (C) 2000 - 2004  The lm_sensors team
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -44,10 +45,7 @@ $ENV{PATH} = '/usr/local/sbin:'.$ENV{PATH}
 # CONSTANT DECLARATIONS #
 #########################
 
-use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
-
-@undetectable_adapters = ( 'i2c-elektor', 'i2c-elv', 'i2c-philips-par',
-                           'i2c-velleman' );
+use vars qw(@pci_adapters @chip_ids @superio_ids);
 
 # This is the list of SMBus or I2C adapters we recognize by their PCI
 # signature. This is an easy and fast way to determine which SMBus or I2C
@@ -4306,7 +4304,7 @@ sub safe_system_vendor
 
 sub main
 {
-  my (@adapters,$res,$did_adapter_detection,$detect_others,$adapter);
+  my (@adapters,$res,$did_adapter_detection,$adapter);
 
   initialize_conf;
   initialize_proc_pci;
@@ -4343,18 +4341,13 @@ sub main
   print "\n";
 
   if (not $did_adapter_detection) {
-    print " As you skipped adapter detection, we will only scan already ",
-          "loaded adapter\n",
-          " modules. You can still be prompted for non-detectable adapters.\n",
-          " Do you want to? (yes/NO): ";
-    $detect_others = <STDIN> =~ /^\s*[Yy]/;
+    print "As you skipped adapter detection, we will only scan already loaded\n".
+          "adapter modules.\n";
   } elsif ($> != 0) {
-    print " As you are not root, we can't load adapter modules. We will only ",
-          "scan\n",
-          " already loaded adapters.\n";
-    $detect_others = 0;
+    print "As you are not root, we can't load adapter modules. We will only scan\n".
+          "already loaded adapters.\n";
   } else {
-    print " We will now try to load each adapter module in turn.\n";
+    print "We will now try to load each adapter module in turn.\n";
     foreach $adapter (@adapters) {
       next if $adapter eq "DISABLED";
       if (contains $adapter, @modules_list) {
@@ -4373,23 +4366,10 @@ sub main
         }
       }
     }
-    print " Do you now want to be prompted for non-detectable adapters? ",
-          "(yes/NO): ";
-    $detect_others = <STDIN> =~ /^\s*[Yy]/ ;
   }
 
-  if ($detect_others) {
-    foreach $adapter (@undetectable_adapters) {
-      print "Load `$adapter' (say NO if built into your kernel)? (YES/no): ";
-      unless (<STDIN> =~ /^\s*[Nn]/) {
-        if (system ("modprobe", $adapter)) {
-          print "Loading failed... skipping.\n";
-        } else {
-          print "Module loaded succesfully.\n";
-        }
-      }
-    }
-  }
+  print "If you have undetectable or unsupported adapters, you can have them\n".
+        "scanned by manually loading the modules before running this script.\n\n";
 
   print " To continue, we need module `i2c-dev' to be loaded.\n";
   print " If it is built-in into your kernel, you can safely skip this.\n";
