@@ -66,6 +66,10 @@ SENSORS_INSMOD_5(pc87360, pc87363, pc87364, pc87365, pc87366);
 #define TMS	0x0e	/* Logical device: temperatures */
 static const u8 logdev[3] = { FSCM, VLM, TMS };
 
+#define LD_FAN		0
+#define LD_IN		1
+#define LD_TEMP		2
+
 static inline void superio_outb(int reg, int val)
 {
 	outb(reg, REG);
@@ -124,7 +128,7 @@ static inline void superio_exit(void)
  * Voltage registers and conversions
  */
 
-/* nr has to be 0 to 11 (PC87365/87366) */
+#define PC87365_REG_IN_CONFIG		0x08
 #define PC87365_REG_IN			0x0B
 #define PC87365_REG_IN_MIN		0x0D
 #define PC87365_REG_IN_MAX		0x0C
@@ -132,16 +136,16 @@ static inline void superio_exit(void)
 #define PC87365_REG_IN_ALARMS1		0x00
 #define PC87365_REG_IN_ALARMS2		0x01
 
-#define IN_FROM_REG(val)		(((val) * 297 + 127) / 255)
-#define IN_TO_REG(val)			((val)<0?0:(val)>297?255: \
-					 ((val) * 255 + 148) / 297)
+#define IN_FROM_REG(val,ref)		(((val) * (ref) + 128) / 256)
+#define IN_TO_REG(val,ref)		((val)<0 ? 0 : \
+					 (val)*256>=(ref)*255 ? 255: \
+					 ((val) * 256 + (ref) / 2) / (ref))
 #define IN_STATUS_FROM_REG(val)		((val) & 0x97)
 
 /*
  * Temperature registers and conversions
  */
 
-/* nr has to be 0 to 1 (PC87365) or 2 (PC87366) */
 #define PC87365_REG_TEMP		0x0B
 #define PC87365_REG_TEMP_MIN		0x0D
 #define PC87365_REG_TEMP_MAX		0x0C
@@ -172,6 +176,7 @@ struct pc87360_data {
 	u8 pwm[3];		/* Register value */
 	u16 fan_conf[2];	/* Configuration register values, combined */
 
+	u16 in_vref;		/* 10mV/bit */
 	u8 in[11];		/* Register value */
 	u8 in_min[11];		/* Register value */
 	u8 in_max[11];		/* Register value */
@@ -555,6 +560,17 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	if ((err = i2c_attach_client(new_client)))
 		goto ERROR1;
 
+	/* Use the correct reference voltage */
+	if (data->innr) {
+		i = pc87360_read_value(data, LD_IN, NO_BANK,
+				       PC87365_REG_IN_CONFIG);
+		data->in_vref = (i&0x02) ? 303 : 297;
+#ifdef DEBUG
+		printk(KERN_DEBUG "Using %s reference voltage\n",
+		       (i&0x02) ? "external" : "internal");
+#endif
+	}
+
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 				    type_name, template)) < 0) {
 		err = i;
@@ -598,10 +614,6 @@ static int pc87360_detach_client(struct i2c_client *client)
 
 	return 0;
 }
-
-#define LD_FAN		0
-#define LD_IN		1
-#define LD_TEMP		2
 
 /* ldi is the logical device index:
    bank is for voltages and temperatures only. */
@@ -865,20 +877,22 @@ void pc87365_in(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		pc87360_update_client(client);
-		results[0] = IN_FROM_REG(data->in_min[nr]);
-		results[1] = IN_FROM_REG(data->in_max[nr]);
-		results[2] = IN_FROM_REG(data->in[nr]);
+		results[0] = IN_FROM_REG(data->in_min[nr], data->in_vref);
+		results[1] = IN_FROM_REG(data->in_max[nr], data->in_vref);
+		results[2] = IN_FROM_REG(data->in[nr], data->in_vref);
 		*nrels_mag = 3;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->in_min[nr] = IN_TO_REG(results[0]);
+			data->in_min[nr] = IN_TO_REG(results[0],
+						     data->in_vref);
 			pc87360_write_value(data, LD_IN, nr,
 					    PC87365_REG_IN_MIN,
 					    data->in_min[nr]);
 		}
 		if (*nrels_mag >= 2) {
-			data->in_max[nr] = IN_TO_REG(results[1]);
+			data->in_max[nr] = IN_TO_REG(results[1],
+						     data->in_vref);
 			pc87360_write_value(data, LD_IN, nr,
 					    PC87365_REG_IN_MAX,
 					    data->in_max[nr]);
