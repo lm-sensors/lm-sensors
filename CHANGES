@@ -13,6 +13,15 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
+2.4.5 (20000116)
+  Introduced DESTDIR installation prefix
+  Module lm80: fixes, temperature now read and set correctly
+  Module i2c-voodoo3: driver enhancements
+  Module w83781d: fixes, AS99127 works much better now
+  Library: New ignore keyword in config file
+  Programs: Support for new ignore keyword
+  Program sensors-detect: Support for MGA detections
+
 2.4.4 (19991201)
   Addition of the alpha release of AMD 756 SMBus host support.
   Many fixes and updates to the gl518sm driver
