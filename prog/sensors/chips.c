@@ -2097,7 +2097,7 @@ void print_w83781d(const sensors_chip_name *name)
         if(!is82d) {
           print_label(label,10);
           print_temp_info( cur, max, min, HYST, 1, 0);
-          printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP2 ?"ALARM":"     ",
+          printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP3 ?"ALARM":"     ",
                  beeps&W83781D_ALARM_TEMP3?"(beep)":"");
         } else {
           if(!sensors_get_feature(*name,SENSORS_W83781D_SENS3,&sens)) {
