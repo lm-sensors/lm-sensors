@@ -95,6 +95,8 @@ ETCDIR := /etc
 # library files (both static and shared) will be installed.
 LIBDIR := $(PREFIX)/lib
 
+EXLDFLAGS := -Wl,-rpath,$(LIBDIR)
+
 # You should not need to change this. It is the directory into which the
 # executable program files will be installed. BINDIR for programs that are
 # also useful for normal users, SBINDIR for programs that can only be run
