@@ -87,8 +87,8 @@ static void bmcsensors_fan_div(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 static void bmcsensors_pwm(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
-void bmcsensors_get_sdr(u16 resid, u16 record, u8 offset);
-void bmcsensors_get_reading(struct i2c_client *client, int i);
+static void bmcsensors_get_sdr(u16 resid, u16 record, u8 offset);
+static void bmcsensors_get_reading(struct i2c_client *client, int i);
 
 static int bmcsensors_id = 0;
 
@@ -160,15 +160,15 @@ static int ipmi_sdr_partial_size = IPMI_SDR_SIZE;
 static struct ipmi_msg tx_message;	/* send message */
 static unsigned char tx_msg_data[IPMI_MAX_MSG_LENGTH + 50];
 static unsigned char rx_msg_data[IPMI_MAX_MSG_LENGTH + 50]; /* sloppy */
-int rx_msg_data_offset;
-static long msgid;		/* message ID */
+static int rx_msg_data_offset;
+static int msgid;		/* API to IPMI is long but we'll let i2c-ipmi convert */
 static u16 resid;
 static u16 nextrecord;
-int errorcount;
+static int errorcount;
 
 enum states {STATE_INIT, STATE_RESERVE, STATE_SDR, STATE_SDRPARTIAL,
              STATE_READING, STATE_UNCANCEL, STATE_DONE};
-int state;
+static int state;
 static int receive_counter;
 
 
@@ -189,7 +189,7 @@ static int receive_counter;
 
 /* do we really need maximums per-type? */
 #define STYPE_MAX	4		/* the last sensor type we are interested in */
-static u8 bmcs_count[STYPE_MAX + 1] = {0,0,0,0,0};
+static u8 bmcs_count[STYPE_MAX + 1];
 static const u8 bmcs_max[STYPE_MAX + 1] = {0, 20, 20, 20, 20};
 
 /************************************/
@@ -461,7 +461,7 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 #ifdef DEBUG
 		printk(KERN_INFO "bmcsensors.o: Reducing SDR request size to %d\n", ipmi_sdr_partial_size);
 #endif
-		bmcsensors_get_sdr(resid, 0, 0);
+		bmcsensors_get_sdr(0, 0, 0);
 		return STATE_SDR;
 	}
 	if(ipmi_sdr_partial_size < IPMI_SDR_SIZE) {
@@ -472,7 +472,7 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 			memcpy(rx_msg_data + rx_msg_data_offset, msg->data + 3, ipmi_sdr_partial_size);
 			rx_msg_data_offset += ipmi_sdr_partial_size;
 		}
-		if(rx_msg_data_offset > IPMI_SDR_SIZE + 3) {
+		if(rx_msg_data_offset > rx_msg_data[7] + 7) {
 			/* got last chunk */
 			rx_msg_data_offset =  0;
 			data = rx_msg_data;
@@ -597,7 +597,7 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 			rstate = STATE_READING;
 		}
 	} else {
-		bmcsensors_get_sdr(resid, nextrecord, 0);
+		bmcsensors_get_sdr(0, nextrecord, 0);
 	}
 	return rstate;
 }
@@ -610,10 +610,10 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 		case STATE_INIT:
 		case STATE_RESERVE:
 			resid = (((u16)msg->data[2]) << 8) || msg->data[1];
-#ifdef DEBUG
+#if 1
 			printk(KERN_INFO "bmcsensors.o: Got first resid 0x%.4x\n", resid);
 #endif
-			bmcsensors_get_sdr(resid, 0, 0);
+			bmcsensors_get_sdr(0, 0, 0);
 			state = STATE_SDR;
 			break;
 
@@ -628,11 +628,11 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 
 		case STATE_UNCANCEL:
 			resid = (((u16)msg->data[2]) << 8) || msg->data[1];
-#ifdef DEBUG
+#if 1
 			printk(KERN_INFO "bmcsensors.o: Got new resid 0x%.4x\n", resid);
 #endif
 			rx_msg_data_offset = 0;
-			bmcsensors_get_sdr(resid, nextrecord, 0);
+			bmcsensors_get_sdr(0, nextrecord, 0);
 			state = STATE_SDR;
 			break;
 
@@ -656,7 +656,7 @@ static void bmcsensors_msg_handler(struct ipmi_recv_msg *msg,
 			       "bmcsensors.o: Too many reservations cancelled, giving up\n");
 			state = STATE_DONE;
 		} else {
-#ifdef DEBUG
+#if 1
 			printk(KERN_ERR
 			       "bmcsensors.o: resid 0x%04x cancelled, getting new one\n", resid);
 #endif
@@ -671,6 +671,13 @@ static void bmcsensors_msg_handler(struct ipmi_recv_msg *msg,
 		bmcsensors_rcv_msg(&(msg->msg));
 	}       
 	ipmi_free_recv_msg(msg);
+}
+
+/* callback from i2c-ipmi */
+static int bmcsensors_command(struct i2c_client *client, unsigned int cmd, void *arg)
+{
+	bmcsensors_msg_handler((struct ipmi_recv_msg *) arg, NULL);
+	return 0;
 }
 
 /************** Message Sending **************/
@@ -688,7 +695,7 @@ static void bmcsensors_send_message(struct ipmi_msg * msg)
 }
 
 /* Compose and send a "reserve SDR" message */
-void bmcsensors_reserve_sdr(void)
+static void bmcsensors_reserve_sdr(void)
 {
 	tx_message.netfn = IPMI_NETFN_STORAGE;
 	tx_message.cmd = IPMI_RESERVE_SDR;
@@ -698,14 +705,18 @@ void bmcsensors_reserve_sdr(void)
 }
 
 /* Componse and send a "get SDR" message */
-void bmcsensors_get_sdr(u16 resid, u16 record, u8 offset)
+static void bmcsensors_get_sdr(u16 res_id, u16 record, u8 offset)
 {
+#if 1
+	printk(KERN_INFO "bmcsensors.o: Get SDR 0x%x 0x%x 0x%x\n",
+		       res_id, record, offset);
+#endif
 	tx_message.netfn = IPMI_NETFN_STORAGE;
 	tx_message.cmd = IPMI_GET_SDR;
 	tx_message.data_len = 6;
 	tx_message.data = tx_msg_data;
-	tx_msg_data[0] = resid & 0xff;
-	tx_msg_data[1] = resid >> 8;
+	tx_msg_data[0] = res_id & 0xff;
+	tx_msg_data[1] = res_id >> 8;
 	tx_msg_data[2] = record & 0xff;
 	tx_msg_data[3] = record >> 8;
 	tx_msg_data[4] = offset;
@@ -714,7 +725,7 @@ void bmcsensors_get_sdr(u16 resid, u16 record, u8 offset)
 }
 
 /* Compose and send a "get sensor reading" message */
-void bmcsensors_get_reading(struct i2c_client *client, int i)
+static void bmcsensors_get_reading(struct i2c_client *client, int i)
 {
 	tx_message.netfn = IPMI_NETFN_SENSOR;
 	tx_message.cmd = IPMI_GET_SENSOR_STATE_READING;
@@ -726,7 +737,7 @@ void bmcsensors_get_reading(struct i2c_client *client, int i)
 
 /**************** Initialization ****************/
 
-int bmcsensors_attach_adapter(struct i2c_adapter *adapter)
+static int bmcsensors_attach_adapter(struct i2c_adapter *adapter)
 {
 	if(adapter->algo->id != I2C_ALGO_IPMI)
 		return 0;
@@ -739,7 +750,7 @@ int bmcsensors_attach_adapter(struct i2c_adapter *adapter)
 	return bmcsensors_detect(adapter, 0, 0, 0);
 }
 
-int bmcsensors_detect(struct i2c_adapter *adapter, int address,
+static int bmcsensors_detect(struct i2c_adapter *adapter, int address,
 		   unsigned short flags, int kind)
 {
 	int err, i;
@@ -758,17 +769,19 @@ int bmcsensors_detect(struct i2c_adapter *adapter, int address,
 	sdrd_count = 0;
 	receive_counter = 0;
 	rx_msg_data_offset = 0;
+	errorcount = 0;
 	ipmi_sdr_partial_size = IPMI_SDR_SIZE;
 	for(i = 0; i <= STYPE_MAX; i++)
 		bmcs_count[i] = 0;
 
 	/* send our first message, which kicks things off */
+	printk(KERN_INFO "bmcsensors.o: Registered client, scanning for sensors...\n");
 	bmcsensors_reserve_sdr();
 	/* don't call i2c_register_entry until we scan the SDR's */
 	return 0;
 }
 
-int bmcsensors_detach_client(struct i2c_client *client)
+static int bmcsensors_detach_client(struct i2c_client *client)
 {
 	int err;
 
@@ -787,30 +800,25 @@ int bmcsensors_detach_client(struct i2c_client *client)
 		return err;
 	}
 
+	bmcsensors_initialized = 1;
 	return 0;
 }
 
-int bmcsensors_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	bmcsensors_msg_handler((struct ipmi_recv_msg *) arg, NULL);
-	return 0;
-}
-
-void bmcsensors_inc_use(struct i2c_client *client)
+static void bmcsensors_inc_use(struct i2c_client *client)
 {
 #ifdef MODULE
 	MOD_INC_USE_COUNT;
 #endif
 }
 
-void bmcsensors_dec_use(struct i2c_client *client)
+static void bmcsensors_dec_use(struct i2c_client *client)
 {
 #ifdef MODULE
 	MOD_DEC_USE_COUNT;
 #endif
 }
 
-void bmcsensors_init_client(struct i2c_client *client)
+static void bmcsensors_init_client(struct i2c_client *client)
 {
 /*******************************************/
 
@@ -818,7 +826,7 @@ void bmcsensors_init_client(struct i2c_client *client)
 
 }
 
-void bmcsensors_update_client(struct i2c_client *client)
+static void bmcsensors_update_client(struct i2c_client *client)
 {
 	struct bmcsensors_data *data = client->data;
 	int i;
@@ -845,7 +853,7 @@ void bmcsensors_update_client(struct i2c_client *client)
 /************* /proc callback helper functions *********/
 
 /* need better way to map from sysctl to sdrd record number */
-int find_sdrd(int sysctl)
+static int find_sdrd(int sysctl)
 {
 	int i;
 
@@ -896,7 +904,7 @@ static long convert_value(u8 value, int i)
 
 /************** /proc callbacks *****************/
 
-void bmcsensors_all(struct i2c_client *client, int operation, int ctl_name,
+static void bmcsensors_all(struct i2c_client *client, int operation, int ctl_name,
 		 int *nrels_mag, long *results)
 {
 	int i;
@@ -938,7 +946,7 @@ void bmcsensors_all(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-void bmcsensors_alarms(struct i2c_client *client, int operation, int ctl_name,
+static void bmcsensors_alarms(struct i2c_client *client, int operation, int ctl_name,
 		    int *nrels_mag, long *results)
 {
 	struct bmcsensors_data *data = client->data;
@@ -953,7 +961,7 @@ void bmcsensors_alarms(struct i2c_client *client, int operation, int ctl_name,
 #endif
 }
 
-int __init sensors_bmcsensors_init(void)
+static int __init sensors_bmcsensors_init(void)
 {
 	int res, addr;
 
@@ -970,7 +978,7 @@ int __init sensors_bmcsensors_init(void)
 	return 0;
 }
 
-int __init bmcsensors_cleanup(void)
+static int __init bmcsensors_cleanup(void)
 {
 	int res;
 
