@@ -3008,16 +3008,14 @@ sub lm92_detect
 # $_[0]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
-# Returns: undef if not detected, (3) if detected,
-#   (5) or (7) if even more bits match. 
+# Returns: undef if not detected, 3 if detected
 # Registers used:
 #   0xAA: Temperature
 #   0xA1: High limit
 #   0xA2: Low limit
 #   0xAC: Configuration
-# Detection is weak. We check if Bit 3 is set and Bit 2 is clear.
-# The DS1621 will aways have a config like 0x????10??. A even better
-# match would be 0x0??01000.
+# Detection is weak. We check if bit 4 (NVB) is clear, because it is
+# unlikely to be set (would mean that EEPROM is currently being accessed).
 # Temperature checkings will hopefully prevent LM75 chips from being
 # detected as a DS1621.
 sub ds1621_detect
@@ -3025,16 +3023,14 @@ sub ds1621_detect
   my $i;
   my ($file,$addr) = @_;
   my $temp = i2c_smbus_read_word_data($file,0xAA);
-  return if ($temp & 0x007F);
+  return if ($temp & 0x7F00);
   $temp = i2c_smbus_read_word_data($file,0xA1);
-  return if ($temp & 0x007F);
+  return if ($temp & 0x7F00);
   $temp = i2c_smbus_read_word_data($file,0xA2);
-  return if ($temp & 0x007F);
+  return if ($temp & 0x7F00);
   my $conf = i2c_smbus_read_byte_data($file,0xAC);
-  return (7) if ($conf & 0x9F) == 0x98;
-  return (5) if ($conf & 0x0F) == 0x08;
-  return (3) if ($conf & 0x0C) == 0x08;
-  return ;
+  return 3 if ($conf & 0x10) == 0x00;
+  return;
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
