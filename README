@@ -37,7 +37,7 @@ At least the following SMBus adapters are supported:
 At least the following hardware sensor chips are supported:
   National Semicoductor LM75, LM78, LM78-J, LM79. LM80, LM81, and LM84
   Winbond W83781D, W83782D, W83783S, and W83627HF
-  Genesys Logic GL518SM (several revisions)
+  Genesys Logic GL518SM (several revisions), GL523SM
   Analog Devices ADM1021, ADM1022, and ADM9240
   SiS Southbridge (integrated in the chipset; the I2C adapter will also be
     supported in the near future)
