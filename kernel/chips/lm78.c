@@ -313,6 +313,9 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
   const char *client_name = "";
   int is_isa = i2c_is_isa_adapter(adapter);
 
+  if (!is_isa && ! i2c_check_functionality(adapter,I2C_FUNC_SMBUS_BYTE_DATA))
+    goto ERROR0;
+
   /* We need address registration for the I2C bus too. That is not yet
      implemented. */
   if (is_isa) {

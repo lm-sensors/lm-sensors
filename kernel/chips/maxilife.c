@@ -49,6 +49,7 @@ static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 #include <linux/i2c.h>
 #include "version.h"
 #include "sensors.h"
+#include "i2c-isa.h"
 #include "compat.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
@@ -264,7 +265,10 @@ static ctl_table maxi_dir_table_template[] = {
     - when a new adapter is inserted (and maxi_driver is still present) */
 int maxi_attach_adapter(struct i2c_adapter *adapter)
 {
-   return maxi_detect_smbus(adapter);
+   if (i2c_is_isa_adapter(adapter))
+     return 0;
+   else
+     return maxi_detect_smbus(adapter);
 }
 
 /* This function is called whenever a client should be removed:
@@ -288,6 +292,10 @@ int maxi_detect_smbus(struct i2c_adapter *adapter)
 
    /* OK, this is no detection. I know. It will do for now, though. */
    err = 0;
+
+   if (! i2c_check_functionality(adapter,I2C_FUNC_SMBUS_BYTE_DATA))
+     goto ERROR0;
+
    for (address = 0x10; (! err) && (address <= 0x14); address++) {
 
       /* Later on, we will keep a list of registered addresses for each
@@ -375,6 +383,7 @@ ERROR3:
 ERROR2:
       kfree(new_client);
    }
+ERROR0:
    return err;
 }
 

@@ -312,14 +312,11 @@ int sis5595_detect(struct i2c_adapter *adapter, int address, int kind)
   const char *type_name = "";
   const char *client_name = "";
 
-  /* Make sure we are probing the ISA bus!! This is just a safety check
-     at this moment; sensors_detect really won't call us for I2C busses. */
-#ifdef DEBUG
+  /* Make sure we are probing the ISA bus!!  */
   if (!i2c_is_isa_adapter(adapter)) {
     printk("sis5595.o: sis5595_detect called for an I2C bus adapter?!?\n");
     return 0;
   }
-#endif
 
   if (check_region(address,SIS5595_EXTENT))
     goto ERROR0;

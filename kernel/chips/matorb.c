@@ -138,6 +138,11 @@ int matorb_detect(struct i2c_adapter *adapter, int address, int kind)
   }
 #endif
 
+  if (! i2c_check_functionality(adapter,I2C_FUNC_SMBUS_WRITE_BYTE |
+                                        I2C_FUNC_SMBUS_WRITE_BYTE_DATA))
+    goto ERROR0;
+
+
   /* Here, we have to do the address registration check for the I2C bus.
      But that is not yet implemented. */
 

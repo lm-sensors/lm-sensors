@@ -594,6 +594,10 @@ int sensors_detect(struct i2c_adapter *adapter,
   int is_isa = i2c_is_isa_adapter(adapter);
   int adapter_id = is_isa?SENSORS_ISA_BUS:i2c_adapter_id(adapter);
 
+  /* Forget it if we can't probe using SMBUS_QUICK */
+  if ((! is_isa) && ! i2c_check_functionality(adapter,I2C_FUNC_SMBUS_QUICK))
+    return -1;
+
   for (addr = 0x00; 
        addr <= (is_isa?0xffff:0x7f); 
        addr ++) {
