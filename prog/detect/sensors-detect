@@ -1052,7 +1052,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        name => "National Semiconductor LM90",
        driver => "to-be-written",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { lm83_detect 0, @_ },
+       i2c_detect => sub { lm90_detect 0, @_ },
      },
      {
        name => "Analog Devices ADM1022",
