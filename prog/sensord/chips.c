@@ -27,7 +27,17 @@
 #include "lib/chips.h"
 #include "kernel/include/sensors.h"
 
-/* N.B: missing from sensors (and this) but in lib/chips.h: "gl520sm", "thmc50", "adm1022" */
+/* NB:
+ *
+ * The following chips from prog/sensors are not (yet) supported:
+ *
+ * lm87 mtp008 it87 fscpos fscscy pcf8591 vt1211 smsc47m1 lm92 adm1024
+ */
+
+/* NB: missing from sensors (and this) but in lib/chips.h:
+ * "gl520sm", "thmc50", "adm1022" */
+
+/* TODO: Temp in C/F */
 
 /** formatters **/
 
@@ -58,6 +68,13 @@ fmtTemps_0
 }
 
 static const char *
+fmtTemps_1_0
+(const double values[], int alarm, int beep) {
+  sprintf (buff, "%.1f C (limit = %.0f C, hysteresis = %.0f C)", values[0], values[1], values[2]);
+  return fmtExtra (alarm, beep);
+}
+
+static const char *
 fmtTemps_1
 (const double values[], int alarm, int beep) {
   sprintf (buff, "%.1f C (limit = %.1f C, hysteresis = %.1f C)", values[0], values[1], values[2]);
@@ -68,6 +85,13 @@ static const char *
 fmtVolt_2
 (const double values[], int alarm, int beep) {
   sprintf (buff, "%+.2f V", values[0]);
+  return fmtExtra (alarm, beep);
+}
+
+static const char *
+fmtVolt_3
+(const double values[], int alarm, int beep) {
+  sprintf (buff, "%+.3f V", values[0]);
   return fmtExtra (alarm, beep);
 }
 
@@ -155,6 +179,38 @@ rrdF2
   return buff;
 }
 
+static const char *
+rrdF3
+(const double values[]) {
+  sprintf (buff, "%.3f", values[0]);
+  return buff;
+}
+
+/** DS1621 */
+
+static const char *
+fmtTemps_DS1621
+(const double values[], int alarm, int beep) {
+  sprintf (buff, "%.2f C (min = %.1f C, max = %.1f C)", values[0], values[1], values[2]);
+  if (alarm)
+    sprintf (buff + strlen (buff), " [ALARM(%s)]", (alarm == DS1621_ALARM_TEMP_LOW) ? "LOW" : (alarm == DS1621_ALARM_TEMP_HIGH) ? "HIGH" : "LOW,HIGH");
+  return buff;
+}
+
+static const char *ds1621_names[] = {
+  SENSORS_DS1621_PREFIX, NULL
+};
+
+static const FeatureDescriptor ds1621_features[] = {
+  { fmtTemps_DS1621, rrdF2, DataType_temperature, DS1621_ALARM_TEMP_LOW | DS1621_ALARM_TEMP_HIGH, 0,
+    { SENSORS_DS1621_TEMP, SENSORS_DS1621_TEMP_HYST, SENSORS_DS1621_TEMP_OVER, -1 } }, /* hyst=min, over=max */
+  { NULL }
+};
+
+static const ChipDescriptor ds1621_chip = {
+  ds1621_names, ds1621_features, SENSORS_DS1621_ALARMS, 0
+};
+
 /** LM75 **/
 
 static const char *lm75_names[] = {
@@ -163,7 +219,7 @@ static const char *lm75_names[] = {
 
 static const FeatureDescriptor lm75_features[] = {
   { fmtTemps_1, rrdF1, DataType_temperature, 0, 0,
-    { SENSORS_LM75_TEMP, SENSORS_LM75_TEMP_HYST, SENSORS_LM75_TEMP_OVER, -1 } },
+    { SENSORS_LM75_TEMP, SENSORS_LM75_TEMP_OVER, SENSORS_LM75_TEMP_HYST, -1 } },
   { NULL }
 };
 
@@ -173,15 +229,38 @@ static const ChipDescriptor lm75_chip = {
 
 /** ADM1021 **/
 
+static const char *
+fmtTemps_ADM1021_0
+(const double values[], int alarm, int beep) {
+  sprintf (buff, "%.0f C (min = %.0f C, max = %.0f C)", values[0], values[1], values[2]);
+  if (alarm) {
+    int low = alarm & ADM1021_ALARM_TEMP_LOW, high = alarm & ADM1021_ALARM_TEMP_HIGH;
+    sprintf (buff + strlen (buff), " [ALARM(%s%s%s)]", low ? "LOW" : "", (low && high) ? "," : "", high ? "HIGH" : "");
+  }
+  return buff;
+}
+
+static const char *
+fmtTemps_ADM1021_1
+(const double values[], int alarm, int beep) {
+  sprintf (buff, "%.0f C (min = %.0f C, max = %.0f C)", values[0], values[1], values[2]);
+  if (alarm) {
+    int na = alarm & ADM1021_ALARM_RTEMP_NA, low = alarm & ADM1021_ALARM_RTEMP_LOW,
+      high = alarm & ADM1021_ALARM_RTEMP_HIGH;
+    sprintf (buff + strlen (buff), " [ALARM(%s%s%s%s%s)]", na ? "N/A" : "", (na && (low || high)) ? "," : "", low ? "LOW" : "", (low && high) ? "," : "", high ? "HIGH" : "");
+  }
+  return buff;
+}
+
 static const char *adm1021_names[] = {
-  SENSORS_ADM1021_PREFIX, NULL
-};
+  SENSORS_ADM1021_PREFIX, SENSORS_ADM1023_PREFIX, NULL
+}; /* N.B: Assume bs sensors 1023 is =~ 1021 */
 
 static const FeatureDescriptor adm1021_features[] = {
-  { fmtTemps_0, rrdF0, DataType_temperature, ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW, 0, /* TODO!! */
-    { SENSORS_ADM1021_TEMP, SENSORS_ADM1021_TEMP_OVER, SENSORS_ADM1021_TEMP_HYST, -1 } },
-  { fmtTemps_0, rrdF0, DataType_temperature, ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW | ADM1021_ALARM_RTEMP_NA, 0, /* TODO!! */
-    { SENSORS_ADM1021_REMOTE_TEMP, SENSORS_ADM1021_REMOTE_TEMP_OVER, SENSORS_ADM1021_REMOTE_TEMP_HYST, -1 } },
+  { fmtTemps_ADM1021_0, rrdF0, DataType_temperature, ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW, 0,
+    { SENSORS_ADM1021_TEMP, SENSORS_ADM1021_TEMP_HYST, SENSORS_ADM1021_TEMP_OVER, -1 } }, /* hyst=min, over=max */
+  { fmtTemps_ADM1021_1, rrdF0, DataType_temperature, ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW | ADM1021_ALARM_RTEMP_NA, 0,
+    { SENSORS_ADM1021_REMOTE_TEMP, SENSORS_ADM1021_REMOTE_TEMP_HYST, SENSORS_ADM1021_REMOTE_TEMP_OVER, -1 } }, /* hyst=min, over=max */
   { fmtValu_0, NULL, DataType_other, 0, 0,
     { SENSORS_ADM1021_DIE_CODE, -1 } },
   { NULL }
@@ -195,13 +274,13 @@ static const ChipDescriptor adm1021_chip = {
 
 static const char *max1617_names[] = {
   SENSORS_MAX1617_PREFIX, SENSORS_MAX1617A_PREFIX, SENSORS_THMC10_PREFIX, SENSORS_LM84_PREFIX, SENSORS_GL523_PREFIX, NULL
-};
+}; /* N.B: Assume vs sensors these have no die code */
 
 static const FeatureDescriptor max1617_features[] = {
-  { fmtTemps_0, rrdF0, DataType_temperature, ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW, 0, /* TODO!! */
-    { SENSORS_MAX1617_TEMP, SENSORS_MAX1617_TEMP_OVER, SENSORS_MAX1617_TEMP_HYST, -1 } },
-  { fmtTemps_0, rrdF0, DataType_temperature, ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW | ADM1021_ALARM_RTEMP_NA, 0, /* TODO!! */
-    { SENSORS_MAX1617_REMOTE_TEMP, SENSORS_MAX1617_REMOTE_TEMP_OVER, SENSORS_MAX1617_REMOTE_TEMP_HYST, -1 } },
+  { fmtTemps_ADM1021_0, rrdF0, DataType_temperature, ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW, 0,
+    { SENSORS_MAX1617_TEMP, SENSORS_MAX1617_TEMP_HYST, SENSORS_MAX1617_TEMP_OVER, -1 } }, /* hyst=min, over=max */
+  { fmtTemps_ADM1021_1, rrdF0, DataType_temperature, ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW | ADM1021_ALARM_RTEMP_NA, 0,
+    { SENSORS_MAX1617_REMOTE_TEMP, SENSORS_MAX1617_REMOTE_TEMP_HYST, SENSORS_MAX1617_REMOTE_TEMP_OVER, -1 } }, /* hyst=min, over=max */
   { NULL }
 };
 
@@ -232,7 +311,7 @@ static const FeatureDescriptor adm9240_features[] = {
     { SENSORS_ADM9240_FAN1, SENSORS_ADM9240_FAN1_MIN, SENSORS_ADM9240_FAN1_DIV, -1 } },
   { fmtFans_0, rrdF0, DataType_rpm, ADM9240_ALARM_FAN2, 0,
     { SENSORS_ADM9240_FAN2, SENSORS_ADM9240_FAN2_MIN, SENSORS_ADM9240_FAN2_DIV, -1 } },
-  { fmtTemps_0, rrdF0, DataType_temperature, ADM9240_ALARM_TEMP, 0,
+  { fmtTemps_1_0, rrdF1, DataType_temperature, ADM9240_ALARM_TEMP, 0,
     { SENSORS_ADM9240_TEMP, SENSORS_ADM9240_TEMP_OVER, SENSORS_ADM9240_TEMP_HYST, -1 } },
   { fmtVolt_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_ADM9240_VID, -1 } },
@@ -243,48 +322,6 @@ static const FeatureDescriptor adm9240_features[] = {
 
 static const ChipDescriptor adm9240_chip = {
   adm9240_names, adm9240_features, SENSORS_ADM9240_ALARMS, 0
-};
-
-/** LM78 **/
-
-static const char *lm78_names[] = {
-  SENSORS_LM78_PREFIX, SENSORS_LM78J_PREFIX, SENSORS_LM79_PREFIX, NULL
-};
-
-static const FeatureDescriptor lm78_features[] = {
-  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN0, 0,
-    { SENSORS_LM78_IN0, SENSORS_LM78_IN0_MIN, SENSORS_LM78_IN0_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN1, 0,
-    { SENSORS_LM78_IN1, SENSORS_LM78_IN1_MIN, SENSORS_LM78_IN1_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN2, 0,
-    { SENSORS_LM78_IN2, SENSORS_LM78_IN2_MIN, SENSORS_LM78_IN2_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN3, 0,
-    { SENSORS_LM78_IN3, SENSORS_LM78_IN3_MIN, SENSORS_LM78_IN3_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN4, 0,
-    { SENSORS_LM78_IN4, SENSORS_LM78_IN4_MIN, SENSORS_LM78_IN4_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN5, 0,
-    { SENSORS_LM78_IN5, SENSORS_LM78_IN5_MIN, SENSORS_LM78_IN5_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN6, 0,
-    { SENSORS_LM78_IN6, SENSORS_LM78_IN6_MIN, SENSORS_LM78_IN6_MAX, -1 } },
-  { fmtFans_0, rrdF0, DataType_rpm, LM78_ALARM_FAN1, 0,
-    { SENSORS_LM78_FAN1, SENSORS_LM78_FAN1_MIN, SENSORS_LM78_FAN1_DIV, -1 } },
-  { fmtFans_0, rrdF0, DataType_rpm, LM78_ALARM_FAN2, 0,
-    { SENSORS_LM78_FAN2, SENSORS_LM78_FAN2_MIN, SENSORS_LM78_FAN2_DIV, -1 } },
-  { fmtFans_0, rrdF0, DataType_rpm, LM78_ALARM_FAN3, 0,
-    { SENSORS_LM78_FAN3, SENSORS_LM78_FAN3_MIN, SENSORS_LM78_FAN3_DIV, -1 } },
-  { fmtTemps_0, rrdF0, DataType_rpm, LM78_ALARM_TEMP, 0,
-    { SENSORS_LM78_TEMP, SENSORS_LM78_TEMP_OVER, SENSORS_LM78_TEMP_HYST, -1 } },
-  { fmtBoardTemperatureInput, NULL, DataType_other, LM78_ALARM_BTI, 0,
-    { SENSORS_LM78_ALARMS, -1 } },
-  { fmtChassisIntrusionDetection, NULL, DataType_other, LM78_ALARM_CHAS, 0,
-    { SENSORS_LM78_ALARMS, -1 } },
-  { fmtVolt_2, rrdF2, DataType_voltage, 0, 0,
-    { SENSORS_LM78_VID, -1 } },
-  { NULL }
-};
-
-static const ChipDescriptor lm78_chip = {
-  lm78_names, lm78_features, SENSORS_LM78_ALARMS, 0
 };
 
 /** SIS5595 **/
@@ -338,17 +375,138 @@ static const FeatureDescriptor via686a_features[] = {
     { SENSORS_VIA686A_FAN1, SENSORS_VIA686A_FAN1_MIN, SENSORS_VIA686A_FAN1_DIV, -1 } },
   { fmtFans_0, rrdF0, DataType_rpm, VIA686A_ALARM_FAN2, 0,
     { SENSORS_VIA686A_FAN2, SENSORS_VIA686A_FAN2_MIN, SENSORS_VIA686A_FAN2_DIV, -1 } },
-  { fmtTemps_1, rrdF1, DataType_temperature, VIA686A_ALARM_TEMP, 0,
+  { fmtTemps_1_0, rrdF1, DataType_temperature, VIA686A_ALARM_TEMP, 0,
     { SENSORS_VIA686A_TEMP, SENSORS_VIA686A_TEMP_OVER, SENSORS_VIA686A_TEMP_HYST, -1 } },
-  { fmtTemps_1, rrdF1, DataType_temperature, VIA686A_ALARM_TEMP2, 0,
+  { fmtTemps_1_0, rrdF1, DataType_temperature, VIA686A_ALARM_TEMP2, 0,
     { SENSORS_VIA686A_TEMP2, SENSORS_VIA686A_TEMP2_OVER, SENSORS_VIA686A_TEMP2_HYST, -1 } },
-  { fmtTemps_1, rrdF1, DataType_temperature, VIA686A_ALARM_TEMP3, 0,
+  { fmtTemps_1_0, rrdF1, DataType_temperature, VIA686A_ALARM_TEMP3, 0,
     { SENSORS_VIA686A_TEMP3, SENSORS_VIA686A_TEMP3_OVER, SENSORS_VIA686A_TEMP3_HYST, -1 } },
   { NULL }
 };
 
 static const ChipDescriptor via686a_chip = {
   via686a_names, via686a_features, SENSORS_VIA686A_ALARMS, 0
+};
+
+/** LM78 **/
+
+static const char *lm78_names[] = {
+  SENSORS_LM78_PREFIX, SENSORS_LM78J_PREFIX, SENSORS_LM79_PREFIX, NULL
+};
+
+static const FeatureDescriptor lm78_features[] = {
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN0, 0,
+    { SENSORS_LM78_IN0, SENSORS_LM78_IN0_MIN, SENSORS_LM78_IN0_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN1, 0,
+    { SENSORS_LM78_IN1, SENSORS_LM78_IN1_MIN, SENSORS_LM78_IN1_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN2, 0,
+    { SENSORS_LM78_IN2, SENSORS_LM78_IN2_MIN, SENSORS_LM78_IN2_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN3, 0,
+    { SENSORS_LM78_IN3, SENSORS_LM78_IN3_MIN, SENSORS_LM78_IN3_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN4, 0,
+    { SENSORS_LM78_IN4, SENSORS_LM78_IN4_MIN, SENSORS_LM78_IN4_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN5, 0,
+    { SENSORS_LM78_IN5, SENSORS_LM78_IN5_MIN, SENSORS_LM78_IN5_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN6, 0,
+    { SENSORS_LM78_IN6, SENSORS_LM78_IN6_MIN, SENSORS_LM78_IN6_MAX, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, LM78_ALARM_FAN1, 0,
+    { SENSORS_LM78_FAN1, SENSORS_LM78_FAN1_MIN, SENSORS_LM78_FAN1_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, LM78_ALARM_FAN2, 0,
+    { SENSORS_LM78_FAN2, SENSORS_LM78_FAN2_MIN, SENSORS_LM78_FAN2_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, LM78_ALARM_FAN3, 0,
+    { SENSORS_LM78_FAN3, SENSORS_LM78_FAN3_MIN, SENSORS_LM78_FAN3_DIV, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_rpm, LM78_ALARM_TEMP, 0,
+    { SENSORS_LM78_TEMP, SENSORS_LM78_TEMP_OVER, SENSORS_LM78_TEMP_HYST, -1 } },
+  { fmtVolt_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_LM78_VID, -1 } },
+  { fmtBoardTemperatureInput, NULL, DataType_other, LM78_ALARM_BTI, 0,
+    { SENSORS_LM78_ALARMS, -1 } },
+  { fmtChassisIntrusionDetection, NULL, DataType_other, LM78_ALARM_CHAS, 0,
+    { SENSORS_LM78_ALARMS, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor lm78_chip = {
+  lm78_names, lm78_features, SENSORS_LM78_ALARMS, 0
+};
+
+/** GL518 **/
+
+/* N.B: sensors supports a "gl518sm-r00" but it is not picked up in main.c...
+static const char *
+fmtVolts_GL518_R00
+(const double values[], int alarm, int beep) {
+  if (values[0] == 0.0)
+    sprintf (buff, "n/a (min = %+.2f V, max = %+.2f V)", values[1], values[2]);
+  else
+    sprintf (buff, "%+.2f V (min = %+.2f V, max = %+.2f V)", values[0], values[1], values[2]);
+  return fmtExtra (alarm, beep);
+}
+*/
+
+static const char *gl518_names[] = {
+  SENSORS_GL518_PREFIX, NULL
+};
+
+static const FeatureDescriptor gl518_features[] = {
+  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VDD, GL518_ALARM_VDD,
+    { SENSORS_GL518_VDD, SENSORS_GL518_VDD_MIN, SENSORS_GL518_VDD_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VIN1, GL518_ALARM_VIN1,
+    { SENSORS_GL518_VIN1, SENSORS_GL518_VIN1_MIN, SENSORS_GL518_VIN1_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VIN2, GL518_ALARM_VIN2,
+    { SENSORS_GL518_VIN2, SENSORS_GL518_VIN2_MIN, SENSORS_GL518_VIN2_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VIN3, GL518_ALARM_VIN3,
+    { SENSORS_GL518_VIN3, SENSORS_GL518_VIN3_MIN, SENSORS_GL518_VIN3_MAX, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, GL518_ALARM_FAN1, GL518_ALARM_FAN1,
+    { SENSORS_GL518_FAN1, SENSORS_GL518_FAN1_MIN, SENSORS_GL518_FAN1_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, GL518_ALARM_FAN2, GL518_ALARM_FAN2,
+    { SENSORS_GL518_FAN2, SENSORS_GL518_FAN2_MIN, SENSORS_GL518_FAN2_DIV, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, GL518_ALARM_TEMP, GL518_ALARM_TEMP,
+    { SENSORS_GL518_TEMP, SENSORS_GL518_TEMP_OVER, SENSORS_GL518_TEMP_HYST, -1 } },
+  { fmtSoundAlarm, NULL, DataType_other, 0, 0,
+    { SENSORS_GL518_BEEP_ENABLE, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor gl518_chip = {
+  gl518_names, gl518_features, SENSORS_GL518_ALARMS, SENSORS_GL518_BEEPS
+};
+
+/** ADM1025 **/
+
+static const char *
+fmtTemps_ADM1025
+(const double values[], int alarm, int beep) {
+  sprintf (buff, "%.1f C (min = %.0f C, max = %.0f C)", values[0], values[1], values[2]);
+  return fmtExtra (alarm, beep);
+}
+
+static const char *adm1025_names[] = {
+  SENSORS_ADM1025_PREFIX, NULL
+};
+
+static const FeatureDescriptor adm1025_features[] = {
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN0, 0,
+    { SENSORS_ADM1025_IN0, SENSORS_ADM1025_IN0_MIN, SENSORS_ADM1025_IN0_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN1, 0,
+    { SENSORS_ADM1025_IN1, SENSORS_ADM1025_IN1_MIN, SENSORS_ADM1025_IN1_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN2, 0,
+    { SENSORS_ADM1025_IN2, SENSORS_ADM1025_IN2_MIN, SENSORS_ADM1025_IN2_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN3, 0,
+    { SENSORS_ADM1025_IN3, SENSORS_ADM1025_IN3_MIN, SENSORS_ADM1025_IN3_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN4, 0,
+    { SENSORS_ADM1025_IN4, SENSORS_ADM1025_IN4_MIN, SENSORS_ADM1025_IN4_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN5, 0,
+    { SENSORS_ADM1025_IN5, SENSORS_ADM1025_IN5_MIN, SENSORS_ADM1025_IN5_MAX, -1 } },
+  { fmtTemps_ADM1025, rrdF1, DataType_temperature, ADM1025_ALARM_TEMP, 0,
+    { SENSORS_ADM1025_TEMP1, SENSORS_ADM1025_TEMP1_HYST, SENSORS_ADM1025_TEMP1_OVER, -1 } }, /* hyst=min, over=max */
+  { fmtTemps_ADM1025, rrdF1, DataType_temperature, ADM1025_ALARM_RTEMP, 0,
+    { SENSORS_ADM1025_TEMP2, SENSORS_ADM1025_TEMP2_HYST, SENSORS_ADM1025_TEMP2_OVER, -1 } }, /* hyst=min, over=max */
+  { NULL }
+};
+
+static const ChipDescriptor adm1025_chip = {
+  adm1025_names, adm1025_features, SENSORS_ADM1025_ALARMS, 0
 };
 
 /** LM80 **/
@@ -396,83 +554,26 @@ static const ChipDescriptor lm80_chip = {
   lm80_names, lm80_features, SENSORS_LM80_ALARMS, 0
 };
 
-/** GL518 **/
+/** W83781D **/
 
-/* N.B: sensors supports a "gl518sm-r00" but it is not picked up in main.c...
 static const char *
-fmtVolts_GL518_R00
+fmtTemps_W83781D
 (const double values[], int alarm, int beep) {
-  if (values[0] == 0.0)
-    sprintf (buff, "n/a (min = %+.2f V, max = %+.2f V)", values[1], values[2]);
-  else
-    sprintf (buff, "%+.2f V (min = %+.2f V, max = %+.2f V)", values[0], values[1], values[2]);
+  if (values[2] == 127) {
+    sprintf (buff, "%.0f C (limit = %.0f C)",
+             values[0], values[1]);
+  } else {
+    sprintf (buff, "%.0f C (limit = %.0f C, hysteresis = %.0f C)",
+             values[0], values[1], values[2]);
+  }
   return fmtExtra (alarm, beep);
 }
-*/
-
-static const char *gl518_names[] = {
-  SENSORS_GL518_PREFIX, NULL
-};
-
-static const FeatureDescriptor gl518_features[] = {
-  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VDD, GL518_ALARM_VDD,
-    { SENSORS_GL518_VDD, SENSORS_GL518_VDD_MIN, SENSORS_GL518_VDD_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VIN1, GL518_ALARM_VIN1,
-    { SENSORS_GL518_VIN1, SENSORS_GL518_VIN1_MIN, SENSORS_GL518_VIN1_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VIN2, GL518_ALARM_VIN2,
-    { SENSORS_GL518_VIN2, SENSORS_GL518_VIN2_MIN, SENSORS_GL518_VIN2_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VIN3, GL518_ALARM_VIN3,
-    { SENSORS_GL518_VIN3, SENSORS_GL518_VIN3_MIN, SENSORS_GL518_VIN3_MAX, -1 } },
-  { fmtFans_0, rrdF0, DataType_rpm, GL518_ALARM_FAN1, GL518_ALARM_FAN1,
-    { SENSORS_GL518_FAN1, SENSORS_GL518_FAN1_MIN, SENSORS_GL518_FAN1_DIV, -1 } },
-  { fmtFans_0, rrdF0, DataType_rpm, GL518_ALARM_FAN2, GL518_ALARM_FAN2,
-    { SENSORS_GL518_FAN2, SENSORS_GL518_FAN2_MIN, SENSORS_GL518_FAN2_DIV, -1 } },
-  { fmtTemps_0, rrdF0, DataType_temperature, GL518_ALARM_TEMP, GL518_ALARM_TEMP,
-    { SENSORS_GL518_TEMP, SENSORS_GL518_TEMP_OVER, SENSORS_GL518_TEMP_HYST, -1 } },
-  { fmtSoundAlarm, NULL, DataType_other, 0, 0,
-    { SENSORS_GL518_BEEP_ENABLE, -1 } },
-  { NULL }
-};
-
-static const ChipDescriptor gl518_chip = {
-  gl518_names, gl518_features, SENSORS_GL518_ALARMS, SENSORS_GL518_BEEPS
-};
-
-/** ADM1025 **/
-
-static const char *adm1025_names[] = {
-  SENSORS_ADM1025_PREFIX, NULL
-};
-
-static const FeatureDescriptor adm1025_features[] = {
-  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN0, 0,
-    { SENSORS_ADM1025_IN0, SENSORS_ADM1025_IN0_MIN, SENSORS_ADM1025_IN0_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN1, 0,
-    { SENSORS_ADM1025_IN1, SENSORS_ADM1025_IN1_MIN, SENSORS_ADM1025_IN1_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN2, 0,
-    { SENSORS_ADM1025_IN2, SENSORS_ADM1025_IN2_MIN, SENSORS_ADM1025_IN2_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN3, 0,
-    { SENSORS_ADM1025_IN3, SENSORS_ADM1025_IN3_MIN, SENSORS_ADM1025_IN3_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN4, 0,
-    { SENSORS_ADM1025_IN4, SENSORS_ADM1025_IN4_MIN, SENSORS_ADM1025_IN4_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN5, 0,
-    { SENSORS_ADM1025_IN5, SENSORS_ADM1025_IN5_MIN, SENSORS_ADM1025_IN5_MAX, -1 } },
-  { fmtTemps_1, rrdF1, DataType_temperature, ADM1025_ALARM_TEMP, 0,
-    { SENSORS_ADM1025_TEMP1, SENSORS_ADM1025_TEMP1_OVER, SENSORS_ADM1025_TEMP1_HYST, -1 } },
-  { NULL }
-};
-
-static const ChipDescriptor adm1025_chip = {
-  adm1025_names, adm1025_features, SENSORS_ADM1025_ALARMS, 0
-};
-
-/** W83781D **/
 
 static const char *w83781d_names[] = {
   SENSORS_W83781D_PREFIX, SENSORS_AS99127F_PREFIX, NULL
 };
 
-/* TODO: flags inverted for as99127f */
+/* TODO: beeps inverted for as99127f */
 static const FeatureDescriptor w83781d_features[] = {
   { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN0, W83781D_ALARM_IN0,
     { SENSORS_W83781D_IN0, SENSORS_W83781D_IN0_MIN, SENSORS_W83781D_IN0_MAX, -1 } },
@@ -494,13 +595,13 @@ static const FeatureDescriptor w83781d_features[] = {
     { SENSORS_W83781D_FAN2, SENSORS_W83781D_FAN2_MIN, SENSORS_W83781D_FAN2_DIV, -1 } },
   { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN3, W83781D_ALARM_FAN3,
     { SENSORS_W83781D_FAN3, SENSORS_W83781D_FAN3_MIN, SENSORS_W83781D_FAN3_DIV, -1 } },
-  { fmtTemps_0, rrdF0, DataType_temperature, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
+  { fmtTemps_W83781D, rrdF0, DataType_temperature, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
     { SENSORS_W83781D_TEMP1, SENSORS_W83781D_TEMP1_OVER, SENSORS_W83781D_TEMP1_HYST, -1 } },
-  { fmtTemps_1, rrdF1, DataType_temperature, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
+  { fmtTemps_1_0, rrdF1, DataType_temperature, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
     { SENSORS_W83781D_TEMP2, SENSORS_W83781D_TEMP2_OVER, SENSORS_W83781D_TEMP2_HYST, -1 } },
-  { fmtTemps_1, rrdF1, DataType_temperature, W83781D_ALARM_TEMP3, W83781D_ALARM_TEMP3,
+  { fmtTemps_1_0, rrdF1, DataType_temperature, W83781D_ALARM_TEMP3, W83781D_ALARM_TEMP3,
     { SENSORS_W83781D_TEMP3, SENSORS_W83781D_TEMP3_OVER, SENSORS_W83781D_TEMP3_HYST, -1 } },
-  { fmtVolt_2, rrdF2, DataType_voltage, 0, 0,
+  { fmtVolt_3, rrdF3, DataType_voltage, 0, 0,
     { SENSORS_W83781D_VID, -1 } },
   { fmtChassisIntrusionDetection, NULL, DataType_other, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
     { SENSORS_W83781D_ALARMS, -1 } },
@@ -521,9 +622,13 @@ fmtTemps_W8378x_0
   int sensorID = (int) values[3];
   const char *sensor = (sensorID == 1) ? "PII/Celeron diode" :
     (sensorID == 2) ? "3904 transistor" : "thermistor";
-   /* Is this still right? */
-  sprintf (buff, "%.0f C (limit = %.0f C, hysteresis = %.0f C, sensor = %s)",
-           values[0], values[1], values[2], sensor);
+  if (values[2] == 127) {
+    sprintf (buff, "%.0f C (limit = %.0f C, sensors = %s)",
+             values[0], values[1], sensor);
+  } else {
+    sprintf (buff, "%.0f C (limit = %.0f C, hysteresis = %.0f C, sensors = %s)",
+             values[0], values[1], values[2], sensor);
+  }
   return fmtExtra (alarm, beep);
 }
 
@@ -533,8 +638,7 @@ fmtTemps_W8378x_1
   int sensorID = (int) values[3];
   const char *sensor = (sensorID == 1) ? "PII/Celeron diode" :
     (sensorID == 2) ? "3904 transistor" : "thermistor";
-   /* Is this still right? */
-  sprintf (buff, "%.1f C (limit = %.1f C, hysteresis = %.1f C, sensor = %s)",
+  sprintf (buff, "%.1f C (limit = %.0f C, hysteresis = %.0f C, sensor = %s)",
            values[0], values[1], values[2], sensor);
   return fmtExtra (alarm, beep);
 }
@@ -574,7 +678,7 @@ static const FeatureDescriptor w83782d_features[] = {
     { SENSORS_W83782D_TEMP2, SENSORS_W83782D_TEMP2_OVER, SENSORS_W83782D_TEMP2_HYST, SENSORS_W83782D_SENS2, -1 } },
   { fmtTemps_W8378x_1, rrdF1, DataType_temperature, W83781D_ALARM_TEMP3, W83781D_ALARM_TEMP3,
     { SENSORS_W83782D_TEMP3, SENSORS_W83782D_TEMP3_OVER, SENSORS_W83782D_TEMP3_HYST, SENSORS_W83782D_SENS3, -1 } },
-  { fmtVolt_2, rrdF2, DataType_voltage, 0, 0,
+  { fmtVolt_3, rrdF3, DataType_voltage, 0, 0,
     { SENSORS_W83782D_VID, -1 } },
   { fmtChassisIntrusionDetection, NULL, DataType_other, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
     { SENSORS_W83781D_ALARMS, -1 } },
@@ -604,6 +708,8 @@ static const FeatureDescriptor w83783s_features[] = {
     { SENSORS_W83783S_IN4, SENSORS_W83783S_IN4_MIN, SENSORS_W83783S_IN4_MAX, -1 } },
   { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN5, W83781D_ALARM_IN5,
     { SENSORS_W83783S_IN5, SENSORS_W83783S_IN5_MIN, SENSORS_W83783S_IN5_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN6, W83781D_ALARM_IN6,
+    { SENSORS_W83782D_IN6, SENSORS_W83782D_IN6_MIN, SENSORS_W83782D_IN6_MAX, -1 } },
   { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN1, W83781D_ALARM_FAN1,
     { SENSORS_W83783S_FAN1, SENSORS_W83783S_FAN1_MIN, SENSORS_W83783S_FAN1_DIV, -1 } },
   { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN2, W83781D_ALARM_FAN2,
@@ -614,10 +720,8 @@ static const FeatureDescriptor w83783s_features[] = {
     { SENSORS_W83783S_TEMP1, SENSORS_W83783S_TEMP1_OVER, SENSORS_W83783S_TEMP1_HYST, SENSORS_W83783S_SENS1, -1 } },
   { fmtTemps_W8378x_1, rrdF1, DataType_temperature, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
     { SENSORS_W83783S_TEMP2, SENSORS_W83783S_TEMP2_OVER, SENSORS_W83783S_TEMP2_HYST, SENSORS_W83783S_SENS2, -1 } },
-  { fmtVolt_2, rrdF2, DataType_voltage, 0, 0,
+  { fmtVolt_3, rrdF3, DataType_voltage, 0, 0,
     { SENSORS_W83783S_VID, -1 } },
-  { fmtChassisIntrusionDetection, NULL, DataType_other, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
-    { SENSORS_W83781D_ALARMS, -1 } },
   { fmtSoundAlarm, NULL, DataType_other, 0, 0,
     { SENSORS_W83781D_BEEP_ENABLE, -1 } },
   { NULL }
@@ -627,6 +731,45 @@ static const ChipDescriptor w83783s_chip = {
   w83783s_names, w83783s_features, SENSORS_W83783S_ALARMS, SENSORS_W83783S_BEEPS
 };
 
+/** W83697HF **/
+
+static const char *w83697hf_names[] = {
+  SENSORS_W83697HF_PREFIX, NULL
+};
+
+static const FeatureDescriptor w83697hf_features[] = {
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN0, W83781D_ALARM_IN0,
+    { SENSORS_W83782D_IN0, SENSORS_W83782D_IN0_MIN, SENSORS_W83782D_IN0_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN2, W83781D_ALARM_IN2,
+    { SENSORS_W83782D_IN2, SENSORS_W83782D_IN2_MIN, SENSORS_W83782D_IN2_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN3, W83781D_ALARM_IN3,
+    { SENSORS_W83782D_IN3, SENSORS_W83782D_IN3_MIN, SENSORS_W83782D_IN3_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN4, W83781D_ALARM_IN4,
+    { SENSORS_W83782D_IN4, SENSORS_W83782D_IN4_MIN, SENSORS_W83782D_IN4_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN5, W83781D_ALARM_IN5,
+    { SENSORS_W83782D_IN5, SENSORS_W83782D_IN5_MIN, SENSORS_W83782D_IN5_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN6, W83781D_ALARM_IN6,
+    { SENSORS_W83782D_IN6, SENSORS_W83782D_IN6_MIN, SENSORS_W83782D_IN6_MAX, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN1, W83781D_ALARM_FAN1,
+    { SENSORS_W83782D_FAN1, SENSORS_W83782D_FAN1_MIN, SENSORS_W83782D_FAN1_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN2, W83781D_ALARM_FAN2,
+    { SENSORS_W83782D_FAN2, SENSORS_W83782D_FAN2_MIN, SENSORS_W83782D_FAN2_DIV, -1 } },
+  { fmtTemps_W8378x_0, rrdF0, DataType_temperature, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
+    { SENSORS_W83782D_TEMP1, SENSORS_W83782D_TEMP1_OVER, SENSORS_W83782D_TEMP1_HYST, SENSORS_W83782D_SENS1, -1 } },
+  { fmtTemps_W8378x_1, rrdF1, DataType_temperature, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
+    { SENSORS_W83782D_TEMP2, SENSORS_W83782D_TEMP2_OVER, SENSORS_W83782D_TEMP2_HYST, SENSORS_W83782D_SENS2, -1 } },
+  { fmtChassisIntrusionDetection, NULL, DataType_other, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
+    { SENSORS_W83781D_ALARMS, -1 } },
+  { fmtSoundAlarm, NULL, DataType_other, 0, 0,
+    { SENSORS_W83781D_BEEP_ENABLE, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor w83697hf_chip = {
+  w83697hf_names, w83697hf_features, SENSORS_W83781D_ALARMS, SENSORS_W83781D_BEEPS
+};
+
+
 /** MAXILIFE **/
 
 static const char *
@@ -634,7 +777,7 @@ fmtTemps_Maxilife
 (const double values[], int alarm, int beep) {
   if (!values[0] && !values[1] && !values[2])
     return NULL;
-  return fmtTemps_1 (values, alarm, beep);
+  return fmtTemps_1_0 (values, alarm, beep);
 }
 
 static const char *
@@ -704,7 +847,7 @@ rrdVolts_Maxilife
 }
 
 static const char *maxilife_names[] = {
-  SENSORS_MAXI_CG_PREFIX, SENSORS_MAXI_CO_PREFIX, SENSORS_MAXI_AS_PREFIX, NULL
+  SENSORS_MAXI_CG_PREFIX, SENSORS_MAXI_CO_PREFIX, SENSORS_MAXI_AS_PREFIX, SENSORS_MAXI_NBA_PREFIX, NULL
 };
 
 static const FeatureDescriptor maxilife_features[] = {
@@ -741,48 +884,6 @@ static const ChipDescriptor maxilife_chip = {
   maxilife_names, maxilife_features, SENSORS_MAXI_CG_ALARMS, 0
 };
 
-/** EEPROM **/
-
-static const char *
-fmtType_EEPROM
-(const double values[], int alarm, int beep) {
-  if ((int) values[0] == 4)
-    sprintf (buff, "SDRAM DIMM SPD");
-  else
-    sprintf (buff, "Invalid"); /* N.B: sensors just returns, aborting further tests; I don't.. */
-  return fmtExtra (alarm, beep);
-}
-
-static const char *
-fmtRowCol_EEPROM
-(const double values[], int alarm, int beep) {
-  int row = (int) values[0];
-  int col = (int) values[1];
-  int num = (int) values[2];
-  int foo = (row & 0xf) + (col & 0xf) + num - 16;
-  if ((foo > 0) && (foo <= 10))
-    sprintf (buff, "%d", 1 << foo);
-  else
-    sprintf (buff, "Invalid");
-  return fmtExtra (alarm, beep);
-}
-
-static const char *eeprom_names[] = {
-  SENSORS_EEPROM_PREFIX, NULL
-};
-
-static const FeatureDescriptor eeprom_features[] = {
-  { fmtType_EEPROM, NULL, DataType_other, 0, 0,
-    { SENSORS_EEPROM_TYPE, -1 } },
-  { fmtRowCol_EEPROM, NULL, DataType_other, 0, 0,
-    { SENSORS_EEPROM_ROWADDR, SENSORS_EEPROM_COLADDR, SENSORS_EEPROM_NUMROWS, -1 } },
-  { NULL }
-};
-
-static const ChipDescriptor eeprom_chip = {
-  eeprom_names, eeprom_features, 0, 0
-};
-
 /** DDCMON **/
 
 static const char *
@@ -797,7 +898,7 @@ fmtID_DDCMON
   buff[5] = ((value >> 28) & 0xf) + '0';
   buff[6] = ((value >> 24) & 0xf) + '0';
   buff[7] = '\0';
-  return fmtExtra (alarm, beep);
+  return buff;
 }
 
 static const char *ddcmon_names[] = {
@@ -822,6 +923,52 @@ static const ChipDescriptor ddcmon_chip = {
   ddcmon_names, ddcmon_features, 0, 0
 };
 
+/** EEPROM **/
+
+static const char *
+fmtType_EEPROM
+(const double values[], int alarm, int beep) {
+  if ((int) values[0] == 4)
+    sprintf (buff, "SDRAM DIMM SPD");
+  else if ((int) values[0] == 7)
+    sprintf (buff, "DDR SDRAM DIMM SPD");
+  else
+    sprintf (buff, "Invalid"); /* N.B: sensors just returns, aborting further tests; I don't.. */
+  return fmtExtra (alarm, beep);
+}
+
+static const char *
+fmtRowCol_EEPROM
+(const double values[], int alarm, int beep) {
+  int row = (int) values[0];
+  int col = (int) values[1];
+  int num = (int) values[2];
+  int banks = (int) values[3];
+  int foo = (row & 0xf) + (col & 0xf) + 17;
+  if ((foo > 0) && (foo <= 12) && (num <= 8) && (banks <= 8)) {
+    sprintf (buff, "%d", (1 << foo) * num * banks);
+  } else {
+    sprintf (buff, "Invalid %d %d %d %d", row, col, num, banks);
+  }
+  return buff;
+}
+
+static const char *eeprom_names[] = {
+  SENSORS_EEPROM_PREFIX, NULL
+};
+
+static const FeatureDescriptor eeprom_features[] = {
+  { fmtType_EEPROM, NULL, DataType_other, 0, 0,
+    { SENSORS_EEPROM_TYPE, -1 } },
+  { fmtRowCol_EEPROM, NULL, DataType_other, 0, 0,
+    { SENSORS_EEPROM_ROWADDR, SENSORS_EEPROM_COLADDR, SENSORS_EEPROM_NUMROWS, SENSORS_EEPROM_BANKS, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor eeprom_chip = {
+  eeprom_names, eeprom_features, 0, 0
+};
+
 /** ALL **/
 
 const ChipDescriptor * const knownChips[] = {
@@ -829,6 +976,7 @@ const ChipDescriptor * const knownChips[] = {
   &adm1025_chip,
   &adm9240_chip,
   &ddcmon_chip,
+  &ds1621_chip,
   &eeprom_chip,
   &gl518_chip,
   &lm75_chip,
@@ -841,5 +989,6 @@ const ChipDescriptor * const knownChips[] = {
   &w83781d_chip,
   &w83782d_chip,
   &w83783s_chip,
+  &w83697hf_chip,
   NULL
 };
