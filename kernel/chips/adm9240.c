@@ -498,7 +498,7 @@ void adm9240_init_client(struct i2c_client *client)
   adm9240_write_value(client,ADM9240_REG_TEMP_CONFIG,0x00);
 
   /* Start monitoring */
-  adm9240_write_value(client,ADM9240_REG_CONFIG,0x0B);
+  adm9240_write_value(client,ADM9240_REG_CONFIG,0x01);
 }
 
 void adm9240_update_client(struct i2c_client *client)
