@@ -10,6 +10,7 @@ i2cset \- set I2C registers
 .I data-address
 .I value
 .RI [ mode ]
+.RI [ mask ]
 .br
 .B i2cset
 .B -V
@@ -42,6 +43,11 @@ The \fImode\fR parameter, if specified, is one of the letters \fBb\fP or
 respectively. If the \fImode\fR parameter is omitted, i2cset defaults to byte
 mode. The \fIvalue\fR provided must be within range for the specified data
 type (0x00-0xFF for bytes, 0x0000-0xFFFF for words).
+.PP
+The \fImask\fR parameter, if specified, describes which bits of \fIvalue\fR
+will be actually written to \fIdata-address\fR. Bits set to 1 in the mask
+are taken from \fIvalue\fR, while bits set to 0 will be read from
+\fIdata-address\fR and thus preserved by the operation.
 
 .SH WARNING
 i2cset can be extremely dangerous if used improperly. It can confuse your

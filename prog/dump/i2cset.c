@@ -33,7 +33,7 @@ void help(void) __attribute__ ((noreturn));
 void help(void)
 {
 	fprintf(stderr, "Syntax: i2cset [-y] I2CBUS CHIP-ADDRESS DATA-ADDRESS "
-	        "VALUE [MODE]\n"
+	        "VALUE [MODE] [MASK]\n"
 	        "        i2cset -V\n"
 	        "  MODE is 'b[yte]' or 'w[ord]' (default b)\n"
 	        "  I2CBUS is an integer\n");
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 {
 	char *end;
 	int res, i2cbus, address, size, file;
-	int value, daddress;
+	int value, daddress, vmask = 0;
 	int e1;
 	char filename[20];
 	long funcs;
@@ -110,6 +110,14 @@ int main(int argc, char *argv[])
 		help();
 	}
 
+	if (argc >= flags + 7) {
+		vmask = strtol(argv[flags+6], &end, 0);
+		if (*end || vmask == 0) {
+			fprintf(stderr, "Error: Data value mask invalid!\n");
+			help();
+		}
+	}
+
 	if (value < 0
 	 || (size == I2C_SMBUS_BYTE_DATA && value > 0xff)
 	 || (size == I2C_SMBUS_WORD_DATA && value > 0xffff)) {
@@ -171,8 +179,9 @@ int main(int argc, char *argv[])
 		}
 
 		fprintf(stderr, "I will write to device file %s, chip address "
-		        "0x%02x, data address\n0x%02x, data 0x%02x, mode "
+		        "0x%02x, data address\n0x%02x, data 0x%02x%s, mode "
 		        "%s.\n", filename, address, daddress, value,
+			vmask ? " (masked)" : "",
 			size == I2C_SMBUS_BYTE_DATA ? "byte" : "word");
 
 		fprintf(stderr, "Continue? [%s] ", dont ? "y/N" : "Y/n");
@@ -181,6 +190,43 @@ int main(int argc, char *argv[])
 		if ((s[0] != '\n' || dont) && s[0] != 'y' && s[0] != 'Y') {
 			fprintf(stderr, "Aborting on user request.\n");
 			exit(0);
+		}
+	}
+
+	if (vmask) {
+		int oldvalue;
+
+		if (size == I2C_SMBUS_WORD_DATA) {
+			oldvalue = i2c_smbus_read_word_data(file, daddress);
+		} else {
+			oldvalue = i2c_smbus_read_byte_data(file, daddress);
+		}
+
+		if (oldvalue < 0) {
+			fprintf(stderr, "Error: Failed to read old value\n");
+			exit(1);
+		}
+
+		value = (value & vmask) | (oldvalue & ~vmask);
+
+		if (!yes) {
+			char s[2];
+			
+			fprintf(stderr, "Old value 0x%0*x, write mask "
+				"0x%0*x: Will write 0x%0*x to register "
+				"0x%02x\n",
+				size == I2C_SMBUS_WORD_DATA ? 4 : 2, oldvalue,
+				size == I2C_SMBUS_WORD_DATA ? 4 : 2, vmask,
+				size == I2C_SMBUS_WORD_DATA ? 4 : 2, value,
+				daddress);
+
+			fprintf(stderr, "Continue? [Y/n] ");
+			fflush(stderr);
+			fgets(s, 2, stdin);
+			if (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y') {
+				fprintf(stderr, "Aborting on user request.\n");
+				exit(0);
+			}
 		}
 	}
 
