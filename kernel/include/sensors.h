@@ -518,4 +518,24 @@
 #define FSCPOS_SYSCTL_CONTROL 2002        /* global control byte */
 #define FSCPOS_SYSCTL_WDOG     2003       /* state, min, ripple, actual value fan 2 */
 
+#define FSCSCY_SYSCTL_VOLT0    1000       /* 12 volt supply */
+#define FSCSCY_SYSCTL_VOLT1    1001       /* 5 volt supply */
+#define FSCSCY_SYSCTL_VOLT2    1002       /* batterie voltage*/
+#define FSCSCY_SYSCTL_FAN0     1101       /* state, min, ripple, actual value fan 0 */
+#define FSCSCY_SYSCTL_FAN1     1102       /* state, min, ripple, actual value fan 1 */
+#define FSCSCY_SYSCTL_FAN2     1103       /* state, min, ripple, actual value fan 2 */
+#define FSCSCY_SYSCTL_FAN3     1104       /* state, min, ripple, actual value fan 3 */
+#define FSCSCY_SYSCTL_FAN4     1105       /* state, min, ripple, actual value fan 4 */
+#define FSCSCY_SYSCTL_FAN5     1106       /* state, min, ripple, actual value fan 5 */
+#define FSCSCY_SYSCTL_TEMP0    1201       /* state and value of sensor 0, cpu die */
+#define FSCSCY_SYSCTL_TEMP1    1202       /* state and value of sensor 1, motherboard */
+#define FSCSCY_SYSCTL_TEMP2    1203       /* state and value of sensor 2, chassis */
+#define FSCSCY_SYSCTL_TEMP3    1204       /* state and value of sensor 3, chassis */
+#define FSCSCY_SYSCTL_REV     2000        /* Revision */
+#define FSCSCY_SYSCTL_EVENT   2001        /* global event status */
+#define FSCSCY_SYSCTL_CONTROL 2002        /* global control byte */
+#define FSCSCY_SYSCTL_WDOG     2003       /* state, min, ripple, actual value fan 2 */
+#define FSCSCY_SYSCTL_PCILOAD  2004       /* PCILoad value */
+#define FSCSCY_SYSCTL_INTRUSION 2005      /* state, control for intrusion sensor */
+
 #endif				/* def SENSORS_SENSORS_H */
