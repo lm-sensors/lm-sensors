@@ -772,8 +772,8 @@ chip "as99127f-*"
 # Most Asus boards have temperatures settled like that:
     label temp1 "M/B Temp"
     label temp2 "CPU Temp"
-# However, some boards have them swapped (A7N8X Deluxe rev.2, A7N8X-X,
-# CUV4X):
+# However, some boards have them swapped (A7N8X Deluxe rev.2,
+# A7N8X-E Deluxe rev.2, A7N8X-X, CUV4X):
 #   label temp1 "CPU Temp"
 #   label temp2 "M/B Temp"
 
