@@ -26,20 +26,26 @@ ask CVS about it:
            Advance version to 2.0.1
   Modules (various): Fix includes for compilation on Alpha.
   Module saa1064: New.
-  Program decode-edid.pl : New. Interfaces between our eeprom module and
-                           parse-edid from the read-edid project.
+  Program decode-dimms.pl: Add Direct Rambus (DRDRAM)
+                           Mark Rambus as unsupported
+  Program decode-edid.pl: New
+                          Interfaces between our eeprom module and
+                          parse-edid from the read-edid project
   Program sensord: Add support for IT87 (Mike Black)
                    Change ADM1025 support to match the changes made to
                    the library
   Program sensors: Rewrite and enhance EEPROM support
                    Change ADM1025 support to match the changes made to
                    the library
+				   Add DRDRAM support to print_eeprom
   Program sensors-detect: Add support for PCF8574, PCF8574A, SAA1064;
                           Add support for LM82, LM86, LM89;
                           Improved W83781D family detection;
                           Add support for AS19927F rev.2, ASB100 Bach
                           Add support for Asus Mozart-2 (3 types)
                           Add support for NE1619
+  Module i2c-sis630: Fix detection
+                     Add block data read/write support
   Module i2c-sis645: Detection method change/bugfix
   Module adm1025: Major driver update
                   Add support for Philips NE1619
@@ -50,6 +56,12 @@ ask CVS about it:
                   Swap remote and local temperatures to match the internal
                   registers order (make the code unification possible)
                   Export remote diode fault through alarms
+  Module ddcmon: Major update
+                 Add half a dozen new features
+                 Add checksum parameter (same as for the eeprom module)
+                 Fix monitor limits
+  Module w83781d: Enhance chip detection
+  
 
 
 2.8.0 (20030714)
