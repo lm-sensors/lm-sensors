@@ -100,7 +100,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        vendid => 0x8086,
        devid  => 0x24C3,
        func => 3,
-       procid => "Intel 82801DB ICH4,
+       procid => "Intel 82801DB ICH4",
        driver => "i2c-i801",
        match => sub { $_[0] =~ /^SMBus I801 adapter at [0-9,a-f]{4}/ },
      } , 
