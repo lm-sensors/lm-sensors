@@ -306,7 +306,7 @@ rrdCGI_LINE
 (void *_data, const char *rawLabel, const char *label, const FeatureDescriptor *feature) {
   struct gr *data = (struct gr *) _data;
   if (!feature || (feature->rrd && (feature->type == data->type)))
-    printf ("\n\tLINE2:%s#%.6x:\"%s\"", rawLabel, random () & 0xffffff, label);
+    printf ("\n\tLINE2:%s#%.6x:\"%s\"", rawLabel, (int) random () & 0xffffff, label);
   return 0;
 }
 
