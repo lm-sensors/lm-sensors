@@ -666,7 +666,7 @@ void LM87_update_client(struct i2c_client *client)
 		 data->ain1_max =
 		    LM87_read_value(client,LM87_REG_FAN1_AIN1_LIMIT);
 		 data->ain2 = 
-		    LM87_read_value(client,LM87_REG_FAN1_AIN1);
+		    LM87_read_value(client,LM87_REG_FAN2_AIN2);
 		 data->ain2_min =
 		    LM87_read_value(client,LM87_REG_AIN2_LOW);
 		 data->ain2_max =
