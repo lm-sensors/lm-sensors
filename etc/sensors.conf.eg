@@ -1718,6 +1718,21 @@ chip "lm83-*"
 # should be higher than each of the high limits above
 #   set tcrit 85
 
+
+chip "max1619-*"
+
+   label temp1 "M/B Temp"
+   label temp2 "CPU Temp"
+
+# change high and low limits to fit your needs
+   set temp2_min   10
+   set temp2_max   100
+
+# change critical limit and hysteresis to fit your needs
+   set temp2_crit  55
+   set temp2_hyst  50
+
+
 chip "lm90-*" "adm1032-*"
 
    label temp1 "M/B Temp"

@@ -81,7 +81,7 @@ problems.
   Author of the decode-vaio.pl Vaio EEPROM decoder.
   Author of the decode-edid.pl EDID data decoder.
   Perl scripts maintainer, tester, bug fixer, general support.
-  Author of the lm83 and lm90 chip drivers.
+  Author of the lm83, lm90, pca9540 and pc87360 chip drivers.
 * Vojtech Pavlik <vojtech@suse.cz>	
   Author of the i2c-amd8111 bus driver.
   Added support for amd8111 SMBus 1.0 controller to i2c-amd756.
@@ -90,8 +90,9 @@ problems.
   Author of the ADM1026 chip driver.
 * Sascha Volkenandt <sascha@akv-soft.de>
   Author of the SAA1064 chip driver.
-* John Morris (john.morris@spirentcom.com)
+* John Morris <john.morris@spirentcom.com>
   Author of the MAX6650 chip driver.
 * Reinhard Nissl <rnissl@gmx.de>
   Author of the fscher driver.
-
+* Alexey Fisher <fishor@mail.ru>
+  Author of the max1619 chip driver.

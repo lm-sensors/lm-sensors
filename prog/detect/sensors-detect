@@ -1163,7 +1163,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "Maxim MAX1619",
-       driver => "to-be-written",
+       driver => "max1619",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
        i2c_detect => sub { max1619_detect 0, @_ },
      },

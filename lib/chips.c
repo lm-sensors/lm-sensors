@@ -4969,6 +4969,32 @@ static sensors_chip_feature xeontemp_features[] =
     { 0 }
   };
 
+static sensors_chip_feature max1619_features[] =
+  {
+    { SENSORS_MAX1619_LOCAL_TEMP, "temp1",
+     NOMAP, NOMAP,
+      R, MAX1619_SYSCTL_LOCAL_TEMP, VALUE(1), 0 },
+    { SENSORS_MAX1619_REMOTE_TEMP, "temp2",
+     NOMAP, NOMAP,
+      R, MAX1619_SYSCTL_REMOTE_TEMP, VALUE(3), 0 },
+    { SENSORS_MAX1619_REMOTE_HIGH, "temp2_min",
+      NOMAP,NOMAP,
+      RW, MAX1619_SYSCTL_REMOTE_TEMP, VALUE(2), 0 },
+    { SENSORS_MAX1619_REMOTE_LOW, "temp2_max",
+      NOMAP, NOMAP,
+      RW, MAX1619_SYSCTL_REMOTE_TEMP, VALUE(1), 0 },
+    { SENSORS_MAX1619_REMOTE_MAX, "temp2_crit",
+      NOMAP,NOMAP,
+      RW, MAX1619_SYSCTL_REMOTE_CRIT, VALUE(1), 0 },
+    { SENSORS_MAX1619_REMOTE_HYST, "temp2_hyst",
+      NOMAP, NOMAP,
+      RW, MAX1619_SYSCTL_REMOTE_CRIT, VALUE(2), 0 },
+    { SENSORS_MAX1619_ALARMS, "alarms",
+      NOMAP, NOMAP,
+      R, MAX1619_SYSCTL_ALARMS, VALUE(1), 0 },
+    { 0 }
+  };
+
 static sensors_chip_feature max6650_features[] =
   {
     { SENSORS_MAX6650_FAN1_TACH, "fan1", NOMAP,
@@ -5071,6 +5097,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_LM90_PREFIX, lm90_features },
  { SENSORS_ADM1032_PREFIX, lm90_features },
  { SENSORS_LM99_PREFIX, lm90_features },
+ { SENSORS_MAX1619_PREFIX, max1619_features },
  { SENSORS_XEONTEMP_PREFIX, xeontemp_features },
  { SENSORS_MAX6650_PREFIX, max6650_features },
  { 0 }

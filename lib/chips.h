@@ -1855,6 +1855,18 @@
 #define SENSORS_XEONTEMP_REMOTE_TEMP_OVER 56 /* RW */
 #define SENSORS_XEONTEMP_ALARMS 81 /* R */
 
+/* MAX1619 chip */
+
+#define SENSORS_MAX1619_PREFIX "max1619"
+
+#define SENSORS_MAX1619_LOCAL_TEMP      51      /* R */
+#define SENSORS_MAX1619_REMOTE_TEMP     52      /* R */
+#define SENSORS_MAX1619_REMOTE_LOW      53      /* RW */
+#define SENSORS_MAX1619_REMOTE_HIGH     54      /* RW */
+#define SENSORS_MAX1619_REMOTE_MAX      55      /* RW */
+#define SENSORS_MAX1619_REMOTE_HYST     56      /* RW */
+#define SENSORS_MAX1619_ALARMS          81      /* R */
+
 /* MAX6650 / 1 chips */
 
 #define SENSORS_MAX6650_PREFIX "max6650"

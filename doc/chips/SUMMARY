@@ -149,6 +149,14 @@ lm92
 	(lm76 needs force parameter)
 	lm76		1	-	-	-	yes	no
 
+max1619
+	max1619		2	-	-	-	yes	no
+
+max6650
+	(all are reported as a "max6650")
+	max6650		-	-	1	1 pwm	yes	no
+	max6651		-	-	4	1 pwm	yes	no
+
 maxilife
 	maxilife-as	5	4	3	-	yes	no
 	maxilife-co	5	4	3	-	yes	no
