@@ -152,10 +152,16 @@
 # Important note: In the 'sensors' program, these only take effect
 # after running 'sensors -s'!!!
 #
+# Here are some examples:
+#
 #	set in0_max vid*1.05
 #	set in0_min vid*0.95
 #	set temp1_over 40	
 #	set temp1_hyst 37	
+#
+# Think of tempx_over as 'alarm set' and tempx_hyst as 'alarm clear'
+# thresholds. In most cases the 'over' value should be higher than
+# the 'hyst' value by several degrees.
 #
 #
 # IGNORE LINES
