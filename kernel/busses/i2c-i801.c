@@ -626,7 +626,7 @@ u32 i801_func(struct i2c_adapter *adapter)
 int __init i2c_i801_init(void)
 {
 	int res;
-	printk("i801.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk("i2c-i801.o version %s (%s)\n", LM_VERSION, LM_DATE);
 #ifdef DEBUG
 /* PE- It might be good to make this a permanent part of the code! */
 	if (i801_initialized) {

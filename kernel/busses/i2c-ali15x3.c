@@ -565,7 +565,7 @@ u32 ali15x3_func(struct i2c_adapter *adapter)
 int __init i2c_ali15x3_init(void)
 {
 	int res;
-	printk("ali15x3.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk("i2c-ali15x3.o version %s (%s)\n", LM_VERSION, LM_DATE);
 #ifdef DEBUG
 /* PE- It might be good to make this a permanent part of the code! */
 	if (ali15x3_initialized) {

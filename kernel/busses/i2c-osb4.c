@@ -452,7 +452,7 @@ u32 osb4_func(struct i2c_adapter *adapter)
 int __init i2c_osb4_init(void)
 {
 	int res;
-	printk("osb4.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk("i2c-osb4.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	if (osb4_initialized) {
 		printk
 		    ("i2c-osb4.o: Oops, osb4_init called a second time!\n");

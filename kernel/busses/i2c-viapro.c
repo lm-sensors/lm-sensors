@@ -486,7 +486,7 @@ u32 vt596_func(struct i2c_adapter *adapter)
 int __init i2c_vt596_init(void)
 {
 	int res;
-	printk("via2.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk("i2c-viapro.o version %s (%s)\n", LM_VERSION, LM_DATE);
 #ifdef DEBUG
 /* PE- It might be good to make this a permanent part of the code! */
 	if (vt596_initialized) {

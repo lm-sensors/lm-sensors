@@ -446,7 +446,7 @@ u32 amd756_func(struct i2c_adapter *adapter)
 int __init i2c_amd756_init(void)
 {
 	int res;
-	printk("amd756.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk("i2c-amd756.o version %s (%s)\n", LM_VERSION, LM_DATE);
 #ifdef DEBUG
 /* PE- It might be good to make this a permanent part of the code! */
 	if (amd756_initialized) {
