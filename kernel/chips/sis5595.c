@@ -217,11 +217,7 @@ static void sis5595_alarms(struct i2c_client *client, int operation, int ctl_nam
 static void sis5595_fan_div(struct i2c_client *client, int operation, int ctl_name,
                          int *nrels_mag, long *results);
 
-/* I choose here for semi-static SIS5595 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
-#define MAX_SIS5595_NR 4
-static struct i2c_client *sis5595_list[MAX_SIS5595_NR];
+static int sis5595_id = 0;
 
 /* The driver. I choose to use type i2c_driver, as at is identical to both
    smbus_driver and isa_driver, and clients could be of either kind */
@@ -401,17 +397,7 @@ int sis5595_detect(struct i2c_adapter *adapter, int address, int kind)
   /* Fill in the remaining client fields and put it into the global list */
   strcpy(new_client->name,client_name);
 
-  for(i = 0; i < MAX_SIS5595_NR; i++)
-    if (! sis5595_list[i])
-      break;
-  if (i == MAX_SIS5595_NR) {
-    printk("sis5595.o: No empty slots left, recompile and heighten "
-           "MAX_SIS5595_NR!\n");
-    err = -ENOMEM;
-    goto ERROR2;
-  }
-  sis5595_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = sis5595_id++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
 
@@ -438,10 +424,6 @@ int sis5595_detect(struct i2c_adapter *adapter, int address, int kind)
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_SIS5595_NR; i++)
-    if (new_client == sis5595_list[i])
-      sis5595_list[i] = NULL;
-ERROR2:
   release_region(address,SIS5595_EXTENT);
 ERROR1:
   kfree(new_client);
@@ -451,7 +433,7 @@ ERROR0:
 
 int sis5595_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct sis5595_data *)(client->data))->sysctl_id);
 
@@ -459,15 +441,6 @@ int sis5595_detach_client(struct i2c_client *client)
     printk("sis5595.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_SIS5595_NR; i++)
-    if (client == sis5595_list[i])
-      break;
-  if ((i == MAX_SIS5595_NR)) {
-    printk("sis5595.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  sis5595_list[i] = NULL;
 
   release_region(client->addr,SIS5595_EXTENT);
   kfree(client);

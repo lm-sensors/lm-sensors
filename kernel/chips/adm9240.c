@@ -286,8 +286,7 @@ static void adm9240_vid(struct i2c_client *client, int operation, int ctl_name,
 /* I choose here for semi-static ADM9240 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
-#define MAX_ADM9240_NR 4
-static struct i2c_client *adm9240_list[MAX_ADM9240_NR];
+static int adm9240_id = 0;
 
 static struct i2c_driver adm9240_driver = {
   /* name */		"ADM9240 sensor driver",
@@ -427,17 +426,7 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind)
   strcpy(new_client->name,client_name);
   data->type = kind;
 
-  for(i = 0; i < MAX_ADM9240_NR; i++)
-    if (! adm9240_list[i])
-      break;
-  if (i == MAX_ADM9240_NR) {
-    printk("adm9240.o: No empty slots left, recompile and heighten "
-           "MAX_ADM9240_NR!\n");
-    err = -ENOMEM;
-    goto ERROR2;
-  }
-  adm9240_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = adm9240_id ++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
 
@@ -446,7 +435,7 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind)
     goto ERROR3;
 
   /* Register a new directory entry with module sensors */
-  if ((i = sensors_register_entry((struct i2c_client *) new_client,
+  if ((i = sensors_register_entry(new_client,
                                   type_name,
                                   adm9240_dir_table_template)) < 0) {
     err = i;
@@ -455,7 +444,7 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind)
   data->sysctl_id = i;
 
   /* Initialize the ADM9240 chip */
-  adm9240_init_client((struct i2c_client *) new_client);
+  adm9240_init_client(new_client);
   return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
@@ -464,10 +453,6 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind)
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_ADM9240_NR; i++)
-    if (new_client == adm9240_list[i])
-      adm9240_list[i] = NULL;
-ERROR2:
 ERROR1:
   kfree(new_client);
 ERROR0:
@@ -476,7 +461,7 @@ ERROR0:
 
 int adm9240_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct adm9240_data *)(client->data))->sysctl_id);
 
@@ -484,15 +469,6 @@ int adm9240_detach_client(struct i2c_client *client)
     printk("adm9240.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_ADM9240_NR; i++)
-    if (client == adm9240_list[i])
-      break;
-  if ((i == MAX_ADM9240_NR)) {
-    printk("adm9240.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  adm9240_list[i] = NULL;
 
   kfree(client);
 

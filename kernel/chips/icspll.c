@@ -118,13 +118,7 @@ static u8 tempdata[MAXBLOCK_SIZE];
 /* Used by init/cleanup */
 static int __initdata icspll_initialized = 0;
 
-/* I choose here for semi-static allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
-#define MAX_ICSPLL_NR 2
-static struct i2c_client *icspll_list[MAX_ICSPLL_NR];
-
-
+static int icspll_id = 0;
 int icspll_attach_adapter(struct i2c_adapter *adapter)
 {
   int address,err,i;
@@ -166,22 +160,10 @@ int icspll_attach_adapter(struct i2c_adapter *adapter)
       continue;
     }
 
-    /* Find a place in our global list */
-    for (i = 0; i < MAX_ICSPLL_NR; i++)
-      if (! icspll_list[i])
-         break;
-    if (i == MAX_ICSPLL_NR) {
-      err = -ENOMEM;
-      printk("icspll.o: No empty slots left, recompile and heighten "
-             "MAX_ICSPLL_NR!\n");
-      goto ERROR1;
-    }
-    icspll_list[i] = new_client;
-    
     /* Fill the new client structure with data */
     data = (struct icspll_data *) (new_client + 1);
     new_client->data = data;
-    new_client->id = i;
+    new_client->id = icspll_id++;
     new_client->addr = address;
     new_client->adapter = adapter;
     new_client->driver = &icspll_driver;
@@ -211,7 +193,6 @@ int icspll_attach_adapter(struct i2c_adapter *adapter)
 ERROR3:
     i2c_detach_client(new_client);
 ERROR2:
-    icspll_list[i] = NULL;
 ERROR1:
     kfree(new_client);
   }
@@ -221,13 +202,6 @@ ERROR1:
 int icspll_detach_client(struct i2c_client *client)
 {
   int err,i;
-  for (i = 0; i < MAX_ICSPLL_NR; i++)
-    if (client == icspll_list[i])
-      break;
-  if ((i == MAX_ICSPLL_NR)) {
-    printk("icspll.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
 
   sensors_deregister_entry(((struct icspll_data *)(client->data))->sysctl_id);
 
@@ -236,7 +210,6 @@ int icspll_detach_client(struct i2c_client *client)
     return err;
   }
 
-  icspll_list[i] = NULL;
   kfree(client);
   return 0;
 }

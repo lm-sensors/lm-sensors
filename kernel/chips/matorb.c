@@ -112,12 +112,7 @@ static ctl_table matorb_dir_table_template[] = {
 /* Used by init/cleanup */
 static int __initdata matorb_initialized = 0;
 
-/* I choose here for semi-static MATORB allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
-#define MAX_MATORB_NR 16
-static struct i2c_client *matorb_list[MAX_MATORB_NR];
-
+static int matorb_id = 0;
 
 int matorb_attach_adapter(struct i2c_adapter *adapter)
 {
@@ -156,7 +151,7 @@ int matorb_detect(struct i2c_adapter *adapter, int address, int kind)
     goto ERROR0;
   }
 
-  data = (struct matorb_data *) (((struct i2c_client *) new_client) + 1);
+  data = (struct matorb_data *) (new_client + 1);
   new_client->addr = address;
   new_client->data = data;
   new_client->adapter = adapter;
@@ -170,18 +165,7 @@ int matorb_detect(struct i2c_adapter *adapter, int address, int kind)
   /* Fill in the remaining client fields and put it into the global list */
   strcpy(new_client->name,client_name);
 
-  /* Find a place in our global list */
-  for (i = 0; i < MAX_MATORB_NR; i++)
-    if (! matorb_list[i])
-       break;
-  if (i == MAX_MATORB_NR) {
-    err = -ENOMEM;
-    printk("matorb.o: No empty slots left, recompile and heighten "
-           "MAX_MATORB_NR!\n");
-    goto ERROR2;
-  }
-  matorb_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = matorb_id ++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
     
@@ -197,7 +181,7 @@ int matorb_detect(struct i2c_adapter *adapter, int address, int kind)
   }
   data->sysctl_id = i;
 
-  matorb_init_client((struct i2c_client *) new_client);
+  matorb_init_client(new_client);
   return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
@@ -206,10 +190,6 @@ int matorb_detect(struct i2c_adapter *adapter, int address, int kind)
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_MATORB_NR; i++)
-    if (new_client == matorb_list[i])
-      matorb_list[i] = NULL;
-ERROR2:
   kfree(new_client);
 ERROR0:
   return err;
@@ -217,7 +197,7 @@ ERROR0:
 
 int matorb_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct matorb_data *)(client->data))->sysctl_id);
 
@@ -225,15 +205,6 @@ int matorb_detach_client(struct i2c_client *client)
     printk("matorb.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_MATORB_NR; i++)
-    if (client == matorb_list[i])
-      break;
-  if ((i == MAX_MATORB_NR)) {
-    printk("matorb.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  matorb_list[i] = NULL;
 
   kfree(client);
 

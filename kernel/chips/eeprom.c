@@ -148,11 +148,7 @@ static ctl_table eeprom_dir_table_template[] = {
 /* Used by init/cleanup */
 static int __initdata eeprom_initialized = 0;
 
-/* I choose here for semi-static LM78 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
-#define MAX_EEPROM_NR 8
-static struct i2c_client *eeprom_list[MAX_EEPROM_NR];
+static int eeprom_id = 0;
 
 int eeprom_attach_adapter(struct i2c_adapter *adapter)
 {
@@ -190,7 +186,7 @@ int eeprom_detect(struct i2c_adapter *adapter, int address, int kind)
     goto ERROR0;
   }
 
-  data = (struct eeprom_data *) (((struct i2c_client *) new_client) + 1);
+  data = (struct eeprom_data *) (new_client + 1);
   new_client->addr = address;
   new_client->data = data;
   new_client->adapter = adapter;
@@ -224,18 +220,7 @@ int eeprom_detect(struct i2c_adapter *adapter, int address, int kind)
   /* Fill in the remaining client fields and put it into the global list */
   strcpy(new_client->name,client_name);
 
-  /* Find a place in our global list */
-  for (i = 0; i < MAX_EEPROM_NR; i++)
-    if (! eeprom_list[i])
-       break;
-  if (i == MAX_EEPROM_NR) {
-    err = -ENOMEM;
-    printk("eeprom.o: No empty slots left, recompile and heighten "
-           "MAX_EEPROM_NR!\n");
-    goto ERROR2;
-  }
-  eeprom_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = eeprom_id++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
 
@@ -259,10 +244,6 @@ int eeprom_detect(struct i2c_adapter *adapter, int address, int kind)
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_EEPROM_NR; i++)
-    if (new_client == eeprom_list[i])
-      eeprom_list[i] = NULL;
-ERROR2:
 ERROR1:
   kfree(new_client);
 ERROR0:
@@ -271,7 +252,7 @@ ERROR0:
 
 int eeprom_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct eeprom_data *)(client->data))->sysctl_id);
 
@@ -279,15 +260,6 @@ int eeprom_detach_client(struct i2c_client *client)
     printk("eeprom.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_EEPROM_NR; i++)
-    if (client == eeprom_list[i])
-      break;
-  if ((i == MAX_EEPROM_NR)) {
-    printk("eeprom.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  eeprom_list[i] = NULL;
 
   kfree(client);
 

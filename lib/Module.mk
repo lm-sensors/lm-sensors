@@ -19,7 +19,7 @@
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := lib
-LIBDIR := $(MODULE_DIR)
+LIB_DIR := $(MODULE_DIR)
 
 # The manual dirs and files
 LIBMAN3DIR := $(MANDIR)/man3
@@ -97,7 +97,7 @@ install-lib: all-lib
 install :: install-lib
 
 clean-lib:
-	$(RM) $(LIBDIR)/*.ld $(LIBDIR)/*.ad
-	$(RM) $(LIBDIR)/*.lo $(LIBDIR)/*.ao
+	$(RM) $(LIB_DIR)/*.ld $(LIB_DIR)/*.ad
+	$(RM) $(LIB_DIR)/*.lo $(LIB_DIR)/*.ao
 	$(RM) $(LIBTARGETS) $(LIBEXTRACLEAN)
 clean :: clean-lib

@@ -238,12 +238,6 @@ static void lm78_alarms(struct i2c_client *client, int operation, int ctl_name,
 static void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
                          int *nrels_mag, long *results);
 
-/* I choose here for semi-static LM78 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
-#define MAX_LM78_NR 8
-static struct i2c_client *lm78_list[MAX_LM78_NR];
-
 static struct i2c_driver lm78_driver = {
   /* name */		"LM78(-J) and LM79 sensor driver",
   /* id */		I2C_DRIVERID_LM78,
@@ -257,6 +251,8 @@ static struct i2c_driver lm78_driver = {
 
 /* Used by lm78_init/cleanup */
 static int __initdata lm78_initialized = 0;
+
+static int lm78_id = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected LM78. This is just a template;
@@ -355,15 +351,14 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
      client structure, even though we cannot fill it completely yet.
      But it allows us to access lm78_{read,write}_value. */
 
-  if (! (new_client = kmalloc((is_isa?sizeof(struct i2c_client):
-                                      sizeof(struct i2c_client)) + 
+  if (! (new_client = kmalloc((sizeof(struct i2c_client)) + 
                               sizeof(struct lm78_data),
                               GFP_KERNEL))) {
     err = -ENOMEM;
     goto ERROR0;
   }
 
-  data = (struct lm78_data *) (((struct i2c_client *) new_client) + 1);
+  data = (struct lm78_data *) (new_client + 1);
   if (is_isa) 
     init_MUTEX(&data->lock);
   new_client->addr = address;
@@ -421,17 +416,7 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
   strcpy(new_client->name,client_name);
   data->type = kind;
 
-  for(i = 0; i < MAX_LM78_NR; i++)
-    if (! lm78_list[i])
-      break;
-  if (i == MAX_LM78_NR) {
-    printk("lm78.o: No empty slots left, recompile and heighten "
-           "MAX_LM78_NR!\n");
-    err = -ENOMEM;
-    goto ERROR2;
-  }
-  lm78_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = lm78_id ++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
 
@@ -440,7 +425,7 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
     goto ERROR3;
 
   /* Register a new directory entry with module sensors */
-  if ((i = sensors_register_entry((struct i2c_client *) new_client,
+  if ((i = sensors_register_entry(new_client,
                                   type_name,
                                   lm78_dir_table_template)) < 0) {
     err = i;
@@ -449,7 +434,7 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
   data->sysctl_id = i;
 
   /* Initialize the LM78 chip */
-  lm78_init_client((struct i2c_client *) new_client);
+  lm78_init_client(new_client);
   return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
@@ -458,10 +443,6 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_LM78_NR; i++)
-    if (new_client == lm78_list[i]) 
-      lm78_list[i] = NULL;
-ERROR2:
   if (is_isa)
     release_region(address,LM78_EXTENT);
 ERROR1:
@@ -472,7 +453,7 @@ ERROR0:
 
 int lm78_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct lm78_data *)(client->data))->sysctl_id);
 
@@ -480,15 +461,6 @@ int lm78_detach_client(struct i2c_client *client)
     printk("lm78.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_LM78_NR; i++)
-    if (client == lm78_list[i])
-      break;
-  if ((i == MAX_LM78_NR)) {
-    printk("lm78.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  lm78_list[i] = NULL;
 
   if i2c_is_isa_client(client)
     release_region(client->addr,LM78_EXTENT);

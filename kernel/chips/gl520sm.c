@@ -280,8 +280,7 @@ static int __initdata gl520_initialized = 0;
 /* I choose here for semi-static GL520SM allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
-#define MAX_GL520_NR 4
-static struct i2c_client *gl520_list[MAX_GL520_NR];
+static int gl520_id = 0;
 
 int gl520_attach_adapter(struct i2c_adapter *adapter)
 {
@@ -352,17 +351,7 @@ static int gl520_detect(struct i2c_adapter *adapter, int address, int kind)
   strcpy(new_client->name,client_name);
   data->type = kind;
 
-  for(i = 0; i < MAX_GL520_NR; i++)
-    if (! gl520_list[i])
-      break;
-  if (i == MAX_GL520_NR) {
-    printk("gl520sm.o: No empty slots left, recompile and heighten "
-           "MAX_GL520_NR!\n");
-    err = -ENOMEM;
-    goto ERROR2;
-  }
-  gl520_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = gl520_id++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
 
@@ -371,7 +360,7 @@ static int gl520_detect(struct i2c_adapter *adapter, int address, int kind)
     goto ERROR3;
 
   /* Register a new directory entry with module sensors */
-  if ((i = sensors_register_entry((struct i2c_client *) new_client,
+  if ((i = sensors_register_entry(new_client,
                                   type_name,
                                   gl520_dir_table_template)) < 0) {
     err = i;
@@ -382,7 +371,7 @@ static int gl520_detect(struct i2c_adapter *adapter, int address, int kind)
   /* Initialize the GL520SM chip */
   data->two_temps=1;
   data->alarm_mask=0xff;
-  gl520_init_client((struct i2c_client *) new_client);
+  gl520_init_client(new_client);
   return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
@@ -391,10 +380,6 @@ static int gl520_detect(struct i2c_adapter *adapter, int address, int kind)
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_GL520_NR; i++)
-    if (new_client == gl520_list[i])
-      gl520_list[i] = NULL;
-ERROR2:
 ERROR1:
   kfree(new_client);
 ERROR0:
@@ -452,7 +437,7 @@ void gl520_init_client(struct i2c_client *client)
 
 int gl520_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct gl520_data *)(client->data))->sysctl_id);
 
@@ -460,15 +445,6 @@ int gl520_detach_client(struct i2c_client *client)
     printk("gl520sm.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_GL520_NR; i++)
-    if (client == gl520_list[i])
-      break;
-  if ((i == MAX_GL520_NR)) {
-    printk("gl520sm.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  gl520_list[i] = NULL;
 
   kfree(client);
 

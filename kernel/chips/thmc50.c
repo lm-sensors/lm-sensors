@@ -169,12 +169,7 @@ static ctl_table thmc50_dir_table_template[] = {
 /* Used by init/cleanup */
 static int __initdata thmc50_initialized = 0;
 
-/* I choose here for semi-static THMC50 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
-#define MAX_THMC50_NR 16
-static struct i2c_client *thmc50_list[MAX_THMC50_NR];
-
+static int thmc50_id = 0;
 
 int thmc50_attach_adapter(struct i2c_adapter *adapter)
 {
@@ -248,18 +243,7 @@ int thmc50_detect(struct i2c_adapter *adapter, int address, int kind)
   /* Fill in the remaining client fields and put it into the global list */
   strcpy(new_client->name,client_name);
 
-  /* Find a place in our global list */
-  for (i = 0; i < MAX_THMC50_NR; i++)
-    if (! thmc50_list[i])
-       break;
-  if (i == MAX_THMC50_NR) {
-    err = -ENOMEM;
-    printk("thmc50.o: No empty slots left, recompile and heighten "
-           "MAX_THMC50_NR!\n");
-    goto ERROR2;
-  }
-  thmc50_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = thmc50_id++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
     
@@ -275,7 +259,7 @@ int thmc50_detect(struct i2c_adapter *adapter, int address, int kind)
   }
   data->sysctl_id = i;
 
-  thmc50_init_client((struct i2c_client *) new_client);
+  thmc50_init_client(new_client);
   return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
@@ -284,10 +268,6 @@ int thmc50_detect(struct i2c_adapter *adapter, int address, int kind)
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_THMC50_NR; i++)
-    if (new_client == thmc50_list[i])
-      thmc50_list[i] = NULL;
-ERROR2:
 ERROR1:
   kfree(new_client);
 ERROR0:
@@ -296,7 +276,7 @@ ERROR0:
 
 int thmc50_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct thmc50_data *)(client->data))->sysctl_id);
 
@@ -304,15 +284,6 @@ int thmc50_detach_client(struct i2c_client *client)
     printk("thmc50.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_THMC50_NR; i++)
-    if (client == thmc50_list[i])
-      break;
-  if ((i == MAX_THMC50_NR)) {
-    printk("thmc50.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  thmc50_list[i] = NULL;
 
   kfree(client);
 

@@ -404,11 +404,7 @@ static void w83781d_rt(struct i2c_client *client, int operation,
                         int ctl_name, int *nrels_mag, long *results);
 #endif
 
-/* I choose here for semi-static W83781D allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
-#define MAX_W83781D_NR 8
-static struct i2c_client *w83781d_list[MAX_W83781D_NR];
+static int w83781d_id = 0;
 
 static struct i2c_driver w83781d_driver = {
   /* name */		"W83781D sensor driver",
@@ -694,7 +690,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
     goto ERROR0;
   }
 
-  data = (struct w83781d_data *) (((struct i2c_client *) new_client) + 1);
+  data = (struct w83781d_data *) (new_client + 1);
   new_client->addr = address;
   init_MUTEX(&data->lock);
   new_client->data = data;
@@ -773,17 +769,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
   strcpy(new_client->name,client_name);
   data->type = kind;
 
-  for(i = 0; i < MAX_W83781D_NR; i++)
-    if (! w83781d_list[i])
-      break;
-  if (i == MAX_W83781D_NR) {
-    printk("w83781d.o: No empty slots left, recompile and heighten "
-           "MAX_W83781D_NR!\n");
-    err = -ENOMEM;
-    goto ERROR2;
-  }
-  w83781d_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = w83781d_id++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
 
@@ -792,7 +778,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
     goto ERROR3;
 
   /* Register a new directory entry with module sensors */
-  if ((i = sensors_register_entry((struct i2c_client *) new_client,
+  if ((i = sensors_register_entry(new_client,
                                   type_name,
                                   kind == w83781d?w83781d_dir_table_template:
                                   kind == w83783s?w83783s_dir_table_template:
@@ -813,10 +799,6 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_W83781D_NR; i++)
-    if (new_client == w83781d_list[i])
-      w83781d_list[i] = NULL;
-ERROR2:
   if (is_isa)
     release_region(address,W83781D_EXTENT);
 ERROR1:
@@ -827,7 +809,7 @@ ERROR0:
 
 int w83781d_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct w83781d_data *)(client->data))->sysctl_id);
 
@@ -835,15 +817,6 @@ int w83781d_detach_client(struct i2c_client *client)
     printk("w83781d.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_W83781D_NR; i++)
-    if (client == w83781d_list[i])
-      break;
-  if (i == MAX_W83781D_NR) {
-    printk("w83781d.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  w83781d_list[i] = NULL;
 
   if i2c_is_isa_client(client)
     release_region(client->addr,W83781D_EXTENT);

@@ -141,8 +141,7 @@ static int __initdata ltc1710_initialized = 0;
 /* I choose here for semi-static LTC1710 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
-#define MAX_LTC1710_NR 3
-static struct i2c_client *ltc1710_list[MAX_LTC1710_NR];
+static int ltc1710_id = 0;
 
 int ltc1710_attach_adapter(struct i2c_adapter *adapter)
 {
@@ -180,7 +179,7 @@ int ltc1710_detect(struct i2c_adapter *adapter, int address, int kind)
     goto ERROR0;
   }
 
-  data = (struct ltc1710_data *) (((struct i2c_client *) new_client) + 1);
+  data = (struct ltc1710_data *) (new_client + 1);
   new_client->addr = address;
   new_client->data = data;
   new_client->adapter = adapter;
@@ -206,18 +205,7 @@ int ltc1710_detect(struct i2c_adapter *adapter, int address, int kind)
   /* Fill in the remaining client fields and put it into the global list */
   strcpy(new_client->name,client_name);
 
-  /* Find a place in our global list */
-  for (i = 0; i < MAX_LTC1710_NR; i++)
-    if (! ltc1710_list[i])
-       break;
-  if (i == MAX_LTC1710_NR) {
-    err = -ENOMEM;
-    printk("ltc1710.o: No empty slots left, recompile and heighten "
-           "MAX_LTC1710_NR!\n");
-    goto ERROR2;
-  }
-  ltc1710_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = ltc1710_id++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
 
@@ -241,10 +229,6 @@ int ltc1710_detect(struct i2c_adapter *adapter, int address, int kind)
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_LTC1710_NR; i++)
-    if (new_client == ltc1710_list[i])
-      ltc1710_list[i] = NULL;
-ERROR2:
 ERROR1:
   kfree(new_client);
 ERROR0:
@@ -254,7 +238,7 @@ ERROR0:
 
 int ltc1710_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct ltc1710_data *)(client->data))->sysctl_id);
 
@@ -262,15 +246,6 @@ int ltc1710_detach_client(struct i2c_client *client)
     printk("ltc1710.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_LTC1710_NR; i++)
-    if (client == ltc1710_list[i])
-      break;
-  if ((i == MAX_LTC1710_NR)) {
-    printk("ltc1710.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  ltc1710_list[i] = NULL;
 
   kfree(client);
 

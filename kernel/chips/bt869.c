@@ -151,12 +151,7 @@ static ctl_table bt869_dir_table_template[] = {
 /* Used by init/cleanup */
 static int __initdata bt869_initialized = 0;
 
-/* I choose here for semi-static bt869 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
-#define MAX_bt869_NR 16
-static struct i2c_client *bt869_list[MAX_bt869_NR];
-
+int bt869_id = 0;
 
 int bt869_attach_adapter(struct i2c_adapter *adapter)
 {
@@ -226,18 +221,7 @@ printk("bt869.o:  probing address %d .\n",address);
   /* Fill in the remaining client fields and put it into the global list */
   strcpy(new_client->name,client_name);
 
-  /* Find a place in our global list */
-  for (i = 0; i < MAX_bt869_NR; i++)
-    if (! bt869_list[i])
-       break;
-  if (i == MAX_bt869_NR) {
-    err = -ENOMEM;
-    printk("bt869.o: No empty slots left, recompile and heighten "
-           "MAX_bt869_NR!\n");
-    goto ERROR2;
-  }
-  bt869_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = bt869_id++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
     
@@ -262,10 +246,6 @@ printk("bt869.o:  probing address %d .\n",address);
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_bt869_NR; i++)
-    if (new_client == bt869_list[i])
-      bt869_list[i] = NULL;
-ERROR2:
 ERROR1:
   kfree(new_client);
 ERROR0:
@@ -274,7 +254,7 @@ ERROR0:
 
 int bt869_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct bt869_data *)(client->data))->sysctl_id);
 
@@ -282,15 +262,6 @@ int bt869_detach_client(struct i2c_client *client)
     printk("bt869.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_bt869_NR; i++)
-    if (client == bt869_list[i])
-      break;
-  if ((i == MAX_bt869_NR)) {
-    printk("bt869.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  bt869_list[i] = NULL;
 
   kfree(client);
 

@@ -227,11 +227,7 @@ static void lm80_alarms(struct i2c_client *client, int operation, int ctl_name,
 static void lm80_fan_div(struct i2c_client *client, int operation, int ctl_name,
                          int *nrels_mag, long *results);
 
-/* I choose here for semi-static LM80 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
-#define MAX_LM80_NR 4
-static struct i2c_client *lm80_list[MAX_LM80_NR];
+static int lm80_id = 0;
 
 static struct i2c_driver lm80_driver = {
   /* name */		"LM80 sensor driver",
@@ -316,7 +312,7 @@ int lm80_detect(struct i2c_adapter *adapter, int address, int kind)
     goto ERROR0;
   }
 
-  data = (struct lm80_data *) (((struct i2c_client *) new_client) + 1);
+  data = (struct lm80_data *) (new_client + 1);
   new_client->addr = address;
   new_client->data = data;
   new_client->adapter = adapter;
@@ -350,18 +346,7 @@ int lm80_detect(struct i2c_adapter *adapter, int address, int kind)
   /* Fill in the remaining client fields and put it into the global list */
   strcpy(new_client->name,client_name);
 
-  /* Find a place in our global list */
-  for (i = 0; i < MAX_LM80_NR; i++)
-    if (! lm80_list[i])
-       break;
-  if (i == MAX_LM80_NR) {
-    err = -ENOMEM;
-    printk("lm80.o: No empty slots left, recompile and heighten "
-           "MAX_LM80_NR!\n");
-    goto ERROR2;
-  }
-  lm80_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = lm80_id++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
 
@@ -385,10 +370,6 @@ int lm80_detect(struct i2c_adapter *adapter, int address, int kind)
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_LM80_NR; i++)
-    if (new_client == lm80_list[i])
-      lm80_list[i] = NULL;
-ERROR2:
 ERROR1:
   kfree(new_client);
 ERROR0:
@@ -397,7 +378,7 @@ ERROR0:
 
 int lm80_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct lm80_data *)(client->data))->sysctl_id);
 
@@ -405,15 +386,6 @@ int lm80_detach_client(struct i2c_client *client)
     printk("lm80.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_LM80_NR; i++)
-    if (client == lm80_list[i])
-      break;
-  if ((i == MAX_LM80_NR)) {
-    printk("lm80.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  lm80_list[i] = NULL;
 
   kfree(client);
 

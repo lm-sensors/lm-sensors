@@ -198,11 +198,7 @@ static void maxi_alarms(struct i2c_client *client, int operation, int ctl_name,
                         int *nrels_mag, long *results);
 
 
-/* I choose here for semi-static MaxiLife allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
-#define MAX_MAXI_NR 4
-static struct i2c_client *maxi_list[MAX_MAXI_NR];
+static int maxi_id = 0;
 
 /* The driver. I choose to use type i2c_driver, as at is identical to
    the smbus_driver. */
@@ -375,7 +371,7 @@ int maxi_detect_smbus(struct i2c_adapter *adapter)
 ERROR4:
       i2c_detach_client(new_client);
 ERROR3:
-      maxi_remove_client((struct i2c_client *) new_client);
+      maxi_remove_client(new_client);
 ERROR2:
       kfree(new_client);
    }
@@ -384,14 +380,7 @@ ERROR2:
 
 int maxi_detach_smbus(struct i2c_client *client)
 {
-   int err,i;
-   for (i = 0; i < MAX_MAXI_NR; i++)
-      if (client == maxi_list[i])
-         break;
-   if ((i == MAX_MAXI_NR)) {
-      printk("maxilife: Client to detach not found.\n");
-      return -ENOENT;
-   }
+   int err;
 
    sensors_deregister_entry(((struct maxi_data *)(client->data))->sysctl_id);
 
@@ -408,21 +397,9 @@ int maxi_detach_smbus(struct i2c_client *client)
 int maxi_new_client(struct i2c_adapter *adapter,
                     struct i2c_client *new_client)
 {
-   int i;
    struct maxi_data *data;
 
-   /* First, seek out an empty slot */
-   for (i = 0; i < MAX_MAXI_NR; i++)
-      if (!maxi_list[i])
-         break;
-   if (i == MAX_MAXI_NR) {
-      printk("maxilife: No empty slots left, recompile and heighten "
-             "MAX_MAXI_NR!\n");
-      return -ENOMEM;
-   }
-  
-   maxi_list[i] = new_client;
-   new_client->id = i;
+   new_client->id = maxi_id++;
    new_client->adapter = adapter;
    new_client->driver = &maxi_driver;
    data = new_client->data;
@@ -435,10 +412,6 @@ int maxi_new_client(struct i2c_adapter *adapter,
 /* Inverse of maxi_new_client */
 void maxi_remove_client(struct i2c_client *client)
 {
-   int i;
-   for (i = 0; i < MAX_MAXI_NR; i++)
-      if (client == maxi_list[i]) 
-         maxi_list[i] = NULL;
 }
 
 /* No commands defined yet */

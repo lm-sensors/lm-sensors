@@ -127,12 +127,7 @@ static ctl_table lm75_dir_table_template[] = {
 /* Used by init/cleanup */
 static int __initdata lm75_initialized = 0;
 
-/* I choose here for semi-static LM75 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
-#define MAX_LM75_NR 16
-static struct i2c_client *lm75_list[MAX_LM75_NR];
-
+static int lm75_id = 0;
 
 int lm75_attach_adapter(struct i2c_adapter *adapter)
 {
@@ -170,7 +165,7 @@ int lm75_detect(struct i2c_adapter *adapter, int address, int kind)
     goto ERROR0;
   }
 
-  data = (struct lm75_data *) (((struct i2c_client *) new_client) + 1);
+  data = (struct lm75_data *) (new_client + 1);
   new_client->addr = address;
   new_client->data = data;
   new_client->adapter = adapter;
@@ -204,18 +199,7 @@ int lm75_detect(struct i2c_adapter *adapter, int address, int kind)
   /* Fill in the remaining client fields and put it into the global list */
   strcpy(new_client->name,client_name);
 
-  /* Find a place in our global list */
-  for (i = 0; i < MAX_LM75_NR; i++)
-    if (! lm75_list[i])
-       break;
-  if (i == MAX_LM75_NR) {
-    err = -ENOMEM;
-    printk("lm75.o: No empty slots left, recompile and heighten "
-           "MAX_LM75_NR!\n");
-    goto ERROR2;
-  }
-  lm75_list[i] = new_client;
-  new_client->id = i;
+  new_client->id = lm75_id++;
   data->valid = 0;
   init_MUTEX(&data->update_lock);
     
@@ -231,7 +215,7 @@ int lm75_detect(struct i2c_adapter *adapter, int address, int kind)
   }
   data->sysctl_id = i;
 
-  lm75_init_client((struct i2c_client *) new_client);
+  lm75_init_client(new_client);
   return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
@@ -240,10 +224,6 @@ int lm75_detect(struct i2c_adapter *adapter, int address, int kind)
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
-  for (i = 0; i < MAX_LM75_NR; i++)
-    if (new_client == lm75_list[i])
-      lm75_list[i] = NULL;
-ERROR2:
 ERROR1:
   kfree(new_client);
 ERROR0:
@@ -252,7 +232,7 @@ ERROR0:
 
 int lm75_detach_client(struct i2c_client *client)
 {
-  int err,i;
+  int err;
 
   sensors_deregister_entry(((struct lm75_data *)(client->data))->sysctl_id);
 
@@ -260,15 +240,6 @@ int lm75_detach_client(struct i2c_client *client)
     printk("lm75.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-
-  for (i = 0; i < MAX_LM75_NR; i++)
-    if (client == lm75_list[i])
-      break;
-  if ((i == MAX_LM75_NR)) {
-    printk("lm75.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
-  lm75_list[i] = NULL;
 
   kfree(client);
 
