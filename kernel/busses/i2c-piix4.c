@@ -105,6 +105,7 @@ static void piix4_do_pause( unsigned int amount );
 static int piix4_transaction(void);
 static void piix4_inc(struct i2c_adapter *adapter);
 static void piix4_dec(struct i2c_adapter *adapter);
+static u32 piix4_func(struct i2c_adapter *adapter);
 
 #ifdef MODULE
 extern int init_module(void);
@@ -119,6 +120,7 @@ static struct i2c_algorithm smbus_algorithm = {
   /* slave_send */	NULL,
   /* slave_rcv */	NULL,
   /* algo_control */	NULL,
+  /* functionality */   piix4_func,
 };
 
 static struct i2c_adapter piix4_adapter = {
@@ -444,6 +446,13 @@ void piix4_dec(struct i2c_adapter *adapter)
 {
 
 	MOD_DEC_USE_COUNT;
+}
+
+u32 piix4_func(struct i2c_adapter *adapter)
+{
+  return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE | 
+         I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA | 
+         I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_PROC_CALL;
 }
 
 int __init i2c_piix4_init(void)

@@ -43,6 +43,7 @@
 
 static void isa_inc_use (struct i2c_adapter *adapter);
 static void isa_dec_use (struct i2c_adapter *adapter);
+static u32 isa_func(struct i2c_adapter *adapter);
 
 #ifdef MODULE
 static
@@ -62,9 +63,11 @@ static struct i2c_algorithm isa_algorithm = {
   /* name */            "ISA bus algorithm",
   /* id */              I2C_ALGO_ISA,
   /* master_xfer */     NULL,
+  /* smbus_access */    NULL,
   /* slave_send */      NULL,
   /* slave_rcv */       NULL,
   /* algo_control */    NULL,
+  /* functionality */   &isa_func,
 };
 
 /* There can only be one... */
@@ -94,6 +97,12 @@ void isa_dec_use (struct i2c_adapter *adapter)
 #ifdef MODULE
   MOD_DEC_USE_COUNT;
 #endif
+}
+
+/* We can't do a thing... */
+static u32 isa_func(struct i2c_adapter *adapter)
+{
+  return 0;
 }
 
 int __init i2c_isa_init(void)

@@ -122,6 +122,7 @@ static void vt596_do_pause( unsigned int amount );
 static int vt596_transaction(void);
 static void vt596_inc(struct i2c_adapter *adapter);
 static void vt596_dec(struct i2c_adapter *adapter);
+static u32 vt596_func(struct i2c_adapter *adapter);
 
 #ifdef MODULE
 extern int init_module(void);
@@ -136,6 +137,7 @@ static struct i2c_algorithm smbus_algorithm = {
   /* slave_send */	NULL,
   /* slave_rcv */	NULL,
   /* algo_control */	NULL,
+  /* functionality */   vt596_func,
 };
 
 static struct i2c_adapter vt596_adapter = {
@@ -481,6 +483,13 @@ void vt596_dec(struct i2c_adapter *adapter)
 {
 
 	MOD_DEC_USE_COUNT;
+}
+
+u32 vt596_func(struct i2c_adapter *adapter)
+{
+	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
+               I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA |
+               I2C_FUNC_SMBUS_BLOCK_DATA;
 }
 
 int __init i2c_vt596_init(void)

@@ -94,6 +94,7 @@ static int i801_transaction(void);
 static int i801_block_transaction(union i2c_smbus_data *data, char read_write);
 static void i801_inc(struct i2c_adapter *adapter);
 static void i801_dec(struct i2c_adapter *adapter);
+static u32 i801_func(struct i2c_adapter *adapter);
 
 #ifdef MODULE
 extern int init_module(void);
@@ -108,6 +109,7 @@ static struct i2c_algorithm smbus_algorithm = {
   /* slave_send */	NULL,
   /* slave_rcv */	NULL,
   /* algo_control */	NULL,
+  /* functionality */   i801_func,
 };
 
 static struct i2c_adapter i801_adapter = {
@@ -557,6 +559,13 @@ void i801_inc(struct i2c_adapter *adapter)
 void i801_dec(struct i2c_adapter *adapter)
 {
 	MOD_DEC_USE_COUNT;
+}
+
+u32 i801_func(struct i2c_adapter *adapter)
+{
+	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE | 
+               I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA | 
+               I2C_FUNC_SMBUS_BLOCK_DATA;
 }
 
 int __init i2c_i801_init(void)

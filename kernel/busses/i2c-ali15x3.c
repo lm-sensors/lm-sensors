@@ -164,6 +164,7 @@ static void ali15x3_do_pause( unsigned int amount );
 static int ali15x3_transaction(void);
 static void ali15x3_inc(struct i2c_adapter *adapter);
 static void ali15x3_dec(struct i2c_adapter *adapter);
+static u32 ali15x3_func(struct i2c_adapter *adapter);
 
 #ifdef MODULE
 extern int init_module(void);
@@ -178,6 +179,7 @@ static struct i2c_algorithm smbus_algorithm = {
   /* slave_send */	NULL,
   /* slave_rcv */	NULL,
   /* algo_control */	NULL,
+  /* functionality */   ali15x3_func,
 };
 
 static struct i2c_adapter ali15x3_adapter = {
@@ -608,6 +610,13 @@ void ali15x3_dec(struct i2c_adapter *adapter)
 {
 
 	MOD_DEC_USE_COUNT;
+}
+
+u32 ali15x3_func(struct i2c_adapter *adapter)
+{
+	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
+               I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA |
+               I2C_FUNC_SMBUS_BLOCK_DATA;
 }
 
 int __init i2c_ali15x3_init(void)

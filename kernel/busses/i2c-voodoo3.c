@@ -84,6 +84,7 @@ static int Voodoo3_I2CWrite_word(int addr,int command,long data);
 static void config_v3(struct pci_dev *dev, int num);
 static void voodoo3_inc(struct i2c_adapter *adapter);
 static void voodoo3_dec(struct i2c_adapter *adapter);
+static u32 voodoo3_func(struct i2c_adapter *adapter);
 
 #ifdef MODULE
 extern int init_module(void);
@@ -98,6 +99,7 @@ static struct i2c_algorithm smbus_algorithm = {
   /* slave_send */	NULL,
   /* slave_rcv */	NULL,
   /* algo_control */	NULL,
+  /* functionality */   voodoo3_func,
 };
 
 static struct i2c_adapter voodoo3_adapter = {
@@ -525,6 +527,12 @@ void voodoo3_dec(struct i2c_adapter *adapter)
 {
 
 	MOD_DEC_USE_COUNT;
+}
+
+u32 voodoo3_func(struct i2c_adapter *adapter)
+{
+  return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE | 
+         I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA;
 }
 
 int __init i2c_voodoo3_init(void)
