@@ -25,7 +25,11 @@
 */
 
 /*
-   Supports AMD756, AMD766, and AMD768.
+    2002-04-08: Added nForce support. (Csaba Halasz)
+*/
+
+/*
+   Supports AMD756, AMD766, AMD768 and nVidia nForce
    Note: we assume there can only be one device, with one SMBus interface.
 */
 
@@ -51,11 +55,31 @@ MODULE_LICENSE("GPL");
 #ifndef PCI_DEVICE_ID_AMD_766
 #define PCI_DEVICE_ID_AMD_766 0x7413
 #endif
+#ifndef PCI_DEVICE_ID_AMD_768
+#define PCI_DEVICE_ID_AMD_768 0x7443
+#endif
+#ifndef PCI_VENDOR_ID_NVIDIA
+#define PCI_VENDOR_ID_NVIDIA 0x10DE
+#endif
+#ifndef PCI_DEVICE_ID_NVIDIA_NFORCE_SMBUS
+#define PCI_DEVICE_ID_NVIDIA_NFORCE_SMBUS 0x01B4
+#endif
 
-static int supported[] = {PCI_DEVICE_ID_AMD_756,
-                          PCI_DEVICE_ID_AMD_766,
-			  0x7443, /* AMD768 */
-                          0 };
+struct sd {
+    const unsigned short vendor;
+    const unsigned short device;
+    const unsigned short function;
+    const char* name;
+    int amdsetup:1;
+};
+
+static struct sd supported[] = {
+    {PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_756, 3, "AMD756", 1},
+    {PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_766, 3, "AMD766", 1},
+    {PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_768, 3, "AMD768", 1},
+    {PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_NFORCE_SMBUS, 1, "nVidia nForce", 0},
+    {0, 0, 0}
+};
 
 /* AMD756 SMBus address offsets */
 #define SMB_ADDR_OFFSET        0xE0
@@ -150,7 +174,7 @@ static unsigned short amd756_smba = 0;
 int amd756_setup(void)
 {
 	unsigned char temp;
-	int *num = supported;
+	struct sd *currdev;
 	struct pci_dev *AMD756_dev = NULL;
 
 	if (pci_present() == 0) {
@@ -158,38 +182,41 @@ int amd756_setup(void)
 		return(-ENODEV);
 	}
 
-	/* Look for the AMD756, function 3 */
-	/* Note: we keep on searching until we have found 'function 3' */
-	do {
-		if((AMD756_dev = pci_find_device(PCI_VENDOR_ID_AMD,
-					      *num, AMD756_dev))) {
-			if(PCI_FUNC(AMD756_dev->devfn) != 3)
-				continue;
-			break;
+	/* Look for a supported chip */
+	for(currdev = supported; currdev->vendor; ) {
+		AMD756_dev = pci_find_device(currdev->vendor,
+						currdev->device, AMD756_dev);
+		if (AMD756_dev != NULL)	{
+			if (PCI_FUNC(AMD756_dev->devfn) == currdev->function)
+				break;
+		} else {
+		    currdev++;
 		}
-		num++;
-	} while (*num != 0);
+	}
 
 	if (AMD756_dev == NULL) {
 		printk
-		    ("i2c-amd756.o: Error: Can't detect AMD756, function 3!\n");
+		    ("i2c-amd756.o: Error: No AMD756 or compatible device detected!\n");
 		return(-ENODEV);
 	}
+	printk(KERN_INFO "i2c-amd756.o: Found %s SMBus controller.\n", currdev->name);
 
-
-	pci_read_config_byte(AMD756_dev, SMBGCFG, &temp);
-	if ((temp & 128) == 0) {
-		printk
-		  ("i2c-amd756.o: Error: SMBus controller I/O not enabled!\n");
+	if (currdev->amdsetup)
+	{
+		pci_read_config_byte(AMD756_dev, SMBGCFG, &temp);
+		if ((temp & 128) == 0) {
+			printk("i2c-amd756.o: Error: SMBus controller I/O not enabled!\n");
+		}
 		return(-ENODEV);
+
+		/* Determine the address of the SMBus areas */
+		/* Technically it is a dword but... */
+		pci_read_config_word(AMD756_dev, SMBBA, &amd756_smba);
+		amd756_smba &= 0xff00;
+		amd756_smba += SMB_ADDR_OFFSET;
+	} else {
+		amd756_smba = 0x5500;
 	}
-
-	/* Determine the address of the SMBus areas */
-	/* Technically it is a dword but... */
-	pci_read_config_word(AMD756_dev, SMBBA, &amd756_smba);
-	amd756_smba &= 0xff00;
-	amd756_smba += SMB_ADDR_OFFSET;
-
 	if (check_region(amd756_smba, SMB_IOSIZE)) {
 		printk
 		    ("i2c-amd756.o: SMB region 0x%x already in use!\n",

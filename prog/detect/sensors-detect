@@ -514,7 +514,8 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x01b4,
        func => 1,
        procid => "nVidia nForce SMBus",
-       match => sub { $_[0] =~ /dontmatchthis/ },
+       driver => "i2c-amd756",
+       match => sub { $_[0] =~ /^SMBus AMD7X6 adapter at [0-9,a-f]{4}/ },
      } , 
      { 
        vendid => 0x1166,
