@@ -128,13 +128,93 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        driver => "i2c-amd756",
        match => sub { $_[0] =~ /^SMBus AMD756 adapter at [0-9,a-f]{4}/ },
      },
+     {
+       vendid => 0x102b,
+       devid  => 0x0519,
+       func   => 0,
+       procid => "MGA 2064W [Millennium]",
+       driver => "i2c-matroxfb",
+       match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
+     },
+     {
+       vendid => 0x102b,
+       devid  => 0x051a,
+       func   => 0,
+       procid => "MGA 1064SG [Mystique]",
+       driver => "i2c-matroxfb",
+       match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
+     },
+     {
+       vendid => 0x102b,
+       devid  => 0x051b,
+       func   => 0,
+       procid => "MGA 2164W [Millennium II]",
+       driver => "i2c-matroxfb",
+       match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
+     },
+     {
+       vendid => 0x102b,
+       devid  => 0x051e,
+       func   => 0,
+       procid => "MGA 1064SG [Mystique] AGP",
+       driver => "i2c-matroxfb",
+       match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
+     },
+     {
+       vendid => 0x102b,
+       devid  => 0x051f,
+       func   => 0,
+       procid => "MGA 2164W [Millennium II] AGP",
+       driver => "i2c-matroxfb",
+       match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
+     },
+     {
+       vendid => 0x102b,
+       devid  => 0x1000,
+       func   => 0,
+       procid => "MGA G100 [Productiva]",
+       driver => "i2c-matroxfb",
+       match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
+     },
+     {
+       vendid => 0x102b,
+       devid  => 0x1001,
+       func   => 0,
+       procid => "MGA G100 [Productiva] AGP",
+       driver => "i2c-matroxfb",
+       match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
+     },
+     {
+       vendid => 0x102b,
+       devid  => 0x0520,
+       func   => 0,
+       procid => "MGA G200",
+       driver => "i2c-matroxfb",
+       match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
+     },
+     {
+       vendid => 0x102b,
+       devid  => 0x0521,
+       func   => 0,
+       procid => "MGA G200 AGP",
+       driver => "i2c-matroxfb",
+       match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
+     },
+     {
+       vendid => 0x102b,
+       devid  => 0x0525,
+       func   => 0,
+       procid => "MGA G400 AGP",
+       driver => "i2c-matroxfb",
+       match  => sub { $_[0] =~ /^(DDC,MAVEN):fb[0-9]{1,2}/ },
+     },
 );
 
 use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect 
             lm80_detect w83781d_detect w83781d_alias_detect
             w83781d_isa_detect gl518sm_detect gl520sm_detect adm9240_detect 
             adm1021_detect sis5595_isa_detect eeprom_detect
-            adm1022_detect ltc1710_detect gl525sm_detect);
+            adm1022_detect ltc1710_detect gl525sm_detect ddcmonitor_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -172,7 +252,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      } ,
      {
        name => "National Semiconductor LM78-J",
-       driver => "lm78",
+       driver => "",
        i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { lm78_detect 1, @_ },
@@ -353,6 +433,12 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        driver => "ltc1710",
        i2c_addrs => [0x58..0x5a],
        i2c_detect => sub { ltc1710_detect @_ },
+     },
+     {
+       name => "DDC monitor",
+       driver => "ddc-none-available-yet",
+       i2c_addrs => [0x50..0x57],
+       i2c_detect => sub { ddcmonitor_detect @_ },
      },
 );
 
@@ -1094,7 +1180,7 @@ sub scan_adapter
         print "Probing for `$$chip{name}'... ";
         if (($conf,@chips) = &{$$chip{i2c_detect}} (\*FILE ,$addr)) {
           print "Success!\n",
-                "    (confidence $conf, driver `$$chip{driver}'";
+                "    (confidence $conf, driver `$$chip{driver}')";
           if (@chips) {
             print ", other addresses:";
             @chips = sort @chips;
@@ -1594,7 +1680,48 @@ sub ltc1710_detect
 {
   return (1);
 }
-  
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, (1) if detected.
+# Registers used:
+#   0x00..0x07: DDC signature
+#   0x08..0x7E: checksumed area
+#   0x7F:       checksum
+# I hope my changes do not break anything...
+sub ddcmonitor_detect
+{
+  my ($file,$addr) = @_;
+  my $i;
+  for ($i = 0; $i < 8; $i ++) {
+    i2c_set_slave_addr \*FILE,$addr+$i or goto FAILURE;
+    i2c_smbus_read_byte_data($file,0x00) == 0x00 or goto FAILURE;
+    i2c_smbus_read_byte_data($file,0x01) == 0xFF or goto FAILURE;
+    i2c_smbus_read_byte_data($file,0x02) == 0xFF or goto FAILURE;
+    i2c_smbus_read_byte_data($file,0x03) == 0xFF or goto FAILURE;
+    i2c_smbus_read_byte_data($file,0x04) == 0xFF or goto FAILURE;
+    i2c_smbus_read_byte_data($file,0x05) == 0xFF or goto FAILURE;
+    i2c_smbus_read_byte_data($file,0x06) == 0xFF or goto FAILURE;
+    i2c_smbus_read_byte_data($file,0x07) == 0x00 or goto FAILURE;
+  }
+  i2c_set_slave_addr \*FILE,$addr or return;
+  # Check the checksum for validity. We should do this for all addresses,
+  # but it would be too slow.
+  my $checksum = 0;
+  for ($i = 0; $i <= 127; $i = $i + 1) {
+    $checksum = $checksum + i2c_smbus_read_byte_data($file,$i);
+  }
+  $checksum=$checksum & 255;
+  if ($checksum != 0) {
+    # I have one such monitor...
+    return (2,$addr+1,$addr+2,$addr+3,$addr+4,$addr+5,$addr+6,$addr+7);
+  }
+  return (8,$addr+1,$addr+2,$addr+3,$addr+4,$addr+5,$addr+6,$addr+7);
+FAILURE:
+  i2c_set_slave_addr \*FILE,$addr;
+  return;
+}
 
 ################
 # MAIN PROGRAM #
