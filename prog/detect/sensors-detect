@@ -227,7 +227,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        func => 3,
        procid => "AMD-756 Athlon ACPI",
        driver => "i2c-amd756",
-       match => sub { $_[0] =~ /^SMBus AMD7X6 adapter at [0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SMBus AMD756 adapter at [0-9,a-f]{4}/ },
      },
      { 
        vendid => 0x1022,
@@ -235,7 +235,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        func => 3,
        procid => "AMD-766 Athlon ACPI",
        driver => "i2c-amd756",
-       match => sub { $_[0] =~ /^SMBus AMD7X6 adapter at [0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SMBus AMD766 adapter at [0-9,a-f]{4}/ },
      },
      { 
        vendid => 0x1022,
@@ -243,7 +243,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        func => 3,
        procid => "AMD-768 System Management",
        driver => "i2c-amd756",
-       match => sub { $_[0] =~ /^SMBus AMD7X6 adapter at [0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SMBus AMD768 adapter at [0-9,a-f]{4}/ },
      },
      {
        vendid => 0x102b,
@@ -515,7 +515,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        func => 1,
        procid => "nVidia nForce SMBus",
        driver => "i2c-amd756",
-       match => sub { $_[0] =~ /^SMBus AMD7X6 adapter at [0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SMBus nVidia nForce adapter at [0-9,a-f]{4}/ },
      } , 
      { 
        vendid => 0x1166,

@@ -2,7 +2,7 @@
     amd756.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
 
-    Copyright (c) 1999 Merlin Hughes <merlin@merlin.org>
+    Copyright (c) 1999-2002 Merlin Hughes <merlin@merlin.org>
 
     Shamelessly ripped from i2c-piix4.c:
 
@@ -155,6 +155,7 @@ static struct i2c_adapter amd756_adapter = {
 };
 
 static int __initdata amd756_initialized;
+static struct sd *amd756_sd = NULL;
 static unsigned short amd756_smba = 0;
 
 /* Detect whether a AMD756 can be found, and initialize it, where necessary.
@@ -196,8 +197,8 @@ int amd756_setup(void)
 		pci_read_config_byte(AMD756_dev, SMBGCFG, &temp);
 		if ((temp & 128) == 0) {
 			printk("i2c-amd756.o: Error: SMBus controller I/O not enabled!\n");
+			return(-ENODEV);
 		}
-		return(-ENODEV);
 
 		/* Determine the address of the SMBus areas */
 		/* Technically it is a dword but... */
@@ -222,6 +223,9 @@ int amd756_setup(void)
 	printk("i2c-amd756.o: SMBREV = 0x%X\n", temp);
 	printk("i2c-amd756.o: AMD756_smba = 0x%X\n", amd756_smba);
 #endif				/* DEBUG */
+
+	/* store struct sd * for future reference */
+        amd756_sd = currdev;
 
 	return 0;
 }
@@ -481,13 +485,13 @@ int __init i2c_amd756_init(void)
 	amd756_initialized = 0;
 	if ((res = amd756_setup())) {
 		printk
-		    ("i2c-amd756.o: AMD756/766 not detected, module not inserted.\n");
+		    ("i2c-amd756.o: AMD756 or compatible device not detected, module not inserted.\n");
 		amd756_cleanup();
 		return res;
 	}
 	amd756_initialized++;
-	sprintf(amd756_adapter.name, "SMBus AMD7X6 adapter at %04x",
-		amd756_smba);
+	sprintf(amd756_adapter.name, "SMBus %s adapter at %04x",
+		amd756_sd->name, amd756_smba);
 	if ((res = i2c_add_adapter(&amd756_adapter))) {
 		printk
 		    ("i2c-amd756.o: Adapter registration failed, module not inserted.\n");
@@ -495,7 +499,8 @@ int __init i2c_amd756_init(void)
 		return res;
 	}
 	amd756_initialized++;
-	printk("i2c-amd756.o: AMD756/766 bus detected and initialized\n");
+	printk("i2c-amd756.o: %s bus detected and initialized\n",
+               amd756_sd->name);
 	return 0;
 }
 
@@ -522,7 +527,7 @@ EXPORT_NO_SYMBOLS;
 #ifdef MODULE
 
 MODULE_AUTHOR("Merlin Hughes <merlin@merlin.org>");
-MODULE_DESCRIPTION("AMD756/766 SMBus driver");
+MODULE_DESCRIPTION("AMD756/766/768/nVidia nForce SMBus driver");
 
 #ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
