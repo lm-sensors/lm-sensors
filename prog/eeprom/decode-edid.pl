@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Copyright 2003 Jean Delvare <khali@linux-fr.org>
+# Copyright (C) 2003-2004 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
 #  Use print instead of syswrite.
 # Version 0.3  2003-08-24  Jean Delvare <khali@linux-fr.org>
 #  Fix data block length (128 bytes instead of 256).
+# Version 1.0  2004-02-08  Jean Delvare <khali@linux-fr.org>
+#  Added support for Linux 2.5/2.6 (i.e. sysfs).
 #
 # EEPROM data decoding for EDID. EDID (Extended Display Identification
 # Data) is a VESA standard which allows storing (on manufacturer's side)
@@ -44,10 +46,12 @@
 #   http://john.fremlin.de/programs/linux/read-edid/
 
 use strict;
-
+use Fcntl qw(:DEFAULT :seek);
 use vars qw($bus $address);
+use constant PROCFS => 1;
+use constant SYSFS  => 2;
 
-sub edid_valid
+sub edid_valid_procfs
 {
 	my ($bus, $addr) = @_;
 
@@ -59,21 +63,70 @@ sub edid_valid
 	return 0;
 }
 
+# Only used for sysfs
+sub rawread
+{
+	my ($filename, $length, $offset) = @_;
+	my $bytes = '';
+	
+	sysopen(FH, $filename, O_RDONLY)
+		or die "Can't open $filename";
+	if ($offset)
+	{
+		sysseek(FH, $offset, SEEK_SET)
+			or die "Can't seek in $filename";
+	}
+
+	$offset = 0;
+	while ($length)
+	{
+		my $r = sysread(FH, $bytes, $length, $offset);
+		die "Can't read $filename"
+			unless defined($r);
+		die "Unexpected EOF in $filename"
+			unless $r;
+		$offset += $r;
+		$length -= $r;
+	}
+	close(FH);
+
+	return $bytes;
+}
+
+sub edid_valid_sysfs
+{
+	my ($bus, $addr) = @_;
+	my $bytes = rawread("/sys/bus/i2c/devices/$bus-00$addr/eeprom", 8, 0);
+
+	return 1
+		if $bytes eq "\x00\xFF\xFF\xFF\xFF\xFF\xFF\x00";
+	return 0;
+}
+
 sub bus_detect
 {
 	my $max = shift;
 
 	for (my $i=0; $i<$max; $i++)
 	{
-		if ( -r "/proc/sys/dev/sensors/eeprom-i2c-$i-50/00" )
+		if (-r "/proc/sys/dev/sensors/eeprom-i2c-$i-50/00")
 		{
-			if (edid_valid ($i, '50'))
+			if (edid_valid_procfs($i, '50'))
 			{
 				print STDERR
 					"decode-edid: using bus $i (autodetected)\n";
 				return $i;
 			}
 		}
+		elsif (-r "/sys/bus/i2c/devices/$i-0050")
+		{
+			if (edid_valid_sysfs($i, '50'))
+			{
+				print STDERR
+					"decode-edid: using bus $i (autodetected)\n";
+				return $i;
+			}
+		}	
 	}
 	
 	return; # default
@@ -81,11 +134,12 @@ sub bus_detect
 
 sub edid_decode
 {
-	my ($bus, $addr) = @_;
+	my ($bus, $addr, $mode) = @_;
 
 	# Make sure it is an EDID EEPROM.
 
-	unless (edid_valid ($bus, $addr))
+	unless (($mode == PROCFS && edid_valid_procfs ($bus, $addr))
+	     || ($mode == SYSFS  && edid_valid_sysfs  ($bus, $addr)))
 	{
 		print STDERR
 			"decode-edid: not an EDID EEPROM at $bus-$addr\n";
@@ -98,21 +152,28 @@ sub edid_decode
 	delete $SIG{__WARN__};
 	binmode PIPE;
 	
-	for (my $i=0; $i<=0x70; $i+=0x10)
+	if ($mode == PROCFS)
 	{
-		my $file = sprintf '%02x', $i;
-		my $output = '';
-		open EEDATA, "/proc/sys/dev/sensors/eeprom-i2c-$bus-$addr/$file"
-			or die "Can't read /proc/sys/dev/sensors/eeprom-i2c-$bus-$addr/$file";
-		while(<EEDATA>)
+		for (my $i=0; $i<=0x70; $i+=0x10)
 		{
-			foreach my $item (split)
+			my $file = sprintf '%02x', $i;
+			my $output = '';
+			open EEDATA, "/proc/sys/dev/sensors/eeprom-i2c-$bus-$addr/$file"
+				or die "Can't read /proc/sys/dev/sensors/eeprom-i2c-$bus-$addr/$file";
+			while(<EEDATA>)
 			{
-				$output .= pack "C", $item;
+				foreach my $item (split)
+				{
+					$output .= pack "C", $item;
+				}
 			}
+			close EEDATA;
+			print PIPE $output;
 		}
-		close EEDATA;
-		print PIPE $output;
+	}
+	elsif ($mode == SYSFS)
+	{
+		print PIPE rawread("/sys/bus/i2c/devices/$bus-00$address/eeprom", 128, 0);
 	}
 
 	close PIPE;
@@ -127,20 +188,26 @@ $address = sprintf '%02x', $address;
 
 # Get the bus. Try to autodetect if not given.
 $bus = $ARGV[0] if defined $ARGV[0];
-$bus = bus_detect (8) unless defined $bus;
+$bus = bus_detect(8) unless defined $bus;
 
-if ( defined $bus
-  && -r "/proc/sys/dev/sensors/eeprom-i2c-$bus-$address" )
+if(defined $bus)
 {
 	print STDERR
-		"decode-edid: decode-edid version 0.3\n";
-	edid_decode ($bus, $address);
+		"decode-edid: decode-edid version 1.0\n";
+	if (-r "/proc/sys/dev/sensors/eeprom-i2c-$bus-$address")
+	{
+		edid_decode ($bus, $address, PROCFS);
+		exit 0;
+	}
+	elsif (-r "/sys/bus/i2c/devices/$bus-00$address")
+	{
+		edid_decode ($bus, $address, SYSFS);
+		exit 0;
+	}
 }
-else
-{
-	print STDERR
-		"EDID EEPROM not found.  Please make sure that the eeprom module is loaded.\n";
-	print STDERR
-		"Maybe your EDID EEPROM is on another bus.  Try \"decode-edid ".($bus+1)."\".\n"
-		if defined $bus;
-}
+
+print STDERR
+	"EDID EEPROM not found.  Please make sure that the eeprom module is loaded.\n";
+print STDERR
+	"Maybe your EDID EEPROM is on another bus.  Try \"decode-edid ".($bus+1)."\".\n"
+	if defined $bus;
