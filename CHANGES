@@ -18,7 +18,8 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.3 (2001????)
-  Library: Add PCF8591 and W83697HF support
+  Library: Add PCF8591 and W83697HF support; fix w83* fan_min computes
+  Module i2c-piix4: Check for uninitialized base address
   Module pcf8591: new
   Module w83781d: Add W83697HF support
   Program i2cdump: Add i2c block read capability
