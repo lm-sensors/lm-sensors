@@ -303,6 +303,8 @@ void matorb_update_client(struct i2c_client *client)
 void matorb_disp(struct i2c_client *client, int operation, int ctl_name,
                int *nrels_mag, long *results)
 {
+int i;
+
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
@@ -310,8 +312,8 @@ void matorb_disp(struct i2c_client *client, int operation, int ctl_name,
     results[0] = 0;
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (*nrels_mag >= 1) {
-      matorb_write_value(client,0,results[0]);
+    for (i=1; i<=*nrels_mag;i++) {
+      matorb_write_value(client,0,results[i-1]);
     }
   }
 }
