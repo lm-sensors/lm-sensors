@@ -2,14 +2,8 @@
 INSTALLATION - SHORT INSTRUCTIONS - NON-KERNEL INSTALLATION
 =============================================================================
 
-	- Make sure you also have the i2c package installed
-	  in the same directory as lm_sensors2
-	- rmdir i2c
-	- ln -s ../i2c i2c
-	- cd i2c
-	- make (ignore 'no such file or directory' warnings)
-	- (as root) make install
-	- cd ../lm_sensors2
+	- Make sure you have a recent version of the i2c package compiled 
+          and installed properly.
 	- make (ignore 'no such file or directory' warnings)
 	- (as root) make install
 	- (as root) prog/mkdev/mkdev.sh        (makes the devices in /dev)
