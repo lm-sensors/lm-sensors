@@ -21,6 +21,13 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/* 
+    Supports following revisions:
+	Version		PCI ID		PCI Revision
+	1		1039/0008	01
+	2		1039/0008	C0
+*/
+
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/malloc.h>
@@ -67,6 +74,7 @@ SENSORS_INSMOD_1(sis5595);
 /* Length of ISA address segment */
 #define SIS5595_EXTENT 8
 /* PCI Config Registers */
+#define SIS5595_REVISION_REG 0x08
 #define SIS5595_BASE_REG 0x68
 #define SIS5595_PIN_REG 0x7A
 #define SIS5595_ENABLE_REG 0x7B
@@ -83,12 +91,18 @@ SENSORS_INSMOD_1(sis5595);
 #define SIS5595_REG_FAN_MIN(nr) (0x3a + (nr))
 #define SIS5595_REG_FAN(nr) (0x27 + (nr))
 
-/* TEMP pin is shared with IN4, configured in PCI register 0x7A. */
-/* The registers are the same as well. */
-/* OVER and HYST are really MAX and MIN. */
-#define SIS5595_REG_TEMP 	SIS5595_REG_IN(4)
-#define SIS5595_REG_TEMP_OVER	SIS5595_REG_IN_MAX(4)
-#define SIS5595_REG_TEMP_HYST	SIS5595_REG_IN_MIN(4)
+/* On the first version of the chip, the temp registers are separate.
+   On the second version,
+   TEMP pin is shared with IN4, configured in PCI register 0x7A.
+   The registers are the same as well.
+   OVER and HYST are really MAX and MIN. */
+
+#define SIS5595_REG_TEMP 	(( data->revision) >= 0xc0) ? \
+					SIS5595_REG_IN(4) : 0x27
+#define SIS5595_REG_TEMP_OVER	(( data->revision) >= 0xc0) ? \
+					SIS5595_REG_IN_MAX(4) : 0x39
+#define SIS5595_REG_TEMP_HYST	(( data->revision) >= 0xc0) ? \
+					SIS5595_REG_IN_MIN(4) : 0x3a
 
 #define SIS5595_REG_CONFIG 0x40
 #define SIS5595_REG_ALARM1 0x41
@@ -177,6 +191,7 @@ struct sis5595_data {
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 	char maxins;		/* == 3 if temp enabled, otherwise == 4 */
+	u8 revision;		/* Reg. value */
 
 	u8 in[5];		/* Register value */
 	u8 in_max[5];		/* Register value */
@@ -357,13 +372,18 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 	/* Reserve the ISA region */
 	request_region(address, SIS5595_EXTENT, type_name);
 
-	pci_read_config_byte(s_bridge, SIS5595_PIN_REG, &val);
-	if(val & 0x80)
-		/* 3 voltages, 1 temp */
+	pci_read_config_byte(s_bridge, SIS5595_PIN_REG, &(data->revision));
+	if(data->revision < 0xc0) {
 		data->maxins = 3;
-	else
-		/* 4 voltages, no temps */
-		data->maxins = 4;
+	} else {
+		pci_read_config_byte(s_bridge, SIS5595_PIN_REG, &val);
+		if(val & 0x80)
+			/* 3 voltages, 1 temp */
+			data->maxins = 3;
+		else
+			/* 4 voltages, no temps */
+			data->maxins = 4;
+	}
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);

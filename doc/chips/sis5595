@@ -9,6 +9,11 @@ Supported chips:
     Addresses scanned: ISA in PCI-space encoded address
     Datasheet: Publicly available at the Silicon Integrated Systems Corp. site.
 
+    Supports following revisions:
+	Version		PCI ID		PCI Revision
+	1		1039/0008	01
+	2		1039/0008	C0
+
 Author: Kyösti Mälkki <kmalkki@cc.hut.fi>
 
 
@@ -27,7 +32,11 @@ For the I2C bus driver see i2c-sis5595.
 The SiS5595 implements zero or one temperature sensor, two FAN speed
 sensors, four or five voltage sensors, and alarms.
 
-The temperature sensor (temp) and the fifth voltage sensor (in4) share a pin
+On the first version of the chip, there are four voltage
+sensors and one temperature sensor.
+
+On the second version of the chip,
+the temperature sensor (temp) and the fifth voltage sensor (in4) share a pin
 which is configurable, but not through the driver. Sorry.
 The driver senses the configuration of the pin, which was hopefully
 set by the BIOS.
