@@ -418,22 +418,21 @@ int i2c_probe(struct i2c_client *client, int low_addr, int hi_addr)
 {
         int i;
 	struct i2c_msg msg;
-	struct i2c_msg *pmsg = &msg;
 	msg.flags=client->flags & (I2C_M_TENMASK | I2C_M_TEN );
 	msg.buf = NULL;
 	msg.len = 0;
         I2C_LOCK(client->adapter);
         for (i = low_addr; i <= hi_addr; i++) {
-                client->addr=i;
+                msg.addr=i;
 		/* TODO: implement a control statement in the algo layer 
 		 * that does address lookup only.
 		 */
                 if (1 == client->adapter->
-		    algo->master_xfer(client->adapter,pmsg,1))
+		    algo->master_xfer(client->adapter,&msg,1))
                         break;
         }
         I2C_UNLOCK(client->adapter);
-        return (i <= hi_addr) ? i : -1;
+        return (i <= hi_addr) ? (client->addr=i) : -1;
 }
 /* +++ frodo
  * return id number for a specific adapter

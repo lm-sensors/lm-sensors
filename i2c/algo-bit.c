@@ -571,7 +571,6 @@ int i2c_bit_add_bus(struct bit_adapter *adap)
 	i2c_adap->timeout = 100;	/* default values, should	*/
 	i2c_adap->retries = 3;		/* be replaced by defines	*/
 	i2c_adaps[i] = i2c_adap;
-	i2c_add_adapter(i2c_adap);
 
 	/* scan bus */
 	if (bit_scan) {
@@ -587,6 +586,9 @@ int i2c_bit_add_bus(struct bit_adapter *adap)
 		}
 		printk("\n");
 	}
+	
+	i2c_add_adapter(i2c_adap);
+	
 	return 0;
 }
 
@@ -655,13 +657,3 @@ void cleanup_module(void)
 	i2c_del_algorithm(&bit_algo);
 }
 #endif
-
-
-
-
-
-
-
-
-
-
