@@ -1,7 +1,8 @@
 #!/usr/bin/perl
 
 #    mkpatch - Create patches against the Linux kernel
-#    Copyright (c) 1999  Frodo Looijaard <frodol@dds.nl>
+#    Copyright (C) 1999  Frodo Looijaard <frodol@dds.nl>
+#    Copyright (C) 2005  Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -100,9 +101,11 @@ sub gen_Documentation_Configure_help
            m@Analog Devices ADM1024@ or
            m@Analog Devices ADM1025@ or
            m@Analog Devices ADM1026@ or
+           m@Analog Devices ADM1030, ADM1031@ or
            m@Analog Devices ADM9240 and compatibles@ or
            m@Asus ASB100@ or
            m@Dallas DS1621 and DS1625@ or
+           m@Fujitsu-Siemens Hermes@ or
            m@Fujitsu-Siemens Poseidon@ or
            m@Fujitsu-Siemens Scylla@ or
            m@Genesys Logic GL518SM@ or
@@ -110,8 +113,10 @@ sub gen_Documentation_Configure_help
            m@HP Maxilife@ or
            m@Intel Xeon Thermal Sensor@ or
            m@ITE 8705, 8712, Sis950@ or
+           m@Maxim MAX1619@ or
            m@Maxim MAX6650, MAX6651@ or
            m@Myson MTP008@ or
+           m@National Semiconductor LM63@ or
            m@National Semiconductor LM75 and compatibles@ or
            m@National Semiconductor LM78@ or
            m@National Semiconductor LM80@ or
@@ -120,6 +125,7 @@ sub gen_Documentation_Configure_help
            m@National Semiconductor LM87@ or
            m@National Semiconductor LM90@ or
            m@National Semiconductor LM92@ or
+           m@National Semiconductor LM93@ or
            m@National Semiconductor PC8736x@ or
            m@Silicon Integrated Systems Corp. SiS5595 Sensor@ or
            m@Texas Instruments THMC50 / Analog Devices ADM1022@ or
@@ -323,6 +329,16 @@ CONFIG_SENSORS_ADM1026
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Analog Devices ADM1030, ADM1031
+CONFIG_SENSORS_ADM1031
+  If you say yes here you get support for Analog Devices ADM1030 and
+  ADM1031 sensor chips.  This can also be built as a module which can
+  be inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
+
 Analog Devices ADM9240 and compatibles
 CONFIG_SENSORS_ADM9240
   If you say yes here you get support for Analog Devices ADM9240 
@@ -352,6 +368,15 @@ CONFIG_SENSORS_DS1621
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
+
+Fujitsu-Siemens Hermes
+CONFIG_SENSORS_FSCHER
+  If you say yes here you get support for the Fujitsu-Siemens Hermes
+  sensor chip.  This can also be built as a module.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Fujitsu-Siemens Poseidon
 CONFIG_SENSORS_FSCPOS
@@ -423,6 +448,15 @@ CONFIG_SENSORS_IT87
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Maxim MAX1619
+CONFIG_SENSORS_MAX1619
+  If you say yes here you get support for the Maxim MAX1619 sensor
+  chips.  This can also be built as a module.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
+
 Maxim MAX6650, MAX6651
 CONFIG_SENSORS_MAX6650
   If you say yes here you get support for the Maxim MAX6650 and
@@ -440,6 +474,16 @@ CONFIG_SENSORS_MTP008
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
+
+National Semiconductor LM63
+CONFIG_SENSORS_LM63
+  If you say yes here you get support for National Semiconductor LM63
+  sensor chips.  This can also be built as a module which can be inserted
+  and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 National Semiconductor LM75 and compatibles
 CONFIG_SENSORS_LM75 
@@ -525,6 +569,16 @@ CONFIG_SENSORS_LM92
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
+
+National Semiconductor LM93
+CONFIG_SENSORS_LM93
+  If you say yes here you get support for National Semiconductor LM93
+  sensor chips.  This can also be built as a module which can be inserted
+  and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 National Semiconductor PC8736x Sensors
 CONFIG_SENSORS_PC87360
@@ -937,17 +991,20 @@ obj-$(CONFIG_SENSORS_ADM1021)	+= adm1021.o
 obj-$(CONFIG_SENSORS_ADM1024)	+= adm1024.o
 obj-$(CONFIG_SENSORS_ADM1025)	+= adm1025.o
 obj-$(CONFIG_SENSORS_ADM1026)	+= adm1026.o
+obj-$(CONFIG_SENSORS_ADM1031)	+= adm1031.o
 obj-$(CONFIG_SENSORS_ADM9240)	+= adm9240.o
 obj-$(CONFIG_SENSORS_ASB100)	+= asb100.o
 obj-$(CONFIG_SENSORS_BT869)	+= bt869.o
 obj-$(CONFIG_SENSORS_DDCMON)	+= ddcmon.o
 obj-$(CONFIG_SENSORS_DS1621)	+= ds1621.o
 obj-$(CONFIG_SENSORS_EEPROM)	+= eeprom.o
+obj-$(CONFIG_SENSORS_FSCHER)	+= fscher.o
 obj-$(CONFIG_SENSORS_FSCPOS)	+= fscpos.o
 obj-$(CONFIG_SENSORS_FSCSCY)	+= fscscy.o
 obj-$(CONFIG_SENSORS_GL518SM)	+= gl518sm.o
 obj-$(CONFIG_SENSORS_GL520SM)	+= gl520sm.o
 obj-$(CONFIG_SENSORS_IT87)	+= it87.o
+obj-$(CONFIG_SENSORS_LM63)	+= lm63.o
 obj-$(CONFIG_SENSORS_LM75)	+= lm75.o
 obj-$(CONFIG_SENSORS_LM78)	+= lm78.o
 obj-$(CONFIG_SENSORS_LM80)	+= lm80.o
@@ -956,6 +1013,8 @@ obj-$(CONFIG_SENSORS_LM85)	+= lm85.o
 obj-$(CONFIG_SENSORS_LM87)	+= lm87.o
 obj-$(CONFIG_SENSORS_LM90)	+= lm90.o
 obj-$(CONFIG_SENSORS_LM92)	+= lm92.o
+obj-$(CONFIG_SENSORS_LM93)	+= lm93.o
+obj-$(CONFIG_SENSORS_MAX1619)	+= max1619.o
 obj-$(CONFIG_SENSORS_MAX6650)	+= max6650.o
 obj-$(CONFIG_SENSORS_MAXILIFE)	+= maxilife.o
 obj-$(CONFIG_SENSORS_MTP008)	+= mtp008.o

@@ -16,9 +16,11 @@ if [ "$CONFIG_I2C_PROC" = "m" -o "$CONFIG_I2C_PROC" = "y" ] ; then
     dep_tristate '  Analog Devices ADM1024' CONFIG_SENSORS_ADM1024 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Analog Devices ADM1025' CONFIG_SENSORS_ADM1025 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Analog Devices ADM1026' CONFIG_SENSORS_ADM1026 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  Analog Devices ADM1030, ADM1031' CONFIG_SENSORS_ADM1031 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Analog Devices ADM9240 and compatibles' CONFIG_SENSORS_ADM9240 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Asus ASB100' CONFIG_SENSORS_ASB100 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Dallas DS1621 and DS1625' CONFIG_SENSORS_DS1621 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  Fujitsu-Siemens Hermes' CONFIG_SENSORS_FSCHER $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Fujitsu-Siemens Poseidon' CONFIG_SENSORS_FSCPOS $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Fujitsu-Siemens Scylla' CONFIG_SENSORS_FSCSCY $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Genesys Logic GL518SM' CONFIG_SENSORS_GL518SM $CONFIG_I2C $CONFIG_I2C_PROC
@@ -26,8 +28,10 @@ if [ "$CONFIG_I2C_PROC" = "m" -o "$CONFIG_I2C_PROC" = "y" ] ; then
     dep_tristate '  HP Maxilife' CONFIG_SENSORS_MAXILIFE $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Intel Xeon Thermal Sensor' CONFIG_SENSORS_XEONTEMP $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  ITE 8705/8712, SiS950' CONFIG_SENSORS_IT87 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  Maxim MAX1619' CONFIG_SENSORS_MAX1619 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Maxim MAX6650, MAX6651' CONFIG_SENSORS_MAX6650 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Myson MTP008' CONFIG_SENSORS_MTP008 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  National Semiconductor LM63' CONFIG_SENSORS_LM63 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductor LM75 and compatibles' CONFIG_SENSORS_LM75 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductor LM78' CONFIG_SENSORS_LM78 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductor LM80' CONFIG_SENSORS_LM80 $CONFIG_I2C $CONFIG_I2C_PROC
@@ -36,6 +40,7 @@ if [ "$CONFIG_I2C_PROC" = "m" -o "$CONFIG_I2C_PROC" = "y" ] ; then
     dep_tristate '  National Semiconductor LM87' CONFIG_SENSORS_LM87 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductor LM90 and compatibles' CONFIG_SENSORS_LM90 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductor LM92' CONFIG_SENSORS_LM92 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  National Semiconductor LM93' CONFIG_SENSORS_LM93 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductor PC8736x Sensors' CONFIG_SENSORS_PC87360 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Silicon Integrated Systems Corp. SiS5595' CONFIG_SENSORS_SIS5595 $CONFIG_I2C $CONFIG_I2C_PROC $CONFIG_I2C_ISA
     dep_tristate '  SMSC47M1xx Integrated Sensors' CONFIG_SENSORS_SMSC47M1 $CONFIG_I2C $CONFIG_I2C_PROC $CONFIG_I2C_ISA
