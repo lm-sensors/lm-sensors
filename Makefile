@@ -33,7 +33,7 @@ KERNELVERSION := $(shell uname -r)
 # The location of linux itself. This is used to find the kernel headers
 # and other things.
 #LINUX := /usr/src/linux
-LINUX := $(shell if [ -L /lib/modules/$(KERNELVERSION)/build ] ; \
+LINUX := $(shell if [ -L "/lib/modules/$(KERNELVERSION)/build" ] ; \
 	then echo "/lib/modules/$(KERNELVERSION)/build" ; \
 	else echo "/usr/src/linux" ; fi)
 LINUX_HEADERS := $(LINUX)/include
@@ -47,17 +47,16 @@ LINUX_HEADERS := $(LINUX)/include
 I2C_HEADERS := /usr/local/include
 #I2C_HEADERS := $(LINUX_HEADERS)
 
-# Uncomment the third line on SMP systems if the magic invocation fails. It
-# is a bit complicated because SMP configuration changed around kernel 2.1.130
-SMP := $(shell if grep -q '^SMP[[:space:]]*=' $(LINUX)/Makefile || \
-                  grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_SMP[[:space:]]*1' $(LINUX_HEADERS)/linux/autoconf.h ; \
+# Uncomment the third line on SMP systems if the magic invocation fails.
+SMP := $(shell if grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_SMP[[:space:]]*1' $(LINUX_HEADERS)/linux/autoconf.h ; \
                then echo 1; else echo 0; fi)
 #SMP := 0
 #SMP := 1
 
 # Uncomment the second or third line if the magic invocation fails.
 # We need to know whether CONFIG_MODVERSIONS is defined.
-MODVER := $(shell if cat $(LINUX_HEADERS)/linux/config.h $(LINUX_HEADERS)/linux/autoconf.h 2>/dev/null | grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_MODVERSIONS[[:space:]]*1'; then echo 1; else echo 0; fi)
+MODVER := $(shell if grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_MODVERSIONS[[:space:]]*1' $(LINUX_HEADERS)/linux/autoconf.h ; \
+                  then echo 1; else echo 0; fi)
 #MODVER := 0
 #MODVER := 1
 
@@ -84,10 +83,7 @@ CC := gcc
 
 # This is the main modules directory into which the modules will be installed.
 # The magic invocation will return something like this:
-#   /lib/modules/2.2.15-ac9
-#MODDIR := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`/misc
-#MODPREF := /lib/modules/$(KERNELVERSION)
-#MODPREF := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`
+#   /lib/modules/2.4.29
 MODPREF := /lib/modules/$(shell $(CC) -I$(LINUX_HEADERS) -E etc/config.c | grep uts_release |cut -f 2 -d'"')
 
 # This is the directory where sensors.conf will be installed, if no other
