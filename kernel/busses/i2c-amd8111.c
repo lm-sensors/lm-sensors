@@ -21,6 +21,10 @@
 #include <linux/delay.h>
 #include "version.h"
 
+#ifndef I2C_HW_SMBUS_AMD8111
+#error Your i2c is too old - i2c-2.7.0 or greater required!
+#endif
+
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR ("Vojtech Pavlik <vojtech@suse.cz>");
 MODULE_DESCRIPTION("AMD8111 SMBus 2.0 driver");
