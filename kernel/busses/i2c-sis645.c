@@ -324,7 +324,11 @@ static int sis645_setup(void)
 	}
 
 	/* get the IO base address */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,13)
 	sis645_smbus_base = SIS645_SMBUS_dev->resource[BASE_IO_REG].start;
+#else
+	sis645_smbus_base = SIS645_SMBUS_dev->base_address[BASE_IO_REG];
+#endif
 	if (!sis645_smbus_base) {
 		printk("i2c-sis645.o: SiS645 SMBus base address not initialized!\n");
 		return -EINVAL;
