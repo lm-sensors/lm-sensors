@@ -22,7 +22,7 @@
 /*
     This driver supports the Intel 82801AA and 82801AB
     I/O Controller Hubs (ICH). They are similar to the PIIX4 and are part
-    of Intel's '810' chipset. See the doc/busses directory for details.
+    of Intel's '810' chipset. See the doc/busses/i2c-i801 file for details.
 */      
 
 /* Note: we assume there can only be one I801, with one SMBus interface */
@@ -67,12 +67,15 @@
 #define MAX_TIMEOUT 500
 #define  ENABLE_INT9 0
 
-/* I801 constants */
-#define I801_QUICK      0x00
-#define I801_BYTE       0x04
-#define I801_BYTE_DATA  0x08
-#define I801_WORD_DATA  0x0C
-#define I801_BLOCK_DATA 0x14
+/* I801 command constants */
+#define I801_QUICK          0x00
+#define I801_BYTE           0x04
+#define I801_BYTE_DATA      0x08
+#define I801_WORD_DATA      0x0C
+#define I801_BLOCK_DATA     0x14
+#define I801_I2C_BLOCK_DATA 0x18	/* unimplemented */
+#define I801_BLOCK_LAST     0x34
+#define I801_I2C_BLOCK_LAST 0x38	/* unimplemented */
 
 /* insmod parameters */
 
@@ -95,6 +98,7 @@ static s32 i801_access(struct i2c_adapter *adap, u8 addr, char read_write,
                         u8 command, int size, union i2c_smbus_data * data);
 static void i801_do_pause( unsigned int amount );
 static int i801_transaction(void);
+static int i801_block_transaction(union i2c_smbus_data *data, char read_write);
 static void i801_inc(struct i2c_adapter *adapter);
 static void i801_dec(struct i2c_adapter *adapter);
 
@@ -194,7 +198,6 @@ int i801_setup(void)
     i801_smba = force_addr & 0xfff0;
     force = 0;
   } else {
-
     pci_read_config_word_united(I801_dev, I801_bus ,I801_devfn,
                                 SMBBA,&i801_smba);
     i801_smba &= 0xfff0;
@@ -303,7 +306,7 @@ int i801_transaction(void)
   /* start the transaction by setting bit 6 */
   outb_p(inb(SMBHSTCNT) | 0x040, SMBHSTCNT); 
 
-  /* We will always wait for a fraction of a second! (See PIIX4 docs errata) */
+  /* We will always wait for a fraction of a second! */
   do {
     i801_do_pause(1);
     temp=inb_p(SMBHSTSTS);
@@ -355,11 +358,140 @@ int i801_transaction(void)
   return result;
 }
 
+/* All-inclusive block transaction function */
+int i801_block_transaction(union i2c_smbus_data *data, char read_write)
+{
+  int i, len;
+  int smbcmd;
+  int temp;
+  int result=0;
+  int timeout=0;
+
+  if (read_write == I2C_SMBUS_WRITE) {
+    len = data->block[0];
+    if (len < 1) 
+      len = 1;
+    if (len > 32)
+      len = 32;
+    outb_p(len,SMBHSTDAT0);
+    outb_p(data->block[1],SMBBLKDAT);
+  } else {
+    len = 32;   /* max for reads */
+  }
+
+  for(i = 1; i <= len; i++)
+  {
+    if(i == len  &&  read_write == I2C_SMBUS_READ)
+      smbcmd = I801_BLOCK_LAST;
+    else
+      smbcmd = I801_BLOCK_DATA;
+    if (read_write == I2C_SMBUS_WRITE)
+      outb_p(data->block[i],SMBBLKDAT);
+    outb_p((smbcmd & 0x3C) + (ENABLE_INT9 & 1), SMBHSTCNT);
+
+#ifdef DEBUG
+    printk("i2c-i801.o: Transaction (pre): CNT=%02x, CMD=%02x, ADD=%02x, "
+           "DAT0=%02x, DAT1=%02x\n",
+           inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
+           inb_p(SMBHSTDAT1));
+#endif
+
+  /* Make sure the SMBus host is ready to start transmitting */
+  /* 0x1f = Failed, Bus_Err, Dev_Err, Intr, Host_Busy */
+  /* 0x9e = Byte_Done, Failed, Bus_Err, Dev_Err, Intr */
+    temp = inb_p(SMBHSTSTS);
+    if (((i == 1)  &&  ((temp & 0x1f) != 0x00)) ||
+        ((i != 1)  &&  ((temp & 0x9e) != 0x00)))
+    {
+#ifdef DEBUG
+      printk("i2c-i801.o: SMBus busy (%02x). Resetting... \n",temp);
+#endif
+      outb_p(temp, SMBHSTSTS);
+      if (((temp = inb_p(SMBHSTSTS)) & 0x9f) != 0x00)
+      {
+        printk("i2c-i801.o: Reset failed! (%02x)\n",temp);
+        return -1;
+      }
+      if(i != 1)
+        return -1;   /* if die in middle of block transaction, fail */
+    }
+
+    /* start the transaction by setting bit 6 */
+    outb_p(inb(SMBHSTCNT) | 0x040, SMBHSTCNT); 
+
+    /* We will always wait for a fraction of a second! */
+    do {
+      i801_do_pause(1);
+      temp=inb_p(SMBHSTSTS);
+    } while ((((i >= len) && (temp & 0x01)) || ((i < len) && (temp & 0x80)))
+             && (timeout++ < MAX_TIMEOUT));
+
+    /* If the SMBus is still busy, we give up */
+    if (timeout >= MAX_TIMEOUT) {
+      result = -1;
+#ifdef DEBUG
+      printk("i2c-i801.o: SMBus Timeout!\n"); 
+#endif
+    }
+
+    if (temp & 0x10) {
+      result = -1;
+#ifdef DEBUG
+      printk("i2c-i801.o: Error: Failed bus transaction\n");
+#endif
+    } else if (temp & 0x08) {
+      result = -1;
+      printk("i2c-i801.o: Bus collision! SMBus may be locked until next hard"
+             " reset. (sorry!)\n");
+      /* Clock stops and slave is stuck in mid-transmission */
+    } else if (temp & 0x04) {
+      result = -1;
+#ifdef DEBUG
+      printk("i2c-i801.o: Error: no response!\n");
+#endif
+    } else if (temp & 0x80) {
+      result = -1;
+#ifdef DEBUG
+      printk("i2c-i801.o: Error: Failed in middle of block!\n");
+#endif
+    }
+
+    if ((temp & 0x9f) != 0x00)
+      outb_p(temp, SMBHSTSTS);
+
+    if ((temp = (0x9f & inb_p(SMBHSTSTS))) != 0x00) {
+#ifdef DEBUG
+      printk("i2c-i801.o: Failed reset at end of transaction (%02x)\n",temp);
+#endif
+    }
+#ifdef DEBUG
+    printk("i2c-i801.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
+           "DAT0=%02x, DAT1=%02x\n",
+           inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
+           inb_p(SMBHSTDAT1));
+#endif
+
+    if (i == 1  &&  read_write == I2C_SMBUS_READ) {
+        len = inb_p(SMBHSTDAT0);
+      if (len < 1) 
+        len = 1;
+      if (len > 32)
+        len = 32;
+      data->block[0] = len;
+    }
+    if (read_write == I2C_SMBUS_READ)
+      data->block[i] = inb_p(SMBBLKDAT);
+
+    if(result < 0)
+      return(result);
+  }
+  return(0);
+}
+
 /* Return -1 on error. See smbus.h for more information */
 s32 i801_access(struct i2c_adapter *adap, u8 addr, char read_write,
                  u8 command, int size, union i2c_smbus_data * data)
 {
-  int i,len;
 
   switch(size) {
     case I2C_SMBUS_PROC_CALL:
@@ -394,22 +526,14 @@ s32 i801_access(struct i2c_adapter *adap, u8 addr, char read_write,
     case I2C_SMBUS_BLOCK_DATA:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
       outb_p(command, SMBHSTCMD);
-      if (read_write == I2C_SMBUS_WRITE) {
-        len = data->block[0];
-        if (len < 0) 
-          len = 0;
-        if (len > 32)
-          len = 32;
-        outb_p(len,SMBHSTDAT0);
-        i = inb_p(SMBHSTCNT); /* Reset SMBBLKDAT */
-        for (i = 1; i <= len; i ++)
-          outb_p(data->block[i],SMBBLKDAT);
-      }
-      size = I801_BLOCK_DATA;
-      break;
+      /* Block transactions are very different from piix4 block
+         and from the other i801 transactions. Handle in the
+         i801_block_transaction() routine. */
+      return(i801_block_transaction(data, read_write));
   }
 
-  outb_p((size & 0x1C) + (ENABLE_INT9 & 1), SMBHSTCNT);
+  /* 'size' is really the transaction type */
+  outb_p((size & 0x3C) + (ENABLE_INT9 & 1), SMBHSTCNT);
 
   if (i801_transaction()) /* Error in transaction */ 
     return -1; 
@@ -419,10 +543,7 @@ s32 i801_access(struct i2c_adapter *adap, u8 addr, char read_write,
   
 
   switch(size) {
-    case I801_BYTE: /* Where is the result put? I assume here it is in
-                        SMBHSTDAT0 but it might just as well be in the
-                        SMBHSTCMD. No clue in the docs */
- 
+    case I801_BYTE: /* Result put in SMBHSTDAT0 */
       data->byte = inb_p(SMBHSTDAT0);
       break;
     case I801_BYTE_DATA:
@@ -430,12 +551,6 @@ s32 i801_access(struct i2c_adapter *adap, u8 addr, char read_write,
       break;
     case I801_WORD_DATA:
       data->word = inb_p(SMBHSTDAT0) + (inb_p(SMBHSTDAT1) << 8);
-      break;
-    case I801_BLOCK_DATA:
-      data->block[0] = inb_p(SMBHSTDAT0);
-      i = inb_p(SMBHSTCNT); /* Reset SMBBLKDAT */
-      for (i = 1; i <= data->block[0]; i++)
-        data->block[i] = inb_p(SMBBLKDAT);
       break;
   }
   return 0;
@@ -448,7 +563,6 @@ void i801_inc(struct i2c_adapter *adapter)
 
 void i801_dec(struct i2c_adapter *adapter)
 {
-
 	MOD_DEC_USE_COUNT;
 }
 
