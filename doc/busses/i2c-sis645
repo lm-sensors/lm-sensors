@@ -6,6 +6,9 @@ Supported adapters:
   * Silicon Integrated Systems Corp (SiS)
 	645/961 chipset
 	645DX/961 chipset
+	645DX/962 chipset
+	648/961 chipset
+	650/961 chipset
 	735 chipset
 
 Author: Mark M. Hoffman <mhoffman@lightlink.com>
@@ -51,7 +54,7 @@ running "make config" or equivalent on your kernel, otherwise the i2c-sis645
 driver will not build in this support.
 
 I suspect that this driver could be made to work for the following SiS chipsets
-as well: 648/963, 651/962, 650/961, 635, and 635T.
+as well: 648/963, 651/962, 635, and 635T.
 If anyone owns a board with those chips AND is willing to risk crashing &
 burning an otherwise well-behaved kernel in the name of progress... please
 contact me at <mhoffman@lightlink.com> or via the project's mailing list:
@@ -63,8 +66,6 @@ TO DOs
 -----------
 * The driver does not support SMBus block reads/writes; I may add them if a
 scenario is found where they're needed.
-* Determine if any of Albert Cranford's cleanups for kernel 2.5.34 can be
-applied to this code.
 
 
 Thank Yous
@@ -77,5 +78,8 @@ Hans-Günter Lütke Uphues <hg_lu@t-online.de>
  - patch for SiS735
 Robert Zwerus <arzie@dds.nl>
  - testing for SiS645DX
+Kianusch Sayah Karadji <kianusch@sk-tech.net>
+ - patch for SiS645DX/962
+
 To anyone else who has written w/ feedback, thanks!
 
