@@ -80,14 +80,12 @@ SENSORS_INSMOD_1(lm83);
 
 /*
  * Conversions and various macros
- * The LM83 uses signed 8-bit values.
+ * The LM83 uses signed 8-bit values with LSB = 1 degree Celcius.
  */
 
-#define TEMP_FROM_REG(val)  ((val) > 127 ? (val) - 0x100 : (val))
-#define TEMP_TO_REG(val)    ((val) <= -50 ? -50 + 0x100 : \
-                             (val) >= 127 ? 127 : \
-			     (val) >= 0 ? (val) : \
-                             (val) + 0x100)
+#define TEMP_FROM_REG(val)	(val)
+#define TEMP_TO_REG(val)	((val) <= -50 ? -50 : \
+				 (val) >= 127 ? 127 : (val))
 
 static const u8 LM83_REG_R_TEMP[] = {
 	LM83_REG_R_LOCAL_TEMP,
@@ -153,7 +151,7 @@ struct lm83_data
 	unsigned long last_updated; /* in jiffies */
 
 	/* registers values */
-	u8 temp[4], temp_high[4], tcrit;
+	s8 temp[4], temp_high[4], tcrit;
 	u16 alarms; /* bitvector, combined */
 };
 

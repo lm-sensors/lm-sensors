@@ -131,19 +131,21 @@ SENSORS_INSMOD_5(lm90, adm1032, lm99, lm86, max6657);
 
 /*
  * Conversions and various macros
- * The LM90 uses signed 8-bit values for the local temperatures,
- * and signed 11-bit values for the remote temperatures (except
- * T_CRIT). The 11-bit conversion formulas may not round negative
- * numbers perfectly, but who cares?
+ * For local temperatures and limits, critical limits and the hysteresis
+ * value, the LM90 uses signed 8-bit values with LSB = 1 degree Celcius.
+ * For remote temperatures and limits, it uses signed 11-bit values with
+ * LSB = 0.125 degree Celcius, left-justified in 16-bit registers.
  */
 
-#define TEMP1_FROM_REG(val)  (val & 0x80 ? val-0x100 : val)
-#define TEMP1_TO_REG(val)    (val < 0 ? val+0x100 : val)
-#define TEMP2_FROM_REG(val)  (((val & 0x8000 ? val-0x10000 : val) \
-                             * 10 + 128) >> 8)
-#define TEMP2_TO_REG(val)    (((val << 8) / 10 + (val < 0 ? \
-                             0x10000 : 0)) & 0xFFE0)
-#define HYST_TO_REG(val)     (val < 0 ? 0 : val > 31 ? 31 : val)
+#define TEMP1_FROM_REG(val)	(val)
+#define TEMP1_TO_REG(val)	((val) <= -128 ? -128 : \
+				 (val) >= 127 ? 127 : (val))
+#define TEMP2_FROM_REG(val)	((val) / 32 * 125 / 100)
+#define TEMP2_TO_REG(val)	((val) <= -1280 ? 0x8000 : \
+				 (val) >= 1270 ? 0x7FE0 : \
+				 ((val) * 100 / 125 * 32))
+#define HYST_TO_REG(val)	((val) <= 0 ? 0 : \
+				 (val) >= 31 ? 31 : (val))
 
 /*
  * Functions declaration
@@ -196,9 +198,9 @@ struct lm90_data
 	unsigned long last_updated; /* in jiffies */
 
 	/* registers values */
-	u8 local_temp, local_high, local_low;
-	u16 remote_temp, remote_high, remote_low; /* combined */
-	u8 local_crit, remote_crit;
+	s8 local_temp, local_high, local_low;
+	s16 remote_temp, remote_high, remote_low; /* combined */
+	s8 local_crit, remote_crit;
 	u8 hyst; /* linked to two sysctl files (hyst1 RW, hyst2 RO) */
 	u8 alarms; /* bitvector */
 };
