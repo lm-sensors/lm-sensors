@@ -858,6 +858,8 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 				else
 					goto ERROR5;
 			}
+			if (kind == w83783s)
+				break;
 		}
 	} else {
 		data->lm75 = NULL;
@@ -934,7 +936,8 @@ int w83781d_detach_client(struct i2c_client *client)
 				  (((struct
 				     w83781d_data *) (client->data))->
 				   lm75[0]));
-		i2c_detach_client(&
+		if((((struct w83781d_data *) (client->data))->type) != w83783s);
+			i2c_detach_client(&
 				  (((struct
 				     w83781d_data *) (client->data))->
 				   lm75[1]));
@@ -1382,12 +1385,14 @@ void w83781d_update_client(struct i2c_client *client)
 		    w83781d_read_value(client, W83781D_REG_TEMP2_OVER);
 		data->temp_add_hyst[0] =
 		    w83781d_read_value(client, W83781D_REG_TEMP2_HYST);
-		data->temp_add[1] =
-		    w83781d_read_value(client, W83781D_REG_TEMP3);
-		data->temp_add_over[1] =
-		    w83781d_read_value(client, W83781D_REG_TEMP3_OVER);
-		data->temp_add_hyst[1] =
-		    w83781d_read_value(client, W83781D_REG_TEMP3_HYST);
+		if (data->type != w83783s) {
+			data->temp_add[1] =
+			    w83781d_read_value(client, W83781D_REG_TEMP3);
+			data->temp_add_over[1] =
+			    w83781d_read_value(client, W83781D_REG_TEMP3_OVER);
+			data->temp_add_hyst[1] =
+			    w83781d_read_value(client, W83781D_REG_TEMP3_HYST);
+		}
 		i = w83781d_read_value(client, W83781D_REG_VID_FANDIV);
 		data->vid = i & 0x0f;
 		data->vid |=
