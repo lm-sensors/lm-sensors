@@ -625,8 +625,6 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
   const char *client_name = "";
   int is_isa = i2c_is_isa_adapter(adapter);
 
-  printk("Detection: kind == %d\n",kind);
-
   /* We need address registration for the I2C bus too. That is not yet
      implemented. */
   if (is_isa) {
