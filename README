@@ -6,7 +6,7 @@ OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
 This is the completely rewritten version of lm_sensors, a collection of
 modules for general SMBus access and hardware monitoring. There are quite
-a few changes compared with 1.x.y versions; they are now officially
+a few changes compared with 1.x.y versions; 1.x.y versions are now officially
 unsupported.
 
 WARNING! Starting with lm_sensors version 2.5.0, only kernels 2.2.0 and
@@ -17,7 +17,7 @@ WARNING! If you downloaded this package through our CVS archive, you walk
 the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
 
-WARNING! Many things have changed sinse version 2.4.0. Most importantly,
+WARNING! Many things have changed since version 2.4.0. Most importantly,
 you need the i2c package.  It should have come bundled with lm_sensors,
 but you may need to download it separately at:
   http://www.netroedge.com/~lm78
@@ -34,17 +34,18 @@ WARNING! Some things have changed since version 2.1.2. Most notably,
 module piix4 is renamed i2c-piix4, module isa is renamed i2c-isa,
 and module bit-mb is renamed i2c-via. You have been warned.
 
-At least the following SMBus adapters are supported:
+
+At least the following I2C/SMBus adapters are supported:
   Acer Labs M1541 and M1543C (used in the Aladdin IV, V and Pro 2 chipsets)
   AMD 756
   Apple Hydra (used on some PPC machines)
-  Intel ICH (used in the Intel 810 and 810E chipsets)
-  Intel PIIX4 (used in most Intel chipsets)
+  Intel I801 ICH (used in the Intel 810, 810E, 820, and 840 chipsets)
+  Intel PIIX4 (used in many Intel chipsets)
   Intel I810 GMCH
   SiS 5595 (used in many SiS chipsets)
   3Dfx Voodoo 3 and Banshee
-  VIA Technologies 82C586B (used in most VIA chipsets)
-  VIA Technologies VT596A/B (used in some more modern VIA chipsets)
+  VIA Technologies VT82C586B, VT82C596A/B, and VT82C686A
+
 
 At least the following hardware sensor chips are supported:
   Analog Devices ADM1021, ADM1022, and ADM9240
@@ -58,14 +59,16 @@ At least the following hardware sensor chips are supported:
   SiS Southbridge (integrated in the chipset; the I2C adapter will also be
     supported in the near future)
   TI THMC10 and THMC50
+  VIA Technologies VT82C686A embedded sensors
   Winbond W83781D, W83782D, W83783S, and W83627HF
 
 
 We also support some miscellaneous chips:
   Linear Technologies LTC1710
-  Dimms with EEPROMs
+  SDRAM Dimms with Serial Presence Detect EEPROMs
   Intel Xeon processor embedded EEPROMs
   DDC Monitor embedded EEPROMs
+
 
 We could use some testers of hardware. If you own a specific monitoring
 chip or I2C bus, and are willing to help us out, please contact us - even
@@ -123,9 +126,8 @@ The latest version of this package can always be found on our homepage:
 http://www.netroedge.com/~lm78. Pre-release versions can be retrieved
 through anonymous CVS; see doc/cvs for more information.
 
-This whole package is copyright (c) 1998, 1999 by Frodo Looijaard and 
-Philip Edelbrock, except for (almost) everything in the i2c directory, which
-is copyright (c) 1995-1999 by Simon Vogl, and a few drivers written by
+This whole package is copyright (c) 1998 - 2000 by Frodo Looijaard and 
+Philip Edelbrock, except for a few drivers written by
 other people. See the individual files for more exact copyright information.  
 This package may be distributed according to the GNU General Public License 
 (GPL), as included in the file COPYING.
