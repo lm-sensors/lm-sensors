@@ -5045,6 +5045,133 @@ void print_asb100(const sensors_chip_name *name)
 
 }
 
+/* happens to be similar to asb100*/
+#define PRINT_LM93_IN(num, name, alarms) \
+	print_asb100_in((name), ((alarms) & LM93_ALARM_IN##num), \
+		(SENSORS_LM93_IN##num), \
+		(SENSORS_LM93_IN##num##_MIN), \
+		(SENSORS_LM93_IN##num##_MAX))
+
+/* print_lm93_fan()
+ *   where fan and fan_min are sensors feature IDs
+ */
+static void print_lm93_fan(const sensors_chip_name *name, int alarm,
+	int fan, int fan_min)
+{
+  char *label = NULL;
+  double cur, min;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name,fan,&label,&valid) &&
+      !sensors_get_feature(*name,fan,&cur) &&
+      !sensors_get_feature(*name,fan_min,&min)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%4.0f RPM  (min = %4.0f RPM)                       %s\n",
+           cur, min, alarm ? "ALARM" : "");
+    }
+  } else
+    printf("ERROR: Can't get FAN data! (0x%04x)\n", fan);
+  free_the_label(&label);
+}
+
+#define PRINT_LM93_FAN(num, name, alarms) \
+	print_lm93_fan((name), ((alarms) & LM93_ALARM_FAN##num), \
+		(SENSORS_LM93_FAN##num), \
+		(SENSORS_LM93_FAN##num##_MIN))
+
+/* print_lm93_temp()
+ * where temp, temp_min, and temp_max are sensors feature IDs
+ */
+static void print_lm93_temp(const sensors_chip_name *name, int alarm,
+	int temp, int temp_min, int temp_max)
+{
+  char *label = NULL;
+  double cur, min, max;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name,temp,&label,&valid) &&
+      !sensors_get_feature(*name,temp,&cur) &&
+      !sensors_get_feature(*name,temp_min,&min) &&
+      !sensors_get_feature(*name,temp_max,&max)) {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info(cur, max, min, MINMAX, 0, 0);
+      printf("     %s\n", alarm ? "ALARM" : "");
+    }
+  } else
+    printf("ERROR: Can't get TEMP data! (0x%04x)\n", temp);
+
+  free_the_label(&label);
+}
+
+#define PRINT_LM93_TEMP(num, name, alarms) \
+	print_lm93_temp((name), ((alarms) & LM93_ALARM_TEMP##num), \
+		(SENSORS_LM93_TEMP##num), \
+		(SENSORS_LM93_TEMP##num##_MIN), \
+		(SENSORS_LM93_TEMP##num##_MAX))
+
+/* print_lm93_vid()
+ * where vid is a sensors feature ID
+ */
+static void print_lm93_vid(const sensors_chip_name *name, int vid)
+{
+  char *label = NULL;
+  double cur;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name,vid,&label,&valid) &&
+      !sensors_get_feature(*name,vid,&cur)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+5.3f V\n",cur);
+    }
+  } else {
+    printf("ERROR: Can't get VID data! (0x%04x)\n", vid);
+  }
+  free_the_label(&label);
+}
+
+void print_lm93(const sensors_chip_name *name)
+{
+  double cur;
+  int alarms = 0;
+
+  if (!sensors_get_feature(*name,SENSORS_LM93_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else
+    printf("ERROR: Can't get alarm data!\n");
+
+  PRINT_LM93_IN(1, name, alarms);
+  PRINT_LM93_IN(2, name, alarms);
+  PRINT_LM93_IN(3, name, alarms);
+  PRINT_LM93_IN(4, name, alarms);
+  PRINT_LM93_IN(5, name, alarms);
+  PRINT_LM93_IN(6, name, alarms);
+  PRINT_LM93_IN(7, name, alarms);
+  PRINT_LM93_IN(8, name, alarms);
+  PRINT_LM93_IN(9, name, alarms);
+  PRINT_LM93_IN(10, name, alarms);
+  PRINT_LM93_IN(11, name, alarms);
+  PRINT_LM93_IN(12, name, alarms);
+  PRINT_LM93_IN(13, name, alarms);
+  PRINT_LM93_IN(14, name, alarms);
+  PRINT_LM93_IN(15, name, alarms);
+  PRINT_LM93_IN(16, name, alarms);
+
+  PRINT_LM93_FAN(1, name, alarms);
+  PRINT_LM93_FAN(2, name, alarms);
+  PRINT_LM93_FAN(3, name, alarms);
+  PRINT_LM93_FAN(4, name, alarms);
+
+  PRINT_LM93_TEMP(1, name, alarms);
+  PRINT_LM93_TEMP(2, name, alarms);
+  PRINT_LM93_TEMP(3, name, alarms);
+
+  print_lm93_vid(name, SENSORS_LM93_VID1);
+  print_lm93_vid(name, SENSORS_LM93_VID2);
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;
