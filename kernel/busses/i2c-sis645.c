@@ -233,7 +233,6 @@ static int __devinit sis645_build_dev(struct pci_dev **smbus_dev,
 static int __devinit sis645_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
 	struct pci_dev *SIS645_SMBUS_dev;
-	int ret;
 	u16 ww = 0;
 
 	if (sis645_smbus_base) {
@@ -287,6 +286,10 @@ static int __devinit sis645_probe(struct pci_dev *dev, const struct pci_device_i
 
 	if (!(SIS645_SMBUS_dev = pci_find_device(PCI_VENDOR_ID_SI,
 			PCI_DEVICE_ID_SI_SMBUS, NULL))) {
+
+#ifdef CONFIG_HOTPLUG
+		int ret;
+#endif
 
 		printk(KERN_INFO DRV_NAME ": "
 			"Attempting to enable SiS645 SMBus device\n");
