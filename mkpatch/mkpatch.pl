@@ -334,6 +334,8 @@ sub gen_drivers_Makefile
       }
       $sensors_present = 1 if m@sensors@;
       s@$@ sensors@ if (not $sensors_present);
+      print OUTPUT;
+      $_ = <INPUT>;
       redo MAIN;
     } 
     if (m@CONFIG_SENSORS@) {
