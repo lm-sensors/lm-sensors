@@ -21,6 +21,7 @@ ask CVS about it:
   Library: Add support for 2.6 fscpos driver (Stefan Ott)
            Fix sis5595 in4 (Aurelien Jarno)
            Add support for 2.6 gl520sm driver (Maarten Deprez)
+           Add support for 2.6 bmcsensors driver (Yani Ioannou)
   Man pages pwmconfig, fancontrol: New (Aurelien Jarno)
   Module bmcsensors: Fix compile error
   Module ds1621: Fix detection (Aurelien Jarno)
