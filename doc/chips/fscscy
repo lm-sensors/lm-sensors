@@ -2,7 +2,8 @@ Kernel driver `fscscy.o'
 ======================
 
 Status: Beta
-   Tested with motherboard d1230
+   Tested with motherboard D1230
+   Should also work with D1204, D1306 and D1307
    
    Think twice before you're using the write mode of some
    variables, especially the watchdog (Not my comment, but it makes
@@ -41,7 +42,7 @@ Description
 
 This driver implements support for the Fujitsu Siemens Scylla chip.
 The code is based on the "fscpos" driver for the FSC Poseidon chip.
-In fact, it seems the Scylla is superset of the "Poseidon", "Poseidon II"
+In fact, it seems the Scylla is a superset of the "Poseidon", "Poseidon II"
 and "Hydra" chips.
 
 The register readings/setting have been deduced from the 'Register Set
