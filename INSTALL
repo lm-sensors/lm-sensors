@@ -98,14 +98,15 @@ If you just want to run a test without installing them, try the following:
   insmod kernel/i2c-dev.o
   insmod kernel/smbus.o
   insmod kernel/sensors.o
-  insmod kernel/busses/isa.o
-  insmod kernel/busses/piix4.o # Or whatever SMBus controller you have
+  insmod kernel/busses/i2c-isa.o
+  insmod kernel/busses/i2c-piix4.o # Or whatever SMBus controller you have
   insmod kernel/chips/lm78.o   # Or whatever hardware monitoring chip you have
 Now you should have new directories under /proc/sys/dev/sensors and some files
 beginning with i2c in /proc/bus.
 
 If you have installed the modules, as described within doc/modules, you can
-do 'modprobe isa && modprobe piix4 && modprobe lm78 && modprobe i2c-proc' 
+do:
+  modprobe i2c-isa && modprobe i2c-piix4 && modprobe lm78 && modprobe i2c-proc
 (the last is optional) from any directory to reach the same situation.
 
 There is a program 'detect.pl' in prog/detect which should tell you at least
