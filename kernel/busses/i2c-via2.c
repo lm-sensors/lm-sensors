@@ -72,7 +72,7 @@ static unsigned short smb_cf_hstcfg;
 #define SMBSLVC     (SMBHSTCFG+1)
 #define SMBSHDW1    (SMBHSTCFG+2)
 #define SMBSHDW2    (SMBHSTCFG+3)
-#define SMB_REV     (SMBHSTCFG+4)
+#define SMBREV      (SMBHSTCFG+4)
 
 /* Other settings */
 #define MAX_TIMEOUT 500
