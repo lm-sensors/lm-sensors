@@ -28,7 +28,8 @@ KERNELBUSSESTARGETS := $(MODULE_DIR)/i2c-i801.o \
                        $(MODULE_DIR)/i2c-voodoo3.o \
                        $(MODULE_DIR)/i2c-amd756.o \
                        $(MODULE_DIR)/i2c-i810.o \
-                       $(MODULE_DIR)/i2c-sis5595.o
+                       $(MODULE_DIR)/i2c-sis5595.o \
+                       $(MODULE_DIR)/i2c-keywest.o
 ifneq ($(shell if grep -q '^CONFIG_I2C_ALI15X3=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ali15x3.o
 endif
