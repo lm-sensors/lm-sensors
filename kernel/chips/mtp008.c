@@ -1,7 +1,7 @@
 /*
    mtp008.c - Part of lm_sensors, Linux kernel modules for hardware
    monitoring
-   Copyright (c) 2000  Kris Van Hees <aedil@alchar.org>
+   Copyright (c) 2001  Kris Van Hees <aedil@alchar.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -42,14 +42,10 @@
 #endif
 
 /* Addresses to scan */
-static unsigned short normal_i2c[] =
-{SENSORS_I2C_END};
-static unsigned short normal_i2c_range[] =
-{0x2c, 0x2e, SENSORS_I2C_END};
-static unsigned int normal_isa[] =
-{SENSORS_ISA_END};
-static unsigned int normal_isa_range[] =
-{SENSORS_ISA_END};
+static unsigned short normal_i2c[] = {SENSORS_I2C_END};
+static unsigned short normal_i2c_range[] = {0x2c, 0x2e, SENSORS_I2C_END};
+static unsigned int normal_isa[] = {SENSORS_ISA_END};
+static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
 
 /* Insmod parameters */
 SENSORS_INSMOD_1(mtp008);
@@ -90,8 +86,8 @@ SENSORS_INSMOD_1(mtp008);
 #define MTP008_REG_BEEP_CTRL1		0x51
 #define MTP008_REG_BEEP_CTRL2		0x52
 
-/*      pwm1 .. pwm3 */
-#define MTP008_REG_PWM_CTRL(nr)		(0x53 + (nr))
+/*      pwm1 .. pwm3  nr range 1-3 */
+#define MTP008_REG_PWM_CTRL(nr)		(0x52 + (nr))
 
 #define MTP008_REG_PIN_CTRL1		0x56
 #define MTP008_REG_PIN_CTRL2		0x57
@@ -107,6 +103,11 @@ SENSORS_INSMOD_1(mtp008);
 #define MTP008_CFG_VT2_PII		0x04
 #define MTP008_CFG_VT2_MASK		0x06
 #define MTP008_CFG_VT3_VT		0x01
+
+/* sensor pin types */
+#define VOLTAGE		1
+#define THERMISTOR	2
+#define PIIDIODE	3
 
 /*
  * Conversion routines and macros.  Rounding and limit checking is only done on
@@ -194,10 +195,11 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define BEEPS_TO_REG(val)	(val)
 
 /*
- * PWM control.
+ * PWM control. nr range 1 to 3
  */
 #define PWM_FROM_REG(val)	(val)
 #define PWM_TO_REG(val)		(val)
+#define PWMENABLE_FROM_REG(nr, val)	(((val) >> ((nr) + 3)) & 1)
 
 /* Initial limits */
 #define MTP008_INIT_IN_0	(vid)				/* VCore 1 */
@@ -278,6 +280,7 @@ struct mtp008_data {
 	u8 sens[3];				/* 1 = Analog input,
 						   2 = Thermistor,
 						   3 = PII/Celeron diode */
+	u8 pwmenable;				/* Register 0x57 value */
 };
 
 #ifdef MODULE
@@ -321,6 +324,7 @@ static void mtp008_pwm(struct i2c_client *client, int operation,
 		       int ctl_name, int *nrels_mag, long *results);
 static void mtp008_sens(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
+static void mtp008_getsensortype(struct mtp008_data *data, u8 inp);
 
 static int mtp008_id = 0;
 
@@ -510,13 +514,11 @@ int mtp008_detach_client(struct i2c_client *client)
 	int err;
 
 	sensors_deregister_entry(
-		((struct mtp008_data *) (client->data)
-	)->sysctl_id);
+		((struct mtp008_data *) (client->data))->sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {
 		printk("mtp008.o: Deregistration failed, "
 		       "client not detached.\n");
-
 		return err;
 	}
 	kfree(client);
@@ -558,14 +560,23 @@ int mtp008_write_value(struct i2c_client *client, u8 reg, u8 value)
 void mtp008_init_client(struct i2c_client *client)
 {
 	int vid;
+	u8 save1, save2;
+	struct mtp008_data *data;
+
+	data = client->data;
 
 	/*
 	 * Initialize the Myson MTP008 hardware monitoring chip.
+	 * Save the pin settings that the BIOS hopefully set.
 	 */
-	mtp008_write_value(
-				  client, MTP008_REG_CONFIG,
-	     (mtp008_read_value(client, MTP008_REG_CONFIG) & 0x7f) | 0x80
-	    );
+	save1 = mtp008_read_value(client, MTP008_REG_PIN_CTRL1);
+	save2 = mtp008_read_value(client, MTP008_REG_PIN_CTRL2);
+	mtp008_write_value(client, MTP008_REG_CONFIG,
+	     (mtp008_read_value(client, MTP008_REG_CONFIG) & 0x7f) | 0x80);
+	mtp008_write_value(client, MTP008_REG_PIN_CTRL1, save1);
+	mtp008_write_value(client, MTP008_REG_PIN_CTRL2, save2);
+
+	mtp008_getsensortype(data, save2);
 
 	/*
 	 * Retrieve the VID setting (needed for the default limits).
@@ -575,20 +586,15 @@ void mtp008_init_client(struct i2c_client *client)
 	vid = VID_FROM_REG(vid);
 
 	/*
-	 * Set the default limits.  We are making the initial assumption that
-	 * AIN4 is to be configured as PII temp sensor 2, since we've only seen
-	 * this hardware monitoring chip on the Tyan S1824D motherboard which
-	 * is a dual PIII motherboard.  We are also making the assumption that
-	 * usually AIN5 is hooked up to the -12V sensing circuit.
+	 * Set the default limits.
 	 *
-	 * Setting temp sensors 1 and 2 to be a PII sensors is done as follows:
+	 * Setting temp sensors is done as follows:
 	 *
-	 *          Register 0x57: 0 0 0 0 1 1 0 0
-	 *                                 | \ / +-- AIN5/VT3 with AIN5
-	 *                                 |  +----- AIN4/VT2/PII with PII
-	 *                                 +-------- VT1/PII with PII
+	 *          Register 0x57: 0 0 0 0 x x x x
+	 *                                 | \ / +-- AIN5/VT3
+	 *                                 |  +----- AIN4/VT2/PII
+	 *                                 +-------- VT1/PII
 	 */
-	mtp008_write_value(client, MTP008_REG_PIN_CTRL2, 0x0c);
 
 	mtp008_write_value(client, MTP008_REG_IN_MAX(0),
 			   IN_TO_REG(MTP008_INIT_IN_MAX_0));
@@ -680,16 +686,6 @@ void mtp008_update_client(struct i2c_client *client)
 		data->temp_min = mtp008_read_value(client, MTP008_REG_TEMP_MIN);
 
 		/*
-		 * Read the fan sensors.
-		 */
-		for (i = 0; i < 3; i++) {
-			data->fan[i] = mtp008_read_value(client,
-						  MTP008_REG_FAN(i + 1));
-			data->fan_min[i] = mtp008_read_value(client,
-					      MTP008_REG_FAN_MIN(i + 1));
-		}
-
-		/*
 		 * Read the first 2 fan dividers and the VID setting.  Read the
 		 * third fan divider from a different register.
 		 */
@@ -722,20 +718,37 @@ void mtp008_update_client(struct i2c_client *client)
 					   MTP008_REG_BEEP_CTRL2) & 0x8f) << 8;
 
 		/*
-		 * Read the PWN registers.
-		 */
-		for (i = 0; i < 3; i++)
-			data->pwm[i] =
-				mtp008_read_value(client,
-						  MTP008_REG_PWM_CTRL(i));
-
-		/*
 		 * Read the sensor configuration.
 		 */
-		inp = mtp008_read_value(client, MTP008_REG_PIN_CTRL2) & 0x0f;
-		data->sens[0] = (inp >> 3) + 2;			/* 2 or 3 */
-		data->sens[1] = ((inp >> 1) & 0x03) + 1;	/* 1, 2 or 3 */
-		data->sens[2] = (inp & 0x01) + 1;		/* 1 or 2 */
+		inp = mtp008_read_value(client, MTP008_REG_PIN_CTRL2);
+		mtp008_getsensortype(data, inp);
+
+		/*
+		 * Read the PWM registers if enabled.
+		 */
+		for (i = 1; i <= 3; i++)
+		{
+			if(PWMENABLE_FROM_REG(i, inp))
+				data->pwm[i-1] = mtp008_read_value(client,
+						  MTP008_REG_PWM_CTRL(i));
+			else
+				data->pwm[i-1] = 255;
+		}
+
+		/*
+		 * Read the fan sensors. Skip 3 if PWM3 enabled.
+		 */
+		for (i = 1; i <= 3; i++) {
+			if(i == 3 && PWMENABLE_FROM_REG(3, inp)) {
+				data->fan[2] = 0;
+				data->fan_min[2] = 0;
+			} else {
+				data->fan[i-1] = mtp008_read_value(client,
+					  MTP008_REG_FAN(i));
+				data->fan_min[i-1] = mtp008_read_value(client,
+					  MTP008_REG_FAN_MIN(i));
+			}
+		}
 
 		data->last_updated = jiffies;
 		data->valid = 1;
@@ -743,6 +756,13 @@ void mtp008_update_client(struct i2c_client *client)
 	up(&data->update_lock);
 }
 
+void mtp008_getsensortype(struct mtp008_data *data, u8 inp)
+{
+	inp &= 0x0f;
+	data->sens[0] = (inp >> 3) + 2;			/* 2 or 3 */
+	data->sens[1] = ((inp >> 1) & 0x03) + 1;	/* 1, 2 or 3 */
+	data->sens[2] = (inp & 0x01) + 1;		/* 1 or 2 */
+}
 
 /* The next few functions are the call-back functions of the /proc/sys and
    sysctl files. Which function is used is defined in the ctl_table in
@@ -774,23 +794,31 @@ void mtp008_in(struct i2c_client *client, int operation, int ctl_name,
 	case SENSORS_PROC_REAL_READ:
 		mtp008_update_client(client);
 
-		results[0] = IN_FROM_REG(data->in_min[nr]);
-		results[1] = IN_FROM_REG(data->in_max[nr]);
-		results[2] = IN_FROM_REG(data->in[nr]);
+		if((nr != 4 && nr != 5) || data->sens[nr - 3] == VOLTAGE) {
+			results[0] = IN_FROM_REG(data->in_min[nr]);
+			results[1] = IN_FROM_REG(data->in_max[nr]);
+			results[2] = IN_FROM_REG(data->in[nr]);
+		} else {
+			results[0] = 0;
+			results[1] = 0;
+			results[2] = 0;
+		}
 
 		*nrels_mag = 3;
 
 		break;
 	case SENSORS_PROC_REAL_WRITE:
-		if (*nrels_mag >= 1) {
-			data->in_min[nr] = IN_TO_REG(results[0]);
-			mtp008_write_value(client, MTP008_REG_IN_MIN(nr),
-					   data->in_min[nr]);
-		}
-		if (*nrels_mag >= 2) {
-			data->in_max[nr] = IN_TO_REG(results[1]);
-			mtp008_write_value(client, MTP008_REG_IN_MAX(nr),
-					   data->in_max[nr]);
+		if((nr != 4 && nr != 5) || data->sens[nr - 3] == VOLTAGE) {
+			if (*nrels_mag >= 1) {
+				data->in_min[nr] = IN_TO_REG(results[0]);
+				mtp008_write_value(client, MTP008_REG_IN_MIN(nr),
+						   data->in_min[nr]);
+			}
+			if (*nrels_mag >= 2) {
+				data->in_max[nr] = IN_TO_REG(results[1]);
+				mtp008_write_value(client, MTP008_REG_IN_MAX(nr),
+						   data->in_max[nr]);
+			}
 		}
 	}
 }
@@ -849,7 +877,6 @@ void mtp008_temp(struct i2c_client *client, int operation, int ctl_name,
 		results[0] = TEMP_FROM_REG(data->temp_max);
 		results[1] = TEMP_FROM_REG(data->temp_min);
 		results[2] = TEMP_FROM_REG(data->temp);
-
 		*nrels_mag = 3;
 
 		break;
@@ -884,23 +911,30 @@ void mtp008_temp_add(struct i2c_client *client, int operation, int ctl_name,
 	case SENSORS_PROC_REAL_READ:
 		mtp008_update_client(client);
 
-		results[0] = TEMP_FROM_REG(data->in_max[nr]);
-		results[1] = TEMP_FROM_REG(data->in_min[nr]);
-		results[2] = TEMP_FROM_REG(data->in[nr]);
-
+		if(data->sens[nr - 3] != VOLTAGE) {
+			results[0] = TEMP_FROM_REG(data->in_max[nr]);
+			results[1] = TEMP_FROM_REG(data->in_min[nr]);
+			results[2] = TEMP_FROM_REG(data->in[nr]);
+		} else {
+			results[0] = 0;
+			results[1] = 0;
+			results[2] = 0;
+		}
 		*nrels_mag = 3;
 
 		break;
 	case SENSORS_PROC_REAL_WRITE:
-		if (*nrels_mag >= 1) {
-			data->in_max[nr] = TEMP_TO_REG(results[0]);
-			mtp008_write_value(client, MTP008_REG_TEMP_MAX,
-					   data->in_max[nr]);
-		}
-		if (*nrels_mag >= 2) {
-			data->in_min[nr] = TEMP_TO_REG(results[1]);
-			mtp008_write_value(client, MTP008_REG_TEMP_MIN,
-					   data->in_min[nr]);
+		if(data->sens[nr - 3] != VOLTAGE) {
+			if (*nrels_mag >= 1) {
+				data->in_max[nr] = TEMP_TO_REG(results[0]);
+				mtp008_write_value(client, MTP008_REG_TEMP_MAX,
+						   data->in_max[nr]);
+			}
+			if (*nrels_mag >= 2) {
+				data->in_min[nr] = TEMP_TO_REG(results[1]);
+				mtp008_write_value(client, MTP008_REG_TEMP_MIN,
+						   data->in_min[nr]);
+			}
 		}
 	}
 }
@@ -1085,14 +1119,14 @@ void mtp008_sens(struct i2c_client *client, int operation, int ctl_name,
 				opts = "2 or 3";
 
 				switch (results[0]) {
-				case 2:	/* Thermistor */
+				case THERMISTOR:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
 						tmp & ~MTP008_CFG_VT1_PII
 					);
 					data->sens[nr] = 2;
 					break;
-				case 3:	/* PII/Celeron thermal diode */
+				case PIIDIODE:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
 						tmp | MTP008_CFG_VT1_PII
@@ -1107,21 +1141,21 @@ void mtp008_sens(struct i2c_client *client, int operation, int ctl_name,
 				opts = "1, 2 or 3";
 
 				switch (results[0]) {
-				case 1:	/* Analog input */
+				case VOLTAGE:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
 						tmp | MTP008_CFG_VT2_AIN
 					);
 					data->sens[nr] = 1;
 					break;
-				case 2:	/* Thermistor */
+				case THERMISTOR:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
 						tmp | MTP008_CFG_VT2_VT
 					);
 					data->sens[nr] = 2;
 					break;
-				case 3:	/* PII/Celeron thermal diode */
+				case PIIDIODE:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
 						tmp | MTP008_CFG_VT2_PII
@@ -1135,14 +1169,14 @@ void mtp008_sens(struct i2c_client *client, int operation, int ctl_name,
 				opts = "1 or 2";
 
 				switch (results[0]) {
-				case 1:	/* Analog input */
+				case VOLTAGE:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
 						tmp & ~MTP008_CFG_VT3_VT
 					);
 					data->sens[nr] = 1;
 					break;
-				case 2:	/* Thermistor */
+				case THERMISTOR:
 					mtp008_write_value(
 						client, MTP008_REG_PIN_CTRL2,
 						tmp | MTP008_CFG_VT3_VT
