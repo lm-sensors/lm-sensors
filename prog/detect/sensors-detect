@@ -26,11 +26,11 @@
 
 use strict;
 
-use vars qw(@pci_list @pci_adapters);
-
 #########################
 # CONSTANT DECLARATIONS #
 #########################
+
+use vars qw(@pci_adapters @chip_ids);
 
 # This is the list of SMBus or I2C adapters we recognize by their PCI
 # signature. This is an easy and fast way to determine which SMBus or I2C
@@ -70,9 +70,59 @@ use vars qw(@pci_list @pci_adapters);
 );
 
 
+# This is a list of all recognized chips. 
+# Each entry must have a name (Full Chip Name), an array i2c_addrs (Valid
+# I2C Addresses; may be omitted if this is a pure ISA chip), an array 
+# isa_addrs (Valid ISA Addresses; may be omitted if this is a pure I2C chip)
+# ,...
+# If no driver is written yet, omit the driver (Driver Name) field.
+@chip_ids = (
+     {
+       name => "National Semiconductors LM78",
+       driver => "lm78",
+       i2c_addrs => (0x00..0x7f), 
+       isa_addrs => (0x290),  # Theoretically anyway, but this will do
+     } ,
+     {
+       name => "National Semiconductors LM78-J",
+       driver => "lm78",
+       i2c_addrs => (0x00..0x7f),
+       isa_addrs => (0x290),  # Theoretically anyway, but this will do
+     } ,
+     {
+       name => "National Semiconductors LM79",
+       driver => "lm78",
+       i2c_addrs => (0x00..0x7f),
+       isa_addrs => (0x290),  # Theoretically anyway, but this will do
+     } ,
+     {
+       name => "National Semiconductors LM75",
+       driver => "lm75",
+       i2c_addrs => (0x48..0x4f),
+     } ,
+     {
+       name => "National Semiconductors LM80",
+       driver => "lm80",
+       i2c_addrs => (0x28..0x2f),
+     }
+);
+
+
+#######################
+# AUXILIARY FUNCTIONS #
+#######################
+
+sub swap_bytes
+{
+  return (($_[0] & 0xff00) >> 8) + (($_[0] & 0x00ff) << 7)
+}
+
+
 ##############
 # PCI ACCESS #
 ##############
+
+use vars qw(@pci_list);
 
 # This function returns a list of hashes. Each hash has some PCI information 
 # (more than we will ever need, probably). The most important
@@ -138,7 +188,6 @@ sub intialize_proc_pci
 # ADAPTER DETECTION #
 #####################
   
-
 sub adapter_pci_detection
 {
   my ($device,$try,@res);
@@ -171,6 +220,12 @@ sub adapter_pci_detection
 #############################
 # I2C AND SMBUS /DEV ACCESS #
 #############################
+
+# This should really go into a separate module/package.
+
+# To do: support i2c-level access (through sysread/syswrite, probably).
+# I can't test this at all (PIIX4 does not support this), so I have not
+# included it.
 
 use vars qw($IOCTL_I2C_RETRIES $IOCTL_I2C_TIMEOUT $IOCTL_I2C_UDELAY 
             $IOCTL_I2C_MDELAY $IOCTL_I2C_SLAVE $IOCTL_I2C_TENBIT 
@@ -225,13 +280,14 @@ sub i2c_set_slave_addr
 # $_[3]: Transaction kind ($SMBUS_BYTE, $SMBUS_BYTE_DATA, etc.)
 # $_[4]: Reference to an array used for input/output of data
 # Returns: 0 on failure, 1 on success.
-# Note the "SS" pack, even though they are declared as chars in the C struct!
-# This is very compiler-dependent; I wish there was some other way to do this.
+# Note that we need to get back to Integer boundaries through the 'x2'
+# in the pack. This is very compiler-dependent; I wish there was some other 
+# way to do this.
 sub i2c_smbus_access
 {
   my ($file,$read_write,$command,$size,$data) = @_;
   my $data_array = pack "C32", @$data;
-  my $ioctl_data = pack "SSIp", ($read_write,$command,$size,$data_array);
+  my $ioctl_data = pack "C2x2Ip", ($read_write,$command,$size,$data_array);
   ioctl $file, $IOCTL_I2C_SMBUS, $ioctl_data or return 0;
   $_[4] = [ unpack "C32",$data_array ];
   return 1;
@@ -299,6 +355,20 @@ sub i2c_smbus_write_byte_data
 
 # $_[0]: Reference to an opened filehandle
 # $_[1]: Command byte (usually register number)
+# Returns: -1 on failure, the read word on success.
+# Note: some devices use the wrong endiannes; use swap_bytes to correct for 
+# this.
+sub i2c_smbus_read_word_data
+{
+  my ($file,$command) = @_;
+  my $data = [];
+  i2c_smbus_access $file, $SMBUS_READ, $command, $SMBUS_WORD_DATA, $data 
+         or return -1;
+  return $$data[0] + 256 * $$data[1];
+}
+
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Command byte (usually register number)
 # $_[2]: Byte to write
 # Returns: -1 on failure, 0 on success.
 # Note: some devices use the wrong endiannes; use swap_bytes to correct for 
@@ -310,20 +380,6 @@ sub i2c_smbus_write_word_data
   i2c_smbus_access $file, $SMBUS_WRITE, $command, $SMBUS_WORD_DATA, $data 
          or return -1;
   return 0;
-}
-
-# $_[0]: Reference to an opened filehandle
-# $_[1]: Command byte (usually register number)
-# Returns: -1 on failure, the read word on success.
-# Note: some devices use the wrong endiannes; use swap_bytes to correct for 
-# this.
-sub i2c_smbus_read_word_data
-{
-  my ($file,$command) = @_;
-  my $data = [];
-  i2c_smbus_access $file, $SMBUS_READ, $command, $SMBUS_WORD_DATA, $data 
-         or return -1;
-  return $$data[0] + 256 * $$data[1];
 }
 
 # $_[0]: Reference to an opened filehandle
@@ -362,7 +418,7 @@ sub i2c_smbus_read_block_data
 # Returns: -1 on failure, 0 on success.
 # Note: some devices use the wrong endiannes; use swap_bytes to correct for 
 # this.
-sub i2c_smbus_read_block_data
+sub i2c_smbus_write_block_data
 {
   my ($file,$command,@data) = @_;
   i2c_smbus_access $file, $SMBUS_WRITE, $command, $SMBUS_BLOCK_DATA, \@data 
@@ -370,27 +426,41 @@ sub i2c_smbus_read_block_data
   return 0;
 }
 
-# $_[0]: Reference to an opened filehandle
-#######################
-# AUXILIARY FUNCTIONS #
-#######################
+####################
+# ADAPTER SCANNING #
+####################
 
-sub swap_bytes
+# $_[0]: The number of the adapter to scan
+sub scan_adapter
 {
-  return (($_[0] & 0xff00) >> 8) + (($_[0] & 0x00ff) << 7)
+  open FILE,"/dev/i2c-".$_[0] or die "Can't open /dev/i2c-".$_[0];
+  foreach (0..0x7f) {
+    i2c_set_slave_addr(\*FILE,$_) or print("Can't set address to $_?!?\n"), 
+                                     next;
+    printf ("Client found at address 0x%02x\n",$_) 
+                                  if i2c_smbus_read_byte(\*FILE) >= 0;
+  }
 }
 
+##################
+# CHIP DETECTION #
+##################
+
+# $_[0]: 0 for ISA, 1 for I2C
+# $_[1]: Address
+# $_[2]: For I2C, a reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was aleady done.
+#sub lm78_detect
+#{
+#  $@lm78_read = 
 
 ################
 # MAIN PROGRAM #
 ################
 
-my @hallo;
-
 intialize_proc_pci;
 adapter_pci_detection;
 
+
 # TEST!
-#open FILE, "+>/dev/i2c-0" or die "Can't open /dev/i2c-0!";
-#i2c_set_slave_addr \*FILE, 0x49 or die "Couldn't set slave addr!";
-#print (i2c_read_word_data \*FILE, 0), "\n";
+#scan_adapter 0;
