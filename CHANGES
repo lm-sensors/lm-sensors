@@ -23,12 +23,13 @@ ask CVS about it:
                         add adm1021 section; add lm87 AIN[1,2] template;
                         swap negative voltage limits for 782d,783s,627hf,
                         697hf,it87; add more it87 help; swap neg. voltage
-                        limits for lm78, lm78-j, lm79, w83781d, as99127f
+                        limits for lm78(-j), lm79, w83781d, as99127f
   Library: Add PCF8591, W83697HF, ADM1023 support;
            fix w83* fan_min computes;
-           swap neg. voltage limits for lm78, lm78-j, lm79, w83781d, as99127f
+           swap neg. voltage limits for lm78(-j), lm79, w83781d, as99127f
   Module adm1024: Add MODULE_LICENSE("GPL")
   Module bt869: Add s-video out and DVD resolution support
+  Module eeprom: Add support for locations 128-255
   Module fscscy: implement min/max for voltages and fans
   Module i2c-amd756: Add support for AMD768
   Module i2c-i810: Add support for 810E
@@ -38,9 +39,11 @@ ask CVS about it:
   Module lm87: Fix in0, in1, in5 initial limits; ain[1,2] -> in[6,7];
                fan -> fan1; fix temp2 limit writes
   Module pcf8591: new
-  Module w83781d: Add W83697HF support
+  Module w83781d: Add W83697HF support; allow force_subclients parameter
+                  for Tyan 2460
   Program decode-vaio.pl: new
-  Program i2cdump: Add i2c block read capability (requires i2c-2.6.3)
+  Program i2cdump: Add i2c block read capability (requires i2c-2.6.3);
+                   add text output
   Program init/sensors: New SysV init script
   Program mkpatch.pl: Add support for fscscy, add more help entries
   Program rrd: Install summ_week.cgi
