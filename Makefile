@@ -38,14 +38,6 @@ LINUX := $(shell if [ -L /lib/modules/$(KERNELVERSION)/build ] ; \
 	else echo "/usr/src/linux" ; fi)
 LINUX_HEADERS := $(LINUX)/include
 
-# Determine whether we need to compile the kernel modules, or only the
-# user-space utilities. By default, the kernel modules are compiled.
-# Leave this set to 1. If you want to compile and install only
-# the library and the userspace programs,
-#  use 'make user' and 'make user_install'
-#COMPILE_KERNEL := 0
-COMPILE_KERNEL := 1
-
 # If you have installed the i2c header at some other place (like 
 # /usr/local/include/linux), set that directory here. Please check this out
 # if you get strange compilation errors; the default Linux i2c headers
@@ -159,9 +151,7 @@ MACHINE := $(shell uname -m)
 
 # The subdirectories we need to build things in 
 SRCDIRS := mkpatch
-ifeq ($(COMPILE_KERNEL),1)
 SRCDIRS += kernel kernel/busses kernel/chips kernel/include
-endif
 SRCDIRS += lib prog/sensors prog/dump prog/detect ${PROG_EXTRA:%=prog/%} etc
 
 # Some often-used commands with default options
