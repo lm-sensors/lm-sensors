@@ -190,8 +190,8 @@ int sis630_transaction(int size) {
 		}
         }
 
-	/* disable timeout interrupt and set clock to 56KHz */
-	sis630_write(SMB_CNT, 0x20);
+	/* disable timeout interrupt , don't set Host Master Clock to 56KHz (it's hung my Laptop)*/
+	sis630_write(SMB_CNT, 0x00);
 
 	/* clear all sticky bits */
 	temp = sis630_read(SMB_STS);
