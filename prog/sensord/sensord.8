@@ -1,0 +1,112 @@
+.\" Copyright 1999 Merlin Hughes <merlin@merlin.org>
+.\" sensord is distributed under the GPL
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.TH sensord 8  "December 2, 1999" "Version 0.2.0" "Linux System Administration"
+.SH NAME
+sensord \- Sensor information logging daemon.
+.SH SYNOPSIS
+.B sensord [
+.I options
+.B ]
+
+.SH DESCRIPTION
+.B Sensord
+is a daemon that records in a log file the readings of all sensor chips at
+an interval of five minutes, or as configured on the command line.
+
+.B Sensord
+knows about certain chips, and outputs nicely formatted readings for them; but
+it can also display the information of unknown chips, as long as 
+.I libsensors
+knows about them.
+
+.SH OPTIONS
+.IP "-c config-file"
+Specify a configuration file. If no file is specified, the name `sensors.conf'
+is used. If the name does not contain a leading directory slash, or this parameter
+is not present, the following paths are examined:
+.BR /etc ,
+.BR /usr/lib/sensors ,
+.BR /usr/local/lib/sensors ,
+.BR /usr/lib ,
+.BR /usr/local/lib .
+.IP "-i interval"
+Specifies the interval, in seconds, between sensor readings. The default
+is 300 seconds (5 minutes).
+.IP "-l log-file"
+Specify the log file to which to append. If no file is specified, the
+default log file `/var/log/sensors' is created. Note that this file is
+interpreted relative to the root directory `/', not the current directory.
+.IP -h
+Prints a help message and exits.
+.IP -v
+Displays the program version and exits.
+.SH SIGNALS
+Upon receipt of a SIGHUP (see
+.BR signal (7)
+for details) this daemon closes and reopens its log file. Use this to rotate
+log-files: Rename the old log file and then HUP this daemon; it will
+commence writing to a new log file.
+
+Upon receipt of a SIGTERM (see
+.BR signal (7)
+for details) this daemon should gracefully shut down.
+.SH ERRORS
+Errors encountered by this daemon are logged to
+.BR syslogd (8)
+under the program name `sensord', after which the daemon aborts
+with a failure note in its own log file.
+.SH NOTES
+It is expected that all required modules are loaded prior to this daemon
+being started. Typically, this is achieved with an entry in
+`/etc/rc.d/...' containing
+.BR modprobe (1)
+commands to load the required modules before starting the daemon.
+.SH BUGS
+.B Sensord
+does not currently support reading alarm events from sensor devices.
+.SH FILES
+.I /etc/sensors.conf
+.RS
+The system wide configuration file. See
+.BR sensors.conf (5)
+for further details.
+.RE
+.I /var/log/sensors
+.RS
+The default sensor log file.
+.RE
+.SH "CONFORMING TO"
+lm_sensors-2.x
+.SH SEE ALSO
+sensors.conf(5)
+.SH AUTHORS
+.B Sensord
+was written by Merlin Hughes <merlin@merlin.org>. Chip-specific formatting
+code was ripped from
+.BR sensors
+which was written by Frodo Looijaard <frodol@dds.nl>.
+
+
+
+

@@ -133,7 +133,7 @@ SRCDIRS := mkpatch
 ifeq ($(COMPILE_KERNEL),1)
 SRCDIRS += kernel kernel/busses kernel/chips kernel/include
 endif
-SRCDIRS += lib prog/sensors prog/dump prog/detect etc
+SRCDIRS += lib prog/sensors prog/sensord prog/dump prog/detect etc
 
 # Some often-used commands with default options
 MKDIR := mkdir -p

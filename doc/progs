@@ -51,6 +51,12 @@ this package.
 * prog/mkdev/mkdev.sh (written in bash, not installed)
   This script creates the /dev/i2c-* files. Please check the source before
   you run it, as you may need to set some variables first.
+* prog/sensord/sensord (written in C, installed by `make install-prog-sensord')
+  This daemon logs sensor information every 5 minutes to the log file
+  /var/log/sensors, in a similar format to sensors (below). This is a bit
+  more lightweight than executing sensors every 5 minutes, depending on how
+  you look at things. Automatically picks up configuration updates and
+  responds to SIGHUP.
 * prog/sensors/sensors (written in C, installed by `make install')
   This pretty-prints the information provided by the modules. It is a normal
   console application, using stdin and stdout. It is essential, because

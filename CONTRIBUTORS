@@ -36,6 +36,8 @@ problems.
   he also tested lots of things, and helped us out on several occasions.
 * Fons Rademakers <Fons.Rademakers@cern.ch>
   Author of the maxilife module (which could only be written under NDA)
+* Merlin Hughes <merlin@merlin.org>
+  Author of the AMD756 module and sensord.
 
 * Simon Vogl <simon@tk.uni-linz.ac.at>
   Wrote the new i2c kernel driver. This driver is indispensable for the
