@@ -2303,6 +2303,11 @@ sub main
         "things may\n",
         " seem a bit confusing, but they will still work.\n\n";
 
+  print " IF THIS IS AN IBM THINKPAD, PRESS CTRL-C NOW!\n";
+  print " IBM Thinkpads have a severely broken i2c/SMBus implementation, ";
+  print " just scanning\n";
+  print " the bus will break your thinkpad forever!\n\n";
+
   print " We can start with probing for (PCI) I2C or SMBus adapters.\n";
   print " You do not need any special privileges for this.\n";
   print " Do you want to probe now? (YES/no): ";
