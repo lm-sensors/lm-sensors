@@ -5,7 +5,7 @@
  * Based on the lm90 driver.
  *
  * The LM63 is a sensor chip made by National Semiconductor. It measures
- * two temperature (its own and one external one) and the speed of one
+ * two temperatures (its own and one external one) and the speed of one
  * fan, those speed it can additionally control. Complete datasheet can be
  * obtained from National's website at:
  *   http://www.national.com/pf/LM/LM63.html
