@@ -68,10 +68,8 @@ struct pcf8574_data {
 	int sysctl_id;
 
 	struct semaphore update_lock;
-	char valid;		/* !=0 if following fields are valid */
-	unsigned long last_updated;	/* In jiffies */
 
-	u8 read, write;	        /* Register values */
+	u8 read, write;		/* Register values */
 };
 
 static int pcf8574_attach_adapter(struct i2c_adapter *adapter);
@@ -116,9 +114,6 @@ static ctl_table pcf8574_dir_table_template[] = {
 	{0}
 };
 
-/* I choose here for semi-static PCF8574 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
 static int pcf8574_id = 0;
 
 static int pcf8574_attach_adapter(struct i2c_adapter *adapter)
@@ -150,8 +145,7 @@ int pcf8574_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR0;
 
 	/* OK. For now, we presume we have a valid client. We now create the
-	   client structure, even though we cannot fill it completely yet.
-	   But it allows us to access pcf8574_{read,write}_value. */
+	   client structure, even though we cannot fill it completely yet. */
 	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
 				   sizeof(struct pcf8574_data),
 				   GFP_KERNEL))) {
@@ -171,63 +165,52 @@ int pcf8574_detect(struct i2c_adapter *adapter, int address,
 
 	/* Determine the chip type */
 	if (kind <= 0) {
-		if (address >= 0x20 && address <= 0x27)
-			kind = pcf8574;
-		else if (address >= 0x38 && address <= 0x3f)
+		if (address >= 0x38 && address <= 0x3f)
 			kind = pcf8574a;
-		else goto ERROR1;
+		else
+			kind = pcf8574;
 	}
 
-	if (kind == pcf8574) {
-		type_name = "pcf8574";
-		client_name = "PCF8574 chip";
-	} else
 	if (kind == pcf8574a) {
 		type_name = "pcf8574a";
 		client_name = "PCF8574A chip";
 	} else {
-#ifdef DEBUG
-		printk("pcf8574.o: Internal error: unknown kind (%d)?!?",
-		       kind);
-#endif
-		goto ERROR1;
+		type_name = "pcf8574a";
+		client_name = "PCF8574A chip";
 	}
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
 
 	new_client->id = pcf8574_id++;
-	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 
 	/* Tell the I2C layer a new client has arrived */
 	if ((err = i2c_attach_client(new_client)))
-		goto ERROR3;
+		goto ERROR1;
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
-					pcf8574_dir_table_template)) < 0) {
+				    pcf8574_dir_table_template)) < 0) {
 		err = i;
-		goto ERROR4;
+		goto ERROR2;
 	}
 	data->sysctl_id = i;
 
-        /* Initialize the PCF8574 chip */
-        pcf8574_init_client(new_client);
+	/* Initialize the PCF8574 chip */
+	pcf8574_init_client(new_client);
 	return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
-      ERROR4:
+      ERROR2:
 	i2c_detach_client(new_client);
-      ERROR3:
       ERROR1:
 	kfree(new_client);
       ERROR0:
 	return err;
 }
-
 
 static int pcf8574_detach_client(struct i2c_client *client)
 {
@@ -237,8 +220,8 @@ static int pcf8574_detach_client(struct i2c_client *client)
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {
-		printk
-		    ("pcf8574.o: Client deregistration failed, client not detached.\n");
+		printk("pcf8574.o: Client deregistration failed, "
+		       "client not detached.\n");
 		return err;
 	}
 
@@ -251,8 +234,8 @@ static int pcf8574_detach_client(struct i2c_client *client)
 /* Called when we have found a new PCF8574. */
 static void pcf8574_init_client(struct i2c_client *client)
 {
-        struct pcf8574_data *data = client->data;
-        data->write = PCF8574_INIT;
+	struct pcf8574_data *data = client->data;
+	data->write = PCF8574_INIT;
 	i2c_smbus_write_byte(client, data->write);
 }
 
@@ -263,26 +246,21 @@ static void pcf8574_update_client(struct i2c_client *client)
 
 	down(&data->update_lock);
 
-	if ((jiffies - data->last_updated > 5*HZ) ||
-	    (jiffies < data->last_updated) || !data->valid) {
-
 #ifdef DEBUG
-		printk("Starting pcf8574 update\n");
+	printk("Starting pcf8574 update\n");
 #endif
 
-		data->read = i2c_smbus_read_byte(client); 
-		data->last_updated = jiffies;
-		data->valid = 1;
-	}
+	data->read = i2c_smbus_read_byte(client); 
 
 	up(&data->update_lock);
 }
 
 
 void pcf8574_read(struct i2c_client *client, int operation,
-		    int ctl_name, int *nrels_mag, long *results)
+		  int ctl_name, int *nrels_mag, long *results)
 {
 	struct pcf8574_data *data = client->data;
+
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
@@ -292,16 +270,17 @@ void pcf8574_read(struct i2c_client *client, int operation,
 	}  
 }
 void pcf8574_write(struct i2c_client *client, int operation,
-		    int ctl_name, int *nrels_mag, long *results)
+		   int ctl_name, int *nrels_mag, long *results)
 {
 	struct pcf8574_data *data = client->data;
+
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		results[0] = data->write; 
 		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		if (*nrels_mag == 1) {
+		if (*nrels_mag >= 1) {
 			data->write = results[0];
 			i2c_smbus_write_byte(client, data->write);
 		}
@@ -321,9 +300,10 @@ static void __exit sm_pcf8574_exit(void)
 }
 
 
-
-MODULE_AUTHOR
-    ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, Dan Eaton <dan.eaton@rocketlogix.com> and Aurelien Jarno <aurelien@aurel32.net>");
+MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, "
+	      "Philip Edelbrock <phil@netroedge.com>, "
+	      "Dan Eaton <dan.eaton@rocketlogix.com> and "
+	      "Aurelien Jarno <aurelien@aurel32.net>");
 MODULE_DESCRIPTION("PCF8574 driver");
 
 module_init(sm_pcf8574_init);
