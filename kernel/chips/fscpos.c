@@ -39,11 +39,6 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-/* temp. because wasn't in kernel 2.4.13 patch */
-#ifndef I2C_DRIVERID_FSCPOS
-#define I2C_DRIVERID_FSCPOS 1028
-#endif
-
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
     (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)

@@ -26,10 +26,6 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifndef I2C_DRIVERID_PCF8591
-#define I2C_DRIVERID_PCF8591 1030
-#endif
-
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
     (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)

@@ -38,10 +38,6 @@
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
 #endif
 
-#ifndef I2C_DRIVERID_SMSC47M1
-#define I2C_DRIVERID_SMSC47M1 1031
-#endif
-
 #ifndef THIS_MODULE
 #define THIS_MODULE NULL
 #endif

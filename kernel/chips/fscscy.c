@@ -39,11 +39,6 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-/* temp. because wasn't in kernel 2.4.13 patch */
-#ifndef I2C_DRIVERID_FSCSCY
-#define I2C_DRIVERID_FSCSCY 1029
-#endif
-
 #ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
 #endif

@@ -370,10 +370,6 @@ static void lm92_dec_use (struct i2c_client *client)
 #endif	/* #ifdef MODULE */
 }
 
-#ifndef I2C_DRIVERID_LM92
-#define I2C_DRIVERID_LM92 1033
-#endif	/* #ifndef I2C_DRIVERID_LM92 */
-
 static struct i2c_driver lm92_driver = {
 	name:			"lm92",
 	id:				I2C_DRIVERID_LM92,

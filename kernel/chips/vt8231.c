@@ -42,10 +42,6 @@
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
 #endif
 
-#ifndef I2C_DRIVERID_VT8231
-#define I2C_DRIVERID_VT8231 1034
-#endif
-
 #ifndef THIS_MODULE
 #define THIS_MODULE NULL
 #endif
