@@ -74,4 +74,6 @@ problems.
 * Mark M. Hoffman <mhoffman@lightlink.com>
   Author of the i2c-sis645 bus driver.
   Added Asus ASB100 Bach support to the w83781d driver.
+* Alexander Malysh <amalysh@web.de>
+  Author of the i2c-sis630 bus driver.
 
