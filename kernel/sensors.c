@@ -85,6 +85,9 @@ extern int sensors_via686a_init(void);
 #ifdef CONFIG_SENSORS_VT1211
 extern int sensors_vt1211_init(void);
 #endif
+#ifdef CONFIG_SENSORS_VT8231
+extern int sensors_vt8231_init(void);
+#endif
 #ifdef CONFIG_SENSORS_W83781D
 extern int sensors_w83781d_init(void);
 #endif
@@ -162,6 +165,9 @@ int __init sensors_init_all(void)
 #endif
 #ifdef CONFIG_SENSORS_VT1211
 	sensors_vt1211_init();
+#endif
+#ifdef CONFIG_SENSORS_VT8231
+	sensors_vt8231_init();
 #endif
 #ifdef CONFIG_SENSORS_W83781D
 	sensors_w83781d_init();
