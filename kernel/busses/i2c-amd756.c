@@ -26,6 +26,7 @@
 
 /*
     2002-04-08: Added nForce support. (Csaba Halasz)
+    2002-10-03: Fixed nForce PnP I/O port. (Michael Steil)
 */
 
 /*
@@ -89,6 +90,7 @@ static struct sd supported[] = {
 
 /* address of I/O space */
 #define SMBBA     0x058		/* mh */
+#define SMBBANFORCE     0x014
 
 /* general configuration */
 #define SMBGCFG   0x041		/* mh */
@@ -158,10 +160,6 @@ static int __initdata amd756_initialized;
 static struct sd *amd756_sd = NULL;
 static unsigned short amd756_smba = 0;
 
-/* Detect whether a AMD756 can be found, and initialize it, where necessary.
-   Note the differences between kernels with the old PCI BIOS interface and
-   newer kernels with the real PCI interface. In compat.h some things are
-   defined to make the transition easier. */
 int amd756_setup(void)
 {
 	unsigned char temp;
@@ -169,8 +167,7 @@ int amd756_setup(void)
 	struct pci_dev *AMD756_dev = NULL;
 
 	if (pci_present() == 0) {
-		printk("i2c-amd756.o: Error: No PCI-bus found!\n");
-		return(-ENODEV);
+		return -ENODEV;
 	}
 
 	/* Look for a supported chip */
@@ -188,7 +185,7 @@ int amd756_setup(void)
 	if (AMD756_dev == NULL) {
 		printk
 		    ("i2c-amd756.o: Error: No AMD756 or compatible device detected!\n");
-		return(-ENODEV);
+		return -ENODEV;
 	}
 	printk(KERN_INFO "i2c-amd756.o: Found %s SMBus controller.\n", currdev->name);
 
@@ -197,7 +194,7 @@ int amd756_setup(void)
 		pci_read_config_byte(AMD756_dev, SMBGCFG, &temp);
 		if ((temp & 128) == 0) {
 			printk("i2c-amd756.o: Error: SMBus controller I/O not enabled!\n");
-			return(-ENODEV);
+			return -ENODEV;
 		}
 
 		/* Determine the address of the SMBus areas */
@@ -206,13 +203,18 @@ int amd756_setup(void)
 		amd756_smba &= 0xff00;
 		amd756_smba += SMB_ADDR_OFFSET;
 	} else {
-		amd756_smba = 0x5500;
+		pci_read_config_word(AMD756_dev, SMBBANFORCE, &amd756_smba);
+		amd756_smba &= 0xfffc;
+	}
+	if(amd756_smba == 0) {
+		printk(KERN_ERR "i2c-amd756.o: Error: SMB base address uninitialized\n");
+		return -ENODEV;
 	}
 	if (check_region(amd756_smba, SMB_IOSIZE)) {
 		printk
 		    ("i2c-amd756.o: SMB region 0x%x already in use!\n",
 		     amd756_smba);
-		return(-ENODEV);
+		return -ENODEV;
 	}
 
 	/* Everything is happy, let's grab the memory and set things up. */
@@ -294,7 +296,7 @@ int amd756_transaction(void)
 		if (timeout >= MAX_TIMEOUT) {
 			printk("i2c-amd756.o: Busy wait timeout! (%04x)\n", temp);
 			amd756_abort();
-			return(-1);
+			return -1;
 		}
 		timeout = 0;
 	}
@@ -312,7 +314,7 @@ int amd756_transaction(void)
 	if (timeout >= MAX_TIMEOUT) {
 		printk("i2c-amd756.o: Completion timeout!\n");
 		amd756_abort ();
-		return(-1);
+		return -1;
 	}
 
 	if (temp & GS_PRERR_STS) {
