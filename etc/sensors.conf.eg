@@ -1,5 +1,13 @@
 # Hardware sensors configuration file
-
+#
+##########################################################################
+# HELPFUL HINT:                                                          #
+#	The 'set' lines (generally for min and max values)               #
+#	do not take effect until you run 'sensors -s' as root !!!        #
+#	We suggest you put 'sensors -s' in a /etc/rc.d/... file       #
+#	to be run at boot time after the modules are inserted !!!        #
+##########################################################################
+#
 # This configuration file will be used by all applications linked to 
 # libsensors.
 
