@@ -370,10 +370,11 @@ int i2cproc_attach_adapter(struct i2c_adapter *adapter)
     kfree(client);
     return res;
   }
-  
+
   i2cproc_proc_entries[i] = proc_entry;
-  i2cproc_inodes[i] = proc_entry->low_ino;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
+
+  i2cproc_inodes[i] = proc_entry->low_ino;
   return 0;
 }
   
