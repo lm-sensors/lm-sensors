@@ -272,7 +272,7 @@ static int gl520_detect(struct i2c_adapter *adapter, int address, int kind)
   struct gl520_data *data;
   int err=0;
   const char *type_name = "";
-  const char *client_name = "";
+  char client_name[32];
 
   /* Make sure we aren't probing the ISA bus!! This is just a safety check
      at this moment; sensors_detect really won't call us. */
@@ -306,7 +306,7 @@ static int gl520_detect(struct i2c_adapter *adapter, int address, int kind)
 
   /* Determine the chip type. */
 
-  if (gl520_read_value(new_client,GL520_REG_CHIP_ID != 0x20) {
+  if (gl520_read_value(new_client,GL520_REG_CHIP_ID) != 0x20) {
      printk("gl520sm.o: Ignoring 'force' parameter for unknown chip at "
           "adapter %d, address 0x%02x\n",i2c_adapter_id(adapter),address);
      goto ERROR1;
@@ -380,8 +380,6 @@ ERROR0:
 /* Called when we have found a new GL520SM. It should set limits, etc. */
 void gl520_init_client(struct i2c_client *client)
 {
-  struct gl520_data *data = client->data;
-
   /* Power-on defaults (bit 7=1) */
   gl520_write_value(client,GL520_REG_CONF,0x80); 
 
@@ -424,7 +422,6 @@ void gl520_init_client(struct i2c_client *client)
   /* Clear status register (bit 5=1), start (bit6=1) */
   gl520_write_value(client,GL520_REG_CONF,0x24);
   gl520_write_value(client,GL520_REG_CONF,0x44);
-  
 }
 
 int gl520_detach_client(struct i2c_client *client)
@@ -546,17 +543,19 @@ void gl520_update_client(struct i2c_client *client)
     data->fan_min[0] = (val >> 8) & 0xff;
     data->fan_min[1] = val & 0xff;
 
-    data->temp = gl520_read_value(client,GL520_REG_TEMP);
-    data->temp_over = gl520_read_value(client,GL520_REG_TEMP_OVER);
-    data->temp_hyst = gl520_read_value(client,GL520_REG_TEMP_HYST);
+    data->temp[0] = gl520_read_value(client,GL520_REG_TEMP1);
+    data->temp_over[0] = gl520_read_value(client,GL520_REG_TEMP1_OVER);
+    data->temp_hyst[0] = gl520_read_value(client,GL520_REG_TEMP1_HYST);
+
+    data->temp[1] = gl520_read_value(client,GL520_REG_TEMP2);
+    data->temp_over[1] = gl520_read_value(client,GL520_REG_TEMP2_OVER);
+    data->temp_hyst[1] = gl520_read_value(client,GL520_REG_TEMP2_HYST);
 
     val = gl520_read_value(client,GL520_REG_MISC);
     data->fan_div[0] = (val >> 6) & 0x03;
     data->fan_div[1] = (val >> 4) & 0x03;
-    data->fan1conf = (val >> 3) & 1;
 
-    if (((data->fan1conf) && (data->temp < data->temp_over)) ||
-        (data->fan_min[0]==0xff))
+    if (data->fan_min[0]==0xff)
        data->alarms &= ~GL520_ALARM_FAN1;
        
     if (data->fan_min[1]==0xff)
@@ -580,18 +579,18 @@ void gl520_temp(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 1;
   else if (operation == SENSORS_PROC_REAL_READ) {
     gl520_update_client(client);
-    results[0] = TEMP_FROM_REG(data->temp_over);
-    results[1] = TEMP_FROM_REG(data->temp_hyst);
-    results[2] = TEMP_FROM_REG(data->temp);
+    results[0] = TEMP_FROM_REG(data->temp_over[0]);
+    results[1] = TEMP_FROM_REG(data->temp_hyst[0]);
+    results[2] = TEMP_FROM_REG(data->temp[0]);
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
-      data->temp_over = TEMP_TO_REG(results[0]);
-      gl520_write_value(client,GL520_REG_TEMP_OVER,data->temp_over);
+      data->temp_over[0] = TEMP_TO_REG(results[0]);
+      gl520_write_value(client,GL520_REG_TEMP1_OVER,data->temp_over[0]);
     }
     if (*nrels_mag >= 2) {
-      data->temp_hyst = TEMP_TO_REG(results[1]);
-      gl520_write_value(client,GL520_REG_TEMP_HYST,data->temp_hyst);
+      data->temp_hyst[0] = TEMP_TO_REG(results[1]);
+      gl520_write_value(client,GL520_REG_TEMP1_HYST,data->temp_hyst[0]);
     }
   }
 }
