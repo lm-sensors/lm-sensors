@@ -1449,6 +1449,23 @@ chip "adm1021-*" "adm1023-*" "max1617-*" "max1617a-*" "thmc10-*" "lm84-*" "gl523
 #   set remote_temp_low		40
 #   set remote_temp_over	70
 
+chip "lm83-*"
+
+   label temp1 "M/B Temp"
+   label temp2 "D1 Temp"
+   label temp3 "CPU Temp"
+   label temp4 "D3 Temp"
+
+# ignore D1 and/or D3 readings if not used
+#   ignore temp2
+#   ignore temp4
+
+# change high limits to fit your needs
+#   set temp1_high 55
+#   set temp2_high 60
+#   set temp3_high 65
+#   set temp4_high 60
+
 chip "vt1211-*" "vt8231-*"
 #
 # temp1 and in6 are not implemented in vt1211 / vt8231
