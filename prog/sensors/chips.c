@@ -3799,18 +3799,6 @@ void print_vt1211(const sensors_chip_name *name)
   } else
     printf("ERROR: Can't get IN5 data!\n");
   free_the_label(&label);
-  if (!sensors_get_label_and_valid(*name,SENSORS_VT1211_IN6,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_VT1211_IN6,&cur) &&
-      !sensors_get_feature(*name,SENSORS_VT1211_IN6_MIN,&min) &&
-      !sensors_get_feature(*name,SENSORS_VT1211_IN6_MAX,&max)) {
-    if (valid) {
-      print_label(label,10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
-             cur,min,max,alarms&VT1211_ALARM_IN6?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN6 data!\n");
-  free_the_label(&label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_VT1211_FAN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT1211_FAN1,&cur) &&
@@ -3837,18 +3825,7 @@ void print_vt1211(const sensors_chip_name *name)
     printf("ERROR: Can't get FAN2 data!\n");
   free_the_label(&label);
 
-  if (!sensors_get_label_and_valid(*name,SENSORS_VT1211_TEMP,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_VT1211_TEMP,&cur) &&
-      !sensors_get_feature(*name,SENSORS_VT1211_TEMP_HYST,&min) &&
-      !sensors_get_feature(*name,SENSORS_VT1211_TEMP_OVER,&max)) {
-    if (valid) {
-      print_label(label,10);
-      print_temp_info( cur, max, min, HYST, 1, 0);
-      printf(" %s\n", alarms & VT1211_ALARM_TEMP ? "ALARM" : "" );
-    }
-  } else
-    printf("ERROR: Can't get TEMP data!\n");
-  free_the_label(&label);
+  /* no temp 1 */
   if (!sensors_get_label_and_valid(*name,SENSORS_VT1211_TEMP2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT1211_TEMP2,&cur) &&
       !sensors_get_feature(*name,SENSORS_VT1211_TEMP2_HYST,&min) &&
@@ -4120,18 +4097,6 @@ void print_vt8231(const sensors_chip_name *name)
   } else
     printf("ERROR: Can't get IN5 data!\n");
   free_the_label(&label);
-  if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_IN6,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_VT8231_IN6,&cur) &&
-      !sensors_get_feature(*name,SENSORS_VT8231_IN6_MIN,&min) &&
-      !sensors_get_feature(*name,SENSORS_VT8231_IN6_MAX,&max)) {
-    if (valid) {
-      print_label(label,10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
-             cur,min,max,alarms&VT8231_ALARM_IN6?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN6 data!\n");
-  free_the_label(&label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_FAN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_FAN1,&cur) &&
@@ -4158,18 +4123,7 @@ void print_vt8231(const sensors_chip_name *name)
     printf("ERROR: Can't get FAN2 data!\n");
   free_the_label(&label);
 
-  if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_TEMP,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_VT8231_TEMP,&cur) &&
-      !sensors_get_feature(*name,SENSORS_VT8231_TEMP_HYST,&min) &&
-      !sensors_get_feature(*name,SENSORS_VT8231_TEMP_OVER,&max)) {
-    if (valid) {
-      print_label(label,10);
-      print_temp_info( cur, max, min, HYST, 1, 0);
-      printf(" %s\n", alarms & VT8231_ALARM_TEMP ? "ALARM" : "" );
-    }
-  } else
-    printf("ERROR: Can't get TEMP data!\n");
-  free_the_label(&label);
+  /* no temp 1 */
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_TEMP2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_TEMP2,&cur) &&
       !sensors_get_feature(*name,SENSORS_VT8231_TEMP2_HYST,&min) &&
