@@ -613,7 +613,7 @@ static sensors_chip_feature gl518_features[] =
 static sensors_chip_feature gl520_features[] =
   {
     { SENSORS_GL520_VDD, "vdd", NOMAP,NOMAP,
-                            R, GL520_SYSCTL_VDD, VALUE(3), 2 },
+                            R, GL520_SYSCTL_VDD, VALUE(3), 2, "in0_input", 3 },
     { SENSORS_GL520_VIN1, "vin1", NOMAP,NOMAP,
                              R, GL520_SYSCTL_VIN1, VALUE(3), 
                              2 },
@@ -626,7 +626,7 @@ static sensors_chip_feature gl520_features[] =
                              R, GL520_SYSCTL_VIN4, VALUE(3), 2 },
     { SENSORS_GL520_VDD_MIN, "vdd_min", SENSORS_GL520_VDD,
                                 SENSORS_GL520_VDD, RW,
-                                GL520_SYSCTL_VDD, VALUE(1), 2 },
+                                GL520_SYSCTL_VDD, VALUE(1), 2, "in0_min", 3 },
     { SENSORS_GL520_VIN1_MIN, "vin1_min", SENSORS_GL520_VIN1, 
                                  SENSORS_GL520_VIN1, RW,
                                  GL520_SYSCTL_VIN1, VALUE(1), 2 },
@@ -641,7 +641,7 @@ static sensors_chip_feature gl520_features[] =
                                  GL520_SYSCTL_VIN4, VALUE(1), 2 },
     { SENSORS_GL520_VDD_MAX, "vdd_max", SENSORS_GL520_VDD,
                                 SENSORS_GL520_VDD, RW,
-                                GL520_SYSCTL_VDD, VALUE(2), 2 },
+                                GL520_SYSCTL_VDD, VALUE(2), 2, "in0_max", 3 },
     { SENSORS_GL520_VIN1_MAX, "vin1_max", SENSORS_GL520_VIN1, 
                                  SENSORS_GL520_VIN1, RW,
                                  GL520_SYSCTL_VIN1, VALUE(2), 2 },
