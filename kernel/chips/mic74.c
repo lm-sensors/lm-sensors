@@ -23,33 +23,14 @@
 	A couple notes about the MIC74:
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
-#include <linux/proc_fs.h>
-#include <linux/ioport.h>
-#include <linux/sysctl.h>
-#include <asm/errno.h>
-#include <asm/io.h>
-#include <linux/types.h>
 #include <linux/i2c.h>
-#define LM_DATE "20011118"
-#define LM_VERSION "2.6.2"
-#include <linux/sensors.h>
+#include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include "version.h"
 
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -73,11 +54,6 @@ SENSORS_INSMOD_1(mic74);
 /* Initial values */
 /* All registers are 0, except for MIC74_REG_DATA which is 0xFF */
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /* For each registered MIC74, we need to keep some data in memory. That
    data is pointed to by mic74_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new mic74 client is
@@ -99,22 +75,10 @@ struct mic74_data {
 	u8 fanSpeed;		/* Register value */
 };
 
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_mic74_init(void);
-static int __init mic74_cleanup(void);
-
 static int mic74_attach_adapter(struct i2c_adapter *adapter);
 static int mic74_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int mic74_detach_client(struct i2c_client *client);
-static int mic74_command(struct i2c_client *client, unsigned int cmd,
-			   void *arg);
-static void mic74_inc_use(struct i2c_client *client);
-static void mic74_dec_use(struct i2c_client *client);
 
 static int mic74_read_value(struct i2c_client *client, u8 register);
 static int mic74_write_value(struct i2c_client *client, u8 register,
@@ -130,21 +94,24 @@ static void mic74_reg_ro(struct i2c_client *client, int operation, int ctl_name,
 /* I choose here for semi-static MIC74 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
-static int mic74_id = 0;
+static int mic74_id;
 
 static struct i2c_driver mic74_driver = {
-	/* name */ "MIC74 sensor driver",
-	/* id */ I2C_DRIVERID_MIC74,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &mic74_attach_adapter,
-	/* detach_client */ &mic74_detach_client,
-	/* command */ &mic74_command,
-	/* inc_use */ &mic74_inc_use,
-	/* dec_use */ &mic74_dec_use
+	.name	= "MIC74 sensor driver",
+	.flags	= I2C_DF_NOTIFY,
+	.attach_adapter	= mic74_attach_adapter,
+	.detach_client	= mic74_detach_client
 };
 
-/* Used by mic74_init/cleanup */
-static int __initdata mic74_initialized = 0;
+/* -- SENSORS SYSCTL START -- */
+#define MIC74_SYSCTL_REG0     1000
+#define MIC74_SYSCTL_REG1     1001
+#define MIC74_SYSCTL_REG2     1002
+#define MIC74_SYSCTL_REG3     1003
+#define MIC74_SYSCTL_REG4     1004
+#define MIC74_SYSCTL_REG5     1005
+#define MIC74_SYSCTL_REG6     1006
+/* -- SENSORS SYSCTL END -- */
 
 /* The /proc/sys entries */
 /* These files are created for each detected MIC74. This is just a template;
@@ -175,7 +142,6 @@ static ctl_table mic74_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &mic74_reg_rw },
 	{MIC74_SYSCTL_REG6, "fan_speed", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &mic74_reg_rw },
-
 	{0}
 };
 
@@ -193,16 +159,6 @@ static int mic74_detect(struct i2c_adapter *adapter, int address,
 	int err = 0;
 	const char *type_name = "";
 	const char *client_name = "";
-
-	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; i2c_detect really won't call us. */
-#ifdef DEBUG
-	if (i2c_is_isa_adapter(adapter)) {
-		printk
-		    ("mic74.o: mic74_detect called for an ISA bus adapter?!?\n");
-		return 0;
-	}
-#endif
 
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
 		goto ERROR0;
@@ -238,10 +194,6 @@ static int mic74_detect(struct i2c_adapter *adapter, int address,
 		client_name = "MIC74 chip";
 	} 
 	else {
-#ifdef DEBUG
-		printk("mic74.o: Internal error: unknown kind (%d)?!?",
-		       kind);
-#endif
 		goto ERROR1;
 	}
 
@@ -298,29 +250,7 @@ int mic74_detach_client(struct i2c_client *client)
 	}
 
 	kfree(client);
-
 	return 0;
-
-}
-
-/* No commands defined yet */
-int mic74_command(struct i2c_client *client, unsigned int cmd, void *arg)
-{
-	return 0;
-}
-
-void mic74_inc_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_INC_USE_COUNT;
-#endif
-}
-
-void mic74_dec_use(struct i2c_client *client)
-{
-#ifdef MODULE
-	MOD_DEC_USE_COUNT;
-#endif
 }
 
 int mic74_read_value(struct i2c_client *client, u8 reg)
@@ -368,26 +298,6 @@ void mic74_update_client(struct i2c_client *client)
 }
 
 
-/* The next couple functions are the call-back functions of the /proc/sys and
-   sysctl files. Which function is used is defined in the ctl_table in
-   the extra1 field.
-
-   Each function must return the magnitude (power of 10 to divide the data
-   with) if it is called with operation==SENSORS_PROC_REAL_INFO. It is 
-   always 0.
-
-   It must put a maximum of *nrels elements in results reflecting the data
-   of this file, and set *nrels to the number it actually put in it, 
-   if operation== SENSORS_PROC_REAL_READ. This is always 1.
-
-   Finally, it must get upto *nrels elements from results and write them
-   to the chip, if operations==SENSORS_PROC_REAL_WRITE. This is also
-   always 1 regardless of how many are sent.
-
-   Note that on SENSORS_PROC_REAL_READ, I do not check whether results is
-   large enough (by checking the incoming value of *nrels). This is not very
-   good practice, but as long as you put less than about 5 values in results,
-   you can assume it is large enough. */
 void mic74_reg_rw(struct i2c_client *client, int operation, int ctl_name,
 		  int *nrels_mag, long *results)
 {
@@ -451,54 +361,19 @@ void mic74_reg_ro(struct i2c_client *client, int operation, int ctl_name,
 	} 
 }
 
-int __init sensors_mic74_init(void)
+static int __init sensors_mic74_init(void)
 {
-	int res;
-
 	printk("mic74.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	mic74_initialized = 0;
-
-	if ((res = i2c_add_driver(&mic74_driver))) {
-		printk
-		    ("mic74.o: Driver registration failed, module not inserted.\n");
-		mic74_cleanup();
-		return res;
-	}
-
-	mic74_initialized++;
-	return 0;
+	return(i2c_add_driver(&mic74_driver));
 }
 
-int __init mic74_cleanup(void)
+static void __init mic74_cleanup(void)
 {
-	int res;
-
-	if (mic74_initialized >= 1) {
-		if ((res = i2c_del_driver(&mic74_driver))) {
-			printk
-			    ("mic74.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		mic74_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&mic74_driver);
 }
 
-EXPORT_NO_SYMBOLS;
-
-#ifdef MODULE
-
-MODULE_AUTHOR("no one willing to take credit");
+MODULE_AUTHOR("zebo25/MDS");
 MODULE_DESCRIPTION("MIC74 driver");
 
-int init_module(void)
-{
-	return sensors_mic74_init();
-}
-
-int cleanup_module(void)
-{
-	return mic74_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sensors_mic74_init);
+module_exit(mic74_cleanup);
