@@ -1019,9 +1019,13 @@ void w83792d_fan(struct i2c_client *client, int operation, int ctl_name,
 				} else if ((data->fan_div[nr])<0x07 &&
 					 (data->fan[nr])==0xff) {
 					(data->fan_div[nr])++;
+					results[1] = FAN_FROM_REG(data->fan[nr],
+					             DIV_FROM_REG(data->fan_div[nr]));
 				} else if ((data->fan_div[nr])>0 &&
 					  (data->fan[nr])<0x78) {
 					(data->fan_div[nr])--;
+					results[1] = FAN_FROM_REG(data->fan[nr],
+					             DIV_FROM_REG(data->fan_div[nr]));
 				}
 
 				tmp_reg = w83792d_read_value(client,
