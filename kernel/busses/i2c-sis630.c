@@ -66,14 +66,6 @@ struct sd {
 	const char *name;
 };
 
-/* supported chips */
-static struct sd supported[] = {
-	{PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_630, 0, "SIS630"},
-	{PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_730, 0, "SIS730"},
-	{0, 0, 0, NULL}
-};
-
-
 /* SIS630 SMBus registers */
 #define SMB_STS     0x80 /* status */
 #define SMB_EN      0x81 /* status enable */
@@ -327,42 +319,8 @@ u32 sis630_func(struct i2c_adapter *adapter) {
 		I2C_FUNC_SMBUS_WORD_DATA | I2C_FUNC_SMBUS_PROC_CALL;
 }
 
-int sis630_setup(void) {
+int sis630_setup(struct pci_dev *sis630_dev) {
 	unsigned char b;
-	struct pci_dev *sis630_dev = NULL,*tmp = NULL;
-	struct sd *en = supported;
-
-	/* First check whether we can access PCI at all */
-	if (pci_present() == 0) {
-		printk("i2c-sis630.o: Error: No PCI-bus found!\n");
-		return -ENODEV;
-	}
-
-	/* Look for the SIS630 and compatible */
-	if (!(sis630_dev = pci_find_device(PCI_VENDOR_ID_SI,
-					    PCI_DEVICE_ID_SI_503,
-					    sis630_dev))) {
-		printk(KERN_ERR "i2c-sis630.o: Error: Can't detect 85C503/5513 ISA bridge!\n");
-		return -ENODEV;
-	}
-	do {
-		if ((tmp = pci_find_device(en->mfr,en->dev,NULL))) {
-			if (PCI_FUNC(tmp->devfn) != en->fn) 
-				continue;
-
-			break;
-		}
-		en++;
-	}
-	while(en->mfr);
-	if (tmp == NULL && force == 0 ) {
-			printk(KERN_ERR "i2c-sis630.o: Error: Can't detect SIS630 compatible device!\n");
-			return -ENODEV;
-	}
-	else if (tmp == NULL && force > 0) {
-		printk(KERN_NOTICE "i2c-sis630.o: WARNING: Can't detect SIS630 compatible device, but "
-			"loading because of force option enabled\n");
-	}
 
 	/*
 	   Enable ACPI first , so we can accsess reg 74-75
@@ -418,13 +376,25 @@ static struct i2c_adapter sis630_adapter = {
 
 
 static struct pci_device_id sis630_ids[] __devinitdata = {
+	{
+		.vendor =	PCI_VENDOR_ID_SI,
+		.device =	PCI_DEVICE_ID_SI_630,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_SI,
+		.device =	PCI_DEVICE_ID_SI_730,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
 	{ 0, }
 };
 
 static int __devinit sis630_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
 
-	if (sis630_setup()) {
+	if (sis630_setup(dev)) {
 		printk(KERN_ERR "i2c-sis630.o: SIS630 comp. bus not detected, module not inserted.\n");
 
 		return -ENODEV;
