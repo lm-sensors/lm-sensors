@@ -21,6 +21,7 @@ ask CVS about it:
   File README.thinkpad: Update
   File doc/chips/lm63: New
   File kernel/chips/Module.mk: Resync module list with mkpatch
+  Module i2c-ipmb: Remove from build since it doesn't work
   Module lm63: New driver for the National Semiconductor LM63
   Module lm83: Use signed types for temperatures
                Check limits on register writes
@@ -31,6 +32,7 @@ ask CVS about it:
                Check limits on register writes
   Module lm93: Added module parameter for VID pin input thresholds.
   Module pc87360: Support secondary Super-I/O address
+  Module smsc47m1: Add support for 47M15x and 47M192 (fans only)
   Library: Add lm63 support
   Program i2cset: Written byte/word can be masked
   Program sensors: Add lm63 support

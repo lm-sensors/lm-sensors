@@ -86,7 +86,7 @@ superio_exit(void)
  * The 47M15x and 47M192 chips "with hardware monitoring block"
  * can do much more besides (device id 0x60).
  */
-#define SMSC_DEVID_MATCH(id) ((id) == 0x51 || (id) == 0x59 || (id) == 0x5F)
+#define SMSC_DEVID_MATCH(id) ((id) == 0x51 || (id) == 0x59 || (id) == 0x5F || (id) == 0x60)
 
 #define SMSC_ACT_REG 0x30
 #define SMSC_BASE_REG 0x60
