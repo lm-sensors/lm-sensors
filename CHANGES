@@ -22,6 +22,7 @@ ask CVS about it:
         If your make fails because it can't find <linux/i2c-proc.h>, you
         forgot this step!!!
   File doc/FAQ: Many updates and additions
+  File doc/busses/i2c-sis5595: new
   File doc/chips/via686a: Claim support for 686b.
   File README.thinkpad: new
   File sensors.conf.eg: Adjust as99127f in5 (-12V) and temp2 calculations;

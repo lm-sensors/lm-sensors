@@ -1,0 +1,38 @@
+Kernel driver `i2c-sis5595.o'
+
+Status: Untested Alpha - may not work at all
+
+Supported adapters:
+  * Silicon Integrated Systems Corp. SiS5595 Southbridge
+    Datasheet: Publicly available at the Silicon Integrated Systems Corp. site.
+
+Author: Frodo Looijaard <frodol@dds.nl> and
+        Mark D. Studebaker <mdsxyz123@yahoo.com>
+
+Module Parameters
+-----------------
+
+force_addr=0xaddr	Set the I/O base address. Useful for boards
+			that don't set the address in the BIOS. Does not do a
+			PCI force; the device must still be present in lspci.
+			Don't use this unless the driver complains that the
+			base address is not set.
+			Example: 'modprobe i2c-sis5595 force_addr=0x290'
+
+
+Description
+-----------
+
+i2c-sis5595 is a true SMBus host driver for motherboards with the
+SiS5595 southbridges.
+
+WARNING: If you are trying to access the integrated sensors on the 
+SiS5595 chip, you want the sis5595.o driver for those, not this driver.
+This driver is a BUS driver, not a CHIP driver.
+A BUS driver is used by other CHIP drivers to access chips on the bus.
+
+To install this driver, simply do
+  # modprobe i2c-sis5595
+
+This driver is ALPHA!!!
+Please send feedback to us at sensors@stimpy.netroedge.com.
