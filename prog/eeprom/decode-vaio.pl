@@ -37,6 +37,8 @@
 #  Added some documentation.
 # Version 1.1  2004-01-17  Jean Delvare <khali@linux-fr.org>
 #  Added support for Linux 2.5/2.6 (i.e. sysfs).
+# Version 1.1  2004-11-28  Jean Delvare <khali@linux-fr.org>
+#  Support bus number 0 to 4 instead of only 0.
 #
 # EEPROM data decoding for Sony Vaio laptops. 
 #
@@ -71,7 +73,7 @@
 
 use strict;
 use Fcntl qw(:DEFAULT :seek);
-use vars qw($sysfs);
+use vars qw($sysfs $found);
 
 sub print_item
 {
@@ -188,8 +190,6 @@ BEGIN
 	print("Sony Vaio EEPROM Decoder\n");
 	print("Copyright (c) 2002-2004  Jean Delvare\n");
 	print("Version 1.1\n\n");
-	
-	$sysfs = 0;
 }
 
 END
@@ -197,23 +197,31 @@ END
 	print("\n");
 }
 
-if (-r '/proc/sys/dev/sensors/eeprom-i2c-0-57')
+for (my $i = 0, $found=0; $i <= 4 && !$found; $i++)
 {
-	if (-r '/proc/sys/dev/sensors/eeprom-i2c-0-57/data0-15')
+	if (-r "/sys/bus/i2c/devices/$i-0057/eeprom")
 	{
-		print("Deprecated old interface found.  Please upgrade to lm_sensors 2.6.3 or greater.");
+		$sysfs = 1;
+		vaio_decode($i, '57');
+		$found++;
 	}
-	else
+	elsif (-r "/proc/sys/dev/sensors/eeprom-i2c-$i-57")
 	{
-		vaio_decode('0', '57');
+		if (-r "/proc/sys/dev/sensors/eeprom-i2c-$i-57/data0-15")
+		{
+			print("Deprecated old interface found.  Please upgrade to lm_sensors 2.6.3 or greater.");
+			exit;
+		}
+		else
+		{
+			$sysfs = 0;
+			vaio_decode($i, '57');
+			$found++;
+		}
 	}
 }
-elsif (-r '/sys/bus/i2c/devices/0-0057/eeprom')
-{
-	$sysfs = 1;
-	vaio_decode('0', '57');
-}
-else
+
+if (!$found)
 {
 	print("Vaio EEPROM not found.  Please make sure that the eeprom module is loaded.\n");
 	print("If you believe this is an error, please contact me <khali\@linux-fr.org>\n");
