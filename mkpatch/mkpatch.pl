@@ -1005,9 +1005,12 @@ sub gen_drivers_i2c_Makefile
         last if m@sensors code ends here@;
       }
       print OUTPUT <<'EOF';
+export-objs	+= i2c-amd756.o
+
 obj-$(CONFIG_I2C_ALI1535)		+= i2c-ali1535.o
 obj-$(CONFIG_I2C_ALI15X3)		+= i2c-ali15x3.o
 obj-$(CONFIG_I2C_AMD756)		+= i2c-amd756.o
+obj-$(CONFIG_I2C_AMD756_S4882)		+= i2c-amd756-s4882.o
 obj-$(CONFIG_I2C_AMD8111)		+= i2c-amd8111.o
 obj-$(CONFIG_I2C_HYDRA)			+= i2c-hydra.o
 obj-$(CONFIG_I2C_I801)			+= i2c-i801.o
