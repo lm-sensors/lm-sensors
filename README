@@ -6,6 +6,10 @@
 
 OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
+REQUIRES kernel 2.4.13 or later, or i2c-2.6.1 or later!!!
+
+=============================================================================
+
 This is the completely rewritten version 2 of lm_sensors, a collection of
 modules for general SMBus access and hardware monitoring.
 Version 1 is now officially unsupported.
@@ -74,7 +78,7 @@ We also support some miscellaneous chips:
   SDRAM Dimms with Serial Presence Detect EEPROMs
   Intel Xeon processor embedded EEPROMs
   DDC Monitor embedded EEPROMs
-  Philips Semiconductors PCF8591  
+  Philips Semiconductors PCF8574, PCF8591  
 
 
 See our New Drivers page http://www.lm-sensors.nu/~lm78/newdrivers.html
@@ -137,7 +141,7 @@ The latest version of this package can always be found on our homepage:
 http://www.netroedge.com/~lm78. Pre-release versions can be retrieved
 through anonymous CVS; see doc/cvs for more information.
 
-This whole package is copyright (c) 1998 - 2001 by Frodo Looijaard and
+This whole package is copyright (c) 1998 - 2002 by Frodo Looijaard and
 Philip Edelbrock, except for a few drivers written by
 other people. See the individual files for more exact copyright information.  
 This package may be distributed according to the GNU General Public License 
