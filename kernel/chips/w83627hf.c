@@ -273,25 +273,9 @@ static inline u8 DIV_TO_REG(long val)
 	return ((u8) i);
 }
 
-/* There are some complications in a module like this. First off, W83781D chips
-   may be both present on the SMBus and the ISA bus, and we have to handle
-   those cases separately at some places. Second, there might be several
-   W83781D chips available (well, actually, that is probably never done; but
-   it is a clean illustration of how to handle a case like that). Finally,
-   a specific chip may be attached to *both* ISA and SMBus, and we would
-   not like to detect it double. Fortunately, in the case of the W83781D at
-   least, a register tells us what SMBus address we are on, so that helps
-   a bit - except if there could be more than one SMBus. Groan. No solution
-   for this yet. */
-
-/* This module may seem overly long and complicated. In fact, it is not so
-   bad. Quite a lot of bookkeeping is done. A real driver can often cut
-   some corners. */
-
-/* For each registered W83781D, we need to keep some data in memory. That
+/* For each registered chip, we need to keep some data in memory. That
    data is pointed to by w83627hf_list[NR]->data. The structure itself is
-   dynamically allocated, at the same time when a new w83627hf client is
-   allocated. */
+   dynamically allocated, at the same time when a new client is allocated. */
 struct w83627hf_data {
 	struct semaphore lock;
 	int sysctl_id;
