@@ -5,7 +5,7 @@ Status: Work in progress
 
 Supported Chips:
   * Asus ASB100 and ASB100-A "Bach"
-    Addresses scanned: I2C 0x28-0x2f (inclusive) ISA (none)
+    Addresses scanned: I2C 0x2d ISA (none)
     Datasheet: none released
 
 Author: Mark M. Hoffman <mhoffman@lightlink.com>
