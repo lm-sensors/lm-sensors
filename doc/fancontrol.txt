@@ -26,8 +26,8 @@ some fan fails, because you probably won't hear it anymore ;)
 
 Configuration
 
-Since most of you are going to use the pwmconfig script, the config file
-syntax will be discussed last. First I'm going to describe the various
+Since most of you are going to use the prog/pwm/pwmconfig script, the config
+file syntax will be discussed last. First I'm going to describe the various
 variables available for changing fancontrol's behaviour:
 
 INTERVAL
