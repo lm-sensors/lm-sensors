@@ -20,6 +20,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 
+#include "i2c.h"
 #ifdef SPINLOCK
 #include <asm/spinlock.h>
 #else
@@ -154,49 +155,6 @@ int smbus_client_register (struct smbus_client *client)
 int smbus_client_unregister (struct smbus_client *client)
 {
   return 0;
-}
-
-/* Next: define SMBus variants of registering. Very boring. To make it possible
-   to change these definitions in the future without recompiling all modules,
-   we do not define them as inline. */
-int smbus_add_algorithm(struct smbus_algorithm *algorithm)
-{
-  return i2c_add_algorithm( (struct i2c_algorithm *) algorithm);
-}
-
-int smbus_del_algorithm(struct smbus_algorithm *algorithm)
-{
-  return i2c_del_algorithm( (struct i2c_algorithm *) algorithm);
-}
-
-int smbus_add_adapter(struct smbus_adapter *adapter)
-{
-  return i2c_add_adapter( (struct i2c_adapter *) adapter);
-}
-
-int smbus_del_adapter(struct smbus_adapter *adapter)
-{
-  return i2c_del_adapter( (struct i2c_adapter *) adapter);
-}
-
-int smbus_add_driver(struct smbus_driver *driver)
-{
-  return i2c_add_driver( (struct i2c_driver *) driver);
-}
-
-int smbus_del_driver(struct smbus_driver *driver)
-{
-  return i2c_del_driver( (struct i2c_driver *) driver);
-}
-
-int smbus_attach_client(struct smbus_client *client)
-{
-  return i2c_attach_client( (struct i2c_client *) client);
-}
-
-int smbus_detach_client(struct smbus_client *client)
-{
-  return i2c_detach_client( (struct i2c_client *) client);
 }
 
 int smbus_init(void)

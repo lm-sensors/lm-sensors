@@ -7,6 +7,8 @@ Document version 1.0, 19981101.
                  1.1, 19981111.
                  1.2, 19981118.
 
+--> Never, ever change the driver struct with this technique! 
+
 
 Object oriented approach
 ========================
@@ -168,7 +170,7 @@ included in kernels around 1.2.120!).
 A driver
 --------
 
-struct sensor_driver {
+struct i2c_driver {
   char name[32];
   int id;
   unsigned int flags;

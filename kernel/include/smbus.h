@@ -124,6 +124,13 @@ struct smbus_adapter {
 /* SMBus Adapter ids */
 #define SMBUS_PIIX4 1
 
+/* Detect whether we are on an SMBus-only bus. Note that if this returns
+   false, you can still use the smbus access routines, as these emulate
+   the SMBus on I2C. Unless they are undefined on your algorithm, of
+   course. */
+#define i2c_is_smbus_client(clientptr) \
+        ((clientptr)->adapter->algo->id == ALGO_SMBUS)
+
 /* This union is used within smbus_access routines */
 union smbus_data { 
         u8 byte;
@@ -255,18 +262,28 @@ extern inline int smbus_write_block_data(struct smbus_adapter * adapter,
   return smbus_access(adapter,addr,SMBUS_WRITE,command,SMBUS_BLOCK_DATA,&data);
 }
 
+
 /* Next: define SMBus variants of registering. */
-extern int smbus_add_algorithm(struct smbus_algorithm *algorithm);
-extern int smbus_del_algorithm(struct smbus_algorithm *algorithm);
 
-extern int smbus_add_adapter(struct smbus_adapter *adapter);
-extern int smbus_del_adapter(struct smbus_adapter *adapter);
+#define smbus_add_algorithm(algoptr) \
+	i2c_add_algorithm((struct i2c_algorithm *) (algoptr))
+#define smbus_del_algorithm(algoptr) \
+	i2c_del_algorithm((struct i2c_algorithm *) (algoptr))
 
-extern int smbus_add_driver(struct smbus_driver *driver);
-extern int smbus_del_driver(struct smbus_driver *driver);
+#define smbus_add_adapter(adapptr) \
+	i2c_add_adapter((struct i2c_adapter *) (adapptr))
+#define smbus_del_adapter(adapptr) \
+	i2c_del_adapter((struct i2c_adapter *) (adapptr))
 
-extern int smbus_attach_client(struct smbus_client *client);
-extern int smbus_detach_client(struct smbus_client *client);
+#define smbus_add_driver(driverptr) \
+	i2c_add_driver((struct i2c_driver *) (driverptr))
+#define smbus_del_driver(driverptr) \
+	i2c_add_driver((struct i2c_driver *) (driverptr))
+
+#define smbus_attach_client(clientptr) \
+	i2c_attach_client((struct i2c_client *) (clientptr))
+#define smbus_detach_client(clientptr) \
+	i2c_detach_client((struct i2c_client *) (clientptr))
 
 
 #endif /* ndef SENSORS_SMBUS_H */
