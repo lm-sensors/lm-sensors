@@ -649,6 +649,14 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
      } , 
      { 
        vendid => 0x10de,
+       devid  => 0x0312,
+       func => 0,
+       procid => "GeForce FX 5600",
+       driver => "rivatv",
+       match => sub { $_[0] =~ /^NVIDIA display/ },
+     } , 
+     { 
+       vendid => 0x10de,
        devid  => 0x01b4,
        func => 1,
        procid => "nVidia nForce SMBus",
