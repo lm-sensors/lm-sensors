@@ -102,6 +102,8 @@ struct i2c_client bmc_client = {
 	0
 };
 
+static bmcsensors_initialized;
+
 #define MAX_SDR_ENTRIES 50
 #define SDR_LIMITS 8
 #define SDR_MAX_ID_LENGTH 16
@@ -389,7 +391,7 @@ static void bmcsensors_build_proc_table()
 	bmcsensors_dir_table[sdrd_count].ctl_name = 0;
 
 	if ((i = i2c_register_entry(&bmc_client, "bmc",
-				    bmcsensors_dir_table) < 0) {
+				    bmcsensors_dir_table)) < 0) {
 		printk(KERN_INFO "bmcsensors.o: i2c registration failed.\n");
 		kfree(bmcsensors_dir_table);
 		kfree(bmcsensors_proc_name_pool);
