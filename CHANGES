@@ -17,7 +17,9 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 2.8.2 (???)
+  Library: Fix bmcsensors scaling, increase number of sensors
   Module i2c-sis630: sync with 2.6.0-X driver version. 
+  Module bmcsensors: Fix voltage scaling, voltage and fan limits
 
 
 2.8.1 (20031005)
