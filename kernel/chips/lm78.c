@@ -334,7 +334,7 @@ int lm78_detect_isa(struct isa_adapter *adapter)
 
     /* Determine exact type */
     outb_p(LM78_REG_CHIPID,address + LM78_ADDR_REG_OFFSET);
-    err = inb_p(address + LM78_DATA_REG_OFFSET);
+    err = inb_p(address + LM78_DATA_REG_OFFSET) & 0xfe;
     if (err == 0x00) {
       type = lm78;
       type_name = "lm78";
@@ -343,14 +343,16 @@ int lm78_detect_isa(struct isa_adapter *adapter)
       type = lm78j;
       type_name = "lm78-j";
       client_name = "LM78-J chip";
-    } else if (err == 0x80) {
+    } else if (err == 0xc0) {
       type = lm79;
       type_name = "lm79";
       client_name = "LM79 chip";
-    }
-    else
+    } else {
+#ifdef DEBUG
+      printk("lm78.o: warning: probed non-lm78 chip?!? (%x)\n",err);
+#endif
       continue;
-      
+    }
 
     request_region(address, LM78_EXTENT, type_name);
 
@@ -448,7 +450,7 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
     /* Real detection code goes here */
 
     /* Determine exact type */
-    err = smbus_read_byte_data(adapter,address,LM78_REG_CHIPID);
+    err = smbus_read_byte_data(adapter,address,LM78_REG_CHIPID) & 0xfe;
     if (err == 0x00) {
       type = lm78;
       type_name = "lm78";
@@ -461,8 +463,12 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
       type = lm79;
       type_name = "lm79";
       client_name = "LM79 chip";
-    } else
+    } else {
+#ifdef DEBUG
+      printk("lm78.o: warning: probed non-lm78 chip?!? (%x)\n",err);
+#endif
       continue;
+    }
 
 
     /* Allocate space for a new client structure. To counter memory
