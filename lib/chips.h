@@ -33,7 +33,7 @@
 /* LM78 chips */
 
 #ifndef LIB_SENSORS_CHIPS_H
-#define LIB_SENSORS_CHIP_H
+#define LIB_SENSORS_CHIPS_H
 
 #define SENSORS_LM78_PREFIX "lm78"
 
