@@ -19,8 +19,10 @@ ask CVS about it:
 
 2.6.2 (2001????)
   Module fscpos: new (Fujitsu-Siemens Poseidon driver)
+  Module i2c-piix4: Add Intel 82443MX and SMSC Victory66 support
   Module via686a: Make limit initializations reliable
   Program sensors-detect: Add ALI1535 detection,
+                          add Intel 82443MX detection,			
                           add Via VT8233 detection (no driver yet)
 
 2.6.1 (20010830)

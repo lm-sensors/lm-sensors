@@ -21,8 +21,9 @@
 
 /*
    Supports:
-	Intel PIIX4
+	Intel PIIX4, 440MX
 	Serverworks OSB4, CSB5
+	SMSC Victory66
 
    Note: we assume there can only be one device, with one SMBus interface.
 */
@@ -40,8 +41,8 @@
 
 #include <linux/init.h>
 
-/* Note: Since the ServerWorks OSB4 SMBus host interface is identical
-         to the Intel PIIX4's, we only mention it during detection.   */
+/* Note: We assume all devices are identical
+         to the Intel PIIX4; we only mention it during detection.   */
 
 #ifndef PCI_DEVICE_ID_SERVERWORKS_OSB4
 #define PCI_DEVICE_ID_SERVERWORKS_OSB4 0x0200
@@ -55,6 +56,33 @@
 #define PCI_VENDOR_ID_SERVERWORKS 0x01166
 #endif
 
+#ifndef PCI_DEVICE_ID_INTEL_82443MX_3
+#define PCI_DEVICE_ID_INTEL_82443MX_3	0x719b
+#endif
+
+#ifndef PCI_VENDOR_ID_EFAR
+#define PCI_VENDOR_ID_EFAR		0x1055
+#endif
+
+#ifndef PCI_DEVICE_ID_EFAR_SLC90E66_3
+#define PCI_DEVICE_ID_EFAR_SLC90E66_3	0x9463
+#endif
+
+struct sd {
+	const unsigned short mfr;
+	const unsigned short dev;
+	const unsigned char fn;
+	const char *name;
+};
+
+static struct sd supported[] = {
+	{PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371AB_3, 3, "PIIX4"},
+	{PCI_VENDOR_ID_SERVERWORKS, PCI_DEVICE_ID_SERVERWORKS_OSB4, 0, "OSB4"},
+	{PCI_VENDOR_ID_SERVERWORKS, PCI_DEVICE_ID_SERVERWORKS_CSB5, 0, "CSB5"},
+	{PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82443MX_3, 3, "440MX"},
+	{PCI_VENDOR_ID_EFAR, PCI_DEVICE_ID_EFAR_SLC90E66_3, 0, "Victory66"},
+	{0, 0, 0, NULL}
+};
 
 /* PIIX4 SMBus address offsets */
 #define SMBHSTSTS (0 + piix4_smba)
@@ -151,7 +179,6 @@ static struct i2c_adapter piix4_adapter = {
 
 static int __initdata piix4_initialized;
 static unsigned short piix4_smba = 0;
-static int kind = 0;
 
 /* Detect whether a PIIX4 can be found, and initialize it, where necessary.
    Note the differences between kernels with the old PCI BIOS interface and
@@ -161,42 +188,33 @@ int piix4_setup(void)
 {
 	int error_return = 0;
 	unsigned char temp;
+	struct sd *num = supported;
+	struct pci_dev *PIIX4_dev = NULL;
 
-	struct pci_dev *PIIX4_dev;
-
-	/* First check whether we can access PCI at all */
 	if (pci_present() == 0) {
-		printk("i2c-piix4.o: Error: No PCI-bus found!\n");
 		error_return = -ENODEV;
 		goto END;
 	}
 
-	/* Look for the PIIX4, function 3 or Serverworks PSB4 func 0          */
-	/* Note: we keep on searching until we have found the proper function */
-	PIIX4_dev = NULL;
-	PIIX4_dev = pci_find_device(PCI_VENDOR_ID_SERVERWORKS,
-				    PCI_DEVICE_ID_SERVERWORKS_OSB4,
-				    PIIX4_dev);
-	while (PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 0));
-	/* Check for a CSB5 */
+	/* Look for a supported device/function */
+	do {
+		if((PIIX4_dev = pci_find_device(num->mfr, num->dev,
+					        PIIX4_dev))) {
+			if(PCI_FUNC(PIIX4_dev->devfn) != num->fn)
+				continue;
+			break;
+		}
+		PIIX4_dev = NULL;
+		num++;
+	} while (num->mfr);
+
 	if (PIIX4_dev == NULL) {
-		PIIX4_dev = pci_find_device(PCI_VENDOR_ID_SERVERWORKS,
-				    PCI_DEVICE_ID_SERVERWORKS_CSB5,
-				    PIIX4_dev);
-		while (PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 0));
-	}
-	if (PIIX4_dev == NULL) {
-		PIIX4_dev = pci_find_device(PCI_VENDOR_ID_INTEL,
-					    PCI_DEVICE_ID_INTEL_82371AB_3,
-					    PIIX4_dev);
-		while (PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 3));
-		if (PIIX4_dev == NULL) {
-		 printk
-		  ("i2c-piix4.o: Error: Can't detect PIIX4 function 3 nor OSB4 function 0!\n");
+		printk
+		  ("i2c-piix4.o: Error: Can't detect PIIX4 or compatible device!\n");
 		 error_return = -ENODEV;
 		 goto END;
-		} else { kind=1; /* Intel PIIX4 found */ }
-	} else { kind=2; /* Serverworks OSB4 found */ }
+	}
+	printk("i2c-piix4.o: Found %s device\n", num->name);
 
 
 /* Determine the address of the SMBus areas */
@@ -204,14 +222,13 @@ int piix4_setup(void)
 		piix4_smba = force_addr & 0xfff0;
 		force = 0;
 	} else {
-
 		pci_read_config_word(PIIX4_dev, SMBBA, &piix4_smba);
 		piix4_smba &= 0xfff0;
 	}
 
 	if (check_region(piix4_smba, 8)) {
 		printk
-		    ("i2c-piix4.o: PIIX4_smb region 0x%x already in use!\n",
+		    ("i2c-piix4.o: SMB region 0x%x already in use!\n",
 		     piix4_smba);
 		error_return = -ENODEV;
 		goto END;
@@ -225,7 +242,7 @@ int piix4_setup(void)
 		pci_write_config_word(PIIX4_dev, SMBBA, piix4_smba);
 		pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp | 0x01);
 		printk
-		    ("i2c-piix4.o: WARNING: PIIX4 SMBus interface set to new "
+		    ("i2c-piix4.o: WARNING: SMBus interface set to new "
 		     "address %04x!\n", piix4_smba);
 	} else if ((temp & 1) == 0) {
 		if (force) {
@@ -238,7 +255,7 @@ int piix4_setup(void)
 			pci_write_config_byte(PIIX4_dev, SMBHSTCFG,
 					      temp | 1);
 			printk
-			    ("i2c-piix4.o: WARNING: PIIX4 SMBus interface has been FORCEFULLY "
+			    ("i2c-piix4.o: WARNING: SMBus interface has been FORCEFULLY "
 			     "ENABLED!\n");
 		} else {
 			printk
@@ -249,23 +266,23 @@ int piix4_setup(void)
 	}
 
 	/* Everything is happy, let's grab the memory and set things up. */
-	request_region(piix4_smba, 8, kind==1?"piix4-smbus":"osb4-smbus");
+	request_region(piix4_smba, 8, "piix4-smbus");
 
 #ifdef DEBUG
 	if ((temp & 0x0E) == 8)
 		printk
-		    ("i2c-piix4.o: PIIX4 using Interrupt 9 for SMBus.\n");
+		    ("i2c-piix4.o: Using Interrupt 9 for SMBus.\n");
 	else if ((temp & 0x0E) == 0)
 		printk
-		    ("i2c-piix4.o: PIIX4 using Interrupt SMI# for SMBus.\n");
+		    ("i2c-piix4.o: Using Interrupt SMI# for SMBus.\n");
 	else
 		printk
-		    ("i2c-piix4.o: PIIX4: Illegal Interrupt configuration (or code out "
+		    ("i2c-piix4.o: Illegal Interrupt configuration (or code out "
 		     "of date)!\n");
 
 	pci_read_config_byte(PIIX4_dev, SMBREV, &temp);
 	printk("i2c-piix4.o: SMBREV = 0x%X\n", temp);
-	printk("i2c-piix4.o: PIIX4_smba = 0x%X\n", piix4_smba);
+	printk("i2c-piix4.o: SMBA = 0x%X\n", piix4_smba);
 #endif				/* DEBUG */
 
       END:
@@ -322,13 +339,13 @@ int piix4_transaction(void)
 		temp = inb_p(SMBHSTSTS);
 	} while ((temp & 0x01) && (timeout++ < MAX_TIMEOUT));
 
+#ifdef DEBUG
 	/* If the SMBus is still busy, we give up */
 	if (timeout >= MAX_TIMEOUT) {
-#ifdef DEBUG
 		printk("i2c-piix4.o: SMBus Timeout!\n");
 		result = -1;
-#endif
 	}
+#endif
 
 	if (temp & 0x10) {
 		result = -1;
@@ -355,14 +372,12 @@ int piix4_transaction(void)
 	if (inb_p(SMBHSTSTS) != 0x00)
 		outb_p(inb(SMBHSTSTS), SMBHSTSTS);
 
-	if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
+	if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 		printk
 		    ("i2c-piix4.o: Failed reset at end of transaction (%02x)\n",
 		     temp);
-#endif
 	}
-#ifdef DEBUG
 	printk
 	    ("i2c-piix4.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
 	     "DAT0=%02x, DAT1=%02x\n", inb_p(SMBHSTCNT), inb_p(SMBHSTCMD),
@@ -494,12 +509,12 @@ int __init i2c_piix4_init(void)
 	piix4_initialized = 0;
 	if ((res = piix4_setup())) {
 		printk
-		    ("i2c-piix4.o: PIIX4 not detected, module not inserted.\n");
+		    ("i2c-piix4.o: Device not detected, module not inserted.\n");
 		piix4_cleanup();
 		return res;
 	}
 	piix4_initialized++;
-	sprintf(piix4_adapter.name, kind==1?"SMBus PIIX4 adapter at %04x":"SMBus OSB4/CSB5 adapter at %04x",
+	sprintf(piix4_adapter.name, "SMBus PIIX4 adapter at %04x",
 		piix4_smba);
 	if ((res = i2c_add_adapter(&piix4_adapter))) {
 		printk
@@ -508,7 +523,7 @@ int __init i2c_piix4_init(void)
 		return res;
 	}
 	piix4_initialized++;
-	printk("i2c-piix4.o: PIIX4 bus detected and initialized\n");
+	printk("i2c-piix4.o: SMBus detected and initialized\n");
 	return 0;
 }
 
