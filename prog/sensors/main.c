@@ -347,6 +347,7 @@ struct match matches[] = {
 	{ "adm1027", print_lm85 },
 	{ "adt7463", print_lm85 },
 	{ "emc6d100", print_lm85 },
+	{ "emc6d102", print_lm85 },
 	{ "lm87", print_lm87 },
 	{ "gl518sm", print_gl518 },
 	{ "gl520sm", print_gl520 },

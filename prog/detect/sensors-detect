@@ -994,7 +994,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { lm85_detect 0x41, @_},
      },
      {
-       name => "SMSC EMC6D100 or EMC6D101",
+       name => "SMSC EMC6D100, EMC6D101 or EMC6D102",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { lm85_detect 0x5c, @_},

@@ -5579,6 +5579,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_LM85B_PREFIX, lm85_features },
  { SENSORS_LM85C_PREFIX, lm85_features },
  { SENSORS_EMC6D100_PREFIX, lm85_features },
+ { SENSORS_EMC6D102_PREFIX, lm85_features },
  { SENSORS_ADM1027_PREFIX, adm1027_features },
  { SENSORS_ADT7463_PREFIX, adm1027_features },
  { SENSORS_LM83_PREFIX, lm83_features },
