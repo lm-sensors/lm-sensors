@@ -117,7 +117,6 @@ static int thmc50_command(struct i2c_client *client, unsigned int cmd,
 			  void *arg);
 static void thmc50_inc_use(struct i2c_client *client);
 static void thmc50_dec_use(struct i2c_client *client);
-static u16 swap_bytes(u16 val);
 static int thmc50_read_value(struct i2c_client *client, u8 reg);
 static int thmc50_write_value(struct i2c_client *client, u8 reg,
 			      u16 value);
@@ -326,11 +325,6 @@ void thmc50_dec_use(struct i2c_client *client)
 #ifdef MODULE
 	MOD_DEC_USE_COUNT;
 #endif
-}
-
-u16 swap_bytes(u16 val)
-{
-	return (val >> 8) | (val << 8);
 }
 
 /* All registers are word-sized, except for the configuration register.
