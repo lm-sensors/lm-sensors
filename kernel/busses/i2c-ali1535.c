@@ -1,11 +1,11 @@
 /*
-    ali1535.c - Part of lm_sensors, Linux kernel modules for hardware
-              monitoring
+    i2c-ali1535.c - Part of lm_sensors, Linux kernel modules for hardware
+                    monitoring
     Copyright (c) 2000  Frodo Looijaard <frodol@dds.nl>, 
-    Philip Edelbrock <phil@netroedge.com>, 
-    Mark D. Studebaker <mdsxyz123@yahoo.com>,
-    Dan Eaton <dan.eaton@rocketlogix.com> and
-    Stephen Rousset <stephen.rousset@rocketlogix.com>
+                        Philip Edelbrock <phil@netroedge.com>, 
+                        Mark D. Studebaker <mdsxyz123@yahoo.com>,
+                        Dan Eaton <dan.eaton@rocketlogix.com> and 
+                        Stephen Rousset<stephen.rousset@rocketlogix.com> 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -83,9 +83,6 @@
 #define SMBBA     0x0E2
 #define SMBHSTCFG 0x0F0
 #define SMBCLK    0x0F2
-/* #define SMBATPC   0x05B	<dwe - not supported> used to unlock xxxBA registers */
-/* #define SMBSLVC   0x0E1      <dwe> slave mode not supported*/
-
 
 /* Other settings */
 #define MAX_TIMEOUT 500		/* times 1/100 sec */
@@ -643,12 +640,17 @@ int __init ali1535_cleanup(void)
 	return 0;
 }
 
+#ifdef RLX
+EXPORT_SYMBOL(ali1535_smba);
+#else
 EXPORT_NO_SYMBOLS;
+#endif
 
 #ifdef MODULE
 
 MODULE_AUTHOR
-    ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, Mark D. Studebaker <mdsxyz123@yahoo.com>, Dan Eaton <dan.eaton@rocketlogix.com, and Stephen.Rousset <stephen.rousset@rocketlogix.com");
+    ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>,
+      Mark D. Studebaker <mdsxyz123@yahoo.com> and Dan Eaton <dan.eaton@rocketlogix.com>");
 MODULE_DESCRIPTION("ALI1535 SMBus driver");
 
 int init_module(void)
