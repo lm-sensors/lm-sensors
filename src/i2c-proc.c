@@ -70,7 +70,9 @@ static struct proc_dir_entry proc_bus_dir =
     /* uid */		0,
     /* gid */		0,
     /* size */		0,
-    /* ops */		&proc_dir_inode_operations,
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,0,36))
+    /* ops */		&proc_dir_inode_operations, 
+#endif
   };
 
 static struct proc_dir_entry proc_bus_i2c_dir =
@@ -170,7 +172,12 @@ int i2cproc_init(void)
   i2cproc_initialized += 2;
 #else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
   /* In Linux 2.0.x, there is no /proc/bus! But I hope no other module
-     introduced it, or we are fucked. */
+     introduced it, or we are fucked. And 2.0.35 and earlier does not
+     export proc_dir_inode_operations, so we grab it from proc_net,
+     which also uses it. Not nice. */
+/* #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,0,36) */
+  proc_bus_dir.ops = proc_net.ops;
+/* #endif */
   if ((res = proc_register_dynamic(&proc_root, &proc_bus_dir))) {
     printk("i2c-proc.o: Could not create /proc/bus/, module not inserted.\n");
     i2cproc_cleanup();
