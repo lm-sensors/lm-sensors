@@ -639,7 +639,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 		 	i &= pc87360_read_value(data, LD_TEMP, NO_BANK,
 						PC87365_REG_TEMP_CONFIG);
 		}
-		data->in_vref = (i&0x02) ? 303 : 297;
+		data->in_vref = (i&0x02) ? 3025 : 2966;
 #ifdef DEBUG
 		printk(KERN_DEBUG "Using %s reference voltage\n",
 		       (i&0x02) ? "external" : "internal");
@@ -1126,7 +1126,7 @@ void pc87365_in(struct i2c_client *client, int operation, int ctl_name,
 	int nr = ctl_name - PC87365_SYSCTL_IN0;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 2;
+		*nrels_mag = 3;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		pc87360_update_client(client);
 		results[0] = IN_FROM_REG(data->in_min[nr], data->in_vref);
