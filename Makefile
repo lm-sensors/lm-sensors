@@ -250,6 +250,13 @@ dep :
 
 user ::
 user_install::
+	@echo "*** Important note:"
+	@echo "***  * The libsensors configuration file ($(ETCDIR)/sensors.conf) is never"
+	@echo "***    overwritten by our installation process, so that you won't lose"
+	@echo "***    your personal settings in that file. You still can get our latest"
+	@echo "***    default config file in etc/sensors.conf.eg and manually copy it to"
+	@echo "***    $(ETCDIR)/sensors.conf if you want. You will then want to edit it"
+	@echo "***    to fit your needs again."
 all :: user
 install :: all user_install
 	@echo "*** The depmod command below may generate errors. We are aware of the"
@@ -259,14 +266,6 @@ ifeq ($(DESTDIR),)
 else
 	-/sbin/depmod -a -b $(DESTDIR)
 endif
-	@echo "*** Installation successful!"
-	@echo "*** Important note:"
-	@echo "***  * The libsensors configuration file ($(ETCDIR)/sensors.conf) is never"
-	@echo "***    overwritten by our installation process, so that you won't lose"
-	@echo "***    your personal settings in that file. You still can get our latest"
-	@echo "***    default config file in etc/sensors.conf.eg and manually copy it to"
-	@echo "***    $(ETCDIR)/sensors.conf if you want. You will then want to edit it"
-	@echo "***    to fit your needs again."
 
 clean::
 	$(RM) lm_sensors-*
