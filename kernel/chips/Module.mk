@@ -54,6 +54,9 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_LTC1710=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/ltc1710.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_PCF8574=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/pcf8574.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_SIS5595=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/sis5595.o
 endif
