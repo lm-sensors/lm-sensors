@@ -139,8 +139,6 @@ static void smbusarp_dec_use(struct i2c_client *client);
 static int smbusarp_init_client(struct i2c_client *client);
 static void smbusarp_contents(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
-static void smbusarp_update_client(struct i2c_client *client);
-
 
 static struct i2c_driver smbusarp_driver = {
 	/* name */ "SMBUS ARP",
@@ -216,18 +214,15 @@ int smbusarp_detect(struct i2c_adapter *adapter, int address,
 	type_name = "arp";
 	client_name = "SMBUS ARP client";
 
-	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
 
 	new_client->id = smbusarp_id++;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 
-	/* Tell the I2C layer a new client has arrived */
 	if ((err = i2c_attach_client(new_client)))
 		goto ERROR1;
 
-	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
 					smbusarp_dir_table_template,
 					THIS_MODULE)) < 0) {
@@ -320,7 +315,8 @@ int smbusarp_init_client(struct i2c_client *client)
 
 	for (i = 0; i < I2C_CLIENT_MAX ; i++) 
 		if (client->adapter->clients[i])
-			data->address_pool[client->adapter->clients[i]->addr] = ARP_BUSY;
+			data->address_pool[client->adapter->clients[i]->addr] =
+			                                   ARP_BUSY;
 
 	ret = i2c_smbus_write_byte(client, ARP_PREPARE);
 	if(ret < 0) {
@@ -369,7 +365,9 @@ int smbusarp_init_client(struct i2c_client *client)
 #ifdef DEBUG
 					printk(KERN_DEBUG "             Taken Non-fixed Address 0x%02x\n", addr);
 #endif
-					if((addr = choose_addr(data->address_pool)) == 0xff) {
+					if((addr =
+					    choose_addr(data->address_pool)) ==
+					                       0xff) {
 						printk(KERN_WARNING "smbus-arp.o: Address pool exhausted\n");
 						return(-1);
 					}
@@ -425,27 +423,10 @@ int smbusarp_init_client(struct i2c_client *client)
 	return(ret);
 }
 
-void smbusarp_update_client(struct i2c_client *client)
-{
-	struct arp_data *data = client->data;
-
-	down(&data->update_lock);
-
-	if ((jiffies - data->last_updated > 300 * HZ) |
-	    (jiffies < data->last_updated) || !data->valid) {
-
-
-		data->last_updated = jiffies;
-		data->valid = 1;
-	}
-
-	up(&data->update_lock);
-}
 
 void smbusarp_contents(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results)
 {
-	int i;
 	int nr = ctl_name - ARP_SYSCTL1;
 	struct arp_data *data = client->data;
 
