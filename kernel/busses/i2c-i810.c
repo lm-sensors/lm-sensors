@@ -140,22 +140,26 @@ static void bit_i810i2c_setsda(void *data, int val)
 	readlong(I810_GPIOB);	/* flush posted write */
 }
 
-/* The GPIO pins are open drain, so the pins always remain outputs.
+/* The GPIO pins are open drain, so the pins could always remain outputs.
+   However, some chip versions don't latch the inputs unless they
+   are set as inputs.
    We rely on the i2c-algo-bit routines to set the pins high before
    reading the input from other chips. Following guidance in the 815
    prog. ref. guide, we do a "dummy write" of 0 to the register before
    reading which forces the input value to be latched. We presume this
-   applies to the 810 as well. This is necessary to get
+   applies to the 810 as well; shouldn't hurt anyway. This is necessary to get
    i2c_algo_bit bit_test=1 to pass. */
 
 static int bit_i810i2c_getscl(void *data)
 {
+	outlong(SCL_DIR_MASK, I810_GPIOB);
 	outlong(0, I810_GPIOB);
 	return (0 != (readlong(I810_GPIOB) & SCL_VAL_IN));
 }
 
 static int bit_i810i2c_getsda(void *data)
 {
+	outlong(SDA_DIR_MASK, I810_GPIOB);
 	outlong(0, I810_GPIOB);
 	return (0 != (readlong(I810_GPIOB) & SDA_VAL_IN));
 }
@@ -176,12 +180,14 @@ static void bit_i810ddc_setsda(void *data, int val)
 
 static int bit_i810ddc_getscl(void *data)
 {
+	outlong(SCL_DIR_MASK, I810_GPIOA);
 	outlong(0, I810_GPIOA);
 	return (0 != (readlong(I810_GPIOA) & SCL_VAL_IN));
 }
 
 static int bit_i810ddc_getsda(void *data)
 {
+	outlong(SDA_DIR_MASK, I810_GPIOA);
 	outlong(0, I810_GPIOA);
 	return (0 != (readlong(I810_GPIOA) & SDA_VAL_IN));
 }
