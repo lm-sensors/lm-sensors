@@ -88,6 +88,7 @@ extern void sensors_deregister_entry(int id);
 #define I2C_DRIVERID_EEPROM 1005
 #define I2C_DRIVERID_W83781D 1006
 #define I2C_DRIVERID_LM80 1007
+#define I2C_DRIVERID_ADM1021 1008
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -167,6 +168,11 @@ struct sensors_chips_data {
 #define W83781D_ALARM_CHAS 0x1000
 
 #define LM75_SYSCTL_TEMP 1200 /* Degrees Celcius * 10 */
+
+#define ADM1021_SYSCTL_TEMP 1200 
+#define ADM1021_SYSCTL_REMOTE_TEMP 1201
+#define ADM1021_SYSCTL_DIE_CODE 1202 
+#define ADM1021_SYSCTL_STATUS 1203 
 
 #define GL518_SYSCTL_VDD  1000     /* Volts * 100 */
 #define GL518_SYSCTL_VIN1 1001
