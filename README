@@ -3,7 +3,6 @@ modules for general SMBus access and hardware monitoring. There are quite
 a few changes compared with 1.x.y versions; read doc/version-2 for the
 most interesting ones.
 
-
 WARNING! This is a BETA release. It is not compatible with any programs
 which are built upon the 1.x.y versions, like wmlm78 or klm. We expect
 version 2 will soon be supported by them, though. As beta release, there
@@ -12,12 +11,16 @@ everything is tested exhaustively, either, often because we simply do
 not have access to the hardware. Please share your experiences, both
 good and bad, regarding this package with us at <lm78@stimpy.netroedge.com>.
 
+WARNING! If you downloaded this package through our CVS archive, you walk
+the cutting edge. Things may not even compile! On the other hand, you will
+be the first to profit from new drivers and other changes. Have fun!
+
 As a rule of thumb: if you have a PIIX4 with LM78/79 and LM75 chips, things
 should run without problem. The GL518 driver is completely untested. All
 supporting modules in the src directory should work without problem. If
 you have a VIA chipset, we would like to hear whether you can access the
-SMBus with it - this is not very well tested either. If you have a Winbond
-chip, use the LM78/LM75 drivers until a specific Winbond driver is written.
+SMBus with it - this is not very well tested either. The new Winbond driver
+should basically work, though not all functionality may be present yet.
 If you have a LM80, you are out of luck at this moment.
 
 We expect many updates and new releases the next few weeks (with both bug

@@ -117,7 +117,7 @@ int open_this_config_file(char *filename)
 
 int main (int argc, char *argv[])
 {
-  int c;
+  int c,res;
 
   struct option long_opts[] =  {
     { "help", no_argument, NULL, 'h' },
@@ -148,13 +148,8 @@ int main (int argc, char *argv[])
     }
   }
   open_config_file();
-  exit(0);
-}
 
-
-
-/*
-  if ((res = sensors_init(stdin))) {
+  if ((res = sensors_init(config_file))) {
     if (res == SENSORS_ERR_PROC)
       fprintf(stderr,
               "/proc/sys/dev/sensors/chips or /proc/bus/i2c unreadable:\n"
@@ -163,9 +158,4 @@ int main (int argc, char *argv[])
       fprintf(stderr,"%s\n",sensors_strerror(res));
     exit(1);
   }
-  for (i = 0; i < sensors_proc_bus_count; i++)
-    printf("%d: %s %s\n",sensors_proc_bus[i].number,
-           sensors_proc_bus[i].adapter,sensors_proc_bus[i].algorithm);
 }
-
-*/

@@ -1,3 +1,10 @@
+Please read this file thoroughly before you try to install and run things. It
+will safe you many headaches. Installation is not really difficult, but there
+are a few pitfalls.
+
+COMPILATION AND INSTALLATION
+============================
+
 Basic installation is uncomplicated. Run 'make all', followed by an optional
 'make install'. Everything is compiled using the Makefile in the root of
 this package. Some interesting variables:
@@ -38,8 +45,8 @@ NOT compatible with this module! Actually, Simon Vogl's modules package
 (which IS compatible) is scheduled to replace the current support. If you
 actually use these modules, you have a problem; they can not coexist
 with Simon's modules. Theoretically, you should be able to replace
-the old modules with the new stuff in our i2c directory, recompile
-the kernel, and then compile our modules with I2C=0. If you try
+the old modules in the kernel tree with the new stuff in our i2c directory,
+recompile the kernel, and then compile our modules with I2C=0. If you try
 this, please share the results with us!
 
 Please make sure that /usr/include/linux and /usr/include/asm are symlinks 
@@ -48,6 +55,10 @@ now (or more exactly, the kernel which you will use the compiled modules
 with). If the tree and the running kernel do not match, you will either
 be unable to insert the modules at all, or you can expect strange 
 behaviour (probably leading to crashes).
+
+
+TESTING AND RUNNING
+===================
 
 When you have compiled this package, you will be left with a lot of modules.
 It can be tricky to know which modules you need to insert. For this reason,
@@ -64,19 +75,39 @@ Now you should have new directories under /proc/sys/dev/sensors and some files
 beginning with i2c in /proc/bus.
 
 If you have installed the modules, as described within doc/modules, you can
-do 'modprobe piix4 && modprobe lm78 && modprobe i2c-proc' (the last is
-optional) from any directory to reach the same situation.
+do 'modprobe isa && modprobe piix4 && modprobe lm78 && modprobe i2c-proc' 
+(the last is optional) from any directory to reach the same situation.
+
+This package also contains a library of functions which can be used to
+access sensor data in a more programmer-friendly way. It will be built as
+both a shared and a static library, and installed in your LIB directory
+(normally /usr/local/lib). It needs a configuration file, which is usually
+called 'sensors.conf', and can be placed in /etc, /usr/lib/sensors,
+/usr/local/lib/sensors, /usr/lib, or /usr/local/lib. [NOTE: No real
+standard config file is written yet. A very simple example can be found in 
+the prog/sensors directory.]
 
 Where version 1 of this package had the human-readable /proc/sensors file,
-this version will include a user-space program which gathers all data
-and displays it in a comparable format. Regrettably, this program is not
-yet finished. To understand the files that are present now, read doc/lm78, 
-doc/lm75 etc.
+this version includes a user-space program which gathers all data
+and displays it in a comparable format. This program is called 'sensors'.
+Everybody can use it to read sensors values; only root can use it to
+set minimum and maximum values [NOTE: not yet implemented]
+
+If you want to run 'sensors' without installing the package, you must
+use the following command to make it able to find its shared library:
+  (bash) export LD_LIBRARY_PATH=/WHEREVER/lm_sensors-2.X.Y/lib:$LD_LIBRARY_PATH
+  (tcsh) setenv LD_LIBRARYPATH /WHEREVER/lm_sensors-2.X.Y/lib:$LD_LIBRARY_PATH
+Replace /WHEREVER/lm_sensors-2.X.Y with the base directory of the package
+source code.
 
 One of the next releases of this package will have a user-space probe program,
 which tells you which chips and busses are present, and which modules you
 will have to load. At this moment, just try to load the modules; if no chip
-or bus is detected, the module will fail to insert.
+or bus is detected, the module will fail to insert. [NOTE: not true for
+the bit-lp.o and bit-elv.o drivers. Don't try them without expecting 
+fake devices]
 
-Please examine the files in the doc subdirectory for more information, or
-try to mail us at <lm78@stimpy.netroedge.com>. Good luck!
+Please examine the files in the doc subdirectory for more information, 
+especially about individual driver. You can always mail us at 
+<lm78@stimpy.netroedge.com>. Alternatively, consider useing the (free)
+support site at http://www.netroedge.com/~lm78/support.html. Good luck!
