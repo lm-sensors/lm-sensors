@@ -217,15 +217,15 @@ static int __initdata fscpos_initialized = 0;
 static ctl_table fscpos_dir_table_template[] = {
 	{FSCPOS_SYSCTL_REV, "rev", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_in},
-	{FSCPOS_SYSCTL_EVENT, "event", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{FSCPOS_SYSCTL_EVENT, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_in},
 	{FSCPOS_SYSCTL_CONTROL, "control", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_in},
-	{FSCPOS_SYSCTL_TEMP0, "temp0", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{FSCPOS_SYSCTL_TEMP0, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_temp},
-	{FSCPOS_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{FSCPOS_SYSCTL_TEMP1, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_temp},
-	{FSCPOS_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{FSCPOS_SYSCTL_TEMP2, "temp3", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_temp},
 	{FSCPOS_SYSCTL_VOLT0, "in0", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_volt},
@@ -233,11 +233,11 @@ static ctl_table fscpos_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &fscpos_volt},
 	{FSCPOS_SYSCTL_VOLT2, "in2", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_volt},
-	{FSCPOS_SYSCTL_FAN0, "fan0", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{FSCPOS_SYSCTL_FAN0, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_fan},
-	{FSCPOS_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{FSCPOS_SYSCTL_FAN1, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_fan},
-	{FSCPOS_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{FSCPOS_SYSCTL_FAN2, "fan3", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_fan},
 	{FSCPOS_SYSCTL_WDOG, "wdog", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_wdog},
@@ -442,6 +442,8 @@ void fscpos_update_client(struct i2c_client *client)
 		data->watchdog[0] = fscpos_read_value(client, FSCPOS_REG_WDOG_PRESET);
 		data->watchdog[1] = fscpos_read_value(client, FSCPOS_REG_WDOG_STATE);
 		data->watchdog[2] = fscpos_read_value(client, FSCPOS_REG_WDOG_CONTROL);
+
+		data->global_event = fscpos_read_value(client, FSCPOS_REG_EVENT_STATE);
 
                 data->last_updated = jiffies;
                 data->valid = 1;                 
