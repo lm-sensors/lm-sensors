@@ -155,7 +155,8 @@ CONFIG_I2C_I810
 Intel 82371AB PIIX4(E) / ServerWorks OSB4 and CSB5
 CONFIG_I2C_PIIX4
   If you say yes to this option, support will be included for the 
-  Intel PIIX4 and PIIX4E and Serverworks OSB4/CSB5 mainboard
+  Intel PIIX4, PIIX4E, and 443MX, Serverworks OSB4/CSB5,
+  and SMSC Victory66 mainboard
   I2C interfaces. This can also be
   built as a module which can be inserted and removed while the kernel
   is running.
@@ -175,7 +176,7 @@ CONFIG_I2C_VIA
   be built as a module which can be inserted and removed while the 
   kernel is running.
 
-VIA Technologies, Inc. VT82C596, 596B, 686A/B
+VIA Technologies, Inc. VT82C596, 596B, 686A/B, 8233
 CONFIG_I2C_VIAPRO
   If you say yes to this option, support will be included for the VIA
   Technologies I2C adapter on these chips. For integrated sensors on the
@@ -705,10 +706,10 @@ sub gen_drivers_i2c_Config_in
     dep_tristate '  DEC Tsunami I2C interface' CONFIG_I2C_TSUNAMI $CONFIG_I2C_ALGOBIT
     tristate '  Intel 82801AA, 82801AB and 82801BA' CONFIG_I2C_I801
     dep_tristate '  Intel i810AA, i810AB and i815' CONFIG_I2C_I810 $CONFIG_I2C_ALGOBIT
-    tristate '  Intel 82371AB PIIX4(E), ServerWorks OSB4/CSB5' CONFIG_I2C_PIIX4
+    tristate '  Intel 82371AB PIIX4(E), 443MX, ServerWorks OSB4/CSB5, SMSC Victory66' CONFIG_I2C_PIIX4
     tristate '  SiS 5595' CONFIG_I2C_SIS5595
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_ALGOBIT
-    tristate '  VIA Technologies, Inc. VT596A/B' CONFIG_I2C_VIAPRO
+    tristate '  VIA Technologies, Inc. VT596A/B, 686A/B, 8233' CONFIG_I2C_VIAPRO
     dep_tristate '  Voodoo3 I2C interface' CONFIG_I2C_VOODOO3 $CONFIG_I2C_ALGOBIT
     tristate '  Pseudo ISA adapter (for some hardware sensors)' CONFIG_I2C_ISA 
   fi
