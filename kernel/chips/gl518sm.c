@@ -254,30 +254,30 @@ static struct i2c_driver gl518_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table gl518_dir_table_template[] = {
-	{GL518_SYSCTL_VIN1, "vin1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_vin},
-	{GL518_SYSCTL_VIN2, "vin2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_vin},
-	{GL518_SYSCTL_VIN3, "vin3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_vin},
-	{GL518_SYSCTL_VDD, "vdd", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_vin},
-	{GL518_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_fan},
-	{GL518_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_fan},
-	{GL518_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_temp},
-	{GL518_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_fan_div},
-	{GL518_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_alarms},
-	{GL518_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_beep},
-	{GL518_SYSCTL_FAN1OFF, "fan1off", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_fan1off},
-	{GL518_SYSCTL_ITERATE, "iterate", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl518_iterate},
+	{GL518_SYSCTL_VIN1, "vin1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_vin},
+	{GL518_SYSCTL_VIN2, "vin2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_vin},
+	{GL518_SYSCTL_VIN3, "vin3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_vin},
+	{GL518_SYSCTL_VDD, "vdd", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_vin},
+	{GL518_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_fan},
+	{GL518_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_fan},
+	{GL518_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_temp},
+	{GL518_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_fan_div},
+	{GL518_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_alarms},
+	{GL518_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_beep},
+	{GL518_SYSCTL_FAN1OFF, "fan1off", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_fan1off},
+	{GL518_SYSCTL_ITERATE, "iterate", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl518_iterate},
 	{0}
 };
 
@@ -292,7 +292,7 @@ static struct i2c_client *gl518_list[MAX_GL518_NR];
 
 int gl518_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, gl518_detect);
+	return i2c_detect(adapter, &addr_data, gl518_detect);
 }
 
 static int gl518_detect(struct i2c_adapter *adapter, int address,
@@ -306,7 +306,7 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 	const char *client_name = "";
 
 	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; sensors_detect really won't call us. */
+	   at this moment; i2c_detect really won't call us. */
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter)) {
 		printk
@@ -402,7 +402,7 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry((struct i2c_client *) new_client,
+	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
 					gl518_dir_table_template,
 					THIS_MODULE)) < 0) {
@@ -483,7 +483,7 @@ int gl518_detach_client(struct i2c_client *client)
 	int err, i;
 	struct gl518_data *data = client->data;
 
-	sensors_deregister_entry(((struct gl518_data *) (client->data))->
+	i2c_deregister_entry(((struct gl518_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

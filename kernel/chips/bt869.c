@@ -137,18 +137,18 @@ static struct i2c_driver bt869_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table bt869_dir_table_template[] = {
-	{BT869_SYSCTL_STATUS, "status", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &bt869_status},
-	{BT869_SYSCTL_NTSC, "ntsc", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &bt869_ntsc},
-	{BT869_SYSCTL_RES, "res", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &bt869_res},
-	{BT869_SYSCTL_HALF, "half", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &bt869_half},
-	{BT869_SYSCTL_COLORBARS, "colorbars", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &bt869_colorbars},
-	{BT869_SYSCTL_DEPTH, "depth", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &bt869_depth},
+	{BT869_SYSCTL_STATUS, "status", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &bt869_status},
+	{BT869_SYSCTL_NTSC, "ntsc", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &bt869_ntsc},
+	{BT869_SYSCTL_RES, "res", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &bt869_res},
+	{BT869_SYSCTL_HALF, "half", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &bt869_half},
+	{BT869_SYSCTL_COLORBARS, "colorbars", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &bt869_colorbars},
+	{BT869_SYSCTL_DEPTH, "depth", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &bt869_depth},
 	{0}
 };
 
@@ -159,10 +159,10 @@ int bt869_id = 0;
 
 int bt869_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, bt869_detect);
+	return i2c_detect(adapter, &addr_data, bt869_detect);
 }
 
-/* This function is called by sensors_detect */
+/* This function is called by i2c_detect */
 int bt869_detect(struct i2c_adapter *adapter, int address,
 		 unsigned short flags, int kind)
 {
@@ -175,7 +175,7 @@ int bt869_detect(struct i2c_adapter *adapter, int address,
 
 	printk("bt869.o:  probing address %d .\n", address);
 	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; sensors_detect really won't call us. */
+	   at this moment; i2c_detect really won't call us. */
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter)) {
 		printk
@@ -238,7 +238,7 @@ int bt869_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client, type_name,
+	if ((i = i2c_register_entry(new_client, type_name,
 					bt869_dir_table_template,
 					THIS_MODULE)) < 0) {
 		err = i;
@@ -265,7 +265,7 @@ int bt869_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct bt869_data *) (client->data))->
+	i2c_deregister_entry(((struct bt869_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

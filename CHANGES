@@ -33,8 +33,10 @@ ask CVS about it:
   Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
   Include file sensors.h: Most contents moved to i2c-proc.h in i2c package
   Library: Fix/standardize some lm87 and mtp008 entries; add sis5595 in4;
-           Add support for maxilife-nba and amd1024.
+           Add support for maxilife-nba and amd1024;
+           Change from sensors_* to i2c_* globals for new i2c-proc.[ch]
   Chip Modules (all ISA): Remove #include "i2c-isa.h"
+  Chip Modules (all): Change from sensors_* to i2c_* globals for new i2c-proc.[ch]
   Module adm1021: Fix lm84 and gl523sm support
   Module adm1024: new
   Module i2c-i801: Chip detection cleanup

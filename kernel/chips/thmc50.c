@@ -155,18 +155,18 @@ static struct i2c_driver thmc50_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table thmc50_dir_table_template[] = {
-	{THMC50_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &thmc50_temp},
-	{THMC50_SYSCTL_REMOTE_TEMP, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &thmc50_remote_temp},
-	{THMC50_SYSCTL_INTER, "inter", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &thmc50_inter},
-	{THMC50_SYSCTL_INTER_MASK, "inter_mask", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &thmc50_inter_mask},
-	{THMC50_SYSCTL_DIE_CODE, "die_code", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &thmc50_die_code},
-	{THMC50_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &thmc50_analog_out},
+	{THMC50_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &thmc50_temp},
+	{THMC50_SYSCTL_REMOTE_TEMP, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &thmc50_remote_temp},
+	{THMC50_SYSCTL_INTER, "inter", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &thmc50_inter},
+	{THMC50_SYSCTL_INTER_MASK, "inter_mask", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &thmc50_inter_mask},
+	{THMC50_SYSCTL_DIE_CODE, "die_code", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &thmc50_die_code},
+	{THMC50_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &thmc50_analog_out},
 	{0}
 };
 
@@ -177,10 +177,10 @@ static int thmc50_id = 0;
 
 int thmc50_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, thmc50_detect);
+	return i2c_detect(adapter, &addr_data, thmc50_detect);
 }
 
-/* This function is called by sensors_detect */
+/* This function is called by i2c_detect */
 int thmc50_detect(struct i2c_adapter *adapter, int address,
 		  unsigned short flags, int kind)
 {
@@ -196,7 +196,7 @@ int thmc50_detect(struct i2c_adapter *adapter, int address,
 #endif
 
 	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; sensors_detect really won't call us. */
+	   at this moment; i2c_detect really won't call us. */
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter)) {
 		printk
@@ -266,7 +266,7 @@ int thmc50_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client, type_name,
+	if ((i = i2c_register_entry(new_client, type_name,
 					thmc50_dir_table_template,
 					THIS_MODULE)) < 0) {
 		err = i;
@@ -293,7 +293,7 @@ int thmc50_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct thmc50_data *) (client->data))->
+	i2c_deregister_entry(((struct thmc50_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

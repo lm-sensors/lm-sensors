@@ -473,30 +473,30 @@ static int __initdata via686a_initialized = 0;
    is done through one of the 'extra' fields which are initialized 
    when a new copy is allocated. */
 static ctl_table via686a_dir_table_template[] = {
-	{VIA686A_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &via686a_in},
-	{VIA686A_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &via686a_in},
-	{VIA686A_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &via686a_in},
-	{VIA686A_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &via686a_in},
-	{VIA686A_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &via686a_in},
-	{VIA686A_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &via686a_fan},
-	{VIA686A_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &via686a_fan},
-	{VIA686A_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &via686a_temp},
+	{VIA686A_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &via686a_in},
+	{VIA686A_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &via686a_in},
+	{VIA686A_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &via686a_in},
+	{VIA686A_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &via686a_in},
+	{VIA686A_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &via686a_in},
+	{VIA686A_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &via686a_fan},
+	{VIA686A_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &via686a_fan},
+	{VIA686A_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &via686a_temp},
 	{VIA686A_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &via686a_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &via686a_temp},
 	{VIA686A_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &via686a_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &via686a_temp},
 	{VIA686A_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &via686a_fan_div},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &via686a_fan_div},
 	{VIA686A_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &via686a_alarms},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &via686a_alarms},
 	{0}
 };
 
@@ -514,7 +514,7 @@ static inline void via686a_write_value(struct i2c_client *client, u8 reg,
 /* This is called when the module is loaded */
 int via686a_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, via686a_detect);
+	return i2c_detect(adapter, &addr_data, via686a_detect);
 }
 
 /* Locate chip and get correct base address */
@@ -615,7 +615,7 @@ int via686a_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry((struct i2c_client *) new_client,
+	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
 					via686a_dir_table_template,
 					THIS_MODULE)) < 0) {
@@ -641,7 +641,7 @@ int via686a_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct via686a_data *) 
+	i2c_deregister_entry(((struct via686a_data *) 
 				  (client->data))->sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

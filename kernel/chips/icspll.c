@@ -121,8 +121,8 @@ static struct i2c_driver icspll_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table icspll_dir_table_template[] = {
-	{ICSPLL_SYSCTL1, "reg0-6", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &icspll_contents},
+	{ICSPLL_SYSCTL1, "reg0-6", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &icspll_contents},
 	{0}
 };
 
@@ -135,10 +135,10 @@ static int __initdata icspll_initialized = 0;
 static int icspll_id = 0;
 int icspll_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, icspll_detect);
+	return i2c_detect(adapter, &addr_data, icspll_detect);
 }
 
-/* This function is called by sensors_detect */
+/* This function is called by i2c_detect */
 int icspll_detect(struct i2c_adapter *adapter, int address,
    	          unsigned short flags, int kind)
 {
@@ -196,7 +196,7 @@ int icspll_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR2;
 
 	/* Register a new directory entry with module sensors */
-	if ((err = sensors_register_entry(new_client, "icspll",
+	if ((err = i2c_register_entry(new_client, "icspll",
 					  icspll_dir_table_template,
 					  THIS_MODULE)) < 0)
 		goto ERROR3;
@@ -216,7 +216,7 @@ int icspll_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct icspll_data *) (client->data))->
+	i2c_deregister_entry(((struct icspll_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

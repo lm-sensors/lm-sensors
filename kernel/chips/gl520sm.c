@@ -244,36 +244,36 @@ static struct i2c_driver gl520_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table gl520_dir_table_template[] = {
-	{GL520_SYSCTL_VIN1, "vin1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_vin},
-	{GL520_SYSCTL_VIN2, "vin2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_vin},
-	{GL520_SYSCTL_VIN3, "vin3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_vin},
-	{GL520_SYSCTL_VIN4, "vin4", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_vin},
-	{GL520_SYSCTL_VDD, "vdd", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_vin},
-	{GL520_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_vid},
-	{GL520_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_fan},
-	{GL520_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_fan},
-	{GL520_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_temp},
-	{GL520_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_temp},
-	{GL520_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_fan_div},
-	{GL520_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_alarms},
-	{GL520_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_beep},
-	{GL520_SYSCTL_FAN1OFF, "fan1off", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_fan1off},
-	{GL520_SYSCTL_CONFIG, "config", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &gl520_config},
+	{GL520_SYSCTL_VIN1, "vin1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_vin},
+	{GL520_SYSCTL_VIN2, "vin2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_vin},
+	{GL520_SYSCTL_VIN3, "vin3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_vin},
+	{GL520_SYSCTL_VIN4, "vin4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_vin},
+	{GL520_SYSCTL_VDD, "vdd", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_vin},
+	{GL520_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_vid},
+	{GL520_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_fan},
+	{GL520_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_fan},
+	{GL520_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_temp},
+	{GL520_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_temp},
+	{GL520_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_fan_div},
+	{GL520_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_alarms},
+	{GL520_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_beep},
+	{GL520_SYSCTL_FAN1OFF, "fan1off", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_fan1off},
+	{GL520_SYSCTL_CONFIG, "config", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &gl520_config},
 	{0}
 };
 
@@ -287,7 +287,7 @@ static int gl520_id = 0;
 
 int gl520_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, gl520_detect);
+	return i2c_detect(adapter, &addr_data, gl520_detect);
 }
 
 static int gl520_detect(struct i2c_adapter *adapter, int address,
@@ -301,7 +301,7 @@ static int gl520_detect(struct i2c_adapter *adapter, int address,
 	char client_name[32];
 
 	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; sensors_detect really won't call us. */
+	   at this moment; i2c_detect really won't call us. */
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter)) {
 		printk
@@ -369,7 +369,7 @@ static int gl520_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client,
+	if ((i = i2c_register_entry(new_client,
 					type_name,
 					gl520_dir_table_template,
 					THIS_MODULE)) < 0) {
@@ -449,7 +449,7 @@ int gl520_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct gl520_data *) (client->data))->
+	i2c_deregister_entry(((struct gl520_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

@@ -130,16 +130,16 @@ static struct i2c_driver ddcmon_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table ddcmon_dir_table_template[] = {
-	{DDCMON_SYSCTL_ID, "ID", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &ddcmon_idcall},
-	{DDCMON_SYSCTL_SIZE, "size", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &ddcmon_size},
+	{DDCMON_SYSCTL_ID, "ID", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &ddcmon_idcall},
+	{DDCMON_SYSCTL_SIZE, "size", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &ddcmon_size},
 	{DDCMON_SYSCTL_SYNC, "sync", NULL, 0, 0444, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &ddcmon_sync},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_sync},
 	{DDCMON_SYSCTL_TIMINGS, "timings", NULL, 0, 0444, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &ddcmon_timings},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_timings},
 	{DDCMON_SYSCTL_SERIAL, "serial", NULL, 0, 0444, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &ddcmon_serial},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_serial},
 	{0}
 };
 
@@ -150,10 +150,10 @@ static int ddcmon_id = 0;
 
 int ddcmon_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, ddcmon_detect);
+	return i2c_detect(adapter, &addr_data, ddcmon_detect);
 }
 
-/* This function is called by sensors_detect */
+/* This function is called by i2c_detect */
 int ddcmon_detect(struct i2c_adapter *adapter, int address,
 		  unsigned short flags, int kind)
 {
@@ -213,7 +213,7 @@ int ddcmon_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client, type_name,
+	if ((i = i2c_register_entry(new_client, type_name,
 					ddcmon_dir_table_template,
 					THIS_MODULE)) < 0) {
 		err = i;
@@ -236,7 +236,7 @@ int ddcmon_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct ddcmon_data *) (client->data))->
+	i2c_deregister_entry(((struct ddcmon_data *) (client->data))->
 				 sysctl_id);
 	if ((err = i2c_detach_client(client))) {
 		printk

@@ -310,42 +310,42 @@ static int __initdata adm1024_initialized = 0;
    is done through one of the 'extra' fields which are initialized 
    when a new copy is allocated. */
 static ctl_table adm1024_dir_table_template[] = {
-	{ADM1024_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_in},
-	{ADM1024_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_in},
-	{ADM1024_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_in},
-	{ADM1024_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_in},
-	{ADM1024_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_in},
-	{ADM1024_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_in},
-	{ADM1024_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_fan},
-	{ADM1024_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_fan},
-	{ADM1024_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_temp},
-	{ADM1024_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_temp1},
-	{ADM1024_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_temp2},
-	{ADM1024_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_fan_div},
-	{ADM1024_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_alarms},
-	{ADM1024_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_analog_out},
-	{ADM1024_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1024_vid},
+	{ADM1024_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_in},
+	{ADM1024_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_in},
+	{ADM1024_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_in},
+	{ADM1024_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_in},
+	{ADM1024_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_in},
+	{ADM1024_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_in},
+	{ADM1024_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_fan},
+	{ADM1024_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_fan},
+	{ADM1024_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_temp},
+	{ADM1024_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_temp1},
+	{ADM1024_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_temp2},
+	{ADM1024_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_fan_div},
+	{ADM1024_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_alarms},
+	{ADM1024_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_analog_out},
+	{ADM1024_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1024_vid},
 	{0}
 };
 
 int adm1024_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, adm1024_detect);
+	return i2c_detect(adapter, &addr_data, adm1024_detect);
 }
 
 static int adm1024_detect(struct i2c_adapter *adapter, int address,
@@ -359,7 +359,7 @@ static int adm1024_detect(struct i2c_adapter *adapter, int address,
 	const char *client_name = "";
 
 	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; sensors_detect really won't call us. */
+	   at this moment; i2c_detect really won't call us. */
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter)) {
 		printk
@@ -435,7 +435,7 @@ static int adm1024_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client,
+	if ((i = i2c_register_entry(new_client,
 					type_name,
 					adm1024_dir_table_template,
 					THIS_MODULE)) < 0) {
@@ -464,7 +464,7 @@ int adm1024_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct adm1024_data *) (client->data))->
+	i2c_deregister_entry(((struct adm1024_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

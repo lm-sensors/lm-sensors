@@ -315,38 +315,38 @@ static int __initdata adm9240_initialized = 0;
    is done through one of the 'extra' fields which are initialized 
    when a new copy is allocated. */
 static ctl_table adm9240_dir_table_template[] = {
-	{ADM9240_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_in},
-	{ADM9240_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_in},
-	{ADM9240_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_in},
-	{ADM9240_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_in},
-	{ADM9240_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_in},
-	{ADM9240_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_in},
-	{ADM9240_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_fan},
-	{ADM9240_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_fan},
-	{ADM9240_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_temp},
-	{ADM9240_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_fan_div},
-	{ADM9240_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_alarms},
-	{ADM9240_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_analog_out},
-	{ADM9240_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm9240_vid},
+	{ADM9240_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_in},
+	{ADM9240_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_in},
+	{ADM9240_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_in},
+	{ADM9240_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_in},
+	{ADM9240_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_in},
+	{ADM9240_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_in},
+	{ADM9240_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_fan},
+	{ADM9240_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_fan},
+	{ADM9240_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_temp},
+	{ADM9240_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_fan_div},
+	{ADM9240_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_alarms},
+	{ADM9240_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_analog_out},
+	{ADM9240_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm9240_vid},
 	{0}
 };
 
 int adm9240_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, adm9240_detect);
+	return i2c_detect(adapter, &addr_data, adm9240_detect);
 }
 
 static int adm9240_detect(struct i2c_adapter *adapter, int address,
@@ -360,7 +360,7 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
 	const char *client_name = "";
 
 	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; sensors_detect really won't call us. */
+	   at this moment; i2c_detect really won't call us. */
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter)) {
 		printk
@@ -451,7 +451,7 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client,
+	if ((i = i2c_register_entry(new_client,
 					type_name,
 					adm9240_dir_table_template,
 					THIS_MODULE)) < 0) {
@@ -480,7 +480,7 @@ int adm9240_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct adm9240_data *) (client->data))->
+	i2c_deregister_entry(((struct adm9240_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

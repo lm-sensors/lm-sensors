@@ -265,34 +265,34 @@ static int lm78_id = 0;
    is done through one of the 'extra' fields which are initialized 
    when a new copy is allocated. */
 static ctl_table lm78_dir_table_template[] = {
-	{LM78_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_in},
-	{LM78_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_in},
-	{LM78_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_in},
-	{LM78_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_in},
-	{LM78_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_in},
-	{LM78_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_in},
-	{LM78_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_in},
-	{LM78_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_fan},
-	{LM78_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_fan},
-	{LM78_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_fan},
-	{LM78_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_temp},
-	{LM78_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_vid},
-	{LM78_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_fan_div},
-	{LM78_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm78_alarms},
+	{LM78_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_in},
+	{LM78_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_in},
+	{LM78_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_in},
+	{LM78_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_in},
+	{LM78_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_in},
+	{LM78_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_in},
+	{LM78_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_in},
+	{LM78_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_fan},
+	{LM78_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_fan},
+	{LM78_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_fan},
+	{LM78_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_temp},
+	{LM78_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_vid},
+	{LM78_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_fan_div},
+	{LM78_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm78_alarms},
 	{0}
 };
 
@@ -303,10 +303,10 @@ static ctl_table lm78_dir_table_template[] = {
      * when a new adapter is inserted (and lm78_driver is still present) */
 int lm78_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, lm78_detect);
+	return i2c_detect(adapter, &addr_data, lm78_detect);
 }
 
-/* This function is called by sensors_detect */
+/* This function is called by i2c_detect */
 int lm78_detect(struct i2c_adapter *adapter, int address,
 		unsigned short flags, int kind)
 {
@@ -438,7 +438,7 @@ int lm78_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client,
+	if ((i = i2c_register_entry(new_client,
 					type_name,
 					lm78_dir_table_template,
 					THIS_MODULE)) < 0) {
@@ -469,7 +469,7 @@ int lm78_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct lm78_data *) (client->data))->
+	i2c_deregister_entry(((struct lm78_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

@@ -171,24 +171,24 @@ static struct i2c_driver adm1021_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table adm1021_dir_table_template[] = {
-	{ADM1021_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1021_temp},
-	{ADM1021_SYSCTL_REMOTE_TEMP, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1021_remote_temp},
-	{ADM1021_SYSCTL_DIE_CODE, "die_code", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1021_die_code},
-	{ADM1021_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1021_alarms},
+	{ADM1021_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1021_temp},
+	{ADM1021_SYSCTL_REMOTE_TEMP, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1021_remote_temp},
+	{ADM1021_SYSCTL_DIE_CODE, "die_code", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1021_die_code},
+	{ADM1021_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1021_alarms},
 	{0}
 };
 
 static ctl_table adm1021_max_dir_table_template[] = {
-	{ADM1021_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1021_temp},
-	{ADM1021_SYSCTL_REMOTE_TEMP, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1021_remote_temp},
-	{ADM1021_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1021_alarms},
+	{ADM1021_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1021_temp},
+	{ADM1021_SYSCTL_REMOTE_TEMP, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1021_remote_temp},
+	{ADM1021_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1021_alarms},
 	{0}
 };
 
@@ -202,7 +202,7 @@ static int adm1021_id = 0;
 
 int adm1021_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, adm1021_detect);
+	return i2c_detect(adapter, &addr_data, adm1021_detect);
 }
 
 static int adm1021_detect(struct i2c_adapter *adapter, int address,
@@ -216,7 +216,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	const char *client_name = "";
 
 	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; sensors_detect really won't call us. */
+	   at this moment; i2c_detect really won't call us. */
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter)) {
 		printk
@@ -323,7 +323,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client,
+	if ((i = i2c_register_entry(new_client,
 					type_name,
 					data->type ==
 					adm1021 ?
@@ -373,7 +373,7 @@ int adm1021_detach_client(struct i2c_client *client)
 
 	int err;
 
-	sensors_deregister_entry(((struct adm1021_data *) (client->data))->
+	i2c_deregister_entry(((struct adm1021_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

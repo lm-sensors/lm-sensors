@@ -126,8 +126,8 @@ static struct i2c_driver pcf8574_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table pcf8574_dir_table_template[] = {
-	{PCF8574_SYSCTL_STAT, "status", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &pcf8574_status},
+	{PCF8574_SYSCTL_STAT, "status", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &pcf8574_status},
 	{0}
 };
 
@@ -141,10 +141,10 @@ static int pcf8574_id = 0;
 
 int pcf8574_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, pcf8574_detect);
+	return i2c_detect(adapter, &addr_data, pcf8574_detect);
 }
 
-/* This function is called by sensors_detect */
+/* This function is called by i2c_detect */
 int pcf8574_detect(struct i2c_adapter *adapter, int address,
 		   unsigned short flags, int kind)
 {
@@ -155,7 +155,7 @@ int pcf8574_detect(struct i2c_adapter *adapter, int address,
 	const char *type_name, *client_name;
 
 	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; sensors_detect really won't call us. */
+	   at this moment; i2c_detect really won't call us. */
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter)) {
 		printk
@@ -214,7 +214,7 @@ int pcf8574_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client, type_name,
+	if ((i = i2c_register_entry(new_client, type_name,
 					pcf8574_dir_table_template,
 					THIS_MODULE)) < 0) {
 		err = i;
@@ -241,7 +241,7 @@ int pcf8574_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct pcf8574_data *) (client->data))->
+	i2c_deregister_entry(((struct pcf8574_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

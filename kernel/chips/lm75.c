@@ -122,8 +122,8 @@ static struct i2c_driver lm75_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table lm75_dir_table_template[] = {
-	{LM75_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &lm75_temp},
+	{LM75_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm75_temp},
 	{0}
 };
 
@@ -134,10 +134,10 @@ static int lm75_id = 0;
 
 int lm75_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, lm75_detect);
+	return i2c_detect(adapter, &addr_data, lm75_detect);
 }
 
-/* This function is called by sensors_detect */
+/* This function is called by i2c_detect */
 int lm75_detect(struct i2c_adapter *adapter, int address,
 		unsigned short flags, int kind)
 {
@@ -148,7 +148,7 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 	const char *type_name, *client_name;
 
 	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; sensors_detect really won't call us. */
+	   at this moment; i2c_detect really won't call us. */
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter)) {
 		printk
@@ -224,7 +224,7 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client, type_name,
+	if ((i = i2c_register_entry(new_client, type_name,
 					lm75_dir_table_template,
 					THIS_MODULE)) < 0) {
 		err = i;
@@ -257,7 +257,7 @@ int lm75_detach_client(struct i2c_client *client)
 #endif
 
 
-	sensors_deregister_entry(((struct lm75_data *) (client->data))->
+	i2c_deregister_entry(((struct lm75_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

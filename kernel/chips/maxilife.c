@@ -362,48 +362,48 @@ static int maxi_version = cristal;
    to the parent - which is done through one of the 'extra' fields 
    which are initialized when a new copy is allocated. */
 static ctl_table maxi_dir_table_template[] = {
-	{MAXI_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_fan},
-	{MAXI_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_fan},
-	{MAXI_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_fan},
-	{MAXI_SYSCTL_FAN4, "fan4", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_fan},
-	{MAXI_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_temp},
-	{MAXI_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_temp},
-	{MAXI_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_temp},
-	{MAXI_SYSCTL_TEMP4, "temp4", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_temp},
-	{MAXI_SYSCTL_TEMP5, "temp5", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_temp},
-	{MAXI_SYSCTL_TEMP6, "temp6", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_temp},
-	{MAXI_SYSCTL_PLL, "pll", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_pll},
-	{MAXI_SYSCTL_VID1, "vid1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_vid},
-	{MAXI_SYSCTL_VID2, "vid2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_vid},
-	{MAXI_SYSCTL_VID3, "vid3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_vid},
-	{MAXI_SYSCTL_VID4, "vid4", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_vid},
-	{MAXI_SYSCTL_VID5, "vid5", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_vid},
-	{MAXI_SYSCTL_LCD1, "lcd1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_lcd},
-	{MAXI_SYSCTL_LCD2, "lcd2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_lcd},
-	{MAXI_SYSCTL_LCD3, "lcd3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_lcd},
-	{MAXI_SYSCTL_LCD4, "lcd4", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_lcd},
-	{MAXI_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &maxi_alarms},
+	{MAXI_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_fan},
+	{MAXI_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_fan},
+	{MAXI_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_fan},
+	{MAXI_SYSCTL_FAN4, "fan4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_fan},
+	{MAXI_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_temp},
+	{MAXI_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_temp},
+	{MAXI_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_temp},
+	{MAXI_SYSCTL_TEMP4, "temp4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_temp},
+	{MAXI_SYSCTL_TEMP5, "temp5", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_temp},
+	{MAXI_SYSCTL_TEMP6, "temp6", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_temp},
+	{MAXI_SYSCTL_PLL, "pll", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_pll},
+	{MAXI_SYSCTL_VID1, "vid1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_vid},
+	{MAXI_SYSCTL_VID2, "vid2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_vid},
+	{MAXI_SYSCTL_VID3, "vid3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_vid},
+	{MAXI_SYSCTL_VID4, "vid4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_vid},
+	{MAXI_SYSCTL_VID5, "vid5", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_vid},
+	{MAXI_SYSCTL_LCD1, "lcd1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_lcd},
+	{MAXI_SYSCTL_LCD2, "lcd2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_lcd},
+	{MAXI_SYSCTL_LCD3, "lcd3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_lcd},
+	{MAXI_SYSCTL_LCD4, "lcd4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_lcd},
+	{MAXI_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &maxi_alarms},
 	{0}
 };
 
@@ -413,10 +413,10 @@ static ctl_table maxi_dir_table_template[] = {
     - when a new adapter is inserted (and maxi_driver is still present) */
 int maxi_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, maxi_detect);
+	return i2c_detect(adapter, &addr_data, maxi_detect);
 }
 
-/* This function is called by sensors_detect */
+/* This function is called by i2c_detect */
 int maxi_detect(struct i2c_adapter *adapter, int address,
 		unsigned short flags, int kind)
 {
@@ -609,7 +609,7 @@ int maxi_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR2;
 
 	/* Register a new directory entry with module sensors */
-	if ((err = sensors_register_entry(new_client, type_name,
+	if ((err = i2c_register_entry(new_client, type_name,
 					  maxi_dir_table_template,
 					  THIS_MODULE)) < 0)
 		goto ERROR4;
@@ -637,7 +637,7 @@ int maxi_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct maxi_data *) (client->data))->
+	i2c_deregister_entry(((struct maxi_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

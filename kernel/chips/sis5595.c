@@ -278,33 +278,33 @@ static int __initdata sis5595_initialized = 0;
    is done through one of the 'extra' fields which are initialized 
    when a new copy is allocated. */
 static ctl_table sis5595_dir_table_template[] = {
-	{SIS5595_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &sis5595_in},
-	{SIS5595_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &sis5595_in},
-	{SIS5595_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &sis5595_in},
-	{SIS5595_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &sis5595_in},
-	{SIS5595_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &sis5595_in},
-	{SIS5595_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &sis5595_fan},
-	{SIS5595_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &sis5595_fan},
-	{SIS5595_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &sis5595_temp},
-	{SIS5595_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &sis5595_fan_div},
-	{SIS5595_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &sis5595_alarms},
+	{SIS5595_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &sis5595_in},
+	{SIS5595_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &sis5595_in},
+	{SIS5595_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &sis5595_in},
+	{SIS5595_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &sis5595_in},
+	{SIS5595_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &sis5595_in},
+	{SIS5595_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &sis5595_fan},
+	{SIS5595_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &sis5595_fan},
+	{SIS5595_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &sis5595_temp},
+	{SIS5595_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &sis5595_fan_div},
+	{SIS5595_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &sis5595_alarms},
 	{0}
 };
 
 /* This is called when the module is loaded */
 int sis5595_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, sis5595_detect);
+	return i2c_detect(adapter, &addr_data, sis5595_detect);
 }
 
 /* Locate SiS bridge and correct base address for SIS5595 */
@@ -437,7 +437,7 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry((struct i2c_client *) new_client,
+	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
 					sis5595_dir_table_template,
 					THIS_MODULE)) < 0) {
@@ -462,7 +462,7 @@ int sis5595_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct sis5595_data *) (client->data))->
+	i2c_deregister_entry(((struct sis5595_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

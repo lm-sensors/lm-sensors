@@ -131,22 +131,22 @@ static struct i2c_driver eeprom_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table eeprom_dir_table_template[] = {
-	{EEPROM_SYSCTL1, "data0-15", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &eeprom_contents},
-	{EEPROM_SYSCTL2, "data16-31", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &eeprom_contents},
-	{EEPROM_SYSCTL3, "data32-47", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &eeprom_contents},
-	{EEPROM_SYSCTL4, "data48-63", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &eeprom_contents},
-	{EEPROM_SYSCTL5, "data64-79", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &eeprom_contents},
-	{EEPROM_SYSCTL6, "data80-95", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &eeprom_contents},
-	{EEPROM_SYSCTL7, "data96-111", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &eeprom_contents},
-	{EEPROM_SYSCTL8, "data112-127", NULL, 0, 0444, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL1, "data0-15", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL2, "data16-31", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL3, "data32-47", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL4, "data48-63", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL5, "data64-79", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL6, "data80-95", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL7, "data96-111", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL8, "data112-127", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &eeprom_contents},
 	{0}
 };
 
@@ -157,10 +157,10 @@ static int eeprom_id = 0;
 
 int eeprom_attach_adapter(struct i2c_adapter *adapter)
 {
-	return sensors_detect(adapter, &addr_data, eeprom_detect);
+	return i2c_detect(adapter, &addr_data, eeprom_detect);
 }
 
-/* This function is called by sensors_detect */
+/* This function is called by i2c_detect */
 int eeprom_detect(struct i2c_adapter *adapter, int address,
 		  unsigned short flags, int kind)
 {
@@ -171,7 +171,7 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 	const char *type_name, *client_name;
 
 	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; sensors_detect really won't call us. */
+	   at this moment; i2c_detect really won't call us. */
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter)) {
 		printk
@@ -239,7 +239,7 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client, type_name,
+	if ((i = i2c_register_entry(new_client, type_name,
 					eeprom_dir_table_template,
 					THIS_MODULE)) < 0) {
 		err = i;
@@ -265,7 +265,7 @@ int eeprom_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct eeprom_data *) (client->data))->
+	i2c_deregister_entry(((struct eeprom_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

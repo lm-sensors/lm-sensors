@@ -331,56 +331,56 @@ static int __initdata lm87_initialized = 0;
 
 static ctl_table LM87_dir_table_template[] = {
 #ifdef LM87_AIN1
-	{LM87_SYSCTL_AIN1, "ain1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_ain},
+	{LM87_SYSCTL_AIN1, "ain1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_ain},
 #endif
 #ifdef LM87_AIN2
-	{LM87_SYSCTL_AIN2, "ain2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_ain},
+	{LM87_SYSCTL_AIN2, "ain2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_ain},
 #endif
 #ifndef LM87_EXT2
-	{LM87_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_in},
-	{LM87_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_in},
+	{LM87_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_in},
+	{LM87_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_in},
 #endif
-	{LM87_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_in},
-	{LM87_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_in},
-	{LM87_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_in},
-	{LM87_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_in},
+	{LM87_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_in},
+	{LM87_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_in},
+	{LM87_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_in},
+	{LM87_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_in},
 #ifndef LM87_AIN1
-	{LM87_SYSCTL_FAN1, "fan", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_fan},
-	{LM87_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_fan_div},
+	{LM87_SYSCTL_FAN1, "fan", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_fan},
+	{LM87_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_fan_div},
 #define LM87_FANDIV_FLAG
 #endif
 #ifndef LM87_AIN2
-	{LM87_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_fan},
+	{LM87_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_fan},
 #ifndef LM87_FANDIV_FLAG
-	{LM87_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_fan_div},
+	{LM87_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_fan_div},
 #endif /* LM87_FANDIV_FLAG */
 #endif /* LM87_AIN2 */
 #ifdef LM87_EXT2
-        {LM87_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_temp},
+        {LM87_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_temp},
 #endif
-	{LM87_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_temp},
-	{LM87_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_temp},
-	{LM87_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_alarms},
-	{LM87_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_analog_out},
-	{LM87_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_vid},
+	{LM87_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_temp},
+	{LM87_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_temp},
+	{LM87_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_alarms},
+	{LM87_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_analog_out},
+	{LM87_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
+	  &i2c_sysctl_real, NULL, &lm87_vid},
 	{0}
 };
 
@@ -398,7 +398,7 @@ int lm87_attach_adapter(struct i2c_adapter *adapter)
    lm87_client_data.force            = addr_data.forces->force;
 
 	error = i2c_probe(adapter, &lm87_client_data, lm87_detect);
-	sensors_detect(adapter, &addr_data, lm87_detect);
+	i2c_detect(adapter, &addr_data, lm87_detect);
 
         return error;
 }
@@ -458,7 +458,7 @@ static int lm87_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR3;
 
 	/* Register a new directory entry with module sensors */
-	if ((i = sensors_register_entry(new_client,
+	if ((i = i2c_register_entry(new_client,
 					type_name,
 					LM87_dir_table_template,
 					THIS_MODULE)) < 0) {
@@ -487,7 +487,7 @@ int lm87_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(((struct lm87_data *) (client->data))->
+	i2c_deregister_entry(((struct lm87_data *) (client->data))->
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {

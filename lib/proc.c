@@ -73,17 +73,17 @@ int sensors_read_proc_chips(void)
     return -SENSORS_ERR_PROC;
 
   lineno = 1;
-  while (buflen >= sizeof(struct sensors_chips_data)) {
+  while (buflen >= sizeof(struct i2c_chips_data)) {
     if ((res = 
-          sensors_parse_chip_name(((struct sensors_chips_data *) bufptr)->name, 
+          sensors_parse_chip_name(((struct i2c_chips_data *) bufptr)->name, 
                                    &entry.name))) {
       sensors_parse_error("Parsing /proc/sys/dev/sensors/chips",lineno);
       return res;
     }
-    entry.sysctl = ((struct sensors_chips_data *) bufptr)->sysctl_id;
+    entry.sysctl = ((struct i2c_chips_data *) bufptr)->sysctl_id;
     add_proc_chips(&entry);
-    bufptr += sizeof(struct sensors_chips_data);
-    buflen -= sizeof(struct sensors_chips_data);
+    bufptr += sizeof(struct i2c_chips_data);
+    buflen -= sizeof(struct i2c_chips_data);
     lineno++;
   }
   return 0;

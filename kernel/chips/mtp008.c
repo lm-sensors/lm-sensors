@@ -353,51 +353,51 @@ static int __initdata mtp008_initialized = 0;
 static ctl_table mtp008_dir_table_template[] =
 {
 	{MTP008_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_in},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_in},
 	{MTP008_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_in},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_in},
 	{MTP008_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_in},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_in},
 	{MTP008_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_in},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_in},
 	{MTP008_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_in},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_in},
 	{MTP008_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_in},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_in},
 	{MTP008_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_in},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_in},
 	{MTP008_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_fan},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_fan},
 	{MTP008_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_fan},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_fan},
 	{MTP008_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_fan},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_fan},
 	{MTP008_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_temp},
 	{MTP008_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL,
-       &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_temp_add},
+       &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_temp_add},
 	{MTP008_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL,
-       &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_temp_add},
+       &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_temp_add},
 	{MTP008_SYSCTL_VID, "vid", NULL, 0, 0444, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_vid},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_vid},
 	{MTP008_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_fan_div},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_fan_div},
 	{MTP008_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_alarms},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_alarms},
 	{MTP008_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_beep},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_beep},
 	{MTP008_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_pwm},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_pwm},
 	{MTP008_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_pwm},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_pwm},
 	{MTP008_SYSCTL_PWM3, "pwm3", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_pwm},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_pwm},
 	{MTP008_SYSCTL_SENS1, "sensor1", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_sens},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_sens},
 	{MTP008_SYSCTL_SENS2, "sensor2", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_sens},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_sens},
 	{MTP008_SYSCTL_SENS3, "sensor3", NULL, 0, 0644, NULL,
-	 &sensors_proc_real, &sensors_sysctl_real, NULL, &mtp008_sens},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_sens},
 	{0}
 };
 
@@ -482,7 +482,7 @@ int mtp008_detect(struct i2c_adapter *adapter, int address,
 	/*
 	 * Register a new directory entry with the sensors module.
 	 */
-	if ((sysid = sensors_register_entry(new_client, type_name,
+	if ((sysid = i2c_register_entry(new_client, type_name,
 					    mtp008_dir_table_template,
 					    THIS_MODULE)) < 0) {
 		err = sysid;
@@ -513,7 +513,7 @@ int mtp008_detach_client(struct i2c_client *client)
 {
 	int err;
 
-	sensors_deregister_entry(
+	i2c_deregister_entry(
 		((struct mtp008_data *) (client->data))->sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {
