@@ -18,21 +18,21 @@
 # Note that MODULE_DIR (the directory in which this file resides) is a
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
-MODULE_DIR := prog/dump
+MODULE_DIR := prog/detect
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-PROGDUMPTARGETS := $(MODULE_DIR)/isadump $(MODULE_DIR)/i2cdump
-PROGDUMPSOURCES := $(MODULE_DIR)/isadump.c  $(MODULE_DIR)/i2cdump.c
+PROGDETECTTARGETS := $(MODULE_DIR)/i2cdetect
+PROGDETECTSOURCES := $(MODULE_DIR)/i2cdetect.c
 
 # Include all dependency files. We use '.rd' to indicate this will create
 # executables.
-INCLUDEFILES += $(PROGDUMPSOURCES:.c=.rd)
+INCLUDEFILES += $(PROGDETECTSOURCES:.c=.rd)
 
-all-prog-dump: $(PROGDUMPTARGETS)
-all :: all-prog-dump
+all-prog-detect: $(PROGDETECTTARGETS)
+all :: all-prog-detect
 
-clean-prog-dump:
-	$(RM) $(PROGDUMPSOURCES:.c=.rd) $(PROGDUMPSOURCES:.c=.ro) \
-	      $(PROGDUMPTARGETS)
-clean :: clean-prog-dump
+clean-prog-detect:
+	$(RM) $(PROGDETECTSOURCES:.c=.rd) $(PROGDETECTSOURCES:.c=.ro) \
+	      $(PROGDETECTTARGETS)
+clean :: clean-prog-detect
