@@ -1132,9 +1132,9 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { lm90_detect 0, @_ },
      },
      {
-       name => "National Semiconductor LM89",
-       driver => "to-be-written",
-       i2c_addrs => [0x4c],
+       name => "National Semiconductor LM89/LM99",
+       driver => "lm90",
+       i2c_addrs => [0x4c..0x4d],
        i2c_detect => sub { lm90_detect 1, @_ },
      },
      {
@@ -2930,7 +2930,7 @@ sub lm83_detect
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, 3, 7 or 8 if detected.
+# Returns: undef if not detected, 3, 5, 7 or 8 if detected.
 #   The Maxim chips have a low confidence value (3)
 #   because the die revision codes are not known.
 # Registers used:
@@ -2946,31 +2946,32 @@ sub lm90_detect
 
   if ($chip == 0) {
     return if ($conf & 0x2a) != 0;
-	return if $mid != 0x01;     # National Semicondutor
+    return if $mid != 0x01;     # National Semiconductor
     return 8 if $cid == 0x21;   # LM90
     return 7 if $cid > 0x21 and $cid < 0x30;
   }
   if ($chip == 1) {
     return if ($conf & 0x2a) != 0;
-	return if $mid != 0x01;     # National Semicondutor
-    return 8 if $cid == 0x31;   # LM89
-    return 7 if $cid > 0x31 and $cid < 0x40;
+    return if $mid != 0x01;     # National Semiconductor
+    return 8 if $addr == 0x4c and $cid == 0x31; # LM89/LM99
+    return 8 if $addr == 0x4d and $cid == 0x34; # LM89-1/LM99-1
+    return 5 if $cid > 0x31 and $cid < 0x40;
   }
   if ($chip == 2) {
     return if ($conf & 0x2a) != 0;
-	return if $mid != 0x01;     # National Semicondutor
+    return if $mid != 0x01;     # National Semiconductor
     return 8 if $cid == 0x11;   # LM86
     return 7 if $cid > 0x11 and $cid < 0x20;
   }
   if ($chip == 3) {
     return if ($conf & 0x3f) != 0;
-	return if $mid != 0x41;     # Analog Devices
-	return 8 if ($cid & 0xf0) == 0x40; # ADM1032
+    return if $mid != 0x41;     # Analog Devices
+    return 8 if ($cid & 0xf0) == 0x40; # ADM1032
   }
   if ($chip == 4) {
     return if ($conf & 0x1f) != 0;
-	return if $mid != 0x4d;     # Maxim
-	return 3;
+    return if $mid != 0x4d;     # Maxim
+    return 3;
   }
   if ($chip == 5) {
     return if ($conf & 0x1b) != 0;
