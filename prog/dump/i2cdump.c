@@ -313,7 +313,7 @@ int main(int argc, char *argv[])
                            size == I2C_SMBUS_I2C_BLOCK_DATA ? "i2c block" :
                            size == I2C_SMBUS_BYTE_DATA ? "byte" : "word");
   if(pec)
-    fprintf(stderr,"  with PEC checking.\n", bank);
+    fprintf(stderr,"  with PEC checking.\n");
   if(bank) { 	
     if(size == I2C_SMBUS_BLOCK_DATA)
       fprintf(stderr,"  Using command 0x%02x.\n", bank);
