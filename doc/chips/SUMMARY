@@ -152,4 +152,5 @@ This may help identify a chip after doing a 'i2cdump [bus] [address] b'.
 0x49	TI
 0x4D	Maxim
 0x5CA3	Winbond (at 0x4F)
+0x90	ITE (at 0x58)
 0xDA	Dallas

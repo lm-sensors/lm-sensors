@@ -255,7 +255,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
             w83781d_isa_detect gl518sm_detect gl520sm_detect adm9240_detect 
             adm1021_detect sis5595_isa_detect eeprom_detect via686a_isa_detect
             adm1022_detect ltc1710_detect gl525sm_detect lm87_detect
-	    ddcmonitor_detect);
+	    ite_detect ite_isa_detect ite_alias_detect ddcmonitor_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -487,6 +487,16 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        isa_addrs => [ 0 ],
        isa_detect => sub { via686a_isa_detect @_ },
      },
+     {
+       name => "ITE IT8705F / IT8712F",
+#        driver => "xxxxxxx",
+       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
+       i2c_driver_addrs => [0x20..0x2f], 
+       i2c_detect => sub { ite_detect 0, @_},
+       isa_addrs => [0x290],
+       isa_detect => sub { ite_isa_detect 0, @_ },
+       alias_detect => sub { ite_alias_detect 0, @_ },
+     } ,
      {
        name => "Serial EEPROM (PC-100 DIMM)",
        driver => "eeprom",
@@ -1790,6 +1800,68 @@ sub via686a_isa_detect
   return if not $found;
 
   return 9;
+}
+
+# $_[0]: Chip to detect (0 = ..., 1 = ...)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, (7) if detected.
+# Registers used:
+#   0x40: Configuration
+#   0x48: Full I2C Address
+#   0x58: Mfr ID
+# Note that this function is always called through a closure, so the
+# arguments are shifted by one place.
+sub ite_detect
+{
+  my $reg;
+  my ($chip,$file,$addr) = @_;
+  return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
+  return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
+  return unless i2c_smbus_read_byte_data($file,0x58) == 0x90;
+  return (7);
+}
+
+# $_[0]: Chip to detect (0 = ..., 1 = ...)
+# $_[1]: Address
+# Returns: undef if not detected, 7 if detected.
+# Note: Only address 0x290 is scanned at this moment.
+sub ite_isa_detect
+{
+  my ($chip,$addr) = @_ ;
+  my $val = inb ($addr + 1);
+  return if inb ($addr + 2) != $val or inb ($addr + 3) != $val or 
+            inb ($addr + 7) != $val;
+
+  $val = inb($addr + 5) & 0x7f;
+  outb($addr+5,~ $val);
+  if ((inb ($addr+5) & 0x7f) != (~ $val & 0x7f)) {
+    outb($addr+5,$val);
+    return;
+  }
+  my $readproc = sub { isa_read_byte $addr + 5, $addr + 6, @_ };
+  return unless (&$readproc(0x40) & 0x80) == 0x00;
+  my $reg = &$readproc(0x58);
+  return unless ($reg == 0x90);
+  return 7;
+}
+
+
+# $_[0]: Chip to detect (0 = ..., 1 = ...)
+# $_[1]: ISA address
+# $_[2]: I2C file handle
+# $_[3]: I2C address
+sub ite_alias_detect
+{
+  my ($chip,$isa_addr,$file,$i2c_addr) = @_;
+  my $i;
+  my $readproc = sub { isa_read_byte $isa_addr + 5, $isa_addr + 6, @_ };
+  return 0 unless &$readproc(0x48) == $i2c_addr;
+  for ($i = 0x2b; $i <= 0x3d; $i ++) {
+    return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($file,$i);
+  }
+  return 1;
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
