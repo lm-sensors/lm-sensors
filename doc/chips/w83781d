@@ -1,8 +1,12 @@
 Kernel driver `w83781d.o'
 =========================
 
-Status: W83781D support is complete and well-tested, others are mostly complete
-        and somewhat tested.
+Status: W83781D support is complete and well-tested.
+        W83782D support is complete and well-tested.
+        W83783S support is complete but has not been well-tested.
+        W83627HF support is complete but has not been well-tested.
+        AS99127F support is BETA and has known problems due to lack of a
+		 chip datasheet. See below.
 
 Supported chips:
   * Winbond W83781D
@@ -144,12 +148,17 @@ AS99127F PROBLEMS
 -----------------
 The as99127f support was developed without the benefit of a datasheet.
 In most cases it is treated as a w83782d.
+This support is BETA. One user has reported problems with fans stopping.
+
 Known problems:
 	- Fans read about 30% low.
 	- -12V readings a little high (-9.5V to -10.5V)
 	- Problems with diode/thermistor settings (supported?)
+	- fan_div register may not really be fan_div.
+	- One user reports fans stopping under high server load.
 
 These will not be fixed unless we get a datasheet.
+If you have problems, please lobby Asus to release a datasheet.
 
 
 Chip Features
