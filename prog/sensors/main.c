@@ -25,6 +25,7 @@
 
 #include "lib/sensors.h" 
 #include "lib/error.h"
+#include "chips.h"
 
 #define PROGRAM "sensors"
 #define VERSION "0.0"
@@ -121,6 +122,7 @@ int main (int argc, char *argv[])
 
   int chip_nr;
   const sensors_chip_name *chip;
+  const char *algo,*adap;
 
   struct option long_opts[] =  {
     { "help", no_argument, NULL, 'h' },
@@ -163,11 +165,22 @@ int main (int argc, char *argv[])
   }
 
   /* Here comes the real code... */
-  printf("Detected chips:\n");
-  for (chip_nr = 0; (chip = sensors_get_detected_chips(&chip_nr));)
+  for (chip_nr = 0; (chip = sensors_get_detected_chips(&chip_nr));) {
     if (chip->bus == SENSORS_CHIP_NAME_BUS_ISA)
-      printf("  %s-isa-%04x\n",chip->prefix,chip->addr);
+      printf("%s-isa-%04x\n",chip->prefix,chip->addr);
     else
-      printf("  %s-i2c-%d-%02x\n",chip->prefix,chip->bus,chip->addr);
+      printf("%s-i2c-%d-%02x\n",chip->prefix,chip->bus,chip->addr);
+    adap = sensors_get_adapter_name(chip->bus);
+    if (adap)
+      printf("Adapter: %s\n",adap);
+    algo = sensors_get_algorithm_name(chip->bus);
+    if (algo)
+      printf("Algorithm: %s\n",algo);
+    if (!algo || !adap)
+      printf(" ERROR: Can't get adapter or algorithm?!?\n");
+    if (!strcmp(chip->prefix,"lm75"))
+      print_lm75(chip);
+     printf("\n");
+  }
   exit(0);
 }

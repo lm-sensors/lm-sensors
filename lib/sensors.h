@@ -60,6 +60,12 @@ extern int sensors_match_chip(sensors_chip_name chip1,
    if there are wildcards. */
 extern int sensors_chip_name_has_wildcards(sensors_chip_name chip);
 
+/* These functions return the adapter and algorithm names of a bus number,
+   as used within the sensors_chip_name structure. If it could not be found, 
+   it returns NULL */
+extern const char *sensors_get_adapter_name(int bus_nr);
+extern const char *sensors_get_algorithm_name(int bus_nr);
+
 /* Look up the label which belongs to this chip. Note that chip should not
    contain wildcard values! *result is newly allocated (free it yourself).
    This function will return 0 on success, and <0 on failure.  */
@@ -75,8 +81,8 @@ extern int sensors_get_feature(sensors_chip_name name, int feature,
 /* Set the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure.  */
-extern int sensors_set_value(sensors_chip_name name, int feature,
-                             double value);
+extern int sensors_set_feature(sensors_chip_name name, int feature,
+                               double value);
 
 /* This function returns all detected chips, one by one. To start at the
    beginning of the list, use 0 for nr; NULL is returned if we are

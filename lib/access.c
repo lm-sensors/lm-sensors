@@ -140,7 +140,7 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
   for (chip = NULL; (chip = sensors_for_all_config_chips(name,chip));)
     for (i = 0; i < chip->labels_count; i++)
       if (!strcmp(featureptr->name, chip->labels[i].name)) {
-        if (! (*result = strdup(chip->labels[i].name)))
+        if (! (*result = strdup(chip->labels[i].value)))
           sensors_fatal_error("sensors_get_label","Allocating label text");
         return 0;
       }
@@ -182,7 +182,7 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
 /* Set the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure.  */
-int sensors_set_value(sensors_chip_name name, int feature, double value)
+int sensors_set_feature(sensors_chip_name name, int feature, double value)
 {
   sensors_chip_feature *featureptr;
   sensors_chip *chip;
@@ -213,4 +213,26 @@ const sensors_chip_name *sensors_get_detected_chips (int *nr)
   res =  *nr >= sensors_proc_chips_count?NULL:&sensors_proc_chips[*nr].name;
   (*nr)++;
   return res;
+}
+
+const char *sensors_get_adapter_name(int bus_nr)
+{
+  int i;
+  if (bus_nr == SENSORS_CHIP_NAME_BUS_ISA)
+    return "ISA adapter";
+  for (i=0; i < sensors_proc_bus_count; i++)
+    if (sensors_proc_bus[i].number == bus_nr)
+      return sensors_proc_bus[i].adapter;
+  return NULL;
+}
+
+const char *sensors_get_algorithm_name(int bus_nr)
+{
+  int i;
+  if (bus_nr == SENSORS_CHIP_NAME_BUS_ISA)
+    return "ISA algorithm";
+  for (i=0; i < sensors_proc_bus_count; i++)
+    if (sensors_proc_bus[i].number == bus_nr)
+      return sensors_proc_bus[i].algorithm;
+  return NULL;
 }

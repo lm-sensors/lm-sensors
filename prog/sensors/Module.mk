@@ -23,14 +23,14 @@ MODULE_DIR := prog/sensors
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 PROGSENSORSTARGETS := $(MODULE_DIR)/sensors
-PROGSENSORSSOURCES := $(MODULE_DIR)/main.c
+PROGSENSORSSOURCES := $(MODULE_DIR)/main.c $(MODULE_DIR)/chips.c
 
 # Include all dependency files. We use '.rd' to indicate this will create
 # executables.
 INCLUDEFILES += $(PROGSENSORSSOURCES:.c=.rd)
 
 $(PROGSENSORSTARGETS): $(PROGSENSORSSOURCES:.c=.ro) lib/$(LIBSHBASENAME)
-	$(CC) -o $@ $^ -Llib -lsensors
+	$(CC) -o $@ $(PROGSENSORSSOURCES:.c=.ro) -Llib -lsensors
 
 all-prog-sensors: $(PROGSENSORSTARGETS)
 all :: all-prog-sensors
