@@ -24,18 +24,19 @@ CONTENTS
 3. Installation and Management
 3.1 Why so many modules, and how do I cope with them?
 3.2 How do I know which chips I own?
-  3.2A What chips are on motherboard XYZ?
+  3.2A What chips are on motherboard XYZ?  ***** MOST POPULAR QUESTION ****
   3.2B Do you support motherboard XYZ?
   3.2C Do you support chip XYZ?
   3.2D Anybody working on a driver for chip XYZ?
 3.3 Which modules should I insert?
-3.4 Do I need the configuration file?
+3.4 Do I need the configuration file /etc/sensors.conf?
   3.4A The labels for the voltage and temperature readings in 'sensors' are incorrect!
   3.4B The min and max for the readings in 'sensors' are incorrect!
   3.4C The min and max settings in /etc/sensors.conf didn't take effect!
   3.4D One sensor isn't hooked up on my board!
   3.4E I need help with sensors.conf!
-3.5 What about the 'No such file or directory' warnings when I compile it?
+  3.4F Do you have a database of sensors.conf entries for specific boards?
+3.5 What about the 'No such file or directory' warnings when I compile?
 3.6 I get all kind of weird compilation errors?
   3.6A 'No rule to make target xxxx needed by xxxx' - how to fix?
 3.7 It still does not compile or patch
@@ -74,7 +75,8 @@ sensor reading results. Why?
   4.17E Bad readings from a w8378[12]d!
   4.17F Bus hangs on Ali 1543 on Asus P5A boards!
   4.17G Bad readings from LM75!
-  4.17H Bad readings from LM80!
+  4.17H Bad readings from LM78!
+  4.17I Bad readings from LM80!
 4.18 How do I configure two chips (LM87) differently?
 4.19 Dmesg says Upgrade BIOS! I don't want to!
 4.20 Sensors says 'Can't access /proc file'
@@ -107,6 +109,7 @@ sensor reading results. Why?
 6.4 How to join the project mailing list
 6.5 How to access mailing list archives
 6.6 How to submit a patch
+6.7 How to REALLY help
 
 7. Version 1 specific questions
 7.1 My manufacturer swears that my mainboard has an SMBus, but your code 
@@ -300,18 +303,20 @@ for candidates, then go to section 5.
 
 3.2A What chips are on motherboard XYZ?
 
+    ********* YES THIS IS THE MOST FREQUENT QUESTION WE GET *********
     We have no idea. Here is what you should do:
 	1) Run sensors-detect.
     If that doesn't work:
 	2) Look at your motherboard.
-	3) Check the manufacturer's website.
+	3) Check the manufacturer's website or ask their support
 	4) Check the Motherboard Monitor website
-	   (see useful_addresses.html) for a good cross-reference.
+	   (see useful_addresses.html or the "links" page on our
+	   website for the address) for a good cross-reference.
 
 
 3.2B Do you support motherboard XYZ?
 
-    See 3.2A.
+    We don't support boards, we support chips. See 3.2A.
 
 
 3.2C Do you support chip XYZ?
@@ -345,7 +350,7 @@ following lines:
         sensors -s
 
 
-3.4 Do I need the sensors.conf configuration file?
+3.4 Do I need the configuration file /etc/sensors.conf?
 
     Yes, for any applications that use libsensors, including the
 'sensors' application included in our package.
@@ -385,7 +390,13 @@ displayed in 'sensors'.
     There is detailed help at the top of that file.
 
 
-3.5 What about the 'No such file or directory' warnings when I compile it?
+3.4F Do you have a database of sensors.conf entries for specific boards?
+
+    No. Good idea though. If you would like to set one up on your website
+send us mail and we will set up a link to it.
+
+
+3.5 What about the 'No such file or directory' warnings when I compile?
 
     Don't worry about them. The dependency files (which tell which
 files should be recompiled when certain files change) are created
@@ -695,6 +706,7 @@ Via will not release details. The driver was developed by tedious
 experimentation. We've done the best we can. If you want to make adjustments
 to the readings please edit /etc/sensors.conf. Please don't ask us to
 fix the driver. Ask Via to release a better datasheet.
+Also, don't forget to 'modprobe i2c-isa'.
 
 
 4.17C Bad readings from the MTP008!
@@ -740,13 +752,20 @@ to the w83781d module to prevent i2c accesses.
 4.17G Bad readings from LM75!
 
     The LM75 detection is poor and other hardware is often misdetected
-as an LM75. Figure out what you really have (see 4.24C).
+as an LM75. Figure out what you really have (see 3.2A).
 
 
-4.17H Bad readings from LM80!
+4.17H Bad readings from LM78!
 
-    The LM75 detection is poor and other hardware is often misdetected
-as an LM75. Figure out what you really have (see 4.24C).
+    The LM78 is no longer manufactured by National Semiconductor.
+You probably don't have a real LM78 but something similar that we
+do not recogize or support. Figure out what you really have (see 3.2A).
+
+
+4.17I Bad readings from LM80!
+
+    The LM80 detection is poor and other hardware is often misdetected
+as an LM80. Figure out what you really have (see 3.2A).
 
 
 4.18 How do I configure two chips (LM87) differently?
@@ -755,11 +774,14 @@ as an LM75. Figure out what you really have (see 4.24C).
 not hooked up in the same way, so they need different defaults.
 For example, both CPU temperatures go to one LM87.
 
-    Make two different sections in /etc/sensors.conf as follows:
+Make two different sections in /etc/sensors.conf as follows:
 	chip "lm87-i2c-*-2c"
 		put configuration for the chip at 0x2c here
 	chip "lm87-i2c-*-2d"
 		put configuration for the chip at 0x2d here
+
+There is a commented example in sensors.conf.eg which should
+be helpful.
 
 
 4.19 Dmesg says Upgrade BIOS! I don't want to!
@@ -804,7 +826,8 @@ you can send us your request.
         Labels: See 3.4A above.
         Min/max readings: See 3.4B&C above.
         AS99127F: See 4.17 above
-        Via 686A: See 4.18 above
+        Via 686A: See 4.17 above
+        Other specific chips: See 4.17 above
         No output for a particular sensors chip: See 5.2 below
         No output at all: See 4.21, 4.22 above; 5.2 below
         Completely bad output for a particular sensor chip: See 5.3 below
@@ -891,7 +914,7 @@ Run devfs in the kernel to get the /dev/i2c/x files.
 
 4.26 Sensors only gives the name, adapter, and algorithm for my chip
 
-    Sensors only says this, for example, and doesn't
+    If 'sensors' only says this, for example, and doesn't
     provide any actual data at all:
 
 	it87-isa-0290
@@ -913,7 +936,7 @@ unless you have something private to say.
     Instead of using email, you can also use the web-based support
 area, at http://www.netroedge.com/~lm78/support.html. You will be helped
 just as fast, and others may profit from the answer too. You will be
-noticed automatically when your question has been answered.
+emailed automatically when your question has been answered.
 
     Here's what you should send us:
 
@@ -921,15 +944,15 @@ noticed automatically when your question has been answered.
     - The output of (as root) 'prog/detect/sensors-detect'
     - The output of 'lsmod'
     - If a PCI chip problem:
-        * The output of 'lspci' or 'cat /proc/pci'
-    - If a I2C sensor chip problem:
+        * The output of 'lspci -n'
+    - If an I2C sensor chip problem:
         * The output of (as root) 'prog/detect/i2cdetect X'
               X = the bus number
               (run 'i2cdetect' with no arguments to list the busses)
         * The output of (as root) 'prog/dump/i2cdump X 0xXX'
               XX = the address of each chip you see in the output
               of i2cdetect. (run once for each chip)
-    - If a ISA sensor chip problem:
+    - If an ISA sensor chip problem:
         * The output of (as root) 'prog/dump/isadump 0x295 0x296'
     - Part numbers of chips on your motherboard you think are
           the sensor chips (look at your motherboard)
@@ -943,8 +966,8 @@ noticed automatically when your question has been answered.
     Did you use 'modprobe' instead of 'insmod'??? Don't use insmod.
     Were there unresolved symbols? Did you run 'depmod -a'? Run
 'depmod -a -e' to see where the symbol problem is.
-    Always inspect the output of 'dmesg'. That's where the error
-messages come out. Don't rely on the generic message from 'modprobe'.
+    ALWAYS inspect the output of 'dmesg'. That's where the error
+messages come out!!! Don't rely on the generic message from 'modprobe'.
 If you still can't figure it out, send us the information
 listed above.
 
@@ -1035,6 +1058,18 @@ there is no automated subscribe/unsubscribe service.
     'diff -u2 -r DIR1 DIR2'. Or you can generate the diff in CVS with
     'cvs diff -u2'. Send us the patch in an email and tell us what it does.
 
+6.7 How to REALLY help
+
+     Believe it or not, what we really need help with are:
+	- Answering email
+	- Answering support tickets
+	- Submitting patches to Linux, etc.
+	- Creating a sensors.conf database
+	- Creating RPM's
+
+    Send us email <sensors@stimpy.netroedge.com> if you can help.
+    No experience necessary :)
+
 
 7. Version 1 specific questions
 ------------------------------
@@ -1093,7 +1128,7 @@ can not be sure.
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
 
-Rev 2.6 (MDS) Minor updates 20011127
+Rev 2.6 (MDS) Minor updates 20020115
 Rev 2.5 (MDS) Minor updates 20011111, released with lm_sensors 2.6.2
 Rev 2.4 (MDS) Minor updates 20010722
 Rev 2.3 (MDS) General update, 20010224, released with lm_sensors 2.6.0.
