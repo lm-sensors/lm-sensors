@@ -54,13 +54,6 @@ MODULE_PARM_DESC(checksum,
 /* EEPROM registers */
 #define EEPROM_REG_CHECKSUM 0x3f
 
-/* EEPROM memory types: */
-#define ONE_K		1
-#define TWO_K		2
-#define FOUR_K		3
-#define EIGHT_K		4
-#define SIXTEEN_K	5
-
 /* possible natures */
 #define NATURE_UNKNOWN 0
 #define NATURE_VAIO 1
