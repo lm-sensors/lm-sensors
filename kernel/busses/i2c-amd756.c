@@ -30,6 +30,8 @@
     2002-12-28: Rewritten into something that resembles a Linux driver (hch)
     2003-11-29: Added back AMD8111 removed by the previous rewrite.
                 (Philip Pokorny)
+    2004-02-15: Don't register driver to avoid driver conflicts.
+                (Daniel Rune Jensen)
 */
 
 /*
@@ -396,23 +398,25 @@ static void __devexit amd756_remove(struct pci_dev *dev)
 	i2c_del_adapter(&amd756_adapter);
 }
 
-static struct pci_driver amd756_driver = {
-	.name		= "amd756 smbus",
-	.id_table	= amd756_ids,
-	.probe		= amd756_probe,
-	.remove		= __devexit_p(amd756_remove),
-};
-
 static int __init i2c_amd756_init(void)
 {
+	struct pci_dev *dev;
+	const struct pci_device_id *id;
+
 	printk(KERN_INFO "i2c-amd756.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	return pci_module_init(&amd756_driver);
+
+ 	pci_for_each_dev(dev) {
+		id = pci_match_device(amd756_ids, dev);
+		if (id && amd756_probe(dev, id) >= 0)
+			return 0; 
+	}
+
+	return -ENODEV;
 }
 
 
 static void __exit i2c_amd756_exit(void)
 {
-	pci_unregister_driver(&amd756_driver);
 	release_region(amd756_ioport, SMB_IOSIZE);
 }
 
