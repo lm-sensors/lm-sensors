@@ -151,7 +151,7 @@ struct smsc47m1_data {
 	u8 fan_min[2];		/* Register value */
 	u8 fan_div[2];		/* Register encoding, shifted right */
 	u8 alarms;		/* Register encoding */
-	u8 pwm[2];		/* Register value */
+	u8 pwm[2];		/* Register value (bit 7 is enable) */
 };
 
 #ifdef MODULE
@@ -528,7 +528,7 @@ int __init sensors_smsc47m1_init(void)
 	smsc47m1_initialized = 0;
 
 	if (smsc47m1_find(&addr)) {
-		printk("smsc47m1.o: SMSC47M1 not detected, module not inserted.\n");
+		printk("smsc47m1.o: SMSC47M1xx not detected, module not inserted.\n");
 		return -ENODEV;
 	}
 	normal_isa[0] = addr;
