@@ -4105,13 +4105,13 @@ void print_pc87366(const sensors_chip_name *name)
   print_pc87364(name);
 
   if (!strcmp(name->prefix, "pc87366"))
-    tempnr = 3;
+    tempnr = 6;
 
   for (i = 0; i < tempnr; i++) {
     if (!sensors_get_feature(*name, SENSORS_PC87360_TEMP1_STATUS + i, &cur))
       status = cur + 0.5;
     else {
-      printf("ERROR: Can't get IN%d status data!\n", i + 1);
+      printf("ERROR: Can't get TEMP%d status data!\n", i + 1);
       status = 0;
     }
 
@@ -4122,7 +4122,7 @@ void print_pc87366(const sensors_chip_name *name)
       if (valid) {
         print_label(label, 10);
         print_temp_info(cur, max, min, MINMAX, 0, 0);
-        if (status&PC87365_STATUS_TEMP_OPEN)
+        if (i<3 && status&PC87365_STATUS_TEMP_OPEN)
           printf("OPEN");
         else if (status&(PC87365_STATUS_TEMP_MIN|PC87365_STATUS_TEMP_MAX))
           printf("ALARM");
