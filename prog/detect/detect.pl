@@ -859,7 +859,7 @@ sub add_isa_to_chips_detected
            print("Can't open ",
                  "/dev/i2c-$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
-      i2c_set_slave_addr \*FILE,$new_detected_ref->[$i]->{address} or
+      i2c_set_slave_addr \*FILE,$new_detected_ref->[$i]->{i2c_addr} or
            print("Can't set I2C address for ",
                  "/dev/i2c-$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
