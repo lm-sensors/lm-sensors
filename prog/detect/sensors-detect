@@ -1247,13 +1247,13 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "Analog Devices ADM1030",
-       driver => "to-be-written",
+       driver => "adm1031",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { adm1031_detect 0, @_ },
      },
      {
        name => "Analog Devices ADM1031",
-       driver => "to-be-written",
+       driver => "adm1031",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { adm1031_detect 1, @_ },
      },
