@@ -1,0 +1,23 @@
+NOTE: PLEASE SKIM THE INSTALL DOCUMENT, OR BETTER YET READ IT CAREFULLY!
+The instructions in this document will only work if you have a standard
+system, and may cause problems.
+
+Quickstart:
+  * Make sure you have the kernel tree corresponding to your current
+    kernel in /usr/src/linux. Distribution kernels usually won't do,
+    compile your own.
+  * Install the i2c package. This won't do any harm, even if use a very 
+    recent 2.3 or 2.4 kernel, though it may be unnecessary
+  * Do a `make' followed by a `make install'. The warnings about .d
+    files at the start are harmless.
+  * Add the line 
+       path=/lib/modules/current/extra
+    to /etc/conf.modules or /etc/modules.conf (whichever one exists)
+    if it is not there yet.
+  * Make sure you do a `depmod -a' and a `ldconfig'.
+  * Run `prog/mkdev/mkdev.sh' to create the device files
+  * Run `prog/detect/sensors-detect' to detect your hardware, put
+    the lines it suggests into /etc/conf.modules or /etc/modules.conf
+    (whichever one exists) and enter the modprobe lines it suggests
+  * Run `sensors' to see your output.
+  * That's all folks!
