@@ -18,20 +18,25 @@ At least the following SMBus adapters are supported:
 
 At least the following hardware sensor chips are supported:
   National Semicoductor LM75, LM78, LM78-J, LM79 and LM80
-  Winbond W83781D
-  Genesys Logic GL518SM
+  Winbond W83781D, W83782D and W83783S
+  Genesys Logic GL518SM (several revisions)
   Analog Devices ADM1021 and ADM9240
   SiS Southbridge (integrated in the chipset; the I2C adapter will also be
     supported in the near future)
-  Maxtor MAX1617
+  Maxtor MAX1617 and MAX1617A
+  Dallas Semiconductor DS1780
+  Hewlett Packard Maxilife (several revisions)
+
+We also support some miscellaneous chips:
+  Linear Technologies LTC1710
+  Dimms with EEPROMs
 
 We could use some testers of hardware. If you own a specific monitoring
 chip or I2C bus, and are willing to help us out, please contact us - even
 if you did so before. Even if you have no programming knowledge, you could
 help us by running new modules and reporting on the results and output. 
 If you want to offer more substantial help, this is very welcome too, of
-course. We have access to LM78(-J), LM79, LM75, Winbond W83781D and
-GL518SM chips, and PIIX4 and VIA chipsets.
+course.
 
 
 SMBus, also known as System Management Bus, is a protocol for communicating
@@ -58,8 +63,8 @@ Please read INSTALL before trying to compile and install these modules.
 There is a lot of additional documentation in the doc/ subdirectory.
 Amnong these is a list of supported busses and chips. Regrettably, there
 are too many mainboards to keep a list of busses and chips used on them.
-We will provide a user-space utility which probes for the presence of
-chips and busses in one of the next releases.
+On the other hand, we provide a program called 'sensors-detect' which
+tries to figure out what hardware is available on your system.
 
 The developers of this package can be reached through the email address
 <lm78@stimpy.netroedge.com>. Do not hesitate to mail us if you have questions,

@@ -54,6 +54,9 @@ Some interesting Makefile variables:
   The directory where 'make install' installs the shared and static libraries.
 * BINDIR ($(PREFIX)/bin)
   The directory where 'make install' installs all executables.
+* SBINDIR ($(PREFIX)/sbin)
+  The directory where 'make install' installs all system programs (programs
+  which can only be run by root).
 * INCLUDEDIR ($(PREFIX)/include)
   The base directory where 'make install' installs your include files.
   Actually, SYSINCLUDEDIR ($(INCLUDEDIR)/linux) is used for kernel header
@@ -92,6 +95,7 @@ TESTING AND RUNNING
 When you have compiled this package, you will be left with a lot of modules.
 It can be tricky to know which modules you need to insert. For this reason,
 I suggest you go the 'modprobe' way, as described within doc/modules.
+
 If you just want to run a test without installing them, try the following:
   insmod i2c/i2c-core.o
   insmod kernel/smbus.o
@@ -109,10 +113,12 @@ do:
   modprobe i2c-isa && modprobe i2c-piix4 && modprobe lm78 && modprobe i2c-proc
 (the last is optional) from any directory to reach the same situation.
 
-There is a program 'detect.pl' in prog/detect which should tell you at least
-what bus driver you should insert. This program is not completely failsafe,
-but it may at least help. It will be expanded to cover chip detection too,
-in the future.
+But instead of doing any of the above things, please read doc/modules and
+do a 'make install'. After that, you can run 'sensors-detect'. This Perl
+program will detect all hardware available on your system, and tell you
+what drivers you need to insert. First check whether you have /dev/i2c-*
+files (at least 4 of them), and if not, create them by running 'mkdev.sh'
+in directory prog/mkdev.
 
 Do not panic if some (or all) of the values in the /proc/sys/dev/sensors/*/*
 files do not seem to correspond to anything in earlier versions. Starting

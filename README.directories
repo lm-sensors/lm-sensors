@@ -6,7 +6,7 @@ The directories within this package:
   Packages from other sources. Currently, it contains Simon Vogl's i2c code
   (mod-????????.tar.gz).
 * doc
-  Documentation about the modules within this package
+  Documentation about the modules within this package, and all other things
 * etc
   Configuration files
 * i2c

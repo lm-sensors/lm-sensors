@@ -13,6 +13,19 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
+2.3.0 (19990424)
+  All: Many, many changes and improvements
+  All: Many small bugs and problems removed
+  Modules: New insmod parameters
+  Modules: Much improved chip detection
+  Module maxilife: NEW
+  Module adm1021: MAX1617A now also supported
+  Module adm9024: DS1780 now also supported
+  Module w83781d: W83782D and W83783S now also supported
+  Program sensors-detect: NEW
+  Library: All chips now supported
+  Documentation: Very much improved
+
 2.2.1 (19990218)
   All: Removed compile warnings
   Module i2c-dev: Small bug removed if DEBUG=1 was used

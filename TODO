@@ -3,7 +3,6 @@ Many, many things. Most notably:
 KERNEL MODULES
 ==============
 
-* Module documentation!!!
 * maxilife.c: Introduce new insmod variables
 * maxilife.c: Round REG_TO_VID correctly
 * icspll.c: Rewrite. The current implementation simply can't work at all.
@@ -54,7 +53,6 @@ LIBRARY
 * Some library routines are pretty inefficient right now.
 * Library should be split in more separate files, for better linking
   behaviour.
-* Many chips are not yet supported by the library.
 
 PROGRAMS
 ========
