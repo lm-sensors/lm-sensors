@@ -824,7 +824,7 @@ static void pc87360_init_client(struct i2c_client *client, int use_thermistors)
 				if (reg & 0x01) {
 #ifdef DEBUG
 					printk(KERN_DEBUG "pc87360.o: Skipping "
-					       "temp%d, pin already in use by ",
+					       "temp%d, pin already in use by "
 					       "temp%d\n", i-7, (i-11)/2);
 #endif
 					continue;
