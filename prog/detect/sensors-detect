@@ -651,13 +651,16 @@ sub read_proc_pci
   open INPUTFILE, "/proc/pci" or return;
   while (<INPUTFILE>) {
     my $record = {};
-    if (($record->{bus}+0,$record->{slot}+0,$record->{func}+0) = 
+    if (($record->{bus},$record->{slot},$record->{func}) = 
         /^\s*Bus\s*(\S)+\s*,\s*device\s*(\S+)\s*,\s*function\s*(\S+)\s*:\s*$/) {
       my $desc = <INPUTFILE>;
       $_ = <INPUTFILE>;
-      unless (($desc =~ /Unknown device/) and
+      if (($desc =~ /Unknown device/) and
               (($record->{vendid},$record->{devid}) = 
                          /^\s*Vendor id=(\S+)\.\s*Device id=(\S+)\.$/)) {
+        $record->{vendid} = hex $record->{vendid};
+        $record->{devid} = hex $record->{devid};
+      } else {
         $record->{desc} = $desc;
       }
       push @pci_list,$record;
