@@ -29,7 +29,7 @@ Many, many things. Most notably:
 * Better chip detection; insmod-time paramters to set addresses 
   (difficult, because of all i2c busses!).
 * At least one case report that unused port addresses do not return 0xff
-* Registrate which i2c addresses are used (a la ISA) for each adapter.
+* Register which i2c addresses are used (a la ISA) for each adapter.
 * Rename i2c-proc.c to i2c-user.c, and extend it with /dev entries;
   or, create a better i2c-dev.c, that understands SMBus commands.
 * Write all other drivers
@@ -41,3 +41,4 @@ Many, many things. Most notably:
   Thomas Dickel <Thomas.Dickel@mni.fh-giessen.de> owns one SIS5595.
 * Make GL518SM rev 00 voltage iteration run as a kernel thread.
   Add libsensors support for the new readable registers.
+* Sensors, sensors.conf.eg: add ADM1021 and ADM9240 support.
