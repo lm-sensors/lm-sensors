@@ -978,7 +978,13 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "w83781d",
        i2c_addrs => [0x2c..0x2f],
        i2c_detect => sub { w83781d_detect 7, @_},
-     } ,
+     },
+     {
+       name => "Winbond W83792D",
+       driver => "to-be-written",
+       i2c_addrs => [0x2c..0x2f],
+       i2c_detect => sub { w83781d_detect 8, @_},
+     },
      {
        name => "Winbond W83627HF",
        driver => "w83781d",
@@ -3283,7 +3289,8 @@ sub lm87_detect
   
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 2 = W83783S,
 #                        3 = W83627HF, 4 = AS99127F (rev.1),
-#                        5 = AS99127F (rev.2), 6 = ASB100, 7 = W83791D
+#                        5 = AS99127F (rev.2), 6 = ASB100, 7 = W83791D,
+#                        8 = W83792D
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -3332,6 +3339,7 @@ sub w83781d_detect
   return if $chip == 5 and  $reg1 != 0x31;
   return if $chip == 6 and  $reg1 != 0x31;
   return if $chip == 7 and  $reg1 != 0x71;
+  return if $chip == 8 and  $reg1 != 0x72;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   @res = (8);
   @res = (7) # Asus chips were always seen at 0x2d
