@@ -124,9 +124,6 @@ static int update_vbat = 0;
 /* Reset the registers on init */
 static int reset_it87 = 0;
 
-/* Initialize the registers to default values on init */
-static int init = 1;
-
 /* Many IT87 constants specified below */
 
 /* Length of ISA address segment */
@@ -673,24 +670,8 @@ static int it87_write_value(struct i2c_client *client, u8 reg, u8 value)
 /* Called when we have found a new IT87. It should set limits, etc. */
 static void it87_init_client(struct i2c_client *client)
 {
-	if( init )
-	{
-	/* Reset all except Watchdog values and last conversion values
-	   This sets fan-divs to 2, among others.
-     It will also reset the automatic temperature controlled fan
-     speed (noise) control the BIOS configured on POST and the
-     fan will be set to propably noisy full speed operation */
-		if( reset_it87 ) {
-			it87_write_value(client, IT87_REG_CONFIG, 0x80);
-		}
-
-		/* Enable voltage monitors */
-		it87_write_value(client, IT87_REG_VIN_ENABLE, 0xff);
-
-		/* Enable fans */
-		it87_write_value(client, IT87_REG_FAN_CTRL,
-				(it87_read_value(client, IT87_REG_FAN_CTRL) & 0x8f)
-				| 0x70);
+	if( reset_it87 ) {
+		it87_write_value(client, IT87_REG_CONFIG, 0x80);
 	}
 	/* Start monitoring */
 	it87_write_value(client, IT87_REG_CONFIG,
@@ -1124,8 +1105,6 @@ MODULE_AUTHOR("Chris Gauthron <chrisg@0-in.com>");
 MODULE_DESCRIPTION("IT8705F, IT8712F, Sis950 driver");
 MODULE_PARM(update_vbat, "i");
 MODULE_PARM_DESC(update_vbat, "Update vbat if set else return powerup value");
-MODULE_PARM(init, "i");
-MODULE_PARM_DESC(init, "Initialize some of the chip's registers, default yes");
 MODULE_PARM(reset_it87, "i");
 MODULE_PARM_DESC(reset_it87, "Reset the chip's registers, default no");
 

@@ -42,39 +42,11 @@ Module Parameters
   boards the battery voltage is always fed to the chip so can be read at 
   any time.  Excessive reading may decrease battery life but no information 
   is given in the datasheet.
-* temp_type: integer bit mask 
-  bit 0: Temp sensor 1 is thermal diode
-  bit 1: Temp sensor 2 is thermal diode
-  bit 2: Temp sensor 3 is thermal diode
-  bit 3: Temp sensor 1 is thermal resistor
-  bit 4: Temp sensor 2 is thermal resistor
-  bit 5: Temp sensor 3 is thermal resistor
-  For each sensor either the diode or resistor bit should be set, not both.
-  Default is temp sensor 1 and 3 resistor, 2 diode (value 0x2a)
-  Legal values:
-	sensor1		sensor2		sensor3		value
-	-------		-------		-------		-----
-	diode		diode		diode		0x07
-	diode		diode		thermistor	0x23
-	diode		thermistor	diode		0x15
-	diode		thermistor	thermistor	0x31
-	thermistor	diode		diode		0x0e
-	thermistor	diode		thermistor	0x2a   ** default
-	thermistor	thermistor	diode		0x1c
-	thermistor	thermistor	thermistor	0x38
+* temp_type: integer bit mask (no longer supported; see below)
   As of release 2.8.2 the sensor type can be set at runtime. See below.
 * reset_it87: integer 1 if the registers of the chip should be reset at
   module load time, 0 to not reset the registers. Default is 0.
-* init: integer 1 if the registers should be initialized with the module's
-  default values, 0 skip the initialization. Default is 1.
-  On some boards (e.g. the Shuttle FN41 from the Shuttle XPC Barebone)
-  the BIOS configures it87's smart temperature monitoring fan power
-  adjust feature. A reset/init would unset this and set the power of the
-  fan to maximum speed (which is very noisy). Set 'reset_it87=0' to
-  keep the registers at the preconfigured values.
-  Note: If the registers weren't preconfigured for monitoring by the BIOS
-  the monitoring will not work if you do not reset and initialize the chip's
-  registers at module load time.
+* init: (no longer supported)
 
 Description
 -----------
@@ -129,6 +101,12 @@ To change sensor x to a thermistor, 'echo 2 > sensorx'
 where x is 1, 2, or 3.
 To change sensor x to a thermal diode, 'echo 3 > sensorx'.
 Any other value is invalid.
+To configure this at startup, put the following lines in the it87 section
+of /etc/sensors.conf.
+2 = thermistor; 3 = thermal diode
+	   set sensor1 3
+	   set sensor2 3
+	   set sensor3 3
 
 The fan speed control features can be enabled by setting the bits 0-2 of
 the fan_ctl register to 1. (Note: bits 6-4 of this register must be set to
