@@ -92,11 +92,10 @@ int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res)
   if (!strcmp(part4,"*"))
     res->addr = SENSORS_CHIP_NAME_ADDR_ANY;
   else {
-    int done = 0;
     if ((strlen(part4) > 4) || (strlen(part4) == 0))
       goto ERROR;
     res->addr = 0;
-    for (i = 0; !done; i++) { 
+    for (i = 0; ; i++) { 
       switch (part4[i]) {
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
@@ -109,12 +108,12 @@ int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res)
         res->addr = res->addr * 16 + part4[i] - 'A' + 10;
         break;
       case 0:
-        done = 1;
-        break;
+        goto DONE;
       default:
         goto ERROR;
       }
     }
+DONE:;
   }
 
   /* OK. So let's look at part3. It must either be the number of the
@@ -133,23 +132,22 @@ int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res)
   } else if (part2 && !strcmp(part2,"i2c") && !strcmp(part3,"*"))
     res->bus = SENSORS_CHIP_NAME_BUS_ANY_I2C;
   else if (part2 && !strcmp(part2,"i2c")) {
-    int done = 0;
     if ((strlen(part3) > 3) || (strlen(part3) == 0))
       goto ERROR;
     res->bus = 0;
-    for (i = 0; !done; i++) { 
+    for (i = 0; ; i++) { 
       switch (part3[i]) {
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
         res->bus = res->bus * 10 + part3[i] - '0';
         break;
       case 0:
-        done = 1;
-        break;
+        goto DONE2;
       default:
         goto ERROR;
       }
     }
+DONE2:;
   } else if (res->addr == SENSORS_CHIP_NAME_ADDR_ANY) {
     res->bus = SENSORS_CHIP_NAME_BUS_ANY;
     if (part2)
