@@ -353,6 +353,9 @@
 #define SENSORS_W83781D_ALARMS 81 /* R */
 #define SENSORS_W83781D_BEEP_ENABLE 82 /* RW */
 #define SENSORS_W83781D_BEEPS 83 /* RW */
+#define SENSORS_W83781D_SENS1 91 /* RW */
+#define SENSORS_W83781D_SENS2 92 /* RW */
+#define SENSORS_W83781D_SENS3 93 /* RW */
 
 
 /* Winbond W83782D chips */
@@ -407,6 +410,9 @@
 #define SENSORS_W83782D_ALARMS 81 /* R */
 #define SENSORS_W83782D_BEEP_ENABLE 82 /* RW */
 #define SENSORS_W83782D_BEEPS 83 /* RW */
+#define SENSORS_W83782D_SENS1 91 /* RW */
+#define SENSORS_W83782D_SENS2 92 /* RW */
+#define SENSORS_W83782D_SENS3 93 /* RW */
 
 
 /* Winbond W83783S chips */
@@ -453,6 +459,8 @@
 #define SENSORS_W83783S_ALARMS 81 /* R */
 #define SENSORS_W83783S_BEEP_ENABLE 82 /* RW */
 #define SENSORS_W83783S_BEEPS 83 /* RW */
+#define SENSORS_W83783S_SENS1 91 /* RW */
+#define SENSORS_W83783S_SENS2 92 /* RW */
 
 
 /* Analog Devices ADM9240 chips */

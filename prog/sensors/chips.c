@@ -530,7 +530,7 @@ void print_lm80(const sensors_chip_name *name)
 void print_w83781d(const sensors_chip_name *name)
 {
   char *label = NULL;
-  double cur,min,max,fdiv;
+  double cur,min,max,fdiv,sens;
   int alarms,beeps;
   int is82d, is83s;
 
@@ -694,37 +694,84 @@ void print_w83781d(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_W83781D_TEMP1,&cur) &&
       !sensors_get_feature(*name,SENSORS_W83781D_TEMP1_HYST,&min) &&
       !sensors_get_feature(*name,SENSORS_W83781D_TEMP1_OVER,&max)) {
-    print_label(label,10);
-    printf("%+3.0f C     (limit = %+3.0f C,  hysteresis = %+3.0f C)   %s  %s\n",
-           cur,max,min, alarms&W83781D_ALARM_TEMP1?"ALARM":"     ",
-           beeps&W83781D_ALARM_TEMP1?"(beep)":"");
+    if((!is82d) && (!is83s)) {
+      print_label(label,10);
+      printf("%+3.0f C   (limit = %+3.0f C, hysteresis = %+3.0f C) %s  %s\n",
+             cur,max,min, alarms&W83781D_ALARM_TEMP1 ?"ALARM":"     ",
+             beeps&W83781D_ALARM_TEMP1?"(beep)":"");
+    } else {
+      if(!sensors_get_feature(*name,SENSORS_W83781D_SENS1,&sens)) {
+        print_label(label,10);
+        printf(
+"%+3.0f C   (limit = %+3.0f C, hysteresis = %+3.0f C, sensor = %s) %s  %s\n",
+               cur,max,min,
+               (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
+               "3904 transistor":"thermistor",
+               alarms&W83781D_ALARM_TEMP1?"ALARM":"     ",
+               beeps&W83781D_ALARM_TEMP1?"(beep)":"");
+      } else {
+        printf("ERROR: Can't get TEMP1 data!\n");
+      }
+    }
   } else
-    printf("ERROR: Can't get TEMP2 data!\n");
+    printf("ERROR: Can't get TEMP1 data!\n");
   free_the_label(&label);
 
   if (!sensors_get_label(*name,SENSORS_W83781D_TEMP2,&label) &&
       !sensors_get_feature(*name,SENSORS_W83781D_TEMP2,&cur) &&
       !sensors_get_feature(*name,SENSORS_W83781D_TEMP2_HYST,&min) &&
       !sensors_get_feature(*name,SENSORS_W83781D_TEMP2_OVER,&max)) {
-    print_label(label,10);
-    printf("%+3.1f C   (limit = %+3.1f C, hysteresis = %+3.1f C) %s  %s\n",
-           cur,max,min, alarms&W83781D_ALARM_TEMP23?"ALARM":"     ",
-           beeps&W83781D_ALARM_TEMP23?"(beep)":"");
+    if((!is82d) && (!is83s)) {
+      print_label(label,10);
+      printf("%+3.1f C   (limit = %+3.1f C, hysteresis = %+3.1f C) %s  %s\n",
+             cur,max,min, alarms&W83781D_ALARM_TEMP23 ?"ALARM":"     ",
+             beeps&W83781D_ALARM_TEMP23?"(beep)":"");
+    } else {
+      if(!sensors_get_feature(*name,SENSORS_W83781D_SENS2,&sens)) {
+        print_label(label,10);
+        printf(
+"%+3.1f C   (limit = %+3.1f C, hysteresis = %+3.1f C, sensor = %s) %s  %s\n",
+               cur,max,min,
+               (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
+               "3904 transistor":"thermistor",
+               alarms&W83781D_ALARM_TEMP2?"ALARM":"     ",
+               beeps&W83781D_ALARM_TEMP2?"(beep)":"");
+      } else {
+        printf("ERROR: Can't get TEMP2 data!\n");
+      }
+    }
   } else
     printf("ERROR: Can't get TEMP2 data!\n");
   free_the_label(&label);
 
-  if (!sensors_get_label(*name,SENSORS_W83781D_TEMP3,&label) &&
-      !sensors_get_feature(*name,SENSORS_W83781D_TEMP3,&cur) &&
-      !sensors_get_feature(*name,SENSORS_W83781D_TEMP3_HYST,&min) &&
-      !sensors_get_feature(*name,SENSORS_W83781D_TEMP3_OVER,&max)) {
-    print_label(label,10);
-    printf("%+3.1f C   (limit = %+3.1f C, hysteresis = %+3.1f C) %s  %s\n",
-           cur,max,min, alarms&W83781D_ALARM_TEMP23?"ALARM":"     ",
-           beeps&W83781D_ALARM_TEMP23?"(beep)":"");
-  } else
-    printf("ERROR: Can't get TEMP3 data!\n");
-  free_the_label(&label);
+  if (!is83s) {
+    if (!sensors_get_label(*name,SENSORS_W83781D_TEMP3,&label) &&
+        !sensors_get_feature(*name,SENSORS_W83781D_TEMP3,&cur) &&
+        !sensors_get_feature(*name,SENSORS_W83781D_TEMP3_HYST,&min) &&
+        !sensors_get_feature(*name,SENSORS_W83781D_TEMP3_OVER,&max)) {
+      if(!is82d) {
+        print_label(label,10);
+        printf("%+3.1f C   (limit = %+3.1f C, hysteresis = %+3.1f C) %s  %s\n",
+               cur,max,min, alarms&W83781D_ALARM_TEMP23 ?"ALARM":"     ",
+               beeps&W83781D_ALARM_TEMP23?"(beep)":"");
+      } else {
+        if(!sensors_get_feature(*name,SENSORS_W83781D_SENS3,&sens)) {
+          print_label(label,10);
+          printf(
+"%+3.1f C   (limit = %+3.1f C, hysteresis = %+3.1f C, sensor = %s) %s  %s\n",
+                 cur,max,min,
+                 (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
+                 "3904 transistor":"thermistor",
+                 alarms&W83781D_ALARM_TEMP3?"ALARM":"     ",
+                 beeps&W83781D_ALARM_TEMP3?"(beep)":"");
+        } else {
+          printf("ERROR: Can't get TEMP3 data!\n");
+        }
+      }
+    } else
+      printf("ERROR: Can't get TEMP3 data!\n");
+    free_the_label(&label);
+  }
 
   if (!sensors_get_label(*name,SENSORS_W83781D_VID,&label) &&
       !sensors_get_feature(*name,SENSORS_W83781D_VID,&cur)) {

@@ -223,6 +223,7 @@ chip "w83782d-*" "w83783s-*"
 # set limits to  5% for the critical voltages
 # set limits to 10% for the non-critical voltages
 # set limits to 20% for the battery voltage
+
     set in0_min vid*0.95
     set in0_max vid*1.05
     set in1_min vid*0.95
@@ -241,6 +242,14 @@ chip "w83782d-*" "w83783s-*"
     set in7_max 5 * 1.05
     set in8_min 3.0 * 0.80
     set in8_max 3.0 * 1.20
+
+# set up sensor types (thermistor is default)
+# 1 = PII/Celeron Diode; 2 = 3904 transistor;
+# 3435 = thermistor with Beta = 3435
+# If temperature changes very little, try 1 or 2.
+#   set sensor1 1
+#   set sensor2 2
+#   set sensor3 3435
 
 
 chip "gl518sm-r00-*" "gl518sm-r80-*"

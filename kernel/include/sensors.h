@@ -403,7 +403,9 @@ struct sensors_chips_data {
 #define W83781D_ALARM_FAN2 0x0080
 #define W83781D_ALARM_FAN3 0x0800
 #define W83781D_ALARM_TEMP1 0x0010
-#define W83781D_ALARM_TEMP23 0x0020
+#define W83781D_ALARM_TEMP23 0x0020  /* 781D only */
+#define W83781D_ALARM_TEMP2 0x0020   /* 782D/783S */
+#define W83781D_ALARM_TEMP3 0x2000   /* 782D only */
 #define W83781D_ALARM_CHAS 0x1000
 
 #define LM75_SYSCTL_TEMP 1200 /* Degrees Celcius * 10 */

@@ -860,6 +860,12 @@ static sensors_chip_feature w83782d_features[] =
     { SENSORS_W83782D_BEEPS, "beeps", SENSORS_W83782D_ALARMS,
                          SENSORS_W83782D_ALARMS, SENSORS_MODE_RW,
                          W83781D_SYSCTL_BEEP, VALUE(2), 0 },
+    { SENSORS_W83782D_SENS1, "sensor1", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_RW, W83781D_SYSCTL_SENS1, VALUE(1), 0 },
+    { SENSORS_W83782D_SENS2, "sensor2", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_RW, W83781D_SYSCTL_SENS2, VALUE(1), 0 },
+    { SENSORS_W83782D_SENS3, "sensor3", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_RW, W83781D_SYSCTL_SENS3, VALUE(1), 0 },
     { 0 }
   };
   
@@ -971,6 +977,10 @@ static sensors_chip_feature w83783s_features[] =
     { SENSORS_W83783S_BEEPS, "beeps", SENSORS_W83783S_ALARMS,
                          SENSORS_W83783S_ALARMS, SENSORS_MODE_RW,
                          W83781D_SYSCTL_BEEP, VALUE(2), 0 },
+    { SENSORS_W83783S_SENS1, "sensor1", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_RW, W83781D_SYSCTL_SENS1, VALUE(1), 0 },
+    { SENSORS_W83783S_SENS2, "sensor2", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_RW, W83781D_SYSCTL_SENS2, VALUE(1), 0 },
     { 0 }
   };
   
