@@ -3,16 +3,22 @@ Many, many things. Most notably:
 * 2.1 kernel tests; at this moment, only 2.0 compiles have been tried.
 * Make it SMP-safe: there are no spinlocks yet. They are needed at many
   places, probably (everywhere where global vars are accessed).
+* Extend sensors.c with a file /proc/sys/dev/sensors/chips, which lists
+  all directories under /proc/sys/dev/sensors with their SYSCTL id
+  (needed for good sysctl access).
 * Write smbus_access_i2c in smbus.c
 * Write piix4_* in piix4.c
-* Complete lm78 driver
-* Extend dev interface for SMBus
-* Create entries in /proc/bus: a list of all registered busses, and for
-  each bus, a file with registered clients (partially done)
+* Make lm78.c detect 'double hits', (same chip connected to both SMBus and
+  ISA).
+* Check whether some lm78 functionality is chip-generic and can be moved to
+  sensors.c.
+* Rename i2c-proc.c to i2c-user.c, and extend it with /dev entries;
+  or, create a better i2c-dev.c, that understands SMBus commands.
 * Write all other drivers
 * How to make drivers detect thing *not*; for example, if a Winbond is 
   present, the LM75 driver should not try to access its simulated
-  LM75 chips!
+  LM75 chips (in this case, simply disable them - but what if the LM75
+  driver was loaded first?).
 * Write a userland-library for SMBus/i2c access (through the /dev interface)
 * Write a userland detection program for busses (clients are less important;
   but perhaps needed too).

@@ -91,7 +91,7 @@ static int lm78_in_conv[7] = {10000, 10000, 10000, 16892, 38000,
 #define LM78_INIT_IN_5 -1200
 #define LM78_INIT_IN_6 -500
 
-#define LM78_INIT_IN_PERCENTAGE 100
+#define LM78_INIT_IN_PERCENTAGE 10
 
 #define LM78_INIT_IN_MIN_0 \
         (LM78_INIT_IN_0 - LM78_INIT_IN_0 * LM78_INIT_IN_PERCENTAGE / 100) 
@@ -256,13 +256,13 @@ static ctl_table lm78_dir_table_template[] = {
   { LM78_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
   { LM78_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
   { LM78_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_FAN2, "fan1", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-  { LM78_SYSCTL_FAN3, "fan1", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
+  { LM78_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
+  { LM78_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
   { LM78_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
   { LM78_SYSCTL_VID, "vid", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
   { LM78_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
-
-  { LM78_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl }
+  { LM78_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &lm78_proc, &lm78_sysctl },
+  { 0 }
 };
 
 
@@ -337,7 +337,7 @@ int lm78_detect_isa(struct isa_adapter *adapter)
     
     /* Register a new directory entry with module sensors */
     if ((err = sensors_register_entry((struct i2c_client *) new_client,"lm78",
-                                      lm78_dir_table_template) < 0))
+                                      lm78_dir_table_template)) < 0)
       goto ERROR4;
     ((struct lm78_data *) (new_client->data)) -> sysctl_id = err;
 
@@ -380,8 +380,8 @@ int lm78_detach_isa(struct isa_client *client)
     return err;
   }
   lm78_remove_client((struct i2c_client *) client);
-  kfree(client);
   release_region(client->isa_addr,LM78_EXTENT);
+  kfree(client);
   return 0;
 }
 
@@ -422,7 +422,7 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
 
     /* Register a new directory entry with module sensors */
     if ((err = sensors_register_entry(new_client,"lm78",
-                                      lm78_dir_table_template) < 0))
+                                      lm78_dir_table_template)) < 0)
       goto ERROR4;
     ((struct lm78_data *) (new_client->data))->sysctl_id = err;
 
@@ -592,7 +592,7 @@ void lm78_init_client(struct i2c_client *client)
 
 void lm78_update_client(struct i2c_client *client)
 {
-  struct lm78_data *data =  client->data;
+  struct lm78_data *data = client->data;
   int i;
 
   down(&data->update_lock);
@@ -600,6 +600,9 @@ void lm78_update_client(struct i2c_client *client)
   if ((jiffies - data->last_updated > HZ+HZ/2 ) ||
       (jiffies < data->last_updated) || ! data->valid) {
 
+#ifdef DEBUG
+    printk("Starting lm78 update\n");
+#endif
     for (i = 0; i <= 6; i++) {
       data->in[i]     = lm78_read_value(client,LM78_REG_IN(i));
       data->in_min[i] = lm78_read_value(client,LM78_REG_IN_MIN(i));
@@ -650,11 +653,12 @@ int lm78_proc (ctl_table *ctl, int write, struct file * filp,
       nrels=3;
       mag=2;
       break;
-    case LM78_SYSCTL_FAN_DIV: case LM78_SYSCTL_TEMP:
+    case LM78_SYSCTL_TEMP:
       nrels=3;
       mag=0;
       break;
     case LM78_SYSCTL_FAN1: case LM78_SYSCTL_FAN2: case LM78_SYSCTL_FAN3:
+    case LM78_SYSCTL_FAN_DIV:
       nrels=2;
       mag=0;
       break;
@@ -736,10 +740,11 @@ int lm78_sysctl (ctl_table *table, int *name, int nlen, void *oldval,
   switch (table->ctl_name) {
     case LM78_SYSCTL_IN0: case LM78_SYSCTL_IN1: case LM78_SYSCTL_IN2: 
     case LM78_SYSCTL_IN3: case LM78_SYSCTL_IN4: case LM78_SYSCTL_IN5: 
-    case LM78_SYSCTL_IN6: case LM78_SYSCTL_TEMP: case LM78_SYSCTL_FAN_DIV:
+    case LM78_SYSCTL_IN6: case LM78_SYSCTL_TEMP: 
       nrels=3;
       break;
     case LM78_SYSCTL_FAN1: case LM78_SYSCTL_FAN2: case LM78_SYSCTL_FAN3:
+    case LM78_SYSCTL_FAN_DIV:
       nrels=2;
       break;
     case LM78_SYSCTL_VID: case LM78_SYSCTL_ALARMS:
@@ -825,8 +830,8 @@ void read_in(struct i2c_client *client, int nr, long *results)
 {
   struct lm78_data *data = client->data;
   results[0] = IN_FROM_REG(data->in_min[nr],nr);
-  results[1] = IN_FROM_REG(data->in_min[nr],nr);
-  results[2] = IN_FROM_REG(data->in_min[nr],nr);
+  results[1] = IN_FROM_REG(data->in_max[nr],nr);
+  results[2] = IN_FROM_REG(data->in[nr],nr);
 }
 
 void write_fan(struct i2c_client *client, int nr, int nrels, long *results)

@@ -62,11 +62,11 @@ int sensors_create_name(char **name, const char *prefix,
   char name_buffer[50]; 
   int id;
   if (i2c_is_isa_adapter(adapter)) 
-    sprintf(name_buffer,"%s-isa-%d",prefix,addr);
+    sprintf(name_buffer,"%s-isa-%04x",prefix,addr);
   else {
     if ((id = i2c_adapter_id(adapter)) < 0);
       return -ENOENT;
-    sprintf(name_buffer,"%s-i2c-%d-%d",prefix,id,addr);
+    sprintf(name_buffer,"%s-i2c-%d-%02x",prefix,id,addr);
   }
   *name = kmalloc(strlen(name_buffer)+1,GFP_KERNEL);
   strcpy(*name,name_buffer);
@@ -94,7 +94,7 @@ int sensors_register_entry(struct i2c_client *client ,const char *prefix,
                                  client->addr)))
     return res;
 
-  for (id = 0; id < SENSORS_ENTRY_MAX; i++)
+  for (id = 0; id < SENSORS_ENTRY_MAX; id++)
     if (! sensors_entries[id]) {
       break;
     }
@@ -129,7 +129,7 @@ int sensors_register_entry(struct i2c_client *client ,const char *prefix,
     return -ENOMEM;
   }
 
-  sensors_entries[i] = new_header;
+  sensors_entries[id-256] = new_header;
 
   return id;
 }
@@ -141,7 +141,7 @@ void sensors_deregister_entry(int id)
   if (sensors_entries[id]) {
     table = sensors_entries[id]->ctl_table;
     unregister_sysctl_table(sensors_entries[id]);
-    kfree((void *) (table->procname));
+    kfree((void *) (table[4].procname));
     kfree(table);
     sensors_entries[id] = 0;
   }

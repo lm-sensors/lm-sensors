@@ -17,7 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-#define RCSID "$Id: i2c-core.c,v 1.4 1998/11/27 22:02:09 frodo Exp $"
+#define RCSID "$Id: i2c-core.c,v 1.5 1998/12/01 21:11:32 frodo Exp $"
 /* ------------------------------------------------------------------------- */
 
 #include <linux/module.h>
@@ -248,7 +248,7 @@ int i2c_del_driver(struct i2c_driver *driver)
 			if (client != NULL && client->driver == driver) {
 				DEB2(printk("i2c:   detaching client %s:\n",
 					client->name));
-				i2c_detach_client(client);
+				/* i2c_detach_client(client); */
 				driver->detach_client(client);
 			}
 		}
