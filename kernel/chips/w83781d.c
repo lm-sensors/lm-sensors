@@ -167,18 +167,8 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 	return SENSORS_LIMIT((1350000 + rpm * div / 2) / (rpm * div), 1,
 			     254);
 }
-extern inline u8 AS_FAN_TO_REG(long rpm, int div)
-{
-	if (rpm == 0)
-		return 255;
-	rpm = SENSORS_LIMIT(rpm, 1, 1000000);
-	return SENSORS_LIMIT((810000 + rpm * div / 2) / (rpm * div), 1,
-			     254);
-}
 
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
-#define AS_FAN_FROM_REG(val,div) \
-                              ((val)==0?-1:(val)==255?0:810000/((val)*(div)))
 
 #define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
                                                  ((val)+5)/10),0,255))
@@ -1320,21 +1310,12 @@ void w83781d_init_client(struct i2c_client *client)
 		w83781d_write_value(client, W83781D_REG_VBAT,
 		    (w83781d_read_value(client, W83781D_REG_VBAT) | 0x01));
 	}
-	if (type == as99127f) {
-		w83781d_write_value(client, W83781D_REG_FAN_MIN(1),
-				    AS_FAN_TO_REG(W83781D_INIT_FAN_MIN_1, 2));
-		w83781d_write_value(client, W83781D_REG_FAN_MIN(2),
-				    AS_FAN_TO_REG(W83781D_INIT_FAN_MIN_2, 2));
-		w83781d_write_value(client, W83781D_REG_FAN_MIN(3),
-				    AS_FAN_TO_REG(W83781D_INIT_FAN_MIN_3, 2));
-	} else {
-		w83781d_write_value(client, W83781D_REG_FAN_MIN(1),
-				    FAN_TO_REG(W83781D_INIT_FAN_MIN_1, 2));
-		w83781d_write_value(client, W83781D_REG_FAN_MIN(2),
-				    FAN_TO_REG(W83781D_INIT_FAN_MIN_2, 2));
-		w83781d_write_value(client, W83781D_REG_FAN_MIN(3),
-				    FAN_TO_REG(W83781D_INIT_FAN_MIN_3, 2));
-	}
+	w83781d_write_value(client, W83781D_REG_FAN_MIN(1),
+			    FAN_TO_REG(W83781D_INIT_FAN_MIN_1, 2));
+	w83781d_write_value(client, W83781D_REG_FAN_MIN(2),
+			    FAN_TO_REG(W83781D_INIT_FAN_MIN_2, 2));
+	w83781d_write_value(client, W83781D_REG_FAN_MIN(3),
+			    FAN_TO_REG(W83781D_INIT_FAN_MIN_3, 2));
 
 	w83781d_write_value(client, W83781D_REG_TEMP_OVER,
 			    TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
@@ -1552,29 +1533,16 @@ void w83781d_fan(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83781d_update_client(client);
-		if(data->type == as99127f) {
-			results[0] = AS_FAN_FROM_REG(data->fan_min[nr - 1],
-					  DIV_FROM_REG(data->fan_div[nr - 1]));
-			results[1] = AS_FAN_FROM_REG(data->fan[nr - 1],
-				          DIV_FROM_REG(data->fan_div[nr - 1]));
-		} else {
-			results[0] = FAN_FROM_REG(data->fan_min[nr - 1],
-					  DIV_FROM_REG(data->fan_div[nr - 1]));
-			results[1] = FAN_FROM_REG(data->fan[nr - 1],
-				          DIV_FROM_REG(data->fan_div[nr - 1]));
-		}
+		results[0] = FAN_FROM_REG(data->fan_min[nr - 1],
+				  DIV_FROM_REG(data->fan_div[nr - 1]));
+		results[1] = FAN_FROM_REG(data->fan[nr - 1],
+			          DIV_FROM_REG(data->fan_div[nr - 1]));
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			if(data->type == as99127f) {
-				data->fan_min[nr - 1] =
-				     AS_FAN_TO_REG(results[0],
-				            DIV_FROM_REG(data->fan_div[nr-1]));
-			} else {
-				data->fan_min[nr - 1] =
-				     FAN_TO_REG(results[0],
-				            DIV_FROM_REG(data->fan_div[nr-1]));
-			}
+			data->fan_min[nr - 1] =
+			     FAN_TO_REG(results[0],
+			            DIV_FROM_REG(data->fan_div[nr-1]));
 			w83781d_write_value(client,
 					    W83781D_REG_FAN_MIN(nr),
 					    data->fan_min[nr - 1]);
