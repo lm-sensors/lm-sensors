@@ -958,7 +958,10 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 	   bank. */
 	if (kind < 0) {
 		if (w83781d_read_value(new_client, W83781D_REG_CONFIG) &
-		    0x80) goto ERROR1;
+		    0x80) {
+			err = -ENODEV;
+			goto ERROR1;
+		}
 		val1 = w83781d_read_value(new_client, W83781D_REG_BANK);
 		val2 = w83781d_read_value(new_client, W83781D_REG_CHIPMAN);
 		/* Check for Winbond or Asus ID if in bank 0 */
@@ -966,14 +969,19 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 		    (((!(val1 & 0x80)) && (val2 != 0xa3) && (val2 != 0xc3) 
 			 && (val2 != 0x94))
 		     || ((val1 & 0x80) && (val2 != 0x5c) && (val2 != 0x12)
-			 && (val2 != 0x06)))) goto ERROR1;
+			 && (val2 != 0x06)))) {
+			goto ERROR1;
+			err = -ENODEV;
+		}
 		/* If Winbond SMBus, check address at 0x48. Asus doesn't support
 		   except maybe (hopefully) for the as99127f rev.2 */
 		if ((!is_isa) && (((!(val1 & 0x80)) && (val2 == 0xa3)) ||
 				  ((val1 & 0x80) && (val2 == 0x5c)))) {
 			if (w83781d_read_value
-			    (new_client, W83781D_REG_I2C_ADDR) != address)
+			    (new_client, W83781D_REG_I2C_ADDR) != address) {
+				err = -ENODEV;
 				goto ERROR1;
+			}
 		}
 	}
 
@@ -992,8 +1000,10 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 			vendid = winbond;
 		else if ((val2 == 0x12) || (val2 == 0x06))
 			vendid = asus;
-		else
+		else {
+			err = -ENODEV;
 			goto ERROR1;
+		}
 		val1 =
 		    w83781d_read_value(new_client, W83781D_REG_WCHIPID);
 		if ((val1 == 0x10 || val1 == 0x11) && vendid == winbond)
@@ -1016,6 +1026,7 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 				    (KERN_WARNING "w83781d.o: Ignoring 'force' parameter for unknown chip at"
 				     "adapter %d, address 0x%02x\n",
 				     i2c_adapter_id(adapter), address);
+			err = -EINVAL;
 			goto ERROR1;
 		}
 	}
@@ -1046,6 +1057,7 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 		printk(KERN_ERR "w83781d.o: Internal error: unknown kind (%d)?!?",
 		       kind);
 #endif
+		err = -ENODEV;
 		goto ERROR1;
 	}
 
@@ -1079,6 +1091,7 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 				   force_subclients[i] > 0x4f) {
 					printk(KERN_ERR "w83781d.o: Invalid subclient address %d; must be 0x48-0x4f\n",
 					        force_subclients[i]);
+					err = -EINVAL;
 					goto ERROR5;
 				}
 			}
@@ -1102,6 +1115,7 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 			if(data->lm75[0].addr == data->lm75[1].addr) {
 				printk(KERN_ERR "w83781d.o: Duplicate addresses 0x%x for subclients.\n",
 					data->lm75[0].addr);
+				err = -EBUSY;
 				goto ERROR5;
 			}
 		}
