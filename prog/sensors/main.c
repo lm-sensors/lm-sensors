@@ -54,6 +54,7 @@ void print_long_help(void)
   printf("Usage: %s [OPTION]...\n",PROGRAM);
   printf("  -c, --config-file     Specify a config file\n");
   printf("  -h, --help            Display this help text\n");
+  printf("  -s, --set             Execute `set' statements too (root only)\n");
   printf("  -v, --version         Display the program version\n");
   printf("\n");
   printf("By default, a list of directories is examined for the config file `sensors.conf'\n");
@@ -119,6 +120,7 @@ int open_this_config_file(char *filename)
 int main (int argc, char *argv[])
 {
   int c,res;
+  int do_sets;
 
   int chip_nr;
   const sensors_chip_name *chip;
@@ -126,12 +128,14 @@ int main (int argc, char *argv[])
 
   struct option long_opts[] =  {
     { "help", no_argument, NULL, 'h' },
+    { "set", no_argument, NULL, 's' },
     { "version", no_argument, NULL, 'v'},
     { "config-file", required_argument, NULL, 'c' }
   };
 
+  do_sets = 0;
   while (1) {
-    c = getopt_long(argc,argv,"hvc:",long_opts,NULL);
+    c = getopt_long(argc,argv,"hvsc:",long_opts,NULL);
     if (c == EOF)
       break;
     switch(c) {
@@ -147,6 +151,9 @@ int main (int argc, char *argv[])
       exit(0);
     case 'c':
       config_file_name = strdup(optarg);
+      break;
+    case 's':
+      do_sets = 1;
       break;
     default:
       fprintf(stderr,"Internal error while parsing options!\n");
@@ -166,6 +173,12 @@ int main (int argc, char *argv[])
 
   /* Here comes the real code... */
 
+  if (do_sets) 
+    if ((res = sensors_do_all_sets())) {
+      fprintf(stderr,"%s\n",sensors_strerror(res));
+      exit(1);
+    }
+  
   for (chip_nr = 0; (chip = sensors_get_detected_chips(&chip_nr));) {
     if (chip->bus == SENSORS_CHIP_NAME_BUS_ISA)
       printf("%s-isa-%04x\n",chip->prefix,chip->addr);

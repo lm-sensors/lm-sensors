@@ -17,13 +17,16 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 #include "access.h"
 #include "sensors.h"
 #include "data.h"
 #include "error.h"
 #include "proc.h"
+#include "general.h"
+
+static int sensors_do_this_chip_sets(sensors_chip_name name);
 
 /* Compare two chips name descriptions, to see whether they could match.
    Return 0 if it does not match, return 1 if it does match. */
@@ -198,25 +201,40 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
    on failure. BUGGY! */
 int sensors_set_feature(sensors_chip_name name, int feature, double value)
 {
-  const sensors_chip_feature *featureptr;
+  const sensors_chip_feature *main_feature;
+  const sensors_chip_feature *alt_feature;
   const sensors_chip *chip;
   const sensors_expr *expr = NULL;
   int i,res;
+  int final_expr=0;
+  double to_write;
 
   if (sensors_chip_name_has_wildcards(name))
     return -SENSORS_ERR_WILDCARDS;
-  if (! (featureptr = sensors_lookup_feature_nr(name.prefix,feature)))
+  if (! (main_feature = sensors_lookup_feature_nr(name.prefix,feature)))
     return -SENSORS_ERR_NO_ENTRY;
-  if (! (featureptr->mode && SENSORS_MODE_W))
+  if (main_feature->compute_mapping == SENSORS_NO_MAPPING)
+    alt_feature = NULL;
+  else if (! (alt_feature =
+                   sensors_lookup_feature_nr(name.prefix,
+                                             main_feature->compute_mapping)))
+    return -SENSORS_ERR_NO_ENTRY;
+  if (! (main_feature->mode && SENSORS_MODE_W))
     return -SENSORS_ERR_ACCESS;
   for (chip = NULL; !expr && (chip = sensors_for_all_config_chips(name,chip));)
-    for (i = 0; !expr && (i < chip->computes_count); i++)
-      if (!strcmp(featureptr->name,chip->computes->name))
+    for (i = 0; !final_expr && (i < chip->computes_count); i++)
+      if (!strcmp(main_feature->name,chip->computes[i].name)) {
         expr = chip->computes->to_proc;
+        final_expr = 1;
+      } else if (alt_feature && 
+                 !strcmp(alt_feature->name,chip->computes[i].name))
+        expr = chip->computes[i].to_proc;
+
+  to_write = value;
   if (expr)
-    if ((res = sensors_eval_expr(name,expr,value,&value)))
+    if ((res = sensors_eval_expr(name,expr,value,&to_write)))
       return res;
-  if (sensors_write_proc(name,feature,value))
+  if (sensors_write_proc(name,feature,to_write))
     return -SENSORS_ERR_PROC;
   return 0;
 }
@@ -330,3 +348,80 @@ int sensors_eval_expr(sensors_chip_name chipname, const sensors_expr *expr,
   }
   return 0;
 }
+
+/* Execute all set statements for this particular chip. The chip may not 
+   contain wildcards!  This function will return 0 on success, and <0 on 
+   failure. */
+int sensors_do_this_chip_sets(sensors_chip_name name)
+{
+  sensors_chip *chip;
+  double value;
+  int err,i,j;
+  int res = 0;
+  const sensors_chip_feature *feature;
+  int *feature_list = NULL;
+  int feature_count = 0;
+  int feature_max = 0;
+  int feature_nr;
+
+  for(chip = NULL; (chip = sensors_for_all_config_chips(name,chip));)
+    for(i = 0; i < chip->sets_count; i++) {
+      feature = sensors_lookup_feature_name(name.prefix,chip->sets[i].name);
+      if (! feature) {
+        sensors_parse_error("Unknown feature name",chip->sets[i].lineno);
+        err = SENSORS_ERR_NO_ENTRY;
+        continue;
+      }
+      feature_nr = feature->number;
+
+      /* Check whether we already set this feature */
+      for(j = 0; j < feature_count; j++)
+        if(feature_list[j] == feature_nr)
+          break;
+      if (j != feature_count)
+        continue;
+      sensors_add_array_el(&feature_nr,(void **)&feature_list,&feature_count,
+                        &feature_max, sizeof(int));
+
+      res = sensors_eval_expr(name,chip->sets[i].value,0,&value);
+      if (res) {
+        sensors_parse_error("Parsing expression",chip->sets[i].lineno);
+        err = res;
+        continue;
+      }
+      if ((res = sensors_set_feature(name,feature_nr,value))) {
+        err = res;
+        continue;
+      }
+    }
+  free(feature_list);
+  return res;
+}
+
+/* Execute all set statements for this particular chip. The chip may contain
+   wildcards!  This function will return 0 on success, and <0 on failure. */
+int sensors_do_chip_sets(sensors_chip_name name)
+{
+  int nr,this_res;
+  const sensors_chip_name *found_name;
+  int res = 0;
+
+  for (nr = 0; (found_name = sensors_get_detected_chips(&nr));)
+    if (sensors_match_chip(name,*found_name)) {
+      this_res = sensors_do_this_chip_sets(*found_name);
+      if (! res)
+        res = this_res;
+    }
+  return res;
+}
+
+/* Execute all set statements for all detected chips. This is the same as
+   calling sensors_do_chip_sets with an all wildcards chip name */
+int sensors_do_all_sets(void)
+{
+  sensors_chip_name name = { SENSORS_CHIP_NAME_PREFIX_ANY, 
+                             SENSORS_CHIP_NAME_BUS_ANY,
+                             SENSORS_CHIP_NAME_ADDR_ANY };
+  return sensors_do_chip_sets(name);
+}
+
