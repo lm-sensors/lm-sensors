@@ -1,4 +1,3 @@
-kernel/busses/dmi_scan.c	drivers/i2c/dmi_scan.c
 kernel/busses/i2c-ali1535.c	drivers/i2c/i2c-ali1535.c
 kernel/busses/i2c-ali15x3.c	drivers/i2c/i2c-ali15x3.c
 kernel/busses/i2c-amd756.c	drivers/i2c/i2c-amd756.c

@@ -966,7 +966,7 @@ obj-$(CONFIG_I2C_HYDRA)			+= i2c-hydra.o
 obj-$(CONFIG_I2C_I801)			+= i2c-i801.o
 obj-$(CONFIG_I2C_I810)			+= i2c-i810.o
 obj-$(CONFIG_I2C_ISA)			+= i2c-isa.o
-obj-$(CONFIG_I2C_PIIX4)			+= i2c-piix4.o dmi_scan.o
+obj-$(CONFIG_I2C_PIIX4)			+= i2c-piix4.o
 obj-$(CONFIG_I2C_SIS5595)		+= i2c-sis5595.o
 obj-$(CONFIG_I2C_SIS630)		+= i2c-sis630.o
 obj-$(CONFIG_I2C_SIS645)		+= i2c-sis645.o
@@ -975,7 +975,6 @@ obj-$(CONFIG_I2C_TSUNAMI)		+= i2c-tsunami.o
 obj-$(CONFIG_I2C_VIA)			+= i2c-via.o
 obj-$(CONFIG_I2C_VIAPRO)		+= i2c-viapro.o
 obj-$(CONFIG_I2C_VOODOO3)		+= i2c-voodoo3.o
-export-objs				+= dmi_scan.o
 EOF
     }
     print OUTPUT;
@@ -1027,6 +1026,87 @@ EOF
   close OUTPUT;
   die "Automatic patch generation for `MAINTAINERS' failed.\n".
       "See our home page http://www.lm-sensors.nu for assistance!" if $done == 0;
+  print_diff $package_root,$kernel_root,$kernel_file,$package_file;
+}
+
+# Generate the diffs for dmi_scan.c and i386_ksyms.c
+# $_[0]: i2c package root (like /tmp/i2c)
+# $_[1]: Linux kernel tree (like /usr/src/linux)
+sub gen_dmi_scan
+{
+  my ($package_root,$kernel_root) = @_;
+  my $kernel_file = "arch/i386/kernel/dmi_scan.c";
+  my $package_file = $temp;
+  my $done = 0;
+
+  open INPUT,"$kernel_root/$kernel_file"
+        or die "Can't open `$kernel_root/$kernel_file'";
+  open OUTPUT,">$package_root/$package_file"
+        or die "Can't open $package_root/$package_file";
+  MAIN: while(<INPUT>) {
+    if ($done == 0 && m/^\s*int is_sony_vaio_laptop;\s*$/) {
+      print OUTPUT <<'EOF';
+int is_unsafe_smbus;
+EOF
+      $done++;
+    }
+    if ($done == 1 && m/^\s*\* Check for a Sony Vaio system\s*$/) {
+      print OUTPUT <<'EOF';
+ * Don't access SMBus on IBM systems which get corrupted eeproms 
+ */
+
+static __init int disable_smbus(struct dmi_blacklist *d)
+{   
+	if (is_unsafe_smbus == 0) {
+		is_unsafe_smbus = 1;
+		printk(KERN_INFO "%s machine detected. Disabling SMBus accesses.\n", d->ident);
+	}
+	return 0;
+}
+
+/*
+EOF
+      $done++;
+    }
+    if ($done == 2 && m/^\s*\{ sony_vaio_laptop, "Sony Vaio", \{ \/\* This is a Sony Vaio laptop \*\/\s*$/) {
+      print OUTPUT <<'EOF';
+	{ disable_smbus, "IBM", {
+			MATCH(DMI_SYS_VENDOR, "IBM"),
+			NO_MATCH, NO_MATCH, NO_MATCH
+			} },
+EOF
+      $done++;
+    }
+    print OUTPUT;
+  }
+  close INPUT;
+  close OUTPUT;
+  die "Automatic patch generation for `$kernel_file' failed.\n".
+      "See our home page http://www.lm-sensors.nu for assistance!" if $done != 3;
+  print_diff $package_root,$kernel_root,$kernel_file,$package_file;
+
+  $kernel_file = "arch/i386/kernel/i386_ksyms.c";
+  $done = 0;
+
+  open INPUT,"$kernel_root/$kernel_file"
+        or die "Can't open `$kernel_root/$kernel_file'";
+  open OUTPUT,">$package_root/$package_file"
+        or die "Can't open $package_root/$package_file";
+  MAIN: while(<INPUT>) {
+    if ($done == 0 && m/^\s*extern int is_sony_vaio_laptop;\s*$/) {
+      print OUTPUT <<'EOF';
+extern int is_unsafe_smbus;
+EXPORT_SYMBOL(is_unsafe_smbus);
+
+EOF
+      $done++;
+    }
+    print OUTPUT;
+  }
+  close INPUT;
+  close OUTPUT;
+  die "Automatic patch generation for `$kernel_file' failed.\n".
+      "See our home page http://www.lm-sensors.nu for assistance!" if $done != 1;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -1102,6 +1182,7 @@ sub main
   gen_drivers_i2c_Makefile $package_root, $kernel_root;
   gen_Documentation_Configure_help $package_root, $kernel_root;
   gen_MAINTAINERS $package_root, $kernel_root;
+  gen_dmi_scan $package_root, $kernel_root;
 }
 
 main;
