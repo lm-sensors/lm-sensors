@@ -3642,6 +3642,74 @@ void print_vt8231(const sensors_chip_name *name)
 
 }
 
+#define BMC_MAX_INS 10
+#define BMC_MAX_FANS 10
+#define BMC_MAX_TEMPS 10
+
+void print_bmc(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur,min,max,fdiv;
+  int alarms, valid, i;
+
+/*
+  if (!sensors_get_feature(*name,SENSORS_VT8231_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+*/
+#define BMC_ALARM_IN1 0
+#define BMC_ALARM_FAN1 0
+#define BMC_ALARM_TEMP1 0
+
+    alarms = 0;
+  for(i = 0; i < BMC_MAX_INS; i++) {
+	  if (!sensors_get_label_and_valid(*name,SENSORS_BMC_IN1+i,&label,&valid) &&
+	      !sensors_get_feature(*name,SENSORS_BMC_IN1+i,&cur) &&
+	      !sensors_get_feature(*name,SENSORS_BMC_IN1_MIN+i,&min) &&
+	      !sensors_get_feature(*name,SENSORS_BMC_IN1_MAX+i,&max)) {
+	    if (valid) {
+	      print_label(label,10);
+	      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+	             cur,min,max,alarms&BMC_ALARM_IN1?"ALARM":"");
+	    }
+	  }
+	  free_the_label(&label);
+  }
+
+  for(i = 0; i < BMC_MAX_FANS; i++) {
+	  if (!sensors_get_label_and_valid(*name,SENSORS_BMC_FAN1+i,&label,&valid) &&
+	      !sensors_get_feature(*name,SENSORS_BMC_FAN1+i,&cur) &&
+/*
+	      !sensors_get_feature(*name,SENSORS_BMC_FAN1_DIV+i,&fdiv) &&
+*/
+	      !sensors_get_feature(*name,SENSORS_BMC_FAN1_MIN+i,&min)) {
+	    if (valid) {
+	      print_label(label,10);
+	      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+	             cur,min,fdiv, alarms&BMC_ALARM_FAN1?"ALARM":"");
+	    }
+	  }
+	  free_the_label(&label);
+  }
+
+  for(i = 0; i < BMC_MAX_TEMPS; i++) {
+	  if (!sensors_get_label_and_valid(*name,SENSORS_BMC_TEMP1+i,&label,&valid) &&
+	      !sensors_get_feature(*name,SENSORS_BMC_TEMP1+i,&cur) &&
+	      !sensors_get_feature(*name,SENSORS_BMC_TEMP1_MIN+i,&min) &&
+	      !sensors_get_feature(*name,SENSORS_BMC_TEMP1_MAX+i,&max)) {
+	    if (valid) {
+	      print_label(label,10);
+	      print_temp_info( cur, max, min, HYST, 1, 0);
+	      printf(" %s\n", alarms & BMC_ALARM_TEMP1 ? "ALARM" : "" );
+	    }
+	  }
+	  free_the_label(&label);
+  }	
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;

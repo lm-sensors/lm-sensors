@@ -274,6 +274,8 @@ const char *sprintf_chip_name(sensors_chip_name name)
 
   if (name.bus == SENSORS_CHIP_NAME_BUS_ISA)
     snprintf(buf,BUF_SIZE,"%s-isa-%04x",name.prefix,name.addr);
+  else if (name.bus == SENSORS_CHIP_NAME_BUS_DUMMY)
+    snprintf(buf,BUF_SIZE,"%s-%s-%04x",name.prefix,name.busname,name.addr);
   else
     snprintf(buf,BUF_SIZE,"%s-i2c-%d-%02x",name.prefix,name.bus,name.addr);
   return buf;
@@ -355,6 +357,8 @@ void do_a_print(sensors_chip_name name)
     print_lm92(&name);
   else if (!strcmp(name.prefix,"vt8231"))
     print_vt8231(&name);
+  else if (!strcmp(name.prefix,"bmc"))
+    print_bmc(&name);
   else
     print_unknown_chip(&name);
   printf("\n");
