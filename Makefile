@@ -26,20 +26,16 @@
 # I think so, but I have not tested it.
 # SHELL=/usr/bin/bash
 
-# The location of your kernel headers (which should be the linux and asm
-# subdirectories). For most people, the below works perfectly. If you use 
-# Debian, you may want to change this to something like /usr/src/linux/include.
-LINUX_HEADERS=/usr/include
+# The location of linux itself. This is used to find the kernel headers
+# and other things.
+LINUX=/usr/src/linux
+LINUX_HEADERS=$(LINUX)/include
 
 # If you have installed the i2c header at some other place (like 
 # /usr/local/include/linux), set that directory here. Please check this out
 # if you get strange compilation errors; the default Linux i2c headers
 # may be used mistakenly.
 I2C_HEADERS=/usr/local/include
-
-# The location of linux itself. This is only used to determine whether you
-# use a SMP kernel in the magic invocation just below.
-LINUX=/usr/src/linux
 
 # Uncomment the third line on SMP systems if the magic invocation fails. It
 # is a bit complicated because SMP configuration changed around kernel 2.1.130
@@ -57,10 +53,11 @@ MODVER := $(shell if cat $(LINUX_HEADERS)/linux/config.h $(LINUX_HEADERS)/linux/
 
 # Uncomment the second line if you are a developer. This will enable many
 # additional warnings at compile-time
-#WARN := 0
-WARN := 1
+WARN := 0
+#WARN := 1
 
-# Uncomment the second line if you want to get (loads of) debug information.
+# Uncomment the second line if you want to get (loads of) debug information
+# at run-time.
 # Not recommended, unless you are actually debugging the code
 DEBUG := 0
 #DEBUG := 1
@@ -69,7 +66,9 @@ DEBUG := 0
 PREFIX := /usr/local
 
 # This is the directory into which the modules will be installed.
-MODDIR := /lib/modules/current/extra/misc
+# The magic invocation will return something like this:
+#   /lib/modules/2.2.15-ac9/extra/misc
+MODDIR := /lib/modules/`sed -ne '1,4 { s/.*= *\(.*\)/\1/; 1,2 s/.*/&./; p; };' <$(LINUX)/Makefile | tr -d '\n'`/misc
 
 # This is the directory where sensors.conf will be installed, if no other
 # configuration file is found
@@ -122,6 +121,7 @@ MANGRP := root
 # Within each Module.mk, rules and dependencies can be added to targets
 # all, install and clean. Use double colons instead of single ones
 # to do this. 
+
 
 # The subdirectories we need to build things in 
 SRCDIRS := kernel kernel/busses kernel/chips kernel/include lib prog/sensors \
