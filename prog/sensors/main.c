@@ -349,6 +349,8 @@ void do_a_print(sensors_chip_name name)
     print_pcf8591(&name);
   else if (!strcmp(name.prefix,"vt1211"))
     print_vt1211(&name);
+  else if (!strcmp(name.prefix,"smsc47m1"))
+    print_smsc47m1(&name);
   else
     print_unknown_chip(&name);
   printf("\n");

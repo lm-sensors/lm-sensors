@@ -2766,6 +2766,31 @@ static sensors_chip_feature vt1211_features[] =
     { 0 }
   };
 
+static sensors_chip_feature smsc47m1_features[] =
+  { 
+    { SENSORS_SMSC47M1_FAN1, "fan1", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, SMSC47M1_SYSCTL_FAN1, VALUE(2), 0 },
+    { SENSORS_SMSC47M1_FAN2, "fan2", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, SMSC47M1_SYSCTL_FAN2, VALUE(2), 0 },
+    { SENSORS_SMSC47M1_FAN1_MIN, "fan1_min", SENSORS_SMSC47M1_FAN1,
+                             SENSORS_SMSC47M1_FAN1,
+                             SENSORS_MODE_RW, SMSC47M1_SYSCTL_FAN1, VALUE(1), 0 },
+    { SENSORS_SMSC47M1_FAN2_MIN, "fan2_min", SENSORS_SMSC47M1_FAN2,
+                             SENSORS_SMSC47M1_FAN2,
+                             SENSORS_MODE_RW, SMSC47M1_SYSCTL_FAN2, VALUE(1), 0 },
+    { SENSORS_SMSC47M1_FAN1_DIV, "fan1_div", SENSORS_SMSC47M1_FAN1,
+                             SENSORS_NO_MAPPING,
+                             SENSORS_MODE_RW, SMSC47M1_SYSCTL_FAN_DIV, VALUE(1), 
+                             0 },
+    { SENSORS_SMSC47M1_FAN2_DIV, "fan2_div", SENSORS_SMSC47M1_FAN2,
+                             SENSORS_NO_MAPPING,
+                             SENSORS_MODE_RW, SMSC47M1_SYSCTL_FAN_DIV, VALUE(2), 
+                             0 },
+    { SENSORS_SMSC47M1_ALARMS, "alarms", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING, 
+                           SENSORS_MODE_R, SMSC47M1_SYSCTL_ALARMS, VALUE(1), 0 },
+    { 0 }
+  };
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -2818,5 +2843,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_FSCSCY_PREFIX, fscscy_features },
  { SENSORS_PCF8591_PREFIX, pcf8591_features }, 
  { SENSORS_VT1211_PREFIX, vt1211_features }, 
+ { SENSORS_SMSC47M1_PREFIX, smsc47m1_features }, 
  { 0 }
 };

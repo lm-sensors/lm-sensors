@@ -1401,3 +1401,8 @@ chip "vt1211-*"
 
     set fan1_min 3000
     set fan2_min 3000
+
+chip "smsc47m1-*"
+
+    set fan1_min 3000
+    set fan2_min 3000
