@@ -1,7 +1,7 @@
 /*
     sensors_vid.h - Part of lm_sensors, Linux kernel modules for hardware
                monitoring
-    Copyright (c) 2002 Mark D. Studebaker <mdsxyz123@yahoo.com>
+    Copyright (c) 2002-2004  Mark D. Studebaker <mdsxyz123@yahoo.com>
     With assistance from Trent Piepho <xyzzy@speakeasy.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -21,11 +21,12 @@
 
 /*
     This file contains common code for decoding VID pins.
-    This file is #included in various chip drivers in this directory.
+    This file is #included in various sensor chip drivers.
     As the user is unlikely to load more than one driver which
     includes this code we don't worry about the wasted space.
-    Reference: VRM x.y DC-DC Converter Design Guidelines,
-    available at http://developer.intel.com
+    References: VRM x.y DC-DC Converter Design Guidelines,
+                VRD 10.0 Design Guide,
+                available at http://developer.intel.com
 */
 
 /*
@@ -44,7 +45,7 @@
  */
 
 /*
-    Legal val values 00 - 1F.
+    Legal val values 00 - 1F except for VRD 10.0, 0x00-0x3f.
     vrm is the Intel VRM document version.
     Note: vrm version is scaled by 10 and the return value is scaled by 1000
     to avoid floating point in the kernel.
@@ -54,7 +55,21 @@
 
 static inline int vid_from_reg(int val, int vrm)
 {
+	int vid;
+
 	switch(vrm) {
+
+	case 100:		/* VRD 10.0 */
+		if((val & 0x1f) == 0x1f)
+			return 0;
+		if((val & 0x1f) <= 0x09 || val == 0x0a)
+			vid = 10875 - (val & 0x1f) * 250;
+		else
+			vid = 18625 - (val & 0x1f) * 250;
+		if(val & 0x20)
+			vid += 125;
+		vid /= 10;	/* only return 3 dec. places for now */
+		return vid;
 
 	case 24:		/* Opteron processor */
 		return(val == 0x1f ? 0 : 1550 - val * 25);
