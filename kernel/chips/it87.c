@@ -65,13 +65,6 @@ SENSORS_INSMOD_4(it87, it8705, it8712, sis950);
 #define PME	0x04	/* The device with the fan registers in it */
 #define	DEVID	0x20	/* Register: Device ID */
 
-static inline void
-superio_outb(int reg, int val)
-{
-	outb(reg, REG);
-	outb(val, VAL);
-}
-
 static inline int
 superio_inb(int reg)
 {
