@@ -21,8 +21,9 @@ ask CVS about it:
   NOTE: i2c-2.6.0 MUST BE be compiled AND installed first!!!
         If your make fails because it can't find <linux/i2c-proc.h>, you
         forgot this step!!!
-  File doc/FAQ: Many updates and additions
+  File doc/FAQ: Many, many updates and additions
   File doc/busses/i2c-sis5595: new
+  File doc/busses/i2c-tsunami: new
   File doc/chips/via686a: Claim support for 686b.
   File README.thinkpad: new
   File sensors.conf.eg: Adjust as99127f in5 (-12V) and temp2 calculations;
@@ -45,6 +46,7 @@ ask CVS about it:
   Module i2c-sis5595: Allow force_addr=0xaddr; enable if not enabled.
   Module i2c-tsunami: New
   Module i2c-via: Ensure i2c bus is tristated correctly.
+  Module it87: new driver for IT8705, IT8712, Sis950 chips
   Module lm78: Recognize chipid=0x20
   Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
   Module mtp008: Fix temp initializations;
@@ -62,17 +64,18 @@ ask CVS about it:
   Program isadump: fix for Alpha arch. compiles
   Program mkpatch.pl: Fix adm9240 typos; Add more chips to Configure.help;
                       Remove ltc1710; Fix i2c_sis5595 typo;
-                      Support kernel 2.4.5 makefile change
+                      Support kernel 2.4.5 makefile change;
+                      Add i2c-tsunami.
   Program sens_update_rrd: new
   Program sensord: Add -d (debug) and -p (pid-file) options
   Program sensors: Change reported version from 1.3 to the lm_sensors version;
                    Fix swapped limit and hysteresis on 9240, 5595, 686a;
                    Change mtp008 temps from max/min to limit/hyst;
-                   Add maxilife-nba and adm1024 support.
+                   Add maxilife-nba, adm1024, it87xx support.
   Program sensors-detect: Recognize lm78 with chipid=0x20;
                           Recognize SMSC Victory66 South Bridge;
                           Add devfs /dev/i2c/x support;
-                          Add adm1024 support; Add thinkpad warning.
+                          Add adm1024, it87xx support; Add thinkpad warning.
   Program tellerstats: new
 
 2.5.5 (20010115)

@@ -18,6 +18,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #include <linux/init.h>
 
 #ifdef MODULE
@@ -97,6 +98,9 @@ extern int sensors_eeprom_init(void);
 #ifdef CONFIG_SENSORS_LTC1710
 extern int sensors_ltc1710_init(void);
 #endif
+#ifdef CONFIG_SENSORS_IT87
+extern int sensors_it87_init(void);
+#endif
 
 int __init sensors_init_all(void)
 {
@@ -157,6 +161,9 @@ int __init sensors_init_all(void)
 #endif
 #ifdef CONFIG_SENSORS_LTC1710
 	sensors_ltc1710_init();
+#endif
+#ifdef CONFIG_SENSORS_IT87
+	sensors_it87_init();
 #endif
 	return 0;
 }

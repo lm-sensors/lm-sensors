@@ -1,0 +1,184 @@
+Kernel driver `it87.o'
+======================
+
+Status: Beta
+
+Supported chips:
+  * IT8705F
+    ISA 0x290
+    Datasheet: Publicly available at the ITE website
+  * IT8712F (untested)
+    Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
+    Datasheet: Publicly available at the ITE website
+  * Sis950   [clone of IT8705F]
+    ISA 0x290
+    Datasheet: Publicly available at the SIS website
+
+Author: Christophe Gauthron <chrisg@0-in.com>
+
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+
+
+Description
+-----------
+
+This driver implements support for the IT8705F chip.
+This chip is also known as SIS 950.
+
+This driver also supports IT8712F, which adds SmBus access, and a Vid
+input, used to report the Vcore voltage of the Pentium processor.
+
+These chips are 'Super I/O chips', supporting floppy disks, infrared ports,
+joysticks and other miscellaneous stuff. For hardware monitoring,
+they include an 'environmnent controller' with 3 temperature sensors,
+3 FAN rotation speed sensors, 8 voltage sensors, and associated alarms.
+
+Temperatures are measured in degrees Celcius. An alarm is triggered once
+when the Overtemperature Shutdown limit is crossed; it is triggered again
+as soon as it drops below the Hysteresis value.
+
+FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
+triggered if the rotation speed has dropped below a programmable limit. FAN 
+readings can be divided by a programmable divider (1, 2, 4 or 8) to give
+the readings more range or accuracy. This is important because some FANs
+report only one 'tick' each rotation, while others report two - making
+all readings twice as high. Not all RPM values can accurately be represented,
+so some rounding is done. With a divider of 2, the lowest representable
+value is around 2600 RPM.
+
+Voltage sensors (also known as IN sensors) report their values in volts.
+An alarm is triggered if the voltage has crossed a programmable minimum 
+or maximum limit. Note that minimum in this case always means 'closest to
+zero'; this is important for negative voltage measurements. All voltage
+inputs can measure voltages between 0 and 4.08 volts, with a resolution
+of 0.016 volt.
+
+The VID lines (IT8712F only) encode the core voltage value: the voltage level
+your processor should work with. This is hardcoded by the mainboard and/or
+processor itself. It is a value in volts.
+
+If an alarm triggers, it will remain triggered until the hardware register
+is read at least once. This means that the cause for the alarm may 
+already have disappeared!  Note that in the current implementation, all
+hardware registers are read whenever any data is read (unless it is less
+than 1.5 seconds since the last update). This means that you can easily
+miss once-only alarms.
+
+The IT87xx only updates its values each 1.5 seconds; reading it more often
+will do no harm, but will return 'old' values.
+
+
+Chip features
+-------------
+
+Chip `it87`
+          LABEL     LABEL CLASS   COMPUTE CLASS ACCESS MAGNITUDE
+            in0            NONE            NONE      R     2
+            in1            NONE            NONE      R     2
+            in2            NONE            NONE      R     2
+            in3            NONE            NONE      R     2
+            in4            NONE            NONE      R     2
+            in5            NONE            NONE      R     2
+            in6            NONE            NONE      R     2
+            in7            NONE            NONE      R     2
+        in0_min             in0             in0      RW    2
+        in1_min             in1             in1      RW    2
+        in2_min             in2             in2      RW    2
+        in3_min             in3             in3      RW    2
+        in4_min             in4             in4      RW    2
+        in5_min             in5             in5      RW    2
+        in6_min             in6             in6      RW    2
+        in7_min             in6             in6      RW    2
+        in0_max             in0             in0      RW    2
+        in1_max             in1             in1      RW    2
+        in2_max             in2             in2      RW    2
+        in3_max             in3             in3      RW    2
+        in4_max             in4             in4      RW    2
+        in5_max             in5             in5      RW    2
+        in6_max             in6             in6      RW    2
+        in7_max             in6             in6      RW    2
+           fan1            NONE            NONE      R     0
+           fan2            NONE            NONE      R     0
+           fan3            NONE            NONE      R     0
+       fan1_min            fan1            fan1      RW    0
+       fan2_min            fan2            fan2      RW    0
+       fan3_min            fan3            fan3      RW    0
+          temp1            NONE            NONE      R     1
+          temp2            NONE            NONE      R     1
+          temp3            NONE            NONE      R     1
+     temp_hyst1            temp            temp      RW    1
+     temp_over1            temp            temp      RW    1
+     temp_hyst2            temp            temp      RW    1
+     temp_over2            temp            temp      RW    1
+     temp_hyst3            temp            temp      RW    1
+     temp_over3            temp            temp      RW    1
+            vid            NONE            NONE      R     2
+       fan1_div            fan1            NONE      RW    0
+       fan2_div            fan2            NONE      RW    0
+       fan3_div            fan3            NONE      R     0
+     alarms_vin            NONE            NONE      R     0
+     alarms_fan            NONE            NONE      R     0
+    alarms_temp            NONE            NONE      R     0
+
+          LABEL                           FEATURE SYMBOL     SYSCTL FILE:OFFSET
+            in0                         SENSORS_IT87_IN0             in0:3
+            in1                         SENSORS_IT87_IN1             in1:3
+            in2                         SENSORS_IT87_IN2             in2:3
+            in3                         SENSORS_IT87_IN3             in3:3
+            in4                         SENSORS_IT87_IN4             in4:3
+            in5                         SENSORS_IT87_IN5             in5:3
+            in6                         SENSORS_IT87_IN6             in6:3
+            in7                         SENSORS_IT87_IN7             in7:3
+        in0_min                     SENSORS_IT87_IN0_MIN             in0:1
+        in1_min                     SENSORS_IT87_IN1_MIN             in1:1
+        in2_min                     SENSORS_IT87_IN2_MIN             in2:1
+        in3_min                     SENSORS_IT87_IN3_MIN             in3:1
+        in4_min                     SENSORS_IT87_IN4_MIN             in4:1
+        in5_min                     SENSORS_IT87_IN5_MIN             in5:1
+        in6_min                     SENSORS_IT87_IN6_MIN             in6:1
+        in7_min                     SENSORS_IT87_IN7_MIN             in7:1
+        in0_max                     SENSORS_IT87_IN0_MAX             in0:2
+        in1_max                     SENSORS_IT87_IN1_MAX             in1:2
+        in2_max                     SENSORS_IT87_IN2_MAX             in2:2
+        in3_max                     SENSORS_IT87_IN3_MAX             in3:2
+        in4_max                     SENSORS_IT87_IN4_MAX             in4:2
+        in5_max                     SENSORS_IT87_IN5_MAX             in5:2
+        in6_max                     SENSORS_IT87_IN6_MAX             in6:2
+        in7_max                     SENSORS_IT87_IN7_MAX             in7:2
+           fan1                        SENSORS_IT87_FAN1            fan1:2
+           fan2                        SENSORS_IT87_FAN2            fan2:2
+           fan3                        SENSORS_IT87_FAN3            fan3:2
+       fan1_min                    SENSORS_IT87_FAN1_MIN            fan1:1
+       fan2_min                    SENSORS_IT87_FAN2_MIN            fan2:1
+       fan3_min                    SENSORS_IT87_FAN3_MIN            fan3:1
+          temp1                       SENSORS_IT87_TEMP1            temp1:3
+          temp2                       SENSORS_IT87_TEMP2            temp2:3
+          temp3                       SENSORS_IT87_TEMP3            temp3:3
+     temp1_hyst                  SENSORS_IT87_TEMP1_HYST            temp1:2
+     temp1_over                  SENSORS_IT87_TEMP1_OVER            temp1:1
+     temp2_hyst                  SENSORS_IT87_TEMP2_HYST            temp2:2
+     temp2_over                  SENSORS_IT87_TEMP2_OVER            temp2:1
+     temp3_hyst                  SENSORS_IT87_TEMP3_HYST            temp3:2
+     temp3_over                  SENSORS_IT87_TEMP3_OVER            temp3:1
+            vid                         SENSORS_IT87_VID             vid:1
+       fan1_div                    SENSORS_IT87_FAN1_DIV         fan_div:1
+       fan2_div                    SENSORS_IT87_FAN2_DIV         fan_div:2
+       fan3_div                    SENSORS_IT87_FAN3_DIV         fan_div:3
+     alarms_fan                  SENSORS_IT87_ALARMS_FAN      alarms_fan:1
+     alarms_vin                  SENSORS_IT87_ALARMS_VIN      alarms_vin:1
+    alarms_temp                 SENSORS_IT87_ALARMS_TEMP     alarms_temp:1
+
+

@@ -25,8 +25,9 @@ KERNELCHIPSDIR := $(MODULE_DIR)
 # defined value verbatim into the command-list of rules...
 # These targets are NOT included in 'mkpatch' ...
 KERNELCHIPSTARGETS :=  \
-                      $(MODULE_DIR)/maxilife.o \
                       $(MODULE_DIR)/adm1024.o \
+                      $(MODULE_DIR)/it87.o \
+                      $(MODULE_DIR)/maxilife.o \
                       $(MODULE_DIR)/mtp008.o
 
 # These targets ARE included in 'mkpatch', except for LTC1710, which we
@@ -57,6 +58,9 @@ KERNELCHIPSTARGETS += $(MODULE_DIR)/gl518sm.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_GL520SM=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/gl520sm.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_IT87=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/it87.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM75=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/lm75.o

@@ -52,11 +52,12 @@ At least the following hardware sensor chips are supported:
   Hewlett Packard Maxilife (several revisions including '99 NBA)
   Genesys Logic GL518SM (rev 00, 80), GL520SM, GL523SM
   Intel Xeon processor embedded sensors
+  ITE IT8705F, IT8712F embedded sensors
   Maxim MAX1617 and MAX1617A
   Myson MTP008
-  National Semicoductor LM75, LM77, LM78, LM78-J, LM79,
-                        LM80, LM81, LM84, and LM87
-  SiS 5595 embedded sensors
+  National Semiconductor LM75, LM77, LM78, LM78-J, LM79,
+                         LM80, LM81, LM84, and LM87
+  SiS 5595, 950 embedded sensors
   TelCom TCN75
   TI THMC10 and THMC50
   VIA Technologies VT82C686A/B embedded sensors

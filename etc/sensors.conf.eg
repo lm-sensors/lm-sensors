@@ -207,7 +207,7 @@
 #### Here begins the real configuration file
 
 
-chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*" "sis5595-*"
+chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*"
 
 # These are as advised in the LM78 and LM79 data sheets, and used on almost
 # any mainboard we have seen.
@@ -272,8 +272,7 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*" "sis5595-*"
     set in6_min -5 * 0.95
     set in6_max -5 * 1.05
 
-# examples for lm78, lm78j, lm79, sis5595 temperature limits;
-# for sis5595, temp_hist is really the low limit, not a hysteresis value
+# examples for lm78, lm78j, lm79 temperature limits;
 #    set temp_over 40	
 #    set temp_hyst 37	
 
@@ -285,6 +284,48 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*" "sis5595-*"
 #    set temp3_over 52	
 #    set temp3_hyst 47	
 
+
+chip "sis5595-*"
+
+    label in0 "VCore 1"
+    label in1 "VCore 2"
+    label in2 "+3.3V"
+    label in3 "+5V"
+    label in4 "+12V"
+
+    compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+    compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
+
+    set in0_min 2.0 * 0.95
+    set in0_max 2.0 * 1.05
+    set in1_min 2.0 * 0.95
+    set in1_max 2.0 * 1.05
+    set in2_min 3.3 * 0.95
+    set in2_max 3.3 * 1.05
+    set in3_min 5.0 * 0.95
+    set in3_max 5.0 * 1.05
+    set in4_min 12 * 0.95
+    set in4_max 12 * 1.05
+
+#
+# SiS5595 temperature calculation
+# The driver does NOT include a calculation due to the wide
+# variation in thermistor types on SiS5595 motherboards.
+# Look in your 'Vendor.ini' file to see which one is present
+# on your motherboard. Look for the line like:
+#	[Temp1]
+#	     ThermistorType     = NTC-10KC15-1608-1P
+# Uncomment the correct 'compute' line below to match your
+# thermistor type.
+#	     ThermistorType     = NTC-10KC15-1608-1P (10K at 25C; Beta = 3435)
+#	     ThermistorType     = NTC-103KC15-1608-1P
+#	     ThermistorType     = NTC-103AT-2 (10K at 25C; Beta = 3435)
+#	     ThermistorType     = NTC-103JT   (10K at 25C; Beta = 3435)
+
+# examples for sis5595 temperature limits;
+# for sis5595, temp_hist is really the low limit, not a hysteresis value
+#    set temp_over 40	
+#    set temp_hyst 37	
 
 chip "w83782d-*" "w83783s-*" "w83627hf-*"
 
@@ -873,9 +914,9 @@ chip "lm87-*"
 
 chip "adm9240-*" "ds1780-*" "lm81-*"
 #
-# This chip has non-standard entries in lib/chips.c so
+# These chips have non-standard entries in lib/chips.c so
 # the feature names are quite different from other chips.
-# For this chip, libsensors anticipates the correct labeling.
+# For these chips, libsensors anticipates the correct labeling.
 # This is great if it's correct but makes it a little more
 # difficult if you want to change it.
 #
@@ -937,3 +978,65 @@ chip "adm1024-*"
     ignore "2.5V" # This register is also used for temp2
     ignore "Vccp1"
     ignore "Vccp2"
+
+
+chip "it87-*"
+
+# The values below have been tested on Asus CUSI, CUM motherboards.
+
+# Voltage monitors as advised in the It8705 data sheet
+
+    label in0 "VCore 1"
+    label in1 "VCore 2"
+    label in2 "+3.3V"
+    label in3 "+5V"
+    label in4 "+12V"
+    label in5 "-12V"
+    label in6 "-5V"
+    label in7 "Stdby"
+
+    set in0_min 1.5 * 0.95
+    set in0_max 1.5 * 1.05
+    set in1_min 2.4
+    set in1_max 2.6
+    set in2_min 3.3 * 0.95
+    set in2_max 3.3 * 1.05
+    set in3_min 5.0 * 0.95
+    set in3_max 5.0 * 1.05
+    set in4_min 12 * 0.95
+    set in4_max 12 * 1.05
+    set in5_min -12 * 0.95
+    set in5_max -12 * 1.05
+    set in6_min -5 * 0.95
+    set in6_max -5 * 1.05
+    set in6_min -5 * 0.95
+    set in6_max -5 * 1.05
+
+    # vid not monitored by IT8705F
+    ignore  vid
+
+    compute in2 (1 + 1)*@ ,       @/(1 + 1)
+    compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+    compute in4 ((30/10) +1)*@  , @/((30/10) +1)
+    compute in5 -(72/10)*@  ,     -@/(72/10)
+    compute in6 -(56/10)*@ ,      -@/(56/10)
+    compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+
+# Temperature
+
+    label temp1       "Temp1/MB"
+    set   temp1_over  40
+    set   temp1_hyst  20
+
+    label temp2       "Temp2/CPU"
+    set   temp2_over  45
+    set   temp2_hyst  25
+
+    ignore temp3
+
+# Fans
+
+    set fan1_min 0
+    set fan2_min 3000
+    ignore fan3
+
