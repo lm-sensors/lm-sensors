@@ -1,7 +1,7 @@
 /*
     adm9240.c - Part of lm_sensors, Linux kernel modules for hardware
              monitoring
-    Copyright (c) 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (C) 1999  Frodo Looijaard <frodol@dds.nl>
     and Philip Edelbrock <phil@netroedge.com>
 
     This program is free software; you can redistribute it and/or modify
@@ -53,8 +53,6 @@
 #include <linux/i2c-proc.h>
 #include <linux/init.h>
 #include "version.h"
-
-MODULE_LICENSE("GPL");
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -126,7 +124,7 @@ SENSORS_INSMOD_3(adm9240, ds1780, lm81);
    variants. Note that you should be a bit careful with which arguments
    these macros are called: arguments may be evaluated more than once.
    Fixing this is just not worth it. */
-#define IN_TO_REG(val,nr) (SENSORS_LIMIT(((val) & 0xff),0,255))
+#define IN_TO_REG(val,nr) (SENSORS_LIMIT((val), 0, 255))
 #define IN_FROM_REG(val,nr) (val)
 
 static inline u8 FAN_TO_REG(long rpm, int div)
@@ -141,13 +139,12 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define FAN_FROM_REG(val,div) ((val)==0?-1:\
                                (val)==255?0:1350000/((div)*(val)))
 
-#define TEMP_FROM_REG(temp) \
-   ((temp)<256?((((temp)&0x1fe) >> 1) * 10)      + ((temp) & 1) * 5:  \
-               ((((temp)&0x1fe) >> 1) -255) * 10 - ((temp) & 1) * 5)  \
+#define TEMP_FROM_REG(temp) ((temp)<256 ? (temp) * 5 : \
+                             ((temp) - 512) * 5)
 
-#define TEMP_LIMIT_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
+#define TEMP_LIMIT_FROM_REG(val) (((val)>=0x80?(val)-0x100:(val))*10)
 
-#define TEMP_LIMIT_TO_REG(val) SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
+#define TEMP_LIMIT_TO_REG(val) SENSORS_LIMIT(((val)<0?(((val)-5)/10)+256:\
                                                       ((val)+5)/10), \
                                              0,255)
 
@@ -159,10 +156,7 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            205-(val)*5)
 
-/* For each registered ADM9240, we need to keep some data in memory. That
-   data is pointed to by adm9240_list[NR]->data. The structure itself is
-   dynamically allocated, at the same time when a new adm9240 client is
-   allocated. */
+/* For each registered ADM9240, we need to keep some data in memory. */
 struct adm9240_data {
 	struct i2c_client client;
 	int sysctl_id;
@@ -192,9 +186,8 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int adm9240_detach_client(struct i2c_client *client);
 
-static int adm9240_read_value(struct i2c_client *client, u8 register);
-static int adm9240_write_value(struct i2c_client *client, u8 register,
-			       u8 value);
+static int adm9240_read_value(struct i2c_client *client, u8 reg);
+static int adm9240_write_value(struct i2c_client *client, u8 reg, u8 value);
 static void adm9240_update_client(struct i2c_client *client);
 static void adm9240_init_client(struct i2c_client *client);
 
@@ -306,16 +299,6 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
 	int err = 0;
 	const char *type_name = "";
 	const char *client_name = "";
-
-	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; i2c_detect really won't call us. */
-#ifdef DEBUG
-	if (i2c_is_isa_adapter(adapter)) {
-		printk
-		    ("adm9240.o: adm9240_detect called for an ISA bus adapter?!?\n");
-		return 0;
-	}
-#endif
 
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
 		goto ERROR0;
@@ -443,7 +426,7 @@ static int adm9240_detach_client(struct i2c_client *client)
 
 static int adm9240_read_value(struct i2c_client *client, u8 reg)
 {
-	return 0xFF & i2c_smbus_read_byte_data(client, reg);
+	return i2c_smbus_read_byte_data(client, reg);
 }
 
 static int adm9240_write_value(struct i2c_client *client, u8 reg, u8 value)
@@ -451,7 +434,7 @@ static int adm9240_write_value(struct i2c_client *client, u8 reg, u8 value)
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
-/* Called when we have found a new ADM9240. It should set limits, etc. */
+/* Called when we have found a new ADM9240. */
 static void adm9240_init_client(struct i2c_client *client)
 {
 	/* Start monitoring */
@@ -722,6 +705,7 @@ static void __exit sm_adm9240_exit(void)
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
+MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("ADM9240 driver");
 
 module_init(sm_adm9240_init);
