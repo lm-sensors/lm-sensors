@@ -58,7 +58,7 @@ SENSORS_INSMOD_1(lm75);
    these macros are called: arguments may be evaluated more than once.
    Fixing this is just not worth it. */
 #define TEMP_FROM_REG(val) ((((val & 0x7fff) >> 7) * 5) | ((val & 0x8000)?-256:0))
-#define TEMP_TO_REG(val)   (SENSORS_LIMIT(((((val) + 2) / 5) << 7),0,0xffff))
+#define TEMP_TO_REG(val)   (SENSORS_LIMIT((val<0?(0x200+((val)/5))<<7:(((val) + 2) / 5) << 7),0,0xffff))
 
 /* Initial values */
 #define LM75_INIT_TEMP_OS 600
