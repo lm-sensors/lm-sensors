@@ -7,9 +7,11 @@ Supported chips:
   * IT8705F
     ISA 0x290
     Datasheet: Publicly available at the ITE website
+               http://www.ite.com.tw
   * IT8712F (untested)
     Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
     Datasheet: Publicly available at the ITE website
+               http://www.ite.com.tw
   * Sis950   [clone of IT8705F]
     ISA 0x290
     Datasheet: Publicly available at the SIS website
