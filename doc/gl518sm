@@ -1,0 +1,70 @@
+This file documents the gl518sm directories.
+
+There will be one directory created for each detected GL518SM chip. Chips
+can only be connected to the SMBus. Directories are called gl518sm-i2c-?-??,
+where the first question mark equals the I2C bus number, and the I2C
+address is at the end.
+/proc/sys/dev/sensors/chips contains the SYSCTL values for all chip
+directories.
+
+Within each LM78 directory, you can find the following files:
+* alarms (GL518_SYSCTL_ALARMS)
+  A number which indicates which alarms are on. An alarm gets triggered when
+  some limit has been crossed. Even if the cause of the alarm is over, it
+  stays triggered until it has been read at least once. Because the LM78
+  values are updated at most once every 1.5 seconds, this means the alarm
+  can be read several times before it is erased.
+  This file can not be written to.
+  The number is the logical OR of the following components:
+  - GL518_ALARM_VDD
+    Gets triggered when the VDD value is higher or lower than its limits
+  - LM78_ALARM_VIN[1-3]
+    Gets triggered when the corresponding VIN value is higher or lower than
+    its limits.
+  - LM78_ALARM_TEMP
+    Gets triggered when the temp value has crossed its limits. See the 
+    description under temp.
+  - LM78_ALARM_FAN[1-2]
+    Gets triggered when the corresponding FAN value drops below its limit.
+  If accessed through sysctl, this value is a long.
+* fan[1-2] (GL518_SYSCTL_FAN[1-2])
+  A list of two numbers. The first is the minimum fan rotation limit; the
+  second is the current fan rotation speed. Both are in RPM (rotation per
+  minute). An alarm is triggered if the rotation speed drops below the
+  limit. The first value can be changed. Not all RPM values can accurately
+  be represented, so some rounding is done.
+  If accessed through sysctl, this is a list of longs.
+* fan_div (GL518_SYSCTL_FAN_DIV)
+  A list of two numbers, one for each fan. Each number can be either 1, 2,
+  4 or 8. It is the internal scaling factor used for the FAN rotations. If
+  you change this number, the FAN readings get more or less detailed, but
+  the range in which they can be read too. Higher numbers give better 
+  resolution, but less range. The first two numbers can be changed, the
+  third not.
+  If accessed through sysctl, this is a list of longs.
+* vin[1-3] and vdd (LM78_SYSCTL_VIN[1-3] and GL518_SYSCTL_VDD)
+  A list of three numbers. The first is the minimum limit, the second is the
+  maximum limit, and the third is the current value. If you have a weird
+  mainboard, all values may be off because some other scaling factor has
+  to be used; user-space programs should compensate for this. Note that
+  minimum means 'closest to zero'; so if the normal value equals -10, a
+  minimum could equal -9, and a maximum -11. 
+  On GL518SM revision 0 chips, only VIN3 is readable; for the others,
+  you can set limits, but you can not read the current values.
+  The first two numbers can be changed, the third not.
+  If accessed through sysctl, this is a list of longs, each being the voltage
+  times 100.
+* temp
+  A list of three numbers. The first number is the Overtemperature Shutdown
+  value; the second is the Hysteris value and the third number is the
+  current value. The first two values can be modified. All values are in
+  degrees Celcius.
+  An alarm is issued when the temperature gets higher then the
+  Overtemperature Shutdown value; it stays on until the temperature falls
+  below the Hysteris value.
+  The first two numbers can be changed, the third not.
+  If accessed through sysctl, this is a list of longs, each being the
+  temperature times 10.
+
+The data for each GL518SM is updated each 1.5 seconds, but only if it is
+actually read.

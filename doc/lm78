@@ -76,7 +76,8 @@ Within each LM78 directory, you can find the following files:
   alarms are issued during all the time when the actual temperature is 
   above the Overtemperature Shutdown value.
   The first two numbers can be changed, the third not.
-  If accessed through sysctl, this is a list of longs.
+  If accessed through sysctl, this is a list of longs, each being the
+  temperature in degrees Celcius times 10.
 * vid
   The core voltage value (the voltage level your processor should work with),
   in volts. This is the value IN0 and IN1 are initialized to. If unconnected,

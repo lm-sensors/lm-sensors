@@ -751,9 +751,9 @@ void lm78_in(struct i2c_client *client, int operation, int ctl_name,
         lm78_write_value(client,LM78_REG_IN_MIN(nr),data->in_min[nr]);
       }
       if (*nrels_mag >= 2) {
-      data->in_max[nr] = IN_TO_REG(results[1],nr);
-      lm78_write_value(client,LM78_REG_IN_MAX(nr),data->in_max[nr]);
-    }
+        data->in_max[nr] = IN_TO_REG(results[1],nr);
+        lm78_write_value(client,LM78_REG_IN_MAX(nr),data->in_max[nr]);
+      }
   }
 }
 
@@ -833,6 +833,8 @@ void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
                   int *nrels_mag, long *results)
 {
   struct lm78_data *data = client->data;
+  int old;
+
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
@@ -842,12 +844,15 @@ void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
     results[2] = 2;
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (*nrels_mag >= 2)
+    old = lm78_read_value(client,LM78_REG_VID_FANDIV);
+    if (*nrels_mag >= 2) {
       data->fan_div[1] = DIV_TO_REG(results[1]);
+      old = (old & 0x3f) | (data->fan_div[1] << 6);
+    }
     if (*nrels_mag >= 1) {
       data->fan_div[0] = DIV_TO_REG(results[0]);
-      lm78_write_value(client,LM78_REG_VID_FANDIV,
-                       (data->fan_div[0] >> 4) | (data->fan_div[1] >> 6));
+      old = (old & 0xcf) | (data->fan_div[0] << 4);
+      lm78_write_value(client,LM78_REG_VID_FANDIV,old);
     }
   }
 }
