@@ -1435,7 +1435,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      }, 
      {
 	name => "Winbond W83637HF Super IO Sensors",
-	driver => "to-be-written",
+	driver => "w83627hf",
 	addrreg => 0x2e,
 	exitreg => 0x2e,
 	datareg => 0x2f,

@@ -2084,9 +2084,11 @@ void print_w83781d(const sensors_chip_name *name)
 
   is82d = (!strcmp(name->prefix,"w83782d")) ||
           (!strcmp(name->prefix,"w83627hf")) ||
+          (!strcmp(name->prefix,"w83637hf")) ||
           (!strcmp(name->prefix,"w83627thf"));
   is83s = !strcmp(name->prefix,"w83783s");
-  is627thf = !strcmp(name->prefix,"w83627thf");
+  is627thf = (!strcmp(name->prefix,"w83627thf")) ||
+             (!strcmp(name->prefix,"w83637hf"));
   is697hf  = !strcmp(name->prefix,"w83697hf");
 
   if (!sensors_get_feature(*name,SENSORS_W83781D_ALARMS,&cur)) 
