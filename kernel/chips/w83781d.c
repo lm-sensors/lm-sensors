@@ -1291,7 +1291,7 @@ static void w83781d_init_client(struct i2c_client *client)
 		vid |=
 		    (w83781d_read_value(client, W83781D_REG_CHIPID) & 0x01) << 4;
                 if (type == w83791d) {
-                        data->vrm = 92;
+                        data->vrm = 90;
                 } else {
 		data->vrm = DEFAULT_VRM;
                 }
