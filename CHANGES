@@ -46,12 +46,14 @@ ask CVS about it:
                   reading changes
   Program mkpatch.pl: Fix adm9240 typos, add more chips to Configure.help,
                       remove ltc1710
+  Program sens_update_rrd: new
   Program sensord: Add -d (debug) and -p (pid-file) options
   Program sensors: Change reported version from 1.3 to the lm_sensors version;
                    Fix swapped limit and hysteresis on 9240, 5595, 686a;
                    Change mtp008 temps from max/min to limit/hyst.
   Program sensors-detect: Recognize lm78 with chipid=0x20
                           Recognize SMSC Victory66 South Bridge
+  Program tellerstats: new
 
 2.5.5 (20010115)
   NOTE: i2c-2.5.5 MUST BE be compiled and installed first, UNLESS

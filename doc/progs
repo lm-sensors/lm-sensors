@@ -83,6 +83,10 @@ this package.
   This script creates the /dev/i2c-* files. Please check the source before
   you run it, as you may need to set some variables first.
 
+* prog/rrd/sens_update_rrd (written in bash, not installed)
+  This script gathers sensors data and adds it to a round robin database
+  (RRD). RRD is then used to display the graphed data in web pages
+
 * prog/sensord/sensord (written in C, installed by `make install-prog-sensord')
   This daemon can be used to periodically log sensor readings from
   the sensors hardware to syslog, and to alert (using syslog level ALERT)
@@ -94,6 +98,9 @@ this package.
   console application, using stdout. It is essential, because
   unlike the raw /proc/sys/dev/sensors/*/* files, it takes your configuration
   file into account.
+
+* prog/tellerstats/gather.sh, tellerstats.sh (written in bash, not installed)
+  These scripts gather sensors data and graph the data for web pages
 
 * prog/xeon/decode-xeon.pl (written in Perl, not installed)
   ID ROM data decoding for Xeon processors.
