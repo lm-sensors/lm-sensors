@@ -1803,6 +1803,12 @@ sub initialize_conf
   }
   close INPUTFILE;
 
+  my $use_udev = 0;
+  if (-f '/dev/.udev.tdb') {
+    $use_udev = 1;
+    $dev_i2c = '/dev/i2c-';
+  } 
+
   if (-f '/etc/modules.conf') {
     $modules_conf = '/etc/modules.conf';
   } elsif (-f '/etc/conf.modules') {
@@ -1811,7 +1817,7 @@ sub initialize_conf
     $modules_conf = '/etc/modules.conf';
   }
 
-  if (!$use_devfs) {
+  if (!($use_devfs || $use_udev)) {
     if (-c '/dev/i2c-0') {
       $dev_i2c = '/dev/i2c-';
     } else { # default
