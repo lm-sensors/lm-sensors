@@ -586,7 +586,7 @@ export-objs	:= sensors.o
 obj-$(CONFIG_SENSORS)		+= sensors.o
 obj-$(CONFIG_SENSORS_ADM1021)	+= adm1021.o
 obj-$(CONFIG_SENSORS_ADM1025)	+= adm1025.o
-obj-$(CONFIG_SENSORS_ADM9024)	+= adm9024.o
+obj-$(CONFIG_SENSORS_ADM9240)	+= adm9240.o
 obj-$(CONFIG_SENSORS_BT869)	+= bt869.o
 obj-$(CONFIG_SENSORS_DDCMON)	+= ddcmon.o
 obj-$(CONFIG_SENSORS_EEPROM)	+= eeprom.o
@@ -650,10 +650,10 @@ else
   endif
 endif
 
-ifeq ($(CONFIG_SENSORS_ADM9024),y)
+ifeq ($(CONFIG_SENSORS_ADM9240),y)
   L_OBJS += adm9240.o
 else
-  ifeq ($(CONFIG_SENSORS_ADM9024),m)
+  ifeq ($(CONFIG_SENSORS_ADM9240),m)
     M_OBJS += adm9240.o
   endif
 endif
