@@ -125,6 +125,11 @@ MACHINE := $(shell uname -m)
 # Extra non-default programs to build; e.g., sensord
 # PROG_EXTRA := sensord
 
+# Set these to add preprocessor or compiler flags, or use
+# environment variables
+# CFLAGS :=
+# CPPFLAGS :=
+
 ##################################################
 # Below this, nothing should need to be changed. #
 ##################################################
@@ -159,38 +164,50 @@ LN := ln -sfn
 GREP := grep
 
 # Determine the default compiler flags
-# MODCFLAGS is to create in-kernel object files (modules); PROGFLAGS is to
-# create non-kernel object files (which are linked into executables).
-# ARCFLAGS are used to create archive object files (static libraries), and
-# LIBCFLAGS are for shared library objects.
-CFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS) -I$(LINUX_HEADERS) -O2 
+# Set CFLAGS or CPPFLAGS above to add your own flags to all.
+# ALLCPPFLAGS/ALLCFLAGS are common flags, plus any user-specified overrides from the environment or make command line.
+# MODCPPFLAGS/MODCFLAGS is to create in-kernel object files (modules).
+# PROGCPPFLAGS/PROGCFLAGS is to create non-kernel object files (which are linked into executables).
+# ARCPPFLAGS/ARCFLAGS are used to create archive object files (static libraries).
+# LIBCPPFLAGS/LIBCFLAGS are for shared library objects.
+ALL_CPPFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS) -I$(LINUX_HEADERS)
+ALL_CFLAGS := -O2 
 
 ifeq ($(DEBUG),1)
-CFLAGS += -DDEBUG
+ALL_CPPFLAGS += -DDEBUG
 endif
 
 ifeq ($(WARN),1)
-CFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
-          -Wcast-align -Wwrite-strings -Wnested-externs -Winline
+ALL_CFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
+            -Wcast-align -Wwrite-strings -Wnested-externs -Winline
 endif
 
-MODCFLAGS := $(CFLAGS) -D__KERNEL__ -DMODULE -fomit-frame-pointer 
-MODCFLAGS := $(MODCFLAGS) -DEXPORT_SYMTAB
-PROGCFLAGS := $(CFLAGS)
-ARCFLAGS := $(CFLAGS)
-LIBCFLAGS := $(CFLAGS) -fpic
+ALL_CPPFLAGS += $(CPPFLAGS)
+ALL_CFLAGS += $(CFLAGS)
+
+MODCPPFLAGS :=
+MODCFLAGS :=
 
 ifeq ($(MACHINE),alpha)
 MODCFLAGS += -ffixed-8
 endif
 
 ifeq ($(SMP),1)
-MODCFLAGS += -D__SMP__
+MODCPPFLAGS += -D__SMP__
 endif
 
 ifeq ($(MODVER),1)
-MODCFLAGS += -DMODVERSIONS -include $(LINUX_HEADERS)/linux/modversions.h
+MODCPPFLAGS += -DMODVERSIONS -include $(LINUX_HEADERS)/linux/modversions.h
 endif
+
+MODCPPFLAGS += -D__KERNEL__ -DMODULE -DEXPORT_SYMTAB -fomit-frame-pointer $(ALL_CPPFLAGS)
+MODCFLAGS += $(ALL_CFLAGS)
+PROGCPPFLAGS := $(ALL_CPPFLAGS)
+PROGCFLAGS := $(ALL_CFLAGS)
+ARCPPFLAGS := $(ALL_CPPFLAGS)
+ARCFLAGS := $(ALL_CFLAGS)
+LIBCPPFLAGS := $(ALL_CPPFLAGS)
+LIBCFLAGS := -fpic $(ALL_CFLAGS)
 
 .PHONY: all clean install version package dep
 
@@ -246,20 +263,20 @@ version:
 
 # .o files are used for modules
 %.o: %.c
-	$(CC) $(MODCFLAGS) -c $< -o $@
+	$(CC) $(MODCPPFLAGS) $(MODCFLAGS) -c $< -o $@
 
 %.d: %.c
-	$(CC) -M -MG $(MODCFLAGS) $< | \
+	$(CC) -M -MG $(MODCPPFLAGS) $(MODCFLAGS) $< | \
        	sed -e 's@^\(.*\)\.o:@$*.d $*.o: Makefile '`dirname $*.d`/Module.mk' @' > $@
 
 
 
 # .ro files are used for programs (as opposed to modules)
 %.ro: %.c
-	$(CC) $(PROGCFLAGS) -c $< -o $@
+	$(CC) $(PROGCPPFLAGS) $(PROGCFLAGS) -c $< -o $@
 
 %.rd: %.c
-	$(CC) -M -MG $(PROGCFLAGS) $< | \
+	$(CC) -M -MG $(PROGCPPFLAGS) $(PROGCFLAGS) $< | \
        	sed -e 's@^\(.*\)\.o:@$*.rd $*.ro: Makefile '`dirname $*.rd`/Module.mk' @' > $@
 
 
@@ -269,19 +286,19 @@ version:
 
 # .ao files are used for static archives
 %.ao: %.c
-	$(CC) $(ARCFLAGS) -c $< -o $@
+	$(CC) $(ARCPPFLAGS) $(ARCFLAGS) -c $< -o $@
 
 %.ad: %.c
-	$(CC) -M -MG $(ARCFLAGS) $< | \
+	$(CC) -M -MG $(ARCPPFLAGS) $(ARCFLAGS) $< | \
        	sed -e 's@^\(.*\)\.o:@$*.ad $*.ao: Makefile '`dirname $*.ad`/Module.mk' @' > $@
 
 
 # .lo files are used for shared libraries
 %.lo: %.c
-	$(CC) $(LIBCFLAGS) -c $< -o $@
+	$(CC) $(LIBCPPFLAGS) $(LIBCFLAGS) -c $< -o $@
 
 %.ld: %.c
-	$(CC) -M -MG $(LIBCFLAGS) $< | \
+	$(CC) -M -MG $(LIBCPPFLAGS) $(LIBCFLAGS) $< | \
        	sed -e 's@^\(.*\)\.o:@$*.ld $*.lo: Makefile '`dirname $*.ld`/Module.mk' @' > $@
 
 

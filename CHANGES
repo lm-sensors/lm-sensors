@@ -25,10 +25,13 @@ ask CVS about it:
   Makefiles: For 2.4+ kernels, modules now install in
              kernel/drivers/[i2c,sensors] , not misc/ , and
              removes old versions in misc/ .
+             Use $CFLAGS and $CPPFLAGS if defined.
   Module i2c-savage4: new
   Module i2c-viapro: Add support for VT8233A (0x3147)
   Module w83781d: Add multiple VRM version support
+  Program eeprom: new
   Program mkpatch: Install new sensors_vid.h
+  Program sensord: Major update, add rrd support
   Program sensors-detect: Add VT8233A, several S3 devices; fix perl warnings
 
 2.6.3 (20020322)
