@@ -57,12 +57,78 @@
 #define RRA_BUFF 256
 /* weak: max sensors for RRD .. TODO: fix */
 #define MAX_RRD_SENSORS 256
-/* DS:label:GAUGE:900:U:U | :3000 */
+/* weak: max raw label length .. TODO: fix */
+#define RAW_LABEL_LENGTH 32
+/* DS:label:GAUGE:900:U:U | :3000 .. TODO: fix */
 #define RRD_BUFF 64
 
-char rrdBuff[MAX_RRD_SENSORS * RRD_BUFF];
+char rrdBuff[MAX_RRD_SENSORS * RRD_BUFF + 1];
+char rrdLabels[MAX_RRD_SENSORS][RAW_LABEL_LENGTH + 1];
 
 typedef int (*FeatureFN) (void *data, const char *rawLabel, char *label, const FeatureDescriptor *feature);
+
+static char
+rrdNextChar
+(char c) {
+  if (c == '9') {
+    return 'A';
+  } else if (c == 'Z') {
+    return 'a';
+  } else if (c == 'z') {
+    return 0;
+  } else {
+    return c + 1;
+  }
+}
+
+static void
+rrdCheckLabel
+(const char *rawLabel, int index) {
+  char *buffer = rrdLabels[index];
+  int i, j, okay;
+  
+  i = 0;
+  while ((i < RAW_LABEL_LENGTH) && rawLabel[i]) { /* contrain raw label to [A-Za-z0-9_] */
+    char c = rawLabel[i];
+    if (((c >= 'A') && (c <= 'Z')) || ((c >= 'a') && (c <= 'z')) || ((c >= '0') && (c <= '9')) || (c == '_')) {
+      buffer[i] = c;
+    } else {
+      buffer[i] = '_';
+    }
+    ++ i;
+  }
+  buffer[i] = '\0';
+
+  j = 0;
+  okay = (i > 0);
+  while (okay && (j < index)) /* locate duplicates */
+    okay = strcmp (rrdLabels[j ++], buffer);
+
+  while (!okay) { /* uniquify duplicate labels with _? or _?? */
+    if (!buffer[i]) {
+      if (i > RAW_LABEL_LENGTH - 3)
+        i = RAW_LABEL_LENGTH - 3;
+      buffer[i] = '_';
+      buffer[i + 1] = '0';
+      buffer[i + 2] = '\0';
+    } else if (!buffer[i + 2]) {
+      if (!(buffer[i + 1] = rrdNextChar (buffer[i + 1]))) {
+        buffer[i + 1] = '0';
+        buffer[i + 2] = '0';
+        buffer[i + 3] = '\0';
+      }
+    } else {
+      if (!(buffer[i + 2] = rrdNextChar (buffer[i + 2]))) {
+        buffer[i + 1] = rrdNextChar (buffer[i + 1]);
+        buffer[i + 2] = '0';
+      }
+    }
+    j = 0;
+    okay = 1;
+    while (okay && (j < index))
+      okay = strcmp (rrdLabels[j ++], buffer);
+  }
+}
 
 static int
 applyToFeatures
@@ -82,7 +148,7 @@ applyToFeatures
           const ChipDescriptor *descriptor = knownChips[chipindex];
           const FeatureDescriptor *features = descriptor->features;
 
-          for (index0 = 0; (ret == 0) && features[index0].format; ++ index0) {
+          for (index0 = 0; (ret == 0) && (num < MAX_RRD_SENSORS) && features[index0].format; ++ index0) {
             const FeatureDescriptor *feature = features + index0;
             int labelNumber = feature->dataNumbers[0];
             const char *rawLabel = NULL;
@@ -98,7 +164,9 @@ applyToFeatures
               sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
               ret = -1;
             } else if (valid) {
-              ret = fn (data, rawLabel, label, feature);
+              rrdCheckLabel (rawLabel, num);
+              ret = fn (data, rrdLabels[num], label, feature);
+              ++ num;
             }
             if (label)
               free (label);
