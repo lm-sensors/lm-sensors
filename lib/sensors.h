@@ -78,4 +78,11 @@ extern int sensors_get_feature(sensors_chip_name name, int feature,
 extern int sensors_set_value(sensors_chip_name name, int feature,
                              double value);
 
+/* This function returns all detected chips, one by one. To start at the
+   beginning of the list, use 0 for nr; NULL is returned if we are
+   at the end of the list. Do not try to change these chip names, as 
+   they point to internal structures! Do not use nr for anything else. */
+extern const sensors_chip_name *sensors_get_detected_chips(int *nr);
+
+
 #endif /* def LIB_SENSORS_ERROR_H */

@@ -119,6 +119,9 @@ int main (int argc, char *argv[])
 {
   int c,res;
 
+  int chip_nr;
+  const sensors_chip_name *chip;
+
   struct option long_opts[] =  {
     { "help", no_argument, NULL, 'h' },
     { "version", no_argument, NULL, 'v'},
@@ -158,4 +161,13 @@ int main (int argc, char *argv[])
       fprintf(stderr,"%s\n",sensors_strerror(res));
     exit(1);
   }
+
+  /* Here comes the real code... */
+  printf("Detected chips:\n");
+  for (chip_nr = 0; (chip = sensors_get_detected_chips(&chip_nr));)
+    if (chip->bus == SENSORS_CHIP_NAME_BUS_ISA)
+      printf("  %s-isa-%04x\n",chip->prefix,chip->addr);
+    else
+      printf("  %s-i2c-%d-%02x\n",chip->prefix,chip->bus,chip->addr);
+  exit(0);
 }

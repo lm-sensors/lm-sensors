@@ -206,3 +206,11 @@ int sensors_set_value(sensors_chip_name name, int feature, double value)
     return -SENSORS_ERR_PROC;
   return 0;
 }
+
+const sensors_chip_name *sensors_get_detected_chips (int *nr)
+{
+  const sensors_chip_name *res;
+  res =  *nr >= sensors_proc_chips_count?NULL:&sensors_proc_chips[*nr].name;
+  (*nr)++;
+  return res;
+}
