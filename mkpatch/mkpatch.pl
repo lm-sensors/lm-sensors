@@ -109,6 +109,12 @@ CONFIG_I2C_MAINBOARD
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Acer Labs ALI 1535
+CONFIG_I2C_ALI1535
+  If you say yes to this option, support will be included for the Acer
+  Labs ALI 1535 mainboard I2C interface. This can also be 
+  built as a module.
+
 Acer Labs ALI 1533 and 1543C
 CONFIG_I2C_ALI15X3
   If you say yes to this option, support will be included for the Acer
@@ -217,6 +223,15 @@ CONFIG_SENSORS_ADM1021
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Analog Devices ADM1024
+CONFIG_SENSORS_ADM1024
+  If you say yes here you get support for Analog Devices ADM1024 sensor
+  chips.  This can also be built as a module.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
 Analog Devices ADM1025
 CONFIG_SENSORS_ADM1025
   If you say yes here you get support for Analog Devices ADM1025 sensor
@@ -239,6 +254,24 @@ CONFIG_SENSORS_ADM9240
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Dallas DS1621 and DS1625
+CONFIG_SENSORS_DS1621
+  If you say yes here you get support for the Dallas DS1621 and DS1625x
+  sensor chips.  This can also be built as a module.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+Fujitsu-Siemens Poseidon
+CONFIG_SENSORS_FSCPOS
+  If you say yes here you get support for the Fujitsu-Siemens Poseidon
+  sensor chip.  This can also be built as a module.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
 Genesys Logic GL518SM
 CONFIG_SENSORS_GL518SM
   If you say yes here you get support for Genesys Logic GL518SM sensor
@@ -254,6 +287,33 @@ CONFIG_SENSORS_GL520SM
   If you say yes here you get support for Genesys Logic GL518SM sensor
   chips.  This can also be built as a module which can be inserted and
   removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+HP Maxilife
+CONFIG_SENSORS_MAXILIFE
+  If you say yes here you get support for the HP Maxilife
+  sensor chip.  This can also be built as a module.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+ITE 8705, 8712, Sis950
+CONFIG_SENSORS_IT87
+  If you say yes here you get support for the ITE 8705 and 8712 and
+  SiS950 sensor chips.  This can also be built as a module.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+Myson MTP008
+CONFIG_SENSORS_MTP008
+  If you say yes here you get support for the Myson MTP008
+  sensor chip.  This can also be built as a module.
 
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
@@ -638,6 +698,7 @@ sub gen_drivers_i2c_Config_in
       print OUTPUT << 'EOF';
   bool 'I2C mainboard interfaces' CONFIG_I2C_MAINBOARD 
   if [ "$CONFIG_I2C_MAINBOARD" = "y" ]; then
+    tristate '  Acer Labs ALI 1535' CONFIG_I2C_ALI1535 
     tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
     tristate '  AMD 756/766' CONFIG_I2C_AMD756
@@ -687,17 +748,23 @@ export-objs	:= sensors.o
 
 obj-$(CONFIG_SENSORS)		+= sensors.o
 obj-$(CONFIG_SENSORS_ADM1021)	+= adm1021.o
+obj-$(CONFIG_SENSORS_ADM1024)	+= adm1024.o
 obj-$(CONFIG_SENSORS_ADM1025)	+= adm1025.o
 obj-$(CONFIG_SENSORS_ADM9240)	+= adm9240.o
 obj-$(CONFIG_SENSORS_BT869)	+= bt869.o
 obj-$(CONFIG_SENSORS_DDCMON)	+= ddcmon.o
+obj-$(CONFIG_SENSORS_DS1621)	+= ds1621.o
 obj-$(CONFIG_SENSORS_EEPROM)	+= eeprom.o
+obj-$(CONFIG_SENSORS_FSCPOS)	+= fscpos.o
 obj-$(CONFIG_SENSORS_GL518SM)	+= gl518sm.o
 obj-$(CONFIG_SENSORS_GL520SM)	+= gl520sm.o
+obj-$(CONFIG_SENSORS_IT87)	+= it87.o
 obj-$(CONFIG_SENSORS_LM75)	+= lm75.o
 obj-$(CONFIG_SENSORS_LM78)	+= lm78.o
 obj-$(CONFIG_SENSORS_LM80)	+= lm80.o
 obj-$(CONFIG_SENSORS_LM87)	+= lm87.o
+obj-$(CONFIG_SENSORS_MAXILIFE)	+= maxilife.o
+obj-$(CONFIG_SENSORS_MTP008)	+= mtp008.o
 obj-$(CONFIG_SENSORS_SIS5595)	+= sis5595.o
 obj-$(CONFIG_SENSORS_THMC50)	+= thmc50.o
 obj-$(CONFIG_SENSORS_VIA686A)	+= via686a.o
@@ -743,6 +810,14 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_SENSORS_ADM1024),y)
+  L_OBJS += adm1024.o
+else
+  ifeq ($(CONFIG_SENSORS_ADM1024),m)
+    M_OBJS += adm1024.o
+  endif
+endif
+
 ifeq ($(CONFIG_SENSORS_ADM1025),y)
   L_OBJS += adm1025.o
 else
@@ -767,11 +842,27 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_SENSORS_DS1621),y)
+  L_OBJS += ds1621.o
+else
+  ifeq ($(CONFIG_SENSORS_DS1621),m)
+    M_OBJS += ds1621.o
+  endif
+endif
+
 ifeq ($(CONFIG_SENSORS_EEPROM),y)
   L_OBJS += eeprom.o
 else
   ifeq ($(CONFIG_SENSORS_EEPROM),m)
     M_OBJS += eeprom.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_FSCPOS),y)
+  L_OBJS += fscpos.o
+else
+  ifeq ($(CONFIG_SENSORS_FSCPOS),m)
+    M_OBJS += fscpos.o
   endif
 endif
 
@@ -788,6 +879,14 @@ ifeq ($(CONFIG_SENSORS_GL520SM),y)
 else
   ifeq ($(CONFIG_SENSORS_GL520SM),m)
     M_OBJS += gl520sm.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_IT87),y)
+  L_OBJS += it87.o
+else
+  ifeq ($(CONFIG_SENSORS_IT87),m)
+    M_OBJS += it87.o
   endif
 endif
 
@@ -828,6 +927,22 @@ ifeq ($(CONFIG_SENSORS_MATORB),y)
 else
   ifeq ($(CONFIG_SENSORS_MATORB),m)
     M_OBJS += matorb.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_MAXILIFE),y)
+  L_OBJS += maxilife.o
+else
+  ifeq ($(CONFIG_SENSORS_MAXILIFE),m)
+    M_OBJS += maxilife.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_MTP008),y)
+  L_OBJS += mtp008.o
+else
+  ifeq ($(CONFIG_SENSORS_MTP008),m)
+    M_OBJS += mtp008.o
   endif
 endif
 
@@ -898,6 +1013,7 @@ sub gen_drivers_i2c_Makefile
       }
       if ($new_format) {
         print OUTPUT << 'EOF';
+obj-$(CONFIG_I2C_ALI1535)		+= i2c-ali1535.o
 obj-$(CONFIG_I2C_ALI15X3)		+= i2c-ali15x3.o
 obj-$(CONFIG_I2C_AMD756)		+= i2c-amd756.o
 obj-$(CONFIG_I2C_HYDRA)			+= i2c-hydra.o
@@ -913,6 +1029,14 @@ obj-$(CONFIG_I2C_VOODOO3)		+= i2c-voodoo3.o
 EOF
       } else {
         print OUTPUT << 'EOF';
+ifeq ($(CONFIG_I2C_ALI1535),y)
+  L_OBJS += i2c-ali1535.o
+else 
+  ifeq ($(CONFIG_I2C_ALI1535),m)
+    M_OBJS += i2c-ali1535.o
+  endif
+endif
+
 ifeq ($(CONFIG_I2C_ALI15X3),y)
   L_OBJS += i2c-ali15x3.o
 else 
@@ -1046,6 +1170,9 @@ sub gen_drivers_i2c_i2c_core_c
       }
       if ($patch_nr == 1) {
         print OUTPUT << 'EOF';
+#ifdef CONFIG_I2C_ALI1535
+	extern int i2c_ali1535_init(void);
+#endif
 #ifdef CONFIG_I2C_ALI15X3
 	extern int i2c_ali15x3_init(void);
 #endif
@@ -1085,6 +1212,9 @@ sub gen_drivers_i2c_i2c_core_c
 EOF
       } elsif ($patch_nr == 2) {
       print OUTPUT << 'EOF';
+#ifdef CONFIG_I2C_ALI1535
+	i2c_ali1535_init();
+#endif
 #ifdef CONFIG_I2C_ALI15X3
 	i2c_ali15x3_init();
 #endif
