@@ -65,7 +65,10 @@ all :: all-kernel-chips
 
 install-kernel-chips: all-kernel-chips
 	$(MKDIR) $(MODDIR) 
-	$(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(MODDIR)
+	if [ -n "$(MODDIR)" ] ; then \
+	  $(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(MODDIR) ;\
+	fi
+
 install :: install-kernel-chips
 
 clean-kernel-chips:
