@@ -1,5 +1,39 @@
-Managing Modules
-================
+Installing Modules
+==================
+
+For 2.4+ kernels that use the new directory structure
+under /lib/modules/x.y.z/ ,
+'make install' will install modules in the subdirectories
+kernel/drivers/i2c and kernel/drivers/sensors. This puts
+the modules in the same location as a kernel
+'make modules_install' does so that there will not
+be duplicate modules.
+
+For older kernels, 'make install' will install the modules
+in the subdirectory misc .
+
+If the kernel headers for the kernel you are running are
+not in /usr/src/linux, you should do
+'make install LINUX=/path-to-linux-source', otherwise
+the modules may get installed into the wrong
+kernel version directory under /lib/modules.
+
+If 'make install' fails, particularly on Mandrake kernels,
+see FAQ #3.8. (fix MODPREF in the Makefile).
+
+After 'make install', you must do 'depmod'.
+
+If you have symbol errors, do 'depmod -e' to identify
+the particluar modules with errors. Then see #3.9 in
+the FAQ for additional assistance.
+
+For details on options that apply to most modules, see
+doc/chips/MODPARMS. For details on options specific to particular
+modules, see the documentation in doc/chips/ and doc/busses/.
+
+
+Older documentation
+-------------------
 
 The hardcore way is to insmod each of them by hand. This is not very
 practical, though. It is better to install them in a subdirectory that
