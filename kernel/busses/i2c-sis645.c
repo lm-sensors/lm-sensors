@@ -47,13 +47,6 @@
 
 #define DRV_NAME "i2c-sis645"
 
-/* PCI identifiers */
-
-/* SiS645 north bridge */
-#ifndef PCI_DEVICE_ID_SI_645
-#define PCI_DEVICE_ID_SI_645 0x0645
-#endif
-
 /* SiS645DX north bridge */
 #ifndef PCI_DEVICE_ID_SI_646
 #define PCI_DEVICE_ID_SI_646 0x0646
@@ -64,15 +57,6 @@
 #define PCI_DEVICE_ID_SI_648 0x0648
 #endif
 
-/* SiS650 north bridge */
-#ifndef PCI_DEVICE_ID_SI_650
-#define PCI_DEVICE_ID_SI_650 0x0650
-#endif
-
-/* SiS735 combo chipset */
-#ifndef PCI_DEVICE_ID_SI_735
-#define PCI_DEVICE_ID_SI_735 0x0735
-#endif
 
 /* SiS961 south bridge */
 #ifndef PCI_DEVICE_ID_SI_961
@@ -83,7 +67,6 @@
 #ifndef PCI_DEVICE_ID_SI_962
 #define PCI_DEVICE_ID_SI_962 0x0962
 #endif
-
 
 #define PCI_DEVICE_ID_SI_SMBUS 0x16
 

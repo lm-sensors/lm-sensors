@@ -43,32 +43,6 @@
 #include "version.h"
 #include "dmi_scan.h"
 
-/* Note: We assume all devices are identical
-         to the Intel PIIX4; we only mention it during detection.   */
-
-#ifndef PCI_DEVICE_ID_SERVERWORKS_OSB4
-#define PCI_DEVICE_ID_SERVERWORKS_OSB4 0x0200
-#endif
-
-#ifndef PCI_DEVICE_ID_SERVERWORKS_CSB5
-#define PCI_DEVICE_ID_SERVERWORKS_CSB5 0x0201
-#endif
-
-#ifndef PCI_VENDOR_ID_SERVERWORKS
-#define PCI_VENDOR_ID_SERVERWORKS 0x01166
-#endif
-
-#ifndef PCI_DEVICE_ID_INTEL_82443MX_3
-#define PCI_DEVICE_ID_INTEL_82443MX_3	0x719b
-#endif
-
-#ifndef PCI_VENDOR_ID_EFAR
-#define PCI_VENDOR_ID_EFAR		0x1055
-#endif
-
-#ifndef PCI_DEVICE_ID_EFAR_SLC90E66_3
-#define PCI_DEVICE_ID_EFAR_SLC90E66_3	0x9463
-#endif
 
 struct sd {
 	const unsigned short mfr;
@@ -76,6 +50,9 @@ struct sd {
 	const unsigned char fn;
 	const char *name;
 };
+
+/* Note: We assume all devices are identical
+         to the Intel PIIX4; we only mention it during detection.   */
 
 static struct sd supported[] = {
 	{PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371AB_3, 3, "PIIX4"},

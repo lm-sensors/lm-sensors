@@ -37,14 +37,6 @@
 
 MODULE_LICENSE("GPL");
 
-/* 3DFX defines */
-#ifndef PCI_DEVICE_ID_3DFX_VOODOO3
-#define PCI_DEVICE_ID_3DFX_VOODOO3 0x05
-#endif
-#ifndef PCI_DEVICE_ID_3DFX_BANSHEE
-#define PCI_DEVICE_ID_3DFX_BANSHEE 0x03
-#endif
-
 /* the only registers we use */
 #define REG	0x78
 #define REG2 	0x70

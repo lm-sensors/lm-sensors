@@ -41,10 +41,6 @@
 #include <asm/io.h>
 #include "version.h"
 
-#ifndef PCI_DEVICE_ID_VIA_82C686_4
-#define PCI_DEVICE_ID_VIA_82C686_4 0x3057
-#endif
-
 
 /* If force_addr is set to anything different from 0, we forcibly enable
    the device at the given address. */

@@ -43,19 +43,6 @@
 #include <asm/io.h>
 #include "version.h"
 
-#ifndef PCI_DEVICE_ID_VIA_82C596_3
-#define PCI_DEVICE_ID_VIA_82C596_3 	0x3050
-#endif
-#ifndef PCI_DEVICE_ID_VIA_82C596B_3
-#define PCI_DEVICE_ID_VIA_82C596B_3	0x3051
-#endif
-#ifndef PCI_DEVICE_ID_VIA_82C686_4
-#define PCI_DEVICE_ID_VIA_82C686_4 	0x3057
-#endif
-#ifndef PCI_DEVICE_ID_VIA_8233_0
-#define PCI_DEVICE_ID_VIA_8233_0	0x3074
-#endif
-
 #define SMBBA1	    0x90
 #define SMBBA2      0x80
 #define SMBBA3      0xD0

@@ -62,22 +62,6 @@
 
 MODULE_LICENSE("GPL");
 
-#ifndef PCI_DEVICE_ID_SI_540
-#define PCI_DEVICE_ID_SI_540		0x0540
-#endif
-#ifndef PCI_DEVICE_ID_SI_550
-#define PCI_DEVICE_ID_SI_550		0x0550
-#endif
-#ifndef PCI_DEVICE_ID_SI_630
-#define PCI_DEVICE_ID_SI_630		0x0630
-#endif
-#ifndef PCI_DEVICE_ID_SI_730
-#define PCI_DEVICE_ID_SI_730		0x0730
-#endif
-#ifndef PCI_DEVICE_ID_SI_5598
-#define PCI_DEVICE_ID_SI_5598		0x5598
-#endif
-
 static int blacklist[] = {
 			PCI_DEVICE_ID_SI_540,
 			PCI_DEVICE_ID_SI_550,

@@ -32,12 +32,6 @@
 #include <asm/io.h>
 #include "version.h"
 
-MODULE_LICENSE("GPL");
-
-/* PCI device */
-#define VENDOR		PCI_VENDOR_ID_VIA
-#define DEVICE		PCI_DEVICE_ID_VIA_82C586_3
-
 /* Power management registers */
 
 #define PM_CFG_REVID    0x08	/* silicon revision code */
@@ -54,14 +48,7 @@ MODULE_LICENSE("GPL");
 #define IOSPACE		0x06
 #define IOTEXT		"via-i2c"
 
-/* ----- global defines -----------------------------------------------	*/
-#define DEB(x) x		/* silicon revision, io addresses       */
-#define DEB2(x) x		/* line status                          */
-#define DEBE(x)			/*                                      */
-
-/* ----- local functions ----------------------------------------------	*/
-
-static u16 pm_io_base;
+static u16 pm_io_base = 0;
 
 /*
    It does not appear from the datasheet that the GPIO pins are
@@ -94,24 +81,6 @@ static int bit_via_getsda(void *data)
 }
 
 
-/* When exactly was the new pci interface introduced? */
-static int find_via(void)
-{
-	struct pci_dev *s_bridge;
-
-	if (!pci_present())
-		return -ENODEV;
-
-	s_bridge = pci_find_device(VENDOR, DEVICE, NULL);
-
-	if (!s_bridge) {
-		printk("i2c-via.o: vt82c586b not found\n");
-		return -ENODEV;
-	}
-
-	return 0;
-}
-
 static struct i2c_algo_bit_data bit_data = {
 	.setsda		= bit_via_setsda,
 	.setscl		= bit_via_setscl,
@@ -122,15 +91,16 @@ static struct i2c_algo_bit_data bit_data = {
 	.timeout	= HZ
 };
 
-static struct i2c_adapter bit_via_adapter = {
+static struct i2c_adapter vt586b_adapter = {
 	.owner		= THIS_MODULE,
 	.name		= "VIA i2c",
 	.id		= I2C_HW_B_VIA,
-	.algo_data		= &bit_data,
+	.algo_data	= &bit_data,
 };
 
 
 static struct pci_device_id vt586b_ids[] __devinitdata = {
+	{ PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_82C586_3, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
 	{ 0, }
 };
 
@@ -138,6 +108,12 @@ static int __devinit vt586b_probe(struct pci_dev *dev, const struct pci_device_i
 {
 	u16 base;
 	u8 rev;
+	int res;
+
+	if (pm_io_base) {
+		printk(KERN_ERR "i2c-via.o: Will only support one host\n");
+		return -EBUSY;
+	}
 
 	pci_read_config_byte(dev, PM_CFG_REVID, &rev);
 
@@ -158,8 +134,6 @@ static int __devinit vt586b_probe(struct pci_dev *dev, const struct pci_device_i
 	pci_read_config_word(dev, base, &pm_io_base);
 	pm_io_base &= (0xff << 8);
 
-	return -ENODEV;
-
 	if (! request_region(I2C_DIR, IOSPACE, IOTEXT)) {
 	    printk("i2c-via.o: IO 0x%x-0x%x already in use\n",
 		   I2C_DIR, I2C_DIR + IOSPACE);
@@ -167,13 +141,21 @@ static int __devinit vt586b_probe(struct pci_dev *dev, const struct pci_device_i
 	}
 	outb(inb(I2C_DIR) & ~(I2C_SDA | I2C_SCL), I2C_DIR);
 	outb(inb(I2C_OUT) & ~(I2C_SDA | I2C_SCL), I2C_OUT);
-
-	i2c_bit_add_bus(&bit_via_adapter);
+	
+	res = i2c_bit_add_bus(&vt586b_adapter);
+	if ( res < 0 ) {
+		release_region(I2C_DIR, IOSPACE);
+		pm_io_base = 0;
+		return res;
+	}
+	return 0;
 }
 
 static void __devexit vt586b_remove(struct pci_dev *dev)
 {
-	i2c_bit_del_bus(&bit_via_adapter);
+	i2c_bit_del_bus(&vt586b_adapter);
+	release_region(I2C_DIR, IOSPACE);
+	pm_io_base = 0;
 }
 
 
@@ -194,13 +176,12 @@ static int __init i2c_vt586b_init(void)
 static void __exit i2c_vt586b_exit(void)
 {
 	pci_unregister_driver(&vt586b_driver);
-	release_region(I2C_DIR, IOSPACE);
 }
-
 
 
 MODULE_AUTHOR("Kyösti Mälkki <kmalkki@cc.hut.fi>");
 MODULE_DESCRIPTION("i2c for Via vt82c586b southbridge");
+MODULE_LICENSE("GPL");
 
 module_init(i2c_vt586b_init);
 module_exit(i2c_vt586b_exit);

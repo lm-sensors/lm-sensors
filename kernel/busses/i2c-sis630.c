@@ -59,22 +59,6 @@
 #include <asm/io.h>
 #include "version.h"
 
-#ifndef PCI_VENDOR_ID_SI
-#define PCI_VENDOR_ID_SI	0x1039
-#endif
-
-#ifndef PCI_DEVICE_ID_SI_630
-#define PCI_DEVICE_ID_SI_630	0x0630
-#endif
-
-#ifndef PCI_DEVICE_ID_SI_730
-#define PCI_DEVICE_ID_SI_730	0x0730
-#endif
-
-#ifndef PCI_DEVICE_ID_SI_503
-#define PCI_DEVICE_ID_SI_503	0x0008
-#endif
-
 struct sd {
 	const unsigned short mfr;
 	const unsigned short dev;
