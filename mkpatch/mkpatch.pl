@@ -76,13 +76,13 @@ sub gen_Documentation_Configure_help
         or die "Can't open `$kernel_root/$kernel_file'";
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
-  while(<INPUT>) {
-    while (m@I2C mainboard interfaces@ or 
+  MAIN: while(<INPUT>) {
+    if (m@I2C mainboard interfaces@ or 
            m@Acer Labs ALI 1533 and 1543C@ or
            m@Apple Hydra Mac I/O@ or
-           m@Intel 82371AB PIIX4(E)@ or
+           m@Intel 82371AB PIIX4\(E\)@ or
            m@VIA Technologies, Inc. VT82C586B@ or
-           m@Pseudo ISA adapter (for hardware sensors modules)@ or
+           m@Pseudo ISA adapter \(for hardware sensors modules\)@ or
            m@Analog Devices ADM1021 and compatibles@ or
            m@Analog Devices ADM9240 and compatibles@ or
            m@Genesys Logic GL518SM@ or
@@ -91,11 +91,12 @@ sub gen_Documentation_Configure_help
            m@National Semiconductors LM80@ or
            m@Silicon Integrated Systems Corp. SiS5595@ or
            m@Winbond W83781D, W83782D and W83783S@ or
-           m@EEprom (DIMM) reader@ or
+           m@EEprom \(DIMM\) reader@ or
            m@Linear Technologies LTC1710@) {
       $_ = <INPUT>;
       $_ = <INPUT>;
       $_ = <INPUT> while not m@^\S$@ and not eof(INPUT);
+      redo MAIN;
     }
     if (eof(INPUT)) {
       print OUTPUT <<'EOF'
@@ -189,11 +190,12 @@ sub gen_Makefile
         or die "Can't open `$kernel_root/$kernel_file'";
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
-  while(<INPUT>) {
+  MAIN: while(<INPUT>) {
     if (m@CONFIG_SENSORS@) {
       $_ = <INPUT> while not m@endif@;
       $_ = <INPUT>;
       $_ = <INPUT> if m@^$@;
+      redo MAIN;
     }
     if (m@include arch/\$\(ARCH\)/Makefile@) {
       print OUTPUT <<'EOF';
@@ -228,7 +230,7 @@ sub gen_drivers_Makefile
         or die "Can't open `$kernel_root/$kernel_file'";
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
-  while(<INPUT>) {
+  MAIN: while(<INPUT>) {
     if (m@^ALL_SUB_DIRS\s*:=@) {
       $sensors_present = 0;
       while (m@\\$@) {
@@ -238,11 +240,13 @@ sub gen_drivers_Makefile
       }
       $sensors_present = 1 if m@sensors@;
       s@$@ sensors@ if (not $sensors_present);
+      redo MAIN;
     } 
     if (m@CONFIG_SENSORS@) {
       $_ = <INPUT> while not m@^endif@;
       $_ = <INPUT>;
       $_ = <INPUT> if m@^$@;
+      redo MAIN;
     } 
     if (m@^include \$\(TOPDIR\)/Rules.make$@) {
       print OUTPUT <<'EOF';
@@ -282,15 +286,17 @@ sub gen_drivers_char_Config_in
         or die "Can't open `$kernel_root/$kernel_file'";
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
-  while(<INPUT>) {
+  MAIN: while(<INPUT>) {
     if (m@source drivers/i2c/Config.in@) {
       print OUTPUT;
-      print OUTPUT "source drivers/sensors/Config.in\n";
+      print OUTPUT "\nsource drivers/sensors/Config.in\n";
       $_ = <INPUT>;
+      redo MAIN;
     }
     if (m@sensors@) {
       $_ = <INPUT>;
-      $_ = <INPUT> if (m@^$@);
+      $_ = <INPUT> if m@^$@;
+      redo MAIN;
     }
     print OUTPUT;
   }
@@ -320,7 +326,7 @@ sub gen_drivers_char_mem_c
         or die "Can't open `$kernel_root/$kernel_file'";
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
-  while(<INPUT>) {
+  MAIN: while(<INPUT>) {
     if ($atstart and m@#ifdef@) {
       print OUTPUT << 'EOF';
 #ifdef CONFIG_SENSORS
@@ -332,15 +338,17 @@ EOF
     if (not $right_place and m@CONFIG_SENSORS@) {
       $_ = <INPUT> while not m@#endif@;
       $_ = <INPUT>;
+      redo MAIN;
     }
     $right_place = 1 if (m@lp_init\(\);@);
     if ($right_place and not $done and
-        (m@CONFIG_SENSORS@ or m@return 0;@)) {
-      if (not m@return 0;@) {
-        $_ = <INPUT> while not m@#endif@;
-        $_ = <INPUT>;
-        $_ = <INPUT> if m@^$@;
-      }
+        m@CONFIG_SENSORS@) {
+      $_ = <INPUT> while not m@#endif@;
+      $_ = <INPUT>;
+      $_ = <INPUT> if m@^$@;
+      redo MAIN;
+    }
+    if ($right_place and not $done and m@return 0;@) {
       print OUTPUT <<'EOF';
 #ifdef CONFIG_SENSORS
 	sensors_init_all();

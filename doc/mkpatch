@@ -58,3 +58,9 @@ files were already present in the kernel, but had to be patched. Because
 they can change between kernel versions, I had to scan them by hand to
 find where the new code should be inserted. Each file has documented
 what actually happens.
+
+One special other thing is done for each of the files specified in FILES.
+The include-file `compat.h' is removed from each source file, and explicit
+compatibility statements are added. The files are scanned for that, to
+see what compatibility statements are needed. In a future version, you
+will be able to specify which of those you want.
