@@ -394,7 +394,7 @@ static struct i2c_driver lm92_driver = {
 	dec_use:		lm92_dec_use
 };
 
-static int __init sensors_lm92_init (void)
+int __init sensors_lm92_init (void)
 {
 	int result;
 
