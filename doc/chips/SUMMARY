@@ -139,8 +139,8 @@ This may help identify a chip after doing a 'i2cdump [bus] [address] b'.
 0x00	National (on LM84)
 0x01	National
 0x12C3	Asus (at 0x4F)
-0x23	AMD
-0x41	AMD
+0x23	Analog Devices
+0x41	Analog Devices
 0x49	TI
 0x4D	Maxim
 0x5CA3	Winbond (at 0x4F)
