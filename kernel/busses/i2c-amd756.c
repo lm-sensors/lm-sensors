@@ -72,13 +72,8 @@
 /* silicon revision code */
 #define SMBREV    0x008
 
-#define SMBSLVC   0x0D3
-#define SMBSHDW1  0x0D4
-#define SMBSHDW2  0x0D5
-
 /* Other settings */
 #define MAX_TIMEOUT 500
-#define  ENABLE_INT9 0
 
 /* AMD756 constants */
 #define AMD756_QUICK        0x00
@@ -295,7 +290,7 @@ int amd756_transaction(void)
   /* start the transaction by setting bit 6 */
   outw_p(inw(SMB_GLOBAL_ENABLE) | GE_HOST_STC, SMB_GLOBAL_ENABLE); 
 
-  /* We will always wait for a fraction of a second! (See AMD756 docs errata) */
+  /* We will always wait for a fraction of a second! */
   do {
     amd756_do_pause(1);
     temp=inw_p(SMB_GLOBAL_STATUS);
@@ -507,7 +502,7 @@ EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 
-MODULE_AUTHOR("Merlni Hughes <merlin@merlin.org>");
+MODULE_AUTHOR("Merlin Hughes <merlin@merlin.org>");
 MODULE_DESCRIPTION("AMD756 SMBus driver");
 
 int init_module(void)
