@@ -1605,6 +1605,16 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	logdev => 0x09,
       },
       {
+	name => "Nat. Semi. PC87371 Super IO",
+	driver => "not-a-sensor",
+	devid => 0xd0,
+      },
+      {
+	name => "Nat. Semi. PC97371 Super IO",
+	driver => "not-a-sensor",
+	devid => 0xdf,
+      },
+      {
 	name => "Nat. Semi. PC8739x Super IO",
 	driver => "not-a-sensor",
 	devid => 0xea,
