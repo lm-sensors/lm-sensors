@@ -117,9 +117,8 @@ static inline void superio_exit(void)
 #define FAN_CONFIG_INVERT(val,nr)	(((val) >> (4 + nr * 3)) & 1)
 
 #define PWM_FROM_REG(val)		(val)
-#define PWM_TO_REG(val)			(((val) < 0) ? 0 : \
-					 ((val) > 255) ? 255 : \
-					 (val))
+#define PWM_TO_REG(val)			((val) < 0 ? 0 : \
+					 (val) > 255 ? 255 : (val))
 
 /*
  * Voltage registers and conversions
@@ -823,7 +822,17 @@ void pc87360_pwm(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1)
 		{
+#ifdef DEBUG
+			printk(KERN_DEBUG "pc87360.o: Old PWM%u register: %u\n",
+			       nr+1, data->pwm[nr]);
+			printk(KERN_DEBUG "pc87360.o: Wanted PWM%u value: %ld\n",
+			       nr+1, results[0]);
+#endif
 			data->pwm[nr] = PWM_TO_REG(results[0]);
+#ifdef DEBUG
+			printk(KERN_DEBUG "pc87360.o: Writing %u to register %u\n",
+			       data->pwm[nr], PC87360_REG_PWM(nr));
+#endif
 			pc87360_write_value(data, LD_FAN, NO_BANK,
 					    PC87360_REG_PWM(nr),
 					    data->pwm[nr]);
