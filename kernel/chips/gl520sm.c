@@ -75,7 +75,9 @@ That's why _TEMP2 and _VIN4 access the same register
 #define GL520_REG_VIN1 0x14
 #define GL520_REG_VDD 0x15
 #define GL520_REG_TEMP2_OVER 0x17
+#define GL520_REG_VIN4_MAX 0x17
 #define GL520_REG_TEMP2_HYST 0x18
+#define GL520_REG_VIN4_MIN 0x18
 
 
 /* Conversions. Rounding and limit checking is only done on the TO_REG
@@ -128,6 +130,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define GL520_INIT_VIN_1 330	/* 3.3 V */
 #define GL520_INIT_VIN_2 286	/* 12 V */
 #define GL520_INIT_VIN_3 260	/* Vcore */
+#define GL520_INIT_VIN_4 160	/* -12 V */
 #define GL520_INIT_VDD 500	/* 5 V */
 
 #define GL520_INIT_PERCENTAGE 10
@@ -170,8 +173,10 @@ struct gl520_data {
          u8 temp_over[2];            /* Register values */
          u8 temp_hyst[2];            /* Register values */
          u8 alarms,beeps,vid;        /* Register value */
+         u8 alarm_mask;              /* Register value */
          u8 fan_div[2];              /* Register encoding, shifted right */
 	 u8 beep_enable;             /* Boolean */
+	 u8 two_temps;               /* Boolean */
 };
 
 #ifdef MODULE
@@ -375,6 +380,8 @@ static int gl520_detect(struct i2c_adapter *adapter, int address, int kind)
   data->sysctl_id = i;
 
   /* Initialize the GL520SM chip */
+  data->two_temps=1;
+  data->alarm_mask=0xff;
   gl520_init_client((struct i2c_client *) new_client);
   return 0;
 
@@ -413,6 +420,7 @@ void gl520_init_client(struct i2c_client *client)
   gl520_write_value(client,GL520_REG_TEMP1_OVER,
                     TEMP_TO_REG(GL520_INIT_TEMP_OVER));
 
+  /* We set Temp2, but not Vin4. */
   gl520_write_value(client,GL520_REG_TEMP2_HYST,
                     TEMP_TO_REG(GL520_INIT_TEMP_HYST));
   gl520_write_value(client,GL520_REG_TEMP2_OVER,
@@ -534,6 +542,7 @@ void gl520_update_client(struct i2c_client *client)
 
     data->alarms = gl520_read_value(client,GL520_REG_INT);
     data->beeps = gl520_read_value(client,GL520_REG_ALARM);
+    data->vid = gl520_read_value(client,GL520_REG_VID) & 0x1f;
 
     val = gl520_read_value(client,GL520_REG_VDD_LIMIT);
     data->voltage_min[0] = val & 0xff;
@@ -548,11 +557,6 @@ void gl520_update_client(struct i2c_client *client)
     data->voltage_min[3] = val & 0xff;
     data->voltage_max[3] = (val >> 8) & 0xff;
 
-    data->voltage[0] = gl520_read_value(client,GL520_REG_VDD);
-    data->voltage[1] = gl520_read_value(client,GL520_REG_VIN1);
-    data->voltage[2] = gl520_read_value(client,GL520_REG_VIN2);
-    data->voltage[3] = gl520_read_value(client,GL520_REG_VIN3);
-
     val = gl520_read_value(client,GL520_REG_FAN_COUNT);
     data->fan[0] = (val >> 8) & 0xff;
     data->fan[1] = val & 0xff;
@@ -560,27 +564,33 @@ void gl520_update_client(struct i2c_client *client)
     val = gl520_read_value(client,GL520_REG_FAN_LIMIT);
     data->fan_min[0] = (val >> 8) & 0xff;
     data->fan_min[1] = val & 0xff;
-
+    
     data->temp[0] = gl520_read_value(client,GL520_REG_TEMP1);
     data->temp_over[0] = gl520_read_value(client,GL520_REG_TEMP1_OVER);
     data->temp_hyst[0] = gl520_read_value(client,GL520_REG_TEMP1_HYST);
 
-    data->temp[1] = gl520_read_value(client,GL520_REG_TEMP2);
-    data->temp_over[1] = gl520_read_value(client,GL520_REG_TEMP2_OVER);
-    data->temp_hyst[1] = gl520_read_value(client,GL520_REG_TEMP2_HYST);
-
     val = gl520_read_value(client,GL520_REG_MISC);
     data->fan_div[0] = (val >> 6) & 0x03;
     data->fan_div[1] = (val >> 4) & 0x03;
+    
+    data->alarms &= data->alarm_mask;
 
-    if (data->fan_min[0]==0xff)
-       data->alarms &= ~GL520_ALARM_FAN1;
-       
-    if (data->fan_min[1]==0xff)
-       data->alarms &= ~GL520_ALARM_FAN2;
-       
     val = gl520_read_value(client, GL520_REG_CONF);
     data->beep_enable = (val >> 2) & 1;
+
+    data->voltage[0] = gl520_read_value(client,GL520_REG_VDD);
+    data->voltage[1] = gl520_read_value(client,GL520_REG_VIN1);
+    data->voltage[2] = gl520_read_value(client,GL520_REG_VIN2);
+    data->voltage[3] = gl520_read_value(client,GL520_REG_VIN3);
+
+    /* Temp1 and Vin4 are the same input */
+    data->temp[1] = gl520_read_value(client,GL520_REG_TEMP2);
+    data->temp_over[1] = gl520_read_value(client,GL520_REG_TEMP2_OVER);
+    data->temp_hyst[1] = gl520_read_value(client,GL520_REG_TEMP2_HYST);
+    
+    data->voltage[4] = gl520_read_value(client,GL520_REG_VIN4);
+    data->voltage_min[4] = gl520_read_value(client,GL520_REG_VIN4_MIN);
+    data->voltage_max[4] = gl520_read_value(client,GL520_REG_VIN4_MAX);
 
     data->last_updated = jiffies;
     data->valid = 1;
@@ -593,22 +603,29 @@ void gl520_temp(struct i2c_client *client, int operation, int ctl_name,
                 int *nrels_mag, long *results)
 {
   struct gl520_data *data = client->data;
+  int nr = ctl_name - GL520_SYSCTL_TEMP1;
+  int regnr;
+  
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 1;
   else if (operation == SENSORS_PROC_REAL_READ) {
     gl520_update_client(client);
-    results[0] = TEMP_FROM_REG(data->temp_over[0]);
-    results[1] = TEMP_FROM_REG(data->temp_hyst[0]);
-    results[2] = TEMP_FROM_REG(data->temp[0]);
+    results[0] = TEMP_FROM_REG(data->temp_over[nr]);
+    results[1] = TEMP_FROM_REG(data->temp_hyst[nr]);
+    results[2] = TEMP_FROM_REG(data->temp[nr]);
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if ((nr==0) && (! data->two_temps))
+      return;
+    regnr=nr==0?GL520_REG_TEMP1_OVER:GL520_REG_TEMP2_OVER;
     if (*nrels_mag >= 1) {
-      data->temp_over[0] = TEMP_TO_REG(results[0]);
-      gl520_write_value(client,GL520_REG_TEMP1_OVER,data->temp_over[0]);
+      data->temp_over[nr] = TEMP_TO_REG(results[nr]);
+      gl520_write_value(client,regnr,data->temp_over[nr]);
     }
+    regnr=nr==0?GL520_REG_TEMP1_HYST:GL520_REG_TEMP2_HYST;
     if (*nrels_mag >= 2) {
-      data->temp_hyst[0] = TEMP_TO_REG(results[1]);
-      gl520_write_value(client,GL520_REG_TEMP1_HYST,data->temp_hyst[0]);
+      data->temp_hyst[nr] = TEMP_TO_REG(results[nr]);
+      gl520_write_value(client,regnr,data->temp_hyst[nr]);
     }
   }
 }
@@ -632,18 +649,25 @@ void gl520_vin(struct i2c_client *client, int operation, int ctl_name,
                     VDD_FROM_REG(data->voltage[nr]);
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    regnr=nr==0?GL520_REG_VDD_LIMIT:nr==1?GL520_REG_VIN1_LIMIT:nr==2?
-                GL520_REG_VIN2_LIMIT:GL520_REG_VIN3_LIMIT;
-    if (*nrels_mag == 1)
-      old = gl520_read_value(client,regnr) & 0xff00;
-    if (*nrels_mag >= 2) {
-      data->voltage_max[nr] = nr?IN_TO_REG(results[1]):VDD_TO_REG(results[1]);
-      old = data->voltage_max[nr] << 8;
-    }
-    if (*nrels_mag >= 1) {
-      data->voltage_min[nr] = nr?IN_TO_REG(results[0]):VDD_TO_REG(results[0]);
-      old |= data->voltage_min[nr];
-      gl520_write_value(client,regnr,old);
+    if (nr!=4) {
+      regnr=nr==0?GL520_REG_VDD_LIMIT:nr==1?GL520_REG_VIN1_LIMIT:nr==2?
+                 GL520_REG_VIN2_LIMIT:GL520_REG_VIN3_LIMIT;
+       if (*nrels_mag == 1)
+        old = gl520_read_value(client,regnr) & 0xff00;
+      if (*nrels_mag >= 2) {
+        data->voltage_max[nr] = nr?IN_TO_REG(results[1]):VDD_TO_REG(results[1]);
+        old = data->voltage_max[nr] << 8;
+      }
+      if (*nrels_mag >= 1) {
+        data->voltage_min[nr] = nr?IN_TO_REG(results[0]):VDD_TO_REG(results[0]);
+        old |= data->voltage_min[nr];
+        gl520_write_value(client,regnr,old);
+      }
+    } else if (! data->two_temps) {
+      if (*nrels_mag == 1)
+        gl520_write_value(client,GL520_REG_VIN4_MIN,IN_TO_REG(results[0]));
+      if (*nrels_mag >= 2)
+        gl520_write_value(client,GL520_REG_VIN4_MAX,IN_TO_REG(results[1]));
     }
   }
 } 
@@ -670,11 +694,19 @@ void gl520_fan(struct i2c_client *client, int operation, int ctl_name,
                                      DIV_FROM_REG(data->fan_div[nr]));
       old = gl520_read_value(client,GL520_REG_FAN_LIMIT);
 
-      if (nr == 0)
+      if (nr == 0) {
         old = (old & 0x00ff) | (data->fan_min[nr] << 8);
-      else  
+        if (results[0]==0)
+          data->alarm_mask &= ~0x20;
+        else  
+          data->alarm_mask |= 0x20;
+      } else {  
         old = (old & 0xff00) | data->fan_min[nr];
-
+        if (results[0]==0)
+          data->alarm_mask &= ~0x40;
+        else  
+          data->alarm_mask |= 0x40;
+      }
       gl520_write_value(client,GL520_REG_FAN_LIMIT,old);
     }
   }
@@ -713,7 +745,7 @@ void gl520_beep(struct i2c_client *client, int operation, int ctl_name,
                          (data->beep_enable << 2));
     }
     if (*nrels_mag >= 2) {
-      data->beeps = BEEPS_TO_REG(results[1]);
+      data->beeps = BEEPS_TO_REG(results[1]) & data->alarm_mask;
       gl520_write_value(client,GL520_REG_ALARM,data->beeps);
     }
   }
@@ -781,17 +813,23 @@ void gl520_fan1off(struct i2c_client *client, int operation, int ctl_name,
 void gl520_config(struct i2c_client *client, int operation, int ctl_name, 
                 int *nrels_mag, long *results)
 {
+  struct gl520_data *data = client->data;
   int old;
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     results[0] = ((gl520_read_value(client, GL520_REG_CONF) & 0x10)==0);
+    data->two_temps = results[0];
     *nrels_mag = 1;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       old = gl520_read_value(client, GL520_REG_CONF) & 0xef;
-      if (! results[1])
+      if (! results[1]) {
         old |= 0x10;
+        data->two_temps=0;
+      } else {
+        data->two_temps=1;
+      }
       gl520_write_value(client,GL520_REG_CONF,old);
     }
   }
@@ -831,7 +869,7 @@ EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 
-MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>");
+MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and Kyösti Mälkki <kmalkki@cc.hut.fi>");
 MODULE_DESCRIPTION("GL520SM driver");
 
 int init_module(void)

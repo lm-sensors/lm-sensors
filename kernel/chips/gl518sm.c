@@ -109,7 +109,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define BEEP_ENABLE_FROM_REG(val) ((val)?0:1)
 
 #define BEEPS_TO_REG(val) ((val) & 0x7f)
-#define BEEPS_FROM_REG(val) (val)
+#define BEEPS_FROM_REG(val) ((val) & 0x7f)
 
 /* Initial values */
 #define GL518_INIT_TEMP_OVER 600
@@ -149,6 +149,11 @@ struct gl518_data {
          enum chips type;
 
          struct semaphore update_lock;
+
+         int iterate_lock, quit_thread;
+         struct task_struct *thread;
+         struct wait_queue *wq;
+         
          char valid;                 /* !=0 if following fields are valid */
          unsigned long last_updated; /* In jiffies */
          unsigned long last_updated_v00; 
@@ -164,10 +169,10 @@ struct gl518_data {
          u8 temp_over;               /* Register values */
          u8 temp_hyst;               /* Register values */
          u8 alarms,beeps;            /* Register value */
+         u8 alarm_mask;              /* Register value */
          u8 fan_div[2];              /* Register encoding, shifted right */
 	 u8 beep_enable;             /* Boolean */
          u8 iterate;                 /* Voltage iteration mode */
-         u8 fan1conf;                /* Fan1 on/off control */
 };
 
 #ifdef MODULE
@@ -194,8 +199,10 @@ static u16 swap_bytes(u16 val);
 static int gl518_read_value(struct i2c_client *client, u8 reg);
 static int gl518_write_value(struct i2c_client *client, u8 reg, u16 value);
 static void gl518_update_client(struct i2c_client *client);
+
 static void gl518_update_client_rev00(struct i2c_client *client);
-static void gl518_update_vins(struct i2c_client *client);
+static int gl518_update_thread(void *data);
+static void gl518_update_iterate(struct i2c_client *client);
 
 static void gl518_vin(struct i2c_client *client, int operation, 
                       int ctl_name, int *nrels_mag, long *results);
@@ -381,6 +388,10 @@ static int gl518_detect(struct i2c_adapter *adapter, int address, int kind)
 
   /* Initialize the GL518SM chip */
   data->iterate = 0;
+  data->iterate_lock = 0;
+  data->quit_thread = 0;
+  data->thread = NULL;
+  data->alarm_mask = 0xff;
   gl518_init_client((struct i2c_client *) new_client);
   return 0;
 
@@ -562,15 +573,9 @@ void gl518_update_client(struct i2c_client *client)
     val = gl518_read_value(client,GL518_REG_MISC);
     data->fan_div[0] = (val >> 6) & 0x03;
     data->fan_div[1] = (val >> 4) & 0x03;
-    data->fan1conf = (val >> 3) & 1;
 
-    if (((data->fan1conf) && (data->temp < data->temp_over)) ||
-        (data->fan_min[0]==0xff))
-       data->alarms &= ~GL518_ALARM_FAN1;
-       
-    if (data->fan_min[1]==0xff)
-       data->alarms &= ~GL518_ALARM_FAN2;
-       
+    data->alarms &= data->alarm_mask;
+    
     val = gl518_read_value(client, GL518_REG_CONF);
     data->beep_enable = (val >> 2) & 1;
 
@@ -603,26 +608,68 @@ void gl518_update_client_rev00(struct i2c_client *client)
 
   if (data->iterate == 1) {    /* 10 sec delay */
     /* as that update is slow, we consider the data valid for 30 seconds */
-    if ((jiffies - data->last_updated_v00 > 30*HZ) || (data->alarms & 7) 
-         || (! data->valid)) {
-      gl518_update_vins(client);
-      for (i=0; i<4; i++)
-        data->voltage[i]=data->iter_voltage[i];
+    if (((jiffies - data->last_updated_v00 > 30*HZ) || (data->alarms & 7)
+         || (! data->valid)) && (! data->iterate_lock)) {
+      data->iterate_lock=1;
+      gl518_update_iterate(client);
+      data->iterate_lock=0;
     }
+    for (i=0; i<4; i++)
+      data->voltage[i]=data->iter_voltage[i];
   } else if (data->iterate == 2) {   /* show results of last iteration */
     for (i=0; i<4; i++)
       data->voltage[i]=data->iter_voltage[i];
-    /* if (! already_running) trigger(gl518sm_update_vins) */
+    wake_up_interruptible(&data->wq);
   } else {                   /* no iteration */
     data->voltage[3] = gl518_read_value(client,GL518_REG_VIN3);
   } 
+}
+
+
+int gl518_update_thread(void *c)
+{
+  struct i2c_client *client = c;
+  struct gl518_data *data = client->data;
+  
+#ifdef __SMP__
+	lock_kernel();
+#endif
+	exit_mm(current);
+	current->session = 1;
+	current->pgrp = 1;
+	sigfillset(&current->blocked);
+	current->fs->umask = 0;
+	strcpy(current->comm,"gl518sm");
+
+	data->wq     = NULL;
+	data->thread = current;
+
+#ifdef __SMP__
+	unlock_kernel();
+#endif
+
+  for (;;) {
+    if (! data->iterate_lock) {
+      data->iterate_lock=1;
+      gl518_update_iterate(client);
+      data->iterate_lock=0;
+    }
+
+    if ((data->quit_thread) || signal_pending(current))
+      break;
+    interruptible_sleep_on(&data->wq);
+  }
+  
+  data->thread = NULL;
+  data->quit_thread = 0;
+  return 0;
 }
 
 /* This updates vdd, vin1, vin2 values by doing slow and multiple
    comparisons for the GL518SM rev 00 that lacks support for direct
    reading of these values.   Values are kept in iter_voltage   */
 
-void gl518_update_vins(struct i2c_client *client)
+void gl518_update_iterate(struct i2c_client *client)
 {
   struct gl518_data *data = client->data;
   int i, j, loop_more=1, min[3], max[3], delta[3];
@@ -640,71 +687,79 @@ void gl518_update_vins(struct i2c_client *client)
 
   alarm = data->alarms;
 
-    for (i=0; i<3; i++) {
-      if (alarm & (1<<i)) {
-        min[i] = 0;
-        max[i] = 127;
-      } else {
-        min[i] = data->voltage_min[i];
-        max[i] = (data->voltage_max[i]+data->voltage_min[i]) / 2;
-      }
-      delta[i] = (max[i] - min[i]) / 2;
+  for (i=0; i<3; i++) {
+    if (alarm & (1<<i)) {
+      min[i] = 0;
+      max[i] = 127;
+    } else {
+      min[i] = data->voltage_min[i];
+      max[i] = (data->voltage_max[i]+data->voltage_min[i]) / 2;
     }
+    delta[i] = (max[i] - min[i]) / 2;
+  }
   
-    for (j=0; (j<10 && loop_more); j++) {
-    
-      for (i=0; i<3; i++)
-        gl518_write_value(client, VIN_REG(i), max[i] << 8 | min[i]);
-
-      /* we wait now 1.5 seconds before comparing */
-      current->state = TASK_INTERRUPTIBLE;
-      schedule_timeout(HZ + HZ/2);
-      alarm = gl518_read_value(client,GL518_REG_INT);
-
-#ifdef DEBUG_VIN   
-      printk("gl518sm: iteration %2d: %4d%c %4d%c %4d%c\n", j,
-             max[0], (alarm&1)?'!':' ',
-             max[1], (alarm&2)?'!':' ',
-             max[2], (alarm&4)?'!':' ');
-#endif
-
-      for (loop_more=0, i=0; i<3; i++) {
-        if (alarm & (1<<i))
-          max[i] += delta[i];
-        else
-          max[i] -= delta[i];
-
-        if (delta[i])
-          loop_more++;
-        delta[i] >>= 1;
-      }
-    }
-    
+  for (j=0; (j<10 && loop_more); j++) {
+  
     for (i=0; i<3; i++)
-      if (alarm & (1<<i))
-         max[i]++;
+      gl518_write_value(client, VIN_REG(i), max[i] << 8 | min[i]);
+
+    if ((data->thread) && 
+       ((data->quit_thread) || signal_pending(current))) 
+      goto finish;
+
+    /* we wait now 1.5 seconds before comparing */
+    current->state = TASK_INTERRUPTIBLE;
+    schedule_timeout(HZ + HZ/2);
     
+    alarm = gl518_read_value(client,GL518_REG_INT);
+
 #ifdef DEBUG_VIN   
-    printk("gl518sm:    final   :%5d %5d %5d\n", max[0], max[1], max[2]);
-    printk("gl518sm:    meter   :%5d %5d %5d\n", data->voltage[0],
-       	   data->voltage[1], data->voltage[2]);
+    printk("gl518sm: iteration %2d: %4d%c %4d%c %4d%c\n", j,
+           max[0], (alarm&1)?'!':' ',
+           max[1], (alarm&2)?'!':' ',
+           max[2], (alarm&4)?'!':' ');
 #endif
 
-    data->last_updated_v00 = jiffies;
-  
-    /* reset beeps & irqs for vin0-2*/
-    gl518_write_value(client,GL518_REG_ALARM, beeps);
-    gl518_write_value(client,GL518_REG_MASK, irqs);
+    for (loop_more=0, i=0; i<3; i++) {
+      if (alarm & (1<<i))
+        max[i] += delta[i];
+      else
+        max[i] -= delta[i];
 
-    /* set values */
-    for (i=0; i<3; i++) {
-      data->iter_voltage[i] = max[i];
-      gl518_write_value(client, VIN_REG(i),
-        data->voltage_max[i] << 8 | data->voltage_min[i]);
-    } 
+      if (delta[i])
+        loop_more++;
+      delta[i] >>= 1;
+    }
+
+  }
     
-    /* finally read the vin3 meter */
-    data->iter_voltage[3] = gl518_read_value(client,GL518_REG_VIN3);
+  for (i=0; i<3; i++)
+    if (alarm & (1<<i))
+       max[i]++;
+    
+#ifdef DEBUG_VIN   
+  printk("gl518sm:    final   :%5d %5d %5d\n", max[0], max[1], max[2]);
+  printk("gl518sm:    meter   :%5d %5d %5d\n", data->voltage[0],
+                      data->voltage[1], data->voltage[2]);
+#endif
+
+  /* update values, including vin3 */
+  for (i=0; i<3; i++) {
+    data->iter_voltage[i] = max[i];
+  }
+  data->iter_voltage[3] = gl518_read_value(client,GL518_REG_VIN3);
+  data->last_updated_v00 = jiffies;
+
+finish:
+    
+  /* reset values */
+  for (i=0; i<3; i++) {
+    gl518_write_value(client, VIN_REG(i),
+      data->voltage_max[i] << 8 | data->voltage_min[i]);
+  } 
+
+  gl518_write_value(client,GL518_REG_ALARM, beeps);
+  gl518_write_value(client,GL518_REG_MASK, irqs);
 
 #undef VIN_REG
 }
@@ -790,11 +845,19 @@ void gl518_fan(struct i2c_client *client, int operation, int ctl_name,
                                      DIV_FROM_REG(data->fan_div[nr]));
       old = gl518_read_value(client,GL518_REG_FAN_LIMIT);
 
-      if (nr == 0)
-        old = (old & 0x00ff) | (data->fan_min[nr] << 8);
-      else  
-        old = (old & 0xff00) | data->fan_min[nr];
-
+      if (nr == 0) {
+        old = (old & 0x00ff) | (data->fan_min[0] << 8);
+        if (results[0]==0)
+          data->alarm_mask &= ~0x20;
+        else
+          data->alarm_mask |= 0x20;
+      } else {  
+        old = (old & 0xff00) | data->fan_min[1];
+        if (results[0]==0)
+          data->alarm_mask &= ~0x40;
+        else
+          data->alarm_mask |= 0x40;
+      }
       gl518_write_value(client,GL518_REG_FAN_LIMIT,old);
     }
   }
@@ -833,7 +896,7 @@ void gl518_beep(struct i2c_client *client, int operation, int ctl_name,
                          (data->beep_enable << 2));
     }
     if (*nrels_mag >= 2) {
-      data->beeps = BEEPS_TO_REG(results[1]);
+      data->beeps = BEEPS_TO_REG(results[1]) & data->alarm_mask;
       gl518_write_value(client,GL518_REG_ALARM,data->beeps);
     }
   }
@@ -904,12 +967,20 @@ void gl518_iterate(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 1;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if ((*nrels_mag >= 1) && (data->iterate!=results[0])) {
-      for (i=0; i<4; i++) {
-        data->voltage[i] = 0;
-        data->iter_voltage[i] = 105; /* bogus */
-      }
       data->iterate=results[0];
+      for (i=0; i<4; i++) {
+        data->voltage[i]=0;
+        data->iter_voltage[i]=0;
+      }
       data->valid=0;
+      
+      if ((data->iterate != 2) && (data->thread)) {
+         data->quit_thread = 1;
+         wake_up_interruptible(&data->wq);
+      } else if ((data->iterate==2) && (! data->thread)) {
+         data->wq = NULL;
+         kernel_thread(gl518_update_thread, (void*) client, 0);
+      }
     }
   }
 }
