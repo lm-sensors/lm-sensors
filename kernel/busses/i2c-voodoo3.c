@@ -115,6 +115,7 @@ static void bit_vooi2c_setscl(void *data, int val)
 	else
 		r &= ~I2C_SCL_OUT;
 	outlong(r);
+	readlong();	/* flush posted write */
 }
 
 static void bit_vooi2c_setsda(void *data, int val)
@@ -126,6 +127,7 @@ static void bit_vooi2c_setsda(void *data, int val)
 	else
 		r &= ~I2C_SDA_OUT;
 	outlong(r);
+	readlong();	/* flush posted write */
 }
 
 /* The GPIO pins are open drain, so the pins always remain outputs.
@@ -151,6 +153,7 @@ static void bit_vooddc_setscl(void *data, int val)
 	else
 		r &= ~DDC_SCL_OUT;
 	outlong(r);
+	readlong();	/* flush posted write */
 }
 
 static void bit_vooddc_setsda(void *data, int val)
@@ -162,6 +165,7 @@ static void bit_vooddc_setsda(void *data, int val)
 	else
 		r &= ~DDC_SDA_OUT;
 	outlong(r);
+	readlong();	/* flush posted write */
 }
 
 static int bit_vooddc_getscl(void *data)
@@ -228,10 +232,11 @@ void config_v3(struct pci_dev *dev)
 #endif
 	cadr &= PCI_BASE_ADDRESS_MEM_MASK;
 	mem = ioremap_nocache(cadr, 0x1000);
-
-	*((unsigned int *) (mem + REG2)) = 0x8160;
-	*((unsigned int *) (mem + REG)) = 0xcffc0020;
-	printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%p\n", mem);
+	if(mem) {
+		*((unsigned int *) (mem + REG2)) = 0x8160;
+		*((unsigned int *) (mem + REG)) = 0xcffc0020;
+		printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%p\n", mem);
+	}
 }
 
 /* Detect whether a Voodoo3 or a Banshee can be found,
@@ -266,6 +271,8 @@ static int voodoo3_setup(void)
 	} while (dev);
 
 	if (v3_num > 0) {
+		if(!mem)
+			return -ENOMEM;
 		printk("i2c-voodoo3: %d Banshee/Voodoo3 found.\n", v3_num);
 		if (v3_num > 1)
 			printk("i2c-voodoo3: warning: only 1 supported.\n");

@@ -78,6 +78,7 @@ static void bit_hydra_setscl(void *data, int state)
 		val |= HYDRA_SCLK_OE;
 	}
 	pdregw(val);
+	pdregr();	/* flush posted write */
 }
 
 static void bit_hydra_setsda(void *data, int state)
@@ -90,6 +91,7 @@ static void bit_hydra_setsda(void *data, int state)
 		val |= HYDRA_SDAT_OE;
 	}
 	pdregw(val);
+	pdregr();	/* flush posted write */
 }
 
 static int bit_hydra_getscl(void *data)

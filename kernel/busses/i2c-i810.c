@@ -129,12 +129,14 @@ static void bit_i810i2c_setscl(void *data, int val)
 {
 	outlong((val ? SCL_VAL_OUT : 0) | SCL_DIR | SCL_DIR_MASK | SCL_VAL_MASK,
 	     I810_GPIOB);
+	readlong(I810_GPIOB);	/* flush posted write */
 }
 
 static void bit_i810i2c_setsda(void *data, int val)
 {
  	outlong((val ? SDA_VAL_OUT : 0) | SDA_DIR | SDA_DIR_MASK | SDA_VAL_MASK,
 	     I810_GPIOB);
+	readlong(I810_GPIOB);	/* flush posted write */
 }
 
 /* The GPIO pins are open drain, so the pins always remain outputs.
@@ -161,12 +163,14 @@ static void bit_i810ddc_setscl(void *data, int val)
 {
 	outlong((val ? SCL_VAL_OUT : 0) | SCL_DIR | SCL_DIR_MASK | SCL_VAL_MASK,
 	     I810_GPIOA);
+	readlong(I810_GPIOA);	/* flush posted write */
 }
 
 static void bit_i810ddc_setsda(void *data, int val)
 {
  	outlong((val ? SDA_VAL_OUT : 0) | SDA_DIR | SDA_DIR_MASK | SDA_VAL_MASK,
 	     I810_GPIOA);
+	readlong(I810_GPIOA);	/* flush posted write */
 }
 
 static int bit_i810ddc_getscl(void *data)
@@ -236,10 +240,12 @@ void config_i810(struct pci_dev *dev)
 	cadr += I810_IOCONTROL_OFFSET;
 	cadr &= PCI_BASE_ADDRESS_MEM_MASK;
 	mem = ioremap_nocache(cadr, 0x1000);
-	bit_i810i2c_setscl(NULL, 1);
-	bit_i810i2c_setsda(NULL, 1);
-	bit_i810ddc_setscl(NULL, 1);
-	bit_i810ddc_setsda(NULL, 1);
+	if(mem) {
+		bit_i810i2c_setscl(NULL, 1);
+		bit_i810i2c_setsda(NULL, 1);
+		bit_i810ddc_setscl(NULL, 1);
+		bit_i810ddc_setsda(NULL, 1);
+	}
 }
 
 /* Detect whether a supported device can be found,
@@ -253,6 +259,8 @@ static int i810i2c_setup(void)
 		if ((dev = pci_find_device(PCI_VENDOR_ID_INTEL,
 					   *num++, dev))) {
 			config_i810(dev);
+			if(!mem)
+				return -ENOMEM;
 			printk("i2c-i810.o: i810/i815 found.\n");
 			return 0;
 		}
