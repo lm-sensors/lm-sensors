@@ -91,6 +91,10 @@ the adm1021 driver, and the address is one of
 adm1021 driver, temp1 is invalid but temp2 looks correct, then
 it is likely you should use the xeontemp driver instead.
 
+If you have dual Xeons you may have appear to have two separate
+adm1021-compatible chips, or two single-temperature sensors,
+at distinct addresses.
+
 In summary, the xeontemp module supports one temperature and the 
 adm1021 module supports two. Use the module that works best for you.
 

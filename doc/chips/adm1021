@@ -149,6 +149,10 @@ If the adm1021 module doesn't load, you should try two things:
 	2) modprobe xeontemp
 	See if you have one valid temperature.
 
+If you have dual Xeons you may have appear to have two separate
+adm1021-compatible chips, or two single-temperature sensors,
+at distinct addresses.
+
 Pick the best module for your processor based on the results.
 See the xeontemp documentation for further information.
 
