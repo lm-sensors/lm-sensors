@@ -1,6 +1,6 @@
 lm_sensors CHANGES file
 -----------------------
-This is a list of the most important changes between 2.x versions. It is by
+This is a list of the most important changes in 2.x versions. It is by
 no means complete, listing only user-visible changes which are interesting.
 The ultimate way to know what has changed is to run diff, or even neater,
 ask CVS about it:
@@ -15,13 +15,18 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
------------------------
+-----------------------------------------------------------------------------
 
 2.5.5 (2000????)
   File sensors.conf.eg: Add mtp008 entries
   Library: Add mtp008 support
   Module adm1021: Add support for adm1021a / adm1023
+  Module i2c-ali1535: Enhance error checking and recovery; add mutex
+  Module ddcmon: allow force and force_ddcmon parameters
+  Module lm87: update voltage calculations
   Module mtp008: new
+  Module pcf8574: change update time to 5 seconds
+  Module w83781d: fix beep setting via /proc
   Program mkpatch.pl: more fixes
   Program sensors: Add mtp008 support
   Program sensors-detect: Add mtp008 detection
@@ -37,8 +42,8 @@ ask CVS about it:
   File useful_addresses.html: update
   Library: Add lm87 support
   Module pcf8574: new
-  Module ali-1535: new
-  Module ali-15x3: removed force #ifdef.
+  Module i2c-ali1535: new
+  Module i2c-ali15x3: removed force #ifdef.
   Module i2c-i801: support Intel 82801BA (815E chipset)
   Module i2c-i801: add i2c block write support, fix smbus block bugs
                    (requires i2c 2.5.3 package)
