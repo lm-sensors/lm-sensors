@@ -1797,6 +1797,22 @@ chip "lm99-*"
 # never exceed this value
 #   set hyst1 105
 
+
+chip "lm63-*"
+
+   label temp1       "M/B Temp"
+   label temp2       "CPU Temp"
+   label temp2_crit  "CPU Crit"
+   label fan1        "CPU Fan"
+
+# Change limits to fit your needs. Note that temp2_crit is read-only.
+#   set temp1_high       50
+#   set temp2_low        10
+#   set temp2_high       70
+#   set temp2_crit_hyst  75
+#   set fan1_min         2000
+
+
 chip "vt1211-*" "vt8231-*"
 #
 # temp1 and in6 are not implemented in vt1211 / vt8231
