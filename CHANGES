@@ -13,6 +13,9 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
+2.5.0 (200001??)
+  Dropped all kernel 2.0 and 2.1 compatibility
+
 2.4.5 (20000116)
   Introduced DESTDIR installation prefix
   Module lm80: fixes, temperature now read and set correctly

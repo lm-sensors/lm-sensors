@@ -9,6 +9,10 @@ modules for general SMBus access and hardware monitoring. There are quite
 a few changes compared with 1.x.y versions; they are now officially
 unsupported.
 
+WARNING! Starting with lm_sensors version 2.5.0, only kernels 2.2.0 and
+later are supported. Use lm_sensors version 2.4.5 if you use an older
+kernel.
+
 WARNING! If you downloaded this package through our CVS archive, you walk
 the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
