@@ -40,16 +40,18 @@
 #include <linux/init.h>
 
 /* AMD756 SMBus address offsets */
-#define SMB_GLOBAL_STATUS      (0xE0 + amd756_smba)
-#define SMB_GLOBAL_ENABLE      (0xE2 + amd756_smba)
-#define SMB_HOST_ADDRESS       (0xE4 + amd756_smba)
-#define SMB_HOST_DATA          (0xE6 + amd756_smba)
-#define SMB_HOST_COMMAND       (0xE8 + amd756_smba)
-#define SMB_HOST_BLOCK_DATA    (0xE9 + amd756_smba)
-#define SMB_HAS_DATA           (0xEA + amd756_smba)
-#define SMB_HAS_DEVICE_ADDRESS (0xEC + amd756_smba)
-#define SMB_HAS_HOST_ADDRESS   (0xEE + amd756_smba)
-#define SMB_SNOOP_ADDRESS      (0xEF + amd756_smba)
+#define SMB_ADDR_OFFSET        0xE0
+#define SMB_IOSIZE             16
+#define SMB_GLOBAL_STATUS      (0x0 + amd756_smba)
+#define SMB_GLOBAL_ENABLE      (0x2 + amd756_smba)
+#define SMB_HOST_ADDRESS       (0x4 + amd756_smba)
+#define SMB_HOST_DATA          (0x6 + amd756_smba)
+#define SMB_HOST_COMMAND       (0x8 + amd756_smba)
+#define SMB_HOST_BLOCK_DATA    (0x9 + amd756_smba)
+#define SMB_HAS_DATA           (0xA + amd756_smba)
+#define SMB_HAS_DEVICE_ADDRESS (0xC + amd756_smba)
+#define SMB_HAS_HOST_ADDRESS   (0xE + amd756_smba)
+#define SMB_SNOOP_ADDRESS      (0xF + amd756_smba)
 
 /* PCI Address Constants */
 
@@ -158,22 +160,8 @@ int amd756_setup(void)
 		goto END;
 	}
 
-/* Determine the address of the SMBus areas */
-
-	/* Technically it is a dword but... */
-	pci_read_config_word(AMD756_dev, SMBBA, &amd756_smba);
-	amd756_smba &= 0xfff0;
-
-	if (check_region(amd756_smba, 8)) {
-		printk
-		    ("i2c-amd756.o: AMD756_smb region 0x%x already in use!\n",
-		     amd756_smba);
-		error_return = -ENODEV;
-		goto END;
-	}
 
 	pci_read_config_byte(AMD756_dev, SMBGCFG, &temp);
-
 	if ((temp & 128) == 0) {
 		printk
 		    ("SMBUS: Error: Host SMBus controller I/O not enabled!\n");
@@ -181,8 +169,22 @@ int amd756_setup(void)
 		goto END;
 	}
 
+	/* Determine the address of the SMBus areas */
+	/* Technically it is a dword but... */
+	pci_read_config_word(AMD756_dev, SMBBA, &amd756_smba);
+	amd756_smba &= 0xff00;
+	amd756_smba += SMB_ADDR_OFFSET;
+
+	if (check_region(amd756_smba, SMB_IOSIZE)) {
+		printk
+		    ("i2c-amd756.o: AMD756_smb region 0x%x already in use!\n",
+		     amd756_smba);
+		error_return = -ENODEV;
+		goto END;
+	}
+
 	/* Everything is happy, let's grab the memory and set things up. */
-	request_region(amd756_smba, 8, "amd756-smbus");
+	request_region(amd756_smba, SMB_IOSIZE, "amd756-smbus");
 
 #ifdef DEBUG
 	/*
@@ -486,7 +488,7 @@ int __init amd756_cleanup(void)
 			amd756_initialized--;
 	}
 	if (amd756_initialized >= 1) {
-		release_region(amd756_smba, 8);
+		release_region(amd756_smba, SMB_IOSIZE);
 		amd756_initialized--;
 	}
 	return 0;
