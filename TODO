@@ -1,17 +1,20 @@
 Many, many things. Most notably:
 
-* Sensors program needs to print a + before lm75 temperatures
-* Timer chips - block read problems?
-* Library: reload does not work (Bison/Flex problem?)
-* Create wait-queues for bus locking instead of pure semaphores, to make
-  it more interactive
-* Check for block read/writes in smbus-on-i2c emulation code
-* Better bounds checking for writes to /proc; fan_min values now checked
-  but other features may need too.
+KERNEL MODULES
+==============
+
+* Module documentation!!!
+* maxilife.c: Introduce new insmod variables
+* maxilife.c: Round REG_TO_VID correctly
+* icspll.c: Rewrite. The current implementation simply can't work at all.
+  It needs i2c-level access (too bad for SMBus-only adapters).
+* Create wait-queues for bus locking instead of pure semaphores in the i2c
+  base modules, to make it more interactive (right now one process can 
+  monopolize the entire adapter)
+* Find some soulation for block reads in smbus-on-i2c emulation code
+  We need a hack in the i2c level code for this :-(
 * At least the bit-lp and bit-velle modules do no detection on loading;
   ask Simon whether this is possible to add.
-* kmalloc with GFP_KERNEL can cause a context switch! Check whether this is
-  safe everywhere it is used.
 * Support 10-bit addresses. At this moment, they are supported nowhere, except
   in Simon Vogl's i2c modules.
 * Change the i2c modules to keep the namespace clean (EXPORT_SYMBOL does not
@@ -21,22 +24,27 @@ Many, many things. Most notably:
   places, probably (everywhere where global vars are accessed). This must be
   done for the i2c modules, too.
 * Better general locking, or at least a once-over to check no race-conditions
-  remain.
-* Make lm78.c detect 'double hits', (same chip connected to both SMBus and
-  ISA).
-* Better chip detection; insmod-time paramters to set addresses 
-  (difficult, because of all i2c busses!).
-* At least one case report that unused port addresses do not return 0xff
+  remain. This is part of the SMP-safeness, and can better be done at once.
 * Register which i2c addresses are used (a la ISA) for each adapter.
-* Rename i2c-proc.c to i2c-user.c, and extend it with /dev entries;
-  or, create a better i2c-dev.c, that understands SMBus commands.
-* Write all other drivers
-* How to make drivers detect thing *not*; for example, if a Winbond is 
-  present, the LM75 driver should not try to access its simulated
-  LM75 chips.
-* Some library routines are pretty inefficient right now
 * Test SIS5595(/91/98) sensor support. Write generic i2c support. 
   Thomas Dickel <Thomas.Dickel@mni.fh-giessen.de> owns one SIS5595.
 * Make GL518SM rev 00 voltage iteration run as a kernel thread.
   Add libsensors support for the new readable registers.
-* Sensors, sensors.conf.eg: add ADM1021 and ADM9240 support.
+* adm9240: check whether the current voltage computations are correct.
+  Probably not, as they are different from the datasheet specifications.
+  Also check for the supported dallas chip.
+
+LIBRARY
+=======
+
+* reload does not work (Bison/Flex problem?).
+* Some library routines are pretty inefficient right now.
+* Library should be split in more separate files, for better linking
+  behaviour.
+* Many chips are not yet supported by the library.
+
+PROGRAMS
+========
+
+* Sensors program needs to print a + before lm75 temperatures
+* Sensors program needs to be extended for many new chips
