@@ -33,8 +33,8 @@ void print_i2c_busses()
 {
 	FILE *fptr;
 	char s[100];
-	struct dirent *de;
-	DIR *dir;
+	struct dirent *de, *dde, *ddde;
+	DIR *dir, *ddir, *dddir;
 	FILE *f;
 	char *border;
 	char dev[NAME_MAX], fstype[NAME_MAX], sysfs[NAME_MAX], n[NAME_MAX];
@@ -70,19 +70,57 @@ void print_i2c_busses()
 	if (! foundsysfs) {
 		goto done;
 	}
-	strcat(sysfs, "/class/i2c-adapter");
-	dir = opendir(sysfs);
-	if (! dir)
+
+	/* Bus numbers in i2c-adapter don't necessarily match those in
+	   i2c-dev and what we really care about are the i2c-dev numbers.
+	   Unfortunately the names are harder to get in i2c-dev */
+	strcat(sysfs, "/class/i2c-dev");
+	if(!(dir = opendir(sysfs)))
 		goto done;
+	/* go through the busses */
 	while ((de = readdir(dir)) != NULL) {
 		if (!strcmp(de->d_name, "."))
 			continue;
 		if (!strcmp(de->d_name, ".."))
 			continue;
 
+		/* this seems to work for ISA */
 		sprintf(n, "%s/%s/device/name", sysfs, de->d_name);
+		f = fopen(n, "r");
+		if(f == NULL) {
+			/* non-ISA is much harder */
+			sprintf(n, "%s/%s/driver", sysfs, de->d_name);
+			if(!(ddir = opendir(n)))
+				continue;       	
+			while ((dde = readdir(ddir)) != NULL) {
+				if (!strcmp(dde->d_name, "."))
+					continue;
+				if (!strcmp(dde->d_name, ".."))
+					continue;
+				/* hope it's a link to a PCI device */
+				if(index(dde->d_name, ':')) {
+					sprintf(n, "%s/%s/driver/%s",
+					        sysfs, de->d_name, dde->d_name);
+					if(!(dddir = opendir(n)))
+						continue;       	
+					while ((ddde = readdir(dddir)) != NULL) {
+						if (!strcmp(ddde->d_name, "."))
+							continue;
+						if (!strcmp(ddde->d_name, ".."))
+							continue;
+						if ((!strncmp(ddde->d_name, "i2c-", 4))) {
+							sprintf(n, "%s/%s/driver/%s/%s/name",
+							        sysfs, de->d_name, dde->d_name, ddde->d_name);
+							if((f = fopen(n, "r")))
+								goto found;
+						}
+					}
+				}
+			}
+		}
 
-		if ((f = fopen(n, "r")) != NULL) {
+found:
+		if (f != NULL) {
 			char	x[120];
 
 			fgets(x, 120, f);
@@ -107,5 +145,7 @@ void print_i2c_busses()
 
 done:
 	if(count == 0)
-		fprintf(stderr,"Error: No I2C busses found!\n");
+		fprintf(stderr,"Error: No I2C busses found!\n"
+		               "Be sure you have done 'modprobe i2c-dev'\n"
+		               "and also modprobed your i2c bus drivers\n");
 }
