@@ -46,6 +46,9 @@ void help(void)
   fprintf(stderr,"Syntax: i2cdump I2CBUS ADDRESS [MODE] [BANK [BANKREG]]\n");
   fprintf(stderr,"  MODE is 'b[yte]', 'w[ord]', 's[mbusblock], or 'i[2cblock]' (default b)\n");
   fprintf(stderr,"  I2CBUS is an integer\n");
+  fprintf(stderr,"  ADDRESS is an integer 0x00 - 0x7f\n");
+  fprintf(stderr,"  BANK and BANKREG are for byte and word accesses (default bank 0, reg 0x4e)\n");
+  fprintf(stderr,"  BANK is the command for smbusblock accesses (default 0)\n");
   if((fptr = fopen("/proc/bus/i2c", "r"))) {
     fprintf(stderr,"  Installed I2C busses:\n");
     while(fgets(s, 100, fptr))
@@ -120,20 +123,27 @@ int main(int argc, char *argv[])
 
   if(argc > 4) {
     bank = strtol(argv[4],&end,0);
-    if (*end) {
+    if (*end || size == I2C_SMBUS_I2C_BLOCK_DATA) {
       fprintf(stderr,"Error: Invalid bank number!\n");
       help();
       exit(1);
     }
-    if ((bank < 0) || (bank > 15)) {
-      fprintf(stderr,"Error: bank out of range (0-15)!\n");
+    if (((size == I2C_SMBUS_BYTE_DATA) || (size == I2C_SMBUS_WORD_DATA)) &&
+        ((bank < 0) || (bank > 15))) {
+      fprintf(stderr,"Error: bank out of range!\n");
+      help();
+      exit(1);
+    }
+    if (((size == I2C_SMBUS_BLOCK_DATA)) &&
+        ((bank < 0) || (bank > 0xff))) {
+      fprintf(stderr,"Error: block command out of range!\n");
       help();
       exit(1);
     }
 
     if(argc > 5) {
       bankreg = strtol(argv[5],&end,0);
-      if (*end) {
+      if (*end || size == I2C_SMBUS_BLOCK_DATA) {
         fprintf(stderr,"Error: Invalid bank register number!\n");
         help();
         exit(1);
@@ -250,13 +260,16 @@ int main(int argc, char *argv[])
                            size == I2C_SMBUS_I2C_BLOCK_DATA ? "i2c block" :
                            size == I2C_SMBUS_BYTE_DATA ? "byte" : "word");
   if(bank) 	
-    fprintf(stderr,"  Probing bank %d using bank register 0x%02x.\n",
-            bank, bankreg);
+    if(size == I2C_SMBUS_BLOCK_DATA)
+      fprintf(stderr,"  Using command 0x%02x.\n", bank);
+    else
+      fprintf(stderr,"  Probing bank %d using bank register 0x%02x.\n",
+              bank, bankreg);
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
   sleep(5);
 
   /* See Winbond w83781d data sheet for bank details */
-  if(bank) {
+  if(bank && size != I2C_SMBUS_BLOCK_DATA) {
     i2c_smbus_write_byte_data(file,bankreg,bank | 0x80);
   }
 
@@ -266,7 +279,7 @@ int main(int argc, char *argv[])
     /* do the block transaction */
     if(size == I2C_SMBUS_BLOCK_DATA || size == I2C_SMBUS_I2C_BLOCK_DATA) {
       if(size == I2C_SMBUS_BLOCK_DATA) {
-        res = i2c_smbus_read_block_data(file,0,cblock);
+        res = i2c_smbus_read_block_data(file, bank, cblock);
       } else if(size == I2C_SMBUS_I2C_BLOCK_DATA) {
 #if USE_I2C_BLOCK
         res = 0;
@@ -320,6 +333,8 @@ int main(int argc, char *argv[])
           printf("%c",res & 0xff);
       }
       printf("\n");
+    if(size == I2C_SMBUS_BLOCK_DATA && i == 16)
+      break;		
     }
   } else {
     printf("     0,8  1,9  2,a  3,b  4,c  5,d  6,e  7,f\n");
@@ -335,7 +350,7 @@ int main(int argc, char *argv[])
       printf("\n");
     }
   }
-  if(bank) {
+  if(bank && size != I2C_SMBUS_BLOCK_DATA) {
     i2c_smbus_write_byte_data(file,bankreg,0x80);
   }
   exit(0);
