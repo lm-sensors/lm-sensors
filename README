@@ -38,14 +38,14 @@ At least the following hardware sensor chips are supported:
   National Semicoductor LM75, LM78, LM78-J, LM79. LM80, and LM81
   Winbond W83781D, W83782D, W83783S, and W83627HF
   Genesys Logic GL518SM (several revisions)
-  Analog Devices ADM1021 and ADM9240
+  Analog Devices ADM1021, ADM1022, and ADM9240
   SiS Southbridge (integrated in the chipset; the I2C adapter will also be
     supported in the near future)
   Maxim MAX1617 and MAX1617A
   Dallas Semiconductor DS1780
   Hewlett Packard Maxilife (several revisions)
   Intel Xeon processor embedded sensors
-  TI THMC10
+  TI THMC10 and THMC50
 
 We also support some miscellaneous chips:
   Linear Technologies LTC1710
