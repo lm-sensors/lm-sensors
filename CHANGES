@@ -17,6 +17,27 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
+2.8.5 (2004XXXX)
+  File doc/chips/SUMMART: Update
+  File etc/sensors.conf.eg: Epox 8K3A tweaks. (Kronos)
+  Module fscher: Rename fanN_min to pwmN (Reinhard Nissl)
+  Module lm80: Code cleanups
+  Module vt1211: Fix bitmask in uch_config read and write
+  Module vt8231: Fix bitmask in uch_config read and write
+  Module w83627hf: Add w83637hf support
+                   Fix exported name
+                   Fix PWM in w83627thf
+  Modules (all chips): Get rid of useless headers
+  Program decode-edid.pl: Add sysfs support
+  Program sensors: Add w83637hf support
+  Program sensors-detect: Add heuristics to the LM80 detection function
+  Library: Update to match renames in fscher
+           Reverse temporary changes to w83l785ts mappings
+           Fix vt1211 and vt8231 uch_config not being writable
+           Add 2.6 lm80 support
+		   Add w83637hf support
+
+
 2.8.4 (20040207)
   File doc/lm_sensors-FAQ.texi: Update 4.20.
   File doc/chips/it87: Change hyst to low
