@@ -405,7 +405,7 @@ void do_a_print(sensors_chip_name name)
 	    break;
 	}
     }
-    if(m == NULL)
+    if(m->prefix == NULL)
 	print_unknown_chip(&name);
   }
   printf("\n");
