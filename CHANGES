@@ -22,22 +22,39 @@ ask CVS about it:
   File doc/chips/pc87360-fan: Renamed to pc87360
   File doc/chips/w83781d: Update AS99127F documentation
   File etc/sensors.conf.eg: Add comments about BP6 voltages
+                            Add comment on Asus A7V8X-X VCore
+                            Misc fixes to lm80 section
   Library: Fix 2.6 VRM
            Fix 2.6 hyst temp for 2.6 (lm75, lm78 and gl518sm)
+           Fully support the PC87360 family
+  Makefile: Do not run depmod on staged installs (Peter Breitenlohner)
+  Man page i2cdetect.8: document new command line flags
+  Man page i2cdump.8: More details on how i2cdump can write to a chip
+  Modules (all chip drivers): Rework memory allocation scheme.
   Modules dmi_scan, i2c-piix4: Move IBM detection into dmi_scan
   Modules w83781d.c, smartbatt.c, lm75.c, gl520sm.c, gl518sm.c, ds1621.c,
           asb100.c, lm92.c: Use swab16
   Module i2c-sis645: Add support for SiS655
   Module lm92: Support MAX6633, MAX6634, MAX6635 and LM76
+  Module p4b_smbus: Add support for mobile versions of the 82801
+                    (Axel Thimm)
   Module pc87360-fan: Renamed to pc87360
                       Also support PC87365 and PC87366
                       Add write support
                       Correctly set the chip name depending on the type
+                      Add voltage and temperature support
+                      Fix fan speed computation
   Module thmc50: Fix address range
+  Module via686a: Fix voltage roundings
   Module w83781d: Drop PWM support for as99127f
+  Program i2cdetect: Adapt probing method to address
+                     Add -q and -r flags to force probing methods
+  Program isadump: Misc improvements
   Program mkpatch: Patch dmi_scan.c in kernel instead of adding our own
                    module
                    Include i2c-nforce2
+  Program sensors: Fully support the PC87360 family
+                   Fix lm80 temperature alarms
   Program sensors-detect: Rework Super I/O detection
                           Support SiS655/SiS96x
                           Support ADT7461 and ADT7467
@@ -45,7 +62,12 @@ ask CVS about it:
                           Explicitely support ADM1028
                           Scan all logical devices of PC87365 and PC87366
                           Detect LM92, LM76, MAX6633, MAX6634, MAX6635
-                          Detect eeproms with software write protect
+                          Detect eeproms with software write protect (not
+                          enabled by default)
+                          Support ALi 1563 (2.6 only)
+                          Drop LTC1710 support
+                          Use byte reads for probing on ranges 0x30-0x37 and
+                          0x50-0x5F
 
 
 2.8.6 (20040405)
