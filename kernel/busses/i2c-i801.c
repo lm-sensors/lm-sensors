@@ -26,7 +26,7 @@
     82801AB		2423           
     82801BA		2443           
     82801CA/CAM		2483           
-    82801DB		24C3           
+    82801DB		24C3   (32 byte buffer and HW PEC not yet supported)
 
     This driver supports several versions of Intel's I/O Controller Hubs (ICH).
     For SMBus support, they are similar to the PIIX4 and are part
@@ -546,25 +546,21 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 	}
 #ifdef HAVE_PEC
 	if(isich4 && command == I2C_SMBUS_BLOCK_DATA_PEC) {
+		/* wait for INTR bit as advised by Intel */
 		timeout = 0;
 		do {
 			temp = inb_p(SMBHSTSTS);
 			i801_do_pause(1);
-		}
-		    while ((!(temp & 0x80))
+		} while ((!(temp & 0x02))
 			   && (timeout++ < MAX_TIMEOUT));
 
-		/* If the SMBus is still busy, we give up */
 		if (timeout >= MAX_TIMEOUT) {
-#ifdef DEBUG
 			printk(KERN_DEBUG "i2c-i801.o: PEC Timeout!\n");
-#endif
 		}
 		if(read_write == I2C_SMBUS_READ) {
 			data->block[len + 1] = inb_p(SMBPEC);
 		}
 		outb_p(temp, SMBHSTSTS); 
-		printk("i2c-i801.o: sts = 0x%02x len = %d PEC = 0x%02x\n", temp, len, data->block[len + 1]);
 	}
 #endif
         result = 0;
