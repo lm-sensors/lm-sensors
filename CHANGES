@@ -21,16 +21,26 @@ ask CVS about it:
   File doc/chips/SUMMARY: Update
   File etc/sensors.conf.eg: Epox 8K3A tweaks. (Kronos)
   Module fscher: Rename fanN_min to pwmN (Reinhard Nissl)
+  Module i2c-amd756: Don't register driver to avoid driver conflicts.
+                     (Daniel Rune Jensen)
   Module lm80: Code cleanups
   Module vt1211: Fix bitmask in uch_config read and write; remove in6 and temp1
   Module vt8231: Fix bitmask in uch_config read and write; remove in6 and temp1
   Module w83627hf: Add w83637hf support
                    Fix exported name
                    Fix PWM in w83627thf
+                   Preserve other bits when forcing temp2/3 to comparator mode
+  Module w83781d: Preserve other bits when forcing temp2/3 to comparator mode
+  Modules asb100.c, fscher.c, lm90.c, max6650.c, w83l785ts.c:
+          Define driver ID if i2c-id.h doesn't have it yet.
+  Modules i2c-ali1535.c, i2c-hydra.c, i2c-i801.c, i2c-sis5595.c:
+          Backport oops fix from Linux 2.6.
   Modules (all chips): Get rid of useless headers
   Program decode-edid.pl: Add sysfs support
   Program sensors: Add w83637hf support
   Program sensors-detect: Add heuristics to the LM80 detection function
+                          Add support for W83L785R, improve W83L784R/AR
+                          Add GeForce FX 5600 as supported by rivatv
   Library: Update to match renames in fscher
            Reverse temporary changes to w83l785ts mappings
            Fix vt1211 and vt8231 uch_config not being writable
