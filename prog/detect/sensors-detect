@@ -3035,7 +3035,6 @@ sub lm92_detect
 {
   my ($chip, $file, $addr) = @_;
 
-  my $cur = i2c_smbus_read_word_data($file, 0x00);
   my $conf = i2c_smbus_read_byte_data($file, 0x01);
   my $hyst = i2c_smbus_read_word_data($file, 0x02);
   my $crit = i2c_smbus_read_word_data($file, 0x03);
