@@ -553,6 +553,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x8A20,
        func => 0,
        procid => "S3 Savage 3D",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /^dontmatchthis/ },
      } , 
      { 
@@ -560,6 +561,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x8A21,
        func => 0,
        procid => "S3 Savage 3D MV",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /^dontmatchthis/ },
      } , 
      { 
@@ -583,6 +585,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x8A25,
        func => 0,
        procid => "S3 ProSavage PM",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /^dontmatchthis/ },
      } , 
      { 
@@ -590,6 +593,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x8A26,
        func => 0,
        procid => "S3 ProSavage KM",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /^dontmatchthis/ },
      } , 
      { 
@@ -597,6 +601,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x8C10,
        func => 0,
        procid => "S3 Savage MX MV",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /^dontmatchthis/ },
      } , 
      { 
@@ -604,6 +609,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x8C11,
        func => 0,
        procid => "S3 Savage MX",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /^dontmatchthis/ },
      } , 
      { 
@@ -611,6 +617,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x8C12,
        func => 0,
        procid => "S3 Savage IX MV",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /^dontmatchthis/ },
      } , 
      { 
@@ -618,6 +625,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x8C13,
        func => 0,
        procid => "S3 Savage IX",
+       driver => "to-be-written",
        match => sub { $_[0] =~ /^dontmatchthis/ },
      } , 
 );
