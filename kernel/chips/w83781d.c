@@ -134,6 +134,7 @@ static const u8 regpwm[] = {W83781D_REG_PWM1, W83781D_REG_PWM2,
 #define W83781D_REG_PWM(nr) (regpwm[(nr) - 1])
 
 #define W83781D_REG_I2C_ADDR 0x48
+#define W83781D_REG_I2C_SUBADDR 0x4A
 
 /* The following are undocumented in the data sheets however we
    received the information in an email from Winbond tech support */
@@ -330,6 +331,9 @@ struct w83781d_data {
          char valid;                 /* !=0 if following fields are valid */
          unsigned long last_updated; /* In jiffies */
 
+         struct i2c_client *lm75;    /* for secondary I2C addresses */  	
+				     /* pointer to array of 2 subclients */
+
          u8 in[9];                   /* Register value - 8 & 9 for 782D only */
          u8 in_max[9];               /* Register value - 8 & 9 for 782D only */
          u8 in_min[9];               /* Register value - 8 & 9 for 782D only */
@@ -406,6 +410,7 @@ static void w83781d_sens(struct i2c_client *client, int operation,
 static void w83781d_rt(struct i2c_client *client, int operation,
                         int ctl_name, int *nrels_mag, long *results);
 #endif
+static u16 swap_bytes(u16 val);
 
 static int w83781d_id = 0;
 
@@ -801,6 +806,45 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
   if ((err = i2c_attach_client(new_client)))
     goto ERROR3;
 
+  /* attach secondary i2c lm75-like clients */
+  if (!is_isa) {
+    if (! (data->lm75 = kmalloc(2 * sizeof(struct i2c_client),
+                                GFP_KERNEL))) {
+      err = -ENOMEM;
+      goto ERROR4;
+    }
+    val1 = w83781d_read_value(new_client,W83781D_REG_I2C_SUBADDR);
+    data->lm75[0].addr = 0x48 + (val1 & 0x07);
+    data->lm75[1].addr = 0x48 + ((val1 >> 4) & 0x07);
+    if (kind == w83781d)
+      client_name = "W83781D subclient";
+    else if (kind == w83782d)
+      client_name = "W83782D subclient";
+    else if (kind == w83783s)
+      client_name = "W83783S subclient";
+    else if (kind == w83627hf)
+      client_name = "W83627HF subclient";
+    else if (kind == as99127f)
+      client_name = "AS99127F subclient";
+
+    for(i = 0; i <= 1; i++) {
+      data->lm75[i].data = NULL;	/* store all data in w83781d */
+      data->lm75[i].adapter = adapter;
+      data->lm75[i].driver = &w83781d_driver;
+      data->lm75[i].flags = 0;
+      strcpy(data->lm75[i].name,client_name);
+      data->lm75[i].id = w83781d_id++;
+      if ((err = i2c_attach_client(&(data->lm75[i])))) {
+        if(i == 1)
+          goto ERROR6;
+        else
+          goto ERROR5;
+      }
+    }
+  } else {
+    data->lm75 = NULL;
+  }
+
   /* Register a new directory entry with module sensors */
   if ((i = sensors_register_entry(new_client,
                                   type_name,
@@ -810,7 +854,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
                                          w83782d_isa_dir_table_template,
 			  	  THIS_MODULE)) < 0) {
     err = i;
-    goto ERROR4;
+    goto ERROR7;
   }
   data->sysctl_id = i;
 
@@ -821,6 +865,15 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
+ERROR7:
+  if (!is_isa)
+    i2c_detach_client(&(((struct w83781d_data *) (new_client->data))->lm75[1]));
+ERROR6:
+  if (!is_isa)
+    i2c_detach_client(&(((struct w83781d_data *) (new_client->data))->lm75[0]));
+ERROR5:
+  if (!is_isa)
+    kfree(((struct w83781d_data *) (new_client->data))->lm75);
 ERROR4:
   i2c_detach_client(new_client);
 ERROR3:
@@ -845,6 +898,11 @@ int w83781d_detach_client(struct i2c_client *client)
 
   if i2c_is_isa_client(client)
     release_region(client->addr,W83781D_EXTENT);
+  else {
+    i2c_detach_client(&(((struct w83781d_data *) (client->data))->lm75[0]));
+    i2c_detach_client(&(((struct w83781d_data *) (client->data))->lm75[1]));
+    kfree(((struct w83781d_data *) (client->data))->lm75);
+  }
   kfree(client);
 
   return 0;
@@ -870,22 +928,28 @@ void w83781d_dec_use (struct i2c_client *client)
 #endif
 }
  
+u16 swap_bytes(u16 val)
+{
+  return (val >> 8) | (val << 8);
+}
+
 /* The SMBus locks itself, usually, but nothing may access the Winbond between
-   bank switches. ISA access must always be locked explicitely! 
+   bank switches. ISA access must always be locked explicitly! 
    We ignore the W83781D BUSY flag at this moment - it could lead to deadlocks,
    would slow down the W83781D access and should not be necessary. 
-   There are some ugly typecasts here, but the good new is - they should
+   There are some ugly typecasts here, but the good news is - they should
    nowhere else be necessary! */
 int w83781d_read_value(struct i2c_client *client, u16 reg)
 {
-  int res,word_sized;
+  int res,word_sized,bank;
+  struct i2c_client *cl;
 
-  word_sized = (((reg & 0xff00) == 0x100) || ((reg & 0xff00) == 0x200)) &&
-                                 (((reg & 0x00ff) == 0x50) || 
-                                  ((reg & 0x00ff) == 0x53) || 
-                                  ((reg & 0x00ff) == 0x55));
   down(& (((struct w83781d_data *) (client->data)) -> lock));
   if (i2c_is_isa_client(client)) {
+    word_sized = (((reg & 0xff00) == 0x100) || ((reg & 0xff00) == 0x200)) &&
+                                   (((reg & 0x00ff) == 0x50) || 
+                                    ((reg & 0x00ff) == 0x53) || 
+                                    ((reg & 0x00ff) == 0x55));
     if (reg & 0xff00) {
       outb_p(W83781D_REG_BANK,client->addr + W83781D_ADDR_REG_OFFSET);
       outb_p(reg >> 8,client->addr + W83781D_DATA_REG_OFFSET);
@@ -901,12 +965,33 @@ int w83781d_read_value(struct i2c_client *client, u16 reg)
       outb_p(0,client->addr + W83781D_DATA_REG_OFFSET);
     }
   } else {
-    if (reg & 0xff00)
-      i2c_smbus_write_byte_data(client,W83781D_REG_BANK, reg >> 8);
-    res = i2c_smbus_read_byte_data(client, reg);
-    if (word_sized)
-      res = (res << 8) + i2c_smbus_read_byte_data(client, reg);
-    if (reg & 0xff00)
+    bank = (reg >> 8) & 0x0f;
+    if (bank > 2)
+      /* switch banks */
+      i2c_smbus_write_byte_data(client,W83781D_REG_BANK, bank);
+    if(bank == 0 || bank > 2) {
+      res = i2c_smbus_read_byte_data(client, reg & 0xff);
+    } else {
+      /* switch to subclient */
+      cl = &(((struct w83781d_data *) (client->data))->lm75[bank - 1]);
+      /* convert from ISA to LM75 I2C addresses */
+      switch (reg & 0xff) {
+        case 0x50:
+          res = swap_bytes(i2c_smbus_read_word_data(cl, 0));
+          break;
+        case 0x52:
+          res = i2c_smbus_read_byte_data(cl, 1);
+          break;
+        case 0x53:
+          res = swap_bytes(i2c_smbus_read_word_data(cl, 2));
+          break;
+        case 0x55:
+	default:
+          res = swap_bytes(i2c_smbus_read_word_data(cl, 3));
+          break;
+      }
+    }
+    if (bank > 2)
       i2c_smbus_write_byte_data(client,W83781D_REG_BANK,0);
   }
   up( & (((struct w83781d_data *) (client->data)) -> lock));
@@ -914,21 +999,21 @@ int w83781d_read_value(struct i2c_client *client, u16 reg)
 }
 
 /* The SMBus locks itself, usually, but nothing may access the Winbond between
-   bank switches. ISA access must always be locked explicitely! 
+   bank switches. ISA access must always be locked explicitly! 
    We ignore the W83781D BUSY flag at this moment - it could lead to deadlocks,
    would slow down the W83781D access and should not be necessary. 
-   There are some ugly typecasts here, but the good new is - they should
+   There are some ugly typecasts here, but the good news is - they should
    nowhere else be necessary! */
 int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 {
-  int word_sized;
+  int word_sized,bank;
+  struct i2c_client *cl;
 
-  word_sized = (((reg & 0xff00) == 0x100) || ((reg & 0xff00) == 0x200)) &&
-                                 (((reg & 0x00ff) == 0x50) || 
-                                  ((reg & 0x00ff) == 0x53) || 
-                                  ((reg & 0x00ff) == 0x55));
   down( & (((struct w83781d_data *) (client->data)) -> lock));
   if (i2c_is_isa_client(client)) {
+    word_sized = (((reg & 0xff00) == 0x100) || ((reg & 0xff00) == 0x200)) &&
+                                   (((reg & 0x00ff) == 0x53) || 
+                                    ((reg & 0x00ff) == 0x55));
     if (reg & 0xff00) {
       outb_p(W83781D_REG_BANK,client->addr + W83781D_ADDR_REG_OFFSET);
       outb_p(reg >> 8,client->addr + W83781D_DATA_REG_OFFSET);
@@ -944,14 +1029,29 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
       outb_p(0,client->addr + W83781D_DATA_REG_OFFSET);
     }
   } else {
-    if (reg & 0xff00)
-      i2c_smbus_write_byte_data(client,W83781D_REG_BANK, reg >> 8);
-    if (word_sized) {
-       i2c_smbus_write_byte_data(client, reg, value >> 8);
-       i2c_smbus_write_byte_data(client, reg+1, value &0xff);
-    } else
-      i2c_smbus_write_byte_data(client, reg, value &0xff);
-    if (reg & 0xff00)
+    bank = (reg >> 8) & 0x0f;
+    if (bank > 2)
+        /* switch banks */
+        i2c_smbus_write_byte_data(client,W83781D_REG_BANK, bank);
+    if(bank == 0 || bank > 2) {
+      i2c_smbus_write_byte_data(client, reg & 0xff, value & 0xff);
+    } else {
+      /* switch to subclient */
+      cl = &(((struct w83781d_data *) (client->data))->lm75[bank - 1]);
+      /* convert from ISA to LM75 I2C addresses */
+      switch (reg & 0xff) {
+        case 0x52:
+          i2c_smbus_write_byte_data(cl, 1, value & 0xff);
+          break;
+        case 0x53:
+          i2c_smbus_write_word_data(cl, 2, swap_bytes(value));
+          break;
+        case 0x55:
+          i2c_smbus_write_word_data(cl, 3, swap_bytes(value));
+          break;
+      }
+    }
+    if (bank > 2)
       i2c_smbus_write_byte_data(client,W83781D_REG_BANK,0);
   }
   up( & (((struct w83781d_data *) (client->data)) -> lock));
