@@ -1,12 +1,39 @@
 /*
- *	DMI decode rev 1.2
+ *	DMI decode rev 1.4
  *
  *	(C) 2000,2001 Alan Cox <alan@redhat.com>
  *
  *      2-July-2001 Matt Domsch <Matt_Domsch@dell.com>
  *      Additional structures displayed per SMBIOS 2.3.1 spec
  *
- *	8/3/02 Enhanced and incorporated in lm_sensors 2.6.5
+ *      13-December-2001 Arjan van de Ven <arjanv@redhat.com>
+ *      Fix memory bank type (DMI case 6)
+ *
+ *      3-August-2002 Mark D. Studebaker <mds@paradyne.com>
+ *      Better indent in dump_raw_data
+ *      Fix return value in dmi_bus_name
+ *      Additional sensor fields decoded
+ *      Fix compilation warnings
+ *
+ *      6-August-2002 Jean Delvare <khali@linux-fr.org>
+ *      Reposition file pointer after DMI table display
+ *      Disable first RSD PTR checksum (was not correct anyway)
+ *      Show actual DMI struct count and occupied size
+ *      Check for NULL after malloc
+ *      Use SEEK_* constants instead of numeric values
+ *      Code optimization (and warning fix) in DMI cases 10 and 14
+ *      Add else's to avoid unneeded cascaded if's in main loop
+ *      Code optimization in DMI information display
+ *      Fix all compilation warnings
+ *
+ *      9-August-2002 Jean Delvare <khali@linux-fr.org>
+ *      Better DMI struct count/size error display
+ *      More careful memory access in dmi_table
+ *      DMI case 13 (Language) decoded
+ *      C++ style comments removed
+ *      Commented out code removed
+ *      DMI 0.0 case handled
+ *      Fix return value in dmi_port_type and dmi_port_connector_type
  *
  *	Licensed under the GNU Public license. If you want to use it in with
  *	another license just ask.
@@ -298,11 +325,15 @@ const char *dmi_port_connector_type(u8 code)
 	if(code == 0xFF)
 		return "Other";
 	
-	if (code > 0xA4)
-		return "";
-	return connector_type[code];
+	if(code <= 0x21)
+		return connector_type[code];
 	
+	if((code >= 0xA0) && (code <= 0xA4))
+		return connector_type[code-0xA0+0x22];
+	
+	return "";
 }
+
 
 const char *dmi_port_type(u8 code)
 {
@@ -346,10 +377,13 @@ const char *dmi_port_type(u8 code)
 	if(code == 0xFF)
 		return "Other";
 	
-	if (code > 0xA1)
-		return "";
-	return port_type[code];
+	if (code <= 0x1F)
+		return port_type[code];
 	
+	if ((code >= 0xA0) && (code <= 0xA1))
+		return port_type[code-0xA0+0x20];
+	
+	return "";
 }
 
 const char *dmi_processor_type(u8 code)
@@ -611,7 +645,12 @@ static void dmi_table(int fd, u32 base, int len, int num)
 	u8 *data;
 	int i=0;
 		
-	if(lseek(fd, (long)base, 0)==-1)
+	if(buf==NULL)
+	{
+		perror("dmi: malloc");
+		return;
+	}
+	if(lseek(fd, (long)base, SEEK_SET)==-1)
 	{
 		perror("dmi: lseek");
 		return;
@@ -622,14 +661,20 @@ static void dmi_table(int fd, u32 base, int len, int num)
 		return;
 	}
 	data = buf;
-	while(i<num)
+	while(data+sizeof(struct dmi_header)<=(u8*)buf+len)
 	{
-		u32 u;
-		u32 u2;
+		u32 u, u2;
 		dm=(struct dmi_header *)data;
 		printf("Handle 0x%04X\n\tDMI type %d, %d bytes.\n",
 			dm->handle,
 			dm->type, dm->length);
+		
+		/* we won't read beyond allocated memory */
+		if(data+dm->length>(u8*)buf+len)
+		{
+			printf("\tIncomplete structure, abort decoding.\n");
+			break;
+		}
 		
 		switch(dm->type)
 		{
@@ -734,7 +779,7 @@ static void dmi_table(int fd, u32 base, int len, int num)
 				if(data[6])
 					printf("\t\tSpeed: %dnS\n", data[6]);
 				printf("\t\tType: ");
-				dmi_decode_ram(data[7]);
+				dmi_decode_ram(data[8]<<8|data[7]);
 				printf("\n");
 				printf("\t\tInstalled Size: ");
 				switch(data[9]&0x7F)
@@ -842,13 +887,13 @@ static void dmi_table(int fd, u32 base, int len, int num)
 							
 		case 10:
 			printf("\tOn Board Devices Information\n");
-			for (u=0; u<((dm->length - 4)/2); u++) {
+			for (u=2; u*2+1<dm->length; u++) {
 				printf("\t\tDescription: %s : %s\n",
-				       dmi_string(dm, data[5+(2*u)]),
-				       (data[4+(2*u)]) & 0x80 ?
+				       dmi_string(dm, data[1+2*u]),
+				       (data[2*u]) & 0x80 ?
 				       "Enabled" : "Disabled");
 				printf("\t\tType: %s\n",
-				       dmi_onboard_type(data[4+(2*u)]));
+				       dmi_onboard_type(data[2*u]));
 
 			}
 
@@ -868,11 +913,16 @@ static void dmi_table(int fd, u32 base, int len, int num)
 				
 		case 13:
 			printf("\tBIOS Language Information\n");
+			printf("\t\tInstallable Languages: %u\n", data[4]);
+			for (u=1; u<=data[4]; u++) {
+				printf("\t\t\t%s\n", dmi_string(dm,u));
+			}
+			printf("\t\tCurrently Installed Language: %s\n", dmi_string(dm, data[21]));
 			break;
 			
 		case 14:
 			printf("\tGroup Associations\n");
-			for (u=0; u<(dm->length - 5)/3 ; u++) {
+			for (u=0; 3*u+7<dm->length; u++) {
 				printf("\t\tGroup Name: %s\n",
 				       dmi_string(dm,data[4]));
 				printf("\t\t\tType: 0x%02x\n", *(data+5+(u*3)));
@@ -882,21 +932,21 @@ static void dmi_table(int fd, u32 base, int len, int num)
 			break;
 			
 			
-		case 15:
-			printf("\tEvent Log\n");
-			printf("\t\tLog Area: %d bytes.\n",
-				data[5]<<8|data[4]);
-			printf("\t\tLog Header At: %d.\n",
-				data[7]<<8|data[6]);
-			printf("\t\tLog Data At: %d.\n",
-				data[9]<<8|data[8]);
-			printf("\t\tLog Type: %d.\n",
-				data[10]);
-			if(data[11]&(1<<0))
-				printf("\t\tLog Valid: Yes.\n");
-			if(data[11]&(1<<1))
-				printf("\t\t**Log Is Full**.\n");
-			break;
+			case 15:
+				printf("\tEvent Log\n");
+				printf("\t\tLog Area: %d bytes.\n",
+					data[5]<<8|data[4]);
+				printf("\t\tLog Header At: %d.\n",
+					data[7]<<8|data[6]);
+				printf("\t\tLog Data At: %d.\n",
+					data[9]<<8|data[8]);
+				printf("\t\tLog Type: %d.\n",
+					data[10]);
+				if(data[11]&(1<<0))
+					printf("\t\tLog Valid: Yes.\n");
+				if(data[11]&(1<<1))
+					printf("\t\t**Log Is Full**.\n");
+				break;
 			
 		case 16:
 			printf("\tPhysical Memory Array\n");
@@ -1087,27 +1137,32 @@ static void dmi_table(int fd, u32 base, int len, int num)
 		data+=2;
 		i++;
 	}
+	if(i!=num)
+	{
+		printf("Wrong DMI structures count: %d announced, %d decoded.\n", num, i);
+	}
+	if(data-(u8*)buf!=len)
+	{
+		printf("Wrong DMI structures length: %d bytes announced, %d bytes decoded.\n", len, data-(u8*)buf);
+	}
 	free(buf);
 }
 
 
-char key[8]={'R','S','D',' ','P','T','R',' '};
-
-char zot[16];
-
-int main(int argc, char *argv[])
+int main(void)
 {
 	unsigned char buf[20];
 	int fd=open("/dev/mem", O_RDONLY);
 	long fp=0xE0000L;
+	u8 smmajver=0, smminver=0;
 	if(fd==-1)
 	{
 		perror("/dev/mem");
 		exit(1);
 	}
-	if(lseek(fd,fp,0)==-1)
+	if(lseek(fd, fp, SEEK_SET)==-1)
 	{
-		perror("seek");
+		perror("lseek");
 		exit(1);
 	}
 		
@@ -1119,41 +1174,34 @@ int main(int argc, char *argv[])
 		fp+=16;
 		if(read(fd, buf, 16)!=16)
 			perror("read");
-//		if(memcmp(buf, zot, 16)==0)
-//			printf("*");
-		if(memcmp(buf, "_SM_", 4)==0) {
-			printf("SMBIOS %d.%d present.\n", buf[6], buf[7]);
-		}
-		
-		if(memcmp(buf, "_SYSID_", 7)==0)
+		else if(memcmp(buf, "_SM_", 4)==0)
+			printf("SMBIOS %d.%d present.\n", smmajver=buf[6], smminver=buf[7]);
+		else if(memcmp(buf, "_SYSID_", 7)==0)
 			printf("SYSID present.\n");
-		if(memcmp(buf, "_DMI_", 5)==0)
+		else if(memcmp(buf, "_DMI_", 5)==0)
 		{
 			u16 num=buf[13]<<8|buf[12];
 			u16 len=buf[7]<<8|buf[6];
 			u32 base=buf[11]<<24|buf[10]<<16|buf[9]<<8|buf[8];
 
 			printf("DMI %d.%d present.\n",
-				buf[14]>>4, buf[14]&0x0F);
+				buf[14]?buf[14]>>4:smmajver, buf[14]?buf[14]&0x0F:smminver);
 			printf("%d structures occupying %d bytes.\n",
-				buf[13]<<8|buf[12],
-				buf[7]<<8|buf[6]);
+				num, len);
 			printf("DMI table at 0x%08X.\n",
-				buf[11]<<24|buf[10]<<16|buf[9]<<8|buf[8]);
-			dmi_table(fd, base,len, num);
+				base);
+			dmi_table(fd, base, len, num);
+
+			/* dmi_table moved us far away */
+			lseek(fd, fp+16, SEEK_SET);
 		}
-		if(memcmp(buf, "$PnP", 4)==0)
+		else if(memcmp(buf, "$PnP", 4)==0)
 			printf("PNP BIOS present.\n");
-		if(memcmp(buf, key, 8)==0)
+		else if(memcmp(buf, "RSD PTR ", 8)==0)
 		{
 			int a;
 			unsigned char sum=0;
-			unsigned int i=0, checksum=0;
-			printf("RSD PTR found at 0x%lX\n", fp);
-			for (i=0; i<20; i++) checksum += buf[i];
-			if (checksum != 0) {
-				printf("checksum failed.\n");
-			}
+			printf("RSD PTR found at 0x%lX.\n", fp);
 
 			if(buf[15]!=0)
 			{
@@ -1163,7 +1211,7 @@ int main(int argc, char *argv[])
 			fwrite(buf+9, 6, 1, stdout);
 			printf("\n");
 			read(fd,buf+16,4);
-			lseek(fd, -4, 1);
+			lseek(fd, -4, SEEK_CUR);
 			for(a=0;a<20;a++)
 				sum+=buf[a];
 			if(sum!=0)
