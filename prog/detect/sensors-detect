@@ -1098,7 +1098,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "National Semiconductor LM90",
-       driver => "to-be-written",
+       driver => "lm90",
        i2c_addrs => [0x4c],
        i2c_detect => sub { lm90_detect 0, @_ },
      },
@@ -1113,6 +1113,18 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "to-be-written",
        i2c_addrs => [0x4c],
        i2c_detect => sub { lm90_detect 2, @_ },
+     },
+     {
+       name => "Analog Devices ADM1032",
+       driver => "to-be-written",
+       i2c_addrs => [0x4c],
+       i2c_detect => sub { lm90_detect 3, @_ },
+     },
+     {
+       name => "Maxim MAX6657/MAX6658",
+       driver => "to-be-written",
+       i2c_addrs => [0x4c],
+       i2c_detect => sub { lm90_detect 4, @_ },
      },
      {
        name => "Analog Devices ADM1022",
@@ -2518,38 +2530,51 @@ sub lm83_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = LM90, 1=LM89, 2=LM86)
+#   (0 = LM90, 1=LM89, 2=LM86, 3=ADM1032, 4=MAX6657/MAX6658)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, 7 or 8 if detected.
+# Returns: undef if not detected, 3, 7 or 8 if detected.
+#   The Analog Devices and Maxim chips have a low confidence value (3)
+#   because the die revision codes are not known.
 # Registers used:
 #   0x03: Configuration
 #   0xfe: Manufacturer ID
 #   0xff: Chip ID / die revision
 sub lm90_detect
 {
-  my $reg;
-  my ($chip, $file,$addr) = @_;
-  return if i2c_smbus_read_byte_data($file,0xfe) != 0x01;
-  return if (i2c_smbus_read_byte_data($file,0x03) & 0x2a) != 0;
+  my ($chip, $file, $addr) = @_;
+  my $mid = i2c_smbus_read_byte_data($file, 0xfe);
+  my $cid = i2c_smbus_read_byte_data($file, 0xff);
+  my $conf = i2c_smbus_read_byte_data($file, 0x03);
+
   if ($chip == 0) {
-    return 8
-  	  if ($reg = i2c_smbus_read_byte_data($file,0xff)) == 0x21;
-    return 7
-      if $reg > 0x21 and $reg < 0x30;
+    return if ($conf & 0x2a) != 0;
+	return if $mid != 0x01;     # National Semicondutor
+    return 8 if $cid == 0x21;   # LM90
+    return 7 if $cid > 0x21 and $cid < 0x30;
   }
   if ($chip == 1) {
-    return 8
-  	  if ($reg = i2c_smbus_read_byte_data($file,0xff)) == 0x31;
-    return 7
-      if $reg > 0x31 and $reg < 0x40;
+    return if ($conf & 0x2a) != 0;
+	return if $mid != 0x01;     # National Semicondutor
+    return 8 if $cid == 0x31;   # LM89
+    return 7 if $cid > 0x31 and $cid < 0x40;
   }
   if ($chip == 2) {
-    return 8
-  	  if ($reg = i2c_smbus_read_byte_data($file,0xff)) == 0x11;
-    return 7
-      if $reg > 0x11 and $reg < 0x20;
+    return if ($conf & 0x2a) != 0;
+	return if $mid != 0x01;     # National Semicondutor
+    return 8 if $cid == 0x11;   # LM86
+    return 7 if $cid > 0x11 and $cid < 0x20;
+  }
+  if ($chip == 3) {
+    return if ($conf & 0x3f) != 0;
+	return if $mid != 0x41;     # Analog Devices
+	return 3;
+  }
+  if ($chip == 4) {
+    return if ($conf & 0x1f) != 0;
+	return if $mid != 0x4d;     # Maxim
+	return 3;
   }
   return;
 }
