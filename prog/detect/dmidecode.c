@@ -131,9 +131,9 @@ static void dmi_decode_cache(u16 c)
 		printf("Asynchronous ");
 }
 
-static char *dmi_bus_name(u8 num)
+const char *dmi_bus_name(u8 num)
 {
-	static char *bus[]={
+	static const char *bus[]={
 		"",
 		"",
 		"",
@@ -153,7 +153,7 @@ static char *dmi_bus_name(u8 num)
 		"AGP 2x ",
 		"AGP 4x "
 	};
-	static char *jpbus[]={
+	static const char *jpbus[]={
 		"PC98/C20",
 		"PC98/C24",
 		"PC98/E",
@@ -164,13 +164,13 @@ static char *dmi_bus_name(u8 num)
 	if(num<=0x12)
 		return bus[num];
 	if(num>=0xA0 && num<0xA5)
-		return jpbus[num];
+		return jpbus[num - 0xA0];
 	return "";
 }
 
-static char *dmi_bus_width(u8 code)
+const char *dmi_bus_width(u8 code)
 {
-	static char *width[]={
+	static const char *width[]={
 		"",
 		"",
 		"",
@@ -185,7 +185,7 @@ static char *dmi_bus_width(u8 code)
 	return width[code];
 }
 
-static char *dmi_card_size(u8 v)
+const char *dmi_card_size(u8 v)
 {
 	if(v==2)
 		return("Short ");
@@ -214,9 +214,9 @@ static void dmi_card_props(u8 v)
 	printf("\n");
 }		
 		
-static char *dmi_chassis_type(u8 code)
+const char *dmi_chassis_type(u8 code)
 {
-	static char *chassis_type[]={
+	static const char *chassis_type[]={
 		"",
 		"Other",
 		"Unknown",
@@ -251,9 +251,9 @@ static char *dmi_chassis_type(u8 code)
 	
 }
 
-static char *dmi_port_connector_type(u8 code)
+const char *dmi_port_connector_type(u8 code)
 {
-	static char *connector_type[]={
+	static const char *connector_type[]={
 		"None",
 		"Centronics",
 		"Mini Centronics",
@@ -304,9 +304,9 @@ static char *dmi_port_connector_type(u8 code)
 	
 }
 
-static char *dmi_port_type(u8 code)
+const char *dmi_port_type(u8 code)
 {
-	static char *port_type[]={
+	static const char *port_type[]={
 		"None",
 		"Parallel Port XT/AT Compatible",
 		"Parallel Port PS/2",
@@ -352,9 +352,9 @@ static char *dmi_port_type(u8 code)
 	
 }
 
-static char *dmi_processor_type(u8 code)
+const char *dmi_processor_type(u8 code)
 {
-	static char *processor_type[]={
+	static const char *processor_type[]={
 		"",
 		"Other",
 		"Unknown",
@@ -372,9 +372,9 @@ static char *dmi_processor_type(u8 code)
 	return processor_type[code];
 }
 
-static char *dmi_processor_family(u8 code)
+const char *dmi_processor_family(u8 code)
 {
-	static char *processor_family[]={
+	static const char *processor_family[]={
 		"",
 		"Other",
 		"Unknown",
@@ -412,9 +412,9 @@ static char *dmi_processor_family(u8 code)
 	return processor_family[code];
 }
 
-static char *dmi_onboard_type(u8 code)
+const char *dmi_onboard_type(u8 code)
 {
-	static char *onboard_type[]={
+	static const char *onboard_type[]={
 		"",
 		"Other",
 		"Unknown",
@@ -430,9 +430,9 @@ static char *dmi_onboard_type(u8 code)
 	return onboard_type[code];
 }
 
-static char *dmi_mgmt_dev_type(u8 code)
+const char *dmi_mgmt_dev_type(u8 code)
 {
-	static char *type[]={
+	static const char *type[]={
 		"",
 		"Other",
 		"Unknown",
@@ -454,9 +454,9 @@ static char *dmi_mgmt_dev_type(u8 code)
 	return type[code];
 }
 
-static char *dmi_mgmt_addr_type(u8 code)
+const char *dmi_mgmt_addr_type(u8 code)
 {
-	static char *type[]={
+	static const char *type[]={
 		"",
 		"Other",
 		"Unknown",
@@ -470,9 +470,9 @@ static char *dmi_mgmt_addr_type(u8 code)
 	return type[code];
 }
 
-static char *dmi_fan_type(u8 code)
+const char *dmi_fan_type(u8 code)
 {
-	static char *type[]={
+	static const char *type[]={
 		"",
 		"Other",
 		"Unknown",
@@ -498,9 +498,9 @@ static char *dmi_fan_type(u8 code)
 	return type[code];
 }
 
-static char *dmi_volt_loc(u8 code)
+const char *dmi_volt_loc(u8 code)
 {
-	static char *type[]={
+	static const char *type[]={
 		"",
 		"Other",
 		"Unknown",
@@ -520,9 +520,9 @@ static char *dmi_volt_loc(u8 code)
 	return type[code];
 }
 
-static char *dmi_temp_loc(u8 code)
+const char *dmi_temp_loc(u8 code)
 {
-	static char *type[]={
+	static const char *type[]={
 		"Front Panel Board",
 		"Back Panel Board",
 		"Power System Board",
@@ -534,9 +534,9 @@ static char *dmi_temp_loc(u8 code)
 	return type[code - 0x0c];
 }
 
-static char *dmi_status(u8 code)
+const char *dmi_status(u8 code)
 {
-	static char *type[]={
+	static const char *type[]={
 		"",
 		"Other",
 		"Unknown",
@@ -552,53 +552,53 @@ static char *dmi_status(u8 code)
 }
 
 /* 3 dec. places */
-static char *dmi_millivolt(u8 *data, int index)
+const char *dmi_millivolt(u8 *data, int indx)
 {
 	static char buffer[20];
 	short int d;
 
-	if (data[index+1] == 0x80 && data[index] == 0)
+	if (data[indx+1] == 0x80 && data[indx] == 0)
 		return "Unknown";
-	d = data[index+1] << 8 | data[index];
+	d = data[indx+1] << 8 | data[indx];
 	sprintf(buffer, "%0.3f", d / 1000.0);
 	return buffer;
 }
 
 /* 2 dec. places */
-static char *dmi_accuracy(u8 *data, int index)
+const char *dmi_accuracy(u8 *data, int indx)
 {
 	static char buffer[20];
 	short int d;
 
-	if (data[index+1] == 0x80 && data[index] == 0)
+	if (data[indx+1] == 0x80 && data[indx] == 0)
 		return "Unknown";
-	d = data[index+1] << 8 | data[index];
+	d = data[indx+1] << 8 | data[indx];
 	sprintf(buffer, "%0.2f", d / 100.0);
 	return buffer;
 }
 
 /* 1 dec. place */
-static char *dmi_temp(u8 *data, int index)
+const char *dmi_temp(u8 *data, int indx)
 {
 	static char buffer[20];
 	short int d;
 
-	if (data[index+1] == 0x80 && data[index] == 0)
+	if (data[indx+1] == 0x80 && data[indx] == 0)
 		return "Unknown";
-	d = data[index+1] << 8 | data[index];
+	d = data[indx+1] << 8 | data[indx];
 	sprintf(buffer, "%0.1f", d / 10.0);
 	return buffer;
 }
 
 /* 0 dec. place */
-static char *dmi_speed(u8 *data, int index)
+const char *dmi_speed(u8 *data, int indx)
 {
 	static char buffer[20];
 	short int d;
 
-	if (data[index+1] == 0x80 && data[index] == 0)
+	if (data[indx+1] == 0x80 && data[indx] == 0)
 		return "Unknown";
-	d = data[index+1] << 8 | data[index];
+	d = data[indx+1] << 8 | data[indx];
 	sprintf(buffer, "%d", d);
 	return buffer;
 }
@@ -778,10 +778,10 @@ static void dmi_table(int fd, u32 base, int len, int num)
 				break;
 			case 7:
 			{
-				static char *types[4]={
+				static const char *types[4]={
 					"Internal ", "External ",
 					"", ""};
-				static char *modes[4]={
+				static const char *modes[4]={
 					"write-through",
 					"write-back",
 					"",""};
