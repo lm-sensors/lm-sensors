@@ -21,8 +21,11 @@
 # You need a full complement of GNU utilities to run this Makefile succesfully;
 # most notably, you need bash, GNU make, flex and bison.
 
-# Uncomment the third line on SMP systems if the magic invocation fails.
-SMP := $(shell if grep -q '^SMP[[:space:]]*=' /usr/src/linux/Makefile; then echo 1; else echo 0; fi)
+# Uncomment the third line on SMP systems if the magic invocation fails. It
+# is a bit complicated because SMP configuration changed around kernel 2.1.130
+SMP := $(shell if grep -q '^SMP[[:space:]]*=' /usr/src/linux/Makefile || \
+                  grep -q '^CONFIG_SMP=y' /usr/src/linux/.config ;  \
+               then echo 1; else echo 0; fi)
 #SMP := 0
 #SMP := 1
 
