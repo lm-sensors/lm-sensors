@@ -27,10 +27,9 @@ KERNELINCLUDEFILES += $(MODULE_DIR)/sensors.h
 endif
 
 $(KERNELINCLUDEDIR)/sensors.h: $(KERNELINCLUDEDIR)/sensors.h.template
-	( cat $@.template ; \
-	   $(AWK) '/SENSORS SYSCTL START/,/SENSORS SYSCTL END/' $(KERNELCHIPSDIR)/*.c ;\
-	   echo '#endif' \
-	) > $@
+	cat $@.template > $@
+	$(AWK) '/SENSORS SYSCTL START/,/SENSORS SYSCTL END/' $(KERNELCHIPSDIR)/*.c >> $@
+	echo '#endif' >> $@
 
 $(KERNELINCLUDEDIR)/sensors.hd:
 	( $(GREP) 'SENSORS SYSCTL START' /dev/null $(KERNELCHIPSDIR)/*.c | \
