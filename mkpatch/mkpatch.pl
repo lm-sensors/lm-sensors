@@ -637,6 +637,7 @@ sub gen_drivers_i2c_Config_in
     tristate '  Intel 82801AA, 82801AB and 82801BA' CONFIG_I2C_I801
     tristate '  Intel i810AA, i810AB and i815' CONFIG_I2C_I810
     tristate '  Intel 82371AB PIIX4(E)' CONFIG_I2C_PIIX4
+    tristate '  SiS 5595' CONFIG_I2C_SIS5595
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_ALGOBIT
     tristate '  VIA Technologies, Inc. VT596A/B' CONFIG_I2C_VIAPRO
     dep_tristate '  Voodoo3 I2C interface' CONFIG_I2C_VOODOO $CONFIG_I2C_ALGOBIT
