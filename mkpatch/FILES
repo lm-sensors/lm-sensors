@@ -37,4 +37,5 @@ kernel/chips/thmc50.c		drivers/sensors/thmc50.c
 kernel/chips/via686a.c		drivers/sensors/via686a.c
 kernel/chips/w83781d.c		drivers/sensors/w83781d.c
 kernel/include/sensors.h	include/linux/sensors.h
+kernel/include/sensors_vid.h	include/linux/sensors_vid.h
 mkpatch/Config.in		drivers/sensors/Config.in

@@ -2103,7 +2103,7 @@ void print_w83781d(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_W83781D_VID,&cur)) {
       if (valid) {
         print_label(label,10);
-        printf("%+6.2f V\n",cur);
+        printf("%+5.3f V\n",cur);
       }
     } else {
       printf("ERROR: Can't get VID data!\n");
