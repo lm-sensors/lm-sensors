@@ -9,7 +9,7 @@ Supported adapters:
   * VIA Technologies, Inc. VT82C686    
     Datasheet: Sometimes available at the VIA website
 
-  * VIA Technologies, Inc. VT8233
+  * VIA Technologies, Inc. VT8233, 8233A
     Datasheet: not available?
 
 Author: Kyösti Mälkki <kmalkki@cc.hut.fi>
@@ -32,10 +32,11 @@ supported VIA southbridges.
 
 Your /proc/pci or lspci -n listing must show one of these :
 
- device 1106:3050   (vt82c596 function 3)
- device 1106:3051   (vt82c596 function 3)
- device 1106:3057   (vt82c686 function 4)
- device 1106:3074   (vt8233 function 4)
+ device 1106:3050   (VT82c596 function 3)
+ device 1106:3051   (VT82c596 function 3)
+ device 1106:3057   (VT82c686 function 4)
+ device 1106:3074   (VT8233)
+ device 1106:3147   (VT8233A)
 
 If none of these show up, you should look in the BIOS for settings like
 enable ACPI / SMBus or even USB.

@@ -17,6 +17,10 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
+2.6.4 (2002????)
+  Module i2c-viapro: Add support for VT8233A (0x3147)
+  Program sensors-detect: Add VT8233A
+
 2.6.3 (20020322)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
   Chip modules (most): Allow THIS_MODULE definition for kernels 2.2.18+
