@@ -1,35 +1,39 @@
 #
-# Character device configuration
+# Sensor device configuration
+# All depend on CONFIG_I2C_PROC.
+# ISA-only devices depend on CONFIG_I2C_ISA also.
 #
 
 if [ "$CONFIG_I2C" = "m" -o "$CONFIG_I2C" = "y" ] ; then
+if [ "$CONFIG_I2C_PROC" = "m" -o "$CONFIG_I2C_PROC" = "y" ] ; then
   mainmenu_option next_comment
   comment 'Hardware sensors support'
   
-  dep_tristate 'Hardware sensors support' CONFIG_SENSORS $CONFIG_I2C
+  dep_mbool 'Hardware sensors support' CONFIG_SENSORS $CONFIG_I2C $CONFIG_I2C_PROC
   
   if [ "$CONFIG_SENSORS" != "n" ]; then
-    dep_tristate '  Analog Devices ADM1021 and compatibles' CONFIG_SENSORS_ADM1021 $CONFIG_SENSORS
-    dep_tristate '  Analog Devices ADM1025' CONFIG_SENSORS_ADM1025 $CONFIG_SENSORS
-    dep_tristate '  Analog Devices ADM9240 and compatibles' CONFIG_SENSORS_ADM9240 $CONFIG_SENSORS
-    dep_tristate '  Genesys Logic GL518SM' CONFIG_SENSORS_GL518SM $CONFIG_SENSORS
-    dep_tristate '  Genesys Logic GL520SM' CONFIG_SENSORS_GL520SM $CONFIG_SENSORS
-    dep_tristate '  National Semiconductors LM75' CONFIG_SENSORS_LM75 $CONFIG_SENSORS
-    dep_tristate '  National Semiconductors LM78' CONFIG_SENSORS_LM78 $CONFIG_SENSORS
-    dep_tristate '  National Semiconductors LM80' CONFIG_SENSORS_LM80 $CONFIG_SENSORS
-    dep_tristate '  National Semiconductors LM87' CONFIG_SENSORS_LM87 $CONFIG_SENSORS
-    dep_tristate '  Silicon Integrated Systems Corp. SiS5595' CONFIG_SENSORS_SIS5595 $CONFIG_SENSORS
-    dep_tristate '  Texas Instruments THMC50 and compatibles' CONFIG_SENSORS_THMC50 $CONFIG_SENSORS
-    dep_tristate '  VIA 686a Integrated Hardware Monitor' CONFIG_SENSORS_VIA686A $CONFIG_SENSORS
-    dep_tristate '  Winbond W83781D, W83782D and W83783S' CONFIG_SENSORS_W83781D $CONFIG_SENSORS
+    dep_tristate '  Analog Devices ADM1021 and compatibles' CONFIG_SENSORS_ADM1021 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  Analog Devices ADM1025' CONFIG_SENSORS_ADM1025 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  Analog Devices ADM9240 and compatibles' CONFIG_SENSORS_ADM9240 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  Genesys Logic GL518SM' CONFIG_SENSORS_GL518SM $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  Genesys Logic GL520SM' CONFIG_SENSORS_GL520SM $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  National Semiconductors LM75 and compatibles' CONFIG_SENSORS_LM75 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  National Semiconductors LM78' CONFIG_SENSORS_LM78 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  National Semiconductors LM80' CONFIG_SENSORS_LM80 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  National Semiconductors LM87' CONFIG_SENSORS_LM87 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  Silicon Integrated Systems Corp. SiS5595' CONFIG_SENSORS_SIS5595 $CONFIG_I2C $CONFIG_I2C_PROC $CONFIG_I2C_ISA
+    dep_tristate '  Texas Instruments THMC50 and compatibles' CONFIG_SENSORS_THMC50 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  VIA 686a Integrated Hardware Monitor' CONFIG_SENSORS_VIA686A $CONFIG_I2C $CONFIG_I2C_PROC $CONFIG_I2C_ISA
+    dep_tristate '  Winbond W83781D, W83782D, W83783S, W83627HF, Asus AS99127F' CONFIG_SENSORS_W83781D $CONFIG_I2C $CONFIG_I2C_PROC
     bool 'Other I2C devices' CONFIG_SENSORS_OTHER 
     if [ "$CONFIG_SENSORS_OTHER" = "y" ] ; then
-      dep_tristate '  Brooktree BT869 Video Modulator' CONFIG_SENSORS_BT869 $CONFIG_SENSORS
-      dep_tristate '  DDC Monitor EDID EEPROM' CONFIG_SENSORS_DDCMON $CONFIG_SENSORS
-      dep_tristate '  EEprom (DIMM) reader ' CONFIG_SENSORS_EEPROM $CONFIG_SENSORS
-      dep_tristate '  Matrix-Orbital LCD Displays' CONFIG_SENSORS_MATORB $CONFIG_MATORB
+      dep_tristate '  Brooktree BT869 Video Modulator' CONFIG_SENSORS_BT869 $CONFIG_I2C $CONFIG_I2C_PROC
+      dep_tristate '  DDC Monitor EDID EEPROM' CONFIG_SENSORS_DDCMON $CONFIG_I2C $CONFIG_I2C_PROC
+      dep_tristate '  EEprom (DIMM) reader ' CONFIG_SENSORS_EEPROM $CONFIG_I2C $CONFIG_I2C_PROC
+      dep_tristate '  Matrix-Orbital LCD Displays' CONFIG_SENSORS_MATORB $CONFIG_I2C $CONFIG_I2C_PROC
     fi
   fi
   endmenu
+fi
 fi
 
