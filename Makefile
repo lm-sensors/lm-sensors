@@ -7,7 +7,7 @@
 #  (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+	#  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #
@@ -137,7 +137,7 @@ clean::
 %.d: %.c
 	$(CC) -M -MG $(CFLAGS) $< | \
        	sed -e 's@^\(.*\)\.o:@$*.d $*.o Makefile '`dirname $*.d`/Module.mk':@' > $@
-	
+
 
 # This is tricky, but it works like a charm. It needs lots of utilities
 # though: cut, find, gzip, ln, tail and tar.
@@ -159,3 +159,15 @@ version:
 	echo '#define LM_DATE "'`date +'%Y%m%d'`\" > version.h
 	echo -n 'Version: '; \
 	echo '#define LM_VERSION "'`read VER; echo $$VER`\" >> version.h
+
+# .ro files are used for programs (as opposed to modules)
+%.ro: %.c
+	$(CC) $(EXCFLAGS) -c $< -o $@
+
+%: %.ro
+	$(CC) $(EXLDFLAGS) -o $@ $^
+
+%.rd: %.c
+	$(CC) -M -MG $(CFLAGS) $< | \
+       	sed -e 's@^\(.*\)\.o:@$*.rd $*.ro Makefile '`dirname $*.rd`/Module.mk':@' > $@
+

@@ -25,8 +25,9 @@ MODULE_DIR := i2c/eeprom
 I2CEEPROMTARGETS := $(MODULE_DIR)/eeprom
 I2CEEPROMSOURCES := $(MODULE_DIR)/eeprom.c
 
-# Include all dependency files
-INCLUDEFILES += $(I2CEEPROMSOURCES:.c=.d)
+# Include all dependency files. We use '.rd' to indicate this will create
+# executables.
+INCLUDEFILES += $(I2CEEPROMSOURCES:.c=.rd)
 
 all-i2c-eeprom: $(I2CEEPROMTARGETS)
 all :: all-i2c-eeprom
@@ -37,19 +38,3 @@ clean-i2c-eeprom:
 	$(RM) $(I2CEEPROMSOURCES:.c=.d) $(I2CEEPROMSOURCES:.c=.o) \
 	      $(I2CEEPROMTARGETS)
 clean :: clean-i2c-eeprom
-
-# The targets
-$(MODULE_DIR)/eeprom: $(MODULE_DIR)/eeprom.o
-
-
-# Oops, we need to use EXCFLAGS instead of CFLAGS... And we have to deal with
-# an executable. Ugly code approaching... :-)
-
-$(I2CEEPROMSOURCES:.c=.o):
-	$(CC) $(EXCFLAGS) -c $(@:.o=.c) -o $@
-
-$(I2CEEPROMSOURCES:.c=.d):
-	$(CC) -M -MG $(EXCFLAGS) $(@:.d=.c) | \
-	sed -e \
-        's@^\(.*\)\.o:@$@ $(@:.d=.o) Makefile '`dirname $@`/Module.mk':@' > $@
-
