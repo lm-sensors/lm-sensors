@@ -33,7 +33,9 @@ KERNELVERSION := $(shell uname -r)
 # The location of linux itself. This is used to find the kernel headers
 # and other things.
 #LINUX := /usr/src/linux
-LINUX := /lib/modules/$(KERNELVERSION)/build
+LINUX := $(shell if [ -L /lib/modules/$(KERNELVERSION)/build ] ; \
+	then echo "/lib/modules/$(KERNELVERSION)/build" ; \
+	else echo "/usr/src/linux" ; fi)
 LINUX_HEADERS := $(LINUX)/include
 
 # Determine whether we need to compile the kernel modules, or only the
