@@ -79,7 +79,7 @@ gl525sm-to-be-written
         gl525sm 	2-3	5-6	2-3	1-2 pwm	yes	no
 
 it87
-	it87		8	3	3	-	yes	yes
+	it87		3	8	3	-	yes	yes
 
 lm75
 	lm75		1	-	-	-	yes	no
