@@ -1,5 +1,13 @@
 Many, many things. Most notably:
 
+I2C CODE CHANGES
+================
+
+* Test all modules
+* Add code and supporting files to compile modules into the main kernel
+* Write a mkpatch script, as in the i2c tree
+* Check the i2c-isa code, use 16 bit address field in i2c struct.
+
 KERNEL MODULES
 ==============
 

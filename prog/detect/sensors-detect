@@ -970,7 +970,7 @@ sub scan_adapter
     i2c_set_slave_addr(\*FILE,$addr) or print("Can't set address to $_?!?\n"), 
                                      next;
 
-    next unless i2c_smbus_read_byte(\*FILE) >= 0;
+    next unless i2c_smbus_write_quick(\*FILE,$SMBUS_WRITE) >= 0;
     printf "Client found at address 0x%02x\n",$addr;
 
     foreach $chip (@chip_ids) {
@@ -1472,8 +1472,6 @@ sub generate_modprobes
   my $configfile = "";
 
   # These are always needed
-  $modprobes .= "# General I2C modules\n";
-  $modprobes .= "modprobe i2c-proc\n";
   $configfile .= "# I2C module options\n";
   $configfile .= "alias char-major-89 i2c-dev\n";
 
@@ -1641,28 +1639,7 @@ sub main
     }
   }
 
-  print " To continue, we need modules `i2c-proc' and `i2c-dev' to be ",
-        "loaded.\n";
-  if (contains "i2c-proc", @modules_list) {
-    print "i2c-proc is already loaded.\n";
-  } else {
-    if ($> != 0) {
-      print " i2c-proc is not loaded, and you are not root. I can't ",
-            "continue.\n";
-      exit;
-    } else {
-      print " i2c-proc is not loaded. May I load it now? (YES/no): ";
-      if (<STDIN> =~ /^\s*[Nn]/) {
-        print " Sorry, in that case I can't continue.\n";
-        exit;
-      } elsif (system "modprobe","i2c-proc") {
-        print " Loading failed ($!), aborting.\n";
-        exit;
-      } else {
-        print " Module loaded succesfully.\n";
-      }
-    }
-  }
+  print " To continue, we need module `i2c-dev' to be loaded.\n";
   if (contains "i2c-dev", @modules_list) {
     print "i2c-dev is already loaded.\n";
   } else {
