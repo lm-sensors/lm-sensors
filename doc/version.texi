@@ -1,4 +1,3 @@
 @set UPDATED 10 September 2002
 @set UPDATED-MONTH September 2002
-@set EDITION 2.0
-@set VERSION 2.0
+@set VERSION 2.9
