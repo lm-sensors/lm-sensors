@@ -42,8 +42,6 @@ KERNEL MODULES
   an lm75. Add support for the two new registers.
 * Add MTP006F chip: http://www.myson.com/Pcd/MTP006/Mtp006.pdf
   gfiala@s.netic.de (Guido Fiala) has one on his mainboard
-* Rewrite i2c-voodoo3 to use i2c-algo-bit
-* Add support for Via 686a integrated sensors
 * Figure out what chips are appearing at 0x08 and 0x30
 
 LIBRARY
