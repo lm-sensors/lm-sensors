@@ -2963,7 +2963,7 @@ void print_eeprom(const sensors_chip_name *name)
 		}
 	} else {
 		free_the_label(&label);
-		printf("ERROR: data 1\n");
+		printf("Memory type: Unavailable\n");
 		return;
 	}
 	free_the_label(&label);
