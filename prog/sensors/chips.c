@@ -3193,7 +3193,7 @@ void print_it87(const sensors_chip_name *name)
 void print_fscpos(const sensors_chip_name *name)
 {
   char *label = NULL;
-  double voltage, temp,state,fan,min_rpm;
+  double voltage, temp, state, fan;
   int valid;
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_TEMP1,&label,&valid) &&
@@ -3240,14 +3240,11 @@ void print_fscpos(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_FAN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN1,&fan) &&
-      !sensors_get_feature(*name,SENSORS_FSCPOS_FAN1_MIN,&min_rpm) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN1_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
 	  printf("\tfaulty\n");
-	else if (fan < min_rpm)
-	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
 	  printf("\t%6.0f RPM \n",fan);
     }
@@ -3257,14 +3254,11 @@ void print_fscpos(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_FAN2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN2,&fan) &&
-      !sensors_get_feature(*name,SENSORS_FSCPOS_FAN2_MIN,&min_rpm) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN2_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
 	  printf("\tfaulty\n");
-	else if (fan < min_rpm)
-	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
 	  printf("\t%6.0f RPM \n",fan);
     }
@@ -3320,7 +3314,7 @@ void print_fscpos(const sensors_chip_name *name)
 void print_fscscy(const sensors_chip_name *name)
 {
   char *label = NULL;
-  double voltage, temp, tempmin, tempmax, templim, state,fan,min_rpm;
+  double voltage, temp, tempmin, tempmax, templim, state, fan;
   int valid;
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_TEMP1,&label,&valid) &&
@@ -3397,14 +3391,11 @@ void print_fscscy(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN1,&fan) &&
-      !sensors_get_feature(*name,SENSORS_FSCSCY_FAN1_MIN,&min_rpm) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN1_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
 	  printf("\tfaulty\n");
-	else if (fan < min_rpm)
-	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
 	  printf("\t%6.0f RPM \n",fan);
     }
@@ -3414,14 +3405,11 @@ void print_fscscy(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN2,&fan) &&
-      !sensors_get_feature(*name,SENSORS_FSCSCY_FAN2_MIN,&min_rpm) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN2_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
 	  printf("\tfaulty\n");
-	else if (fan < min_rpm)
-	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
 	  printf("\t%6.0f RPM \n",fan);
     }
@@ -3431,14 +3419,11 @@ void print_fscscy(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN3,&fan) &&
-      !sensors_get_feature(*name,SENSORS_FSCSCY_FAN3_MIN,&min_rpm) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN3_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
 	  printf("\tfaulty\n");
-	else if (fan < min_rpm)
-	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
 	  printf("\t%6.0f RPM \n",fan);
     }
@@ -3448,14 +3433,11 @@ void print_fscscy(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN4,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN4,&fan) &&
-      !sensors_get_feature(*name,SENSORS_FSCSCY_FAN4_MIN,&min_rpm) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN4_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
 	  printf("\tfaulty\n");
-	else if (fan < min_rpm)
-	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
 	  printf("\t%6.0f RPM \n",fan);
     }
@@ -3465,14 +3447,11 @@ void print_fscscy(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN5,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN5,&fan) &&
-      !sensors_get_feature(*name,SENSORS_FSCSCY_FAN5_MIN,&min_rpm) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN5_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
 	  printf("\tfaulty\n");
-	else if (fan < min_rpm)
-	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
 	  printf("\t%6.0f RPM \n",fan);
     }
@@ -3482,14 +3461,11 @@ void print_fscscy(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_FAN6,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN6,&fan) &&
-      !sensors_get_feature(*name,SENSORS_FSCSCY_FAN6_MIN,&min_rpm) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN6_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x02)
 	  printf("\tfaulty\n");
-	else if (fan < min_rpm)
-	  printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
 	  printf("\t%6.0f RPM \n",fan);
     }
@@ -3531,7 +3507,7 @@ void print_fscscy(const sensors_chip_name *name)
 void print_fscher(const sensors_chip_name *name)
 {
   char *label = NULL;
-  double voltage, temp,state,fan,min_rpm;
+  double voltage, temp, state, fan;
   int valid;
   
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_TEMP1,&label,&valid)
@@ -3578,14 +3554,11 @@ void print_fscher(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_FAN1,&label,&valid)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN1,&fan)
-      && !sensors_get_feature(*name,SENSORS_FSCHER_FAN1_MIN,&min_rpm)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN1_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
       if((int) state & 0x02)
         printf("\tfaulty\n");
-      else if (fan < min_rpm)
-        printf("\t%6.0f RPM (not present or faulty)\n",fan);
       else
         printf("\t%6.0f RPM \n",fan);
     }
@@ -3595,14 +3568,11 @@ void print_fscher(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_FAN2,&label,&valid)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN2,&fan)
-      && !sensors_get_feature(*name,SENSORS_FSCHER_FAN2_MIN,&min_rpm)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN2_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
       if((int) state & 0x02)
         printf("\tfaulty\n");
-      else if (fan < min_rpm)
-        printf("\t%6.0f RPM (not present or faulty)\n",fan);
       else
         printf("\t%6.0f RPM \n",fan);
     }
@@ -3612,14 +3582,11 @@ void print_fscher(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_FAN3,&label,&valid)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN3,&fan)
-      && !sensors_get_feature(*name,SENSORS_FSCHER_FAN3_MIN,&min_rpm)
       && !sensors_get_feature(*name,SENSORS_FSCHER_FAN3_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
       if((int) state & 0x02)
         printf("\tfaulty\n");
-      else if (fan < min_rpm)
-        printf("\t%6.0f RPM (not present or faulty)\n",fan);
       else
         printf("\t%6.0f RPM \n",fan);
     }
