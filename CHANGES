@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.9.0 (2004????)
+2.9.0 (20041228)
   NOTE: Requires i2c-2.9.0 or newer!
   File README.thinkpad: Update
   File doc/chips/it87: Cleanups
