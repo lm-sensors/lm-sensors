@@ -58,17 +58,32 @@ extern int sensors_lm80_init(void);
 #ifdef CONFIG_SENSORS_LM87
 extern int sensors_lm87_init(void);
 #endif
+#ifdef CONFIG_SENSORS_LM92
+extern int sensors_lm92_init(void);
+#endif
 #ifdef CONFIG_SENSORS_MTP008
 extern int sensors_mtp008_init(void);
 #endif
+#ifdef CONFIG_SENSORS_PCF8574
+extern int sensors_pcf8574_init(void);
+#endif
+#ifdef CONFIG_SENSORS_PCF8591
+extern int sensors_pcf8591_init(void);
+#endif
 #ifdef CONFIG_SENSORS_SIS5595
 extern int sensors_sis5595_init(void);
+#endif
+#ifdef CONFIG_SENSORS_SMSC47M1
+extern int sensors_smsc47m1_init(void);
 #endif
 #ifdef CONFIG_SENSORS_THMC50
 extern int sensors_thmc50_init(void);
 #endif
 #ifdef CONFIG_SENSORS_VIA686A
 extern int sensors_via686a_init(void);
+#endif
+#ifdef CONFIG_SENSORS_VT1211
+extern int sensors_vt1211_init(void);
 #endif
 #ifdef CONFIG_SENSORS_W83781D
 extern int sensors_w83781d_init(void);
@@ -121,17 +136,32 @@ int __init sensors_init_all(void)
 #ifdef CONFIG_SENSORS_LM87
 	sensors_lm87_init();
 #endif
+#ifdef CONFIG_SENSORS_LM92
+	sensors_lm92_init();
+#endif
+#ifdef CONFIG_SENSORS_PCF8574
+	sensors_pcf8574_init();
+#endif
+#ifdef CONFIG_SENSORS_PCF8591
+	sensors_pcf8591_init();
+#endif
 #ifdef CONFIG_SENSORS_MTP008
 	sensors_mtp008_init();
 #endif
 #ifdef CONFIG_SENSORS_SIS5595
 	sensors_sis5595_init();
 #endif
+#ifdef CONFIG_SENSORS_SMSC47M1
+	sensors_smsc47m1_init();
+#endif
 #ifdef CONFIG_SENSORS_THMC50
 	sensors_thmc50_init();
 #endif
 #ifdef CONFIG_SENSORS_VIA686A
 	sensors_via686a_init();
+#endif
+#ifdef CONFIG_SENSORS_VT1211
+	sensors_vt1211_init();
 #endif
 #ifdef CONFIG_SENSORS_W83781D
 	sensors_w83781d_init();

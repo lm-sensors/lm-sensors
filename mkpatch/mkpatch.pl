@@ -353,7 +353,7 @@ CONFIG_SENSORS_MTP008
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-National Semiconductors LM75 and compatibles
+National Semiconductor LM75 and compatibles
 CONFIG_SENSORS_LM75 
   If you say yes here you get support for National Semiconductor LM75
   sensor chips and clones: Dallas Semi DS75 and DS1775, TelCon
@@ -364,7 +364,7 @@ CONFIG_SENSORS_LM75
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-National Semiconductors LM78
+National Semiconductor LM78
 CONFIG_SENSORS_LM78
   If you say yes here you get support for National Semiconductor LM78
   sensor chips family: the LM78-J and LM79. Many clone chips will
@@ -376,7 +376,7 @@ CONFIG_SENSORS_LM78
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-National Semiconductors LM80
+National Semiconductor LM80
 CONFIG_SENSORS_LM80
   If you say yes here you get support for National Semiconductor LM80
   sensor chips. This can also be built as a module which can be 
@@ -386,10 +386,42 @@ CONFIG_SENSORS_LM80
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-National Semiconductors LM87
+National Semiconductor LM87
 CONFIG_SENSORS_LM87
   If you say yes here you get support for National Semiconductor LM87
   sensor chips. This can also be built as a module which can be 
+  inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+National Semiconductor LM92
+CONFIG_SENSORS_LM92
+  If you say yes here you get support for National Semiconductor LM92
+  sensor chips. This can also be built as a module which can be 
+  inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+Philips PCF8574
+CONFIG_SENSORS_PCF8574
+  If you say yes here you get support for the Philips PCF8574
+  I2C 8-bit Parallel I/O device.
+  This can also be built as a module which can be 
+  inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+Philips PCF8591
+CONFIG_SENSORS_PCF8591
+  If you say yes here you get support for the Philips PCF8591
+  I2C Quad D/A + Single A/D I/O device.
+  This can also be built as a module which can be 
   inserted and removed while the kernel is running.
 
   You will also need the latest user-space utilties: you can find them
@@ -400,6 +432,17 @@ Silicon Integrated Systems Corp. SiS5595 Sensor
 CONFIG_SENSORS_SIS5595
   If you say yes here you get support for the integrated sensors in 
   SiS5595 South Bridges. This can also be built as a module 
+  which can be inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+SMSC47M1xx Super I/O Fan Support
+CONFIG_SENSORS_SMSC47M1
+  If you say yes here you get support for the integrated fan
+  monitoring and control in the SMSC 47M1xx Super I/O chips.
+  This can also be built as a module 
   which can be inserted and removed while the kernel is running.
 
   You will also need the latest user-space utilties: you can find them
@@ -421,6 +464,16 @@ Via VT82C686A/B
 CONFIG_SENSORS_VIA686A
   If you say yes here you get support for the integrated sensors in 
   Via 686A/B South Bridges. This can also be built as a module 
+  which can be inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+Via VT1211 Sensors
+CONFIG_SENSORS_VT1211
+  If you say yes here you get support for the integrated sensors in 
+  the Via VT1211 Super I/O device. This can also be built as a module 
   which can be inserted and removed while the kernel is running.
 
   You will also need the latest user-space utilties: you can find them
@@ -737,12 +790,13 @@ sub gen_drivers_i2c_Config_in
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
     tristate '  AMD 756/766/768' CONFIG_I2C_AMD756
     dep_tristate '  DEC Tsunami I2C interface' CONFIG_I2C_TSUNAMI $CONFIG_I2C_ALGOBIT
-    tristate '  Intel 82801AA, 82801AB and 82801BA' CONFIG_I2C_I801
+    tristate '  Intel 82801AA, AB, BA, DB' CONFIG_I2C_I801
     dep_tristate '  Intel i810AA/AB/E and i815' CONFIG_I2C_I810 $CONFIG_I2C_ALGOBIT
     tristate '  Intel 82371AB PIIX4(E), 443MX, ServerWorks OSB4/CSB5, SMSC Victory66' CONFIG_I2C_PIIX4
     tristate '  SiS 5595' CONFIG_I2C_SIS5595
+    dep_tristate '  Savage 4' CONFIG_I2C_SAVAGE4 $CONFIG_I2C_ALGOBIT
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_ALGOBIT
-    tristate '  VIA Technologies, Inc. VT596A/B, 686A/B, 8233' CONFIG_I2C_VIAPRO
+    tristate '  VIA Technologies, Inc. VT596A/B, 686A/B, 8231, 8233, 8233A' CONFIG_I2C_VIAPRO
     dep_tristate '  Voodoo3 I2C interface' CONFIG_I2C_VOODOO3 $CONFIG_I2C_ALGOBIT
     tristate '  Pseudo ISA adapter (for some hardware sensors)' CONFIG_I2C_ISA 
   fi
@@ -798,11 +852,16 @@ obj-$(CONFIG_SENSORS_LM75)	+= lm75.o
 obj-$(CONFIG_SENSORS_LM78)	+= lm78.o
 obj-$(CONFIG_SENSORS_LM80)	+= lm80.o
 obj-$(CONFIG_SENSORS_LM87)	+= lm87.o
+obj-$(CONFIG_SENSORS_LM92)	+= lm92.o
 obj-$(CONFIG_SENSORS_MAXILIFE)	+= maxilife.o
 obj-$(CONFIG_SENSORS_MTP008)	+= mtp008.o
+obj-$(CONFIG_SENSORS_PCF8574)	+= pcf8574.o
+obj-$(CONFIG_SENSORS_PCF8591)	+= pcf8591.o
 obj-$(CONFIG_SENSORS_SIS5595)	+= sis5595.o
+obj-$(CONFIG_SENSORS_SMSC47M1)	+= smsc47m1.o
 obj-$(CONFIG_SENSORS_THMC50)	+= thmc50.o
 obj-$(CONFIG_SENSORS_VIA686A)	+= via686a.o
+obj-$(CONFIG_SENSORS_VT1211)	+= vt1211.o
 obj-$(CONFIG_SENSORS_W83781D)	+= w83781d.o
 
 include $(TOPDIR)/Rules.make
@@ -965,6 +1024,14 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_SENSORS_LM92),y)
+  L_OBJS += lm92.o
+else
+  ifeq ($(CONFIG_SENSORS_LM92),m)
+    M_OBJS += lm92.o
+  endif
+endif
+
 ifeq ($(CONFIG_SENSORS_MATORB),y)
   L_OBJS += matorb.o
 else
@@ -989,11 +1056,35 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_SENSORS_PCF8574),y)
+  L_OBJS += pcf8574.o
+else
+  ifeq ($(CONFIG_SENSORS_PCF8574),m)
+    M_OBJS += pcf8574.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_PCF8591),y)
+  L_OBJS += pcf8591.o
+else
+  ifeq ($(CONFIG_SENSORS_PCF8591),m)
+    M_OBJS += pcf8591.o
+  endif
+endif
+
 ifeq ($(CONFIG_SENSORS_SIS5595),y)
   L_OBJS += sis5595.o
 else
   ifeq ($(CONFIG_SENSORS_SIS5595),m)
     M_OBJS += sis5595.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_SMSC47M1),y)
+  L_OBJS += smsc47m1.o
+else
+  ifeq ($(CONFIG_SENSORS_SMSC47M1),m)
+    M_OBJS += smsc47m1.o
   endif
 endif
 
@@ -1010,6 +1101,14 @@ ifeq ($(CONFIG_SENSORS_VIA686A),y)
 else
   ifeq ($(CONFIG_SENSORS_VIA686A),m)
     M_OBJS += via686a.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_VT1211),y)
+  L_OBJS += vt1211.o
+else
+  ifeq ($(CONFIG_SENSORS_VT1211),m)
+    M_OBJS += vt1211.o
   endif
 endif
 
@@ -1065,6 +1164,7 @@ obj-$(CONFIG_I2C_I810)			+= i2c-i810.o
 obj-$(CONFIG_I2C_ISA)			+= i2c-isa.o
 obj-$(CONFIG_I2C_PIIX4)			+= i2c-piix4.o
 obj-$(CONFIG_I2C_SIS5595)		+= i2c-sis5595.o
+obj-$(CONFIG_I2C_SAVAGE4)		+= i2c-savage4.o
 obj-$(CONFIG_I2C_TSUNAMI)		+= i2c-tsunami.o
 obj-$(CONFIG_I2C_VIA)			+= i2c-via.o
 obj-$(CONFIG_I2C_VIAPRO)		+= i2c-viapro.o
@@ -1141,6 +1241,14 @@ ifeq ($(CONFIG_I2C_SIS5595),y)
 else 
   ifeq ($(CONFIG_I2C_SIS5595),m)
     M_OBJS += i2c-sis5595.o
+  endif
+endif
+
+ifeq ($(CONFIG_I2C_SAVAGE4),y)
+  L_OBJS += i2c-savage4.o
+else 
+  ifeq ($(CONFIG_I2C_SAVAGE4),m)
+    M_OBJS += i2c-savage4.o
   endif
 endif
 
@@ -1240,6 +1348,9 @@ sub gen_drivers_i2c_i2c_core_c
 #ifdef CONFIG_I2C_SIS5595
 	extern int i2c_sis5595_init(void);
 #endif
+#ifdef CONFIG_I2C_SAVAGE4
+	extern int i2c_savage4_init(void);
+#endif
 #ifdef CONFIG_I2C_TSUNAMI
 	extern int i2c_tsunami_init(void);
 #endif
@@ -1278,6 +1389,9 @@ EOF
 #endif
 #ifdef CONFIG_I2C_SIS5595
 	i2c_sis5595_init();
+#endif
+#ifdef CONFIG_I2C_SAVAGE4
+	i2c_savage4_init();
 #endif
 #ifdef CONFIG_I2C_TSUNAMI
 	i2c_tsunami_init();
