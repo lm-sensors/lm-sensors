@@ -892,7 +892,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 			data->lm75[1].addr = 0x48 + ((val1 >> 4) & 0x07);
 			if(data->lm75[0].addr == data->lm75[1].addr) {
 				printk("w83781d.o: Duplicate addresses 0x%x for subclients.\n",
-					data->lm75[i].addr);
+					data->lm75[0].addr);
 				goto ERROR5;
 			}
 		}
