@@ -49,13 +49,6 @@ MODULE_LICENSE("GPL");
 #define PCI_DEVICE_ID_INTEL_82815_2   0x1132
 #endif
 
-static int i810_supported[] = {PCI_DEVICE_ID_INTEL_82810_IG1,
-                               PCI_DEVICE_ID_INTEL_82810_IG3,
-                               0x7125,
-                               PCI_DEVICE_ID_INTEL_82815_2,
-                               0x2562,
-                               0 };
-
 /* GPIO register locations */
 #define I810_IOCONTROL_OFFSET 0x5000
 #define I810_HVSYNC	0x00	/* not used */
@@ -224,6 +217,36 @@ static struct i2c_adapter i810_ddc_adapter = {
 
 
 static struct pci_device_id i810_ids[] __devinitdata = {
+	{
+		.vendor =	PCI_VENDOR_ID_INTEL,
+		.device =	PCI_DEVICE_ID_INTEL_82810_IG1,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_INTEL,
+		.device =	PCI_DEVICE_ID_INTEL_82810_IG3,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_INTEL,
+		.device =	0x7125,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_INTEL,
+		.device =	PCI_DEVICE_ID_INTEL_82815_2,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_INTEL,
+		.device =	0x2562,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
 	{ 0, }
 };
 
