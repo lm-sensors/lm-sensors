@@ -77,4 +77,7 @@ problems.
 * Alexander Malysh <amalysh@web.de>
   Author of the i2c-sis630 bus driver.
   Added Onsemi MC1066 support to the adm1021 driver.
+* Jean Delvare <khali@linux-fr.org>
+  Author of the decode-vaio.pl Vaio EEPROM decoder.
+  Perl scripts maintainer, tester, dmidecode maintainer, bug fixer.
 
