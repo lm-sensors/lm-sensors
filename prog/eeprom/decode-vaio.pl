@@ -46,7 +46,7 @@
 # Please note that this is a guess-only work.  Sony support refused to help
 # me, so if someone can provide information, please contact me.
 # My knowledge is summarized on this page:
-# http://www.ensicaen.ismra.fr/~delvare/vaio/eeprom.html
+# http://khali.linux-fr.org/vaio/eeprom.html
 #
 # It seems that if present, the EEPROM is always at 0x57.
 #

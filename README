@@ -49,8 +49,7 @@ will require additional patches for the Linux 2.4.21 and 2.4.22 kernels.
 These patches fix compatibility differences between i2c-2.8.1 and
 the Linux 2.4 kernels.
 A complete installation guide is available at
-http://www.ensicaen.ismra.fr/~delvare/devel/i2c/
-(and mirrored at http://delvare.nerim.net/i2c/  ),
+  http://khali.linux-fr.org/devel/i2c/
 
 See the lm_sensors download page for further guidance:
   http://secure.netroedge.com/~lm78/download.html
