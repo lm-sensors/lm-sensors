@@ -9,6 +9,26 @@ Supported chips:
     Addresses scanned: I2C 0x48 - 0x4f (inclusive)
     Datasheet: Publicly available at the National Semiconductors website
 
+Author: Frodo Looijaard <frodol@dds.nl>
+
+
+Insmod Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_lm75: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `lm75' chip
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+
 
 Description
 -----------
@@ -29,17 +49,18 @@ The LM75 is usually used in combination with LM78-like chips, to measure
 the temperature of the processor(s).
 
 
-Configuration file features
----------------------------
+Chip Features
+-------------
 
+Chip `lm75'
           LABEL     LABEL CLASS   COMPUTE CLASS ACCESS MAGNITUDE
            temp            NONE            NONE      R     1
       temp_hyst            temp            temp      RW    1
       temp_over            temp            temp      RW    1
 
-
           LABEL                           FEATURE SYMBOL     SYSCTL FILE:OFFSET
            temp                        SENSORS_LM75_TEMP            temp:3
       temp_hyst                   SENSORS_LM75_TEMP_HYST            temp:2
       temp_over                   SENSORS_LM75_TEMP_OVER            temp:1
+
 

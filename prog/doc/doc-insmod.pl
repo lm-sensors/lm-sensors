@@ -51,7 +51,7 @@ sub print_info
 {
   my ($modname) = @_;
   my (@lines,$line,$option,$type,$desc);
-  print "Author: ", `modinfo -a $modname`, "\n";
+  print "Author: ", `modinfo -a $modname`, "\n\n";
   print "Insmod Parameters\n";
   print "-----------------\n";
   print "\n";
