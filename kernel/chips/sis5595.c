@@ -170,6 +170,7 @@ static inline u8 FAN_TO_REG(long rpm, int div)
    dynamically allocated, at the time when the new sis5595 client is
    allocated. */
 struct sis5595_data {
+	struct i2c_client client;
 	struct semaphore lock;
 	int sysctl_id;
 
@@ -386,13 +387,11 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 		}
 	}
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct sis5595_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct sis5595_data), GFP_KERNEL))) {
 		return -ENOMEM;
 	}
 
-	data = (struct sis5595_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	init_MUTEX(&data->lock);
 	new_client->data = data;
@@ -445,7 +444,7 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 	i2c_detach_client(new_client);
       ERROR3:
 	release_region(address, SIS5595_EXTENT);
-	kfree(new_client);
+	kfree(data);
 	return err;
 }
 
@@ -463,7 +462,7 @@ static int sis5595_detach_client(struct i2c_client *client)
 	}
 
 	release_region(client->addr, SIS5595_EXTENT);
-	kfree(client);
+	kfree(client->data);
 
 	return 0;
 }

@@ -238,6 +238,7 @@ enum sensor_type { fan, temp, vid, pll, lcd, alarm };
    client is allocated. We assume MaxiLife will only be present on the
    SMBus and not on the ISA bus. */
 struct maxi_data {
+	struct i2c_client client;
 	struct semaphore lock;
 	int sysctl_id;
 	enum maxi_type type;
@@ -439,15 +440,13 @@ int maxi_detect(struct i2c_adapter *adapter, int address,
 	/* OK. For now, we presume we have a valid client. We now create the
 	   client structure, even though we cannot fill it completely yet.
 	   But it allows us to access maxi_{read,write}_value. */
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct maxi_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct maxi_data), GFP_KERNEL))) {
 		err = -ENOMEM;
 		goto ERROR0;
 	}
 
 	/* Fill the new client structure with data */
-	data = (struct maxi_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	new_client->data = data;
 	new_client->adapter = adapter;
@@ -629,7 +628,7 @@ int maxi_detect(struct i2c_adapter *adapter, int address,
       ERROR4:
 	i2c_detach_client(new_client);
       ERROR2:
-	kfree(new_client);
+	kfree(data);
       ERROR0:
 	return err;
 }
@@ -650,7 +649,7 @@ static int maxi_detach_client(struct i2c_client *client)
 		    ("maxilife: Client deregistration failed, client not detached.\n");
 		return err;
 	}
-	kfree(client);
+	kfree(client->data);
 	return 0;
 }
 

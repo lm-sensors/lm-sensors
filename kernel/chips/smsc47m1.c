@@ -121,6 +121,7 @@ static inline u8 MIN_TO_REG(long rpm, int div)
 #define PWM_TO_REG(val) SENSORS_LIMIT((((val) * 645) / 1000), 0, 63)
 
 struct smsc47m1_data {
+	struct i2c_client client;
 	struct semaphore lock;
 	int sysctl_id;
 
@@ -259,13 +260,11 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 		superio_exit();
 	}
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct smsc47m1_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct smsc47m1_data), GFP_KERNEL))) {
 		return -ENOMEM;
 	}
 
-	data = (struct smsc47m1_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	init_MUTEX(&data->lock);
 	new_client->data = data;
@@ -298,7 +297,7 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 	i2c_detach_client(new_client);
       ERROR3:
 	release_region(address, SMSC_EXTENT);
-	kfree(new_client);
+	kfree(data);
 	return err;
 }
 
@@ -316,7 +315,7 @@ static int smsc47m1_detach_client(struct i2c_client *client)
 	}
 
 	release_region(client->addr, SMSC_EXTENT);
-	kfree(client);
+	kfree(client->data);
 
 	return 0;
 }

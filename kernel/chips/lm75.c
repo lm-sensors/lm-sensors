@@ -45,6 +45,7 @@ SENSORS_INSMOD_1(lm75);
 
 /* Each client has this additional data */
 struct lm75_data {
+	struct i2c_client client;
 	int sysctl_id;
 
 	struct semaphore update_lock;
@@ -128,14 +129,12 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 	/* OK. For now, we presume we have a valid client. We now create the
 	   client structure, even though we cannot fill it completely yet.
 	   But it allows us to access lm75_{read,write}_value. */
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct lm75_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct lm75_data), GFP_KERNEL))) {
 		err = -ENOMEM;
 		goto error0;
 	}
 
-	data = (struct lm75_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	new_client->data = data;
 	new_client->adapter = adapter;
@@ -202,7 +201,7 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 	i2c_detach_client(new_client);
       error3:
       error1:
-	kfree(new_client);
+	kfree(data);
       error0:
 	return err;
 }
@@ -213,7 +212,7 @@ static int lm75_detach_client(struct i2c_client *client)
 
 	i2c_deregister_entry(data->sysctl_id);
 	i2c_detach_client(client);
-	kfree(client);
+	kfree(client->data);
 	return 0;
 }
 

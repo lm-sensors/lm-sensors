@@ -101,6 +101,7 @@ static struct i2c_driver w83l785ts_driver = {
  */
 
 struct w83l785ts_data {
+	struct i2c_client client;
 	int sysctl_id;
 
 	struct semaphore update_lock;
@@ -166,21 +167,21 @@ static int w83l785ts_detect(struct i2c_adapter *adapter, int address,
 		return 0;
 	}
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) + sizeof(struct w83l785ts_data),
-	    GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct w83l785ts_data), GFP_KERNEL))) {
 		printk(KERN_ERR "w83l785ts.o: Out of memory in w83l785ts_detect "
 			"(new_client).\n");
 		return -ENOMEM;
 	}
 
 	/*
-	 * The W83L785TS-specific data is placed right after the common I2C
-	 * client data, and is pointed to by the data field from the I2C
-	 * client data.
+	 * The common I2C client data is placed right after the
+	 * W83L785TS-specific. The W83L785TS-specific data is pointed to by the
+	 * data field from the I2C client data.
 	 */
 
+	new_client = &data->client;
 	new_client->addr = address;
-	new_client->data = data = (struct w83l785ts_data *) (new_client + 1);
+	new_client->data = data;
 	new_client->adapter = adapter;
 	new_client->driver = &w83l785ts_driver;
 	new_client->flags = 0;
@@ -279,7 +280,7 @@ static int w83l785ts_detect(struct i2c_adapter *adapter, int address,
 	ERROR2:
 	i2c_detach_client(new_client);
 	ERROR1:
-	kfree(new_client);
+	kfree(data);
 	return err;
 }
 
@@ -294,7 +295,7 @@ static int w83l785ts_detach_client(struct i2c_client *client)
 		return err;
 	}
 
-	kfree(client);
+	kfree(client->data);
 	return 0;
 }
 

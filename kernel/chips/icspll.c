@@ -53,6 +53,7 @@ SENSORS_INSMOD_1(icspll);
 
 /* Each client has this additional data */
 struct icspll_data {
+	struct i2c_client client;
 	int sysctl_id;
 	struct semaphore update_lock;
 	char valid;		/* !=0 if following fields are valid */
@@ -133,15 +134,13 @@ int icspll_detect(struct i2c_adapter *adapter, int address,
 	}
 
 	/* Allocate space for a new client structure */
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct icspll_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct icspll_data), GFP_KERNEL))) {
 		err = -ENOMEM;
 		goto ERROR0;
 	}
 
 	/* Fill the new client structure with data */
-	data = (struct icspll_data *) (new_client + 1);
+	new_data = &data->client;
 	new_client->data = data;
 	new_client->id = icspll_id++;
 	new_client->addr = address;
@@ -178,7 +177,7 @@ int icspll_detect(struct i2c_adapter *adapter, int address,
 	i2c_detach_client(new_client);
       ERROR2:
       ERROR1:
-	kfree(new_client);
+	kfree(data);
       ERROR0:
 	return err;
 }
@@ -196,7 +195,7 @@ static int icspll_detach_client(struct i2c_client *client)
 		return err;
 	}
 
-	kfree(client);
+	kfree(client->data);
 	return 0;
 }
 

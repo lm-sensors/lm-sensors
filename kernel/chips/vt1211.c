@@ -175,6 +175,7 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define FAN_FROM_REG(val,div) ((val)==0?0:(val)==255?0:1310720/((val)*(div)))
 
 struct vt1211_data {
+	struct i2c_client client;
 	struct semaphore lock;
 	int sysctl_id;
 
@@ -409,13 +410,11 @@ int vt1211_detect(struct i2c_adapter *adapter, int address,
 		superio_outb(VT1211_ACT_REG, 1);
 	superio_exit();
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct vt1211_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct vt1211_data), GFP_KERNEL))) {
 		return -ENOMEM;
 	}
 
-	data = (struct vt1211_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	init_MUTEX(&data->lock);
 	new_client->data = data;
@@ -448,7 +447,7 @@ int vt1211_detect(struct i2c_adapter *adapter, int address,
 	i2c_detach_client(new_client);
       ERROR3:
 	release_region(address, VT1211_EXTENT);
-	kfree(new_client);
+	kfree(data);
 	return err;
 }
 
@@ -466,7 +465,7 @@ static int vt1211_detach_client(struct i2c_client *client)
 	}
 
 	release_region(client->addr, VT1211_EXTENT);
-	kfree(client);
+	kfree(client->data);
 
 	return 0;
 }

@@ -48,6 +48,7 @@ SENSORS_INSMOD_1(pca9540);
 
 /* Each client has this additional data */
 struct pca9540_data {
+	struct i2c_client client;
 	int sysctl_id;
 
 	struct semaphore update_lock;
@@ -107,14 +108,12 @@ int pca9540_detect(struct i2c_adapter *adapter, int address,
 
 	/* OK. For now, we presume we have a valid client. We now create the
 	   client structure, even though we cannot fill it completely yet. */
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct pca9540_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct pca9540_data), GFP_KERNEL))) {
 		err = -ENOMEM;
 		goto ERROR0;
 	}
 
-	data = (struct pca9540_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	new_client->data = data;
 	new_client->adapter = adapter;
@@ -159,7 +158,7 @@ int pca9540_detect(struct i2c_adapter *adapter, int address,
       ERROR2:
 	i2c_detach_client(new_client);
       ERROR1:
-	kfree(new_client);
+	kfree(data);
       ERROR0:
 	return err;
 }
@@ -176,10 +175,9 @@ static int pca9540_detach_client(struct i2c_client *client)
 		return err;
 	}
 
-	kfree(client);
+	kfree(client->data);
 
 	return 0;
-
 }
 
 static void pca9540_update_client(struct i2c_client *client)

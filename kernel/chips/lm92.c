@@ -83,6 +83,7 @@ static ctl_table lm92_dir_table[] = {
 
 /* NOTE: all temperatures are degrees centigrade * 16 */
 typedef struct {
+	struct i2c_client client;
 	int sysctl_id;
 	unsigned long timestamp;
 	struct {
@@ -307,10 +308,10 @@ static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short f
 	if (!i2c_check_functionality (adapter,I2C_FUNC_SMBUS_BYTE_DATA))
 		return (-ENODEV);
 
-	if ((client = kmalloc (sizeof (struct i2c_client) + sizeof (lm92_t),GFP_KERNEL)) == NULL)
+	if (!(data = kmalloc(sizeof(lm92_t), GFP_KERNEL)))
 		return (-ENOMEM);
 
-	data = (lm92_t *) (client + 1);
+	client = &data->client;
 	client->addr = address;
 	client->data = data;
 	client->adapter = adapter;
@@ -319,8 +320,8 @@ static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short f
 	strcpy (client->name,lm92_driver.name);
 
 	if (down_interruptible (&mutex)) {
-		kfree (client);
-		return (-ERESTARTSYS);
+		result = -ERESTARTSYS;
+		goto ERROR1;
 	}
 
 	if (kind < 0) {
@@ -330,33 +331,23 @@ static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short f
 		  || manufacturer != LM92_MANUFACTURER_ID)) {
 		  	/* Is it a MAX6635/MAX6635/MAX6635? */
 			if (!max6635_check(client)) {
-				kfree (client);
-				up (&mutex);
-				return (-ENODEV);
+				result = -ENODEV;
+				goto ERROR2;
 			}
 		}
 	}
 
 	if ((result = i2c_attach_client (client))) {
-		kfree (client);
-		up (&mutex);
-		return (result);
+		goto ERROR2;
 	}
 
 	if ((result = i2c_register_entry (client,client->name,lm92_dir_table)) < 0) {
-		i2c_detach_client (client);
-		kfree (client);
-		up (&mutex);
-		return (result);
+		goto ERROR3;
 	}
 	data->sysctl_id = result;
 
 	if ((result = lm92_init_client (client)) < 0) {
-		i2c_deregister_entry (data->sysctl_id);
-		i2c_detach_client (client);
-		kfree (client);
-		up (&mutex);
-		return (result);
+		goto ERROR4;
 	}
 
 	client->id = id++;
@@ -364,6 +355,16 @@ static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short f
 	up (&mutex);
 
 	return (0);
+
+ERROR4:
+	i2c_deregister_entry(data->sysctl_id);
+ERROR3:
+	i2c_detach_client(client);
+ERROR2:
+	up(&mutex);
+ERROR1:
+	kfree(data);
+	return result;
 }
 
 static int lm92_attach_adapter (struct i2c_adapter *adapter)
@@ -394,7 +395,7 @@ static int lm92_detach_client (struct i2c_client *client)
 	if ((result = i2c_detach_client (client)))
 		return (result);
 
-	kfree (client);
+	kfree(client->data);
 
 	return (0);
 }

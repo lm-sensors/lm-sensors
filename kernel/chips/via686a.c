@@ -334,6 +334,7 @@ static inline long TEMP_FROM_REG10(u16 val)
    The structure is dynamically allocated, at the same time when a new
    via686a client is allocated. */
 struct via686a_data {
+	struct i2c_client client;
 	struct semaphore lock;
 	int sysctl_id;
 
@@ -516,14 +517,12 @@ int via686a_detect(struct i2c_adapter *adapter, int address,
 			return -ENODEV;
 	}
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct via686a_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct via686a_data), GFP_KERNEL))) {
 		err = -ENOMEM;
 		goto ERROR0;
 	}
 
-	data = (struct via686a_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	init_MUTEX(&data->lock);
 	new_client->data = data;
@@ -562,7 +561,7 @@ int via686a_detect(struct i2c_adapter *adapter, int address,
 	i2c_detach_client(new_client);
       ERROR3:
 	release_region(address, VIA686A_EXTENT);
-	kfree(new_client);
+	kfree(data);
       ERROR0:
 	return err;
 }
@@ -581,7 +580,7 @@ static int via686a_detach_client(struct i2c_client *client)
 	}
 
 	release_region(client->addr, VIA686A_EXTENT);
-	kfree(client);
+	kfree(client->data);
 
 	return 0;
 }

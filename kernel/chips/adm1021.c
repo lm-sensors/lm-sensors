@@ -86,6 +86,7 @@ SENSORS_INSMOD_8(adm1021, adm1023, max1617, max1617a, thmc10, lm84, gl523sm, mc1
 
 /* Each client has this additional data */
 struct adm1021_data {
+	struct i2c_client client;
 	int sysctl_id;
 	enum chips type;
 
@@ -211,14 +212,12 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	   client structure, even though we cannot fill it completely yet.
 	   But it allows us to access adm1021_{read,write}_value. */
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct adm1021_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct adm1021_data), GFP_KERNEL))) {
 		err = -ENOMEM;
 		goto error0;
 	}
 
-	data = (struct adm1021_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	new_client->data = data;
 	new_client->adapter = adapter;
@@ -321,7 +320,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	i2c_detach_client(new_client);
       error3:
       error1:
-	kfree(new_client);
+	kfree(data);
       error0:
 	return err;
 }
@@ -337,7 +336,6 @@ static void adm1021_init_client(struct i2c_client *client)
 
 static int adm1021_detach_client(struct i2c_client *client)
 {
-
 	int err;
 
 	i2c_deregister_entry(((struct adm1021_data *) (client->data))->
@@ -349,10 +347,9 @@ static int adm1021_detach_client(struct i2c_client *client)
 		return err;
 	}
 
-	kfree(client);
+	kfree(client->data);
 
 	return 0;
-
 }
 
 

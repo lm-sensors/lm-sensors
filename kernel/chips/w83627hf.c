@@ -277,6 +277,7 @@ static inline u8 DIV_TO_REG(long val)
    data is pointed to by w83627hf_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new client is allocated. */
 struct w83627hf_data {
+	struct i2c_client client;
 	struct semaphore lock;
 	int sysctl_id;
 	enum chips type;
@@ -660,14 +661,12 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 	   client structure, even though we cannot fill it completely yet.
 	   But it allows us to access w83627hf_{read,write}_value. */
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct w83627hf_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct w83627hf_data), GFP_KERNEL))) {
 		err = -ENOMEM;
 		goto ERROR0;
 	}
 
-	data = (struct w83627hf_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	init_MUTEX(&data->lock);
 	new_client->data = data;
@@ -733,7 +732,7 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
       ERROR3:
 	release_region(address, WINB_EXTENT);
       ERROR1:
-	kfree(new_client);
+	kfree(data);
       ERROR0:
 	return err;
 }
@@ -752,7 +751,7 @@ static int w83627hf_detach_client(struct i2c_client *client)
 	}
 
 	release_region(client->addr, WINB_EXTENT);
-	kfree(client);
+	kfree(client->data);
 
 	return 0;
 }

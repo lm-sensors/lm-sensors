@@ -128,6 +128,7 @@ static struct i2c_driver max6650_driver = {
 
 struct max6650_data
 {
+	struct i2c_client client;
     int sysctl_id;
     struct semaphore update_lock;
     char valid;                 /* zero until following fields are valid */
@@ -219,20 +220,20 @@ static int max6650_detect(struct i2c_adapter *adapter, int address, unsigned
         return 0;
     }
 
-    if (!(new_client = kmalloc(sizeof(struct i2c_client) + sizeof(struct
-		max6650_data), GFP_KERNEL))) {
+    if (!(data = kmalloc(sizeof(struct max6650_data), GFP_KERNEL))) {
         printk("max6650.o: Out of memory in max6650_detect (new_client).\n");
         return -ENOMEM;
     }
 
     /*
-     * The max6650-specific data is placed right after the common I2C
-     * client data, and is pointed to by the data field from the I2C
-     * client data.
+     * The common I2C client data is placed right before the
+     * max6650-specific data. The max6650-specific data is pointed to by the
+	 * data field from the I2C client data.
      */
 
+	new_client = &data->client;
     new_client->addr = address;
-    new_client->data = data = (struct max6650_data *) (new_client + 1);
+    new_client->data = data;
     new_client->adapter = adapter;
     new_client->driver = &max6650_driver;
     new_client->flags = 0;
@@ -328,7 +329,7 @@ static int max6650_detect(struct i2c_adapter *adapter, int address, unsigned
 ERROR2:
     i2c_detach_client(new_client);
 ERROR1:
-    kfree(new_client);
+    kfree(data);
     return err;
 }
 
@@ -348,7 +349,7 @@ static int max6650_detach_client(struct i2c_client *client)
         return err;
     }
 
-    kfree(client);
+    kfree(client->data);
     return 0;
 }
 

@@ -108,6 +108,7 @@ SENSORS_INSMOD_1(fscher);
    dynamically allocated, at the same time when a new fscher client is
    allocated. */
 struct fscher_data {
+  struct i2c_client client;
   int sysctl_id;
 
   struct semaphore update_lock;
@@ -266,14 +267,12 @@ int fscher_detect(struct i2c_adapter *adapter, int address,
   /* OK. For now, we presume we have a valid client. We now create the
      client structure, even though we cannot fill it completely yet.
      But it allows us to access fscher_{read,write}_value. */
-  if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-                             sizeof(struct fscher_data),
-                             GFP_KERNEL))) {
+  if (!(data = kmalloc(sizeof(struct fscher_data), GFP_KERNEL))) {
     err = -ENOMEM;
     goto ERROR0;
   }
 
-  data = (struct fscher_data *) (new_client + 1);
+  new_client = &data->client;
   new_client->addr = address;
   new_client->data = data;
   new_client->adapter = adapter;
@@ -324,7 +323,7 @@ int fscher_detect(struct i2c_adapter *adapter, int address,
   i2c_detach_client(new_client);
  ERROR3:
  ERROR1:
-  kfree(new_client);
+  kfree(data);
  ERROR0:
   return err;
 }
@@ -340,7 +339,7 @@ static int fscher_detach_client(struct i2c_client *client)
     return err;
   }
 
-  kfree(client);
+  kfree(client->data);
 
   return 0;
 }

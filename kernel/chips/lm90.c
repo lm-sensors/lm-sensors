@@ -160,6 +160,7 @@ static struct i2c_driver lm90_driver = {
 
 struct lm90_data
 {
+	struct i2c_client client;
 	int sysctl_id;
 
 	struct semaphore update_lock;
@@ -265,21 +266,21 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 		return 0;
 	}
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-		sizeof(struct lm90_data), GFP_KERNEL)))
+	if (!(data = kmalloc(sizeof(struct lm90_data), GFP_KERNEL)))
 	{
 		printk("lm90.o: Out of memory in lm90_detect (new_client).\n");
 		return -ENOMEM;
 	}
 
 	/*
-	 * The LM90-specific data is placed right after the common I2C
-	 * client data, and is pointed to by the data field from the I2C
-	 * client data.
+	 * The common I2C client data is placed right before the
+	 * LM90-specific data. The LM90-specific data is pointed to by the
+	 * data field from the I2C client data.
 	 */
 
+	new_client = &data->client;
 	new_client->addr = address;
-	new_client->data = data = (struct lm90_data *) (new_client + 1);
+	new_client->data = data;
 	new_client->adapter = adapter;
 	new_client->driver = &lm90_driver;
 	new_client->flags = 0;
@@ -412,7 +413,7 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	ERROR2:
 	i2c_detach_client(new_client);
 	ERROR1:
-	kfree(new_client);
+	kfree(data);
 	return err;
 }
 
@@ -445,7 +446,7 @@ static int lm90_detach_client(struct i2c_client *client)
 		return err;
 	}
 
-	kfree(client);
+	kfree(client->data);
 	return 0;
 }
 

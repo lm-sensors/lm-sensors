@@ -118,6 +118,7 @@ static inline u8 FAN_TO_REG(long rpm, int div)
    dynamically allocated, at the same time when a new lm78 client is
    allocated. */
 struct lm78_data {
+	struct i2c_client client;
 	struct semaphore lock;
 	int sysctl_id;
 	enum chips type;
@@ -312,14 +313,12 @@ int lm78_detect(struct i2c_adapter *adapter, int address,
 	   client structure, even though we cannot fill it completely yet.
 	   But it allows us to access lm78_{read,write}_value. */
 
-	if (!(new_client = kmalloc((sizeof(struct i2c_client)) +
-				   sizeof(struct lm78_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct lm78_data), GFP_KERNEL))) {
 		err = -ENOMEM;
 		goto ERROR0;
 	}
 
-	data = (struct lm78_data *) (new_client + 1);
+	new_client = &data->client;
 	if (is_isa)
 		init_MUTEX(&data->lock);
 	new_client->addr = address;
@@ -412,7 +411,7 @@ int lm78_detect(struct i2c_adapter *adapter, int address,
 	if (is_isa)
 		release_region(address, LM78_EXTENT);
       ERROR1:
-	kfree(new_client);
+	kfree(data);
       ERROR0:
 	return err;
 }
@@ -432,7 +431,7 @@ static int lm78_detach_client(struct i2c_client *client)
 
 	if(i2c_is_isa_client(client))
 		release_region(client->addr, LM78_EXTENT);
-	kfree(client);
+	kfree(client->data);
 
 	return 0;
 }

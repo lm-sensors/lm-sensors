@@ -109,6 +109,7 @@ static inline void superio_exit(void)
 #define ALARM_FROM_REG(val)	((val) & 0x07)
 
 struct pc87360_data {
+	struct i2c_client client;
 	struct semaphore lock;
 	int sysctl_id;
 
@@ -276,13 +277,11 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 		return -ENODEV;
 	}
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct pc87360_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct pc87360_data), GFP_KERNEL))) {
 		return -ENOMEM;
 	}
 
-	data = (struct pc87360_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	init_MUTEX(&data->lock);
 	new_client->data = data;
@@ -337,7 +336,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	i2c_detach_client(new_client);
       ERROR1:
 	release_region(address, PC87360_EXTENT);
-	kfree(new_client);
+	kfree(data);
 	return err;
 }
 
@@ -354,7 +353,7 @@ static int pc87360_detach_client(struct i2c_client *client)
 	}
 
 	release_region(client->addr, PC87360_EXTENT);
-	kfree(client);
+	kfree(client->data);
 
 	return 0;
 }

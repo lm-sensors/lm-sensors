@@ -105,6 +105,7 @@ struct arp_device {
 
 /* Each client has this additional data */
 struct arp_data {
+	struct i2c_client client;
 	int sysctl_id;
 
 	struct semaphore update_lock;
@@ -190,13 +191,11 @@ int smbusarp_detect(struct i2c_adapter *adapter, int address,
 	        I2C_FUNC_SMBUS_BLOCK_DATA_PEC)))
 		return(0);
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct arp_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct arp_data), GFP_KERNEL))) {
 		return(-ENOMEM);
 	}
 
-	data = (struct arp_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	new_client->data = data;
 	new_client->adapter = adapter;
@@ -231,7 +230,7 @@ int smbusarp_detect(struct i2c_adapter *adapter, int address,
       ERROR4:
 	i2c_detach_client(new_client);
       ERROR1:
-	kfree(new_client);
+	kfree(data);
 	return err;
 }
 
@@ -248,7 +247,7 @@ static int smbusarp_detach_client(struct i2c_client *client)
 		return err;
 	}
 
-	kfree(client);
+	kfree(client->data);
 
 	return 0;
 }

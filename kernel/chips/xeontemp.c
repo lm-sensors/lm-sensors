@@ -78,6 +78,7 @@ SENSORS_INSMOD_1(xeontemp);
 
 /* Each client has this additional data */
 struct xeontemp_data {
+	struct i2c_client client;
 	int sysctl_id;
 	enum chips type;
 
@@ -167,14 +168,12 @@ static int xeontemp_detect(struct i2c_adapter *adapter, int address,
 	   client structure, even though we cannot fill it completely yet.
 	   But it allows us to access xeontemp_{read,write}_value. */
 
-	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
-				   sizeof(struct xeontemp_data),
-				   GFP_KERNEL))) {
+	if (!(data = kmalloc(sizeof(struct xeontemp_data), GFP_KERNEL))) {
 		err = -ENOMEM;
 		goto error0;
 	}
 
-	data = (struct xeontemp_data *) (new_client + 1);
+	new_client = &data->client;
 	new_client->addr = address;
 	new_client->data = data;
 	new_client->adapter = adapter;
@@ -226,7 +225,7 @@ static int xeontemp_detect(struct i2c_adapter *adapter, int address,
 	i2c_detach_client(new_client);
       error3:
       error1:
-	kfree(new_client);
+	kfree(data);
       error0:
 	return err;
 }
@@ -253,7 +252,7 @@ static int xeontemp_detach_client(struct i2c_client *client)
 		return err;
 	}
 
-	kfree(client);
+	kfree(client->data);
 
 	return 0;
 
