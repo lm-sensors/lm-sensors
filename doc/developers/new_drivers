@@ -29,7 +29,10 @@ If you wish to write a driver for 2.5 only, email us for information.
   You should use this as a base for your development.
   See instructions on our download page.
 
-* Write the new driver. 
+* Write the new driver.
+  If you write a driver for a device that is similar to one we already
+  support, use the other device driver as a template. If you don't know
+  which one to use, either ask us or use the following defaults.
   For a chip driver, use lm78.c as template. For an SMBus-only adapter, 
   use i2c-piix4.c. Use i2c-via.c for an I2C-level adapter ('bit banger').
   Usually, we make all prefixes start with the driver name. This is not
@@ -72,7 +75,8 @@ If you wish to write a driver for 2.5 only, email us for information.
 
 * Test the module.
   This is usually the boring part...
-  Test both with 2.2.x and 2.4.x kernels.
+  Test with a recent 2.4 kernel, and possibly with an older one
+  (>=2.4.9).
 
 * Add detection information to prog/detect/sensors-detect.
   This is a perl script that automatically detects what chips and adapters
@@ -120,6 +124,12 @@ If you wish to write a driver for 2.5 only, email us for information.
   Do a 'cvs update' to get in sync (things will have changed since
   you started), then submit the changes to us as a patch against CVS,
   or check them in.
+
+* If you want to have your driver integrated to Linux 2.5, you have to
+  port your driver to the new sysfs interface. Once done and preferably
+  after testing, submit a patch to the Linux kernel mailing list
+  <linux-kernel at vger dot kernel dot org> and Greg KH (greg at kroah
+  dot com).
 
 ---------------------------------------------------------------------
 Checklist for us to do on the webpage:
