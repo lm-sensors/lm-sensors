@@ -752,6 +752,9 @@ sub add_i2c_to_chips_detected
   FIND_LOOP:
   foreach $main_entry (@chips_detected) {
     foreach $detected_entry (@{$main_entry->{detected}}) {
+      @entry_addrs = ($detected_entry->{i2c_addr});
+      push @entry_addrs, @{$detected_entry->{i2c_sub_addrs}}
+               if exists $datahash->{i2c_sub_addrs};
       if ($detected_entry->{i2c_devnr} == $datahash->{i2c_devnr} and
           any_list_match \@entry_addrs, \@hash_addrs) {
         if ($detected_entry->{conf} >= $datahash->{conf}) {
@@ -832,7 +835,7 @@ sub add_isa_to_chips_detected
            print("Can't open ",
                  "/dev/i2c-$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
-      i2c_set_slave_addr \*FILE,$new_misdetected_ref->[$i]->{address} or
+      i2c_set_slave_addr \*FILE,$new_misdetected_ref->[$i]->{i2c_addr} or
            print("Can't set I2C address for ",
                  "/dev/i2c-$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
