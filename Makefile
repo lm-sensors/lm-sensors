@@ -200,6 +200,11 @@ ifeq ($(MACHINE),alpha)
 MODCFLAGS += -ffixed-8
 endif
 
+ifeq ($(MACHINE),x86_64)
+MODCFLAGS += -fno-strict-aliasing -fno-common -fomit-frame-pointer -mno-red-zone\
+	     -mcmodel=kernel -fno-reorder-blocks -finline-limit=2000 -fno-strength-reduce
+endif
+
 ifeq ($(SMP),1)
 MODCPPFLAGS += -D__SMP__
 endif

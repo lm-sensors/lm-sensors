@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.7.0 (200211??)
+2.7.0 (200212??)
   NOTE: Requires i2c-2.7.0 or newer.
   File doc/busses/i2c-ali1535: Add license, miscellaneous changes
   File doc/busses/i2c-ali15x3: Add license, miscellaneous changes
@@ -30,11 +30,12 @@ ask CVS about it:
   Library: Add support for MC1066; add multiple VRM version support for lm87;
            enhance adm1023 support; initial support for Sony Vaio eeprom;
            add support for bmcsensors; add hacks for additional dummy drivers
-  Makefile: Take kernel source location from /lib/modules/x.x.x/build
+  Makefile: Take kernel source location from /lib/modules/x.x.x/build;
+            add flags for x86_64 compiles
   Module adm1021: Add support for MC1066
   Module bmcsensors: New	
   Module dmi_scan: Rename symbol duplicated in kernel; apply fixes from
-                   kernel 2.5.43
+                   kernel 2.5.43; fix 2.2 kernel compiles
   Module gl518sm: Iterate allowed only for rev 0x00
   Module i2c-amd756: Configure base address for nForce support;
                      check for uninitialized base address;
@@ -45,7 +46,8 @@ ask CVS about it:
   Module i2c-keywest: Sync with kernel 2.4.20
   Module i2c-sis630: Add support for SiS730
   Module i2c-sis645: Improve support for SiS645/961;
-                     add support for SiS645DX/961 and SiS735
+                     add support for SiS645DX/961 and SiS735;
+                     fix 2.2 kernel compiles
   Module i2c-viapro: Add support for VT8233A (new ID 0x3177) and VT8235
   Module lm87: Add multiple VRM version support
   Module vt1211: Fix inx limits and alarms; fix in0
@@ -60,7 +62,7 @@ ask CVS about it:
   Program doc-features: Complete rewrite; handle missing sysctl entries;
                         handle unknown prefix with suggestion
   Program lm_sensors.init: Remove spaces bug; add green/red output
-  Program mkpatch: Fix dmi_scan module compile
+  Program mkpatch: Fix dmi_scan module compile; add sis630, sis645, amd8111
   Program rrd: Add sanity limits to newly-created RRD.
   Program sensord: (v0.6.2) Add sanity limits to newly-created RRD.
   Program sensors: Add support for MC1066, Rambus Rimms;
