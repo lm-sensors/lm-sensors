@@ -22,9 +22,11 @@ ask CVS about it:
   File sensors.conf.eg: Un-ignore it87 in8, temp3, fan3;
                         add adm1021 section; add lm87 AIN[1,2] template;
                         swap negative voltage limits for 782d,783s,627hf,
-                        697hf,it87; add more it87 help
+                        697hf,it87; add more it87 help; swap neg. voltage
+                        limits for lm78, lm78-j, lm79, as99127f
   Library: Add PCF8591, W83697HF, ADM1023 support;
-           fix w83* fan_min computes
+           fix w83* fan_min computes;
+           swap negative voltage limits for lm78, lm78-j, lm79, as99127f
   Module adm1024: Add MODULE_LICENSE("GPL")
   Module bt869: Add s-video out and DVD resolution support
   Module fscscy: implement min/max for voltages and fans

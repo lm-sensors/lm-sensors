@@ -280,10 +280,10 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*"
     set in3_max 5.0 * 1.05
     set in4_min 12 * 0.95
     set in4_max 12 * 1.05
-    set in5_min -12 * 0.95
-    set in5_max -12 * 1.05
-    set in6_min -5 * 0.95
-    set in6_max -5 * 1.05
+    set in5_max -12 * 0.95
+    set in5_min -12 * 1.05
+    set in6_max -5 * 0.95
+    set in6_min -5 * 1.05
 
 # examples for lm78, lm78j, lm79 temperature limits;
 #    set temp_over 40	
@@ -518,10 +518,10 @@ chip "as99127f-*"
     set in3_max 5.0 * 1.05
     set in4_min 12 * 0.90
     set in4_max 12 * 1.10
-    set in5_min -12 * 0.90
-    set in5_max -12 * 1.10
-    set in6_min -5 * 0.95
-    set in6_max -5 * 1.05
+    set in5_max -12 * 0.90
+    set in5_min -12 * 1.10
+    set in6_max -5 * 0.95
+    set in6_min -5 * 1.05
 
 # examples for temperature limits
 #    set temp1_over 40	
