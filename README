@@ -51,7 +51,7 @@ At least the following hardware sensor chips are supported:
   Analog Devices ADM1021, ADM1022, and ADM9240
   Asus AS99127F
   Dallas Semiconductor DS1780, DS75, and DS1775
-  Hewlett Packard Maxilife (several revisions)
+  Hewlett Packard Maxilife (several revisions including '99 NBA)
   Genesys Logic GL518SM (rev 00, 80), GL520SM, GL523SM
   Intel Xeon processor embedded sensors
   Maxim MAX1617 and MAX1617A
