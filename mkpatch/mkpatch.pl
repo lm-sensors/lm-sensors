@@ -22,6 +22,9 @@ use strict;
 use vars qw($temp);
 $temp = "mkpatch/.temp";
 
+# Generate a diff between the old kernel file and the new I2C file. We
+# arrange the headers to tell us the old tree was under directory
+# `linux-old', and the new tree under `linux'.
 # $_[0]: sensors package root (like /tmp/sensors)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
 # $_[2]: Name of the kernel file
@@ -55,6 +58,10 @@ sub print_diff
 }
 
 
+# This generates diffs for the main Linux Makefile.
+# Three lines which add drivers/sensors/sensors.a to the DRIVERS list are 
+# put just before the place where the architecture Makefile is included.
+# Of course, care is taken old lines are removed.
 # $_[0]: sensors package root (like /tmp/sensors)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
 sub gen_Makefile
@@ -88,6 +95,11 @@ EOF
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
+# This generates diffs for drivers/Makefile
+# First, `sensors' is added to the ALL_SUB_DIRS list. Next, a couple of lines
+# to add sensors to the SUB_DIRS and/or MOD_SUB_DIRS lists is put right before
+# Rules.make is included.
+# Of course, care is taken old lines are removed.
 # $_[0]: sensors package root (like /tmp/sensors)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
 sub gen_drivers_Makefile
@@ -137,6 +149,10 @@ EOF
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
+# This generates diffs for drivers/char/Config.in
+# It adds a line just before CONFIG_APM or main_menu_option lines to include
+# the sensors Config.in.
+# Of course, care is taken old lines are removed.
 # $_[0]: sensors package root (like /tmp/sensors)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
 sub gen_drivers_char_Config_in
@@ -169,6 +185,11 @@ sub gen_drivers_char_Config_in
 }
  
 
+# This generates diffs for drivers/char/mem.c They are a bit intricate.
+# Lines are generated at the beginning to declare sensors_init_all
+# At the bottom, a call to sensors_init_all is added when the
+# new lm_sensors stuff is configured in.
+# Of course, care is taken old lines are removed.
 # $_[0]: sensors package root (like /tmp/sensors)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
 sub gen_drivers_char_mem_c
@@ -221,6 +242,10 @@ EOF
 }
 
 
+# This generates diffs for drivers/i2c/Config.in
+# Several adapter drivers that are included in the lm_sensors package are
+# added at the bottom.
+# Of course, care is taken old lines are removed.
 # $_[0]: sensors package root (like /tmp/sensors)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
 sub gen_drivers_i2c_Config_in
@@ -259,6 +284,10 @@ EOF
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
+# This generates diffs for drivers/i2c/Makefile.
+# Lines to add correct files to M_OBJS and/or L_OBJS are added just before
+# Rules.make is included
+# Of course, care is taken old lines are removed.
 # $_[0]: sensors package root (like /tmp/sensors)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
 sub gen_drivers_i2c_Makefile
@@ -329,6 +358,12 @@ EOF
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
+# This generates diffs for drivers/i2c/i2c-core.c
+# Lines are generated at the beginning to declare several *_init functions.
+# At the bottom, calls to them are added when the sensors stuff is configured
+# in.
+# $_[0]: sensors package root (like /tmp/sensors)
+# $_[1]: Linux kernel tree (like /usr/src/linux)
 sub gen_drivers_i2c_i2c_core_c
 {
   my ($package_root,$kernel_root) = @_;
@@ -392,7 +427,7 @@ EOF
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
-
+# Main function
 sub main
 {
   my ($package_root,$kernel_root,%files,%includes,$package_file,$kernel_file);

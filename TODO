@@ -56,3 +56,4 @@ OTHERS
 * Examine watchdog-4.3 or later of meskes@debian.org (Michael Meskes)
   tsx-11.mit.edu /pub/linux/sources/sbin or 
   sunsite.unc.edu /pub/linux/system/daemons/watchdog
+* Add experimental drivers
