@@ -778,7 +778,8 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             adm1026_detect w83l785ts_detect lm83_detect lm90_detect
             saa1064_detect w83l784r_detect mozart_detect max6650_detect
             fscher_detect adm1029_detect adm1031_detect max6900_detect
-            m5879_detect pca9540_detect);
+            m5879_detect pca9540_detect smartbatt_mgr_detect
+            smartbatt_chgr_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1279,6 +1280,18 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "bmcsensors",
        isa_addrs => [ 0x0ca8 ],
        isa_detect => sub { ipmi_smic_detect @_ },
+     },
+     {
+       name => "Smart Battery Charger",
+       driver => "to-be-written",
+       i2c_addrs => [0x09],
+       i2c_detect => sub { smartbatt_chgr_detect @_},
+     },
+     {
+       name => "Smart Battery Manager/Selector",
+       driver => "to-be-written",
+       i2c_addrs => [0x0a],
+       i2c_detect => sub { smartbatt_mgr_detect @_},
      },
      {
        name => "Smart Battery",
@@ -3906,6 +3919,46 @@ sub max6900_detect
 sub arp_detect
 {
   return (1);
+}
+
+# This checks for non-FFFF values for SpecInfo and Status.
+# The address (0x09) is specified by the SMBus standard so it's likely
+# that this really is a smart battery charger.
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: 5
+sub smartbatt_chgr_detect
+{
+  my ($file,$addr) = @_;
+  # check some registers
+  if (i2c_smbus_read_word_data($file,0x11) == 0xffff) {
+  	return;
+  }
+  if (i2c_smbus_read_word_data($file,0x13) == 0xffff) {
+  	return;
+  }
+  return (5);
+}
+
+# This checks for non-FFFF values for State and Info.
+# The address (0x0a) is specified by the SMBus standard so it's likely
+# that this really is a smart battery manager/selector.
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: 5
+sub smartbatt_mgr_detect
+{
+  my ($file,$addr) = @_;
+  # check some registers
+  if (i2c_smbus_read_word_data($file,0x01) == 0xffff) {
+  	return;
+  }
+  if (i2c_smbus_read_word_data($file,0x04) == 0xffff) {
+  	return;
+  }
+  return (5);
 }
 
 # This checks for non-FFFF values for temperature, voltage, and current.
