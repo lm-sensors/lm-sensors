@@ -272,8 +272,6 @@ user_install::
 all :: user
 install :: all user_install
 ifeq ($(DESTDIR),)
-	@echo "*** The depmod command below may generate errors. We are aware of the"
-	@echo "*** problem and are working on a solution."
 	-/sbin/depmod -a
 else
 	@echo "*** This is a \`staged' install using \"$(DESTDIR)\" as prefix."
