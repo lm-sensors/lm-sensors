@@ -117,12 +117,13 @@ static struct i2c_adapter bit_hydra_ops = {
 	.algo_data		= &bit_hydra_data,
 };
 
-
-/* PCI device */
-#define VENDOR		PCI_VENDOR_ID_APPLE
-#define DEVICE		PCI_DEVICE_ID_APPLE_HYDRA
-
 static struct pci_device_id hydra_ids[] __devinitdata = {
+	{
+		.vendor =	PCI_VENDOR_ID_APPLE,
+		.device =	PCI_DEVICE_ID_APPLE_HYDRA,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
 	{ 0, }
 };
 

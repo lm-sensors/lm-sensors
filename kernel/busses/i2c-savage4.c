@@ -167,12 +167,19 @@ static struct i2c_adapter savage4_i2c_adapter = {
 	.algo_data	= &sav_i2c_bit_data,
 };
 
-#if 0
-PCI_VENDOR_ID_S3, PCI_CHIP_SAVAGE4,
-PCI_VENDOR_ID_S3, PCI_CHIP_SAVAGE2000,
-#endif
-
 static struct pci_device_id savage4_ids[] __devinitdata = {
+	{
+		.vendor =	PCI_VENDOR_ID_S3,
+		.device =	PCI_CHIP_SAVAGE4,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_S3,
+		.device =	PCI_CHIP_SAVAGE2000,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
 	{ 0, }
 };
 

@@ -141,27 +141,11 @@ static void sis5595_write(u8 reg, u8 data)
    Note the differences between kernels with the old PCI BIOS interface and
    newer kernels with the real PCI interface. In compat.h some things are
    defined to make the transition easier. */
-int sis5595_setup(void)
+int sis5595_setup(struct pci_dev *SIS5595_dev)
 {
 	u16 a;
 	u8 val;
-	struct pci_dev *SIS5595_dev;
 	int *i;
-
-	/* First check whether we can access PCI at all */
-	if (pci_present() == 0) {
-		printk("i2c-sis5595.o: Error: No PCI-bus found!\n");
-		return -ENODEV;
-	}
-
-	/* Look for the SIS5595 */
-	SIS5595_dev = NULL;
-	if (!(SIS5595_dev = pci_find_device(PCI_VENDOR_ID_SI,
-					    PCI_DEVICE_ID_SI_503,
-					    SIS5595_dev))) {
-		printk("i2c-sis5595.o: Error: Can't detect SIS5595!\n");
-		return -ENODEV;
-	}
 
 	/* Look for imposters */
 	for(i = blacklist; *i != 0; i++) {
@@ -425,13 +409,19 @@ static struct i2c_adapter sis5595_adapter = {
 
 
 static struct pci_device_id sis5595_ids[] __devinitdata = {
+	{
+		.vendor =	PCI_VENDOR_ID_SI,
+		.device =	PCI_DEVICE_ID_SI_503,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
 	{ 0, }
 };
 
 static int __devinit sis5595_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
 
-	if (sis5595_setup()) {
+	if (sis5595_setup(dev)) {
 		printk
 		    ("i2c-sis5595.o: SIS5595 not detected, module not inserted.\n");
 

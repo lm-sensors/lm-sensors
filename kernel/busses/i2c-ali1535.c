@@ -147,31 +147,10 @@ DECLARE_MUTEX(i2c_ali1535_sem);
    Note the differences between kernels with the old PCI BIOS interface and
    newer kernels with the real PCI interface. In compat.h some things are
    defined to make the transition easier. */
-int ali1535_setup(void)
+int ali1535_setup(struct pci_dev *ALI1535_dev)
 {
 	int error_return = 0;
 	unsigned char temp;
-
-	struct pci_dev *ALI1535_dev;
-
-	/* First check whether we can access PCI at all */
-	if (pci_present() == 0) {
-		printk("i2c-ali1535.o: Error: No PCI-bus found!\n");
-		error_return = -ENODEV;
-		goto END;
-	}
-
-	/* Look for the ALI1535, M7101 device */
-	ALI1535_dev = NULL;
-	ALI1535_dev = pci_find_device(PCI_VENDOR_ID_AL,
-				      PCI_DEVICE_ID_AL_M7101, 
-				      ALI1535_dev); 
-
-	if (ALI1535_dev == NULL) {
-		printk("i2c-ali1535.o: Error: Can't detect ali1535!\n");
-		error_return = -ENODEV;
-		goto END;
-	}
 
 /* Check the following things:
 	- SMB I/O address is initialized
@@ -564,12 +543,18 @@ static struct i2c_adapter ali1535_adapter = {
 
 
 static struct pci_device_id ali1535_ids[] __devinitdata = {
+	{
+	.vendor =	PCI_VENDOR_ID_AL,
+	.device =	PCI_DEVICE_ID_AL_M7101,
+	.subvendor =	PCI_ANY_ID,
+	.subdevice =	PCI_ANY_ID,
+	},
 	{ 0, }
 };
 
 static int __devinit ali1535_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
-	if (ali1535_setup()) {
+	if (ali1535_setup(dev)) {
 		printk
 		    ("i2c-ali1535.o: ALI1535 not detected, module not inserted.\n");
 		return -ENODEV;
