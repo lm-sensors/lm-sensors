@@ -20,21 +20,41 @@ ask CVS about it:
 2.8.8 (???)
   File doc/lm_sensors-FAQ.texi: Add 4.6.1
                                 Update 4.7
+  File doc/chips/lm75: LM77 is not supported
+  File doc/chips/lm90: LM86, MAX6657 and MAX6658 are supported
   File doc/chips/w83l785ts: Improvements
   File kernel/include/sensors_vid.h: Support VRM 10.0
+  Library: Support 2.6 adm1025
+           Preliminary support for 2.6 lm87
+           Support 2.6 adm9240
   Makefiles: Implement user_uninstall (Rudolf Marek)
+  Module adm1025: Refine detection
+                  Update limit registers again (revert of 2.8.1)
+                  Init high limits if they read 0
+                  Fix conversions
+  Module lm75: Refine detection
+  Module lm90: Add LM86, MAX6657 and MAX6658 support
   Module pca9540: Refine detection
-  Module pc87360: Change voltage magnitude from 2 to 3
+  Module pc87360: Change voltage/thermistor magnitude from 2 to 3
                   Support VID
                   Fix fan_div file when fan count is less than 3
+                  Additional init and debug
   Module w83627hf: Add alternate VCORE/in0 calculation method
   Module w83781d: Fix default VRM for w83791d
   Module w83l785ts: Implement read error handling (backport from 2.6)
   Program fancontrol.init: New (Dean Takemori)
   Program fancontrol.pl: Restore fans on many kinds of errors/interrupts
-  Program sensors-detect: Support LM93
+  Program mkdev.sh: Detect devfs and refuse to run
+                    Use mknod's mode instead of chmod
+  Program sensors: Rework adm1025 support
+                   Display pc87365/pc87366 VID
+  Program sensors-detect: Support LM93, LM77
                           Support PC8739x Super-I/O family (no sensors)
                           Fix PCA9540 support
+                          Refine ADM1025/ADM1025A detection
+                          Refine LM75 detection
+                          Ignore missing /proc/modules (Andras Bali)
+                          Script-wide Perl cleanups
 
 2.8.7 (20040611)
   File README.thinkpad: Update 24RF08 status
