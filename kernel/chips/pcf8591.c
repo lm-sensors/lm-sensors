@@ -179,7 +179,8 @@ int pcf8591_detect(struct i2c_adapter *adapter, int address,
         }
 #endif
 
-        if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE))
+        if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE
+                                     | I2C_FUNC_SMBUS_WRITE_BYTE_DATA))
                 goto ERROR0;
 
         /* OK. For now, we presume we have a valid client. We now create the

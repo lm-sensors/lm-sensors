@@ -183,7 +183,8 @@ int ds1621_detect(struct i2c_adapter *adapter, int address,
 #endif
 
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA |
-				     I2C_FUNC_SMBUS_WORD_DATA))
+				     I2C_FUNC_SMBUS_WORD_DATA |
+				     I2C_FUNC_SMBUS_WRITE_BYTE))
 		    goto ERROR0;
 
 	/* OK. For now, we presume we have a valid client. We now create the
