@@ -55,12 +55,12 @@ Module Parameters
 	sensor1		sensor2		sensor3		value
 	-------		-------		-------		-----
 	diode		diode		diode		0x07
-	diode		diode		thermistor	0x0e
+	diode		diode		thermistor	0x23
 	diode		thermistor	diode		0x15
-	diode		thermistor	thermistor	0x1c
-	thermistor	diode		diode		0x23
+	diode		thermistor	thermistor	0x31
+	thermistor	diode		diode		0x0e
 	thermistor	diode		thermistor	0x2a   ** default
-	thermistor	thermistor	diode		0x31
+	thermistor	thermistor	diode		0x1c
 	thermistor	thermistor	thermistor	0x38
 
 
