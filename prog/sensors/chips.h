@@ -52,6 +52,8 @@ extern void print_fscher(const sensors_chip_name *name);
 extern void print_pcf8591(const sensors_chip_name *name);
 extern void print_vt1211(const sensors_chip_name *name);
 extern void print_smsc47m1(const sensors_chip_name *name);
+extern void print_pc87360(const sensors_chip_name *name);
+extern void print_pc87364(const sensors_chip_name *name);
 extern void print_lm92(const sensors_chip_name *name);
 extern void print_vt8231(const sensors_chip_name *name);
 extern void print_bmc(const sensors_chip_name *name);

@@ -3988,6 +3988,88 @@ void print_smsc47m1(const sensors_chip_name *name)
 
 }
 
+void print_pc87360(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur, min, fdiv;
+  int status, valid;
+
+  if (!sensors_get_feature(*name, SENSORS_PC87360_FAN1_STATUS, &cur)) 
+    status = cur + 0.5;
+  else {
+    printf("ERROR: Can't get FAN1 status data!\n");
+    status = 0;
+  }
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_FAN1, &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_PC87360_FAN1, &cur)
+   && !sensors_get_feature(*name, SENSORS_PC87360_FAN1_DIV, &fdiv)
+   && !sensors_get_feature(*name, SENSORS_PC87360_FAN1_MIN, &min)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+             cur, min, fdiv,
+             status&PC87360_ALARM_FAN_OVERFLOW?"OVERFLOW":
+             status&PC87360_ALARM_FAN_LOW?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get FAN1 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_feature(*name, SENSORS_PC87360_FAN2_STATUS, &cur)) 
+    status = cur + 0.5;
+  else {
+    printf("ERROR: Can't get FAN2 status data!\n");
+    status = 0;
+  }
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_FAN2, &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_PC87360_FAN2, &cur)
+   && !sensors_get_feature(*name, SENSORS_PC87360_FAN2_DIV, &fdiv)
+   && !sensors_get_feature(*name, SENSORS_PC87360_FAN2_MIN, &min)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+             cur, min, fdiv,
+             status&PC87360_ALARM_FAN_OVERFLOW?"OVERFLOW":
+             status&PC87360_ALARM_FAN_LOW?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get FAN2 data!\n");
+  free_the_label(&label);
+}
+
+void print_pc87364(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur, min, fdiv;
+  int status, valid;
+
+  print_pc87360(name);
+
+  if (!sensors_get_feature(*name, SENSORS_PC87360_FAN3_STATUS, &cur)) 
+    status = cur + 0.5;
+  else {
+    printf("ERROR: Can't get FAN3 status data!\n");
+    status = 0;
+  }
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_FAN3, &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_PC87360_FAN3, &cur)
+   && !sensors_get_feature(*name, SENSORS_PC87360_FAN3_DIV, &fdiv)
+   && !sensors_get_feature(*name, SENSORS_PC87360_FAN3_MIN, &min)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+             cur, min, fdiv,
+             status&PC87360_ALARM_FAN_OVERFLOW?"OVERFLOW":
+             status&PC87360_ALARM_FAN_LOW?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get FAN3 data!\n");
+  free_the_label(&label);
+}
+
 static void lm92_print_temp (float n_cur,float n_high,float n_low,float n_crit,float n_hyst)
 {
 	if (fahrenheit) {

@@ -1380,7 +1380,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      }, 
      {
 	name => "Nat. Semi. PC87360 Super IO Fan Sensors",
-	driver => "to-be-written",
+	driver => "pc87360-fan",
 	addrreg => 0x2e,
 	datareg => 0x2f,
 	enter => [],
@@ -1394,7 +1394,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      }, 
      {
 	name => "Nat. Semi. PC87363 Super IO Fan Sensors",
-	driver => "to-be-written",
+	driver => "pc87360-fan",
 	addrreg => 0x2e,
 	datareg => 0x2f,
 	enter => [],
@@ -1408,7 +1408,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      }, 
      {
 	name => "Nat. Semi. PC87364 Super IO Fan Sensors",
-	driver => "to-be-written",
+	driver => "pc87360-fan",
 	addrreg => 0x2e,
 	datareg => 0x2f,
 	enter => [],

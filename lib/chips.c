@@ -4251,6 +4251,61 @@ static sensors_chip_feature smsc47m1_features[] =
     { 0 }
   };
 
+static sensors_chip_feature pc87360_features[] =
+  { 
+    { SENSORS_PC87360_FAN1, "fan1", NOMAP, NOMAP, R,
+                PC87360_SYSCTL_FAN1, VALUE(2), 0 },
+    { SENSORS_PC87360_FAN2, "fan2", NOMAP, NOMAP, R,
+                PC87360_SYSCTL_FAN2, VALUE(2), 0 },
+    { SENSORS_PC87360_FAN1_MIN, "fan1_min", SENSORS_PC87360_FAN1,
+                SENSORS_PC87360_FAN1, R, PC87360_SYSCTL_FAN1,
+                VALUE(1), 0 },
+    { SENSORS_PC87360_FAN2_MIN, "fan2_min", SENSORS_PC87360_FAN2,
+                SENSORS_PC87360_FAN2, R, PC87360_SYSCTL_FAN2,
+                VALUE(1), 0 },
+    { SENSORS_PC87360_FAN1_DIV, "fan1_div", SENSORS_PC87360_FAN1,
+                NOMAP, R, PC87360_SYSCTL_FAN_DIV, VALUE(1), 0 },
+    { SENSORS_PC87360_FAN2_DIV, "fan2_div", SENSORS_PC87360_FAN2,
+                NOMAP, R, PC87360_SYSCTL_FAN_DIV, VALUE(2), 0 },
+    { SENSORS_PC87360_FAN1_STATUS, "fan1_status", SENSORS_PC87360_FAN1,
+                NOMAP, R, PC87360_SYSCTL_FAN1_STATUS, VALUE(1), 0 },
+    { SENSORS_PC87360_FAN2_STATUS, "fan2_status", SENSORS_PC87360_FAN2,
+                NOMAP, R, PC87360_SYSCTL_FAN2_STATUS, VALUE(1), 0 },
+    { 0 }
+  };
+
+static sensors_chip_feature pc87364_features[] =
+  { 
+    { SENSORS_PC87360_FAN1, "fan1", NOMAP, NOMAP, R,
+                PC87360_SYSCTL_FAN1, VALUE(2), 0 },
+    { SENSORS_PC87360_FAN2, "fan2", NOMAP, NOMAP, R,
+                PC87360_SYSCTL_FAN2, VALUE(2), 0 },
+    { SENSORS_PC87360_FAN3, "fan3", NOMAP, NOMAP, R,
+                PC87360_SYSCTL_FAN3, VALUE(2), 0 },
+    { SENSORS_PC87360_FAN1_MIN, "fan1_min", SENSORS_PC87360_FAN1,
+                SENSORS_PC87360_FAN1, R, PC87360_SYSCTL_FAN1,
+                VALUE(1), 0 },
+    { SENSORS_PC87360_FAN2_MIN, "fan2_min", SENSORS_PC87360_FAN2,
+                SENSORS_PC87360_FAN2, R, PC87360_SYSCTL_FAN2,
+                VALUE(1), 0 },
+    { SENSORS_PC87360_FAN3_MIN, "fan3_min", SENSORS_PC87360_FAN3,
+                SENSORS_PC87360_FAN3, R, PC87360_SYSCTL_FAN3,
+                VALUE(1), 0 },
+    { SENSORS_PC87360_FAN1_DIV, "fan1_div", SENSORS_PC87360_FAN1,
+                NOMAP, R, PC87360_SYSCTL_FAN_DIV, VALUE(1), 0 },
+    { SENSORS_PC87360_FAN2_DIV, "fan2_div", SENSORS_PC87360_FAN2,
+                NOMAP, R, PC87360_SYSCTL_FAN_DIV, VALUE(2), 0 },
+    { SENSORS_PC87360_FAN3_DIV, "fan3_div", SENSORS_PC87360_FAN3,
+                NOMAP, R, PC87360_SYSCTL_FAN_DIV, VALUE(2), 0 },
+    { SENSORS_PC87360_FAN1_STATUS, "fan1_status", SENSORS_PC87360_FAN1,
+                NOMAP, R, PC87360_SYSCTL_FAN1_STATUS, VALUE(1), 0 },
+    { SENSORS_PC87360_FAN2_STATUS, "fan2_status", SENSORS_PC87360_FAN2,
+                NOMAP, R, PC87360_SYSCTL_FAN2_STATUS, VALUE(1), 0 },
+    { SENSORS_PC87360_FAN3_STATUS, "fan3_status", SENSORS_PC87360_FAN3,
+                NOMAP, R, PC87360_SYSCTL_FAN3_STATUS, VALUE(1), 0 },
+    { 0 }
+  };
+
 static sensors_chip_feature lm92_features[] =
   {
     { SENSORS_LM92_TEMP, "temp", NOMAP, NOMAP,
@@ -4797,6 +4852,9 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_PCF8591_PREFIX, pcf8591_features }, 
  { SENSORS_VT1211_PREFIX, vt1211_features }, 
  { SENSORS_SMSC47M1_PREFIX, smsc47m1_features }, 
+ { SENSORS_PC87360_PREFIX, pc87360_features }, 
+ { SENSORS_PC87363_PREFIX, pc87360_features }, 
+ { SENSORS_PC87364_PREFIX, pc87364_features }, 
  { SENSORS_LM92_PREFIX, lm92_features }, 
  { SENSORS_VT8231_PREFIX, vt8231_features }, 
  { SENSORS_BMC_PREFIX, bmc_features }, 

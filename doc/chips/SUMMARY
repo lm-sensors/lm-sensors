@@ -145,6 +145,11 @@ maxilife
 mtp008
 	mtp008		3	7	3	3 pwm	yes	no
 
+pc87360
+	pc87360		-	-	2	2 pwm	no	yes (LPC)
+	pc87363		-	-	2	2 pwm	no	yes (LPC)
+	pc87364		-	-	3	3 pwm	no	yes (LPC)
+
 sis5595
 	sis5595 	0-1	4-5	2	-	no	yes
 
