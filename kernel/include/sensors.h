@@ -538,4 +538,12 @@
 #define FSCSCY_SYSCTL_PCILOAD  2004       /* PCILoad value */
 #define FSCSCY_SYSCTL_INTRUSION 2005      /* state, control for intrusion sensor */
 
+#define PCF8591_SYSCTL_AIN_CONF 1000      /* Analog input configuration */
+#define PCF8591_SYSCTL_CH0 1001           /* Input channel 1 */
+#define PCF8591_SYSCTL_CH1 1002           /* Input channel 2 */
+#define PCF8591_SYSCTL_CH2 1003           /* Input channel 3 */
+#define PCF8591_SYSCTL_CH3 1004           /* Input channel 4 */
+#define PCF8591_SYSCTL_AOUT_ENABLE 1005   /* Analog output enable flag */
+#define PCF8591_SYSCTL_AOUT 1006          /* Analog output */
+
 #endif				/* def SENSORS_SENSORS_H */
