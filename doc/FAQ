@@ -1044,10 +1044,11 @@ wanted.
 --------------------------------------------
 
    These are often 'shadows' of your EEPROMs on your SDRAM DIMMs at
-addresses 0x50 - 0x57. They aren't really there. If you try and do a
-`i2cdump' on them you won't get anything. This is probably caused by
-some timing problem on your motherboard or on the DIMMs.  We don't know
-the exact cause.
+addresses 0x50 - 0x57. They are the 'software write-protect' registers
+of the SDRAM Serial Presence Detect EEPROMs.  If you try and do a
+`i2cdump' on them to read the location, you won't get anything, because
+they contain a single write-only register.  This register can be used
+to permanently write-protect the contents of the eeprom.
 
 4.24 Sensors-detect doesn't work at all
 =======================================

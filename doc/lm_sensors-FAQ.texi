@@ -1048,10 +1048,13 @@ look at some basic data in @command{sensors} or use the program
 @subsection What is at I2C addresses 0x30 - 0x37?
 
 These are often 'shadows' of your EEPROMs on your SDRAM DIMMs
-at addresses 0x50 - 0x57. They aren't really there. If you try and
-do a @command{i2cdump} on them you won't get anything. This is probably
-caused by some timing problem on your motherboard or on the DIMMs.
-We don't know the exact cause.
+at addresses 0x50 - 0x57. They are the 'software write-protect'
+registers of the SDRAM Serial Presence Detect EEPROMs.
+If you try and
+do a @command{i2cdump} on them to read the location, you won't get anything,
+because they contain a single write-only register.
+This register can be used to permanently
+write-protect the contents of the eeprom.
 
 
 @node Section 4.24, Section 4.25, Section 4.23, Problems
