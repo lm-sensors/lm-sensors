@@ -63,7 +63,7 @@
 
 /* ----- local functions ----------------------------------------------	*/
 
-u16 pm_io_base;
+static u16 pm_io_base;
 
 static void bit_via_setscl(void *data, int state)
 {
@@ -100,7 +100,7 @@ static int bit_via_unreg(struct i2c_client *client)
 
 /* ------------------------------------------------------------------------ */
 
-struct bit_adapter bit_via_ops = {
+static struct bit_adapter bit_via_ops = {
 	"VIA i2c",
 	HW_B_VIA,
 	NULL,
@@ -199,7 +199,7 @@ static int find_via(void)
 }
 #endif
 
-int init_i2c_via(void)
+static int init_i2c_via(void)
 {
 	if (find_via() < 0) {
 		printk("Error while reading PCI configuration\n");

@@ -68,9 +68,12 @@ SENSORS_INSMOD_3(w83781d,w83782d,w83783s);
 
 /* The W83781D registers */
 /* The W83782D registers for nr=7,8 are in bank 5 */
-#define W83781D_REG_IN_MAX(nr) ((nr < 7) ? (0x2b + (nr) * 2) : (0x554 + (((nr) - 7) * 2)))
-#define W83781D_REG_IN_MIN(nr) ((nr < 7) ? (0x2c + (nr) * 2) : (0x555 + (((nr) - 7) * 2)))
-#define W83781D_REG_IN(nr)     ((nr < 7) ? (0x20 + (nr)) : (0x550 + (nr) - 7))
+#define W83781D_REG_IN_MAX(nr) ((nr < 7) ? (0x2b + (nr) * 2) : \
+					   (0x554 + (((nr) - 7) * 2)))
+#define W83781D_REG_IN_MIN(nr) ((nr < 7) ? (0x2c + (nr) * 2) : \
+					   (0x555 + (((nr) - 7) * 2)))
+#define W83781D_REG_IN(nr)     ((nr < 7) ? (0x20 + (nr)) : \
+					   (0x550 + (nr) - 7))
 
 #define W83781D_REG_FAN_MIN(nr) (0x3a + (nr))
 #define W83781D_REG_FAN(nr) (0x27 + (nr))
@@ -108,8 +111,9 @@ SENSORS_INSMOD_3(w83781d,w83782d,w83783s);
 #define W83781D_REG_PIN 0x4B
 
 /* PWM 782D (1-4) and 783S (1-2) only */
-#define W83781D_REG_PWM1 0x5B		/* 782d and 783s datasheets disagree on which is which. */
-#define W83781D_REG_PWM2 0x5A		/* We follow 782d datasheet convention here */
+#define W83781D_REG_PWM1 0x5B	/* 782d and 783s datasheets disagree
+				   on which is which. */
+#define W83781D_REG_PWM2 0x5A	/* We follow 782d datasheet convention here */
 #define W83781D_REG_PWM3 0x5E
 #define W83781D_REG_PWM4 0x5F
 #define W83781D_REG_PWMCLK12 0x5C
@@ -124,9 +128,9 @@ static const u8 regpwm[] = {W83781D_REG_PWM1, W83781D_REG_PWM2,
    received the information in an email from Winbond tech support */
 /* Sensor selection 782D/783S only */
 #define W83781D_REG_SCFG1 0x5D
-const u8 BIT_SCFG1[] = {0x02, 0x04, 0x08};
+static const u8 BIT_SCFG1[] = {0x02, 0x04, 0x08};
 #define W83781D_REG_SCFG2 0x59
-const u8 BIT_SCFG2[] = {0x10, 0x04, 0x08};
+static const u8 BIT_SCFG2[] = {0x10, 0x04, 0x08};
 #define W83781D_DEFAULT_BETA 3435
 
 /* RT Table registers */

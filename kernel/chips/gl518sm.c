@@ -155,7 +155,7 @@ struct gl518_data {
 
 /* load time parameter that says if we want to spend 10 seconds for
    reading all voltages from a GL518 rev 0, or if we want to read zeros */
-int readall = 0;
+static int readall = 0;
 
 #ifdef MODULE
 extern int init_module(void);
@@ -175,6 +175,7 @@ static u16 swap_bytes(u16 val);
 static int gl518_read_value(struct i2c_client *client, u8 reg);
 static int gl518_write_value(struct i2c_client *client, u8 reg, u16 value);
 static void gl518_update_client(struct i2c_client *client);
+static void gl518_update_client_rev00(struct i2c_client *client);
 
 static void gl518_vin(struct i2c_client *client, int operation, 
                       int ctl_name, int *nrels_mag, long *results);
@@ -512,7 +513,6 @@ void gl518_update_client(struct i2c_client *client)
 void gl518_update_client_rev00(struct i2c_client *client)
 {
   struct gl518_data *data = client->data;
-  struct wait_queue *wait = NULL;
   int j, min, max[3], delta;
 
   down(&data->update_lock);

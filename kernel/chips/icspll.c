@@ -102,7 +102,7 @@ static ctl_table icspll_dir_table_template[] = {
 };
 
 /* holding place for data - block read could be as much as 32 */
-u8 tempdata[MAXBLOCK_SIZE];
+static u8 tempdata[MAXBLOCK_SIZE];
 
 /* Used by init/cleanup */
 static int icspll_initialized = 0;
