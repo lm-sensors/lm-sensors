@@ -255,7 +255,6 @@ struct i2c_adapter *i2c_virt_create_adapter(struct i2c_adapter *parent_adap,
         /* Need to do algo dynamically because we don't know ahead
            of time what sort of physical adapter we'll be dealing with.
         */
-        algo->owner = NULL;
         algo->id = I2C_ALGO_VIRT;
         strcpy(algo->name, "Virtual I2C algorithm driver");
         algo->master_xfer = (parent_adap->algo->master_xfer
@@ -272,7 +271,8 @@ struct i2c_adapter *i2c_virt_create_adapter(struct i2c_adapter *parent_adap,
 #endif
 
         /* Now fill out new adapter structure */
-        adap->owner = NULL;
+	adap->inc_use = NULL;
+	adap->dec_use = NULL;
 	snprintf(adap->name, sizeof(adap->name),
                  "Virtual I2C (i2c-%d, mux %02lx:%02lx)",
                  i2c_adapter_id(parent_adap),
