@@ -18,6 +18,7 @@ NOTE: OPTION 2 WILL CURRENTLY NOT WORK FOR 2.0 AND OLDER 2.1 KERNELS!
 
 NOTE: IN EACH CASE, YOU WILL HAVE TO GET AND INSTALL THE I2C PACKAGE FIRST!
 
+NOTE: PLEASE READ THE DOCUMENTATION IN THE DOC SUBDIRECTORY IF YOU GET STUCK!
 
 
 Installing the i2c package
@@ -252,6 +253,9 @@ sensor devices. There is also a manual page for this program. Calling
 `sensors -s' will set the limits and other configuration settings 
 specified in /etc/sensors.conf. Again, read the manual pages for more
 information.
+
+There are many auxiliary programs not installed. You can find them under
+the prog subdirectory. A list can be found in doc/progs.
 
 
 Old and new I2C drivers

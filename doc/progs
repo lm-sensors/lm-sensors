@@ -7,6 +7,8 @@ this package.
   file. It read /proc/bus/i2c (or the file specified on the command-line),
   and prints to stdout `bus' statements reflecting the currently detected
   adapters.
+* prog/daemon/healthd.sh (written in bash, not installed)
+  An example of a very simple hardware health monitoring daemon.
 * prog/detect/sensors-detect (written in Perl, installed by 'make install')
   This program tries to detect the available SMBus adapters and the chips
   connected to them and/or the ISA bus. It also generates modprobe lines
@@ -54,14 +56,5 @@ this package.
   console application, using stdin and stdout. It is essential, because
   unlike the raw /proc/sys/dev/sensors/*/* files, it takes your configuration
   file into account.
-
-There are some programs distributed with Simon Vogl's i2c package too:
-* i2c/detect/detect (written in C, not installed)
-  This program needs module `i2c-dev.o' to be loaded. It scans the complete
-  address range of a certain bus for connected devices. It will only work
-  for i2c-level drivers (not for PIIX4 busses). This program is superceded
-  by prog/detect/i2c-detect.
-* i2c/eeprom/eeprom (written in C, not installed)
-  This program needs the i2c `eeprom.o' module (that is the one that is not
-  installed; it can be found in the i2c/drivers/ directory). It reads from
-  or writes to the eeprom.
+* prog/xeon/decode-xeon.pl (written in perl, not installed)
+  ID ROM data decoding for Xeon processors.
