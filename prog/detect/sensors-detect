@@ -770,7 +770,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect
             fscscy_detect pcf8591_detect arp_detect ipmi_kcs_detect
             ipmi_smic_detect via8231_isa_detect lm85_detect smartbatt_detect
-            adm1026_detect);
+            adm1026_detect w83l785ts_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -915,6 +915,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "to-be-written",
        i2c_addrs => [0x20..0x2f], 
        i2c_detect => sub { w83781d_detect 6, @_},
+     } ,
+     {
+       name => "Winbond W83L785TS",
+       driver => "to-be-written",
+       i2c_addrs => [0x2e], 
+       i2c_detect => sub { w83l785ts_detect 0, @_},
      } ,
      {
        name => "Winbond W83697HF",
@@ -3009,6 +3015,24 @@ sub ipmi_smic_detect
 {
   return if inb (0x0cab) == 0xff;
   return (4);
+}
+
+# $_[0]: Chip to detect (0 = ..., 1 = ...)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, 8 if detected
+# Registers used:
+#   0x4C-4E: Mfr and Chip ID
+# Note that this function is always called through a closure, so the
+# arguments are shifted by one place.
+sub w83l785ts_detect
+{
+  my ($chip,$file,$addr) = @_;
+  return unless i2c_smbus_read_byte_data($file,0x4c) == 0xa3;
+  return unless i2c_smbus_read_byte_data($file,0x4d) == 0x5c;
+  return unless i2c_smbus_read_byte_data($file,0x4e) == 0x70;
+  return (8);
 }
 
 
