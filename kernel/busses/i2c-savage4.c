@@ -28,7 +28,8 @@
    the BT869 and possibly other I2C devices. The DDC bus is not
    yet supported because its register is not memory-mapped.
    However we leave the DDC code here, commented out, to make
-   it easier to add later. */
+   it easier to add later.
+*/
 
 #include <linux/version.h>
 #include <linux/module.h>
@@ -39,8 +40,8 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
-MODULE_LICENSE("GPL");
+#ifndef I2C_HW_B_SAVG
+#define I2C_HW_B_SAVG	0x0d
 #endif
 
 /* 3DFX defines */
@@ -56,9 +57,6 @@ MODULE_LICENSE("GPL");
 #define PCI_CHIP_SAVAGE_IX_MV	0x8c12
 #define PCI_CHIP_SAVAGE_IX	0x8c13
 
-/* the only registers we use */
-//#define REG	0x78
-//#define REG2 	0x70
 #define REG 0xff20	/* Serial Port 1 Register */
 
 /* bit locations in the register */
@@ -194,7 +192,7 @@ static struct i2c_algo_bit_data sav_i2c_bit_data = {
 
 static struct i2c_adapter savage4_i2c_adapter = {
 	"I2C Savage4 adapter",
-	I2C_HW_B_VOO,
+	I2C_HW_B_SAVG,
 	NULL,
 	&sav_i2c_bit_data,
 	savage4_inc,
@@ -359,6 +357,9 @@ MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, Ralph Metzler <rjkm@thp.uni-koeln.de>, and Mark D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("Savage4 I2C/SMBus driver");
 
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 int init_module(void)
 {
