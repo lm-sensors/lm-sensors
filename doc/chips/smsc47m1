@@ -1,14 +1,14 @@
-Kernel driver `smsc74m1.o'
-=========================
+Kernel driver `smsc47m1.o'
+==========================
 
 Status: Beta.
 
 Supported chips:
-  * SMSC 74M1xx Super I/O Controllers
+  * SMSC 47B27x and 47M1xx Super I/O Controllers
     Addresses scanned: none, address read from Super I/O config space
     Datasheets:
+	http://www.smsc.com/main/datasheets/47b27x.pdf
 	http://www.smsc.com/main/datasheets/47m10x.pdf
-	http://www.smsc.com/main/datasheets/47m120.pdf
 	http://www.smsc.com/main/datasheets/47m13x.pdf
 	http://www.smsc.com/main/datasheets/47m14x.pdf
 
