@@ -25,9 +25,9 @@
 
     Chip	#vin	#fanin	#pwm	#temp	wchipid	i2c	ISA
     w83781d	7	3	0	3	0x10	yes	yes
+    w83627hf	9	3	2-4	3	0x20	yes	yes (LPC)
     w83782d	9	3	2-4	3	0x30	yes	yes
     w83783s	5-6	3	2	1-2	0x40	yes	no
-    w83782d	9	3	2-4	3	0x20	yes	yes (LPC)
 
 */
 
@@ -1018,7 +1018,7 @@ void w83781d_init_client(struct i2c_client *client)
       }
     }
   }
-#endif
+#endif /* W83781D_RT */
 
   w83781d_write_value(client,W83781D_REG_IN_MIN(0),
                       IN_TO_REG(W83781D_INIT_IN_MIN_0));
@@ -1065,7 +1065,7 @@ void w83781d_init_client(struct i2c_client *client)
     w83781d_write_value(client,W83781D_REG_IN_MAX(6),
                         IN_TO_REG(W83782D_INIT_IN_MAX_6));
   }
-  if (type == w83782d) {
+  if ((type == w83782d) || (type == w83627hf)) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(7),
                         IN_TO_REG(W83781D_INIT_IN_MIN_7));
     w83781d_write_value(client,W83781D_REG_IN_MAX(7),
@@ -1126,7 +1126,7 @@ void w83781d_update_client(struct i2c_client *client)
       data->in[i]     = w83781d_read_value(client,W83781D_REG_IN(i));
       data->in_min[i] = w83781d_read_value(client,W83781D_REG_IN_MIN(i));
       data->in_max[i] = w83781d_read_value(client,W83781D_REG_IN_MAX(i));
-      if((data->type != w83782d)  &&  (i == 6))
+      if((data->type != w83782d) && (data->type != w83627hf) && (i == 6))
         break;
     }
     for (i = 1; i <= 3; i++) {
@@ -1137,7 +1137,8 @@ void w83781d_update_client(struct i2c_client *client)
       for (i = 1; i <= 4; i++) {
         data->pwm[i-1] = w83781d_read_value(client,W83781D_REG_PWM(i));
         if(((data->type == w83783s) ||
-           ((data->type == w83782d) && i2c_is_isa_client(client)))
+           (((data->type == w83782d) || (data->type == w83627hf)) &&
+            i2c_is_isa_client(client)))
           &&  i == 2)
           break;
       }
@@ -1167,7 +1168,7 @@ void w83781d_update_client(struct i2c_client *client)
     }
     data->alarms = w83781d_read_value(client,W83781D_REG_ALARM1) +
                    (w83781d_read_value(client,W83781D_REG_ALARM2) << 8);
-    if (data->type == w83782d) {
+    if ((data->type == w83782d) || (data->type == w83627hf)) {
       data->alarms |= w83781d_read_value(client,W83781D_REG_ALARM3) << 16;
     }
     i = w83781d_read_value(client,W83781D_REG_BEEP_INTS2);
