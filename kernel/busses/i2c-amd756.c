@@ -28,8 +28,8 @@
     2002-04-08: Added nForce support. (Csaba Halasz)
     2002-10-03: Fixed nForce PnP I/O port. (Michael Steil)
     2002-12-28: Rewritten into something that resembles a Linux driver (hch)
-    2003-11-29: Added back AMD8111 removed by backport of the previous
-                rewrite. (Philip Pokorny)
+    2003-11-29: Added back AMD8111 removed by the previous rewrite.
+                (Philip Pokorny)
 */
 
 /*
@@ -418,7 +418,7 @@ static void __exit i2c_amd756_exit(void)
 }
 
 MODULE_AUTHOR("Merlin Hughes <merlin@merlin.org>");
-MODULE_DESCRIPTION("AMD 756/766/768/8111 and nVidia nForce SMBus driver");
+MODULE_DESCRIPTION("AMD756/766/768/8111 and nVidia nForce SMBus driver");
 MODULE_LICENSE("GPL");
 
 module_init(i2c_amd756_init)
