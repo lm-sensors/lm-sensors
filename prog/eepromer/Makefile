@@ -1,15 +1,11 @@
 #eepromer  Makefile
 CFLAGS = -O2
-#DEBUG  = -ggdb
 
-all:  eepromer
+all:  eepromer eeprom
 
+eepromer:  eepromer.o
 
-eepromer:  eepromer.c
-		gcc $(CFLAGS) $(DEBUG) eepromer.c  -o eepromer
+eeprom:  eeprom.o
 
-
-
-
-clean: all
-		rm -rf eepromer   
+clean:
+	rm -rf *~ *.o eepromer eeprom   
