@@ -1,5 +1,5 @@
 This directory contains files useful for initialization
-scripts, especially for RedHat.
+scripts, especially for RedHat and SuSE.
 
 There are two choices, lm_sensors.init and sensord.init.
 Use one or the other but not both!
@@ -20,6 +20,10 @@ as would be determined by running sensors-detect.
 The lm_sensors.sysconfig file contains the MODULE_# variable definitions;
 it should be modified for your setup and then
 copied to /etc/sysconfig/lm_sensors.
+
+SuSE users will want to use lm_sensors.init.suse instead, which is
+more specifically designed for this distribution. Changes were contributed
+by Marc Rieffel <marc@paracel.com>.
 
 ----------------
 
