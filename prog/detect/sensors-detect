@@ -3131,9 +3131,9 @@ sub system_safeness_by_dmi
       next;
     }
     next unless defined $dmitype;
-    if ($dmitype == 1 && m/^\s*Vendor: (.*)$/)
+    if ($dmitype == 1 && m/^\s*(Vendor|Manufacturer): (.*)$/)
     {
-      $systemvendor = $1;
+      $systemvendor = $2;
     }
     elsif ($dmitype == 0 && m/^\s*Version: (.*)$/)
     {
