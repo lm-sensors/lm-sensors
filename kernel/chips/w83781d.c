@@ -27,7 +27,7 @@
     as99127f	7	3	1?	3	0x31	0x12c3	yes	no
     as99127f rev.2 (type name = as99127f)	0x31	0x5ca3	yes	no
     asb100 "bach" (type_name = as99127f)	0x31	0x0694	yes	no
-    w83627hf	9	3	2	3	0x20	0x5ca3	yes	yes(LPC)
+    w83627hf	9	3	2	3	0x21	0x5ca3	yes	yes(LPC)
     w83697hf	8	2	2	2	0x60	0x5ca3	no	yes(LPC)
     w83781d	7	3	0	3	0x10-1	0x5ca3	yes	yes
     w83782d	9	3	2-4	3	0x30	0x5ca3	yes	yes
@@ -1012,7 +1012,7 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 			kind = w83782d;
 		else if (val1 == 0x40 && vendid == winbond && !is_isa && address == 0x2d)
 			kind = w83783s;
-		else if (val1 == 0x20 && vendid == winbond)
+		else if (val1 == 0x21 && vendid == winbond)
 			kind = w83627hf;
 		else if (val1 == 0x70 && vendid == winbond && address >= 0x2c)
 			kind = w83791d;

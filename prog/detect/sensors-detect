@@ -2687,7 +2687,7 @@ sub w83781d_detect
   return if $chip == 0 and ($reg1 != 0x10 && $reg1 != 0x11);
   return if $chip == 1 and  $reg1 != 0x30;
   return if $chip == 2 and  $reg1 != 0x40;
-  return if $chip == 3 and  $reg1 != 0x20;
+  return if $chip == 3 and  $reg1 != 0x21;
   return if $chip == 4 and  $reg1 != 0x31;
   return if $chip == 5 and  $reg1 != 0x31;
   return if $chip == 6 and  $reg1 != 0x31;
