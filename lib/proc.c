@@ -309,7 +309,7 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 		if (! strcmp(name.prefix, "eeprom")){
 			strcat(n, "eeprom");
 			if ((f = fopen(n, "r")) != NULL) {
-				eepromoffset = 1 +
+				eepromoffset =
 				  (the_feature->offset / sizeof(long))  +
 				  (16 * (the_feature->sysctl - EEPROM_SYSCTL1));
 				for(i = 0; i <= eepromoffset; i++)
