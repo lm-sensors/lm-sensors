@@ -33,10 +33,12 @@ use strict;
 # CONSTANT DECLARATIONS #
 #########################
 
-use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
+use vars qw(@pci_adapters @chip_ids @undetectable_adapters @dmidecode);
 
-@undetectable_adapters = ( "i2c-elektor","i2c-elv", "i2c-philips-par",
-                           "i2c-velleman" );
+@dmidecode = ( '/usr/local/sbin/dmidecode', '/usr/sbin/dmidecode' );
+
+@undetectable_adapters = ( 'i2c-elektor', 'i2c-elv', 'i2c-philips-par',
+                           'i2c-velleman' );
 
 # This is the list of SMBus or I2C adapters we recognize by their PCI
 # signature. This is an easy and fast way to determine which SMBus or I2C
@@ -2767,6 +2769,58 @@ sub generate_modprobes
   
 }
 
+sub safe_system_vendor
+{
+  if ($> != 0)
+  {
+  	print " As you are not root, we can't run dmidecode to determine your system vendor.\n";
+  	return 0;
+  }
+
+  my $opened = 0;
+  foreach my $dmidecode (@dmidecode)
+  {
+    last if (-r $dmidecode && ($opened = open (DMI, "$dmidecode |")));
+  }
+
+  unless ($opened)
+  {
+    print " Could not find dmidecode, which should have been installed with lm_sensors.\n",
+          " Runing dmidecode would help us determining your system vendor, which allows\n",
+          " safer operations. Please provide one of the following:\n  ";
+    print join ("\n  ", @dmidecode);
+    print "\nYou can still go on, but you are encouraged to fix the problem first.\n";
+    return 0;
+  }
+
+  my $line;
+  while (<DMI>)
+  {
+  	next unless m/System Information Block/;
+    $line = <DMI>;    
+    last;
+  }
+  close (DMI);
+
+  if ((defined $line) && ($line =~ m/^\s*Vendor: (.*)$/) && ($1 !~ /^\s*$/))
+  {
+    my $vendor = $1;
+  	$vendor =~ s/\s*$//;
+  	print " System vendor: $vendor\n";
+    if ($vendor =~ /\bIBM\b/)
+    {
+      print " Sorry, we won't let you go on. IBM systems are known to have serious\n",
+            " problems with lm_sensors, resulting in hardware failures.\n";
+      exit;
+    }
+    return 1;
+  }
+  
+  print " Could not determine system vendor, due to some problem with dmidecode. Please\n",
+        " have it fixed, we use it for safer operations.\n".
+  return 0;
+}
+
 sub main
 {
   my (@adapters,$res,$did_adapter_detection,$detect_others,$adapter);
@@ -2795,10 +2849,15 @@ sub main
         "things may\n",
         " seem a bit confusing, but they will still work.\n\n";
 
-  print " IF THIS IS AN IBM THINKPAD, PRESS CTRL-C NOW!\n";
-  print " IBM Thinkpads have a severely broken i2c/SMBus implementation, ";
-  print " just scanning\n";
-  print " the bus will break your thinkpad forever!\n\n";
+  unless (safe_system_vendor ())
+  {
+    print " IF THIS IS AN IBM THINKPAD, PRESS CTRL-C NOW!\n";
+    print " IBM Thinkpads have a severely broken i2c/SMBus implementation, ";
+    print "just scanning\n";
+    print " the bus will break your Thinkpad forever!\n";
+    print " If this is a non-Thinkpad IBM, we still suggest you press CTRL+C. We have\n";
+    print " had users reporting system breakage on other IBM systems as well.\n\n";
+  }
 
   print " We can start with probing for (PCI) I2C or SMBus adapters.\n";
   print " You do not need any special privileges for this.\n";
