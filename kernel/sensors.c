@@ -741,7 +741,7 @@ int sensors_detect(struct i2c_adapter *adapter,
 
     /* OK, so we really should examine this address. First check
        whether there is some client here at all! */
-    if (is_isa || (i2c_smbus_read_byte(adapter,addr) >= 0))
+    if (is_isa || (i2c_smbus_write_quick(adapter,addr,0) >= 0))
       if ((err = found_proc(adapter,addr,-1)))
         return err;
   }
