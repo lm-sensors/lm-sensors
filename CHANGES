@@ -13,7 +13,13 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
-2.2.0 (199902??)
+2.2.1 (19990218)
+  All: Removed compile warnings
+  Module i2c-dev: Small bug removed if DEBUG=1 was used
+  Module sis5595: Now compiles for 2.0 kernels
+  Module adm1021: Detection corrected
+  
+2.2.0 (19990216)
   All: Set copyrights to include 1999
   All: Small bugfixes
   I2C: Upgraded to newest archive of Simon Vogl
@@ -29,6 +35,7 @@ ask CVS about it:
   Program detect.pl: NEW
   Program doc-features: NEW
   Program sensors: Added man-page
+  Document BUGS: Added cdrom bug and kernel i2c conflict
   
 2.1.2 (19990116)
   Modules lm80.o, w83781d.o: fan-related Segmentation fault corrected
