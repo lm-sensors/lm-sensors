@@ -56,6 +56,37 @@
 #define I2C_HW_SMBUS_SIS630	0x08
 #endif
 
+#ifndef PCI_VENDOR_ID_SI
+#define PCI_VENDOR_ID_SI	0x1039
+#endif
+
+#ifndef PCI_DEVICE_ID_SI_630
+#define PCI_DEVICE_ID_SI_630	0x0630
+#endif
+
+#ifndef PCI_DEVICE_ID_SI_730
+#define PCI_DEVICE_ID_SI_730	0x0730
+#endif
+
+#ifndef PCI_DEVICE_ID_SI_503
+#define PCI_DEVICE_ID_SI_503	0x0008
+#endif
+
+struct sd {
+	const unsigned short mfr;
+	const unsigned short dev;
+	const unsigned char fn;
+	const char *name;
+};
+
+/* supported chips */
+static struct sd supported[] = {
+	{PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_630, 0, "SIS630"},
+	{PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_730, 0, "SIS730"},
+	{0, 0, 0, NULL}
+};
+
+
 /* SIS630 SMBus registers */
 #define SMB_STS     0x80 /* status */
 #define SMB_EN      0x81 /* status enable */
@@ -325,6 +356,7 @@ u32 sis630_func(struct i2c_adapter *adapter) {
 int sis630_setup(void) {
 	unsigned char b;
 	struct pci_dev *sis630_dev = NULL,*tmp = NULL;
+	struct sd *en = supported;
 
 	/* First check whether we can access PCI at all */
 	if (pci_present() == 0) {
@@ -332,20 +364,29 @@ int sis630_setup(void) {
 		return -ENODEV;
 	}
 
-	/* Look for the SIS630 */
+	/* Look for the SIS630 and compatible */
 	if (!(sis630_dev = pci_find_device(PCI_VENDOR_ID_SI,
 					    PCI_DEVICE_ID_SI_503,
 					    sis630_dev))) {
-		printk(KERN_ERR "i2c-sis630.o: Error: Can't detect SIS630!\n");
+		printk(KERN_ERR "i2c-sis630.o: Error: Can't detect 85C503/5513 ISA bridge!\n");
 		return -ENODEV;
 	}
-	tmp = pci_find_device(PCI_VENDOR_ID_SI,PCI_DEVICE_ID_SI_630,NULL);
-	if (tmp == NULL && force == 0) {
-		printk(KERN_ERR "i2c-sis630.o: Error: Can't detect SIS630!\n");
-		return -ENODEV;
+	do {
+		if ((tmp = pci_find_device(en->mfr,en->dev,NULL))) {
+			if (PCI_FUNC(tmp->devfn) != en->fn) 
+				continue;
+
+			break;
+		}
+		en++;
+	}
+	while(en->mfr);
+	if (tmp == NULL && force == 0 ) {
+			printk(KERN_ERR "i2c-sis630.o: Error: Can't detect SIS630 compatible device!\n");
+			return -ENODEV;
 	}
 	else if (tmp == NULL && force > 0) {
-		printk(KERN_NOTICE "i2c-sis630.o: WARNING: Can't detect SIS630 , but "
+		printk(KERN_NOTICE "i2c-sis630.o: WARNING: Can't detect SIS630 compatible device, but "
 			"loading because of force option enabled\n");
 	}
 
@@ -397,7 +438,7 @@ int __init i2c_sis630_init(void) {
 
 	sis630_initialized = 0;
 	if ((res = sis630_setup())) {
-		printk(KERN_ERR "i2c-sis630.o: SIS630 not detected, module not inserted.\n");
+		printk(KERN_ERR "i2c-sis630.o: SIS630 compatible bus not detected, module not inserted.\n");
 		i2c_sis630_cleanup();
 		return res;
 	}
@@ -411,7 +452,7 @@ int __init i2c_sis630_init(void) {
 		return res;
 	}
 	sis630_initialized++;
-	printk(KERN_INFO "i2c-sis630.o: SIS630 bus detected and initialized\n");
+	printk(KERN_INFO "i2c-sis630.o: SIS630 compatible bus detected and initialized\n");
 
 	return 0;
 }
