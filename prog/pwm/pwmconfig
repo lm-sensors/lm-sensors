@@ -1,5 +1,6 @@
+#!/bin/bash
 #
-# pwmconfig v0.5
+# pwmconfig v0.6
 # Tests the pwm outputs of sensors and configures fancontrol
 #
 #    Warning!!! This program will stop your fans, one at a time,
@@ -136,10 +137,10 @@ function pwmdetail()
 	F=$2
 	PLOT=
 
-	type gnuplot > /dev/null 2>&1
+	type $PLOTTER > /dev/null 2>&1
 	if [ $? -eq 0 ]
 	then
-		echo -n "    Would you like to generate a graphical plot using $PLOTTER (y) ? "
+		echo -n "    Would you like to generate a graphical plot using $PLOTTER (y)? "
 		read X
 		if [ "$X" = "y" -o "$X" = "Y" -o "$X" = "" ]
 		then
@@ -247,7 +248,7 @@ do
 			then
 				echo "    Fan $j has not returned to speed, please investigate!"
 			else
-				echo -n "    Would you like to generate a detailed correlation (y) ? "
+				echo -n "Would you like to generate a detailed correlation (y)? "
 				read X
 				if [ "$X" = "y" -o "$X" = "Y" -o "$X" = "" ]
 				then
@@ -260,17 +261,23 @@ do
 		let count=count+1
 	done
 	echo
-		if [ "$pwmactivecount" = "0" ]
+	if [ "$pwmactivecount" = "0" ]
+	then
+		echo "No correlations were detected."
+		echo "There is either no fan connected to the output of $i,"
+		echo "or the connected fan has no rpm-signal connected to one of"
+		echo "the tested fan sensors. (Note: not all motherboards have"
+		echo "the pwm outputs connected to the fan connectors,"
+		echo "check out the hardware database on http://www.almico.com/forumindex.php)"
+		echo
+		echo -n "Did you see/hear a fan stopping during the above test (n)? "
+		read X
+		if [ "$X" = "y" -o "$X" = "Y" ]
 		then
-			echo "No correlations were detected, there is either no fan connected to the output of $i, or the connected fan has no rpm-signal connected to one of the tested fan sensors. (Note: not all motherboards have the pwm outputs connected to the fan connectors, check out the hardware database on http://www.almico.com/forumindex.php)"
-			echo
-			echo -n "  Did you see/hear a fan stopping during the above test (y)?"
-			read X
-			if [ "$X" = "y" -o "$X" = "Y" -o "$X" = "" ]
-			then
-				pwmactive="$i ${pwmactive}"
-			fi
+			pwmactive="$i ${pwmactive}"
 		fi
+		echo
+	fi
 done
 
 
@@ -278,8 +285,8 @@ echo 'Testing is complete.'
 echo 'Please verify that all fans have returned to their normal speed.'
 echo
 echo 'The fancontrol script can automatically respond to temperature changes'
-echo 'of your system by changing fanspeeds. Do you want to set up its'
-echo 'configuration file now? (y)'
+echo 'of your system by changing fanspeeds.'
+echo -n 'Do you want to set up its configuration file now (y)? '
 
 read X
 if [ "$X" = "n" -o "$X" = "N" ]
@@ -295,7 +302,7 @@ then
 fi
 
 function AskPath {
-	echo 'What should be the path to your fancontrol config file? (/etc/fancontrol)'
+	echo -n 'What should be the path to your fancontrol config file (/etc/fancontrol)? '
 
 	read X
 	if [ "$X" = "y" -o "$X" = "Y" -o "$X" = "" ]
@@ -306,7 +313,7 @@ function AskPath {
 	then
 		FCCONFIG=$X
 	else
-		echo "$X does not exist, shall I create it now? (y)"
+		echo -n "$X does not exist, shall I create it now (y)? "
 		read Y
 		if [ "$Y" = "y" -o "$Y" = "Y" -o "$Y" = "" ]
 		then
@@ -336,39 +343,44 @@ LoadConfig $FCCONFIG
 
 function TestMinStart {
 	echo
-	echo 'Now we increase the PWM value in 10-unit-steps. Let the fan stop completely, then press return until the fan starts spinning, we will use this value +20 to be safe.'
+	echo 'Now we increase the PWM value in 10-unit-steps.'
+	echo 'Let the fan stop completely, then press return until the'
+	echo 'fan starts spinning. We will use this value +20 to be safe.'
 	let fanok=0
 	let fanval=0
 	until [ "$fanok" = "1" ]
 	do
 		let fanval=fanval+10
+		if [ $fanval -gt 240 ] ; then let fanval=255 ; let fanok=1 ; fi
 		echo -n "Setting $pwms to $fanval..."
 		echo $fanval > $pwms
 		read FANTEST
 		if [ "$FANTEST" = "y" -o "$FANTEST" = "Y" ] ; then let fanok=1 ; fi
 	done
 	let fanval=fanval+20
-	if (( $fanval > 240 )) ; then let fanval=255 ; fi
+	if [ $fanval -gt 240 ] ; then let fanval=255 ; fi
 	echo "OK, using $fanval"
 	echo 255 > $pwms
 }
 
 function TestMinStop {
         echo
-        echo 'Now we decrease the PWM value in 10-unit-steps, Let the fan has reach full speed, then press return until the fan stops spinning, we will use this value +20 as the minimum speed.'
+        echo 'Now we decrease the PWM value in 10-unit-steps.'
+	echo 'Let the fan reach full speed, then press return until the'
+	echo 'fan stops spinning. We will use this value +20 as the minimum speed.'
         let fanok=0
         let fanval=255
         until [ "$fanok" = "1" ]
         do
                 let fanval=fanval-10
-		if (( $fanval < 0 )) ; then fanval=0 ; fi
+		if [ $fanval -lt 0 ] ; then let fanval=0 ; let fanok=1 ; fi
                 echo -n "Setting $pwms to $fanval..."
                 echo $fanval > $pwms
                 read FANTEST
                 if [ "$FANTEST" = "y" -o "$FANTEST" = "Y" ] ; then let fanok=1 ; fi
         done
         let fanval=fanval+20
-        if (( $fanval > 255 )) ; then let fanval=255 ; fi
+        if [ $fanval -gt 255 ] ; then let fanval=255 ; fi
         echo "OK, using $fanval"
 	echo 255 > $pwms
 }
@@ -387,15 +399,21 @@ function SaveConfig {
 #}
 
 INTERVAL=10
+PS3='select (1-n): '
+DEFMINTEMP=0
+DEFMAXTEMP=60
+DEFMINSTART=150
+DEFMINSTOP=100
 
 #the section below has a high potential for usability improvements
 echo
-echo 'Select fan output to configure:'
+echo 'Select fan output to configure, or other action:'
 select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show configuration"; do
 	case $pwms in
 	"Change INTERVAL")
 		echo
-		echo "Enter the interval at which fancontrol should update PWM values (in s):"
+		echo "Current interval is $INTERVAL seconds."
+		echo -n "Enter the interval at which fancontrol should update PWM values (in s):"
 		read INTERVAL ;; #check user input here
 	"Just quit")
 		exit ;;
@@ -418,7 +436,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 		done
 		echo ;;
 
-	"`echo ${pwmactive} |sed -e \"s/ /\n/g\" | egrep \"${pwms}\"`" )
+	"`echo ${pwmactive} |sed -e 's/ /\n/g' | egrep \"${pwms}\"`" )
 		pwmsed=`echo ${pwms} | sed -e 's/\//\\\\\//g'` #escape / for sed
 		echo
 		echo "Select a temperature sensor as source for ${pwms}:"
@@ -436,8 +454,13 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 				fi
 			fi
 			echo
-			echo 'Enter the minimum temperature at which the fan should be switched off:'
+			echo 'Enter the low temperature (C)'
+			echo -n "at which the fan should be switched off ($DEFMINTEMP): "
 			read XMT
+			if [ "$XMT" = "" ]
+			then
+				XMT=$DEFMINTEMP
+			fi
 			if [ "$MINTEMP" = "" ]
 			then
 				MINTEMP="${pwms}=>${XMT}"
@@ -445,8 +468,13 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 				MINTEMP="`echo $MINTEMP | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMT}"
 			fi
 			echo
-			echo 'Enter the maximum temperature at which the fan should be switched to full speed:'
+			echo 'Enter the high temperature (C)'
+			echo -n "at which the fan should be switched to full speed ($DEFMAXTEMP): "
 			read XMT
+			if [ "$XMT" = "" ]
+			then
+				XMT=$DEFMAXTEMP
+			fi
 			if [ "$MAXTEMP" = "" ]
 			then
 				MAXTEMP="${pwms}=>${XMT}"
@@ -454,9 +482,14 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 				MAXTEMP="`echo $MAXTEMP | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMT}"
 			fi
 			echo
-			echo 'Enter the minimum PWM value at which the fan STARTS spinning (press return to test):'
+			echo 'Enter the minimum PWM value (0-255)'
+			echo -n "at which the fan STARTS spinning (press t to test) ($DEFMINSTART): "
 			read XMV
 			if [ "$XMV" = "" ]
+			then
+				XMV=$DEFMINSTART
+			fi
+			if [ "$XMV" = "t" -o "$XMV" = "T" ]
 			then
 				TestMinStart
 				XMV=$fanval
@@ -468,9 +501,14 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 				MINSTART="`echo $MINSTART | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMV}"
 			fi
 			echo
-			echo 'Enter the minimum PWM value at which the fan STOPS spinning (press return to test):'
+			echo 'Enter the minimum PWM value (0-255)'
+			echo -n "at which the fan STOPS spinning (press t to test) ($DEFMINSTOP): "
 			read XMV
 			if [ "$XMV" = "" ]
+			then
+				XMV=$DEFMINSTOP
+			fi
+			if [ "$XMV" = "t" -o "$XMV" = "T" ]
 			then
 				TestMinStop
 				XMV=$fanval
@@ -485,6 +523,8 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 		done ;;
 	
 	*)
-		echo "No such option, press RETURN to show menu" ;;
+		grep $pwm
+
+		echo "No such option. Enter a number." ;;
 	esac
 done
