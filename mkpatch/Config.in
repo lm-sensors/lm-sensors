@@ -18,6 +18,7 @@ if [ "$CONFIG_I2C_PROC" = "m" -o "$CONFIG_I2C_PROC" = "y" ] ; then
     dep_tristate '  Analog Devices ADM9240 and compatibles' CONFIG_SENSORS_ADM9240 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Dallas DS1621 and DS1625' CONFIG_SENSORS_DS1621 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Fujitsu-Siemens Poseidon' CONFIG_SENSORS_FSCPOS $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  Fujitsu-Siemens Scylla' CONFIG_SENSORS_FSCSCY $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Genesys Logic GL518SM' CONFIG_SENSORS_GL518SM $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Genesys Logic GL520SM' CONFIG_SENSORS_GL520SM $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  HP Maxilife' CONFIG_SENSORS_MAXILIFE $CONFIG_I2C $CONFIG_I2C_PROC
