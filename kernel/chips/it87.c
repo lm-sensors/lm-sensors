@@ -465,39 +465,32 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 	int is_isa = i2c_is_isa_adapter(adapter);
 
 	if (!is_isa
-	    && !i2c_check_functionality(adapter,
-					I2C_FUNC_SMBUS_BYTE_DATA)) goto
-		    ERROR0;
+	 && !i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
+	 	return 0;
 
-	if (is_isa) {
-		if (check_region(address, IT87_EXTENT))
-			goto ERROR0;
-	}
+	if (is_isa
+	 && check_region(address, IT87_EXTENT))
+	 	return 0;
 
 	/* Probe whether there is anything available on this address. Already
 	   done for SMBus clients */
-	if (kind < 0) {
-		if (is_isa) {
-
+	if (is_isa && kind < 0) {
 #define REALLY_SLOW_IO
-			/* We need the timeouts for at least some IT87-like chips. But only
-			   if we read 'undefined' registers. */
-			i = inb_p(address + 1);
-			if (inb_p(address + 2) != i)
-				goto ERROR0;
-			if (inb_p(address + 3) != i)
-				goto ERROR0;
-			if (inb_p(address + 7) != i)
-				goto ERROR0;
+		/* We need the timeouts for at least some IT87-like chips.
+		   But only if we read 'undefined' registers. */
+		i = inb_p(address + 1);
+		if (inb_p(address + 2) != i
+		 || inb_p(address + 3) != i
+		 || inb_p(address + 7) != i)
+			return -ENODEV;
 #undef REALLY_SLOW_IO
 
-			/* Let's just hope nothing breaks here */
-			i = inb_p(address + 5) & 0x7f;
-			outb_p(~i & 0x7f, address + 5);
-			if ((inb_p(address + 5) & 0x7f) != (~i & 0x7f)) {
-				outb_p(i, address + 5);
-				return 0;
-			}
+		/* Let's just hope nothing breaks here */
+		i = inb_p(address + 5) & 0x7f;
+		outb_p(~i & 0x7f, address + 5);
+		if ((inb_p(address + 5) & 0x7f) != (~i & 0x7f)) {
+			outb_p(i, address + 5);
+			return -ENODEV;
 		}
 	}
 
@@ -524,11 +517,12 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 	/* Now, we do the remaining detection. */
 
 	if (kind < 0) {
-		if (it87_read_value(new_client, IT87_REG_CONFIG) & 0x80)
-			goto ERROR1;
-		if (!is_isa
-		    && (it87_read_value(new_client, IT87_REG_I2C_ADDR) !=
-			address)) goto ERROR1;
+		if ((it87_read_value(new_client, IT87_REG_CONFIG) & 0x80)
+		 || (!is_isa
+		  && it87_read_value(new_client, IT87_REG_I2C_ADDR) != address)) {
+		  	err = -ENODEV;
+		 	goto ERROR1;
+		}
 	}
 
 	/* Determine the chip type. */
@@ -543,6 +537,7 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 				    ("it87.o: Ignoring 'force' parameter for unknown chip at "
 				     "adapter %d, address 0x%02x\n",
 				     i2c_adapter_id(adapter), address);
+			err = -ENODEV;
 			goto ERROR1;
 		}
 	}
