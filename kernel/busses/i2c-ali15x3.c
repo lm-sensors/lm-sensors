@@ -25,7 +25,7 @@
     Acer Labs Inc. (ALI) M1541 and M1543C South Bridges.
 
     The M1543C is a South bridge for desktop systems.
-    The M1541 is a South bridge for portable systems.
+    The M1533 is a South bridge for portable systems.
     They are part of the following ALI chipsets:
        "Aladdin Pro 2": Includes the M1621 Slot 1 North bridge
        with AGP and 100MHz CPU Front Side bus
