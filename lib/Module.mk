@@ -27,26 +27,36 @@ LIBVER := $(LIBMAINVER).$(LIBMINORVER)
 
 # The static lib name, the shared lib name, and the internal ('so') name of
 # the shared lib.
+LIBSHBASENAME := libsensors.so
 LIBSHLIBNAME := libsensors.so.$(LIBVER)
 LIBSTLIBNAME := libsensors.a
 LIBSHSONAME := libsensors.so.$(LIBMAINVER)
 
 LIBTARGETS := $(MODULE_DIR)/$(LIBSTLIBNAME) $(MODULE_DIR)/$(LIBSHLIBNAME)
 
-LIBCSOURCES :=
-LIBSHOBJECTS := $(LIBCSOURCES:.c=.lo) 
-LIBSTOBJECTS := $(LIBCSOURCES:.c=.ao)
+LIBCSOURCES := $(MODULE_DIR)/data.c $(MODULE_DIR)/general.c \
+               $(MODULE_DIR)/error.c
+LIBOTHEROBJECTS := $(MODULE_DIR)/conf-parse.o $(MODULE_DIR)/conf-lex.o
+LIBSHOBJECTS := $(LIBCSOURCES:.c=.lo) $(LIBOTHEROBJECTS:.o=.lo)
+LIBSTOBJECTS := $(LIBCSOURCES:.c=.ao) $(LIBOTHEROBJECTS:.o=.ao)
 
-LIBHEADERFILES := 
+LIBHEADERFILES := $(MODULE_DIR)/error.h
 
 # How to create the shared library
 $(MODULE_DIR)/$(LIBSHLIBNAME): $(LIBSHOBJECTS)
-	$(CC) -shared -Wl,-soname,$(LIBSONAME) -o $@ $< -lc
+	$(CC) -shared -Wl,-soname,$(LIBSONAME) -o $@ $^ -lc
 
 # And the static library
 $(MODULE_DIR)/$(LIBSTLIBNAME): $(LIBSTOBJECTS)
 	$(RM) $@
 	$(AR) rcvs $@ $^
+
+# Depencies for non-C sources
+$(MODULE_DIR)/conf-lex.c: $(MODULE_DIR)/conf-lex.l $(MODULE_DIR)/general.h \
+                          $(MODULE_DIR)/data.h $(MODULE_DIR)/conf-parse.h
+$(MODULE_DIR)/conf-parse.c: $(MODULE_DIR)/conf-parse.y $(MODULE_DIR)/general.h \
+                            $(MODULE_DIR)/data.h
+$(MODULE_DIR)/conf-parse.h: $(MODULE_DIR)/conf-parse.c
 
 # Include all dependency files
 INCLUDEFILES += $(LIBCSOURCES:.c=.ld) $(LIBCSOURCES:.c=.ad)
@@ -57,10 +67,13 @@ all :: all-lib
 install-lib:
 	$(MKDIR) $(LIBDIR) $(LIBINCLUDEDIR)
 	install -o root -g root -m 644 $(LIBTARGETS) $(LIBDIR)
+	$(LN) $(LIBSHLIBNAME) $(LIBDIR)/$(LIBSHSONAME)
+	$(LN) $(LIBSHSONAME) $(LIBDIR)/$(LIBSHBASENAME)
 	install -o root -g root -m 644 $(LIBHEADERFILES) $(LIBINCLUDEDIR)
 install :: install-lib
 
 clean-lib:
 	$(RM) $(LIBTARGETS) $(LIBSHOBJECTS) $(LIBSTOBJECTS)
 	$(RM) $(LIBSHOBJECTS:.lo=.ld) $(LIBSTOBJECTS:.ao=.ad)
+	$(RM) $(LIBOTHEROBJECTS:.o=.c) $(MODULE_DIR)/conf-parse.h
 clean :: clean-lib

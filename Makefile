@@ -198,7 +198,7 @@ version:
 
 %.d: %.c
 	$(CC) -M -MG $(MODCFLAGS) $< | \
-       	sed -e 's@^\(.*\)\.o:@$*.d $*.o Makefile '`dirname $*.d`/Module.mk':@' > $@
+       	sed -e 's@^\(.*\)\.o:@$*.d $*.o: Makefile '`dirname $*.d`/Module.mk' @' > $@
 
 
 
@@ -208,7 +208,7 @@ version:
 
 %.rd: %.c
 	$(CC) -M -MG $(PROGCFLAGS) $< | \
-       	sed -e 's@^\(.*\)\.o:@$*.rd $*.ro Makefile '`dirname $*.rd`/Module.mk':@' > $@
+       	sed -e 's@^\(.*\)\.o:@$*.rd $*.ro: Makefile '`dirname $*.rd`/Module.mk' @' > $@
 
 
 %: %.ro
@@ -221,7 +221,7 @@ version:
 
 %.ad: %.c
 	$(CC) -M -MG $(ARCFLAGS) $< | \
-       	sed -e 's@^\(.*\)\.o:@$*.ad $*.ao Makefile '`dirname $*.ad`/Module.mk':@' > $@
+       	sed -e 's@^\(.*\)\.o:@$*.ad $*.ao: Makefile '`dirname $*.ad`/Module.mk' @' > $@
 
 
 # .lo files are used for shared libraries
@@ -230,12 +230,12 @@ version:
 
 %.ld: %.c
 	$(CC) -M -MG $(LIBCFLAGS) $< | \
-       	sed -e 's@^\(.*\)\.o:@$*.ld $*.lo Makefile '`dirname $*.ld`/Module.mk':@' > $@
+       	sed -e 's@^\(.*\)\.o:@$*.ld $*.lo: Makefile '`dirname $*.ld`/Module.mk' @' > $@
 
 
 # Flex and Bison
 %c: %y
-	$(BISON) -d $< -o $@
+	$(BISON) -p sensors_yy -d $< -o $@
 
 %.c: %.l
-	$(FLEX) -t $< > $@
+	$(FLEX) -Psensors_yy -t $< > $@
