@@ -684,7 +684,7 @@ void via686a_update_client(struct i2c_client *client)
 		i = via686a_read_value(client, VIA686A_REG_FANDIV);
 		data->fan_div[0] = (i >> 4) & 0x03;
 		data->fan_div[1] = i >> 6;
-		data->alarms = via686a_read_value(client, VIA686A_REG_ALARM1) ||
+		data->alarms = via686a_read_value(client, VIA686A_REG_ALARM1) |
 		       (via686a_read_value(client, VIA686A_REG_ALARM2) << 8);
 		data->last_updated = jiffies;
 		data->valid = 1;
