@@ -64,3 +64,5 @@ problems.
   Author of the IT87 driver.
 * Hermann Jung <hej@odn.de>
   Author of the fscpos driver.
+* Aurelien Jarno <aurelien.jarno@laposte.net>
+  Author of the pcf8591 driver.

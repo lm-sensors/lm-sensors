@@ -18,13 +18,14 @@ WARNING! If you downloaded this package through our CVS archive, you walk
 the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
 
-WARNING! You also need the latest i2c package,
+WARNING! You may also need the latest i2c package,
 EVEN IF your kernel does contain i2c support!!!!!!!!!,
 unless i2c came bundled with lm_sensors.
 
 Kernels 2.3.34 and later, and all 2.4.x kernels, contain the
-I2C package; however, you will still need to download and install
-the latest I2C version if you want lm_sensors to compile.
+I2C package. Kernel 2.4.13 contains i2c-2.6.1, which is sufficient
+for most users. However, if you have problems compiling,
+you may still need to download and install the latest I2C version.
 
 See the lm_sensors download page for guidance:
   http://www.netroedge.com/~lm78/download.html
@@ -52,7 +53,7 @@ At least the following hardware sensor chips are supported:
   Asus AS99127F
   Dallas Semiconductor DS75, DS1621, DS1625, DS1775, and DS1780
   Hewlett Packard Maxilife (several revisions including '99 NBA)
-  Fujitsu Siemens Poseidon Chip
+  Fujitsu Siemens Poseidon, Scylla
   Genesys Logic GL518SM (rev 00, 80), GL520SM, GL523SM
   Intel Xeon processor embedded sensors
   ITE IT8705F, IT8712F embedded sensors
@@ -73,12 +74,17 @@ We also support some miscellaneous chips:
   SDRAM Dimms with Serial Presence Detect EEPROMs
   Intel Xeon processor embedded EEPROMs
   DDC Monitor embedded EEPROMs
+  Philips Semiconductors PCF8591  
+
+
+See our New Drivers page http://www.lm-sensors.nu/~lm78/newdrivers.html
+for the latest information on supported devices.
 
 
 We always appreciate testers. If you own a specific monitoring
 chip listed on our 'new drivers' page, and are willing to help us out,
 please contact us. Even if you have no programming knowledge, you could
-help us by running new modules and reporting on the results and output. 
+help us by running new modules and reporting on the results and output.
 If you want to offer more substantial help, this is very welcome too, of
 course.
 

@@ -2453,6 +2453,26 @@ static sensors_chip_feature fscscy_features[] =
     { 0 }
   };
 
+  static sensors_chip_feature pcf8591_features[] =
+  {
+    { SENSORS_PCF8591_AIN_CONF, "ain_conf", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                              SENSORS_MODE_RW, PCF8591_SYSCTL_AIN_CONF, VALUE(1), 0 },
+    { SENSORS_PCF8591_CH0, "ch0", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, PCF8591_SYSCTL_CH0, VALUE(1), 0 },
+    { SENSORS_PCF8591_CH1, "ch1", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, PCF8591_SYSCTL_CH1, VALUE(1), 0 },
+    { SENSORS_PCF8591_CH2, "ch2", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, PCF8591_SYSCTL_CH2, VALUE(1), 0 },
+    { SENSORS_PCF8591_CH3, "ch3", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, PCF8591_SYSCTL_CH3, VALUE(1), 0 },
+    { SENSORS_PCF8591_AOUT_ENABLE, "aout_enable", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                                 SENSORS_MODE_RW, PCF8591_SYSCTL_AOUT_ENABLE, VALUE(1), 0 },
+    { SENSORS_PCF8591_AOUT, "aout", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                          SENSORS_MODE_RW, PCF8591_SYSCTL_AOUT, VALUE(1), 0 },
+    { 0 }
+  };
+
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -2502,5 +2522,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_IT87_PREFIX, it87_features },
  { SENSORS_FSCPOS_PREFIX, fscpos_features },
  { SENSORS_FSCSCY_PREFIX, fscscy_features },
+ { SENSORS_PCF8591_PREFIX, pcf8591_features }, 
  { 0 }
 };

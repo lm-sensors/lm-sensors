@@ -1113,6 +1113,17 @@
 #define SENSORS_FSCSCY_WDOG_STATE   52 /* RW */
 #define SENSORS_FSCSCY_WDOG_CONTROL 52 /* RW */
 
+/* PCF8591 chip. */
+
+#define SENSORS_PCF8591_PREFIX "pcf8591"
+
+#define SENSORS_PCF8591_AIN_CONF 1 /* RW */
+#define SENSORS_PCF8591_CH0 2 /* R */
+#define SENSORS_PCF8591_CH1 3 /* R */
+#define SENSORS_PCF8591_CH2 4 /* R */
+#define SENSORS_PCF8591_CH3 5 /* R */
+#define SENSORS_PCF8591_AOUT_ENABLE 6 /* RW */
+#define SENSORS_PCF8591_AOUT 7 /* RW */
 
 
 #endif /* def LIB_SENSORS_CHIPS_H */

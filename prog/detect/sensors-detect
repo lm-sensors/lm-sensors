@@ -518,7 +518,8 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             adm9240_detect adm1021_detect sis5595_isa_detect eeprom_detect
             via686a_isa_detect adm1022_detect ltc1710_detect gl525sm_detect
             lm87_detect ite_detect ite_isa_detect ite_alias_detect
-            ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect fscscy_detect);
+            ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect fscscy_detect
+            pcf8591_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -805,6 +806,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "fscscy",
        i2c_addrs => [0x73],
        i2c_detect => sub { fscscy_detect @_ },
+     },
+     {
+       name => "Philips Semiconductors PCF8591",
+       driver => "pcf8591",
+       i2c_addrs => [0x48..0x4f],
+       i2c_detect => sub { pcf8591_detect @_},
      },
 );
 
@@ -2327,6 +2334,17 @@ sub fscscy_detect
   }
   return (8);
 }
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, (1) if detected.
+# Detection is impossible!
+sub pcf8591_detect
+{
+  return (1);
+}
+
 
 ################
 # MAIN PROGRAM #

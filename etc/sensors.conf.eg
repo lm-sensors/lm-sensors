@@ -1174,3 +1174,24 @@ chip "fscscy-*"
     label volt5       "+5V"
     label voltbatt    "+3.3V"
 
+
+chip "pcf8591-*"
+#
+#    values for the Philips PCF8574 chip
+#
+# Analog inputs
+
+   ignore ain_conf
+   set    ain_conf    0
+   label  ch0         "Chan. 0"
+   label  ch1         "Chan. 1"
+   label  ch2         "Chan. 2"
+   label  ch3         "Chan. 3"
+
+# Analog output
+
+   ignore aout_enable
+   set    aout_enable 1
+   label  aout        "Output"
+   set    aout        0
+
