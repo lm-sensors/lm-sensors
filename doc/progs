@@ -2,6 +2,12 @@ This is a list of additional programs, that may or may not be installed by
 `make install', and that usually can be found in the `prog' directory of
 this package.
 
+These programs are generally small utilities used for debugging,
+and installation of the lm_sensors package, and for demonstrating
+the use of the drivers and libraries in this package.
+For more elaborate programs (for example, GUI sensor displays),
+see useful_addresses.html.
+
 
 * doc/developers/editticket (written in shell, not installed)
   Calls netscape to edit a specific support ticket.
@@ -46,18 +52,23 @@ this package.
     ./doc-insmod.pl DRIVER
 
 * prog/dump/i2cdump (written in C, not installed)
-  This program helps to dump the registers of a I2C device that understands
+  This program dumps the registers of a I2C device that understands
   the 'byte data' or 'word data' and block read SMBus protocols.
   Usual syntax:
     ./i2cdump 0 0x49 b
   Here the '0' stands for the bus number (run i2cdump with no arguments 
   to list all installed busses).
-  0x49' is the device address, and 'b' or 'w' stands for byte
+  '0x49' is the device address, and 'b' or 'w' stands for byte
   or word data.
 
+* prog/dump/i2cset (written in C, not installed)
+  This program is used to write the register of a I2C device.
+  Usual syntax:
+    ./i2cset bus device address data
+
 * prog/dump/isadump (written in C, not installed)
-  This program helps to dump the registers of LM78-like chips, or more
-  exactly, chips which use an I/O-port for its address and one as its
+  This program dumps the registers of LM78-like chips, or more
+  exactly, chips which use one I/O-port for its address and one as its
   data register. Usual syntax: 
      ./isadump 0x295 0x296
 
@@ -85,7 +96,8 @@ this package.
 
 * prog/rrd/sens_update_rrd (written in bash, not installed)
   This script gathers sensors data and adds it to a round robin database
-  (RRD). RRD is then used to display the graphed data in web pages
+  (RRD). RRD is then used to display the graphed data in web pages.
+  See prog/rrd/README for more information.
 
 * prog/sensord/sensord (written in C, installed by `make install-prog-sensord')
   This daemon can be used to periodically log sensor readings from
@@ -100,7 +112,8 @@ this package.
   file into account.
 
 * prog/tellerstats/gather.sh, tellerstats.sh (written in bash, not installed)
-  These scripts gather sensors data and graph the data for web pages
+  These scripts gather sensors data and graph the data for web pages.
+  See prog/tellerstats/README for more information.
 
 * prog/xeon/decode-xeon.pl (written in Perl, not installed)
   ID ROM data decoding for Xeon processors.
