@@ -90,11 +90,11 @@ What to do for help
 	Cron problems: check the cron logs, maybe your cron format
 		is different or you need to signal the cron daemon?
 
-	Unused sensors: remove appropriate sections from sens_day.cgi.in
-		and sens_week.cgi.in and remake and install.
+	Unused sensors: remove appropriate sections from sens_*.cgi.in
+		and remake and install.
 
 	Sensor scaling factors incorrect (in3-in6): Edit lines in
-		sens_day.cgi.in and sens_week.cgi.in that start
+		sens_*.cgi.in that start
 		'CDEF:' to change the scale factor.
 
 	CGI problems: Check the apache logs. If CGI is not enabled for
