@@ -1,3 +1,9 @@
+=============================================================================
+          FOR INSTALLATION INSTRUCTIONS SEE THE 'INSTALL' FILE
+=============================================================================
+
+OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
+
 This is the completely rewritten version of lm_sensors, a collection of
 modules for general SMBus access and hardware monitoring. There are quite
 a few changes compared with 1.x.y versions; read doc/version-2 for the
@@ -17,12 +23,13 @@ and module bit-mb is renamed i2c-via. You have been warned.
 
 At least the following SMBus adapters are supported:
   Intel PIIX4 (used in most Intel chipsets)
+  Intel ICH (used Intel 810 chipsets for Celeron processors)
   Acer Labs M1541 and M1543C (used in the Aladdin IV, V and Pro 2 chipsets)
   VIA Technologies 82C586B (used in most VIA chipsets)
 
 At least the following hardware sensor chips are supported:
   National Semicoductor LM75, LM78, LM78-J, LM79 and LM80
-  Winbond W83781D, W83782D and W83783S
+  Winbond W83781D, W83782D, W83783S, and W83627HF
   Genesys Logic GL518SM (several revisions)
   Analog Devices ADM1021 and ADM9240
   SiS Southbridge (integrated in the chipset; the I2C adapter will also be
@@ -30,6 +37,7 @@ At least the following hardware sensor chips are supported:
   Maxim MAX1617 and MAX1617A
   Dallas Semiconductor DS1780
   Hewlett Packard Maxilife (several revisions)
+  Intel Xeon processor embedded sensors
 
 We also support some miscellaneous chips:
   Linear Technologies LTC1710
