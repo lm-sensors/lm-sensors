@@ -570,7 +570,7 @@ EOF
   }
   close INPUT;
   close OUTPUT;
-  die "Automatic patch generation for `Makefile' failed.\n".
+  die "Automatic patch generation for main `Makefile' failed.\n".
       "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
@@ -687,7 +687,7 @@ sub gen_drivers_char_Config_in
   }
   close INPUT;
   close OUTPUT;
-  die "Automatic patch generation for `drivers/Makefile' failed.\n".
+  die "Automatic patch generation for `drivers/char/Config.in' failed.\n".
       "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
@@ -785,20 +785,20 @@ sub gen_drivers_i2c_Config_in
       print OUTPUT << 'EOF';
   bool 'I2C mainboard interfaces' CONFIG_I2C_MAINBOARD 
   if [ "$CONFIG_I2C_MAINBOARD" = "y" ]; then
-    tristate '  Acer Labs ALI 1535' CONFIG_I2C_ALI1535 
-    tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 
+    dep_tristate '  Acer Labs ALI 1535' CONFIG_I2C_ALI1535 $CONFIG_I2C
+    dep_tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 $CONFIG_I2C
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
-    tristate '  AMD 756/766/768' CONFIG_I2C_AMD756
+    dep_tristate '  AMD 756/766/768' CONFIG_I2C_AMD756 $CONFIG_I2C
     dep_tristate '  DEC Tsunami I2C interface' CONFIG_I2C_TSUNAMI $CONFIG_I2C_ALGOBIT
-    tristate '  Intel 82801AA, AB, BA, DB' CONFIG_I2C_I801
+    dep_tristate '  Intel 82801AA, AB, BA, DB' CONFIG_I2C_I801 $CONFIG_I2C
     dep_tristate '  Intel i810AA/AB/E and i815' CONFIG_I2C_I810 $CONFIG_I2C_ALGOBIT
-    tristate '  Intel 82371AB PIIX4(E), 443MX, ServerWorks OSB4/CSB5, SMSC Victory66' CONFIG_I2C_PIIX4
-    tristate '  SiS 5595' CONFIG_I2C_SIS5595
+    dep_tristate '  Intel 82371AB PIIX4(E), 443MX, ServerWorks OSB4/CSB5, SMSC Victory66' CONFIG_I2C_PIIX4 $CONFIG_I2C
+    dep_tristate '  SiS 5595' CONFIG_I2C_SIS5595 $CONFIG_I2C
     dep_tristate '  Savage 4' CONFIG_I2C_SAVAGE4 $CONFIG_I2C_ALGOBIT
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_ALGOBIT
-    tristate '  VIA Technologies, Inc. VT596A/B, 686A/B, 8231, 8233, 8233A' CONFIG_I2C_VIAPRO
+    dep_tristate '  VIA Technologies, Inc. VT596A/B, 686A/B, 8231, 8233, 8233A' CONFIG_I2C_VIAPRO $CONFIG_I2C
     dep_tristate '  Voodoo3 I2C interface' CONFIG_I2C_VOODOO3 $CONFIG_I2C_ALGOBIT
-    tristate '  Pseudo ISA adapter (for some hardware sensors)' CONFIG_I2C_ISA 
+    dep_tristate '  Pseudo ISA adapter (for some hardware sensors)' CONFIG_I2C_ISA $CONFIG_I2C
   fi
 
 EOF
@@ -1169,6 +1169,7 @@ obj-$(CONFIG_I2C_TSUNAMI)		+= i2c-tsunami.o
 obj-$(CONFIG_I2C_VIA)			+= i2c-via.o
 obj-$(CONFIG_I2C_VIAPRO)		+= i2c-viapro.o
 obj-$(CONFIG_I2C_VOODOO3)		+= i2c-voodoo3.o
+export-objs				+= dmi_scan.o
 EOF
       } else {
         print OUTPUT << 'EOF';
