@@ -9,3 +9,8 @@ for the corresponding SYSCTL ids). You can only read this file; it
 returns an array of struct sensors_chips_data, as defined in sensors.h.
 Each chip will have its own entry here, with both its sysctl id and
 the corresponding /proc name. 
+
+Generally, it is a better idea to use the new libsensors to access this 
+data. If you feel you need more than the library offers, please mail us,
+so we can either add the new functionality to the library, or explain how
+you can work around it.

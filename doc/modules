@@ -68,6 +68,10 @@ at all!
 (src) gl518sm: sensors smbus i2c-core
   GL518SM revision 0x00 and 0x80 chip driver
 
+(src) eeprom: sensors smbus i2c-core
+  Driver for DIMMs connected to the SMBus. You need prog/eeprom/decode-dimms.pl
+  to make sense of its output.
+
 (i2c) algo-bit: i2c-core
   The 'bit' algorithm, used by many i2c adapters
   Module parameters:
@@ -99,8 +103,14 @@ at all!
   will also implement SMBus access.
 
 (i2c) hw-monitor: ???
-  Old skeleton driver for GL518SM. Will be superseded by a module which
-  interfaces with the sensors module.
+  Old skeleton driver for GL518SM. Superseded by the gl518sm module.
 
 Several other modules are not yet ported by Simon Vogl. They are mostly in
 i2c/old-code.
+
+Usually, if you load the modules through modprobe, you need the following
+commands:
+  modprobe i2c-proc
+  modprobe isa     # Unless you are certain no sensor chips live on the ISA bus
+  modprobe piix4   # One such line for each adapter you own
+  modprobe lm78    # One such line for each device you own

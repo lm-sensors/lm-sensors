@@ -7,8 +7,13 @@ package. Some of the more important ones:
   is supported by Simon Vogl, it is supported by us.
 * Many things which were done in kernel space are now done in user space.
   The most obvious result is the absence of /proc/sensors. Use instead the
-  supplied program.
+  supplied 'sensors' program.
 * No more limits on the number of chips.
 * All detected chips get their own directory under /proc/sys/dev/sensors
-* /proc/bus contains a list of all I2C/SMBus adapters found
+* /proc/bus contains a list of all I2C/SMBus adapters found.
+* All applications which want to use sensor data can now access it through
+  the new libsensors.
+* A configuration file which is read by the above mentioned library, which
+  can (through libsensors) be used by any application, and which describes
+  how all sensor readings are to be interpreted.
 * All code has been completely rewritten.

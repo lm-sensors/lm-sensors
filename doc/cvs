@@ -1,5 +1,10 @@
 (This is based on mails from Philip and William, and edited by Frodo)
 
+Anybody can now use CVS to access the code archive. CVS allows you to get
+the latest and greatest version of lm_sensors, or any older version.
+You need the rcs and cvs package, which can be retrieved from any GNU
+mirror site (prep.ai.mit.edu is the master site).
+
 1) Go to the directory where you want lm_sensors (and lm_sensors2?)
    directory/ies to reside with the project source code.  A good choice is
    your home directory.
