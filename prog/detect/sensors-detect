@@ -28,7 +28,8 @@
 require 5.004;
 
 use strict;
-use Fcntl qw(:seek);
+use Fcntl;
+use POSIX;
 
 #########################
 # CONSTANT DECLARATIONS #
@@ -2854,7 +2855,7 @@ sub system_safeness_by_dmi
           " Runing dmidecode would help us determining your system vendor, which allows\n",
           " safer operations. Please provide one of the following:\n  ";
     print join ("\n  ", @dmidecode);
-    print "\nYou can still go on, but you are encouraged to fix the problem first.\n";
+    print "\n You can still go on, but you are encouraged to fix the problem first.\n\n";
     return 0;
   }
 
@@ -3221,7 +3222,7 @@ sub main
   } else {
     if (($have_sysconfig and not <STDIN> =~ /^\s*[Nn]/) or <STDIN> =~ /^\s*[Yy]/) {
       unless ($have_sysconfig) {
-        mkdir '/etc/sysconfig'
+        mkdir '/etc/sysconfig', 0777
           or die "Sorry, can't create /etc/sysconfig ($!)?!?";
       }
       open(SYSCONFIG, ">/etc/sysconfig/lm_sensors")
