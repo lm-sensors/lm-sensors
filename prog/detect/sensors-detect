@@ -1613,6 +1613,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	driver => "not-a-sensor",
 	devid => 0x14,
       },
+      {
+        name => "SMSC LPC57B397-NC Super IO",
+        driver => "smsc57b397",
+        devid => 0x6f,
+        logdev => 0x0a,
+      },
     ],
   },
   {

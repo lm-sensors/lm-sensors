@@ -5245,6 +5245,26 @@ static sensors_chip_feature max6650_features[] =
     { 0 }
   };
 
+#define SENSORS_SMSC57B397_TEMP(nr) \
+	{ SENSORS_SMSC57B397_TEMP##nr, "temp" #nr, NOMAP, NOMAP, R, 0, \
+		VALUE(1), 1 }
+
+#define SENSORS_SMSC57B397_FAN(nr) \
+	{ SENSORS_SMSC57B397_FAN##nr, "fan" #nr, NOMAP, NOMAP, R, 0, \
+		VALUE(1), 1 }
+
+static sensors_chip_feature smsc57b397_features[] =
+{
+	SENSORS_SMSC57B397_TEMP(1),
+	SENSORS_SMSC57B397_TEMP(2),
+	SENSORS_SMSC57B397_TEMP(3),
+	SENSORS_SMSC57B397_TEMP(4),
+	SENSORS_SMSC57B397_FAN(1),
+	SENSORS_SMSC57B397_FAN(2),
+	SENSORS_SMSC57B397_FAN(3),
+	SENSORS_SMSC57B397_FAN(4),
+};
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -5337,5 +5357,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_ADM1030_PREFIX, adm1030_features },
  { SENSORS_ADM1031_PREFIX, adm1031_features },
  { SENSORS_LM93_PREFIX, lm93_features },
+ { SENSORS_SMSC57B397_PREFIX, smsc57b397_features },
  { 0 }
 };

@@ -5197,6 +5197,65 @@ void print_lm93(const sensors_chip_name *name)
   print_lm93_vid(name, SENSORS_LM93_VID2);
 }
 
+/* print_smsc57b397_temp()
+ * where temp is a sensors feature ID
+ */
+static void print_smsc57b397_temp(const sensors_chip_name *name, int temp)
+{
+  char *label = NULL;
+  double cur;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name,temp,&label,&valid) &&
+      !sensors_get_feature(*name,temp,&cur)) {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+      printf("\n");
+    }
+  } else
+    printf("ERROR: Can't get TEMP data! (0x%04x)\n", temp);
+
+  free_the_label(&label);
+}
+
+#define PRINT_SMSC57B397_TEMP(num, name) \
+	print_smsc57b397_temp((name), (SENSORS_SMSC57B397_TEMP1 + (num)))
+
+/* print_smsc57b397_fan()
+ *   where fan is a sensors feature ID
+ */
+static void print_smsc57b397_fan(const sensors_chip_name *name, int fan)
+{
+  char *label = NULL;
+  double cur;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name,fan,&label,&valid) &&
+      !sensors_get_feature(*name,fan,&cur)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%4.0f RPM\n", cur);
+    }
+  } else
+    printf("ERROR: Can't get FAN data! (0x%04x)\n", fan);
+  free_the_label(&label);
+}
+
+#define PRINT_SMSC57B397_FAN(num, name) \
+        print_smsc57b397_fan((name), (SENSORS_SMSC57B397_FAN1 + (num)))
+
+void print_smsc57b397(const sensors_chip_name *name)
+{
+  int ii;
+
+  for (ii=0;ii<4;ii++)
+    PRINT_SMSC57B397_TEMP(ii, name);
+
+  for (ii=0;ii<4;ii++)
+    PRINT_SMSC57B397_FAN(ii, name);
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;
