@@ -148,6 +148,10 @@ vt1211
 vt8231
 	vt8231		2-7	2-7	2	2	no	yes
 
+w83627hf
+	w83627hf	3	9	3	2 pwm	no	yes (LPC)
+	w83697hf	2	6	2	2 pwm	no	yes
+
 w83781d
 	as99127f	3	7	3	2 pwm?  yes	no
 	w83781d		3	7	3	-	yes	yes

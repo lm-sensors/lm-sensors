@@ -43,7 +43,13 @@ For the 2510, which has two MTP008 chips, each with a different
 configuration, follow the instructions in the mtp008 section of
 etc/sensors.conf.eg to configure 'sensors' correctly.
 
-The PWM outputs are configurable but not via the driver.
+The PWM outputs are configurable via the driver.
+PWM values are from 0 to 255. The first value in the /proc entry is
+the pwm value; the second is the enable (0 or 1).
+
+The fan3 and pwm1 functions share a pin.
+If pwm1 is enabled than fan3 will read as 0.
+
 The Fan input types (2 wire or 3 wire) are configurable but
 not via the driver.
 

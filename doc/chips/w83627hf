@@ -1,0 +1,71 @@
+Kernel driver `w83627hf.o'
+=========================
+
+Status: Beta.
+
+Supported chips:
+  * Winbond W83627HF (ISA accesses ONLY)
+    Prefix 'w83627hf'
+    Addresses scanned: ISA address retrieved from Super I/O registers
+    Datasheet: Publicly available at the Winbond website
+  * Winbond W83697HF (ISA accesses ONLY)
+    Prefix 'w83697hf'
+    Addresses scanned: ISA address retrieved from Super I/O registers
+    Datasheet: Publicly available at the Winbond website
+
+Authors: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>,
+         and Mark Studebaker <mdsxyz123@yahoo.com>
+
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_addr: int
+  Program the Super I/O register for the sensors ISA base address
+* force_w83627hf: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `w83781d' chip
+* force_w83697hf:
+  Ditto
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+* init=[0,1] (default 1)
+  Use 'init=0' to bypass initializing the chip.
+  Try this if your computer crashes when you load the module.
+
+
+Description
+-----------
+
+This driver implements support for ISA accesses *only* for
+the Winbond W83627HF and W83697HF Super I/O chips.
+We will refer to them collectively as Winbond chips.
+
+This driver supports ISA accesses, which should be more reliable
+than i2c accesses. Also, for Tyan boards which contain both a
+Super I/O chip and a second i2c-only Winbond chip (often a W83782D),
+using this driver will avoid i2c address conflicts and complex
+initialization that were required in the w83781d driver
+(lm_sensors releases 2.7.0 and earlier).
+
+If you really want i2c accesses for these Super I/O chips,
+use the w83781d driver. However this is not the preferred method
+now that this ISA driver has been developed.
+
+For further information on the w83627hf/697hf driver, /proc values, etc.
+see the w83781d driver documentation.
+
+
+Author/Maintainer
+-----------------
+Mark D. Studebaker (mdsxyz123@yahoo.com).
+Derived from the w83781d driver.
+Send requests to the sensors@stimpy.netroedge.com mailing list.

@@ -70,8 +70,8 @@ all readings twice as high. Not all RPM values can accurately be represented,
 so some rounding is done. With a divider of 2, the lowest representable
 value is around 2600 RPM.
 
-PWM values are from 0 to 100%. The first value in the /proc entry is
-the percentage; the second is the enable (0 or 1).
+PWM values are from 0 to 255. The first value in the /proc entry is
+the pwm value; the second is the enable (0 or 1).
 
 If an alarm triggers, it will remain triggered until the hardware register
 is read at least once. This means that the cause for the alarm may 
