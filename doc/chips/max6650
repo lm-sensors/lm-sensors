@@ -86,7 +86,7 @@ Bugs
    returning all ones or something. (OK, so maybe I should have called
    this driver max6651, and ignored the max6650 totally...)
 
- o The /proc names don't match the standards in proc/sevelopers/proc,
+ o The /proc names don't match the standards in doc/developers/proc,
    as this chip doesn't map well to other fan controllers,
 
 Detection notes 
