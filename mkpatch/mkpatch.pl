@@ -19,6 +19,9 @@
 
 use strict;
 
+use vars qw($temp);
+$temp = "mkpatch/.temp";
+
 # $_[0]: sensors package root (like /tmp/sensors)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
 # $_[2]: Name of the kernel file
@@ -30,7 +33,7 @@ sub print_diff
 
   $diff_command = "diff -u2 $kernel_root/$kernel_file ";
   $diff_command .= "$package_root/$package_file";
-  open INPUT, "$diff_command|";
+  open INPUT, "$diff_command|" or die "Can't execute `$diff_command'";
   $dummy = <INPUT>;
   $dummy = <INPUT>;
   print "--- linux-old/$kernel_file\t".`date`;
@@ -42,17 +45,18 @@ sub print_diff
   close INPUT;
 }
 
+
 # $_[0]: sensors package root (like /tmp/sensors)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
 sub gen_Makefile
 {
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "Makefile";
-  my $package_file = "mkpatch/.temp";
+  my $package_file = $temp;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
-  open OUTPUT,">$package_root/mkpatch/.temp"
+  open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
     if (m@CONFIG_SENSORS@) {
@@ -81,12 +85,12 @@ sub gen_drivers_Makefile
 {
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "drivers/Makefile";
-  my $package_file = "mkpatch/.temp";
+  my $package_file = $temp;
   my $sensors_present;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
-  open OUTPUT,">$package_root/mkpatch/.temp"
+  open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
     if (m@^ALL_SUB_DIRS\s*:=@) {
@@ -130,13 +134,13 @@ sub gen_drivers_char_Config_in
 {
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "drivers/char/Config.in";
-  my $package_file = "mkpatch/.temp";
+  my $package_file = $temp;
   my $ready = 0;
   my $done = 0;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
-  open OUTPUT,">$package_root/mkpatch/.temp"
+  open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
     if (m@source drivers/i2c/Config.in@) {
@@ -162,14 +166,14 @@ sub gen_drivers_char_mem_c
 {
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "drivers/char/mem.c";
-  my $package_file = "mkpatch/.temp";
+  my $package_file = $temp;
   my $right_place = 0;
   my $done = 0;
   my $atstart = 1;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
-  open OUTPUT,">$package_root/mkpatch/.temp"
+  open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
     if ($atstart and m@#ifdef@) {
@@ -214,11 +218,11 @@ sub gen_drivers_i2c_Config_in
 {
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "drivers/i2c/Config.in";
-  my $package_file = "mkpatch/.temp";
+  my $package_file = "$temp";
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
-  open OUTPUT,">$package_root/mkpatch/.temp"
+  open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
     if (m@CONFIG_I2C_MAINBOARD@) {
@@ -252,11 +256,11 @@ sub gen_drivers_i2c_Makefile
 {
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "drivers/i2c/Makefile";
-  my $package_file = "mkpatch/.temp";
+  my $package_file = $temp;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
-  open OUTPUT,">$package_root/mkpatch/.temp"
+  open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
     while (m@CONFIG_I2C_ALI5X3@ or m@CONFIG_I2C_HYDRA@ or m@CONFIG_I2C_PIIX4@ or
@@ -320,12 +324,12 @@ sub gen_drivers_i2c_i2c_core_c
 {
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "drivers/i2c/i2c-core.c";
-  my $package_file = "mkpatch/.temp";
+  my $package_file = $temp;
   my $right_place = 0;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
-  open OUTPUT,">$package_root/mkpatch/.temp"
+  open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
     while (m@CONFIG_I2C_ALI5X3@ or m@CONFIG_I2C_HYDRA@ or m@CONFIG_I2C_PIIX4@ or
@@ -384,7 +388,6 @@ sub main
 {
   my ($package_root,$kernel_root,%files,%includes,$package_file,$kernel_file);
   my ($diff_command,$dummy,$data0,$data1,$sedscript,$version_string);
-  my $temp_file=".temp";
 
   # --> Read the command-lineo
   $package_root = $ARGV[0];
@@ -423,8 +426,8 @@ sub main
   foreach $package_file (sort keys %files) {
     open INPUT,"$package_root/$package_file" 
           or die "Can't open `$package_root/$package_file'";
-    open OUTPUT,">$package_root/mkpatch/$temp_file"
-          or die "Can't open `$package_root/$temp_file'";
+    open OUTPUT,">$package_root/$temp"
+          or die "Can't open `$package_root/$temp'";
     while (<INPUT>) {
       eval $sedscript;
       if (m@#\s*include\s*"version.h"@) {
@@ -577,23 +580,7 @@ EOF
     close OUTPUT;
 
     $kernel_file = $files{$package_file};
-    $diff_command = "diff -u2 ";
-    if ( -f "$kernel_root/$kernel_file") {
-      $diff_command .= "$kernel_root/$kernel_file";
-    } else {
-      $diff_command .= "/dev/null";
-    }
-    $diff_command .= " $package_root/mkpatch/$temp_file";
-    open INPUT, "$diff_command|";
-    $dummy = <INPUT>;
-    $dummy = <INPUT>;
-    print "--- linux-old/$kernel_file\t".`date`;
-    print "+++ linux/$kernel_file\t".`date`;
-    
-    while (<INPUT>) {
-      print;
-    }
-    close INPUT;
+    print_diff $package_root,$kernel_root,$kernel_file,$temp;
   }
 
   gen_Makefile $package_root, $kernel_root;
