@@ -21,7 +21,6 @@ ask CVS about it:
   NOTE: i2c-2.6.0 MUST BE be compiled AND installed first!!!
         If your make fails because it can't find <linux/i2c-proc.h>, you
         forgot this step!!!
-        Also, mkpatch is probably broken right now.
   File doc/FAQ: Many updates and additions
   File doc/chips/via686a: Claim support for 686b.
   File README.thinkpad: new
@@ -43,7 +42,7 @@ ask CVS about it:
                  Save BIOS pin configuration of temps and fans
   Module sensors: Disabled, moved to i2c package as i2c-proc.c
   Module sis5595: Fix temp, add in4 for chip revision 0xc0.
-  Module via686a: Allow force=9191,address (for A7V/K7V boards)
+  Module via686a: Allow force_addr=0xaddr (for A7V/K7V boards)
   Module w83781d: Don't reinitialize as99127f chip; this may cause fan/temp
                   reading changes
   Programs i2cdetect, i2cdump: add devfs /dev/i2c/x support

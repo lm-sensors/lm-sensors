@@ -58,6 +58,13 @@
 #define THIS_MODULE NULL
 #endif
 
+/* If force_addr is set to anything different from 0, we forcibly enable
+   the PIIX4 at the given address. VERY DANGEROUS! */
+static int force_addr = 0;
+MODULE_PARM(force_addr, "i");
+MODULE_PARM_DESC(force_addr,
+		 "Initialize the Via686a at the given address");
+
 /* Addresses to scan.
    Note that we can't determine the ISA address until we have initialized
    our module */
@@ -526,25 +533,13 @@ int via686a_find(int *address)
 	    pci_read_config_word(s_bridge, VIA686A_BASE_REG, &val))
 		return -ENODEV;
 	*address = val & ~(VIA686A_EXTENT - 1);
-	if (*address == 0) {
-		printk("via686a.o: base address not set - upgrade BIOS or use force=9191,addr\n");
-/*
-   If we do this then the module won't load and force won't work.
-   But unfortunately the above printk is printed even if we are doing a force.
+	if (*address == 0 && force_addr == 0) {
+		printk("via686a.o: base address not set - upgrade BIOS or use force_addr=0xaddr\n");
 		return -ENODEV;
-*/
 	}
-/*
-   Moved below.
-	if (PCIBIOS_SUCCESSFUL !=
-	    pci_read_config_word(s_bridge, VIA686A_ENABLE_REG, &val))
-		return -ENODEV;
-	if (!(val & 0x01)) {
-		printk("via686a.o: enabling sensors\n");
-		pci_write_config_word(s_bridge, VIA686A_ENABLE_REG,
-		                      val | 0x01);
-	}
-*/
+	if (force_addr)
+		*address = force_addr;	/* so detect will get called */
+
 	return 0;
 }
 
@@ -565,15 +560,15 @@ int via686a_detect(struct i2c_adapter *adapter, int address,
 		return 0;
 	}
 
-	if(kind >= 0)		/* force or force_via686a */
-		address &= ~(VIA686A_EXTENT - 1);
+	if(force_addr)
+		address = force_addr & ~(VIA686A_EXTENT - 1);
 	if (check_region(address, VIA686A_EXTENT)) {
 		printk("via686a.o: region 0x%x already in use!\n",
 		       address);
 		return -ENODEV;
 	}
 
-	if(kind >= 0) {		/* treat force and force_via686a equally */
+	if(force_addr) {
 		printk("via686a.o: forcing ISA address 0x%04X\n", address);
 		if (PCIBIOS_SUCCESSFUL !=
 		    pci_write_config_word(s_bridge, VIA686A_BASE_REG, address))
