@@ -62,7 +62,6 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 SENSORS_INSMOD_1(vt8231);
 
-#define VT8231_EXTENT 0x80
 #define VIA686A_EXTENT 0x80
 #define VIA686A_BASE_REG 0x70
 #define VIA686A_ENABLE_REG 0x74
@@ -73,7 +72,7 @@ SENSORS_INSMOD_1(vt8231);
 
 /* The VT8231 registers */
 /* We define the sensors as follows. Somewhat convoluted to minimize
-   changes from vt8231.
+   changes from via686a.
 	Sensor		Voltage Mode	Temp Mode
 	--------	------------	---------
 	Reading 1			temp3
@@ -382,7 +381,7 @@ int vt8231_detect(struct i2c_adapter *adapter, int address,
 	request_region(address, VIA686A_EXTENT, "vt8231-sensors");
 
 	/* Fill in the remaining client fields and put into the global list */
-	strcpy(new_client->name, "Via 686A Integrated Sensors");
+	strcpy(new_client->name, "Via 8231 Integrated Sensors");
 
 	new_client->id = vt8231_id++;
 	data->valid = 0;
@@ -427,7 +426,7 @@ int vt8231_detach_client(struct i2c_client *client)
 		return err;
 	}
 
-	release_region(client->addr, VT8231_EXTENT);
+	release_region(client->addr, VIA686A_EXTENT);
 	kfree(client);
 
 	return 0;
