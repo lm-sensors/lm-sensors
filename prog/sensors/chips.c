@@ -3335,11 +3335,8 @@ void print_lm92 (const sensors_chip_name *name)
 {
 	char *label = NULL;
 	double temp[5];
-	int valid;
+	int valid,alarms;
 
-	if (fahrenheit) {
-		sprintf (degv,"%cF",176);
-		n
 	if (!sensors_get_feature (*name,SENSORS_LM92_ALARMS,temp)) {
 		alarms = *temp + 0.5;
 	} else {
