@@ -1889,7 +1889,7 @@ sub initialize_conf
   close INPUTFILE;
 
   my $use_udev = 0;
-  if (-f '/dev/.udev.tdb') {
+  if (-f '/dev/.udev.tdb' || -f '/dev/.udev' || -d '/dev/.udevdb') {
     $use_udev = 1;
     $dev_i2c = '/dev/i2c-';
   } 
