@@ -27,7 +27,10 @@
  *  PC87363     -       2       2       -       0xE8
  *  PC87364     -       3       3       -       0xE4
  *  PC87365     11      3       3       2       0xE5
- *  PC87366     11      3       3       3       0xE9
+ *  PC87366     11      3       3       6       0xE9
+ *
+ *  This driver assumes that no more than one chip is present, and the
+ *  standard Super-I/O address is used (0x2E/0x2F).
  */
 
 #include <linux/module.h>
@@ -170,7 +173,6 @@ static inline u8 PWM_TO_REG(int val, int inv)
 #define IN_TO_REG(val,ref)		((val)<0 ? 0 : \
 					 (val)*256>=(ref)*255 ? 255: \
 					 ((val) * 256 + (ref) / 2) / (ref))
-#define IN_STATUS_FROM_REG(val)		((val) & 0x97)
 
 /*
  * Temperature registers and conversions
@@ -187,7 +189,6 @@ static inline u8 PWM_TO_REG(int val, int inv)
 #define TEMP_FROM_REG(val)		((val)&0x80 ? (val) - 0x100 : (val))
 #define TEMP_TO_REG(val)		((val)<-55 ? 201 : (val)>127 ? 0x7F : \
 					 (val)<0 ? (val) + 0x100 : (val))
-#define TEMP_STATUS_FROM_REG(val)	((val) & 0xFF)
 
 struct pc87360_data {
 	struct i2c_client client;
@@ -208,10 +209,11 @@ struct pc87360_data {
 	u16 fan_conf[2];	/* Configuration register values, combined */
 
 	u16 in_vref;		/* 10mV/bit */
-	u8 in[11];		/* Register value */
-	u8 in_min[11];		/* Register value */
-	u8 in_max[11];		/* Register value */
-	u8 in_status[11];	/* Register value */
+	u8 in[14];		/* Register value */
+	u8 in_min[14];		/* Register value */
+	u8 in_max[14];		/* Register value */
+	u8 in_crit[3];		/* Register value */
+	u8 in_status[14];	/* Register value */
 	u16 in_alarms;		/* Register values, combined, masked */
 
 	u8 temp[3];		/* Register value */
@@ -299,6 +301,9 @@ static struct i2c_driver pc87360_driver = {
 #define PC87365_SYSCTL_IN8		2108
 #define PC87365_SYSCTL_IN9		2109
 #define PC87365_SYSCTL_IN10		2110
+#define PC87365_SYSCTL_TEMP4		2111 /* not for PC87365 */
+#define PC87365_SYSCTL_TEMP5		2112 /* not for PC87365 */
+#define PC87365_SYSCTL_TEMP6		2113 /* not for PC87365 */
 #define PC87365_SYSCTL_IN0_STATUS	2300 /* bit field */
 #define PC87365_SYSCTL_IN1_STATUS	2301
 #define PC87365_SYSCTL_IN2_STATUS	2302
@@ -310,6 +315,9 @@ static struct i2c_driver pc87360_driver = {
 #define PC87365_SYSCTL_IN8_STATUS	2308
 #define PC87365_SYSCTL_IN9_STATUS	2309
 #define PC87365_SYSCTL_IN10_STATUS	2310
+#define PC87365_SYSCTL_TEMP4_STATUS	2311 /* not for PC87365 */
+#define PC87365_SYSCTL_TEMP5_STATUS	2312 /* not for PC87365 */
+#define PC87365_SYSCTL_TEMP6_STATUS	2313 /* not for PC87365 */
 
 #define PC87365_STATUS_IN_MIN		0x02
 #define PC87365_STATUS_IN_MAX		0x04
@@ -425,12 +433,24 @@ static ctl_table pc87365_dir_table_template[] = { /* PC87366 too */
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_temp},
 	{PC87365_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_temp},
-	{PC87365_SYSCTL_TEMP1_STATUS, "temp1_status", NULL, 0, 0644, NULL,
+	{PC87365_SYSCTL_TEMP4, "temp4", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_in},
+	{PC87365_SYSCTL_TEMP5, "temp5", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_in},
+	{PC87365_SYSCTL_TEMP6, "temp6", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_in},
+	{PC87365_SYSCTL_TEMP1_STATUS, "temp1_status", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_temp_status},
-	{PC87365_SYSCTL_TEMP2_STATUS, "temp2_status", NULL, 0, 0644, NULL,
+	{PC87365_SYSCTL_TEMP2_STATUS, "temp2_status", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_temp_status},
-	{PC87365_SYSCTL_TEMP3_STATUS, "temp3_status", NULL, 0, 0644, NULL,
+	{PC87365_SYSCTL_TEMP3_STATUS, "temp3_status", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_temp_status},
+	{PC87365_SYSCTL_TEMP4_STATUS, "temp4_status", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_in_status},
+	{PC87365_SYSCTL_TEMP5_STATUS, "temp5_status", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_in_status},
+	{PC87365_SYSCTL_TEMP6_STATUS, "temp6_status", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87365_in_status},
 	{0}
 };
 
@@ -450,7 +470,7 @@ static int pc87360_find(u8 *devid, int *address)
 	/* identify device */
 	val = superio_inb(DEVID);
 	switch (val) {
-       	case 0xE1: /* PC87360 */
+	case 0xE1: /* PC87360 */
 	case 0xE8: /* PC87363 */
 	case 0xE4: /* PC87364 */
 		nrdev = 1;
@@ -571,7 +591,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 		type_name = "pc87366";
 		template = pc87365_dir_table_template;
 		data->fannr = extra_isa[0] ? 3 : 0;
-		data->innr = extra_isa[1] ? 11 : 0;
+		data->innr = extra_isa[1] ? 14 : 0;
 		data->tempnr = extra_isa[2] ? 3 : 0;
 		break;
 	}
@@ -694,11 +714,11 @@ static void pc87360_init_client(struct i2c_client *client)
 {
 	struct pc87360_data *data = client->data;
 	int i;
-	const u8 init_in[11] = { 2, 2, 2, 2, 2, 2, 2, 1, 1, 3, 1 };
+	const u8 init_in[14] = { 2, 2, 2, 2, 2, 2, 2, 1, 1, 3, 1, 2, 2, 2 };
 	const u8 init_temp[3] = { 2, 2, 1 };
 	u8 reg;
 
-	if (init >= 3) {
+	if (init >= 3 && data->innr) {
 		reg = pc87360_read_value(data, LD_IN, NO_BANK,
 					 PC87365_REG_IN_CONVRATE);
 		if (reg & 0x06) {
@@ -719,12 +739,20 @@ static void pc87360_init_client(struct i2c_client *client)
 						 PC87365_REG_IN_STATUS);
 			if (!(reg & 0x01)) {
 #ifdef DEBUG
-				printk(KERN_DEBUG "pc87360.o: Forcibly "
-				       "enabling in%d\n", i);
+				if (i < 11)
+					printk(KERN_DEBUG "pc87360.o: "
+					       "Forcibly enabling in%d\n",
+					       i);
+				else
+					printk(KERN_DEBUG "pc87360.o: "
+					       "Forcibly enabling temp%d\n",
+					       i-8);
 #endif
 				pc87360_write_value(data, LD_IN, i,
 						    PC87365_REG_IN_STATUS,
-						    (reg & 0x68) | 0x87);
+						    i < 11 ?
+						    (reg & 0x68) | 0x87 :
+						    (reg & 0x60) | 0x8F);
 			}
 
 		}
@@ -854,7 +882,7 @@ static void pc87360_update_client(struct i2c_client *client)
 		/* Voltages */
 		for (i = 0; i < data->innr; i++) {
 			data->in_status[i] = pc87360_read_value(data, LD_IN, i,
-			                     PC87365_REG_IN_STATUS);
+					     PC87365_REG_IN_STATUS);
 			/* Clear bits */
 			pc87360_write_value(data, LD_IN, i,
 					    PC87365_REG_IN_STATUS,
@@ -868,6 +896,10 @@ static void pc87360_update_client(struct i2c_client *client)
 				data->in_max[i] = pc87360_read_value(data,
 						  LD_IN, i,
 						  PC87365_REG_IN_MAX);
+				if (i >= 11)
+					data->in_crit[i-11] =
+						pc87360_read_value(data, LD_IN,
+						i, PC87365_REG_TEMP_CRIT);
 			}
 		}
 		if (data->innr) {
@@ -1075,7 +1107,13 @@ void pc87365_in(struct i2c_client *client, int operation, int ctl_name,
 		results[0] = IN_FROM_REG(data->in_min[nr], data->in_vref);
 		results[1] = IN_FROM_REG(data->in_max[nr], data->in_vref);
 		results[2] = IN_FROM_REG(data->in[nr], data->in_vref);
-		*nrels_mag = 3;
+		if (nr < 11) {
+			*nrels_mag = 3;
+		} else {
+			results[3] = IN_FROM_REG(data->in_crit[nr-11],
+						 data->in_vref);
+			*nrels_mag = 4;
+		}
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
@@ -1092,6 +1130,13 @@ void pc87365_in(struct i2c_client *client, int operation, int ctl_name,
 					    PC87365_REG_IN_MAX,
 					    data->in_max[nr]);
 		}
+		if (*nrels_mag >= 3 && nr > 11) {
+			data->in_crit[nr-11] = IN_TO_REG(results[3],
+							 data->in_vref);
+			pc87360_write_value(data, LD_IN, nr,
+					    PC87365_REG_TEMP_CRIT,
+					    data->in_crit[nr-11]);
+		}
 	}
 }
 
@@ -1105,7 +1150,7 @@ void pc87365_in_status(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		pc87360_update_client(client);
-		results[0] = IN_STATUS_FROM_REG(data->in_status[nr]);
+		results[0] = data->in_status[nr];
 		*nrels_mag = 1;
 	}
 }
@@ -1160,7 +1205,7 @@ void pc87365_temp_status(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		pc87360_update_client(client);
-		results[0] = TEMP_STATUS_FROM_REG(data->temp_status[nr]);
+		results[0] = data->temp_status[nr];
 		*nrels_mag = 1;
 	}
 }
