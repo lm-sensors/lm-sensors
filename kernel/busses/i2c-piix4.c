@@ -193,9 +193,9 @@ static int piix4_setup(struct pci_dev *PIIX4_dev, const struct pci_device_id *id
 			temp &= 0xfd;
 			pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp);
 		} else {
-			printk(KERN_INFO "i2c-piix4.o: Unusual config register value "
-			       "(0x%02x)\n", temp);
-			printk(KERN_INFO "i2c-piix4.o: Please report!\n");
+			printk(KERN_INFO "i2c-piix4.o: Unusual config register value\n");
+			printk(KERN_INFO "i2c-piix4.o: Try using fix_hstcfg=1 if you "
+			       "experience problems\n");
 		}
 	}
 
