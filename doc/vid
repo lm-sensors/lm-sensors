@@ -86,12 +86,12 @@ For those that do, the VRM support status is listed below.
 The following chip drivers support all the VRM versions via
 /etc/sensors.conf and the vrm entry in /proc:
 
-	adm1025, w83781d
+	adm1025, w83781d, lm87
 
 
 The following chip drivers support only VRM 8.2 and cannot be changed:
 
-	adm1024, it87, lm87, mtp008
+	adm1024, it87, mtp008
 	adm9240, gl520sm, lm78, maxilife
 
 If you have a board with one of these chips which needs advanced

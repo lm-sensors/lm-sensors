@@ -34,6 +34,7 @@
 #include <linux/i2c.h>
 #include "version.h"
 #include "sensors.h"
+#include "sensors_vid.h"
 #include <linux/init.h>
 
 /* Chip configuration settings.  These should be set to reflect the
@@ -204,9 +205,6 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==1?0:((val)==8?3:((val)==4?2:1)))
 
-#define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
-                           205-(val)*5)
-                           
 #define LM87_INIT_FAN_MIN 3000
 
 #define LM87_INIT_EXT_TEMP_MAX 600
@@ -258,6 +256,7 @@ struct lm87_data {
 	u16 alarms;		/* Register encoding, combined */
 	u8  analog_out;		/* Register value */
 	u8  vid;		/* Register value combined */
+	u8  vrm;		/* VRM version * 10 */
 };
 
 #ifdef MODULE
@@ -302,6 +301,8 @@ static void lm87_analog_out(struct i2c_client *client, int operation,
 			       int ctl_name, int *nrels_mag,
 			       long *results);
 static void lm87_vid(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+static void lm87_vrm(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
 /* I choose here for semi-static LM87 allocation. Complete dynamic
@@ -382,6 +383,8 @@ static ctl_table LM87_dir_table_template[] = {
 	  &i2c_sysctl_real, NULL, &lm87_analog_out},
 	{LM87_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
 	  &i2c_sysctl_real, NULL, &lm87_vid},
+	{LM87_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &lm87_vrm},
 	{0}
 };
 
@@ -536,6 +539,7 @@ int lm87_write_value(struct i2c_client *client, u8 reg, u8 value)
 /* Called when we have found a new LM87. It should set limits, etc. */
 void lm87_init_client(struct i2c_client *client)
 {
+	struct lm87_data *data = client->data;
 	int vid;
 	u8 v;
 
@@ -597,11 +601,13 @@ void lm87_init_client(struct i2c_client *client)
 	v = (lm87_read_value(client, LM87_REG_VID_FAN_DIV) & 0x0f)
 		    | ((lm87_read_value(client, LM87_REG_VID4) & 0x01)
                     << 4 );
-	vid = VID_FROM_REG(v);
-	v = vid * 95 * 192 / 27000;
+	data->vrm = DEFAULT_VRM;
+	vid = vid_from_reg(v, data->vrm);
+
+	v = vid * 95 * 192 / 270000;
 	lm87_write_value(client, LM87_REG_IN_MIN(1), v);
 	lm87_write_value(client, LM87_REG_IN_MIN(5), v);
-	v = vid * 105 * 192 / 27000;
+	v = vid * 105 * 192 / 270000;
 	lm87_write_value(client, LM87_REG_IN_MAX(1), v);
 	lm87_write_value(client, LM87_REG_IN_MAX(5), v);
 
@@ -1012,11 +1018,26 @@ void lm87_vid(struct i2c_client *client, int operation, int ctl_name,
 	struct lm87_data *data = client->data;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 2;
+		*nrels_mag = 3;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm87_update_client(client);
-		results[0] = VID_FROM_REG(data->vid);
-        *nrels_mag = 1;
+		results[0] = vid_from_reg(data->vid, data->vrm);
+		*nrels_mag = 1;
+	}
+}
+
+void lm87_vrm(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct lm87_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		results[0] = data->vrm;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1)
+			data->vrm = results[0];
 	}
 }
 

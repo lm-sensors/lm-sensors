@@ -69,7 +69,7 @@
 #define W83781D_SYSCTL_TEMP1 1200	/* Degrees Celcius * 10 */
 #define W83781D_SYSCTL_TEMP2 1201	/* Degrees Celcius * 10 */
 #define W83781D_SYSCTL_TEMP3 1202	/* Degrees Celcius * 10 */
-#define W83781D_SYSCTL_VID 1300	/* Volts * 100 */
+#define W83781D_SYSCTL_VID 1300		/* Volts * 1000 */
 #define W83781D_SYSCTL_VRM 1301
 #define W83781D_SYSCTL_PWM1 1401
 #define W83781D_SYSCTL_PWM2 1402
@@ -414,6 +414,7 @@
 #define LM87_SYSCTL_ALARMS     2001 /* bitvector */
 #define LM87_SYSCTL_ANALOG_OUT 2002
 #define LM87_SYSCTL_VID        2003
+#define LM87_SYSCTL_VRM        2004
 
 #define LM87_ALARM_IN0          0x0001
 #define LM87_ALARM_IN1          0x0002
