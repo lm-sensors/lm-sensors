@@ -37,9 +37,9 @@ all :: all-kernel
 install-kernel: all-kernel
 	$(MKDIR) $(MODDIR)
 	if [ -n "$(MODDIR)" ] ; then \
-	  $(INSTALL) -o root -g root -m 644 $(KERNELTARGETS) $(MODDIR)
-install :: install-kernel ; \
+	  $(INSTALL) -o root -g root -m 644 $(KERNELTARGETS) $(MODDIR) ;\
 	fi
+install :: install-kernel 
 
 clean-kernel:
 	$(RM) $(KERNELDIR)/*.o $(KERNELDIR)/*.d
