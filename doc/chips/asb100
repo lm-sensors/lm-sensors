@@ -75,6 +75,5 @@ TODO:
 * Are there really 13 voltage inputs?  Probably not...
 * Fix bogus client deregistration (like w83781d in 2.6).
 * Fix fan divisor / fan minimum interaction (like lm78).
-* Beeps are broken.
 * Cleanups, no doubt...
 
