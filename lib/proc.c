@@ -284,13 +284,16 @@ int sensors_get_chip_id(sensors_chip_name name)
   return -SENSORS_ERR_NO_ENTRY;
 }
   
-/* This reads a feature /proc file */
+/* This reads a feature /proc or /sys file.
+   Sysfs uses a one-value-per file system...
+   except for eeprom, which puts the entire eeprom into one file.
+*/
 int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 {
 	int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
 	const sensors_chip_feature *the_feature;
 	int buflen = BUF_LEN;
-	int mag;
+	int mag, eepromoffset, i, ret=0;
 	char n[NAME_MAX];
 	FILE *f;
 
@@ -302,19 +305,38 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 	if(foundsysfs) {
 		strcpy(n, name.busname);
 		strcat(n, "/");
-		/* use rindex to append sysname to n */
-		getsysname(the_feature, rindex(n, '\0'), &mag);
-		if ((f = fopen(n, "r")) != NULL) {
-			fscanf(f, "%lf", value);
-			fclose(f);
-			for (; mag > 0; mag --)
-				*value /= 10.0;
-	//		fprintf(stderr, "Feature %s value %lf scale %d offset %d\n",
-	//			the_feature->name, *value,
-	//			the_feature->scaling, the_feature->offset);
-			return 0;
-		} else
-			return -SENSORS_ERR_PROC;
+		/* total hack for eeprom */
+		if (! strcmp(name.prefix, "eeprom")){
+			strcat(n, "eeprom");
+			if ((f = fopen(n, "r")) != NULL) {
+				eepromoffset = 1 +
+				  (the_feature->offset / sizeof(long))  +
+				  (16 * (the_feature->sysctl - EEPROM_SYSCTL1));
+				for(i = 0; i <= eepromoffset; i++)
+					if(EOF == (ret = getc(f)))
+						break;
+				fclose(f);
+				if(ret == EOF)
+					return -SENSORS_ERR_PROC;
+				*value = ret;
+				return 0;
+			} else
+				return -SENSORS_ERR_PROC;
+		} else {
+			/* use rindex to append sysname to n */
+			getsysname(the_feature, rindex(n, '\0'), &mag);
+			if ((f = fopen(n, "r")) != NULL) {
+				fscanf(f, "%lf", value);
+				fclose(f);
+				for (; mag > 0; mag --)
+					*value /= 10.0;
+		//		fprintf(stderr, "Feature %s value %lf scale %d offset %d\n",
+		//			the_feature->name, *value,
+		//			the_feature->scaling, the_feature->offset);
+				return 0;
+			} else
+				return -SENSORS_ERR_PROC;
+		}
 	} else {
 		sysctl_name[3] = the_feature->sysctl;
 		if (sysctl(sysctl_name, 4, buf, &buflen, NULL, 0))
