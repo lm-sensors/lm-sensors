@@ -4074,275 +4074,73 @@ void print_pc87366(const sensors_chip_name *name)
 {
   char *label = NULL;
   double cur, min, max;
-  int alarms, valid;
+  int status, valid, i, tempnr = 2;
 
-  if (!sensors_get_feature(*name, SENSORS_PC87360_ALARMS_IN, &cur)) 
-    alarms = cur + 0.5;
-  else {
-    printf("ERROR: Can't get IN alarms data!\n");
-    alarms = 0;
+  for (i = 0; i < 11; i++) {
+    if (!sensors_get_feature(*name, SENSORS_PC87360_IN0_STATUS + i, &cur))
+      status = cur + 0.5;
+    else {
+      printf("ERROR: Can't get IN%d status data!\n", i);
+      status = 0;
+    }
+
+    if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN0 + i, &label, &valid)
+     && !sensors_get_feature(*name, SENSORS_PC87360_IN0 + i, &cur)
+     && !sensors_get_feature(*name, SENSORS_PC87360_IN0_MIN + i, &min)
+     && !sensors_get_feature(*name, SENSORS_PC87360_IN0_MAX + i, &max)) {
+      if (valid) {
+        print_label(label, 10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
+               cur, min, max,
+               status&(PC87365_STATUS_IN_MIN
+                      |PC87365_STATUS_IN_MAX)?"ALARM":"");
+      }
+    } else
+      printf("ERROR: Can't get IN%d data!\n", i);
+    free_the_label(&label);
   }
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN0, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN0, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN0_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN0_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<0)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN0 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN1, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN1, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN1_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN1_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<1)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN1 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN2, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN2, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN2_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN2_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<2)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN2 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN3, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN3, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN3_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN3_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<3)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN3 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN4, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN4, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN4_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN4_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<4)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN4 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN4, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN4, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN4_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN4_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<4)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN4 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN5, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN5, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN5_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN5_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<5)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN5 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN6, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN6, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN6_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN6_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<6)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN6 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN7, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN7, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN7_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN7_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<7)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN7 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN8, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN8, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN8_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN8_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<8)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN8 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN9, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN9, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN9_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN9_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<9)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN9 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_IN10, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN10, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN10_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_IN10_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
-             cur, min, max,
-             alarms&(1<<10)?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get IN10 data!\n");
-  free_the_label(&label);
 
   print_pc87364(name);
 
-  if (!sensors_get_feature(*name, SENSORS_PC87360_ALARMS_TEMP, &cur)) 
-    alarms = cur + 0.5;
-  else {
-    printf("ERROR: Can't get TEMP alarms data!\n");
-    alarms = 0;
-  }
+  if (!strcmp(name->prefix, "pc87366"))
+    tempnr = 3;
 
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_TEMP1, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_TEMP1, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_TEMP1_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_TEMP1_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      print_temp_info(cur, max, min, MINMAX, 0, 0);
-      if (alarms&(1<<0))
-        printf("ALARM");
-      printf("\n");
+  for (i = 0; i < tempnr; i++) {
+    if (!sensors_get_feature(*name, SENSORS_PC87360_TEMP1_STATUS + i, &cur))
+      status = cur + 0.5;
+    else {
+      printf("ERROR: Can't get IN%d status data!\n", i + 1);
+      status = 0;
     }
-  } else
-    printf("ERROR: Can't get TEMP1 data!\n");
-  free_the_label(&label);
 
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_TEMP1_CRIT, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_TEMP1_CRIT, &cur)) {
-    if (valid) {
-      print_label(label, 10);
-      print_temp_info(cur, 0, 0, SINGLE, 0, 0);
-      if (alarms&(1<<1))
-        printf("ALARM");
-      printf("\n");
-    }
-  } else
-    printf("ERROR: Can't get TEMP1 overtemperature data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_TEMP2, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_TEMP2, &cur)
-   && !sensors_get_feature(*name, SENSORS_PC87360_TEMP2_MIN, &min)
-   && !sensors_get_feature(*name, SENSORS_PC87360_TEMP2_MAX, &max)) {
-    if (valid) {
-      print_label(label, 10);
-      print_temp_info(cur, max, min, MINMAX, 0, 0);
-      if (alarms&(1<<2))
-        printf("ALARM");
-      printf("\n");
-    }
-  } else
-    printf("ERROR: Can't get TEMP2 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_TEMP2_CRIT, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_TEMP2_CRIT, &cur)) {
-    if (valid) {
-      print_label(label, 10);
-      print_temp_info(cur, 0, 0, SINGLE, 0, 0);
-      if (alarms&(1<<3))
-        printf("ALARM");
-      printf("\n");
-    }
-  } else
-    printf("ERROR: Can't get TEMP2 overtemperature data!\n");
-  free_the_label(&label);
-
-  if (!strcmp(name->prefix, "pc87366")) {
-    if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_TEMP3, &label, &valid)
-     && !sensors_get_feature(*name, SENSORS_PC87360_TEMP3, &cur)
-     && !sensors_get_feature(*name, SENSORS_PC87360_TEMP3_MIN, &min)
-     && !sensors_get_feature(*name, SENSORS_PC87360_TEMP3_MAX, &max)) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_TEMP1 + i, &label, &valid)
+     && !sensors_get_feature(*name, SENSORS_PC87360_TEMP1 + i, &cur)
+     && !sensors_get_feature(*name, SENSORS_PC87360_TEMP1_MIN + i, &min)
+     && !sensors_get_feature(*name, SENSORS_PC87360_TEMP1_MAX + i, &max)) {
       if (valid) {
         print_label(label, 10);
         print_temp_info(cur, max, min, MINMAX, 0, 0);
-        if (alarms&(1<<4))
+        if (status&PC87365_STATUS_TEMP_OPEN)
+          printf("OPEN");
+        else if (status&(PC87365_STATUS_TEMP_MIN|PC87365_STATUS_TEMP_MAX))
           printf("ALARM");
         printf("\n");
       }
     } else
-      printf("ERROR: Can't get TEMP3 data!\n");
+      printf("ERROR: Can't get TEMP%d data!\n", i + 1);
     free_the_label(&label);
 
-    if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_TEMP3_CRIT, &label, &valid)
-     && !sensors_get_feature(*name, SENSORS_PC87360_TEMP3_CRIT, &cur)) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_TEMP1_CRIT + i, &label, &valid)
+     && !sensors_get_feature(*name, SENSORS_PC87360_TEMP1_CRIT + i, &cur)) {
       if (valid) {
         print_label(label, 10);
         print_temp_info(cur, 0, 0, SINGLE, 0, 0);
-        if (alarms&(1<<5))
+        if (status&PC87365_STATUS_TEMP_CRIT)
           printf("ALARM");
         printf("\n");
       }
     } else
-      printf("ERROR: Can't get TEMP3 overtemperature data!\n");
+      printf("ERROR: Can't get TEMP%d overtemperature data!\n", i + 1);
     free_the_label(&label);
   }
 }
