@@ -1,7 +1,7 @@
 /*
   fscher.c - Part of lm_sensors, Linux kernel modules for hardware
   monitoring
-  Copyright (c) 2003 Reinhard Nissl <rnissl@gmx.de>
+  Copyright (C) 2003, 2004 Reinhard Nissl <rnissl@gmx.de>
   
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 /* 
    fujitsu siemens hermes chip, 
    module based on fscpos.c 
-   Copyright (c) 2000 Hermann Jung <hej@odn.de>
-   Copyright (c) 1998, 1999 Frodo Looijaard <frodol@dds.nl>
+   Copyright (C) 2000 Hermann Jung <hej@odn.de>
+   Copyright (C) 1998, 1999 Frodo Looijaard <frodol@dds.nl>
    and Philip Edelbrock <phil@netroedge.com>
 */
 
@@ -529,37 +529,12 @@ void fscher_temp(struct i2c_client *client, int operation, int ctl_name,
 }
 
 /*
- * Multiplier, ReferenceVoltage and Offset were taken from dmidecode output:
- *
- * Handle 0x0002
- *        DMI type 2, 8 bytes.
- *        Board Information Block
- *                Vendor: FUJITSU SIEMENS
- *                Product: D1562
- *                Version: S26361-D1562
- *                Serial Number: 11732921
- *
- * Handle 0x0045
- *        DMI type 185, 56 bytes.
- *        13
- *        ...
- *           01
- *              14 00
- *                    00 00
- *           02
- *              31 00
- *                    00 00 
- *           03
- *              0a 00
- *                    00 00
- *        ...
- *           07
- *              21 00
- *        ...
+ * The final conversion is specified in sensors.conf, as it depends on
+ * mainboard specific values. We export the registers contents as
+ * pseudo-hundreds-of-Volts (range 0V - 2.55V). Not that it makes much
+ * sense per se, but it minimizes the conversions count and keeps the
+ * values within a usual range.
  */
-
-#define VOLT_FROM_REG(val,mult,ref,off)    (val*mult*ref/255+off)
-
 void fscher_volt(struct i2c_client *client, int operation, int ctl_name,
                  int *nrels_mag, long *results)
 {
@@ -570,13 +545,13 @@ void fscher_volt(struct i2c_client *client, int operation, int ctl_name,
     fscher_update_client(client);
     switch(ctl_name) {
     case FSCHER_SYSCTL_VOLT0:
-      results[0] = VOLT_FROM_REG(data->volt[0],0x0031,0x0021,0x0000);
+      results[0] = data->volt[0];
       break;
     case FSCHER_SYSCTL_VOLT1:
-      results[0] = VOLT_FROM_REG(data->volt[1],0x0014,0x0021,0x0000);
+      results[0] = data->volt[1];
       break;
     case FSCHER_SYSCTL_VOLT2:
-      results[0] = VOLT_FROM_REG(data->volt[2],0x000a,0x0021,0x0000);
+      results[0] = data->volt[2];
       break;
     default:
       printk("fscher: ctl_name %d not supported\n", ctl_name);

@@ -1560,22 +1560,40 @@ chip "fscher-*"
 # Fujitsu-Siemens Hermes chip
 
 # Temperature
-
     label temp1       "Temp1/CPU"
     label temp2       "Temp2/MB"
     label temp3       "Temp3/AUX"
 
 # Fans
-
     label fan1        "Fan1/CPU"
     label fan2        "Fan2/AUX"
     label fan3        "Fan3/PS"
 
 # Voltage
-
     label in0         "+12V"
     label in1         "+5V"
     label in2         "Battery"
+
+# Compute Voltages using mainboard dependant MRO-values (see doc/chips/fscher)
+#                           M    R             O               O                  M    R
+    compute in0       (@ * (49 * 33) / 255) + (0 / 100), (@ - (0 / 100)) * 255 / (49 * 33)
+    compute in1       (@ * (20 * 33) / 255) + (0 / 100), (@ - (0 / 100)) * 255 / (20 * 33)
+    compute in2       (@ * (10 * 33) / 255) + (0 / 100), (@ - (0 / 100)) * 255 / (10 * 33)
+
+# Allow fans to turn off
+#    set pwm1          0
+#    set pwm2          0
+#    set pwm3          0
+
+# Min cooling
+#    set pwm1          2
+#    set pwm2          1
+#    set pwm3          1
+
+# Max cooling
+#    set pwm1          255
+#    set pwm2          255
+#    set pwm3          255
 
 
 chip "pcf8591-*"
