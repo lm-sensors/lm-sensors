@@ -61,19 +61,19 @@ MODULE_LICENSE("GPL");
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
-static unsigned short normal_i2c_range[] = { 0x20, 0x27, SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x20, 0x27, 0x38, 0x3f, SENSORS_I2C_END };
 static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_1(pcf8574);
+SENSORS_INSMOD_2(pcf8574, pcf8574a);
 
 /* The PCF8574 registers */
 
 /* (No registers.  [Wow! This thing is SIMPLE!] ) */
 
 /* Initial values */
-#define PCF8574_INIT 0		/* Both off */
+#define PCF8574_INIT 255	/* All outputs on (input mode) */
 
 /* Each client has this additional data */
 struct pcf8574_data {
@@ -83,7 +83,7 @@ struct pcf8574_data {
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 
-	u8 status;		/* Register values */
+	u8 read, write;	        /* Register values */
 };
 
 #ifdef MODULE
@@ -106,10 +106,12 @@ static int pcf8574_command(struct i2c_client *client, unsigned int cmd,
 			   void *arg);
 static void pcf8574_inc_use(struct i2c_client *client);
 static void pcf8574_dec_use(struct i2c_client *client);
-static void pcf8574_status(struct i2c_client *client, int operation,
+static void pcf8574_read(struct i2c_client *client, int operation,
+			               int ctl_name, int *nrels_mag, long *results);
+static void pcf8574_write(struct i2c_client *client, int operation,
 			               int ctl_name, int *nrels_mag, long *results);
 static void pcf8574_update_client(struct i2c_client *client);
-
+static void pcf8574_init_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver pcf8574_driver = {
@@ -129,8 +131,10 @@ static struct i2c_driver pcf8574_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table pcf8574_dir_table_template[] = {
-	{PCF8574_SYSCTL_STAT, "status", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &pcf8574_status},
+	{PCF8574_SYSCTL_READ, "read", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &pcf8574_read},
+	{PCF8574_SYSCTL_WRITE, "write", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &pcf8574_write},
 	{0}
 };
 
@@ -190,13 +194,22 @@ int pcf8574_detect(struct i2c_adapter *adapter, int address,
 	/* Now, we would do the remaining detection. But the PCF8574 is plainly
 	   impossible to detect! Stupid chip. */
 
-	/* Determine the chip type - only one kind supported! */
-	if (kind <= 0)
-		kind = pcf8574;
+	/* Determine the chip type */
+	if (kind <= 0) {
+		if (address >= 0x20 && address <= 0x27)
+			kind = pcf8574;
+		else if (address >= 0x38 && address <= 0x3f)
+			kind = pcf8574a;
+		else goto ERROR1;
+	}
 
 	if (kind == pcf8574) {
 		type_name = "pcf8574";
 		client_name = "PCF8574 chip";
+	} else
+	if (kind == pcf8574a) {
+		type_name = "pcf8574a";
+		client_name = "PCF8574A chip";
 	} else {
 #ifdef DEBUG
 		printk("pcf8574.o: Internal error: unknown kind (%d)?!?",
@@ -225,6 +238,8 @@ int pcf8574_detect(struct i2c_adapter *adapter, int address,
 	}
 	data->sysctl_id = i;
 
+        /* Initialize the PCF8574 chip */
+        pcf8574_init_client(new_client);
 	return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
@@ -281,6 +296,14 @@ void pcf8574_dec_use(struct i2c_client *client)
 #endif
 }
 
+/* Called when we have found a new PCF8574. */
+void pcf8574_init_client(struct i2c_client *client)
+{
+        struct pcf8574_data *data = client->data;
+        data->write = PCF8574_INIT;
+	i2c_smbus_write_byte(client, data->write);
+}
+
 
 void pcf8574_update_client(struct i2c_client *client)
 {
@@ -295,7 +318,7 @@ void pcf8574_update_client(struct i2c_client *client)
 		printk("Starting pcf8574 update\n");
 #endif
 
-		data->status = i2c_smbus_read_byte(client); 
+		data->read = i2c_smbus_read_byte(client); 
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -304,7 +327,19 @@ void pcf8574_update_client(struct i2c_client *client)
 }
 
 
-void pcf8574_status(struct i2c_client *client, int operation,
+void pcf8574_read(struct i2c_client *client, int operation,
+		    int ctl_name, int *nrels_mag, long *results)
+{
+	struct pcf8574_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		pcf8574_update_client(client);
+		results[0] = data->read;
+		*nrels_mag = 1;
+	}  
+}
+void pcf8574_write(struct i2c_client *client, int operation,
 		    int ctl_name, int *nrels_mag, long *results)
 {
 	u8	tmpstatus; 
@@ -313,21 +348,16 @@ void pcf8574_status(struct i2c_client *client, int operation,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		pcf8574_update_client(client);
-		tmpstatus = data->status;		
-		tmpstatus = (tmpstatus & 0xf0) >> 4;
-		results[0] = tmpstatus; 
-		tmpstatus = data->status;		
-		tmpstatus &= 0x0f;
-		results[1] = tmpstatus; 
-		*nrels_mag = 2;
+		results[0] = data->write; 
+		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		if (*nrels_mag >= 1) {
-			data->status = (data->status & 2) | results[0];
-			i2c_smbus_write_byte(client, data->status);
+		if (*nrels_mag = 1) {
+			data->write = results[0];
+			i2c_smbus_write_byte(client, data->write);
 		}
 	}
 }
+
 
 int __init sensors_pcf8574_init(void)
 {
@@ -366,7 +396,7 @@ EXPORT_NO_SYMBOLS;
 #ifdef MODULE
 
 MODULE_AUTHOR
-    ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com and Dan Eaton <dan.eaton@rocketlogix.com>");
+    ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, Dan Eaton <dan.eaton@rocketlogix.com> and Aurelien Jarno <aurelien@aurel32.net>");
 MODULE_DESCRIPTION("PCF8574 driver");
 
 int init_module(void)

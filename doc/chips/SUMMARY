@@ -162,7 +162,7 @@ ltc1710
 matorb
 	Matrix Orbital LCD displays
 
-pcf8574
+pcf8574 & pcf8574a
 	Simple eight-bit parallel I/O
 
 pcf8591

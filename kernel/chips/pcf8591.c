@@ -200,7 +200,7 @@ int pcf8591_detect(struct i2c_adapter *adapter, int address,
 #ifdef DEBUG
         if (i2c_is_isa_adapter(adapter)) {
                 printk
-                    (KERN_ERR "pcf8574.o: pcf8574_detect called for an ISA bus adapter?!?\n");
+                    (KERN_ERR "pcf8591.o: pcf8591_detect called for an ISA bus adapter?!?\n");
                 return 0;
         }
 #endif
@@ -224,7 +224,7 @@ int pcf8591_detect(struct i2c_adapter *adapter, int address,
         new_client->driver = &pcf8591_driver;
         new_client->flags = 0;
 
-        /* Now, we would do the remaining detection. But the PCF8574 is plainly
+        /* Now, we would do the remaining detection. But the PCF8591 is plainly
            impossible to detect! Stupid chip. */
 
         /* Determine the chip type - only one kind supported! */

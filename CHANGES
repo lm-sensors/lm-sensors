@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.3 (2002????)
+  Chip modules (most): Allow THIS_MODULE definition for kernels 2.2.18+
   File doc/chips/it87: add more temp_type help
   File sensors.conf.eg: Un-ignore it87 in8, temp3, fan3;
                         add adm1021 section; add lm87 AIN[1,2] template;
@@ -34,11 +35,14 @@ ask CVS about it:
   Module i2c-amd756: Add support for AMD768
   Module i2c-i810: Add support for 810E
   Module i2c-piix4: Check for uninitialized base address
+  Module i2c-sis5595: Blacklist 735
   Module i2c-viapro: Check for uninitialized base address
   Module gl518sm: Standardize /proc entries in0-3
   Module lm87: Fix in0, in1, in5 initial limits; ain[1,2] -> in[6,7];
                fan -> fan1; fix temp2 limit writes
+  Module pcf8574: Add support for PCF8574A; /proc interface changed
   Module pcf8591: new
+  Module sis5595: Blacklist 735
   Module w83781d: Add W83697HF support; allow force_subclients parameter
                   for Tyan 2460
   Program decode-vaio.pl: new
