@@ -391,6 +391,6 @@ intialize_proc_pci;
 adapter_pci_detection;
 
 # TEST!
-open FILE, "+>/dev/i2c-0" or die "Can't open /dev/i2c-0!";
-i2c_set_slave_addr \*FILE, 0x49 or die "Couldn't set slave addr!";
-print (i2c_read_word_data \*FILE, 0), "\n";
+#open FILE, "+>/dev/i2c-0" or die "Can't open /dev/i2c-0!";
+#i2c_set_slave_addr \*FILE, 0x49 or die "Couldn't set slave addr!";
+#print (i2c_read_word_data \*FILE, 0), "\n";
