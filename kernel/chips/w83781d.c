@@ -1137,12 +1137,14 @@ void w83781d_init_client(struct i2c_client *client)
 	int type = data->type;
 	u8 tmp;
 
+	/* save this register */
+	i = w83781d_read_value(client, W83781D_REG_BEEP_CONFIG);
 	/* Reset all except Watchdog values and last conversion values
 	   This sets fan-divs to 2, among others */
 	w83781d_write_value(client, W83781D_REG_CONFIG, 0x80);
-	/* Disable power-on abnormal beep. BIOS should have already turned off but
-	   not all do. Reset value is 0x15, write a 0x95. */
-	w83781d_write_value(client, W83781D_REG_BEEP_CONFIG, 0x95);
+	/* Restore the register and disable power-on abnormal beep.
+	   This saves FAN 1/2/3 input/output values set by BIOS. */
+	w83781d_write_value(client, W83781D_REG_BEEP_CONFIG, i | 0x80);
 	/* Disable master beep-enable (reset turns it on).
 	   Individual beeps should be reset to off but for some reason
 	   disabling this bit helps some people not get beeped */
@@ -1301,6 +1303,11 @@ void w83781d_init_client(struct i2c_client *client)
 	if (type != w83783s) {
 		w83781d_write_value(client, W83781D_REG_TEMP3_CONFIG,
 				    0x00);
+	}
+	/* enable PWM2 control (can't hurt since PWM reg should have been
+           reset to 0xff) */
+	if (type != w83781d) {
+		w83781d_write_value(client, W83781D_REG_PWMCLK12, 0x19);
 	}
 
 	/* Start monitoring */
