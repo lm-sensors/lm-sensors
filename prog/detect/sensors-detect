@@ -1052,6 +1052,15 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        alias_detect => sub { w83781d_alias_detect 3, @_ },
      } ,
      {
+       name => "Winbond W83627EHF",
+       driver => "to-be-written",
+       i2c_addrs => [0x28..0x2f], 
+       i2c_detect => sub { w83781d_detect 9, @_},
+       isa_addrs => [0x290],
+       isa_detect => sub { w83781d_isa_detect 9, @_ },
+       alias_detect => sub { w83781d_alias_detect 9, @_ },
+     },
+     {
        name => "Asus AS99127F (rev.1)",
        driver => "w83781d",
        i2c_addrs => [0x28..0x2f],
@@ -1512,6 +1521,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #      lookup when people report them).
 #  enter: The password sequence to write to the address register
 #  devid: The device ID(s) we have to match (base device)
+#  devid_mask (optional): Bitmask to apply before checking the device ID
 #  logdev: The logical device containing the sensors
 #  exit (optional): Sequence to write to the address register to exit config
 #      mode. If not provided, a default reset operation is performed.
@@ -1760,6 +1770,23 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
       },
     ],
   },
+  {
+    enter =>
+    {
+      0x2e => [0x87, 0x87],
+      0x4e => [0x87, 0x87],
+    },
+    chips =>
+    [
+      {
+	name => "Winbond W83627EHF Super IO Sensors",
+	driver => "to-be-written",
+	devid => 0x8860,
+	devid_mask => 0xFFF0,
+	logdev => 0x0b,
+      },
+    ]
+  }
 );
 
 #######################
@@ -2684,7 +2711,7 @@ sub scan_superio
         outb($addrreg, $superio{devidreg} + 1);
         $val = ($val << 8) | inb($datareg);
       }
-      if ($val != $chip->{devid}) {
+      if (($val & ($chip->{devid_mask} || 0xffff)) != $chip->{devid}) {
 	printf "  Failed! (0x%02x)\n", $val;
 	next;
       }
@@ -3420,7 +3447,7 @@ sub lm87_detect
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 2 = W83783S,
 #                        3 = W83627HF, 4 = AS99127F (rev.1),
 #                        5 = AS99127F (rev.2), 6 = ASB100, 7 = W83791D,
-#                        8 = W83792D
+#                        8 = W83792D, 9 = W83627EHF)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -3469,11 +3496,12 @@ sub w83781d_detect
   return if $chip == 5 and  $reg1 != 0x31;
   return if $chip == 6 and  $reg1 != 0x31;
   return if $chip == 7 and  $reg1 != 0x71;
-  return if $chip == 7 and  $reg1 != 0x7a;
+  return if $chip == 8 and  $reg1 != 0x7a;
+  return if $chip == 9 and  $reg1 != 0xa1;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
-  @res = (8);
-  @res = (7) # Asus chips were always seen at 0x2d
-    if ($chip >= 4 && $chip <= 6 && $addr != 0x2d);
+  # Default address is 0x2d
+  @res = ($addr != 0x2d) ? (7) : (8);
+  return @res if $chip == 9; # No subclients
   push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;
   push @res, (($reg1 & 0x70) >> 4) + 0x48 unless ($reg1 & 0x80 or $chip == 2);
   return @res;
@@ -3537,7 +3565,8 @@ sub mozart_detect
   return 5;
 }
 
-# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 2 = W83783S, 3 = W83627HF)
+# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83627HF,
+#                        9 = W83627EHF)
 # $_[1]: ISA address
 # $_[2]: I2C file handle
 # $_[3]: I2C address
@@ -3553,8 +3582,8 @@ sub w83781d_alias_detect
   return 1;
 }
 
-# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83627HF, 5 = W83697HF)
-#        (W83783S and AS99127F not on ISA bus)
+# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83627HF,
+#                        5 = W83697HF, 9 = W83627EHF)
 # $_[1]: Address
 # Returns: undef if not detected, (8) if detected.
 sub w83781d_isa_detect
@@ -3583,6 +3612,7 @@ sub w83781d_isa_detect
   return if $chip == 1 and  $reg1 != 0x30;
   return if $chip == 3 and  $reg1 != 0x20;
   return if $chip == 5 and  $reg1 != 0x60;
+  return if $chip == 9 and  $reg1 != 0xa0;
   return 8;
 }
 
