@@ -1246,7 +1246,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "FSC Hermes",
-       driver => "to-be-written",
+       driver => "fscher",
        i2c_addrs => [0x73],
        i2c_detect => sub { fscher_detect @_ },
      },
