@@ -25,10 +25,10 @@
 #include <linux/proc_fs.h>
 
 #include "version.h"
-#include "compat.h"
 #include "i2c.h"
 #include "i2c-isa.h"
 #include "sensors.h"
+#include "compat.h"
 
 
 #ifdef MODULE

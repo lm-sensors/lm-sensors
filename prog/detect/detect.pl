@@ -1389,7 +1389,7 @@ sub generate_modprobes
 {
   my ($prefer_isa) = @_;
 
-  my ($chip,$detection,%adapters,$nr,@optionlist);
+  my ($chip,$detection,%adapters,$nr,$i,@optionlist);
   my $modprobes = "";
   my $configfile = "";
 
@@ -1414,8 +1414,11 @@ sub generate_modprobes
                not (exists $detection->{i2c_driver} and not $prefer_isa);
     }
   }
-  foreach $detection (keys %adapters) {
-    $modprobes .= "modprobe $detection\n";
+  for ($i = 0; $i < $nr; $i ++) {
+    foreach $detection (keys %adapters) {
+      $modprobes .= "modprobe $detection\n", last 
+                 if $adapters{$detection} == $i;
+    }
   }
 
   # Now determine the chip probe lines

@@ -26,8 +26,8 @@
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/malloc.h>
-#include "compat.h"
 #include "i2c.h"
+#include "compat.h"
 #include "smbus.h"
 #include "i2c-isa.h"
 #include "sensors.h"
