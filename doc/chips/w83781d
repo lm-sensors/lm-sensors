@@ -1,31 +1,41 @@
-
-
+Winbond 83781D driver
+---------------------
 Supports the following Winbond chips:
 
 Chip	#vin	#fanin	#pwm	#temp	wchipid	i2c	ISA
+------------------------------------------------------------
 w83781d	7	3	0	3	0x10	yes	yes
 w83782d	9	3	2-4	3	0x30	yes	yes
 w83783s	5-6	3	2	1-2	0x40	yes	no
 
 
+Stability
+---------
+w83781d: tested, stable
+w83782d: beta tested
+w83783s: untested
+
+
+/PROC ENTRIES
+-------------
+Varies depending on chip type.
+
 The driver only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
 
 
-
-
-To do:
+TO DO:
 -----
- 782d/783s clock speed select
  782d beep 3 register
  782d programmable pins
  783s temp2 (labeled as temp1 in data sheet) at different location
       than 781d/782d, not implemented yet.
  781d R-T table
- 782d/783s undocumented thermistor/PII/3904 select bits
+ 782d/783s undocumented thermistor/PII/3904 select bits for pins 38-40
+ 782d/783s clock speed select
 
 
-Notes:
+NOTES:
 -----
   783s has no in1 for compatibility with the 781d/782d.
 
@@ -41,3 +51,58 @@ Notes:
 
   782d has pwm1-2 for isa, pwm1-4 for i2c. (pwm3-4 share pins with
        the isa pins)
+
+
+
+Data sheet updates:
+------------------
+	- Mask off lower bit of all ID registers.
+
+	- PWM clock registers:
+
+		000: master /  512
+		001: master / 1024
+		010: master / 2048
+		011: master / 4096
+		100: master / 8192
+
+
+Answers from Winbond tech support
+---------------------------------
+> 
+> 1) In the W83781D data sheet section 7.2 last paragraph, it talks about
+>    reprogramming the R-T table if the Beta of the thermistor is not
+>    3435K. The R-T table is described briefly in section 8.20.
+>    What formulas do I use to program a new R-T table for a given Beta?
+> 
+	We are sorry that the calculation for R-T table value is
+confidential. If you have another Beta value of thermistor, we can help
+to calculate the R-T table for you. But you should give us real R-T
+Table which can be gotten by thermistor vendor. Therefore we will calculate
+them and obtain 32-byte data, and you can fill the 32-byte data to the
+register in Bank0.CR51 of W83781D.
+
+
+> 2) In the W83782D data sheet, it mentions that pins 38, 39, and 40 are 
+>    programmable to be either thermistor or Pentium II diode inputs. 
+>    How do I program them for diode inputs? I can't find any register
+>    to program these to be diode inputs.
+ --> You may program Bank0 CR[5Dh] and CR[59h] registers.
+ 
+ 	CR[5Dh]    		bit 1(VTIN1)    bit 2(VTIN2)   bit 3(VTIN3)
+ 	      
+      	thermistor                0		 0		0	
+ 	diode 		          1		 1		1		
+ 
+ 
+ 	CR[59h] 		bit 4(VTIN1)	bit 2(VTIN2)   bit 3(VTIN3)
+ 	
+ 	PII thermal diode         1		 1		1
+ 	2N3904	diode	          0		 0		0
+ 
+ 
+Author/Maintainer
+-----------------
+Original 781D support: Frodo and Phil (lm78@stimpy.netroedge.com)
+782D/783S support added by: Mark D. Studebaker (mds@eng.paradyne.com)
+Send requests to the lm78@stimpy.netroedge.com mailing list.

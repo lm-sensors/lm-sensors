@@ -21,17 +21,10 @@
 */
 
 /*
-    Supports Integrated Circuit Systems (ICS)
-    and PhaseLink Labs (PLL) I2C clock generators
-    at address 0x69.
-
-    Supported chips (preliminary):
-	ICS:
-	  9148-02, 9148B-04, 9148-08, 9150-01, 9150-04, 9150-11
-	PLL:
-	  52C64-05, 52C64-25, 52C65-02, 52C66-01, 52C66-03, 52C66-10,
-	  52C66-11, 52C66-28, 52C66-29, 52C66-31, 52C66-38, 52C66-39,
-	  52C68-02, 52C68-04, 52C69-13, 52C69-15
+    ** WARNING  **
+    Supports limited combinations of clock chips and busses.
+    Use on unsupported chips may crash your system.
+    See doc/chips/icspll for details.
 */
 
 
