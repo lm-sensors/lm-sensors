@@ -31,6 +31,10 @@
 #include <linux/init.h>
 #include "version.h"
 
+#ifndef I2C_DRIVERID_W83L785TS
+#define I2C_DRIVERID_W83L785TS	1043
+#endif
+
 /*
  * Address to scan
  * Address is fully defined internally and cannot be changed.

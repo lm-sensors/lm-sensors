@@ -42,6 +42,10 @@
 #include <linux/init.h>
 #include "version.h"
 
+#ifndef I2C_DRIVERID_LM90
+#define I2C_DRIVERID_LM90	1042
+#endif
+
 /*
  * Addresses to scan
  * Address is fully defined internally and cannot be changed.

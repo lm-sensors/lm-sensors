@@ -33,6 +33,10 @@
 #include <linux/init.h>
 #include "version.h"
 
+#ifndef I2C_DRIVERID_FSCHER
+#define I2C_DRIVERID_FSCHER		1046
+#endif
+
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { 0x73, SENSORS_I2C_END };
 static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };

@@ -47,6 +47,10 @@
 #include "sensors_vid.h"
 #include "lm75.h"
 
+#ifndef I2C_DRIVERID_ASB100
+#define I2C_DRIVERID_ASB100		1043
+#endif
+
 /* I2C addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
 static unsigned short normal_i2c_range[] = { 0x28, 0x2f, SENSORS_I2C_END };

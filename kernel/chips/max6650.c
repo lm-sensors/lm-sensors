@@ -37,6 +37,10 @@
 #include <linux/init.h>
 #include "version.h"
 
+#ifndef I2C_DRIVERID_MAX6650
+#define I2C_DRIVERID_MAX6650	1044
+#endif
+
 /*
  * Addresses to scan. There are four disjoint possibilities, by pin config.
  */
