@@ -11,13 +11,19 @@ OGROUP=root
 # The mode of the devices
 MODE=600
 
+# This script doesn't need to be run if devfs is used
+if [ -r /proc/mounts ] ; then
+	if grep -q "/dev devfs" /proc/mounts ; then
+		echo "You do not need to run this script as your system uses devfs."
+		exit;
+	fi
+fi
 
 i=0;
 
 while [ $i -lt $NUMBER ] ; do
-  echo /dev/i2c-$i
-  mknod -m 000 /dev/i2c-$i c 89 $i
-  chown "$OUSER:$OGROUP" /dev/i2c-$i
-  chmod $MODE /dev/i2c-$i
-  i=$[$i + 1]
+	echo /dev/i2c-$i
+	mknod -m $MODE /dev/i2c-$i c 89 $i || exit
+	chown "$OUSER:$OGROUP" /dev/i2c-$i || exit
+	i=$[$i + 1]
 done
