@@ -453,6 +453,7 @@ MODULE_DESCRIPTION("I2C-Bus main module");
 MODULE_PARM(i2c_debug, "i");
 MODULE_PARM_DESC(i2c_debug,"debug level");
 
+#ifndef LM_SENSORS
 EXPORT_SYMBOL(i2c_add_algorithm);
 EXPORT_SYMBOL(i2c_del_algorithm);
 EXPORT_SYMBOL(i2c_add_adapter);
@@ -466,6 +467,7 @@ EXPORT_SYMBOL(i2c_master_send);
 EXPORT_SYMBOL(i2c_master_recv);
 EXPORT_SYMBOL(i2c_control);
 EXPORT_SYMBOL(i2c_transfer);
+#endif
 
 
 int init_module(void) 

@@ -639,8 +639,10 @@ MODULE_PARM_DESC(bit_scan, "Scan for active chips on the bus");
 MODULE_PARM_DESC(i2c_debug,"debug level - 0 off; 1 normal; 2,3 more verbose; 9 bit-protocol");
 
 
+#ifndef LM_SENSORS
 EXPORT_SYMBOL(i2c_bit_add_bus);
 EXPORT_SYMBOL(i2c_bit_del_bus);
+#endif
 
 
 int init_module(void) 

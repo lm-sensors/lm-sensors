@@ -337,7 +337,9 @@ struct i2c_driver driver = {
 MODULE_AUTHOR("Simon G. Vogl <simon@tk.uni-linz.ac.at>");
 MODULE_DESCRIPTION("I2C-Bus character device interface");
 
+#ifndef LM_SENSORS
 EXPORT_NO_SYMBOLS;
+#endif
 
 int init_module(void) 
 {

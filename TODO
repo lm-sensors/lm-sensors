@@ -1,6 +1,6 @@
 Many, many things. Most notably:
 
-* CHeck CDROM insert-remove error of Matt Mueller
+* Check CDROM insert-remove error of Matt Mueller
 * Create wait-queues for bus locking instead of pure semaphores, to make
   it more interactive
 * Check for block read/writes in smbus-on-i2c emulation code

@@ -151,7 +151,9 @@ MODULE_DESCRIPTION("I2C-Bus adapter routines for Philips parallel port adapter")
 
 MODULE_PARM(base, "i");
 
+#ifndef LM_SENSORS
 EXPORT_NO_SYMBOLS;
+#endif
 
 int init_module(void) 
 {
