@@ -1081,6 +1081,7 @@ void w83781d_init_client(struct i2c_client *client)
 */
 
   if(wchipid == W83781D_WCHIPID) {
+    u16 k = 0;
 /*
     Auto-indexing doesn't seem to work...
     w83781d_write_value(client,W83781D_REG_RT_IDX,0);
@@ -1088,7 +1089,6 @@ void w83781d_init_client(struct i2c_client *client)
     for (i = 0; i < 3; i++) {
       int j;
       for (j = 0; j < 32; j++) {
-        u16 k = 0;
         w83781d_write_value(client,W83781D_REG_RT_IDX,k++);
         data->rt[i][j] = w83781d_read_value(client,W83781D_REG_RT_VAL);
       }
