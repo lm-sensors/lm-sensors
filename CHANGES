@@ -28,8 +28,8 @@ ask CVS about it:
   Library: Change adm1025 names (hyst/over become low/high)
            Swap adm1025 temp1 and temp2 to match the driver's order
            Advance version to 2.0.1
-		   Update lm83 support
-		   Add support for the lm90
+           Update lm83 support
+           Add support for the lm90
   Makefile: Move LINUX_HEADERS from ALL_CPPFLAGS to MODCPPFLAGS
   Modules (various): Fix includes for compilation on Alpha
                      Use the new i2c_delay function instead of the various
@@ -65,6 +65,7 @@ ask CVS about it:
   Program decode-edid.pl: New
                           Interfaces between our eeprom module and
                           parse-edid from the read-edid project
+  Program p4b_smbus: Fix SMP compilation
   Program sensord: Add support for IT87 (Mike Black)
                    Change ADM1025 support to match the changes made to
                    the library
@@ -73,7 +74,7 @@ ask CVS about it:
                    made to the library
                    Add DRDRAM support to print_eeprom
                    Exit(1) on /proc write failure (Malte Starostik)
-				   Add LM90 support
+                   Add LM90 support
   Program sensors-detect: Add support for PCF8574, PCF8574A, SAA1064
                           Add support for LM82, LM86, LM89
                           Improved W83781D family detection
@@ -86,8 +87,6 @@ ask CVS about it:
                           Improve LM82 and LM83 detection
                           Handle "to-be-written" cleanly
                           
-
-
 2.8.0 (20030714)
   NOTE: Requires i2c-2.8.0 or newer!!!
   Dropped all kernel 2.2 and 2.3 compatibility; 2.4.9 or later required;
