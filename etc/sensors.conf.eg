@@ -1445,10 +1445,12 @@ chip "it87-*" "it8705-*" "it8712-*"
 # Adujst and uncomment the appropriate lines below.
 # The old method (modprobe it87 temp_type=0xXX) is no longer supported.
 #
-# 2 = thermistor; 3 = thermal diode
+# 2 = thermistor; 3 = thermal diode; 0 = unused
 #   set sensor1 3
 #   set sensor2 3
 #   set sensor3 3
+# If a given sensor isn't used, you will probably want to ignore it
+# (see ignore statement right below).
 
     label temp1       "M/B Temp"
     set   temp1_over  40
