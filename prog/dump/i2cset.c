@@ -1,5 +1,5 @@
 /*
-    i2cset.c - A user-space program to dump I2C registers
+    i2cset.c - A user-space program to write an I2C register.
     Copyright (c) 2001  Frodo Looijaard <frodol@dds.nl>, and
     Mark D. Studebaker <mdsxyz123@yahoo.com>
 
