@@ -80,7 +80,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
 use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect 
             lm80_detect w83781d_detect w83781d_alias_detect
             w83781d_isa_detect gl518sm_detect gl520sm_detect adm9240_detect 
-            adm1021_detect);
+            adm1021_detect sis5595_isa_detect );
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -203,6 +203,12 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        i2c_addrs => [0x18..0x1b,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 1, @_ },
      },
+     {
+       name => "Silicon Integrated Systems SIS5595",
+       driver => "sis5595",
+       isa_addrs => [ "Undetermined" ],
+       isa_detect => sub { sis5595_isa_detect @_ },
+     }
 );
 
 
@@ -836,7 +842,7 @@ sub scan_adapter
     printf "Client found at address 0x%02x\n",$addr;
     foreach $chip (@chip_ids) {
       if (exists $$chip{i2c_addrs} and contains $addr, @{$$chip{i2c_addrs}}) {
-        print "Probing for $$chip{name}... ";
+        print "Probing for `$$chip{name}'... ";
         if (($conf,@chips) = &{$$chip{i2c_detect}} (\*FILE ,$addr)) {
           print "Success!\n",
                 "    (confidence $conf, driver `$$chip{driver}'";
@@ -879,7 +885,7 @@ sub scan_isa_bus
   my ($chip,$addr,$conf);
   foreach $chip (@chip_ids) {
     next if not exists $$chip{isa_addrs} or not exists $$chip{isa_detect};
-    print "Probing for `$$chip{name}\n";
+    print "Probing for `$$chip{name}'\n";
     foreach $addr (@{$$chip{isa_addrs}}) {
       printf "  Trying address 0x%04x... ", $addr;
       $conf = &{$$chip{isa_detect}} ($addr);
@@ -1163,7 +1169,7 @@ sub adm9240_detect
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, (5) or (3) if detected.
+# Returns: undef if not detected, (6) or (3) if detected.
 # Registers used:
 #   0xfe: Company ID
 #   0x02: Status
@@ -1182,6 +1188,41 @@ sub adm1021_detect
   } else {
     return (3);
   }
+}
+
+# $_[0]: Address
+# Returns: undef if not detected, (9) if detected.
+# Note: It is already 99% certain this chip exists if we find the PCI
+# entry. The exact address is encoded in PCI space.
+sub sis5595_isa_detect
+{
+  my ($addr) = @_;
+  my ($adapter,$try);
+  my $found = 0;
+  foreach $try (@pci_list) {
+    if ($try->{procid} eq "Silicon Integrated Systems 85C503") {
+      $found = 1;
+      last;
+    }
+  }
+  return if not $found;
+
+  $found = 0;
+  foreach $adapter (@pci_adapters) {
+    if ((defined($adapter->{vendid}) and 
+         $try->{vendid} == $adapter->{vendid} and
+         $try->{devid} == $adapter->{devid} and
+         $try->{func} == $adapter->{func}) or
+        (! defined($adapter->{vendid}) and
+         $adapter->{desc} =~ /$try->{procid}/ and
+         $try->{func} == $adapter->{func})) {
+      $found = 1;
+      last;
+    }
+  }
+  return if not $found;
+
+  return (9);
 }
 
 ################
@@ -1373,7 +1414,13 @@ sub main
                $data->{address} if $is_i2c;
         printf "(main: 0x%02x", $data->{main} if (exists $data->{main});
         print "    " if  $is_i2c and $is_isa;
-        printf "ISA bus address 0x%04x", $data->{isa_addr} if $is_isa;
+        if ($is_isa) {
+          if ($data->{isa_addr}) {
+            printf "ISA bus address 0x%04x", $data->{isa_addr};
+          } else {
+            printf "ISA bus, undetermined address"
+          }
+        }
         printf "\n    Chip `%s' (confidence: %d)\n",
                $data->{chipname},  $data->{confidence};
       }
