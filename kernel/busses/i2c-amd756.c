@@ -393,11 +393,6 @@ static int __devinit amd756_probe(struct pci_dev *pdev,
 }
 
 
-static void __devexit amd756_remove(struct pci_dev *dev)
-{
-	i2c_del_adapter(&amd756_adapter);
-}
-
 static int __init i2c_amd756_init(void)
 {
 	struct pci_dev *dev;
@@ -417,6 +412,7 @@ static int __init i2c_amd756_init(void)
 
 static void __exit i2c_amd756_exit(void)
 {
+	i2c_del_adapter(&amd756_adapter);
 	release_region(amd756_ioport, SMB_IOSIZE);
 }
 
