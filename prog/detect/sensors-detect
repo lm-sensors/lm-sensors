@@ -214,7 +214,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        name => "Serial EEPROM",
        driver => "eeprom",
        i2c_addrs => [0x50..0x57],
-       i2c_detect => sub { eeprom_detect 0, @_ },
+       i2c_detect => sub { eeprom_detect @_ },
      }
 );
 
@@ -1290,12 +1290,23 @@ sub sis5595_isa_detect
 # $_[1]: Address
 # Returns: undef if not detected, (5) if detected.
 # Registers used:
-#   0x??: PC-100 Checksum
+#   0x00-0x63: PC-100 Data and Checksum
 sub eeprom_detect
 {
   my ($file,$addr) = @_;
+  # Check the checksum for validity (only works for PC-100 DIMMs)
+  my $checksum = 0;
+  for (my $i = 0; $i <= 62; $i = $i + 1) {
+    $checksum = $checksum + i2c_smbus_read_byte_data($file,$i);
+  }
+  $checksum=$checksum & 255;
+  if (i2c_smbus_read_byte_data($file,63) == $checksum) {
+  	return (8);
+  }
+  # Even if checksum test fails, it still may be an eeprom
   return (1);
 }
+
 ################
 # MAIN PROGRAM #
 ################
