@@ -29,3 +29,7 @@ Your /proc/pci or lspci listing must show this :
 To install this driver, simply do
   # modprobe i2c-hydra  
 
+This driver uses the i2c-algo-bit module which must be
+modprobed and/or enabled in your kernel
+(Character Devices -> I2C Support -> I2C Bit-Banging Interfaces).
+

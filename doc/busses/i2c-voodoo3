@@ -43,6 +43,9 @@ features.  I.e., SMBus byte reads and writes, as well as detected faults in
 transmission.  Quick reads/writes, block transactions, word transactions,
 are yet unwritten but are probably not too hard to add.
 
+This driver uses the i2c-algo-bit module which must be
+modprobed and/or enabled in your kernel
+(Character Devices -> I2C Support -> I2C Bit-Banging Interfaces).
 
 Stability
 ---------

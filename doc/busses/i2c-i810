@@ -20,6 +20,10 @@ Module Parameters
 
 Description
 -----------
+This driver uses the i2c-algo-bit module which must be
+modprobed and/or enabled in your kernel
+(Character Devices -> I2C Support -> I2C Bit-Banging Interfaces).
+
 WARNING: If you have an '810' or '815' motherboard, your standard I2C
 temperature sensors are most likely on the 801's I2C bus.
 You want the i2c-i801.o driver for those, not this driver.

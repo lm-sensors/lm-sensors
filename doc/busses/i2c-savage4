@@ -35,3 +35,8 @@ directly memory-mapped.
 
 The second interface is a general-purpose I2C bus.
 This is the only interface supported by the driver at the moment.
+
+This driver uses the i2c-algo-bit module which must be
+modprobed and/or enabled in your kernel
+(Character Devices -> I2C Support -> I2C Bit-Banging Interfaces).
+

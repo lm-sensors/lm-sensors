@@ -22,6 +22,11 @@ and appropriate open drain pins. This bus is usually used to read
 SPD SDRAM DIMMs, however there may be other devices on
 the bus also. These chips are used with wide range of 21264A boards.
 
+This driver uses the i2c-algo-bit module which must be
+modprobed and/or enabled in your kernel
+(Character Devices -> I2C Support -> I2C Bit-Banging Interfaces).
+
+
 Stability
 ---------
 Apparently stable.
