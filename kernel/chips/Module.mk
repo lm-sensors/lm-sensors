@@ -113,10 +113,23 @@ INCLUDEFILES += $(KERNELCHIPSTARGETS:.o=.d)
 all-kernel-chips: $(KERNELCHIPSTARGETS)
 all :: all-kernel-chips
 
+#
+# If $MODPREF/kernel exists, we presume the new (2.4.0) /lib/modules/x.y.z directory
+# layout, so we install in kernel/drivers/sensors/ and remove old versions in misc/
+# Otherwise we install in misc/ as before.
+#
 install-kernel-chips: all-kernel-chips
 	if [ -n "$(KERNELCHIPSTARGETS)" ] ; then \
-	  $(MKDIR) $(DESTDIR)$(MODDIR) ; \
-	  $(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(DESTDIR)$(MODDIR) ;\
+	  if [ -d "$(DESTDIR)$(MODPREF)/kernel" ] ; then \
+	    $(MKDIR) $(DESTDIR)$(MODPREF)/kernel/drivers/sensors ; \
+	    $(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(DESTDIR)$(MODPREF)/kernel/drivers/sensors ; \
+	    for i in $(KERNELCHIPSTARGETS) ; do \
+	      $(RM) $(DESTDIR)$(MODPREF)/misc/`basename $$i` ; \
+	    done \
+	  else \
+	    $(MKDIR) $(DESTDIR)$(MODPREF)/misc ; \
+	    $(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(DESTDIR)$(MODPREF)/misc ; \
+	  fi \
 	fi
 
 install :: install-kernel-chips

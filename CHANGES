@@ -18,9 +18,18 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.4 (2002????)
+  NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
+  File doc/vid: New
+  File include/sensors_vid.h: New
+  Library: Add multiple VRM version support for w83781d
+  Makefiles: For 2.4+ kernels, modules now install in
+             kernel/drivers/[i2c,sensors] , not misc/ , and
+             removes old versions in misc/ .
   Module i2c-savage4: new
   Module i2c-viapro: Add support for VT8233A (0x3147)
-  Program sensors-detect: Add VT8233A, several S3 devices
+  Module w83781d: Add multiple VRM version support
+  Program mkpatch: Install new sensors_vid.h
+  Program sensors-detect: Add VT8233A, several S3 devices; fix perl warnings
 
 2.6.3 (20020322)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
