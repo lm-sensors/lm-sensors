@@ -125,10 +125,8 @@ int pca9540_detect(struct i2c_adapter *adapter, int address,
 		if ((reg & 0xfa) != 0x00
 		 || reg != i2c_smbus_read_byte(new_client)
 		 || reg != i2c_smbus_read_byte(new_client)
-		 || reg != i2c_smbus_read_byte(new_client)) {
-			err = -ENODEV;
+		 || reg != i2c_smbus_read_byte(new_client))
 			goto ERROR1;
-		}
 	}
 
 	kind = pca9540;

@@ -302,11 +302,11 @@ static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short f
 	static int id = 0;
 	struct i2c_client *client;
 	lm92_t *data;
-	int result;
+	int result = 0;
 	u16 manufacturer;
 
 	if (!i2c_check_functionality (adapter,I2C_FUNC_SMBUS_BYTE_DATA))
-		return (-ENODEV);
+		return 0;
 
 	if (!(data = kmalloc(sizeof(lm92_t), GFP_KERNEL)))
 		return (-ENOMEM);
@@ -331,7 +331,6 @@ static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short f
 		  || manufacturer != LM92_MANUFACTURER_ID)) {
 		  	/* Is it a MAX6635/MAX6635/MAX6635? */
 			if (!max6635_check(client)) {
-				result = -ENODEV;
 				goto ERROR2;
 			}
 		}

@@ -357,7 +357,7 @@ static int asb100_attach_adapter(struct i2c_adapter *adapter)
 static int asb100_detect_subclients(struct i2c_adapter *adapter, int address,
 		int kind, struct i2c_client *new_client)
 {
-	int i, id, err;
+	int i, id, err = 0;
 	struct asb100_data *data = new_client->data;
 
 	data->lm75[0] = kmalloc(sizeof(struct i2c_client), GFP_KERNEL);
@@ -383,7 +383,6 @@ static int asb100_detect_subclients(struct i2c_adapter *adapter, int address,
 				printk(KERN_ERR "asb100.o: invalid subclient "
 					"address %d; must be 0x48-0x4f\n",
 			        	force_subclients[i]);
-				err = -ENODEV;
 				goto ERROR_SC_2;
 			}
 		}
@@ -401,7 +400,6 @@ static int asb100_detect_subclients(struct i2c_adapter *adapter, int address,
 	if(data->lm75[0]->addr == data->lm75[1]->addr) {
 		printk(KERN_ERR "asb100.o: duplicate addresses 0x%x "
 				"for subclients\n", data->lm75[0]->addr);
-		err = -ENODEV;
 		goto ERROR_SC_2;
 	}
 
@@ -441,7 +439,7 @@ ERROR_SC_0:
 static int asb100_detect(struct i2c_adapter *adapter, int address,
 		unsigned short flags, int kind)
 {
-	int err;
+	int err = 0;
 	struct i2c_client *new_client;
 	struct asb100_data *data;
 
@@ -449,14 +447,12 @@ static int asb100_detect(struct i2c_adapter *adapter, int address,
 	if (i2c_is_isa_adapter(adapter)) {
 		pr_debug("asb100.o: detect failed, "
 				"cannot attach to legacy adapter!\n");
-		err = -ENODEV;
 		goto ERROR0;
 	}
 
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA)) {
 		pr_debug("asb100.o: detect failed, "
 				"smbus byte data not supported!\n");
-		err = -ENODEV;
 		goto ERROR0;
 	}
 
@@ -497,7 +493,6 @@ static int asb100_detect(struct i2c_adapter *adapter, int address,
 				((val1 & 0x80) && (val2 != 0x06)) ) ) {
 			pr_debug("asb100.o: detect failed, "
 					"bad chip id 0x%02x!\n", val2);
-			err = -ENODEV;
 			goto ERROR1;
 		}
 
@@ -521,7 +516,6 @@ static int asb100_detect(struct i2c_adapter *adapter, int address,
 					"'force' parameter for unknown chip "
 					"at adapter %d, address 0x%02x.\n",
 					i2c_adapter_id(adapter), address);
-			err = -ENODEV;
 			goto ERROR1;
 		}
 	}

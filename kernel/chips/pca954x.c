@@ -324,7 +324,6 @@ int pca954x_detect(struct i2c_adapter *adapter, int address,
 		printk(KERN_WARNING
                        "i2c-%d: pca954x.o failed to read reg at %0x",
                        i2c_adapter_id(adapter), address);
-                err = -ENODEV;
                 goto ERROR1;
         }
         data->origval = i;

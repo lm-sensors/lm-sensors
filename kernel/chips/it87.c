@@ -469,7 +469,7 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 		if (inb_p(address + 2) != i
 		 || inb_p(address + 3) != i
 		 || inb_p(address + 7) != i)
-			return -ENODEV;
+			return 0;
 #undef REALLY_SLOW_IO
 
 		/* Let's just hope nothing breaks here */
@@ -477,7 +477,7 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 		outb_p(~i & 0x7f, address + 5);
 		if ((inb_p(address + 5) & 0x7f) != (~i & 0x7f)) {
 			outb_p(i, address + 5);
-			return -ENODEV;
+			return 0;
 		}
 	}
 
@@ -504,10 +504,8 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 	if (kind < 0) {
 		if ((it87_read_value(new_client, IT87_REG_CONFIG) & 0x80)
 		 || (!is_isa
-		  && it87_read_value(new_client, IT87_REG_I2C_ADDR) != address)) {
-		  	err = -ENODEV;
+		  && it87_read_value(new_client, IT87_REG_I2C_ADDR) != address))
 		 	goto ERROR1;
-		}
 	}
 
 	/* Determine the chip type. */
@@ -522,7 +520,6 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 				    ("it87.o: Ignoring 'force' parameter for unknown chip at "
 				     "adapter %d, address 0x%02x\n",
 				     i2c_adapter_id(adapter), address);
-			err = -ENODEV;
 			goto ERROR1;
 		}
 	}

@@ -228,10 +228,8 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	if (kind < 0) {
 		if ((adm1021_read_value(new_client, ADM1021_REG_STATUS) & 0x03) != 0x00
 		 || (adm1021_read_value(new_client, ADM1021_REG_CONFIG_R) & 0x3F) != 0x00
-		 || (adm1021_read_value(new_client, ADM1021_REG_CONV_RATE_R) & 0xF8) != 0x00) {
-			err = -ENODEV;
+		 || (adm1021_read_value(new_client, ADM1021_REG_CONV_RATE_R) & 0xF8) != 0x00)
  			goto error1;
-		}
 	}
 
 	/* Determine the chip type. */

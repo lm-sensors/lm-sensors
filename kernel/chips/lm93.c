@@ -2187,7 +2187,7 @@ static struct i2c_driver lm93_driver;
 static int lm93_detect(struct i2c_adapter *adapter, int address,
 		unsigned short flags, int kind)
 {
-	int err, func;
+	int err = 0, func;
 	struct lm93_data *data;
 	struct i2c_client *client;
 	void (*update)(struct lm93_data *, struct i2c_client *);
@@ -2196,7 +2196,6 @@ static int lm93_detect(struct i2c_adapter *adapter, int address,
 	if (i2c_is_isa_adapter(adapter)) {
 		pr_debug("lm93.o: detect failed, "
 				"cannot attach to legacy adapter!\n");
-		err = -ENODEV;
 		goto ERROR0;
 	}
 
@@ -2213,7 +2212,6 @@ static int lm93_detect(struct i2c_adapter *adapter, int address,
 	} else {
 		pr_debug("lm93.o: detect failed, "
 				"smbus byte and/or word data not supported!\n");
-		err = -ENODEV;
 		goto ERROR0;
 	}
 
@@ -2242,7 +2240,6 @@ static int lm93_detect(struct i2c_adapter *adapter, int address,
 		if (mfr != 0x01) {
 			pr_debug("lm93.o: detect failed, "
 				"bad manufacturer id 0x%02x!\n", mfr);
-			err = -ENODEV;
 			goto ERROR1;
 		}
 	}
@@ -2258,7 +2255,6 @@ static int lm93_detect(struct i2c_adapter *adapter, int address,
 			if (kind == 0)
 				pr_debug("lm93.o: "
 					"(ignored 'force' parameter)\n");
-			err = -ENODEV;
 			goto ERROR1;
 		}
 	}
