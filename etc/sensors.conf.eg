@@ -567,8 +567,6 @@ chip "w83697hf-*"
 #    set temp1_hyst 37
 #    set temp2_over 52
 #    set temp2_hyst 47
-#    set temp3_over 52
-#    set temp3_hyst 47
 
 
 chip "w83627thf-*"
