@@ -18,6 +18,8 @@
 */
 
 #include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/sysctl.h>
 #include <linux/sysctl.h>
 #include "src/sensors.h"
@@ -36,6 +38,14 @@
 
 static char buf[BUF_LEN];
 
+sensors_proc_chips_entry *sensors_proc_chips;
+int sensors_proc_chips_count;
+int sensors_proc_chips_max;
+
+sensors_bus *sensors_proc_bus;
+int sensors_proc_bus_count;
+int sensors_proc_bus_max;
+
 static int sensors_get_chip_id(sensors_chip_name name);
 
 #define add_proc_chips(el) sensors_add_array_el(el,\
@@ -43,6 +53,12 @@ static int sensors_get_chip_id(sensors_chip_name name);
                                        &sensors_proc_chips_count,\
                                        &sensors_proc_chips_max,\
                                        sizeof(struct sensors_proc_chips_entry))
+
+#define add_bus(el) sensors_add_array_el(el,\
+                                       (void **) &sensors_proc_bus,\
+                                       &sensors_proc_bus_count,\
+                                       &sensors_proc_bus_max,\
+                                       sizeof(struct sensors_bus))
 
 /* This reads /proc/sys/dev/sensors/chips into memory */
 int sensors_read_proc_chips(void)
@@ -68,6 +84,45 @@ int sensors_read_proc_chips(void)
   }
   return 0;
 }
+
+int sensors_read_proc_bus(void)
+{
+  FILE *f;
+  char line[255];
+  char *border;
+  sensors_bus entry;
+  f = fopen("/proc/bus/i2c","r");
+  if (!f)
+    return -SENSORS_ERR_PROC;
+  while (fgets(line,255,f)) {
+    if (! (border = rindex(line,'\t')))
+      goto ERROR;
+    if (! (entry.algorithm = strdup(border+1)))
+      goto FAT_ERROR;
+    *border='\0';
+    if (! (border = rindex(line,'\t')))
+      goto ERROR;
+    if (! (entry.adapter = strdup(border + 1)))
+      goto FAT_ERROR;
+    *border='\0';
+    if (! (border = rindex(line,'\t')))
+      goto ERROR;
+    *border='\0';
+    if (strncmp(line,"i2c-",4))
+      goto ERROR;
+    if (sensors_parse_i2cbus_name(line,&entry.number))
+      goto ERROR;
+    add_bus(&entry);
+  }
+  fclose(f);
+  return 0;
+FAT_ERROR:
+  sensors_fatal_error("sensors_read_proc_bus","Allocating entry");
+ERROR:
+  fclose(f);
+  return -SENSORS_ERR_PROC;
+}
+    
 
 /* This returns the first detected chip which matches the name */
 int sensors_get_chip_id(sensors_chip_name name)

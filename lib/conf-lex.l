@@ -96,26 +96,31 @@ OCTESC		(1[0-7]{0,2})|([2-7][0-7]?)|(0[1-7][0-7]?)|(00[1-7])
 
  /* Some keywords at the beginning of lines */
 <INITIAL>"label" {
+		  sensors_yylval.line = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return LABEL;
 		}
 
 <INITIAL>"set"	{
+		  sensors_yylval.line = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return SET;
 		}
 
 <INITIAL>"compute" {
+		  sensors_yylval.line = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return COMPUTE;
 		}
 
 <INITIAL>"bus"	{
+		  sensors_yylval.line = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return BUS;
 		}
 
 <INITIAL>"chip"	{
+		  sensors_yylval.line = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return CHIP;
 		}

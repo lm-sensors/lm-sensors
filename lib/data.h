@@ -54,17 +54,20 @@ typedef struct sensors_expr {
 typedef struct sensors_label {
   char *name;
   char *value;
+  int lineno;
 } sensors_label;
 
 typedef struct sensors_set {
   char *name;
   sensors_expr *value;
+  int lineno;
 } sensors_set;
 
 typedef struct sensors_compute {
   char *name;
   sensors_expr *from_proc;
   sensors_expr *to_proc;
+  int lineno;
 } sensors_compute;
 
 typedef struct sensors_chip_name_list {
@@ -84,6 +87,7 @@ typedef struct sensors_chip {
   sensors_compute *computes;
   int computes_count;
   int computes_max;
+  int lineno;
 } sensors_chip;
 
 typedef enum sensors_bus_type {sensors_i2c, sensors_isa, 
@@ -93,12 +97,14 @@ typedef struct sensors_bus {
   int number;
   char *adapter;
   char *algorithm;
+  int lineno;
 } sensors_bus;
 
 typedef struct sensors_proc_chips_entry {
   int sysctl;
   sensors_chip_name name;
 } sensors_proc_chips_entry;
+
 
 extern sensors_chip *sensors_config_chips;
 extern int sensors_config_chips_count;
@@ -111,6 +117,10 @@ extern int sensors_config_busses_max;
 extern sensors_proc_chips_entry *sensors_proc_chips;
 extern int sensors_proc_chips_count;
 extern int sensors_proc_chips_max;
+
+extern sensors_bus *sensors_proc_bus;
+extern int sensors_proc_bus_count;
+extern int sensors_proc_bus_max;
 
 /* Parse an i2c bus name into its components. Returns 0 on succes, a value from
    error.h on failure. */

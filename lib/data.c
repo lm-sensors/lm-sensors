@@ -198,6 +198,7 @@ int sensors_parse_i2cbus_name(const char *name, int *res)
   }
 }
 
+
 int sensors_eval_expr(sensors_expr *expr, double val, double *result)
 {
   double res1,res2;

@@ -18,12 +18,14 @@
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "sensors.h"
 #include "data.h"
 #include "proc.h"
 #include "error.h"
 
 extern int sensors_yyparse(void);
+extern FILE *sensors_yyin;
 
 static void free_proc_chips_entry(sensors_proc_chips_entry entry);
 static void free_chip_name(sensors_chip_name name);
@@ -34,12 +36,15 @@ static void free_set(sensors_set set);
 static void free_compute(sensors_compute compute);
 static void free_expr(sensors_expr *expr);
 
-int sensors_init(void)
+int sensors_init(FILE *input)
 {
   int res;
   sensors_cleanup();
   if ((res = sensors_read_proc_chips()))
     return res;
+  if ((res = sensors_read_proc_bus()))
+    return res;
+  sensors_yyin = input;
   if ((res = sensors_yyparse()))
     return SENSORS_ERR_PARSE;
   return 0;
@@ -66,6 +71,12 @@ void sensors_cleanup(void)
   free(sensors_config_chips);
   sensors_config_chips = NULL;
   sensors_config_chips_count = sensors_config_chips_max = 0;
+
+  for (i = 0; i < sensors_proc_bus_count; i++)
+    free_bus(sensors_proc_bus[i]);
+  free(sensors_proc_bus);
+  sensors_proc_bus = NULL;
+  sensors_proc_bus_count = sensors_proc_bus_max = 0;
 }
 
 void free_proc_chips_entry(sensors_proc_chips_entry entry)

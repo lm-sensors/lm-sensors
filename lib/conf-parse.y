@@ -89,6 +89,7 @@ static sensors_chip *current_chip = NULL;
   sensors_expr *expr;
   int bus;
   sensors_chip_name chip;
+  int line;
 }  
 
 %left <nothing> '-' '+'
@@ -97,11 +98,11 @@ static sensors_chip *current_chip = NULL;
 
 %token <nothing> ','
 %token <nothing> EOL
-%token <nothing> BUS
-%token <nothing> LABEL
-%token <nothing> SET
-%token <nothing> CHIP
-%token <nothing> COMPUTE
+%token <line> BUS
+%token <line> LABEL
+%token <line> SET
+%token <line> CHIP
+%token <line> COMPUTE
 %token <value> FLOAT
 %token <name> NAME
 %token <nothing> ERROR
@@ -133,6 +134,7 @@ line:	  bus_statement EOL
 
 bus_statement:	  BUS i2cbus_name adapter_name algorithm_name
 		  { sensors_bus new_el;
+		    new_el.lineno = $1;
                     new_el.number = $2;
                     new_el.adapter = $3;
                     new_el.algorithm = $4;
@@ -143,6 +145,7 @@ bus_statement:	  BUS i2cbus_name adapter_name algorithm_name
 label_statement:	  LABEL function_name string
 			  { sensors_label new_el;
 			    check_current_chip();
+			    new_el.lineno = $1;
 			    new_el.name = $2;
 			    new_el.value = $3;
 			    label_add_el(&new_el);
@@ -152,6 +155,7 @@ label_statement:	  LABEL function_name string
 set_statement:	  SET function_name expression
 		  { sensors_set new_el;
 		    check_current_chip();
+		    new_el.lineno = $1;
 		    new_el.name = $2;
 		    new_el.value = $3;
 		    set_add_el(&new_el);
@@ -161,6 +165,7 @@ set_statement:	  SET function_name expression
 compute_statement:	  COMPUTE function_name expression ',' expression
 			  { sensors_compute new_el;
 			    check_current_chip();
+			    new_el.lineno = $1;
 			    new_el.name = $2;
 			    new_el.from_proc = $3;
 			    new_el.to_proc = $5;
@@ -170,6 +175,7 @@ compute_statement:	  COMPUTE function_name expression ',' expression
 
 chip_statement:	  CHIP chip_name_list
 		  { sensors_chip new_el;
+		    new_el.lineno = $1;
 		    new_el.labels = NULL;
 		    new_el.sets = NULL;
 		    new_el.computes = NULL;

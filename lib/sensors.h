@@ -20,6 +20,8 @@
 #ifndef LIB_SENSORS_SENSORS_H
 #define LIB_SENSORS_SENSORS_H
 
+#include <stdio.h>
+
 /* Publicly accessible library functions */
 
 #define SENSORS_CHIP_NAME_PREFIX_ANY NULL
@@ -35,12 +37,11 @@ typedef struct sensors_chip_name {
 } sensors_chip_name;
 
 /* (Re)load the configuration file and the detected chips list. */
-extern int sensors_init(void);
+extern int sensors_init(FILE *input);
 
 /* Strictly optional clean-up function: You can't access anything after
    this, until the next sensors_init() call! */
 extern void sensors_cleanup(void);
-
 
 /* Parse a chip name to the internal representation. Return 0 on succes, <0
    on error. */
