@@ -29,6 +29,8 @@
 #include <linux/smbus.h>
 #endif /* def LM_SENSORS */
 
+#include <linux/types.h>
+
 /* Some IOCTL commands are defined in <linux/i2c.h> */
 /* Note: 10-bit addresses are NOT supported! */
 
@@ -37,20 +39,19 @@
 /* This is the structure as used in the I2C_SMBUS ioctl call */
 struct i2c_smbus_data {
   char read_write;
-  u8 command;
+  __u8 command;
   int size;
   union smbus_data *data;
 };
 
 #ifndef __KERNEL__
 
-#include <linux/ioctl.h>
+#include <sys/ioctl.h>
 
-extern inline s32 i2c_smbus_access(int file, char read_write, u8 command, 
-                                   int size, union smbus_data *data)
+extern inline __s32 i2c_smbus_access(int file, char read_write, __u8 command, 
+                                     int size, union smbus_data *data)
 {
   struct i2c_smbus_data args;
-  int res;
 
   args.read_write = read_write;
   args.command = command;
@@ -60,12 +61,12 @@ extern inline s32 i2c_smbus_access(int file, char read_write, u8 command,
 }
 
 
-extern inline s32 i2c_smbus_write_quick(int file, u8 value)
+extern inline __s32 i2c_smbus_write_quick(int file, __u8 value)
 {
   return i2c_smbus_access(file,value,0,SMBUS_QUICK,NULL);
 }
 
-extern inline s32 i2c_smbus_read_byte(int file)
+extern inline __s32 i2c_smbus_read_byte(int file)
 {
   union smbus_data data;
   if (i2c_smbus_access(file,SMBUS_READ,0,SMBUS_BYTE,&data))
@@ -74,12 +75,12 @@ extern inline s32 i2c_smbus_read_byte(int file)
     return 0x0FF & data.byte;
 }
 
-extern inline s32 i2c_smbus_write_byte(int file, u8 value)
+extern inline __s32 i2c_smbus_write_byte(int file, __u8 value)
 {
   return i2c_smbus_access(file,SMBUS_WRITE,value, SMBUS_BYTE,NULL);
 }
 
-extern inline s32 i2c_smbus_read_byte_data(int file, u8 command)
+extern inline __s32 i2c_smbus_read_byte_data(int file, __u8 command)
 {
   union smbus_data data;
   if (i2c_smbus_access(file,SMBUS_READ,command,SMBUS_BYTE_DATA,&data))
@@ -88,14 +89,15 @@ extern inline s32 i2c_smbus_read_byte_data(int file, u8 command)
     return 0x0FF & data.byte;
 }
 
-extern inline s32 i2c_smbus_write_byte_data(int file, u8 command, u8 value)
+extern inline __s32 i2c_smbus_write_byte_data(int file, __u8 command, 
+                                              __u8 value)
 {
   union smbus_data data;
   data.byte = value;
   return i2c_smbus_access(file,SMBUS_WRITE,command,SMBUS_BYTE_DATA,&data);
 }
 
-extern inline s32 i2c_smbus_read_word_data(int file, u8 command)
+extern inline __s32 i2c_smbus_read_word_data(int file, __u8 command)
 {
   union smbus_data data;
   if (i2c_smbus_access(file,SMBUS_READ,command,SMBUS_WORD_DATA,&data))
@@ -104,14 +106,15 @@ extern inline s32 i2c_smbus_read_word_data(int file, u8 command)
     return 0x0FFFF & data.word;
 }
 
-extern inline s32 i2c_smbus_write_word_data(int file, u8 command, u16 value)
+extern inline __s32 i2c_smbus_write_word_data(int file, __u8 command, 
+                                              __u16 value)
 {
   union smbus_data data;
   data.word = value;
   return i2c_smbus_access(file,SMBUS_WRITE,command,SMBUS_WORD_DATA, &data);
 }
 
-extern inline s32 i2c_smbus_process_call(int file, u8 command, u16 value)
+extern inline __s32 i2c_smbus_process_call(int file, __u8 command, __u16 value)
 {
   union smbus_data data;
   data.word = value;
@@ -123,7 +126,8 @@ extern inline s32 i2c_smbus_process_call(int file, u8 command, u16 value)
 
 
 /* Returns the number of read bytes */
-extern inline s32 i2c_smbus_read_block_data(int file, u8 command, u8 *values)
+extern inline __s32 i2c_smbus_read_block_data(int file, __u8 command, 
+                                              __u8 *values)
 {
   union smbus_data data;
   int i;
@@ -136,8 +140,8 @@ extern inline s32 i2c_smbus_read_block_data(int file, u8 command, u8 *values)
   }
 }
 
-extern inline s32 i2c_smbus_write_block_data(int file, u8 command, u8 length,
-                                             u8 *values)
+extern inline __s32 i2c_smbus_write_block_data(int file, __u8 command, 
+                                               __u8 length, __u8 *values)
 {
   union smbus_data data;
   int i;

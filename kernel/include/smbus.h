@@ -21,13 +21,33 @@
 #ifndef SENSORS_SMBUS_H
 #define SENSORS_SMBUS_H
 
-#ifdef __KERNEL__
-
 /* This file must interface with Simon Vogl's i2c driver. Version 19981006 is
    OK, earlier versions are not; later versions will probably give problems
    too. 
 */
 #include <asm/types.h>
+
+/* This union is used within smbus_access routines */
+union smbus_data { 
+        __u8 byte;
+        __u16 word;
+        __u8 block[32];
+};
+
+/* smbus_access read or write markers */
+#define SMBUS_READ      1
+#define SMBUS_WRITE     0
+
+/* SMBus transaction types (size parameter in the above functions) 
+   Note: these no longer correspond to the (arbitrary) PIIX4 internal codes! */
+#define SMBUS_QUICK      0
+#define SMBUS_BYTE       1
+#define SMBUS_BYTE_DATA  2 
+#define SMBUS_WORD_DATA  3
+#define SMBUS_PROC_CALL  4
+#define SMBUS_BLOCK_DATA 5
+
+#ifdef __KERNEL__
 
 /* SPINLOCK is defined in i2c.h. */
 #ifdef SPINLOCK
@@ -136,25 +156,6 @@ struct smbus_adapter {
 #define i2c_is_smbus_adapter(adapptr) \
         ((adapptr)->algo->id == ALGO_SMBUS)
 
-/* This union is used within smbus_access routines */
-union smbus_data { 
-        u8 byte;
-        u16 word;
-        u8 block[32];
-};
-
-/* smbus_access read or write markers */
-#define SMBUS_READ      1
-#define SMBUS_WRITE     0
-
-/* SMBus transaction types (size parameter in the above functions) 
-   Note: these no longer correspond to the (arbitrary) PIIX4 internal codes! */
-#define SMBUS_QUICK      0
-#define SMBUS_BYTE       1
-#define SMBUS_BYTE_DATA  2 
-#define SMBUS_WORD_DATA  3
-#define SMBUS_PROC_CALL  4
-#define SMBUS_BLOCK_DATA 5
 
 /* Declare an algorithm structure. All SMBus derived adapters should use this
    algorithm! */
