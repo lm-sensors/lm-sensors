@@ -8,6 +8,9 @@ OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
 REQUIRES kernel 2.4.13 or later, or i2c-2.6.1 or later!!!
 
+FOR 2.5 KERNELS, we do not recommend attempting to compile this package.
+                 Use kernel patches linked from our download page instead!!!
+
 =============================================================================
 
 This is the completely rewritten version 2 of lm_sensors, a collection of
@@ -32,7 +35,7 @@ for most users. However, if you have problems compiling,
 you may still need to download and install the latest I2C version.
 
 See the lm_sensors download page for guidance:
-  http://www.netroedge.com/~lm78/download.html
+  http://secure.netroedge.com/~lm78/download.html
 
 
 At least the following I2C/SMBus adapters are supported:
@@ -69,9 +72,10 @@ At least the following hardware sensor chips are supported:
                          LM80, LM81, LM84, LM87, and LM92
   Philips NE1617, NE1617A
   SiS 5595, 950 embedded sensors
+  SMSC 47M1xx embedded sensors
   TelCom TCN75
   TI THMC10 and THMC50
-  VIA Technologies VT82C686A/B embedded sensors
+  VIA Technologies VT1211 and VT82C686A/B embedded sensors
   Winbond W83781D, W83782D, W83783S, W83627HF, and W83697HF
 
 

@@ -4,6 +4,9 @@ INSTALLATION INSTRUCTIONS
 
 REQUIRES kernel 2.4.13 or later, or i2c-2.6.1 or later!!!
 
+FOR 2.5 KERNELS, we do not recommend attempting to compile this package.
+                 Use kernel patches linked from our download page instead!!!
+
 =============================================================================
 These are the installation instruction for the lm_sensors package.
 
