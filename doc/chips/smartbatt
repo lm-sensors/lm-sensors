@@ -1,0 +1,46 @@
+Smart Battery Driver
+-------------
+Supports smart batteries at address 0x0b.
+
+Reference: Smart Battery Data Specification Revision 1.1
+           http://www.sbs-forum.org/
+
+
+Stability
+---------
+Alpha
+
+
+DETECTION
+-------------
+Very poor. Just looks for the presence of some registers.
+
+
+USES
+-------------
+Provides read-only access to battery voltage, current, temperature,
+charge status, time remaining, and alarms.
+
+
+/PROC ENTRIES
+-------------
+average readings are one minute rolling averages.
+
+	alarms		bitmask
+	charge		relative charge, absolute charge (%)
+	i		average current, instantaneous current (amps)
+	temp		temperature (deg. C)
+	time		avg. time to empty, avg. time to full,
+			instantaneous time to full (minutes)
+	v		max voltage, current voltage (volts)
+
+
+TO DO
+-----
+more features
+
+
+Author/Maintainer
+-----------------
+Mark D. Studebaker (mdsxyz123@yahoo.com)
+

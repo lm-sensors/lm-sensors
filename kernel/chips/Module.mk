@@ -25,6 +25,7 @@ KERNELCHIPSDIR := $(MODULE_DIR)
 # defined value verbatim into the command-list of rules...
 # These targets are NOT included in 'mkpatch' ...
 KERNELCHIPSTARGETS :=
+KERNELCHIPSTARGETS += $(MODULE_DIR)/smartbatt.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smbus-arp.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/vt8231.o
 
