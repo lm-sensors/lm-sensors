@@ -173,7 +173,7 @@ void print_adm1021(const sensors_chip_name *name)
   double cur,hyst,over;
   int alarms,i,valid;
 
-  if (!sensors_get_feature(*name,SENSORS_LM78_ALARMS,&cur)) 
+  if (!sensors_get_feature(*name,SENSORS_ADM1021_ALARMS,&cur)) 
     alarms = cur + 0.5;
   else {
     printf("ERROR: Can't get alarm data!\n");
