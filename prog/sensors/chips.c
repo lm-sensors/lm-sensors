@@ -1190,7 +1190,7 @@ void print_w83781d(const sensors_chip_name *name)
   if (!sensors_get_feature(*name,SENSORS_W83781D_BEEPS,&cur)) {
     beeps = cur + 0.5;
     /* strangely, as99127f beep bits are inverted */
-    if (!strcmp(name->prefix,"as99127f"));
+    if (!strcmp(name->prefix,"as99127f"))
       beeps = ~beeps;
   } else {
     printf("ERROR: Can't get beep data!\n");
