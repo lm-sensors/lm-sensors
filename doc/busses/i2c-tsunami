@@ -17,7 +17,7 @@ Module Parameters
 
 Description
 -----------
-Tsunami/Typhoon chipsets support I2C busses via MPD registers
+The Tsunami/Typhoon chipsets' "Cchip" supports I2C busses via MPD registers
 and appropriate open drain pins. This bus is usually used to read 
 SPD SDRAM DIMMs, however there may be other devices on
 the bus also. These chips are used with wide range of 21264A boards.
