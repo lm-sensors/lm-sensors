@@ -2,7 +2,7 @@
     sis645.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
 
-    Copyright (c) 2002 Mark M. Hoffman <mhoffman@lightlink.com>
+    Copyright (c) 2003 Mark M. Hoffman <mhoffman@lightlink.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,6 +55,11 @@
 /* SiS648 north bridge */
 #ifndef PCI_DEVICE_ID_SI_648
 #define PCI_DEVICE_ID_SI_648 0x0648
+#endif
+
+/* SiS651 north bridge */
+#ifndef PCI_DEVICE_ID_SI_651
+#define PCI_DEVICE_ID_SI_651 0x0651
 #endif
 
 
@@ -232,6 +237,8 @@ static int __devinit sis645_probe(struct pci_dev *dev, const struct pci_device_i
 				PCI_DEVICE_ID_SI_648, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
 				PCI_DEVICE_ID_SI_650, NULL))
+			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
+				PCI_DEVICE_ID_SI_651, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
 				PCI_DEVICE_ID_SI_735, NULL))) {
 			printk(KERN_ERR DRV_NAME ": Can't find suitable host bridge!\n");
