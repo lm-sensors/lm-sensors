@@ -67,7 +67,7 @@ extern
        int __init i2c_voodoo3_init(void);
 static int __init voodoo3_cleanup(void);
 static int voodoo3_setup(void);
-static s32 voodoo3_access(struct i2c_adapter *adap, u8 addr, 
+static s32 voodoo3_access(struct i2c_adapter *adap, u16 addr, 
                           unsigned short flags, char read_write,
                           u8 command, int size, union i2c_smbus_data * data);
 static void Voodoo3_I2CStart(void);
@@ -470,7 +470,7 @@ static int voodoo3_setup(void)
 
 
 /* Return -1 on error. See smbus.h for more information */
-s32 voodoo3_access(struct i2c_adapter *adap, u8 addr, 
+s32 voodoo3_access(struct i2c_adapter *adap, u16 addr, 
                    unsigned short flags, char read_write,
                    u8 command, int size, union i2c_smbus_data * data)
 {
