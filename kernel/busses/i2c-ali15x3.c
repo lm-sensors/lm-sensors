@@ -501,6 +501,7 @@ static int __devinit ali15x3_probe(struct pci_dev *dev, const struct pci_device_
 static void __devexit ali15x3_remove(struct pci_dev *dev)
 {
 	i2c_del_adapter(&ali15x3_adapter);
+	release_region(ali15x3_smba, ALI15X3_SMB_IOSIZE);
 }
 
 static struct pci_driver ali15x3_driver = {
@@ -519,7 +520,6 @@ static int __init i2c_ali15x3_init(void)
 static void __exit i2c_ali15x3_exit(void)
 {
 	pci_unregister_driver(&ali15x3_driver);
-	release_region(ali15x3_smba, ALI15X3_SMB_IOSIZE);
 }
 
 MODULE_AUTHOR ("Frodo Looijaard <frodol@dds.nl>, "
