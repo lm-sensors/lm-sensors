@@ -102,8 +102,10 @@ static inline void superio_exit(void)
 
 #define FAN_FROM_REG(val,div)	((val)==0?-1:(val)==255?0: \
 				 960000/((val)*(div)))
+#define FAN_TO_REG(val,div)	((val)<=0?255: \
+				 960000/((val)*(div)))
 #define FAN_DIV_FROM_REG(val)	(1 << ((val >> 5) & 0x03))
-#define PWM_FROM_REG(val)	(val)
+#define FAN_DIV_TO_REG(val)	((val)==8?0x60:(val)==4?0x40:(val)==1?0x00:0x20)
 #define ALARM_FROM_REG(val)	((val) & 0x07)
 
 struct pc87360_data {
@@ -129,10 +131,8 @@ static int pc87360_detect(struct i2c_adapter *adapter, int address,
 static int pc87360_detach_client(struct i2c_client *client);
 
 static int pc87360_read_value(struct i2c_client *client, u8 register);
-#if 0
 static int pc87360_write_value(struct i2c_client *client, u8 register,
 			       u8 value);
-#endif
 static void pc87360_update_client(struct i2c_client *client);
 static void pc87360_init_client(struct i2c_client *client);
 static int pc87360_find(int *address, u8 *devid);
@@ -177,31 +177,31 @@ static struct i2c_driver pc87360_driver = {
 /* -- SENSORS SYSCTL END -- */
 
 static ctl_table pc87360_dir_table_template[] = { /* PC87363 too */
-	{PC87360_SYSCTL_FAN1, "fan1", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan},
-	{PC87360_SYSCTL_FAN2, "fan2", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan},
-	{PC87360_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan_div},
 	{PC87360_SYSCTL_FAN1_STATUS, "fan1_status", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan_status},
 	{PC87360_SYSCTL_FAN2_STATUS, "fan2_status", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan_status},
-	{PC87360_SYSCTL_PWM1, "pwm1", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_pwm},
-	{PC87360_SYSCTL_PWM2, "pwm2", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_pwm},
 	{0}
 };
 
 static ctl_table pc87364_dir_table_template[] = { /* PC87365 and PC87366 too */
-	{PC87360_SYSCTL_FAN1, "fan1", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan},
-	{PC87360_SYSCTL_FAN2, "fan2", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan},
-	{PC87360_SYSCTL_FAN3, "fan3", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan},
-	{PC87360_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan_div},
 	{PC87360_SYSCTL_FAN1_STATUS, "fan1_status", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan_status},
@@ -209,11 +209,11 @@ static ctl_table pc87364_dir_table_template[] = { /* PC87365 and PC87366 too */
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan_status},
 	{PC87360_SYSCTL_FAN3_STATUS, "fan3_status", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan_status},
-	{PC87360_SYSCTL_PWM1, "pwm1", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_pwm},
-	{PC87360_SYSCTL_PWM2, "pwm2", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_pwm},
-	{PC87360_SYSCTL_PWM3, "pwm3", NULL, 0, 0444, NULL,
+	{PC87360_SYSCTL_PWM3, "pwm3", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_pwm},
 	{0}
 };
@@ -356,13 +356,11 @@ static int pc87360_read_value(struct i2c_client *client, u8 reg)
 	return res;
 }
 
-#if 0
 static int pc87360_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	outb_p(value, client->addr + reg);
 	return 0;
 }
-#endif
 
 static void pc87360_init_client(struct i2c_client *client)
 {
@@ -409,8 +407,16 @@ void pc87360_fan(struct i2c_client *client, int operation, int ctl_name,
 					  FAN_DIV_FROM_REG(data->fan_status[nr]));
 		*nrels_mag = 2;
 	}
+	/* We ignore National's recommendation */
+	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->fan_min[nr] = FAN_TO_REG(results[0],
+						       FAN_DIV_FROM_REG(data->fan_status[nr]));
+			pc87360_write_value(client, PC87360_REG_FAN_MIN(nr),
+					    data->fan_min[nr]);
+		}
+	}
 }
-
 
 void pc87360_fan_div(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results)
@@ -427,6 +433,22 @@ void pc87360_fan_div(struct i2c_client *client, int operation,
 		}
 		*nrels_mag = data->fannr;
 	}
+	/* We ignore National's recommendation */
+	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		for (i = 0; i < data->fannr && i < *nrels_mag; i++) {
+			/* Preserve fan min */
+			int fan_min = FAN_FROM_REG(data->fan_min[i],
+						   FAN_DIV_FROM_REG(data->fan_status[i]));
+			data->fan_status[i] = (data->fan_status[i] & 0x9F)
+					    | FAN_DIV_TO_REG(results[i]);
+			pc87360_write_value(client, PC87360_REG_FAN_STATUS(i),
+					    data->fan_status[i]);
+			data->fan_min[i] = FAN_TO_REG(fan_min,
+						      FAN_DIV_FROM_REG(data->fan_status[i]));
+			pc87360_write_value(client, PC87360_REG_FAN_MIN(i),
+					    data->fan_min[i]);
+		}
+	}
 }
 
 void pc87360_pwm(struct i2c_client *client, int operation, int ctl_name,
@@ -439,8 +461,16 @@ void pc87360_pwm(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		pc87360_update_client(client);
-		results[0] = PWM_FROM_REG(data->pwm[nr]);
+		results[0] = data->pwm[nr];
 		*nrels_mag = 1;
+	}
+	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1)
+		{
+			data->pwm[nr] = SENSORS_LIMIT(results[0], 0, 255);
+			pc87360_write_value(client, PC87360_REG_PWM(nr),
+					    data->pwm[nr]);
+		}
 	}
 }
 

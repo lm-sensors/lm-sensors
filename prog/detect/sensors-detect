@@ -1373,13 +1373,13 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
       },
       {
 	name => "Nat. Semi. PC87365 Super IO Sensors",
-	driver => "to-be-written",
+	driver => "pc87360",
 	devid => 0xe5,
 	logdev => 0x09, # fans; voltages at 0x0d; temps at 0x0e
       },
       {
 	name => "Nat. Semi. PC87366 Super IO Sensors",
-	driver => "to-be-written",
+	driver => "pc87360",
 	devid => 0xe9,
 	logdev => 0x09, # fans; voltages at 0x0d; temps at 0x0e
       },

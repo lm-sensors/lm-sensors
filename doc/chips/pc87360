@@ -40,7 +40,7 @@ is triggered if the rotation speed has dropped below a programmable limit.
 Fan readings can be divided by a programmable divider (1, 2, 4 or 8) to give
 the readings more range or accuracy. Not all RPM values can accurately be
 represented, so some rounding is done. With a divider of 2, the lowest
-representable value is around 2600 RPM.
+representable value is around 1900 RPM. See doc/fan-divisors for details.
 
 A different alarm is also triggered if the fan speed is too low to be
 measured. It is suggested to increase the fan divisor in this case.
@@ -58,7 +58,8 @@ miss once-only alarms.
 Limitations
 -----------
 
-This driver is read-only at the moment, and only supports fans. Since I
-don't own a supported chip for testing, and the datasheet suggests that
-you shouldn't change values once the monitoring has started (this is
-normally done by the BIOS at boot time), I decided to play it safe.
+This driver only supports fans at the moment.
+
+The datasheets suggests that some values (fan mins, fan divisors)
+shouldn't be changed once the monitoring has started, but we ignore that
+recommendation. We'll reconsider if it actually causes trouble.
