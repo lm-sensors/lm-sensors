@@ -98,6 +98,7 @@ CONTENTS
 4.27 Sensors says 'ERROR: Can't get xxxxx data!'
 4.28 Sensors doesn't find any sensors, just eeproms
 4.29 Inserting modules hangs my board
+4.30 Inserting modules slows down my board
 
 5. How to Ask for Help  
 5.1 What to do if a module won't insert?
@@ -952,6 +953,10 @@ Run devfs in the kernel to get the /dev/i2c/x files.
 	2) Check the manufacturer's website.
 	3) Check the Motherboard Monitor website
 	   (see useful_addresses.html) for a good cross-reference.
+    When you know what chips you have, check the Newest Driver Status
+    web page to see if support has been added for your chip in
+    a later release or in CVS:
+	  http://www2.lm-sensors.nu/~lm78/newdrivers.html
 
 
 4.25 Sensors says 'Error: Line xxx: zzzzzzz'
@@ -1019,6 +1024,15 @@ Run devfs in the kernel to get the /dev/i2c/x files.
 	   'modprobe ignore_range=0,0x00,0x28,0,0x2a,0x7f'
 	   to prevent access to other addresses. (init=0 also req'd
 	   for the Tyan 2688).
+
+
+4.30 Inserting modules slows down my board
+
+    Generally this is caused by an overtemperature alarm output from
+the sensor chip. This triggers hardware on the board which
+automatically slows down the CPU clock. Be sure that your
+temperature limits are above the temperature reading. Put
+the new limits in /etc/sensors.conf and run 'sensors -s'.
 
 
 5 How to ask for help
@@ -1225,7 +1239,7 @@ can not be sure.
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
 
-Rev 2.7 (MDS) Minor updates 20020413
+Rev 2.7 (MDS) Minor updates 20020425
 Rev 2.6 (MDS) Minor updates 20020115, released with lm_sensors 2.6.3
 Rev 2.5 (MDS) Minor updates 20011111, released with lm_sensors 2.6.2
 Rev 2.4 (MDS) Minor updates 20010722
