@@ -916,6 +916,107 @@ void print_gl518(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_adm1025(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur,min,max;
+  int alarms,valid;
+
+  if (!sensors_get_feature(*name,SENSORS_ADM1025_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_ADM1025_IN0,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN0,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN0_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN0_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM1025_ALARM_IN0?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN0 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_ADM1025_IN1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN1_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN1_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM1025_ALARM_IN1?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_ADM1025_IN2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN2_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN2_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM1025_ALARM_IN2?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN2 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_ADM1025_IN3,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN3_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN3_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM1025_ALARM_IN3?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN3 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_ADM1025_IN4,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN4,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN4_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN4_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM1025_ALARM_IN4?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN4 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_ADM1025_IN5,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN5,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN5_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_IN5_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM1025_ALARM_IN5?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN5 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_ADM1025_TEMP1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_TEMP1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_TEMP1_HYST,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_TEMP1_OVER,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+3.2f C (hot:limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
+           cur,max,min, alarms&ADM1025_ALARM_TEMP?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get TEMP data!\n");
+  free_the_label(&label);
+
+}
+
 void print_lm80(const sensors_chip_name *name)
 {
   char *label = NULL;
