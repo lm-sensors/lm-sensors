@@ -621,7 +621,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        isa_detect => sub { via686a_isa_detect @_ },
      },
      {
-       name => "ITE IT8705F / IT8712F",
+       name => "ITE IT8705F / IT8712F / SiS 950",
        driver => "Unwritten (IT87xxF)",
        i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_driver_addrs => [0x20..0x2f], 
