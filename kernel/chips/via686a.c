@@ -521,13 +521,18 @@ int via686a_find(int *address)
 	    pci_read_config_word(s_bridge, VIA686A_BASE_REG, &val))
 		return -ENODEV;
 	*address = (val & 0xff80);
+	if (*address == 0) {
+		printk("via686a.o: sensors not enabled - upgrade BIOS?\n");
+		return -ENODEV;
+	}
 
 	if (PCIBIOS_SUCCESSFUL !=
 	    pci_read_config_word(s_bridge, VIA686A_ENABLE_REG, &val))
 		return -ENODEV;
-	if ((*address == 0) || !(val & 0x01)) {
-		printk("via686a.o: sensors not enabled - upgrade BIOS?\n");
-		return -ENODEV;
+	if (!(val & 0x01)) {
+		printk("via686a.o: enabling sensors\n");
+		pci_write_config_word(s_bridge, VIA686A_ENABLE_REG,
+		                      val | 0x01);
 	}
 	return 0;
 }
