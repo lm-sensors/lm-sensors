@@ -31,4 +31,9 @@ Fujitsu Siemens Computers	Complete system for		11/01
 				general project suupport
 
 HardData Ltd.	Tyan 2466 w/ 1G Duron; W83627HF and W73782D	5/02
-		Drivers developed: Tyan 2466 initialization
+		Drivers developed: Tyan 2466 initialization;
+		DDR recognition
+
+Intel		SMBus 2.0 system				6/02
+		Drivers developed: SMBus 2.0; ADM1025 improvements;
+		82801 improvements
