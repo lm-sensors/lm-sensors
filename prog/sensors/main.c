@@ -282,6 +282,7 @@ int do_a_set(sensors_chip_name name)
   if(name.bus >= 0)
 	if(name.addr >= 0x48 && name.addr <= 0x4f)
 		if(!strcmp(name.prefix, "as99127f") ||
+		   !strcmp(name.prefix, "asb100") ||
 		   !strcmp(name.prefix, "w83781d") ||
 		   !strcmp(name.prefix, "w83782d") ||
 		   !strcmp(name.prefix, "w83783s") ||
@@ -397,6 +398,7 @@ void do_a_print(sensors_chip_name name)
   if(name.bus >= 0)
 	if(name.addr >= 0x48 && name.addr <= 0x4f)
 		if(!strcmp(name.prefix, "as99127f") ||
+		   !strcmp(name.prefix, "asb100") ||
 		   !strcmp(name.prefix, "w83781d") ||
 		   !strcmp(name.prefix, "w83782d") ||
 		   !strcmp(name.prefix, "w83783s") ||
