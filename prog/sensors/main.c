@@ -45,7 +45,7 @@ static void open_config_file(void);
 static int open_this_config_file(char *filename);
 static void do_a_print(sensors_chip_name name);
 static void do_a_set(sensors_chip_name name);
-static void do_the_real_work(void);
+static int do_the_real_work(void);
 static const char *sprintf_chip_name(sensors_chip_name name);
 
 #define CHIPS_MAX 20
@@ -206,14 +206,23 @@ int main (int argc, char *argv[])
     exit(1);
   }
 
-  do_the_real_work();
-  exit(0);
+  if(do_the_real_work()) {
+    exit(0);
+  } else {
+    if(chips[0].prefix == SENSORS_CHIP_NAME_PREFIX_ANY)
+	    fprintf(stderr,"No sensors found!\n");
+    else
+	    fprintf(stderr,"Specified sensor(s) not found!\n");
+    exit(1);
+  }
 }
 
-void do_the_real_work(void)
+/* returns number of chips found */
+int do_the_real_work(void)
 {
   const sensors_chip_name *chip;
   int chip_nr,i;
+  int cnt = 0;
 
   for (chip_nr = 0; (chip = sensors_get_detected_chips(&chip_nr));)
     for(i = 0; i < chips_count; i++)
@@ -223,7 +232,9 @@ void do_the_real_work(void)
         else
           do_a_print(*chip);
         i = chips_count;
+	cnt++;
       }
+   return(cnt);
 }
 
 void do_a_set(sensors_chip_name name)

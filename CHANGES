@@ -36,7 +36,8 @@ ask CVS about it:
   Program mkpatch.pl: more fixes
   Program sensors: Add ds1621, mtp008 support; add -f (Fahrenheit) option;
                    add adm1025 temp2; report temp limits correctly as
-                   min/max or limit/hysteresis
+                   min/max or limit/hysteresis; print message if no
+                   sensors are found.
   Program sensors-detect: Add ds1621, mtp008 detection;
                           add ServerWorks detection (no driver yet)
 
