@@ -88,7 +88,7 @@ If you try this on a supported configuration,
 please report your clock chip, your SMBus chip
 (piix4 or ali15x3), and the results of
 'cat /proc/sys/dev/sensors/icspll-i2c-*-69/reg0-6' to
-lm78@stimpy.netroedge.com.
+sensors@stimpy.netroedge.com.
 
 
 TO DO

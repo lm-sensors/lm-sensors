@@ -693,7 +693,7 @@ P:      Frodo Looijaard
 M:      frodol@dds.nl
 P:	Philip Edelbrock
 M:	phil@netroedge.com
-L:      lm78@stimpy.netroedge.com
+L:      sensors@stimpy.netroedge.com
 W:      http://www.lm-sensors.nu/
 S:      Maintained
 

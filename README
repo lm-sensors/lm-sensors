@@ -114,10 +114,10 @@ On the other hand, we provide a program called 'sensors-detect' which
 tries to figure out what hardware is available on your system.
 
 The developers of this package can be reached through the email address
-<lm78@stimpy.netroedge.com>. Do not hesitate to mail us if you have questions,
-suggestions, problems, want to contribute, or just want to report it works
-for you. But please try to read the documentation and FAQ first before you ask
-any questions!
+<sensors@stimpy.netroedge.com>. Do not hesitate to mail us if you have 
+questions, suggestions, problems, want to contribute, or just want to 
+report it works for you. But please try to read the documentation and\
+FAQ first before you ask any questions!
 
 The latest version of this package can always be found on our homepage:
 http://www.netroedge.com/~lm78. Pre-release versions can be retrieved

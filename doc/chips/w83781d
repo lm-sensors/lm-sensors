@@ -583,6 +583,6 @@ register in Bank0.CR51 of W83781D.
  
 Author/Maintainer
 -----------------
-Original 781D support: Frodo and Phil (lm78@stimpy.netroedge.com)
+Original 781D support: Frodo and Phil (sensors@stimpy.netroedge.com)
 782D/783S support added by: Mark D. Studebaker (mdsxyz123@yahoo.com)
-Send requests to the lm78@stimpy.netroedge.com mailing list.
+Send requests to the sensors@stimpy.netroedge.com mailing list.
