@@ -156,14 +156,16 @@ int i2cproc_init(void)
     return -ENOENT;
   }
   proc_bus_i2c = create_proc_entry("i2c",0,proc_bus);
-  if (proc_bus_i2c)
-    proc_bus_i2c->read_proc = &read_bus_i2c;
-  else {
+  if (!proc_bus_i2c) {
     printk("i2c-proc.o: Could not create /proc/bus/i2c, "
            "module not inserted.\n");
     i2cproc_cleanup();
     return -ENOENT;
   }
+  proc_bus_i2c->read_proc = &read_bus_i2c;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
+  proc_bus_i2c->fill_inode = &monitor_bus_i2c;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
   i2cproc_initialized += 2;
 #else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
   /* In Linux 2.0.x, there is no /proc/bus! But I hope no other module
@@ -252,7 +254,8 @@ int read_bus_i2c(char *buf, char **start, off_t offset, int len, int unused)
   len = 0;
   for (i = 0; i < I2C_ADAP_MAX; i++)
     if (i2cproc_adapters[i])
-      len += sprintf(buf+len, "i2c-%d\t%s\t%-32s\t%-32s\n",i,
+      len += sprintf(buf+len, "i2c-%d\t%s\t%-32s\t%-32s\n",
+                     i2c_adapter_id(i2cproc_adapters[i]),
                      i2c_is_smbus_adapter(i2cproc_adapters[i])?"smbus":
 #ifdef DEBUG
                        i2c_is_isa_adapter(i2cproc_adapters[i])?"isa":
@@ -356,7 +359,7 @@ int i2cproc_attach_adapter(struct i2c_adapter *adapter)
   }
   i2cproc_adapters[i] = adapter;
 
-  sprintf(name,"i2c-%d",i);
+  sprintf(name,"i2c-%d",i2c_adapter_id(adapter));
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
   proc_entry = create_proc_entry(name,0,proc_bus);
@@ -413,7 +416,7 @@ int i2cproc_detach_client(struct i2c_client *client)
   for (i = 0; i < I2C_ADAP_MAX; i++) 
     if (client->adapter == i2cproc_adapters[i]) {
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
-      sprintf(name,"i2c-%d",i);
+      sprintf(name,"i2c-%d",i2c_adapter_id(i2cproc_adapters[i]));
       remove_proc_entry(name,proc_bus);
 #else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
       if ((res = proc_unregister(&proc_bus_dir,
