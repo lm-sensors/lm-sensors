@@ -211,15 +211,14 @@ int vt596_setup(void)
 			/* try 2nd address and config reg. for 596 */
 			if((num->dev == PCI_DEVICE_ID_VIA_82C596_3) &&
 			   (!pci_read_config_word(VT596_dev, SMBBA2, &vt596_smba)) &&
-			   (vt596_smba & 0x1))
+			   (vt596_smba & 0x1)) {
 				smb_cf_hstcfg = 0x84;
-			else
-				goto FAIL;
-		} else {
-FAIL:
-			printk
-			    ("i2c-viapro.o: Cannot configure SMBus I/O Base address\n");
-			return(-ENODEV);
+			} else {
+			        /* no matches at all */
+			        printk("i2c-viapro.o: Cannot configure SMBus "
+				       "I/O Base address\n");
+			        return(-ENODEV);
+			}
 		}
 	}
 	vt596_smba &= 0xfff0;
