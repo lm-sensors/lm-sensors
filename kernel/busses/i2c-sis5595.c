@@ -238,7 +238,7 @@ int sis5595_transaction(void)
   }
 
   /* start the transaction by setting bit 4 */
-  sis5595_write(SMB_CTL_LO,sis5595_read(SMB_CTL_LO));
+  sis5595_write(SMB_CTL_LO,sis5595_read(SMB_CTL_LO)|0x10);
 
   /* We will always wait for a fraction of a second! */
   do {
@@ -250,8 +250,8 @@ int sis5595_transaction(void)
   if (timeout >= MAX_TIMEOUT) {
 #ifdef DEBUG
     printk("i2c-sis5595.o: SMBus Timeout!\n"); 
-    result = -1;
 #endif
+    result = -1;
   }
 
   if (temp & 0x10) {
@@ -407,7 +407,7 @@ int __init sis5595_cleanup(void)
       sis5595_initialized--;
   }
   if (sis5595_initialized >= 1) {
-    release_region(sis5595_base, 2);
+    release_region(sis5595_base + SMB_INDEX, 2);
     sis5595_initialized--;
   }
   return 0;
