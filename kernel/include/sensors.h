@@ -144,7 +144,7 @@ struct sensors_chips_data {
 #define W83781D_SYSCTL_FAN1 1101 /* Rotations/min */
 #define W83781D_SYSCTL_FAN2 1102
 #define W83781D_SYSCTL_FAN3 1103
-#define W83781D_SYSCTL_TEMP 1200 /* Degrees Celcius * 10 */
+#define W83781D_SYSCTL_TEMP1 1200 /* Degrees Celcius * 10 */
 #define W83781D_SYSCTL_TEMP2 1201 /* Degrees Celcius * 10 */
 #define W83781D_SYSCTL_TEMP3 1202 /* Degrees Celcius * 10 */
 #define W83781D_SYSCTL_VID 1300 /* Volts * 100 */
@@ -162,11 +162,9 @@ struct sensors_chips_data {
 #define W83781D_ALARM_FAN1 0x0040
 #define W83781D_ALARM_FAN2 0x0080
 #define W83781D_ALARM_FAN3 0x0800
-#define W83781D_ALARM_TEMP 0x0010
-#define W83781D_ALARM_BTI 0x0020
+#define W83781D_ALARM_TEMP1 0x0010
+#define W83781D_ALARM_TEMP23 0x0020
 #define W83781D_ALARM_CHAS 0x1000
-#define W83781D_ALARM_FIFO 0x2000
-#define W83781D_ALARM_SMI_IN 0x4000
 
 #define LM75_SYSCTL_TEMP 1200 /* Degrees Celcius * 10 */
 

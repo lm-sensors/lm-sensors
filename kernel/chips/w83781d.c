@@ -1,4 +1,3 @@
-
 /*
     w83781d.c - Part of lm_sensors, Linux kernel modules for hardware
                 monitoring
@@ -52,15 +51,20 @@
 #define W83781D_REG_FAN_MIN(nr) (0x3a + (nr))
 #define W83781D_REG_FAN(nr) (0x27 + (nr))
 
-#define W83781D_REG_TEMP23 0x50
-#define W83781D_REG_TEMP_HYST23 0x53
-#define W83781D_REG_TEMP_CONFIG23 0x52
-#define W83781D_REG_TEMP_OVER23 0x55
+#define W83781D_REG_TEMP2 0x0150
+#define W83781D_REG_TEMP3 0x0250
+#define W83781D_REG_TEMP2_HYST 0x153
+#define W83781D_REG_TEMP3_HYST 0x253
+#define W83781D_REG_TEMP2_CONFIG 0x152
+#define W83781D_REG_TEMP3_CONFIG 0x252
+#define W83781D_REG_TEMP2_OVER 0x155
+#define W83781D_REG_TEMP3_OVER 0x255
+
 #define W83781D_REG_TEMP 0x27
 #define W83781D_REG_TEMP_OVER 0x39
 #define W83781D_REG_TEMP_HYST 0x3A
 #define W83781D_REG_TEMP_CONFIG 0x52
-#define W83781D_REG_TEMP_SEL 0x4E
+#define W83781D_REG_BANK 0x4E
 
 #define W83781D_REG_CONFIG 0x40
 #define W83781D_REG_ALARM1 0x41
@@ -72,26 +76,34 @@
 
 #define W83781D_REG_VID_FANDIV 0x47
 
-#define W83781D_REG_CHIPID 0x58
+#define W83781D_REG_CHIPID 0x49
+#define W83781D_REG_WCHIPID 0x58
 #define W83781D_REG_CHIPMAN 0x4F
+#define W83781D_REG_PIN 0x4B
 
 
 /* Conversions. Rounding is only done on the TO_REG variants. */
-static int w83781d_in_conv[7] = {10000, 10000, 10000, 16892, 38000, 
-                              -34768, -15050 };
-#define IN_TO_REG(val,nr) (((((val) * 100000 / w83781d_in_conv[nr]) + 8) / 16) \
-                           & 0xff)
-#define IN_FROM_REG(val,nr) (((val) *  16 * w83781d_in_conv[nr]) / 100000)
+#define IN_TO_REG(val,nr) (((val) * 10 + 8)/16)
+#define IN_FROM_REG(val,nr) (((val) * 16) / 10)
 
-#define FAN_TO_REG(val) ((val)==0?255:((1350000+(val))/((val)*2)) & 0xff)
-#define FAN_FROM_REG(val) ((val)==0?-1:(val)==255?0:1350000/((val)*2))
+#define FAN_TO_REG(val,div) ((val)==0?255:((1350000+(val))/\
+                            ((val)*2*(div))) & 0xff)
+#define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*2*(div)))
 
 #define TEMP_TO_REG(val) (((val)<0?(((val)-5)/10)&0xff:((val)+5)/10) & 0xff)
 #define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
 
+#define TEMP_ADD_TO_REG(val)   (((((val) + 2) / 5) << 7) & 0xff80)
+#define TEMP_ADD_FROM_REG(val) (((val) >> 7) * 5)
+
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            (val)>=0x06?0:205-(val)*5)
 #define ALARMS_FROM_REG(val) (val)
+#define BEEPS_FROM_REG(val) (val)
+#define BEEPS_TO_REG(val) ((val) & 0xffff)
+
+#define BEEP_ENABLE_TO_REG(val) (val)
+#define BEEP_ENABLE_FROM_REG(val) ((val)?1:0)
 
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
@@ -100,41 +112,55 @@ static int w83781d_in_conv[7] = {10000, 10000, 10000, 16892, 38000,
 #define W83781D_INIT_IN_0 (vid==350?280:vid)
 #define W83781D_INIT_IN_1 (vid==350?280:vid)
 #define W83781D_INIT_IN_2 330
-#define W83781D_INIT_IN_3 500
-#define W83781D_INIT_IN_4 1200
-#define W83781D_INIT_IN_5 -1200
-#define W83781D_INIT_IN_6 -500
+#define W83781D_INIT_IN_3 (((500)   * 100)/168)
+#define W83781D_INIT_IN_4 (((1200)  * 10)/38)
+#define W83781D_INIT_IN_5 (((-1200) * -604)/2100)
+#define W83781D_INIT_IN_6 (((-500)  * -604)/909)
 
 #define W83781D_INIT_IN_PERCENTAGE 10
 
 #define W83781D_INIT_IN_MIN_0 \
-        (W83781D_INIT_IN_0 - W83781D_INIT_IN_0 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_0 - W83781D_INIT_IN_0 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MAX_0 \
-        (W83781D_INIT_IN_0 + W83781D_INIT_IN_0 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_0 + W83781D_INIT_IN_0 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MIN_1 \
-        (W83781D_INIT_IN_1 - W83781D_INIT_IN_1 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_1 - W83781D_INIT_IN_1 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MAX_1 \
-        (W83781D_INIT_IN_1 + W83781D_INIT_IN_1 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_1 + W83781D_INIT_IN_1 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MIN_2 \
-        (W83781D_INIT_IN_2 - W83781D_INIT_IN_2 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_2 - W83781D_INIT_IN_2 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MAX_2 \
-        (W83781D_INIT_IN_2 + W83781D_INIT_IN_2 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_2 + W83781D_INIT_IN_2 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MIN_3 \
-        (W83781D_INIT_IN_3 - W83781D_INIT_IN_3 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_3 - W83781D_INIT_IN_3 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MAX_3 \
-        (W83781D_INIT_IN_3 + W83781D_INIT_IN_3 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_3 + W83781D_INIT_IN_3 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MIN_4 \
-        (W83781D_INIT_IN_4 - W83781D_INIT_IN_4 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_4 - W83781D_INIT_IN_4 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MAX_4 \
-        (W83781D_INIT_IN_4 + W83781D_INIT_IN_4 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_4 + W83781D_INIT_IN_4 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MIN_5 \
-        (W83781D_INIT_IN_5 - W83781D_INIT_IN_5 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_5 - W83781D_INIT_IN_5 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MAX_5 \
-        (W83781D_INIT_IN_5 + W83781D_INIT_IN_5 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_5 + W83781D_INIT_IN_5 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MIN_6 \
-        (W83781D_INIT_IN_6 - W83781D_INIT_IN_6 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_6 - W83781D_INIT_IN_6 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 #define W83781D_INIT_IN_MAX_6 \
-        (W83781D_INIT_IN_6 + W83781D_INIT_IN_6 * W83781D_INIT_IN_PERCENTAGE / 100) 
+        (W83781D_INIT_IN_6 + W83781D_INIT_IN_6 * W83781D_INIT_IN_PERCENTAGE \
+         / 100) 
 
 #define W83781D_INIT_FAN_MIN_1 3000
 #define W83781D_INIT_FAN_MIN_2 3000
@@ -180,13 +206,17 @@ struct w83781d_data {
          u8 in_min[7];               /* Register value */
          u8 fan[3];                  /* Register value */
          u8 fan_min[3];              /* Register value */
-         u8 temp[3];                    /* Register value */
-         u8 temp_over[3];               /* Register value */
-         u8 temp_hyst[3];               /* Register value */
-         u8 fan_div[2];              /* Register encoding, shifted right */
+         u8 temp;
+         u8 temp_over;               /* Register value */
+         u8 temp_hyst;               /* Register value */
+         u8 temp_add[2];             /* Register value */
+         u16 temp_add_over[2];       /* Register value */
+         u16 temp_add_hyst[2];       /* Register value */
+         u8 fan_div[3];              /* Register encoding, shifted right */
          u8 vid;                     /* Register encoding, combined */
          u16 alarms;                 /* Register encoding, combined */
-         u8 beep[3];                    /* Register value of config and interrupt masks */
+         u16 beeps;                  /* Register encoding, combined */
+         u8 beep_enable;             /* Boolean */
 };
 
 
@@ -207,8 +237,9 @@ static int w83781d_command(struct i2c_client *client, unsigned int cmd,
 static void w83781d_inc_use (struct i2c_client *client);
 static void w83781d_dec_use (struct i2c_client *client);
 
-static int w83781d_read_value(struct i2c_client *client, u8 register);
-static int w83781d_write_value(struct i2c_client *client, u8 register, u8 value);
+static int w83781d_read_value(struct i2c_client *client, u16 register);
+static int w83781d_write_value(struct i2c_client *client, u16 register, 
+                               u16 value);
 static void w83781d_update_client(struct i2c_client *client);
 static void w83781d_init_client(struct i2c_client *client);
 
@@ -217,22 +248,18 @@ static void w83781d_in(struct i2c_client *client, int operation, int ctl_name,
                     int *nrels_mag, long *results);
 static void w83781d_fan(struct i2c_client *client, int operation, int ctl_name,
                      int *nrels_mag, long *results);
-static void w83781d_temp(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results,int tempnum);
-static void w83781d_temp1(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
-static void w83781d_temp2(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
-static void w83781d_temp3(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
+static void w83781d_temp(struct i2c_client *client, int operation, 
+                          int ctl_name, int *nrels_mag, long *results);
+static void w83781d_temp_add(struct i2c_client *client, int operation, 
+                          int ctl_name, int *nrels_mag, long *results);
 static void w83781d_vid(struct i2c_client *client, int operation, int ctl_name,
-                     int *nrels_mag, long *results);
-static void w83781d_alarms(struct i2c_client *client, int operation, int ctl_name,
-                        int *nrels_mag, long *results);
+                         int *nrels_mag, long *results);
+static void w83781d_alarms(struct i2c_client *client, int operation,
+                           int ctl_name, int *nrels_mag, long *results);
 static void w83781d_beep(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
-static void w83781d_fan_div(struct i2c_client *client, int operation, int ctl_name,
-                         int *nrels_mag, long *results);
+static void w83781d_fan_div(struct i2c_client *client, int operation,
+                            int ctl_name, int *nrels_mag, long *results);
 
 /* I choose here for semi-static W83781D allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -283,12 +310,12 @@ static ctl_table w83781d_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &w83781d_fan },
   { W83781D_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_fan },
-  { W83781D_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &w83781d_temp1 },
+  { W83781D_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_temp },
   { W83781D_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &w83781d_temp2 },
+    &sensors_sysctl_real, NULL, &w83781d_temp_add },
   { W83781D_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &w83781d_temp3 },
+    &sensors_sysctl_real, NULL, &w83781d_temp_add },
   { W83781D_SYSCTL_VID, "vid", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_vid },
   { W83781D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
@@ -354,7 +381,13 @@ int w83781d_detect_isa(struct isa_adapter *adapter)
     
     /* Real detection code goes here */
 
-    outb_p(W83781D_REG_CHIPID,address + W83781D_ADDR_REG_OFFSET);
+    /* The Winbond may be stuck in bank 1 or 2. This should reset it. 
+       We really need some nifty detection code, because this can lead
+       to a lot of problems if there is no Winbond present! */
+    outb_p(W83781D_REG_BANK,address + W83781D_ADDR_REG_OFFSET);
+    outb_p(0x00,address + W83781D_DATA_REG_OFFSET);
+
+    outb_p(W83781D_REG_WCHIPID,address + W83781D_ADDR_REG_OFFSET);
     err = inb_p(address + W83781D_DATA_REG_OFFSET) & 0xfe;
 
     if (err != 0x20) {
@@ -460,7 +493,9 @@ int w83781d_detect_smbus(struct i2c_adapter *adapter)
     if (smbus_read_byte_data(adapter,address,W83781D_REG_CONFIG) < 0) 
       continue;
 
-    err = smbus_read_byte_data(adapter,address,W83781D_REG_CHIPID);
+    smbus_write_byte_data(adapter,address,W83781D_REG_BANK,0x00);
+
+    err = smbus_read_byte_data(adapter,address,W83781D_REG_WCHIPID);
     
     if (err == 0x20) {
       printk("w83781d.o: Winbond W83781D detected (SMBus addr 0x%X)\n",address);
@@ -599,41 +634,109 @@ void w83781d_dec_use (struct i2c_client *client)
 }
  
 
-/* The SMBus locks itself, but ISA access must be locked explicitely! 
+/* The SMBus locks itself, usually, but nothing may access the Winbond between
+   bank switches. ISA access must always be locked explicitely! 
    We ignore the W83781D BUSY flag at this moment - it could lead to deadlocks,
    would slow down the W83781D access and should not be necessary. 
    There are some ugly typecasts here, but the good new is - they should
    nowhere else be necessary! */
-int w83781d_read_value(struct i2c_client *client, u8 reg)
+int w83781d_read_value(struct i2c_client *client, u16 reg)
 {
-  int res;
+  int res,word_sized;
+
+  word_sized = (reg & 0x0ff) && (((reg && 0x00ff) == 0x50) || 
+                                 ((reg && 0x00ff) == 0x53) || 
+                                 ((reg && 0x00ff) == 0x55));
+  down((struct semaphore *) (client->data));
   if (i2c_is_isa_client(client)) {
-    down((struct semaphore *) (client->data));
-    outb_p(reg,(((struct isa_client *) client)->isa_addr) + 
-               W83781D_ADDR_REG_OFFSET);
-    res = inb_p((((struct isa_client *) client)->isa_addr) + 
+    if (reg & 0xff00) {
+      outb_p(W83781D_REG_BANK,(((struct isa_client *) client)->isa_addr) +
+                              W83781D_ADDR_REG_OFFSET);
+      outb_p(reg >> 8,(((struct isa_client *) client)->isa_addr) +
+                      W83781D_DATA_REG_OFFSET);
+    }
+    outb_p(reg & 0xff,(((struct isa_client *) client)->isa_addr) +
+                      W83781D_ADDR_REG_OFFSET);
+    res = inb_p((((struct isa_client *) client)->isa_addr) +
                 W83781D_DATA_REG_OFFSET);
-    up((struct semaphore *) (client->data));
-    return res;
-  } else
-    return smbus_read_byte_data(client->adapter,client->addr, reg);
+    if (word_sized) {
+      outb_p((reg & 0xff)+1,(((struct isa_client *) client)->isa_addr) +
+                        W83781D_ADDR_REG_OFFSET);
+      res = (res << 8) + inb_p((((struct isa_client *) client)->isa_addr) +
+                         W83781D_DATA_REG_OFFSET);
+    }
+    if (reg & 0xff00) {
+      outb_p(W83781D_REG_BANK,(((struct isa_client *) client)->isa_addr) +
+                              W83781D_ADDR_REG_OFFSET);
+      outb_p(0,(((struct isa_client *) client)->isa_addr) +
+               W83781D_DATA_REG_OFFSET);
+    }
+  } else {
+    if (reg & 0xff00)
+      smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,
+                            reg >> 8);
+    res = smbus_read_byte_data(client->adapter,client->addr, reg);
+    if (word_sized)
+      res = (res << 8) + smbus_read_byte_data(client->adapter,client->addr, 
+                                              reg);
+    if (reg & 0xff00)
+      smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,0);
+  }
+  up((struct semaphore *) (client->data));
+  return res;
 }
 
-/* The SMBus locks itself, but ISA access muse be locked explicitely! 
+/* The SMBus locks itself, usually, but nothing may access the Winbond between
+   bank switches. ISA access must always be locked explicitely! 
    We ignore the W83781D BUSY flag at this moment - it could lead to deadlocks,
    would slow down the W83781D access and should not be necessary. 
    There are some ugly typecasts here, but the good new is - they should
    nowhere else be necessary! */
-int w83781d_write_value(struct i2c_client *client, u8 reg, u8 value)
+int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 {
+  int word_sized;
+
+  word_sized = (reg & 0x0ff) && (((reg && 0x00ff) == 0x50) || 
+                                 ((reg && 0x00ff) == 0x53) || 
+                                 ((reg && 0x00ff) == 0x55));
+  down((struct semaphore *) (client->data));
   if (i2c_is_isa_client(client)) {
-    down((struct semaphore *) (client->data));
-    outb_p(reg,((struct isa_client *) client)->isa_addr + W83781D_ADDR_REG_OFFSET);
-    outb_p(value,((struct isa_client *) client)->isa_addr + W83781D_DATA_REG_OFFSET);
-    up((struct semaphore *) (client->data));
-    return 0;
-  } else
-    return smbus_write_byte_data(client->adapter, client->addr, reg,value);
+    if (reg & 0xff00) {
+      outb_p(W83781D_REG_BANK,(((struct isa_client *) client)->isa_addr) +
+                              W83781D_ADDR_REG_OFFSET);
+      outb_p(reg >> 8,(((struct isa_client *) client)->isa_addr) +
+                      W83781D_DATA_REG_OFFSET);
+    }
+    outb_p(reg & 0xff,(((struct isa_client *) client)->isa_addr) +
+                      W83781D_ADDR_REG_OFFSET);
+    if (word_sized) {
+      outb_p(value >> 8,(((struct isa_client *) client)->isa_addr) +
+                        W83781D_DATA_REG_OFFSET);
+      outb_p((reg & 0xff)+1,(((struct isa_client *) client)->isa_addr) +
+                        W83781D_ADDR_REG_OFFSET);
+    }
+    outb_p(value &0xff,(((struct isa_client *) client)->isa_addr) +
+                       W83781D_DATA_REG_OFFSET);
+    if (reg & 0xff00) {
+      outb_p(W83781D_REG_BANK,(((struct isa_client *) client)->isa_addr) +
+                              W83781D_ADDR_REG_OFFSET);
+      outb_p(0,(((struct isa_client *) client)->isa_addr) +
+               W83781D_DATA_REG_OFFSET);
+    }
+  } else {
+    if (reg & 0xff00)
+      smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,
+                            reg >> 8);
+    if (word_sized) {
+       smbus_write_byte_data(client->adapter,client->addr, reg, value >> 8);
+       smbus_write_byte_data(client->adapter,client->addr, reg+1, value &0xff);
+    } else
+      smbus_write_byte_data(client->adapter,client->addr, reg, value &0xff);
+    if (reg & 0xff00)
+      smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,0);
+  }
+  up((struct semaphore *) (client->data));
+  return 0;
 }
 
 /* Called when we have found a new W83781D. It should set limits, etc. */
@@ -649,48 +752,63 @@ void w83781d_init_client(struct i2c_client *client)
   vid |= (w83781d_read_value(client,W83781D_REG_CHIPID) & 0x01) >> 4;
   vid = VID_FROM_REG(vid);
 
-  w83781d_write_value(client,W83781D_REG_IN_MIN(0),IN_TO_REG(W83781D_INIT_IN_MIN_0,0));
-  w83781d_write_value(client,W83781D_REG_IN_MAX(0),IN_TO_REG(W83781D_INIT_IN_MAX_0,0));
-  w83781d_write_value(client,W83781D_REG_IN_MIN(1),IN_TO_REG(W83781D_INIT_IN_MIN_1,1));
-  w83781d_write_value(client,W83781D_REG_IN_MAX(1),IN_TO_REG(W83781D_INIT_IN_MAX_1,1));
-  w83781d_write_value(client,W83781D_REG_IN_MIN(2),IN_TO_REG(W83781D_INIT_IN_MIN_2,2));
-  w83781d_write_value(client,W83781D_REG_IN_MAX(2),IN_TO_REG(W83781D_INIT_IN_MAX_2,2));
-  w83781d_write_value(client,W83781D_REG_IN_MIN(3),IN_TO_REG(W83781D_INIT_IN_MIN_3,3));
-  w83781d_write_value(client,W83781D_REG_IN_MAX(3),IN_TO_REG(W83781D_INIT_IN_MAX_3,3));
-  w83781d_write_value(client,W83781D_REG_IN_MIN(4),IN_TO_REG(W83781D_INIT_IN_MIN_4,4));
-  w83781d_write_value(client,W83781D_REG_IN_MAX(4),IN_TO_REG(W83781D_INIT_IN_MAX_4,4));
-  w83781d_write_value(client,W83781D_REG_IN_MIN(5),IN_TO_REG(W83781D_INIT_IN_MIN_5,5));
-  w83781d_write_value(client,W83781D_REG_IN_MAX(5),IN_TO_REG(W83781D_INIT_IN_MAX_5,5));
-  w83781d_write_value(client,W83781D_REG_IN_MIN(6),IN_TO_REG(W83781D_INIT_IN_MIN_6,6));
-  w83781d_write_value(client,W83781D_REG_IN_MAX(6),IN_TO_REG(W83781D_INIT_IN_MAX_6,6));
-  w83781d_write_value(client,W83781D_REG_FAN_MIN(1),FAN_TO_REG(W83781D_INIT_FAN_MIN_1));
-  w83781d_write_value(client,W83781D_REG_FAN_MIN(2),FAN_TO_REG(W83781D_INIT_FAN_MIN_2));
-  w83781d_write_value(client,W83781D_REG_FAN_MIN(3),FAN_TO_REG(W83781D_INIT_FAN_MIN_3));
-  /* Init Temp Sensor1 */
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x00);/* Switch Banks! */
-  w83781d_write_value(client,W83781D_REG_TEMP_OVER,TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
-  w83781d_write_value(client,W83781D_REG_TEMP_HYST,TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
+  w83781d_write_value(client,W83781D_REG_IN_MIN(0),
+                      IN_TO_REG(W83781D_INIT_IN_MIN_0,0));
+  w83781d_write_value(client,W83781D_REG_IN_MAX(0),
+                      IN_TO_REG(W83781D_INIT_IN_MAX_0,0));
+  w83781d_write_value(client,W83781D_REG_IN_MIN(1),
+                      IN_TO_REG(W83781D_INIT_IN_MIN_1,1));
+  w83781d_write_value(client,W83781D_REG_IN_MAX(1),
+                      IN_TO_REG(W83781D_INIT_IN_MAX_1,1));
+  w83781d_write_value(client,W83781D_REG_IN_MIN(2),
+                      IN_TO_REG(W83781D_INIT_IN_MIN_2,2));
+  w83781d_write_value(client,W83781D_REG_IN_MAX(2),
+                      IN_TO_REG(W83781D_INIT_IN_MAX_2,2));
+  w83781d_write_value(client,W83781D_REG_IN_MIN(3),
+                      IN_TO_REG(W83781D_INIT_IN_MIN_3,3));
+  w83781d_write_value(client,W83781D_REG_IN_MAX(3),
+                      IN_TO_REG(W83781D_INIT_IN_MAX_3,3));
+  w83781d_write_value(client,W83781D_REG_IN_MIN(4),
+                      IN_TO_REG(W83781D_INIT_IN_MIN_4,4));
+  w83781d_write_value(client,W83781D_REG_IN_MAX(4),
+                      IN_TO_REG(W83781D_INIT_IN_MAX_4,4));
+  w83781d_write_value(client,W83781D_REG_IN_MIN(5),
+                      IN_TO_REG(W83781D_INIT_IN_MIN_5,5));
+  w83781d_write_value(client,W83781D_REG_IN_MAX(5),
+                      IN_TO_REG(W83781D_INIT_IN_MAX_5,5));
+  w83781d_write_value(client,W83781D_REG_IN_MIN(6),
+                      IN_TO_REG(W83781D_INIT_IN_MIN_6,6));
+  w83781d_write_value(client,W83781D_REG_IN_MAX(6),
+                      IN_TO_REG(W83781D_INIT_IN_MAX_6,6));
+  w83781d_write_value(client,W83781D_REG_FAN_MIN(1),
+                      FAN_TO_REG(W83781D_INIT_FAN_MIN_1,2));
+  w83781d_write_value(client,W83781D_REG_FAN_MIN(2),
+                      FAN_TO_REG(W83781D_INIT_FAN_MIN_2,2));
+  w83781d_write_value(client,W83781D_REG_FAN_MIN(3),
+                      FAN_TO_REG(W83781D_INIT_FAN_MIN_3,2));
+
+  w83781d_write_value(client,W83781D_REG_TEMP_OVER,
+                      TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
+  w83781d_write_value(client,W83781D_REG_TEMP_HYST,
+                      TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
   w83781d_write_value(client,W83781D_REG_TEMP_CONFIG,0x00);
-  /* Init Temp Sensor2 */
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x01);/* Switch Banks! */
-  w83781d_write_value(client,W83781D_REG_TEMP_OVER23,TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
-  w83781d_write_value(client,W83781D_REG_TEMP_OVER23 + 1,0);
-  w83781d_write_value(client,W83781D_REG_TEMP_HYST23,TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
-  w83781d_write_value(client,W83781D_REG_TEMP_HYST23 + 1,0);
-  w83781d_write_value(client,W83781D_REG_TEMP_CONFIG23,0x00);
-  /* Init Temp Sensor3 */
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x02);/* Switch Banks! */
-  w83781d_write_value(client,W83781D_REG_TEMP_OVER23,TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
-  w83781d_write_value(client,W83781D_REG_TEMP_OVER23 + 1,0);
-  w83781d_write_value(client,W83781D_REG_TEMP_HYST23,TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
-  w83781d_write_value(client,W83781D_REG_TEMP_HYST23 + 1,0);
-  w83781d_write_value(client,W83781D_REG_TEMP_CONFIG23,0x00);
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x00);/* Switch Banks! */
+
+  w83781d_write_value(client,W83781D_REG_TEMP2_OVER,
+                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP_OVER));
+  w83781d_write_value(client,W83781D_REG_TEMP2_HYST,
+                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP_HYST));
+  w83781d_write_value(client,W83781D_REG_TEMP2_CONFIG,0x00);
+
+  w83781d_write_value(client,W83781D_REG_TEMP3_OVER,
+                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP_OVER));
+  w83781d_write_value(client,W83781D_REG_TEMP3_HYST,
+                      TEMP_ADD_TO_REG(W83781D_INIT_TEMP_HYST));
+  w83781d_write_value(client,W83781D_REG_TEMP3_CONFIG,0x00);
 
   /* Start monitoring */
   w83781d_write_value(client,W83781D_REG_CONFIG,
-                   (w83781d_read_value(client,W83781D_REG_CONFIG) & 0xf7) | 0x01);
-  
+                   (w83781d_read_value(client,
+                                       W83781D_REG_CONFIG) & 0xf7) | 0x01);
 }
 
 void w83781d_update_client(struct i2c_client *client)
@@ -715,28 +833,27 @@ void w83781d_update_client(struct i2c_client *client)
       data->fan[i-1] = w83781d_read_value(client,W83781D_REG_FAN(i));
       data->fan_min[i-1] = w83781d_read_value(client,W83781D_REG_FAN_MIN(i));
     }
-    data->temp[0] = w83781d_read_value(client,W83781D_REG_TEMP);
-    data->temp_over[0] = w83781d_read_value(client,W83781D_REG_TEMP_OVER);
-    data->temp_hyst[0] = w83781d_read_value(client,W83781D_REG_TEMP_HYST);
-    w83781d_write_value(client,W83781D_REG_TEMP_SEL,1);/* Switch Banks!! */
-    data->temp[1] = w83781d_read_value(client,W83781D_REG_TEMP23);
-    data->temp_over[1] = w83781d_read_value(client,W83781D_REG_TEMP_OVER23);
-    data->temp_hyst[1] = w83781d_read_value(client,W83781D_REG_TEMP_HYST23);
-    w83781d_write_value(client,W83781D_REG_TEMP_SEL,2);/* Switch Banks!! */
-    data->temp[2] = w83781d_read_value(client,W83781D_REG_TEMP23);
-    data->temp_over[2] = w83781d_read_value(client,W83781D_REG_TEMP_OVER23);
-    data->temp_hyst[2] = w83781d_read_value(client,W83781D_REG_TEMP_HYST23);
-    w83781d_write_value(client,W83781D_REG_TEMP_SEL,0);/* Switch Banks!! */
+    data->temp = w83781d_read_value(client,W83781D_REG_TEMP);
+    data->temp_over = w83781d_read_value(client,W83781D_REG_TEMP_OVER);
+    data->temp_hyst = w83781d_read_value(client,W83781D_REG_TEMP_HYST);
+    data->temp_add[0] = w83781d_read_value(client,W83781D_REG_TEMP2);
+    data->temp_add_over[0] = w83781d_read_value(client,W83781D_REG_TEMP2_OVER);
+    data->temp_add_hyst[0] = w83781d_read_value(client,W83781D_REG_TEMP2_HYST);
+    data->temp_add[1] = w83781d_read_value(client,W83781D_REG_TEMP3);
+    data->temp_add_over[1] = w83781d_read_value(client,W83781D_REG_TEMP3_OVER);
+    data->temp_add_hyst[1] = w83781d_read_value(client,W83781D_REG_TEMP3_HYST);
     i = w83781d_read_value(client,W83781D_REG_VID_FANDIV);
     data->vid = i & 0x0f;
     data->vid |= (w83781d_read_value(client,W83781D_REG_CHIPID) & 0x01) >> 4;
     data->fan_div[0] = (i >> 4) & 0x03;
     data->fan_div[1] = i >> 6;
+    data->fan_div[2] = (w83781d_read_value(client,W83781D_REG_PIN) >> 6) & 0x03;
     data->alarms = w83781d_read_value(client,W83781D_REG_ALARM1) +
-                   (w83781d_read_value(client,W83781D_REG_ALARM2) >> 8);
-    data->beep[0] = w83781d_read_value(client,W83781D_REG_BEEP_CONFIG);
-    data->beep[1] = w83781d_read_value(client,W83781D_REG_BEEP_INTS1);
-    data->beep[2] = w83781d_read_value(client,W83781D_REG_BEEP_INTS2);
+                   (w83781d_read_value(client,W83781D_REG_ALARM2) << 8);
+    i = w83781d_read_value(client,W83781D_REG_BEEP_INTS2);
+    data->beep_enable = i >> 7;
+    data->beeps = ((i & 0x7f) << 8) + 
+                  w83781d_read_value(client,W83781D_REG_BEEP_INTS1);
     data->last_updated = jiffies;
     data->valid = 1;
   }
@@ -794,12 +911,12 @@ void w83781d_fan(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     w83781d_update_client(client);
-    results[0] = FAN_FROM_REG(data->fan_min[nr-1]);
-    results[1] = FAN_FROM_REG(data->fan[nr-1]);
+    results[0] = FAN_FROM_REG(data->fan_min[nr-1],data->fan_div[nr-1]);
+    results[1] = FAN_FROM_REG(data->fan[nr-1],data->fan_div[nr-1]);
     *nrels_mag = 2;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
-      data->fan_min[nr-1] = FAN_TO_REG(results[0]);
+      data->fan_min[nr-1] = FAN_TO_REG(results[0],data->fan_div[nr-1]);
       w83781d_write_value(client,W83781D_REG_FAN_MIN(nr),data->fan_min[nr-1]);
     }
   }
@@ -807,76 +924,58 @@ void w83781d_fan(struct i2c_client *client, int operation, int ctl_name,
 
 
 void w83781d_temp(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results,int tempnum )
+               int *nrels_mag, long *results)
 {
   struct w83781d_data *data = client->data;
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 1;
   else if (operation == SENSORS_PROC_REAL_READ) {
     w83781d_update_client(client);
-    results[0] = TEMP_FROM_REG(data->temp_over[tempnum - 1]);
-    results[1] = TEMP_FROM_REG(data->temp_hyst[tempnum - 1]);
-    results[2] = TEMP_FROM_REG(data->temp[tempnum - 1]);
+    results[0] = TEMP_FROM_REG(data->temp_over);
+    results[1] = TEMP_FROM_REG(data->temp_hyst);
+    results[2] = TEMP_FROM_REG(data->temp);
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (tempnum == 3) {
-     w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x02);/* Switch Banks!! */
-     if (*nrels_mag >= 1) {
-       data->temp_over[2] = TEMP_TO_REG(results[0]);
-       w83781d_write_value(client,W83781D_REG_TEMP_OVER23,data->temp_over[2]);
-       w83781d_write_value(client,W83781D_REG_TEMP_OVER23 + 1,0);
-     }
-     if (*nrels_mag >= 2) {
-       data->temp_hyst[2] = TEMP_TO_REG(results[1]);
-       w83781d_write_value(client,W83781D_REG_TEMP_HYST23,data->temp_hyst[2]);
-       w83781d_write_value(client,W83781D_REG_TEMP_HYST23 + 1,0);
-     }
-     w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x0);/* Switch Banks!! */
-    } else if (tempnum == 2) {
-     w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x01);/* Switch Banks!! */
-     if (*nrels_mag >= 1) {
-       data->temp_over[1] = TEMP_TO_REG(results[0]);
-       w83781d_write_value(client,W83781D_REG_TEMP_OVER23,data->temp_over[1]);
-       w83781d_write_value(client,W83781D_REG_TEMP_OVER23 + 1,0);
-     }
-     if (*nrels_mag >= 2) {
-       data->temp_hyst[1] = TEMP_TO_REG(results[1]);
-       w83781d_write_value(client,W83781D_REG_TEMP_HYST23,data->temp_hyst[1]);
-       w83781d_write_value(client,W83781D_REG_TEMP_HYST23 + 1,0);
-     }
-     w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x0);/* Switch Banks!! */
-    } else {
-     if (*nrels_mag >= 1) {
-       data->temp_over[0] = TEMP_TO_REG(results[0]);
-       w83781d_write_value(client,W83781D_REG_TEMP_OVER,data->temp_over[0]);
-     }
-     if (*nrels_mag >= 2) {
-       data->temp_hyst[0] = TEMP_TO_REG(results[1]);
-       w83781d_write_value(client,W83781D_REG_TEMP_HYST,data->temp_hyst[0]);
-     }
+    if (*nrels_mag >= 1) {
+      data->temp_over = TEMP_TO_REG(results[0]);
+      w83781d_write_value(client,W83781D_REG_TEMP_OVER,data->temp_over);
+    }
+    if (*nrels_mag >= 2) {
+      data->temp_hyst = TEMP_TO_REG(results[1]);
+      w83781d_write_value(client,W83781D_REG_TEMP_HYST,data->temp_hyst);
     }
   }
 }
 
 
-void w83781d_temp1(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results) {
+void w83781d_temp_add(struct i2c_client *client, int operation, int ctl_name,
+                      int *nrels_mag, long *results)
+{
+  struct w83781d_data *data = client->data;
+  int nr = ctl_name - W83781D_SYSCTL_TEMP2;
 
-  w83781d_temp(client,operation,ctl_name,nrels_mag,results,1);
-}
-
-
-void w83781d_temp2(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results) {
-	       
-  w83781d_temp(client,operation,ctl_name,nrels_mag,results,2);
-}
-
-
-void w83781d_temp3(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results) {
-	       
-  w83781d_temp(client,operation,ctl_name,nrels_mag,results,3);
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 1;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    w83781d_update_client(client);
+    results[0] = TEMP_ADD_FROM_REG(data->temp_add_over[nr]);
+    results[1] = TEMP_ADD_FROM_REG(data->temp_add_hyst[nr]);
+    results[2] = TEMP_ADD_FROM_REG(data->temp_add[nr]);
+    *nrels_mag = 3;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 1) {
+      data->temp_add_over[nr] = TEMP_ADD_TO_REG(results[0]);
+      w83781d_write_value(client,
+                          nr?W83781D_REG_TEMP3_OVER:W83781D_REG_TEMP2_OVER,
+                          data->temp_add_over[nr]);
+    }
+    if (*nrels_mag >= 2) {
+      data->temp_add_hyst[nr] = TEMP_ADD_TO_REG(results[1]);
+      w83781d_write_value(client,
+                          nr?W83781D_REG_TEMP3_HYST:W83781D_REG_TEMP2_HYST,
+                          data->temp_add_hyst[nr]);
+    }
+  }
 }
 
 
@@ -910,21 +1009,27 @@ void w83781d_beep(struct i2c_client *client, int operation, int ctl_name,
                  int *nrels_mag, long *results)
 {
   struct w83781d_data *data = client->data;
+  int val;
+
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     w83781d_update_client(client);
-    results[0] = data->beep[0];
-    results[1] = data->beep[1];
-    results[2] = data->beep[2];
-    *nrels_mag = 3;
+    results[0] = BEEP_ENABLE_FROM_REG(data->beep_enable);
+    results[1] = BEEPS_FROM_REG(data->beeps);
+    *nrels_mag = 2;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    data->beep[0] = results[0];
-    w83781d_write_value(client,W83781D_REG_BEEP_CONFIG,data->beep[0]);
-    data->beep[1] = results[1];
-    w83781d_write_value(client,W83781D_REG_BEEP_INTS1,data->beep[1]);
-    data->beep[2] = results[2];
-    w83781d_write_value(client,W83781D_REG_BEEP_INTS2,data->beep[2]);
+    if (*nrels_mag >= 2) {
+      data->beeps = BEEPS_TO_REG(results[1]);
+      w83781d_write_value(client,W83781D_REG_BEEP_INTS1,data->beeps & 0xff);
+      val = data->beeps >> 8;
+    } else if (*nrels_mag >= 1)
+      val = w83781d_read_value(client,W83781D_REG_BEEP_INTS1) & 0x7f;
+    if (*nrels_mag >= 1) {
+      data->beep_enable = BEEP_ENABLE_TO_REG(results[0]);
+      w83781d_write_value(client,W83781D_REG_BEEP_INTS2,
+                          val | data->beep_enable << 7);
+    }
   }
 }
 
@@ -940,7 +1045,7 @@ void w83781d_fan_div(struct i2c_client *client, int operation, int ctl_name,
     w83781d_update_client(client);
     results[0] = DIV_FROM_REG(data->fan_div[0]);
     results[1] = DIV_FROM_REG(data->fan_div[1]);
-    results[2] = 2;
+    results[2] = DIV_FROM_REG(data->fan_div[2]);
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     old = w83781d_read_value(client,W83781D_REG_VID_FANDIV);
@@ -952,6 +1057,11 @@ void w83781d_fan_div(struct i2c_client *client, int operation, int ctl_name,
       data->fan_div[0] = DIV_TO_REG(results[0]);
       old = (old & 0xcf) | (data->fan_div[0] << 4);
       w83781d_write_value(client,W83781D_REG_VID_FANDIV,old);
+    }
+    if (*nrels_mag >= 3) {
+      data->fan_div[2] = DIV_TO_REG(results[2]);
+      w83781d_write_value(client,W83781D_REG_PIN,
+                          w83781d_read_value(client,W83781D_REG_PIN));
     }
   }
 }

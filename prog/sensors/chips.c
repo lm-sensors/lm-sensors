@@ -508,7 +508,7 @@ void print_lm80(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM80_TEMP_OS_HYST,&min2) &&
       !sensors_get_feature(*name,SENSORS_LM80_TEMP_OS_MAX,&max2)) {
     print_label(label,10);
-    printf("%+3.0f C (hot:limit = %+3.0f C,  hysteris = %+3.0f C) %s\n",
+    printf("%+3.2f C (hot:limit = %+3.0f C,  hysteris = %+3.0f C) %s\n",
            cur,max,min, alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
     printf("         (os: limit = %+3.0f C,  hysteris = %+3.0f C) %s\n",
            max2,min2, alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
