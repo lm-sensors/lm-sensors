@@ -11,7 +11,7 @@ OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 !!! This package is ONLY for 2.6, 2.5, and 2.4 kernels (2.4.9 or later) !!!
 !!! THIS PACKAGE REQUIRES i2c-2.8.1 or later!!!
 
-FOR 2.6/2.5 KERNELS, Use only the userspace tools in this package.
+FOR 2.6/2.5 KERNELS, Use only the userspace tools in this package!
 Build and install them with 'make user' and 'make user_install'.
 The kernel modules in this package will not compile for 2.6/2.5;
 use the drivers already in the 2.5 kernel development tree.
@@ -41,7 +41,7 @@ for compilation of this package.
 ADDITIONALLY, i2c-2.8.1 is not API compatible to earlier i2c
 releases due to struct changes; therefore you must NOT ENABLE
 any other i2c drivers (e.g. bttv) in the kernel.
-Do NOT use lm-sensors 2.8.1 or i2c-2.8.1 directly out of this package
+Do NOT install lm-sensors kernel modules directly out of this package
 if you require bttv or related modules.
 
 Users whose systems require additional i2c-related
