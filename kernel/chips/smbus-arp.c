@@ -71,13 +71,13 @@ SENSORS_INSMOD_1(arp);
 static u8 reserved[] =
 /* As defined by SMBus Spec. Appendix C */
 			{0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x28,
-                        0x2c, 0x2d, 0x37, 0x40, 0x41, 0x42,
-	                0x43, 0x44, ARP_ADDRESS,
+                        0x37, ARP_ADDRESS,
 /* As defined by SMBus Spec. Sect. 5.2 */
 			0x01, 0x02, 0x03, 0x04, 0x05,
 			0x06, 0x07, 0x78, 0x79, 0x7a, 0x7b,
 			0x7c, 0x7d, 0x7e, 0x7f,
 /* Common PC addresses (bad idea) */
+			0x2d, 0x48, 0x49, /* sensors */
 			0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, /* eeproms */
 			0x69, /* clock chips */
 /* Must end in 0 which is also reserved */
@@ -91,7 +91,14 @@ static u8 reserved[] =
 #define ARP_MAX_DEVICES 8
 struct arp_device {
 	int status;
-	u8 udid[16];	
+	u8 dev_cap;
+	u8 dev_ver;
+	u16 dev_vid;
+	u16 dev_did;
+	u16 dev_int;
+	u16 dev_svid;
+	u16 dev_sdid;
+	u32 dev_vsid;
 	u8 saddr;
 };
 
@@ -135,7 +142,6 @@ static void smbusarp_contents(struct i2c_client *client, int operation,
 static void smbusarp_update_client(struct i2c_client *client);
 
 
-/* This is the driver that will be inserted */
 static struct i2c_driver smbusarp_driver = {
 	/* name */ "SMBUS ARP",
 	/* id */ I2C_DRIVERID_ARP,
@@ -147,8 +153,23 @@ static struct i2c_driver smbusarp_driver = {
 	/* dec_use */ &smbusarp_dec_use
 };
 
-/* These files are created for each bus */
 static ctl_table smbusarp_dir_table_template[] = {
+	{ARP_SYSCTL1, "0", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smbusarp_contents},
+	{ARP_SYSCTL2, "1", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smbusarp_contents},
+	{ARP_SYSCTL3, "2", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smbusarp_contents},
+	{ARP_SYSCTL4, "3", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smbusarp_contents},
+	{ARP_SYSCTL5, "4", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smbusarp_contents},
+	{ARP_SYSCTL6, "5", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smbusarp_contents},
+	{ARP_SYSCTL7, "6", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smbusarp_contents},
+	{ARP_SYSCTL8, "7", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smbusarp_contents},
 	{0}
 };
 
@@ -286,6 +307,9 @@ int smbusarp_init_client(struct i2c_client *client)
 	int found = 0;
 	int newdev = 0;
 	
+	for(i = 0; i < ARP_MAX_DEVICES; i++)
+		data->dev[i].status = ARP_FREE;
+
 	for(i = 0; i < SMBUS_ADDRESS_SIZE; i++)
 		data->address_pool[i] = ARP_FREE;
 
@@ -365,9 +389,17 @@ int smbusarp_init_client(struct i2c_client *client)
 			}
 
 		}
-		for(i = 0; i < 16; i++)
 		data->dev[newdev].saddr = addr;
-			data->dev[newdev].udid[i] = blk[i];
+		data->dev[newdev].status = ARP_BUSY;
+		data->dev[newdev].dev_cap = blk[0];
+		data->dev[newdev].dev_ver = blk[1];
+		data->dev[newdev].dev_vid = (blk[2] << 8) | blk[3];
+		data->dev[newdev].dev_did = (blk[4] << 8) | blk[5];
+		data->dev[newdev].dev_int = (blk[6] << 8) | blk[7];
+		data->dev[newdev].dev_svid = (blk[8] << 8) | blk[9];
+		data->dev[newdev].dev_sdid = (blk[10] << 8) | blk[11];
+		data->dev[newdev].dev_vsid = (blk[12] << 24) | (blk[13] << 16) |
+		                             (blk[14] << 8) | blk[15] ;
 
 		blk[16] = addr << 1;
 		ret = i2c_smbus_write_block_data(client, ARP_ASSIGN_ADDR,
@@ -410,6 +442,35 @@ void smbusarp_update_client(struct i2c_client *client)
 	up(&data->update_lock);
 }
 
+void smbusarp_contents(struct i2c_client *client, int operation,
+		     int ctl_name, int *nrels_mag, long *results)
+{
+	int i;
+	int nr = ctl_name - ARP_SYSCTL1;
+	struct arp_data *data = client->data;
+
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		if(data->dev[nr].status == ARP_BUSY) {
+			results[0] = data->dev[nr].saddr;
+			results[1] = data->dev[nr].dev_cap;
+			results[2] = data->dev[nr].dev_ver;
+			results[3] = data->dev[nr].dev_vid;
+			results[4] = data->dev[nr].dev_did;
+			results[5] = data->dev[nr].dev_int;
+			results[6] = data->dev[nr].dev_svid;
+			results[7] = data->dev[nr].dev_sdid;
+			results[8] = data->dev[nr].dev_vsid;
+			*nrels_mag = 9;
+		} else {
+			*nrels_mag = 0;
+		}
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		printk(KERN_WARNING "smbus-arp.o: No writes supported!\n");
+	}
+}
 int __init sensors_smbusarp_init(void)
 {
 	int res;

@@ -558,4 +558,13 @@
 #define PCF8591_SYSCTL_AOUT_ENABLE 1005   /* Analog output enable flag */
 #define PCF8591_SYSCTL_AOUT 1006          /* Analog output */
 
+#define ARP_SYSCTL1 1000
+#define ARP_SYSCTL2 1001
+#define ARP_SYSCTL3 1002
+#define ARP_SYSCTL4 1003
+#define ARP_SYSCTL5 1004
+#define ARP_SYSCTL6 1005
+#define ARP_SYSCTL7 1006
+#define ARP_SYSCTL8 1007
+
 #endif				/* def SENSORS_SENSORS_H */
