@@ -3295,7 +3295,8 @@ static sensors_chip_feature bmc_features[] =
     { SENSORS_BMC_TEMP1_MAX+2, "temp3_max", SENSORS_BMC_TEMP1+2,
                               SENSORS_BMC_TEMP1+2, SENSORS_MODE_RW, 
                               BMC_SYSCTL_TEMP1+2, VALUE(1), 0 },
-    { SENSORS_BMC_TEMP1+3, "temp4", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,    /* scalings from here down */
+	/* scalings from here down */
+    { SENSORS_BMC_TEMP1+3, "temp4", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
                          SENSORS_MODE_R, BMC_SYSCTL_TEMP1+3, VALUE(3), 1 },
     { SENSORS_BMC_TEMP1_MIN+3, "temp4_min", SENSORS_BMC_TEMP1+3,
                               SENSORS_BMC_TEMP1+3, SENSORS_MODE_RW, 
@@ -3331,6 +3332,7 @@ static sensors_chip_feature bmc_features[] =
                            SENSORS_MODE_R, BMC_SYSCTL_ALARMS, VALUE(1), 0 },
     { 0 }
   };
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },

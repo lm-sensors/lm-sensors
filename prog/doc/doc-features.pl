@@ -140,6 +140,7 @@ sub scan_kernel_chip
 	while ($line = <INPUTFILE>)
 	{
 		next unless $line =~ m/^\s*static\s+ctl_table/;
+		last if $line =~ m/;/; # Skip dynamic ctl_table
     	my @tokens = tokenize($line);
 		
 		while ($line = <INPUTFILE>)
