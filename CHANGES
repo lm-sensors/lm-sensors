@@ -13,6 +13,12 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
+2.3.3 (19990603)
+  Module i2c-voodoo3: Timing issue fixes
+  Module bt869: Seems to be functional and relatively well tested
+  Many modules were modified to be more compatible with the new
+   Mutex structure in the new experimental kernels.
+
 2.3.2 (19990507)
   Module i2c-hydra: Now compiles on 2.0.x kernels
   Module i2c-lm75: Slightly better detection
