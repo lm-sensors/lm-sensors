@@ -41,7 +41,7 @@ echo $$ > /var/run/fancontrol.pid
 
 function LoadConfig {
 	echo "Loading configuration from $1 ..."
-	#grep configuration from file
+	# grep configuration from file
 	INTERVAL=`egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g'`
 	FCTEMPS=`egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS=//g'`
 	MINTEMP=`egrep '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP=//g'`
@@ -54,13 +54,14 @@ function LoadConfig {
 		echo "Some settings missing..."
 		exit 1
 	fi
+	# here the other settings should be verified
+	
 
-
+	# write settings to arrays for easier use and print them
         echo
 	echo "Common settings:"
 	echo "  INTERVAL=$INTERVAL"
 						
-	#write values to arrays
 	let fcvcount=0
 	for fcv in $FCTEMPS
 	do
@@ -96,11 +97,15 @@ if (( $? != 0 )) ; then
   exit 1
 fi
 
-function calc () { awk "BEGIN { print $@ }"; }
+# function doing all the math
+function calc () {
+	awk "BEGIN { print $@ }"
+}
 
+# main function
 function UpdateFanSpeeds {
 	let fcvcount=0
-	while (( $fcvcount < ${#AFCPWM[@]} ))
+	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
 	do
 		#hopefully shorter vars will improve readability:
 		pwmo=${AFCPWM[$fcvcount]}
@@ -123,22 +128,24 @@ function UpdateFanSpeeds {
 		#echo "pwmpval=$pwmpval"
 		
 		if (( $tval <= $mint ))
-		  then pwmval=0
+		  then pwmval=0 # at specified mintemp shut fan off
 		elif (( $tval >= $maxt ))
-		  then pwmval=255
+		  then pwmval=255 # at specified maxtemp switch to 100%
 		else 
+		  # calculate the new value from temperature and settings
 		  pwmval=`calc "((10/(${maxt}-${mint})*(${tval}-${mint}))^2/1000*(${maxt}-${mint})*(255-${minso})+${minso})" |cut -d'.' -f1`
-		  if (( $pwmpval == 0 )) # if fan was stopped, start it
-		  then
+		  if (( $pwmpval == 0 ))
+		  then # if fan was stopped start it using a safe value
 		  	echo $minsa > $pwmo
 			sleep 1
 		  fi
 		fi
-		echo $pwmval > $pwmo
+		echo $pwmval > $pwmo # write new value to pwm output
 		fcvcount=$fcvcount+1
 	done
 }
 
+# main loop calling the main function at specified intervals
 while true
 do
 	UpdateFanSpeeds
