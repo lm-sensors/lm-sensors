@@ -17,9 +17,13 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 2.8.2 (???)
-  Library: Fix bmcsensors scaling, increase number of sensors
+  Library: Fix bmcsensors scaling, increase number of sensors;
+           Add w83627thf support; Advance version to 2.0.2
+  Makefiles: Install burntest, fancontrol, pwmconfig, decode-*.pl
   Module i2c-sis630: sync with 2.6.0-X driver version. 
   Module bmcsensors: Fix voltage scaling, voltage and fan limits
+  Program sensors-detect: Prefer Super I/O drivers;
+                          Fix w83627hf detection
 
 
 2.8.1 (20031005)

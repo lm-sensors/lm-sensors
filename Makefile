@@ -152,7 +152,8 @@ MACHINE := $(shell uname -m)
 # The subdirectories we need to build things in 
 SRCDIRS := mkpatch
 SRCDIRS += kernel kernel/busses kernel/chips kernel/include
-SRCDIRS += lib prog/sensors prog/dump prog/detect ${PROG_EXTRA:%=prog/%} etc
+SRCDIRS += lib prog/detect prog/dump prog/eeprom prog/pwm \
+           prog/sensors prog/xeon ${PROG_EXTRA:%=prog/%} etc
 
 # Some often-used commands with default options
 MKDIR := mkdir -p
