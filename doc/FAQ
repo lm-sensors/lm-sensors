@@ -99,6 +99,11 @@ CONTENTS
 4.28 Sensors doesn't find any sensors, just eeproms
 4.29 Inserting modules hangs my board
 4.30 Inserting modules slows down my board
+4.31 Problems on particular motherboards
+  4.31A Asus P4B
+  4.31B Tyan 2460, 2462
+  4.31C Tyan 2466
+  4.31D Tyan 2688
 
 5. How to Ask for Help  
 5.1 What to do if a module won't insert?
@@ -948,6 +953,7 @@ Run devfs in the kernel to get the /dev/i2c/x files.
 	2) We don't support the sensors on the board.
 	3) The sensors it has are on an I2C bus connected to an
 	   I2C bus adapter that we don't support.
+	4) You don't have the latest version of lm_sensors.
     But in any case you should figure out what is on the board:
 	1) Look at your motherboard.
 	2) Check the manufacturer's website.
@@ -1033,6 +1039,32 @@ the sensor chip. This triggers hardware on the board which
 automatically slows down the CPU clock. Be sure that your
 temperature limits are above the temperature reading. Put
 the new limits in /etc/sensors.conf and run 'sensors -s'.
+
+
+4.31 Problems on particular motherboards
+
+    The following boards have unique problems and solutions.
+
+
+4.31A Asus P4B
+
+    See prog/hotplug/README.p4b if your SMBus master is not found.
+
+
+4.31B Tyan 2460, 2462
+
+    See support tickets 805, 765, 781, 812, 813, and 867 for information.
+
+
+4.31C Tyan 2466
+
+    See support tickets 941, 840, and 841 for information.
+
+
+4.31D Tyan 2688
+
+    For board hangs, see support ticket 721 for information.
+Also see #4.29 5) above.
 
 
 5 How to ask for help

@@ -29,3 +29,6 @@ print "Send this encrypted password to phil\@netroedge.com\n";
 print "with your requested username.\n";
 print "Please specify whether you want access to i2c, lm_sensors, or both.\n";
 print "Please also indicate what area of the project you wish to work on.\n";
+print "\n";
+print "Please include your username in the CVS comments when you\n";
+print "check in files like so: (username)\n";

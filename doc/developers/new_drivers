@@ -16,6 +16,7 @@ Steps which apply to only one type of driver are noted.
   You will also need to ask us to have an ID reserved in
   i2c-id.h in the i2c package.
   Tell us it's OK to put your name on the "New Drivers" page.
+  Ask to be put on the mailing list so you get project updates.
 
 * Check out our latest code from CVS.
   You should use this as a base for your development.
@@ -38,12 +39,16 @@ Steps which apply to only one type of driver are noted.
   Also, please do not go past column 80.
   Please do this _before_ you check in your driver.
 
+* Add sysctl definitions to kernel/include/sensors.h (for chip drivers only).
+  These define the entries in the ctl_table for /proc.
+
 * Meet /proc naming standards in the ctl_table (for chip drivers only).
   See doc/developers/proc for information.
 
-* Add the driver to the Module.mk (makefile).
+* Add the driver to the Module.mk (the makefile).
   Usually, you can just add it to KERNEL{CHIPS,DRIVERS}TARGETS in the
-  Module.mk file in the directory itself.
+  Module.mk file in the directory itself. Put it at the beginning,
+  where the comment says to put drivers NOT included in mkpatch.
 
 * Make sure it compiles cleanly.
   If you compile with 'make WARN=1', you usually get many additional
@@ -89,7 +94,7 @@ Steps which apply to only one type of driver are noted.
 
 * Add your name to the CONTRIBUTORS file.
 
-* Add entries to the CHANGES file.
+* Add entries to the CHANGES file. Please keep in alphabetical order.
 
 * Write a doc/chips/xxx or doc/busses/xxx file.
 
@@ -98,9 +103,14 @@ Steps which apply to only one type of driver are noted.
   (or if applicable your company's name) is at the top of the
   new driver so we know you are giving it to us under the GPL.
 
-* Submit the changes to us.
-  Check out a clean version of CVS again (things will have changed since
-  you started), then submit the changes to us as a patch against CVS.
+* Get CVS write access if you want to check in your driver yourself.
+  Do this by running the script doc/developers/genpasswd.pl and following
+  the instructions it gives you.
+
+* Submit the changes to us, or check them in.
+  Do a 'cvs update' to get in sync (things will have changed since
+  you started), then submit the changes to us as a patch against CVS,
+  or check them in.
 
 ---------------------------------------------------------------------
 Checklist for us to do on the webpage:
