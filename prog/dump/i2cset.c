@@ -194,7 +194,8 @@ int main(int argc, char *argv[])
 	if(res != 'y' && res != 'Y')
 		exit(1);
   }	
-  fprintf(stderr,"  I will write device file %s, chip address 0x%.2x, data address 0x%.2x, data 0x%x, mode %s\n",
+  fprintf(stderr,"  I will write to device file %s, chip address 0x%02x, data address\n"
+          "  0x%02x, data 0x%02x, mode %s.\n",
           filename, address, daddress, value,
                            size == I2C_SMBUS_BYTE_DATA ? "byte" : "word");
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
