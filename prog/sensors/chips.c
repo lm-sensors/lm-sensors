@@ -1285,6 +1285,14 @@ void print_adm1025(const sensors_chip_name *name)
     printf("ERROR: Can't get TEMP2 data!\n");
   free_the_label(&label);
 
+  if (!sensors_get_label_and_valid(*name,SENSORS_ADM1025_VID,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_VID,&cur)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V\n",cur);
+    }
+  }
+  free_the_label(&label);
 }
 
 void print_lm80(const sensors_chip_name *name)
