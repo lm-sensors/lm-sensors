@@ -562,7 +562,7 @@ static int __devinit ali1535_probe(struct pci_dev *dev, const struct pci_device_
 
 	sprintf(ali1535_adapter.name, "SMBus ALI1535 adapter at %04x",
 		ali1535_smba);
-	i2c_add_adapter(&ali1535_adapter);
+	return i2c_add_adapter(&ali1535_adapter);
 }
 
 static void __devexit ali1535_remove(struct pci_dev *dev)
