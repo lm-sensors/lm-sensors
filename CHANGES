@@ -20,8 +20,10 @@ ask CVS about it:
 2.8.3 (2004????)
   File lm_sensors.spec: Update
   Library: Add 2.6 eeprom support
-  Makefiles: remove -o and -g arguments to install; add DESTDIR where missing
+  Makefile: Update Alpha CMODFLAGS (Daniel Nilsson)
+  Makefiles: Remove -o and -g arguments to install; add DESTDIR where missing
   Module i2c-amd756: Fix byte writes
+  Module i2c-tsunami: Cleanups (Daniel Nilsson)
   Module it87: Fix sg_tlx writes; fix sensor type reporting;
                add 8712 Super I/O detection
   Module w83781d: Fix negative voltages
