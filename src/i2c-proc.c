@@ -163,7 +163,7 @@ int i2cproc_init(void)
     return -ENOENT;
   }
   proc_bus_i2c->read_proc = &read_bus_i2c;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
   proc_bus_i2c->fill_inode = &monitor_bus_i2c;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
   i2cproc_initialized += 2;
