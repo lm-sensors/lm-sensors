@@ -29,7 +29,7 @@ LIBMAN5FILES := $(MODULE_DIR)/sensors.conf.5
 
 # The main and minor version of the library
 LIBMAINVER := 2
-LIBMINORVER := 0.0
+LIBMINORVER := 0.1
 LIBVER := $(LIBMAINVER).$(LIBMINORVER)
 
 # The static lib name, the shared lib name, and the internal ('so') name of
