@@ -966,4 +966,55 @@
 #define SENSORS_ADM1024_ALARMS 91 /* R */
 #define SENSORS_ADM1024_ANALOG_OUT 92 /* RW */
 
+/* IT87xx chips */
+
+#define SENSORS_IT87_PREFIX "it87"
+
+#define SENSORS_IT87_IN0 1 /* R */
+#define SENSORS_IT87_IN1 2 /* R */
+#define SENSORS_IT87_IN2 3 /* R */
+#define SENSORS_IT87_IN3 4 /* R */
+#define SENSORS_IT87_IN4 5 /* R */
+#define SENSORS_IT87_IN5 6 /* R */
+#define SENSORS_IT87_IN6 7 /* R */
+#define SENSORS_IT87_IN7 8 /* R */
+#define SENSORS_IT87_IN0_MIN 11 /* RW */
+#define SENSORS_IT87_IN1_MIN 12 /* RW */
+#define SENSORS_IT87_IN2_MIN 13 /* RW */
+#define SENSORS_IT87_IN3_MIN 14 /* RW */
+#define SENSORS_IT87_IN4_MIN 15 /* RW */
+#define SENSORS_IT87_IN5_MIN 16 /* RW */
+#define SENSORS_IT87_IN6_MIN 17 /* RW */
+#define SENSORS_IT87_IN7_MIN 18 /* RW */
+#define SENSORS_IT87_IN0_MAX 21 /* RW */
+#define SENSORS_IT87_IN1_MAX 22 /* RW */
+#define SENSORS_IT87_IN2_MAX 23 /* RW */
+#define SENSORS_IT87_IN3_MAX 24 /* RW */
+#define SENSORS_IT87_IN4_MAX 25 /* RW */
+#define SENSORS_IT87_IN5_MAX 26 /* RW */
+#define SENSORS_IT87_IN6_MAX 27 /* RW */
+#define SENSORS_IT87_IN7_MAX 28 /* RW */
+#define SENSORS_IT87_FAN1 31 /* R */
+#define SENSORS_IT87_FAN2 32 /* R */
+#define SENSORS_IT87_FAN3 33 /* R */
+#define SENSORS_IT87_FAN1_MIN 41 /* RW */
+#define SENSORS_IT87_FAN2_MIN 42 /* RW */
+#define SENSORS_IT87_FAN3_MIN 43 /* RW */
+#define SENSORS_IT87_TEMP1 51 /* R */
+#define SENSORS_IT87_TEMP2 52 /* R */
+#define SENSORS_IT87_TEMP3 53 /* R */
+#define SENSORS_IT87_TEMP1_LOW 54 /* RW */
+#define SENSORS_IT87_TEMP2_LOW 55 /* RW */
+#define SENSORS_IT87_TEMP3_LOW 56 /* RW */
+#define SENSORS_IT87_TEMP1_HIGH 57 /* RW */
+#define SENSORS_IT87_TEMP2_HIGH 58 /* RW */
+#define SENSORS_IT87_TEMP3_HIGH 59 /* RW */
+#define SENSORS_IT87_VID 61 /* R */
+#define SENSORS_IT87_FAN1_DIV 71 /* RW */
+#define SENSORS_IT87_FAN2_DIV 72 /* RW */
+#define SENSORS_IT87_FAN3_DIV 73 /* R (fan3 different) */
+#define SENSORS_IT87_ALARMS_FAN 81 /* R */
+#define SENSORS_IT87_ALARMS_VIN 82 /* R */
+#define SENSORS_IT87_ALARMS_TEMP 83 /* R */
+
 #endif /* def LIB_SENSORS_CHIPS_H */
