@@ -154,8 +154,14 @@ SRCDIRS :=
 ifneq ($(MAKECMDGOALS),user)
 ifneq ($(MAKECMDGOALS),user_install)
 ifneq ($(MAKECMDGOALS),user_uninstall)
+ifneq ($(MAKECMDGOALS),package)
+ifneq ($(MAKECMDGOALS),userpackage)
+ifneq ($(MAKECMDGOALS),manhtml)
 SRCDIRS += mkpatch
 SRCDIRS += kernel kernel/busses kernel/chips
+endif
+endif
+endif
 endif
 endif
 endif
@@ -247,7 +253,11 @@ ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),uninstall)
 ifneq ($(MAKECMDGOALS),user_uninstall)
 ifneq ($(MAKECMDGOALS),help)
+ifneq ($(MAKECMDGOALS),package)
+ifneq ($(MAKECMDGOALS),userpackage)
 include $(INCLUDEFILES)
+endif
+endif
 endif
 endif
 endif
@@ -255,7 +265,7 @@ endif
 
 # Man pages
 MANPAGES := $(LIBMAN3FILES) $(LIBMAN5FILES) $(PROGDETECTMAN8FILES) $(PROGDUMPMAN8FILES) \
-            $(PROGSENSORSMAN1FILES) prog/sensord/sensord.8
+            $(PROGSENSORSMAN1FILES) $(PROGPWMMAN8FILES) prog/sensord/sensord.8
 
 # Making the dependency files - done automatically!
 dep : 
@@ -303,6 +313,25 @@ package: version clean
 	ln -s . $$lmpackage;  \
 	find $$lmpackage/ -type f | grep -v ^$$lmpackage/$$lmpackage$$ | \
 	                            grep -v ^$$lmpackage/$$lmpackage.tar$$ | \
+	                            grep -v ^$$lmpackage/$$ | \
+	                            grep -v /CVS | \
+	                            grep -v /\\.# | \
+	                            tar rvf $$lmpackage.tar -T -; \
+        gzip -9 $$lmpackage.tar ;\
+        $(RM) $$lmpackage.tar $$lmpackage
+	cat doc/developers/checklist
+
+# doesn't work well yet... needs Makefile changes too
+userpackage: version clean $(KERNELINCLUDEDIR)/sensors.h
+	lmversion=`tail -1 version.h|cut -f 2 -d \"`; \
+	lmpackage=lm_sensors-user-$$lmversion; \
+	ln -s . $$lmpackage;  \
+	find $$lmpackage/ -type f | grep -v ^$$lmpackage/$$lmpackage$$ | \
+	                            grep -v ^$$lmpackage/$$lmpackage.tar$$ | \
+	                            grep -v ^$$lmpackage/doc/chips | \
+	                            grep -v ^$$lmpackage/doc/busses | \
+	                            grep -v ^$$lmpackage/kernel/chips | \
+	                            grep -v ^$$lmpackage/kernel/busses | \
 	                            grep -v ^$$lmpackage/$$ | \
 	                            grep -v /CVS | \
 	                            grep -v /\\.# | \
