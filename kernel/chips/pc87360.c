@@ -452,8 +452,8 @@ static int pc87360_find(u8 *devid, int *address)
 		address[i] = val;
 
 		if (i==0) { /* Fans */
-			fanconf[0] = superio_inb(0x70)
-				   | (superio_inb(0x71) << 8);
+			fanconf[0] = superio_inb(0xF0)
+				   | (superio_inb(0xF1) << 8);
 			
 #ifdef DEBUG
 			printk(KERN_DEBUG "pc87360.o: Fan 1: mon=%d "
