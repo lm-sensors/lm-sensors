@@ -34,6 +34,7 @@ kernel/chips/it87.c		drivers/sensors/it87.c
 kernel/chips/lm75.c		drivers/sensors/lm75.c
 kernel/chips/lm78.c		drivers/sensors/lm78.c
 kernel/chips/lm80.c		drivers/sensors/lm80.c
+kernel/chips/lm85.c		drivers/sensors/lm85.c
 kernel/chips/lm87.c		drivers/sensors/lm87.c
 kernel/chips/lm92.c		drivers/sensors/lm92.c
 kernel/chips/matorb.c		drivers/sensors/matorb.c

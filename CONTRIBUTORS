@@ -83,4 +83,5 @@ problems.
 * Vojtech Pavlik <vojtech@suse.cz>	
   Author of the i2c-amd8111 bus driver.
   Added support for amd8111 SMBus 1.0 controller to i2c-amd756.
-
+* Philip Pokorny <ppokorny@penguincomputing.com>
+  Author of the LM85 chip driver.

@@ -794,9 +794,15 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "National Semiconductor LM85",
-       driver => "Unwritten: lm85",
+       driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect @_},
+       i2c_detect => sub { lm85_detect 0x01, @_},
+     },
+     {
+       name => "Analog Devices ADM1027 or ADT7463",
+       driver => "lm85",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { lm85_detect 0x41, @_},
      },
      {
        name => "National Semiconductor LM87",
@@ -2219,18 +2225,21 @@ sub lm80_detect
   return (3);
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# #_[1]: Base address.
+# $_[0]: Vendor to check for
+#   (0x01 = National Semi, 0x41 = Analog Dev)
+# $_[1]: A reference to the file descriptor to access this chip.
+# #_[2]: Base address.
 # Returns: undef if not detected, (7) if detected.
 # Registers used: 0x3e == Vendor register.
 #		  0x3f == Version/Stepping register.
 # Constants used: 0x01 == National Semiconductor Vendor Id.
+#                 0x41 == Analog Devices Vendor Id.
 #		  0x60 == Version number. The lower 4 stepping
 #			  bits are masked and ignored.
 sub lm85_detect
 {
-  my ($file,$addr) = @_;
-  return if (i2c_smbus_read_byte_data($file,0x3e)) != 0x01;
+  my ($vendor,$file,$addr) = @_;
+  return if (i2c_smbus_read_byte_data($file,0x3e)) != $vendor ;
   return if (i2c_smbus_read_byte_data($file,0x3f) & 0xf0) != 0x60;
   return (7);
 }

@@ -320,6 +320,12 @@ void do_a_print(sensors_chip_name name)
     print_via686a(&name);
   else if (!strcmp(name.prefix,"lm80"))
     print_lm80(&name);
+  else if (!strcmp(name.prefix,"lm85")  ||
+           !strcmp(name.prefix,"lm85b") ||
+           !strcmp(name.prefix,"lm85c") ||
+           !strcmp(name.prefix,"adm1027") ||
+           !strcmp(name.prefix,"adt7463") )
+    print_lm85(&name);
   else if (!strcmp(name.prefix,"lm87"))
     print_lm87(&name);
   else if (!strcmp(name.prefix,"gl518sm"))

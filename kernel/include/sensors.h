@@ -463,6 +463,73 @@ struct i2c_chips_data {
 #define LM87_ALARM_TEMP2_FAULT  0x4000
 #define LM87_ALARM_TEMP3_FAULT 0x08000
 
+/* Common parameters */
+#define LM85_SYSCTL_IN0                1000
+#define LM85_SYSCTL_IN1                1001
+#define LM85_SYSCTL_IN2                1002
+#define LM85_SYSCTL_IN3                1003
+#define LM85_SYSCTL_IN4                1004
+#define LM85_SYSCTL_FAN1               1005
+#define LM85_SYSCTL_FAN2               1006
+#define LM85_SYSCTL_FAN3               1007
+#define LM85_SYSCTL_FAN4               1008
+#define LM85_SYSCTL_TEMP1              1009
+#define LM85_SYSCTL_TEMP2              1010
+#define LM85_SYSCTL_TEMP3              1011
+#define LM85_SYSCTL_VID                1012
+#define LM85_SYSCTL_ALARMS             1013
+#define LM85_SYSCTL_PWM1               1014
+#define LM85_SYSCTL_PWM2               1015
+#define LM85_SYSCTL_PWM3               1016
+#define LM85_SYSCTL_VRM                1017
+#define LM85_SYSCTL_PWM_CFG1           1019
+#define LM85_SYSCTL_PWM_CFG2           1020
+#define LM85_SYSCTL_PWM_CFG3           1021
+#define LM85_SYSCTL_PWM_ZONE1          1022
+#define LM85_SYSCTL_PWM_ZONE2          1023
+#define LM85_SYSCTL_PWM_ZONE3          1024
+#define LM85_SYSCTL_ZONE1              1025
+#define LM85_SYSCTL_ZONE2              1026
+#define LM85_SYSCTL_ZONE3              1027
+#define LM85_SYSCTL_SMOOTH1            1028
+#define LM85_SYSCTL_SMOOTH2            1029
+#define LM85_SYSCTL_SMOOTH3            1030
+
+/* Vendor specific values */
+#define LM85_SYSCTL_SPINUP_CTL         1100
+#define LM85_SYSCTL_TACH_MODE          1101
+
+/* Analog Devices variant of the LM85 */
+#define ADM1027_SYSCTL_TACH_MODE       1200
+#define ADM1027_SYSCTL_TEMP_OFFSET1    1201
+#define ADM1027_SYSCTL_TEMP_OFFSET2    1202
+#define ADM1027_SYSCTL_TEMP_OFFSET3    1203
+#define ADM1027_SYSCTL_FAN_PPR         1204
+#define ADM1027_SYSCTL_ALARM_MASK      1205
+
+/* Analog Devices variant of the LM85/ADM1027 */
+#define ADT7463_SYSCTL_TMIN_CTL1       1300
+#define ADT7463_SYSCTL_TMIN_CTL2       1301
+#define ADT7463_SYSCTL_TMIN_CTL3       1302
+#define ADT7463_SYSCTL_THERM_SIGNAL    1303
+
+#define LM85_ALARM_IN0          0x0001
+#define LM85_ALARM_IN1          0x0002
+#define LM85_ALARM_IN2          0x0004
+#define LM85_ALARM_IN3          0x0008
+#define LM85_ALARM_TEMP1        0x0010
+#define LM85_ALARM_TEMP2        0x0020
+#define LM85_ALARM_TEMP3        0x0040
+#define LM85_ALARM_ALARM2       0x0080
+#define LM85_ALARM_IN4          0x0100
+#define LM85_ALARM_RESERVED     0x0200
+#define LM85_ALARM_FAN1         0x0400
+#define LM85_ALARM_FAN2         0x0800
+#define LM85_ALARM_FAN3         0x1000
+#define LM85_ALARM_FAN4         0x2000
+#define LM85_ALARM_TEMP1_FAULT  0x4000
+#define LM85_ALARM_TEMP3_FAULT 0x08000
+
 #define PCF8574_SYSCTL_READ     1000
 #define PCF8574_SYSCTL_WRITE    1001
 
@@ -651,7 +718,7 @@ struct i2c_chips_data {
 #define VT1211_ALARM_TEMP7 VT1211_ALARM_IN4
 
 #define LM92_SYSCTL_ALARMS		2001	/* high, low, critical */
-#define LM92_SYSCTL_TEMP		1200	/* high, low, critical, hysterisis, input */
+#define LM92_SYSCTL_TEMP		1200	/* high, low, critical, hysteresis, input */
 
 #define LM92_ALARM_TEMP_HIGH	0x01
 #define LM92_ALARM_TEMP_LOW		0x02

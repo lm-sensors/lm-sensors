@@ -317,6 +317,106 @@
 #define SENSORS_LM80_FAN2_DIV 72 /* RW */
 #define SENSORS_LM80_ALARMS 81 /* R */
 
+/* LM85 chips */
+
+#define SENSORS_LM85_PREFIX "lm85"
+#define SENSORS_LM85B_PREFIX "lm85b"
+#define SENSORS_LM85C_PREFIX "lm85c"
+#define SENSORS_ADM1027_PREFIX "adm1027"
+#define SENSORS_ADT7463_PREFIX "adt7463"
+
+#define SENSORS_ADM1027_ALARM_MASK           1  /* RW -- alarm_mask  */
+#define SENSORS_ADM1027_FAN1_PPR             2  /* RW -- fan1_ppr  */
+#define SENSORS_ADM1027_FAN1_TACH_MODE       3  /* RW -- fan1_tach_mode  */
+#define SENSORS_ADM1027_FAN2_PPR             4  /* RW -- fan2_ppr  */
+#define SENSORS_ADM1027_FAN2_TACH_MODE       5  /* RW -- fan2_tach_mode  */
+#define SENSORS_ADM1027_FAN3_PPR             6  /* RW -- fan3_ppr  */
+#define SENSORS_ADM1027_FAN3_TACH_MODE       7  /* RW -- fan3_tach_mode  */
+#define SENSORS_ADM1027_FAN4_PPR             8  /* RW -- fan4_ppr  */
+#define SENSORS_ADM1027_FAN4_TACH_MODE       9  /* RW -- fan4_tach_mode  */
+#define SENSORS_ADM1027_PWM1_SMOOTH         10  /* RW -- pwm1_smooth  */
+#define SENSORS_ADM1027_PWM2_SMOOTH         11  /* RW -- pwm2_smooth  */
+#define SENSORS_ADM1027_PWM3_SMOOTH         12  /* RW -- pwm3_smooth  */
+#define SENSORS_ADM1027_TEMP1_OFFSET        13  /* RW -- temp1_offset  */
+#define SENSORS_ADM1027_TEMP2_OFFSET        14  /* RW -- temp2_offset  */
+#define SENSORS_ADM1027_TEMP3_OFFSET        15  /* RW -- temp3_offset  */
+#define SENSORS_LM85_ALARMS                 16  /* R  -- alarms  */
+#define SENSORS_LM85_FAN1                   17  /* R  -- fan1  */
+#define SENSORS_LM85_FAN1_MIN               18  /* RW -- fan1_min  */
+#define SENSORS_LM85_FAN1_TACH_MODE         19  /* RW -- fan1_tach_mode  */
+#define SENSORS_LM85_FAN2                   20  /* R  -- fan2  */
+#define SENSORS_LM85_FAN2_MIN               21  /* RW -- fan2_min  */
+#define SENSORS_LM85_FAN2_TACH_MODE         22  /* RW -- fan2_tach_mode  */
+#define SENSORS_LM85_FAN3                   23  /* R  -- fan3  */
+#define SENSORS_LM85_FAN3_MIN               24  /* RW -- fan3_min  */
+#define SENSORS_LM85_FAN3_TACH_MODE         25  /* RW -- fan3_tach_mode  */
+#define SENSORS_LM85_FAN4                   26  /* R  -- fan4  */
+#define SENSORS_LM85_FAN4_MIN               27  /* RW -- fan4_min  */
+#define SENSORS_LM85_IN0                    28  /* R  -- in0  */
+#define SENSORS_LM85_IN0_MAX                29  /* RW -- in0_max  */
+#define SENSORS_LM85_IN0_MIN                30  /* RW -- in0_min  */
+#define SENSORS_LM85_IN1                    31  /* R  -- in1  */
+#define SENSORS_LM85_IN1_MAX                32  /* RW -- in1_max  */
+#define SENSORS_LM85_IN1_MIN                33  /* RW -- in1_min  */
+#define SENSORS_LM85_IN2                    34  /* R  -- in2  */
+#define SENSORS_LM85_IN2_MAX                35  /* RW -- in2_max  */
+#define SENSORS_LM85_IN2_MIN                36  /* RW -- in2_min  */
+#define SENSORS_LM85_IN3                    37  /* R  -- in3  */
+#define SENSORS_LM85_IN3_MAX                38  /* RW -- in3_max  */
+#define SENSORS_LM85_IN3_MIN                39  /* RW -- in3_min  */
+#define SENSORS_LM85_IN4                    40  /* R  -- in4  */
+#define SENSORS_LM85_IN4_MAX                41  /* RW -- in4_max  */
+#define SENSORS_LM85_IN4_MIN                42  /* RW -- in4_min  */
+#define SENSORS_LM85_PWM1                   43  /* RW -- pwm1  */
+#define SENSORS_LM85_PWM1_FREQ              44  /* RW -- pwm1_freq  */
+#define SENSORS_LM85_PWM1_INVERT            45  /* RW -- pwm1_invert  */
+#define SENSORS_LM85_PWM1_MIN               46  /* RW -- pwm1_min  */
+#define SENSORS_LM85_PWM1_MIN_CTL           47  /* RW -- pwm1_min_ctl  */
+#define SENSORS_LM85_PWM1_SPINUP            48  /* RW -- pwm1_spinup  */
+#define SENSORS_LM85_PWM1_SPINUP_CTL        49  /* RW -- pwm1_spinup_ctl  */
+#define SENSORS_LM85_PWM1_ZONE              50  /* RW -- pwm1_zone  */
+#define SENSORS_LM85_PWM2                   51  /* RW -- pwm2  */
+#define SENSORS_LM85_PWM2_FREQ              52  /* RW -- pwm2_freq  */
+#define SENSORS_LM85_PWM2_INVERT            53  /* RW -- pwm2_invert  */
+#define SENSORS_LM85_PWM2_MIN               54  /* RW -- pwm2_min  */
+#define SENSORS_LM85_PWM2_MIN_CTL           55  /* RW -- pwm2_min_ctl  */
+#define SENSORS_LM85_PWM2_SPINUP            56  /* RW -- pwm2_spinup  */
+#define SENSORS_LM85_PWM2_SPINUP_CTL        57  /* RW -- pwm2_spinup_ctl  */
+#define SENSORS_LM85_PWM2_ZONE              58  /* RW -- pwm2_zone  */
+#define SENSORS_LM85_PWM3                   59  /* RW -- pwm3  */
+#define SENSORS_LM85_PWM3_FREQ              60  /* RW -- pwm3_freq  */
+#define SENSORS_LM85_PWM3_INVERT            61  /* RW -- pwm3_invert  */
+#define SENSORS_LM85_PWM3_MIN               62  /* RW -- pwm3_min  */
+#define SENSORS_LM85_PWM3_MIN_CTL           63  /* RW -- pwm3_min_ctl  */
+#define SENSORS_LM85_PWM3_SPINUP            64  /* RW -- pwm3_spinup  */
+#define SENSORS_LM85_PWM3_SPINUP_CTL        65  /* RW -- pwm3_spinup_ctl  */
+#define SENSORS_LM85_PWM3_ZONE              66  /* RW -- pwm3_zone  */
+#define SENSORS_LM85_TEMP1                  67  /* R  -- temp1  */
+#define SENSORS_LM85_TEMP1_MAX              68  /* RW -- temp1_max  */
+#define SENSORS_LM85_TEMP1_MIN              69  /* RW -- temp1_min  */
+#define SENSORS_LM85_TEMP2                  70  /* R  -- temp2  */
+#define SENSORS_LM85_TEMP2_MAX              71  /* RW -- temp2_max  */
+#define SENSORS_LM85_TEMP2_MIN              72  /* RW -- temp2_min  */
+#define SENSORS_LM85_TEMP3                  73  /* R  -- temp3  */
+#define SENSORS_LM85_TEMP3_MAX              74  /* RW -- temp3_max  */
+#define SENSORS_LM85_TEMP3_MIN              75  /* RW -- temp3_min  */
+#define SENSORS_LM85_VID                    76  /* R  -- vid  */
+#define SENSORS_LM85_VRM                    77  /* RW -- vrm  */
+#define SENSORS_LM85_ZONE1_CRITICAL         78  /* RW -- zone1_critical  */
+#define SENSORS_LM85_ZONE1_HYST             79  /* RW -- zone1_hyst  */
+#define SENSORS_LM85_ZONE1_LIMIT            80  /* RW -- zone1_limit  */
+#define SENSORS_LM85_ZONE1_RANGE            81  /* RW -- zone1_range  */
+#define SENSORS_LM85_ZONE1_SMOOTH           82  /* RW -- zone1_smooth  */
+#define SENSORS_LM85_ZONE2_CRITICAL         83  /* RW -- zone2_critical  */
+#define SENSORS_LM85_ZONE2_HYST             84  /* RW -- zone2_hyst  */
+#define SENSORS_LM85_ZONE2_LIMIT            85  /* RW -- zone2_limit  */
+#define SENSORS_LM85_ZONE2_RANGE            86  /* RW -- zone2_range  */
+#define SENSORS_LM85_ZONE2_SMOOTH           87  /* RW -- zone2_smooth  */
+#define SENSORS_LM85_ZONE3_CRITICAL         88  /* RW -- zone3_critical  */
+#define SENSORS_LM85_ZONE3_HYST             89  /* RW -- zone3_hyst  */
+#define SENSORS_LM85_ZONE3_LIMIT            90  /* RW -- zone3_limit  */
+#define SENSORS_LM85_ZONE3_RANGE            91  /* RW -- zone3_range  */
+#define SENSORS_LM85_ZONE3_SMOOTH           92  /* RW -- zone3_smooth  */
 
 /* Winbond W83781D chips */
 

@@ -111,6 +111,11 @@ lm78
 lm80
 	lm80		1	7	2	-	yes	no
 
+lm85
+	lm85		3	5	4	3 pwm	yes	no
+	adm1027		3	5	4	3 pwm	yes	no
+	adt7463		3	5	4	3 pwm	yes	no
+
 lm87
         lm87	 	2-3	6-8	0-2	1 pwm	yes	no
 

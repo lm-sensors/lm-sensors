@@ -1468,6 +1468,244 @@ void print_lm80(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_lm85(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur, min, max;
+  int alarms, alarm_mask, valid;
+  int is85, is1027;
+
+  is85 = !strcmp(name->prefix,"lm85")
+         || !strcmp(name->prefix,"lm85b")
+         || !strcmp(name->prefix,"lm85c") ;
+  is1027 = !strcmp(name->prefix,"adm1027")
+           || !strcmp(name->prefix,"adt7463") ;
+
+  if (!sensors_get_feature(*name,SENSORS_LM85_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  if (!sensors_get_feature(*name,SENSORS_ADM1027_ALARM_MASK,&cur)) 
+    alarm_mask = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm mask data!\n");
+    alarm_mask = 0;
+  }
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_IN0,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN0,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN0_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN0_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+7.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
+           (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN0?"ALARM":"");
+      if (is1027) { printf(alarm_mask&LM85_ALARM_IN0?" MASKED":""); }
+      putchar( '\n' );
+    }
+  } else
+    printf("ERROR: Can't get IN0 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_IN1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN1_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN1_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+7.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
+           (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN1?"ALARM":"");
+      if (is1027) { printf(alarm_mask&LM85_ALARM_IN1?" MASKED":""); }
+      putchar( '\n' );
+    }
+  } else
+    printf("ERROR: Can't get IN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_IN2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN2_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN2_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+7.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
+           (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN2?"ALARM":"");
+      if (is1027) { printf(alarm_mask&LM85_ALARM_IN2?" MASKED":""); }
+      putchar( '\n' );
+    }
+  } else
+    printf("ERROR: Can't get IN2 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_IN3,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN3_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN3_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
+           (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN3?"ALARM":"");
+      if (is1027) { printf(alarm_mask&LM85_ALARM_IN3?" MASKED":""); }
+      putchar( '\n' );
+    }
+  } else
+    printf("ERROR: Can't get IN3 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_IN4,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN4,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN4_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM85_IN4_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
+           (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN4?"ALARM":"");
+      if (is1027) { printf(alarm_mask&LM85_ALARM_IN4?" MASKED":""); }
+      putchar( '\n' );
+    }
+  } else
+    printf("ERROR: Can't get IN4 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_FAN1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_FAN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_FAN1_MIN,&min)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%5.0f RPM  (min = %4.0f RPM)                     %s",
+           cur,min, alarms&LM85_ALARM_FAN1?"ALARM":"");
+      if (is1027) { printf(alarm_mask&LM85_ALARM_FAN1?" MASKED":""); }
+      putchar( '\n' );
+    }
+  } else
+    printf("ERROR: Can't get FAN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_FAN2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_FAN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_FAN2_MIN,&min)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%5.0f RPM  (min = %4.0f RPM)                     %s",
+           cur,min, alarms&LM85_ALARM_FAN2?"ALARM":"");
+      if (is1027) { printf(alarm_mask&LM85_ALARM_FAN2?" MASKED":""); }
+      putchar( '\n' );
+    }
+  } else
+    printf("ERROR: Can't get FAN2 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_FAN3,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_FAN3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_FAN3_MIN,&min)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%5.0f RPM  (min = %4.0f RPM)                     %s",
+           cur,min, alarms&LM85_ALARM_FAN3?"ALARM":"");
+      if (is1027) { printf(alarm_mask&LM85_ALARM_FAN3?" MASKED":""); }
+      putchar( '\n' );
+    }
+  } else
+    printf("ERROR: Can't get FAN3 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_FAN4,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_FAN4,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_FAN4_MIN,&min)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%5.0f RPM  (min = %4.0f RPM)                     %s",
+           cur,min, alarms&LM85_ALARM_FAN4?"ALARM":"");
+      if (is1027) { printf(alarm_mask&LM85_ALARM_FAN4?" MASKED":""); }
+      putchar( '\n' );
+    }
+  } else
+    printf("ERROR: Can't get FAN4 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_TEMP1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_TEMP1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_TEMP1_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM85_TEMP1_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, max, min, MINMAX, (is1027 ? 2 : 0), 0);
+      printf( "   %s %s %s\n",
+                 alarms&LM85_ALARM_TEMP1?"ALARM":"",
+                 alarms&LM85_ALARM_TEMP1_FAULT?"FAULT":"",
+                 is1027&&(alarm_mask&LM85_ALARM_TEMP1)?"MASKED":""
+            );
+    }
+  } else
+    printf("ERROR: Can't get TEMP1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_TEMP2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_TEMP2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_TEMP2_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM85_TEMP2_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, max, min, MINMAX, (is1027 ? 2 : 0), 0);
+      printf( "   %s %s\n",
+                 alarms&LM85_ALARM_TEMP2?"ALARM":"",
+                 is1027&&(alarm_mask&LM85_ALARM_TEMP2)?"MASKED":""
+            );
+    }
+  } else
+    printf("ERROR: Can't get TEMP2 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_TEMP3,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_TEMP3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM85_TEMP3_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM85_TEMP3_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, max, min, MINMAX, (is1027 ? 2 : 0), 0);
+      printf( "   %s %s %s\n",
+                 alarms&LM85_ALARM_TEMP3?"ALARM":"",
+                 alarms&LM85_ALARM_TEMP3_FAULT?"FAULT":"",
+                 is1027&&(alarm_mask&LM85_ALARM_TEMP3)?"MASKED":""
+            );
+    }
+  } else
+    printf("ERROR: Can't get TEMP3 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_PWM1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_PWM1,&cur)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%4.0f\n", cur);
+    }
+  } else
+    printf("ERROR: Can't get PWM1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_PWM2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_PWM2,&cur)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%4.0f\n", cur);
+    }
+  } else
+    printf("ERROR: Can't get PWM2 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_PWM3,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM85_PWM3,&cur)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%4.0f\n", cur);
+    }
+  } else
+    printf("ERROR: Can't get PWM3 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_VID,&label,&valid)
+      && !sensors_get_feature(*name,SENSORS_LM85_VID,&cur)
+      && !sensors_get_feature(*name,SENSORS_LM85_VRM,&min) ) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.3f V    (VRM Version %4.1f)\n",cur,min);
+    }
+  }
+  free_the_label(&label);
+}
+
 void print_lm87(const sensors_chip_name *name)
 {
   char *label = NULL;
