@@ -30,8 +30,8 @@ void help(void)
   FILE *fptr;
   char s[100];
 
-  fprintf(stderr,"Syntax: i2cdump I2CBUS ADDRESS MODE\n");
-  fprintf(stderr,"  MODE may be 'b' or 'w'\n");
+  fprintf(stderr,"Syntax: i2cdump I2CBUS ADDRESS [MODE] [BANK [BANKREG]]\n");
+  fprintf(stderr,"  MODE may be 'b' or 'w' (default b)\n");
   fprintf(stderr,"  I2CBUS is an integer\n");
   if((fptr = fopen("/proc/bus/i2c", "r"))) {
     fprintf(stderr,"  Installed I2C busses:\n");
@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 {
   char *end;
   int i,j,res,i2cbus,address,size,file;
+  int bank = 0, bankreg = 0x4E;
   char filename[20];
   
 
@@ -94,6 +95,34 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
+  if(argc > 4) {
+    bank = strtol(argv[4],&end,0);
+    if (*end) {
+      fprintf(stderr,"Error: Invalid bank number!\n");
+      help();
+      exit(1);
+    }
+    if ((bank < 0) || (bank > 15)) {
+      fprintf(stderr,"Error: bank out of range (0-15)!\n");
+      help();
+      exit(1);
+    }
+
+    if(argc > 5) {
+      bankreg = strtol(argv[5],&end,0);
+      if (*end) {
+        fprintf(stderr,"Error: Invalid bank register number!\n");
+        help();
+        exit(1);
+      }
+      if ((bankreg < 0) || (bankreg > 0xff)) {
+        fprintf(stderr,"Error: bank out of range (0-0xff)!\n");
+        help();
+        exit(1);
+      }
+    }
+  }
+
   sprintf(filename,"/dev/i2c-%d",i2cbus);
   if ((file = open(filename,O_RDWR)) < 0) {
     fprintf(stderr,"Error: Could not open file `%s': %s\n",filename,
@@ -113,8 +142,16 @@ int main(int argc, char *argv[])
           "cause data loss and worse!\n");
   fprintf(stderr,"  I will probe file %s, address 0x%x, mode %s\n",
           filename,address,size == I2C_SMBUS_BYTE_DATA?"byte":"word");
+  if(bank) 	
+    fprintf(stderr,"  Probing bank %d using bank register 0x%02x.\n",
+            bank, bankreg);
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
   sleep(5);
+
+  /* See Winbond w83781d data sheet for bank details */
+  if(bank) {
+    i2c_smbus_write_byte_data(file,bankreg,bank | 0x80);
+  }
 
   if (size == I2C_SMBUS_BYTE_DATA) {
     printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
@@ -142,6 +179,9 @@ int main(int argc, char *argv[])
       }
       printf("\n");
     }
+  }
+  if(bank) {
+    i2c_smbus_write_byte_data(file,bankreg,0x80);
   }
   exit(0);
 }
