@@ -16,6 +16,7 @@ SUMMARY
 		init=[0,1] (default 1)
 
 	All arguments are in decimal unless prefixed by "0x".
+	No spaces are allowed.
 
 ==================================
 OVERVIEW
@@ -30,6 +31,7 @@ if you do, you are often told by sensors-detect which ones you need.
 
 If a module doesn't load with no parameters, you may need to
 add parameters. Check 'dmesg' for clues to what went wrong.
+
 
 BUS NUMBERING
 -------------
@@ -120,7 +122,8 @@ This parameter is currently supported only by the w83781d driver.
 ==================================
 EXAMPLE
 
-  modprobe lm78 force_lm79=9191,0x390 ignore=0,0x2d,1,0x20 probe_range=-1,0,0x7f
   # ISA address 0x390 contains a LM79
   # Scan all I2C addresses (from 0 to 0x7f) for all I2C adapters
   # But skip address 0x2d on adapter 0, and address 0x20 on adapter 1
+
+  modprobe lm78 force_lm79=9191,0x390 ignore=0,0x2d,1,0x20 probe_range=-1,0,0x7f
