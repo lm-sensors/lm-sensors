@@ -446,7 +446,7 @@ static sensors_chip_feature gl518r80_features[] =
                                   GL518_SYSCTL_TEMP, VALUE(2), 1 },
     { SENSORS_GL518R80_TEMP_OVER, "temp_over", SENSORS_GL518R80_TEMP, 
                                   SENSORS_GL518R80_TEMP, SENSORS_MODE_RW,
-                                  GL518_SYSCTL_VDD, VALUE(1), 1 },
+                                  GL518_SYSCTL_TEMP, VALUE(1), 1 },
     { SENSORS_GL518R80_VID, "vid", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
                             SENSORS_MODE_R, GL518_SYSCTL_VID, VALUE(1), 0 },
     { SENSORS_GL518R80_FAN1_DIV, "fan1_div", SENSORS_GL518R80_FAN1, 

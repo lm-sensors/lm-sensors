@@ -312,12 +312,13 @@ int gl518_attach_adapter(struct i2c_adapter *adapter)
     gl518_write_value(new_client,GL518_REG_CONF,0x04); 
     /* Never interrupts */
     gl518_write_value(new_client,GL518_REG_MASK,0x00);
+    
     gl518_write_value(new_client,GL518_REG_TEMP_HYST,
                       TEMP_TO_REG(GL518_INIT_TEMP_HYST));
     gl518_write_value(new_client,GL518_REG_TEMP_OVER,
                       TEMP_TO_REG(GL518_INIT_TEMP_OVER));
     gl518_write_value(new_client,GL518_REG_MISC,(DIV_TO_REG(2) << 6) | 
-                                                (DIV_TO_REG(2) << 4) | 0x08);
+                                                (DIV_TO_REG(2) << 4));
     gl518_write_value(new_client,GL518_REG_FAN_LIMIT,
                       (FAN_TO_REG(GL518_INIT_FAN_MIN_1,2) << 8) |
                       FAN_TO_REG(GL518_INIT_FAN_MIN_2,2));
