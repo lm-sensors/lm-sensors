@@ -89,6 +89,9 @@ maxilife
 	maxilife-co	5	4	3	-	yes	no
 	maxilife-cg	5	4	3	-	yes	no
 
+mtp008
+	mtp008		3	7	3	3 pwm	yes	no
+
 sis5595
 	sis5595 	1	4	2	-	no	yes
 

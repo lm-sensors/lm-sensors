@@ -18,7 +18,8 @@ ask CVS about it:
 -----------------------
 
 2.5.5 (2000????)
-  Module adm1021: Add support for adm1023
+  Module adm1021: Add support for adm1021a / adm1023
+  Module mtp008: new
   Program mkpatch.pl: more fixes
 
 2.5.4 (20001012)
