@@ -617,9 +617,6 @@ Winbond W83781D which emulates two LM75's, but many systems which use the
 Winbond chip (such as the Asus P2B) don't have the thermo-resisters connected
 to the chip resulting in these strange -48 degree readings.
 
-If you have an Asus P2B and want more information on adding thermal sensing capability, check out:
-@uref{http://ultimatepc.fsn.net/techinfo/p2bthermistor/p2bthermistor.htm}
-
 In upcoming versions, you will be able to disable non-interesting
 readings.
 
