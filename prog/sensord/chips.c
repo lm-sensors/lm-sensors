@@ -146,27 +146,6 @@ fmtSoundAlarm
 }
 
 static const char *
-fmtInt
-(const double values[], int alarm, int beep) {
-  sprintf (buff, "%d", (int) values[0]);
-  return fmtExtra (alarm, beep);
-}
-
-static const char *
-fmtIntCrossInt
-(const double values[], int alarm, int beep) {
-  sprintf (buff, "%dx%d", (int) values[0], (int) values[1]);
-  return fmtExtra (alarm, beep);
-}
-
-static const char *
-fmtIntDashInt
-(const double values[], int alarm, int beep) {
-  sprintf (buff, "%d-%d", (int) values[0], (int) values[1]);
-  return fmtExtra (alarm, beep);
-}
-
-static const char *
 rrdF0
 (const double values[]) {
   sprintf (buff, "%.0f", values[0]);
@@ -930,45 +909,6 @@ static const ChipDescriptor maxilife_chip = {
   maxilife_names, maxilife_features, SENSORS_MAXI_CG_ALARMS, 0
 };
 
-/** DDCMON **/
-
-static const char *
-fmtID_DDCMON
-(const double values[], int alarm, int beep) {
-  int value = (int) values[0];
-  buff[0] = ((value >> 10) & 0x1f) + '@';
-  buff[1] = ((value >> 5) & 0x1f) + '@';
-  buff[2] = (value & 0x1f) + '@';
-  buff[3] = ((value >> 20) & 0xf) + '0';
-  buff[4] = ((value >> 16) & 0xf) + '0';
-  buff[5] = ((value >> 28) & 0xf) + '0';
-  buff[6] = ((value >> 24) & 0xf) + '0';
-  buff[7] = '\0';
-  return buff;
-}
-
-static const char *ddcmon_names[] = {
-  SENSORS_DDCMON_PREFIX, NULL
-};
-
-static const FeatureDescriptor ddcmon_features[] = {
-  { fmtID_DDCMON, NULL, DataType_other, 0, 0,
-    { SENSORS_DDCMON_ID, -1 } },
-  { fmtInt, NULL, DataType_other, 0, 0,
-    { SENSORS_DDCMON_SERIAL, -1 } },
-  { fmtIntCrossInt, NULL, DataType_other, 0, 0,
-    { SENSORS_DDCMON_VERSIZE, SENSORS_DDCMON_HORSIZE, -1 } },
-  { fmtIntDashInt, NULL, DataType_other, 0, 0,
-    { SENSORS_DDCMON_VERSYNCMIN, SENSORS_DDCMON_VERSYNCMAX, -1 } },
-  { fmtIntDashInt, NULL, DataType_other, 0, 0,
-    { SENSORS_DDCMON_HORSYNCMIN, SENSORS_DDCMON_HORSYNCMAX, -1 } },
-  { NULL }
-};
-
-static const ChipDescriptor ddcmon_chip = {
-  ddcmon_names, ddcmon_features, 0, 0
-};
-
 /** EEPROM **/
 
 static const char *
@@ -1021,7 +961,6 @@ const ChipDescriptor * const knownChips[] = {
   &adm1021_chip,
   &adm1025_chip,
   &adm9240_chip,
-  &ddcmon_chip,
   &ds1621_chip,
   &eeprom_chip,
   &gl518_chip,
