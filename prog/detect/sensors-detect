@@ -2306,7 +2306,7 @@ sub scan_superio
 	next;
       }	        
       printf " found at address 0x%04x\n", $addr;
-      my $new_hash = { conf => 8,
+      my $new_hash = { conf => 9,
                        isa_addr => $addr,
                        chipname =>  $$chip{name}
                      };
