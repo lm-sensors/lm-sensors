@@ -32,8 +32,9 @@ void print_i2c_busses(int);
 
 void help(void)
 {
-	fprintf(stderr,"Syntax: i2cdetect I2CBUS\n");
+	fprintf(stderr,"Syntax: i2cdetect [-f] I2CBUS\n");
 	fprintf(stderr,"  I2CBUS is an integer\n");
+	fprintf(stderr,"  With -f, scans all addresses (NOT RECOMMENDED)\n");
 	fprintf(stderr,"  i2cdetect -l lists installed busses only\n");
 	print_i2c_busses(0);
 }
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
   char filename3[20];
   char *filename;
   long funcs;
+  int force = 0;
   
 
   if (argc < 2) {
@@ -66,15 +68,25 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
-  i2cbus = strtol(argv[1],&end,0);
+  if(!strcmp(argv[1], "-f")) {
+    force = 1;
+    if (argc < 3) {
+      fprintf(stderr,"Error: No i2c-bus specified!\n");
+      help();
+      exit(1);
+    }
+  }
+
+  i2cbus = strtol(argv[force?2:1],&end,0);
   if (*end) {
-    fprintf(stderr,"Error: First argument not a number!\n");
+    fprintf(stderr,"Error: I2CBUS argument not a number!\n");
     help();
     exit(1);
   }
   if ((i2cbus < 0) || (i2cbus > 0xff)) {
     fprintf(stderr,"Error: I2CBUS argument out of range!\n");
     help();
+    exit(1);
   }
 
 /*
@@ -147,6 +159,10 @@ int main(int argc, char *argv[])
   for (i = 0; i < 128; i+=16) {
     printf("%02x: ",i);
     for(j = 0; j < 16; j++) {
+      if (!force && (i+j<0x04 || i+j>0x77)) {
+        printf("   ");
+        continue;
+      }
       if (ioctl(file,I2C_SLAVE,i+j) < 0) {
         if (errno == EBUSY) {
           printf("UU ");
