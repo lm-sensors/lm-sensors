@@ -30,6 +30,7 @@
 
 #include <linux/version.h>
 #include <linux/module.h>
+#include <linux/config.h>
 #include <linux/pci.h>
 #include <asm/io.h>
 #include <linux/kernel.h>
@@ -40,6 +41,7 @@
 #include "version.h"
 #include <linux/init.h>
 #include <linux/apm_bios.h>
+#include "dmi_scan.h"
 
 /* Note: We assume all devices are identical
          to the Intel PIIX4; we only mention it during detection.   */
@@ -180,124 +182,26 @@ static struct i2c_adapter piix4_adapter = {
 static int __initdata piix4_initialized;
 static unsigned short piix4_smba = 0;
 
-/* The following DMI section is used to detect IBM Thinkpad laptops,
-   whose AT24RF08 serial eeproms on the PIIX4 SMBus get corrupted.
-   We refuse to load on those systems.
-   From drivers/char/i8k.c (retabbed), which was
-   stolen from arch/i386/kernel/dmi_scan.c */
-
-static char system_vendor[48] = "?";
-typedef struct {
-	u8	type;
-	u8	length;
-	u16	handle;
-} DMIHeader;
-#define IBM_SIGNATURE		"IBM"
-
-static char* __init dmi_string(DMIHeader *dmi, u8 s)
-{
-	u8 *p;
-
-	if (!s)
-		return "";
-	s--;
-
-	p = (u8 *)dmi + dmi->length;
-	while (s > 0) {
-		p += strlen(p);
-		p++;
-		s--;
-	}
-
-	return p;
-}
-
-static void __init dmi_decode(DMIHeader *dmi)
-{
-	u8 *data = (u8 *) dmi;
-	char *p;
-
-	switch (dmi->type) {
-		case 1:	/* System Information */
-			p = dmi_string(dmi,data[4]);
-			if (*p)
-				strncpy(system_vendor, p, sizeof(system_vendor));
-			break;
-	}
-}
-
-static int __init dmi_table(u32 base, int len, int num, void (*fn)(DMIHeader*))
-{
-	u8 *buf;
-	u8 *data;
-	DMIHeader *dmi;
-	int i = 1;
-
-	buf = ioremap(base, len);
-	if (buf == NULL)
-		return -1;
-	data = buf;
-
-/*
- * Stop when we see al the items the table claimed to have
- * or we run off the end of the table (also happens)
- */
-	while ((i<num) && ((data-buf) < len)) {
-		dmi = (DMIHeader *)data;
-/*
- * Avoid misparsing crud if the length of the last
- * record is crap
- */
-		if ((data-buf+dmi->length) >= len)
-			break;
-		fn(dmi);
-		data += dmi->length;
-/*
- * Don't go off the end of the data if there is
- * stuff looking like string fill past the end
- */
-		while (((data-buf) < len) && (*data || data[1]))
-			data++;
-		data += 2;
-		i++;
-	}
-	iounmap(buf);
-	return 0;
-}
-
-static int __init dmi_iterate(void (*decode)(DMIHeader *))
-{
-	unsigned char buf[20];
-	long fp = 0x000e0000L;
-	fp -= 16;
-
-	while (fp < 0x000fffffL) {
-		fp += 16;
-		isa_memcpy_fromio(buf, fp, 20);
-		if (memcmp(buf, "_DMI_", 5)==0) {
-			u16 num  = buf[13]<<8  | buf[12];
-			u16 len  = buf [7]<<8  | buf [6];
-			u32 base = buf[11]<<24 | buf[10]<<16 |
-			           buf[9]<<8 | buf[8];
-			if (dmi_table(base, len, num, decode)==0)
-				return 0;
-		}
-	}
-	return -1;
-}
-/* end of DMI code */
-
+#ifdef CONFIG_X86
 /*
  * Get DMI information.
  */
+void dmi_scan_machine(void);
+#define IBM_SIGNATURE		"IBM"
 static int __init ibm_dmi_probe(void)
 {
-	if (dmi_iterate(dmi_decode) != 0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,99)
+
+	dmi_scan_machine();
+#endif
+	if(dmi_ident[DMI_SYS_VENDOR] == NULL)
 		return 0;
-	if (strncmp(system_vendor,IBM_SIGNATURE,strlen(IBM_SIGNATURE)) == 0)
+	if(strncmp(dmi_ident[DMI_SYS_VENDOR], IBM_SIGNATURE,
+	           strlen(IBM_SIGNATURE)) == 0)
 		return 1;
 	return 0;
 }
+#endif
 
 /* Detect whether a PIIX4 can be found, and initialize it, where necessary.
    Note the differences between kernels with the old PCI BIOS interface and
@@ -335,6 +239,7 @@ int piix4_setup(void)
 	}
 	printk(KERN_INFO "i2c-piix4.o: Found %s device\n", num->name);
 
+#ifdef CONFIG_X86
 	if(ibm_dmi_probe()) {
 		printk
 		  (KERN_ERR "i2c-piix4.o: IBM Laptop detected; this module may corrupt\n");
@@ -343,6 +248,7 @@ int piix4_setup(void)
 		 error_return = -EPERM;
 		 goto END;
 	}
+#endif
 
 /* Determine the address of the SMBus areas */
 	if (force_addr) {

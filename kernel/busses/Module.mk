@@ -53,7 +53,7 @@ ifneq ($(shell if grep -q '^CONFIG_I2C_SIS5595=y' $(LINUX)/.config; then echo 1;
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-sis5595.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_PIIX4=y' $(LINUX)/.config; then echo 1; fi),1)
-KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-piix4.o
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-piix4.o $(MODULE_DIR)/dmi_scan.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_SAVAGE4=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-savage4.o
