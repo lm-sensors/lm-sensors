@@ -40,19 +40,19 @@ then
 fi
 
 $RRDPATH/rrdtool create $RRDB --step 300 \
-	DS:fan1:GAUGE:${HB}:U:U \
-	DS:fan2:GAUGE:${HB}:U:U \
-	DS:fan3:GAUGE:${HB}:U:U \
-	DS:temp1:GAUGE:${HB}:U:U \
-	DS:temp2:GAUGE:${HB}:U:U \
-	DS:temp3:GAUGE:${HB}:U:U \
-	DS:in0:GAUGE:${HB}:U:U \
-	DS:in1:GAUGE:${HB}:U:U \
-	DS:in2:GAUGE:${HB}:U:U \
-	DS:in3:GAUGE:${HB}:U:U \
-	DS:in4:GAUGE:${HB}:U:U \
-	DS:in5:GAUGE:${HB}:U:U \
-	DS:in6:GAUGE:${HB}:U:U \
-	DS:loadavg:GAUGE:${HB}:U:U \
+	DS:fan1:GAUGE:${HB}:0:12000 \
+	DS:fan2:GAUGE:${HB}:0:12000 \
+	DS:fan3:GAUGE:${HB}:0:12000 \
+	DS:temp1:GAUGE:${HB}:-25:250 \
+	DS:temp2:GAUGE:${HB}:-25:250 \
+	DS:temp3:GAUGE:${HB}:-25:250 \
+	DS:in0:GAUGE:${HB}:-25:25 \
+	DS:in1:GAUGE:${HB}:-25:25 \
+	DS:in2:GAUGE:${HB}:-25:25 \
+	DS:in3:GAUGE:${HB}:-25:25 \
+	DS:in4:GAUGE:${HB}:-25:25 \
+	DS:in5:GAUGE:${HB}:-25:25 \
+	DS:in6:GAUGE:${HB}:-25:25 \
+	DS:loadavg:GAUGE:${HB}:0:U \
 	RRA:AVERAGE:0.5:1:$RW
 
