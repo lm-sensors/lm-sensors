@@ -378,8 +378,8 @@ void lm75_temp(struct i2c_client *client, int operation, int ctl_name,
       lm75_write_value(client,LM75_REG_TEMP_OS,data->temp_os);
     }
     if (*nrels_mag >= 2) {
-      data->temp_os = TEMP_TO_REG(results[1]);
-      lm75_write_value(client,LM75_REG_TEMP_HYST,data->temp_os);
+      data->temp_hyst = TEMP_TO_REG(results[1]);
+      lm75_write_value(client,LM75_REG_TEMP_HYST,data->temp_hyst);
     }
   }
 }

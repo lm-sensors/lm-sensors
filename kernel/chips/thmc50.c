@@ -420,8 +420,8 @@ void thmc50_temp(struct i2c_client *client, int operation, int ctl_name,
       thmc50_write_value(client,THMC50_REG_TEMP_OS,data->temp_os);
     }
     if (*nrels_mag >= 2) {
-      data->temp_os = TEMP_TO_REG(results[1]);
-      thmc50_write_value(client,THMC50_REG_TEMP_HYST,data->temp_os);
+      data->temp_hyst = TEMP_TO_REG(results[1]);
+      thmc50_write_value(client,THMC50_REG_TEMP_HYST,data->temp_hyst);
     }
   }
 }
@@ -445,8 +445,8 @@ void thmc50_remote_temp(struct i2c_client *client, int operation, int ctl_name,
       thmc50_write_value(client,THMC50_REG_REMOTE_TEMP_OS,data->remote_temp_os);
     }
     if (*nrels_mag >= 2) {
-      data->remote_temp_os = TEMP_TO_REG(results[1]);
-      thmc50_write_value(client,THMC50_REG_REMOTE_TEMP_HYST,data->remote_temp_os);
+      data->remote_temp_hyst = TEMP_TO_REG(results[1]);
+      thmc50_write_value(client,THMC50_REG_REMOTE_TEMP_HYST,data->remote_temp_hyst);
     }
   }
 }
@@ -480,7 +480,7 @@ void thmc50_inter_mask(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 1;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
-      data->remote_temp_os = results[0];
+      data->inter_mask = results[0];
       thmc50_write_value(client,THMC50_REG_INTER_MASK,data->inter_mask);
     }
   }
@@ -515,7 +515,7 @@ void thmc50_analog_out(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 1;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
-      data->remote_temp_os = results[0];
+      data->analog_out = results[0];
       thmc50_write_value(client,THMC50_REG_ANALOG_OUT,data->analog_out);
     }
   }
