@@ -31,14 +31,9 @@
 #include <linux/module.h>
 #include <linux/pci.h>
 #include <asm/io.h>
-#include <linux/kernel.h>
-#include <linux/stddef.h>
-#include <linux/sched.h>
-#include <linux/ioport.h>
-#include <linux/delay.h>
 #include <linux/i2c.h>
+#include <linux/i2c-algo-bit.h>
 #include "version.h"
-
 #include <linux/init.h>
 
 /* 3DFX defines */
@@ -49,6 +44,30 @@
 #define PCI_DEVICE_ID_3DFX_BANSHEE 0x03
 #endif
 
+/* the only registers we use */
+#define REG	0x78
+#define REG2 	0x70
+
+/* bit locations in the register */
+#define DDC_ENAB	0x00040000
+#define DDC_SCL_OUT	0x00080000
+#define DDC_SDA_OUT	0x00100000
+#define DDC_SCL_IN	0x00200000
+#define DDC_SDA_IN	0x00400000
+#define I2C_ENAB	0x00800000
+#define I2C_SCL_OUT	0x01000000
+#define I2C_SDA_OUT	0x02000000
+#define I2C_SCL_IN	0x04000000
+#define I2C_SDA_IN	0x08000000
+
+/* initialization states */
+#define INIT2	0x2
+#define INIT3	0x4
+
+/* delays */
+#define CYCLE_DELAY	10
+#define TIMEOUT		50
+
 #ifdef MODULE
 static
 #else
@@ -57,666 +76,139 @@ extern
 int __init i2c_voodoo3_init(void);
 static int __init voodoo3_cleanup(void);
 static int voodoo3_setup(void);
-static s32 voodoo3_access(struct i2c_adapter *adap, u16 addr,
-			  unsigned short flags, char read_write,
-			  u8 command, int size,
-			  union i2c_smbus_data *data);
-static void Voodoo3_I2CStart(void);
-static void Voodoo3_I2CStop(void);
-static int Voodoo3_I2CAck(int ackit);
-static int Voodoo3_I2CReadByte(int ackit);
-static int Voodoo3_I2CSendByte(unsigned char data);
-static int Voodoo3_BusCheck(void);
-static int Voodoo3_I2CRead_byte(int addr);
-static int Voodoo3_I2CRead_byte_data(int addr, int command);
-static int Voodoo3_I2CRead_word(int addr, int command);
-static int Voodoo3_I2CWrite_byte(int addr, int command);
-static int Voodoo3_I2CWrite_byte_data(int addr, int command, int data);
-static int Voodoo3_I2CWrite_word(int addr, int command, long data);
-static s32 voodoo3_ddc_access(struct i2c_adapter *adap, u16 addr,
-			      unsigned short flags, char read_write,
-			      u8 command, int size,
-			      union i2c_smbus_data *data);
-static void Voodoo3_DDCStart(void);
-static void Voodoo3_DDCStop(void);
-static int Voodoo3_DDCAck(int ackit);
-static int Voodoo3_DDCReadByte(int ackit);
-static int Voodoo3_DDCSendByte(unsigned char data);
-static int Voodoo3_DDCBusCheck(void);
-static int Voodoo3_DDCRead_byte(int addr);
-static int Voodoo3_DDCRead_byte_data(int addr, int command);
-static int Voodoo3_DDCRead_word(int addr, int command);
-static int Voodoo3_DDCWrite_byte(int addr, int command);
-static int Voodoo3_DDCWrite_byte_data(int addr, int command, int data);
-static int Voodoo3_DDCWrite_word(int addr, int command, long data);
 static void config_v3(struct pci_dev *dev);
 static void voodoo3_inc(struct i2c_adapter *adapter);
 static void voodoo3_dec(struct i2c_adapter *adapter);
-static u32 voodoo3_func(struct i2c_adapter *adapter);
 
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
 #endif				/* MODULE */
 
-static struct i2c_algorithm smbus_algorithm = {
-	/* name */ "Non-I2C SMBus adapter",
-	/* id */ I2C_ALGO_SMBUS,
-	/* master_xfer */ NULL,
-	/* smbus_access */ &voodoo3_access,
-	/* slave_send */ NULL,
-	/* slave_rcv */ NULL,
-	/* algo_control */ NULL,
-	/* functionality */ voodoo3_func,
+
+static int __initdata voodoo3_initialized;
+static unsigned char *mem;
+
+extern inline void outlong(unsigned int dat)
+{
+	*((unsigned int *) (mem + REG)) = dat;
+}
+
+extern inline unsigned int readlong(void)
+{
+	return *((unsigned int *) (mem + REG));
+}
+
+/* The voo GPIO registers don't have individual masks for each bit
+   so we always have to read before writing. */
+
+static void bit_vooi2c_setscl(void *data, int val)
+{
+	unsigned int r;
+	r = readlong();
+	if(val)
+		r |= I2C_SCL_OUT;
+	else
+		r &= ~I2C_SCL_OUT;
+	outlong(r);
+}
+
+static void bit_vooi2c_setsda(void *data, int val)
+{
+	unsigned int r;
+	r = readlong();
+	if(val)
+		r |= I2C_SDA_OUT;
+	else
+		r &= ~I2C_SDA_OUT;
+	outlong(r);
+}
+
+/* The GPIO pins are open drain, so the pins always remain outputs.
+   We rely on the i2c-algo-bit routines to set the pins high before
+   reading the input from other chips. */
+
+static int bit_vooi2c_getscl(void *data)
+{
+	return (0 != (readlong() & I2C_SCL_IN));
+}
+
+static int bit_vooi2c_getsda(void *data)
+{
+	return (0 != (readlong() & I2C_SDA_IN));
+}
+
+static void bit_vooddc_setscl(void *data, int val)
+{
+	unsigned int r;
+	r = readlong();
+	if(val)
+		r |= DDC_SCL_OUT;
+	else
+		r &= ~DDC_SCL_OUT;
+	outlong(r);
+}
+
+static void bit_vooddc_setsda(void *data, int val)
+{
+	unsigned int r;
+	r = readlong();
+	if(val)
+		r |= DDC_SDA_OUT;
+	else
+		r &= ~DDC_SDA_OUT;
+	outlong(r);
+}
+
+static int bit_vooddc_getscl(void *data)
+{
+	return (0 != (readlong() & DDC_SCL_IN));
+}
+
+static int bit_vooddc_getsda(void *data)
+{
+	return (0 != (readlong() & DDC_SDA_IN));
+}
+
+static struct i2c_algo_bit_data voo_i2c_bit_data = {
+	NULL,
+	bit_vooi2c_setsda,
+	bit_vooi2c_setscl,
+	bit_vooi2c_getsda,
+	bit_vooi2c_getscl,
+	CYCLE_DELAY, CYCLE_DELAY, TIMEOUT
 };
 
 static struct i2c_adapter voodoo3_i2c_adapter = {
-	"unset",
-	I2C_ALGO_SMBUS | I2C_HW_SMBUS_VOODOO3,
-	&smbus_algorithm,
+	"I2C Voodoo3/Banshee adapter",
+	I2C_HW_B_VOO,
 	NULL,
+	&voo_i2c_bit_data,
 	voodoo3_inc,
 	voodoo3_dec,
 	NULL,
 	NULL,
 };
 
-static struct i2c_algorithm ddc_algorithm = {
-	/* name */ "DDC I2C adapter",
-	/* id */ I2C_ALGO_SMBUS,
-	/* master_xfer */ NULL,
-	/* smbus_access */ &voodoo3_ddc_access,
-	/* slave_send */ NULL,
-	/* slave_rcv */ NULL,
-	/* algo_control */ NULL,
-	/* functionality */ voodoo3_func,
+static struct i2c_algo_bit_data voo_ddc_bit_data = {
+	NULL,
+	bit_vooddc_setsda,
+	bit_vooddc_setscl,
+	bit_vooddc_getsda,
+	bit_vooddc_getscl,
+	CYCLE_DELAY, CYCLE_DELAY, TIMEOUT
 };
 
 static struct i2c_adapter voodoo3_ddc_adapter = {
-	"unset",
-	I2C_ALGO_SMBUS | I2C_HW_SMBUS_VOODOO3,
-	&ddc_algorithm,
+	"DDC Voodoo3/Banshee adapter",
+	I2C_HW_B_VOO,
 	NULL,
+	&voo_ddc_bit_data,
 	voodoo3_inc,
 	voodoo3_dec,
 	NULL,
 	NULL,
 };
-
-static int __initdata voodoo3_initialized;
-static unsigned int state = 0xcffc0020;
-static unsigned char *mem;
-static int v3_num;
-
-extern inline void outlong(int off, unsigned int dat)
-{
-	*((unsigned int *) (mem + off)) = dat;
-}
-
-extern inline unsigned int readlong(int off)
-{
-	return *((unsigned int *) (mem + off));
-}
-
-extern inline void out(void)
-{
-	outlong(0x78, state);
-	udelay(10);
-}
-
-/* For I2C BUS */
-
-extern inline void dat(int data)
-{
-	state &= ~(1 << 25);
-	if (data)
-		state |= (1 << 25);
-}
-
-extern inline void clkon(void)
-{
-	state |= (1 << 24);
-}
-
-extern inline void clkoff(void)
-{
-	state &= ~(1 << 24);
-}
-
-extern inline int rdat(void)
-{
-	dat(1);
-	out();
-	return ((readlong(0x78) & (1 << 27)) != 0);
-}
-
-/* For DDC BUS */
-
-extern inline void ddc_dat(int data)
-{
-	state &= ~(1 << 20);
-	if (data)
-		state |= (1 << 20);
-}
-
-extern inline void ddc_clkon(void)
-{
-	state |= (1 << 19);
-}
-
-extern inline void ddc_clkoff(void)
-{
-	state &= ~(1 << 19);
-}
-
-extern inline int ddc_rdat(void)
-{
-	ddc_dat(1);
-	out();
-	return ((readlong(0x78) & (1 << 22)) != 0);
-}
-
-/* For I2C BUS */
-
-/* Changing the Data line while clock is 'on' (high) is a
-   no-no, except for a start or stop.  */
-
-void Voodoo3_I2CStart(void)
-{
-	clkon();		/* in theory, clk is already on */
-	out();
-	out();
-	out();
-	out();
-	dat(0);
-	out();
-	clkoff();
-	out();
-}
-
-void Voodoo3_I2CStop(void)
-{
-	dat(0);
-	out();
-	clkon();
-	out();
-	dat(1);
-	out();
-	clkoff();
-	out();
-	out();
-	clkon();
-	out();
-}
-
-int Voodoo3_I2CAck(int ackit)
-{
-	int ack = 0;
-
-	out();
-	clkon();
-	if (!ackit) {
-		ack = rdat();
-	} else {
-		dat(0);
-	}
-	out();
-	clkoff();
-	out();
-	return ack;
-}
-
-int Voodoo3_I2CReadByte(int ackit)
-{
-	int i, temp;
-	unsigned char data = 0;
-
-	for (i = 7; i >= 0; i--) {
-		out();
-		clkon();
-		data |= (rdat() << i);
-		out();
-		clkoff();
-		out();
-	}
-	temp = Voodoo3_I2CAck(ackit);
-#ifdef DEBUG
-	printk("i2c-voodoo3: Readbyte ack -->0x%X, read result -->0x%X\n",
-	       temp, data);
-#endif
-	return data;
-}
-
-int Voodoo3_I2CSendByte(unsigned char data)
-{
-	int i, temp;
-
-	for (i = 7; i >= 0; i--) {
-		dat(temp = data & (1 << i));
-		out();
-		clkon();
-		out();
-//    dat(temp);
-		out();
-		clkoff();
-		out();
-	}
-	temp = Voodoo3_I2CAck(0);
-#ifdef DEBUG
-	printk("i2c-voodoo3: Writebyte ack -->0x%X\n", temp);
-#endif
-	return temp;
-}
-
-
-int Voodoo3_BusCheck(void)
-{
-/* Check the bus to see if it is in use */
-
-	if (!rdat()) {
-		printk
-		    ("i2c-voodoo3: I2C bus in use or hung!  Try again later.\n");
-		return 1;
-	}
-	return 0;
-}
-
-/* For DDC BUS */
-
-void Voodoo3_DDCStart(void)
-{
-	ddc_clkon();		/* in theory, clk is already on */
-	out();
-	out();
-	out();
-	out();
-	ddc_dat(0);
-	out();
-	ddc_clkoff();
-	out();
-}
-
-void Voodoo3_DDCStop(void)
-{
-	ddc_dat(0);
-	out();
-	ddc_clkon();
-	out();
-	ddc_dat(1);
-	out();
-	ddc_clkoff();
-	out();
-	out();
-	ddc_clkon();
-	out();
-}
-
-int Voodoo3_DDCAck(int ackit)
-{
-	int ack = 0;
-
-	out();
-	ddc_clkon();
-	if (!ackit) {
-		ack = ddc_rdat();
-	} else {
-		ddc_dat(0);
-	}
-	out();
-	ddc_clkoff();
-	out();
-	return ack;
-}
-
-int Voodoo3_DDCReadByte(int ackit)
-{
-	int i, temp;
-	unsigned char data = 0;
-
-	for (i = 7; i >= 0; i--) {
-		out();
-		ddc_clkon();
-		data |= (ddc_rdat() << i);
-		out();
-		ddc_clkoff();
-		out();
-	}
-	temp = Voodoo3_DDCAck(ackit);
-	return data;
-}
-
-int Voodoo3_DDCSendByte(unsigned char data)
-{
-	int i, temp;
-
-	for (i = 7; i >= 0; i--) {
-		ddc_dat(temp = data & (1 << i));
-		out();
-		ddc_clkon();
-		out();
-		out();
-		ddc_clkoff();
-		out();
-	}
-	temp = Voodoo3_DDCAck(0);
-	return temp;
-}
-
-
-int Voodoo3_DDCBusCheck(void)
-{
-/* Check the bus to see if it is in use */
-
-	if (!ddc_rdat()) {
-		printk
-		    ("i2c-voodoo3: DDC bus in use or hung!  Try again later.\n");
-		return 1;
-	}
-	return 0;
-}
-
-/* For I2C Bus */
-
-int Voodoo3_I2CRead_byte(int addr)
-{
-	int this_dat = 0;
-
-	Voodoo3_I2CStart();
-	if (Voodoo3_I2CSendByte(addr)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		this_dat = -1;
-		goto ENDREAD1;
-	}
-	this_dat = Voodoo3_I2CReadByte(0);
-      ENDREAD1:Voodoo3_I2CStop();
-#ifdef DEBUG
-	printk("i2c-voodoo3: Byte read at addr:0x%X result:0x%X\n", addr,
-	       this_dat);
-#endif
-	return this_dat;
-}
-
-int Voodoo3_I2CRead_byte_data(int addr, int command)
-{
-	Voodoo3_I2CStart();
-	if (Voodoo3_I2CSendByte(addr & 0xfe)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		goto ENDREAD2;
-	}
-	if (Voodoo3_I2CSendByte(command)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on cmd WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		goto ENDREAD2;
-	}
-	return(Voodoo3_I2CRead_byte(addr));
-      ENDREAD2:Voodoo3_I2CStop();
-#ifdef DEBUG
-	printk
-	    ("i2c-voodoo3: Byte read at addr:0x%X (command:0x%X) failed\n",
-	     addr, command);
-#endif
-	return(-1);
-}
-
-int Voodoo3_I2CRead_word(int addr, int command)
-{
-	int this_dat = 0;
-
-	Voodoo3_I2CStart();
-	if (Voodoo3_I2CSendByte(addr)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		this_dat = -1;
-		goto ENDREAD3;
-	}
-	this_dat = Voodoo3_I2CReadByte(1);
-	this_dat |= (Voodoo3_I2CReadByte(0) << 8);
-      ENDREAD3:Voodoo3_I2CStop();
-#ifdef DEBUG
-	printk
-	    ("i2c-voodoo3: Word read at addr:0x%X (command:0x%X) result:0x%X\n",
-	     addr, command, this_dat);
-#endif
-	return this_dat;
-}
-
-int Voodoo3_I2CWrite_byte(int addr, int command)
-{
-	int result = 0;
-
-	Voodoo3_I2CStart();
-	if (Voodoo3_I2CSendByte(addr)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		result = -1;
-		goto ENDWRITE1;
-	}
-	if (Voodoo3_I2CSendByte(command)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on command WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		result = -1;
-	}
-      ENDWRITE1:Voodoo3_I2CStop();
-#ifdef DEBUG
-	printk("i2c-voodoo3: Byte write at addr:0x%X command:0x%X\n", addr,
-	       command);
-#endif
-	return result;
-}
-
-int Voodoo3_I2CWrite_byte_data(int addr, int command, int data)
-{
-	int result = 0;
-
-	Voodoo3_I2CStart();
-	if (Voodoo3_I2CSendByte(addr)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		result = -1;
-		goto ENDWRITE2;
-	}
-	if (Voodoo3_I2CSendByte(command)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on command WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		result = -1;
-		goto ENDWRITE2;
-	}
-	if (Voodoo3_I2CSendByte(data)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on data WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		result = -1;
-	}
-      ENDWRITE2:Voodoo3_I2CStop();
-#ifdef DEBUG
-	printk
-	    ("i2c-voodoo3: Byte write at addr:0x%X command:0x%X data:0x%X\n",
-	     addr, command, data);
-#endif
-	return result;
-}
-
-
-int Voodoo3_I2CWrite_word(int addr, int command, long data)
-{
-	int result = 0;
-
-	Voodoo3_I2CStart();
-	if (Voodoo3_I2CSendByte(addr)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		result = -1;
-		goto ENDWRITE3;
-	}
-	if (Voodoo3_I2CSendByte(command)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on command WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		result = -1;
-		goto ENDWRITE3;
-	}
-	if (Voodoo3_I2CSendByte(data & 0x0FF)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on data WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		result = -1;
-		goto ENDWRITE3;
-	}
-	if (Voodoo3_I2CSendByte((data & 0x0FF00) >> 8)) {
-#ifdef DEBUG
-		printk
-		    ("i2c-voodoo3: No Ack on data byte 2 WriteByte to addr 0x%X\n",
-		     addr);
-#endif
-		result = -1;
-	}
-      ENDWRITE3:Voodoo3_I2CStop();
-#ifdef DEBUG
-	printk
-	    ("i2c-voodoo3: Word write at addr:0x%X command:0x%X data:0x%lX\n",
-	     addr, command, data);
-#endif
-	return result;
-}
-
-/* For DDC Bus */
-
-int Voodoo3_DDCRead_byte(int addr)
-{
-	int this_dat = 0;
-
-	Voodoo3_DDCStart();
-	if (Voodoo3_DDCSendByte(addr)) {
-		this_dat = -1;
-		goto ENDREAD1;
-	}
-	this_dat = Voodoo3_DDCReadByte(0);
-      ENDREAD1:Voodoo3_DDCStop();
-	return this_dat;
-}
-
-int Voodoo3_DDCRead_byte_data(int addr, int command)
-{
-	Voodoo3_DDCStart();
-        if (Voodoo3_DDCSendByte(addr & 0xfe))
-		goto ENDREAD2;
-	if (Voodoo3_DDCSendByte(command))
-		goto ENDREAD2;
-	return(Voodoo3_DDCRead_byte(addr));
-      ENDREAD2: Voodoo3_DDCStop();
-	return (-1);
-}
-
-int Voodoo3_DDCRead_word(int addr, int command)
-{
-	int this_dat = 0;
-
-	Voodoo3_DDCStart();
-	if (Voodoo3_DDCSendByte(addr)) {
-		this_dat = -1;
-		goto ENDREAD3;
-	}
-	this_dat = Voodoo3_DDCReadByte(1);
-	this_dat |= (Voodoo3_DDCReadByte(0) << 8);
-      ENDREAD3:Voodoo3_DDCStop();
-	return this_dat;
-}
-
-int Voodoo3_DDCWrite_byte(int addr, int command)
-{
-	int result = 0;
-
-	Voodoo3_DDCStart();
-	if (Voodoo3_DDCSendByte(addr)) {
-		result = -1;
-		goto ENDWRITE1;
-	}
-	if (Voodoo3_DDCSendByte(command)) {
-		result = -1;
-	}
-      ENDWRITE1:Voodoo3_DDCStop();
-	return result;
-}
-
-int Voodoo3_DDCWrite_byte_data(int addr, int command, int data)
-{
-	int result = 0;
-
-	Voodoo3_DDCStart();
-	if (Voodoo3_DDCSendByte(addr)) {
-		result = -1;
-		goto ENDWRITE2;
-	}
-	if (Voodoo3_DDCSendByte(command)) {
-		result = -1;
-		goto ENDWRITE2;
-	}
-	if (Voodoo3_DDCSendByte(data)) {
-		result = -1;
-	}
-      ENDWRITE2:Voodoo3_DDCStop();
-	return result;
-}
-
-
-int Voodoo3_DDCWrite_word(int addr, int command, long data)
-{
-	int result = 0;
-
-	Voodoo3_DDCStart();
-	if (Voodoo3_DDCSendByte(addr)) {
-		result = -1;
-		goto ENDWRITE3;
-	}
-	if (Voodoo3_DDCSendByte(command)) {
-		result = -1;
-		goto ENDWRITE3;
-	}
-	if (Voodoo3_DDCSendByte(data & 0x0FF)) {
-		result = -1;
-		goto ENDWRITE3;
-	}
-	if (Voodoo3_DDCSendByte((data & 0x0FF00) >> 8)) {
-		result = -1;
-	}
-      ENDWRITE3:Voodoo3_DDCStop();
-	return result;
-}
 
 /* Configures the chip */
 
@@ -731,21 +223,19 @@ void config_v3(struct pci_dev *dev)
 	cadr = dev->base_address[0];
 #endif
 	cadr &= PCI_BASE_ADDRESS_MEM_MASK;
-	mem = ioremap(cadr, 0x1000);
+	mem = ioremap_nocache(cadr, 0x1000);
 
-	*((unsigned int *) (mem + 0x70)) = 0x8160;
-	*((unsigned int *) (mem + 0x78)) = 0xcffc0020;
+	*((unsigned int *) (mem + REG2)) = 0x8160;
+	*((unsigned int *) (mem + REG)) = 0xcffc0020;
 	printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%p\n", mem);
 }
 
 /* Detect whether a Voodoo3 or a Banshee can be found,
-   and initialize it, where necessary.
-   Note the differences between kernels with the old PCI BIOS interface and
-   newer kernels with the real PCI interface. In compat.h some things are
-   defined to make the transition easier. */
+   and initialize it. */
 static int voodoo3_setup(void)
 {
 	struct pci_dev *dev;
+	int v3_num;
 
 	v3_num = 0;
 
@@ -784,146 +274,6 @@ static int voodoo3_setup(void)
 	}
 }
 
-/* For I2C BUS */
-
-/* Return -1 on error. See smbus.h for more information */
-s32 voodoo3_access(struct i2c_adapter * adap, u16 addr,
-		   unsigned short flags, char read_write,
-		   u8 command, int size, union i2c_smbus_data * data)
-{
-	int temp = 0;
-
-	if (Voodoo3_BusCheck())
-		return -1;
-
-	if ((read_write != I2C_SMBUS_READ)
-	    && (read_write != I2C_SMBUS_WRITE)) {
-		printk("i2c-voodoo3: Unknown read_write command! (0x%X)\n",
-		       read_write);
-		return -1;
-	}
-	addr = ((addr & 0x7f) << 1) | (read_write & 0x01);
-	switch (size) {
-	case I2C_SMBUS_QUICK:
-		Voodoo3_I2CStart();
-		if (Voodoo3_I2CSendByte(addr)) {
-#ifdef DEBUG
-			printk
-			    ("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",
-			     addr);
-#endif
-			return -1;
-		}
-	case I2C_SMBUS_BYTE:
-		if (read_write == I2C_SMBUS_READ) {
-			temp = Voodoo3_I2CRead_byte(addr);
-			data->byte = temp;
-		} else {
-			temp = Voodoo3_I2CWrite_byte(addr, command);
-		}
-		goto TESTACK;
-	case I2C_SMBUS_BYTE_DATA:
-		if (read_write == I2C_SMBUS_READ) {
-			temp = Voodoo3_I2CRead_byte_data(addr, command);
-			data->byte = temp;
-		} else {
-			temp =
-			    Voodoo3_I2CWrite_byte_data(addr, command,
-						       data->byte);}
-		goto TESTACK;
-	case I2C_SMBUS_WORD_DATA:
-		if (read_write == I2C_SMBUS_READ) {
-			temp = Voodoo3_I2CRead_word(addr, command);
-			data->word = temp;
-		} else {
-			temp =
-			    Voodoo3_I2CWrite_word(addr, command,
-						  data->word);}
-		goto TESTACK;
-	case I2C_SMBUS_PROC_CALL:
-		printk("i2c-voodoo3: Proc call not supported.\n");
-		return -1;
-	case I2C_SMBUS_BLOCK_DATA:
-		printk
-		    ("i2c-voodoo3: Block transfers not supported yet.\n");
-		return -1;
-	}
-
-      TESTACK:if (temp < 0) {
-#ifdef DEBUG
-		printk("i2c-voodoo3: no device at 0x%X\n", addr);
-#endif
-		return -1;
-	}
-	return 0;
-}
-
-/* For DDC BUS */
-
-/* Return -1 on error. See smbus.h for more information */
-s32 voodoo3_ddc_access(struct i2c_adapter * adap, u16 addr,
-		       unsigned short flags, char read_write,
-		       u8 command, int size, union i2c_smbus_data * data)
-{
-	int temp = 0;
-
-	if (Voodoo3_DDCBusCheck())
-		return -1;
-
-	if ((read_write != I2C_SMBUS_READ)
-	    && (read_write != I2C_SMBUS_WRITE)) {
-		printk("i2c-voodoo3: Unknown read_write command! (0x%X)\n",
-		       read_write);
-		return -1;
-	}
-	addr = ((addr & 0x7f) << 1) | (read_write & 0x01);
-	switch (size) {
-	case I2C_SMBUS_QUICK:
-		Voodoo3_DDCStart();
-		if (Voodoo3_DDCSendByte(addr)) {
-			return -1;
-		}
-	case I2C_SMBUS_BYTE:
-		if (read_write == I2C_SMBUS_READ) {
-			temp = Voodoo3_DDCRead_byte(addr);
-			data->byte = temp;
-		} else {
-			temp = Voodoo3_DDCWrite_byte(addr, command);
-		}
-		goto TESTACK;
-	case I2C_SMBUS_BYTE_DATA:
-		if (read_write == I2C_SMBUS_READ) {
-			temp = Voodoo3_DDCRead_byte_data(addr, command);
-			data->byte = temp;
-		} else {
-			temp =
-			    Voodoo3_DDCWrite_byte_data(addr, command,
-						       data->byte);}
-		goto TESTACK;
-	case I2C_SMBUS_WORD_DATA:
-		if (read_write == I2C_SMBUS_READ) {
-			temp = Voodoo3_DDCRead_word(addr, command);
-			data->word = temp;
-		} else {
-			temp =
-			    Voodoo3_DDCWrite_word(addr, command,
-						  data->word);}
-		goto TESTACK;
-	case I2C_SMBUS_PROC_CALL:
-		printk("i2c-voodoo3: Proc call not supported.\n");
-		return -1;
-	case I2C_SMBUS_BLOCK_DATA:
-		printk
-		    ("i2c-voodoo3: Block transfers not supported yet.\n");
-		return -1;
-	}
-
-      TESTACK:if (temp < 0) {
-		return -1;
-	}
-	return 0;
-}
-
 void voodoo3_inc(struct i2c_adapter *adapter)
 {
 	MOD_INC_USE_COUNT;
@@ -931,28 +281,13 @@ void voodoo3_inc(struct i2c_adapter *adapter)
 
 void voodoo3_dec(struct i2c_adapter *adapter)
 {
-
 	MOD_DEC_USE_COUNT;
-}
-
-u32 voodoo3_func(struct i2c_adapter *adapter)
-{
-	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
-	    I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA;
 }
 
 int __init i2c_voodoo3_init(void)
 {
 	int res;
 	printk("i2c-voodoo3.o version %s (%s)\n", LM_VERSION, LM_DATE);
-#ifdef DEBUG
-/* PE- It might be good to make this a permanent part of the code! */
-	if (voodoo3_initialized) {
-		printk
-		    ("i2c-voodoo3.o: Oops, voodoo3_init called a second time!\n");
-		return -EBUSY;
-	}
-#endif
 	voodoo3_initialized = 0;
 	if ((res = voodoo3_setup())) {
 		printk
@@ -960,25 +295,23 @@ int __init i2c_voodoo3_init(void)
 		voodoo3_cleanup();
 		return res;
 	}
-	voodoo3_initialized++;
-	sprintf(voodoo3_i2c_adapter.name, "SMBus Voodoo3/Banshee adapter");
-	if ((res = i2c_add_adapter(&voodoo3_i2c_adapter))) {
-		printk
-		    ("i2c-voodoo3.o: Adapter registration failed, module not inserted.\n");
+	if ((res = i2c_bit_add_bus(&voodoo3_i2c_adapter))) {
+		printk("i2c-voodoo3.o: I2C adapter registration failed\n");
+	} else {
+		printk("i2c-i810.o: I810 I2C bus initialized\n");
+		voodoo3_initialized |= INIT2;
+	}
+	if ((res = i2c_bit_add_bus(&voodoo3_ddc_adapter))) {
+		printk("i2c-voodoo3.o: DDC adapter registration failed\n");
+	} else {
+		printk("i2c-i810.o: I810 DDC bus initialized\n");
+		voodoo3_initialized |= INIT3;
+	}
+	if(!(voodoo3_initialized & (INIT2 | INIT3))) {
+		printk("i2c-i810.o: Both registrations failed, module not inserted\n");
 		voodoo3_cleanup();
 		return res;
 	}
-	voodoo3_initialized++;
-	sprintf(voodoo3_ddc_adapter.name, "DDC Voodoo3/Banshee adapter");
-	if ((res = i2c_add_adapter(&voodoo3_ddc_adapter))) {
-		printk
-		    ("i2c-voodoo3.o: Adapter registration failed, module not inserted.\n");
-		voodoo3_cleanup();
-		return res;
-	}
-	voodoo3_initialized++;
-	printk
-	    ("i2c-voodoo3.o: Voodoo3/Banshee I2C and DDC busses detected and initialized\n");
 	return 0;
 }
 
@@ -987,24 +320,19 @@ int __init voodoo3_cleanup(void)
 	int res;
 
 	iounmap(mem);
-	if (voodoo3_initialized >= 3) {
-		if ((res = i2c_del_adapter(&voodoo3_ddc_adapter))) {
+	if (voodoo3_initialized & INIT3) {
+		if ((res = i2c_bit_del_bus(&voodoo3_ddc_adapter))) {
 			printk
-			    ("i2c-voodoo3.o: i2c_del_adapter failed, module not removed\n");
+			    ("i2c-voodoo3.o: i2c_bit_del_bus failed, module not removed\n");
 			return res;
-		} else
-			voodoo3_initialized--;
+		}
 	}
-	if (voodoo3_initialized >= 2) {
-		if ((res = i2c_del_adapter(&voodoo3_i2c_adapter))) {
+	if (voodoo3_initialized & INIT2) {
+		if ((res = i2c_bit_del_bus(&voodoo3_i2c_adapter))) {
 			printk
-			    ("i2c-voodoo3.o: i2c_del_adapter failed, module not removed\n");
+			    ("i2c-voodoo3.o: i2c_bit_del_bus failed, module not removed\n");
 			return res;
-		} else
-			voodoo3_initialized--;
-	}
-	if (voodoo3_initialized >= 1) {
-		voodoo3_initialized--;
+		}
 	}
 	return 0;
 }
