@@ -3,10 +3,39 @@
 
 VERSION=1.40
 
+# The location of linux itself. This is used to find the kernel headers
+# and other things.
+LINUX=/usr/src/linux
+LINUX_HEADERS=$(LINUX)/include
+
+# Uncomment the third line on SMP systems if the magic invocation fails. It
+# is a bit complicated because SMP configuration changed around kernel 2.1.130
+SMP := $(shell if grep -q '^SMP[[:space:]]*=' $(LINUX)/Makefile || \
+                  grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_SMP[[:space:]]*1' $(LINUX_HEADERS)/linux/autoconf.h ; \
+               then echo 1; else echo 0; fi)
+#SMP := 0
+#SMP := 1
+
+# Uncomment the second or third line if the magic invocation fails.
+# We need to know whether CONFIG_MODVERSIONS is defined.
+MODVER := $(shell if cat $(LINUX_HEADERS)/linux/config.h $(LINUX_HEADERS)/linux/autoconf.h 2>/dev/null | grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_MODVERSIONS[[:space:]]*1'; then echo 1; else echo 0; fi)
+#MODVER := 0
+#MODVER := 1
+
+MODCPPFLAGS :=
+
+ifeq ($(SMP),1)
+MODCPPFLAGS += -D__SMP__
+endif
+
+ifeq ($(MODVER),1)
+MODCPPFLAGS += -DMODVERSIONS -include $(LINUX_HEADERS)/linux/modversions.h
+endif
+
 VER = $(shell uname -r)
 INCLUDEDIR= /lib/modules/$(VER)/build/include
 
-CFLAGS= -D__KERNEL__ -DMODULE -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -I$(INCLUDEDIR)
+CFLAGS= $(MODCPPFLAGS) -D__KERNEL__ -DMODULE -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -I$(INCLUDEDIR)
 
 OBJS = p4b_smbus.o
 

@@ -60,12 +60,6 @@
 #error ERROR - You must have 'Support for hot-pluggable devices' enabled in your kernel (under 'general setup')!!
 #endif
 
-/* Deal with CONFIG_MODVERSIONS */
-#ifdef CONFIG_MODVERSIONS
-#define MODVERSIONS
-#include <linux/modversions.h>
-#endif
-
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
@@ -131,7 +125,7 @@ i801smbus_enable(struct pci_dev *dev){
 		    return -EIO;
 		  }
 		else
-		  printk("SMBus activated in LPC!\n");
+		  printk("i801smbus: SMBus activated in LPC!\n");
 	}
 	return 0;
 
@@ -230,17 +224,17 @@ int init_module(void)
 	    dev = pci_find_device(0x8086, ICH4, NULL);
 	    if (NULL == dev) 
 	      {
-		printk("INTEL ICH2/4 (82801AB/DB) not found.\n");
+		printk("i801smbus: INTEL ICH2/4 (82801AB/DB) not found.\n");
 		return -ENODEV ;
 	      }
 	    else
 	      {
-		printk("found Intel ICH4 (82801DB).\n");
+		printk("i801smbus: found Intel ICH4 (82801DB).\n");
 	      }
 	  }
 	else
 	  {
-	    printk("found Intel ICH2 (82801AB).\n");
+	    printk("i801smbus: found Intel ICH2 (82801AB).\n");
 	  }
 
 	/* we need the bus pointer later */
