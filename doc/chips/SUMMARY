@@ -1,0 +1,54 @@
+SUPPORTED DEVICES
+=================
+
+SENSOR CHIPS
+-------------
+
+Driver  Chip		#temp	#vin	#fanin	pwm/dac	i2c	ISA
+---------------------------------------------------------------------
+adm1021
+	adm1021		2	-	-	-	yes	no
+	max1617		2	-	-	-	yes	no
+
+adm9240
+	adm9240		1	6	5	1 dac	yes	no
+	ds1780		1	6	5	1 dac	yes	no
+
+gl518sm
+        gl518smR00	1	1	2	-	yes	no
+        gl518smR80	1	4	2	-	yes	no
+
+lm75
+	lm75		1	-	-	-	yes	no
+
+lm78
+	lm78		1	7	3	-	yes	yes
+
+lm80
+	lm80		1	7	2	-	yes	no
+
+sis5595
+	sis5595 	1	7	3	-	no	yes
+
+w83781d
+	w83781d		3	7	3	-	yes	yes
+	w83782d		3	9	3	2-4 pwm	yes	yes
+	w83783s		1-2	5-6	3	2 pwm	yes	no
+
+
+
+
+NON-SENSOR CHIPS
+----------------
+
+Driver  Chips
+-------------
+icspll
+	supported clock chips - reads registers only
+
+eeprom
+	all eeproms - reads registers only
+
+ltc1710
+	ltc1710	two switches only
+
