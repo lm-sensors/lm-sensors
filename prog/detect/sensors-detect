@@ -836,7 +836,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             fscher_detect adm1029_detect adm1031_detect max6900_detect
             m5879_detect pca9540_detect smartbatt_mgr_detect
             smartbatt_chgr_detect adt7467_detect lm92_detect max1619_detect
-            lm93_detect lm77_detect lm63_detect);
+            lm93_detect lm77_detect lm63_detect pca9556_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1386,6 +1386,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "pca9540",
        i2c_addrs => [0x70],
        i2c_detect => sub { pca9540_detect @_ },
+     },
+     {
+       name => "Philips Semiconductors PCA9556",
+       driver => "to-be-written",
+       i2c_addrs => [0x18..0x1f],
+       i2c_detect => sub { pca9556_detect @_ },
      },
      {
        name => "Maxim MAX6900",
@@ -4181,6 +4187,35 @@ sub pca9540_detect
 	return if $reg != i2c_smbus_read_byte($file);
 	return if $reg != i2c_smbus_read_byte($file);
 	return if $reg != i2c_smbus_read_byte($file);
+
+	return 1;
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We assume an i2c_set_slave_addr was already done.
+# $_[1]: Address (unused)
+# Returns: undef if not detected, 1 if detected
+# Detection is rather difficult, since the PCA9556 only has 4 registers
+# and no unused bit. We use the fact that the registers cycle over
+# 4 addresses boundaries, and the logic rules between registers.
+sub pca9556_detect
+{
+	my ($file, $addr) = @_;
+	my $input = i2c_smbus_read_byte_data($file, 0x00);
+	my $output = i2c_smbus_read_byte_data($file, 0x01);
+	my $invert = i2c_smbus_read_byte_data($file, 0x02);
+	my $config = i2c_smbus_read_byte_data($file, 0x03);
+
+	# Pins configured for output (config = 0) must obey the following
+	# rule: input = output ^ invert
+
+	return unless ($input & ~$config) == (($output ^ $invert) & ~$config);
+
+	for (my $i = 5; $i < 254 ; $i+=4) {
+		return unless i2c_smbus_read_byte_data($file, $i) == $output;
+		return unless i2c_smbus_read_byte_data($file, $i+1) == $invert;
+		return unless i2c_smbus_read_byte_data($file, $i+2) == $config;
+	}
 
 	return 1;
 }
