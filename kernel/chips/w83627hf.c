@@ -200,7 +200,7 @@ superio_exit(void)
 #define W83627THF_REG_PWM2		0x03	/* 697HF and 637HF too */
 #define W83627THF_REG_PWM3		0x11	/* 637HF too */
 
-#define W83627THF_REG_VRM_OVT_CFG 	0x18	/* 637HF too, unused yet */
+#define W83627THF_REG_VRM_OVT_CFG 	0x18	/* 637HF too */
 
 static const u8 regpwm_627hf[] = { W83627HF_REG_PWM1, W83627HF_REG_PWM2 };
 static const u8 regpwm[] = { W83627THF_REG_PWM1, W83627THF_REG_PWM2,
@@ -313,6 +313,7 @@ struct w83627hf_data {
 				   Default = 3435. 
 				   Other Betas unimplemented */
 	u8 vrm;
+	u8 vrm_ovt;		/* Register value, 627thf & 637hf only */
 };
 
 
@@ -882,8 +883,16 @@ static void w83627hf_init_client(struct i2c_client *client)
 		data->vid = w83627thf_read_gpio5(client) & 0x1f;
 	}
 
-	/* Convert VID to voltage based on default VRM */
-	data->vrm = DEFAULT_VRM;
+	/* Read VRM & OVT Config only once */
+	if (w83627thf == data->type || w83637hf == data->type) {
+		data->vrm_ovt =
+			w83627hf_read_value(client, W83627THF_REG_VRM_OVT_CFG);
+		data->vrm = (data->vrm_ovt & 0x01) ? 90 : 82;
+	} else {
+		/* Convert VID to voltage based on default VRM */
+		data->vrm = DEFAULT_VRM;
+	}
+
 	if (type != w83697hf)
 		vid = vid_from_reg(vid, data->vrm);
 
@@ -1027,18 +1036,54 @@ void w83627hf_in(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83627hf_update_client(client);
-		results[0] = IN_FROM_REG(data->in_min[nr]);
-		results[1] = IN_FROM_REG(data->in_max[nr]);
-		results[2] = IN_FROM_REG(data->in[nr]);
+
+		if (nr == 0 && (data->vrm_ovt & 0x01) &&
+			(w83627thf == data->type || w83637hf == data->type)) {
+
+			/* use VRM9 calculation */
+			results[0] = ((data->in_min[0] * 488 + 70500) / 1000);
+			results[1] = ((data->in_max[0] * 488 + 70500) / 1000);
+			results[2] = ((data->in[0] * 488 + 70500) / 1000);
+
+		} else {
+			/* use VRM8 (standard) calculation */
+			results[0] = IN_FROM_REG(data->in_min[nr]);
+			results[1] = IN_FROM_REG(data->in_max[nr]);
+			results[2] = IN_FROM_REG(data->in[nr]);
+		}
+
 		*nrels_mag = 3;
+
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->in_min[nr] = IN_TO_REG(results[0]);
+			if (nr == 0 && (data->vrm_ovt & 0x01) &&
+				(w83627thf == data->type ||
+				w83637hf == data->type))
+
+				/* use VRM9 calculation */
+				data->in_min[0] = SENSORS_LIMIT(
+					((results[0]*1000 - 70000+244) / 488),
+						0, 255);
+			else
+				/* use VRM8 (standard) calculation */
+				data->in_min[nr] = IN_TO_REG(results[0]);
+
 			w83627hf_write_value(client, W83781D_REG_IN_MIN(nr),
 					    data->in_min[nr]);
 		}
 		if (*nrels_mag >= 2) {
-			data->in_max[nr] = IN_TO_REG(results[1]);
+			if (nr == 0 && (data->vrm_ovt & 0x01) &&
+				(w83627thf == data->type ||
+				w83637hf == data->type))
+
+				/* use VRM9 calculation */
+				data->in_min[0] = SENSORS_LIMIT(
+					((results[1]*1000 - 70000+244) / 488),
+						0, 255);
+			else
+				/* use VRM8 (standard) calculation */
+				data->in_max[nr] = IN_TO_REG(results[1]);
+
 			w83627hf_write_value(client, W83781D_REG_IN_MAX(nr),
 					    data->in_max[nr]);
 		}

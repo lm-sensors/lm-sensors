@@ -17,6 +17,9 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
+2.8.8 (???)
+  Module w83627hf: Add alternate VCORE/in0 calculation method
+
 2.8.7 (20040611)
   File README.thinkpad: Update 24RF08 status
   File doc/fan-divisors: More info on accuracy
