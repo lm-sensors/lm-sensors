@@ -1307,7 +1307,7 @@ sub w83781d_detect
   return if $chip == 1 and  $reg1 != 0x30;
   return if $chip == 2 and  $reg1 != 0x40;
   return if $chip == 3 and  $reg1 != 0x20;
-  return if $chip == 4 and  $reg1 != 0x20;
+  return if $chip == 4 and  $reg1 != 0x30;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   @res = (8);
   push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;

@@ -750,7 +750,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
       kind = w83783s;
     else if (val1 == 0x20 && vendid == winbond)
       kind = w83627hf;
-    else if (val1 == 0x20 && vendid == asus && !is_isa)
+    else if (val1 == 0x30 && vendid == asus && !is_isa)
       kind = as99127f;
     else {
       if (kind == 0) 
