@@ -34,6 +34,15 @@
 #include "i2c.h"
 #include "compat.h"
 
+/* Addresses to scan */
+static unsigned short normal_i2c[] = {SENSORS_I2C_END};
+static unsigned short normal_i2c_range[] = {0x20,0x2f,SENSORS_I2C_END};
+static unsigned int normal_isa[] = {SENSORS_ISA_END};
+static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+
+/* Insmod parameters */
+SENSORS_INSMOD_1(lm80);
+
 /* Many LM80 constants specified below */
 
 /* The LM80 registers */
@@ -175,10 +184,8 @@ static int lm80_init(void);
 static int lm80_cleanup(void);
 
 static int lm80_attach_adapter(struct i2c_adapter *adapter);
+static int lm80_detect(struct i2c_adapter *adapter, int address, int kind);
 static int lm80_detach_client(struct i2c_client *client);
-static int lm80_new_client(struct i2c_adapter *adapter,
-                           struct i2c_client *new_client);
-static void lm80_remove_client(struct i2c_client *client);
 static int lm80_command(struct i2c_client *client, unsigned int cmd, 
                         void *arg);
 static void lm80_inc_use (struct i2c_client *client);
@@ -259,87 +266,123 @@ static ctl_table lm80_dir_table_template[] = {
   { 0 }
 };
 
-
 int lm80_attach_adapter(struct i2c_adapter *adapter)
 {
-  int address,err;
+  return sensors_detect(adapter,&addr_data,lm80_detect);
+}
+
+int lm80_detect(struct i2c_adapter *adapter, int address, int kind)
+{
+  int i,cur;
   struct i2c_client *new_client;
+  struct lm80_data *data;
+  int err=0;
   const char *type_name,*client_name;
 
-  /* OK, this is no detection. I know. It will do for now, though.  */
-  err = 0;
-  
-  /* Make sure we aren't probing the ISA bus!! */
-  if (i2c_is_isa_adapter(adapter)) return 0;
-  
-  for (address = 0x20; (! err) && (address <= 0x2f); address ++) {
+  /* Make sure we aren't probing the ISA bus!! This is just a safety check
+     at this moment; sensors_detect really won't call us. */
+#ifdef DEBUG
+  if (i2c_is_isa_adapter(adapter)) {
+    printk("lm80.o: lm80_detect called for an ISA bus adapter?!?\n");
+    return 0;
+  }
+#endif
 
-    /* Later on, we will keep a list of registered addresses for each
-       adapter, and check whether they are used here */
+  /* Here, we have to do the address registration check for the I2C bus.
+     But that is not yet implemented. */
 
-    if (smbus_read_byte_data(adapter,address,LM80_REG_CONFIG) < 0) 
-      continue;
+  /* OK. For now, we presume we have a valid client. We now create the
+     client structure, even though we cannot fill it completely yet.
+     But it allows us to access lm80_{read,write}_value. */
+  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
+                              sizeof(struct lm80_data),
+                              GFP_KERNEL))) {
+    err = -ENOMEM;
+    goto ERROR0;
+  }
 
-    /* Real detection code goes here */
+  data = (struct lm80_data *) (((struct i2c_client *) new_client) + 1);
+  new_client->addr = address;
+  new_client->data = data;
+  new_client->adapter = adapter;
+  new_client->driver = &lm80_driver;
 
-    printk("lm80.o: LM80 detected\n");
+  /* Now, we do the remaining detection. It is lousy. */
+  if (lm80_read_value(new_client,LM80_REG_ALARM2) & 0xc0)
+    goto ERROR1;
+  for (i = 0x2a; i <= 0x3d; i++) {
+    cur = smbus_read_byte_data(adapter,address,i);
+    if ((smbus_read_byte_data(adapter,address,i+0x40) != cur) ||
+        (smbus_read_byte_data(adapter,address,i+0x80) != cur) ||
+        (smbus_read_byte_data(adapter,address,i+0xc0) != cur))
+      goto ERROR1;
+  }
+
+  /* Determine the chip type - only one kind supported! */
+  if (kind <= 0)
+    kind = lm80;
+
+  if (kind == lm80) {
     type_name = "lm80";
     client_name = "LM80 chip";
+  } else {
+#ifdef DEBUG
+    printk("lm80.o: Internal error: unknown kind (%d)?!?",kind);
+#endif
+    goto ERROR1;
+  }
 
+  /* Fill in the remaining client fields and put it into the global list */
+  strcpy(new_client->name,client_name);
 
-    /* Allocate space for a new client structure. To counter memory
-       fragmentation somewhat, we only do one kmalloc. */
-    if (! (new_client = kmalloc(sizeof(struct i2c_client) + 
-                                sizeof(struct lm80_data),
-                               GFP_KERNEL))) {
-      err = -ENOMEM;
-      continue;
-    }
+  /* Find a place in our global list */
+  for (i = 0; i < MAX_LM80_NR; i++)
+    if (! lm80_list[i])
+       break;
+  if (i == MAX_LM80_NR) {
+    err = -ENOMEM;
+    printk("lm80.o: No empty slots left, recompile and heighten "
+           "MAX_LM80_NR!\n");
+    goto ERROR2;
+  }
+  lm80_list[i] = new_client;
+  new_client->id = i;
+  data->valid = 0;
+  data->update_lock = MUTEX;
 
-    /* Fill the new client structure with data */
-    new_client->data = (struct lm80_data *) (new_client + 1);
-    new_client->addr = address;
-    strcpy(new_client->name,client_name);
-    if ((err = lm80_new_client(adapter,new_client)))
-      goto ERROR2;
+  /* Tell the I2C layer a new client has arrived */
+  if ((err = i2c_attach_client(new_client)))
+    goto ERROR3;
 
-    /* Tell i2c-core a new client has arrived */
-    if ((err = i2c_attach_client(new_client))) 
-      goto ERROR3;
+  /* Register a new directory entry with module sensors */
+  if ((i = sensors_register_entry(new_client,type_name,
+                                  lm80_dir_table_template)) < 0) {
+    err = i;
+    goto ERROR4;
+  }
+  data->sysctl_id = i;
 
-    /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,type_name,
-                                      lm80_dir_table_template)) < 0)
-      goto ERROR4;
-    ((struct lm80_data *) (new_client->data))->sysctl_id = err;
-    err = 0;
-
-    /* Initialize the LM80 chip */
-    lm80_init_client(new_client);
-    continue;
+  lm80_init_client(new_client);
+  return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 ERROR4:
-    i2c_detach_client(new_client);
+  i2c_detach_client(new_client);
 ERROR3:
-    lm80_remove_client((struct i2c_client *) new_client);
+  for (i = 0; i < MAX_LM80_NR; i++)
+    if (new_client == lm80_list[i])
+      lm80_list[i] = NULL;
 ERROR2:
-    kfree(new_client);
-  }
+ERROR1:
+  kfree(new_client);
+ERROR0:
   return err;
 }
 
 int lm80_detach_client(struct i2c_client *client)
 {
   int err,i;
-  for (i = 0; i < MAX_LM80_NR; i++)
-    if (client == lm80_list[i])
-      break;
-  if ((i == MAX_LM80_NR)) {
-    printk("lm80.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
 
   sensors_deregister_entry(((struct lm80_data *)(client->data))->sysctl_id);
 
@@ -347,46 +390,19 @@ int lm80_detach_client(struct i2c_client *client)
     printk("lm80.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-  lm80_remove_client(client);
-  kfree(client);
-  return 0;
-}
 
-
-/* Find a free slot, and initialize most of the fields */
-int lm80_new_client(struct i2c_adapter *adapter,
-                    struct i2c_client *new_client)
-{
-  int i;
-  struct lm80_data *data;
-
-  /* First, seek out an empty slot */
-  for(i = 0; i < MAX_LM80_NR; i++)
-    if (! lm80_list[i])
-      break;
-  if (i == MAX_LM80_NR) {
-    printk("lm80.o: No empty slots left, recompile and heighten "
-           "MAX_LM80_NR!\n");
-    return -ENOMEM;
-  }
-  
-  lm80_list[i] = new_client;
-  new_client->id = i;
-  new_client->adapter = adapter;
-  new_client->driver = &lm80_driver;
-  data = new_client->data;
-  data->valid = 0;
-  data->update_lock = MUTEX;
-  return 0;
-}
-
-/* Inverse of lm80_new_client */
-void lm80_remove_client(struct i2c_client *client)
-{
-  int i;
   for (i = 0; i < MAX_LM80_NR; i++)
-    if (client == lm80_list[i]) 
-      lm80_list[i] = NULL;
+    if (client == lm80_list[i])
+      break;
+  if ((i == MAX_LM80_NR)) {
+    printk("lm80.o: Client to detach not found.\n");
+    return -ENOENT;
+  }
+  lm80_list[i] = NULL;
+
+  kfree(client);
+
+  return 0;
 }
 
 /* No commands defined yet */
