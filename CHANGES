@@ -17,6 +17,9 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
+2.5.6 (2000????)
+  mkpatch now adds many more modules
+
 2.5.5 (2000????)
   NOTE: i2c 2.5.5 MUST BE be compiled and installed first.
   Chip modules (all): Update mutex definition (works now for new 2.2 kernels)

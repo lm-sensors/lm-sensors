@@ -540,8 +540,13 @@ sub gen_drivers_i2c_Config_in
   if [ "$CONFIG_I2C_MAINBOARD" = "y" ]; then
     tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
+    tristate '  AMD 756' CONFIG_I2C_AMD756
+    tristate '  Intel 82801AA, 82801AB and 82801BA' CONFIG_I2C_I801
+    tristate '  Intel i810AA, i810AB and i815' CONFIG_I2C_I810
     tristate '  Intel 82371AB PIIX4(E)' CONFIG_I2C_PIIX4
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_ALGOBIT
+    tristate '  VIA Technologies, Inc. VT596A/B' CONFIG_I2C_VIAPRO
+    dep_tristate '  Voodoo3 I2C interface' CONFIG_I2C_VOODOO $CONFIG_I2C_ALGOBIT
     tristate '  Pseudo ISA adapter (for hardware sensors modules)' CONFIG_I2C_ISA 
   fi
 
@@ -580,14 +585,21 @@ export-objs	:= sensors.o
 
 obj-$(CONFIG_SENSORS)		+= sensors.o
 obj-$(CONFIG_SENSORS_ADM1021)	+= adm1021.o
+obj-$(CONFIG_SENSORS_ADM1025)	+= adm1025.o
 obj-$(CONFIG_SENSORS_ADM9024)	+= adm9024.o
+obj-$(CONFIG_SENSORS_BT869)	+= bt869.o
+obj-$(CONFIG_SENSORS_DDCMON)	+= ddcmon.o
 obj-$(CONFIG_SENSORS_EEPROM)	+= eeprom.o
 obj-$(CONFIG_SENSORS_GL518SM)	+= gl518sm.o
+obj-$(CONFIG_SENSORS_GL520SM)	+= gl520sm.o
 obj-$(CONFIG_SENSORS_LM75)	+= lm75.o
 obj-$(CONFIG_SENSORS_LM78)	+= lm78.o
 obj-$(CONFIG_SENSORS_LM80)	+= lm80.o
+obj-$(CONFIG_SENSORS_LM87)	+= lm87.o
 obj-$(CONFIG_SENSORS_LTC1710)	+= ltc1710.o
 obj-$(CONFIG_SENSORS_SIS5595)	+= sis5595.o
+obj-$(CONFIG_SENSORS_THMC50)	+= thmc50.o
+obj-$(CONFIG_SENSORS_VIA686A)	+= via686a.o
 obj-$(CONFIG_SENSORS_W83781D)	+= w83781d.o
 
 O_OBJS          := $(filter-out $(export-objs), $(obj-y))
@@ -635,11 +647,27 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_SENSORS_ADM1025),y)
+  L_OBJS += adm1025.o
+else
+  ifeq ($(CONFIG_SENSORS_ADM1025),m)
+    M_OBJS += adm1025.o
+  endif
+endif
+
 ifeq ($(CONFIG_SENSORS_ADM9024),y)
   L_OBJS += adm9240.o
 else
   ifeq ($(CONFIG_SENSORS_ADM9024),m)
     M_OBJS += adm9240.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_DDCMON),y)
+  L_OBJS += ddcmon.o
+else
+  ifeq ($(CONFIG_SENSORS_DDCMON),m)
+    M_OBJS += ddcmon.o
   endif
 endif
 
@@ -656,6 +684,14 @@ ifeq ($(CONFIG_SENSORS_GL518SM),y)
 else
   ifeq ($(CONFIG_SENSORS_GL518SM),m)
     M_OBJS += gl518sm.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_GL520SM),y)
+  L_OBJS += gl520sm.o
+else
+  ifeq ($(CONFIG_SENSORS_GL520SM),m)
+    M_OBJS += gl520sm.o
   endif
 endif
 
@@ -683,6 +719,14 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_SENSORS_LM87),y)
+  L_OBJS += lm87.o
+else
+  ifeq ($(CONFIG_SENSORS_LM87),m)
+    M_OBJS += lm87.o
+  endif
+endif
+
 ifeq ($(CONFIG_SENSORS_LTC1710),y)
   L_OBJS += ltc1710.o
 else
@@ -691,11 +735,35 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_SENSORS_MATORB),y)
+  L_OBJS += matorb.o
+else
+  ifeq ($(CONFIG_SENSORS_MATORB),m)
+    M_OBJS += matorb.o
+  endif
+endif
+
 ifeq ($(CONFIG_SENSORS_SIS5595),y)
   L_OBJS += sis5595.o
 else
   ifeq ($(CONFIG_SENSORS_SIS5595),m)
     M_OBJS += sis5595.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_THMC50),y)
+  L_OBJS += thmc50.o
+else
+  ifeq ($(CONFIG_SENSORS_THMC50),m)
+    M_OBJS += thmc50.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_VIA686A),y)
+  L_OBJS += via686a.o
+else
+  ifeq ($(CONFIG_SENSORS_VIA686A),m)
+    M_OBJS += via686a.o
   endif
 endif
 
@@ -743,10 +811,16 @@ sub gen_drivers_i2c_Makefile
       if ($new_format) {
         print OUTPUT << 'EOF';
 obj-$(CONFIG_I2C_ALI15X3)		+= i2c-ali15x3.o
+obj-$(CONFIG_I2C_AMD756)		+= i2c-amd756.o
 obj-$(CONFIG_I2C_HYDRA)			+= i2c-hydra.o
-obj-$(CONFIG_I2C_PIIX4)			+= i2c-piix4.o
-obj-$(CONFIG_I2C_VIA)			+= i2c-via.o
+obj-$(CONFIG_I2C_I801)			+= i2c-i801.o
+obj-$(CONFIG_I2C_I810)			+= i2c-i810.o
 obj-$(CONFIG_I2C_ISA)			+= i2c-isa.o
+obj-$(CONFIG_I2C_PIIX4)			+= i2c-piix4.o
+obj-$(CONFIG_I2C_SIS5595)		+= i2c-sis5595.o
+obj-$(CONFIG_I2C_VIA)			+= i2c-via.o
+obj-$(CONFIG_I2C_VIAPRO)		+= i2c-viapro.o
+obj-$(CONFIG_I2C_VOODOO3)		+= i2c-voodoo3.o
 EOF
       } else {
         print OUTPUT << 'EOF';
@@ -758,11 +832,43 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_I2C_AMD756),y)
+  L_OBJS += i2c-amd756.o
+else 
+  ifeq ($(CONFIG_I2C_AMD756),m)
+    M_OBJS += i2c-amd756.o
+  endif
+endif
+
 ifeq ($(CONFIG_I2C_HYDRA),y)
   L_OBJS += i2c-hydra.o
 else 
   ifeq ($(CONFIG_I2C_HYDRA),m)
     M_OBJS += i2c-hydra.o
+  endif
+endif
+
+ifeq ($(CONFIG_I2C_I801),y)
+  L_OBJS += i2c-i801.o
+else 
+  ifeq ($(CONFIG_I2C_I801),m)
+    M_OBJS += i2c-i801.o
+  endif
+endif
+
+ifeq ($(CONFIG_I2C_I810),y)
+  L_OBJS += i2c-i810.o
+else 
+  ifeq ($(CONFIG_I2C_I810),m)
+    M_OBJS += i2c-i810.o
+  endif
+endif
+
+ifeq ($(CONFIG_I2C_ISA),y)
+  L_OBJS += i2c-isa.o
+else 
+  ifeq ($(CONFIG_I2C_ISA),m)
+    M_OBJS += i2c-isa.o
   endif
 endif
 
@@ -774,6 +880,14 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_I2C_SIS5595),y)
+  L_OBJS += i2c-sis5595.o
+else 
+  ifeq ($(CONFIG_I2C_SIS5595),m)
+    M_OBJS += i2c-sis5595.o
+  endif
+endif
+
 ifeq ($(CONFIG_I2C_VIA),y)
   L_OBJS += i2c-via.o
 else 
@@ -782,11 +896,19 @@ else
   endif
 endif
 
-ifeq ($(CONFIG_I2C_ISA),y)
-  L_OBJS += i2c-isa.o
+ifeq ($(CONFIG_I2C_VIAPRO),y)
+  L_OBJS += i2c-viapro.o
 else 
-  ifeq ($(CONFIG_I2C_ISA),m)
-    M_OBJS += i2c-isa.o
+  ifeq ($(CONFIG_I2C_VIAPRO),m)
+    M_OBJS += i2c-viapro.o
+  endif
+endif
+
+ifeq ($(CONFIG_I2C_VOODOO3),y)
+  L_OBJS += i2c-voodoo3.o
+else 
+  ifeq ($(CONFIG_I2C_VOODOO3),m)
+    M_OBJS += i2c-voodoo3.o
   endif
 endif
 
@@ -830,17 +952,35 @@ sub gen_drivers_i2c_i2c_core_c
 #ifdef CONFIG_I2C_ALI15X3
 	extern int i2c_ali15x3_init(void);
 #endif
+#ifdef CONFIG_I2C_AMD756
+	extern int i2c_amd756_init(void);
+#endif
 #ifdef CONFIG_I2C_HYDRA
 	extern int i2c_hydra_init(void);
+#endif
+#ifdef CONFIG_I2C_I801
+	extern int i2c_i801_init(void);
+#endif
+#ifdef CONFIG_I2C_I810
+	extern int i2c_i810_init(void);
+#endif
+#ifdef CONFIG_I2C_ISA
+	extern int i2c_isa_init(void);
 #endif
 #ifdef CONFIG_I2C_PIIX4
 	extern int i2c_piix4_init(void);
 #endif
+#ifdef CONFIG_I2C_SIS5595
+	extern int i2c_sis5595_init(void);
+#endif
 #ifdef CONFIG_I2C_VIA
 	extern int i2c_via_init(void);
 #endif
-#ifdef CONFIG_I2C_ISA
-	extern int i2c_isa_init(void);
+#ifdef CONFIG_I2C_VIAPRO
+	extern int i2c_viapro_init(void);
+#endif
+#ifdef CONFIG_I2C_VOODOO3
+	extern int i2c_voodoo3_init(void);
 #endif
 EOF
       } elsif ($patch_nr == 2) {
@@ -848,14 +988,32 @@ EOF
 #ifdef CONFIG_I2C_ALI15X3
 	i2c_ali15x3_init();
 #endif
+#ifdef CONFIG_I2C_AMD756
+	i2c_amd756_init();
+#endif
 #ifdef CONFIG_I2C_HYDRA
 	i2c_hydra_init();
+#endif
+#ifdef CONFIG_I2C_I801
+	i2c_i801_init();
+#endif
+#ifdef CONFIG_I2C_I810
+	i2c_i810_init();
 #endif
 #ifdef CONFIG_I2C_PIIX4
 	i2c_piix4_init();
 #endif
+#ifdef CONFIG_I2C_SIS5595
+	i2c_sis5595_init();
+#endif
 #ifdef CONFIG_I2C_VIA
 	i2c_via_init();
+#endif
+#ifdef CONFIG_I2C_VIAPRO
+	i2c_viapro_init();
+#endif
+#ifdef CONFIG_I2C_VOODOO3
+	i2c_voodoo3_init();
 #endif
 #ifdef CONFIG_I2C_ISA
 	i2c_isa_init();
