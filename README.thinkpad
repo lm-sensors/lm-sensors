@@ -24,13 +24,15 @@ chance of corruption. Later evolutions were made and the current state is:
 
 1) Sensors-detect accesses VPD information in the BIOS to identify IBM
    systems. If it finds the VPD structure (which is IBM-proprietary),
-   sensors-detect will print a message and exit, unless the system is
-   listed in a growing white-list. We add system signatures to the list
-   when users report that a given model has been tested to be safe.
+   sensors-detect will print a message and exit. This is a temporary
+   additional measure, which will be removed as soon as the other
+   measures have proven to be efficient.
 
-2) The sequence of probes in sensors-detect has been changed so that
-   24RF08 eeproms are not corrupted. This *should* prevent corruption
-   of 24RF08 eeproms in any non-IBM systems in most cases.
+2) The probing command (quick write 0) has been replaced by a different
+   command (read byte) for addresses where eeproms are known to live.
+   This should prevent corruption of 24RF08 eeproms in any system,
+   IBM or not. A similar change was made to i2cdetect as well, although
+   no corruption was ever reported using this tool.
 
 3) The i2c-piix4 module (the bus driver that is used for Intel PIIX4-based
    systems, including IBM Thinkpads) now accesses DMI information
@@ -55,29 +57,30 @@ lm_sensors 2.6.5 or later on IBM Thinkpads, because:
 
 2) lm_sensors won't run on most IBM systems because of these changes.
 
-3) IBM Thinkpads contain a proprietary Embedded Controller which
+3) Most IBM Thinkpads contain a proprietary Embedded Controller which
    is used to access sensors. This controller is not on the SMBus,
    and IBM will not release the programming interface to the
-   controller. So lm_sensors isn't useful on Thinkpads anyway.
+   controller. So lm_sensors isn't useful on these Thinkpads anyway.
 
 You may want to try ACPI instead, it should let you get some information
 about temperatures and fan status.
 
-As described above, our 2.6.5 release "blacklisted" all IBM
-systems. We were planning to refine refine the system detection so that
-only those models containing 24RF08's are blacklisted. But it looks like
-we will not get sufficient cooperation from IBM to implement a reliable
-blacklist. For this reason, we will now be using the other approach:
-a "white list" of known-to-be-safe systems. This is the only safe way.
+As described above, our 2.6.5 release "blacklisted" all IBM systems.
+For a moment, we have been planning to refine the system detection
+so that only those models containing 24RF08's are blacklisted. After that,
+we planned to use a different approach: a "white list" of known-to-be-safe
+systems. In both cases, it would require continuous updates of a machines
+list. This would have been slow and inefficient.
 
-Systems will be added to the white list at a slow rate, on user report.
-Basically, users wanting to use lm_sensors on their IBM systems, either
-because they know for sure that the system doesn't have the 24RF08 chip,
-or because they like playing with fire, have to bypass the securities we
-have implemented, and then report (hopefully) success, then we add their
-system signature to the white list. Note that this list is only
-implemented in sensors-detect at the moment, not the i2c-piix4 bus
-driver.
+The latest idea is to stop using the dangerous command for EEPROM
+addresses. That way, risks of corruption are reduced to zero. This was
+already done for user-space tools, as mentioned above. Once this will
+have been tested and we are sure that there are no drawbacks, we'll
+do the same on the kernel side in Linux 2.6. The change won't occur in
+Linux 2.4 however, because it implies changes to both i2c modules and
+lm_sensors modules. It is possible to use mismatching versions of
+these modules, and when doing so, the fix would become more dangerous
+than helpful.
 
 We do not have any reports of 24RF08 eeproms on non-IBM systems.
 If there are any such systems with 24RF08 eeproms, these changes will
