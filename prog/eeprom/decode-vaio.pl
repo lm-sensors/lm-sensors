@@ -18,18 +18,23 @@
 #
 # Version 0.1  2002-02-06  Jean Delvare <khali@linux-fr.org>
 # Version 0.2  2002-02-16  Jean Delvare <khali@linux-fr.org>
-#  Fixed to work with the new, simplified /proc interface names of the eeprom driver
-#  (lm_sensors 2.6.3 and greater.)
+#  Fixed to work with the new, simplified /proc interface names of the eeprom
+#    driver (lm_sensors 2.6.3 and greater).
 #  Shifted data display by 4 columns left.
 # Version 0.3  2002-02-17  Jean Delvare <khali@linux-fr.org>
-#  Added UUID field at 0x10 (added decode_uuid.)
+#  Added UUID field at 0x10 (added decode_uuid).
 #  Merged decode_string and decode_string32.
 #  Added unknown field at 0x20.
-#  Moved header and footer to BEGIN and END, respectivly.
+#  Moved header and footer to BEGIN and END, respectively.
 #  Reformated history to match those of the other decode scripts.
-#  Deleted decode_char (made useless by decode_string.)
+#  Deleted decode_char (made useless by decode_string).
 #  Reordered field display, changed some labels.
 #  Added old /proc interface check.
+# Version 1.0  2002-11-15  Jean Delvare <khali@linux-fr.org>
+#  Gave the label "OEM Data" to the field at 0x20.
+#  Gave the label "Timestamp" to the field at 0xE0.
+#  Renamed "Model Number" to "Model Name".
+#  Added some Documentation.
 #
 # EEPROM data decoding for Sony Vaio laptops. 
 #
@@ -37,9 +42,22 @@
 # and Perl is at /usr/bin/perl
 #
 # Please note that this is a guess-only work.  Sony support refused to help
-# me, so if someone can provide information, please contact me.  I used my
-# PCG-GR214EP as a base, but I can't promise that this script will work with
-# other models.  Any feedback appreciated anyway.
+# me, so if someone can provide information, please contact me.
+#
+# It seems that if present, the EEPROM is always at 0x57.
+#
+# Models tested so far:
+#   PCG-GR214EP : OK
+#   PCG-F403 : No EEPROM
+#   PCG-Z600LEK : No EEPROM
+#   PCG-Z600NE : No EEPROM
+#   PCG-F707 : No EEPROM
+#   PCG-GRX570 : OK
+#   PCG-GRX316G : OK
+# Any feedback appreciated anyway.
+#
+# Thanks to Werner Heuser, Carsten Blume, Christian Gennerat, Joe Wreschnig,
+# Xavier Roche, Sebastien Lefevre and Philippe H. for their precious help.
 #
 
 use strict;
@@ -112,16 +130,16 @@ sub vaio_decode
 	print_item('Serial Number',decode_string($bus,$addr,192,0,32));
 	print_item('UUID',decode_uuid($bus,$addr,16));
 	print_item('Revision',decode_string($bus,$addr,160,0,10));
-	print_item('Model Number','PCG-'.decode_string($bus,$addr,160,10,4));
-	print_item('?',decode_string($bus,$addr,32,0,16));
-	print_item('?',decode_string($bus,$addr,224,0,32));
+	print_item('Model Name','PCG-'.decode_string($bus,$addr,160,10,4));
+	print_item('OEM Data',decode_string($bus,$addr,32,0,16));
+	print_item('Timestamp',decode_string($bus,$addr,224,0,32));
 }
 
 BEGIN
 {
 	print("Sony Vaio EEPROM Decoder\n");
 	print("Written by Jean Delvare.  Copyright 2002.\n");
-	print("Version 0.3\n\n");
+	print("Version 1.0\n\n");
 }
 
 END
