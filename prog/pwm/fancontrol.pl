@@ -52,6 +52,8 @@ use constant MAX   => 255;
 
 use constant PIDFILE  => '/var/run/fancontrol.pid';
 use constant CONFFILE => '/etc/fancontrol';
+use constant LOGFILE  => '/var/log/fancontrol/fancontrol.log';
+use constant ERRFILE  => '/var/log/fancontrol/fancontrol.err';
 
 use constant SDIR => '/sys/bus/i2c/devices';
 ### End Configuration ###
@@ -65,7 +67,6 @@ our @afcmaxtemp;
 our @afcmintemp;
 our @afcminstart;
 our @afcminstop;
-our $fanrestored;
 
 sub loadconfig($);
 sub pwmdisable($);
@@ -73,7 +74,6 @@ sub pwmenable($);
 sub restorefans();
 sub calc(@);
 sub UpdateFanSpeeds();
-
 END { restorefans(); }
 
 our $opt_d;
@@ -89,14 +89,14 @@ else
 if ( defined($opt_d) && ($opt_d == 1) )
    {
      my $pid = fork;
-     exit if $pid;
+     POSIX::_exit(0) if $pid;
 
      unless (defined($pid))
        { die("Couldn't fork: $!"); }
 
-     open(*STDERR, '>>', '/var/log/fancontrol/fancontrol.log');
+     open(*STDERR, '>', ERRFILE);
      IO::Handle::autoflush(*STDERR);
-     open(*STDOUT, '>>', '/var/log/fancontrol/fancontrol.log');
+     open(*STDOUT, '>>', LOGFILE);
      IO::Handle::autoflush(*STDOUT);
 
      unless (POSIX::setsid())
@@ -142,10 +142,7 @@ while ($fcvcount < $#afcpwm+1)
    {
      $pwmo = $afcpwm[$fcvcount];
      unless (pwmenable($pwmo))
-       {
-         print("Error enabling PWM on $dir/$pwmo : $!\n");
-         restorefans();
-       }
+       { die("Error enabling PWM on $dir/$pwmo : $!\n"); }
      $fcvcount++;
    }
 
@@ -160,6 +157,7 @@ while(1)
 1;
 
 ################################################################ 
+loadconfig($)
 sub loadconfig($)
 {
    my $file = shift;
@@ -217,6 +215,7 @@ $minstop);
 
 
 ################################################################ 
+pwmdisable($)
 sub pwmdisable($)
 {
    my $p = shift;
@@ -258,6 +257,7 @@ sub pwmdisable($)
 
 
 ################################################################# 
+pwmenable($)
 sub pwmenable($)
 {
    my $p = shift;
@@ -273,10 +273,7 @@ sub pwmenable($)
                close(F);
              }
            else
-             {
-               print("$dir/$p : $!\n");
-               restorefans();
-             }
+             { die("$dir/$p : $!\n"); }
          }
      }
    else
@@ -287,42 +284,37 @@ sub pwmenable($)
            close(F);
          }
        else
-         {
-           print("$dir/$p : $!\n");
-           restorefans();
-         }
+         { die("$dir/$p : $!\n"); }
      }
    return(1);
 }
 
 
 ################################################################ 
+restorefans()
 sub restorefans()
 {
-   unless ($fanrestored)
+   $SIG{TERM} = 'IGNORE';
+   $SIG{HUP}  = 'IGNORE';
+   $SIG{INT}  = 'IGNORE';
+   $SIG{QUIT} = 'IGNORE';
+
+   print("Aborting, restoring fans...\n");
+   my $fcvcount = 0;
+
+   while ( $fcvcount < $#afcpwm+1)
      {
-       $SIG{TERM} = 'IGNORE';
-       $SIG{HUP}  = 'IGNORE';
-       $SIG{INT}  = 'IGNORE';
-       $SIG{QUIT} = 'IGNORE';
-
-       print("Aborting, restoring fans...\n");
-       my $fcvcount = 0;
-
-       while ($fcvcount < $#afcpwm+1)
-         {
-           my $pwmo = $afcpwm[$fcvcount];
-           &pwmdisable($afcpwm[$fcvcount]);
-           $fcvcount++;
-         }
-       print("Verify fans have returned to full speed\n");
-       $fanrestored = 1;
-       exit(0);
+       my $pwmo = $afcpwm[$fcvcount];
+       &pwmdisable($afcpwm[$fcvcount]);
+       $fcvcount++;
      }
+   print("Verify fans have returned to full speed\n");
+   POSIX:_exit(-1);
 }
 
 
 ############################################################ 
+UpdateFanSpeeds()
 sub UpdateFanSpeeds()
 {
    my $fcvcount = 0;
@@ -345,10 +337,7 @@ sub UpdateFanSpeeds()
            close(F);
          }
        else
-         {
-           print("Error reading temperature from $dir/$tsens");
-           restorefans();
-         }
+         { die("Error reading temperature from $dir/$tsens"); }
        $tval =~ /([.\d]+)\s*$/;
        $tval = int($1);
        if ($sysfs == 1)
@@ -362,10 +351,7 @@ sub UpdateFanSpeeds()
            close(F);
          }
        else
-         {
-           print("Error reading PWM value from $dir/$pwmo");
-           restorefans();
-         }
+         { die("Error reading PWM value from $dir/$pwmo"); }
        ($pwmpval) = split(/\s/, $pwmpval);
 
        ### fanval
@@ -376,10 +362,7 @@ sub UpdateFanSpeeds()
            close(F);
          }
        else
-         {
-           print("Error reading Fan value from $dir/$fan");
-           restorefans();
-         }
+         { die("Error reading Fan value from $dir/$fan"); }
        $fanval =~ /(\d+)\s$/;
        $fanval = $1;
 
@@ -418,10 +401,7 @@ sub UpdateFanSpeeds()
                    close(F);
                  }
                else
-                 {
-                   print("Error writing PWM value to $dir/$pwmo : $!\n");
-                   restorefans();
-                 }
+                 { die("Error writing PWM value to $dir/$pwmo : $!\n"); }
                sleep 1;
              }
          }
@@ -432,10 +412,7 @@ sub UpdateFanSpeeds()
            close(F);
          }
        else
-         {
-           print("Error writing PWM value to $dir/$pwmo : $!\n");
-           restorefans();
-         }
+         { die("Error writing PWM value to $dir/$pwmo : $!\n"); }
 
        if (DEBUG == 1)
          { print("new pwmval = $pwmval\n"); }
