@@ -1153,7 +1153,7 @@ sub scan_isa_bus
                                             $new_hash;
       if ($new_hash) {
         printf "    Alias of the chip on I2C bus `%s', address 0x%04x",
-                        $new_hash->i2c_adap,$new_hash->i2c_addr;
+                        $new_hash->{i2c_adap},$new_hash->{i2c_addr};
       }
     }
   }
