@@ -178,7 +178,7 @@ static const u8 BIT_SCFG2[] = { 0x10, 0x20, 0x40 };
    these macros are called: arguments may be evaluated more than once.
    Fixing this is just not worth it. */
 #define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 8)/16),0,255))
-#define IN_FROM_REG(val) (((val) * 16) / 10)
+#define IN_FROM_REG(val) (((val) * 16 + 5) / 10)
 
 static inline u8 FAN_TO_REG(long rpm, int div)
 {
