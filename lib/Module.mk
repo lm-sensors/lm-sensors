@@ -144,4 +144,6 @@ clean-lib:
 	$(RM) $(LIB_DIR)/*.ld $(LIB_DIR)/*.ad
 	$(RM) $(LIB_DIR)/*.lo $(LIB_DIR)/*.ao
 	$(RM) $(LIBTARGETS) $(LIBEXTRACLEAN)
+# old versions
+	$(RM) $(LIB_DIR)/$(LIBSHBASENAME).*
 clean :: clean-lib
