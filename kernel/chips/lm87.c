@@ -504,15 +504,11 @@ static int lm87_write_value(struct i2c_client *client, u8 reg, u8 value)
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
-/* Called when we have found a new LM87. It should set limits, etc. */
+/* Called when we have found a new LM87. */
 static void lm87_init_client(struct i2c_client *client)
 {
 	struct lm87_data *data = client->data;
-
-	/* Reset all except Watchdog values and last conversion values
-	   This sets fan-divs to 2, among others. This makes most other
-	   initializations unnecessary */
-	lm87_write_value(client, LM87_REG_CONFIG, 0x80);
+	u8 reg;
 
         /* Setup Channel Mode register for configuration of monitoring 
 	 * Default is 00000000b
@@ -526,8 +522,10 @@ static void lm87_init_client(struct i2c_client *client)
 	 * 	bit 7 - Configures VID/IRQ input as interrupts if = 1
 	 */
 
+	/* Preserve 4 MSB */
+	reg = lm87_read_value(client, LM87_REG_CHANNEL_MODE);
 /* I know, not clean, but it works. :'p */
-	lm87_write_value(client, LM87_REG_CHANNEL_MODE,
+	lm87_write_value(client, LM87_REG_CHANNEL_MODE, (reg & 0xf0) |
 #ifdef LM87_AIN1
  0x01
 #else
@@ -556,7 +554,12 @@ static void lm87_init_client(struct i2c_client *client)
 	data->vrm = DEFAULT_VRM;
 
 	/* Start monitoring */
-	lm87_write_value(client, LM87_REG_CONFIG, 0x01);
+	reg = lm87_read_value(client, LM87_REG_CONFIG);
+	if (!(reg & 0x01)) {
+		printk(KERN_INFO "lm87.o: Monitoring starts\n");
+		lm87_write_value(client, LM87_REG_CONFIG,
+				 (reg & 0x7e) | 0x01);
+	}
 }
 
 static void lm87_update_client(struct i2c_client *client)
