@@ -1,6 +1,7 @@
 /*
     isadump.c - Part of isadump, a user-space program to dump ISA registers
-    Copyright (c) 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (c) 2000  Frodo Looijaard <frodol@dds.nl>, and
+                        Mark D. Studebaker <mdsxyz123@yahoo.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,17 +45,17 @@ char hexchar(int i)
 
 void help(void)
 {
-  fprintf(stderr,"Syntax: isadump ADDRREG DATAREG\n");
+  fprintf(stderr,"Syntax: isadump ADDRREG DATAREG [BANK [BANKREG]]\n");
 }
 
 int main(int argc, char *argv[])
 {
-  int addrreg, datareg;
+  int addrreg, datareg, bank = 0, bankreg = 0x4E;
   char *end;
   int i,j,res;
 
   if (argc < 2) {
-    fprintf(stderr,"Error: No address register specified!\n");
+    fprintf(stderr,"Error: No registers specified!\n");
     help();
     exit(1);
   }
@@ -68,6 +69,7 @@ int main(int argc, char *argv[])
   if ((addrreg < 0) || (addrreg > 0xfff)) {
     fprintf(stderr,"Error: Address register out of range!\n");
     help();
+    exit(1);
   }
 
   if (argc < 3) {
@@ -75,6 +77,7 @@ int main(int argc, char *argv[])
     help();
     exit(1);
   }
+
   datareg = strtol(argv[2],&end,0);
   if (*end) {
     fprintf(stderr,"Error: Second argument not a number!\n");
@@ -84,6 +87,35 @@ int main(int argc, char *argv[])
   if ((datareg < 0) || (datareg > 0xfff)) {
     fprintf(stderr,"Error: Data register out of range!\n");
     help();
+    exit(1);
+  }
+
+  if(argc > 3) {
+    bank = strtol(argv[3],&end,0);
+    if (*end) {
+      fprintf(stderr,"Error: Invalid bank number!\n");
+      help();
+      exit(1);
+    }
+    if ((bank < 0) || (bank > 15)) {
+      fprintf(stderr,"Error: bank out of range (0-15)!\n");
+      help();
+      exit(1);
+    }
+
+    if(argc > 4) {
+      bankreg = strtol(argv[4],&end,0);
+      if (*end) {
+        fprintf(stderr,"Error: Invalid bank register number!\n");
+        help();
+        exit(1);
+      }
+      if ((bankreg < 0) || (bankreg > 0xff)) {
+        fprintf(stderr,"Error: bank out of range (0-0xff)!\n");
+        help();
+        exit(1);
+      }
+    }
   }
 
   if (getuid()) {
@@ -95,6 +127,9 @@ int main(int argc, char *argv[])
           "data loss and worse!\n");
   fprintf(stderr,"  I will probe address register 0x%04x and "
                  "data register 0x%04x.\n",addrreg,datareg);
+  if(bank) 	
+    fprintf(stderr,"  Probing bank %d using bank register 0x%02x.\n",
+            bank, bankreg);
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
   sleep(5);
 
@@ -116,6 +151,12 @@ int main(int argc, char *argv[])
   }
 #endif
 
+  /* See Winbond w83781d data sheet for bank details */
+  if(bank) {
+    outb(bankreg,addrreg);
+    outb(bank | 0x80,datareg); /* OR in high byte flag */
+  }
+
   printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
   for (i = 0; i < 256; i+=16) {
     printf("%c0: ",hexchar(i/16));
@@ -125,6 +166,10 @@ int main(int argc, char *argv[])
       printf("%c%c ",hexchar(res/16),hexchar(res%16));
     }
     printf("\n");
+  }
+  if(bank) {
+    outb(bankreg,addrreg);
+    outb(0x80,datareg); /* put back in bank 0 high byte */
   }
   exit(0);
 }
