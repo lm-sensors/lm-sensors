@@ -286,9 +286,80 @@ const char *sprintf_chip_name(sensors_chip_name name)
   return buf;
 }
 
+struct match {
+	const char * prefix;
+	void (*fn) (const sensors_chip_name *name);
+};
+
+struct match matches[] = {
+	{ "ds1621", print_ds1621 },
+	{ "lm75", print_lm75 },
+	{ "adm1021", print_adm1021 },
+	{ "max1617", print_adm1021 },
+	{ "max1617a", print_adm1021 },
+	{ "thmc10", print_adm1021 },
+	{ "lm84", print_adm1021 },
+	{ "gl523", print_adm1021 },
+	{ "adm1023", print_adm1021 },
+	{ "mc1066", print_adm1021 },
+	{ "adm9240", print_adm9240 },
+	{ "ds1780", print_adm9240 },
+	{ "lm81", print_adm9240 },
+	{ "lm78", print_lm78 },
+	{ "lm78-j", print_lm78 },
+	{ "lm79", print_lm78 },
+	{ "mtp008", print_mtp008 },
+	{ "sis5595", print_sis5595 },
+	{ "via686a", print_via686a },
+	{ "lm80", print_lm80 },
+	{ "lm85", print_lm85 },
+	{ "lm85b", print_lm85 },
+	{ "lm85c", print_lm85 },
+	{ "adm1027", print_lm85 },
+	{ "adt7463", print_lm85 },
+	{ "emc6d100", print_lm85 },
+	{ "lm87", print_lm87 },
+	{ "gl518sm", print_gl518 },
+	{ "adm1025", print_adm1025 },
+	{ "adm1024", print_adm1024 },
+	{ "w83781d", print_w83781d },
+	{ "w83782d", print_w83781d },
+	{ "w83783d", print_w83781d },
+	{ "w83627hf", print_w83781d },
+	{ "w83627thf", print_w83781d },
+	{ "w83697hf", print_w83781d },
+	{ "w83791d", print_w83781d },
+	{ "as99127f", print_w83781d },
+	{ "maxilife", print_maxilife },
+	{ "maxilife-cg", print_maxilife },
+	{ "maxilife-co", print_maxilife },
+	{ "maxilife-as", print_maxilife },
+	{ "maxilife-nba", print_maxilife },
+	{ "it87", print_it87 },
+	{ "ddcmon", print_ddcmon },
+	{ "eeprom", print_eeprom },
+	{ "fscpos", print_fscpos },
+	{ "fscscy", print_fscscy },
+	{ "fscher", print_fscher },
+	{ "pcf8591", print_pcf8591 },
+	{ "vt1211", print_vt1211 },
+	{ "smsc47m1", print_smsc47m1 },
+	{ "lm92", print_lm92 },
+	{ "vt8231", print_vt8231 },
+	{ "bmc", print_bmc },
+	{ "adm1026", print_adm1026 },
+	{ "lm83", print_lm83 },
+	{ "lm90", print_lm90 },
+	{ "adm1032", print_lm90 },
+	{ "xeontemp", print_xeontemp },
+	{ "max6650", print_max6650 },
+	{ NULL, NULL }
+};
+
 void do_a_print(sensors_chip_name name)
 {
   const char *algo,*adap;
+  struct match *m;
 
   printf("%s\n",sprintf_chip_name(name));
   adap = sensors_get_adapter_name(name.bus);
@@ -301,92 +372,15 @@ void do_a_print(sensors_chip_name name)
     printf(" ERROR: Can't get adapter or algorithm?!?\n");
   if (do_unknown)
     print_unknown_chip(&name);
-  else if (!strcmp(name.prefix,"ds1621"))
-    print_ds1621(&name);
-  else if (!strcmp(name.prefix,"lm75"))
-    print_lm75(&name);
-  else if (!strcmp(name.prefix,"adm1021") || !strcmp(name.prefix,"max1617") ||
-           !strcmp(name.prefix,"max1617a") || !strcmp(name.prefix, "thmc10") ||
-           !strcmp(name.prefix,"lm84") || !strcmp(name.prefix, "gl523") ||
-	   !strcmp(name.prefix, "adm1023") || !strcmp(name.prefix, "mc1066"))
-    print_adm1021(&name);
-  else if (!strcmp(name.prefix,"adm9240") ||
-           !strcmp(name.prefix,"ds1780") ||
-           !strcmp(name.prefix,"lm81"))
-    print_adm9240(&name);
-  else if (!strcmp(name.prefix,"lm78") || !strcmp(name.prefix,"lm78-j") ||
-           !strcmp(name.prefix,"lm79"))
-    print_lm78(&name);
-  else if (!strcmp(name.prefix,"mtp008"))
-    print_mtp008(&name);
-  else if (!strcmp(name.prefix,"sis5595"))
-    print_sis5595(&name);
-  else if (!strcmp(name.prefix,"via686a"))
-    print_via686a(&name);
-  else if (!strcmp(name.prefix,"lm80"))
-    print_lm80(&name);
-  else if (!strcmp(name.prefix,"lm85")  ||
-           !strcmp(name.prefix,"lm85b") ||
-           !strcmp(name.prefix,"lm85c") ||
-           !strcmp(name.prefix,"adm1027") ||
-           !strcmp(name.prefix,"adt7463") ||
-           !strcmp(name.prefix,"emc6d100") )
-    print_lm85(&name);
-  else if (!strcmp(name.prefix,"lm87"))
-    print_lm87(&name);
-  else if (!strcmp(name.prefix,"gl518sm"))
-    print_gl518(&name);
-  else if (!strcmp(name.prefix,"adm1025"))
-    print_adm1025(&name);
-  else if (!strcmp(name.prefix,"adm1024"))
-    print_adm1024(&name);
-  else if ((!strcmp(name.prefix,"w83781d")) ||
-           (!strcmp(name.prefix,"w83782d")) ||
-           (!strcmp(name.prefix,"w83783s")) ||
-           (!strcmp(name.prefix,"w83627hf")) ||
-           (!strcmp(name.prefix,"w83627thf")) ||
-           (!strcmp(name.prefix,"w83697hf")) ||
-           (!strcmp(name.prefix,"w83791d")) ||
-           (!strcmp(name.prefix,"as99127f")))
-    print_w83781d(&name);
-  else if (!strncmp(name.prefix,"maxilife-", 9))
-    print_maxilife(&name);
-  else if (!strcmp(name.prefix,"it87"))
-    print_it87(&name);
-  else if (!strcmp(name.prefix,"ddcmon"))
-    print_ddcmon(&name);
-  else if (!strcmp(name.prefix,"eeprom"))
-    print_eeprom(&name);
-  else if (!strcmp(name.prefix,"fscpos"))
-    print_fscpos(&name);
-  else if (!strcmp(name.prefix,"fscscy"))
-    print_fscscy(&name);
-  else if (!strcmp(name.prefix,"fscher"))
-    print_fscher(&name);
-  else if (!strcmp(name.prefix,"pcf8591"))
-    print_pcf8591(&name);
-  else if (!strcmp(name.prefix,"vt1211"))
-    print_vt1211(&name);
-  else if (!strcmp(name.prefix,"smsc47m1"))
-    print_smsc47m1(&name);
-  else if (!strcmp(name.prefix,"lm92"))
-    print_lm92(&name);
-  else if (!strcmp(name.prefix,"vt8231"))
-    print_vt8231(&name);
-  else if (!strcmp(name.prefix,"bmc"))
-    print_bmc(&name);
-  else if (!strcmp(name.prefix,"adm1026"))
-    print_adm1026(&name);
-  else if (!strcmp(name.prefix,"lm83"))
-    print_lm83(&name);
-  else if (!strcmp(name.prefix,"lm90")
-        || !strcmp(name.prefix,"adm1032"))
-    print_lm90(&name);
-  else if (!strcmp(name.prefix,"xeontemp"))
-    print_xeontemp(&name);
-  else if (!strcmp(name.prefix,"max6650"))
-    print_max6650(&name);
-  else
-    print_unknown_chip(&name);
+  else {
+    for(m = matches; m->prefix != NULL; m++) {
+	if(!strcmp(name.prefix, m->prefix)) {
+	    m->fn(&name);
+	    break;
+	}
+    }
+    if(m == NULL)
+	print_unknown_chip(&name);
+  }
   printf("\n");
 }
