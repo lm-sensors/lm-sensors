@@ -178,7 +178,7 @@ undaemonize
 int
 main
 (int argc, char **argv) {
-  int ret;
+  int ret = 0;
   
   if (parseArgs (argc, argv) ||
       parseChips (argc, argv))
