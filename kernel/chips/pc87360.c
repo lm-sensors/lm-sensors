@@ -27,7 +27,7 @@
  *  PC87363     -       2       2       -       0xE8
  *  PC87364     -       3       3       -       0xE4
  *  PC87365     11      3       3       2       0xE5
- *  PC87366     11      3       3       6       0xE9
+ *  PC87366     11      3       3       3-4     0xE9
  *
  *  This driver assumes that no more than one chip is present, and the
  *  standard Super-I/O address is used (0x2E/0x2F).
@@ -49,7 +49,7 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 static struct i2c_force_data forces[] = {{NULL}};
 static u8 devid;
 static unsigned int extra_isa[] = { 0x0000, 0x0000, 0x0000 };
-static u16 fanconf[2];
+static u8 confreg[3];
 
 enum chips { any_chip, pc87360, pc87363, pc87364, pc87365, pc87366 };
 static struct i2c_address_data addr_data = {
@@ -206,7 +206,7 @@ struct pc87360_data {
 	u8 fan_min[3];		/* Register value */
 	u8 fan_status[3];	/* Register value */
 	u8 pwm[3];		/* Register value */
-	u16 fan_conf[2];	/* Configuration register values, combined */
+	u16 fan_conf;		/* Configuration register values, combined */
 
 	u16 in_vref;		/* 10mV/bit */
 	u8 in[14];		/* Register value */
@@ -234,7 +234,7 @@ static int pc87360_read_value(struct pc87360_data *data, u8 ldi, u8 bank,
 			      u8 reg);
 static void pc87360_write_value(struct pc87360_data *data, u8 ldi, u8 bank,
 				u8 reg, u8 value);
-static void pc87360_init_client(struct i2c_client *client);
+static void pc87360_init_client(struct i2c_client *client, int use_thermistors);
 static void pc87360_update_client(struct i2c_client *client);
 static int pc87360_find(u8 *devid, int *address);
 
@@ -465,9 +465,9 @@ static int pc87360_find(u8 *devid, int *address)
 	int i;
 	int nrdev; /* logical device count */
 
-	/* no superio_enter */
+	/* No superio_enter */
 
-	/* identify device */
+	/* Identify device */
 	val = superio_inb(DEVID);
 	switch (val) {
 	case 0xE1: /* PC87360 */
@@ -483,7 +483,7 @@ static int pc87360_find(u8 *devid, int *address)
 		superio_exit();
 		return -ENODEV;
 	}
-	/* remember the device id */
+	/* Remember the device id */
 	*devid = val;
 
 	for (i = 0; i < nrdev; i++) {
@@ -508,20 +508,34 @@ static int pc87360_find(u8 *devid, int *address)
 		address[i] = val;
 
 		if (i==0) { /* Fans */
-			fanconf[0] = superio_inb(0xF0)
-				   | (superio_inb(0xF1) << 8);
+			confreg[0] = superio_inb(0xF0);
+			confreg[1] = superio_inb(0xF1);
 			
 #ifdef DEBUG
 			printk(KERN_DEBUG "pc87360.o: Fan 1: mon=%d "
-			       "ctrl=%d inv=%d\n", (fanconf[0]>>2)&1,
-			       (fanconf[0]>>3)&1, (fanconf[0]>>4)&1);
+			       "ctrl=%d inv=%d\n", (confreg[0]>>2)&1,
+			       (confreg[0]>>3)&1, (confreg[0]>>4)&1);
 			printk(KERN_DEBUG "pc87360.o: Fan 2: mon=%d "
-			       "ctrl=%d inv=%d\n", (fanconf[0]>>5)&1,
-			       (fanconf[0]>>6)&1, (fanconf[0]>>7)&1);
+			       "ctrl=%d inv=%d\n", (confreg[0]>>5)&1,
+			       (confreg[0]>>6)&1, (confreg[0]>>7)&1);
 			printk(KERN_DEBUG "pc87360.o: Fan 3: mon=%d "
-			       "ctrl=%d inv=%d\n", (fanconf[0]>>8)&1,
-			       (fanconf[0]>>9)&1, (fanconf[0]>>10)&1);
+			       "ctrl=%d inv=%d\n", confreg[1]&1,
+			       (confreg[1]>>1)&1, (confreg[1]>>2)&1);
 #endif
+		} else if (i==1) { /* Voltages */
+			/* Are we using thermistors? */
+			if (*devid == 0xE9) { /* PC87366 */
+				/* This register is not logical-device
+				   specific, just that we won't need it if we
+				   don't use the VLM device */
+				confreg[2] = superio_inb(0x2B);
+
+				if (confreg[2] & 0x40) {
+					printk(KERN_INFO "pc87360.o: Using "
+					       "thermistors for temperature "
+					       "monitoring\n");
+				}
+			}
 		}
 	}
 
@@ -541,6 +555,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	const char *type_name = "pc87360";
 	const char *client_name = "PC8736x chip";
 	ctl_table *template = pc87360_dir_table_template;
+	int use_thermistors = 0;
 
 	if (!i2c_is_isa_adapter(adapter)) {
 		return 0;
@@ -597,7 +612,8 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	}
 
 	/* Retrieve the fans configuration from Super-I/O space */
-	data->fan_conf[0] = fanconf[0];
+	if (data->fannr)
+		data->fan_conf = confreg[0] | (confreg[1] << 8);
 
 	for (i = 0; i < 3; i++) {
 		if ((data->address[i] = extra_isa[i])) {
@@ -630,14 +646,21 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 #endif
 	}
 
-	/* Fan clock dividers may be needed before any data is read */
+	/* Fan clock dividers and fan low limits may be needed before any
+	   data is read */
 	for (i = 0; i < data->fannr; i++) {
 		data->fan_status[i] = pc87360_read_value(data, LD_FAN,
 				      NO_BANK, PC87360_REG_FAN_STATUS(i));
+		data->fan_min[i] = pc87360_read_value(data, LD_FAN,
+				   NO_BANK, PC87360_REG_FAN_MIN(i));
 	}
 
-	if (init > 0)
-		pc87360_init_client(new_client);
+	if (init > 0) {
+		if (devid == 0xe9 && data->address[1]) /* PC87366 */
+			use_thermistors = confreg[2] & 0x40;
+
+		pc87360_init_client(new_client, use_thermistors);
+	}
 
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 				    type_name, template)) < 0) {
@@ -710,10 +733,10 @@ static void pc87360_write_value(struct pc87360_data *data, u8 ldi, u8 bank,
 	up(&(data->lock));
 }
 
-static void pc87360_init_client(struct i2c_client *client)
+static void pc87360_init_client(struct i2c_client *client, int use_thermistors)
 {
 	struct pc87360_data *data = client->data;
-	int i;
+	int i, nr;
 	const u8 init_in[14] = { 2, 2, 2, 2, 2, 2, 2, 1, 1, 3, 1, 2, 2, 2 };
 	const u8 init_temp[3] = { 2, 2, 1 };
 	u8 reg;
@@ -732,33 +755,34 @@ static void pc87360_init_client(struct i2c_client *client)
 		}
 	}
 
-	for (i=0; i<data->innr; i++) {
+	nr = data->innr < 11 ? data->innr : 11;
+	for (i=0; i<nr; i++) {
 		if (init >= init_in[i]) {
 			/* Forcibly enable voltage channel */
 			reg = pc87360_read_value(data, LD_IN, i,
 						 PC87365_REG_IN_STATUS);
 			if (!(reg & 0x01)) {
 #ifdef DEBUG
-				if (i < 11)
-					printk(KERN_DEBUG "pc87360.o: "
-					       "Forcibly enabling in%d\n",
-					       i);
-				else
-					printk(KERN_DEBUG "pc87360.o: "
-					       "Forcibly enabling temp%d\n",
-					       i-8);
+				printk(KERN_DEBUG "pc87360.o: Forcibly "
+				       "enabling in%d\n", i);
 #endif
 				pc87360_write_value(data, LD_IN, i,
 						    PC87365_REG_IN_STATUS,
-						    i < 11 ?
-						    (reg & 0x68) | 0x87 :
-						    (reg & 0x60) | 0x8F);
+						    (reg & 0x68) | 0x87);
 			}
-
 		}
 	}
 
-	for (i=0; i<data->tempnr; i++) {
+	/* We can't blindly trust the Super-I/O space configuration bit,
+	   most BIOS won't set it properly */
+	for (i=11; i<data->innr; i++) {
+		reg = pc87360_read_value(data, LD_IN, i,
+					 PC87365_REG_TEMP_STATUS);
+		use_thermistors = use_thermistors || (reg & 0x01);
+	}
+
+	i = use_thermistors ? 2 : 0;
+	for (; i<data->tempnr; i++) {
 		if (init >= init_temp[i]) {
 			/* Forcibly enable temperature channel */
 			reg = pc87360_read_value(data, LD_TEMP, i,
@@ -771,6 +795,32 @@ static void pc87360_init_client(struct i2c_client *client)
 				pc87360_write_value(data, LD_TEMP, i,
 						    PC87365_REG_TEMP_STATUS,
 						    0xCF);
+			}
+		}
+	}
+
+	if (use_thermistors) {
+		for (i=11; i<data->innr; i++) {
+			if (init >= init_in[i]) {
+				/* The pin may already be used by thermal
+				   diodes */
+				reg = pc87360_read_value(data, LD_TEMP, (i-11)/2,
+							 PC87365_REG_TEMP_STATUS);
+				if (reg & 0x01)
+					continue;
+			
+				/* Forcibly enable thermistor channel */
+				reg = pc87360_read_value(data, LD_IN, i,
+							 PC87365_REG_IN_STATUS);
+				if (!(reg & 0x01)) {
+#ifdef DEBUG
+					printk(KERN_DEBUG "pc87360.o: Forcibly "
+					       "enabling temp%d\n", i-7);
+#endif
+					pc87360_write_value(data, LD_IN, i,
+							    PC87365_REG_TEMP_STATUS,
+							    (reg & 0x60) | 0x8F);
+				}
 			}
 		}
 	}
@@ -859,7 +909,7 @@ static void pc87360_update_client(struct i2c_client *client)
 
 		/* Fans */
 		for (i = 0; i < data->fannr; i++) {
-			if (FAN_CONFIG_MONITOR(data->fan_conf[0], i)) {
+			if (FAN_CONFIG_MONITOR(data->fan_conf, i)) {
 				data->fan_status[i] = pc87360_read_value(data,
 						      LD_FAN, NO_BANK,
 						      PC87360_REG_FAN_STATUS(i));
@@ -887,9 +937,11 @@ static void pc87360_update_client(struct i2c_client *client)
 			pc87360_write_value(data, LD_IN, i,
 					    PC87365_REG_IN_STATUS,
 					    data->in_status[i]);
-			if (data->in_status[i] & 0x01) {
+			if (data->in_status[i] & 0x81) {
 				data->in[i] = pc87360_read_value(data, LD_IN,
 					      i, PC87365_REG_IN);
+			}
+			if (data->in_status[i] & 0x01) {
 				data->in_min[i] = pc87360_read_value(data,
 						  LD_IN, i,
 						  PC87365_REG_IN_MIN);
@@ -919,10 +971,12 @@ static void pc87360_update_client(struct i2c_client *client)
 			pc87360_write_value(data, LD_TEMP, i,
 					    PC87365_REG_TEMP_STATUS,
 					    data->temp_status[i]);
-			if (data->temp_status[i] & 0x01) {
+			if (data->temp_status[i] & 0x81) {
 				data->temp[i] = pc87360_read_value(data,
 						LD_TEMP, i,
 						PC87365_REG_TEMP);
+			}
+			if (data->temp_status[i] & 0x01) {
 				data->temp_min[i] = pc87360_read_value(data,
 						    LD_TEMP, i,
 						    PC87365_REG_TEMP_MIN);
@@ -1009,7 +1063,7 @@ void pc87360_fan_div(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results)
 {
 	struct pc87360_data *data = client->data;
-	int i;
+	int i, nr;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
@@ -1022,7 +1076,8 @@ void pc87360_fan_div(struct i2c_client *client, int operation,
 	}
 	/* We ignore National's recommendation */
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
-		for (i = 0; i < data->fannr && i < *nrels_mag; i++) {
+		nr = data->fannr <= *nrels_mag ? data->fannr : *nrels_mag;
+		for (i = 0; i < nr; i++) {
 			/* Preserve fan min */
 			int fan_min = FAN_FROM_REG(data->fan_min[i],
 				      FAN_DIV_FROM_REG(data->fan_status[i]));
@@ -1051,27 +1106,16 @@ void pc87360_pwm(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		pc87360_update_client(client);
 		results[0] = PWM_FROM_REG(data->pwm[nr],
-			     FAN_CONFIG_INVERT(data->fan_conf[0], nr));
-		results[1] = FAN_CONFIG_CONTROL(data->fan_conf[0], nr);
+			     FAN_CONFIG_INVERT(data->fan_conf, nr));
+		results[1] = FAN_CONFIG_CONTROL(data->fan_conf, nr);
 		*nrels_mag = 2;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (nr >= data->fannr)
 			return;
-		if (*nrels_mag >= 1)
-		{
-#ifdef DEBUG
-			printk(KERN_DEBUG "pc87360.o: Old PWM%u register: %u\n",
-			       nr+1, data->pwm[nr]);
-			printk(KERN_DEBUG "pc87360.o: Wanted PWM%u value: %ld\n",
-			       nr+1, results[0]);
-#endif
+		if (*nrels_mag >= 1) {
 			data->pwm[nr] = PWM_TO_REG(results[0],
-					FAN_CONFIG_INVERT(data->fan_conf[0], nr));
-#ifdef DEBUG
-			printk(KERN_DEBUG "pc87360.o: Writing %u to register %u\n",
-			       data->pwm[nr], PC87360_REG_PWM(nr));
-#endif
+					FAN_CONFIG_INVERT(data->fan_conf, nr));
 			pc87360_write_value(data, LD_FAN, NO_BANK,
 					    PC87360_REG_PWM(nr),
 					    data->pwm[nr]);
