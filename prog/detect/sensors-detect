@@ -1330,7 +1330,15 @@ sub inb
 # Returns: -1 on failure, 0 on success.
 sub outb
 {
-  my $towrite = pack("C", $_[1] & 0x7f);
+  if ($_[1] > 0xff)
+  {
+	my ($package, $filename, $line, $sub) = caller(1);
+    print "\n*** Called outb with value=$_[1] from line $line\n",
+          "*** (in $sub). PLEASE REPORT!\n",
+          "*** Terminating.\n";
+    exit(-1);
+  }
+  my $towrite = pack "C", $_[1];
   sysseek IOPORTS, $_[0], 0 or return -1;
   my $nrchars = syswrite IOPORTS, $towrite, 1;
   return -1 if not defined $nrchars or $nrchars != 1;
@@ -2186,7 +2194,7 @@ sub lm78_isa_detect
             inb ($addr + 7) != $val;
 
   $val = inb($addr + 5) & 0x7f;
-  outb($addr+5,~ $val);
+  outb($addr + 5, ~$val & 0xff);
   if ((inb ($addr+5) & 0x7f) != (~ $val & 0x7f)) {
     outb($addr+5,$val);
     return;
@@ -2402,7 +2410,7 @@ sub w83781d_isa_detect
             inb ($addr + 7) != $val;
 
   $val = inb($addr + 5) & 0x7f;
-  outb($addr+5,~ $val);
+  outb($addr+5, ~$val & 0xff);
   if ((inb ($addr+5) & 0x7f) != (~ $val & 0x7f)) {
     outb($addr+5,$val);
     return;
@@ -2757,7 +2765,7 @@ sub ite_isa_detect
             inb ($addr + 7) != $val;
 
   $val = inb($addr + 5) & 0x7f;
-  outb($addr+5,~ $val);
+  outb($addr+5, ~$val & 0xff);
   if ((inb ($addr+5) & 0x7f) != (~ $val & 0x7f)) {
     outb($addr+5,$val);
     return;
