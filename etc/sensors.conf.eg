@@ -1399,24 +1399,6 @@ chip "it87-*"
     label in7 "Stdby"
     label in8 "VBat"
 
-    set in0_min 1.5 * 0.95
-    set in0_max 1.5 * 1.05
-    set in1_min 2.4
-    set in1_max 2.6
-    set in2_min 3.3 * 0.95
-    set in2_max 3.3 * 1.05
-    set in3_min 5.0 * 0.95
-    set in3_max 5.0 * 1.05
-    set in4_min 12 * 0.95
-    set in4_max 12 * 1.05
-    set in5_max -12 * 0.95
-    set in5_min -12 * 1.05
-    set in6_max -5 * 0.95
-    set in6_min -5 * 1.05
-    set in7_min 5 * 0.95
-    set in7_max 5 * 1.05
-    #the chip does not support in8 min/max
-
     # vid is not monitored by IT8705F
     # and is not supported by driver at this time
     ignore  vid
@@ -1460,6 +1442,24 @@ chip "it87-*"
 #   compute in6 -(56/10)*@, -@/(56/10)
 #
     compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+
+    set in0_min 1.5 * 0.95
+    set in0_max 1.5 * 1.05
+    set in1_min 2.4
+    set in1_max 2.6
+    set in2_min 3.3 * 0.95
+    set in2_max 3.3 * 1.05
+    set in3_min 5.0 * 0.95
+    set in3_max 5.0 * 1.05
+    set in4_min 12 * 0.95
+    set in4_max 12 * 1.05
+    set in5_max -12 * 0.95
+    set in5_min -12 * 1.05
+    set in6_max -5 * 0.95
+    set in6_min -5 * 1.05
+    set in7_min 5 * 0.95
+    set in7_max 5 * 1.05
+    #the chip does not support in8 min/max
 
 # Temperature
 #
