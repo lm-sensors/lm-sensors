@@ -898,7 +898,7 @@ void lm87_temp(struct i2c_client *client, int operation, int ctl_name,
 		   if (ctl_name == LM87_SYSCTL_TEMP2) {
 			data->ext_temp_max = TEMP_LIMIT_TO_REG(results[0]);
 			lm87_write_value(client, LM87_REG_EXT_TEMP_1_HIGH,
-					    data->int_temp_max);
+					    data->ext_temp_max);
 		   }
 		   if (ctl_name == LM87_SYSCTL_TEMP1) {
 			data->int_temp_max = TEMP_LIMIT_TO_REG(results[0]);
@@ -915,7 +915,7 @@ void lm87_temp(struct i2c_client *client, int operation, int ctl_name,
 		   if (ctl_name == LM87_SYSCTL_TEMP2) {
 			data->ext_temp_min = TEMP_LIMIT_TO_REG(results[1]);
 			lm87_write_value(client, LM87_REG_EXT_TEMP_1_LOW,
-					    data->int_temp_min);
+					    data->ext_temp_min);
 		   }
 		   if (ctl_name == LM87_SYSCTL_TEMP1) {
 			data->int_temp_min = TEMP_LIMIT_TO_REG(results[1]);
