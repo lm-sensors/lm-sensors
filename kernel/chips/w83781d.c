@@ -868,14 +868,13 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = sensors_register_entry(new_client,
 					type_name,
-					kind ==
-					w83781d ?
-					w83781d_dir_table_template : kind
-					==
-					w83783s ?
-					w83783s_dir_table_template : is_isa
-					? w83782d_isa_dir_table_template :
-					w83782d_i2c_dir_table_template,
+					kind == w83781d ?
+					   w83781d_dir_table_template :
+					kind == w83783s ?
+					   w83783s_dir_table_template :
+					(is_isa || kind == w83627hf) ?
+					   w83782d_isa_dir_table_template :
+					   w83782d_i2c_dir_table_template,
 					THIS_MODULE)) < 0) {
 		err = i;
 		goto ERROR7;
@@ -1026,20 +1025,20 @@ int w83781d_read_value(struct i2c_client *client, u16 reg)
 			      lm75[bank - 1]);
 			/* convert from ISA to LM75 I2C addresses */
 			switch (reg & 0xff) {
-			case 0x50:
+			case 0x50: /* TEMP */
 				res =
 				    swap_bytes(i2c_smbus_read_word_data
 					       (cl, 0));
 				break;
-			case 0x52:
+			case 0x52: /* CONFIG */
 				res = i2c_smbus_read_byte_data(cl, 1);
 				break;
-			case 0x53:
+			case 0x53: /* HYST */
 				res =
 				    swap_bytes(i2c_smbus_read_word_data
 					       (cl, 2));
 				break;
-			case 0x55:
+			case 0x55: /* OVER */
 			default:
 				res =
 				    swap_bytes(i2c_smbus_read_word_data
@@ -1103,24 +1102,21 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 						  value & 0xff);
 		} else {
 			/* switch to subclient */
-			cl =
-			    &(((struct w83781d_data *) (client->data))->
+			cl = &(((struct w83781d_data *) (client->data))->
 			      lm75[bank - 1]);
 			/* convert from ISA to LM75 I2C addresses */
 			switch (reg & 0xff) {
-			case 0x52:
+			case 0x52: /* CONFIG */
 				i2c_smbus_write_byte_data(cl, 1,
 							  value & 0xff);
 				break;
-			case 0x53:
+			case 0x53: /* HYST */
 				i2c_smbus_write_word_data(cl, 2,
-							  swap_bytes
-							  (value));
+							  swap_bytes(value));
 				break;
-			case 0x55:
+			case 0x55: /* OVER */
 				i2c_smbus_write_word_data(cl, 3,
-							  swap_bytes
-							  (value));
+							  swap_bytes(value));
 				break;
 			}
 		}
@@ -1361,14 +1357,11 @@ void w83781d_update_client(struct i2c_client *client)
 				data->pwm[i - 1] =
 				    w83781d_read_value(client,
 						       W83781D_REG_PWM(i));
-				if (
-				    ((data->type == w83783s)
-				     ||
-				     (((data->
-					type == w83782d)
-				       || (data->type == w83627hf)
-				       || data->type == as99127f)
-				      && i2c_is_isa_client(client)))
+				if (((data->type == w83783s)
+				     || (data->type == w83627hf)
+				     || (((data->type == w83782d)
+				          || (data->type == as99127f))
+				        && i2c_is_isa_client(client)))
 				    && i == 2)
 					break;
 			}
@@ -1759,15 +1752,13 @@ void w83781d_sens(struct i2c_client *client, int operation, int ctl_name,
 		if (*nrels_mag >= 1) {
 			switch (results[0]) {
 			case 1:	/* PII/Celeron diode */
-				tmp =
-				    w83781d_read_value(client,
+				tmp = w83781d_read_value(client,
 						       W83781D_REG_SCFG1);
 				w83781d_write_value(client,
 						    W83781D_REG_SCFG1,
 						    tmp | BIT_SCFG1[nr -
 								    1]);
-				tmp =
-				    w83781d_read_value(client,
+				tmp = w83781d_read_value(client,
 						       W83781D_REG_SCFG2);
 				w83781d_write_value(client,
 						    W83781D_REG_SCFG2,
@@ -1776,15 +1767,13 @@ void w83781d_sens(struct i2c_client *client, int operation, int ctl_name,
 				data->sens[nr - 1] = results[0];
 				break;
 			case 2:	/* 3904 */
-				tmp =
-				    w83781d_read_value(client,
+				tmp = w83781d_read_value(client,
 						       W83781D_REG_SCFG1);
 				w83781d_write_value(client,
 						    W83781D_REG_SCFG1,
 						    tmp | BIT_SCFG1[nr -
 								    1]);
-				tmp =
-				    w83781d_read_value(client,
+				tmp = w83781d_read_value(client,
 						       W83781D_REG_SCFG2);
 				w83781d_write_value(client,
 						    W83781D_REG_SCFG2,
@@ -1793,8 +1782,7 @@ void w83781d_sens(struct i2c_client *client, int operation, int ctl_name,
 				data->sens[nr - 1] = results[0];
 				break;
 			case W83781D_DEFAULT_BETA:	/* thermistor */
-				tmp =
-				    w83781d_read_value(client,
+				tmp = w83781d_read_value(client,
 						       W83781D_REG_SCFG1);
 				w83781d_write_value(client,
 						    W83781D_REG_SCFG1,
@@ -1878,7 +1866,7 @@ EXPORT_NO_SYMBOLS;
 #ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, "
-	      "Philip Edelbrock <phil@netroedge .com>, "
+	      "Philip Edelbrock <phil@netroedge.com>, "
 	      "and Mark Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("W83781D driver");
 

@@ -12,7 +12,7 @@ Supported chips:
   * Winbond W83781D
     Prefix 'w83781d'
     Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
-    Datasheet: Publicly available at the Winbond website
+    Datasheet: Publicly available at the Winbond website (www.winbond.com.tw)
   * Winbond W83782D
     Prefix 'w83782d'
     Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
@@ -24,7 +24,7 @@ Supported chips:
   * Winbond W83627HF
     Prefix 'w83627hf'
     Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
-    Datasheet: Unavailable from Winbond
+    Datasheet: Publicly available at the Winbond website
   * Asus AS99127F
     Prefix 'as99127f'
     Addresses scanned: I2C 0x20 - 0x2f (inclusive)
@@ -68,8 +68,8 @@ We will refer to them collectively as W8378* chips.
 
 There is quite some difference between these chips, but they are similar
 enough that it was sensible to put them together in one driver. 
-The W83627HF chip is assumed to be identical to the W83782D.
-The AS99127F chip is assumed to be identical to an I2C-only W83782D.
+The W83627HF chip is assumed to be identical to the ISA W83782D.
+The AS99127F chip is similar to an I2C-only W83782D.
 
 Detection of these chips can sometimes be foiled because they can be in
 an internal state that allows no clean access. If you know the address
@@ -99,7 +99,7 @@ sensor(s) of 0.5 degree.
 FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
 triggered if the rotation speed has dropped below a programmable limit. FAN 
 readings can be divided by a programmable divider (1, 2, 4 or 8 for the
-W83781D; 1, 2, 4, 8, 16, 32, 64 or 128 for the W83782D and W83783S) to give
+W83781D; 1, 2, 4, 8, 16, 32, 64 or 128 for the others) to give
 the readings more range or accuracy. This is important because some FANs
 report only one 'tick' each rotation, while others report two - making
 all readings twice as high. Not all RPM values can accurately be represented,
@@ -127,7 +127,7 @@ rt interface, but this is not very useful, because these tables are
 under NDA.
 
 In addition to the alarms described above, there is a CHAS alarm on the
-W83781D and W83782D which triggers if your computer case is open. 
+chips which triggers if your computer case is open. 
 
 When an alarm goes off, you can be warned by a beeping signal through
 your computer speaker. It is possible to enable all beeping globally,
@@ -457,26 +457,9 @@ Chip `w83783s'
 
 
 
-Old documentation
------------------
+Miscellaneous documentation
+===========================
 
-
-Winbond 83781D driver
----------------------
-Supports the following Winbond chips:
-
-Chip	#vin	#fanin	#pwm	#temp	wchipid	i2c	ISA
-------------------------------------------------------------
-w83781d	7	3	0	3	0x10	yes	yes
-w83782d	9	3	2-4	3	0x30	yes	yes
-w83783s	5-6	3	2	1-2	0x40	yes	no
-
-
-Stability
----------
-w83781d: tested, stable
-w83782d: beta tested, some minor bugs and things to do.
-w83783s: untested
 
 
 /PROC ENTRIES
@@ -510,15 +493,10 @@ Additional entries not in the lm78:
 	  Only set at initialization; not updated every 1.5 seconds.
 
 
-The driver only updates its values each 1.5 seconds; reading it more often
-will do no harm, but will return 'old' values.
-
 
 TO DO:
 -----
  782d programmable pins
- 783s temp2 (labeled as temp1 in data sheet) at different location
-      than 781d/782d, not implemented yet.
 
 
 NOTES:
