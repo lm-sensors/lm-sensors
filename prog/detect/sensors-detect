@@ -421,7 +421,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      },
      {
        name => "National Semiconductor LM87",
-       driver => "Unwritten (LM87)",
+       driver => "lm87",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { lm87_detect @_} ,
      },
@@ -2263,6 +2263,10 @@ sub main
         unless (<STDIN> =~ /^\s*[Nn]/) {
           if (system ("modprobe", $adapter)) {
             print "Loading failed ($!)... skipping.\n";
+            if ($adapter eq "i2c-riva") {
+              print "** Note: i2c-riva module is available at \n";
+              print "** http://drama.obuda.kando.hu/~fero/cgi-bin/rivatv.shtml\n"; 
+            }
           } else {
             print "Module loaded succesfully.\n";
           }
