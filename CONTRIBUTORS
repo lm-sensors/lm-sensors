@@ -23,7 +23,10 @@ problems.
 * Kyösti Mälkki <kmalkki@cc.hut.fi>
   Author of the i2c-via and sis5595 drivers.
 * Mark D. Studebaker <mds@eng.paradyne.com>
-  Author of the i2c-ali15x3 driver.
+  Author of the i2c-ali15x3 driver, as well as other drivers.
+* Adrian Baugh <adrian@merlin.keble.ox.ac.uk>
+  Author of wmsensors (get it at http://users.ox.ac.uk/~kebl0850/wmlm78);
+  he also tested lots of things, and helped us out on several occasions.
 
 * Simon Vogl <simon@tk.uni-linz.ac.at>
   Wrote the new i2c kernel driver. This driver is indispensable for the

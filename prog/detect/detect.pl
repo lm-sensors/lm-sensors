@@ -25,6 +25,8 @@
 # each be put in a separate file, using modules and packages. That is beyond
 # me.
 
+require 5.004;
+
 use strict;
 
 #########################
