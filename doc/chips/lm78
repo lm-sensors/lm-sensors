@@ -60,8 +60,8 @@ seven voltage sensors, VID lines, alarms, and some miscellaneous stuff.
 
 Temperatures are measured in degrees Celcius. An alarm is triggered once
 when the Overtemperature Shutdown limit is crossed; it is triggered again
-as soon as it drops below the Hysteris value.  A more useful behaviour 
-can be found by setting the Hysteris value to +127 degrees Celcius; in 
+as soon as it drops below the Hysteresis value.  A more useful behaviour 
+can be found by setting the Hysteresis value to +127 degrees Celcius; in 
 this case, alarms are issued during all the time when the actual temperature
 is above the Overtemperature Shutdown value. Measurements are guaranteed
 between -55 and +125 degrees, with a resolution of 1 degree.

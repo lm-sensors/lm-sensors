@@ -50,7 +50,7 @@ computer speakers.
 
 Temperatures are measured in degrees Celcius. An alarm goes off while the
 temperature is above the over temperature limit, and has not yet dropped
-below the hysteris limit. The alarm always reflects the current situation.
+below the hysteresis limit. The alarm always reflects the current situation.
 Measurements are guaranteed between -10 degrees and +110 degrees, with
 a resolution of +-3 degrees.
 

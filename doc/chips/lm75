@@ -38,11 +38,11 @@ Description
 -----------
 
 The LM75 implements one temperature sensor. Limits can be set through the
-Overtemperature Shutdown register and Hysteris register. Each value can be 
+Overtemperature Shutdown register and Hysteresis register. Each value can be 
 set and read to half-degree accuracy.
 An alarm is issued (usually to a connected LM78) when the temperature
 gets higher then the Overtemperature Shutdown value; it stays on until
-the temperature falls below the Hysteris value.
+the temperature falls below the Hysteresis value.
 All temperatures are in degrees Celcius, and are guaranteed within a 
 range of -55 to +125 degrees.
 

@@ -60,7 +60,7 @@ two FAN rotation speed sensors, VID lines and some miscellaneous stuff.
 
 Temperatures are measured in degrees Celcius. An alarm is triggered whenever
 the temperature is above the hot limit, and will continue to be generated
-until the temperature has dropped beneath the hysteris limit. Measurements
+until the temperature has dropped beneath the hysteresis limit. Measurements
 are guaranteed between -40 and +125 degrees. The current temperature
 has a resolution of 0.5 degrees, the limits of 1 degree.
 
