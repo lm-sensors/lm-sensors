@@ -61,7 +61,7 @@ static struct proc_dir_entry proc_bus_dir =
     /* namelen */	3, 
     /* name */		"bus",
     /* mode */		S_IRUGO | S_IXUGO | S_IFDIR,
-    /* nlink */		1,     /* Corrected by proc_register[_dynamic] */
+    /* nlink */		2,     /* Corrected by proc_register[_dynamic] */
     /* uid */		0,
     /* gid */		0,
     /* size */		0,

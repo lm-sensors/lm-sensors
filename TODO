@@ -1,5 +1,6 @@
 Many, many things. Most notably:
 
+* Support 10-bit addresses. At this moment, they are supported nowhere 
 * Change the i2c modules to keep the namespace clean (EXPORT_SYMBOL does not
   work for us; many static declarations need to be added; better ask Simon
   Vogl first)

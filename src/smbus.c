@@ -93,25 +93,93 @@ s32 smbus_access (struct i2c_adapter * adapter, u8 addr, char read_write,
 }
   
 /* Simulate a SMBus command using the i2c protocol 
-   No checking of paramters is done!
-   For SMBUS_QUICK: Use addr, read_write 
-   For SMBUS_BYTE: Use addr, read_write, command 
-   ....  */
+   No checking of paramters is done!  */
 s32 smbus_access_i2c(struct i2c_adapter * adapter, u8 addr, char read_write,
                      u8 command, int size, union smbus_data * data)
 {
-  /* For now */
-  return -1;
+  /* So we need to generate a series of msgs. In the case of writing, we
+     need to use only one message; when reading, we need two. We initialize
+     most things with sane defaults, to keep the code below somewhat
+     simpler. */
+  char msgbuf0[33] = { command }; 
+  char msgbuf1[33];
+  int num = read_write == SMBUS_READ?2:1;
+  struct i2c_msg msg[2] = { { addr, 0, 1, msgbuf0 }, 
+                            { addr, I2C_M_RD, 0, msgbuf1 }
+                          };
+  int i;
 
-  /* So we need to generate a series of msgs 
-  struct i2c_msg msg[2];
-  char msgbuf0[2];
-  char msgbuf1[32];
-  msg[0].addr = addr;
-  msg[0].flags = read_write;
-  msg[0].len = 0;
-  msg[0].buf = msgbuf0;
-  WHATEVER */
+  switch(size) {
+  case SMBUS_QUICK:
+    msg[0].len = 0;
+    num = 1; /* Special case: The read/write field is used as data */
+    break;
+  case SMBUS_BYTE:
+    if (read_write == SMBUS_READ)
+      /* Special case: only a read! */
+      msg[0].flags = I2C_M_RD;
+    break;
+  case SMBUS_BYTE_DATA:
+    if (read_write == SMBUS_READ)
+      msg[1].len = 1;
+    else {
+      msg[0].len = 2;
+      msgbuf0[1] = data->byte;
+    }
+    break;
+  case SMBUS_WORD_DATA:
+    if (read_write == SMBUS_READ)
+      msg[1].len = 2;
+    else {
+      msg[0].len=3;
+      msgbuf0[1] = data->word & 0xff;
+      msgbuf0[2] = (data->word >> 8) & 0xff;
+    }
+    break;
+  case SMBUS_PROC_CALL:
+    num = 2; /* Special case */
+    msg[0].len = 3;
+    msg[1].len = 2;
+    msgbuf0[1] = data->word & 0xff;
+    msgbuf0[2] = (data->word >> 8) & 0xff;
+    break;
+  case SMBUS_BLOCK_DATA:
+    if (read_write == SMBUS_READ) {
+      printk("smbus.o: Block read not supported under I2C emulation!\n");
+      return -1;
+    } else {
+      msg[1].len = data->block[0] + 1;
+      if (msg[1].len > 32) {
+        printk("smbus.o: smbus_access called with invalid block write "
+               "size (%d)\n",msg[1].len);
+        return -1;
+      }
+      for (i = 1; i <= msg[1].len; i++)
+        msgbuf0[i] = data->block[1];
+    }
+    break;
+  default:
+    printk("smbus.o: smbus_access called with invalid size (%d)\n",size);
+    return -1;
+  }
+    
+  if (i2c_transfer(adapter, msg, num) < 0)
+    return -1;
+
+  if(read_write == SMBUS_READ)
+    switch(size) {
+    case SMBUS_BYTE:
+      data->byte = msgbuf0[0];
+      break;
+    case SMBUS_BYTE_DATA:
+      data->byte = msgbuf1[0];
+      break;
+    case SMBUS_WORD_DATA: 
+    case SMBUS_PROC_CALL:
+      data->word = msgbuf1[0] + (msgbuf1[1] << 8);
+      break;
+  }
+  return 0;
 }
 
 /* Algorithm master_xfer call-back implementation. Can't do that... */
