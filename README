@@ -19,7 +19,7 @@ use the drivers already in the 2.5 kernel development tree.
 =============================================================================
 
 This is the completely rewritten version 2 of lm_sensors, a collection of
-modules for general SMBus access and hardware monitoring.
+modules for general SMBus[1] access and hardware monitoring.
 Version 1 is now officially unsupported.
 
 WARNING! This drivers in this package will work on kernels 2.4.9 - 2.4.xx only.
@@ -34,7 +34,7 @@ HOWEVER, the userspace tools in this package will work for
 WARNING! You must have at least i2c-2.8.1.
 EVEN IF your kernel does contain i2c support!
 
-The I2C package in existing 2.4 kernels is NOT sufficient
+The I2C[2] package in existing 2.4 kernels is NOT sufficient
 for compilation of this package.
 
 ADDITIONALLY, i2c-2.8.1 is not API compatible to earlier i2c
@@ -122,12 +122,11 @@ See our New Drivers page http://www.lm-sensors.nu/~lm78/newdrivers.html
 for the latest information on supported devices.
 
 
-We always appreciate testers. If you own a specific monitoring
-chip listed on our 'new drivers' page, and are willing to help us out,
-please contact us. Even if you have no programming knowledge, you could
-help us by running new modules and reporting on the results and output.
-If you want to offer more substantial help, this is very welcome too, of
-course.
+We always appreciate testers. If you own a specific monitoring chip listed
+on our 'new drivers' page, and are willing to help us out, please contact
+us. Even if you have no programming knowledge, you could help us by running
+new modules and reporting on the results and output. If you want to offer
+more substantial help, this is very welcome too, of course.
 
 
 Don't ask us whether we support a particular mainboard; we do not know.
@@ -149,17 +148,17 @@ chips for hardware monitoring.
 
 Most modern mainboards incorporate some form of hardware monitoring chips.
 These chips read things like chip temperatures, fan rotation speeds and
-voltage levels. There are quite a few different chips which can be used
-by mainboard builders for approximately the same results.
+voltage levels. There are quite a few different chips which can be used by
+mainboard builders for approximately the same results.
 
 Hardware monitoring chips are often connected to the SMBus, but often they
 can also be connected to the ISA bus. The modules in this package usually
 support both ways of accessing them.
 
-Because the SMBus is just a special case of the generalized I2C bus, we
-can simulate the SMBus protocol on plain I2C busses. These busses are
-sometimes used in other parts of your computer. If a supported chip is
-attached to one of these additional busses, they can be used too.
+Because the SMBus is just a special case of the generalized I2C bus, we can
+simulate the SMBus protocol on plain I2C busses. These busses are sometimes
+used in other parts of your computer. If a supported chip is attached to
+one of these additional busses, they can be used too.
 
 Please read INSTALL before trying to compile and install these modules.
 There is a lot of additional documentation in the doc/ subdirectory.
@@ -178,14 +177,18 @@ The latest version of this package can always be found on our homepage:
 http://secure.netroedge.com/~lm78. Pre-release versions can be retrieved
 through anonymous CVS; see doc/cvs for more information.
 
-This whole package is copyright (c) 1998 - 2003 by Frodo Looijaard and
-Philip Edelbrock, except for a few drivers written by
-other people. See the individual files for more exact copyright information.  
-This package may be distributed according to the GNU General Public License 
-(GPL), as included in the file COPYING.
+This whole package is copyright (c) 1998 - 2004 by Frodo Looijaard and
+Philip Edelbrock, except for a few drivers written by other people. See the
+individual files for more exact copyright information.  This package may be
+distributed according to the GNU General Public License (GPL), as included
+in the file COPYING.
 
-Note that at this moment, libsensors falls under the GPL, not the LGPL.
-In more human language, that means it is FORBIDDEN to link any application
-to the library, even to the shared version, if the application itself
-does not fall under the GPL. This will probably be changed in the future.
-In the meantime, you will have to contact us first if you want to do this.
+Note that libsensors falls under the GPL, not the LGPL.  In more human
+language, that means it is FORBIDDEN to link any application to the
+library, even to the shared version, if the application itself does not
+fall under the GPL.
+
+
+-----
+[1] SMBus is a trademark of Intel Corporation
+[2] I2Câis a trademark of Philips Corporation
