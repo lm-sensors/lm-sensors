@@ -173,8 +173,8 @@ int pcf8574_detect(struct i2c_adapter *adapter, int address,
 		type_name = "pcf8574a";
 		client_name = "PCF8574A chip";
 	} else {
-		type_name = "pcf8574a";
-		client_name = "PCF8574A chip";
+		type_name = "pcf8574";
+		client_name = "PCF8574 chip";
 	}
 
 	/* Fill in the remaining client fields and put it into the global list */
