@@ -23,8 +23,8 @@ but you may need to download it separately at:
   http://www.netroedge.com/~lm78
 Users of kernel 2.3.34 and later (and also all soon to be 2.4.x) kernels
 will be happy to know that the new I2C implementation has been included 
-in the kernel; you can still patch it with the latest version 
-(see i2c/mkpatch/mkpatch.pl), but this is optional.
+in the kernel; you may still need to patch it with the latest version 
+if lm_sensors does not compile.
 
 WARNING! The default module installation directory changed since version
 2.2.1. If you don't change the directory in /etc/modules.conf (or
@@ -36,13 +36,13 @@ and module bit-mb is renamed i2c-via. You have been warned.
 
 
 At least the following I2C/SMBus adapters are supported:
-  Acer Labs M1541 and M1543C (used in the Aladdin IV, V and Pro 2 chipsets)
+  Acer Labs M1533, M1535, and M1543C
   AMD 756
   Apple Hydra (used on some PPC machines)
   Intel I801 ICH/ICH0/ICH2 (used in Intel 810, 810E, 815E, 820, 840 chipsets)
   Intel PIIX4 (used in many Intel chipsets)
   Intel I810/I815 GMCH
-  SiS 5595 (used in many SiS chipsets)
+  SiS 5595
   3Dfx Voodoo 3 and Banshee
   VIA Technologies VT82C586B, VT82C596A/B, and VT82C686A
 
@@ -55,9 +55,9 @@ At least the following hardware sensor chips are supported:
   Genesys Logic GL518SM (rev 00, 80), GL520SM, GL523SM
   Intel Xeon processor embedded sensors
   Maxim MAX1617 and MAX1617A
-  National Semicoductor LM75, LM77, LM78, LM78-J, LM79. LM80, LM81, and LM84
-  SiS Southbridge (integrated in the chipset; the I2C adapter will also be
-    supported in the near future)
+  National Semicoductor LM75, LM77, LM78, LM78-J, LM79,
+                        LM80, LM81, LM84, and LM87
+  SiS 5595 embedded sensors
   TI THMC10 and THMC50
   VIA Technologies VT82C686A embedded sensors
   Winbond W83781D, W83782D, W83783S, and W83627HF
