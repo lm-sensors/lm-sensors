@@ -95,14 +95,21 @@ sub gen_Documentation_Configure_help
            m@Linear Technologies LTC1710@) {
       $_ = <INPUT>;
       $_ = <INPUT>;
-      $_ = <INPUT> while not m@^\S$@ and not eof(INPUT);
+      $_ = <INPUT> while not m@^\S@ and not eof(INPUT);
       redo MAIN;
     }
     if (eof(INPUT)) {
       print OUTPUT <<'EOF'
 I2C mainboard interfaces
 CONFIG_I2C_MAINBOARD
- 
+  Many modern mainboards have some kind of I2C interface integrated. This
+  is often in the form of a SMBus, or System Management Bus, which is
+  basically the same as I2C but which uses only a subset of the I2C
+  protocol.
+
+  You will also want the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 Acer Labs ALI 1533 and 1543C
 CONFIG_I2C_ALI5X3
@@ -861,6 +868,7 @@ EOF
   gen_drivers_i2c_Config_in $package_root, $kernel_root;
   gen_drivers_i2c_Makefile $package_root, $kernel_root;
   gen_drivers_i2c_i2c_core_c $package_root, $kernel_root;
+  gen_Documentation_Configure_help $package_root, $kernel_root;
 }
 
 main;
