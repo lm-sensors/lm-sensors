@@ -283,6 +283,12 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        i2c_detect => sub { adm1021_detect 2, @_ },
      },
      {
+       name => "TI THMC10",
+       driver => "adm1021",
+       i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
+       i2c_detect => sub { adm1021_detect 3, @_ },
+     },
+     {
        name => "Silicon Integrated Systems SIS5595",
        driver => "sis5595",
        isa_addrs => [ 0 ],
@@ -1376,7 +1382,7 @@ sub adm9240_detect
   return (8);
 }
 
-# $_[0]: Chip to detect (0 = ADM1021, 1 = MAX1617, 2 = MAX1617A)
+# $_[0]: Chip to detect (0 = ADM1021, 1 = MAX1617, 2 = MAX1617A, 3 = THMC10)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -1391,6 +1397,7 @@ sub adm1021_detect
   my $reg;
   my ($chip, $file,$addr) = @_;
   return if $chip == 0 and i2c_smbus_read_byte_data($file,0xfe) != 0x41;
+  return if $chip == 3 and i2c_smbus_read_byte_data($file,0xfe) != 0x49;
   return if $chip == 2 and i2c_smbus_read_byte_data($file,0xfe) != 0x4d and
                            i2c_smbus_read_byte_data($file,0xff) != 0x01;
   # The remaining things are flaky at best. Perhaps something can be done

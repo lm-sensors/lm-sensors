@@ -38,6 +38,7 @@ At least the following hardware sensor chips are supported:
   Dallas Semiconductor DS1780
   Hewlett Packard Maxilife (several revisions)
   Intel Xeon processor embedded sensors
+  TI THMC10
 
 We also support some miscellaneous chips:
   Linear Technologies LTC1710
