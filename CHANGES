@@ -1,3 +1,5 @@
+lm_sensors CHANGES file
+-----------------------
 This is a list of the most important changes between 2.x versions. It is by
 no means complete, listing only user-visible changes which are interesting.
 The ultimate way to know what has changed is to run diff, or even neater,
@@ -13,9 +15,14 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
+-----------------------
+
 2.5.3 (2000????)
+  NOTE: i2c 2.5.3 MUST BE be compiled and installed first.
   File useful_addresses.html: update
   Library: Add lm87 support
+  Module ali-1535: new
+  Module ali-15x3: removed force #ifdef.
   Module i2c-i801: support Intel 82801BA (815E chipset)
   Module i2c-i801: add i2c block write support, fix smbus block bugs
                    (requires i2c 2.5.3 package)

@@ -73,8 +73,6 @@
 
 #include <linux/init.h>
 
-#undef FORCE_ALI15X3_ENABLE
-
 /* ALI15X3 SMBus address offsets */
 #define SMBHSTSTS (0 + ali15x3_smba)
 #define SMBHSTCNT (1 + ali15x3_smba)
@@ -254,26 +252,12 @@ int ali15x3_setup(void)
 
 /* Is SMB Host controller enabled? */
 	pci_read_config_byte(ALI15X3_dev, SMBHSTCFG, &temp);
-#ifdef FORCE_ALI15X3_ENABLE
-/* This should never need to be done.
-   NOTE: This assumes I/O space and other allocations WERE
-   done by the Bios!  Don't complain if your hardware does weird 
-   things after enabling this. :') Check for Bios updates before
-   resorting to this.  */
-	if ((temp & 1) == 0) {
-		pci_write_config_byte(ALI15X3_dev, SMBHSTCFG, temp | 1);
-		printk
-		    ("i2c-ali15x3.o: WARNING: ALI15X3 SMBus interface has been FORCEFULLY "
-		     "ENABLED!!\n");
-	}
-#else				/* FORCE_ALI15X3_ENABLE */
 	if ((temp & 1) == 0) {
 		printk
 		    ("SMBUS: Error: Host SMBus controller not enabled - upgrade BIOS?\n");
 		error_return = -ENODEV;
 		goto END;
 	}
-#endif				/* FORCE_ALI15X3_ENABLE */
 
 /* set SMB clock to 74KHz as recommended in data sheet */
 	pci_write_config_byte(ALI15X3_dev, SMBCLK, 0x20);
