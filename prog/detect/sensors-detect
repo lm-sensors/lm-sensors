@@ -220,6 +220,14 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters @dmidecode);
      } ,
      {
        vendid => 0x1039,
+       devid  => 0x0650,
+       func => 0,
+       procid => "Silicon Integrated Systems SIS650",
+       driver => "i2c-sis645",
+       match => sub { $_[0] =~ /^SMBus SiS645 adapter at 0x[0-9,a-f]{4}/ },
+     } ,
+     {
+       vendid => 0x1039,
        devid  => 0x0735,
        func => 0,
        procid => "Silicon Integrated Systems SIS735",
