@@ -20,16 +20,12 @@
 #ifndef SENSORS_SENSOR_H
 #define SENSORS_SENSOR_H
 
+#ifdef __KERNEL__
+
 /* This file must interface with Simon Vogl's i2c driver. Version 19981006 is
    OK, earlier versions are not; later versions will probably give problems
    too. 
 */
-#ifdef I2C
-#include "i2c/i2c.h"
-#else /* def I2C */
-#include <linux/i2c.h>
-#endif /* def I2C */
-
 #include <asm/types.h>
 
 /* SPINLOCK is defined in i2c.h. */
@@ -39,7 +35,11 @@
 #include <asm/semaphore.h>
 #endif
 
-#include "isa.h"
+#ifdef LM_SENSORS
+#include "i2c.h"
+#else /* ndef LM_SENSORS */
+#include <linux/i2c.h>
+#endif /* def LM_SENSORS */
 
 /* Note that this driver is *not* built upon smbus.c, but is parallel to it.
    We do not need SMBus facilities if we are on the ISA bus, after all */
@@ -117,11 +117,6 @@ struct isa_adapter {
   int retries;
 };
 
-/* We need to mark ISA algorithms in the algorithm structure. */
-#define ALGO_ISA 0x50000
-
-/* ISA Adapter ids */
-#define ISA_MAIN 1
 
 /* Detect whether we are on the isa bus. If this returns true, all i2c
   access will fail! */
@@ -151,5 +146,12 @@ struct isa_adapter {
 #define isa_detach_client(clientptr) \
         i2c_detach_client((struct i2c_client *) (clientptr))
 
+#endif /* def __KERNEL__ */
+
+/* We need to mark ISA algorithms in the algorithm structure. */
+#define ALGO_ISA 0x50000
+
+/* ISA Adapter ids */
+#define ISA_MAIN 1
 
 #endif /* ndef SENSORS_ISA_H */

@@ -26,7 +26,6 @@
    OK, earlier versions are not; later versions will probably give problems
    too. 
 */
-#include "i2c.h"
 #include <asm/types.h>
 
 /* SPINLOCK is defined in i2c.h. */
@@ -34,6 +33,12 @@
 #include <asm/spinlock.h>
 #else
 #include <asm/semaphore.h>
+#endif
+
+#ifdef LM_SENSORS
+#include "i2c.h"
+#else
+#include <linux/i2c.h>
 #endif
 
 /* Declarations, to keep the compiler happy */

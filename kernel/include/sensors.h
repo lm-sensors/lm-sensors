@@ -20,12 +20,12 @@
 #ifndef SENSORS_SENSORS_H
 #define SENSORS_SENSORS_H
 
+#ifdef __KERNEL__
+
 /* Next two must be included before sysctl.h can be included, in 2.0 kernels */
 #include <linux/types.h>
 #include <linux/fs.h>
 #include <linux/sysctl.h>
-
-#ifdef __KERNEL__
 
 /* The type of callback functions used in sensors_{proc,sysctl}_real */
 typedef void (*sensors_real_callback) (struct i2c_client *client,
