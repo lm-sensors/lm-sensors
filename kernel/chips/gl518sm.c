@@ -63,8 +63,19 @@
 #define TEMP_TO_REG(val) (((((val)<0?(val)-5:(val)+5) / 10) + 119) & 0xff)
 #define TEMP_FROM_REG(val) (((val) - 119) * 10)
 
-#define FAN_TO_REG(val,div) \
- (( (val)==0 ? 255 : ((960000+(val)*(div))/(2*(val)*(div))) ) & 0xff)
+static inline unsigned char
+FAN_TO_REG (unsigned rpm, unsigned divisor)
+{
+  unsigned val;
+  
+  if (rpm == 0)
+      return 255;
+
+  val = (960000 + rpm * divisor) / (2 * rpm * divisor);
+  if (val > 255)
+      val = 255;
+  return val;
+}
 #define FAN_FROM_REG(val,div) \
  ( (val)==0 ? 0 : (val)==255 ? 0 : (960000/(2*(val)*(div))) )
 

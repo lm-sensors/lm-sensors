@@ -85,7 +85,19 @@ static const char *version = "1.00 25/2/99 Fons Rademakers";
                                /* 19531 / val * 60 == 1171860 / val */
 #define FAN_FROM_REG(val)      ((val)==0xfe ? -1 : (val)==0xff ? 0 : \
                                 (1171860 / (val)))
-#define FAN_TO_REG(val)        (1171860 / (val))
+static inline unsigned char
+FAN_TO_REG (unsigned rpm)
+{
+  unsigned val;
+  
+  if (rpm == 0)
+      return 255;
+
+  val = 1171860 / rpm;
+  if (val > 255)
+      val = 255;
+  return val;
+}
 
 #define TEMP_FROM_REG(val)     ((val) * 5)
 #define TEMP_TO_REG(val)       ((val) / 5)
