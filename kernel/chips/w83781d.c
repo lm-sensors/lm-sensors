@@ -185,7 +185,7 @@ FAN_TO_REG (unsigned rpm, unsigned divisor)
 #define W83781D_INIT_IN_5 (((-1200) * -604)/2100)
 #define W83781D_INIT_IN_6 (((-500)  * -604)/909)
 #define W83781D_INIT_IN_7 (((500)   * 100)/168)
-#define W83781D_INIT_IN_8 330
+#define W83781D_INIT_IN_8 300
 /* Initial limits for 782d/783s negative voltages */
 /* Note level shift. Change min/max below if you change these. */
 #define W83782D_INIT_IN_5 ((((-1200) + 1491) * 100)/514)

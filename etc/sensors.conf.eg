@@ -201,8 +201,8 @@ chip "w83782d-*" "w83783s-*"
 # Same as above for w83781d except that in5 and in6 are computed differently.
 # Rather than an internal inverting op amp, the 82d/83s use standard positive
 # inputs and the negative voltages are level shifted by a 3.6V reference.
-# The math is convoluted, hope that your motherboard uses the recommended
-# resistor values.
+# The math is convoluted, so we hope that your motherboard
+# uses the recommended resistor values.
 
     label in0 "VCore 1"
     label in1 "VCore 2"
@@ -220,6 +220,9 @@ chip "w83782d-*" "w83783s-*"
     compute in6 (3.14 * @) -  7.71  ,  (@ +  7.71) / 3.14
     compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
 
+# set limits to  5% for the critical voltages
+# set limits to 10% for the non-critical voltages
+# set limits to 20% for the battery voltage
     set in0_min vid*0.95
     set in0_max vid*1.05
     set in1_min vid*0.95
@@ -228,16 +231,16 @@ chip "w83782d-*" "w83783s-*"
     set in2_max 3.3 * 1.05
     set in3_min 5.0 * 0.95
     set in3_max 5.0 * 1.05
-    set in4_min 12 * 0.95
-    set in4_max 12 * 1.05
-    set in5_min -12 * 0.95
-    set in5_max -12 * 1.05
+    set in4_min 12 * 0.90
+    set in4_max 12 * 1.10
+    set in5_min -12 * 0.90
+    set in5_max -12 * 1.10
     set in6_min -5 * 0.95
     set in6_max -5 * 1.05
     set in7_min 5 * 0.95
     set in7_max 5 * 1.05
-    set in8_min 3.3 * 0.95
-    set in8_max 3.3 * 1.05
+    set in8_min 3.0 * 0.80
+    set in8_max 3.0 * 1.20
 
 
 chip "gl518sm-r00-*" "gl518sm-r80-*"
