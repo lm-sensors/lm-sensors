@@ -153,7 +153,7 @@ install-kernel-chips: all-kernel-chips
 	    $(RM) $(DESTDIR)$(MODPREF)/misc/`basename $$i` $(DESTDIR)$(MODPREF)/kernel/drivers/sensors/`basename $$i` \
 	          $(DESTDIR)$(MODPREF)/kernel/drivers/sensors/`basename $$i`.gz $(DESTDIR)$(MODPREF)/kernel/drivers/chips/`basename $$i`.gz ; \
 	  done ; \
-	  $(RMDIR) $(DESTDIR)$(MODPREF)/misc 2> /dev/null || true ; \
+	  $(RMDIR) $(DESTDIR)$(MODPREF)/misc $(DESTDIR)$(MODPREF)/kernel/drivers/sensors 2> /dev/null || true ; \
 	fi
 
 install :: install-kernel-chips
