@@ -316,7 +316,7 @@ void do_a_print(sensors_chip_name name)
            (!strcmp(name.prefix,"w83627hf")) ||
            (!strcmp(name.prefix,"as99127f")))
     print_w83781d(&name);
-  else if (!strcmp(name.prefix,"maxilife-"))
+  else if (!strncmp(name.prefix,"maxilife-", 9))
     print_maxilife(&name);
   else if (!strcmp(name.prefix,"ddcmon"))
     print_ddcmon(&name);
