@@ -1,5 +1,6 @@
 These are the steps you should follow to write a new driver and
 submit it to us so that it will be applied cleanly to our package.
+See at the bottom for adding new chip support to an existing driver.
 
 Don't be intimidated by the list, it's just here so we don't
 forget anything.
@@ -37,6 +38,7 @@ Steps which apply to only one type of driver are noted.
   Be sure and use 8 column tabs.
   Also, please do not use // comments.
   Also, please do not go past column 80.
+  Also, please use C99 struct initializers {.foo = blat}
   Please do this _before_ you check in your driver.
 
 * Add sysctl definitions to kernel/include/sensors.h (for chip drivers only).
@@ -140,3 +142,33 @@ Checklist for mkpatch support, after the driver is tested and stable:
 
 * Move .o reference in kernel/[chips,busses]/Module.mk
   from first to second section.
+
+
+---------------------------------------------------------------------
+Checklist for _adding_ support for a chip to an _existing_ driver:
+
+* Make the changes to the driver itself.
+
+* Add detection information to prog/detect/sensors-detect.
+
+* Add a strncmp() call for the new prefix in prog/sensors/main.c
+  (chip drivers only).
+
+* Add entries for the new prefix to etc/sensors.conf.eg (chip drivers only).
+
+* Update config help in mkpatch/mkpatch.pl.
+
+* Update config entry in mkpatch/Config.in (chip drivers only)
+
+* Update config entry in mkpatch/mkpatch.pl (bus drivers only)
+
+* Update doc/[chips,busses]/xxx file
+
+* Update doc/chips/SUMMARY file (chip drivers only)
+
+* Update list in README
+
+* Submit the changes as a patch or check them in
+
+* Update entry on 'new drivers' page
+

@@ -131,8 +131,8 @@ sis5595
 smartbatt
 	smartbatt	1	1	-	-	yes	no
 
-smsc74m1
-	smsc74m1 	-	-	2	2	no	yes (LPC)
+smsc47m1
+	smsc47m1 	-	-	2	2	no	yes (LPC)
 
 thmc50
 	adm1022		3	2	-	1 dac	yes	no
@@ -144,6 +144,9 @@ via686a
 
 vt1211
 	vt1211		2-7	2-7	2	2	no	yes (LPC)
+
+vt8231
+	vt8231		2-7	2-7	2	2	no	yes
 
 w83781d
 	as99127f	3	7	3	2 pwm?  yes	no
@@ -161,6 +164,9 @@ SUPPORTED NON-SENSOR CHIPS
 
 Driver  Chips
 ------  -----
+
+bmcsensors
+	An interface to an IPMI BMC (Baseboard management controller)
 
 bt869
 	bt869 video modulator chip

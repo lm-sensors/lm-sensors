@@ -34,10 +34,17 @@ There is no facility in the lm_sensors package for drivers
 to output general strings via /proc. This facility may be added
 in the future.
 
+Alarms are direct indications read from the chips. The drivers do NOT make
+comparisons of readings to thresholds. This allows violations
+between readings to be caught and alarmed. The exact definition of
+an alarm (for example, whether a threshold must be met or must be
+exceeded to cause an alarm) is chip-dependent.
+
 Guidelines for new entries:
 	- If there are multiple values, some r/w and some r/o,
 	  put the r/w ones first.
 	- Additional non-standard values should be after the standard values.
+
 
 
 -------------------------------------------------------------------------
@@ -66,7 +73,7 @@ beep	  2     Beep/interrupt enable and bitmask.
 		same format as 'alarms' with same bit locations.
 		
 curr[1-n]  3	Current max, min or hysteresis, and input value.
-	       	Floating point values XXX.X or XXX.XX in Amps.
+	       	Floating point values XX.X or XX.XX in Amps.
 		The second value is preferably a hysteresis value,
 		reported as a absolute current, NOT a delta from
 		the max value.

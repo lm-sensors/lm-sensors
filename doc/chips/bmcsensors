@@ -47,10 +47,14 @@ You must configure the following features in your kernel
 	IPMI KCS handler
 The IPMI device interface and IPMI watchdog handler are not required.
 
+You must modprobe i2c-ipmi separately, it will not
+load automatically when you modprobe bmcsensors.
+
 If the KCS handler (ipmi_kcs_drv) is configured as a module,
-you must modprobe it separately, it will not load automatically
+you must also modprobe it separately, it will not load automatically
 when you modprobe i2c-ipmi or ipmi_msghandler (unless you set up
 /etc/modules.conf to load ipmi_kcs_drv when ipmi_msghandler is loaded).
+
 
 /proc entries
 -------------
