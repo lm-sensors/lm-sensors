@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.8.1 (2003????)
+2.8.1 (20031005)
   NOTE: Requires i2c-2.8.1 or newer!
   File sensors.conf.eg: Improved adm1025 section
                         Default temp labels for as99127f
