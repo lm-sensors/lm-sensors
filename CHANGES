@@ -51,6 +51,7 @@ ask CVS about it:
                   Fix temp1 limits being unsettable in application
                   Ensure that temp2 and in4 are not used at the same time
   Module i2c-i801: Support 6300ESB and ICH6
+  Module i2c-piix4: Don't blacklist IBM with Serverworks chip
   Module i2c-sis645: Add support for SiS655
   Module it87: Discard non-standard Super-I/O exit sequence (Bjorn Mork)
   Module lm90: Support LM99 and LM89 
@@ -82,6 +83,7 @@ ask CVS about it:
                   Invert AS99127F beep bits in driver rather than user-space
   Programs pwmconfig, fancontrol: Switch to new sysfs naming scheme
   Program fancontrol: restore fans on TERM and KILL (Stephen Kitt)
+  Program fancontrol.pl: New
   Program i2cdetect: Adapt probing method to address
                      Add -q and -r flags to force probing methods
                      Allow probing range selection
@@ -116,6 +118,7 @@ ask CVS about it:
                           Improve LM89 and LM99 support
                           Support GeForce FX 5900 video cards
                           Fix devfs misdetection (Aurelien Jarno)
+                          Detect 6300ESB, ICH6
                           Fix double detection of ISA chips
                           Support MAX1619
                           Support PC87373 Super-I/O

@@ -123,6 +123,9 @@ see useful_addresses.html.
   Controls fanspeeds responding to changes on temperature sensors.
   Configuration through pwmconfig.
 
+* prog/pwm/fancontrol.pl (perl script, installed by 'make install')
+  Reimplementation of fancontrol in perl, with self-daemonizing.
+
 * prog/rrd/sens_update_rrd (written in bash, not installed)
   This script gathers sensors data and adds it to a round robin database
   (RRD). RRD is then used to display the graphed data in web pages.
