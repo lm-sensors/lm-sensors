@@ -40,6 +40,12 @@ KERNEL MODULES
   Also check for the supported dallas chip.
 * lm80: Check how OS alarms work. At page 17 of the sheet, it tells
   something completely different from the description at page 25.
+* gl518sm: Update binary search to 'trinary' search: because we have
+  both upper and lower limits, you can see the difference between three
+  pieces of the current range.
+  Also, you can assume that new values are close to old values, so start
+  with trying to use a small range near the old values (already partially
+  done?)
 
 LIBRARY
 =======

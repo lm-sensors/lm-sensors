@@ -1,85 +1,208 @@
-This file documents the gl518sm directories.
+Kernel driver `gl518sm.o'
+=========================
 
-There will be one directory created for each detected GL518SM chip. Chips
-can only be connected to the SMBus. Directories are called 
-gl518sm-r??-i2c-?-??, where the first two question marks are the revision
-number, the question mark after i2c equals the I2C bus number, and the I2C
-address is at the end.
-At this moment, revisions 0x00 and 0x80 are known and supported. Revision
-0x00 chips can only display the VIN3 value; revision 0x80 can also 
-display the VIN1, VIN2 and VDD values.
+Status: Complete and well-tested
 
-Experimental:
-You can insert the module with parameter 'readall=1' to use an iteration
-code to show all the voltages for rev 00 chip, too. This will cause a delay
-of about 10 seconds, and is currently only available through /proc system.
+Supported chips:
+  * Genesys Logic GL518SM release 0x00
+    Prefix `gl518sm-r00'
+    Addresses scanned: I2C 0x2c and 0x2d
+    Datasheet: Not openly available
+  * Genesys Logic GL518SM release 0x80
+    Prefix `gl518sm-r80'
+    Addresses scanned: I2C 0x2c and 0x2d
+    Datasheet: Not available at all, as far as we know
 
-/proc/sys/dev/sensors/chips contains the SYSCTL values for all chip
-directories.
+Author: Frodo Looijaard <frodol@dds.nl>
 
-Within each GL518 directory, you can find the following files:
-* alarms (GL518_SYSCTL_ALARMS)
-  A number which indicates which alarms are on. An alarm gets triggered when
-  some limit has been crossed. Even if the cause of the alarm is over, it
-  stays triggered until it has been read at least once. Because the LM78
-  values are updated at most once every 1.5 seconds, this means the alarm
-  can be read several times before it is erased.
-  This file can not be written to.
-  The number is the logical OR of the following components:
-  - GL518_ALARM_VDD
-    Gets triggered when the VDD value is higher or lower than its limits
-  - GL518_ALARM_VIN[1-3]
-    Gets triggered when the corresponding VIN value is higher or lower than
-    its limits.
-  - GL518_ALARM_TEMP
-    Gets triggered when the temp value has crossed its limits. See the 
-    description under temp.
-  - GAL518_ALARM_FAN[1-2]
-    Gets triggered when the corresponding FAN value drops below its limit.
-  If accessed through sysctl, this value is a long.
-* beep (GL518_SYSCTL_BEEP)
-  Two numbers. The first is 0 if all sound signals are disabled; it is 1 if
-  they are enabled. The second number determines which alarms will cause
-  a sound signal, if the first number is set to 1. The encoding of the
-  second number is the same as that in alarms.
-* fan[1-2] (GL518_SYSCTL_FAN[1-2])
-  A list of two numbers. The first is the minimum fan rotation limit; the
-  second is the current fan rotation speed. Both are in RPM (rotation per
-  minute). An alarm is triggered if the rotation speed drops below the
-  limit. The first value can be changed. Not all RPM values can accurately
-  be represented, so some rounding is done.
-  If accessed through sysctl, this is a list of longs.
-* fan_div (GL518_SYSCTL_FAN_DIV)
-  A list of two numbers, one for each fan. Each number can be either 1, 2,
-  4 or 8. It is the internal scaling factor used for the FAN rotations. If
-  you change this number, the FAN readings get more or less detailed, but
-  the range in which they can be read too. Higher numbers give better 
-  resolution, but less range. The first two numbers can be changed, the
-  third not.
-  If accessed through sysctl, this is a list of longs.
-* vin[1-3] and vdd (GL518_SYSCTL_VIN[1-3] and GL518_SYSCTL_VDD)
-  A list of three numbers. The first is the minimum limit, the second is the
-  maximum limit, and the third is the current value. If you have a weird
-  mainboard, all values may be off because some other scaling factor has
-  to be used; user-space programs should compensate for this. Note that
-  minimum means 'closest to zero'; so if the normal value equals -10, a
-  minimum could equal -9, and a maximum -11.
-  On GL518SM revision 0 chips, only VIN3 is readable; for the others,
-  you can set limits, but you can not read the current values.
-  The first two numbers can be changed, the third not.
-  If accessed through sysctl, this is a list of longs, each being the voltage
-  times 100.
-* temp
-  A list of three numbers. The first number is the Overtemperature Shutdown
-  value; the second is the Hysteris value and the third number is the
-  current value. The first two values can be modified. All values are in
-  degrees Celcius.
-  An alarm is issued when the temperature gets higher then the
-  Overtemperature Shutdown value; it stays on until the temperature falls
-  below the Hysteris value.
-  The first two numbers can be changed, the third not.
-  If accessed through sysctl, this is a list of longs, each being the
-  temperature times 10.
 
-The data for each GL518SM is updated each 1.5 seconds, but only if it is
-actually read.
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_gl518sm_r00: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `gl518sm_r00' chip
+* force_gl518sm_r80: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `gl518sm_r80' chip
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+* readall: int
+  Enable the experimental code, which tries to find the voltages of
+  revision zero chips by slow (10 seconds) interpolation
+
+
+Description
+-----------
+
+This driver supports the Genesys Logic GL518SM chip. There are at least
+two revision of this chip, which we call revision 0x00 and 0x80. Revision
+0x80 chips support the reading of voltages directly, 0x00 only for VIN3.
+
+The GL518SM implements one temperature sensor, two FAN rotation speed
+sensors, and four voltage sensors. It can report alarms through the
+computer speakers.
+
+Temperatures are measured in degrees Celcius. An alarm goes off while the
+temperature is above the over temperature limit, and has not yet dropped
+below the hysteris limit. The alarm always reflects the current situation.
+Measurements are guaranteed between -40 degrees and +125 degrees, with
+a resolution of 1 degree.
+
+FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
+triggered if the rotation speed has dropped below a programmable limit. FAN 
+readings can be divided by a programmable divider (1, 2, 4 or 8) to give
+the readings more range or accuracy. This is important because some FANs
+report only one 'tick' each rotation, while others report two - making
+all readings twice as high. Not all RPM values can accurately be represented,
+so some rounding is done. With a divider of 2, the lowest representable
+value is around 1900 RPM.
+
+Voltage sensors (also known as VIN sensors) report their values in volts.
+An alarm is triggered if the voltage has crossed a programmable minimum 
+or maximum limit. Note that minimum in this case always means 'closest to
+zero'; this is important for negative voltage measurements. The VDD input
+measures voltages between 0.000 and 5.865 volt, with a resolution of 0.023
+volt. The other inputs measure voltages between 0.000 and 4.845 volt, with
+a resolution of 0.019 volt. Note that revision 0x00 chips do not support
+reading the current voltage of any input except for VIN3; limit setting
+and alarms work fine, though. Yes, this is weird. There is experimental
+code to compute them by interpolation; see the 'readall' module parameter.
+
+When an alarm goes off, you can be warned by a beeping signal through
+your computer speaker. It is possible to enable all beeping globally,
+or only the beeping for some alarms.
+
+If an alarm triggers, it will remain triggered until the hardware register
+is read at least once (except for temperature alarms). This means that the 
+cause for the alarm may already have disappeared!  Note that in the current 
+implementation, all hardware registers are read whenever any data is read 
+(unless it is less than 1.5 seconds since the last update). This means that 
+you can easily miss once-only alarms.
+
+The GL518SM only updates its values each 1.5 seconds; reading it more often
+will do no harm, but will return 'old' values.
+
+Not supported is the option to use only one fan, and to enable/disable the 
+speed of that fan automatically as function of the current temperature.
+
+
+Chip Features
+-------------
+
+Chip `gl518sm-r00'
+             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
+               vdd               NONE               NONE     R     2
+              vin1               NONE               NONE     R     2
+              vin2               NONE               NONE     R     2
+              vin3               NONE               NONE     R     2
+           vdd_min                vdd                vdd     RW    2
+          vin1_min               vin1               vin1     RW    2
+          vin2_min               vin2               vin2     RW    2
+          vin3_min               vin3               vin3     RW    2
+           vdd_max                vdd                vdd     RW    2
+          vin1_max               vin1               vin1     RW    2
+          vin2_max               vin2               vin2     RW    2
+          vin3_max               vin3               vin3     RW    2
+              fan1               NONE               NONE     R     0
+              fan2               NONE               NONE     R     0
+          fan1_min               fan1               fan1     RW    0
+          fan2_min               fan2               fan2     RW    0
+              temp               NONE               NONE     R     1
+         temp_hyst               temp               temp     RW    1
+         temp_over               temp               temp     RW    1
+          fan1_div               fan1               NONE     RW    0
+          fan2_div               fan2               NONE     RW    0
+            alarms               NONE               NONE     R     0
+       beep_enable             alarms               NONE     RW    0
+             beeps             alarms             alarms     RW    0
+
+             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
+               vdd                    SENSORS_GL518R00_VDD                vdd:3
+              vin1                   SENSORS_GL518R00_VIN1               vin1:3
+              vin2                   SENSORS_GL518R00_VIN2               vin2:3
+              vin3                   SENSORS_GL518R00_VIN3               vin3:3
+           vdd_min                SENSORS_GL518R00_VDD_MIN                vdd:1
+          vin1_min               SENSORS_GL518R00_VIN1_MIN               vin1:1
+          vin2_min               SENSORS_GL518R00_VIN2_MIN               vin2:1
+          vin3_min               SENSORS_GL518R00_VIN3_MIN               vin3:1
+           vdd_max                SENSORS_GL518R00_VDD_MAX                vdd:2
+          vin1_max               SENSORS_GL518R00_VIN1_MAX               vin1:2
+          vin2_max               SENSORS_GL518R00_VIN2_MAX               vin2:2
+          vin3_max               SENSORS_GL518R00_VIN3_MAX               vin3:2
+              fan1                   SENSORS_GL518R00_FAN1               fan1:2
+              fan2                   SENSORS_GL518R00_FAN2               fan2:2
+          fan1_min               SENSORS_GL518R00_FAN1_MIN               fan1:1
+          fan2_min               SENSORS_GL518R00_FAN2_MIN               fan2:1
+              temp                   SENSORS_GL518R00_TEMP               temp:3
+         temp_hyst              SENSORS_GL518R00_TEMP_HYST               temp:2
+         temp_over              SENSORS_GL518R00_TEMP_OVER               temp:1
+          fan1_div               SENSORS_GL518R00_FAN1_DIV            fan_div:1
+          fan2_div               SENSORS_GL518R00_FAN2_DIV            fan_div:2
+            alarms                 SENSORS_GL518R00_ALARMS             alarms:1
+       beep_enable            SENSORS_GL518R00_BEEP_ENABLE               beep:1
+             beeps                  SENSORS_GL518R00_BEEPS               beep:2
+
+
+Chip `gl518sm-r80'
+             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
+               vdd               NONE               NONE     R     2
+              vin1               NONE               NONE     R     2
+              vin2               NONE               NONE     R     2
+              vin3               NONE               NONE     R     2
+           vdd_min                vdd                vdd     RW    2
+          vin1_min               vin1               vin1     RW    2
+          vin2_min               vin2               vin2     RW    2
+          vin3_min               vin3               vin3     RW    2
+           vdd_max                vdd                vdd     RW    2
+          vin1_max               vin1               vin1     RW    2
+          vin2_max               vin2               vin2     RW    2
+          vin3_max               vin3               vin3     RW    2
+              fan1               NONE               NONE     R     0
+              fan2               NONE               NONE     R     0
+          fan1_min               fan1               fan1     RW    0
+          fan2_min               fan2               fan2     RW    0
+              temp               NONE               NONE     R     1
+         temp_hyst               temp               temp     RW    1
+         temp_over               temp               temp     RW    1
+          fan1_div               fan1               NONE     RW    0
+          fan2_div               fan2               NONE     RW    0
+            alarms               NONE               NONE     R     0
+       beep_enable             alarms               NONE     RW    0
+             beeps             alarms             alarms     RW    0
+
+             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
+               vdd                    SENSORS_GL518R80_VDD                vdd:3
+              vin1                   SENSORS_GL518R80_VIN1               vin1:3
+              vin2                   SENSORS_GL518R80_VIN2               vin2:3
+              vin3                   SENSORS_GL518R80_VIN3               vin3:3
+           vdd_min                SENSORS_GL518R80_VDD_MIN                vdd:1
+          vin1_min               SENSORS_GL518R80_VIN1_MIN               vin1:1
+          vin2_min               SENSORS_GL518R80_VIN2_MIN               vin2:1
+          vin3_min               SENSORS_GL518R80_VIN3_MIN               vin3:1
+           vdd_max                SENSORS_GL518R80_VDD_MAX                vdd:2
+          vin1_max               SENSORS_GL518R80_VIN1_MAX               vin1:2
+          vin2_max               SENSORS_GL518R80_VIN2_MAX               vin2:2
+          vin3_max               SENSORS_GL518R80_VIN3_MAX               vin3:2
+              fan1                   SENSORS_GL518R80_FAN1               fan1:2
+              fan2                   SENSORS_GL518R80_FAN2               fan2:2
+          fan1_min               SENSORS_GL518R80_FAN1_MIN               fan1:1
+          fan2_min               SENSORS_GL518R80_FAN2_MIN               fan2:1
+              temp                   SENSORS_GL518R80_TEMP               temp:3
+         temp_hyst              SENSORS_GL518R80_TEMP_HYST               temp:2
+         temp_over              SENSORS_GL518R80_TEMP_OVER               temp:1
+          fan1_div               SENSORS_GL518R80_FAN1_DIV            fan_div:1
+          fan2_div               SENSORS_GL518R80_FAN2_DIV            fan_div:2
+            alarms                 SENSORS_GL518R80_ALARMS             alarms:1
+       beep_enable            SENSORS_GL518R80_BEEP_ENABLE               beep:1
+             beeps                  SENSORS_GL518R80_BEEPS               beep:2
+
+

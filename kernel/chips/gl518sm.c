@@ -168,6 +168,9 @@ static int readall = 0;
 extern int init_module(void);
 extern int cleanup_module(void);
 MODULE_PARM(readall,"i");
+MODULE_PARM_DESC(readall,"Enable the experimental code, which tries to find "
+                         "the voltages of revision zero chips by "
+                         "slow (10 seconds) interpolation");
 #endif /* MODULE */
 
 static int gl518_init(void);
