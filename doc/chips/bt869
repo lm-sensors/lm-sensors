@@ -11,7 +11,9 @@ Supported chips:
     (www.brooktree.com)
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
-	<phil@netroege.com> and Ralph Metzler <rjkm@thp.uni-koeln.de>
+	<phil@netroedge.com>, Ralph Metzler <rjkm@thp.uni-koeln.de>
+	Steve Davies <steve@daviesfam.org> added the 720x576 and
+	720x480 support, and the svideo configuration.
 
 Main Contact: Philip Edelbrock <phil@netroedge.com>
 
@@ -34,32 +36,42 @@ Module Parameters
 
 Description
 -----------
-This driver provides some access to the Brooktree bt869 found on some video
-cards (like the 'Voodoo3 3000').  Typically, the output can be either an
-s-video connection or composite video.  Resolutions supported using the
-chip's built in configurations are 640x480 or 800x600.  Other possible
-implementations may allow for double resolutions with some decimations
-(e.g., a monitor running at 1280x960 but the TV out getting every other
-pixel for 640x480).
+
+This driver provides some access to the Brooktree bt869 found on some
+video cards (like the 'Voodoo3 3000').  Typically, the output can be
+either an s-video connection or composite video.  Resolutions
+supported using the chip's built in configurations are 640x480 or
+800x600.  In addition, a 720x576 PAL mode and a 720x480 NTSC mode,
+both without overscan compensation, are supported - a convenient
+configuration for video playback.
+
+Other possible implementations may allow for double resolutions with some
+decimations (e.g., a monitor running at 1280x960 but the TV out getting every
+other pixel for 640x480).
 
 
 Driver Features
 ---------------
-Stanards: (US) NTSC or PAL (PAL untested)
-Resultions: 640x480 and 800x600
-Depths: 16 bit or 32 (I forgot if 24 bit worked OK, it probably does)
+Standards: (US) NTSC or PAL
+Resolutions: 640x480, 800x600, 720x576 (PAL only), 720x480 (NTSC only)
+Depths: 16, 24 or 32 bits
 Colorbars: Switch on the built-in color bar generator. (FYI- using a blue
 filter, you should see only alternating bright stripes of equal brightness.
 Adjust your TV's color and saturation if this isn't the case.)
+SVideo: composite or s-video output.  Also, theoretically, RGB output, though
+this isn't tested and will require that your card presents all three DAC outputs
+(the 3dfx Voodoo3 doesn't)
 
 In your XF86Config file, you should have these entries for NTSC output:
 
 ModeLine "640x480NTSC"  28.195793   640  656  658  784   480  520  525  600
+ModeLine "720x480NTSC"  27.5        720  744  800  872   480  483  485  525
 ModeLine "800x600NTSC"  38.769241   800  812  814  880   600  646  649  735
 
-or for PAL (untested),
+or for PAL
 
 ModeLine "640x480PAL"   29.50       640  675  678  944   480  530  535  625
+ModeLine "720x576PAL"   27.50       720  744  800  880   576  581  583  625
 ModeLine "800x600PAL"   36.00       800  818  820  960   600  653  655  750
 
 Also, don't forget to add these modes to the resolutions list in the
@@ -76,10 +88,12 @@ be fashionable to warn about it.)
 
 Chip Features
 -------------
-The chip is very flexible and customizable for many standards.  Right now
-the driver sticks with the chip's built in NTSC and PAL standards.  It also
+The chip is very flexible and customizable for many standards.  Right
+now the driver sticks with the chip's built in NTSC and PAL standards,
+with the addition of the 720x576PAL and 720x480NTSC modes.  It also
 does some other wacky stuff like closed-captioning, Macro-vision
-copy-protection, and other things.  Check out the datasheet for more info.
+copy-protection, and other things.  Check out the datasheet for more
+info.
 
 
 Issues
@@ -92,7 +106,6 @@ connected but you monitor not, may force the video card to configure and
 use the BT869 as your primary output device (all bets are off once X is
 started).  Let me know if you have problems which you can't figure out 
 (phil@netroedge.com).
-
 
 --------------------------------
 
