@@ -24,7 +24,7 @@ MODULE_DIR := kernel/busses
 # defined value verbatim into the command-list of rules...
 KERNELBUSSESTARGETS := $(MODULE_DIR)/i2c-piix4.o $(MODULE_DIR)/i2c-isa.o \
 		       $(MODULE_DIR)/i2c-via.o $(MODULE_DIR)/i2c-ali15x3.o \
-                       $(MODULE_DIR)/i2c-hydra.o
+                       $(MODULE_DIR)/i2c-hydra.o $(MODULE_DIR)/i2c-voodoo3.o
 
 KERNELBUSSESOLD := bit-via.o bit-mb.o isa.o piix4.o
 

@@ -314,6 +314,7 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
 #define I2C_DRIVERID_SIS5595 1011
 #define I2C_DRIVERID_ICSPLL 1012
 #define I2C_DRIVERID_MAXILIFE 1012
+#define I2C_DRIVERID_BT869 1013
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -553,4 +554,7 @@ struct sensors_chips_data {
 #define SIS5595_ALARM_FAN2 0x80
 
 #define ICSPLL_SYSCTL1 1000
+
+#define BT869_SYSCTL_STATUS 1000
+
 #endif /* def SENSORS_SENSORS_H */

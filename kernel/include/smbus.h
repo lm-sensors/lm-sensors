@@ -151,6 +151,7 @@ struct smbus_adapter {
 
 /* SMBus Adapter ids */
 #define SMBUS_PIIX4 1
+#define SMBUS_VOODOO3 2
 
 /* Detect whether we are on an SMBus-only bus. Note that if this returns
    false, you can still use the smbus access routines, as these emulate
