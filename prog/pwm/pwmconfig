@@ -63,8 +63,14 @@ then
 	exit 1
 fi
 
-PWM=`echo */pwm[1-9]`
-if [ "*/pwm[1-9]" = "$PWM" ]
+if [ "$SYSFS" = "1" ]
+then
+	MATCH='*/fan[1-9]_pwm'
+else
+	MATCH='*/pwm[1-9]'
+fi
+PWM=`echo $MATCH`
+if [ "$MATCH" = "$PWM" ]
 then
 	echo $0: 'There are no pwm-capable sensor modules installed'
 	exit 1
@@ -72,7 +78,7 @@ fi
 
 if [ "$SYSFS" = "1" ]
 then
-	MATCH='*/fan_input[1-9]'
+	MATCH='*/fan[1-9]_input'
 else
 	MATCH='*/fan[1-9]'
 fi
