@@ -37,6 +37,7 @@ ask CVS about it:
                    pcf8574, pcf8591, smsc47m1, vt1211;
                    add dmi_scan
   Program p4b_smbus: Fix compile for SMP and MODVERSIONS; fix PCI ID problem
+  Program lm_sensors.init: fix stop()
   Program sensord: Add /usr/local/etc to config file path;
                    add support for logging loadavg in RRD;
                    fix down-converting raw labels for RRD;
@@ -45,7 +46,8 @@ ask CVS about it:
                    fix -c and -u flags; add vt8231
   Program sensors-detect: recognize Asus "ASB100 Bach" as AS99127F;
                           refuse to run on IBM systems;
-                          fix sysconfig module numbering
+                          fix sysconfig module numbering;
+                          change quick write to not corrupt 24RF08's
 
 2.6.4 (20020719)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.

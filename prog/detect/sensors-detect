@@ -686,8 +686,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
        name => "National Semiconductor LM78",
        driver => "lm78",
-       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
-       i2c_driver_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x20..0x2f], 
        i2c_detect => sub { lm78_detect 0, @_},
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect 0, @_ },
@@ -696,8 +695,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
        name => "National Semiconductor LM78-J",
        driver => "lm78",
-       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
-       i2c_driver_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x20..0x2f], 
        i2c_detect => sub { lm78_detect 1, @_ },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect 1, @_ },
@@ -706,8 +704,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
        name => "National Semiconductor LM79",
        driver => "lm78",
-       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
-       i2c_driver_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x20..0x2f], 
        i2c_detect => sub { lm78_detect 2, @_ },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect 2, @_ },
@@ -740,9 +737,8 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
        name => "Winbond W83781D",
        driver => "w83781d",
-       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_detect => sub { w83781d_detect 0, @_},
-       i2c_driver_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x20..0x2f], 
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect 0, @_ },
        alias_detect => sub { w83781d_alias_detect 0, @_ },
@@ -750,8 +746,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
        name => "Winbond W83782D",
        driver => "w83781d",
-       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
-       i2c_driver_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x20..0x2f], 
        i2c_detect => sub { w83781d_detect 1, @_},
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect 1, @_ },
@@ -760,15 +755,13 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
        name => "Winbond W83783S",
        driver => "w83781d",
-       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
-       i2c_driver_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x20..0x2f], 
        i2c_detect => sub { w83781d_detect 2, @_},
      } ,
      {
        name => "Winbond W83627HF",
        driver => "w83781d",
-       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
-       i2c_driver_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x20..0x2f], 
        i2c_detect => sub { w83781d_detect 3, @_},
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect 3, @_ },
@@ -777,15 +770,13 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
        name => "Asus AS99127F",
        driver => "w83781d",
-       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
-       i2c_driver_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x20..0x2f], 
        i2c_detect => sub { w83781d_detect 4, @_},
      } ,
      {
        name => "Winbond W83L784R/AR",
        driver => "to-be-written",
-       i2c_addrs => [0x00..0x68,0x6a..0x7f], 
-       i2c_driver_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x20..0x2f], 
        i2c_detect => sub { w83781d_detect 6, @_},
      } ,
      {
@@ -1724,7 +1715,7 @@ sub scan_adapter
     i2c_set_slave_addr(\*FILE,$addr) or 
         printf("Client at address 0x%02x can not be probed - unload all client drivers first!\n",$addr), next;
 
-    next unless i2c_smbus_write_quick(\*FILE,$SMBUS_WRITE) >= 0;
+    next unless i2c_smbus_write_quick(\*FILE,$SMBUS_READ) >= 0;
     printf "Client found at address 0x%02x\n",$addr;
 
     foreach $chip (@chip_ids) {
