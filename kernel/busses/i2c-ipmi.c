@@ -139,10 +139,11 @@ static void ipmi_i2c_msg_handler(struct ipmi_recv_msg *msg,
 	int rcvid = msg->msgid & 0xffffff;
 	int client = (msg->msgid >> 24) & 0xf;
 
+#ifdef DEBUG
 	if (msg->msg.data[0] != 0)
-		printk(KERN_WARNING "IPMI BMC response: Error 0x%x on cmd 0x%x\n",
-		       msg->msg.data[0], msg->msg.cmd);
-
+		printk(KERN_WARNING "IPMI BMC response: Error 0x%x on cmd 0x%x/0x%x\n",
+		       msg->msg.data[0], msg->msg.netfn, msg->msg.cmd);
+#endif
 	/* todo: keep track of multiple clients */
 	if(client == 1 && rcv_callback != NULL)
 		(*rcv_callback)(NULL, client, msg);
