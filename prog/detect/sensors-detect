@@ -184,14 +184,17 @@ $IOCTL_I2C_TIMEOUT = 0x0702;
 $IOCTL_I2C_UDELAY = 0x0705;
 $IOCTL_I2C_MDELAY = 0x0706;
 
-# General ones
+# General ones:
 $IOCTL_I2C_SLAVE = 0x0703;
 $IOCTL_I2C_TENBIT = 0x0704;
 $IOCTL_I2C_SMBUS = 0x0720;
 
+
 use vars qw($SMBUS_READ $SMBUS_WRITE $SMBUS_QUICK $SMBUS_BYTE $SMBUS_BYTE_DATA 
             $SMBUS_WORD_DATA $SMBUS_PROC_CALL $SMBUS_BLOCK_DATA);
+
 # These are copied from <linux/smbus.h>
+
 $SMBUS_READ = 1;
 $SMBUS_WRITE = 0;
 $SMBUS_QUICK = 0;
@@ -201,6 +204,10 @@ $SMBUS_WORD_DATA  = 3;
 $SMBUS_PROC_CALL = 4;
 $SMBUS_BLOCK_DATA = 5;
 
+# Select the device to communicate with through its address.
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Address to select
+# Returns: 0 on failure, 1 on success.
 sub i2c_set_slave_addr
 {
   my ($file,$addr) = @_;
@@ -209,10 +216,17 @@ sub i2c_set_slave_addr
 }
 
 # i2c_smbus_access is based upon the corresponding C function (see 
-# <linux/i2c-dev.h>). Note that 'data' is a reference to a list,
-# while 'file' is a reference to a filehandle. Also, it seems that in
-# a struct, chars are encoded as shorts. This is all very tricky and
-# depends on C compiler internals...
+# <linux/i2c-dev.h>). You should not need to call this directly.
+# Exact calling conventions are intricate; read i2c-dev.c if you really need
+# to know.
+# $_[0]: Reference to an opened filehandle
+# $_[1]: $SMBUS_READ for reading, $SMBUS_WRITE for writing
+# $_[2]: Command (usually register number)
+# $_[3]: Transaction kind ($SMBUS_BYTE, $SMBUS_BYTE_DATA, etc.)
+# $_[4]: Reference to an array used for input/output of data
+# Returns: 0 on failure, 1 on success.
+# Note the "SS" pack, even though they are declared as chars in the C struct!
+# This is very compiler-dependent; I wish there was some other way to do this.
 sub i2c_smbus_access
 {
   my ($file,$read_write,$command,$size,$data) = @_;
@@ -223,34 +237,160 @@ sub i2c_smbus_access
   return 1;
 }
 
-sub i2c_read_byte_data
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Either 0 or 1
+# Returns: -1 on failure, the 0 on success.
+sub i2c_smbus_write_quick
+{
+  my ($file,$value) = @_;
+  my $data = [];
+  i2c_smbus_access $file, $value, 0, $SMBUS_QUICK, $data 
+         or return -1;
+  return 0;
+}
+
+# $_[0]: Reference to an opened filehandle
+# Returns: -1 on failure, the read byte on success.
+sub i2c_smbus_read_byte
+{
+  my ($file) = @_;
+  my $data = [];
+  i2c_smbus_access $file, $SMBUS_READ, 0, $SMBUS_BYTE, $data 
+         or return -1;
+  return $$data[0];
+}
+
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Byte to write
+# Returns: -1 on failure, 0 on success.
+sub i2c_smbus_write_byte
 {
   my ($file,$command) = @_;
-  my @data = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-  i2c_smbus_access $file, $SMBUS_READ, $command, $SMBUS_BYTE_DATA, \@data 
+  my $data = [$command];
+  i2c_smbus_access $file, $SMBUS_WRITE, 0, $SMBUS_BYTE, $data 
          or return -1;
-  printf "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n", @data;
-  return $data[0];
+  return 0;
+}
+
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Command byte (usually register number)
+# Returns: -1 on failure, the read byte on success.
+sub i2c_smbus_read_byte_data
+{
+  my ($file,$command) = @_;
+  my $data = [];
+  i2c_smbus_access $file, $SMBUS_READ, $command, $SMBUS_BYTE_DATA, $data 
+         or return -1;
+  return $$data[0];
 }
   
-sub i2c_read_word_data
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Command byte (usually register number)
+# $_[2]: Byte to write
+# Returns: -1 on failure, 0 on success.
+sub i2c_smbus_write_byte_data
+{
+  my ($file,$command,$value) = @_;
+  my $data = [$value];
+  i2c_smbus_access $file, $SMBUS_WRITE, $command, $SMBUS_BYTE_DATA, $data 
+         or return -1;
+  return 0;
+}
+
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Command byte (usually register number)
+# $_[2]: Byte to write
+# Returns: -1 on failure, 0 on success.
+# Note: some devices use the wrong endiannes; use swap_bytes to correct for 
+# this.
+sub i2c_smbus_write_word_data
+{
+  my ($file,$command,$value) = @_;
+  my $data = [$value & 0xff, $value >> 8];
+  i2c_smbus_access $file, $SMBUS_WRITE, $command, $SMBUS_WORD_DATA, $data 
+         or return -1;
+  return 0;
+}
+
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Command byte (usually register number)
+# Returns: -1 on failure, the read word on success.
+# Note: some devices use the wrong endiannes; use swap_bytes to correct for 
+# this.
+sub i2c_smbus_read_word_data
 {
   my ($file,$command) = @_;
-  my $data = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  my $data = [];
   i2c_smbus_access $file, $SMBUS_READ, $command, $SMBUS_WORD_DATA, $data 
          or return -1;
   return $$data[0] + 256 * $$data[1];
 }
-  
+
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Command byte (usually register number)
+# $_[2]: Word to write
+# Returns: -1 on failure, read word on success.
+# Note: some devices use the wrong endiannes; use swap_bytes to correct for 
+# this.
+sub i2c_smbus_process_call
+{
+  my ($file,$command,$value) = @_;
+  my $data = [$value & 0xff, $value >> 8];
+  i2c_smbus_access $file, $SMBUS_WRITE, $command, $SMBUS_PROC_CALL, $data 
+         or return -1;
+  return $$data[0] + 256 * $$data[1];
+}
+
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Command byte (usually register number)
+# Returns: Undefined on failure, a list of read bytes on success
+# Note: some devices use the wrong endiannes; use swap_bytes to correct for 
+# this.
+sub i2c_smbus_read_block_data
+{
+  my ($file,$command) = @_;
+  my $data = [];
+  i2c_smbus_access $file, $SMBUS_READ, $command, $SMBUS_BLOCK_DATA, $data 
+         or return;
+  shift @$data;
+  return @$data;
+}
+
+# $_[0]: Reference to an opened filehandle
+# $_[1]: Command byte (usually register number)
+# @_[2..]: List of values to write
+# Returns: -1 on failure, 0 on success.
+# Note: some devices use the wrong endiannes; use swap_bytes to correct for 
+# this.
+sub i2c_smbus_read_block_data
+{
+  my ($file,$command,@data) = @_;
+  i2c_smbus_access $file, $SMBUS_WRITE, $command, $SMBUS_BLOCK_DATA, \@data 
+         or return;
+  return 0;
+}
+
+# $_[0]: Reference to an opened filehandle
+#######################
+# AUXILIARY FUNCTIONS #
+#######################
+
+sub swap_bytes
+{
+  return (($_[0] & 0xff00) >> 8) + (($_[0] & 0x00ff) << 7)
+}
+
 
 ################
 # MAIN PROGRAM #
 ################
 
+my @hallo;
+
 intialize_proc_pci;
 adapter_pci_detection;
 
 # TEST!
-#open FILE, "+>/dev/i2c-0" or die "Can't open /dev/i2c-0!";
-#i2c_set_slave_addr \*FILE, 0x49 or die "Couldn't set slave addr!";
-#print (i2c_read_word_data \*FILE, 0), "\n";
+open FILE, "+>/dev/i2c-0" or die "Can't open /dev/i2c-0!";
+i2c_set_slave_addr \*FILE, 0x49 or die "Couldn't set slave addr!";
+print (i2c_read_word_data \*FILE, 0), "\n";
