@@ -71,7 +71,8 @@ char sysfsmount[NAME_MAX];
                                        &sensors_proc_bus_max,\
                                        sizeof(struct sensors_bus))
 
-int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag);
+int getsysname(const sensors_chip_feature *feature, char *sysname,
+	int *sysmag, char *altsysname);
 
 /* This reads /proc/sys/dev/sensors/chips into memory */
 int sensors_read_proc_chips(void)
@@ -304,8 +305,6 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 	const sensors_chip_feature *the_feature;
 	int buflen = BUF_LEN;
 	int mag, eepromoffset, fd, ret=0;
-	char n[NAME_MAX];
-	FILE *f;
 
 	if(!foundsysfs)
 		if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
@@ -313,6 +312,8 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 	if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 	if(foundsysfs) {
+		char n[NAME_MAX], altn[NAME_MAX];
+		FILE *f;
 		strcpy(n, name.busname);
 		strcat(n, "/");
 		/* total hack for eeprom */
@@ -335,9 +336,11 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 			} else
 				return -SENSORS_ERR_PROC;
 		} else {
+			strcpy(altn, n);
 			/* use rindex to append sysname to n */
-			getsysname(the_feature, rindex(n, '\0'), &mag);
-			if ((f = fopen(n, "r")) != NULL) {
+			getsysname(the_feature, rindex(n, '\0'), &mag, rindex(altn, '\0'));
+			if ((f = fopen(n, "r")) != NULL
+			 || (f = fopen(altn, "r")) != NULL) {
 				fscanf(f, "%lf", value);
 				fclose(f);
 				for (; mag > 0; mag --)
@@ -368,8 +371,6 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 	const sensors_chip_feature *the_feature;
 	int buflen = BUF_LEN;
 	int mag;
-	char n[NAME_MAX];
-	FILE *f;
  
 	if(!foundsysfs)
 		if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
@@ -377,11 +378,15 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 	if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 	if(foundsysfs) {
+		char n[NAME_MAX], altn[NAME_MAX];
+		FILE *f;
 		strcpy(n, name.busname);
 		strcat(n, "/");
+		strcpy(altn, n);
 		/* use rindex to append sysname to n */
-		getsysname(the_feature, rindex(n, '\0'), &mag);
-		if ((f = fopen(n, "w")) != NULL) {
+		getsysname(the_feature, rindex(n, '\0'), &mag, rindex(altn, '\0'));
+		if ((f = fopen(n, "w")) != NULL
+		 || (f = fopen(altn, "w")) != NULL) {
 			for (; mag > 0; mag --)
 				value *= 10.0;
 			fprintf(f, "%d", (int) value);
@@ -454,7 +459,8 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 	References: doc/developers/proc in the lm_sensors package;
 	            Documentation/i2c/sysfs_interface in the kernel
 */
-int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
+int getsysname(const sensors_chip_feature *feature, char *sysname,
+	int *sysmag, char *altsysname)
 {
 	const char * name = feature->name;
 	char last;
@@ -464,6 +470,7 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	struct match {
 		const char * name, * sysname;
 		const int sysmag;
+		const char * altsysname;
 	};
 
 	struct match *m;
@@ -471,7 +478,7 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	struct match matches[] = {
 		{ "beeps", "beep_mask", 0 },
 		{ "pwm", "fan1_pwm", 0 },
-		{ "vid", "in0_ref", INMAG },
+		{ "vid", "cpu0_vid", INMAG, "in0_ref" },
 		{ "remote_temp", "temp2_input", TEMPMAG },
 		{ "remote_temp_hyst", "temp2_max_hyst", TEMPMAG },
 		{ "remote_temp_low", "temp2_min", TEMPMAG },
@@ -483,6 +490,9 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 		{ NULL, NULL }
 	};
 
+
+/* default to a non-existent alternate name (should rarely be tried) */
+	strcpy(altsysname, "_");
 
 /* use override in feature structure if present */
 	if(feature->sysname != NULL) {
@@ -498,6 +508,8 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	for(m = matches; m->name != NULL; m++) {
 		if(!strcmp(m->name, name)) {
 			strcpy(sysname, m->sysname);
+			if (m->altsysname != NULL)
+				strcpy(altsysname, m->altsysname);
 			*sysmag = m->sysmag;
 			return 0;
 		}

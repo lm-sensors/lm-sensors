@@ -161,6 +161,7 @@ typedef struct sensors_chip_feature {
   int scaling;
   const char *sysname;
   int sysscaling;
+  const char *altsysname;
 } sensors_chip_feature;
 
 /* Internal data about all features of a type of chip */
