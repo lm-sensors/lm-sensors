@@ -15,6 +15,15 @@ Module Parameters
 
 <TODO: fill in here>
 
+Asus' BIOS is often broken
+--------------------------
+
+If you have an Asus P4PE, you need to read prog/hotplug/README.p4b.
+
+If you have any other (Asus) board for which sensors-detect finds neither
+asb100 nor an I2C bus, please read prog/hotplug/README.p4b before sending
+a bug report.
+
 Description
 -----------
 
