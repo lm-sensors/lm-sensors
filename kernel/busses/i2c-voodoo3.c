@@ -71,8 +71,8 @@ static s32 voodoo3_access(struct i2c_adapter *adap, u8 addr, char read_write,
                         u8 command, int size, union i2c_smbus_data * data);
 static void Voodoo3_I2CStart(void);
 static void Voodoo3_I2CStop(void);
-static int Voodoo3_I2CAck(void);
-static int Voodoo3_I2CReadByte(void);
+static int Voodoo3_I2CAck(int ackit);
+static int Voodoo3_I2CReadByte(int ackit);
 static int Voodoo3_I2CSendByte(unsigned char data);
 static int Voodoo3_BusCheck(void);
 static int Voodoo3_I2CRead_byte(int addr);
@@ -189,20 +189,22 @@ void Voodoo3_I2CStop(void)
   out();
 }
 
-int Voodoo3_I2CAck(void)
+int Voodoo3_I2CAck(int ackit)
 {
 int ack;
 
   out();
   clkon();
-  ack=rdat();
+  if (!ackit) {
+   ack=rdat();
+  } else { dat(0); }
   out();
   clkoff();
   out();
   return ack;
 }
 
-int Voodoo3_I2CReadByte(void)
+int Voodoo3_I2CReadByte(int ackit)
 {
   int i,temp;
   unsigned char data=0;
@@ -215,15 +217,11 @@ int Voodoo3_I2CReadByte(void)
     clkoff();
     out();
   }
-  temp=Voodoo3_I2CAck();
+  temp=Voodoo3_I2CAck(ackit);
 #ifdef DEBUG
   printk("i2c-voodoo3: Readbyte ack -->0x%X, read result -->0x%X\n",temp,data);
 #endif
-  if (! temp)
-   return data;
-  else {
-   return -1;
-  }
+  return data;
 }
 
 int Voodoo3_I2CSendByte(unsigned char data)
@@ -240,7 +238,7 @@ int Voodoo3_I2CSendByte(unsigned char data)
     clkoff();
     out();
   }
-  temp=Voodoo3_I2CAck();
+  temp=Voodoo3_I2CAck(0);
 #ifdef DEBUG
   printk("i2c-voodoo3: Writebyte ack -->0x%X\n",temp);
 #endif
@@ -269,7 +267,7 @@ int Voodoo3_I2CRead_byte(int addr)
 #endif
 	  this_dat=-1;
 	  goto ENDREAD1; }
-        this_dat=Voodoo3_I2CReadByte();
+        this_dat=Voodoo3_I2CReadByte(0);
 ENDREAD1: Voodoo3_I2CStop();
 #ifdef DEBUG
 	printk("i2c-voodoo3: Byte read at addr:0x%X result:0x%X\n",addr,this_dat);
@@ -288,13 +286,13 @@ int Voodoo3_I2CRead_byte_data(int addr,int command)
 #endif
 	  this_dat=-1;
 	  goto ENDREAD2; }
-        if (Voodoo3_I2CSendByte(command)) { 
+        if (!Voodoo3_I2CSendByte(command)) { 
 #ifdef DEBUG
 	  printk("i2c-voodoo3: No Ack on cmd WriteByte to addr 0x%X\n",addr);
 #endif
 	  this_dat=-1;
 	  goto ENDREAD2; }
-        this_dat=Voodoo3_I2CReadByte();
+        this_dat=Voodoo3_I2CReadByte(0);
 ENDREAD2: Voodoo3_I2CStop();
 #ifdef DEBUG
 	printk("i2c-voodoo3: Byte read at addr:0x%X (command:0x%X) result:0x%X\n",addr,command,this_dat);
@@ -313,8 +311,8 @@ int Voodoo3_I2CRead_word(int addr,int command)
 #endif
 	  this_dat=-1;
 	  goto ENDREAD3; }
-        this_dat=Voodoo3_I2CReadByte();
-        this_dat|=(Voodoo3_I2CReadByte()<<8);
+        this_dat=Voodoo3_I2CReadByte(1);
+        this_dat|=(Voodoo3_I2CReadByte(0)<<8);
 ENDREAD3: Voodoo3_I2CStop();
 #ifdef DEBUG
 	printk("i2c-voodoo3: Word read at addr:0x%X (command:0x%X) result:0x%X\n",addr,command,this_dat);
