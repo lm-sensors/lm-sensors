@@ -14,7 +14,12 @@ Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
 Module Parameters
 -----------------
 
-(none)
+force_addr=0xaddr	Set the I/O base address. Useful for boards
+			that don't set the address in the BIOS. Does not do a
+			PCI force; the device must still be present in lspci.
+			Don't use this unless the driver complains that the
+			base address is not set.
+			Example: 'modprobe i2c-ali15x3 force_addr=0xe800'
 
 
 Description
