@@ -61,13 +61,13 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x0008,
        func => 0,
        procid => "Silicon Integrated Systems 85C503",
-       driver => "i2c-ali15x3"
      } ,
      {
        vendid => 0x10b9,
        devid => 0x7101,
        funcid => 0,
        procid => "Acer Labs M7101",
+       driver => "i2c-ali15x3"
      }
 );
 
