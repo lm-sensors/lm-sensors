@@ -13,8 +13,12 @@ Quickstart:
   * Add the line 
        path=/lib/modules/current/extra
     to /etc/conf.modules or /etc/modules.conf (whichever one exists)
-    if it is not there yet.
-  * Make sure you do a `depmod -a' and a `ldconfig'.
+    if it is not there yet
+  * Do a `depmod -a'.
+  * Add  the line
+      /usr/local/lib 
+    to /etc/ld.so.conf if it is not there yet.
+  * Do a `ldconfig'.
   * Run `prog/mkdev/mkdev.sh' to create the device files
   * Run `prog/detect/sensors-detect' to detect your hardware, put
     the lines it suggests into /etc/conf.modules or /etc/modules.conf
