@@ -1,0 +1,102 @@
+Kernel driver `lm63.o'
+======================
+
+Status: Complete, lightly tested
+
+Supported chips: 
+  * National Semiconductor LM63
+    Prefix: `lm63'
+    Addresses scanned: I2C 0x4c
+    Datasheet: Publicly available at the National Semiconductor website
+               http://www.national.com/pf/LM/LM63.html
+
+
+Author: Jean Delvare <khali@linux-fr.org>
+
+Thanks go to Tyan and especially Alex Buckingham for setting up a remote
+access to their S4882 test platform for this driver.
+  http://www.tyan.com/
+
+License: GPL
+
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_lm63: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `lm63' chip
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+
+
+Description
+-----------
+
+The LM63 is a digital temperature sensor with integrated fan monitoring
+and control.
+
+All temperature values are given in degrees Celcius. Resolution is 1.0
+degree for the local temperature, 0.125 degree for the remote temperature.
+
+The fan speed is measured using a tachometer. Contrary to most chips which
+store the value in an 8-bit register and have a selectable clock divider
+to make sure that the result will fit in the register, the LM63 uses 16-bit
+value for measuring the speed of the fan. It can measure fan speeds down to
+83 RPM, at least in theory.
+
+Note that the pin used for fan monitoring is shared with an alert out
+function. Depending on how the board designer wanted to use the chip, fan
+speed monitoring will or will not be possible. The proper chip configuration
+is left to the BIOS, and the driver will blindly trust it.
+
+A PWM output can be used to control the speed of the fan. The LM63 has two
+PWM modes: manual and automatic. Automatic mode is not fully implemented yet
+(you cannot define your custom pwm/temperature curve), and mode change isn't
+supported either.
+
+The lm63 driver will not update its values more frequently than every
+second; reading them more often will do no harm, but will return 'old'
+values.
+
+
+Chip Features
+-------------
+
+Chip 'lm63'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp1                 -                     -                       R-     0
+temp1_high            temp1                 temp1                   RW     0
+temp2                 -                     -                       R-     3
+temp2_high            temp2                 temp2                   RW     3
+temp2_low             temp2                 temp2                   RW     3
+temp2_crit            temp2                 temp2                   R-     0
+temp2_crit_hyst       temp2                 temp2                   RW     0
+fan1                  -                     -                       R-     0
+fan1_low              fan1                  fan1                    RW     0
+pwm1                  -                     -                       RW     0
+pwm1_enable           pwm1                  -                       R-     0
+alarms                -                     -                       R-     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp1                 SENSORS_LM63_LOCAL_TEMP                           temp1:2
+temp1_high            SENSORS_LM63_LOCAL_HIGH                           temp1:1
+temp2                 SENSORS_LM63_REMOTE_TEMP                          temp2:3
+temp2_high            SENSORS_LM63_REMOTE_HIGH                          temp2:1
+temp2_low             SENSORS_LM63_REMOTE_LOW                           temp2:2
+temp2_crit            SENSORS_LM63_REMOTE_TCRIT                    temp2_crit:1
+temp2_crit_hyst       SENSORS_LM63_REMOTE_TCRIT_HYST          temp2_crit_hyst:1
+fan1                  SENSORS_LM63_FAN                                   fan1:2
+fan1_low              SENSORS_LM63_FAN_LOW                               fan1:1
+pwm1                  SENSORS_LM63_PWM                                   pwm1:1
+pwm1_enable           SENSORS_LM63_PWM_ENABLE                            pwm1:2
+alarms                SENSORS_LM63_ALARMS                              alarms:1

@@ -110,6 +110,9 @@ it87
 	it8712		3	8	3	-	yes	yes
 	sis950		3	8	3	-	yes	yes
 
+lm63
+	lm63		2	-	1	1 pwm	yes	no
+
 lm75
 	lm75		1	-	-	-	yes	no
 	  (the following chips are detected as an lm75)
