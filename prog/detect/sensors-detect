@@ -1781,8 +1781,9 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
       {
 	name => "Winbond W83627EHF Super IO Sensors",
 	driver => "to-be-written",
-	devid => 0x8860,
-	devid_mask => 0xFFF0,
+	# Datasheet says 0x886x but 0x8853 was seen, thus the broader mask
+	devid => 0x8840,
+	devid_mask => 0xFFC0,
 	logdev => 0x0b,
       },
     ]
