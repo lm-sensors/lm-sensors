@@ -203,7 +203,8 @@ static int __init sensors_lm80_init(void);
 static int __init lm80_cleanup(void);
 
 static int lm80_attach_adapter(struct i2c_adapter *adapter);
-static int lm80_detect(struct i2c_adapter *adapter, int address, int kind);
+static int lm80_detect(struct i2c_adapter *adapter, int address, 
+                       unsigned short flags, int kind);
 static int lm80_detach_client(struct i2c_client *client);
 static int lm80_command(struct i2c_client *client, unsigned int cmd, 
                         void *arg);
@@ -282,7 +283,8 @@ int lm80_attach_adapter(struct i2c_adapter *adapter)
   return sensors_detect(adapter,&addr_data,lm80_detect);
 }
 
-int lm80_detect(struct i2c_adapter *adapter, int address, int kind)
+int lm80_detect(struct i2c_adapter *adapter, int address, 
+                unsigned short flags, int kind)
 {
   int i,cur;
   struct i2c_client *new_client;
@@ -320,15 +322,16 @@ int lm80_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &lm80_driver;
+  new_client->flags = 0;
 
   /* Now, we do the remaining detection. It is lousy. */
   if (lm80_read_value(new_client,LM80_REG_ALARM2) & 0xc0)
     goto ERROR1;
   for (i = 0x2a; i <= 0x3d; i++) {
-    cur = i2c_smbus_read_byte_data(adapter,address,i);
-    if ((i2c_smbus_read_byte_data(adapter,address,i+0x40) != cur) ||
-        (i2c_smbus_read_byte_data(adapter,address,i+0x80) != cur) ||
-        (i2c_smbus_read_byte_data(adapter,address,i+0xc0) != cur))
+    cur = i2c_smbus_read_byte_data(new_client,i);
+    if ((i2c_smbus_read_byte_data(new_client,i+0x40) != cur) ||
+        (i2c_smbus_read_byte_data(new_client,i+0x80) != cur) ||
+        (i2c_smbus_read_byte_data(new_client,i+0xc0) != cur))
       goto ERROR1;
   }
 
@@ -418,12 +421,12 @@ void lm80_dec_use (struct i2c_client *client)
 
 int lm80_read_value(struct i2c_client *client, u8 reg)
 {
-  return i2c_smbus_read_byte_data(client->adapter,client->addr, reg);
+  return i2c_smbus_read_byte_data(client, reg);
 }
 
 int lm80_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
-  return i2c_smbus_write_byte_data(client->adapter, client->addr, reg,value);
+  return i2c_smbus_write_byte_data(client, reg,value);
 }
 
 /* Called when we have found a new LM80. It should set limits, etc. */

@@ -365,7 +365,8 @@ extern
 static int __init w83781d_cleanup(void);
 
 static int w83781d_attach_adapter(struct i2c_adapter *adapter);
-static int w83781d_detect(struct i2c_adapter *adapter, int address, int kind);
+static int w83781d_detect(struct i2c_adapter *adapter, int address, 
+                          unsigned short flags, int kind);
 static int w83781d_detach_client(struct i2c_client *client);
 static int w83781d_command(struct i2c_client *client, unsigned int cmd, 
                         void *arg);
@@ -635,7 +636,8 @@ int w83781d_attach_adapter(struct i2c_adapter *adapter)
   return sensors_detect(adapter,&addr_data,w83781d_detect);
 }
 
-int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
+int w83781d_detect(struct i2c_adapter *adapter, int address, 
+                   unsigned short flags, int kind)
 {
   int i,val1,val2;
   struct i2c_client *new_client;
@@ -699,6 +701,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &w83781d_driver;
+  new_client->flags = 0;
 
   /* Now, we do the remaining detection. */
 
@@ -880,14 +883,12 @@ int w83781d_read_value(struct i2c_client *client, u16 reg)
     }
   } else {
     if (reg & 0xff00)
-      i2c_smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,
-                            reg >> 8);
-    res = i2c_smbus_read_byte_data(client->adapter,client->addr, reg);
+      i2c_smbus_write_byte_data(client,W83781D_REG_BANK, reg >> 8);
+    res = i2c_smbus_read_byte_data(client, reg);
     if (word_sized)
-      res = (res << 8) + i2c_smbus_read_byte_data(client->adapter,client->addr, 
-                                              reg);
+      res = (res << 8) + i2c_smbus_read_byte_data(client, reg);
     if (reg & 0xff00)
-      i2c_smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,0);
+      i2c_smbus_write_byte_data(client,W83781D_REG_BANK,0);
   }
   up( & (((struct w83781d_data *) (client->data)) -> lock));
   return res;
@@ -925,15 +926,14 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
     }
   } else {
     if (reg & 0xff00)
-      i2c_smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,
-                            reg >> 8);
+      i2c_smbus_write_byte_data(client,W83781D_REG_BANK, reg >> 8);
     if (word_sized) {
-       i2c_smbus_write_byte_data(client->adapter,client->addr, reg, value >> 8);
-       i2c_smbus_write_byte_data(client->adapter,client->addr, reg+1, value &0xff);
+       i2c_smbus_write_byte_data(client, reg, value >> 8);
+       i2c_smbus_write_byte_data(client, reg+1, value &0xff);
     } else
-      i2c_smbus_write_byte_data(client->adapter,client->addr, reg, value &0xff);
+      i2c_smbus_write_byte_data(client, reg, value &0xff);
     if (reg & 0xff00)
-      i2c_smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,0);
+      i2c_smbus_write_byte_data(client,W83781D_REG_BANK,0);
   }
   up( & (((struct w83781d_data *) (client->data)) -> lock));
   return 0;

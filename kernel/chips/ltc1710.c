@@ -97,7 +97,8 @@ extern
        int __init sensors_ltc1710_init(void);
 static int __init ltc1710_cleanup(void);
 static int ltc1710_attach_adapter(struct i2c_adapter *adapter);
-static int ltc1710_detect(struct i2c_adapter *adapter, int address, int kind);
+static int ltc1710_detect(struct i2c_adapter *adapter, int address, 
+                          unsigned short flags, int kind);
 static int ltc1710_detach_client(struct i2c_client *client);
 static int ltc1710_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
@@ -149,7 +150,8 @@ int ltc1710_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* This function is called by sensors_detect */
-int ltc1710_detect(struct i2c_adapter *adapter, int address, int kind)
+int ltc1710_detect(struct i2c_adapter *adapter, int address, 
+                   unsigned short flags, int kind)
 {
   int i;
   struct i2c_client *new_client;
@@ -187,6 +189,7 @@ int ltc1710_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &ltc1710_driver;
+  new_client->flags = 0;
 
   /* Now, we would do the remaining detection. But the LTC1710 is plainly
      impossible to detect! Stupid chip. */
@@ -292,7 +295,7 @@ void ltc1710_update_client(struct i2c_client *client)
     printk("Starting ltc1710 update\n");
 #endif
 
-    /* data->status = i2c_smbus_read_byte(client->adapter,client->addr); 
+    /* data->status = i2c_smbus_read_byte(client); 
     	Unfortunately, reads always fail!  */
     data->last_updated = jiffies;
     data->valid = 1;
@@ -315,7 +318,7 @@ void ltc1710_switch1(struct i2c_client *client, int operation, int ctl_name,
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       data->status = (data->status & 2) | results[0];
-      i2c_smbus_write_byte(client->adapter,client->addr,data->status);
+      i2c_smbus_write_byte(client,data->status);
     }
   }
 }
@@ -333,7 +336,7 @@ void ltc1710_switch2(struct i2c_client *client, int operation, int ctl_name,
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       data->status = (data->status & 1) | (results[0] << 1);
-      i2c_smbus_write_byte(client->adapter,client->addr,data->status);
+      i2c_smbus_write_byte(client,data->status);
     }
   }
 }

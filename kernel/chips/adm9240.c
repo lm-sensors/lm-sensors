@@ -255,7 +255,8 @@ extern
 static int __init adm9240_cleanup(void);
 
 static int adm9240_attach_adapter(struct i2c_adapter *adapter);
-static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind);
+static int adm9240_detect(struct i2c_adapter *adapter, int address, 
+                          unsigned short flags, int kind);
 static int adm9240_detach_client(struct i2c_client *client);
 static int adm9240_command(struct i2c_client *client, unsigned int cmd, 
                         void *arg);
@@ -343,7 +344,8 @@ int adm9240_attach_adapter(struct i2c_adapter *adapter)
   return sensors_detect(adapter,&addr_data,adm9240_detect);
 }
 
-static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind)
+static int adm9240_detect(struct i2c_adapter *adapter, int address, 
+                          unsigned short flags, int kind)
 {
   int i;
   struct i2c_client *new_client;
@@ -383,6 +385,7 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &adm9240_driver;
+  new_client->flags = 0;
 
   /* Now, we do the remaining detection. */
 
@@ -501,12 +504,12 @@ void adm9240_dec_use (struct i2c_client *client)
  
 int adm9240_read_value(struct i2c_client *client, u8 reg)
 {
-  return 0xFF & i2c_smbus_read_byte_data(client->adapter,client->addr, reg);
+  return 0xFF & i2c_smbus_read_byte_data(client, reg);
 }
 
 int adm9240_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
-  return i2c_smbus_write_byte_data(client->adapter, client->addr, reg,value);
+  return i2c_smbus_write_byte_data(client, reg,value);
 }
 
 /* Called when we have found a new ADM9240. It should set limits, etc. */

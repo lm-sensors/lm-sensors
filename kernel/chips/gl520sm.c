@@ -192,7 +192,8 @@ extern
        int __init sensors_gl520_init(void);
 static int __init gl520_cleanup(void);
 static int gl520_attach_adapter(struct i2c_adapter *adapter);
-static int gl520_detect(struct i2c_adapter *adapter, int address, int kind);
+static int gl520_detect(struct i2c_adapter *adapter, int address, 
+                        unsigned short flags, int kind);
 static void gl520_init_client(struct i2c_client *client);
 static int gl520_detach_client(struct i2c_client *client);
 static int gl520_command(struct i2c_client *client, unsigned int cmd,
@@ -287,7 +288,8 @@ int gl520_attach_adapter(struct i2c_adapter *adapter)
   return sensors_detect(adapter,&addr_data,gl520_detect);
 }
 
-static int gl520_detect(struct i2c_adapter *adapter, int address, int kind)
+static int gl520_detect(struct i2c_adapter *adapter, int address, 
+                        unsigned short flags, int kind)
 { 
   int i;
   struct i2c_client *new_client;
@@ -328,6 +330,7 @@ static int gl520_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &gl520_driver;
+  new_client->flags = 0;
 
   /* Determine the chip type. */
 
@@ -488,9 +491,9 @@ u16 swap_bytes(u16 val)
 int gl520_read_value(struct i2c_client *client, u8 reg)
 {
   if ((reg >= 0x07) && (reg <= 0x0c)) 
-    return swap_bytes(i2c_smbus_read_word_data(client->adapter,client->addr,reg));
+    return swap_bytes(i2c_smbus_read_word_data(client,reg));
   else
-    return i2c_smbus_read_byte_data(client->adapter,client->addr,reg);
+    return i2c_smbus_read_byte_data(client,reg);
 }
 
 /* Registers 0x07 to 0x0c are word-sized, others are byte-sized 
@@ -499,10 +502,9 @@ int gl520_read_value(struct i2c_client *client, u8 reg)
 int gl520_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
   if ((reg >= 0x07) && (reg <= 0x0c)) 
-    return i2c_smbus_write_word_data(client->adapter,client->addr,reg,
-                                 swap_bytes(value));
+    return i2c_smbus_write_word_data(client,reg, swap_bytes(value));
   else
-    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client,reg,value);
 }
 
 void gl520_update_client(struct i2c_client *client)

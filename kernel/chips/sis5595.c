@@ -192,7 +192,8 @@ extern
 static int __init sis5595_cleanup(void);
 
 static int sis5595_attach_adapter(struct i2c_adapter *adapter);
-static int sis5595_detect(struct i2c_adapter *adapter, int address, int kind);
+static int sis5595_detect(struct i2c_adapter *adapter, int address, 
+                          unsigned short flags, int kind);
 static int sis5595_detach_client(struct i2c_client *client);
 static int sis5595_command(struct i2c_client *client, unsigned int cmd, 
                         void *arg);
@@ -303,7 +304,8 @@ int sis5595_find_sis(int *address)
   return 0;
 }
 
-int sis5595_detect(struct i2c_adapter *adapter, int address, int kind)
+int sis5595_detect(struct i2c_adapter *adapter, int address, 
+                   unsigned short flags, int kind)
 {
   int i;
   struct i2c_client *new_client;
@@ -366,6 +368,7 @@ int sis5595_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &sis5595_driver;
+  new_client->flags = 0;
 
   /* Now, we do the remaining detection. */
 

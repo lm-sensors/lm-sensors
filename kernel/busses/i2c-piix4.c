@@ -99,7 +99,8 @@ extern
        int __init i2c_piix4_init(void);
 static int __init piix4_cleanup(void);
 static int piix4_setup(void);
-static s32 piix4_access(struct i2c_adapter *adap, u8 addr, char read_write,
+static s32 piix4_access(struct i2c_adapter *adap, u8 addr, 
+                        unsigned short flags, char read_write,
                         u8 command, int size, union i2c_smbus_data * data);
 static void piix4_do_pause( unsigned int amount );
 static int piix4_transaction(void);
@@ -352,7 +353,8 @@ int piix4_transaction(void)
 }
 
 /* Return -1 on error. See smbus.h for more information */
-s32 piix4_access(struct i2c_adapter *adap, u8 addr, char read_write,
+s32 piix4_access(struct i2c_adapter *adap, u8 addr, 
+                 unsigned short flags, char read_write,
                  u8 command, int size, union i2c_smbus_data * data)
 {
   int i,len;

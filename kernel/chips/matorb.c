@@ -73,7 +73,8 @@ extern
        int __init sensors_matorb_init(void);
 static int __init matorb_cleanup(void);
 static int matorb_attach_adapter(struct i2c_adapter *adapter);
-static int matorb_detect(struct i2c_adapter *adapter, int address, int kind);
+static int matorb_detect(struct i2c_adapter *adapter, int address, 
+                         unsigned short flags, int kind);
 static void matorb_init_client(struct i2c_client *client);
 static int matorb_detach_client(struct i2c_client *client);
 static int matorb_command(struct i2c_client *client, unsigned int cmd,
@@ -120,7 +121,8 @@ int matorb_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* This function is called by sensors_detect */
-int matorb_detect(struct i2c_adapter *adapter, int address, int kind)
+int matorb_detect(struct i2c_adapter *adapter, int address, 
+                  unsigned short flags, int kind)
 {
   int i,cur;
   struct i2c_client *new_client;
@@ -161,9 +163,10 @@ int matorb_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &matorb_driver;
+  new_client->flags = 0;
 
   /* Now, we do the remaining detection. It is lousy. */
-  cur = i2c_smbus_write_byte_data(adapter,address,0x0FE, 0x58); /* clear screen */
+  cur = i2c_smbus_write_byte_data(new_client,0x0FE, 0x58); /* clear screen */
   
   printk("matorb.o: debug detect 0x%X\n",cur);
   
@@ -255,9 +258,9 @@ int matorb_read_value(struct i2c_client *client, u8 reg)
 int matorb_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
   if (reg==0) {
-    return i2c_smbus_write_byte(client->adapter,client->addr,value);
+    return i2c_smbus_write_byte(client,value);
   } else {
-    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client,reg,value);
   }
 }
 

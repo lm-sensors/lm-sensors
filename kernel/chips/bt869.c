@@ -91,7 +91,8 @@ extern
        int __init sensors_bt869_init(void);
 static int __init bt869_cleanup(void);
 static int bt869_attach_adapter(struct i2c_adapter *adapter);
-static int bt869_detect(struct i2c_adapter *adapter, int address, int kind);
+static int bt869_detect(struct i2c_adapter *adapter, int address, 
+                        unsigned short flags, int kind);
 static void bt869_init_client(struct i2c_client *client);
 static int bt869_detach_client(struct i2c_client *client);
 static int bt869_command(struct i2c_client *client, unsigned int cmd,
@@ -159,7 +160,8 @@ int bt869_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* This function is called by sensors_detect */
-int bt869_detect(struct i2c_adapter *adapter, int address, int kind)
+int bt869_detect(struct i2c_adapter *adapter, int address, 
+                 unsigned short flags, int kind)
 {
   int i,cur;
   struct i2c_client *new_client;
@@ -200,11 +202,11 @@ printk("bt869.o:  probing address %d .\n",address);
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &bt869_driver;
+  new_client->flags = 0;
 
   /* Now, we do the remaining detection. It is lousy. */
-  i2c_smbus_write_byte_data(new_client->adapter,
-	new_client->addr,0xC4,0);         /* set status bank 0 */
-  cur = i2c_smbus_read_byte(adapter,address);
+  i2c_smbus_write_byte_data(new_client,0xC4,0);      /* set status bank 0 */
+  cur = i2c_smbus_read_byte(new_client);
   printk("bt869.o: address 0x%X testing-->0x%X\n",address,cur);
   if ((cur & 0xE0) != 0x20)
       goto ERROR1;
@@ -300,7 +302,7 @@ void bt869_dec_use (struct i2c_client *client)
    the usual practice. */
 int bt869_read_value(struct i2c_client *client, u8 reg)
 {
-    return i2c_smbus_read_byte(client->adapter,client->addr);
+    return i2c_smbus_read_byte(client);
 }
 
 /* All registers are byte-sized.
@@ -308,7 +310,7 @@ int bt869_read_value(struct i2c_client *client, u8 reg)
    the usual practice. */
 int bt869_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
-    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client,reg,value);
 }
 
 void bt869_init_client(struct i2c_client *client)

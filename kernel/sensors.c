@@ -584,7 +584,7 @@ void sensors_write_reals(int nrels,void *buffer,int *bufsize,long *results,
 }
 
 
-/* Very inefficient for ISA detects! */
+/* Very inefficient for ISA detects, and won't work for 10-bit addresses! */
 int sensors_detect(struct i2c_adapter *adapter,
                    struct sensors_address_data *address_data,
                    sensors_found_addr_proc *found_proc)
@@ -618,7 +618,7 @@ int sensors_detect(struct i2c_adapter *adapter,
           printk("sensors.o: found force parameter for adapter %d, addr %04x\n",
                  adapter_id,addr);
 #endif
-          if ((err = found_proc(adapter,addr,this_force->kind)))
+          if ((err = found_proc(adapter,addr,0,this_force->kind)))
             return err;
           found = 1;
         }
@@ -745,8 +745,9 @@ int sensors_detect(struct i2c_adapter *adapter,
 
     /* OK, so we really should examine this address. First check
        whether there is some client here at all! */
-    if (is_isa || (i2c_smbus_write_quick(adapter,addr,0) >= 0))
-      if ((err = found_proc(adapter,addr,-1)))
+    if (is_isa || 
+        (i2c_smbus_xfer(adapter,addr,0,0,0,I2C_SMBUS_QUICK,NULL) >= 0))
+      if ((err = found_proc(adapter,addr,0,-1)))
         return err;
   }
   return 0;

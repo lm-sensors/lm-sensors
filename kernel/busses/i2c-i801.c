@@ -87,8 +87,9 @@ MODULE_PARM_DESC(force_addr,"Forcibly enable the I801 at the given address. "
 
 static int __init i801_cleanup(void);
 static int i801_setup(void);
-static s32 i801_access(struct i2c_adapter *adap, u8 addr, char read_write,
-                        u8 command, int size, union i2c_smbus_data * data);
+static s32 i801_access(struct i2c_adapter *adap, u8 addr, 
+                       unsigned short flags, char read_write,
+                       u8 command, int size, union i2c_smbus_data * data);
 static void i801_do_pause( unsigned int amount );
 static int i801_transaction(void);
 static int i801_block_transaction(union i2c_smbus_data *data, char read_write);
@@ -484,8 +485,9 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write)
 }
 
 /* Return -1 on error. See smbus.h for more information */
-s32 i801_access(struct i2c_adapter *adap, u8 addr, char read_write,
-                 u8 command, int size, union i2c_smbus_data * data)
+s32 i801_access(struct i2c_adapter *adap, u8 addr, unsigned short flags,
+                char read_write, u8 command, int size, 
+                union i2c_smbus_data * data)
 {
 
   switch(size) {

@@ -116,7 +116,8 @@ extern
        int __init sensors_adm1021_init(void);
 static int __init adm1021_cleanup(void);
 static int adm1021_attach_adapter(struct i2c_adapter *adapter);
-static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind);
+static int adm1021_detect(struct i2c_adapter *adapter, int address, 
+                          unsigned short flags, int kind);
 static void adm1021_init_client(struct i2c_client *client);
 static int adm1021_detach_client(struct i2c_client *client);
 static int adm1021_command(struct i2c_client *client, unsigned int cmd,
@@ -189,7 +190,8 @@ int adm1021_attach_adapter(struct i2c_adapter *adapter)
   return sensors_detect(adapter,&addr_data,adm1021_detect);
 }
 
-static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind)
+static int adm1021_detect(struct i2c_adapter *adapter, int address, 
+                          unsigned short flags, int kind)
 { 
   int i;
   struct i2c_client *new_client;
@@ -229,6 +231,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &adm1021_driver;
+  new_client->flags = 0;
 
   /* Now, we do the remaining detection. */
 
@@ -368,12 +371,12 @@ void adm1021_dec_use (struct i2c_client *client)
 /* All registers are byte-sized */
 int adm1021_read_value(struct i2c_client *client, u8 reg)
 {
-    return i2c_smbus_read_byte_data(client->adapter,client->addr,reg);
+    return i2c_smbus_read_byte_data(client,reg);
 }
 
 int adm1021_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
-    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client,reg,value);
 }
 
 void adm1021_update_client(struct i2c_client *client)

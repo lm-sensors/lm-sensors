@@ -212,7 +212,8 @@ extern
 static int __init lm78_cleanup(void);
 
 static int lm78_attach_adapter(struct i2c_adapter *adapter);
-static int lm78_detect(struct i2c_adapter *adapter, int address, int kind);
+static int lm78_detect(struct i2c_adapter *adapter, int address, 
+                       unsigned short flags, int kind);
 static int lm78_detach_client(struct i2c_client *client);
 static int lm78_command(struct i2c_client *client, unsigned int cmd, 
                         void *arg);
@@ -303,7 +304,8 @@ int lm78_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* This function is called by sensors_detect */
-int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
+int lm78_detect(struct i2c_adapter *adapter, int address, 
+                unsigned short flags, int kind)
 {
   int i;
   struct i2c_client *new_client;
@@ -368,6 +370,7 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &lm78_driver;
+  new_client->flags = 0;
   
   /* Now, we do the remaining detection. */
 
@@ -514,7 +517,7 @@ int lm78_read_value(struct i2c_client *client, u8 reg)
     up( & (((struct lm78_data *) (client->data)) -> lock));
     return res;
   } else
-    return i2c_smbus_read_byte_data(client->adapter,client->addr, reg);
+    return i2c_smbus_read_byte_data(client, reg);
 }
 
 /* The SMBus locks itself, but ISA access muse be locked explicitely! 
@@ -533,7 +536,7 @@ int lm78_write_value(struct i2c_client *client, u8 reg, u8 value)
     up(&(((struct lm78_data *) (client->data)) -> lock));
     return 0;
   } else
-    return i2c_smbus_write_byte_data(client->adapter, client->addr, reg,value);
+    return i2c_smbus_write_byte_data(client, reg,value);
 }
 
 /* Called when we have found a new LM78. It should set limits, etc. */

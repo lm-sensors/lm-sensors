@@ -116,7 +116,8 @@ extern
        int __init i2c_vt596_init(void);
 static int __init vt596_cleanup(void);
 static int vt596_setup(void);
-static s32 vt596_access(struct i2c_adapter *adap, u8 addr, char read_write,
+static s32 vt596_access(struct i2c_adapter *adap, u8 addr, 
+                        unsigned short flags,char read_write,
                         u8 command, int size, union i2c_smbus_data * data);
 static void vt596_do_pause( unsigned int amount );
 static int vt596_transaction(void);
@@ -389,7 +390,8 @@ int vt596_transaction(void)
 }
 
 /* Return -1 on error. See smbus.h for more information */
-s32 vt596_access(struct i2c_adapter *adap, u8 addr, char read_write,
+s32 vt596_access(struct i2c_adapter *adap, u8 addr, unsigned short flags,
+                 char read_write,
                  u8 command, int size, union i2c_smbus_data * data)
 {
   int i,len;

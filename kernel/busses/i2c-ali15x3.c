@@ -158,8 +158,9 @@ extern
        int __init i2c_ali15x3_init(void);
 static int __init ali15x3_cleanup(void);
 static int ali15x3_setup(void);
-static s32 ali15x3_access(struct i2c_adapter *adap, u8 addr, char read_write,
-                        u8 command, int size, union i2c_smbus_data * data);
+static s32 ali15x3_access(struct i2c_adapter *adap, u8 addr, 
+                          unsigned short flags,char read_write,
+                          u8 command, int size, union i2c_smbus_data * data);
 static void ali15x3_do_pause( unsigned int amount );
 static int ali15x3_transaction(void);
 static void ali15x3_inc(struct i2c_adapter *adapter);
@@ -493,8 +494,9 @@ int ali15x3_transaction(void)
 }
 
 /* Return -1 on error. See smbus.h for more information */
-s32 ali15x3_access(struct i2c_adapter *adap, u8 addr, char read_write,
-                 u8 command, int size, union i2c_smbus_data * data)
+s32 ali15x3_access(struct i2c_adapter *adap, u8 addr, unsigned short flags,
+                   char read_write, u8 command, int size, 
+                   union i2c_smbus_data * data)
 {
   int i,len;
   int temp;

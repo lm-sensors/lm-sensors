@@ -301,8 +301,22 @@ int maxi_detect_smbus(struct i2c_adapter *adapter)
       /* Later on, we will keep a list of registered addresses for each
          adapter, and check whether they are used here */
 
-      if (i2c_smbus_read_byte_data(adapter, address, MAXI_REG_LED_STATE) < 0) 
+      /* Allocate space for a new client structure. To counter memory
+         fragmentation somewhat, we only do one kmalloc. */
+      if (! (new_client = kmalloc(sizeof(struct i2c_client) + 
+                                  sizeof(struct maxi_data),
+                                  GFP_KERNEL))) {
+         err = -ENOMEM;
          continue;
+      }
+
+      /* Fill the new client structure with data */
+      new_client->data = (struct maxi_data *) (new_client + 1);
+      new_client->addr = address;
+      new_client->flags = 0;
+
+      if (i2c_smbus_read_byte_data(new_client, MAXI_REG_LED_STATE) < 0) 
+         goto ERROR2;
 
 #ifdef AUTODETECT
       /* The right way to get the platform info is to read the firmware
@@ -311,10 +325,10 @@ int maxi_detect_smbus(struct i2c_adapter *adapter)
            "CG 00.04" -> Cristal [XU] / Geronimo [XAs]
            "CO 00.03" -> Cognac [XU]
            "AS 00.01" -> Ashaki [XA] */
-      biosctl = i2c_smbus_read_byte_data(adapter, address, MAXI_REG_BIOS_CTRL);
-      i2c_smbus_write_byte_data(adapter, address, MAXI_REG_BIOS_CTRL, biosctl|4);
+      biosctl = i2c_smbus_read_byte_data(new_client, MAXI_REG_BIOS_CTRL);
+      i2c_smbus_write_byte_data(new_client, MAXI_REG_BIOS_CTRL, biosctl|4);
       err = eeprom_read_byte_data(adapter, 0x54, 0x45);
-      i2c_smbus_write_byte_data(adapter, address, MAXI_REG_BIOS_CTRL, biosctl);
+      i2c_smbus_write_byte_data(new_client, MAXI_REG_BIOS_CTRL, biosctl);
 #endif
 
       if (maxi_version == cristal) {
@@ -339,21 +353,9 @@ int maxi_detect_smbus(struct i2c_adapter *adapter)
          printk("maxilife: Error: specified wrong maxi_version (%d)\n",
                 maxi_version);
 #endif
-         continue;
+         goto ERROR2;
       }
 
-      /* Allocate space for a new client structure. To counter memory
-         fragmentation somewhat, we only do one kmalloc. */
-      if (! (new_client = kmalloc(sizeof(struct i2c_client) + 
-                                  sizeof(struct maxi_data),
-                                  GFP_KERNEL))) {
-         err = -ENOMEM;
-         continue;
-      }
-
-      /* Fill the new client structure with data */
-      new_client->data = (struct maxi_data *) (new_client + 1);
-      new_client->addr = address;
       strcpy(new_client->name, client_name);
       ((struct maxi_data *) (new_client->data))->type = type;
       if ((err = maxi_new_client(adapter, new_client)))
@@ -449,14 +451,14 @@ void maxi_dec_use (struct i2c_client *client)
 /* Read byte from specified register. */
 int maxi_read_value(struct i2c_client *client, u8 reg)
 {
-   return i2c_smbus_read_byte_data(client->adapter, client->addr, reg);
+   return i2c_smbus_read_byte_data(client, reg);
 }
 
 #ifndef NOWRITE
 /* Write byte to specified register. */ 
 int maxi_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
-   return i2c_smbus_write_byte_data(client->adapter, client->addr, reg, value);
+   return i2c_smbus_write_byte_data(client, reg, value);
 }
 #endif
 

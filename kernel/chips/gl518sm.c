@@ -191,7 +191,8 @@ extern
        int __init sensors_gl518_init(void);
 static int __init gl518_cleanup(void);
 static int gl518_attach_adapter(struct i2c_adapter *adapter);
-static int gl518_detect(struct i2c_adapter *adapter, int address, int kind);
+static int gl518_detect(struct i2c_adapter *adapter, int address, 
+                        unsigned short flags, int kind);
 static void gl518_init_client(struct i2c_client *client);
 static int gl518_detach_client(struct i2c_client *client);
 static int gl518_command(struct i2c_client *client, unsigned int cmd,
@@ -285,7 +286,8 @@ int gl518_attach_adapter(struct i2c_adapter *adapter)
   return sensors_detect(adapter,&addr_data,gl518_detect);
 }
 
-static int gl518_detect(struct i2c_adapter *adapter, int address, int kind)
+static int gl518_detect(struct i2c_adapter *adapter, int address, 
+                        unsigned short flags, int kind)
 { 
   int i;
   struct i2c_client *new_client;
@@ -326,6 +328,7 @@ static int gl518_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &gl518_driver;
+  new_client->flags = 0;
 
   /* Now, we do the remaining detection. */
 
@@ -529,9 +532,9 @@ u16 swap_bytes(u16 val)
 int gl518_read_value(struct i2c_client *client, u8 reg)
 {
   if ((reg >= 0x07) && (reg <= 0x0c)) 
-    return swap_bytes(i2c_smbus_read_word_data(client->adapter,client->addr,reg));
+    return swap_bytes(i2c_smbus_read_word_data(client,reg));
   else
-    return i2c_smbus_read_byte_data(client->adapter,client->addr,reg);
+    return i2c_smbus_read_byte_data(client,reg);
 }
 
 /* Registers 0x07 to 0x0c are word-sized, others are byte-sized 
@@ -540,10 +543,9 @@ int gl518_read_value(struct i2c_client *client, u8 reg)
 int gl518_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
   if ((reg >= 0x07) && (reg <= 0x0c)) 
-    return i2c_smbus_write_word_data(client->adapter,client->addr,reg,
-                                 swap_bytes(value));
+    return i2c_smbus_write_word_data(client,reg, swap_bytes(value));
   else
-    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client,reg,value);
 }
 
 void gl518_update_client(struct i2c_client *client)

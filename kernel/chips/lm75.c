@@ -86,7 +86,8 @@ extern
        int __init sensors_lm75_init(void);
 static int __init lm75_cleanup(void);
 static int lm75_attach_adapter(struct i2c_adapter *adapter);
-static int lm75_detect(struct i2c_adapter *adapter, int address, int kind);
+static int lm75_detect(struct i2c_adapter *adapter, int address, 
+                       unsigned short flags, int kind);
 static void lm75_init_client(struct i2c_client *client);
 static int lm75_detach_client(struct i2c_client *client);
 static int lm75_command(struct i2c_client *client, unsigned int cmd,
@@ -135,7 +136,8 @@ int lm75_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* This function is called by sensors_detect */
-int lm75_detect(struct i2c_adapter *adapter, int address, int kind)
+int lm75_detect(struct i2c_adapter *adapter, int address, 
+                unsigned short flags, int kind)
 {
   int i,cur,conf,hyst,os;
   struct i2c_client *new_client;
@@ -174,16 +176,17 @@ int lm75_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &lm75_driver;
+  new_client->flags = 0;
 
   /* Now, we do the remaining detection. It is lousy. */
-  cur = i2c_smbus_read_word_data(adapter,address,0);
-  conf = i2c_smbus_read_byte_data(adapter,address,1);
-  hyst = i2c_smbus_read_word_data(adapter,address,2);
-  os = i2c_smbus_read_word_data(adapter,address,3);
+  cur = i2c_smbus_read_word_data(new_client,0);
+  conf = i2c_smbus_read_byte_data(new_client,1);
+  hyst = i2c_smbus_read_word_data(new_client,2);
+  os = i2c_smbus_read_word_data(new_client,3);
   for (i = 0; i <= 0x1f; i++) 
-    if ((i2c_smbus_read_byte_data(adapter,address,i*8+1) != conf) ||
-        (i2c_smbus_read_word_data(adapter,address,i*8+2) != hyst) ||
-        (i2c_smbus_read_word_data(adapter,address,i*8+3) != os))
+    if ((i2c_smbus_read_byte_data(new_client,i*8+1) != conf) ||
+        (i2c_smbus_read_word_data(new_client,i*8+2) != hyst) ||
+        (i2c_smbus_read_word_data(new_client,i*8+3) != os))
       goto ERROR1;
   
   /* Determine the chip type - only one kind supported! */
@@ -284,9 +287,9 @@ u16 swap_bytes(u16 val)
 int lm75_read_value(struct i2c_client *client, u8 reg)
 {
   if (reg == LM75_REG_CONF)
-    return i2c_smbus_read_byte_data(client->adapter,client->addr,reg);
+    return i2c_smbus_read_byte_data(client,reg);
   else
-    return swap_bytes(i2c_smbus_read_word_data(client->adapter,client->addr,reg));
+    return swap_bytes(i2c_smbus_read_word_data(client,reg));
 }
 
 /* All registers are word-sized, except for the configuration register.
@@ -295,9 +298,9 @@ int lm75_read_value(struct i2c_client *client, u8 reg)
 int lm75_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
   if (reg == LM75_REG_CONF)
-    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client,reg,value);
   else
-    return i2c_smbus_write_word_data(client->adapter,client->addr,reg,
+    return i2c_smbus_write_word_data(client,reg,
            swap_bytes(value));
 }
 

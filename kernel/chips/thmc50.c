@@ -108,7 +108,8 @@ extern
        int __init sensors_thmc50_init(void);
 static int __init thmc50_cleanup(void);
 static int thmc50_attach_adapter(struct i2c_adapter *adapter);
-static int thmc50_detect(struct i2c_adapter *adapter, int address, int kind);
+static int thmc50_detect(struct i2c_adapter *adapter, int address, 
+                         unsigned short flags, int kind);
 static void thmc50_init_client(struct i2c_client *client);
 static int thmc50_detach_client(struct i2c_client *client);
 static int thmc50_command(struct i2c_client *client, unsigned int cmd,
@@ -177,7 +178,8 @@ int thmc50_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* This function is called by sensors_detect */
-int thmc50_detect(struct i2c_adapter *adapter, int address, int kind)
+int thmc50_detect(struct i2c_adapter *adapter, int address, 
+                  unsigned short flags, int kind)
 {
   int company,i;
   struct i2c_client *new_client;
@@ -219,9 +221,10 @@ int thmc50_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &thmc50_driver;
+  new_client->flags = 0;
 
   /* Now, we do the remaining detection. */
-  company = i2c_smbus_read_byte_data(adapter,address,THMC50_REG_COMPANY_ID);
+  company = i2c_smbus_read_byte_data(new_client,THMC50_REG_COMPANY_ID);
 
   if (company != 0x49) {
 #ifdef DEBUG
@@ -324,7 +327,7 @@ u16 swap_bytes(u16 val)
    the usual practice. */
 int thmc50_read_value(struct i2c_client *client, u8 reg)
 {
-    return i2c_smbus_read_byte_data(client->adapter,client->addr,reg);
+    return i2c_smbus_read_byte_data(client,reg);
 }
 
 /* All registers are word-sized, except for the configuration register.
@@ -332,7 +335,7 @@ int thmc50_read_value(struct i2c_client *client, u8 reg)
    the usual practice. */
 int thmc50_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
-    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client,reg,value);
 }
 
 void thmc50_init_client(struct i2c_client *client)

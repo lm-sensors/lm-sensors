@@ -167,6 +167,7 @@ int icspll_attach_adapter(struct i2c_adapter *adapter)
     new_client->addr = address;
     new_client->adapter = adapter;
     new_client->driver = &icspll_driver;
+  new_client->flags = 0;
     strcpy(new_client->name,"ICSPLL chip");
     data->valid = 0;
     init_MUTEX(&data->update_lock);

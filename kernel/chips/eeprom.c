@@ -91,7 +91,8 @@ extern
 static int __init eeprom_cleanup(void);
 
 static int eeprom_attach_adapter(struct i2c_adapter *adapter);
-static int eeprom_detect(struct i2c_adapter *adapter, int address, int kind);
+static int eeprom_detect(struct i2c_adapter *adapter, int address, 
+                         unsigned short flags, int kind);
 static int eeprom_detach_client(struct i2c_client *client);
 static int eeprom_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
@@ -156,7 +157,8 @@ int eeprom_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* This function is called by sensors_detect */
-int eeprom_detect(struct i2c_adapter *adapter, int address, int kind)
+int eeprom_detect(struct i2c_adapter *adapter, int address, 
+                  unsigned short flags, int kind)
 {
   int i,cs;
   struct i2c_client *new_client;
@@ -195,15 +197,16 @@ int eeprom_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &eeprom_driver;
+  new_client->flags = 0;
 
   /* Now, we do the remaining detection. It is not there, unless you force
      the checksum to work out. */
   if (checksum) {
     cs = 0;
     for (i = 0; i <= 0x3e; i++)
-      cs += i2c_smbus_read_byte_data(adapter,address,i);
+      cs += i2c_smbus_read_byte_data(new_client,i);
     cs &= 0xff;
-    if (i2c_smbus_read_byte_data(adapter,address,EEPROM_REG_CHECKSUM) != cs)
+    if (i2c_smbus_read_byte_data(new_client,EEPROM_REG_CHECKSUM) != cs)
       goto ERROR1;
   }
   
@@ -296,9 +299,9 @@ void eeprom_dec_use (struct i2c_client *client)
 int eeprom_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
   if (reg == EEPROM_REG_CONF)
-    return i2c_smbus_write_byte_data(client->adapter,client->addr,reg,value);
+    return i2c_smbus_write_byte_data(client,reg,value);
   else
-    return i2c_smbus_write_word_data(client->adapter,client->addr,reg,value); */
+    return i2c_smbus_write_word_data(client,reg,value); */
     
     return 0;
 }
@@ -318,13 +321,13 @@ void eeprom_update_client(struct i2c_client *client)
     printk("Starting eeprom update\n");
 #endif
 
-   if (i2c_smbus_write_byte(client->adapter,client->addr,0)) {
+   if (i2c_smbus_write_byte(client,0)) {
 #ifdef DEBUG
     printk("eeprom read start has failed!\n");
 #endif   	
    }
     for (i=0;i<EEPROM_SIZE;i++) {
-         data->data[i] = (u8)i2c_smbus_read_byte(client->adapter,client->addr);
+         data->data[i] = (u8)i2c_smbus_read_byte(client);
     }
     
     data->last_updated = jiffies;
