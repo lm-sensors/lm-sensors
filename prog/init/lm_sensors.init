@@ -39,6 +39,7 @@
 [ -e /var/lock/subsys/sensors ] || /sbin/modprobe -r i2c-proc &>/dev/null
 
 CONFIG=/etc/sysconfig/lm_sensors
+PSENSORS=/usr/local/bin/sensors
 
 # Source function library.
 . /etc/init.d/functions
@@ -49,24 +50,30 @@ start() {
 	echo -n $"Starting up sensors: "
 	test -r "$CONFIG" && . "$CONFIG"
 
-        modules=`grep \^MODULE_ $CONFIG | wc -l`
+        modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
         i=0
         while [ $i -lt $modules ] ; do
                 module=`eval echo '$'MODULE_$i`
+		echo starting module __${module}__
 		/sbin/modprobe $module &>/dev/null
 		i=`expr $i + 1`
 	done
 
 	RETVAL=$?
-	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/sensors
-	echo
+	if [ $RETVAL -eq 0 ] && touch /var/lock/subsys/sensors ; then
+		echo_success
+		echo
+	else
+		echo_failure
+		echo
+	fi
 }
 
 stop() {
 	echo -n $"Shutting down sensors: "
 	test -r "$CONFIG" && . "$CONFIG"
 
-        modules=`grep \^MODULE_ $CONFIG | wc -l`
+        modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
         i=`expr $modules`
         while [ $i -ge 0 ] ; do
                 module=`eval echo '$'MODULE_$i`
@@ -76,12 +83,17 @@ stop() {
 	/sbin/modprobe -r i2c-proc &>/dev/null
 
 	RETVAL=$?
-	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/sensors
-	echo
+	if [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/sensors ; then
+		echo_success
+		echo
+	else
+		echo_failure
+		echo
+	fi
 }
 
 dostatus() {
-        /usr/bin/sensors
+        $PSENSORS
 	RETVAL=$?
 }
 
