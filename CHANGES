@@ -27,9 +27,9 @@ ask CVS about it:
   Module i2c-viapro: Add Via VT8233 support
   Module sis5595: Fix support for rev B0
   Module via686a: Make limit initializations reliable
-  Program sensors-detect: Add ALI1535 detection,
-                          add Intel 82443MX and 82801CA/CAM detection,			
-                          add Via VT8233 detection,
+  Program isadump: Add flat address space support
+  Program sensors-detect: Add ALI1535, Via VT8233,
+                          Intel 82443MX and 82801CA/CAM detection,			
                           add ITE 8172G detection (driver in kernel 2.4.10)
 
 2.6.1 (20010830)

@@ -1,5 +1,5 @@
 /*
-    isadump.c - Part of isadump, a user-space program to dump ISA registers
+    isadump.c - isadump, a user-space program to dump ISA registers
     Copyright (c) 2000  Frodo Looijaard <frodol@dds.nl>, and
                         Mark D. Studebaker <mdsxyz123@yahoo.com>
 
@@ -16,6 +16,13 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+/*
+	Typical usage:
+	isadump 0x295 0x296		Basic winbond dump using address/data registers
+	isadump 0x295 0x296 2		Winbond dump, bank 2
+	isadump -f 0x5000		Flat address space dump like for Via 686a
 */
 
 #include <stdio.h>
@@ -47,45 +54,52 @@ char hexchar(int i)
 void help(void)
 {
   fprintf(stderr,"Syntax: isadump ADDRREG DATAREG [BANK [BANKREG]]\n");
+  fprintf(stderr,"        isadump -f ADDRESS (for flat address space)\n");
 }
 
 int main(int argc, char *argv[])
 {
-  int addrreg, datareg, bank = 0, bankreg = 0x4E;
-  char *end;
+  int addrreg, datareg = 0, bank = 0, bankreg = 0x4E;
   int i,j,res;
-
-  if (argc < 2) {
-    fprintf(stderr,"Error: No registers specified!\n");
-    help();
-    exit(1);
-  }
-
-  addrreg = strtol(argv[1],&end,0);
-  if (*end) {
-    fprintf(stderr,"Error: First argument not a number!\n");
-    help();
-    exit(1);
-  }
-  if ((addrreg < 0) || (addrreg > 0xfff)) {
-    fprintf(stderr,"Error: Address register out of range!\n");
-    help();
-    exit(1);
-  }
+  int flat = 0;
+  char *end;
 
   if (argc < 3) {
-    fprintf(stderr,"Error: No data register specified!\n");
     help();
     exit(1);
   }
+
+  if(strcmp(argv[1], "-f")) {
+    addrreg = strtol(argv[1],&end,0);
+  } else {
+    if(argc != 3) {
+      help();
+      exit(1);
+    }
+    flat = 1;
+    addrreg = strtol(argv[2],&end,0) & 0xff00;
+  }
+  if (*end) {
+    fprintf(stderr,"Error: Invalid address!\n");
+    help();
+    exit(1);
+  }
+  if ((addrreg < 0) || (addrreg > 0xffff)) {
+    fprintf(stderr,"Error: Address out of range!\n");
+    help();
+    exit(1);
+  }
+
+  if(flat)
+    goto START;
 
   datareg = strtol(argv[2],&end,0);
   if (*end) {
-    fprintf(stderr,"Error: Second argument not a number!\n");
+    fprintf(stderr,"Error: Invalid data register!\n");
     help();
     exit(1);
   }
-  if ((datareg < 0) || (datareg > 0xfff)) {
+  if ((datareg < 0) || (datareg > 0xffff)) {
     fprintf(stderr,"Error: Data register out of range!\n");
     help();
     exit(1);
@@ -107,7 +121,7 @@ int main(int argc, char *argv[])
     if(argc > 4) {
       bankreg = strtol(argv[4],&end,0);
       if (*end) {
-        fprintf(stderr,"Error: Invalid bank register number!\n");
+        fprintf(stderr,"Error: Invalid bank register!\n");
         help();
         exit(1);
       }
@@ -119,6 +133,8 @@ int main(int argc, char *argv[])
     }
   }
 
+START:
+
   if (getuid()) {
     fprintf(stderr,"Error: Can only be run as root (or make it suid root)\n");
     exit(1);
@@ -126,7 +142,11 @@ int main(int argc, char *argv[])
 
   fprintf(stderr,"  WARNING! Running this program can cause system crashes, "
           "data loss and worse!\n");
-  fprintf(stderr,"  I will probe address register 0x%04x and "
+  if(flat)
+	fprintf(stderr,"  I will probe address range 0x%04x to "
+                 "0x%04x.\n",addrreg, addrreg + 0xff);
+  else
+	fprintf(stderr,"  I will probe address register 0x%04x and "
                  "data register 0x%04x.\n",addrreg,datareg);
   if(bank) 	
     fprintf(stderr,"  Probing bank %d using bank register 0x%02x.\n",
@@ -135,7 +155,7 @@ int main(int argc, char *argv[])
   sleep(5);
 
 #ifndef __powerpc__
-  if ((datareg < 0x400) && (addrreg < 0x400)) {
+  if ((datareg < 0x400) && (addrreg < 0x400) && !flat) {
     if(ioperm(datareg,1,1)) {
       fprintf(stderr,"Error: Could not ioperm() data register!\n");
       exit(1);
@@ -162,9 +182,13 @@ int main(int argc, char *argv[])
   for (i = 0; i < 256; i+=16) {
     printf("%c0: ",hexchar(i/16));
     for(j = 0; j < 16; j++) {
-      outb(i+j,addrreg);
-      res = inb(datareg);
-      printf("%c%c ",hexchar(res/16),hexchar(res%16));
+	if(flat) {
+	      res = inb(addrreg + i + j);
+	} else {	
+	      outb(i+j,addrreg);
+	      res = inb(datareg);
+	}
+	printf("%c%c ",hexchar(res/16),hexchar(res%16));
     }
     printf("\n");
   }
