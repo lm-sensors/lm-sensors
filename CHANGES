@@ -18,6 +18,7 @@ ask CVS about it:
   Programs i2cdetect, i2cdump: Improve error reporting
   Program sensors: new switch -u (--unknown)
   Program sensors-detect: detect Intel 82801BA (815E chipset)
+  Program sensors-detect: detect National LM87 (no driver yet)
 
 2.5.2 (20000709)
   File sensors.conf.eg: Fix lm80 in8 calculation

@@ -254,7 +254,8 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
             lm80_detect w83781d_detect w83781d_alias_detect adm1025_detect
             w83781d_isa_detect gl518sm_detect gl520sm_detect adm9240_detect 
             adm1021_detect sis5595_isa_detect eeprom_detect via686a_isa_detect
-            adm1022_detect ltc1710_detect gl525sm_detect ddcmonitor_detect);
+            adm1022_detect ltc1710_detect gl525sm_detect lm87_detect
+	    ddcmonitor_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -321,6 +322,12 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        driver => "lm80",
        i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { lm80_detect @_} ,
+     },
+     {
+       name => "National Semiconductor LM87",
+#        driver => "xxxxxxx",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { lm87_detect @_} ,
      },
      {
        name => "Winbond W83781D",
@@ -1447,6 +1454,20 @@ sub lm80_detect
     return if i2c_smbus_read_byte_data($file,$i+0xc0) != $reg;
   }
   return (3);
+}
+  
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, (7) if detected.
+# Registers used: 0x3E, 0x3F
+#        Assume lower 2 bits of reg 0x3F are for revisions.
+sub lm87_detect
+{
+  my ($file,$addr) = @_;
+  return if (i2c_smbus_read_byte_data($file,0x3e)) != 0x02;
+  return if (i2c_smbus_read_byte_data($file,0x3f) & 0xfc) != 0x04;
+  return (7);
 }
   
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 2 = W83783S,

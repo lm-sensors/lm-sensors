@@ -79,6 +79,9 @@ lm78
 lm80
 	lm80		1	7	2	-	yes	no
 
+lm87-to-be-written
+        lm87	 	2-3	6-8	0-2	1 pwm	yes	no
+
 maxilife
 	maxilife-as	5	4	3	-	yes	no
 	maxilife-co	5	4	3	-	yes	no
