@@ -1,0 +1,115 @@
+Kernel driver `lm83.o'
+=====================
+
+Status: Incomplete and untested
+
+Supported chips: 
+  * National Semiconductor LM83
+    Prefix: `lm83'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Datasheet: Publicly available at the National Semiconductor website
+               http://www.national.com/pf/LM/LM83.html
+
+
+Author: Jean Delvare <khali@linux-fr.org>
+
+License: GPL
+
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_lm83: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `lm83' chip
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+
+
+Description
+-----------
+
+The LM83 is a digital temperature sensor. It senses its own temperature as
+well as the temperature of up to three external diodes. It is compatible
+with many other devices such as the LM84 and all other ADM1021 clones.
+The main difference between the LM83 and the LM84 in that the later can
+only sense the temperature of one external diode.
+
+Using the adm1021 driver for a LM83 should work, but only two temperatures
+will be reported instead of four.
+
+Alarms and critical temperature (common to all four temperature readings)
+are not handled by this driver yet, but should be someday.
+
+The LM83 is only found on a handful of motherboards. An unconfirmed list
+follows. If you can confirm or infirm the fact that any of these
+motherboards do actually have an LM83, please contact us.
+
+    Gigabyte    GA-7VAX
+    Gigabyte    GA-7VRXP    (rev 2.0)
+    Gigabyte    GA-8IK1100
+    Iwill       MPX2
+    Soltek      SL-75DRV5
+
+Note that the driver is untested so far. We really want testers! If you
+want to help, please contact us.
+
+The fact that the LM83 is only scarcely used can be easily explained.
+Most motherboards come with more than just temperature sensors for
+health monitoring. They also have voltage and fan rotation speed
+sensors. This means that temperature-only chips are usually used as
+secondary chips coupled with another chip such as an IT87 or similar
+chip, which provides more features. Since systems usually need three
+temperature sensors (motherboard, processor, power supply) and primary
+chips provide some temperature sensors, the secondary chip, if needed,
+won't have to handle more than two temperatures. Thus, ADM1021 clones
+are sufficent, and there is no need for a four temperatures sensor
+chip such as the LM83. The only case where using an LM83 would make
+sense is on SMP systems, such as the above-mentioned Iwill MPX2,
+because you want an additional temperature sensor for each additional
+CPU.
+
+All temperature values are given in degrees Celcius. Local temperature
+is given within a range of 0 to +85 degrees. Remote temperatures are
+given within a range of 0 to +125 degrees. Resolution is 1.0 degree,
+accuracy is guaranteed to 3.0 degrees (see the datasheet for more
+details).
+
+Each sensor has its own high limit. There is no hysteresis mechanism as
+found on most recent temperature sensors.
+
+
+Chip Features
+-------------
+
+Chip 'lm83'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+local_temp            -                     -                       R-     0
+local_temp_high       local_temp            local_temp              RW     0
+remote1_temp          -                     -                       R-     0
+remote1_temp_high     remote1_temp          remote1_temp            RW     0
+remote2_temp          -                     -                       R-     0
+remote2_temp_high     remote2_temp          remote2_temp            RW     0
+remote3_temp          -                     -                       R-     0
+remote3_temp_high     remote3_temp          remote3_temp            RW     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+local_temp            SENSORS_LM83_LOCAL_TEMP                           temp1:2
+local_temp_high       SENSORS_LM83_LOCAL_HIGH                           temp1:1
+remote1_temp          SENSORS_LM83_REMOTE1_TEMP                         temp2:2
+remote1_temp_high     SENSORS_LM83_REMOTE1_HIGH                         temp2:1
+remote2_temp          SENSORS_LM83_REMOTE2_TEMP                         temp3:2
+remote2_temp_high     SENSORS_LM83_REMOTE2_HIGH                         temp3:1
+remote3_temp          SENSORS_LM83_REMOTE3_TEMP                         temp4:2
+remote3_temp_high     SENSORS_LM83_REMOTE3_HIGH                         temp4:1
+
+
