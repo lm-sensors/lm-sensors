@@ -1614,19 +1614,19 @@ chip "fscpos-*"
 
     label temp1       "Temp1/CPU"
     label temp2       "Temp2/MB"
-    label temp3       "Temp2/AUX"
+    label temp3       "Temp3/AUX"
 
 # Fans
 
-    label  fan1       "Fan1"
-    ignore  fan2
-    ignore  fan3
+    label fan1        "Fan1"
+    label fan2        "Fan2"
+    label fan3        "Fan3"
 
 # Voltage
 
     label volt12      "+12V"
     label volt5       "+5V"
-    label voltbatt    "+3.3V"
+    label voltbatt    "Battery"
 
 
 chip "fscscy-*"
