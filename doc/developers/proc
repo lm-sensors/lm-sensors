@@ -2,12 +2,13 @@ Naming and data format standards under /proc
 --------------------------------------------
 
 The libsensors library offers an interface to the raw sensors data
-through the sysctl interface. See the 'sysctl' file and the libsensors
-source for further information.
+through the sysctl interface. See the doc/developers/sysctl
+and the libsensors source for further information.
 
 An alternative method that some programs use is to access the /proc
 files directly. This document briefly describes the standards that
-the drivers follow, so that a program can access this data in a consistent way.
+the drivers follow, so that an application program can access
+this data in a simple and consistent way.
 
 Note that not all chip drivers adhere to this standard.
 We will attempt to migrate older drivers to this standard,
@@ -31,6 +32,11 @@ All /proc values are integers or floating point numbers.
 There is no facility in the lm_sensors package for drivers
 to output general strings via /proc.
 
+Guidelines for new entries:
+	- If there are multiple values, some r/w and some r/o,
+	  put the r/w ones first
+
+
 -------------------------------------------------------------------------
 
 /proc entries are as follows:
@@ -42,7 +48,7 @@ alarms	  1	Alarm bitmask.
 		Read only.
 		Integer representation of one, two, or three bytes.
 		A '1' bit means an alarm.
-		Generally a straight representation of a chips' internal
+		Generally a direct representation of a chip's internal
 		alarm registers; there is no standard for the position
 		of individual bits.
 		Bits are defined in kernel/include/sensors.h.
@@ -53,7 +59,7 @@ beep	  2     Beep/interrupt enable and bitmask.
 		The second value is a bitmask, with the
 		same format as 'alarms' with same bit locations.
 		
-fan[1-3]  2	Fan min and input value.
+fan[1-3]  2	Fan minimum and input value.
 		Two integers indicating RPM.
 		First value is read/write and second is read only.
 
@@ -61,15 +67,18 @@ fan_div	  3	Fan divisor.
 		Integers in powers of two (1,2,4,8,16,32,64,128).
 		Some chips only support values 1,2,4,8.
 		Entries correspond to the fans[1-3].
+		See doc/fan-divisors for details.
 
 in[0-8]   3	Voltage min, max, and input value.
 		Floating point values X.XX in volts from 0 to 4.01 volts.
-		Actual voltage depends on the scaling resistors on the motherboard,
-		as recommended in the chip datasheet.
+		Actual voltage depends on the scaling resistors on the
+		motherboard, as recommended in the chip datasheet.
 		This varies by chip and by motherboard.
 		Because of this variation, values are generally NOT scaled
 		by the chip driver, and must be done by the application.
-		However, some drivers do scale, with various success.
+		However, some drivers (notably lm87 and via686a)
+		do scale, with various degrees of success.
+		These drivers will output the actual voltage.
 		First two values are read/write and third is read only.
 		Typical usage:
 			in0	CPU #1 voltage (not scaled)
@@ -92,8 +101,8 @@ sensor[1-3]  1	Sensor type selection.
 temp,
 temp[1-3]  3	Temperature max, min or hysteresis, and input value.
 	       	Floating point values XXX.X or XXX.XX in degrees Celcius.
-		'temp' is used if there is only one temperature sensor on the chip.
-		Temp1 is generally the sensor inside the chip itself,
+		'temp' is used if there is only one temperature sensor on the
+		chip. Temp1 is generally the sensor inside the chip itself,
 		generally reported as "motherboard temperature".
 		temp2 and temp3 are generally external sensors, 
 		the thermal diode inside the CPU, generally reported as
@@ -101,7 +110,10 @@ temp[1-3]  3	Temperature max, min or hysteresis, and input value.
 
 vid	   1	CPU core voltage.
 		Read only.
-		Floating point X.XX corresponding to CPU core voltage as
-		told to the sensor chip. Not always correct.
-		Possible values are 1.30 - 2.05 in 0.05 increments
-		or 2.1 - 3.5 in 0.1 increments.
+		Floating point X.XX or X.XXX corresponding to CPU core voltage
+		as told to the sensor chip. Not always correct.
+
+vrm        1   Voltage Regulator Module version number. 
+               "Floating point" X.X. Default 8.2.
+		Affects the way the driver calculates the core voltage from
+		the vid pins. See doc/vid for details.
