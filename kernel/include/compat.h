@@ -37,4 +37,20 @@
 #endif
 #endif /* def MODULE */
 
+/* copy_from/to_usr is called memcpy_from/to_fs in 2.0 kernels; perhaps in
+   some early 2.1 kernels too? */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,4))
+#define copy_from_user memcpy_fromfs
+#define copy_to_user memcpy_tofs
+#endif
+
+/* get_user was redefined in 2.1 kernels to use two arguments, and returns
+   an error code */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,4))
+#define get_user_data(to,from) ((to) = get_user(from),0)
+#else
+#define get_user_data(to,from) get_user(to,from)
+#endif
+
+
 #endif /* SENSORS_COMPAT_H */

@@ -1,0 +1,346 @@
+/*
+    sensors.c - A Linux module for reading sensor data.
+    Copyright (c) 1998  Frodo Looijaard <frodol@dds.nl> 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+#include <linux/module.h>
+#include <linux/malloc.h>
+#include <linux/ctype.h>
+#include <linux/sysctl.h>
+
+#include "version.h"
+#include "compat.h"
+#include "i2c.h"
+#include "isa.h"
+#include "sensors.h"
+
+#ifdef MODULE
+extern int init_module(void);
+extern int cleanup_module(void);
+#endif /* MODULE */
+
+int sensors_register_entry(struct i2c_client *client ,const char *prefix, 
+                           ctl_table *ctl_template);
+static int sensors_create_name(char **name, const char *prefix,
+                               struct i2c_adapter * adapter, int addr);
+static int sensors_init(void);
+static int sensors_cleanup(void);
+
+#define SENSORS_ENTRY_MAX 20
+static struct ctl_table_header *sensors_entries[SENSORS_ENTRY_MAX];
+
+static ctl_table sysctl_table[] = {
+  { CTL_DEV, "dev", NULL, 0, 0555 },
+  { 0 },
+  { DEV_SENSORS, "sensors", NULL, 0, 0555 },
+  { 0 },
+  { 0, NULL, NULL, 0, 0555 },
+  { 0 }
+};
+
+/* This returns a nice name for a new directory; for example lm78-isa-0310
+   (for a LM78 chip on the ISA bus at port 0x310), or lm75-i2c-3-4e (for
+   a LM75 chip on the third i2c bus at address 0x4e).  
+   name is allocated first. */
+int sensors_create_name(char **name, const char *prefix, 
+                        struct i2c_adapter * adapter, int addr)
+{
+  char name_buffer[50]; 
+  int id;
+  if (i2c_is_isa_adapter(adapter)) 
+    sprintf(name_buffer,"%s-isa-%d",prefix,addr);
+  else {
+    if ((id = i2c_adapter_id(adapter)) < 0);
+      return -ENOENT;
+    sprintf(name_buffer,"%s-i2c-%d-%d",prefix,id,addr);
+  }
+  *name = kmalloc(strlen(name_buffer)+1,GFP_KERNEL);
+  strcpy(*name,name_buffer);
+  return 0;
+}
+
+/* This rather complex function must be called when you want to add an entry
+   to /proc/sys/dev/sensors/chips (not yet implemented). It also creates
+   a new directory within /proc/sys/dev/sensors/.
+   ctl_template should be a template of the newly created directory. It is
+   copied in memory. The extra1 field of each file is set to point to client.
+   If any driver wants subdirectories within the newly created directory,
+   this function must be updated! */
+int sensors_register_entry(struct i2c_client *client ,const char *prefix, 
+                           ctl_table *ctl_template)
+{
+  int i,res,len,id;
+  ctl_table *new_table;
+  char *name;
+  struct ctl_table_header *new_header;
+
+  if ((res = sensors_create_name(&name,prefix,client->adapter,
+                                 i2c_is_isa_client(client)?
+                                 ((struct isa_client *) client)->isa_addr:
+                                 client->addr)))
+    return res;
+
+  for (id = 0; id < SENSORS_ENTRY_MAX; i++)
+    if (! sensors_entries[id]) {
+      break;
+    }
+  if (id == SENSORS_ENTRY_MAX) {
+    kfree(name);
+    return -ENOMEM;
+  }
+  id += 256;
+
+  len = 0;
+  while (ctl_template[len].procname)
+    len++;
+  len += 7;
+  if (! (new_table = kmalloc(sizeof(ctl_table) * len,GFP_KERNEL))) {
+    kfree(name);
+    return -ENOMEM;
+  }
+    
+  memcpy(new_table,sysctl_table,6 * sizeof(ctl_table));
+  new_table[0].child = &new_table[2];
+  new_table[2].child = &new_table[4];
+  new_table[4].child = &new_table[6];
+  new_table[4].procname = name;
+  new_table[4].ctl_name = id;
+  memcpy(new_table+6,ctl_template,(len-6) * sizeof(ctl_table));
+  for (i = 6; i < len; i++)
+    new_table[i].extra1 = client;
+
+  if (! (new_header = register_sysctl_table(new_table,0))) {
+    kfree(new_table);
+    kfree(name);
+    return -ENOMEM;
+  }
+
+  sensors_entries[i] = new_header;
+
+  return id;
+}
+
+void sensors_deregister_entry(int id)
+{
+  ctl_table *table;
+  id -= 256;
+  if (sensors_entries[id]) {
+    table = sensors_entries[id]->ctl_table;
+    unregister_sysctl_table(sensors_entries[id]);
+    kfree((void *) (table->procname));
+    kfree(table);
+    sensors_entries[id] = 0;
+  }
+}
+
+/* nrels contains initially the maximum number of elements which can be
+   put in results, and finally the number of elements actually put there.
+   A magnitude of 1 will multiply everything with 10; etc.
+   buffer, bufsize is the character buffer we read from and its length.
+   results will finally contain the parsed integers. 
+
+   Buffer should contain several reals, separated by whitespace. A real
+   has the following syntax:
+     [ Minus ] Digit* [ Dot Digit* ] 
+   (everything between [] is optional; * means zero or more).
+   When the next character is unparsable, everything is skipped until the
+   next whitespace.
+
+   WARNING! This is tricky code. I have tested it, but there may still be
+            hidden bugs in it, even leading to crashes and things!
+*/
+void sensors_parse_reals(int *nrels, void *buffer, int bufsize, 
+                         long *results, int magnitude)
+{
+  int maxels,min,mag;
+  long res;
+  char nextchar=0;
+
+  maxels = *nrels;
+  *nrels = 0;
+
+  while (bufsize && (*nrels < maxels)) {
+
+    /* Skip spaces at the start */
+    while (bufsize && ! get_user_data(nextchar,(char *) buffer) && 
+           isspace((int) nextchar)) {
+      bufsize --;
+      ((char *) buffer)++;
+    }
+
+    /* Well, we may be done now */
+    if (! bufsize)
+      return;
+
+    /* New defaults for our result */
+    min = 0;
+    res = 0;
+    mag = magnitude;
+
+    /* Check for a minus */
+    if (! get_user_data(nextchar,(char *) buffer) && (nextchar == '-')) {
+      min=1;
+      bufsize--;
+      ((char *) buffer)++;
+    }
+
+    /* Digits before a decimal dot */
+    while (bufsize && !get_user_data(nextchar,(char *) buffer) && 
+           isdigit((int) nextchar)) {
+      res = res * 10 + nextchar - '0';
+      bufsize--;
+      ((char *) buffer)++;
+    }
+
+    /* If mag < 0, we must actually divide here! */
+    while (mag < 0) {
+      res = res / 10;
+      mag++;
+    }
+
+    if (bufsize && (nextchar == '.')) {
+      /* Skip the dot */
+      bufsize--;
+      ((char *) buffer)++;
+  
+      /* Read digits while they are significant */
+      while(bufsize && (mag > 0) && 
+            !get_user_data(nextchar,(char *) buffer) &&
+            isdigit((int) nextchar)) {
+        res = res * 10 + nextchar - '0';
+        mag--;
+        bufsize--;
+        ((char *) buffer)++;
+      }
+    }
+    /* If we are out of data, but mag > 0, we need to scale here */
+    while (mag > 0) {
+      res = res * 10;
+      mag --;
+    }
+
+    /* Skip everything until we hit whitespace */
+    while(bufsize && !get_user_data(nextchar,(char *) buffer) &&
+          isspace ((int) nextchar)) {
+      bufsize --;
+      ((char *) buffer) ++;
+    }
+
+    /* Put res in results */
+    results[*nrels] = (min?-1:1)*res;
+    (*nrels)++;
+  }    
+  
+  /* Well, there may be more in the buffer, but we need no more data. 
+     Ignore anything that is left. */
+  return;
+}
+    
+void sensors_write_reals(int nrels,void *buffer,int *bufsize,long *results,
+                         int magnitude)
+{
+  #define BUFLEN 20
+  char BUF[BUFLEN+1]; /* An individual representation should fit in here! */
+  char printfstr[10];
+  int nr=0;
+  int buflen,mag,times;
+  int curbufsize=0;
+
+  while ((nr < nrels) && (curbufsize < *bufsize)) {
+    mag=magnitude;
+
+    if (nr != 0) {
+      put_user(' ', (char *) buffer);
+      curbufsize ++;
+      ((char *) buffer) ++;
+    }
+
+    /* Fill BUF with the representation of the next string */
+    if (mag <= 0) {
+
+      buflen=sprintf(BUF,"%ld",results[nr]);
+      if (buflen < 0) { /* Oops, a sprintf error! */
+        *bufsize=0;
+        return;
+      }
+      while ((mag < 0) && (buflen < BUFLEN)) {
+        BUF[buflen++]='0';
+        mag++;
+      }
+      BUF[buflen]=0;
+    } else {
+      times=1;
+      for (times=1; mag-- > 0; times *= 10);
+      if (results[nr] < 0) {
+        BUF[0] = '-';
+        buflen = 1;
+      } else
+        buflen=0;
+      strcpy(printfstr,"%ld.%0Xld");
+      printfstr[6]=magnitude+'0';
+      buflen+=sprintf(BUF+buflen,printfstr,abs(results[nr])/times,
+                      abs(results[nr])%times);
+      if (buflen < 0) { /* Oops, a sprintf error! */
+        *bufsize=0;
+        return;
+      }
+    }
+
+    /* Now copy it to the user-space buffer */
+    if (buflen + curbufsize > *bufsize)
+      buflen=*bufsize-curbufsize;
+    copy_to_user(buffer,BUF,buflen);
+    curbufsize += buflen;
+    (char *) buffer += buflen;
+
+    nr ++;
+  }
+  if (curbufsize < *bufsize) {
+    put_user('\n', (char *) buffer);
+    curbufsize ++;
+  }
+  *bufsize=curbufsize;
+}
+
+int sensors_init(void) 
+{
+  printk("sensors.o version %s (%s)\n",LM_VERSION,LM_DATE);
+  return 0;
+}
+
+int sensors_cleanup(void)
+{
+  return 0;
+}
+
+#ifdef MODULE
+
+MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>");
+MODULE_DESCRIPTION("LM78 driver");
+
+int init_module(void)
+{
+  return sensors_init();
+}
+
+int cleanup_module(void)
+{
+  return sensors_cleanup();
+}
+
+#endif /* MODULE */
+

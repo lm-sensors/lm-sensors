@@ -254,6 +254,10 @@ extern int i2c_probe(struct i2c_client *client, int low_addr, int hi_addr);
 extern int i2c_control(struct i2c_client *,unsigned int, unsigned long);
 
 
+/* This call returns a unique low identifier for each registered adapter,
+   or -1 if the adapter was not regisitered. */
+extern int i2c_adapter_id(struct i2c_adapter *adap);
+
 #endif /* __KERNEL__ */
 
 

@@ -17,7 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-#define RCSID "$Id: i2c-core.c,v 1.3 1998/11/19 03:07:18 frodo Exp $"
+#define RCSID "$Id: i2c-core.c,v 1.4 1998/11/27 22:02:09 frodo Exp $"
 /* ------------------------------------------------------------------------- */
 
 #include <linux/module.h>
@@ -434,6 +434,16 @@ int i2c_probe(struct i2c_client *client, int low_addr, int hi_addr)
         I2C_UNLOCK(client->adapter);
         return (i <= hi_addr) ? i : -1;
 }
+
+int i2c_adapter_id(struct i2c_adapter *adap)
+{
+	int i;
+	for (i = 0; i < I2C_ADAP_MAX; i++)
+		if (adap == adapters[i])
+			return i;
+	return -1;
+}
+
 
 #ifdef MODULE
 MODULE_AUTHOR("Simon G. Vogl <simon@tk.uni-linz.ac.at>");

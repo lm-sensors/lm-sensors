@@ -1,11 +1,14 @@
 Many, many things. Most notably:
 
+* 2.1 kernel tests; at this moment, only 2.0 compiles have been tried.
+* Make it SMP-safe: there are no spinlocks yet. They are needed at many
+  places, probably (everywhere where global vars are accessed).
 * Write smbus_access_i2c in smbus.c
 * Write piix4_* in piix4.c
 * Complete lm78 driver
 * Extend dev interface for SMBus
 * Create entries in /proc/bus: a list of all registered busses, and for
-  each bus, a file with registered clients.
+  each bus, a file with registered clients (partially done)
 * Write all other drivers
 * How to make drivers detect thing *not*; for example, if a Winbond is 
   present, the LM75 driver should not try to access its simulated

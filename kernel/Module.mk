@@ -23,16 +23,23 @@ MODULE_DIR := src
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 SRCTARGETS := $(MODULE_DIR)/smbus.o $(MODULE_DIR)/piix4.o $(MODULE_DIR)/isa.o \
-              $(MODULE_DIR)/lm78.o $(MODULE_DIR)/i2c-proc.o
+              $(MODULE_DIR)/lm78.o $(MODULE_DIR)/sensors.o  \
+              $(MODULE_DIR)/i2c-proc.o
+
+HEADERFILES := $(MODULE_DIR)/sensors.h 
 
 # Include all dependency files
 INCLUDEFILES += $(SRCTARGETS:.o=.d)
 
-all :: $(SRCTARGETS)
+all-src: $(SRCTARGETS)
+all :: all-src
 
-install ::
+install-src:
 	$(MKDIR) $(MODDIR)
 	install -o root -g root -m 644 $(SRCTARGETS) $(MODDIR)
+	install -o root -g root -m 644 $(HEADERFILES) $(INCLUDEDIR)
+install :: install-src
 
-clean ::
+clean-src:
 	$(RM) $(SRCTARGETS) $(SRCTARGETS:.o=.d)
+clean :: clean-src

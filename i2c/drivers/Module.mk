@@ -27,11 +27,14 @@ I2CDRIVERTARGETS := $(MODULE_DIR)/eeprom.o
 # Include all dependency files
 INCLUDEFILES += $(I2CDRIVERTARGETS:.o=.d)
 
-all :: $(I2CDRIVERTARGETS)
+all-i2c-drivers: $(I2CDRIVERTARGETS)
+all :: all-i2c-drivers
 
-install :: 
+install-i2c-drivers:
 	$(MKDIR) $(MODDIR)
 	install -o root -g root -m 644 $(I2CDRIVERTARGETS) $(MODDIR)
+install :: install-i2c-drivers
 
-clean ::
+clean-i2c-drivers:
 	$(RM) $(I2CDRIVERTARGETS) $(I2CDRIVERTARGETS:.o=.d)
+clean :: clean-i2c-drivers

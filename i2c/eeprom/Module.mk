@@ -28,13 +28,15 @@ I2CEEPROMSOURCES := $(MODULE_DIR)/eeprom.c
 # Include all dependency files
 INCLUDEFILES += $(I2CEEPROMSOURCES:.c=.d)
 
-all :: $(I2CEEPROMTARGETS)
+all-i2c-eeprom: $(I2CEEPROMTARGETS)
+all :: all-i2c-eeprom
 
 # No install rule
 
-clean ::
+clean-i2c-eeprom:
 	$(RM) $(I2CEEPROMSOURCES:.c=.d) $(I2CEEPROMSOURCES:.c=.o) \
 	      $(I2CEEPROMTARGETS)
+clean :: clean-i2c-eeprom
 
 # The targets
 $(MODULE_DIR)/eeprom: $(MODULE_DIR)/eeprom.o

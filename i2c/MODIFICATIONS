@@ -43,3 +43,5 @@ Here come the changes:
     i2c_detach_client(client);
   with:
     client->driver->detach_client(client);
+
+! i2c-core: function i2c_adapter_id added

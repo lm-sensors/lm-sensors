@@ -29,11 +29,14 @@ I2CTARGETS := $(MODULE_DIR)/i2c-core.o  $(MODULE_DIR)/algo-bit.o \
 # Include all dependency files
 INCLUDEFILES += $(I2CTARGETS:.o=.d)
 
-all :: $(I2CTARGETS)
+all-i2c: $(I2CTARGETS)
+all :: all-i2c
 
-install :: 
+install-i2c:
 	$(MKDIR) $(MODDIR)
 	install -o root -g root -m 644 $(I2CTARGETS) $(MODDIR)
+install :: install-i2c
 
-clean ::
+clean-i2c:
 	$(RM) $(I2CTARGETS) $(I2CTARGETS:.o=.d)
+clean :: clean-i2c

@@ -28,13 +28,15 @@ I2CDETECTSOURCES := $(MODULE_DIR)/detect.c
 # Include all dependency files
 INCLUDEFILES += $(I2CDETECTSOURCES:.c=.d)
 
-all :: $(I2CDETECTTARGETS)
+all-i2c-detect: $(I2CDETECTTARGETS)
+all :: all-i2c-detect
 
 # No install rule
 
-clean ::
+clean-i2c-detect:
 	$(RM) $(I2CDETECTSOURCES:.c=.d) $(I2CDETECTSOURCES:.c=.o) \
 	      $(I2CDETECTTARGETS)
+clean :: clean-i2c-detect
 
 # The targets
 $(MODULE_DIR)/detect: $(MODULE_DIR)/detect.o
