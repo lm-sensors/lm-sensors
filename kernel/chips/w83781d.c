@@ -992,7 +992,7 @@ int w83781d_detach_client(struct i2c_client *client)
 				  (((struct
 				     w83781d_data *) (client->data))->
 				   lm75[0]));
-		if((((struct w83781d_data *) (client->data))->type) != w83783s);
+		if((((struct w83781d_data *) (client->data))->type) != w83783s)
 			i2c_detach_client(&
 				  (((struct
 				     w83781d_data *) (client->data))->

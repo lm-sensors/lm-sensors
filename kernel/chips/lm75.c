@@ -251,6 +251,12 @@ int lm75_detach_client(struct i2c_client *client)
 {
 	int err;
 
+#ifdef MODULE
+	if (MOD_IN_USE)
+		return -EBUSY;
+#endif
+
+
 	sensors_deregister_entry(((struct lm75_data *) (client->data))->
 				 sysctl_id);
 
