@@ -40,7 +40,7 @@ ask CVS about it:
   Module lm87: Add multiple VRM version support
   Module w83781d: Fix in0/in1 initialization
   Module smartbatt: New
-  Program dmidecode: Fix read bug
+  Program dmidecode: Fix read bug; upgrade to version 1.8
   Program doc-insmod: Complete rewrite; fix author output
   Program doc-features: Complete rewrite; handle missing sysctl entries;
                         handle unknown prefix with suggestion
