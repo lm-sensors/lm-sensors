@@ -149,8 +149,9 @@ lm90
 	max6657		2	-	-	-	yes	no
 	(lm89 is detected as an lm99)
 	lm89		2	-	-	-	yes	no
-	(max6658 is detected as a max6657)
+	(max6658 and max6659 are detected as a max6657)
 	max6658		2	-	-	-	yes	no
+	max6659		2	-	-	-	yes	no
 
 lm92
 	(all are reported as an "lm92")

@@ -39,6 +39,11 @@ Supported chips:
     Addresses scanned: I2C 0x4c
     Datasheet: Publicly available at the Maxim website
                http://www.maxim-ic.com/quick_view2.cfm/qv_pk/2578
+  * Maxim MAX6659
+    Prefix: `max6657'
+    Addresses scanned: I2C 0x4c and 0x4d
+    Datasheet: Publicly available at the Maxim website
+               http://www.maxim-ic.com/quick_view2.cfm/qv_pk/2578
 
 
 Author: Jean Delvare <khali@linux-fr.org>
@@ -82,7 +87,8 @@ Description
 The LM90 is a digital temperature sensor. It senses its own temperature as
 well as the temperature of up to one external diode. It is compatible
 with many other devices such as the LM86, the LM89, the LM99, the ADM1032,
-the MAX6657 and the MAX6658, all of which are supported by this driver.
+the MAX6657, the MAX6658, and the MAX6659, all of which are supported by
+this driver.
 
 The specificity of this family of chipsets over the ADM1021/LM84
 family is that it features critical limits with hysteresis, and an
@@ -113,6 +119,10 @@ ADM1032:
 
 MAX6657 and MAX6658:
   * Remote sensor type selecion
+
+MAX6659
+  * Selectable address
+  * Second critical temperature limit
 
 All temperature values are given in degrees Celcius. Resolution
 is 1.0 degree for the local temperature, 0.125 degree for the remote
