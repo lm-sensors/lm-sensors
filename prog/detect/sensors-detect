@@ -819,7 +819,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             saa1064_detect w83l784r_detect mozart_detect max6650_detect
             fscher_detect adm1029_detect adm1031_detect max6900_detect
             m5879_detect pca9540_detect smartbatt_mgr_detect
-            smartbatt_chgr_detect adt7467_detect lm92_detect);
+            smartbatt_chgr_detect adt7467_detect lm92_detect max1619_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1144,6 +1144,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 7, @_ },
+     },
+     {
+       name => "Maxim MAX1619",
+       driver => "to-be-written",
+       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+       i2c_detect => sub { max1619_detect 0, @_ },
      },
      {
        name => "National Semiconductor LM82",
@@ -3565,6 +3571,36 @@ sub adm1021_detect
   return 3 if ($chip == 2) or ($chip == 5);
   return 7 if $chip <= 3;
   return 5;
+}
+
+# $_[0]: Chip to detect
+#   (0 = MAX1619)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, 7 if detected
+# Registers used:
+#   0xfe: Company ID
+#   0xff: Device ID
+#   0x02: Status
+#   0x03: Configuration
+#   0x04: Conversion rate
+sub max1619_detect
+{
+  my ($chip, $file, $addr) = @_;
+  my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
+  my $dev_id = i2c_smbus_read_byte_data($file, 0xff);
+  my $conf = i2c_smbus_read_byte_data($file, 0x03);
+  my $status = i2c_smbus_read_byte_data($file, 0x02);
+  my $convrate = i2c_smbus_read_byte_data($file, 0x04);
+
+  return if $man_id != 0x4D
+    or $dev_id != 0x04
+    or ($conf & 0x03)
+    or ($status & 0x61)
+    or $convrate >= 8;
+
+  return 7;
 }
 
 # $_[0]: Address
