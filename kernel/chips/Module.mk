@@ -26,6 +26,7 @@ KERNELCHIPSDIR := $(MODULE_DIR)
 # These targets are NOT included in 'mkpatch' ...
 KERNELCHIPSTARGETS := $(MODULE_DIR)/pcf8591.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smbus-arp.o
+KERNELCHIPSTARGETS += $(MODULE_DIR)/smsc47m1.o
 
 # These targets ARE included in 'mkpatch', except for LTC1710, which we
 # leave here because it used to be in 'mkpatch' ...

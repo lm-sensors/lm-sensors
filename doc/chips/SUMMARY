@@ -1,7 +1,7 @@
 SUMMARY OF SUPPORTED CHIPS
 ==========================
 This is a summary of the sensor and non-sensor chips supported
-by this package. It summarizes the features of each supported chip.
+by this package. It lists the features of each supported chip.
 
 For further information on a particular chip, see the documentation
 in this directory. Data sheets are generally available on the
@@ -119,6 +119,9 @@ mtp008
 sis5595
 	sis5595 	0-1	4-5	2	-	no	yes
 
+smsc74m1
+	smsc74m1 	-	-	2	2	no	yes (LPC)
+
 thmc50
 	adm1022		3	2	-	1 dac	yes	no
 	thmc50		3	2	-	1 dac	yes	no
@@ -167,6 +170,9 @@ pcf8574 & pcf8574a
 
 pcf8591
 	Quad A/D + one D/A
+
+smbus-arp
+	An SMBus 2.0 ARP client
 
 
 -----------------------------------------------------------------------------
