@@ -24,10 +24,6 @@ see useful_addresses.html.
 * prog/daemon/healthd.sh (written in bash, not installed)
   An example of a very simple hardware health monitoring daemon.
 
-* prog/detect/dmidecode (written in C, installed by 'make install')
-  This program scans the DMI (Desktop Management Interface) information
-  in the BIOS and prints out the useful information.
-
 * prog/detect/i2cdetect (written in C, installed by 'make install')
   This program scans your complete I2C or SMBus adapter for connected devices.
   Not all devices can be detected in this way, though; and it may hang your

@@ -23,8 +23,8 @@ PROGDETECTDIR := $(MODULE_DIR)
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-PROGDETECTTARGETS := $(MODULE_DIR)/i2cdetect $(MODULE_DIR)/dmidecode
-PROGDETECTSOURCES := $(MODULE_DIR)/i2cdetect.c $(MODULE_DIR)/dmidecode.c
+PROGDETECTTARGETS := $(MODULE_DIR)/i2cdetect
+PROGDETECTSOURCES := $(MODULE_DIR)/i2cdetect.c
 PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect \
                          $(MODULE_DIR)/i2cdetect
 
@@ -41,9 +41,6 @@ $(MODULE_DIR)/i2cdetect: $(MODULE_DIR)/i2cdetect.ro prog/dump/i2cbusses.ro
 install-prog-detect: all-prog-detect
 	mkdir -p $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -o root -g root -m 755 $(PROGDETECTSBININSTALL) $(DESTDIR)$(SBINDIR)
-	if [ ! -e $(DESTDIR)$(SBINDIR)/dmidecode -o $(DESTDIR)$(SBINDIR)/dmidecode -ot $(PROGDETECTDIR)/dmidecode.c ] ; then \
-	  $(INSTALL) -o root -g root -m 755 $(PROGDETECTDIR)/dmidecode $(DESTDIR)$(SBINDIR) ; \
-	fi
 user_install :: install-prog-detect
 
 clean-prog-detect:
