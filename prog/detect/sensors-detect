@@ -1174,14 +1174,20 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
        name => "Analog Devices ADM1022",
        driver => "thmc50",
-       i2c_addrs => [0x2c..0x2f],
+       i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { adm1022_detect 0, @_ },
      },
      {
        name => "Texas Instruments THMC50",
        driver => "thmc50",
-       i2c_addrs => [0x2c..0x2f],
+       i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { adm1022_detect 1, @_ },
+     },
+     {
+       name => "Analog Devices ADM1028",
+       driver => "thmc50",
+       i2c_addrs => [0x2e],
+       i2c_detect => sub { adm1022_detect 2, @_ },
      },
      {
        name => "Silicon Integrated Systems SIS5595",
@@ -3228,7 +3234,7 @@ sub adm9240_detect
   return (7);
 }
 
-# $_[0]: Chip to detect (0 = ADM1022, 1 = THMC50)
+# $_[0]: Chip to detect (0 = ADM1022, 1 = THMC50, 2 = ADM1028)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -3244,9 +3250,13 @@ sub adm1022_detect
   my ($chip, $file,$addr) = @_;
   $reg = i2c_smbus_read_byte_data($file,0x3e);
   return unless ($chip == 0 and $reg == 0x41) or
-                ($chip == 1 and $reg == 0x49);
+                ($chip == 1 and $reg == 0x49) or
+                ($chip == 2 and $reg == 0x41);
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
-  return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xc0) == 0xc0;
+  $reg = i2c_smbus_read_byte_data($file, 0x3f);
+  return unless ($reg & 0xc0) == 0xc0;
+  return if $chip == 0 and ($reg & 0xc0) != 0xc0;
+  return if $chip == 2 and ($reg & 0xc0) == 0xc0;
   return (8);
 }
 
