@@ -23,26 +23,20 @@ We made several changes in release 2.6.5 (released September 15, 2002)
 to minimize the chance of corruption.
 Later evolutions were made and the current state is:
 
-1) Sensors-detect accesses VPD information in the BIOS to identify IBM
-   systems. If it finds the VPD structure (which is IBM-proprietary),
-   sensors-detect will print a message and exit. This is a temporary
-   additional measure, which will be removed as soon as the other
-   measures have proven to be efficient.
-
-2) The probing command (quick write 0) has been replaced by a different
+1) The probing command (quick write 0) has been replaced by a different
    command (read byte) for addresses where eeproms are known to live.
    This should prevent corruption of 24RF08 eeproms in any system,
    IBM or not. A similar change was made to i2cdetect as well, although
    no corruption was ever reported using this tool.
 
-3) The i2c-piix4 module (the bus driver that is used for Intel PIIX4-based
+2) The i2c-piix4 module (the bus driver that is used for Intel PIIX4-based
    systems, including IBM Thinkpads) now accesses DMI information
    in the BIOS to identify the system manufacturer. If the system
    manufacturer is IBM, i2c-piix4 will print a message and exit.
    As the 24RF08 is on the PIIX4 SMBus, this prevents access to
-   the 24RF08, even if sensors-detect was not used.
+   the 24RF08.
 
-4) The sequence of probes in the eeprom module (when loaded with
+3) The sequence of probes in the eeprom module (when loaded with
    checksum=1) has been changed so that 24RF08 eeproms will
    not be corrupted. This *should* prevent corruption of 24RF08
    eeproms in non-IBM systems.
