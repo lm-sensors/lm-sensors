@@ -646,13 +646,10 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 #endif
 	}
 
-	/* Fan clock dividers and fan low limits may be needed before any
-	   data is read */
+	/* Fan clock dividers may be needed before any data is read */
 	for (i = 0; i < data->fannr; i++) {
 		data->fan_status[i] = pc87360_read_value(data, LD_FAN,
 				      NO_BANK, PC87360_REG_FAN_STATUS(i));
-		data->fan_min[i] = pc87360_read_value(data, LD_FAN,
-				   NO_BANK, PC87360_REG_FAN_MIN(i));
 	}
 
 	if (init > 0) {
@@ -1063,7 +1060,7 @@ void pc87360_fan_div(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results)
 {
 	struct pc87360_data *data = client->data;
-	int i, nr;
+	int i;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
@@ -1073,25 +1070,6 @@ void pc87360_fan_div(struct i2c_client *client, int operation,
 			results[i] = FAN_DIV_FROM_REG(data->fan_status[i]);
 		}
 		*nrels_mag = data->fannr;
-	}
-	/* We ignore National's recommendation */
-	else if (operation == SENSORS_PROC_REAL_WRITE) {
-		nr = data->fannr <= *nrels_mag ? data->fannr : *nrels_mag;
-		for (i = 0; i < nr; i++) {
-			/* Preserve fan min */
-			int fan_min = FAN_FROM_REG(data->fan_min[i],
-				      FAN_DIV_FROM_REG(data->fan_status[i]));
-			data->fan_status[i] = (data->fan_status[i] & 0x9F)
-					    | FAN_DIV_TO_REG(results[i]);
-			pc87360_write_value(data, LD_FAN, NO_BANK,
-					    PC87360_REG_FAN_STATUS(i),
-					    data->fan_status[i]);
-			data->fan_min[i] = FAN_TO_REG(fan_min,
-					   FAN_DIV_FROM_REG(data->fan_status[i]));
-			pc87360_write_value(data, LD_FAN, NO_BANK,
-					    PC87360_REG_FAN_MIN(i),
-					    data->fan_min[i]);
-		}
 	}
 }
 
