@@ -28,6 +28,7 @@
 #include <linux/pci.h>
 #include <asm/io.h>
 #include <linux/types.h>
+#include <linux/delay.h>
 
 #include <linux/i2c.h>
 
@@ -85,84 +86,88 @@ static struct i2c_algorithm smbus_algorithm = {
 void dump_ifaces (struct keywest_iface **ifaces);
 /***** End of Protos ******/
 
+
+/** Vars **/
 struct keywest_iface *ifaces=NULL;
+
+
+/** Functions **/
+
+int poll_interrupt(void *ISR) {
+ int i,res;
+  for (i=0; i < POLL_SANITY; i++) {
+    udelay(100);
+    if (res=readb(ISR) & 0x0F > 0) { /*printk("i2c-keywest: received interrupt: 0x%02X\n",res);*/ return res; }
+  }
+  if (i == POLL_SANITY) { printk("i2c-keywest: Sanity check failed!  Expected interrupt never happened.\n"); return -1; }
+  return -1; /* Should never get here */
+}
+
+
+void keywest_reset(struct keywest_iface *ifaceptr) {
+int i;
+int interrupt_state=1;
+
+  /* Let's see if we can clear some busy conditions */
+//  writeb(0xFF,ifaceptr->status);
+  writeb(0x04,ifaceptr->control);
+  writeb(0xFF,ifaceptr->ISR);
+//  printk("Initalizing.  Ignore: ");
+  for (i=0;(i<10) & (interrupt_state > 0);i++) {
+   interrupt_state=poll_interrupt(ifaceptr->ISR);
+   if (interrupt_state) writeb(interrupt_state,ifaceptr->ISR);
+  }
+}
 
 s32 keywest_access(struct i2c_adapter * adap, u16 addr,
                   unsigned short flags, char read_write,
                   u8 command, int size, union i2c_smbus_data * data) {
 
- int poll_interrupt(void *ISR) {
- int i,res;
-  for (i=0; i < POLL_SANITY; i++) {
-    current->state = TASK_INTERRUPTIBLE;
-    schedule_timeout(10);
-    if (res=readb(ISR)) { printk("i2c-keywest: received interrupt: 0x%02X\n",res); return res; }
-  }
-  if (i == POLL_SANITY) { printk("i2c-keywest: Sanity check failed!  Expected interrupt never happened.\n"); return -1; }
-  return -1; /* Should never get here */
- }
-
-
  struct keywest_iface *ifaceptr;
- int interrupt_state=0;
+ int interrupt_state=1;
  int ack;
  int error_state=0;
  int len,i; /* for block transfers */
 
   ifaceptr=(struct keywest_iface *)adap->data;
-  printk("Keywest access called with ref to iface: 0x%X\n",ifaceptr->base);
-  printk("Access request: addr:%X flags:%X rw:%X command:%X size:%X\n",
-   addr, flags, read_write, command, size);
+//  printk("Keywest access called with ref to iface: 0x%X\n",ifaceptr->base);
+//  printk("Access request: addr:%X flags:%X rw:%X command:%X size:%X\n",
+//   addr, flags, read_write, command, size);
 
-
-  /* Let's see if we can clear some busy conditions */
-  writeb(0x0FF,ifaceptr->status);
-  writeb(0x04,ifaceptr->control);
-  writeb(0x0FF,ifaceptr->ISR);
-  printk("Ignore: "); 
-  for (i=0;(i<10)&&(interrupt_state>0);i++) {
-   interrupt_state=poll_interrupt(ifaceptr->ISR);
-   writeb(interrupt_state,ifaceptr->ISR);
-  }
+  keywest_reset(ifaceptr);
+  printk("start of transaction\n");
+  dump_ifaces(&ifaces);
 
   /* see if bus is busy */
   if ((readb(ifaceptr->status) & 1) > 0) {
    printk("i2c-keywest: Busy!\n");
    dump_ifaces(&ifaces);
    return -1;
-  } else { printk("Not busy!\n"); }
+  }
   /* Set up address and r/w bit */
   writeb(((addr << 1) | (read_write == I2C_SMBUS_READ)),(void *)ifaceptr->addr);
+  /* Set up 'sub address' which I'm guessing is the command field? */
+  writeb(command,(void *)ifaceptr->subaddr);
   /* Start sending address */
   writeb(readb(ifaceptr->control) | 2,ifaceptr->control);
-  if ((interrupt_state=poll_interrupt(ifaceptr->ISR)) < 0) { /*error_state=-1;*/ }
-  if (!(ack=readb(ifaceptr->status) & 0x02)) { printk("i2c-keywest: Ack Status on addr expected but got: 0x%X\n",ack); /*error_state=-1;*/ }
-  if (size & (I2C_FUNC_SMBUS_BYTE | I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA | I2C_FUNC_SMBUS_BLOCK_DATA)) {
+  interrupt_state=poll_interrupt(ifaceptr->ISR);
+  ack=readb(ifaceptr->status) & 0x0F;
+//  printk("status:0x%02X ack:0x%02X\n",ack,interrupt_state);
+  if ((ack & 0x02)==0) {
+   printk("i2c-keywest: Ack Status on addr expected but got: 0x%02X on addr: 0x%02X\n",ack,addr);
+   return -1;
+  } else {  
+  if (size & (I2C_FUNC_SMBUS_BYTE_DATA | 
+      I2C_FUNC_SMBUS_WORD_DATA | I2C_FUNC_SMBUS_BLOCK_DATA)) {
+   if (read_write == I2C_SMBUS_READ)
+    writeb(1 | readb(ifaceptr->control),ifaceptr->control); /* Set ACK if reading */
    switch (size) {
-    case I2C_SMBUS_BYTE:
-     if (read_write == I2C_SMBUS_WRITE) {
-       writeb(command,ifaceptr->data);
-       writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
-       interrupt_state=poll_interrupt(ifaceptr->ISR);
-       if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received!\n"); /*error_state=-1;*/ } 
-       writeb(readb(ifaceptr->control) | 4,ifaceptr->control); /* Send stop */
-     } else {
-       writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
-       interrupt_state=poll_interrupt(ifaceptr->ISR);
-       data->byte=readb(ifaceptr->data);
-       writeb(0,ifaceptr->control); /* End read: clear ack */
-     }
-     break;
     case I2C_SMBUS_BYTE_DATA:
      if (read_write == I2C_SMBUS_WRITE) {
-       writeb(command,ifaceptr->data);
-       writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
-       interrupt_state=poll_interrupt(ifaceptr->ISR);
-       if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received!\n"); /*error_state=-1;*/ } 
        writeb(data->byte,ifaceptr->data);
        writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
        interrupt_state=poll_interrupt(ifaceptr->ISR);
-       if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received(2)!\n"); /*error_state=-1;*/ } 
+       if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received(2)!\n"); error_state=-1; } 
        writeb(readb(ifaceptr->control) | 4,ifaceptr->control); /* Send stop */
      } else {
        writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
@@ -173,23 +178,20 @@ s32 keywest_access(struct i2c_adapter * adap, u16 addr,
      break;
     case I2C_SMBUS_WORD_DATA:
      if (read_write == I2C_SMBUS_WRITE) {
-       writeb(command,ifaceptr->data);
-       writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
-       interrupt_state=poll_interrupt(ifaceptr->ISR);
-       if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received!\n"); /*error_state=-1;*/ } 
        writeb(data->word & 0x0ff,ifaceptr->data);
        writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
        interrupt_state=poll_interrupt(ifaceptr->ISR);
-       if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received(2)!\n"); /*error_state=-1;*/ } 
+       if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received(2)!\n"); error_state=-1; } 
        writeb((data->word & 0x0ff00) >> 8,ifaceptr->data);
        writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
        interrupt_state=poll_interrupt(ifaceptr->ISR);
-       if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received(3)!\n"); /*error_state=-1;*/ } 
+       if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received(3)!\n"); error_state=-1; } 
        writeb(readb(ifaceptr->control) | 4,ifaceptr->control); /* Send stop */
      } else {
        writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
        interrupt_state=poll_interrupt(ifaceptr->ISR);
        data->word=(readb(ifaceptr->data) << 8);
+       writeb(1,ifaceptr->control); /* Send ack */
        writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
        interrupt_state=poll_interrupt(ifaceptr->ISR);
        data->word|=(readb(ifaceptr->data));
@@ -198,10 +200,6 @@ s32 keywest_access(struct i2c_adapter * adap, u16 addr,
      break;
     case I2C_SMBUS_BLOCK_DATA:
      if (read_write == I2C_SMBUS_WRITE) {
-       writeb(command,ifaceptr->data);
-       writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
-       interrupt_state=poll_interrupt(ifaceptr->ISR);
-       if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received!\n"); /*error_state=-1;*/ } 
        len = data->block[0];
        if (len < 0) len = 0;
        if (len > 32) len = 32;
@@ -209,24 +207,30 @@ s32 keywest_access(struct i2c_adapter * adap, u16 addr,
         writeb(data->byte,ifaceptr->data);
         writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
         interrupt_state=poll_interrupt(ifaceptr->ISR);
-        if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received(block)!\n"); /*error_state=-1;*/ } 
+        if ((readb(ifaceptr->status) & 0x02) == 0) { printk("i2c-keywest: Ack Expected by not received(block)!\n"); error_state=-1; } 
        }
        writeb(readb(ifaceptr->control) | 4,ifaceptr->control); /* Send stop */
      } else {
        for (i = 1; i <= data->block[0]; i++) {
+         writeb(1,ifaceptr->control); /* Send ack */
          writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
          interrupt_state=poll_interrupt(ifaceptr->ISR);
          data->block[i] =readb(ifaceptr->data);
        }
-       writeb(0,ifaceptr->control); /* End read: clear ack */
      }
      break;
-   }
-  } 
-  if ((interrupt_state=poll_interrupt(ifaceptr->ISR)) != 0x04) {
+   } /* switch */
+  } /* if size */
+  } /* if ack */
+  writeb(0,ifaceptr->control); /* End read: clear ack */
+  writeb(readb(ifaceptr->control) | 4,ifaceptr->control); /* Send stop */
+  writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt and go */
+  if (((interrupt_state=poll_interrupt(ifaceptr->ISR)) & 0x04) > 0)
     printk("i2c-keywest: Expected stop interrupt but got: 0x%02X\n",interrupt_state);
-//    error_state=-1;
-  }
+    error_state=-1;
+  writeb(interrupt_state,ifaceptr->ISR); /* Clear interrupt*/
+  printk("Transaction complete.\n");
+  dump_ifaces(&ifaces);
   return error_state;
 }
 
@@ -252,7 +256,7 @@ int init_iface (void *base,void *steps,struct keywest_iface **ifaces) {
  struct i2c_adapter *keywest_adapter;
  char *name;
  struct keywest_iface **temp_hdl=ifaces;
- int res;
+ int res,temp;
 
   if (ifaces == NULL) {
    printk("Ah!  Passed a null handle to init_iface");
@@ -297,8 +301,35 @@ int init_iface (void *base,void *steps,struct keywest_iface **ifaces) {
   /* Now actually do the initialization of the device */
   writeb(0x08,(*temp_hdl)->mode); /* So-called 'standard sub-mode' */
   writeb(0,(*temp_hdl)->status);
-  writeb(0,(*temp_hdl)->ISR);
+  writeb(0x0FF,(*temp_hdl)->ISR);
   printk("Done creating iface entry\n");
+
+  keywest_reset(*temp_hdl);
+
+// Test access to SDA and SCK
+  printk("Serial settings: control:%02X status:%02X\n",readb((*temp_hdl)->control),readb((*temp_hdl)->status));
+  writeb( 0x10,(*temp_hdl)->control);
+  temp=readb((*temp_hdl)->control);
+  printk("Serial settings: %02X\n",temp);
+  udelay(10);
+  keywest_reset(*temp_hdl);
+  
+  writeb(0x10,(*temp_hdl)->control);
+  temp=readb((*temp_hdl)->control);
+  printk("Serial settings: control:%02X status:%02X\n",readb((*temp_hdl)->control),readb((*temp_hdl)->status));
+  udelay(10);
+  keywest_reset(*temp_hdl);
+
+  writeb(0x08,(*temp_hdl)->control);
+  temp=readb((*temp_hdl)->control);
+  printk("Serial settings: control:%02X status:%02X\n",readb((*temp_hdl)->control),readb((*temp_hdl)->status));
+  udelay(10);
+  keywest_reset(*temp_hdl);
+
+  writeb(0x08,(*temp_hdl)->control);
+  temp=readb((*temp_hdl)->control);
+  printk("Serial settings: control:%02X status:%02X\n",readb((*temp_hdl)->control),readb((*temp_hdl)->status));
+
   return res;
 }
 
