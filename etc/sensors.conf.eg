@@ -533,6 +533,11 @@ chip "w83697hf-*"
 #    label in6 "Vdimm"
 #    label in7 "VBat"
 #    label in8 "V5SB"
+#
+# For Epox 8K3A you should swap in7 and in8:
+#    label in7 "V5SB"
+#    label in8 "VBat"
+#
 # You'll also want to comment out the in5 and in6 compute lines right below.
 
     compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
