@@ -49,15 +49,17 @@ function LoadConfig {
 	# grep configuration from file
 	INTERVAL=`egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g'`
 	FCTEMPS=`egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS=//g'`
-	FCFANS=`egrep '^FCFANS=.*$' $1 | sed -e 's/FCFANS=//g'`
 	MINTEMP=`egrep '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP=//g'`
 	MAXTEMP=`egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP=//g'`
 	MINSTART=`egrep '^MINSTART=.*$' $1 | sed -e 's/MINSTART=//g'`
 	MINSTOP=`egrep '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP=//g'`
-
-	if [ "$INTERVAL" = "" ]
+	# optional settings:
+	FCFANS=`egrep '^FCFANS=.*$' $1 | sed -e 's/FCFANS=//g'`
+	
+	# Check whether all mandatory settings are set
+	if [[ -z ${INTERVAL} || -z ${FCTEMPS} || -z ${MINTEMP} || -z ${MAXTEMP} || -z ${MINSTART} || -z ${MINSTOP} ]]
 	then
-		echo "Some settings missing..."
+		echo "Some mandatory settings missing, please check your config file!"
 		exit 1
 	fi
 	# here the other settings should be verified
@@ -199,13 +201,19 @@ function UpdateFanSpeeds {
 		fi
 		pwmpval=`echo ${pwmpval} | cut -d' ' -f1`
 		
-		fanval=`cat ${fan}`
-		if [ $? -ne 0 ]
+		# If fanspeed-sensor output shall be used, do it
+		if [[ -n ${fan} ]]
 		then
-			echo "Error reading Fan value from $DIR/$fan"
-			restorefans
+			fanval=`cat ${fan}`
+			if [ $? -ne 0 ]
+			then
+				echo "Error reading Fan value from $DIR/$fan"
+				restorefans
+			fi
+			fanval=`echo ${fanval} | cut -d' ' -f2`
+		else
+			fanval=1  # set it to a non zero value, so the rest of the script still works
 		fi
-		fanval=`echo ${fanval} | cut -d' ' -f2`
 		
 		# debug info
 		if [ "$DEBUG" != "" ]
