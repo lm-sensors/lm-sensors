@@ -2498,7 +2498,7 @@ sub ite_alias_detect
 # $_[0]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
-# Returns: 8 for a memory eeprom, 6 for a Sony Vaio eeprom,
+# Returns: 8 for a memory eeprom, 6 or 8 for a Sony Vaio eeprom,
 #          1 or 2 for an unknown eeprom
 # Registers used:
 #   0-63: PC-100 Data and Checksum
@@ -2520,11 +2520,15 @@ sub eeprom_detect
    && i2c_smbus_read_byte_data($file,4) == 0
    && i2c_smbus_read_byte_data($file,5) == 0)
   {
-    return 6 # Sony Vaio
-      if (i2c_smbus_read_byte_data($file,128) == ord 'P'
-       && i2c_smbus_read_byte_data($file,129) == ord 'C'
-       && i2c_smbus_read_byte_data($file,130) == ord 'G'
-       && i2c_smbus_read_byte_data($file,131) == ord '-');
+    if (i2c_smbus_read_byte_data($file,128) == ord 'P'
+     && i2c_smbus_read_byte_data($file,129) == ord 'C'
+     && i2c_smbus_read_byte_data($file,130) == ord 'G'
+     && i2c_smbus_read_byte_data($file,131) == ord '-')
+    {
+      # Sony Vaio
+      return 8 if ($addr == 0x57);
+      return 6;
+    }
     return 2;
   }
   return 1;
