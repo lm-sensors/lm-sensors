@@ -79,6 +79,7 @@ problems.
   Added Onsemi MC1066 support to the adm1021 driver.
 * Jean Delvare <khali@linux-fr.org>
   Author of the decode-vaio.pl Vaio EEPROM decoder.
+  Author of the decode-edid.pl EDID data decoder.
   Perl scripts maintainer, tester, dmidecode maintainer, bug fixer.
   Author of the LM83 chip driver.
 * Vojtech Pavlik <vojtech@suse.cz>	
@@ -87,3 +88,5 @@ problems.
 * Philip Pokorny <ppokorny@penguincomputing.com>
   Author of the LM85 chip driver.
   Author of the ADM1026 chip driver.
+* Sascha Volkenandt <sascha@akv-soft.de>
+  Author of the SAA1064 chip driver.
