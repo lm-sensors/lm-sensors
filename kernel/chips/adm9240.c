@@ -561,6 +561,9 @@ void adm9240_update_client(struct i2c_client *client)
 void adm9240_in(struct i2c_client *client, int operation, int ctl_name, 
              int *nrels_mag, long *results)
 {
+
+ int scales[6]={250, 270, 330, 500, 1200, 270};
+
   struct adm9240_data *data = client->data;
   int nr = ctl_name - ADM9240_SYSCTL_IN0;
 
@@ -568,17 +571,17 @@ void adm9240_in(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 2;
   else if (operation == SENSORS_PROC_REAL_READ) {
     adm9240_update_client(client);
-    results[0] = IN_FROM_REG(data->in_min[nr],nr);
-    results[1] = IN_FROM_REG(data->in_max[nr],nr);
-    results[2] = IN_FROM_REG(data->in[nr],nr);
+    results[0] = IN_FROM_REG(data->in_min[nr],nr) * scales[nr] / 192;
+    results[1] = IN_FROM_REG(data->in_max[nr],nr) * scales[nr] / 192;
+    results[2] = IN_FROM_REG(data->in[nr],nr) * scales[nr] / 192;
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
       if (*nrels_mag >= 1) {
-        data->in_min[nr] = IN_TO_REG(results[0],nr);
+        data->in_min[nr] = IN_TO_REG((results[0]*192)/scales[nr],nr);
         adm9240_write_value(client,ADM9240_REG_IN_MIN(nr),data->in_min[nr]);
       }
       if (*nrels_mag >= 2) {
-        data->in_max[nr] = IN_TO_REG(results[1],nr);
+        data->in_max[nr] = IN_TO_REG((results[1]*192)/scales[nr],nr);
         adm9240_write_value(client,ADM9240_REG_IN_MAX(nr),data->in_max[nr]);
       }
   }
