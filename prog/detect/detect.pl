@@ -69,7 +69,8 @@ use vars qw(@pci_adapters @chip_ids);
      }
 );
 
-use subs qw(lm78_detect lm75_detect lm80_detect);
+use subs qw(lm78_detect lm75_detect lm80_detect w83781d_detect
+            gl518sm_detect gl520sm_detect adm9240_detect adm1021_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have a name (Full Chip Name), an array i2c_addrs (Valid
@@ -84,21 +85,21 @@ use subs qw(lm78_detect lm75_detect lm80_detect);
        driver => "lm78",
        i2c_addrs => [0x00..0x7f], 
        i2c_detect => sub { lm78_detect 0, @_},
-       isa_addrs => (0x290),  # Theoretically anyway, but this will do
+       isa_addrs => [0x290],  # Theoretically anyway, but this will do
      } ,
      {
        name => "National Semiconductors LM78-J",
        driver => "lm78",
        i2c_addrs => [0x00..0x7f],
        i2c_detect => sub { lm78_detect 1, @_ },
-       isa_addrs => (0x290),  # Theoretically anyway, but this will do
+       isa_addrs => [0x290],  # Theoretically anyway, but this will do
      } ,
      {
        name => "National Semiconductors LM79",
        driver => "lm78",
        i2c_addrs => [0x00..0x7f],
        i2c_detect => sub { lm78_detect 2, @_ },
-       isa_addrs => (0x290),  # Theoretically anyway, but this will do
+       isa_addrs => [0x290],  # Theoretically anyway, but this will do
      } ,
      {
        name => "National Semiconductors LM75",
@@ -111,7 +112,49 @@ use subs qw(lm78_detect lm75_detect lm80_detect);
        driver => "lm80",
        i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { lm80_detect @_} ,
-     }
+     },
+     {
+       name => "Winbond W83781D",
+       driver => "w83781d",
+       i2c_addrs => [0x00..0x7f], 
+       i2c_detect => sub { w83781d_detect 0, @_},
+       isa_addrs => [0x290],  # Theoretically anyway, but this will do
+     } ,
+     {
+       name => "Genesys Logic GL518SM Revision 0x00",
+       driver => "gl518sm",
+       i2c_addrs => [0x4c, 0x4d],
+       i2c_detect => sub { gl518sm_detect 0, @_} ,
+     },
+     {
+       name => "Genesys Logic GL518SM Revision 0x80",
+       driver => "gl518sm",
+       i2c_addrs => [0x4c, 0x4d],
+       i2c_detect => sub { gl518sm_detect 1, @_} ,
+     },
+     {
+       name => "Genesys Logic GL520SM",
+       i2c_addrs => [0x4c, 0x4d],
+       i2c_detect => sub { gl520sm_detect 1, @_} ,
+     },
+     {
+       name => "Analog Devices ADM9240",
+       driver => "adm9240",
+       i2c_addrs => [0x2c..0x2f],
+       i2c_detect => sub { adm9240_detect @_ }
+     },
+     {
+       name => "Analog Devices ADM1021",
+       driver => "adm9240",
+       i2c_addrs => [0x18..0x1b,0x29..0x2b,0x4c..0x4e],
+       i2c_detect => sub { adm1021_detect 0, @_ },
+     },
+     {
+       name => "Maxim MAX1617",
+       driver => "adm9240",
+       i2c_addrs => [0x18..0x1b,0x29..0x2b,0x4c..0x4e],
+       i2c_detect => sub { adm1021_detect 1, @_ },
+     },
 );
 
 
@@ -477,7 +520,14 @@ sub scan_adapter
 ##################
 
 # Each function returns a confidence value. The higher this value, the more
-# sure we are about this chip.
+# sure we are about this chip. A Winbond W83781D, for example, will be
+# detected as a LM78 too; but as the Winbond detection has a higher confidence 
+# factor, you should identify it as a Winbond.
+
+# Each function returns a list. The first element is the confidence value;
+# Each element after it is an SMBus address. In this way, we can detect 
+# chips with several SMBus addresses. The SMBus address for which the
+# function was called is never returned.
 
 # If there are devices which get confused if they are only read from, then
 # this program will surely confuse them. But we guarantee never to write to
@@ -488,26 +538,30 @@ sub scan_adapter
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: 0 if not detected, 7 if detected.
+# Returns: undef if not detected, (7) if detected.
 # Registers used:
+#   0x40: Configuration
 #   0x48: Full I2C Address
 #   0x49: Device ID
+# Note that this function is always called through a closure, so the
+# arguments are shifted by one place.
 sub lm78_detect
 {
   my $reg;
   my ($chip,$file,$addr) = @_;
-  return 0 unless i2c_smbus_read_byte_data($file,0x48) == $addr;
+  return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
+  return unless i2c_smbus_read_byte_data($file,0x40) & 0x80 == 0x00;
   $reg = i2c_smbus_read_byte_data($file,0x49);
-  return 0 unless ($chip == 0 and $reg == 0x00) or
-                  ($chip == 1 and $reg == 0x40) or
-                  ($chip == 2 and $reg & 0xfe == 0xc0);
-  return 7;
+  return unless ($chip == 0 and $reg == 0x00) or
+                    ($chip == 1 and $reg == 0x40) or
+                    ($chip == 2 and $reg & 0xfe == 0xc0);
+  return (7);
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
-# Returns: 0 if not detected, 3 if detected.
+# Returns: undef if not detected, (3) if detected.
 # Registers used:
 #   0x01: Configuration
 #   0x02: Hysteris
@@ -524,18 +578,18 @@ sub lm75_detect
   my $hyst = i2c_smbus_read_word_data($file,0x02);
   my $os = i2c_smbus_read_word_data($file,0x03);
   for ($i = 0x00; $i <= 0xff; $i += 4) {
-    return 0 if i2c_smbus_read_byte_data($file,$i + 0x01) != $conf;
-    return 0 if i2c_smbus_read_word_data($file,$i + 0x02) != $hyst;
-    return 0 if i2c_smbus_read_word_data($file,$i + 0x03) != $os;
+    return if i2c_smbus_read_byte_data($file,$i + 0x01) != $conf;
+    return if i2c_smbus_read_word_data($file,$i + 0x02) != $hyst;
+    return if i2c_smbus_read_word_data($file,$i + 0x03) != $os;
   }
-  return 3;
+  return (3);
 }
   
 
 # $_[0]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
-# Returns: 0 if not detected, 3 if detected.
+# Returns: undef if not detected, (3) if detected.
 # Registers used:
 # Registers used:
 #   0x02: Interrupt state register
@@ -544,16 +598,132 @@ sub lm80_detect
 {
   my $i;
   my ($file,$addr) = @_;
-  return 0 if i2c_smbus_read_byte_data($file,$0x02) & 0xc0 != 0;
+  return if i2c_smbus_read_byte_data($file,$0x02) & 0xc0 != 0;
   for ($i = 0x2a; $i <= 0x3d; $i++) {
     my $reg = i2c_smbus_read_byte_data($file,$i);
-    return 0 if i2c_smbus_read_byte_data($file,$i+0x40) != $reg;
-    return 0 if i2c_smbus_read_byte_data($file,$i+0x80) != $reg;
-    return 0 if i2c_smbus_read_byte_data($file,$i+0xc0) != $reg;
+    return if i2c_smbus_read_byte_data($file,$i+0x40) != $reg;
+    return if i2c_smbus_read_byte_data($file,$i+0x80) != $reg;
+    return if i2c_smbus_read_byte_data($file,$i+0xc0) != $reg;
   }
-  return 3;
+  return (3);
 }
   
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, (8,addr1,addr2) if detected, but only
+#          if the LM75 chip emulation is enabled.
+# Registers used:
+#   0x48: Full I2C Address
+#   0x4a: I2C addresses of emulated LM75 chips
+#   0x4e: Vendor ID byte selection, and bank selection
+#   0x4f: Vendor ID
+#   0x58: Device ID (only when in bank 0)
+# Note: Fails if the W83781D is not in bank 0 (may succeed for bank 2; bank 1
+# leaves almost all registers in an undefined state, too bad).
+# Note: Detection overrules a previous LM78 detection
+sub w83781d_detect
+{
+  my ($reg1,$reg2,@res);
+  my ($chip,$file,$addr) = @_;
+  return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
+  $reg1 = i2c_smbus_read_byte_data($file,0x4e);
+  $reg2 = i2c_smbus_read_byte_data($file,0x4f);
+  return unless ($reg1 & 0x80 == 0x00 and $reg2 == 0xa3) or 
+                ($reg1 & 0x80 == 0x80 and $reg2 == 0x5c);
+  return if $reg1 & 0x07 == 0x00 and 
+            i2c_smbus_read_byte_data($file,0x58) != 0x10;
+  $reg1 = i2c_smbus_read_byte_data($file,0x4a);
+  @res = (8);
+  push @res, ($reg1 & 0x07) + 0x48 if $reg1 & 0x08;
+  push @res, ($reg1 & 0x80) >>4 + 0x48 if $reg1 & 0x80;
+  return @res;
+}
+
+# $_[0]: Chip to detect (0 = Revision 0x00, 1 = Revision 0x80)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, (6) if detected.
+# Registers used:
+#   0x00: Device ID
+#   0x01: Revision ID
+#   0x03: Configuration 
+# Mediocre detection
+sub gl518sm_detect
+{
+  my $reg;
+  my ($chip,$file,$addr) = @_;
+  return unless i2c_smbus_read_byte_data($file,0x00) == 0x80;
+  return unless i2c_smbus_read_byte_data($file,0x03) & 0x80 == 0x00;
+  $reg = i2c_smbus_read_byte_data($file,0x01);
+  return unless ($chip == 0 and $reg == 0x00) or
+                ($chip == 1 and $reg == 0x80);
+  return (6);
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, (5) if detected.
+# Registers used:
+#   0x00: Device ID
+#   0x01: Revision ID
+#   0x03: Configuration 
+# Mediocre detection
+sub gl520sm_detect
+{
+  my ($file,$addr) = @_;
+  return unless i2c_smbus_read_byte_data($file,0x00) == 0x20;
+  return unless i2c_smbus_read_byte_data($file,0x03) & 0x80 == 0x00;
+  # The line below must be better checked before I dare to use it.
+  # return unless i2c_smbus_read_byte_data($file,0x01) == 0x00;
+  return (5);
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, (5) if detected.
+# Registers used:
+#   0x3e: Company ID
+#   0x40: Configuration
+#   0x48: Full I2C Address
+# Note: Detection overrules a previous LM78 detection
+sub adm9240_detect
+{
+  my ($file,$addr) = @_;
+  return unless i2c_smbus_read_byte_data($file,0x3e) == 0x23;
+  return unless i2c_smbus_read_byte_data($file,0x40) & 0x80 == 0x00;
+  return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
+  
+  return (8);
+}
+
+# $_[0]: Chip to detect (0 = ADM1021, 1 = MAX1617)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, (5) or (3) if detected.
+# Registers used:
+#   0xfe: Company ID
+#   0x02: Status
+# Note: Especially the Maxim has very bad detection; we give it a low 
+# confidence value.
+sub adm1021_detect
+{
+  my $reg;
+  my ($chip, $file,$addr) = @_;
+  return if $chip == 0 and i2c_smbus_read_byte_data($file,0xfe) != 0x41;
+  # The remaining things are flaky at best. Perhaps something can be done
+  # with the fact that some registers are unreadable?
+  return if i2c_smbus_read_byte_data($file,0x02) & 0x03 != 0;
+  if ($chip == 0) {
+    return (6);
+  } else {
+    return (3);
+  }
+}
 
 ################
 # MAIN PROGRAM #
