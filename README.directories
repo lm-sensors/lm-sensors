@@ -1,0 +1,14 @@
+The directories within this package:
+
+* CVS
+  The CVS directories. Do not touch these!
+* archive
+  Packages from other sources. Currently, it contains Simon Vogl's i2c code
+  (mod-????????.tar.gz).
+* doc
+  Documentation about the modules within this package
+* i2c
+  Simon Vogl's i2c module, including any necessary patches, excluding any
+  files which are removed by 'make clean'.
+* src
+  Our own code.

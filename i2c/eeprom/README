@@ -1,0 +1,4 @@
+This is a simple demo program that prints out the 
+first 256 bytes of an EEPROM memory. Adittionally,
+you can write a test pattern to the chip.
+With -[aA] the chip address may be specified.

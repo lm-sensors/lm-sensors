@@ -1,0 +1,22 @@
+Okay, a new version is born... 
+There are still many files from the old version lying around that
+need to be ported - anyone have spare time ?
+
+Currently, the following modules are running in the new mode:
+	i2c.c		- main admin module & common interface
+	i2c-dev.c 	- character device interface for the bus
+	algo-bit.c	- Algorithms for bit banging
+	bit-lp.c	- hw part for parallel port adapter, Philips interface
+	bit-velle.c	- hw part for parallel port adapter, Vellemann K9000
+	bit-mb		- VIA Chipset motherboards' SMBus -> see README.bitmb
+
+The other modules, esp. algo-pcf.c still need to be converted. For the
+hw specific mods, this should be relatively easy & quick.
+
+A simple driver example is in drivers -- a piece of code to access EEPROMs.
+
+Simon (simon@tk.uni-linz.ac.at)
+
+For more detailed documentation have a look at 
+http://www.tk.uni-linz.ac.at/~simon/private/i2c
+
