@@ -5,7 +5,7 @@ Status: Complete and tested.
 
 Supported adapters:
   * Acer Labs, Inc. ALI 1533 and 1543C
-    Datasheet: Publicly available at the Acer Labs website
+    Datasheet: Available at the Acer Labs website (password required)
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
 	<phil@netroedge.com>, and Mark D. Studebaker <mds@eng.paradyne.com>
@@ -23,10 +23,10 @@ Description
 
 Stability
 ---------
-Complete and tested on the author's system.
-Untested by others.
-SMBus sometimes hangs on author's system when accessing W83781D,
-cause unknown (see Issues below).
+Complete and tested.
+SMBus periodically hangs on ASUS P5A motherboards and can only be
+cleared by a power cycle. Cause unknown (see Issues below).
+Block reads/writes untested (not used by any existing sensor driver).
 
 
 Supported Devices
@@ -104,24 +104,10 @@ It will therefore conflict with separate software
 that accesses the ACPI registers?
 To fix this, undefine MAP_ACPI.
 
-On the author's ASUS P5A, the W83781D chip is on both the
-ISA and the SMBus.
-
-On the author's ASUS P5A, the W83781D chip hangs the whole
-bus and this can only be resolved by powering off the computer.
-The chip does not hang if an external device is attached
-to the SMBus. There may be electrical problems on this board.
-The EEPROM on the DRAM DIMM is accessible on the SMBus and
-it does not hang the bus.
-
-
-External Device Connection for ASUS P5A
----------------------------------------
-On the author's ASUS P5A board,
-the SMBus connector is between the 4th and 5th PCI
-connector. The pinouts are:
-	1. Clock
-	2. no pin
-	3. Ground
-	4. Data
-	5. +5V
+On the ASUS P5A motherboard, there are several reports that
+the SMBus will hang
+and this can only be resolved by powering off the computer.
+There may be electrical problems on this board.
+On the P5A, the W83781D sensor chip is on both the ISA and
+SMBus. Therefore the SMBus hangs can generally be avoided
+by accessing the W83781D on the ISA bus only.
