@@ -260,7 +260,7 @@ static int voodoo3_setup(void)
 s32 voodoo3_access(u8 addr, char read_write,
                  u8 command, int size, union smbus_data * data)
 {
-  if (size == SMBUS_BYTE_DATA) {
+  if ((size == SMBUS_BYTE_DATA) || (size == SMBUS_BYTE)) {
         addr=((addr & 0x7f) << 1) | (read_write & 0x01);
   	if (read_write == SMBUS_READ) {
 	  data->byte=Voodoo3_I2CRead(addr,command); 

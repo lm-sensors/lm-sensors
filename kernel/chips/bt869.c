@@ -165,9 +165,11 @@ printk("bt869.o:  probing address %d .\n",address);
   new_client->driver = &bt869_driver;
 
   /* Now, we do the remaining detection. It is lousy. */
-  cur = smbus_read_word_data(adapter,address,0);
-  printk("bt869.o: testing-->%d\n",cur);
-  if ((cur | 0x20) != 0x21)
+  smbus_write_byte_data(new_client->adapter,
+	new_client->addr,0xC4,0);         /* set status bank 0 */
+  cur = smbus_read_byte_data(adapter,address,0);
+  printk("bt869.o: address 0x%X testing-->0x%X\n",address,cur);
+  if ((cur | 0x27) != 0x27)
       goto ERROR1;
       
   /* Determine the chip type */
@@ -285,15 +287,15 @@ u16 swap_bytes(u16 val)
   return (val >> 8) | (val << 8);
 }
 
-/* All registers are word-sized, except for the configuration register.
+/* All registers are byte-sized.
    bt869 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
 int bt869_read_value(struct i2c_client *client, u8 reg)
 {
-    return smbus_read_byte_data(client->adapter,client->addr,reg);
+    return smbus_read_byte(client->adapter,client->addr);
 }
 
-/* All registers are word-sized, except for the configuration register.
+/* All registers are byte-sized.
    bt869 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
 int bt869_write_value(struct i2c_client *client, u8 reg, u16 value)
@@ -342,7 +344,7 @@ void bt869_status(struct i2c_client *client, int operation, int ctl_name,
 {
   struct bt869_data *data = client->data;
   if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 1;
+    *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     bt869_update_client(client);
     results[0] = data->status[0];
