@@ -67,6 +67,7 @@ ask CVS about it:
                    Display pc87365/pc87366 VID
                    Improve smsc47m1 support
                    Hide 2.6 adm1027 alarm_mask being missing
+                   Print VRM version for all supported chips
   Program sensors-detect: Support LM93, LM77, LM63
                           Support PC8739x Super-I/O family (no sensors)
                           Fix PCA9540 support

@@ -119,6 +119,27 @@ int sensors_get_label_and_valid(sensors_chip_name name, int feature, char **labe
   return err;
 }
 
+void print_vid_info(const sensors_chip_name *name, int f_vid, int f_vrm)
+{
+  char *label = NULL;
+  int valid;
+  double vid, vrm;
+
+  if (!sensors_get_label_and_valid(*name,f_vid,&label,&valid)
+      && !sensors_get_feature(*name,f_vid,&vid) ) {
+    if (valid) {
+      print_label(label,10);
+      if(!sensors_get_feature(*name,f_vrm,&vrm))
+	printf("%+6.3f V  (VRM Version %.1f)\n",vid,vrm);
+      else
+	printf("%+6.3f V\n",vid);
+    }
+  }
+  free_the_label(&label);
+}
+
+/* Chip-specific print routines start here */
+
 void print_ds1621(const sensors_chip_name *name)
 {
   char *label;
@@ -1185,15 +1206,7 @@ void print_adm1025(const sensors_chip_name *name)
     free_the_label(&label);
   }
 
-  if (!sensors_get_label_and_valid(*name,SENSORS_ADM1025_VID,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_ADM1025_VID,&cur)) {
-    if (valid) {
-      print_label(label,10);
-      printf("%+6.3f V\n", cur);
-    }
-  } else
-    printf("ERROR: Can't get VID data!\n");
-  free_the_label(&label);
+  print_vid_info(name, SENSORS_ADM1025_VID, SENSORS_ADM1025_VRM);
 }
 
 void print_lm80(const sensors_chip_name *name)
@@ -1626,15 +1639,7 @@ void print_lm85(const sensors_chip_name *name)
     printf("ERROR: Can't get PWM3 data!\n");
   free_the_label(&label);
 
-  if (!sensors_get_label_and_valid(*name,SENSORS_LM85_VID,&label,&valid)
-      && !sensors_get_feature(*name,SENSORS_LM85_VID,&cur)
-      && !sensors_get_feature(*name,SENSORS_LM85_VRM,&min) ) {
-    if (valid) {
-      print_label(label,10);
-      printf("%+6.3f V    (VRM Version %4.1f)\n",cur,min);
-    }
-  }
-  free_the_label(&label);
+  print_vid_info(name, SENSORS_LM85_VID, SENSORS_LM85_VRM);
 }
 
 void print_lm87(const sensors_chip_name *name)
@@ -1807,14 +1812,7 @@ void print_lm87(const sensors_chip_name *name)
   }
   free_the_label(&label);
 
-  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_VID,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_LM87_VID,&cur)) {
-    if (valid) {
-      print_label(label,10);
-      printf("%+6.3f V\n", cur);
-    }
-  }
-  free_the_label(&label);
+  print_vid_info(name, SENSORS_LM87_VID, SENSORS_LM87_VRM);
 }
 
 void print_mtp008(const sensors_chip_name *name)
@@ -2297,16 +2295,7 @@ void print_w83781d(const sensors_chip_name *name)
   }
 
   if(!is697hf) {
-    if (!sensors_get_label_and_valid(*name,SENSORS_W83781D_VID,&label,&valid) &&
-        !sensors_get_feature(*name,SENSORS_W83781D_VID,&cur)) {
-      if (valid) {
-        print_label(label,10);
-        printf("%+5.3f V\n",cur);
-      }
-    } else {
-      printf("ERROR: Can't get VID data!\n");
-    }
-    free_the_label(&label);
+    print_vid_info(name, SENSORS_W83781D_VID, SENSORS_W83781D_VRM);
   }
     
   if (!sensors_get_label_and_valid(*name,SENSORS_W83781D_ALARMS,&label,&valid)
@@ -3865,15 +3854,7 @@ void print_vt1211(const sensors_chip_name *name)
     printf("ERROR: Can't get TEMP7 data!\n");
   free_the_label(&label);
 
-  if (!sensors_get_label_and_valid(*name,SENSORS_VT1211_VID,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_VT1211_VID,&cur)) {
-    if (valid) {
-      print_label(label,10);
-      printf("%+6.2f V\n",cur);
-    }
-  }
-  free_the_label(&label);
-
+  print_vid_info(name, SENSORS_VT1211_VID, SENSORS_VT1211_VRM);
 }
 
 void print_smsc47m1(const sensors_chip_name *name)
@@ -4064,14 +4045,7 @@ void print_pc87366(const sensors_chip_name *name)
     free_the_label(&label);
   }
   
-  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_VID, &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_PC87360_VID, &cur)) {
-    if (valid) {
-      print_label(label, 10);
-      printf("%+6.3f V\n", cur);
-    }
-  }
-  free_the_label(&label);
+  print_vid_info(name, SENSORS_PC87360_VID, SENSORS_PC87360_VRM);
 }
 
 static void lm92_print_temp (float n_cur,float n_high,float n_low,float n_crit,float n_hyst)
@@ -4320,15 +4294,7 @@ void print_vt8231(const sensors_chip_name *name)
     printf("ERROR: Can't get TEMP7 data!\n");
   free_the_label(&label);
 
-  if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_VID,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_VT8231_VID,&cur)) {
-    if (valid) {
-      print_label(label,10);
-      printf("%+6.2f V\n",cur);
-    }
-  }
-  free_the_label(&label);
-
+  print_vid_info(name, SENSORS_VT8231_VID, SENSORS_VT8231_VRM);
 }
 
 #define BMC_MAX_INS 10
@@ -4490,16 +4456,7 @@ void print_adm1026(const sensors_chip_name *name)
   };
 
   /* VID/VRM */
-  if (!sensors_get_label_and_valid(*name,SENSORS_ADM1026_VID,&label,&valid)
-      && !sensors_get_feature(*name,SENSORS_ADM1026_VID,&cur)
-      && !sensors_get_feature(*name,SENSORS_ADM1026_VRM,&min) ) {
-    if (valid) {
-      print_label(label,10);
-      printf("%+6.3f V    (VRM Version %4.1f)\n",cur,min);
-    }
-  }
-  free_the_label(&label);
-
+  print_vid_info(name, SENSORS_ADM1026_VID, SENSORS_ADM1026_VRM);
 }
 
 void print_lm83(const sensors_chip_name *name)
@@ -5023,16 +4980,7 @@ void print_asb100(const sensors_chip_name *name)
   PRINT_ASB100_TEMP(3, name, alarms);
   PRINT_ASB100_TEMP(4, name, alarms);
 
-  if (!sensors_get_label_and_valid(*name,SENSORS_ASB100_VID,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_ASB100_VID,&cur)) {
-    if (valid) {
-      print_label(label,10);
-      printf("%+5.3f V\n",cur);
-    }
-  } else {
-    printf("ERROR: Can't get VID data!\n");
-  }
-  free_the_label(&label);
+  print_vid_info(name, SENSORS_ASB100_VID, SENSORS_ASB100_VRM);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_ASB100_ALARMS,&label,&valid)) {
     print_label(label,10);
