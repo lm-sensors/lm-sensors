@@ -307,6 +307,7 @@ function AskPath {
 			touch $X
 			chmod 0660 $X
 			chown root.root $X
+			FCCONFIG=$X
 		else
 			AskPath
 		fi
