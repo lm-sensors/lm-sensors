@@ -2270,3 +2270,18 @@ chip "adm1031-*"
 chip "w83l785ts-*"
 
    label temp1 "CPU Diode"
+
+chip "lm92-*"
+
+   label temp "CPU Temp"
+
+# Change limits as you see fit
+#   set temp_low 14
+#   set temp_high 60
+#   set temp_crit 72
+# Hysteresis is computed from critical limit for Linux 2.6,
+# and from high limit for Linux 2.4. That might change in the future.
+# Whatever, the same relative hysteresis is used for all of low, high
+# and critical limits.
+#   set temp_hyst 70 # Linux 2.6
+#   set temp_hyst 58 # Linux 2.4

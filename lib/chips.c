@@ -4747,7 +4747,7 @@ static sensors_chip_feature lm92_features[] =
     { SENSORS_LM92_TEMP_CRIT, "temp_crit", SENSORS_LM92_TEMP, SENSORS_LM92_TEMP,
                        RW, LM92_SYSCTL_TEMP, VALUE(4), 4 },
     { SENSORS_LM92_TEMP_HYST, "temp_hyst", SENSORS_LM92_TEMP, SENSORS_LM92_TEMP,
-                       RW, LM92_SYSCTL_TEMP, VALUE(5), 4 },
+                       RW, LM92_SYSCTL_TEMP, VALUE(5), 4 , "temp1_crit_hyst", 3 },
     { SENSORS_LM92_ALARMS, "alarms", NOMAP, NOMAP,
                        R, LM92_SYSCTL_ALARMS, VALUE(1), 0 },
     { 0 }
