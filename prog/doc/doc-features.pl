@@ -215,13 +215,13 @@ sub scan_kernel_module
 # $_[0]: Base directory
 sub scan_all
 {
-  my ($prefix,@modules) = @_;
+  my ($prefix) = @_;
   my ($filename);
   scan_chips_h $prefix . "/lib/chips.h";
   scan_chips_c_1 $prefix . "/lib/chips.c";
   scan_chips_c_2 $prefix . "/lib/chips.c";
-  foreach $filename (@modules) { 
-    scan_kernel_module "$prefix/kernel/chips/$filename"
+  foreach $filename (glob ($prefix . "/kernel/chips/*.c")) { 
+    scan_kernel_module "$filename"
   }
 }
 
@@ -265,40 +265,50 @@ sub initialize
 
 sub help_message
 {
-  print STDERR "Syntax: doc-features PATH MODULES...\n";
+  print STDERR "Syntax: doc-features PATH PREFIXES...\n";
   print STDERR "PATH is the path to the base of the lm_sensors tree.\n";
-  print STDERR "MODULES are the modules that need to be examined. If none ".
+  print STDERR "PREFIXES are the chips that have to be output. If none ".
                "are specified,\n".
-               "all modules are examined. Modules are looked for in ".
-               "PATH/kernel/chips\n.";
+               "all chips are printed.\n";
 }
 
 # @_: @ARGV
 # Returns ($base_dir,@modules)
 sub scan_arguments 
 {
-  my ($base_dir,@modules);
+  my ($base_dir,@chips);
   if (@_ < 1 or @_[0] =~ /^-/) {
     help_message;
     exit 0;
   }
   $base_dir = @_[0];
   if (@_ == 1) {
-    @modules = map { substr $_, length "$base_dir/kernel/chips/" }
-                   glob "$base_dir/kernel/chips/*.c";
+    @chips =  ();
   } else {
-    splice(@_,0,1);
-    @modules = map { $_ !~ /\./ ? $_.".c" : $_ } @_; 
+    @chips = @_; 
+    splice(@chips,0,1);
   }
-  return ($base_dir,@modules)
+  return ($base_dir,@chips)
 }
 
-initialize;
-scan_all scan_arguments @ARGV;
-my $el;
-foreach $el (keys %features) {
-  if (exists $sysctls{$features{$el}->{features}->[0]->{sysctl}}) {
-    output_data $el;
-    print "\n\n";
+sub main {
+  my ($el,$base_dir,@prefixes,$prefix);
+  initialize;
+  my ($base_dir,@prefixes) = scan_arguments @_;
+  scan_all $base_dir;
+  if (@prefixes) {
+    foreach $prefix (@prefixes) {
+      foreach $el (keys %features) {
+        output_data ($el), print "\n\n"  
+                 if ($features{$el}->{prefix} eq $prefix);
+      }
+    } 
+  } else {
+    foreach $el (keys %features) {
+      output_data $el;
+      print "\n\n";
+    }
   }
 }
+
+main @ARGV;
