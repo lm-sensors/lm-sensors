@@ -276,7 +276,7 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 					      hostc | SMBHSTCFG_I2C_EN);
 		} else {
 			dev_err(I801_dev,
-				"I2C_SMBUS_I2C_BLOCK_READ not DB!\n");
+				"I2C_SMBUS_I2C_BLOCK_READ unsupported!\n");
 			return -1;
 		}
 	}
