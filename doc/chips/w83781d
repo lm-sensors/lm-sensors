@@ -1,0 +1,24 @@
+
+
+Supports following Winbond chips:
+
+Chip	#vin	#fanin	#pwm	#temp	wchipid	i2c	ISA
+w83781d	7	3	0	3	0x10	yes	yes
+w83782d	9	3	2-4	3	0x30	yes	yes
+w83783s	5-6	3	2	1-2	0x40	yes	no
+
+
+The driver only updates its values each 1.5 seconds; reading it more often
+will do no harm, but will return 'old' values.
+
+
+To do:
+ 782d/783s PWM enable, clock select, duty cycle
+ 782d beep 3 register
+ 782d programmable pins
+ 783s pin is programmable for -5V or temp1; defaults to -5V,
+      no control in driver so temp1 doesn't work.
+ 783s temp2 (labeled as temp1 in data sheet) at different location
+      than 781d/782d, not implemented yet.
+
+w83783s has no in1 for compatibility with the 781d/782d.
