@@ -778,7 +778,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        isa_detect => sub { sis5595_isa_detect @_ },
      },
      {
-       name => "VIA Technologies VT 82C686 Integrated Sensors",
+       name => "VIA Technologies VT82C686 Integrated Sensors",
        driver => "via686a",
        isa_addrs => [ 0 ],
        isa_detect => sub { via686a_isa_detect @_ },
@@ -2149,7 +2149,7 @@ sub via686a_isa_detect
   my ($adapter,$try,$local_try);
   my $found = 0;
   foreach $local_try (@pci_adapters) {
-    if ($local_try->{procid} eq "VIA Technologies VT 82C686 Apollo ACPI") {
+    if ($local_try->{procid} eq "VIA Technologies VT82C686 Apollo ACPI") {
       $try = $local_try;
       $found = 1;
       last;

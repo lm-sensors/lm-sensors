@@ -24,7 +24,8 @@ ask CVS about it:
   Module w83781d: Add W83697HF support
   Program i2cdump: Add i2c block read capability
   Program sensors: Add PCF8591 and W83697HF support
-  Program sensors-detect: Add several Nvidia chips, add PCF8591
+  Program sensors-detect: Add several Nvidia chips, add PCF8591,
+                          fix Via 686a detection
 
 
 2.6.2 (20011118)
