@@ -55,7 +55,7 @@
 #include <linux/types.h>
 #include "smbus.h"
 #include "version.h"
-#include "isa.h"
+#include "i2c-isa.h"
 #include "sensors.h"
 #include "i2c.h"
 #include "compat.h"

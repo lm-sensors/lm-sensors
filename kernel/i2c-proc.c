@@ -23,7 +23,7 @@
 
 #include "i2c.h"
 #include "smbus.h"
-#include "isa.h"
+#include "i2c-isa.h"
 #include "version.h"
 #include "compat.h"
 #include "sensors.h"

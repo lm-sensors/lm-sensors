@@ -1,5 +1,5 @@
 /*
-    isa.c - Part of lm_sensors, Linux kernel modules for hardware
+    i2c-isa.c - Part of lm_sensors, Linux kernel modules for hardware
             monitoring
     Copyright (c) 1998  Frodo Looijaard <frodol@dds.nl> 
 
@@ -35,7 +35,7 @@
 #endif
 
 #include "version.h"
-#include "isa.h"
+#include "i2c-isa.h"
 
 static int isa_master_xfer (struct isa_adapter *adap,
                             struct i2c_msg msgs[], int num);

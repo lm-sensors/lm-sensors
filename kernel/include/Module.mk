@@ -20,7 +20,7 @@
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := kernel/include
 
-KERNELINCLUDEFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/isa.h \
+KERNELINCLUDEFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/i2c-isa.h \
                       $(MODULE_DIR)/smbus.h $(MODULE_DIR)/i2c-dev.h
 
 install-all-kernel-include:
