@@ -44,6 +44,11 @@
 #include <asm/io.h>
 #include "version.h"
 
+/* kernel 2.4.9 needs this */
+#ifndef min_t
+#define min_t(type,x,y) min(type,x,y)
+#endif
+
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR ("Hans-Frieder Vogt <hfvogt@arcor.de>");
 MODULE_DESCRIPTION("nForce2 SMBus driver");
