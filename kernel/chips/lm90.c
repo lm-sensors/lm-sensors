@@ -35,12 +35,13 @@
  * Among others, it has a higher accuracy than the LM90, much like the
  * LM86 does.
  *
- * This driver also supports the MAX6657 and MAX6658, sensor chips made
- * by Maxim. These chips are similar to the LM86. Complete datasheet
- * can be obtained at Maxim's website at:
+ * This driver also supports the MAX6657, MAX6658 and MAX6659 sensor
+ * chips made by Maxim. These chips are similar to the LM86. Complete
+ * datasheet can be obtained at Maxim's website at:
  *   http://www.maxim-ic.com/quick_view2.cfm/qv_pk/2578
- * Note that there is no way to differenciate between both chips (but
- * no need either).
+ * Note that there is no easy way to differenciate between the three
+ * variants. The extra address and features of the MAX6659 are not
+ * supported by this driver.
  *
  * Since the LM90 was the first chipset supported by this driver, most
  * comments will refer to this chipset, but are actually general and
@@ -74,9 +75,11 @@
 
 /*
  * Addresses to scan
- * Address is fully defined internally and cannot be changed.
+ * Address is fully defined internally and cannot be changed except for
+ * MAX6659.
  * LM86, LM89, LM90, LM99, ADM1032, MAX6657 and MAX6658 have address 0x4c.
  * LM89-1, and LM99-1 have address 0x4d.
+ * MAX6659 can have address 0x4c, 0x4d or 0x4e (unsupported).
  */
 
 static unsigned short normal_i2c[] = { 0x4c, 0x4d, SENSORS_I2C_END };
@@ -372,8 +375,17 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 		}
 		else if (man_id == 0x4D) /* Maxim */
 		{
-			if (address == 0x4C
-			 && (reg_config1 & 0x1F) == 0
+ 			/*
+ 			 * The Maxim variants do NOT have a chip_id register.
+ 			 * Reading from that address will return the last read
+ 			 * value, which in our case is those of the man_id
+ 			 * register. Likewise, the config1 register seems to
+ 			 * lack a low nibble, so the value will be those of the
+ 			 * previous read, so in our case those of the man_id
+ 			 * register.
+ 			 */
+			if (chip_id == man_id
+			 && (reg_config1 & 0x1F) == (man_id & 0x0F)
 			 && reg_convrate <= 0x09)
 				kind = max6657;
 		}
