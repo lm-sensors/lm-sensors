@@ -33,8 +33,11 @@ between 0x00 and 0xFF (default value: 0x4E). The W83781D data sheet has more
 information on bank selection.
 
 .SH WARNING
-i2cdump can be dangerous if used improperly. On some chips that do not support
-read data commands, i2cdump can actually WRITE to the chip. Do not use i2cdump
+i2cdump can be dangerous if used improperly. Most notably, the \fBc\fP mode
+starts with WRITING a byte to the chip. On most chips it will be stored in the
+address pointer register, which is OK, but some chips with a single register
+or no (visible) register at all will most likely see this as a real WRITE,
+resulting in possible misbehavior or corruption. Do not use i2cdump
 on random addresses. Anyway, it is of little use unless you have an idea of
 what you are looking for and have some general knowledge about hardware
 monitoring chips internals.
