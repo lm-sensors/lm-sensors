@@ -38,6 +38,10 @@
 #define PCI_DEVICE_ID_SERVERWORKS_OSB4 0x0200
 #endif
 
+#ifndef PCI_VENDOR_ID_SERVERWORKS
+#define PCI_VENDOR_ID_SERVERWORKS 0x01166
+#endif
+
 /* OSB4 SMBus address offsets */
 #define SMBHSTSTS (0 + osb4_smba)
 #define SMBHSLVSTS (1 + osb4_smba)

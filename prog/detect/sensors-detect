@@ -357,7 +357,8 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        devid  => 0x0200,
        func => 0,
        procid => "ServerWorks South Bridge",
-       match => sub { $_[0] =~ /^ServerWorks tobewritten/ },
+       driver => "i2c-osb4",
+       match => sub { $_[0] =~ /^SMBus OSB4 adapter at / },
      } , 
 );
 
