@@ -208,6 +208,22 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        driver => "i2c-matroxfb",
        match  => sub { $_[0] =~ /^(DDC,MAVEN):fb[0-9]{1,2}/ },
      },
+     {
+       vendid => 0x121a,
+       devid  => 0x0005,
+       func   => 0,
+       procid => "3Dfx Voodoo3",
+       driver => "i2c-voodoo3",
+       match  => sub { $_[0] =~ /Voodoo3 adapter at/ },
+     },
+     {
+       vendid => 0x121a,
+       devid  => 0x0003,
+       func   => 0,
+       procid => "3Dfx Voodoo Banshee",
+       driver => "i2c-voodoo3",
+       match  => sub { $_[0] =~ /Voodoo3 adapter at/ },
+     },
 );
 
 use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect 
