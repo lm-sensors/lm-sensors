@@ -55,6 +55,11 @@
 #include "version.h"
 #include "sensors_compat.h"
 
+/* 82801CA is undefined before kernel 2.4.13 */
+#ifndef PCI_DEVICE_ID_INTEL_82801CA_3
+#define PCI_DEVICE_ID_INTEL_82801CA_3      0x2483
+#endif
+
 /* 82801DB is undefined before kernel 2.4.19 */
 #ifndef PCI_DEVICE_ID_INTEL_82801DB_3
 #define PCI_DEVICE_ID_INTEL_82801DB_3      0x24c3
