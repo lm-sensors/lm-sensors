@@ -88,7 +88,7 @@ superio_exit(void)
  */
 #define SMSC_DEVID_MATCH(id) ((id) == 0x51 || (id) == 0x59 || (id) == 0x5F)
 
-#define SMSC_ACT_REG 0x20
+#define SMSC_ACT_REG 0x30
 #define SMSC_BASE_REG 0x60
 
 #define SMSC_EXTENT 0x80
@@ -466,16 +466,16 @@ void smsc47m1_pwm(struct i2c_client *client, int operation, int ctl_name,
 			data->pwm[nr - 1] &= 0x81;
 			data->pwm[nr - 1] |= PWM_TO_REG(results[0]);
 			if (*nrels_mag >= 2) {
-				if(results[1] && (!(data->pwm[nr-1] & 0x01))) {
+				if(results[1] && (data->pwm[nr-1] & 0x01)) {
 					/* enable PWM */
 /* hope BIOS did it already
 					smsc47m1_write_value(client,
 					          SMSC47M1_REG_PPIN(nr), 0x04);
 */
-					data->pwm[nr - 1] |= 0x01;
-				} else if((!results[1]) && (data->pwm[nr-1] & 0x01)) {
-					/* disable PWM */
 					data->pwm[nr - 1] &= 0xfe;
+				} else if((!results[1]) && (!(data->pwm[nr-1] & 0x01))) {
+					/* disable PWM */
+					data->pwm[nr - 1] |= 0x01;
 				}
 			}
 			smsc47m1_write_value(client, SMSC47M1_REG_PWM(nr),
