@@ -748,7 +748,7 @@ void LM87_temp(struct i2c_client *client, int operation, int ctl_name,
 	   {
 		results[0] = TEMP_LIMIT_FROM_REG(data->front_amb_temp_max);
 		results[1] = TEMP_LIMIT_FROM_REG(data->front_amb_temp_min);
-		results[2] = TEMP_FROM_REG(data->int_temp);
+		results[2] = TEMP_FROM_REG(data->front_amb_temp);
 	   }
 	   else if(ctl_name == LM87_SYSCTL_CPU_TEMP)
 	   {
