@@ -1,7 +1,8 @@
 /*
     isadump.c - isadump, a user-space program to dump ISA registers
-    Copyright (c) 2000  Frodo Looijaard <frodol@dds.nl>, and
+    Copyright (C) 2000  Frodo Looijaard <frodol@dds.nl>, and
                         Mark D. Studebaker <mdsxyz123@yahoo.com>
+    Copyright (C) 2004  The lm_sensors group
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@
 	Typical usage:
 	isadump 0x295 0x296		Basic winbond dump using address/data registers
 	isadump 0x295 0x296 2		Winbond dump, bank 2
+	isadump 0x2e 0x2f 0x09 0x07	Super-I/O, logical device 9
 	isadump -f 0x5000		Flat address space dump like for Via 686a
 */
 
@@ -60,7 +62,8 @@ void help(void)
 
 int main(int argc, char *argv[])
 {
-  int addrreg, datareg = 0, bank = 0, bankreg = 0x4E;
+  int addrreg, datareg = 0, bank = -1, bankreg = 0x4E;
+  int oldbank = 0;
   int i,j,res;
   int flat = 0;
   char *end;
@@ -149,7 +152,7 @@ START:
   else
 	fprintf(stderr,"  I will probe address register 0x%04x and "
                  "data register 0x%04x.\n",addrreg,datareg);
-  if(bank) 	
+  if(bank>=0) 	
     fprintf(stderr,"  Probing bank %d using bank register 0x%02x.\n",
             bank, bankreg);
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
@@ -173,10 +176,10 @@ START:
   }
 #endif
 
-  /* See Winbond w83781d data sheet for bank details */
-  if(bank) {
+  if(bank>=0) {
     outb(bankreg,addrreg);
-    outb(bank | 0x80,datareg); /* OR in high byte flag */
+    oldbank=inb(datareg);
+    outb(bank,datareg);
   }
 
   printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
@@ -193,9 +196,9 @@ START:
     }
     printf("\n");
   }
-  if(bank) {
+  if(bank>=0) {
     outb(bankreg,addrreg);
-    outb(0x80,datareg); /* put back in bank 0 high byte */
+    outb(oldbank,datareg); /* restore original value */
   }
   exit(0);
 }
