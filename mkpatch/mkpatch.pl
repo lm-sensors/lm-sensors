@@ -102,67 +102,154 @@ sub gen_Documentation_Configure_help
       print OUTPUT <<'EOF'
 I2C mainboard interfaces
 CONFIG_I2C_MAINBOARD
-  No help yet
+ 
 
 Acer Labs ALI 1533 and 1543C
 CONFIG_I2C_ALI5X3
-  No help yet
+  If you say yes to this option, support will be included for the Acer
+  Labs ALI 1533 and 1543C mainboard I2C interfaces. This can also be 
+  built as a module which can be inserted and removed while the kernel
+  is running.
 
 Apple Hydra Mac I/O
 CONFIG_I2C_HYDRA
-  No help yet
+  If you say yes to this option, support will be included for the 
+  Hydra mainboard I2C interface. This can also be built as a module 
+  which can be inserted and removed while the kernel is running.
 
 Intel 82371AB PIIX4(E)
 CONFIG_I2C_PIIX4
-  No help yet
+  If you say yes to this option, support will be included for the 
+  Intel PIIX4 and PIIX4E mainboard I2C interfaces. This can also be
+  built as a module which can be inserted and removed while the kernel
+  is running.
 
 VIA Technologies, Inc. VT82C586B
 CONFIG_I2C_VIA
-  No help yet
+  If you say yes to this option, support will be included for the VIA
+  Technologies I2C adapter found on some motherboards. This can also 
+  be built as a module which can be inserted and removed while the 
+  kernel is running.
 
 Pseudo ISA adapter (for hardware sensors modules)
 CONFIG_I2C_ISA
-  No help yet
+  This provides support for accessing some hardware sensor chips over
+  the ISA bus rather than the I2C or SMBus. If you want to do this, 
+  say yes here. This feature can also be built as a module which can 
+  be inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 Analog Devices ADM1021 and compatibles
 CONFIG_SENSORS_ADM1021 
-  No help yet
+  If you say yes here you get support for Analog Devices ADM1021 
+  sensor chips and clones: the Maxim MAX1617 and MAX1617A, the
+  TI THMC10 and the XEON processor built-in sensor. This can also 
+  be built as a module which can be inserted and removed while the 
+  kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 Analog Devices ADM9240 and compatibles
 CONFIG_SENSORS_ADM9240
-  No help yet
+  If you say yes here you get support for Analog Devices ADM9240 
+  sensor chips and clones: the Dallas Semiconductors DS1780 and
+  the National Semiconductors LM81. This can also be built as a 
+  module which can be inserted and removed while the kernel is
+  running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 Genesys Logic GL518SM
 CONFIG_SENSORS_GL518SM
-  No help yet
+  If you say yes here you get support for Genesys Logic GL518SM sensor
+  chips.  This can also be built as a module which can be inserted and
+  removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 National Semiconductors LM75
 CONFIG_SENSORS_LM75 
-  No help yet
+  If you say yes here you get support for National Semiconductor LM75
+  sensor chips. This can also be built as a module which can be
+  inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 National Semiconductors LM78
 CONFIG_SENSORS_LM78
-  No help yet
+  If you say yes here you get support for National Semiconductor LM78
+  sensor chips family: the LM78-J and LM79. Many clone chips will
+  also work at least somewhat with this driver. This can also be built
+  as a module which can be inserted and removed while the kernel is 
+  running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 National Semiconductors LM80
 CONFIG_SENSORS_LM80
-  No help yet
+  If you say yes here you get support for National Semiconductor LM80
+  sensor chips. This can also be built as a module which can be 
+  inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 Silicon Integrated Systems Corp. SiS5595
 CONFIG_SENSORS_SIS5595
-  No help yet
+  If you say yes here you get support for Silicon Integrated Systems 
+  Corp.  SiS5595 sensor chips. This can also be built as a module 
+  which can be inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 Winbond W83781D, W83782D and W83783S
 CONFIG_SENSORS_W83781D
-  No help yet
+  If you say yes here you get support for the Winbond W8378x series 
+  of sensor chips: the W83781D, W83782D, W83783S and W83682HF. This 
+  can also be built as a module which can be inserted and removed
+  while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 EEprom (DIMM) reader
 CONFIG_SENSORS_EEPROM
-  No help yet
+  If you say yes here you get read-only access to the EEPROM data 
+  available on modern memory DIMMs, and which could theoretically
+  also be available on other devices. This can also be built as a 
+  module which can be inserted and removed while the kernel is 
+  running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 Linear Technologies LTC1710
 CONFIG_SENSORS_LTC1710
-  No help yet
+  If you say yes here you get support for Linear Technologies LTC1710
+  sensor chips. This can also be built as a module which can be 
+  inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
 
 EOF
     }
