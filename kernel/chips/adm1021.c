@@ -72,6 +72,10 @@ SENSORS_INSMOD_8(adm1021, adm1023, max1617, max1617a, thmc10, lm84, gl523sm, mc1
 /* write-only */
 #define ADM1021_REG_ONESHOT 0x0F
 
+#define ADM1021_ALARM_TEMP (ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW)
+#define ADM1021_ALARM_RTEMP (ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW\
+                             | ADM1021_ALARM_RTEMP_NA)
+#define ADM1021_ALARM_ALL  (ADM1021_ALARM_TEMP | ADM1021_ALARM_RTEMP)
 
 /* Conversions. Rounding and limit checking is only done on the TO_REG
    variants. Note that you should be a bit careful with which arguments
@@ -103,6 +107,7 @@ struct adm1021_data {
 
 	u8 temp, temp_os, temp_hyst;	/* Register values */
 	u8 remote_temp, remote_temp_os, remote_temp_hyst, alarms, die_code;
+	u8 fail;
         /* Special values for ADM1023 only */
 	u8 remote_temp_prec, remote_temp_os_prec, remote_temp_hyst_prec, 
 	   remote_temp_offset, remote_temp_offset_prec;
@@ -118,7 +123,7 @@ static int adm1021_command(struct i2c_client *client, unsigned int cmd,
 static void adm1021_inc_use(struct i2c_client *client);
 static void adm1021_dec_use(struct i2c_client *client);
 static int adm1021_read_value(struct i2c_client *client, u8 reg);
-static int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg);
+static int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg, u8 mask);
 static int adm1021_write_value(struct i2c_client *client, u8 reg,
 			       u16 value);
 static void adm1021_temp(struct i2c_client *client, int operation,
@@ -397,13 +402,17 @@ int adm1021_read_value(struct i2c_client *client, u8 reg)
 	return i2c_smbus_read_byte_data(client, reg);
 }
 
-/* only update value if read succeeded */
-int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg)
+/* only update value if read succeeded; set fail bit if failed */
+int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg, u8 mask)
 {
 	int i;
+	struct adm1021_data *data = client->data;
+
 	i = i2c_smbus_read_byte_data(client, reg);
-	if(i < 0)
+	if (i < 0) {
+		data->fail |= mask;
 		return i;
+	}
 	*val = i;
 	return 0;
 }
@@ -429,33 +438,43 @@ void adm1021_update_client(struct i2c_client *client)
 		printk("Starting adm1021 update\n");
 #endif
 
-		adm1021_rd_good(&(data->temp), client, ADM1021_REG_TEMP);
-		adm1021_rd_good(&(data->temp_os), client, ADM1021_REG_TOS_R);
+		data->fail = 0;
+		adm1021_rd_good(&(data->temp), client, ADM1021_REG_TEMP,
+		                ADM1021_ALARM_TEMP);
+		adm1021_rd_good(&(data->temp_os), client, ADM1021_REG_TOS_R,
+		                ADM1021_ALARM_TEMP);
 		adm1021_rd_good(&(data->temp_hyst), client,
-		                ADM1021_REG_THYST_R);
+		                ADM1021_REG_THYST_R, ADM1021_ALARM_TEMP);
 		adm1021_rd_good(&(data->remote_temp), client,
-		                ADM1021_REG_REMOTE_TEMP);
+		                ADM1021_REG_REMOTE_TEMP, ADM1021_ALARM_RTEMP);
 		adm1021_rd_good(&(data->remote_temp_os), client,
-		                ADM1021_REG_REMOTE_TOS_R);
+		                ADM1021_REG_REMOTE_TOS_R, ADM1021_ALARM_RTEMP);
 		adm1021_rd_good(&(data->remote_temp_hyst), client,
-		                   ADM1021_REG_REMOTE_THYST_R);
-		if(!adm1021_rd_good(&(data->alarms), client,
-		                       ADM1021_REG_STATUS))
-			data->alarms &= 0xec;
+		                ADM1021_REG_REMOTE_THYST_R,
+		                ADM1021_ALARM_RTEMP);
+		data->alarms = ADM1021_ALARM_ALL;
+		if (!adm1021_rd_good(&(data->alarms), client,
+		                     ADM1021_REG_STATUS, 0))
+			data->alarms &= ADM1021_ALARM_ALL;
 		if (data->type == adm1021)
 			adm1021_rd_good(&(data->die_code), client,
-			                ADM1021_REG_DIE_CODE);
+			                ADM1021_REG_DIE_CODE, 0);
 		if (data->type == adm1023) {
 			adm1021_rd_good(&(data->remote_temp_prec), client,
-			                ADM1021_REG_REM_TEMP_PREC);
+			                ADM1021_REG_REM_TEMP_PREC,
+			                ADM1021_ALARM_TEMP);
 			adm1021_rd_good(&(data->remote_temp_os_prec), client,
-			                ADM1021_REG_REM_TOS_PREC);
+			                ADM1021_REG_REM_TOS_PREC,
+			                ADM1021_ALARM_RTEMP);
 			adm1021_rd_good(&(data->remote_temp_hyst_prec), client,
-			                ADM1021_REG_REM_THYST_PREC);
+			                ADM1021_REG_REM_THYST_PREC,
+			                ADM1021_ALARM_RTEMP);
 			adm1021_rd_good(&(data->remote_temp_offset), client,
-			                   ADM1021_REG_REM_OFFSET);
+			                ADM1021_REG_REM_OFFSET,
+			                ADM1021_ALARM_RTEMP);
 			adm1021_rd_good(&(data->remote_temp_offset_prec),
-			                   client, ADM1021_REG_REM_OFFSET_PREC);
+			                client, ADM1021_REG_REM_OFFSET_PREC,
+			                ADM1021_ALARM_RTEMP);
 		}
 		data->last_updated = jiffies;
 		data->valid = 1;
@@ -587,7 +606,7 @@ void adm1021_alarms(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		adm1021_update_client(client);
-		results[0] = data->alarms;
+		results[0] = data->alarms | data->fail;
 		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		/* Can't write to it */
