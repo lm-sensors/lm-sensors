@@ -501,11 +501,11 @@ sub gen_drivers_i2c_Config_in
       print OUTPUT << 'EOF';
   bool 'I2C mainboard interfaces' CONFIG_I2C_MAINBOARD 
   if [ "$CONFIG_I2C_MAINBOARD" = "y" ]; then
-    dep_tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 $CONFIG_I2C_MAINBOARD
-    dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_MAINBOARD
-    dep_tristate '  Intel 82371AB PIIX4(E)' CONFIG_I2C_PIIX4 $CONFIG_I2C_MAINBOARD
+    tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 
+    dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
+    tristate '  Intel 82371AB PIIX4(E)' CONFIG_I2C_PIIX4
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_ALGOBIT
-    dep_tristate '  Pseudo ISA adapter (for hardware sensors modules)' CONFIG_I2C_ISA $CONFIG_I2C_MAINBOARD
+    tristate '  Pseudo ISA adapter (for hardware sensors modules)' CONFIG_I2C_ISA 
   fi
 
 EOF
