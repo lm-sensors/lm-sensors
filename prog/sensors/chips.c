@@ -415,7 +415,8 @@ void print_sis5595(const sensors_chip_name *name)
     printf("ERROR: Can't get TEMP data!\n");
   free_the_label(&label);
 
-  if (!sensors_get_label(*name,SENSORS_SIS5595_ALARMS,&label)) {
+  if (!sensors_get_label_and_valid(*name,SENSORS_SIS5595_ALARMS,&label,&valid)
+      && valid) {
     print_label(label,10);
     printf("Board temperature input (usually LM75 chips) %s\n",
            alarms & SIS5595_ALARM_BTI ?"ALARM":"     ");
@@ -720,7 +721,8 @@ void print_lm78(const sensors_chip_name *name)
   }
   free_the_label(&label);
     
-  if (!sensors_get_label(*name,SENSORS_LM78_ALARMS,&label)) {
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM78_ALARMS,&label,&valid)
+      && valid) {
     print_label(label,10);
     printf("Board temperature input (usually LM75 chips) %s\n",
            alarms & LM78_ALARM_BTI?"ALARM":"");
@@ -904,15 +906,17 @@ void print_gl518(const sensors_chip_name *name)
     printf("ERROR: Can't get TEMP data!\n");
   free_the_label(&label);
 
-  if (!sensors_get_label(*name,SENSORS_GL518_BEEP_ENABLE,&label) &&
-      !sensors_get_feature(*name,SENSORS_GL518_BEEP_ENABLE,&cur)) {
-    print_label(label,10);
-    if (cur < 0.5) 
-      printf("Sound alarm disabled\n");
-    else
-      printf("Sound alarm enabled\n");
-  } else
-    printf("ERROR: Can't get BEEP data!\n");
+  if (!sensors_get_label_and_valid(*name,SENSORS_GL518_BEEP_ENABLE,&label,&valid)
+      && valid) {
+    if (!sensors_get_feature(*name,SENSORS_GL518_BEEP_ENABLE,&cur)) {
+      print_label(label,10);
+      if (cur < 0.5) 
+        printf("Sound alarm disabled\n");
+      else
+        printf("Sound alarm enabled\n");
+    } else
+      printf("ERROR: Can't get BEEP data!\n");
+  }
   free_the_label(&label);
 }
 
@@ -1157,7 +1161,8 @@ void print_lm80(const sensors_chip_name *name)
     printf("ERROR: Can't get TEMP data!\n");
   free_the_label(&label);
 
-  if (!sensors_get_label(*name,SENSORS_LM80_ALARMS,&label)) {
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM80_ALARMS,&label,&valid)
+      && valid) {
     if (alarms & LM80_ALARM_BTI) {
       print_label(label,10);
       printf("Board temperature input (a LM75 perhaps?)    ALARM\n");
@@ -1459,7 +1464,8 @@ void print_w83781d(const sensors_chip_name *name)
   }
   free_the_label(&label);
     
-  if (!sensors_get_label(*name,SENSORS_W83781D_ALARMS,&label)) {
+  if (!sensors_get_label_and_valid(*name,SENSORS_W83781D_ALARMS,&label,&valid)
+      && valid) {
     print_label(label,10);
     printf("Chassis intrusion detection                      %s  %s\n",
            alarms & W83781D_ALARM_CHAS?"ALARM":"     ",
@@ -1467,15 +1473,17 @@ void print_w83781d(const sensors_chip_name *name)
   }
   free_the_label(&label);
 
-  if (!sensors_get_label(*name,SENSORS_W83781D_BEEP_ENABLE,&label) &&
-      !sensors_get_feature(*name,SENSORS_W83781D_BEEP_ENABLE,&cur)) {
-    print_label(label,10);
-    if (cur < 0.5) 
-      printf("Sound alarm disabled\n");
-    else
-      printf("Sound alarm enabled\n");
-  } else
-    printf("ERROR: Can't get BEEP data!\n");
+  if (!sensors_get_label_and_valid(*name,SENSORS_W83781D_BEEP_ENABLE,&label,&valid)
+      && valid) {
+    if (!sensors_get_feature(*name,SENSORS_W83781D_BEEP_ENABLE,&cur)) {
+      print_label(label,10);
+      if (cur < 0.5) 
+        printf("Sound alarm disabled\n");
+      else
+        printf("Sound alarm enabled\n");
+    } else
+      printf("ERROR: Can't get BEEP data!\n");
+  }
   free_the_label(&label);
 }
 
