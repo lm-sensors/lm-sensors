@@ -127,6 +127,27 @@ int poll_interrupt(void *ISR)
 	return -1;		/* Should never get here */
 }
 
+int poll_ack(void *status)
+{
+	int i, res;
+	for (i = 0; i < 100; i++) {
+		udelay(10);
+
+		res = readb(status) & 0x02;
+		if (res > 0) {
+			printk("i2c-keywest: got ack: 0x%02X in 0x%02X iter\n",res,i);
+			return res;
+		}
+	}
+
+	if (i == POLL_SANITY) {
+		printk("i2c-keywest: Sanity check failed!  Expected ack never happened.\n");
+		return 0;
+	}
+
+	return 0;		/* Should never get here */
+}
+
 
 void keywest_reset(struct keywest_iface *ifaceptr)
 {
@@ -163,6 +184,7 @@ s32 keywest_access(struct i2c_adapter *adap, u16 addr,
 	/* Start sending address */
 	writeb_wait(readb(ifaceptr->control) | 2, ifaceptr->control);
 	interrupt_state = poll_interrupt(ifaceptr->ISR);
+
 	ack = readb(ifaceptr->status) & 0x0F;
 
 	if ((ack & 0x02) == 0) {
@@ -176,6 +198,15 @@ s32 keywest_access(struct i2c_adapter *adap, u16 addr,
 		writeb_wait(1 | readb(ifaceptr->control), ifaceptr->control);	
 		
 	switch (size) {
+	    case I2C_SMBUS_QUICK:
+		/* Send stop */
+		writeb_wait(readb(ifaceptr->control) | 4, ifaceptr->control);
+		writeb_wait(interrupt_state, ifaceptr->control);		
+		interrupt_state = poll_interrupt(ifaceptr->ISR);
+		if (interrupt_state < 0) 
+			error_state = -1;
+		writeb_wait(interrupt_state, ifaceptr->ISR);	
+		break; /* we're done! */
 	    case I2C_SMBUS_BYTE_DATA:
 		if (read_write == I2C_SMBUS_WRITE) {
 			writeb_wait(data->byte, ifaceptr->data);
@@ -581,6 +612,6 @@ i2c_keywest_cleanup(void)
 module_init(i2c_keywest_init);
 module_exit(i2c_keywest_cleanup);
 
-MODULE_AUTHOR("Philip Edelbrock <phil@netroedge.com");
+MODULE_AUTHOR("Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("I2C driver for Apple's Keywest");
 EXPORT_NO_SYMBOLS;
