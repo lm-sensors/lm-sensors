@@ -71,6 +71,7 @@
 #include <linux/i2c.h>
 #include <linux/init.h>
 #include <asm/io.h>
+#include "version.h"
 #include "sensors_compat.h"
 
 /* ALI15X3 SMBus address offsets */
@@ -517,7 +518,7 @@ static struct pci_driver ali15x3_driver = {
 
 static int __init i2c_ali15x3_init(void)
 {
-	printk("i2c-ali15x3.o version %s (%s)\n", I2C_VERSION, I2C_DATE);
+	printk("i2c-ali15x3.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	return pci_module_init(&ali15x3_driver);
 }
 

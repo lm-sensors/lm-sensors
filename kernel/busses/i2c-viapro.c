@@ -41,6 +41,7 @@
 #include <linux/i2c.h>
 #include <linux/init.h>
 #include <asm/io.h>
+#include "version.h"
 #include "sensors_compat.h"
 
 #define SMBBA1	   	 0x90
@@ -463,6 +464,7 @@ static struct pci_driver vt596_driver = {
 
 static int __init i2c_vt596_init(void)
 {
+	printk("i2c-viapro.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	return pci_module_init(&vt596_driver);
 }
 
