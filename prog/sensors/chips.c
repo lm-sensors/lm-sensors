@@ -3666,15 +3666,17 @@ void print_fscher(const sensors_chip_name *name)
 void print_pcf8591(const sensors_chip_name *name)
 {
   char *label;
-  double ain_conf, ch0, ch1, ch2, ch3;
+  int ain_conf = -1;
+  double ain;
   double aout_enable, aout;
   int valid;
 
   if (!sensors_get_label_and_valid(*name,SENSORS_PCF8591_AIN_CONF,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_PCF8591_AIN_CONF,&ain_conf)) {
+      !sensors_get_feature(*name, SENSORS_PCF8591_AIN_CONF, &ain)) {
+        ain_conf = (int)ain;
         if (valid) {
           print_label(label,10);
-          switch ((int)ain_conf)
+          switch (ain_conf)
           {
             case 0: printf("four single ended inputs\n");
                     break;
@@ -3687,24 +3689,24 @@ void print_pcf8591(const sensors_chip_name *name)
           }
         }
       }
-  else printf("ERROR: Can't read analog inputs configuration!\n");
+  /* display no error, 2.6 driver doesn't have that file */
   free_the_label(&label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_PCF8591_CH0,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_PCF8591_CH0,&ch0)) {
+      !sensors_get_feature(*name, SENSORS_PCF8591_CH0, &ain)) {
         if (valid) {
           print_label(label,10);
-          printf("%0.0f\n", ch0);
+          printf("%6.2fV\n", ain);
         }
       }
   else printf("ERROR: Can't read ch0!\n");
   free_the_label(&label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_PCF8591_CH1,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_PCF8591_CH1,&ch1)) {
+      !sensors_get_feature(*name, SENSORS_PCF8591_CH1, &ain)) {
         if (valid) {
           print_label(label,10);
-          printf("%0.0f\n", ch1);
+          printf("%6.2fV\n", ain);
         }
       }
   else printf("ERROR: Can't read ch1!\n");
@@ -3712,25 +3714,27 @@ void print_pcf8591(const sensors_chip_name *name)
 
   if (ain_conf != 3) {
     if (!sensors_get_label_and_valid(*name,SENSORS_PCF8591_CH2,&label,&valid) &&
-        !sensors_get_feature(*name,SENSORS_PCF8591_CH2,&ch2)) {
+        !sensors_get_feature(*name, SENSORS_PCF8591_CH2, &ain)) {
           if (valid) {
             print_label(label,10);
-            printf("%0.0f\n", ch2);
+            printf("%6.2fV\n", ain);
           }
         }
-    else printf("ERROR: Can't read ch2!\n");
+    else if (ain_conf >= 0) /* hide error for 2.6 kernel driver */
+      printf("ERROR: Can't read ch2!\n");
     free_the_label(&label);
   }
 
-  if (ain_conf == 0) {
+  if (ain_conf <= 0) {
     if (!sensors_get_label_and_valid(*name,SENSORS_PCF8591_CH3,&label,&valid) &&
-        !sensors_get_feature(*name,SENSORS_PCF8591_CH3,&ch3)) {
+        !sensors_get_feature(*name, SENSORS_PCF8591_CH3, &ain)) {
           if (valid) {
             print_label(label,10);
-            printf("%0.0f\n", ch3);
+            printf("%6.2fV\n", ain);
           }
         }
-    else printf("ERROR: Can't read ch3!\n");
+    else if (ain_conf >= 0) /* hide error for 2.6 kernel driver */
+      printf("ERROR: Can't read ch3!\n");
     free_the_label(&label);
   }
 
@@ -3739,7 +3743,7 @@ void print_pcf8591(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_PCF8591_AOUT_ENABLE,&aout_enable)) {
         if (valid) {
           print_label(label,10);
-          printf("%0.0f (%s)\n", aout, aout_enable?"enabled":"disabled");
+          printf("%6.2fV (%s)\n", aout, aout_enable?"enabled":"disabled");
         }
       }
   else printf("ERROR: Can't read aout!\n");
