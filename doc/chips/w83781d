@@ -637,3 +637,111 @@ Author/Maintainer
 Original 781D support: Frodo and Phil (sensors@stimpy.netroedge.com)
 782D/783S support added by: Mark D. Studebaker (mdsxyz123@yahoo.com)
 Send requests to the sensors@stimpy.netroedge.com mailing list.
+
+
+Asus Clones
+-----------
+
+We have no datasheets for the Asus clones (AS99127F and ASB100 Bach).
+Here are some very useful information that were given to us by Alex Van
+Kaam about how to detect these chips, and how to read their values. He
+also gives advice for another Asus chipset, the Mozart-2 (which we
+don't support yet). Thanks Alex!
+I reworded some parts and added personal comments.
+
+# Detection:
+
+AS99127F rev.1, AS99127F rev.2 and ASB100:
+- I2C address range: 0x29 - 0x2F
+- If register 0x58 holds 0x31 then we have an Asus (either ASB100 or
+  AS99127F)
+- Which one depends on register 0x4F (manufacturer ID):
+  0x06 or 0x94: ASB100
+  0x12 or 0xC3: AS99127F rev.1
+  0x5C or 0xA3: AS99127F rev.2
+  Note that 0x5CA3 is Winbond's ID (WEC), which let us think Asus get their
+  AS99127F rev.2 direct from Winbond. The other codes mean ATT and DVC,
+  respectively. ATT could stand for Asustek something (although it would be
+  very badly chosen IMHO), I don't know what DVC could stand for. Maybe
+  these codes simply aren't meant to be decoded that way.
+
+Mozart-2:
+- I2C address: 0x77
+- If register 0x58 holds 0x56 or 0x10 then we have a Mozart-2
+- Of the mozart there are 3 types:
+  0x58=0x56, 0x4E=0x94, 0x4F=0x36: Asus ASM58 Mozart-2
+  0x58=0x56, 0x4E=0x94, 0x4F=0x06: Asus AS2K129R Mozart-2
+  0x58=0x10, 0x4E=0x5C, 0x4F=0xA3: Asus ??? Mozart-2
+  You can handle all 3 the exact same way :)
+
+# Temperature sensors:
+
+ASB100:
+- sensor 1: register 0x27
+- sensor 2 & 3 are the 2 LM75's on the SMBus
+- sensor 4: register 0x17
+Remark: I noticed that on Intel boards sensor 2 is used for the CPU
+  and 4 is ignored/stuck, on AMD boards sensor 4 is the CPU and sensor 2 is
+  either ignored or a socket temperature.
+
+AS99127F (rev.1 and 2 alike):
+- sensor 1: register 0x27
+- sensor 2 & 3 are the 2 LM75's on the SMBus
+Remark: Register 0x5b is suspected to be temperature type selector. Bit 1
+  would control temp1, bit 3 temp2 and bit 5 temp3.
+
+Mozart-2:
+- sensor 1: register 0x27
+- sensor 2: register 0x13
+
+# Fan sensors:
+
+ASB100, AS99127F (rev.1 and 2 alike):
+- 3 fans, identical to the W83781D
+
+Mozart-2:
+- 2 fans only, 1350000/rpm/div
+- fan 1: register 0x28,  divisor on register 0xA1 (bits 4-5)
+- fan 2: register 0x29,  divisor on register 0xA1 (bits 6-7)
+
+# Voltages:
+
+This is where there is a diffrence between AS99127F rev.1 and 2.
+Remark: The difference is similar to the difference between
+  W83781D and W83782D.
+
+ASB100:
+in0=r(0x20)*0.016
+in1=r(0x21)*0.016
+in2=r(0x22)*0.016
+in3=r(0x23)*0.016*1.68
+in4=r(0x24)*0.016*3.8
+in5=r(0x25)*(-0.016)*3.97
+in6=r(0x26)*(-0.016)*1.666
+
+AS99127F rev.1:
+in0=r(0x20)*0.016
+in1=r(0x21)*0.016
+in2=r(0x22)*0.016
+in3=r(0x23)*0.016*1.68
+in4=r(0x24)*0.016*3.8
+in5=r(0x25)*(-0.016)*3.97
+in6=r(0x26)*(-0.016)*1.503
+
+AS99127F rev.2:
+in0=r(0x20)*0.016
+in1=r(0x21)*0.016
+in2=r(0x22)*0.016
+in3=r(0x23)*0.016*1.68
+in4=r(0x24)*0.016*3.8
+in5=(r(0x25)*0.016-3.6)*5.14+3.6
+in6=(r(0x26)*0.016-3.6)*3.14+3.6
+
+Mozart-2:
+in0=r(0x20)*0.016
+in1=255
+in2=r(0x22)*0.016
+in3=r(0x23)*0.016*1.68
+in4=r(0x24)*0.016*4
+in5=255
+in6=255
