@@ -24,7 +24,7 @@ PROGEEPROMTARGETS := $(MODULE_DIR)/decode-dimms.pl \
 
 install-prog-eeprom: $(PROGEEPROMTARGETS)
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -o root -g root -m 755 $(PROGEEPROMTARGETS) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 755 $(PROGEEPROMTARGETS) $(DESTDIR)$(BINDIR)
 
 user_install :: install-prog-eeprom
 

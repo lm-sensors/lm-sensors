@@ -39,7 +39,7 @@ INCLUDEFILES += $(MODULE_DIR)/sensors.hd
 install-all-kernel-include:
 	if [ -n "$(KERNELINCLUDEFILES)" ] ; then \
 	  $(MKDIR) $(DESTDIR)$(SYSINCLUDEDIR) ; \
-	  $(INSTALL) -o root -g root -m 644 $(KERNELINCLUDEFILES) $(DESTDIR)$(SYSINCLUDEDIR) ; \
+	  $(INSTALL) -m 644 $(KERNELINCLUDEFILES) $(DESTDIR)$(SYSINCLUDEDIR) ; \
 	fi
 
 user_install :: install-all-kernel-include

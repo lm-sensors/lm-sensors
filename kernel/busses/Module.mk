@@ -105,7 +105,7 @@ all :: all-kernel-busses
 install-kernel-busses: all-kernel-busses
 	if [ -n "$(KERNELBUSSESTARGETS)" ] ; then \
 	  $(MKDIR) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/busses ; \
-	  $(INSTALL) -o root -g root -m 644 $(KERNELBUSSESTARGETS) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/busses ; \
+	  $(INSTALL) -m 644 $(KERNELBUSSESTARGETS) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/busses ; \
 	  for i in $(KERNELBUSSESTARGETS) ; do \
 	    $(RM) $(DESTDIR)$(MODPREF)/misc/`basename $$i` $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/`basename $$i` \
 	          $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/`basename $$i`.gz $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/busses/`basename $$i`.gz ; \

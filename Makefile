@@ -121,11 +121,6 @@ LIBINCLUDEDIR := $(INCLUDEDIR)/sensors
 # manual pages will be installed.
 MANDIR := $(PREFIX)/man
 
-# You should not need to change this. It defines the manual owner and group
-# as which manual pages are installed.
-MANOWN := root
-MANGRP := root
-
 MACHINE := $(shell uname -m)
 
 # Extra non-default programs to build; e.g., sensord

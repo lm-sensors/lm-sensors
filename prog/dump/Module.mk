@@ -44,8 +44,8 @@ $(MODULE_DIR)/i2cset: $(MODULE_DIR)/i2cset.ro $(MODULE_DIR)/i2cbusses.ro
 	$(CC) $(EXLDFLAGS) -o $@ $^
 
 install-prog-dump: all-prog-dump
-	mkdir -p $(DESTDIR)$(SBINDIR)
-	$(INSTALL) -o root -g root -m 755 $(PROGDUMPBININSTALL) $(DESTDIR)$(SBINDIR)
+	$(MKDIR) $(DESTDIR)$(SBINDIR)
+	$(INSTALL) -m 755 $(PROGDUMPBININSTALL) $(DESTDIR)$(SBINDIR)
 user_install :: install-prog-dump
 
 clean-prog-dump:

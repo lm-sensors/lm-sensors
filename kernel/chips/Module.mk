@@ -160,7 +160,7 @@ all :: all-kernel-chips
 install-kernel-chips: all-kernel-chips
 	if [ -n "$(KERNELCHIPSTARGETS)" ] ; then \
 	  $(MKDIR) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/chips ; \
-	  $(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/chips ; \
+	  $(INSTALL) -m 644 $(KERNELCHIPSTARGETS) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/chips ; \
 	  for i in $(KERNELCHIPSTARGETS) ; do \
 	    $(RM) $(DESTDIR)$(MODPREF)/misc/`basename $$i` $(DESTDIR)$(MODPREF)/kernel/drivers/sensors/`basename $$i` \
 	          $(DESTDIR)$(MODPREF)/kernel/drivers/sensors/`basename $$i`.gz $(DESTDIR)$(MODPREF)/kernel/drivers/chips/`basename $$i`.gz ; \

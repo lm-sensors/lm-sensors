@@ -29,7 +29,7 @@ ETCINSTALL := $(ETCDIR)/sensors.conf
 install-etc:
 	$(MKDIR) $(DESTDIR)$(ETCDIR)
 	if [ ! -e $(DESTDIR)$(ETCINSTALL) ] ; then \
-	  $(INSTALL) -o  root -g root -m 644 $(ETCTARGET) $(DESTDIR)$(ETCINSTALL); \
+	  $(INSTALL) -m 644 $(ETCTARGET) $(DESTDIR)$(ETCINSTALL); \
 	fi
 user_install :: install-etc
 

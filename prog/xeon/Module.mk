@@ -22,7 +22,7 @@ PROGXEONTARGETS := $(MODULE_DIR)/decode-xeon.pl
 
 install-prog-xeon: $(PROGXEONTARGETS)
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -o root -g root -m 755 $(PROGXEONTARGETS) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 755 $(PROGXEONTARGETS) $(DESTDIR)$(BINDIR)
 
 user_install :: install-prog-xeon
 
