@@ -13,7 +13,7 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
-2.5.1 (2000????)
+2.5.1 (20000618)
   Library: Add adm1025 support
   Module adm1025: new
   Module ddcmon: Fixed bus scan which could hang SMBus
