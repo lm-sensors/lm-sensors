@@ -2084,7 +2084,6 @@ chip "pc87366-*"
    label temp3_crit  "S-IO Crit"
 
 # On some systems, thermistors are used instead of these thermal diodes
-# (thermistors are not yet supported by the driver)
 #   ignore temp1
 #   ignore temp2
 
@@ -2098,17 +2097,35 @@ chip "pc87366-*"
    set temp3_max   70
    set temp3_crit  85
 
+# Thermistors
+# 3435 is the thermistor beta.
+# This assumes that the thermistor forms a resistor divider with a resistor
+# equal to its nominal value at 25 degres Celcius. If not, change the values.
+# We also assume that you have a working in10 (which is forcibly enabled by
+# default). If not, use 3.3 instead, but you lose accuracy.
+
+   compute temp4  3435 / (` (1 / (1 - @ / in10) - 1) + 3435 / 298.15) - 273.15, \
+                  in10 * (1 - 1 / (1 + (^ (3435 / (273.15 + @) - 3435 / 298.15))))
+   compute temp5  3435 / (` (1 / (1 - @ / in10) - 1) + 3435 / 298.15) - 273.15, \
+                  in10 * (1 - 1 / (1 + (^ (3435 / (273.15 + @) - 3435 / 298.15))))
+   compute temp6  3435 / (` (1 / (1 - @ / in10) - 1) + 3435 / 298.15) - 273.15, \
+                  in10 * (1 - 1 / (1 + (^ (3435 / (273.15 + @) - 3435 / 298.15))))
+
+   set temp4_min    0
+   set temp4_max   70
+   set temp4_crit  85
+   set temp5_min    0
+   set temp5_max   70
+   set temp5_crit  85
+   set temp6_min    0
+   set temp6_max   70
+   set temp6_crit  85
+
 # Fan inputs
 
 # Ignore fans you don't have
 #   ignore fan2
 #   ignore fan3
-
-# Increase clock dividers if you have very low speed fans and readings
-# overflow
-#   set fan1_div 8
-#   set fan2_div 8
-#   set fan3_div 8
 
    set fan1_min 2000
    set fan2_min 2000
