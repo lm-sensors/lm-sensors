@@ -1355,19 +1355,19 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
       },
       {
 	name => "Nat. Semi. PC87360 Super IO Fan Sensors",
-	driver => "pc87360-fan",
+	driver => "pc87360",
 	devid => 0xe1,
 	logdev => 0x09,
       },
       {
 	name => "Nat. Semi. PC87363 Super IO Fan Sensors",
-	driver => "pc87360-fan",
+	driver => "pc87360",
 	devid => 0xe8,
 	logdev => 0x09,
       },
       {
 	name => "Nat. Semi. PC87364 Super IO Fan Sensors",
-	driver => "pc87360-fan",
+	driver => "pc87360",
 	devid => 0xe4,
 	logdev => 0x09,
       },
