@@ -88,7 +88,7 @@ static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_1(LM87);
+SENSORS_INSMOD_1(lm87);
 
 /* The following is the calculation for the register offset
  * for the monitored items minimum and maximum locations.
@@ -493,7 +493,7 @@ int LM87_detach_client(struct i2c_client *client)
 
 	if ((err = i2c_detach_client(client))) {
 		printk
-		    ("LM87.o: Client deregistration failed, client not detached.\n");
+		    ("lm87.o: Client deregistration failed, client not detached.\n");
 		return err;
 	}
 
@@ -1030,12 +1030,12 @@ int __init sensors_LM87_init(void)
 {
 	int res;
 
-	printk("LM87.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk("lm87.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	LM87_initialized = 0;
 
 	if ((res = i2c_add_driver(&LM87_driver))) {
 		printk
-		    ("LM87.o: Driver registration failed, module not inserted.\n");
+		    ("lm87.o: Driver registration failed, module not inserted.\n");
 		LM87_cleanup();
 		return res;
 	}
@@ -1050,7 +1050,7 @@ int __init LM87_cleanup(void)
 	if (LM87_initialized >= 1) {
 		if ((res = i2c_del_driver(&LM87_driver))) {
 			printk
-			    ("LM87.o: Driver deregistration failed, module not removed.\n");
+			    ("lm87.o: Driver deregistration failed, module not removed.\n");
 			return res;
 		}
 		LM87_initialized--;
