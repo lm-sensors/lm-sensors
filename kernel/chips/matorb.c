@@ -29,6 +29,7 @@
 #include "i2c.h"
 #include "i2c-isa.h"
 #include "version.h"
+#include "compat.h"
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {0x2E,SENSORS_I2C_END};
@@ -198,7 +199,6 @@ ERROR3:
     if (new_client == matorb_list[i])
       matorb_list[i] = NULL;
 ERROR2:
-ERROR1:
   kfree(new_client);
 ERROR0:
   return err;
@@ -252,6 +252,7 @@ void matorb_dec_use (struct i2c_client *client)
 #endif
 }
 
+#if 0
 /* All registers are word-sized, except for the configuration register.
    MATORB uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
@@ -259,13 +260,14 @@ int matorb_read_value(struct i2c_client *client, u8 reg)
 {
     return -1;  /* Doesn't support reads */
 }
+#endif
 
 /* All registers are word-sized, except for the configuration register.
    MATORB uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
 int matorb_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
-  if (reg=0) {
+  if (reg==0) {
     return smbus_write_byte(client->adapter,client->addr,value);
   } else {
     return smbus_write_byte_data(client->adapter,client->addr,reg,value);
@@ -302,7 +304,6 @@ void matorb_update_client(struct i2c_client *client)
 void matorb_disp(struct i2c_client *client, int operation, int ctl_name,
                int *nrels_mag, long *results)
 {
-  struct matorb_data *data = client->data;
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {

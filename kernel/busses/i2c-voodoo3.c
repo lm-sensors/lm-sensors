@@ -139,7 +139,7 @@ void Voodoo3_I2CStop(void)
   out();
 }
 
-int Voodoo3_I2CAck()
+int Voodoo3_I2CAck(void)
 {
 int ack;
 
@@ -153,7 +153,7 @@ int ack;
 
 }
 
-int Voodoo3_I2CReadByte()
+int Voodoo3_I2CReadByte(void)
 {
   int i,temp;
   unsigned char data=0;
@@ -216,66 +216,66 @@ int Voodoo3_BusCheck(void) {
 
 int Voodoo3_I2CRead_byte(int addr)
 {
-        int dat=0;
+        int this_dat=0;
 
         Voodoo3_I2CStart();
         if (Voodoo3_I2CSendByte(addr)) { 
 #ifdef DEBUG
 	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
 #endif
-	  dat=-1;
+	  this_dat=-1;
 	  goto ENDREAD1; }
-        dat=Voodoo3_I2CReadByte();
+        this_dat=Voodoo3_I2CReadByte();
 ENDREAD1: Voodoo3_I2CStop();
 #ifdef DEBUG
-	printk("i2c-voodoo3: Byte read at addr:0x%X result:0x%X\n",addr,dat);
+	printk("i2c-voodoo3: Byte read at addr:0x%X result:0x%X\n",addr,this_dat);
 #endif
-        return dat;
+        return this_dat;
 }
 
 int Voodoo3_I2CRead_byte_data(int addr,int command)
 {
-        int dat=0;
+        int this_dat=0;
 
         Voodoo3_I2CStart();
         if (Voodoo3_I2CSendByte(addr)) { 
 #ifdef DEBUG
 	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
 #endif
-	  dat=-1;
+	  this_dat=-1;
 	  goto ENDREAD2; }
         if (Voodoo3_I2CSendByte(command)) { 
 #ifdef DEBUG
 	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
 #endif
-	  dat=-1;
+	  this_dat=-1;
 	  goto ENDREAD2; }
-        dat=Voodoo3_I2CReadByte();
+        this_dat=Voodoo3_I2CReadByte();
 ENDREAD2: Voodoo3_I2CStop();
 #ifdef DEBUG
-	printk("i2c-voodoo3: Byte read at addr:0x%X (command:0x%X) result:0x%X\n",addr,command,dat);
+	printk("i2c-voodoo3: Byte read at addr:0x%X (command:0x%X) result:0x%X\n",addr,command,this_dat);
 #endif
-        return dat;
+        return this_dat;
 }
 
 int Voodoo3_I2CRead_word(int addr,int command)
 {
-        int dat=0;
+        int this_dat=0;
 
         Voodoo3_I2CStart();
         if (Voodoo3_I2CSendByte(addr)) { 
 #ifdef DEBUG
 	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
 #endif
-	  dat=-1;
+	  this_dat=-1;
 	  goto ENDREAD3; }
-        dat=Voodoo3_I2CReadByte();
-        dat|=(Voodoo3_I2CReadByte()<<8);
+        this_dat=Voodoo3_I2CReadByte();
+        this_dat|=(Voodoo3_I2CReadByte()<<8);
 ENDREAD3: Voodoo3_I2CStop();
 #ifdef DEBUG
-	printk("i2c-voodoo3: Word read at addr:0x%X (command:0x%X) result:0x%X\n",addr,command,dat);
+	printk("i2c-voodoo3: Word read at addr:0x%X (command:0x%X) result:0x%X\n",addr,command,this_dat);
 #endif
-        return dat;
+        return this_dat;
 }
 
 int Voodoo3_I2CWrite_byte(int addr,int command)
@@ -361,7 +361,7 @@ int result=0;
 	result=-1; }
 ENDWRITE3: Voodoo3_I2CStop();
 #ifdef DEBUG
-	printk("i2c-voodoo3: Word write at addr:0x%X command:0x%X data:0x%X\n",addr,command,data);
+	printk("i2c-voodoo3: Word write at addr:0x%X command:0x%X data:0x%lX\n",addr,command,data);
 #endif
 	return result;
 }
@@ -371,14 +371,19 @@ void config_v3(struct pci_dev *dev, int num)
         unsigned int cadr;
 
         /* map Voodoo3 memory */
-        cadr=dev->base_address[0];
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
+        cadr = dev->base_address[0];
+#else
+        pcibios_read_config_dword(dev->bus->number, dev->devfn,
+                                  PCI_BASE_ADDRESS_0,&cadr);
+#endif
         cadr&=PCI_BASE_ADDRESS_MEM_MASK;
         mem=ioremap(cadr, 0x1000);
         
         /* Enable TV out mode, Voodoo3_I2C bus, etc. */
         *((unsigned int *)(mem+0x70))=0x8160;
         *((unsigned int *)(mem+0x78))=0xcf980020;
-	printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%X\n",mem);
+	printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%p\n",mem);
 }
 
 
@@ -422,7 +427,7 @@ static int voodoo3_setup(void)
 s32 voodoo3_access(u8 addr, char read_write,
                  u8 command, int size, union smbus_data * data)
 {
-int temp;
+int temp=0;
 
   if (Voodoo3_BusCheck()) return -1;
 

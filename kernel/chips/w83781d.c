@@ -1366,7 +1366,7 @@ void w83781d_fan_div(struct i2c_client *client, int operation, int ctl_name,
                   int *nrels_mag, long *results)
 {
   struct w83781d_data *data = client->data;
-  int old,old2,old3;
+  int old,old2,old3=0;
 
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 0;

@@ -14,6 +14,7 @@ ask CVS about it:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
 2.3.3 (19990603)
+  All: Now compiles against kernel 2.3.x (x >= 1)
   Module i2c-voodoo3: Timing issue fixes
   Module bt869: Seems to be functional and relatively well tested
   Many modules were modified to be more compatible with the new
