@@ -110,7 +110,7 @@ int piix4_setup(void)
   do
     PIIX4_dev = pci_find_device(PCI_VENDOR_ID_INTEL, 
                                 PCI_DEVICE_ID_INTEL_82371AB_3, PIIX4_dev);
-  while(PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 3);
+  while(PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 3));
   if(PIIX4_dev == NULL) {
 #else /* LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54) */
   for (i = 0; 
@@ -194,8 +194,8 @@ END:
 void piix4_do_pause( unsigned int amount )
 {
       current->state = TASK_INTERRUPTIBLE;
-      current->timeout = jiffies + amount;
-      schedule();
+      current->state = TASK_INTERRUPTIBLE;
+      schedule_timeout(amount);
 }
 
 /* Another internally used function */

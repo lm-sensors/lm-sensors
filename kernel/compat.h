@@ -49,6 +49,11 @@
 #define get_user_data(to,from) get_user(to,from)
 #endif
 
+/* Add a scheduling fix for the new code in kernel 2.1.127 */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,127))
+#define schedule_timeout(x) ( current->timeout = jiffies + (x), schedule() )
+#endif
+
 /* If the new PCI interface is not present, fall back on the old PCI BIOS
    interface. We also define some things to unite both interfaces. Not
    very nice, but it works like a charm. 
