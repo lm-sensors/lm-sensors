@@ -47,7 +47,8 @@ They are part of the following ALI chipsets:
 	Atrend ATC-5220
 	BCM/GVC VP1541
 	Biostar M5ALA
-	Gigabyte GA-5AX
+	Gigabyte GA-5AX (** Generally doesn't work because the BIOS doesn't
+                            enable the 7101 device! **)
 	Iwill XA100 Plus
 	Micronics C200
 	Microstar (MSI) MS-5169
