@@ -8,17 +8,16 @@
 # Written and copywritten (C) by Philip Edelbrock, 1999.
 
 
-# Clear the screen
-$temp=`echo  "254 88" > /proc/sys/dev/sensors/matorb*/disp`;
-
 # Turn off the blinking cursor
 $temp=`echo  "254 84" > /proc/sys/dev/sensors/matorb*/disp`;
 
 $linenum=1;
 
 while (<STDIN>) {
-# Reset the position of the cursor to the next line
-$temp=`echo "254 71 1 $linenum" > /proc/sys/dev/sensors/matorb*/disp`;
+ # Reset the position of the cursor to the next line
+ $temp=`echo "254 71 1 $linenum" > /proc/sys/dev/sensors/matorb*/disp`;
+ chop;
+ $_="$_                    ";
  if (/^(.{1,20})/) {
   $_=$1;
   $line="";
