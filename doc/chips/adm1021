@@ -17,7 +17,8 @@ Supported chips:
     Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
     Datasheet:
   * Intel Xeon Processor
-    Prefix - any other - requires 'force_adm1021' parameter - see MODPARMS file
+    Prefix - any other - may require 'force_adm1021' parameter -
+    see MODPARMS and xeontemp files for more information
     Addresses scanned: none
     Datasheet: Publicly available at Intel website
     Status: Alpha, untested.
@@ -132,13 +133,24 @@ for that.
 
 Xeon support
 ------------
-The Xeon support is untested.
-The Xeon has only one sensor where the other devices have two.
-Use 'force_adm1021=BUS,ADDRESS' as a modprobe parameter.
-ADDRESS can only be 0x18, 0x1a, 0x29, 0x2b, 0x4c, or 0x4e.
-The driver will report two temperatures but one will be invalid.
-It is not clear if all Xeon processors have this feature.
-Please report results.
+Some Xeon processors have real max1617, adm1021, or compatible chips
+with in them, with two temperature sensors.
+
+Other Xeons have chips with only one sensor.
+
+If you have a Xeon, and the adm1021 module loads, and both
+temperatures appear valid, then things are good.
+
+If the adm1021 module doesn't load, you should try two things:
+	1) modprobe adm1021 force_adm1021=BUS,ADDRESS
+	ADDRESS can only be 0x18, 0x1a, 0x29, 0x2b, 0x4c, or 0x4e.
+	See if you have one or two valid temperatures
+
+	2) modprobe xeontemp
+	See if you have one valid temperature.
+
+Pick the best module for your processor based on the results.
+See the xeontemp documentation for further information.
 
 
 Chip Features
