@@ -11,7 +11,7 @@ release:
 - Update CHANGES
 - Update lm_sensors.lsm and send it to the LSM by mailing it to 
   lsm@execpc.com with the subject `add' (no quotes).
-- update lm_sensors2/version.h, and cvs commit it
+- update lm_sensors2/version.h and i2c/kernel/i2c.h, and cvs commit it
 - Tag the release using CVS ('cvs tag V#-#-#' from the dist root)
 - cvs commit
 - remove 'CVS' related files/directories
