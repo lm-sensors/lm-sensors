@@ -31,15 +31,17 @@ ask CVS about it:
            enhance adm1023 support
   Makefile: Take kernel source location from /lib/modules/x.x.x/build
   Module adm1021: Add support for MC1066
+  Module bmcsensors: New	
   Module dmi_scan: Rename symbol duplicated in kernel; apply fixes from
                    kernel 2.5.43
   Module gl518sm: Iterate allowed only for rev 0x00
   Module i2c-amd756: Configure base address for nForce support;
                      check for uninitialized base address
+  Module i2c-ipmi: New
   Module i2c-sis630: Add support for SiS730
   Module i2c-sis645: Improve support for SiS645/961;
                      add support for SiS645DX/961 and SiS735
-  Module i2c-viapro: VT8233A (new ID 0x3177)
+  Module i2c-viapro: Add support for VT8233A (new ID 0x3177) and VT8235
   Module lm87: Add multiple VRM version support
   Module w83781d: Fix in0/in1 initialization
   Module smartbatt: New

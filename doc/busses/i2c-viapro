@@ -6,10 +6,10 @@ Supported adapters:
   * VIA Technologies, Inc. VT82C596A/B
     Datasheet: Sometimes available at the VIA website
 
-  * VIA Technologies, Inc. VT82C686    
+  * VIA Technologies, Inc. VT82C686A/B 
     Datasheet: Sometimes available at the VIA website
 
-  * VIA Technologies, Inc. VT8231, VT8233, VT8233A
+  * VIA Technologies, Inc. VT8231, VT8233, VT8233A, VT8235
     Datasheet: available on request from Via
 
 Author: Kyösti Mälkki <kmalkki@cc.hut.fi>

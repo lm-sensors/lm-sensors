@@ -1,7 +1,7 @@
 /*
     i2c-viapro.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
-    Copyright (c) 1998 - 2001  Frodo Looijaard <frodol@dds.nl>, 
+    Copyright (c) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>, 
     Philip Edelbrock <phil@netroedge.com>, Kyösti Mälkki <kmalkki@cc.hut.fi>,
     Mark D. Studebaker <mdsxyz123@yahoo.com>
 
@@ -28,6 +28,7 @@
 	8231
 	8233
 	8233A (0x3147 and 0x3177)
+	8235
    Note: we assume there can only be one device, with one SMBus interface.
 */
 
@@ -75,6 +76,7 @@ static struct sd supported[] = {
 	{0x3147, SMBBA3, 0xD2, "VT8233A"},
 	{0x3177, SMBBA3, 0xD2, "VT8233A"},
 	{0x8235, SMBBA1, 0xD2, "VT8231"},
+	{0x3074, SMBBA3, 0xD2, "VT8235"},
 	{0, 0, 0, NULL}
 };
 
