@@ -154,22 +154,35 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
    on failure.  */
 int sensors_get_feature(sensors_chip_name name, int feature, double *result)
 {
-  sensors_chip_feature *featureptr;
+  sensors_chip_feature *main_feature;
+  sensors_chip_feature *alt_feature;
   sensors_chip *chip;
   sensors_expr *expr = NULL;
   double val;
   int res,i;
+  int final_expr=0;
 
   if (sensors_chip_name_has_wildcards(name))
     return -SENSORS_ERR_WILDCARDS;
-  if (! (featureptr = sensors_lookup_feature_nr(name.prefix,feature)))
+  if (! (main_feature = sensors_lookup_feature_nr(name.prefix,feature)))
     return -SENSORS_ERR_NO_ENTRY;
-  if (! (featureptr->mode && SENSORS_R))
+  if (main_feature->compute_mapping == SENSORS_NO_MAPPING)
+    alt_feature = NULL;
+  else if (! (alt_feature =
+                   sensors_lookup_feature_nr(name.prefix,
+                                             main_feature->compute_mapping)))
+    return -SENSORS_ERR_NO_ENTRY;
+  if (! (main_feature->mode && SENSORS_R))
     return -SENSORS_ERR_ACCESS;
   for (chip = NULL; !expr && (chip = sensors_for_all_config_chips(name,chip));)
-    for (i = 0; !expr && (i < chip->computes_count); i++)
-      if (!strcmp(featureptr->name,chip->computes->name))
-        expr = chip->computes->from_proc;
+    for (i = 0; !final_expr && (i < chip->computes_count); i++) {
+      if (!strcmp(main_feature->name,chip->computes[i].name)) {
+        expr = chip->computes[i].from_proc;
+        final_expr = 1;
+      } else if (alt_feature && 
+                 !strcmp(alt_feature->name,chip->computes[i].name))
+        expr = chip->computes[i].from_proc;
+    }
   if (sensors_read_proc(name,feature,&val))
     return -SENSORS_ERR_PROC;
   if (! expr)
