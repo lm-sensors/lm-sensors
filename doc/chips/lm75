@@ -1,24 +1,29 @@
-This file documents the lm75 directories.
+Kernel driver `lm75.o'
 
-There will be one directory created for each detected LM75 chip. As LM75
-chips can only be on a SMBus, they will be called lm75-i2c-?-??, with
-the first question mark being the number of the i2c bus (see /proc/bus/i2c
-for a list of them, if i2c-proc is loaded), and the SMBus (I2C) address
-of the chip at the end. An LM75 is uniquely characterised with these
-two numbers. /proc/sys/dev/sensors/chips contains the SYSCTL values for
-all chip directories.
+Prefixes: lm75 (LM75, I2C)
 
-Within each LM75 directory, you can find the following files:
-* temp (LM75_SYSCTL_TEMP)
-  A list of three numbers. The first number is the Overtemperature Shutdown
-  value, the second number is Hysteris value, and the third number is the
-  current temperature. The first two values can be modified. Each value can
-  be set and read to half-degree accuracy. All values are in degrees Celcius.
-  An alarm is issued (usually to a connected LM78) when the temperature 
-  gets higher then the Overtemperature Shutdown value; it stays on until
-  the temperature falls below the Hysteris value.
-  If accessed through sysctl, this is a list of longs, each being the
-  temperature times 10.
+This driver implements support for the National Semiconductor LM75, a
+`Digital Temperature Sensor and Thermal Watchdog with Two-Wire Interface'.
 
-The data for each LM75 is updated each 1.5 seconds, but only if it is actually
-read.
+The LM75 implements one temperature sensor. Limits can be set through the
+Overtemperature Shutdown register and Hysteris register. Each value can be 
+set and read to half-degree accuracy.
+An alarm is issued (usually to a connected LM78) when the temperature
+gets higher then the Overtemperature Shutdown value; it stays on until
+the temperature falls below the Hysteris value.
+All temperatures are in degrees Celcius.
+
+The LM75 only updates its values each 1.5 seconds; reading it more often
+will do no harm, but will return 'old' values.
+
+
+/proc and sysctl interface files:
+  * temp (LM75_SYSCTL_TEMP)
+    Overtemperature Shutdown Value (RW,1), Hysteris Value (RW,1) and Current 
+    Temperature (R,1).
+
+configuration file features:
+               NAME        LABEL CLASS     COMPUTE CLASS   RW
+               temp:                                       R 
+          temp_hyst:              temp              temp   RW
+          temp_over:              temp              temp   RW

@@ -51,11 +51,10 @@ const char *mode_string(int mode)
 void dump_feature(const sensors_chip_feature *featuredata,
                   const sensors_chip_features *chipdata)
 {
-  printf("  %17s: %17s %17s   %2s   %2d\n",featuredata->name,
+  printf("  %17s: %17s %17s   %2s\n",featuredata->name,
          lookup_feature_name(featuredata->logical_mapping,chipdata),
          lookup_feature_name(featuredata->compute_mapping,chipdata),
-         mode_string(featuredata->mode),
-         featuredata->scaling);
+         mode_string(featuredata->mode));
 }
 
 int qsort_compare (const void *f1, const void *f2)
@@ -77,8 +76,8 @@ void dump_chip (const sensors_chip_features *chipdata)
   qsort(features,i,sizeof(*features),qsort_compare);
 
   printf("Chip `%s'\n",chipdata->prefix);
-  printf("  %17s  %17s %17s   %2s   %s\n","NAME","LABEL CLASS","COMPUTE CLASS",
-         "RW","SCALE");
+  printf("  %17s  %17s %17s   %2s\n","NAME","LABEL CLASS","COMPUTE CLASS",
+         "RW");
   for (i = 0; features[i]->name; i++)
     dump_feature(features[i],chipdata);
 
