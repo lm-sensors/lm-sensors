@@ -1275,7 +1275,7 @@ chip "lm87-*"
    set Vccp1_max    vid * 1.05
    set "3.3V_min"   3.3 * 0.92
    set "3.3V_max"   3.3 * 1.08
-   set "5V_min"		  5 * 0.92
+   set "5V_min"       5 * 0.92
    set "5V_max"       5 * 1.08
    set "12V_min"     12 * 0.90
    set "12V_max"     12 * 1.10
@@ -1309,12 +1309,14 @@ chip "lm87-*"
 # As described above, the driver must be recompiled to use either or
 # both of these. -12 and -5 may be reversed on your board, this is
 # just a guess, the datasheet gives no guidance.
+# Note that the Linux 2.6 driver needs no recompilation, it'll read the
+# configuration from the chip.
 #   label AIN1 "-12V"
 #   label AIN2 "-5V"
 #   set AIN1_min -12 * 0.95
 #   set AIN2_min -5 * 0.95
 #   set AIN1_max -12 * 1.05
-#   set AIN2_max -5 * 0.95
+#   set AIN2_max -5 * 1.05
 #   compute AIN1 (7.50 * @) - 21.45  ,  (@ + 21.45) / 7.50
 #   compute AIN2 (4.05 * @) - 10.07  ,  (@ + 10.07) / 4.05
 
