@@ -1,0 +1,20 @@
+Kernel driver `i2c-amd756.o'
+
+Status: Complete and somewhat tested
+
+Supported adapters:
+  * AMD 756
+  * AMD 766
+    Datasheets: Publicly available on AMD website
+
+
+Module Parameters
+-----------------
+
+(none)
+
+
+Description
+-----------
+
+This driver supports the AMD 756 and 766 Peripheral Bus Controllers.
