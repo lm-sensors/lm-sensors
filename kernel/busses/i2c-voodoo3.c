@@ -205,26 +205,34 @@ static struct i2c_adapter voodoo3_ddc_adapter = {
 };
 
 
-#if 0
-PCI_VENDOR_ID_3DFX, PCI_DEVICE_ID_3DFX_VOODOO3,
-PCI_VENDOR_ID_3DFX, PCI_DEVICE_ID_3DFX_BANSHEE,
-#endif
 static struct pci_device_id voodoo3_ids[] __devinitdata = {
+	{
+		.vendor =	PCI_VENDOR_ID_3DFX,
+		.device =	PCI_DEVICE_ID_3DFX_VOODOO3,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_3DFX,
+		.device =	PCI_DEVICE_ID_3DFX_BANSHEE,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
 	{ 0, }
 };
 
 static int __devinit voodoo3_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
+	int retval;
 
-	if (voodoo3_setup()) {
-		printk
-		    ("i2c-voodoo3.o: Voodoo3 not detected, module not inserted.\n");
-		return -ENODEV;
-	}
 	config_v3(dev);
-
-	i2c_bit_add_bus(&voodoo3_i2c_adapter);
-	i2c_bit_add_bus(&voodoo3_ddc_adapter);
+	retval = i2c_bit_add_bus(&voodoo3_i2c_adapter);
+	if(retval)
+		return retval;
+	retval = i2c_bit_add_bus(&voodoo3_ddc_adapter);
+	if(retval)
+		i2c_bit_del_bus(&voodoo3_i2c_adapter);
+	return retval;
 }
 
 static void __devexit voodoo3_remove(struct pci_dev *dev)
