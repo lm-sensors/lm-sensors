@@ -4695,7 +4695,11 @@ sub print_chips_report
     my $is_isa = exists $data->{isa_addr};
     print "  * ";
     if ($is_i2c) {
-      printf "Bus `%s' (%s)\n", $data->{i2c_adap}, $data->{i2c_algo};
+      if ($data->{i2c_algo} eq "Algorithm unavailable") {
+        printf "Bus `%s'\n", $data->{i2c_adap};
+      } else {
+        printf "Bus `%s' (%s)\n", $data->{i2c_adap}, $data->{i2c_algo};
+      }
       printf "    Busdriver `%s', I2C address 0x%02x", 
              $data->{i2c_driver}, $data->{i2c_addr};
       if (exists $data->{i2c_sub_addrs}) {
