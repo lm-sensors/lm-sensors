@@ -57,6 +57,121 @@ sub print_diff
   close INPUT;
 }
 
+# This generates diffs for kernel file Documentation/Configure.help. This
+# file contains the help texts that can be displayed during `make *config'
+# for the kernel.
+# The new texts are put at the end of the file, or just before the
+# lm_sensors texts.
+# Of course, care is taken old lines are removed.
+# NOTE: MOST OF THE TEXTS ARE UNWRITTEN YET!
+# $_[0]: i2c package root (like /tmp/i2c)
+# $_[1]: Linux kernel tree (like /usr/src/linux)
+sub gen_Documentation_Configure_help
+{
+  my ($package_root,$kernel_root) = @_;
+  my $kernel_file = "Documentation/Configure.help";
+  my $package_file = $temp;
+
+  open INPUT,"$kernel_root/$kernel_file"
+        or die "Can't open `$kernel_root/$kernel_file'";
+  open OUTPUT,">$package_root/$package_file"
+        or die "Can't open $package_root/$package_file";
+  while(<INPUT>) {
+    while (m@I2C mainboard interfaces@ or 
+           m@Acer Labs ALI 1533 and 1543C@ or
+           m@Apple Hydra Mac I/O@ or
+           m@Intel 82371AB PIIX4(E)@ or
+           m@VIA Technologies, Inc. VT82C586B@ or
+           m@Pseudo ISA adapter (for hardware sensors modules)@ or
+           m@Analog Devices ADM1021 and compatibles@ or
+           m@Analog Devices ADM9240 and compatibles@ or
+           m@Genesys Logic GL518SM@ or
+           m@National Semiconductors LM75@ or
+           m@National Semiconductors LM78@ or
+           m@National Semiconductors LM80@ or
+           m@Silicon Integrated Systems Corp. SiS5595@ or
+           m@Winbond W83781D, W83782D and W83783S@ or
+           m@EEprom (DIMM) reader@ or
+           m@Linear Technologies LTC1710@) {
+      $_ = <INPUT>;
+      $_ = <INPUT>;
+      $_ = <INPUT> while not m@^\S$@ and not eof(INPUT);
+    }
+    if (eof(INPUT)) {
+      print OUTPUT <<'EOF'
+I2C mainboard interfaces
+CONFIG_I2C_MAINBOARD
+  No help yet
+
+Acer Labs ALI 1533 and 1543C
+CONFIG_I2C_ALI5X3
+  No help yet
+
+Apple Hydra Mac I/O
+CONFIG_I2C_HYDRA
+  No help yet
+
+Intel 82371AB PIIX4(E)
+CONFIG_I2C_PIIX4
+  No help yet
+
+VIA Technologies, Inc. VT82C586B
+CONFIG_I2C_VIA
+  No help yet
+
+Pseudo ISA adapter (for hardware sensors modules)
+CONFIG_I2C_ISA
+  No help yet
+
+Analog Devices ADM1021 and compatibles
+CONFIG_SENSORS_ADM1021 
+  No help yet
+
+Analog Devices ADM9240 and compatibles
+CONFIG_SENSORS_ADM9240
+  No help yet
+
+Genesys Logic GL518SM
+CONFIG_SENSORS_GL518SM
+  No help yet
+
+National Semiconductors LM75
+CONFIG_SENSORS_LM75 
+  No help yet
+
+National Semiconductors LM78
+CONFIG_SENSORS_LM78
+  No help yet
+
+National Semiconductors LM80
+CONFIG_SENSORS_LM80
+  No help yet
+
+Silicon Integrated Systems Corp. SiS5595
+CONFIG_SENSORS_SIS5595
+  No help yet
+
+Winbond W83781D, W83782D and W83783S
+CONFIG_SENSORS_W83781D
+  No help yet
+
+EEprom (DIMM) reader
+CONFIG_SENSORS_EEPROM
+  No help yet
+
+Linear Technologies LTC1710
+CONFIG_SENSORS_LTC1710
+  No help yet
+
+EOF
+    }
+    print OUTPUT;
+  }
+  close INPUT;
+  close OUTPUT;
+  print_diff $package_root,$kernel_root,$kernel_file,$package_file;
+}
+
 
 # This generates diffs for the main Linux Makefile.
 # Three lines which add drivers/sensors/sensors.a to the DRIVERS list are 
