@@ -18,7 +18,21 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.8.7 (2004xxxx)
+  File doc/chips/pc87360-fan: Renamed to pc87360
+  File doc/chips/w83781d: Update AS99127F documentation
+  Library: Fix 2.6 VRM
+           Fix 2.6 hyst temp for 2.6 (lm75, lm78 and gl518sm)
+  Modules dmi_scan, i2c-piix4: Move IBM detection into dmi_scan
   Module i2c-sis645: Add support for SiS655
+  Module pc87360-fan: Renamed to pc87360
+                      Also support PC87365 and PC87366
+                      Add write support
+                      Correctly set the chip name depending on the type
+  Module w83781d: Drop PWM support for as99127f
+  Program mkpatch: Patch dmi_scan.c in kernel instead of adding our own
+                   module
+  Program sensors-detect: Rework Super I/O detection
+                          Support SiS655/SiS96x
 
 
 2.8.6 (20040405)
