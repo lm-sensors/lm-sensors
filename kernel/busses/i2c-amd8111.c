@@ -20,6 +20,7 @@
 #include <linux/slab.h>
 #include <asm/io.h>
 #include "version.h"
+#include "sensors_compat.h"
 
 #ifndef I2C_HW_SMBUS_AMD8111
 #error Your i2c is too old - i2c-2.7.0 or greater required!

@@ -64,6 +64,7 @@
 #include <asm/io.h>
 #include <asm/semaphore.h>
 #include "version.h"
+#include "sensors_compat.h"
 
 
 /* ALI1535 SMBus address offsets */

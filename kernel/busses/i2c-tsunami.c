@@ -37,6 +37,7 @@
 #include <asm/hwrpb.h>
 #include <asm/core_tsunami.h>
 #include "version.h"
+#include "sensors_compat.h"
 
 MODULE_LICENSE("GPL");
 

@@ -37,6 +37,7 @@
 #include <asm/io.h>
 #include <asm/param.h> /* for HZ */
 #include "version.h"
+#include "sensors_compat.h"
 
 /* 3DFX defines */
 /* #define PCI_VENDOR_ID_S3		0x5333 */

@@ -41,6 +41,7 @@
 #include <linux/apm_bios.h>
 #include <asm/io.h>
 #include "version.h"
+#include "sensors_compat.h"
 
 
 struct sd {

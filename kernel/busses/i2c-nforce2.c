@@ -46,6 +46,7 @@
 #include <linux/slab.h>
 #include <asm/io.h>
 #include "version.h"
+#include "sensors_compat.h"
 
 /* kernel 2.4.9 needs this */
 #ifndef min_t

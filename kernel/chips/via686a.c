@@ -40,6 +40,7 @@
 #include <linux/init.h>
 #include <asm/io.h>
 #include "version.h"
+#include "sensors_compat.h"
 
 
 /* If force_addr is set to anything different from 0, we forcibly enable

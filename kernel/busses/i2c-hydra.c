@@ -34,6 +34,7 @@
 #include <asm/io.h>
 #include <asm/system.h>
 #include <asm/param.h>	/* for HZ */
+#include "sensors_compat.h"
 
 MODULE_LICENSE("GPL");
 
