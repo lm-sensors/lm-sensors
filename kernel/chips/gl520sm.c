@@ -24,6 +24,7 @@
 #include <linux/malloc.h>
 #include <linux/i2c.h>
 #include "sensors.h"
+#include "i2c-isa.h"
 #include "version.h"
 #include "compat.h"
 
