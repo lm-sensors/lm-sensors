@@ -153,8 +153,10 @@ MACHINE := $(shell uname -m)
 SRCDIRS :=
 ifneq ($(MAKECMDGOALS),user)
 ifneq ($(MAKECMDGOALS),user_install)
+ifneq ($(MAKECMDGOALS),user_uninstall)
 SRCDIRS += mkpatch
 SRCDIRS += kernel kernel/busses kernel/chips
+endif
 endif
 endif
 SRCDIRS += kernel/include
@@ -242,7 +244,13 @@ all::
 INCLUDEFILES := 
 include $(patsubst %,%/Module.mk,$(SRCDIRS))
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),uninstall)
+ifneq ($(MAKECMDGOALS),user_uninstall)
+ifneq ($(MAKECMDGOALS),help)
 include $(INCLUDEFILES)
+endif
+endif
+endif
 endif
 
 # Man pages
@@ -283,6 +291,12 @@ endif
 clean::
 	$(RM) lm_sensors-*
 
+user_uninstall::
+	
+uninstall :: user_uninstall
+	@echo "*** Note:"
+	@echo "***  * Kernel modules were not uninstalled."
+
 # This is tricky, but it works like a charm. It needs lots of utilities
 # though: cut, find, gzip, ln, tail and tar.
 package: version clean
@@ -311,6 +325,7 @@ help:
 	@echo '  install: install modules and userspace programs'
 	@echo '  user: build userspace programs'
 	@echo '  user_install: install userspace programs'
+	@echo '  user_uninstall: remove userspace programs'
 	@echo '  clean: cleanup'
 	@echo '  package: create a distribution package'
 	@echo 'Note: make dep is automatic'

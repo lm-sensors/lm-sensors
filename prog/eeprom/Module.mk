@@ -22,9 +22,13 @@ PROGEEPROMTARGETS := $(MODULE_DIR)/decode-dimms.pl \
                      $(MODULE_DIR)/decode-edid.pl \
                      $(MODULE_DIR)/decode-vaio.pl
 
+REMOVEEEPROMBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(BINDIR)/%,$(PROGEEPROMTARGETS))
+
 install-prog-eeprom: $(PROGEEPROMTARGETS)
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 755 $(PROGEEPROMTARGETS) $(DESTDIR)$(BINDIR)
 
 user_install :: install-prog-eeprom
 
+user_uninstall::
+	$(RM) $(REMOVEEEPROMBIN)

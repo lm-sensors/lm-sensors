@@ -20,9 +20,13 @@ PROGXEONDIR := $(MODULE_DIR)
 
 PROGXEONTARGETS := $(MODULE_DIR)/decode-xeon.pl
 
+REMOVEXEONBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(BINDIR)/%,$(PROGXEONTARGETS))
+
 install-prog-xeon: $(PROGXEONTARGETS)
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 755 $(PROGXEONTARGETS) $(DESTDIR)$(BINDIR)
 
 user_install :: install-prog-xeon
 
+user_uninstall::
+	$(RM) $(REMOVEXEONBIN)

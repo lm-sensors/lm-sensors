@@ -35,6 +35,9 @@ PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect \
 # executables.
 INCLUDEFILES += $(PROGDETECTSOURCES:.c=.rd)
 
+REMOVEDETECTBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(SBINDIR)/%,$(PROGDETECTSBININSTALL))
+REMOVEDETECTMAN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(PROGDETECTMAN8DIR)/%,$(PROGDETECTMAN8FILES))
+
 all-prog-detect: $(PROGDETECTTARGETS)
 user :: all-prog-detect
 
@@ -46,6 +49,10 @@ install-prog-detect: all-prog-detect
 	$(INSTALL) -m 755 $(PROGDETECTSBININSTALL) $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -m 644 $(PROGDETECTMAN8FILES) $(DESTDIR)$(PROGDETECTMAN8DIR)
 user_install :: install-prog-detect
+
+user_uninstall::
+	$(RM) $(REMOVEDETECTBIN)
+	$(RM) $(REMOVEDETECTMAN)
 
 clean-prog-detect:
 	$(RM) $(PROGDETECTDIR)/*.rd $(PROGDETECTDIR)/*.ro $(PROGDETECTTARGETS)

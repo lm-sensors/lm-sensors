@@ -22,9 +22,13 @@ PROGPWMTARGETS := $(MODULE_DIR)/fancontrol \
                   $(MODULE_DIR)/fancontrol.pl \
                   $(MODULE_DIR)/pwmconfig
 
+REMOVEPWMBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(SBINDIR)/%,$(PROGPWMTARGETS))
+
 install-prog-pwm: $(PROGPWMTARGETS)
 	$(MKDIR) $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -m 755 $(PROGPWMTARGETS) $(DESTDIR)$(SBINDIR)
 
 user_install :: install-prog-pwm
 
+user_uninstall::
+	$(RM) $(REMOVEPWMBIN)

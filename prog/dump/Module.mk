@@ -43,6 +43,9 @@ endif
 # executables.
 INCLUDEFILES += $(PROGDUMPSOURCES:.c=.rd)
 
+REMOVEDUMPBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(SBINDIR)/%,$(PROGDUMPBININSTALL))
+REMOVEDUMPMAN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(PROGDUMPMAN8DIR)/%,$(PROGDUMPMAN8FILES))
+
 all-prog-dump: $(PROGDUMPTARGETS)
 user :: all-prog-dump
 
@@ -57,6 +60,10 @@ install-prog-dump: all-prog-dump
 	$(INSTALL) -m 755 $(PROGDUMPBININSTALL) $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -m 644 $(PROGDUMPMAN8FILES) $(DESTDIR)$(PROGDUMPMAN8DIR)
 user_install :: install-prog-dump
+
+user_uninstall::
+	$(RM) $(REMOVEDUMPBIN)
+	$(RM) $(REMOVEDUMPMAN)
 
 clean-prog-dump:
 	$(RM) $(PROGDUMPDIR)/*.rd $(PROGDUMPDIR)/*.ro $(PROGDUMPTARGETS)

@@ -36,6 +36,8 @@ $(KERNELINCLUDEDIR)/sensors.hd:
 # Get dependencies of sensors.h
 INCLUDEFILES += $(MODULE_DIR)/sensors.hd
 
+REMOVEKERNELINC := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(SYSINCLUDEDIR)/%,$(KERNELINCLUDEFILES))
+
 install-all-kernel-include:
 	if [ -n "$(KERNELINCLUDEFILES)" ] ; then \
 	  $(MKDIR) $(DESTDIR)$(SYSINCLUDEDIR) ; \
@@ -43,6 +45,9 @@ install-all-kernel-include:
 	fi
 
 user_install :: install-all-kernel-include
+
+user_uninstall::
+	$(RM) $(REMOVEKERNELINC)
 
 clean-all-kernel-include:
 	$(RM) $(KERNELINCLUDEDIR)/*.h.install $(KERNELINCLUDEDIR)/sensors.h $(KERNELINCLUDEDIR)/sensors.hd

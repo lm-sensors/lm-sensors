@@ -92,6 +92,14 @@ $(MODULE_DIR)/conf-lex.ao: $(MODULE_DIR)/conf-lex.c
 $(MODULE_DIR)/conf-lex.lo: $(MODULE_DIR)/conf-lex.c
 	$(CC) $(LIBCPPFLAGS) $(LIBCFLAGS) -Wno-unused -c $< -o $@
 
+REMOVELIBST := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(LIBDIR)/%,$(LIB_DIR)/$(LIBSTLIBNAME))
+REMOVELIBSH := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(LIBDIR)/%,$(LIB_DIR)/$(LIBSHLIBNAME))
+REMOVELNSO  := $(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)
+REMOVELNBS  := $(DESTDIR)$(LIBDIR)/$(LIBSHBASENAME)
+REMOVELIBHF := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(LIBINCLUDEDIR)/%,$(LIBHEADERFILES))
+REMOVEMAN3  := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(LIBMAN3DIR)/%,$(LIBMAN3FILES))
+REMOVEMAN5  := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(LIBMAN5DIR)/%,$(LIBMAN5FILES))
+
 all-lib: $(LIBTARGETS)
 user :: all-lib
 
@@ -139,6 +147,10 @@ install-lib: all-lib
 
 
 user_install :: install-lib
+
+user_uninstall::
+	$(RM) $(REMOVELIBST) $(REMOVELIBSH) $(REMOVELNSO) $(REMOVELNBS) 
+	$(RM) $(REMOVELIBHF) $(REMOVEMAN3) $(REMOVEMAN5)
 
 clean-lib:
 	$(RM) $(LIB_DIR)/*.ld $(LIB_DIR)/*.ad
