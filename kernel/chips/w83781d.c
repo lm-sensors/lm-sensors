@@ -61,7 +61,7 @@
 /* The W83782D registers for nr=7,8 are in bank 5 */
 #define W83781D_REG_IN_MAX(nr) ((nr < 7) ? (0x2b + (nr) * 2) : (0x554 + (((nr) - 7) * 2)))
 #define W83781D_REG_IN_MIN(nr) ((nr < 7) ? (0x2c + (nr) * 2) : (0x555 + (((nr) - 7) * 2)))
-#define W83781D_REG_IN(nr)     ((nr < 7) ? (0x20 + (nr)) : (0x550 + (nr)))
+#define W83781D_REG_IN(nr)     ((nr < 7) ? (0x20 + (nr)) : (0x550 + (nr) - 7))
 
 #define W83781D_REG_FAN_MIN(nr) (0x3a + (nr))
 #define W83781D_REG_FAN(nr) (0x27 + (nr))
@@ -135,8 +135,12 @@
 #define W83781D_INIT_IN_4 (((1200)  * 10)/38)
 #define W83781D_INIT_IN_5 (((-1200) * -604)/2100)
 #define W83781D_INIT_IN_6 (((-500)  * -604)/909)
-#define W83781D_INIT_IN_7 330
+#define W83781D_INIT_IN_7 (((500)   * 100)/168)
 #define W83781D_INIT_IN_8 330
+/* Initial limits for 782d/783s negative voltages */
+/* Note level shift. Change min/max below if you change these. */
+#define W83782D_INIT_IN_5 (((-1200) + 1491)/514)
+#define W83782D_INIT_IN_6 (((-500)  + 771)/314)
 
 #define W83781D_INIT_IN_PERCENTAGE 10
 
@@ -194,6 +198,22 @@
 #define W83781D_INIT_IN_MAX_8 \
         (W83781D_INIT_IN_8 + W83781D_INIT_IN_8 * W83781D_INIT_IN_PERCENTAGE \
          / 100) 
+/* Initial limits for 782d/783s negative voltages */
+/* These aren't direct multiples because of level shift */
+/* Beware going negative - check */
+#define W83782D_INIT_IN_6 (((-500)  + 771)/314)
+#define W83782D_INIT_IN_MIN_5_TMP \
+        ((-1200 * ((100 + W83781D_INIT_IN_PERCENTAGE) / 100) + 1491)/514)
+#define W83782D_INIT_IN_MIN_5 \
+        ((W83782D_INIT_IN_MIN_5_TMP > 0) ? W83782D_INIT_IN_MIN_5_TMP : 0)
+#define W83782D_INIT_IN_MAX_5 \
+        ((-1200 * ((100 - W83781D_INIT_IN_PERCENTAGE) / 100) + 1491)/514)
+#define W83782D_INIT_IN_MIN_6_TMP \
+        ((-500 * ((100 + W83781D_INIT_IN_PERCENTAGE) / 100) + 771)/314)
+#define W83782D_INIT_IN_MIN_6 \
+        ((W83782D_INIT_IN_MIN_6_TMP > 0) ? W83782D_INIT_IN_MIN_6_TMP : 0)
+#define W83782D_INIT_IN_MAX_6 \
+        ((-500 * ((100 - W83781D_INIT_IN_PERCENTAGE) / 100) + 771)/314)
 
 #define W83781D_INIT_FAN_MIN_1 3000
 #define W83781D_INIT_FAN_MIN_2 3000
@@ -912,15 +932,27 @@ void w83781d_init_client(struct i2c_client *client)
                       IN_TO_REG(W83781D_INIT_IN_MIN_4,4));
   w83781d_write_value(client,W83781D_REG_IN_MAX(4),
                       IN_TO_REG(W83781D_INIT_IN_MAX_4,4));
-  w83781d_write_value(client,W83781D_REG_IN_MIN(5),
-                      IN_TO_REG(W83781D_INIT_IN_MIN_5,5));
-  w83781d_write_value(client,W83781D_REG_IN_MAX(5),
-                      IN_TO_REG(W83781D_INIT_IN_MAX_5,5));
-  if(wchipid != W83783S_WCHIPID) {
+  if(wchipid == W83781D_WCHIPID) {
+    w83781d_write_value(client,W83781D_REG_IN_MIN(5),
+                        IN_TO_REG(W83781D_INIT_IN_MIN_5,5));
+    w83781d_write_value(client,W83781D_REG_IN_MAX(5),
+                        IN_TO_REG(W83781D_INIT_IN_MAX_5,5));
+  } else {
+    w83781d_write_value(client,W83781D_REG_IN_MIN(5),
+                        IN_TO_REG(W83782D_INIT_IN_MIN_5,5));
+    w83781d_write_value(client,W83781D_REG_IN_MAX(5),
+                        IN_TO_REG(W83782D_INIT_IN_MAX_5,5));
+  }
+  if(wchipid == W83781D_WCHIPID) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(6),
                         IN_TO_REG(W83781D_INIT_IN_MIN_6,6));
     w83781d_write_value(client,W83781D_REG_IN_MAX(6),
                         IN_TO_REG(W83781D_INIT_IN_MAX_6,6));
+  } else if(wchipid == W83782D_WCHIPID) {
+    w83781d_write_value(client,W83781D_REG_IN_MIN(6),
+                        IN_TO_REG(W83782D_INIT_IN_MIN_6,6));
+    w83781d_write_value(client,W83781D_REG_IN_MAX(6),
+                        IN_TO_REG(W83782D_INIT_IN_MAX_6,6));
   }
   if(wchipid == W83782D_WCHIPID) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(7),
