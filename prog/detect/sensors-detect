@@ -1659,6 +1659,8 @@ sub swap_bytes
 # $_[0] is the sought value
 # @_[1..] is the list to seek in
 # Returns: 0 on failure, 1 if found.
+# Note: Every use of this sub probably indicates the use of the wrong
+#       datastructure
 sub contains
 {
   my $sought = shift;
@@ -1672,7 +1674,7 @@ sub parse_not_to_scan
 {
   my ($min,$max,$to_parse) = @_;
   my @ranges = split /\s*,\s*/, $to_parse;
-  my @res = ();
+  my @res;
   my $range;
   foreach $range (@ranges) {
     my ($start,$end) = split /\s*-s*/, $range;
@@ -1784,7 +1786,7 @@ use vars qw($modules_conf $dev_i2c);
 sub initialize_conf
 {
   my $use_devfs = 0;
-  open INPUTFILE, "/proc/mounts" or die "Can't access /proc/mounts!";
+  open(local *INPUTFILE, "/proc/mounts") or die "Can't access /proc/mounts!";
   while (<INPUTFILE>) {
     if (m@^\w+ /dev devfs @) {
       $use_devfs = 1;
@@ -1844,12 +1846,11 @@ use vars qw(%modules_list);
 
 sub initialize_modules_list
 {
-  open INPUTFILE, "/proc/modules" or return;
+  open(local *INPUTFILE, "/proc/modules") or return;
   while (<INPUTFILE>) {
     tr/_/-/;
     $modules_list{$1} = 1 if m/^(\S*)/;
   }
-  close INPUTFILE;
 }
 
 ##############
@@ -1865,7 +1866,7 @@ use vars qw(%pci_list);
 sub read_proc_dev_pci
 {
   my ($dfn,$vend,%pci_list);
-  open INPUTFILE, "/proc/bus/pci/devices" or return;
+  open(local *INPUTFILE, "/proc/bus/pci/devices") or return;
   while (<INPUTFILE>) {
     my $record = {};
     ($dfn,$vend,$record->{irq},$record->{base_addr0},$record->{base_addr1},
@@ -1881,7 +1882,6 @@ sub read_proc_dev_pci
     $pci_list{ sprintf("%04x:%04x",$record->{vendid},$record->{devid}) } =
 	$record;
   }
-  close INPUTFILE or return;
   return %pci_list;
 }
 
@@ -1897,7 +1897,7 @@ sub initialize_proc_pci
 
 sub all_available_adapters
 {
-  my @res = ();
+  my @res;
   foreach my $adapter (@pci_adapters) {
     push @res, $adapter->{driver}
       if exists $modules_list{$adapter->{driver}};
@@ -2391,7 +2391,7 @@ sub add_isa_to_chips_detected
         not exists $new_misdetected_ref->[$i]->{isa_addr} and
         defined $alias_detect and
         $new_misdetected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
-      open FILE,"$dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}" or
+      open(local *FILE, "$dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}") or
         print("Can't open $dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
         next;
       binmode FILE;
@@ -2404,10 +2404,8 @@ sub add_isa_to_chips_detected
         $new_misdetected_ref->[$i]->{isa_addr} = $datahash->{isa_addr};
         $new_misdetected_ref->[$i]->{isa_extra} = $datahash->{isa_extra} 
                if exists $datahash->{isa_extra};
-        close FILE;
         return $new_misdetected_ref->[$i]; 
       }
-      close FILE;
     }
   }
 
@@ -2417,7 +2415,7 @@ sub add_isa_to_chips_detected
         not exists $new_detected_ref->[$i]->{isa_addr} and
         defined $alias_detect and
         $new_detected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
-      open FILE,"$dev_i2c$new_detected_ref->[$i]->{i2c_devnr}" or
+      open(local *FILE, "$dev_i2c$new_detected_ref->[$i]->{i2c_devnr}") or
         print("Can't open $dev_i2c$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
         next;
       binmode FILE;
@@ -2431,11 +2429,9 @@ sub add_isa_to_chips_detected
         $new_detected_ref->[$i]->{isa_extra} = $datahash->{isa_extra} 
                if exists $datahash->{isa_extra};
         ($datahash) = splice (@$new_detected_ref, $i, 1);
-        close FILE;
         $isalias=1;
         last;
       }
-      close FILE;
     }
   }
 
@@ -2491,7 +2487,7 @@ sub scan_adapter
   # As we modify it, we need a copy
   my @not_to_scan = @$not_to_scan;
 
-  open FILE,"$dev_i2c$adapter_nr" or 
+  open(local *FILE, "$dev_i2c$adapter_nr") or 
     (print "Can't open $dev_i2c$adapter_nr\n"), return;
   binmode FILE;
 
@@ -4521,7 +4517,7 @@ sub generate_modprobes
 
   # Collect all loaded adapters
   # i2cdetect -l either cats /proc/bus/i2c or scans sysfs for the same information
-  open INPUTFILE,"i2cdetect -l |" or die "Couldn't find i2cdetect program!!";
+  open(local *INPUTFILE, "i2cdetect -l |") or die "Couldn't find i2cdetect program!!";
   while (<INPUTFILE>) {
     my ($dev_nr,$type,$adap,$algo) = /^i2c-(\S+)\s+(\S+)\s+(.*?)\s*\t\s*(.*?)\s+$/;
     next if ($type eq "dummy");
@@ -4581,8 +4577,6 @@ sub generate_modprobes
     } else {
       $modprobes .= "modprobe $chip->{driver}\n";
     }
-    @optionlist = ();
-    @probelist = ();
 
     # Handle detects at addresses normally not probed
     foreach $detection (@{$chip->{detected}}) {
@@ -4651,22 +4645,13 @@ sub vpd_bios_build_id
   my $found = 0;
   my $bbid;
 
-  return 0
-    unless open MEM, '/dev/mem';
+  open(local *MEM, '/dev/mem') || return 0;
   binmode MEM;
-  unless (seek MEM, $pos, SEEK_SET)
-  {
-    close MEM;
-    return 0;
-  }
+  seek MEM, $pos, SEEK_SET || return 0;
   while ($pos <= 0xFFFD0 && !$found)
   {
     my $r = read(MEM, my $buf, 48);
-    unless ($r == 48)
-    {
-      close MEM;
-      return 0;
-    }
+    return 0 unless ($r == 48);
     seek (MEM, -32, SEEK_CUR);
     my $len;
     if (substr($buf, 0, 5) eq "\xAA\x55VPD"
@@ -4683,7 +4668,6 @@ sub vpd_bios_build_id
     }
     $pos += 16;
   }
-  close MEM;
 
   return 1 unless $found;
   print " System vendor: IBM\n";
@@ -4830,7 +4814,7 @@ sub main
 
   my ($inp,@not_to_scan,$inp2);
   # i2cdetect -l either cats /proc/bus/i2c or scans sysfs for the same information
-  open INPUTFILE,"i2cdetect -l |" or die "Couldn't find i2cdetect program!!";
+  open(local *INPUTFILE, "i2cdetect -l |") or die "Couldn't find i2cdetect program!!";
   while (<INPUTFILE>) {
     my ($dev_nr,$type,$adap,$algo) = /^i2c-(\S+)\s+(\S+)\s+(.*?)\s*\t\s*(.*?)\s+$/;
     next if ($type eq "dummy");
@@ -4839,7 +4823,6 @@ sub main
     print "Do you want to scan it? (YES/no/selectively): ";
     
     $inp = <STDIN>;
-    @not_to_scan=();
     if ($inp =~ /^\s*[Ss]/) {
       print "Please enter one or more addresses not to scan. Separate them ",
             "with comma's.\n",
@@ -4970,7 +4953,7 @@ sub main
         mkdir '/etc/sysconfig', 0777
           or die "Sorry, can't create /etc/sysconfig ($!)?!?";
       }
-      open(SYSCONFIG, ">/etc/sysconfig/lm_sensors")
+      open(local *SYSCONFIG, ">/etc/sysconfig/lm_sensors")
         or die "Sorry, can't create /etc/sysconfig/lm_sensors ($!)?!?";
       print SYSCONFIG <<'EOT';
 #    /etc/sysconfig/sensors - Defines modules loaded by /etc/rc.d/init.d/lm_sensors
@@ -5015,7 +4998,6 @@ EOT
         $i++;
       }
       print SYSCONFIG $sysconfig;
-      close(SYSCONFIG);
       print "Copy prog/init/lm_sensors.init to /etc/rc.d/init.d/lm_sensors\n";
       print "for initialization at boot time.\n";
     }
