@@ -3,6 +3,36 @@ modules for general SMBus access and hardware monitoring. There are quite
 a few changes compared with 1.x.y versions; read doc/version-2 for the
 most interesting ones.
 
+
+WARNING! This is a BETA release. It is not compatible with any programs
+which are built upon the 1.x.y versions, like wmlm78 or klm. We expect
+version 2 will soon be supported by them, though. As beta release, there
+may be problems, and not all version 1 chips are yet supported. Not
+everything is tested exhaustively, either, often because we simply do
+not have access to the hardware. Please share your experiences, both
+good and bad, regarding this package with us at <lm78@stimpy.netroedge.com>.
+
+As a rule of thumb: if you have a PIIX4 with LM78/79 and LM75 chips, things
+should run without problem. The GL518 driver is completely untested. All
+supporting modules in the src directory should work without problem. If
+you have a VIA chipset, we would like to hear whether you can access the
+SMBus with it - this is not very well tested either. If you have a Winbond
+chip, use the LM78/LM75 drivers until a specific Winbond driver is written.
+If you have a LM80, you are out of luck at this moment.
+
+We expect many updates and new releases the next few weeks (with both bug
+fixes and new features), so check http://www.netroedge.com/~lm78 (our
+homepage) often.
+
+We could use some testers of hardware. If you own a specific monitoring
+chip or I2C bus, and are willing to help us out, please contact us - even
+if you did so before. Even if you have no programming knowledge, you could
+help us by running new modules and reporting on the results and output. 
+If you want to offer more substantial help, this is very welcome too, of
+course. We have access to LM78(-J), LM79, LM75, Winbond W83781D and
+GL518SM chips, and PIIX4 and VIA chipsets.
+
+
 SMBus, also known as System Management Bus, is a protocol for communicating
 through a I2C ('I squared C') bus. Many modern mainboards have a System
 Management Bus. There are a lot of devices which can be connected to a
