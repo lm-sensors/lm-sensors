@@ -804,7 +804,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             ipmi_smic_detect via8231_isa_detect lm85_detect smartbatt_detect
             adm1026_detect w83l785ts_detect lm83_detect lm90_detect
             saa1064_detect w83l784r_detect mozart_detect max6650_detect
-			fscher_detect adm1029_detect adm1031_detect);
+			fscher_detect adm1029_detect adm1031_detect max6900_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1269,6 +1269,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "saa1064",
        i2c_addrs => [0x38..0x3b],
        i2c_detect => sub { saa1064_detect @_ },
+     },
+     {
+       name => "Maxim MAX6900",
+       driver => "to-be-written",
+       i2c_addrs => [0x50],
+       i2c_detect => sub { max6900_detect @_ },
      },
      {
        name => "SMBus 2.0 ARP-Capable Device",
@@ -3748,6 +3754,73 @@ sub saa1064_detect
 	return 7
 		if $status == 0x80;
 	return 4;
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, 3 if detected
+sub max6900_detect
+{
+	my ($file,$addr) = @_;
+	my $reg;
+	
+	# SEC
+	$reg = i2c_smbus_read_byte_data ($file, 0x81);
+	return if
+		($reg & 0xF0) > 0x50 or
+		($reg & 0x0F) > 9;
+
+	# MIN
+	$reg = i2c_smbus_read_byte_data ($file, 0x83);
+	return if
+		($reg & 0xF0) > 0x50 or
+		($reg & 0x0F) > 9;
+
+	# HR
+	$reg = i2c_smbus_read_byte_data ($file, 0x85);
+	return if
+		($reg & 0x40) != 0x00 or
+		($reg & 0x0F) > 9;
+
+	# DATE
+	$reg = i2c_smbus_read_byte_data ($file, 0x87);
+	return if
+		$reg == 0x00 or
+		($reg & 0xF0) > 0x30 or
+		($reg & 0x0F) > 9;
+
+	# MONTH
+	$reg = i2c_smbus_read_byte_data ($file, 0x89);
+	return if
+		$reg == 0x00 or
+		($reg & 0xF0) > 0x10 or
+		($reg & 0x0F) > 9;
+
+	# DAY
+	$reg = i2c_smbus_read_byte_data ($file, 0x8B);
+	return if
+		$reg == 0 or
+		$reg > 7;
+
+	# YEAR
+	$reg = i2c_smbus_read_byte_data ($file, 0x8D);
+	return if
+		($reg & 0xF0) > 0x90 or
+		($reg & 0x0F) > 9;
+
+	# CONTROL
+	$reg = i2c_smbus_read_byte_data ($file, 0x8F);
+	return if
+		($reg & 0x7F) != 0x00;
+
+	# CENTURY
+	$reg = i2c_smbus_read_byte_data ($file, 0x93);
+	return if
+		($reg & 0xF0) > 0x90 or
+		($reg & 0x0F) > 9;
+
+	return 3;
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
