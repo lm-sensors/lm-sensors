@@ -195,7 +195,7 @@ rrdGetSensors_DS
     char *ptr = rrdBuff + data->num * RRD_BUFF;
     const char *min, *max;
     data->argv[data->num ++] = ptr;
-    switch (feature->type) { /* arbitrary sanity limits */
+    switch (feature ? feature->type : DataType_other) { /* arbitrary sanity limits */
       case DataType_voltage:
         min="-25";
         max="25";
