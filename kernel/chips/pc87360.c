@@ -177,14 +177,14 @@ struct pc87360_data {
 	u8 in_min[11];		/* Register value */
 	u8 in_max[11];		/* Register value */
 	u8 in_status[11];	/* Register value */
-	u16 in_alarms;		/* Register values, combined */
+	u16 in_alarms;		/* Register values, combined, masked */
 
 	u8 temp[3];		/* Register value */
 	u8 temp_min[3];		/* Register value */
 	u8 temp_max[3];		/* Register value */
 	u8 temp_crit[3];	/* Register value */
 	u8 temp_status[3];	/* Register value */
-	u8 temp_alarms;		/* Register value */
+	u8 temp_alarms;		/* Register value, masked */
 };
 
 
@@ -281,9 +281,9 @@ static struct i2c_driver pc87360_driver = {
 #define PC87365_SYSCTL_TEMP1		3101 /* degrees Celcius */
 #define PC87365_SYSCTL_TEMP2		3102
 #define PC87365_SYSCTL_TEMP3		3103 /* not for PC87365 */
-#define PC87365_SYSCTL_TEMP1_STATUS	3101 /* bit field */
-#define PC87365_SYSCTL_TEMP2_STATUS	3102
-#define PC87365_SYSCTL_TEMP3_STATUS	3103 /* not for PC87365 */
+#define PC87365_SYSCTL_TEMP1_STATUS	3301 /* bit field */
+#define PC87365_SYSCTL_TEMP2_STATUS	3302
+#define PC87365_SYSCTL_TEMP3_STATUS	3303 /* not for PC87365 */
 
 #define PC87365_STATUS_TEMP_MIN		0x02
 #define PC87365_STATUS_TEMP_MAX		0x04
@@ -646,13 +646,19 @@ static void pc87360_update_client(struct i2c_client *client)
 
 		/* Fans */
 		for (i = 0; i < data->fannr; i++) {
-			data->fan[i] = pc87360_read_value(data, LD_FAN,
-				       NO_BANK, PC87360_REG_FAN(i));
-			data->fan_min[i] = pc87360_read_value(data, LD_FAN,
-					   NO_BANK, PC87360_REG_FAN_MIN(i));
 			data->fan_status[i] = pc87360_read_value(data, LD_FAN,
 					      NO_BANK,
 					      PC87360_REG_FAN_STATUS(i));
+			/* Clear bits */
+			pc87360_write_value(data, LD_FAN, NO_BANK,
+					    PC87360_REG_FAN_STATUS(i),
+					    data->fan_status[i] | 0x06);
+			if (data->fan_status[i] & 0x01) {
+				data->fan[i] = pc87360_read_value(data, LD_FAN,
+					       NO_BANK, PC87360_REG_FAN(i));
+			}
+			data->fan_min[i] = pc87360_read_value(data, LD_FAN,
+					   NO_BANK, PC87360_REG_FAN_MIN(i));
 			data->pwm[i] = pc87360_read_value(data, LD_FAN,
 				       NO_BANK, PC87360_REG_PWM(i));
 		}
@@ -676,10 +682,13 @@ static void pc87360_update_client(struct i2c_client *client)
 						  PC87365_REG_IN_MAX);
 			}
 		}
-		data->in_alarms = pc87360_read_value(data, LD_IN, NO_BANK,
-				  PC87365_REG_IN_ALARMS1)
-				| (pc87360_read_value(data, LD_IN, NO_BANK,
-				   PC87365_REG_IN_ALARMS2) << 8);
+		if (data->innr) {
+			data->in_alarms = pc87360_read_value(data, LD_IN,
+					  NO_BANK, PC87365_REG_IN_ALARMS1)
+					| ((pc87360_read_value(data, LD_IN,
+					    NO_BANK, PC87365_REG_IN_ALARMS2)
+					    & 0x07) << 8);
+		}
 
 		/* Temperatures */
 		for (i = 0; i < data->tempnr; i++) {
@@ -705,8 +714,11 @@ static void pc87360_update_client(struct i2c_client *client)
 						     PC87365_REG_TEMP_CRIT);
 			}
 		}
-		data->temp_alarms = pc87360_read_value(data, LD_TEMP, NO_BANK,
-				    PC87365_REG_TEMP_ALARMS);
+		if (data->tempnr) {
+			data->temp_alarms = pc87360_read_value(data, LD_TEMP,
+					    NO_BANK, PC87365_REG_TEMP_ALARMS)
+					  & 0x3F;
+		}
 
 		data->last_updated = jiffies;
 		data->valid = 1;
