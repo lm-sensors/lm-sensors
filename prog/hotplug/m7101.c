@@ -380,7 +380,7 @@ void cleanup_module()
 EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
-
+MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Burkhard Kohl <bku@buks.ipn.de>, "
 	      "Frank Bauer <frank.bauer@nikocity.de>, "
 	      "and Mark Studebaker <mdsxyz123@yahoo.com>");
