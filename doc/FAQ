@@ -37,6 +37,7 @@ CONTENTS
   3.4E I need help with sensors.conf!
 3.5 What about the 'No such file or directory' warnings when I compile it?
 3.6 I get all kind of weird compilation errors?
+  3.6A 'No rule to make target xxxx needed by xxxx' - how to fix?
 3.7 It still does not compile or patch
 
 4 Problems
@@ -380,6 +381,14 @@ it will do is generate them. So all is well.
     Check that the correct i2c header files are used. Depending on
 how you installed, they should be under either /usr/local/include or
 /usr/src/linux*/include. Try to edit the Makefile for the other setting.
+
+
+3.6A 'No rule to make target xxxx needed by xxxx' - how to fix?
+
+    See 3.6 above. Also try 'make clean' in lm_sensors.
+    If that doesn't work, try 'make clean' in i2c.
+    If that doesn't work, try 'make clean' in the kernel.
+    Also make sure /usr/include/linux points to /usr/src/linux/include/linux.
 
 
 3.7 It still does not compile or patch!
@@ -902,7 +911,9 @@ can not be sure.
 
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
-Rev 2.3 (MDS) General update, 20010224
+
+Rev 2.4 (MDS) Minor updates 20010625
+Rev 2.3 (MDS) General update, 20010224, released with lm_sensors 2.6.0.
 Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 19990920
 Rev 2.1 (Frodo) Corrections for lm_sensors 2.2, 19990112
 Rev 2.0 (Frodo) Major revision for lm_sensors 2.1, 19981229
