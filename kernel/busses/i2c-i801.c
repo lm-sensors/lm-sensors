@@ -119,12 +119,6 @@ static int supported[] = {PCI_DEVICE_ID_INTEL_82801AA_3,
 
 /* insmod parameters */
 
-/* If force is set to anything different from 0, we forcibly enable the
-   I801. DANGEROUS! */
-static int force = 0;
-MODULE_PARM(force, "i");
-MODULE_PARM_DESC(force, "Forcibly enable the I801. DANGEROUS!");
-
 /* If force_addr is set to anything different from 0, we forcibly enable
    the I801 at the given address. VERY DANGEROUS! */
 static int force_addr = 0;
@@ -225,10 +219,13 @@ int i801_setup(void)
 /* Determine the address of the SMBus areas */
 	if (force_addr) {
 		i801_smba = force_addr & 0xfff0;
-		force = 0;
 	} else {
 		pci_read_config_word(I801_dev, SMBBA, &i801_smba);
 		i801_smba &= 0xfff0;
+		if(i801_smba == 0) {
+			printk(KERN_ERR "i2c-i801.o: SMB base address uninitialized - upgrade BIOS or use force_addr=0xaddr\n");
+			return -ENODEV;
+		}
 	}
 
 	if (check_region(i801_smba, (isich4 ? 16 : 8))) {
@@ -243,7 +240,7 @@ int i801_setup(void)
 	temp &= ~SMBHSTCFG_I2C_EN;	/* SMBus timing */
 	pci_write_config_byte(I801_dev, SMBHSTCFG, temp);
 /* If force_addr is set, we program the new address here. Just to make
-   sure, we disable the I801 first. */
+   sure, we disable the device first. */
 	if (force_addr) {
 		pci_write_config_byte(I801_dev, SMBHSTCFG, temp & 0xfe);
 		pci_write_config_word(I801_dev, SMBBA, i801_smba);
@@ -252,22 +249,8 @@ int i801_setup(void)
 		    (KERN_WARNING "i2c-i801.o: WARNING: I801 SMBus interface set to new "
 		     "address %04x!\n", i801_smba);
 	} else if ((temp & 1) == 0) {
-		if (force) {
-/* NOTE: This assumes I/O space and other allocations WERE
-   done by the Bios!  Don't complain if your hardware does weird 
-   things after enabling this. :') Check for Bios updates before
-   resorting to this.  */
-			pci_write_config_byte(I801_dev, SMBHSTCFG,
-					      temp | 1);
-			printk
-			    (KERN_WARNING "i2c-i801.o: WARNING: I801 SMBus interface has been FORCEFULLY "
-			     "ENABLED!\n");
-		} else {
-			printk
-			    (KERN_ERR "SMBUS: Error: Host SMBus controller not enabled!\n");
-			error_return = -ENODEV;
-			goto END;
-		}
+		pci_write_config_byte(I801_dev, SMBHSTCFG, temp | 1);
+		printk(KERN_WARNING "i2c-i801.o: enabling SMBus device\n");
 	}
 
 	request_region(i801_smba, (isich4 ? 16 : 8), "i801-smbus");
@@ -590,7 +573,7 @@ s32 i801_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 {
 	int hwpec = 0;
 	int block = 0;
-	int ret, xact;
+	int ret, xact = 0;
 
 #ifdef HAVE_PEC
 	if(isich4)

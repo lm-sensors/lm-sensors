@@ -19,8 +19,6 @@ Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
 Module Parameters
 -----------------
 
-* force: int
-  Forcibly enable the ICH. DANGEROUS!
 * force_addr: int
   Forcibly enable the ICH at the given address. EXTREMELY DANGEROUS!
 
