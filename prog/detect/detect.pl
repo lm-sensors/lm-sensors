@@ -605,7 +605,7 @@ sub add_to_chips_detected
       if ($detected_ref->[$j]->{driver} eq $datahash->{driver} and
           $detected_ref->[$j]->{description} eq $datahash->{description} and
           $detected_ref->[$j]->{address} eq $datahash->{address}) {
-        if ($detected_ref->[$j]->{confidence} > $datahash->{confidence}) {
+        if ($detected_ref->[$j]->{confidence} < $datahash->{confidence}) {
           push @$misdetected_ref, $detected_ref->[$j];
           splice @$detected_ref, $j, 1;
           push @$new_detected_ref, $datahash;
