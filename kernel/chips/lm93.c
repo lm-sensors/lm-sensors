@@ -382,6 +382,7 @@ static u8 lm93_read_byte(struct i2c_client *client, u8 reg)
 	}
 
 	/* <TODO> what to return in case of error? */
+	printk(KERN_ERR "lm93.o: All read byte retries failed!!\n");
 	return 0;
 }
 
@@ -416,6 +417,7 @@ static u16 lm93_read_word(struct i2c_client *client, u8 reg)
 	}
 
 	/* <TODO> what to return in case of error? */
+	printk(KERN_ERR "lm93.o: All read word retries failed!!\n");
 	return 0;
 }
 
@@ -849,12 +851,12 @@ static unsigned LM93_ALARMS_FROM_REG(struct block1_t b1)
 	result  = b1.host_status_2 & 0x3f;
 
 	if (vccp_limit_type[0])
-		result |= (b1.host_status_1 & 0x10) << 2;
+		result |= (b1.host_status_4 & 0x10) << 2;
 	else
 		result |= b1.host_status_2 & 0x40;
 
 	if (vccp_limit_type[1])
-		result |= (b1.host_status_1 & 0x20) << 2;
+		result |= (b1.host_status_4 & 0x20) << 2;
 	else
 		result |= b1.host_status_2 & 0x80;
 
