@@ -12,17 +12,17 @@
 @center Copyright (C) 1998 - 2004
 @sp 1
 @center Frodo Looijaard,
-@center @email{phil@@netroedge.com, Philip Edelbrock},
+@center @email{phil..at..netroedge.com, Philip Edelbrock},
 @center and
-@center @email{mdsxyz123@@yahoo.com, Mark Studebaker}
+@center @email{mdsxyz123..at..yahoo.com, Mark Studebaker}
 @end titlepage
 
 @ifhtml
 Copyright (C) 1998 - 2004@*
 Frodo Looijaard,@*
-@email{phil@@netroedge.com, Philip Edelbrock},@*
+@email{phil..at..netroedge.com, Philip Edelbrock},@*
 and@*
-@email{mdsxyz123@@yahoo.com, Mark Studebaker}@*
+@email{mdsxyz123..at..yahoo.com, Mark Studebaker}@*
 @end ifhtml
 
 @dircategory Utilities
@@ -776,7 +776,7 @@ written to, but lock things up when they are read.
 We display the actual temperature of the sensor. This may not be the
 temperature you are interested in, though.  If a sensor should measure
 the CPU temperature, it must be in thermal contact with it.  In practice,
-it is just somewhere near it. Your BIOS may correct for this (by adding,
+it may be just somewhere nearby. Your BIOS may correct for this (by adding,
 for example, thirty degrees to the measured temperature).  The correction
 factor is regrettably different for each mainboard, so we can not do this
 in the module itself. You can do it through the configuration file, though:
@@ -787,6 +787,14 @@ label temp "Processor"
 compute temp @@*1.2+13,(@@-13)/1.2    # Or whatever formula
 @end example
 
+However, the offset you are introducing might not be necessary. If you
+tried to have Linux idle temperature and BIOS "idle" temperature match,
+you may be misguided.
+We have a Supermicro (370DLE) motherboard and we know
+that its BIOS has a closed, almost undelayed while(1) loop that
+keeps the CPU busy all the time. Linux reads 26 degrees idle, BIOS reads
+38 degrees. Linux at full load is in the 35-40 degrees range so this
+makes sense.
 
 @node Section 4.13, Section 4.14, Section 4.12, Problems
 @section I try to read the raw @file{/proc} files, but the values are strange?!?

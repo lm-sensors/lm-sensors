@@ -1,8 +1,8 @@
 <html lang="en">
 <head>
-<title>Sensors FAQ for lm_sensors version 2.12</title>
+<title>Sensors FAQ for lm_sensors version 2.14</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="Sensors FAQ for lm_sensors version 2.12">
+<meta name="description" content="Sensors FAQ for lm_sensors version 2.14">
 <meta name="generator" content="makeinfo 4.7">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
@@ -19,12 +19,12 @@
 --></style>
 </head>
 <body>
-<h1 class="settitle">Sensors FAQ for lm_sensors version 2.12</h1>
+<h1 class="settitle">Sensors FAQ for lm_sensors version 2.14</h1>
 Copyright (C) 1998 - 2004<br>
 Frodo Looijaard,<br>
-<a href="mailto:phil@netroedge.com">Philip Edelbrock</a>,<br>
+<a href="mailto:phil..at..netroedge.com">Philip Edelbrock</a>,<br>
 and<br>
-<a href="mailto:mdsxyz123@yahoo.com">Mark Studebaker</a><br>
+<a href="mailto:mdsxyz123..at..yahoo.com">Mark Studebaker</a><br>
 
    <div class="shortcontents">
 <h2>Short Contents</h2>
@@ -1144,7 +1144,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 <p>We display the actual temperature of the sensor. This may not be the
 temperature you are interested in, though.  If a sensor should measure
 the CPU temperature, it must be in thermal contact with it.  In practice,
-it is just somewhere near it. Your BIOS may correct for this (by adding,
+it may be just somewhere nearby. Your BIOS may correct for this (by adding,
 for example, thirty degrees to the measured temperature).  The correction
 factor is regrettably different for each mainboard, so we can not do this
 in the module itself. You can do it through the configuration file, though:
@@ -1153,7 +1153,16 @@ in the module itself. You can do it through the configuration file, though:
      label temp "Processor"
      compute temp @*1.2+13,(@-13)/1.2    # Or whatever formula
 </pre>
-   <div class="node">
+   <p>However, the offset you are introducing might not be necessary. If you
+tried to have Linux idle temperature and BIOS "idle" temperature match,
+you may be misguided. 
+We have a Supermicro (370DLE) motherboard and we know
+that its BIOS has a closed, almost undelayed while(1) loop that
+keeps the CPU busy all the time. Linux reads 26 degrees idle, BIOS reads
+38 degrees. Linux at full load is in the 35-40 degrees range so this
+makes sense.
+
+<div class="node">
 <p><hr>
 <a name="Section-4_002e13"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e14">Section 4.14</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e12">Section 4.12</a>,
