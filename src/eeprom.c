@@ -27,10 +27,16 @@
 
 /* Many constants specified below */
 
+/* EEPROM memory types: */
+#define ONE_K		1
+#define TWO_K		2
+#define FOUR_K		3
+#define EIGHT_K		4
+#define SIXTEEN_K	5
 
 /* Conversions */
-
-/* Initial values */
+/* Size of EEPROM in bytes */
+#define EEPROM_SIZE 16
 
 /* Each client has this additional data */
 struct eeprom_data {
@@ -40,8 +46,8 @@ struct eeprom_data {
          char valid;                 /* !=0 if following fields are valid */
          unsigned long last_updated; /* In jiffies */
 
-/* These need to change. (PAE) */
-         u16 temp,temp_os,temp_hyst; /* Register values */
+         u8 data[EEPROM_SIZE]; /* Register values */
+	 int memtype;
 };
 
 #ifdef MODULE
@@ -65,7 +71,7 @@ static u16 swap_bytes(u16 val);
 static int eeprom_read_value(struct i2c_client *client, u8 reg);
 static int eeprom_write_value(struct i2c_client *client, u8 reg, u16 value);
 
-static void eeprom_data(struct i2c_client *client, int operation, int ctl_name,
+static void eeprom_contents(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
 static void eeprom_update_client(struct i2c_client *client);
 
@@ -88,8 +94,14 @@ static struct i2c_driver eeprom_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table eeprom_dir_table_template[] = {
-  { EEPROM_SYSCTL, "EEPROM", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &eeprom_data },
+  { EEPROM_SYSCTL1, "data0-15", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &eeprom_contents },
+  { EEPROM_SYSCTL2, "data16-31", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &eeprom_contents },
+  { EEPROM_SYSCTL3, "data32-47", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &eeprom_contents },
+  { EEPROM_SYSCTL4, "data48-63", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &eeprom_contents },
   { 0 }
 };
 
@@ -116,20 +128,24 @@ int eeprom_attach_adapter(struct i2c_adapter *adapter)
   /* Set err only if a global error would make registering other clients
      impossible too (like out-of-memory). */
      
-  /* Serial EEPROMs for SMBus use addresses from 0x28 to 0x2f */
-  for (address = 0x28; (! err) && (address <= 0x2f); address ++) {
+  /* Serial EEPROMs for SMBus use addresses from 0x50 to 0x57 */
+  for (address = 0x50; (! err) && (address <= 0x57); address ++) {
 
     /* Later on, we will keep a list of registered addresses for each
        adapter, and check whether they are used here */
     
-    if (smbus_read_byte_data(adapter,address,0) < 0)
+    if (smbus_read_byte(adapter,address) < 0) {
+#ifdef DEBUG
+      printk("eeprom.o: No eeprom found at: 0x%X\n",address);
+#endif
       continue;
+    }
 
     /* Real detection code goes here */
 
     /* Allocate space for a new client structure */
     if (! (new_client =  kmalloc(sizeof(struct i2c_client) +
-                                sizeof(struct eeprom5_data),
+                                sizeof(struct eeprom_data),
                                GFP_KERNEL))) {
       err = -ENOMEM;
       continue;
@@ -168,8 +184,6 @@ int eeprom_attach_adapter(struct i2c_adapter *adapter)
       goto ERROR3;
     data->sysctl_id = err;
     err = 0;
-
-    /* Initialize the chip -- No init needed for EEPROMs*/
 
     continue;
 /* OK, this is not exactly good programming practice, usually. But it is
@@ -215,14 +229,18 @@ int eeprom_command(struct i2c_client *client, unsigned int cmd, void *arg)
   return 0;
 }
 
-/* Nothing here yet */
 void eeprom_inc_use (struct i2c_client *client)
 {
+#ifdef MODULE
+  MOD_INC_USE_COUNT;
+#endif
 }
 
-/* Nothing here yet */
 void eeprom_dec_use (struct i2c_client *client)
 {
+#ifdef MODULE
+  MOD_DEC_USE_COUNT;
+#endif
 }
 
 u16 swap_bytes(u16 val)
@@ -230,29 +248,22 @@ u16 swap_bytes(u16 val)
   return (val >> 8) | (val << 8);
 }
 
-/* All registers are word-sized, except for the configuration register.
-   For some reason, we must swap the low and high byte, but only on 
-   reading words?!? */
-int eeprom_read_value(struct i2c_client *client, u8 reg)
-{
-  if (reg == EEPROM_REG_CONF)
-    return smbus_read_byte_data(client->adapter,client->addr,reg);
-  else
-    return swap_bytes(smbus_read_word_data(client->adapter,client->addr,reg));
-}
-
 /* No swapping needed here! */
 int eeprom_write_value(struct i2c_client *client, u8 reg, u16 value)
-{
+{/*
   if (reg == EEPROM_REG_CONF)
     return smbus_write_byte_data(client->adapter,client->addr,reg,value);
   else
-    return smbus_write_word_data(client->adapter,client->addr,reg,value);
+    return smbus_write_word_data(client->adapter,client->addr,reg,value); */
+    
+    /* No writes yet (PAE) */
+    return 0;
 }
 
 void eeprom_update_client(struct i2c_client *client)
 {
   struct eeprom_data *data = client->data;
+  int i;
 
   down(&data->update_lock);
 
@@ -263,8 +274,14 @@ void eeprom_update_client(struct i2c_client *client)
     printk("Starting eeprom update\n");
 #endif
 
-/* Need to read the data here (PAE) */
-    data->eeprom = eeprom_read_value(client,EEPROM_REG_TEMP);
+   if (smbus_write_byte(client->adapter,client->addr,0)) {
+#ifdef DEBUG
+    printk("eeprom read start has failed!\n");
+#endif   	
+   }
+    for (i=0;i<EEPROM_SIZE;i++) {
+      data->data[i] = smbus_read_byte(client->adapter,client->addr);
+    }
     
     data->last_updated = jiffies;
     data->valid = 1;
@@ -273,18 +290,34 @@ void eeprom_update_client(struct i2c_client *client)
   up(&data->update_lock);
 }
 
-/* ? (PAE) */
-void eeprom_data(struct i2c_client *client, int operation, int ctl_name,
+
+void eeprom_contents(struct i2c_client *client, int operation, int ctl_name,
                int *nrels_mag, long *results)
 {
+  int i;
+  int base=0;
   struct eeprom_data *data = client->data;
+  
+  if (ctl_name == EEPROM_SYSCTL2){ base=16; }
+  if (ctl_name == EEPROM_SYSCTL3){ base=32; }
+  if (ctl_name == EEPROM_SYSCTL4){ base=48; }
+  
   if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 1;
+    *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     eeprom_update_client(client);
-    results[0] = DATA_FROM_REG(data->temp_os);
-    /* ... More needs to go here (PAE) */
-    *nrels_mag = 3;
+    /* just for testing, we won't do the whole thing */
+    for (i=0; i<EEPROM_SIZE; i++) {
+    	results[i]=data->data[i + base];
+    }
+#ifdef DEBUG
+    printk("eeprom.o: 0x%X EEPROM Contents (base %d): ",client->addr,base);
+    for (i=0; i<EEPROM_SIZE; i++) {
+      printk(" 0x%X",data->data[i + base]);
+    }
+    printk(" .\n");
+#endif
+    *nrels_mag = EEPROM_SIZE;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
 
 /* No writes to the EEPROM (yet, anyway) (PAE) */
