@@ -231,9 +231,9 @@ struct lm87_data {
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 
-	u8  in[6];		/* Register value */
-	u8  in_max[6];		/* Register value */
-	u8  in_min[6];		/* Register value */
+	u8  in[6];		/* Scaled Register value */
+	u8  in_max[6];		/* Scaled Register value */
+	u8  in_min[6];		/* Scaled Register value */
 	u8  ain1;		/* Register value */
 	u8  ain1_min;		/* Register value */
 	u8  ain1_max;		/* Register value */
@@ -332,11 +332,11 @@ static int __initdata lm87_initialized = 0;
 
 static ctl_table LM87_dir_table_template[] = {
 #ifdef LM87_AIN1
-	{LM87_SYSCTL_AIN1, "ain1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{LM87_SYSCTL_AIN1, "in6", NULL, 0, 0644, NULL, &i2c_proc_real,
 	  &i2c_sysctl_real, NULL, &lm87_ain},
 #endif
 #ifdef LM87_AIN2
-	{LM87_SYSCTL_AIN2, "ain2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{LM87_SYSCTL_AIN2, "in7", NULL, 0, 0644, NULL, &i2c_proc_real,
 	  &i2c_sysctl_real, NULL, &lm87_ain},
 #endif
 #ifndef LM87_EXT2
@@ -354,7 +354,7 @@ static ctl_table LM87_dir_table_template[] = {
 	{LM87_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &i2c_proc_real,
 	  &i2c_sysctl_real, NULL, &lm87_in},
 #ifndef LM87_AIN1
-	{LM87_SYSCTL_FAN1, "fan", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{LM87_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
 	  &i2c_sysctl_real, NULL, &lm87_fan},
 	{LM87_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
 	  &i2c_sysctl_real, NULL, &lm87_fan_div},
