@@ -20,6 +20,7 @@ ask CVS about it:
 2.5.6 (2001????)
   Module lm78: Recognize chipid=0x20
   Module sensors: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
+  Module via686a: Allow force=9191,address (for A7V/K7V boards)
   Program mkpatch.pl: Fix adm9240 typos
   Program sensors-detect: Recognize lm78 with chipid=0x20
 

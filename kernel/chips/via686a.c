@@ -24,6 +24,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/*
+    Warning - only supports a single via686a device.
+*/
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/malloc.h>
@@ -374,11 +377,7 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif				/* MODULE */
 
-/* This module may seem overly long and complicated. In fact, it is not so
-   bad. Quite a lot of bookkeeping is done. A real driver can often cut
-   some corners. */
-
-/* For each registered VIA686A, we need to keep some data in memory. That
+/* For the VIA686A, we need to keep some data in memory. That
    data is pointed to by via686a_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new via686a client is
    allocated. */
@@ -402,6 +401,7 @@ struct via686a_data {
 	u16 alarms;		/* Register encoding, combined */
 };
 
+static struct pci_dev *s_bridge;	/* pointer to the (only) via686a */
 
 #ifdef MODULE
 static
@@ -511,7 +511,6 @@ int via686a_attach_adapter(struct i2c_adapter *adapter)
 /* Locate chip and get correct base address */
 int via686a_find(int *address)
 {
-	struct pci_dev *s_bridge;
 	u16 val;
 
 	if (!pci_present())
@@ -524,12 +523,17 @@ int via686a_find(int *address)
 	if (PCIBIOS_SUCCESSFUL !=
 	    pci_read_config_word(s_bridge, VIA686A_BASE_REG, &val))
 		return -ENODEV;
-	*address = (val & 0xff80);
+	*address = val & ~(VIA686A_EXTENT - 1);
 	if (*address == 0) {
-		printk("via686a.o: sensors not enabled - upgrade BIOS?\n");
+		printk("via686a.o: base address not set - upgrade BIOS or use force=9191,addr\n");
+/*
+   If we do this then the module won't load and force won't work.
+   But unfortunately the above printk is printed even if we are doing a force.
 		return -ENODEV;
+*/
 	}
-
+/*
+   Moved below.
 	if (PCIBIOS_SUCCESSFUL !=
 	    pci_read_config_word(s_bridge, VIA686A_ENABLE_REG, &val))
 		return -ENODEV;
@@ -538,6 +542,7 @@ int via686a_find(int *address)
 		pci_write_config_word(s_bridge, VIA686A_ENABLE_REG,
 		                      val | 0x01);
 	}
+*/
 	return 0;
 }
 
@@ -549,6 +554,7 @@ int via686a_detect(struct i2c_adapter *adapter, int address,
 	struct via686a_data *data;
 	int err = 0;
 	const char *type_name = "via686a";
+	u16 val;
 
 	/* Make sure we are probing the ISA bus!!  */
 	if (!i2c_is_isa_adapter(adapter)) {
@@ -557,11 +563,29 @@ int via686a_detect(struct i2c_adapter *adapter, int address,
 		return 0;
 	}
 
+	if(kind >= 0)		/* force or force_via686a */
+		address &= ~(VIA686A_EXTENT - 1);
 	if (check_region(address, VIA686A_EXTENT)) {
 		printk("via686a.o: region 0x%x already in use!\n",
 		       address);
-		err = -ENODEV;
-		goto ERROR0;
+		return -ENODEV;
+	}
+
+	if(kind >= 0) {		/* treat force and force_via686a equally */
+		printk("via686a.o: forcing ISA address 0x%04X\n", address);
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_write_config_word(s_bridge, VIA686A_BASE_REG, address))
+			return -ENODEV;
+	}
+	if (PCIBIOS_SUCCESSFUL !=
+	    pci_read_config_word(s_bridge, VIA686A_ENABLE_REG, &val))
+		return -ENODEV;
+	if (!(val & 0x0001)) {
+		printk("via686a.o: enabling sensors\n");
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_write_config_word(s_bridge, VIA686A_ENABLE_REG,
+		                      val | 0x0001))
+			return -ENODEV;
 	}
 
 	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
@@ -580,7 +604,7 @@ int via686a_detect(struct i2c_adapter *adapter, int address,
 	new_client->flags = 0;
 
 	/* Reserve the ISA region */
-	request_region(address, VIA686A_EXTENT, type_name);
+	request_region(address, VIA686A_EXTENT, "via686a-sensors");
 
 	/* Fill in the remaining client fields and put into the global list */
 	strcpy(new_client->name, "Via 686A Integrated Sensors");
@@ -696,7 +720,7 @@ void via686a_init_client(struct i2c_client *client)
 	/* Cofigure temp interrupt mode for continuous-interrupt operation */
 	via686a_write_value(client, VIA686A_REG_TEMP_MODE, 
 			    via686a_read_value(client, VIA686A_REG_TEMP_MODE) &
-			    !VIA686A_TEMP_MODE_MASK | VIA686A_TEMP_MODE_CONTINUOUS);
+			    !(VIA686A_TEMP_MODE_MASK | VIA686A_TEMP_MODE_CONTINUOUS));
 }
 
 void via686a_update_client(struct i2c_client *client)

@@ -18,7 +18,14 @@ Authors: Kyösti Mälkki <kmalkki@cc.hut.fi>,
 Module Parameters
 -----------------
 
-none
+force=9191,address	Set the I/O base address. Useful for Asus A7V boards that
+			don't set the address in the BIOS. Does not do a PCI
+			force; the via686a must still be present in lspci.
+			Don't use this unless the driver complains that the
+			base address is not set. Otherwise the driver will
+			recognize both the old and the forced address.
+
+force_via686a=9191,address	Same as force.
 
 
 Description
