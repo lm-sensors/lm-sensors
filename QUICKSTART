@@ -3,24 +3,39 @@ The instructions in this document will only work if you have a standard
 system, and may cause problems.
 
 Quickstart:
+
   * Make sure you have the kernel tree corresponding to your current
     kernel in /usr/src/linux. Distribution kernels usually won't do,
     compile your own from a 'vanilla' tree (get one from
     ftp://ftp.kernel/org/pub/linux/kernel/).
-  * Install the i2c package. This won't do any harm, even if use a very 
-    recent 2.3 or 2.4 kernel, though it may be unnecessary. At the very
-    least, make sure you have i2c-algo-bit either compiled into your
-    kernel or available as a module somewhere.
-  * Do a `make' followed by a `make install'. The warnings about .d
-    files at the start are harmless.
+
+  * Install the latest i2c package. This may be necessary even if
+    you have a 2.4 kernel.
+
+  * Do `make'.
+    The warnings about .d files at the start are harmless.
+    If you have compile problems, you probably skipped step 2.
+    Go back and install the latest i2c package.
+
+  * Do (as root) `make install'.
+
   * Do a `depmod -a'.
+
   * Add  the line
       /usr/local/lib 
     to /etc/ld.so.conf if it is not there yet.
+
   * Do a `ldconfig'.
+
   * Run `prog/mkdev/mkdev.sh' to create the device files
+
   * Run `prog/detect/sensors-detect' to detect your hardware, put
     the lines it suggests into /etc/conf.modules or /etc/modules.conf
     (whichever one exists) and enter the modprobe lines it suggests.
+    Add the line `sensors -s' after the modprobe lines.
+
+  * Reboot or else type in the modprobe lines and `sensors -s'
+
   * Run `sensors' to see your output.
+
   * That's all folks!
