@@ -131,7 +131,8 @@ static int i801_setup(struct pci_dev *dev)
 	I801_dev = dev;
 	if (dev->device == PCI_DEVICE_ID_INTEL_82801DB_3 ||
 	    dev->device == 0x24d3 ||
-	    dev->device == 0x25a4)
+	    dev->device == 0x25a4 ||
+	    dev->device == 0x266a)
 		isich4 = 1;
 	else
 		isich4 = 0;
