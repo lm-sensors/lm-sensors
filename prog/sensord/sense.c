@@ -3,7 +3,7 @@
  *
  * A daemon that periodically logs sensor information to syslog.
  *
- * Copyright (c) 1999-2000 Merlin Hughes <merlin@merlin.org>
+ * Copyright (c) 1999-2001 Merlin Hughes <merlin@merlin.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -214,6 +214,7 @@ doChips
 (int action) {
   const sensors_chip_name *chip;
   int i = 0, j, ret = 0;
+
   while ((ret == 0) && ((chip = sensors_get_detected_chips (&i)) != NULL)) {
     for (j = 0; j < numChipNames; ++ j) {
       if (sensors_match_chip (*chip, chipNames[j])) {
@@ -222,6 +223,8 @@ doChips
       }
     }
   }
+
+  return ret;
 }
 
 int
@@ -241,9 +244,9 @@ scanChips
 (void) {
   int ret = 0;
 
-  sensorLog (LOG_DEBUG, "sensor scan started");
+  sensorLog (LOG_DEBUG, "sensor sweeep started");
   ret = doChips (DO_SCAN);
-  sensorLog (LOG_DEBUG, "sensor scan finished");
+  sensorLog (LOG_DEBUG, "sensor sweep finished");
 
   return ret;
 }

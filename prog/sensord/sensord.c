@@ -3,7 +3,7 @@
  *
  * A daemon that periodically logs sensor information to syslog.
  *
- * Copyright (c) 1999-2000 Merlin Hughes <merlin@merlin.org>
+ * Copyright (c) 1999-2001 Merlin Hughes <merlin@merlin.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <string.h>
 #include <signal.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "sensord.h"
 
@@ -45,11 +49,13 @@ sensorLog
   vsnprintf (buffer, LOG_BUFFER, fmt, ap);
   buffer[LOG_BUFFER] = '\0';
   va_end (ap);
-  if (logOpened) {
-    syslog (priority, "%s", buffer);
-  } else if (priority != LOG_DEBUG) {
-    fprintf (stderr, "%s\n", buffer);
-    fflush (stderr);
+  if (debug || (priority < LOG_DEBUG)) {
+    if (logOpened) {
+      syslog (priority, "%s", buffer);
+    } else {
+      fprintf (stderr, "%s\n", buffer);
+      fflush (stderr);
+    }
   }
 }
 
@@ -108,6 +114,8 @@ static void
 daemonize
 (void) {
   int pid;
+  struct stat fileStat;
+  FILE *file;
 
   openlog ("sensord", 0, syslogFacility);
   
@@ -115,6 +123,17 @@ daemonize
 
   if (chdir ("/") < 0) {
     perror ("chdir()");
+    exit (EXIT_FAILURE);
+  }
+
+  if (!(stat (pidFile, &fileStat)) &&
+      ((!S_ISREG (fileStat.st_mode)) || (fileStat.st_size > 11))) {
+    fprintf (stderr, "Error: PID file `%s' already exists and looks suspicious.\n", pidFile);
+    exit (EXIT_FAILURE);
+  }
+ 
+  if (!(file = fopen (pidFile, "w"))) {
+    fprintf (stderr, "fopen(\"%s\"): %s\n", pidFile, strerror (errno));
     exit (EXIT_FAILURE);
   }
   
@@ -128,6 +147,8 @@ daemonize
     perror ("fork()");
     exit (EXIT_FAILURE);
   } else if (pid != 0) {
+    fprintf (file, "%d\n", pid);
+    fclose (file);
     exit (EXIT_SUCCESS);
   }
 
@@ -136,6 +157,7 @@ daemonize
     exit (EXIT_FAILURE);
   }
 
+  fclose (file);
   close (STDIN_FILENO);
   close (STDOUT_FILENO);
   close (STDERR_FILENO);
@@ -144,6 +166,7 @@ daemonize
 static void 
 undaemonize
 (void) {
+  unlink (pidFile);
   closelog ();
 }
 

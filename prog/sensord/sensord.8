@@ -1,4 +1,4 @@
-.\" Copyright 1999-2000 Merlin Hughes <merlin@merlin.org>
+.\" Copyright 1999-2001 Merlin Hughes <merlin@merlin.org>
 .\" sensord is distributed under the GPL
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
@@ -21,7 +21,7 @@
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
-.TH sensord 8  "July 7, 2000" "Version 0.4.0" "Linux System Administration"
+.TH sensord 8  "February 11, 2001" "Version 0.5.0" "Linux System Administration"
 .SH NAME
 sensord \- Sensor information logging daemon.
 .SH SYNOPSIS
@@ -42,7 +42,7 @@ fan fails, a temperature limit is exceeded, etc.
 .B Sensord
 knows about certain chips, and outputs nicely formatted readings for them; but
 it can also display the information of unknown chips, as long as 
-.BR libsensors
+.BR libsensors (3)
 knows about them.
 .SH OPTIONS
 .IP "-i, --interval time"
@@ -78,13 +78,19 @@ or
 .IR user .
 .IP "-c, --config-file file"
 Specify a
-.BR libsensors
+.BR libsensors (3)
 configuration file. If no file is specified, the name `sensors.conf'
 is used.
 
 If the sensors configuration name does not contain a directory separator,
 the following paths are searched for the file:
 `/etc', `/usr/lib/sensors', `/usr/local/lib/sensors', `/usr/lib', `/usr/local/lib'.
+.IP "-p, --pid-file file"
+Specify what PID file to write; the default is to write the file
+`/var/run/sensord.pid'. You should always specify an absolute path
+here. The file is removed when the daemon exits.
+.IP "-d, --debug"
+Prints a small amount of additional debugging information.
 .IP "-h, --help"
 Prints a help message and exits.
 .IP "-v, --version"
@@ -116,7 +122,8 @@ Alarms are logged at the level
 .IR alert .
 Inconsequential status messages are logged at
 the minimum level,
-.IR debug .
+.IR debug ,
+when debugging is enabled.
 
 You can use an appropriate `/etc/syslog.conf'
 file to direct these messages in a useful manner. See
@@ -126,7 +133,7 @@ for full details, however the following is a sample configuration:
 .nf
 # Sample syslog.conf entries
 *.info;...;local4.none;local4.warn  /var/log/messages
-local4.debug                       -/var/log/sensors
+local4.info                        -/var/log/sensors
 local4.alert                        /dev/console
 local4.alert                        *
 .fi
@@ -173,10 +180,10 @@ Typically, an alarm will only be signaled once,
 even if the critical condition persists. This means that it is very
 easy to miss an alarm!
 
-In other cases, however,
-uninteresting alarms (e.g., chassis intrusion detection) will be
-repeated continuously. You can configure
-.BR libsensors
+In other cases, however, uninteresting alarms (e.g., chassis
+intrusion detection) will be repeated continuously. You can
+configure
+.BR libsensors (3)
 to ignore unwanted sensor reading such as these by placing an
 `ignore' entry in the appropriate chip-specific section of the
 .BR sensors.conf (5)
@@ -201,28 +208,26 @@ your system is configured to issue an audio warning from the
 motherboard if an alarm is signalled on that sensor.
 .SH MODULES
 It is expected that all required sensor modules are loaded prior to
-this daemon being started. Typically, this is achieved with an entry
-in `/etc/rc.d/...' containing
+this daemon being started. This can either be achieved with a system
+specific module loading scheme (e.g., listing the required modules
+in the file `/etc/modules' under Debian) or with explicit
 .BR modprobe (1)
-commands to load the required modules before starting the daemon.
+commands in an init script before loading the daemon.
 
-For example, on my box I have a `sensord' initialization script
-containing (among others) the following commands:
+For example, a `sensord' initialization script might
+contain (among others) the following commands:
 .IP
 .nf
-# Sample /etc/rc.d/init.d scriptlet
+# Sample init.d scriptlet
 echo -n "Loading AMD756 module: "
-modprobe i2c-amd756 || { failure ; echo ; exit 1 ; }
-echo_success
-echo
+modprobe i2c-amd756 || { echo Fail. ; exit 1 ; }
+echo OK.
 echo -n "Loading W83781D module: "
-modprobe w83781d || { failure ; echo ; exit 1 ; }
-echo_success
-echo
+modprobe w83781d || { echo Fail. ; exit 1 ; }
+echo OK.
 echo -n "Starting sensord: "
 daemon sensord
-RETVAL=$?
-echo
+...
 .fi
 .PP
 Ignore the platform-specific shell functions; the general idea
@@ -240,7 +245,7 @@ chips.
 .I /etc/sensors.conf
 .RS
 The system-wide
-.BR libsensors
+.BR libsensors (3)
 configuration file. See
 .BR sensors.conf (5)
 for further details.

@@ -3,7 +3,7 @@
  *
  * A daemon that periodically logs sensor information to syslog.
  *
- * Copyright (c) 1999-2000 Merlin Hughes <merlin@merlin.org>
+ * Copyright (c) 1999-2001 Merlin Hughes <merlin@merlin.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#define version "0.4.0"
+#define version "0.5.0"
 
 #include "lib/sensors.h"
 
@@ -30,11 +30,13 @@ extern void sensorLog (int priority, const char *fmt, ...);
 
 extern int isDaemon;
 extern const char *sensorsCfgFile;
+extern const char *pidFile;
 extern int scanTime;
 extern int logTime;
 extern int syslogFacility;
 extern int doScan;
 extern int doSet;
+extern int debug;
 extern sensors_chip_name chipNames[];
 extern int numChipNames;
 
