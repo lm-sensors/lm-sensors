@@ -1014,7 +1014,9 @@ chip "via686a-*"
 # conversion info).  So, you may wish to 'ignore temp3'.
 
 # Johannes Drechsel-Burkhard <jdb@chello.at> notes that on his MSI K7T Pro,
-# temp1 is the CPU temp and temp2 is the SYS temp.
+# temp1 is the CPU temp and temp2 is the SYS temp. Hugo van der Merwe notes
+# the same for his Gigabyte GA-7DXC, and Olivier Martin for his Gigabyte
+# GA-7ZM.
 
     label temp1 "SYS Temp"
     label temp2 "CPU Temp"
@@ -1048,15 +1050,6 @@ chip "via686a-*"
 
     #set fan1_min 5000
     #set fan2_min 5000
-
-# For at least one Tyan S1598, the following corrections make the sensors
-# readings more in-line with the BIOS readings on boot.  Try these, and
-# adjust as necessary.
-
-  #compute "2.0V" 1.02*@ ,  @/1.02
-  #compute "3.3V" 1.02*@  ,  @/1.02
-  #compute "5.0V" 1.009*@  ,  @/1.009
-  #compute "12V" 1.04*@ ,  @/1.04
 
 
 chip "mtp008-*"
@@ -1726,6 +1719,39 @@ chip "lm90-*" "adm1032-*"
 # between critical temperatures and respective absolute hysteresis can
 # never exceed this value
 #   set hyst1 70
+
+chip "lm99-*"
+
+   label temp1 "G/C Temp"
+   label temp2 "GPU Temp"
+   label tcrit1 "G/C Crit"
+   label tcrit2 "GPU Crit"
+
+# note #1: only the LM99 needs this; for a LM89, comment the compute line
+# out
+# note #2: there is no way for us to differenciate between a LM89 and a
+# LM99; you have to know what you have; LM99 are frequently found on
+# graphics cards, most notably nVidia ones
+   compute temp2 @+16, @-16
+
+# change high and low limits to fit your needs
+#   set temp1_low  10
+#   set temp1_high 90
+#   set temp2_low  10
+#   set temp2_high 100
+
+# change critical limits to fit your needs
+# should be higher than the corresponding high limit above
+#   set tcrit1 100
+#   set tcrit2 110
+
+# change the hysteresis values (to critical limits) to fit your needs
+# note #1: hyst2 will be automatically set with the same delta
+# note #2: the internal register, which stores a single, relative value
+# for both channels, cannot hold values greater than 31, so the delta
+# between critical temperatures and respective absolute hysteresis can
+# never exceed this value
+#   set hyst1 105
 
 chip "vt1211-*" "vt8231-*"
 #
