@@ -112,9 +112,7 @@ int sensors_read_proc_chips(void)
 			continue;
 */
 
-		strcpy(n, sysfs);
-		strcat(n, "/");
-		strcat(n, de->d_name);
+		sprintf(n, "%s/%s", sysfs, de->d_name);
 		strcpy(dirname, n);
 		strcat(n, "/name");
 
@@ -278,12 +276,12 @@ int sensors_get_chip_id(sensors_chip_name name)
 /* This reads a feature /proc file */
 int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 {
-	int				sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
-	const sensors_chip_feature	*the_feature;
-	int				buflen = BUF_LEN;
-	int				mag;
-	char				n[NAME_MAX];
-	FILE				*f;
+	int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
+	const sensors_chip_feature *the_feature;
+	int buflen = BUF_LEN;
+	int mag;
+	char n[NAME_MAX];
+	FILE *f;
 
 	if(!foundsysfs)
 		if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
@@ -327,26 +325,49 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
   
 int sensors_write_proc(sensors_chip_name name, int feature, double value)
 {
-  int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
-  const sensors_chip_feature *the_feature;
-  int buflen = BUF_LEN;
-  int mag;
+	int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
+	const sensors_chip_feature *the_feature;
+	int buflen = BUF_LEN;
+	int mag;
+	char n[NAME_MAX];
+	FILE *f;
  
-  if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
-    return sysctl_name[2];
-  if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
-    return -SENSORS_ERR_NO_ENTRY;
-  sysctl_name[3] = the_feature->sysctl;
-  if (sysctl(sysctl_name, 4, buf, &buflen, NULL, 0))
-    return -SENSORS_ERR_PROC;
-  if (sysctl_name[0] != CTL_DEV) { sysctl_name[0] = CTL_DEV ; }
-  for (mag = the_feature->scaling; mag > 0; mag --)
-    value *= 10.0;
-  for (; mag < 0; mag ++)
-    value /= 10.0;
-  * ((long *) (buf + the_feature->offset)) = (long) value;
-  buflen = the_feature->offset + sizeof(long);
-  if (sysctl(sysctl_name, 4, NULL, 0, buf, buflen))
-    return -SENSORS_ERR_PROC;
-  return 0;
+	if(!foundsysfs)
+		if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
+			return sysctl_name[2];
+	if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
+		return -SENSORS_ERR_NO_ENTRY;
+	if(foundsysfs) {
+		strcpy(n, name.busname);
+		strcat(n, "/");
+		if(the_feature->sysname != NULL)
+			strcat(n, the_feature->sysname);
+		else
+			strcat(n, the_feature->name);
+		if ((f = fopen(n, "w")) != NULL) {
+			if(the_feature->sysscaling)
+				mag = the_feature->sysscaling;
+			else
+				mag = the_feature->scaling;
+			for (; mag > 0; mag --)
+				value *= 10.0;
+			fprintf(f, "%d", (int) value);
+			fclose(f);
+		} else
+			return -SENSORS_ERR_PROC;
+	} else {
+		sysctl_name[3] = the_feature->sysctl;
+		if (sysctl(sysctl_name, 4, buf, &buflen, NULL, 0))
+			return -SENSORS_ERR_PROC;
+		if (sysctl_name[0] != CTL_DEV) { sysctl_name[0] = CTL_DEV ; }
+		for (mag = the_feature->scaling; mag > 0; mag --)
+			value *= 10.0;
+		for (; mag < 0; mag ++)
+			value /= 10.0;
+		* ((long *) (buf + the_feature->offset)) = (long) value;
+		buflen = the_feature->offset + sizeof(long);
+		if (sysctl(sysctl_name, 4, NULL, 0, buf, buflen))
+			return -SENSORS_ERR_PROC;
+	}
+	return 0;
 }
