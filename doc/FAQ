@@ -43,8 +43,9 @@ CONTENTS
 3.9 I get unresolved symbols when I modprobe modules (Red Hat especially)
 
 4. Problems
-4.1 Why do my fans report exactly half/double their values by your code
-compared to the BIOS? 
+4.1 Why do my fans report exactly half/double their values compared to the BIOS? 
+  4.1A Fans sometimes / always read 0!!
+  4.1B I doubled the fan divisor and the fan still reads 7000!
 4.2 Why do my two LM75's report "-48 degrees"?
 4.3 Why do I have two Vcore readings, I have only one processor!
 4.4 How do those ALARMS work? The current value is within range but there
@@ -454,16 +455,33 @@ are running with something like 'make LINUX=/usr/src/linux-2.4.14'.
 4 Problems
 ----------
 
-4.1 Why do my fans report exactly half/double their values by your code
-compared to the BIOS? 
+4.1 Why do my fans report exactly half/double their values compared to the BIOS? 
 
     The problem with much of the sensor data is that it is impossible to 
 properly interpret some of the readings without knowing what the hardware 
 configuration is.  Some fans report one 'tick' each rotation, some report
 two 'ticks' each rotation. It is easy to resolve this through the
-configuration file:
+configuration file /etc/sensors.conf:
+
     chip lm78-*               # Or whatever chip this relates to
-    compute fan1 2*@,@/2      # Copy for each fan present
+    compute fan1 2*@,@/2      # This will double the fan1 reading
+                              # -- or --
+    compute fan1 @/2,2*@      # This will halve the fan1 reading
+
+
+4.1A Fans sometimes / always read 0!!
+
+    You may not have a three-wire fan, which is required.
+    You may need to increase the 'fan divisor'. See doc/fan-divisors
+in our package for further information.
+
+
+4.1B I doubled the fan divisor and the fan still reads 7000!
+
+    Believe it or not, doubling the 'fan divisor' will not halve
+the fan reading. You have to add a compute line in /etc/sensors.conf.
+See 4.1 above, and see doc/fan-divisors in our package for further
+information.
 
 
 4.2 Why do my two LM75's report "-48 degrees"?

@@ -1,3 +1,6 @@
+Fan reading problems and solutions
+----------------------------------
+
 If you aren't getting the expected readings on your fans,
 try the following:
 
@@ -8,16 +11,19 @@ try the following:
 - Try experimenting with the fan divisor settings:
 
 
-Fan Divisor	Minimum RPM	Maximum RPM
+Fan Divisor Settings
+--------------------
 
+Fan Divisor	Minimum RPM	Maximum RPM
+-----------	-----------	-----------
   1		5314		1350000
-  2		2657		 675000
+  2		2657		 675000		default on most chips
   4		1328		 337500
   8		 664		 168750
- 16		 332		  84375
- 32		 166		  42187
- 64		  83		  21093
-128		  41		  10546
+ 16		 332		  84375		not supported on most chips
+ 32		 166		  42187		""
+ 64		  83		  21093		""
+128		  41		  10546		""
 
 
 Pick a divisor so that the nominal RPM is about 50%
@@ -36,7 +42,9 @@ If you have a nominal reading more than 3 times the
 minimum, decrease the divisor to provide better
 accuracy.
 
-- How to change fan divisors:
+
+How to change fan divisors
+--------------------------
 
   Method 1: "echo x y z > /proc/sys/dev/sensors/...../fan_div"
   where 'x y z' are the fan divisors for the three fans and '...'
@@ -45,3 +53,47 @@ accuracy.
   Method 2: Put an entry "set fanx_div y" in the appropriate section
   of /etc/sensors.conf and rerun 'sensors -s'.
   (x is the number of the fan 1-3 and y is the divisor).
+
+
+Further details
+---------------
+
+Fan divisors are quite confusing.
+
+Sensor chips count fan speed by using the fan signal
+to gate an 8-bit counter driven by a 22.5 kHz clock.
+So the _higher_ the counter value, the _slower_ the fan,
+and vice versa.
+
+The term 'fan divisor' is a misnomer because it doesn't divide
+the fan signal, it divides the 22.5 kHz clock.
+Thus you _increase_ the divisor if you have a slow fan.
+
+The drivers account for the 'fan divisor' in its calculation
+of RPM. So changing the fan divisor will NOT change the
+nominal RPM reading, it will only affect the minimum and maximum
+readings and the accuracy of the readings.
+
+The actual formula is RPM = (60 * 22500) / (count * divisor)
+
+
+Fan readings 2X too high
+------------------------
+
+This is caused by a fan clock which is actually half the expected
+22.5 kHz, or by a fan which outputs twice as many pulses per revolution
+as expected.
+
+As we learned above, you can _not_ fix this by changing
+the fan divisor. You must add entries into the appropriate
+section of /etc/sensors.conf:
+
+	compute fan1  @/2,  2*@
+	compute fan2  @/2,  2*@
+	compute fan3  @/2,  2*@
+
+
+
+
+------------------
+Copyright (c) 2000,2001 Mark D. Studebaker <mdsxyz123@yahoo.com>
