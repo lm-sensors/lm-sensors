@@ -152,7 +152,8 @@ static ctl_table *bmcsensors_dir_table;
 static char *bmcsensors_proc_name_pool;
 
 #define IPMI_SDR_SIZE 67
-static int ipmi_sdr_partial_size = IPMI_SDR_SIZE;
+#define IPMI_CHUNK_SIZE 16
+static int ipmi_sdr_partial_size = IPMI_CHUNK_SIZE;
 static struct ipmi_msg tx_message;	/* send message */
 static unsigned char tx_msg_data[IPMI_MAX_MSG_LENGTH + 50];
 static unsigned char rx_msg_data[IPMI_MAX_MSG_LENGTH + 50]; /* sloppy */
@@ -463,6 +464,7 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 	int id_length;
 	int i;
 	int rstate = STATE_SDR;
+	int ipmi_ver = 0;
 	unsigned char * data;
 	u8 id[SDR_MAX_UNPACKED_ID_LENGTH];
 
@@ -516,7 +518,7 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 		entity = data[11];
 		init = data[13];
 */
-		stype = data[15];
+		stype = data[(ipmi_ver == 0x90?16:15)];
 		if(stype <= STYPE_MAX) {	/* known sensor type */
 			if(bmcs_count[stype] >= bmcs_max[stype]) {
 				if(bmcs_max[stype] > 0)
@@ -534,11 +536,11 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 				       "bmcsensors.o: Limit of %d exceeded for total sensors\n",
 				       MAX_SDR_ENTRIES);
 				nextrecord = 0xffff;
-			} else if(data[16] != 0x01) {
+			} else if(data[(ipmi_ver == 0x90?17:16)] != 0x01) {
 				if(type == 1)
 					ipmi_sprintf(id, &data[51], data[50] >> 6, data[50] & 0x1f);
 				else
-					ipmi_sprintf(id, &data[35], data[34] >> 6, data[34] & 0x1f);
+					ipmi_sprintf(id, &data[(ipmi_ver == 0x90?30:35)], data[(ipmi_ver == 0x90?29:34)] >> 6, data[(ipmi_ver == 0x90?29:34)] & 0x1f);
 				printk(KERN_INFO
 				       "bmcsensors.o: skipping non-threshold sensor \"%s\"\n",
 				       id);
@@ -546,23 +548,23 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 				/* add entry to sdrd table */
 				sdrd[sdrd_count].stype = stype;
 				sdrd[sdrd_count].number = data[10];
-				sdrd[sdrd_count].capab = data[14];
-				sdrd[sdrd_count].thresh_mask = (((u16) data[22]) << 8) | data[21];
+				sdrd[sdrd_count].capab = data[(ipmi_ver == 0x90?15:14)];
+				sdrd[sdrd_count].thresh_mask = (((u16) data[(ipmi_ver == 0x90?21:22)]) << 8) | data[21];
 				if(type == 1) {
-					sdrd[sdrd_count].format = data[24] >> 6;
-					sdrd[sdrd_count].linear = data[26] & 0x7f;
-					sdrd[sdrd_count].m = data[27];
-					sdrd[sdrd_count].m |= ((u16) (data[28] & 0xc0)) << 2;
+					sdrd[sdrd_count].format = data[(ipmi_ver == 0x90?22:24)] >> 6;
+					sdrd[sdrd_count].linear = data[(ipmi_ver == 0x90?25:26)] & 0x7f;
+					sdrd[sdrd_count].m = data[(ipmi_ver == 0x90?26:27)];
+					sdrd[sdrd_count].m |= ((u16) (data[(ipmi_ver == 0x90?27:28)] & 0xc0)) << 2;
 					if(sdrd[sdrd_count].m & 0x0200)
 						sdrd[sdrd_count].m |= 0xfc00;	/* sign extend */
-					sdrd[sdrd_count].b = data[29];
-					sdrd[sdrd_count].b |= ((u16) (data[30] & 0xc0)) << 2;
+					sdrd[sdrd_count].b = data[(ipmi_ver == 0x90?28:29)];
+					sdrd[sdrd_count].b |= ((u16) (data[(ipmi_ver == 0x90?29:30)] & 0xc0)) << 2;
 					if(sdrd[sdrd_count].b & 0x0200)
 						sdrd[sdrd_count].b |= 0xfc00;	/* sign extend */
-					sdrd[sdrd_count].k = data[32];
-					sdrd[sdrd_count].nominal = data[34];
+					sdrd[sdrd_count].k = data[(ipmi_ver == 0x90?31:32)];
+					sdrd[sdrd_count].nominal = data[(ipmi_ver == 0x90?33:34)];
 					for(i = 0; i < SDR_LIMITS; i++)		/* assume readable */
-						sdrd[sdrd_count].limits[i] = data[39 + i];
+						sdrd[sdrd_count].limits[i] = data[(ipmi_ver == 0x90?40:39) + i];
 					sdrd[sdrd_count].string_type = data[50] >> 6;
 					id_length = data[50] & 0x1f;
 					memcpy(sdrd[sdrd_count].id, &data[51], id_length);
@@ -571,12 +573,16 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 					sdrd[sdrd_count].m = 1;
 					sdrd[sdrd_count].b = 0;
 					sdrd[sdrd_count].k = 0;
-					sdrd[sdrd_count].string_type = data[34] >> 6;
+					sdrd[sdrd_count].string_type = data[(ipmi_ver == 0x90?29:34)] >> 6;
 					id_length = data[34] & 0x1f;
 					if(id_length > 0)
-						memcpy(sdrd[sdrd_count].id, &data[35], id_length);
+						memcpy(sdrd[sdrd_count].id, &data[(ipmi_ver == 0x90?30:35)], id_length);
 					sdrd[sdrd_count].id_length = id_length;
 					/* limits?? */
+					if(ipmi_ver == 0x90){
+						memcpy(sdrd[sdrd_count].id, &data[30], id_length);
+						sdrd[sdrd_count].id_length = id_length;
+					}
 				}
 				bmcs_count[stype]++;
 				sdrd_count++;
@@ -611,7 +617,12 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 	if (nextrecord>=6224) {
 	  nextrecord = 0xffff; /*YJ stop sensor scan on poweredge 1750 */
 	}
-			
+	if (ipmi_ver != 0x90) {
+ 		if (nextrecord>=6224) {
+ 			nextrecord = 0xffff; /*YJ stop sensor scan on poweredge 1750 */
+ 		}
+  	}
+		
 	if(nextrecord == 0xFFFF) {
 		if(sdrd_count == 0) {
 			printk(KERN_INFO "bmcsensors.o: No recognized sensors found.\n");
@@ -821,7 +832,7 @@ static int bmcsensors_detect(struct i2c_adapter *adapter, int address,
 	receive_counter = 0;
 	rx_msg_data_offset = 0;
 	errorcount = 0;
-	ipmi_sdr_partial_size = IPMI_SDR_SIZE;
+	ipmi_sdr_partial_size = IPMI_CHUNK_SIZE;
 	for(i = 0; i <= STYPE_MAX; i++)
 		bmcs_count[i] = 0;
 
