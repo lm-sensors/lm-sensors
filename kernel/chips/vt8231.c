@@ -751,13 +751,13 @@ void vt8231_uch(struct i2c_client *client, int operation, int ctl_name,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		results[0] = data->uch_config;
+		results[0] = data->uch_config & 0x7c;
 		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->uch_config = results[0] & 0x7c;
+			data->uch_config = (data->uch_config & 0x83)|(results[0] & 0x7c);
 			vt8231_write_value(client, VT8231_REG_UCH_CONFIG,
-			                   results[0] & 0x7c);
+			                   data->uch_config);
 		}
 	}
 }
