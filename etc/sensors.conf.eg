@@ -196,7 +196,7 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*" "sis5595-*"
     set in6_max -5 * 1.05
 
 
-chip "w83782d-*" "w83783s-*"
+chip "w83782d-*" "w83783s-*" "w83627hf-*"
 
 # Same as above for w83781d except that in5 and in6 are computed differently.
 # Rather than an internal inverting op amp, the 82d/83s use standard positive

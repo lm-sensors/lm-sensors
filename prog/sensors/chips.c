@@ -810,7 +810,8 @@ void print_w83781d(const sensors_chip_name *name)
   int alarms,beeps;
   int is82d, is83s;
 
-  is82d = !strcmp(name->prefix,"w83782d");
+  is82d = (!strcmp(name->prefix,"w83782d")) ||
+          (!strcmp(name->prefix,"w83627hf"));
   is83s = !strcmp(name->prefix,"w83782s");
   if (!sensors_get_feature(*name,SENSORS_W83781D_ALARMS,&cur)) 
     alarms = cur + 0.5;
@@ -979,7 +980,7 @@ void print_w83781d(const sensors_chip_name *name)
       if(!sensors_get_feature(*name,SENSORS_W83781D_SENS1,&sens)) {
         print_label(label,10);
         printf(
-"%+3.0f C   (limit = %+3.0f C, hysteresis = %+3.0f C, sensor = %s) %s  %s\n",
+"%+3.0f C  (limit = %+3.0f C, hysteresis = %+3.0f C, sensor = %s) %s  %s\n",
                cur,max,min,
                (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                "3904 transistor":"thermistor",
@@ -1006,7 +1007,7 @@ void print_w83781d(const sensors_chip_name *name)
       if(!sensors_get_feature(*name,SENSORS_W83781D_SENS2,&sens)) {
         print_label(label,10);
         printf(
-"%+3.1f C   (limit = %+3.1f C, hysteresis = %+3.1f C, sensor = %s) %s  %s\n",
+"%+3.1f C  (limit = %+3.1f C, hysteresis = %+3.1f C, sensor = %s) %s  %s\n",
                cur,max,min,
                (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                "3904 transistor":"thermistor",
@@ -1034,7 +1035,7 @@ void print_w83781d(const sensors_chip_name *name)
         if(!sensors_get_feature(*name,SENSORS_W83781D_SENS3,&sens)) {
           print_label(label,10);
           printf(
-"%+3.1f C   (limit = %+3.1f C, hysteresis = %+3.1f C, sensor = %s) %s  %s\n",
+"%+3.1f C  (limit = %+3.1f C, hysteresis = %+3.1f C, sensor = %s) %s  %s\n",
                  cur,max,min,
                  (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                  "3904 transistor":"thermistor",

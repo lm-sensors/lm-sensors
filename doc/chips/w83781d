@@ -12,10 +12,14 @@ Supported chips:
   * Winbond W83782D
     Prefix 'w83782d'
     Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
-    Datasheet: Available on request from Winbond
+    Datasheet: Publicly available at the Winbond website
   * Winbond W83783S
     Prefix 'w83783s'
     Addresses scanned: I2C 0x20 - 0x2f (inclusive)
+    Datasheet: Publicly available at the Winbond website
+  * Winbond W83627HF
+    Prefix 'w83627hf'
+    Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
     Datasheet: Available on request from Winbond
 
 
@@ -50,11 +54,13 @@ Module Parameters
 Description
 -----------
 
-This driver implements support for the Winbond W83781D, W83782D and W83783S.
+This driver implements support for the Winbond W83781D, W83782D,
+W8783S, and W83627HF chips.
 We will refer to them collectively as W8378* chips.
 
 There is quite some difference between these chips, but they are similar
 enough that it was sensible to put them together in one driver. 
+The W83627HF chip is assumed to be identical to the W83782D.
 
 Detection of these chips can sometimes be foiled because they can be in
 an internal state that allows no clean access. If you know the address
@@ -70,12 +76,12 @@ Temperatures are measured in degrees Celcius. There is always one main
 temperature sensor, and one (W83783S) or two (W83781D and W83782D) other
 sensors.  An alarm is triggered for the main sensor once when the 
 Overtemperature Shutdown limit is crossed; it is triggered again as soon as 
-it drops below the Hysteris value. A more useful behaviour 
-can be found by setting the Hysteris value to +127 degrees Celcius; in 
+it drops below the Hysteresis value. A more useful behaviour 
+can be found by setting the Hysteresis value to +127 degrees Celcius; in 
 this case, alarms are issued during all the time when the actual temperature
 is above the Overtemperature Shutdown value. For the other sensor(s), an
 alarm is triggered when the temperature gets higher then the Overtemperature 
-Shutdown value; it stays on until the temperature falls below the Hysteris 
+Shutdown value; it stays on until the temperature falls below the Hysteresis 
 value. But on the W83781D, there is only one alarm that functions for both 
 other sensors!  Temperatures are guaranteed within a range of -55 to +125 
 degrees. The main temperature sensors has a resolution of 1 degree; the other 
