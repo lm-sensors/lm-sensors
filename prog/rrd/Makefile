@@ -1,14 +1,14 @@
 #
 # Edit the following for your setup
 #
-USER=httpd
+USER=apache
 #CRONTAB=/var/spool/cron/tabs/$(USER)
 RRDPATH=/usr/local/rrdtool/bin
 BINPATH=/usr/local/bin
 RRDDIR=/var/lib/sensors-rrd
-APACHE=/usr/local/apache/htdocs
+APACHE=/var/www/html
 APACHDIR=$(APACHE)/senspix
-SENSDEV=w83781d-isa-0290
+SENSDEV=bmc-ipmi-0000
 MACH=`uname -n`
 #
 # Everything below here should be fine
@@ -41,10 +41,10 @@ $(APACHDIR)/pix : $(APACHE)
 	install -d -o $(USER) -m 777 $(APACHDIR)/pix
 
 install: all $(RRDB) $(SENSDIR) $(CRONTAB) $(APACHDIR)/pix
-	install -o root -g root -m 755 sens_update_rrd $(BINPATH)
-	install -o root -g root -m 755 sens_week.cgi $(APACHDIR)
-	install -o root -g root -m 755 sens_day.cgi $(APACHDIR)
-	install -o root -g root -m 755 summ_week.cgi $(APACHDIR)
+	install -m 755 sens_update_rrd $(BINPATH)
+	install -m 755 sens_week.cgi $(APACHDIR)
+	install -m 755 sens_day.cgi $(APACHDIR)
+	install -m 755 summ_week.cgi $(APACHDIR)
 #	grep sens_update_rrd $(CRONTAB) > /dev/null 2>&1 || echo '*/5 * * * *	/usr/local/bin/sens_update_rrd' $(RRDB) $(SENSDEV) >> $(CRONTAB)
 	@echo
 	@echo Note!!! You must manually install the following line in the crontab for user $(USER):
