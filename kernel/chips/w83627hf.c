@@ -25,6 +25,7 @@
 
     Chip	#vin	#fanin	#pwm	#temp	wchipid	vendid	i2c	ISA
     w83627hf	9	3	2	3	0x20	0x5ca3	no	yes(LPC)
+    w83627thf	9	2	?	3	??	0x5ca3	no	yes(LPC)
     w83697hf	8	2	2	2	0x60	0x5ca3	no	yes(LPC)
 
     For other winbond chips, and for i2c support in the above chips,
@@ -115,6 +116,7 @@ superio_exit(void)
 }
 
 #define W627_DEVID 0x52
+#define W627THF_DEVID 0x82
 #define W697_DEVID 0x60
 #define WINB_ACT_REG 0x30
 #define WINB_BASE_REG 0x60
@@ -629,7 +631,7 @@ static int w83627hf_find(int *address)
 
 	superio_enter();
 	val= superio_inb(DEVID);
-	if(val != W627_DEVID && val != W697_DEVID) {
+	if(val != W627_DEVID && val !=W627THF_DEVID && val != W697_DEVID) {
 		superio_exit();
 		return -ENODEV;
 	}
@@ -685,6 +687,9 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 		kind = w83627hf;
 	else if(val == W697_DEVID)
 		kind = w83697hf;
+	else if(val == W627THF_DEVID)
+		kind = w83627hf;
+		
 	superio_select();
 	if((val = 0x01 & superio_inb(WINB_ACT_REG)) == 0)
 		superio_outb(WINB_ACT_REG, 1);

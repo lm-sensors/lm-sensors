@@ -8,6 +8,10 @@ Supported chips:
     Prefix 'w83627hf'
     Addresses scanned: ISA address retrieved from Super I/O registers
     Datasheet: Publicly available at the Winbond website
+  * Winbond W83627THF (ISA accesses ONLY)
+    Prefix 'w83627hf'
+    Addresses scanned: ISA address retrieved from Super I/O registers
+    Datasheet: unavailable
   * Winbond W83697HF (ISA accesses ONLY)
     Prefix 'w83697hf'
     Addresses scanned: ISA address retrieved from Super I/O registers
@@ -46,8 +50,9 @@ Description
 -----------
 
 This driver implements support for ISA accesses *only* for
-the Winbond W83627HF and W83697HF Super I/O chips.
+the Winbond W83627HF, W83627THF, and W83697HF Super I/O chips.
 We will refer to them collectively as Winbond chips.
+The 627THF is treated as a 627HF.
 
 This driver supports ISA accesses, which should be more reliable
 than i2c accesses. Also, for Tyan boards which contain both a
