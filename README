@@ -53,7 +53,7 @@ support both ways of accessing them.
 
 Because the SMBus is just a special case of the generalized I2C bus, we
 can simulate the SMBus protocol on plain I2C busses. These busses are
-sometimes used in other parts of your computer. If a supported chips is
+sometimes used in other parts of your computer. If a supported chip is
 attached to one of these additional busses, they can be used too.
 
 Please read INSTALL before trying to compile and install these modules.

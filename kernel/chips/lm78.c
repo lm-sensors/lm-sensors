@@ -65,11 +65,8 @@
 
 
 /* Conversions. Rounding is only done on the TO_REG variants. */
-static int lm78_in_conv[7] = {10000, 10000, 10000, 16892, 38000, 
-                              -34768, -15050 };
-#define IN_TO_REG(val,nr) (((((val) * 100000 / lm78_in_conv[nr]) + 8) / 16) \
-                           & 0xff)
-#define IN_FROM_REG(val,nr) (((val) *  16 * lm78_in_conv[nr]) / 100000)
+#define IN_TO_REG(val,nr)  (((val) * 10 + 8)/16)
+#define IN_FROM_REG(val,nr) (((val) *  16) / 10)
 
 #define FAN_TO_REG(val) ((val)==0?255:((1350000+(val))/((val)*2)) & 0xff)
 #define FAN_FROM_REG(val) ((val)==0?-1:(val)==255?0:1350000/((val)*2))
@@ -84,14 +81,15 @@ static int lm78_in_conv[7] = {10000, 10000, 10000, 16892, 38000,
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 
-/* Initial limits */
+/* Initial limits. To keep them sane, we use the 'standard' translation as
+   specified in the LM78 sheet. Use the config file to set better limits. */
 #define LM78_INIT_IN_0 (vid==350?280:vid)
 #define LM78_INIT_IN_1 (vid==350?280:vid)
 #define LM78_INIT_IN_2 330
-#define LM78_INIT_IN_3 500
-#define LM78_INIT_IN_4 1200
-#define LM78_INIT_IN_5 -1200
-#define LM78_INIT_IN_6 -500
+#define LM78_INIT_IN_3 (((500)   * 100)/168)
+#define LM78_INIT_IN_4 (((1200)  * 10)/38)
+#define LM78_INIT_IN_5 (((-1200) * -604)/2100)
+#define LM78_INIT_IN_6 (((-500)  * -604)/909)
 
 #define LM78_INIT_IN_PERCENTAGE 10
 

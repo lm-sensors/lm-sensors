@@ -1,0 +1,120 @@
+# Hardware sensors configuration file
+
+# This configuration file will be used by all applcations linked to 
+# libsensors.
+
+# Hash marks introduce comments, which continue until the end of a line
+#
+# Identifiers consisting of only digits and letters can be used
+# unquoted; other identifiers must be quoted. Escape characters within
+# quotes operate like those in C.
+
+# A 'chip' line specifies what the following 'label', 'compute', 'set' and 
+# (not yet implemented) 'valid' lines refer to. In this case, until the
+# next 'chip' line, everything refers to all lm78, lm78-j and lm79
+# chips. Other examples are *-isa-* for everything on the ISA bus, and
+# lm78-j-i2c-*-4e for all lm78-j chips on address 0x4e of any I2C bus.
+#
+# If more chip statements match a specific chip, they are all considered.
+# Later lines overrule earlier lines, so if you set the in0 label for
+# lm78-* to "This", and later on the in0 label for lm78-isa-* to "That",
+# "That" is used for LM78 chips on the ISA bus, and "This" for LM78
+# chips on a non-ISA bus.
+
+chip "lm78-*" "lm78-j-*" "lm79-*"
+
+# A label line describes what a certain feature stands for on your
+# mainboard. Programs can retrieve these names and display them.
+# If no label is specified for a certain feature, the default name
+# (ie. 'fan1' for fan1) is used.
+
+# If you specify a label for in1, this label is also used for in1_min and
+# in1_max, unless they have their own labels declared. There are several
+# of these logical groups.
+
+# These are as advised in the LM78 and LM79 data sheets, and used on almost
+# any # mainboard we have seen.
+
+  label in0 "VCore 1"
+  label in1 "VCore 2"
+  label in2 "+3.3V"
+  label in3 "+5V"
+  label in4 "+12V"
+  label in5 "-12V"
+  label in6 "-5V"
+  
+# A compute line describes how to scale a certain feature. There are
+# two expressions in it: the first describes how the /proc value must
+# be translated to a user value, the second how a user value must be
+# translated to a /proc value. 'val' is the value to operate on.
+
+# Like for the label statement, there are logical groups here. They are
+# sometimes a bit different, though. For example, fan1_div is in the
+# logical label group of fan1 (it gets the same label if none is declared
+# for it), but it is not in the compute group of fan1 (as it uses a
+# completely different system of values).
+
+# For positive voltages (in0..in4), two resistors are used, with the following
+# formula (R1,R2: resistor values, Vs: read voltage, Vin: pin voltage)
+#   R1 = R2 * (Vs/Vin - 1)
+# For negative voltages (in5, in6) two resistors are used, with the following
+# formula (Rin,Rf: resistor values, Vs: read voltage, Vin: pin voltage)
+#   Rin = (Vs * Rf) / Vin
+
+# Here are the official LM78 and LM79 data sheet values.
+#       Vs     R1,Rin   R2,Rf    Vin
+# in3   +5.0      6.8    10     +2.98
+# in4  +12.0     30      10     +3.00
+# in5  -12.0    240      60     +3.00
+# in6   -5.0    100      60     +3.00
+
+# These would lead to these declarations:
+# compute in3 ((6.8/10)+1)*val ,  val/((6.8/10)+1)
+# compute in4 ((30/10)+1)*val  ,  val/((30/10)+1)
+# compute in5 -(240/60)*val    ,  -val/(240/60)
+# compute in6 -(100/60)*val    ,  -val/(100/60)
+
+# On almost any mainboard we have seen, the Winbond compute values lead to
+# much better results, though. 
+
+#       Vs     R1,Rin   R2,Rf    Vin
+# in4  +12.0     28      10     +3.00
+# in5  -12.0    210      60.4   +3.00
+# in6   -5.0     90.9    60.4   +3.00
+
+# These leads to these declarations:
+  compute in3 ((6.8/10)+1)*val ,  val/((6.8/10)+1)
+  compute in4 ((28/10)+1)*val  ,  val/((28/10)+1)
+  compute in5 -(210/60.4)*val  ,  -val/(210/60.4)
+  compute in6 -(90.9/60.4)*val ,  -val/(90.9/60.4)
+
+# Set statements set things like limits. Complete expressions can be
+# used. Not everything can sensibly be set: setting 'in0', for example,
+# is impossible! These settings # are put through the compute translations;
+# so if we specify '12.8' # for in6, '3.2' will actually be written!
+
+# Though set statements are correctly parsed at this moment, nothing will
+# be done with them yet by libsensors
+
+# Invalid statements tell certain features are not wanted. User programs can
+# still read them if they really want, though; this is just an advisory
+# marking. 'in0' would also invalidate 'in0_max' and 'in0_min'.
+# The invalid keyword is not yet recognized by the parser.
+
+
+# There is one other feature: the 'bus' statement. An example is below.
+
+bus "i2c-0" "SMBus PIIX4 adapter at e800" "Non-I2C SMBus adapter"
+
+# If we refer from now on to 'i2c-0' in 'chip' lines, this will run-time
+# be matched to this bus. So even if the PIIX4 is called 'i2c-5' at that
+# moment, because five other adapters were detected first, 'i2c-0' in
+# the config file would always only match this physical bus. In the above
+# config file, this feature is not needed; but the next lines would
+# only affect the LM75 chips on the PIIX4 adapter:
+
+chip "lm75-i2c-0-*"
+
+# You should really use the output of /proc/bus/chips to generate bus lines,
+# because one mistyped characted will inhibit the match. Wildcards are not
+# yet supported; spaces at the end are ignored, though.

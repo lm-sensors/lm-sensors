@@ -30,6 +30,9 @@ this package. Some interesting variables:
   The prefix which is added to most directory locations below.
 * MODDIR (/lib/modules/extra/misc)
   The directory where 'make install' installs your modules.
+* ETCDIR (/etc)
+  The directory where 'make install' installs the example configuration file
+  if none is found there.
 * LIBDIR ($(PREFIX)/lib)
   The directory where 'make install' installs the shared and static libraries.
 * BINDIR ($(PREFIX)/bin)
@@ -78,14 +81,21 @@ If you have installed the modules, as described within doc/modules, you can
 do 'modprobe isa && modprobe piix4 && modprobe lm78 && modprobe i2c-proc' 
 (the last is optional) from any directory to reach the same situation.
 
-This package also contains a library of functions which can be used to
+Do not panic if some (or all) of the values in the /proc/sys/dev/sensors/*/*
+files do not seem to correspond to anything in earlier versions. Starting
+with lm_sensors version 2.1.0, these files will reflect the real chip
+measurements, without any scaling or adjusting. This is most obvious for
+the voltage files. You can specify the conversion factors in a configuration
+file.  Use an application linked to libsensors to read these real values.
+
+This package contains a library of functions which can be used to
 access sensor data in a more programmer-friendly way. It will be built as
 both a shared and a static library, and installed in your LIB directory
 (normally /usr/local/lib). It needs a configuration file, which is usually
 called 'sensors.conf', and can be placed in /etc, /usr/lib/sensors,
 /usr/local/lib/sensors, /usr/lib, or /usr/local/lib. [NOTE: No real
-standard config file is written yet. A very simple example can be found in 
-the prog/sensors directory.]
+config file documentation is written yet. A relatively well-commented
+example can be found in the etc directory.]
 
 Where version 1 of this package had the human-readable /proc/sensors file,
 this version includes a user-space program which gathers all data

@@ -56,6 +56,10 @@ PREFIX := /usr/local
 # This is the directory into which the modules will be installed.
 MODDIR := /lib/modules/extra/misc
 
+# This is the directory where sensors.conf will be installed, if no other
+# configuration file is found
+ETCDIR := /etc
+
 # You should not need to change this. It is the directory into which the
 # library files (both static and shared) will be installed.
 LIBDIR := $(PREFIX)/lib
@@ -95,7 +99,7 @@ LIBINCLUDEDIR := $(INCLUDEDIR)/sensors
 # to do this. 
 
 # The subdirectories we need to build things in 
-SRCDIRS := src lib prog/sensors
+SRCDIRS := src lib prog/sensors etc
 ifeq ($(I2C),1)
 SRCDIRS += i2c i2c/detect i2c/drivers i2c/eeprom
 endif

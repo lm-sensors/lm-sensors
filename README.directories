@@ -7,12 +7,14 @@ The directories within this package:
   (mod-????????.tar.gz).
 * doc
   Documentation about the modules within this package
+* etc
+  Configuration files
 * i2c
   Simon Vogl's i2c module, including any necessary patches, excluding any
   files which are removed by 'make clean'.
-* src
-  Our own module code.
 * lib
   The user-space sensors support library code
 * prog
   Several supporting programs, some of them use the library, some do not.
+* src
+  Our own module code.
