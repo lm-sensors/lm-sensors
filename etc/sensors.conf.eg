@@ -673,9 +673,7 @@ chip "via686a-*"
 # Jonathan Yew <j.teh@iname.com> and Alex van Kaam <darkside@chello.nl>
 # came through with some data for temp conversion and formulae for voltage 
 # conversion. However, the conversions should be regarded as our best guess- 
-# YMMV.  If you notice any glaring inaccuracies (eg. by comparing what sensors
-# says to what your BIOS says when you boot up), please let us know so we can
-# improve.
+# YMMV.
 
 # On the Tyan S1598, the 2.5V sensor reads 0 and is not displayed in the BIOS.
 # Linas Vepstas <linas@linas.org> reports that this sensor shows nothing of
