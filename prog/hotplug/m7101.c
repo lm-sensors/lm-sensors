@@ -101,10 +101,10 @@
 #define SMB_BASE 0x1
 static u32 acpi_io = 0xEC00;	/* Set I/O Base defaults here */
 static u32 smb_io  = 0xE800;
-static int debug = 0;
 MODULE_PARM(acpi_io, "l"); 
 MODULE_PARM(smb_io, "l");
 #ifdef M7101_DEBUG
+static int debug = 0;
 MODULE_PARM(debug, "i");
 #endif
 
@@ -282,8 +282,8 @@ int init_module(void)
 #ifdef M7101_DEBUG
 		if(debug)
 		{
-			pci_remove_device(dev);
 			printk("m7101: removing device for testing\n");
+			pci_remove_device(dev);
 			m7101_inserted = 0;
 			return 0;
 		}

@@ -1,9 +1,10 @@
 INCLUDEDIR = /usr/include
-#CFLAGS := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -I$(INCLUDEDIR)
-CC := gcc
 
 # Compile with Debugging turned on - watch out, lots of pci device infos.
 CFLAGS = -D__KERNEL__ -DMODULE -DLINUX -DM7101_DEBUG -O2 -Wall -I$(INCLUDEDIR)
+# CFLAGS := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -I$(INCLUDEDIR)
+
+CC := gcc
 LD := ld
 
 # extract versionnumber from version.h
