@@ -1,0 +1,112 @@
+Kernel driver `ddcmon.o'
+========================
+
+Status: Beta
+
+Supported chips:
+  * Any DDC Monitor EDID EEPROM chip at 0x50
+    Prefix `ddcmon'
+    Addresses scanned: I2C 0x50
+    Standards: available for purchase from VESA http://www.vesa.org
+
+Authors: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>,
+        and Mark Studebaker <mdsxyz123@yahoo.com>
+
+Special assistance on DDC provided by Petr Vandrovec <vandrove@vc.cvut.cz>
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_ddcmon: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `ddcmon' chip
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+
+
+Description
+-----------
+
+This is a simple module for reading the EEPROM on a DDC-compliant monitor.
+DDC (Display Data Channel) is the I2C-based communication channel
+to the monitor. The EEPROM contains a 128-byte data structure defined
+by the EDID (Extended Display Identification Data) standard.
+
+Use:
+
+After inserting the module (and any other required smbus/i2c modules), you
+should have a directory in /proc/sys/dev/sensors/ with a name such
+as "ddcmon-i2c-3-50".  Inside each of these is a series of files which
+represent interesting data from the DDC monitor.
+
+/proc entries:
+
+	ID: Encoded Monitor ID string.
+		For encoding, see 'sensors'
+		source ../../prog/sensors/chips.c.
+
+	serial: 1 integer
+		serial number
+
+	size: 2 integers
+		vertical monitor size (cm)
+		horizontal monitor size (cm)
+
+	sync: 4 integers
+		minimum vertical sync frequency (Hz)
+		maximum vertical sync frequency (Hz)
+		minimum horizontal sync frequency (KHz)
+		maximum horizontal sync frequency (KHz)
+
+	timings: supported timings (bitmask)
+		0x000001 720x400@70Hz (VGA 640x400, IBM)
+		0x000002 720x400@88Hz (XGA2)
+		0x000004 640x480@60Hz (VGA)
+		0x000008 640x480@67Hz (Mac II, Apple)
+		0x000010 640x480@72Hz (VESA)
+		0x000020 640x480@75Hz (VESA)
+		0x000040 800x600@56Hz (VESA)
+		0x000080 800x600@60Hz (VESA)
+		0x000100 800x600@72Hz (VESA)
+		0x000200 800x600@75Hz (VESA)
+		0x000400 832x624@75Hz (Mac II)
+		0x000800 1024x768@87Hz interlaced (8514A)
+		0x001000 1024x768@60Hz (VESA)
+		0x002000 1024x768@70Hz (VESA)
+		0x004000 1024x768@75Hz (VESA)
+		0x008000 1280x1024@75Hz (VESA)
+		0x010000 - 0x800000 Manufacturer reserved
+
+Notes:
+
+- The eeprom.o module will also attach to a DDC monitor. Install the
+  ddcmon.o module before the eeprom.o module to prevent this.
+  Alternatively, give the eeprom.o module an ignore= parameter or
+  a checksum= parameter. The ddcmon.o module will not attach to non-DDC
+  eeproms because it checks for a DDC 'signature' at the beginning
+  of the DDC Monitor's eeprom.
+
+- This module requires a bus driver for your video chip to access the
+  DDC bus. Currently drivers exist for Voodoo3/Banshee chips and
+  Matrox chips only. See documentation for those drivers in ../busses.
+
+- There is a checksum over the 128 bytes in the eeprom but the driver
+  does not check it.
+
+- More information is available in the eeprom which could be made
+  available by enhancing the driver.
+  To see the entire eeprom, use the eeprom.o module instead of ddcmon.o.
+
+- This driver does not support the DDC/CI (DDC2Bi) bidirectional
+  communications channel to the monitor for controlling the monitor.
+
+- The driver caches the data from the monitor and only rereads it
+  from the eeprom if the cache is more than 5 minutes old.
