@@ -35,12 +35,12 @@ PROGDUMPBININSTALL := $(MODULE_DIR)/isadump $(MODULE_DIR)/i2cdump \
 INCLUDEFILES += $(PROGDUMPSOURCES:.c=.rd)
 
 all-prog-dump: $(PROGDUMPTARGETS)
-all :: all-prog-dump
+user :: all-prog-dump
 
 install-prog-dump: all-prog-dump
 	mkdir -p $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -o root -g root -m 755 $(PROGDUMPBININSTALL) $(DESTDIR)$(SBINDIR)
-install :: install-prog-dump
+user_install :: install-prog-dump
 
 clean-prog-dump:
 	$(RM) $(PROGDUMPDIR)/*.rd $(PROGDUMPDIR)/*.ro $(PROGDUMPTARGETS)

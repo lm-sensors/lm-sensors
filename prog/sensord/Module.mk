@@ -41,13 +41,13 @@ $(PROGSENSORDTARGETS): $(PROGSENSORDSOURCES:.c=.ro) lib/$(LIBSHBASENAME)
 	$(CC) -o $@ $(PROGSENSORDSOURCES:.c=.ro) -Llib -lsensors -lrrd
 
 all-prog-sensord: $(PROGSENSORDTARGETS)
-all :: all-prog-sensord
+user :: all-prog-sensord
 
 install-prog-sensord: all-prog-sensord
 	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGSENSORDMAN1DIR)
 	$(INSTALL) -o root -g root -m 755 $(PROGSENSORDTARGETS) $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -o $(MANOWN) -g $(MANGRP) -m 644 $(PROGSENSORDMAN1FILES) $(DESTDIR)$(PROGSENSORDMAN1DIR)
-install :: install-prog-sensord
+user_install :: install-prog-sensord
 
 clean-prog-sensord:
 	$(RM) $(PROGSENSORDDIR)/*.rd $(PROGSENSORDDIR)/*.ro 

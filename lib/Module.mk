@@ -83,7 +83,7 @@ $(MODULE_DIR)/conf-parse.h: $(MODULE_DIR)/conf-parse.c
 INCLUDEFILES += $(LIBCSOURCES:.c=.ld) $(LIBCSOURCES:.c=.ad)
 
 all-lib: $(LIBTARGETS)
-all :: all-lib
+user :: all-lib
 
 # Generate warnings if the install directory isn't in /etc/ld.so.conf
 # or if the library wasn't there before (which means ldconfig must be run).
@@ -126,7 +126,7 @@ install-lib: all-lib
 	$(INSTALL) -o $(MANOWN) -g $(MANGRP) -m 644 $(LIBMAN5FILES) $(DESTDIR)$(LIBMAN5DIR)
 
 
-install :: install-lib
+user_install :: install-lib
 
 clean-lib:
 	$(RM) $(LIB_DIR)/*.ld $(LIB_DIR)/*.ad

@@ -40,6 +40,9 @@ LINUX_HEADERS := $(LINUX)/include
 
 # Determine whether we need to compile the kernel modules, or only the
 # user-space utilities. By default, the kernel modules are compiled.
+# Leave this set to 1. If you want to compile and install only
+# the library and the userspace programs,
+#  use 'make user' and 'make user_install'
 #COMPILE_KERNEL := 0
 COMPILE_KERNEL := 1
 
@@ -246,10 +249,10 @@ endif
 # Making the dependency files - done automatically!
 dep : 
 
-all ::
-
-install :: all
-
+user ::
+user_install::
+all :: user
+install :: all user_install
 clean::
 	$(RM) lm_sensors-*
 
@@ -275,6 +278,15 @@ version:
 	echo -n 'Version: '; \
 	echo '#define LM_VERSION "'`read VER; echo $$VER`\" >> version.h
 
+help:
+	@echo 'Make targets are:'
+	@echo '  all (default): build modules and userspace programs'
+	@echo '  install: install modules and userspace programs'
+	@echo '  user: build userspace programs'
+	@echo '  user_install: install userspace programs'
+	@echo '  clean: cleanup'
+	@echo '  package: create a distribution package'
+	@echo 'Note: make dep is automatic'
 
 # Here, we define all implicit rules we want to use.
 

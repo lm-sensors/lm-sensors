@@ -21,7 +21,7 @@
 MODULE_DIR := kernel/include
 KERNELINCLUDEDIR := $(MODULE_DIR)
 
-KERNELINCLUDEFILES := 
+KERNELINCLUDEFILES := i2c-dev.h
 ifneq ($(shell if grep -q '^CONFIG_SENSORS=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELINCLUDEFILES += $(MODULE_DIR)/sensors.h
 endif
@@ -35,7 +35,7 @@ $(KERNELINCLUDEDIR)/sensors.hd:
 	( $(GREP) 'SENSORS SYSCTL START' /dev/null $(KERNELCHIPSDIR)/*.c | \
 	  $(SED) -e 's/:.*//' -e 's#^#$(KERNELINCLUDEDIR)/sensors.h: #' ) > $@
 
-# Get dependancies of sensors.h
+# Get dependencies of sensors.h
 INCLUDEFILES += $(MODULE_DIR)/sensors.hd
 
 install-all-kernel-include:
@@ -44,7 +44,7 @@ install-all-kernel-include:
 	  $(INSTALL) -o root -g root -m 644 $(KERNELINCLUDEFILES) $(DESTDIR)$(SYSINCLUDEDIR) ; \
 	fi
 
-install :: install-all-kernel-include
+user_install :: install-all-kernel-include
 
 clean-all-kernel-include:
 	$(RM) $(KERNELINCLUDEDIR)/*.h.install $(KERNELINCLUDEDIR)/sensors.h $(KERNELINCLUDEDIR)/sensors.hd

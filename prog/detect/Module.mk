@@ -33,12 +33,12 @@ PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect \
 INCLUDEFILES += $(PROGDETECTSOURCES:.c=.rd)
 
 all-prog-detect: $(PROGDETECTTARGETS)
-all :: all-prog-detect
+user :: all-prog-detect
 
 install-prog-detect: all-prog-detect
 	mkdir -p $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -o root -g root -m 755 $(PROGDETECTSBININSTALL) $(DESTDIR)$(SBINDIR)
-install :: install-prog-detect
+user_install :: install-prog-detect
 
 clean-prog-detect:
 	$(RM) $(PROGDETECTDIR)/*.rd $(PROGDETECTDIR)/*.ro $(PROGDETECTTARGETS)

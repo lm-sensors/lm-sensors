@@ -31,6 +31,6 @@ install-etc:
 	if [ ! -e $(DESTDIR)$(ETCINSTALL) ] ; then \
 	  $(INSTALL) -o  root -g root -m 644 $(ETCTARGET) $(DESTDIR)$(ETCINSTALL); \
 	fi
-install :: install-etc
+user_install :: install-etc
 
 # No clean rule
