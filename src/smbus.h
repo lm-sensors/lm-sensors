@@ -24,12 +24,7 @@
    OK, earlier versions are not; later versions will probably give problems
    too. 
 */
-#ifdef I2C
-#include "i2c/i2c.h"
-#else /* def I2C */
-#include <linux/i2c.h>
-#endif /* def I2C */
-
+#include "i2c.h"
 #include <asm/types.h>
 
 /* SPINLOCK is defined in i2c.h. */
