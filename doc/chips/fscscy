@@ -59,6 +59,13 @@ three current values (12 volt, 5 volt and battery) and up to
 six fans (power supply, cpu and auxiliary). 
 
 Temperatures are measured in degrees Celcius. The resolution is 1 degree.
+In addition to state and actual temperature, the temperature sensors also export
+a LIMIT temperature for each sensor. The meaning of the information itself is
+obvious. The rest is guesswork. It likely triggers an alarm/event as soon as it is
+reached. The authors feeling is that it is even a writeable register. But beeing of
+the cautios kind he did not implement writing the LIMIT resister. The driver itself
+keeps track of the minimum and maximum temperatures since module load. The more often
+the module is accessed, the more meaningful these values are. 
 
 FAN rotation speeds are reported in RPM (rotations per minute). 
 The value can be divided by a programmable divider (1, 2, 4 or 8) which 
@@ -88,6 +95,14 @@ Chip `fscscy'
     temp2_state           temp2	          temp2     RW     0
     temp3_state           temp3	          temp3     RW     0
     temp4_state           temp4	          temp4     RW     0
+    temp1_lim             temp1	          temp1     R*     0
+    temp2_lim             temp2	          temp2     R*     0
+    temp3_lim             temp3	          temp3     R*     0
+    temp4_lim             temp4	          temp4     R*     0
+    temp1_min             temp1	          temp1      R     0
+    temp2_min             temp2	          temp2      R     0
+    temp3_min             temp3	          temp3      R     0
+    temp4_min             temp4	          temp4      R     0
     temp1_max             temp1	          temp1      R     0
     temp2_max             temp2	          temp2      R     0
     temp3_max             temp3	          temp3      R     0
@@ -120,6 +135,8 @@ Chip `fscscy'
      wdog_state     wdog_preset	    wdog_preset     RW     0
    wdog_control     wdog_preset	    wdog_preset     RW     0
 	
+  R*: Maybe writable, but due to lack of documentation the author did not dare
+      to implement it :-)
 
 
           LABEL                           FEATURE SYMBOL     SYSCTL FILE:OFFSET
@@ -137,10 +154,18 @@ Chip `fscscy'
     temp2_state               FSCSCY_SYSCTL_TEMP2_STATE            temp1:1
     temp3_state               FSCSCY_SYSCTL_TEMP3_STATE            temp2:1
     temp4_state               FSCSCY_SYSCTL_TEMP4_STATE            temp3:1
-    temp1_max                 FSCSCY_SYSCTL_TEMP1_MAX              temp0:3
-    temp2_max                 FSCSCY_SYSCTL_TEMP2_MAX              temp1:3
-    temp3_max                 FSCSCY_SYSCTL_TEMP3_MAX              temp2:3
-    temp4_max                 FSCSCY_SYSCTL_TEMP4_MAX              temp3:3
+    temp1_lim                 FSCSCY_SYSCTL_TEMP1_LIM              temp0:3
+    temp2_lim                 FSCSCY_SYSCTL_TEMP2_LIM              temp1:3
+    temp3_lim                 FSCSCY_SYSCTL_TEMP3_LIM              temp2:3
+    temp4_lim                 FSCSCY_SYSCTL_TEMP4_LIM              temp3:3
+    temp1_min                 FSCSCY_SYSCTL_TEMP1_MIN              temp0:4
+    temp2_min                 FSCSCY_SYSCTL_TEMP2_MIN              temp1:4
+    temp3_min                 FSCSCY_SYSCTL_TEMP3_MIN              temp2:4
+    temp4_min                 FSCSCY_SYSCTL_TEMP4_MIN              temp3:4
+    temp1_max                 FSCSCY_SYSCTL_TEMP1_MIN              temp0:5
+    temp2_max                 FSCSCY_SYSCTL_TEMP2_MIN              temp1:5
+    temp3_max                 FSCSCY_SYSCTL_TEMP3_MIN              temp2:5
+    temp4_max                 FSCSCY_SYSCTL_TEMP4_MIN              temp3:5
            fan1                      FSCSCY_SYSCTL_FAN1             fan0:4
            fan2                      FSCSCY_SYSCTL_FAN2             fan1:4
            fan3                      FSCSCY_SYSCTL_FAN3             fan2:4
