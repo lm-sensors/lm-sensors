@@ -12,10 +12,11 @@ output to a certain voltage. These pins are also connected to
 the sensor chip so that the VID setting can be read back
 by applications.
 
-There are generally 5 VID pins. The VID codes are defined
-by Intel in documents titled
+There are generally 5 VID pins. Recent motherboards may use 6 pins.
+The VID codes are defined by Intel in documents titled
 "VRM X.X DC-DC Converter Design Guidelines".
-(VRM = Voltage Regulator Module)
+(VRM = Voltage Regulator Module), or
+"Voltage Regulator-Down (VRD) 10.0 Design Guide".
 These documents are available at http://developer.intel.com.
 
 There are several different VRM document versions.
@@ -35,6 +36,8 @@ Document Version	Voltage Range	Increment	Processors
 
 9.0, (9.1)		1.100 - 1.850V	0.025V		P4, AMD Socket A
 
+10.0			0.8375 - 1.6000 0.0125V		Desktop Socket 478
+
 
 "2.4" is not an actual document version but simply a way to identify
 AMD Opteron 24x processors.
@@ -44,17 +47,22 @@ lm_sensors versions through 2.6.3 support only the VRM 8.2 standard.
 
 Starting in lm_sensors 2.6.4 the VRM version is configurable.
 To configure the sensor chip for the correct voltage range,
-you must set the "vrm" correctly either via /proc or sensors.conf.
+you must set the "vrm" correctly either via /proc, /sys,  or sensors.conf.
 
 To be compatible with previous lm_sensors versions, the vrm defaults
-to version 8.2.
+to version 8.2. Generally, for recent motherboards, this will not
+be correct. Try 9.0 first.
 
 To change the vrm version to 9.0, for example, do the following
 after the chip module (in this example, w83781d) is loaded:
 
-	echo 9.0 > /proc/sys/dev/sensors/w83781d-isa-0290/vrm
+	(kernel 2.4)
+	    echo 9.0 > /proc/sys/dev/sensors/w83781d-isa-0290/vrm
+	(kernel 2.6)
+	    echo 90 > /sys/bus/i2c/devices/0-0290/vrm
 
-Alternatively, add a line in /etc/sensors.conf in the w83781d section:
+Alternatively, add a line in /etc/sensors.conf in the w83781d section
+(you should put this line BEFORE any line that uses vid in a calculation):
 
 	set vrm 9.0
 
@@ -64,7 +72,10 @@ and then, after the chip module is loaded, do:
 
 After this, reading the vid either by
 
-	cat /proc/sys/dev/sensors/w83781d-isa-0290/vid
+	(kernel 2.4)
+	    cat /proc/sys/dev/sensors/w83781d-isa-0290/vid
+	(kernel 2.6 - divide the output by 1000)
+	    cat /sys/bus/i2c/devices/0-0290/in0_ref
 
 or by
 
@@ -73,24 +84,26 @@ or by
 should show the new vid value.
 
 
-The following values are legal vrm values:
+The following values are legal vrm values. Other values will be
+allowed but will result in using the 8.2 standard.
 
-	8.2, 8.4, 8.5, 9.0
+	2.4, 8.1-8.5, 9.0, 9.1, 10.0
 
 
 Remember, the VID pins on the sensor chips are inputs only.
 That means they can't be changed and there shouldn't be
 any problems if you experiment with the vrm values until you
-get it right.
-
+get it right. You cannot manipulate the actual processor core
+voltage through lm_sensors drivers.
 
 Not all sensor chips have VID inputs.
 For those that do, the VRM support status is listed below.
 
 The following chip drivers support all the VRM versions via
-/etc/sensors.conf and the vrm entry in /proc:
+/etc/sensors.conf and the vrm entry in /proc or /sys:
 
-	adm1025, w83781d, lm87
+	adm1025, adm1026, asb100, lm85, lm87,
+	vt1211, vt8231, w83627hf, w83781d
 
 
 The following chip drivers support only VRM 8.2 and cannot be changed:
@@ -100,3 +113,6 @@ The following chip drivers support only VRM 8.2 and cannot be changed:
 
 If you have a board with one of these chips which needs advanced
 VRM support please email us.
+
+------------------
+Copyright (c) 2002-2004 Mark D. Studebaker
