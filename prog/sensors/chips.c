@@ -2839,6 +2839,8 @@ void print_ddcmon(const sensors_chip_name *name)
  * (Khali, 2003-08-09) Rewrote Sony Vaio EEPROMs detection, and move it
  * to the top. This should prevent such EEPROMs from being accidentally
  * detected as valid memory modules.
+ * (Khali, 2004-02-23) Add support for Shuttle EEPROMs, which contain
+ * MAC ethernet addresses.
  */
 void print_eeprom(const sensors_chip_name *name)
 {
@@ -2885,6 +2887,37 @@ void print_eeprom(const sensors_chip_name *name)
 			}
 		} else
 			printf("ERROR: data Vaio 2\n");
+		free_the_label(&label);
+	}
+
+	/* then Shuttle EEPROMs */
+	if (name->addr == 0x53) {
+ 		unsigned char buffer[6];
+
+		/* first make sure it is a Shuttle EEPROM */
+		if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_SHUTTLE, &label, &valid)
+		 && valid) {
+			for (i = 0; i < 3; i++)
+	            if (!sensors_get_feature(*name, SENSORS_EEPROM_SHUTTLE+i, &a))
+					buffer[i] = (unsigned char) a;
+			if (buffer[0] == 0x00
+			 && buffer[1] == 0x30
+			 && buffer[2] == 0x1b)
+			{
+				/* must be a real Shuttle EEPROM */
+				for (i = 4; i < 6; i++)
+	            	if (!sensors_get_feature(*name, SENSORS_EEPROM_SHUTTLE+i, &a))
+						buffer[i] = (unsigned char) a;
+
+				print_label(label, 24);
+				printf("%02X:%02X:%02X:%02X:%02X:%02X\n", buffer[0],
+					buffer[1], buffer[2], buffer[3], buffer[4], buffer[5]);
+				free_the_label(&label);
+				
+				return;
+			}
+		} else
+			printf("ERROR: data Shuttle\n");
 		free_the_label(&label);
 	}
 

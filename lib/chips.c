@@ -2975,6 +2975,25 @@ static sensors_chip_feature eeprom_features[] =
     { SENSORS_EEPROM_EDID_HEADER, "EDID header",
                          NOMAP, NOMAP,
                          R, EEPROM_SYSCTL1, VALUE(1), 0 },
+/* for Shuttle EEPROMS */
+    { SENSORS_EEPROM_SHUTTLE, "Ethernet Address",
+                         NOMAP, NOMAP,
+                         R, EEPROM_SYSCTL1, VALUE(1), 0 },
+    { SENSORS_EEPROM_SHUTTLE, "shuttle2",
+                         NOMAP, NOMAP,
+                         R, EEPROM_SYSCTL1, VALUE(2), 0 },
+    { SENSORS_EEPROM_SHUTTLE, "shuttle3",
+                         NOMAP, NOMAP,
+                         R, EEPROM_SYSCTL1, VALUE(3), 0 },
+    { SENSORS_EEPROM_SHUTTLE, "shuttle4",
+                         NOMAP, NOMAP,
+                         R, EEPROM_SYSCTL1, VALUE(4), 0 },
+    { SENSORS_EEPROM_SHUTTLE, "shuttle5",
+                         NOMAP, NOMAP,
+                         R, EEPROM_SYSCTL1, VALUE(5), 0 },
+    { SENSORS_EEPROM_SHUTTLE, "shuttle6",
+                         NOMAP, NOMAP,
+                         R, EEPROM_SYSCTL1, VALUE(6), 0 },
     { 0 }
   };
 
