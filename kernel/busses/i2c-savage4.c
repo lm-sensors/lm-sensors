@@ -1,13 +1,11 @@
 /*
     i2c-savage4.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>,
-    Philip Edelbrock <phil@netroedge.com>,
-    Ralph Metzler <rjkm@thp.uni-koeln.de>, and
+    Copyright (C) 1998-2003  The LM Sensors Team
+    Alexander Wold <awold@bigfoot.com>
     Mark D. Studebaker <mdsxyz123@yahoo.com>
     
-    Based on code written by Ralph Metzler <rjkm@thp.uni-koeln.de> and
-    Simon Vogl
+    Based on i2c-voodoo3.c.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -221,8 +219,8 @@ static void __exit i2c_savage4_exit(void)
 	iounmap((void *)ioaddr);
 }
 
-MODULE_AUTHOR
-    ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, Ralph Metzler <rjkm@thp.uni-koeln.de>, and Mark D. Studebaker <mdsxyz123@yahoo.com>");
+MODULE_AUTHOR("Alexander Wold <awold@bigfoot.com> "
+		"and Mark D. Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("Savage4 I2C/SMBus driver");
 MODULE_LICENSE("GPL");
 
