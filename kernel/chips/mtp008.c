@@ -1,7 +1,7 @@
 /*
    mtp008.c - Part of lm_sensors, Linux kernel modules for hardware
    monitoring
-   Copyright (c) 2001  Kris Van Hees <aedil@alchar.org>
+   Copyright (C) 2001, 2004  Kris Van Hees <aedil@alchar.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -337,9 +337,9 @@ static ctl_table mtp008_dir_table_template[] =
 	{MTP008_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_temp},
 	{MTP008_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL,
-       &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_temp_add},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_temp_add},
 	{MTP008_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL,
-       &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_temp_add},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_temp_add},
 	{MTP008_SYSCTL_VID, "vid", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &mtp008_vid},
 	{MTP008_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL,
@@ -809,12 +809,14 @@ void mtp008_temp_add(struct i2c_client *client, int operation, int ctl_name,
 		if(data->sens[nr - 3] != VOLTAGE) {
 			if (*nrels_mag >= 1) {
 				data->in_max[nr] = TEMP_TO_REG(results[0]);
-				mtp008_write_value(client, MTP008_REG_TEMP_MAX,
+				mtp008_write_value(client,
+						   MTP008_REG_IN_MAX(nr),
 						   data->in_max[nr]);
 			}
 			if (*nrels_mag >= 2) {
 				data->in_min[nr] = TEMP_TO_REG(results[1]);
-				mtp008_write_value(client, MTP008_REG_TEMP_MIN,
+				mtp008_write_value(client,
+						   MTP008_REG_IN_MIN(nr),
 						   data->in_min[nr]);
 			}
 		}
