@@ -269,21 +269,17 @@ static const u8 viaLUT[] =
 	    239, 240
 };
 
-/* Converting temps to (8-bit) hyst and over registers */
-// No interpolation here.  Just check the limits and go.
-// The +5 effectively rounds off properly and the +50 is because 
-// the temps start at -50
+/* Converting temps to (8-bit) hyst and over registers
+   No interpolation here.
+   The +50 is because the temps start at -50 */
 static inline u8 TEMP_TO_REG(long val)
 {
-	return (u8)
-	    SENSORS_LIMIT(viaLUT[((val <= -500) ? 0 : (val >= 1100) ? 160 : 
-				  ((val + 5) / 10 + 50))], 0, 255);
+	return viaLUT[val <= -500 ? 0 : val >= 1100 ? 160 : 
+		      (val < 0 ? val - 5 : val + 5) / 10 + 50];
 }
 
 /* for 8-bit temperature hyst and over registers */
-// The temp values are already *10, so we don't need to do that.
-// But we _will_ round these off to the nearest degree with (...*10+5)/10
-#define TEMP_FROM_REG(val) ((tempLUT[(val)]*10+5)/10)
+#define TEMP_FROM_REG(val) (tempLUT[(val)])
 
 /* for 10-bit temperature readings */
 // You might _think_ this is too long to inline, but's it's really only
@@ -295,26 +291,15 @@ static inline long TEMP_FROM_REG10(u16 val)
 	u16 eightBits = val >> 2;
 	u16 twoBits = val & 3;
 
-	// handle the extremes first (they won't interpolate well! ;-)
-	if (val == 0)
-		return (long) tempLUT[0];
-	if (val == 1023)
-		return (long) tempLUT[255];
-
-	if (twoBits == 0)
+	/* no interpolation for these */
+	if (twoBits == 0 || eightBits == 255)
 		return (long) tempLUT[eightBits];
-	else {
-		// do some interpolation by multipying the lower and upper
-		// bounds by 25, 50 or 75, then /100.
-		temp = ((25 * (4 - twoBits)) * tempLUT[eightBits]
-			+ (25 * twoBits) * tempLUT[eightBits + 1]);
-		// increase the magnitude by 50 to achieve rounding.
-		if (temp > 0)
-			temp += 50;
-		else
-			temp -= 50;
-		return (temp / 100);
-	}
+
+	/* do some linear interpolation */
+	temp = (4 - twoBits) * tempLUT[eightBits]
+	     + twoBits * tempLUT[eightBits + 1];
+	/* achieve rounding */
+	return (temp < 0 ? temp - 2 : temp + 2) / 4;
 }
 
 #define ALARMS_FROM_REG(val) (val)
