@@ -2,7 +2,7 @@
 #
 # Copyright 1998, 1999 Philip Edelbrock <phil@netroedge.com>
 #
-# Version 0.3
+# Version 0.4
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
 #
@@ -306,7 +306,7 @@ for $i ( 0 .. $#dimm_list ) {
 
 		print "\tSPD Revision code:\t\t\t\t$bytes[14]\n";
 		print "\tEEPROM Checksum of bytes 0-62:\t\t\t";
-		printf("0x%.4X (verses calculated: 0x%.4X)\n",$bytes[15],$dimm_checksum);
+		printf("0x%.2X (verses calculated: 0x%.2X)\n",$bytes[15],$dimm_checksum & 255);
 		
 # Decode next 16 bytes (64-79)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data64-79`;
