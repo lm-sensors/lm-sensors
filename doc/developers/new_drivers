@@ -14,6 +14,10 @@ We are more than happy to help you with any part of the process.
   i2c-id.h in the i2c package.
   Tell us it's OK to put your name on the "New Drivers" page.
 
+* Check out our latest code from CVS.
+  You should use this as a base for your development.
+  See instructions on our download page.
+
 * Write the new driver. 
   For a chip driver, use lm78.c as template. For an SMBus-only adapter, 
   use i2c-piix4.c. Use i2c-via.c for an I2C-level adapter.
@@ -24,11 +28,14 @@ We are more than happy to help you with any part of the process.
   chip. If these sensor values need scaling, this should be done through
   the configuration file.
 
-* Meet Kernel coding standards
+* Meet Kernel coding standards.
   See Documentation/CodingStyle in the kernel source.
   Be sure and use 8 column tabs.
 
-* Add the driver to the Module.mk (makefile)
+* Meet /proc naming standards in the ctl_table (for chip drivers only).
+  See doc/developers/proc for information.
+
+* Add the driver to the Module.mk (makefile).
   Usually, you can just add it to KERNEL{CHIPS,DRIVERS}TARGETS in the
   Module.mk file in the directory itself.
 
@@ -40,28 +47,31 @@ We are more than happy to help you with any part of the process.
   stop the driver from functioning; they should just output additional
   information.
 
-* Check for external symbols
+* Check for external symbols.
   'nm --extern --defined' should only output symbols starting with __module,
   cleanup_module, init_module and some kernel versioning symbols. Mark all
   other symbols as static in your source file.
 
-* Test the module
+* Test the module.
   This is usually the boring part...
   Test both with 2.2.x and 2.4.x kernels.
 
-* Add detection information to prog/detect/sensors-detect
+* Add detection information to prog/detect/sensors-detect.
   This is a perl script that automatically detects what chips and adapters
-  are present. Contact Frodo if you need help.
+  are present. Contact us if you need help.
 
-* Add chip information to lib/chips.{c,h} (for chip drivers only)
+* Add chip information to lib/chips.{c,h} (for chip drivers only).
   Until you have done this, the chip will be invisible for user-level
-  programs. Again, contact Frodo if you need help with this.
+  programs which use libsensors. Use standard names in lib/chips.c;
+  see also the comments in etc/sensors.conf.eg for help.
+  Contact us if you need more assistance.
 
-* Add entries to etc/sensors.conf.eg (for chip drivers only)
+* Add entries to etc/sensors.conf.eg (for chip drivers only).
   If needed, you can set defaults here.
 
-* Add a dedicated procedure to prog/sensors/chips.[ch] (for chip drivers only)
-  This makes the included sensors program pretty-print your chip information.
+* Add a procedure to prog/sensors/chips.[ch] (for chip drivers only).
+  This is a function specific for your driver that
+  makes the included 'sensors' program pretty-print your chip information.
 
 * Add the name of the device to the README file.
 
@@ -71,11 +81,14 @@ We are more than happy to help you with any part of the process.
 
 * Write a doc/chips/xxx or doc/busses/xxx file.
 
-* Make sure the GPL boilerplate and your name (and if applicable your
-  company's name) is at the top of the
+* Clearly specify licensing and copyright.
+  Make sure the GPL boilerplate and your name
+  (or if applicable your company's name) is at the top of the
   new driver so we know you are giving it to us under the GPL.
 
-* Submit the changes to us a patch against CVS.
+* Submit the changes to us.
+  Check out a clean version of CVS again (things will have changed since
+  you started), then submit the changes to us as a patch against CVS.
 
 ---------------------------------------------------------------------
 Checklist for us to do on the webpage:
