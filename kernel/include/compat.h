@@ -93,6 +93,14 @@
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
 #endif
 
+/* Including init.h should be safe, even if it is not used. */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#define __initdata
+#endif
+
 /* For old 2.0 kernels */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,0,34))
 #define PCI_DEVICE_ID_VIA_82C586_3  0x3040

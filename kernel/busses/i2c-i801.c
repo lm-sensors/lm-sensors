@@ -42,13 +42,6 @@
 #include <linux/bios32.h>
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
-#include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
-
 /* I801 SMBus address offsets */
 #define SMBHSTSTS (0 + i801_smba)
 #define SMBHSTCNT (2 + i801_smba)

@@ -31,8 +31,17 @@ sub print_diff
   my ($package_root,$kernel_root,$kernel_file,$package_file) = @_;
   my ($diff_command,$dummy);
 
-  $diff_command = "diff -u2 $kernel_root/$kernel_file ";
-  $diff_command .= "$package_root/$package_file";
+  $diff_command = "diff -u2";
+  if ( -e "$kernel_root/$kernel_file") {
+    $diff_command .= " $kernel_root/$kernel_file ";
+  } else {
+    $diff_command .= " /dev/null ";
+  }
+  if ( -e "$package_root/$package_file") {
+    $diff_command .= " $package_root/$package_file ";
+  } else {
+    $diff_command .= " /dev/null";
+  }
   open INPUT, "$diff_command|" or die "Can't execute `$diff_command'";
   $dummy = <INPUT>;
   $dummy = <INPUT>;
@@ -530,8 +539,17 @@ EOF
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
 #endif
 EOF
-
         }
+	if (`grep '__init' "$package_root/$package_file"`) {
+          print OUTPUT << 'EOF';
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#define __initdata
+#endif
+EOF
+	}
         if (`grep 'PCI_DEVICE_ID_VIA_82C586_3' "$package_root/$package_file"`) {
           print OUTPUT << 'EOF';
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,0,34))
@@ -568,7 +586,18 @@ EOF
 #endif
 EOF
         }
+	if (`grep 'PCI_DEVICE_ID_INTEL_82801AA_3\|PCI_DEVICE_ID_INTEL_82801AB_3' "$package_root/$package_file"`) {
+	  print OUTPUT << 'EOF';
+#ifndef PCI_DEVICE_ID_INTEL_82801AA_3
+#define PCI_DEVICE_ID_INTEL_82801AA_3  0x2413
+#endif
+#ifndef PCI_DEVICE_ID_INTEL_82801AB_3
+#define PCI_DEVICE_ID_INTEL_82801AB_3  0x2423
+#endif
+EOF
+        }
         print OUTPUT << 'EOF';
+
 /* --> END OF COMPATIBILITY SECTION */
 
 EOF
