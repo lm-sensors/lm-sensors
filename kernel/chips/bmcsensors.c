@@ -291,13 +291,17 @@ static void bmcsensors_select_thresholds(int i)
 	if(sdrd[i].lim1 >= 0)
 		printk(KERN_INFO "bmcsensors.o: sensor %d: using %s for upper limit\n",
 			i, threshold_text[sdrd[i].lim1]);
+/*
 	else
 		printk(KERN_INFO "bmcsensors.o: sensor %d: no readable upper limit\n", i);
+*/
 	if(sdrd[i].lim2 >= 0)
 		printk(KERN_INFO "bmcsensors.o: sensor %d: using %s for lower limit\n",
 			i, threshold_text[sdrd[i].lim2]);
+/*
 	else
 		printk(KERN_INFO "bmcsensors.o: sensor %d: no readable lower limit\n", i);
+*/
 }
 
 /* After we have received all the SDR entries and picked out the ones
@@ -330,22 +334,22 @@ static void bmcsensors_build_proc_table()
 
 		switch(sdrd[i].stype) {
 			case(STYPE_TEMP) :
-				bmcsensors_dir_table[i].ctl_name = BMCSENSORS_SYSCTL_TEMP1 + temps;
+				bmcsensors_dir_table[i].ctl_name = BMC_SYSCTL_TEMP1 + temps;
 				sprintf((char *)bmcsensors_dir_table[i].procname, "temp%d", ++temps);
 				bmcsensors_dir_table[i].extra1 = &bmcsensors_all;
 				break;
 			case(STYPE_VOLT) :
-				bmcsensors_dir_table[i].ctl_name = BMCSENSORS_SYSCTL_IN1 + volts;
+				bmcsensors_dir_table[i].ctl_name = BMC_SYSCTL_IN1 + volts;
 				sprintf((char *)bmcsensors_dir_table[i].procname, "in%d", ++volts);
 				bmcsensors_dir_table[i].extra1 = &bmcsensors_all;
 				break;
 			case(STYPE_CURR) :
-				bmcsensors_dir_table[i].ctl_name = BMCSENSORS_SYSCTL_CURR1 + currs;
+				bmcsensors_dir_table[i].ctl_name = BMC_SYSCTL_CURR1 + currs;
 				sprintf((char *)bmcsensors_dir_table[i].procname, "curr%d", ++currs);
 				bmcsensors_dir_table[i].extra1 = &bmcsensors_all;
 				break;
 			case(STYPE_FAN) :
-				bmcsensors_dir_table[i].ctl_name = BMCSENSORS_SYSCTL_FAN1 + fans;
+				bmcsensors_dir_table[i].ctl_name = BMC_SYSCTL_FAN1 + fans;
 				sprintf((char *)bmcsensors_dir_table[i].procname, "fan%d", ++fans);
 				bmcsensors_dir_table[i].extra1 = &bmcsensors_all;
 				break;
@@ -840,7 +844,7 @@ void bmcsensors_all(struct i2c_client *client, int operation, int ctl_name,
 {
 	int i;
 	struct bmcsensors_data *data = client->data;
-	int nr = ctl_name - BMCSENSORS_SYSCTL_TEMP1 + 1;
+	int nr = ctl_name - BMC_SYSCTL_TEMP1 + 1;
 
 	if((i = find_sdrd(ctl_name)) < 0) {
 		*nrels_mag = 0;
