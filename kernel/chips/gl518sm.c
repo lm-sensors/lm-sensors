@@ -157,7 +157,8 @@ struct gl518_data {
          u8 temp_hyst;               /* Register values */
          u8 alarms,beeps;            /* Register value */
          u8 fan_div[2];              /* Register encoding, shifted right */
-	 u8 beep_enable;             /* Boolean */	 
+	 u8 beep_enable;             /* Boolean */
+	 u8 sw_alarm_mask;           /* Mask unwanted HW alarms */
 };
 
 /* load time parameter that says if we want to spend 10 seconds for
@@ -387,6 +388,8 @@ ERROR0:
 /* Called when we have found a new GL518SM. It should set limits, etc. */
 void gl518_init_client(struct i2c_client *client)
 {
+  struct gl518_data *data = client->data;
+
   /* Power-on defaults (bit 7=1) */
   gl518_write_value(client,GL518_REG_CONF,0x80); 
 
@@ -422,6 +425,10 @@ void gl518_init_client(struct i2c_client *client)
   /* Clear status register (bit 5=1), start (bit6=1) */
   gl518_write_value(client,GL518_REG_CONF,0x24);
   gl518_write_value(client,GL518_REG_CONF,0x44);
+  
+  /* Sometimes we want to report no alarm, even when
+     the hardware tells the opposite */
+  data->sw_alarm_mask = 0xff;
 }
 
 int gl518_detach_client(struct i2c_client *client)
@@ -764,10 +771,17 @@ void gl518_fan(struct i2c_client *client, int operation, int ctl_name,
       data->fan_min[nr] = FAN_TO_REG(results[0],
                                      DIV_FROM_REG(data->fan_div[nr]));
       old = gl518_read_value(client,GL518_REG_FAN_LIMIT);
+
       if (nr == 0)
         old = (old & 0x00ff) | (data->fan_min[nr] << 8);
-      else
+      else  
         old = (old & 0xff00) | data->fan_min[nr];
+
+      if (results[0])
+      	  data->sw_alarm_mask |= (nr ? GL518_ALARM_FAN2 : GL518_ALARM_FAN1);
+      else
+      	  data->sw_alarm_mask &= ~(nr ? GL518_ALARM_FAN2 : GL518_ALARM_FAN1);
+
       gl518_write_value(client,GL518_REG_FAN_LIMIT,old);
     }
   }
@@ -782,7 +796,7 @@ void gl518_alarms(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     gl518_update_client(client);
-    results[0] = ALARMS_FROM_REG(data->alarms);
+    results[0] = ALARMS_FROM_REG(data->alarms & data->sw_alarm_mask);
     *nrels_mag = 1;
   }
 }
