@@ -32,7 +32,7 @@
     For SMBus support, they are similar to the PIIX4 and are part
     of Intel's '810' and other chipsets.
     See the doc/busses/i2c-i801 file for details.
-    I2C Block Read is not supported.
+    I2C Block Read and Process Call are not supported.
 */
 
 /* Note: we assume there can only be one I801, with one SMBus interface */
@@ -109,6 +109,7 @@ static int supported[] = {PCI_DEVICE_ID_INTEL_82801AA_3,
 #define I801_BYTE           0x04
 #define I801_BYTE_DATA      0x08
 #define I801_WORD_DATA      0x0C
+#define I801_PROC_CALL      0x10	/* later chips only, unimplemented */
 #define I801_BLOCK_DATA     0x14
 #define I801_I2C_BLOCK_DATA 0x18	/* unimplemented */
 #define I801_BLOCK_LAST     0x34
@@ -430,7 +431,7 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 			smbcmd = I801_BLOCK_LAST;
 		else
 			smbcmd = I801_BLOCK_DATA;
-#ifdef HAVE_PEC
+#if 0 /* now using HW PEC */
 		if(isich4 && command == I2C_SMBUS_BLOCK_DATA_PEC)
 			smbcmd |= I801_PEC_EN;
 #endif
@@ -648,12 +649,8 @@ s32 i801_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 #ifdef HAVE_PEC
 	if(isich4 && hwpec) {
 		if(size != I2C_SMBUS_QUICK &&
-		   size != I2C_SMBUS_I2C_BLOCK_DATA) {
-			if(!block)
-				xact |= I801_PEC_EN;	/* enable PEC */
-			if(read_write == I2C_SMBUS_WRITE)
-				outb_p(1, SMBAUXCTL);	/* append HW PEC */
-		}
+		   size != I2C_SMBUS_I2C_BLOCK_DATA)
+			outb_p(1, SMBAUXCTL);	/* enable HW PEC */
 	}
 #endif
 	if(block)
@@ -665,8 +662,7 @@ s32 i801_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 
 #ifdef HAVE_PEC
 	if(isich4 && hwpec) {
-		if(read_write == I2C_SMBUS_WRITE &&
-		   size != I2C_SMBUS_QUICK &&
+		if(size != I2C_SMBUS_QUICK &&
 		   size != I2C_SMBUS_I2C_BLOCK_DATA)
 			outb_p(0, SMBAUXCTL);
 	}
