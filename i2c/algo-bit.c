@@ -17,7 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-static char alg_rcsid[] = "$Id: algo-bit.c,v 1.2 1998/11/03 03:48:44 phil Exp $";
+static char alg_rcsid[] = "$Id: algo-bit.c,v 1.7 1998/09/28 06:45:38 i2c Exp i2c $";
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -639,6 +639,12 @@ MODULE_PARM_DESC(bit_scan, "Scan for active chips on the bus");
 MODULE_PARM_DESC(i2c_debug,"debug level - 0 off; 1 normal; 2,3 more verbose; 9 bit-protocol");
 
 
+#ifndef LM_SENSORS
+EXPORT_SYMBOL(i2c_bit_add_bus);
+EXPORT_SYMBOL(i2c_bit_del_bus);
+#endif
+
+
 int init_module(void) 
 {
 	return algo_bit_init();
@@ -649,3 +655,13 @@ void cleanup_module(void)
 	i2c_del_algorithm(&bit_algo);
 }
 #endif
+
+
+
+
+
+
+
+
+
+

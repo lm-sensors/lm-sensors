@@ -83,8 +83,8 @@ CC := gcc
 # Determine the default compiler flags
 # CFLAGS is to create in-kernel object files (modules); EXCFLAGS is to create
 # non-kernel object files (which are linked into executables).
-CFLAGS := -D__KERNEL__ -DMODULE -I. -Ii2c -O2 -fomit-frame-pointer
-EXCFLAGS := -I. -O2 -Ii2c
+CFLAGS := -D__KERNEL__ -DMODULE -I. -Ii2c -O2 -fomit-frame-pointer -DLM_SENSORS
+EXCFLAGS := -I. -O2 -Ii2c -D LM_SENSORS
 
 ifeq ($(DEBUG),1)
 CFLAGS += -DDEBUG

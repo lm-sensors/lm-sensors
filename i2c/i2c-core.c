@@ -17,7 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-#define RCSID "$Id: i2c-core.c,v 1.5 1998/12/01 21:11:32 frodo Exp $"
+#define RCSID "$Id: i2c.c,v 1.7 1998/09/28 06:45:38 i2c Exp i2c $"
 /* ------------------------------------------------------------------------- */
 
 #include <linux/module.h>
@@ -173,6 +173,7 @@ int i2c_del_adapter(struct i2c_adapter *adap)
 			 * flag, as _all_ clients that reside on the adapter
 			 * must be deleted, as this would cause invalid states.
 			 */
+			/* i2c_detach_client(client); */
 			client->driver->detach_client(client);
 	}
 	/* all done, now unregister */
@@ -248,7 +249,7 @@ int i2c_del_driver(struct i2c_driver *driver)
 			if (client != NULL && client->driver == driver) {
 				DEB2(printk("i2c:   detaching client %s:\n",
 					client->name));
-				/* i2c_detach_client(client); */
+				/*i2c_detach_client(client);*/
 				driver->detach_client(client);
 			}
 		}
@@ -445,11 +446,29 @@ int i2c_adapter_id(struct i2c_adapter *adap)
 }
 
 
+
 #ifdef MODULE
 MODULE_AUTHOR("Simon G. Vogl <simon@tk.uni-linz.ac.at>");
 MODULE_DESCRIPTION("I2C-Bus main module");
 MODULE_PARM(i2c_debug, "i");
 MODULE_PARM_DESC(i2c_debug,"debug level");
+
+#ifndef LM_SENSORS
+EXPORT_SYMBOL(i2c_add_algorithm);
+EXPORT_SYMBOL(i2c_del_algorithm);
+EXPORT_SYMBOL(i2c_add_adapter);
+EXPORT_SYMBOL(i2c_del_adapter);
+EXPORT_SYMBOL(i2c_add_driver);
+EXPORT_SYMBOL(i2c_del_driver);
+EXPORT_SYMBOL(i2c_attach_client);
+EXPORT_SYMBOL(i2c_detach_client);
+
+EXPORT_SYMBOL(i2c_master_send);
+EXPORT_SYMBOL(i2c_master_recv);
+EXPORT_SYMBOL(i2c_control);
+EXPORT_SYMBOL(i2c_transfer);
+#endif
+
 
 int init_module(void) 
 {
