@@ -180,7 +180,10 @@ int main (int argc, char *argv[])
       printf(" ERROR: Can't get adapter or algorithm?!?\n");
     if (!strcmp(chip->prefix,"lm75"))
       print_lm75(chip);
-     printf("\n");
+    else if (!strcmp(chip->prefix,"lm78") || !strcmp(chip->prefix,"lm78-j") ||
+             !strcmp(chip->prefix,"lm79"))
+      print_lm78(chip);
+    printf("\n");
   }
   exit(0);
 }
