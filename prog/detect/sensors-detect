@@ -3369,58 +3369,90 @@ sub adm1024_detect
 #   0xfe: Company ID (all but LM84 and MAX1617)
 #   0xff: Revision (ADM1021, ADM1021A/ADM1023 and MAX1617A)
 #   0x02: Status
+#   0x03: Configuration
+#   0x04: Conversion rate
 #   0x00-0x01, 0x05-0x08: Temperatures (MAX1617 and LM84)
 # Note: Especially the MAX1617 has very bad detection; we give it a low 
 # confidence value.
 sub adm1021_detect
 {
-  my ($chip, $file,$addr) = @_;
-  return if $chip == 0 and i2c_smbus_read_byte_data($file,0xfe) != 0x41 ||
-                          (i2c_smbus_read_byte_data($file,0xff) & 0xf0) != 0x00;
-  return if $chip == 1 and i2c_smbus_read_byte_data($file,0xfe) != 0x41 ||
-                          (i2c_smbus_read_byte_data($file,0xff) & 0xf0) != 0x30;
-  return if $chip == 4 and i2c_smbus_read_byte_data($file,0xfe) != 0x49;
-  return if $chip == 5 and i2c_smbus_read_byte_data($file,0x04) != 0x00;
-  return if $chip == 6 and i2c_smbus_read_byte_data($file,0xfe) != 0x23;
-  return if $chip == 3 and i2c_smbus_read_byte_data($file,0xfe) != 0x4d ||
-                           i2c_smbus_read_byte_data($file,0xff) != 0x01;
-  return if $chip == 7 and i2c_smbus_read_byte_data($file,0xfe) != 0x54;
-  # The remaining things are flaky at best. Perhaps something can be done
-  # with the fact that some registers are unreadable?
-  return if (i2c_smbus_read_byte_data($file,0x02) & 0x03) != 0;
+  my ($chip, $file, $addr) = @_;
+  my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
+  my $rev = i2c_smbus_read_byte_data($file, 0xff);
+  my $conf = i2c_smbus_read_byte_data($file, 0x03);
+  my $status = i2c_smbus_read_byte_data($file, 0x02);
+  my $convrate = i2c_smbus_read_byte_data($file, 0x04);
+
+  # Check manufacturer IDs and product revisions when available
+  return if $chip == 0 and $man_id != 0x41 ||
+                          ($rev & 0xf0) != 0x00;
+  return if $chip == 1 and $man_id != 0x41 ||
+                          ($rev & 0xf0) != 0x30;
+  return if $chip == 3 and $man_id != 0x4d ||
+                           $rev != 0x01;
+  return if $chip == 4 and $man_id != 0x49;
+  return if $chip == 5 and $convrate != 0x00;
+  return if $chip == 6 and $man_id != 0x23;
+  return if $chip == 7 and $man_id != 0x54;
+
+  # Check unused bits
+  if ($chip == 5) # LM84
+  {
+    return if ($status & 0xab) != 0;
+    return if ($conf & 0x7f) != 0;
+  }
+  else
+  {
+    return if ($status & 0x03) != 0;
+    return if ($conf & 0x3f) != 0;
+    return if ($convrate & 0xf8) != 0;
+  }
+
   # Extra checks for MAX1617 and LM84, since those are often misdetected
+  # We verify 6 assertions and discard the chip if too many (2 for the
+  # MAX1617, 4 for the LM84) fail. Not that these checks are not done
+  # by the adm1021 driver.
   if ($chip == 2 || $chip == 5)
   {
+    my $lte = i2c_smbus_read_byte_data($file, 0x00);
+    my $rte = i2c_smbus_read_byte_data($file, 0x01);
+    my $lhi = i2c_smbus_read_byte_data($file, 0x05);
+    my $rhi = i2c_smbus_read_byte_data($file, 0x07);
+    my $llo = i2c_smbus_read_byte_data($file, 0x06);
+    my $rlo = i2c_smbus_read_byte_data($file, 0x08);
+
+    # If all registers hold the same value, it has to be a misdetection
+    return if $lte == $rte and $lte == $lhi and $lte == $rhi
+           and $lte == $llo and $lte == $rlo;
+
     # Increase the misdetect value each time a temperature doesn't
     # match reasonable expectations
     my $misdetect = 0;
     # Negative temperatures
-    $misdetect++ if ((my $lte=i2c_smbus_read_byte_data($file,0x00)) & 0x80);
-    $misdetect++ if ((my $rte=i2c_smbus_read_byte_data($file,0x01)) & 0x80);
+    $misdetect++ if ($lte & 0x80);
+    $misdetect++ if ($rte & 0x80);
     # Negative high limits
-	my ($lhi, $rhi);
-    if (($lhi=i2c_smbus_read_byte_data($file,0x05)) & 0x80)
+    if ($lhi & 0x80)
     {
       $misdetect++;
       $lhi-=256;
     }
-    if (($rhi=i2c_smbus_read_byte_data($file,0x07)) & 0x80)
+    if ($rhi & 0x80)
     {
       $misdetect++;
       $rhi-=256;
     }
     # Low limits over high limits
-    my $llo=i2c_smbus_read_byte_data($file,0x06);
-    my $rlo=i2c_smbus_read_byte_data($file,0x08);
-    $llo-=256 if ($llo & 0x80);
-    $rlo-=256 if ($rlo & 0x80);
-    $misdetect++ if $llo > $lhi;
-    $misdetect++ if $rlo > $rhi;
-    return if $misdetect >= 4;
-	# Also return if all six bytes have the same value
-	return if $lte == $rte and $lte == $lhi and $lte == $rhi
-      and $lte == $llo and $lte == $rlo;
+    if ($chip != 5) # LM84 doesn't have low limits
+    {
+      $llo-=256 if ($llo & 0x80);
+      $rlo-=256 if ($rlo & 0x80);
+      $misdetect++ if $llo > $lhi;
+      $misdetect++ if $rlo > $rhi;
+    }
+    return if $misdetect > 2;
   }
+
   return 3 if $chip == 2;
   return 7 if $chip <= 3;
   return 5;
