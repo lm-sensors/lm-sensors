@@ -137,7 +137,7 @@ ifneq ($(shell if grep -q '^CONFIG_SENSORS_SMSC47M1=y' $(LINUX)/.config; then ec
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smsc47m1.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_PC87360=y' $(LINUX)/.config; then echo 1; fi),1)
-KERNELCHIPSTARGETS += $(MODULE_DIR)/pc87360-fan.o
+KERNELCHIPSTARGETS += $(MODULE_DIR)/pc87360.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_THMC50=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/thmc50.o

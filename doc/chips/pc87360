@@ -1,0 +1,56 @@
+Kernel driver `pc87360-fan.o'
+=============================
+
+Status: Alpha, untested.
+
+Supported chips:
+  * National Semiconductor PC87360, PC87363 and PC87364
+    Addresses scanned: none, address read from Super I/O config space
+    Datasheets:
+	http://www.national.com/pf/PC/PC87360.html
+	http://www.national.com/pf/PC/PC87363.html
+	http://www.national.com/pf/PC/PC87364.html
+
+Authors: Jean Delvare <khali@linux-fr.org>
+
+
+Module Parameters
+-----------------
+
+None.
+
+
+Description
+-----------
+
+The National Semiconductor PC87360 Super I/O chip contains monitoring and
+PWM control circuitry for two fans. The PC87363 chip is similar, and the
+PC87364 chip has monitoring and PWM control for a third fan.
+
+Fan rotation speeds are reported in RPM (revolutions per minute). An alarm
+is triggered if the rotation speed has dropped below a programmable limit.
+Fan readings can be divided by a programmable divider (1, 2, 4 or 8) to give
+the readings more range or accuracy. Not all RPM values can accurately be
+represented, so some rounding is done. With a divider of 2, the lowest
+representable value is around 2600 RPM.
+
+A different alarm is also triggered if the fan speed is too low to be
+measured. It is suggested to increase the fan divisor in this case.
+
+PWM values are from 0 to 255.
+
+If an alarm triggers, it will remain triggered until the hardware register
+is read at least once. This means that the cause for the alarm may 
+already have disappeared!  Note that in the current implementation, all
+hardware registers are read whenever any data is read (unless it is less
+than 1.5 seconds since the last update). This means that you can easily
+miss once-only alarms.
+
+
+Limitations
+-----------
+
+This driver is read-only at the moment. Since I don't own a supported
+chip for testing, and the datasheet suggests that you shouldn't change
+values once the monitoring has started (this is normally done by the BIOS
+at boot time), I decided to play it safe.
