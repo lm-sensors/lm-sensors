@@ -1055,11 +1055,21 @@ chip "via686a-*"
     label temp3 "SBr Temp"
     #ignore temp3
 
-# Set your CPU core limits here.  For the other voltage sensors, the
-# built-in defaults should be fine.
+# Set your CPU core limits here if the BIOS did not.
 
-    set in0_min 2.0
-    set in0_max 2.5
+    #set in0_min 1.70 * 0.95
+    #set in0_max 1.70 * 1.05
+
+# Other voltage values are standard so we can enforce the limits.
+
+    set in1_min 2.5 * 0.95
+    set in1_max 2.5 * 1.05
+    set in2_min 3.3 * 0.95
+    set in2_max 3.3 * 1.05
+    set in3_min 5 * 0.9
+    set in3_max 5 * 1.1
+    set in4_min 12 * 0.9
+    set in4_max 12 * 1.1
 
 # Set your temp limits here.  Remember, 'tempX_over' is the temp at which an
 # alarm is triggered, and 'tempX_hyst' is the temp at which an alarm turns off.
