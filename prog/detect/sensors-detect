@@ -1734,7 +1734,7 @@ sub initialize_conf
   my $use_devfs = 0;
   open INPUTFILE, "/proc/mounts" or die "Can't access /proc/mounts!";
   while (<INPUTFILE>) {
-    if (m@^none /dev devfs @) {
+    if (m@^\w+ /dev devfs @) {
       $use_devfs = 1;
       $dev_i2c = '/dev/i2c/';
       last;
