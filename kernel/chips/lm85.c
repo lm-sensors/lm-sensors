@@ -55,7 +55,6 @@
     2003-06-30   Add support for EMC6D100 extra voltage inputs.
 */
 
-#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
