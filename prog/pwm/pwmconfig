@@ -209,8 +209,8 @@ function pwmdetail()
 
 	if [ "$PLOT" = "y" ]
 	then
-		TMP1=/usr/tmp/pwmtest$$.1
-		TMP2=/usr/tmp/pwmtest$$.2
+		TMP1=`mktemp -t pwmtest1.XXXXXXXXXX` || { echo "$0: Cannot create temporary file" >&2; exit 1; }
+		TMP2=`mktemp -t pwmtest2.XXXXXXXXXX` || { rm -f $TMP1 ; echo "$0: Cannot create temporary file" >&2; exit 1; }
 		echo "set xlabel \"PWM: $P\"" > $TMP1
 		echo "set ylabel \"FAN: $F (RPM)\"" >> $TMP1
 		echo 'set nokey' >> $TMP1
