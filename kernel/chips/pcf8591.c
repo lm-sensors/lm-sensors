@@ -70,9 +70,7 @@ SENSORS_INSMOD_1(pcf8591);
 
 
 struct pcf8591_data {
-        struct semaphore lock;
         int sysctl_id;
-        enum chips type;
 
         struct semaphore update_lock;
         char valid;             /* !=0 if following fields are valid */
@@ -206,16 +204,8 @@ int pcf8591_detect(struct i2c_adapter *adapter, int address,
         if (kind <= 0)
                 kind = pcf8591;
 
-        if (kind == pcf8591) {
-                type_name = "pcf8591";
-                client_name = "PCF8591 chip";
-        } else {
-#ifdef DEBUG
-                printk(KERN_ERR "pcf8591.o: Internal error: unknown kind (%d)?!?",
-                       kind);
-#endif
-                goto ERROR1;
-        }
+	type_name = "pcf8591";
+	client_name = "PCF8591 chip";
 
         /* Fill in the remaining client fields and put it into the global list */
         strcpy(new_client->name, client_name);
@@ -247,7 +237,6 @@ int pcf8591_detect(struct i2c_adapter *adapter, int address,
       ERROR4:
         i2c_detach_client(new_client);
       ERROR3:
-      ERROR1:
         kfree(new_client);
       ERROR0:
         return err;
