@@ -47,6 +47,13 @@
 #define VENDOR		0x106b
 #define DEVICE		0x22
 
+/*****    Protos    ******/
+s32 keywest_access(struct i2c_adapter * adap, u16 addr,
+                  unsigned short flags, char read_write,
+                  u8 command, int size, union i2c_smbus_data * data);
+u32 keywest_func(struct i2c_adapter *adapter);
+/***** End ofProtos ******/
+
 
 struct keywest_iface {
 	void *base;
@@ -58,13 +65,55 @@ struct keywest_iface {
 	void *addr;
 	void *subaddr;
 	void *data;
+	struct i2c_adapter *i2c_adapt;
 	struct keywest_iface *next;
 };
 
+static struct i2c_algorithm smbus_algorithm = {
+        /* name */ "Non-I2C SMBus adapter",
+        /* id */ I2C_ALGO_SMBUS,
+        /* master_xfer */ NULL,
+        /* smbus_access */ keywest_access,
+        /* slave_send */ NULL,
+        /* slave_rcv */ NULL,
+        /* algo_control */ NULL,
+        /* functionality */ keywest_func,
+};
+
+
 struct keywest_iface *ifaces=NULL;
 
+s32 keywest_access(struct i2c_adapter * adap, u16 addr,
+                  unsigned short flags, char read_write,
+                  u8 command, int size, union i2c_smbus_data * data) {
+ struct keywest_iface *ifaceptr;
+
+  ifaceptr=(struct keywest_iface *)adap->data;
+  printk("Keywest access called with ref to iface: 0x%X\n",ifaceptr->base);
+  return -1;
+}
+
+u32 keywest_func(struct i2c_adapter *adapter){
+        return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
+            I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA |
+            I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_PROC_CALL;
+}
+
+void keywest_inc(struct i2c_adapter *adapter)
+{
+        MOD_INC_USE_COUNT;
+}
+
+void keywest_dec(struct i2c_adapter *adapter)
+{
+        MOD_DEC_USE_COUNT;
+}
+
 int init_iface (void *base,void *steps,struct keywest_iface **ifaces) {
+ struct i2c_adapter *keywest_adapter;
+ char *name;
  struct keywest_iface **temp_hdl=ifaces;
+ int res;
 
   if (ifaces == NULL) {
    printk("Ah!  Passed a null handle to init_iface");
@@ -75,9 +124,9 @@ int init_iface (void *base,void *steps,struct keywest_iface **ifaces) {
    temp_hdl=&(*temp_hdl)->next;
   }
   *temp_hdl=(struct keywest_iface *)kmalloc(sizeof(struct keywest_iface),GFP_KERNEL);
-  if (*temp_hdl == NULL) { printk("kmalloc failed!"); return -1; }
+  if (*temp_hdl == NULL) { printk("kmalloc failed on temp_hdl!"); return -1; }
   (*temp_hdl)->next=NULL;
-  base=ioremap(base,(int)steps*8);
+  base=ioremap((int)base,(int)steps*8);
   (*temp_hdl)->base=base;
   (*temp_hdl)->steps=steps;
   (*temp_hdl)->control=(void *)((__u32)base+(__u32)steps);
@@ -87,8 +136,26 @@ int init_iface (void *base,void *steps,struct keywest_iface **ifaces) {
   (*temp_hdl)->addr=(void *)((__u32)base+(__u32)steps*5);
   (*temp_hdl)->subaddr=(void *)((__u32)base+(__u32)steps*6);
   (*temp_hdl)->data=(void *)((__u32)base+(__u32)steps*7);
+  keywest_adapter=(struct i2c_adapter*)kmalloc(sizeof(struct i2c_adapter),GFP_KERNEL);
+  memset((void *)keywest_adapter,0,(sizeof(struct i2c_adapter)));
+  if (keywest_adapter == NULL) { printk("kmalloc failed on keywest_adapter!"); return -1; }
+  strcpy(keywest_adapter->name,"keywest i2c\0");
+  keywest_adapter->id=I2C_ALGO_SMBUS;
+  keywest_adapter->algo=&smbus_algorithm;
+  keywest_adapter->algo_data=NULL;
+  keywest_adapter->inc_use=keywest_inc;
+  keywest_adapter->dec_use=keywest_dec;
+  keywest_adapter->client_register=NULL;
+  keywest_adapter->client_unregister=NULL;
+  keywest_adapter->data=(void *)(*temp_hdl);
+  (*temp_hdl)->i2c_adapt=keywest_adapter;
+  if (res=i2c_add_adapter((*temp_hdl)->i2c_adapt)) {
+                printk
+                    ("i2c-keywest.o: Adapter registration failed, module not inserted.\n");
+                cleanup();
+  }
   printk("Done creating iface entry\n");
-  return 0;
+  return res;
 }
 
 void dump_ifaces (struct keywest_iface **ifaces) {
@@ -103,11 +170,15 @@ void dump_ifaces (struct keywest_iface **ifaces) {
      readb((*ifaces)->control),readb((*ifaces)->status),readb((*ifaces)->ISR),
      readb((*ifaces)->IER),readb((*ifaces)->addr),readb((*ifaces)->subaddr),
      readb((*ifaces)->data));
+   printk("I2C-Adapter:\n");
+   printk("  name:%s\n",(*ifaces)->i2c_adapt->name);
    dump_ifaces(&(*ifaces)->next);
   } else { printk("End of ifaces.\n"); }
 }
 
-void cleanup (struct keywest_iface **ifaces) {
+int cleanup (struct keywest_iface **ifaces) {
+ int res=0;
+
   if (ifaces == NULL) { printk("Ah!  Passed null handle to cleanup!\n"); return; }
   if (*ifaces != NULL) {
    printk("Cleaning up interface @%X,%X\n",(*ifaces)->base,(*ifaces)->steps);
@@ -115,10 +186,14 @@ void cleanup (struct keywest_iface **ifaces) {
      (*ifaces)->control,(*ifaces)->status,(*ifaces)->ISR,(*ifaces)->ISR,
      (*ifaces)->IER,(*ifaces)->addr,(*ifaces)->subaddr,(*ifaces)->data);
    cleanup(&(*ifaces)->next);
+   if (res = i2c_del_adapter((*ifaces)->i2c_adapt)) {
+     printk ("i2c-keywest.o: i2c_del_adapter failed, module not removed\n");
+   }
    kfree(*ifaces);
    iounmap((*ifaces)->base);
    (*ifaces)=NULL;
   }
+  return res;
 }
 
 
@@ -207,7 +282,6 @@ int init_module(void)
 
 void cleanup_module(void)
 {
-	printk("Cleaning up\n");
 	cleanup(&ifaces);
 }
 #endif
