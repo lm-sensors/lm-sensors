@@ -2442,15 +2442,33 @@ void print_eeprom(const sensors_chip_name *name)
            print_label(label, 24);
 	   printf("RAMBUS RIMM SPD\n");
 	   rambus = 1;
-	} else
+	} else if(((int) a) == 0) {
 	   vaio = 1;
+	} else {
+	   free_the_label(&label);
+           return;
+	}
       }
    } else
       printf("ERROR: data 1\n");
    free_the_label(&label);
    
-   if(vaio)
-   {
+   if(vaio) {
+      /* first make sure it is a Vaio EEPROM (could still be some ddcmon) */
+      if(!sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a) &&
+       !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b) &&
+       !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c)) {
+      	if(((int) a) != 0 || ((int) b) != 0 || ((int) c) !=0) {
+	   /* not a memory chip nor a Vaio EEPROM, so leave */
+	   return;
+	}
+      } else {
+        printf("ERROR: data Vaio 2\n");
+	return;
+      }
+   }
+
+   if(vaio) {
       char buffer[33];
       memset(buffer, '\0', 33);
       
@@ -2475,7 +2493,7 @@ void print_eeprom(const sensors_chip_name *name)
 	 print_label(label, 24);
 	 printf("%s\n", buffer);
       } else
-         printf("ERROR: data Vaio 2\n");
+         printf("ERROR: data Vaio 3\n");
       free_the_label(&label);
 
       return;
