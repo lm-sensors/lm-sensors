@@ -377,7 +377,7 @@ void print_adm9240(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM9240_VID,&cur)) {
     if (valid) {
       print_label(label,10);
-      printf("%+5.2f V\n",cur);
+      printf("%+6.2f V\n",cur);
     }
   }
   free_the_label(&label);
@@ -385,8 +385,10 @@ void print_adm9240(const sensors_chip_name *name)
   if (!sensors_get_label_and_valid(*name,SENSORS_ADM9240_ALARMS,&label,&valid)) {
     if (valid) {
       print_label(label,10);
-      printf("Chassis intrusion detection                  %s\n",
-             alarms & ADM9240_ALARM_CHAS?"ALARM":"     ");
+      if(alarms & ADM9240_ALARM_CHAS)
+        printf("Chassis intrusion detection                  ALARM\n");
+      else
+        printf("\n");
     }
   }
   free_the_label(&label);
@@ -547,7 +549,7 @@ void print_adm1024(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1024_VID,&cur)) {
     if (valid) {
       print_label(label,10);
-      printf("%+5.2f V\n",cur);
+      printf("%+6.2f V\n",cur);
     }
   }
   free_the_label(&label);
@@ -555,8 +557,10 @@ void print_adm1024(const sensors_chip_name *name)
   if (!sensors_get_label_and_valid(*name,SENSORS_ADM1024_ALARMS,&label,&valid)) {
     if (valid) {
       print_label(label,10);
-      printf("Chassis intrusion detection                  %s\n",
-             alarms & ADM1024_ALARM_CHAS?"ALARM":"     ");
+      if(alarms & ADM1024_ALARM_CHAS)
+        printf("Chassis intrusion detection                  ALARM\n");
+      else
+        printf("\n");
     }
   }
   free_the_label(&label);
@@ -963,19 +967,21 @@ void print_lm78(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM78_VID,&cur)) {
     if (valid) {
       print_label(label,10);
-      printf("%+5.2f V\n",cur);
+      printf("%+6.2f V\n",cur);
     }
   }
   free_the_label(&label);
     
   if (!sensors_get_label_and_valid(*name,SENSORS_LM78_ALARMS,&label,&valid)
       && valid) {
-    print_label(label,10);
-    printf("Board temperature input (usually LM75 chips) %s\n",
-           alarms & LM78_ALARM_BTI?"ALARM":"");
-    print_label(label,10);
-    printf("Chassis intrusion detection                  %s\n",
-           alarms & LM78_ALARM_CHAS?"ALARM":"     ");
+    if(alarms & LM78_ALARM_BTI) {
+      print_label(label,10);
+      printf("Board temperature input (LM75)               ALARM\n");
+    }
+    if(alarms & LM78_ALARM_CHAS) {
+      print_label(label,10);
+      printf("Chassis intrusion detection                  ALARM\n");
+    }
   }
   free_the_label(&label);
 }
@@ -1436,7 +1442,7 @@ void print_lm80(const sensors_chip_name *name)
       && valid) {
     if (alarms & LM80_ALARM_BTI) {
       print_label(label,10);
-      printf("Board temperature input (a LM75 perhaps?)    ALARM\n");
+      printf("Board temperature input (LM75)               ALARM\n");
     }
     if (alarms & LM80_ALARM_CHAS) {
       print_label(label,10);
@@ -2097,7 +2103,7 @@ void print_w83781d(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_W83781D_VID,&cur)) {
       if (valid) {
         print_label(label,10);
-        printf("%+5.2f V\n",cur);
+        printf("%+6.2f V\n",cur);
       }
     } else {
       printf("ERROR: Can't get VID data!\n");
@@ -2106,11 +2112,12 @@ void print_w83781d(const sensors_chip_name *name)
   }
     
   if (!sensors_get_label_and_valid(*name,SENSORS_W83781D_ALARMS,&label,&valid)
-      && valid) {
+      && valid && !is83s) {
     print_label(label,10);
-    printf("Chassis intrusion detection                      %s  %s\n",
-           alarms & W83781D_ALARM_CHAS?"ALARM":"     ",
-           beeps & W83781D_ALARM_CHAS?"(beep)":"");
+    if (alarms & W83781D_ALARM_CHAS)
+      printf("Chassis intrusion detection                      ALARM\n");
+    else
+      printf("\n");
   }
   free_the_label(&label);
 
@@ -2633,7 +2640,7 @@ void print_it87(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_IT87_VID,&cur)) {
     if (valid) {
       print_label(label,10);
-      printf("%+5.2f V\n",cur);
+      printf("%+6.2f V\n",cur);
     }
   }
   free_the_label(&label);
