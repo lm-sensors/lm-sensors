@@ -293,7 +293,8 @@ int sensors_proc_chips(ctl_table * ctl, int write, struct file *filp,
 				    client_tbl->procname);
 			if (buflen + curbufsize > *lenp)
 				buflen = *lenp - curbufsize;
-			copy_to_user_ret(buffer, BUF, buflen,-EFAULT);
+			if(copy_to_user(buffer, BUF, buflen))
+				return -EFAULT;
 			curbufsize += buflen;
 			(char *) buffer += buflen;
 		}
@@ -322,16 +323,17 @@ int sensors_sysctl_chips(ctl_table * table, int *name, int nlen,
 				    child;
 				data.sysctl_id = client_tbl->ctl_name;
 				strcpy(data.name, client_tbl->procname);
-				copy_to_user_ret(oldval, &data,
+				if(copy_to_user(oldval, &data,
 					     sizeof(struct
-						    sensors_chips_data),
-				                    -EFAULT);
+						    sensors_chips_data)))
+					return -EFAULT;
 				(char *) oldval +=
 				    sizeof(struct sensors_chips_data);
 				nrels++;
 			}
 		oldlen = nrels * sizeof(struct sensors_chips_data);
-		put_user_ret(oldlen, oldlenp,-EFAULT);
+		if(put_user(oldlen, oldlenp))
+			return -EFAULT;
 	}
 	return ret;
 }
@@ -426,15 +428,18 @@ int sensors_sysctl_real(ctl_table * table, int *name, int nlen,
 		if (nrels * sizeof(long) < oldlen)
 			oldlen = nrels * sizeof(long);
 		oldlen = (oldlen / sizeof(long)) * sizeof(long);
-		copy_to_user_ret(oldval, results, oldlen,-EFAULT);
-		put_user_ret(oldlen, oldlenp,-EFAULT);
+		if(copy_to_user(oldval, results, oldlen))
+			return -EFAULT;
+		if(put_user(oldlen, oldlenp))
+			return -EFAULT;
 	}
 
 	if (newval && newlen) {
 		/* Note the rounding factor! */
 		newlen -= newlen % sizeof(long);
 		nrels = newlen / sizeof(long);
-		copy_from_user_ret(results, newval, newlen,-EFAULT);
+		if(copy_from_user(results, newval, newlen))
+			return -EFAULT;
 
 		/* Get the new values back to the client */
 		callback(client, SENSORS_PROC_REAL_WRITE, table->ctl_name,
@@ -575,7 +580,8 @@ int sensors_write_reals(int nrels, void *buffer, int *bufsize,
 		mag = magnitude;
 
 		if (nr != 0) {
-			put_user_ret(' ', (char *) buffer,-EFAULT);
+			if(put_user(' ', (char *) buffer))
+				return -EFAULT;
 			curbufsize++;
 			((char *) buffer)++;
 		}
@@ -615,14 +621,16 @@ int sensors_write_reals(int nrels, void *buffer, int *bufsize,
 		/* Now copy it to the user-space buffer */
 		if (buflen + curbufsize > *bufsize)
 			buflen = *bufsize - curbufsize;
-		copy_to_user_ret(buffer, BUF, buflen,-EFAULT);
+		if(copy_to_user(buffer, BUF, buflen))
+			return -EFAULT;
 		curbufsize += buflen;
 		(char *) buffer += buflen;
 
 		nr++;
 	}
 	if (curbufsize < *bufsize) {
-		put_user_ret('\n', (char *) buffer,-EFAULT);
+		if(put_user('\n', (char *) buffer))
+			return -EFAULT;
 		curbufsize++;
 	}
 	*bufsize = curbufsize;
