@@ -45,6 +45,7 @@
 #include <linux/i2c.h>
 #include "version.h"
 #include "sensors.h"
+#include "sensors_vid.h"
 #include <linux/init.h>
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
@@ -189,8 +190,6 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
                                                << 7),0,0xffff))
 #define AS99127_TEMP_ADD_FROM_REG(val) ((((val) >> 7) * 10) / 4)
 
-#define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
-                           205-(val)*5)
 #define ALARMS_FROM_REG(val) (val)
 #define PWM_FROM_REG(val) (val)
 #define PWM_TO_REG(val) (SENSORS_LIMIT((val),0,255))
@@ -374,6 +373,7 @@ struct w83781d_data {
 #ifdef W83781D_RT
 	u8 rt[3][32];		/* Register value */
 #endif
+	u8 vrm;
 };
 
 
@@ -410,6 +410,8 @@ static void w83781d_temp(struct i2c_client *client, int operation,
 static void w83781d_temp_add(struct i2c_client *client, int operation,
 			     int ctl_name, int *nrels_mag, long *results);
 static void w83781d_vid(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+static void w83781d_vrm(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 static void w83781d_alarms(struct i2c_client *client, int operation,
 			   int ctl_name, int *nrels_mag, long *results);
@@ -480,6 +482,8 @@ static ctl_table as99127f_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &w83781d_temp_add},
 	{W83781D_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_vid},
+	{W83781D_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_vrm},
 	{W83781D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_fan_div},
 	{W83781D_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
@@ -522,6 +526,8 @@ static ctl_table w83781d_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &w83781d_temp_add},
 	{W83781D_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_vid},
+	{W83781D_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_vrm},
 	{W83781D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_fan_div},
 	{W83781D_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
@@ -573,6 +579,8 @@ static ctl_table w83782d_isa_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &w83781d_temp_add},
 	{W83781D_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_vid},
+	{W83781D_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_vrm},
 	{W83781D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_fan_div},
 	{W83781D_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
@@ -626,6 +634,8 @@ static ctl_table w83782d_i2c_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &w83781d_temp_add},
 	{W83781D_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_vid},
+	{W83781D_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_vrm},
 	{W83781D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_fan_div},
 	{W83781D_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
@@ -675,6 +685,8 @@ static ctl_table w83783s_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &w83781d_temp_add},
 	{W83781D_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_vid},
+	{W83781D_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_vrm},
 	{W83781D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83781d_fan_div},
 	{W83781D_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
@@ -1284,7 +1296,8 @@ void w83781d_init_client(struct i2c_client *client)
 		vid = w83781d_read_value(client, W83781D_REG_VID_FANDIV) & 0x0f;
 		vid |=
 		    (w83781d_read_value(client, W83781D_REG_CHIPID) & 0x01) << 4;
-		vid = VID_FROM_REG(vid);
+		data->vrm = DEFAULT_VRM;
+		vid = vid_from_reg(vid, data->vrm);
 	}
 
 	if ((type != w83781d) && (type != as99127f)) {
@@ -1728,11 +1741,26 @@ void w83781d_vid(struct i2c_client *client, int operation, int ctl_name,
 {
 	struct w83781d_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 2;
+		*nrels_mag = 3;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83781d_update_client(client);
-		results[0] = VID_FROM_REG(data->vid);
+		results[0] = vid_from_reg(data->vid, data->vrm);
 		*nrels_mag = 1;
+	}
+}
+
+void w83781d_vrm(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct w83781d_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		results[0] = data->vrm;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1)
+			data->vrm = results[0];
 	}
 }
 
