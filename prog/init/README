@@ -1,0 +1,34 @@
+This directory contains files useful for initialization
+scripts, especially for RedHat.
+
+There are two choices, lm_sensors.init and sensord.init.
+Use one or the other but not both!
+
+----------------
+
+The script lm_sensors.init is a nice startup/shutdown script.
+On RH and other RH-based systems (MDK, notably) use this sort of startup
+mechanism (i.e. SVR4-based), as opposed to the everything-in-one-script
+(/etc/rc or /etc/rc.local) like the BSD-based systems do.
+The lm_sensors.init file should be copied to /etc/rc.d/init.d/lm_sensors.
+For more information see the top of the file.
+It requires the /etc/sysconfig/sensors file, which identifies
+the correct modules.
+
+The /etc/sysconfig/lm_sensors file is only a list of modules,
+as would be determined by running sensors-detect.
+The lm_sensors.sysconfig file contains the MODULE_# variable definitions;
+it should be modified for your setup and then
+copied to /etc/sysconfig/lm_sensors.
+
+----------------
+
+The script sensord.init also loads the modules, and then
+starts the sensord daemon. See the directory ../sensord for
+more information on the daemon.
+
+The sensord.init file should be copied to /etc/rc.d/init.d/sensord.
+For more information see the top of the file.
+
+To configure this service one should put appropriate "alias i2c-bus-0 xxx"
+and "alias i2c-sensors-chip-0 xxx" in /etc/modules.conf.
