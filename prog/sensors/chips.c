@@ -3696,7 +3696,7 @@ void print_pcf8591(const sensors_chip_name *name)
       !sensors_get_feature(*name, SENSORS_PCF8591_CH0, &ain)) {
         if (valid) {
           print_label(label,10);
-          printf("%6.2fV\n", ain);
+          printf("%6.2f V\n", ain);
         }
       }
   else printf("ERROR: Can't read ch0!\n");
@@ -3706,7 +3706,7 @@ void print_pcf8591(const sensors_chip_name *name)
       !sensors_get_feature(*name, SENSORS_PCF8591_CH1, &ain)) {
         if (valid) {
           print_label(label,10);
-          printf("%6.2fV\n", ain);
+          printf("%6.2f V\n", ain);
         }
       }
   else printf("ERROR: Can't read ch1!\n");
@@ -3717,7 +3717,7 @@ void print_pcf8591(const sensors_chip_name *name)
         !sensors_get_feature(*name, SENSORS_PCF8591_CH2, &ain)) {
           if (valid) {
             print_label(label,10);
-            printf("%6.2fV\n", ain);
+            printf("%6.2f V\n", ain);
           }
         }
     else if (ain_conf >= 0) /* hide error for 2.6 kernel driver */
@@ -3730,7 +3730,7 @@ void print_pcf8591(const sensors_chip_name *name)
         !sensors_get_feature(*name, SENSORS_PCF8591_CH3, &ain)) {
           if (valid) {
             print_label(label,10);
-            printf("%6.2fV\n", ain);
+            printf("%6.2f V\n", ain);
           }
         }
     else if (ain_conf >= 0) /* hide error for 2.6 kernel driver */
@@ -3743,7 +3743,7 @@ void print_pcf8591(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_PCF8591_AOUT_ENABLE,&aout_enable)) {
         if (valid) {
           print_label(label,10);
-          printf("%6.2fV (%s)\n", aout, aout_enable?"enabled":"disabled");
+          printf("%6.2f V (%s)\n", aout, aout_enable?"enabled":"disabled");
         }
       }
   else printf("ERROR: Can't read aout!\n");
