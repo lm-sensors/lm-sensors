@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.3 (2002????)
+  NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
   Chip modules (most): Allow THIS_MODULE definition for kernels 2.2.18+
   File doc/chips/it87: add more temp_type help
   File sensors.conf.eg: Un-ignore it87 in8, temp3, fan3;
@@ -30,7 +31,7 @@ ask CVS about it:
            swap neg. voltage limits for lm78(-j), lm79, w83781d, as99127f
   Module adm1024: Add MODULE_LICENSE("GPL")
   Module bt869: Add s-video out and DVD resolution support
-  Module eeprom: Add support for locations 128-255
+  Module eeprom: Add support for locations 128-255; rename /proc entries in hex
   Module fscscy: implement min/max for voltages and fans
   Module i2c-amd756: Add support for AMD768
   Module i2c-i810: Add support for 810E
@@ -45,6 +46,7 @@ ask CVS about it:
   Module sis5595: Blacklist 735
   Module w83781d: Add W83697HF support; allow force_subclients parameter
                   for Tyan 2460
+  Programs decode-dimms.pl, decode-xeon.pl: Update for new /proc names
   Program decode-vaio.pl: new
   Program i2cdump: Add i2c block read capability (requires i2c-2.6.3);
                    add text output
