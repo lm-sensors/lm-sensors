@@ -231,7 +231,7 @@ sub output_data
            $read_write,$data->{magnitude};
   }
   print "\n";
-  print "           LABEL                          FEATURE SYMBOL     ".
+  print "          LABEL                           FEATURE SYMBOL     ".
         "SYSCTL FILE:OFFSET\n";
   foreach $data (@{$feature->{features}}) {
     printf "%15s %40s %15s:%1d\n",$data->{name}, $data->{number},
