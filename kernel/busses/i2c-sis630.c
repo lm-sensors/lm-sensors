@@ -91,6 +91,14 @@
 #define SIS630_PCALL      0x04
 #define SIS630_BLOCK_DATA 0x05
 
+/* insmod parameters */
+
+/* If force is set to anything different from 0, we forcibly enable the
+   SIS630. DANGEROUS! */
+static int force = 0;
+MODULE_PARM(force, "i");
+MODULE_PARM_DESC(force, "Forcibly enable the SIS630. DANGEROUS!")
+
 
 #ifdef MODULE
 static
@@ -316,7 +324,7 @@ u32 sis630_func(struct i2c_adapter *adapter) {
 
 int sis630_setup(void) {
 	unsigned char b;
-	struct pci_dev *sis630_dev = NULL;
+	struct pci_dev *sis630_dev = NULL,*tmp = NULL;
 
 	/* First check whether we can access PCI at all */
 	if (pci_present() == 0) {
@@ -331,9 +339,14 @@ int sis630_setup(void) {
 		printk(KERN_ERR "i2c-sis630.o: Error: Can't detect SIS630!\n");
 		return -ENODEV;
 	}
-	if (NULL == pci_find_device(PCI_VENDOR_ID_SI,PCI_DEVICE_ID_SI_630,NULL)) {
+	tmp = pci_find_device(PCI_VENDOR_ID_SI,PCI_DEVICE_ID_SI_630,NULL);
+	if (tmp == NULL && force == 0) {
 		printk(KERN_ERR "i2c-sis630.o: Error: Can't detect SIS630!\n");
 		return -ENODEV;
+	}
+	else if (tmp == NULL && force > 0) {
+		printk(KERN_NOTICE "i2c-sis630.o: WARNING: Can't detect SIS630 , but "
+			"loading because of force option enabled\n");
 	}
 
 	/*
