@@ -131,8 +131,7 @@ void print_ds1621(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_DS1621_TEMP_OVER,&over))  {
     if (valid) {
       print_label(label,10);
-      printf("%6.1f C (high limit: %6.1f C, low limit: %6.1f C)   ",
-             cur,over,hyst);
+      print_temp_info( cur, over, hyst, MINMAX );
       if (alarms & (DS1621_ALARM_TEMP_HIGH | DS1621_ALARM_TEMP_LOW)) {
         printf("ALARM (");
         if (alarms & DS1621_ALARM_TEMP_LOW) {
