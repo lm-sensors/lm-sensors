@@ -50,17 +50,10 @@
     The whole 7101 device has to be enabled for the SMB to work.
     You can't just enable the SMB alone.
     The SMB and the ACPI have separate I/O spaces.
-    So we have to make sure that both the SMB and the ACPI
-    are mapped and enabled.
+    We make sure that the SMB is enabled. We leave the ACPI alone.
 
     This driver controls the SMB Host only.
     The SMB Slave controller on the M15X3 is not enabled.
-
-    This driver requests the I/O space both for the SMB and the ACPI
-    registers, just to be safe. It doesn't actually use the ACPI region.
-    It will therefore conflict with separate software
-    that accesses the ACPI registers?
-    To fix this, undefine MAP_ACPI.
 
     This driver does not use interrupts.
 */
@@ -89,10 +82,6 @@
 #define __initdata 
 #endif
 
-/* undefine this if separate ACPI software is accessing the
-   registers at the offset defined at 0x10.
-*/
-#define MAP_ACPI 1
 #undef FORCE_ALI15X3_ENABLE
 
 /* ALI15X3 SMBus address offsets */
@@ -107,7 +96,6 @@
 
 /* PCI Address Constants */
 #define SMBCOM    0x004 
-#define ACPIBA     0x010
 #define SMBBA     0x014
 #define SMBATPC   0x05B		/* used to unlock xxxBA registers */
 #define SMBHSTCFG 0x0E0
@@ -117,14 +105,12 @@
 
 /* Other settings */
 #define MAX_TIMEOUT 500		/* times 1/100 sec */
-#define ALI15X3_ACPI_IOSIZE 64
 #define ALI15X3_SMB_IOSIZE 32
 
 /* this is what the Award 1004 BIOS sets them to on a ASUS P5A MB.
    We don't use these here. If the bases aren't set to some value we
    tell user to upgrade BIOS and we fail.
 */
-#define ALI15X3_ACPI_DEFAULTBASE 0xEC00
 #define ALI15X3_SMB_DEFAULTBASE 0xE800
 
 /* ALI15X3 address lock bits */
@@ -195,9 +181,6 @@ static struct i2c_adapter ali15x3_adapter = {
 };
 
 static int __initdata ali15x3_initialized;
-#ifdef MAP_ACPI
-static unsigned short ali15x3_acpia = 0;
-#endif
 static unsigned short ali15x3_smba = 0;
 
 
@@ -243,7 +226,7 @@ int ali15x3_setup(void)
   } 
 
 /* Check the following things:
-	- ACPI and SMB I/O addresses are initialized
+	- SMB I/O address is initialized
 	- Device is enabled
 	- We can use the addresses
 */
@@ -262,17 +245,7 @@ int ali15x3_setup(void)
                                  SMBATPC, temp);
   }
 
-/* Determine the address of the ACPI and SMBus areas */
-#ifdef MAP_ACPI
-  pci_read_config_word_united(ALI15X3_dev, ALI15X3_bus ,ALI15X3_devfn,
-                              ACPIBA,&ali15x3_acpia);
-  ali15x3_acpia &= (0xffff & ~ (ALI15X3_ACPI_IOSIZE - 1));
-  if(ali15x3_acpia == 0) {
-    printk("i2c-ali15x3.o: ALI15X3_acpi region uninitialized - upgrade BIOS?\n");
-    error_return=-ENODEV;
-  }
-#endif
-
+/* Determine the address of the SMBus area */
   pci_read_config_word_united(ALI15X3_dev, ALI15X3_bus ,ALI15X3_devfn,
                               SMBBA,&ali15x3_smba);
   ali15x3_smba &= (0xffff & ~ (ALI15X3_SMB_IOSIZE - 1));
@@ -283,14 +256,6 @@ int ali15x3_setup(void)
 
   if(error_return == -ENODEV)
     goto END;
-
-#ifdef MAP_ACPI
-  if (check_region(ali15x3_acpia, ALI15X3_ACPI_IOSIZE)) {
-    printk("i2c-ali15x3.o: ALI15X3_acpi region 0x%x already in use!\n", ali15x3_acpia);
-    printk("i2c-ali15x3.o: If conflicting ACPI software is installed, undefine MAP_ACPI and recompile!\n");
-    error_return=-ENODEV;
-  }
-#endif
 
   if (check_region(ali15x3_smba, ALI15X3_SMB_IOSIZE)) {
     printk("i2c-ali15x3.o: ALI15X3_smb region 0x%x already in use!\n", ali15x3_smba);
@@ -304,7 +269,7 @@ int ali15x3_setup(void)
     pci_read_config_byte_united(ALI15X3_dev, ALI15X3_bus ,ALI15X3_devfn,
                                 SMBCOM, &temp);
   if ((temp & 1) == 0) {
-    printk("SMBUS: Error: ACPI/SMB device not enabled - upgrade BIOS?\n");     
+    printk("SMBUS: Error: SMB device not enabled - upgrade BIOS?\n");     
     error_return=-ENODEV;
     goto END;
   }
@@ -337,9 +302,6 @@ int ali15x3_setup(void)
                                SMBCLK, 0x20);
 
   /* Everything is happy, let's grab the memory and set things up. */
-#ifdef MAP_ACPI
-  request_region(ali15x3_acpia, ALI15X3_ACPI_IOSIZE, "ali15x3-acpi");       
-#endif
   request_region(ali15x3_smba, ALI15X3_SMB_IOSIZE, "ali15x3-smb");       
 
 #ifdef DEBUG
@@ -639,9 +601,6 @@ int __init i2c_ali15x3_init(void)
     return res;
   }
   ali15x3_initialized ++;
-#ifdef MAP_ACPI
-  sprintf(ali15x3_adapter.name,"ACPI ALI15X3 at %04x",ali15x3_acpia);
-#endif
   sprintf(ali15x3_adapter.name,"SMBus ALI15X3 adapter at %04x",ali15x3_smba);
   if ((res = i2c_add_adapter(&ali15x3_adapter))) {
     printk("i2c-ali15x3.o: Adapter registration failed, module not inserted.\n");
@@ -665,9 +624,6 @@ int __init ali15x3_cleanup(void)
       ali15x3_initialized--;
   }
   if (ali15x3_initialized >= 1) {
-#ifdef MAP_ACPI
-    release_region(ali15x3_acpia, ALI15X3_ACPI_IOSIZE);
-#endif
     release_region(ali15x3_smba, ALI15X3_SMB_IOSIZE);
     ali15x3_initialized--;
   }

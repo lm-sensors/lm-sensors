@@ -85,8 +85,7 @@ ACPI-compliant Power Management Unit (PMU).
 The whole 7101 device has to be enabled for the SMB to work.
 You can't just enable the SMB alone.
 The SMB and the ACPI have separate I/O spaces.
-So we have to make sure that both the SMB and the ACPI
-are mapped and enabled.
+We make sure that the SMB is enabled. We leave the ACPI alone.
 
 
 Features
@@ -98,11 +97,8 @@ This driver does not use interrupts.
 
 Issues
 ------
-This driver requests the I/O space both for the SMB and the ACPI
-registers, just to be safe. It doesn't actually use the ACPI region.
-It will therefore conflict with separate software
-that accesses the ACPI registers?
-To fix this, undefine MAP_ACPI.
+This driver requests the I/O space for only the SMB
+registers. It doesn't use the ACPI region.
 
 On the ASUS P5A motherboard, there are several reports that
 the SMBus will hang
