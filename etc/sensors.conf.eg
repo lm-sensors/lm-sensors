@@ -699,7 +699,7 @@ chip "as99127f-*"
 # Dual power plane
     label in0 "VCore 1"
     label in1 "VCore 2"
-# Single power plane (A7V133, A7M266)
+# Single power plane (A7V133, A7M266, CUV4X)
 #   label in0 "VCore"
 #   ignore in1
 
@@ -741,11 +741,13 @@ chip "as99127f-*"
 # Most Asus boards have temperatures settled like that:
     label temp1 "M/B Temp"
     label temp2 "CPU Temp"
-# However, some A7N8X boards (Deluxe rev.2, -X) have them swapped:
+# However, some boards have them swapped (A7N8X Deluxe rev.2, A7N8X-X,
+# CUV4X):
 #   label temp1 "CPU Temp"
 #   label temp2 "M/B Temp"
-# If you know other boards where they are swapped, let us know and
-# we'll update the list.
+
+# Most boards have no temp3 by default
+#   ignore temp3
 
 # adjust this if your vid is wrong; see doc/vid
 #   set vrm 9.0
