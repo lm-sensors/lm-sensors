@@ -500,6 +500,16 @@ CONFIG_SENSORS_VT1211
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Via VT8231 Sensors
+CONFIG_SENSORS_VT8231
+  If you say yes here you get support for the integrated sensors in 
+  the Via VT8231 device. This can also be built as a module 
+  which can be inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
 Winbond W83781D, W83782D, W83783S, W83627HF, AS99127F
 CONFIG_SENSORS_W83781D
   If you say yes here you get support for the Winbond W8378x series 
@@ -810,7 +820,9 @@ sub gen_drivers_i2c_Config_in
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
     dep_tristate '  AMD 756/766/768/8111' CONFIG_I2C_AMD756 $CONFIG_I2C
     dep_tristate '  AMD 8111 SMBus 2.0' CONFIG_I2C_AMD8111 $CONFIG_I2C
-    dep_tristate '  DEC Tsunami I2C interface' CONFIG_I2C_TSUNAMI $CONFIG_I2C_ALGOBIT $CONFIG_ALPHA
+    if [ "$CONFIG_ALPHA" = "y" ]; then
+      dep_tristate '  DEC Tsunami I2C interface' CONFIG_I2C_TSUNAMI $CONFIG_I2C_ALGOBIT
+    fi
     dep_tristate '  Intel 82801AA, AB, BA, DB' CONFIG_I2C_I801 $CONFIG_I2C
     dep_tristate '  Intel i810AA/AB/E and i815' CONFIG_I2C_I810 $CONFIG_I2C_ALGOBIT
     dep_tristate '  Intel 82371AB PIIX4(E), 443MX, ServerWorks OSB4/CSB5, SMSC Victory66' CONFIG_I2C_PIIX4 $CONFIG_I2C
@@ -885,6 +897,7 @@ obj-$(CONFIG_SENSORS_SMSC47M1)	+= smsc47m1.o
 obj-$(CONFIG_SENSORS_THMC50)	+= thmc50.o
 obj-$(CONFIG_SENSORS_VIA686A)	+= via686a.o
 obj-$(CONFIG_SENSORS_VT1211)	+= vt1211.o
+obj-$(CONFIG_SENSORS_VT8231)	+= vt8231.o
 obj-$(CONFIG_SENSORS_W83781D)	+= w83781d.o
 
 include $(TOPDIR)/Rules.make
@@ -1132,6 +1145,14 @@ ifeq ($(CONFIG_SENSORS_VT1211),y)
 else
   ifeq ($(CONFIG_SENSORS_VT1211),m)
     M_OBJS += vt1211.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_VT8211),y)
+  L_OBJS += vt8231.o
+else
+  ifeq ($(CONFIG_SENSORS_VT8231),m)
+    M_OBJS += vt8231.o
   endif
 endif
 

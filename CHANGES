@@ -20,6 +20,7 @@ ask CVS about it:
 2.7.1 (2003????)
   File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
   Library: Add support for exponents and logarithms for vt1211/vt8235
+  Program mkpatch: Fix vt8231 compile; keep tsunami from menu on non-alpha
   Program sensors-detect: Add super i/o detection (smsc47m1, vt1211,
                           w83627hf, w83697hf)
 
@@ -29,7 +30,7 @@ ask CVS about it:
   File doc/busses/i2c-ali15x3: Add license, miscellaneous changes
   File doc/busses/i2c-sis645: Add license
   File doc/chips/lm92: Add license, features
-  File doc/chips/maxilife: Add license, parameters, features
+u File doc/chips/maxilife: Add license, parameters, features
   File doc/chips/smartbatt: Complete rewrite
   File doc/chips/vt8231: Add license, parameters
   File sensors.conf.eg: Add section for lm75; complete the lm78 section
