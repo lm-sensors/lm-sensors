@@ -40,6 +40,7 @@
 #include <asm/errno.h>
 #include <asm/io.h>
 #include <linux/types.h>
+#include <linux/delay.h>
 #include <linux/i2c.h>
 #include "version.h"
 #include "sensors.h"
@@ -679,6 +680,13 @@ void via686a_init_client(struct i2c_client *client)
 
 	/* Reset the device */
 	via686a_write_value(client, VIA686A_REG_CONFIG, 0x80);
+
+	/* Have to wait for reset to complete or else the following
+	   initializations won't work reliably. The delay was arrived at
+	   empirically, the datasheet doesn't tell you.
+	   Waiting for the reset bit to clear doesn't work, it
+	   clears in about 2-4 udelays and that isn't nearly enough. */
+	udelay(50);
 
 	via686a_write_value(client, VIA686A_REG_IN_MIN(0),
 			    IN_TO_REG(VIA686A_INIT_IN_MIN_0, 0));
