@@ -217,8 +217,8 @@ int main(int argc, char *argv[])
           "cause data loss and worse!\n");
   fprintf(stderr,"  I will probe file %s, address 0x%x, mode %s\n",
           filename,address,size == I2C_SMBUS_BLOCK_DATA ? "smbus block" :
-                                   I2C_SMBUS_I2C_BLOCK_DATA ? "i2c block" :
-                                   I2C_SMBUS_BYTE_DATA ? "byte" : "word");
+                           size == I2C_SMBUS_I2C_BLOCK_DATA ? "i2c block" :
+                           size == I2C_SMBUS_BYTE_DATA ? "byte" : "word");
   if(bank) 	
     fprintf(stderr,"  Probing bank %d using bank register 0x%02x.\n",
             bank, bankreg);
