@@ -125,6 +125,13 @@
 #define ALI15X3_STS_ERR		0xE0	/* all the bad error bits */
 
 
+/* If force_addr is set to anything different from 0, we forcibly enable
+   the device at the given address. */
+static int force_addr = 0;
+MODULE_PARM(force_addr, "i");
+MODULE_PARM_DESC(force_addr,
+		 "Initialize the base address of the i2c controller");
+
 #ifdef MODULE
 static
 #else
@@ -180,7 +187,7 @@ static unsigned short ali15x3_smba = 0;
    defined to make the transition easier. */
 int ali15x3_setup(void)
 {
-	int error_return = 0;
+	u16 a;
 	unsigned char temp;
 
 	struct pci_dev *ALI15X3_dev;
@@ -188,8 +195,7 @@ int ali15x3_setup(void)
 	/* First check whether we can access PCI at all */
 	if (pci_present() == 0) {
 		printk("i2c-ali15x3.o: Error: No PCI-bus found!\n");
-		error_return = -ENODEV;
-		goto END;
+		return -ENODEV;
 	}
 
 	/* Look for the ALI15X3, M7101 device */
@@ -198,8 +204,7 @@ int ali15x3_setup(void)
 				      PCI_DEVICE_ID_AL_M7101, ALI15X3_dev);
 	if (ALI15X3_dev == NULL) {
 		printk("i2c-ali15x3.o: Error: Can't detect ali15x3!\n");
-		error_return = -ENODEV;
-		goto END;
+		return -ENODEV;
 	}
 
 /* Check the following things:
@@ -222,41 +227,48 @@ int ali15x3_setup(void)
 /* Determine the address of the SMBus area */
 	pci_read_config_word(ALI15X3_dev, SMBBA, &ali15x3_smba);
 	ali15x3_smba &= (0xffff & ~(ALI15X3_SMB_IOSIZE - 1));
-	if (ali15x3_smba == 0) {
+	if (ali15x3_smba == 0 && force_addr == 0) {
 		printk
-		    ("i2c-ali15x3.o: ALI15X3_smb region uninitialized - upgrade BIOS?\n");
-		error_return = -ENODEV;
+		    ("i2c-ali15x3.o: ALI15X3_smb region uninitialized - upgrade BIOS or use force_addr=0xaddr\n");
+		return -ENODEV;
 	}
 
-	if (error_return == -ENODEV)
-		goto END;
+	if(force_addr)
+		ali15x3_smba = force_addr & ~(ALI15X3_SMB_IOSIZE - 1);
 
 	if (check_region(ali15x3_smba, ALI15X3_SMB_IOSIZE)) {
 		printk
 		    ("i2c-ali15x3.o: ALI15X3_smb region 0x%x already in use!\n",
 		     ali15x3_smba);
-		error_return = -ENODEV;
+		return -ENODEV;
 	}
 
-	if (error_return == -ENODEV)
-		goto END;
-
+	if(force_addr) {
+		printk("i2c-ali15x3.o: forcing ISA address 0x%04X\n", ali15x3_smba);
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_write_config_word(ALI15X3_dev, SMBBA, ali15x3_smba))
+			return -ENODEV;
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_read_config_word(ALI15X3_dev, SMBBA, &a))
+			return -ENODEV;
+		if ((a & ~(ALI15X3_SMB_IOSIZE - 1)) != ali15x3_smba) {
+			/* make sure it works */
+			printk("i2c-ali15x3.o: force address failed - not supported?\n");
+			return -ENODEV;
+		}
+	}
 /* check if whole device is enabled */
 	pci_read_config_byte(ALI15X3_dev, SMBCOM, &temp);
 	if ((temp & 1) == 0) {
-		printk
-		    ("SMBUS: Error: SMB device not enabled - upgrade BIOS?\n");
-		error_return = -ENODEV;
-		goto END;
+		printk("i2c-ali15x3: enabling SMBus device\n");
+		pci_write_config_byte(ALI15X3_dev, SMBCOM, temp | 0x01);
 	}
 
 /* Is SMB Host controller enabled? */
 	pci_read_config_byte(ALI15X3_dev, SMBHSTCFG, &temp);
 	if ((temp & 1) == 0) {
-		printk
-		    ("SMBUS: Error: Host SMBus controller not enabled - upgrade BIOS?\n");
-		error_return = -ENODEV;
-		goto END;
+		printk("i2c-ali15x3: enabling SMBus controller\n");
+		pci_write_config_byte(ALI15X3_dev, SMBHSTCFG, temp | 0x01);
 	}
 
 /* set SMB clock to 74KHz as recommended in data sheet */
@@ -278,8 +290,7 @@ int ali15x3_setup(void)
 	printk("i2c-ali15x3.o: ALI15X3_smba = 0x%X\n", ali15x3_smba);
 #endif				/* DEBUG */
 
-      END:
-	return error_return;
+	return 0;
 }
 
 
