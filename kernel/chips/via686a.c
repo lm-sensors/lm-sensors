@@ -2,7 +2,7 @@
     via686a.c - Part of lm_sensors, Linux kernel modules
                 for hardware monitoring
                 
-    Copyright (c) 1998 - 2001  Frodo Looijaard <frodol@dds.nl>,
+    Copyright (c) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>,
                         Kyösti Mälkki <kmalkki@cc.hut.fi>,
 			Mark Studebaker <mdsxyz123@yahoo.com>,
 			and Bob Dougherty <bobd@stanford.edu>
@@ -25,8 +25,9 @@
 */
 
 /*
-    Supports the Via VT82C686A and VT82C686B south bridges.
-    Reports either as a 686A.
+    Supports the Via VT82C686A, VT82C686B, and VT8231 south bridges.
+    Reports all as a 686A.
+    8231-specific features not yet supported.
     See doc/chips/via686a for details.
     Warning - only supports a single device.
 */
@@ -532,7 +533,10 @@ int via686a_find(int *address)
 
 	if (!(s_bridge = pci_find_device(PCI_VENDOR_ID_VIA,
 					 PCI_DEVICE_ID_VIA_82C686_4,
-					 NULL))) return -ENODEV;
+					 NULL)))
+		if (!(s_bridge = pci_find_device(PCI_VENDOR_ID_VIA,
+						 0x8235,
+						 NULL))) return -ENODEV;
 
 	if (PCIBIOS_SUCCESSFUL !=
 	    pci_read_config_word(s_bridge, VIA686A_BASE_REG, &val))
@@ -565,8 +569,9 @@ int via686a_detect(struct i2c_adapter *adapter, int address,
 		return 0;
 	}
 
+	/* 8231 requires multiple of 256, we enforce that on 686 as well */
 	if(force_addr)
-		address = force_addr & ~(VIA686A_EXTENT - 1);
+		address = force_addr & 0xFF00;
 	if (check_region(address, VIA686A_EXTENT)) {
 		printk("via686a.o: region 0x%x already in use!\n",
 		       address);
