@@ -1,3 +1,33 @@
+=============================================================================
+INSTALLATION - SHORT INSTRUCTIONS - NON-KERNEL INSTALLATION
+=============================================================================
+
+	- Make sure you also have the i2c package installed
+	  in the same directory as lm_sensors2
+	- rmdir i2c
+	- ln -s ../i2c i2c
+	- cd i2c
+	- make (ignore 'no such file or directory'  warnings)
+	- (as root) make install
+	- cd ../lm_sensors2
+	- make (ignore 'no such file or directory'  warnings)
+	- (as root) make install
+	- prog/mkdev/mkdev.sh        (makes the devices in /dev)
+	- prog/detect/sensors-detect (determines installed hardware)
+	- Place the 'modprobe' commands output by sensors-detect in a
+	  boot file like /etc/rc.d/rc.multi
+	- After those commands, put the line 'sensors -s' in the boot file
+	  to initialize the sensors at boot time
+	- Place the lines output by sensors-detect in the module
+	  configuration file /etc/conf.modules or /etc/modules.conf
+	- Reboot
+	- Verify correct installation of modules at boot time
+	- Use the command 'sensors' to check sensor status.
+
+
+=============================================================================
+=============================================================================
+
 Please read this file thoroughly before you try to install and run things. It
 will safe you many headaches. Installation is not really difficult, but there
 are a few pitfalls.
@@ -169,5 +199,5 @@ USEFUL PROGRAMS
 The prog subdirectory contains lots of useful programs, many of which are
 not installed. doc/progs contains some documentation for each of them.
 Most important are prog/mkdev/mkdev.sh, which creates /dev/i2c-* files,
-and prog/detect/detect.pl, which tries to detect what adapters are
+and prog/detect/sensors-detect, which tries to detect what adapters are
 present on your system.
