@@ -88,8 +88,8 @@ PREFIX := /usr/local
 # The magic invocation will return something like this:
 #   /lib/modules/2.2.15-ac9/misc
 #MODDIR := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`/misc
-#MODPREF := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`
-MODPREF := /lib/modules/$(KERNELVERSION)
+MODPREF := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`
+#MODPREF := /lib/modules/$(KERNELVERSION)
 
 # This is the directory where sensors.conf will be installed, if no other
 # configuration file is found
