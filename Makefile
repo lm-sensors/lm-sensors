@@ -254,9 +254,9 @@ user_install::
 all :: user
 install :: all user_install
 ifeq ($(DESTDIR),)
-    -/sbin/depmod -a
+	-/sbin/depmod -a
 else
-    -/sbin/depmod -a -b $(DESTDIR)
+	-/sbin/depmod -a -b $(DESTDIR)
 endif
 
 clean::
