@@ -23,15 +23,18 @@ ask CVS about it:
            Fix gcc 3.3 warnings (Philipp Thomas)
            Support 2.6 ds1621
   Makefile: Install shared library 755
-  Man pages i2cdump.8, i2cset.8, isadump.8: New
+  Man pages i2cdump.8, i2cset.8, isadump.8: New (Debian team)
+  Man pages i2cdetect.8, sensors-detect.8: New (Debian team)
   Modules ds1621, pcf8591: Check for capabilities before using them
                            (Aurelien Jarno)
   Module pcf8574: Cleanups
-  Module pca9540: New driver (Philips PCA9540)
+  Module pca9540: New driver for the Philips PCA9540
   Module smsc47m1: Support the LPC47B27x
   Programs i2cdetect, i2cdump, i2cset: Fix incorrect bus names if possible
   Program i2cdetect: Skip special addresses by default
   Program sensord: Prevent null pointer dereference (Tim Toohey)
+  Program sensors: Print the degree symbol in the terminal's current locale
+                   (Aurelien Jarno)
   Program sensors-detect: Support Maxim MAX6900, ALi M5879, Philips PCA9540
                           Improved SiS chips support
                           Add a white list of IBM systems
