@@ -724,9 +724,9 @@
 #define SENSORS_THMC50_INTER_MASK 82 /* RW */
 #define SENSORS_THMC50_DIE_CODE 90 /* R */
 
-/* ADM1025 chips */
+/* ADM1025 chip */
 
-#define SENSORS_ADM1025_PREFIX "w83783s"
+#define SENSORS_ADM1025_PREFIX "adm1025"
 
 #define SENSORS_ADM1025_IN0 1 /* R */
 #define SENSORS_ADM1025_IN1 2 /* R */
