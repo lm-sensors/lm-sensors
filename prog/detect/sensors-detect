@@ -836,7 +836,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             fscher_detect adm1029_detect adm1031_detect max6900_detect
             m5879_detect pca9540_detect smartbatt_mgr_detect
             smartbatt_chgr_detect adt7467_detect lm92_detect max1619_detect
-            lm93_detect);
+            lm93_detect lm77_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -901,6 +901,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_addrs => [0x48..0x4f],
        i2c_detect => sub { lm75_detect @_},
      } ,
+     {
+       name => "National Semiconductor LM77",
+       driver => "lm75",
+       i2c_addrs => [0x48..0x4b],
+       i2c_detect => sub { lm77_detect @_},
+     },
      {
        name => "National Semiconductor LM80",
        driver => "lm80",
@@ -2785,9 +2791,13 @@ sub lm78_alias_detect
 #   0x01: Configuration
 #   0x02: Hysteresis
 #   0x03: Overtemperature Shutdown
+#   0x04-0x07: No registers
 # The first detection step is only based on the fact that the LM75 has only
 # four registers. Any other chip in the valid address range with only four
-# registers will be detected too.
+# registers will be detected too. We use the 0x04-0x07 addresses to improve
+# the reliability. These are not real registers and will always return the
+# same value as register 0x03 (Overtemperature Shutdown) although it isn't
+# documented.
 # Note that register $00 may change, so we can't use the modulo trick on it.
 sub lm75_detect
 {
@@ -2798,10 +2808,19 @@ sub lm75_detect
   my $conf = i2c_smbus_read_byte_data($file,0x01);
   my $hyst = i2c_smbus_read_word_data($file,0x02);
   my $os = i2c_smbus_read_word_data($file,0x03);
+
+  return if i2c_smbus_read_word_data($file,0x04) != $os;
+  return if i2c_smbus_read_word_data($file,0x05) != $os;
+  return if i2c_smbus_read_word_data($file,0x06) != $os;
+  return if i2c_smbus_read_word_data($file,0x07) != $os;
   for ($i = 0x00; $i <= 0x1f; $i += 1) {
     return if i2c_smbus_read_byte_data($file,($i * 0x08) + 0x01) != $conf;
     return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x02) != $hyst;
     return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x03) != $os;
+    return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x04) != $os;
+    return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x05) != $os;
+    return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x06) != $os;
+    return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x07) != $os;
 	$cur_varies = 1
       if (! $cur_varies) and
         i2c_smbus_read_word_data($file,($i * 0x08)) != $cur;
@@ -2824,6 +2843,71 @@ sub lm75_detect
     if (($cur&0x00ff) <= 125 || ($cur&0x00ff) >= 201)
        and ($hyst&0x00ff) <= 125 and ($os&0x00ff) <= 125 and $hyst<$os;
   return 3;
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, 2 to 5 if detected;
+#   5 means that the LM77 was found in its default power up state;
+#   3 means that the LM77 was found in a probable state (temperatures
+#       make sense);
+#   2 means that the configuration register passes the test;
+# Registers used:
+#   0x00: Temperature
+#   0x01: Configuration
+#   0x02: Hysteresis
+#   0x03: Overtemperature Shutdown
+#   0x04: Low limit
+#   0x05: High limit
+# The first detection step is only based on the fact that the LM77 has only
+# six registers. Any other chip in the valid address range with only six
+# registers will be detected too.
+# Note that register $00 may change, so we can't use the modulo trick on it.
+sub lm77_detect
+{
+  my $i;
+  my ($file,$addr) = @_;
+  my $cur = i2c_smbus_read_word_data($file,0x00);
+  my $cur_varies = 0;
+  my $conf = i2c_smbus_read_byte_data($file,0x01);
+  my $hyst = i2c_smbus_read_word_data($file,0x02);
+  my $os = i2c_smbus_read_word_data($file,0x03);
+  my $low = i2c_smbus_read_word_data($file,0x04);
+  my $high = i2c_smbus_read_word_data($file,0x05);
+  for ($i = 0x00; $i <= 0x1f; $i += 1) {
+    return if i2c_smbus_read_byte_data($file,($i * 0x08) + 0x01) != $conf;
+    return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x02) != $hyst;
+    return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x03) != $os;
+    return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x04) != $low;
+    return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x05) != $high;
+    $cur_varies = 1
+      if (! $cur_varies) and
+        i2c_smbus_read_word_data($file,($i * 0x08)) != $cur;
+  }
+
+  $cur = swap_bytes($cur) >> 4;
+  $os = swap_bytes($os) >> 4;
+  $hyst = swap_bytes($hyst) >> 4;
+  $low = swap_bytes($low) >> 4;
+  $high = swap_bytes($high) >> 4;
+
+  # Default power up state (from specs)
+  return 5
+    if $conf == 0 and ($hyst&0xfff8) == 0x0020 and ($os&0xfff8) == 0x0500
+      and ($low&0xfff8) == 0x00a0 and ($high&0xfff8) == 0x0400;
+  # All registers hold the same value, obviously a misdetection
+  return
+    if (! $cur_varies) and $conf == ($cur>>8) and $cur == $hyst
+      and $cur == $os and $cur == $low and $cur == $high;
+  # Unused bits in conf register
+  return
+    if ($conf&0xe0) != 0;
+  # Most probable value ranges
+  return 3
+    if $cur <= 125 and $hyst <= 30 and $os <= 125 and $low <= 30
+      and $high <= 125;
+  return 2;
 }
 
 # $_[0]: Chip to detect (0 = LM92, 1 = LM76, 2 = MAX6633/MAX6634/MAX6635)
