@@ -443,6 +443,21 @@
 #define SENSORS_LM85_ZONE3_RANGE           100  /* RW -- zone3_range  */
 #define SENSORS_LM85_ZONE3_SMOOTH          101  /* RW -- zone3_smooth  */
 
+/* LM90 chips */
+
+#define SENSORS_LM90_PREFIX "lm90"
+
+#define SENSORS_LM90_LOCAL_TEMP 51 /* R */
+#define SENSORS_LM90_LOCAL_HIGH 52 /* RW */
+#define SENSORS_LM90_LOCAL_LOW 53 /* RW */
+#define SENSORS_LM90_LOCAL_TCRIT 54 /* RW */
+#define SENSORS_LM90_REMOTE_TEMP 57 /* R */
+#define SENSORS_LM90_REMOTE_HIGH 58 /* RW */
+#define SENSORS_LM90_REMOTE_LOW 59 /* RW */
+#define SENSORS_LM90_REMOTE_TCRIT 60 /* RW */
+#define SENSORS_LM90_TCRIT_HYST 79 /* RW */
+#define SENSORS_LM90_ALARMS 81 /* R */
+
 /* Winbond W83781D chips */
 
 #define SENSORS_W83781D_PREFIX "w83781d"
