@@ -487,24 +487,22 @@
 #define IT87_SYSCTL_TEMP3 1202  /* Degrees Celcius * 10 */
 #define IT87_SYSCTL_VID 1300    /* Volts * 100 */
 #define IT87_SYSCTL_FAN_DIV 2000        /* 1, 2, 4 or 8 */
-#define IT87_SYSCTL_ALARMS_FAN  2001    /* bitvector */
-#define IT87_SYSCTL_ALARMS_VIN  2002    /* bitvector */
-#define IT87_SYSCTL_ALARMS_TEMP 2003    /* bitvector */
+#define IT87_SYSCTL_ALARMS 2004    /* bitvector */
 
-#define IT87_ALARM_IN0 0x0001
-#define IT87_ALARM_IN1 0x0002
-#define IT87_ALARM_IN2 0x0004
-#define IT87_ALARM_IN3 0x0008
-#define IT87_ALARM_IN4 0x0010
-#define IT87_ALARM_IN5 0x0020
-#define IT87_ALARM_IN6 0x0040
-#define IT87_ALARM_IN7 0x0080
+#define IT87_ALARM_IN0 0x000100
+#define IT87_ALARM_IN1 0x000200
+#define IT87_ALARM_IN2 0x000400
+#define IT87_ALARM_IN3 0x000800
+#define IT87_ALARM_IN4 0x001000
+#define IT87_ALARM_IN5 0x002000
+#define IT87_ALARM_IN6 0x004000
+#define IT87_ALARM_IN7 0x008000
 #define IT87_ALARM_FAN1 0x0001
 #define IT87_ALARM_FAN2 0x0002
 #define IT87_ALARM_FAN3 0x0004
-#define IT87_ALARM_TEMP1 0x0001
-#define IT87_ALARM_TEMP2 0x0002
-#define IT87_ALARM_TEMP3 0x0004
+#define IT87_ALARM_TEMP1 0x00010000
+#define IT87_ALARM_TEMP2 0x00020000
+#define IT87_ALARM_TEMP3 0x00040000
 
 #define FSCPOS_SYSCTL_VOLT0    1000       /* 12 volt supply */
 #define FSCPOS_SYSCTL_VOLT1    1001       /* 5 volt supply */

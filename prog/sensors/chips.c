@@ -2430,32 +2430,15 @@ void print_it87(const sensors_chip_name *name)
 {
   char *label = NULL;
   double cur, min, max, fdiv;
-  int alarms_fan, alarms_vin, alarms_temp, valid;
+  int alarms, valid;
 
-  if (!sensors_get_feature(*name,SENSORS_IT87_ALARMS_FAN, &cur)) {
-    alarms_fan = cur + 0.5;
+  if (!sensors_get_feature(*name,SENSORS_IT87_ALARMS, &cur)) {
+    alarms = cur + 0.5;
   }
   else {
-    printf("ERROR: Can't get fan alarm data!\n");
-    alarms_fan = 0;
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
   }
-
-  if (!sensors_get_feature(*name,SENSORS_IT87_ALARMS_VIN, &cur)) {
-    alarms_vin = cur + 0.5;
-  }
-  else {
-    printf("ERROR: Can't get vin alarm data!\n");
-    alarms_vin = 0;
-  }
-
-  if (!sensors_get_feature(*name,SENSORS_IT87_ALARMS_TEMP, &cur)) {
-    alarms_temp = cur + 0.5;
-  }
-  else {
-    printf("ERROR: Can't get temp alarm data!\n");
-    alarms_temp = 0;
-  }
-
 
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_IN0,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_IN0,&cur) &&
@@ -2464,7 +2447,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
-             cur,min,max,alarms_vin&IT87_ALARM_IN0?"ALARM":"");
+             cur,min,max,alarms&IT87_ALARM_IN0?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get IN0 data!\n");
@@ -2476,7 +2459,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
-             cur,min,max,alarms_vin&IT87_ALARM_IN1?"ALARM":"");
+             cur,min,max,alarms&IT87_ALARM_IN1?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get IN1 data!\n");
@@ -2488,7 +2471,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
-             cur,min,max,alarms_vin&IT87_ALARM_IN2?"ALARM":"");
+             cur,min,max,alarms&IT87_ALARM_IN2?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get IN2 data!\n");
@@ -2500,7 +2483,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
-             cur,min,max,alarms_vin&IT87_ALARM_IN3?"ALARM":"");
+             cur,min,max,alarms&IT87_ALARM_IN3?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get IN3 data!\n");
@@ -2512,7 +2495,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
-             cur,min,max,alarms_vin&IT87_ALARM_IN4?"ALARM":"");
+             cur,min,max,alarms&IT87_ALARM_IN4?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get IN4 data!\n");
@@ -2524,7 +2507,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
-             cur,min,max,alarms_vin&IT87_ALARM_IN5?"ALARM":"");
+             cur,min,max,alarms&IT87_ALARM_IN5?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get IN5 data!\n");
@@ -2536,7 +2519,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
-             cur,min,max,alarms_vin&IT87_ALARM_IN6?"ALARM":"");
+             cur,min,max,alarms&IT87_ALARM_IN6?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get IN6 data!\n");
@@ -2548,7 +2531,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
-             cur,min,max,alarms_vin&IT87_ALARM_IN7?"ALARM":"");
+             cur,min,max,alarms&IT87_ALARM_IN7?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get IN7 data!\n");
@@ -2570,7 +2553,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
-             cur,min,fdiv, alarms_fan&IT87_ALARM_FAN1?"ALARM":"");
+             cur,min,fdiv, alarms&IT87_ALARM_FAN1?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get FAN1 data!\n");
@@ -2582,7 +2565,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
-             cur,min,fdiv, alarms_fan&IT87_ALARM_FAN2?"ALARM":"");
+             cur,min,fdiv, alarms&IT87_ALARM_FAN2?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get FAN2 data!\n");
@@ -2594,7 +2577,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
-             cur,min,fdiv, alarms_fan&IT87_ALARM_FAN3?"ALARM":"");
+             cur,min,fdiv, alarms&IT87_ALARM_FAN3?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get FAN3 data!\n");
@@ -2607,7 +2590,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       print_temp_info( cur, max, min, MINMAX, 0, 0);
-      printf( " %s\n", alarms_temp & IT87_ALARM_TEMP1 ? "ALARM" : "" );
+      printf( " %s\n", alarms & IT87_ALARM_TEMP1 ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get TEMP1 data!\n");
@@ -2619,7 +2602,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       print_temp_info( cur, max, min, MINMAX, 0, 0);
-      printf( " %s\n", alarms_temp & IT87_ALARM_TEMP2 ? "ALARM" : "" );
+      printf( " %s\n", alarms & IT87_ALARM_TEMP2 ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get TEMP2 data!\n");
@@ -2631,7 +2614,7 @@ void print_it87(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       print_temp_info( cur, max, min, MINMAX, 0, 0);
-      printf( " %s\n", alarms_temp & IT87_ALARM_TEMP3 ? "ALARM" : "" );
+      printf( " %s\n", alarms & IT87_ALARM_TEMP3 ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get TEMP3 data!\n");

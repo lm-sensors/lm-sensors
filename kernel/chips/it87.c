@@ -65,7 +65,7 @@ static unsigned int normal_isa[] = { 0x0290, SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_1(it87);
+SENSORS_INSMOD_4(it87, it8705, it8712, sis950);
 
 
 /* Update battery voltage after every reading if true */
@@ -232,9 +232,7 @@ struct it87_data {
 	u8 temp_low[3];		/* Register value */
 	u8 fan_div[3];		/* Register encoding, shifted right */
 	u8 vid;			/* Register encoding, combined */
-	u8 alarms_fan;		/* Register value */
-	u8 alarms_vin;		/* Register value */
-	u8 alarms_temp;		/* Register value */
+	u32 alarms;		/* Register encoding, combined */
 };
 
 
@@ -270,11 +268,7 @@ static void it87_temp(struct i2c_client *client, int operation,
 		      int ctl_name, int *nrels_mag, long *results);
 static void it87_vid(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results);
-static void it87_alarms_fan(struct i2c_client *client, int operation,
-			    int ctl_name, int *nrels_mag, long *results);
-static void it87_alarms_vin(struct i2c_client *client, int operation,
-			    int ctl_name, int *nrels_mag, long *results);
-static void it87_alarms_temp(struct i2c_client *client, int operation,
+static void it87_alarms(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 static void it87_fan_div(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
@@ -336,12 +330,8 @@ static ctl_table it87_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &it87_vid},
 	{IT87_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &it87_fan_div},
-	{IT87_SYSCTL_ALARMS_FAN, "alarms_fan", NULL, 0, 0444, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &it87_alarms_fan},
-	{IT87_SYSCTL_ALARMS_VIN, "alarms_vin", NULL, 0, 0444, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &it87_alarms_vin},
-	{IT87_SYSCTL_ALARMS_TEMP, "alarms_temp", NULL, 0, 0444, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &it87_alarms_temp},
+	{IT87_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_alarms},
 	{0}
 };
 
@@ -727,12 +717,10 @@ void it87_update_client(struct i2c_client *client)
 		data->fan_div[1] = (i >> 3) & 0x07;
 		data->fan_div[2] = 1;
 
-		data->alarms_fan =
-			it87_read_value(client, IT87_REG_ALARM1) & 0x7;
-		data->alarms_vin =
-			it87_read_value(client, IT87_REG_ALARM2) & 0xff;
-		data->alarms_temp =
-			it87_read_value(client, IT87_REG_ALARM3) & 0x7;
+		data->alarms =
+			it87_read_value(client, IT87_REG_ALARM1) |
+			(it87_read_value(client, IT87_REG_ALARM2) << 8) |
+			(it87_read_value(client, IT87_REG_ALARM3) << 16);
 
 		data->last_updated = jiffies;
 		data->valid = 1;
@@ -855,7 +843,7 @@ void it87_vid(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-void it87_alarms_fan(struct i2c_client *client, int operation,
+void it87_alarms(struct i2c_client *client, int operation,
                      int ctl_name, int *nrels_mag, long *results)
 {
 	struct it87_data *data = client->data;
@@ -863,33 +851,7 @@ void it87_alarms_fan(struct i2c_client *client, int operation,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		it87_update_client(client);
-		results[0] = ALARMS_FROM_REG(data->alarms_fan);
-		*nrels_mag = 1;
-	}
-}
-
-void it87_alarms_vin(struct i2c_client *client, int operation,
-                     int ctl_name, int *nrels_mag, long *results)
-{
-	struct it87_data *data = client->data;
-	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
-	else if (operation == SENSORS_PROC_REAL_READ) {
-		it87_update_client(client);
-		results[0] = ALARMS_FROM_REG(data->alarms_vin);
-		*nrels_mag = 1;
-	}
-}
-
-void it87_alarms_temp(struct i2c_client *client, int operation,
-                      int ctl_name, int *nrels_mag, long *results)
-{
-	struct it87_data *data = client->data;
-	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
-	else if (operation == SENSORS_PROC_REAL_READ) {
-		it87_update_client(client);
-		results[0] = ALARMS_FROM_REG(data->alarms_temp);
+		results[0] = ALARMS_FROM_REG(data->alarms);
 		*nrels_mag = 1;
 	}
 }

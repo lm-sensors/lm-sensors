@@ -2227,12 +2227,8 @@ static sensors_chip_feature it87_features[] =
     { SENSORS_IT87_FAN3_DIV, "fan3_div", SENSORS_IT87_FAN3, SENSORS_NO_MAPPING,
                               SENSORS_MODE_R, IT87_SYSCTL_FAN_DIV, VALUE(3),
                               0 },
-    { SENSORS_IT87_ALARMS_FAN, "alarms_fan", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
-                           SENSORS_MODE_R, IT87_SYSCTL_ALARMS_FAN, VALUE(1), 0 },
-    { SENSORS_IT87_ALARMS_VIN, "alarms_vin", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
-                           SENSORS_MODE_R, IT87_SYSCTL_ALARMS_VIN, VALUE(1), 0 },
-    { SENSORS_IT87_ALARMS_TEMP, "alarms_temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
-                           SENSORS_MODE_R, IT87_SYSCTL_ALARMS_TEMP, VALUE(1), 0 },
+    { SENSORS_IT87_ALARMS, "alarms", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                           SENSORS_MODE_R, IT87_SYSCTL_ALARMS, VALUE(1), 0 },
     { 0 }
   };
 
