@@ -45,6 +45,7 @@ ask CVS about it:
                           Explicitely support ADM1028
                           Scan all logical devices of PC87365 and PC87366
                           Detect LM92, LM76, MAX6633, MAX6634, MAX6635
+                          Detect eeproms with software write protect
 
 
 2.8.6 (20040405)

@@ -7,9 +7,15 @@ Supported chips:
   * Any EEPROM chip in the designated address range
     Prefix `eeprom'
     Addresses scanned: I2C 0x50 - 0x57 (inclusive)
-    Datasheets: Publicly available from Atmel (www.atmel.com),
-                Fairchild (www.fairchildsemi.com), and
-                Microchip (www.microchip.com)
+    Datasheets: Publicly available from:
+                Atmel (www.atmel.com),
+                Catalyst (www.catsemi.com),
+                Fairchild (www.fairchildsemi.com),
+                Microchip (www.microchip.com),
+                Philips (www.semiconductor.philips.com),
+                Rohm (www.rohm.com),
+                ST (www.st.com),	
+                Xicor (www.xicor.com)		
 
         Chip     Size (bits)    Address
         24C01     1K            0x50 (shadows at 0x51 - 0x57)
@@ -21,6 +27,8 @@ Supported chips:
                                 0x53, 0x55, 0x56, 0x57)
         24C16    16K            0x50 (additional data at 0x51 - 0x57)
 	Sony      2K            0x57
+        Microchip 24AA52  2K    0x50 - 0x57, SW write protect at 0x30-37
+        ST M34C02         2K    0x50 - 0x57, SW write protect at 0x30-37
 
 
 Author: Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock
@@ -72,6 +80,15 @@ eeprom.
 Recent Sony Vaio laptops have an EEPROM at 0x57. We couldn't get the
 specification, so it is guess work and far from being complete.
 
+The Microchip 24AA52/24LCS52 and the ST M34C02 support an additional
+software write protect register at 0x30 - 0x37 (0x20 less than the
+memory location). The chip responds to "write quick" detection at this
+address but does not respond to byte reads.
+If this register is present, the lower 128 bytes of the memory
+array are not write protected. Any byte data write to this address
+will write protect the memory array permanently, and the device
+will no longer respond at the 0x30-37 address.
+The eeprom driver does not support this register.
 
 Lacking functionality:
 
@@ -84,7 +101,8 @@ These devices require two-byte address fields and are not supported.
 
 * Enable Writing.  Again, no technical reason why not, but making it easy
 to change the contents of the EEPROMs (on DIMMs anyway) also makes it easy
-to disable the DIMMs until the values are restored somehow.
+to disable the DIMMs (potentially preventing the computer from booting)
+until the values are restored somehow.
 
 
 Use:

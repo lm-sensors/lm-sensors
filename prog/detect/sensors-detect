@@ -1246,6 +1246,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { eeprom_detect 1, @_ },
      },
      {
+       name => "SPD EEPROM with Software Write-Protect",
+       driver => "eeprom",
+       i2c_addrs => [0x50..0x57],
+       i2c_detect => sub { eeprom_detect 2, @_ },
+     },
+     {
        name => "LTC1710",
        driver => "ltc1710",
        i2c_addrs => [0x58..0x5a],
@@ -3672,7 +3678,8 @@ sub ite_alias_detect
   return 1;
 }
 
-# $_[0]: Chip to detect (0 = SPD EEPROM, 1 = Sony Vaio EEPROM)
+# $_[0]: Chip to detect (0 = SPD EEPROM, 1 = Sony Vaio EEPROM
+#                        2 = SPD EEPROM with Software Write Protect)
 # $_[1]: A reference to the file descriptor to access this chip
 # $_[2]: Address
 # Returns: 8 for a memory eeprom, 4 to 9 for a Sony Vaio eeprom,
@@ -3687,17 +3694,37 @@ sub ite_alias_detect
 sub eeprom_detect
 {
   my ($chip,$file,$addr) = @_;
+  my $checksum = 0;
 
   # Check the checksum for validity (works for most DIMMs and RIMMs)
-  my $checksum = 0;
-  for (my $i = 0; $i <= 62; $i ++) {
-    $checksum += i2c_smbus_read_byte_data($file,$i);
+  if ($chip != 1) {
+	  for (my $i = 0; $i <= 62; $i ++) {
+	    $checksum += i2c_smbus_read_byte_data($file,$i);
+	  }
+	  $checksum &= 255;
+	  $checksum -= i2c_smbus_read_byte_data($file,63);
+  }     
+  if ($chip == 0) {
+	if($checksum == 0) {
+		return 8;
+	} else {
+		return 1;
+	}
+  }	
+  if ($chip == 2) {
+	# check for 'shadow' write-protect register at 0x30-37
+	i2c_set_slave_addr($file,$addr - 0x20);
+	if(i2c_smbus_write_quick($file,$SMBUS_WRITE) >= 0 &&
+	   i2c_smbus_read_byte_data($file,0x80) == -1) {
+		if($checksum == 0) {
+			return (9, $addr - 0x20);
+		} else {
+			return (2, $addr - 0x20);
+		}
+	}
   }
-  $checksum &= 255;
-  return 8
-    if $chip == 0 and i2c_smbus_read_byte_data($file,63) == $checksum;
 
-  # Look for a Sony Vaio EEPROM
+  # Look for a Sony Vaio EEPROM ($chip == 1)
   my $vaioconf = 1;
   $vaioconf += 4
     if i2c_smbus_read_byte_data($file,0x80) == 0x50
@@ -3718,14 +3745,9 @@ sub eeprom_detect
     if $vaioconf > 9;
 
   if ($vaioconf > 1) {
-    return if $chip != 1;
     return $vaioconf;
   }
-
-  # Even if all tests fail, it still may be an eeprom
-  return if $chip != 0;
-  # Default to SPD EEPROM
-  return 1;
+  return;
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
