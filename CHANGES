@@ -18,12 +18,12 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.8.5 (2004XXXX)
-  File doc/chips/SUMMART: Update
+  File doc/chips/SUMMARY: Update
   File etc/sensors.conf.eg: Epox 8K3A tweaks. (Kronos)
   Module fscher: Rename fanN_min to pwmN (Reinhard Nissl)
   Module lm80: Code cleanups
-  Module vt1211: Fix bitmask in uch_config read and write
-  Module vt8231: Fix bitmask in uch_config read and write
+  Module vt1211: Fix bitmask in uch_config read and write; remove in6 and temp1
+  Module vt8231: Fix bitmask in uch_config read and write; remove in6 and temp1
   Module w83627hf: Add w83637hf support
                    Fix exported name
                    Fix PWM in w83627thf
@@ -35,7 +35,7 @@ ask CVS about it:
            Reverse temporary changes to w83l785ts mappings
            Fix vt1211 and vt8231 uch_config not being writable
            Add 2.6 lm80 support
-		   Add w83637hf support
+           Add w83637hf support
 
 
 2.8.4 (20040207)
@@ -243,7 +243,7 @@ ask CVS about it:
                           Improve LM82 and LM83 detection
                           Handle "to-be-written" cleanly
                           Add detection for 47M14x Super I/O
-						  Handle the one-address-many-chips-same-driver
+                          Handle the one-address-many-chips-same-driver
                           case
 
                           

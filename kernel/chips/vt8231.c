@@ -260,10 +260,13 @@ static ctl_table vt8231_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &vt8231_in},
 	{VT8231_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &vt8231_in},
+/*
+    not in 8231
 	{VT8231_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &vt8231_in},
 	{VT8231_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &vt8231_temp},
+*/
 	{VT8231_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_temp},
 	{VT8231_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL,
@@ -470,7 +473,7 @@ static void vt8231_update_client(struct i2c_client *client)
 	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
 	    (jiffies < data->last_updated) || !data->valid) {
 		data->uch_config = vt_rdval(client, VT8231_REG_UCH_CONFIG);
-		for (i = 0; i <= 6; i++) {
+		for (i = 0; i <= 5; i++) {
 			if(ISVOLT(i, data->uch_config)) {
 				data->in[i] = vt_rdval(client, VT8231_REG_IN(i));
 				data->in_min[i] = vt_rdval(client,
@@ -488,7 +491,7 @@ static void vt8231_update_client(struct i2c_client *client)
 			data->fan_min[i - 1] = vt_rdval(client,
 						     VT8231_REG_FAN_MIN(i));
 		}
-		for (i = 1; i <= 7; i++) {
+		for (i = 2; i <= 7; i++) {
 			if(ISTEMP(i, data->uch_config)) {
 				data->temp[i - 1] = vt_rdval(client,
 					             VT8231_REG_TEMP(i)) << 2;
