@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.6.0 (2001????)
+2.6.0 (20010612)
   NOTE: i2c-2.6.0 MUST BE be compiled AND installed first!!!
         If your make fails because it can't find <linux/i2c-proc.h>, you
         forgot this step!!!
