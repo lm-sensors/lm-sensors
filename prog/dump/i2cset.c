@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
 	if (version) {
 		fprintf(stderr, "i2cset version %s\n", LM_VERSION);
-		exit(1);
+		exit(0);
 	}
 
 	if (argc + flags < 5)
