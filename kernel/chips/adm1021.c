@@ -42,7 +42,7 @@ static unsigned int normal_isa[] = {SENSORS_ISA_END};
 static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
 
 /* Insmod parameters */
-SENSORS_INSMOD_4(adm1021,max1617,max1617a,thmc10);
+SENSORS_INSMOD_5(adm1021,max1617,max1617a,thmc10,lm84);
 
 /* adm1021 constants specified below */
 
@@ -248,6 +248,8 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
       kind = adm1021;
     else if (i == 0x49)
       kind = thmc10;
+    else if (i == 0x00)
+      kind = lm84;
     else if ((i== 0x4d) && 
              (adm1021_read_value(new_client,ADM1021_REG_DEV_ID) == 0x01))
       kind = max1617a;

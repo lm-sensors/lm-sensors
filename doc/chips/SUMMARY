@@ -37,6 +37,7 @@ Driver  Chips		#temp	#vin	#fanin	pwm/dac	i2c	ISA
 ---------------------------------------------------------------------
 adm1021
 	adm1021		2	-	-	-	yes	no
+	lm84		2	-	-	-	yes	no
 	max1617		2	-	-	-	yes	no
 	max1617a	2	-	-	-	yes	no
 	thmc10		2	-	-	-	yes	no
@@ -120,6 +121,7 @@ Many SMBus chips have a company ID at location 0x3E or 0xFE.
 Here is a partial list.
 This may help identify a chip after doing a 'i2cdump [bus] [address] b'.
 
+0x00	National
 0x01	National
 0x23	AMD
 0x41	AMD
