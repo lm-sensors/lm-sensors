@@ -414,9 +414,9 @@ static void lm90_init_client(struct i2c_client *client)
 	i2c_smbus_write_byte_data(client, LM90_REG_W_CONVRATE,
 		5); /* 2 Hz */
 	config = i2c_smbus_read_byte_data(client, LM90_REG_R_CONFIG1);
-	if (!(config & 0x40))
+	if (config & 0x40)
 		i2c_smbus_write_byte_data(client, LM90_REG_W_CONFIG1,
-			config | 0x40); /* run */
+			config & 0xBF); /* run */
 }
 
 
