@@ -21,6 +21,7 @@ ask CVS about it:
   File doc/FAQ: Updates
   File doc/chips/via686a: Claim support for 686b.
   File sensors.conf.eg: Adjust as99127f -12V calculation
+  Module i2c-i801: Chip detection cleanup
   Module lm78: Recognize chipid=0x20
   Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
   Module sensors: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.

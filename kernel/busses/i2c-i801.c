@@ -1,7 +1,7 @@
 /*
     i801.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>,
+    Copyright (c) 1998 - 2001  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>, and Mark D. Studebaker
     <mdsxyz123@yahoo.com>
 
@@ -50,6 +50,11 @@
 #ifndef PCI_DEVICE_ID_INTEL_82801BA_3
 #define PCI_DEVICE_ID_INTEL_82801BA_3   0x2443
 #endif
+
+static int supported[] = {PCI_DEVICE_ID_INTEL_82801AA_3,
+                          PCI_DEVICE_ID_INTEL_82801AB_3,
+                          PCI_DEVICE_ID_INTEL_82801BA_3,
+                          0 };
 
 /* I801 SMBus address offsets */
 #define SMBHSTSTS (0 + i801_smba)
@@ -158,6 +163,7 @@ static struct pci_dev *I801_dev = NULL;
 int i801_setup(void)
 {
 	int error_return = 0;
+	int *num = supported;
 	unsigned char temp;
 
 	/* First check whether we can access PCI at all */
@@ -167,29 +173,19 @@ int i801_setup(void)
 		goto END;
 	}
 
-	/* Look for the I801, function 3 */
-	/* Have to check for both the 82801AA and 82801AB */
+	/* Look for each chip */
 	/* Note: we keep on searching until we have found 'function 3' */
 	I801_dev = NULL;
-	do
-		I801_dev = pci_find_device(PCI_VENDOR_ID_INTEL,
-					   PCI_DEVICE_ID_INTEL_82801AA_3,
-					   I801_dev);
-	while (I801_dev && (PCI_FUNC(I801_dev->devfn) != 3));
-	if (I801_dev == NULL) {
-		do
-			I801_dev = pci_find_device(PCI_VENDOR_ID_INTEL,
-					   PCI_DEVICE_ID_INTEL_82801AB_3,
-					   I801_dev);
-		while (I801_dev && (PCI_FUNC(I801_dev->devfn) != 3));
-	}
-	if (I801_dev == NULL) {
-		do
-			I801_dev = pci_find_device(PCI_VENDOR_ID_INTEL,
-					   PCI_DEVICE_ID_INTEL_82801BA_3,
-					   I801_dev);
-		while (I801_dev && (PCI_FUNC(I801_dev->devfn) != 3));
-	}
+	do {
+		if((I801_dev = pci_find_device(PCI_VENDOR_ID_INTEL,
+					      *num, I801_dev))) {
+			if(PCI_FUNC(I801_dev->devfn) != 3)
+				continue;
+			break;
+		}
+		num++;
+	} while (*num != 0);
+
 	if (I801_dev == NULL) {
 		printk
 		    ("i2c-i801.o: Error: Can't detect I801, function 3!\n");
