@@ -29,6 +29,10 @@
                  Fix silly bug in fan_div logic
                  Fix fan_min handling so that 0xff is 0 is 0xff
     2003-05-25   Fix more silly typos...
+    2003-06-11   Change FAN_xx_REG macros to use different scaling
+                 Most (all?) drivers assume two pulses per rev fans
+                 and the old scaling was producing double the RPM's
+                 Thanks to Jerome Hsiao @ Arima for pointing this out.
 */
 
 #include <linux/version.h>
@@ -244,10 +248,11 @@ static int adm1026_scaling[] = {  /* .001 Volts */
 #endif
 
 /* FAN speed is measured using 22.5kHz clock and counts for 2 pulses
- *      22500 * 60 * 2 == 2700000
+ *   and we assume a 2 pulse-per-rev fan tach signal
+ *      22500 kHz * 60 (sec/min) * 2 (pulse) / 2 (pulse/rev) == 1350000
  */
-#define FAN_TO_REG(val,div)  ((val)<=0 ? 0xff : SENSORS_LIMIT(2700000/((val)*(div)),1,254))
-#define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==0xff ? 0 : 2700000/((val)*(div)))
+#define FAN_TO_REG(val,div)  ((val)<=0 ? 0xff : SENSORS_LIMIT(1350000/((val)*(div)),1,254))
+#define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==0xff ? 0 : 1350000/((val)*(div)))
 #define DIV_FROM_REG(val) (1<<(val))
 #define DIV_TO_REG(val) ((val)>=8 ? 3 : (val)>=4 ? 2 : (val)>=2 ? 1 : 0)
 
@@ -1117,7 +1122,7 @@ void adm1026_update_client(struct i2c_client *client)
 		for (i = 0 ; i <= 7 ; ++i) {
 			data->fan_min[i] =
 			    adm1026_read_value(client, ADM1026_REG_FAN_MIN(i));
-			data->fan_div[i] = 1 << (value & 0x03);
+			data->fan_div[i] = DIV_FROM_REG(value & 0x03);
 			value >>= 2 ;
 		}
 
