@@ -63,7 +63,6 @@ sub print_diff
 # The new texts are put at the end of the file, or just before the
 # lm_sensors texts.
 # Of course, care is taken old lines are removed.
-# NOTE: MOST OF THE TEXTS ARE UNWRITTEN YET!
 # $_[0]: i2c package root (like /tmp/i2c)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
 sub gen_Documentation_Configure_help
@@ -319,6 +318,8 @@ sub gen_drivers_Makefile
   my $kernel_file = "drivers/Makefile";
   my $package_file = $temp;
   my $sensors_present;
+  my $pr1 = 0;
+  my $pr2 = 0;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
@@ -326,6 +327,7 @@ sub gen_drivers_Makefile
         or die "Can't open $package_root/$package_file";
   MAIN: while(<INPUT>) {
     if (m@^ALL_SUB_DIRS\s*:=@) {
+      $pr1 = 1;
       $sensors_present = 0;
       while (m@\\$@) {
         $sensors_present = 1 if m@sensors@;
@@ -345,6 +347,7 @@ sub gen_drivers_Makefile
       redo MAIN;
     } 
     if (m@^include \$\(TOPDIR\)/Rules.make$@) {
+      $pr2 = 1;
       print OUTPUT <<'EOF';
 ifeq ($(CONFIG_SENSORS),y)
 SUB_DIRS += sensors
@@ -361,6 +364,8 @@ EOF
   }
   close INPUT;
   close OUTPUT;
+  die "Automatic patch generation for `drivers/Makefile' failed.\n".
+      "Contact the authors please!" if $pr1 == 0 or $pr2 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -375,8 +380,7 @@ sub gen_drivers_char_Config_in
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "drivers/char/Config.in";
   my $package_file = $temp;
-  my $ready = 0;
-  my $done = 0;
+  my $pr1 = 0;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
@@ -384,6 +388,7 @@ sub gen_drivers_char_Config_in
         or die "Can't open $package_root/$package_file";
   MAIN: while(<INPUT>) {
     if (m@source drivers/i2c/Config.in@) {
+      $pr1 = 1;
       print OUTPUT;
       print OUTPUT "\nsource drivers/sensors/Config.in\n";
       $_ = <INPUT>;
@@ -398,6 +403,8 @@ sub gen_drivers_char_Config_in
   }
   close INPUT;
   close OUTPUT;
+  die "Automatic patch generation for `drivers/Makefile' failed.\n".
+      "Contact the authors please!" if $pr1 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
  
@@ -417,6 +424,8 @@ sub gen_drivers_char_mem_c
   my $right_place = 0;
   my $done = 0;
   my $atstart = 1;
+  my $pr1 = 0;
+  my $pr2 = 0;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
@@ -424,6 +433,7 @@ sub gen_drivers_char_mem_c
         or die "Can't open $package_root/$package_file";
   MAIN: while(<INPUT>) {
     if ($atstart and m@#ifdef@) {
+      $pr1 = 1;
       print OUTPUT << 'EOF';
 #ifdef CONFIG_SENSORS
 extern void sensors_init_all(void);
@@ -445,6 +455,7 @@ EOF
       redo MAIN;
     }
     if ($right_place and not $done and m@return 0;@) {
+      $pr2 = 1;
       print OUTPUT <<'EOF';
 #ifdef CONFIG_SENSORS
 	sensors_init_all();
@@ -457,6 +468,8 @@ EOF
   }
   close INPUT;
   close OUTPUT;
+  die "Automatic patch generation for `drivers/char/mem.c' failed.\n".
+      "Contact the authors please!" if $pr1 == 0 or $pr2 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -472,6 +485,7 @@ sub gen_drivers_i2c_Config_in
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "drivers/i2c/Config.in";
   my $package_file = "$temp";
+  my $pr1 = 0;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
@@ -479,6 +493,7 @@ sub gen_drivers_i2c_Config_in
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
     if (m@sensors code starts here@) {
+      $pr1++;
       print OUTPUT;
       while (<INPUT>) {
         last if m@sensors code ends here@;
@@ -499,6 +514,8 @@ EOF
   }
   close INPUT;
   close OUTPUT;
+  die "Automatic patch generation for `drivers/i2c/Config.in' failed.\n".
+      "Contact the authors please!" if $pr1 != 1;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -513,6 +530,7 @@ sub gen_drivers_i2c_Makefile
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "drivers/i2c/Makefile";
   my $package_file = $temp;
+  my $pr1 = 0;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
@@ -520,6 +538,7 @@ sub gen_drivers_i2c_Makefile
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
     if (m@sensors code starts here@) {
+      $pr1 ++;
       print OUTPUT;
       while (<INPUT>) {
         last if m@sensors code ends here@;
@@ -571,6 +590,8 @@ EOF
   }
   close INPUT;
   close OUTPUT;
+  die "Automatic patch generation for `drivers/i2c/Makefile' failed.\n".
+      "Contact the authors please!" if $pr1 != 1;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -640,6 +661,8 @@ EOF
   }
   close INPUT;
   close OUTPUT;
+  die "Automatic patch generation for `drivers/i2c/i2c-core.c' failed.\n".
+      "Contact the authors please!" if $patch_nr != 3;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
