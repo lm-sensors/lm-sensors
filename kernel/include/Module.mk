@@ -21,10 +21,7 @@
 MODULE_DIR := kernel/include
 KERNELINCLUDEDIR := $(MODULE_DIR)
 
-KERNELINCLUDEFILES := i2c-dev.h
-ifneq ($(shell if grep -q '^CONFIG_SENSORS=y' $(LINUX)/.config; then echo 1; fi),1)
-KERNELINCLUDEFILES += $(MODULE_DIR)/sensors.h
-endif
+KERNELINCLUDEFILES := $(MODULE_DIR)/i2c-dev.h $(MODULE_DIR)/sensors.h
 
 $(KERNELINCLUDEDIR)/sensors.h: $(KERNELINCLUDEDIR)/sensors.h.template
 	cat $@.template > $@
