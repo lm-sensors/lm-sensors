@@ -150,7 +150,7 @@ int sis5595_setup(void)
 		goto END;
 	}
 
-	/* Look for the SIS5595, function 3 */
+	/* Look for the SIS5595 */
 	SIS5595_dev = NULL;
 	if (!(SIS5595_dev = pci_find_device(PCI_VENDOR_ID_SI,
 					    PCI_DEVICE_ID_SI_503,
