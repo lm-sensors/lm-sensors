@@ -409,7 +409,7 @@ int Voodoo3_DDCBusCheck(void)
 
 	if (!ddc_rdat()) {
 		printk
-		    ("i2c-voodoo3: I2C bus in use or hung!  Try again later.\n");
+		    ("i2c-voodoo3: DDC bus in use or hung!  Try again later.\n");
 		return 1;
 	}
 	return 0;
@@ -442,35 +442,31 @@ int Voodoo3_I2CRead_byte(int addr)
 
 int Voodoo3_I2CRead_byte_data(int addr, int command)
 {
-	int this_dat = 0;
-
 	Voodoo3_I2CStart();
-	if (Voodoo3_I2CSendByte(addr)) {
+	if (Voodoo3_I2CSendByte(addr & 0xfe)) {
 #ifdef DEBUG
 		printk
 		    ("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",
 		     addr);
 #endif
-		this_dat = -1;
 		goto ENDREAD2;
 	}
-	if (!Voodoo3_I2CSendByte(command)) {
+	if (Voodoo3_I2CSendByte(command)) {
 #ifdef DEBUG
 		printk
 		    ("i2c-voodoo3: No Ack on cmd WriteByte to addr 0x%X\n",
 		     addr);
 #endif
-		this_dat = -1;
 		goto ENDREAD2;
 	}
-	this_dat = Voodoo3_I2CReadByte(0);
+	return(Voodoo3_I2CRead_byte(addr));
       ENDREAD2:Voodoo3_I2CStop();
 #ifdef DEBUG
 	printk
-	    ("i2c-voodoo3: Byte read at addr:0x%X (command:0x%X) result:0x%X\n",
-	     addr, command, this_dat);
+	    ("i2c-voodoo3: Byte read at addr:0x%X (command:0x%X) failed\n",
+	     addr, command);
 #endif
-	return this_dat;
+	return(-1);
 }
 
 int Voodoo3_I2CRead_word(int addr, int command)
@@ -636,20 +632,14 @@ int Voodoo3_DDCRead_byte(int addr)
 
 int Voodoo3_DDCRead_byte_data(int addr, int command)
 {
-	int this_dat = 0;
-
 	Voodoo3_DDCStart();
-	if (Voodoo3_DDCSendByte(addr)) {
-		this_dat = -1;
+        if (Voodoo3_DDCSendByte(addr & 0xfe))
 		goto ENDREAD2;
-	}
-	if (!Voodoo3_DDCSendByte(command)) {
-		this_dat = -1;
+	if (Voodoo3_DDCSendByte(command))
 		goto ENDREAD2;
-	}
-	this_dat = Voodoo3_DDCReadByte(0);
-      ENDREAD2:Voodoo3_DDCStop();
-	return this_dat;
+	return(Voodoo3_DDCRead_byte(addr));
+      ENDREAD2: Voodoo3_DDCStop();
+	return (-1);
 }
 
 int Voodoo3_DDCRead_word(int addr, int command)
