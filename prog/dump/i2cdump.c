@@ -47,7 +47,8 @@ void print_i2c_busses();
 void help(void)
 {
   fprintf(stderr,"Syntax: i2cdump I2CBUS ADDRESS [MODE] [BANK [BANKREG]]\n");
-  fprintf(stderr,"  MODE is 'b[yte]', 'w[ord]', 's[mbusblock], or 'i[2cblock]' (default b)\n");
+  fprintf(stderr,"  MODE is 'b[yte]', 'w[ord]', 's[mbusblock], 'i[2cblock]',\n");
+  fprintf(stderr,"       or 'c[onsectutive byte address mode]' (default b)\n");
   fprintf(stderr,"  Append MODE with 'p' for PEC checking\n");
   fprintf(stderr,"  I2CBUS is an integer\n");
   fprintf(stderr,"  ADDRESS is an integer 0x00 - 0x7f\n");
@@ -120,6 +121,9 @@ int main(int argc, char *argv[])
     pec = argv[3][1] == 'p';
   } else if (!strncmp(argv[3],"s",1)) {
     size = I2C_SMBUS_BLOCK_DATA;
+    pec = argv[3][1] == 'p';
+  } else if (!strncmp(argv[3],"c",1)) {
+    size = I2C_SMBUS_BYTE;
     pec = argv[3][1] == 'p';
   } else if (!strcmp(argv[3],"i"))
     size = I2C_SMBUS_I2C_BLOCK_DATA;
@@ -220,6 +224,25 @@ int main(int argc, char *argv[])
   }
 
   switch(size) {
+     case I2C_SMBUS_BYTE:
+#ifdef HAVE_PEC
+	if(pec) {
+	  if (! (funcs & I2C_FUNC_SMBUS_READ_BYTE_PEC)) {
+	     fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	     fprintf(stderr, " does not have read w/ PEC capability\n");
+	     exit(1);
+	  }       
+	} else
+#endif
+	{
+	  if (! (funcs & I2C_FUNC_SMBUS_READ_BYTE)) {
+	     fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	     fprintf(stderr, " does not have read capability\n");
+	     exit(1);
+	  }       
+	}
+	break;
+
      case I2C_SMBUS_BYTE_DATA:
 #ifdef HAVE_PEC
 	if(pec) {
@@ -311,6 +334,7 @@ int main(int argc, char *argv[])
   fprintf(stderr,"  I will probe file %s, address 0x%x, mode %s\n",
           filename,address,size == I2C_SMBUS_BLOCK_DATA ? "smbus block" :
                            size == I2C_SMBUS_I2C_BLOCK_DATA ? "i2c block" :
+                           size == I2C_SMBUS_BYTE ? "byte consecutive read" :
                            size == I2C_SMBUS_BYTE_DATA ? "byte" : "word");
   if(pec)
     fprintf(stderr,"  with PEC checking.\n");
@@ -362,13 +386,21 @@ int main(int argc, char *argv[])
         block[i] = -1;
     }
 
+    if(size == I2C_SMBUS_BYTE) {
+      res = i2c_smbus_write_byte(file, 0);
+      if(res != 0) {
+        fprintf(stderr, "Error: Write start address failed, return code %d\n", res);
+        exit(1);
+      }
+    }
     printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f    0123456789abcdef\n");
     for (i = 0; i < 256; i+=16) {
       printf("%02x: ",i);
       for(j = 0; j < 16; j++) {
         if(size == I2C_SMBUS_BYTE_DATA) {
-          res = i2c_smbus_read_byte_data(file,i+j);
-          block[i+j] = res;
+          block[i+j] = res = i2c_smbus_read_byte_data(file,i+j);
+        } else if(size == I2C_SMBUS_BYTE) {
+          block[i+j] = res = i2c_smbus_read_byte(file);
         } else
           res = block[i+j];
         if (res < 0)
