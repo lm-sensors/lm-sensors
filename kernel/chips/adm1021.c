@@ -27,18 +27,6 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
-MODULE_LICENSE("GPL");
-#endif
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -120,18 +108,6 @@ struct adm1021_data {
 	   remote_temp_offset, remote_temp_offset_prec;
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_adm1021_init(void);
-static int __init adm1021_cleanup(void);
 static int adm1021_attach_adapter(struct i2c_adapter *adapter);
 static int adm1021_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
@@ -162,14 +138,14 @@ static int read_only = 0;
 
 /* This is the driver that will be inserted */
 static struct i2c_driver adm1021_driver = {
-	/* name */ "ADM1021, MAX1617 sensor driver",
-	/* id */ I2C_DRIVERID_ADM1021,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &adm1021_attach_adapter,
-	/* detach_client */ &adm1021_detach_client,
-	/* command */ &adm1021_command,
-	/* inc_use */ &adm1021_inc_use,
-	/* dec_use */ &adm1021_dec_use
+	.name		= "ADM1021, MAX1617 sensor driver",
+	.id		= I2C_DRIVERID_ADM1021,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= adm1021_attach_adapter,
+	.detach_client	= adm1021_detach_client,
+	.command	= adm1021_command,
+	.inc_use	= adm1021_inc_use,
+	.dec_use	= adm1021_dec_use
 };
 
 /* These files are created for each detected adm1021. This is just a template;
@@ -198,9 +174,6 @@ static ctl_table adm1021_max_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &adm1021_alarms},
 	{0}
 };
-
-/* Used by init/cleanup */
-static int __initdata adm1021_initialized = 0;
 
 /* I choose here for semi-static allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -233,7 +206,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 #endif
 
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
-		goto ERROR0;
+		goto error0;
 
 	/* OK. For now, we presume we have a valid client. We now create the
 	   client structure, even though we cannot fill it completely yet.
@@ -243,7 +216,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 				   sizeof(struct adm1021_data),
 				   GFP_KERNEL))) {
 		err = -ENOMEM;
-		goto ERROR0;
+		goto error0;
 	}
 
 	data = (struct adm1021_data *) (new_client + 1);
@@ -259,7 +232,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 		if (
 		    (adm1021_read_value(new_client, ADM1021_REG_STATUS) &
 		     0x03) != 0x00)
-			goto ERROR1;
+			goto error1;
 	}
 
 	/* Determine the chip type. */
@@ -319,7 +292,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 		printk("adm1021.o: Internal error: unknown kind (%d)?!?",
 		       kind);
 #endif
-		goto ERROR1;
+		goto error1;
 	}
 
 	/* Fill in the remaining client fields and put it into the global list */
@@ -332,7 +305,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 
 	/* Tell the I2C layer a new client has arrived */
 	if ((err = i2c_attach_client(new_client)))
-		goto ERROR3;
+		goto error3;
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client,
@@ -343,7 +316,7 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 					adm1021_max_dir_table_template,
 					THIS_MODULE)) < 0) {
 		err = i;
-		goto ERROR4;
+		goto error4;
 	}
 	data->sysctl_id = i;
 
@@ -351,15 +324,12 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	adm1021_init_client(new_client);
 	return 0;
 
-/* OK, this is not exactly good programming practice, usually. But it is
-   very code-efficient in this case. */
-
-      ERROR4:
+      error4:
 	i2c_detach_client(new_client);
-      ERROR3:
-      ERROR1:
+      error3:
+      error1:
 	kfree(new_client);
-      ERROR0:
+      error0:
 	return err;
 }
 
@@ -524,8 +494,9 @@ void adm1021_temp(struct i2c_client *client, int operation, int ctl_name,
 void adm1021_remote_temp(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results)
 {
-int prec=0;
 	struct adm1021_data *data = client->data;
+	int prec = 0;
+
 	if (operation == SENSORS_PROC_REAL_INFO)
 		if (data->type == adm1023) { *nrels_mag = 3; }
                  else { *nrels_mag = 0; }
@@ -623,57 +594,24 @@ void adm1021_alarms(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
-int __init sensors_adm1021_init(void)
+static int __init sensors_adm1021_init(void)
 {
-	int res;
-
-	printk("adm1021.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	adm1021_initialized = 0;
-	if ((res = i2c_add_driver(&adm1021_driver))) {
-		printk
-		    ("adm1021.o: Driver registration failed, module not inserted.\n");
-		adm1021_cleanup();
-		return res;
-	}
-	adm1021_initialized++;
-	return 0;
+	printk(KERN_INFO "adm1021.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	return i2c_add_driver(&adm1021_driver);
 }
 
-int __init adm1021_cleanup(void)
+static void __exit sensors_adm1021_exit(void)
 {
-	int res;
-
-	if (adm1021_initialized >= 1) {
-		if ((res = i2c_del_driver(&adm1021_driver))) {
-			printk
-			    ("adm1021.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		adm1021_initialized--;
-	}
-
-	return 0;
+	i2c_del_driver(&adm1021_driver);
 }
-
-EXPORT_NO_SYMBOLS;
-
-#ifdef MODULE
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("adm1021 driver");
+MODULE_LICENSE("GPL");
 
 MODULE_PARM(read_only, "i");
 MODULE_PARM_DESC(read_only, "Don't set any values, read only mode");
 
-int init_module(void)
-{
-	return sensors_adm1021_init();
-}
-
-int cleanup_module(void)
-{
-	return adm1021_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sensors_adm1021_init)
+module_exit(sensors_adm1021_exit)
