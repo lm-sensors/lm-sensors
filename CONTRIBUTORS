@@ -90,3 +90,6 @@ problems.
   Author of the ADM1026 chip driver.
 * Sascha Volkenandt <sascha@akv-soft.de>
   Author of the SAA1064 chip driver.
+* John Morris (john.morris@spirentcom.com)
+  Author of the MAX6650 chip driver.
+  

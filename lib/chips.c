@@ -4443,6 +4443,25 @@ static sensors_chip_feature xeontemp_features[] =
     { 0 }
   };
 
+static sensors_chip_feature max6650_features[] =
+  {
+    { SENSORS_MAX6650_FAN1_TACH, "fan1", SENSORS_NO_MAPPING,
+                                 SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                                 MAX6650_SYSCTL_FAN1, VALUE(1), 0 },
+    { SENSORS_MAX6650_FAN2_TACH, "fan2", SENSORS_NO_MAPPING,
+                                 SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                                 MAX6650_SYSCTL_FAN2, VALUE(1), 0 },
+    { SENSORS_MAX6650_FAN3_TACH, "fan3", SENSORS_NO_MAPPING,
+                                 SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                                 MAX6650_SYSCTL_FAN3, VALUE(1), 0 },
+    { SENSORS_MAX6650_FAN4_TACH, "fan4", SENSORS_NO_MAPPING,
+                                 SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                                 MAX6650_SYSCTL_FAN4, VALUE(1), 0 },
+    { SENSORS_MAX6650_SPEED, "speed", SENSORS_NO_MAPPING,
+                                 SENSORS_NO_MAPPING, SENSORS_MODE_RW,
+                                 MAX6650_SYSCTL_SPEED, VALUE(1), 0 },
+  };
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -4511,5 +4530,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_LM83_PREFIX, lm83_features },
  { SENSORS_LM90_PREFIX, lm90_features },
  { SENSORS_XEONTEMP_PREFIX, xeontemp_features },
+ { SENSORS_MAX6650_PREFIX, max6650_features },
  { 0 }
 };

@@ -58,6 +58,7 @@ ask CVS about it:
   Module lm78: Fix a fan_div/fan_min bug
   Module lm83: Add t_crit and alarms support
   Module lm90: New
+  Module max6650: New
   Module saa1064: New
   Module w83781d: Enhance chip detection
   Module xeontemp: New

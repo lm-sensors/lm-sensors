@@ -380,6 +380,8 @@ void do_a_print(sensors_chip_name name)
     print_lm90(&name);
   else if (!strcmp(name.prefix,"xeontemp"))
     print_xeontemp(&name);
+  else if (!strcmp(name.prefix,"max6650"))
+    print_max6650(&name);
   else
     print_unknown_chip(&name);
   printf("\n");

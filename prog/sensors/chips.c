@@ -4511,6 +4511,55 @@ void print_xeontemp(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_max6650(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double tach, speed;
+  int valid, i;
+
+  static const struct
+  {
+    int tag;
+    char *name;
+  }
+  tach_list[] =
+  {
+    { SENSORS_MAX6650_FAN1_TACH, "FAN1" },
+    { SENSORS_MAX6650_FAN2_TACH, "FAN2" },
+    { SENSORS_MAX6650_FAN3_TACH, "FAN3" },
+    { SENSORS_MAX6650_FAN4_TACH, "FAN4" }
+  };
+
+  /* Display full config for fan1, which is controlled */
+
+  if (!sensors_get_label_and_valid(*name,tach_list[0].tag,&label,&valid) &&
+      !sensors_get_feature(*name,tach_list[0].tag,&tach) &&
+      !sensors_get_feature(*name,SENSORS_MAX6650_SPEED,&speed)) {
+    if (valid) {
+      print_label(label,10);
+      printf("configured %4.0f RPM, actual %4.0f RPM.\n", speed, tach);
+    }
+  } else
+    printf("ERROR: Can't get %s data!\n", tach_list[i].name);
+  free_the_label(&label);
+  
+  /* Just display the measured speed for the other three, uncontrolled fans */
+  
+  for (i = 1; i < 4; i++)
+  {
+    if (!sensors_get_label_and_valid(*name,tach_list[i].tag,&label,&valid) &&
+        !sensors_get_feature(*name,tach_list[i].tag,&tach)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%4.0f RPM  \n", tach);
+      }
+    } else
+      printf("ERROR: Can't get %s data!\n", tach_list[i].name);
+ 
+    free_the_label(&label);
+  }
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;

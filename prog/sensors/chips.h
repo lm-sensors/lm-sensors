@@ -55,5 +55,6 @@ extern void print_bmc(const sensors_chip_name *name);
 extern void print_lm83(const sensors_chip_name *name);
 extern void print_lm90(const sensors_chip_name *name);
 extern void print_xeontemp(const sensors_chip_name *name);
+extern void print_max6650(const sensors_chip_name *name);
 
 #endif /* def PROG_SENSORS_CHIPS_H */
