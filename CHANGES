@@ -19,8 +19,6 @@ ask CVS about it:
 
 2.6.4 (2002????)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
-  Module lm92: New
-  Module ds1307: New
   File doc/vid: New
   File include/sensors_vid.h: New
   File sensors.conf.eg: Add vt1211, smsc47m1
@@ -41,18 +39,20 @@ ask CVS about it:
   Module i2c-savage4: new
   Module i2c-viapro: Add support for VT8231 (0x8235), VT8233A (0x3147)
   Module i2c-voodoo3: Flush posted writes
+  Module ds1307: New
+  Module lm92: New
   Module smbus-arp: new
   Module smsc47m1: new
   Module via686a: Add support for VT8231 sensors
   Module vt1211: new
   Module w83781d: Add multiple VID version support; fix temp alarms
   Program eeprom: new
-  Program i2cdump: Add smbus block command specification
+  Program i2cdump: Add smbus block command specification, add PEC support
+  Program lm_sensors.init: new
   Program mkpatch: Add sensors_vid.h, i2c-savage4, lm92,
                    pcf8574, pcf8591, smsc47m1, vt1211
   Program p4b_smbus: Add support for ICH4
   Program rrd: Fix swapped CPU and MB temps in summ_week.cgi
-  Program lm_sensors.init: new
   Program sensord.init: Renamed, was prog/init/sensors
   Program sensord: Major update, now requires rrd source;
                    not compiled by default
