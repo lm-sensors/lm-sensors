@@ -49,5 +49,31 @@
 #define get_user_data(to,from) get_user(to,from)
 #endif
 
+/* If the new PCI interface is not present, fall back on the old PCI BIOS
+   interface. We also define some things to unite both interfaces. Not
+   very nice, but it works like a charm. 
+   device is the 2.1 struct pci_dev, bus is the 2.0 bus number, dev is the
+   2.0 device/function code, com is the PCI command, and res is the result. */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))
+#define pci_present pcibios_present
+#define pci_read_config_byte_united(device,bus,dev,com,res) \
+                            pcibios_read_config_byte(bus,dev,com,res);
+#define pci_read_config_word_united(device,bus,dev,com,res) \
+                            pcibios_read_config_word(bus,dev,com,res);
+#define pci_write_config_byte_united(device,bus,dev,com,res) \
+                            pcibios_write_config_byte(bus,dev,com,res);
+#define pci_write_config_word_united(device,bus,dev,com,res) \
+                            pcibios_write_config_word(bus,dev,com,res);
+#else
+#define pci_read_config_byte_united(device,bus,dev,com,res) \
+                            pci_read_config_byte(device,com,res);
+#define pci_read_config_word_united(device,bus,dev,com,res) \
+                            pci_read_config_word(device,com,res);
+#define pci_write_config_byte_united(device,bus,dev,com,res) \
+                            pci_write_config_byte(device,com,res);
+#define pci_write_config_word_united(device,bus,dev,com,res) \
+                            pci_write_config_byte(device,com,res);
+#endif
+
 
 #endif /* SENSORS_COMPAT_H */

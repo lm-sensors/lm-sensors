@@ -18,26 +18,57 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* Note: New PCI (non-BIOS) interface introduced in 2.1.54! */
+/* Note: we assume there can only be one PIIX4, with one SMBus interface */
 
+#include <linux/module.h>
 #include <linux/pci.h>
 #include <asm/io.h>
-#include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/stddef.h>
+#include <linux/sched.h>
+#include <linux/ioport.h>
 #include "smbus.h"
 #include "version.h"
 #include "compat.h"
-#include "piix4.h"
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))
+#include <linux/bios32.h>
+#endif
+
+
+/* PIIX4 SMBus address offsets */
+#define SMBHSTSTS (0 + piix4_smba)
+#define SMBHSLVSTS (1 + piix4_smba)
+#define SMBHSTCNT (2 + piix4_smba)
+#define SMBHSTCMD (3 + piix4_smba)
+#define SMBHSTADD (4 + piix4_smba)
+#define SMBHSTDAT0 (5 + piix4_smba)
+#define SMBHSTDAT1 (6 + piix4_smba)
+#define SMBBLKDAT (7 + piix4_smba)
+#define SMBSLVCNT (8 + piix4_smba)
+#define SMBSHDWCMD (9 + piix4_smba)
+#define SMBSLVEVT (0xA + piix4_smba)
+#define SMBSLVDAT (0xC + piix4_smba)
+
+/* PCI Address Constants */
+#define SMBBA     0x090
+#define SMBHSTCFG 0x0D2
+#define SMBSLVC   0x0D3
+#define SMBSHDW1  0x0D4
+#define SMBSHDW2  0x0D5
+#define SMBREV    0x0D6
+
+/* Other settings */
+#define MAX_TIMEOUT 500
+#define  ENABLE_INT9 0
 
 static int piix4_init(void);
 static int piix4_cleanup(void);
 static int piix4_setup(void);
 static s32 piix4_access(u8 addr, char read_write,
                         u8 command, int size, union smbus_data * data);
-/* Internal functions */
-static void do_pause( unsigned int amount );
-static int SMBus_PIIX4_Transaction(void);
+static void piix4_do_pause( unsigned int amount );
+static int piix4_transaction(void);
 
 #ifdef MODULE
 extern int init_module(void);
@@ -46,62 +77,70 @@ extern int cleanup_module(void);
 
 static struct smbus_adapter piix4_adapter;
 static int piix4_initialized;
-
-/* Global variables  -- At least some of these may be modified/moved later */
-static unsigned short PIIX4_smba = 0;
-static struct semaphore smbus_piix4_sem = MUTEX;
+static unsigned short piix4_smba = 0;
 
 
-/* Detect whether a PIIX4 can be found, and initialize it, where necessary. 
-   Return -ENODEV if not found. */
+/* Detect whether a PIIX4 can be found, and initialize it, where necessary.
+   Note the differences between kernels with the old PCI BIOS interface and
+   newer kernels with the real PCI interface. In compat.h some things are
+   defined to make the transition easier. */
 int piix4_setup(void)
 {
   int error_return=0;
   unsigned char temp;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   struct pci_dev *PIIX4_dev;
 #else
   unsigned char PIIX4_bus, PIIX4_devfn;
+  int i,res;
 #endif
 
+  /* First check whether we can access PCI at all */
   if (pci_present() == 0) {
-    printk("SMBus: Error: No PCI-bus found!\n");
+    printk("piix4.o: Error: No PCI-bus found!\n");
     error_return=-ENODEV;
-  } else {
+    goto END;
+  }
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,0))
+  /* Look for the PIIX4, function 3 */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
+  /* Note: we keep on searching until we have found 'function 3' */
+  PIIX4_dev = NULL;
+  do
     PIIX4_dev = pci_find_device(PCI_VENDOR_ID_INTEL, 
-                                 PCI_DEVICE_ID_INTEL_82371AB_0, NULL);
-    if(PIIX4_dev == NULL) {
-#else
-    if(pcibios_find_device(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371AB_0, 
-                           0, &PIIX4_bus, &PIIX4_devfn)) {
-#endif
-      printk("SMBus: Error: Can't detect PIIX4!\n");
-      error_return=-ENODEV;
-    } else {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,0))
-      /* For some reason, pci_read_config fails here sometimes! */
-      pcibios_read_config_word(PIIX4_dev->bus->number, PIIX4_dev->devfn | 3, 
-                               SMBBA, &PIIX4_smba);
-#else
-      pci_read_config_word_united(PIIX4_dev, PIIX4_bus ,PIIX4_devfn | 3,
-                                  SMBBA,&PIIX4_smba);
-#endif
-      PIIX4_smba &= 0xfff0;
-      if (check_region(PIIX4_smba, 8)) {
-        printk("PIIX4_smb region 0x%x already in use!\n",
-               PIIX4_smba);
-        error_return=-ENODEV;
-      } else {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,0))
-        pcibios_read_config_byte(PIIX4_dev->bus->number, 
-		PIIX4_dev->devfn | 3, SMBHSTCFG, &temp);
-#else
-        pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn | 3, 
-                                    SMBHSTCFG, &temp);
-#endif
+                                PCI_DEVICE_ID_INTEL_82371AB_0, PIIX4_dev);
+  while(PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 3);
+  if(PIIX4_dev == NULL) {
+#else /* LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54) */
+  for (i = 0; 
+       ! (res = pcibios_find_device(PCI_VENDOR_ID_INTEL,
+                                    PCI_DEVICE_ID_INTEL_82371AB_0,
+                                    i,&PIIX4_bus, &PIIX4_devfn)) && 
+         PCI_FUNC(PIIX4_devfn) != 3; 
+       i++);
+  if (res) {
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
+    printk("piix4.o: Error: Can't detect PIIX4, function 3!\n");
+    error_return=-ENODEV;
+    goto END;
+  } 
+
+/* Determine the address of the SMBus areas */
+  pci_read_config_word_united(PIIX4_dev, PIIX4_bus ,PIIX4_devfn,
+                              SMBBA,&piix4_smba);
+  piix4_smba &= 0xfff0;
+
+  if (check_region(piix4_smba, 8)) {
+    printk("piix4.o: PIIX4_smb region 0x%x already in use!\n", piix4_smba);
+    error_return=-ENODEV;
+    goto END;
+  }
+
+  pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn, 
+                              SMBHSTCFG, &temp);
+
+
 #ifdef FORCE_PIIX4_ENABLE
 /* This should never need to be done, but has been noted that
    many Dell machines have the SMBus interface on the PIIX4
@@ -109,65 +148,57 @@ int piix4_setup(void)
    done by the Bios!  Don't complain if your hardware does weird 
    things after enabling this. :') Check for Bios updates before
    resorting to this.  */
-	if ((temp & 1) == 0) {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,0))
-          pcibios_write_config_byte(PIIX4_dev->bus->number, PIIX4_dev->devfn | 3, 
-                               SMBHSTCFG, temp | 1);
-#else
-          pcibios_write_config_byte(PIIX4_bus, PIIX4_devfn | 3, SMBHSTCFG, temp | 1);
-#endif
-	  printk("SMBus: WARNING: PIIX4 SMBus interface has been FORCEFULLY ENABLED!!\n");
-	  /* Update configuration value */
-          pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn | 3, SMBHSTCFG, &temp);
-	  /* Note: We test the bit again in the next 'if' just to be sure... */
-	}
-#endif
-	if ((temp & 1) == 0) {
-          printk("SMBUS: Error: Host SMBus controller not enabled!\n");     
-          piix4_initialized=0;
-	  error_return=-ENODEV;
-	} else {
-        	/* Everything is happy, let's grab the memory and set things up. */
-        	request_region(PIIX4_smba, 8, "SMBus");       
-        	piix4_initialized=1;
-	}
-#ifdef DEBUG
-        if ((temp & 0x0E) == 8)
-          printk("SMBUS: PIIX4 using Interrupt 9 for SMBus.\n");
-        else if ((temp & 0x0E) == 0)
-          printk("SMBUS: PIIX4 using Interrupt SMI# for SMBus.\n");
-        else 
-          printk( "SMBUS: PIIX4: Illegal Interrupt configuration (or code out of date)!\n");
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,0))
-        pcibios_read_config_byte(PIIX4_dev->bus->number, 
-		PIIX4_dev->devfn | 3, SMBREV, &temp);
-#else
-        pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn | 3, 
-                                    SMBREV, &temp);
-#endif
-        printk("SMBUS: SMBREV = 0x%X\n",temp);
-#endif
-      }
-    }
-  if (error_return)
-    printk("SMBus setup failed.\n");
-#ifdef DEBUG
-  else
-    printk("PIIX4_smba = 0x%X\n",PIIX4_smba);
-#endif
+  if ((temp & 1) == 0) {
+    pcibios_write_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
+                                     SMBHSTCFG, temp | 1);
+    printk("piix4.0: WARNING: PIIX4 SMBus interface has been FORCEFULLY "
+           "ENABLED!!\n");
+    /* Update configuration value */
+    pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
+                                SMBHSTCFG, &temp);
+    /* Note: We test the bit again in the next 'if' just to be sure... */
   }
+#endif /* FORCE_PIIX4_ENABLE */
+
+  if ((temp & 1) == 0) {
+    printk("SMBUS: Error: Host SMBus controller not enabled!\n");     
+    error_return=-ENODEV;
+    goto END;
+  }
+
+  /* Everything is happy, let's grab the memory and set things up. */
+  request_region(piix4_smba, 8, "SMBus");       
+
+#ifdef DEBUG
+  if ((temp & 0x0E) == 8)
+     printk("piix4.o: PIIX4 using Interrupt 9 for SMBus.\n");
+  else if ((temp & 0x0E) == 0)
+     printk("piix4.o: PIIX4 using Interrupt SMI# for SMBus.\n");
+  else 
+     printk("piix4.o: PIIX4: Illegal Interrupt configuration (or code out "
+            "of date)!\n");
+
+  pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn, SMBREV, 
+                              &temp);
+  printk("piix4.o: SMBREV = 0x%X\n",temp);
+  printk("piix4.o: PIIX4_smba = 0x%X\n",piix4_smba);
+#endif /* DEBUG */
+
+END:
   return error_return;
 }
 
+
 /* Internally used pause function */
-void do_pause( unsigned int amount )
+void piix4_do_pause( unsigned int amount )
 {
       current->state = TASK_INTERRUPTIBLE;
-      schedule_timeout(amount);
+      current->timeout = jiffies + amount;
+      schedule();
 }
 
 /* Another internally used function */
-int SMBus_PIIX4_Transaction(void) 
+int piix4_transaction(void) 
 {
   int temp;
   int result=0;
@@ -176,17 +207,17 @@ int SMBus_PIIX4_Transaction(void)
   /* Make sure the SMBus host is ready to start transmitting */
   if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-    printk("SMBus: SMBus_Read: SMBus busy (%02x). Resetting... ",temp);
+    printk("piix4.o: SMBus busy (%02x). Resetting... ",temp);
 #endif
     outb_p(temp, SMBHSTSTS);
     if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-      printk("Failed! (%02x)\n",temp);
+      printk("piix4.o: Failed! (%02x)\n",temp);
 #endif
       return -1;
     } else {
 #ifdef DEBUG
-      printk("Successfull!\n");
+      printk("piix4.o: Successfull!\n");
 #endif
     }
   }
@@ -195,20 +226,20 @@ int SMBus_PIIX4_Transaction(void)
   outb_p(inb(SMBHSTCNT) | 0x040, SMBHSTCNT); 
 
   /* Wait for a fraction of a second! (See PIIX4 docs errata) */
-  do_pause(1);
+  piix4_do_pause(1);
 
   /* Poll Host_busy bit */
   temp=inb_p(SMBHSTSTS) & 0x01;
   while (temp & (timeout++ < MAX_TIMEOUT)) {
     /* Wait for a while and try again*/
-    do_pause(1);
+    piix4_do_pause(1);
     temp = inb_p(SMBHSTSTS) & 0x01;
   }
 
   /* If the SMBus is still busy, we give up */
   if (timeout >= MAX_TIMEOUT) {
 #ifdef DEBUG
-    printk("SMBus: SMBus_Read: SMBus Timeout!\n"); 
+    printk("piix4.o: SMBus Timeout!\n"); 
     result = -1;
 #endif
   }
@@ -218,20 +249,21 @@ int SMBus_PIIX4_Transaction(void)
   if (temp  & 0x10) {
     result = -1;
 #ifdef DEBUG
-    printk("SMBus error: Failed bus transaction\n");
+    printk("piix4.o: Error: Failed bus transaction\n");
 #endif
   }
 
   if (temp & 0x08) {
     result = -1;
-    printk("SMBus error: Bus collision! SMBus may be locked until next hard reset. (sorry!)\n");
+    printk("piix4.o: Bus collision! SMBus may be locked until next hard
+           reset. (sorry!)\n");
     /* Clock stops and slave is stuck in mid-transmission */
   }
 
   if (temp & 0x04) {
     result = -1;
 #ifdef DEBUG
-    printk("SMBus error: no response!\n");
+    printk("piix4.o: Error: no response!\n");
 #endif
   }
 
@@ -240,7 +272,7 @@ int SMBus_PIIX4_Transaction(void)
 
   if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-    printk("SMBus error: Failed reset at end of transaction (%02x)\n",temp);
+    printk("piix4.o: Failed reset at end of transaction (%02x)\n",temp);
 #endif
   }
   return result;
@@ -251,8 +283,6 @@ s32 piix4_access(u8 addr, char read_write,
                  u8 command, int size, union smbus_data * data)
 {
   int i,len;
-
-  down(&smbus_piix4_sem);
 
   outb_p((size & 0x1C) + (ENABLE_INT9 & 1), SMBHSTCNT);
 
@@ -296,16 +326,36 @@ s32 piix4_access(u8 addr, char read_write,
       }
   }
 
-  if (SMBus_PIIX4_Transaction()) { /* Error in transaction */ 
-    up(&smbus_piix4_sem);
+  if (piix4_transaction()) /* Error in transaction */ 
     return -1; 
-  }
+  
 
-  if ((read_write == SMBUS_WRITE) || (size == SMBUS_QUICK)) {
-    up(&smbus_piix4_sem);
+  if ((read_write == SMBUS_WRITE) || (size == SMBUS_QUICK))
     return 0;
+  
+
+  switch(size) {
+    case SMBUS_BYTE: /* Where is the result put? I assume here it is in
+                        SMBHSTDAT0 but it might just as well be in the
+                        SMBHSTCMD. No clue in the docs */
+ 
+      data->byte = inb_p(SMBHSTDAT0);
+      break;
+    case SMBUS_BYTE_DATA:
+      data->byte = inb_p(SMBHSTDAT0);
+      break;
+    case SMBUS_WORD_DATA:
+      data->word = inb_p(SMBHSTDAT0) + (inb_p(SMBHSTDAT1) << 8);
+      break;
+    case SMBUS_BLOCK_DATA:
+      data->block[0] = inb_p(SMBHSTDAT0);
+      i = inb_p(SMBHSTCNT); /* Reset SMBBLKDAT */
+      for (i = 1; i <= data->block[0]; i++)
+        data->block[i] = inb_p(SMBBLKDAT);
+      break;
   }
-}  
+  return 0;
+}
 
 
 int piix4_init(void)
@@ -352,10 +402,8 @@ int piix4_cleanup(void)
       piix4_initialized=0;
   }
   if (piix4_initialized >= 1) {
-    if (piix4_initialized) {
-		release_region(PIIX4_smba, 8);
-		piix4_initialized=0;
-    }
+    release_region(piix4_smba, 8);
+    piix4_initialized=0;
   }
   return 0;
 }

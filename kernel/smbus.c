@@ -74,21 +74,21 @@ s32 smbus_access (struct i2c_adapter * adapter, u8 addr, char read_write,
                   u8 command, int size, union smbus_data * data)
 {
   int res;
+  if (adapter->id & ALGO_SMBUS) {
 #ifdef SPINLOCK
-  spin_lock_irqsave(&adapter->lock,adapter->lockflags);
+    spin_lock_irqsave(&adapter->lock,adapter->lockflags);
 #else
-  down(&adapter->lock);
+    down(&adapter->lock);
 #endif
-  if (adapter->id & ALGO_SMBUS) 
     res = ((struct smbus_adapter *) adapter) -> 
            smbus_access(addr,read_write,command,size,data);
-  else
-    res = smbus_access_i2c(adapter,addr,read_write,command,size,data);
 #ifdef SPINLOCK
-  spin_unlock_irqrestore(&adapter->lock,adapter->lockflags);
+    spin_unlock_irqrestore(&adapter->lock,adapter->lockflags);
 #else
-  up(&adapter->lock);
+    up(&adapter->lock);
 #endif
+  } else
+    res = smbus_access_i2c(adapter,addr,read_write,command,size,data);
   return res;
 }
   

@@ -20,6 +20,8 @@
 #ifndef SENSORS_SMBUS_H
 #define SENSORS_SMBUS_H
 
+#ifdef __KERNEL__
+
 /* This file must interface with Simon Vogl's i2c driver. Version 19981006 is
    OK, earlier versions are not; later versions will probably give problems
    too. 
@@ -284,6 +286,8 @@ extern inline int smbus_write_block_data(struct i2c_adapter * adapter,
 #define smbus_detach_client(clientptr) \
 	i2c_detach_client((struct i2c_client *) (clientptr))
 
+
+#endif /* def __KERNEL__ */
 
 #endif /* ndef SENSORS_SMBUS_H */
 
