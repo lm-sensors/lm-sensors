@@ -223,7 +223,7 @@ static ctl_table gl518_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &gl518_temp },
   { GL518_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &gl518_fan_div },
-  { GL518_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { GL518_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &gl518_alarms },
   { GL518_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &gl518_beep },

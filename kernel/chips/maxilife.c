@@ -246,7 +246,7 @@ static ctl_table maxi_dir_table_template[] = {
      &sensors_sysctl_real, NULL, &maxi_vid },
    { MAXI_SYSCTL_VID4, "vid4", NULL, 0, 0644, NULL, &sensors_proc_real,
      &sensors_sysctl_real, NULL, &maxi_vid },
-   { MAXI_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &sensors_proc_real,
+   { MAXI_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
      &sensors_sysctl_real, NULL, &maxi_alarms },
    { 0 }
 };

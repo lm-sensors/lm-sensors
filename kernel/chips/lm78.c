@@ -277,11 +277,11 @@ static ctl_table lm78_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &lm78_fan },
   { LM78_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &lm78_temp },
-  { LM78_SYSCTL_VID, "vid", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { LM78_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &lm78_vid },
   { LM78_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &lm78_fan_div },
-  { LM78_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { LM78_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &lm78_alarms },
   { 0 }
 };

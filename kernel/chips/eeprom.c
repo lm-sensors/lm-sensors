@@ -95,21 +95,21 @@ static struct i2c_driver eeprom_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table eeprom_dir_table_template[] = {
-  { EEPROM_SYSCTL1, "data0-15", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { EEPROM_SYSCTL1, "data0-15", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL2, "data16-31", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { EEPROM_SYSCTL2, "data16-31", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL3, "data32-47", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { EEPROM_SYSCTL3, "data32-47", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL4, "data48-63", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { EEPROM_SYSCTL4, "data48-63", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL5, "data64-79", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { EEPROM_SYSCTL5, "data64-79", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL6, "data80-95", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { EEPROM_SYSCTL6, "data80-95", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL7, "data96-111", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { EEPROM_SYSCTL7, "data96-111", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL8, "data112-127", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { EEPROM_SYSCTL8, "data112-127", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
   { 0 }
 };

@@ -96,7 +96,7 @@ static struct i2c_driver icspll_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table icspll_dir_table_template[] = {
-  { ICSPLL_SYSCTL1, "reg0-6", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { ICSPLL_SYSCTL1, "reg0-6", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &icspll_contents },
   { 0 }
 };

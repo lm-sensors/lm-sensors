@@ -254,7 +254,7 @@ static ctl_table lm80_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &lm80_temp },
   { LM80_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &lm80_fan_div },
-  { LM80_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { LM80_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &lm80_alarms },
   { 0 }
 };

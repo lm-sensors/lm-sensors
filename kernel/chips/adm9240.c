@@ -305,11 +305,11 @@ static ctl_table adm9240_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &adm9240_temp },
   { ADM9240_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &adm9240_fan_div },
-  { ADM9240_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { ADM9240_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &adm9240_alarms },
   { ADM9240_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &adm9240_analog_out },
-  { ADM9240_SYSCTL_VID, "vid", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { ADM9240_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &adm9240_vid },
   { 0 }
 };
