@@ -4751,8 +4751,8 @@ void print_adm1031(const sensors_chip_name *name)
 	      print_label(label, 10);
 	      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)", cur, low, div);
 	      printf(" %s\n",
-		     alarms&(ADM1031_ALARM_FAN1_FLT<<(i*8))?"FAN_FAULT":
-		     alarms&((ADM1031_ALARM_FAN1_MIN<<(i*8)))?"ALARM":"");
+		     alarms&(ADM1031_ALARM_FAN1_FLT<<(i*8))?"FAULT":
+		     alarms&(ADM1031_ALARM_FAN1_MIN<<(i*8))?"ALARM":"");
 	  }
       } else
 	  printf("ERROR: Can't get fan%d data!\n", i+1);
