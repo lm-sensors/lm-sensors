@@ -10,6 +10,7 @@ kernel/busses/i2c-isa.c		drivers/i2c/i2c-isa.c
 kernel/busses/i2c-piix4.c	drivers/i2c/i2c-piix4.c
 kernel/busses/i2c-savage4.c	drivers/i2c/i2c-savage4.c
 kernel/busses/i2c-sis5595.c	drivers/i2c/i2c-sis5595.c
+kernel/busses/i2c-sis630.c	drivers/i2c/i2c-sis630.c
 kernel/busses/i2c-tsunami.c	drivers/i2c/i2c-tsunami.c
 kernel/busses/i2c-via.c		drivers/i2c/i2c-via.c
 kernel/busses/i2c-viapro.c	drivers/i2c/i2c-viapro.c
@@ -43,6 +44,7 @@ kernel/chips/smsc47m1.c		drivers/sensors/smsc47m1.c
 kernel/chips/thmc50.c		drivers/sensors/thmc50.c
 kernel/chips/via686a.c		drivers/sensors/via686a.c
 kernel/chips/vt1211.c		drivers/sensors/vt1211.c
+kernel/chips/vt8231.c		drivers/sensors/vt8231.c
 kernel/chips/w83781d.c		drivers/sensors/w83781d.c
 kernel/include/sensors.h	include/linux/sensors.h
 kernel/include/sensors_vid.h	include/linux/sensors_vid.h
