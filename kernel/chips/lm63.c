@@ -324,7 +324,7 @@ static int lm63_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry */
 	if ((err = i2c_register_entry(new_client, "lm63",
-	     lm63_dir_table_template)) < 0) {
+	     lm63_dir_table_template, THIS_MODULE)) < 0) {
 		printk(KERN_ERR "lm63: Failed registering directory entry\n");
 		goto ERROR2;
 	}

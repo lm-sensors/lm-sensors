@@ -433,7 +433,8 @@ int vt1211_detect(struct i2c_adapter *adapter, int address,
 
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
-					vt1211_dir_table_template)) < 0) {
+					vt1211_dir_table_template,
+					THIS_MODULE)) < 0) {
 		err = i;
 		goto ERROR4;
 	}

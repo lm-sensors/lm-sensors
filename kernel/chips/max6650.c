@@ -311,7 +311,8 @@ static int max6650_detect(struct i2c_adapter *adapter, int address, unsigned
      * Register a new directory entry.
      */
     if ((err = i2c_register_entry(new_client, type_name,
-                                    max6650_dir_table_template)) < 0) {
+                                    max6650_dir_table_template,
+				    THIS_MODULE)) < 0) {
 #ifdef DEBUG
         printk("max6650.o: Failed registering directory entry.\n");
 #endif

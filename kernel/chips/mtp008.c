@@ -443,7 +443,8 @@ int mtp008_detect(struct i2c_adapter *adapter, int address,
 	 * Register a new directory entry with the sensors module.
 	 */
 	if ((sysid = i2c_register_entry(new_client, type_name,
-					    mtp008_dir_table_template)) < 0) {
+					    mtp008_dir_table_template,
+					    THIS_MODULE)) < 0) {
 		err = sysid;
 		goto ERROR2;
 	}

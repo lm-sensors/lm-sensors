@@ -297,11 +297,13 @@ adm1031_detect(struct i2c_adapter *adapter, int address,
 
 	if (kind == adm1030) {
 		if ((err = i2c_register_entry(new_client, type_name,
-					      adm1030_dir_table_template)) < 0)
+					      adm1030_dir_table_template,
+					      THIS_MODULE)) < 0)
 			goto exit_detach;
 	} else if (kind == adm1031) {
 		if ((err = i2c_register_entry(new_client, type_name,
-					      adm1031_dir_table_template)) < 0)
+					      adm1031_dir_table_template,
+					      THIS_MODULE)) < 0)
 			goto exit_detach;
 	}
 

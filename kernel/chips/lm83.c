@@ -354,7 +354,7 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	 */
 
 	if ((err = i2c_register_entry(new_client, type_name,
-	     lm83_dir_table_template)) < 0)
+	     lm83_dir_table_template, THIS_MODULE)) < 0)
 	{
 #ifdef DEBUG
 		printk("lm83.o: Failed registering directory entry.\n");

@@ -1049,7 +1049,8 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
                                             w83791d_dir_table_template :
                                         (is_isa || kind == w83627hf) ?
 					   w83782d_isa_dir_table_template :
-					   w83782d_i2c_dir_table_template)) < 0) {
+					   w83782d_i2c_dir_table_template,
+					THIS_MODULE)) < 0) {
 		err = i;
 		goto ERROR7;
 	}

@@ -304,7 +304,8 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client,	type_name,
 					data->type == adm1021 ? adm1021_dir_table_template :
-					adm1021_max_dir_table_template)) < 0) {
+					adm1021_max_dir_table_template,
+					THIS_MODULE)) < 0) {
 		err = i;
 		goto error4;
 	}

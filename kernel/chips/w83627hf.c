@@ -718,7 +718,8 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 				(kind == w83627hf) ?
 				   w83627hf_dir_table_template :
 				   /* w83627thf table also used for 637 */
-				   w83627thf_dir_table_template)) < 0) {
+				   w83627thf_dir_table_template,
+				THIS_MODULE)) < 0) {
 		err = i;
 		goto ERROR7;
 	}

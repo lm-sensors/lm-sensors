@@ -218,7 +218,8 @@ int smbusarp_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR1;
 
 	if ((i = i2c_register_entry(new_client, type_name,
-					smbusarp_dir_table_template)) < 0) {
+					smbusarp_dir_table_template,
+					THIS_MODULE)) < 0) {
 		err = i;
 		goto ERROR4;
 	}

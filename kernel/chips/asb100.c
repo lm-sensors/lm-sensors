@@ -547,7 +547,7 @@ static int asb100_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register a new directory entry with module sensors */
 	if ((data->sysctl_id = i2c_register_entry(new_client, "asb100",
-			asb100_dir_table_template)) < 0) {
+			asb100_dir_table_template, THIS_MODULE)) < 0) {
 		err = data->sysctl_id;
 		goto ERROR3;
 	}

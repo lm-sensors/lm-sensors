@@ -408,7 +408,8 @@ static void bmcsensors_build_proc_table()
 	bmcsensors_dir_table[sdrd_count].ctl_name = 0;
 
 	if ((i = i2c_register_entry(&bmc_client, "bmc",
-				    bmcsensors_dir_table)) < 0) {
+				    bmcsensors_dir_table,
+				    THIS_MODULE)) < 0) {
 		printk(KERN_INFO "bmcsensors.o: i2c registration failed.\n");
 		kfree(bmcsensors_dir_table);
 		kfree(bmcsensors_proc_name_pool);

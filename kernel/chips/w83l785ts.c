@@ -270,7 +270,7 @@ static int w83l785ts_detect(struct i2c_adapter *adapter, int address,
 	 */
 
 	if ((err = i2c_register_entry(new_client, type_name,
-	    w83l785ts_dir_table_template)) < 0) {
+	    w83l785ts_dir_table_template, THIS_MODULE)) < 0) {
 #ifdef DEBUG
 		printk(KERN_ERR "w83l785ts.o: Failed registering directory "
 			"entry.\n");

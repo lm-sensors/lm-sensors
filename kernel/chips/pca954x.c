@@ -378,7 +378,8 @@ int pca954x_detect(struct i2c_adapter *adapter, int address,
 
 	/* Register new /proc directory entries with module sensors */
 	if ((i = i2c_register_entry(client, type_name,
-				    pca954x_dir_table_template)) < 0) {
+				    pca954x_dir_table_template,
+				    THIS_MODULE)) < 0) {
 		err = i;
 		goto ERROR2;
 	}

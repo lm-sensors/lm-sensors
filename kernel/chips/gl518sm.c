@@ -356,7 +356,8 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
-					gl518_dir_table_template)) < 0) {
+					gl518_dir_table_template,
+					THIS_MODULE)) < 0) {
 		err = i;
 		goto ERROR4;
 	}

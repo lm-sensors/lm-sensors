@@ -2282,7 +2282,7 @@ static int lm93_detect(struct i2c_adapter *adapter, int address,
 
 	/* register a new directory entry with module sensors */
 	if ((data->sysctl_id = i2c_register_entry(client, "lm93", 
-			lm93_dir_table_template)) < 0) {
+			lm93_dir_table_template, THIS_MODULE)) < 0) {
 		err = data->sysctl_id;
 		goto ERROR2;
 	}

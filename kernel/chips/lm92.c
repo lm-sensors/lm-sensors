@@ -341,7 +341,8 @@ static int lm92_detect (struct i2c_adapter *adapter,int address,unsigned short f
 		goto ERROR2;
 	}
 
-	if ((result = i2c_register_entry (client,client->name,lm92_dir_table)) < 0) {
+	if ((result = i2c_register_entry(client, client->name, lm92_dir_table,
+					 THIS_MODULE)) < 0) {
 		goto ERROR3;
 	}
 	data->sysctl_id = result;

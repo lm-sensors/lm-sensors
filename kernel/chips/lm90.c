@@ -443,7 +443,7 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	 */
 
 	if ((err = i2c_register_entry(new_client, type_name,
-	     lm90_dir_table_template)) < 0)
+	     lm90_dir_table_template, THIS_MODULE)) < 0)
 	{
 #ifdef DEBUG
 		printk("lm90.o: Failed registering directory entry.\n");

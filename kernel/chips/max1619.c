@@ -305,7 +305,7 @@ static int max1619_detect(struct i2c_adapter *adapter, int address,
 	 */
 
 	if ((err = i2c_register_entry(new_client, type_name,
-	     max1619_dir_table_template)) < 0) {
+	     max1619_dir_table_template, THIS_MODULE)) < 0) {
 		printk(KERN_ERR "max1619.o: Failed registering directory "
 		       "entry.\n");
 		goto ERROR2;

@@ -681,7 +681,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	}
 
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
-				    type_name, template)) < 0) {
+				    type_name, template, THIS_MODULE)) < 0) {
 		err = i;
 		goto ERROR2;
 	}

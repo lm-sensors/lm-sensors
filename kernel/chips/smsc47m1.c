@@ -284,7 +284,8 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
-					smsc47m1_dir_table_template)) < 0) {
+					smsc47m1_dir_table_template,
+					THIS_MODULE)) < 0) {
 		err = i;
 		goto ERROR4;
 	}
