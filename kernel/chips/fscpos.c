@@ -39,8 +39,9 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
-MODULE_LICENSE("GPL");
+/* temp. because wasn't in kernel 2.4.13 patch */
+#ifndef I2C_DRIVERID_FSCPOS
+#define I2C_DRIVERID_FSCPOS 1028
 #endif
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
@@ -757,6 +758,10 @@ EXPORT_NO_SYMBOLS;
 MODULE_AUTHOR
     ("Hermann Jung <hej@odn.de> based on work from Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("fujitsu siemens poseidon chip driver");
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
+
 
 int init_module(void)
 {
