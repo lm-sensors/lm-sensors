@@ -20,6 +20,9 @@
 #ifndef SENSORS_SENSORS_H
 #define SENSORS_SENSORS_H
 
+/* Next two must be included before sysctl.h can be included, in 2.0 kernels */
+#include <linux/types.h>
+#include <linux/fs.h>
 #include <linux/sysctl.h>
 
 #ifdef __KERNEL__
@@ -77,6 +80,7 @@ extern void sensors_deregister_entry(int id);
 /* Driver IDs */
 #define I2C_DRIVERID_I2CPROC 1001
 #define I2C_DRIVERID_LM78 1002
+#define I2C_DRIVERID_LM75 1003
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -100,5 +104,7 @@ extern void sensors_deregister_entry(int id);
 #define LM78_SYSCTL_VID 1300 /* Volts * 100 */
 #define LM78_SYSCTL_FAN_DIV 2000 /* 1, 2, 4 or 8 */
 #define LM78_SYSCTL_ALARMS 2001 /* bitvector */
+
+#define LM75_SYSCTL_TEMP 1200 /* Degrees Celcius * 10 */
 
 #endif /* def SENSORS_SENSORS_H */

@@ -12,10 +12,11 @@ Many, many things. Most notably:
 * Write piix4_* in piix4.c
 * Make lm78.c detect 'double hits', (same chip connected to both SMBus and
   ISA).
-* Better lm78 detection; insmod-time paramters to set addresses (difficult,
-  because of all i2c busses!).
+* Better lm78/lm75 detection; insmod-time paramters to set addresses 
+  (difficult, because of all i2c busses!).
 * Check whether some lm78 functionality is chip-generic and can be moved to
   sensors.c.
+* Registrate which i2c addresses are used (a la ISA) for each adapter.
 * Rename i2c-proc.c to i2c-user.c, and extend it with /dev entries;
   or, create a better i2c-dev.c, that understands SMBus commands.
 * Write all other drivers

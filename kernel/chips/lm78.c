@@ -442,7 +442,7 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
     /* Later on, we will keep a list of registered addresses for each
        adapter, and check whether they are used here */
 
-    if (smbus_read_byte_data(adapter,address,1) == 0xff) 
+    if (smbus_read_byte_data(adapter,address,LM78_REG_CONFIG) == 0xff) 
       continue;
 
     /* Real detection code goes here */
@@ -465,7 +465,8 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
       continue;
 
 
-    /* Allocate space for a new client structure */
+    /* Allocate space for a new client structure. To counter memory
+       ragmentation somewhat, we only do one kmalloc. */
     if (! (new_client = kmalloc(sizeof(struct i2c_client) + 
                                 sizeof(struct lm78_data),
                                GFP_KERNEL))) {

@@ -24,7 +24,7 @@ MODULE_DIR := src
 # defined value verbatim into the command-list of rules...
 SRCTARGETS := $(MODULE_DIR)/smbus.o $(MODULE_DIR)/piix4.o $(MODULE_DIR)/isa.o \
               $(MODULE_DIR)/lm78.o $(MODULE_DIR)/sensors.o  \
-              $(MODULE_DIR)/i2c-proc.o
+              $(MODULE_DIR)/i2c-proc.o $(MODULE_DIR)/lm75.o
 
 HEADERFILES := $(MODULE_DIR)/sensors.h 
 
