@@ -87,8 +87,8 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
 
 #define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
-                                                 ((val)+5)/10),0,255))
-#define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
+                                                 ((val)+5)/10), -128, 127))
+#define TEMP_FROM_REG(val) ((val)*10)
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            205-(val)*5)
@@ -130,9 +130,9 @@ struct lm78_data {
 	u8 in_min[7];		/* Register value */
 	u8 fan[3];		/* Register value */
 	u8 fan_min[3];		/* Register value */
-	u8 temp;		/* Register value */
-	u8 temp_over;		/* Register value */
-	u8 temp_hyst;		/* Register value */
+	s8 temp;		/* Register value */
+	s8 temp_over;		/* Register value */
+	s8 temp_hyst;		/* Register value */
 	u8 fan_div[3];		/* Register encoding, shifted right */
 	u8 vid;			/* Register encoding, combined */
 	u16 alarms;		/* Register encoding, combined */
