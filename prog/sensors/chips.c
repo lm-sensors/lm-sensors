@@ -4078,6 +4078,15 @@ void print_pc87366(const sensors_chip_name *name)
       printf("ERROR: Can't get TEMP%d overtemperature data!\n", i + 1);
     free_the_label(&label);
   }
+  
+  if (!sensors_get_label_and_valid(*name, SENSORS_PC87360_VID, &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_PC87360_VID, &cur)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%+6.3f V\n", cur);
+    }
+  }
+  free_the_label(&label);
 }
 
 static void lm92_print_temp (float n_cur,float n_high,float n_low,float n_crit,float n_hyst)
