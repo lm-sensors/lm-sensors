@@ -1,7 +1,7 @@
 Kernel driver `via686a.o'
 =========================
 
-Status: Complete and tested
+Status: Alpha.
 
 Supported chips:
   * Via 686a Southbridge Integrated Hardware Monitor
@@ -60,7 +60,7 @@ hardware registers are read whenever any data is read (unless it is less
 than 1.5 seconds since the last update). This means that you can easily
 miss once-only alarms.
 
-The Sis5595 only updates its values each 1.5 seconds; reading it more often
+The driver only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
 
 
