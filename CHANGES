@@ -38,7 +38,7 @@ ask CVS about it:
   Program eepromer: new
   Program mkpatch.pl: Fix dependencies on i2c-proc; disallow compilation
                       of sensors.c as a module in kernel
-  Program sensors: it87 updates
+  Program sensors: it87 updates; adjust temp. precision for some chips
   Program sensors-detect: Fix ADM1024 and ADM1025 detection;
                           recognize unsupported SiS chips;
                           recognize AMD 766 and Serverworks CSB5.

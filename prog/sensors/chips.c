@@ -1,6 +1,7 @@
 /*
     chips.c - Part of sensors, a user-space program for hardware monitoring
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (c) 1998, 1999, 2001  Frodo Looijaard <frodol@dds.nl>
+    and Mark D. Studebaker <mdsxyz123@yahoo.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,7 +29,7 @@
 static char *spacestr(int n);
 static void print_label(const char *label, int space);
 static void free_the_label(char **label);
-static void print_temp_info( float, float, float, int );
+static void print_temp_info(float, float, float, int, int, int);
 static inline float deg_ctof( float );
 
 extern int fahrenheit;
@@ -50,36 +51,34 @@ inline float deg_ctof( float cel )
 
 #define HYST 0
 #define MINMAX 1
-/* minmax = 0 for limit/hysteresis, 1 for max/min */
-void print_temp_info( float cur, float over, float hyst, int minmax )
+/* minmax = 0 for limit/hysteresis, 1 for max/min;
+   curprec and limitprec are # of digits after decimal point
+   for the current temp and the limits */
+void print_temp_info(float n_cur, float n_over, float n_hyst,
+                     int minmax, int curprec, int limitprec)
 {
    char degv[5];
 
-   float n_cur, 
-         n_over, 
-	 n_hyst;
-
-   if ( fahrenheit )
-   {
-      sprintf( degv, "%cF", 176 );
-      n_cur  = deg_ctof( cur  );
-      n_over = deg_ctof( over );
-      n_hyst = deg_ctof( hyst );
-   }
-   else
-   {
-      sprintf( degv, "%cC", 176 );
-      n_cur  = cur;
-      n_over = over;
-      n_hyst = hyst;
+   if (fahrenheit) {
+      sprintf(degv, "%cF", 176);
+      n_cur  = deg_ctof(n_cur);
+      n_over = deg_ctof(n_over);
+      n_hyst = deg_ctof(n_hyst);
+   } else {
+      sprintf(degv, "%cC", 176);
    }
 
+/* use %* to pass size and precision as arguments */
    if(minmax == MINMAX)
-	printf( "%+3.1f%s   (min = %+3.0f%s, max = %+3.0f%s)",
-           n_cur, degv, n_hyst, degv, n_over, degv );
+	printf( "%+6.*f%s  (min = %+*.*f%s, max = %+*.*f%s)",
+            curprec, n_cur, degv,
+	    limitprec + 4, limitprec, n_hyst, degv,
+	    limitprec + 4, limitprec, n_over, degv);
    else /* HYST */
-	printf( "%+3.1f%s   (limit = %+3.0f%s, hysteresis = %+3.0f%s)",
-           n_cur, degv, n_over, degv, n_hyst, degv );
+	printf( "%+6.*f%s  (limit = %+*.*f%s, hysteresis = %+*.*f%s)",
+	    curprec, n_cur, degv,
+	    limitprec + 4, limitprec, n_over, degv,
+	    limitprec + 4, limitprec, n_hyst, degv);
 }
 
 void print_label(const char *label, int space)
@@ -131,7 +130,7 @@ void print_ds1621(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_DS1621_TEMP_OVER,&over))  {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, over, hyst, MINMAX );
+      print_temp_info( cur, over, hyst, MINMAX, 2, 1);
       if (alarms & (DS1621_ALARM_TEMP_HIGH | DS1621_ALARM_TEMP_LOW)) {
         printf("ALARM (");
         if (alarms & DS1621_ALARM_TEMP_LOW) {
@@ -160,7 +159,7 @@ void print_lm75(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM75_TEMP_OVER,&over))  {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, over, hyst, HYST );
+      print_temp_info( cur, over, hyst, HYST, 1, 1);
       printf( "\n" );
     }
   } else
@@ -187,7 +186,7 @@ void print_adm1021(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1021_TEMP_OVER,&over))  {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, over, hyst, MINMAX );
+      print_temp_info( cur, over, hyst, MINMAX, 0, 0);
       if (alarms & (ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW)) {
         printf("ALARM (");
         i = 0;
@@ -212,7 +211,7 @@ void print_adm1021(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1021_REMOTE_TEMP_OVER,&over))  {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, over, hyst, MINMAX );
+      print_temp_info( cur, over, hyst, MINMAX, 0, 0);
       if (alarms & (ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW |
                     ADM1021_ALARM_RTEMP_NA)) {
         printf("ALARM (");
@@ -366,7 +365,7 @@ void print_adm9240(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM9240_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, HYST );
+      print_temp_info( cur, max, min, HYST, 1, 0);
       printf( " %s\n", alarms & ADM9240_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
@@ -510,7 +509,7 @@ void print_adm1024(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1024_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, min, max, HYST );
+      print_temp_info( cur, min, max, HYST, 1, 0);
       printf( " %s\n", alarms & ADM1024_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
@@ -523,7 +522,7 @@ void print_adm1024(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1024_TEMP1_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, min, max, HYST );
+      print_temp_info( cur, min, max, HYST, 1, 0);
       printf( " %s\n", alarms & ADM1024_ALARM_TEMP1 ? "ALARM" : "" );
     }
   } else
@@ -536,7 +535,7 @@ void print_adm1024(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1024_TEMP2_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, min, max, HYST );
+      print_temp_info( cur, min, max, HYST, 1, 0);
       printf( " %s\n", alarms & ADM1024_ALARM_TEMP2 ? "ALARM" : "" );
     }
   } else
@@ -655,7 +654,7 @@ void print_sis5595(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_SIS5595_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, HYST );
+      print_temp_info( cur, max, min, HYST, 0, 0);
       printf( " %s\n", alarms & SIS5595_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
@@ -777,7 +776,7 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, HYST );
+      print_temp_info( cur, max, min, HYST, 1, 0);
       printf(" %s\n", alarms & VIA686A_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
@@ -789,7 +788,7 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP2_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, HYST );
+      print_temp_info( cur, max, min, HYST, 1, 0);
       printf(" %s\n", alarms & VIA686A_ALARM_TEMP2 ? "ALARM" : "" );
     }
   } else
@@ -801,7 +800,7 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP3_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, HYST );
+      print_temp_info( cur, max, min, HYST, 1, 0);
       printf(" %s\n", alarms & VIA686A_ALARM_TEMP3 ? "ALARM" : "" );
     }
   } else
@@ -952,7 +951,7 @@ void print_lm78(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM78_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, HYST );
+      print_temp_info( cur, max, min, HYST, 1, 0);
       printf( " %s\n", alarms & LM78_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
@@ -1145,7 +1144,7 @@ void print_gl518(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_GL518_TEMP_HYST,&min)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, HYST );
+      print_temp_info( cur, max, min, HYST, 1, 0);
       printf("%s  %s\n", alarms&GL518_ALARM_TEMP?"ALARM":"     ",
              beeps&GL518_ALARM_TEMP?"(beep)":"");
     }
@@ -1259,7 +1258,7 @@ void print_adm1025(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1025_TEMP1_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX );
+      print_temp_info( cur, max, min, MINMAX, 1, 0);
       printf(" %s\n", alarms&ADM1025_ALARM_TEMP?"ALARM":"");
     }
   } else
@@ -1272,7 +1271,7 @@ void print_adm1025(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1025_TEMP2_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX );
+      print_temp_info( cur, max, min, MINMAX, 1, 0);
       printf(" %s\n", alarms&ADM1025_ALARM_RTEMP ? "ALARM":"");
     }
   } else
@@ -1581,7 +1580,7 @@ void print_lm87(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM87_TEMP1_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX );
+      print_temp_info( cur, max, min, MINMAX, 0, 0);
       printf(" %s%s\n", alarms&LM87_ALARM_TEMP1?"ALARM":"",
       	alarms&LM87_ALARM_THERM_SIG?" THERM#":"");
     }
@@ -1595,7 +1594,7 @@ void print_lm87(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM87_TEMP2_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX );
+      print_temp_info( cur, max, min, MINMAX, 0, 0);
       printf(" %s%s\n", alarms&LM87_ALARM_TEMP2?"ALARM":"",
       	alarms&LM87_ALARM_TEMP2_FAULT?" FAULT":"");
     }
@@ -1609,7 +1608,7 @@ void print_lm87(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM87_TEMP3_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX );
+      print_temp_info( cur, max, min, MINMAX, 0, 0);
       printf(" %s%s\n", alarms&LM87_ALARM_TEMP3?"ALARM":"",
       	alarms&LM87_ALARM_TEMP3_FAULT?" FAULT":"");
     }
@@ -1768,7 +1767,7 @@ void print_mtp008(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_MTP008_TEMP1_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, HYST );
+      print_temp_info( cur, max, min, HYST, 0, 0);
       printf(" %s\n", alarms&MTP008_ALARM_TEMP1?"ALARM":"");
     }
   } else
@@ -1781,7 +1780,7 @@ void print_mtp008(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_MTP008_TEMP2_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, HYST );
+      print_temp_info( cur, max, min, HYST, 0, 0);
       printf(" %s\n", alarms&MTP008_ALARM_TEMP2?"ALARM":"");
     }
   } else
@@ -1794,7 +1793,7 @@ void print_mtp008(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_MTP008_TEMP3_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, HYST );
+      print_temp_info( cur, max, min, HYST, 0, 0);
       printf(" %s\n", alarms&MTP008_ALARM_TEMP3?"ALARM":"");
     }
   } else
@@ -2009,13 +2008,13 @@ void print_w83781d(const sensors_chip_name *name)
     if (valid) {
       if((!is82d) && (!is83s)) {
         print_label(label,10);
-        print_temp_info( cur, max, min, HYST );
+        print_temp_info( cur, max, min, HYST, 1, 0);
         printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP1 ?"ALARM":"     ",
                beeps&W83781D_ALARM_TEMP1?"(beep)":"");
       } else {
         if(!sensors_get_feature(*name,SENSORS_W83781D_SENS1,&sens)) {
           print_label(label,10);
-          print_temp_info( cur, max, min, HYST );
+          print_temp_info( cur, max, min, HYST, 1, 0);
           printf( " sensor = %s   %s   %s\n",
                  (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                  "3904 transistor":"thermistor",
@@ -2037,13 +2036,13 @@ void print_w83781d(const sensors_chip_name *name)
     if (valid) {
       if((!is82d) && (!is83s)) {
         print_label(label,10);
-        print_temp_info( cur, max, min, HYST );
+        print_temp_info( cur, max, min, HYST, 0, 0);
         printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP2 ?"ALARM":"     ",
                beeps&W83781D_ALARM_TEMP2?"(beep)":"");
       } else {
         if(!sensors_get_feature(*name,SENSORS_W83781D_SENS2,&sens)) {
           print_label(label,10);
-          print_temp_info( cur, max, min, HYST );
+          print_temp_info( cur, max, min, HYST, 0, 0);
           printf( " sensor = %s   %s   %s\n",
                  (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                  "3904 transistor":"thermistor",
@@ -2066,13 +2065,13 @@ void print_w83781d(const sensors_chip_name *name)
       if (valid) {
         if(!is82d) {
           print_label(label,10);
-          print_temp_info( cur, max, min, HYST );
+          print_temp_info( cur, max, min, HYST, 0, 0);
           printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP2 ?"ALARM":"     ",
                  beeps&W83781D_ALARM_TEMP3?"(beep)":"");
         } else {
           if(!sensors_get_feature(*name,SENSORS_W83781D_SENS3,&sens)) {
             print_label(label,10);
-            print_temp_info( cur, max, min, HYST );
+            print_temp_info( cur, max, min, HYST, 0, 0);
             printf( " sensor = %s   %s   %s\n",
                    (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                    "3904 transistor":"thermistor",
@@ -2139,7 +2138,7 @@ void print_maxilife(const sensors_chip_name *name)
        !sensors_get_feature(*name, SENSORS_MAXI_CG_TEMP1_HYST, &min)) {
       if (valid && (cur || max || min)) {
          print_label(label, 12);
-	 print_temp_info( cur, max, min, HYST );
+	 print_temp_info( cur, max, min, HYST, 1, 0);
          printf("\n");
       }
    } else
@@ -2152,7 +2151,7 @@ void print_maxilife(const sensors_chip_name *name)
        !sensors_get_feature(*name, SENSORS_MAXI_CG_TEMP2_HYST, &min)) {
       if (valid && (cur || max || min)) {
          print_label(label, 12);
-	 print_temp_info( cur, max, min, HYST );
+	 print_temp_info( cur, max, min, HYST, 1, 0);
          printf(" %s\n", alarms&MAXI_ALARM_TEMP2 ? "ALARM" : "");
       }
    } else
@@ -2165,7 +2164,7 @@ void print_maxilife(const sensors_chip_name *name)
        !sensors_get_feature(*name, SENSORS_MAXI_CG_TEMP3_HYST, &min)) {
       if (valid && (cur || max || min)) {
          print_label(label, 12);
-	 print_temp_info( cur, max, min, HYST );
+	 print_temp_info( cur, max, min, HYST, 1, 0);
          printf("\n");
       }
    } else
@@ -2178,7 +2177,7 @@ void print_maxilife(const sensors_chip_name *name)
        !sensors_get_feature(*name, SENSORS_MAXI_CG_TEMP4_HYST, &min)) {
       if (valid && (cur || max || min)) {
          print_label(label, 12);
-	 print_temp_info( cur, max, min, HYST );
+	 print_temp_info( cur, max, min, HYST, 1, 0);
          printf(" %s\n", alarms&MAXI_ALARM_TEMP4 ? "ALARM" : "");
       }
    } else
@@ -2191,7 +2190,7 @@ void print_maxilife(const sensors_chip_name *name)
        !sensors_get_feature(*name, SENSORS_MAXI_CG_TEMP5_HYST, &min)) {
       if (valid && (cur || max || min)) {
          print_label(label, 12);
-	 print_temp_info( cur, max, min, HYST );
+	 print_temp_info( cur, max, min, HYST, 1, 0);
          printf(" %s\n", alarms&MAXI_ALARM_TEMP5 ? "ALARM" : "");
       }
    } else
@@ -2607,7 +2606,7 @@ void print_it87(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_IT87_TEMP1_HIGH,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX );
+      print_temp_info( cur, max, min, MINMAX, 0, 0);
       printf( " %s\n", alarms_temp & IT87_ALARM_TEMP1 ? "ALARM" : "" );
     }
   } else
@@ -2619,7 +2618,7 @@ void print_it87(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_IT87_TEMP2_HIGH,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX );
+      print_temp_info( cur, max, min, MINMAX, 0, 0);
       printf( " %s\n", alarms_temp & IT87_ALARM_TEMP2 ? "ALARM" : "" );
     }
   } else
@@ -2631,7 +2630,7 @@ void print_it87(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_IT87_TEMP3_HIGH,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX );
+      print_temp_info( cur, max, min, MINMAX, 0, 0);
       printf( " %s\n", alarms_temp & IT87_ALARM_TEMP3 ? "ALARM" : "" );
     }
   } else
