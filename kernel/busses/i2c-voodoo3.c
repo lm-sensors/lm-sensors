@@ -165,11 +165,13 @@ void Voodoo3_I2CStart(void)
 {
   clkon(); /* in theory, clk is already on */
   out();
+  out();
+  out();
+  out();
   dat(0);
   out();
   clkoff();
   out();
-  clkon();
 }
 
 void Voodoo3_I2CStop(void)
@@ -182,6 +184,7 @@ void Voodoo3_I2CStop(void)
   out();
   clkoff();
   out();
+  out();
   clkon();
   out();
 }
@@ -190,14 +193,13 @@ int Voodoo3_I2CAck(void)
 {
 int ack;
 
-  dat(1); /* put data line in tristate/hi */
-  clkon();
   out();
+  clkon();
   ack=rdat();
+  out();
   clkoff();
   out();
   return ack;
-
 }
 
 int Voodoo3_I2CReadByte(void)
@@ -205,16 +207,13 @@ int Voodoo3_I2CReadByte(void)
   int i,temp;
   unsigned char data=0;
 
-  clkoff();
-  out();
   for (i=7; i>=0; i--) {
-    out();
     out();
     clkon();
     data|=(rdat()<<i);
     out();
-    out();
     clkoff();
+    out();
   }
   temp=Voodoo3_I2CAck();
 #ifdef DEBUG
@@ -231,14 +230,12 @@ int Voodoo3_I2CSendByte(unsigned char data)
 {
   int i,temp;
 
-  clkoff();
-  out();
   for (i=7; i>=0; i--) {
     dat(temp=data&(1<<i));
     out();
     clkon();
     out();
-    dat(temp);
+//    dat(temp);
     out();
     clkoff();
     out();
@@ -293,7 +290,7 @@ int Voodoo3_I2CRead_byte_data(int addr,int command)
 	  goto ENDREAD2; }
         if (Voodoo3_I2CSendByte(command)) { 
 #ifdef DEBUG
-	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
+	  printk("i2c-voodoo3: No Ack on cmd WriteByte to addr 0x%X\n",addr);
 #endif
 	  this_dat=-1;
 	  goto ENDREAD2; }
@@ -403,7 +400,7 @@ int result=0;
 	goto ENDWRITE3; }
         if (Voodoo3_I2CSendByte((data &0x0FF00)>>8)) {
 #ifdef DEBUG
-	  printk("i2c-voodoo3: No Ack on data WriteByte to addr 0x%X\n",addr);
+	  printk("i2c-voodoo3: No Ack on data byte 2 WriteByte to addr 0x%X\n",addr);
 #endif
 	result=-1; }
 ENDWRITE3: Voodoo3_I2CStop();
@@ -429,7 +426,6 @@ void config_v3(struct pci_dev *dev, int num)
         cadr&=PCI_BASE_ADDRESS_MEM_MASK;
         mem=ioremap(cadr, 0x1000);
         
-        /* Enable TV out mode, Voodoo3_I2C bus, etc. */
         *((unsigned int *)(mem+0x70))=0x8160;
         *((unsigned int *)(mem+0x78))=0xcf980020;
 	printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%p\n",mem);
