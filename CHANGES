@@ -86,7 +86,9 @@ ask CVS about it:
   Program fancontrol: New
   Program lm_sensors.init: Call sensors -s in start()
   Program mkpatch: Fix vt8231 compile; keep tsunami from menu on non-alpha;
-                   add adm1026,lm85 support
+                   Add adm1026,lm85 support;
+                   Remove sensors.c file; add sensors_compat.h;
+                   Remove patches to i2c-core.c and drivers/char/mem.c
   Program p4b_smbus: Fix 'make install', install in same place as other modules
   Program pwmconfig, pwmtest: New
   Program sensors: add adm1026, lm85, w83791d support

@@ -10,7 +10,7 @@ OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
            !!! THIS PACKAGE REQUIRES i2c-2.8.0 or later!!!
 
-FOR 2.5 KERNELS, we do not recommend attempting to compile this package.
+FOR 2.5 KERNELS, Do not attempt to compile this package.
                  Use the drivers already in the 2.5 kernel development tree.
 
 =============================================================================
@@ -19,19 +19,24 @@ This is the completely rewritten version 2 of lm_sensors, a collection of
 modules for general SMBus access and hardware monitoring.
 Version 1 is now officially unsupported.
 
-WARNING! This package will kernels 2.4.9 - 2.4.xx only.
+WARNING! This package will work on kernels 2.4.9 - 2.4.xx only.
 Use lm_sensors-2.4.5 for 2.0 kernels.
 Use lm_sensors-2.7.0 for 2.2, 2.3, and 2.4.0 - 2.4.8 kernels.
-Use the kernel patches linked from our download page for 2.5 kernels.
+Use the drivers already in the kernel for 2.5 kernels; if you need
+additional drivers in 2.5 please port and submit them to us.
 
 WARNING! You must get the latest i2c package, i2c-2.8.0,
 EVEN IF your kernel does contain i2c support!!!!!!!!!
 
-Kernels 2.3.34 and later, and all 2.4.x kernels, contain the
-I2C package. Kernels 2.4.13 - 2.4.20 contain i2c-2.6.1,
-which is NOT sufficient for compilation of this package.
+The I2C package in existing 2.4 kernels is NOT sufficient
+for compilation of this package.
 
-See the lm_sensors download page for guidance:
+ADDITIONALLY, i2c-2.8.0 is not API compatible to earlier i2c
+releases due to struct changes; therefore you must NOT ENABLE
+any other i2c drivers (e.g. bttv) in the kernel.
+Do NOT use lm-sensors 2.8.0 or i2c-2.8.0 if you require bttv.
+
+See the lm_sensors download page for further guidance:
   http://secure.netroedge.com/~lm78/download.html
 
 
@@ -81,7 +86,8 @@ At least the following hardware sensor chips are supported:
   SMSC 47M1xx embedded sensors, EMC6D100, EMC6D101
   TI THMC10 and THMC50
   VIA Technologies VT1211 and VT82C686A/B embedded sensors
-  Winbond W83781D, W83782D, W83783S, W83627HF, and W83697HF
+  Winbond W83781D, W83782D, W83783S, W83791D,
+          W83627HF, W83627THF, and W83697HF
 
 
 We also support some miscellaneous chips:
