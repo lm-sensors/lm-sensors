@@ -56,6 +56,8 @@
 		if ((x) > TEMP_MAX) (x) = TEMP_MAX;		\
 	} while (0)
 
+#define PROC_TO_NATIVE(x) ((x) / 625)
+#define NATIVE_TO_PROC(x) ((x) * 625)
 #define CELSIUS(x) ((x) * 16)
 
 #define ENTRY(name,proc,perm,callback)		\
@@ -184,17 +186,17 @@ static void lm92_temp (struct i2c_client *client,int operation,int ctl_name,int 
 
 		if (operation == SENSORS_PROC_REAL_READ) {
 			lm92_read (client);
-			results[0] = data->temp.high;
-			results[1] = data->temp.low;
-			results[2] = data->temp.crit;
-			results[3] = data->temp.hyst;
-			results[4] = data->temp.input;
+			results[0] = NATIVE_TO_PROC (data->temp.high);
+			results[1] = NATIVE_TO_PROC (data->temp.low);
+			results[2] = NATIVE_TO_PROC (data->temp.crit);
+			results[3] = NATIVE_TO_PROC (data->temp.hyst);
+			results[4] = NATIVE_TO_PROC (data->temp.input);
 			*nrels_mag = 5;
 		} else if (operation == SENSORS_PROC_REAL_WRITE && *nrels_mag == 4) {
-			data->temp.high = results[0];
-			data->temp.low = results[1];
-			data->temp.crit = results[2];
-			data->temp.hyst = results[3];
+			data->temp.high = PROC_TO_NATIVE (results[0]);
+			data->temp.low = PROC_TO_NATIVE (results[1]);
+			data->temp.crit = PROC_TO_NATIVE (results[2]);
+			data->temp.hyst = PROC_TO_NATIVE (results[3]);
 			lm92_write (client);
 		} else if (operation == SENSORS_PROC_REAL_INFO) {
 			*nrels_mag = 0;
