@@ -142,6 +142,7 @@ static int adm1021_command(struct i2c_client *client, unsigned int cmd,
 static void adm1021_inc_use(struct i2c_client *client);
 static void adm1021_dec_use(struct i2c_client *client);
 static int adm1021_read_value(struct i2c_client *client, u8 reg);
+static int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg);
 static int adm1021_write_value(struct i2c_client *client, u8 reg,
 			       u16 value);
 static void adm1021_temp(struct i2c_client *client, int operation,
@@ -426,6 +427,19 @@ int adm1021_read_value(struct i2c_client *client, u8 reg)
 	return i2c_smbus_read_byte_data(client, reg);
 }
 
+/* only update value if read succeeded */
+int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg)
+{
+	int i;
+	i = i2c_smbus_read_byte_data(client, reg);
+	if(i < 0)
+		return i;
+	else {
+		*val = i;
+		return 0;
+	}
+}
+
 int adm1021_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
 	if (read_only > 0)
@@ -447,34 +461,33 @@ void adm1021_update_client(struct i2c_client *client)
 		printk("Starting adm1021 update\n");
 #endif
 
-		data->temp = adm1021_read_value(client, ADM1021_REG_TEMP);
-		data->temp_os =
-		    adm1021_read_value(client, ADM1021_REG_TOS_R);
-		data->temp_hyst =
-		    adm1021_read_value(client, ADM1021_REG_THYST_R);
-		data->remote_temp =
-		    adm1021_read_value(client, ADM1021_REG_REMOTE_TEMP);
-		data->remote_temp_os =
-		    adm1021_read_value(client, ADM1021_REG_REMOTE_TOS_R);
-		data->remote_temp_hyst =
-		    adm1021_read_value(client, ADM1021_REG_REMOTE_THYST_R);
-		data->alarms =
-		    adm1021_read_value(client, ADM1021_REG_STATUS) & 0xec;
+		adm1021_rd_good(&(data->temp), client, ADM1021_REG_TEMP);
+		adm1021_rd_good(&(data->temp_os), client, ADM1021_REG_TOS_R);
+		adm1021_rd_good(&(data->temp_hyst), client,
+		                ADM1021_REG_THYST_R);
+		adm1021_rd_good(&(data->remote_temp), client,
+		                ADM1021_REG_REMOTE_TEMP);
+		adm1021_rd_good(&(data->remote_temp_os), client,
+		                ADM1021_REG_REMOTE_TOS_R);
+		adm1021_rd_good(&(data->remote_temp_hyst), client,
+		                   ADM1021_REG_REMOTE_THYST_R);
+		if(!adm1021_rd_good(&(data->alarms), client,
+		                       ADM1021_REG_STATUS))
+			data->alarms &= 0xec;
 		if (data->type == adm1021)
-			data->die_code =
-			    adm1021_read_value(client,
-					       ADM1021_REG_DIE_CODE);
+			adm1021_rd_good(&(data->die_code), client,
+			                ADM1021_REG_DIE_CODE);
 		if (data->type == adm1023) {
-		  data->remote_temp_prec =
-		    adm1021_read_value(client, ADM1021_REG_REM_TEMP_PREC);
-		  data->remote_temp_os_prec =
-		    adm1021_read_value(client, ADM1021_REG_REM_TOS_PREC);
-		  data->remote_temp_hyst_prec =
-		    adm1021_read_value(client, ADM1021_REG_REM_THYST_PREC);
-		  data->remote_temp_offset =
-		    adm1021_read_value(client, ADM1021_REG_REM_OFFSET);
-		  data->remote_temp_offset_prec =
-		    adm1021_read_value(client, ADM1021_REG_REM_OFFSET_PREC);
+			adm1021_rd_good(&(data->remote_temp_prec), client,
+			                ADM1021_REG_REM_TEMP_PREC);
+			adm1021_rd_good(&(data->remote_temp_os_prec), client,
+			                ADM1021_REG_REM_TOS_PREC);
+			adm1021_rd_good(&(data->remote_temp_hyst_prec), client,
+			                ADM1021_REG_REM_THYST_PREC);
+			adm1021_rd_good(&(data->remote_temp_offset), client,
+			                   ADM1021_REG_REM_OFFSET);
+			adm1021_rd_good(&(data->remote_temp_offset_prec),
+			                   client, ADM1021_REG_REM_OFFSET_PREC);
 		}
 		data->last_updated = jiffies;
 		data->valid = 1;

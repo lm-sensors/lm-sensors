@@ -22,11 +22,13 @@ ask CVS about it:
   File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
   Library: Add support for exponents and logarithms for vt1211/vt8235 temps
   Makefile: Generate warnings if new library won't be found by ld.so
+  Module adm1021: Ignore failed reads and report old value
   Module i2c-i810.c: Fix for some chips
   Modules mtp008, smsc47m1, vt1211, vt8231, w83781d: Standardize and improve
           pwm and pwm enable support; update docs
   Module w83627hf: New
   Program mkpatch: Fix vt8231 compile; keep tsunami from menu on non-alpha
+  Program pwmtest: New
   Program sensors-detect: Add super i/o detection (smsc47m1, vt1211,
                           w83627hf, w83697hf)
 
