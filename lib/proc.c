@@ -395,14 +395,14 @@ struct match *m;
 struct match matches[] = {
 	{ "beeps", "beep_mask", 0 },
 	{ "pwm", "pwm1", 0 },
-	{ "rempte_temp", "temp_input1", TEMPMAG },
-	{ "remote_temp_hyst", "temp_hyst1", TEMPMAG },
-	{ "remote_temp_low", "temp_min1", TEMPMAG },
-	{ "remote_temp_over", "temp_max1", TEMPMAG },
-	{ "temp", "temp_input0", TEMPMAG },
-	{ "temp_hyst", "temp_hyst0", TEMPMAG },
-	{ "temp_low", "temp_min0", TEMPMAG },
-	{ "temp_over", "temp_max0", TEMPMAG },
+	{ "rempte_temp", "temp_input2", TEMPMAG },
+	{ "remote_temp_hyst", "temp_hyst2", TEMPMAG },
+	{ "remote_temp_low", "temp_min2", TEMPMAG },
+	{ "remote_temp_over", "temp_max2", TEMPMAG },
+	{ "temp", "temp_input1", TEMPMAG },
+	{ "temp_hyst", "temp_min1", TEMPMAG },		/* kernel patch pending for hyst */
+	{ "temp_low", "temp_min1", TEMPMAG },
+	{ "temp_over", "temp_max1", TEMPMAG },
 	{ NULL, NULL }
 };
 
@@ -472,7 +472,7 @@ struct match matches[] = {
 	}
 
 	if(sscanf(name, "temp%d_hys%c%c", &num, &last, &check) == 2 && last == 't') {
-		sprintf(sysname, "temp_min%d", num);
+		sprintf(sysname, "temp_min%d", num);	/* kernel patch pending for hyst */
 		*sysmag = TEMPMAG;
 		return 0;
 	}
