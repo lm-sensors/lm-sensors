@@ -45,8 +45,9 @@
 
 void help(void)
 {
-	fprintf(stderr, "Syntax: i2cdump I2CBUS ADDRESS [MODE] [BANK "
+	fprintf(stderr, "Syntax: i2cdump [-y] I2CBUS ADDRESS [MODE] [BANK "
 	        "[BANKREG]]\n"
+	        "        i2cdump -V\n"
 	        "  MODE is 'b[yte]', 'w[ord]', 's[mbusblock], 'i[2cblock]',\n"
 	        "       or 'c[onsecutive byte address mode]' (default b)\n"
 	        "  Append MODE with 'p' for PEC checking\n"
@@ -68,19 +69,34 @@ int main(int argc, char *argv[])
 	unsigned char cblock[256];
 	int block[256];
 	int pec = 0;
+	int flags = 0;
+	int yes = 0, version = 0;
 
-	if (argc < 2) {
-		fprintf(stderr, "Error: No i2c-bus specified!\n");
-		help();
-		exit(1);
+	/* handle (optional) flags first */
+	while (1+flags < argc && argv[1+flags][0] == '-') {
+		switch (argv[1+flags][1]) {
+		case 'V': version = 1; break;
+		case 'y': yes = 1; break;
+		default:
+			fprintf(stderr, "Warning: Unsupported flag "
+				"\"-%c\"!\n", argv[1+flags][1]);
+			help();
+			exit(1);
+		}
+		flags++;
 	}
 
-	if(!strcmp(argv[1], "-v") || !strcmp(argv[1], "-V")) {
+	if (version) {
 		fprintf(stderr, "i2cdump version %s\n", LM_VERSION);
 		exit(1);
 	}
 
-	i2cbus = strtol(argv[1], &end, 0);
+	if (argc < flags + 2) {
+		fprintf(stderr, "Error: No i2c-bus specified!\n");
+		help();
+		exit(1);
+	}
+	i2cbus = strtol(argv[flags+1], &end, 0);
 	if (*end) {
 		fprintf(stderr, "Error: First argument not a number!\n");
 		help();
@@ -92,12 +108,12 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (argc < 3) {
+	if (argc < flags + 3) {
 		fprintf(stderr, "Error: No address specified!\n");
 		help();
 		exit(1);
 	}
-	address = strtol(argv[2], &end, 0);
+	address = strtol(argv[flags+2], &end, 0);
 	if (*end) {
 		fprintf(stderr, "Error: Second argument not a number!\n");
 		help();
@@ -109,22 +125,22 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (argc < 4) {
+	if (argc < flags + 4) {
 		fprintf(stderr, "No size specified (using byte-data access)\n");
 		size = I2C_SMBUS_BYTE_DATA;
-	} else if (!strncmp(argv[3], "b", 1)) {
+	} else if (!strncmp(argv[flags+3], "b", 1)) {
 		size = I2C_SMBUS_BYTE_DATA;
-		pec = argv[3][1] == 'p';
-	} else if (!strncmp(argv[3], "w", 1)) {
+		pec = argv[flags+3][1] == 'p';
+	} else if (!strncmp(argv[flags+3], "w", 1)) {
 		size = I2C_SMBUS_WORD_DATA;
-		pec = argv[3][1] == 'p';
-	} else if (!strncmp(argv[3], "s", 1)) {
+		pec = argv[flags+3][1] == 'p';
+	} else if (!strncmp(argv[flags+3], "s", 1)) {
 		size = I2C_SMBUS_BLOCK_DATA;
-		pec = argv[3][1] == 'p';
-	} else if (!strncmp(argv[3], "c", 1)) {
+		pec = argv[flags+3][1] == 'p';
+	} else if (!strncmp(argv[flags+3], "c", 1)) {
 		size = I2C_SMBUS_BYTE;
-		pec = argv[3][1] == 'p';
-	} else if (!strcmp(argv[3], "i"))
+		pec = argv[flags+3][1] == 'p';
+	} else if (!strcmp(argv[flags+3], "i"))
 		size = I2C_SMBUS_I2C_BLOCK_DATA;
 	else {
 		fprintf(stderr, "Error: Invalid mode!\n");
@@ -132,8 +148,8 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (argc > 4) {
-		bank = strtol(argv[4], &end, 0);
+	if (argc > flags + 4) {
+		bank = strtol(argv[flags+4], &end, 0);
 		if (*end || size == I2C_SMBUS_I2C_BLOCK_DATA) {
 			fprintf(stderr, "Error: Invalid bank number!\n");
 			help();
@@ -152,8 +168,8 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 
-		if (argc > 5) {
-			bankreg = strtol(argv[5], &end, 0);
+		if (argc > flags + 5) {
+			bankreg = strtol(argv[flags+5], &end, 0);
 			if (*end || size == I2C_SMBUS_BLOCK_DATA) {
 				fprintf(stderr, "Error: Invalid bank register "
 				        "number!\n");
@@ -297,26 +313,37 @@ int main(int argc, char *argv[])
 #endif
 	}
 
-	fprintf(stderr, "WARNING! This program can confuse your I2C bus, "
-	        "cause data loss and worse!\n");
-	fprintf(stderr, "I will probe file %s, address 0x%x, mode %s\n",
-	        filename, address,
-	        size == I2C_SMBUS_BLOCK_DATA ? "smbus block" :
-	        size == I2C_SMBUS_I2C_BLOCK_DATA ? "i2c block" :
-	        size == I2C_SMBUS_BYTE ? "byte consecutive read" :
-	        size == I2C_SMBUS_BYTE_DATA ? "byte" : "word");
-	if (pec)
-		fprintf(stderr, "PEC checking enabled.\n");
-	if (bank) {
-		if (size == I2C_SMBUS_BLOCK_DATA)
-			fprintf(stderr, "Using command 0x%02x.\n", bank);
-		else
-			fprintf(stderr, "Probing bank %d using bank register "
-			        "0x%02x.\n", bank, bankreg);
+	if (!yes) {
+		char s[2];
+
+		fprintf(stderr, "WARNING! This program can confuse your I2C "
+		        "bus, cause data loss and worse!\n");
+
+		fprintf(stderr, "I will probe file %s, address 0x%x, mode "
+		        "%s\n", filename, address,
+		        size == I2C_SMBUS_BLOCK_DATA ? "smbus block" :
+		        size == I2C_SMBUS_I2C_BLOCK_DATA ? "i2c block" :
+		        size == I2C_SMBUS_BYTE ? "byte consecutive read" :
+		        size == I2C_SMBUS_BYTE_DATA ? "byte" : "word");
+		if (pec)
+			fprintf(stderr, "PEC checking enabled.\n");
+		if (bank) {
+			if (size == I2C_SMBUS_BLOCK_DATA)
+				fprintf(stderr, "Using command 0x%02x.\n",
+				        bank);
+			else
+				fprintf(stderr, "Probing bank %d using bank "
+				        "register 0x%02x.\n", bank, bankreg);
+		}
+
+		fprintf(stderr, "Continue? [Y/n] ");
+		fflush(stderr);
+		fgets(s, 2, stdin);
+		if (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y') {
+			fprintf(stderr, "Aborting on user request.\n");
+			exit(0);
+		}
 	}
-	fprintf(stderr, "You have five seconds to reconsider and press "
-	        "CTRL-C!\n\n");
-	sleep(5);
 
 	/* See Winbond w83781d data sheet for bank details */
 	if (bank && size != I2C_SMBUS_BLOCK_DATA) {
