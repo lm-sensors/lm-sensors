@@ -36,10 +36,6 @@ KERNEL MODULES
   something completely different from the description at page 25.
 * gl518sm: Assume that new values are close to old values, so start with
   trying to use a small range near the old values (already partially done)
-* lm78: Quote (gtoumi@messel.emse.fr)
-  exept the ALARM signals in front of non-working/non-presents fans : 
-  using the smbus adapter, the program sensors show the ALARM signal, 
-  but not when it uses the isa adapter
 
 
 LIBRARY
