@@ -2036,9 +2036,10 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
 #   compute fan2  @ / 2,  @ * 2    # 4 pulse per rev
 #   set fan2_ppr  4                # ADM1027 or ADT7463
 
-   ignore fan2
-   ignore fan3
-   ignore fan4
+# Ignore fans you (or your motherboard) don't have
+#   ignore fan2
+#   ignore fan3
+#   ignore fan4
 
 # Set VRM version
    set vrm  9.1   # Pentium 4
