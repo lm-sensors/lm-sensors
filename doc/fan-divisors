@@ -22,7 +22,8 @@ Fan Divisor	Minimum RPM	Maximum RPM
 
 Pick a divisor so that the nominal RPM is about 50%
 above the minimum. This is a good compromise between
-margin and accuracy.
+margin and accuracy. Note that most chips only support
+fan divisors of 1, 2, 4, and 8.
 
 If you have a 0 RPM reading some or all of the time,
 increase the divisor until you get good readings.
@@ -35,3 +36,12 @@ If you have a nominal reading more than 3 times the
 minimum, decrease the divisor to provide better
 accuracy.
 
+- How to change fan divisors:
+
+  Method 1: "echo x y z > /proc/sys/dev/sensors/...../fan_div"
+  where 'x y z' are the fan divisors for the three fans and '...'
+  is the sensor in question.
+
+  Method 2: Put an entry "set fanx_div y" in the appropriate section
+  of /etc/sensors.conf and rerun 'sensors -s'.
+  (x is the number of the fan 1-3 and y is the divisor).
