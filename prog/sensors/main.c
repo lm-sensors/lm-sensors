@@ -207,12 +207,11 @@ int main (int argc, char *argv[])
   open_config_file();
 
   if ((res = sensors_init(config_file))) {
-    if (res == SENSORS_ERR_PROC)
+    fprintf(stderr,"%s\n",sensors_strerror(res));
+    if (res == -SENSORS_ERR_PROC)
       fprintf(stderr,
-              "/proc/sys/dev/sensors/chips or /proc/bus/i2c unreadable:\n"
-              "Make sure you have inserted modules sensors.o and i2c-proc.o!");
-    else
-      fprintf(stderr,"%s\n",sensors_strerror(res));
+              "/proc/sys/dev/sensors/chips or /proc/bus/i2c unreadable;\n"
+              "Make sure you have done 'modprobe i2c-proc'!\n");
     exit(1);
   }
 
@@ -250,8 +249,16 @@ int do_the_real_work(void)
 void do_a_set(sensors_chip_name name)
 {
   int res;
-  if ((res = sensors_do_chip_sets(name))) 
-    fprintf(stderr,"%s: %s\n",sprintf_chip_name(name),sensors_strerror(res));
+  if ((res = sensors_do_chip_sets(name))) {
+    if (res == -SENSORS_ERR_PROC) {
+      fprintf(stderr,"%s: %s for writing;\n",sprintf_chip_name(name),
+              sensors_strerror(res));
+      fprintf(stderr,"Run as root?\n");
+    } else {
+      fprintf(stderr,"%s: %s\n",sprintf_chip_name(name),
+              sensors_strerror(res));
+    }
+  }
 }
 
 const char *sprintf_chip_name(sensors_chip_name name)
@@ -320,12 +327,12 @@ void do_a_print(sensors_chip_name name)
     print_w83781d(&name);
   else if (!strncmp(name.prefix,"maxilife-", 9))
     print_maxilife(&name);
+  else if (!strcmp(name.prefix,"it87"))
+    print_it87(&name);
   else if (!strcmp(name.prefix,"ddcmon"))
     print_ddcmon(&name);
   else if (!strcmp(name.prefix,"eeprom"))
     print_eeprom(&name);
-  else if (!strcmp(name.prefix,"it87"))
-    print_it87(&name);
   else
     print_unknown_chip(&name);
   printf("\n");
