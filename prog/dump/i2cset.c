@@ -207,15 +207,13 @@ int main(int argc, char *argv[])
 	} else
 	if (res != value) {
 		e1++;
-		if (size == I2C_SMBUS_WORD_DATA)
-			fprintf(stderr, "Warning - data mismatch - wrote "
-			        "0x%04x, read back 0x%04x\n", value, res);
-		else
-			fprintf(stderr, "Warning - data mismatch - wrote "
-			        "0x%02x, read back 0x%02x\n", value, res);
+		fprintf(stderr, "Warning - data mismatch - wrote "
+		        "0x%0*x, read back 0x%0*x\n",
+		        size == I2C_SMBUS_WORD_DATA ? 4 : 2, value,
+		        size == I2C_SMBUS_WORD_DATA ? 4 : 2, res);
 	} else {
-		fprintf(stderr, "Value 0x%x written, readback matched\n",
-		        value);
+		fprintf(stderr, "Value 0x%0*x written, readback matched\n",
+		        size == I2C_SMBUS_WORD_DATA ? 4 : 2, value);
 	}
 
 	exit(e1);
