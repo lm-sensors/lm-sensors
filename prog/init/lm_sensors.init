@@ -67,7 +67,7 @@ stop() {
 	test -r "$CONFIG" && . "$CONFIG"
 
         modules=`grep \^MODULE_ $CONFIG | wc -l`
-        i=$modules
+        i=`expr $modules`
         while [ $i -ge 0 ] ; do
                 module=`eval echo '$'MODULE_$i`
 		/sbin/modprobe -r $module &>/dev/null
