@@ -97,23 +97,21 @@ Chip Features
 Chip 'lm83'
 
 LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
-local_temp            -                     -                       R-     0
-local_temp_high       local_temp            local_temp              RW     0
-remote1_temp          -                     -                       R-     0
-remote1_temp_high     remote1_temp          remote1_temp            RW     0
-remote2_temp          -                     -                       R-     0
-remote2_temp_high     remote2_temp          remote2_temp            RW     0
-remote3_temp          -                     -                       R-     0
-remote3_temp_high     remote3_temp          remote3_temp            RW     0
+temp1                 -                     -                       R-     0
+temp1_high            temp1                 temp1                   RW     0
+temp2                 -                     -                       R-     0
+temp2_high            temp2                 temp2                   RW     0
+temp3                 -                     -                       R-     0
+temp3_high            temp3                 temp3                   RW     0
+temp4                 -                     -                       R-     0
+temp4_high            temp4                 temp4                   RW     0
 
 LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
-local_temp            SENSORS_LM83_LOCAL_TEMP                           temp1:2
-local_temp_high       SENSORS_LM83_LOCAL_HIGH                           temp1:1
-remote1_temp          SENSORS_LM83_REMOTE1_TEMP                         temp2:2
-remote1_temp_high     SENSORS_LM83_REMOTE1_HIGH                         temp2:1
-remote2_temp          SENSORS_LM83_REMOTE2_TEMP                         temp3:2
-remote2_temp_high     SENSORS_LM83_REMOTE2_HIGH                         temp3:1
-remote3_temp          SENSORS_LM83_REMOTE3_TEMP                         temp4:2
-remote3_temp_high     SENSORS_LM83_REMOTE3_HIGH                         temp4:1
-
-
+temp1                 SENSORS_LM83_LOCAL_TEMP                           temp1:2
+temp1_high            SENSORS_LM83_LOCAL_HIGH                           temp1:1
+temp2                 SENSORS_LM83_REMOTE1_TEMP                         temp2:2
+temp2_high            SENSORS_LM83_REMOTE1_HIGH                         temp2:1
+temp3                 SENSORS_LM83_REMOTE2_TEMP                         temp3:2
+temp3_high            SENSORS_LM83_REMOTE2_HIGH                         temp3:1
+temp4                 SENSORS_LM83_REMOTE3_TEMP                         temp4:2
+temp4_high            SENSORS_LM83_REMOTE3_HIGH                         temp4:1
