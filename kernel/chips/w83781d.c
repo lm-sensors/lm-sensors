@@ -25,13 +25,17 @@
 
     Chip	#vin	#fanin	#pwm	#temp	wchipid	i2c	ISA
     w83781d	7	3	0	3	0x10	yes	yes
-    w83782d	9	2-3	2-4	3	0x30	yes	yes
+    w83782d	9	3	2-4	3	0x30	yes	yes
     w83783s	5-6	3	2	1-2	0x40	yes	no
 
-    To do: PWM enable, clock, duty cycle
-	   782d beep 3 register
-           782d programmable pins
-           783s pin programmable for vin or temp. assume both now! no way to set.
+    To do:
+     782d/783s PWM enable, clock select, duty cycle
+     782d beep 3 register
+     782d programmable pins
+     783s pin is programmable for -5V or temp1; defaults to -5V,
+          no control in driver so temp1 doesn't work.
+     783s temp2 (labeled as temp1 in data sheet) at different location
+          than 781d/782d, not implemented yet.
 */
 
 #include <linux/module.h>
@@ -410,6 +414,8 @@ static ctl_table w83782d_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &w83781d_fan },
   { W83781D_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_fan },
+  { W83781D_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_fan },
   { W83781D_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_temp },
   { W83781D_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
@@ -430,8 +436,7 @@ static ctl_table w83782d_dir_table_template[] = {
 static ctl_table w83783s_dir_table_template[] = {
   { W83781D_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_in },
-  { W83781D_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &w83781d_in },
+  /* no in1 to maintain compatibility with 781d and 782d. */
   { W83781D_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_in },
   { W83781D_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
@@ -439,6 +444,8 @@ static ctl_table w83783s_dir_table_template[] = {
   { W83781D_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_in },
   { W83781D_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_in },
+  { W83781D_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_in },
   { W83781D_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_fan },
@@ -970,10 +977,8 @@ void w83781d_init_client(struct i2c_client *client)
                       FAN_TO_REG(W83781D_INIT_FAN_MIN_1,2));
   w83781d_write_value(client,W83781D_REG_FAN_MIN(2),
                       FAN_TO_REG(W83781D_INIT_FAN_MIN_2,2));
-  if(wchipid != W83782D_WCHIPID) {
-    w83781d_write_value(client,W83781D_REG_FAN_MIN(3),
-                        FAN_TO_REG(W83781D_INIT_FAN_MIN_3,2));
-  }
+  w83781d_write_value(client,W83781D_REG_FAN_MIN(3),
+                      FAN_TO_REG(W83781D_INIT_FAN_MIN_3,2));
 
   w83781d_write_value(client,W83781D_REG_TEMP_OVER,
                       TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
@@ -1015,18 +1020,17 @@ void w83781d_update_client(struct i2c_client *client)
     printk("Starting w83781d update\n");
 #endif
     for (i = 0; i <= 8; i++) {
+      if(data->wchipid == W83783S_WCHIPID  &&  i == 1)
+        continue; /* 783S has no in1 */
       data->in[i]     = w83781d_read_value(client,W83781D_REG_IN(i));
       data->in_min[i] = w83781d_read_value(client,W83781D_REG_IN_MIN(i));
       data->in_max[i] = w83781d_read_value(client,W83781D_REG_IN_MAX(i));
-      if((data->wchipid == W83783S_WCHIPID  &&  i == 5) ||
-         (data->wchipid == W83781D_WCHIPID  &&  i == 6))
+      if(data->wchipid != W83782D_WCHIPID  &&  i == 6)
         break;
     }
     for (i = 1; i <= 3; i++) {
       data->fan[i-1] = w83781d_read_value(client,W83781D_REG_FAN(i));
       data->fan_min[i-1] = w83781d_read_value(client,W83781D_REG_FAN_MIN(i));
-      if(data->wchipid == W83783S_WCHIPID  &&  i == 2)
-        break;
     }
     data->temp = w83781d_read_value(client,W83781D_REG_TEMP);
     data->temp_over = w83781d_read_value(client,W83781D_REG_TEMP_OVER);
