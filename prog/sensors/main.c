@@ -40,6 +40,7 @@ FILE *config_file;
 static const char *config_file_path[] = 
   { "/etc", "/usr/local/etc", "/usr/lib/sensors", "/usr/local/lib/sensors",
     "/usr/lib", "/usr/local/lib", ".", 0 };
+extern const char *libsensors_version;
 
 extern int main(int argc, char *arv[]);
 static void print_short_help(void);
@@ -92,7 +93,7 @@ void print_long_help(void)
 
 void print_version(void)
 {
-  printf("%s version %s\n", PROGRAM, VERSION);
+  printf("%s version %s with libsensors version %s\n", PROGRAM, VERSION, libsensors_version);
 }
 
 /* This examines global var config_file, and leaves the name there too. 
