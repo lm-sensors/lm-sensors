@@ -593,7 +593,10 @@ chip "as99127f-*"
     compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
     compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
     compute in5 -(240/60.4)*@ ,  -@/(240/60.4)
+# AS99127F
     compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
+# ASB100 Bach (contributed by Alex van Kaam)
+#   compute in6 -(5/3)*@       ,  -@/(5/3)
 
 # Depending on your motherboard, you have to choose between three formulae
 # for temp2. Quoting Artur Gawryszczak:
@@ -613,6 +616,8 @@ chip "as99127f-*"
 # See comments above if temp3 looks bad. What works for temp2 is likely
 # to work for temp3.
     compute temp3 @*2.0, @/2.0
+
+# ASB100's temp4 isn't supported yet.
 
 # adjust this if your vid is wrong; see doc/vid
 #   set vrm 9.0
