@@ -111,14 +111,13 @@ inline int rdat(void)
 
 void Voodoo3_I2CStart(void)
 {
-  dat(1);
-  out();
+  dat(0);
   clkon();
   out();
-  dat(0);
   out();
   clkoff();
   out();
+  clkon();
 }
 
 void Voodoo3_I2CStop(void)
@@ -129,38 +128,41 @@ void Voodoo3_I2CStop(void)
   out();
   dat(1);
   out();
+  clkoff();
+  out();
+  clkon();
+  out();
 }
 
-int Voodoo3_I2CAck(int ack)
+int Voodoo3_I2CAck()
 {
-/*  dat(ack);
+int ack;
+
+  dat(1); /* put data line in tristate/hi */
+  clkon();
   out();
-  clkon();/
-  out(); testing PAE */
   ack=rdat();
   clkoff();
   out();
   return ack;
+
 }
 
-int Voodoo3_I2CReadByte(int ack)
+int Voodoo3_I2CReadByte()
 {
   int i,temp;
   unsigned char data=0;
 
-  clkoff();
-  dat(1);
-  out();
   for (i=7; i>=0; i--) {
+    out();
     clkon();
-    out();
     data|=(rdat()<<i);
-    clkoff();
     out();
+    clkoff();
   }
-  temp=Voodoo3_I2CAck(ack);
+  temp=Voodoo3_I2CAck();
 #ifdef DEBUG
-  printk("i2c-voodoo3: ack -->0x%X!\n",temp);
+  printk("i2c-voodoo3: Readbyte ack -->0x%X, read result -->0x%X\n",temp,data);
 #endif
   if (! temp)
    return data;
@@ -171,49 +173,84 @@ int Voodoo3_I2CReadByte(int ack)
 
 int Voodoo3_I2CSendByte(unsigned char data)
 {
-  int i;
-
-  clkoff();
-  dat(0);
-  out();
+  int i,temp;
 
   for (i=7; i>=0; i--) {
-    dat(data&(1<<i));
+    dat(temp=data&(1<<i));
     out();
     clkon();
     out();
+    dat(temp);
     clkoff();
     out();
   }
-  return Voodoo3_I2CAck(1);
+  temp=Voodoo3_I2CAck();
+#ifdef DEBUG
+  printk("i2c-voodoo3: Writebyte ack -->0x%X\n",temp);
+#endif
+  return temp;
+}
+
+
+int Voodoo3_BusCheck(void) {
+/* Check the bus to see if it is in use */
+
+  if (! rdat()) {
+    printk("i2c-voodoo3: I2C bus in use or hung!  Try again later.\n");
+    return 1;
+  }
+  return 0;
 }
 
 /* Note, this is actually a byte read and not a byte_data read */
 /* I.e., the command value is dumped.                          */
-int Voodoo3_I2CRead(int adr,int command)
+int Voodoo3_I2CRead(int addr,int command)
 {
-        int i,j,dat;
+        int dat=0;
 
         Voodoo3_I2CStart();
-        Voodoo3_I2CSendByte(adr);
-        dat=Voodoo3_I2CReadByte(1);
-        Voodoo3_I2CStop();
+        if (Voodoo3_I2CSendByte(addr)) { 
 #ifdef DEBUG
-	printk("i2c-voodoo3: Byte read at addr:0x%X (command:0x%X) result:0x%X\n",adr,command,dat);
+	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
+#endif
+	  dat=-1;
+	  goto ENDREAD; }
+        dat=Voodoo3_I2CReadByte();
+ENDREAD: Voodoo3_I2CStop();
+#ifdef DEBUG
+	printk("i2c-voodoo3: Byte read at addr:0x%X (command:0x%X) result:0x%X\n",addr,command,dat);
 #endif
         return dat;
 }
 
-void Voodoo3_I2CWrite(int addr,int command,int data)
+int Voodoo3_I2CWrite(int addr,int command,int data)
 {
+int temp=0;
+
         Voodoo3_I2CStart();
-        Voodoo3_I2CSendByte(addr);
-        Voodoo3_I2CSendByte(command);
-        Voodoo3_I2CSendByte(data);
-        Voodoo3_I2CStop();
+        if (Voodoo3_I2CSendByte(addr)) { 
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
+#endif
+	  temp=-1;
+	  goto ENDWRITE; }
+        if (Voodoo3_I2CSendByte(command)) {
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on command WriteByte to addr 0x%X\n",addr);
+#endif
+	  temp=-1;
+	  goto ENDWRITE; }
+        if (Voodoo3_I2CSendByte(data)) {
+#ifdef DEBUG
+	  printk("i2c-voodoo3: No Ack on data WriteByte to addr 0x%X\n",addr);
+#endif
+ 	}
+	temp=-1;
+ENDWRITE: Voodoo3_I2CStop();
 #ifdef DEBUG
 	printk("i2c-voodoo3: Byte write at addr:0x%X command:0x%X data:0x%X\n",addr,command,data);
 #endif
+	return temp;
 }
 
 void config_v3(struct pci_dev *dev, int num)
@@ -268,6 +305,8 @@ s32 voodoo3_access(u8 addr, char read_write,
 {
 int temp;
 
+  if (Voodoo3_BusCheck()) return -1;
+
   if ((size == SMBUS_BYTE_DATA) || (size == SMBUS_BYTE)) {
         addr=((addr & 0x7f) << 1) | (read_write & 0x01);
   	if (read_write == SMBUS_READ) {
@@ -283,7 +322,7 @@ int temp;
 		printk("i2c-voodoo3: access returning 0x%X\n",data->byte);
 #endif
 	} else {
-	  Voodoo3_I2CWrite(addr,command,data->byte);
+	  return Voodoo3_I2CWrite(addr,command,data->byte);
 	}
   	return 0;
   } else { return -1; } /* The rest isn't implemented yet */

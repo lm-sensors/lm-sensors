@@ -31,6 +31,8 @@
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {SENSORS_I2C_END};
+
+/* also can be on 0x45 */
 static unsigned short normal_i2c_range[] = {0x44,0x45,SENSORS_I2C_END};
 static unsigned int normal_isa[] = {SENSORS_ISA_END};
 static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
@@ -169,7 +171,7 @@ printk("bt869.o:  probing address %d .\n",address);
 	new_client->addr,0xC4,0);         /* set status bank 0 */
   cur = smbus_read_byte_data(adapter,address,0);
   printk("bt869.o: address 0x%X testing-->0x%X\n",address,cur);
-  if ((cur | 0x27) != 0x27)
+  if (cur != 0x22)
       goto ERROR1;
       
   /* Determine the chip type */
