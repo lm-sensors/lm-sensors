@@ -273,27 +273,42 @@ static void __devexit i810_remove(struct pci_dev *dev)
 }
 
 
+/* Don't register driver to avoid driver conflicts */
+/*
 static struct pci_driver i810_driver = {
 	.name		= "i810 smbus",
 	.id_table	= i810_ids,
 	.probe		= i810_probe,
 	.remove		= __devexit_p(i810_remove),
 };
+*/
 
 static int __init i2c_i810_init(void)
 {
-	printk("i2c-i810.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	return pci_module_init(&i810_driver);
-}
+	struct pci_dev *dev;
+	const struct pci_device_id *id;
 
+	printk("i2c-i810.o version %s (%s)\n", LM_VERSION, LM_DATE);
+/*
+	return pci_module_init(&i810_driver);
+*/
+	pci_for_each_dev(dev) {
+		id = pci_match_device(i810_ids, dev);
+		if(id)
+			if(i810_probe(dev, id) >= 0)
+				return 0;
+	}
+	return -ENODEV;
+}
 
 static void __exit i2c_i810_exit(void)
 {
+/*
 	pci_unregister_driver(&i810_driver);
+*/
+	i810_remove(NULL);
 	iounmap(mem);
 }
-
-
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, Ralph Metzler <rjkm@thp.uni-koeln.de>, and Mark D. Studebaker <mdsxyz123@yahoo.com>");

@@ -225,6 +225,7 @@ static int __devinit voodoo3_probe(struct pci_dev *dev, const struct pci_device_
 {
 	int retval;
 
+	printk("voodoo3: in probe\n");
 	config_v3(dev);
 	retval = i2c_bit_add_bus(&voodoo3_i2c_adapter);
 	if(retval)
@@ -242,23 +243,41 @@ static void __devexit voodoo3_remove(struct pci_dev *dev)
 }
 
 
+/* Don't register driver to avoid driver conflicts */
+/*
 static struct pci_driver voodoo3_driver = {
 	.name		= "voodoo3 smbus",
 	.id_table	= voodoo3_ids,
 	.probe		= voodoo3_probe,
 	.remove		= __devexit_p(voodoo3_remove),
 };
+*/
 
 static int __init i2c_voodoo3_init(void)
 {
+	struct pci_dev *dev;
+	const struct pci_device_id *id;
+
 	printk("i2c-voodoo3.o version %s (%s)\n", LM_VERSION, LM_DATE);
+/*
 	return pci_module_init(&voodoo3_driver);
+*/
+	pci_for_each_dev(dev) {
+		id = pci_match_device(voodoo3_ids, dev);
+		if(id)
+			if(voodoo3_probe(dev, id) >= 0)
+				return 0;
+	}
+	return -ENODEV;
 }
 
 
 static void __exit i2c_voodoo3_exit(void)
 {
+/*
 	pci_unregister_driver(&voodoo3_driver);
+*/
+	voodoo3_remove(NULL);
 	iounmap(mem);
 }
 

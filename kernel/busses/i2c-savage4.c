@@ -195,27 +195,42 @@ static void __devexit savage4_remove(struct pci_dev *dev)
 }
 
 
+/* Don't register driver to avoid driver conflicts */
+/*
 static struct pci_driver savage4_driver = {
 	.name		= "savage4 smbus",
 	.id_table	= savage4_ids,
 	.probe		= savage4_probe,
 	.remove		= __devexit_p(savage4_remove),
 };
+*/
 
 static int __init i2c_savage4_init(void)
 {
-	printk("i2c-savage4.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	return pci_module_init(&savage4_driver);
-}
+	struct pci_dev *dev;
+	const struct pci_device_id *id;
 
+	printk("i2c-savage4.o version %s (%s)\n", LM_VERSION, LM_DATE);
+/*
+	return pci_module_init(&savage4_driver);
+*/
+	pci_for_each_dev(dev) {
+		id = pci_match_device(savage4_ids, dev);
+		if(id)
+			if(savage4_probe(dev, id) >= 0)
+				return 0;
+	}
+	return -ENODEV;
+}
 
 static void __exit i2c_savage4_exit(void)
 {
+/*
 	pci_unregister_driver(&savage4_driver);
+*/
+	savage4_remove(NULL);
 	iounmap(mem);
 }
-
-
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, Ralph Metzler <rjkm@thp.uni-koeln.de>, and Mark D. Studebaker <mdsxyz123@yahoo.com>");

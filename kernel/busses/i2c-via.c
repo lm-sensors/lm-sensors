@@ -159,23 +159,41 @@ static void __devexit vt586b_remove(struct pci_dev *dev)
 }
 
 
+/* Don't register driver to avoid driver conflicts */
+/*
 static struct pci_driver vt586b_driver = {
 	.name		= "vt586b smbus",
 	.id_table	= vt586b_ids,
 	.probe		= vt586b_probe,
 	.remove		= __devexit_p(vt586b_remove),
 };
+*/
 
 static int __init i2c_vt586b_init(void)
 {
+	struct pci_dev *dev;
+	const struct pci_device_id *id;
+
 	printk("i2c-via.o version %s (%s)\n", LM_VERSION, LM_DATE);
+/*
 	return pci_module_init(&vt586b_driver);
+*/
+	pci_for_each_dev(dev) {
+		id = pci_match_device(vt586b_ids, dev);
+		if(id)
+			if(vt586b_probe(dev, id) >= 0)
+				return 0;
+	}
+	return -ENODEV;
 }
 
 
 static void __exit i2c_vt586b_exit(void)
 {
+/*
 	pci_unregister_driver(&vt586b_driver);
+*/
+	vt586b_remove(NULL);
 }
 
 

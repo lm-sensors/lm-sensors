@@ -459,23 +459,41 @@ static struct pci_device_id vt596_ids[] __devinitdata = {
 	{ 0, }
 };
 
+/* Don't register driver to avoid driver conflicts */
+/*
 static struct pci_driver vt596_driver = {
 	.name		= "vt596 smbus",
 	.id_table	= vt596_ids,
 	.probe		= vt596_probe,
 	.remove		= __devexit_p(vt596_remove),
 };
+*/
 
 static int __init i2c_vt596_init(void)
 {
+	struct pci_dev *dev;
+	const struct pci_device_id *id;
+
 	printk("i2c-viapro.o version %s (%s)\n", LM_VERSION, LM_DATE);
+/*
 	return pci_module_init(&vt596_driver);
+*/
+	pci_for_each_dev(dev) {
+		id = pci_match_device(vt596_ids, dev);
+		if(id)
+			if(vt596_probe(dev, id) >= 0)
+				return 0;
+	}
+	return -ENODEV;
 }
 
 
 static void __exit i2c_vt596_exit(void)
 {
+/*
 	pci_unregister_driver(&vt596_driver);
+*/
+	vt596_remove(NULL);
 }
 
 MODULE_AUTHOR(
