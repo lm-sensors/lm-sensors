@@ -32,7 +32,7 @@ See the lm_sensors download page for guidance:
 
 At least the following I2C/SMBus adapters are supported:
   Acer Labs M1533, M1535, and M1543C
-  AMD 756
+  AMD 756, 766
   Apple Hydra (used on some PPC machines)
   DEC 21272/21274 (Tsunami/Typhoon - on Alpha boards)
   Intel I801 ICH/ICH0/ICH2 (used in Intel 810, 810E, 815E, 820, 840 chipsets)

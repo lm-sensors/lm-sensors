@@ -24,7 +24,10 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* Note: we assume there can only be one AMD756, with one SMBus interface */
+/*
+   Supports AMD756 and AMD766.
+   Note: we assume there can only be one device, with one SMBus interface.
+*/
 
 #include <linux/version.h>
 #include <linux/module.h>
@@ -38,6 +41,17 @@
 #include "version.h"
 
 #include <linux/init.h>
+
+#ifndef PCI_DEVICE_ID_AMD_756
+#define PCI_DEVICE_ID_AMD_756 0x740B
+#endif
+#ifndef PCI_DEVICE_ID_AMD_766
+#define PCI_DEVICE_ID_AMD_766 0x7413
+#endif
+
+static int supported[] = {PCI_DEVICE_ID_AMD_756,
+                          PCI_DEVICE_ID_AMD_766,
+                          0 };
 
 /* AMD756 SMBus address offsets */
 #define SMB_ADDR_OFFSET        0xE0
@@ -104,7 +118,7 @@ static struct i2c_algorithm smbus_algorithm = {
 	/* id */ I2C_ALGO_SMBUS,
 	/* master_xfer */ NULL,
 	/* smbus_access */ amd756_access,
-	/* slave_send */ NULL,
+	/* slave;_send */ NULL,
 	/* slave_rcv */ NULL,
 	/* algo_control */ NULL,
 	/* functionality */ amd756_func,
@@ -124,9 +138,6 @@ static struct i2c_adapter amd756_adapter = {
 static int __initdata amd756_initialized;
 static unsigned short amd756_smba = 0;
 
-/* externalize it */
-#define PCI_DEVICE_ID_AMD_756 0x740B
-
 /* Detect whether a AMD756 can be found, and initialize it, where necessary.
    Note the differences between kernels with the old PCI BIOS interface and
    newer kernels with the real PCI interface. In compat.h some things are
@@ -135,29 +146,31 @@ int amd756_setup(void)
 {
 	int error_return = 0;
 	unsigned char temp;
-
-	struct pci_dev *AMD756_dev;
+	int *num = supported;
+	struct pci_dev *AMD756_dev = NULL;
 
 	/* First check whether we can access PCI at all */
 	if (pci_present() == 0) {
 		printk("i2c-amd756.o: Error: No PCI-bus found!\n");
-		error_return = -ENODEV;
-		goto END;
+		return(-ENODEV);
 	}
 
 	/* Look for the AMD756, function 3 */
 	/* Note: we keep on searching until we have found 'function 3' */
-	AMD756_dev = NULL;
-	do
-		AMD756_dev = pci_find_device(PCI_VENDOR_ID_AMD,
-					     PCI_DEVICE_ID_AMD_756,
-					     AMD756_dev);
-	while (AMD756_dev && (PCI_FUNC(AMD756_dev->devfn) != 3));
+	do {
+		if((AMD756_dev = pci_find_device(PCI_VENDOR_ID_AMD,
+					      *num, AMD756_dev))) {
+			if(PCI_FUNC(AMD756_dev->devfn) != 3)
+				continue;
+			break;
+		}
+		num++;
+	} while (*num != 0);
+
 	if (AMD756_dev == NULL) {
 		printk
 		    ("i2c-amd756.o: Error: Can't detect AMD756, function 3!\n");
-		error_return = -ENODEV;
-		goto END;
+		return(-ENODEV);
 	}
 
 
@@ -165,8 +178,7 @@ int amd756_setup(void)
 	if ((temp & 128) == 0) {
 		printk
 		    ("SMBUS: Error: Host SMBus controller I/O not enabled!\n");
-		error_return = -ENODEV;
-		goto END;
+		return(-ENODEV);
 	}
 
 	/* Determine the address of the SMBus areas */
@@ -179,8 +191,7 @@ int amd756_setup(void)
 		printk
 		    ("i2c-amd756.o: AMD756_smb region 0x%x already in use!\n",
 		     amd756_smba);
-		error_return = -ENODEV;
-		goto END;
+		return(-ENODEV);
 	}
 
 	/* Everything is happy, let's grab the memory and set things up. */
@@ -202,8 +213,7 @@ int amd756_setup(void)
 	printk("i2c-amd756.o: AMD756_smba = 0x%X\n", amd756_smba);
 #endif				/* DEBUG */
 
-      END:
-	return error_return;
+	return 0;
 }
 
 /* 
@@ -458,12 +468,12 @@ int __init i2c_amd756_init(void)
 	amd756_initialized = 0;
 	if ((res = amd756_setup())) {
 		printk
-		    ("i2c-amd756.o: AMD756 not detected, module not inserted.\n");
+		    ("i2c-amd756.o: AMD756/766 not detected, module not inserted.\n");
 		amd756_cleanup();
 		return res;
 	}
 	amd756_initialized++;
-	sprintf(amd756_adapter.name, "SMBus AMD756 adapter at %04x",
+	sprintf(amd756_adapter.name, "SMBus AMD7X6 adapter at %04x",
 		amd756_smba);
 	if ((res = i2c_add_adapter(&amd756_adapter))) {
 		printk
@@ -472,7 +482,7 @@ int __init i2c_amd756_init(void)
 		return res;
 	}
 	amd756_initialized++;
-	printk("i2c-amd756.o: AMD756 bus detected and initialized\n");
+	printk("i2c-amd756.o: AMD756/766 bus detected and initialized\n");
 	return 0;
 }
 
@@ -499,7 +509,7 @@ EXPORT_NO_SYMBOLS;
 #ifdef MODULE
 
 MODULE_AUTHOR("Merlin Hughes <merlin@merlin.org>");
-MODULE_DESCRIPTION("AMD756 SMBus driver");
+MODULE_DESCRIPTION("AMD756/766 SMBus driver");
 
 int init_module(void)
 {

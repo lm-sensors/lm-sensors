@@ -24,6 +24,7 @@ ask CVS about it:
   File sensors.conf.eg: Fix/enhance it87 section
   Library: ds1621 and it87 updates
   Module i2c-ali15x3: Allow force_addr=0xaddr; enable if not enabled.
+  Module i2c-amd756: Add AMD 766 support
   Module i2c-i801: Fix 82801BA detection broken by kernel 2.4.6
   Module i2c-sis5595: Recognize unsupported chips and refuse to load
   Module adm1025: Fixed temp2 min/max writes
@@ -32,7 +33,9 @@ ask CVS about it:
   Module sis5595: Recognize unsupported chips and refuse to load
   Module w83781d: Fix fan speed for as99127f (broken by 2.6.0)
   Program sensors: it87 updates
-  Program sensors-detect: Fix ADM1024 and ADM1025 detection.
+  Program sensors-detect: Fix ADM1024 and ADM1025 detection;
+                          recognize unsupported SiS chips;
+                          recognize AMD 766.
 
 2.6.0 (20010612)
   NOTE: i2c-2.6.0 MUST BE be compiled AND installed first!!!
