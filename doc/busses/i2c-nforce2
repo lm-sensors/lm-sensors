@@ -1,21 +1,25 @@
-Kernel driver `i2c-nforce2.o'
+Kernel driver i2c-nforce2
+-------------------------
 
-Status: Beta, although no problems found during one month usage with hwsensor
+Status: Well tested
 
 Supported adapters:
     * nVidia nForce2 SMBus PCI interface
+      (10de:0064, included in nForce2 MCP,
+       10de:0084, included in nForce2 Ultra 400 MCP)
       Datasheet: not publically available, but seems to be similar to the
                  AMD-8111 SMBus 2.0 adapter.
+
     * nVidia nForce3 SMBus PCI interface
+      (10de:00d4, included in nForce3 Pro150 MCP,
+       10de:00e4, included in nForce3 250Gb MCP)
+      Datasheet: same as for nForce2 SMBus PCI interface
+
     * nVidia nForce4 SMBus PCI interface
+      (10de:0052, included in nForce4 MCP)
+      Datasheet: same as for nForce2 SMBus PCI interface
 
 Author: Hans-Frieder Vogt <hfvogt@arcor.de>
-
-
-Module Parameters
------------------
-
-None.
 
 
 Description
@@ -34,13 +38,11 @@ If your 'lspci -v' listing shows something like the following,
 
 then this driver should support the SMBuses of your motherboard.
 
-See the driver code for the exact list of supported PCI devices.
-
 
 Notes
 -----
 
-The SMBus adapter in the nForce2 chipset seems to be very similar to the
+The SMBus adapter in the nForce2/3/4 chipset seems to be very similar to the
 SMBus 2.0 adapter in the AMD-8111 southbridge. However, I could only get the
 driver to work with direct I/O access, which is different to the EC interface
 of the AMD-8111.
