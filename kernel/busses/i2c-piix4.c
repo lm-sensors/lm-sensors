@@ -70,6 +70,20 @@
 #define PIIX4_WORD_DATA  0x0C
 #define PIIX4_BLOCK_DATA 0x14
 
+/* insmod parameters */
+
+/* If force is set to anything different from 0, we forcibly enable the
+   PIIX4. DANGEROUS! */
+static int force = 0;
+MODULE_PARM(force,"i");
+MODULE_PARM_DESC(force,"Forcibly enable the PIIX4. DANGEROUS!");
+
+/* If force_addr is set to anything different from 0, we forcibly enable
+   the PIIX4 at the given address. VERY DANGEROUS! */
+static int force_addr = 0;
+MODULE_PARM(force_addr,"i");
+MODULE_PARM_DESC(force_addr,"Forcibly enable the PIIX4 at the given address. "
+                            "EXTREMELY DANGEROUS!");
 
 static int piix4_init(void);
 static int piix4_cleanup(void);
@@ -137,9 +151,15 @@ int piix4_setup(void)
   } 
 
 /* Determine the address of the SMBus areas */
-  pci_read_config_word_united(PIIX4_dev, PIIX4_bus ,PIIX4_devfn,
-                              SMBBA,&piix4_smba);
-  piix4_smba &= 0xfff0;
+  if (force_addr) {
+    piix4_smba = force_addr & 0xfff0;
+    force = 0;
+  } else {
+
+    pci_read_config_word_united(PIIX4_dev, PIIX4_bus ,PIIX4_devfn,
+                                SMBBA,&piix4_smba);
+    piix4_smba &= 0xfff0;
+  }
 
   if (check_region(piix4_smba, 8)) {
     printk("i2c-piix4.o: PIIX4_smb region 0x%x already in use!\n", piix4_smba);
@@ -147,33 +167,36 @@ int piix4_setup(void)
     goto END;
   }
 
-  pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn, 
+  pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
                               SMBHSTCFG, &temp);
-
-
-#ifdef FORCE_PIIX4_ENABLE
+/* If force_addr is set, we program the new address here. Just to make
+   sure, we disable the PIIX4 first. */
+  if (force_addr) {
+    pci_write_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
+                                SMBHSTCFG, temp & 0xfe);
+    pci_write_config_word_united(PIIX4_dev, PIIX4_bus ,PIIX4_devfn,
+                                 SMBBA,piix4_smba);
+    pci_write_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
+                                SMBHSTCFG, temp | 0x01);
+    printk("i2c-piix4.o: WARNING: PIIX4 SMBus interface set to new "
+           "address %04x!\n",piix4_smba);
+  } else if ((temp & 1) == 0) {
+    if (force) {
 /* This should never need to be done, but has been noted that
    many Dell machines have the SMBus interface on the PIIX4
    disabled!? NOTE: This assumes I/O space and other allocations WERE
    done by the Bios!  Don't complain if your hardware does weird 
    things after enabling this. :') Check for Bios updates before
    resorting to this.  */
-  if ((temp & 1) == 0) {
-    pci_write_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
-                                     SMBHSTCFG, temp | 1);
-    printk("i2c-piix4.o: WARNING: PIIX4 SMBus interface has been FORCEFULLY "
-           "ENABLED!!\n");
-    /* Update configuration value */
-    pci_read_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
-                                SMBHSTCFG, &temp);
-    /* Note: We test the bit again in the next 'if' just to be sure... */
-  }
-#endif /* FORCE_PIIX4_ENABLE */
-
-  if ((temp & 1) == 0) {
-    printk("SMBUS: Error: Host SMBus controller not enabled!\n");     
-    error_return=-ENODEV;
-    goto END;
+      pci_write_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
+                                       SMBHSTCFG, temp | 1);
+      printk("i2c-piix4.o: WARNING: PIIX4 SMBus interface has been FORCEFULLY "
+             "ENABLED!\n");
+    } else {
+      printk("SMBUS: Error: Host SMBus controller not enabled!\n");     
+      error_return=-ENODEV;
+      goto END;
+    }
   }
 
   /* Everything is happy, let's grab the memory and set things up. */
