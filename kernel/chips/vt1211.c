@@ -19,6 +19,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/* Supports VIA VT1211 Super I/O sensors via ISA (LPC) accesses only. */
+
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -81,21 +83,21 @@ superio_inb(int reg)
 }
 
 static inline void
-superio_select()
+superio_select(void)
 {
 	outb(DEV, REG);
 	outb(PME, VAL);
 }
 
 static inline void
-superio_enter()
+superio_enter(void)
 {
 	outb(0x87, REG);
 	outb(0x87, REG);
 }
 
 static inline void
-superio_exit()
+superio_exit(void)
 {
 	outb(0xAA, REG);
 }
@@ -108,6 +110,7 @@ superio_exit()
 
 /* pwm numbered 1-2 */
 #define VT1211_REG_PWM(nr) (0x5f + (nr))
+#define VT1211_REG_PWM_CTL 0x51
 
 /* The VT1211 registers */
 /* We define the sensors as follows. Somewhat convoluted to minimize
@@ -115,14 +118,14 @@ superio_exit()
 	Sensor		Voltage Mode	Temp Mode
 	--------	------------	---------
 	Reading 1			temp3
-	Reading 3			temp1
+	Reading 3			temp1	not in vt1211
 	UCH1/Reading2	in0		temp2
 	UCH2		in1		temp4
 	UCH3		in2		temp5
 	UCH4		in3		temp6
 	UCH5		in4		temp7
 	3.3V		in5
-	-12V		in6
+	-12V		in6			not in vt1211
 */
 
 /* ins numbered 0-6 */
@@ -213,6 +216,7 @@ struct vt1211_data {
 	u8 fan_div[2];		/* Register encoding, shifted right */
 	u16 alarms;		/* Register encoding */
 	u8 pwm[2];		/* Register value */
+	u8 pwm_ctl;		/* Register value */
 	u8 vid;			/* Register encoding */
 	u8 vrm;
 	u8 uch_config;
@@ -574,6 +578,7 @@ void vt1211_update_client(struct i2c_client *client)
 			data->pwm[i - 1] = vt_rdval(client, VT1211_REG_PWM(i));
 		}
 
+		data->pwm_ctl = vt_rdval(client, VT1211_REG_PWM_CTL);
 		i = vt_rdval(client, VT1211_REG_FANDIV);
 		data->fan_div[0] = (i >> 4) & 0x03;
 		data->fan_div[1] = i >> 6;
@@ -726,13 +731,25 @@ void vt1211_pwm(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		vt1211_update_client(client);
 		results[0] = PWM_FROM_REG(data->pwm[nr - 1]);
-		results[1] = 1; /* always enabled */
+		results[1] = (data->pwm_ctl >> (3 + (4 * (nr - 1)))) & 1;
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			data->pwm[nr - 1] = PWM_TO_REG(results[0]);
 			if (*nrels_mag >= 2) {
-				/* ignore enable for now */
+				if(results[1]) {
+					data->pwm_ctl |=
+					          (0x08 << (4 * (nr - 1)));
+					vt1211_write_value(client,
+					                   VT1211_REG_PWM_CTL, 
+				                           data->pwm_ctl);
+				} else {
+					data->pwm_ctl &=
+					        ~ (0x08 << (4 * (nr - 1)));
+					vt1211_write_value(client,
+					                   VT1211_REG_PWM_CTL, 
+				                           data->pwm_ctl);
+				}
 			}
 			vt1211_write_value(client, VT1211_REG_PWM(nr),
 					    data->pwm[nr - 1]);
