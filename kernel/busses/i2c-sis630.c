@@ -1,6 +1,8 @@
 /*
     SIS 630 SMBUS access implementation based on i2c-sis5595.
 
+    Status: beta
+
     Copyright (c) 2002 Alexander Malysh <amalysh@web.de>
 
     This program is free software; you can redistribute it and/or modify
