@@ -924,6 +924,28 @@ static void w83627hf_init_client(struct i2c_client *client)
 	data->pwmenable[2] = 1;
 
 	if(init) {
+		/* Enable temp2 */
+		tmp = w83627hf_read_value(client, W83781D_REG_TEMP2_CONFIG);
+		if (tmp & 0x01) {
+			printk(KERN_WARNING "w83627hf: temp2 was disabled, "
+			       "readings might not make sense\n");
+			w83627hf_write_value(client, W83781D_REG_TEMP2_CONFIG,
+				tmp & 0xfe);
+		}
+
+		/* Enable temp3 */
+		if (type != w83697hf) {
+			tmp = w83627hf_read_value(client,
+				W83781D_REG_TEMP3_CONFIG);
+			if (tmp & 0x01) {
+				printk(KERN_WARNING "w83627hf: temp3 was "
+				       "disabled, readings might not make "
+				       "sense\n");
+				w83627hf_write_value(client,
+					W83781D_REG_TEMP3_CONFIG, tmp & 0xfe);
+			}
+		}
+
 		if (type == w83627hf) {
 			/* enable PWM2 control (can't hurt since PWM reg
 		           should have been reset to 0xff) */
