@@ -35,7 +35,8 @@ use strict;
 
 use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
 
-@undetectable_adapters = ( "bit-lp", "bit-velle" );
+@undetectable_adapters = ( "i2c-elektor","i2c-elv", "i2c-philips-par",
+                           "i2c-velleman" );
 
 # This is the list of SMBus or I2C adapters we recognize by their PCI
 # signature. This is an easy and fast way to determine which SMBus or I2C
@@ -1679,7 +1680,12 @@ sub main
         "/dev/i2c-* files\n",
         " for some things. You can use prog/mkdev/mkdev.sh to create these ",
         "/dev files\n",
-        " if you do not have them already.\n\n";
+        " if you do not have them already.\n";
+  print " If you have patched your kernel and have some drivers built-in ",
+        "you can\n",
+        " safely answer NO if asked to load some modules. In this case, ",
+        "things may\n",
+        " seem a bit confusing, but they will still work.\n\n";
 
   print " We can start with probing for (PCI) I2C or SMBus adapters.\n";
   print " You do not need any special privileges for this.\n";
@@ -1706,7 +1712,7 @@ sub main
       if (contains $adapter, @modules_list) {
         print "Module `$adapter' already loaded.\n";
       } else {
-        print "Load `$adapter'? (YES/no): ";
+        print "Load `$adapter' (say NO if built into your kernel)? (YES/no): ";
         unless (<STDIN> =~ /^\s*[Nn]/) {
           if (system ("modprobe", $adapter)) {
             print "Loading failed ($!)... skipping.\n";
@@ -1723,7 +1729,7 @@ sub main
 
   if ($detect_others) {
     foreach $adapter (@undetectable_adapters) {
-      print "Load `$adapter'? (YES/no): ";
+      print "Load `$adapter' (say NO if built into your kernel)? (YES/no): ";
       unless (<STDIN> =~ /^\s*[Nn]/) {
         if (system ("modprobe", $adapter)) {
           print "Loading failed ($!)... skipping.\n";
@@ -1735,6 +1741,7 @@ sub main
   }
 
   print " To continue, we need module `i2c-dev' to be loaded.\n";
+  print " If it is built-in into your kernel, you can safely skip this.\n";
   if (contains "i2c-dev", @modules_list) {
     print "i2c-dev is already loaded.\n";
   } else {
@@ -1751,11 +1758,12 @@ sub main
         print " Well, you will know best. We will just hope you edited ",
               "`/etc/conf.modules'\n",
               " (or `/etc/modules.conf') for automatic loading of this ",
-              "module. If not,",
-              " you won't be able to open any /dev/i2c-* file.\n";
+              "module. If not,\n",
+              " you won't be able to open any /dev/i2c-* file (unless you",
+              "have it built-in\n",
+              " into your kernel)\n";
       } elsif (system "modprobe","i2c-dev") {
-        print " Loading failed ($!), aborting.\n";
-        exit;
+        print " Loading failed ($!), expect problems later on.\n";
       } else {
         print " Module loaded succesfully.\n";
       }
@@ -1855,6 +1863,8 @@ sub main
   my $use_isa = not <STDIN> =~ /\s*[Ss]/;
      
   my ($modprobes,$configfile) = generate_modprobes $use_isa;
+  print "\nWARNING! If you have some things built into your kernel, the \n",
+        "below list will contain too many modules. Skip the appropriate ones!";
   print "\nTo load everything that is needed, add this to some /etc/rc* ",
         "file:\n\n";
   print "#----cut here----\n";
