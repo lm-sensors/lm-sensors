@@ -531,7 +531,7 @@ void fscher_temp(struct i2c_client *client, int operation, int ctl_name,
 /*
  * The final conversion is specified in sensors.conf, as it depends on
  * mainboard specific values. We export the registers contents as
- * pseudo-hundreds-of-Volts (range 0V - 2.55V). Not that it makes much
+ * pseudo-hundredths-of-Volts (range 0V - 2.55V). Not that it makes much
  * sense per se, but it minimizes the conversions count and keeps the
  * values within a usual range.
  */
