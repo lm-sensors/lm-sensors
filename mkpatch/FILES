@@ -22,7 +22,6 @@ kernel/chips/lm75.c		drivers/sensors/lm75.c
 kernel/chips/lm78.c		drivers/sensors/lm78.c
 kernel/chips/lm80.c		drivers/sensors/lm80.c
 kernel/chips/lm87.c		drivers/sensors/lm87.c
-kernel/chips/ltc1710.c		drivers/sensors/ltc1710.c
 kernel/chips/matorb.c		drivers/sensors/matorb.c
 kernel/chips/sis5595.c		drivers/sensors/sis5595.c
 kernel/chips/thmc50.c		drivers/sensors/thmc50.c

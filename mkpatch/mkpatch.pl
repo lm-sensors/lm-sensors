@@ -90,8 +90,7 @@ sub gen_Documentation_Configure_help
            m@National Semiconductors LM80@ or
            m@Silicon Integrated Systems Corp. SiS5595@ or
            m@Winbond W83781D, W83782D and W83783S@ or
-           m@EEprom \(DIMM\) reader@ or
-           m@Linear Technologies LTC1710@) {
+           m@EEprom \(DIMM\) reader@ {
       $_ = <INPUT>;
       $_ = <INPUT>;
       $_ = <INPUT> while not m@^\S@ and not eof(INPUT);
@@ -346,16 +345,6 @@ CONFIG_SENSORS_EEPROM
   also be available on other devices. This can also be built as a 
   module which can be inserted and removed while the kernel is 
   running.
-
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
-
-Linear Technologies LTC1710
-CONFIG_SENSORS_LTC1710
-  If you say yes here you get support for Linear Technologies LTC1710
-  sensor chips. This can also be built as a module which can be 
-  inserted and removed while the kernel is running.
 
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
@@ -700,7 +689,6 @@ obj-$(CONFIG_SENSORS_LM75)	+= lm75.o
 obj-$(CONFIG_SENSORS_LM78)	+= lm78.o
 obj-$(CONFIG_SENSORS_LM80)	+= lm80.o
 obj-$(CONFIG_SENSORS_LM87)	+= lm87.o
-obj-$(CONFIG_SENSORS_LTC1710)	+= ltc1710.o
 obj-$(CONFIG_SENSORS_SIS5595)	+= sis5595.o
 obj-$(CONFIG_SENSORS_THMC50)	+= thmc50.o
 obj-$(CONFIG_SENSORS_VIA686A)	+= via686a.o
@@ -823,14 +811,6 @@ ifeq ($(CONFIG_SENSORS_LM87),y)
 else
   ifeq ($(CONFIG_SENSORS_LM87),m)
     M_OBJS += lm87.o
-  endif
-endif
-
-ifeq ($(CONFIG_SENSORS_LTC1710),y)
-  L_OBJS += ltc1710.o
-else
-  ifeq ($(CONFIG_SENSORS_LTC1710),m)
-    M_OBJS += ltc1710.o
   endif
 endif
 

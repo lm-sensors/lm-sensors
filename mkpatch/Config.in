@@ -27,7 +27,6 @@ if [ "$CONFIG_I2C" = "m" -o "$CONFIG_I2C" = "y" ] ; then
       dep_tristate '  Brooktree BT869 Video Modulator' CONFIG_SENSORS_BT869 $CONFIG_SENSORS
       dep_tristate '  DDC Monitor EDID EEPROM' CONFIG_SENSORS_DDCMON $CONFIG_SENSORS
       dep_tristate '  EEprom (DIMM) reader ' CONFIG_SENSORS_EEPROM $CONFIG_SENSORS
-      dep_tristate '  Linear Technologies LTC1710 ' CONFIG_SENSORS_LTC1710 $CONFIG_SENSORS
       dep_tristate '  Matrix-Orbital LCD Displays' CONFIG_SENSORS_MATORB $CONFIG_MATORB
     fi
   fi
