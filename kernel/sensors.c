@@ -582,40 +582,45 @@ void sensors_write_reals(int nrels,void *buffer,int *bufsize,long *results,
 
 
 /* Very inefficient for ISA detects! */
-void sensors_detect(struct i2c_adapter *adapter,
-                    struct sensors_address_data *address_data,
-                    sensors_found_addr_proc *found_proc)
+int sensors_detect(struct i2c_adapter *adapter,
+                   struct sensors_address_data *address_data,
+                   sensors_found_addr_proc *found_proc)
 {
-  int addr,i,found,j;
+  int addr,i,found,j,err;
   struct sensors_force_data *this_force;
-  unsigned int end_marker = i2c_is_isa_adapter(adapter)?SENSORS_ISA_END:
-                                                        SENSORS_I2C_END;
   int adapter_id = i2c_is_isa_adapter(adapter)?SENSORS_ISA_BUS:
                                                i2c_adapter_id(adapter);
 
-  for (addr = 0x00; addr <= i2c_is_isa_adapter(adapter)?0xfff:0x7f; addr ++) {
+printk("IGNORE: %04hx %04hx %04hx %04hx %04hx %04hx\n",address_data->ignore[0],address_data->ignore[1],address_data->ignore[2],address_data->ignore[3],address_data->ignore[4],address_data->ignore[5]);
+  for (addr = 0x00; 
+       addr <= (i2c_is_isa_adapter(adapter)?0xffff:0x7f); 
+       addr ++) {
+
     /* If it is in one of the force entries, we don't do any detection
        at all */
     found = 0;
     for (i = 0; 
          !found && (this_force = address_data->forces+i, this_force->force); 
          i++) {
-      for (j = 0; !found && (this_force->force[j] != end_marker) ; i += 2) {
+      for (j = 0; 
+           !found && (this_force->force[j] != SENSORS_I2C_END) ; 
+           i += 2) {
         if (((adapter_id == this_force->force[j]) || 
              (this_force->force[j] == SENSORS_ANY_I2C_BUS)) &&
             (addr == this_force->force[j+1])) {
-          found_proc(adapter,addr,this_force->kind);
+          if ((err = found_proc(adapter,addr,this_force->kind)))
+            return err;
           found = 1;
         }
       }
     }
-    if (found)
+    if (found) 
       continue;
 
     /* If this address is in one of the ignores, we can forget about it
        right now */
     for (i = 0;
-         !found && (address_data->ignore[i] != end_marker); 
+         !found && (address_data->ignore[i] != SENSORS_I2C_END); 
          i += 2) {
       if (((adapter_id == address_data->ignore[i]) || 
            (address_data->ignore[i] == SENSORS_ANY_I2C_BUS)) &&
@@ -624,7 +629,7 @@ void sensors_detect(struct i2c_adapter *adapter,
       }
     }
     for (i = 0;
-         !found && (address_data->ignore_range[i] != end_marker);
+         !found && (address_data->ignore_range[i] != SENSORS_I2C_END);
          i += 3) {
       if (((adapter_id == address_data->ignore_range[i]) ||
            (address_data->ignore_range[i] == SENSORS_ANY_I2C_BUS)) &&
@@ -632,7 +637,7 @@ void sensors_detect(struct i2c_adapter *adapter,
           (addr <= address_data->ignore_range[i+2]))
         found = 1;
     }
-    if (found)
+    if (found) 
       continue;
 
     /* Now, we will do a detection, but only if it is in the normal or 
@@ -645,7 +650,7 @@ void sensors_detect(struct i2c_adapter *adapter,
           found = 1;
       }
       for (i = 0;
-           !found && (address_data->normal_isa_range[i] != SENSORS_I2C_END);
+           !found && (address_data->normal_isa_range[i] != SENSORS_ISA_END);
            i += 3) {
          if ((addr >= address_data->normal_isa_range[i]) &&
              (addr <= address_data->normal_isa_range[i+1]) &&
@@ -689,15 +694,17 @@ void sensors_detect(struct i2c_adapter *adapter,
         found = 1;
       }
     }
-    if (!found)
+    if (!found) 
       continue;
 
     /* OK, so we really should examine this address. First check
        whether there is some client here at all! */
-    if (!i2c_is_isa_adapter(adapter) || 
+    if (i2c_is_isa_adapter(adapter) || 
         (smbus_read_byte(adapter,addr) >= 0))
-      found_proc(adapter,addr,0);
+      if ((err = found_proc(adapter,addr,-1)))
+        return err;
   }
+  return 0;
 }
       
 int sensors_init(void) 

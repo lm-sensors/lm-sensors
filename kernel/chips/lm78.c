@@ -33,6 +33,14 @@
 #include "i2c.h"
 #include "compat.h"
 
+/* Addresses to scan */
+static unsigned short normal_i2c[] = {SENSORS_I2C_END};
+static unsigned short normal_i2c_range[] = {0x20,0x2f,SENSORS_I2C_END};
+static unsigned int normal_isa[] = {0x0290,SENSORS_ISA_END};
+static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+
+/* Insmod parameters */
+SENSORS_INSMOD_3(lm78,lm78j,lm79);
 /* Many LM78 constants specified below */
 
 /* Length of ISA address segment */
@@ -61,6 +69,7 @@
 
 #define LM78_REG_CONFIG 0x40
 #define LM78_REG_CHIPID 0x49
+#define LM78_REG_I2C_ADDR 0x48
 
 
 /* Conversions. Rounding is only done on the TO_REG variants. */
@@ -149,9 +158,6 @@ extern int cleanup_module(void);
    bad. Quite a lot of bookkeeping is done. A real driver can often cut
    some corners. */
 
-/* Types of chips supported */
-enum lm78_type { lm78, lm78j, lm79 };
-
 /* For each registered LM78, we need to keep some data in memory. That
    data is pointed to by lm78_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new lm78 client is
@@ -159,7 +165,7 @@ enum lm78_type { lm78, lm78j, lm79 };
 struct lm78_data {
          struct semaphore lock;
          int sysctl_id;
-         enum lm78_type type;
+         enum chips type;
 
          struct semaphore update_lock;
          char valid;                 /* !=0 if following fields are valid */
@@ -183,14 +189,8 @@ static int lm78_init(void);
 static int lm78_cleanup(void);
 
 static int lm78_attach_adapter(struct i2c_adapter *adapter);
-static int lm78_detect_isa(struct isa_adapter *adapter);
-static int lm78_detect_smbus(struct i2c_adapter *adapter);
+static int lm78_detect(struct i2c_adapter *adapter, int address, int kind);
 static int lm78_detach_client(struct i2c_client *client);
-static int lm78_detach_isa(struct isa_client *client);
-static int lm78_detach_smbus(struct i2c_client *client);
-static int lm78_new_client(struct i2c_adapter *adapter,
-                           struct i2c_client *new_client);
-static void lm78_remove_client(struct i2c_client *client);
 static int lm78_command(struct i2c_client *client, unsigned int cmd, 
                         void *arg);
 static void lm78_inc_use (struct i2c_client *client);
@@ -218,7 +218,7 @@ static void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
 /* I choose here for semi-static LM78 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
-#define MAX_LM78_NR 4
+#define MAX_LM78_NR 8
 static struct i2c_client *lm78_list[MAX_LM78_NR];
 
 /* The driver. I choose to use type i2c_driver, as at is identical to both
@@ -282,253 +282,164 @@ static ctl_table lm78_dir_table_template[] = {
      * when a new adapter is inserted (and lm78_driver is still present) */
 int lm78_attach_adapter(struct i2c_adapter *adapter)
 {
-  if (i2c_is_isa_adapter(adapter))
-    return lm78_detect_isa((struct isa_adapter *) adapter);
-  else
-    return lm78_detect_smbus(adapter);
+  return sensors_detect(adapter,&addr_data,lm78_detect);
 }
 
-/* This function is called whenever a client should be removed:
-    * lm78_driver is removed (when this module is unloaded)
-    * when an adapter is removed which has a lm78 client (and lm78_driver
-      is still present). */
-int lm78_detach_client(struct i2c_client *client)
+/* This function is called by sensors_detect */
+int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
 {
-  if (i2c_is_isa_client(client))
-    return lm78_detach_isa((struct isa_client *) client);
-  else
-    return lm78_detach_smbus(client);
-}
+  int i;
+  struct i2c_client *new_client;
+  struct lm78_data *data;
+  int err=0;
+  const char *type_name = "";
+  const char *client_name = "";
 
-/* Detect whether there is a LM78 on the ISA bus, register and initialize 
-   it. */
-int lm78_detect_isa(struct isa_adapter *adapter)
-{
-  int address,err;
-  struct isa_client *new_client;
-  enum lm78_type type;
-  const char *type_name;
-  const char *client_name;
 
-  /* OK, this is no detection. I know. It will do for now, though.  */
+  if (kind < 0) {
+  /* We need address registration for the I2C bus too. That is not yet
+     implemented. */
+    if (i2c_is_isa_adapter(adapter)) {
 
-  err = 0;
-  for (address = 0x290; (! err) && (address <= 0x290); address += 0x08) {
-    if (check_region(address, LM78_EXTENT))
-      continue;
-
-    if (inb_p(address + LM78_ADDR_REG_OFFSET) == 0xff) {
-      outb_p(0x00,address + LM78_ADDR_REG_OFFSET);
-      if (inb_p(address + LM78_ADDR_REG_OFFSET) == 0xff)
-        continue;
+#define REALLY_SLOW_IO
+      /* We need the timeouts for at least some LM78-like chips. But only
+         if we read 'undefined' registers. */
+      if (check_region(address,LM78_EXTENT))
+        goto ERROR0;
+      i = inb_p(address + 1);
+      if (inb_p(address + 2) != i)
+        goto ERROR0;
+      if (inb_p(address + 3) != i)
+        goto ERROR0;
+      if (inb_p(address + 7) != i)
+        goto ERROR0;
+#undef REALLY_SLOW_IO
+      
+      /* Let's just hope nothing breaks here */
+      i = inb_p(address + 5) & 0x7f;
+      outb_p(~i & 0x7f,address+5);
+      if ((inb_p(address + 5) & 0x7f) != (~i & 0x7f)) {
+        outb_p(i,address+5);
+        return 0;
+      }
     }
-    
-    /* Real detection code goes here */
+  }
 
-    /* Determine exact type */
-    outb_p(LM78_REG_CHIPID,address + LM78_ADDR_REG_OFFSET);
-    err = inb_p(address + LM78_DATA_REG_OFFSET) & 0xfe;
-    if (err == 0x00) {
-      type = lm78;
+  /* OK. For now, we presume we have a valid client. We now create the
+     client structure, even though we cannot fill it completely yet.
+     But it allows us to access lm78_{read,write}_value. */
+
+  if (! (new_client = kmalloc((i2c_is_isa_adapter(adapter)?
+                                      sizeof(struct isa_client):
+                                      sizeof(struct i2c_client)) + 
+                               sizeof(struct lm78_data),
+                              GFP_KERNEL))) {
+    err = -ENOMEM;
+    goto ERROR0;
+  }
+
+  if (i2c_is_isa_adapter(adapter)) {
+    data = (struct lm78_data *) (((struct isa_client *) new_client) + 1);
+    new_client->addr = 0;
+    ((struct isa_client *) new_client)->isa_addr = address;
+    data->lock = MUTEX;
+  } else {
+    data = (struct lm78_data *) (((struct i2c_client *) new_client) + 1);
+    new_client->addr = address;
+  }
+  new_client->data = data;
+  new_client->adapter = adapter;
+  new_client->driver = &lm78_driver;
+  
+  /* Now, we do the remaining detection. */
+
+  if (kind < 0) {
+    if (lm78_read_value(new_client,LM78_REG_CONFIG) & 0x80)
+      goto ERROR1;
+    if (!i2c_is_isa_adapter(adapter) && 
+        (lm78_read_value(new_client,LM78_REG_I2C_ADDR) != address))
+      goto ERROR1;
+  }
+    
+  /* Determine the chip type. */
+  if (kind <= 0) {
+    i = lm78_read_value(new_client,LM78_REG_CHIPID);
+    if (i == 0x00) {
+      kind = lm78;
       type_name = "lm78";
       client_name = "LM78 chip";
-    } else if (err == 0x40) {
-      type = lm78j;
+    } else if (i == 0x40) {
+      kind = lm78j;
       type_name = "lm78-j";
       client_name = "LM78-J chip";
-    } else if (err == 0xc0) {
-      type = lm79;
+    } else if ((i & 0xfe) == 0xc0) {
+      kind = lm79;
       type_name = "lm79";
       client_name = "LM79 chip";
-    } else if (err == 0x02) {
-      printk("lm78.o: Warning: Winbond W83781D detected (treated as a LM79)\n");
-      type = lm79;
-      type_name = "lm79";
-      client_name = "LM79 chip";
-    } else {
-#ifdef DEBUG
-      printk("lm78.o: warning: probed non-lm78 chip?!? (%x)\n",err);
-#endif
-      continue;
-    }
+    } else
+      goto ERROR1;
+  }
 
+  /* Reserve the ISA region */
+  if i2c_is_isa_adapter(adapter)
     request_region(address, LM78_EXTENT, type_name);
 
-    /* Allocate space for a new client structure */
-    if (! (new_client = kmalloc(sizeof(struct isa_client) + 
-                                sizeof(struct lm78_data),
-                               GFP_KERNEL)))
-    {
-      err=-ENOMEM;
-      goto ERROR1;
-    } 
+  /* Fill in the remaining client fields and put it into the global list */
+  strcpy(new_client->name,client_name);
+  data->type = kind;
 
-    /* Fill the new client structure with data */
-    new_client->data = (struct lm78_data *) (new_client + 1);
-    new_client->addr = 0;
-    strcpy(new_client->name,client_name);
-    ((struct lm78_data *) (new_client->data))->type = type;
-    new_client->isa_addr = address;
-    if ((err = lm78_new_client((struct i2c_adapter *) adapter,
-                               (struct i2c_client *) new_client)))
-      goto ERROR2;
-
-    /* Tell i2c-core a new client has arrived */
-    if ((err = isa_attach_client(new_client)))
-      goto ERROR3;
-    
-    /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry((struct i2c_client *) new_client,
-                                      type_name,
-                                      lm78_dir_table_template)) < 0)
-      goto ERROR4;
-    ((struct lm78_data *) (new_client->data)) -> sysctl_id = err;
-    err = 0;
-
-    /* Initialize the LM78 chip */
-    lm78_init_client((struct i2c_client *) new_client);
-    continue;
-
-/* OK, this is not exactly good programming practice, usually. But it is
-   very code-efficient in this case. */
-
-ERROR4:
-    isa_detach_client(new_client);
-ERROR3:
-    lm78_remove_client((struct i2c_client *) new_client);
-ERROR2:
-    kfree(new_client);
-ERROR1:
-    release_region(address, LM78_EXTENT);
-  }
-  return err;
-
-}
-
-/* Deregister and remove a LM78 client */
-int lm78_detach_isa(struct isa_client *client)
-{
-  int err,i;
-  for (i = 0; i < MAX_LM78_NR; i++)
-    if ((client == (struct isa_client *) (lm78_list[i])))
+  for(i = 0; i < MAX_LM78_NR; i++)
+    if (! lm78_list[i])
       break;
   if (i == MAX_LM78_NR) {
-    printk("lm78.o: Client to detach not found.\n");
-    return -ENOENT;
+    printk("lm78.o: No empty slots left, recompile and heighten "
+           "MAX_LM78_NR!\n");
+    err = -ENOMEM;
+    goto ERROR2;
   }
+  lm78_list[i] = new_client;
+  new_client->id = i;
+  data->valid = 0;
+  data->update_lock = MUTEX;
 
-  sensors_deregister_entry(((struct lm78_data *)(client->data))->sysctl_id);
+  /* Tell the I2C layer a new client has arrived */
+  if ((err = i2c_attach_client(new_client)))
+    goto ERROR3;
 
-  if ((err = isa_detach_client(client))) {
-    printk("lm78.o: Client deregistration failed, client not detached.\n");
-    return err;
+  /* Register a new directory entry with module sensors */
+  if ((i = sensors_register_entry((struct i2c_client *) new_client,
+                                  type_name,
+                                  lm78_dir_table_template)) < 0) {
+    err = i;
+    goto ERROR4;
   }
-  lm78_remove_client((struct i2c_client *) client);
-  release_region(client->isa_addr,LM78_EXTENT);
-  kfree(client);
+  data->sysctl_id = i;
+
+  /* Initialize the LM78 chip */
+  lm78_init_client((struct i2c_client *) new_client);
   return 0;
-}
-
-int lm78_detect_smbus(struct i2c_adapter *adapter)
-{
-  int address,err;
-  struct i2c_client *new_client;
-  enum lm78_type type;
-  const char *type_name,*client_name;
-
-  /* OK, this is no detection. I know. It will do for now, though.  */
-  err = 0;
-  for (address = 0x20; (! err) && (address <= 0x2f); address ++) {
-
-    /* Later on, we will keep a list of registered addresses for each
-       adapter, and check whether they are used here */
-
-    if (smbus_read_byte_data(adapter,address,LM78_REG_CONFIG) < 0) 
-      continue;
-
-    /* Real detection code goes here */
-
-    /* Determine exact type */
-    err = smbus_read_byte_data(adapter,address,LM78_REG_CHIPID) & 0xfe;
-    if (err == 0x00) {
-      type = lm78;
-      type_name = "lm78";
-      client_name = "LM78 chip";
-    } else if (err == 0x40) {
-      type = lm78j;
-      type_name = "lm78-j";
-      client_name = "LM78-J chip";
-    } else if (err == 0xc0) {
-      type = lm79;
-      type_name = "lm79";
-      client_name = "LM79 chip";
-    } else if (err == 0x02) {
-      printk("lm78.o: Warning: Winbond W83781D detected (treated as a LM79)\n");
-      type = lm79;
-      type_name = "lm79";
-      client_name = "LM79 chip";
-    } else {
-#ifdef DEBUG
-      printk("lm78.o: warning: probed non-lm78 chip?!? (%x)\n",err);
-#endif
-      continue;
-    }
-
-
-    /* Allocate space for a new client structure. To counter memory
-       ragmentation somewhat, we only do one kmalloc. */
-    if (! (new_client = kmalloc(sizeof(struct i2c_client) + 
-                                sizeof(struct lm78_data),
-                               GFP_KERNEL))) {
-      err = -ENOMEM;
-      continue;
-    }
-
-    /* Fill the new client structure with data */
-    new_client->data = (struct lm78_data *) (new_client + 1);
-    new_client->addr = address;
-    strcpy(new_client->name,client_name);
-    ((struct lm78_data *) (new_client->data))->type = type;
-    if ((err = lm78_new_client(adapter,new_client)))
-      goto ERROR2;
-
-    /* Tell i2c-core a new client has arrived */
-    if ((err = i2c_attach_client(new_client))) 
-      goto ERROR3;
-
-    /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,type_name,
-                                      lm78_dir_table_template)) < 0)
-      goto ERROR4;
-    ((struct lm78_data *) (new_client->data))->sysctl_id = err;
-    err = 0;
-
-    /* Initialize the LM78 chip */
-    lm78_init_client(new_client);
-    continue;
 
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
+
 ERROR4:
-    i2c_detach_client(new_client);
+  i2c_detach_client(new_client);
 ERROR3:
-    lm78_remove_client((struct i2c_client *) new_client);
+  for (i = 0; i < MAX_LM78_NR; i++)
+    if (new_client == lm78_list[i]) 
+      lm78_list[i] = NULL;
 ERROR2:
-    kfree(new_client);
-  }
+  if i2c_is_isa_adapter(adapter)
+    release_region(address,LM78_EXTENT);
+ERROR1:
+  kfree(new_client);
+ERROR0:
   return err;
 }
 
-int lm78_detach_smbus(struct i2c_client *client)
+int lm78_detach_client(struct i2c_client *client)
 {
   int err,i;
-  for (i = 0; i < MAX_LM78_NR; i++)
-    if (client == lm78_list[i])
-      break;
-  if ((i == MAX_LM78_NR)) {
-    printk("lm78.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
 
   sensors_deregister_entry(((struct lm78_data *)(client->data))->sysctl_id);
 
@@ -536,47 +447,21 @@ int lm78_detach_smbus(struct i2c_client *client)
     printk("lm78.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-  lm78_remove_client(client);
-  kfree(client);
-  return 0;
-}
 
-
-/* Find a free slot, and initialize most of the fields */
-int lm78_new_client(struct i2c_adapter *adapter,
-                    struct i2c_client *new_client)
-{
-  int i;
-  struct lm78_data *data;
-
-  /* First, seek out an empty slot */
-  for(i = 0; i < MAX_LM78_NR; i++)
-    if (! lm78_list[i])
-      break;
-  if (i == MAX_LM78_NR) {
-    printk("lm78.o: No empty slots left, recompile and heighten "
-           "MAX_LM78_NR!\n");
-    return -ENOMEM;
-  }
-  
-  lm78_list[i] = new_client;
-  new_client->id = i;
-  new_client->adapter = adapter;
-  new_client->driver = &lm78_driver;
-  data = new_client->data;
-  data->valid = 0;
-  data->lock = MUTEX;
-  data->update_lock = MUTEX;
-  return 0;
-}
-
-/* Inverse of lm78_new_client */
-void lm78_remove_client(struct i2c_client *client)
-{
-  int i;
   for (i = 0; i < MAX_LM78_NR; i++)
-    if (client == lm78_list[i]) 
-      lm78_list[i] = NULL;
+    if (client == lm78_list[i])
+      break;
+  if ((i == MAX_LM78_NR)) {
+    printk("lm78.o: Client to detach not found.\n");
+    return -ENOENT;
+  }
+  lm78_list[i] = NULL;
+
+  if i2c_is_isa_client(client)
+    release_region(((struct isa_client *)client)->isa_addr,LM78_EXTENT);
+  kfree(client);
+
+  return 0;
 }
 
 /* No commands defined yet */
@@ -603,6 +488,8 @@ void lm78_dec_use (struct i2c_client *client)
  
 
 /* The SMBus locks itself, but ISA access must be locked explicitely! 
+   We don't want to lock the whole ISA bus, so we lock each client
+   separately.
    We ignore the LM78 BUSY flag at this moment - it could lead to deadlocks,
    would slow down the LM78 access and should not be necessary. 
    There are some ugly typecasts here, but the good new is - they should
@@ -611,18 +498,20 @@ int lm78_read_value(struct i2c_client *client, u8 reg)
 {
   int res;
   if (i2c_is_isa_client(client)) {
-    down((struct semaphore *) (client->data));
+    down(& (((struct lm78_data *) (client->data)) -> lock));
     outb_p(reg,(((struct isa_client *) client)->isa_addr) + 
                LM78_ADDR_REG_OFFSET);
     res = inb_p((((struct isa_client *) client)->isa_addr) + 
                 LM78_DATA_REG_OFFSET);
-    up((struct semaphore *) (client->data));
+    up( & (((struct lm78_data *) (client->data)) -> lock));
     return res;
   } else
     return smbus_read_byte_data(client->adapter,client->addr, reg);
 }
 
 /* The SMBus locks itself, but ISA access muse be locked explicitely! 
+   We don't want to lock the whole ISA bus, so we lock each client
+   separately.
    We ignore the LM78 BUSY flag at this moment - it could lead to deadlocks,
    would slow down the LM78 access and should not be necessary. 
    There are some ugly typecasts here, but the good new is - they should
@@ -630,10 +519,10 @@ int lm78_read_value(struct i2c_client *client, u8 reg)
 int lm78_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
   if (i2c_is_isa_client(client)) {
-    down((struct semaphore *) (client->data));
+    down(&(((struct lm78_data *) (client->data)) -> lock));
     outb_p(reg,((struct isa_client *) client)->isa_addr + LM78_ADDR_REG_OFFSET);
     outb_p(value,((struct isa_client *) client)->isa_addr + LM78_DATA_REG_OFFSET);
-    up((struct semaphore *) (client->data));
+    up(&(((struct lm78_data *) (client->data)) -> lock));
     return 0;
   } else
     return smbus_write_byte_data(client->adapter, client->addr, reg,value);
