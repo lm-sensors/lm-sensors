@@ -162,7 +162,7 @@ pc87360
 	pc87363		-	-	2	2 pwm	no	yes (LPC)
 	pc87364		-	-	3	3 pwm	no	yes (LPC)
 	pc87365		2	11	3	3 pwm	no	yes (LPC)
-	pc87366		3	11	3	3 pwm	no	yes (LPC)
+	pc87366		6	11	3	3 pwm	no	yes (LPC)
 
 sis5595
 	sis5595 	0-1	4-5	2	-	no	yes
