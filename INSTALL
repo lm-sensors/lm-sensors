@@ -11,7 +11,20 @@ COMPILATION AND INSTALLATION
 
 Basic installation is uncomplicated. Run 'make all', followed by an optional
 'make install'. Everything is compiled using the Makefile in the root of
-this package. Some interesting variables:
+this package. 
+
+You need flex and bison (reportedly a version newer than 1.22). You must
+also make sure you have all kernel headers installed properly, including
+the ones created during the kernel compilation. Some of the additional
+programs in the prog/ subdirectory need Perl and GAWK to run, but you
+don't need them to use this package. And you need a fully working compilation
+environment, of course; the program should compile against both libc5
+and glibc2. Like always, we recommend gcc-2.7.2.3 as the compiler for
+kernel modules, but 2.8.1 and any non-buggy egcs version will very
+probably work too. The modules in this package should work with any 2.0,
+2.1 or 2.2 kernel.
+
+Some interesting Makefile variables:
 
 * SMP
   This must be set to 1 if your kernel was compiled with SMP set to 1. There
@@ -68,6 +81,9 @@ now (or more exactly, the kernel which you will use the compiled modules
 with). If the tree and the running kernel do not match, you will either
 be unable to insert the modules at all, or you can expect strange 
 behaviour (probably leading to crashes).
+
+If you do a 'make install', remember to do a 'depmod -a' and a 'ldconfig'
+to make sure the new modules and shared libraries are recognized.
 
 
 TESTING AND RUNNING
