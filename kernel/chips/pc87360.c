@@ -665,8 +665,10 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 
 	/* Fan clock dividers may be needed before any data is read */
 	for (i = 0; i < data->fannr; i++) {
-		data->fan_status[i] = pc87360_read_value(data, LD_FAN,
-				      NO_BANK, PC87360_REG_FAN_STATUS(i));
+		if (FAN_CONFIG_MONITOR(data->fan_conf, i))
+			data->fan_status[i] = pc87360_read_value(data,
+					      LD_FAN, NO_BANK,
+					      PC87360_REG_FAN_STATUS(i));
 	}
 
 	if (init > 0) {
