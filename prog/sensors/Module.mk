@@ -35,8 +35,7 @@ $(PROGSENSORSTARGETS): $(PROGSENSORSSOURCES:.c=.ro) lib/$(LIBSHBASENAME)
 all-prog-sensors: $(PROGSENSORSTARGETS)
 all :: all-prog-sensors
 
-# No install rule
-install-prog-sensors:
+install-prog-sensors: all-prog-sensors
 	mkdir -p $(BINDIR)
 	$(INSTALL) -o root -g root -m 755 $(PROGSENSORSTARGETS) $(BINDIR)
 install :: install-prog-sensors

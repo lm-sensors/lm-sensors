@@ -23,23 +23,25 @@ MODULE_DIR := i2c
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 I2CTARGETS := $(MODULE_DIR)/i2c-core.o  $(MODULE_DIR)/algo-bit.o \
-              $(MODULE_DIR)/i2c-dev.o   $(MODULE_DIR)/bit-lp.o \
+              $(MODULE_DIR)/bit-lp.o \
               $(MODULE_DIR)/bit-velle.o $(MODULE_DIR)/bit-mb.o
+I2CADDTARGETS := $(MODULE_DIR)/i2c-dev.o
 
 I2CHEADERFILES := $(MODULE_DIR)/i2c.h
 
 # Include all dependency files
 INCLUDEFILES += $(I2CTARGETS:.o=.d)
 
-all-i2c: $(I2CTARGETS)
+all-i2c: $(I2CTARGETS) $(I2CADDTARGETS)
 all :: all-i2c
 
-install-i2c:
+install-i2c: all-i2c
 	$(MKDIR) $(MODDIR) $(SYSINCLUDEDIR)
 	$(INSTALL) -o root -g root -m 644 $(I2CTARGETS) $(MODDIR)
 	$(INSTALL) -o root -g root -m 644 $(I2CHEADERFILES) $(SYSINCLUDEDIR)
 install :: install-i2c
 
 clean-i2c:
-	$(RM) $(I2CTARGETS) $(I2CTARGETS:.o=.d)
+	$(RM) $(I2CTARGETS) $(I2CTARGETS:.o=.d) $(I2CADDTARGETS) \
+              $(I2CADDTARGETS:.o=.d)
 clean :: clean-i2c

@@ -40,7 +40,7 @@ INCLUDEFILES += $(SRCTARGETS:.o=.d)
 all-src: $(SRCTARGETS)
 all :: all-src
 
-install-src:
+install-src: all-src
 	$(MKDIR) $(MODDIR) $(SYSINCLUDEDIR)
 	$(INSTALL) -o root -g root -m 644 $(SRCTARGETS) $(MODDIR)
 	$(INSTALL) -o root -g root -m 644 $(SRCHEADERFILES) $(SYSINCLUDEDIR)

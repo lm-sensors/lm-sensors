@@ -76,7 +76,7 @@ INCLUDEFILES += $(LIBCSOURCES:.c=.ld) $(LIBCSOURCES:.c=.ad)
 all-lib: $(LIBTARGETS)
 all :: all-lib
 
-install-lib:
+install-lib: all-lib
 	$(MKDIR) $(LIBDIR) $(LIBINCLUDEDIR)
 	$(INSTALL) -o root -g root -m 644 $(LIBTARGETS) $(LIBDIR)
 	$(LN) $(LIBSHLIBNAME) $(LIBDIR)/$(LIBSHSONAME)
