@@ -636,9 +636,6 @@ sub scan_adapter
                                      next;
     next unless i2c_smbus_read_byte(\*FILE) >= 0;
     printf "Client found at address 0x%02x\n",$addr;
-    my @detection_list = ();
-    my $highest_conf = 0;
-    my $double_conf = 0;
     foreach $chip (@chip_ids) {
       if (contains $addr, @{$$chip{i2c_addrs}}) {
         print "Probing for $$chip{name}... ";
@@ -796,8 +793,8 @@ sub w83781d_detect
             (i2c_smbus_read_byte_data($file,0x58) & 0xfe) != 0x10;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   @res = (8);
-  push @res, ($reg1 & 0x07) + 0x48 if $reg1 & 0x08;
-  push @res, (($reg1 & 0x80) >> 4) + 0x48 if $reg1 & 0x80;
+  push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;
+  push @res, (($reg1 & 0x80) >> 4) + 0x48 unless $reg1 & 0x80;
   return @res;
 }
 
