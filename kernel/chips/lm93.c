@@ -661,7 +661,7 @@ static void lm93_vid(struct i2c_client *client, int operation, int ctl_name,
 		return; /* ERROR */
 
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 2;
+		*nrels_mag = 3;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm93_update_client(client);
 		results[0] = LM93_VID_FROM_REG(data->vid[nr]);
@@ -1342,7 +1342,7 @@ static void lm93_write_fan_smart_tach(struct i2c_client *client,
 {
 	/* insert the new mapping and write it out */
 	data->sf_tach_to_pwm = lm93_read_byte(client, LM93_REG_SF_TACH_TO_PWM);
-	data->sf_tach_to_pwm &= ~0x3 << fan * 2;
+	data->sf_tach_to_pwm &= ~(0x3 << fan * 2);
 	data->sf_tach_to_pwm |= value << fan * 2;
 	lm93_write_byte(client, LM93_REG_SF_TACH_TO_PWM, data->sf_tach_to_pwm);
 
@@ -1351,7 +1351,7 @@ static void lm93_write_fan_smart_tach(struct i2c_client *client,
 	if (value)
 		data->sfc2 |= 1 << fan;
 	else
-		data->sfc2 &= ~1 << fan;
+		data->sfc2 &= ~(1 << fan);
 	lm93_write_byte(client, LM93_REG_SFC2, data->sfc2);
 }
 
