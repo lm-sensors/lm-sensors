@@ -155,5 +155,8 @@ struct sensors_chips_data {
 #define EEPROM_SYSCTL2 1001
 #define EEPROM_SYSCTL3 1002
 #define EEPROM_SYSCTL4 1003
+#define EEPROM_SYSCTL5 1004
+#define EEPROM_SYSCTL6 1005
+#define EEPROM_SYSCTL7 1006
 
 #endif /* def SENSORS_SENSORS_H */

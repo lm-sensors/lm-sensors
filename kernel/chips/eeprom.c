@@ -36,7 +36,7 @@
 
 /* Conversions */
 /* Size of EEPROM in bytes */
-#define EEPROM_SIZE 16
+#define EEPROM_SIZE 128
 
 /* Each client has this additional data */
 struct eeprom_data {
@@ -101,6 +101,12 @@ static ctl_table eeprom_dir_table_template[] = {
   { EEPROM_SYSCTL3, "data32-47", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
   { EEPROM_SYSCTL4, "data48-63", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &eeprom_contents },
+  { EEPROM_SYSCTL5, "data64-79", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &eeprom_contents },
+  { EEPROM_SYSCTL6, "data80-95", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &eeprom_contents },
+  { EEPROM_SYSCTL7, "data96-127", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
   { 0 }
 };
@@ -280,7 +286,7 @@ void eeprom_update_client(struct i2c_client *client)
 #endif   	
    }
     for (i=0;i<EEPROM_SIZE;i++) {
-      data->data[i] = smbus_read_byte(client->adapter,client->addr);
+      data->data[i] = (u8)smbus_read_byte(client->adapter,client->addr);
     }
     
     data->last_updated = jiffies;
@@ -301,27 +307,29 @@ void eeprom_contents(struct i2c_client *client, int operation, int ctl_name,
   if (ctl_name == EEPROM_SYSCTL2){ base=16; }
   if (ctl_name == EEPROM_SYSCTL3){ base=32; }
   if (ctl_name == EEPROM_SYSCTL4){ base=48; }
+  if (ctl_name == EEPROM_SYSCTL5){ base=64; }
+  if (ctl_name == EEPROM_SYSCTL6){ base=80; }
+  if (ctl_name == EEPROM_SYSCTL7){ base=96; }
   
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     eeprom_update_client(client);
-    /* just for testing, we won't do the whole thing */
-    for (i=0; i<EEPROM_SIZE; i++) {
+    for (i=0; i<16; i++) {
     	results[i]=data->data[i + base];
     }
 #ifdef DEBUG
     printk("eeprom.o: 0x%X EEPROM Contents (base %d): ",client->addr,base);
-    for (i=0; i<EEPROM_SIZE; i++) {
+    for (i=0; i<16; i++) {
       printk(" 0x%X",data->data[i + base]);
     }
     printk(" .\n");
 #endif
-    *nrels_mag = EEPROM_SIZE;
+    *nrels_mag = 16;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
 
 /* No writes to the EEPROM (yet, anyway) (PAE) */
-
+	printk("eeprom.o: No writes to EEPROMs supported!\n");
   }
 }
 
