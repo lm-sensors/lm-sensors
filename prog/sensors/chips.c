@@ -2860,6 +2860,10 @@ void print_eeprom(const sensors_chip_name *name)
 					print_label(label, 24);
 					printf("DDR SDRAM DIMM\n");
 					break;
+				case 8:
+					print_label(label, 24);
+					printf("DDR2 SDRAM DIMM\n");
+					break;
 				case 17:
 					print_label(label, 24);
 					printf("RAMBUS RIMM\n");
@@ -2915,6 +2919,9 @@ void print_eeprom(const sensors_chip_name *name)
 		} else if (type == 1) { /* DRDRAM */
 			i = (((int) b) & 0x0f) + (((int) b) >> 4) + (((int) c) & 0x07) - 13;
 			k = 1;
+		} else if (type == 8) { /* DDR2 */
+			i = (((int) a) & 0x0f) + (((int) b) & 0x0f) - 17;
+			k = ((((int) c) & 0x7) + 1) * ((int) d);
 		} else { /* SDRAM */
 			i = (((int) a) & 0x0f) + (((int) b) & 0x0f) - 17;
 			if (((int) c) <= 8 && ((int) d) <= 8)
