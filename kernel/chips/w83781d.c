@@ -327,7 +327,6 @@ static void w83781d_sens(struct i2c_client *client, int operation,
 static void w83781d_rt(struct i2c_client *client, int operation,
 		       int ctl_name, int *nrels_mag, long *results);
 #endif
-static u16 swap_bytes(u16 val);
 
 static int w83781d_id = 0;
 
@@ -1127,11 +1126,6 @@ static int w83781d_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-static inline u16 swap_bytes(u16 val)
-{
-	return (val >> 8) | (val << 8);
-}
-
 /* The SMBus locks itself, usually, but nothing may access the Winbond between
    bank switches. ISA access must always be locked explicitly! 
    We ignore the W83781D BUSY flag at this moment - it could lead to deadlocks,
@@ -1186,23 +1180,17 @@ static int w83781d_read_value(struct i2c_client *client, u16 reg)
 			/* convert from ISA to LM75 I2C addresses */
 			switch (reg & 0xff) {
 			case 0x50: /* TEMP */
-				res =
-				    swap_bytes(i2c_smbus_read_word_data
-					       (cl, 0));
+				res = swab16(i2c_smbus_read_word_data(cl, 0));
 				break;
 			case 0x52: /* CONFIG */
 				res = i2c_smbus_read_byte_data(cl, 1);
 				break;
 			case 0x53: /* HYST */
-				res =
-				    swap_bytes(i2c_smbus_read_word_data
-					       (cl, 2));
+				res = swab16(i2c_smbus_read_word_data(cl, 2));
 				break;
 			case 0x55: /* OVER */
 			default:
-				res =
-				    swap_bytes(i2c_smbus_read_word_data
-					       (cl, 3));
+				res = swab16(i2c_smbus_read_word_data(cl, 3));
 				break;
 			}
 		}
@@ -1261,16 +1249,13 @@ static int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 			/* convert from ISA to LM75 I2C addresses */
 			switch (reg & 0xff) {
 			case 0x52: /* CONFIG */
-				i2c_smbus_write_byte_data(cl, 1,
-							  value & 0xff);
+				i2c_smbus_write_byte_data(cl, 1, value & 0xff);
 				break;
 			case 0x53: /* HYST */
-				i2c_smbus_write_word_data(cl, 2,
-							  swap_bytes(value));
+				i2c_smbus_write_word_data(cl, 2, swab16(value));
 				break;
 			case 0x55: /* OVER */
-				i2c_smbus_write_word_data(cl, 3,
-							  swap_bytes(value));
+				i2c_smbus_write_word_data(cl, 3, swab16(value));
 				break;
 			}
 		}

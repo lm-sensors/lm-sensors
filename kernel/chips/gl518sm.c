@@ -147,7 +147,6 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 static void gl518_init_client(struct i2c_client *client);
 static int gl518_detach_client(struct i2c_client *client);
 
-static u16 swap_bytes(u16 val);
 static int gl518_read_value(struct i2c_client *client, u8 reg);
 static int gl518_write_value(struct i2c_client *client, u8 reg, u16 value);
 static void gl518_update_client(struct i2c_client *client);
@@ -447,18 +446,13 @@ static int gl518_detach_client(struct i2c_client *client)
 }
 
 
-static u16 swap_bytes(u16 val)
-{
-	return (val >> 8) | (val << 8);
-}
-
 /* Registers 0x07 to 0x0c are word-sized, others are byte-sized 
    GL518 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
 static int gl518_read_value(struct i2c_client *client, u8 reg)
 {
 	if ((reg >= 0x07) && (reg <= 0x0c))
-		return swap_bytes(i2c_smbus_read_word_data(client, reg));
+		return swab16(i2c_smbus_read_word_data(client, reg));
 	else
 		return i2c_smbus_read_byte_data(client, reg);
 }
@@ -469,8 +463,7 @@ static int gl518_read_value(struct i2c_client *client, u8 reg)
 static int gl518_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
 	if ((reg >= 0x07) && (reg <= 0x0c))
-		return i2c_smbus_write_word_data(client, reg,
-						 swap_bytes(value));
+		return i2c_smbus_write_word_data(client, reg, swab16(value));
 	else
 		return i2c_smbus_write_byte_data(client, reg, value);
 }

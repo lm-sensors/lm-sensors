@@ -102,7 +102,6 @@ static int smartbatt_detach_client(struct i2c_client *client);
 
 static int smartbatt_read(struct i2c_client *client, u8 reg);
 #if 0
-static u16 swap_bytes(u16 val);
 static int smartbatt_write_value(struct i2c_client *client, u8 reg, u16 value);
 #endif
 static void smartbatt_temp(struct i2c_client *client, int operation,
@@ -321,14 +320,6 @@ static int smartbatt_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-#if 0
-/*   Why swap bytes?  */
-static u16 swap_bytes(u16 val)
-{
-	return (val >> 8) | (val << 8);
-}
-#endif
-
 static int smartbatt_read(struct i2c_client *client, u8 reg)
 { 
 	int n = COMM_TIMEOUT;
@@ -342,7 +333,8 @@ static int smartbatt_read(struct i2c_client *client, u8 reg)
 #if 0
 static int smartbatt_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
-	return i2c_smbus_write_word_data(client, reg, swap_bytes(value));
+	/* Why swap bytes? */
+	return i2c_smbus_write_word_data(client, reg, swab16(value));
 }
 #endif
 

@@ -126,7 +126,7 @@ static inline int lm92_read16 (struct i2c_client *client,u8 reg,u16 *value)
 	if (tmp < 0) return (-EIO);
 
 	/* convert the data to little endian format */
-	*value = ((u16) tmp >> 8) | (u16) ((u16) tmp << 8);
+	*value = swab16((u16) tmp);
 
 	return (0);
 }
@@ -134,8 +134,10 @@ static inline int lm92_read16 (struct i2c_client *client,u8 reg,u16 *value)
 static inline int lm92_write16 (struct i2c_client *client,u8 reg,u16 value)
 {
 	/* convert the data to big endian format */
-	u16 be = (value >> 8) | (u16) (value << 8);
-	return (i2c_smbus_write_word_data (client,reg,be) < 0 ? -EIO : 0);
+	if (i2c_smbus_write_word_data(client, reg, swab16(value)) < 0)
+		return -EIO;
+
+	return 0;
 }
 
 static int lm92_read (struct i2c_client *client)

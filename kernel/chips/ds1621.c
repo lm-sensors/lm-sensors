@@ -99,7 +99,6 @@ static int ds1621_detect(struct i2c_adapter *adapter, int address,
 static void ds1621_init_client(struct i2c_client *client);
 static int ds1621_detach_client(struct i2c_client *client);
 
-static u16 swap_bytes(u16 val);
 static int ds1621_read_value(struct i2c_client *client, u8 reg);
 static int ds1621_write_value(struct i2c_client *client, u8 reg, u16 value);
 static void ds1621_temp(struct i2c_client *client, int operation,
@@ -281,11 +280,6 @@ static int ds1621_detach_client(struct i2c_client *client)
 }
 
 
-static u16 swap_bytes(u16 val)
-{
-	return (val >> 8) | (val << 8);
-}
-
 /* All registers are word-sized, except for the configuration register.
    DS1621 uses a high-byte first convention, which is exactly opposite to
    the usual practice. */
@@ -295,7 +289,7 @@ static int ds1621_read_value(struct i2c_client *client, u8 reg)
 	    || (reg == DS1621_REG_TEMP_SLOPE))
 		return i2c_smbus_read_byte_data(client, reg);
 	else
-		return swap_bytes(i2c_smbus_read_word_data(client, reg));
+		return swab16(i2c_smbus_read_word_data(client, reg));
 }
 
 /* All registers are word-sized, except for the configuration register.
@@ -310,8 +304,7 @@ static int ds1621_write_value(struct i2c_client *client, u8 reg, u16 value)
 	    || (reg == DS1621_REG_TEMP_SLOPE))
 		return i2c_smbus_write_byte_data(client, reg, value);
 	else
-		return i2c_smbus_write_word_data(client, reg,
-						 swap_bytes(value));
+		return i2c_smbus_write_word_data(client, reg, swab16(value));
 }
 
 static void ds1621_init_client(struct i2c_client *client)
