@@ -41,6 +41,7 @@
 	5598		0008		5597/5598
 	 630		0008		0630
 	 730		0008		0730
+	 735		0008		0735
 */
 
 #include <linux/version.h>
@@ -115,6 +116,7 @@ static int blacklist[] = {
 						  use the 5511 ID for recognition */
 			PCI_DEVICE_ID_SI_5597,
 			PCI_DEVICE_ID_SI_5598,
+			0x735,
                           0 };
 /*
    SiS southbridge has a LM78-like chip integrated on the same IC.
