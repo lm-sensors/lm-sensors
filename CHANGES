@@ -18,21 +18,33 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.8.7 (2004xxxx)
+  File doc/lm_sensors-FAQ.texi: Update 4.27.
   File doc/chips/pc87360-fan: Renamed to pc87360
   File doc/chips/w83781d: Update AS99127F documentation
+  File etc/sensors.conf.eg: Add comments about BP6 voltages
   Library: Fix 2.6 VRM
            Fix 2.6 hyst temp for 2.6 (lm75, lm78 and gl518sm)
   Modules dmi_scan, i2c-piix4: Move IBM detection into dmi_scan
+  Modules w83781d.c, smartbatt.c, lm75.c, gl520sm.c, gl518sm.c, ds1621.c,
+          asb100.c, lm92.c: Use swab16
   Module i2c-sis645: Add support for SiS655
+  Module lm92: Support MAX6633, MAX6634, MAX6635 and LM76
   Module pc87360-fan: Renamed to pc87360
                       Also support PC87365 and PC87366
                       Add write support
                       Correctly set the chip name depending on the type
+  Module thmc50: Fix address range
   Module w83781d: Drop PWM support for as99127f
   Program mkpatch: Patch dmi_scan.c in kernel instead of adding our own
                    module
+                   Include i2c-nforce2
   Program sensors-detect: Rework Super I/O detection
                           Support SiS655/SiS96x
+                          Support ADT7461 and ADT7467
+                          Better support for ADM1027, ADT7460 and ADT7463
+                          Explicitely support ADM1028
+                          Scan all logical devices of PC87365 and PC87366
+                          Detect LM92, LM76, MAX6633, MAX6634, MAX6635
 
 
 2.8.6 (20040405)
