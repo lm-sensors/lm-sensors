@@ -32,7 +32,8 @@ LIBSHLIBNAME := libsensors.so.$(LIBVER)
 LIBSTLIBNAME := libsensors.a
 LIBSHSONAME := libsensors.so.$(LIBMAINVER)
 
-LIBTARGETS := $(MODULE_DIR)/$(LIBSTLIBNAME) $(MODULE_DIR)/$(LIBSHLIBNAME)
+LIBTARGETS := $(MODULE_DIR)/$(LIBSTLIBNAME) $(MODULE_DIR)/$(LIBSHLIBNAME) \
+              $(MODULE_DIR)/$(LIBSHSONAME) $(MODULE_DIR)/$(LIBSHBASENAME)
 
 LIBCSOURCES := $(MODULE_DIR)/data.c $(MODULE_DIR)/general.c \
                $(MODULE_DIR)/error.c $(MODULE_DIR)/chips.c \
@@ -48,6 +49,14 @@ LIBHEADERFILES := $(MODULE_DIR)/error.h $(MODULE_DIR)/sensors.h
 # How to create the shared library
 $(MODULE_DIR)/$(LIBSHLIBNAME): $(LIBSHOBJECTS)
 	$(CC) -shared -Wl,-soname,$(LIBSHSONAME) -o $@ $^ -lc
+
+$(MODULE_DIR)/$(LIBSHSONAME): $(MODULE_DIR)/$(LIBSHLIBNAME)
+	$(RM) $@
+	$(LN) $(LIBSHLIBNAME) $@
+
+$(MODULE_DIR)/$(LIBSHBASENAME): $(MODULE_DIR)/$(LIBSHLIBNAME)
+	$(RM) $@ 
+	$(LN) $(LIBSHLIBNAME) $@
 
 # And the static library
 $(MODULE_DIR)/$(LIBSTLIBNAME): $(LIBSTOBJECTS)

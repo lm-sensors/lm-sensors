@@ -23,7 +23,7 @@
 #include "sensors.h"
 
 /* This header file contains all kinds of data structures which are used
-   for the representation of the config file data and the /proc/.../chips
+   for the representation of the config file data and the /proc/...
    data. */
 
 typedef enum sensors_operation { 
