@@ -18,13 +18,21 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.1 (2005????)
+  Library: Add support for 2.6 fscpos driver (Stefan Ott)
   Module bmcsensors: Fix compile error
+  Module ds1621: Fix detection (Aurelien Jarno)
+  Module it87: Improve Super-I/O detection
+               Limit I2C address range
+               Support VID on the IT8712F
   Module lm90: Fix MAX6657, MAX6658 and MAX6659 detection
   Program ddcmon: New; user-space replacement for the ddcmon driver
   Program eeprog: Fix missing first char in ascii mode (J. A. McMahan Jr.)
   Program lm_sensors.init: Cleanups (Axel Thimm)
   Program sensord: Fix erroneous error message (Aurelien Jarno)
   Program sensors-detect: Fix MAX6657, MAX6658 and MAX6659 detection
+                          Improve IT8705F and IT8712F detection
+                          Improve udev detection
+                          Fix DS1621 detection
 
 2.9.0 (20041228)
   NOTE: Requires i2c-2.9.0 or newer!
