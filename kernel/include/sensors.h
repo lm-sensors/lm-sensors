@@ -84,6 +84,7 @@ extern void sensors_deregister_entry(int id);
 #define I2C_DRIVERID_LM78 1002
 #define I2C_DRIVERID_LM75 1003
 #define I2C_DRIVERID_GL518 1004
+#define I2C_DRIVERID_EEPROM 1005
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -149,5 +150,10 @@ struct sensors_chips_data {
 #define GL518_ALARM_TEMP 0x10
 #define GL518_ALARM_FAN1 0x20
 #define GL518_ALARM_FAN2 0x40
+
+#define EEPROM_SYSCTL1 1000
+#define EEPROM_SYSCTL2 1001
+#define EEPROM_SYSCTL3 1002
+#define EEPROM_SYSCTL4 1003
 
 #endif /* def SENSORS_SENSORS_H */
