@@ -1089,6 +1089,24 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #	exitreg => 0x02,
 #	exit => 0x01,
 #     }, 
+# Nat'l untested
+#     {
+#	name => "Nat. Semi. PC87366 Super I/O Sensors",
+#	driver => "xxxx",
+#	addrreg => 0x2e,
+#	datareg => 0x2f,
+#	enter => ?? none required?
+#	devidreg => 0x20,
+#	devid => 0xe9,
+#	logdevreg => 0x07,
+#	logdev => 0x09 # fans; temps at 0x0e
+#	actreg => 0x30,
+#	actmask => 0x01,
+#	basereg => 0x60,
+# exit is writing 0x01 to reg 0x02. - not compatible with other superio chips
+#	exitreg => ?? none req'd??
+#	exit => ??
+#     }, 
      {
 	name => "SMSC 47M1xx Super IO Fan Sensors",
 	driver => "smsc47m1",
@@ -1123,7 +1141,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      }, 
      {
 	name => "Winbond W83627HF Super IO Sensors",
-	driver => "w83781d",
+	driver => "w83627hf",
 	addrreg => 0x2e,
 	exitreg => 0x2e,
 	datareg => 0x2f,
@@ -1139,7 +1157,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      }, 
      {
 	name => "Winbond W83697HF Super IO Sensors",
-	driver => "w83781d",
+	driver => "w83627hf",
 	addrreg => 0x2e,
 	exitreg => 0x2e,
 	datareg => 0x2f,
