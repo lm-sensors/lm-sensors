@@ -24,6 +24,14 @@
 #include <linux/module.h>
 #include <linux/pci.h>
 #include <asm/io.h>
+#include <linux/types.h>
+#include <linux/version.h>
+
+/* When exactly was the new pci interface introduced? */
+#if LINUX_VERSION_CODE < 0x020100
+#include <linux/bios32.h>
+#endif
+
 
 #include "i2c.h"
 #include "algo-bit.h"
@@ -119,6 +127,9 @@ static void bit_mb_exit(void)
 	release_region(I2C_DIR, IOSPACE);
 }
 
+/* When exactly was the new pci interface introduced? */
+#if LINUX_VERSION_CODE >= 0x020100
+
 static u32 find_i2c(void)
 {
 	struct pci_dev *s_bridge;
@@ -137,6 +148,31 @@ static u32 find_i2c(void)
 
 	return (val & (0xff<<8));
 }
+
+#else
+
+static u32 find_i2c(void)
+{
+	unsigned char VIA_bus, VIA_devfn;
+	u32 val;
+	
+	if (! pcibios_present())
+		return(0);
+		
+	if(pcibios_find_device(
+		PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_82C586_3, 0, &VIA_bus, 
+		&VIA_devfn));
+		return 0;
+
+	if ( PCIBIOS_SUCCESSFUL !=
+                pcibios_read_config_dword(VIA_bus, VIA_devfn,
+			PM_IO_BASE_REGISTER, &val))
+		return 0;
+	return (val & (0xff<<8));
+}
+
+#endif
+
 
 #ifdef MODULE
 MODULE_AUTHOR("Kyosti Malkki <kmalkki@cc.hut.fi>");
