@@ -68,6 +68,9 @@ example, have serial EEPROMs in them connected to the SMBus which will be
 found by the module.  Take care to ignore the output of decode_dimms.pl for
 these EEPROMs.
 
+The driver caches the data from the monitor and only rereads it
+from the eeprom if the cache is more than 5 minutes old.
+
 
 DECODE_DIMMS.PL
 ---------------
