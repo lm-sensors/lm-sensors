@@ -13,9 +13,12 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
-2.3.2 (1999050?)
+2.3.2 (19990507)
   Module i2c-hydra: Now compiles on 2.0.x kernels
   Module i2c-lm75: Slightly better detection
+  * New, but not compiled by default:
+  Module i2c-voodoo3: beginning of Voodoo3 I2C bus driver
+  Module bt869: Beginning of BT869 (PAL/NTSC video converter) driver
 
 2.3.1 (19990501)
   All: Now compiles on PPC
