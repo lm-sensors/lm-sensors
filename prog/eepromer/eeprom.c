@@ -139,12 +139,14 @@ int main(int argc, char **argv){
     while((i=getopt(argc,argv,"d:a:p:wyf:h"))>=0){
 	switch(i){
 	case 'h':
-	    fprintf(stderr,"%s [-d dev] [-a adr] [-p pgs] [-y] [-w]\n",argv[0]);
+	    fprintf(stderr,"%s [-d dev] [-a adr] [-p pgs] [-w] [-y] [-f file]\n",argv[0]);
 	    fprintf(stderr,"\tdev: device, e.g. /dev/i2c-0    (def)\n");
 	    fprintf(stderr,"\tadr: base address of eeprom, eg 0xA0 (def)\n");
 	    fprintf(stderr,"\tpgs: number of pages to read, eg 8 (def)\n");
 	    fprintf(stderr,"\t-w : write to eeprom (default is reading!)\n");
 	    fprintf(stderr,"\t-y : suppress warning when writing (default is to warn!)\n");
+	    fprintf(stderr,"\t-f file: copy eeprom contents to/from file\n");
+	    fprintf(stderr,"\t         (default for read is test only; for write is all zeros)\n");
 	    fprintf(stderr,"Note on pages/addresses:\n");
 	    fprintf(stderr,"\teeproms with more than 256 byte appear as if they\n");
 	    fprintf(stderr,"\twere several eeproms with consecutive addresses on the bus\n");
