@@ -548,12 +548,15 @@ void lm80_fan(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     lm80_update_client(client);
-    results[0] = FAN_FROM_REG(data->fan_min[nr-1],data->fan_div[nr-1]);
-    results[1] = FAN_FROM_REG(data->fan[nr-1],data->fan_div[nr-1]);
+    results[0] = FAN_FROM_REG(data->fan_min[nr-1],
+                              DIV_FROM_REG(data->fan_div[nr-1]));
+    results[1] = FAN_FROM_REG(data->fan[nr-1],
+                              DIV_FROM_REG(data->fan_div[nr-1]));
     *nrels_mag = 2;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
-      data->fan_min[nr-1] = FAN_TO_REG(results[0],data->fan_div[nr-1]);
+      data->fan_min[nr-1] = FAN_TO_REG(results[0],
+                            DIV_FROM_REG(data->fan_div[nr-1]));
       lm80_write_value(client,nr==1?LM80_REG_FAN1_MIN:LM80_REG_FAN2_MIN,
                        data->fan_min[nr-1]);
     }

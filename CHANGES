@@ -13,14 +13,19 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
+2.1.2 (199801??)
+  Modules lm80.o, w83781d.o: fan-related Segmentation fault corrected
+
 2.1.1 (19990107)
   Module i2c-proc.o: Hack to make /proc/bus/ possible for kernels 2.0.35
                      and older
   Module gl518sm.o: Miscelaneous bugs and problems solved
+  Program isadump: NEW
 
 2.1.0 (19981230)
   Library: Completely NEW
   Program sensors: NEW
+  Program grab_busses: NEW
   Program decode-dimms: More information
   Module bit-mb.o: Removed spurious semicolon; now runs on more VIA chipsets
   Module w83781d.o: NEW
