@@ -16,7 +16,7 @@ ask CVS about it:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
 -----------------------------------------------------------------------------
-2.8.2 (???)
+2.8.2 (20031211)
   IMPORTANT: Limit initialization removed from all chip drivers!
              If you didn't run 'sensors -s' in the past you may need to now!
   File sensors.conf.eg: Change lm75 scaling back to 1;
