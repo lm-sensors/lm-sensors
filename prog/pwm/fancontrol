@@ -1,0 +1,181 @@
+#!/bin/bash
+#
+# Simple script implementing a temperature dependent fan speed control
+#
+# Version 0.5
+#
+# Usage: fancontrol [CONFIGFILE]
+#
+# Dependencies:
+#   bash, awk, egrep, sed, lm-sensors :)
+#
+# Please send me any comments/suggestions to: marius.reiner@hdev.de Thanks!
+#
+#
+# Please be careful when using the fan control features of your mainboard, in
+# addition to the risk of burning your CPU, at higher temperatures there will
+# be a higher wearout of your other hardware components, too. So if you plan to
+# use these components in 20 years, maybe you shouldn't use fancontrol/your
+# hardware at all.
+#
+#
+#    Copyright 2003 Marius Reiner <marius.reiner@hdev.de>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+#
+
+function LoadConfig {
+	echo "Loading configuration from $1 ..."
+	#grep configuration from file
+	INTERVAL=`egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g'`
+	FCTEMPS=`egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS=//g'`
+	MINTEMP=`egrep '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP=//g'`
+	MAXTEMP=`egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP=//g'`
+	MINSTART=`egrep '^MINSTART=.*$' $1 | sed -e 's/MINSTART=//g'`
+	MINSTOP=`egrep '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP=//g'`
+
+	if [ "$INTERVAL" = "" ]
+	then
+		echo "Some settings missing..."
+		exit 1
+	fi
+
+
+        echo
+	echo "Common settings:"
+	echo "  INTERVAL=$INTERVAL"
+						
+	#write values to arrays
+	let fcvcount=0
+	for fcv in $FCTEMPS
+	do
+		AFCPWM[$fcvcount]=`echo $fcv |cut -d'=' -f1`
+		AFCTEMP[$fcvcount]=`echo $fcv |cut -d'=' -f2`
+		AFCMINTEMP[$fcvcount]=`echo $MINTEMP |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		AFCMAXTEMP[$fcvcount]=`echo $MAXTEMP |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		AFCMINSTART[$fcvcount]=`echo $MINSTART |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		AFCMINSTOP[$fcvcount]=`echo $MINSTOP |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		echo
+		echo "Settings for ${AFCPWM[$fcvcount]}:"
+		echo "  Depends on ${AFCTEMP[$fcvcount]}"
+		echo "  MINTEMP=${AFCMINTEMP[$fcvcount]}"
+		echo "  MAXTEMP=${AFCMAXTEMP[$fcvcount]}"
+		echo "  MINSTART=${AFCMINSTART[$fcvcount]}"
+		echo "  MINSTOP=${AFCMINSTOP[$fcvcount]}"
+		let fcvcount=fcvcount+1
+	done
+	echo
+}
+
+if [ -f "$1" ]
+then 
+	LoadConfig $1
+else
+	LoadConfig /etc/fancontrol
+fi
+
+cd /proc/sys/dev/sensors/
+
+if (( $? != 0 )) ; then 
+  echo "Directory /proc/sys/dev/sensors/ does not exist, did you load the necessary kernel modules?"
+  exit 1
+fi
+
+function calc () { awk "BEGIN { print $@ }"; }
+
+function UpdateFanSpeeds {
+	let fcvcount=0
+	while (( $fcvcount < ${#AFCPWM[@]} ))
+	do
+		#hopefully shorter vars will improve readability:
+		pwmo=${AFCPWM[$fcvcount]}
+		tsens=${AFCTEMP[$fcvcount]}
+		mint=${AFCMINTEMP[$fcvcount]}
+		maxt=${AFCMAXTEMP[$fcvcount]}
+		minsa=${AFCMINSTART[$fcvcount]}
+		minso=${AFCMINSTOP[$fcvcount]}
+		tval=`cat ${tsens} |cut -d' ' -f3 |cut -d'.' -f1`
+		pwmpval=`cat ${pwmo}`
+		
+		# debug info
+		#echo "pwmo=$pwmo"
+		#echo "tsens=$tsens"
+		#echo "mint=$mint"
+		#echo "maxt=$maxt"
+		#echo "minsa=$minsa"
+		#echo "minso=$minso"
+		#echo "tval=$tval"
+		#echo "pwmpval=$pwmpval"
+		
+		if (( $tval <= $mint ))
+		  then pwmval=0
+		elif (( $tval >= $maxt ))
+		  then pwmval=255
+		else 
+		  pwmval=`calc "((10/(${maxt}-${mint})*(${tval}-${mint}))^2/1000*(${maxt}-${mint})*(255-${minso})+${minso})" |cut -d'.' -f1`
+		  if (( $pwmpval == 0 )) # if fan was stopped, start it
+		  then
+		  	echo $minsa > $pwmo
+			sleep 1
+		  fi
+		fi
+		echo $pwmval > $pwmo
+		fcvcount=$fcvcount+1
+	done
+}
+
+while true
+do
+	UpdateFanSpeeds
+	sleep $INTERVAL
+done
+
+# some old stuff/missing features, will clean this up soon
+#if ( test "$regulationtype" = "quad" ) ; then
+#  while true ; do
+#    temp=`cat ${temp1} | cut -b 12-13`
+#    if (( ${temp} < ${mintemp} )) ;
+#    	then pwm=0
+#    elif (( ${temp} > ${maxtemp} )) ;
+#    	then pwm=255
+#    else
+#	pwm=`calc "((10/(${maxtemp}-${mintemp})*(${temp}-${mintemp}))^2/1000*(${maxtemp}-${mintemp})*(255-${minspeed})+${minspeed})"`
+#	#no optimization here for readability (or sloth :))
+#    fi ;
+#    echo $pwm > ${pwm1} ;
+#
+#    sleep 10 ;
+#  done ;
+
+#elif ( test "$regulationtype" = "exp" ) ; then
+  #add support for exponential calculation here
+
+#else
+#  pwmconst=$[(255-${minspeed})/(${maxtemp}-${mintemp})]
+#  while true ; do
+#    let temp=`cat temp1 | cut -b 12-13` ;
+#    if (( ${temp} < ${mintemp} )) ;
+#        then pwm=0
+#    elif (( ${temp} > ${maxtemp} )) ;
+#        then pwm=255
+#    else
+#    	pwm=$[(${temp}-${mintemp})*${pwmconst}+${minspeed}]
+#    fi ;
+#    echo $pwm > pwm2 ;
+#
+#    sleep 10 ;
+#  done ;
+#fi
