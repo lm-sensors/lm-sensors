@@ -68,7 +68,7 @@ int sensors_create_name(char **name, const char *prefix,
   if (i2c_is_isa_adapter(adapter)) 
     sprintf(name_buffer,"%s-isa-%04x",prefix,addr);
   else {
-    if ((id = i2c_adapter_id(adapter)) < 0);
+    if ((id = i2c_adapter_id(adapter)) < 0)
       return -ENOENT;
     sprintf(name_buffer,"%s-i2c-%d-%02x",prefix,id,addr);
   }

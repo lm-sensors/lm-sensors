@@ -168,7 +168,7 @@ int piix4_setup(void)
   }
 
   /* Everything is happy, let's grab the memory and set things up. */
-  request_region(piix4_smba, 8, "SMBus");       
+  request_region(piix4_smba, 8, "piix4");       
 
 #ifdef DEBUG
   if ((temp & 0x0E) == 8)
@@ -376,7 +376,7 @@ int piix4_init(void)
     return res;
   }
   piix4_initialized ++;
-  strcpy(piix4_adapter.name,"SMBus PIIX4 adapter");
+  sprintf(piix4_adapter.name,"SMBus PIIX4 adapter at %04x",piix4_smba);
   piix4_adapter.id = ALGO_SMBUS | SMBUS_PIIX4;
   piix4_adapter.algo = &smbus_algorithm;
   piix4_adapter.smbus_access = &piix4_access;

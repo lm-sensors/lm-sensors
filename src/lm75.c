@@ -174,7 +174,6 @@ int lm75_attach_adapter(struct i2c_adapter *adapter)
     lm75_write_value(new_client,LM75_REG_CONF,0);
 
     continue;
-
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
@@ -300,9 +299,6 @@ void lm75_temp(struct i2c_client *client, int operation, int ctl_name,
     }
   }
 }
-
-
-
 
 int lm75_init(void)
 {
