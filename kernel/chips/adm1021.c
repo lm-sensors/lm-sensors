@@ -149,6 +149,17 @@ static ctl_table adm1021_dir_table_template[] = {
   { 0 }
 };
 
+static ctl_table adm1021_max_dir_table_template[] = {
+  { ADM1021_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &adm1021_temp },
+    {ADM1021_SYSCTL_REMOTE_TEMP, "remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &adm1021_remote_temp },
+    {ADM1021_SYSCTL_STATUS, "status", NULL, 0, 0444, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &adm1021_status },
+  { 0 }
+};
+
+
 /* Used by init/cleanup */
 static int adm1021_initialized = 0;
 
@@ -262,8 +273,9 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind)
 
   /* Register a new directory entry with module sensors */
   if ((i = sensors_register_entry((struct i2c_client *) new_client,
-                                  type_name,
-                                  adm1021_dir_table_template)) < 0) {
+                        type_name,
+                        data->type==adm1021?adm1021_dir_table_template:
+                                    adm1021_max_dir_table_template)) < 0) {
     err = i;
     goto ERROR4;
   }
@@ -384,8 +396,9 @@ void adm1021_update_client(struct i2c_client *client)
     data->remote_temp = adm1021_read_value(client,ADM1021_REG_REMOTE_TEMP);
     data->remote_temp_os = adm1021_read_value(client,ADM1021_REG_REMOTE_TOS_R);
     data->remote_temp_hyst = adm1021_read_value(client,ADM1021_REG_REMOTE_THYST_R);
-    data->die_code = adm1021_read_value(client,ADM1021_REG_DIE_CODE);
     data->status = adm1021_read_value(client,ADM1021_REG_STATUS);
+    if (data->type == adm1021)
+      data->die_code = adm1021_read_value(client,ADM1021_REG_DIE_CODE);
     data->last_updated = jiffies;
     data->valid = 1;
   }
