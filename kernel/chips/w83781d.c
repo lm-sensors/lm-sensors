@@ -621,6 +621,8 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
   const char *client_name = "";
   int is_isa = i2c_is_isa_adapter(adapter);
 
+  printk("Detection: kind == %d\n",kind);
+
   /* We need address registration for the I2C bus too. That is not yet
      implemented. */
   if (is_isa) {
@@ -715,8 +717,12 @@ int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
       kind = w83782d;
     else if (val1 == 0x40)
       kind = w83783s;
-    else
+    else {
+      if (kind == 0) 
+        printk("w83781d.o: Ignoring 'force' parameter for unknown chip at"
+               "adapter %d, address 0x%02x\n",i2c_adapter_id(adapter),address);
       goto ERROR1;
+    }
   }
 
   if (kind == w83781d) {

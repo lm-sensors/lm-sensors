@@ -385,8 +385,12 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
       kind = lm78j;
     else if ((i & 0xfe) == 0xc0)
       kind = lm79;
-    else
+    else {
+      if (kind == 0)
+        printk("lm78.o: Ignoring 'force' parameter for unknown chip at "
+               "adapter %d, address 0x%02x\n",i2c_adapter_id(adapter),address);
       goto ERROR1;
+    }
   }
 
   if (kind == lm78) {
