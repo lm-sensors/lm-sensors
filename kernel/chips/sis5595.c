@@ -276,7 +276,7 @@ int sis5595_find_sis(int *address)
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   if (! (s_bridge = pci_find_device(
-                   PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_503, NULL)));
+                   PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_503, NULL)))
 		
 #else
   if(pcibios_find_device(
