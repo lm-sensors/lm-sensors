@@ -26,18 +26,7 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
-MODULE_LICENSE("GPL");
-#endif
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
-#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
-#endif
-
-#ifndef THIS_MODULE
-#define THIS_MODULE NULL
-#endif
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -78,18 +67,6 @@ struct lm75_data {
 	u16 temp, temp_os, temp_hyst;	/* Register values */
 };
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
-#ifdef MODULE
-static
-#else
-extern
-#endif
-int __init sensors_lm75_init(void);
-static int __init lm75_cleanup(void);
 static int lm75_attach_adapter(struct i2c_adapter *adapter);
 static int lm75_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
@@ -109,14 +86,14 @@ static void lm75_update_client(struct i2c_client *client);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver lm75_driver = {
-	/* name */ "LM75 sensor chip driver",
-	/* id */ I2C_DRIVERID_LM75,
-	/* flags */ I2C_DF_NOTIFY,
-	/* attach_adapter */ &lm75_attach_adapter,
-	/* detach_client */ &lm75_detach_client,
-	/* command */ &lm75_command,
-	/* inc_use */ &lm75_inc_use,
-	/* dec_use */ &lm75_dec_use
+	.name		= "LM75 sensor chip driver",
+	.id		= I2C_DRIVERID_LM75,
+	.flags		= I2C_DF_NOTIFY,
+	.attach_adapter	= lm75_attach_adapter,
+	.detach_client	= lm75_detach_client,
+	.command	= lm75_command,
+	.inc_use	= lm75_inc_use,
+	.dec_use	= lm75_dec_use
 };
 
 /* These files are created for each detected LM75. This is just a template;
@@ -129,9 +106,6 @@ static ctl_table lm75_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &lm75_temp},
 	{0}
 };
-
-/* Used by init/cleanup */
-static int __initdata lm75_initialized = 0;
 
 static int lm75_id = 0;
 
@@ -162,7 +136,7 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA |
 				     I2C_FUNC_SMBUS_WORD_DATA))
-		    goto ERROR0;
+		    goto error0;
 
 	/* OK. For now, we presume we have a valid client. We now create the
 	   client structure, even though we cannot fill it completely yet.
@@ -171,7 +145,7 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 				   sizeof(struct lm75_data),
 				   GFP_KERNEL))) {
 		err = -ENOMEM;
-		goto ERROR0;
+		goto error0;
 	}
 
 	data = (struct lm75_data *) (new_client + 1);
@@ -197,7 +171,7 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 			    ||
 			    (i2c_smbus_read_word_data
 			     (new_client, i * 8 + 3) != os))
-				goto ERROR1;
+				goto error1;
 	}
 
 	/* Determine the chip type - only one kind supported! */
@@ -208,11 +182,8 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 		type_name = "lm75";
 		client_name = "LM75 chip";
 	} else {
-#ifdef DEBUG
-		printk("lm75.o: Internal error: unknown kind (%d)?!?",
-		       kind);
-#endif
-		goto ERROR1;
+		pr_debug("lm75.o: Internal error: unknown kind (%d)?!?", kind);
+		goto error1;
 	}
 
 	/* Fill in the remaining client fields and put it into the global list */
@@ -224,14 +195,14 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 
 	/* Tell the I2C layer a new client has arrived */
 	if ((err = i2c_attach_client(new_client)))
-		goto ERROR3;
+		goto error3;
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
 					lm75_dir_table_template,
 					THIS_MODULE)) < 0) {
 		err = i;
-		goto ERROR4;
+		goto error4;
 	}
 	data->sysctl_id = i;
 
@@ -241,41 +212,25 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
-      ERROR4:
+      error4:
 	i2c_detach_client(new_client);
-      ERROR3:
-      ERROR1:
+      error3:
+      error1:
 	kfree(new_client);
-      ERROR0:
+      error0:
 	return err;
 }
 
 int lm75_detach_client(struct i2c_client *client)
 {
-	int err;
+	struct lm75_data *data = client->data;
 
-#ifdef MODULE
-	if (MOD_IN_USE)
-		return -EBUSY;
-#endif
-
-
-	i2c_deregister_entry(((struct lm75_data *) (client->data))->
-				 sysctl_id);
-
-	if ((err = i2c_detach_client(client))) {
-		printk
-		    ("lm75.o: Client deregistration failed, client not detached.\n");
-		return err;
-	}
-
+	i2c_deregister_entry(data->sysctl_id);
+	i2c_detach_client(client);
 	kfree(client);
-
 	return 0;
 }
 
-
-/* No commands defined yet */
 int lm75_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
 	return 0;
@@ -343,10 +298,7 @@ void lm75_update_client(struct i2c_client *client)
 
 	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
 	    (jiffies < data->last_updated) || !data->valid) {
-
-#ifdef DEBUG
-		printk("Starting lm75 update\n");
-#endif
+		pr_debug("Starting lm75 update\n");
 
 		data->temp = lm75_read_value(client, LM75_REG_TEMP);
 		data->temp_os = lm75_read_value(client, LM75_REG_TEMP_OS);
@@ -388,51 +340,18 @@ void lm75_temp(struct i2c_client *client, int operation, int ctl_name,
 
 int __init sensors_lm75_init(void)
 {
-	int res;
-
-	printk("lm75.o version %s (%s)\n", LM_VERSION, LM_DATE);
-	lm75_initialized = 0;
-	if ((res = i2c_add_driver(&lm75_driver))) {
-		printk
-		    ("lm75.o: Driver registration failed, module not inserted.\n");
-		lm75_cleanup();
-		return res;
-	}
-	lm75_initialized++;
-	return 0;
+	printk(KERN_INFO "lm75.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	return i2c_add_driver(&lm75_driver);
 }
 
-int __init lm75_cleanup(void)
+static void __exit sensors_lm75_exit(void)
 {
-	int res;
-
-	if (lm75_initialized >= 1) {
-		if ((res = i2c_del_driver(&lm75_driver))) {
-			printk
-			    ("lm75.o: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		lm75_initialized--;
-	}
-
-	return 0;
+	i2c_del_driver(&lm75_driver);
 }
-
-EXPORT_NO_SYMBOLS;
-
-#ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>");
 MODULE_DESCRIPTION("LM75 driver");
+MODULE_LICENSE("GPL");
 
-int init_module(void)
-{
-	return sensors_lm75_init();
-}
-
-int cleanup_module(void)
-{
-	return lm75_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sensors_lm75_init);
+module_exit(sensors_lm75_exit);
