@@ -356,6 +356,9 @@ int ds1621_read_value(struct i2c_client *client, u8 reg)
    the usual practice. */
 int ds1621_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
+	if ( (reg == DS1621_COM_START) || (reg == DS1621_COM_STOP) )
+		return i2c_smbus_write_byte(client, reg);
+	else
 	if ((reg == DS1621_REG_CONF) || (reg == DS1621_REG_TEMP_COUNTER)
 	    || (reg == DS1621_REG_TEMP_SLOPE))
 		return i2c_smbus_write_byte_data(client, reg, value);
@@ -410,7 +413,7 @@ void ds1621_update_client(struct i2c_client *client)
 			data->temp_int = ITEMP_FROM_REG(data->temp);
 			/* restart the conversion */
 			if (data->enable)
-				ds1621_read_value(client, DS1621_COM_START);
+				ds1621_write_value(client, DS1621_COM_START, 0);
 		}
 
 		/* reset alarms if neccessary */
@@ -504,14 +507,14 @@ void ds1621_enable(struct i2c_client *client, int operation, int ctl_name,
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			if (results[0]) {
-				ds1621_read_value(client, DS1621_COM_START);
+				ds1621_write_value(client, DS1621_COM_START, 0);
 				data->enable=1;
 			} else {
-				ds1621_read_value(client, DS1621_COM_STOP);
+				ds1621_write_value(client, DS1621_COM_STOP, 0);
 				data->enable=0;
 			}
 		} else {
-			ds1621_read_value(client, DS1621_COM_START);
+			ds1621_write_value(client, DS1621_COM_START, 0);
 			data->enable=1;
 		}
 	}
