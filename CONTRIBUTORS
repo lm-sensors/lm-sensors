@@ -39,6 +39,8 @@ problems.
   Author of the maxilife module (which could only be written under NDA)
 * Merlin Hughes <merlin@merlin.org>
   Author of the AMD756 module and sensord.
+* Constantine Gavrilov <const-g@xpert.com>
+  Created and maintains the RPM files
 
 * Simon Vogl <simon@tk.uni-linz.ac.at>
   Wrote the new i2c kernel driver. This driver is indispensable for the
