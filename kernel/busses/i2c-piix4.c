@@ -186,12 +186,12 @@ static unsigned short piix4_smba = 0;
 /*
  * Get DMI information.
  */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,99)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,34)
 void dmi_scan_machine(void);
 #endif
 static int __init ibm_dmi_probe(void)
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,99)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,34)
 	extern int is_unsafe_smbus;
 	return is_unsafe_smbus;
 #else
