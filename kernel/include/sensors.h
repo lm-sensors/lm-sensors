@@ -313,8 +313,8 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
 #define I2C_DRIVERID_LTC1710 1010
 #define I2C_DRIVERID_SIS5595 1011
 #define I2C_DRIVERID_ICSPLL 1012
-#define I2C_DRIVERID_MAXILIFE 1012
 #define I2C_DRIVERID_BT869 1013
+#define I2C_DRIVERID_MAXILIFE 1014
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
