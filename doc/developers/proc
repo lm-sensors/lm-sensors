@@ -43,7 +43,9 @@ alarms	  1	Alarm bitmask.
 		Integer representation of one, two, or three bytes.
 		A '1' bit means an alarm.
 		Generally a straight representation of a chips' internal
-		alarm registers; no standard.
+		alarm registers; there is no standard for the position
+		of individual bits.
+		Bits are defined in kernel/include/sensors.h.
 
 beep	  2     Beep/interrupt enable and bitmask.
 		The first value is 0 or 1 to globally disable
