@@ -49,8 +49,8 @@ COMPILE_KERNEL := 1
 # may be used mistakenly. Note: This should point to the directory
 # *above* the linux/ subdirectory, so to /usr/local/include in the
 # above example.
-I2C_HEADERS=/usr/local/include
-#I2C_HEADERS=$(LINUX_HEADERS)
+I2C_HEADERS := /usr/local/include
+#I2C_HEADERS := $(LINUX_HEADERS)
 
 # Uncomment the third line on SMP systems if the magic invocation fails. It
 # is a bit complicated because SMP configuration changed around kernel 2.1.130
