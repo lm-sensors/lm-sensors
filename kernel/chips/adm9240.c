@@ -45,6 +45,7 @@
 
 */
 
+
 #include <linux/module.h>
 #include <linux/malloc.h>
 #include <linux/proc_fs.h>
@@ -59,6 +60,16 @@
 #include "sensors.h"
 #include "i2c.h"
 #include "compat.h"
+
+
+/* Addresses to scan */
+static unsigned short normal_i2c[] = {SENSORS_I2C_END};
+static unsigned short normal_i2c_range[] = {0x2c,0x2f,SENSORS_I2C_END};
+static unsigned int normal_isa[] = {SENSORS_ISA_END};
+static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+
+/* Insmod parameters */
+SENSORS_INSMOD_2(adm9240,ds1780);
 
 /* Many ADM9240 constants specified below */
 
@@ -200,6 +211,7 @@ extern int cleanup_module(void);
    allocated. */
 struct adm9240_data {
          int sysctl_id;
+         enum chips type;
 
          struct semaphore update_lock;
          char valid;                 /* !=0 if following fields are valid */
@@ -224,10 +236,8 @@ static int adm9240_init(void);
 static int adm9240_cleanup(void);
 
 static int adm9240_attach_adapter(struct i2c_adapter *adapter);
+static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind);
 static int adm9240_detach_client(struct i2c_client *client);
-static int adm9240_new_client(struct i2c_adapter *adapter,
-                           struct i2c_client *new_client);
-static void adm9240_remove_client(struct i2c_client *client);
 static int adm9240_command(struct i2c_client *client, unsigned int cmd, 
                         void *arg);
 static void adm9240_inc_use (struct i2c_client *client);
@@ -314,93 +324,139 @@ static ctl_table adm9240_dir_table_template[] = {
   { 0 }
 };
 
-
 int adm9240_attach_adapter(struct i2c_adapter *adapter)
 {
-  int address,err,temp;
+  return sensors_detect(adapter,&addr_data,adm9240_detect);
+}
+
+static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind)
+{
+  int i;
   struct i2c_client *new_client;
-  const char *type_name,*client_name;
+  struct adm9240_data *data;
+  int err=0;
+  const char *type_name = "";
+  const char *client_name = "";
 
-  err = 0;
-  /* Make sure we aren't probing the ISA bus!! */
-  if (i2c_is_isa_adapter(adapter)) return 0;
-  
-  /* The address of the ADM9240 must at least start somewhere in
-     0x2C to 0x2F, but can be changed to be anyelse after that. 
-     (But, why??) */
-  for (address = 0x2C; (! err) && (address <= 0x2f); address ++) {
+  /* Make sure we aren't probing the ISA bus!! This is just a safety check
+     at this moment; sensors_detect really won't call us. */
+#ifdef DEBUG
+  if (i2c_is_isa_adapter(adapter)) {
+    printk("adm9240.o: adm9240_detect called for an ISA bus adapter?!?\n");
+    return 0;
+  }
+#endif
 
-    /* Later on, we will keep a list of registered addresses for each
-       adapter, and check whether they are used here */
+  /* We need address registration for the I2C bus too. That is not yet
+     implemented. */
 
-    temp = smbus_read_byte_data(adapter,address,ADM9240_REG_COMPANY_ID);
-    if (temp == 0x23) {
-      type_name = "adm9240";
-      client_name = "ADM9240 chip";
-    } else if (temp == 0xDA) {  
-      type_name = "ds1780";
-      client_name = "DS1780 chip";
-    } else	
-      continue;
-    temp=smbus_read_byte_data(adapter,address,ADM9240_REG_DIE_REV);
-    printk("adm9240.o: %s detected with die rev.: 0x%X\n",
-            client_name, temp);
+  /* OK. For now, we presume we have a valid client. We now create the
+     client structure, even though we cannot fill it completely yet.
+     But it allows us to access adm9240_{read,write}_value. */
 
-
-
-    /* Allocate space for a new client structure. To counter memory
-       fragmentation somewhat, we only do one kmalloc. */
-    if (! (new_client = kmalloc(sizeof(struct i2c_client) + 
-                                sizeof(struct adm9240_data),
+  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
+                               sizeof(struct adm9240_data),
                                GFP_KERNEL))) {
-      err = -ENOMEM;
-      continue;
+    err = -ENOMEM;
+    goto ERROR0;
+  }
+
+  data = (struct adm9240_data *) (new_client + 1);
+  new_client->addr = address;
+  new_client->data = data;
+  new_client->adapter = adapter;
+  new_client->driver = &adm9240_driver;
+
+  /* Now, we do the remaining detection. */
+
+  if (kind < 0) {
+    if (((adm9240_read_value(new_client,ADM9240_REG_CONFIG) & 0x80) != 0x80) ||
+        (adm9240_read_value(new_client,ADM9240_REG_I2C_ADDR) != address))
+      goto ERROR1;
+  }
+
+  /* Determine the chip type. */
+  if (kind <= 0) {
+    i = adm9240_read_value(new_client,ADM9240_REG_COMPANY_ID);
+    if (i == 0x23)
+      kind = adm9240;
+    else if (i == 0xda)
+      kind = ds1780;
+    else {
+      if (kind == 0)
+        printk("adm9240.o: Ignoring 'force' parameter for unknown chip at "
+               "adapter %d, address 0x%02x\n",i2c_adapter_id(adapter),address);
+      goto ERROR1;
     }
+  }
 
-    /* Fill the new client structure with data */
-    new_client->data = (struct adm9240_data *) (new_client + 1);
-    new_client->addr = address;
-    strcpy(new_client->name,client_name);
-    if ((err = adm9240_new_client(adapter,new_client)))
-      goto ERROR2;
+  if (kind == adm9240) {
+    type_name = "adm9240";
+    client_name = "ADM9240 chip";
+  } else if (kind == ds1780) {
+    type_name = "ds1780";
+    client_name = "DS1780 chip";
+  } else {
+#ifdef DEBUG
+    printk("adm9240.o: Internal error: unknown kind (%d)?!?",kind);
+#endif
+    goto ERROR1;
+  }
 
-    /* Tell i2c-core a new client has arrived */
-    if ((err = i2c_attach_client(new_client))) 
-      goto ERROR3;
+  /* Fill in the remaining client fields and put it into the global list */
+  strcpy(new_client->name,client_name);
+  data->type = kind;
 
-    /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,type_name,
-                                      adm9240_dir_table_template)) < 0)
-      goto ERROR4;
-    ((struct adm9240_data *) (new_client->data))->sysctl_id = err;
-    err = 0;
+  for(i = 0; i < MAX_ADM9240_NR; i++)
+    if (! adm9240_list[i])
+      break;
+  if (i == MAX_ADM9240_NR) {
+    printk("adm9240.o: No empty slots left, recompile and heighten "
+           "MAX_ADM9240_NR!\n");
+    err = -ENOMEM;
+    goto ERROR2;
+  }
+  adm9240_list[i] = new_client;
+  new_client->id = i;
+  data->valid = 0;
+  data->update_lock = MUTEX;
 
-    /* Initialize the ADM9240 chip */
-    adm9240_init_client(new_client);
-    continue;
+  /* Tell the I2C layer a new client has arrived */
+  if ((err = i2c_attach_client(new_client)))
+    goto ERROR3;
+
+  /* Register a new directory entry with module sensors */
+  if ((i = sensors_register_entry((struct i2c_client *) new_client,
+                                  type_name,
+                                  adm9240_dir_table_template)) < 0) {
+    err = i;
+    goto ERROR4;
+  }
+  data->sysctl_id = i;
+
+  /* Initialize the ADM9240 chip */
+  adm9240_init_client((struct i2c_client *) new_client);
+  return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
+
 ERROR4:
-    i2c_detach_client(new_client);
+  i2c_detach_client(new_client);
 ERROR3:
-    adm9240_remove_client((struct i2c_client *) new_client);
+  for (i = 0; i < MAX_ADM9240_NR; i++)
+    if (new_client == adm9240_list[i])
+      adm9240_list[i] = NULL;
 ERROR2:
-    kfree(new_client);
-  }
+ERROR1:
+  kfree(new_client);
+ERROR0:
   return err;
 }
 
 int adm9240_detach_client(struct i2c_client *client)
 {
   int err,i;
-  for (i = 0; i < MAX_ADM9240_NR; i++)
-    if (client == adm9240_list[i])
-      break;
-  if ((i == MAX_ADM9240_NR)) {
-    printk("adm9240.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
 
   sensors_deregister_entry(((struct adm9240_data *)(client->data))->sysctl_id);
 
@@ -408,46 +464,20 @@ int adm9240_detach_client(struct i2c_client *client)
     printk("adm9240.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-  adm9240_remove_client(client);
-  kfree(client);
-  return 0;
-}
 
-
-/* Find a free slot, and initialize most of the fields */
-int adm9240_new_client(struct i2c_adapter *adapter,
-                    struct i2c_client *new_client)
-{
-  int i;
-  struct adm9240_data *data;
-
-  /* First, seek out an empty slot */
-  for(i = 0; i < MAX_ADM9240_NR; i++)
-    if (! adm9240_list[i])
-      break;
-  if (i == MAX_ADM9240_NR) {
-    printk("adm9240.o: No empty slots left, recompile and heighten "
-           "MAX_ADM9240_NR!\n");
-    return -ENOMEM;
-  }
-  
-  adm9240_list[i] = new_client;
-  new_client->id = i;
-  new_client->adapter = adapter;
-  new_client->driver = &adm9240_driver;
-  data = new_client->data;
-  data->valid = 0;
-  data->update_lock = MUTEX;
-  return 0;
-}
-
-/* Inverse of adm9240_new_client */
-void adm9240_remove_client(struct i2c_client *client)
-{
-  int i;
   for (i = 0; i < MAX_ADM9240_NR; i++)
-    if (client == adm9240_list[i]) 
-      adm9240_list[i] = NULL;
+    if (client == adm9240_list[i])
+      break;
+  if ((i == MAX_ADM9240_NR)) {
+    printk("adm9240.o: Client to detach not found.\n");
+    return -ENOENT;
+  }
+  adm9240_list[i] = NULL;
+
+  kfree(client);
+
+  return 0;
+
 }
 
 /* No commands defined yet */
