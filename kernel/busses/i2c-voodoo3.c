@@ -24,8 +24,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#define DEBUG 1
-
 /* This interfaces to the I2C bus of the Voodoo3 to gain access to
     the BT869 and possibly other I2C devices. */
 
@@ -143,7 +141,6 @@ static struct i2c_adapter voodoo3_ddc_adapter = {
 };
 
 static int __initdata voodoo3_initialized;
-static unsigned short voodoo3_smba = 0;
 static unsigned int state = 0xcffc0020;
 static unsigned char *mem;
 static int v3_num;
@@ -738,9 +735,8 @@ void config_v3(struct pci_dev *dev)
 	printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%p\n", mem);
 }
 
-
-
-/* Detect whether a Voodoo3 can be found, and initialize it, where necessary.
+/* Detect whether a Voodoo3 or a Banshee can be found,
+   and initialize it, where necessary.
    Note the differences between kernels with the old PCI BIOS interface and
    newer kernels with the real PCI interface. In compat.h some things are
    defined to make the transition easier. */
@@ -774,8 +770,10 @@ static int voodoo3_setup(void)
 
 	if (v3_num > 0) {
 		printk(KERN_INFO
-		       "i2c-voodoo3: %d Banshee/Voodoo3(s) found.\n",
-		       v3_num);
+		       "i2c-voodoo3: %d Banshee/Voodoo3 found.\n", v3_num);
+		if (v3_num > 1)
+			printk(KERN_INFO
+			       "i2c-voodoo3: warning: only 1 supported.\n");
 		return 0;
 	} else {
 		printk(KERN_INFO "i2c-voodoo3: No Voodoo3 found.\n");
@@ -960,8 +958,7 @@ int __init i2c_voodoo3_init(void)
 		return res;
 	}
 	voodoo3_initialized++;
-	sprintf(voodoo3_i2c_adapter.name, "SMBus Voodoo3 adapter at %04x",
-		voodoo3_smba);
+	sprintf(voodoo3_i2c_adapter.name, "SMBus Voodoo3/Banshee adapter");
 	if ((res = i2c_add_adapter(&voodoo3_i2c_adapter))) {
 		printk
 		    ("i2c-voodoo3.o: Adapter registration failed, module not inserted.\n");
@@ -969,8 +966,7 @@ int __init i2c_voodoo3_init(void)
 		return res;
 	}
 	voodoo3_initialized++;
-	sprintf(voodoo3_ddc_adapter.name, "DDC Voodoo3 adapter at %04x",
-		voodoo3_smba);
+	sprintf(voodoo3_ddc_adapter.name, "DDC Voodoo3/Banshee adapter");
 	if ((res = i2c_add_adapter(&voodoo3_ddc_adapter))) {
 		printk
 		    ("i2c-voodoo3.o: Adapter registration failed, module not inserted.\n");
@@ -979,7 +975,7 @@ int __init i2c_voodoo3_init(void)
 	}
 	voodoo3_initialized++;
 	printk
-	    ("i2c-voodoo3.o: Voodoo3 I2C and DDC busses detected and initialized\n");
+	    ("i2c-voodoo3.o: Voodoo3/Banshee I2C and DDC busses detected and initialized\n");
 	return 0;
 }
 
