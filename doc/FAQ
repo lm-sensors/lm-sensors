@@ -1,0 +1,527 @@
+Sensors FAQ for lm_sensors version 2
+------------------------------------
+
+[Internal comments/questions/uncertainties are in square brackets.]
+
+Note: some questions were specific for version 1. These are put together
+under chapter 5: version 1 questions.
+
+1 What sensors are available on my PC?
+1.1 What can a sensor chip like the "LM78" do? 
+1.2 Where do I find out more about any of these LMxx chips?
+
+2 How are these sensors read?
+2.1 What is the SMBus? And the I2C bus?
+2.2 What sensors does the Pentium 2 (and P6) have?
+2.3 How often are the sensor values updated?
+2.4 How are alarms triggered?
+
+3 Installation and management
+3.1 Why so many modules, and how do I cope with them?
+3.2 How do I know which chips I own?
+3.3 Which modules should I insert?
+3.4 Do I need the configuration file?
+
+4 Problems
+4.1 Why do my fans report exactly half/double their values by your code
+compared to the BIOS? 
+4.2 Why do my two LM75's report "-48 degrees"?
+4.3 Why do I have two Vcore readings, I have only one processor!
+4.4 How do those ALARMS work? The current value is within range but there
+is still an ALARM warning!
+4.5 My voltage readings seem to drift a bit. Is something wrong with my power
+supply?
+4.6 Some measurements are way out of range. What happened?
+4.7 What are VID lines?
+4.8 I try to read sensor values several times a second, but it seems to be
+updated only each second or so. Why?
+4.9 It sometimes seems to take a fraction of a seconds before I see the
+sensor reading results. Why?
+4.10 Can I be alerted when an ALARM occurs?
+4.11 SMBus transactions on my PIIX4 simply don't work (timeouts happen).  Why?
+4.12 My BIOS reports a much higher CPU temperature than your modules!
+4.13 I try to read the raw /proc files, but the values are strange?!?
+4.14 How do I set new limits?
+4.15 Some sensors are doubly detected?
+
+5 How to ask for help: 
+5.1 What to do if it won't insert? 
+5.2 What to do if it inserts, but nothing happens?
+5.3 What to do if I read only bogus information?
+5.4 What to do if you have other problems?
+5.5 What if it just works like a charm?
+
+6 Version 1 specific questions
+6.1 My manufacturer swears that my mainboard has an SMBus, but your code 
+reports that it can't find it.  What's wrong? 
+6.2 The modules won't load, saying 'SMBus not detected'.
+6.3 I try to read /proc/sensors, and I get a "No sensor data yet (try again in 
+a few moments)" message. Why?
+
+-------------------------------------------------------------
+
+1 What sensors are available on my PC?
+
+	Most medium/high-end computers since late 1997 now come with a LM78 or 
+LM79 hardware health monitoring chip and an SMBus. 
+	
+	
+1.1 What can a sensor chip like the "LM78" do? 
+
+	The LM78 is a chip made by National Semiconductor which can monitor 7 
+voltages (5 positive, 2 negative) from 0 to 4.08V.  The inputs are usually in 
+series with voltage dividers which lower the 12+/-V and 5+/-V supplies to 
+measurable range.  Therefore, the readings for such inputs need to be 
+re-scaled appropriately by software. 
+	The LM78 also has 3 fan speed monitoring inputs, an internal 
+temperature sensor, a chassis intrusion sensor, and a couple maskable interrupt 
+inputs.  The LM78 can also relay the processor's (P6 or Pent II) VID lines
+which are hardwired and used to indicate to the power regulator (usually on 
+the mainboard close to the processor socket/slot) what voltage to supply to 
+the processor. 
+	The LM78 can be interfaced to a system via the ISA bus and/or the 
+SMBus. 
+	Most other sensor chips have comparable functionality. Each supported
+chip should be documented somewhere in the doc/chips directory.
+
+	
+1.2 Where do I find out more about any of these LMxx chips?
+
+	National Semiconductor has an excellent documentation resource on their
+web-site.  Complete specs on the LMxx chips talked about in this FAQ can be 
+downloaded at: 
+	http://www.national.com
+The Winbond documentation for Wxxxxxxx chips can be found at:
+	http://www.winbond.com.tw/produ/perso7.htm
+The Genesys Logic documentation for GLxxxxx chips is regrettably not freely
+downloadable.
+	Please see the file doc/useful_addresses.html for hyperlinks to
+the available documentation.
+
+
+2 How are these sensors read?
+
+	The LM78 and most other chips sensors are usually read through
+the ISA bus.  Our code looks for the presence of the chips on the ISA bus
+and attempts to read the sensors from it by reading their different internal
+registers.
+	Many chips have also, or even exclusively, an SMBus interface,
+explained more in detail below. 
+	
+
+2.1 What is the SMBus? And the I2C bus?
+
+	The SMBus is the "System Management Bus".  More specifically, it is a 
+2-wire, low-speed serial communication bus used for basic health monitoring 
+and hardware management. It is a specific implementation of the more
+general I2C (pronunciation: I-squared-C) bus. In fact, both I2C devices
+and SMBus devices may be connected to the same (I2C) bus.
+	The SMBus (or I2C bus) starts at the host controller, used for
+starting transactions on the SMBus.  From the host interface, the
+devices communicated with are the 'slave' devices.  Each slave device has a
+unique 7-bit address in which the host must refer to it with. 
+	For each supported SMBus host, there is a separate kernel module
+which implements the communication protocol with the host. Some SMBus hosts
+really operate on the SMBus level; these hosts can not cope with pure I2C
+devices. Other hosts are in fact I2C hosts: in this case, we implement
+the SMBus protocol in terms of I2C operations. But these hosts can also
+talk to pure I2C devices.
+	
+
+2.2 What sensors does the Pentium 2 (and P6) have?
+
+	The Pentium 2 'boxed' processor usually has an LM75 very close to the 
+base of the box. It can be read through the SMBus to report the approximate 
+temperature of the processor.  The processor also contains an internal 
+temperature sensor (of low accuracy) used as a fail-safe to disable the 
+processor in case it gets much too hot (usually around 130 degrees C).  And, 
+the Pentium 2 also has a hard-wired signal (VID lines) on it's SEC (single 
+edge connector) which indicates what power supply is required to operate the 
+processor.
+	Apparently, the SEC connector has connectivity to the thermal sensor 
+for devices like the Analog Devices ADM1021 which has circuitry for 
+converting the sense information into temperature degrees.  The Winbond 
+chip's external temperature lines may be compatible with the P2 temperature 
+lines as well.
+	The P6 (Pentium-Pro) may have an LM75 in or just under the socket.  
+P6's also have VID lines.
+	Pentiums and Pentium w/ MMX do not have VID lines, and sometimes have 
+LM75's under the sockets (depends on the mainboard, and how 'modern' the 
+mainboard is).
+	The P2 Xeon will be the first Intel processor to include the SMBus 
+interface on the P2 Xeon SEC.
+	
+
+2.3 How often are the sensor values updated?
+
+	The LM78, and most other sensor chips like it, reads its sensors one
+by one. A complete scanning sweep will take about 1.5 seconds. The LM78 stops
+readings sensors if you try to access it, so if you access it very often
+(by reading sensor values; writing new limits is safe) it will not find the
+time to update its sensor values at all! Fortunately, the kernel module takes
+care not to do this, and only reads new values each 1.5 seconds. If you
+read the values again, you will get the 'old' values again.
+
+
+2.4 How are alarms triggered?
+
+	It is possible to monitor each sensor and let an alarm go off if
+it crosses some pre-determined limits.  There are two sorts of interrupts
+which can be generated by sensor chips if this happens (it depends a bit on
+the actual chip if both are supported; the LM80, for example, has only
+IRQ interrupts): IRQ interrupts and SMI interrupts.  IRQ stands for 
+Interrupt Request and are the interrupt lines you can find in /proc/interrupts.
+SMI stands for System Management Interrupt, and is a special interrupt which
+puts the processor in a secure environment independent of any other things
+running.  SMI is currently not supported by the Linux kernel.  IRQs are 
+supported, of course.
+	Even if no interrupt is generated, some bits in a status register
+will be set until the register is read the next time. If the alarm condition
+persists after that, the bits will be set on the next scanning sweep, etc.
+	At this moment, interrupts are not supported.
+
+
+3 Installation and management
+
+3.1 Why so many modules, and how do I cope with them?
+
+	We tried to make this package as modular as possible. This makes it
+easy to add new drivers, and unused drivers will take no precious kernel
+space. On the other hand, it can be a bit confusing at first.
+	It is strongly suggested you read doc/modules, and follow the
+installation described there. It will allow you to use simple modprobe
+commands to load the modules, instead of the more low-level insmod calls.
+This file also describes how you can load the modules automatically at
+boot-time.
+
+
+3.2 How do I know which chips I own?
+
+	At the moment this is written (just before version 2.1.0 is released),
+the adapter (SMBus host) detection is quite good, but the chip detection
+is quite worthless (I wrote it myself, so I am allowed to say this :-)).
+	As always, the best way to do this is to read the documentation, in
+this case, your mainboard manual (I hope you ever got one; if not, go
+complain to your salesperson). Usually, it tells you what adapter and chips
+are present.
+	If you really have no idea what is supported on your mainboard, you
+will have to experiment. First, try to find out your adapter. First try
+the piix4.o module; if it does not load, try the bit-mb.o (VIA) module.
+You can type 'dmesg' to see what happened. Also, insert the isa.o module;
+it may be enough, even if no other module loads succesfully.
+	Now, the chips. Try the drivers one by one (lm78.o, lm80.o, lm75.o,
+gl518sm.o and w83781d.o at this moment). Type 'sensors' to determine whether
+the read values make any sense. Remove modules if you are convinced that
+the values are bogus. Also, see some of the driver-specific questions below.
+	There will be an automatic detection program in later versions of
+this package; it is simply not implemented yet. We need the /dev interface
+first. Sorry for the inconvenience, in the meantime.
+
+
+3.3 Which modules should I insert?
+
+	Using modprobe, you should always insert i2c-proc.o. You need one
+module for each adapter you own; if there are chips on the ISA bus, this
+includes isa.o. Finally, you need one module for each type of chip you
+own. That's all. On my computer, I could use the following line:
+    modprobe i2c-proc && modprobe isa && modprobe piix4 && modprobe lm78 \
+                      && modprobe lm75
+
+
+3.4 Do I need the configuration file?
+
+	Usually, you do. It tells how to translate the values the chip
+measures to real-world values. This is especially important for voltage
+inputs. The default configuration file should usually do the trick.
+It is automatically installed as /etc/sensors.conf, but it will not 
+overwrite any existing file with that name.
+
+
+
+4 Problems
+
+4.1 Why do my fans report exactly half/double their values by your code
+compared to the BIOS? 
+
+	The problem with much of the sensor data is that it is impossible to 
+properly interpret some of the readings without knowing what the hardware 
+configuration is.  Some fans report one 'tick' each rotation, some report
+two 'ticks' each rotation. It is easy to resolve this through the
+configuration file:
+    chip lm78-*               # Or whatever chip this relates to
+    compute fan1 2*@,@/2      # Copy for each fan present
+
+
+4.2 Why do my two LM75's report "-48 degrees"?
+
+	For starters, those aren't LM75's.  Your mainboard actually has the 
+Winbond W83781D which emulates two LM75's, but many systems which use the 
+Winbond chip (such as the Asus P2B) don't have the thermo-resisters connected 
+to the chip resulting in these strange -48 degree readings.
+	If you have an Asus P2B and want more information on adding thermal
+sensing capability, check out:
+http://ultimatepc.fsn.net/techinfo/p2bthermistor/p2bthermistor.htm
+	In upcoming versions, you will be able to disable non-interesting
+readings.
+
+
+4.3 Why do I have two Vcore readings, I have only one processor!
+
+	The LM78 family has seven voltage sensors. The default way of
+connecting them is used in the configuration file. This includes a VCore2,
+even if you do not have one. You can easily edit the configuration file
+to give it another name, or (in upcoming versions) to make this reading
+disappear.
+	Note that Vcore2 is usually the same as Vcore on motherboards which
+only support one processor. It is possible, though, that is monitors something
+else, so you should not be too surprised if the values are completely 
+different.
+
+
+4.4 How do those ALARMS work? The current value is within range but there
+is still an ALARM warning!
+
+	An ALARM will go off when a minimum or maximum limit is crossed. It 
+will stay there until the next internal update - which will be the next time
+you read these values, but not within (usually) 1.5 seconds since the last
+update. After that, it will only stay if the current value is out of range,
+though this too depends a bit on the kind of chip. See the specific chip
+documentation in doc/chips for more information.
+
+
+4.5 My voltage readings seem to drift a bit. Is something wrong with my power
+supply?
+
+	No, probably not. If your motherboard heats up a bit, the sensed
+voltages will drift a bit. If your power supply is loaded (because a disk
+gets going, for example), the voltages may get a bit lower. As long as they
+stay within a sensible range (say 10% of the expected value), there is no
+reason to worry.
+
+
+4.6 Some measurements are way out of range. What happened?
+
+	Each module tries to set limits to sensible values on initialization,
+but a module does not know how a chip is actually connected. This is
+described in the configuration file, which is not read by kernel modules.
+So limits can be strange, if the chip is connected in a non-standard way.
+	Readings can also be strange; there are several reasons for this.
+Temperature sensors, for example, can simply not be present, even though
+the chip supports them. Also, it can be that the input is used in a
+non-standard way. You can use the configuration file to describe how this
+measurement should be interpreted; see the comments the example file for
+more information.
+
+
+4.7 What are VID lines?
+
+	These describe the voltage your processors use. This is only supported
+for Pentium 2 and newer processors, and even then they are not always
+correctly connected to the sensor chip, so the readings may be out of
+range. A value of +3.5 V is especially suspect.
+
+
+4.8 I try to read sensor values several times a second, but it seems to be
+updated only each second or so. Why?
+
+	If we would read the registers more often, it would not find the
+time to update them. So we only update our readings once each 1.5 seconds
+(the actual delay is chip-specific; for some chips, it may not be needed
+at all).
+
+
+4.9 It sometimes seems to take a fraction of a seconds before I see the
+sensor reading results. Why?
+
+	ISA bus access is fast, but SMBus access is really slow. If you have
+a lot of sensors, it just takes a lot of time to access them. Fortunately,
+this has almost no impact on the system as a whole, as another job can run
+while we are waiting for the transaction to finish.
+
+
+4.10 Can I be alerted when an ALARM occurs?
+
+	No, you can't; and it may well be never supported.
+	Almost no mainboard we have encountered have actually connected the
+IRQ-out pin of sensor chips. That means that we could enable IRQ reporting, but
+nothing would happen. Also, even if a motherboard has it connected, it is
+unclear what interrupt number would be triggered. And IRQ lines are a scarce
+facility, which means that almost nobody would be able to use it anyway.
+	The SMI interrupt is only available on a few types of chips. It is
+really a very obscure way to handle interrupts, and supporting it under Linux
+might be quite hard to do.
+	Your best bet would be to poll the alarm file with a user-land daemon
+which alerts you if an alarm is raised. I am not aware of any program which
+does the job, though you might want to examine one of the graphical monitor
+programs under X, see doc/useful_addresses.html for addresses.
+
+
+4.11 SMBus transactions on my PIIX4 simply don't work (timeouts happen).  Why?
+
+	Some chips which mainboard makers connect to the SMBus are not SMBus 
+devices.  An example is the 91xx clock generator chips.  When read, these 
+devices can lock up the SMBus until the next hard reboot.  This is because 
+they have a similar serial interface (like the I2C), but don't conform to 
+Intel's SMBus standard.
+	Why did they connect these devices to the SMBus if they aren't 
+compatible?  Good question! :')  Actually, these devices may support being 
+written to, but lock things up when they are read.
+
+
+4.12 My BIOS reports a much higher CPU temperature than your modules!
+
+	We display the actual temperature of the sensor. This may not be the 
+temperature you are interested in, though.  If a sensor should measure
+the CPU temperature, it must be in thermal contact with it.  In practice,
+it is just somewhere near it. Your BIOS may correct for this (by adding,
+for example, thirty degrees to the measured temperature).  The correction 
+factor is regrettably different for each mainboard, so we can not do this
+in the module itself. You can do it through the configuration file, though:
+  
+    chip lm75-*-49                     # Or whatever chip this relates to
+    label temp "Processor"
+    compute temp @*1.2+13,(@-13)/1.2   # Or whatever formula
+
+
+4.13 I try to read the raw /proc files, but the values are strange?!?
+
+	Remember, these values do not take the configuration file
+'compute' lines in account. This is especially obvious for voltage readings
+(usually called in? or vin?). Use a program linked to libsensors (like
+the provided 'sensors' program) instead.
+
+
+4.14 How do I set new limits?
+
+	This is a bit intricate right now. In the near future, this can be
+done through the 'sensors' program, which will take account of the
+computations specified in the configuration file. This will probably not
+be implemented in time for 2.1.0, though.
+	At this moment, you have to cat values to /proc/sys/dev/sensors/*/*
+files, and do any computations by hand. Sorry.
+
+
+4.15 Some sensors are doubly detected?
+
+	Yes, this is still a problem. It will partially solved in the future,
+but it is really tough. Double detections can be caused by two things: 
+sensors can be detected to both the ISA and the SMBus (and if you have
+loaded the approprate adapter drivers, it will be detected on both), and
+some chips simulate other chips (the Winbond W83781D simulates LM75 chips
+on the SMBus, for example). Remove the offending adapter or chip driver,
+or live with it for now.
+
+
+5 How to ask for help:
+
+	We are always willing to answer questions if things don't work out.
+Please mail lm78@stimpy.netroedge.com, and not the individual authors,
+unless you have something private to say. Especially, do not mail
+Alexander Larsson, as he has left the development team. You can be assured
+that any mail sent to lm78@stimpy.netroedge.com will arrive at anyone
+who answered your email, so please do not CC: him again.
+	Instead of using email, you can also use the web-based support
+area, at http://www.netroedge.com/~lm78/support.html. You will be helped
+just as fast, and others may profit from the answer too. You will be
+noticed automatically when your question has been answered.
+
+
+5.1 What to do if it won't insert?
+
+	Always inspect the output of 'dmesg' and send it to us. Check
+/proc/pci for your SMBus adapter, and send the output too. Check whether
+you actually have a sensor chip - sometimes, it is only an upgrade option.
+If your mainboard manual happens to mention the chip type, send it too.
+Tell us what mainboard you own.
+
+
+5.2 What to do if it inserts, but nothing happens?
+
+	Check /proc/pci to see whether you have a supported adapter. If it
+is not there, we do not support it. Future version may do it. If you want,
+you can send us an email telling you have a such-and-so mainboard, together
+with the PCI output - that way, we can see what SMBus hosts are used most.
+
+
+5.3 What to do if I read only bogus information?
+
+	It may be that this was a mis-detection: the chip may not be
+present. If you are convinced there is something wrong, please send us
+the usual information (see 5.1).
+
+
+5.4 What to do if you have other problems?
+
+	Again, send the output of 'dmesg', /proc/sensors and /proc/pci.
+
+
+5.5 What if it just works like a charm?
+
+	Drop us a mail if you feel like it, mentioning the mainboard and
+detected chip type. That way, we have some positive feedback, too!
+
+
+6 Version 1 specific questions
+
+6.1 My manufacturer swears that my mainboard has an SMBus, but your code 
+reports that it can't find it.  What's wrong? 
+
+	Currently, our code only assumes that an SMBus exists if it originates 
+from the Intel PIIX4 (82371AB).  If your computer doesn't have one, or if your 
+SMBus originates from a different SMBus 'host', then you are out of luck. :'( 
+Our experience is, though, that most machines have a PIIX4, and that it is 
+where the SMBus is hosted.
+
+Regarding the VIA chip set(s):
+	Right now, the SMBus code depends on the Intel PIIX4 chip to handle 
+SMBus transactions.  The VIA chip set is NOT supported at this time because 
+it forces much of the SMBus protocol to be implemented by software.
+	To implement the SMBus correctly with the VIA chip, it needs to be 
+written at a low level to be quick.  A more attractive alternative is to 
+use the Bios SMBus interface (not always available nor standard).
+
+	Version 2 supports the VIA chipset, and will support other chipsets.
+Version 1 never will.
+
+
+6.2 The modules won't load, saying 'SMBus not detected'.
+
+	This should no longer be an issue in 1.4.10 and later; it will
+continue loading, but it won't support SMBus-connected devices, of course.
+
+
+6.3 I try to read /proc/sensors, and I get a "No sensor data yet (try again in 
+a few moments)" message. Why?
+
+	It takes about 1.5 seconds for the LM78 to update all its sensor 
+values.  If we would try to read it before it finished that, you would get
+old garbage instead. So you have to wait 1.5 seconds after the module is
+inserted before you can access /proc/sensors.
+	Module versions 1.3.7 and later let the process sleep if it tries
+to access sensor data right after insertion time, and do not display this
+message anymore.
+
+
+6.4 On my Dell, a LM80 is detected, but all readings are 0!
+
+	This is a bug we have only observed on Dell computers. There is
+probably a problem with the way the SMBus is accessed; but it is not yet
+clear whether the problem is in our code or with the Dells.
+	There are very probably no sensor chips at all on your computer;
+but until somebody contacts Dell about this and tells us the results, we
+can not be sure.
+
+
+-----------
+Rev 2.0 (Frodo) Major revision for lm_sensors 2.1, 19981229
+Rev 1.10 (Frodo) Modified 3.8, updated some other things, 19980924
+Rev 1.9 (Frodo) Added 3.15, 19980906
+Rev 1.8 (Frodo) Added 3.14, 19980905
+Rev 1.7 (Phil) Added 3.13 and some other minor changes, 19980901
+Rev 1.6 (Frodo) Added 4, 4.1, 4.2, 4.3, 4.4, 4.5, 19980901
+Rev 1.5 (Frodo) Added 2.3, 2.4, 3.9, 3.10, 3.11, 19980826
+Rev 1.4 (Frodo) Added some more Winbond information, and 3.5-3.8, 19980817
+Rev 1.3 Added info on the Winbond chip, 19980816
+Rev 1.2 Adapation by Frodo Looijaard, 19980810
+Rev 1.1 Modifications by Philip Edelbrock, 19980809
+Rev 1.0 Written by Philip Edelbrock, 19980803

@@ -5,7 +5,8 @@ most interesting ones.
 
 WARNING! This is a BETA release. It is not compatible with any programs
 which are built upon the 1.x.y versions, like wmlm78 or klm. We expect
-version 2 will soon be supported by them, though. As beta release, there
+version 2 will soon be supported by them, though (a new version of wmlm78
+may already be released once you read this). As beta release, there
 may be problems, and not all version 1 chips are yet supported. Not
 everything is tested exhaustively, either, often because we simply do
 not have access to the hardware. Please share your experiences, both
@@ -16,12 +17,12 @@ the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
 
 As a rule of thumb: if you have a PIIX4 with LM78/79 and LM75 chips, things
-should run without problem. The GL518 driver is completely untested. All
+should run without problem. The GL518 driver is mostly untested. All
 supporting modules in the src directory should work without problem. If
 you have a VIA chipset, we would like to hear whether you can access the
 SMBus with it - this is not very well tested either. The new Winbond driver
-should basically work, though not all functionality may be present yet.
-If you have a LM80, you are out of luck at this moment.
+should be all right, too. If you have a LM80, please share your experiences
+with us.
 
 We expect many updates and new releases the next few weeks (with both bug
 fixes and new features), so check http://www.netroedge.com/~lm78 (our
@@ -66,7 +67,7 @@ chips and busses in one of the next releases.
 The developers of this package can be reached through the email address
 <lm78@stimpy.netroedge.com>. Do not hesitate to mail us if you have questions,
 suggestions, problems, want to contribute, or just want to report it works
-for you. But please try to read the documentation first before you ask
+for you. But please try to read the documentation and FAQ first before you ask
 any questions!
 
 The latest version of this package can always be found on our homepage:
