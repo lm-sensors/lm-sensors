@@ -20,7 +20,8 @@ Please include the following in your mail:
  	      (assuming your smbus adapter is on bus 1 -
 	      check the output of 'cat /proc/bus/i2c' to make sure).
 	- The output of (as root) 'prog/dump/i2cdump 1 0xXX b'
-	      XX = the address of the chip you see in the output of i2cdetect.
+	      XX = the address of each chip you see in the output
+	      of i2cdetect. (run once for each chip)
 	- Part numbers of chips on your motherboard you think are
 	      the sensor chips.
 
@@ -37,13 +38,13 @@ Driver  Chips		#temp	#vin	#fanin	pwm/dac	i2c	ISA
 ---------------------------------------------------------------------
 adm1021
 	adm1021		2	-	-	-	yes	no
-	lm84		2	-	-	-	yes	no
 	gl523sm		2	-	-	-	yes	no
+	lm84		2	-	-	-	yes	no
 	max1617		2	-	-	-	yes	no
 	max1617a	2	-	-	-	yes	no
 	thmc10		2	-	-	-	yes	no
 	xeon		1	-	-	-	yes	no
-	(xeon - no detection - requires force parameter)
+	  (xeon - no detection - requires force parameter)
 
 adm9240
 	adm9240		1	6	2	1 dac	yes	no
@@ -63,6 +64,7 @@ gl525sm-to-be-written
 lm75
 	lm75		1	-	-	-	yes	no
 	lm77		1	-	-	-	yes	no
+	  (lm77 detected as an lm75)
 
 lm78
 	lm78		1	7	3	-	yes	yes
@@ -130,6 +132,7 @@ This may help identify a chip after doing a 'i2cdump [bus] [address] b'.
 
 0x00	National (on LM84)
 0x01	National
+0x12C3	Asus (at 0x4F)
 0x23	AMD
 0x41	AMD
 0x49	TI
