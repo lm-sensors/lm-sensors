@@ -107,7 +107,7 @@ SENSORS_INSMOD_4(w83781d,w83782d,w83783s,w83627hf);
 #define W83781D_REG_BEEP_CONFIG 0x4D
 #define W83781D_REG_BEEP_INTS1 0x56
 #define W83781D_REG_BEEP_INTS2 0x57
-#define W83781D_REG_BEEP_INTS3 0x453	/* W83782D only */
+#define W83781D_REG_BEEP_INTS3 0x453	/* not on W83781D */
 
 #define W83781D_REG_VID_FANDIV 0x47
 
@@ -177,7 +177,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define PWM_FROM_REG(val) (val)
 #define PWM_TO_REG(val) (SENSORS_LIMIT((val),0,255))
 #define BEEPS_FROM_REG(val) (val)
-#define BEEPS_TO_REG(val) ((val) & 0xffff)
+#define BEEPS_TO_REG(val) ((val) & 0xffffff)
 
 #define BEEP_ENABLE_TO_REG(val) (val)
 #define BEEP_ENABLE_FROM_REG(val) ((val)?1:0)
@@ -342,7 +342,7 @@ struct w83781d_data {
          u8 fan_div[3];              /* Register encoding, shifted right */
          u8 vid;                     /* Register encoding, combined */
          u32 alarms;                 /* Register encoding, combined */
-         u16 beeps;                  /* Register encoding, combined */
+         u32 beeps;                  /* Register encoding, combined */
          u8 beep_enable;             /* Boolean */
          u8 pwm[4];                  /* Register value */				
          u16 sens[3];                /* 782D/783S only.
@@ -1153,6 +1153,9 @@ void w83781d_update_client(struct i2c_client *client)
     data->beep_enable = i >> 7;
     data->beeps = ((i & 0x7f) << 8) + 
                   w83781d_read_value(client,W83781D_REG_BEEP_INTS1);
+    if (data->type != w83781d) {
+      data->beeps |= w83781d_read_value(client,W83781D_REG_BEEP_INTS3) << 16;
+    }
     data->last_updated = jiffies;
     data->valid = 1;
   }
@@ -1322,6 +1325,11 @@ void w83781d_beep(struct i2c_client *client, int operation, int ctl_name,
     if (*nrels_mag >= 2) {
       data->beeps = BEEPS_TO_REG(results[1]);
       w83781d_write_value(client,W83781D_REG_BEEP_INTS1,data->beeps & 0xff);
+      if(data->type != w83781d)
+      {
+        w83781d_write_value(client,W83781D_REG_BEEP_INTS3,
+          ((data->beeps) >> 16) & 0xff);
+      } 
       val = data->beeps >> 8;
     } else if (*nrels_mag >= 1)
       val = w83781d_read_value(client,W83781D_REG_BEEP_INTS1) & 0x7f;

@@ -490,7 +490,6 @@ will do no harm, but will return 'old' values.
 
 TO DO:
 -----
- 782d beep 3 register
  782d programmable pins
  783s temp2 (labeled as temp1 in data sheet) at different location
       than 781d/782d, not implemented yet.
