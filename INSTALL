@@ -5,7 +5,8 @@ See QUICKSTART for the simple version.
 
 The driver modules in this package are ONLY for 2.4 kernels 2.4.9 or later !!!
 
-This package REQUIRES i2c-2.8.1 or later!!!
+This package REQUIRES i2c-2.8.1 or later! The i2c subsystem found in the
+Linux 2.4 kernel trees, even the latest ones, is outdated and won't work.
 
 FOR 2.5/2.6 KERNELS, do not attempt to compile this package.
     Use the drivers already in the 2.5/2.6 kernel tree.
