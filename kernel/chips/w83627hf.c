@@ -225,6 +225,10 @@ static const u8 BIT_SCFG2[] = { 0x10, 0x20, 0x40 };
 #define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 8)/16),0,255))
 #define IN_FROM_REG(val) (((val) * 16 + 5) / 10)
 
+#define IN_TO_REG_VRM9(val) \
+	(SENSORS_LIMIT((((val) * 1000 - 70000 + 244) / 488), 0, 255))
+#define IN_FROM_REG_VRM9(reg)	(((reg) * 488 + 70000 + 500) / 1000)
+
 static inline u8 FAN_TO_REG(long rpm, int div)
 {
 	if (rpm == 0)
@@ -884,14 +888,14 @@ static void w83627hf_init_client(struct i2c_client *client)
 	}
 
 	/* Read VRM & OVT Config only once */
-	if (w83627thf == data->type || w83637hf == data->type) {
+	if (w83627thf == data->type || w83637hf == data->type)
 		data->vrm_ovt =
 			w83627hf_read_value(client, W83627THF_REG_VRM_OVT_CFG);
-		data->vrm = (data->vrm_ovt & 0x01) ? 90 : 82;
-	} else {
-		/* Convert VID to voltage based on default VRM */
-		data->vrm = DEFAULT_VRM;
-	}
+	else
+		data->vrm_ovt = 0;
+
+	/* Choose VRM based on "VRM & OVT" register */
+	data->vrm = (data->vrm_ovt & 0x01) ? 90 : 82;
 
 	if (type != w83697hf)
 		vid = vid_from_reg(vid, data->vrm);
@@ -1037,13 +1041,11 @@ void w83627hf_in(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83627hf_update_client(client);
 
-		if (nr == 0 && (data->vrm_ovt & 0x01) &&
-			(w83627thf == data->type || w83637hf == data->type)) {
-
+		if (nr == 0 && (data->vrm_ovt & 0x01)) {
 			/* use VRM9 calculation */
-			results[0] = ((data->in_min[0] * 488 + 70500) / 1000);
-			results[1] = ((data->in_max[0] * 488 + 70500) / 1000);
-			results[2] = ((data->in[0] * 488 + 70500) / 1000);
+			results[0] = IN_FROM_REG_VRM9(data->in_min[0]);
+			results[1] = IN_FROM_REG_VRM9(data->in_max[0]);
+			results[2] = IN_FROM_REG_VRM9(data->in[0]);
 
 		} else {
 			/* use VRM8 (standard) calculation */
@@ -1056,14 +1058,9 @@ void w83627hf_in(struct i2c_client *client, int operation, int ctl_name,
 
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			if (nr == 0 && (data->vrm_ovt & 0x01) &&
-				(w83627thf == data->type ||
-				w83637hf == data->type))
-
+			if (nr == 0 && (data->vrm_ovt & 0x01))
 				/* use VRM9 calculation */
-				data->in_min[0] = SENSORS_LIMIT(
-					((results[0]*1000 - 70000+244) / 488),
-						0, 255);
+				data->in_min[0] = IN_TO_REG_VRM9(results[0]);
 			else
 				/* use VRM8 (standard) calculation */
 				data->in_min[nr] = IN_TO_REG(results[0]);
@@ -1072,14 +1069,9 @@ void w83627hf_in(struct i2c_client *client, int operation, int ctl_name,
 					    data->in_min[nr]);
 		}
 		if (*nrels_mag >= 2) {
-			if (nr == 0 && (data->vrm_ovt & 0x01) &&
-				(w83627thf == data->type ||
-				w83637hf == data->type))
-
+			if (nr == 0 && (data->vrm_ovt & 0x01))
 				/* use VRM9 calculation */
-				data->in_min[0] = SENSORS_LIMIT(
-					((results[1]*1000 - 70000+244) / 488),
-						0, 255);
+				data->in_min[0] = IN_TO_REG_VRM9(results[1]);
 			else
 				/* use VRM8 (standard) calculation */
 				data->in_max[nr] = IN_TO_REG(results[1]);
