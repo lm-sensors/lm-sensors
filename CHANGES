@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.8.0 (200307??)
+2.8.0 (20030714)
   NOTE: Requires i2c-2.8.0 or newer!!!
   Dropped all kernel 2.2 and 2.3 compatibility; 2.4.9 or later required;
                   2.4.13 or later required for mkpatch.
