@@ -689,7 +689,7 @@ static const unsigned long lm93_vin_val_min[16] = {
 };
 static const unsigned long lm93_vin_val_max[16] = {
 	1236, 1236, 1236, 1600, 2000, 2000, 1600, 1600,
-	4400, 6667, 3333, 2625, 1312, 1312, 1236, 3600,
+	4400, 6500, 3333, 2625, 1312, 1312, 1236, 3600,
 };
 /*
 static const unsigned long lm93_vin_val_nom[16] = {

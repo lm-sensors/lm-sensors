@@ -35,6 +35,7 @@ ask CVS about it:
                Limit I2C address range
                Support VID on the IT8712F
   Module lm90: Fix MAX6657, MAX6658 and MAX6659 detection
+  Module lm93: Fix IN10 (+5V) scaling
   Module mic74: New
   Module w83781d: Revert AS99127F temp2 and temp3 computation change
                   Skip final initialization step for AS99127F chips
