@@ -101,6 +101,7 @@ We also support some miscellaneous chips:
   SDRAM Dimms with Serial Presence Detect EEPROMs
   Smart Battery sensors
   IPMI-BMC sensors
+  Philips Semiconductors SAA1064
 
 
 See our New Drivers page http://www.lm-sensors.nu/~lm78/newdrivers.html
