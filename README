@@ -79,3 +79,9 @@ is copyright (c) 1995-1998 by Simon Vogl. See the individual files for
 more exact copyright information.  This package may be distributed
 according to the GNU General Public License (GPL), as included in the
 file COPYING.
+
+Note that at this moment, libsensors falls under the GPL, not the LGPL.
+In more human language, that means it is FORBIDDEN to link any application
+to the library, even to the shared version, if the application itself
+does not fall under the GPL. This will probably be changed in the future.
+In the meantime, you will have to contact us first if you want to do this.

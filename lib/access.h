@@ -39,13 +39,6 @@ typedef struct sensors_chip_features {
   struct sensors_chip_feature *feature;
 } sensors_chip_features;
 
-#define SENSORS_NO_RW 0
-#define SENSORS_R 1
-#define SENSORS_W 2
-#define SENSORS_RW 3
-
-#define SENSORS_NO_MAPPING -1
-
 extern sensors_chip_features sensors_chip_features_list[];
 
 /* Returns, one by one, a pointer to all sensor_chip structs of the

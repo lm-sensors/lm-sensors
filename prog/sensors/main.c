@@ -165,6 +165,7 @@ int main (int argc, char *argv[])
   }
 
   /* Here comes the real code... */
+
   for (chip_nr = 0; (chip = sensors_get_detected_chips(&chip_nr));) {
     if (chip->bus == SENSORS_CHIP_NAME_BUS_ISA)
       printf("%s-isa-%04x\n",chip->prefix,chip->addr);
@@ -183,7 +184,11 @@ int main (int argc, char *argv[])
     else if (!strcmp(chip->prefix,"lm78") || !strcmp(chip->prefix,"lm78-j") ||
              !strcmp(chip->prefix,"lm79"))
       print_lm78(chip);
+    else
+      print_unknown_chip(chip);
     printf("\n");
   }
   exit(0);
 }
+
+

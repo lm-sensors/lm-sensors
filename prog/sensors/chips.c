@@ -218,3 +218,30 @@ void print_lm78(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_unknown_chip(const sensors_chip_name *name)
+{
+  int a,b;
+  const sensors_feature_data *data;
+  char *label;
+  double val;
+ 
+  a=b=0;
+  while((data=sensors_get_all_features(*name,&a,&b))) {
+    if (sensors_get_label(*name,data->number,&label)) {
+      printf("ERROR: Can't get feature `%s' data!",data->name);
+      continue;
+    }
+    if (data->mode & SENSORS_MODE_R) {
+      if(sensors_get_feature(*name,data->number,&val)) {
+        printf("ERROR: Can't get feature `%s' data!",data->name);
+        continue;
+      }
+      if (data->mapping != SENSORS_NO_MAPPING)
+        printf("  %s: %.2f (%s)\n",label,val,data->name);
+      else
+        printf("%s: %.2f (%s)\n",label,val,data->name);
+    } else 
+      printf("(%s)",label);
+  }
+}
+

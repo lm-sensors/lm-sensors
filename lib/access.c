@@ -172,7 +172,7 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
                    sensors_lookup_feature_nr(name.prefix,
                                              main_feature->compute_mapping)))
     return -SENSORS_ERR_NO_ENTRY;
-  if (! (main_feature->mode && SENSORS_R))
+  if (! (main_feature->mode && SENSORS_MODE_R))
     return -SENSORS_ERR_ACCESS;
   for (chip = NULL; !expr && (chip = sensors_for_all_config_chips(name,chip));)
     for (i = 0; !final_expr && (i < chip->computes_count); i++) {
@@ -206,7 +206,7 @@ int sensors_set_feature(sensors_chip_name name, int feature, double value)
     return -SENSORS_ERR_WILDCARDS;
   if (! (featureptr = sensors_lookup_feature_nr(name.prefix,feature)))
     return -SENSORS_ERR_NO_ENTRY;
-  if (! (featureptr->mode && SENSORS_W))
+  if (! (featureptr->mode && SENSORS_MODE_W))
     return -SENSORS_ERR_ACCESS;
   for (chip = NULL; !expr && (chip = sensors_for_all_config_chips(name,chip));)
     for (i = 0; !expr && (i < chip->computes_count); i++)
@@ -249,3 +249,34 @@ const char *sensors_get_algorithm_name(int bus_nr)
       return sensors_proc_bus[i].algorithm;
   return NULL;
 }
+
+/* nr1-1 is the last main feature found; nr2-1 is the last subfeature found */
+const sensors_feature_data *sensors_get_all_features (sensors_chip_name name, 
+                                                      int *nr1, int*nr2)
+{
+  sensors_chip_feature *feature_list;
+  int i;
+
+  for (i = 0; sensors_chip_features_list[i].prefix; i++)
+    if (!strcmp(sensors_chip_features_list[i].prefix,name.prefix)) {
+      feature_list=sensors_chip_features_list[i].feature;
+      if (!*nr1 && !*nr2) { /* Return the first entry */
+        if (!feature_list[0].name) /* The list may be empty */
+          return NULL;
+        *nr1 = *nr2 = 1;
+        return (sensors_feature_data *) (feature_list + 0);
+      }
+      for ((*nr2)++; feature_list[*nr2-1].name; (*nr2)++) 
+        if (feature_list[*nr2-1].logical_mapping == feature_list[*nr1-1].number)
+          return (sensors_feature_data *) (feature_list + *nr2 - 1);
+      for ((*nr1)++; feature_list[*nr1-1].name && 
+                  (feature_list[*nr1-1].logical_mapping != SENSORS_NO_MAPPING);
+           (*nr1)++);
+      *nr2 = *nr1;
+      if (! feature_list[*nr1-1].name)
+        return NULL;
+      return (sensors_feature_data *) (feature_list + *nr1 - 1);
+    }
+  return NULL;
+}
+      

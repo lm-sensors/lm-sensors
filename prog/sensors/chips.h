@@ -22,6 +22,8 @@
 
 #include "lib/sensors.h"
 
+extern void print_unknown_chip(const sensors_chip_name *name);
+
 extern void print_lm75(const sensors_chip_name *name);
 extern void print_lm78(const sensors_chip_name *name);
 
