@@ -70,6 +70,7 @@ sensor reading results. Why?
   4.17C Bad readings from the MTP008!
   4.17D Bad temperature readings from the SIS5595!
   4.17E Bad readings from a w8378[12]d!
+  4.17F Bus hangs on Ali 1543 on Asus P5A boards!
 4.18 How do I configure two chips (LM87) differently?
 4.19 Dmesg says Upgrade BIOS! I don't want to!
 4.20 Sensors says 'Can't access /proc file'
@@ -638,6 +639,8 @@ fix the driver. Ask Via to release a better datasheet.
     The MTP008 has programmable temperature sensor types.
 If your sensor type does not match the default, you will have to change it.
 See doc/chips/mtp008 for details.
+Also, MTP008 chips seem to randomly refuse to respond, for
+unknown reasons. You can see this as 'XX' entries in i2cdump.
 
 
 4.17D Bad temperature readings from the SIS5595!
@@ -661,6 +664,14 @@ forced to recognize the as99127f with
 Cat /proc/bus/i2c to see a list of bus numbers.
 Read the w83781d module documentation (doc/chips/w83781d)
 for more details.
+
+
+4.17F Bus hangs on Ali 1543 on Asus P5A boards!
+
+    The SMBus tends to hang on this board and it seems to get worse
+at higher temperatures. Use ISA accesses to reliably use the w83781d
+monitor chip on this board and use the 'ignore=1,0x2d' or similar option
+to the w83781d module to prevent i2c accesses.
 
 
 4.18 How do I configure two chips (LM87) differently?
