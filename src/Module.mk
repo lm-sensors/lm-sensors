@@ -38,9 +38,9 @@ all-src: $(SRCTARGETS)
 all :: all-src
 
 install-src:
-	$(MKDIR) $(MODDIR) $(INCLUDEDIR)
+	$(MKDIR) $(MODDIR) $(SYSINCLUDEDIR)
 	install -o root -g root -m 644 $(SRCTARGETS) $(MODDIR)
-	install -o root -g root -m 644 $(SRCHEADERFILES) $(INCLUDEDIR)
+	install -o root -g root -m 644 $(SRCHEADERFILES) $(SYSINCLUDEDIR)
 install :: install-src
 
 clean-src:

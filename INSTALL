@@ -15,18 +15,27 @@ this package. Some interesting variables:
   If you already have Simon Vogl's i2c package installed, you may not have
   to compile the version included in this package. In that case, check
   the file i2c/MODIFICATIONS in this package to see what versions are
-  OK.
+  safe.
 * WARN, DEBUG
   These options should only be needed if you are an active developer of
   this package.
-* MODDIR
+* PREFIX (/usr/local)
+  The prefix which is added to most directory locations below.
+* MODDIR (/lib/modules/extra/misc)
   The directory where 'make install' installs your modules.
-* INCLUDEDIR
-  The directory where 'make install' installs your include files.
+* LIBDIR ($(PREFIX)/lib)
+  The directory where 'make install' installs the shared and static libraries.
+* BINDIR ($(PREFIX)/bin)
+  The directory where 'make install' installs all executables.
+* INCLUDEDIR ($(PREFIX)/include)
+  The basic directory where 'make install' installs your include files.
+  Actually, SYSINCLUDEDIR ($(INCLUDEDIR)/linux) is used for kernel header
+  files, and LIBINCLUDEDIR ($(INCLUDEDIR)/sensors) is used for library
+  header files.
 
 Warning! In newer 2.1 kernels, there is support for I2C. This support is
-NOT compatible with this module! Actually, Simon Vogl's modules (which
-ARE compatible) is scheduled to replace the current support. If you
+NOT compatible with this module! Actually, Simon Vogl's modules package 
+(which IS compatible) is scheduled to replace the current support. If you
 actually use these modules, you have a problem; they can not coexist
 with Simon's modules. Theoretically, you should be able to replace
 the old modules with the new stuff in our i2c directory, recompile
