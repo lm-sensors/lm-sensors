@@ -14,8 +14,6 @@ Many, many things. Most notably:
 * Make it SMP-safe: there are no spinlocks yet. They are needed at many
   places, probably (everywhere where global vars are accessed). This must be
   done for the i2c modules, too.
-* Extend the mod_inc_use/mod_dec_use through the fill_inode trick, for all
-  new /proc files.
 * Make lm78.c detect 'double hits', (same chip connected to both SMBus and
   ISA).
 * Better lm78/lm75 detection; insmod-time paramters to set addresses 

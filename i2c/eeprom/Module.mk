@@ -35,6 +35,6 @@ all :: all-i2c-eeprom
 # No install rule
 
 clean-i2c-eeprom:
-	$(RM) $(I2CEEPROMSOURCES:.c=.d) $(I2CEEPROMSOURCES:.c=.o) \
+	$(RM) $(I2CEEPROMSOURCES:.c=.rd) $(I2CEEPROMSOURCES:.c=.ro) \
 	      $(I2CEEPROMTARGETS)
 clean :: clean-i2c-eeprom

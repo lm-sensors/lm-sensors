@@ -56,7 +56,8 @@ static struct ctl_table_header *sensors_entries[SENSORS_ENTRY_MAX];
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
 static struct i2c_client *sensors_clients[SENSORS_ENTRY_MAX];
 static unsigned short sensors_inodes[SENSORS_ENTRY_MAX];
-void sensors_fill_inode(struct inode *inode, int fill);
+static void sensors_fill_inode(struct inode *inode, int fill);
+static void sensors_dir_fill_inode(struct inode *inode, int fill);
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
 
 static ctl_table sysctl_table[] = {
@@ -180,7 +181,7 @@ int sensors_register_entry(struct i2c_client *client ,const char *prefix,
   }
 #endif /* DEBUG */
   sensors_inodes[id-256] = new_header->ctl_table->child->child->de->low_ino;
-  new_header->ctl_table->child->child->de->fill_inode = &sensors_fill_inode;
+  new_header->ctl_table->child->child->de->fill_inode = &sensors_dir_fill_inode;
 #endif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
 
   return id;
@@ -203,7 +204,20 @@ void sensors_deregister_entry(int id)
 }
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+/* Monitor access for /proc/sys/dev/sensors; make unloading sensors.o 
+   impossible if some process still uses it or some file in it */
 void sensors_fill_inode(struct inode *inode, int fill)
+{
+  if (fill)
+    MOD_INC_USE_COUNT;
+  else
+    MOD_DEC_USE_COUNT;
+}
+
+/* Monitor access for /proc/sys/dev/sensors/* directories; make unloading
+   the corresponding module impossible if some process still uses it or
+   some file in it */
+void sensors_dir_fill_inode(struct inode *inode, int fill)
 {
   int i;
   struct i2c_client *client;
@@ -567,6 +581,9 @@ int sensors_init(void)
   sensors_initialized = 0;
   if (! (sensors_proc_header = register_sysctl_table(sensors_proc,0)))
     return -ENOMEM;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+  sensors_proc_header->ctl_table->child->de->fill_inode = &sensors_fill_inode;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
   sensors_initialized ++;
   return 0;
 }

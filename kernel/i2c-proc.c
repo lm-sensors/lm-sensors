@@ -41,6 +41,10 @@ static int i2cproc_command(struct i2c_client *client, unsigned int cmd,
 static void i2cproc_inc_use(struct i2c_client *client);
 static void i2cproc_dec_use(struct i2c_client *client);
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+static void monitor_bus_i2c(struct inode *inode, int fill);
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
+
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
 
 static ssize_t i2cproc_bus_read(struct file * file, char * buf,size_t count, 
@@ -80,6 +84,9 @@ static struct proc_dir_entry proc_bus_i2c_dir =
     /* size */		0,
     /* ops */		NULL,
     /* get_info */	&read_bus_i2c
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+    /* fill_inode */    &monitor_bus_i2c
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
   };
 
 /* List of registered entries in /proc/bus */
@@ -223,6 +230,19 @@ int i2cproc_cleanup(void)
   return 0;
 }
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+/* Monitor access to /proc/bus/i2c*; make unloading i2c-proc.o impossible
+   if some process still uses it or some file in it */
+void monitor_bus_i2c(struct inode *inode, int fill)
+{
+  if (fill)
+    MOD_INC_USE_COUNT;
+  else
+    MOD_DEC_USE_COUNT;
+}
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
+
+
 /* This function generates the output for /proc/bus/i2c */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
 int read_bus_i2c(char *buf, char **start, off_t offset, int len, int *eof, 
@@ -349,6 +369,9 @@ int i2cproc_attach_adapter(struct i2c_adapter *adapter)
     return -ENOENT;
   }
   proc_entry->ops = &i2cproc_inode_operations;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+  proc_entry->fill_inode = &monitor_bus_i2c;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
 #else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
   if (!(proc_entry = kmalloc(sizeof(struct proc_dir_entry)+strlen(name)+1,
                              GFP_KERNEL))) {
