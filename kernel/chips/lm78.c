@@ -102,54 +102,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 #define DIV_FROM_REG(val) (1 << (val))
 
-/* Initial limits. To keep them sane, we use the 'standard' translation as
-   specified in the LM78 sheet. Use the config file to set better limits. */
-#define LM78_INIT_IN_0 (vid==350?280:vid)
-#define LM78_INIT_IN_1 (vid==350?280:vid)
-#define LM78_INIT_IN_2 330
-#define LM78_INIT_IN_3 (((500)   * 100)/168)
-#define LM78_INIT_IN_4 (((1200)  * 10)/38)
-#define LM78_INIT_IN_5 (((-1200) * -604)/2100)
-#define LM78_INIT_IN_6 (((-500)  * -604)/909)
-
-#define LM78_INIT_IN_PERCENTAGE 10
-
-#define LM78_INIT_IN_MIN_0 \
-        (LM78_INIT_IN_0 - LM78_INIT_IN_0 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MAX_0 \
-        (LM78_INIT_IN_0 + LM78_INIT_IN_0 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MIN_1 \
-        (LM78_INIT_IN_1 - LM78_INIT_IN_1 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MAX_1 \
-        (LM78_INIT_IN_1 + LM78_INIT_IN_1 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MIN_2 \
-        (LM78_INIT_IN_2 - LM78_INIT_IN_2 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MAX_2 \
-        (LM78_INIT_IN_2 + LM78_INIT_IN_2 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MIN_3 \
-        (LM78_INIT_IN_3 - LM78_INIT_IN_3 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MAX_3 \
-        (LM78_INIT_IN_3 + LM78_INIT_IN_3 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MIN_4 \
-        (LM78_INIT_IN_4 - LM78_INIT_IN_4 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MAX_4 \
-        (LM78_INIT_IN_4 + LM78_INIT_IN_4 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MIN_5 \
-        (LM78_INIT_IN_5 - LM78_INIT_IN_5 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MAX_5 \
-        (LM78_INIT_IN_5 + LM78_INIT_IN_5 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MIN_6 \
-        (LM78_INIT_IN_6 - LM78_INIT_IN_6 * LM78_INIT_IN_PERCENTAGE / 100)
-#define LM78_INIT_IN_MAX_6 \
-        (LM78_INIT_IN_6 + LM78_INIT_IN_6 * LM78_INIT_IN_PERCENTAGE / 100)
-
-#define LM78_INIT_FAN_MIN_1 3000
-#define LM78_INIT_FAN_MIN_2 3000
-#define LM78_INIT_FAN_MIN_3 3000
-
-#define LM78_INIT_TEMP_OVER 600
-#define LM78_INIT_TEMP_HYST 500
-
 /* There are some complications in a module like this. First off, LM78 chips
    may be both present on the SMBus and the ISA bus, and we have to handle
    those cases separately at some places. Second, there might be several
@@ -544,45 +496,6 @@ static void lm78_init_client(struct i2c_client *client)
 	else
 		vid |= 0x10;
 	vid = VID_FROM_REG(vid);
-
-	lm78_write_value(client, LM78_REG_IN_MIN(0),
-			 IN_TO_REG(LM78_INIT_IN_MIN_0));
-	lm78_write_value(client, LM78_REG_IN_MAX(0),
-			 IN_TO_REG(LM78_INIT_IN_MAX_0));
-	lm78_write_value(client, LM78_REG_IN_MIN(1),
-			 IN_TO_REG(LM78_INIT_IN_MIN_1));
-	lm78_write_value(client, LM78_REG_IN_MAX(1),
-			 IN_TO_REG(LM78_INIT_IN_MAX_1));
-	lm78_write_value(client, LM78_REG_IN_MIN(2),
-			 IN_TO_REG(LM78_INIT_IN_MIN_2));
-	lm78_write_value(client, LM78_REG_IN_MAX(2),
-			 IN_TO_REG(LM78_INIT_IN_MAX_2));
-	lm78_write_value(client, LM78_REG_IN_MIN(3),
-			 IN_TO_REG(LM78_INIT_IN_MIN_3));
-	lm78_write_value(client, LM78_REG_IN_MAX(3),
-			 IN_TO_REG(LM78_INIT_IN_MAX_3));
-	lm78_write_value(client, LM78_REG_IN_MIN(4),
-			 IN_TO_REG(LM78_INIT_IN_MIN_4));
-	lm78_write_value(client, LM78_REG_IN_MAX(4),
-			 IN_TO_REG(LM78_INIT_IN_MAX_4));
-	lm78_write_value(client, LM78_REG_IN_MIN(5),
-			 IN_TO_REG(LM78_INIT_IN_MIN_5));
-	lm78_write_value(client, LM78_REG_IN_MAX(5),
-			 IN_TO_REG(LM78_INIT_IN_MAX_5));
-	lm78_write_value(client, LM78_REG_IN_MIN(6),
-			 IN_TO_REG(LM78_INIT_IN_MIN_6));
-	lm78_write_value(client, LM78_REG_IN_MAX(6),
-			 IN_TO_REG(LM78_INIT_IN_MAX_6));
-	lm78_write_value(client, LM78_REG_FAN_MIN(1),
-			 FAN_TO_REG(LM78_INIT_FAN_MIN_1, 2));
-	lm78_write_value(client, LM78_REG_FAN_MIN(2),
-			 FAN_TO_REG(LM78_INIT_FAN_MIN_2, 2));
-	lm78_write_value(client, LM78_REG_FAN_MIN(3),
-			 FAN_TO_REG(LM78_INIT_FAN_MIN_3, 2));
-	lm78_write_value(client, LM78_REG_TEMP_OVER,
-			 TEMP_TO_REG(LM78_INIT_TEMP_OVER));
-	lm78_write_value(client, LM78_REG_TEMP_HYST,
-			 TEMP_TO_REG(LM78_INIT_TEMP_HYST));
 
 	/* Start monitoring */
 	lm78_write_value(client, LM78_REG_CONFIG,

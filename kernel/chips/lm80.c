@@ -114,55 +114,6 @@ static inline long TEMP_FROM_REG(u16 temp)
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 
-/* Initial limits */
-#define LM80_INIT_IN_0 190
-#define LM80_INIT_IN_1 190
-#define LM80_INIT_IN_2 190
-#define LM80_INIT_IN_3 190
-#define LM80_INIT_IN_4 190
-#define LM80_INIT_IN_5 190
-#define LM80_INIT_IN_6 190
-
-#define LM80_INIT_IN_PERCENTAGE 10
-
-#define LM80_INIT_IN_MIN_0 \
-        (LM80_INIT_IN_0 - LM80_INIT_IN_0 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MAX_0 \
-        (LM80_INIT_IN_0 + LM80_INIT_IN_0 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MIN_1 \
-        (LM80_INIT_IN_1 - LM80_INIT_IN_1 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MAX_1 \
-        (LM80_INIT_IN_1 + LM80_INIT_IN_1 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MIN_2 \
-        (LM80_INIT_IN_2 - LM80_INIT_IN_2 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MAX_2 \
-        (LM80_INIT_IN_2 + LM80_INIT_IN_2 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MIN_3 \
-        (LM80_INIT_IN_3 - LM80_INIT_IN_3 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MAX_3 \
-        (LM80_INIT_IN_3 + LM80_INIT_IN_3 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MIN_4 \
-        (LM80_INIT_IN_4 - LM80_INIT_IN_4 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MAX_4 \
-        (LM80_INIT_IN_4 + LM80_INIT_IN_4 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MIN_5 \
-        (LM80_INIT_IN_5 - LM80_INIT_IN_5 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MAX_5 \
-        (LM80_INIT_IN_5 + LM80_INIT_IN_5 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MIN_6 \
-        (LM80_INIT_IN_6 - LM80_INIT_IN_6 * LM80_INIT_IN_PERCENTAGE / 100)
-#define LM80_INIT_IN_MAX_6 \
-        (LM80_INIT_IN_6 + LM80_INIT_IN_6 * LM80_INIT_IN_PERCENTAGE / 100)
-
-#define LM80_INIT_FAN_MIN_1 3000
-#define LM80_INIT_FAN_MIN_2 3000
-
-#define LM80_INIT_TEMP_OS_MAX 600
-#define LM80_INIT_TEMP_OS_HYST 500
-#define LM80_INIT_TEMP_HOT_MAX 700
-#define LM80_INIT_TEMP_HOT_HYST 600
-
-
 /* For each registered LM80, we need to keep some data in memory. That
    data is pointed to by lm80_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new lm80 client is
@@ -432,47 +383,6 @@ static void lm80_init_client(struct i2c_client *client)
 	lm80_write_value(client, LM80_REG_CONFIG, 0x80);
 	/* Set 11-bit temperature resolution */
 	lm80_write_value(client, LM80_REG_RES, 0x08);
-
-	lm80_write_value(client, LM80_REG_IN_MIN(0),
-			 IN_TO_REG(LM80_INIT_IN_MIN_0, 0));
-	lm80_write_value(client, LM80_REG_IN_MAX(0),
-			 IN_TO_REG(LM80_INIT_IN_MAX_0, 0));
-	lm80_write_value(client, LM80_REG_IN_MIN(1),
-			 IN_TO_REG(LM80_INIT_IN_MIN_1, 1));
-	lm80_write_value(client, LM80_REG_IN_MAX(1),
-			 IN_TO_REG(LM80_INIT_IN_MAX_1, 1));
-	lm80_write_value(client, LM80_REG_IN_MIN(2),
-			 IN_TO_REG(LM80_INIT_IN_MIN_2, 2));
-	lm80_write_value(client, LM80_REG_IN_MAX(2),
-			 IN_TO_REG(LM80_INIT_IN_MAX_2, 2));
-	lm80_write_value(client, LM80_REG_IN_MIN(3),
-			 IN_TO_REG(LM80_INIT_IN_MIN_3, 3));
-	lm80_write_value(client, LM80_REG_IN_MAX(3),
-			 IN_TO_REG(LM80_INIT_IN_MAX_3, 3));
-	lm80_write_value(client, LM80_REG_IN_MIN(4),
-			 IN_TO_REG(LM80_INIT_IN_MIN_4, 4));
-	lm80_write_value(client, LM80_REG_IN_MAX(4),
-			 IN_TO_REG(LM80_INIT_IN_MAX_4, 4));
-	lm80_write_value(client, LM80_REG_IN_MIN(5),
-			 IN_TO_REG(LM80_INIT_IN_MIN_5, 5));
-	lm80_write_value(client, LM80_REG_IN_MAX(5),
-			 IN_TO_REG(LM80_INIT_IN_MAX_5, 5));
-	lm80_write_value(client, LM80_REG_IN_MIN(6),
-			 IN_TO_REG(LM80_INIT_IN_MIN_6, 6));
-	lm80_write_value(client, LM80_REG_IN_MAX(6),
-			 IN_TO_REG(LM80_INIT_IN_MAX_6, 6));
-	lm80_write_value(client, LM80_REG_FAN1_MIN,
-			 FAN_TO_REG(LM80_INIT_FAN_MIN_1, 2));
-	lm80_write_value(client, LM80_REG_FAN2_MIN,
-			 FAN_TO_REG(LM80_INIT_FAN_MIN_2, 2));
-	lm80_write_value(client, LM80_REG_TEMP_HOT_MAX,
-			 TEMP_LIMIT_TO_REG(LM80_INIT_TEMP_OS_MAX));
-	lm80_write_value(client, LM80_REG_TEMP_HOT_HYST,
-			 TEMP_LIMIT_TO_REG(LM80_INIT_TEMP_OS_HYST));
-	lm80_write_value(client, LM80_REG_TEMP_OS_MAX,
-			 TEMP_LIMIT_TO_REG(LM80_INIT_TEMP_OS_MAX));
-	lm80_write_value(client, LM80_REG_TEMP_OS_HYST,
-			 TEMP_LIMIT_TO_REG(LM80_INIT_TEMP_OS_HYST));
 
 	/* Start monitoring */
 	lm80_write_value(client, LM80_REG_CONFIG, 0x01);

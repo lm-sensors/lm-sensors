@@ -49,10 +49,6 @@ SENSORS_INSMOD_1(lm75);
 #define TEMP_FROM_REG(val) ((((val & 0x7fff) >> 7) * 5) | ((val & 0x8000)?-256:0))
 #define TEMP_TO_REG(val)   (SENSORS_LIMIT((val<0?(0x200+((val)/5))<<7:(((val) + 2) / 5) << 7),0,0xffff))
 
-/* Initial values */
-#define LM75_INIT_TEMP_OS 600
-#define LM75_INIT_TEMP_HYST 500
-
 /* Each client has this additional data */
 struct lm75_data {
 	int sysctl_id;
@@ -259,10 +255,6 @@ static int lm75_write_value(struct i2c_client *client, u8 reg, u16 value)
 static void lm75_init_client(struct i2c_client *client)
 {
 	/* Initialize the LM75 chip */
-	lm75_write_value(client, LM75_REG_TEMP_OS,
-			 TEMP_TO_REG(LM75_INIT_TEMP_OS));
-	lm75_write_value(client, LM75_REG_TEMP_HYST,
-			 TEMP_TO_REG(LM75_INIT_TEMP_HYST));
 	lm75_write_value(client, LM75_REG_CONF, 0);
 }
 

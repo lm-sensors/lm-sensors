@@ -86,9 +86,6 @@ SENSORS_INSMOD_1(lm83);
 #define TEMP_FROM_REG(val)  (val > 127 ? val-256 : val)
 #define TEMP_TO_REG(val)    (val < 0 ? val+256 : val)
 
-#define LM83_INIT_HIGH      100
-#define LM83_INIT_CRIT      120
-
 static const u8 LM83_REG_R_TEMP[] = {
 	LM83_REG_R_LOCAL_TEMP,
 	LM83_REG_R_REMOTE1_TEMP,
@@ -378,13 +375,7 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 
 static void lm83_init_client(struct i2c_client *client)
 {
-	int nr;
 
-	for (nr = 0; nr < 4; nr++)
-		i2c_smbus_write_byte_data(client, LM83_REG_W_HIGH[nr],
-	        	TEMP_TO_REG(LM83_INIT_HIGH));
-	i2c_smbus_write_byte_data(client, LM83_REG_W_TCRIT,
-	        TEMP_TO_REG(LM83_INIT_CRIT));
 }
 
 static int lm83_detach_client(struct i2c_client *client)

@@ -113,11 +113,6 @@ SENSORS_INSMOD_2(lm90, adm1032);
                              0x10000 : 0)) & 0xFFE0)
 #define HYST_TO_REG(val)     (val < 0 ? 0 : val > 31 ? 31 : val)
 
-#define LM90_INIT_LOW        5 /* degrees */
-#define LM90_INIT_HIGH      70
-#define LM90_INIT_CRIT      85
-#define LM90_INIT_HYST      10
-
 /*
  * Functions declaration
  */
@@ -416,29 +411,6 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 static void lm90_init_client(struct i2c_client *client)
 {
 	u8 config;
-
-	/*
-	 * Set limits.
-	 */
-
-	i2c_smbus_write_byte_data(client, LM90_REG_W_LOCAL_HIGH,
-		TEMP1_TO_REG(LM90_INIT_HIGH));
-	i2c_smbus_write_byte_data(client, LM90_REG_W_LOCAL_LOW,
-		TEMP1_TO_REG(LM90_INIT_LOW));
-	i2c_smbus_write_byte_data(client, LM90_REG_W_LOCAL_CRIT,
-		TEMP1_TO_REG(LM90_INIT_CRIT));
-	i2c_smbus_write_byte_data(client, LM90_REG_W_REMOTE_HIGHH,
-		TEMP1_TO_REG(LM90_INIT_HIGH));
-	i2c_smbus_write_byte_data(client, LM90_REG_W_REMOTE_HIGHL,
-		0);
-	i2c_smbus_write_byte_data(client, LM90_REG_W_REMOTE_LOWH,
-		TEMP1_TO_REG(LM90_INIT_LOW));
-	i2c_smbus_write_byte_data(client, LM90_REG_W_REMOTE_LOWL,
-		0);
-	i2c_smbus_write_byte_data(client, LM90_REG_W_REMOTE_CRIT,
-		TEMP1_TO_REG(LM90_INIT_CRIT));
-	i2c_smbus_write_byte_data(client, LM90_REG_W_TCRIT_HYST,
-		HYST_TO_REG(LM90_INIT_HYST));
 
 	/*
 	 * Starts the conversions.

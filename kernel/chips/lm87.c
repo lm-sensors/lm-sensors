@@ -196,13 +196,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==1?0:((val)==8?3:((val)==4?2:1)))
 
-#define LM87_INIT_FAN_MIN 3000
-
-#define LM87_INIT_EXT_TEMP_MAX 600
-#define LM87_INIT_EXT_TEMP_MIN 100
-#define LM87_INIT_INT_TEMP_MAX 600
-#define LM87_INIT_INT_TEMP_MIN 100
-
 /* For each registered LM87, we need to keep some data in memory. That
    data is pointed to by LM87_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new LM87 client is
@@ -528,8 +521,6 @@ static int lm87_write_value(struct i2c_client *client, u8 reg, u8 value)
 static void lm87_init_client(struct i2c_client *client)
 {
 	struct lm87_data *data = client->data;
-	int vid;
-	u8 v;
 
 	/* Reset all except Watchdog values and last conversion values
 	   This sets fan-divs to 2, among others. This makes most other
@@ -575,54 +566,7 @@ static void lm87_init_client(struct i2c_client *client)
 #endif
 	);
 
-	/* Set IN (voltage) initial limits to sane values  +/- 5% */
-	lm87_write_value(client, LM87_REG_IN_MIN(0),182);
-	lm87_write_value(client, LM87_REG_IN_MAX(0),202);
-	lm87_write_value(client, LM87_REG_IN_MIN(2),182);
-	lm87_write_value(client, LM87_REG_IN_MAX(2),202);
-	lm87_write_value(client, LM87_REG_IN_MIN(3),182);
-	lm87_write_value(client, LM87_REG_IN_MAX(3),202);
-	lm87_write_value(client, LM87_REG_IN_MIN(4),182);
-	lm87_write_value(client, LM87_REG_IN_MAX(4),202);
-
-	/* Set CPU core voltage limits relative to vid readings +/- 5% */
-	v = (lm87_read_value(client, LM87_REG_VID_FAN_DIV) & 0x0f)
-		    | ((lm87_read_value(client, LM87_REG_VID4) & 0x01)
-                    << 4 );
 	data->vrm = DEFAULT_VRM;
-	vid = vid_from_reg(v, data->vrm);
-
-	v = vid * 95 * 192 / 270000;
-	lm87_write_value(client, LM87_REG_IN_MIN(1), v);
-	lm87_write_value(client, LM87_REG_IN_MIN(5), v);
-	v = vid * 105 * 192 / 270000;
-	lm87_write_value(client, LM87_REG_IN_MAX(1), v);
-	lm87_write_value(client, LM87_REG_IN_MAX(5), v);
-
-	/* Set Temp initial limits to sane values */
-	lm87_write_value(client, LM87_REG_EXT_TEMP_1_HIGH,
-			    TEMP_LIMIT_TO_REG(LM87_INIT_EXT_TEMP_MAX));
-	lm87_write_value(client, LM87_REG_EXT_TEMP_1_LOW,
-			    TEMP_LIMIT_TO_REG(LM87_INIT_EXT_TEMP_MIN));
-#ifdef LM87_EXT2
-	lm87_write_value(client, LM87_REG_2_5V_EXT_TEMP_2_HIGH,
-			    TEMP_LIMIT_TO_REG(LM87_INIT_EXT_TEMP_MAX));
-	lm87_write_value(client, LM87_REG_2_5V_EXT_TEMP_2_LOW,
-			    TEMP_LIMIT_TO_REG(LM87_INIT_EXT_TEMP_MIN));
-#endif
-	lm87_write_value(client, LM87_REG_INT_TEMP_HIGH,
-			    TEMP_LIMIT_TO_REG(LM87_INIT_INT_TEMP_MAX));
-	lm87_write_value(client, LM87_REG_INT_TEMP_LOW,
-			    TEMP_LIMIT_TO_REG(LM87_INIT_INT_TEMP_MIN));
-
-#ifndef LM87_AIN1
-	lm87_write_value(client, LM87_REG_FAN1_AIN1_LIMIT,
-			    FAN_TO_REG(LM87_INIT_FAN_MIN, 2));
-#endif
-#ifndef LM87_AIN2
-	lm87_write_value(client, LM87_REG_FAN2_AIN2_LIMIT,
-			    FAN_TO_REG(LM87_INIT_FAN_MIN, 2));
-#endif
 
 	/* Start monitoring */
 	lm87_write_value(client, LM87_REG_CONFIG, 0x01);
