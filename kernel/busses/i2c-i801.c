@@ -65,6 +65,11 @@
 #define SMBHSTCFG 0x040
 #define SMBREV    0x008
 
+/* Host configuration bits for SMBHSTCFG */
+#define SMBHSTCFG_HST_EN      1
+#define SMBHSTCFG_SMB_SMI_EN  2
+#define SMBHSTCFG_I2C_EN      4
+
 /* Other settings */
 #define MAX_TIMEOUT 500
 #define  ENABLE_INT9 0
@@ -103,7 +108,7 @@ static s32 i801_access(struct i2c_adapter *adap, u16 addr,
 static void i801_do_pause(unsigned int amount);
 static int i801_transaction(void);
 static int i801_block_transaction(union i2c_smbus_data *data,
-				  char read_write);
+				  char read_write, int i2c_enable);
 static void i801_inc(struct i2c_adapter *adapter);
 static void i801_dec(struct i2c_adapter *adapter);
 static u32 i801_func(struct i2c_adapter *adapter);
@@ -117,7 +122,7 @@ static struct i2c_algorithm smbus_algorithm = {
 	/* name */ "Non-I2C SMBus adapter",
 	/* id */ I2C_ALGO_SMBUS,
 	/* master_xfer */ NULL,
-	/* smbus_access */ i801_access,
+	/* smbus_xfer */ i801_access,
 	/* slave_send */ NULL,
 	/* slave_rcv */ NULL,
 	/* algo_control */ NULL,
@@ -137,6 +142,7 @@ static struct i2c_adapter i801_adapter = {
 
 static int __initdata i801_initialized;
 static unsigned short i801_smba = 0;
+static struct pci_dev *I801_dev = NULL;
 
 
 /* Detect whether a I801 can be found, and initialize it, where necessary.
@@ -147,8 +153,6 @@ int i801_setup(void)
 {
 	int error_return = 0;
 	unsigned char temp;
-
-	struct pci_dev *I801_dev;
 
 	/* First check whether we can access PCI at all */
 	if (pci_present() == 0) {
@@ -358,13 +362,28 @@ int i801_transaction(void)
 }
 
 /* All-inclusive block transaction function */
-int i801_block_transaction(union i2c_smbus_data *data, char read_write)
+int i801_block_transaction(union i2c_smbus_data *data, char read_write, 
+                           int i2c_enable)
 {
 	int i, len;
 	int smbcmd;
 	int temp;
 	int result = 0;
 	int timeout = 0;
+        unsigned char hostc, errmask;
+
+        if (i2c_enable) {
+                if (read_write == I2C_SMBUS_WRITE) {
+                        /* set I2C_EN bit in configuration register */
+                        pci_read_config_byte(I801_dev, SMBHSTCFG, &hostc);
+                        pci_write_config_byte(I801_dev, SMBHSTCFG, 
+                                              hostc | SMBHSTCFG_I2C_EN);
+                } else {
+                        printk("i2c-i801.o: "
+                               "I2C_SMBUS_I2C_BLOCK_READ not supported!\n");
+                        return -1;
+                }
+        }
 
 	if (read_write == I2C_SMBUS_WRITE) {
 		len = data->block[0];
@@ -383,51 +402,59 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write)
 			smbcmd = I801_BLOCK_LAST;
 		else
 			smbcmd = I801_BLOCK_DATA;
-		if (read_write == I2C_SMBUS_WRITE)
-			outb_p(data->block[i], SMBBLKDAT);
+
 		outb_p((smbcmd & 0x3C) + (ENABLE_INT9 & 1), SMBHSTCNT);
 
 #ifdef DEBUG
 		printk
 		    ("i2c-i801.o: Transaction (pre): CNT=%02x, CMD=%02x, ADD=%02x, "
-		     "DAT0=%02x, DAT1=%02x\n", inb_p(SMBHSTCNT),
+		     "DAT0=%02x, BLKDAT=%02x\n", inb_p(SMBHSTCNT),
 		     inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
-		     inb_p(SMBHSTDAT1));
+		     inb_p(SMBBLKDAT));
 #endif
 
 		/* Make sure the SMBus host is ready to start transmitting */
-		/* 0x1f = Failed, Bus_Err, Dev_Err, Intr, Host_Busy */
-		/* 0x9e = Byte_Done, Failed, Bus_Err, Dev_Err, Intr */
 		temp = inb_p(SMBHSTSTS);
-		if (((i == 1) && ((temp & 0x1f) != 0x00)) ||
-		    ((i != 1) && ((temp & 0x9e) != 0x00))) {
+                if (i == 1) {
+                    /* Erronenous conditions before transaction: 
+                     * Byte_Done, Failed, Bus_Err, Dev_Err, Intr, Host_Busy */
+                    errmask=0x9f; 
+                } else {
+                    /* Erronenous conditions during transaction: 
+                     * Failed, Bus_Err, Dev_Err, Intr */
+                    errmask=0x1e; 
+                }
+		if (temp & errmask) {
 #ifdef DEBUG
 			printk
 			    ("i2c-i801.o: SMBus busy (%02x). Resetting... \n",
 			     temp);
 #endif
 			outb_p(temp, SMBHSTSTS);
-			if (((temp = inb_p(SMBHSTSTS)) & 0x9f) != 0x00) {
+			if (((temp = inb_p(SMBHSTSTS)) & errmask) != 0x00) {
 				printk
 				    ("i2c-i801.o: Reset failed! (%02x)\n",
 				     temp);
-				return -1;
+				result = -1;
+                                goto END;
 			}
-			if (i != 1)
-				return -1;	/* if die in middle of block transaction, fail */
+			if (i != 1) {
+                                result = -1;  /* if die in middle of block transaction, fail */
+                                goto END;
+                        }
 		}
 
 		/* start the transaction by setting bit 6 */
-		outb_p(inb(SMBHSTCNT) | 0x040, SMBHSTCNT);
+		if (i==1) outb_p(inb(SMBHSTCNT) | 0x040, SMBHSTCNT);
 
 		/* We will always wait for a fraction of a second! */
 		do {
-			i801_do_pause(1);
 			temp = inb_p(SMBHSTSTS);
+			i801_do_pause(1);
 		}
 		    while (
 			   (((i >= len) && (temp & 0x01))
-			    || ((i < len) && (temp & 0x80)))
+			    || ((i < len) && !(temp & 0x80)))
 			   && (timeout++ < MAX_TIMEOUT));
 
 		/* If the SMBus is still busy, we give up */
@@ -455,31 +482,7 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write)
 #ifdef DEBUG
 			printk("i2c-i801.o: Error: no response!\n");
 #endif
-		} else if (temp & 0x80) {
-			result = -1;
-#ifdef DEBUG
-			printk
-			    ("i2c-i801.o: Error: Failed in middle of block!\n");
-#endif
 		}
-
-		if ((temp & 0x9f) != 0x00)
-			outb_p(temp, SMBHSTSTS);
-
-		if ((temp = (0x9f & inb_p(SMBHSTSTS))) != 0x00) {
-#ifdef DEBUG
-			printk
-			    ("i2c-i801.o: Failed reset at end of transaction (%02x)\n",
-			     temp);
-#endif
-		}
-#ifdef DEBUG
-		printk
-		    ("i2c-i801.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
-		     "DAT0=%02x, DAT1=%02x\n", inb_p(SMBHSTCNT),
-		     inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
-		     inb_p(SMBHSTDAT1));
-#endif
 
 		if (i == 1 && read_write == I2C_SMBUS_READ) {
 			len = inb_p(SMBHSTDAT0);
@@ -489,13 +492,42 @@ int i801_block_transaction(union i2c_smbus_data *data, char read_write)
 				len = 32;
 			data->block[0] = len;
 		}
+
+                /* Retrieve/store value in SMBBLKDAT */
 		if (read_write == I2C_SMBUS_READ)
 			data->block[i] = inb_p(SMBBLKDAT);
+		if (read_write == I2C_SMBUS_WRITE && i+1 <= len)
+			outb_p(data->block[i+1], SMBBLKDAT);
+		if ((temp & 0x9e) != 0x00)
+                        outb_p(temp, SMBHSTSTS);  /* signals SMBBLKDAT ready */
 
-		if (result < 0)
-			return (result);
+		temp = inb_p(SMBHSTSTS);
+		if ((temp = (0x1e & inb_p(SMBHSTSTS))) != 0x00) {
+#ifdef DEBUG
+			printk
+			    ("i2c-i801.o: Failed reset at end of transaction (%02x)\n",
+			     temp);
+#endif
+		}
+#ifdef DEBUG
+		printk
+		    ("i2c-i801.o: Transaction (post): CNT=%02x, CMD=%02x, ADD=%02x, "
+		     "DAT0=%02x, BLKDAT=%02x\n", inb_p(SMBHSTCNT),
+		     inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
+		     inb_p(SMBBLKDAT));
+#endif
+
+		if (result < 0) {
+			goto END;
+                }
 	}
-	return (0);
+        result = 0;
+END:
+        if (i2c_enable) {
+                /* restore saved configuration register value */
+		pci_write_config_byte(I801_dev, SMBHSTCFG, hostc);
+        }
+	return result;
 }
 
 /* Return -1 on error. See smbus.h for more information */
@@ -539,13 +571,15 @@ s32 i801_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 		size = I801_WORD_DATA;
 		break;
 	case I2C_SMBUS_BLOCK_DATA:
+	case I2C_SMBUS_I2C_BLOCK_DATA:
 		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
 		       SMBHSTADD);
 		outb_p(command, SMBHSTCMD);
 		/* Block transactions are very different from piix4 block
 		   and from the other i801 transactions. Handle in the
 		   i801_block_transaction() routine. */
-		return (i801_block_transaction(data, read_write));
+		return i801_block_transaction(data, read_write, 
+                                              size==I2C_SMBUS_I2C_BLOCK_DATA);
 	}
 
 	/* 'size' is really the transaction type */
@@ -586,7 +620,7 @@ u32 i801_func(struct i2c_adapter *adapter)
 {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
 	    I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA |
-	    I2C_FUNC_SMBUS_BLOCK_DATA;
+	    I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_WRITE_I2C_BLOCK;
 }
 
 int __init i2c_i801_init(void)
