@@ -1044,6 +1044,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { adm1021_detect 7, @_ },
      },
      {
+       name => "National Semiconductor LM82",
+       driver => "to-be-written",
+       i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
+       i2c_detect => sub { lm83_detect 1, @_ },
+     },
+     {
        name => "National Semiconductor LM83",
        driver => "lm83",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
@@ -1054,6 +1060,18 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "to-be-written",
        i2c_addrs => [0x4c],
        i2c_detect => sub { lm90_detect 0, @_ },
+     },
+     {
+       name => "National Semiconductor LM89",
+       driver => "to-be-written",
+       i2c_addrs => [0x4c],
+       i2c_detect => sub { lm90_detect 1, @_ },
+     },
+     {
+       name => "National Semiconductor LM86",
+       driver => "to-be-written",
+       i2c_addrs => [0x4c],
+       i2c_detect => sub { lm90_detect 2, @_ },
      },
      {
        name => "Analog Devices ADM1022",
@@ -2378,7 +2396,6 @@ sub ds1621_detect
 # $_[1]: Address
 # Returns: undef if not detected, (3) if detected.
 # Registers used:
-# Registers used:
 #   0x02: Interrupt state register
 # How to detect this beast? 
 sub lm80_detect
@@ -2396,29 +2413,38 @@ sub lm80_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = LM83)
+#   (0 = LM83, 1 = LM82)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, 6 or 8 if detected.
+# Returns: undef if not detected, 5 to 8 if detected.
 # Registers used:
+#   0x03: Configuration
 #   0x04: Company ID of LM84
 #   0xfe: Manufacturer ID
+#   0xff: Chip ID / die revision
+# We can use the LM84 Company ID register because the LM83 and the LM82 are
+# compatible with the LM84.
+# We give a lower confidence to the LM83 because it has no known Die Revision
+# so far.
 sub lm83_detect
 {
-  my ($chip, $file,$addr) = @_;
+  my ($chip, $file) = @_;
   return if $chip == 0 and i2c_smbus_read_byte_data($file,0xfe) != 0x01;
-  return 8
+  return if $chip == 1 and i2c_smbus_read_byte_data($file,0xfe) != 0x01
+                        || i2c_smbus_read_byte_data($file,0xff) != 0x01;
+  return if (i2c_smbus_read_byte_data($file,0x03) & 0x41) != 0;
+  return (7 + ($chip != 0))
   	if i2c_smbus_read_byte_data($file,0x04) == 0x00;
-  return 6;
+  return (5 + ($chip != 0));
 }
 
 # $_[0]: Chip to detect
-#   (0 = LM90)
+#   (0 = LM90, 1=LM89, 2=LM86)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, 6, 7 or 8 if detected.
+# Returns: undef if not detected, 7 or 8 if detected.
 # Registers used:
 #   0x03: Configuration
 #   0xfe: Manufacturer ID
@@ -2427,13 +2453,27 @@ sub lm90_detect
 {
   my $reg;
   my ($chip, $file,$addr) = @_;
-  return if $chip == 0 and i2c_smbus_read_byte_data($file,0xfe) != 0x01;
+  return if i2c_smbus_read_byte_data($file,0xfe) != 0x01;
   return if (i2c_smbus_read_byte_data($file,0x03) & 0x2a) != 0;
-  return 8
-  	if ($reg = i2c_smbus_read_byte_data($file,0xff)) == 0x21;
-  return 7
-    if $reg > 0x21 and $reg < 0x30;
-  return 6;
+  if ($chip == 0) {
+    return 8
+  	  if ($reg = i2c_smbus_read_byte_data($file,0xff)) == 0x21;
+    return 7
+      if $reg > 0x21 and $reg < 0x30;
+  }
+  if ($chip == 1) {
+    return 8
+  	  if ($reg = i2c_smbus_read_byte_data($file,0xff)) == 0x31;
+    return 7
+      if $reg > 0x31 and $reg < 0x40;
+  }
+  if ($chip == 2) {
+    return 8
+  	  if ($reg = i2c_smbus_read_byte_data($file,0xff)) == 0x11;
+    return 7
+      if $reg > 0x11 and $reg < 0x20;
+  }
+  return;
 }
 
 # $_[0]: Vendor to check for
