@@ -853,6 +853,8 @@ static void pc87360_init_client(struct i2c_client *client, int use_thermistors)
 
 static void pc87360_autodiv(struct pc87360_data *data, int nr)
 {
+	u8 old_min = data->fan_min[nr];
+
 	/* Increase clock divider if needed and possible */
 	if ((data->fan_status[nr] & 0x04) /* overflow flag */
 	 || (data->fan[nr] >= 224)) { /* next to overflow */
@@ -860,9 +862,6 @@ static void pc87360_autodiv(struct pc87360_data *data, int nr)
 			data->fan_status[nr] += 0x20;
 			data->fan_min[nr] >>= 1;
 			data->fan[nr] >>= 1;
-			pc87360_write_value(data, LD_FAN, NO_BANK,
-					    PC87360_REG_FAN_MIN(nr),
-					    data->fan_min[nr]);
 #ifdef DEBUG
 			printk(KERN_DEBUG "pc87360.o: Increasing "
 			       "clock divider to %d for fan %d\n",
@@ -870,17 +869,14 @@ static void pc87360_autodiv(struct pc87360_data *data, int nr)
 			       nr+1);
 #endif
 		}
-	} else
-	/* Decrease clock divider if needed and possible */
-	if (data->fan[nr] < 85 /* bad accuracy */
-	 && !(data->fan_min[nr] & 0x80)) {
-		if ((data->fan_status[nr] & 0x60) != 0x00) {
+	} else {
+		/* Decrease clock divider if possible */
+		while (!(data->fan_min[nr] & 0x80) /* fan min "nails" divider */
+		 && data->fan[nr] < 85 /* bad accuracy */
+		 && (data->fan_status[nr] & 0x60) != 0x00) {
 			data->fan_status[nr] -= 0x20;
 			data->fan_min[nr] <<= 1;
 			data->fan[nr] <<= 1;
-			pc87360_write_value(data, LD_FAN, NO_BANK,
-					    PC87360_REG_FAN_MIN(nr),
-					    data->fan_min[nr]);
 #ifdef DEBUG
 			printk(KERN_DEBUG "pc87360.o: Decreasing "
 			       "clock divider to %d for fan %d\n",
@@ -888,6 +884,13 @@ static void pc87360_autodiv(struct pc87360_data *data, int nr)
 			       nr+1);
 #endif
 		}
+	}
+
+	/* Write new fan min if it changed */
+	if (old_min != data->fan_min[nr]) {
+		pc87360_write_value(data, LD_FAN, NO_BANK,
+				    PC87360_REG_FAN_MIN(nr),
+				    data->fan_min[nr]);
 	}
 }
 
