@@ -303,6 +303,12 @@ help:
 	@echo '  package: create a distribution package'
 	@echo 'Note: make dep is automatic'
 
+$(LINUX)/.config:
+	@echo "Error - missing file $(LINUX)/.config !! "
+	@echo "  Verify kernel source is in $(LINUX) and then"
+	@echo "  cd to $(LINUX) and run 'make config' !!"
+	@exit 1
+
 # Here, we define all implicit rules we want to use.
 
 .SUFFIXES:
@@ -311,7 +317,8 @@ help:
 # dir/file.c in front of the dependency file rule.
 
 # .o files are used for modules
-%.o: %.c
+# depend on the kernel config file!
+%.o: %.c $(LINUX)/.config
 	$(CC) $(MODCPPFLAGS) $(MODCFLAGS) -c $< -o $@
 
 %.d: %.c

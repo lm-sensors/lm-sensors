@@ -21,7 +21,8 @@ ask CVS about it:
   Library: Fix bmcsensors scaling, increase number of sensors;
            Add w83627thf support; Advance version to 2.0.2;
            Add hermes, ADM1032, ASB100 support
-  Makefiles: Install fancontrol, pwmconfig, decode-*.pl
+  Makefiles: Install fancontrol, pwmconfig, decode-*.pl;
+             Fail if no kernel .config file exists
   Module asb100: New
   Module bmcsensors: Fix voltage scaling, voltage and fan limits
   Module fscher: New (Fujitsu-Siemens Hermes driver)
