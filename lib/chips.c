@@ -5349,6 +5349,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_LM99_PREFIX, lm90_features },
  { SENSORS_LM86_PREFIX, lm90_features },
  { SENSORS_MAX6657_PREFIX, lm90_features },
+ { SENSORS_ADT7461_PREFIX, lm90_features },
  { SENSORS_LM63_PREFIX, lm63_features },
  { SENSORS_MAX1619_PREFIX, max1619_features },
  { SENSORS_XEONTEMP_PREFIX, xeontemp_features },
