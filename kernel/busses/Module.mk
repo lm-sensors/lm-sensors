@@ -23,27 +23,43 @@ KERNELBUSSESDIR := $(MODULE_DIR)
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-KERNELBUSSESTARGETS := $(MODULE_DIR)/i2c-i801.o \
-                       $(MODULE_DIR)/i2c-viapro.o \
-                       $(MODULE_DIR)/i2c-voodoo3.o \
-                       $(MODULE_DIR)/i2c-amd756.o \
-                       $(MODULE_DIR)/i2c-i810.o \
-                       $(MODULE_DIR)/i2c-ali1535.o \
-                       $(MODULE_DIR)/i2c-sis5595.o
+# These targets are NOT included in 'mkpatch' ...
+KERNELBUSSESTARGETS :=  \
+                       $(MODULE_DIR)/i2c-ali1535.o
+
+# These targets ARE included in 'mkpatch' ...
 ifneq ($(shell if grep -q '^CONFIG_I2C_ALI15X3=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ali15x3.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_AMD756=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-amd756.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_HYDRA=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-hydra.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_I801=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-i801.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_I810=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-i810.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_ISA=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-isa.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_SIS5595=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-sis5595.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_PIIX4=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-piix4.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_VIA=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-via.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_VIAPRO=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-viapro.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_VOODOO=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-voodoo3.o
 endif
 
 # Include all dependency files
