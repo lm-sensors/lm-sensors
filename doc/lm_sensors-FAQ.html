@@ -166,6 +166,9 @@ and<br>
 </li></ul>
 <li><a href="#Section-4_002e32">4.32 Problems on particular systems</a>
 <li><a href="#Section-4_002e33">4.33 Problems on 2.6 kernels</a>
+<ul>
+<li><a href="#Section-4_002e33">4.33.1 i2c-viapro and via686a</a>
+</li></ul>
 </li></ul>
 <li><a name="toc_Help" href="#Help">5 How to Ask for Help</a>
 <ul>
@@ -1750,6 +1753,14 @@ Please don't bother asking us why it is not in 2.6.
 If you would like to port the driver, see the file
 Documentation/i2c/porting-clients in the 2.6 kernel tree for help,
 then send us the ported driver when you are done.
+
+<h4 class="subsection">4.33.1 i2c-viapro and via686a</h4>
+
+<p>Until kernel 2.6.11, there was a PCI resource conflict between
+i2c-viapro (the SMBus driver for VIA bridges) and via686a (the integrated
+sensors driver for VIA bridges). This caused the second loaded driver to
+silently fail working. So do not load both i2c-viapro and via686a together
+unless you have a recent kernel.
 
 <div class="node">
 <p><hr>

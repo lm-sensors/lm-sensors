@@ -108,6 +108,7 @@ lm_sensors
     4.31.4 Tyan 2688
   4.32 Problems on particular systems
   4.33 Problems on 2.6 kernels
+    4.33.1 i2c-viapro and via686a
 5 How to Ask for Help
   5.1 What to send us when asking for help
   5.2 What to do if a module won't insert?
@@ -1239,6 +1240,15 @@ in 2.6, the reason is that nobody has ported it.  Please don't bother
 asking us why it is not in 2.6.  If you would like to port the driver,
 see the file Documentation/i2c/porting-clients in the 2.6 kernel tree
 for help, then send us the ported driver when you are done.
+
+4.33.1 i2c-viapro and via686a
+-----------------------------
+
+Until kernel 2.6.11, there was a PCI resource conflict between
+i2c-viapro (the SMBus driver for VIA bridges) and via686a (the
+integrated sensors driver for VIA bridges). This caused the second
+loaded driver to silently fail working. So do not load both i2c-viapro
+and via686a together unless you have a recent kernel.
 
 5 How to Ask for Help
 *********************
