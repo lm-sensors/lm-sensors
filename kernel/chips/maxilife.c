@@ -35,7 +35,7 @@
    maxi_version=0 is the default
 */
 
-static const char *version = "1.00 25/2/99 Fons Rademakers";
+static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 
 
 #include <linux/module.h>
@@ -53,7 +53,7 @@ static const char *version = "1.00 25/2/99 Fons Rademakers";
 #include "compat.h"
 
 
-/*#define AUTODETECT          /* try to autodetect MaxiLife version */
+#undef AUTODETECT          /* try to autodetect MaxiLife version */
 #define NOWRITE             /* don't allow writing to MaxiLife registers */
 
 
@@ -169,7 +169,9 @@ static void maxi_inc_use (struct i2c_client *client);
 static void maxi_dec_use (struct i2c_client *client);
 
 static int  maxi_read_value(struct i2c_client *client, u8 register);
+#ifndef NOWRITE
 static int  maxi_write_value(struct i2c_client *client, u8 register, u8 value);
+#endif
 static void maxi_update_client(struct i2c_client *client);
 static void maxi_init_client(struct i2c_client *client);
 
@@ -269,7 +271,9 @@ int maxi_detach_client(struct i2c_client *client)
 
 int maxi_detect_smbus(struct i2c_adapter *adapter)
 {
+#ifdef AUTODETECT
    u8  biosctl;
+#endif
    int address, err;
    struct i2c_client *new_client;
    enum maxi_type type;
@@ -455,11 +459,13 @@ int maxi_read_value(struct i2c_client *client, u8 reg)
    return smbus_read_byte_data(client->adapter, client->addr, reg);
 }
 
+#ifndef NOWRITE
 /* Write byte to specified register. */ 
 int maxi_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
    return smbus_write_byte_data(client->adapter, client->addr, reg, value);
 }
+#endif
 
 /* Called when we have found a new MaxiLife. It should set limits, etc. */
 void maxi_init_client(struct i2c_client *client)
@@ -709,7 +715,7 @@ int maxi_init(void)
 {
    int res;
 
-   printk("maxilife: Version %s (lm_sensors %s (%s))\n", version,
+   printk("maxilife: Version %s (lm_sensors %s (%s))\n", version_str,
           LM_VERSION, LM_DATE);
    maxi_initialized = 0;
 
