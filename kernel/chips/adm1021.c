@@ -434,10 +434,8 @@ int adm1021_rd_good(u8 *val, struct i2c_client *client, u8 reg)
 	i = i2c_smbus_read_byte_data(client, reg);
 	if(i < 0)
 		return i;
-	else {
-		*val = i;
-		return 0;
-	}
+	*val = i;
+	return 0;
 }
 
 int adm1021_write_value(struct i2c_client *client, u8 reg, u16 value)
