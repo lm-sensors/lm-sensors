@@ -498,13 +498,19 @@ chip "lm80-*"
     set in6_min -5 * 1.05
     set in6_max -5 * 0.95
 
-# examples for temperature limits
-#    set temp1_over 40	
-#    set temp1_hyst 37	
-#    set temp2_over 52	
-#    set temp2_hyst 47	
-#    set temp3_over 52	
-#    set temp3_hyst 47	
+# examples for lm80 temperature limits
+# WARNING - nonstandard names and functions for the lm80!!!
+# All 4 of these limits apply to the single temperature sensor.
+# "hot" is like the standard alarm for most chips.
+# "os" is the threshold for the overtemperature shutdown output.
+# "os" may or may not do anything on your motherboard but it should
+#  be set higher than the "hot" thresholds.
+# Note that the /proc file 'temp" also has five entries instead of
+# the usual three.
+#    set temp_hot_hyst 45
+#    set temp_hot_max  52	
+#    set temp_os_hyst  57	
+#    set temp_os_max   62	
 
 chip "maxilife-cg-*" "maxilife-co-*" "maxilife-as-*"
 
