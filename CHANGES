@@ -20,6 +20,7 @@ ask CVS about it:
 2.6.3 (2001????)
   Library: Add PCF8591 support
   Module pcf8591: new
+  Program i2cdump: Add i2c block read capability
   Program sensors: Add PCF8591 support
   Program sensors-detect: Add several Nvidia chips, add PCF8591
 

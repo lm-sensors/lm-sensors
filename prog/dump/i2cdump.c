@@ -26,6 +26,18 @@
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
 
+/*
+   We don't use this #define but it was put into i2c.h at the same time as
+   i2c_smbus_read_i2c_block_data() was implemented (i2c 2.6.3),
+   so we use it as a version check.
+*/
+#if defined(I2C_FUNC_SMBUS_READ_I2C_BLOCK_2)
+#define USE_I2C_BLOCK 1
+#else
+#define USE_I2C_BLOCK 0
+#endif
+
+
 void help(void)
 {
   FILE *fptr;
@@ -256,13 +268,14 @@ int main(int argc, char *argv[])
       if(size == I2C_SMBUS_BLOCK_DATA) {
         res = i2c_smbus_read_block_data(file,0,cblock);
       } else if(size == I2C_SMBUS_I2C_BLOCK_DATA) {
-/*
+#if USE_I2C_BLOCK
         res = i2c_smbus_read_i2c_block_data(file,0,cblock);
-*/
+#else
         fprintf(stderr, "Error: I2C block read unimplemented\n");
         exit(1);
+#endif
       }
-      if(res < 0) {
+      if(res <= 0) {
         fprintf(stderr, "Error: Block read failed, return code %d\n", res);
         exit(1);
       }
