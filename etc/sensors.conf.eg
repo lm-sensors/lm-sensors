@@ -1421,6 +1421,12 @@ chip "it87-*" "it8705-*" "it8712-*"
 #   label temp2       "M/B Temp"
 #   compute temp1     (-15.096+1.4893*@), (@+15.096)/1.4893
 
+# The A7V600 also has temperatures inverted, and needs a different
+# conversion for CPU temp. Thanks to Dariusz Jaszkowski for the formula.
+#   label temp1       "CPU Temp"
+#   label temp2       "M/B Temp"
+#   compute temp1     (@+128)/3, (3*@-128)
+
 # Fans
     set fan1_min 0
     set fan2_min 3000
