@@ -214,7 +214,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        func   => 0,
        procid => "3Dfx Voodoo3",
        driver => "i2c-voodoo3",
-       match  => sub { $_[0] =~ /Voodoo3 adapter at/ },
+       match  => sub { $_[0] =~ /Banshee adapter/ },
      },
      {
        vendid => 0x121a,
@@ -222,7 +222,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        func   => 0,
        procid => "3Dfx Voodoo Banshee",
        driver => "i2c-voodoo3",
-       match  => sub { $_[0] =~ /Voodoo3 adapter at/ },
+       match  => sub { $_[0] =~ /Banshee adapter/ },
      },
 );
 
@@ -452,7 +452,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      },
      {
        name => "DDC monitor",
-       driver => "ddc-none-available-yet",
+       driver => "ddcmon",
        i2c_addrs => [0x50],
        i2c_detect => sub { ddcmonitor_detect @_ },
      },
@@ -1705,13 +1705,13 @@ sub ltc1710_detect
 #   0x00..0x07: DDC signature
 #   0x08..0x7E: checksumed area
 #   0x7F:       checksum
-# I hope my changes do not break anything...
+### commented out additional location checks for now - don't work?
 sub ddcmonitor_detect
 {
   my ($file,$addr) = @_;
   my $i;
-  for ($i = 0; $i < 8; $i ++) {
-    i2c_set_slave_addr \*FILE,$addr+$i or goto FAILURE;
+###  for ($i = 0; $i < 8; $i ++) {
+###    i2c_set_slave_addr \*FILE,$addr+$i or goto FAILURE;
     i2c_smbus_read_byte_data($file,0x00) == 0x00 or goto FAILURE;
     i2c_smbus_read_byte_data($file,0x01) == 0xFF or goto FAILURE;
     i2c_smbus_read_byte_data($file,0x02) == 0xFF or goto FAILURE;
@@ -1720,8 +1720,8 @@ sub ddcmonitor_detect
     i2c_smbus_read_byte_data($file,0x05) == 0xFF or goto FAILURE;
     i2c_smbus_read_byte_data($file,0x06) == 0xFF or goto FAILURE;
     i2c_smbus_read_byte_data($file,0x07) == 0x00 or goto FAILURE;
-  }
-  i2c_set_slave_addr \*FILE,$addr or return;
+###  }
+###  i2c_set_slave_addr \*FILE,$addr or return;
   # Check the checksum for validity. We should do this for all addresses,
   # but it would be too slow.
   my $checksum = 0;
