@@ -396,3 +396,135 @@ void print_unknown_chip(const sensors_chip_name *name)
   }
 }
 
+void print_lm80(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur,min,max,min2,max2,fdiv;
+  int alarms;
+
+  if (!sensors_get_feature(*name,SENSORS_LM80_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  if (!sensors_get_label(*name,SENSORS_LM80_IN0,&label) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN0,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN0_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN0_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&LM80_ALARM_IN0?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN0 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_LM80_IN1,&label) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN1_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN1_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&LM80_ALARM_IN1?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_LM80_IN2,&label) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN2_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN2_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&LM80_ALARM_IN2?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN2 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_LM80_IN3,&label) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN3_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN3_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&LM80_ALARM_IN3?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN3 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_LM80_IN4,&label) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN4,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN4_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN4_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&LM80_ALARM_IN4?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN4 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_LM80_IN5,&label) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN5,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN5_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN5_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&LM80_ALARM_IN5?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN5 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_LM80_IN6,&label) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN6,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN6_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM80_IN6_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&LM80_ALARM_IN6?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN6 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_LM80_FAN1,&label) &&
+      !sensors_get_feature(*name,SENSORS_LM80_FAN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM80_FAN1_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_LM80_FAN1_MIN,&min)) {
+    print_label(label,10);
+    printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+           cur,min,fdiv, alarms&LM80_ALARM_FAN1?"ALARM":"");
+  } else
+    printf("ERROR: Can't get FAN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_LM80_FAN2,&label) &&
+      !sensors_get_feature(*name,SENSORS_LM80_FAN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM80_FAN2_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_LM80_FAN2_MIN,&min)) {
+    print_label(label,10);
+    printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+           cur,min,fdiv, alarms&LM80_ALARM_FAN2?"ALARM":"");
+  } else
+    printf("ERROR: Can't get FAN2 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_LM80_TEMP,&label) &&
+      !sensors_get_feature(*name,SENSORS_LM80_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM80_TEMP_HOT_HYST,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM80_TEMP_HOT_MAX,&max) &&
+      !sensors_get_feature(*name,SENSORS_LM80_TEMP_OS_HYST,&min2) &&
+      !sensors_get_feature(*name,SENSORS_LM80_TEMP_OS_MAX,&max2)) {
+    print_label(label,10);
+    printf("%+3.0f C (hot:limit = %+3.0f C,  hysteris = %+3.0f C) %s\n",
+           cur,max,min, alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
+    printf("         (os: limit = %+3.0f C,  hysteris = %+3.0f C) %s\n",
+           max2,min2, alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
+  } else
+    printf("ERROR: Can't get TEMP data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_LM80_ALARMS,&label)) {
+    if (alarms & LM80_ALARM_BTI) {
+      print_label(label,10);
+      printf("Board temperature input (a LM75 perhaps?)    ALARM\n");
+    }
+    if (alarms & LM80_ALARM_CHAS) {
+      print_label(label,10);
+      printf("Chassis intrusion detection                  ALARM\n");
+    }
+  }
+  free_the_label(&label);
+}
