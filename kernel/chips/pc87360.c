@@ -43,11 +43,32 @@ static unsigned short normal_i2c[] = { SENSORS_I2C_END };
 static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
 static unsigned int normal_isa[] = { 0x0000, SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
+static struct i2c_force_data forces[] = {{NULL}};
 static u8 devid;
 static unsigned int extra_isa[] = { 0x0000, 0x0000, 0x0000 };
 static u16 fanconf[2];
 
-SENSORS_INSMOD_5(pc87360, pc87363, pc87364, pc87365, pc87366);
+enum chips { any_chip, pc87360, pc87363, pc87364, pc87365, pc87366 };
+static struct i2c_address_data addr_data = {
+	.normal_i2c		= normal_i2c,
+	.normal_i2c_range	= normal_i2c_range,
+	.normal_isa		= normal_isa,
+	.normal_isa_range	= normal_isa_range,
+	.probe			= normal_i2c,		/* cheat */
+	.probe_range		= normal_i2c_range,	/* cheat */
+	.ignore			= normal_i2c,		/* cheat */
+	.ignore_range		= normal_i2c_range,	/* cheat */
+	.forces			= forces,
+};
+
+static int init = 1;
+MODULE_PARM(init, "i");
+MODULE_PARM_DESC(init,
+	"Chip initialization level:\n"
+	" 0: None\n"
+	"*1: Forcibly enable internal voltage and temperature channels, except in9\n"
+	" 2: Forcibly enable all voltage and temperature channels, except in9\n"
+	" 3: Forcibly enable all voltage and temperature channels, including in9");
 
 /*
  * Super-I/O registers and operations
@@ -107,7 +128,7 @@ static inline void superio_exit(void)
 #define PC87360_REG_FAN(nr)		(0x07 + 3 * (nr))
 #define PC87360_REG_FAN_STATUS(nr)	(0x08 + 3 * (nr))
 
-#define FAN_FROM_REG(val,div)		((val)==0?-1:(val)==255?0: \
+#define FAN_FROM_REG(val,div)		((val)==0?0: \
 					 480000/((val)*(div)))
 #define FAN_TO_REG(val,div)		((val)<=0?255: \
 					 480000/((val)*(div)))
@@ -120,9 +141,17 @@ static inline void superio_exit(void)
 #define FAN_CONFIG_CONTROL(val,nr)	(((val) >> (3 + nr * 3)) & 1)
 #define FAN_CONFIG_INVERT(val,nr)	(((val) >> (4 + nr * 3)) & 1)
 
-#define PWM_FROM_REG(val)		(val)
-#define PWM_TO_REG(val)			((val) < 0 ? 0 : \
-					 (val) > 255 ? 255 : (val))
+#define PWM_FROM_REG(val,inv)		((inv) ? 255 - (val) : (val))
+static inline u8 PWM_TO_REG(int val, int inv)
+{
+	if (inv)
+		val = 255 - val;
+	if (val < 0)
+		return 0;
+	if (val > 255)
+		return 255;
+	return val;
+}
 
 /*
  * Voltage registers and conversions
@@ -573,7 +602,8 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 #endif
 	}
 
-	pc87360_init_client(new_client);
+	if (init >= 0)
+		pc87360_init_client(new_client);
 
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 				    type_name, template)) < 0) {
@@ -649,57 +679,43 @@ static void pc87360_write_value(struct pc87360_data *data, u8 ldi, u8 bank,
 static void pc87360_init_client(struct i2c_client *client)
 {
 	struct pc87360_data *data = client->data;
+	int i;
+	const u8 init_in[11] = { 2, 2, 2, 2, 2, 2, 2, 1, 1, 3, 1 };
+	const u8 init_temp[3] = { 2, 2, 1 };
 	u8 reg;
 
-	if (data->innr >= 10) {
-		/* Forcibly enable in7 (Vsb) */
-		reg = pc87360_read_value(data, LD_IN, 7,
-					 PC87365_REG_IN_STATUS);
-		if (!(reg & 0x01)) {
+	for (i=0; i<data->innr; i++) {
+		if (init >= init_in[i]) {
+			/* Forcibly enable voltage channel */
+			reg = pc87360_read_value(data, LD_IN, i,
+						 PC87365_REG_IN_STATUS);
+			if (!(reg & 0x01)) {
 #ifdef DEBUG
-			printk(KERN_DEBUG "pc87360.o: Forcibly enabling "
-			       "in7 (Vsb)\n");
+				printk(KERN_DEBUG "pc87360.o: Forcibly "
+				       "enabling in%d\n", i);
 #endif
-			pc87360_write_value(data, LD_IN, 7,
-					    PC87365_REG_IN_STATUS,
-					    (reg & 0x68) | 0x87);
-		}
-		/* Forcibly enable in8 (Vdd) */
-		reg = pc87360_read_value(data, LD_IN, 8,
-					 PC87365_REG_IN_STATUS);
-		if (!(reg & 0x01)) {
-			pc87360_write_value(data, LD_IN, 8,
-					    PC87365_REG_IN_STATUS,
-					    (reg & 0x68) | 0x87);
-#ifdef DEBUG
-			printk(KERN_DEBUG "pc87360.o: Forcibly enabling "
-			       "in8 (Vdd)\n");
-#endif
-		}
-		/* Forcibly enable in10 (AVdd) */
-		reg = pc87360_read_value(data, LD_IN, 10,
-					 PC87365_REG_IN_STATUS);
-		if (!(reg & 0x01)) {
-			pc87360_write_value(data, LD_IN, 10,
-					    PC87365_REG_IN_STATUS,
-					    (reg & 0x68) | 0x87);
-#ifdef DEBUG
-			printk(KERN_DEBUG "pc87360.o: Forcibly enabling "
-			       "in10 (AVdd)\n");
-#endif
+				pc87360_write_value(data, LD_IN, i,
+						    PC87365_REG_IN_STATUS,
+						    (reg & 0x68) | 0x87);
+			}
+
 		}
 	}
-	if (data->tempnr >= 3) {
-		/* Forcibly enable temp3 (PC87366 temperature) */
-		reg = pc87360_read_value(data, LD_TEMP, 2,
-					 PC87365_REG_TEMP_STATUS);
-		if (!(reg & 0x01)) {
-			pc87360_write_value(data, LD_TEMP, 2,
-					    PC87365_REG_TEMP_STATUS, 0xCF);
+
+	for (i=0; i<data->tempnr; i++) {
+		if (init >= init_temp[i]) {
+			/* Forcibly enable temperature channel */
+			reg = pc87360_read_value(data, LD_TEMP, i,
+						 PC87365_REG_TEMP_STATUS);
+			if (!(reg & 0x01)) {
 #ifdef DEBUG
-			printk(KERN_DEBUG "pc87360.o: Forcibly enabling "
-			       "temp3 (PC87366 temperature)\n");
+				printk(KERN_DEBUG "pc87360.o: Forcibly "
+				       "enabling temp%d\n", i+1);
 #endif
+				pc87360_write_value(data, LD_TEMP, i,
+						    PC87365_REG_TEMP_STATUS,
+						    0xCF);
+			}
 		}
 	}
 }
@@ -892,7 +908,8 @@ void pc87360_pwm(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		pc87360_update_client(client);
-		results[0] = PWM_FROM_REG(data->pwm[nr]);
+		results[0] = PWM_FROM_REG(data->pwm[nr],
+			     FAN_CONFIG_INVERT(data->fan_conf[0], nr));
 		results[1] = FAN_CONFIG_CONTROL(data->fan_conf[0], nr);
 		*nrels_mag = 2;
 	}
@@ -905,7 +922,8 @@ void pc87360_pwm(struct i2c_client *client, int operation, int ctl_name,
 			printk(KERN_DEBUG "pc87360.o: Wanted PWM%u value: %ld\n",
 			       nr+1, results[0]);
 #endif
-			data->pwm[nr] = PWM_TO_REG(results[0]);
+			data->pwm[nr] = PWM_TO_REG(results[0],
+					FAN_CONFIG_INVERT(data->fan_conf[0], nr));
 #ifdef DEBUG
 			printk(KERN_DEBUG "pc87360.o: Writing %u to register %u\n",
 			       data->pwm[nr], PC87360_REG_PWM(nr));
