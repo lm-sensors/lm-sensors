@@ -25,55 +25,7 @@
 #error Your i2c is too old - i2c-2.7.0 or greater required!
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)
-#include <linux/kcomp.h>
-#define MAX_PCI_DEVS	8
-static struct pci_dev *amd8111_devs[MAX_PCI_DEVS] = { NULL, /* ... */ };
-static void *amd8111_drvdata[MAX_PCI_DEVS];
-static int amd8111_devcnt = 0;
-
-#define min_t(t, x, y)	(((x)<(y))?(x):(y))
-#define __devinit
-#define __devexit
-#define __devinitdata
-#define __devexit_p(x)	x
-struct pci_device_id {
-        unsigned int vendor, device;
-        unsigned int subvendor, subdevice;
-        unsigned int class, class_mask;
-        unsigned long driver_data;
-};
-struct pci_driver {
-        struct list_head node;
-        char *name;
-        const struct pci_device_id *id_table;
-        int (*probe)(struct pci_dev *dev, const struct pci_device_id *id);
-        void (*remove)(struct pci_dev *dev);
-};
-#define PCI_ANY_ID	0xffff
-
-static void *pci_get_drvdata(struct pci_dev *dev)
-{
-        int i;
-        for (i = 0; i < amd8111_devcnt; i++)
-                if (amd8111_devs[i] == dev)
-                        return amd8111_drvdata[i];
-        return NULL;
-}
-
-static void pci_set_drvdata(struct pci_dev *dev, void *driver_data)
-{
-        int i;
-        for (i = 0; i < amd8111_devcnt; i++)
-                if (amd8111_devs[i] == dev)
-                        amd8111_drvdata[i] = driver_data;
-}
-
-#endif
-
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 MODULE_AUTHOR ("Vojtech Pavlik <vojtech@suse.cz>");
 MODULE_DESCRIPTION("AMD8111 SMBus 2.0 driver");
 
@@ -400,7 +352,7 @@ static int __devinit amd8111_probe(struct pci_dev *dev, const struct pci_device_
 	if (~pci_resource_flags(dev, 0) & IORESOURCE_IO)
 		return -1;
 
-	if (!(smbus = kmalloc(sizeof(struct amd_smbus), GFP_KERNEL)))
+	if (!(smbus = (void*)kmalloc(sizeof(struct amd_smbus), GFP_KERNEL)))
 		return -1;
 	memset(smbus, 0, sizeof(struct amd_smbus));
 
@@ -409,18 +361,10 @@ static int __devinit amd8111_probe(struct pci_dev *dev, const struct pci_device_
 	smbus->base = pci_resource_start(dev, 0);
 	smbus->size = pci_resource_len(dev, 0);
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,3,14)
 	if (!request_region(smbus->base, smbus->size, "amd8111 SMBus 2.0")) {
 		kfree(smbus);
 		return -1;
 	}
-#else
-	if (check_region(smbus->base, smbus->size) < 0) {
-		kfree(smbus);
-		return -1;
-	}
-	request_region(smbus->base, smbus->size, "amd8111 SMBus 2.0");
-#endif
 
 	sprintf(smbus->adapter.name, "SMBus2 AMD8111 adapter at %04x", smbus->base);
 	smbus->adapter.id = I2C_ALGO_SMBUS | I2C_HW_SMBUS_AMD8111;
@@ -438,17 +382,13 @@ static int __devinit amd8111_probe(struct pci_dev *dev, const struct pci_device_
 
 	pci_write_config_dword(smbus->dev, AMD_PCI_MISC, 0);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)
 	printk(KERN_INFO "i2c-amd8111.c: AMD8111 SMBus 2.0 adapter at %#x\n", smbus->base);
-#else
-	printk(KERN_INFO "i2c-amd8111.c: AMD8111 SMBus 2.0 adapter at pci%s\n", dev->slot_name);
-#endif
 	return 0;
 }
 
 static void __devexit amd8111_remove(struct pci_dev *dev)
 {
-	struct amd_smbus *smbus = pci_get_drvdata(dev);
+	struct amd_smbus *smbus = (void*) pci_get_drvdata(dev);
 	if (i2c_del_adapter(&smbus->adapter)) {
 		printk(KERN_WARNING "i2c-amd8111.c: Failed to unregister adapter.\n");
 		return;
@@ -461,37 +401,6 @@ static struct pci_device_id amd8111_id_table[] __devinitdata =
 {{ 0x1022, 0x746a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
  { 0 }};
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)
-
-int i2c_amd8111_init(void)
-{
-	struct pci_dev *pci;
-	struct pci_device_id *id;
-	int found = 0;
-
-	for (id = amd8111_id_table; id->vendor; id++) {
-		pci = NULL;
-		while ((pci = pci_find_device(id->vendor, id->device, pci)))
-			if (amd8111_devcnt < 8 && !amd8111_probe(pci, id))
-				amd8111_devs[amd8111_devcnt++] = pci;
-	}
-
-	return found ? 0 : -ENODEV;
-}
-
-int __init amd8111_init(void)
-{
-        return i2c_amd8111_init();
-}
-
-void __exit amd8111_exit(void)
-{
-	int i;
-	for (i = 0; i < amd8111_devcnt; i++)
-		amd8111_remove(amd8111_devs[i]);
-}
-
-#else
 
 static struct pci_driver amd8111_driver = {
 	.name = "amd8111 smbus 2.0",
@@ -502,6 +411,7 @@ static struct pci_driver amd8111_driver = {
 
 int __init amd8111_init(void)
 {
+	printk(KERN_INFO "i2c-amd8111.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	return pci_module_init(&amd8111_driver);
 }
 
@@ -510,11 +420,5 @@ void __exit amd8111_exit(void)
 	pci_unregister_driver(&amd8111_driver);
 }
 
-
-MODULE_DEVICE_TABLE(pci, amd8111_id_table);
-
-#endif
-
 module_init(amd8111_init);
 module_exit(amd8111_exit);
-
