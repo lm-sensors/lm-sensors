@@ -690,6 +690,14 @@ non-standard way. You can use the configuration file to describe how this
 measurement should be interpreted; see the comments the example file for
 more information.
 
+@anchor{-5V and -12V readings are way out of range!}
+@subsection -5V and -12V readings are way out of range!
+
+It's very frequent that negative voltage lines are not wired because
+motherboard manufacturers don't think they're worth monitoring
+(they are mostly unused these days). You can just add
+@command{ignore inN} lines to @file{/etc/sensors.conf} to hide them.
+
 
 @node Section 4.7, Section 4.8, Section 4.6, Problems
 @section What are VID lines? Why is the VID reading wrong?
@@ -701,6 +709,12 @@ A reading of 0V, +3.5V or +2.05V is especially suspect.
 If this is the case, add a line @command{ignore vid} to @file{/etc/sensors.conf},
 and change the min and max settings for the Processor Core voltage
 (often in0_min and in0_max) in that file so that they don't depend on vid.
+
+The CPU nominal voltage is computed from VID lines according to a formula
+that depends on the CPU type. Most chips that report a VID value can be
+configured to use either VRM 8.2 (for Pentium III) or VRM 9.0 (for Pentium 4
+and Athlon). You chose which one you want through @file{/etc/sensors.conf}.
+See @file{doc/vid} for more information.
 
 
 @node Section 4.8, Section 4.9, Section 4.7, Problems
