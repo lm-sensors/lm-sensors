@@ -26,7 +26,7 @@
     Chip	#vin	#fanin	#pwm	#temp	wchipid	vendid	i2c	ISA
     as99127f	9	3	2-4	3	0x20	0x12c3	yes	no
     w83781d	7	3	0	3	0x10	0x5ca3	yes	yes
-    w83627hf	9	3	2-4	3	0x20	0x5ca3	yes	yes (LPC)
+    w83627hf	9	3	2-4	3	0x20	0x5ca3	yes	yes(LPC)
     w83782d	9	3	2-4	3	0x30	0x5ca3	yes	yes
     w83783s	5-6	3	2	1-2	0x40	0x5ca3	yes	no
 
@@ -173,7 +173,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define TEMP_ADD_FROM_REG(val) (((val) >> 7) * 5)
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
-                           (val)>=0x06?0:205-(val)*5)
+                           205-(val)*5)
 #define ALARMS_FROM_REG(val) (val)
 #define PWM_FROM_REG(val) (val)
 #define PWM_TO_REG(val) (SENSORS_LIMIT((val),0,255))
@@ -964,8 +964,13 @@ void w83781d_init_client(struct i2c_client *client)
 
   /* Reset all except Watchdog values and last conversion values
      This sets fan-divs to 2, among others */
-  /* Disable beeps (reset turns them on) */
   w83781d_write_value(client,W83781D_REG_CONFIG,0x80);
+  /* Disable power-on abnormal beep. BIOS should have already turned off but
+     not all do. Reset value is 0x15, write a 0x95. */
+  w83781d_write_value(client,W83781D_REG_BEEP_CONFIG, 0x95);
+  /* Disable master beep-enable (reset turns it on).
+     Individual beeps should be reset to off but for some reason
+     disabling this bit helps some people not get beeped */
   w83781d_write_value(client,W83781D_REG_BEEP_INTS2,0);
 
   vid = w83781d_read_value(client,W83781D_REG_VID_FANDIV) & 0x0f;

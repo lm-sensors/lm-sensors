@@ -169,7 +169,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define DIV_TO_REG(val) ((val)==1?0:((val)==8?3:((val)==4?2:1)))
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
-                           (val)>=0x06?0:205-(val)*5)
+                           205-(val)*5)
 
 /* Initial limits */
 #define ADM9240_INIT_IN_0 190

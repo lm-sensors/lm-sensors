@@ -102,7 +102,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
-                           (val)>=0x06?0:205-(val)*5)
+                           205-(val)*5)
 #define ALARMS_FROM_REG(val) (val)
 
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)

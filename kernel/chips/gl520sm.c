@@ -118,7 +118,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define BEEPS_FROM_REG(val) (val)
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
-                           (val)>=0x06?0:205-(val)*5)
+                           205-(val)*5)
 
 /* Initial values */
 #define GL520_INIT_TEMP_OVER 600
