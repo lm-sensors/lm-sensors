@@ -2563,8 +2563,8 @@ sub lm87_detect
 # Note: Fails if the W8378xD is not in bank 0!
 # Note: Detection overrules a previous LM78 detection
 # Note: Asus chips do not have their I2C address at register 0x48?
-#       AS99127F rev.1 has 0x00, confirmation wanted for rev.2 and
-#       ASB100.
+#       AS99127F rev.1 and ASB100 have 0x00, confirmation wanted for
+#       AS99127F rev.2.
 sub w83781d_detect
 {
   my ($reg1,$reg2,@res);
