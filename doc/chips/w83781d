@@ -106,7 +106,10 @@ Overtemperature Shutdown limit is crossed; it is triggered again as soon as
 it drops below the Hysteresis value. A more useful behaviour 
 can be found by setting the Hysteresis value to +127 degrees Celcius; in 
 this case, alarms are issued during all the time when the actual temperature
-is above the Overtemperature Shutdown value. For the other sensor(s), an
+is above the Overtemperature Shutdown value. The driver sets the
+hysteresis value for temp1 to 127 at initialization.
+
+For the other temperature sensor(s), an
 alarm is triggered when the temperature gets higher then the Overtemperature 
 Shutdown value; it stays on until the temperature falls below the Hysteresis 
 value. But on the W83781D, there is only one alarm that functions for both 

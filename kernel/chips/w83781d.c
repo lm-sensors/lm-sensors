@@ -115,6 +115,7 @@ MODULE_PARM_DESC(init, "Set to zero to bypass chip initialization");
 #define W83781D_REG_ALARM2 0x42
 #define W83781D_REG_ALARM3 0x450	/* not on W83781D */
 
+#define W83781D_REG_IRQ 0x4C
 #define W83781D_REG_BEEP_CONFIG 0x4D
 #define W83781D_REG_BEEP_INTS1 0x56
 #define W83781D_REG_BEEP_INTS2 0x57
@@ -306,7 +307,7 @@ extern inline u8 DIV_TO_REG(long val, enum chips type)
 #define W83781D_INIT_FAN_MIN_3 3000
 
 #define W83781D_INIT_TEMP_OVER 600
-#define W83781D_INIT_TEMP_HYST 500
+#define W83781D_INIT_TEMP_HYST 1270	/* must be 127 for ALARM to work */
 #define W83781D_INIT_TEMP2_OVER 600
 #define W83781D_INIT_TEMP2_HYST 500
 #define W83781D_INIT_TEMP3_OVER 600
@@ -1455,10 +1456,13 @@ void w83781d_init_client(struct i2c_client *client)
 			w83781d_write_value(client, W83781D_REG_TEMP3_CONFIG,
 					    0x00);
 		}
-		/* enable PWM2 control (can't hurt since PWM reg should have
-	           been reset to 0xff) */
 		if (type != w83781d) {
+			/* enable PWM2 control (can't hurt since PWM reg
+		           should have been reset to 0xff) */
 			w83781d_write_value(client, W83781D_REG_PWMCLK12, 0x19);
+			/* enable comparator mode for temp2 and temp3 so
+		           alarm indication will work correctly */
+			w83781d_write_value(client, W83781D_REG_IRQ, 0x41);
 		}
 	}
 

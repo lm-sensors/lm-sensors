@@ -51,7 +51,8 @@ inline float deg_ctof( float cel )
 
 #define HYST 0
 #define MINMAX 1
-/* minmax = 0 for limit/hysteresis, 1 for max/min;
+#define MAXONLY 2
+/* minmax = 0 for limit/hysteresis, 1 for max/min, 2 for max only;
    curprec and limitprec are # of digits after decimal point
    for the current temp and the limits */
 void print_temp_info(float n_cur, float n_over, float n_hyst,
@@ -73,6 +74,10 @@ void print_temp_info(float n_cur, float n_over, float n_hyst,
 	printf( "%+6.*f%s  (min = %+*.*f%s, max = %+*.*f%s)",
             curprec, n_cur, degv,
 	    limitprec + 4, limitprec, n_hyst, degv,
+	    limitprec + 4, limitprec, n_over, degv);
+   else if(minmax == MAXONLY)
+	printf( "%+6.*f%s  (limit = %+*.*f%s)                      ",
+	    curprec, n_cur, degv,
 	    limitprec + 4, limitprec, n_over, degv);
    else /* HYST */
 	printf( "%+6.*f%s  (limit = %+*.*f%s, hysteresis = %+*.*f%s)",
@@ -2027,13 +2032,19 @@ void print_w83781d(const sensors_chip_name *name)
     if (valid) {
       if((!is82d) && (!is83s) && (!is697hf)) {
         print_label(label,10);
-        print_temp_info( cur, max, min, HYST, 0, 0);
+	if(min == 127)
+          print_temp_info( cur, max, 0, MAXONLY, 0, 0);
+	else
+          print_temp_info( cur, max, min, HYST, 0, 0);
         printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP1 ?"ALARM":"     ",
                beeps&W83781D_ALARM_TEMP1?"(beep)":"");
       } else {
         if(!sensors_get_feature(*name,SENSORS_W83781D_SENS1,&sens)) {
           print_label(label,10);
-          print_temp_info( cur, max, min, HYST, 0, 0);
+	  if(min == 127)
+            print_temp_info( cur, max, 0, MAXONLY, 0, 0);
+	  else
+            print_temp_info( cur, max, min, HYST, 0, 0);
           printf( " sensor = %s   %s   %s\n",
                  (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                  "3904 transistor":"thermistor",
