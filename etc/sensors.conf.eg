@@ -535,12 +535,16 @@ chip "as99127f-*"
     compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
 
 # Depending on your motherboard, you have to choose between two formulae
-# for temp2:
-# - Asus A7V133/133-C
-    compute temp2 @*2.0, @/2.0
-# - Asus CUV4X (thanks go to Artur Gawryszczak)
-# - Asus A7V8X (thanks go to Michele Conte)
+# for temp2. Quoting Artur Gawryszczak:
+# "I guess, that the formula "temp2 (@*30/43)+25, (@-25)*43/30" is correct
+# for those Asus motherboards, which get CPU temperature from internal 
+# thermal diode (Pentium Coppermine, and above), and "temp2 @*2.0, @/2.0" 
+# is correct for Athlon/Duron boards, which use a thermistor in the 
+# socket."
+# Intel systems (e.g. Asus CUV4X, Asus A7V8X)
 #   compute temp2 (@*30/43)+25, (@-25)*43/30
+# AMD systems (e.g. Asus A7V133/133-C)
+    compute temp2 @*2.0, @/2.0
 
     compute temp3 @*2.0, @/2.0
 
