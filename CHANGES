@@ -25,7 +25,7 @@ ask CVS about it:
   File doc/chips/fscscy: Add watchdog documentation
   File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
   Library: Add support for exponents and logarithms for vt1211/vt8235 temps;
-           add adm1026, lm85, w83791d support;
+           add adm1026, lm83, lm85, w83791d support;
            Advance version to 2.0.0
   Makefiles: Generate warnings if new library won't be found by ld.so;
              Modules now install in kernel/drivers/i2c/[busses,chips];
@@ -66,6 +66,7 @@ ask CVS about it:
   Module ds1307: Add to Makefile
   Module gl520sm: Fix temperature over/hyst writes
   Module lm75: merge changes from kernel 2.5.54
+  Module lm83: New
   Module lm85: New
   Module i2c-ali1535: Check for invalid transaction
   Module i2c-ali15x3: Check for invalid transaction
@@ -108,6 +109,7 @@ ask CVS about it:
                           Add support for w83l785ts, nForce2;
                           Fix UTF-8 incompatibility;
                           Better support for lm75 
+                          Add support for lm83
 
 2.7.0 (20021208)
   NOTE: Requires i2c-2.7.0 or newer.
