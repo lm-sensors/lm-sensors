@@ -4612,7 +4612,7 @@ static sensors_chip_feature vt1211_features[] =
     { SENSORS_VT1211_VRM, "vrm", NOMAP, NOMAP, 
                            RW, VT1211_SYSCTL_VRM, VALUE(1), 1 },
     { SENSORS_VT1211_UCH, "config", NOMAP, NOMAP, 
-                           RW, VT1211_SYSCTL_UCH, VALUE(1), 0 },
+                           RW, VT1211_SYSCTL_UCH, VALUE(1), 0, "uch_config" },
     { 0 }
   };
 
