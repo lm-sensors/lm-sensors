@@ -6,7 +6,7 @@ The instructions in this document will generally work if you have a standard
 system, but not always!!
 
 Quickstart for i2c option 1 (modules) and lm_sensors option 1 (modules).
-This is the recommended EASIEST METHOD.
+This is by far the EASIEST METHOD.
 Other methods are described in INSTALL.
 ------------------------------------------
 
@@ -19,8 +19,11 @@ Other methods are described in INSTALL.
     modules or is disabled. If it is compiled-in, you obviously
     cannot replace it with modules in the next step.
 
+  * Do `lsmod'. If there are any old i2c or sensors modules loaded,
+    you MUST remove them (as root) with `rmmod'.
+
   * Download, build, and install the latest i2c package,
-    (i2c-2.7.0 or later).
+    (i2c-2.8.0 or later).
     Quickstart for i2c: make; make install; depmod -a
 
   * Go back to the lm_sensors directory. Do `make'.
@@ -34,9 +37,8 @@ Other methods are described in INSTALL.
 
   * Do (as root) `depmod -a'.
 
-  * Add  the line
-      /usr/local/lib 
-    to /etc/ld.so.conf if it is not there yet.
+  * Verify that /usr/local/lib is listed in /etc/ld.so.conf;
+    add it if it isn't.
 
   * Do (as root) `ldconfig'.
 
@@ -52,5 +54,5 @@ Other methods are described in INSTALL.
 
   * Run `sensors' to see your output.
 
-  * That's it! If you have problems, read the INSTALL document and,
-    of course our excellent FAQ (doc/FAQ).
+  * That's it! If you have problems, read our excellent FAQ
+    (doc/FAQ or doc/lm_sensors-FAQ.html).

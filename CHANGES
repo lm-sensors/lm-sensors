@@ -42,12 +42,15 @@ ask CVS about it:
 		- Remove #ifdef MODULE
 		- Remove #ifndef THIS_MODULE
 		- Remove #ifndef MODULE_LICENSE
+		- Remove other 2.1/2.2 #ifdefs
 		- Remove #include "sensors.h", copy SYSCTL defs to module
+		- Remove excess #includes
 		- Remove argument in i2c_register_entry()
 		- Remove dummy xxx_command() definition
 		- Remove EXPORT_NO_SYMBOLS
 		- Remove init_MUTEX #define
-		- Remove xxx_inc_use() and xxx_dec_use() functions
+		- Remove xxx_inc_use() and xxx_dec_use() functions; modules
+                  no longer adjust their own refcounts
 		- Use module_init() and module_exit()
 		- Update to new i2c_driver struct definition
   Modules (bus PCI): Convert to PCI-module-style initialization
