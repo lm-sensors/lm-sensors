@@ -398,13 +398,11 @@ static sensors_chip_feature gl518r00_features[] =
 static sensors_chip_feature gl518r80_features[] =
   {
     { SENSORS_GL518R80_VDD, "vdd", SENSORS_NO_MAPPING,SENSORS_NO_MAPPING,
-                            SENSORS_MODE_NO_RW, GL518_SYSCTL_VDD, VALUE(3), 2 },
+                             SENSORS_MODE_R, GL518_SYSCTL_VDD, VALUE(3), 2 },
     { SENSORS_GL518R80_VIN1, "vin1", SENSORS_NO_MAPPING,SENSORS_NO_MAPPING,
-                             SENSORS_MODE_NO_RW, GL518_SYSCTL_VIN1, VALUE(3), 
-                             2 },
+                             SENSORS_MODE_R, GL518_SYSCTL_VIN1, VALUE(3), 2 },
     { SENSORS_GL518R80_VIN2, "vin2", SENSORS_NO_MAPPING,SENSORS_NO_MAPPING,
-                             SENSORS_MODE_NO_RW, GL518_SYSCTL_VIN2, VALUE(3), 
-                             2 },
+                             SENSORS_MODE_R, GL518_SYSCTL_VIN2, VALUE(3), 2 },
     { SENSORS_GL518R80_VIN3, "vin3", SENSORS_NO_MAPPING,SENSORS_NO_MAPPING,
                              SENSORS_MODE_R, GL518_SYSCTL_VIN3, VALUE(3), 2 },
     { SENSORS_GL518R80_VDD_MIN, "vdd_min", SENSORS_GL518R80_VDD,
