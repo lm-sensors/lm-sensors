@@ -181,18 +181,18 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      {
        name => "Genesys Logic GL518SM Revision 0x00",
        driver => "gl518sm",
-       i2c_addrs => [0x4c, 0x4d],
+       i2c_addrs => [0x2c, 0x2d],
        i2c_detect => sub { gl518sm_detect 0, @_} ,
      },
      {
        name => "Genesys Logic GL518SM Revision 0x80",
        driver => "gl518sm",
-       i2c_addrs => [0x4c, 0x4d],
+       i2c_addrs => [0x2c, 0x2d],
        i2c_detect => sub { gl518sm_detect 1, @_} ,
      },
      {
        name => "Genesys Logic GL520SM",
-       i2c_addrs => [0x4c, 0x4d],
+       i2c_addrs => [0x2c, 0x2d],
        i2c_detect => sub { gl520sm_detect @_} ,
      },
      {
