@@ -46,19 +46,19 @@ extern void sensors_write_reals(int nrels,void *buffer,int *bufsize,
                           dev table */
 #endif /* def DEV_HWMON */
 
-#define LM78_SYSCTL_IN0 1000
+#define LM78_SYSCTL_IN0 1000  /* Volts * 100 */
 #define LM78_SYSCTL_IN1 1001
 #define LM78_SYSCTL_IN2 1002
 #define LM78_SYSCTL_IN3 1003
 #define LM78_SYSCTL_IN4 1004
 #define LM78_SYSCTL_IN5 1005
 #define LM78_SYSCTL_IN6 1006
-#define LM78_SYSCTL_FAN1 1101
+#define LM78_SYSCTL_FAN1 1101 /* Rotations/min */
 #define LM78_SYSCTL_FAN2 1102
 #define LM78_SYSCTL_FAN3 1103
-#define LM78_SYSCTL_TEMP 1200
-#define LM78_SYSCTL_VID 1300
-#define LM78_SYSCTL_FAN_DIV 2000
-#define LM78_SYSCTL_ALARMS 2001
+#define LM78_SYSCTL_TEMP 1200 /* Degrees Celcius * 10 */
+#define LM78_SYSCTL_VID 1300 /* Volts * 100 */
+#define LM78_SYSCTL_FAN_DIV 2000 /* 1, 2, 4 or 8 */
+#define LM78_SYSCTL_ALARMS 2001 /* bitvector */
 
 #endif /* def SENSORS_SENSORS_H */

@@ -60,31 +60,33 @@
 #define LM78_REG_VID_FANDIV 0x47
 
 #define LM78_REG_CONFIG 0x40
+#define LM78_REG_CHIPID 0x49
 
 
 /* Conversions */
 static int lm78_in_conv[7] = {10000, 10000, 10000, 16892, 38000, 
                               -34768, -15050 };
-#define IN_TO_REG(val,nr) ((((val) * 100000 / lm78_in_conv[nr]) + 8) / 16)
+#define IN_TO_REG(val,nr) (((((val) * 100000 / lm78_in_conv[nr]) + 8) / 16) \
+                           & 0xff)
 #define IN_FROM_REG(val,nr) (((val) *  16 * lm78_in_conv[nr]) / 100000)
 
-#define FAN_TO_REG(val) (((val)==0)?255:((1350000+(val))/((val)*2)))
+#define FAN_TO_REG(val) ((((val)==0)?255:((1350000+(val))/((val)*2))) & 0xff)
 #define FAN_FROM_REG(val) (((val)==0)?-1:\
                            ((val)==255)?0:(1350000 + (val))/((val)*2))
 
-#define TEMP_TO_REG(val) ((val)<0?(val)&0xff:(val))
-#define TEMP_FROM_REG(val) ((val)>0x80?(val)-0x100:(val));
+#define TEMP_TO_REG(val) (((val)<0?(val/10)&0xff:(val/10)) & 0xff)
+#define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
 
-#define VID_FROM_REG(val) ((val) == 0x0f?0:350-(val)*10)
-
+#define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
+                           (val)>=0x06?0:205-(val)*5)
 #define ALARMS_FROM_REG(val) (val)
 
 #define DIV_FROM_REG(val) (1 >> (val))
-#define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?1:2)
+#define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 
 /* Initial limits */
-#define LM78_INIT_IN_0 280
-#define LM78_INIT_IN_1 280
+#define LM78_INIT_IN_0 (vid==350?280:vid)
+#define LM78_INIT_IN_1 (vid==350?280:vid)
 #define LM78_INIT_IN_2 330
 #define LM78_INIT_IN_3 500
 #define LM78_INIT_IN_4 1200
@@ -126,8 +128,8 @@ static int lm78_in_conv[7] = {10000, 10000, 10000, 16892, 38000,
 #define LM78_INIT_FAN_MIN_2 3000
 #define LM78_INIT_FAN_MIN_3 3000
 
-#define LM78_INIT_TEMP_OVER 60
-#define LM78_INIT_TEMP_HYST 50
+#define LM78_INIT_TEMP_OVER 600
+#define LM78_INIT_TEMP_HYST 500
 
 #ifdef MODULE
 extern int init_module(void);
@@ -149,6 +151,9 @@ extern int cleanup_module(void);
    bad. Quite a lot of bookkeeping is done. A real driver can often cut
    some corners. */
 
+/* Types of chips supported */
+enum lm78_type { lm78, lm78j, lm79 };
+
 /* For each registered LM78, we need to keep some data in memory. That
    data is pointed to by lm78_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new lm78 client is
@@ -156,6 +161,7 @@ extern int cleanup_module(void);
 struct lm78_data {
          struct semaphore lock;
          int sysctl_id;
+         enum lm78_type type;
 
          struct semaphore update_lock;
          char valid;                 /* !=0 if following fields are valid */
@@ -296,12 +302,20 @@ int lm78_detect_isa(struct isa_adapter *adapter)
 {
   int address,err;
   struct isa_client *new_client;
+  enum lm78_type type;
+  const char *type_name;
+  const char *client_name;
 
   /* OK, this is no detection. I know. It will do for now, though.  */
 
   err = 0;
   for (address = 0x290; (! err) && (address <= 0x290); address += 0x08) {
     if (check_region(address, LM78_EXTENT))
+      continue;
+
+    /* Awful, but true: unused port addresses should return 0xff */
+    if ((inb_p(address + 1) != 0xff) || (inb_p(address + 2) != 0xff) ||
+       (inb_p(address + 3) != 0xff) || (inb_p(address + 7) != 0xff))
       continue;
     
     if (inb_p(address + LM78_ADDR_REG_OFFSET) == 0xff) {
@@ -311,8 +325,28 @@ int lm78_detect_isa(struct isa_adapter *adapter)
     }
     
     /* Real detection code goes here */
-   
-    request_region(address, LM78_EXTENT, "lm78");
+
+    /* Determine exact type */
+    outb_p(LM78_REG_CHIPID,address + LM78_ADDR_REG_OFFSET);
+    err = inb_p(address + LM78_DATA_REG_OFFSET);
+    if (err == 0x00) {
+      type = lm78;
+      type_name = "lm78";
+      client_name = "LM78 chip";
+    } else if (err == 0x40) {
+      type = lm78j;
+      type_name = "lm78-j";
+      client_name = "LM78-J chip";
+    } else if (err == 0x80) {
+      type = lm79;
+      type_name = "lm79";
+      client_name = "LM79 chip";
+    }
+    else
+      continue;
+      
+
+    request_region(address, LM78_EXTENT, type_name);
 
     /* Allocate space for a new client structure */
     if (! (new_client = kmalloc(sizeof(struct isa_client) + 
@@ -326,6 +360,8 @@ int lm78_detect_isa(struct isa_adapter *adapter)
     /* Fill the new client structure with data */
     new_client->data = (struct lm78_data *) (new_client + 1);
     new_client->addr = 0;
+    strcpy(new_client->name,client_name);
+    ((struct lm78_data *) (new_client->data))->type = type;
     new_client->isa_addr = address;
     if ((err = lm78_new_client((struct i2c_adapter *) adapter,
                                (struct i2c_client *) new_client)))
@@ -336,7 +372,8 @@ int lm78_detect_isa(struct isa_adapter *adapter)
       goto ERROR3;
     
     /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry((struct i2c_client *) new_client,"lm78",
+    if ((err = sensors_register_entry((struct i2c_client *) new_client,
+                                      type_name,
                                       lm78_dir_table_template)) < 0)
       goto ERROR4;
     ((struct lm78_data *) (new_client->data)) -> sysctl_id = err;
@@ -389,6 +426,8 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
 {
   int address,err;
   struct i2c_client *new_client;
+  enum lm78_type type;
+  const char *type_name,*client_name;
 
   /* OK, this is no detection. I know. It will do for now, though.  */
   err = 0;
@@ -402,6 +441,24 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
 
     /* Real detection code goes here */
 
+    /* Determine exact type */
+    err = smbus_read_byte_data(adapter,address,LM78_REG_CHIPID);
+    if (err == 0x00) {
+      type = lm78;
+      type_name = "lm78";
+      client_name = "LM78 chip";
+    } else if (err == 0x40) {
+      type = lm78j;
+      type_name = "lm78-j";
+      client_name = "LM78-J chip";
+    } else if (err == 0x80) {
+      type = lm79;
+      type_name = "lm79";
+      client_name = "LM79 chip";
+    } else
+      continue;
+
+
     /* Allocate space for a new client structure */
     if (! (new_client = kmalloc(sizeof(struct i2c_client) + 
                                 sizeof(struct lm78_data),
@@ -413,6 +470,8 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
     /* Fill the new client structure with data */
     new_client->data = (struct lm78_data *) (new_client + 1);
     new_client->addr = address;
+    strcpy(new_client->name,client_name);
+    ((struct lm78_data *) (new_client->data))->type = type;
     if ((err = lm78_new_client(adapter,new_client)))
       goto ERROR2;
 
@@ -421,7 +480,7 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
       goto ERROR3;
 
     /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,"lm78",
+    if ((err = sensors_register_entry(new_client,type_name,
                                       lm78_dir_table_template)) < 0)
       goto ERROR4;
     ((struct lm78_data *) (new_client->data))->sysctl_id = err;
@@ -483,7 +542,6 @@ int lm78_new_client(struct i2c_adapter *adapter,
   }
   
   lm78_list[i] = new_client;
-  strcpy(new_client->name,"LM78 chip");
   new_client->id = i;
   new_client->adapter = adapter;
   new_client->driver = &lm78_driver;
@@ -560,9 +618,18 @@ int lm78_write_value(struct i2c_client *client, u8 reg, u8 value)
 /* Called when we have found a new LM78. It should set limits, etc. */
 void lm78_init_client(struct i2c_client *client)
 {
+  int vid;
+
   /* Reset all except Watchdog values and last conversion values
      This sets fan-divs to 2, among others */
   lm78_write_value(client,LM78_REG_CONFIG,0x80);
+
+  vid = lm78_read_value(client,LM78_REG_VID_FANDIV) & 0x0f;
+  if (((struct lm78_data *) (client->data))->type == lm79)
+    vid |= (lm78_read_value(client,LM78_REG_CHIPID) & 0x01) >> 4;
+  else
+    vid |= 0x10;
+  vid = VID_FROM_REG(vid);
 
   lm78_write_value(client,LM78_REG_IN_MIN(0),IN_TO_REG(LM78_INIT_IN_MIN_0,0));
   lm78_write_value(client,LM78_REG_IN_MAX(0),IN_TO_REG(LM78_INIT_IN_MAX_0,0));
@@ -617,6 +684,10 @@ void lm78_update_client(struct i2c_client *client)
     data->temp_hyst = lm78_read_value(client,LM78_REG_TEMP_HYST);
     i = lm78_read_value(client,LM78_REG_VID_FANDIV);
     data->vid = i & 0x0f;
+    if (data->type == lm79)
+      data->vid |= (lm78_read_value(client,LM78_REG_CHIPID) & 0x01) >> 4;
+    else
+      data->vid |= 0x10;
     data->fan_div[0] = (i >> 4) & 0x03;
     data->fan_div[1] = i >> 6;
     data->alarms = lm78_read_value(client,LM78_REG_ALARM1) +
@@ -655,10 +726,13 @@ int lm78_proc (ctl_table *ctl, int write, struct file * filp,
       break;
     case LM78_SYSCTL_TEMP:
       nrels=3;
+      mag=1;
+      break;
+    case LM78_SYSCTL_FAN_DIV:
+      nrels=3;
       mag=0;
       break;
     case LM78_SYSCTL_FAN1: case LM78_SYSCTL_FAN2: case LM78_SYSCTL_FAN3:
-    case LM78_SYSCTL_FAN_DIV:
       nrels=2;
       mag=0;
       break;
@@ -741,10 +815,10 @@ int lm78_sysctl (ctl_table *table, int *name, int nlen, void *oldval,
     case LM78_SYSCTL_IN0: case LM78_SYSCTL_IN1: case LM78_SYSCTL_IN2: 
     case LM78_SYSCTL_IN3: case LM78_SYSCTL_IN4: case LM78_SYSCTL_IN5: 
     case LM78_SYSCTL_IN6: case LM78_SYSCTL_TEMP: 
+    case LM78_SYSCTL_FAN_DIV:
       nrels=3;
       break;
     case LM78_SYSCTL_FAN1: case LM78_SYSCTL_FAN2: case LM78_SYSCTL_FAN3:
-    case LM78_SYSCTL_FAN_DIV:
       nrels=2;
       break;
     case LM78_SYSCTL_VID: case LM78_SYSCTL_ALARMS:
@@ -858,7 +932,7 @@ void write_temp(struct i2c_client *client, int nrels, long *results)
     lm78_write_value(client,LM78_REG_TEMP_OVER,data->temp_over);
   }
   if (nrels >= 2) {
-    data->temp_hyst = TEMP_TO_REG(results[0]);
+    data->temp_hyst = TEMP_TO_REG(results[1]);
     lm78_write_value(client,LM78_REG_TEMP_HYST,data->temp_hyst);
   }
 }
@@ -888,6 +962,7 @@ void read_fan_div(struct i2c_client *client, long *results)
   struct lm78_data *data = client->data;
   results[0] = DIV_FROM_REG(data->fan_div[0]);
   results[1] = DIV_FROM_REG(data->fan_div[1]);
+  results[2] = 2;
 }
  
 void write_fan_div(struct i2c_client *client, int nrels, long *results)
