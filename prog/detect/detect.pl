@@ -604,6 +604,12 @@ use vars qw(@chips_detected);
 #          with field 'confidence', containing the confidence level of this
 #               detection
 #          with field 'chipname", containing the chip name
+#          with optional field 'main' containing the address of the main
+#               chip this is a subsidiary off (like LM75 emulations on 
+#               Winbond chips)
+#          with optional field 'isa_addr' containing the ISA address this
+#               chip is on (for aliased chips, also the other fields are
+#               present; else 'driver' and 'address' are no present)
 #          
 #    with field 'misdetected'
 #      being a reference to a list of
@@ -615,6 +621,12 @@ use vars qw(@chips_detected);
 #          with field 'confidence', containing the confidence level of this
 #               detection
 #          with field 'chipname", containing the chip name
+#          with optional field 'main' containing the address of the main
+#               chip this is a subsidiary off (like LM75 emulations on 
+#               Winbond chips)
+#          with optional field 'isa_addr' containing the ISA address this
+#               chip is on (for aliased chips, also the other fields are
+#               present; else 'driver' and 'address' are no present)
 
 # $_[0]: chip driver
 # $_[1]: reference to data hash
@@ -704,10 +716,11 @@ sub scan_adapter
           foreach $add_addr(@chips) {
             add_to_chips_detected $$chip{driver},
                                   { confidence => $conf,
-                                    address => $addr,
+                                    address => $add_addr,
                                     chipname =>  $$chip{name},
                                     description => $adapter_name,
                                     driver => $adapter_driver,
+                                    main => $addr,
                                   };
           }
         } else {
