@@ -70,7 +70,7 @@ MODULE_LICENSE("GPL");
 
 /* delays */
 #define CYCLE_DELAY	10
-#define TIMEOUT		50
+#define TIMEOUT		(HZ / 2)
 
 #ifdef MODULE
 static

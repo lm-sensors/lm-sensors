@@ -114,7 +114,7 @@ static struct i2c_algo_bit_data bit_data = {
 	bit_via_setscl,
 	bit_via_getsda,
 	bit_via_getscl,
-	5, 5, 100,		/*waits, timeout */
+	5, 5, HZ,		/*waits, timeout */
 };
 
 static struct i2c_adapter bit_via_ops = {

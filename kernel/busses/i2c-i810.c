@@ -63,6 +63,7 @@ static int i810_supported[] = {PCI_DEVICE_ID_INTEL_82810_IG1,
                                PCI_DEVICE_ID_INTEL_82810_IG3,
                                0x7125,
                                PCI_DEVICE_ID_INTEL_82815_2,
+                               0x2562,
                                0 };
 
 /* GPIO register locations */
@@ -90,7 +91,7 @@ static int i810_supported[] = {PCI_DEVICE_ID_INTEL_82810_IG1,
 
 /* delays */
 #define CYCLE_DELAY		10
-#define TIMEOUT			50
+#define TIMEOUT			(HZ / 2)
 
 #ifdef MODULE
 static

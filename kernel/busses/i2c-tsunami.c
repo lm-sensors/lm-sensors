@@ -123,7 +123,7 @@ static struct i2c_algo_bit_data tsunami_i2c_bit_data = {
 	bit_tsunami_setscl,
 	bit_tsunami_getsda,
 	bit_tsunami_getscl,
-	10, 10, 50	/* delays/timeout */
+	10, 10, HZ/2	/* delays/timeout */
 };
 
 static struct i2c_adapter tsunami_i2c_adapter = {
