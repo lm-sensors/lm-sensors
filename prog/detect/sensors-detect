@@ -156,6 +156,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        driver => "w83781d",
        i2c_addrs => [0x00..0x7f], 
        i2c_detect => sub { w83781d_detect 0, @_},
+       i2c_driver_addrs => [0x20..0x2f], 
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect 0, @_ },
        alias_detect => sub { w83781d_alias_detect 0, @_ },
@@ -164,12 +165,14 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        name => "Winbond W83782D",
        driver => "w83781d",
        i2c_addrs => [0x00..0x7f], 
+       i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { w83781d_detect 1, @_},
      } ,
      {
        name => "Winbond W83783S",
        driver => "w83781d",
        i2c_addrs => [0x00..0x7f], 
+       i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { w83781d_detect 2, @_},
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect 2, @_ },
@@ -1174,7 +1177,7 @@ sub w83781d_detect
   return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
                 (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
   return unless ($reg1 & 0x07) == 0x00;
-  $reg1 = i2c_smbus_read_byte_data($file,0x58) &0xfe;
+  $reg1 = i2c_smbus_read_byte_data($file,0x58) & 0xfe;
   return if $chip == 0 and  $reg1 != 0x10;
   return if $chip == 1 and  $reg1 != 0x30;
   return if $chip == 2 and  $reg1 != 0x40;
@@ -1207,9 +1210,8 @@ sub w83781d_alias_detect
 sub w83781d_isa_detect
 {
   my ($chip,$addr) = @_ ;
-  my ($reg1,$reg2);
   my $val = inb ($addr + 1);
-  return if inb ($addr + 2) != $val or inb ($addr + 3) != $val or 
+  return if inb ($addr + 2) != $val or inb ($addr + 3) != $val or
             inb ($addr + 7) != $val;
 
   $val = inb($addr + 5) & 0x7f;
@@ -1225,8 +1227,8 @@ sub w83781d_isa_detect
   return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
                 (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
   return unless ($reg1 & 0x07) == 0x00;
-  $reg1 = &$read_proc(0x58);
-  return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
+  $reg1 = &$read_proc(0x58) & 0xfe;
+  return if $chip == 0 and  $reg1 != 0x10;
   return if $chip == 1 and  $reg1 != 0x30;
   return if $chip == 2 and  $reg1 != 0x40;
   return 8;

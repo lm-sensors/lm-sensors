@@ -41,6 +41,7 @@ static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
 
 /* Insmod parameters */
 SENSORS_INSMOD_3(lm78,lm78j,lm79);
+
 /* Many LM78 constants specified below */
 
 /* Length of ISA address segment */
@@ -322,8 +323,6 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
 #define REALLY_SLOW_IO
       /* We need the timeouts for at least some LM78-like chips. But only
          if we read 'undefined' registers. */
-      if (check_region(address,LM78_EXTENT))
-        goto ERROR0;
       i = inb_p(address + 1);
       if (inb_p(address + 2) != i)
         goto ERROR0;

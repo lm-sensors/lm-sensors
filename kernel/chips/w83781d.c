@@ -48,6 +48,15 @@
 /* RT Table support experimental - define this to enable */
 #undef W83781D_RT
 
+/* Addresses to scan */
+static unsigned short normal_i2c[] = {SENSORS_I2C_END};
+static unsigned short normal_i2c_range[] = {0x20,0x2f,SENSORS_I2C_END};
+static unsigned int normal_isa[] = {0x0290,SENSORS_ISA_END};
+static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+
+/* Insmod parameters */
+SENSORS_INSMOD_3(w83781d,w83782d,w83783s);
+
 /* Many W83781D constants specified below */
 
 /* Length of ISA address segment */
@@ -105,8 +114,11 @@
 #define W83781D_REG_PWM4 0x5F
 #define W83781D_REG_PWMCLK12 0x5C
 #define W83781D_REG_PWMCLK34 0x45C
-const u8 regpwm[] = {W83781D_REG_PWM1, W83781D_REG_PWM2, W83781D_REG_PWM3, W83781D_REG_PWM4};
+static const u8 regpwm[] = {W83781D_REG_PWM1, W83781D_REG_PWM2, 
+                            W83781D_REG_PWM3, W83781D_REG_PWM4};
 #define W83781D_REG_PWM(nr) (regpwm[(nr) - 1])
+
+#define W83781D_REG_I2C_ADDR 0x48
 
 /* The following are undocumented in the data sheets however we
    received the information in an email from Winbond tech support */
@@ -120,11 +132,6 @@ const u8 BIT_SCFG2[] = {0x10, 0x04, 0x08};
 /* RT Table registers */
 #define W83781D_REG_RT_IDX 0x50
 #define W83781D_REG_RT_VAL 0x51
-
-#define W83781D_WCHIPID 0x10
-#define W83782D_WCHIPID 0x30
-#define W83783S_WCHIPID 0x40
-
 
 /* Conversions. Rounding is only done on the TO_REG variants. */
 #define IN_TO_REG(val,nr) (((val) * 10 + 8)/16)
@@ -290,20 +297,21 @@ extern int cleanup_module(void);
 struct w83781d_data {
          struct semaphore lock;
          int sysctl_id;
+         enum chips type;
 
          struct semaphore update_lock;
          char valid;                 /* !=0 if following fields are valid */
          unsigned long last_updated; /* In jiffies */
 
-         u8 in[9];                   /* Register value - 8 and 9 for 782D only */
-         u8 in_max[9];               /* Register value - 8 and 9 for 782D only */
-         u8 in_min[9];               /* Register value - 8 and 9 for 782D only */
+         u8 in[9];                   /* Register value - 8 & 9 for 782D only */
+         u8 in_max[9];               /* Register value - 8 & 9 for 782D only */
+         u8 in_min[9];               /* Register value - 8 & 9 for 782D only */
          u8 fan[3];                  /* Register value */
          u8 fan_min[3];              /* Register value */
          u8 temp;
          u8 temp_over;               /* Register value */
          u8 temp_hyst;               /* Register value */
-         u16 temp_add[2];             /* Register value */
+         u16 temp_add[2];            /* Register value */
          u16 temp_add_over[2];       /* Register value */
          u16 temp_add_hyst[2];       /* Register value */
          u8 fan_div[3];              /* Register encoding, shifted right */
@@ -311,12 +319,12 @@ struct w83781d_data {
          u32 alarms;                 /* Register encoding, combined */
          u16 beeps;                  /* Register encoding, combined */
          u8 beep_enable;             /* Boolean */
-         u8 wchipid;                 /* Register value */
          u8 pwm[4];                  /* Register value */				
          u16 sens[3];                /* 782D/783S only.
 					1 = pentium diode; 2 = 3904 diode;
                                         3000-5000 = thermistor beta.
-                                        Default = 3435. Other Betas unimplemented */
+                                        Default = 3435. 
+                                        Other Betas unimplemented */
 #ifdef W83781D_RT
          u8 rt[3][32];               /* Register value */
 #endif
@@ -327,14 +335,8 @@ static int w83781d_init(void);
 static int w83781d_cleanup(void);
 
 static int w83781d_attach_adapter(struct i2c_adapter *adapter);
-static int w83781d_detect_isa(struct isa_adapter *adapter);
-static int w83781d_detect_smbus(struct i2c_adapter *adapter);
+static int w83781d_detect(struct i2c_adapter *adapter, int address, int kind);
 static int w83781d_detach_client(struct i2c_client *client);
-static int w83781d_detach_isa(struct isa_client *client);
-static int w83781d_detach_smbus(struct i2c_client *client);
-static int w83781d_new_client(struct i2c_adapter *adapter,
-                           struct i2c_client *new_client);
-static void w83781d_remove_client(struct i2c_client *client);
 static int w83781d_command(struct i2c_client *client, unsigned int cmd, 
                         void *arg);
 static void w83781d_inc_use (struct i2c_client *client);
@@ -375,7 +377,7 @@ static void w83781d_rt(struct i2c_client *client, int operation,
 /* I choose here for semi-static W83781D allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
-#define MAX_W83781D_NR 4
+#define MAX_W83781D_NR 8
 static struct i2c_client *w83781d_list[MAX_W83781D_NR];
 
 /* The driver. I choose to use type i2c_driver, as at is identical to both
@@ -606,260 +608,196 @@ static ctl_table w83783s_dir_table_template[] = {
      * when a new adapter is inserted (and w83781d_driver is still present) */
 int w83781d_attach_adapter(struct i2c_adapter *adapter)
 {
-  if (i2c_is_isa_adapter(adapter))
-    return w83781d_detect_isa((struct isa_adapter *) adapter);
-  else
-    return w83781d_detect_smbus(adapter);
+  return sensors_detect(adapter,&addr_data,w83781d_detect);
 }
 
-/* This function is called whenever a client should be removed:
-    * w83781d_driver is removed (when this module is unloaded)
-    * when an adapter is removed which has a w83781d client (and w83781d_driver
-      is still present). */
-int w83781d_detach_client(struct i2c_client *client)
+int w83781d_detect(struct i2c_adapter *adapter, int address, int kind)
 {
-  if (i2c_is_isa_client(client))
-    return w83781d_detach_isa((struct isa_client *) client);
-  else
-    return w83781d_detach_smbus(client);
-}
+  int i,val1,val2;
+  struct i2c_client *new_client;
+  struct w83781d_data *data;
+  int err=0;
+  const char *type_name = "";
+  const char *client_name = "";
+  int is_isa = i2c_is_isa_adapter(adapter);
 
-/* Detect whether there is a W83781D on the ISA bus, register and initialize 
-   it. */
-int w83781d_detect_isa(struct isa_adapter *adapter)
-{
-  int address,err,temp,wchipid;
-  struct isa_client *new_client;
-  const char *type_name;
-  const char *client_name;
+  /* We need address registration for the I2C bus too. That is not yet
+     implemented. */
+  if (is_isa) {
+    if (check_region(address,W83781D_EXTENT))
+      goto ERROR0;
+  }
 
-  /* OK, this is no detection. I know. It will do for now, though.  */
+  /* Probe whether there is anything available on this address. Already
+     done for SMBus clients */
+  if (kind < 0) {
+    if (is_isa) {
 
-  err = 0;
-  for (address = 0x290; (! err) && (address <= 0x290); address += 0x08) {
-    if (check_region(address, W83781D_EXTENT))
-      continue;
+#define REALLY_SLOW_IO
+      /* We need the timeouts for at least some LM78-like chips. But only
+         if we read 'undefined' registers. */
+      i = inb_p(address + 1);
+      if (inb_p(address + 2) != i)
+        goto ERROR0;
+      if (inb_p(address + 3) != i)
+        goto ERROR0;
+      if (inb_p(address + 7) != i)
+        goto ERROR0;
+#undef REALLY_SLOW_IO
 
-    if (inb_p(address + W83781D_ADDR_REG_OFFSET) == 0xff) {
-      outb_p(0x00,address + W83781D_ADDR_REG_OFFSET);
-      if (inb_p(address + W83781D_ADDR_REG_OFFSET) == 0xff)
-        continue;
+      /* Let's just hope nothing breaks here */
+      i = inb_p(address + 5) & 0x7f;
+      outb_p(~i & 0x7f,address+5);
+      if ((inb_p(address + 5) & 0x7f) != (~i & 0x7f)) {
+        outb_p(i,address+5);
+        return 0;
+      }
     }
-    
-    /* Real detection code goes here */
+  }
 
-    /* The Winbond may be stuck in bank 1 or 2. This should reset it. 
-       We really need some nifty detection code, because this can lead
-       to a lot of problems if there is no Winbond present! */
-    outb_p(W83781D_REG_BANK,address + W83781D_ADDR_REG_OFFSET);
-    outb_p(0x00,address + W83781D_DATA_REG_OFFSET);
-    
-    /* Detection -- To bad we can't do this before setting to bank 0 */
-    outb_p(W83781D_REG_CHIPMAN,address + W83781D_ADDR_REG_OFFSET);
-    temp=inb_p(address + W83781D_DATA_REG_OFFSET);
- #ifdef DEBUG
-    printk("w83781d.o: Detect byte: 0x%X\n",temp);
- #endif
-    if (temp != 0x0A3) {
- #ifdef DEBUG
-        printk("w83781d.o: Winbond W8378xx detection failed (ISA at 0x%X)\n",address);
- #endif
-    	continue;
-    }
-    outb_p(W83781D_REG_WCHIPID,address + W83781D_ADDR_REG_OFFSET);
+  /* OK. For now, we presume we have a valid client. We now create the
+     client structure, even though we cannot fill it completely yet.
+     But it allows us to access w83781d_{read,write}_value. */
+
+  if (! (new_client = kmalloc((is_isa?sizeof(struct isa_client):
+                                      sizeof(struct i2c_client)) +
+                              sizeof(struct w83781d_data),
+                              GFP_KERNEL))) {
+    err = -ENOMEM;
+    goto ERROR0;
+  }
+
+  if (is_isa) {
+    data = (struct w83781d_data *) (((struct isa_client *) new_client) + 1);
+    new_client->addr = 0;
+    ((struct isa_client *) new_client)->isa_addr = address;
+    data->lock = MUTEX;
+  } else {
+    data = (struct w83781d_data *) (((struct i2c_client *) new_client) + 1);
+    new_client->addr = address;
+  }
+  new_client->data = data;
+  new_client->adapter = adapter;
+  new_client->driver = &w83781d_driver;
+
+  /* Now, we do the remaining detection. */
+
+  /* The w8378?d may be stuck in some other bank than bank 0. This may
+     make reading other information impossible. Specify a force=... or
+     force_*=... parameter, and the Winbond will be reset to the right
+     bank. */
+  if (kind < 0) {
+    if (w83781d_read_value(new_client,W83781D_REG_CONFIG) & 0x80)
+      goto ERROR1;
+    if (!is_isa && 
+        (w83781d_read_value(new_client,W83781D_REG_I2C_ADDR) != address))
+      goto ERROR1;
+    val1 = w83781d_read_value(new_client,W83781D_REG_BANK);
+    val2 = w83781d_read_value(new_client,W83781D_REG_CHIPMAN);
+    if (!(val1 & 0x07) &&
+        ((!(val1 & 0x80) && (val2 != 0xa3)) ||
+         ((val1 & 0x80) && (val2 != 0x5c))))
+      goto ERROR1;
+  }
+
+  /* We have either had a force parameter, or we have already detected the
+     Winbond. Put it now into bank 0 */
+  w83781d_write_value(new_client,W83781D_REG_BANK,
+                      w83781d_read_value(new_client,W83781D_REG_BANK) & 0xf8);
+
+  /* Determine the chip type. */
+  if (kind <= 0) {
     /* mask off lower bit, not reliable */
-    wchipid = 0xFE & inb_p(address + W83781D_DATA_REG_OFFSET);
-    if(wchipid == W83782D_WCHIPID) {
-      printk("w83781d.o: Winbond W83782D detected (ISA addr=0x%X)\n",address);
-      type_name = "w83782d";
-      client_name = "Winbond W83782D chip";
-    } else {
-      printk("w83781d.o: Winbond W83781D detected (ISA addr=0x%X)\n",address);
-      type_name = "w83781d";
-      client_name = "Winbond W83781D chip";
-    }
+    val1 = w83781d_read_value(new_client,W83781D_REG_WCHIPID) & 0xfe;
+    if (val1 == 0x10)
+      kind = w83781d;
+    else if (val1 == 0x30)
+      kind = w83782d;
+    else if (val1 == 0x40)
+      kind = w83783s;
+    else
+      goto ERROR1;
+  }
 
+  if (kind == w83781d) {
+    type_name = "w83781d";
+    client_name = "W83781D chip";
+  } else if (kind == w83782d) {
+    type_name = "w83782d";
+    client_name = "W83782D chip";
+  } else if (kind == w83783s) {
+    type_name = "w83783s";
+    client_name = "W83783S chip";
+  } else {
+#ifdef DEBUG
+    printk("w83781d.o: Internal error: unknown kind (%d)?!?",kind);
+#endif
+    goto ERROR1;
+  }
+
+  /* Reserve the ISA region */
+  if (is_isa)
     request_region(address, W83781D_EXTENT, type_name);
 
-    /* Allocate space for a new client structure */
-    if (! (new_client = kmalloc(sizeof(struct isa_client) + 
-                                sizeof(struct w83781d_data),
-                               GFP_KERNEL)))
-    {
-      err=-ENOMEM;
-      goto ERROR1;
-    } 
+  /* Fill in the remaining client fields and put it into the global list */
+  strcpy(new_client->name,client_name);
+  data->type = kind;
 
-    /* Fill the new client structure with data */
-    new_client->data = (struct w83781d_data *) (new_client + 1);
-    new_client->addr = 0;
-    strcpy(new_client->name,client_name);
-    new_client->isa_addr = address;
-    if ((err = w83781d_new_client((struct i2c_adapter *) adapter,
-                               (struct i2c_client *) new_client)))
-      goto ERROR2;
-
-    /* Tell i2c-core a new client has arrived */
-    if ((err = isa_attach_client(new_client)))
-      goto ERROR3;
-    
-    /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry((struct i2c_client *) new_client,
-                                      type_name,
-                                      (wchipid == W83782D_WCHIPID) ? w83782d_isa_dir_table_template :
-                                      w83781d_dir_table_template)) < 0)
-      goto ERROR4;
-    ((struct w83781d_data *) (new_client->data)) -> sysctl_id = err;
-    ((struct w83781d_data *) (new_client->data))->wchipid = wchipid;
-    err = 0;
-
-    /* Initialize the W83781D chip */
-    w83781d_init_client((struct i2c_client *) new_client);
-    continue;
-
-/* OK, this is not exactly good programming practice, usually. But it is
-   very code-efficient in this case. */
-
-ERROR4:
-    isa_detach_client(new_client);
-ERROR3:
-    w83781d_remove_client((struct i2c_client *) new_client);
-ERROR2:
-    kfree(new_client);
-ERROR1:
-    release_region(address, W83781D_EXTENT);
-  }
-  return err;
-
-}
-
-/* Deregister and remove a W83781D client */
-int w83781d_detach_isa(struct isa_client *client)
-{
-  int err,i;
-  for (i = 0; i < MAX_W83781D_NR; i++)
-    if ((client == (struct isa_client *) (w83781d_list[i])))
+  for(i = 0; i < MAX_W83781D_NR; i++)
+    if (! w83781d_list[i])
       break;
   if (i == MAX_W83781D_NR) {
-    printk("w83781d.o: Client to detach not found.\n");
-    return -ENOENT;
+    printk("w83781d.o: No empty slots left, recompile and heighten "
+           "MAX_W83781D_NR!\n");
+    err = -ENOMEM;
+    goto ERROR2;
   }
+  w83781d_list[i] = new_client;
+  new_client->id = i;
+  data->valid = 0;
+  data->update_lock = MUTEX;
 
-  sensors_deregister_entry(((struct w83781d_data *)(client->data))->sysctl_id);
+  /* Tell the I2C layer a new client has arrived */
+  if ((err = i2c_attach_client(new_client)))
+    goto ERROR3;
 
-  if ((err = isa_detach_client(client))) {
-    printk("w83781d.o: Client deregistration failed, client not detached.\n");
-    return err;
+  /* Register a new directory entry with module sensors */
+  if ((i = sensors_register_entry((struct i2c_client *) new_client,
+                                  type_name,
+                                  kind == w83781d?w83781d_dir_table_template:
+                                  kind == w83783s?w83783s_dir_table_template:
+                                  is_isa?w83782d_i2c_dir_table_template:
+                                         w83782d_isa_dir_table_template)) < 0) {
+    err = i;
+    goto ERROR4;
   }
-  w83781d_remove_client((struct i2c_client *) client);
-  release_region(client->isa_addr,W83781D_EXTENT);
-  kfree(client);
+  data->sysctl_id = i;
+
+  /* Initialize the Winbond chip */
+  w83781d_init_client(new_client);
   return 0;
-}
-
-int w83781d_detect_smbus(struct i2c_adapter *adapter)
-{
-  int address,err,wchipid;
-  struct i2c_client *new_client;
-  const char *type_name,*client_name;
-
-  /* OK, this is no detection. I know. It will do for now, though.  */
-  err = 0;
-  for (address = 0x20; (! err) && (address <= 0x2f); address ++) {
-
-    /* Later on, we will keep a list of registered addresses for each
-       adapter, and check whether they are used here */
-
-    if (smbus_read_byte_data(adapter,address,W83781D_REG_CONFIG) < 0) 
-      continue;
-
-    smbus_write_byte_data(adapter,address,W83781D_REG_BANK,0x00);
-
-    err = smbus_read_byte_data(adapter,address,W83781D_REG_CHIPMAN);
- #ifdef DEBUG
-    printk("w83781d.o: Detect byte: 0x%X\n",err);
- #endif
-    if (err == 0x0A3) {
-      /* mask off lower bit, not reliable */
-      wchipid = 0xFE & smbus_read_byte_data(adapter,address,W83781D_REG_WCHIPID);
-      if(wchipid == W83783S_WCHIPID) {
-        printk("w83781d.o: Winbond W83783S detected (SMBus addr 0x%X)\n",address);
-        type_name = "w83783s";
-        client_name = "Winbond W83783S chip";
-      } else if (wchipid == W83782D_WCHIPID) {
-        printk("w83781d.o: Winbond W83782D detected (SMBus addr 0x%X)\n",address);
-        type_name = "w83782d";
-        client_name = "Winbond W83782D chip";
-      } else {
-        printk("w83781d.o: Winbond W83781D detected (SMBus addr 0x%X)\n",address);
-        type_name = "w83781d";
-        client_name = "Winbond W83781D chip";
-      }
-      err=0;
-    } else {
- #ifdef DEBUG
-     printk("w83781d.o: Winbond W8378xx detection failed (SMBus/I2C at 0x%X)\n",address);
- #endif
-     continue;
-    }
-
-
-    /* Allocate space for a new client structure. To counter memory
-       ragmentation somewhat, we only do one kmalloc. */
-    if (! (new_client = kmalloc(sizeof(struct i2c_client) + 
-                                sizeof(struct w83781d_data),
-                               GFP_KERNEL))) {
-      err = -ENOMEM;
-      continue;
-    }
-
-    /* Fill the new client structure with data */
-    new_client->data = (struct w83781d_data *) (new_client + 1);
-    new_client->addr = address;
-    strcpy(new_client->name,client_name);
-    if ((err = w83781d_new_client(adapter,new_client)))
-      goto ERROR2;
-
-    /* Tell i2c-core a new client has arrived */
-    if ((err = i2c_attach_client(new_client))) 
-      goto ERROR3;
-
-    /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,type_name,
-                                      (wchipid == W83783S_WCHIPID) ? w83783s_dir_table_template : 
-                                      ((wchipid == W83782D_WCHIPID) ? w83782d_i2c_dir_table_template :
-                                      w83781d_dir_table_template))) < 0)
-      goto ERROR4;
-    ((struct w83781d_data *) (new_client->data))->sysctl_id = err;
-    ((struct w83781d_data *) (new_client->data))->wchipid = wchipid;
-    err = 0;
-
-    /* Initialize the W83781D chip */
-    w83781d_init_client(new_client);
-    continue;
 
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
+
 ERROR4:
-    i2c_detach_client(new_client);
+  i2c_detach_client(new_client);
 ERROR3:
-    w83781d_remove_client((struct i2c_client *) new_client);
+  for (i = 0; i < MAX_W83781D_NR; i++)
+    if (new_client == w83781d_list[i])
+      w83781d_list[i] = NULL;
 ERROR2:
-    kfree(new_client);
-  }
+  if (is_isa)
+    release_region(address,W83781D_EXTENT);
+ERROR1:
+  kfree(new_client);
+ERROR0:
   return err;
 }
 
-int w83781d_detach_smbus(struct i2c_client *client)
+int w83781d_detach_client(struct i2c_client *client)
 {
   int err,i;
-  for (i = 0; i < MAX_W83781D_NR; i++)
-    if (client == w83781d_list[i])
-      break;
-  if ((i == MAX_W83781D_NR)) {
-    printk("w83781d.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
 
   sensors_deregister_entry(((struct w83781d_data *)(client->data))->sysctl_id);
 
@@ -867,47 +805,21 @@ int w83781d_detach_smbus(struct i2c_client *client)
     printk("w83781d.o: Client deregistration failed, client not detached.\n");
     return err;
   }
-  w83781d_remove_client(client);
-  kfree(client);
-  return 0;
-}
 
-
-/* Find a free slot, and initialize most of the fields */
-int w83781d_new_client(struct i2c_adapter *adapter,
-                    struct i2c_client *new_client)
-{
-  int i;
-  struct w83781d_data *data;
-
-  /* First, seek out an empty slot */
-  for(i = 0; i < MAX_W83781D_NR; i++)
-    if (! w83781d_list[i])
+  for (i = 0; i < MAX_W83781D_NR; i++)
+    if (client == w83781d_list[i])
       break;
   if (i == MAX_W83781D_NR) {
-    printk("w83781d.o: No empty slots left, recompile and heighten "
-           "MAX_W83781D_NR!\n");
-    return -ENOMEM;
+    printk("w83781d.o: Client to detach not found.\n");
+    return -ENOENT;
   }
-  
-  w83781d_list[i] = new_client;
-  new_client->id = i;
-  new_client->adapter = adapter;
-  new_client->driver = &w83781d_driver;
-  data = new_client->data;
-  data->valid = 0;
-  data->lock = MUTEX;
-  data->update_lock = MUTEX;
-  return 0;
-}
+  w83781d_list[i] = NULL;
 
-/* Inverse of w83781d_new_client */
-void w83781d_remove_client(struct i2c_client *client)
-{
-  int i;
-  for (i = 0; i < MAX_W83781D_NR; i++)
-    if (client == w83781d_list[i]) 
-      w83781d_list[i] = NULL;
+  if i2c_is_isa_client(client)
+    release_region(((struct isa_client *)client)->isa_addr,W83781D_EXTENT);
+  kfree(client);
+
+  return 0;
 }
 
 /* No commands defined yet */
@@ -930,7 +842,6 @@ void w83781d_dec_use (struct i2c_client *client)
 #endif
 }
  
-
 /* The SMBus locks itself, usually, but nothing may access the Winbond between
    bank switches. ISA access must always be locked explicitely! 
    We ignore the W83781D BUSY flag at this moment - it could lead to deadlocks,
@@ -945,7 +856,7 @@ int w83781d_read_value(struct i2c_client *client, u16 reg)
                                  (((reg & 0x00ff) == 0x50) || 
                                   ((reg & 0x00ff) == 0x53) || 
                                   ((reg & 0x00ff) == 0x55));
-  down((struct semaphore *) (client->data));
+  down(& (((struct w83781d_data *) (client->data)) -> lock));
   if (i2c_is_isa_client(client)) {
     if (reg & 0xff00) {
       outb_p(W83781D_REG_BANK,(((struct isa_client *) client)->isa_addr) +
@@ -980,7 +891,7 @@ int w83781d_read_value(struct i2c_client *client, u16 reg)
     if (reg & 0xff00)
       smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,0);
   }
-  up((struct semaphore *) (client->data));
+  up( & (((struct w83781d_data *) (client->data)) -> lock));
   return res;
 }
 
@@ -998,7 +909,7 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
                                  (((reg & 0x00ff) == 0x50) || 
                                   ((reg & 0x00ff) == 0x53) || 
                                   ((reg & 0x00ff) == 0x55));
-  down((struct semaphore *) (client->data));
+  down( & (((struct w83781d_data *) (client->data)) -> lock));
   if (i2c_is_isa_client(client)) {
     if (reg & 0xff00) {
       outb_p(W83781D_REG_BANK,(((struct isa_client *) client)->isa_addr) +
@@ -1034,7 +945,7 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
     if (reg & 0xff00)
       smbus_write_byte_data(client->adapter,client->addr,W83781D_REG_BANK,0);
   }
-  up((struct semaphore *) (client->data));
+  up( & (((struct w83781d_data *) (client->data)) -> lock));
   return 0;
 }
 
@@ -1042,11 +953,10 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 void w83781d_init_client(struct i2c_client *client)
 {
   struct w83781d_data *data = client->data;
-  int vid,wchipid;
-  int i;
+  int vid,i;
+  int type = data->type;
   u8 tmp;
 
-  wchipid = data->wchipid;
   /* Reset all except Watchdog values and last conversion values
      This sets fan-divs to 2, among others */
   w83781d_write_value(client,W83781D_REG_CONFIG,0x80);
@@ -1055,7 +965,7 @@ void w83781d_init_client(struct i2c_client *client)
   vid |= (w83781d_read_value(client,W83781D_REG_CHIPID) & 0x01) << 4;
   vid = VID_FROM_REG(vid);
 
-  if(wchipid != W83781D_WCHIPID) {
+  if (type != w83781d) {
     tmp = w83781d_read_value(client,W83781D_REG_SCFG1);
     for (i = 1; i <= 3; i++) {
       if(!(tmp & BIT_SCFG1[i-1])) {
@@ -1066,7 +976,7 @@ void w83781d_init_client(struct i2c_client *client)
         else
           data->sens[i-1] = 2;
       }
-      if(data->wchipid == W83783S_WCHIPID && i == 2)
+      if((type == w83783s) && (i == 2))
         break;
     }
   }
@@ -1080,7 +990,7 @@ void w83781d_init_client(struct i2c_client *client)
    that the 782D/783D support it as well....
 */
 
-  if(wchipid == W83781D_WCHIPID) {
+  if(type == w83781d) {
     u16 k = 0;
 /*
     Auto-indexing doesn't seem to work...
@@ -1100,12 +1010,13 @@ void w83781d_init_client(struct i2c_client *client)
                       IN_TO_REG(W83781D_INIT_IN_MIN_0,0));
   w83781d_write_value(client,W83781D_REG_IN_MAX(0),
                       IN_TO_REG(W83781D_INIT_IN_MAX_0,0));
-  if(wchipid != W83783S_WCHIPID) {
+  if(type != w83783s) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(1),
                         IN_TO_REG(W83781D_INIT_IN_MIN_1,1));
     w83781d_write_value(client,W83781D_REG_IN_MAX(1),
                         IN_TO_REG(W83781D_INIT_IN_MAX_1,1));
   }
+
   w83781d_write_value(client,W83781D_REG_IN_MIN(2),
                       IN_TO_REG(W83781D_INIT_IN_MIN_2,2));
   w83781d_write_value(client,W83781D_REG_IN_MAX(2),
@@ -1118,7 +1029,7 @@ void w83781d_init_client(struct i2c_client *client)
                       IN_TO_REG(W83781D_INIT_IN_MIN_4,4));
   w83781d_write_value(client,W83781D_REG_IN_MAX(4),
                       IN_TO_REG(W83781D_INIT_IN_MAX_4,4));
-  if(wchipid == W83781D_WCHIPID) {
+  if (type == w83781d) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(5),
                         IN_TO_REG(W83781D_INIT_IN_MIN_5,5));
     w83781d_write_value(client,W83781D_REG_IN_MAX(5),
@@ -1129,7 +1040,7 @@ void w83781d_init_client(struct i2c_client *client)
     w83781d_write_value(client,W83781D_REG_IN_MAX(5),
                         IN_TO_REG(W83782D_INIT_IN_MAX_5,5));
   }
-  if(wchipid == W83781D_WCHIPID) {
+  if (type == w83781d) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(6),
                         IN_TO_REG(W83781D_INIT_IN_MIN_6,6));
     w83781d_write_value(client,W83781D_REG_IN_MAX(6),
@@ -1140,7 +1051,7 @@ void w83781d_init_client(struct i2c_client *client)
     w83781d_write_value(client,W83781D_REG_IN_MAX(6),
                         IN_TO_REG(W83782D_INIT_IN_MAX_6,6));
   }
-  if(wchipid == W83782D_WCHIPID) {
+  if (type == w83782d) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(7),
                         IN_TO_REG(W83781D_INIT_IN_MIN_7,7));
     w83781d_write_value(client,W83781D_REG_IN_MAX(7),
@@ -1169,7 +1080,7 @@ void w83781d_init_client(struct i2c_client *client)
                       TEMP_ADD_TO_REG(W83781D_INIT_TEMP2_HYST));
   w83781d_write_value(client,W83781D_REG_TEMP2_CONFIG,0x00);
 
-  if(wchipid != W83783S_WCHIPID) {
+  if (type != w83783s) {
     w83781d_write_value(client,W83781D_REG_TEMP3_OVER,
                         TEMP_ADD_TO_REG(W83781D_INIT_TEMP3_OVER));
     w83781d_write_value(client,W83781D_REG_TEMP3_HYST,
@@ -1197,27 +1108,28 @@ void w83781d_update_client(struct i2c_client *client)
     printk("Starting w83781d update\n");
 #endif
     for (i = 0; i <= 8; i++) {
-      if(data->wchipid == W83783S_WCHIPID  &&  i == 1)
+      if((data->type == w83783s)  &&  (i == 1))
         continue; /* 783S has no in1 */
       data->in[i]     = w83781d_read_value(client,W83781D_REG_IN(i));
       data->in_min[i] = w83781d_read_value(client,W83781D_REG_IN_MIN(i));
       data->in_max[i] = w83781d_read_value(client,W83781D_REG_IN_MAX(i));
-      if(data->wchipid != W83782D_WCHIPID  &&  i == 6)
+      if((data->type != w83782d)  &&  (i == 6))
         break;
     }
     for (i = 1; i <= 3; i++) {
       data->fan[i-1] = w83781d_read_value(client,W83781D_REG_FAN(i));
       data->fan_min[i-1] = w83781d_read_value(client,W83781D_REG_FAN_MIN(i));
     }
-    if(data->wchipid != W83781D_WCHIPID) {
+    if(data->type != w83781d) {
       for (i = 1; i <= 4; i++) {
         data->pwm[i-1] = w83781d_read_value(client,W83781D_REG_PWM(i));
-        if((data->wchipid == W83783S_WCHIPID ||
-           (data->wchipid == W83782D_WCHIPID && i2c_is_isa_client(client)))
+        if(((data->type == w83783s) ||
+           ((data->type == w83782d) && i2c_is_isa_client(client)))
           &&  i == 2)
           break;
       }
     }
+
     data->temp = w83781d_read_value(client,W83781D_REG_TEMP);
     data->temp_over = w83781d_read_value(client,W83781D_REG_TEMP_OVER);
     data->temp_hyst = w83781d_read_value(client,W83781D_REG_TEMP_HYST);
@@ -1232,12 +1144,13 @@ void w83781d_update_client(struct i2c_client *client)
     data->vid |= (w83781d_read_value(client,W83781D_REG_CHIPID) & 0x01) << 4;
     data->fan_div[0] = (i >> 4) & 0x03;
     data->fan_div[1] = i >> 6;
-    if(data->wchipid != W83782D_WCHIPID) {
-      data->fan_div[2] = (w83781d_read_value(client,W83781D_REG_PIN) >> 6) & 0x03;
+    if (data->type != w83782d) {
+      data->fan_div[2] = (w83781d_read_value(client,
+                                             W83781D_REG_PIN) >> 6) & 0x03;
     }
     data->alarms = w83781d_read_value(client,W83781D_REG_ALARM1) +
                    (w83781d_read_value(client,W83781D_REG_ALARM2) << 8);
-    if(data->wchipid == W83782D_WCHIPID) {
+    if (data->type == w83782d) {
       data->alarms |= w83781d_read_value(client,W83781D_REG_ALARM3) << 16;
     }
     i = w83781d_read_value(client,W83781D_REG_BEEP_INTS2);
@@ -1315,7 +1228,6 @@ void w83781d_fan(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-
 void w83781d_temp(struct i2c_client *client, int operation, int ctl_name,
                int *nrels_mag, long *results)
 {
@@ -1339,7 +1251,6 @@ void w83781d_temp(struct i2c_client *client, int operation, int ctl_name,
     }
   }
 }
-
 
 void w83781d_temp_add(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results)
@@ -1494,27 +1405,30 @@ void w83781d_sens(struct i2c_client *client, int operation, int ctl_name,
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       switch(results[0]) {
-        case 1:				/* PII/Celeron diode */
+        case 1:                         /* PII/Celeron diode */
           tmp = w83781d_read_value(client,W83781D_REG_SCFG1);
           w83781d_write_value(client,W83781D_REG_SCFG1, tmp | BIT_SCFG2[nr-1]);
           tmp = w83781d_read_value(client,W83781D_REG_SCFG2);
           w83781d_write_value(client,W83781D_REG_SCFG2, tmp | BIT_SCFG2[nr-1]);
           data->sens[nr-1] = results[0];
           break;
-        case 2:				/* 3904 */
+        case 2:                         /* 3904 */
           tmp = w83781d_read_value(client,W83781D_REG_SCFG1);
           w83781d_write_value(client,W83781D_REG_SCFG1, tmp | BIT_SCFG2[nr-1]);
           tmp = w83781d_read_value(client,W83781D_REG_SCFG2);
-          w83781d_write_value(client,W83781D_REG_SCFG2, tmp & ~ BIT_SCFG2[nr-1]);
+          w83781d_write_value(client,W83781D_REG_SCFG2, tmp & ~ BIT_SCFG2[nr-1])
+;
           data->sens[nr-1] = results[0];
           break;
-        case W83781D_DEFAULT_BETA: 	/* thermistor */
+        case W83781D_DEFAULT_BETA:      /* thermistor */
           tmp = w83781d_read_value(client,W83781D_REG_SCFG1);
-          w83781d_write_value(client,W83781D_REG_SCFG1, tmp & ~ BIT_SCFG2[nr-1]);
+          w83781d_write_value(client,W83781D_REG_SCFG1, tmp & ~ BIT_SCFG2[nr-1])
+;
           data->sens[nr-1] = results[0];
           break;
         default:
-          printk("w83781d.o: Invalid sensor type %ld; must be 1, 2, or %d\n", results[0], W83781D_DEFAULT_BETA);
+          printk("w83781d.o: Invalid sensor type %ld; must be 1, 2, or %d\n", 
+                 results[0], W83781D_DEFAULT_BETA);
           break;
       }
     }
@@ -1573,7 +1487,8 @@ int w83781d_cleanup(void)
 
 #ifdef MODULE
 
-MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, and Mark Studebaker <mds@eng.paradyne.com>");
+MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge
+.com>, and Mark Studebaker <mds@eng.paradyne.com>");
 MODULE_DESCRIPTION("W83781D driver");
 
 int init_module(void)
@@ -1588,3 +1503,6 @@ int cleanup_module(void)
 
 #endif /* MODULE */
 
+
+
+    
