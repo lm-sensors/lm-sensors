@@ -4,6 +4,7 @@
     Copyright (c) 1998, 1999, 2000  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>,
     and Mark Studebaker <mdsxyz123@yahoo.com>
+    Copyright (c) 2003  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,18 +39,34 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 /* Insmod parameters */
 SENSORS_INSMOD_1(ddcmon);
 
+static int checksum = 0;
+MODULE_PARM(checksum, "i");
+MODULE_PARM_DESC(checksum, "Only accept eeproms whose checksum is correct");
+
 /* Many constants specified below */
 
 /* DDCMON registers */
-#define DDCMON_REG_ID 0x08
+/* vendor section */
+#define DDCMON_REG_MAN_ID 0x08
+#define DDCMON_REG_PROD_ID 0x0A
 #define DDCMON_REG_SERIAL 0x0C
+#define DDCMON_REG_WEEK 0x10
+#define DDCMON_REG_YEAR 0x11
+/* EDID version */
+#define DDCMON_REG_EDID_VER 0x12
+#define DDCMON_REG_EDID_REV 0x13
+/* display information */
 #define DDCMON_REG_HORSIZE 0x15
 #define DDCMON_REG_VERSIZE 0x16
-#define DDCMON_REG_TIMINGS 0x23
+#define DDCMON_REG_GAMMA 0x17
+#define DDCMON_REG_DPMS_FLAGS 0x18
+/* supported timings */
+#define DDCMON_REG_ESTABLISHED_TIMINGS 0x23
+#define DDCMON_REG_STANDARD_TIMINGS 0x26
 #define DDCMON_REG_TIMBASE 0x36
 #define DDCMON_REG_TIMINCR 18
 #define DDCMON_REG_TIMNUM   4
-#define DDCMON_REG_TIMOFFSET 5
+
 #define DDCMON_REG_CHECKSUM 0x7f
 
 /* Size of DDCMON in bytes */
@@ -64,7 +81,6 @@ struct ddcmon_data {
 	unsigned long last_updated;	/* In jiffies */
 
 	u8 data[DDCMON_SIZE];	/* Register values */
-	int memtype;
 };
 
 
@@ -79,9 +95,21 @@ static void ddcmon_size(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 static void ddcmon_sync(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
+static void ddcmon_maxclock(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
 static void ddcmon_timings(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 static void ddcmon_serial(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
+static void ddcmon_time(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
+static void ddcmon_edid(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
+static void ddcmon_gamma(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
+static void ddcmon_dpms(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
+static void ddcmon_standard_timing(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 static void ddcmon_update_client(struct i2c_client *client);
 
@@ -97,11 +125,25 @@ static struct i2c_driver ddcmon_driver = {
 };
 
 /* -- SENSORS SYSCTL START -- */
+
 #define DDCMON_SYSCTL_ID 1010
 #define DDCMON_SYSCTL_SIZE 1011
 #define DDCMON_SYSCTL_SYNC 1012
 #define DDCMON_SYSCTL_TIMINGS 1013
 #define DDCMON_SYSCTL_SERIAL 1014
+#define DDCMON_SYSCTL_TIME 1015
+#define DDCMON_SYSCTL_EDID 1016
+#define DDCMON_SYSCTL_GAMMA 1017
+#define DDCMON_SYSCTL_DPMS 1018
+#define DDCMON_SYSCTL_TIMING1 1021
+#define DDCMON_SYSCTL_TIMING2 1022
+#define DDCMON_SYSCTL_TIMING3 1023
+#define DDCMON_SYSCTL_TIMING4 1024
+#define DDCMON_SYSCTL_TIMING5 1025
+#define DDCMON_SYSCTL_TIMING6 1026
+#define DDCMON_SYSCTL_TIMING7 1027
+#define DDCMON_SYSCTL_TIMING8 1028
+#define DDCMON_SYSCTL_MAXCLOCK 1029
 
 /* -- SENSORS SYSCTL END -- */
 
@@ -111,7 +153,7 @@ static struct i2c_driver ddcmon_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table ddcmon_dir_table_template[] = {
-	{DDCMON_SYSCTL_ID, "ID", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{DDCMON_SYSCTL_ID, "id", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &ddcmon_idcall},
 	{DDCMON_SYSCTL_SIZE, "size", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &ddcmon_size},
@@ -121,6 +163,32 @@ static ctl_table ddcmon_dir_table_template[] = {
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_timings},
 	{DDCMON_SYSCTL_SERIAL, "serial", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_serial},
+	{DDCMON_SYSCTL_TIME, "time", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_time},
+	{DDCMON_SYSCTL_EDID, "edid", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_edid},
+	{DDCMON_SYSCTL_GAMMA, "gamma", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_gamma},
+	{DDCMON_SYSCTL_DPMS, "dpms", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_dpms},
+	{DDCMON_SYSCTL_TIMING1, "timing1", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_standard_timing},
+	{DDCMON_SYSCTL_TIMING2, "timing2", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_standard_timing},
+	{DDCMON_SYSCTL_TIMING3, "timing3", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_standard_timing},
+	{DDCMON_SYSCTL_TIMING4, "timing4", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_standard_timing},
+	{DDCMON_SYSCTL_TIMING5, "timing5", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_standard_timing},
+	{DDCMON_SYSCTL_TIMING6, "timing6", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_standard_timing},
+	{DDCMON_SYSCTL_TIMING7, "timing7", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_standard_timing},
+	{DDCMON_SYSCTL_TIMING8, "timing8", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_standard_timing},
+	{DDCMON_SYSCTL_MAXCLOCK, "maxclock", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &ddcmon_maxclock},
 	{0}
 };
 
@@ -163,6 +231,16 @@ int ddcmon_detect(struct i2c_adapter *adapter, int address,
 	new_client->flags = 0;
 
 	/* Now, we do the remaining detection. */
+	if (checksum) {
+		int cs = 0;
+		/* prevent 24RF08 corruption (just in case) */
+		i2c_smbus_write_quick(new_client, 0);
+		for (i = 0; i < 0x80; i++)
+			cs += i2c_smbus_read_byte_data(new_client, i);
+		if ((cs & 0xff) != 0)
+			goto ERROR1;
+	}
+
 	/* Verify the first 8 locations 0x00FFFFFFFFFFFF00 */
 	/* Allow force and force_ddcmon arguments */
 	if(kind < 0)
@@ -273,11 +351,11 @@ void ddcmon_idcall(struct i2c_client *client, int operation,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		ddcmon_update_client(client);
-		results[0] = data->data[DDCMON_REG_ID + 1] |
-		             (data->data[DDCMON_REG_ID] << 8) |
-		             (data->data[DDCMON_REG_ID + 3] << 16) |
-		             (data->data[DDCMON_REG_ID + 2] << 24);
-		*nrels_mag = 1;
+		results[0] = data->data[DDCMON_REG_MAN_ID + 1] |
+		             (data->data[DDCMON_REG_MAN_ID] << 8);
+		results[1] = data->data[DDCMON_REG_PROD_ID + 1] |
+		             (data->data[DDCMON_REG_PROD_ID] << 8);
+		*nrels_mag = 2;
 	}
 }
 
@@ -307,20 +385,51 @@ void ddcmon_sync(struct i2c_client *client, int operation,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		ddcmon_update_client(client);
 		*nrels_mag = 4;
-		/* look for sync entry */
+		/* look for monitor limits entry */
 		for(i = DDCMON_REG_TIMBASE;
 		    i < DDCMON_REG_TIMBASE +
 		        (DDCMON_REG_TIMNUM * DDCMON_REG_TIMINCR);
 		    i += DDCMON_REG_TIMINCR) {
-			if(data->data[i] == 0) {
+			if (data->data[i] == 0x00
+			 && data->data[i + 1] == 0x00
+			 && data->data[i + 2] == 0x00
+			 && data->data[i + 3] == 0xfd) {
 				for(j = 0; j < 4; j++)
-					results[j] = data->data[i + j +
-					                DDCMON_REG_TIMOFFSET];
+					results[j] = data->data[i + j + 5];
 				return;
 			}
 		}
 		for(j = 0; j < 4; j++)
 			results[j] = 0;
+	}
+}
+
+void ddcmon_maxclock(struct i2c_client *client, int operation,
+		    int ctl_name, int *nrels_mag, long *results)
+{
+	int i;
+	struct ddcmon_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		ddcmon_update_client(client);
+		*nrels_mag = 1;
+		/* look for monitor limits entry */
+		for(i = DDCMON_REG_TIMBASE;
+		    i < DDCMON_REG_TIMBASE +
+		        (DDCMON_REG_TIMNUM * DDCMON_REG_TIMINCR);
+		    i += DDCMON_REG_TIMINCR) {
+			if (data->data[i] == 0x00
+			 && data->data[i + 1] == 0x00
+			 && data->data[i + 2] == 0x00
+			 && data->data[i + 3] == 0xfd) {
+				results[0] = (data->data[i + 9] == 0xff ?
+				             0 : data->data[i + 9] * 10);
+				return;
+			}
+		}
+		results[0] = 0;
 	}
 }
 
@@ -333,9 +442,9 @@ void ddcmon_timings(struct i2c_client *client, int operation,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		ddcmon_update_client(client);
-		results[0] = data->data[DDCMON_REG_TIMINGS] |
-		             (data->data[DDCMON_REG_TIMINGS + 1] << 8) |
-		             (data->data[DDCMON_REG_TIMINGS + 2] << 16);
+		results[0] = data->data[DDCMON_REG_ESTABLISHED_TIMINGS] |
+		             (data->data[DDCMON_REG_ESTABLISHED_TIMINGS + 1] << 8) |
+		             (data->data[DDCMON_REG_ESTABLISHED_TIMINGS + 2] << 16);
 		*nrels_mag = 1;
 	}
 }
@@ -357,6 +466,105 @@ void ddcmon_serial(struct i2c_client *client, int operation,
 	}
 }
 
+void ddcmon_time(struct i2c_client *client, int operation,
+		 int ctl_name, int *nrels_mag, long *results)
+{
+	struct ddcmon_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		ddcmon_update_client(client);
+		results[0] = data->data[DDCMON_REG_YEAR] + 1990;
+		results[1] = data->data[DDCMON_REG_WEEK];
+		*nrels_mag = 2;
+	}
+}
+
+void ddcmon_edid(struct i2c_client *client, int operation,
+		 int ctl_name, int *nrels_mag, long *results)
+{
+	struct ddcmon_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		ddcmon_update_client(client);
+		results[0] = data->data[DDCMON_REG_EDID_VER];
+		results[1] = data->data[DDCMON_REG_EDID_REV];
+		*nrels_mag = 2;
+	}
+}
+
+void ddcmon_gamma(struct i2c_client *client, int operation,
+		 int ctl_name, int *nrels_mag, long *results)
+{
+	struct ddcmon_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 2;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		ddcmon_update_client(client);
+		results[0] = 100 + data->data[DDCMON_REG_GAMMA];
+		*nrels_mag = 1;
+	}
+}
+
+void ddcmon_dpms(struct i2c_client *client, int operation,
+		 int ctl_name, int *nrels_mag, long *results)
+{
+	struct ddcmon_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		ddcmon_update_client(client);
+		results[0] = data->data[DDCMON_REG_DPMS_FLAGS];
+		*nrels_mag = 1;
+	}
+}
+
+void ddcmon_standard_timing(struct i2c_client *client, int operation,
+		 int ctl_name, int *nrels_mag, long *results)
+{
+	struct ddcmon_data *data = client->data;
+	int nr = ctl_name - DDCMON_SYSCTL_TIMING1;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		ddcmon_update_client(client);
+		/* If both bytes of the timing are 0x00 or 0x01, then the timing
+		   slot is unused. */
+		if ((data->data[DDCMON_REG_STANDARD_TIMINGS + nr * 2]
+		    | data->data[DDCMON_REG_STANDARD_TIMINGS + nr * 2 + 1]) & 0xfe) {
+			results[0] = (data->data[DDCMON_REG_STANDARD_TIMINGS + nr * 2] + 31) * 8;
+			switch (data->data[DDCMON_REG_STANDARD_TIMINGS + nr * 2 + 1] >> 6) {
+				/* We don't care about rounding issues there, it really
+				   should be OK without it. */
+				case 0x00:
+					results[1] = results[0]; /* unconfirmed */
+					break;
+				case 0x01:
+					results[1] = results[0] * 3 / 4;
+					break;
+				case 0x02:
+					results[1] = results[0] * 4 / 5;
+					break;
+				case 0x03:
+					results[1] = results[0] * 9 / 16;
+					break;
+			}
+			results[2] = (data->data[DDCMON_REG_STANDARD_TIMINGS + nr * 2 + 1] & 0x3f) + 60;
+		} else {
+			results[0] = 0;
+			results[1] = 0;
+			results[2] = 0;
+		}
+		*nrels_mag = 3;
+	}
+}
+
 static int __init sm_ddcmon_init(void)
 {
 	printk("ddcmon.o version %s (%s)\n", LM_VERSION, LM_DATE);
@@ -371,8 +579,9 @@ static void __exit sm_ddcmon_exit(void)
 
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, "
-	      "Philip Edelbrock <phil@netroedge .com>, "
-	      "and Mark Studebaker <mdsxyz123@yahoo.com>");
+	      "Philip Edelbrock <phil@netroedge.com>, "
+	      "Mark Studebaker <mdsxyz123@yahoo.com> "
+		  "and Jean Delvare <khali@linux-fr.org>");
 MODULE_DESCRIPTION("DDCMON driver");
 
 module_init(sm_ddcmon_init);

@@ -2638,27 +2638,31 @@ void print_maxilife(const sensors_chip_name *name)
 void print_ddcmon(const sensors_chip_name *name)
 {
 	char  *label = NULL;
-	double a, b;
+	double a, b, c;
 	int    valid, i;
-	char  s[8];
-        
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_ID, &label,&valid) &&
-       !sensors_get_feature(*name, SENSORS_DDCMON_ID, &a)) {
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_MAN_ID, &label, &valid)
+    && !sensors_get_feature(*name, SENSORS_DDCMON_MAN_ID, &a)) {
       if (valid) {
-	i = (int) a;	
-	s[0] = ((i >> 10) & 0x1f) | 0x40;
-	s[1] = ((i >> 5) & 0x1f) | 0x40;
-	s[2] = (i & 0x1f) | 0x40;
-	s[3] = ((i >> 20) & 0x0f) + '0';
-	s[4] = ((i >> 16) & 0x0f) + '0';
-	s[5] = ((i >> 28) & 0x0f) + '0';
-	s[6] = ((i >> 24) & 0x0f) + '0';
-	s[7] = 0;
+         i = (int) a;	
          print_label(label, 24);
-         printf("%s\n", s);
+         printf("%c%c%c\n",
+          ((i >> 10) & 0x1f) + 'A' - 1, ((i >> 5) & 0x1f) + 'A' - 1,
+          (i & 0x1f) + 'A' - 1);
       }
    } else
       printf("ERROR: data 1\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_PROD_ID, &label, &valid)
+    && !sensors_get_feature(*name, SENSORS_DDCMON_PROD_ID, &a)) {
+      if (valid) {
+         i = (int) a;	
+         print_label(label, 24);
+         printf("0x%04X\n", i);
+      }
+   } else
+      printf("ERROR: data 2\n");
    free_the_label(&label);
 
    if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_SERIAL, &label,&valid) &&
@@ -2668,7 +2672,29 @@ void print_ddcmon(const sensors_chip_name *name)
          printf("%d\n", (int) a);
       }
    } else
-      printf("ERROR: data 2\n");
+      printf("ERROR: data 3\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_YEAR, &label, &valid)
+    && !sensors_get_feature(*name, SENSORS_DDCMON_YEAR, &a)
+    && !sensors_get_feature(*name, SENSORS_DDCMON_WEEK, &b)) {
+      if (valid) {
+         print_label(label, 24);
+         printf("%d-W%d\n", (int) a, (int) b);
+      }
+   } else
+      printf("ERROR: data 4\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_EDID_VER, &label, &valid)
+    && !sensors_get_feature(*name, SENSORS_DDCMON_EDID_VER, &a)
+    && !sensors_get_feature(*name, SENSORS_DDCMON_EDID_REV, &b)) {
+      if (valid) {
+         print_label(label, 24);
+         printf("%d.%d\n", (int) a, (int) b);
+      }
+   } else
+      printf("ERROR: data 5\n");
    free_the_label(&label);
 
    if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_VERSIZE, &label,&valid) &&
@@ -2679,31 +2705,148 @@ void print_ddcmon(const sensors_chip_name *name)
          printf("%dx%d\n", (int) a, (int) b);
       }
    } else
-      printf("ERROR: data 3\n");
+      printf("ERROR: data 6\n");
    free_the_label(&label);
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_GAMMA, &label, &valid)
+    && !sensors_get_feature(*name, SENSORS_DDCMON_GAMMA, &a)) {
+      if (valid) {
+         print_label(label, 24);
+         printf("%.02f\n", a);
+      }
+   } else
+      printf("ERROR: data 7\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_DPMS, &label, &valid)
+    && !sensors_get_feature(*name, SENSORS_DDCMON_DPMS, &a)) {
+      if (valid) {
+         i = (int) a;
+         print_label(label, 24);
+         if (i & 0xe0) {
+            printf("%s%s%s%s%s\n",
+               i & 0x20 ? "Active Off" : "",
+               (i & 0x40) && (i & 0x20) ? ", ": "",
+               i & 0x40 ? "Suspend" : "",
+               (i & 0x80) && (i & 0x60) ? ", ": "",
+               i & 0x80 ? "Standby" : "");
+         } else {
+            printf("None supported\n");
+         }
+      }
+   } else
+      printf("ERROR: data 8\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_TIMINGS, &label,&valid) &&
+       !sensors_get_feature(*name, SENSORS_DDCMON_TIMINGS, &a)) {
+      if (valid) {
+         i = (int) a;
+         if (i & 0x03) { /* 720x400 */
+            print_label(label, 24);
+            printf("720x400 @ %s%s%s Hz\n",
+               i & 0x01 ? "70" : "",
+               (i & 0x02) && (i & 0x01) ? "/" : "",
+               i & 0x02 ? "88" : "");
+         }
+         if (i & 0x3c) { /* 640x480 */
+            print_label(label, 24);
+            printf("640x480 @ %s%s%s%s%s%s%s Hz\n",
+               i & 0x04 ? "60" : "",
+               (i & 0x08) && (i & 0x04) ? "/" : "",
+               i & 0x08 ? "67" : "",
+               (i & 0x10) && (i & 0x0c) ? "/" : "",
+               i & 0x10 ? "72" : "",
+               (i & 0x20) && (i & 0x1c) ? "/" : "",
+               i & 0x20 ? "75" : "");
+         }
+         i >>= 6;
+         if (i & 0x0f) { /* 800x600 */
+            print_label(label, 24);
+            printf("800x600 @ %s%s%s%s%s%s%s Hz\n",
+               i & 0x01 ? "56" : "",
+               (i & 0x02) && (i & 0x01) ? "/" : "",
+               i & 0x02 ? "60" : "",
+               (i & 0x04) && (i & 0x03) ? "/" : "",
+               i & 0x04 ? "72" : "",
+               (i & 0x08) && (i & 0x07) ? "/" : "",
+               i & 0x08 ? "75" : "");
+         }
+         if (i & 0x10) { /* 832x624 */
+            print_label(label, 24);
+            printf("832x624 @ 75 Hz\n");
+         }
+         i >>= 5;
+         if (i & 0x0f) { /* 1024x768 */
+            print_label(label, 24);
+            printf("1024x768 @ %s%s%s%s%s%s%s Hz\n",
+               i & 0x01 ? "87i" : "",
+               (i & 0x02) && (i & 0x01) ? "/" : "",
+               i & 0x02 ? "60" : "",
+               (i & 0x04) && (i & 0x03) ? "/" : "",
+               i & 0x04 ? "70" : "",
+               (i & 0x08) && (i & 0x07) ? "/" : "",
+               i & 0x08 ? "75" : "");
+         }
+         if (i & 0x100) { /* 1152x870 */
+            print_label(label, 24);
+            printf("1152x870 @ 75 Hz\n");
+         }
+         if (i & 0x10) { /* 1280x1024 */
+            print_label(label, 24);
+            printf("1280x1024 @ 75 Hz\n");
+         }
+      }
+   } else
+      printf("ERROR: data 9\n");
+   free_the_label(&label);
+
+   for(i = 0; i < 8; i++) {
+      if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_TIMING1_HOR + i * 3, &label, &valid)
+       && !sensors_get_feature(*name, SENSORS_DDCMON_TIMING1_HOR + i * 3, &a)
+       && !sensors_get_feature(*name, SENSORS_DDCMON_TIMING1_VER + i * 3, &b)
+       && !sensors_get_feature(*name, SENSORS_DDCMON_TIMING1_REF + i * 3, &c)) {
+         if (valid && ((int) a) != 0) {
+            print_label(label, 24);
+            printf("%dx%d @ %d Hz\n", (int) a, (int) b, (int) c);
+         }
+      } else
+         printf("ERROR: data 10-%d\n", i+1);
+      free_the_label(&label);
+   }
+   
 
    if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_VERSYNCMIN, &label,&valid) &&
        !sensors_get_feature(*name, SENSORS_DDCMON_VERSYNCMIN, &a) &&
        !sensors_get_feature(*name, SENSORS_DDCMON_VERSYNCMAX, &b)) {
-      if (valid) {
+      if (valid && ((int) a) != 0) {
          print_label(label, 24);
          printf("%d-%d\n", (int) a, (int) b);
       }
    } else
-      printf("ERROR: data 4\n");
+      printf("ERROR: data 11\n");
    free_the_label(&label);
 
    if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_HORSYNCMIN, &label,&valid) &&
        !sensors_get_feature(*name, SENSORS_DDCMON_HORSYNCMIN, &a) &&
        !sensors_get_feature(*name, SENSORS_DDCMON_HORSYNCMAX, &b)) {
-      if (valid) {
+      if (valid && ((int) a) != 0) {
          print_label(label, 24);
          printf("%d-%d\n", (int) a, (int) b);
       }
    } else
-      printf("ERROR: data 5\n");
+      printf("ERROR: data 12\n");
    free_the_label(&label);
 
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_MAXCLOCK, &label, &valid)
+    && !sensors_get_feature(*name, SENSORS_DDCMON_MAXCLOCK, &a)) {
+      if (valid && ((int) a) != 0) {
+         print_label(label, 24);
+         printf("%d\n", (int) a);
+      }
+   } else
+      printf("ERROR: data 13\n");
+   free_the_label(&label);
 }
 
 /*
