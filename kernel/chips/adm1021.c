@@ -21,7 +21,7 @@
 
 #include <linux/version.h>
 #include <linux/module.h>
-#include <linux/malloc.h>
+#include <linux/slab.h>
 #include <linux/i2c.h>
 #include "sensors.h"
 #include "version.h"
