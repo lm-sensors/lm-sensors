@@ -123,6 +123,13 @@ see useful_addresses.html.
   This script tests the pwm (pulse width modulation) outputs of sensors
   for their effect on the fans.
 
+* prog/pwm/pwmconfig (shell script, not installed)
+  Extended version of pwmtest, helps setup configfile for fancontrol
+
+* prog/pwm/fancontrol (shell script, not installed)
+  Controls fanspeeds responding to changes on temperature sensors.
+  Configuration through pwmconfig.
+
 * prog/rrd/sens_update_rrd (written in bash, not installed)
   This script gathers sensors data and adds it to a round robin database
   (RRD). RRD is then used to display the graphed data in web pages.
