@@ -2,7 +2,7 @@
 
 INSTALLATION INSTRUCTIONS
 
-REQUIRES i2c-2.6.6 or later!!!
+REQUIRES i2c-2.7.0 or later!!!
 
 FOR 2.5 KERNELS, we do not recommend attempting to compile this package.
                  Use kernel patches linked from our download page instead!!!
@@ -43,13 +43,13 @@ NOTE: PLEASE READ THE DOCUMENTATION IN THE DOC SUBDIRECTORY IF YOU GET STUCK!
 Installing the i2c package
 ==========================
 
-Note: as of kernel 2.3.34, the new i2c code is integrated into the
-mainstream kernels. You MAY be able to skip this whole step if you use kernel
-2.3.34 or later, but it is likely that you will have compilation problems.
-We strongly recommend that you download and install the i2c package with
-the same version number as the lm_sensors package.
+Note: as of kernel 2.3.34, the i2c code is integrated into the
+mainstream kernels. Unfortunately, this lm_sensors release REQUIRES
+i2c-2.7.0 or later, which is not in kernels through 2.4.19.
+Therefore, you must download and install the i2c package with
+the same version number or higher as this lm_sensors package.
 
-As of version 2.4.0 of lm_sensors, all i2c components are distributed in
+All i2c components are distributed in
 a separate package. There are install instructions in that package. If
 you want to use compilation option 2 (patching the kernel) for lm_sensors,
 you will have to use compilation option 3 (patching the kernel) for i2c

@@ -17,8 +17,8 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.6.6 (200211??)
-  NOTE: Requires i2c-2.6.6 or newer.
+2.7.0 (200211??)
+  NOTE: Requires i2c-2.7.0 or newer.
   File doc/busses/i2c-ali1535: Add license, miscellaneous changes
   File doc/busses/i2c-ali15x3: Add license, miscellaneous changes
   File doc/busses/i2c-sis645: Add license
@@ -47,8 +47,11 @@ ask CVS about it:
                      add support for SiS645DX/961 and SiS735
   Module i2c-viapro: Add support for VT8233A (new ID 0x3177) and VT8235
   Module lm87: Add multiple VRM version support
+  Module vt1211: Fix inx limits and alarms; fix in0
+  Module vt8231: Fix inx limits and alarms; fix in0
   Module w83781d: Fix in0/in1 initialization
   Module smartbatt: New
+  Modules (several): Remove #ifndefs, require i2c-2.7.0
   Program decode-dimms.pl: Code cleanup; valid HTML; better HTML output;
                            stop decoding on checksum error
   Program dmidecode: Fix read bug; upgrade to version 1.8
@@ -57,6 +60,7 @@ ask CVS about it:
                         handle unknown prefix with suggestion
   Program lm_sensors.init: Remove spaces bug; add green/red output
   Program mkpatch: Fix dmi_scan module compile
+  Program rrd: Add sanity limits to newly-created RRD.
   Program sensord: (v0.6.2) Add sanity limits to newly-created RRD.
   Program sensors: Add support for MC1066, Rambus Rimms;
                    fix w83781d temp3 alarm; fix gl518sm rev 0x00 recognition;

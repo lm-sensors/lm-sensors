@@ -1,12 +1,14 @@
 =============================================================================
+
      FOR QUICK INSTALLATION INSTRUCTIONS SEE THE 'QUICKSTART' FILE.
      FOR FULL INSTALLATION INSTRUCTIONS SEE THE 'INSTALL' FILE.
-     FOR THE FAQ SEE THE 'doc/FAQ' FILE.
+     FOR THE FAQ SEE THE 'doc/FAQ' or 'doc/lm_sensors-FAQ.html' FILES.
+
 =============================================================================
 
 OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
-REQUIRES kernel 2.4.13 or later, or i2c-2.6.1 or later!!!
+           !!! THIS PACKAGE REQUIRES i2c-2.7.0 or later!!!
 
 FOR 2.5 KERNELS, we do not recommend attempting to compile this package.
                  Use kernel patches linked from our download page instead!!!
@@ -17,26 +19,26 @@ This is the completely rewritten version 2 of lm_sensors, a collection of
 modules for general SMBus access and hardware monitoring.
 Version 1 is now officially unsupported.
 
-WARNING! Starting with lm_sensors version 2.5.0, only kernels 2.2.0 and
-later are supported. Use lm_sensors version 2.4.5 if you use an older
-kernel.
+WARNING! This package will compile for 2.2 and 2.4 kernels only.
+Use lm_sensors-2.4.5 for 2.0 kernels.
+Use the kernel patches linked from our download page for 2.5 kernels.
+
+WARNING! You must get the latest i2c package, i2c-2.7.0,
+EVEN IF your kernel does contain i2c support!!!!!!!!!
+
+Kernels 2.3.34 and later, and all 2.4.x kernels, contain the
+I2C package. Kernels 2.4.13 - 2.4.19 contain i2c-2.6.1,
+which is NOT sufficient for compilation of this package.
+
+See the lm_sensors download page for guidance:
+  http://secure.netroedge.com/~lm78/download.html
+
 
 WARNING! If you downloaded this package through our CVS archive, you walk
 the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
 
-WARNING! You may also need the latest i2c package,
-EVEN IF your kernel does contain i2c support!!!!!!!!!,
-unless i2c came bundled with lm_sensors.
-
-Kernels 2.3.34 and later, and all 2.4.x kernels, contain the
-I2C package. Kernel 2.4.13 contains i2c-2.6.1, which is sufficient
-for most users. However, if you have problems compiling,
-you may still need to download and install the latest I2C version.
-
-See the lm_sensors download page for guidance:
-  http://secure.netroedge.com/~lm78/download.html
-
+=============================================================================
 
 At least the following I2C/SMBus adapters are supported:
   Acer Labs M1533, M1535, and M1543C
@@ -87,6 +89,8 @@ We also support some miscellaneous chips:
   Philips Semiconductors PCF8574, PCF8591  
   DDC Monitor embedded EEPROMs
   SDRAM Dimms with Serial Presence Detect EEPROMs
+  Smart Battery sensors
+  IPMI-BMC sensors
 
 
 See our New Drivers page http://www.lm-sensors.nu/~lm78/newdrivers.html
@@ -146,7 +150,7 @@ report it works for you. But please try to read the documentation and
 FAQ before you ask any questions!
 
 The latest version of this package can always be found on our homepage:
-http://www.netroedge.com/~lm78. Pre-release versions can be retrieved
+http://secure.netroedge.com/~lm78. Pre-release versions can be retrieved
 through anonymous CVS; see doc/cvs for more information.
 
 This whole package is copyright (c) 1998 - 2002 by Frodo Looijaard and
