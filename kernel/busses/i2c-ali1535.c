@@ -67,6 +67,10 @@
 
 #include <linux/init.h>
 
+#ifndef DECLARE_MUTEX
+#define DECLARE_MUTEX(name)  struct semaphore name = MUTEX
+#endif /* def DECLARE_MUTEX */
+
 /* ALI1535 SMBus address offsets */
 #define SMBHSTSTS (0 + ali1535_smba)
 #define SMBHSTTYP (1 + ali1535_smba)
