@@ -26,6 +26,11 @@
 #include <linux/ipmi.h>
 #include <linux/init.h>
 #include <asm/io.h>
+/* for kernel thread ... */
+#include <asm/atomic.h>
+#include <asm/semaphore.h>
+#include <linux/smp_lock.h>
+#include <asm/errno.h>
 #include "version.h"
 
 /*
@@ -60,6 +65,7 @@ static int bmcsensors_command(struct i2c_client *client, unsigned int cmd,
 
 static void bmcsensors_update_client(struct i2c_client *client);
 static void bmcsensors_reserve_sdr(void);
+static void bmc_do_pause(unsigned int amount); /* YJ for debug */
 
 
 static void bmcsensors_all(struct i2c_client *client, int operation,
@@ -158,7 +164,8 @@ static u16 nextrecord;
 static int errorcount;
 
 enum states {STATE_INIT, STATE_RESERVE, STATE_SDR, STATE_SDRPARTIAL,
-             STATE_READING, STATE_UNCANCEL, STATE_DONE};
+             STATE_READING, STATE_UNCANCEL, STATE_PROCTABLE, STATE_DONE};
+/* YJ : added extra state STATE_PROCTABLE for thread activity */
 static int state;
 static int receive_counter;
 
@@ -181,10 +188,15 @@ static int receive_counter;
 /* do we really need maximums per-type? */
 #define STYPE_MAX	4		/* the last sensor type we are interested in */
 static u8 bmcs_count[STYPE_MAX + 1];
-static const u8 bmcs_max[STYPE_MAX + 1] = {0, 20, 20, 20, 20};
+static const u8 bmcs_max[STYPE_MAX + 1] = {0, 20, 40, 20, 20};
+/* YJ: on poweredge 1750, we need                 ^^            */
 
 /************************************/
-
+/* YJ ... */
+static int thread_pid= 0;
+static DECLARE_MUTEX_LOCKED(bmc_sem);
+/* ... YJ */
+/************************************/
 
 /* unpack based on string type, convert to normal, null terminate */
 static void ipmi_sprintf(u8 * to, u8 * from, u8 type, u8 length)
@@ -310,6 +322,8 @@ static void bmcsensors_build_proc_table()
 	int temps = 0, volts = 0, currs = 0, fans = 0;
 	u8 id[SDR_MAX_UNPACKED_ID_LENGTH];
 
+	
+	printk(KERN_INFO "bmcsensors.o: building proc table\n");
 	if(!(bmcsensors_dir_table = kmalloc((sdrd_count + 1) * sizeof(struct ctl_table), GFP_KERNEL))) {
 		printk(KERN_ERR "bmcsensors.o: no memory\n");
 		return; /* do more than this */	/* ^^ add 1 or more for alarms, etc. */
@@ -451,6 +465,7 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 		ipmi_sdr_partial_size /= 2;
 		if(ipmi_sdr_partial_size < 8) {
 			printk(KERN_INFO "bmcsensors.o: IPMI buffers too small, giving up\n");
+			up (&bmc_sem); /* should wait for thread exit ! */
 			return STATE_DONE;
 		}
 #ifdef DEBUG
@@ -482,6 +497,9 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 	}
 
 	nextrecord = (data[2] << 8) | data[1];
+	/* printk(KERN_INFO "bmcsensors.o: nextrecord %d \n", nextrecord); */
+
+
 	type = data[6];
 	if(type == 1 || type == 2) {		/* known SDR type */
 /*
@@ -555,6 +573,8 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 				}
 				bmcs_count[stype]++;
 				sdrd_count++;
+				if (sdrd_count>=MAX_SDR_ENTRIES) nextrecord = 0xffff; /*YJ*/
+
 			}
 		}
 #ifdef DEBUG
@@ -581,16 +601,26 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 		printk(KERN_INFO "bmcsensors.o: Skipping SDR type 0x%x\n", type);
 #endif
 	}
+	if (nextrecord>=6224) {
+	  nextrecord = 0xffff; /*YJ stop sensor scan on poweredge 1750 */
+	}
 			
 	if(nextrecord == 0xFFFF) {
 		if(sdrd_count == 0) {
 			printk(KERN_INFO "bmcsensors.o: No recognized sensors found.\n");
 			/* unregister?? */
+			rstate = STATE_DONE;
+			up (&bmc_sem); /* should wait for thread exit !!! */
 		} else {
-			bmcsensors_build_proc_table();
+  	          /* YJ ...*/
+		  printk(KERN_INFO "bmcsensors.o: all sensors detected\n");
+		  rstate = STATE_PROCTABLE;
+		  /* YJ bmcsensors_build_proc_table() call by thread */
+		  /* ... YJ */
 		}
-		rstate = STATE_DONE;
+
 	} else {
+
 		bmcsensors_get_sdr(0, nextrecord, 0);
 	}
 	return rstate;
@@ -614,6 +644,17 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 		case STATE_SDR:
 		case STATE_SDRPARTIAL:
 			state = bmcsensors_rcv_sdr_msg(msg, state);
+			/*YJ ...*/
+			if (state==STATE_PROCTABLE){
+
+#ifdef DEBUG
+			  printk(KERN_DEBUG "releasing thread\n");
+#endif
+
+			  up (&bmc_sem);
+			}
+			 /*YJ bmcsensors_build_proc_table() called by thread */ 
+			/* ... YJ */
 			break;
 
 		case STATE_READING:
@@ -631,6 +672,7 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 			break;
 
 		case STATE_DONE:
+	        case STATE_PROCTABLE:
 			break;
 
 		default:
@@ -649,6 +691,7 @@ static void bmcsensors_msg_handler(struct ipmi_recv_msg *msg,
 			printk(KERN_ERR
 			       "bmcsensors.o: Too many reservations cancelled, giving up\n");
 			state = STATE_DONE;
+			up (&bmc_sem); /* YJ : should make sure thread exited ! */
 		} else {
 #ifdef DEBUG
 			printk(KERN_DEBUG
@@ -657,7 +700,9 @@ static void bmcsensors_msg_handler(struct ipmi_recv_msg *msg,
 			bmcsensors_reserve_sdr();
 			state = STATE_UNCANCEL;
 		}
-	} else if (msg->msg.data[0] != 0 && msg->msg.data[0] != 0xca) {
+	} else if (msg->msg.data[0] != 0 && msg->msg.data[0] != 0xca &&
+	           msg->msg.data[0] != 0xce) {
+	  /* YJ : accept  0xce */
 		printk(KERN_ERR
 		       "bmcsensors.o: Error 0x%x on cmd 0x%x/0x%x; state = %d; probably fatal.\n",
 		       msg->msg.data[0], msg->msg.netfn & 0xfe, msg->msg.cmd, state);
@@ -695,6 +740,7 @@ static void bmcsensors_reserve_sdr(void)
 	tx_message.cmd = IPMI_RESERVE_SDR;
 	tx_message.data_len = 0;
 	tx_message.data = NULL;
+	printk(KERN_INFO "bmcsensors.o: reserve_sdr...\n");
 	bmcsensors_send_message(&tx_message);
 }
 
@@ -733,8 +779,12 @@ static void bmcsensors_get_reading(struct i2c_client *client, int i)
 
 static int bmcsensors_attach_adapter(struct i2c_adapter *adapter)
 {
-	if(adapter->algo->id != I2C_ALGO_IPMI)
+	printk(KERN_INFO "bmcsensors.o: attach_adapter...\n");
+ 
+	if(adapter->algo->id != I2C_ALGO_IPMI){
+	  printk(KERN_INFO "bmcsensors.o: attach_adapter, expected 0x%x, got 0x%x\n", I2C_ALGO_IPMI, adapter->algo->id);
 		return 0;
+	}
 
 	if(bmcsensors_initialized >= 2) {
 		printk(KERN_INFO "bmcsensors.o: Additional IPMI adapter not supported\n");
@@ -965,15 +1015,90 @@ static void bmcsensors_alarms(struct i2c_client *client, int operation, int ctl_
 }
 #endif
 
+/* YJ ... */
+static int bmc_thread(void *dummy){
+
+  lock_kernel();
+  daemonize();
+  unlock_kernel();
+
+  strcpy(current->comm, "bmc-sensors");
+
+  if(down_interruptible(&bmc_sem)) {
+
+   printk("exiting...");
+
+   thread_pid= 0;
+   up (&bmc_sem);
+
+   return 0;
+  }
+
+  if (state == STATE_PROCTABLE){
+
+    bmcsensors_build_proc_table();
+    
+    state = STATE_DONE;
+    
+    printk(KERN_INFO "bmcsensors.o: bmcsensor thread done\n" );
+    
+  }
+
+  thread_pid= 0;
+ 
+  up (&bmc_sem);
+
+  return 0;
+}
+/* ... YJ */
+
 static int __init sm_bmcsensors_init(void)
 {
 	printk(KERN_INFO "bmcsensors.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	/* YJ ... */
+	init_MUTEX_LOCKED(&bmc_sem);
+
+	thread_pid= kernel_thread(bmc_thread, NULL, 0);
+
+	if (thread_pid<0){
+	  printk(KERN_ERR "bmcsensors.o : Could not initialize bmc thread.  Aborting\n");
+	  return 0;
+	}
+	/* ... YJ */
+
 	return i2c_add_driver(&bmcsensors_driver);
 }
 
 static void __exit sm_bmcsensors_exit(void)
 {
-	i2c_del_driver(&bmcsensors_driver);
+  int j;
+  j= 0;
+  /* YJ ... */
+  printk(KERN_INFO "bmcsensors.o sleeping a while\n");
+  while( (j++ < 50)){
+    bmc_do_pause(HZ / 25);
+  }
+  if (thread_pid > 0){
+    printk(KERN_INFO "bmcsensors.o stopping kernel thread\n");
+    state= STATE_DONE;
+    j= 0;
+    up (&bmc_sem);
+    printk(KERN_INFO "bmcsensors.o waiting...\n");
+    /* make sure kernel thread does not access driver memory any more */
+    while((thread_pid > 0)&& (j++ < 100)){
+      bmc_do_pause(HZ / 25);
+    }
+    printk(KERN_INFO "bmcsensors.o OK\n");
+  }
+  j= 0;
+  /* sleep for debug... not necessary ? */
+  printk(KERN_INFO "bmcsensors.o sleeping again\n");
+  while( (j++ < 50)){
+    bmc_do_pause(HZ / 25);
+  }
+  /* ...YJ */
+  printk(KERN_INFO "bmcsensors.o i2c cleanup\n");
+  i2c_del_driver(&bmcsensors_driver);
 }
 
 
