@@ -1905,6 +1905,8 @@ sub generate_modprobes
     my ($dev_nr,$type,$adap,$algo) = /^i2c-(\S+)\s+(\S+)\s+(.*?)\s*\t\s*(.*?)\s+$/;
     next if ($type eq "dummy");
     $adapters[$dev_nr]->{driver} = find_adapter_driver($adap,$algo);
+    $adapters[$dev_nr]->{adapname} = $adap;
+    $adapters[$dev_nr]->{algoname} = $algo;
   }
   close INPUTFILE;
 
@@ -1933,7 +1935,7 @@ sub generate_modprobes
   for ($i = 0; $i < $nr; $i++) {
     foreach $adap (@adapters) {
       if ($adap->{driver} eq "UNKNOWN") {
-        $modprobes .= "# modprobe some unknown, currently loaded adapter(s)";
+        $modprobes .= "# modprobe unknown adapter ".$adap->{adapname}." using ". $adap->{algoname}."\n";
       } else {
         $modprobes .= "modprobe $adap->{driver}\n" if (defined($adap->{nr_later}) and $adap->{nr_later} == $i) and not $modprobes =~ /modprobe $adap->{driver}\n/;
       }
