@@ -76,7 +76,7 @@ sensor reading results. Why?
   4.23C What is at I2C addresses 0x30 - 0x37?
 4.24 Sensors-detect doesn't work at all
   4.24A Sensors-detect says "Couldn't open /proc/bus/i2c?!?"
-  4.24B Sensors-detect says "Can't open /dev/i2c[-]0"
+  4.24B Sensors-detect says "Can't open /dev/i2c[-/]0"
   4.24C Sensors-detect doesn't find any sensors
 
 5 How to Ask for Help  
@@ -717,11 +717,12 @@ We don't know the exact cause.
 was not loaded and you did not run sensors-detect as root.
 
 
-4.24B Sensors-detect says "Can't open /dev/i2c[-]0"
+4.24B Sensors-detect says "Can't open /dev/i2c[-/]0"
 
-    Your /dev/i2c-0 or /dev/i2c0 (either will work) files do not exist
-(run the script prog/mkdev/mkdev.sh to create them), or you did not
-run sensors-detect as root.
+    Your /dev/i2c-0, /dev/i2c0, or /dev/i2c/0 files do not exist
+or you did not run sensors-detect as root.
+Run the script prog/mkdev/mkdev.sh to create the /dev/i2c-x files.
+Run devfs in the kernel to get the /dev/i2c/x files.
 
 
 4.24C Sensors-detect doesn't find any sensors!
