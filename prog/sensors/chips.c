@@ -1178,8 +1178,7 @@ void print_w83781d(const sensors_chip_name *name)
   int is82d, is83s,valid;
 
   is82d = (!strcmp(name->prefix,"w83782d")) ||
-          (!strcmp(name->prefix,"w83627hf")) ||
-          (!strcmp(name->prefix,"as99127f"));
+          (!strcmp(name->prefix,"w83627hf"));
   is83s = !strcmp(name->prefix,"w83783s");
   if (!sensors_get_feature(*name,SENSORS_W83781D_ALARMS,&cur)) 
     alarms = cur + 0.5;
@@ -1188,9 +1187,12 @@ void print_w83781d(const sensors_chip_name *name)
     alarms = 0;
   }
 
-  if (!sensors_get_feature(*name,SENSORS_W83781D_BEEPS,&cur)) 
+  if (!sensors_get_feature(*name,SENSORS_W83781D_BEEPS,&cur)) {
     beeps = cur + 0.5;
-  else {
+    /* strangely, as99127f beep bits are inverted */
+    if (!strcmp(name->prefix,"as99127f"));
+      beeps = ~beeps;
+  } else {
     printf("ERROR: Can't get beep data!\n");
     beeps = 0;
   }
