@@ -638,12 +638,12 @@ void adm1025_rm_temp(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->temp_max = TEMP_LIMIT_TO_REG(results[0]);
+			data->rtemp_max = TEMP_LIMIT_TO_REG(results[0]);
 			adm1025_write_value(client, ADM1025_REG_RTEMP_HIGH,
 					    data->rtemp_max);
 		}
 		if (*nrels_mag >= 2) {
-			data->temp_min = TEMP_LIMIT_TO_REG(results[1]);
+			data->rtemp_min = TEMP_LIMIT_TO_REG(results[1]);
 			adm1025_write_value(client, ADM1025_REG_RTEMP_LOW,
 					    data->rtemp_min);
 		}
