@@ -1040,13 +1040,13 @@ sub main
       }
     }
     if (@{$$chip{detected}}) {
-      print " Detects correctly:\n";
+      print "  Detects correctly:\n";
       foreach $data (@{$$chip{detected}}) {
         printf "  * Bus `%s'\n".
                "    Busdriver `%s', I2C address 0x%02x\n".
                "    Chip `%s' (confidence: %d)\n",
                $data->{description}, $data->{driver}, $data->{address},
-               $data->{chipname}, $data->{address}, $data->{confidence};
+               $data->{chipname},  $data->{confidence};
       }
     }
     if (@{$$chip{misdetected}}) {
@@ -1056,7 +1056,7 @@ sub main
                "    Busdriver `%s', I2C address 0x%02x\n".
                "    Chip `%s' (confidence: %d)\n",
                $data->{description}, $data->{driver}, $data->{address},
-               $data->{chipname}, $data->{address}, $data->{confidence};
+               $data->{chipname}, $data->{confidence};
       }
     }
   }
