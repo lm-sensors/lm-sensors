@@ -2,6 +2,7 @@ CHECKLIST FOR NEW RELEASES
 ==========================
 
 release:
+- check out i2c and lm_sensors2
 - Update, if necessary, the version number of `sensors' 
   (edit prog/sensors/sensors.c and change the VERSION define)
 - Update if necessary, the version number of libsensors
@@ -11,9 +12,8 @@ release:
 - Update CHANGES
 - Update lm_sensors.lsm and send it to the LSM by mailing it to 
   lsm@execpc.com with the subject `add' (no quotes).
-- Tag the release using CVS ('cvs tag V#-#-#' from the dist root)
-- check out i2c and lm_sensors2
 - update lm_sensors2/version.h, and cvs commit it
+- Tag the release using CVS ('cvs tag V#-#-#' from the dist root)
 - cp lm_sensors2/README.package README
 - remove 'CVS' related files/directories
 - tar it up and post it (sign it!)

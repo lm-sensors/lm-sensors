@@ -13,6 +13,11 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
+2.4.4 (19991201)
+  Addition of the alpha release of AMD 756 SMBus host support.
+  Many fixes and updates to the gl518sm driver
+  Updates and fixes for device detection
+
 2.4.0 (19990920)
   Too much to list. 
   i2c and smbus parts are split off to a separate i2c package.
