@@ -7,15 +7,16 @@ INSTALLATION - SHORT INSTRUCTIONS - NON-KERNEL INSTALLATION
 	- rmdir i2c
 	- ln -s ../i2c i2c
 	- cd i2c
-	- make (ignore 'no such file or directory'  warnings)
+	- make (ignore 'no such file or directory' warnings)
 	- (as root) make install
 	- cd ../lm_sensors2
-	- make (ignore 'no such file or directory'  warnings)
+	- make (ignore 'no such file or directory' warnings)
 	- (as root) make install
-	- prog/mkdev/mkdev.sh        (makes the devices in /dev)
-	- prog/detect/sensors-detect (determines installed hardware)
+	- (as root) prog/mkdev/mkdev.sh        (makes the devices in /dev)
+	- (as root) prog/detect/sensors-detect (determines installed hardware)
 	- Place the 'modprobe' commands output by sensors-detect in a
-	  boot file like /etc/rc.d/rc.multi
+	  boot file like /etc/rc.d/rc.multi.
+	  Make sure it is after 'depmod -a -e' is run.
 	- After those commands, put the line 'sensors -s' in the boot file
 	  to initialize the sensors at boot time
 	- Place the lines output by sensors-detect in the module
