@@ -66,7 +66,7 @@ char rrdBuff[MAX_RRD_SENSORS * RRD_BUFF + 1];
 static char rrdLabels[MAX_RRD_SENSORS][RAW_LABEL_LENGTH + 1];
 
 #define LOADAVG "loadavg"
-#define LOAD_AVERAGE "Load Average * 10"
+#define LOAD_AVERAGE "Load Average"
 
 typedef int (*FeatureFN) (void *data, const char *rawLabel, const char *label, const FeatureDescriptor *feature);
 
@@ -385,7 +385,7 @@ rrdUpdate
         sensorLog (LOG_ERR, "Error reading load average");
         ret = 2;
       } else {
-        sprintf (rrdBuff + strlen (rrdBuff), ":%f", value * 10.0);
+        sprintf (rrdBuff + strlen (rrdBuff), ":%f", value);
       }
       fclose (loadavg);
     }
