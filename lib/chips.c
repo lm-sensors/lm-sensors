@@ -2803,16 +2803,16 @@ static sensors_chip_feature smsc47m1_features[] =
 		scaling:			4							\
 	}
 
-#define LM92_ALARM(_idx,_name,_mapping,_offset)		\
-	{												\
-		number:				_idx,					\
-		name:				_name,					\
-		logical_mapping:	_mapping,				\
-		compute_mapping:	_mapping,				\
-		mode:				SENSORS_MODE_R,			\
-		sysctl:				LM92_SYSCTL_ALARMS,		\
-		offset:				VALUE(_offset),			\
-		scaling:			0						\
+#define LM92_ALARM(_idx,_name,_mapping,_offset)			\
+	{													\
+		number:				_idx,						\
+		name:				_name,						\
+		logical_mapping:	_mapping,					\
+		compute_mapping:	_mapping,					\
+		mode:				SENSORS_MODE_R,				\
+		sysctl:				LM92_SYSCTL_ALARMS,			\
+		offset:				VALUE(_offset),				\
+		scaling:			0							\
 	}
 
 static sensors_chip_feature lm92_features[] =
@@ -2822,9 +2822,7 @@ static sensors_chip_feature lm92_features[] =
 	LM92_TEMP (SENSORS_LM92_TEMP_LOW,"temp_low",SENSORS_LM92_TEMP,SENSORS_MODE_RW,3),
 	LM92_TEMP (SENSORS_LM92_TEMP_CRIT,"temp_crit",SENSORS_LM92_TEMP,SENSORS_MODE_RW,4),
 	LM92_TEMP (SENSORS_LM92_TEMP_HYST,"temp_hyst",SENSORS_LM92_TEMP,SENSORS_MODE_RW,5),
-	LM92_ALARM (SENSORS_LM92_ALARMS_HIGH,"alarms_high",SENSORS_NO_MAPPING,1),
-	LM92_ALARM (SENSORS_LM92_ALARMS_LOW,"alarms_low",SENSORS_LM92_ALARMS_HIGH,2),
-	LM92_ALARM (SENSORS_LM92_ALARMS_CRIT,"alarms_crit",SENSORS_LM92_ALARMS_CRIT,3)
+	LM92_ALARM (SENSORS_LM92_ALARMS,"alarms",SENSORS_NO_MAPPING,1),
 };
 
 sensors_chip_features sensors_chip_features_list[] =

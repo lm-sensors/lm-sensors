@@ -1202,8 +1202,6 @@
 #define SENSORS_LM92_TEMP_CRIT		3	/* RW */
 #define SENSORS_LM92_TEMP_HYST		4	/* RW */
 #define SENSORS_LM92_TEMP			5	/* R */
-#define SENSORS_LM92_ALARMS_HIGH	6	/* R */
-#define SENSORS_LM92_ALARMS_LOW		7	/* R */
-#define SENSORS_LM92_ALARMS_CRIT	8	/* R */
+#define SENSORS_LM92_ALARMS			6	/* R */
 
 #endif /* def LIB_SENSORS_CHIPS_H */

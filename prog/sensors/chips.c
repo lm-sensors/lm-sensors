@@ -3334,18 +3334,14 @@ static void lm92_print_temp (float n_cur,float n_high,float n_low,float n_crit,f
 void print_lm92 (const sensors_chip_name *name)
 {
 	char *label = NULL;
-	double temp[5],alarms[3];
-	int valid,comma = 0;
+	double temp[5];
+	int valid;
 
 	if (fahrenheit) {
 		sprintf (degv,"%cF",176);
 		n
-	if (!sensors_get_feature (*name,SENSORS_LM92_ALARMS_HIGH,alarms) &&
-		!sensors_get_feature (*name,SENSORS_LM92_ALARMS_LOW,alarms + 1) &&
-		!sensors_get_feature (*name,SENSORS_LM92_ALAMRS_CRIT,alarms + 2)) {
-		alarms[0] = (int) (alarms[0] + 0.5);
-		alarms[1] = (int) (alarms[1] + 0.5);
-		alarms[2] = (int) (alarms[2] + 0.5);
+	if (!sensors_get_feature (*name,SENSORS_LM92_ALARMS,temp)) {
+		alarms = *temp + 0.5;
 	} else {
 		printf ("ERROR: Can't get alarm data!\n");
 		return;
@@ -3360,24 +3356,17 @@ void print_lm92 (const sensors_chip_name *name)
 		if (valid) {
 			print_label (label,10);
 			print_temp_info (temp[0],temp[1],temp[2],temp[3],temp[4]);
-			if (alarms[0] || alarms[1] || alarms[2]) {
+			if (alarms) {
 				printf (" ALARMS (");
 
-				if (alarms[0]) {
-					comma = 1;
+				if ((alarms & LM92_ALARM_TEMP_HIGH))
 					printf ("HIGH");
-				}
 
-				if (alarms[1]) {
-					if (comma) printf (",");
-					comma = 1;
-					printf ("LOW");
-				}
+				if (alarms & LM92_ALARM_TEMP_LOW)
+					printf ("%sLOW",(alarms & LM92_ALARM_TEMP_HIGH) ? "," : "");
 
-				if (alarms[2]) {
-					if (comma) printf (",");
-					printf ("CRIT");
-				}
+				if (alarms & LM92_ALARM_TEMP_CRIT)
+					printf ("%sCRIT",(alarms & (LM92_ALARM_TEMP_HIGH | LM92_ALARM_TEMP_LOW)) ? "," : "");
 
 				printf (")");
 			}
