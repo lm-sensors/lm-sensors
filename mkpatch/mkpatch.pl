@@ -729,10 +729,10 @@ sub gen_drivers_i2c_Makefile
       if ($new_format) {
         print OUTPUT << 'EOF';
 obj-$(CONFIG_I2C_ALI15X3)		+= i2c-ali15x3.o
-obj-$(CONFIG_I2C_ALI15X3)		+= i2c-hydra.o
-obj-$(CONFIG_I2C_ALI15X3)		+= i2c-piix4.o
-obj-$(CONFIG_I2C_ALI15X3)		+= i2c-via.o
-obj-$(CONFIG_I2C_ALI15X3)		+= i2c-isa.o
+obj-$(CONFIG_I2C_HYDRA)			+= i2c-hydra.o
+obj-$(CONFIG_I2C_PIIX4)			+= i2c-piix4.o
+obj-$(CONFIG_I2C_VIA)			+= i2c-via.o
+obj-$(CONFIG_I2C_ISA)			+= i2c-isa.o
 EOF
       } else {
         print OUTPUT << 'EOF';
