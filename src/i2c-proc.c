@@ -84,9 +84,6 @@ static struct proc_dir_entry proc_bus_i2c_dir =
     /* size */		0,
     /* ops */		NULL,
     /* get_info */	&read_bus_i2c
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
-    /* fill_inode */    &monitor_bus_i2c
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
   };
 
 /* List of registered entries in /proc/bus */
