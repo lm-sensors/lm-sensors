@@ -87,9 +87,8 @@ all :: all-lib
 
 # Generate warnings if the install directory isn't in /etc/ld.so.conf
 # or if the library wasn't there before (which means ldconfig must be run).
-# Don't generate warning about old versions in /usr/lib unless the new version
-# won't be picked up, since ld.so looks at the directories in ld.so.conf
-# before it looks at /usr/lib.
+# Note that some ld.so's put /usr/lib and /lib first, others put them last,
+# so we can't make any assumptions.
 install-lib: all-lib
 	$(MKDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(LIBINCLUDEDIR) $(DESTDIR)$(LIBMAN3DIR) $(DESTDIR)$(LIBMAN5DIR)
 	@if [ ! -e "$(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)" ] ; then \
@@ -104,6 +103,15 @@ install-lib: all-lib
 	$(LN) $(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)
 	$(LN) $(LIBSHSONAME) $(DESTDIR)$(LIBDIR)/$(LIBSHBASENAME)
 	@if [ "$(DESTDIR)$(LIBDIR)" != "/usr/lib" -a "$(DESTDIR)$(LIBDIR)" != "/lib" ] ; then \
+	   if [ -e "/usr/lib/$(LIBSHSONAME)" ] ; then \
+	     echo '******************************************************************************' ;  \
+	     echo 'Warning: You have old $(LIBSHBASENAME)* library files in /usr/lib' ;  \
+	     echo '         and the new library files are in $(DESTDIR)$(LIBDIR) !!!' ; \
+	     echo '         These old files must be removed or the userspace tools' ; \
+	     echo '         will have unpredictable results !!!' ; \
+	     echo '         Run the following command: rm /usr/lib/$(LIBSHBASENAME)*' ; \
+	     echo '******************************************************************************' ;  \
+	   fi ; \
 	   grep -q '^$(DESTDIR)$(LIBDIR)$$' /etc/ld.so.conf || \
 	   grep -q '^$(DESTDIR)$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
 	   grep -q '[[:space:]:,]$(DESTDIR)$(LIBDIR)$$' /etc/ld.so.conf || \
@@ -111,10 +119,6 @@ install-lib: all-lib
 		( echo '******************************************************************************' ;  \
 		  echo 'Warning: Library directory $(DESTDIR)$(LIBDIR) not in /etc/ld.so.conf !!!' ;  \
 		  echo '         Add it and run /sbin/ldconfig for the userspace tools to work !!!' ; \
-		  if [ -e "/usr/lib/$(LIBSHSONAME)" ] ; then \
-		     echo '         Even worse, you have old $(LIBSHBASENAME)* library files in /usr/lib !!!' ;  \
-		     echo '         These will be used instead which will cause unpredictable results !!!' ; \
-		  fi ; \
 		  echo '******************************************************************************' ) ;  \
 	fi
 	$(INSTALL) -o root -g root -m 644 $(LIBHEADERFILES) $(DESTDIR)$(LIBINCLUDEDIR)
