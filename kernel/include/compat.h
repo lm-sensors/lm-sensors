@@ -93,4 +93,9 @@
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
 #endif
 
+/* For old 2.0 kernels */
+#ifndef PCI_DEVICE_ID_VIA_82C586_3  
+#define PCI_DEVICE_ID_VIA_82C586_3  0x3040
+#endif
+
 #endif /* SENSORS_COMPAT_H */
