@@ -24,6 +24,7 @@
 #include <linux/i2c-proc.h>
 #include <linux/init.h>
 #include "version.h"
+#include "lm75.h"
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
@@ -41,13 +42,6 @@ SENSORS_INSMOD_1(lm75);
 #define LM75_REG_CONF 0x01
 #define LM75_REG_TEMP_HYST 0x02
 #define LM75_REG_TEMP_OS 0x03
-
-/* Conversions. Rounding and limit checking is only done on the TO_REG
-   variants. Note that you should be a bit careful with which arguments
-   these macros are called: arguments may be evaluated more than once.
-   Fixing this is just not worth it. */
-#define TEMP_FROM_REG(val) ((((val & 0x7fff) >> 7) * 5) | ((val & 0x8000)?-256:0))
-#define TEMP_TO_REG(val)   (SENSORS_LIMIT((val<0?(0x200+((val)/5))<<7:(((val) + 2) / 5) << 7),0,0xffff))
 
 /* Each client has this additional data */
 struct lm75_data {
@@ -288,18 +282,18 @@ void lm75_temp(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 1;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm75_update_client(client);
-		results[0] = TEMP_FROM_REG(data->temp_os);
-		results[1] = TEMP_FROM_REG(data->temp_hyst);
-		results[2] = TEMP_FROM_REG(data->temp);
+		results[0] = LM75_TEMP_FROM_REG(data->temp_os);
+		results[1] = LM75_TEMP_FROM_REG(data->temp_hyst);
+		results[2] = LM75_TEMP_FROM_REG(data->temp);
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->temp_os = TEMP_TO_REG(results[0]);
+			data->temp_os = LM75_TEMP_TO_REG(results[0]);
 			lm75_write_value(client, LM75_REG_TEMP_OS,
 					 data->temp_os);
 		}
 		if (*nrels_mag >= 2) {
-			data->temp_hyst = TEMP_TO_REG(results[1]);
+			data->temp_hyst = LM75_TEMP_TO_REG(results[1]);
 			lm75_write_value(client, LM75_REG_TEMP_HYST,
 					 data->temp_hyst);
 		}
