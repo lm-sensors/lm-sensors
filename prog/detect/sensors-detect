@@ -3472,7 +3472,7 @@ sub main
   print $modprobes;
   print "# Next 2 lines are optional\n",
         "sleep 3\n",
-        "sensors -s\n";
+        "/usr/local/bin/sensors -s\n";
   print "#----cut here----\n";
   print "\nTo make the sensors modules behave correctly, add these lines to ",
         "either\n",
