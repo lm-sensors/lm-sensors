@@ -483,6 +483,9 @@ static struct i2c_driver lm85_driver = {
 	.detach_client	= &lm85_detach_client,
 };
 
+/* Unique ID assigned to each LM85 detected */
+static int lm85_id = 0;
+
 /* -- SENSORS SYSCTL START -- */
 /* Common parameters */
 #define LM85_SYSCTL_IN0                1000
@@ -551,9 +554,6 @@ static struct i2c_driver lm85_driver = {
 #define LM85_ALARM_TEMP1_FAULT  0x4000
 #define LM85_ALARM_TEMP3_FAULT 0x08000
 /* -- SENSORS SYSCTL END -- */
-
-/* Unique ID assigned to each LM85 detected */
-static int lm85_id = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected LM85. This is just a template;
@@ -1567,6 +1567,7 @@ void lm85_pwm_config(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 5;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		int  old_config ;
+
 		down(&data->update_lock);
 		old_config = data->autofan[nr].config ;
 		if (*nrels_mag > 4) {
@@ -1929,7 +1930,7 @@ void adt7463_therm_signal(struct i2c_client *client, int operation,
 
 static int __init sm_lm85_init(void)
 {
-	printk("lm85 version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk("lm85: Version %s (%s)\n", LM_VERSION, LM_DATE);
 	printk("lm85: See http://www.penguincomputing.com/lm_sensors for more info.\n" );
 	return i2c_add_driver(&lm85_driver);
 }

@@ -63,6 +63,9 @@ adm1024
 adm1025
 	adm1025		2	6	-	-	yes	no
 
+adm1026
+	adm1026		3	17	8	2 pwm+dac yes	no
+
 adm9240
 	adm9240		1	6	2	1 dac	yes	no
 	ds1780		1	6	2	1 dac	yes	no

@@ -8,10 +8,10 @@
 
 OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
-           !!! THIS PACKAGE REQUIRES i2c-2.7.0 or later!!!
+           !!! THIS PACKAGE REQUIRES i2c-2.8.0 or later!!!
 
 FOR 2.5 KERNELS, we do not recommend attempting to compile this package.
-                 Use kernel patches linked from our download page instead!!!
+                 Use the drivers already in the 2.5 kernel development tree.
 
 =============================================================================
 
@@ -19,15 +19,16 @@ This is the completely rewritten version 2 of lm_sensors, a collection of
 modules for general SMBus access and hardware monitoring.
 Version 1 is now officially unsupported.
 
-WARNING! This package will compile for 2.2 and 2.4 kernels only.
+WARNING! This package will kernels 2.4.9 - 2.4.xx only.
 Use lm_sensors-2.4.5 for 2.0 kernels.
+Use lm_sensors-2.7.0 for 2.2, 2.3, and 2.4.0 - 2.4.8 kernels.
 Use the kernel patches linked from our download page for 2.5 kernels.
 
-WARNING! You must get the latest i2c package, i2c-2.7.0,
+WARNING! You must get the latest i2c package, i2c-2.8.0,
 EVEN IF your kernel does contain i2c support!!!!!!!!!
 
 Kernels 2.3.34 and later, and all 2.4.x kernels, contain the
-I2C package. Kernels 2.4.13 - 2.4.19 contain i2c-2.6.1,
+I2C package. Kernels 2.4.13 - 2.4.20 contain i2c-2.6.1,
 which is NOT sufficient for compilation of this package.
 
 See the lm_sensors download page for guidance:
@@ -46,7 +47,7 @@ At least the following I2C/SMBus adapters are supported:
   AMD 8111 SMBus 2.0
   Apple Hydra (used on some PPC machines)
   DEC 21272/21274 (Tsunami/Typhoon - on Alpha boards)
-  Intel I801 ICH/ICH0/ICH2/ICH3 (used in Intel 810, 810E, 815E, 820, 840 chipsets)
+  Intel I801 ICH/ICH0/ICH2/ICH3/ICH4/ICH5
   Intel PIIX4 (used in many Intel chipsets)
   Intel I810/I815 GMCH
   Intel 82443MX (440MX)
@@ -60,8 +61,8 @@ At least the following I2C/SMBus adapters are supported:
 
 
 At least the following hardware sensor chips are supported:
-  Analog Devices ADM1021, ADM1021A, ADM1022, ADM1023
-                 ADM1024, ADM1025, ADM1027 and ADM9240
+  Analog Devices ADM1021, ADM1021A, ADM1022, ADM1023, ADM1024,
+                 ADM1025, ADM1026, ADM1027 and ADM9240
                  ADT7463
   Asus AS99127F, ASB100 Bach
   Dallas Semiconductor DS75, DS1621, DS1625, DS1775, and DS1780
@@ -77,7 +78,7 @@ At least the following hardware sensor chips are supported:
                          LM80, LM81, LM84, LM85, LM87, and LM92
   Philips NE1617, NE1617A
   SiS 5595, 950 embedded sensors
-  SMSC 47M1xx embedded sensors
+  SMSC 47M1xx embedded sensors, EMC6D100, EMC6D101
   TI THMC10 and THMC50
   VIA Technologies VT1211 and VT82C686A/B embedded sensors
   Winbond W83781D, W83782D, W83783S, W83627HF, and W83697HF

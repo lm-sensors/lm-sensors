@@ -366,6 +366,8 @@ void do_a_print(sensors_chip_name name)
     print_vt8231(&name);
   else if (!strcmp(name.prefix,"bmc"))
     print_bmc(&name);
+  else if (!strcmp(name.prefix,"adm1026"))
+    print_adm1026(&name);
   else
     print_unknown_chip(&name);
   printf("\n");

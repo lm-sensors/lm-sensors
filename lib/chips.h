@@ -945,6 +945,118 @@
 #define SENSORS_ADM1025_ALARMS 81 /* R */
 
 
+#define SENSORS_ADM1026_PREFIX "adm1026"
+/* NOTE: print_adm1026 (sensors) depends on the ordering
+ *    of these entries in each group.  For example
+ *         fan#, fan#_div, fan#_min
+ *         temp#, temp#_max, temp#_min, temp#_offset
+ *    and the ordering of the groups
+ *         in0, in1, ... in9, in10, in11
+ */
+#define SENSORS_ADM1026_AFC_DAC            1  /* RW -- afc_analog_out  */
+#define SENSORS_ADM1026_AFC_PWM            2  /* RW -- afc_pwm  */
+#define SENSORS_ADM1026_ALARMS             3  /* R  -- alarms  */
+#define SENSORS_ADM1026_ALARM_MASK         4  /* R  -- alarm_mask  */
+#define SENSORS_ADM1026_DAC                5  /* RW -- analog_out  */
+#define SENSORS_ADM1026_GPIO               6  /* R  -- gpio  */
+#define SENSORS_ADM1026_GPIO_MASK          7  /* R  -- gpio_mask  */
+#define SENSORS_ADM1026_PWM                8  /* RW -- pwm  */
+#define SENSORS_ADM1026_VID                9  /* RW -- vid  */
+#define SENSORS_ADM1026_VRM               10  /* RW -- vrm  */
+#define SENSORS_ADM1026_FAN0              11  /* R  -- fan0  */
+#define SENSORS_ADM1026_FAN0_DIV          12  /* RW -- fan0_div  */
+#define SENSORS_ADM1026_FAN0_MIN          13  /* RW -- fan0_min  */
+#define SENSORS_ADM1026_FAN1              14  /* R  -- fan1  */
+#define SENSORS_ADM1026_FAN1_DIV          15  /* RW -- fan1_div  */
+#define SENSORS_ADM1026_FAN1_MIN          16  /* RW -- fan1_min  */
+#define SENSORS_ADM1026_FAN2              17  /* R  -- fan2  */
+#define SENSORS_ADM1026_FAN2_DIV          18  /* RW -- fan2_div  */
+#define SENSORS_ADM1026_FAN2_MIN          19  /* RW -- fan2_min  */
+#define SENSORS_ADM1026_FAN3              20  /* R  -- fan3  */
+#define SENSORS_ADM1026_FAN3_DIV          21  /* RW -- fan3_div  */
+#define SENSORS_ADM1026_FAN3_MIN          22  /* RW -- fan3_min  */
+#define SENSORS_ADM1026_FAN4              23  /* R  -- fan4  */
+#define SENSORS_ADM1026_FAN4_DIV          24  /* RW -- fan4_div  */
+#define SENSORS_ADM1026_FAN4_MIN          25  /* RW -- fan4_min  */
+#define SENSORS_ADM1026_FAN5              26  /* R  -- fan5  */
+#define SENSORS_ADM1026_FAN5_DIV          27  /* RW -- fan5_div  */
+#define SENSORS_ADM1026_FAN5_MIN          28  /* RW -- fan5_min  */
+#define SENSORS_ADM1026_FAN6              29  /* R  -- fan6  */
+#define SENSORS_ADM1026_FAN6_DIV          30  /* RW -- fan6_div  */
+#define SENSORS_ADM1026_FAN6_MIN          31  /* RW -- fan6_min  */
+#define SENSORS_ADM1026_FAN7              32  /* R  -- fan7  */
+#define SENSORS_ADM1026_FAN7_DIV          33  /* RW -- fan7_div  */
+#define SENSORS_ADM1026_FAN7_MIN          34  /* RW -- fan7_min  */
+#define SENSORS_ADM1026_IN0               35  /* R  -- in0  */
+#define SENSORS_ADM1026_IN0_MAX           36  /* RW -- in0_max  */
+#define SENSORS_ADM1026_IN0_MIN           37  /* RW -- in0_min  */
+#define SENSORS_ADM1026_IN1               38  /* R  -- in1  */
+#define SENSORS_ADM1026_IN1_MAX           39  /* RW -- in1_max  */
+#define SENSORS_ADM1026_IN1_MIN           40  /* RW -- in1_min  */
+#define SENSORS_ADM1026_IN2               41  /* R  -- in2  */
+#define SENSORS_ADM1026_IN2_MAX           42  /* RW -- in2_max  */
+#define SENSORS_ADM1026_IN2_MIN           43  /* RW -- in2_min  */
+#define SENSORS_ADM1026_IN3               44  /* R  -- in3  */
+#define SENSORS_ADM1026_IN3_MAX           45  /* RW -- in3_max  */
+#define SENSORS_ADM1026_IN3_MIN           46  /* RW -- in3_min  */
+#define SENSORS_ADM1026_IN4               47  /* R  -- in4  */
+#define SENSORS_ADM1026_IN4_MAX           48  /* RW -- in4_max  */
+#define SENSORS_ADM1026_IN4_MIN           49  /* RW -- in4_min  */
+#define SENSORS_ADM1026_IN5               50  /* R  -- in5  */
+#define SENSORS_ADM1026_IN5_MAX           51  /* RW -- in5_max  */
+#define SENSORS_ADM1026_IN5_MIN           52  /* RW -- in5_min  */
+#define SENSORS_ADM1026_IN6               53  /* R  -- in6  */
+#define SENSORS_ADM1026_IN6_MAX           54  /* RW -- in6_max  */
+#define SENSORS_ADM1026_IN6_MIN           55  /* RW -- in6_min  */
+#define SENSORS_ADM1026_IN7               56  /* R  -- in7  */
+#define SENSORS_ADM1026_IN7_MAX           57  /* RW -- in7_max  */
+#define SENSORS_ADM1026_IN7_MIN           58  /* RW -- in7_min  */
+#define SENSORS_ADM1026_IN8               59  /* R  -- in8  */
+#define SENSORS_ADM1026_IN8_MAX           60  /* RW -- in8_max  */
+#define SENSORS_ADM1026_IN8_MIN           61  /* RW -- in8_min  */
+#define SENSORS_ADM1026_IN9               62  /* R  -- in9  */
+#define SENSORS_ADM1026_IN9_MAX           63  /* RW -- in9_max  */
+#define SENSORS_ADM1026_IN9_MIN           64  /* RW -- in9_min  */
+#define SENSORS_ADM1026_IN10              65  /* R  -- in10  */
+#define SENSORS_ADM1026_IN10_MAX          66  /* RW -- in10_max  */
+#define SENSORS_ADM1026_IN10_MIN          67  /* RW -- in10_min  */
+#define SENSORS_ADM1026_IN11              68  /* R  -- in11  */
+#define SENSORS_ADM1026_IN11_MAX          69  /* RW -- in11_max  */
+#define SENSORS_ADM1026_IN11_MIN          70  /* RW -- in11_min  */
+#define SENSORS_ADM1026_IN12              71  /* R  -- in12  */
+#define SENSORS_ADM1026_IN12_MAX          72  /* RW -- in12_max  */
+#define SENSORS_ADM1026_IN12_MIN          73  /* RW -- in12_min  */
+#define SENSORS_ADM1026_IN13              74  /* R  -- in13  */
+#define SENSORS_ADM1026_IN13_MAX          75  /* RW -- in13_max  */
+#define SENSORS_ADM1026_IN13_MIN          76  /* RW -- in13_min  */
+#define SENSORS_ADM1026_IN14              77  /* R  -- in14  */
+#define SENSORS_ADM1026_IN14_MAX          78  /* RW -- in14_max  */
+#define SENSORS_ADM1026_IN14_MIN          79  /* RW -- in14_min  */
+#define SENSORS_ADM1026_IN15              80  /* R  -- in15  */
+#define SENSORS_ADM1026_IN15_MAX          81  /* RW -- in15_max  */
+#define SENSORS_ADM1026_IN15_MIN          82  /* RW -- in15_min  */
+#define SENSORS_ADM1026_IN16              83  /* R  -- in16  */
+#define SENSORS_ADM1026_IN16_MAX          84  /* RW -- in16_max  */
+#define SENSORS_ADM1026_IN16_MIN          85  /* RW -- in16_min  */
+#define SENSORS_ADM1026_TEMP1             86  /* R  -- temp1  */
+#define SENSORS_ADM1026_TEMP1_MAX         87  /* RW -- temp1_max  */
+#define SENSORS_ADM1026_TEMP1_MIN         88  /* RW -- temp1_min  */
+#define SENSORS_ADM1026_TEMP1_OFFSET      89  /* RW -- temp1_offset  */
+#define SENSORS_ADM1026_TEMP1_THERM       90  /* RW -- temp1_therm  */
+#define SENSORS_ADM1026_TEMP1_TMIN        91  /* RW -- temp1_tmin  */
+#define SENSORS_ADM1026_TEMP2             92  /* R  -- temp2  */
+#define SENSORS_ADM1026_TEMP2_MAX         93  /* RW -- temp2_max  */
+#define SENSORS_ADM1026_TEMP2_MIN         94  /* RW -- temp2_min  */
+#define SENSORS_ADM1026_TEMP2_OFFSET      95  /* RW -- temp2_offset  */
+#define SENSORS_ADM1026_TEMP2_THERM       96  /* RW -- temp2_therm  */
+#define SENSORS_ADM1026_TEMP2_TMIN        97  /* RW -- temp2_tmin  */
+#define SENSORS_ADM1026_TEMP3             98  /* R  -- temp3  */
+#define SENSORS_ADM1026_TEMP3_MAX         99  /* RW -- temp3_max  */
+#define SENSORS_ADM1026_TEMP3_MIN        100  /* RW -- temp3_min  */
+#define SENSORS_ADM1026_TEMP3_OFFSET     101  /* RW -- temp3_offset  */
+#define SENSORS_ADM1026_TEMP3_THERM      102  /* RW -- temp3_therm  */
+#define SENSORS_ADM1026_TEMP3_TMIN       103  /* RW -- temp3_tmin  */
+
 
 #define SENSORS_VIA686A_PREFIX "via686a"
 

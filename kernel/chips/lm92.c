@@ -60,7 +60,7 @@ static void lm92_alarms (struct i2c_client *client,int operation,int ctl_name,in
 
 /* -- SENSORS SYSCTL START -- */
 #define LM92_SYSCTL_ALARMS		2001	/* high, low, critical */
-#define LM92_SYSCTL_TEMP		1200	/* high, low, critical, hysterisis, input */
+#define LM92_SYSCTL_TEMP		1200	/* high, low, critical, hysteresis, input */
 
 #define LM92_ALARM_TEMP_HIGH	0x01
 #define LM92_ALARM_TEMP_LOW		0x02

@@ -171,6 +171,8 @@ AR := ar
 INSTALL := install
 LN := ln -sfn
 GREP := grep
+AWK := awk
+SED := sed
 
 # Determine the default compiler flags
 # Set CFLAGS or CPPFLAGS above to add your own flags to all.
@@ -286,7 +288,7 @@ version:
 
 %.d: %.c
 	$(CC) -M -MG $(MODCPPFLAGS) $(MODCFLAGS) $< | \
-       	sed -e 's@^\(.*\)\.o:@$*.d $*.o: Makefile '`dirname $*.d`/Module.mk' @' > $@
+       	$(SED) -e 's@^\(.*\)\.o:@$*.d $*.o: Makefile '`dirname $*.d`/Module.mk' @' > $@
 
 
 
@@ -296,7 +298,7 @@ version:
 
 %.rd: %.c
 	$(CC) -M -MG $(PROGCPPFLAGS) $(PROGCFLAGS) $< | \
-       	sed -e 's@^\(.*\)\.o:@$*.rd $*.ro: Makefile '`dirname $*.rd`/Module.mk' @' > $@
+       	$(SED) -e 's@^\(.*\)\.o:@$*.rd $*.ro: Makefile '`dirname $*.rd`/Module.mk' @' > $@
 
 
 %: %.ro
@@ -309,7 +311,7 @@ version:
 
 %.ad: %.c
 	$(CC) -M -MG $(ARCPPFLAGS) $(ARCFLAGS) $< | \
-       	sed -e 's@^\(.*\)\.o:@$*.ad $*.ao: Makefile '`dirname $*.ad`/Module.mk' @' > $@
+       	$(SED) -e 's@^\(.*\)\.o:@$*.ad $*.ao: Makefile '`dirname $*.ad`/Module.mk' @' > $@
 
 
 # .lo files are used for shared libraries
@@ -318,7 +320,7 @@ version:
 
 %.ld: %.c
 	$(CC) -M -MG $(LIBCPPFLAGS) $(LIBCFLAGS) $< | \
-       	sed -e 's@^\(.*\)\.o:@$*.ld $*.lo: Makefile '`dirname $*.ld`/Module.mk' @' > $@
+       	$(SED) -e 's@^\(.*\)\.o:@$*.ld $*.lo: Makefile '`dirname $*.ld`/Module.mk' @' > $@
 
 
 # Flex and Bison

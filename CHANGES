@@ -25,12 +25,13 @@ ask CVS about it:
   File doc/chips/fscscy: Add watchdog documentation
   File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
   Library: Add support for exponents and logarithms for vt1211/vt8235 temps;
-           add lm85 support; add w83791d support
+           add adm1026, lm85, w83791d support
   Makefiles: Generate warnings if new library won't be found by ld.so;
              Modules now install in kernel/drivers/i2c/[busses,chips];
              Ensure that headers in /usr/local/include are used first;
              Don't use /usr/include headers for modules;
-             Handle multiple UTS_RELEASE definitions in linux/version.h
+             Handle multiple UTS_RELEASE definitions in linux/version.h;
+             Automatically generate kernel/include/sensors.h
   Modules (all): Cleanups including
 		- Add #include <i2c-proc.h>
 		- C99 initializers
@@ -49,32 +50,39 @@ ask CVS about it:
   Modules (several): Add support for AMD Opteron VRM (VID) encoding
   Module adm1021: Set alarm on failed reads and report old value;
                   merge changes from kernel 2.5.54
+  Module adm1026: New
   Module bmcsensors: Fix compile when DEBUG=1
   Modules ddcmon, eeprom: Use i2c block reads if possible;
                           better error handling
+  Module ds1307: Add to Makefile
   Module gl520sm: Fix temperature over/hyst writes
   Module lm75: merge changes from kernel 2.5.54
   Module lm85: New
   Module i2c-amd756: merge changes from kernel 2.5.54
   Module i2c-amd8111: merge changes from kernel 2.5.54
-  Module i2c-i810.c: Fix for some chips
-  Module i2c-nforce2.c: New
+  Module i2c-i801: Add support for 82801EB (ICH5)
+  Module i2c-i810: Fix for some chips
+  Module i2c-nforce2: New
   Module i2c-sis645: Add support for SiS651, SiS961, SiS745
   Modules mtp008, smsc47m1, vt1211, vt8231, w83781d: Standardize and improve
           pwm and pwm enable support; update docs
+  Module w83781d: Add support for w83791d
   Module w83627hf: New
   Program decode-dimms.pl: Recognize DDR and Rambus
   Program eeprom: Fix writes for small eeproms
   Program eeprom, eepromer: Use local i2c-dev.h for build
   Program lm_sensors.init: Call sensors -s in start()
-  Program mkpatch: Fix vt8231 compile; keep tsunami from menu on non-alpha
+  Program mkpatch: Fix vt8231 compile; keep tsunami from menu on non-alpha;
+                   add adm1026,lm85 support
   Program p4b_smbus: Fix 'make install', install in same place as other modules
   Program pwmtest: New
-  Program sensors: add lm85 support; add w83791d support
+  Program sensors: add adm1026, lm85, w83791d support
   Program sensors-detect: Add super i/o detection (smsc47m1, vt1211,
                           w83627hf, w83697hf);
                           Add support for SiS651, SiS961, SiS745, nForce2;
-                          Support dmidecode 2.0 and later
+                          Support dmidecode 2.0 and later;
+                          Fix "C" format error;
+                          Add support for adm1026, 82801EB (ICH5)
 
 2.7.0 (20021208)
   NOTE: Requires i2c-2.7.0 or newer.

@@ -3967,6 +3967,112 @@ void print_bmc(const sensors_chip_name *name)
   }	
 }
 
+static long adm1026_alarms_in[] = {
+  ADM1026_ALARM_IN0,  ADM1026_ALARM_IN1,  ADM1026_ALARM_IN2,
+  ADM1026_ALARM_IN3,  ADM1026_ALARM_IN4,  ADM1026_ALARM_IN5,
+  ADM1026_ALARM_IN6,  ADM1026_ALARM_IN7,  ADM1026_ALARM_IN8,
+  ADM1026_ALARM_IN9,  ADM1026_ALARM_IN10, ADM1026_ALARM_IN11,
+  ADM1026_ALARM_IN12, ADM1026_ALARM_IN13, ADM1026_ALARM_IN14,
+  ADM1026_ALARM_IN15, ADM1026_ALARM_IN16
+};
+static long adm1026_alarms_temp[] = {
+  ADM1026_ALARM_TEMP1,  ADM1026_ALARM_TEMP2,  ADM1026_ALARM_TEMP3
+};
+
+void print_adm1026(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur,min,max;
+  long alarms, gpio;
+  int valid, i;
+
+  if (!sensors_get_feature(*name,SENSORS_ADM1026_ALARMS,&cur)) {
+    alarms = cur + 0.5;
+  } else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  /* Seventeen voltage sensors */
+  for (i = 0; i <= 16 ; ++i) {
+    int  feat_base = SENSORS_ADM1026_IN0 + (3 * i);
+    int  feat_max = feat_base +1, feat_min = feat_base +2;
+    if (!sensors_get_label_and_valid(*name,feat_base,&label,&valid) &&
+        !sensors_get_feature(*name,feat_base,&cur) &&
+        !sensors_get_feature(*name,feat_min,&min) &&
+        !sensors_get_feature(*name,feat_max,&max)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+               cur,min,max,(alarms&adm1026_alarms_in[i])?"ALARM":"");
+      }
+    } else {
+      printf("ERROR: Can't get IN%d data!\n",i);
+    }
+    free_the_label(&label);
+  };
+
+  /* Eight fan sensors */
+  for (i = 0; i <= 7 ; ++i) {
+    int  feat_base = SENSORS_ADM1026_FAN0 + (3 * i);
+    int  feat_div = feat_base +1, feat_min = feat_base +2;
+    if (!sensors_get_label_and_valid(*name,feat_base,&label,&valid) &&
+        !sensors_get_feature(*name,feat_base,&cur) &&
+        !sensors_get_feature(*name,feat_min,&min) &&
+        !sensors_get_feature(*name,feat_div,&max)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)   %s\n",
+               cur,min,max,(alarms&(ADM1026_ALARM_FAN0<<i))?"ALARM":"");
+      }
+    } else {
+      printf("ERROR: Can't get FAN%d data!\n",i);
+    }
+    free_the_label(&label);
+  };
+
+  /* Three temperature sensors
+   * NOTE:  6 config values per temperature
+   *      0  current
+   *      1  max
+   *      2  min
+   *      3  offset   (to current)
+   *      4  therm    (SMBAlert)
+   *      5  tmin     (AFC)
+   */
+  for (i = 0; i <= 2 ; ++i) {
+    int  feat_base = SENSORS_ADM1026_TEMP1 + (6 * i);
+    int  feat_max = feat_base +1;
+    int  feat_min = feat_base +2;
+
+    if (!sensors_get_label_and_valid(*name,feat_base,&label,&valid) &&
+        !sensors_get_feature(*name,feat_base,&cur) &&
+        !sensors_get_feature(*name,feat_min,&min) &&
+        !sensors_get_feature(*name,feat_max,&max)) {
+      if (valid) {
+        print_label(label,10);
+        print_temp_info( cur, max, min, MINMAX, 0, 0);
+	puts( (alarms&adm1026_alarms_temp[i])?"   ALARM":"" );
+      }
+    } else {
+      printf("ERROR: Can't get TEMP%d data!\n",i+1);
+    }
+    free_the_label(&label);
+  };
+
+  /* VID/VRM */
+  if (!sensors_get_label_and_valid(*name,SENSORS_ADM1026_VID,&label,&valid)
+      && !sensors_get_feature(*name,SENSORS_ADM1026_VID,&cur)
+      && !sensors_get_feature(*name,SENSORS_ADM1026_VRM,&min) ) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.3f V    (VRM Version %4.1f)\n",cur,min);
+    }
+  }
+  free_the_label(&label);
+
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;

@@ -94,6 +94,7 @@ sub gen_Documentation_Configure_help
            m@Analog Devices ADM1021 and compatibles@ or
            m@Analog Devices ADM1024@ or
            m@Analog Devices ADM1025@ or
+           m@Analog Devices ADM1026@ or
            m@Analog Devices ADM9240 and compatibles@ or
            m@Dallas DS1621 and DS1625@ or
            m@Fujitsu-Siemens Poseidon@ or
@@ -106,6 +107,7 @@ sub gen_Documentation_Configure_help
            m@National Semiconductors LM75 and compatibles@ or
            m@National Semiconductors LM78@ or
            m@National Semiconductors LM80@ or
+           m@National Semiconductors LM85 and compatibles@ or
            m@National Semiconductors LM87@ or
            m@Silicon Integrated Systems Corp. SiS5595 Sensor@ or
            m@Texas Instruments THMC50 / Analog Devices ADM1022@ or
@@ -283,6 +285,16 @@ CONFIG_SENSORS_ADM1025
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Analog Devices ADM1026
+CONFIG_SENSORS_ADM1026
+  If you say yes here you get support for Analog Devices ADM1026 sensor
+  chips.  This can also be built as a module which can be inserted and
+  removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
 Analog Devices ADM9240 and compatibles
 CONFIG_SENSORS_ADM9240
   If you say yes here you get support for Analog Devices ADM9240 
@@ -401,6 +413,18 @@ CONFIG_SENSORS_LM80
   If you say yes here you get support for National Semiconductor LM80
   sensor chips. This can also be built as a module which can be 
   inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
+National Semiconductor LM85
+CONFIG_SENSORS_LM85
+  If you say yes here you get support for National Semiconductor LM85
+  sensor chips and compatibles.  Compatible chips include the Analog
+  Devices ADM1027 and ADT7463 and SMSC EMC6D100 and EMC6D101.  This
+  can also be built as a module which can be inserted and removed
+  while the kernel is running.
 
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
@@ -873,6 +897,7 @@ obj-$(CONFIG_SENSORS)		+= sensors.o
 obj-$(CONFIG_SENSORS_ADM1021)	+= adm1021.o
 obj-$(CONFIG_SENSORS_ADM1024)	+= adm1024.o
 obj-$(CONFIG_SENSORS_ADM1025)	+= adm1025.o
+obj-$(CONFIG_SENSORS_ADM1026)	+= adm1026.o
 obj-$(CONFIG_SENSORS_ADM9240)	+= adm9240.o
 obj-$(CONFIG_SENSORS_BT869)	+= bt869.o
 obj-$(CONFIG_SENSORS_DDCMON)	+= ddcmon.o
@@ -954,6 +979,14 @@ ifeq ($(CONFIG_SENSORS_ADM1025),y)
 else
   ifeq ($(CONFIG_SENSORS_ADM1025),m)
     M_OBJS += adm1025.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_ADM1026),y)
+  L_OBJS += adm1026.o
+else
+  ifeq ($(CONFIG_SENSORS_ADM1026),m)
+    M_OBJS += adm1026.o
   endif
 endif
 
@@ -1050,6 +1083,14 @@ ifeq ($(CONFIG_SENSORS_LM80),y)
 else
   ifeq ($(CONFIG_SENSORS_LM80),m)
     M_OBJS += lm80.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_LM85),y)
+  L_OBJS += lm85.o
+else
+  ifeq ($(CONFIG_SENSORS_LM85),m)
+    M_OBJS += lm85.o
   endif
 endif
 

@@ -183,6 +183,7 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
   sysctl_name[3] = the_feature->sysctl;
   if (sysctl(sysctl_name, 4, buf, &buflen, NULL, 0))
     return -SENSORS_ERR_PROC;
+  if (sysctl_name[0] != CTL_DEV) { sysctl_name[0] = CTL_DEV ; }
   for (mag = the_feature->scaling; mag > 0; mag --)
     value *= 10.0;
   for (; mag < 0; mag ++)

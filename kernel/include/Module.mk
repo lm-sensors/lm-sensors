@@ -26,6 +26,19 @@ ifneq ($(shell if grep -q '^CONFIG_SENSORS=y' $(LINUX)/.config; then echo 1; fi)
 KERNELINCLUDEFILES += $(MODULE_DIR)/sensors.h
 endif
 
+$(KERNELINCLUDEDIR)/sensors.h: $(KERNELINCLUDEDIR)/sensors.h.template
+	( cat $@.template ; \
+	   $(AWK) '/SENSORS SYSCTL START/,/SENSORS SYSCTL END/' $(KERNELCHIPSDIR)/*.c ;\
+	   echo '#endif' \
+	) > $@
+
+$(KERNELINCLUDEDIR)/sensors.hd:
+	( $(GREP) 'SENSORS SYSCTL START' /dev/null $(KERNELCHIPSDIR)/*.c | \
+	  $(SED) -e 's/:.*//' -e 's#^#$(KERNELINCLUDEDIR)/sensors.h: #' ) > $@
+
+# Get dependancies of sensors.h
+INCLUDEFILES += $(MODULE_DIR)/sensors.hd
+
 install-all-kernel-include:
 	if [ -n "$(KERNELINCLUDEFILES)" ] ; then \
 	  $(MKDIR) $(DESTDIR)$(SYSINCLUDEDIR) ; \
@@ -35,6 +48,6 @@ install-all-kernel-include:
 install :: install-all-kernel-include
 
 clean-all-kernel-include:
-	$(RM) $(KERNELINCLUDEDIR)/*.h.install
+	$(RM) $(KERNELINCLUDEDIR)/*.h.install $(KERNELINCLUDEDIR)/sensors.h $(KERNELINCLUDEDIR)/sensors.hd
 
 clean :: clean-all-kernel-include

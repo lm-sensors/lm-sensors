@@ -21,6 +21,7 @@ kernel/sensors.c		drivers/sensors/sensors.c
 kernel/chips/adm1021.c		drivers/sensors/adm1021.c
 kernel/chips/adm1024.c		drivers/sensors/adm1024.c
 kernel/chips/adm1025.c		drivers/sensors/adm1025.c
+kernel/chips/adm1026.c		drivers/sensors/adm1026.c
 kernel/chips/adm9240.c		drivers/sensors/adm9240.c
 kernel/chips/bt869.c		drivers/sensors/bt869.c
 kernel/chips/ddcmon.c		drivers/sensors/ddcmon.c

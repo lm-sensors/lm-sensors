@@ -46,6 +46,9 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM1025=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1025.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM1026=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1026.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM9240=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/adm9240.o
 endif
