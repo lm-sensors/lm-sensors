@@ -132,6 +132,9 @@
 #define DIV_FROM_REG(val) (1 << val)
 #define DIV_TO_REG(val) (val==1?0:(val==2?1:(val==4?2:3)))
 
+#define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
+                           (val)>=0x06?0:205-(val)*5)
+
 /* Initial limits */
 #define ADM9240_INIT_IN_0 190
 #define ADM9240_INIT_IN_1 190
@@ -201,7 +204,8 @@ struct adm9240_data {
          u8 temp_os_max;             /* Register value */
          u8 temp_os_hyst;            /* Register value */
          u16 alarms;                 /* Register encoding, combined */
-         u8 analog_out;            /* Register value */
+         u8 analog_out;              /* Register value */
+         u8 vid;                     /* Register value combined */
 };
 
 
@@ -237,6 +241,8 @@ static void adm9240_alarms(struct i2c_client *client, int operation, int ctl_nam
 static void adm9240_fan_div(struct i2c_client *client, int operation, int ctl_name,
                          int *nrels_mag, long *results);
 static void adm9240_analog_out(struct i2c_client *client, int operation, int ctl_name,
+                         int *nrels_mag, long *results);
+static void adm9240_vid(struct i2c_client *client, int operation, int ctl_name,
                          int *nrels_mag, long *results);
 
 /* I choose here for semi-static ADM9240 allocation. Complete dynamic
@@ -292,6 +298,8 @@ static ctl_table adm9240_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &adm9240_alarms },
   { ADM9240_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &adm9240_analog_out },
+  { ADM9240_SYSCTL_VID, "vid", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &adm9240_vid },
   { 0 }
 };
 
@@ -523,6 +531,9 @@ void adm9240_update_client(struct i2c_client *client)
     i = adm9240_read_value(client,ADM9240_REG_VID_FAN_DIV);
     data->fan_div[0] = (i >> 4) & 0x03;
     data->fan_div[1] = (i >> 6) & 0x03;
+    data->vid = i & 0x0f;
+    data->vid |= (adm9240_read_value(client,ADM9240_REG_VID4) & 0x01) << 4;
+
     data->alarms = adm9240_read_value(client,ADM9240_REG_INT1_STAT) +
                    (adm9240_read_value(client,ADM9240_REG_INT2_STAT) << 8);
     data->analog_out = adm9240_read_value(client,ADM9240_REG_ANALOG_OUT);
@@ -679,6 +690,20 @@ void adm9240_analog_out(struct i2c_client *client, int operation, int ctl_name,
       data->analog_out = results[0];
       adm9240_write_value(client,ADM9240_REG_ANALOG_OUT,data->analog_out);
     }
+  }
+}
+
+void adm9240_vid(struct i2c_client *client, int operation, int ctl_name,
+              int *nrels_mag, long *results)
+{
+  struct adm9240_data *data = client->data;
+  
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 2;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    adm9240_update_client(client);
+    results[0] = VID_FROM_REG(data->vid);
+    *nrels_mag = 1;
   }
 }
 

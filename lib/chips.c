@@ -295,6 +295,31 @@ static sensors_chip_feature lm75_features[] =
     { 0 }
   };
 
+
+static sensors_chip_feature adm1021_features[] =
+  {
+    { SENSORS_ADM1021_TEMP, "temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, ADM1021_SYSCTL_TEMP, VALUE(3), 0 },
+    { SENSORS_ADM1021_TEMP_HYST, "temp_low", SENSORS_ADM1021_TEMP,
+                              SENSORS_ADM1021_TEMP, SENSORS_MODE_RW, 
+                              ADM1021_SYSCTL_TEMP, VALUE(2), 0 },
+    { SENSORS_ADM1021_TEMP_OVER, "temp_over", SENSORS_ADM1021_TEMP,
+                              SENSORS_ADM1021_TEMP, SENSORS_MODE_RW,
+                              ADM1021_SYSCTL_TEMP, VALUE(1), 0 },
+    { SENSORS_ADM1021_REMOTE_TEMP, "remote_temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, ADM1021_SYSCTL_REMOTE_TEMP, VALUE(3), 0 },
+    { SENSORS_ADM1021_REMOTE_TEMP_HYST, "remote_temp_low", SENSORS_ADM1021_REMOTE_TEMP,
+                              SENSORS_ADM1021_REMOTE_TEMP, SENSORS_MODE_RW, 
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(2), 0 },
+    { SENSORS_ADM1021_REMOTE_TEMP_OVER, "remote_temp_over", SENSORS_ADM1021_REMOTE_TEMP,
+                              SENSORS_ADM1021_REMOTE_TEMP, SENSORS_MODE_RW,
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(1), 0 },
+    { SENSORS_ADM1021_STATUS, "status", SENSORS_NO_MAPPING,
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                              ADM1021_SYSCTL_STATUS, VALUE(1), 0 },
+    { 0 }
+  };
+
 static sensors_chip_feature gl518r00_features[] =
   {
     { SENSORS_GL518R00_VDD, "vdd", SENSORS_NO_MAPPING,SENSORS_NO_MAPPING,
@@ -641,6 +666,91 @@ static sensors_chip_feature w83781d_features[] =
                          W83781D_SYSCTL_BEEP, VALUE(2), 0 },
     { 0 }
   };
+  
+static sensors_chip_feature adm9240_features[] =
+  { 
+    { SENSORS_ADM9240_IN0, "2.5V", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING, 
+                        SENSORS_MODE_R, ADM9240_SYSCTL_IN0, VALUE(3), 2 },
+    { SENSORS_ADM9240_IN1, "Vccp1", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                        SENSORS_MODE_R, ADM9240_SYSCTL_IN1, VALUE(3), 2 },
+    { SENSORS_ADM9240_IN2, "3.3V", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                        SENSORS_MODE_R, ADM9240_SYSCTL_IN2, VALUE(3), 2 },
+    { SENSORS_ADM9240_IN3, "5V", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                        SENSORS_MODE_R, ADM9240_SYSCTL_IN3, VALUE(3), 2 },
+    { SENSORS_ADM9240_IN4, "12V", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                        SENSORS_MODE_R, ADM9240_SYSCTL_IN4, VALUE(3), 2 },
+    { SENSORS_ADM9240_IN5, "Vccp2", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                        SENSORS_MODE_R, ADM9240_SYSCTL_IN5, VALUE(3), 2 },
+    { SENSORS_ADM9240_IN0_MIN, "2.5V_min", SENSORS_ADM9240_IN0, 
+                        SENSORS_ADM9240_IN0, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_IN0, VALUE(1), 2 },
+    { SENSORS_ADM9240_IN1_MIN, "Vccp1_min", SENSORS_ADM9240_IN1, 
+                        SENSORS_ADM9240_IN1, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_IN1, VALUE(1), 2 },
+    { SENSORS_ADM9240_IN2_MIN, "3.3V_min", SENSORS_ADM9240_IN2, 
+                        SENSORS_ADM9240_IN2, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_IN2, VALUE(1), 2 },
+    { SENSORS_ADM9240_IN3_MIN, "5V_min", SENSORS_ADM9240_IN3, 
+                        SENSORS_ADM9240_IN3, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_IN3, VALUE(1), 2 },
+    { SENSORS_ADM9240_IN4_MIN, "12V_min", SENSORS_ADM9240_IN4, 
+                        SENSORS_ADM9240_IN4, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_IN4, VALUE(1), 2 },
+    { SENSORS_ADM9240_IN5_MIN, "Vccp2_min", SENSORS_ADM9240_IN5, 
+                        SENSORS_ADM9240_IN5, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_IN5, VALUE(1), 2 },
+    { SENSORS_ADM9240_IN0_MAX, "2.5V_max", SENSORS_ADM9240_IN0, 
+                        SENSORS_ADM9240_IN0, SENSORS_MODE_RW,
+                        ADM9240_SYSCTL_IN0, VALUE(2), 2 },
+    { SENSORS_ADM9240_IN1_MAX, "Vccp1_max", SENSORS_ADM9240_IN1, 
+                        SENSORS_ADM9240_IN1, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_IN1, VALUE(2), 2 },
+    { SENSORS_ADM9240_IN2_MAX, "3.3V_max", SENSORS_ADM9240_IN2, 
+                        SENSORS_ADM9240_IN2, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_IN2, VALUE(2), 2 },
+    { SENSORS_ADM9240_IN3_MAX, "5V_max", SENSORS_ADM9240_IN3, 
+                        SENSORS_ADM9240_IN3, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_IN3, VALUE(2), 2 },
+    { SENSORS_ADM9240_IN4_MAX, "12V_max", SENSORS_ADM9240_IN4, 
+                        SENSORS_ADM9240_IN4, SENSORS_MODE_RW,
+                        ADM9240_SYSCTL_IN4, VALUE(2), 2 },
+    { SENSORS_ADM9240_IN5_MAX, "Vccp2_max", SENSORS_ADM9240_IN5, 
+                        SENSORS_ADM9240_IN5, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_IN5, VALUE(2), 2 },
+    { SENSORS_ADM9240_FAN1, "fan1", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                        SENSORS_MODE_R, ADM9240_SYSCTL_FAN1, VALUE(2), 0 },
+    { SENSORS_ADM9240_FAN2, "fan2", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                        SENSORS_MODE_R, ADM9240_SYSCTL_FAN2, VALUE(2), 0 },
+    { SENSORS_ADM9240_FAN1_MIN, "fan1_min", SENSORS_ADM9240_FAN1,
+                        SENSORS_NO_MAPPING, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_FAN1, VALUE(1), 0 },
+    { SENSORS_ADM9240_FAN2_MIN, "fan2_min", SENSORS_ADM9240_FAN2, 
+                        SENSORS_NO_MAPPING, SENSORS_MODE_RW, 
+                        ADM9240_SYSCTL_FAN2, VALUE(1), 0 },
+    { SENSORS_ADM9240_TEMP, "temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, ADM9240_SYSCTL_TEMP, VALUE(3), 1 },
+    { SENSORS_ADM9240_TEMP_HYST, "temp_hyst", SENSORS_ADM9240_TEMP,
+                         SENSORS_ADM9240_TEMP, SENSORS_MODE_RW, 
+                         ADM9240_SYSCTL_TEMP, VALUE(2), 1 },
+    { SENSORS_ADM9240_TEMP_OVER, "temp_over", SENSORS_ADM9240_TEMP,
+                         SENSORS_ADM9240_TEMP, SENSORS_MODE_RW, 
+                         ADM9240_SYSCTL_TEMP, VALUE(1), 1 },
+
+    { SENSORS_ADM9240_VID, "vid", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, ADM9240_SYSCTL_VID, VALUE(1), 2 },
+    { SENSORS_ADM9240_FAN1_DIV, "fan1_div", SENSORS_ADM9240_FAN1, 
+                         SENSORS_NO_MAPPING, SENSORS_MODE_RW, 
+                         ADM9240_SYSCTL_FAN_DIV, VALUE(1), 0 },
+    { SENSORS_ADM9240_FAN2_DIV, "fan2_div", SENSORS_ADM9240_FAN2, 
+                         SENSORS_NO_MAPPING, SENSORS_MODE_RW, 
+                         ADM9240_SYSCTL_FAN_DIV, VALUE(2), 0 },
+    { SENSORS_ADM9240_ALARMS, "alarms", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING, 
+                         SENSORS_MODE_R, ADM9240_SYSCTL_ALARMS, VALUE(1), 0 },
+    { SENSORS_ADM9240_ANALOG_OUT, "analog_out", SENSORS_NO_MAPPING,
+                         SENSORS_NO_MAPPING, SENSORS_MODE_RW,
+                         ADM9240_SYSCTL_ANALOG_OUT, VALUE(1), 0 },
+    { 0 }
+  };
 
 sensors_chip_features sensors_chip_features_list[] =
 {
@@ -652,6 +762,8 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_GL518R80_PREFIX, gl518r80_features },
  { SENSORS_LM80_PREFIX, lm80_features },
  { SENSORS_W83781D_PREFIX, w83781d_features },
+ { SENSORS_ADM9240_PREFIX, adm9240_features },
+ { SENSORS_ADM1021_PREFIX, adm1021_features },
  { 0 }
 };
 

@@ -231,6 +231,7 @@ struct sensors_chips_data {
 #define ADM9240_SYSCTL_FAN_DIV 2000 /* 1, 2, 4 or 8 */
 #define ADM9240_SYSCTL_ALARMS 2001 /* bitvector */
 #define ADM9240_SYSCTL_ANALOG_OUT 2002
+#define ADM9240_SYSCTL_VID 2003
 
 #define LTC1710_SYSCTL_SWITCH_1 1000
 #define LTC1710_SYSCTL_SWITCH_2 1001

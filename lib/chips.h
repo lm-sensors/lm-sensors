@@ -166,6 +166,17 @@
 #define SENSORS_LM75_TEMP_HYST 52 /* RW */
 #define SENSORS_LM75_TEMP_OVER 53 /* RW */
 
+/* ADM1021 chips. */
+
+#define SENSORS_ADM1021_PREFIX "adm1021"
+
+#define SENSORS_ADM1021_TEMP 51 /* R */
+#define SENSORS_ADM1021_TEMP_HYST 52 /* RW */
+#define SENSORS_ADM1021_TEMP_OVER 53 /* RW */
+#define SENSORS_ADM1021_REMOTE_TEMP 54 /* R */
+#define SENSORS_ADM1021_REMOTE_TEMP_HYST 55 /* RW */
+#define SENSORS_ADM1021_REMOTE_TEMP_OVER 56 /* RW */
+#define SENSORS_ADM1021_STATUS 81 /* R */
 
 /* GL518SM revision 0x00 chips. You may also use the revision 0x80 defines,
    but note that some features are unaccessible in revision 0x00. */
@@ -317,5 +328,42 @@
 #define SENSORS_W83781D_ALARMS 81 /* R */
 #define SENSORS_W83781D_BEEP_ENABLE 82 /* RW */
 #define SENSORS_W83781D_BEEPS 83 /* RW */
+
+
+/* Analog Devices ADM9240 chips */
+
+#define SENSORS_ADM9240_PREFIX "adm9240"
+
+#define SENSORS_ADM9240_IN0 1 /* R */
+#define SENSORS_ADM9240_IN1 2 /* R */
+#define SENSORS_ADM9240_IN2 3 /* R */
+#define SENSORS_ADM9240_IN3 4 /* R */
+#define SENSORS_ADM9240_IN4 5 /* R */
+#define SENSORS_ADM9240_IN5 6 /* R */
+#define SENSORS_ADM9240_IN0_MIN 11 /* RW */
+#define SENSORS_ADM9240_IN1_MIN 12 /* RW */
+#define SENSORS_ADM9240_IN2_MIN 13 /* RW */
+#define SENSORS_ADM9240_IN3_MIN 14 /* RW */
+#define SENSORS_ADM9240_IN4_MIN 15 /* RW */
+#define SENSORS_ADM9240_IN5_MIN 16 /* RW */
+#define SENSORS_ADM9240_IN0_MAX 21 /* RW */
+#define SENSORS_ADM9240_IN1_MAX 22 /* RW */
+#define SENSORS_ADM9240_IN2_MAX 23 /* RW */
+#define SENSORS_ADM9240_IN3_MAX 24 /* RW */
+#define SENSORS_ADM9240_IN4_MAX 25 /* RW */
+#define SENSORS_ADM9240_IN5_MAX 26 /* RW */
+#define SENSORS_ADM9240_FAN1 31 /* R */
+#define SENSORS_ADM9240_FAN2 32 /* R */
+#define SENSORS_ADM9240_FAN1_MIN 41 /* RW */
+#define SENSORS_ADM9240_FAN2_MIN 42 /* RW */
+#define SENSORS_ADM9240_TEMP 51 /* R */
+#define SENSORS_ADM9240_TEMP_HYST 52 /* RW */
+#define SENSORS_ADM9240_TEMP_OVER 53 /* RW */
+#define SENSORS_ADM9240_VID 61 /* R */
+#define SENSORS_ADM9240_FAN1_DIV 71 /* RW */
+#define SENSORS_ADM9240_FAN2_DIV 72 /* RW */
+#define SENSORS_ADM9240_ALARMS 81 /* R */
+#define SENSORS_ADM9240_ANALOG_OUT 82 /* RW */
+
 
 #endif /* def LIB_SENSORS_CHIPS_H */
