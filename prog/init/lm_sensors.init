@@ -28,18 +28,30 @@
 # in order as normal shell variables with the special names:
 #    MODULE_1, MODULE_2, MODULE_3, etc.
 
-# If sensors isn't supported by the kernel, try loading the module...
-[ -e /proc/sys/dev/sensors ] || /sbin/modprobe i2c-proc &>/dev/null
+if grep -q sysfs /proc/mounts; then
+	WITHSYS=1
+else
+	WITHSYS=0
+fi
 
-# Don't bother if /proc/sensors still doesn't exist, kernel doesn't have
-# support for sensors.
-[ -e /proc/sys/dev/sensors ] || exit 0
+if [ $WITHSYS == "0" ]; then
+	# If sensors isn't supported by the kernel, try loading the module...
+	[ -e /proc/sys/dev/sensors ] || /sbin/modprobe i2c-proc &>/dev/null
 
-# If sensors was not already running, unload the module...
-[ -e /var/lock/subsys/sensors ] || /sbin/modprobe -r i2c-proc &>/dev/null
+	# Don't bother if /proc/sensors still doesn't exist, kernel doesn't have
+	# support for sensors.
+	[ -e /proc/sys/dev/sensors ] || exit 0
+
+	# If sensors was not already running, unload the module...
+	[ -e /var/lock/subsys/sensors ] || /sbin/modprobe -r i2c-proc &>/dev/null
+fi
 
 CONFIG=/etc/sysconfig/lm_sensors
 PSENSORS=/usr/local/bin/sensors
+
+if [ ! -x $PSENSORS ]; then
+	PSENSORS=/usr/bin/sensors
+fi
 
 # Source function library.
 . /etc/init.d/functions
@@ -50,15 +62,15 @@ start() {
 	echo -n $"Starting up sensors: "
 	test -r "$CONFIG" && . "$CONFIG"
 
-        modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
-        i=0
-        while [ $i -lt $modules ] ; do
-                module=`eval echo '$'MODULE_$i`
+	modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
+	i=0
+	while [ $i -lt $modules ] ; do
+		module=`eval echo '$'MODULE_$i`
 		echo starting module __${module}__
 		/sbin/modprobe $module &>/dev/null
 		i=`expr $i + 1`
 	done
-        $PSENSORS -s
+	$PSENSORS -s
 
 	RETVAL=$?
 	if [ $RETVAL -eq 0 ] && touch /var/lock/subsys/sensors ; then
@@ -74,14 +86,17 @@ stop() {
 	echo -n $"Shutting down sensors: "
 	test -r "$CONFIG" && . "$CONFIG"
 
-        modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
-        i=`expr $modules`
-        while [ $i -ge 0 ] ; do
-                module=`eval echo '$'MODULE_$i`
+	modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
+	i=`expr $modules`
+	while [ $i -ge 0 ] ; do
+		module=`eval echo '$'MODULE_$i`
 		/sbin/modprobe -r $module &>/dev/null
 		i=`expr $i - 1`
 	done
-	/sbin/modprobe -r i2c-proc &>/dev/null
+
+	if [ $WITHSYS == "0" ]; then
+		/sbin/modprobe -r i2c-proc &>/dev/null
+	fi
 
 	RETVAL=$?
 	if [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/sensors ; then
@@ -94,7 +109,7 @@ stop() {
 }
 
 dostatus() {
-        $PSENSORS
+	$PSENSORS
 	RETVAL=$?
 }
 
