@@ -41,7 +41,6 @@ ask CVS about it:
   Module i2c-savage4: new
   Module i2c-viapro: Add support for VT8231 (0x8235), VT8233A (0x3147)
   Module i2c-voodoo3: Flush posted writes
-  Module lm92: new
   Module smbus-arp: new
   Module smsc47m1: new
   Module via686a: Add support for VT8231 sensors
