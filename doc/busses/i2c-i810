@@ -3,7 +3,7 @@ Kernel driver `i2c-i810.o'
 Status: Stable
 
 Supported adapters:
-  * Intel 82810, 82810-DC100, and 82815 (GMCH)
+  * Intel 82810, 82810-DC100, 82810E, and 82815 (GMCH)
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
         <phil@netroedge.com>,
@@ -42,20 +42,20 @@ Stability
 ---------
 Apparently stable.
 
+
 Supported Devices
 -----------------
-Specifically, this driver was written and tested on the '3dfx Voodoo3 AGP
-3000' which has a tv-out feature (s-video or composite).  According to the
-docs and discussions, this code should work for any Voodoo3 based cards as
-well as Voodoo Banshee based cards.  The DDC interface has been tested
-on a Voodoo Banshee card.
+See above.
 	
+
 Features
 --------
 Both busses use the i2c-algo-bit driver for 'bit banging' and support
 for specific transactions is provided by i2c-algo-bit.
 
+
 Issues
 ------
 If you enable bus testing in i2c-algo-bit (insmod i2c-algo-bit bit_test=1),
-the test may fail and the i2c-i810 driver won't be inserted.
+the test may fail; if so, the i2c-i810 driver won't be inserted.
+However, we think this has been fixed.

@@ -30,6 +30,7 @@
    SUPPORTED DEVICES	PCI ID
    i810AA		7121           
    i810AB		7123           
+   i810E		7125           
    i815			1132           
 */
 
@@ -60,6 +61,7 @@ MODULE_LICENSE("GPL");
 
 static int i810_supported[] = {PCI_DEVICE_ID_INTEL_82810_IG1,
                                PCI_DEVICE_ID_INTEL_82810_IG3,
+                               0x7125,
                                PCI_DEVICE_ID_INTEL_82815_2,
                                0 };
 
