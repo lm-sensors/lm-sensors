@@ -25,6 +25,7 @@ ask CVS about it:
   File doc/FAQ: Updates
   File doc/chips/via686a: Claim support for 686b.
   File sensors.conf.eg: Adjust as99127f in5 (-12V) and temp2 calculations
+  File sensors.conf.eg: Enhance help comments in file
   File sensors.c: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
   Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
   Include file sensors.h: Most contents moved to i2c-proc.h in i2c package
@@ -267,8 +268,10 @@ ask CVS about it:
            2.1.58
   Modules: Somewhat less verbose on transfers
   Module lm78.o now recognizes and handles lm78-j and lm79
+
 2.0.1 (1998121?)
   Module gl518sm.o updates, to make it actually work
   Module lm75.o high/low-byte swapping write bug fixed
+
 2.0.0 (19981209)
   Initial release
