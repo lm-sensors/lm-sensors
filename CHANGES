@@ -25,6 +25,10 @@ ask CVS about it:
            Add sysfs support for kernel 2.6
   Makefiles: Install fancontrol, pwmconfig, decode-*.pl;
              Fail if no kernel .config file exists
+  Modules adm1021, adm1024, adm1025, adm9240, ds1621, gl518sm, gl520sm,
+          it87, lm75, lm78, lm80, lm83, lm87, lm90, mtp008, sis5595,
+          smsc47m1, thmc50, via686a, w83627hf, w83781d:
+          Remove initialization of limits by driver.
   Module asb100: New
   Module bmcsensors: Fix voltage scaling, voltage and fan limits
   Module fscher: New (Fujitsu-Siemens Hermes driver)
@@ -34,6 +38,8 @@ ask CVS about it:
                add it87 sensor type support
   Module lm90: Add ADM1032 support
   Module w83781d: Fix 791d and 627hf detection
+  Programs i2cdetect, i2cdump, i2cset: add -v (version) option;
+                                       support sysfs for i2c bus search
   Program pwmconfig: Handle multiple fans controlled by a single pwm
   Program sensors: Add ADM1032 support; add messages for sysfs
   Program sensors-detect: Prefer Super I/O drivers;
