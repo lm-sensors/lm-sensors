@@ -495,6 +495,13 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
+       vendid => 0x10de,
+       devid  => 0x01b4,
+       func => 1,
+       procid => "nVidia nForce SMBus",
+       match => sub { $_[0] =~ /dontmatchthis/ },
+     } , 
+     { 
        vendid => 0x1166,
        devid  => 0x0200,
        func => 0,
