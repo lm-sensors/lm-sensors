@@ -8,4 +8,4 @@ then
 	exit 1
 fi
 #
-exec netscape -remote "openURL(https://www.netroedge.com/~lm78/secure_support/editticket.cgi?ticket=$1)"
+exec netscape -remote "openURL(https://secure.netroedge.com/~lm78/secure_support/editticket.cgi?ticket=$1)"
