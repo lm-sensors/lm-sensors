@@ -94,9 +94,9 @@ It can be tricky to know which modules you need to insert. For this reason,
 I suggest you go the 'modprobe' way, as described within doc/modules.
 If you just want to run a test without installing them, try the following:
   insmod i2c/i2c-core.o
+  insmod kernel/smbus.o
   insmod kernel/i2c-proc.o
   insmod kernel/i2c-dev.o
-  insmod kernel/smbus.o
   insmod kernel/sensors.o
   insmod kernel/busses/i2c-isa.o
   insmod kernel/busses/i2c-piix4.o # Or whatever SMBus controller you have
