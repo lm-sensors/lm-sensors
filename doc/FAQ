@@ -42,6 +42,7 @@ CONTENTS
 3.7 It still does not compile or patch
 3.8 'make install' fails on Mandrake kernels
 3.9 I get unresolved symbols when I modprobe modules (Red Hat especially)
+3.10 I2C_DRIVERID_ADM1024 undefined (Red Hat especially)
 
 4. Problems
 4.1 Why do my fans report exactly half/double their values compared to the BIOS? 
@@ -462,6 +463,30 @@ are running with something like 'make LINUX=/usr/src/linux-2.4.14'.
     * Compare both sets of symbols. Are they the same? If so, the problem
       lies somewhere else. Are they different? If so, you have a module
       versioning problem.
+
+
+3.10 I2C_DRIVERID_ADM1024 undefined (Red Hat especially)
+
+    In some versions of Redhat, an RPM is included to provide i2c support.
+However, this RPM does not place the header files in the kernel directory
+structure.  When you update kernels, they may persist.  To get rid of
+these obsolete header files, at a command prompt:
+
+	1. rpm -qa | grep i2c
+	2. Look for kernel-i2c, or a similar rpm in the output
+	3. <as root>
+	        rpm -e kernel-i2c (or the name of the similar package)
+	   If this complains about dependencies, you can try adding
+	   --nodeps , but this *MAY* break something else.  Not likely,
+	   as you have upgraded kernels, and nothing should be using the
+	   old i2c stuff anymore anyway.  Just don't use it with abandon.
+	4. Try (in the build directory of lm_sensors)
+	        make clean
+	        make
+	5. *If* you still have problems, you may have to replace the include
+	    paths in the .c/.h files with absolute paths to the header files.
+	    More of a workaround than a real fix, but at least you can get it
+	    to work.
 
 
 4 Problems
