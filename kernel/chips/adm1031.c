@@ -610,26 +610,29 @@ static void adm1031_fan_div(struct i2c_client *client, int operation,
 		    *nrels_mag = 2;
 		}
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		int old_div, new_min;
 		if (*nrels_mag >= 1) {
-			int old_div = FAN_DIV_FROM_REG(data->fan_div[0]);
+			old_div = FAN_DIV_FROM_REG(data->fan_div[0]);
 			data->fan_div[0] = FAN_DIV_TO_REG(results[0]);
 			adm1031_write_value(client,
 					    ADM1031_REG_FAN_DIV(0),
 					    data->fan_div[0]);
-			data->fan_min[0] = data->fan_min[0] * old_div /
-					   FAN_DIV_FROM_REG(data->fan_div[0]);
+			new_min = data->fan_min[0] * old_div /
+				  FAN_DIV_FROM_REG(data->fan_div[0]);
+			data->fan_min[0] = new_min > 0xff ? 0xff : new_min;
 			adm1031_write_value(client,
 					    ADM1031_REG_FAN_MIN(0),
 					    data->fan_min[0]);
 		}
 		if (*nrels_mag >= 2) {
-			int old_div = FAN_DIV_FROM_REG(data->fan_div[1]);
+			old_div = FAN_DIV_FROM_REG(data->fan_div[1]);
 			data->fan_div[1] = FAN_DIV_TO_REG(results[1]);
 			adm1031_write_value(client,
 					    ADM1031_REG_FAN_DIV(1),
 					    data->fan_div[1]);
-			data->fan_min[1] = data->fan_min[1] * old_div /
-					   FAN_DIV_FROM_REG(data->fan_div[1]);
+			new_min = data->fan_min[1] * old_div /
+				  FAN_DIV_FROM_REG(data->fan_div[1]);
+			data->fan_min[1] = new_min > 0xff ? 0xff : new_min;
 			adm1031_write_value(client,
 					    ADM1031_REG_FAN_MIN(1),
 					    data->fan_min[1]);
