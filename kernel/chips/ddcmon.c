@@ -229,11 +229,12 @@ int ddcmon_detect(struct i2c_adapter *adapter, int address,
 	new_client->driver = &ddcmon_driver;
 	new_client->flags = 0;
 
+	/* prevent 24RF08 corruption (just in case) */
+	i2c_smbus_write_quick(new_client, 0);
+
 	/* Now, we do the remaining detection. */
 	if (checksum) {
 		int cs = 0;
-		/* prevent 24RF08 corruption (just in case) */
-		i2c_smbus_write_quick(new_client, 0);
 		for (i = 0; i < 0x80; i++)
 			cs += i2c_smbus_read_byte_data(new_client, i);
 		if ((cs & 0xff) != 0)

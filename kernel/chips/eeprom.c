@@ -208,12 +208,13 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 	new_client->driver = &eeprom_driver;
 	new_client->flags = 0;
 
+	/* prevent 24RF08 corruption */
+	i2c_smbus_write_quick(new_client, 0);
+
 	/* Now, we do the remaining detection. It is not there, unless you force
 	   the checksum to work out. */
 	if (checksum) {
 		int cs = 0;
-		/* prevent 24RF08 corruption */
-		i2c_smbus_write_quick(new_client, 0);
 		for (i = 0; i <= 0x3e; i++)
 			cs += i2c_smbus_read_byte_data(new_client, i);
 		cs &= 0xff;
