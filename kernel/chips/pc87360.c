@@ -84,7 +84,13 @@ static inline void superio_exit(void)
 	outb(0x02, VAL);
 }
 
+/*
+ * Logical devices
+ */
+
 #define PC87360_EXTENT		0x10
+#define PC87365_REG_BANK	0x09
+#define NO_BANK			0xff
 
 /*
  * Fan registers and conversions
@@ -119,8 +125,6 @@ static inline void superio_exit(void)
  * Voltage registers and conversions
  */
 
-#define PC87365_REG_IN_BANK		0x09
-
 /* nr has to be 0 to 11 (PC87365/87366) */
 #define PC87365_REG_IN			0x0B
 #define PC87365_REG_IN_MIN		0x0D
@@ -137,8 +141,6 @@ static inline void superio_exit(void)
 /*
  * Temperature registers and conversions
  */
-
-#define PC87365_REG_TEMP_BANK		0x09
 
 /* nr has to be 0 to 1 (PC87365) or 2 (PC87366) */
 #define PC87365_REG_TEMP		0x0B
@@ -191,9 +193,10 @@ static int pc87360_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int pc87360_detach_client(struct i2c_client *client);
 
-static int pc87360_read_value(struct pc87360_data *data, int ldi, u8 reg);
-static int pc87360_write_value(struct pc87360_data *data, int ldi, u8 reg,
-			       u8 value);
+static int pc87360_read_value(struct pc87360_data *data, u8 ldi, u8 bank,
+			      u8 reg);
+static void pc87360_write_value(struct pc87360_data *data, u8 ldi, u8 bank,
+				u8 reg, u8 value);
 static void pc87360_update_client(struct i2c_client *client);
 static int pc87360_find(u8 *devid, int *address);
 
@@ -462,8 +465,8 @@ static int pc87360_find(u8 *devid, int *address)
 			printk(KERN_DEBUG "pc87360.o: Fan 3: mon=%d "
 			       "ctrl=%d inv=%d\n", (fanconf[0]>>8)&1,
 			       (fanconf[0]>>9)&1, (fanconf[0]>>10)&1);
-		}
 #endif
+		}
 	}
 
 	superio_exit();
@@ -597,33 +600,41 @@ static int pc87360_detach_client(struct i2c_client *client)
 	return 0;
 }
 
+#define LD_FAN		0
+#define LD_IN		1
+#define LD_TEMP		2
+
 /* ldi is the logical device index:
-   0: fans
-   1: voltages
-   2: temperatures */
-static int pc87360_read_value(struct pc87360_data *data, int ldi, u8 reg)
+   bank is for voltages and temperatures only. */
+static int pc87360_read_value(struct pc87360_data *data, u8 ldi, u8 bank,
+			      u8 reg)
 {
 	int res;
 
 	down(&(data->lock));
+	if (bank != NO_BANK) {
+		outb_p(bank, data->address[ldi] + PC87365_REG_BANK);
+	}
 	res = inb_p(data->address[ldi] + reg);
 	up(&(data->lock));
 	return res;
 }
 
-static int pc87360_write_value(struct pc87360_data *data, int ldi, u8 reg,
-			       u8 value)
+static void pc87360_write_value(struct pc87360_data *data, u8 ldi, u8 bank,
+				u8 reg, u8 value)
 {
 	down(&(data->lock));
+	if (bank != NO_BANK) {
+		outb_p(bank, data->address[ldi] + PC87365_REG_BANK);
+	}
 	outb_p(value, data->address[ldi] + reg);
 	up(&(data->lock));
-	return 0;
 }
 
 static void pc87360_update_client(struct i2c_client *client)
 {
 	struct pc87360_data *data = client->data;
-	int i;
+	u8 i;
 
 	down(&data->update_lock);
 
@@ -635,59 +646,67 @@ static void pc87360_update_client(struct i2c_client *client)
 
 		/* Fans */
 		for (i = 0; i < data->fannr; i++) {
-			data->fan[i] = pc87360_read_value(data, 0,
-				       PC87360_REG_FAN(i));
-			data->fan_min[i] = pc87360_read_value(data, 0,
-					   PC87360_REG_FAN_MIN(i));
-			data->fan_status[i] = pc87360_read_value(data, 0,
+			data->fan[i] = pc87360_read_value(data, LD_FAN,
+				       NO_BANK, PC87360_REG_FAN(i));
+			data->fan_min[i] = pc87360_read_value(data, LD_FAN,
+					   NO_BANK, PC87360_REG_FAN_MIN(i));
+			data->fan_status[i] = pc87360_read_value(data, LD_FAN,
+					      NO_BANK,
 					      PC87360_REG_FAN_STATUS(i));
-			data->pwm[i] = pc87360_read_value(data, 0,
-				       PC87360_REG_PWM(i));
+			data->pwm[i] = pc87360_read_value(data, LD_FAN,
+				       NO_BANK, PC87360_REG_PWM(i));
 		}
 
 		/* Voltages */
 		for (i = 0; i < data->innr; i++) {
-			pc87360_write_value(data, 1, PC87365_REG_IN_BANK, i);
-			data->in_status[i] = pc87360_read_value(data, 1,
+			data->in_status[i] = pc87360_read_value(data, LD_IN, i,
 			                     PC87365_REG_IN_STATUS);
 			/* Clear bits */
-			pc87360_write_value(data, 1, PC87365_REG_IN_STATUS,
+			pc87360_write_value(data, LD_IN, i,
+					    PC87365_REG_IN_STATUS,
 					    data->in_status[i] | 0x86);
 			if (data->in_status[i] & 0x01) {
-				data->in[i] = pc87360_read_value(data, 1,
-					      PC87365_REG_IN);
-				data->in_min[i] = pc87360_read_value(data, 1,
+				data->in[i] = pc87360_read_value(data, LD_IN,
+					      i, PC87365_REG_IN);
+				data->in_min[i] = pc87360_read_value(data,
+						  LD_IN, i,
 						  PC87365_REG_IN_MIN);
-				data->in_max[i] = pc87360_read_value(data, 1,
+				data->in_max[i] = pc87360_read_value(data,
+						  LD_IN, i,
 						  PC87365_REG_IN_MAX);
 			}
-			data->in_alarms = pc87360_read_value(data, 1,
-					  PC87365_REG_IN_ALARMS1)
-					| (pc87360_read_value(data, 1,
-					   PC87365_REG_IN_ALARMS2) << 8);
 		}
+		data->in_alarms = pc87360_read_value(data, LD_IN, NO_BANK,
+				  PC87365_REG_IN_ALARMS1)
+				| (pc87360_read_value(data, LD_IN, NO_BANK,
+				   PC87365_REG_IN_ALARMS2) << 8);
 
 		/* Temperatures */
 		for (i = 0; i < data->tempnr; i++) {
-			pc87360_write_value(data, 2, PC87365_REG_TEMP_BANK, i);
-			data->temp_status[i] = pc87360_read_value(data, 2,
+			data->temp_status[i] = pc87360_read_value(data,
+					       LD_TEMP, i,
 					       PC87365_REG_TEMP_STATUS);
 			/* Clear bits */
-			pc87360_write_value(data, 2, PC87365_REG_TEMP_STATUS,
+			pc87360_write_value(data, LD_TEMP, i,
+					    PC87365_REG_TEMP_STATUS,
 					    data->temp_status[i] | 0xCE);
 			if (data->temp_status[i] & 0x01) {
-				data->temp[i] = pc87360_read_value(data, 2,
+				data->temp[i] = pc87360_read_value(data,
+						LD_TEMP, i,
 						PC87365_REG_TEMP);
-				data->temp_min[i] = pc87360_read_value(data, 2,
+				data->temp_min[i] = pc87360_read_value(data,
+						    LD_TEMP, i,
 						    PC87365_REG_TEMP_MIN);
-				data->temp_max[i] = pc87360_read_value(data, 2,
+				data->temp_max[i] = pc87360_read_value(data,
+						    LD_TEMP, i,
 						    PC87365_REG_TEMP_MAX);
-				data->temp_crit[i] = pc87360_read_value(data, 2,
+				data->temp_crit[i] = pc87360_read_value(data,
+						     LD_TEMP, i,
 						     PC87365_REG_TEMP_CRIT);
 			}
-			data->temp_alarms = pc87360_read_value(data, 2,
-					    PC87365_REG_TEMP_ALARMS);
 		}
+		data->temp_alarms = pc87360_read_value(data, LD_TEMP, NO_BANK,
+				    PC87365_REG_TEMP_ALARMS);
 
 		data->last_updated = jiffies;
 		data->valid = 1;
@@ -735,7 +754,8 @@ void pc87360_fan(struct i2c_client *client, int operation, int ctl_name,
 		if (*nrels_mag >= 1) {
 			data->fan_min[nr] = FAN_TO_REG(results[0],
 					    FAN_DIV_FROM_REG(data->fan_status[nr]));
-			pc87360_write_value(data, 0, PC87360_REG_FAN_MIN(nr),
+			pc87360_write_value(data, LD_FAN, NO_BANK,
+					    PC87360_REG_FAN_MIN(nr),
 					    data->fan_min[nr]);
 		}
 	}
@@ -764,11 +784,13 @@ void pc87360_fan_div(struct i2c_client *client, int operation,
 				      FAN_DIV_FROM_REG(data->fan_status[i]));
 			data->fan_status[i] = (data->fan_status[i] & 0x9F)
 					    | FAN_DIV_TO_REG(results[i]);
-			pc87360_write_value(data, 0, PC87360_REG_FAN_STATUS(i),
+			pc87360_write_value(data, LD_FAN, NO_BANK,
+					    PC87360_REG_FAN_STATUS(i),
 					    data->fan_status[i]);
 			data->fan_min[i] = FAN_TO_REG(fan_min,
 					   FAN_DIV_FROM_REG(data->fan_status[i]));
-			pc87360_write_value(data, 0, PC87360_REG_FAN_MIN(i),
+			pc87360_write_value(data, LD_FAN, NO_BANK,
+					    PC87360_REG_FAN_MIN(i),
 					    data->fan_min[i]);
 		}
 	}
@@ -794,7 +816,8 @@ void pc87360_pwm(struct i2c_client *client, int operation, int ctl_name,
 		{
 			data->pwm[nr] = PWM_TO_REG(results[0],
 					FAN_CONFIG_INVERT(data->fan_conf[0], nr));
-			pc87360_write_value(data, 0, PC87360_REG_PWM(nr),
+			pc87360_write_value(data, LD_FAN, NO_BANK,
+					    PC87360_REG_PWM(nr),
 					    data->pwm[nr]);
 		}
 	}
@@ -833,13 +856,14 @@ void pc87365_in(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			data->in_min[nr] = IN_TO_REG(results[0]);
-			pc87360_write_value(data, 1, PC87365_REG_IN_BANK, nr);
-			pc87360_write_value(data, 1, PC87365_REG_IN_MIN,
+			pc87360_write_value(data, LD_IN, nr,
+					    PC87365_REG_IN_MIN,
 					    data->in_min[nr]);
 		}
 		if (*nrels_mag >= 2) {
 			data->in_max[nr] = IN_TO_REG(results[1]);
-			pc87360_write_value(data, 1, PC87365_REG_IN_MAX,
+			pc87360_write_value(data, LD_IN, nr,
+					    PC87365_REG_IN_MAX,
 					    data->in_max[nr]);
 		}
 	}
@@ -880,19 +904,21 @@ void pc87365_temp(struct i2c_client *client, int operation, int ctl_name,
 		if (nr >= data->tempnr)
 			return;
 		if (*nrels_mag >= 1) {
-			pc87360_write_value(data, 2, PC87365_REG_TEMP_BANK, nr);
 			data->temp_max[nr] = TEMP_TO_REG(results[0]);
-			pc87360_write_value(data, 2, PC87365_REG_TEMP_MAX,
+			pc87360_write_value(data, LD_TEMP, nr,
+					    PC87365_REG_TEMP_MAX,
 					    data->temp_max[nr]);
 		}
 		if (*nrels_mag >= 2) {
 			data->temp_min[nr] = TEMP_TO_REG(results[1]);
-			pc87360_write_value(data, 2, PC87365_REG_TEMP_MIN,
+			pc87360_write_value(data, LD_TEMP, nr,
+					    PC87365_REG_TEMP_MIN,
 					    data->temp_min[nr]);
 		}
 		if (*nrels_mag >= 3) {
 			data->temp_crit[nr] = TEMP_TO_REG(results[2]);
-			pc87360_write_value(data, 2, PC87365_REG_TEMP_CRIT,
+			pc87360_write_value(data, LD_TEMP, nr,
+					    PC87365_REG_TEMP_CRIT,
 					    data->temp_crit[nr]);
 		}
 	}
