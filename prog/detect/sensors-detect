@@ -1299,8 +1299,8 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 # This is a list of all recognized superio chips. 
 # Each entry must have the following fields:
 #  name: The full chip name
-#  driver: The driver name (without .o extension). Put in something like
-#      "Unwritten: <drivername>" if it is not yet available.
+#  driver: The driver name (without .o extension). Put in
+#      "to-be-written" if it is not yet available.
 #  addrreg: The address register
 #  datareg: The data register
 #  enter: The password sequence to write to the address register
@@ -1311,7 +1311,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #  actreg (optional): The activation register within the logical device
 #  actmask (optional): The activation bit in the activation register
 #  basereg: The I/O base register within the logical device
-#  exitseq: Sequence of addr,val pairs which exits config modem
+#  exitseq: Sequence of addr,val pairs which exits config mode
 #  alias_detect (optional): For chips which can be both on the ISA and the
 #      I2C bus, a function which detectes whether two entries are the same.
 #      The function should take three parameters: The ISA address, the
@@ -1371,7 +1371,6 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	name => "SMSC 47M10x Super IO Fan Sensors",
 	driver => "smsc47m1",
 	addrreg => 0x2e,
-	exitreg => 0x2e,
 	datareg => 0x2f,
 	enter => [0x55],
 	devidreg => 0x20,
@@ -1387,7 +1386,6 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	name => "SMSC 47M14x Super IO Fan Sensors",
 	driver => "smsc47m1",
 	addrreg => 0x2e,
-	exitreg => 0x2e,
 	datareg => 0x2f,
 	enter => [0x55],
 	devidreg => 0x20,
@@ -1403,7 +1401,6 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	name => "VT1211 Super IO Sensors",
 	driver => "vt1211",
 	addrreg => 0x2e,
-	exitreg => 0x2e,
 	datareg => 0x2f,
 	enter => [0x87, 0x87],
 	devidreg => 0x20,
@@ -1419,7 +1416,6 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	name => "Winbond W83627HF Super IO Sensors",
 	driver => "w83627hf",
 	addrreg => 0x2e,
-	exitreg => 0x2e,
 	datareg => 0x2f,
 	enter => [0x87, 0x87],
 	devidreg => 0x20,
@@ -1435,7 +1431,6 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	name => "Winbond W83627THF Super IO Sensors",
 	driver => "w83627hf",
 	addrreg => 0x2e,
-	exitreg => 0x2e,
 	datareg => 0x2f,
 	enter => [0x87, 0x87],
 	devidreg => 0x20,
@@ -1445,13 +1440,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exit => 0xaa,
+	exitseq => [0x2e, 0xaa],
      }, 
      {
 	name => "Winbond W83637HF Super IO Sensors",
 	driver => "w83627hf",
 	addrreg => 0x2e,
-	exitreg => 0x2e,
 	datareg => 0x2f,
 	enter => [0x87, 0x87],
 	devidreg => 0x20,
@@ -1467,7 +1461,6 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	name => "Winbond W83697HF Super IO Sensors",
 	driver => "w83627hf",
 	addrreg => 0x2e,
-	exitreg => 0x2e,
 	datareg => 0x2f,
 	enter => [0x87, 0x87],
 	devidreg => 0x20,
@@ -1477,13 +1470,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	actreg => 0x30,
 	actmask => 0x01,
 	basereg => 0x60,
-	exit => 0xaa,
+	exitseq => [0x2e, 0xaa],
      }, 
      {
 	name => "Winbond W83697UF Super IO PWM",
 	driver => "to-be-written",
 	addrreg => 0x2e,
-	exitreg => 0x2e,
 	datareg => 0x2f,
 	enter => [0x87, 0x87],
 	devidreg => 0x20,
@@ -2364,6 +2356,16 @@ sub scan_isa_bus
   }
 }
 
+sub exit_superio
+{
+  my $chip = shift;
+  my $addr;  
+
+  while (defined($addr = shift(@{$$chip{exitseq}}))) {
+    outb($addr, shift(@{$$chip{exitseq}}));
+  }
+}
+
 sub scan_superio
 {
   my ($chip,$val,$addr,$conf);
@@ -2391,7 +2393,7 @@ sub scan_superio
 	$val = inb($$chip{datareg});
 	if(!($val & $$chip{actmask})) {
 	  print " but not activated, module may not find\n";
-	  outb($$chip{exitreg}, $$chip{exit});
+	  exit_superio($chip);
 	  next;
 	}
       }
@@ -2402,7 +2404,7 @@ sub scan_superio
       $addr = ($addr << 8) | inb($$chip{datareg});
       if($addr == 0) {
 	print " but not activated, module may not find\n";
-	outb($$chip{addrreg}, $$chip{exit});
+	exit_superio($chip);
 	next;
       }	        
       printf " found at address 0x%04x\n", $addr;
@@ -2419,9 +2421,7 @@ sub scan_superio
         printf "  Failed! (0x%02x)\n", $val;
       }
     }
-    while ($addr = shift(@{$$chip{exitseq}})) {
-      outb($addr, shift(@{$$chip{exitseq}}));
-    }
+    exit_superio($chip);
   }
 }
 
