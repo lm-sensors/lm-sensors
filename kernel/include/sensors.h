@@ -80,6 +80,97 @@ extern int sensors_register_entry(struct i2c_client *client,
                                   const char *prefix, ctl_table *ctl_template);
 extern void sensors_deregister_entry(int id);
 
+
+/* A structure containing detect information.
+   Force variables overrule all other variables; they force a detection on
+   that place. If a specific chip is given, the module blindly assumes this
+   chip type is present; if a general force (kind == 0) is given, the module
+   will still try to figure out what type of chip is present. This is useful
+   if for some reasons the detect for SMBus or ISA address space filled
+   fails.
+   probe: insmod parameter. Initialize this list with SENSORS_I2C_END values.
+     A list of pairs. The first value is a bus number (SENSORS_ISA_BUS for
+     the ISA bus, -1 for any I2C bus), the second is the address. 
+   kind: The kind of chip. 0 equals any chip.
+*/
+struct sensors_force_data {
+  unsigned short *force;
+  unsigned short kind;
+};
+
+/* A structure containing the detect information.
+   normal_i2c: filled in by the module writer. Terminated by SENSORS_I2C_END.
+     A list of I2C addresses which should normally be examined.
+   normal_i2c_range: filled in by the module writer. Terminated by 
+     SENSORS_I2C_END
+     A list of pairs of I2C addresses, each pair being an inclusive range of
+     addresses which should normally be examined.
+   normal_isa: filled in by the module writer. Terminated by SENSORS_ISA_END.
+     A list of ISA addresses which should normally be examined.
+   normal_isa_range: filled in by the module writer. Terminated by 
+     SENSORS_ISA_END
+     A list of triples. The first two elements are ISA addresses, being an
+     range of addresses which should normally be examined. The third is the
+     modulo parameter: only addresses which are 0 module this value relative
+     to the first address of the range are actually considered.
+   probe: insmod parameter. Initialize this list with SENSORS_I2C_END values.
+     A list of pairs. The first value is a bus number (SENSORS_ISA_BUS for
+     the ISA bus, -1 for any I2C bus), the second is the address. These
+     addresses are also probed, as if they were in the 'normal' list.
+   probe_range: insmod parameter. Initialize this list with SENSORS_I2C_END 
+     values.
+     A list of triples. The first value is a bus number (SENSORS_ISA_BUS for
+     the ISA bus, -1 for any I2C bus), the second and third are addresses. 
+     These form an inclusive range of addresses that are also probed, as
+     if they were in the 'normal' list.
+   ignore: insmod parameter. Initialize this list with SENSORS_I2C_END values.
+     A list of pairs. The first value is a bus number (SENSORS_ISA_BUS for
+     the ISA bus, -1 for any I2C bus), the second is the I2C address. These
+     addresses are never probed. This parameter overrules 'normal' and 
+     'probe', but not the 'force' lists.
+   ignore_range: insmod parameter. Initialize this list with SENSORS_I2C_END 
+      values.
+     A list of triples. The first value is a bus number (SENSORS_ISA_BUS for
+     the ISA bus, -1 for any I2C bus), the second and third are addresses. 
+     These form an inclusive range of I2C addresses that are never probed.
+     This parameter overrules 'normal' and 'probe', but not the 'force' lists.
+   force_data: insmod parameters. A list, ending with an element of which
+     the force field is NULL.
+*/
+struct sensors_address_data {
+  unsigned short *normal_i2c;
+  unsigned short *normal_i2c_range;
+  unsigned int *normal_isa;
+  unsigned int *normal_isa_range;
+  unsigned short *probe;
+  unsigned short *probe_range;
+  unsigned short *ignore;
+  unsigned short *ignore_range;
+  struct sensors_force_data *forces;
+};
+
+/* Internal numbers to terminate lists */
+#define SENSORS_I2C_END 0xfffe
+#define SENSORS_ISA_END 0xfffefffe
+
+/* The numbers to use to set an ISA or I2C bus address */
+#define SENSORS_ISA_BUS 9191
+#define SENSORS_ANY_I2C_BUS 0xffff
+
+/* The length of the option lists */
+#define SENSORS_MAX_OPTS 48
+
+typedef void sensors_found_addr_proc (struct i2c_adapter *adapter, 
+                                      int addr, int kind);
+
+/* Detect function. It itterates over all possible addresses itself. For
+   SMBus addresses, it will only call found_proc if some client is connected
+   to the SMBus (unless a 'force' matched); for ISA detections, this is not
+   done. */
+extern void sensors_detect(struct i2c_adapter *adapter,
+                           struct sensors_address_data *address_data,
+                           sensors_found_addr_proc *found_proc);
+
 #endif /* def __KERNEL__ */
 
 

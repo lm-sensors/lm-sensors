@@ -1,5 +1,7 @@
 Many, many things. Most notably:
 
+* Sensors program needs to print a + before lm75 temperatures
+* Timer chips - block read problems?
 * LM78 detection: bit 5 reg 0x49 may be one?!?
 * bit-lp increases module count stupidly
 * Segfault if too high /dev/i2c-* file accessed

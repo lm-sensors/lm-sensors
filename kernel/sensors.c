@@ -29,6 +29,7 @@
 #include "i2c-isa.h"
 #include "sensors.h"
 #include "compat.h"
+#include "smbus.h"
 
 
 #ifdef MODULE
@@ -113,8 +114,8 @@ int sensors_create_name(char **name, const char *prefix,
 }
 
 /* This rather complex function must be called when you want to add an entry
-   to /proc/sys/dev/sensors/chips (not yet implemented). It also creates
-   a new directory within /proc/sys/dev/sensors/.
+   to /proc/sys/dev/sensors/chips. It also creates a new directory within 
+   /proc/sys/dev/sensors/.
    ctl_template should be a template of the newly created directory. It is
    copied in memory. The extra2 field of each file is set to point to client.
    If any driver wants subdirectories within the newly created directory,
@@ -579,6 +580,126 @@ void sensors_write_reals(int nrels,void *buffer,int *bufsize,long *results,
   *bufsize=curbufsize;
 }
 
+
+/* Very inefficient for ISA detects! */
+void sensors_detect(struct i2c_adapter *adapter,
+                    struct sensors_address_data *address_data,
+                    sensors_found_addr_proc *found_proc)
+{
+  int addr,i,found,j;
+  struct sensors_force_data *this_force;
+  unsigned int end_marker = i2c_is_isa_adapter(adapter)?SENSORS_ISA_END:
+                                                        SENSORS_I2C_END;
+  int adapter_id = i2c_is_isa_adapter(adapter)?SENSORS_ISA_BUS:
+                                               i2c_adapter_id(adapter);
+
+  for (addr = 0x00; addr <= i2c_is_isa_adapter(adapter)?0xfff:0x7f; addr ++) {
+    /* If it is in one of the force entries, we don't do any detection
+       at all */
+    found = 0;
+    for (i = 0; 
+         !found && (this_force = address_data->forces+i, this_force->force); 
+         i++) {
+      for (j = 0; !found && (this_force->force[j] != end_marker) ; i += 2) {
+        if (((adapter_id == this_force->force[j]) || 
+             (this_force->force[j] == SENSORS_ANY_I2C_BUS)) &&
+            (addr == this_force->force[j+1])) {
+          found_proc(adapter,addr,this_force->kind);
+          found = 1;
+        }
+      }
+    }
+    if (found)
+      continue;
+
+    /* If this address is in one of the ignores, we can forget about it
+       right now */
+    for (i = 0;
+         !found && (address_data->ignore[i] != end_marker); 
+         i += 2) {
+      if (((adapter_id == address_data->ignore[i]) || 
+           (address_data->ignore[i] == SENSORS_ANY_I2C_BUS)) &&
+          (addr == address_data->ignore[i+1])) {
+        found = 1;
+      }
+    }
+    for (i = 0;
+         !found && (address_data->ignore_range[i] != end_marker);
+         i += 3) {
+      if (((adapter_id == address_data->ignore_range[i]) ||
+           (address_data->ignore_range[i] == SENSORS_ANY_I2C_BUS)) &&
+          (addr >= address_data->ignore_range[i+1]) &&
+          (addr <= address_data->ignore_range[i+2]))
+        found = 1;
+    }
+    if (found)
+      continue;
+
+    /* Now, we will do a detection, but only if it is in the normal or 
+       probe entries */
+    if (i2c_is_isa_adapter(adapter)) {
+      for (i = 0;
+           !found && (address_data->normal_isa[i] != SENSORS_ISA_END);
+           i += 1) {
+        if (addr == address_data->normal_isa[i]) {
+          found = 1;
+      }
+      for (i = 0;
+           !found && (address_data->normal_isa_range[i] != SENSORS_I2C_END);
+           i += 3) {
+         if ((addr >= address_data->normal_isa_range[i]) &&
+             (addr <= address_data->normal_isa_range[i+1]) &&
+             ((addr - address_data->normal_isa_range[i]) % 
+                                  address_data->normal_isa_range[i+2] == 0));
+          found = 1;
+        }
+      }
+    } else {
+      for (i = 0;
+           !found && (address_data->normal_i2c[i] != SENSORS_I2C_END);
+           i += 1) {
+        if (addr == address_data->normal_i2c[i]) {
+          found = 1;
+      }
+      for (i = 0;
+           !found && (address_data->normal_i2c_range[i] != SENSORS_I2C_END);
+           i += 2) {
+         if ((addr >= address_data->normal_i2c_range[i]) &&
+             (addr <= address_data->normal_i2c_range[i+1]))
+          found = 1;
+        }
+      }
+    }
+
+    for (i = 0;
+         !found && (address_data->probe[i] != SENSORS_I2C_END);
+         i += 2) {
+      if (((adapter_id == address_data->probe[i]) ||
+           (address_data->probe[i] == SENSORS_ANY_I2C_BUS)) &&
+          (addr == address_data->probe[i+1])) {
+        found = 1;
+      }
+    for (i = 0;
+         !found && (address_data->probe_range[i] != SENSORS_I2C_END);
+         i += 3) {
+      if (((adapter_id == address_data->probe_range[i]) ||
+           (address_data->probe_range[i] == SENSORS_ANY_I2C_BUS)) &&
+          (addr >= address_data->probe_range[i+1]) &&
+          (addr <= address_data->probe_range[i+2])) 
+        found = 1;
+      }
+    }
+    if (!found)
+      continue;
+
+    /* OK, so we really should examine this address. First check
+       whether there is some client here at all! */
+    if (!i2c_is_isa_adapter(adapter) || 
+        (smbus_read_byte(adapter,addr) >= 0))
+      found_proc(adapter,addr,0);
+  }
+}
+      
 int sensors_init(void) 
 {
   printk("sensors.o version %s (%s)\n",LM_VERSION,LM_DATE);
