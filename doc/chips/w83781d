@@ -9,8 +9,6 @@ Status: W83781D support is complete and well-tested.
         W83697HF support is complete but has not been well-tested.
         AS99127F support is BETA and has known problems due to lack of a
 		 chip datasheet. SEE BELOW.
-	ASB100 Bach support is BETA; presently this chip is treated
-		exactly like AS99127F.
 
 Supported chips:
   * Winbond W83781D
@@ -23,11 +21,11 @@ Supported chips:
     Datasheet: Publicly available at the Winbond website
   * Winbond W83783S
     Prefix 'w83783s'
-    Addresses scanned: I2C 0x20 - 0x2f (inclusive)
+    Addresses scanned: I2C 0x2d
     Datasheet: Publicly available at the Winbond website
   * Winbond W83791D
     Prefix 'w83791d'
-    Addresses scanned: I2C 0x20 - 0x2f (inclusive)
+    Addresses scanned: I2C 0x2c - 0x2f (inclusive)
     Datasheet: Publicly available at the Winbond website
   * Winbond W83627HF
     Prefix 'w83627hf'
@@ -39,11 +37,7 @@ Supported chips:
     Datasheet: Publicly available at the Winbond website
   * Asus AS99127F
     Prefix 'as99127f'
-    Addresses scanned: I2C 0x20 - 0x2f (inclusive)
-    Datasheet: Unavailable from Asus
-  * Asus ASB100 Bach
-    Prefix 'as99127f'
-    Addresses scanned: I2C 0x20 - 0x2f (inclusive)
+    Addresses scanned: I2C 0x28 - 0x2f (inclusive)
     Datasheet: Unavailable from Asus
 
 
@@ -95,7 +89,7 @@ Description
 -----------
 
 This driver implements support for the Winbond W83781D, W83782D,
-W8783S, and W83627HF chips, and the Asus AS99127F/ASB100 chips.
+W8783S, and W83627HF chips, and the Asus AS99127F chips.
 We will refer to them collectively as W8378* chips.
 
 There is quite some difference between these chips, but they are similar
@@ -191,9 +185,9 @@ Known problems:
 	   cat /proc/bus/i2c to see a list of bus numbers)
 
 
-AS99127F/ASB100 PROBLEMS
+AS99127F PROBLEMS
 -----------------
-The as99127f/asb100 support was developed without the benefit of a datasheet.
+The as99127f support was developed without the benefit of a datasheet.
 In most cases it is treated as a w83781d.
 This support will be BETA until a datasheet is released.
 One user has reported problems with fans stopping

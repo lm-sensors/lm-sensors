@@ -698,9 +698,6 @@ chip "as99127f-*"
 # AS99127F rev.2 (same as w83782d)
 #   compute in5 (5.14 * @) - 14.91 , (@ + 14.91) / 5.14
 #   compute in6 (3.14 * @) -  7.71 , (@ +  7.71) / 3.14
-# ASB100 Bach (contributed by Alex van Kaam)
-#   compute in5 -(240/60.4)*@  ,  -@/(240/60.4)
-#   compute in6 -(5/3)*@       ,  -@/(5/3)
 
 # Depending on your motherboard, you have to choose between three formulae
 # for temp2. Quoting Artur Gawryszczak:
@@ -720,8 +717,6 @@ chip "as99127f-*"
 # See comments above if temp3 looks bad. What works for temp2 is likely
 # to work for temp3.
     compute temp3 @*2.0, @/2.0
-
-# ASB100's temp4 isn't supported by the w83781d driver.
 
 # Most Asus boards have temperatures settled like that:
     label temp1 "M/B Temp"
