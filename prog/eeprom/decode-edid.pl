@@ -17,6 +17,8 @@
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 # Version 0.1  2003-07-17  Jean Delvare <khali@linux-fr.org>
+# Version 0.2  2003-07-22  Jean Delvare <khali@linux-fr.org>
+#  Use print instead of syswrite.
 #
 # EEPROM data decoding for EDID. EDID (Extended Display Identification
 # Data) is a VESA standard which allows storing (on manufacturer's side)
@@ -108,10 +110,10 @@ sub edid_decode
 			}
 		}
 		close EEDATA;
-		syswrite PIPE, $output;
+		print PIPE $output;
 	}
 
-	syswrite PIPE, "\n"; # keep the customer satifsied
+	print PIPE "\n"; # keep the customer satifsied
 	close PIPE;
 }
 
