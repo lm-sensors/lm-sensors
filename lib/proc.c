@@ -422,6 +422,7 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 	Common conversions are as follows:
 		fan%d_div -> fan_div%d
 		fan%d_min -> fan_min%d
+		fan%d_state -> fan_status%d
 		fan%d -> fan_input%d
 		in%d_max -> in_max%d
 		in%d_min -> in_min%d
@@ -432,6 +433,7 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 		temp%d_high -> temp_max%d
 		temp%d_min -> temp_min%d
 		temp%d_low -> temp_min%d
+		temp%d_state -> temp_status%d
 		temp%d -> temp_input%d
 		tcrit%d -> temp_crit%d
 		hyst%d -> temp_hyst%d
@@ -501,6 +503,11 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 		*sysmag = FANMAG;
 		return 0;
 	}
+	if(sscanf(name, "fan%d_stat%c%c", &num, &last, &check) == 2 && last == 'e') {
+		sprintf(sysname, "fan_status%d", num);
+		*sysmag = FANMAG;
+		return 0;
+	}
 	if(sscanf(name, "fan%d%c", &num, &check) == 1) {
 		sprintf(sysname, "fan_input%d", num);
 		*sysmag = FANMAG;
@@ -562,6 +569,11 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	}
 	if(sscanf(name, "temp%d_hig%c%c", &num, &last, &check) == 2 && last == 'h') {
 		sprintf(sysname, "temp_max%d", num);
+		*sysmag = TEMPMAG;
+		return 0;
+	}
+	if(sscanf(name, "temp%d_stat%c%c", &num, &last, &check) == 2 && last == 'e') {
+		sprintf(sysname, "temp_status%d", num);
 		*sysmag = TEMPMAG;
 		return 0;
 	}
