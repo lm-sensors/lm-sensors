@@ -299,6 +299,7 @@ extern int i2c_adapter_id(struct i2c_adapter *adap);
 #define I2C_DRIVERID_TEA6415	 6	/* video matrix switch		*/
 #define I2C_DRIVERID_TDA9840	 7	/* stereo sound processor	*/
 #define I2C_DRIVERID_SAA7111	 8	/* video input processor	*/
+#define I2C_DRIVERID_BT848       9      /* video input processor        */
 
 #define I2C_DRIVERID_EXP0	0xF0	/* experimental use id's	*/
 #define I2C_DRIVERID_EXP1	0xF1

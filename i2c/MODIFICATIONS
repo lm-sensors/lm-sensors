@@ -11,6 +11,8 @@ The current version of Simon's code is called mod-19990118.tar.gz.
 
 Here come the changes:
 
+* Added I2C_DRIVERID_BT848 in i2c.h 
+
 ! Changed line 2 of algo-bit.h from AGLO_BIT_H to ALGO_BIT_H
 
 ! Fixed i2c_probe bug
