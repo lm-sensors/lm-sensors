@@ -22,6 +22,7 @@ ask CVS about it:
   Dropped all kernel 2.2 and 2.3 compatibility; 2.4.9 or later required
   File i2c-dev.h: Include userspace portion removed from i2c-dev.h in
                   i2c package
+  File doc/chips/fscscy: Add watchdog documentation
   File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
   Library: Add support for exponents and logarithms for vt1211/vt8235 temps;
            add lm85 support; add w83791d support
@@ -44,6 +45,7 @@ ask CVS about it:
 		- Remove xxx_inc_use() and xxx_dec_use() functions
 		- Use module_init() and module_exit()
 		- Update to new i2c_driver struct definition
+  Modules (bus PCI): Convert to PCI-module-style initialization
   Modules (several): Add support for AMD Opteron VRM (VID) encoding
   Module adm1021: Set alarm on failed reads and report old value;
                   merge changes from kernel 2.5.54
@@ -57,6 +59,7 @@ ask CVS about it:
   Module i2c-amd8111: merge changes from kernel 2.5.54
   Module i2c-i810.c: Fix for some chips
   Module i2c-nforce2.c: New
+  Module i2c-sis645: Add support for SiS651, SiS961, SiS745
   Modules mtp008, smsc47m1, vt1211, vt8231, w83781d: Standardize and improve
           pwm and pwm enable support; update docs
   Module w83627hf: New
@@ -65,10 +68,13 @@ ask CVS about it:
   Program eeprom, eepromer: Use local i2c-dev.h for build
   Program lm_sensors.init: Call sensors -s in start()
   Program mkpatch: Fix vt8231 compile; keep tsunami from menu on non-alpha
+  Program p4b_smbus: Fix 'make install', install in same place as other modules
   Program pwmtest: New
   Program sensors: add lm85 support; add w83791d support
   Program sensors-detect: Add super i/o detection (smsc47m1, vt1211,
-                          w83627hf, w83697hf)
+                          w83627hf, w83697hf);
+                          Add support for SiS651, SiS961, SiS745, nForce2;
+                          Support dmidecode 2.0 and later
 
 2.7.0 (20021208)
   NOTE: Requires i2c-2.7.0 or newer.
