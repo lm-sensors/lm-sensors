@@ -158,9 +158,6 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        driver => "w83781d",
        i2c_addrs => [0x00..0x7f], 
        i2c_detect => sub { w83781d_detect 1, @_},
-       isa_addrs => [0x290],
-       isa_detect => sub { w83781d_isa_detect 1, @_ },
-       alias_detect => sub { w83781d_alias_detect 1, @_ },
      } ,
      {
        name => "Winbond W83783S",
@@ -1149,8 +1146,8 @@ sub w83781d_detect
   return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
                 (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
   return unless ($reg1 & 0x07) == 0x00;
-  $reg1 = i2c_smbus_read_byte_data($file,0x58);
-  return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
+  $reg1 = i2c_smbus_read_byte_data($file,0x58) &0xfe;
+  return if $chip == 0 and  $reg1 != 0x10;
   return if $chip == 1 and  $reg1 != 0x30;
   return if $chip == 2 and  $reg1 != 0x40;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);

@@ -70,11 +70,14 @@ ETCDIR := /etc
 LIBDIR := $(PREFIX)/lib
 
 # You should not need to change this. It is the directory into which the
-# executable program files will be installed.
+# executable program files will be installed. BINDIR for programs that are
+# also useful for normal users, SBINDIR for programs that can only be run
+# by the superuser.
 # Note that not all programs in this package are really installed;
 # some are just examples. You can always install them by hand, of
 # course.
 BINDIR := $(PREFIX)/bin
+SBINDIR := $(PREFIX)/sbin
 
 # You should not need to change this. It is the basic directory into which
 # include files will be installed. The actual directory will be 
