@@ -789,6 +789,30 @@ use vars qw(@pci_adapters @chip_ids @superio_ids);
        driver => "to-be-written",
        match => sub { 0 },
      } , 
+     { 
+       vendid => 0x1002,
+       devid  => 0x4353,
+       func => 0,
+       procid => "ATI Technologies Inc ATI SMBus",
+       driver => "to-be-written",
+       match => sub { 0 },
+     } , 
+     { 
+       vendid => 0x1002,
+       devid  => 0x4363,
+       func => 0,
+       procid => "ATI Technologies Inc ATI SMBus",
+       driver => "to-be-written",
+       match => sub { 0 },
+     } , 
+     { 
+       vendid => 0x1002,
+       devid  => 0x4372,
+       func => 0,
+       procid => "ATI Technologies Inc ATI SMBus",
+       driver => "to-be-written",
+       match => sub { 0 },
+     } , 
 );
 
 # The following entries used to appear directly in @pci_adapters.
