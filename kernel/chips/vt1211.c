@@ -1,0 +1,1039 @@
+/*
+    vt1211.c - Part of lm_sensors, Linux kernel modules
+                for hardware monitoring
+                
+    Copyright (c) 2002 Mark D. Studebaker <mdsxyz123@yahoo.com>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+#include <linux/version.h>
+#include <linux/module.h>
+#include <linux/slab.h>
+#include <linux/proc_fs.h>
+#include <linux/ioport.h>
+#include <linux/sysctl.h>
+#include <asm/errno.h>
+#include <asm/io.h>
+#include <linux/types.h>
+#include <linux/i2c.h>
+#include "version.h"
+#include "sensors.h"
+#include "sensors_vid.h"
+#include <linux/init.h>
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
+    (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
+#define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
+#endif
+
+#ifndef I2C_DRIVERID_VT1211
+#define I2C_DRIVERID_VT1211 1032
+#endif
+
+#ifndef THIS_MODULE
+#define THIS_MODULE NULL
+#endif
+
+static int force_addr = 0;
+MODULE_PARM(force_addr, "i");
+MODULE_PARM_DESC(force_addr,
+		 "Initialize the base address of the sensors");
+
+static unsigned short normal_i2c[] = { SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
+static unsigned int normal_isa[] = { 0x0000, SENSORS_ISA_END };
+static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
+
+SENSORS_INSMOD_1(vt1211);
+
+/* modified from kernel/include/traps.c */
+#define	REG	0x2e	/* The register to read/write */
+#define	DEV	0x07	/* Register: Logical device select */
+#define	VAL	0x2f	/* The value to read/write */
+#define PME	0x0b	/* The device with the hardware monitor */
+#define	DEVID	0x20	/* Register: Device ID */
+
+static inline void
+superio_outb(int reg, int val)
+{
+	outb(reg, REG);
+	outb(val, VAL);
+}
+
+static inline int
+superio_inb(int reg)
+{
+	outb(reg, REG);
+	return inb(VAL);
+}
+
+static inline void
+superio_select()
+{
+	outb(DEV, REG);
+	outb(PME, VAL);
+}
+
+static inline void
+superio_enter()
+{
+	outb(0x87, REG);
+	outb(0x87, REG);
+}
+
+static inline void
+superio_exit()
+{
+	outb(0xAA, REG);
+}
+
+#define VT1211_DEVID 0x3c
+#define VT1211_ACT_REG 0x30
+#define VT1211_BASE_REG 0x60
+
+#define VT1211_EXTENT 0x80
+
+/* pwm numbered 1-2 */
+#define VT1211_REG_PWM(nr) (0x5f + (nr))
+
+/* The VT1211 registers */
+/* We define the sensors as follows. Somewhat convoluted to minimize
+   changes from via686a.
+	Sensor		Voltage Mode	Temp Mode
+	--------	------------	---------
+	Reading 1			temp3
+	Reading 3			temp1
+	UCH1/Reading2	in0		temp2
+	UCH2		in1		temp4
+	UCH3		in2		temp5
+	UCH4		in3		temp6
+	UCH5		in4		temp7
+	3.3V		in5
+	-12V		in6
+*/
+
+/* ins numbered 0-6 */
+#define VT1211_REG_IN_MAX(nr) ((nr)==0 ? 0x3d : 0x2b + (((nr)+1) * 2))
+#define VT1211_REG_IN_MIN(nr) ((nr)==0 ? 0x3e : 0x2c + (((nr)+1) * 2))
+#define VT1211_REG_IN(nr)     (0x21 + (nr))
+
+/* fans numbered 1-2 */
+#define VT1211_REG_FAN_MIN(nr) (0x3a + (nr))
+#define VT1211_REG_FAN(nr)     (0x28 + (nr))
+
+static const u8 regtemp[] = { 0x20, 0x21, 0x1f, 0x22, 0x23, 0x24, 0x25 };
+static const u8 regover[] = { 0x39, 0x3d, 0x1d, 0x2b, 0x2d, 0x2f, 0x31 };
+static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e, 0x2c, 0x2e, 0x30, 0x32 };
+
+/* temps numbered 1-7 */
+#define VT1211_REG_TEMP(nr)		(regtemp[(nr) - 1])
+#define VT1211_REG_TEMP_OVER(nr)	(regover[(nr) - 1])
+#define VT1211_REG_TEMP_HYST(nr)	(reghyst[(nr) - 1])
+#define VT1211_REG_TEMP_LOW3	0x4b	/* bits 7-6 */
+#define VT1211_REG_TEMP_LOW2	0x49	/* bits 5-4 */
+#define VT1211_REG_TEMP_LOW47	0x4d
+
+#define VT1211_REG_CONFIG 0x40
+#define VT1211_REG_ALARM1 0x41
+#define VT1211_REG_ALARM2 0x42
+#define VT1211_REG_VID    0x45
+#define VT1211_REG_FANDIV 0x47
+#define VT1211_REG_UCH_CONFIG 0x4a
+#define VT1211_REG_TEMP1_CONFIG 0x4b
+#define VT1211_REG_TEMP1_CONFIG 0x4c
+
+/* temps 1-7; voltages 0-6 */
+#define ISTEMP(i, ch_config) ((i) == 1 ? 1 : \
+			      (i) == 3 ? 1 : \
+			      (i) == 2 ? (ch_config) & 0x01 : \
+			      ((ch_config) >> ((i)-1)) & 0x01)
+#define ISVOLT(i, ch_config) ((i) > 4 ? 1 : !(((ch_config) >> ((i)+2)) & 0x01))
+
+#define DIV_FROM_REG(val) (1 << (val))
+#define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
+#define PWM_FROM_REG(val) (((val) * 1005) / 2550)
+#define PWM_TO_REG(val) SENSORS_LIMIT((((val) * 2555) / 1000), 0, 255)
+
+/* Conversions. Rounding and limit checking is only done on the TO_REG
+   variants. */
+
+/********* VOLTAGE CONVERSIONS (Bob Dougherty) ********/
+// From HWMon.cpp (Copyright 1998-2000 Jonathan Teh Soon Yew):
+// voltagefactor[0]=1.25/2628; (2628/1.25=2102.4)   // Vccp
+// voltagefactor[1]=1.25/2628; (2628/1.25=2102.4)   // +2.5V
+// voltagefactor[2]=1.67/2628; (2628/1.67=1573.7)   // +3.3V
+// voltagefactor[3]=2.6/2628;  (2628/2.60=1010.8)   // +5V
+// voltagefactor[4]=6.3/2628;  (2628/6.30=417.14)   // +12V
+// in[i]=(data[i+2]*25.0+133)*voltagefactor[i];
+// That is:
+// volts = (25*regVal+133)*factor
+// regVal = (volts/factor-133)/25
+// (These conversions were contributed by Jonathan Teh Soon Yew 
+// <j.teh@iname.com>)
+// 
+// These get us close, but they don't completely agree with what my BIOS 
+// says- they are all a bit low.  But, it all we have to go on...
+extern inline u8 IN_TO_REG(long val, int inNum)
+{
+	// to avoid floating point, we multiply everything by 100.
+	// val is guaranteed to be positive, so we can achieve the effect of 
+	// rounding by (...*10+5)/10.  Note that the *10 is hidden in the 
+	// /250 (which should really be /2500).
+	// At the end, we need to /100 because we *100 everything and we need
+	// to /10 because of the rounding thing, so we /1000.  
+	if (inNum <= 1)
+		return (u8)
+		    SENSORS_LIMIT(((val * 210240 - 13300) / 250 + 5) / 1000, 
+				  0, 255);
+	else if (inNum == 2)
+		return (u8)
+		    SENSORS_LIMIT(((val * 157370 - 13300) / 250 + 5) / 1000, 
+				  0, 255);
+	else if (inNum == 3)
+		return (u8)
+		    SENSORS_LIMIT(((val * 101080 - 13300) / 250 + 5) / 1000, 
+				  0, 255);
+	else
+		return (u8) SENSORS_LIMIT(((val * 41714 - 13300) / 250 + 5)
+					  / 1000, 0, 255);
+}
+
+extern inline long IN_FROM_REG(u8 val, int inNum)
+{
+	// to avoid floating point, we multiply everything by 100.
+	// val is guaranteed to be positive, so we can achieve the effect of
+	// rounding by adding 0.5.  Or, to avoid fp math, we do (...*10+5)/10.
+	// We need to scale with *100 anyway, so no need to /100 at the end.
+	if (inNum <= 1)
+		return (long) (((250000 * val + 13300) / 210240 * 10 + 5) /10);
+	else if (inNum == 2)
+		return (long) (((250000 * val + 13300) / 157370 * 10 + 5) /10);
+	else if (inNum == 3)
+		return (long) (((250000 * val + 13300) / 101080 * 10 + 5) /10);
+	else
+		return (long) (((250000 * val + 13300) / 41714 * 10 + 5) /10);
+}
+
+/********* FAN RPM CONVERSIONS ********/
+/* But this chip saturates back at 0, not at 255 like all the other chips.
+   So, 0 means 0 RPM */
+extern inline u8 FAN_TO_REG(long rpm, int div)
+{
+	if (rpm == 0)
+		return 0;
+	rpm = SENSORS_LIMIT(rpm, 1, 1000000);
+	return SENSORS_LIMIT((1350000 + rpm * div / 2) / (rpm * div), 1, 255);
+}
+
+#define MIN_TO_REG(a,b) FAN_TO_REG(a,b)
+#define FAN_FROM_REG(val,div) ((val)==0?0:(val)==255?0:1350000/((val)*(div)))
+
+/******** TEMP CONVERSIONS (Bob Dougherty) *********/
+// linear fits from HWMon.cpp (Copyright 1998-2000 Jonathan Teh Soon Yew)
+//      if(temp<169)
+//              return double(temp)*0.427-32.08;
+//      else if(temp>=169 && temp<=202)
+//              return double(temp)*0.582-58.16;
+//      else
+//              return double(temp)*0.924-127.33;
+//
+// A fifth-order polynomial fits the unofficial data (provided by Alex van 
+// Kaam <darkside@chello.nl>) a bit better.  It also give more reasonable 
+// numbers on my machine (ie. they agree with what my BIOS tells me).  
+// Here's the fifth-order fit to the 8-bit data:
+// temp = 1.625093e-10*val^5 - 1.001632e-07*val^4 + 2.457653e-05*val^3 - 
+//        2.967619e-03*val^2 + 2.175144e-01*val - 7.090067e+0.
+//
+// (2000-10-25- RFD: thanks to Uwe Andersen <uandersen@mayah.com> for 
+// finding my typos in this formula!)
+//
+// Alas, none of the elegant function-fit solutions will work because we 
+// aren't allowed to use floating point in the kernel and doing it with 
+// integers doesn't rpovide enough precision.  So we'll do boring old 
+// look-up table stuff.  The unofficial data (see below) have effectively 
+// 7-bit resolution (they are rounded to the nearest degree).  I'm assuming 
+// that the transfer function of the device is monotonic and smooth, so a 
+// smooth function fit to the data will allow us to get better precision.  
+// I used the 5th-order poly fit described above and solved for
+// VIA register values 0-255.  I *10 before rounding, so we get tenth-degree 
+// precision.  (I could have done all 1024 values for our 10-bit readings, 
+// but the function is very linear in the useful range (0-80 deg C), so 
+// we'll just use linear interpolation for 10-bit readings.)  So, tempLUT 
+// is the temp at via register values 0-255:
+static const long tempLUT[] =
+    { -709, -688, -667, -646, -627, -607, -589, -570, -553, -536, -519,
+	    -503, -487, -471, -456, -442, -428, -414, -400, -387, -375,
+	    -362, -350, -339, -327, -316, -305, -295, -285, -275, -265,
+	    -255, -246, -237, -229, -220, -212, -204, -196, -188, -180,
+	    -173, -166, -159, -152, -145, -139, -132, -126, -120, -114,
+	    -108, -102, -96, -91, -85, -80, -74, -69, -64, -59, -54, -49,
+	    -44, -39, -34, -29, -25, -20, -15, -11, -6, -2, 3, 7, 12, 16,
+	    20, 25, 29, 33, 37, 42, 46, 50, 54, 59, 63, 67, 71, 75, 79, 84,
+	    88, 92, 96, 100, 104, 109, 113, 117, 121, 125, 130, 134, 138,
+	    142, 146, 151, 155, 159, 163, 168, 172, 176, 181, 185, 189,
+	    193, 198, 202, 206, 211, 215, 219, 224, 228, 232, 237, 241,
+	    245, 250, 254, 259, 263, 267, 272, 276, 281, 285, 290, 294,
+	    299, 303, 307, 312, 316, 321, 325, 330, 334, 339, 344, 348,
+	    353, 357, 362, 366, 371, 376, 380, 385, 390, 395, 399, 404,
+	    409, 414, 419, 423, 428, 433, 438, 443, 449, 454, 459, 464,
+	    469, 475, 480, 486, 491, 497, 502, 508, 514, 520, 526, 532,
+	    538, 544, 551, 557, 564, 571, 578, 584, 592, 599, 606, 614,
+	    621, 629, 637, 645, 654, 662, 671, 680, 689, 698, 708, 718,
+	    728, 738, 749, 759, 770, 782, 793, 805, 818, 830, 843, 856,
+	    870, 883, 898, 912, 927, 943, 958, 975, 991, 1008, 1026, 1044,
+	    1062, 1081, 1101, 1121, 1141, 1162, 1184, 1206, 1229, 1252,
+	    1276, 1301, 1326, 1352, 1378, 1406, 1434, 1462
+};
+
+/* the original LUT values from Alex van Kaam <darkside@chello.nl> 
+   (for via register values 12-240):
+{-50,-49,-47,-45,-43,-41,-39,-38,-37,-35,-34,-33,-32,-31,
+-30,-29,-28,-27,-26,-25,-24,-24,-23,-22,-21,-20,-20,-19,-18,-17,-17,-16,-15,
+-15,-14,-14,-13,-12,-12,-11,-11,-10,-9,-9,-8,-8,-7,-7,-6,-6,-5,-5,-4,-4,-3,
+-3,-2,-2,-1,-1,0,0,1,1,1,3,3,3,4,4,4,5,5,5,6,6,7,7,8,8,9,9,9,10,10,11,11,12,
+12,12,13,13,13,14,14,15,15,16,16,16,17,17,18,18,19,19,20,20,21,21,21,22,22,
+22,23,23,24,24,25,25,26,26,26,27,27,27,28,28,29,29,30,30,30,31,31,32,32,33,
+33,34,34,35,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43,44,44,45,
+45,46,46,47,48,48,49,49,50,51,51,52,52,53,53,54,55,55,56,57,57,58,59,59,60,
+61,62,62,63,64,65,66,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,83,84,
+85,86,88,89,91,92,94,96,97,99,101,103,105,107,109,110};
+*/
+
+// Here's the reverse LUT.  I got it by doing a 6-th order poly fit (needed
+// an extra term for a good fit to these inverse data!) and then 
+// solving for each temp value from -50 to 110 (the useable range for 
+// this chip).  Here's the fit: 
+// viaRegVal = -1.160370e-10*val^6 +3.193693e-08*val^5 - 1.464447e-06*val^4 
+// - 2.525453e-04*val^3 + 1.424593e-02*val^2 + 2.148941e+00*val +7.275808e+01)
+// Note that n=161:
+static const u8 viaLUT[] =
+    { 12, 12, 13, 14, 14, 15, 16, 16, 17, 18, 18, 19, 20, 20, 21, 22, 23,
+	    23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 35, 36, 37, 39, 40,
+	    41, 43, 45, 46, 48, 49, 51, 53, 55, 57, 59, 60, 62, 64, 66,
+	    69, 71, 73, 75, 77, 79, 82, 84, 86, 88, 91, 93, 95, 98, 100,
+	    103, 105, 107, 110, 112, 115, 117, 119, 122, 124, 126, 129,
+	    131, 134, 136, 138, 140, 143, 145, 147, 150, 152, 154, 156,
+	    158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180,
+	    182, 183, 185, 187, 188, 190, 192, 193, 195, 196, 198, 199,
+	    200, 202, 203, 205, 206, 207, 208, 209, 210, 211, 212, 213,
+	    214, 215, 216, 217, 218, 219, 220, 221, 222, 222, 223, 224,
+	    225, 226, 226, 227, 228, 228, 229, 230, 230, 231, 232, 232,
+	    233, 233, 234, 235, 235, 236, 236, 237, 237, 238, 238, 239,
+	    239, 240
+};
+
+/* Converting temps to (8-bit) hyst and over registers */
+// No interpolation here.  Just check the limits and go.
+// The +5 effectively rounds off properly and the +50 is because 
+// the temps start at -50
+extern inline u8 TEMP_TO_REG(long val)
+{
+	return (u8)
+	    SENSORS_LIMIT(viaLUT[((val <= -500) ? 0 : (val >= 1100) ? 160 : 
+				  ((val + 5) / 10 + 50))], 0, 255);
+}
+
+/* for 8-bit temperature hyst and over registers */
+// The temp values are already *10, so we don't need to do that.
+// But we _will_ round these off to the nearest degree with (...*10+5)/10
+#define TEMP_FROM_REG(val) ((tempLUT[(val)]*10+5)/10)
+
+/* for 10-bit temperature readings */
+// You might _think_ this is too long to inline, but's it's really only
+// called once...
+extern inline long TEMP_FROM_REG10(u16 val)
+{
+	// the temp values are already *10, so we don't need to do that.
+	long temp;
+	u16 eightBits = val >> 2;
+	u16 twoBits = val & 3;
+
+	// handle the extremes first (they won't interpolate well! ;-)
+	if (val == 0)
+		return (long) tempLUT[0];
+	if (val == 1023)
+		return (long) tempLUT[255];
+
+	if (twoBits == 0)
+		return (long) tempLUT[eightBits];
+	else {
+		// do some interpolation by multipying the lower and upper
+		// bounds by 25, 50 or 75, then /100.
+		temp = ((25 * (4 - twoBits)) * tempLUT[eightBits]
+			+ (25 * twoBits) * tempLUT[eightBits + 1]);
+		// increase the magnitude by 50 to achieve rounding.
+		if (temp > 0)
+			temp += 50;
+		else
+			temp -= 50;
+		return (temp / 100);
+	}
+}
+
+#define VT1211_INIT_FAN_MIN_1 3000
+#define VT1211_INIT_FAN_MIN_2 3000
+
+#ifdef MODULE
+extern int init_module(void);
+extern int cleanup_module(void);
+#endif				/* MODULE */
+
+struct vt1211_data {
+	struct semaphore lock;
+	int sysctl_id;
+
+	struct semaphore update_lock;
+	char valid;		/* !=0 if following fields are valid */
+	unsigned long last_updated;	/* In jiffies */
+
+	u8 in[7];		/* Register value */
+	u8 in_max[7];		/* Register value */
+	u8 in_min[7];		/* Register value */
+	u16 temp[7];		/* Register value 10 bit */
+	u8 temp_over[7];	/* Register value */
+	u8 temp_hyst[7];	/* Register value */
+	u8 fan[2];		/* Register value */
+	u8 fan_min[2];		/* Register value */
+	u8 fan_div[2];		/* Register encoding, shifted right */
+	u16 alarms;		/* Register encoding */
+	u8 pwm[2];		/* Register value */
+	u8 vid;			/* Register encoding */
+	u8 vrm;
+	u8 uch_config;
+};
+
+#ifdef MODULE
+static
+#else
+extern
+#endif
+int __init sensors_vt1211_init(void);
+static int __init vt1211_cleanup(void);
+
+static int vt1211_attach_adapter(struct i2c_adapter *adapter);
+static int vt1211_detect(struct i2c_adapter *adapter, int address,
+			  unsigned short flags, int kind);
+static int vt1211_detach_client(struct i2c_client *client);
+static int vt1211_command(struct i2c_client *client, unsigned int cmd,
+			   void *arg);
+static void vt1211_inc_use(struct i2c_client *client);
+static void vt1211_dec_use(struct i2c_client *client);
+
+static inline int vt_rdval(struct i2c_client *client, u8 register);
+static inline void vt1211_write_value(struct i2c_client *client, u8 register,
+			       u8 value);
+static void vt1211_update_client(struct i2c_client *client);
+static void vt1211_init_client(struct i2c_client *client);
+static int vt1211_find(int *address);
+
+
+static void vt1211_fan(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+static void vt1211_alarms(struct i2c_client *client, int operation,
+			   int ctl_name, int *nrels_mag, long *results);
+static void vt1211_fan_div(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
+static void vt1211_in(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+static void vt1211_pwm(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+static void vt1211_vid(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+static void vt1211_vrm(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+static void vt1211_uch(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+static void vt1211_temp(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+
+static int vt1211_id = 0;
+
+static struct i2c_driver vt1211_driver = {
+	/* name */ "SiS 5595",
+	/* id */ I2C_DRIVERID_VT1211,
+	/* flags */ I2C_DF_NOTIFY,
+	/* attach_adapter */ &vt1211_attach_adapter,
+	/* detach_client */ &vt1211_detach_client,
+	/* command */ &vt1211_command,
+	/* inc_use */ &vt1211_inc_use,
+	/* dec_use */ &vt1211_dec_use
+};
+
+static int __initdata vt1211_initialized = 0;
+
+static ctl_table vt1211_dir_table_template[] = {
+	{VT1211_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_in},
+	{VT1211_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_in},
+	{VT1211_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_in},
+	{VT1211_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_in},
+	{VT1211_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_in},
+	{VT1211_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_in},
+	{VT1211_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_in},
+	{VT1211_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_temp},
+	{VT1211_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt1211_temp},
+	{VT1211_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt1211_temp},
+	{VT1211_SYSCTL_TEMP4, "temp4", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt1211_temp},
+	{VT1211_SYSCTL_TEMP5, "temp5", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt1211_temp},
+	{VT1211_SYSCTL_TEMP6, "temp6", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt1211_temp},
+	{VT1211_SYSCTL_TEMP7, "temp7", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt1211_temp},
+	{VT1211_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_fan},
+	{VT1211_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_fan},
+	{VT1211_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_fan_div},
+	{VT1211_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_alarms},
+	{VT1211_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_pwm},
+	{VT1211_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_pwm},
+	{VT1211_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_vid},
+	{VT1211_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_vrm},
+	{VT1211_SYSCTL_UCH, "uch_config", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &vt1211_uch},
+	{0}
+};
+
+int vt1211_attach_adapter(struct i2c_adapter *adapter)
+{
+	return i2c_detect(adapter, &addr_data, vt1211_detect);
+}
+
+int vt1211_find(int *address)
+{
+	u16 val;
+
+	superio_enter();
+	val= superio_inb(DEVID);
+	if(VT1211_DEVID != val) {
+		superio_exit();
+		return -ENODEV;
+	}
+
+	superio_select();
+	val = (superio_inb(VT1211_BASE_REG) << 8) |
+	       superio_inb(VT1211_BASE_REG + 1);
+	*address = val & ~(VT1211_EXTENT - 1);
+	if (*address == 0 && force_addr == 0) {
+		printk("vt1211.o: base address not set - use force_addr=0xaddr\n");
+		superio_exit();
+		return -ENODEV;
+	}
+	if (force_addr)
+		*address = force_addr;	/* so detect will get called */
+
+	superio_exit();
+	return 0;
+}
+
+int vt1211_detect(struct i2c_adapter *adapter, int address,
+		   unsigned short flags, int kind)
+{
+	int i;
+	struct i2c_client *new_client;
+	struct vt1211_data *data;
+	int err = 0;
+	u8 val;
+	const char *type_name = "vt1211";
+	const char *client_name = "VT1211 chip";
+
+	if (!i2c_is_isa_adapter(adapter)) {
+		return 0;
+	}
+
+	if(force_addr)
+		address = force_addr & ~(VT1211_EXTENT - 1);
+	if (check_region(address, VT1211_EXTENT)) {
+		printk("vt1211.o: region 0x%x already in use!\n", address);
+		return -ENODEV;
+	}
+	if(force_addr) {
+		printk("vt1211.o: forcing ISA address 0x%04X\n", address);
+		superio_enter();
+		superio_select();
+		superio_outb(VT1211_BASE_REG, address >> 8);
+		superio_outb(VT1211_BASE_REG+1, address & 0xff);
+		superio_exit();
+	}
+
+	superio_enter();
+	superio_select();
+	if((val = 0x01 & superio_inb(VT1211_ACT_REG)) == 0)
+		superio_outb(VT1211_ACT_REG, 1);
+	superio_exit();
+
+	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
+				   sizeof(struct vt1211_data),
+				   GFP_KERNEL))) {
+		return -ENOMEM;
+	}
+
+	data = (struct vt1211_data *) (new_client + 1);
+	new_client->addr = address;
+	init_MUTEX(&data->lock);
+	new_client->data = data;
+	new_client->adapter = adapter;
+	new_client->driver = &vt1211_driver;
+	new_client->flags = 0;
+
+	request_region(address, VT1211_EXTENT, "vt1211-sensors");
+	strcpy(new_client->name, client_name);
+
+	new_client->id = vt1211_id++;
+	data->valid = 0;
+	init_MUTEX(&data->update_lock);
+
+	if ((err = i2c_attach_client(new_client)))
+		goto ERROR3;
+
+	if ((i = i2c_register_entry((struct i2c_client *) new_client,
+					type_name,
+					vt1211_dir_table_template,
+					THIS_MODULE)) < 0) {
+		err = i;
+		goto ERROR4;
+	}
+	data->sysctl_id = i;
+
+	vt1211_init_client(new_client);
+	return 0;
+
+      ERROR4:
+	i2c_detach_client(new_client);
+      ERROR3:
+	release_region(address, VT1211_EXTENT);
+	kfree(new_client);
+	return err;
+}
+
+int vt1211_detach_client(struct i2c_client *client)
+{
+	int err;
+
+	i2c_deregister_entry(((struct vt1211_data *) (client->data))->
+				 sysctl_id);
+
+	if ((err = i2c_detach_client(client))) {
+		printk
+		    ("vt1211.o: Client deregistration failed, client not detached.\n");
+		return err;
+	}
+
+	release_region(client->addr, VT1211_EXTENT);
+	kfree(client);
+
+	return 0;
+}
+
+int vt1211_command(struct i2c_client *client, unsigned int cmd, void *arg)
+{
+	return 0;
+}
+
+void vt1211_inc_use(struct i2c_client *client)
+{
+#ifdef MODULE
+	MOD_INC_USE_COUNT;
+#endif
+}
+
+void vt1211_dec_use(struct i2c_client *client)
+{
+#ifdef MODULE
+	MOD_DEC_USE_COUNT;
+#endif
+}
+
+static inline int vt_rdval(struct i2c_client *client, u8 reg)
+{
+	return (inb_p(client->addr + reg));
+}
+
+static inline void vt1211_write_value(struct i2c_client *client, u8 reg, u8 value)
+{
+	outb_p(value, client->addr + reg);
+}
+
+void vt1211_init_client(struct i2c_client *client)
+{
+	struct vt1211_data *data = client->data;
+
+	data->vrm = DEFAULT_VRM;
+}
+
+void vt1211_update_client(struct i2c_client *client)
+{
+	struct vt1211_data *data = client->data;
+	int i, j;
+
+	down(&data->update_lock);
+
+	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
+	    (jiffies < data->last_updated) || !data->valid) {
+		data->uch_config = vt_rdval(client, VT1211_REG_UCH_CONFIG);
+		for (i = 0; i <= 6; i++) {
+			if(ISVOLT(i, data->uch_config)) {
+				data->in[i] = vt_rdval(client, VT1211_REG_IN(i));
+				data->in_min[i] = vt_rdval(client,
+				                        VT1211_REG_IN_MIN(i));
+				data->in_max[i] = vt_rdval(client,
+				                        VT1211_REG_IN_MAX(i));
+			} else {
+				data->in[i] = 0;
+				data->in_min[i] = 0;
+				data->in_max[i] = 0;
+			}
+		}
+		for (i = 1; i <= 2; i++) {
+			data->fan[i - 1] = vt_rdval(client, VT1211_REG_FAN(i));
+			data->fan_min[i - 1] = vt_rdval(client,
+						     VT1211_REG_FAN_MIN(i));
+		}
+		for (i = 1; i <= 7; i++) {
+			if(ISTEMP(i, data->uch_config)) {
+				data->temp[i - 1] = vt_rdval(client,
+					             VT1211_REG_TEMP(i)) << 2;
+				switch(i) {
+					case 1:
+						/* ? */
+						j = 0;
+						break;
+					case 2:
+						j = (vt_rdval(client,
+						  VT1211_REG_TEMP_LOW2) &
+						                    0x30) >> 4;
+						break;
+					case 3:
+						j = (vt_rdval(client,
+						  VT1211_REG_TEMP_LOW3) &
+						                    0xc0) >> 6;
+						break;
+					case 4:
+					case 5:
+					case 6:
+					case 7:
+					default:
+						j = (vt_rdval(client,
+						  VT1211_REG_TEMP_LOW47) >>
+						            ((i-4)*2)) & 0x03;	
+						break;
+	
+				}
+				data->temp[i - 1] |= j;
+				data->temp_over[i - 1] = vt_rdval(client,
+					              VT1211_REG_TEMP_OVER(i));
+				data->temp_hyst[i - 1] = vt_rdval(client,
+					              VT1211_REG_TEMP_HYST(i));
+			} else {
+				data->temp[i - 1] = 0;
+				data->temp_over[i - 1] = 0;
+				data->temp_hyst[i - 1] = 0;
+			}
+		}
+
+		for (i = 1; i <= 2; i++) {
+			data->fan[i - 1] = vt_rdval(client, VT1211_REG_FAN(i));
+			data->fan_min[i - 1] = vt_rdval(client,
+			                                VT1211_REG_FAN_MIN(i));
+			data->pwm[i - 1] = vt_rdval(client, VT1211_REG_PWM(i));
+		}
+
+		i = vt_rdval(client, VT1211_REG_FANDIV);
+		data->fan_div[0] = (i >> 4) & 0x03;
+		data->fan_div[1] = i >> 6;
+		data->alarms = vt_rdval(client, VT1211_REG_ALARM1) |
+		                    (vt_rdval(client, VT1211_REG_ALARM2) << 8);
+		data->uch_config= vt_rdval(client, VT1211_REG_UCH_CONFIG);
+		data->vid= vt_rdval(client, VT1211_REG_VID) & 0x1f;
+		data->last_updated = jiffies;
+		data->valid = 1;
+	}
+
+	up(&data->update_lock);
+}
+
+
+void vt1211_in(struct i2c_client *client, int operation, int ctl_name,
+		int *nrels_mag, long *results)
+{
+	struct vt1211_data *data = client->data;
+	int nr = ctl_name - VT1211_SYSCTL_IN0;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 2;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		vt1211_update_client(client);
+		results[0] = IN_FROM_REG(data->in_min[nr], nr);
+		results[1] = IN_FROM_REG(data->in_max[nr], nr);
+		results[2] = IN_FROM_REG(data->in[nr], nr);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->in_min[nr] = IN_TO_REG(results[0], nr);
+			vt1211_write_value(client, VT1211_REG_IN_MIN(nr),
+					    data->in_min[nr]);
+		}
+		if (*nrels_mag >= 2) {
+			data->in_max[nr] = IN_TO_REG(results[1], nr);
+			vt1211_write_value(client, VT1211_REG_IN_MAX(nr),
+					    data->in_max[nr]);
+		}
+	}
+}
+
+void vt1211_fan(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct vt1211_data *data = client->data;
+	int nr = ctl_name - VT1211_SYSCTL_FAN1 + 1;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		vt1211_update_client(client);
+		results[0] = FAN_FROM_REG(data->fan_min[nr - 1],
+					  DIV_FROM_REG(data->fan_div
+						       [nr - 1]));
+		results[1] = FAN_FROM_REG(data->fan[nr - 1],
+				 DIV_FROM_REG(data->fan_div[nr - 1]));
+		*nrels_mag = 2;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->fan_min[nr - 1] = MIN_TO_REG(results[0],
+							   DIV_FROM_REG
+							   (data->
+							    fan_div[nr-1]));
+			vt1211_write_value(client, VT1211_REG_FAN_MIN(nr),
+					    data->fan_min[nr - 1]);
+		}
+	}
+}
+
+
+void vt1211_temp(struct i2c_client *client, int operation, int ctl_name,
+		  int *nrels_mag, long *results)
+{
+	struct vt1211_data *data = client->data;
+	int nr = ctl_name - VT1211_SYSCTL_TEMP;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		vt1211_update_client(client);
+		results[0] = TEMP_FROM_REG(data->temp_over[nr]);
+		results[1] = TEMP_FROM_REG(data->temp_hyst[nr]);
+		results[2] = TEMP_FROM_REG10(data->temp[nr]);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->temp_over[nr] = TEMP_TO_REG(results[0]);
+			vt1211_write_value(client,
+					    VT1211_REG_TEMP_OVER(nr + 1),
+					    data->temp_over[nr]);
+		}
+		if (*nrels_mag >= 2) {
+			data->temp_hyst[nr] = TEMP_TO_REG(results[1]);
+			vt1211_write_value(client,
+					    VT1211_REG_TEMP_HYST(nr + 1),
+					    data->temp_hyst[nr]);
+		}
+	}
+}
+
+void vt1211_alarms(struct i2c_client *client, int operation, int ctl_name,
+		    int *nrels_mag, long *results)
+{
+	struct vt1211_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		vt1211_update_client(client);
+		results[0] = data->alarms;
+		*nrels_mag = 1;
+	}
+}
+
+void vt1211_fan_div(struct i2c_client *client, int operation,
+		     int ctl_name, int *nrels_mag, long *results)
+{
+	struct vt1211_data *data = client->data;
+	int old;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		vt1211_update_client(client);
+		results[0] = DIV_FROM_REG(data->fan_div[0]);
+		results[1] = DIV_FROM_REG(data->fan_div[1]);
+		*nrels_mag = 2;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		old = vt_rdval(client, VT1211_REG_FANDIV);
+		if (*nrels_mag >= 2) {
+			data->fan_div[1] = DIV_TO_REG(results[1]);
+			old = (old & 0x3f) | (data->fan_div[1] << 6);
+		}
+		if (*nrels_mag >= 1) {
+			data->fan_div[0] = DIV_TO_REG(results[0]);
+			old = (old & 0xcf) | (data->fan_div[0] << 4);
+			vt1211_write_value(client, VT1211_REG_FANDIV, old);
+		}
+	}
+}
+
+void vt1211_pwm(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct vt1211_data *data = client->data;
+	int nr = 1 + ctl_name - VT1211_SYSCTL_PWM1;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		vt1211_update_client(client);
+		results[0] = PWM_FROM_REG(data->pwm[nr - 1]);
+		results[1] = 1; /* always enabled */
+		*nrels_mag = 2;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->pwm[nr - 1] = PWM_TO_REG(results[0]);
+			if (*nrels_mag >= 2) {
+				/* ignore enable for now */
+			}
+			vt1211_write_value(client, VT1211_REG_PWM(nr),
+					    data->pwm[nr - 1]);
+		}
+	}
+}
+
+void vt1211_vid(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct vt1211_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 3;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		vt1211_update_client(client);
+		results[0] = vid_from_reg(data->vid, data->vrm);
+		*nrels_mag = 1;
+	}
+}
+
+void vt1211_vrm(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct vt1211_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		results[0] = data->vrm;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1)
+			data->vrm = results[0];
+	}
+}
+
+void vt1211_uch(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct vt1211_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		results[0] = data->uch_config;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1)
+			data->vrm = results[0];
+	}
+}
+
+int __init sensors_vt1211_init(void)
+{
+	int res, addr;
+
+	printk("vt1211.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	vt1211_initialized = 0;
+
+	if (vt1211_find(&addr)) {
+		printk("vt1211.o: VT1211 not detected, module not inserted.\n");
+		return -ENODEV;
+	}
+	normal_isa[0] = addr;
+
+	if ((res = i2c_add_driver(&vt1211_driver))) {
+		printk
+		    ("vt1211.o: Driver registration failed, module not inserted.\n");
+		vt1211_cleanup();
+		return res;
+	}
+	vt1211_initialized++;
+	return 0;
+}
+
+int __init vt1211_cleanup(void)
+{
+	int res;
+
+	if (vt1211_initialized >= 1) {
+		if ((res = i2c_del_driver(&vt1211_driver))) {
+			printk
+			    ("vt1211.o: Driver deregistration failed, module not removed.\n");
+			return res;
+		}
+		vt1211_initialized--;
+	}
+	return 0;
+}
+
+EXPORT_NO_SYMBOLS;
+
+#ifdef MODULE
+
+MODULE_AUTHOR("Mark D. Studebaker <mdsxyz123@yahoo.com>");
+MODULE_DESCRIPTION("VT1211 sensors");
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
+
+int init_module(void)
+{
+	return sensors_vt1211_init();
+}
+
+int cleanup_module(void)
+{
+	return vt1211_cleanup();
+}
+
+#endif				/* MODULE */

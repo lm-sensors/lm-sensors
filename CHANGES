@@ -21,6 +21,7 @@ ask CVS about it:
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
   File doc/vid: New
   File include/sensors_vid.h: New
+  File sensors.conf.eg: Add vt1211
   Library: Add multiple VRM version support for adm1025, w83781d;
            fix 'flex scanner jammed' on some systems
   Makefiles: For 2.4+ kernels, modules now install in
@@ -36,6 +37,7 @@ ask CVS about it:
   Module smbus-arp: new
   Module smsc47m1: new
   Module via686a: Add support for VT8231 sensors
+  Module vt1211: new
   Module w83781d: Add multiple VID version support; fix temp alarms
   Program eeprom: new
   Program i2cdump: Add smbus block command specification
@@ -45,9 +47,10 @@ ask CVS about it:
   Program sensord: Major update, now requires rrd source;
                    not compiled by default
   Program sensors: Recognize DDR SDRAM; add adm1025 VID; add -A
-                   (don't display algo. and adap.) option
+                   (don't display algo. and adap.) option;
+                   support vt1211	
   Program sensors-detect: Add VT8231, VT8233A, several S3 devices;
-                          add 82801DB; fix perl warnings
+                          add 82801DB, LM85; fix perl warnings
 
 2.6.3 (20020322)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
