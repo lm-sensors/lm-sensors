@@ -17,7 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-#define RCSID "$Id: i2c-core.c,v 1.2 1998/11/03 03:48:44 phil Exp $"
+#define RCSID "$Id: i2c-core.c,v 1.3 1998/11/19 03:07:18 frodo Exp $"
 /* ------------------------------------------------------------------------- */
 
 #include <linux/module.h>
@@ -173,7 +173,7 @@ int i2c_del_adapter(struct i2c_adapter *adap)
 			 * flag, as _all_ clients that reside on the adapter
 			 * must be deleted, as this would cause invalid states.
 			 */
-			i2c_detach_client(client);
+			client->driver->detach_client(client);
 	}
 	/* all done, now unregister */
 	adapters[i] = NULL;
@@ -248,7 +248,7 @@ int i2c_del_driver(struct i2c_driver *driver)
 			if (client != NULL && client->driver == driver) {
 				DEB2(printk("i2c:   detaching client %s:\n",
 					client->name));
-				/*i2c_detach_client(client);*/
+				i2c_detach_client(client);
 				driver->detach_client(client);
 			}
 		}

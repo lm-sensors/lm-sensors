@@ -86,6 +86,11 @@ CC := gcc
 CFLAGS := -D__KERNEL__ -DMODULE -I. -Ii2c -O2 -fomit-frame-pointer
 EXCFLAGS := -I. -O2 -Ii2c
 
+ifeq ($(DEBUG),1)
+CFLAGS += -DDEBUG
+EXCFLAGS += -DDEBUG
+endif
+
 ifeq ($(SMP),1)
 CFLAGS += -D__SMP__
 endif

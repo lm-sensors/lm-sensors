@@ -3,6 +3,12 @@ by Simon Vogl, and the code included in and beneath this directory. None
 of these changes are important; you can still use a self-compiled version
 of the i2c code and not compile the version in here.
 
+! Changes marked with an exclamation mark *are* important, and *must*
+  be applied! If there are changes like this in this list, you *must*
+  use our version of the i2c module!
+
+Here come the changes:
+
 * rscid declarations are changed
   This is an unfortunate interaction between our CVS server and Simon's
   RCS (CVS?) server. As these ids do not seem to be accessed anywhere,
@@ -31,3 +37,9 @@ of the i2c code and not compile the version in here.
 * Removed files: object files and executables
   Everywhere, remakeable files are removed, to keep the source distribution
   small and lean.
+
+! i2c-core: i2c_del_adapter() change
+  Replaced
+    i2c_detach_client(client);
+  with:
+    client->driver->detach_client(client);
