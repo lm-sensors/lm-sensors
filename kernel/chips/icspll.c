@@ -139,7 +139,7 @@ int icspll_detect(struct i2c_adapter *adapter, int address,
 	}
 
 	/* Fill the new client structure with data */
-	new_data = &data->client;
+	new_client = &data->client;
 	new_client->data = data;
 	new_client->id = icspll_id++;
 	new_client->addr = address;
