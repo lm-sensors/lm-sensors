@@ -38,7 +38,7 @@ PROGSENSORDSOURCES := $(MODULE_DIR)/args.c $(MODULE_DIR)/chips.c $(MODULE_DIR)/l
 INCLUDEFILES += $(PROGSENSORDSOURCES:.c=.rd)
 
 $(PROGSENSORDTARGETS): $(PROGSENSORDSOURCES:.c=.ro) lib/$(LIBSHBASENAME)
-	$(CC) -o $@ $(PROGSENSORDSOURCES:.c=.ro) -Llib -lsensors -lrrd
+	$(CC) $(EXLDFLAGS) -o $@ $(PROGSENSORDSOURCES:.c=.ro) -Llib -lsensors -lrrd
 
 all-prog-sensord: $(PROGSENSORDTARGETS)
 user :: all-prog-sensord

@@ -36,7 +36,7 @@ all-prog-detect: $(PROGDETECTTARGETS)
 user :: all-prog-detect
 
 $(MODULE_DIR)/i2cdetect: $(MODULE_DIR)/i2cdetect.ro prog/dump/i2cbusses.ro
-	$(CC) -o $@ $^
+	$(CC) $(EXLDFLAGS) -o $@ $^
 
 install-prog-detect: all-prog-detect
 	mkdir -p $(DESTDIR)$(SBINDIR)

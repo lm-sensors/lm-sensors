@@ -38,10 +38,10 @@ all-prog-dump: $(PROGDUMPTARGETS)
 user :: all-prog-dump
 
 $(MODULE_DIR)/i2cdump: $(MODULE_DIR)/i2cdump.ro $(MODULE_DIR)/i2cbusses.ro
-	$(CC) -o $@ $^
+	$(CC) $(EXLDFLAGS) -o $@ $^
 
 $(MODULE_DIR)/i2cset: $(MODULE_DIR)/i2cset.ro $(MODULE_DIR)/i2cbusses.ro
-	$(CC) -o $@ $^
+	$(CC) $(EXLDFLAGS) -o $@ $^
 
 install-prog-dump: all-prog-dump
 	mkdir -p $(DESTDIR)$(SBINDIR)

@@ -34,7 +34,7 @@ PROGSENSORSSOURCES := $(MODULE_DIR)/main.c $(MODULE_DIR)/chips.c
 INCLUDEFILES += $(PROGSENSORSSOURCES:.c=.rd)
 
 $(PROGSENSORSTARGETS): $(PROGSENSORSSOURCES:.c=.ro) lib/$(LIBSHBASENAME)
-	$(CC) -o $@ $(PROGSENSORSSOURCES:.c=.ro) -Llib -lsensors
+	$(CC) $(EXLDFLAGS) -o $@ $(PROGSENSORSSOURCES:.c=.ro) -Llib -lsensors
 
 all-prog-sensors: $(PROGSENSORSTARGETS)
 user :: all-prog-sensors
