@@ -45,10 +45,12 @@ ask CVS about it:
                Adds a couple log messages for failed transactions (David
                Knierim)
                Fix compilation breaking C99-ism (Axel Thimm)
+               Fix block read retries
   Module pc87360: Support secondary Super-I/O address
   Module smsc47m1: Add support for 47M15x and 47M192 (fans only)
   Library: Add lm63 support
            Add lpc47b397 support
+  Programs *.init: Rename lockfile to match file name
   Programs i2cset, isaset: Written byte/word can be masked
   Program decode-vaio.pl: Find eeproms on non-0 i2c bus too
   Program mkpatch: Include i2c-amd756-s4882

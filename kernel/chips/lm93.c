@@ -444,13 +444,15 @@ static u8 lm93_block_buffer[I2C_SMBUS_BLOCK_MAX];
 */
 static void lm93_read_block(struct i2c_client *client, u8 fbn, u8 *values)
 {
-	int i, result;
+	int i, result=0;
 
 	for (i = 1; i <= MAX_RETRIES; i++) {
 		result = i2c_smbus_read_block_data(client, 
 			lm93_block_read_cmds[fbn].cmd, lm93_block_buffer);
 
-		if (result != lm93_block_read_cmds[fbn].len) {
+		if (result == lm93_block_read_cmds[fbn].len) {
+			break;
+		} else {
 			printk(KERN_WARNING "lm93.o: block read data failed, "
 				"command 0x%02x.\n", 
 				lm93_block_read_cmds[fbn].cmd);
