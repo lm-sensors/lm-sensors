@@ -985,7 +985,7 @@ void w83781d_init_client(struct i2c_client *client)
   w83781d_write_value(client,W83781D_REG_CONFIG,0x80);
 
   vid = w83781d_read_value(client,W83781D_REG_VID_FANDIV) & 0x0f;
-  vid |= (w83781d_read_value(client,W83781D_REG_CHIPID) & 0x01) >> 4;
+  vid |= (w83781d_read_value(client,W83781D_REG_CHIPID) & 0x01) << 4;
   vid = VID_FROM_REG(vid);
 
   w83781d_write_value(client,W83781D_REG_IN_MIN(0),

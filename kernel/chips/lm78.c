@@ -544,7 +544,7 @@ void lm78_init_client(struct i2c_client *client)
 
   vid = lm78_read_value(client,LM78_REG_VID_FANDIV) & 0x0f;
   if (((struct lm78_data *) (client->data))->type == lm79)
-    vid |= (lm78_read_value(client,LM78_REG_CHIPID) & 0x01) >> 4;
+    vid |= (lm78_read_value(client,LM78_REG_CHIPID) & 0x01) << 4;
   else
     vid |= 0x10;
   vid = VID_FROM_REG(vid);
@@ -606,7 +606,7 @@ void lm78_update_client(struct i2c_client *client)
     i = lm78_read_value(client,LM78_REG_VID_FANDIV);
     data->vid = i & 0x0f;
     if (data->type == lm79)
-      data->vid |= (lm78_read_value(client,LM78_REG_CHIPID) & 0x01) >> 4;
+      data->vid |= (lm78_read_value(client,LM78_REG_CHIPID) & 0x01) << 4;
     else
       data->vid |= 0x10;
     data->fan_div[0] = (i >> 4) & 0x03;
