@@ -89,7 +89,7 @@ fmtMHz_2
 
 /** LM75 **/
 
-static char *lm75_names[] = {
+static const char *lm75_names[] = {
   SENSORS_LM75_PREFIX, NULL
 };
 
@@ -101,7 +101,7 @@ static FeatureDescriptor lm75_features[] = {
 
 /** ADM1021 **/
 
-static char *adm1021_names[] = {
+static const char *adm1021_names[] = {
   SENSORS_ADM1021_PREFIX, NULL
 };
 
@@ -117,7 +117,7 @@ static FeatureDescriptor adm1021_features[] = {
 
 /** MAX1617 **/
 
-static char *max1617_names[] = {
+static const char *max1617_names[] = {
   SENSORS_MAX1617_PREFIX, SENSORS_MAX1617A_PREFIX, SENSORS_THMC10_PREFIX, SENSORS_LM84_PREFIX, SENSORS_GL523_PREFIX, NULL
 };
 
@@ -131,7 +131,7 @@ static FeatureDescriptor max1617_features[] = {
 
 /** ADM9240 **/
 
-static char *adm9240_names[] = {
+static const char *adm9240_names[] = {
   SENSORS_ADM9240_PREFIX, SENSORS_DS1780_PREFIX, SENSORS_LM81_PREFIX, NULL
 };
 
@@ -161,7 +161,7 @@ static FeatureDescriptor adm9240_features[] = {
 
 /** SIS5595 **/
 
-static char *sis5595_names[] = {
+static const char *sis5595_names[] = {
   SENSORS_SIS5595_PREFIX, NULL
 };
 
@@ -185,7 +185,7 @@ static FeatureDescriptor sis5595_features[] = {
 
 /** LM78 **/
 
-static char *lm78_names[] = {
+static const char *lm78_names[] = {
   SENSORS_LM78_PREFIX, SENSORS_LM78J_PREFIX, SENSORS_LM79_PREFIX, /*"sis5595",*/ NULL
 };
 
@@ -219,7 +219,7 @@ static FeatureDescriptor lm78_features[] = {
 
 /** GL518 **/
 
-static char *gl518_names[] = {
+static const char *gl518_names[] = {
   SENSORS_GL518_PREFIX, NULL
 };
 
@@ -250,7 +250,7 @@ fmtTemps_LM80
   return buff;
 }
 
-static char *lm80_names[] = {
+static const char *lm80_names[] = {
   SENSORS_LM80_PREFIX, NULL
 };
 
@@ -280,7 +280,7 @@ static FeatureDescriptor lm80_features[] = {
 
 /** W83781D **/
 
-static char *w83781d_names[] = {
+static const char *w83781d_names[] = {
   SENSORS_W83781D_PREFIX, NULL
 };
 
@@ -327,7 +327,7 @@ fmtTemps_W8378x
   return buff;
 }
 
-static char *w83782d_names[] = {
+static const char *w83782d_names[] = {
   SENSORS_W83782D_PREFIX, SENSORS_W83627HF_PREFIX, SENSORS_AS99127F_PREFIX, NULL
 };
 
@@ -367,7 +367,7 @@ static FeatureDescriptor w83782d_features[] = {
 
 /** W83783S **/
 
-static char *w83783s_names[] = {
+static const char *w83783s_names[] = {
   SENSORS_W83783S_PREFIX, NULL
 };
 
@@ -412,7 +412,7 @@ fmtFans_Maxilife
   return buff;
 }
 
-static char *maxilife_names[] = {
+static const char *maxilife_names[] = {
   SENSORS_MAXI_CG_PREFIX, SENSORS_MAXI_CO_PREFIX, SENSORS_MAXI_AS_PREFIX, NULL
 };
 

@@ -39,13 +39,13 @@
 
 #include "sensord.h"
 
-static char *version = "0.2.0";
+static const char *version = "0.2.0";
 
-static char *sensorsCfgPaths[] = {
+static const char *sensorsCfgPaths[] = {
   "/etc", "/usr/lib/sensors", "/usr/local/lib/sensors", "/usr/lib", "/usr/local/lib", NULL
 };
-static char *sensorsCfgFile = "sensors.conf";
-static char *sensorsLogFile = "/var/log/sensors";
+static const char *sensorsCfgFile = "sensors.conf";
+static const char *sensorsLogFile = "/var/log/sensors";
 static int sleepTime = 5 * 60;
 
 static int cfgLoaded = 0;
@@ -79,7 +79,7 @@ initSignals
 }
 
 static char *
-now
+nowf
 (void) {
   time_t now;
   char *str;
@@ -128,11 +128,11 @@ static int
 readKnownChip
 (const sensors_chip_name *chip, ChipDescriptor *descriptor) {
   FeatureDescriptor *features = descriptor->features;
-  int index, subindex;
+  int index0, subindex;
   int ret = 0;
 
-  for (index = 0; !done && (ret == 0) && features[index].format; ++ index) {
-    FeatureDescriptor *feature = features + index;
+  for (index0 = 0; !done && (ret == 0) && features[index0].format; ++ index0) {
+    FeatureDescriptor *feature = features + index0;
     char *label = NULL;
     double values[MAX_DATA];
     
@@ -158,25 +158,25 @@ static int
 readChip
 (const sensors_chip_name *chip) {
   const char *adapter, *algorithm;
-  int index, subindex, chipindex = -1;
+  int index0, subindex, chipindex = -1;
   int ret = 0;
 
   if (chip->bus == SENSORS_CHIP_NAME_BUS_ISA)
-    fprintf (sensorsLog, "%s: Chip: %s-isa-%04x\n", now (), chip->prefix, chip->addr);
+    fprintf (sensorsLog, "%s: Chip: %s-isa-%04x\n", nowf(), chip->prefix, chip->addr);
   else
-    fprintf (sensorsLog, "%s: Chip: %s-i2c-%d-%02x\n", now (), chip->prefix, chip->bus, chip->addr);
+    fprintf (sensorsLog, "%s: Chip: %s-i2c-%d-%02x\n", nowf(), chip->prefix, chip->bus, chip->addr);
   adapter = sensors_get_adapter_name (chip->bus);
   if (adapter)
-    fprintf (sensorsLog, "%s: Adapter: %s\n", now (), adapter);
+    fprintf (sensorsLog, "%s: Adapter: %s\n", nowf(), adapter);
   algorithm = sensors_get_algorithm_name (chip->bus);
   if (algorithm)
-    fprintf (sensorsLog, "%s: Algorithm: %s\n", now (), algorithm);
+    fprintf (sensorsLog, "%s: Algorithm: %s\n", nowf(), algorithm);
   /* assert adapter || algorithm */
 
-  for (index = 0; knownChips[index].names; ++ index)
-    for (subindex = 0; knownChips[index].names[subindex]; ++ subindex)
-      if (!strcmp (chip->prefix, knownChips[index].names[subindex]))
-        chipindex = index;
+  for (index0 = 0; knownChips[index0].names; ++ index0)
+    for (subindex = 0; knownChips[index0].names[subindex]; ++ subindex)
+      if (!strcmp (chip->prefix, knownChips[index0].names[subindex]))
+        chipindex = index0;
   
   if (chipindex >= 0)
     ret = readKnownChip (chip, knownChips + chipindex);
@@ -190,17 +190,17 @@ static int
 readChips
 (void) {
   const sensors_chip_name *chip;
-  int index = 0;
+  int index0 = 0;
   int ret = 0;
 
-  fprintf (sensorsLog, "%s: Sense.\n", now ());
+  fprintf (sensorsLog, "%s: Sense.\n", nowf());
   fflush (sensorsLog);
 
-  while (!done && (ret == 0) && ((chip = sensors_get_detected_chips (&index)) != NULL)) {
+  while (!done && (ret == 0) && ((chip = sensors_get_detected_chips (&index0)) != NULL)) {
     ret = readChip (chip);
   }
 
-  fprintf (sensorsLog, "%s: Done.\n", now ());
+  fprintf (sensorsLog, "%s: Done.\n", nowf());
   fflush (sensorsLog);
 
   return ret;
@@ -212,14 +212,14 @@ rotateLog
   int ret = 0;
 
   if (sensorsLog != NULL) {
-    fprintf (sensorsLog, "%s: Rotate.\n", now ());
+    fprintf (sensorsLog, "%s: Rotate.\n", nowf());
     fclose (sensorsLog);
   }
   if (!(sensorsLog = fopen (sensorsLogFile, "a"))) {
     syslog (LOG_ERR, "Error opening sensors log: %s", sensorsLogFile);
     ret = 1;
   } else {
-    fprintf (sensorsLog, "%s: Started.\n", now ());
+    fprintf (sensorsLog, "%s: Started.\n", nowf());
     fflush (sensorsLog);
   }
   rotate = 0;
@@ -240,13 +240,13 @@ initSensors
     if (sensorsCfgFile[0] == '/') {
       strcpy (cfgPath, sensorsCfgFile);
     } else {
-      int index;
-      for (index = 0; sensorsCfgPaths[index]; ++ index) {
-        sprintf (cfgPath, "%s/%s", sensorsCfgPaths[index], sensorsCfgFile);
+      int index0;
+      for (index0 = 0; sensorsCfgPaths[index0]; ++ index0) {
+        sprintf (cfgPath, "%s/%s", sensorsCfgPaths[index0], sensorsCfgFile);
         if (stat (cfgPath, &stats) == 0)
           break;
       }
-      if (!sensorsCfgPaths[index]) {
+      if (!sensorsCfgPaths[index0]) {
         syslog (LOG_ERR, "Error locating sensors configuration: %s", sensorsCfgFile);
         return 9;
       }
@@ -298,7 +298,7 @@ sensord
     sensors_cleanup ();
 
   if (sensorsLog) {
-    fprintf (sensorsLog, "%s: %s.\n", now (), ret ? "Failed" : "Stopped");
+    fprintf (sensorsLog, "%s: %s.\n", nowf(), ret ? "Failed" : "Stopped");
     fclose (sensorsLog);
   }
 
