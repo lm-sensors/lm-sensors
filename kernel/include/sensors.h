@@ -45,7 +45,7 @@ struct i2c_chips_data {
 
 
 /* This file should be automatically generated from the sysctl enumerations
-   found in chips/*.c. At release time, diff againts previous release to make
+   found in chips/ *.c. At release time, diff againts previous release to make
    sure we maintain binary compatibility of userland utilities that include
    this file. --km */
 
