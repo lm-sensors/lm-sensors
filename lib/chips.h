@@ -820,7 +820,7 @@
 
 /* Analog Devices LM87 chips */
 
-#define SENSORS_LM87_PREFIX "LM87"
+#define SENSORS_LM87_PREFIX "lm87"
 
 #define SENSORS_LM87_IN0              1 /* R */
 #define SENSORS_LM87_IN1              2 /* R */
