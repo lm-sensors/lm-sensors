@@ -252,7 +252,7 @@ chip "w83782d-*" "w83783s-*"
 #   set sensor3 3435
 
 
-chip "gl518sm-r00-*" "gl518sm-r80-*"
+chip "gl518sm-*"
 
 # Factors and labels taken from GL518SM datasheet, they seem to give
 # reasonable values with EISCA connected Fan78

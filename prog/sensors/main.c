@@ -261,8 +261,7 @@ void do_a_print(sensors_chip_name name)
     print_sis5595(&name);
   else if (!strcmp(name.prefix,"lm80"))
     print_lm80(&name);
-  else if (!strcmp(name.prefix,"gl518sm-r00") || 
-           !strcmp(name.prefix,"gl518sm-r80"))
+  else if (!strcmp(name.prefix,"gl518sm"))
     print_gl518(&name);
   else if ((!strcmp(name.prefix,"w83781d")) ||
            (!strcmp(name.prefix,"w83782d")) ||

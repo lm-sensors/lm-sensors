@@ -203,67 +203,34 @@
 #define SENSORS_MAX1617A_REMOTE_TEMP_OVER 56 /* RW */
 #define SENSORS_MAX1617A_ALARMS 81 /* R */
 
-/* GL518SM revision 0x00 chips. You may also use the revision 0x80 defines,
-   but note that some features are unaccessible in revision 0x00. */
+/* GL518SM chips */
 
-#define SENSORS_GL518R00_PREFIX "gl518sm-r00"
+#define SENSORS_GL518_PREFIX "gl518sm"
 
-/* Note that other voltages can not be read! */
-#define SENSORS_GL518R00_VDD 1 /* No access! */
-#define SENSORS_GL518R00_VIN1 2 /* No access! */
-#define SENSORS_GL518R00_VIN2 3 /* No access! */
-#define SENSORS_GL518R00_VIN3 4 /* R */
-#define SENSORS_GL518R00_VDD_MIN 11 /* RW */
-#define SENSORS_GL518R00_VIN1_MIN 12 /* RW */
-#define SENSORS_GL518R00_VIN2_MIN 13 /* RW */
-#define SENSORS_GL518R00_VIN3_MIN 14 /* RW */
-#define SENSORS_GL518R00_VDD_MAX 21 /* RW */
-#define SENSORS_GL518R00_VIN1_MAX 22 /* RW */
-#define SENSORS_GL518R00_VIN2_MAX 23 /* RW */
-#define SENSORS_GL518R00_VIN3_MAX 24 /* RW */
-#define SENSORS_GL518R00_FAN1 31 /* R */
-#define SENSORS_GL518R00_FAN2 32 /* R */
-#define SENSORS_GL518R00_FAN1_MIN 41 /* RW */
-#define SENSORS_GL518R00_FAN2_MIN 42 /* RW */
-#define SENSORS_GL518R00_TEMP 51 /* R */
-#define SENSORS_GL518R00_TEMP_HYST 52 /* RW */
-#define SENSORS_GL518R00_TEMP_OVER 53 /* RW */
-#define SENSORS_GL518R00_FAN1_DIV 71 /* RW */
-#define SENSORS_GL518R00_FAN2_DIV 72 /* RW */
-#define SENSORS_GL518R00_ALARMS 81 /* R */
-#define SENSORS_GL518R00_BEEP_ENABLE 82 /* RW */
-#define SENSORS_GL518R00_BEEPS 83 /* RW */
-
-
-/* GL518SM revision 0x80 chips. */
-
-#define SENSORS_GL518R80_PREFIX "gl518sm-r80"
-
-#define SENSORS_GL518R80_VDD 1 /* R */
-#define SENSORS_GL518R80_VIN1 2 /* R */
-#define SENSORS_GL518R80_VIN2 3 /* R */
-#define SENSORS_GL518R80_VIN3 4 /* R */
-#define SENSORS_GL518R80_VDD_MIN 11 /* RW */
-#define SENSORS_GL518R80_VIN1_MIN 12 /* RW */
-#define SENSORS_GL518R80_VIN2_MIN 13 /* RW */
-#define SENSORS_GL518R80_VIN3_MIN 14 /* RW */
-#define SENSORS_GL518R80_VDD_MAX 21 /* RW */
-#define SENSORS_GL518R80_VIN1_MAX 22 /* RW */
-#define SENSORS_GL518R80_VIN2_MAX 23 /* RW */
-#define SENSORS_GL518R80_VIN3_MAX 24 /* RW */
-#define SENSORS_GL518R80_FAN1 31 /* R */
-#define SENSORS_GL518R80_FAN2 32 /* R */
-#define SENSORS_GL518R80_FAN1_MIN 41 /* RW */
-#define SENSORS_GL518R80_FAN2_MIN 42 /* RW */
-#define SENSORS_GL518R80_TEMP 51 /* R */
-#define SENSORS_GL518R80_TEMP_HYST 52 /* RW */
-#define SENSORS_GL518R80_TEMP_OVER 53 /* RW */
-#define SENSORS_GL518R80_FAN1_DIV 71 /* RW */
-#define SENSORS_GL518R80_FAN2_DIV 72 /* RW */
-#define SENSORS_GL518R80_ALARMS 81 /* R */
-#define SENSORS_GL518R80_BEEP_ENABLE 82 /* RW */
-#define SENSORS_GL518R80_BEEPS 83 /* RW */
-
+#define SENSORS_GL518_VDD 1 /* R */
+#define SENSORS_GL518_VIN1 2 /* R */
+#define SENSORS_GL518_VIN2 3 /* R */
+#define SENSORS_GL518_VIN3 4 /* R */
+#define SENSORS_GL518_VDD_MIN 11 /* RW */
+#define SENSORS_GL518_VIN1_MIN 12 /* RW */
+#define SENSORS_GL518_VIN2_MIN 13 /* RW */
+#define SENSORS_GL518_VIN3_MIN 14 /* RW */
+#define SENSORS_GL518_VDD_MAX 21 /* RW */
+#define SENSORS_GL518_VIN1_MAX 22 /* RW */
+#define SENSORS_GL518_VIN2_MAX 23 /* RW */
+#define SENSORS_GL518_VIN3_MAX 24 /* RW */
+#define SENSORS_GL518_FAN1 31 /* R */
+#define SENSORS_GL518_FAN2 32 /* R */
+#define SENSORS_GL518_FAN1_MIN 41 /* RW */
+#define SENSORS_GL518_FAN2_MIN 42 /* RW */
+#define SENSORS_GL518_TEMP 51 /* R */
+#define SENSORS_GL518_TEMP_HYST 52 /* RW */
+#define SENSORS_GL518_TEMP_OVER 53 /* RW */
+#define SENSORS_GL518_FAN1_DIV 71 /* RW */
+#define SENSORS_GL518_FAN2_DIV 72 /* RW */
+#define SENSORS_GL518_ALARMS 81 /* R */
+#define SENSORS_GL518_BEEP_ENABLE 82 /* RW */
+#define SENSORS_GL518_BEEPS 83 /* RW */
 
 /* LM80 chips */
 

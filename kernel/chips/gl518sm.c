@@ -329,10 +329,10 @@ static int gl518_detect(struct i2c_adapter *adapter, int address, int kind)
   }
 
   if (kind == gl518sm_r00) {
-    type_name = "gl518sm-r00";
+    type_name = "gl518sm";
     client_name = "GL518SM Revision 0x00 chip";
   } else if (kind == gl518sm_r80) {
-    type_name = "gl518sm-r80";
+    type_name = "gl518sm";
     client_name = "GL518SM Revision 0x80 chip";
   } else {
 #ifdef DEBUG

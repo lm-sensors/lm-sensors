@@ -512,13 +512,13 @@ void print_gl518(const sensors_chip_name *name)
   int is_r00;
 
   is_r00 = !strcmp(name->prefix,"gl518sm-r00");
-  if (!sensors_get_feature(*name,SENSORS_GL518R00_ALARMS,&cur)) 
+  if (!sensors_get_feature(*name,SENSORS_GL518_ALARMS,&cur)) 
     alarms = cur + 0.5;
   else {
     printf("ERROR: Can't get alarm data!\n");
     alarms = 0;
   }
-  if (!sensors_get_feature(*name,SENSORS_GL518R00_BEEPS,&cur)) 
+  if (!sensors_get_feature(*name,SENSORS_GL518_BEEPS,&cur)) 
     beeps = cur + 0.5;
   else {
     printf("ERROR: Can't get beep data!\n");
@@ -528,10 +528,10 @@ void print_gl518(const sensors_chip_name *name)
   /* We need special treatment for the R00 chips, because they can't display
      actual readings! We hardcode this, as this is the easiest way. */
   if (is_r00) {
-    if (!sensors_get_label(*name,SENSORS_GL518R00_VDD,&label) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VDD,&cur) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VDD_MIN,&min) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VDD_MAX,&max)) {
+    if (!sensors_get_label(*name,SENSORS_GL518_VDD,&label) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VDD,&cur) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VDD_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VDD_MAX,&max)) {
       print_label(label,10);
       if (cur == 0.0)
         printf("(n/a)     ");
@@ -544,10 +544,10 @@ void print_gl518(const sensors_chip_name *name)
       printf("ERROR: Can't get VDD data!\n");
     free_the_label(&label);
 
-    if (!sensors_get_label(*name,SENSORS_GL518R00_VIN1,&label) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN1,&cur) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN1_MIN,&min) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN1_MAX,&max)) {
+    if (!sensors_get_label(*name,SENSORS_GL518_VIN1,&label) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN1,&cur) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN1_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN1_MAX,&max)) {
       print_label(label,10);
       if (cur == 0.0)
         printf("(n/a)     ");
@@ -559,10 +559,10 @@ void print_gl518(const sensors_chip_name *name)
     } else
       printf("ERROR: Can't get VIN1 data!\n");
     free_the_label(&label);
-    if (!sensors_get_label(*name,SENSORS_GL518R00_VIN2,&label) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN2,&cur) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN2_MIN,&min) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN2_MAX,&max)) {
+    if (!sensors_get_label(*name,SENSORS_GL518_VIN2,&label) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN2,&cur) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN2_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN2_MAX,&max)) {
       print_label(label,10);
       if (cur == 0.0)
         printf("(n/a)     ");
@@ -575,10 +575,10 @@ void print_gl518(const sensors_chip_name *name)
       printf("ERROR: Can't get IN2 data!\n");
     free_the_label(&label);
   } else {
-    if (!sensors_get_label(*name,SENSORS_GL518R00_VDD,&label) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VDD,&cur) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VDD_MIN,&min) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VDD_MAX,&max)) {
+    if (!sensors_get_label(*name,SENSORS_GL518_VDD,&label) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VDD,&cur) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VDD_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VDD_MAX,&max)) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
              cur,min,max,alarms&GL518_ALARM_VDD?"ALARM":"     ",
@@ -586,10 +586,10 @@ void print_gl518(const sensors_chip_name *name)
     } else
       printf("ERROR: Can't get VDD data!\n");
     free_the_label(&label);
-    if (!sensors_get_label(*name,SENSORS_GL518R00_VIN1,&label) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN1,&cur) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN1_MIN,&min) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN1_MAX,&max)) {
+    if (!sensors_get_label(*name,SENSORS_GL518_VIN1,&label) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN1,&cur) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN1_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN1_MAX,&max)) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
              cur,min,max,alarms&GL518_ALARM_VIN1?"ALARM":"     ",
@@ -597,10 +597,10 @@ void print_gl518(const sensors_chip_name *name)
     } else
       printf("ERROR: Can't get VIN1 data!\n");
     free_the_label(&label);
-    if (!sensors_get_label(*name,SENSORS_GL518R00_VIN2,&label) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN2,&cur) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN2_MIN,&min) &&
-        !sensors_get_feature(*name,SENSORS_GL518R00_VIN2_MAX,&max)) {
+    if (!sensors_get_label(*name,SENSORS_GL518_VIN2,&label) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN2,&cur) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN2_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_GL518_VIN2_MAX,&max)) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
              cur,min,max,alarms&GL518_ALARM_VIN2?"ALARM":"     ",
@@ -610,10 +610,10 @@ void print_gl518(const sensors_chip_name *name)
     free_the_label(&label);
   }
 
-  if (!sensors_get_label(*name,SENSORS_GL518R00_VIN3,&label) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_VIN3,&cur) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_VIN3_MIN,&min) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_VIN3_MAX,&max)) {
+  if (!sensors_get_label(*name,SENSORS_GL518_VIN3,&label) &&
+      !sensors_get_feature(*name,SENSORS_GL518_VIN3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL518_VIN3_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_GL518_VIN3_MAX,&max)) {
     print_label(label,10);
     printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
            cur,min,max,alarms&GL518_ALARM_VIN3?"ALARM":"     ",
@@ -623,10 +623,10 @@ void print_gl518(const sensors_chip_name *name)
     printf("ERROR: Can't get VIN3 data!\n");
   free_the_label(&label);
   
-  if (!sensors_get_label(*name,SENSORS_GL518R00_FAN1,&label) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_FAN1,&cur) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_FAN1_DIV,&fdiv) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_FAN1_MIN,&min)) {
+  if (!sensors_get_label(*name,SENSORS_GL518_FAN1,&label) &&
+      !sensors_get_feature(*name,SENSORS_GL518_FAN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL518_FAN1_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_GL518_FAN1_MIN,&min)) {
     print_label(label,10);
     printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s  %s\n",
            cur,min,fdiv, alarms&GL518_ALARM_FAN1?"ALARM":"     ",
@@ -634,10 +634,10 @@ void print_gl518(const sensors_chip_name *name)
   } else
     printf("ERROR: Can't get FAN1 data!\n");
   free_the_label(&label);
-  if (!sensors_get_label(*name,SENSORS_GL518R00_FAN2,&label) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_FAN2,&cur) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_FAN2_DIV,&fdiv) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_FAN2_MIN,&min)) {
+  if (!sensors_get_label(*name,SENSORS_GL518_FAN2,&label) &&
+      !sensors_get_feature(*name,SENSORS_GL518_FAN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL518_FAN2_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_GL518_FAN2_MIN,&min)) {
     print_label(label,10);
     printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s  %s\n",
            cur,min,fdiv, alarms&GL518_ALARM_FAN2?"ALARM":"     ",
@@ -646,10 +646,10 @@ void print_gl518(const sensors_chip_name *name)
     printf("ERROR: Can't get FAN2 data!\n");
   free_the_label(&label);
 
-  if (!sensors_get_label(*name,SENSORS_GL518R00_TEMP,&label) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_TEMP,&cur) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_TEMP_OVER,&max) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_TEMP_HYST,&min)) {
+  if (!sensors_get_label(*name,SENSORS_GL518_TEMP,&label) &&
+      !sensors_get_feature(*name,SENSORS_GL518_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_GL518_TEMP_OVER,&max) &&
+      !sensors_get_feature(*name,SENSORS_GL518_TEMP_HYST,&min)) {
     print_label(label,10);
     printf("%+3.0f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s  %s\n",
            cur,max,min, alarms&GL518_ALARM_TEMP?"ALARM":"     ",
@@ -658,8 +658,8 @@ void print_gl518(const sensors_chip_name *name)
     printf("ERROR: Can't get TEMP data!\n");
   free_the_label(&label);
 
-  if (!sensors_get_label(*name,SENSORS_GL518R00_BEEP_ENABLE,&label) &&
-      !sensors_get_feature(*name,SENSORS_GL518R00_BEEP_ENABLE,&cur)) {
+  if (!sensors_get_label(*name,SENSORS_GL518_BEEP_ENABLE,&label) &&
+      !sensors_get_feature(*name,SENSORS_GL518_BEEP_ENABLE,&cur)) {
     print_label(label,10);
     if (cur < 0.5) 
       printf("Sound alarm disabled\n");
