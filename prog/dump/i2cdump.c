@@ -27,8 +27,18 @@
 
 void help(void)
 {
+  FILE *fptr;
+  char s[100];
+
   fprintf(stderr,"Syntax: i2cdump I2CBUS ADDRESS MODE\n");
   fprintf(stderr,"  MODE may be 'b' or 'w'\n");
+  fprintf(stderr,"  I2CBUS is an integer\n");
+  if((fptr = fopen("/proc/bus/i2c", "r"))) {
+    fprintf(stderr,"  Installed I2C busses:\n");
+    while(fgets(s, 100, fptr))
+      fprintf(stderr, "    %s", s);	
+    fclose(fptr);
+  }
 }
 
 int main(int argc, char *argv[])
@@ -91,7 +101,9 @@ int main(int argc, char *argv[])
     exit(1);
   }
   
-  if (ioctl(file,I2C_SLAVE,address) < 0) {
+  /* use FORCE so that we can look at registers even when
+     a driver is also running */
+  if (ioctl(file,I2C_SLAVE_FORCE,address) < 0) {
     fprintf(stderr,"Error: Could not set address to %d: %s\n",address,
             strerror(errno));
     exit(1);
