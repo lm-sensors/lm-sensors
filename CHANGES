@@ -52,8 +52,9 @@ ask CVS about it:
   Program sensors: Change reported version from 1.3 to the lm_sensors version;
                    Fix swapped limit and hysteresis on 9240, 5595, 686a;
                    Change mtp008 temps from max/min to limit/hyst.
-  Program sensors-detect: Recognize lm78 with chipid=0x20
-                          Recognize SMSC Victory66 South Bridge
+  Program sensors-detect: Recognize lm78 with chipid=0x20;
+                          Recognize SMSC Victory66 South Bridge;
+                          Add devfs /dev/i2c/x support
   Program tellerstats: new
 
 2.5.5 (20010115)

@@ -1276,12 +1276,13 @@ sub add_isa_to_chips_detected
         $new_misdetected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
       open FILE,"/dev/i2c-$new_misdetected_ref->[$i]->{i2c_devnr}" or
         open FILE,"/dev/i2c$new_misdetected_ref->[$i]->{i2c_devnr}" or
-           print("Can't open ",
-                 "/dev/i2c[-]$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
-           next;
+          open FILE,"/dev/i2c/$new_misdetected_ref->[$i]->{i2c_devnr}" or
+             print("Can't open ",
+                   "/dev/i2c[-/]$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
+             next;
       i2c_set_slave_addr \*FILE,$new_misdetected_ref->[$i]->{i2c_addr} or
            print("Can't set I2C address for ",
-                 "/dev/i2c[-]$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
+                 "/dev/i2c[-/]$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_misdetected_ref->[$i]->{i2c_addr})) {
@@ -1303,12 +1304,13 @@ sub add_isa_to_chips_detected
         $new_detected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
       open FILE,"/dev/i2c-$new_detected_ref->[$i]->{i2c_devnr}" or
         open FILE,"/dev/i2c$new_detected_ref->[$i]->{i2c_devnr}" or
-           print("Can't open ",
-                 "/dev/i2c[-]$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
-           next;
+          open FILE,"/dev/i2c/$new_detected_ref->[$i]->{i2c_devnr}" or
+             print("Can't open ",
+                   "/dev/i2c[-/]$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
+             next;
       i2c_set_slave_addr \*FILE,$new_detected_ref->[$i]->{i2c_addr} or
            print("Can't set I2C address for ",
-                 "/dev/i2c[-]$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
+                 "/dev/i2c[-/]$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_detected_ref->[$i]->{i2c_addr})) {
@@ -1374,7 +1376,8 @@ sub scan_adapter
 
   open FILE,"/dev/i2c-$adapter_nr" or 
     open FILE,"/dev/i2c$adapter_nr" or 
-       (print "Can't open /dev/i2c[-]$adapter_nr\n"), return;
+      open FILE,"/dev/i2c/$adapter_nr" or 
+         (print "Can't open /dev/i2c[-/]$adapter_nr\n"), return;
 
   # Now scan each address in turn
   foreach $addr (0..0x7f) {
@@ -2293,7 +2296,7 @@ sub main
         "Read\n",
         " doc/modules for more information.\n";
   print " Also, you need to be `root', or at least have access to the ",
-        "/dev/i2c[-]* files\n",
+        "/dev/i2c[-/]* files\n",
         " for some things. You can use prog/mkdev/mkdev.sh to create these ",
         "/dev files\n",
         " if you do not have them already.\n";
@@ -2375,7 +2378,7 @@ sub main
             "you edited\n",
             " `/etc/conf.modules' (or `/etc/modules.conf') for automatic ",
             "loading of\n",
-            " this module. If not, you won't be able to open any /dev/i2c[-]* ",
+            " this module. If not, you won't be able to open any /dev/i2c[-/]* ",
             "file.\n";
     } else {
       print " i2c-dev is not loaded. Do you want to load it now? (YES/no): ";
@@ -2384,7 +2387,7 @@ sub main
               "`/etc/conf.modules'\n",
               " (or `/etc/modules.conf') for automatic loading of this ",
               "module. If not,\n",
-              " you won't be able to open any /dev/i2c[-]* file (unless you",
+              " you won't be able to open any /dev/i2c[-/]* file (unless you",
               "have it built-in\n",
               " into your kernel)\n";
       } elsif (system "modprobe","i2c-dev") {
