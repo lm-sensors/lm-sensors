@@ -427,27 +427,26 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 	to their sysfs equivalent, and uses common sysfs magnitude.
 	Common magnitudes are #defined above.
 	Common conversions are as follows:
-		fan%d_div -> fan_div%d
-		fan%d_min -> fan_min%d
-		fan%d_state -> fan_status%d
-		fan%d_ripple -> fan_ripple%d
+		fan%d_min -> fan%d_min (for magnitude)
+		fan%d_state -> fan%d_status
 		fan%d -> fan_input%d
-		in%d_max -> in_max%d
-		in%d_min -> in_min%d
-		in%d -> in_input%d
-		vin%d_max -> in_max%d
-		vin%d_min -> in_min%d
+		pwm%d -> fan%d_pwm
+		pwm%d_enable -> fan%d_pwm_enable
+		in%d_max -> in%d_max (for magnitude)
+		in%d_min -> in%d_min (for magnitude)
+		in%d -> in%d_input
+		vin%d_max -> in%d_max
+		vin%d_min -> in%d_min
 		vin%d -> in_input%d
-		temp%d_over -> temp_max%d
-		temp%d_hyst -> temp_hyst%d
-		temp%d_max -> temp_max%d
-		temp%d_high -> temp_max%d
-		temp%d_min -> temp_min%d
-		temp%d_low -> temp_min%d
-		temp%d_state -> temp_status%d
-		temp%d -> temp_input%d
-		tcrit%d -> temp_crit%d
-		hyst%d -> temp_hyst%d
+		temp%d_over -> temp%d_max
+		temp%d_hyst -> temp%d_max_hyst
+		temp%d_max -> temp%d_max (for magnitude)
+		temp%d_high -> temp%d_max
+		temp%d_min -> temp%d_min (for magnitude)
+		temp%d_low -> temp%d_min
+		temp%d_state -> temp%d_status
+		temp%d -> temp%d_input
+		sensor%d -> temp%d_type
 	AND all conversions listed in the matches[] structure below.
 
 	If that fails, returns old /proc feature name and magnitude.
@@ -471,15 +470,16 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 
 	struct match matches[] = {
 		{ "beeps", "beep_mask", 0 },
-		{ "pwm", "pwm1", 0 },
-		{ "remote_temp", "temp_input2", TEMPMAG },
-		{ "remote_temp_hyst", "temp_hyst2", TEMPMAG },
-		{ "remote_temp_low", "temp_min2", TEMPMAG },
-		{ "remote_temp_over", "temp_max2", TEMPMAG },
-		{ "temp", "temp_input1", TEMPMAG },
-		{ "temp_hyst", "temp_hyst1", TEMPMAG },
-		{ "temp_low", "temp_min1", TEMPMAG },
-		{ "temp_over", "temp_max1", TEMPMAG },
+		{ "pwm", "fan1_pwm", 0 },
+		{ "vid", "in0_ref", INMAG },
+		{ "remote_temp", "temp2_input", TEMPMAG },
+		{ "remote_temp_hyst", "temp2_hyst", TEMPMAG },
+		{ "remote_temp_low", "temp2_min", TEMPMAG },
+		{ "remote_temp_over", "temp2_max", TEMPMAG },
+		{ "temp", "temp1_input", TEMPMAG },
+		{ "temp_hyst", "temp1_hyst", TEMPMAG },
+		{ "temp_low", "temp1_min", TEMPMAG },
+		{ "temp_over", "temp1_max", TEMPMAG },
 		{ NULL, NULL }
 	};
 
@@ -504,141 +504,99 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	}
 
 /* convert common /proc names to common sysfs names */
-	if(sscanf(name, "fan%d_di%c%c", &num, &last, &check) == 2 && last == 'v') {
-		sprintf(sysname, "fan_div%d", num);
-		*sysmag = 0;
-		return 0;
-	}
 	if(sscanf(name, "fan%d_mi%c%c", &num, &last, &check) == 2 && last == 'n') {
-		sprintf(sysname, "fan_min%d", num);
+		strcpy(sysname, name);
 		*sysmag = FANMAG;
 		return 0;
 	}
 	if(sscanf(name, "fan%d_stat%c%c", &num, &last, &check) == 2 && last == 'e') {
-		sprintf(sysname, "fan_status%d", num);
-		*sysmag = 0;
-		return 0;
-	}
-	if(sscanf(name, "fan%d_rippl%c%c", &num, &last, &check) == 2 && last == 'e') {
-		sprintf(sysname, "fan_ripple%d", num);
+		sprintf(sysname, "fan%d_status", num);
 		*sysmag = 0;
 		return 0;
 	}
 	if(sscanf(name, "fan%d%c", &num, &check) == 1) {
-		sprintf(sysname, "fan_input%d", num);
+		sprintf(sysname, "fan%d_input", num);
 		*sysmag = FANMAG;
 		return 0;
 	}
-
-	if(sscanf(name, "in%d_mi%c%c", &num, &last, &check) == 2 && last == 'n') {
-		sprintf(sysname, "in_min%d", num);
-		*sysmag = INMAG;
+	if(sscanf(name, "pwm%d%c", &num, &check) == 1) {
+		sprintf(sysname, "fan%d_pwm", num);
+		*sysmag = 0;
 		return 0;
 	}
-	if(sscanf(name, "in%d_ma%c%c", &num, &last, &check) == 2 && last == 'x') {
-		sprintf(sysname, "in_max%d", num);
-		*sysmag = INMAG;
-		return 0;
-	}
-	if(sscanf(name, "in%d%c", &num, &check) == 1) {
-		sprintf(sysname, "in_input%d", num);
-		*sysmag = INMAG;
+	if(sscanf(name, "pwm%d_enabl%c%c", &num, &last, &check) == 2 && last == 'e') {
+		sprintf(sysname, "fan%d_pwm_enable", num);
+		*sysmag = 0;
 		return 0;
 	}
 
+	if((sscanf(name, "in%d_mi%c%c", &num, &last, &check) == 2 && last == 'n')
+	|| (sscanf(name, "in%d_ma%c%c", &num, &last, &check) == 2 && last == 'x')) {
+		strcpy(sysname, name);
+		*sysmag = INMAG;
+		return 0;
+	}
+	if((sscanf(name, "in%d%c", &num, &check) == 1)
+	|| (sscanf(name, "vin%d%c", &num, &check) == 1)) {
+		sprintf(sysname, "in%d_input", num);
+		*sysmag = INMAG;
+		return 0;
+	}
 	if(sscanf(name, "vin%d_mi%c%c", &num, &last, &check) == 2 && last == 'n') {
-		sprintf(sysname, "in_min%d", num);
+		sprintf(sysname, "in%d_min", num);
 		*sysmag = INMAG;
 		return 0;
 	}
 	if(sscanf(name, "vin%d_ma%c%c", &num, &last, &check) == 2 && last == 'x') {
-		sprintf(sysname, "in_max%d", num);
+		sprintf(sysname, "in%d_max", num);
 		*sysmag = INMAG;
-		return 0;
-	}
-	if(sscanf(name, "vin%d%c", &num, &check) == 1) {
-		sprintf(sysname, "in_input%d", num);
-		*sysmag = INMAG;
-		return 0;
-	}
-
-	if(sscanf(name, "pwm%d%c", &num, &check) == 1) {
-		strcpy(sysname, name);
-		*sysmag = 0;
-		return 0;
-	}
-
-	if(sscanf(name, "sensor%d%c", &num, &check) == 1) {
-		strcpy(sysname, name);
-		*sysmag = 0;
 		return 0;
 	}
 
 	if(sscanf(name, "temp%d_hys%c%c", &num, &last, &check) == 2 && last == 't') {
-		sprintf(sysname, "temp_hyst%d", num);
+		sprintf(sysname, "temp%d_max_hyst", num);
 		*sysmag = TEMPMAG;
 		return 0;
 	}
-	if(sscanf(name, "temp%d_ove%c%c", &num, &last, &check) == 2 && last == 'r') {
-		sprintf(sysname, "temp_max%d", num);
+	if((sscanf(name, "temp%d_ove%c%c", &num, &last, &check) == 2 && last == 'r')
+	|| (sscanf(name, "temp%d_ma%c%c", &num, &last, &check) == 2 && last == 'x')
+	|| (sscanf(name, "temp%d_hig%c%c", &num, &last, &check) == 2 && last == 'h')) {
+		sprintf(sysname, "temp%d_max", num);
 		*sysmag = TEMPMAG;
 		return 0;
 	}
-	if(sscanf(name, "temp%d_mi%c%c", &num, &last, &check) == 2 && last == 'n') {
-		sprintf(sysname, "temp_min%d", num);
-		*sysmag = TEMPMAG;
-		return 0;
-	}
-	if(sscanf(name, "temp%d_lo%c%c", &num, &last, &check) == 2 && last == 'w') {
-		sprintf(sysname, "temp_min%d", num);
-		*sysmag = TEMPMAG;
-		return 0;
-	}
-	if(sscanf(name, "temp%d_ma%c%c", &num, &last, &check) == 2 && last == 'x') {
-		sprintf(sysname, "temp_max%d", num);
-		*sysmag = TEMPMAG;
-		return 0;
-	}
-	if(sscanf(name, "temp%d_hig%c%c", &num, &last, &check) == 2 && last == 'h') {
-		sprintf(sysname, "temp_max%d", num);
+	if((sscanf(name, "temp%d_mi%c%c", &num, &last, &check) == 2 && last == 'n')
+	|| (sscanf(name, "temp%d_lo%c%c", &num, &last, &check) == 2 && last == 'w')) {
+		sprintf(sysname, "temp%d_min", num);
 		*sysmag = TEMPMAG;
 		return 0;
 	}
 	if(sscanf(name, "temp%d_stat%c%c", &num, &last, &check) == 2 && last == 'e') {
-		sprintf(sysname, "temp_status%d", num);
+		sprintf(sysname, "temp%d_status", num);
 		*sysmag = 0;
 		return 0;
 	}
-	if(sscanf(name, "tcrit%d%c", &num, &check) == 1) {
-		sprintf(sysname, "temp_crit%d", num);
-		*sysmag = TEMPMAG;
-		return 0;
-	}
-	if(sscanf(name, "hyst%d%c", &num, &check) == 1) {
-		sprintf(sysname, "temp_hyst%d", num);
-		*sysmag = TEMPMAG;
-		return 0;
-	}
 	if(sscanf(name, "temp%d%c", &num, &check) == 1) {
-		sprintf(sysname, "temp_input%d", num);
+		sprintf(sysname, "temp%d_input", num);
 		*sysmag = TEMPMAG;
+		return 0;
+	}
+	if(sscanf(name, "sensor%d%c", &num, &check) == 1) {
+		sprintf(sysname, "temp%d_type", num);
+		*sysmag = 0;
 		return 0;
 	}
 
 /* bmcsensors only, not yet in kernel */
 /*
-	if(sscanf(name, "curr%d_mi%c%c", &num, &last, &check) == 2 && last == 'n') {
-		sprintf(sysname, "curr_min%d", num);
-		*sysmag = CURRMAG;
-		return 0;
-	}
-	if(sscanf(name, "curr%d_ma%c%c", &num, &last, &check) == 2 && last == 'x') {
-		sprintf(sysname, "curr_max%d", num);
+	if((sscanf(name, "curr%d_mi%c%c", &num, &last, &check) == 2 && last == 'n')
+	|| (sscanf(name, "curr%d_ma%c%c", &num, &last, &check) == 2 && last == 'x')) {
+		strcpy(sysname, name);
 		*sysmag = CURRMAG;
 		return 0;
 	}
 	if(sscanf(name, "curr%d%c", &num, &check) == 1) {
-		sprintf(sysname, "curr_input%d", num);
+		sprintf(sysname, "curr%d_input", num);
 		*sysmag = CURRMAG;
 		return 0;
 	}
@@ -646,9 +604,9 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 
 /* give up, use old name (probably won't work though...) */
 /* known to be the same:
-	"alarms", "beep_enable", "vid", "vrm"
+	"alarms", "beep_enable", "vrm", "fan%d_div"
 */
 	strcpy(sysname, name);
-	*sysmag = feature->scaling;
+	*sysmag = (feature->scaling==0?0:3);
 	return 0;
 }

@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.8.6 (2004????)
+  Library: Switch to new sysfs naming standard
   Programs i2cdetect, i2cdump, i2cset: Fix incorrect bus names if possible
 
 
