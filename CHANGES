@@ -1,0 +1,39 @@
+This is a list of the most important changes between 2.x versions. It is by
+no means complete, listing only user-visible changes which are interesting.
+The ultimate way to know what has changed is to run diff, or even neater,
+ask CVS about it:
+
+  * Checkout the archive (see doc/cvs for how you can do this)
+  * Determine which tags are valid, by running this command from the
+    project root directory:
+      cvs status -v -l Makefile
+    Valid tags are usually like form V-2-1-0 for version 2.1.0
+  * Ask cvs for the difference between two versions:
+      cvs diff -r TAG1 -r TAG2 DIFF-OPTIONS
+    for example:
+      cvs diff -r V2-0-0 -r V2-0-1 -u
+
+
+2.1.0 (19981230)
+  Library: Completely NEW
+  Program sensors: NEW
+  Program decode-dimms: More information
+  Module bit-mb.o: Removed spurious semicolon; now runs on more VIA chipsets
+  Module w83781d.o: NEW
+  Module lm80.o: NEW
+  Module gl518sm.o: new procfile beep, several small updates
+  Modules: Now use pin readings, no more scaling within the kernel (use the
+           library instead)
+  
+2.0.2 (19981214)
+  Module eeprom.o: NEW
+  Program decode-dimms: NEW
+  Modules: fill_inode fix, will stop segfaults on unloading in kernels after
+           2.1.58
+  Modules: Somewhat less verbose on transfers
+  Module lm78.o now recognizes and handles lm78-j and lm79
+2.0.1 (1998121?)
+  Module gl518sm.o updates, to make it actually work
+  Module lm75.o high/low-byte swapping write bug fixed
+2.0.0 (19981209)
+  Initial release
