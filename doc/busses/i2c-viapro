@@ -9,7 +9,7 @@ Supported adapters:
   * VIA Technologies, Inc. VT82C686A/B 
     Datasheet: Sometimes available at the VIA website
 
-  * VIA Technologies, Inc. VT8231, VT8233, VT8233A, VT8235
+  * VIA Technologies, Inc. VT8231, VT8233, VT8233A, VT8235, VT8237
     Datasheet: available on request from Via
 
 Author: Kyösti Mälkki <kmalkki@cc.hut.fi>
@@ -38,6 +38,8 @@ Your /proc/pci or lspci -n listing must show one of these :
  device 1106:3074   (VT8233)
  device 1106:3147   (VT8233A)
  device 1106:8235   (VT8231)
+ devide 1106:3177   (VT8235)
+ devide 1106:3227   (VT8237)
 
 If none of these show up, you should look in the BIOS for settings like
 enable ACPI / SMBus or even USB.

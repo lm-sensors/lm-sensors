@@ -29,6 +29,7 @@
 	8233
 	8233A (0x3147 and 0x3177)
 	8235
+	8237
    Note: we assume there can only be one device, with one SMBus interface.
 */
 
@@ -401,6 +402,10 @@ static void __devexit vt596_remove(struct pci_dev *pdev)
 #ifndef PCI_DEVICE_ID_VIA_8235
 #define PCI_DEVICE_ID_VIA_8235	0x3177
 #endif
+/* 8237 is undefined before kernel 2.4.21 */
+#ifndef PCI_DEVICE_ID_VIA_8237
+#define PCI_DEVICE_ID_VIA_8237	0x3227
+#endif
 static struct pci_device_id vt596_ids[] __devinitdata = {
 	{
 		.vendor		= PCI_VENDOR_ID_VIA,
@@ -440,6 +445,13 @@ static struct pci_device_id vt596_ids[] __devinitdata = {
 	{
 		.vendor		= PCI_VENDOR_ID_VIA,
 		.device 	= PCI_DEVICE_ID_VIA_8235,
+		.subvendor	= PCI_ANY_ID,
+		.subdevice	= PCI_ANY_ID,
+		.driver_data	= SMBBA3
+	},
+	{
+		.vendor		= PCI_VENDOR_ID_VIA,
+		.device 	= PCI_DEVICE_ID_VIA_8237,
 		.subvendor	= PCI_ANY_ID,
 		.subdevice	= PCI_ANY_ID,
 		.driver_data	= SMBBA3
