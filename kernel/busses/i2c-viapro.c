@@ -26,6 +26,7 @@
 	82C596B (0x3051)
 	82C686A/B
 	8233, 8233A
+	8231
    Note: we assume there can only be one device, with one SMBus interface.
 */
 
@@ -71,6 +72,7 @@ static struct sd supported[] = {
 	{PCI_DEVICE_ID_VIA_82C686_4, SMBBA1, 0xD2, "VT82C686A/B"},
 	{PCI_DEVICE_ID_VIA_8233_0, SMBBA3, 0xD2, "VT8233"},
 	{0x3147, SMBBA3, 0xD2, "VT8233A"},
+	{0x8235, SMBBA1, 0xD2, "VT8231"},
 	{0, 0, 0, NULL}
 };
 
