@@ -473,11 +473,11 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 		{ "pwm", "fan1_pwm", 0 },
 		{ "vid", "in0_ref", INMAG },
 		{ "remote_temp", "temp2_input", TEMPMAG },
-		{ "remote_temp_hyst", "temp2_hyst", TEMPMAG },
+		{ "remote_temp_hyst", "temp2_max_hyst", TEMPMAG },
 		{ "remote_temp_low", "temp2_min", TEMPMAG },
 		{ "remote_temp_over", "temp2_max", TEMPMAG },
 		{ "temp", "temp1_input", TEMPMAG },
-		{ "temp_hyst", "temp1_hyst", TEMPMAG },
+		{ "temp_hyst", "temp1_max_hyst", TEMPMAG },
 		{ "temp_low", "temp1_min", TEMPMAG },
 		{ "temp_over", "temp1_max", TEMPMAG },
 		{ NULL, NULL }
