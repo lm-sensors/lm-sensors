@@ -21,6 +21,7 @@ kernel/chips/ddcmon.c		drivers/sensors/ddcmon.c
 kernel/chips/ds1621.c		drivers/sensors/ds1621.c
 kernel/chips/eeprom.c		drivers/sensors/eeprom.c
 kernel/chips/fscpos.c		drivers/sensors/fscpos.c
+kernel/chips/fscscy.c		drivers/sensors/fscscy.c
 kernel/chips/gl518sm.c		drivers/sensors/gl518sm.c
 kernel/chips/gl520sm.c		drivers/sensors/gl520sm.c
 kernel/chips/it87.c		drivers/sensors/it87.c
