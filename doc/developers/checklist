@@ -16,7 +16,8 @@ release:
 - update lm_sensors2/version.h and i2c/kernel/i2c.h, and cvs commit it
 - Tag the release using CVS ('cvs tag V#-#-#' from the dist root)
 - remove empty directories (e.g. rmdir `find . -type d`)
-- remove 'CVS' related files/directories
+- remove 'CVS' related files/directories (e.g. rm -fR `find . -name CVS`)
+- rename i2c and lm_sensors2 to i2c-#.#.# and lm_sensors-#.#.#
 - tar it up and post it (sign it!)
 
 misc:
