@@ -42,9 +42,11 @@ ask CVS about it:
   Program decode-edid.pl: Add sysfs support
   Program sensors: Add w83637hf support
                    Add support for Shuttle Ethernet EEPROMs
+                   Drop 2.6 subclient detection
   Program sensors-detect: Add heuristics to the LM80 detection function
                           Add support for W83L785R, improve W83L784R/AR
                           Add GeForce FX 5600 as supported by rivatv
+                          More Super IO chips, better handling
   Library: Update to match renames in fscher
            Reverse temporary changes to w83l785ts mappings
            Fix vt1211 and vt8231 uch_config not being writable
@@ -52,6 +54,7 @@ ask CVS about it:
            Add w83637hf support
            Remove in6 and temp1 from vt1211 and vt8231
            Add support for Shuttle Ethernet EEPROMs
+           Remove unused as99127f features
 
 
 2.8.4 (20040207)
