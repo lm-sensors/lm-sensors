@@ -395,10 +395,9 @@ the provided 'sensors' program) instead.
 
 	This is a bit intricate right now. In the near future, this can be
 done through the 'sensors' program, which will take account of the
-computations specified in the configuration file. This will probably not
-be implemented in time for 2.1.0, though.
-	At this moment, you have to cat values to /proc/sys/dev/sensors/*/*
-files, and do any computations by hand. Sorry.
+computations specified in the configuration file. At this moment, you must
+also put the 'set' commands into the configuration file. This will get
+easier in newer versions.
 
 
 4.15 Some sensors are doubly detected?

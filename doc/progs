@@ -20,7 +20,8 @@ this package.
 There are some programs distributed with Simon Vogl's i2c package too:
 * i2c/detect/detect (written in C, not installed)
   This program needs module `i2c-dev.o' to be loaded. It scans the complete
-  address range of a certain bus for connected devices.
+  address range of a certain bus for connected devices. It will only work
+  for i2c-level drivers (not for PIIX4 busses).
 * i2c/eeprom/eeprom (written in C, not installed)
   This program needs the i2c `eeprom.o' module (that is the one that is not
   installed; it can be found in the i2c/drivers/ directory). It reads from

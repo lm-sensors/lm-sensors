@@ -95,11 +95,11 @@
 
 # Set statements set things like limits. Complete expressions can be
 # used. Not everything can sensibly be set: setting 'in0', for example,
-# is impossible! These settings # are put through the compute translations;
-# so if we specify '12.8' # for in6, '3.2' will actually be written!
+# is impossible! These settings are put through the compute translations;
+# so if we specify '12.8' for in6, '3.2' will actually be written!
 
-# Though set statements are correctly parsed at this moment, nothing will
-# be done with them yet by libsensors
+#set in0_max vid*1.05
+#set in0_min vid*0.95
 
 # Invalid statements tell certain features are not wanted. User programs can
 # still read them if they really want, though; this is just an advisory
@@ -178,6 +178,23 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*"
     compute in5 -(210/60.4)*@  ,  -@/(210/60.4)
     compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
 
+# Here, we assume the VID readings are valid, and we use a max. 5% deviation
+
+    set in0_min vid*0.95
+    set in0_max vid*1.05
+    set in1_min vid*0.95
+    set in1_max vid*1.05
+    set in2_min 3.3 * 0.95
+    set in2_max 3.3 * 1.05
+    set in3_min 5.0 * 0.95
+    set in3_max 5.0 * 1.05
+    set in4_min 12 * 0.95
+    set in4_max 12 * 1.05
+    set in5_min -12 * 0.95
+    set in5_max -12 * 1.05
+    set in6_min -5 * 0.95
+    set in6_max -5 * 1.05
+
 
 chip "gl518sm-r00-*" "gl518sm-r80-*"
 
@@ -229,3 +246,20 @@ chip "lm80-*"
     compute in4 (160/35.7 + 1) * @,       @ / (160/35.7 + 1)
     compute in5 (160/35.7)*(@ - in0) + @, (@ + in0 * 160/25.7)/ (1 + 160/25.7)
     compute in6 (36/16.2)*(@ - in0) + @,  (@ + in0 * 36/16.2) / (1 + 36/16.2)
+
+    set in0_min 5 * 0.95
+    set in0_max 5 * 0.95
+# What is your VTT? It is probably not this value...
+    set in1_min 2*0.95
+    set in1_max 2*1.05
+    set in2_min 3.3 * 0.95
+    set in2_max 3.3 * 1.05
+# What is your VCore? It is probably not this value...
+    set in3_min 1.9 * 0.95
+    set in3_max 1.9 * 1.05
+    set in4_min 12 * 0.95
+    set in4_max 12 * 1.05
+    set in5_min -12 * 0.95
+    set in5_max -12 * 1.05
+    set in6_min -5 * 0.95
+    set in6_max -5 * 1.05

@@ -101,7 +101,7 @@ Where version 1 of this package had the human-readable /proc/sensors file,
 this version includes a user-space program which gathers all data
 and displays it in a comparable format. This program is called 'sensors'.
 Everybody can use it to read sensors values; only root can use it to
-set minimum and maximum values [NOTE: not yet implemented]
+set minimum and maximum values.
 
 If you want to run 'sensors' without installing the package, you must
 use the following command to make it able to find its shared library:
