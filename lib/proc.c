@@ -18,6 +18,9 @@
 */
 
 #include <stddef.h>
+#ifdef DEBUG
+#include <unistd.h> /* for getuid(), to be removed */
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <sys/sysctl.h>
@@ -358,6 +361,13 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 			value /= 10.0;
 		* ((long *) (buf + the_feature->offset)) = (long) value;
 		buflen = the_feature->offset + sizeof(long);
+#ifdef DEBUG
+		/* The following get* calls don't do anything, they are here
+		   for debugging purposes only. Strace will show the
+		   returned values. */
+		getuid(); geteuid();
+		getgid(); getegid();
+#endif
 		if (sysctl(sysctl_name, 4, NULL, 0, buf, buflen))
 			return -SENSORS_ERR_PROC;
 	}
