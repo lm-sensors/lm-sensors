@@ -262,7 +262,7 @@ int piix4_setup(void)
 			     "ENABLED!\n");
 		} else {
 			printk
-			    (KERN_ERR "SMBUS: Error: Host SMBus controller not enabled!\n");
+			    (KERN_ERR "i2c-piix4.o: Host SMBus controller not enabled!\n");
 			error_return = -ENODEV;
 			goto END;
 		}
