@@ -496,20 +496,14 @@ static int sis5595_write_value(struct i2c_client *client, u8 reg, u8 value)
 	return 0;
 }
 
-/* Called when we have found a new SIS5595. It should set limits, etc. */
+/* Called when we have found a new SIS5595. */
 static void sis5595_init_client(struct i2c_client *client)
 {
-	struct sis5595_data *data = client->data;
-
-	/* Reset all except Watchdog values and last conversion values
-	   This sets fan-divs to 2, among others */
-	sis5595_write_value(client, SIS5595_REG_CONFIG, 0x80);
+	u8 reg;
 
 	/* Start monitoring */
-	sis5595_write_value(client, SIS5595_REG_CONFIG,
-			    (sis5595_read_value(client, SIS5595_REG_CONFIG)
-			     & 0xf7) | 0x01);
-
+	reg = i2c_smbus_read_byte_data(client, SIS5595_REG_CONFIG);
+	sis5595_write_value(client, SIS5595_REG_CONFIG, (reg|0x01)&0x7F);
 }
 
 static void sis5595_update_client(struct i2c_client *client)

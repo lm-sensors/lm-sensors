@@ -114,7 +114,6 @@ static const u8 LM83_REG_W_HIGH[] = {
 static int lm83_attach_adapter(struct i2c_adapter *adapter);
 static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	short flags, int kind);
-static void lm83_init_client(struct i2c_client *client);
 static int lm83_detach_client(struct i2c_client *client);
 static void lm83_update_client(struct i2c_client *client);
 static void lm83_temp(struct i2c_client *client, int operation, int
@@ -361,9 +360,9 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 
 	/*
 	 * Initialize the LM83 chip
+	 * (Nothing to do for this one.)
 	 */
 
-	lm83_init_client(new_client);
 	return 0;
 
 	ERROR2:
@@ -371,11 +370,6 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	ERROR1:
 	kfree(new_client);
 	return err;
-}
-
-static void lm83_init_client(struct i2c_client *client)
-{
-
 }
 
 static int lm83_detach_client(struct i2c_client *client)

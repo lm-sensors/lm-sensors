@@ -587,25 +587,16 @@ static int via686a_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-/* Called when we have found a new VIA686A. Set limits, etc. */
+/* Called when we have found a new VIA686A. */
 static void via686a_init_client(struct i2c_client *client)
 {
-	int i;
-
-	/* Reset the device */
-	via686a_write_value(client, VIA686A_REG_CONFIG, 0x80);
-
-	/* Have to wait for reset to complete or else the following
-	   initializations won't work reliably. The delay was arrived at
-	   empirically, the datasheet doesn't tell you.
-	   Waiting for the reset bit to clear doesn't work, it
-	   clears in about 2-4 udelays and that isn't nearly enough. */
-	udelay(50);
+	u8 reg;
 
 	/* Start monitoring */
-	via686a_write_value(client, VIA686A_REG_CONFIG, 0x01);
+	reg = via686a_read_value(client, VIA686A_REG_CONFIG);
+	via686a_write_value(client, VIA686A_REG_CONFIG, (reg|0x01)&0x7F);
 
-	/* Cofigure temp interrupt mode for continuous-interrupt operation */
+	/* Configure temp interrupt mode for continuous-interrupt operation */
 	via686a_write_value(client, VIA686A_REG_TEMP_MODE, 
 			    via686a_read_value(client, VIA686A_REG_TEMP_MODE) &
 			    !(VIA686A_TEMP_MODE_MASK | VIA686A_TEMP_MODE_CONTINUOUS));

@@ -373,22 +373,16 @@ static int adm1025_detach_client(struct i2c_client *client)
 
 }
 
-/* Called when we have found a new ADM1025. It should set limits, etc. */
+/* Called when we have found a new ADM1025. */
 static void adm1025_init_client(struct i2c_client *client)
 {
 	struct adm1025_data *data = client->data;
-	u8 reg, nr;
+	u8 reg;
 
 	data->vrm = DEFAULT_VRM;
-	/* Restore power-up default values (configuration and status
-	   registers). This makes some other initializations
-	   unnecessary. Set the chip in standby mode until the
-	   limits are properly set. Note that we take great care not to
-	   change the bits 1-6 of the configuration register, since
-	   they hold data we want to preserve. */
-	reg = i2c_smbus_read_byte_data(client, ADM1025_REG_CONFIG);
 
-	/* Restore configuration and start monitoring */
+	/* Start monitoring */
+	reg = i2c_smbus_read_byte_data(client, ADM1025_REG_CONFIG);
 	i2c_smbus_write_byte_data(client, ADM1025_REG_CONFIG, (reg|0x01)&0x7F);
 }
 
