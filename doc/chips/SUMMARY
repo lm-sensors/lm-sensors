@@ -1,15 +1,29 @@
-SUPPORTED DEVICES
-=================
+SUMMARY OF SUPPORTED CHIPS
+==========================
+This is a summary of the sensor and non-sensor chips supported
+by this package. It summarizes the features of each supported chip.
+
+For further information on a particular chip, see the documentation
+in this directory.
+
+To determine what chips you have on your system,
+run prog/detect/sensors-detect.
+
+
+
 
 SENSOR CHIPS
 -------------
 
-Driver  Chip		#temp	#vin	#fanin	pwm/dac	i2c	ISA
+			Included Sensors	Controls Busses	
+			----------------------	-------  -----------
+Driver  Chips		#temp	#vin	#fanin	pwm/dac	i2c	ISA
 ---------------------------------------------------------------------
 adm1021
 	adm1021		2	-	-	-	yes	no
 	max1617		2	-	-	-	yes	no
-	max1617		2	-	-	-	yes	no
+	max1617a	2	-	-	-	yes	no
+	xeon		1	-	-	-	yes	no
 
 adm9240
 	adm9240		1	6	5	1 dac	yes	no
@@ -30,7 +44,6 @@ lm78
 lm80
 	lm80		1	7	2	-	yes	no
 
-
 maxilife
 	maxilife	5	4	3	-	yes	no
 
@@ -50,11 +63,16 @@ NON-SENSOR CHIPS
 
 Driver  Chips
 -------------
-icspll
-	supported clock chips - reads registers only
+
+bt869
+	bt869 video modulator chip
 
 eeprom
-	all eeproms - reads registers only
+	Memory SPD (serial presence detect) eeproms - reads locations only
+	Xeon scratch eeproms - reads locations only
+
+icspll
+	supported clock chips - reads registers only
 
 ltc1710
 	ltc1710	two switches only
