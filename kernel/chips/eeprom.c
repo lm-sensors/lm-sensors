@@ -4,6 +4,11 @@
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl> and
     Philip Edelbrock <phil@netroedge.com>
 
+    2003-08-18  Jean Delvare <khali@linux-fr.org>
+    Divide the eeprom in 2-row (arbitrary) slices. This significantly
+    speeds sensors up, as well as various scripts using the eeprom
+    module.
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -68,14 +73,14 @@ struct eeprom_data {
 	int sysctl_id;
 
 	struct semaphore update_lock;
-	char valid;		/* !=0 if following fields are valid */
-	unsigned long last_updated;	/* In jiffies */
+	u8 valid;		/* bitfield, bit!=0 if slice is valid */
+	unsigned long last_updated[8];	/* In jiffies, 8 slices */
 
 	u8 data[EEPROM_SIZE];	/* Register values */
 #if 0
-	int memtype;
+	u8 memtype;
 #endif
-	int nature;
+	u8 nature;
 };
 
 
@@ -91,7 +96,7 @@ static int eeprom_write_value(struct i2c_client *client, u8 reg,
 
 static void eeprom_contents(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
-static void eeprom_update_client(struct i2c_client *client);
+static void eeprom_update_client(struct i2c_client *client, u8 slice);
 
 
 /* This is the driver that will be inserted */
@@ -315,44 +320,46 @@ static int eeprom_write_value(struct i2c_client *client, u8 reg, u8 value)
 }
 #endif
 
-static void eeprom_update_client(struct i2c_client *client)
+static void eeprom_update_client(struct i2c_client *client, u8 slice)
 {
 	struct eeprom_data *data = client->data;
 	int i, j;
 
 	down(&data->update_lock);
 
-	if ((jiffies - data->last_updated > 300 * HZ) |
-	    (jiffies < data->last_updated) || !data->valid) {
+	if (!(data->valid & (1 << slice))
+	 || (jiffies - data->last_updated[slice] > 300 * HZ)
+	 || (jiffies < data->last_updated[slice])) {
 
 #ifdef DEBUG
-		printk("Starting eeprom update\n");
+		printk("Starting eeprom update, slice %u\n", slice);
 #endif
 
 		if (i2c_check_functionality(client->adapter,
 		                            I2C_FUNC_SMBUS_READ_I2C_BLOCK))
 		{
-			for (i=0; i<EEPROM_SIZE; i+=I2C_SMBUS_I2C_BLOCK_MAX)
+			for (i = slice << 5; i < (slice + 1) << 5;
+			                            i += I2C_SMBUS_I2C_BLOCK_MAX)
 				if (i2c_smbus_read_i2c_block_data(client,
 				                           i, data->data + i)
 				                    != I2C_SMBUS_I2C_BLOCK_MAX)
 					goto DONE;
 		} else {
-			if (i2c_smbus_write_byte(client, 0)) {
+			if (i2c_smbus_write_byte(client, slice << 5)) {
 #ifdef DEBUG
 				printk("eeprom read start has failed!\n");
 #endif
 				goto DONE;
 			}
-			for (i = 0; i < EEPROM_SIZE; i++) {
+			for (i = slice << 5; i < (slice + 1) << 5; i++) {
 				j = i2c_smbus_read_byte(client);
 				if (j < 0)
 					goto DONE;
 				data->data[i] = (u8) j;
 			}
 		}
-		data->last_updated = jiffies;
-		data->valid = 1;
+		data->last_updated[slice] = jiffies;
+		data->valid |= (1 << slice);
 	}
 DONE:
 	up(&data->update_lock);
@@ -369,7 +376,7 @@ void eeprom_contents(struct i2c_client *client, int operation,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		eeprom_update_client(client);
+		eeprom_update_client(client, nr >> 1);
 		/* Hide Vaio security settings to regular users */
 		if (nr == 0 && data->nature == NATURE_VAIO
 		 && !capable(CAP_SYS_ADMIN))
