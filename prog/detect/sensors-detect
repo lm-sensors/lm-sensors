@@ -1002,6 +1002,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { adm1025_detect 0, @_ }
      },
      {
+       name => "Philips NE1619",
+       driver => "adm1025",
+       i2c_addrs => [0x2c..0x2d],
+       i2c_detect => sub { adm1025_detect 1, @_ }
+     },
+     {
        name => "Analog Devices ADM1024",
        driver => "adm1024",
        i2c_addrs => [0x2c..0x2e],
@@ -2730,7 +2736,7 @@ sub adm1022_detect
   return (8);
 }
 
-# $_[0]: Chip to detect (0 = ADM1025)
+# $_[0]: Chip to detect (0 = ADM1025, 1 = NE1619)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -2744,10 +2750,14 @@ sub adm1025_detect
 {
   my $reg;
   my ($chip, $file,$addr) = @_;
+
   $reg = i2c_smbus_read_byte_data($file,0x3e);
-  return unless ($reg == 0x41);
+  return if ($chip == 0) and ($reg != 0x41);
+  return if ($chip == 1) and ($reg != 0xA1);
+
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
   return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xf0) == 0x20;
+
   return (8);
 }
 
