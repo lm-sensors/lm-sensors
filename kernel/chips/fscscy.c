@@ -129,22 +129,22 @@ SENSORS_INSMOD_1(fscscy);
 /* sensor 0 */
 #define FSCSCY_REG_TEMP0_ACT	0x64
 #define FSCSCY_REG_TEMP0_STATE	0x71
-#define FSCSCY_REG_TEMP0_MAX	0x76
+#define FSCSCY_REG_TEMP0_LIM	0x76
 
 /* sensor 1 */
 #define FSCSCY_REG_TEMP1_ACT	0xD0
 #define FSCSCY_REG_TEMP1_STATE	0xD1
-#define FSCSCY_REG_TEMP1_MAX	0xD6
+#define FSCSCY_REG_TEMP1_LIM	0xD6
 
 /* sensor 2 */
 #define FSCSCY_REG_TEMP2_ACT	0x32
 #define FSCSCY_REG_TEMP2_STATE	0x81
-#define FSCSCY_REG_TEMP2_MAX	0x86
+#define FSCSCY_REG_TEMP2_LIM	0x86
 
 /* sensor3 */
 #define FSCSCY_REG_TEMP3_ACT	0x35
 #define FSCSCY_REG_TEMP3_STATE	0x91
-#define FSCSCY_REG_TEMP3_MAX	0x96
+#define FSCSCY_REG_TEMP3_LIM	0x96
 
 /* PCI Load */
 #define FSCSCY_REG_PCILOAD	0x1a
@@ -185,8 +185,10 @@ struct fscscy_data {
 	u8  watchdog[3];     /* watchdog */
 	u8  volt[3];         /* 12, 5, battery current */ 
 	u8  temp_act[4];     /* temperature */
-	u8  temp_status[4];  /* status of sensor */
-	u8  temp_max[4];     /* maximum of sensor */
+	u8  temp_status[4];  /* status of temp. sensor */
+	u8  temp_lim[4];     /* limit temperature of temp. sensor */
+	u8  temp_min[4];     /* minimum of temp. sensor, this is just calculated by the module */
+	u8  temp_max[4];     /* maximum of temp. sensor, this is just calculsted by the module */
 	u8  fan_act[6];      /* fans revolutions per second */
 	u8  fan_status[6];   /* fan status */
 	u8  fan_min[6];      /* fan min value for rps */
@@ -460,6 +462,12 @@ void fscscy_init_client(struct i2c_client *client)
 	data->revision =  fscscy_read_value(client,FSCSCY_REG_REVISION);
 	/* setup missing fan2_min value */
 	/* data->fan_min[2] = 0xff; */
+
+        /* Initialize min/max values from chip */
+        data->temp_min[0] = data->temp_max[0] = fscscy_read_value(client, FSCSCY_REG_TEMP0_ACT);
+        data->temp_min[1] = data->temp_max[1] = fscscy_read_value(client, FSCSCY_REG_TEMP1_ACT);
+        data->temp_min[2] = data->temp_max[2] = fscscy_read_value(client, FSCSCY_REG_TEMP2_ACT);
+        data->temp_min[3] = data->temp_max[3] = fscscy_read_value(client, FSCSCY_REG_TEMP3_ACT);
 }
 
 void fscscy_update_client(struct i2c_client *client)
@@ -475,17 +483,26 @@ void fscscy_update_client(struct i2c_client *client)
 		printk("Starting fscscy update\n");
 #endif
 		data->temp_act[0] = fscscy_read_value(client, FSCSCY_REG_TEMP0_ACT);
+		  if (data->temp_min[0] > data->temp_act[0]) data->temp_min[0] = data->temp_act[0];
+		  if (data->temp_max[0] < data->temp_act[0]) data->temp_max[0] = data->temp_act[0];
 		data->temp_act[1] = fscscy_read_value(client, FSCSCY_REG_TEMP1_ACT);
+		  if (data->temp_min[1] > data->temp_act[1]) data->temp_min[1] = data->temp_act[1];
+		  if (data->temp_max[1] < data->temp_act[1]) data->temp_max[1] = data->temp_act[1];
 		data->temp_act[2] = fscscy_read_value(client, FSCSCY_REG_TEMP2_ACT);
+		  if (data->temp_min[2] > data->temp_act[2]) data->temp_min[2] = data->temp_act[2];
+		  if (data->temp_max[2] < data->temp_act[2]) data->temp_max[2] = data->temp_act[2];
 		data->temp_act[3] = fscscy_read_value(client, FSCSCY_REG_TEMP3_ACT);
+		  if (data->temp_min[3] > data->temp_act[3]) data->temp_min[3] = data->temp_act[3];
+		  if (data->temp_max[3] < data->temp_act[3]) data->temp_max[3] = data->temp_act[3];
+
 		data->temp_status[0] = fscscy_read_value(client, FSCSCY_REG_TEMP0_STATE);
 		data->temp_status[1] = fscscy_read_value(client, FSCSCY_REG_TEMP1_STATE);
 		data->temp_status[2] = fscscy_read_value(client, FSCSCY_REG_TEMP2_STATE);
 		data->temp_status[3] = fscscy_read_value(client, FSCSCY_REG_TEMP3_STATE);
-		data->temp_max[0] = fscscy_read_value(client, FSCSCY_REG_TEMP0_MAX);
-		data->temp_max[1] = fscscy_read_value(client, FSCSCY_REG_TEMP1_MAX);
-		data->temp_max[2] = fscscy_read_value(client, FSCSCY_REG_TEMP2_MAX);
-		data->temp_max[3] = fscscy_read_value(client, FSCSCY_REG_TEMP3_MAX);
+		data->temp_lim[0] = fscscy_read_value(client, FSCSCY_REG_TEMP0_LIM);
+		data->temp_lim[1] = fscscy_read_value(client, FSCSCY_REG_TEMP1_LIM);
+		data->temp_lim[2] = fscscy_read_value(client, FSCSCY_REG_TEMP2_LIM);
+		data->temp_lim[3] = fscscy_read_value(client, FSCSCY_REG_TEMP3_LIM);
 
 		data->volt[0] = fscscy_read_value(client, FSCSCY_REG_VOLT_12);
 		data->volt[1] = fscscy_read_value(client, FSCSCY_REG_VOLT_5);
@@ -602,22 +619,30 @@ void fscscy_temp(struct i2c_client *client, int operation, int ctl_name,
 			case FSCSCY_SYSCTL_TEMP0:
 				results[0] = data->temp_status[0] & 0x03;
 				results[1] = TEMP_FROM_REG(data->temp_act[0]);
-				results[2] = TEMP_FROM_REG(data->temp_max[0]);
+				results[2] = TEMP_FROM_REG(data->temp_lim[0]);
+				results[3] = TEMP_FROM_REG(data->temp_min[0]);
+				results[4] = TEMP_FROM_REG(data->temp_max[0]);
 				break;
 			case FSCSCY_SYSCTL_TEMP1:
 				results[0] = data->temp_status[1] & 0x03;
 				results[1] = TEMP_FROM_REG(data->temp_act[1]);
-				results[2] = TEMP_FROM_REG(data->temp_max[1]);
+				results[2] = TEMP_FROM_REG(data->temp_lim[1]);
+				results[3] = TEMP_FROM_REG(data->temp_min[1]);
+				results[4] = TEMP_FROM_REG(data->temp_max[1]);
 				break;
 			case FSCSCY_SYSCTL_TEMP2:
 				results[0] = data->temp_status[2] & 0x03;
 				results[1] = TEMP_FROM_REG(data->temp_act[2]);
-				results[2] = TEMP_FROM_REG(data->temp_max[2]);
+				results[2] = TEMP_FROM_REG(data->temp_lim[2]);
+				results[3] = TEMP_FROM_REG(data->temp_min[2]);
+				results[4] = TEMP_FROM_REG(data->temp_max[2]);
 				break;
 			case FSCSCY_SYSCTL_TEMP3:
 				results[0] = data->temp_status[3] & 0x03;
 				results[1] = TEMP_FROM_REG(data->temp_act[3]);
-				results[2] = TEMP_FROM_REG(data->temp_max[3]);
+				results[2] = TEMP_FROM_REG(data->temp_lim[3]);
+				results[3] = TEMP_FROM_REG(data->temp_min[3]);
+				results[4] = TEMP_FROM_REG(data->temp_max[3]);
 				break;
 			default:
 				printk("fscscy: ctl_name %d not supported\n",
@@ -625,7 +650,7 @@ void fscscy_temp(struct i2c_client *client, int operation, int ctl_name,
 				*nrels_mag = 0;
 				return;
 		}
-		*nrels_mag = 3;
+		*nrels_mag = 5;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if(*nrels_mag >= 1) {
 			switch(ctl_name) {
