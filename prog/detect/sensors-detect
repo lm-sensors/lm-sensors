@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 #
-#    detect.pl - Detect PCI bus and chips
+#    sensors-detect - Detect PCI bus and chips
 #    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
 #
 #    This program is free software; you can redistribute it and/or modify

@@ -1,9 +1,17 @@
 Kernel driver `lm75.o'
+=====================
 
-Prefixes: lm75 (LM75, I2C)
+Status: Complete and well-tested
 
-This driver implements support for the National Semiconductor LM75, a
-`Digital Temperature Sensor and Thermal Watchdog with Two-Wire Interface'.
+Supported chips: 
+  * National Semiconductors LM75
+    Prefix: `lm75'
+    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Datasheet: Publicly available at the National Semiconductors website
+
+
+Description
+-----------
 
 The LM75 implements one temperature sensor. Limits can be set through the
 Overtemperature Shutdown register and Hysteris register. Each value can be 
@@ -11,19 +19,27 @@ set and read to half-degree accuracy.
 An alarm is issued (usually to a connected LM78) when the temperature
 gets higher then the Overtemperature Shutdown value; it stays on until
 the temperature falls below the Hysteris value.
-All temperatures are in degrees Celcius.
+All temperatures are in degrees Celcius, and are guaranteed within a 
+range of -55 to +125 degrees.
 
 The LM75 only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
 
+The LM75 is usually used in combination with LM78-like chips, to measure
+the temperature of the processor(s).
 
-/proc and sysctl interface files:
-  * temp (LM75_SYSCTL_TEMP)
-    Overtemperature Shutdown Value (RW,1), Hysteris Value (RW,1) and Current 
-    Temperature (R,1).
 
-configuration file features:
-               NAME        LABEL CLASS     COMPUTE CLASS   RW
-               temp:                                       R 
-          temp_hyst:              temp              temp   RW
-          temp_over:              temp              temp   RW
+Configuration file features
+---------------------------
+
+          LABEL     LABEL CLASS   COMPUTE CLASS ACCESS MAGNITUDE
+           temp            NONE            NONE      R     1
+      temp_hyst            temp            temp      RW    1
+      temp_over            temp            temp      RW    1
+
+
+          LABEL                           FEATURE SYMBOL     SYSCTL FILE:OFFSET
+           temp                        SENSORS_LM75_TEMP            temp:3
+      temp_hyst                   SENSORS_LM75_TEMP_HYST            temp:2
+      temp_over                   SENSORS_LM75_TEMP_OVER            temp:1
+

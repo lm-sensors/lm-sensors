@@ -1,5 +1,24 @@
 #!/usr/bin/perl
 
+#
+#    doc-features.pl - Generate module/library documentation
+#    Copyright (c) 1999  Frodo Looijaard <frodol@dds.nl>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+
 use strict;
 
 # Features is a hash of references (indexed by SENSORS_*_PREFIX names) to 
@@ -196,13 +215,13 @@ sub scan_kernel_module
 # $_[0]: Base directory
 sub scan_all
 {
-  my ($prefix) = @_;
+  my ($prefix,@modules) = @_;
   my ($filename);
   scan_chips_h $prefix . "/lib/chips.h";
   scan_chips_c_1 $prefix . "/lib/chips.c";
   scan_chips_c_2 $prefix . "/lib/chips.c";
-  foreach $filename (glob ($prefix ."/kernel/chips/*.c")) { 
-    scan_kernel_module $filename 
+  foreach $filename (@modules) { 
+    scan_kernel_module "$prefix/kernel/chips/$filename"
   }
 }
 
@@ -244,11 +263,42 @@ sub initialize
   $feature_name{SENSORS_NO_MAPPING} = "NONE";
 }
 
+sub help_message
+{
+  print STDERR "Syntax: doc-features PATH MODULES...\n";
+  print STDERR "PATH is the path to the base of the lm_sensors tree.\n";
+  print STDERR "MODULES are the modules that need to be examined. If none ".
+               "are specified,\n".
+               "all modules are examined. Modules are looked for in ".
+               "PATH/kernel/chips\n.";
+}
+
+# @_: @ARGV
+# Returns ($base_dir,@modules)
+sub scan_arguments 
+{
+  my ($base_dir,@modules);
+  if (@_ < 1 or @_[0] =~ /^-/) {
+    help_message;
+    exit 0;
+  }
+  $base_dir = @_[0];
+  if (@_ == 1) {
+    @modules = map { substr $_, length "$base_dir/kernel/chips/" }
+                   glob "$base_dir/kernel/chips/*.c";
+  } else {
+    splice(@_,0,1);
+    @modules = map { $_ !~ /\./ ? $_.".c" : $_ } @_; 
+  }
+  return ($base_dir,@modules)
+}
 
 initialize;
-scan_all "../..";
+scan_all scan_arguments @ARGV;
 my $el;
 foreach $el (keys %features) {
-  output_data $el;
-  print "\n\n";
+  if (exists $sysctls{$features{$el}->{features}->[0]->{sysctl}}) {
+    output_data $el;
+    print "\n\n";
+  }
 }
