@@ -8,7 +8,9 @@ Quickstart:
     compile your own from a 'vanilla' tree (get one from
     ftp://ftp.kernel/org/pub/linux/kernel/).
   * Install the i2c package. This won't do any harm, even if use a very 
-    recent 2.3 or 2.4 kernel, though it may be unnecessary
+    recent 2.3 or 2.4 kernel, though it may be unnecessary. At the very
+    least, make sure you have i2c-algo-bit either compiled into your
+    kernel or available as a module somewhere.
   * Do a `make' followed by a `make install'. The warnings about .d
     files at the start are harmless.
   * Add the line 
