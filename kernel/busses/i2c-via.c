@@ -31,6 +31,7 @@
 
 #include <linux/i2c.h>
 #include <linux/i2c-algo-bit.h>
+#include "version.h"
 
 #include <linux/init.h>
 
@@ -55,9 +56,9 @@
 #define IOTEXT		"via-i2c"
 
 /* ----- global defines -----------------------------------------------	*/
-#define DEB(x) x		/* silicon revision, io addresses               */
-#define DEB2(x) x		/* line status                                  */
-#define DEBE(x)			/*                                              */
+#define DEB(x) x		/* silicon revision, io addresses       */
+#define DEB2(x) x		/* line status                          */
+#define DEBE(x)			/*                                      */
 
 /* ----- local functions ----------------------------------------------	*/
 
@@ -139,7 +140,7 @@ static int find_via(void)
 	s_bridge = pci_find_device(VENDOR, DEVICE, NULL);
 
 	if (!s_bridge) {
-		printk("vt82c586b not found\n");
+		printk("i2c-via.o: vt82c586b not found\n");
 		return -ENODEV;
 	}
 
@@ -176,13 +177,14 @@ extern
 #endif
 int __init i2c_via_init(void)
 {
+	printk("i2c-via.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	if (find_via() < 0) {
-		printk("Error while reading PCI configuration\n");
+		printk("i2c-via.o: Error while reading PCI configuration\n");
 		return -ENODEV;
 	}
 
 	if (check_region(I2C_DIR, IOSPACE) < 0) {
-		printk("IO 0x%x-0x%x already in use\n",
+		printk("i2c-via.o: IO 0x%x-0x%x already in use\n",
 		       I2C_DIR, I2C_DIR + IOSPACE);
 		return -EBUSY;
 	} else {
