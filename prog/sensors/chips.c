@@ -4123,9 +4123,9 @@ void print_pc87366(const sensors_chip_name *name)
         print_label(label, 10);
         print_temp_info(cur, max, min, MINMAX, 0, 0);
         if (i<3 && status&PC87365_STATUS_TEMP_OPEN)
-          printf("OPEN");
+          printf(" OPEN");
         else if (status&(PC87365_STATUS_TEMP_MIN|PC87365_STATUS_TEMP_MAX))
-          printf("ALARM");
+          printf(" ALARM");
         printf("\n");
       }
     } else
@@ -4138,7 +4138,7 @@ void print_pc87366(const sensors_chip_name *name)
         print_label(label, 10);
         print_temp_info(cur, 0, 0, SINGLE, 0, 0);
         if (status&PC87365_STATUS_TEMP_CRIT)
-          printf("ALARM");
+          printf(" ALARM");
         printf("\n");
       }
     } else
