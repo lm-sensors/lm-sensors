@@ -24,6 +24,7 @@ KERNELCHIPSDIR := $(MODULE_DIR)
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 # These targets are NOT included in 'mkpatch' ...
+KERNELCHIPSTARGETS :=
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smbus-arp.o
 
 
