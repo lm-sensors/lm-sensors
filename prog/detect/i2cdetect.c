@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 {
   char *end;
   int i,j,res,i2cbus,file;
+  int e1, e2;
   char filename1[20];
   char filename2[20];
   char *filename;
@@ -71,9 +72,25 @@ int main(int argc, char *argv[])
   sprintf(filename1,"/dev/i2c-%d",i2cbus);
   sprintf(filename2,"/dev/i2c%d",i2cbus);
   if ((file = open(filename1,O_RDWR)) < 0) {
+    e1 = errno;
     if ((file = open(filename2,O_RDWR)) < 0) {
-      fprintf(stderr,"Error: Could not open file `%s' or `%s': %s\n",filename1,
-              filename2,strerror(errno));
+      e2 = errno;
+      if(e1 == ENOENT && e2 == ENOENT) {
+        fprintf(stderr,"Error: Could not open file `%s' or `%s': %s\n",
+                   filename1,filename2,strerror(ENOENT));
+      }
+      if (e1 != ENOENT) {
+        fprintf(stderr,"Error: Could not open file `%s' : %s\n",
+                   filename1,strerror(e1));
+        if(e1 == EACCES)
+          fprintf(stderr,"Run as root?\n");
+      }
+      if (e2 != ENOENT) {
+        fprintf(stderr,"Error: Could not open file `%s' : %s\n",
+                   filename2,strerror(e2));
+        if(e2 == EACCES)
+          fprintf(stderr,"Run as root?\n");
+      }
       exit(1);
     } else {
        filename = filename2;
