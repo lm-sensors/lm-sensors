@@ -53,15 +53,9 @@ static const char *version_str = "2.00 29/2/2000 Fons Rademakers";
 
 #include <linux/module.h>
 #include <linux/slab.h>
-#include <linux/proc_fs.h>
-#include <linux/ioport.h>
-#include <linux/sysctl.h>
-#include <linux/types.h>
 #include <linux/i2c.h>
 #include <linux/i2c-proc.h>
 #include <linux/init.h>
-#include <asm/errno.h>
-#include <asm/io.h>
 #include "version.h"
 
 MODULE_LICENSE("GPL");

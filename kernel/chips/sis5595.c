@@ -47,15 +47,11 @@
 
 #include <linux/module.h>
 #include <linux/slab.h>
-#include <linux/proc_fs.h>
 #include <linux/ioport.h>
-#include <linux/sysctl.h>
 #include <linux/pci.h>
-#include <linux/types.h>
 #include <linux/i2c.h>
 #include <linux/i2c-proc.h>
 #include <linux/init.h>
-#include <asm/errno.h>
 #include <asm/io.h>
 #include "version.h"
 
