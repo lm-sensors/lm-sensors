@@ -15,6 +15,10 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+# The round robin database (RRD) development headers and libraries are
+# REQUIRED. Get this package from:
+#   http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool
+
 # Note that MODULE_DIR (the directory in which this file resides) is a
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
@@ -37,13 +41,13 @@ $(PROGSENSORDTARGETS): $(PROGSENSORDSOURCES:.c=.ro) lib/$(LIBSHBASENAME)
 	$(CC) -o $@ $(PROGSENSORDSOURCES:.c=.ro) -Llib -lsensors -lrrd
 
 all-prog-sensord: $(PROGSENSORDTARGETS)
-# all :: all-prog-sensord
+all :: all-prog-sensord
 
 install-prog-sensord: all-prog-sensord
 	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGSENSORDMAN1DIR)
 	$(INSTALL) -o root -g root -m 755 $(PROGSENSORDTARGETS) $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -o $(MANOWN) -g $(MANGRP) -m 644 $(PROGSENSORDMAN1FILES) $(DESTDIR)$(PROGSENSORDMAN1DIR)
-# install :: install-prog-sensord
+install :: install-prog-sensord
 
 clean-prog-sensord:
 	$(RM) $(PROGSENSORDDIR)/*.rd $(PROGSENSORDDIR)/*.ro 

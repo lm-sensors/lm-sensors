@@ -122,6 +122,9 @@ MANGRP := root
 
 MACHINE := $(shell uname -m)
 
+# Extra non-default programs to build; e.g., sensord
+# PROG_EXTRA := sensord
+
 ##################################################
 # Below this, nothing should need to be changed. #
 ##################################################
@@ -142,7 +145,7 @@ SRCDIRS := mkpatch
 ifeq ($(COMPILE_KERNEL),1)
 SRCDIRS += kernel kernel/busses kernel/chips kernel/include
 endif
-SRCDIRS += lib prog/sensors prog/sensord prog/dump prog/detect etc
+SRCDIRS += lib prog/sensors prog/dump prog/detect ${PROG_EXTRA:%=prog/%} etc
 
 # Some often-used commands with default options
 MKDIR := mkdir -p
