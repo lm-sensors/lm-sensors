@@ -743,15 +743,17 @@ sub add_i2c_to_chips_detected
   $new_misdetected_ref = $chips_detected[$i]->{misdetected};
 
   # Find out whether our new entry should go into the detected or the
-  # misdetected list. We only compare main i2c_addr here; so we can have
-  # the unlikely case that we replace a subsidiary i2c_addr with a higher
-  # confidence value. Too bad.
+  # misdetected list. We compare all i2c addresses; if at least one matches,
+  # but our conf value is lower, we assume this is a misdetect.
+  @hash_addrs = ($datahash->{i2c_addr});
+  push @hash_addrs, @{$datahash->{i2c_sub_addrs}}
+       if exists $datahash->{i2c_sub_addrs};
   $put_in_detected = 1;
   FIND_LOOP:
   foreach $main_entry (@chips_detected) {
     foreach $detected_entry (@{$main_entry->{detected}}) {
       if ($detected_entry->{i2c_devnr} == $datahash->{i2c_devnr} and
-          $detected_entry->{i2c_addr} == $datahash->{i2c_addr}) {
+          any_list_match \@entry_addrs, \@hash_addrs) {
         if ($detected_entry->{conf} >= $datahash->{conf}) {
           $put_in_detected = 0;
         }
@@ -890,7 +892,7 @@ sub add_isa_to_chips_detected
     }
   }
 
-  # Nor found? OK, put it in the detected list
+  # Not found? OK, put it in the detected list
   push @$new_detected_ref, $datahash;
 }
 
@@ -898,6 +900,7 @@ sub add_isa_to_chips_detected
 # $_[1]: The name of the adapter, as appearing in /proc/bus/i2c
 # $_[2]: The name of the algorithm, as appearing in /proc/bus/i2c
 # $_[3]: The driver of the adapter
+# @_[4..]: Addresses not to scan
 sub scan_adapter
 {
   my ( $adapter_nr,$adapter_name,$algorithm_name,$adapter_driver, 
@@ -934,7 +937,7 @@ sub scan_adapter
             print ", other addresses:";
             @chips = sort @chips;
             foreach $other_addr (sort @chips) {
-              printf(" %02x",$other_addr);
+              printf(" 0x%02x",$other_addr);
             }
           }
           printf "\n";
