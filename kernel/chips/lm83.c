@@ -1,7 +1,7 @@
 /*
  * lm83.c - Part of lm_sensors, Linux kernel modules for hardware
  *          monitoring
- * Copyright (c) 2003  Jean Delvare <khali@linux-fr.org>
+ * Copyright (C) 2003  Jean Delvare <khali@linux-fr.org>
  *
  * Heavily inspired from the lm78, lm75 and adm1021 drivers. The LM83 is
  * a sensor chip made by National Semiconductor. It reports up to four
@@ -119,6 +119,7 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	short flags, int kind);
 static void lm83_init_client(struct i2c_client *client);
 static int lm83_detach_client(struct i2c_client *client);
+static void lm83_update_client(struct i2c_client *client);
 static void lm83_temp(struct i2c_client *client, int operation, int
 	ctl_name, int *nrels_mag, long *results);
 static void lm83_tcrit(struct i2c_client *client, int operation, int
@@ -136,7 +137,7 @@ static struct i2c_driver lm83_driver = {
 	.id             = I2C_DRIVERID_LM83,
 	.flags          = I2C_DF_NOTIFY,
 	.attach_adapter = lm83_attach_adapter,
-	.detach_client  = lm83_detach_client
+	.detach_client  = lm83_detach_client,
 };
 
 /*
@@ -221,7 +222,6 @@ static int lm83_attach_adapter(struct i2c_adapter *adapter)
  * The following function does more than just detection. If detection
  * succeeds, it also registers the new chip.
  */
-
 static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	short flags, int kind)
 {
