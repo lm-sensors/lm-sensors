@@ -74,7 +74,7 @@ s32 smbus_access (struct i2c_adapter * adapter, u8 addr, char read_write,
                   u8 command, int size, union smbus_data * data)
 {
   int res;
-  if (adapter->id & ALGO_SMBUS) {
+  if ((adapter->id & ALGO_MASK) == ALGO_SMBUS) {
 #ifdef SPINLOCK
     spin_lock_irqsave(&adapter->lock,adapter->lockflags);
 #else
@@ -87,7 +87,7 @@ s32 smbus_access (struct i2c_adapter * adapter, u8 addr, char read_write,
 #else
     up(&adapter->lock);
 #endif
-  } else
+  } else 
     res = smbus_access_i2c(adapter,addr,read_write,command,size,data);
   return res;
 }
@@ -100,7 +100,10 @@ s32 smbus_access (struct i2c_adapter * adapter, u8 addr, char read_write,
 s32 smbus_access_i2c(struct i2c_adapter * adapter, u8 addr, char read_write,
                      u8 command, int size, union smbus_data * data)
 {
-  /* So we need to generate a series of msgs */
+  /* For now */
+  return -1;
+
+  /* So we need to generate a series of msgs 
   struct i2c_msg msg[2];
   char msgbuf0[2];
   char msgbuf1[32];
@@ -108,7 +111,7 @@ s32 smbus_access_i2c(struct i2c_adapter * adapter, u8 addr, char read_write,
   msg[0].flags = read_write;
   msg[0].len = 0;
   msg[0].buf = msgbuf0;
-  /* WHATEVER */
+  WHATEVER */
 }
 
 /* Algorithm master_xfer call-back implementation. Can't do that... */
