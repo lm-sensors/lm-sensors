@@ -15,10 +15,14 @@ ask CVS about it:
 
 2.5.3 (2000????)
   File useful_addresses.html: update
+  Library: Add lm87 support
   Module i2c-i801: support Intel 82801BA (815E chipset)
   Module i2c-i801: add i2c block write support, fix smbus block bugs
                    (requires i2c 2.5.3 package)
   Module i2c-i810: support Intel 82815
+  Module lm87: new
+  Module sensors: Fix for kernel 2.4.0-test8
+                  (remove copy_to_user_ret and put_user_ret)
   Module w83781d: limit fan divisors to 8 max. for as99127f
   Program i2cdump: Add smbus block read support
   Programs i2cdetect, i2cdump: Improve error reporting
@@ -26,7 +30,7 @@ ask CVS about it:
   Program sensors-detect: detect Intel 82801BA (815E chipset)
   Program sensors-detect: detect Intel 82815
   Program sensors-detect: detect ITE IT8705F / IT8712F (no driver yet)
-  Program sensors-detect: detect National LM87 (no driver yet)
+  Program sensors-detect: detect National LM87
   Program sensors-detect: detect nVidia devices supported by i2c-riva.o
   Program sensors-detect: Improve error reporting
 
