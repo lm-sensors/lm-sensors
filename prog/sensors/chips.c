@@ -3885,8 +3885,8 @@ void print_vt1211(const sensors_chip_name *name)
 void print_smsc47m1(const sensors_chip_name *name)
 {
   char *label = NULL;
-  double cur,min,fdiv;
-  int alarms,valid;
+  double cur, min, div;
+  int alarms, valid, i;
 
   if (!sensors_get_feature(*name,SENSORS_SMSC47M1_ALARMS,&cur)) 
     alarms = cur + 0.5;
@@ -3895,32 +3895,23 @@ void print_smsc47m1(const sensors_chip_name *name)
     alarms = 0;
   }
 
-  if (!sensors_get_label_and_valid(*name,SENSORS_SMSC47M1_FAN1,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_SMSC47M1_FAN1,&cur) &&
-      !sensors_get_feature(*name,SENSORS_SMSC47M1_FAN1_DIV,&fdiv) &&
-      !sensors_get_feature(*name,SENSORS_SMSC47M1_FAN1_MIN,&min)) {
-    if (valid) {
-    print_label(label,10);
-    printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
-           cur,min,fdiv, alarms&SMSC47M1_ALARM_FAN1?"ALARM":"");
+  for (i=0; i<2; i++) { /* 2 fans */
+    if (!sensors_get_label_and_valid(*name, SENSORS_SMSC47M1_FAN1+i, &label, &valid)
+     && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1+i, &cur)
+     && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1_DIV+i, &div)
+     && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1_MIN+i, &min)) {
+      if (valid) {
+        print_label(label, 10);
+        printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+               cur, min, div, alarms&(SMSC47M1_ALARM_FAN1<<i) ?
+               "ALARM" : "");
+      }
     }
-  } else
-    printf("ERROR: Can't get FAN1 data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name,SENSORS_SMSC47M1_FAN2,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_SMSC47M1_FAN2,&cur) &&
-      !sensors_get_feature(*name,SENSORS_SMSC47M1_FAN2_DIV,&fdiv) &&
-      !sensors_get_feature(*name,SENSORS_SMSC47M1_FAN2_MIN,&min)) {
-    if (valid) {
-    print_label(label,10);
-    printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
-           cur,min,fdiv, alarms&SMSC47M1_ALARM_FAN2?"ALARM":"");
-    }
-  } else
-    printf("ERROR: Can't get FAN2 data!\n");
-  free_the_label(&label);
-
+    /* In Linux 2.6, the original chip configuration is respected, so channels
+       may be missing without it being considered an error; thus we don't
+       print any error if this happens. */
+    free_the_label(&label);
+  }
 }
 
 void print_pc87360(const sensors_chip_name *name)

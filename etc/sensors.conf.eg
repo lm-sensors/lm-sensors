@@ -1910,12 +1910,16 @@ chip "bmc-*"
 # label temp1 "Ambient Temp"
 
 
-
-#
 chip "smsc47m1-*"
 
-    set fan1_min 3000
-    set fan2_min 3000
+# SMSC LPC47M10x, LPC47M13x, LPC47M14x and LPC47B27x chips
+
+# We don't set the fan mins by default anymore because they may not exist
+# when using the Linux 2.6 driver (since we respect the original chip
+# configuration).
+#    set fan1_min 3000
+#    set fan2_min 3000
+
 
 #
 # This example was tested vs. Asus P4S333
