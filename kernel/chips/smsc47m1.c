@@ -81,11 +81,12 @@ superio_exit(void)
 }
 
 /*
- * SMSC LPC47M10x (device id 0x59), LPC47M14x (device id 0x5F) have fan
- * control. The 47M15x and 47M192 chips "with hardware monitoring block"
+ * SMSC LPC47M10x (device id 0x59), LPC47M14x (device id 0x5F) and
+ * LPC47B27x (device id 0x51) have fan control.
+ * The 47M15x and 47M192 chips "with hardware monitoring block"
  * can do much more besides (device id 0x60).
  */
-#define SMSC_DEVID_MATCH(id) ((id) == 0x59 || (id) == 0x5F)
+#define SMSC_DEVID_MATCH(id) ((id) == 0x51 || (id) == 0x59 || (id) == 0x5F)
 
 #define SMSC_ACT_REG 0x20
 #define SMSC_BASE_REG 0x60
