@@ -41,10 +41,6 @@
 #include "version.h"
 #include <linux/init.h>
 
-#ifdef MODULE_LICENSE
-MODULE_LICENSE("GPL");
-#endif
-
 #ifndef PCI_DEVICE_ID_VIA_82C596_3
 #define PCI_DEVICE_ID_VIA_82C596_3 	0x3050
 #endif
@@ -206,7 +202,7 @@ int vt596_setup(void)
 /* Determine the address of the SMBus areas */
 	smb_cf_hstcfg = num->hstcfg;
 	if (force_addr) {
-		vt596_smba = force_addr;
+		vt596_smba = force_addr & 0xfff0;
 		force = 0;
 	} else {
 		if ((pci_read_config_word(VT596_dev, num->base, &vt596_smba))
@@ -223,11 +219,16 @@ int vt596_setup(void)
 			        return(-ENODEV);
 			}
 		}
+		vt596_smba &= 0xfff0;
+		if(vt596_smba == 0) {
+			printk(KERN_ERR "i2c-viapro.o: SMBus base address"
+			   "uninitialized - upgrade BIOS or use force_addr=0xaddr\n");
+			return -ENODEV;
+		}
 	}
-	vt596_smba &= 0xfff0;
 
 	if (check_region(vt596_smba, 8)) {
-		printk("i2c-viapro.o: SMB region 0x%x already in use!\n",
+		printk("i2c-viapro.o: SMBus region 0x%x already in use!\n",
 		        vt596_smba);
 		return(-ENODEV);
 	}
@@ -251,17 +252,17 @@ int vt596_setup(void)
 			pci_write_config_byte(VT596_dev, SMBHSTCFG,
 					      temp | 1);
 			printk
-			    ("i2c-viapro.o: WARNING: SMBus interface has been FORCEFULLY "
-			     "ENABLED!\n");
+			    ("i2c-viapro.o: enabling SMBus device\n");
 		} else {
 			printk
-			    ("SMBUS: Error: Host SMBus controller not enabled!\n");
+			    ("SMBUS: Error: Host SMBus controller not enabled! - "
+			     "upgrade BIOS or use force=1\n");
 			return(-ENODEV);
 		}
 	}
 
 	/* Everything is happy, let's grab the memory and set things up. */
-	request_region(vt596_smba, 8, "via2-smbus");
+	request_region(vt596_smba, 8, "viapro-smbus");
 
 #ifdef DEBUG
 	if ((temp & 0x0E) == 8)
@@ -551,6 +552,9 @@ MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("vt82c596 SMBus driver");
 
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 int init_module(void)
 {
