@@ -231,7 +231,6 @@ static int __devinit voodoo3_probe(struct pci_dev *dev, const struct pci_device_
 {
 	int retval;
 
-	printk("voodoo3: in probe\n");
 	config_v3(dev);
 	retval = i2c_bit_add_bus(&voodoo3_i2c_adapter);
 	if(retval)
