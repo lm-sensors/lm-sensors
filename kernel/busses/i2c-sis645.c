@@ -25,6 +25,9 @@
 
     The register definitions are based on the SiS630.
     The method for *finding* the registers is based on trial and error.
+
+    A history of changes to this file is available by anonymous CVS:
+    http://www2.lm-sensors.nu/~lm78/download.html
 */
 
 /*
@@ -53,8 +56,25 @@ MODULE_LICENSE("GPL");
 #endif
 
 /* PCI identifiers */
+
+/* SiS645 north bridge */
 #ifndef PCI_DEVICE_ID_SI_645
 #define PCI_DEVICE_ID_SI_645 0x0645
+#endif
+
+/* SiS645DX north bridge */
+#ifndef PCI_DEVICE_ID_SI_646
+#define PCI_DEVICE_ID_SI_646 0x0646
+#endif
+
+/* SiS735 combo chipset */
+#ifndef PCI_DEVICE_ID_SI_735
+#define PCI_DEVICE_ID_SI_735 0x0735
+#endif
+
+/* SiS961 south bridge */
+#ifndef PCI_DEVICE_ID_SI_961
+#define PCI_DEVICE_ID_SI_961 0x0961
 #endif
 
 #define PCI_DEVICE_ID_SI_SMBUS 0x16
@@ -237,15 +257,29 @@ static int sis645_setup(void)
 		return -ENODEV;
 	}
 
-	if (NULL == pci_find_device(PCI_VENDOR_ID_SI, 
-			PCI_DEVICE_ID_SI_645, NULL)) {
-		printk("i2c-sis645.o: Error: Can't find SiS645 host bridge!\n");
-		return -ENODEV;
+	if (SIS645_ISA_dev = pci_find_device(PCI_VENDOR_ID_SI,
+			PCI_DEVICE_ID_SI_961, NULL)) {
+		printk("i2c-sis645.o: Found SiS961 south bridge.\n");
 	}
-	
-	if (!(SIS645_ISA_dev = pci_find_device(PCI_VENDOR_ID_SI,
-			PCI_DEVICE_ID_SI_503, NULL))) {
-		printk("i2c-sis645.o: Error: Can't find SiS645 ISA bridge!\n");
+
+	else if (SIS645_ISA_dev = pci_find_device(PCI_VENDOR_ID_SI,
+			PCI_DEVICE_ID_SI_503, NULL)) {
+		printk("i2c-sis645.o: Found SiS south bridge in compatability mode(?)\n");
+
+		/* look for known compatible north bridges */
+		if ((NULL == pci_find_device(PCI_VENDOR_ID_SI, 
+				PCI_DEVICE_ID_SI_645, NULL))
+			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
+				PCI_DEVICE_ID_SI_646, NULL))
+			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
+				PCI_DEVICE_ID_SI_735, NULL))) {
+			printk("i2c-sis645.o: Error: Can't find suitable host bridge!\n");
+			return -ENODEV;
+		}
+	}
+
+	else {
+		printk("i2c-sis645.o: Error: Can't find suitable south bridge!\n");
 		return -ENODEV;
 	}
 
@@ -258,6 +292,7 @@ static int sis645_setup(void)
 #ifndef CONFIG_HOTPLUG
 		printk("i2c-sis645.o: "
 			"Requires kernel >= 2.4 with CONFIG_HOTPLUG, sorry!\n");
+		return -ENODEV;
 
 #else /* CONFIG_HOTPLUG */
 		if (ret = sis645_enable_smbus(SIS645_ISA_dev)) {
