@@ -497,8 +497,11 @@ chip "via686a-*"
 # says to what your BIOS says when you boot up), please let us know so we can
 # improve.
 
-# On the Tyan S1598, the 2.5V sensor reads 0 and is not displayed in the BIOS, 
-# so you may want to ignore it here.
+# On the Tyan S1598, the 2.5V sensor reads 0 and is not displayed in the BIOS.
+# Also, Linas Vepstas <linas@linas.org> reports that this sensor shows
+# nothing of interest on the Abit KA7 (Athalon), and is also not displayed 
+# in the BIOS.  So, if you have either of these boards may want to uncomment 
+# the 'ignore 2.5V' line below.
 
     label "2.0V" "CPU core"
     label "2.5V" "+2.5V"
@@ -510,9 +513,17 @@ chip "via686a-*"
     label fan1  "CPU Fan"
     label fan2  "P/S Fan"
 
+# VIA suggests that temp3 is an internal temp sensor for the 686a.  However,
+# on the Tyan S1598 as well as the Abit KA7 (Athalon), the absolute values
+# of the readings from that sensor are not valid.  The readings do seem to 
+# correlate with temp changes, but the conversion factor may be quite 
+# different from temp1 & temp2 (as noted above, VIA has not provided
+# conversion info).  So, you may wish to 'ignore temp3'. 
+
     label temp1 "SYS Temp"
     label temp2 "CPU Temp"
     label temp3 "SBr Temp"
+    #ignore temp3
 
 # Set your CPU core limits here.  For the other voltage sensors, the 
 # built-in defaults should be fine.
