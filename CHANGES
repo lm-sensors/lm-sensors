@@ -42,7 +42,8 @@ ask CVS about it:
   Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
   Module mtp008: Fix temp initializations;
                  Save BIOS pin configuration of temps and fans;
-                 Fix sensor type reads/writes		
+                 Fix sensor type reads/writes and fan min writes;
+                 Fix spurious invalid sensor type messages
   Module sensors: Disabled, moved to i2c package as i2c-proc.c
   Module sis5595: Fix temp, add in4 for chip revision 0xc0;
                   Allow force_addr=0xaddr
