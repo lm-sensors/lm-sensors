@@ -1,9 +1,9 @@
 Kernel driver `i2c-i810.o'
 
-Status: 'Beta', still under development and testing
+Status: Stable
 
 Supported adapters:
-  * Intel 82810 and 82810-DC100 (GMCH)
+  * Intel 82810, 82810-DC100, and 82815 (GMCH)
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
         <phil@netroedge.com>,
@@ -20,9 +20,9 @@ Module Parameters
 
 Description
 -----------
-WARNING: If you have an '810' motherboard, your standard I2C
+WARNING: If you have an '810' or '815' motherboard, your standard I2C
 temperature sensors are most likely on the 801's I2C bus.
-You want the i2c-i801.o driver for those.
+You want the i2c-i801.o driver for those, not this driver.
 
 Now for the i2c-i810...
 
@@ -40,8 +40,7 @@ to a digital flat-panel display.
 
 Stability
 ---------
-Seems to be stable on the test machine, but needs more testing on other
-machines.
+Apparently stable.
 
 Supported Devices
 -----------------

@@ -1,7 +1,7 @@
 /*
     i2c-i810.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>,
+    Copyright (c) 1998, 1999, 2000  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>,
     Ralph Metzler <rjkm@thp.uni-koeln.de>, and
     Mark D. Studebaker <mdsxyz123@yahoo.com>
@@ -23,9 +23,16 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+/*
+   This interfaces to the I810/I815 to provide access to
+   the DDC Bus and the I2C Bus.
 
-/* This interfaces to the I2C bus of the I810 to gain access to
-    the DDC Bus and possibly other I2C devices. */
+   SUPPORTED DEVICES	PCI ID
+   i810AA		7121           
+   i810AB		7123           
+   i815			1132           
+*/
+
 
 #include <linux/version.h>
 #include <linux/module.h>
@@ -43,6 +50,14 @@
 #ifndef PCI_DEVICE_ID_INTEL_82810_IG3
 #define PCI_DEVICE_ID_INTEL_82810_IG3 0x7123
 #endif
+#ifndef PCI_DEVICE_ID_INTEL_82815_2
+#define PCI_DEVICE_ID_INTEL_82815_2   0x1132
+#endif
+
+static int i810_supported[] = {PCI_DEVICE_ID_INTEL_82810_IG1,
+                               PCI_DEVICE_ID_INTEL_82810_IG3,
+                               PCI_DEVICE_ID_INTEL_82815_2,
+                               0 };
 
 /* GPIO register locations */
 #define I810_IOCONTROL_OFFSET 0x5000
@@ -162,7 +177,7 @@ static struct i2c_algo_bit_data i810_i2c_bit_data = {
 };
 
 static struct i2c_adapter i810_i2c_adapter = {
-	"I810 I2C Adapter",
+	"I810/I815 I2C Adapter",
 	I2C_HW_B_I810,
 	NULL,
 	&i810_i2c_bit_data,
@@ -182,7 +197,7 @@ static struct i2c_algo_bit_data i810_ddc_bit_data = {
 };
 
 static struct i2c_adapter i810_ddc_adapter = {
-	"I810 DDC Adapter",
+	"I810/I815 DDC Adapter",
 	I2C_HW_B_I810,
 	NULL,
 	&i810_ddc_bit_data,
@@ -213,45 +228,24 @@ void config_i810(struct pci_dev *dev)
 	bit_i810ddc_setsda(NULL, 1);
 }
 
-/* Detect whether a I810 or I810_DC100 can be found,
+/* Detect whether a supported device can be found,
    and initialize it */
 static int i810i2c_setup(void)
 {
-	struct pci_dev *dev;
-	int num = 0;
+	struct pci_dev *dev = NULL;
+	int *num = i810_supported;
 
-	dev = NULL;
 	do {
 		if ((dev = pci_find_device(PCI_VENDOR_ID_INTEL,
-					   PCI_DEVICE_ID_INTEL_82810_IG1,
-					   dev))) {
-			if (!num)
-				config_i810(dev);
-			num++;
-		}
-	} while (dev);
-
-	dev = NULL;
-	do {
-		if ((dev = pci_find_device(PCI_VENDOR_ID_INTEL,
-					   PCI_DEVICE_ID_INTEL_82810_IG3,
-					   dev))) {
-			if (!num)
-				config_i810(dev);
-			num++;
-		}
-	} while (dev);
-
-	if (num > 0) {
-		printk(KERN_INFO
-		       "i2c-i810.o: %d i810 found.\n", num);
-		if (num > 1)
+					   *num++, dev))) {
+			config_i810(dev);
 			printk(KERN_INFO
-			       "i2c-i810.o: warning: only 1 supported.\n");
-		return 0;
-	} else {
-		return -ENODEV;
-	}
+			       "i2c-i810.o: i810/i815 found.\n");
+			return 0;
+		}
+	} while (*num != 0);
+
+	return -ENODEV;
 }
 
 
@@ -273,20 +267,20 @@ int __init i2c_i810i2c_init(void)
 	i810i2c_initialized = 0;
 	if ((res = i810i2c_setup())) {
 		printk
-		    ("i2c-i810.o: i810 not detected, module not inserted.\n");
+		    ("i2c-i810.o: i810/i815 not detected, module not inserted.\n");
 		i810i2c_cleanup();
 		return res;
 	}
 	if ((res = i2c_bit_add_bus(&i810_i2c_adapter))) {
 		printk("i2c-i810.o: I2C adapter registration failed\n");
 	} else {
-		printk("i2c-i810.o: I810 I2C bus initialized\n");
+		printk("i2c-i810.o: I810/I815 I2C bus initialized\n");
 		i810i2c_initialized |= INIT2;
 	}
 	if ((res = i2c_bit_add_bus(&i810_ddc_adapter))) {
 		printk("i2c-i810.o: DDC adapter registration failed\n");
 	} else {
-		printk("i2c-i810.o: I810 DDC bus initialized\n");
+		printk("i2c-i810.o: I810/I815 DDC bus initialized\n");
 		i810i2c_initialized |= INIT3;
 	}
 	if(!(i810i2c_initialized & (INIT2 | INIT3))) {
@@ -326,7 +320,7 @@ EXPORT_NO_SYMBOLS;
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, Ralph Metzler <rjkm@thp.uni-koeln.de>, and Mark D. Studebaker <mdsxyz123@yahoo.com>");
-MODULE_DESCRIPTION("I810 I2C/DDC driver");
+MODULE_DESCRIPTION("I810/I815 I2C/DDC driver");
 
 
 int init_module(void)

@@ -41,7 +41,7 @@ At least the following I2C/SMBus adapters are supported:
   Apple Hydra (used on some PPC machines)
   Intel I801 ICH/ICH0/ICH2 (used in Intel 810, 810E, 815E, 820, 840 chipsets)
   Intel PIIX4 (used in many Intel chipsets)
-  Intel I810 GMCH
+  Intel I810/I815 GMCH
   SiS 5595 (used in many SiS chipsets)
   3Dfx Voodoo 3 and Banshee
   VIA Technologies VT82C586B, VT82C596A/B, and VT82C686A
