@@ -1,7 +1,7 @@
 lm_sensors CHANGES file
 -----------------------
 This is a list of the most important changes in 2.x versions. It is by
-no means complete, listing only user-visible changes which are interesting.
+no means complete, listing only the most significant changes.
 The ultimate way to know what has changed is to run diff, or even neater,
 ask CVS about it:
 
@@ -9,7 +9,7 @@ ask CVS about it:
   * Determine which tags are valid, by running this command from the
     project root directory:
       cvs status -v -l Makefile
-    Valid tags are usually like form V2-1-0 for version 2.1.0
+    Valid tags are usually of the form V2-1-0 for version 2.1.0
   * Ask cvs for the difference between two versions:
       cvs diff -r TAG1 -r TAG2 DIFF-OPTIONS
     for example:
@@ -17,16 +17,19 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.6.3 (2001????)
+2.6.3 (2002????)
   File sensors.conf.eg: Un-ignore it87 in8, temp3, fan3;
-                        add adm1021 section
+                        add adm1021 section; add lm87 AIN[1,2] template
   Library: Add PCF8591, W83697HF, ADM1023 support;
            fix w83* fan_min computes
+  Module adm1024: Add MODULE_LICENSE("GPL")
   Module fscscy: implement min/max for voltages and fans
   Module i2c-amd756: Add support for AMD768
   Module i2c-i810: Add support for 810E
   Module i2c-piix4: Check for uninitialized base address
-  Module lm87: Fix in0, in1, in5 initial limits
+  Module i2c-viapro: Check for uninitialized base address
+  Module lm87: Fix in0, in1, in5 initial limits; ain[1,2] -> in[6,7];
+               fan -> fan1; fix temp2 limit writes
   Module pcf8591: new
   Module w83781d: Add W83697HF support
   Program i2cdump: Add i2c block read capability (requires i2c-2.6.3)
@@ -35,10 +38,10 @@ ask CVS about it:
   Program rrd: Install summ_week.cgi
   Program sensors: Add PCF8591, W83697HF, ADM1023 support,
                    clean up chassis intrusion prints
-  Program sensors-detect: Add several Nvidia chips, add PCF8591, add 810E,
-                          fix Via686a and it87 detection,
-                          add AMD768, IPMI-BMC-KCS and -SMIC,
-                          fix uninitialized values, it87 beats lm78
+  Program sensors-detect: Add several Nvidia chips, add PCF8591, add 810E;
+                          fix Via686a and it87 detection;
+                          add AMD768, IPMI-BMC-KCS and -SMIC;
+                          fix uninitialized values; it87 beats lm78
 
 2.6.2 (20011118)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
