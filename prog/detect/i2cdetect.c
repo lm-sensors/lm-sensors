@@ -1,8 +1,9 @@
 /*
     i2cdetect.c - Part of i2cdetect, a user-space program to scan for I2C 
                   devices.
-    Copyright (c) 1999-2004  Frodo Looijaard <frodol@dds.nl> and
-                             Mark D. Studebaker <mdsxyz123@yahoo.com>
+    Copyright (C) 1999-2004  Frodo Looijaard <frodol@dds.nl>,
+                             Mark D. Studebaker <mdsxyz123@yahoo.com> and
+                             Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,15 +46,87 @@ void help(void)
 	print_i2c_busses(0);
 }
 
+int open_i2c_dev(const int i2cbus, char *filename)
+{
+	int file;
+
+	sprintf(filename, "/dev/i2c-%d", i2cbus);
+	file = open(filename, O_RDWR);
+
+	if (file >= 0 || errno != ENOENT) {
+		return file;
+	}
+
+	sprintf(filename, "/dev/i2c/%d", i2cbus);
+	file = open(filename, O_RDWR);
+	
+	return file;
+}
+
+int scan_i2c_bus(int file, const int mode, const int first, const int last)
+{
+	int i, j;
+	int res;
+
+	printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
+
+	for (i = 0; i < 128; i += 16) {
+		printf("%02x: ", i);
+		for(j = 0; j < 16; j++) {
+			/* Skip unwanted addresses */
+			if (i+j < first || i+j > last) {
+				printf("   ");
+				continue;
+			}
+
+			/* Set slave address */
+			if (ioctl(file, I2C_SLAVE, i+j) < 0) {
+				if (errno == EBUSY) {
+					printf("UU ");
+					continue;
+				} else {
+					fprintf(stderr,
+					        "Error: Could not set address to 0x%02x: %s\n",
+					        i+j, strerror(errno));
+					return -1;
+				}
+			}
+
+			/* Probe this address */
+			switch (mode) {
+			case MODE_QUICK:
+				/* This is known to corrupt the Atmel AT24RF08 EEPROM */
+				res = i2c_smbus_write_quick(file, I2C_SMBUS_WRITE);
+				break;
+			case MODE_READ:
+				/* This is known to lock SMBus on various write-only chips
+				(mainly clock chips) */
+				res = i2c_smbus_read_byte(file);
+				break;
+			default:
+				if ((i+j >= 0x30 && i+j <= 0x37)
+				 || (i+j >= 0x50 && i+j <= 0x5F))
+					res = i2c_smbus_write_quick(file, I2C_SMBUS_WRITE);
+				else
+					res = i2c_smbus_read_byte(file);
+			}
+
+			if (res < 0)
+				printf("XX ");
+			else
+				printf("%02x ", i+j);
+		}
+		printf("\n");
+	}
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
   char *end;
-  int i=1,j,res,i2cbus=-1,file;
-  int e1, e2, e3;
-  char filename1[20];
-  char filename2[20];
-  char filename3[20];
-  char *filename;
+  int i = 1, i2cbus = -1, file, res;
+  char filename[20];
   long funcs;
   int force = 0;
   int mode = MODE_AUTO;
@@ -109,51 +182,19 @@ int main(int argc, char *argv[])
       }
     }
   }
-/*
- * Try all three variants and give the correct error message
- * upon failure
- */
 
-  sprintf(filename1,"/dev/i2c-%d",i2cbus);
-  sprintf(filename2,"/dev/i2c%d",i2cbus);
-  sprintf(filename3,"/dev/i2c/%d",i2cbus);
-  if ((file = open(filename1,O_RDWR)) < 0) {
-    e1 = errno;
-    if ((file = open(filename2,O_RDWR)) < 0) {
-      e2 = errno;
-      if ((file = open(filename3,O_RDWR)) < 0) {
-        e3 = errno;
-        if(e1 == ENOENT && e2 == ENOENT && e3 == ENOENT) {
-          fprintf(stderr,"Error: Could not open file `%s', `%s', or `%s': %s\n",
-                     filename1,filename2,filename3,strerror(ENOENT));
-        }
-        if (e1 != ENOENT) {
-          fprintf(stderr,"Error: Could not open file `%s' : %s\n",
-                     filename1,strerror(e1));
-          if(e1 == EACCES)
-            fprintf(stderr,"Run as root?\n");
-        }
-        if (e2 != ENOENT) {
-          fprintf(stderr,"Error: Could not open file `%s' : %s\n",
-                     filename2,strerror(e2));
-          if(e2 == EACCES)
-            fprintf(stderr,"Run as root?\n");
-        }
-        if (e3 != ENOENT) {
-          fprintf(stderr,"Error: Could not open file `%s' : %s\n",
-                     filename3,strerror(e3));
-          if(e3 == EACCES)
-            fprintf(stderr,"Run as root?\n");
-        }
-        exit(1);
-      } else {
-         filename = filename3;
-      }
+  file = open_i2c_dev(i2cbus, filename);
+  if (file < 0) {
+    if (errno == ENOENT) {
+      fprintf(stderr, "Error: Could not open file `/dev/i2c-%d' or `/dev/i2c/%d': %s\n",
+              i2cbus, i2cbus, strerror(ENOENT));
     } else {
-       filename = filename2;
+      fprintf(stderr, "Error: Could not open file `%s': %s\n",
+              filename, strerror(errno));
+      if (errno == EACCES)
+        fprintf(stderr, "Run as root?\n");
     }
-  } else {
-    filename = filename1;
+    exit(1);
   }
 
   if (ioctl(file,I2C_FUNCS,&funcs) < 0) {
@@ -186,52 +227,12 @@ int main(int argc, char *argv[])
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
   sleep(5);
 
-  printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
-  for (i = 0; i < 128; i+=16) {
-    printf("%02x: ",i);
-    for(j = 0; j < 16; j++) {
-      if (!force && (i+j<0x03 || i+j>0x77)) {
-        printf("   ");
-        continue;
-      }
-      if (ioctl(file,I2C_SLAVE,i+j) < 0) {
-        if (errno == EBUSY) {
-          printf("UU ");
-          continue;
-        } else {
-          fprintf(stderr,"Error: Could not set address to %02x: %s\n",i+j,
-                  strerror(errno));
-          close(file);
-          exit(1);
-        }
-      }
+  if (force)
+    res = scan_i2c_bus(file, mode, 0x00, 0x7F);
+  else
+    res = scan_i2c_bus(file, mode, 0x03, 0x77);
 
-      switch(mode) {
-      case MODE_QUICK:
-        /* This is known to corrupt the Atmel AT24RF08 EEPROM */
-        res = i2c_smbus_write_quick(file, I2C_SMBUS_WRITE);
-        break;
-      case MODE_READ:
-        /* This is known to lock SMBus on various write-only chips
-           (mainly clock chips) */
-        res = i2c_smbus_read_byte(file);
-        break;
-      default:
-        if((i+j>=0x30 && i+j<=0x37)
-        || (i+j>=0x50 && i+j<=0x5F)) {
-          res = i2c_smbus_write_quick(file, I2C_SMBUS_WRITE);
-        } else {
-          res = i2c_smbus_read_byte(file);
-        }
-      }
-
-      if (res < 0)
-        printf("XX ");
-      else
-        printf("%02x ",i+j);
-    }
-    printf("\n");
-  }
   close(file);
-  exit(0);
+
+  exit(res?1:0);
 }
