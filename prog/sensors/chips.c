@@ -1488,11 +1488,15 @@ void print_lm85(const sensors_chip_name *name)
     alarms = 0;
   }
 
-  if (!sensors_get_feature(*name,SENSORS_ADM1027_ALARM_MASK,&cur)) 
-    alarm_mask = cur + 0.5;
-  else {
-    printf("ERROR: Can't get alarm mask data!\n");
-    alarm_mask = 0;
+  if( is1027 ) {
+    if (!sensors_get_feature(*name,SENSORS_ADM1027_ALARM_MASK,&cur)) 
+      alarm_mask = cur + 0.5;
+    else {
+      printf("ERROR: Can't get alarm mask data!\n");
+      alarm_mask = 0;
+    }
+  } else {
+    alarm_mask = 0 ;
   }
 
   if (!sensors_get_label_and_valid(*name,SENSORS_LM85_IN0,&label,&valid) &&

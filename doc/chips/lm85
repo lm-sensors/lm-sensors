@@ -503,9 +503,9 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
    set in2_min  3.3 * 0.95
    set in2_max  3.3 * 1.05
    set in3_min  5.0 * 0.95
-   set in4_max  5.0 * 1.05
+   set in3_max  5.0 * 1.05
    set in4_min   12 * 0.95
-   set in3_max   12 * 1.05
+   set in4_max   12 * 1.05
 
 # Set Fan limits
    set fan1_min  3000
