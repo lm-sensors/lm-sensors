@@ -31,7 +31,7 @@ Document Version	Voltage Range	Increment	Processors
 
 8.5			1.050 - 1.825V	0.05V		PIII-S Tualatin
 
-9.0, (9.1)		1.100 - 1.850V	0.025V		PIV, AMD Socket A
+9.0, (9.1)		1.100 - 1.850V	0.025V		P4, AMD Socket A
 
 
 Note that versions 8.1 - 8.4 are compatible.
@@ -86,11 +86,12 @@ For those that do, the VRM support status is listed below.
 The following chip drivers support all the VRM versions via
 /etc/sensors.conf and the vrm entry in /proc:
 
-	adm1024, adm1025, it87, lm87, mtp008, w83781d
+	adm1025, w83781d
 
 
 The following chip drivers support only VRM 8.2 and cannot be changed:
 
+	adm1024, it87, lm87, mtp008
 	adm9240, gl520sm, lm78, maxilife
 
 If you have a board with one of these chips which needs advanced
