@@ -937,7 +937,7 @@ static void pc87360_update_client(struct i2c_client *client)
 			pc87360_write_value(data, LD_IN, i,
 					    PC87365_REG_IN_STATUS,
 					    data->in_status[i]);
-			if (data->in_status[i] & 0x81) {
+			if ((data->in_status[i] & 0x81) == 0x81) {
 				data->in[i] = pc87360_read_value(data, LD_IN,
 					      i, PC87365_REG_IN);
 			}
@@ -971,7 +971,7 @@ static void pc87360_update_client(struct i2c_client *client)
 			pc87360_write_value(data, LD_TEMP, i,
 					    PC87365_REG_TEMP_STATUS,
 					    data->temp_status[i]);
-			if (data->temp_status[i] & 0x81) {
+			if ((data->temp_status[i] & 0x81) == 0x81) {
 				data->temp[i] = pc87360_read_value(data,
 						LD_TEMP, i,
 						PC87365_REG_TEMP);
