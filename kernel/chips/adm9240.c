@@ -370,7 +370,7 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind)
   /* Now, we do the remaining detection. */
 
   if (kind < 0) {
-    if (((adm9240_read_value(new_client,ADM9240_REG_CONFIG) & 0x80) != 0x80) ||
+    if (((adm9240_read_value(new_client,ADM9240_REG_CONFIG) & 0x80) != 0x00) ||
         (adm9240_read_value(new_client,ADM9240_REG_I2C_ADDR) != address))
       goto ERROR1;
   }
