@@ -20,6 +20,7 @@ ask CVS about it:
 2.9.1 (2005????)
   File doc/busses/i2c-nforce2: Update
   File doc/chips/it87: Update
+  File doc/chips/lm90: Update for adt7461
   File doc/chips/mic74: New
   File etc/sensors.conf.eg: New sections for lm92 and w83792d
   Library: Add support for 2.6 fscpos driver (Stefan Ott)
@@ -41,16 +42,19 @@ ask CVS about it:
                  Cleanup detection function (backport from Linux 2.6)
   Module i2c-ali1535: Add delay loops for reliability (Ubel Walter)
   Module i2c-i801: Temporarily disable broken I2C block read
-  Module i2c-nforce2: Add nForce4 support (Hans-Frieder Vogt)
   Module i2c-ipmi: Fix bogus return in a middle of a function (Sergio
                    Gelato)
+  Module i2c-nforce2: Add nForce4 support (Hans-Frieder Vogt)
+  Module i2c-viapro: Prevent repeated resets
   Module it87: Improve Super-I/O detection
                Limit I2C address range
                Support VID on the IT8712F
   Module lm75: Only initialize CMP/INT bit
   Module lm78: Fix bug with setting negative temperature limits
   Module lm85: Properly differenciate between ADM1027 and ADT7463
+               Add EMC6D102 support
   Module lm90: Fix MAX6657, MAX6658 and MAX6659 detection
+               Add limited ADT7461 support
   Module lm93: Fix IN10 (+5V) scaling
   Module mic74: New
   Module w83627hf: Support secondary Super-I/O address
