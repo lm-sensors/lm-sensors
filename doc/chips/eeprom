@@ -7,7 +7,20 @@ Supported chips:
   * Any EEPROM chip in the designated address range
     Prefix `eeprom'
     Addresses scanned: I2C 0x50 - 0x57 (inclusive)
-    Datasheet: Publicly available from Intel
+    Datasheets: Publicly available from Atmel (www.atmel.com),
+                Fairchild (www.fairchildsemi.com), and
+                Microchip (www.microchip.com)
+
+	Chip	Size (bits)	Address
+	24C01	 1K		0x50 (shadows at 0x51 - 0x57)
+	24C01A	 1K		0x50 - 0x57 (Typical device on DIMMs)
+	24C02	 2K		0x50 - 0x57
+	24C04	 4K		0x50, 0x52, 0x54, 0x56
+				(additional data at 0x51, 0x53, 0x55, 0x57)
+	24C08	 8K		0x50, 0x54 (additional data at 0x51, 0x52,
+				0x53, 0x55, 0x56, 0x57)
+	24C16	16K		0x50 (additional data at 0x51 - 0x57)
+
 
 Author: Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock
         <phil@netroedge.com>
@@ -37,21 +50,43 @@ Description
 -----------
 
 This is a simple EEPROM module meant to enable reading the first 128 bytes
-of an EEPROM (on a SDRAM DIMM).  This module will probably need to be at
-least expanded.  A /dev file interface would probably be more effective. 
+of an EEPROM (on a SDRAM DIMM). However, it will access serial EEPROMs
+on any I2C adapter. This module will probably need to be
+expanded.  A /dev file interface would probably be more effective. 
 This module was a programming exercise to get used to the new project
 organization laid out by Frodo, but it should be at least completely
 effective for decoding the contents of EEPROMs on DIMMs. 
 
+DIMMS will typically contain a 24C01A or 24C02. The other devices
+will not be found on a DIMM because they respond to more than one
+address.
+
+DDC Monitors may contain any device. Often a 24C01, which responds
+to all 8 addresses, is found. See the 'ddcmon' driver which has
+specialized /proc entries for DDC monitors. If the eeprom driver is
+loaded before the ddcmon driver and there is no 'ignore' line in the
+/etc/sensors.conf file, the eeprom driver will latch onto the DDC monitor
+eeprom.
+
+
 Lacking functionality:
 
-* Read past byte 128.  There is no technical restriction for not doing
+* Read bytes 128-255.  There is no technical restriction for not doing
 this, but making a zillion dataxx-xx files would be a bit rediculous. 
 EEPROMs on DIMMs shouldn't use the contents past byte 128, so we are fine. 
+
+* Full support for larger devices (24C04, 24C08, 24C16). These are
+not typically found on a PC. These devices will appear as separate
+devices at multiple addresses, with every other 128-byte block inaccessable
+because of the missing 128-255 functionality.
+
+* Support for really large devices (24C32, 24C64, 24C128, 24C256, 24C5412).
+These devices require two-byte address fields and are not supported.
 
 * Enable Writing.  Again, no technical reason why not, but making it easy
 to change the contents of the EEPROMs (on DIMMs anyway) also makes it easy
 to disable the DIMMs until the values are restored somehow. 
+
 
 Use:
 

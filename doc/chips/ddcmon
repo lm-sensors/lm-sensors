@@ -8,6 +8,21 @@ Supported chips:
     Prefix `ddcmon'
     Addresses scanned: I2C 0x50
     Standards: available for purchase from VESA http://www.vesa.org
+    Datasheets: Publicly available from Atmel (www.atmel.com),
+                Fairchild (www.fairchildsemi.com), and
+                Microchip (www.microchip.com)
+
+	Chip	Size (bits)	Address
+	24C01	 1K		0x50 (shadows at 0x51 - 0x57)
+		 		     (Typical device in monitors)
+	24C01A	 1K		0x50 - 0x57 (Typical device in monitors)
+	24C02	 2K		0x50 - 0x57
+	24C04	 4K		0x50, 0x52, 0x54, 0x56
+				(additional data at 0x51, 0x53, 0x55, 0x57)
+	24C08	 8K		0x50, 0x54 (additional data at 0x51, 0x52,
+				0x53, 0x55, 0x56, 0x57)
+	24C16	16K		0x50 (additional data at 0x51 - 0x57)
+
 
 Authors: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>,
         and Mark Studebaker <mdsxyz123@yahoo.com>
@@ -20,8 +35,7 @@ Module Parameters
 * force: short array (min = 1, max = 48)
   List of adapter,address pairs to boldly assume to be present
 * force_ddcmon: short array (min = 1, max = 48)
-  List of adapter,address pairs which are unquestionably assumed to contain
-  a `ddcmon' chip
+  Same as 'force'
 * ignore: short array (min = 1, max = 48)
   List of adapter,address pairs not to scan
 * ignore_range: short array (min = 1, max = 48)
@@ -94,9 +108,15 @@ Notes:
   eeproms because it checks for a DDC 'signature' at the beginning
   of the DDC Monitor's eeprom.
 
+- If a DDC monitor eeprom lacks the 'signature', you may use the
+  'force' parameter (modprobe ddcmon force=x,0x50 where 'x' is the
+  i2c bus number).
+
 - This module requires a bus driver for your video chip to access the
-  DDC bus. Currently drivers exist for Voodoo3/Banshee chips and
-  Matrox chips only. See documentation for those drivers in ../busses.
+  DDC bus. In this package, drivers exist for Voodoo3/Banshee chips.
+  See documentation for those drivers in ../busses. Other drivers
+  (Matrox and NVidia, for example) are available in the kernel or
+  elsewhere. See our 'Supported Devices' web page for details.
 
 - There is a checksum over the 128 bytes in the eeprom but the driver
   does not check it.
@@ -104,9 +124,13 @@ Notes:
 - More information is available in the eeprom which could be made
   available by enhancing the driver.
   To see the entire eeprom, use the eeprom.o module instead of ddcmon.o.
+  However, then you lose the DDC-specific formatting.
 
 - This driver does not support the DDC/CI (DDC2Bi) bidirectional
   communications channel to the monitor for controlling the monitor.
 
 - The driver caches the data from the monitor and only rereads it
   from the eeprom if the cache is more than 5 minutes old.
+
+- X 4.0 also accesses the DDC monitor EEPROM to auto-configure itself.
+  There could possibly be conflicts from these multiple accesses.
