@@ -846,7 +846,18 @@ static void lm93_in(struct i2c_client *client, int operation, int ctl_name,
 static unsigned LM93_ALARMS_FROM_REG(struct block1_t b1)
 {
 	unsigned result;
-	result  = b1.host_status_2;
+	result  = b1.host_status_2 & 0x3f;
+
+	if (vccp_limit_type[0])
+		result |= (b1.host_status_1 & 0x10) << 2;
+	else
+		result |= b1.host_status_2 & 0x40;
+
+	if (vccp_limit_type[1])
+		result |= (b1.host_status_1 & 0x20) << 2;
+	else
+		result |= b1.host_status_2 & 0x80;
+
 	result |= b1.host_status_3 << 8;
 	result |= (b1.fan_status & 0x0f) << 16;
 	result |= (b1.p1_prochot_status & 0x80) << 13;
@@ -2128,10 +2139,6 @@ static void lm93_init_client(struct i2c_client *client)
 	lm93_write_byte(client, LM93_REG_GPI_VID_CTL,
 			reg | (vid_agtl ? 0x03 : 0x00));
 
-	/* start monitoring */
-	reg = lm93_read_byte(client, LM93_REG_CONFIG);
-	lm93_write_byte(client, LM93_REG_CONFIG, reg | 0x01);
-
 	if (init) {
 		/* enable #ALERT pin */
 		reg = lm93_read_byte(client, LM93_REG_CONFIG);
@@ -2143,8 +2150,19 @@ static void lm93_init_client(struct i2c_client *client)
 
 		/* set sleep state to S0 */
 		lm93_write_byte(client, LM93_REG_SLEEP_CONTROL, 0);
+
+		/* unmask #VRDHOT and dynamic VCCP (if nec) error events */
+		reg = lm93_read_byte(client, LM93_REG_MISC_ERR_MASK);
+		reg &= ~0x03;
+		reg &= ~(vccp_limit_type[0] ? 0x10 : 0);
+		reg &= ~(vccp_limit_type[1] ? 0x20 : 0);
+		lm93_write_byte(client, LM93_REG_MISC_ERR_MASK, reg);
 	}
-		
+
+	/* start monitoring */
+	reg = lm93_read_byte(client, LM93_REG_CONFIG);
+	lm93_write_byte(client, LM93_REG_CONFIG, reg | 0x01);
+
 	/* spin until ready */
 	for (i=0; i<20; i++) {
 		mdelay(10);

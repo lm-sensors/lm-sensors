@@ -101,6 +101,10 @@
 #define LM93_REG_GPI_VID_CTL	0xbe
 #define LM93_REG_SF_TACH_TO_PWM	0xe0
 
+/* error masks */
+#define LM93_REG_GPI_ERR_MASK	0xec
+#define LM93_REG_MISC_ERR_MASK	0xed
+
 /* LM93 REGISTER VALUES */
 #define LM93_MFR_ID		0x73
 #define LM93_MFR_ID_PROTOTYPE	0x72
