@@ -919,14 +919,26 @@ int cleanup_module(void)
 #ifdef CONFIG_SENSORS_ADM1021
 extern int sensors_adm1021_init(void);
 #endif
+#ifdef CONFIG_SENSORS_ADM1025
+extern int sensors_adm1025_init(void);
+#endif
 #ifdef CONFIG_SENSORS_ADM9240
-extern int sensors_adm9024_init(void);
+extern int sensors_adm9240_init(void);
+#endif
+#ifdef CONFIG_SENSORS_BT869
+extern int sensors_bt869_init(void);
+#endif
+#ifdef CONFIG_SENSORS_DDCMON
+extern int sensors_ddcmon_init(void);
 #endif
 #ifdef CONFIG_SENSORS_DS1621
 extern int sensors_ds1621_init(void);
 #endif
 #ifdef CONFIG_SENSORS_GL518SM
 extern int sensors_gl518sm_init(void);
+#endif
+#ifdef CONFIG_SENSORS_GL520SM
+extern int sensors_gl520sm_init(void);
 #endif
 #ifdef CONFIG_SENSORS_LM75
 extern int sensors_lm75_init(void);
@@ -937,8 +949,20 @@ extern int sensors_lm78_init(void);
 #ifdef CONFIG_SENSORS_LM80
 extern int sensors_lm80_init(void);
 #endif
+#ifdef CONFIG_SENSORS_LM87
+extern int sensors_lm87_init(void);
+#endif
+#ifdef CONFIG_SENSORS_MTP008
+extern int sensors_mtp008_init(void);
+#endif
 #ifdef CONFIG_SENSORS_SIS5595
 extern int sensors_sis5595_init(void);
+#endif
+#ifdef CONFIG_SENSORS_THMC50
+extern int sensors_thmc50_init(void);
+#endif
+#ifdef CONFIG_SENSORS_VIA686A
+extern int sensors_via686a_init(void);
 #endif
 #ifdef CONFIG_SENSORS_W83781D
 extern int sensors_w83781d_init(void);
@@ -956,14 +980,26 @@ int __init sensors_init_all(void)
 #ifdef CONFIG_SENSORS_ADM1021
 	sensors_adm1021_init();
 #endif
-#ifdef CONFIG_SENSORS_ADM9024
-	sensors_adm9024_init();
+#ifdef CONFIG_SENSORS_ADM1025
+	sensors_adm1025_init();
+#endif
+#ifdef CONFIG_SENSORS_ADM9240
+	sensors_adm9240_init();
+#endif
+#ifdef CONFIG_SENSORS_BT869
+	sensors_bt869_init();
+#endif
+#ifdef CONFIG_SENSORS_DDCMON
+	sensors_ddcmon_init();
 #endif
 #ifdef CONFIG_SENSORS_DS1621
 	sensors_ds1621_init();
 #endif
 #ifdef CONFIG_SENSORS_GL518SM
 	sensors_gl518sm_init();
+#endif
+#ifdef CONFIG_SENSORS_GL520SM
+	sensors_gl520sm_init();
 #endif
 #ifdef CONFIG_SENSORS_LM75
 	sensors_lm75_init();
@@ -974,8 +1010,20 @@ int __init sensors_init_all(void)
 #ifdef CONFIG_SENSORS_LM80
 	sensors_lm80_init();
 #endif
+#ifdef CONFIG_SENSORS_LM87
+	sensors_lm87_init();
+#endif
+#ifdef CONFIG_SENSORS_MTP008
+	sensors_mtp008_init();
+#endif
 #ifdef CONFIG_SENSORS_SIS5595
 	sensors_sis5595_init();
+#endif
+#ifdef CONFIG_SENSORS_THMC50
+	sensors_thmc50_init();
+#endif
+#ifdef CONFIG_SENSORS_VIA686A
+	sensors_via686a_init();
 #endif
 #ifdef CONFIG_SENSORS_W83781D
 	sensors_w83781d_init();

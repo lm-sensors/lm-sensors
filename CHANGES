@@ -17,6 +17,10 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
+2.5.6 (2001????)
+  Module sensors: add xxx_init() calls for drivers added to mkpatch in 2.5.5.
+  Program mkpatch.pl: fix adm9240 typos
+
 2.5.5 (20010115)
   NOTE: i2c 2.5.5 MUST BE be compiled and installed first, UNLESS
         you have kernel 2.4.0-prerelease or greater.
