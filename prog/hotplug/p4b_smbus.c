@@ -260,12 +260,12 @@ int init_module(void)
 
 void cleanup_module(void)
 {
-	write_lock_irqsave(i801smbus_lock, i801smbus_lock_flags);
+	write_lock_irqsave(&i801smbus_lock, i801smbus_lock_flags);
 	if (i801smbus_inserted) {
 		pci_remove_device(i801smbus);
 		i801smbus_inserted = FALSE;
 	}
-	write_unlock_irqrestore(i801smbus_lock, i801smbus_lock_flags);
+	write_unlock_irqrestore(&i801smbus_lock, i801smbus_lock_flags);
 
 	if (NULL != i801smbus)
 	  {
