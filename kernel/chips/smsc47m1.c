@@ -277,6 +277,7 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 		superio_select();
 		superio_outb(SMSC_BASE_REG, address >> 8);
 		superio_outb(SMSC_BASE_REG, address & 0xff);
+		superio_exit();
 	}
 
 	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
