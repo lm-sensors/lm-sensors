@@ -168,8 +168,7 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 		 	goto error1;
 
 		/* Unused bits */
-		if ((conf & 0xe0) || (cur & 0x7f00) || (hyst & 0x7f00)
-		 || (os & 0x7f00))
+		if (conf & 0xe0)
 		 	goto error1;
 
 		/* Addresses cycling */

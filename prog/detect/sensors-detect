@@ -2840,8 +2840,7 @@ sub lm75_detect
   $hyst = swap_bytes($hyst);
   $os = swap_bytes($os);
   # Unused bits
-  return if ($conf & 0xe0) or ($cur & 0x007f) or ($hyst & 0x007f)
-    or ($os & 0x007f);
+  return if ($conf & 0xe0);
 
   $cur = $cur >> 8;
   $hyst = $hyst >> 8;
