@@ -1,28 +1,95 @@
 #!/usr/bin/perl
 #
 # Copyright 1998, 1999 Philip Edelbrock <phil@netroedge.com>
+# modified by Christian Zuckschwerdt <zany@triq.net>
 #
-# Version 0.4
+# Version 0.4  1999  Philip Edelbrock <phil@netroedge.com>
+# Version 0.5  2000-03-30  Christian Zuckschwerdt <zany@triq.net>
+#  html output (selectable by commandline switches)
+# Version 0.6  2000-09-16  Christian Zuckschwerdt <zany@triq.net>
+#  updated according to SPD Spec Rev 1.2B
+#  see http://developer.intel.com/
+#             technology/memory/pc133sdram/spec/Spdsd12b.htm
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
 #
-# Two assumptions: lm_sensors-2.0.2 installed,
+# Two assumptions: lm_sensors-2.x installed,
 # and Perl is at /usr/bin/perl
 #
+# use the following command line switches
+#  -f, --format            print nice html output
+#  -b, --bodyonly          don't printhtml header
+#                          (useful for postprocessing the output)
+#  -h, --help              display this usage summary
 #
 # References: 
 # PC SDRAM Serial Presence 
 # Detect (SPD) Specification, Intel, 
-# Dec '97, Rev 1.2A
-#
+# 1997,1999, Rev 1.2B
 #
 # Jedec Standards 4.1.x & 4.5.x
 # http://www.jedec.org
 #
 
-print "PC-100 DIMM Serial Presence Detect Tester/Decoder\n";
-print "Written by Philip Edelbrock.  Copyright 1998, 1999.\n";
-print "Version 0.2\n\n";
+sub printl ($$) # print a line w/ label and value
+{
+   my ($label, $value) = @_;
+   if ($opt_html) {
+       $value =~ s%\n%<br>%sg;
+       print "<tr><td valign=top>$label</td><td>$value</td></tr>\n";
+   } else {
+       $value =~ s%\n%\n\t\t%sg;
+       print "$label\t$value\n";
+   }
+}
+
+sub prints ($) # print seperator w/ given text
+{
+   my ($label) = @_;
+   if ($opt_html) {
+       print "<tr><td align=center colspan=2><b>$label</b></td></tr>\n";
+   } else {
+       print "\n---=== $label ===---\n";
+   }
+}
+
+sub printh ($) # print header w/ given text
+{
+   my ($label) = @_;
+   if ($opt_html) {
+       $label =~ s%\n%<br>%sg;
+       print "<h1>$label</h1>\n";
+   } else {
+	print "\n$label\n";
+   }
+}
+
+for (@ARGV) {
+    if (/-h/) {
+	print "Usage: $0 [-f|-b|-h]
+
+  -f, --format            print nice html output
+  -b, --bodyonly          don't printhtml header
+                          (useful for postprocessing the output)
+  -h, --help              display this usage summary
+";
+	exit;
+    }
+    $opt_html = 1 if (/-f/);
+    $opt_bodyonly = 1 if (/-b/);
+}
+$opt_body = $opt_html and not $opt_bodyonly;
+
+print "<html><head></head><body>\n" if $opt_body;
+
+printh '
+PC DIMM Serial Presence Detect Tester/Decoder
+Written by Philip Edelbrock.  Copyright 1998, 1999.
+Modified by Christian Zuckschwerdt <zany@triq.net>
+Version 0.6
+';
+
+print "<table border=1>\n" if $opt_html;
 
 $dimm_count=0;
 $_=`ls /proc/sys/dev/sensors/`;
@@ -34,241 +101,265 @@ for $i ( 0 .. $#dimm_list ) {
 		$dimm_checksum=0;
 		$dimm_count=$dimm_count + 1;
 		
-		print "\nDecoding EEPROM: /proc/sys/dev/sensors/$dimm_list[$i]\n";
+		printl "Decoding EEPROM", "/proc/sys/dev/sensors/$dimm_list[$i]";
 		if (/^[^-]+-[^-]+-[^-]+-([^-]+)$/) {
 			$dimm_num=$1 - 49;
-			print "Guessing DIMM is in bank $dimm_num\n";
+			printl "Guessing DIMM is in", "bank $dimm_num";
 		}
 # Decode first 16 bytes
-		print "\t\t----=== The Following is Required Data and is Applicable to all DIMM Types ===----\n";
+		prints "The Following is Required Data and is Applicable to all DIMM Types";
 
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data0-15`;
 		@bytes=split(" ");
 		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
 		
-		print "\t# of bytes written to SDRAM EEPROM:\t\t$bytes[0]\n";
+		printl "# of bytes written to SDRAM EEPROM",$bytes[0];
 
-		print "\tTotal number of bytes in EEPROM:\t\t";
-		if ($bytes[1] < 13) {
-			print 2**$bytes[1];
-			print "\n";
+		$l = "Total number of bytes in EEPROM";
+		if ($bytes[1] <= 13) {
+			printl $l, 2**$bytes[1];
 		} elsif ($bytes[1] == 0) {
-			print "RFU\n"; 
-		} else { print "ERROR!\n"; }
+			printl $l, "RFU"; 
+		} else { printl $l, "ERROR!"; }
 
-		print "\tFundemental Memory type:\t\t\t";
-		if ($bytes[2] == 2) { print "EDO\n"; } elsif ($bytes[2] == 4) { print "SDRAM\n";
-			} else { print "???\n"; }
+		$l = "Fundemental Memory type";
+		if ($bytes[2] == 2) { printl $l, "EDO"; }
+		elsif ($bytes[2] == 4) { printl $l, "SDRAM"; }
+		else { printl $l, "???"; }
 
-		print "\tNumber of Row Address Bits (SDRAM only):\t";
-		if ($bytes[3] == 0) { print "Undefined!\n" } 		
-		elsif ($bytes[3] == 1) { print "1/16\n" } 		
-		elsif ($bytes[3] == 2) { print "2/17\n" } 		
-		elsif ($bytes[3] == 3) { print "3/18\n" }
-		else { print $bytes[3]; print "\n"; }
+		$l = "Number of Row Address Bits (SDRAM only)";
+		if ($bytes[3] == 0) { printl $l, "Undefined!" } 		
+		elsif ($bytes[3] == 1) { printl $l, "1/16" } 		
+		elsif ($bytes[3] == 2) { printl $l, "2/17" } 		
+		elsif ($bytes[3] == 3) { printl $l, "3/18" }
+		else { printl $l, $bytes[3]; }
 
-		print "\tNumber of Col Address Bits (SDRAM only):\t";
-		if ($bytes[4] == 0) { print "Undefined!\n" } 		
-		elsif ($bytes[4] == 1) { print "1/16\n" } 		
-		elsif ($bytes[4] == 2) { print "2/17\n" } 		
-		elsif ($bytes[4] == 3) { print "3/18\n" }
-		else { print $bytes[4]; print "\n"; }
+		$l = "Number of Col Address Bits (SDRAM only)";
+		if ($bytes[4] == 0) { printl $l, "Undefined!" } 		
+		elsif ($bytes[4] == 1) { printl $l, "1/16" } 		
+		elsif ($bytes[4] == 2) { printl $l, "2/17" } 		
+		elsif ($bytes[4] == 3) { printl $l, "3/18" }
+		else { printl $l, $bytes[4]; }
 
-		print "\tNumber of Module Rows:\t\t\t\t";
-		if ($bytes[5] == 0 ) { print "Undefined!\n"; } else { print $bytes[5]; print "\n"; }
+		$l = "Number of Module Rows";
+		if ($bytes[5] == 0 ) { printl $l, "Undefined!"; }
+		else { printl $l, $bytes[5]; }
 
-		print "\tData Width (SDRAM only):\t\t\t";
-		if ($bytes[7] > 1) { print "Undefined!\n" } else {
+		$l = "Data Width (SDRAM only)";
+		if ($bytes[7] > 1) { printl $l, "Undefined!" } else {
 			$temp=($bytes[7]*256) + $bytes[6];
-			print $temp; print "\n"; }
+			printl $l, $temp; }
 
-		print "\tModule Interface Signal Levels:\t\t\t";
-		if ($bytes[8] == 0) { print "5.0 Volt/TTL\n";} elsif ($bytes[8] == 1) { 
-			print "LVTTL\n";} elsif ($bytes[8] == 2) { print "HSTL 1.5\n";} elsif ($bytes[8] == 3) { 
-			print "SSTL 3.3\n";} elsif ($bytes[8] == 4) { print "SSTL 2.5\n";} else { print "Undefined!\n";}
+		$l = "Module Interface Signal Levels";
+		if ($bytes[8] == 0) { printl $l, "5.0 Volt/TTL";}
+		elsif ($bytes[8] == 1) { printl $l, "LVTTL";}
+		elsif ($bytes[8] == 2) { printl $l, "HSTL 1.5";}
+		elsif ($bytes[8] == 3) { printl $l, "SSTL 3.3";}
+		elsif ($bytes[8] == 4) { printl $l, "SSTL 2.5";}
+		elsif ($bytes[8] == 255) { printl $l, "New Table";}
+		else { printl $l, "Undefined!";}
 		
-		print "\tCycle Time (SDRAM):\t\t\t\t";
-		$temp=($bytes[9] >> 4) + (($bytes[9] - (($bytes[9] >> 4)<< 4)) * 0.1);
-		print $temp; print "ns\n";
+		$l = "Cycle Time (SDRAM) highest CAS latency";
+		$temp=($bytes[9] >> 4) + ($bytes[9] & 0xf) * 0.1;
+		printl $l, "${temp}ns";
 		
-		print "\tAccess Time (SDRAM):\t\t\t\t";
-		$temp=($bytes[10] >> 4) + (($bytes[10] - (($bytes[10] >> 4)<< 4)) * 0.1);
-		print $temp; print "ns\n";
+		$l = "Access Time (SDRAM)";
+		$temp=($bytes[10] >> 4) + ($bytes[10] & 0xf) * 0.1;
+		printl $l, "${temp}ns";
 		
-		print "\tModule Configuration Type:\t\t\t";
-		if ($bytes[11] == 0) { print "No Parity\n"; } elsif ($bytes[11] == 1) { print "Parity\n"; 
-			} elsif ($bytes[11] == 2) { print "ECC\n"; } else { print "Undefined!"; }
+		$l = "Module Configuration Type";
+		if ($bytes[11] == 0) { printl $l, "No Parity"; }
+		elsif ($bytes[11] == 1) { printl $l, "Parity"; }
+		elsif ($bytes[11] == 2) { printl $l, "ECC"; }
+		else { printl $l, "Undefined!"; }
 			
-		print "\tRefresh Type:\t\t\t\t\t";
-		if ($bytes[12] > 126) { print "Self Refreshing\n"; $temp=$bytes[12] - 127;
-			} else { print "Not Self Refreshing\n"; $temp=$bytes[12];}
+		$l = "Refresh Type";
+		if ($bytes[12] > 126) { printl $l, "Self Refreshing"; }
+		else { printl $l, "Not Self Refreshing"; }
 		
-		print "\tRefresh Rate:\t\t\t\t\t";
-		if ($temp == 0) { print "Normal (15.625uS)\n"; } elsif ($temp == 1) { print "Reduced (3.9uS)\n"; 
-		} elsif ($temp == 2) { print "Reduced (7.8uS)\n"; } elsif ($temp == 3) { print "Extended (31.3uS)\n"; 
-		} elsif ($temp == 4) { print "Extended (62.5uS)\n"; } elsif ($temp == 5) { print "Extended (125uS)\n";
-		} else { print "Undefined!";}
+		$l = "Refresh Rate";
+		$temp=$bytes[12] & 0x7f;
+		if ($temp == 0) { printl $l, "Normal (15.625uS)"; }
+		elsif ($temp == 1) { printl $l, "Reduced (3.9uS)"; }
+		elsif ($temp == 2) { printl $l, "Reduced (7.8uS)"; }
+		elsif ($temp == 3) { printl $l, "Extended (31.3uS)"; }
+		elsif ($temp == 4) { printl $l, "Extended (62.5uS)"; }
+		elsif ($temp == 5) { printl $l, "Extended (125uS)"; }
+		else { printl $l, "Undefined!";}
 		
-		print "\tPrimary SDRAM Component Bank Config:\t\t";
-		if ($bytes[13]>126) {$temp=$bytes[13]-127; print "Bank2 = 2 x Bank1\n";} else {
-			$temp=$bytes[13]; print "No Bank2 OR Bank2 = Bank1 width\n";}
+		$l = "Primary SDRAM Component Bank Config";
+		if ($bytes[13]>126) { printl $l, "Bank2 = 2 x Bank1";}
+		else { printl $l, "No Bank2 OR Bank2 = Bank1 width";}
 		
-		print "\tPrimary SDRAM Component Widths:\t\t\t";
-		if ($temp == 0) { print "Undefined!\n"; } else { print "$temp\n"; }
+		$l = "Primary SDRAM Component Widths";
+		$temp=$bytes[13] & 0x7f;
+		if ($temp == 0) { printl $l, "Undefined!\n"; }
+		else { printl $l, $temp; }
 		
-		print "\tError Checking SDRAM Component Bank Config:\t";
-		if ($bytes[14]>126) {$temp=$bytes[14]-127; print "Bank2 = 2 x Bank1\n";} else {
-			$temp=$bytes[14]; print "No Bank2 OR Bank2 = Bank1 width\n";}
+		$l = "Error Checking SDRAM Component Bank Config";
+		if ($bytes[14]>126) { printl $l, "Bank2 = 2 x Bank1";}
+		else { printl $l, "No Bank2 OR Bank2 = Bank1 width";}
 		
-		print "\tError Checking SDRAM Component Widths:\t\t";
-		if ($temp == 0) { print "Undefined!\n"; } else { print "$temp\n"; }
+		$l = "Error Checking SDRAM Component Widths";
+		$temp=$bytes[14] & 0x7f;
+		if ($temp == 0) { printl $l, "Undefined!"; }
+		else { printl $l, $temp; }
 		
-		print "\tMin Clock Delay for Back to Back Random Access:\t";
-		if ($bytes[15] == 0) { print "Undefined!\n"; } else { print "$bytes[15]\n"; }
+		$l = "Min Clock Delay for Back to Back Random Access";
+		if ($bytes[15] == 0) { printl $l, "Undefined!"; }
+		else { printl $l, $bytes[15]; }
 		
-		print "\t\t----=== The Following Apply to SDRAM DIMMs ONLY ===----\n";
+		prints "The Following Apply to SDRAM DIMMs ONLY";
 		
 # Decode next 16 bytes
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data16-31`;
 		@bytes=split(" ");
-		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
+		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j]; }
 		
-		print "\tBurst lengths supported:\t\t\t";
+		$l = "Burst lengths supported";
 		$temp="";
-		if (($bytes[0] & 1) > 0) { print "${temp}Burst Length = 1\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[0] & 2) > 0) { print "${temp}Burst Length = 2\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[0] & 4) > 0) { print "${temp}Burst Length = 4\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[0] & 8) > 0) { print "${temp}Burst Length = 8\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[0] & 16) > 0) { print "${temp}Undefined! (bit 4)\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[0] & 32) > 0) { print "${temp}Undefined! (bit 5)\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[0] & 64) > 0) { print "${temp}Undefined! (bit 6)\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[0] & 128) > 0) { print "${temp}Burst Length = Page\n"; $temp="\t\t\t\t\t\t\t"; }
-		if ($bytes[0] == 0) { print "(None Supported)\n";}
+		if (($bytes[0] & 1) > 0) { $temp .= "Burst Length = 1\n"; }
+		if (($bytes[0] & 2) > 0) { $temp .= "Burst Length = 2\n"; }
+		if (($bytes[0] & 4) > 0) { $temp .= "Burst Length = 4\n"; }
+		if (($bytes[0] & 8) > 0) { $temp .= "Burst Length = 8\n"; }
+		if (($bytes[0] & 16) > 0) { $temp .= "Undefined! (bit 4)\n"; }
+		if (($bytes[0] & 32) > 0) { $temp .= "Undefined! (bit 5)\n"; }
+		if (($bytes[0] & 64) > 0) { $temp .= "Undefined! (bit 6)\n"; }
+		if (($bytes[0] & 128) > 0) { $temp .= "Burst Length = Page\n"; }
+		if ($bytes[0] == 0) { $temp .= "(None Supported)\n";}
+		printl $l, $temp;
 		
-		print "\tNumber of Device Banks:\t\t\t\t";
-		if ($bytes[1] == 0) { print "Undefined/Reserved!\n"; } else { print "$bytes[1]\n"; }
+		$l = "Number of Device Banks";
+		if ($bytes[1] == 0) { printl $l, "Undefined/Reserved!"; }
+		else { printl $l, $bytes[1]; }
 		
-		print "\tSupported CAS Latencies:\t\t\t";
+		$l = "Supported CAS Latencies";
 		$temp="";
-		if (($bytes[2] & 1) > 0) { print "${temp}CAS Latency = 1\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[2] & 2) > 0) { print "${temp}CAS Latency = 2\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[2] & 4) > 0) { print "${temp}CAS Latency = 3\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[2] & 8) > 0) { print "${temp}CAS Latency = 4\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[2] & 16) > 0) { print "${temp}CAS Latency = 5\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[2] & 32) > 0) { print "${temp}CAS Latency = 6\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[2] & 64) > 0) { print "${temp}CAS Latency = 7\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[2] & 128) > 0) { print "${temp}Undefined (bit 7)\n"; $temp="\t\t\t\t\t\t\t"; }
-		if ($bytes[2] == 0) { print "(None Supported)\n";}
+		if (($bytes[2] & 1) > 0) { $temp .= "CAS Latency = 1\n";}
+		if (($bytes[2] & 2) > 0) { $temp .= "CAS Latency = 2\n"; }
+		if (($bytes[2] & 4) > 0) { $temp .= "CAS Latency = 3\n"; }
+		if (($bytes[2] & 8) > 0) { $temp .= "CAS Latency = 4\n"; }
+		if (($bytes[2] & 16) > 0) { $temp .= "CAS Latency = 5\n"; }
+		if (($bytes[2] & 32) > 0) { $temp .= "CAS Latency = 6\n"; }
+		if (($bytes[2] & 64) > 0) { $temp .= "CAS Latency = 7\n"; }
+		if (($bytes[2] & 128) > 0) { $temp .= "Undefined (bit 7)\n"; }
+		if ($bytes[2] == 0) { $temp .= "(None Supported)\n";}
+		printl $l, $temp;
 		
-		print "\tSupported CS Latencies:\t\t\t\t";
+		$l = "Supported CS Latencies";
 		$temp="";
-		if (($bytes[3] & 1) > 0) { print "${temp}CS Latency = 0\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[3] & 2) > 0) { print "${temp}CS Latency = 1\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[3] & 4) > 0) { print "${temp}CS Latency = 2\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[3] & 8) > 0) { print "${temp}CS Latency = 3\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[3] & 16) > 0) { print "${temp}CS Latency = 4\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[3] & 32) > 0) { print "${temp}CS Latency = 5\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[3] & 64) > 0) { print "${temp}CS Latency = 6\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[3] & 128) > 0) { print "${temp}Undefined (bit 7)\n"; $temp="\t\t\t\t\t\t\t"; }
-		if ($bytes[3] == 0) { print "(None Supported)\n";}
+		if (($bytes[3] & 1) > 0) { $temp .= "CS Latency = 0\n";}
+		if (($bytes[3] & 2) > 0) { $temp .= "CS Latency = 1\n"; }
+		if (($bytes[3] & 4) > 0) { $temp .= "CS Latency = 2\n"; }
+		if (($bytes[3] & 8) > 0) { $temp .= "CS Latency = 3\n"; }
+		if (($bytes[3] & 16) > 0) { $temp .= "CS Latency = 4\n"; }
+		if (($bytes[3] & 32) > 0) { $temp .= "CS Latency = 5\n"; }
+		if (($bytes[3] & 64) > 0) { $temp .= "CS Latency = 6\n"; }
+		if (($bytes[3] & 128) > 0) { $temp .= "Undefined (bit 7)\n"; }
+		if ($bytes[3] == 0) { $temp .= "(None Supported)\n";}
+		printl $l, $temp;
 		
-		print "\tSupported WE Latencies:\t\t\t\t";
+		$l = "Supported WE Latencies";
 		$temp="";
-		if (($bytes[4] & 1) > 0) { print "${temp}WE Latency = 0\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[4] & 2) > 0) { print "${temp}WE Latency = 1\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[4] & 4) > 0) { print "${temp}WE Latency = 2\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[4] & 8) > 0) { print "${temp}WE Latency = 3\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[4] & 16) > 0) { print "${temp}WE Latency = 4\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[4] & 32) > 0) { print "${temp}WE Latency = 5\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[4] & 64) > 0) { print "${temp}WE Latency = 6\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[4] & 128) > 0) { print "${temp}Undefined (bit 7)\n"; $temp="\t\t\t\t\t\t\t"; }
-		if ($bytes[4] == 0) { print "(None Supported)\n";}
+		if (($bytes[4] & 1) > 0) { $temp .= "WE Latency = 0\n";}
+		if (($bytes[4] & 2) > 0) { $temp .= "WE Latency = 1\n"; }
+		if (($bytes[4] & 4) > 0) { $temp .= "WE Latency = 2\n"; }
+		if (($bytes[4] & 8) > 0) { $temp .= "WE Latency = 3\n"; }
+		if (($bytes[4] & 16) > 0) { $temp .= "WE Latency = 4\n"; }
+		if (($bytes[4] & 32) > 0) { $temp .= "WE Latency = 5\n"; }
+		if (($bytes[4] & 64) > 0) { $temp .= "WE Latency = 6\n"; }
+		if (($bytes[4] & 128) > 0) { $temp .= "Undefined (bit 7)\n"; }
+		if ($bytes[4] == 0) { $temp .= "(None Supported)\n";}
+		printl $l, $temp;
 		
-		print "\tSDRAM Module Attributes:\t\t\t";
+		$l = "SDRAM Module Attributes";
 		$temp="";
-		if (($bytes[5] & 1) > 0) { print "${temp}Buffered Address/Control Inputs\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[5] & 2) > 0) { print "${temp}Registered Address/Control Inputs\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[5] & 4) > 0) { print "${temp}On card PLL (clock)\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[5] & 8) > 0) { print "${temp}Buffered DQMB Inputs\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[5] & 16) > 0) { print "${temp}Registered DQMB Inputs\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[5] & 32) > 0) { print "${temp}Differential Clock Input\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[5] & 64) > 0) { print "${temp}Redundant Row Address\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[5] & 128) > 0) { print "${temp}Undefined (bit 7)\n"; $temp="\t\t\t\t\t\t\t"; }
-		if ($bytes[5] == 0) { print "(None Reported)\n";}
+		if (($bytes[5] & 1) > 0) { $temp .= "Buffered Address/Control Inputs\n";}
+		if (($bytes[5] & 2) > 0) { $temp .= "Registered Address/Control Inputs\n"; }
+		if (($bytes[5] & 4) > 0) { $temp .= "On card PLL (clock)\n"; }
+		if (($bytes[5] & 8) > 0) { $temp .= "Buffered DQMB Inputs\n"; }
+		if (($bytes[5] & 16) > 0) { $temp .= "Registered DQMB Inputs\n"; }
+		if (($bytes[5] & 32) > 0) { $temp .= "Differential Clock Input\n"; }
+		if (($bytes[5] & 64) > 0) { $temp .= "Redundant Row Address\n"; }
+		if (($bytes[5] & 128) > 0) { $temp .= "Undefined (bit 7)\n"; }
+		if ($bytes[5] == 0) { $temp .= "(None Reported)\n";}
+		printl $l, $temp;
 		
-		print "\tSDRAM Device Attributes (General):\t\t";
+		$l = "SDRAM Device Attributes (General)";
 		$temp="";
-		if (($bytes[6] & 1) > 0) { print "${temp}Supports Early RAS# Recharge\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[6] & 2) > 0) { print "${temp}Supports Auto-Precharge\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[6] & 4) > 0) { print "${temp}Supports Precharge All\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[6] & 8) > 0) { print "${temp}Supports Write1/Read Burst\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[6] & 16) > 0) { print "${temp}Lower VCC Tolerance:5%\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[6] & 16) == 0) { print "${temp}Lower VCC Tolerance:10%\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[6] & 32) > 0) { print "${temp}Upper VCC Tolerance:5%\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[6] & 32) == 0) { print "${temp}Upper VCC Tolerance:10%\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[6] & 64) > 0) { print "${temp}Undefined (bit 6)\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[6] & 128) > 0) { print "${temp}Undefined (bit 7)\n"; $temp="\t\t\t\t\t\t\t"; }
+		if (($bytes[6] & 1) > 0) { $temp .= "Supports Early RAS# Recharge\n";}
+		if (($bytes[6] & 2) > 0) { $temp .= "Supports Auto-Precharge\n"; }
+		if (($bytes[6] & 4) > 0) { $temp .= "Supports Precharge All\n"; }
+		if (($bytes[6] & 8) > 0) { $temp .= "Supports Write1/Read Burst\n"; }
+		if (($bytes[6] & 16) > 0) { $temp .= "Lower VCC Tolerance:5%\n"; }
+		if (($bytes[6] & 16) == 0) { $temp .= "Lower VCC Tolerance:10%\n"; }
+		if (($bytes[6] & 32) > 0) { $temp .= "Upper VCC Tolerance:5%\n"; }
+		if (($bytes[6] & 32) == 0) { $temp .= "Upper VCC Tolerance:10%\n"; }
+		if (($bytes[6] & 64) > 0) { $temp .= "Undefined (bit 6)\n"; }
+		if (($bytes[6] & 128) > 0) { $temp .= "Undefined (bit 7)\n"; }
+		printl $l, $temp;
 		
-		print "\tSDRAM Cycle Time (2ns highest CAS):\t\t";
-		$temp=$bytes[7] >> 4;
-		if ($temp == 0) { print "Undefined!\n"; } else {
+		$l = "SDRAM Cycle Time (2nd highest CAS)";
+		$temp = $bytes[7] >> 4;
+		if ($temp == 0) { printl $l, "Undefined!"; }
+		else {
 			if ($temp < 4 ) {$temp=$temp + 15;}
-			print $temp + (($bytes[7] & 15) / 10);
-			print "nS\n";
+			printl $l, $temp + (($bytes[7] & 0xf) * 0.1) . "nS";
 		}
 		
-		print "\tSDRAM Access from Clock Time (2nd highest CAS):\t";
-		$temp=$bytes[8] >> 4;
-		if ($temp == 0) { print "Undefined!\n"; } else {
+		$l = "SDRAM Access from Clock Time (2nd highest CAS)";
+		$temp = $bytes[8] >> 4;
+		if ($temp == 0) { printl $l, "Undefined!"; }
+		else {
 			if ($temp < 4 ) {$temp=$temp + 15;}
-			print $temp + (($bytes[8] & 15) / 10.0);
-			print "nS\n";
+			printl $l, $temp + (($bytes[8] & 0xf) * 0.1) . "nS";
 		}
 		
-		print "\t\t----=== The Following are Optional (may be Bogus) ===----\n";
+		prints "The Following are Optional (may be Bogus)";
 		
-		print "\tSDRAM Cycle Time (3rd highest CAS):\t\t";
-		$temp=$bytes[9] >> 2;
-		if ($temp == 0) { print "Undefined!\n"; } else {
-			print $temp + (($bytes[9] & 3) / 4.0);
-			print "nS\n";
-		}
+		$l = "SDRAM Cycle Time (3rd highest CAS)";
+		$temp = $bytes[9] >> 2;
+		if ($temp == 0) { printl $l, "Undefined!"; }
+		else { printl $l, $temp + ($bytes[9] & 0x3) * 0.25 . "nS"; }
 		
-		print "\tSDRAM Access from Clock Time (3rd highest CAS):\t";
-		$temp=$bytes[10] >> 2;
-		if ($temp == 0) { print "Undefined!\n"; } else {
-			print $temp + (($bytes[10] & 3) / 4.0);
-			print "nS\n";
-		}
+		$l = "SDRAM Access from Clock Time (3rd highest CAS)";
+		$temp = $bytes[10] >> 2;
+		if ($temp == 0) { printl $l, "Undefined!"; }
+		else { printl $l, $temp + ($bytes[10] & 0x3) * 0.25 . "nS"; }
 		
-		print "\t\t----=== The Following are Required (for SDRAMs) ===----\n";
+		prints "The Following are Required (for SDRAMs)";
 		
-		print "\tMinumum Row Precharge Time:\t\t\t";
-		if ($bytes[11] == 0) { print "Undefined!\n"; } else { print "$bytes[11]nS\n"; }
+		$l = "Minumum Row Precharge Time";
+		if ($bytes[11] == 0) { printl $l, "Undefined!"; }
+		else { printl $l, "$bytes[11]nS"; }
 		
-		print "\tRow Active to Row Active Min:\t\t\t";
-		if ($bytes[12] == 0) { print "Undefined!\n"; } else { print "$bytes[12]nS\n"; }
+		$l = "Row Active to Row Active Min";
+		if ($bytes[12] == 0) { printl $l, "Undefined!"; }
+		else { printl $l, "$bytes[12]nS"; }
 		
-		print "\tRAS to CAS Delay:\t\t\t\t";
-		if ($bytes[13] == 0) { print "Undefined!\n"; } else { print "$bytes[13]nS\n"; }
+		$l = "RAS to CAS Delay";
+		if ($bytes[13] == 0) { printl $l, "Undefined!"; }
+		else { printl $l, "$bytes[13]nS"; }
 		
-		print "\tMin RAS Pulse Width:\t\t\t\t";
-		if ($bytes[14] == 0) { print "Undefined!\n"; } else { print "$bytes[14]nS\n"; }
+		$l = "Min RAS Pulse Width";
+		if ($bytes[14] == 0) { printl $l, "Undefined!"; }
+		else { printl $l, "$bytes[14]nS"; }
 		
 		
-		print "\t\t----=== The Following are Required and Apply to ALL DIMMs ===----\n";
+		prints "The Following are Required and Apply to ALL DIMMs";
 		
-		print "\tRow Densities:\t\t\t\t\t";
+		$l = "Row Densities";
 		$temp="";
-		if (($bytes[15] & 1) > 0) { print "${temp}4 MByte\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[15] & 2) > 0) { print "${temp}8 MByte\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[15] & 4) > 0) { print "${temp}16 MByte\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[15] & 8) > 0) { print "${temp}32 MByte\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[15] & 16) > 0) { print "${temp}64 MByte\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[15] & 32) > 0) { print "${temp}128 MByte\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[15] & 64) > 0) { print "${temp}256 MByte\n"; $temp="\t\t\t\t\t\t\t"; }
-		if (($bytes[15] & 128) > 0) { print "${temp}512 MByte\n"; $temp="\t\t\t\t\t\t\t"; }
-		if ($bytes[15] == 0) { print "(Undefined! -- None Reported!)\n";}
+		if (($bytes[15] & 1) > 0) { $temp .= "4 MByte\n";}
+		if (($bytes[15] & 2) > 0) { $temp .= "8 MByte\n"; }
+		if (($bytes[15] & 4) > 0) { $temp .= "16 MByte\n"; }
+		if (($bytes[15] & 8) > 0) { $temp .= "32 MByte\n"; }
+		if (($bytes[15] & 16) > 0) { $temp .= "64 MByte\n"; }
+		if (($bytes[15] & 32) > 0) { $temp .= "128 MByte\n"; }
+		if (($bytes[15] & 64) > 0) { $temp .= "256 MByte\n"; }
+		if (($bytes[15] & 128) > 0) { $temp .= "512 MByte\n"; }
+		if ($bytes[15] == 0) { $temp .= "(Undefined! -- None Reported!)\n";}
+		printl $l, $temp;
 		
 		
 # Decode next 16 bytes (32-47)
@@ -276,27 +367,23 @@ for $i ( 0 .. $#dimm_list ) {
 		@bytes=split(" ");
 		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
 		
-		print "\t\t----=== The Following are Proposed and Apply to SDRAM DIMMs ===----\n";
+		prints "The Following are Proposed and Apply to SDRAM DIMMs";
 		
-		print "\tCommand and Address Signal Setup Time:\t\t";
-		if ($bytes[0] > 127) { $temp=($bytes[0]-128)>>4; $temp2=-1; } else { $temp=$bytes[0]>>4; $temp2=1;}
-		print $temp2 * ($temp + (($bytes[0] & 15) / 10.0));
-		print "nS\n";
+		$l = "Command and Address Signal Setup Time";
+		$temp = (($bytes[0] & 0x7f) >> 4) + ($bytes[0] & 0xf) * 0.1;
+		printl $l, ( ($bytes[0] >> 7) ? -$temp : $temp ) . "nS";
 		
-		print "\tCommand and Address Signal Hold Time:\t\t";
-		if ($bytes[1] > 127) { $temp=($bytes[1]-128)>>4; $temp2=-1; } else { $temp=$bytes[1]>>4; $temp2=1;}
-		print $temp2 * ($temp + (($bytes[1] & 15) / 10.0));
-		print "nS\n";
+		$l = "Command and Address Signal Hold Time";
+		$temp = (($bytes[1] & 0x7f) >> 4) + ($bytes[1] & 0xf) * 0.1;
+		printl $l, ( ($bytes[1] >> 7) ? -$temp : $temp ) . "nS";
 		
-		print "\tData Signal Setup Time:\t\t\t\t";
-		if ($bytes[2] > 127) { $temp=($bytes[2]-128)>>4; $temp2=-1; } else { $temp=$bytes[2]>>4; $temp2=1;}
-		print $temp2 * ($temp + (($bytes[2] & 15) / 10.0));
-		print "nS\n";
+		$l = "Data Signal Setup Time";
+		$temp =(($bytes[2] & 0x7f) >> 4) + ($bytes[2] & 0xf) * 0.1;
+		printl $l, ( ($bytes[2] >> 7) ? -$temp : $temp ) . "nS";
 		
-		print "\tData Signal Hold Time:\t\t\t\t";
-		if ($bytes[3] > 127) { $temp=($bytes[3]-128)>>4; $temp2=-1; } else { $temp=$bytes[3]>>4; $temp2=1;}
-		print $temp2 * ($temp + (($bytes[3] & 15) / 10.0));
-		print "nS\n";
+		$l = "Data Signal Hold Time";
+		$temp = (($bytes[3] & 0x7f) >> 4) + ($bytes[3] & 0xf) * 0.1;
+		printl $l, ( ($bytes[3] >> 7) ? -$temp : $temp ) . "nS";
 
 # That's it for the lower part of an SDRAM EEPROM's memory!
 # Decode next 16 bytes (48-63)
@@ -304,66 +391,77 @@ for $i ( 0 .. $#dimm_list ) {
 		@bytes=split(" ");
 		for $j ( 0 .. 14 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
 
-		print "\tSPD Revision code:\t\t\t\t$bytes[14]\n";
-		print "\tEEPROM Checksum of bytes 0-62:\t\t\t";
-		printf("0x%.2X (verses calculated: 0x%.2X)\n",$bytes[15],$dimm_checksum & 255);
-		
+		printl "SPD Revision code ", sprintf("%x", $bytes[14]);
+		$l = "EEPROM Checksum of bytes 0-62";
+		$temp = sprintf("0x%.2X (verses calculated: 0x%.2X)\n",$bytes[15],$dimm_checksum & 255);
+		printl $l, $temp;
+
 # Decode next 16 bytes (64-79)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data64-79`;
 		@bytes=split(" ");
 		
-		print "\tManufacturer's JEDEC ID Code:\t\t\t";
-		printf("0x%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X\n",$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
-		print "\t\t\t\t\t\t\t(\"";
-		print pack("cccccccc",
+		$l = "Manufacturer's JEDEC ID Code";
+		$temp = sprintf("0x%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X\n",$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
+		printl $l, $temp;
+		$temp = pack("cccccccc",
 			$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
-		print "\")\n";
+		printl $l, "(\"$temp\")";
 		
-		print "\tManufacturing Location Code:\t\t\t";
-		printf("0x%.2X\n",$bytes[8]);
+		$l = "Manufacturing Location Code";
+		$temp = sprintf("0x%.2X\n",$bytes[8]);
+		printl $l, $temp;
 		
-		print "\tManufacurer's Part Number:\t\t\t\"";
+		$l = "Manufacurer's Part Number:\"";
 # Decode next 16 bytes (80-95)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data80-95`;
 		@bytes2=split(" ");
-		print pack("cccccccccccccccccc",$bytes[9],$bytes[10],$bytes[11],$bytes[12],$bytes[13],$bytes[14],$bytes[15],
+		$temp = pack("cccccccccccccccccc",$bytes[9],$bytes[10],$bytes[11],$bytes[12],$bytes[13],$bytes[14],$bytes[15],
 			$bytes2[0],$bytes2[1],$bytes2[2],$bytes2[3],$bytes2[4],$bytes2[5],$bytes2[6],$bytes2[7],$bytes2[8],$bytes2[9]);
-		print "\"\n";
+		printl $l, $temp;
 		
-		print "\tRevision Code:\t\t\t\t\t";
-		printf("0x%.2X%.2X\n",$bytes2[10],$bytes2[11]);
+		$l = "Revision Code";
+		$temp = sprintf("0x%.2X%.2X\n",$bytes2[10],$bytes2[11]);
+		printl $l, $temp;
 		
-		print "\tManufacturing Date:\t\t\t\t";
-		printf("0x%.2X%.2X\n",$bytes2[12],$bytes2[13]);
+		$l = "Manufacturing Date";
+		$temp = sprintf("0x%.2X%.2X\n",$bytes2[12],$bytes2[13]);
+		printl $l, $temp;
 		
-		print "\tAssembly Serial Number:\t\t\t\t";
+		$l = "Assembly Serial Number";
 # Decode next 16 bytes (96-111)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data96-111`;
 		@bytes=split(" ");
 		
-		printf("0x%.2X%.2X%.2X%.2X\n",$bytes2[15],$bytes[0],$bytes[1],$bytes[2]);
+		$temp = sprintf("0x%.2X%.2X%.2X%.2X\n",$bytes2[15],$bytes[0],$bytes[1],$bytes[2]);
 # Decode next 16 bytes (112-127)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data112-127`;
 		@bytes=split(" ");
 		
-		print "\tIntel Specification for Frequency:\t\t";
-		if ($bytes[14] == 102) { print "66MHz\n"; } elsif ($bytes[14] == 100) { print "100MHz\n"; } else { print "Undefined!\n"; }
+		$l = "Intel Specification for Frequency";
+		if ($bytes[14] == 102) { printl $l, "66MHz\n"; }
+		elsif ($bytes[14] == 100) { printl $l, "100MHz\n"; }
+		else { printl $l, "Undefined!\n"; }
 		
-		print "\tIntel Spec Details for 100MHz Support:\t\t";
+		$l = "Intel Spec Details for 100MHz Support";
 		$temp="";
-		if (($bytes[15] & 1) > 0) { print "${temp}Intel Concurrent AutoPrecharge\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[15] & 2) > 0) { print "${temp}CAS Latency = 2\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[15] & 4) > 0) { print "${temp}CAS Latency = 3\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[15] & 8) > 0) { print "${temp}Junction Temp A (90 degrees C)\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[15] & 8) == 0) { print "${temp}Junction Temp B (100 degrees C)\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[15] & 16) > 0) { print "${temp}CLK 3 Connected\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[15] & 32) > 0) { print "${temp}CLK 2 Connected\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[15] & 64) > 0) { print "${temp}CLK 1 Connected\n"; $temp="\t\t\t\t\t\t\t";}
-		if (($bytes[15] & 128) > 0) { print "${temp}CLK 0 Connected\n"; $temp="\t\t\t\t\t\t\t";}
-		if ($bytes[15] > 175) { print "${temp}Double Sided DIMM\n"; $temp="\t\t\t\t\t\t\t";
-			} else {print "${temp}Single Sided DIMM\n"; $temp="\t\t\t\t\t\t\t";}
+		if (($bytes[15] & 1) > 0) { $temp .= "Intel Concurrent AutoPrecharge\n";}
+		if (($bytes[15] & 2) > 0) { $temp .= "CAS Latency = 2\n";}
+		if (($bytes[15] & 4) > 0) { $temp .= "CAS Latency = 3\n";}
+		if (($bytes[15] & 8) > 0) { $temp .= "Junction Temp A (90 degrees C)\n";}
+		if (($bytes[15] & 8) == 0) { $temp .= "Junction Temp B (100 degrees C)\n";}
+		if (($bytes[15] & 16) > 0) { $temp .= "CLK 3 Connected\n";}
+		if (($bytes[15] & 32) > 0) { $temp .= "CLK 2 Connected\n";}
+		if (($bytes[15] & 64) > 0) { $temp .= "CLK 1 Connected\n";}
+		if (($bytes[15] & 128) > 0) { $temp .= "CLK 0 Connected\n";}
+		if ($bytes[15] > 175) { $temp .= "Double Sided DIMM\n"; }
+		else { $temp .= "Single Sided DIMM\n";}
+		printl $l, $temp;
 		
 		
 	}
 }
-print "\n\nNumber of SDRAM DIMMs detected and decoded: $dimm_count\n";
+printl "Number of SDRAM DIMMs detected and decoded", $dimm_count;
+
+print "</table>\n" if $opt_html;
+print "</body></html>\n" if $opt_body;
+print "\nTry '$0 --format' for html output.\n" unless $opt_html;
