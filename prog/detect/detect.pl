@@ -801,8 +801,7 @@ sub add_isa_to_chips_detected
            next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_misdetected_ref->[$j]->{address})) {
-        $new_misdetected_ref->[$j] = { %$new_misdetected_ref->[$j],
-                                      isa_addr => $datahash->{isa_addr}};
+        $new_misdetected_ref->[$j]->{isa_addr} = $datahash->{isa_addr};
         return;
       }
       close FILE;
@@ -881,7 +880,12 @@ sub scan_adapter
           print "Success!\n",
                 "    (confidence $conf, driver `$$chip{driver}'";
           if (@chips) {
-            print ", other addresses: @chips)\n";
+            print ", other addresses:";
+            my $other_addr;
+            foreach $other_addr (sort @chips) {
+              printf(" %02x",$other_addr);
+            }
+            printf "\n";
           } else {
             print ")\n";
           }
@@ -1469,7 +1473,7 @@ sub main
                if $is_i2c;
         printf "    Busdriver `%s', I2C address 0x%02x", $data->{driver}, 
                $data->{address} if $is_i2c;
-        printf "(main: 0x%02x", $data->{main} if (exists $data->{main});
+        printf " (main: 0x%02x)", $data->{main} if (exists $data->{main});
         print "    " if  $is_i2c and $is_isa;
         if ($is_isa) {
           if ($data->{isa_addr}) {
