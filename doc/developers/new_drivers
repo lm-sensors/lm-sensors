@@ -1,6 +1,11 @@
+These are the steps you should follow to write a new driver and
+submit it to us so that it will be applied cleanly to our package.
+
 * Contact us first.
   You are of course free to write your own drivers, but it is smart to
   check first nobody else is already working on it.
+  Check our "New Drivers" page for information also.
+
 * Write the new driver. 
   For a chip driver, use lm78.c as template. For an SMBus-only adapter, 
   use i2c-piix4.c. Use i2c-via.c for an I2C-level adapter.
@@ -10,9 +15,15 @@
   Remember that you want to output the direct measurements done by the
   chip. If these sensor values need scaling, this should be done through
   the configuration file.
+
+* Meet Kernel coding standards
+  See Documentation/CodingStyle in the kernel source.
+  Be sure and use 8 column tabs.
+
 * Add the driver to the Makefile.
   Usually, you can just add it to KERNEL{CHIPS,DRIVERS}TARGETS in the
   Module.mk file in the directory itself.
+
 * Make sure it compiles cleanly.
   If you compile with 'make WARN=1', you usually get many additional
   warnings. Please resolve these too, even if you know they are
@@ -20,19 +31,40 @@
   information. Remember, things put between #ifdef DEBUG #endif may never
   stop the driver from functioning; they should just output additional
   information.
+
 * Check for external symbols
   'nm --extern --defined' should only output symbols starting with __module,
   cleanup_module, init_module and some kernel versioning symbols. Mark all
   other symbols as static in your source file.
+
 * Test the module
   This is usually the boring part...
+  Test both with 2.2.x and 2.4.x kernels.
+
 * Add detection information to prog/detect/sensors-detect
   This is a perl script that automatically detects what chips and adapters
   are present. Contact Frodo if you need help.
+
 * Add chip information to lib/chips.{c,h} for chip drivers
   Until you have done this, the chip will be invisible for user-level
   programs. Again, contact Frodo if you need help with this.
+
 * Add entries to etc/sensors.conf.eg
   If needed, you can set defaults here.
+
 * Add a dedicated procedure to prog/sensors/chips.[ch]
   This makes the included sensors program pretty-print your chip information.
+
+* Add the name of the device to the README file.
+
+* Add your name to the CONTRIBUTORS file.
+
+* Add entries to the CHANGES file.
+
+* Write a doc/chips/xxx or doc/busses/xxx file.
+
+* Make sure the GPL boilerplate and your name (and if applicable your
+  company's name) is at the top of the
+  new driver so we know you are giving it to us under the GPL.
+
+* Submit the changes to us a patch against CVS.
