@@ -4743,6 +4743,7 @@ sub generate_modprobes
   my ($prefer_isa) = @_;
 
   my ($chip,$detection,$nr,$i,@optionlist,@probelist,$driver,$isa,$adap);
+  my $bmcsensors = 0;
   my @adapters;
   my $modprobes = "";
   my $configfile = "";
@@ -4784,6 +4785,9 @@ sub generate_modprobes
           not (exists $detection->{i2c_driver} and not $prefer_isa)) {
            $isa=1;
       }
+      if ($chip->{driver} eq "bmcsensors") {
+           $bmcsensors=1;
+      }
     }
   }
 
@@ -4804,6 +4808,10 @@ sub generate_modprobes
     }
   }
   $modprobes .= "modprobe i2c-isa\n" if ($isa);
+  if ($bmcsensors) {
+    $modprobes .= "# You must also install and load the IPMI modules\n";
+    $modprobes .= "modprobe i2c-ipmi\n";
+  }
 
   # Now determine the chip probe lines
   $modprobes .= "# I2C chip drivers\n";
