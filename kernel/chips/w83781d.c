@@ -983,10 +983,9 @@ int w83781d_detach_client(struct i2c_client *client)
 		return err;
 	}
 
-	if i2c_is_isa_client
-		(client)
-		    release_region(client->addr, W83781D_EXTENT);
-	else {
+	if(i2c_is_isa_client(client)) {
+		release_region(client->addr, W83781D_EXTENT);
+	} else {
 		i2c_detach_client(&
 				  (((struct
 				     w83781d_data *) (client->data))->

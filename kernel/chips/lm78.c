@@ -478,9 +478,8 @@ int lm78_detach_client(struct i2c_client *client)
 		return err;
 	}
 
-	if i2c_is_isa_client
-		(client)
-		    release_region(client->addr, LM78_EXTENT);
+	if(i2c_is_isa_client(client))
+		release_region(client->addr, LM78_EXTENT);
 	kfree(client);
 
 	return 0;
