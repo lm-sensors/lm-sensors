@@ -83,7 +83,7 @@ static int supported[] = {PCI_DEVICE_ID_AMD_756,
 #define SMBREV    0x008
 
 /* Other settings */
-#define MAX_TIMEOUT 100
+#define MAX_TIMEOUT 500
 
 /* AMD756 constants */
 #define AMD756_QUICK        0x00
@@ -234,6 +234,15 @@ void amd756_do_pause(unsigned int amount)
 
 #define GE_CYC_TYPE_MASK (7)
 #define GE_HOST_STC (1 << 3)
+#define GE_ABORT (1 << 5)
+
+void amd756_abort(void)
+{
+	printk("i2c-amd756.o: Sending abort.\n");
+	outw_p(inw(SMB_GLOBAL_ENABLE) | GE_ABORT, SMB_GLOBAL_ENABLE);
+	amd756_do_pause(100);
+	outw_p(GS_CLEAR_STS, SMB_GLOBAL_STATUS);
+}
 
 int amd756_transaction(void)
 {
@@ -261,8 +270,8 @@ int amd756_transaction(void)
 		         (timeout++ < MAX_TIMEOUT));
 		/* If the SMBus is still busy, we give up */
 		if (timeout >= MAX_TIMEOUT) {
-			printk("i2c-amd756.o: Busy wait timeout! (%04x)\n",
-			       temp);
+			printk("i2c-amd756.o: Busy wait timeout! (%04x)\n", temp);
+			amd756_abort();
 			return(-1);
 		}
 		timeout = 0;
@@ -280,6 +289,7 @@ int amd756_transaction(void)
 	/* If the SMBus is still busy, we give up */
 	if (timeout >= MAX_TIMEOUT) {
 		printk("i2c-amd756.o: Completion timeout!\n");
+		amd756_abort ();
 		return(-1);
 	}
 
@@ -293,7 +303,6 @@ int amd756_transaction(void)
 	if (temp & GS_COL_STS) {
 		result = -1;
 		printk("i2c-amd756.o: SMBus collision!\n");
-		/* TODO: Clear Collision Status with a 1 */
 	}
 
 	if (temp & GS_TO_STS) {
