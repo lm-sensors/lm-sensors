@@ -33,6 +33,8 @@
                  Most (all?) drivers assume two pulses per rev fans
                  and the old scaling was producing double the RPM's
                  Thanks to Jerome Hsiao @ Arima for pointing this out.
+	2004-01-27   Remove use of temporary ID.
+                 Define addresses as a range.
 */
 
 #include <linux/version.h>
@@ -50,17 +52,9 @@
 #include "version.h"
 #include "sensors_vid.h"
 
-#ifndef I2C_DRIVERID_ADM1026
-/* i2c-id.h hasn't been updated to assign us an ID.
- * So...  Use a local ID from 0xf000 to 0xffff as
- *    documented in i2c-id.h
- */
-#define I2C_DRIVERID_ADM1026  (0xf126)
-#endif
-
 /* Addresses to scan */
-static unsigned short normal_i2c[] = { 0x2c, 0x2d, 0x2e, SENSORS_I2C_END };
-static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
+static unsigned short normal_i2c[] = { SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x2c, 0x2e, SENSORS_I2C_END };
 static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
