@@ -17,9 +17,11 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.8.5 (2004XXXX)
+2.8.5 (2004030X)
   File doc/chips/SUMMARY: Update
   File etc/sensors.conf.eg: Epox 8K3A tweaks. (Kronos)
+  Makefiles hotplug and rrd: Remove -o and -g arguments to install
+  Module bmcsensors: Increase max SDRs to 100
   Module fscher: Rename fanN_min to pwmN (Reinhard Nissl)
   Module i2c-amd756: Don't register driver to avoid driver conflicts.
                      (Daniel Rune Jensen)
@@ -34,9 +36,9 @@ ask CVS about it:
                    Preserve other bits when forcing temp2/3 to comparator mode
   Module w83781d: Preserve other bits when forcing temp2/3 to comparator mode
                   Remove asb100 support
-  Modules asb100.c, fscher.c, lm90.c, max6650.c, w83l785ts.c:
+  Modules asb100, fscher, lm90, max6650, w83l785ts, xeontemp:
           Define driver ID if i2c-id.h doesn't have it yet.
-  Modules i2c-ali1535.c, i2c-hydra.c, i2c-i801.c, i2c-sis5595.c:
+  Modules i2c-ali1535, i2c-hydra, i2c-i801, i2c-sis5595:
           Backport oops fix from Linux 2.6.
   Modules (all chips): Get rid of useless headers
   Program decode-edid.pl: Add sysfs support
