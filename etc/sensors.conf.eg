@@ -1281,7 +1281,7 @@ chip "it87-*" "it8705-*" "it8712-*"
     # and is not supported by driver at this time
     ignore  vid
 
-# If 3.3V reads 2X too high (Soyo Dragon, for example),
+# If 3.3V reads 2X too high (Soyo Dragon and Asus A7V8X-X, for example),
 # comment out following line.
     compute in2   2*@ , @/2
 #
@@ -1320,6 +1320,9 @@ chip "it87-*" "it8705-*" "it8712-*"
 # you probably need to change the sensor type. This must be done
 # with 'modprobe it87 temp_type=0xXX', you can't fix it in this file.
 # See ../doc/chips/it87 for details and valid 'XX' values!!!
+# Also, note that on some motherboards (Asus A7V8X-X for example), temp1 is
+# the CPU temp and temp2 is the MB temp. On that same motherboard, temp3
+# should be ignored since it is not used.
 #
     label temp1       "Temp1/MB"
     set   temp1_over  40
