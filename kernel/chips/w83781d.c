@@ -67,6 +67,8 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
 SENSORS_INSMOD_6(w83781d, w83782d, w83783s, w83627hf, as99127f, w83697hf);
+SENSORS_MODULE_PARM(force_subclients, "List of subclient addresses: " \
+                      "{bus, clientaddr, subclientaddr1, subclientaddr2}");
 
 static int init = 1;
 MODULE_PARM(init, "i");
@@ -747,7 +749,7 @@ int w83781d_attach_adapter(struct i2c_adapter *adapter)
 int w83781d_detect(struct i2c_adapter *adapter, int address,
 		   unsigned short flags, int kind)
 {
-	int i, val1, val2;
+	int i, val1, val2, id;
 	struct i2c_client *new_client;
 	struct w83781d_data *data;
 	int err = 0;
@@ -929,11 +931,33 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 			err = -ENOMEM;
 			goto ERROR4;
 		}
-		val1 = w83781d_read_value(new_client,
-				          W83781D_REG_I2C_SUBADDR);
-		data->lm75[0].addr = 0x48 + (val1 & 0x07);
+		id = i2c_adapter_id(adapter);
+		if(force_subclients[0] == id && force_subclients[1] == address) {
+			for(i = 2; i <= 3; i++) {
+				if(force_subclients[i] < 0x48 ||
+				   force_subclients[i] > 0x4f) {
+					printk(KERN_ERR "w83781d.o: Invalid subclient address %d; must be 0x48-0x4f\n",
+					        force_subclients[i]);
+					goto ERROR5;
+				}
+			}
+			w83781d_write_value(new_client,
+			                    W83781D_REG_I2C_SUBADDR,
+			                    (force_subclients[2] & 0x07) |
+			                    ((force_subclients[3] & 0x07) <<4));
+			data->lm75[0].addr = force_subclients[2];
+		} else {
+			val1 = w83781d_read_value(new_client,
+					          W83781D_REG_I2C_SUBADDR);
+			data->lm75[0].addr = 0x48 + (val1 & 0x07);
+		}
 		if (kind != w83783s) {
-			data->lm75[1].addr = 0x48 + ((val1 >> 4) & 0x07);
+			if(force_subclients[0] == id &&
+			   force_subclients[1] == address) {
+				data->lm75[1].addr = force_subclients[3];
+			} else {
+				data->lm75[1].addr = 0x48 + ((val1 >> 4) & 0x07);
+			}
 			if(data->lm75[0].addr == data->lm75[1].addr) {
 				printk(KERN_ERR "w83781d.o: Duplicate addresses 0x%x for subclients.\n",
 					data->lm75[0].addr);
@@ -963,8 +987,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 				       i, data->lm75[i].addr);
 				if (i == 1)
 					goto ERROR6;
-				else
-					goto ERROR5;
+				goto ERROR5;
 			}
 			if (kind == w83783s)
 				break;
@@ -993,7 +1016,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 	}
 	data->sysctl_id = i;
 
-	/* Initialize the Winbond chip */
+	/* Initialize the chip */
 	w83781d_init_client(new_client);
 	return 0;
 

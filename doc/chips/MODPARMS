@@ -3,15 +3,16 @@ Parameters for modprobe and insmod
 ==================================
 SUMMARY
 
-	[modprobe,insmod] module [parameter...]
+	[modprobe,insmod] module {parameter...}
 	Parameters:
-		force=bus,address
-		force_addr=address
-		force_[chipname]=bus,address
-		ignore=bus,address
-		ignore_range=bus,startaddress,endaddress
-		probe=bus,address
-		probe_range=bus,startaddress,endaddress
+		force=bus,address{,bus,address}
+		force_addr=address{,address}
+		force_[chipname]=bus,address{,bus,address}
+		force_subclients=bus,caddr,saddr,saddr
+		ignore=bus,address{,bus,address}
+		ignore_range=bus,start,end{,bus,start,end}
+		probe=bus,address{,bus,address}
+		probe_range=bus,start,end{,bus,start,end}
 		init=[0,1] (default 1)
 
 	All arguments are in decimal unless prefixed by "0x".
@@ -89,11 +90,19 @@ very strange results...
 It is used to program the base address of the sensor registers.
 This is required if the BIOS does not initialize the base address.
 
+`force_subclients' is used to force the i2c addresses for subclients of
+a certain chip. Typical usage is `force_subclients=0,0x2d,0x4a,0x4b'
+to force the subclients of chip 0x2d on bus 0 to i2c addresses
+0x4a and 0x4b.
+This parameter is currently supported only by the w83781d driver
+and is useful for certain Tyan boards.
+
 `init' is used to tell a driver to bypass initializing a chip.
 This may be necessary if the BIOS has initialized the chip a certain way
 and the driver should not overwrite that initialization.
+It is also useful if normal initialization crashes the system.
 The default is 1, so the only useful value is `init=0'.
-This parameter is not supported by most drivers.
+This parameter is currently supported only by the w83781d driver.
 
 ==================================
 EXAMPLE

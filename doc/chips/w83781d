@@ -54,8 +54,16 @@ Module Parameters
   Ditto
 * force_w83627hf:
   Ditto
+* force_w83697hf:
+  Ditto
 * force_as99127f:
   Ditto
+* force_subclients=bus,caddr,saddr,saddr
+  This is used to force the i2c addresses for subclients of
+  a certain chip. Typical usage is `force_subclients=0,0x2d,0x4a,0x4b'
+  to force the subclients of chip 0x2d on bus 0 to i2c addresses
+  0x4a and 0x4b.
+  This parameter is useful for certain Tyan boards.
 * ignore: short array (min = 1, max = 48)
   List of adapter,address pairs not to scan
 * ignore_range: short array (min = 1, max = 48)
