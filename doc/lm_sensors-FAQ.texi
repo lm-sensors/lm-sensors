@@ -1375,7 +1375,12 @@ Send us email @email{sensors@@stimpy.netroedge.com}.
 @section How to join the project mailing list
 
 Send us email @email{sensors@@stimpy.netroedge.com}. Sorry,
-there is no automated subscribe/unsubscribe service.
+there is no automated subscribe/unsubscribe service yet
+(but we're seriously thinking of switching to majordomo).
+Please note that you do NOT need to be subscribed to the list
+in order to post. If you simply need help as a user, post your
+detailed problem and questions directly. Don't worry, you'll be
+CC'd on all replies.
 
 
 @node Section 6.5, Section 6.6, Section 6.4, Contribute

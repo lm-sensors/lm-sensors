@@ -1,21 +1,3 @@
-START-INFO-DIR-ENTRY
-* lm_sensors-FAQ: (lm_sensors-FAQ)           The lm_sensors FAQ
-END-INFO-DIR-ENTRY
-
-Short Contents
-**************
-
-lm_sensors
-1 PC and Sensor Overview
-2 Sensor and Bus Basics
-3 Installation and Management
-4 Problems
-5 How to Ask for Help
-6 How to Contribute
-7 Version 1 Specific Questions
-Appendix A Revision History of This Document
-
-
 Table of Contents
 *****************
 
@@ -1344,7 +1326,11 @@ package you would like to work on.
 ========================================
 
    Send us email <sensors@stimpy.netroedge.com>. Sorry, there is no
-automated subscribe/unsubscribe service.
+automated subscribe/unsubscribe service yet (but we're seriously
+thinking of switching to majordomo).  Please note that you do NOT need
+to be subscribed to the list in order to post. If you simply need help
+as a user, post your detailed problem and questions directly. Don't
+worry, you'll be CC'd on all replies.
 
 6.5 How to access mailing list archives
 =======================================
@@ -1498,3 +1484,4 @@ Appendix A Revision History of This Document
    * Rev 1.1 Modifications by Philip Edelbrock, 19980809
 
    * Rev 1.0 Written by Philip Edelbrock, 19980803
+
