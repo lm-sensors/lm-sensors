@@ -26,7 +26,7 @@ PROGDETECTDIR := $(MODULE_DIR)
 PROGDETECTTARGETS := $(MODULE_DIR)/i2cdetect $(MODULE_DIR)/dmidecode
 PROGDETECTSOURCES := $(MODULE_DIR)/i2cdetect.c $(MODULE_DIR)/dmidecode.c
 PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect \
-                         $(MODULE_DIR)/i2cdetect $(MODULE_DIR)/dmidecode
+                         $(MODULE_DIR)/i2cdetect
 
 # Include all dependency files. We use '.rd' to indicate this will create
 # executables.
@@ -38,6 +38,9 @@ user :: all-prog-detect
 install-prog-detect: all-prog-detect
 	mkdir -p $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -o root -g root -m 755 $(PROGDETECTSBININSTALL) $(DESTDIR)$(SBINDIR)
+	if [ ! -e $(DESTDIR)$(SBINDIR)/dmidecode -o $(DESTDIR)$(SBINDIR)/dmidecode -ot $(PROGDETECTDIR)/dmidecode.c ] ; then \
+	  $(INSTALL) -o root -g root -m 755 $(PROGDETECTDIR)/dmidecode $(DESTDIR)$(SBINDIR) ; \
+	fi
 user_install :: install-prog-detect
 
 clean-prog-detect:
