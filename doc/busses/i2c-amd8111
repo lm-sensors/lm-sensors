@@ -1,14 +1,15 @@
 Kernel driver `i2c-adm8111.o'
 
-Status: Untested.
+Status: Slightly tested.
 
 Supported adapters:
     * AMD-8111 SMBus 2.0 PCI interface
-    * Possibly any other interface that implements the ACPI 2.0 EC interface
-    Datasheets: Publicly available at AMD and ACPI websites
+
+Datasheets:
+	AMD datasheet not yet available, but almost everything can be found in
+        publically available ACPI 2.0 specification, which the adapter follows.
 
 Author: Vojtech Pavlik <vojtech@suse.cz>
-
 
 Module Parameters
 -----------------
@@ -30,15 +31,22 @@ in your 'lspci -v', then this driver is for your chipset.
 Process Call Support
 --------------------
 
-The chip supports it, but it's not implemented in the driver at the moment.
+Supported.
 
 SMBus 2.0 Support
 -----------------
 
-The chip supports SMBus 2.0, however the only extension the driver
-supports is PEC. Slave mode or host notification are not implemented.
+Supported. Both PEC and block process call support is implemented.
+Slave mode or host notification are not yet implemented.
 
+Notes
+-----
 
 Note that for the 8111, there are two SMBus adapters. The SMBus 2.0 adapter is
 supported by this driver, and the SMBus 1.0 adapter is supported
 by the i2c-amd756 driver.
+
+The 8111 used with the AMD Hammer. While the module should work either with
+CONFIG_X86 or CONFIG_X86_64, it will only be compiled with CONFIG_X86_64
+(as it was the easiest way to prevent compilation in 2.2 kernels).
+If you would like to compile it for CONFIG_X86, modify kernel/busses/Module.mk.
