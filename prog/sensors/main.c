@@ -22,6 +22,8 @@
 #include <getopt.h>
 #include <string.h>
 #include <errno.h>
+#include <locale.h>
+#include <langinfo.h>
 
 #include "lib/sensors.h" 
 #include "lib/error.h"
@@ -169,6 +171,8 @@ int main (int argc, char *argv[])
     { 0,0,0,0 }
   };
 
+  setlocale(LC_CTYPE, "");
+
   do_unknown = 0;
   do_sets = 0;
   show_algorithm = 0;
@@ -248,7 +252,10 @@ int main (int argc, char *argv[])
   close_config_file();
 
   /* build the degrees string */
-  sprintf(degstr, "%c", 176);
+  if (strcmp(nl_langinfo(CODESET), "UTF-8") == 0)
+    sprintf(degstr, "%c%c", 0xc2, 0xb0);
+  else
+    sprintf(degstr, "%c", 176);
   if (fahrenheit) {
     strcat(degstr, "F");
   } else {
