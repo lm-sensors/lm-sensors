@@ -2,7 +2,7 @@
     via686a.c - Part of lm_sensors, Linux kernel modules
                 for hardware monitoring
                 
-    Copyright (c) 1998, 1999,2000  Frodo Looijaard <frodol@dds.nl>,
+    Copyright (c) 1998 - 2001  Frodo Looijaard <frodol@dds.nl>,
                         Kyösti Mälkki <kmalkki@cc.hut.fi>,
 			Mark Studebaker <mdsxyz123@yahoo.com>,
 			and Bob Dougherty <bobd@stanford.edu>
@@ -25,7 +25,10 @@
 */
 
 /*
-    Warning - only supports a single via686a device.
+    Supports the Via VT82C686A and VT82C686B south bridges.
+    Reports either as a 686A.
+    See doc/chips/via686a for details.
+    Warning - only supports a single device.
 */
 #include <linux/version.h>
 #include <linux/module.h>

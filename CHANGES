@@ -17,14 +17,16 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.5.6 (2001????)
+2.6.0 (2001????)
   File doc/FAQ: Updates
+  File doc/chips/via686a: Claim support for 686b.
   File sensors.conf.eg: Adjust as99127f -12V calculation
   Module lm78: Recognize chipid=0x20
   Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
   Module sensors: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
   Module via686a: Allow force=9191,address (for A7V/K7V boards)
   Program mkpatch.pl: Fix adm9240 typos
+  Program sensors: Change reported version from 1.3 to the lm_sensors version.
   Program sensors-detect: Recognize lm78 with chipid=0x20
 
 2.5.5 (20010115)

@@ -1,13 +1,13 @@
 Kernel driver `via686a.o'
 =========================
 
-Status: Alpha.
+Status: Stable.
 
 Supported chips:
-  * Via 686a Southbridge Integrated Hardware Monitor
+  * Via VT82C686A, VT82C686B  Southbridge Integrated Hardware Monitor
     Prefix: via686a
     Addresses scanned: ISA in PCI-space encoded address
-    Datasheet: Publicly available at the Silicon Integrated Systems Corp. site.
+    Datasheet: Publicly available at the Via site http://www.via.com.tw.
 
 Authors: Kyösti Mälkki <kmalkki@cc.hut.fi>,
          Mark D. Studebaker <mdsxyz123@yahoo.com>
@@ -18,9 +18,9 @@ Authors: Kyösti Mälkki <kmalkki@cc.hut.fi>,
 Module Parameters
 -----------------
 
-force=9191,address	Set the I/O base address. Useful for Asus A7V boards that
-			don't set the address in the BIOS. Does not do a PCI
-			force; the via686a must still be present in lspci.
+force=9191,address	Set the I/O base address. Useful for Asus A7V boards
+			that don't set the address in the BIOS. Does not do a
+			PCI force; the via686a must still be present in lspci.
 			Don't use this unless the driver complains that the
 			base address is not set. Otherwise the driver will
 			recognize both the old and the forced address.
@@ -30,6 +30,9 @@ force_via686a=9191,address	Same as force.
 
 Description
 -----------
+
+The driver does not distinguish between a 686A or 686B and reports
+both as a 686A.
 
 The Via 686a southbridge has integrated hardware monitor functionality.
 It also has an I2C bus, but this driver only supports the hardware monitor.

@@ -55,7 +55,7 @@ At least the following hardware sensor chips are supported:
   SiS 5595 embedded sensors
   TelCom TCN75
   TI THMC10 and THMC50
-  VIA Technologies VT82C686A embedded sensors
+  VIA Technologies VT82C686A/B embedded sensors
   Winbond W83781D, W83782D, W83783S, and W83627HF
 
 
