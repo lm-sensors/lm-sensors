@@ -28,6 +28,7 @@
 require 5.004;
 
 use strict;
+use Fcntl qw(:seek);
 
 #########################
 # CONSTANT DECLARATIONS #
@@ -2835,14 +2836,12 @@ sub generate_modprobes
   
 }
 
-sub safe_system_vendor
+# returns:
+# system id string (e.g. 'IBM'), unsafe system
+# '1', safe system
+# 0, could not determine
+sub system_safeness_by_dmi
 {
-  if ($> != 0)
-  {
-  	print " As you are not root, we can't run dmidecode to determine your system vendor.\n";
-  	return 0;
-  }
-
   my $opened = 0;
   foreach my $dmidecode (@dmidecode)
   {
@@ -2860,31 +2859,125 @@ sub safe_system_vendor
   }
 
   my $line;
-  while (<DMI>)
-  {
-  	next unless m/System Information Block/;
-    $line = <DMI>;    
-    last;
-  }
+  while (defined ($line = <DMI>) && $line !~ m/^\s*System Information/) {}
+  while (defined ($line = <DMI>) && $line !~ m/^\s*Vendor:/) {}
   close (DMI);
 
   if ((defined $line) && ($line =~ m/^\s*Vendor: (.*)$/) && ($1 !~ /^\s*$/))
   {
     my $vendor = $1;
   	$vendor =~ s/\s*$//;
-  	print " System vendor: $vendor\n";
-    if ($vendor =~ /\bIBM\b/)
-    {
-      print " Sorry, we won't let you go on. IBM systems are known to have serious\n",
-            " problems with lm_sensors, resulting in hardware failures.\n";
-      exit;
-    }
-    return 1;
+  	print " System vendor (DMI): $vendor\n";
+    return 'IBM' if $vendor =~ /\bIBM\b/;
+    return '1';
   }
-  
-  print " Could not determine system vendor, due to some problem with dmidecode. Please\n",
-        " have it fixed, we use it for safer operations.\n".
-  return 0;
+
+  return undef;
+}
+
+# returns:
+# system id string (e.g. 'IBM'), unsafe system
+# '1', safe system
+# 0, could not determine
+sub system_safeness_by_acpi
+{
+  my $pos = 0xF0000;
+  my $found = 0;
+  my $oem = '';
+
+  return 0
+    unless open MEM, '/dev/mem';
+  binmode MEM;
+  unless (seek MEM, $pos, SEEK_SET)
+  {
+    close MEM;
+    return 0;
+  }
+  while ($pos <= 0xFFFF0 && !$found)
+  {
+    my $r = read (MEM, my $buf, 16);
+    unless ($r == 16)
+    {
+      close MEM;
+      return 0;
+    }
+    if (substr ($buf, 0, 8) eq 'RSD PTR ')
+    {
+      $oem = substr ($buf, 9, 6);
+      $found++;
+    }
+    $pos += 16;
+  }
+  close MEM;
+
+  return 0 unless $found;
+  print " BIOS vendor (ACPI): $oem\n";
+  return 'IBM' if $oem eq 'IBM   ';
+  return '1';
+}
+
+# returns:
+# 1 : the system is known to be safe
+# 0 : the system safeness is unknown
+# If the system is know to be unsafe (i.e. for now, IBM systems), never
+#   return.
+sub safe_system_vendor
+{
+  if ($> != 0)
+  {
+  	print " As you are not root, we can't determine your system vendor.\n";
+  	return 0;
+  }
+
+  # We now have two methods for detecting IBM systems: ACPI and DMI.
+  # The ACPI scan is easy and handled internally. The DMI scan, being more
+  # complex, is handled by dmidecode, externally. Each method can return
+  # three status:
+  #  * the system is known to be safe (returns '1');
+  #  * the system is known to be unsafe (returns a string that identifies
+  #    the system, e.g. 'IBM');
+  #  * the method doesn't permit to detect wether the system is safe
+  #    (returns 0).
+  # We then combine both results to come to a conclusion. The rules we
+  # follow are (in order):
+  #  * if both methods return 0, we can't say anything and return 0 (meaning
+  #    "system safeness is unknown");
+  #  * else, if no method returns an identifier string (that is, each method
+  #    returns either 0 or '1'), we assume that the system is safe and
+  #    return 1 (meaning "system is safe");
+  #  * else display an alert message and exit; if only one of the methods
+  #    worked, ask the user to be kind and send us a report.
+
+  my $safeness_acpi = system_safeness_by_acpi();
+  my $safeness_dmi = system_safeness_by_dmi();
+
+  return 0
+  	unless ($safeness_acpi || $safeness_dmi);
+
+  return 1
+    if ((!$safeness_acpi || $safeness_acpi eq '1')
+         && (!$safeness_dmi || $safeness_dmi eq '1'));
+
+  my $safeness = (!$safeness_acpi || $safeness_acpi eq '1')?
+    $safeness_dmi:$safeness_acpi;
+
+  print " Sorry, we won't let you go on. $safeness systems are known to have\n",
+        " serious problems with lm_sensors, resulting in hardware failures.\n";
+
+  if($safeness_acpi eq '1' || $safeness_dmi eq '1')
+  {
+    print " We used two methods to determine your system's vendor, and they led\n",
+          " to different results. We'd appreciate to have feedback about such\n",
+          " systems. Please, take some time and contact the lm_sensors mailing\n",
+          " list at <sensors\@stimpy.netroedge.com>.\n",
+          " We need the following information:\n",
+          "  * The brand and model of your system\n",
+          "  * The BIOS vendor (ACPI) displayed above\n",
+          "  * The System vendor (DMI) displayed above\n",
+          " Thanks!\n";
+  }
+
+  exit;
 }
 
 sub main

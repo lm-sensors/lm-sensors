@@ -50,7 +50,8 @@ ask CVS about it:
   Program mkpatch: Fix dmi_scan module compile
   Program sensors: Add support for MC1066, Rambus Rimms;
                    fix w83781d temp3 alarm; fix gl518sm rev 0x00 recognition
-  Program sensors-detect: Add support for MC1066, smart battery
+  Program sensors-detect: Add support for MC1066, smart battery;
+                          add ACPI method for IBM system detection
   Program sensord: (v0.6.2) Add sanity limits to newly-created RRD.
 
 2.6.5 (20020915)
