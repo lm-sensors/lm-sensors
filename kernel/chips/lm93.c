@@ -1211,14 +1211,20 @@ void lm93_fan_smart_tach(struct i2c_client *client, int operation, int ctl_name,
 			if (0 <= results[0] && results[0] <= 2) {
 
 				/* insert the new mapping and write it out */
+				data->sf_tach_to_pwm = lm93_read_byte(client,
+					LM93_REG_SF_TACH_TO_PWM);
 				data->sf_tach_to_pwm &= ~0x3 << nr * 2;
 				data->sf_tach_to_pwm |= results[0] << nr * 2;
 				lm93_write_byte(client, LM93_REG_SF_TACH_TO_PWM,
 					data->sf_tach_to_pwm);
 
 				/* insert the enable bit and write it out */
-				data->sfc2 &= ~1 << nr;
-				data->sfc2 |= 1 << nr;
+				data->sfc2 = lm93_read_byte(client,
+					LM93_REG_SFC2);
+				if (results[0])
+					data->sfc2 |= 1 << nr;
+				else
+					data->sfc2 &= ~1 << nr;
 				lm93_write_byte(client, LM93_REG_SFC2,
 					data->sfc2);
 			}
