@@ -24,8 +24,8 @@
 /* 
     Supports following revisions:
 	Version		PCI ID		PCI Revision
-	1		1039/0008	01
-	2		1039/0008	C0
+	1		1039/0008	AF or less
+	2		1039/0008	B0 or greater
 
    Note: these chips contain a 0008 device which is incompatible with the
          5595. We recognize these by the presence of the listed
@@ -146,11 +146,12 @@ static int blacklist[] = {
    The registers are the same as well.
    OVER and HYST are really MAX and MIN. */
 
-#define SIS5595_REG_TEMP 	(( data->revision) >= 0xc0) ? \
+#define REV2MIN	0xb0
+#define SIS5595_REG_TEMP 	(( data->revision) >= REV2MIN) ? \
 					SIS5595_REG_IN(4) : 0x27
-#define SIS5595_REG_TEMP_OVER	(( data->revision) >= 0xc0) ? \
+#define SIS5595_REG_TEMP_OVER	(( data->revision) >= REV2MIN) ? \
 					SIS5595_REG_IN_MAX(4) : 0x39
-#define SIS5595_REG_TEMP_HYST	(( data->revision) >= 0xc0) ? \
+#define SIS5595_REG_TEMP_HYST	(( data->revision) >= REV2MIN) ? \
 					SIS5595_REG_IN_MIN(4) : 0x3a
 
 #define SIS5595_REG_CONFIG 0x40
@@ -463,7 +464,7 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 
 	/* Check revision and pin registers to determine whether 3 or 4 voltages */
 	pci_read_config_byte(s_bridge, SIS5595_REVISION_REG, &(data->revision));
-	if(data->revision < 0xb0) {
+	if(data->revision < REV2MIN) {
 		data->maxins = 3;
 	} else {
 		pci_read_config_byte(s_bridge, SIS5595_PIN_REG, &val);

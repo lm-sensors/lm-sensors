@@ -25,6 +25,7 @@ ask CVS about it:
   Module i2c-i801: Add 82801CA/CAM support
   Module i2c-piix4: Add Intel 82443MX and SMSC Victory66 support
   Module i2c-viapro: Add Via VT8233 support
+  Module sis5595: Fix support for rev B0
   Module via686a: Make limit initializations reliable
   Program sensors-detect: Add ALI1535 detection,
                           add Intel 82443MX and 82801CA/CAM detection,			
