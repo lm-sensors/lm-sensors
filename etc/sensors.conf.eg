@@ -656,6 +656,9 @@ chip "w83627thf-*" "w83637hf-*"
 # Note that in1 (+12V) is the usual in4, and in4 (-12V) is the usual in5.
 # Data sheet is obviously wrong for in4, the usual formula should work.
 # No in5 nor in6.
+# sensors doesn't need the ignore lines but sensord does...
+    ignore in5
+    ignore in6
 
     label in0 "VCore"
     label in1 "+12V"
