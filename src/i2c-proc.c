@@ -40,14 +40,31 @@ static int i2cproc_command(struct i2c_client *client, unsigned int cmd,
                            void *arg);
 static void i2cproc_inc_use(struct i2c_client *client);
 static void i2cproc_dec_use(struct i2c_client *client);
+static int i2cproc_bus_read(struct inode * inode, struct file * file,char * buf,
+                            int count);
+
+/* To implement the dynamic /proc/bus/i2c-? files, we need our own 
+   implementation of the read hook */
+static struct file_operations i2cproc_operations = {
+        NULL,
+        i2cproc_bus_read,
+};
+
+static struct inode_operations i2cproc_inode_operations = {
+        &i2cproc_operations
+};
+
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
 
-static int read_bus_i2c(char *buf, char **start, off_t offset, int len,
-                        int *eof , void *private);
+static int i2proc_bus_read(char *buf, char **start, off_t offset, int len,
+                           int *eof , void *private);
+ssize_t array_read(struct file * file, char * buf,size_t count, loff_t *ppos);
 
 #else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
 
+int i2cproc_bus_read(struct inode * inode, struct file * file,char * buf,
+                     int count);
 static int read_bus_i2c(char *buf, char **start, off_t offset, int len,
                         int unused);
 
@@ -88,6 +105,9 @@ static int i2cproc_initialized;
 
 /* This is a sorted list of all adapters that will have entries in /proc/bus */
 static struct i2c_adapter *i2cproc_adapters[I2C_ADAP_MAX];
+
+/* Inodes of /dev/bus/i2c-? files */
+static int i2cproc_inodes[I2C_ADAP_MAX];
 
 /* We will use a nasty trick: we register a driver, that will be notified
    for each adapter. Then, we register a dummy client on the adapter, that
@@ -207,6 +227,7 @@ int i2cproc_cleanup(void)
   return 0;
 }
 
+/* This function generates the output for /proc/bus/i2c */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
 int read_bus_i2c(char *buf, char **start, off_t offset, int len, int *eof, 
                  void *private)
@@ -218,7 +239,7 @@ int read_bus_i2c(char *buf, char **start, off_t offset, int len, int unused)
   len = 0;
   for (i = 0; i < I2C_ADAP_MAX; i++)
     if (i2cproc_adapters[i])
-      len += sprintf(buf, "/dev/i2c-%d\t%s\t%-32s\t%-32s\n",i,
+      len += sprintf(buf, "i2c-%d\t%s\t%-32s\t%-32s\n",i,
                      i2c_is_smbus_adapter(i2cproc_adapters[i])?"smbus":
 #ifdef DEBUG
                        i2c_is_isa_adapter(i2cproc_adapters[i])?"isa":
@@ -229,16 +250,52 @@ int read_bus_i2c(char *buf, char **start, off_t offset, int len, int unused)
   return len;
 }
 
+/* This function generates the output for /proc/bus/i2c-? */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
-int read_bus_i2c_file(char *buf, char **start, off_t offset, int len, 
-                      int *eof, void *private)
-#else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
-int read_bus_i2c_file(char *buf, char **start, off_t offset, int len, 
-                      int unused)
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
+ssize_t i2cproc_read(struct file * file, char * buf,size_t count, loff_t *ppos)
 {
-  len = 0;
-  return len;
+  struct inode * inode = file->f_dentry->d_inode;
+#else (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29))
+int i2cproc_bus_read(struct inode * inode, struct file * file,char * buf,
+                     int count)
+{
+#endif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29))
+  char *kbuf;
+  struct i2c_client *client;
+  int i,j,len=0;
+
+  if (count < 0)
+    return -EINVAL;
+  if (count > 4000)
+    count = 4000;
+  for (i = 0; i < I2C_ADAP_MAX; i++)
+    if (i2cproc_inodes[i] == inode->i_ino) {
+      if (! (kbuf = kmalloc(count,GFP_KERNEL)))
+        return -ENOMEM;
+      for (j = 0; j < I2C_CLIENT_MAX; j++)
+        if ((client = i2cproc_adapters[i]->clients[j]))
+          /* Filter out dummy clients */
+#ifndef DEBUG
+          if (client->driver->id != I2C_DRIVERID_I2CPROC)
+#endif /* ndef DEBUG */
+            len += sprintf(kbuf+len,"%x\t%-32s\t%-32s\n",
+#ifdef DEBUG
+                           i2c_is_isa_client(client)?
+                             ((struct isa_client *) client)->isa_addr&0xffffff:
+#endif /* def DEBUG */
+                             client->addr,
+                           client->name,client->driver->name);
+      if (file->f_pos+len > count)
+        len = count - file->f_pos;
+      len = len - file->f_pos;
+      if (len < 0) 
+        len = 0;
+      memcpy_tofs(buf,kbuf+file->f_pos,len);
+      file->f_pos += len;
+      kfree(kbuf);
+      return len;
+    }
+  return -ENOENT;
 }
 
 
@@ -265,11 +322,18 @@ int i2cproc_attach_adapter(struct i2c_adapter *adapter)
     return -ENOMEM;
   }
 
+#ifndef DEBUG
   if (! (client = kmalloc(sizeof(struct i2c_client),GFP_KERNEL))) {
+#else /* def DEBUG */
+  if (! (client = kmalloc(sizeof(struct isa_client),GFP_KERNEL))) {
+#endif 
     printk("i2c-proc.o: Out of memory!\n");
     return -ENOMEM;
   }
   memcpy(client,&i2cproc_client_template,sizeof(struct i2c_client));
+#ifdef DEBUG
+  ((struct isa_client *) client) -> isa_addr = -1;
+#endif /* def DEBUG */
   client->adapter = adapter;
   if ((res = i2c_attach_client(client))) {
     printk("i2c-proc.o: Attaching client failed.\n");
@@ -288,7 +352,7 @@ int i2cproc_attach_adapter(struct i2c_adapter *adapter)
     kfree(client);
     return -ENOENT;
   }
-  proc_entry->read_proc = &read_bus_i2c_file;
+  proc_entry->ops = &i2cproc_inode_operations;
 #else /* (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,29)) */
   if (!(proc_entry = kmalloc(sizeof(struct proc_dir_entry)+strlen(name)+1,
                              GFP_KERNEL))) {
@@ -301,7 +365,7 @@ int i2cproc_attach_adapter(struct i2c_adapter *adapter)
   proc_entry->name = (char *) (proc_entry + 1);
   proc_entry->mode = S_IRUGO | S_IFREG;
   proc_entry->nlink = 1;
-  proc_entry->get_info = &read_bus_i2c_file;
+  proc_entry->ops = &i2cproc_inode_operations;
   strcpy((char *) proc_entry->name,name);
 
   if ((res = proc_register_dynamic(&proc_bus_dir, proc_entry))) {
@@ -312,6 +376,7 @@ int i2cproc_attach_adapter(struct i2c_adapter *adapter)
   }
   
   i2cproc_proc_entries[i] = proc_entry;
+  i2cproc_inodes[i] = proc_entry->low_ino;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
   return 0;
 }
@@ -354,6 +419,7 @@ int i2cproc_detach_client(struct i2c_client *client)
         return res;
       }
       i2cproc_adapters[i] = NULL;
+      i2cproc_inodes[i] = 0;
       kfree(client);
       return 0;
     }

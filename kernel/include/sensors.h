@@ -21,7 +21,7 @@
 #define SENSORS_SENSORS_H
 
 /* Driver IDs */
-#define I2C_DRIVERID_LM78 2
-#define I2C_DRIVERID_I2CPROC 1
+#define I2C_DRIVERID_I2CPROC 1001
+#define I2C_DRIVERID_LM78 1002
 
 #endif /* def SENSORS_SENSORS_H */
