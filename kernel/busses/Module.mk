@@ -52,6 +52,12 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_PIIX4=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-piix4.o
 endif
+# don't compile unless alpha because of kernel include-file dependencies
+ifeq ($(MACHINE),alpha)
+ifneq ($(shell if grep -q '^CONFIG_I2C_TSUNAMI=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-tsunami.o
+endif
+endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_VIA=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-via.o
 endif
