@@ -197,7 +197,7 @@ int ali15x3_setup(void)
 #else /* LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54) */
     res = pcibios_find_device(PCI_VENDOR_ID_AL,
                                     PCI_DEVICE_ID_AL_M7101,
-                                    0,&ALI15X3_bus, &ALI15X3_devfn));
+                                    0,&ALI15X3_bus, &ALI15X3_devfn);
      
   if (res) {
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
