@@ -31,8 +31,6 @@ implementations. Please report any other references you have found!</p>
 		inventors
 		<br />This site contains many example programs.</li>
 	<li>Simon Vogl's <a href="http://voxel.at/prj/i2c/">I&sup2;C for Linux</a> page</li>
-	<li>Simon's <a href="news://goesser.tk.uni-linz.ac.at/linux.i2c">I&sup2;C newsgroup</a></li>
-	</ul>
 </li>
 <li><span class="toplvl"><a name="smbus">SMBus</a></span>
 	<ul>
@@ -82,8 +80,7 @@ implementations. Please report any other references you have found!</p>
 		<a href="http://products.analog.com/products/info.asp?product=ADM1025">ADM1025</a>,
 		<a href="http://products.analog.com/products/info.asp?product=ADM1025A">ADM1025A</a>,
 		<a href="http://products.analog.com/products/info.asp?product=ADM9240">ADM9240</a>)
-		<br />Datasheets available for
-		<a href="http://products.analog.com/products_html/list_gen_100_2_1.html">download</a>.</li>
+		<br />Datasheets available for download.</li>
 	<li><a href="http://www.genesyslogic.com/">Genesys Logic</a> (GL518, GL520, GL523)
 		<br />No datasheet available.</li>
 	<li><a href="http://www.hp.com/">Hewlett Packard</a> (Maxilife)
@@ -131,145 +128,124 @@ implementations. Please report any other references you have found!</p>
 		chips.</li>
 	</ul>
 </li>
-<li><span class="toplvl"><a name="other">Other protocol information</a></span>
+<li><span class="toplvl"><a name="protocol">Other protocol information</a></span>
 	<ul>
 	<li><a href="http://developer.intel.com/design/servers/ipmi/">IPMI documentation</a>
 		<br />IPMI (intelligent platform management interface), a standard for hardware
 		monitor chip reading.</li>
 	</ul>
 </li>
-<li><span class="toplvl">Hardware monitoring applications using the lm_sensors package</span>
-	<br />Also see the prog/ directory in the lm_sensors package for sample applications.
+<li><span class="toplvl"><a name="applications">Hardware monitoring applications using the lm_sensors package</a></span>
 	<ul>
-	<li><a href="http://freshmeat.net/search/?q=lm_sensors&amp;filter=&amp;orderby=popularity_percent_DESC">Freshmeat
-		search for "Lm_sensors" brings up a good starter list</a></li>
-	<li><a href="http://stimpy.netroedge.com/tellerstats/">A web-based hardware monitor
-		(tellerstats)</a>
-		<br />This is created by Phil Edelbrock, one of our main project contributors (Now defunct,
-			but still viewable). An updated version is now included in the lm_sensors package.</li>
-	<li><a href="http://krypton.mankato.msus.edu/~turnet1/">asfatm</a>
-		<br />Afterstep fan and temperature monitor</li>
-	<li><a href="http://www.ma-scha.de/index.phtml?menu=progs&amp;submenu=asftavm">asftavm</a>
-		<br />Afterstep fan, temperature, and voltage monitor. An enhancement of asfatm.</li>
+	<li><a href="http://www2.lm-sensors.nu/~lm78/">LM Sensors</a>
+		<br />First see the
+		<a href="http://www2.lm-sensors.nu/~lm78/cvs/browse.cgi/lm_sensors2/prog">prog
+		directory</a> in the lm_sensors package for sample applications. In particular,
+		see <a href="http://stimpy.netroedge.com/tellerstats/">Tellerstats</a>, a web-based
+		hardware monitor created by Phil Edelbrock, one of our main project contributors.</li>
+	<li><a href="http://freshmeat.net/">Freshmeat</a>
+		<br />A <a href="http://freshmeat.net/search/?q=lm_sensors">search for "lm_sensors"</a>
+		brings up a good starter list.</li>
+	<li>ASFATM (Afterstep fan and temperature monitor)
+		<br />A wharf/dock app that is capable of displaying system/CPU temperatures and up to
+		three fan rotation speeds depending on the hardware being used. The developpement has
+		stopped, but you still can download the sources from
+		<a href="http://public.planetmirror.com/pub/afterstep/apps/asfatm/">Planet Mirror</a>
+		or <a href="http://www-ftp.lip6.fr/pub/X11/afterstep/apps/asfatm/">LIP6</a>.</li>
+	<li><a href="http://www.ma-scha.de/index.phtml?menu=progs&amp;submenu=asftavm">ASFTAVM</a>
+		(Afterstep fan, temperature and voltage monitor)
+		<br />An enhancement of ASFATM.</li>
 	<li><a href="http://www.warmcat.com/milksop/cheapi2c.html">CheapI2C</a>
 		<br />A real-time linux I2C bus protocol capture tool using the parallel port.</li>
 	<li><a href="http://www.plogic.com/dogsled/">Dogsled</a>
 		<br />A tool to manage and monitor Linux clusters.</li>
-	<li><a href="http://www.multiweb.nl/~s.jonker/">GLS</a>
-		<br />Stijn Jonker's program to make nice graphs of the lm_sensors output.
-		Recommended. Requires mysql package. (dead link? please report new location)</li>
-	<li><a href="http://gpdialapplet.sourceforge.net/">gpdial_applet</a>
+	<li><a href="http://gpdialapplet.sourceforge.net/">GPDial Applet</a>
 		<br />A Gnome applet that displays a specific number from a file on the Gnome panel.
 		By configuring it for a specific sensor file in /proc, you get a
 		sensor reading. Requires fam and fam++.</li>
-	<li><a href="http://www.brendy.addr.com/linux/gnomesensors/">GnomeSensors</a>
-		<br />Brendon Humphrey's Gnome display program for lm_sensors.
-		Nice. Recommended. (dead link? please report new location)</li>
-	<li><a href="http://digilander.iol.it/robang/gsensor/">Gsensor</a>
-		<br />GTK app (in Italian).</li>
-	<li><a href="http://www.brendy.addr.com/linux/klm/klm_home.html">klm</a>
-		<br />Brendon Humphrey's KDE display program for lm_sensors.
-		(dead link? please report new location)</li>
+	<li><a href="http://digilander.libero.it/robang/gsensor/gsensor_en.html">GSensor</a>
+		<br />GTK+ application.</li>
 	<li><a href="http://lcd4linux.sourceforge.net/">LCD4Linux</a>
 		<br />Displays kernel information on an external LCD.</li>
-	<li><a href="http://dan.ddktech.com/MonitorSensors/">MonitorSensors</a>
-		<br />Daniel Schudel's Gnome display program for lm_sensors.
-		Requires GTK--. (dead link? please report new location)</li>
-	<li><a href="http://www.gedanken.demon.co.uk/procmeter3">Procmeter</a>
-		<br />A comprehensive system monitoring package. Nice desktop app. Recommended.</li>
+	<li><a href="http://www.gedanken.demon.co.uk/procmeter3/">ProcMeter 3</a>
+		<br />A comprehensive system monitoring package. Nice desktop application.
+		Recommended.</li>
 	<li><a href="http://www.joenst.de/s2w/">Sens2web</a>
 		<br />A Perl script to generate a web page of sensor readings.</li>
-	<li><a href="http://www.coverfire.com/sensor_sweep_applet">Sensor Sweep Applet</a>
-		<br />A configurable Gnome Panel Applet.</li>
+	<li><a href="http://www.coverfire.com/sensor_sweep_applet/">Sensor Sweep Applet</a>
+		<br />A configurable Gnome panel applet.</li>
 	<li><a href="http://voyager2.htmlplanet.com/sensors_srvr.html">Sensors Server</a>
 		<br />Nice client/server application with a html-embedded Java applet.</li>
-	<li><a href="http://denis.corbin.free.fr/software.html">sentinelle</a>
+	<li><a href="http://denis.corbin.free.fr/software.html">Sentinelle</a>
 		<br />A daemon which warns you when your sensor readings reach critical values.</li>
-	<li><a href="http://www.wells.org.uk/thermal">Thermal</a>
-		<br />A simple set of scripts to plot LM75 temperatures using gnuplot.
-		Similar to tellerstats. (dead link? please report new location)</li>
-	<li><a href="http://www.windowmaker.org/pub/contrib/old/srcs/apps/">wmsensors and
-		wmlm78</a>
-		<br />wmlm78 and wmsensors are graphical extensions of lm_sensors, which
-		can be docked in Window Manager. By Adrian Baugh.</li>
-	<li><a href="http://www.linuxgod.net/~jd/">wmsensors for W83697HF</a>
-		<br />By J. D.</li>
+	<li><a href="http://packages.debian.org/stable/x11/wmsensors.html">WMSensors</a>
+		<br />A Windowmaker dockapp. By Adrian Baugh, maintained by the Debian team.</li>
+	<li><a href="http://www.linuxgod.net/~jd/">WMSens Dockapp</a>
+		<br />A Windowmaker dockapp that works only with the Winbond 83697HF chipset.
+		By Jonathan D. Meadows.</li>
 	</ul>
 </li>
-<li><span class="toplvl">Other hardware monitoring implementations (NOT using lm_sensors)</span>
+<li><span class="toplvl"><a name="other">Other hardware monitoring implementations (not using LM Sensors)</a></span>
 	<ul>
 	<li><a href="http://mbm.livewiredev.com/">Motherboard Monitor</a>
 		<br />A very comprehensive package for Windows. Supports many many devices.
 		Also has a great database of motherboards.</li>
 	<li><a href="http://www.lysator.liu.se/~alla/files/lm78_stuff/">Alexander Larsson's
-		lm78 module</a>
-		<br />This is the original module lm_sensors is based upon.</li>
-	<li><a href="http://www.tu-chemnitz.de/~ronsc/tree/2_Projects/0_c++/lm78/index.html">Ronald
-		Schmidt's lm78 module</a></li>
-	<li><a href="ftp://ftp.vu.union.edu/pub/users/hagopiar/">Beowulf project lm78 module</a>
-		<br />Written by Erik Hendriks. This <a href="http://beowulf.gsfc.nasa.gov/software/">Nasa
-		site</a> may have a newer version. There is also <a href="http://smile.cpe.ku.ac.th">SCMS
-		Cluster Management</a> for Beowulf clusters available, which supports the
-		LM78 through the above kernel module. (dead link? please report new location)</li>
-	<li><a href="http://pweb.uunet.de/ganzfix.duew/">txwd, another lm78 module</a></li>
-	<li><a href="http://wwwcip.rus.uni-stuttgart.de/~phy10296/index.html">Andr&aacute;s
-		Major's LM75 module, and graphical monitor for it</a></li>
-	<li><a href="http://groups.yahoo.com/group/solarisonintel/files/Drivers/">Solaris drivers
-		for the LM78</a></li>
-	<li><a href="ftp://ftp.hypercore.co.jp/linux-sbs/kernel-patches/;type=d/">Beta SMBus access
-		through the BIOS interface</a></li>
+		LM78 module</a>
+		<br />The original module LM Sensors is based upon.</li>
+	<li><a href="http://www.beowulf.org/software/">Beowulf project LM78 module</a>
+		<br />By Erik Hendriks. Old, probably unmaintained.</li>
+	<li><a href="http://www.ganzfix.de/">TXWD</a>
+		<br />Another LM78/LM75 module, by Chris Benndorf.</li>
+	<li><a href="ftp://ftp.hypercore.co.jp/linux-sbs/kernel-patches/">Beta SMBus access
+		through the BIOS interface</a>
+		<br />Old, obviously abandoned.</li>
 	</ul>
 </li>
-<li><span class="toplvl">Other useful tools</span>
+<li><span class="toplvl"><a name="tools">Other useful tools</a></span>
 	<ul>
 	<li><a href="http://users.ev1.net/~redelm/">CPUBurn</a>
 		<br />CPU-heating program to stress-test marginally-cooled systems and test
-		lm_sensors. Highly recommended.</li>
-	<li><a href="http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool">Round Robin Database
-		(RRDTool)</a>
-		<br />The RRD tool is a database for readings taken over time, such as sensor data.
-		The lm_sensors package contains scripts to create and update an RRD database
+		LM Sensors. Highly recommended.</li>
+	<li><a href="http://people.ee.ethz.ch/~oetiker/webtools/rrdtool/">RRDTool (Round Robin
+		Database)</a>
+		<br />A database for readings taken over time, such as sensor data.
+		The LM Sensors package contains scripts to create and update an RRD database
 		and graphically display the data on webpages.</li>
 	</ul>
 </li>
-<li><span class="toplvl">White papers and other things</span>
+<li><span class="toplvl"><a name="papers">White papers, documents, articles and other things</a></span>
 	<ul>
 	<li><a href="http://www.sbs-forum.org/marcom/winter01/Designing%20with%20SMBus%202.pdf">
 		Designing with SMBus 2.0</a><br />
 		A great introduction to SMBus 2.0 and the differences with version 1.x.</li>
-	<li><a href="http://www.dmtf.org/standards/standard_alert.php">Alert Standard Format
-		Specification</a>
-		<br />A new standard for system management messages using the SMBus
-		and passing this information to remote management devices.
-		From the Distributed Management Task Force.</li>
-	<li><a href="http://archives.andrew.net.au/lm-sensors">lm_sensors mailing list
+	<li><a href="http://www.dmtf.org/standards/standard_alert.php">Alert standard format
+		(ASF) specification</a>
+		<br />A standard for system management messages using the SMBus
+		and passing this information to remote management devices. By the DMTF.</li>
+	<li><a href="http://archives.andrew.net.au/lm-sensors/">LM Sensors mailing list
 		archive</a>
 		<br />This is the mailing list archive for sensors@stimpy.netroedge.com,
-		the developer's mailing list. The archive contains messages
-		since October 28, 2001.</li>
+		the developer's mailing list. The archive contains messages since October 28, 2001.</li>
 	<li><a href="http://www.tip.net.au/~millerp/rmch/recu-make-cons-harm.html">Recursive
-		Make considered Harmful</a>
-		<br />A paper on which the version 2 Makefile is based</li>
+		make considered harmful</a>
+		<br />A paper on which the version 2 Makefile is based.</li>
 	<li><a href="http://www.3dhardware.net/features/thermistor/">Building a temperature
 		sensor using a thermistor</a>
 		<br />An article on the <a href="http://www.3dhardware.net">3D Hardware</a> site.</li>
-	<li><a href="http://www.thermometrics.com/assets/images/ntcnotes.pdf">NTC Thermistor
-		Guide</a>
-		<br />A comprehensive description of the physics and mathematics of NTC Thermistors</li>
-	<li><a href="http://www.jedec.com/DOWNLOAD/jedec/JEP106I.pdf">Standard Manufacturers
-		Identification Code</a>
+	<li><a href="http://www.thermometrics.com/assets/images/ntcnotes.pdf">NTC thermistors</a>
+		<br />A comprehensive description of the physics and mathematics of NTC thermistors.</li>
+	<li><a href="http://www.jedec.org/DOWNLOAD/jedec/JEP106I.pdf">Standard manufacturer's
+		identification code</a>
 		<br />The official list of Manufacturer IDs for EEPROMs.</li>
-	<li><a href="http://www.temperatures.com">Guide to Temperature Sensors</a>
-		<br />General information.</li>
+	<li><a href="http://www.temperatures.com/">About temperature sensors</a>
+		<br />A web guide to devices that measure temperature. General information.</li>
 	<li><a href="http://www.analog.com/library/analogDialogue/archives/33-04/temperatures/index.html">Measuring
 		temperatures on computer chips with speed and accuracy</a>
 		<br />The advantages of thermal diodes over traditional thermistors.</li>
-	<li><a href="http://www.analog.com/publications/magazines/Dialogue/archives/33-01/chip/index.html">A
-		chip you can use...</a>
-		<br />An article detailing the features of the Analog Devices ADM9240.</li>
 	<li><a href="http://www-900.ibm.com/developerWorks/cn/linux/hardware/stability/index_eng.shtml">Linux
-		Hardware Stability Guide</a>
-		<br /> A nice article about using lm_sensors for diagnosing hardware problems.</li>
+		hardware stability guide</a>
+		<br />A nice article about using LM Sensors for diagnosing hardware problems.</li>
 	</ul>
 </li>
 </ul>
