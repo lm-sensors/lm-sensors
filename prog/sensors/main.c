@@ -35,7 +35,6 @@
 #define VERSION LM_VERSION
 #define DEFAULT_CONFIG_FILE_NAME "sensors.conf"
 
-static char *config_file_name = NULL;
 FILE *config_file;
 extern const char *libsensors_version;
 
@@ -43,8 +42,6 @@ extern int main(int argc, char *arv[]);
 static void print_short_help(void);
 static void print_long_help(void);
 static void print_version(void);
-static void open_config_file(void);
-static int open_this_config_file(char *filename);
 static void do_a_print(sensors_chip_name name);
 static int do_a_set(sensors_chip_name name);
 static int do_the_real_work(int *error);
@@ -94,60 +91,27 @@ void print_version(void)
 
 /* This examines global var config_file, and leaves the name there too. 
    It also opens config_file. */
-void open_config_file(void)
+void open_config_file(const char* config_file_name)
 {
-#define MAX_FILENAME_LEN 1024
-  char *filename;
-  char buffer[MAX_FILENAME_LEN];
-  int res;
-
-  if (config_file_name && !strcmp(config_file_name,"-")) {
+  if (!strcmp(config_file_name,"-")) {
     config_file = stdin;
     return;
-  } else if (config_file_name && index(config_file_name,'/')) {
-    if ((res = open_this_config_file(config_file_name))) {
-      fprintf(stderr,"Could not locate or open config file\n");
-      fprintf(stderr,"%s: %s\n",config_file_name,strerror(-res));
-      exit(1);
-    }
   }
-  else {
-    if (config_file_name)
-      filename = config_file_name;
-    else
-      filename = DEFAULT_CONFIG_FILE_NAME;
-    if ((snprintf(buffer,MAX_FILENAME_LEN,
-                  "%s/%s", ETCDIR, filename)) < 1) {
-      fprintf(stderr,
-              "open_config_file: ridiculous long config file name!\n");
-      exit(1);
-    }
-    if (!open_this_config_file(buffer)) {
-      free(config_file_name);
-      config_file_name = strdup(buffer);
-      return;
-    }
-    fprintf(stderr,"Could not locate or open config file!\n");
+
+  config_file = fopen(config_file_name, "r");
+  if (!config_file) {
+    fprintf(stderr, "Could not open config file\n");
+    perror(config_file_name);
     exit(1);
   }
 }
     
-int open_this_config_file(char *filename)
+void close_config_file(const char* config_file_name)
 {
-  config_file = fopen(filename,"r");
-  if (! config_file)
-    return -errno;
-  return 0;
-}
-
-void close_config_file(void)
-{
-  if (fclose(config_file)) {
+  if (fclose(config_file) == EOF) {
     fprintf(stderr,"Could not close config file\n");
-    fprintf(stderr,"%s: %s\n",config_file_name,strerror(errno));
+    perror(config_file_name);
   }
-  
-  free(config_file_name);
 }
 
 static void set_degstr(void)
@@ -178,6 +142,7 @@ static void set_degstr(void)
 int main (int argc, char *argv[])
 {
   int c,res,i,error;
+  char *config_file_name = NULL;
 
   struct option long_opts[] =  {
     { "help", no_argument, NULL, 'h' },
@@ -258,7 +223,9 @@ int main (int argc, char *argv[])
       }
 
 
-  open_config_file();
+  if (config_file_name == NULL)
+    config_file_name = strdup(ETCDIR "/" DEFAULT_CONFIG_FILE_NAME);
+  open_config_file(config_file_name);
 
   if ((res = sensors_init(config_file))) {
     fprintf(stderr,"%s\n",sensors_strerror(res));
@@ -271,7 +238,8 @@ int main (int argc, char *argv[])
     exit(1);
   }
 
-  close_config_file();
+  close_config_file(config_file_name);
+  free(config_file_name);
 
   /* build the degrees string */
   set_degstr();
