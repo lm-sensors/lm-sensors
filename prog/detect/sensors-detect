@@ -195,8 +195,9 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters @dmidecode);
        vendid => 0x1039,
        devid  => 0x0630,
        func => 0,
-       procid => "Silicon Integrated Systems SIS630 (To be written - Do not use 5595 drivers)",
-       match => sub { $_[0] =~ /dontmatchthis/ },
+       procid => "Silicon Integrated Systems SIS630",
+       driver => "i2c-sis630",
+       match => sub { $_[0] =~ /^SMBus SIS630 adapter at [0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x1039,
