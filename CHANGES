@@ -32,7 +32,8 @@ ask CVS about it:
   Program sensors: Add ADM1032 support
   Program sensors-detect: Prefer Super I/O drivers;
                           Fix W83627HF and W83791D detection; detect CSB6;
-                          Detect ADM1029,30,31,32
+                          Detect ADM1029,30,31,32;
+                          Detect W83637HF, W83697UF
 
 
 2.8.1 (20031005)
