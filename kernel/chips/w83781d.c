@@ -29,6 +29,7 @@
     w83783s	5-6	3	2	1-2	0x40	yes	no
 
     To do: PWM enable, clock, duty cycle
+	   782d beep 3 register
            782d programmable pins
            783s pin programmable for vin or temp. assume both now! no way to set.
 */
@@ -84,10 +85,12 @@
 #define W83781D_REG_CONFIG 0x40
 #define W83781D_REG_ALARM1 0x41
 #define W83781D_REG_ALARM2 0x42
+#define W83781D_REG_ALARM3 0x450	/* W83782D only */
 
 #define W83781D_REG_BEEP_CONFIG 0x4D
 #define W83781D_REG_BEEP_INTS1 0x56
 #define W83781D_REG_BEEP_INTS2 0x57
+#define W83781D_REG_BEEP_INTS3 0x453	/* W83782D only */
 
 #define W83781D_REG_VID_FANDIV 0x47
 
@@ -139,8 +142,8 @@
 #define W83781D_INIT_IN_8 330
 /* Initial limits for 782d/783s negative voltages */
 /* Note level shift. Change min/max below if you change these. */
-#define W83782D_INIT_IN_5 (((-1200) + 1491)/514)
-#define W83782D_INIT_IN_6 (((-500)  + 771)/314)
+#define W83782D_INIT_IN_5 ((((-1200) + 1491) * 100)/514)
+#define W83782D_INIT_IN_6 ((( (-500)  + 771) * 100)/314)
 
 #define W83781D_INIT_IN_PERCENTAGE 10
 
@@ -201,19 +204,18 @@
 /* Initial limits for 782d/783s negative voltages */
 /* These aren't direct multiples because of level shift */
 /* Beware going negative - check */
-#define W83782D_INIT_IN_6 (((-500)  + 771)/314)
 #define W83782D_INIT_IN_MIN_5_TMP \
-        ((-1200 * ((100 + W83781D_INIT_IN_PERCENTAGE) / 100) + 1491)/514)
+        (((-1200 * (100 + W83781D_INIT_IN_PERCENTAGE)) + (1491 * 100))/514)
 #define W83782D_INIT_IN_MIN_5 \
         ((W83782D_INIT_IN_MIN_5_TMP > 0) ? W83782D_INIT_IN_MIN_5_TMP : 0)
 #define W83782D_INIT_IN_MAX_5 \
-        ((-1200 * ((100 - W83781D_INIT_IN_PERCENTAGE) / 100) + 1491)/514)
+        (((-1200 * (100 - W83781D_INIT_IN_PERCENTAGE)) + (1491 * 100))/514)
 #define W83782D_INIT_IN_MIN_6_TMP \
-        ((-500 * ((100 + W83781D_INIT_IN_PERCENTAGE) / 100) + 771)/314)
+        ((( -500 * (100 + W83781D_INIT_IN_PERCENTAGE)) +  (771 * 100))/314)
 #define W83782D_INIT_IN_MIN_6 \
         ((W83782D_INIT_IN_MIN_6_TMP > 0) ? W83782D_INIT_IN_MIN_6_TMP : 0)
 #define W83782D_INIT_IN_MAX_6 \
-        ((-500 * ((100 - W83781D_INIT_IN_PERCENTAGE) / 100) + 771)/314)
+        ((( -500 * (100 - W83781D_INIT_IN_PERCENTAGE)) +  (771 * 100))/314)
 
 #define W83781D_INIT_FAN_MIN_1 3000
 #define W83781D_INIT_FAN_MIN_2 3000
@@ -271,7 +273,7 @@ struct w83781d_data {
          u16 temp_add_hyst[2];       /* Register value */
          u8 fan_div[3];              /* Register encoding, shifted right */
          u8 vid;                     /* Register encoding, combined */
-         u16 alarms;                 /* Register encoding, combined */
+         u32 alarms;                 /* Register encoding, combined */
          u16 beeps;                  /* Register encoding, combined */
          u8 beep_enable;             /* Boolean */
          u8 wchipid;                 /* Register value */
@@ -1045,6 +1047,9 @@ void w83781d_update_client(struct i2c_client *client)
     }
     data->alarms = w83781d_read_value(client,W83781D_REG_ALARM1) +
                    (w83781d_read_value(client,W83781D_REG_ALARM2) << 8);
+    if(data->wchipid == W83782D_WCHIPID) {
+      data->alarms |= w83781d_read_value(client,W83781D_REG_ALARM3) << 16;
+    }
     i = w83781d_read_value(client,W83781D_REG_BEEP_INTS2);
     data->beep_enable = i >> 7;
     data->beeps = ((i & 0x7f) << 8) + 
