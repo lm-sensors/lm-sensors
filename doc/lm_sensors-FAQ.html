@@ -1,15 +1,15 @@
 <html lang="en">
 <head>
-<title>Sensors FAQ for lm_sensors version 2.11</title>
+<title>Sensors FAQ for lm_sensors version 2.12</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="Sensors FAQ for lm_sensors version 2.11">
+<meta name="description" content="Sensors FAQ for lm_sensors version 2.12">
 <meta name="generator" content="makeinfo 4.5">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home">
 </head>
 <body>
-<h1 class="settitle">Sensors FAQ for lm_sensors version 2.11</h1>
-Copyright (c) 1998 - 2002<br>
-<a href="mailto:frodol@dds.nl">Frodo Looijaard</a>,<br>
+<h1 class="settitle">Sensors FAQ for lm_sensors version 2.12</h1>
+Copyright (C) 1998 - 2004<br>
+Frodo Looijaard,<br>
 <a href="mailto:phil@netroedge.com">Philip Edelbrock</a>,<br>
 and<br>
 <a href="mailto:mdsxyz123@yahoo.com">Mark Studebaker</a><br>
@@ -1623,13 +1623,19 @@ Up:<a rel="up" accesskey="u" href="#Problems">Problems</a>
 
 <h3 class="section">4.27 Sensors says <code>ERROR: Can't get xxxxx data!</code></h3>
 
-   <p>You have a <code>libsensors/sensors</code> mismatch. <code>sensors</code> is unable to
+     <ul>
+<li>(Linux 2.6) Make sure you are using one of the
+<a href="http://secure.netroedge.com/~lm78/kernel26.html">recommended kernel/lm_sensors combination</a>. 
+<li>You have a <code>libsensors</code>/<code>sensors</code> mismatch. 
+<code>sensors</code> is unable to
 get a data entry from <code>libsensors</code>. You probably have an
 old <code>libsensors</code> in your <code>/etc/ld.so.conf</code> path. 
-Make sure you did (as root) a <code>make install</code> followed by a <code>ldconfig</code>. 
+Make sure you did (as root) a <code>make install</code> (Linux 2.4) or
+<code>make user_install</code> (Linux 2.6) followed by a <code>ldconfig</code>. 
 Then check the output of <code>ldconfig -v | grep libsensors</code> to
 verify that there is only ONE <code>libsensors</code> entry and that it matches
-the <code>libsensors</code> that was built in the <code>lib/</code> directory in <code>lm_sensors2</code>.
+the <code>libsensors</code> that was built in the <code>lib/</code> directory in <code>lm_sensors2</code>. 
+</ul>
 
 <div class="node">
 <p><hr>

@@ -9,17 +9,17 @@
 @titlepage
 @center @titlefont{This is the FAQ for the @command{lm_sensors} program, @value{VERSION}}
 @sp 3
-@center Copyright (c) 1998 - 2004
+@center Copyright (C) 1998 - 2004
 @sp 1
-@center @email{frodol@@dds.nl, Frodo Looijaard},
+@center Frodo Looijaard,
 @center @email{phil@@netroedge.com, Philip Edelbrock},
 @center and
 @center @email{mdsxyz123@@yahoo.com, Mark Studebaker}
 @end titlepage
 
 @ifhtml
-Copyright (c) 1998 - 2002@*
-@email{frodol@@dds.nl, Frodo Looijaard},@*
+Copyright (C) 1998 - 2004@*
+Frodo Looijaard,@*
 @email{phil@@netroedge.com, Philip Edelbrock},@*
 and@*
 @email{mdsxyz123@@yahoo.com, Mark Studebaker}@*
@@ -1129,13 +1129,20 @@ and not some older @command{sensors}.
 @node Section 4.27, Section 4.28, Section 4.26, Problems
 @section Sensors says @samp{ERROR: Can't get xxxxx data!}
 
-You have a @command{libsensors/sensors} mismatch. @command{sensors} is unable to
+@itemize
+@item (Linux 2.6) Make sure you are using one of the
+@uref{http://secure.netroedge.com/~lm78/kernel26.html,
+recommended kernel/lm_sensors combination}.
+@item You have a @file{libsensors}/@command{sensors} mismatch.
+@command{sensors} is unable to
 get a data entry from @file{libsensors}. You probably have an
 old @file{libsensors} in your @file{/etc/ld.so.conf} path.
-Make sure you did (as root) a @command{make install} followed by a @command{ldconfig}.
+Make sure you did (as root) a @command{make install} (Linux 2.4) or
+@command{make user_install} (Linux 2.6) followed by a @command{ldconfig}.
 Then check the output of @command{ldconfig -v | grep libsensors} to
 verify that there is only ONE @file{libsensors} entry and that it matches
 the @file{libsensors} that was built in the @file{lib/} directory in @file{lm_sensors2}.
+@end itemize
 
 
 @node Section 4.28, Section 4.29, Section 4.27, Problems

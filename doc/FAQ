@@ -1120,13 +1120,18 @@ are running the `sensors' program it installed and not some older
 4.27 Sensors says `ERROR: Can't get xxxxx data!'
 ================================================
 
-   You have a `libsensors/sensors' mismatch. `sensors' is unable to get
-a data entry from `libsensors'. You probably have an old `libsensors'
-in your `/etc/ld.so.conf' path.  Make sure you did (as root) a `make
-install' followed by a `ldconfig'.  Then check the output of `ldconfig
--v | grep libsensors' to verify that there is only ONE `libsensors'
-entry and that it matches the `libsensors' that was built in the `lib/'
-directory in `lm_sensors2'.
+   * (Linux 2.6) Make sure you are using one of the recommended
+     kernel/lm_sensors combination
+     (http://secure.netroedge.com/~lm78/kernel26.html).
+
+   * You have a `libsensors'/`sensors' mismatch.  `sensors' is unable to
+     get a data entry from `libsensors'. You probably have an old
+     `libsensors' in your `/etc/ld.so.conf' path.  Make sure you did
+     (as root) a `make install' (Linux 2.4) or `make user_install'
+     (Linux 2.6) followed by a `ldconfig'.  Then check the output of
+     `ldconfig -v | grep libsensors' to verify that there is only ONE
+     `libsensors' entry and that it matches the `libsensors' that was
+     built in the `lib/' directory in `lm_sensors2'.
 
 4.28 Sensors doesn't find any sensors, just eeproms.
 ====================================================
