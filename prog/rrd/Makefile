@@ -44,6 +44,7 @@ install: all $(RRDB) $(SENSDIR) $(CRONTAB) $(APACHDIR)/pix
 	install -o root -g root -m 755 sens_update_rrd $(BINPATH)
 	install -o root -g root -m 755 sens_week.cgi $(APACHDIR)
 	install -o root -g root -m 755 sens_day.cgi $(APACHDIR)
+	install -o root -g root -m 755 summ_week.cgi $(APACHDIR)
 #	grep sens_update_rrd $(CRONTAB) > /dev/null 2>&1 || echo '*/5 * * * *	/usr/local/bin/sens_update_rrd' $(RRDB) $(SENSDEV) >> $(CRONTAB)
 	@echo
 	@echo Note!!! You must manually install the following line in the crontab for user $(USER):

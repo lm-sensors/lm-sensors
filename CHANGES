@@ -27,7 +27,9 @@ ask CVS about it:
   Module w83781d: Add W83697HF support
   Program i2cdump: Add i2c block read capability
   Program mkpatch.pl: Add support for fscscy, add more help entries
-  Program sensors: Add PCF8591 and W83697HF support
+  Program rrd: Install summ_week.cgi
+  Program sensors: Add PCF8591 and W83697HF support,
+                   clean up chassis intrusion prints
   Program sensors-detect: Add several Nvidia chips, add PCF8591,
                           fix Via686a and it87 detection,
                           add AMD768, IPMI-BMC-KCS and -SMIC,
