@@ -2450,7 +2450,10 @@ sub lm78_alias_detect
 #       make sense);
 #   3 means that the configuration register passes the test;
 #   2 means that the configuration register test failed, so the chipset
-#       is unlikely to be a LM75.
+#       is unlikely to be a LM75;
+#   1 means that the chip contains only zeroes, so it's unlikely to be
+#       a LM75 (we could even consider returning no confidence value
+#       at all). *TODO*
 # Registers used:
 #   0x01: Temperature
 #   0x01: Configuration
@@ -2966,6 +2969,7 @@ sub adm1024_detect
 #   0xfe: Company ID (all but LM84 and MAX1617)
 #   0xff: Revision (ADM1021, ADM1021A/ADM1023 and MAX1617A)
 #   0x02: Status
+#   0x00-0x01, 0x05-0x08: Temperatures (MAX1617 and LM84)
 # Note: Especially the MAX1617 has very bad detection; we give it a low 
 # confidence value.
 sub adm1021_detect
@@ -2984,6 +2988,29 @@ sub adm1021_detect
   # The remaining things are flaky at best. Perhaps something can be done
   # with the fact that some registers are unreadable?
   return if (i2c_smbus_read_byte_data($file,0x02) & 0x03) != 0;
+  # Extra checks for MAX1617 and LM84, since those are often misdetected
+  if ($chip == 2 || $chip == 5)
+  {
+    # Increase the misdetect value each time a temperature doesn't
+    # match reasonable expectations
+    my $misdetect = 0;
+    # Negative temperatures
+    $misdetect++ if i2c_smbus_read_byte_data($file,0x00) > 128;
+    $misdetect++ if i2c_smbus_read_byte_data($file,0x01) > 128;
+    # Negative high limits
+    $misdetect++ if ((my $lhi=i2c_smbus_read_byte_data($file,0x05)) >= 128);
+    $misdetect++ if ((my $rhi=i2c_smbus_read_byte_data($file,0x07)) >= 128);
+    # Low limits over high limits
+    $lhi-=256 if $lhi >= 128;
+    $rhi-=256 if $rhi >= 128;
+    my $llo=i2c_smbus_read_byte_data($file,0x06);
+    my $rlo=i2c_smbus_read_byte_data($file,0x08);
+    $llo-=256 if $llo >= 128;
+    $rlo-=256 if $rlo >= 128;
+    $misdetect++ if $llo > $lhi;
+    $misdetect++ if $rlo > $rhi;
+    return if $misdetect >= 4;
+  }
   return 3 if $chip == 2;
   return 7 if $chip <= 3;
   return 6;
