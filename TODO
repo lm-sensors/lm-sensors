@@ -4,10 +4,7 @@ Many, many things. Most notably:
 * Create wait-queues for bus locking instead of pure semaphores, to make
   it more interactive
 * Check for block read/writes in smbus-on-i2c emulation code
-* Add proc-call SMBus command to i2c-dev
-* Merge newest Simon Vogl archive
 * Merge man-pages
-* Rename some public kernel header files
 * Fans give overflow if small values are written to them.
 * At least the bit-lp and bit-velle modules do no detection on loading;
   ask Simon whether this is possible to add.
@@ -35,7 +32,10 @@ Many, many things. Most notably:
 * How to make drivers detect thing *not*; for example, if a Winbond is 
   present, the LM75 driver should not try to access its simulated
   LM75 chips.
-* Write a userland-library for SMBus/i2c access (through the /dev interface)
 * Write a userland detection program for busses (clients are less important;
   but perhaps needed too).
 * Some library routines are pretty inefficient right now
+* Write SIS5591/95/98 adapter support 
+  Thomas Dickel <Thomas.Dickel@mni.fh-giessen.de> owns one.
+* Write Acer Labs Aladdin V southbridge (M1543C) support
+  Mark Studebaker <mds@blazer.eng.paradyne.com> is working on it.
