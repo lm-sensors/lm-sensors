@@ -1031,17 +1031,25 @@ chip "it87-*"
 
 # For this family of chips the negative voltage equation is different from
 # the lm78.  The chip uses two external resistor for scaling but one is
-# tied to a positive reference voltage.  See ITE8705F datasheet (SIS950
+# tied to a positive reference voltage.  See ITE8705/12 datasheet (SIS950
 # data sheet is wrong)
 # Vs = (1 + Rin/Rf) * Vin - (Rin/Rf) * Vref.
 # Vref = 4.096 volts, Vin is voltage measured, Vs is actual voltage.
-
     compute in2 (1 + 1)*@ ,       @/(1 + 1)
     compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
     compute in4 ((30/10) +1)*@  , @/((30/10) +1)
-# Since these have the wrong equation form they are probably not correct
-    compute in5 -(72/10)*@  ,     -@/(72/10)
-    compute in6 -(56/10)*@ ,      -@/(56/10)
+# The next two are negative voltages (-12 and -5).
+# The following formulas must be used. Unfortunately the datasheet
+# does not give recommendations for Rin, Rf, but we can back into
+# them based on a nominal +2V input to the chip, together with a 4.096V Vref.
+# Formula:
+#    actual V = (Vmeasured * (1 + Rin/Rf)) - (Vref * (Rin/Rf))
+#    For -12V input use Rin/Rf = 6.68
+#    For -5V input use Rin/Rf = 3.33
+# Then you can convert the forumula to a standard form like:
+    compute in5 (7.67 * @) - 27.36  ,  (@ + 27.36) / 7.67
+    compute in6 (4.33 * @) - 13.64  ,  (@ + 13.64) / 4.33
+#
     compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
 
 # Temperature

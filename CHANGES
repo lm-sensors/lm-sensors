@@ -21,6 +21,7 @@ ask CVS about it:
   Chip Modules (all): malloc.h -> slab.h
   Modules (all): Add MODULE_LICENSE("GPL")
   File doc/FAQ: More updates and additions
+  File sensors.conf.eg: Fix it87 in5,in6 (-12,-5) calculations
   Module fscpos: new (Fujitsu-Siemens Poseidon driver)
   Module i2c-amd756: Improve busy handling/printk's
   Module i2c-i801: Add 82801CA/CAM support
