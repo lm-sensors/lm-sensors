@@ -1432,6 +1432,113 @@ void print_maxilife(const sensors_chip_name *name)
    free_the_label(&label);
 }
 
+void print_ddcmon(const sensors_chip_name *name)
+{
+	char  *label = NULL;
+	double a, b;
+	int    valid, i;
+	char  s[8];
+        
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_ID, &label,&valid) &&
+       !sensors_get_feature(*name, SENSORS_DDCMON_ID, &a)) {
+      if (valid) {
+	i = (int) a;	
+	s[0] = ((i >> 10) & 0x1f) | 0x40;
+	s[1] = ((i >> 5) & 0x1f) | 0x40;
+	s[2] = (i & 0x1f) | 0x40;
+	s[3] = ((i >> 20) & 0x0f) + '0';
+	s[4] = ((i >> 16) & 0x0f) + '0';
+	s[5] = ((i >> 28) & 0x0f) + '0';
+	s[6] = ((i >> 24) & 0x0f) + '0';
+	s[7] = 0;
+         print_label(label, 24);
+         printf("%s\n", s);
+      }
+   } else
+      printf("ERROR: data 1\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_SERIAL, &label,&valid) &&
+       !sensors_get_feature(*name, SENSORS_DDCMON_SERIAL, &a)) {
+      if (valid) {
+         print_label(label, 24);
+         printf("%d\n", (int) a);
+      }
+   } else
+      printf("ERROR: data 2\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_VERSIZE, &label,&valid) &&
+       !sensors_get_feature(*name, SENSORS_DDCMON_VERSIZE, &a) &&
+       !sensors_get_feature(*name, SENSORS_DDCMON_HORSIZE, &b)) {
+      if (valid) {
+         print_label(label, 24);
+         printf("%dx%d\n", (int) a, (int) b);
+      }
+   } else
+      printf("ERROR: data 3\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_VERSYNCMIN, &label,&valid) &&
+       !sensors_get_feature(*name, SENSORS_DDCMON_VERSYNCMIN, &a) &&
+       !sensors_get_feature(*name, SENSORS_DDCMON_VERSYNCMAX, &b)) {
+      if (valid) {
+         print_label(label, 24);
+         printf("%d-%d\n", (int) a, (int) b);
+      }
+   } else
+      printf("ERROR: data 4\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_HORSYNCMIN, &label,&valid) &&
+       !sensors_get_feature(*name, SENSORS_DDCMON_HORSYNCMIN, &a) &&
+       !sensors_get_feature(*name, SENSORS_DDCMON_HORSYNCMAX, &b)) {
+      if (valid) {
+         print_label(label, 24);
+         printf("%d-%d\n", (int) a, (int) b);
+      }
+   } else
+      printf("ERROR: data 5\n");
+   free_the_label(&label);
+
+}
+
+void print_eeprom(const sensors_chip_name *name)
+{
+	char  *label = NULL;
+	double a, b, c;
+	int    valid, i;
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_TYPE, &label,&valid) &&
+       !sensors_get_feature(*name, SENSORS_EEPROM_TYPE, &a)) {
+      if (valid) {
+	if(((int) a) != 4)	
+	    return;
+         print_label(label, 24);
+	 printf("SDRAM DIMM SPD\n");
+      }
+   } else
+      printf("ERROR: data 1\n");
+   free_the_label(&label);
+
+   if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_ROWADDR, &label,&valid) &&
+       !sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a) &&
+       !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b) &&
+       !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c)) {
+      if (valid) {
+         print_label(label, 24);
+	 i = (((int) a) & 0x0f) + (((int) b) & 0x0f) + ((int) c) - 16;
+	 if(i > 0 && i <= 10)
+	         printf("%d\n", 1 << i);
+	 else
+	         printf("invalid\n");
+      }
+   } else
+      printf("ERROR: data 2\n");
+   free_the_label(&label);
+
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;

@@ -1559,6 +1559,55 @@ static sensors_chip_feature thmc50_features[] =
     { 0 }
   };
 
+static sensors_chip_feature ddcmon_features[] =
+  {
+    { SENSORS_DDCMON_ID, "Monitor ID",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, DDCMON_SYSCTL_ID, VALUE(1), 0 },
+    { SENSORS_DDCMON_VERSIZE, "Monitor Size (cm)",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, DDCMON_SYSCTL_SIZE, VALUE(1), 0 },
+    { SENSORS_DDCMON_HORSIZE, "hsize",
+                         SENSORS_DDCMON_VERSIZE, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, DDCMON_SYSCTL_SIZE, VALUE(2), 0 },
+    { SENSORS_DDCMON_VERSYNCMIN, "Vertical Sync (Hz)",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, DDCMON_SYSCTL_SYNC, VALUE(1), 0 },
+    { SENSORS_DDCMON_VERSYNCMAX, "v_sync_max",
+                         SENSORS_DDCMON_VERSYNCMIN, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, DDCMON_SYSCTL_SYNC, VALUE(2), 0 },
+    { SENSORS_DDCMON_HORSYNCMIN, "Horizontal Sync (KHz)",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, DDCMON_SYSCTL_SYNC, VALUE(3), 0 },
+    { SENSORS_DDCMON_HORSYNCMAX, "h_sync_max",
+                         SENSORS_DDCMON_HORSYNCMIN, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, DDCMON_SYSCTL_SYNC, VALUE(4), 0 },
+    { SENSORS_DDCMON_TIMINGS, "timings",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, DDCMON_SYSCTL_TIMINGS, VALUE(1), 0 },
+    { SENSORS_DDCMON_SERIAL, "Serial number",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, DDCMON_SYSCTL_SERIAL, VALUE(1), 0 },
+    { 0 }
+  };
+
+static sensors_chip_feature eeprom_features[] =
+  {
+    { SENSORS_EEPROM_TYPE, "Memory type",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, EEPROM_SYSCTL1, VALUE(3), 0 },
+    { SENSORS_EEPROM_ROWADDR, "SDRAM Size (MB)",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, EEPROM_SYSCTL1, VALUE(4), 0 },
+    { SENSORS_EEPROM_COLADDR, "col",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, EEPROM_SYSCTL1, VALUE(5), 0 },
+    { SENSORS_EEPROM_NUMROWS, "num rows",
+                         SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, EEPROM_SYSCTL1, VALUE(6), 0 },
+    { 0 }
+  };
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -1595,6 +1644,8 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_THMC50_PREFIX, thmc50_features },
 		/* Cheat on ADM1022 for now - no separate #defines */
  { SENSORS_ADM1022_PREFIX, thmc50_features },
+ { SENSORS_DDCMON_PREFIX, ddcmon_features },
+ { SENSORS_EEPROM_PREFIX, eeprom_features },
  { 0 }
 };
 

@@ -276,6 +276,10 @@ void do_a_print(sensors_chip_name name)
            !strcmp(name.prefix,"maxilife-co") ||
            !strcmp(name.prefix,"maxilife-as"))
     print_maxilife(&name);
+  else if (!strcmp(name.prefix,"ddcmon"))
+    print_ddcmon(&name);
+  else if (!strcmp(name.prefix,"eeprom"))
+    print_eeprom(&name);
   else
     print_unknown_chip(&name);
   printf("\n");
