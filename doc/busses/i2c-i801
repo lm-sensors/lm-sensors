@@ -1,7 +1,8 @@
 Kernel driver `i2c-i801.o'
 
 Status: Tested and stable.
-        Block reads/writes untested (but not used by any current chip driver).
+        Block reads/writes lightly tested.
+	ICH4 HW PEC support Beta.
 
 Supported adapters:
   * Intel 82801AA and 82801AB (ICH and ICH0 - part of the
@@ -45,10 +46,21 @@ An output of lspci will show something similar to the following:
 The SMBus controller is function 3 in device 1f.
 Class 0c05 is SMBus Serial Controller.
 
+If you do NOT see the 24x3 device at function 3, and you can't
+figure out any way in the BIOS to enable it,
+(and especially if you have an Asus P4B board),
+see prog/hotplug/README.p4b.
+
 The ICH chips are quite similar to Intel's PIIX4 chip,
 at least in the SMBus controller.
 
 See the file i2c-piix4 for some additional information.
+
+
+Process Call Support
+--------------------
+
+Not supported.
 
 
 I2C Block Read Support
@@ -76,7 +88,7 @@ Hardware PEC	yes		yes
 Other ICH4 Features
 -------------------
 
-The following additional ICH4 features are also supported:
+The following additional ICH4 features are also _not_ supported:
 
 32 Byte buffer
 
