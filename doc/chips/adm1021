@@ -218,7 +218,7 @@ Within each ADM1021 or MAX1617  directory, you can find the following files:
     1-0 Reserved.
   Note: # - These flags stay high until the status register is read or they 
             are reset by POR.
-* temp (ADM1021_SYSCTL_TEMP)
+* temp1 (ADM1021_SYSCTL_TEMP)
   A list of three numbers. The first number is the Overtemperature Shutdown
   value, the second number is Low limit value, and the third number is the
   current temperature. The first two values can be modified. Each value can
@@ -237,8 +237,8 @@ Within each ADM1021 or MAX1617  directory, you can find the following files:
   computer gets too cold.
   If accessed through sysctl, this is a list of longs, each being the
   temperature times 10.
-* remote_temp (ADM1021_SYSCTL_REMOTE_TEMP)
-  Works exactly the same way as 'temp', but uses an external temperature
+* temp2 (ADM1021_SYSCTL_REMOTE_TEMP)
+  Works exactly the same way as 'temp1', but uses an external temperature
   probe for the sensing.  The temperature probe is of a silicon diode type
   and not of a thermal-resistive type.  A probe can easily be made from a
   common transister (see the ADM1021 for qualification specs) by shorting

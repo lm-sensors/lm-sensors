@@ -38,7 +38,7 @@ Module Parameters
 Description
 -----------
 
-The THMC50 implements: an internal temperature sensors, support for an
+The THMC50 implements: an internal temperature sensor, support for an
 external diode-type temperature sensor (compatible w/ the diode sensor inside
 many processors), and a controllable fan/analog_out DAC. For the temperature
 sensors, limits can be set through the appropriate Overtemperature Shutdown 
@@ -61,8 +61,8 @@ Driver Features
 These are the files which are provided by the driver (ro=read-only, 
 rw=read and writeable):
 
-temp -- 	Three fields: [temp-os,rw] [temp-hyst,rw] [temp,ro]
-remote_temp -- 	Three fields: [temp-os,rw] [temp-hyst,rw] [temp,ro]
+temp1 (internal) -- 	Three fields: [temp-os,rw] [temp-hyst,rw] [temp,ro]
+temp2 (remote)   -- 	Three fields: [temp-os,rw] [temp-hyst,rw] [temp,ro]
 
 temp-os, temp-hyst, and temp are whole degree integers representing degrees
 celcius.
