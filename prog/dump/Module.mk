@@ -35,7 +35,8 @@ PROGDUMPBININSTALL := $(MODULE_DIR)/i2cdump $(MODULE_DIR)/i2cset
 ifneq (,$(findstring $(MACHINE), i386 i486 i586 i686 x86_64))
 PROGDUMPMAN8FILES += $(MODULE_DIR)/isadump.8 $(MODULE_DIR)/isaset.8
 PROGDUMPTARGETS += $(MODULE_DIR)/isadump $(MODULE_DIR)/isaset
-PROGDUMPSOURCES += $(MODULE_DIR)/isadump.c $(MODULE_DIR)/isaset.c
+PROGDUMPSOURCES += $(MODULE_DIR)/isadump.c $(MODULE_DIR)/isaset.c \
+		   $(MODULE_DIR)/superio.c
 PROGDUMPBININSTALL += $(MODULE_DIR)/isadump $(MODULE_DIR)/isaset
 endif
 
@@ -53,6 +54,9 @@ $(MODULE_DIR)/i2cdump: $(MODULE_DIR)/i2cdump.ro $(MODULE_DIR)/i2cbusses.ro
 	$(CC) $(EXLDFLAGS) -o $@ $^
 
 $(MODULE_DIR)/i2cset: $(MODULE_DIR)/i2cset.ro $(MODULE_DIR)/i2cbusses.ro
+	$(CC) $(EXLDFLAGS) -o $@ $^
+
+$(MODULE_DIR)/isadump: $(MODULE_DIR)/isadump.ro $(MODULE_DIR)/superio.ro
 	$(CC) $(EXLDFLAGS) -o $@ $^
 
 install-prog-dump: all-prog-dump

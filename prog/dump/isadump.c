@@ -33,6 +33,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "superio.h"
+
 
 /* To keep glibc2 happy */
 #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ >= 0
@@ -59,7 +61,7 @@ void help(void)
 {
 	fprintf(stderr,
 	        "Syntax for I2C-like access:\n"
-	        "  isadump [-y] ADDRREG DATAREG [BANK [BANKREG]]\n"
+	        "  isadump [-y] [-k V1,V2...] ADDRREG DATAREG [BANK [BANKREG]]\n"
 	        "Syntax for flat address space:\n"
 	        "  isadump [-y] -f ADDRESS [RANGE [BANK [BANKREG]]]\n");
 }
@@ -107,12 +109,24 @@ int main(int argc, char *argv[])
 	int flags = 0;
 	int flat = 0, yes = 0;
 	char *end;
+	unsigned char enter_key[SUPERIO_MAX_KEY+1];
+
+	enter_key[0] = 0;
 
 	/* handle (optional) flags first */
 	while (1+flags < argc && argv[1+flags][0] == '-') {
 		switch (argv[1+flags][1]) {
 		case 'f': flat = 1; break;
 		case 'y': yes = 1; break;
+		case 'k':
+			if (2+flags >= argc
+			 || superio_parse_key(enter_key, argv[2+flags]) < 0) {
+				fprintf(stderr, "Invalid or missing key\n");
+				help();
+				exit(1);
+			}
+			flags++;
+			break;
 		default:
 			fprintf(stderr, "Warning: Unsupported flag "
 				"\"-%c\"!\n", argv[1+flags][1]);
@@ -120,6 +134,12 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 		flags++;
+	}
+
+	/* key is never needed in flat mode */
+	if (flat && enter_key[0]) {
+		fprintf(stderr, "Error: Cannot use key in flat mode\n");
+		exit(1);
 	}
 
 	/* verify that the argument count is correct */
@@ -255,12 +275,26 @@ int main(int argc, char *argv[])
 	}
 #endif
 
+	/* Enter Super-I/O configuration mode */
+	if (enter_key[0])
+		superio_write_key(addrreg, enter_key);
+
 	if (bank >= 0)
 		oldbank = set_bank(flat, addrreg, datareg, bank, bankreg);
 
 	printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
 	for (i = 0; i < range; i += 16) {
 		printf("%c0: ", hexchar(i/16));
+
+		/* It was noticed that Winbond Super-I/O chips
+		   would leave the configuration mode after
+		   an arbitrary number of register reads,
+		   causing any subsequent read attempt to
+		   silently fail. Repeating the key every 16 reads
+		   prevents that. */
+		if (enter_key[0])
+			superio_write_key(addrreg, enter_key);
+
 		for (j = 0; j < 16; j++) {
 			if (flat) {
 				res = inb(addrreg + i + j);
@@ -276,6 +310,10 @@ int main(int argc, char *argv[])
 	/* Restore the original bank value */
 	if (bank >= 0)
 		set_bank(flat, addrreg, datareg, oldbank, bankreg);
+
+	/* Exit Super-I/O configuration mode */
+	if (enter_key[0])
+		superio_reset(addrreg, datareg);
 
 	exit(0);
 }
