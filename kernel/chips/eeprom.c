@@ -43,16 +43,6 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 /* Insmod parameters */
 SENSORS_INSMOD_1(eeprom);
 
-static int checksum = 0;
-MODULE_PARM(checksum, "i");
-MODULE_PARM_DESC(checksum,
-		 "Only accept eeproms whose checksum is correct");
-
-
-/* Many constants specified below */
-
-/* EEPROM registers */
-#define EEPROM_REG_CHECKSUM 0x3f
 
 /* possible natures */
 #define NATURE_UNKNOWN 0
@@ -209,18 +199,6 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 
 	/* prevent 24RF08 corruption */
 	i2c_smbus_write_quick(new_client, 0);
-
-	/* Now, we do the remaining detection. It is not there, unless you force
-	   the checksum to work out. */
-	if (checksum) {
-		int cs = 0;
-		for (i = 0; i <= 0x3e; i++)
-			cs += i2c_smbus_read_byte_data(new_client, i);
-		cs &= 0xff;
-		if (i2c_smbus_read_byte_data
-		    (new_client, EEPROM_REG_CHECKSUM) != cs)
-			goto ERROR1;
-	}
 
 	data->nature = NATURE_UNKNOWN;
 	/* Detect the Vaio nature of EEPROMs.
