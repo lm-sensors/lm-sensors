@@ -1404,6 +1404,13 @@ chip "it87-*"
     # and is not supported by driver at this time
     ignore  vid
 
+# Incubus Saturnus reports that the IT87 chip on Asus A7V8X-X seems
+# to report the VCORE voltage approximately 0.05V higher than the board's
+# BIOS does. Although it doesn't make much sense physically, uncommenting
+# the next line should bring the readings in line with the BIOS' ones in
+# this case.
+# compute in0 -0.05+@ , @+0.05
+
 # If 3.3V reads 2X too high (Soyo Dragon and Asus A7V8X-X, for example),
 # comment out following line.
     compute in2   2*@ , @/2
