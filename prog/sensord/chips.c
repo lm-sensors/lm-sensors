@@ -720,7 +720,7 @@ fmtTemps_W8378x_1
 }
 
 static const char *w83782d_names[] = {
-  SENSORS_W83782D_PREFIX, SENSORS_W83627HF_PREFIX, NULL
+  SENSORS_W83782D_PREFIX, SENSORS_W83627HF_PREFIX, SENSORS_W83627THF_PREFIX, NULL
 };
 
 static const FeatureDescriptor w83782d_features[] = {
