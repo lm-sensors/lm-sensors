@@ -31,12 +31,12 @@ PROGDUMPSOURCES := $(MODULE_DIR)/i2cdump.c $(MODULE_DIR)/i2cset.c \
 		   $(MODULE_DIR)/i2cbusses.c
 PROGDUMPBININSTALL := $(MODULE_DIR)/i2cdump $(MODULE_DIR)/i2cset
 
-# Only build isadump on x86 machines.
+# Only build isadump and isaset on x86 machines.
 ifneq (,$(findstring $(MACHINE), i386 i486 i586 i686 x86_64))
 PROGDUMPMAN8FILES += $(MODULE_DIR)/isadump.8
-PROGDUMPTARGETS += $(MODULE_DIR)/isadump
-PROGDUMPSOURCES += $(MODULE_DIR)/isadump.c
-PROGDUMPBININSTALL += $(MODULE_DIR)/isadump
+PROGDUMPTARGETS += $(MODULE_DIR)/isadump $(MODULE_DIR)/isaset
+PROGDUMPSOURCES += $(MODULE_DIR)/isadump.c $(MODULE_DIR)/isaset.c
+PROGDUMPBININSTALL += $(MODULE_DIR)/isadump $(MODULE_DIR)/isaset
 endif
 
 # Include all dependency files. We use '.rd' to indicate this will create

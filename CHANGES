@@ -31,6 +31,7 @@ ask CVS about it:
   Man page i2cdetect.8: document new command line flags
   Man page i2cdump.8: More details on how i2cdump can write to a chip
   Modules (all chip drivers): Rework memory allocation scheme.
+  Module bmcsensors: Fix oops by creating thread for initialization
   Modules dmi_scan, i2c-piix4: Move IBM detection into dmi_scan
   Modules w83781d.c, smartbatt.c, lm75.c, gl520sm.c, gl518sm.c, ds1621.c,
           asb100.c, lm92.c: Use swab16
@@ -50,6 +51,7 @@ ask CVS about it:
   Program i2cdetect: Adapt probing method to address
                      Add -q and -r flags to force probing methods
   Program isadump: Misc improvements
+  Program isaset: New
   Program mkpatch: Patch dmi_scan.c in kernel instead of adding our own
                    module
                    Include i2c-nforce2
