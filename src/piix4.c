@@ -65,7 +65,7 @@ int piix4_init(void)
 #endif
   piix4_initialized = 0;
   if ((res = piix4_setup())) {
-    printk("piix4.o: PIIX4 not detected, module not inserted\n");
+    printk("piix4.o: PIIX4 not detected, module not inserted.\n");
     piix4_cleanup();
     return res;
   }
@@ -75,7 +75,7 @@ int piix4_init(void)
   piix4_adapter.algo = &smbus_algorithm;
   piix4_adapter.smbus_access = &piix4_access;
   if ((res = smbus_add_adapter(&piix4_adapter))) {
-    printk("piix4.o: smbus_add_adapter failed, module not inserted\n");
+    printk("piix4.o: Adapter registration failed, module not inserted.\n");
     piix4_cleanup();
     return res;
   }

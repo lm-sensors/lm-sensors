@@ -114,7 +114,7 @@ s32 smbus_access_i2c(struct i2c_adapter * adapter, u8 addr, char read_write,
 int smbus_master_xfer (struct smbus_adapter *adap, struct i2c_msg msgs[], 
                        int num)
 {
-  printk("smbus_master_xfer called for adapter `%s' "
+  printk("smbus.o: smbus_master_xfer called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
   return 0;
@@ -123,7 +123,7 @@ int smbus_master_xfer (struct smbus_adapter *adap, struct i2c_msg msgs[],
 /* Algorithm slave_send call-back implementation. Can't do that... */
 int smbus_slave_send (struct smbus_adapter *adap, char *data, int len)
 {
-  printk("smbus_slave_send called for adapter `%s' "
+  printk("smbus.o: smbus_slave_send called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
   return 0;
@@ -132,7 +132,7 @@ int smbus_slave_send (struct smbus_adapter *adap, char *data, int len)
 /* Algorithm slave_recv call-back implementation. Can't do that... */
 int smbus_slave_recv (struct smbus_adapter *adap, char *data, int len)
 {
-  printk("smbus_slave_recv called for adapter `%s' "
+  printk("smbus.o: smbus_slave_recv called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
   return 0;
@@ -163,7 +163,7 @@ int smbus_init(void)
   int res;
   printk("smbus.o version %s (%s)\n",LM_VERSION,LM_DATE);
   if ((res = smbus_add_algorithm(&smbus_algorithm)))
-    printk("Module smbus.o not inserted!\n");
+    printk("smbus.o: Algorithm registration failed, module not inserted.\n");
   else
     printk("smbus.o initialized\n");
   return res;
@@ -173,7 +173,7 @@ int smbus_cleanup(void)
 {
   int res;
   if ((res = smbus_del_algorithm(&smbus_algorithm)))
-    printk("Module smbus.o could not be removed cleanly!\n");
+    printk("smbus.o: Algorithm deregistration failed, module not removed\n");
   return res;
 }
 

@@ -75,7 +75,7 @@ static int isa_initialized;
 int isa_master_xfer (struct isa_adapter *adap, struct i2c_msg msgs[],
                      int num)
 {
-  printk("isa_master_xfer called for adapter `%s' "
+  printk("isa.o: isa_master_xfer called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
   return 0;
@@ -84,7 +84,7 @@ int isa_master_xfer (struct isa_adapter *adap, struct i2c_msg msgs[],
 /* Algorithm slave_send call-back implementation. Can't do that... */
 int isa_slave_send (struct isa_adapter *adap, char *data, int len)
 {
-  printk("isa_slave_send called for adapter `%s' "
+  printk("isa.o: isa_slave_send called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
   return 0;
@@ -93,7 +93,7 @@ int isa_slave_send (struct isa_adapter *adap, char *data, int len)
 /* Algorithm slave_recv call-back implementation. Can't do that... */
 int isa_slave_recv (struct isa_adapter *adap, char *data, int len)
 {
-  printk("isa_slave_recv called for adapter `%s' "
+  printk("isa.o: isa_slave_recv called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
   return 0;
@@ -131,7 +131,7 @@ int isa_init(void)
 #endif
   isa_initialized = 0;
   if ((res = isa_add_algorithm(&isa_algorithm))) {
-    printk("isa.o: Algorithm registration failed, module isa.o not inserted\n");
+    printk("isa.o: Algorithm registration failed, module not inserted.\n");
     isa_cleanup();
     return res;
   }
@@ -141,12 +141,12 @@ int isa_init(void)
   isa_adapter.algo = &isa_algorithm;
   if ((res = isa_add_adapter(&isa_adapter))) {
     printk("isa.o: Adapter registration failed, "
-           "module isa.o is not inserted\n");
+           "module isa.o is not inserted\n.");
     isa_cleanup();
     return res;
   }
   isa_initialized++;
-  printk("isa.o: ISA bus access for i2c modules initialized\n");
+  printk("isa.o: ISA bus access for i2c modules initialized.\n");
   return 0;
 }
 
@@ -156,7 +156,7 @@ int isa_cleanup(void)
   if (isa_initialized >= 2)
   {
     if ((res = isa_del_adapter(&isa_adapter))) {
-      printk("isa.o: isa_del_adapter failed, module not removed\n");
+      printk("isa.o: Adapter deregistration failed, module not removed.\n");
       return res;
     } else
       isa_initialized--;
@@ -164,7 +164,7 @@ int isa_cleanup(void)
   if (isa_initialized >= 1)
   {
     if ((res = isa_del_algorithm(&isa_algorithm))) {
-      printk("isa.o: isa_del_algorithm failed, module not removed\n");
+      printk("isa.o: Algorithm deregistration failed, module not removed.\n");
       return res;
     } else
       isa_initialized--;
