@@ -39,10 +39,6 @@
 #include "sensors.h"
 #include <linux/init.h>
 
-/* temporary defines */
-#define I2C_DRIVERID_FSCPOS   0xabcd
-/* -- end of temporary defines */
-
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
     (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
@@ -231,11 +227,11 @@ static ctl_table fscpos_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &fscpos_temp},
 	{FSCPOS_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_temp},
-	{FSCPOS_SYSCTL_VOLT0, "volt0", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{FSCPOS_SYSCTL_VOLT0, "in0", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_volt},
-	{FSCPOS_SYSCTL_VOLT1, "volt1", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{FSCPOS_SYSCTL_VOLT1, "in1", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_volt},
-	{FSCPOS_SYSCTL_VOLT2, "volt2", NULL, 0, 0444, NULL, &i2c_proc_real,
+	{FSCPOS_SYSCTL_VOLT2, "in2", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_volt},
 	{FSCPOS_SYSCTL_FAN0, "fan0", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &fscpos_fan},
