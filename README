@@ -163,21 +163,18 @@ are too many mainboards to keep a list of busses and chips used on them.
 On the other hand, we provide a program called 'sensors-detect' which
 tries to figure out what hardware is available on your system.
 
-The developers of this package can be reached through the email address
+The developers of this package can be reached through the mailing-list
 <sensors@stimpy.netroedge.com>. Do not hesitate to mail us if you have 
 questions, suggestions, problems, want to contribute, or just want to 
 report it works for you. But please try to read the documentation and
 FAQ before you ask any questions!
 
 The latest version of this package can always be found on our homepage:
-http://secure.netroedge.com/~lm78. Pre-release versions can be retrieved
+http://secure.netroedge.com/~lm78/. Pre-release versions can be retrieved
 through anonymous CVS; see doc/cvs for more information.
 
-This whole package is copyright (c) 1998 - 2004 by Frodo Looijaard and
-Philip Edelbrock, except for a few drivers written by other people. See the
-individual files for more exact copyright information.  This package may be
-distributed according to the GNU General Public License (GPL), as included
-in the file COPYING.
+This package may be distributed according to the GNU General Public
+License (GPL), as included in the file COPYING.
 
 Note that libsensors falls under the GPL, not the LGPL.  In more human
 language, that means it is FORBIDDEN to link any application to the
