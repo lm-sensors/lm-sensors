@@ -45,10 +45,6 @@ You can't just enable the SMB alone.
 The SMB and the ACPI have separate I/O spaces.
 We make sure that the SMB is enabled. We leave the ACPI alone.
 
-This driver controls the SMB Host only.
-
-This driver does not use interrupts.
-
 
 Features
 --------
