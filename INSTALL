@@ -5,16 +5,16 @@ See QUICKSTART for the simple version.
 
 The driver modules in this package are ONLY for 2.4 kernels 2.4.9 or later !!!
 
-This package REQUIRES i2c-2.8.1 or later! The i2c subsystem found in the
+This package REQUIRES i2c-2.9.0 or later! The i2c subsystem found in the
 Linux 2.4 kernel trees, even the latest ones, is outdated and won't work.
 
-FOR 2.5/2.6 KERNELS, do not attempt to compile this package.
+FOR 2.5/2.6 KERNELS, do not attempt to compile the modules in this package.
     Use the drivers already in the 2.5/2.6 kernel tree.
     If you are running a 2.5/2.6 kernel, the ONLY thing you need to
     do is 'make user' and 'make user_install'. Do NOT follow the rest
     of these instructions.
 
-IF YOU REQUIRE  BTTV AND RELATED MODULES,
+IF YOU REQUIRE BTTV AND RELATED MODULES,
     See the information in README.
     Do NOT follow the rest of these instructions.
 
@@ -57,8 +57,8 @@ NOTE: PLEASE READ THE DOCUMENTATION IN THE DOC SUBDIRECTORY IF YOU GET STUCK!
 Installing the i2c package
 ==========================
 
-This lm_sensors release REQUIRES i2c-2.8.0 or later,
-which is not in kernels through (at least) 2.4.22.
+This lm_sensors release REQUIRES i2c-2.9.0 or later,
+which is not in kernels through (at least) 2.4.28.
 Therefore, you must download and install the i2c package with
 the same version number or higher as this lm_sensors package.
 

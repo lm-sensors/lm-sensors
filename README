@@ -9,7 +9,7 @@
 OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
 !!! This package is ONLY for 2.6, 2.5, and 2.4 kernels (2.4.9 or later) !!!
-!!! THIS PACKAGE REQUIRES i2c-2.8.1 or later!!!
+!!! THIS PACKAGE REQUIRES i2c-2.9.0 or later!!!
 
 FOR 2.6/2.5 KERNELS, Use only the userspace tools in this package!
 Build and install them with 'make user' and 'make user_install'.
@@ -31,23 +31,21 @@ additional drivers in 2.6 please port and submit them to us.
 HOWEVER, the userspace tools in this package will work for
 2.4, 2.5, and 2.6 kernels.
 
-WARNING! You must have at least i2c-2.8.1.
+WARNING! You must have at least i2c-2.9.0.
 EVEN IF your kernel does contain i2c support!
 
 The I2C[2] package in existing 2.4 kernels is NOT sufficient
 for compilation of this package.
 
-ADDITIONALLY, i2c-2.8.1 is not API compatible to earlier i2c
-releases due to struct changes; therefore you must NOT ENABLE
-any other i2c drivers (e.g. bttv) in the kernel.
-Do NOT install lm-sensors kernel modules directly out of this package
-if you require bttv or related modules.
+ADDITIONALLY, i2c-2.9.0 is API compatible to i2c releases 2.7.0 and earlier,
+but is not API compatible to i2c releases 2.8.0 - 2.8.8
+due to struct changes.
 
 Users whose systems require additional i2c-related
 kernel modules (bttv, i2c-matrox, rivatv, zoran...)
-will require additional patches for the Linux 2.4.21 and 2.4.22 kernels.
-These patches fix compatibility differences between i2c-2.8.1 and
-the Linux 2.4 kernels.
+will require additional patches for the Linux 2.4.x kernels.
+These patches fix compatibility differences between those modules and
+the 2.9.0 i2c release.
 A complete installation guide is available at
   http://khali.linux-fr.org/devel/i2c/
 

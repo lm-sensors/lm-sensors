@@ -33,7 +33,7 @@ Other methods are described in INSTALL.
     you MUST remove them (as root) with `rmmod'.
 
   * Download, build, and install the latest i2c package,
-    (i2c-2.8.1 or later). The i2c subsystem found in the Linux 2.4
+    (i2c-2.9.0 or later). The i2c subsystem found in the Linux 2.4
     kernel trees, even the latest ones, is outdated and won't work.
     Quickstart for i2c: make; make install; depmod -a
 
