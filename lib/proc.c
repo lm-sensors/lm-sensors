@@ -487,6 +487,14 @@ int getsysname(const sensors_chip_feature *feature, char *sysname,
 		{ "temp_hyst", "temp1_max_hyst", TEMPMAG },
 		{ "temp_low", "temp1_min", TEMPMAG },
 		{ "temp_over", "temp1_max", TEMPMAG },
+		{ "pwm1", "pwm1", 0, "fan1_pwm" },
+		{ "pwm2", "pwm2", 0, "fan2_pwm" },
+		{ "pwm3", "pwm3", 0, "fan3_pwm" },
+		{ "pwm4", "pwm4", 0, "fan4_pwm" },
+		{ "pwm1_enable", "pwm1_enable", 0, "fan1_pwm_enable" },
+		{ "pwm2_enable", "pwm2_enable", 0, "fan2_pwm_enable" },
+		{ "pwm3_enable", "pwm3_enable", 0, "fan3_pwm_enable" },
+		{ "pwm4_enable", "pwm4_enable", 0, "fan4_pwm_enable" },
 		{ NULL, NULL }
 	};
 
