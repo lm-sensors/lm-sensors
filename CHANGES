@@ -14,15 +14,24 @@ ask CVS about it:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
 2.5.1 (2000????)
+  Library: Add adm1025 support
   Module adm1025: new
   Module ddcmon: Fixed bus scan which could hang SMBus
   Module maxilife: Add support for Maxilife '99 (NBA)
   Module via686a: Enable sensors if not enabled by BIOS
   Module w83781d: Improve w83783s support, w83627hf always has 2 pwm
   Module w83781d: Fix sensor2&3 selection, enable VBAT (in8) monitoring
+  Module w83781d: Remove as99127f entries for in7-8, pwm3-4, sensor1-3
+  Module w83781d: Improve beep input checking
   Program i2cdump: Add Winbond-style bank selection
   Program isadump: Add Winbond-style bank selection
-  Program sensors-detect: Fix i801 detection
+  Program sensors: Add adm1025 support.
+  Program sensors: Remove some as99127f entries, fix as99127 "(beep)"
+  Program sensors-detect: Fix i801 detection, add adm1025 driver entry
+  File sensors.conf.eg: Add Maxilife '99 entries
+  File sensors.conf.eg: Remove some as99127f entries.
+    Note: For as99127f, reinstall sensors.conf.eg manually (make install
+          won't reinstall it) or else 'sensors -s' will fail.
 
 2.5.0 (20000312)
   Dropped all kernel 2.0 and 2.1 compatibility

@@ -265,14 +265,11 @@ chip "as99127f-*"
     label in4 "+12V"
     label in5 "-12V"
     label in6 "-5V"
-    label in7 "V5SB"
-    label in8 "VBat"
 
     compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
     compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
     compute in5 -(210/60.4)*@  ,  -@/(210/60.4)
     compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
-    compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
 
 # set limits to  5% for the critical voltages
 # set limits to 10% for the non-critical voltages
@@ -292,18 +289,6 @@ chip "as99127f-*"
     set in5_max -12 * 1.10
     set in6_min -5 * 0.95
     set in6_max -5 * 1.05
-    set in7_min 5 * 0.95
-    set in7_max 5 * 1.05
-    set in8_min 3.0 * 0.80
-    set in8_max 3.0 * 1.20
-
-# set up sensor types (thermistor is default)
-# 1 = PII/Celeron Diode; 2 = 3904 transistor;
-# 3435 = thermistor with Beta = 3435
-# If temperature changes very little, try 1 or 2.
-#   set sensor1 1
-#   set sensor2 2
-#   set sensor3 3435
 
 
 chip "gl518sm-*"

@@ -147,7 +147,7 @@ will do no harm, but will return 'old' values.
 AS99127F PROBLEMS
 -----------------
 The as99127f support was developed without the benefit of a datasheet.
-In most cases it is treated as a w83782d.
+In most cases it is treated as a w83781d.
 This support is BETA. One user has reported problems with fans stopping.
 
 Known problems:
@@ -159,6 +159,10 @@ Known problems:
 
 These will not be fixed unless we get a datasheet.
 If you have problems, please lobby Asus to release a datasheet.
+
+Note that the individual beep bits are inverted from the other chips.
+That is, in the second entry in the 'beep' file, a '1' bit means
+disable, not enable.
 
 
 Chip Features
@@ -562,7 +566,8 @@ register in Bank0.CR51 of W83781D.
  	diode 		          1		 1		1		
  
  
- 	CR[59h] 		bit 4(VTIN1)	bit 2(VTIN2)   bit 3(VTIN3)
+(error) CR[59h] 		bit 4(VTIN1)	bit 2(VTIN2)   bit 3(VTIN3)
+(right) CR[59h] 		bit 4(VTIN1)	bit 5(VTIN2)   bit 6(VTIN3)
  	
  	PII thermal diode         1		 1		1
  	2N3904	diode	          0		 0		0
