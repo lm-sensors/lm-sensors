@@ -55,7 +55,6 @@ MODULE_PARM_DESC(checksum,
 #define EIGHT_K		4
 #define SIXTEEN_K	5
 
-/* Conversions */
 /* Size of EEPROM in bytes */
 #define EEPROM_SIZE 256
 
@@ -221,6 +220,22 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 		if (i2c_smbus_read_byte_data
 		    (new_client, EEPROM_REG_CHECKSUM) != cs)
 			goto ERROR1;
+	}
+
+	/* Ignore Vaio EEPROMs with a password set, unless forced.
+	   We use the "PCG-" prefix as the signature. */
+	if (kind < 0 && address == 0x57)
+	{
+		if (i2c_smbus_read_byte_data(new_client, 0x80) == 'P'
+    	 && i2c_smbus_read_byte_data(new_client, 0x81) == 'C'
+    	 && i2c_smbus_read_byte_data(new_client, 0x82) == 'G'
+    	 && i2c_smbus_read_byte_data(new_client, 0x83) == '-'
+		 && i2c_smbus_read_byte_data(new_client, 0x00) != 0x00)
+		{
+	 		printk("eeprom.o: Protecting Sony Vaio password, use force to"
+			       "override\n");
+			goto ERROR1;
+		}
 	}
 
 	/* Determine the chip type - only one kind supported! */
