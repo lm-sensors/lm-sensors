@@ -35,7 +35,7 @@ all-i2c: $(I2CTARGETS)
 all :: all-i2c
 
 install-i2c:
-	$(MKDIR) $(MODDIR)
+	$(MKDIR) $(MODDIR) $(INCLUDEDIR)
 	install -o root -g root -m 644 $(I2CTARGETS) $(MODDIR)
 	install -o root -g root -m 644 $(I2CHEADERFILES) $(INCLUDEDIR)
 install :: install-i2c
