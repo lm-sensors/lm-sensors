@@ -101,7 +101,8 @@ static inline void superio_exit(void)
 #define FAN_TO_REG(val,div)		((val)<=0?255: \
 					 480000/((val)*(div)))
 #define FAN_DIV_FROM_REG(val)		(1 << ((val >> 5) & 0x03))
-#define FAN_DIV_TO_REG(val)		((val)==8?0x60:(val)==4?0x40:(val)==1?0x00:0x20)
+#define FAN_DIV_TO_REG(val)		((val)==8?0x60:(val)==4?0x40: \
+					 (val)==1?0x00:0x20)
 #define FAN_STATUS_FROM_REG(val)	((val) & 0x07)
 
 /*
@@ -452,14 +453,17 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	int err = 0;
 	const char *type_name = "pc87360";
 	const char *client_name = "PC8736x chip";
+	const ctl_table *template = pc87360_dir_table_template;
 
 	if (!i2c_is_isa_adapter(adapter)) {
 		return 0;
 	}
 
 	for (i = 0; i < 3; i++) {
-		if (extra_isa[i] && check_region(extra_isa[i], PC87360_EXTENT)) {
-			printk("pc87360.o: region 0x%x already in use!\n", address);
+		if (extra_isa[i]
+		 && check_region(extra_isa[i], PC87360_EXTENT)) {
+			printk(KERN_ERR "pc87360.o: region 0x%x already in "
+			       "use!\n", address);
 			return -ENODEV;
 		}
 	}
@@ -490,15 +494,17 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 		break;
 	case 0xe5:
 		type_name = "pc87365";
-		data->fannr = 3;
-		data->innr = 11;
-		data->tempnr = 2;
+		template = pc87365_dir_table_template;
+		data->fannr = extra_isa[0] ? 3 : 0;
+		data->innr = extra_isa[1] ? 11 : 0;
+		data->tempnr = extra_isa[2] ? 2 : 0;
 		break;
 	case 0xe9:
 		type_name = "pc87366";
-		data->fannr = 3;
-		data->innr = 11;
-		data->tempnr = 3;
+		template = pc87365_dir_table_template;
+		data->fannr = extra_isa[0] ? 3 : 0;
+		data->innr = extra_isa[1] ? 11 : 0;
+		data->tempnr = extra_isa[2] ? 3 : 0;
 		break;
 	}
 
@@ -517,9 +523,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR1;
 
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
-				    type_name, data->innr ?
-				    pc87365_dir_table_template :
-				    pc87360_dir_table_template)) < 0) {
+				    type_name, template)) < 0) {
 		err = i;
 		goto ERROR2;
 	}
@@ -527,10 +531,14 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 
 	return 0;
 
-      ERROR2:
+ERROR2:
 	i2c_detach_client(new_client);
-      ERROR1:
-	release_region(address, PC87360_EXTENT);
+ERROR1:
+	for (i = 0; i < 3; i++) {
+		if (data->address[i]) {
+			release_region(data->address[i], PC87360_EXTENT);
+		}
+	}
 	kfree(data);
 	return err;
 }
@@ -543,7 +551,7 @@ static int pc87360_detach_client(struct i2c_client *client)
 	i2c_deregister_entry(data->sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {
-		printk("pc87360.o: Client deregistration failed, "
+		printk(KERN_ERR "pc87360.o: Client deregistration failed, "
 		       "client not detached.\n");
 		return err;
 	}
@@ -591,34 +599,50 @@ static void pc87360_update_client(struct i2c_client *client)
 	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
 	    (jiffies < data->last_updated) || !data->valid) {
 		for (i = 0; i < data->fannr; i++) {
-			data->fan[i] = pc87360_read_value(data, 0, PC87360_REG_FAN(i));
-			data->fan_min[i] = pc87360_read_value(data, 0, PC87360_REG_FAN_MIN(i));
-			data->fan_status[i] = pc87360_read_value(data, 0, PC87360_REG_FAN_STATUS(i));
-			data->pwm[i] = pc87360_read_value(data, 0, PC87360_REG_PWM(i));
+			data->fan[i] = pc87360_read_value(data, 0,
+				       PC87360_REG_FAN(i));
+			data->fan_min[i] = pc87360_read_value(data, 0,
+					   PC87360_REG_FAN_MIN(i));
+			data->fan_status[i] = pc87360_read_value(data, 0,
+					      PC87360_REG_FAN_STATUS(i));
+			data->pwm[i] = pc87360_read_value(data, 0,
+				       PC87360_REG_PWM(i));
 		}
 
 		for (i = 0; i < data->innr; i++) {
 			pc87360_write_value(data, 1, PC87365_REG_IN_BANK, i);
-			data->in_status[i] = pc87360_read_value(data, 1, PC87365_REG_IN_STATUS);
+			data->in_status[i] = pc87360_read_value(data, 1,
+			                     PC87365_REG_IN_STATUS);
 			if (data->in_status[i] & 0x01) {
-				data->in[i] = pc87360_read_value(data, 1, PC87365_REG_IN);
-				data->in_min[i] = pc87360_read_value(data, 1, PC87365_REG_IN_MIN);
-				data->in_max[i] = pc87360_read_value(data, 1, PC87365_REG_IN_MAX);
+				data->in[i] = pc87360_read_value(data, 1,
+					      PC87365_REG_IN);
+				data->in_min[i] = pc87360_read_value(data, 1,
+						  PC87365_REG_IN_MIN);
+				data->in_max[i] = pc87360_read_value(data, 1,
+						  PC87365_REG_IN_MAX);
 			}
-			data->in_alarms = pc87360_read_value(data, 1, PC87365_REG_IN_ALARMS1)
-					| (pc87360_read_value(data, 1, PC87365_REG_IN_ALARMS2) << 8);
+			data->in_alarms = pc87360_read_value(data, 1,
+					  PC87365_REG_IN_ALARMS1)
+					| (pc87360_read_value(data, 1,
+					   PC87365_REG_IN_ALARMS2) << 8);
 		}
 
 		for (i = 0; i < data->tempnr; i++) {
 			pc87360_write_value(data, 2, PC87365_REG_TEMP_BANK, i);
-			data->temp_status[i] = pc87360_read_value(data, 2, PC87365_REG_TEMP_STATUS);
+			data->temp_status[i] = pc87360_read_value(data, 2,
+					       PC87365_REG_TEMP_STATUS);
 			if (data->temp_status[i] & 0x01) {
-				data->temp[i] = pc87360_read_value(data, 2, PC87365_REG_TEMP);
-				data->temp_min[i] = pc87360_read_value(data, 2, PC87365_REG_TEMP_MIN);
-				data->temp_max[i] = pc87360_read_value(data, 2, PC87365_REG_TEMP_MAX);
-				data->temp_crit[i] = pc87360_read_value(data, 2, PC87365_REG_TEMP_CRIT);
+				data->temp[i] = pc87360_read_value(data, 2,
+						PC87365_REG_TEMP);
+				data->temp_min[i] = pc87360_read_value(data, 2,
+						    PC87365_REG_TEMP_MIN);
+				data->temp_max[i] = pc87360_read_value(data, 2,
+						    PC87365_REG_TEMP_MAX);
+				data->temp_crit[i] = pc87360_read_value(data, 2,
+						     PC87365_REG_TEMP_CRIT);
 			}
-			data->temp_alarms = pc87360_read_value(data, 2, PC87365_REG_TEMP_ALARMS);
+			data->temp_alarms = pc87360_read_value(data, 2,
+					    PC87365_REG_TEMP_ALARMS);
 		}
 
 		data->last_updated = jiffies;
@@ -655,9 +679,9 @@ void pc87360_fan(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		pc87360_update_client(client);
 		results[0] = FAN_FROM_REG(data->fan_min[nr],
-					  FAN_DIV_FROM_REG(data->fan_status[nr]));
+			     FAN_DIV_FROM_REG(data->fan_status[nr]));
 		results[1] = FAN_FROM_REG(data->fan[nr],
-					  FAN_DIV_FROM_REG(data->fan_status[nr]));
+			     FAN_DIV_FROM_REG(data->fan_status[nr]));
 		*nrels_mag = 2;
 	}
 	/* We ignore National's recommendation */
@@ -666,7 +690,7 @@ void pc87360_fan(struct i2c_client *client, int operation, int ctl_name,
 			return;
 		if (*nrels_mag >= 1) {
 			data->fan_min[nr] = FAN_TO_REG(results[0],
-						       FAN_DIV_FROM_REG(data->fan_status[nr]));
+					    FAN_DIV_FROM_REG(data->fan_status[nr]));
 			pc87360_write_value(data, 0, PC87360_REG_FAN_MIN(nr),
 					    data->fan_min[nr]);
 		}
@@ -693,13 +717,13 @@ void pc87360_fan_div(struct i2c_client *client, int operation,
 		for (i = 0; i < data->fannr && i < *nrels_mag; i++) {
 			/* Preserve fan min */
 			int fan_min = FAN_FROM_REG(data->fan_min[i],
-						   FAN_DIV_FROM_REG(data->fan_status[i]));
+				      FAN_DIV_FROM_REG(data->fan_status[i]));
 			data->fan_status[i] = (data->fan_status[i] & 0x9F)
 					    | FAN_DIV_TO_REG(results[i]);
 			pc87360_write_value(data, 0, PC87360_REG_FAN_STATUS(i),
 					    data->fan_status[i]);
 			data->fan_min[i] = FAN_TO_REG(fan_min,
-						      FAN_DIV_FROM_REG(data->fan_status[i]));
+					   FAN_DIV_FROM_REG(data->fan_status[i]));
 			pc87360_write_value(data, 0, PC87360_REG_FAN_MIN(i),
 					    data->fan_min[i]);
 		}
@@ -845,15 +869,30 @@ void pc87365_temp_status(struct i2c_client *client, int operation, int ctl_name,
 
 static int __init pc87360_init(void)
 {
-	printk("pc87360.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	int i;
+
+	printk(KERN_INFO "pc87360.o version %s (%s)\n", LM_VERSION, LM_DATE);
 
 	if (pc87360_find(&devid, extra_isa)) {
-		printk("pc87360.o: PC8736x not detected, module not inserted.\n");
+		printk(KERN_WARNING "pc87360.o: PC8736x not detected, "
+		       "module not inserted.\n");
 		return -ENODEV;
 	}
 
-	/* i2c-proc wants a checkable region */
-	normal_isa[0] = extra_isa[0];
+	/* Arbitrarily pick one of the addresses */
+	for (i = 0; i < 3; i++) {
+		if (extra_isa[i] != 0x0000) {
+			normal_isa[0] = extra_isa[i];
+			break;
+		}
+	}
+
+	if (normal_isa[0] == 0x0000) {
+		printk(KERN_WARNING "pc87360.o: No active logical device, "
+		       "module not inserted.\n");
+		return -ENODEV;
+	
+	}
 
 	return i2c_add_driver(&pc87360_driver);
 }
