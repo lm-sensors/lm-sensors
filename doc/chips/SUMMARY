@@ -1,5 +1,6 @@
 SUMMARY OF SUPPORTED CHIPS
 ==========================
+
 This is a summary of the sensor and non-sensor chips supported
 by this package. It lists the features of each supported chip.
 
@@ -113,6 +114,9 @@ lm78
 
 lm80
 	lm80		1	7	2	-	yes	no
+
+lm83
+	lm83		4	-	-	-	yes	no
 
 lm85
 	lm85		3	5	4	3 pwm	yes	no
@@ -242,4 +246,4 @@ This may help identify a chip after doing a 'i2cdump [bus] [address]'.
 
 
 ------------------
-Copyright (c) 2001-2002 The lm_sensors group
+Copyright (c) 2001-2003 The lm_sensors group
