@@ -298,17 +298,17 @@ int __init i2c_voodoo3_init(void)
 	if ((res = i2c_bit_add_bus(&voodoo3_i2c_adapter))) {
 		printk("i2c-voodoo3.o: I2C adapter registration failed\n");
 	} else {
-		printk("i2c-i810.o: I810 I2C bus initialized\n");
+		printk("i2c-voodoo3.o: I2C bus initialized\n");
 		voodoo3_initialized |= INIT2;
 	}
 	if ((res = i2c_bit_add_bus(&voodoo3_ddc_adapter))) {
 		printk("i2c-voodoo3.o: DDC adapter registration failed\n");
 	} else {
-		printk("i2c-i810.o: I810 DDC bus initialized\n");
+		printk("i2c-voodoo3.o: DDC bus initialized\n");
 		voodoo3_initialized |= INIT3;
 	}
 	if(!(voodoo3_initialized & (INIT2 | INIT3))) {
-		printk("i2c-i810.o: Both registrations failed, module not inserted\n");
+		printk("i2c-voodoo3.o: Both registrations failed, module not inserted\n");
 		voodoo3_cleanup();
 		return res;
 	}
