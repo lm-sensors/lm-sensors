@@ -1,5 +1,6 @@
 /*
-    lm75.c - A Linux module for reading sensor data.
+    lm75.c - Part of lm_sensors, Linux kernel modules for hardware
+             monitoring
     Copyright (c) 1998  Frodo Looijaard <frodol@dds.nl>
 
     This program is free software; you can redistribute it and/or modify

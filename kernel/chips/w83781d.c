@@ -1,6 +1,7 @@
 
 /*
-    w83781d.c - A Linux module for reading sensor data.
+    w83781d.c - Part of lm_sensors, Linux kernel modules for hardware
+                monitoring
     Copyright (c) 1998  Frodo Looijaard <frodol@dds.nl>
     and Philip Edelbrock <phil@netroedge.com>
 
