@@ -17,10 +17,13 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/* for open() */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <stddef.h>
-#ifdef DEBUG
-#include <unistd.h> /* for getuid(), to be removed */
-#endif
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/sysctl.h>
@@ -293,7 +296,7 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 	int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
 	const sensors_chip_feature *the_feature;
 	int buflen = BUF_LEN;
-	int mag, eepromoffset, i, ret=0;
+	int mag, eepromoffset, fd, ret=0;
 	char n[NAME_MAX];
 	FILE *f;
 
@@ -308,16 +311,18 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 		/* total hack for eeprom */
 		if (! strcmp(name.prefix, "eeprom")){
 			strcat(n, "eeprom");
-			if ((f = fopen(n, "r")) != NULL) {
+			/* we use unbuffered I/O to benefit from eeprom driver
+			   optimization */
+			if ((fd = open(n, O_RDONLY)) >= 0) {
 				eepromoffset =
 				  (the_feature->offset / sizeof(long))  +
 				  (16 * (the_feature->sysctl - EEPROM_SYSCTL1));
-				for(i = 0; i <= eepromoffset; i++)
-					if(EOF == (ret = getc(f)))
-						break;
-				fclose(f);
-				if(ret == EOF)
+				if (lseek(fd, eepromoffset, SEEK_SET) < 0
+				 || read(fd, &ret, 1) != 1) {
+					close(fd);
 					return -SENSORS_ERR_PROC;
+				}
+				close(fd);
 				*value = ret;
 				return 0;
 			} else
