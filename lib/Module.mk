@@ -82,6 +82,12 @@ $(MODULE_DIR)/conf-parse.h: $(MODULE_DIR)/conf-parse.c
 # Include all dependency files
 INCLUDEFILES += $(LIBCSOURCES:.c=.ld) $(LIBCSOURCES:.c=.ad)
 
+# Special warning prevention for flex-generated files
+$(MODULE_DIR)/conf-lex.ao: $(MODULE_DIR)/conf-lex.c
+	$(CC) $(ARCPPFLAGS) $(ARCFLAGS) -Wno-unused -c $< -o $@
+$(MODULE_DIR)/conf-lex.lo: $(MODULE_DIR)/conf-lex.c
+	$(CC) $(LIBCPPFLAGS) $(LIBCFLAGS) -Wno-unused -c $< -o $@
+
 all-lib: $(LIBTARGETS)
 user :: all-lib
 
