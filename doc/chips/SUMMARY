@@ -68,6 +68,9 @@ ds1621
 	  (the following chip is detected as a ds1621)
 	ds1625		1	-	-	-	yes	no
 
+fscpos
+	fscpos		3	3	3	-	yes	no
+
 gl518sm
         gl518sm (r00)	1	1-4	2	-	yes	no
         gl518sm (r80)	1	4	2	-	yes	no

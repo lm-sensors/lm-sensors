@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.2 (2001????)
+  Module fscpos: new (Fujitsu-Siemens Poseidon driver)
   Module via686a: Make limit initializations reliable
   Program sensors-detect: Add ALI1535 detection,
                           add Via VT8233 detection (no driver yet)
