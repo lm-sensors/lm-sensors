@@ -241,7 +241,7 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 
 #define MTP008_INIT_TEMP_OVER	700				/* 70 Celsius */
 #define MTP008_INIT_TEMP_HYST	50				/* 5 Celsius */
-#define MTP008_INIT_TEMP2_OVER	70				/* 70 Celsius */
+#define MTP008_INIT_TEMP2_OVER	700				/* 70 Celsius */
 #define MTP008_INIT_TEMP2_HYST	50				/* 5 Celsius */
 
 #ifdef MODULE

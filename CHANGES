@@ -33,6 +33,7 @@ ask CVS about it:
   Module i2c-i801: Chip detection cleanup
   Module lm78: Recognize chipid=0x20
   Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
+  Module mtp008: Fix temp2 max initialization
   Module sensors: Disabled, moved to i2c package as i2c-proc.c
   Module via686a: Allow force=9191,address (for A7V/K7V boards)
   Program mkpatch.pl: Fix adm9240 typos, add more chips to Configure.help
