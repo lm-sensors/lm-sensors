@@ -19,6 +19,13 @@
 */
 
 /*
+   Changes:
+   24.08.2002
+   	Fixed the typo in sis630_access (Thanks to Mark M. Hoffman)
+	Changed sis630_transaction. Now it's 2x faster (Thanks to Mark M. Hoffman)
+*/
+
+/*
    TODO:
      Implement block data write/read
      Check SMBALT# : why it can't be cleared ????
@@ -96,7 +103,7 @@ static s32 sis630_access(struct i2c_adapter *adap, u16 addr,
 			  u8 command, int size,
 			  union i2c_smbus_data *data);
 static void sis630_do_pause(unsigned int amount);
-static int sis630_transaction(void);
+static int sis630_transaction(int size);
 static void sis630_inc(struct i2c_adapter *adapter);
 static void sis630_dec(struct i2c_adapter *adapter);
 static u32 sis630_func(struct i2c_adapter *adapter);
@@ -144,23 +151,23 @@ void sis630_do_pause(unsigned int amount)
 	schedule_timeout(amount);
 }
 
-int sis630_transaction() {
+int sis630_transaction(int size) {
         int temp;
         int result = 0;
         int timeout = 0;
 
         /*
 	  Make sure the SMBus host is ready to start transmitting.
-	  Datasheet say SMB_STS are sticky bits, but on my Laptop
-	  (Clevo/Kapok 2202) SMBALT# (bit 7) cannot be cleared ???
 	*/
-        if ((temp = sis630_read(SMB_STS)) != 0x80) {
+	if ((temp = sis630_read(SMB_CNT) & 0x03) != 0x00) {
 #ifdef DEBUG
                 printk(KERN_DEBUG "i2c-sis630.o: SMBus busy (%02x). "
 			"Resetting...\n",temp);
 #endif
-		sis630_write(SMB_STS, temp & 0xff);
-                if ((temp = sis630_read(SMB_STS)) != 0x80) {
+		/* kill smbus transaction */
+		sis630_write(SMBHOST_CNT, 0x02);
+
+		if ((temp = sis630_read(SMB_CNT) & 0x03) != 0x00) {
 #ifdef DEBUG
                         printk(KERN_DEBUG "i2c-sis630.o: Failed! (%02x)\n",
 				temp);
@@ -173,14 +180,21 @@ int sis630_transaction() {
 		}
         }
 
-        /* start the transaction by setting bit 4 */
-        sis630_write(SMBHOST_CNT, sis630_read(SMBHOST_CNT) | 0x10);
+	/* disable timeout interrupt and set clock to 56KHz */
+	sis630_write(SMB_CNT, 0x20);
+
+	/* clear all sticky bits */
+	temp = sis630_read(SMB_STS);
+	sis630_write(SMB_STS, temp & 0x1e);
+
+	/* start the transaction by setting bit 4 and size */
+	sis630_write(SMBHOST_CNT,0x10 | (size & 0x07));
 
         /* We will always wait for a fraction of a second! */
         do {
                 sis630_do_pause(1);
                 temp = sis630_read(SMB_STS);
-        } while (!(temp & 0x08) && (timeout++ < MAX_TIMEOUT));
+        } while (!(temp & 0x0e) && (timeout++ < MAX_TIMEOUT));
 
         /* If the SMBus is still busy, we give up */
         if (timeout >= MAX_TIMEOUT) {
@@ -202,22 +216,13 @@ int sis630_transaction() {
                 result = -1;
                 printk(KERN_ERR "i2c-sis630.o: Bus collision! "
 			"SMBus may be locked until next hard reset (or not...)\n");
-
 		/* TBD: Datasheet say:
 		   the software should clear this bit and restart SMBUS operation
 		*/
         }
 
-        if ((temp = sis630_read(SMB_STS)) != 0x80) {
-                sis630_write(SMB_STS, temp & 0xff);
-        }
-
-        if ((temp = sis630_read(SMB_STS)) != 0x80) {
-#ifdef DEBUG
-                printk(KERN_DEBUG "i2c-sis630.o: Failed reset at end of "
-			"transaction (%02x)\n",temp);
-#endif
-	}
+        /* clear all status "sticky" bits */
+	sis630_write(SMB_STS, temp);
 
         return result;
 }
@@ -269,9 +274,7 @@ s32 sis630_access(struct i2c_adapter * adap, u16 addr,
 	}
 
 
-	sis630_write(SMBHOST_CNT,(size & 0x07));
-
-	if (sis630_transaction())
+	if (sis630_transaction(size))
 		return -1;
 
         if ((size != I2C_SMBUS_PROC_CALL) &&
@@ -280,12 +283,12 @@ s32 sis630_access(struct i2c_adapter * adap, u16 addr,
 	}
 
 	switch(size) {
-		case I2C_SMBUS_BYTE:
-		case I2C_SMBUS_BYTE_DATA:
+		case SIS630_BYTE:
+		case SIS630_BYTE_DATA:
 			data->byte = sis630_read(SMB_BYTE);
 			break;
-		case I2C_SMBUS_PROC_CALL:
-		case I2C_SMBUS_WORD_DATA:
+		case SIS630_PCALL:
+		case SIS630_WORD_DATA:
 			data->word = sis630_read(SMB_BYTE) + (sis630_read(SMB_BYTE + 1) << 8);
 			break;
 		default:
@@ -311,7 +314,6 @@ u32 sis630_func(struct i2c_adapter *adapter) {
 
 int sis630_setup(void) {
 	unsigned char b;
-	int rc;
 	struct pci_dev *sis630_dev = NULL;
 
 	/* First check whether we can access PCI at all */
@@ -336,19 +338,23 @@ int sis630_setup(void) {
 	   Enable ACPI first , so we can accsess reg 74-75
 	   in acpi io space and read acpi base addr
 	*/
-	if ((rc = pci_read_config_byte(sis630_dev, SIS630_BIOS_CTL_REG, &b))) {
+	if (PCIBIOS_SUCCESSFUL !=
+	    pci_read_config_byte(sis630_dev, SIS630_BIOS_CTL_REG,&b)) {
 		printk(KERN_ERR "i2c-sis630.o: Error: Can't read bios ctl reg\n");
-		return rc;
+		return -ENODEV;
 	}
+	/* if ACPI already anbled , do nothing */
 	if (!(b & 0x80) &&
-	    (rc = pci_write_config_byte(sis630_dev, SIS630_BIOS_CTL_REG, b | 0x80))) {
+	    PCIBIOS_SUCCESSFUL !=
+	    pci_write_config_byte(sis630_dev,SIS630_BIOS_CTL_REG,b|0x80)) {
 		printk(KERN_ERR "i2c-sis630.o: Error: Can't enable ACPI\n");
-		return rc;
+		return -ENODEV;
 	}
 	/* Determine the ACPI base address */
-	if ((rc = pci_read_config_word(sis630_dev, SIS630_ACPI_BASE_REG,&acpi_base))) {
+	if (PCIBIOS_SUCCESSFUL !=
+	    pci_read_config_word(sis630_dev,SIS630_ACPI_BASE_REG,&acpi_base)) {
 		printk(KERN_ERR "i2c-sis630.o: Error: Can't determine ACPI base address\n");
-		return rc;
+		return -ENODEV;
 	}
 
 #ifdef DEBUG
@@ -357,7 +363,6 @@ int sis630_setup(void) {
 
 	/* Everything is happy, let's grab the memory and set things up. */
 	if (!request_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION, "sis630-smbus")){
-
 		printk(KERN_ERR "i2c-sis630.o: SMBus registers 0x%04x-0x%04x "
 			"already in use!\n",acpi_base + SMB_STS, acpi_base + SMB_SAA);
 		return -ENODEV;
