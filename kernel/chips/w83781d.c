@@ -391,19 +391,22 @@ int w83781d_detect_isa(struct isa_adapter *adapter)
     outb_p(W83781D_REG_BANK,address + W83781D_ADDR_REG_OFFSET);
     outb_p(0x00,address + W83781D_DATA_REG_OFFSET);
 
-    outb_p(W83781D_REG_WCHIPID,address + W83781D_ADDR_REG_OFFSET);
+/*    outb_p(W83781D_REG_WCHIPID,address + W83781D_ADDR_REG_OFFSET);
     err = inb_p(address + W83781D_DATA_REG_OFFSET) & 0xfe;
 
     if (err != 0x20) {
+*/
       printk("w83781d.o: Winbond W83781D detected (ISA addr=0x%X)\n",address);
       type_name = "w83781d";
       client_name = "Winbond W83781D chip";
+/*
     } else {
  #ifdef DEBUG
      printk("83781d.o: Winbond W83781D not detected (ISA)\n");
  #endif
      continue;
     }
+*/
 
     request_region(address, W83781D_EXTENT, type_name);
 
@@ -499,18 +502,20 @@ int w83781d_detect_smbus(struct i2c_adapter *adapter)
 
     smbus_write_byte_data(adapter,address,W83781D_REG_BANK,0x00);
 
-    err = smbus_read_byte_data(adapter,address,W83781D_REG_WCHIPID);
+/*    err = smbus_read_byte_data(adapter,address,W83781D_REG_WCHIPID);
     
     if (err == 0x20) {
+*/
       printk("w83781d.o: Winbond W83781D detected (SMBus addr 0x%X)\n",address);
       type_name = "w83781d";
       client_name = "Winbond W83781D chip";
-    } else {
+/*    } else {
  #ifdef DEBUG
      printk("83781d.o: Winbond W83781D not detected (SMBus/I2C)\n");
  #endif
      continue;
     }
+*/
 
     /* Allocate space for a new client structure. To counter memory
        ragmentation somewhat, we only do one kmalloc. */
@@ -916,14 +921,14 @@ void w83781d_fan(struct i2c_client *client, int operation, int ctl_name,
   else if (operation == SENSORS_PROC_REAL_READ) {
     w83781d_update_client(client);
     results[0] = FAN_FROM_REG(data->fan_min[nr-1],
-                              FAN_DIV_FROM_REG(data->fan_div[nr-1]));
+                              DIV_FROM_REG(data->fan_div[nr-1]));
     results[1] = FAN_FROM_REG(data->fan[nr-1],
-                              FAN_DIV_FROM_REG(data->fan_div[nr-1]));
+                              DIV_FROM_REG(data->fan_div[nr-1]));
     *nrels_mag = 2;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       data->fan_min[nr-1] = FAN_TO_REG(results[0],
-                                       FAN_DIV_FROM_REG(data->fan_div[nr-1]));
+                                       DIV_FROM_REG(data->fan_div[nr-1]));
       w83781d_write_value(client,W83781D_REG_FAN_MIN(nr),data->fan_min[nr-1]);
     }
   }
