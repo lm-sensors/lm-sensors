@@ -1687,10 +1687,12 @@ sub main
         "hang halfway\n",
         " through; we can't really help that. Also, some chips will be double ",
         "detected;\n",
-        " choose the one with the highest confidence value in that case.\n",
+        " we choose the one with the highest confidence value in that case.\n",
         " If you found that the adapter hung after probing a certain address, ",
         "you can\n",
-        " specify that address to remain unprobed.\n";
+        " specify that address to remain unprobed. If you have a PIIX4, that ",
+        "often\n",
+        " includes addresses 0x69 and/or 0x6a.\n";
 
   my ($inp,@not_to_scan,$inp2);
   open INPUTFILE,"/proc/bus/i2c" or die "Couldn't open /proc/bus/i2c?!?";
