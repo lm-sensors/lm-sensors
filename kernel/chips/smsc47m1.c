@@ -84,7 +84,13 @@ superio_exit(void)
 	outb(0xAA, REG);
 }
 
-#define SMSC_DEVID 0x59
+/*
+ * SMSC LPC47M10x (device id 0x59), LPC47M14x (device id 0x5F) have fan
+ * control. The 47M15x and 47M192 chips "with hardware monitoring block"
+ * can do much more besides (device id 0x60).
+ */
+#define SMSC_DEVID_MATCH(id) ((id) == 0x59 || (id) == 0x5F)
+
 #define SMSC_ACT_REG 0x20
 #define SMSC_BASE_REG 0x60
 
@@ -162,7 +168,7 @@ static int smsc47m1_id = 0;
 
 static struct i2c_driver smsc47m1_driver = {
 	.owner		= THIS_MODULE,
-	.name		= "SMSC47M1xx fan driver",
+	.name		= "SMSC 47M1xx fan monitor",
 	.id		= I2C_DRIVERID_SMSC47M1,
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= smsc47m1_attach_adapter,
@@ -209,7 +215,7 @@ static int smsc47m1_find(int *address)
 
 	superio_enter();
 	val= superio_inb(DEVID);
-	if(SMSC_DEVID != val) {
+	if (!SMSC_DEVID_MATCH(val)) {
 		superio_exit();
 		return -ENODEV;
 	}
@@ -238,7 +244,7 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 	struct smsc47m1_data *data;
 	int err = 0;
 	const char *type_name = "smsc47m1";
-	const char *client_name = "SMSC47M11xx chip";
+	const char *client_name = "47M1xx chip";
 
 	if (!i2c_is_isa_adapter(adapter)) {
 		return 0;
@@ -273,7 +279,7 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 	new_client->driver = &smsc47m1_driver;
 	new_client->flags = 0;
 
-	request_region(address, SMSC_EXTENT, "smsc47m1x-fans");
+	request_region(address, SMSC_EXTENT, "smsc47m1-fans");
 	strcpy(new_client->name, client_name);
 
 	new_client->id = smsc47m1_id++;
@@ -486,7 +492,7 @@ static int __init sm_smsc47m1_init(void)
 	printk("smsc47m1.o version %s (%s)\n", LM_VERSION, LM_DATE);
 
 	if (smsc47m1_find(&addr)) {
-		printk("smsc47m1.o: SMSC47M1xx not detected, module not inserted.\n");
+		printk("smsc47m1.o: SMSC 47M1xx not detected, module not inserted.\n");
 		return -ENODEV;
 	}
 	normal_isa[0] = addr;
@@ -502,7 +508,7 @@ static void __exit sm_smsc47m1_exit(void)
 
 
 MODULE_AUTHOR("Mark D. Studebaker <mdsxyz123@yahoo.com>");
-MODULE_DESCRIPTION("SMSC47M110x Fan sensors");
+MODULE_DESCRIPTION("SMSC 47M1xx Fan sensors");
 MODULE_LICENSE("GPL");
 
 module_init(sm_smsc47m1_init);
