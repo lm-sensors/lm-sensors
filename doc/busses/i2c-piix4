@@ -1,3 +1,27 @@
+Kernel driver `i2c-piix4.o'
+
+Status: Complete and well-tested
+
+Supported adapters:
+  * Intel 82371AB PIIX4 and PIIX4E
+    Datasheet: Publicly available at the Intel website
+
+Author: Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock
+        <phil@netroedge.com>
+
+
+Module Parameters
+-----------------
+
+* force: int
+  Forcibly enable the PIIX4. DANGEROUS!
+* force_addr: int
+  Forcibly enable the PIIX4 at the given address. EXTREMELY DANGEROUS!
+
+
+Description
+-----------
+
 The PIIX4 (properly known as the 82371AB) is an Intel chip with a lot of
 functionality. Among other things, it implements the PCI bus. One of its
 minor functions is implementing a System Management Bus. This is a true 

@@ -1,9 +1,23 @@
-ALI 1533 / 1543C SMB driver
+Kernel driver `i2c-ali5x3.o'
+
+Status: Complete and tested
+
+Supported adapters:
+  * Acer Labs, Inc. ALI 1533 and 1543C
+    Datasheet: Publicly available at the Acer Labs website
+
+Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
+	<phil@netroedge.com>, and Mark D. Studebaker <mds@eng.paradyne.com>
 
 
-Author/Maintainer
+Module Parameters
 -----------------
-Mark D. Studebaker (mds@eng.paradyne.com)
+
+(none)
+
+
+Description
+-----------
 
 
 Stability
