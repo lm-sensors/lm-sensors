@@ -24,6 +24,7 @@
 #include "smbus.h"
 #include "sensors.h"
 #include "i2c.h"
+#include "i2c-isa.h"
 #include "version.h"
 
 /* adm1021 constants specified below */
@@ -150,7 +151,7 @@ static struct i2c_client *adm1021_list[MAX_adm1021_NR];
 
 int adm1021_attach_adapter(struct i2c_adapter *adapter)
 {
-  int address,err,i;
+  int address,err,i,temp;
   struct i2c_client *new_client;
   struct adm1021_data *data;
   enum adm1021_type type;
@@ -158,8 +159,8 @@ int adm1021_attach_adapter(struct i2c_adapter *adapter)
   const char *client_name;
 
   err = 0;
-
-  /* OK, this is no detection. I know. It will do for now, though.  */
+  /* Make sure we aren't probing the ISA bus!! */
+  if (i2c_is_isa_adapter(adapter)) return 0;
 
   /* Set err only if a global error would make registering other clients
      impossible too (like out-of-memory). */
@@ -174,7 +175,9 @@ int adm1021_attach_adapter(struct i2c_adapter *adapter)
     /* Verify device is 1021 by checked special DEVICE_ID 
        register (I wish all SMBus chips had this..)       */
     /* The MAX1617 does not have it, regrettably. */
-    if (smbus_read_byte_data(adapter,address,adm1021_REG_DEVICE_ID) == 0x41){
+    temp=smbus_read_byte_data(adapter,address,adm1021_REG_DEVICE_ID);
+    if (temp == -1) continue;
+    if (temp == 0x41){
 	type = adm1021;
         type_name = "adm1021";
         client_name = "ADM1021 chip";
@@ -183,7 +186,6 @@ int adm1021_attach_adapter(struct i2c_adapter *adapter)
         type_name = "max1617";
         client_name = "MAX1617 chip";
     }
-      /* continue; */
 
     /* Allocate space for a new client structure */
     if (! (new_client =  kmalloc(sizeof(struct i2c_client) +
