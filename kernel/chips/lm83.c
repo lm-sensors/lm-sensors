@@ -9,6 +9,8 @@
  * resolution and a 3-4 deg precision. Complete datasheet can be obtained
  * from National's website at:
  *   http://www.national.com/pf/LM/LM83.html
+ * Since the datasheet omits to give the chip stepping code, I give it
+ * here: 0x03 (at register 0xff).
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,6 +58,7 @@ SENSORS_INSMOD_1(lm83);
  */
 
 #define LM83_REG_R_MAN_ID        0xFE
+#define LM83_REG_R_CHIP_ID       0xFF
 #define LM83_REG_R_CONFIG        0x03
 #define LM83_REG_W_CONFIG        0x09
 #define LM83_REG_R_STATUS1       0x02
@@ -72,17 +75,33 @@ SENSORS_INSMOD_1(lm83);
 #define LM83_REG_R_REMOTE3_TEMP  0x31
 #define LM83_REG_R_REMOTE3_HIGH  0x3A
 #define LM83_REG_W_REMOTE3_HIGH  0x52
+#define LM83_REG_R_TCRIT         0x42
+#define LM83_REG_W_TCRIT         0x5A
 
 /*
  * Conversions, initial values and various macros
- * The LM83 uses normal signed 8-bit values. We use the default initial
- * values.
+ * The LM83 uses signed 8-bit values.
  */
 
 #define TEMP_FROM_REG(val)  (val > 127 ? val-256 : val)
 #define TEMP_TO_REG(val)    (val < 0 ? val+256 : val)
 
-#define LM83_INIT_HIGH      127
+#define LM83_INIT_HIGH      100
+#define LM83_INIT_CRIT      120
+
+static const u8 LM83_REG_R_TEMP[] = {
+	LM83_REG_R_LOCAL_TEMP,
+	LM83_REG_R_REMOTE1_TEMP,
+	LM83_REG_R_REMOTE2_TEMP,
+	LM83_REG_R_REMOTE3_TEMP
+};
+
+static const u8 LM83_REG_R_HIGH[] = {
+	LM83_REG_R_LOCAL_HIGH,
+	LM83_REG_R_REMOTE1_HIGH,
+	LM83_REG_R_REMOTE2_HIGH,
+	LM83_REG_R_REMOTE3_HIGH
+};
 
 static const u8 LM83_REG_W_HIGH[] = {
 	LM83_REG_W_LOCAL_HIGH,
@@ -101,6 +120,10 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 static void lm83_init_client(struct i2c_client *client);
 static int lm83_detach_client(struct i2c_client *client);
 static void lm83_temp(struct i2c_client *client, int operation, int
+	ctl_name, int *nrels_mag, long *results);
+static void lm83_tcrit(struct i2c_client *client, int operation, int
+	ctl_name, int *nrels_mag, long *results);
+static void lm83_alarms(struct i2c_client *client, int operation, int
 	ctl_name, int *nrels_mag, long *results);
 
 /*
@@ -129,7 +152,8 @@ struct lm83_data
 	unsigned long last_updated; /* in jiffies */
 
 	/* registers values */
-	u8 temp[4], temp_high[4];
+	u8 temp[4], temp_high[4], tcrit;
+	u16 alarms; /* bitvector, combined */
 };
 
 /*
@@ -143,6 +167,20 @@ struct lm83_data
 #define LM83_SYSCTL_REMOTE1_TEMP  1201
 #define LM83_SYSCTL_REMOTE2_TEMP  1202
 #define LM83_SYSCTL_REMOTE3_TEMP  1203
+#define LM83_SYSCTL_TCRIT         1208
+#define LM83_SYSCTL_ALARMS        1210
+
+#define LM83_ALARM_LOCAL_HIGH     0x0040
+#define LM83_ALARM_LOCAL_CRIT     0x0001
+#define LM83_ALARM_REMOTE1_HIGH   0x8000
+#define LM83_ALARM_REMOTE1_CRIT   0x0100
+#define LM83_ALARM_REMOTE1_OPEN   0x2000
+#define LM83_ALARM_REMOTE2_HIGH   0x0010
+#define LM83_ALARM_REMOTE2_CRIT   0x0002
+#define LM83_ALARM_REMOTE2_OPEN   0x0004
+#define LM83_ALARM_REMOTE3_HIGH   0x1000
+#define LM83_ALARM_REMOTE3_CRIT   0x0200
+#define LM83_ALARM_REMOTE3_OPEN   0x0400
 
 /* -- SENSORS SYSCTL END -- */
 
@@ -157,6 +195,10 @@ static ctl_table lm83_dir_table_template[] =
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_temp},
 	{LM83_SYSCTL_REMOTE3_TEMP, "temp4", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_temp},
+	{LM83_SYSCTL_TCRIT, "tcrit", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_tcrit},
+	{LM83_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_alarms},
 	{0}
 };
 
@@ -257,11 +299,15 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 
 	if (kind <= 0) /* identification */
 	{
-		unsigned char man_id;
+		u8 man_id, chip_id;
 
 		man_id = i2c_smbus_read_byte_data(new_client, LM83_REG_R_MAN_ID);
+		chip_id = i2c_smbus_read_byte_data(new_client, LM83_REG_R_CHIP_ID);
 		if (man_id == 0x01) /* National Semiconductor */
-			kind = lm83;
+		{
+			if (chip_id == 0x03)
+				kind = lm83;
+		}
 	}
 
 	if (kind <= 0) /* identification failed */
@@ -330,14 +376,13 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 
 static void lm83_init_client(struct i2c_client *client)
 {
-	i2c_smbus_write_byte_data(client, LM83_REG_W_LOCAL_HIGH,
-	                 TEMP_TO_REG(LM83_INIT_HIGH));
-	i2c_smbus_write_byte_data(client, LM83_REG_W_REMOTE1_HIGH,
-	                 TEMP_TO_REG(LM83_INIT_HIGH));
-	i2c_smbus_write_byte_data(client, LM83_REG_W_REMOTE2_HIGH,
-	                 TEMP_TO_REG(LM83_INIT_HIGH));
-	i2c_smbus_write_byte_data(client, LM83_REG_W_REMOTE3_HIGH,
-	                 TEMP_TO_REG(LM83_INIT_HIGH));
+	int nr;
+
+	for (nr = 0; nr < 4; nr++)
+		i2c_smbus_write_byte_data(client, LM83_REG_W_HIGH[nr],
+	        	TEMP_TO_REG(LM83_INIT_HIGH));
+	i2c_smbus_write_byte_data(client, LM83_REG_W_TCRIT,
+	        TEMP_TO_REG(LM83_INIT_CRIT));
 }
 
 static int lm83_detach_client(struct i2c_client *client)
@@ -362,28 +407,24 @@ static void lm83_update_client(struct i2c_client *client)
 
 	down(&data->update_lock);
 
-	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
+	if ((jiffies - data->last_updated > HZ * 2) ||
 	    (jiffies < data->last_updated) || !data->valid)
 	{
+		int nr;
 #ifdef DEBUG
 		printk("lm83.o: Updating LM83 data.\n");
 #endif
-		data->temp[0] =
-			i2c_smbus_read_byte_data(client, LM83_REG_R_LOCAL_TEMP);
-		data->temp[1] =
-			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE1_TEMP);
-		data->temp[2] =
-			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE2_TEMP);
-		data->temp[3] =
-			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE3_TEMP);
-		data->temp_high[0] =
-			i2c_smbus_read_byte_data(client, LM83_REG_R_LOCAL_HIGH);
-		data->temp_high[1] =
-			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE1_HIGH);
-		data->temp_high[2] =
-			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE2_HIGH);
-		data->temp_high[3] =
-			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE3_HIGH);
+		for (nr = 0; nr < 4 ; nr++)
+		{
+			data->temp[nr] =
+				i2c_smbus_read_byte_data(client, LM83_REG_R_TEMP[nr]);
+			data->temp_high[nr] =
+				i2c_smbus_read_byte_data(client, LM83_REG_R_HIGH[nr]);
+		}
+		data->tcrit = i2c_smbus_read_byte_data(client, LM83_REG_R_TCRIT);
+		data->alarms =
+			i2c_smbus_read_byte_data(client, LM83_REG_R_STATUS1) +
+			(i2c_smbus_read_byte_data(client, LM83_REG_R_STATUS2) << 8);
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -414,6 +455,45 @@ static void lm83_temp(struct i2c_client *client, int operation, int
 			i2c_smbus_write_byte_data(client, LM83_REG_W_HIGH[nr],
 					    data->temp_high[nr]);
 		}
+	}
+}
+
+static void lm83_tcrit(struct i2c_client *client, int operation, int
+	ctl_name, int *nrels_mag, long *results)
+{
+	struct lm83_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0; /* magnitude */
+	else if (operation == SENSORS_PROC_REAL_READ)
+	{
+		lm83_update_client(client);
+		results[0] = TEMP_FROM_REG(data->tcrit);
+		*nrels_mag = 1;
+	}
+	else if (operation == SENSORS_PROC_REAL_WRITE)
+	{
+		if (*nrels_mag >= 1)
+		{
+			data->tcrit = TEMP_TO_REG(results[0]);
+			i2c_smbus_write_byte_data(client, LM83_REG_W_TCRIT,
+				data->tcrit);
+		}
+	}
+}
+
+static void lm83_alarms(struct i2c_client *client, int operation, int
+	ctl_name, int *nrels_mag, long *results)
+{
+	struct lm83_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0; /* magnitude */
+	else if (operation == SENSORS_PROC_REAL_READ)
+	{
+		lm83_update_client(client);
+		results[0] = data->alarms;
+		*nrels_mag = 1;
 	}
 }
 
