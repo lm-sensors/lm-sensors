@@ -23,7 +23,7 @@ force_addr=0xaddr	Set the I/O base address. Useful for Asus A7V boards
 			PCI force; the via686a must still be present in lspci.
 			Don't use this unless the driver complains that the
 			base address is not set.
-			Example: 'modprobe via686a force_addr=0x290'
+			Example: 'modprobe via686a force_addr=0x6000'
 
 
 Description
