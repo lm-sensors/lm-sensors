@@ -165,7 +165,7 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
   *value = *((long *) (buf + the_feature->offset));
   for (mag = the_feature->scaling; mag > 0; mag --)
     *value /= 10.0;
-  for (; mag < 0; mag --)
+  for (; mag < 0; mag ++)
     *value *= 10.0;
   return 0;
 }
@@ -186,7 +186,7 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
     return -SENSORS_ERR_PROC;
   for (mag = the_feature->scaling; mag > 0; mag --)
     value *= 10.0;
-  for (; mag < 0; mag --)
+  for (; mag < 0; mag ++)
     value /= 10.0;
   * ((long *) (buf + the_feature->offset)) = (long) value;
   buflen = the_feature->offset + sizeof(long);
