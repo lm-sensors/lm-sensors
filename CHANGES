@@ -21,13 +21,17 @@ ask CVS about it:
   NOTE: Requires i2c-2.9.0 or newer!
   File README.thinkpad: Update
   File doc/chips/lm63: New
+  File etc/sensors.conf.eg: Set via686a voltage limits
   File kernel/chips/Module.mk: Resync module list with mkpatch
   Modules (all bus drivers): Remove owner from i2c_adapter; restore inc_use
                              and dec_use removed in release 2.8.0
+  Modules (all chip drivers): Remove owner from i2c_driver; pass
+                              controlling_mod to i2c_register_entry() again
   Module bmcsensors: Support function 1/x
   Module i2c-amd756: Display the real bus name
   Module i2c-amd756-s4882: New; SMBus multiplexing on the Tyan S4882
   Module i2c-ipmb: Remove from build since it doesn't work
+  Module icspll: Fix compilation
   Module lm63: New driver for the National Semiconductor LM63
   Module lm83: Use signed types for temperatures
                Check limits on register writes
@@ -44,14 +48,19 @@ ask CVS about it:
   Module pc87360: Support secondary Super-I/O address
   Module smsc47m1: Add support for 47M15x and 47M192 (fans only)
   Library: Add lm63 support
+           Add lpc47b397 support
   Programs i2cset, isaset: Written byte/word can be masked
+  Program decode-vaio.pl: Find eeproms on non-0 i2c bus too
   Program mkpatch: Include i2c-amd756-s4882
   Program sensord: Do not scale load average (Aurelien Jarno)
-  Program sensors: Add lm63 support
+  Program sensors: Add lm63, lpc47b397 support
                    Support DDR2 memory module EEPROMs (Rudolf Marek)
+                   Support only one location for the default configuration file
+                   Display the default configuration file location in --help
+                   Simplify the configuration file opening code
   Program sensors-detect: Improve LM63 detection
                           Discard IBM Thinkpad detection code
-                          Add PCA9556 detection
+                          Add PCA9556, LPC47B397 detection
 
 
 2.8.8 (20041007)
