@@ -127,14 +127,6 @@ static inline void sis630_write(u8 reg, u8 data) {
 	outb(data, acpi_base + reg);
 }
 
-/* Internally used pause function */
-static void sis630_do_pause(unsigned int amount)
-{
-	current->state = TASK_INTERRUPTIBLE;
-	schedule_timeout(amount);
-}
-
-
 static int sis630_transaction_start(int size, u8 *oldclock) {
         int temp;
 
@@ -180,7 +172,7 @@ static int sis630_transaction_wait(int size) {
 
         /* We will always wait for a fraction of a second! */
         do {
-                sis630_do_pause(1);
+                i2c_delay(1);
                 temp = sis630_read(SMB_STS);
 		/* check if block transmitted */
 		if (size == SIS630_BLOCK_DATA && (temp & 0x10))

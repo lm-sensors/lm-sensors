@@ -294,13 +294,6 @@ static int __devinit sis645_hotplug_smbus(void)
 }
 #endif /* CONFIG_HOTPLUG */
 
-/* Internally used pause function */
-static void sis645_do_pause(unsigned int amount)
-{
-	current->state = TASK_INTERRUPTIBLE;
-	schedule_timeout(amount);
-}
-
 /* Execute a SMBus transaction.
    int size is from SIS645_QUICK to SIS645_BLOCK_DATA
  */
@@ -345,7 +338,7 @@ static int sis645_transaction(int size)
 
 	/* We will always wait for a fraction of a second! */
 	do {
-		sis645_do_pause(1);
+		i2c_delay(1);
 		temp = sis645_read(SMB_STS);
 	} while (!(temp & 0x0e) && (timeout++ < MAX_TIMEOUT));
 

@@ -281,8 +281,7 @@ s32 amd8111_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 	}
 
 	if (~temp[0] & AMD_SMB_STS_DONE) {
-		current->state = TASK_INTERRUPTIBLE;
-		schedule_timeout(HZ/100);
+		i2c_delay(HZ/100);
 		amd_ec_read(smbus, AMD_SMB_STS, temp + 0);
 	}
 

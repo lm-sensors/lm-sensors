@@ -223,13 +223,6 @@ static int ali15x3_setup(struct pci_dev *ALI15X3_dev)
 	return 0;
 }
 
-/* Internally used pause function */
-static void ali15x3_do_pause(unsigned int amount)
-{
-	current->state = TASK_INTERRUPTIBLE;
-	schedule_timeout(amount);
-}
-
 /* Another internally used function */
 static int ali15x3_transaction(struct i2c_adapter *adap)
 {
@@ -302,7 +295,7 @@ static int ali15x3_transaction(struct i2c_adapter *adap)
 	/* We will always wait for a fraction of a second! */
 	timeout = 0;
 	do {
-		ali15x3_do_pause(1);
+		i2c_delay(1);
 		temp = inb_p(SMBHSTSTS);
 	} while ((!(temp & (ALI15X3_STS_ERR | ALI15X3_STS_DONE)))
 		 && (timeout++ < MAX_TIMEOUT));
@@ -359,7 +352,7 @@ static s32 ali15x3_access(struct i2c_adapter * adap, u16 addr,
 	for (timeout = 0;
 	     (timeout < MAX_TIMEOUT) && !(temp & ALI15X3_STS_IDLE);
 	     timeout++) {
-		ali15x3_do_pause(1);
+		i2c_delay(1);
 		temp = inb_p(SMBHSTSTS);
 	}
 	if (timeout >= MAX_TIMEOUT) {

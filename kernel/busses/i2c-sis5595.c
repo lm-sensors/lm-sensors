@@ -131,7 +131,6 @@ MODULE_PARM(force_addr, "i");
 MODULE_PARM_DESC(force_addr,
 		 "Initialize the base address of the i2c controller");
 
-static void sis5595_do_pause(unsigned int amount);
 static int sis5595_transaction(void);
 
 static unsigned short sis5595_base = 0;
@@ -228,13 +227,6 @@ int sis5595_setup(struct pci_dev *SIS5595_dev)
 }
 
 
-/* Internally used pause function */
-void sis5595_do_pause(unsigned int amount)
-{
-	current->state = TASK_INTERRUPTIBLE;
-	schedule_timeout(amount);
-}
-
 /* Another internally used function */
 int sis5595_transaction(void)
 {
@@ -273,7 +265,7 @@ int sis5595_transaction(void)
 
 	/* We will always wait for a fraction of a second! */
 	do {
-		sis5595_do_pause(1);
+		i2c_delay(1);
 		temp = sis5595_read(SMB_STS_LO);
 	} while (!(temp & 0x40) && (timeout++ < MAX_TIMEOUT));
 

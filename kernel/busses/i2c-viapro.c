@@ -105,13 +105,6 @@ MODULE_PARM_DESC(force_addr,
 
 static struct i2c_adapter vt596_adapter;
 
-/* Internally used pause function */
-static void vt596_do_pause(unsigned int amount)
-{
-	current->state = TASK_INTERRUPTIBLE;
-	schedule_timeout(amount);
-}
-
 /* Another internally used function */
 static int vt596_transaction(void)
 {
@@ -145,7 +138,7 @@ static int vt596_transaction(void)
 	/* We will always wait for a fraction of a second! 
 	   I don't know if VIA needs this, Intel did  */
 	do {
-		vt596_do_pause(1);
+		i2c_delay(1);
 		temp = inb_p(SMBHSTSTS);
 	} while ((temp & 0x01) && (timeout++ < MAX_TIMEOUT));
 
