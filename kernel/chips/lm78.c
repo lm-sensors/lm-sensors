@@ -389,6 +389,7 @@ int lm78_detect_isa(struct isa_adapter *adapter)
                                       lm78_dir_table_template)) < 0)
       goto ERROR4;
     ((struct lm78_data *) (new_client->data)) -> sysctl_id = err;
+    err = 0;
 
     /* Initialize the LM78 chip */
     lm78_init_client((struct i2c_client *) new_client);
@@ -506,6 +507,7 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
                                       lm78_dir_table_template)) < 0)
       goto ERROR4;
     ((struct lm78_data *) (new_client->data))->sysctl_id = err;
+    err = 0;
 
     /* Initialize the LM78 chip */
     lm78_init_client(new_client);
