@@ -26,6 +26,8 @@ I2CTARGETS := $(MODULE_DIR)/i2c-core.o  $(MODULE_DIR)/algo-bit.o \
               $(MODULE_DIR)/i2c-dev.o   $(MODULE_DIR)/bit-lp.o \
               $(MODULE_DIR)/bit-velle.o $(MODULE_DIR)/bit-mb.o
 
+I2CHEADERFILES := $(MODULE_DIR)/i2c.h
+
 # Include all dependency files
 INCLUDEFILES += $(I2CTARGETS:.o=.d)
 
@@ -35,6 +37,7 @@ all :: all-i2c
 install-i2c:
 	$(MKDIR) $(MODDIR)
 	install -o root -g root -m 644 $(I2CTARGETS) $(MODDIR)
+	install -o root -g root -m 644 $(I2CHEADERFILES) $(INCLUDEDIR)
 install :: install-i2c
 
 clean-i2c:

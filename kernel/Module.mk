@@ -26,7 +26,7 @@ SRCTARGETS := $(MODULE_DIR)/smbus.o $(MODULE_DIR)/piix4.o $(MODULE_DIR)/isa.o \
               $(MODULE_DIR)/lm78.o $(MODULE_DIR)/sensors.o  \
               $(MODULE_DIR)/i2c-proc.o $(MODULE_DIR)/lm75.o
 
-HEADERFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/isa.h \
+SRCHEADERFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/isa.h \
                $(MODULE_DIR)/smbus.h
 
 # Include all dependency files
@@ -38,7 +38,7 @@ all :: all-src
 install-src:
 	$(MKDIR) $(MODDIR)
 	install -o root -g root -m 644 $(SRCTARGETS) $(MODDIR)
-	install -o root -g root -m 644 $(HEADERFILES) $(INCLUDEDIR)
+	install -o root -g root -m 644 $(SRCHEADERFILES) $(INCLUDEDIR)
 install :: install-src
 
 clean-src:
