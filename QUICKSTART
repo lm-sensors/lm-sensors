@@ -13,11 +13,6 @@ Quickstart:
     kernel or available as a module somewhere.
   * Do a `make' followed by a `make install'. The warnings about .d
     files at the start are harmless.
-  * Add the line 
-       path=/lib/modules/current/extra
-    to /etc/conf.modules or /etc/modules.conf (whichever one exists)
-    if it is not there yet. Depending on your version of modutils,
-    you may have to add all default paths to it too.
   * Do a `depmod -a'.
   * Add  the line
       /usr/local/lib 

@@ -137,7 +137,7 @@ out by itself their settings, but it is possible to overrule them. A list
 is found below. Most important are the variables that determine where
 your kernel is located (LINUX=/usr/src/linux), where the i2c header files
 are (I2C_HEADERS=/usr/local/include) and where you want to install 
-your modules (MODDIR=/lib/modules/KERNELVERSION/extra/misc) and
+your modules (MODDIR=/lib/modules/KERNELVERSION/misc) and
 header files (LINUX_INCLUDE_DIR=/usr/local/include/linux). You can see
 that the installation locations are choosen in such a way that they
 are separate from the true kernel.
@@ -193,7 +193,7 @@ DEBUG default: 0
   so by the lm_sensors team.
 PREFIX default: /usr/local
   Prefix for almost all installation directories
-MODDIR default: /lib/modules/KERNELVERSION/extra/misc)
+MODDIR default: /lib/modules/KERNELVERSION/misc)
   The location where the kernel modules will be installed. 
 ETCDIR default: /etc
   Installation location of the sensors.conf configuration file
@@ -221,25 +221,7 @@ MANGRP default: root
 Handling the modules (compilation option 1)
 ===========================================
 
-Once you have installed the kernel modules, you will have to make sure
-they are found.
-
-First, check whether your modutils will look in the right directory at
-all. If you used build system 1, you will probably have to add lines
-to /etc/conf.modules or /etc/modules.conf (use the one that exists, or
-take your pick):
-  (modules-2.0.0):
-    path[misc]=/lib/modules/current/extra/misc
-  (modutils-2.1.x):
-    path=/lib/modules/current/extra
-This assumes /lib/modules/current will always be linked to the correct
-modules tree. If not, you will have to change it as appropriate for
-your system.
-
-You may also have to add all default paths to this file. You can get
-a list of them by doing a `modprobe -c', before and after your changes.
-
-Next, you will have to run `depmod -a' to have them recognised. Most
+Run the command `depmod -a' to have the new modules recognised. Most
 distributions run this command when you boot, so if you were cross-
 compiling, you can skip this step.
 
