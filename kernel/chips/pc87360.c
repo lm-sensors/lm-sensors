@@ -116,10 +116,10 @@ static inline void superio_exit(void)
 #define FAN_CONFIG_CONTROL(val,nr)	(((val) >> (3 + nr * 3)) & 1)
 #define FAN_CONFIG_INVERT(val,nr)	(((val) >> (4 + nr * 3)) & 1)
 
-#define PWM_FROM_REG(val,inv)		((inv) ? 255 - (val) : (val))
-#define PWM_TO_REG(val,inv)		(((val) < 0) ? ((inv) ? 255 : 0) : \
-					 ((val) > 255) ? ((inv) ? 0 : 255) : \
-					 (inv) ? 255 - (val) : (val))
+#define PWM_FROM_REG(val)		(val)
+#define PWM_TO_REG(val)			(((val) < 0) ? 0 : \
+					 ((val) > 255) ? 255 : \
+					 (val))
 
 /*
  * Voltage registers and conversions
@@ -653,10 +653,8 @@ static void pc87360_update_client(struct i2c_client *client)
 			pc87360_write_value(data, LD_FAN, NO_BANK,
 					    PC87360_REG_FAN_STATUS(i),
 					    data->fan_status[i] | 0x06);
-			if (data->fan_status[i] & 0x01) {
-				data->fan[i] = pc87360_read_value(data, LD_FAN,
-					       NO_BANK, PC87360_REG_FAN(i));
-			}
+			data->fan[i] = pc87360_read_value(data, LD_FAN,
+				       NO_BANK, PC87360_REG_FAN(i));
 			data->fan_min[i] = pc87360_read_value(data, LD_FAN,
 					   NO_BANK, PC87360_REG_FAN_MIN(i));
 			data->pwm[i] = pc87360_read_value(data, LD_FAN,
@@ -818,16 +816,14 @@ void pc87360_pwm(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		pc87360_update_client(client);
-		results[0] = PWM_FROM_REG(data->pwm[nr],
-			     FAN_CONFIG_INVERT(data->fan_conf[0], nr));
+		results[0] = PWM_FROM_REG(data->pwm[nr]);
 		results[1] = FAN_CONFIG_CONTROL(data->fan_conf[0], nr);
 		*nrels_mag = 2;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1)
 		{
-			data->pwm[nr] = PWM_TO_REG(results[0],
-					FAN_CONFIG_INVERT(data->fan_conf[0], nr));
+			data->pwm[nr] = PWM_TO_REG(results[0]);
 			pc87360_write_value(data, LD_FAN, NO_BANK,
 					    PC87360_REG_PWM(nr),
 					    data->pwm[nr]);
