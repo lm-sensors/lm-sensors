@@ -60,6 +60,11 @@ MODULE_LICENSE("GPL");
 #define PCI_DEVICE_ID_SI_646 0x0646
 #endif
 
+/* SiS648 north bridge */
+#ifndef PCI_DEVICE_ID_SI_648
+#define PCI_DEVICE_ID_SI_648 0x0648
+#endif
+
 /* SiS650 north bridge */
 #ifndef PCI_DEVICE_ID_SI_650
 #define PCI_DEVICE_ID_SI_650 0x0650
@@ -74,6 +79,12 @@ MODULE_LICENSE("GPL");
 #ifndef PCI_DEVICE_ID_SI_961
 #define PCI_DEVICE_ID_SI_961 0x0961
 #endif
+
+/* SiS962 south bridge */
+#ifndef PCI_DEVICE_ID_SI_962
+#define PCI_DEVICE_ID_SI_962 0x0962
+#endif
+
 
 #define PCI_DEVICE_ID_SI_SMBUS 0x16
 
@@ -229,6 +240,11 @@ static int sis645_setup(void)
 	}
 
 	else if (SIS645_ISA_dev = pci_find_device(PCI_VENDOR_ID_SI,
+			PCI_DEVICE_ID_SI_962, NULL)) {
+		printk("i2c-sis645.o: Found SiS962 [MuTIOL Media IO].\n");
+        }
+
+	else if (SIS645_ISA_dev = pci_find_device(PCI_VENDOR_ID_SI,
 			PCI_DEVICE_ID_SI_503, NULL)) {
 		printk("i2c-sis645.o: Found SiS south bridge in compatability mode(?)\n");
 
@@ -237,6 +253,8 @@ static int sis645_setup(void)
 				PCI_DEVICE_ID_SI_645, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
 				PCI_DEVICE_ID_SI_646, NULL))
+			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
+				PCI_DEVICE_ID_SI_648, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
 				PCI_DEVICE_ID_SI_650, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
@@ -495,6 +513,12 @@ static struct i2c_adapter sis645_adapter = {
 
 
 static struct pci_device_id sis645_ids[] __devinitdata = {
+
+	/* look for these south bridges */
+	{ PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_503, PCI_ANY_ID, PCI_ANY_ID, },
+	{ PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_961, PCI_ANY_ID, PCI_ANY_ID, },
+	{ PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_962, PCI_ANY_ID, PCI_ANY_ID, },
+
 	{ 0, }
 };
 
