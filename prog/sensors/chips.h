@@ -26,6 +26,7 @@ extern void print_unknown_chip(const sensors_chip_name *name);
 
 extern void print_lm75(const sensors_chip_name *name);
 extern void print_adm1021(const sensors_chip_name *name);
+extern void print_adm9240(const sensors_chip_name *name);
 extern void print_lm78(const sensors_chip_name *name);
 extern void print_gl518(const sensors_chip_name *name);
 extern void print_lm80(const sensors_chip_name *name);

@@ -145,6 +145,127 @@ void print_adm1021(const sensors_chip_name *name)
   }
 }
 
+void print_adm9240(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur,min,max,fdiv;
+  int alarms;
+
+  if (!sensors_get_feature(*name,SENSORS_ADM9240_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  if (!sensors_get_label(*name,SENSORS_ADM9240_IN0,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN0,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN0_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN0_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM9240_ALARM_IN0?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN0 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_ADM9240_IN1,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN1_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN1_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM9240_ALARM_IN1?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_ADM9240_IN2,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN2_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN2_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM9240_ALARM_IN2?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN2 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_ADM9240_IN3,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN3_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN3_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM9240_ALARM_IN3?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN3 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_ADM9240_IN4,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN4,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN4_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN4_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM9240_ALARM_IN4?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN4 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_ADM9240_IN5,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN5,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN5_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_IN5_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+           cur,min,max,alarms&ADM9240_ALARM_IN5?"ALARM":"");
+  } else
+    printf("ERROR: Can't get IN5 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_ADM9240_FAN1,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_FAN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_FAN1_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_FAN1_MIN,&min)) {
+    print_label(label,10);
+    printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+           cur,min,fdiv, alarms&ADM9240_ALARM_FAN1?"ALARM":"");
+  } else
+    printf("ERROR: Can't get FAN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_ADM9240_FAN2,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_FAN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_FAN2_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_FAN2_MIN,&min)) {
+    print_label(label,10);
+    printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+           cur,min,fdiv, alarms&ADM9240_ALARM_FAN2?"ALARM":"");
+  } else
+    printf("ERROR: Can't get FAN2 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_ADM9240_TEMP,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_TEMP_HYST,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_TEMP_OVER,&max)) {
+    print_label(label,10);
+    printf("%+3.0f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
+           cur,max,min, alarms&ADM9240_ALARM_TEMP?"ALARM":"");
+  } else
+    printf("ERROR: Can't get TEMP data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_ADM9240_VID,&label) &&
+      !sensors_get_feature(*name,SENSORS_ADM9240_VID,&cur)) {
+    print_label(label,10);
+    printf("%+5.2f V\n",cur);
+  }
+  free_the_label(&label);
+    
+  if (!sensors_get_label(*name,SENSORS_ADM9240_ALARMS,&label)) {
+    print_label(label,10);
+    printf("Chassis intrusion detection                  %s\n",
+           alarms & ADM9240_ALARM_CHAS?"ALARM":"     ");
+  }
+  free_the_label(&label);
+}
+
 void print_lm78(const sensors_chip_name *name)
 {
   char *label = NULL;
@@ -280,10 +401,10 @@ void print_lm78(const sensors_chip_name *name)
     
   if (!sensors_get_label(*name,SENSORS_LM78_ALARMS,&label)) {
     print_label(label,10);
-    printf("Board temperature input (usually LM75 chips)   %s\n",
+    printf("Board temperature input (usually LM75 chips) %s\n",
            alarms & LM78_ALARM_BTI?"ALARM":"");
     print_label(label,10);
-    printf("Chassis intrusion detection                    %s\n",
+    printf("Chassis intrusion detection                  %s\n",
            alarms & LM78_ALARM_CHAS?"ALARM":"     ");
   }
   free_the_label(&label);
