@@ -2637,7 +2637,7 @@ static sensors_chip_feature via686a_features[] =
                              RW, VIA686A_SYSCTL_FAN_DIV, VALUE(2), 
                              0 },
     { SENSORS_VIA686A_ALARMS, "alarms", NOMAP, NOMAP, 
-                           R, VIA686A_SYSCTL_ALARMS, VALUE(1), 0, "alarm" }, /* temporary until fixed in kernel */
+                           R, VIA686A_SYSCTL_ALARMS, VALUE(1) },
     { 0 }
   };
 
@@ -3784,7 +3784,7 @@ static sensors_chip_feature it87_features[] =
                               RW, IT87_SYSCTL_FAN_DIV, VALUE(3),
                               0 },
     { SENSORS_IT87_ALARMS, "alarms", NOMAP, NOMAP,
-                           R, IT87_SYSCTL_ALARMS, VALUE(1), 0, "alarm" }, /* temporary until fixed in kernel */
+                           R, IT87_SYSCTL_ALARMS, VALUE(1) },
     { SENSORS_IT87_SENS1, "sensor1", NOMAP, NOMAP,
                          RW, IT87_SYSCTL_SENS1, VALUE(1), 0 },
     { SENSORS_IT87_SENS2, "sensor2", NOMAP, NOMAP,
