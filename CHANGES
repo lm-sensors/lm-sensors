@@ -17,6 +17,10 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
+2.6.6 (????????)
+  Module i2c-sis645: improved support for SiS645/961
+                     added support for SiS645DX/961 and SiS735
+
 2.6.5 (20020915)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
   File sensors.conf.eg: Fix temp[23] for as99127f; add vt8231
