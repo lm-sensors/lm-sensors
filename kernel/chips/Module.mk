@@ -26,15 +26,11 @@ KERNELCHIPSDIR := $(MODULE_DIR)
 
 # These targets are NOT included in 'mkpatch'
 KERNELCHIPSTARGETS :=
-KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1031.o
 ifeq ($(shell if grep -q '^CONFIG_IPMI_HANDLER=' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/bmcsensors.o
 endif
 KERNELCHIPSTARGETS += $(MODULE_DIR)/ds1307.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/lm63.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/lm93.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/ltc1710.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/max1619.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/saa1064.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smartbatt.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smbus-arp.o
@@ -52,6 +48,9 @@ KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1025.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM1026=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1026.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM1031=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1031.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM9240=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/adm9240.o
@@ -89,6 +88,9 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_IT87=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/it87.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM63=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/lm63.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM75=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/lm75.o
 endif
@@ -113,8 +115,14 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM92=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/lm92.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM93=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/lm93.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_MATORB=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/matorb.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_MAX1619=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/max1619.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_MAX6650=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/max6650.o
