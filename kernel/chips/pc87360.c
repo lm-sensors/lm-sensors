@@ -441,7 +441,7 @@ static int pc87360_find(u8 *devid, int *address)
 	return 0;
 }
 
-/* We should not trust the address, it is unset.
+/* We don't really care about the address.
    Read from extra_isa instead. */
 int pc87360_detect(struct i2c_adapter *adapter, int address,
 		   unsigned short flags, int kind)
@@ -851,6 +851,9 @@ static int __init pc87360_init(void)
 		printk("pc87360.o: PC8736x not detected, module not inserted.\n");
 		return -ENODEV;
 	}
+
+	/* i2c-proc wants a checkable region */
+	normal_isa[0] = extra_isa[0];
 
 	return i2c_add_driver(&pc87360_driver);
 }
