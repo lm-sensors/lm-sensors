@@ -90,11 +90,19 @@ void print_i2c_busses(int procfmt)
 		if (!strcmp(de->d_name, ".."))
 			continue;
 
-		/* this seems to work for ISA */
-		sprintf(n, "%s/%s/device/name", sysfs, de->d_name);
+		/* this should work for kernels 2.6.5 or higher and */
+		/* is preferred because is unambiguous */
+		sprintf(n, "%s/%s/name", sysfs, de->d_name);
 		f = fopen(n, "r");
+		/* this seems to work for ISA */
 		if(f == NULL) {
-			/* non-ISA is much harder */
+			sprintf(n, "%s/%s/device/name", sysfs, de->d_name);
+			f = fopen(n, "r");
+		}
+		/* non-ISA is much harder */
+		/* and this won't find the correct bus name if a driver
+		   has more than one bus */
+		if(f == NULL) {
 			sprintf(n, "%s/%s/device", sysfs, de->d_name);
 			if(!(ddir = opendir(n)))
 				continue;       	

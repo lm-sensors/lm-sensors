@@ -17,6 +17,10 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
+2.8.6 (2004????)
+  Programs i2cdetect, i2cdump, i2cset: Fix incorrect bus names if possible
+
+
 2.8.5 (20040305)
   File doc/chips/SUMMARY: Update
   File etc/sensors.conf.eg: Epox 8K3A tweaks. (Kronos)
