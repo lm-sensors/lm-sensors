@@ -98,6 +98,7 @@ extern void sensors_deregister_entry(int id);
 #define I2C_DRIVERID_ADM1021 1008
 #define I2C_DRIVERID_ADM9240 1009
 #define I2C_DRIVERID_LTC1710 1010
+#define I2C_DRIVERID_SIS5595 1011
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON

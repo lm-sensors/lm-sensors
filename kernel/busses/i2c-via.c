@@ -36,16 +36,20 @@
 #include "i2c.h"
 #include "algo-bit.h"
 
+/* PCI device */
+#define VENDOR		PCI_VENDOR_ID_VIA
+#define DEVICE		PCI_DEVICE_ID_VIA_82C586_3
+
 /* Power management registers */
 
-#define PM_CFG_REVID   0x08  /* silicon revision code */
-#define PM_CFG_IOBASE0 0x20
-#define PM_CFG_IOBASE1 0x48
+#define PM_CFG_REVID    0x08  /* silicon revision code */
+#define PM_CFG_IOBASE0  0x20
+#define PM_CFG_IOBASE1  0x48
 
 #define I2C_DIR		(pm_io_base+0x40)
 #define I2C_OUT		(pm_io_base+0x42)
 #define I2C_IN		(pm_io_base+0x44)
-#define I2C_SCL		0x02
+#define I2C_SCL		0x02   /* clock bit in DIR/OUT/IN register */
 #define I2C_SDA		0x04
 
 /* io-region reservation */
@@ -59,7 +63,7 @@
 
 /* ----- local functions ----------------------------------------------	*/
 
-u32 pm_io_base;
+u16 pm_io_base;
 
 static void bit_via_setscl(void *data, int state)
 {
@@ -109,21 +113,19 @@ struct bit_adapter bit_via_ops = {
 	5, 5, 100,	/*waits, timeout */
 };
 
-u32 pm_io_base=0;
 
 /* When exactly was the new pci interface introduced? */
 #if LINUX_VERSION_CODE >= 0x020136 /* 2.1.54 */
 static int find_via(void)
 {
 	struct pci_dev *s_bridge;
-	u32 val, base;
+	u16 base;
 	u8 rev;
 	
 	if (! pci_present())
 		return -ENODEV;
 		
-	s_bridge = pci_find_device(
-		PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_82C586_3, NULL);
+	s_bridge = pci_find_device(VENDOR, DEVICE, NULL);
 		
 	if (! s_bridge)	{
 		printk("vt82c586b not found\n");
@@ -147,10 +149,10 @@ static int find_via(void)
 	}	
 
 	if ( PCIBIOS_SUCCESSFUL !=
-		pci_read_config_dword(s_bridge, base, &val))
+		pci_read_config_word(s_bridge, base, &pm_io_base))
 		return -ENODEV;
 		
-	pm_io_base = (val & (0xff<<8));
+	pm_io_base &= (0xff<<8);
 	return 0;
 }
 
@@ -159,15 +161,13 @@ static int find_via(void)
 static int find_via(void)
 {
 	unsigned char VIA_bus, VIA_devfn;
-	u32 val, base;
+	u16 base;
 	u8 rev;
 	
 	if (! pcibios_present())
 		return -ENODEV;
 		
-	if(pcibios_find_device(
-		PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_82C586_3, 0, &VIA_bus, 
-		&VIA_devfn))
+	if(pcibios_find_device(VENDOR, DEVICE, 0, &VIA_bus, &VIA_devfn))
 	{
 		printk("vt82c586b not found\n");
 		return -ENODEV;
@@ -191,21 +191,15 @@ static int find_via(void)
 	}	
 
 	if ( PCIBIOS_SUCCESSFUL !=
-                pcibios_read_config_dword(VIA_bus, VIA_devfn,
-					base, &val))
+                pcibios_read_config_word(VIA_bus, VIA_devfn, base, &pm_io_base))
 		return -ENODEV;
 
-	pm_io_base = (val & (0xff<<8));
+	pm_io_base &= (0xff<<8);
 	return 0;
 }
 #endif
 
-
-#ifdef MODULE
-MODULE_AUTHOR("Kyösti Mälkki <kmalkki@cc.hut.fi>");
-MODULE_DESCRIPTION("i2c for Via vt82c586b southbridge");
-
-int init_module(void) 
+int init_i2c_via()
 {
 	if (find_via() < 0) {
 		printk("Error while reading PCI configuration\n");
@@ -231,6 +225,15 @@ int init_module(void)
 		printk("Via i2c: Algo-bit error, couldn't register bus\n");
 		return -ENODEV;
 	}
+}
+
+#ifdef MODULE
+MODULE_AUTHOR("Kyösti Mälkki <kmalkki@cc.hut.fi>");
+MODULE_DESCRIPTION("i2c for Via vt82c586b southbridge");
+
+int init_module(void) 
+{
+	return init_i2c_via();
 }
 
 void cleanup_module(void) 
