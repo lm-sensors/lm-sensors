@@ -97,9 +97,9 @@ static inline void superio_exit(void)
 #define PC87360_REG_FAN_STATUS(nr)	(0x08 + 3 * (nr))
 
 #define FAN_FROM_REG(val,div)		((val)==0?-1:(val)==255?0: \
-					 960000/((val)*(div)))
+					 480000/((val)*(div)))
 #define FAN_TO_REG(val,div)		((val)<=0?255: \
-					 960000/((val)*(div)))
+					 480000/((val)*(div)))
 #define FAN_DIV_FROM_REG(val)		(1 << ((val >> 5) & 0x03))
 #define FAN_DIV_TO_REG(val)		((val)==8?0x60:(val)==4?0x40:(val)==1?0x00:0x20)
 #define FAN_STATUS_FROM_REG(val)	((val) & 0x07)
@@ -118,7 +118,9 @@ static inline void superio_exit(void)
 #define PC87365_REG_IN_ALARMS1		0x00
 #define PC87365_REG_IN_ALARMS2		0x01
 
-#define IN_FROM_REG(val)		(((val) * 2967 + 127) / 255)
+#define IN_FROM_REG(val)		(((val) * 297 + 127) / 255)
+#define IN_TO_REG(val)			((val)<0?0:(val)>297?255: \
+					 ((val) * 255 + 148) / 297)
 #define IN_STATUS_FROM_REG(val)		((val) & 0x86)
 
 /*
@@ -136,6 +138,8 @@ static inline void superio_exit(void)
 #define PC87365_REG_TEMP_ALARMS		0x00
 
 #define TEMP_FROM_REG(val)		((val)&0x80 ? (val) : (val) - 128)
+#define TEMP_TO_REG(val)		((val)<-128?0x80:(val)>127?0x7F: \
+					 (val)<0?(val)+0x80:(val))
 #define TEMP_STATUS_FROM_REG(val)	((val) & 0xCE)
 
 struct pc87360_data {
@@ -658,6 +662,8 @@ void pc87360_fan(struct i2c_client *client, int operation, int ctl_name,
 	}
 	/* We ignore National's recommendation */
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (nr >= data->fannr)
+			return;
 		if (*nrels_mag >= 1) {
 			data->fan_min[nr] = FAN_TO_REG(results[0],
 						       FAN_DIV_FROM_REG(data->fan_status[nr]));
@@ -745,13 +751,26 @@ void pc87365_in(struct i2c_client *client, int operation, int ctl_name,
 	int nr = ctl_name - PC87365_SYSCTL_IN0;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 3;
+		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		pc87360_update_client(client);
-		results[0] = IN_FROM_REG(data->in_max[nr]);
-		results[1] = IN_FROM_REG(data->in_min[nr]);
+		results[0] = IN_FROM_REG(data->in_min[nr]);
+		results[1] = IN_FROM_REG(data->in_max[nr]);
 		results[2] = IN_FROM_REG(data->in[nr]);
 		*nrels_mag = 3;
+	}
+	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->in_min[nr] = IN_TO_REG(results[0]);
+			pc87360_write_value(data, 1, PC87365_REG_IN_BANK, nr);
+			pc87360_write_value(data, 1, PC87365_REG_IN_MIN,
+					    data->in_min[nr]);
+		}
+		if (*nrels_mag >= 2) {
+			data->in_max[nr] = IN_TO_REG(results[1]);
+			pc87360_write_value(data, 1, PC87365_REG_IN_MAX,
+					    data->in_max[nr]);
+		}
 	}
 }
 
@@ -785,6 +804,26 @@ void pc87365_temp(struct i2c_client *client, int operation, int ctl_name,
 		results[1] = TEMP_FROM_REG(data->temp_crit[nr]);
 		results[2] = TEMP_FROM_REG(data->temp[nr]);
 		*nrels_mag = 4;
+	}
+	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (nr >= data->tempnr)
+			return;
+		if (*nrels_mag >= 1) {
+			pc87360_write_value(data, 2, PC87365_REG_TEMP_BANK, nr);
+			data->temp_max[nr] = TEMP_TO_REG(results[0]);
+			pc87360_write_value(data, 2, PC87365_REG_TEMP_MAX,
+					    data->temp_max[nr]);
+		}
+		if (*nrels_mag >= 2) {
+			data->temp_min[nr] = TEMP_TO_REG(results[1]);
+			pc87360_write_value(data, 2, PC87365_REG_TEMP_MAX,
+					    data->temp_max[nr]);
+		}
+		if (*nrels_mag >= 3) {
+			data->temp_crit[nr] = TEMP_TO_REG(results[2]);
+			pc87360_write_value(data, 2, PC87365_REG_TEMP_CRIT,
+					    data->temp_crit[nr]);
+		}
 	}
 }
 
