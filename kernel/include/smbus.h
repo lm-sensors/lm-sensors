@@ -130,6 +130,8 @@ struct smbus_adapter {
    course. */
 #define i2c_is_smbus_client(clientptr) \
         ((clientptr)->adapter->algo->id == ALGO_SMBUS)
+#define i2c_is_smbus_adapter(adapptr) \
+        ((adapptr)->algo->id == ALGO_SMBUS)
 
 /* This union is used within smbus_access routines */
 union smbus_data { 
@@ -157,21 +159,23 @@ extern struct smbus_algorithm smbus_algorithm;
 
 /* This is the very generalized SMBus access routine. You probably do not
    want to use this, though; one of the functions below may be much easier,
-   and probably just as fast. */
-extern s32 smbus_access (struct smbus_adapter * adapter, u8 addr, 
+   and probably just as fast. 
+   Note that we use i2c_adapter here, because you do not need a specific
+   smbus adapter to call this function. */
+extern s32 smbus_access (struct i2c_adapter * adapter, u8 addr, 
                          char read_write, u8 command, int size,
                          union smbus_data * data);
 
 /* Now follow the 'nice' access routines. These also document the calling
    conventions of smbus_access. */
 
-extern inline s32 smbus_write_quick(struct smbus_adapter * adapter, u8 addr, 
+extern inline s32 smbus_write_quick(struct i2c_adapter * adapter, u8 addr, 
                                     u8 value)
 {
   return smbus_access(adapter,addr,value,0,SMBUS_QUICK,NULL);
 }
 
-extern inline s32 smbus_read_byte(struct smbus_adapter * adapter,u8 addr)
+extern inline s32 smbus_read_byte(struct i2c_adapter * adapter,u8 addr)
 {
   union smbus_data data;
   if (smbus_access(adapter,addr,SMBUS_READ,0,SMBUS_BYTE,&data))
@@ -180,13 +184,13 @@ extern inline s32 smbus_read_byte(struct smbus_adapter * adapter,u8 addr)
     return data.byte;
 }
 
-extern inline s32 smbus_write_byte(struct smbus_adapter * adapter, u8 addr, 
+extern inline s32 smbus_write_byte(struct i2c_adapter * adapter, u8 addr, 
                                    u8 value)
 {
   return smbus_access(adapter,addr,SMBUS_WRITE,value, SMBUS_BYTE,NULL);
 }
 
-extern inline s32 smbus_read_byte_data(struct smbus_adapter * adapter,
+extern inline s32 smbus_read_byte_data(struct i2c_adapter * adapter,
                                        u8 addr, u8 command)
 {
   union smbus_data data;
@@ -196,7 +200,7 @@ extern inline s32 smbus_read_byte_data(struct smbus_adapter * adapter,
     return data.byte;
 }
 
-extern inline s32 smbus_write_byte_data(struct smbus_adapter * adapter,
+extern inline s32 smbus_write_byte_data(struct i2c_adapter * adapter,
                                         u8 addr, u8 command, u8 value)
 {
   union smbus_data data;
@@ -204,7 +208,7 @@ extern inline s32 smbus_write_byte_data(struct smbus_adapter * adapter,
   return smbus_access(adapter,addr,SMBUS_WRITE,command,SMBUS_BYTE_DATA,&data);
 }
 
-extern inline s32 smbus_read_word_data(struct smbus_adapter * adapter,
+extern inline s32 smbus_read_word_data(struct i2c_adapter * adapter,
                                        u8 addr, u8 command)
 {
   union smbus_data data;
@@ -214,7 +218,7 @@ extern inline s32 smbus_read_word_data(struct smbus_adapter * adapter,
     return data.word;
 }
 
-extern inline s32 smbus_write_word_data(struct smbus_adapter * adapter,
+extern inline s32 smbus_write_word_data(struct i2c_adapter * adapter,
                                         u8 addr, u8 command, u16 value)
 {
   union smbus_data data;
@@ -222,7 +226,7 @@ extern inline s32 smbus_write_word_data(struct smbus_adapter * adapter,
   return smbus_access(adapter,addr,SMBUS_WRITE,command,SMBUS_WORD_DATA,&data);
 }
 
-extern inline s32 smbus_process_call(struct smbus_adapter * adapter,
+extern inline s32 smbus_process_call(struct i2c_adapter * adapter,
                                      u8 addr, u8 command, u16 value)
 {
   union smbus_data data;
@@ -234,7 +238,7 @@ extern inline s32 smbus_process_call(struct smbus_adapter * adapter,
 }
 
 /* Returns the number of read bytes */
-extern inline s32 smbus_read_block_data(struct smbus_adapter * adapter,
+extern inline s32 smbus_read_block_data(struct i2c_adapter * adapter,
                                         u8 addr, u8 command, u8 *values)
 {
   union smbus_data data;
@@ -248,7 +252,7 @@ extern inline s32 smbus_read_block_data(struct smbus_adapter * adapter,
   }
 }
 
-extern inline int smbus_write_block_data(struct smbus_adapter * adapter,
+extern inline int smbus_write_block_data(struct i2c_adapter * adapter,
                                          u8 addr, u8 command, u8 length,
                                          u8 *values)
 {

@@ -77,7 +77,7 @@ struct isa_client {
   void *data;
 
   /* Here ended i2c_client */
-  unsigned int full_address;
+  unsigned int isa_addr;
 };
 
 /* An algorithm describes how a certain class of busses can be accessed.
@@ -127,6 +127,8 @@ struct isa_adapter {
   access will fail! */
 #define i2c_is_isa_client(clientptr) \
         ((clientptr)->adapter->algo->id == ALGO_ISA)
+#define i2c_is_isa_adapter(adapptr) \
+        ((adapptr)->algo->id == ALGO_ISA)
 
 /* Next: define ISA variants of registering. */
 #define isa_add_algorithm(algoptr) \

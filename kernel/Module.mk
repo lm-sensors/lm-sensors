@@ -22,7 +22,8 @@ MODULE_DIR := src
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-SRCTARGETS := $(MODULE_DIR)/smbus.o $(MODULE_DIR)/piix4.o $(MODULE_DIR)/isa.o
+SRCTARGETS := $(MODULE_DIR)/smbus.o $(MODULE_DIR)/piix4.o $(MODULE_DIR)/isa.o \
+              $(MODULE_DIR)/lm78.o
 
 # Include all dependency files
 INCLUDEFILES += $(SRCTARGETS:.o=.d)

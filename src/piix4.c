@@ -49,6 +49,7 @@ s32 piix4_access(u8 addr, char read_write,
                  u8 command, int size, union smbus_data * data)
 {
   /* TO BE WRITTEN! */
+  return -1;
 }
 
 
@@ -89,10 +90,9 @@ int piix4_cleanup(void)
   if (piix4_initialized >= 2)
   {
     if ((res = smbus_del_adapter(&piix4_adapter))) {
-      printk("piix4.o: smbus_del_adapter failed, module not removed");
+      printk("piix4.o: smbus_del_adapter failed, module not removed\n");
       return res;
-    }
-    else
+    } else
       piix4_initialized--;
   }
   if (piix4_initialized >= 1) {

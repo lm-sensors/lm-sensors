@@ -30,7 +30,7 @@
 #include "version.h"
 #include "smbus.h"
 
-static s32 smbus_access_i2c (struct smbus_adapter * adapter, u8 addr,
+static s32 smbus_access_i2c (struct i2c_adapter * adapter, u8 addr,
                              char read_write, u8 command, int size,
                              union smbus_data * data);
 
@@ -69,7 +69,7 @@ struct smbus_algorithm smbus_algorithm = {
    simulate the SMBus commands using the i2c access routines. 
    We do all locking here, so you can ignore that in the adapter-specific
    smbus_accesss routine. */
-s32 smbus_access (struct smbus_adapter * adapter, u8 addr, char read_write,
+s32 smbus_access (struct i2c_adapter * adapter, u8 addr, char read_write,
                   u8 command, int size, union smbus_data * data)
 {
   int res;
@@ -79,7 +79,8 @@ s32 smbus_access (struct smbus_adapter * adapter, u8 addr, char read_write,
   down(&adapter->lock);
 #endif
   if (adapter->id & ALGO_SMBUS) 
-    res = adapter->smbus_access(addr,read_write,command,size,data);
+    res = ((struct smbus_adapter *) adapter) -> 
+           smbus_access(addr,read_write,command,size,data);
   else
     res = smbus_access_i2c(adapter,addr,read_write,command,size,data);
 #ifdef SPINLOCK
@@ -95,7 +96,7 @@ s32 smbus_access (struct smbus_adapter * adapter, u8 addr, char read_write,
    For SMBUS_QUICK: Use addr, read_write 
    For SMBUS_BYTE: Use addr, read_write, command 
    ....  */
-s32 smbus_access_i2c(struct smbus_adapter * adapter, u8 addr, char read_write,
+s32 smbus_access_i2c(struct i2c_adapter * adapter, u8 addr, char read_write,
                      u8 command, int size, union smbus_data * data)
 {
   /* So we need to generate a series of msgs */

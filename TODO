@@ -1,5 +1,16 @@
 Many, many things. Most notably:
 
-* Write s32 smbus_access_i2c in smbus.c
-* Check out whether we can use the dev interface for smbus (like i2c)
-* Write all other modules
+* Write smbus_access_i2c in smbus.c
+* Write piix4_* in piix4.c
+* Complete lm78 driver
+* Extend dev interface for SMBus
+* Create entries in /proc/bus: a list of all registered busses, and for
+  each bus, a file with registered clients.
+* Write all other drivers
+* How to make drivers detect thing *not*; for example, if a Winbond is 
+  present, the LM75 driver should not try to access its simulated
+  LM75 chips!
+* Write a userland-library for SMBus/i2c access (through the /dev interface)
+* Write a userland detection program for busses (clients are less important;
+  but perhaps needed too).
+* Bring doc/design up-to-date (it is horribly out of date right now)
