@@ -121,12 +121,6 @@ superio_exit(void)
 /* Update battery voltage after every reading if true */
 static int update_vbat = 0;
 
-
-/* Enable Temp1 as thermal resistor */
-/* Enable Temp2 as thermal diode */
-/* Enable Temp3 as thermal resistor */
-static int temp_type = 0x2a;
-
 /* Reset the registers on init */
 static int reset_it87 = 0;
 
@@ -693,11 +687,6 @@ static void it87_init_client(struct i2c_client *client)
 		/* Enable voltage monitors */
 		it87_write_value(client, IT87_REG_VIN_ENABLE, 0xff);
 
-		/* Enable Temp1-Temp3 */
-		it87_write_value(client, IT87_REG_TEMP_ENABLE,
-				(it87_read_value(client, IT87_REG_TEMP_ENABLE) & 0xc0)
-				| (temp_type & 0x3f));
-
 		/* Enable fans */
 		it87_write_value(client, IT87_REG_FAN_CTRL,
 				(it87_read_value(client, IT87_REG_FAN_CTRL) & 0x8f)
@@ -1135,10 +1124,8 @@ MODULE_AUTHOR("Chris Gauthron <chrisg@0-in.com>");
 MODULE_DESCRIPTION("IT8705F, IT8712F, Sis950 driver");
 MODULE_PARM(update_vbat, "i");
 MODULE_PARM_DESC(update_vbat, "Update vbat if set else return powerup value");
-MODULE_PARM(temp_type, "i");
-MODULE_PARM_DESC(temp_type, "Temperature sensor type, normally leave unset");
 MODULE_PARM(init, "i");
-MODULE_PARM_DESC(init, "Initialize the chip's registers, default yes");
+MODULE_PARM_DESC(init, "Initialize some of the chip's registers, default yes");
 MODULE_PARM(reset_it87, "i");
 MODULE_PARM_DESC(reset_it87, "Reset the chip's registers, default no");
 
