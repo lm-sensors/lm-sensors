@@ -23,7 +23,7 @@ PROGEEPROMTARGETS := $(MODULE_DIR)/decode-dimms.pl \
                      $(MODULE_DIR)/decode-vaio.pl
 
 install-prog-eeprom: $(PROGEEPROMTARGETS)
-	$(INSTALL) -o root -g root -m 755 $(PROGEEPROMTARGETS) $(SBINDIR)
+	$(INSTALL) -o root -g root -m 755 $(PROGEEPROMTARGETS) $(BINDIR)
 
 user_install :: install-prog-eeprom
 
