@@ -22,6 +22,8 @@ ask CVS about it:
   Library: Switch to new sysfs naming standard
            Fix gcc 3.3 warnings (Philipp Thomas)
            Support 2.6 ds1621
+  Makefile: Install shared library 755
+  Man pages i2cdump.8, i2cset.8, isadump.8: New
   Modules ds1621, pcf8591: Check for capabilities before using them
                            (Aurelien Jarno)
   Module pcf8574: Cleanups
@@ -34,6 +36,7 @@ ask CVS about it:
                           Improved SiS chips support
                           Add a white list of IBM systems
                           Drop support of undetectable adapters
+                          Fix smart battery detection
   Program sensors-detect-stat.pl: New
 
 

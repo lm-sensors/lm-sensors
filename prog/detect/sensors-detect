@@ -777,8 +777,8 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             ipmi_smic_detect via8231_isa_detect lm85_detect smartbatt_detect
             adm1026_detect w83l785ts_detect lm83_detect lm90_detect
             saa1064_detect w83l784r_detect mozart_detect max6650_detect
-			fscher_detect adm1029_detect adm1031_detect max6900_detect
-			m5879_detect pca9540_detect);
+            fscher_detect adm1029_detect adm1031_detect max6900_detect
+            m5879_detect pca9540_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -3908,24 +3908,27 @@ sub arp_detect
   return (1);
 }
 
+# This checks for non-FFFF values for temperature, voltage, and current.
+# The address (0x0b) is specified by the SMBus standard so it's likely
+# that this really is a smart battery.
 # $_[0]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
-# Returns: 3
+# Returns: 5
 sub smartbatt_detect
 {
   my ($file,$addr) = @_;
   # check some registers
-  if (i2c_smbus_read_byte_data($file,0x08) == 0xff) {
+  if (i2c_smbus_read_word_data($file,0x08) == 0xffff) {
   	return;
   }
-  if (i2c_smbus_read_byte_data($file,0x09) != 0xff) {
+  if (i2c_smbus_read_word_data($file,0x09) == 0xffff) {
   	return;
   }
-  if (i2c_smbus_read_byte_data($file,0x0a) != 0xff) {
+  if (i2c_smbus_read_word_data($file,0x0a) == 0xffff) {
   	return;
   }
-  return (3);
+  return (5);
 }
 
 # Returns: 4
