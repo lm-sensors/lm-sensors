@@ -534,11 +534,15 @@ chip "as99127f-*"
     compute in5 -(240/60.4)*@ ,  -@/(240/60.4)
     compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
 
-# for at least Asus A7V133/133-C
+# Depending on your motherboard, you have to choose between two formulae
+# for temp2:
+# - Asus A7V133/133-C
     compute temp2 @*2.0, @/2.0
-    compute temp3 @*2.0, @/2.0
-# does anyone know a board for which the following is correct?
+# - Asus CUV4X (thanks go to Artur Gawryszczak)
+# - Asus A7V8X (thanks go to Michele Conte)
 #   compute temp2 (@*30/43)+25, (@-25)*43/30
+
+    compute temp3 @*2.0, @/2.0
 
 # adjust this if your vid is wrong; see doc/vid
 #   set vrm 9.0
