@@ -77,13 +77,14 @@ static
 #else
 extern
 #endif
-       int __init i2c_sis5595_init(void);
+int __init i2c_sis5595_init(void);
 static int __init sis5595_cleanup(void);
 static int sis5595_setup(void);
-static s32 sis5595_access(struct i2c_adapter *adap, u16 addr, 
-                        unsigned short flags, char read_write,
-                        u8 command, int size, union i2c_smbus_data * data);
-static void sis5595_do_pause( unsigned int amount );
+static s32 sis5595_access(struct i2c_adapter *adap, u16 addr,
+			  unsigned short flags, char read_write,
+			  u8 command, int size,
+			  union i2c_smbus_data *data);
+static void sis5595_do_pause(unsigned int amount);
 static int sis5595_transaction(void);
 static void sis5595_inc(struct i2c_adapter *adapter);
 static void sis5595_dec(struct i2c_adapter *adapter);
@@ -92,28 +93,28 @@ static u32 sis5595_func(struct i2c_adapter *adapter);
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
-#endif /* MODULE */
+#endif				/* MODULE */
 
 static struct i2c_algorithm smbus_algorithm = {
-  /* name */		"Non-I2C SMBus adapter",
-  /* id */		I2C_ALGO_SMBUS,
-  /* master_xfer */	NULL,
-  /* smbus_access */    sis5595_access,
-  /* slave_send */	NULL,
-  /* slave_rcv */	NULL,
-  /* algo_control */	NULL,
-  /* functionality */   sis5595_func,
+	/* name */ "Non-I2C SMBus adapter",
+	/* id */ I2C_ALGO_SMBUS,
+	/* master_xfer */ NULL,
+	/* smbus_access */ sis5595_access,
+	/* slave_send */ NULL,
+	/* slave_rcv */ NULL,
+	/* algo_control */ NULL,
+	/* functionality */ sis5595_func,
 };
 
 static struct i2c_adapter sis5595_adapter = {
-  "unset",
-  I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS5595,
-  &smbus_algorithm,
-  NULL,
-  sis5595_inc,
-  sis5595_dec,
-  NULL,
-  NULL,
+	"unset",
+	I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS5595,
+	&smbus_algorithm,
+	NULL,
+	sis5595_inc,
+	sis5595_dec,
+	NULL,
+	NULL,
 };
 
 static int __initdata sis5595_initialized;
@@ -121,14 +122,14 @@ static unsigned short sis5595_base = 0;
 
 static u8 sis5595_read(u8 reg)
 {
-	outb(reg,sis5595_base+SMB_INDEX);
-	return inb(sis5595_base+SMB_DAT);
+	outb(reg, sis5595_base + SMB_INDEX);
+	return inb(sis5595_base + SMB_DAT);
 }
 
 static void sis5595_write(u8 reg, u8 data)
 {
-	outb(reg,sis5595_base+SMB_INDEX);
-	outb(data,sis5595_base+SMB_DAT);
+	outb(reg, sis5595_base + SMB_INDEX);
+	outb(data, sis5595_base + SMB_DAT);
 }
 
 
@@ -138,192 +139,217 @@ static void sis5595_write(u8 reg, u8 data)
    defined to make the transition easier. */
 int sis5595_setup(void)
 {
-  int error_return=0;
+	int error_return = 0;
 
-  struct pci_dev *SIS5595_dev;
+	struct pci_dev *SIS5595_dev;
 
-  /* First check whether we can access PCI at all */
-  if (pci_present() == 0) {
-    printk("i2c-sis5595.o: Error: No PCI-bus found!\n");
-    error_return=-ENODEV;
-    goto END;
-  }
+	/* First check whether we can access PCI at all */
+	if (pci_present() == 0) {
+		printk("i2c-sis5595.o: Error: No PCI-bus found!\n");
+		error_return = -ENODEV;
+		goto END;
+	}
 
-  /* Look for the SIS5595, function 3 */
-  SIS5595_dev = NULL;
-  if (!(SIS5595_dev = pci_find_device(PCI_VENDOR_ID_SI, 
-                              PCI_DEVICE_ID_SI_503, SIS5595_dev))) {
-    printk("i2c-sis5595.o: Error: Can't detect SIS5595!\n");
-    error_return=-ENODEV;
-    goto END;
-  } 
+	/* Look for the SIS5595, function 3 */
+	SIS5595_dev = NULL;
+	if (!(SIS5595_dev = pci_find_device(PCI_VENDOR_ID_SI,
+					    PCI_DEVICE_ID_SI_503,
+					    SIS5595_dev))) {
+		printk("i2c-sis5595.o: Error: Can't detect SIS5595!\n");
+		error_return = -ENODEV;
+		goto END;
+	}
 
 /* Determine the address of the SMBus areas */
-  pci_read_config_word(SIS5595_dev, ACPI_BASE,&sis5595_base);
+	pci_read_config_word(SIS5595_dev, ACPI_BASE, &sis5595_base);
 #ifdef DEBUG
-  printk("ACPI Base address: %04x\n",sis5595_base);
+	printk("ACPI Base address: %04x\n", sis5595_base);
 #endif
-  /* NB: We grab just the two SMBus registers here, but this may still
-   * interfere with ACPI :-(  */
-  if (check_region(sis5595_base + SMB_INDEX, 2)) {
-    printk("i2c-sis5595.o: SMBus registers 0x%4x-0x%4x already in use!\n", 
-           sis5595_base + SMB_INDEX,sis5595_base + SMB_INDEX+1);
-    error_return=-ENODEV;
-    goto END;
-  }
+	/* NB: We grab just the two SMBus registers here, but this may still
+	 * interfere with ACPI :-(  */
+	if (check_region(sis5595_base + SMB_INDEX, 2)) {
+		printk
+		    ("i2c-sis5595.o: SMBus registers 0x%4x-0x%4x already in use!\n",
+		     sis5595_base + SMB_INDEX,
+		     sis5595_base + SMB_INDEX + 1);
+		error_return = -ENODEV;
+		goto END;
+	}
 
-  /* Everything is happy, let's grab the memory and set things up. */
-  request_region(sis5595_base + SMB_INDEX, 2, "sis5595-smbus");       
+	/* Everything is happy, let's grab the memory and set things up. */
+	request_region(sis5595_base + SMB_INDEX, 2, "sis5595-smbus");
 
-END:
-  return error_return;
+      END:
+	return error_return;
 }
 
 
 /* Internally used pause function */
-void sis5595_do_pause( unsigned int amount )
+void sis5595_do_pause(unsigned int amount)
 {
-      current->state = TASK_INTERRUPTIBLE;
-      schedule_timeout(amount);
+	current->state = TASK_INTERRUPTIBLE;
+	schedule_timeout(amount);
 }
 
 /* Another internally used function */
-int sis5595_transaction(void) 
+int sis5595_transaction(void)
 {
-  int temp;
-  int result=0;
-  int timeout=0;
+	int temp;
+	int result = 0;
+	int timeout = 0;
 
-  /* Make sure the SMBus host is ready to start transmitting */
-  if ((temp = sis5595_read(SMB_STS_LO) + (sis5595_read(SMB_STS_HI) << 8)) 
-		  != 0x00) {
+	/* Make sure the SMBus host is ready to start transmitting */
+	if (
+	    (temp =
+	     sis5595_read(SMB_STS_LO) + (sis5595_read(SMB_STS_HI) << 8)) !=
+	    0x00) {
 #ifdef DEBUG
-    printk("i2c-sis5595.o: SMBus busy (%04x). Resetting... \n",temp);
+		printk("i2c-sis5595.o: SMBus busy (%04x). Resetting... \n",
+		       temp);
 #endif
-    sis5595_write(SMB_STS_LO,temp & 0xff);
-    sis5595_write(SMB_STS_HI,temp >> 8);
-    if ((temp = sis5595_read(SMB_STS_LO) + (sis5595_read(SMB_STS_HI) << 8)) 
-		    != 0x00) {
+		sis5595_write(SMB_STS_LO, temp & 0xff);
+		sis5595_write(SMB_STS_HI, temp >> 8);
+		if (
+		    (temp =
+		     sis5595_read(SMB_STS_LO) +
+		     (sis5595_read(SMB_STS_HI) << 8)) != 0x00) {
 #ifdef DEBUG
-      printk("i2c-sis5595.o: Failed! (%02x)\n",temp);
+			printk("i2c-sis5595.o: Failed! (%02x)\n", temp);
 #endif
-      return -1;
-    } else {
+			return -1;
+		} else {
 #ifdef DEBUG
-      printk("i2c-sis5595.o: Successfull!\n");
+			printk("i2c-sis5595.o: Successfull!\n");
 #endif
-    }
-  }
+		}
+	}
 
-  /* start the transaction by setting bit 4 */
-  sis5595_write(SMB_CTL_LO,sis5595_read(SMB_CTL_LO)|0x10);
+	/* start the transaction by setting bit 4 */
+	sis5595_write(SMB_CTL_LO, sis5595_read(SMB_CTL_LO) | 0x10);
 
-  /* We will always wait for a fraction of a second! */
-  do {
-    sis5595_do_pause(1);
-    temp=sis5595_read(SMB_STS_LO);
-  } while (!(temp & 0x40) && (timeout++ < MAX_TIMEOUT));
+	/* We will always wait for a fraction of a second! */
+	do {
+		sis5595_do_pause(1);
+		temp = sis5595_read(SMB_STS_LO);
+	} while (!(temp & 0x40) && (timeout++ < MAX_TIMEOUT));
 
-  /* If the SMBus is still busy, we give up */
-  if (timeout >= MAX_TIMEOUT) {
+	/* If the SMBus is still busy, we give up */
+	if (timeout >= MAX_TIMEOUT) {
 #ifdef DEBUG
-    printk("i2c-sis5595.o: SMBus Timeout!\n"); 
+		printk("i2c-sis5595.o: SMBus Timeout!\n");
 #endif
-    result = -1;
-  }
+		result = -1;
+	}
 
-  if (temp & 0x10) {
-    result = -1;
+	if (temp & 0x10) {
+		result = -1;
 #ifdef DEBUG
-    printk("i2c-sis5595.o: Error: Failed bus transaction\n");
+		printk("i2c-sis5595.o: Error: Failed bus transaction\n");
 #endif
-  }
+	}
 
-  if (temp & 0x20) {
-    result = -1;
-    printk("i2c-sis5595.o: Bus collision! SMBus may be locked until next hard
-           reset (or not...)\n");
-    /* Clock stops and slave is stuck in mid-transmission */
-  }
+	if (temp & 0x20) {
+		result = -1;
+		printk
+		    ("i2c-sis5595.o: Bus collision! SMBus may be locked until next hard\n"
+		     "reset (or not...)\n");
+		/* Clock stops and slave is stuck in mid-transmission */
+	}
 
-  if ((temp = sis5595_read(SMB_STS_LO) + (sis5595_read(SMB_STS_HI) << 8)) 
-		  != 0x00) {
-    sis5595_write(SMB_STS_LO,temp & 0xff);
-    sis5595_write(SMB_STS_HI,temp >> 8);
-  }
+	if (
+	    (temp =
+	     sis5595_read(SMB_STS_LO) + (sis5595_read(SMB_STS_HI) << 8)) !=
+	    0x00) {
+		sis5595_write(SMB_STS_LO, temp & 0xff);
+		sis5595_write(SMB_STS_HI, temp >> 8);
+	}
 
-  if ((temp = sis5595_read(SMB_STS_LO) + (sis5595_read(SMB_STS_HI) << 8))
-                      != 0x00) {
+	if (
+	    (temp =
+	     sis5595_read(SMB_STS_LO) + (sis5595_read(SMB_STS_HI) << 8)) !=
+	    0x00) {
 
 #ifdef DEBUG
-    printk("i2c-sis5595.o: Failed reset at end of transaction (%02x)\n",temp);
+		printk
+		    ("i2c-sis5595.o: Failed reset at end of transaction (%02x)\n",
+		     temp);
 #endif
-  }
-  return result;
+	}
+	return result;
 }
 
 /* Return -1 on error. See smbus.h for more information */
-s32 sis5595_access(struct i2c_adapter *adap, u16 addr, 
-                 unsigned short flags, char read_write,
-                 u8 command, int size, union i2c_smbus_data * data)
+s32 sis5595_access(struct i2c_adapter * adap, u16 addr,
+		   unsigned short flags, char read_write,
+		   u8 command, int size, union i2c_smbus_data * data)
 {
-  switch(size) {
-    case I2C_SMBUS_QUICK:
-      sis5595_write(SMB_ADDR,((addr & 0x7f) << 1) | (read_write & 0x01));
-      size = SIS5595_QUICK;
-      break;
-    case I2C_SMBUS_BYTE:
-      sis5595_write(SMB_ADDR,((addr & 0x7f) << 1) | (read_write & 0x01));
-      if (read_write == I2C_SMBUS_WRITE)
-	sis5595_write(SMB_CMD,command);
-      size = SIS5595_BYTE;
-      break;
-    case I2C_SMBUS_BYTE_DATA:
-      sis5595_write(SMB_ADDR,((addr & 0x7f) << 1) | (read_write & 0x01));
-      sis5595_write(SMB_CMD,command);
-      if (read_write == I2C_SMBUS_WRITE)
-        sis5595_write(SMB_BYTE,data->byte);
-      size = SIS5595_BYTE_DATA;
-      break;
-    case I2C_SMBUS_PROC_CALL:
-    case I2C_SMBUS_WORD_DATA:
-      sis5595_write(SMB_ADDR,((addr & 0x7f) << 1) | (read_write & 0x01));
-      sis5595_write(SMB_CMD,command);
-      if (read_write == I2C_SMBUS_WRITE) {
-	sis5595_write(SMB_BYTE,data->word & 0xff);
-	sis5595_write(SMB_BYTE+1,(data->word & 0xff00) >> 8);
-      }
-      size = (size==I2C_SMBUS_PROC_CALL)?SIS5595_PROC_CALL:SIS5595_WORD_DATA;
-      break;
-    case I2C_SMBUS_BLOCK_DATA:
-      printk("sis5595.o: Block data not yet implemented!\n");
-      return -1;
-      break;
-  }
+	switch (size) {
+	case I2C_SMBUS_QUICK:
+		sis5595_write(SMB_ADDR,
+			      ((addr & 0x7f) << 1) | (read_write & 0x01));
+		size = SIS5595_QUICK;
+		break;
+	case I2C_SMBUS_BYTE:
+		sis5595_write(SMB_ADDR,
+			      ((addr & 0x7f) << 1) | (read_write & 0x01));
+		if (read_write == I2C_SMBUS_WRITE)
+			sis5595_write(SMB_CMD, command);
+		size = SIS5595_BYTE;
+		break;
+	case I2C_SMBUS_BYTE_DATA:
+		sis5595_write(SMB_ADDR,
+			      ((addr & 0x7f) << 1) | (read_write & 0x01));
+		sis5595_write(SMB_CMD, command);
+		if (read_write == I2C_SMBUS_WRITE)
+			sis5595_write(SMB_BYTE, data->byte);
+		size = SIS5595_BYTE_DATA;
+		break;
+	case I2C_SMBUS_PROC_CALL:
+	case I2C_SMBUS_WORD_DATA:
+		sis5595_write(SMB_ADDR,
+			      ((addr & 0x7f) << 1) | (read_write & 0x01));
+		sis5595_write(SMB_CMD, command);
+		if (read_write == I2C_SMBUS_WRITE) {
+			sis5595_write(SMB_BYTE, data->word & 0xff);
+			sis5595_write(SMB_BYTE + 1,
+				      (data->word & 0xff00) >> 8);
+		}
+		size =
+		    (size ==
+		     I2C_SMBUS_PROC_CALL) ? SIS5595_PROC_CALL :
+		    SIS5595_WORD_DATA;
+		break;
+	case I2C_SMBUS_BLOCK_DATA:
+		printk("sis5595.o: Block data not yet implemented!\n");
+		return -1;
+		break;
+	}
 
-  sis5595_write(SMB_CTL_LO,((size & 0x0E)));
+	sis5595_write(SMB_CTL_LO, ((size & 0x0E)));
 
-  if (sis5595_transaction()) /* Error in transaction */ 
-    return -1; 
-  
-  if ((size != SIS5595_PROC_CALL) && 
-         ((read_write == I2C_SMBUS_WRITE) || (size == SIS5595_QUICK)))
-    return 0;
-  
+	if (sis5595_transaction())	/* Error in transaction */
+		return -1;
 
-  switch(size) {
-    case SIS5595_BYTE: /* Where is the result put? I assume here it is in
-                        SMB_DATA but it might just as well be in the
-                        SMB_CMD. No clue in the docs */
-    case SIS5595_BYTE_DATA:
-      data->byte = sis5595_read(SMB_BYTE);
-      break;
-    case SIS5595_WORD_DATA:
-    case SIS5595_PROC_CALL:
-      data->word = sis5595_read(SMB_BYTE) + (sis5595_read(SMB_BYTE+1) << 8);
-      break;
-  }
-  return 0;
+	if ((size != SIS5595_PROC_CALL) &&
+	    ((read_write == I2C_SMBUS_WRITE) || (size == SIS5595_QUICK)))
+		return 0;
+
+
+	switch (size) {
+	case SIS5595_BYTE:	/* Where is the result put? I assume here it is in
+				   SMB_DATA but it might just as well be in the
+				   SMB_CMD. No clue in the docs */
+	case SIS5595_BYTE_DATA:
+		data->byte = sis5595_read(SMB_BYTE);
+		break;
+	case SIS5595_WORD_DATA:
+	case SIS5595_PROC_CALL:
+		data->word =
+		    sis5595_read(SMB_BYTE) +
+		    (sis5595_read(SMB_BYTE + 1) << 8);
+		break;
+	}
+	return 0;
 }
 
 void sis5595_inc(struct i2c_adapter *adapter)
@@ -339,56 +365,60 @@ void sis5595_dec(struct i2c_adapter *adapter)
 
 u32 sis5595_func(struct i2c_adapter *adapter)
 {
-  return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE | 
-         I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA | 
-         I2C_FUNC_SMBUS_PROC_CALL;
+	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
+	    I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA |
+	    I2C_FUNC_SMBUS_PROC_CALL;
 }
 
 int __init i2c_sis5595_init(void)
 {
-  int res;
-  printk("sis5595.o version %s (%s)\n",LM_VERSION,LM_DATE);
+	int res;
+	printk("sis5595.o version %s (%s)\n", LM_VERSION, LM_DATE);
 #ifdef DEBUG
 /* PE- It might be good to make this a permanent part of the code! */
-  if (sis5595_initialized) {
-    printk("i2c-sis5595.o: Oops, sis5595_init called a second time!\n");
-    return -EBUSY;
-  }
+	if (sis5595_initialized) {
+		printk
+		    ("i2c-sis5595.o: Oops, sis5595_init called a second time!\n");
+		return -EBUSY;
+	}
 #endif
-  sis5595_initialized = 0;
-  if ((res = sis5595_setup())) {
-    printk("i2c-sis5595.o: SIS5595 not detected, module not inserted.\n");
-    sis5595_cleanup();
-    return res;
-  }
-  sis5595_initialized ++;
-  sprintf(sis5595_adapter.name,"SMBus SIS5595 adapter at %04x",sis5595_base + SMB_INDEX);
-  if ((res = i2c_add_adapter(&sis5595_adapter))) {
-    printk("i2c-sis5595.o: Adapter registration failed, module not inserted.\n");
-    sis5595_cleanup();
-    return res;
-  }
-  sis5595_initialized++;
-  printk("i2c-sis5595.o: SIS5595 bus detected and initialized\n");
-  return 0;
+	sis5595_initialized = 0;
+	if ((res = sis5595_setup())) {
+		printk
+		    ("i2c-sis5595.o: SIS5595 not detected, module not inserted.\n");
+		sis5595_cleanup();
+		return res;
+	}
+	sis5595_initialized++;
+	sprintf(sis5595_adapter.name, "SMBus SIS5595 adapter at %04x",
+		sis5595_base + SMB_INDEX);
+	if ((res = i2c_add_adapter(&sis5595_adapter))) {
+		printk
+		    ("i2c-sis5595.o: Adapter registration failed, module not inserted.\n");
+		sis5595_cleanup();
+		return res;
+	}
+	sis5595_initialized++;
+	printk("i2c-sis5595.o: SIS5595 bus detected and initialized\n");
+	return 0;
 }
 
 int __init sis5595_cleanup(void)
 {
-  int res;
-  if (sis5595_initialized >= 2)
-  {
-    if ((res = i2c_del_adapter(&sis5595_adapter))) {
-      printk("i2c-sis5595.o: i2c_del_adapter failed, module not removed\n");
-      return res;
-    } else
-      sis5595_initialized--;
-  }
-  if (sis5595_initialized >= 1) {
-    release_region(sis5595_base + SMB_INDEX, 2);
-    sis5595_initialized--;
-  }
-  return 0;
+	int res;
+	if (sis5595_initialized >= 2) {
+		if ((res = i2c_del_adapter(&sis5595_adapter))) {
+			printk
+			    ("i2c-sis5595.o: i2c_del_adapter failed, module not removed\n");
+			return res;
+		} else
+			sis5595_initialized--;
+	}
+	if (sis5595_initialized >= 1) {
+		release_region(sis5595_base + SMB_INDEX, 2);
+		sis5595_initialized--;
+	}
+	return 0;
 }
 
 EXPORT_NO_SYMBOLS;
@@ -400,13 +430,12 @@ MODULE_DESCRIPTION("SIS5595 SMBus driver");
 
 int init_module(void)
 {
-  return i2c_sis5595_init();
+	return i2c_sis5595_init();
 }
 
 int cleanup_module(void)
 {
-  return sis5595_cleanup();
+	return sis5595_cleanup();
 }
 
-#endif /* MODULE */
-
+#endif				/* MODULE */

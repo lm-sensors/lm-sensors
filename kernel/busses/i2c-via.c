@@ -40,14 +40,14 @@
 
 /* Power management registers */
 
-#define PM_CFG_REVID    0x08  /* silicon revision code */
+#define PM_CFG_REVID    0x08	/* silicon revision code */
 #define PM_CFG_IOBASE0  0x20
 #define PM_CFG_IOBASE1  0x48
 
 #define I2C_DIR		(pm_io_base+0x40)
 #define I2C_OUT		(pm_io_base+0x42)
 #define I2C_IN		(pm_io_base+0x44)
-#define I2C_SCL		0x02   /* clock bit in DIR/OUT/IN register */
+#define I2C_SCL		0x02	/* clock bit in DIR/OUT/IN register */
 #define I2C_SDA		0x04
 
 /* io-region reservation */
@@ -55,9 +55,9 @@
 #define IOTEXT		"via-i2c"
 
 /* ----- global defines -----------------------------------------------	*/
-#define DEB(x) x	/* silicon revision, io addresses	 	*/
-#define DEB2(x) x	/* line status					*/
-#define DEBE(x) 	/* 						*/
+#define DEB(x) x		/* silicon revision, io addresses               */
+#define DEB2(x) x		/* line status                                  */
+#define DEBE(x)			/*                                              */
 
 /* ----- local functions ----------------------------------------------	*/
 
@@ -65,22 +65,24 @@ static u16 pm_io_base;
 
 static void bit_via_setscl(void *data, int state)
 {
-  outb(state ? inb(I2C_OUT)|I2C_SCL : inb(I2C_OUT)&~I2C_SCL, I2C_OUT);
+	outb(state ? inb(I2C_OUT) | I2C_SCL : inb(I2C_OUT) & ~I2C_SCL,
+	     I2C_OUT);
 }
 
 static void bit_via_setsda(void *data, int state)
 {
-  outb(state ? inb(I2C_OUT)|I2C_SDA : inb(I2C_OUT)&~I2C_SDA, I2C_OUT);
+	outb(state ? inb(I2C_OUT) | I2C_SDA : inb(I2C_OUT) & ~I2C_SDA,
+	     I2C_OUT);
 }
 
 static int bit_via_getscl(void *data)
 {
-  return (0 != (inb(I2C_IN) & I2C_SCL) );
+	return (0 != (inb(I2C_IN) & I2C_SCL));
 }
 
 static int bit_via_getsda(void *data)
 {
-  return (0 != (inb(I2C_IN) & I2C_SDA) );
+	return (0 != (inb(I2C_IN) & I2C_SDA));
 }
 
 static void bit_via_inc(struct i2c_adapter *adapter)
@@ -101,7 +103,7 @@ static struct i2c_algo_bit_data bit_data = {
 	bit_via_setscl,
 	bit_via_getsda,
 	bit_via_getscl,
-	5, 5, 100,	/*waits, timeout */
+	5, 5, 100,		/*waits, timeout */
 };
 
 static struct i2c_adapter bit_via_ops = {
@@ -122,38 +124,40 @@ static int find_via(void)
 	struct pci_dev *s_bridge;
 	u16 base;
 	u8 rev;
-	
-	if (! pci_present())
+
+	if (!pci_present())
 		return -ENODEV;
-		
+
 	s_bridge = pci_find_device(VENDOR, DEVICE, NULL);
-		
-	if (! s_bridge)	{
+
+	if (!s_bridge) {
 		printk("vt82c586b not found\n");
 		return -ENODEV;
 	}
 
-	if ( PCIBIOS_SUCCESSFUL != 
-		pci_read_config_byte(s_bridge, PM_CFG_REVID, &rev))
+	if (PCIBIOS_SUCCESSFUL !=
+	    pci_read_config_byte(s_bridge, PM_CFG_REVID, &rev))
 		return -ENODEV;
 
-	switch(rev)
-	{
-		case 0x00:	base = PM_CFG_IOBASE0;
-				break;
-		case 0x01:
-		case 0x10:	base = PM_CFG_IOBASE1;
-				break;
-				
-		default	:	base = PM_CFG_IOBASE1;
-				/* later revision */	
-	}	
+	switch (rev) {
+	case 0x00:
+		base = PM_CFG_IOBASE0;
+		break;
+	case 0x01:
+	case 0x10:
+		base = PM_CFG_IOBASE1;
+		break;
 
-	if ( PCIBIOS_SUCCESSFUL !=
-		pci_read_config_word(s_bridge, base, &pm_io_base))
-		return -ENODEV;
-		
-	pm_io_base &= (0xff<<8);
+	default:
+		base = PM_CFG_IOBASE1;
+		/* later revision */
+	}
+
+	if (PCIBIOS_SUCCESSFUL !=
+	    pci_read_config_word(s_bridge, base, &pm_io_base))
+		    return -ENODEV;
+
+	pm_io_base &= (0xff << 8);
 	return 0;
 }
 
@@ -162,30 +166,31 @@ static
 #else
 extern
 #endif
-       int __init i2c_via_init(void)
+int __init i2c_via_init(void)
 {
 	if (find_via() < 0) {
 		printk("Error while reading PCI configuration\n");
 		return -ENODEV;
 	}
 
-	if ( check_region(I2C_DIR, IOSPACE) < 0) {
+	if (check_region(I2C_DIR, IOSPACE) < 0) {
 		printk("IO 0x%x-0x%x already in use\n",
-			I2C_DIR, I2C_DIR+IOSPACE);
+		       I2C_DIR, I2C_DIR + IOSPACE);
 		return -EBUSY;
 	} else {
 		request_region(I2C_DIR, IOSPACE, IOTEXT);
 		outb(inb(I2C_DIR) | I2C_SDA | I2C_SCL, I2C_DIR);
-		outb(inb(I2C_OUT) | I2C_SDA | I2C_SCL, I2C_OUT);		
+		outb(inb(I2C_OUT) | I2C_SDA | I2C_SCL, I2C_OUT);
 	}
-			
+
 	if (i2c_bit_add_bus(&bit_via_ops) == 0) {
 		printk("i2c-via.o: Module succesfully loaded\n");
 		return 0;
 	} else {
-		outb(inb(I2C_DIR)&~(I2C_SDA|I2C_SCL), I2C_DIR);	
+		outb(inb(I2C_DIR) & ~(I2C_SDA | I2C_SCL), I2C_DIR);
 		release_region(I2C_DIR, IOSPACE);
-		printk("i2c-via.o: Algo-bit error, couldn't register bus\n");
+		printk
+		    ("i2c-via.o: Algo-bit error, couldn't register bus\n");
 		return -ENODEV;
 	}
 }
@@ -196,12 +201,12 @@ EXPORT_NO_SYMBOLS;
 MODULE_AUTHOR("Kyösti Mälkki <kmalkki@cc.hut.fi>");
 MODULE_DESCRIPTION("i2c for Via vt82c586b southbridge");
 
-int init_module(void) 
+int init_module(void)
 {
 	return i2c_via_init();
 }
 
-void cleanup_module(void) 
+void cleanup_module(void)
 {
 	i2c_bit_del_bus(&bit_via_ops);
 	release_region(I2C_DIR, IOSPACE);

@@ -38,14 +38,15 @@
 #endif
 
 /* Addresses to scan */
-static unsigned short normal_i2c[] = {SENSORS_I2C_END};
-static unsigned short normal_i2c_range[] = {0x18,0x1a,0x29,0x2b,
-                                            0x4c,0x4e,SENSORS_I2C_END};
-static unsigned int normal_isa[] = {SENSORS_ISA_END};
-static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+static unsigned short normal_i2c[] = { SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x18, 0x1a, 0x29, 0x2b,
+	0x4c, 0x4e, SENSORS_I2C_END
+};
+static unsigned int normal_isa[] = { SENSORS_ISA_END };
+static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_6(adm1021,max1617,max1617a,thmc10,lm84,gl523sm);
+SENSORS_INSMOD_6(adm1021, max1617, max1617a, thmc10, lm84, gl523sm);
 
 /* adm1021 constants specified below */
 
@@ -54,9 +55,9 @@ SENSORS_INSMOD_6(adm1021,max1617,max1617a,thmc10,lm84,gl523sm);
 #define ADM1021_REG_TEMP 0x00
 #define ADM1021_REG_REMOTE_TEMP 0x01
 #define ADM1021_REG_STATUS 0x02
-#define ADM1021_REG_MAN_ID 0x0FE  /* 0x41 = AMD, 0x49 = TI, 0x4D = Maxim, 0x23 = Genesys */
-#define ADM1021_REG_DEV_ID 0x0FF /* ADM1021 */
-#define ADM1021_REG_DIE_CODE 0x0FF /* MAX1617A */
+#define ADM1021_REG_MAN_ID 0x0FE	/* 0x41 = AMD, 0x49 = TI, 0x4D = Maxim, 0x23 = Genesys */
+#define ADM1021_REG_DEV_ID 0x0FF	/* ADM1021 */
+#define ADM1021_REG_DIE_CODE 0x0FF	/* MAX1617A */
 /* These use different addresses for reading/writing */
 #define ADM1021_REG_CONFIG_R 0x03
 #define ADM1021_REG_CONFIG_W 0x09
@@ -95,61 +96,63 @@ clearing it.  Weird, ey?   --Phil  */
 
 /* Each client has this additional data */
 struct adm1021_data {
-         int sysctl_id;
-	 enum chips type;
+	int sysctl_id;
+	enum chips type;
 
-         struct semaphore update_lock;
-         char valid;                 /* !=0 if following fields are valid */
-         unsigned long last_updated; /* In jiffies */
+	struct semaphore update_lock;
+	char valid;		/* !=0 if following fields are valid */
+	unsigned long last_updated;	/* In jiffies */
 
-         u8 temp,temp_os,temp_hyst; /* Register values */
-         u8 remote_temp,remote_temp_os,remote_temp_hyst,alarms,die_code; 
+	u8 temp, temp_os, temp_hyst;	/* Register values */
+	u8 remote_temp, remote_temp_os, remote_temp_hyst, alarms, die_code;
 };
 
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
-#endif /* MODULE */
+#endif				/* MODULE */
 
 #ifdef MODULE
 static
 #else
 extern
 #endif
-       int __init sensors_adm1021_init(void);
+int __init sensors_adm1021_init(void);
 static int __init adm1021_cleanup(void);
 static int adm1021_attach_adapter(struct i2c_adapter *adapter);
-static int adm1021_detect(struct i2c_adapter *adapter, int address, 
-                          unsigned short flags, int kind);
+static int adm1021_detect(struct i2c_adapter *adapter, int address,
+			  unsigned short flags, int kind);
 static void adm1021_init_client(struct i2c_client *client);
 static int adm1021_detach_client(struct i2c_client *client);
 static int adm1021_command(struct i2c_client *client, unsigned int cmd,
-                        void *arg);
-static void adm1021_inc_use (struct i2c_client *client);
-static void adm1021_dec_use (struct i2c_client *client);
+			   void *arg);
+static void adm1021_inc_use(struct i2c_client *client);
+static void adm1021_dec_use(struct i2c_client *client);
 static int adm1021_read_value(struct i2c_client *client, u8 reg);
-static int adm1021_write_value(struct i2c_client *client, u8 reg, u16 value);
-static void adm1021_temp(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
-static void adm1021_remote_temp(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
-static void adm1021_alarms(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
-static void adm1021_die_code(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
+static int adm1021_write_value(struct i2c_client *client, u8 reg,
+			       u16 value);
+static void adm1021_temp(struct i2c_client *client, int operation,
+			 int ctl_name, int *nrels_mag, long *results);
+static void adm1021_remote_temp(struct i2c_client *client, int operation,
+				int ctl_name, int *nrels_mag,
+				long *results);
+static void adm1021_alarms(struct i2c_client *client, int operation,
+			   int ctl_name, int *nrels_mag, long *results);
+static void adm1021_die_code(struct i2c_client *client, int operation,
+			     int ctl_name, int *nrels_mag, long *results);
 static void adm1021_update_client(struct i2c_client *client);
 
 
 /* This is the driver that will be inserted */
 static struct i2c_driver adm1021_driver = {
-  /* name */            "ADM1021, MAX1617 sensor driver",
-  /* id */              I2C_DRIVERID_ADM1021,
-  /* flags */           I2C_DF_NOTIFY,
-  /* attach_adapter */  &adm1021_attach_adapter,
-  /* detach_client */   &adm1021_detach_client,
-  /* command */         &adm1021_command,
-  /* inc_use */         &adm1021_inc_use,
-  /* dec_use */         &adm1021_dec_use
+	/* name */ "ADM1021, MAX1617 sensor driver",
+	/* id */ I2C_DRIVERID_ADM1021,
+	/* flags */ I2C_DF_NOTIFY,
+	/* attach_adapter */ &adm1021_attach_adapter,
+	/* detach_client */ &adm1021_detach_client,
+	/* command */ &adm1021_command,
+	/* inc_use */ &adm1021_inc_use,
+	/* dec_use */ &adm1021_dec_use
 };
 
 /* These files are created for each detected adm1021. This is just a template;
@@ -158,25 +161,25 @@ static struct i2c_driver adm1021_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table adm1021_dir_table_template[] = {
-  { ADM1021_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &adm1021_temp },
-    {ADM1021_SYSCTL_REMOTE_TEMP, "remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &adm1021_remote_temp },
-    {ADM1021_SYSCTL_DIE_CODE, "die_code", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &adm1021_die_code },
-    {ADM1021_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &adm1021_alarms },
-  { 0 }
+	{ADM1021_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &adm1021_temp},
+	{ADM1021_SYSCTL_REMOTE_TEMP, "remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &adm1021_remote_temp},
+	{ADM1021_SYSCTL_DIE_CODE, "die_code", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &adm1021_die_code},
+	{ADM1021_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &adm1021_alarms},
+	{0}
 };
 
 static ctl_table adm1021_max_dir_table_template[] = {
-  { ADM1021_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &adm1021_temp },
-    {ADM1021_SYSCTL_REMOTE_TEMP, "remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &adm1021_remote_temp },
-    {ADM1021_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &adm1021_alarms },
-  { 0 }
+	{ADM1021_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &adm1021_temp},
+	{ADM1021_SYSCTL_REMOTE_TEMP, "remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &adm1021_remote_temp},
+	{ADM1021_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &adm1021_alarms},
+	{0}
 };
 
 
@@ -190,166 +193,177 @@ static int adm1021_id = 0;
 
 int adm1021_attach_adapter(struct i2c_adapter *adapter)
 {
-  return sensors_detect(adapter,&addr_data,adm1021_detect);
+	return sensors_detect(adapter, &addr_data, adm1021_detect);
 }
 
-static int adm1021_detect(struct i2c_adapter *adapter, int address, 
-                          unsigned short flags, int kind)
-{ 
-  int i;
-  struct i2c_client *new_client;
-  struct adm1021_data *data;
-  int err=0;
-  const char *type_name = "";
-  const char *client_name = "";
+static int adm1021_detect(struct i2c_adapter *adapter, int address,
+			  unsigned short flags, int kind)
+{
+	int i;
+	struct i2c_client *new_client;
+	struct adm1021_data *data;
+	int err = 0;
+	const char *type_name = "";
+	const char *client_name = "";
 
-  /* Make sure we aren't probing the ISA bus!! This is just a safety check
-     at this moment; sensors_detect really won't call us. */
+	/* Make sure we aren't probing the ISA bus!! This is just a safety check
+	   at this moment; sensors_detect really won't call us. */
 #ifdef DEBUG
-  if (i2c_is_isa_adapter(adapter)) {
-    printk("adm1021.o: adm1021_detect called for an ISA bus adapter?!?\n");
-    return 0;
-  }
+	if (i2c_is_isa_adapter(adapter)) {
+		printk
+		    ("adm1021.o: adm1021_detect called for an ISA bus adapter?!?\n");
+		return 0;
+	}
 #endif
 
-  if (! i2c_check_functionality(adapter,I2C_FUNC_SMBUS_BYTE_DATA))
-    goto ERROR0;
+	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
+		goto ERROR0;
 
-  /* OK. For now, we presume we have a valid client. We now create the
-     client structure, even though we cannot fill it completely yet.
-     But it allows us to access adm1021_{read,write}_value. */
+	/* OK. For now, we presume we have a valid client. We now create the
+	   client structure, even though we cannot fill it completely yet.
+	   But it allows us to access adm1021_{read,write}_value. */
 
-  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
-                               sizeof(struct adm1021_data),
-                               GFP_KERNEL))) {
-    err = -ENOMEM;
-    goto ERROR0;
-  }
+	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
+				   sizeof(struct adm1021_data),
+				   GFP_KERNEL))) {
+		err = -ENOMEM;
+		goto ERROR0;
+	}
 
-  data = (struct adm1021_data *) (new_client + 1);
-  new_client->addr = address;
-  new_client->data = data;
-  new_client->adapter = adapter;
-  new_client->driver = &adm1021_driver;
-  new_client->flags = 0;
+	data = (struct adm1021_data *) (new_client + 1);
+	new_client->addr = address;
+	new_client->data = data;
+	new_client->adapter = adapter;
+	new_client->driver = &adm1021_driver;
+	new_client->flags = 0;
 
-  /* Now, we do the remaining detection. */
+	/* Now, we do the remaining detection. */
 
-  if (kind < 0) {
-    if ((adm1021_read_value(new_client,ADM1021_REG_STATUS) & 0x03) != 0x00)
-      goto ERROR1;
-  }
+	if (kind < 0) {
+		if (
+		    (adm1021_read_value(new_client, ADM1021_REG_STATUS) &
+		     0x03) != 0x00)
+			goto ERROR1;
+	}
 
-  /* Determine the chip type. */
-  
-  if (kind <= 0) {
-    i = adm1021_read_value(new_client,ADM1021_REG_MAN_ID);
-    if (i == 0x41)
-      kind = adm1021;
-    else if (i == 0x49)
-      kind = thmc10;
-    else if (i == 0x23)
-      kind = gl523sm;
-    else if ((i== 0x4d) && 
-             (adm1021_read_value(new_client,ADM1021_REG_DEV_ID) == 0x01))
-      kind = max1617a;
-    /* LM84 Mfr ID in a different place */
-    else if (adm1021_read_value(new_client,ADM1021_REG_CONV_RATE_R) == 0x00)
-      kind = lm84;
-    else 
-      kind = max1617;
-  }
+	/* Determine the chip type. */
 
-  if (kind == max1617) {
-    type_name = "max1617";
-    client_name = "MAX1617 chip";
-  } else if (kind == max1617a) {
-    type_name = "max1617a";
-    client_name = "MAX1617A chip";
-  } else if (kind == adm1021) {
-    type_name = "adm1021";
-    client_name = "ADM1021 chip";
-  } else if (kind == thmc10) {
-    type_name = "thmc10";
-    client_name = "THMC10 chip";
-  } else {
+	if (kind <= 0) {
+		i = adm1021_read_value(new_client, ADM1021_REG_MAN_ID);
+		if (i == 0x41)
+			kind = adm1021;
+		else if (i == 0x49)
+			kind = thmc10;
+		else if (i == 0x23)
+			kind = gl523sm;
+		else if ((i == 0x4d) &&
+			 (adm1021_read_value
+			  (new_client, ADM1021_REG_DEV_ID) == 0x01))
+			kind = max1617a;
+		/* LM84 Mfr ID in a different place */
+		else
+		    if (adm1021_read_value
+			(new_client, ADM1021_REG_CONV_RATE_R) == 0x00)
+			kind = lm84;
+		else
+			kind = max1617;
+	}
+
+	if (kind == max1617) {
+		type_name = "max1617";
+		client_name = "MAX1617 chip";
+	} else if (kind == max1617a) {
+		type_name = "max1617a";
+		client_name = "MAX1617A chip";
+	} else if (kind == adm1021) {
+		type_name = "adm1021";
+		client_name = "ADM1021 chip";
+	} else if (kind == thmc10) {
+		type_name = "thmc10";
+		client_name = "THMC10 chip";
+	} else {
 #ifdef DEBUG
-    printk("adm1021.o: Internal error: unknown kind (%d)?!?",kind);
+		printk("adm1021.o: Internal error: unknown kind (%d)?!?",
+		       kind);
 #endif
-    goto ERROR1;
-  }
+		goto ERROR1;
+	}
 
-  /* Fill in the remaining client fields and put it into the global list */
-  strcpy(new_client->name,client_name);
-  data->type = kind;
+	/* Fill in the remaining client fields and put it into the global list */
+	strcpy(new_client->name, client_name);
+	data->type = kind;
 
-  new_client->id = adm1021_id++;
-  data->valid = 0;
-  init_MUTEX(&data->update_lock);
+	new_client->id = adm1021_id++;
+	data->valid = 0;
+	init_MUTEX(&data->update_lock);
 
-  /* Tell the I2C layer a new client has arrived */
-  if ((err = i2c_attach_client(new_client)))
-    goto ERROR3;
+	/* Tell the I2C layer a new client has arrived */
+	if ((err = i2c_attach_client(new_client)))
+		goto ERROR3;
 
-  /* Register a new directory entry with module sensors */
-  if ((i = sensors_register_entry(new_client,
-                        type_name,
-                        data->type==adm1021?adm1021_dir_table_template:
-                                    adm1021_max_dir_table_template,
-	                THIS_MODULE)) < 0) {
-    err = i;
-    goto ERROR4;
-  }
-  data->sysctl_id = i;
+	/* Register a new directory entry with module sensors */
+	if ((i = sensors_register_entry(new_client,
+					type_name,
+					data->type ==
+					adm1021 ?
+					adm1021_dir_table_template :
+					adm1021_max_dir_table_template,
+					THIS_MODULE)) < 0) {
+		err = i;
+		goto ERROR4;
+	}
+	data->sysctl_id = i;
 
-  /* Initialize the ADM1021 chip */
-  adm1021_init_client(new_client);
-  return 0;
+	/* Initialize the ADM1021 chip */
+	adm1021_init_client(new_client);
+	return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
-ERROR4:
-  i2c_detach_client(new_client);
-ERROR3:
-ERROR1:
-  kfree(new_client);
-ERROR0:
-  return err;
+      ERROR4:
+	i2c_detach_client(new_client);
+      ERROR3:
+      ERROR1:
+	kfree(new_client);
+      ERROR0:
+	return err;
 }
 
 void adm1021_init_client(struct i2c_client *client)
 {
-  /* Initialize the adm1021 chip */
-  adm1021_write_value(client,ADM1021_REG_TOS_W,
-                   TEMP_TO_REG(adm1021_INIT_TOS));
-  adm1021_write_value(client,ADM1021_REG_THYST_W,
-                   TEMP_TO_REG(adm1021_INIT_THYST));
-  adm1021_write_value(client,ADM1021_REG_REMOTE_TOS_W,
-                   TEMP_TO_REG(adm1021_INIT_REMOTE_TOS));
-  adm1021_write_value(client,ADM1021_REG_REMOTE_THYST_W,
-                   TEMP_TO_REG(adm1021_INIT_REMOTE_THYST));
-  /* Enable ADC and disable suspend mode */
-  adm1021_write_value(client,ADM1021_REG_CONFIG_W,0);  
-  /* Set Conversion rate to 1/sec (this can be tinkered with) */
-  adm1021_write_value(client,ADM1021_REG_CONV_RATE_W,0x04); 
+	/* Initialize the adm1021 chip */
+	adm1021_write_value(client, ADM1021_REG_TOS_W,
+			    TEMP_TO_REG(adm1021_INIT_TOS));
+	adm1021_write_value(client, ADM1021_REG_THYST_W,
+			    TEMP_TO_REG(adm1021_INIT_THYST));
+	adm1021_write_value(client, ADM1021_REG_REMOTE_TOS_W,
+			    TEMP_TO_REG(adm1021_INIT_REMOTE_TOS));
+	adm1021_write_value(client, ADM1021_REG_REMOTE_THYST_W,
+			    TEMP_TO_REG(adm1021_INIT_REMOTE_THYST));
+	/* Enable ADC and disable suspend mode */
+	adm1021_write_value(client, ADM1021_REG_CONFIG_W, 0);
+	/* Set Conversion rate to 1/sec (this can be tinkered with) */
+	adm1021_write_value(client, ADM1021_REG_CONV_RATE_W, 0x04);
 }
 
 int adm1021_detach_client(struct i2c_client *client)
 {
 
-  int err;
+	int err;
 
-  sensors_deregister_entry(((struct adm1021_data *)(client->data))->sysctl_id);
+	sensors_deregister_entry(((struct adm1021_data *) (client->data))->
+				 sysctl_id);
 
-  if ((err = i2c_detach_client(client))) {
-    printk("adm1021.o: Client deregistration failed, client not detached.\n");
-    return err;
-  }
+	if ((err = i2c_detach_client(client))) {
+		printk
+		    ("adm1021.o: Client deregistration failed, client not detached.\n");
+		return err;
+	}
 
-  kfree(client);
+	kfree(client);
 
-  return 0;
+	return 0;
 
 }
 
@@ -357,188 +371,204 @@ int adm1021_detach_client(struct i2c_client *client)
 /* No commands defined yet */
 int adm1021_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
-  return 0;
+	return 0;
 }
 
-void adm1021_inc_use (struct i2c_client *client)
+void adm1021_inc_use(struct i2c_client *client)
 {
 #ifdef MODULE
-  MOD_INC_USE_COUNT;
+	MOD_INC_USE_COUNT;
 #endif
 }
 
-void adm1021_dec_use (struct i2c_client *client)
+void adm1021_dec_use(struct i2c_client *client)
 {
 #ifdef MODULE
-  MOD_DEC_USE_COUNT;
+	MOD_DEC_USE_COUNT;
 #endif
 }
 
 /* All registers are byte-sized */
 int adm1021_read_value(struct i2c_client *client, u8 reg)
 {
-    return i2c_smbus_read_byte_data(client,reg);
+	return i2c_smbus_read_byte_data(client, reg);
 }
 
 int adm1021_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
-    return i2c_smbus_write_byte_data(client,reg,value);
+	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
 void adm1021_update_client(struct i2c_client *client)
 {
-  struct adm1021_data *data = client->data;
+	struct adm1021_data *data = client->data;
 
-  down(&data->update_lock);
+	down(&data->update_lock);
 
-  if ((jiffies - data->last_updated > HZ+HZ/2 ) ||
-      (jiffies < data->last_updated) || ! data->valid) {
+	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
+	    (jiffies < data->last_updated) || !data->valid) {
 
 #ifdef DEBUG
-    printk("Starting adm1021 update\n");
+		printk("Starting adm1021 update\n");
 #endif
 
-    data->temp = adm1021_read_value(client,ADM1021_REG_TEMP);
-    data->temp_os = adm1021_read_value(client,ADM1021_REG_TOS_R);
-    data->temp_hyst = adm1021_read_value(client,ADM1021_REG_THYST_R);
-    data->remote_temp = adm1021_read_value(client,ADM1021_REG_REMOTE_TEMP);
-    data->remote_temp_os = adm1021_read_value(client,ADM1021_REG_REMOTE_TOS_R);
-    data->remote_temp_hyst = adm1021_read_value(client,ADM1021_REG_REMOTE_THYST_R);
-    data->alarms = adm1021_read_value(client,ADM1021_REG_STATUS) & 0xec;
-    if (data->type == adm1021)
-      data->die_code = adm1021_read_value(client,ADM1021_REG_DIE_CODE);
-    data->last_updated = jiffies;
-    data->valid = 1;
-  }
+		data->temp = adm1021_read_value(client, ADM1021_REG_TEMP);
+		data->temp_os =
+		    adm1021_read_value(client, ADM1021_REG_TOS_R);
+		data->temp_hyst =
+		    adm1021_read_value(client, ADM1021_REG_THYST_R);
+		data->remote_temp =
+		    adm1021_read_value(client, ADM1021_REG_REMOTE_TEMP);
+		data->remote_temp_os =
+		    adm1021_read_value(client, ADM1021_REG_REMOTE_TOS_R);
+		data->remote_temp_hyst =
+		    adm1021_read_value(client, ADM1021_REG_REMOTE_THYST_R);
+		data->alarms =
+		    adm1021_read_value(client, ADM1021_REG_STATUS) & 0xec;
+		if (data->type == adm1021)
+			data->die_code =
+			    adm1021_read_value(client,
+					       ADM1021_REG_DIE_CODE);
+		data->last_updated = jiffies;
+		data->valid = 1;
+	}
 
-  up(&data->update_lock);
+	up(&data->update_lock);
 }
 
 
 void adm1021_temp(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+		  int *nrels_mag, long *results)
 {
-  struct adm1021_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    adm1021_update_client(client);
-    results[0] = TEMP_FROM_REG(data->temp_os);
-    results[1] = TEMP_FROM_REG(data->temp_hyst);
-    results[2] = TEMP_FROM_REG(data->temp);
-    *nrels_mag = 3;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (*nrels_mag >= 1) {
-      data->temp_os = TEMP_TO_REG(results[0]);
-      adm1021_write_value(client,ADM1021_REG_TOS_W,data->temp_os);
-    }
-    if (*nrels_mag >= 2) {
-      data->temp_hyst = TEMP_TO_REG(results[1]);
-      adm1021_write_value(client,ADM1021_REG_THYST_W,data->temp_hyst);
-    }
-  }
+	struct adm1021_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		adm1021_update_client(client);
+		results[0] = TEMP_FROM_REG(data->temp_os);
+		results[1] = TEMP_FROM_REG(data->temp_hyst);
+		results[2] = TEMP_FROM_REG(data->temp);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->temp_os = TEMP_TO_REG(results[0]);
+			adm1021_write_value(client, ADM1021_REG_TOS_W,
+					    data->temp_os);
+		}
+		if (*nrels_mag >= 2) {
+			data->temp_hyst = TEMP_TO_REG(results[1]);
+			adm1021_write_value(client, ADM1021_REG_THYST_W,
+					    data->temp_hyst);
+		}
+	}
 }
 
-void adm1021_remote_temp(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+void adm1021_remote_temp(struct i2c_client *client, int operation,
+			 int ctl_name, int *nrels_mag, long *results)
 {
-  struct adm1021_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    adm1021_update_client(client);
-    results[0] = TEMP_FROM_REG(data->remote_temp_os);
-    results[1] = TEMP_FROM_REG(data->remote_temp_hyst);
-    results[2] = TEMP_FROM_REG(data->remote_temp);
-    *nrels_mag = 3;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (*nrels_mag >= 1) {
-      data->remote_temp_os = TEMP_TO_REG(results[0]);
-      adm1021_write_value(client,ADM1021_REG_REMOTE_TOS_W,data->remote_temp_os);
-    }
-    if (*nrels_mag >= 2) {
-      data->remote_temp_hyst = TEMP_TO_REG(results[1]);
-      adm1021_write_value(client,ADM1021_REG_REMOTE_THYST_W,data->remote_temp_hyst);
-    }
-  }
+	struct adm1021_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		adm1021_update_client(client);
+		results[0] = TEMP_FROM_REG(data->remote_temp_os);
+		results[1] = TEMP_FROM_REG(data->remote_temp_hyst);
+		results[2] = TEMP_FROM_REG(data->remote_temp);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->remote_temp_os = TEMP_TO_REG(results[0]);
+			adm1021_write_value(client,
+					    ADM1021_REG_REMOTE_TOS_W,
+					    data->remote_temp_os);
+		}
+		if (*nrels_mag >= 2) {
+			data->remote_temp_hyst = TEMP_TO_REG(results[1]);
+			adm1021_write_value(client,
+					    ADM1021_REG_REMOTE_THYST_W,
+					    data->remote_temp_hyst);
+		}
+	}
 }
 
-void adm1021_die_code(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+void adm1021_die_code(struct i2c_client *client, int operation,
+		      int ctl_name, int *nrels_mag, long *results)
 {
-  struct adm1021_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    adm1021_update_client(client);
-    results[0] = data->die_code;
-    *nrels_mag = 1;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    /* Can't write to it */
-  }
+	struct adm1021_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		adm1021_update_client(client);
+		results[0] = data->die_code;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		/* Can't write to it */
+	}
 }
 
 void adm1021_alarms(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+		    int *nrels_mag, long *results)
 {
-  struct adm1021_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    adm1021_update_client(client);
-    results[0] = data->alarms;
-    *nrels_mag = 1;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    /* Can't write to it */
-  }
+	struct adm1021_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		adm1021_update_client(client);
+		results[0] = data->alarms;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		/* Can't write to it */
+	}
 }
 
 int __init sensors_adm1021_init(void)
 {
-  int res;
+	int res;
 
-  printk("adm1021.o version %s (%s)\n",LM_VERSION,LM_DATE);
-  adm1021_initialized = 0;
-  if ((res = i2c_add_driver(&adm1021_driver))) {
-    printk("adm1021.o: Driver registration failed, module not inserted.\n");
-    adm1021_cleanup();
-    return res;
-  }
-  adm1021_initialized ++;
-  return 0;
+	printk("adm1021.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	adm1021_initialized = 0;
+	if ((res = i2c_add_driver(&adm1021_driver))) {
+		printk
+		    ("adm1021.o: Driver registration failed, module not inserted.\n");
+		adm1021_cleanup();
+		return res;
+	}
+	adm1021_initialized++;
+	return 0;
 }
 
 int __init adm1021_cleanup(void)
 {
-  int res;
+	int res;
 
-  if (adm1021_initialized >= 1) {
-    if ((res = i2c_del_driver(&adm1021_driver))) {
-      printk("adm1021.o: Driver deregistration failed, module not removed.\n");
-      return res;
-    }
-    adm1021_initialized --;
-  }
+	if (adm1021_initialized >= 1) {
+		if ((res = i2c_del_driver(&adm1021_driver))) {
+			printk
+			    ("adm1021.o: Driver deregistration failed, module not removed.\n");
+			return res;
+		}
+		adm1021_initialized--;
+	}
 
-  return 0;
+	return 0;
 }
 
 EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 
-MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
+MODULE_AUTHOR
+    ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("adm1021 driver");
 
 int init_module(void)
 {
-  return sensors_adm1021_init();
+	return sensors_adm1021_init();
 }
 
 int cleanup_module(void)
 {
-  return adm1021_cleanup();
+	return adm1021_cleanup();
 }
 
-#endif /* MODULE */
-
+#endif				/* MODULE */

@@ -39,10 +39,10 @@
 #endif
 
 /* Addresses to scan */
-static unsigned short normal_i2c[] = {SENSORS_I2C_END};
-static unsigned short normal_i2c_range[] = {0x2D,0x2F,SENSORS_I2C_END};
-static unsigned int normal_isa[] = {SENSORS_ISA_END};
-static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+static unsigned short normal_i2c[] = { SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x2D, 0x2F, SENSORS_I2C_END };
+static unsigned int normal_isa[] = { SENSORS_ISA_END };
+static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
 SENSORS_INSMOD_1(thmc50);
@@ -85,66 +85,68 @@ SENSORS_INSMOD_1(thmc50);
 
 /* Each client has this additional data */
 struct thmc50_data {
-         int sysctl_id;
+	int sysctl_id;
 
-         struct semaphore update_lock;
-         char valid;                 /* !=0 if following fields are valid */
-         unsigned long last_updated; /* In jiffies */
+	struct semaphore update_lock;
+	char valid;		/* !=0 if following fields are valid */
+	unsigned long last_updated;	/* In jiffies */
 
-         u16 temp,temp_os,temp_hyst,
-             remote_temp,remote_temp_os,remote_temp_hyst,
-             inter, inter_mask, die_code, analog_out; /* Register values */
+	u16 temp, temp_os, temp_hyst,
+	    remote_temp, remote_temp_os, remote_temp_hyst,
+	    inter, inter_mask, die_code, analog_out;	/* Register values */
 };
 
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
-#endif /* MODULE */
+#endif				/* MODULE */
 
 #ifdef MODULE
 static
 #else
 extern
 #endif
-       int __init sensors_thmc50_init(void);
+int __init sensors_thmc50_init(void);
 static int __init thmc50_cleanup(void);
 static int thmc50_attach_adapter(struct i2c_adapter *adapter);
-static int thmc50_detect(struct i2c_adapter *adapter, int address, 
-                         unsigned short flags, int kind);
+static int thmc50_detect(struct i2c_adapter *adapter, int address,
+			 unsigned short flags, int kind);
 static void thmc50_init_client(struct i2c_client *client);
 static int thmc50_detach_client(struct i2c_client *client);
 static int thmc50_command(struct i2c_client *client, unsigned int cmd,
-                        void *arg);
-static void thmc50_inc_use (struct i2c_client *client);
-static void thmc50_dec_use (struct i2c_client *client);
+			  void *arg);
+static void thmc50_inc_use(struct i2c_client *client);
+static void thmc50_dec_use(struct i2c_client *client);
 static u16 swap_bytes(u16 val);
 static int thmc50_read_value(struct i2c_client *client, u8 reg);
-static int thmc50_write_value(struct i2c_client *client, u8 reg, u16 value);
-static void thmc50_temp(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
-static void thmc50_remote_temp(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
-static void thmc50_inter(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
-static void thmc50_inter_mask(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
-static void thmc50_die_code(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
-static void thmc50_analog_out(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
+static int thmc50_write_value(struct i2c_client *client, u8 reg,
+			      u16 value);
+static void thmc50_temp(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
+static void thmc50_remote_temp(struct i2c_client *client, int operation,
+			       int ctl_name, int *nrels_mag,
+			       long *results);
+static void thmc50_inter(struct i2c_client *client, int operation,
+			 int ctl_name, int *nrels_mag, long *results);
+static void thmc50_inter_mask(struct i2c_client *client, int operation,
+			      int ctl_name, int *nrels_mag, long *results);
+static void thmc50_die_code(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
+static void thmc50_analog_out(struct i2c_client *client, int operation,
+			      int ctl_name, int *nrels_mag, long *results);
 static void thmc50_update_client(struct i2c_client *client);
 
 
 /* This is the driver that will be inserted */
 static struct i2c_driver thmc50_driver = {
-  /* name */            "THMC50 sensor chip driver",
-  /* id */              I2C_DRIVERID_THMC50,
-  /* flags */           I2C_DF_NOTIFY,
-  /* attach_adapter */  &thmc50_attach_adapter,
-  /* detach_client */   &thmc50_detach_client,
-  /* command */         &thmc50_command,
-  /* inc_use */         &thmc50_inc_use,
-  /* dec_use */         &thmc50_dec_use
+	/* name */ "THMC50 sensor chip driver",
+	/* id */ I2C_DRIVERID_THMC50,
+	/* flags */ I2C_DF_NOTIFY,
+	/* attach_adapter */ &thmc50_attach_adapter,
+	/* detach_client */ &thmc50_detach_client,
+	/* command */ &thmc50_command,
+	/* inc_use */ &thmc50_inc_use,
+	/* dec_use */ &thmc50_dec_use
 };
 
 /* These files are created for each detected THMC50. This is just a template;
@@ -153,19 +155,19 @@ static struct i2c_driver thmc50_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table thmc50_dir_table_template[] = {
-  { THMC50_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &thmc50_temp },
-  { THMC50_SYSCTL_REMOTE_TEMP, "remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &thmc50_remote_temp },
-  { THMC50_SYSCTL_INTER, "inter", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &thmc50_inter },
-  { THMC50_SYSCTL_INTER_MASK, "inter_mask", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &thmc50_inter_mask },
-  { THMC50_SYSCTL_DIE_CODE, "die_code", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &thmc50_die_code },
-  { THMC50_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &thmc50_analog_out },
-  { 0 }
+	{THMC50_SYSCTL_TEMP, "temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &thmc50_temp},
+	{THMC50_SYSCTL_REMOTE_TEMP, "remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &thmc50_remote_temp},
+	{THMC50_SYSCTL_INTER, "inter", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &thmc50_inter},
+	{THMC50_SYSCTL_INTER_MASK, "inter_mask", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &thmc50_inter_mask},
+	{THMC50_SYSCTL_DIE_CODE, "die_code", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &thmc50_die_code},
+	{THMC50_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &thmc50_analog_out},
+	{0}
 };
 
 /* Used by init/cleanup */
@@ -175,150 +177,160 @@ static int thmc50_id = 0;
 
 int thmc50_attach_adapter(struct i2c_adapter *adapter)
 {
-  return sensors_detect(adapter,&addr_data,thmc50_detect);
+	return sensors_detect(adapter, &addr_data, thmc50_detect);
 }
 
 /* This function is called by sensors_detect */
-int thmc50_detect(struct i2c_adapter *adapter, int address, 
-                  unsigned short flags, int kind)
+int thmc50_detect(struct i2c_adapter *adapter, int address,
+		  unsigned short flags, int kind)
 {
-  int company,i;
-  struct i2c_client *new_client;
-  struct thmc50_data *data;
-  int err=0;
-  const char *type_name,*client_name;
+	int company, i;
+	struct i2c_client *new_client;
+	struct thmc50_data *data;
+	int err = 0;
+	const char *type_name, *client_name;
 
 #ifdef DEBUG
-   printk("thmc50.o: Probing for THMC50 at 0x%2X on bus %d\n",address,adapter->id);
+	printk("thmc50.o: Probing for THMC50 at 0x%2X on bus %d\n",
+	       address, adapter->id);
 #endif
 
-  /* Make sure we aren't probing the ISA bus!! This is just a safety check
-     at this moment; sensors_detect really won't call us. */
+	/* Make sure we aren't probing the ISA bus!! This is just a safety check
+	   at this moment; sensors_detect really won't call us. */
 #ifdef DEBUG
-  if (i2c_is_isa_adapter(adapter)) {
-    printk("thmc50.o: thmc50_detect called for an ISA bus adapter?!?\n");
-    return 0;
-  }
+	if (i2c_is_isa_adapter(adapter)) {
+		printk
+		    ("thmc50.o: thmc50_detect called for an ISA bus adapter?!?\n");
+		return 0;
+	}
 #endif
 
-  if (! i2c_check_functionality(adapter,I2C_FUNC_SMBUS_BYTE_DATA))
-    goto ERROR0;
+	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
+		goto ERROR0;
 
-  /* OK. For now, we presume we have a valid client. We now create the
-     client structure, even though we cannot fill it completely yet.
-     But it allows us to access thmc50_{read,write}_value. */
-  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
-                              sizeof(struct thmc50_data),
-                              GFP_KERNEL))) {
-    err = -ENOMEM;
-    goto ERROR0;
-  }
+	/* OK. For now, we presume we have a valid client. We now create the
+	   client structure, even though we cannot fill it completely yet.
+	   But it allows us to access thmc50_{read,write}_value. */
+	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
+				   sizeof(struct thmc50_data),
+				   GFP_KERNEL))) {
+		err = -ENOMEM;
+		goto ERROR0;
+	}
 
-  data = (struct thmc50_data *) (((struct i2c_client *) new_client) + 1);
-  new_client->addr = address;
-  new_client->data = data;
-  new_client->adapter = adapter;
-  new_client->driver = &thmc50_driver;
-  new_client->flags = 0;
+	data =
+	    (struct thmc50_data *) (((struct i2c_client *) new_client) +
+				    1);
+	new_client->addr = address;
+	new_client->data = data;
+	new_client->adapter = adapter;
+	new_client->driver = &thmc50_driver;
+	new_client->flags = 0;
 
-  /* Now, we do the remaining detection. */
-  company = i2c_smbus_read_byte_data(new_client,THMC50_REG_COMPANY_ID);
+	/* Now, we do the remaining detection. */
+	company =
+	    i2c_smbus_read_byte_data(new_client, THMC50_REG_COMPANY_ID);
 
-  if (company != 0x49) {
+	if (company != 0x49) {
 #ifdef DEBUG
-  printk("thmc50.o: Detect of THMC50 failed (reg 3E: 0x%X)\n",company);
+		printk
+		    ("thmc50.o: Detect of THMC50 failed (reg 3E: 0x%X)\n",
+		     company);
 #endif
-	goto ERROR1;
-  }
+		goto ERROR1;
+	}
 
-  /* Determine the chip type - only one kind supported! */
-  kind = thmc50;
+	/* Determine the chip type - only one kind supported! */
+	kind = thmc50;
 
-  if (kind == thmc50) {
-    type_name = "thmc50";
-    client_name = "THMC50 chip";
-  } else {
+	if (kind == thmc50) {
+		type_name = "thmc50";
+		client_name = "THMC50 chip";
+	} else {
 #ifdef DEBUG
-    printk("thmc50.o: Internal error: unknown kind (%d)?!?",kind);
+		printk("thmc50.o: Internal error: unknown kind (%d)?!?",
+		       kind);
 #endif
-    goto ERROR1;
-  }
-  
-  /* Fill in the remaining client fields and put it into the global list */
-  strcpy(new_client->name,client_name);
+		goto ERROR1;
+	}
 
-  new_client->id = thmc50_id++;
-  data->valid = 0;
-  init_MUTEX(&data->update_lock);
-    
-  /* Tell the I2C layer a new client has arrived */
-  if ((err = i2c_attach_client(new_client)))
-    goto ERROR3;
+	/* Fill in the remaining client fields and put it into the global list */
+	strcpy(new_client->name, client_name);
 
-  /* Register a new directory entry with module sensors */
-  if ((i = sensors_register_entry(new_client,type_name,
-                                  thmc50_dir_table_template,
-				  THIS_MODULE)) < 0) {
-    err = i;
-    goto ERROR4;
-  }
-  data->sysctl_id = i;
+	new_client->id = thmc50_id++;
+	data->valid = 0;
+	init_MUTEX(&data->update_lock);
 
-  thmc50_init_client(new_client);
-  return 0;
+	/* Tell the I2C layer a new client has arrived */
+	if ((err = i2c_attach_client(new_client)))
+		goto ERROR3;
+
+	/* Register a new directory entry with module sensors */
+	if ((i = sensors_register_entry(new_client, type_name,
+					thmc50_dir_table_template,
+					THIS_MODULE)) < 0) {
+		err = i;
+		goto ERROR4;
+	}
+	data->sysctl_id = i;
+
+	thmc50_init_client(new_client);
+	return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
-ERROR4:
-  i2c_detach_client(new_client);
-ERROR3:
-ERROR1:
-  kfree(new_client);
-ERROR0:
-  return err;
+      ERROR4:
+	i2c_detach_client(new_client);
+      ERROR3:
+      ERROR1:
+	kfree(new_client);
+      ERROR0:
+	return err;
 }
 
 int thmc50_detach_client(struct i2c_client *client)
 {
-  int err;
+	int err;
 
-  sensors_deregister_entry(((struct thmc50_data *)(client->data))->sysctl_id);
+	sensors_deregister_entry(((struct thmc50_data *) (client->data))->
+				 sysctl_id);
 
-  if ((err = i2c_detach_client(client))) {
-    printk("thmc50.o: Client deregistration failed, client not detached.\n");
-    return err;
-  }
+	if ((err = i2c_detach_client(client))) {
+		printk
+		    ("thmc50.o: Client deregistration failed, client not detached.\n");
+		return err;
+	}
 
-  kfree(client);
+	kfree(client);
 
-  return 0;
+	return 0;
 }
 
 
 /* No commands defined yet */
 int thmc50_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
-  return 0;
+	return 0;
 }
 
-void thmc50_inc_use (struct i2c_client *client)
+void thmc50_inc_use(struct i2c_client *client)
 {
 #ifdef MODULE
-  MOD_INC_USE_COUNT;
+	MOD_INC_USE_COUNT;
 #endif
 }
 
-void thmc50_dec_use (struct i2c_client *client)
+void thmc50_dec_use(struct i2c_client *client)
 {
 #ifdef MODULE
-  MOD_DEC_USE_COUNT;
+	MOD_DEC_USE_COUNT;
 #endif
 }
 
 u16 swap_bytes(u16 val)
 {
-  return (val >> 8) | (val << 8);
+	return (val >> 8) | (val << 8);
 }
 
 /* All registers are word-sized, except for the configuration register.
@@ -326,7 +338,7 @@ u16 swap_bytes(u16 val)
    the usual practice. */
 int thmc50_read_value(struct i2c_client *client, u8 reg)
 {
-    return i2c_smbus_read_byte_data(client,reg);
+	return i2c_smbus_read_byte_data(client, reg);
 }
 
 /* All registers are word-sized, except for the configuration register.
@@ -334,167 +346,183 @@ int thmc50_read_value(struct i2c_client *client, u8 reg)
    the usual practice. */
 int thmc50_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
-    return i2c_smbus_write_byte_data(client,reg,value);
+	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
 void thmc50_init_client(struct i2c_client *client)
 {
-    /* Initialize the THMC50 chip */
-    thmc50_write_value(client,THMC50_REG_TEMP_OS,
-                     TEMP_TO_REG(THMC50_INIT_TEMP_OS));
-    thmc50_write_value(client,THMC50_REG_TEMP_HYST,
-                     TEMP_TO_REG(THMC50_INIT_TEMP_HYST));
-    thmc50_write_value(client,THMC50_REG_CONF,1);
+	/* Initialize the THMC50 chip */
+	thmc50_write_value(client, THMC50_REG_TEMP_OS,
+			   TEMP_TO_REG(THMC50_INIT_TEMP_OS));
+	thmc50_write_value(client, THMC50_REG_TEMP_HYST,
+			   TEMP_TO_REG(THMC50_INIT_TEMP_HYST));
+	thmc50_write_value(client, THMC50_REG_CONF, 1);
 }
 
 void thmc50_update_client(struct i2c_client *client)
 {
-  struct thmc50_data *data = client->data;
+	struct thmc50_data *data = client->data;
 
-  down(&data->update_lock);
+	down(&data->update_lock);
 
-  if ((jiffies - data->last_updated > HZ+HZ/2 ) ||
-      (jiffies < data->last_updated) || ! data->valid) {
+	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
+	    (jiffies < data->last_updated) || !data->valid) {
 
 #ifdef DEBUG
-    printk("Starting thmc50 update\n");
+		printk("Starting thmc50 update\n");
 #endif
 
-    data->temp = thmc50_read_value(client,THMC50_REG_TEMP);
-    data->temp_os = thmc50_read_value(client,THMC50_REG_TEMP_OS);
-    data->temp_hyst = thmc50_read_value(client,THMC50_REG_TEMP_HYST);
-    data->remote_temp = thmc50_read_value(client,THMC50_REG_REMOTE_TEMP);
-    data->remote_temp_os = thmc50_read_value(client,THMC50_REG_REMOTE_TEMP_OS);
-    data->remote_temp_hyst = thmc50_read_value(client,THMC50_REG_REMOTE_TEMP_HYST);
-    data->inter = thmc50_read_value(client,THMC50_REG_INTER);
-    data->inter_mask = thmc50_read_value(client,THMC50_REG_INTER_MASK);
-    data->die_code = thmc50_read_value(client,THMC50_REG_DIE_CODE);
-    data->analog_out = thmc50_read_value(client,THMC50_REG_ANALOG_OUT);
-    data->last_updated = jiffies;
-    data->valid = 1;
-  }
+		data->temp = thmc50_read_value(client, THMC50_REG_TEMP);
+		data->temp_os =
+		    thmc50_read_value(client, THMC50_REG_TEMP_OS);
+		data->temp_hyst =
+		    thmc50_read_value(client, THMC50_REG_TEMP_HYST);
+		data->remote_temp =
+		    thmc50_read_value(client, THMC50_REG_REMOTE_TEMP);
+		data->remote_temp_os =
+		    thmc50_read_value(client, THMC50_REG_REMOTE_TEMP_OS);
+		data->remote_temp_hyst =
+		    thmc50_read_value(client, THMC50_REG_REMOTE_TEMP_HYST);
+		data->inter = thmc50_read_value(client, THMC50_REG_INTER);
+		data->inter_mask =
+		    thmc50_read_value(client, THMC50_REG_INTER_MASK);
+		data->die_code =
+		    thmc50_read_value(client, THMC50_REG_DIE_CODE);
+		data->analog_out =
+		    thmc50_read_value(client, THMC50_REG_ANALOG_OUT);
+		data->last_updated = jiffies;
+		data->valid = 1;
+	}
 
-  up(&data->update_lock);
+	up(&data->update_lock);
 }
 
 
 void thmc50_temp(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+		 int *nrels_mag, long *results)
 {
-  struct thmc50_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    thmc50_update_client(client);
-    results[0] = TEMP_FROM_REG(data->temp_os);
-    results[1] = TEMP_FROM_REG(data->temp_hyst);
-    results[2] = TEMP_FROM_REG(data->temp);
-    *nrels_mag = 3;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (*nrels_mag >= 1) {
-      data->temp_os = TEMP_TO_REG(results[0]);
-      thmc50_write_value(client,THMC50_REG_TEMP_OS,data->temp_os);
-    }
-    if (*nrels_mag >= 2) {
-      data->temp_hyst = TEMP_TO_REG(results[1]);
-      thmc50_write_value(client,THMC50_REG_TEMP_HYST,data->temp_hyst);
-    }
-  }
+	struct thmc50_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		thmc50_update_client(client);
+		results[0] = TEMP_FROM_REG(data->temp_os);
+		results[1] = TEMP_FROM_REG(data->temp_hyst);
+		results[2] = TEMP_FROM_REG(data->temp);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->temp_os = TEMP_TO_REG(results[0]);
+			thmc50_write_value(client, THMC50_REG_TEMP_OS,
+					   data->temp_os);
+		}
+		if (*nrels_mag >= 2) {
+			data->temp_hyst = TEMP_TO_REG(results[1]);
+			thmc50_write_value(client, THMC50_REG_TEMP_HYST,
+					   data->temp_hyst);
+		}
+	}
 }
 
 
-void thmc50_remote_temp(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+void thmc50_remote_temp(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results)
 {
-  struct thmc50_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    thmc50_update_client(client);
-    results[0] = TEMP_FROM_REG(data->remote_temp_os);
-    results[1] = TEMP_FROM_REG(data->remote_temp_hyst);
-    results[2] = TEMP_FROM_REG(data->remote_temp);
-    *nrels_mag = 3;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (*nrels_mag >= 1) {
-      data->remote_temp_os = TEMP_TO_REG(results[0]);
-      thmc50_write_value(client,THMC50_REG_REMOTE_TEMP_OS,data->remote_temp_os);
-    }
-    if (*nrels_mag >= 2) {
-      data->remote_temp_hyst = TEMP_TO_REG(results[1]);
-      thmc50_write_value(client,THMC50_REG_REMOTE_TEMP_HYST,data->remote_temp_hyst);
-    }
-  }
+	struct thmc50_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		thmc50_update_client(client);
+		results[0] = TEMP_FROM_REG(data->remote_temp_os);
+		results[1] = TEMP_FROM_REG(data->remote_temp_hyst);
+		results[2] = TEMP_FROM_REG(data->remote_temp);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->remote_temp_os = TEMP_TO_REG(results[0]);
+			thmc50_write_value(client,
+					   THMC50_REG_REMOTE_TEMP_OS,
+					   data->remote_temp_os);
+		}
+		if (*nrels_mag >= 2) {
+			data->remote_temp_hyst = TEMP_TO_REG(results[1]);
+			thmc50_write_value(client,
+					   THMC50_REG_REMOTE_TEMP_HYST,
+					   data->remote_temp_hyst);
+		}
+	}
 }
 
 
 void thmc50_inter(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+		  int *nrels_mag, long *results)
 {
-  struct thmc50_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    thmc50_update_client(client);
-    results[0] = data->inter;
-    *nrels_mag = 1;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    printk("thmc50.o: No writes to Interrupt register!\n");
-  }
+	struct thmc50_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		thmc50_update_client(client);
+		results[0] = data->inter;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		printk("thmc50.o: No writes to Interrupt register!\n");
+	}
 }
 
 
-void thmc50_inter_mask(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+void thmc50_inter_mask(struct i2c_client *client, int operation,
+		       int ctl_name, int *nrels_mag, long *results)
 {
-  struct thmc50_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    thmc50_update_client(client);
-    results[0] = data->inter_mask;
-    *nrels_mag = 1;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (*nrels_mag >= 1) {
-      data->inter_mask = results[0];
-      thmc50_write_value(client,THMC50_REG_INTER_MASK,data->inter_mask);
-    }
-  }
+	struct thmc50_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		thmc50_update_client(client);
+		results[0] = data->inter_mask;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->inter_mask = results[0];
+			thmc50_write_value(client, THMC50_REG_INTER_MASK,
+					   data->inter_mask);
+		}
+	}
 }
 
 
-void thmc50_die_code(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+void thmc50_die_code(struct i2c_client *client, int operation,
+		     int ctl_name, int *nrels_mag, long *results)
 {
-  struct thmc50_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    thmc50_update_client(client);
-    results[0] = data->die_code;
-    *nrels_mag = 1;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    printk("thmc50.o: No writes to Die-Code register!\n");
-  }
+	struct thmc50_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		thmc50_update_client(client);
+		results[0] = data->die_code;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		printk("thmc50.o: No writes to Die-Code register!\n");
+	}
 }
 
 
-void thmc50_analog_out(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+void thmc50_analog_out(struct i2c_client *client, int operation,
+		       int ctl_name, int *nrels_mag, long *results)
 {
-  struct thmc50_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    thmc50_update_client(client);
-    results[0] = data->analog_out;
-    *nrels_mag = 1;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (*nrels_mag >= 1) {
-      data->analog_out = results[0];
-      thmc50_write_value(client,THMC50_REG_ANALOG_OUT,data->analog_out);
-    }
-  }
+	struct thmc50_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		thmc50_update_client(client);
+		results[0] = data->analog_out;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->analog_out = results[0];
+			thmc50_write_value(client, THMC50_REG_ANALOG_OUT,
+					   data->analog_out);
+		}
+	}
 }
 
 
@@ -502,50 +530,52 @@ void thmc50_analog_out(struct i2c_client *client, int operation, int ctl_name,
 
 int __init sensors_thmc50_init(void)
 {
-  int res;
+	int res;
 
-  printk("thmc50.o version %s (%s)\n",LM_VERSION,LM_DATE);
-  thmc50_initialized = 0;
-  if ((res = i2c_add_driver(&thmc50_driver))) {
-    printk("thmc50.o: Driver registration failed, module not inserted.\n");
-    thmc50_cleanup();
-    return res;
-  }
-  thmc50_initialized ++;
-  return 0;
+	printk("thmc50.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	thmc50_initialized = 0;
+	if ((res = i2c_add_driver(&thmc50_driver))) {
+		printk
+		    ("thmc50.o: Driver registration failed, module not inserted.\n");
+		thmc50_cleanup();
+		return res;
+	}
+	thmc50_initialized++;
+	return 0;
 }
 
 int __init thmc50_cleanup(void)
 {
-  int res;
+	int res;
 
-  if (thmc50_initialized >= 1) {
-    if ((res = i2c_del_driver(&thmc50_driver))) {
-      printk("thmc50.o: Driver deregistration failed, module not removed.\n");
-      return res;
-    }
-    thmc50_initialized --;
-  }
+	if (thmc50_initialized >= 1) {
+		if ((res = i2c_del_driver(&thmc50_driver))) {
+			printk
+			    ("thmc50.o: Driver deregistration failed, module not removed.\n");
+			return res;
+		}
+		thmc50_initialized--;
+	}
 
-  return 0;
+	return 0;
 }
 
 EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 
-MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
+MODULE_AUTHOR
+    ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("THMC50 driver");
 
 int init_module(void)
 {
-  return sensors_thmc50_init();
+	return sensors_thmc50_init();
 }
 
 int cleanup_module(void)
 {
-  return thmc50_cleanup();
+	return thmc50_cleanup();
 }
 
-#endif /* MODULE */
-
+#endif				/* MODULE */

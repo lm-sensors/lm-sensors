@@ -38,17 +38,18 @@
 #endif
 
 /* Addresses to scan */
-static unsigned short normal_i2c[] = {SENSORS_I2C_END};
-static unsigned short normal_i2c_range[] = {0x50,0x57,SENSORS_I2C_END};
-static unsigned int normal_isa[] = {SENSORS_ISA_END};
-static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+static unsigned short normal_i2c[] = { SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x50, 0x57, SENSORS_I2C_END };
+static unsigned int normal_isa[] = { SENSORS_ISA_END };
+static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
 SENSORS_INSMOD_1(eeprom);
 
 static int checksum = 0;
-MODULE_PARM(checksum,"i");
-MODULE_PARM_DESC(checksum,"Only accept eeproms whose checksum is correct");
+MODULE_PARM(checksum, "i");
+MODULE_PARM_DESC(checksum,
+		 "Only accept eeproms whose checksum is correct");
 
 
 /* Many constants specified below */
@@ -69,58 +70,59 @@ MODULE_PARM_DESC(checksum,"Only accept eeproms whose checksum is correct");
 
 /* Each client has this additional data */
 struct eeprom_data {
-         int sysctl_id;
+	int sysctl_id;
 
-         struct semaphore update_lock;
-         char valid;                 /* !=0 if following fields are valid */
-         unsigned long last_updated; /* In jiffies */
+	struct semaphore update_lock;
+	char valid;		/* !=0 if following fields are valid */
+	unsigned long last_updated;	/* In jiffies */
 
-         u8 data[EEPROM_SIZE]; /* Register values */
-	 int memtype;
+	u8 data[EEPROM_SIZE];	/* Register values */
+	int memtype;
 };
 
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
-#endif /* MODULE */
+#endif				/* MODULE */
 
 #ifdef MODULE
 static
 #else
 extern
 #endif
-       int __init sensors_eeprom_init(void);
+int __init sensors_eeprom_init(void);
 static int __init eeprom_cleanup(void);
 
 static int eeprom_attach_adapter(struct i2c_adapter *adapter);
-static int eeprom_detect(struct i2c_adapter *adapter, int address, 
-                         unsigned short flags, int kind);
+static int eeprom_detect(struct i2c_adapter *adapter, int address,
+			 unsigned short flags, int kind);
 static int eeprom_detach_client(struct i2c_client *client);
 static int eeprom_command(struct i2c_client *client, unsigned int cmd,
-                        void *arg);
-			
-static void eeprom_inc_use (struct i2c_client *client);
-static void eeprom_dec_use (struct i2c_client *client);
+			  void *arg);
+
+static void eeprom_inc_use(struct i2c_client *client);
+static void eeprom_dec_use(struct i2c_client *client);
 
 #if 0
-static int eeprom_write_value(struct i2c_client *client, u8 reg, u16 value);
+static int eeprom_write_value(struct i2c_client *client, u8 reg,
+			      u16 value);
 #endif
 
-static void eeprom_contents(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
+static void eeprom_contents(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
 static void eeprom_update_client(struct i2c_client *client);
 
 
 /* This is the driver that will be inserted */
 static struct i2c_driver eeprom_driver = {
-  /* name */            "EEPROM READER",
-  /* id */              I2C_DRIVERID_EEPROM,
-  /* flags */           I2C_DF_NOTIFY,
-  /* attach_adapter */  &eeprom_attach_adapter,
-  /* detach_client */   &eeprom_detach_client,
-  /* command */         &eeprom_command,
-  /* inc_use */         &eeprom_inc_use,
-  /* dec_use */         &eeprom_dec_use
+	/* name */ "EEPROM READER",
+	/* id */ I2C_DRIVERID_EEPROM,
+	/* flags */ I2C_DF_NOTIFY,
+	/* attach_adapter */ &eeprom_attach_adapter,
+	/* detach_client */ &eeprom_detach_client,
+	/* command */ &eeprom_command,
+	/* inc_use */ &eeprom_inc_use,
+	/* dec_use */ &eeprom_dec_use
 };
 
 /* These files are created for each detected EEPROM. This is just a template;
@@ -129,23 +131,23 @@ static struct i2c_driver eeprom_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table eeprom_dir_table_template[] = {
-  { EEPROM_SYSCTL1, "data0-15", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL2, "data16-31", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL3, "data32-47", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL4, "data48-63", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL5, "data64-79", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL6, "data80-95", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL7, "data96-111", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL8, "data112-127", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &eeprom_contents },
-  { 0 }
+	{EEPROM_SYSCTL1, "data0-15", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL2, "data16-31", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL3, "data32-47", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL4, "data48-63", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL5, "data64-79", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL6, "data80-95", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL7, "data96-111", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &eeprom_contents},
+	{EEPROM_SYSCTL8, "data112-127", NULL, 0, 0444, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &eeprom_contents},
+	{0}
 };
 
 /* Used by init/cleanup */
@@ -155,142 +157,147 @@ static int eeprom_id = 0;
 
 int eeprom_attach_adapter(struct i2c_adapter *adapter)
 {
-  return sensors_detect(adapter,&addr_data,eeprom_detect);
+	return sensors_detect(adapter, &addr_data, eeprom_detect);
 }
 
 /* This function is called by sensors_detect */
-int eeprom_detect(struct i2c_adapter *adapter, int address, 
-                  unsigned short flags, int kind)
+int eeprom_detect(struct i2c_adapter *adapter, int address,
+		  unsigned short flags, int kind)
 {
-  int i,cs;
-  struct i2c_client *new_client;
-  struct eeprom_data *data;
-  int err=0;
-  const char *type_name,*client_name;
+	int i, cs;
+	struct i2c_client *new_client;
+	struct eeprom_data *data;
+	int err = 0;
+	const char *type_name, *client_name;
 
-  /* Make sure we aren't probing the ISA bus!! This is just a safety check
-     at this moment; sensors_detect really won't call us. */
+	/* Make sure we aren't probing the ISA bus!! This is just a safety check
+	   at this moment; sensors_detect really won't call us. */
 #ifdef DEBUG
-  if (i2c_is_isa_adapter(adapter)) {
-    printk("eeprom.o: eeprom_detect called for an ISA bus adapter?!?\n");
-    return 0;
-  }
+	if (i2c_is_isa_adapter(adapter)) {
+		printk
+		    ("eeprom.o: eeprom_detect called for an ISA bus adapter?!?\n");
+		return 0;
+	}
 #endif
 
-  if (! i2c_check_functionality(adapter,I2C_FUNC_SMBUS_BYTE_DATA | 
-                                        I2C_FUNC_SMBUS_WRITE_WORD_DATA))
-    goto ERROR0;
+	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA |
+				     I2C_FUNC_SMBUS_WRITE_WORD_DATA))
+		    goto ERROR0;
 
-  /* OK. For now, we presume we have a valid client. We now create the
-     client structure, even though we cannot fill it completely yet.
-     But it allows us to access eeprom_{read,write}_value. */
-  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
-                              sizeof(struct eeprom_data),
-                              GFP_KERNEL))) {
-    err = -ENOMEM;
-    goto ERROR0;
-  }
+	/* OK. For now, we presume we have a valid client. We now create the
+	   client structure, even though we cannot fill it completely yet.
+	   But it allows us to access eeprom_{read,write}_value. */
+	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
+				   sizeof(struct eeprom_data),
+				   GFP_KERNEL))) {
+		err = -ENOMEM;
+		goto ERROR0;
+	}
 
-  data = (struct eeprom_data *) (new_client + 1);
-  new_client->addr = address;
-  new_client->data = data;
-  new_client->adapter = adapter;
-  new_client->driver = &eeprom_driver;
-  new_client->flags = 0;
+	data = (struct eeprom_data *) (new_client + 1);
+	new_client->addr = address;
+	new_client->data = data;
+	new_client->adapter = adapter;
+	new_client->driver = &eeprom_driver;
+	new_client->flags = 0;
 
-  /* Now, we do the remaining detection. It is not there, unless you force
-     the checksum to work out. */
-  if (checksum) {
-    cs = 0;
-    for (i = 0; i <= 0x3e; i++)
-      cs += i2c_smbus_read_byte_data(new_client,i);
-    cs &= 0xff;
-    if (i2c_smbus_read_byte_data(new_client,EEPROM_REG_CHECKSUM) != cs)
-      goto ERROR1;
-  }
-  
-  /* Determine the chip type - only one kind supported! */
-  if (kind <= 0)
-    kind = eeprom;
+	/* Now, we do the remaining detection. It is not there, unless you force
+	   the checksum to work out. */
+	if (checksum) {
+		cs = 0;
+		for (i = 0; i <= 0x3e; i++)
+			cs += i2c_smbus_read_byte_data(new_client, i);
+		cs &= 0xff;
+		if (i2c_smbus_read_byte_data
+		    (new_client, EEPROM_REG_CHECKSUM) != cs)
+			goto ERROR1;
+	}
 
-  if (kind == eeprom) {
-    type_name = "eeprom";
-    client_name = "EEPROM chip";
-  } else {
+	/* Determine the chip type - only one kind supported! */
+	if (kind <= 0)
+		kind = eeprom;
+
+	if (kind == eeprom) {
+		type_name = "eeprom";
+		client_name = "EEPROM chip";
+	} else {
 #ifdef DEBUG
-    printk("eeprom.o: Internal error: unknown kind (%d)?!?",kind);
+		printk("eeprom.o: Internal error: unknown kind (%d)?!?",
+		       kind);
 #endif
-    goto ERROR1;
-  }
+		goto ERROR1;
+	}
 
-  /* Fill in the remaining client fields and put it into the global list */
-  strcpy(new_client->name,client_name);
+	/* Fill in the remaining client fields and put it into the global list */
+	strcpy(new_client->name, client_name);
 
-  new_client->id = eeprom_id++;
-  data->valid = 0;
-  init_MUTEX(&data->update_lock);
+	new_client->id = eeprom_id++;
+	data->valid = 0;
+	init_MUTEX(&data->update_lock);
 
-  /* Tell the I2C layer a new client has arrived */
-  if ((err = i2c_attach_client(new_client)))
-    goto ERROR3;
+	/* Tell the I2C layer a new client has arrived */
+	if ((err = i2c_attach_client(new_client)))
+		goto ERROR3;
 
-  /* Register a new directory entry with module sensors */
-  if ((i = sensors_register_entry(new_client,type_name,
-                                  eeprom_dir_table_template,
-				  THIS_MODULE)) < 0) {
-    err = i;
-    goto ERROR4;
-  }
-  data->sysctl_id = i;
+	/* Register a new directory entry with module sensors */
+	if ((i = sensors_register_entry(new_client, type_name,
+					eeprom_dir_table_template,
+					THIS_MODULE)) < 0) {
+		err = i;
+		goto ERROR4;
+	}
+	data->sysctl_id = i;
 
-  return 0;
+	return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
-ERROR4:
-  i2c_detach_client(new_client);
-ERROR3:
-ERROR1:
-  kfree(new_client);
-ERROR0:
-  return err;
+      ERROR4:
+	i2c_detach_client(new_client);
+      ERROR3:
+      ERROR1:
+	kfree(new_client);
+      ERROR0:
+	return err;
 }
 
 int eeprom_detach_client(struct i2c_client *client)
 {
-  int err;
+	int err;
 
-  sensors_deregister_entry(((struct eeprom_data *)(client->data))->sysctl_id);
+	sensors_deregister_entry(((struct eeprom_data *) (client->data))->
+				 sysctl_id);
 
-  if ((err = i2c_detach_client(client))) {
-    printk("eeprom.o: Client deregistration failed, client not detached.\n");
-    return err;
-  }
+	if ((err = i2c_detach_client(client))) {
+		printk
+		    ("eeprom.o: Client deregistration failed, client not detached.\n");
+		return err;
+	}
 
-  kfree(client);
+	kfree(client);
 
-  return 0;
+	return 0;
 }
 
 
 /* No commands defined yet */
 int eeprom_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
-  return 0;
+	return 0;
 }
 
-void eeprom_inc_use (struct i2c_client *client)
+void eeprom_inc_use(struct i2c_client *client)
 {
 #ifdef MODULE
-  MOD_INC_USE_COUNT;
+	MOD_INC_USE_COUNT;
 #endif
 }
 
-void eeprom_dec_use (struct i2c_client *client)
+void eeprom_dec_use(struct i2c_client *client)
 {
 #ifdef MODULE
-  MOD_DEC_USE_COUNT;
+	MOD_DEC_USE_COUNT;
 #endif
 }
 
@@ -298,129 +305,145 @@ void eeprom_dec_use (struct i2c_client *client)
 /* No writes yet (PAE) */
 int eeprom_write_value(struct i2c_client *client, u8 reg, u16 value)
 {
-  if (reg == EEPROM_REG_CONF)
-    return i2c_smbus_write_byte_data(client,reg,value);
-  else
-    return i2c_smbus_write_word_data(client,reg,value); */
-    
-    return 0;
+	if (reg == EEPROM_REG_CONF)
+		return i2c_smbus_write_byte_data(client, reg, value);
+	else
+		return i2c_smbus_write_word_data(client, reg, value);
+	*/return 0;
 }
 #endif
 
 void eeprom_update_client(struct i2c_client *client)
 {
-  struct eeprom_data *data = client->data;
-  int i;
+	struct eeprom_data *data = client->data;
+	int i;
 
-  down(&data->update_lock);
+	down(&data->update_lock);
 
-  if ((jiffies - data->last_updated > HZ+HZ/2 ) ||
-      (jiffies < data->last_updated) || ! data->valid) {
+	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
+	    (jiffies < data->last_updated) || !data->valid) {
 
 #ifdef DEBUG
-    printk("Starting eeprom update\n");
+		printk("Starting eeprom update\n");
 #endif
 
-   if (i2c_smbus_write_byte(client,0)) {
+		if (i2c_smbus_write_byte(client, 0)) {
 #ifdef DEBUG
-    printk("eeprom read start has failed!\n");
-#endif   	
-   }
-    for (i=0;i<EEPROM_SIZE;i++) {
-         data->data[i] = (u8)i2c_smbus_read_byte(client);
-    }
-    
-    data->last_updated = jiffies;
-    data->valid = 1;
-  }
+			printk("eeprom read start has failed!\n");
+#endif
+		}
+		for (i = 0; i < EEPROM_SIZE; i++) {
+			data->data[i] = (u8) i2c_smbus_read_byte(client);
+		}
 
-  up(&data->update_lock);
+		data->last_updated = jiffies;
+		data->valid = 1;
+	}
+
+	up(&data->update_lock);
 }
 
 
-void eeprom_contents(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+void eeprom_contents(struct i2c_client *client, int operation,
+		     int ctl_name, int *nrels_mag, long *results)
 {
-  int i;
-  int base=0;
-  struct eeprom_data *data = client->data;
-  
-  if (ctl_name == EEPROM_SYSCTL2){ base=16; }
-  if (ctl_name == EEPROM_SYSCTL3){ base=32; }
-  if (ctl_name == EEPROM_SYSCTL4){ base=48; }
-  if (ctl_name == EEPROM_SYSCTL5){ base=64; }
-  if (ctl_name == EEPROM_SYSCTL6){ base=80; }
-  if (ctl_name == EEPROM_SYSCTL7){ base=96; }
-  if (ctl_name == EEPROM_SYSCTL8){ base=112; }
-  
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    eeprom_update_client(client);
-    for (i=0; i<16; i++) {
-    	results[i]=data->data[i + base];
-    }
+	int i;
+	int base = 0;
+	struct eeprom_data *data = client->data;
+
+	if (ctl_name == EEPROM_SYSCTL2) {
+		base = 16;
+	}
+	if (ctl_name == EEPROM_SYSCTL3) {
+		base = 32;
+	}
+	if (ctl_name == EEPROM_SYSCTL4) {
+		base = 48;
+	}
+	if (ctl_name == EEPROM_SYSCTL5) {
+		base = 64;
+	}
+	if (ctl_name == EEPROM_SYSCTL6) {
+		base = 80;
+	}
+	if (ctl_name == EEPROM_SYSCTL7) {
+		base = 96;
+	}
+	if (ctl_name == EEPROM_SYSCTL8) {
+		base = 112;
+	}
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		eeprom_update_client(client);
+		for (i = 0; i < 16; i++) {
+			results[i] = data->data[i + base];
+		}
 #ifdef DEBUG
-    printk("eeprom.o: 0x%X EEPROM Contents (base %d): ",client->addr,base);
-    for (i=0; i<16; i++) {
-      printk(" 0x%X",data->data[i + base]);
-    }
-    printk(" .\n");
+		printk("eeprom.o: 0x%X EEPROM Contents (base %d): ",
+		       client->addr, base);
+		for (i = 0; i < 16; i++) {
+			printk(" 0x%X", data->data[i + base]);
+		}
+		printk(" .\n");
 #endif
-    *nrels_mag = 16;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+		*nrels_mag = 16;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 
 /* No writes to the EEPROM (yet, anyway) (PAE) */
-	printk("eeprom.o: No writes to EEPROMs supported!\n");
-  }
+		printk("eeprom.o: No writes to EEPROMs supported!\n");
+	}
 }
 
 int __init sensors_eeprom_init(void)
 {
-  int res;
+	int res;
 
-  printk("eeprom.o version %s (%s)\n",LM_VERSION,LM_DATE);
-  eeprom_initialized = 0;
-  if ((res = i2c_add_driver(&eeprom_driver))) {
-    printk("eeprom.o: Driver registration failed, module not inserted.\n");
-    eeprom_cleanup();
-    return res;
-  }
-  eeprom_initialized ++;
-  return 0;
+	printk("eeprom.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	eeprom_initialized = 0;
+	if ((res = i2c_add_driver(&eeprom_driver))) {
+		printk
+		    ("eeprom.o: Driver registration failed, module not inserted.\n");
+		eeprom_cleanup();
+		return res;
+	}
+	eeprom_initialized++;
+	return 0;
 }
 
 int __init eeprom_cleanup(void)
 {
-  int res;
+	int res;
 
-  if (eeprom_initialized >= 1) {
-    if ((res = i2c_del_driver(&eeprom_driver))) {
-      printk("eeprom.o: Driver deregistration failed, module not removed.\n");
-      return res;
-    }
-  } else
-    eeprom_initialized --;
+	if (eeprom_initialized >= 1) {
+		if ((res = i2c_del_driver(&eeprom_driver))) {
+			printk
+			    ("eeprom.o: Driver deregistration failed, module not removed.\n");
+			return res;
+		}
+	} else
+		eeprom_initialized--;
 
-  return 0;
+	return 0;
 }
 
 EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 
-MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
+MODULE_AUTHOR
+    ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("EEPROM driver");
 
 int init_module(void)
 {
-  return sensors_eeprom_init();
+	return sensors_eeprom_init();
 }
 
 int cleanup_module(void)
 {
-  return eeprom_cleanup();
+	return eeprom_cleanup();
 }
 
-#endif /* MODULE */
-
+#endif				/* MODULE */

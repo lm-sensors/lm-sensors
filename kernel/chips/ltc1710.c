@@ -60,10 +60,10 @@
 #endif
 
 /* Addresses to scan */
-static unsigned short normal_i2c[] = {SENSORS_I2C_END};
-static unsigned short normal_i2c_range[] = {0x58,0x5a,SENSORS_I2C_END};
-static unsigned int normal_isa[] = {SENSORS_ISA_END};
-static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+static unsigned short normal_i2c[] = { SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x58, 0x5a, SENSORS_I2C_END };
+static unsigned int normal_isa[] = { SENSORS_ISA_END };
+static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
 SENSORS_INSMOD_1(ltc1710);
@@ -73,56 +73,56 @@ SENSORS_INSMOD_1(ltc1710);
 /* (No registers.  [Wow! This thing is SIMPLE!] ) */
 
 /* Initial values */
-#define LTC1710_INIT 0 /* Both off */
+#define LTC1710_INIT 0		/* Both off */
 
 /* Each client has this additional data */
 struct ltc1710_data {
-         int sysctl_id;
+	int sysctl_id;
 
-         struct semaphore update_lock;
-         char valid;                 /* !=0 if following fields are valid */
-         unsigned long last_updated; /* In jiffies */
+	struct semaphore update_lock;
+	char valid;		/* !=0 if following fields are valid */
+	unsigned long last_updated;	/* In jiffies */
 
-         u8 status; /* Register values */
+	u8 status;		/* Register values */
 };
 
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
-#endif /* MODULE */
+#endif				/* MODULE */
 
 #ifdef MODULE
 static
 #else
 extern
 #endif
-       int __init sensors_ltc1710_init(void);
+int __init sensors_ltc1710_init(void);
 static int __init ltc1710_cleanup(void);
 static int ltc1710_attach_adapter(struct i2c_adapter *adapter);
-static int ltc1710_detect(struct i2c_adapter *adapter, int address, 
-                          unsigned short flags, int kind);
+static int ltc1710_detect(struct i2c_adapter *adapter, int address,
+			  unsigned short flags, int kind);
 static int ltc1710_detach_client(struct i2c_client *client);
 static int ltc1710_command(struct i2c_client *client, unsigned int cmd,
-                        void *arg);
-static void ltc1710_inc_use (struct i2c_client *client);
-static void ltc1710_dec_use (struct i2c_client *client);
-static void ltc1710_switch1(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
-static void ltc1710_switch2(struct i2c_client *client, int operation, int ctl_name,
-                      int *nrels_mag, long *results);
+			   void *arg);
+static void ltc1710_inc_use(struct i2c_client *client);
+static void ltc1710_dec_use(struct i2c_client *client);
+static void ltc1710_switch1(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
+static void ltc1710_switch2(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
 static void ltc1710_update_client(struct i2c_client *client);
 
 
 /* This is the driver that will be inserted */
 static struct i2c_driver ltc1710_driver = {
-  /* name */            "LTC1710 sensor chip driver",
-  /* id */              I2C_DRIVERID_LTC1710,
-  /* flags */           I2C_DF_NOTIFY,
-  /* attach_adapter */  &ltc1710_attach_adapter,
-  /* detach_client */   &ltc1710_detach_client,
-  /* command */         &ltc1710_command,
-  /* inc_use */         &ltc1710_inc_use,
-  /* dec_use */         &ltc1710_dec_use
+	/* name */ "LTC1710 sensor chip driver",
+	/* id */ I2C_DRIVERID_LTC1710,
+	/* flags */ I2C_DF_NOTIFY,
+	/* attach_adapter */ &ltc1710_attach_adapter,
+	/* detach_client */ &ltc1710_detach_client,
+	/* command */ &ltc1710_command,
+	/* inc_use */ &ltc1710_inc_use,
+	/* dec_use */ &ltc1710_dec_use
 };
 
 /* These files are created for each detected LTC1710. This is just a template;
@@ -131,11 +131,11 @@ static struct i2c_driver ltc1710_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table ltc1710_dir_table_template[] = {
-  { LTC1710_SYSCTL_SWITCH_1, "switch1", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &ltc1710_switch1 },
-  { LTC1710_SYSCTL_SWITCH_2, "switch2", NULL, 0, 0644, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &ltc1710_switch2 },
-  { 0 }
+	{LTC1710_SYSCTL_SWITCH_1, "switch1", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &ltc1710_switch1},
+	{LTC1710_SYSCTL_SWITCH_2, "switch2", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &ltc1710_switch2},
+	{0}
 };
 
 /* Used by init/cleanup */
@@ -148,245 +148,252 @@ static int ltc1710_id = 0;
 
 int ltc1710_attach_adapter(struct i2c_adapter *adapter)
 {
-  return sensors_detect(adapter,&addr_data,ltc1710_detect);
+	return sensors_detect(adapter, &addr_data, ltc1710_detect);
 }
 
 /* This function is called by sensors_detect */
-int ltc1710_detect(struct i2c_adapter *adapter, int address, 
-                   unsigned short flags, int kind)
+int ltc1710_detect(struct i2c_adapter *adapter, int address,
+		   unsigned short flags, int kind)
 {
-  int i;
-  struct i2c_client *new_client;
-  struct ltc1710_data *data;
-  int err=0;
-  const char *type_name,*client_name;
+	int i;
+	struct i2c_client *new_client;
+	struct ltc1710_data *data;
+	int err = 0;
+	const char *type_name, *client_name;
 
-  /* Make sure we aren't probing the ISA bus!! This is just a safety check
-     at this moment; sensors_detect really won't call us. */
+	/* Make sure we aren't probing the ISA bus!! This is just a safety check
+	   at this moment; sensors_detect really won't call us. */
 #ifdef DEBUG
-  if (i2c_is_isa_adapter(adapter)) {
-    printk("ltc1710.o: ltc1710_detect called for an ISA bus adapter?!?\n");
-    return 0;
-  }
+	if (i2c_is_isa_adapter(adapter)) {
+		printk
+		    ("ltc1710.o: ltc1710_detect called for an ISA bus adapter?!?\n");
+		return 0;
+	}
 #endif
 
-  if (! i2c_check_functionality(adapter,I2C_FUNC_SMBUS_BYTE))
-    goto ERROR0;
+	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE))
+		goto ERROR0;
 
-  /* OK. For now, we presume we have a valid client. We now create the
-     client structure, even though we cannot fill it completely yet.
-     But it allows us to access ltc1710_{read,write}_value. */
-  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
-                              sizeof(struct ltc1710_data),
-                              GFP_KERNEL))) {
-    err = -ENOMEM;
-    goto ERROR0;
-  }
+	/* OK. For now, we presume we have a valid client. We now create the
+	   client structure, even though we cannot fill it completely yet.
+	   But it allows us to access ltc1710_{read,write}_value. */
+	if (!(new_client = kmalloc(sizeof(struct i2c_client) +
+				   sizeof(struct ltc1710_data),
+				   GFP_KERNEL))) {
+		err = -ENOMEM;
+		goto ERROR0;
+	}
 
-  data = (struct ltc1710_data *) (new_client + 1);
-  new_client->addr = address;
-  new_client->data = data;
-  new_client->adapter = adapter;
-  new_client->driver = &ltc1710_driver;
-  new_client->flags = 0;
+	data = (struct ltc1710_data *) (new_client + 1);
+	new_client->addr = address;
+	new_client->data = data;
+	new_client->adapter = adapter;
+	new_client->driver = &ltc1710_driver;
+	new_client->flags = 0;
 
-  /* Now, we would do the remaining detection. But the LTC1710 is plainly
-     impossible to detect! Stupid chip. */
+	/* Now, we would do the remaining detection. But the LTC1710 is plainly
+	   impossible to detect! Stupid chip. */
 
-  /* Determine the chip type - only one kind supported! */
-  if (kind <= 0)
-    kind = ltc1710;
+	/* Determine the chip type - only one kind supported! */
+	if (kind <= 0)
+		kind = ltc1710;
 
-  if (kind == ltc1710) {
-    type_name = "ltc1710";
-    client_name = "LTC1710 chip";
-  } else {
+	if (kind == ltc1710) {
+		type_name = "ltc1710";
+		client_name = "LTC1710 chip";
+	} else {
 #ifdef DEBUG
-    printk("ltc1710.o: Internal error: unknown kind (%d)?!?",kind);
+		printk("ltc1710.o: Internal error: unknown kind (%d)?!?",
+		       kind);
 #endif
-    goto ERROR1;
-  }
+		goto ERROR1;
+	}
 
-  /* Fill in the remaining client fields and put it into the global list */
-  strcpy(new_client->name,client_name);
+	/* Fill in the remaining client fields and put it into the global list */
+	strcpy(new_client->name, client_name);
 
-  new_client->id = ltc1710_id++;
-  data->valid = 0;
-  init_MUTEX(&data->update_lock);
+	new_client->id = ltc1710_id++;
+	data->valid = 0;
+	init_MUTEX(&data->update_lock);
 
-  /* Tell the I2C layer a new client has arrived */
-  if ((err = i2c_attach_client(new_client)))
-    goto ERROR3;
+	/* Tell the I2C layer a new client has arrived */
+	if ((err = i2c_attach_client(new_client)))
+		goto ERROR3;
 
-  /* Register a new directory entry with module sensors */
-  if ((i = sensors_register_entry(new_client,type_name,
-                                  ltc1710_dir_table_template,
-				  THIS_MODULE)) < 0) {
-    err = i;
-    goto ERROR4;
-  }
-  data->sysctl_id = i;
+	/* Register a new directory entry with module sensors */
+	if ((i = sensors_register_entry(new_client, type_name,
+					ltc1710_dir_table_template,
+					THIS_MODULE)) < 0) {
+		err = i;
+		goto ERROR4;
+	}
+	data->sysctl_id = i;
 
-  return 0;
+	return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
-ERROR4:
-  i2c_detach_client(new_client);
-ERROR3:
-ERROR1:
-  kfree(new_client);
-ERROR0:
-  return err;
+      ERROR4:
+	i2c_detach_client(new_client);
+      ERROR3:
+      ERROR1:
+	kfree(new_client);
+      ERROR0:
+	return err;
 }
 
 
 int ltc1710_detach_client(struct i2c_client *client)
 {
-  int err;
+	int err;
 
-  sensors_deregister_entry(((struct ltc1710_data *)(client->data))->sysctl_id);
+	sensors_deregister_entry(((struct ltc1710_data *) (client->data))->
+				 sysctl_id);
 
-  if ((err = i2c_detach_client(client))) {
-    printk("ltc1710.o: Client deregistration failed, client not detached.\n");
-    return err;
-  }
+	if ((err = i2c_detach_client(client))) {
+		printk
+		    ("ltc1710.o: Client deregistration failed, client not detached.\n");
+		return err;
+	}
 
-  kfree(client);
+	kfree(client);
 
-  return 0;
+	return 0;
 
 }
 
 /* No commands defined yet */
 int ltc1710_command(struct i2c_client *client, unsigned int cmd, void *arg)
 {
-  return 0;
+	return 0;
 }
 
 /* Nothing here yet */
-void ltc1710_inc_use (struct i2c_client *client)
+void ltc1710_inc_use(struct i2c_client *client)
 {
 #ifdef MODULE
-  MOD_INC_USE_COUNT;
+	MOD_INC_USE_COUNT;
 #endif
 }
 
 /* Nothing here yet */
-void ltc1710_dec_use (struct i2c_client *client)
+void ltc1710_dec_use(struct i2c_client *client)
 {
 #ifdef MODULE
-  MOD_DEC_USE_COUNT;
+	MOD_DEC_USE_COUNT;
 #endif
 }
 
 
 void ltc1710_update_client(struct i2c_client *client)
 {
-  struct ltc1710_data *data = client->data;
+	struct ltc1710_data *data = client->data;
 
-  down(&data->update_lock);
+	down(&data->update_lock);
 
-  if ((jiffies - data->last_updated > HZ+HZ/2 ) ||
-      (jiffies < data->last_updated) || ! data->valid) {
+	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
+	    (jiffies < data->last_updated) || !data->valid) {
 
 #ifdef DEBUG
-    printk("Starting ltc1710 update\n");
+		printk("Starting ltc1710 update\n");
 #endif
 
-    /* data->status = i2c_smbus_read_byte(client); 
-    	Unfortunately, reads always fail!  */
-    data->last_updated = jiffies;
-    data->valid = 1;
-  }
+		/* data->status = i2c_smbus_read_byte(client); 
+		   Unfortunately, reads always fail!  */
+		data->last_updated = jiffies;
+		data->valid = 1;
+	}
 
-  up(&data->update_lock);
+	up(&data->update_lock);
 }
 
 
-void ltc1710_switch1(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+void ltc1710_switch1(struct i2c_client *client, int operation,
+		     int ctl_name, int *nrels_mag, long *results)
 {
-  struct ltc1710_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    ltc1710_update_client(client);
-    results[0] = data->status & 1;
-    *nrels_mag = 1;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (*nrels_mag >= 1) {
-      data->status = (data->status & 2) | results[0];
-      i2c_smbus_write_byte(client,data->status);
-    }
-  }
+	struct ltc1710_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		ltc1710_update_client(client);
+		results[0] = data->status & 1;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->status = (data->status & 2) | results[0];
+			i2c_smbus_write_byte(client, data->status);
+		}
+	}
 }
 
-void ltc1710_switch2(struct i2c_client *client, int operation, int ctl_name,
-               int *nrels_mag, long *results)
+void ltc1710_switch2(struct i2c_client *client, int operation,
+		     int ctl_name, int *nrels_mag, long *results)
 {
-  struct ltc1710_data *data = client->data;
-  if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 0;
-  else if (operation == SENSORS_PROC_REAL_READ) {
-    ltc1710_update_client(client);
-    results[0] = (data->status & 2) >> 1;
-    *nrels_mag = 1;
-  } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (*nrels_mag >= 1) {
-      data->status = (data->status & 1) | (results[0] << 1);
-      i2c_smbus_write_byte(client,data->status);
-    }
-  }
+	struct ltc1710_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		ltc1710_update_client(client);
+		results[0] = (data->status & 2) >> 1;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->status =
+			    (data->status & 1) | (results[0] << 1);
+			i2c_smbus_write_byte(client, data->status);
+		}
+	}
 }
 
 int __init sensors_ltc1710_init(void)
 {
-  int res;
+	int res;
 
-  printk("ltc1710.o version %s (%s)\n",LM_VERSION,LM_DATE);
-  ltc1710_initialized = 0;
-  if ((res = i2c_add_driver(&ltc1710_driver))) {
-    printk("ltc1710.o: Driver registration failed, module not inserted.\n");
-    ltc1710_cleanup();
-    return res;
-  }
-  ltc1710_initialized ++;
-  return 0;
+	printk("ltc1710.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	ltc1710_initialized = 0;
+	if ((res = i2c_add_driver(&ltc1710_driver))) {
+		printk
+		    ("ltc1710.o: Driver registration failed, module not inserted.\n");
+		ltc1710_cleanup();
+		return res;
+	}
+	ltc1710_initialized++;
+	return 0;
 }
 
 int __init ltc1710_cleanup(void)
 {
-  int res;
+	int res;
 
-  if (ltc1710_initialized >= 1) {
-    if ((res = i2c_del_driver(&ltc1710_driver))) {
-      printk("ltc1710.o: Driver deregistration failed, module not removed.\n");
-      return res;
-    }
-    ltc1710_initialized --;
-  }
+	if (ltc1710_initialized >= 1) {
+		if ((res = i2c_del_driver(&ltc1710_driver))) {
+			printk
+			    ("ltc1710.o: Driver deregistration failed, module not removed.\n");
+			return res;
+		}
+		ltc1710_initialized--;
+	}
 
-  return 0;
+	return 0;
 }
 
 EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 
-MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
+MODULE_AUTHOR
+    ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("LTC1710 driver");
 
 int init_module(void)
 {
-  return sensors_ltc1710_init();
+	return sensors_ltc1710_init();
 }
 
 int cleanup_module(void)
 {
-  return ltc1710_cleanup();
+	return ltc1710_cleanup();
 }
 
-#endif /* MODULE */
-
+#endif				/* MODULE */

@@ -54,10 +54,10 @@
 /* PCI Address Constants */
 
 /* address of I/O space */
-#define SMBBA     0x058 /* mh */
+#define SMBBA     0x058		/* mh */
 
 /* general configuration */
-#define SMBGCFG   0x041 /* mh */
+#define SMBGCFG   0x041		/* mh */
 
 /* silicon revision code */
 #define SMBREV    0x008
@@ -80,13 +80,13 @@ static
 #else
 extern
 #endif
-       int __init i2c_amd756_init(void);
+int __init i2c_amd756_init(void);
 static int __init amd756_cleanup(void);
 static int amd756_setup(void);
-static s32 amd756_access(struct i2c_adapter *adap, u16 addr, 
-                        unsigned short flags, char read_write,
-                        u8 command, int size, union i2c_smbus_data * data);
-static void amd756_do_pause( unsigned int amount );
+static s32 amd756_access(struct i2c_adapter *adap, u16 addr,
+			 unsigned short flags, char read_write,
+			 u8 command, int size, union i2c_smbus_data *data);
+static void amd756_do_pause(unsigned int amount);
 static int amd756_transaction(void);
 static void amd756_inc(struct i2c_adapter *adapter);
 static void amd756_dec(struct i2c_adapter *adapter);
@@ -95,28 +95,28 @@ static u32 amd756_func(struct i2c_adapter *adapter);
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
-#endif /* MODULE */
+#endif				/* MODULE */
 
 static struct i2c_algorithm smbus_algorithm = {
-  /* name */		"Non-I2C SMBus adapter",
-  /* id */		I2C_ALGO_SMBUS,
-  /* master_xfer */	NULL,
-  /* smbus_access */    amd756_access,
-  /* slave_send */	NULL,
-  /* slave_rcv */	NULL,
-  /* algo_control */	NULL,
-  /* functionality */   amd756_func,
+	/* name */ "Non-I2C SMBus adapter",
+	/* id */ I2C_ALGO_SMBUS,
+	/* master_xfer */ NULL,
+	/* smbus_access */ amd756_access,
+	/* slave_send */ NULL,
+	/* slave_rcv */ NULL,
+	/* algo_control */ NULL,
+	/* functionality */ amd756_func,
 };
 
 static struct i2c_adapter amd756_adapter = {
-  "unset",
-  I2C_ALGO_SMBUS | I2C_HW_SMBUS_AMD756,
-  &smbus_algorithm,
-  NULL,
-  amd756_inc,
-  amd756_dec,
-  NULL,
-  NULL,
+	"unset",
+	I2C_ALGO_SMBUS | I2C_HW_SMBUS_AMD756,
+	&smbus_algorithm,
+	NULL,
+	amd756_inc,
+	amd756_dec,
+	NULL,
+	NULL,
 };
 
 static int __initdata amd756_initialized;
@@ -131,72 +131,77 @@ static unsigned short amd756_smba = 0;
    defined to make the transition easier. */
 int amd756_setup(void)
 {
-  int error_return=0;
-  unsigned char temp;
+	int error_return = 0;
+	unsigned char temp;
 
-  struct pci_dev *AMD756_dev;
+	struct pci_dev *AMD756_dev;
 
-  /* First check whether we can access PCI at all */
-  if (pci_present() == 0) {
-    printk("i2c-amd756.o: Error: No PCI-bus found!\n");
-    error_return=-ENODEV;
-    goto END;
-  }
+	/* First check whether we can access PCI at all */
+	if (pci_present() == 0) {
+		printk("i2c-amd756.o: Error: No PCI-bus found!\n");
+		error_return = -ENODEV;
+		goto END;
+	}
 
-  /* Look for the AMD756, function 3 */
-  /* Note: we keep on searching until we have found 'function 3' */
-  AMD756_dev = NULL;
-  do
-    AMD756_dev = pci_find_device(PCI_VENDOR_ID_AMD, 
-                                PCI_DEVICE_ID_AMD_756, AMD756_dev);
-  while (AMD756_dev && (PCI_FUNC(AMD756_dev->devfn) != 3));
-  if(AMD756_dev == NULL) {
-    printk("i2c-amd756.o: Error: Can't detect AMD756, function 3!\n");
-    error_return=-ENODEV;
-    goto END;
-  } 
+	/* Look for the AMD756, function 3 */
+	/* Note: we keep on searching until we have found 'function 3' */
+	AMD756_dev = NULL;
+	do
+		AMD756_dev = pci_find_device(PCI_VENDOR_ID_AMD,
+					     PCI_DEVICE_ID_AMD_756,
+					     AMD756_dev);
+	while (AMD756_dev && (PCI_FUNC(AMD756_dev->devfn) != 3));
+	if (AMD756_dev == NULL) {
+		printk
+		    ("i2c-amd756.o: Error: Can't detect AMD756, function 3!\n");
+		error_return = -ENODEV;
+		goto END;
+	}
 
 /* Determine the address of the SMBus areas */
 
-  /* Technically it is a dword but... */
-  pci_read_config_word(AMD756_dev, SMBBA, &amd756_smba);
-  amd756_smba &= 0xfff0;
+	/* Technically it is a dword but... */
+	pci_read_config_word(AMD756_dev, SMBBA, &amd756_smba);
+	amd756_smba &= 0xfff0;
 
-  if (check_region(amd756_smba, 8)) {
-    printk("i2c-amd756.o: AMD756_smb region 0x%x already in use!\n", amd756_smba);
-    error_return=-ENODEV;
-    goto END;
-  }
+	if (check_region(amd756_smba, 8)) {
+		printk
+		    ("i2c-amd756.o: AMD756_smb region 0x%x already in use!\n",
+		     amd756_smba);
+		error_return = -ENODEV;
+		goto END;
+	}
 
-  pci_read_config_byte(AMD756_dev, SMBGCFG, &temp);
+	pci_read_config_byte(AMD756_dev, SMBGCFG, &temp);
 
-  if ((temp & 128) == 0) {
-    printk("SMBUS: Error: Host SMBus controller I/O not enabled!\n");     
-    error_return=-ENODEV;
-    goto END;
-  }
+	if ((temp & 128) == 0) {
+		printk
+		    ("SMBUS: Error: Host SMBus controller I/O not enabled!\n");
+		error_return = -ENODEV;
+		goto END;
+	}
 
-  /* Everything is happy, let's grab the memory and set things up. */
-  request_region(amd756_smba, 8, "amd756-smbus");       
+	/* Everything is happy, let's grab the memory and set things up. */
+	request_region(amd756_smba, 8, "amd756-smbus");
 
 #ifdef DEBUG
-  /*
-  if ((temp & 0x0E) == 8)
-     printk("i2c-amd756.o: AMD756 using Interrupt 9 for SMBus.\n");
-  else if ((temp & 0x0E) == 0)
-     printk("i2c-amd756.o: AMD756 using Interrupt SMI# for SMBus.\n");
-  else 
-     printk("i2c-amd756.o: AMD756: Illegal Interrupt configuration (or code out "
-            "of date)!\n");
-  */
+	/*
+	   if ((temp & 0x0E) == 8)
+	   printk("i2c-amd756.o: AMD756 using Interrupt 9 for SMBus.\n");
+	   else if ((temp & 0x0E) == 0)
+	   printk("i2c-amd756.o: AMD756 using Interrupt SMI# for SMBus.\n");
+	   else 
+	   printk("i2c-amd756.o: AMD756: Illegal Interrupt configuration (or code out "
+	   "of date)!\n");
+	 */
 
-  pci_read_config_byte(AMD756_dev, SMBREV, &temp);
-  printk("i2c-amd756.o: SMBREV = 0x%X\n",temp);
-  printk("i2c-amd756.o: AMD756_smba = 0x%X\n",amd756_smba);
-#endif /* DEBUG */
+	pci_read_config_byte(AMD756_dev, SMBREV, &temp);
+	printk("i2c-amd756.o: SMBREV = 0x%X\n", temp);
+	printk("i2c-amd756.o: AMD756_smba = 0x%X\n", amd756_smba);
+#endif				/* DEBUG */
 
-END:
-  return error_return;
+      END:
+	return error_return;
 }
 
 /* 
@@ -206,13 +211,13 @@ END:
 */
 
 /* Internally used pause function */
-void amd756_do_pause( unsigned int amount )
+void amd756_do_pause(unsigned int amount)
 {
-      current->state = TASK_INTERRUPTIBLE;
-      schedule_timeout(amount);
+	current->state = TASK_INTERRUPTIBLE;
+	schedule_timeout(amount);
 }
 
-#define GS_ABRT_STS (1 << 0) 
+#define GS_ABRT_STS (1 << 0)
 #define GS_COL_STS (1 << 1)
 #define GS_PRERR_STS (1 << 2)
 #define GS_HST_STS (1 << 3)
@@ -222,186 +227,200 @@ void amd756_do_pause( unsigned int amount )
 #define GS_CLEAR_STS (GS_ABRT_STS | GS_COL_STS | GS_PRERR_STS | \
   GS_HCYC_STS | GS_TO_STS )
 
-#define GE_CYC_TYPE_MASK (7) 
-#define GE_HOST_STC (1 << 3) 
- 
+#define GE_CYC_TYPE_MASK (7)
+#define GE_HOST_STC (1 << 3)
+
 /* Another internally used function */
-int amd756_transaction(void) 
+int amd756_transaction(void)
 {
-  int temp;
-  int result=0;
-  int timeout=0;
+	int temp;
+	int result = 0;
+	int timeout = 0;
 
 #ifdef DEBUG
-  printk("i2c-amd756.o: Transaction (pre): GS=%04x, GE=%04x, ADD=%04x, DAT=%04x\n",
-         inw_p(SMB_GLOBAL_STATUS),inw_p(SMB_GLOBAL_ENABLE),inw_p(SMB_HOST_ADDRESS),inb_p(SMB_HOST_DATA));
+	printk
+	    ("i2c-amd756.o: Transaction (pre): GS=%04x, GE=%04x, ADD=%04x, DAT=%04x\n",
+	     inw_p(SMB_GLOBAL_STATUS), inw_p(SMB_GLOBAL_ENABLE),
+	     inw_p(SMB_HOST_ADDRESS), inb_p(SMB_HOST_DATA));
 #endif
 
-  /* Make sure the SMBus host is ready to start transmitting */
-  /* TODO: What about SM_BSY? */
-  if (((temp = inw_p(SMB_GLOBAL_STATUS)) & GS_HST_STS) != 0x00) {
+	/* Make sure the SMBus host is ready to start transmitting */
+	/* TODO: What about SM_BSY? */
+	if (((temp = inw_p(SMB_GLOBAL_STATUS)) & GS_HST_STS) != 0x00) {
 #ifdef DEBUG
-    printk("i2c-amd756.o: SMBus busy (%04x). Resetting (NOT)... \n",temp);
+		printk
+		    ("i2c-amd756.o: SMBus busy (%04x). Resetting (NOT)... \n",
+		     temp);
 #endif
-    /* TODO: How to reset the AMD?
-    outb_p(temp, SMBHSTSTS);
-    */
-    if (((temp = inw_p(SMB_GLOBAL_STATUS)) & GS_HST_STS) != 0x00) {
+		/* TODO: How to reset the AMD?
+		   outb_p(temp, SMBHSTSTS);
+		 */
+		if (((temp = inw_p(SMB_GLOBAL_STATUS)) & GS_HST_STS) !=
+		    0x00) {
 #ifdef DEBUG
-      printk("i2c-amd756.o: Failed! (%04x)\n",temp);
+			printk("i2c-amd756.o: Failed! (%04x)\n", temp);
 #endif
-      return -1;
-    } else {
+			return -1;
+		} else {
 #ifdef DEBUG
-      printk("i2c-amd756.o: Successfull!\n");
+			printk("i2c-amd756.o: Successfull!\n");
 #endif
-    }
-  }
+		}
+	}
 
-  /* start the transaction by setting bit 6 */
-  outw_p(inw(SMB_GLOBAL_ENABLE) | GE_HOST_STC, SMB_GLOBAL_ENABLE); 
+	/* start the transaction by setting bit 6 */
+	outw_p(inw(SMB_GLOBAL_ENABLE) | GE_HOST_STC, SMB_GLOBAL_ENABLE);
 
-  /* We will always wait for a fraction of a second! */
-  do {
-    amd756_do_pause(1);
-    temp=inw_p(SMB_GLOBAL_STATUS);
-  } while ((temp & GS_HST_STS) && (timeout++ < MAX_TIMEOUT));
+	/* We will always wait for a fraction of a second! */
+	do {
+		amd756_do_pause(1);
+		temp = inw_p(SMB_GLOBAL_STATUS);
+	} while ((temp & GS_HST_STS) && (timeout++ < MAX_TIMEOUT));
 
-  /* If the SMBus is still busy, we give up */
-  if (timeout >= MAX_TIMEOUT) {
+	/* If the SMBus is still busy, we give up */
+	if (timeout >= MAX_TIMEOUT) {
 #ifdef DEBUG
-    printk("i2c-amd756.o: SMBus explicit timeout!\n"); 
-    result = -1;
+		printk("i2c-amd756.o: SMBus explicit timeout!\n");
+		result = -1;
 #endif
-  }
+	}
 
-  if (temp & GS_PRERR_STS) {
-    result = -1;
+	if (temp & GS_PRERR_STS) {
+		result = -1;
 #ifdef DEBUG
-    printk("i2c-amd756.o: SMBus Protocol error!\n");
+		printk("i2c-amd756.o: SMBus Protocol error!\n");
 #endif
-  }
+	}
 
-  if (temp & GS_COL_STS) {
-    result = -1;
-    printk("i2c-amd756.o: SMBus collision!\n");
-    /* TODO: Clear Collision Status with a 1 */
-  }
+	if (temp & GS_COL_STS) {
+		result = -1;
+		printk("i2c-amd756.o: SMBus collision!\n");
+		/* TODO: Clear Collision Status with a 1 */
+	}
 
-  if (temp & GS_TO_STS) {
-    result = -1;
+	if (temp & GS_TO_STS) {
+		result = -1;
 #ifdef DEBUG
-    printk("i2c-amd756.o: SMBus protocol timeout!\n");
+		printk("i2c-amd756.o: SMBus protocol timeout!\n");
 #endif
-  }
-
+	}
 #ifdef DEBUG
-  if (temp & GS_HCYC_STS) {
-    printk("i2c-amd756.o: SMBus protocol success!\n");
-  }
+	if (temp & GS_HCYC_STS) {
+		printk("i2c-amd756.o: SMBus protocol success!\n");
+	}
 #endif
 
-  outw_p (GS_CLEAR_STS, SMB_GLOBAL_STATUS);
+	outw_p(GS_CLEAR_STS, SMB_GLOBAL_STATUS);
 
-  if (((temp = inw_p (SMB_GLOBAL_STATUS)) & GS_CLEAR_STS) != 0x00) {
+	if (((temp = inw_p(SMB_GLOBAL_STATUS)) & GS_CLEAR_STS) != 0x00) {
 #ifdef DEBUG
-    printk("i2c-amd756.o: Failed reset at end of transaction (%04x)\n",temp);
+		printk
+		    ("i2c-amd756.o: Failed reset at end of transaction (%04x)\n",
+		     temp);
 #endif
-  }
-  
+	}
 #ifdef DEBUG
-  printk("i2c-amd756.o: Transaction (post): GS=%04x, GE=%04x, ADD=%04x, DAT=%04x\n",
-         inw_p(SMB_GLOBAL_STATUS),inw_p(SMB_GLOBAL_ENABLE),inw_p(SMB_HOST_ADDRESS),inb_p(SMB_HOST_DATA));
+	printk
+	    ("i2c-amd756.o: Transaction (post): GS=%04x, GE=%04x, ADD=%04x, DAT=%04x\n",
+	     inw_p(SMB_GLOBAL_STATUS), inw_p(SMB_GLOBAL_ENABLE),
+	     inw_p(SMB_HOST_ADDRESS), inb_p(SMB_HOST_DATA));
 #endif
-  
-  return result;
+
+	return result;
 }
 
 /* Return -1 on error. See smbus.h for more information */
-s32 amd756_access(struct i2c_adapter *adap, u16 addr, 
-                 unsigned short flags, char read_write,
-                 u8 command, int size, union i2c_smbus_data * data)
+s32 amd756_access(struct i2c_adapter * adap, u16 addr,
+		  unsigned short flags, char read_write,
+		  u8 command, int size, union i2c_smbus_data * data)
 {
-  int i,len;
-    
+	int i, len;
+
   /** TODO: Should I supporte the 10-bit transfers? */
-  switch(size) {
-    case I2C_SMBUS_PROC_CALL:
-      printk("i2c-amd756.o: I2C_SMBUS_PROC_CALL not supported!\n");
-      /* TODO: Well... It is supported, I'm just not sure what to do here... */
-      return -1;
-    case I2C_SMBUS_QUICK:
-      outw_p (((addr & 0x7f) << 1) | (read_write & 0x01), SMB_HOST_ADDRESS);
-      size = AMD756_QUICK;
-      break;
-    case I2C_SMBUS_BYTE:
-      outw_p (((addr & 0x7f) << 1) | (read_write & 0x01), SMB_HOST_ADDRESS);
-      /* TODO: Why only during write? */
-      if (read_write == I2C_SMBUS_WRITE)
-        outb_p (command, SMB_HOST_COMMAND);
-      size = AMD756_BYTE;
-      break;
-    case I2C_SMBUS_BYTE_DATA:
-      outw_p (((addr & 0x7f) << 1) | (read_write & 0x01), SMB_HOST_ADDRESS);
-      outb_p (command, SMB_HOST_COMMAND);
-      if (read_write == I2C_SMBUS_WRITE)
-        outw_p(data->byte, SMB_HOST_DATA);
-      size = AMD756_BYTE_DATA;
-      break;
-    case I2C_SMBUS_WORD_DATA:
-      outw_p (((addr & 0x7f) << 1) | (read_write & 0x01), SMB_HOST_ADDRESS);
-      outb_p (command, SMB_HOST_COMMAND);
-      if (read_write == I2C_SMBUS_WRITE)
-        outw_p (data->word, SMB_HOST_DATA); /* TODO: endian???? */
-      size = AMD756_WORD_DATA;
-      break;
-    case I2C_SMBUS_BLOCK_DATA:
-      outw_p (((addr & 0x7f) << 1) | (read_write & 0x01), SMB_HOST_ADDRESS);
-      outb_p (command, SMB_HOST_COMMAND);
-      if (read_write == I2C_SMBUS_WRITE) {
-        len = data->block[0];
-        if (len < 0) 
-          len = 0;
-        if (len > 32)
-          len = 32;
-        outw_p (len, SMB_HOST_DATA);
-        /* i = inw_p(SMBHSTCNT); Reset SMBBLKDAT */
-        for (i = 1; i <= len; i ++)
-          outb_p (data->block[i], SMB_HOST_BLOCK_DATA);
-      }
-      size = AMD756_BLOCK_DATA;
-      break;
-  }
+	switch (size) {
+	case I2C_SMBUS_PROC_CALL:
+		printk
+		    ("i2c-amd756.o: I2C_SMBUS_PROC_CALL not supported!\n");
+		/* TODO: Well... It is supported, I'm just not sure what to do here... */
+		return -1;
+	case I2C_SMBUS_QUICK:
+		outw_p(((addr & 0x7f) << 1) | (read_write & 0x01),
+		       SMB_HOST_ADDRESS);
+		size = AMD756_QUICK;
+		break;
+	case I2C_SMBUS_BYTE:
+		outw_p(((addr & 0x7f) << 1) | (read_write & 0x01),
+		       SMB_HOST_ADDRESS);
+		/* TODO: Why only during write? */
+		if (read_write == I2C_SMBUS_WRITE)
+			outb_p(command, SMB_HOST_COMMAND);
+		size = AMD756_BYTE;
+		break;
+	case I2C_SMBUS_BYTE_DATA:
+		outw_p(((addr & 0x7f) << 1) | (read_write & 0x01),
+		       SMB_HOST_ADDRESS);
+		outb_p(command, SMB_HOST_COMMAND);
+		if (read_write == I2C_SMBUS_WRITE)
+			outw_p(data->byte, SMB_HOST_DATA);
+		size = AMD756_BYTE_DATA;
+		break;
+	case I2C_SMBUS_WORD_DATA:
+		outw_p(((addr & 0x7f) << 1) | (read_write & 0x01),
+		       SMB_HOST_ADDRESS);
+		outb_p(command, SMB_HOST_COMMAND);
+		if (read_write == I2C_SMBUS_WRITE)
+			outw_p(data->word, SMB_HOST_DATA);	/* TODO: endian???? */
+		size = AMD756_WORD_DATA;
+		break;
+	case I2C_SMBUS_BLOCK_DATA:
+		outw_p(((addr & 0x7f) << 1) | (read_write & 0x01),
+		       SMB_HOST_ADDRESS);
+		outb_p(command, SMB_HOST_COMMAND);
+		if (read_write == I2C_SMBUS_WRITE) {
+			len = data->block[0];
+			if (len < 0)
+				len = 0;
+			if (len > 32)
+				len = 32;
+			outw_p(len, SMB_HOST_DATA);
+			/* i = inw_p(SMBHSTCNT); Reset SMBBLKDAT */
+			for (i = 1; i <= len; i++)
+				outb_p(data->block[i],
+				       SMB_HOST_BLOCK_DATA);
+		}
+		size = AMD756_BLOCK_DATA;
+		break;
+	}
 
-  /* How about enabling interrupts... */
-  outw_p (size & GE_CYC_TYPE_MASK, SMB_GLOBAL_ENABLE);
+	/* How about enabling interrupts... */
+	outw_p(size & GE_CYC_TYPE_MASK, SMB_GLOBAL_ENABLE);
 
-  if (amd756_transaction()) /* Error in transaction */ 
-    return -1; 
-  
-  if ((read_write == I2C_SMBUS_WRITE) || (size == AMD756_QUICK))
-    return 0;
-  
+	if (amd756_transaction())	/* Error in transaction */
+		return -1;
 
-  switch(size) {
-    case AMD756_BYTE:
-      data->byte = inw_p (SMB_HOST_DATA);
-      break;
-    case AMD756_BYTE_DATA:
-      data->byte = inw_p (SMB_HOST_DATA);
-      break;
-    case AMD756_WORD_DATA:
-      data->word = inw_p (SMB_HOST_DATA); /* TODO: endian???? */
-      break;
-    case AMD756_BLOCK_DATA:
-      data->block[0] = inw_p (SMB_HOST_DATA & 63);
-      /* i = inw_p(SMBHSTCNT); Reset SMBBLKDAT */
-      for (i = 1; i <= data->block[0]; i++)
-        data->block[i] = inb_p (SMB_HOST_BLOCK_DATA);
-      break;
-  }
-  
-  return 0;
+	if ((read_write == I2C_SMBUS_WRITE) || (size == AMD756_QUICK))
+		return 0;
+
+
+	switch (size) {
+	case AMD756_BYTE:
+		data->byte = inw_p(SMB_HOST_DATA);
+		break;
+	case AMD756_BYTE_DATA:
+		data->byte = inw_p(SMB_HOST_DATA);
+		break;
+	case AMD756_WORD_DATA:
+		data->word = inw_p(SMB_HOST_DATA);	/* TODO: endian???? */
+		break;
+	case AMD756_BLOCK_DATA:
+		data->block[0] = inw_p(SMB_HOST_DATA & 63);
+		/* i = inw_p(SMBHSTCNT); Reset SMBBLKDAT */
+		for (i = 1; i <= data->block[0]; i++)
+			data->block[i] = inb_p(SMB_HOST_BLOCK_DATA);
+		break;
+	}
+
+	return 0;
 }
 
 void amd756_inc(struct i2c_adapter *adapter)
@@ -417,56 +436,60 @@ void amd756_dec(struct i2c_adapter *adapter)
 
 u32 amd756_func(struct i2c_adapter *adapter)
 {
-  return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE | 
-         I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA | 
-         I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_PROC_CALL;
+	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
+	    I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA |
+	    I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_PROC_CALL;
 }
 
 int __init i2c_amd756_init(void)
 {
-  int res;
-  printk("amd756.o version %s (%s)\n",LM_VERSION,LM_DATE);
+	int res;
+	printk("amd756.o version %s (%s)\n", LM_VERSION, LM_DATE);
 #ifdef DEBUG
 /* PE- It might be good to make this a permanent part of the code! */
-  if (amd756_initialized) {
-    printk("i2c-amd756.o: Oops, amd756_init called a second time!\n");
-    return -EBUSY;
-  }
+	if (amd756_initialized) {
+		printk
+		    ("i2c-amd756.o: Oops, amd756_init called a second time!\n");
+		return -EBUSY;
+	}
 #endif
-  amd756_initialized = 0;
-  if ((res = amd756_setup())) {
-    printk("i2c-amd756.o: AMD756 not detected, module not inserted.\n");
-    amd756_cleanup();
-    return res;
-  }
-  amd756_initialized ++;
-  sprintf(amd756_adapter.name,"SMBus AMD756 adapter at %04x",amd756_smba);
-  if ((res = i2c_add_adapter(&amd756_adapter))) {
-    printk("i2c-amd756.o: Adapter registration failed, module not inserted.\n");
-    amd756_cleanup();
-    return res;
-  }
-  amd756_initialized++;
-  printk("i2c-amd756.o: AMD756 bus detected and initialized\n");
-  return 0;
+	amd756_initialized = 0;
+	if ((res = amd756_setup())) {
+		printk
+		    ("i2c-amd756.o: AMD756 not detected, module not inserted.\n");
+		amd756_cleanup();
+		return res;
+	}
+	amd756_initialized++;
+	sprintf(amd756_adapter.name, "SMBus AMD756 adapter at %04x",
+		amd756_smba);
+	if ((res = i2c_add_adapter(&amd756_adapter))) {
+		printk
+		    ("i2c-amd756.o: Adapter registration failed, module not inserted.\n");
+		amd756_cleanup();
+		return res;
+	}
+	amd756_initialized++;
+	printk("i2c-amd756.o: AMD756 bus detected and initialized\n");
+	return 0;
 }
 
 int __init amd756_cleanup(void)
 {
-  int res;
-  if (amd756_initialized >= 2)
-  {
-    if ((res = i2c_del_adapter(&amd756_adapter))) {
-      printk("i2c-amd756.o: i2c_del_adapter failed, module not removed\n");
-      return res;
-    } else
-      amd756_initialized--;
-  }
-  if (amd756_initialized >= 1) {
-    release_region(amd756_smba, 8);
-    amd756_initialized--;
-  }
-  return 0;
+	int res;
+	if (amd756_initialized >= 2) {
+		if ((res = i2c_del_adapter(&amd756_adapter))) {
+			printk
+			    ("i2c-amd756.o: i2c_del_adapter failed, module not removed\n");
+			return res;
+		} else
+			amd756_initialized--;
+	}
+	if (amd756_initialized >= 1) {
+		release_region(amd756_smba, 8);
+		amd756_initialized--;
+	}
+	return 0;
 }
 
 EXPORT_NO_SYMBOLS;
@@ -478,13 +501,12 @@ MODULE_DESCRIPTION("AMD756 SMBus driver");
 
 int init_module(void)
 {
-  return i2c_amd756_init();
+	return i2c_amd756_init();
 }
 
 int cleanup_module(void)
 {
-  return amd756_cleanup();
+	return amd756_cleanup();
 }
 
-#endif /* MODULE */
-
+#endif				/* MODULE */

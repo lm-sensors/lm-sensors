@@ -57,37 +57,37 @@ static unsigned long hydra_base;
 
 static inline void pdregw(u32 val)
 {
-	writel(val, hydra_base+HYDRA_CACHE_PD);
+	writel(val, hydra_base + HYDRA_CACHE_PD);
 }
 
 static inline u32 pdregr(void)
 {
-	u32 val = readl(hydra_base+HYDRA_CACHE_PD);
+	u32 val = readl(hydra_base + HYDRA_CACHE_PD);
 	return val;
 }
 
 static void bit_hydra_setscl(void *data, int state)
 {
-    u32 val = pdregr();
-    if (state)
-	val &= ~ HYDRA_SCLK_OE;
-    else {
-	val &= ~HYDRA_SCLK;
-	val |= HYDRA_SCLK_OE;
-    }
-    pdregw(val);
+	u32 val = pdregr();
+	if (state)
+		val &= ~HYDRA_SCLK_OE;
+	else {
+		val &= ~HYDRA_SCLK;
+		val |= HYDRA_SCLK_OE;
+	}
+	pdregw(val);
 }
 
 static void bit_hydra_setsda(void *data, int state)
 {
-    u32 val = pdregr();
-    if (state)
-	val &= ~ HYDRA_SDAT_OE;
-    else {
-	val &= ~HYDRA_SDAT;
-	val |= HYDRA_SDAT_OE;
-    }
-    pdregw(val);
+	u32 val = pdregr();
+	if (state)
+		val &= ~HYDRA_SDAT_OE;
+	else {
+		val &= ~HYDRA_SDAT;
+		val |= HYDRA_SDAT_OE;
+	}
+	pdregw(val);
 }
 
 static int bit_hydra_getscl(void *data)
@@ -118,7 +118,7 @@ struct i2c_algo_bit_data bit_hydra_data = {
 	bit_hydra_setscl,
 	bit_hydra_getsda,
 	bit_hydra_getscl,
-	5, 5, 100,	/*waits, timeout */
+	5, 5, 100,		/*waits, timeout */
 };
 
 struct i2c_adapter bit_hydra_ops = {
@@ -140,20 +140,19 @@ static int find_hydra(void)
 
 	if (!pci_present())
 		return -ENODEV;
-		
+
 	dev = pci_find_device(VENDOR, DEVICE, NULL);
 	if (!dev) {
 		printk("Hydra not found\n");
 		return -ENODEV;
 	}
 
-
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,13)
 	base_addr = dev->resource[0].start;
 #else
 	base_addr = dev->base_address[0];
 #endif
-	hydra_base = (unsigned long)ioremap(base_addr, 0x100);
+	hydra_base = (unsigned long) ioremap(base_addr, 0x100);
 
 	return 0;
 }
@@ -163,21 +162,22 @@ static
 #else
 extern
 #endif
-       int __init i2c_hydra_init(void)
+int __init i2c_hydra_init(void)
 {
 	if (find_hydra() < 0) {
 		printk("Error while reading PCI configuration\n");
 		return -ENODEV;
 	}
 
-	pdregw(0);	/* clear SCLK_OE and SDAT_OE */
+	pdregw(0);		/* clear SCLK_OE and SDAT_OE */
 
 	if (i2c_bit_add_bus(&bit_hydra_ops) == 0) {
 		printk("Hydra i2c: Module succesfully loaded\n");
 		return 0;
 	} else {
-		iounmap((void *)hydra_base);
-		printk("Hydra i2c: Algo-bit error, couldn't register bus\n");
+		iounmap((void *) hydra_base);
+		printk
+		    ("Hydra i2c: Algo-bit error, couldn't register bus\n");
 		return -ENODEV;
 	}
 }
@@ -188,17 +188,17 @@ EXPORT_NO_SYMBOLS;
 MODULE_AUTHOR("Geert Uytterhoeven <geert@linux-m68k.org>");
 MODULE_DESCRIPTION("i2c for Apple Hydra Mac I/O");
 
-int init_module(void) 
+int init_module(void)
 {
 	return i2c_hydra_init();
 }
 
-void cleanup_module(void) 
+void cleanup_module(void)
 {
 	i2c_bit_del_bus(&bit_hydra_ops);
 	if (hydra_base) {
 		pdregw(0);	/* clear SCLK_OE and SDAT_OE */
-		iounmap((void *)hydra_base);
+		iounmap((void *) hydra_base);
 	}
 }
 #endif

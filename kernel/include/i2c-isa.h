@@ -24,7 +24,7 @@
 
 #ifdef __KERNEL__
 
-#include <linux/i2c.h>			
+#include <linux/i2c.h>
 
 /* Detect whether we are on the isa bus. If this returns true, all i2c
    access will fail! */
@@ -33,6 +33,6 @@
 #define i2c_is_isa_adapter(adapptr) \
         ((adapptr)->algo->id == I2C_ALGO_ISA)
 
-#endif /* def __KERNEL__ */
+#endif				/* def __KERNEL__ */
 
-#endif /* ndef SENSORS_ISA_H */
+#endif				/* ndef SENSORS_ISA_H */
