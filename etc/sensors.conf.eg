@@ -269,8 +269,8 @@ chip "as99127f-*"
 
     compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
     compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
-    compute in5 (5.14 * @) - 14.91  ,  (@ + 14.91) / 5.14
-    compute in6 (3.14 * @) -  7.71  ,  (@ +  7.71) / 3.14
+    compute in5 -(210/60.4)*@  ,  -@/(210/60.4)
+    compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
     compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
 
 # set limits to  5% for the critical voltages
