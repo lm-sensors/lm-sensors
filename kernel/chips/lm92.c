@@ -406,6 +406,11 @@ static int __init sensors_lm92_init (void)
 	return (0);
 }
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0))
+#undef __exit
+#define __exit
+#endif	/* #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)) */
+
 static void __exit sensors_lm92_exit (void)
 {
 	i2c_del_driver (&lm92_driver);

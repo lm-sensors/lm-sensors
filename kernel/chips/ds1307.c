@@ -317,12 +317,16 @@ static int ds1307_command (struct i2c_client *client,unsigned int cmd,void *arg)
 
 static void ds1307_inc_use (struct i2c_client *client)
 {
+#ifdef MODULE
 	MOD_INC_USE_COUNT;
+#endif	/* #ifdef MODULE */
 }
 
 static void ds1307_dec_use (struct i2c_client *client)
 {
+#ifdef MODULE
 	MOD_DEC_USE_COUNT;
+#endif	/* #ifdef MODULE */
 }
 
 static struct i2c_driver ds1307 = {
@@ -347,6 +351,11 @@ static int __init ds1307_init (void)
 
 	return (0);
 }
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0))
+#undef __exit
+#define __exit
+#endif	/* #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)) */
 
 static void __exit ds1307_exit (void)
 {
