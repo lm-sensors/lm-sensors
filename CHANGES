@@ -18,8 +18,9 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.5 (2002????)
-  File sensors.conf.eg: Fix temp[23] for as99127f
-  Library: Fix fan3_div writes for w8378* and it87
+  NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
+  File sensors.conf.eg: Fix temp[23] for as99127f; add vt8231
+  Library: Fix fan3_div writes for w8378* and it87; add vt8231
   Module dmi_scan: new
   Module ds1621: Fix enable/disable
   Module i2c-i801: Check for uninitialized base address;
@@ -41,7 +42,7 @@ ask CVS about it:
                    fix down-converting raw labels for RRD;
                    update chip support, still behind sensors
   Program sensors: Add /usr/local/etc to config file path;
-                   fix -c and -u flags
+                   fix -c and -u flags; add vt8231
   Program sensors-detect: recognize Asus "ASB100 Bach" as AS99127F;
                           refuse to run on IBM systems;
                           fix sysconfig module numbering

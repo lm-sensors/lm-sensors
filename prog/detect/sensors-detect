@@ -915,7 +915,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "VIA Technologies VT8231 Integrated Sensors",
-       driver => "via686a",
+       driver => "vt8231",
        isa_addrs => [ 0 ],
        isa_detect => sub { via8231_isa_detect @_ },
      },
