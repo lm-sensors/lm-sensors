@@ -43,6 +43,7 @@ int syslogFacility = LOG_LOCAL4;
 int doScan = 0;
 int doSet = 0;
 int doCGI = 0;
+int doLoad = 0;
 int debug = 0;
 sensors_chip_name chipNames[MAX_CHIP_NAMES];
 int numChipNames = 0;
@@ -102,6 +103,7 @@ static const char *daemonSyntax =
   "  -p, --pid-file <file>     -- PID file (default /var/run/sensord.pid)\n"
   "  -f, --syslog-facility <f> -- syslog facility to use (default local4)\n"
   "  -g, --rrd-cgi <img-dir>   -- output an RRD CGI script and exit\n"
+  "  -a, --load-average        -- include load average in RRD file\n"
   "  -d, --debug               -- display some debug information\n"
   "  -v, --version             -- display version and exit\n"
   "  -h, --help                -- display help and exit\n"
@@ -116,7 +118,8 @@ static const char *daemonSyntax =
   "\n"
   "If unspecified, no RRD (round robin database) is used. If specified and the\n"
   "file does not exist, it will be created. For RRD updates to be successful,\n"
-  "the RRD file configuration must EXACTLY match the sensors that are used.\n";
+  "the RRD file configuration must EXACTLY match the sensors that are used. If\n"
+  "your configuration changes, delete the old RRD file and restart sensord.\n";
 
 static const char *appSyntax =
   "  -a, --alarm-scan          -- only scan for alarms\n"
@@ -132,7 +135,7 @@ static const char *appSyntax =
   "\n"
   "If no chips are specified, all chip info will be printed.\n";
 
-static const char *daemonShortOptions = "i:l:t:f:r:c:p:dvhg:";
+static const char *daemonShortOptions = "i:l:t:f:r:c:p:advhg:";
 
 static const struct option daemonLongOptions[] = {
   { "interval", required_argument, NULL, 'i' },
@@ -143,6 +146,7 @@ static const struct option daemonLongOptions[] = {
   { "config-file", required_argument, NULL, 'c' },
   { "pid-file", required_argument, NULL, 'p' },
   { "rrd-cgi", required_argument, NULL, 'g' },
+  { "load-average", no_argument, NULL, 'a' },
   { "debug", no_argument, NULL, 'd' },
   { "version", no_argument, NULL, 'v' },
   { "help", no_argument, NULL, 'h' },
@@ -192,7 +196,10 @@ parseArgs
           return -1;
         break;
       case 'a':
-        doScan = 1;
+        if (isDaemon)
+          doLoad = 1;
+        else
+          doScan = 1;
         break;
       case 's':
         doSet = 1;

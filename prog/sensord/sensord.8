@@ -21,7 +21,7 @@
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
-.TH sensord 8  "April 27, 2002" "Version 0.6.0" "Linux System Administration"
+.TH sensord 8  "July 31, 2002" "Version 0.6.2" "Linux System Administration"
 .SH NAME
 sensord \- Sensor information logging daemon.
 .SH SYNOPSIS
@@ -115,6 +115,9 @@ this will be accessed under the `/sensord/' directory on the Webserver. See
 the section
 .B ROUND ROBIN DATABASES
 below for more details.
+.IP "-a, --load-average"
+Include the load average (multiplied by 10) in the RRD database. You should
+also specify this flag when you create the CGI script.
 .IP "-d, --debug"
 Prints a small amount of additional debugging information.
 .IP "-h, --help"
@@ -277,7 +280,9 @@ names and order of sensors read by
 .BR sensord (8).
 It is recommended that you create the default database and then use
 .BR rrdinfo (1)
-to obtain this information.
+to obtain this information, and/or
+.BR rrdtune (1)
+to change it.
 
 After creating the round-robin database, you must then configure
 your Web server to display the sensor information. This assumes that
@@ -296,14 +301,17 @@ An example of how to set up Web-accessible graphs of recent sensor readings
 follows:
 .IP
 .nf
-sensord -i 0 -r /var/log/sensord.rrd
+sensord --log-interval 0 \\
+  --load-average \\
+  --rrd-cgi /var/log/sensord.rrd
 .fi
 .PP
 Here, we start
 .BR sensord (8)
 and configure it to store readings in a round-robin database; note
 that we disable logging of sensor readings to
-.BR syslog (3).
+.BR syslog (3),
+and enable logging of the load average.
 .IP
 .nf
 mkdir /var/www/sensord
@@ -317,7 +325,8 @@ directory appropriately. You will have to determine the location and
 ownership that is appropriate for your machine.
 .IP
 .nf
-sensord --rrd-file /var/log/sensord.rrd \\
+sensord --load-average \\
+  --rrd-file /var/log/sensord.rrd \\
   --rrd-cgi /var/www/sensord \\
   > /usr/lib/cgi-bin/sensord.cgi
 chmod a+rx /usr/lib/cgi-bin/sensord.cgi
@@ -325,8 +334,9 @@ chmod a+rx /usr/lib/cgi-bin/sensord.cgi
 .PP
 Here, we create
 a CGI script that will display sensor readings from the database.
-You must specify the location of the round-robin database and the
-location of the directory where the images should be stored. The
+You must specify the location of the round-robin database, the
+location of the directory where the images should be stored,
+and whether you want the load average displayed. The
 .BR --rrd-cgi
 command-line parameter causes
 .BR sensord (8)

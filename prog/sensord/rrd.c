@@ -63,9 +63,12 @@
 #define RRD_BUFF 64
 
 char rrdBuff[MAX_RRD_SENSORS * RRD_BUFF + 1];
-char rrdLabels[MAX_RRD_SENSORS][RAW_LABEL_LENGTH + 1];
+static char rrdLabels[MAX_RRD_SENSORS][RAW_LABEL_LENGTH + 1];
 
-typedef int (*FeatureFN) (void *data, const char *rawLabel, char *label, const FeatureDescriptor *feature);
+#define LOADAVG "loadavg"
+#define LOAD_AVERAGE "Load Average * 10"
+
+typedef int (*FeatureFN) (void *data, const char *rawLabel, const char *label, const FeatureDescriptor *feature);
 
 static char
 rrdNextChar
@@ -186,8 +189,8 @@ struct ds {
 
 static int
 rrdGetSensors_DS
-(void *_data, const char *rawLabel, char *label, const FeatureDescriptor *feature) {
-  if (feature->rrd) {
+(void *_data, const char *rawLabel, const char *label, const FeatureDescriptor *feature) {
+  if (!feature || feature->rrd) {
     struct ds *data = (struct ds *) _data;
     char *ptr = rrdBuff + data->num * RRD_BUFF;
     data->argv[data->num ++] = ptr;
@@ -202,6 +205,8 @@ rrdGetSensors
   int ret = 0;
   struct ds data = { 0, argv};
   ret = applyToFeatures (rrdGetSensors_DS, &data);
+  if (!ret && doLoad)
+    ret = rrdGetSensors_DS (&data, LOADAVG, LOAD_AVERAGE, NULL);
   return ret ? -1 : data.num;
 }
 
@@ -262,22 +267,23 @@ struct gr {
   char *axisTitle;
   char *axisDefn;
   char *options;
+  int loadAvg;
 };
 
 static int
 rrdCGI_DEF
-(void *_data, const char *rawLabel, char *label, const FeatureDescriptor *feature) {
+(void *_data, const char *rawLabel, const char *label, const FeatureDescriptor *feature) {
   struct gr *data = (struct gr *) _data;
-  if (feature->rrd && (feature->type == data->type))
+  if (!feature || (feature->rrd && (feature->type == data->type)))
     printf ("\n\tDEF:%s=%s:%s:AVERAGE", rawLabel, rrdFile, rawLabel);
   return 0;
 }
 
 static int
 rrdCGI_LINE
-(void *_data, const char *rawLabel, char *label, const FeatureDescriptor *feature) {
+(void *_data, const char *rawLabel, const char *label, const FeatureDescriptor *feature) {
   struct gr *data = (struct gr *) _data;
-  if (feature->rrd && (feature->type == data->type))
+  if (!feature || (feature->rrd && (feature->type == data->type)))
     printf ("\n\tLINE2:%s#%.6x:\"%s\"", rawLabel, random () & 0xffffff, label);
   return 0;
 }
@@ -290,7 +296,8 @@ static struct gr graphs[] = {
     "Temperature",
     "Temperature (C)",
     "HOUR:1:HOUR:3:HOUR:3:0:%b %d %H:00",
-    "-s -1d -l 0"
+    "-s -1d -l 0",
+    1
   }, {
     DataType_rpm,
     "Daily Fan Speed Summary",
@@ -298,7 +305,8 @@ static struct gr graphs[] = {
     "Fan Speed",
     "Speed (RPM)",
     "HOUR:1:HOUR:3:HOUR:3:0:%b %d %H:00",
-    "-s -1d -l 0"
+    "-s -1d -l 0",
+    0
   }, {
     DataType_voltage,
     "Daily Voltage Summary",
@@ -306,7 +314,8 @@ static struct gr graphs[] = {
     "Power Supply",
     "Voltage (V)",
     "HOUR:1:HOUR:3:HOUR:3:0:%b %d %H:00",
-    "-s -1d --alt-autoscale"
+    "-s -1d --alt-autoscale",
+    0
   }, {
     DataType_temperature,
     "Weekly Temperature Summary",
@@ -314,7 +323,8 @@ static struct gr graphs[] = {
     "Temperature",
     "Temperature (C)",
     "HOUR:6:DAY:1:DAY:1:86400:%a %b %d",
-    "-s -1w -l 0"
+    "-s -1w -l 0",
+    1
   }, {
     DataType_rpm,
     "Weekly Fan Speed Summary",
@@ -322,7 +332,8 @@ static struct gr graphs[] = {
     "Fan Speed",
     "Speed (RPM)",
     "HOUR:6:DAY:1:DAY:1:86400:%a %b %d",
-    "-s -1w -l 0"
+    "-s -1w -l 0",
+    0
   }, {
     DataType_voltage,
     "Weekly Voltage Summary",
@@ -330,7 +341,8 @@ static struct gr graphs[] = {
     "Power Supply",
     "Voltage (V)",
     "HOUR:6:DAY:1:DAY:1:86400:%a %b %d",
-    "-s -1w --alt-autoscale"
+    "-s -1w --alt-autoscale",
+    0
   }, {
     DataType_other
   }  
@@ -340,7 +352,21 @@ int
 rrdUpdate
 (void) {
   int ret = rrdChips ();
-  
+  if (!ret && doLoad) {
+    FILE *loadavg;
+    if (!(loadavg = fopen ("/proc/loadavg", "r"))) {
+      sensorLog (LOG_ERR, "Error opening `/proc/loadavg': %s", strerror (errno));
+      ret = 1;
+    } else {
+      float value;
+      if (fscanf (loadavg, "%f", &value) != 1) {
+        sensorLog (LOG_ERR, "Error reading load average");
+        ret = 2;
+      } else {
+        sprintf (rrdBuff + strlen (rrdBuff), ":%f", value * 10.0);
+      }
+    }
+  }
   if (!ret) {
     const char *argv[] = {
       "sensord", rrdFile, rrdBuff, NULL
@@ -371,8 +397,12 @@ rrdCGI
     printf ("\t--lazy\n\t-v '%s'\n\t-t '%s'\n\t-x '%s'\n\t%s", graph->axisTitle, graph->title, graph->axisDefn, graph->options);
     if (!ret)
       ret = applyToFeatures (rrdCGI_DEF, graph);
+    if (!ret && doLoad && graph->loadAvg)
+      ret = rrdCGI_DEF (graph, LOADAVG, LOAD_AVERAGE, NULL);
     if (!ret)
       ret = applyToFeatures (rrdCGI_LINE, graph);
+    if (!ret && doLoad && graph->loadAvg)
+      ret = rrdCGI_LINE (graph, LOADAVG, LOAD_AVERAGE, NULL);
     printf (">\n</P>\n");
     ++ graph;
   }

@@ -20,7 +20,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#define version "0.6.0"
+#define version "0.6.2"
 
 #include "lib/sensors.h"
 
@@ -40,6 +40,7 @@ extern int syslogFacility;
 extern int doScan;
 extern int doSet;
 extern int doCGI;
+extern int doLoad;
 extern int debug;
 extern sensors_chip_name chipNames[];
 extern int numChipNames;
