@@ -123,8 +123,6 @@ struct gl520_data {
 	struct semaphore update_lock;
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
-	unsigned long last_updated_v00;
-	/* In jiffies (used only by rev00 chips) */
 
 	u8 voltage[5];		/* Register values; [0] = VDD */
 	u8 voltage_min[5];	/* Register values; [0] = VDD */
@@ -341,9 +339,15 @@ static int gl520_detect(struct i2c_adapter *adapter, int address,
 	data->sysctl_id = i;
 
 	/* Initialize the GL520SM chip */
-	data->two_temps = 1;
 	data->alarm_mask = 0xff;
 	gl520_init_client(new_client);
+	if (data->two_temps)
+		data->voltage_max[4] = data->voltage_min[4] =
+			data->voltage[4] = 0;
+	else
+		data->temp_hyst[1] = data->temp_over[1] =
+			data->temp[1] = 0;
+
 	return 0;
 
 /* OK, this is not exactly good programming practice, usually. But it is
@@ -359,22 +363,24 @@ static int gl520_detect(struct i2c_adapter *adapter, int address,
 }
 
 
-/* Called when we have found a new GL520SM. It should set limits, etc. */
+/* Called when we have found a new GL520SM. */
 static void gl520_init_client(struct i2c_client *client)
 {
-	/* Power-on defaults (bit 7=1) */
-	gl520_write_value(client, GL520_REG_CONF, 0x80);
+	struct gl520_data *data = (struct gl520_data *)(client->data);
+	u8 oldconf, conf;
 
-	/* No noisy output (bit 2=1), Comparator mode (bit 3=0), two fans (bit4=0),
-	   standby mode (bit6=0) */
-	gl520_write_value(client, GL520_REG_CONF, 0x04);
+	conf = oldconf = gl520_read_value(client, GL520_REG_CONF);
+	data->two_temps = !(conf & 0x10);
 
-	/* Never interrupts */
-	gl520_write_value(client, GL520_REG_MASK, 0x00);
+	/* If IRQ# is disabled, we can safely force comparator mode */
+	if (!(conf & 0x20))
+		conf &= 0xf7;
 
-	/* Clear status register (bit 5=1), start (bit6=1) */
-	gl520_write_value(client, GL520_REG_CONF, 0x24);
-	gl520_write_value(client, GL520_REG_CONF, 0x44);
+	/* Enable monitoring if needed */
+	conf |= 0x40;
+
+	if (conf != oldconf)
+		gl520_write_value(client, GL520_REG_CONF, conf);
 }
 
 static int gl520_detach_client(struct i2c_client *client)
@@ -481,18 +487,21 @@ static void gl520_update_client(struct i2c_client *client)
 		    gl520_read_value(client, GL520_REG_VIN3);
 
 		/* Temp1 and Vin4 are the same input */
-		data->temp[1] = gl520_read_value(client, GL520_REG_TEMP2);
-		data->temp_over[1] =
-		    gl520_read_value(client, GL520_REG_TEMP2_OVER);
-		data->temp_hyst[1] =
-		    gl520_read_value(client, GL520_REG_TEMP2_HYST);
-
-		data->voltage[4] =
-		    gl520_read_value(client, GL520_REG_VIN4);
-		data->voltage_min[4] =
-		    gl520_read_value(client, GL520_REG_VIN4_MIN);
-		data->voltage_max[4] =
-		    gl520_read_value(client, GL520_REG_VIN4_MAX);
+		if (data->two_temps) {
+			data->temp[1] =
+			    gl520_read_value(client, GL520_REG_TEMP2);
+			data->temp_over[1] =
+			    gl520_read_value(client, GL520_REG_TEMP2_OVER);
+			data->temp_hyst[1] =
+			    gl520_read_value(client, GL520_REG_TEMP2_HYST);
+		} else {
+			data->voltage[4] =
+			    gl520_read_value(client, GL520_REG_VIN4);
+			data->voltage_min[4] =
+			    gl520_read_value(client, GL520_REG_VIN4_MIN);
+			data->voltage_max[4] =
+			    gl520_read_value(client, GL520_REG_VIN4_MAX);
+		}
 
 		data->last_updated = jiffies;
 		data->valid = 1;
@@ -517,7 +526,7 @@ void gl520_temp(struct i2c_client *client, int operation, int ctl_name,
 		results[2] = TEMP_FROM_REG(data->temp[nr]);
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		if ((nr == 0) && (!data->two_temps))
+		if ((nr == 1) && (!data->two_temps))
 			return;
 		regnr =
 		    nr == 0 ? GL520_REG_TEMP1_OVER : GL520_REG_TEMP2_OVER;
@@ -766,8 +775,12 @@ void gl520_config(struct i2c_client *client, int operation, int ctl_name,
 			if (!results[1]) {
 				old |= 0x10;
 				data->two_temps = 0;
+				data->temp_hyst[1] = data->temp_over[1] =
+					data->temp[1] = 0;
 			} else {
 				data->two_temps = 1;
+				data->voltage_max[4] = data->voltage_min[4] =
+					data->voltage[4] = 0;
 			}
 			gl520_write_value(client, GL520_REG_CONF, old);
 		}
