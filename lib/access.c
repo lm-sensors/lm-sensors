@@ -304,11 +304,8 @@ const sensors_chip_name *sensors_get_detected_chips (int *nr)
 
 const char *sensors_get_adapter_name(int bus_nr)
 {
-  extern int foundsysfs;
   int i;
 
-  if(foundsysfs)
-    return "Unavailable from sysfs";
   if (bus_nr == SENSORS_CHIP_NAME_BUS_ISA)
     return "ISA adapter";
   if (bus_nr == SENSORS_CHIP_NAME_BUS_DUMMY)
@@ -321,11 +318,8 @@ const char *sensors_get_adapter_name(int bus_nr)
 
 const char *sensors_get_algorithm_name(int bus_nr)
 {
-  extern int foundsysfs;
   int i;
 
-  if(foundsysfs)
-    return "Unavailable from sysfs";
   if (bus_nr == SENSORS_CHIP_NAME_BUS_ISA)
     return "ISA algorithm";
   if (bus_nr == SENSORS_CHIP_NAME_BUS_DUMMY)

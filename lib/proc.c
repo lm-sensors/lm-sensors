@@ -26,6 +26,8 @@
 #include "error.h"
 #include "access.h"
 #include "general.h"
+#include <limits.h>
+#include <dirent.h>
 
 /* OK, this proves one thing: if there are too many chips detected, we get in
    trouble. The limit is around 4096/sizeof(struct sensors_chip_data), which
@@ -49,6 +51,7 @@ int sensors_proc_bus_count, sensors_proc_bus_max;
 static int sensors_get_chip_id(sensors_chip_name name);
 
 int foundsysfs=0;
+char sysfsmount[NAME_MAX];
 
 #define add_proc_chips(el) sensors_add_array_el(el,\
                                        (void **) &sensors_proc_chips,\
@@ -62,8 +65,6 @@ int foundsysfs=0;
                                        &sensors_proc_bus_max,\
                                        sizeof(struct sensors_bus))
 
-#include <limits.h>
-#include <dirent.h>
 /* This reads /proc/sys/dev/sensors/chips into memory */
 int sensors_read_proc_chips(void)
 {
@@ -93,17 +94,18 @@ int sensors_read_proc_chips(void)
 	fclose(f);
 	if (! foundsysfs)
 		goto proc;
+	strcpy(sysfsmount, sysfs);
 	strcat(sysfs, "/bus/i2c/devices");
 
 	/* Then read from it */
-	dir = opendir(sysfs);		/* Might just be "/sys/bus/i2c/devices" */
+	dir = opendir(sysfs);
 	if (! dir)
 		goto proc;
 
 	while ((de = readdir(dir)) != NULL) {
-		if (de->d_name[0] == '.' && de->d_name[1] == '\0')
+		if (!strcmp(de->d_name, "."))
 			continue;
-		if (de->d_name[0] == '.' && de->d_name[1] == '.' && de->d_name[2] == '\0')
+		if (!strcmp(de->d_name, ".."))
 			continue;
 /*
 		if (de->d_type != DT_DIR && de->d_type != DT_LNK)
@@ -118,7 +120,7 @@ int sensors_read_proc_chips(void)
 
 		if ((f = fopen(n, "r")) != NULL) {
 			char	x[120];
-			fscanf(f, "%[a-zA-z0-9_]", &x);
+			fscanf(f, "%[a-zA-z0-9_]", x);
 			/* HACK */ strcat(x, "-*");
 			if ((res = sensors_parse_chip_name(x, &entry.name))) {
 				char	em[NAME_MAX + 20];
@@ -160,22 +162,61 @@ proc:
 
 int sensors_read_proc_bus(void)
 {
+	struct dirent *de;
+	DIR *dir;
 	FILE *f;
 	char line[255];
 	char *border;
 	sensors_bus entry;
 	int lineno;
+	char sysfs[NAME_MAX], n[NAME_MAX];
+	char dirname[NAME_MAX];
 
 	if(foundsysfs) {
-		/* I don't have a clue what to read here. */
-		entry.adapter = 0;	/* ?? */
-		entry.algorithm = 0;	/* ?? */
-		entry.number = SENSORS_CHIP_NAME_BUS_ISA;
-		add_proc_bus(&entry);
-		entry.number = SENSORS_CHIP_NAME_BUS_DUMMY;
-		add_proc_bus(&entry);
+		strcpy(sysfs, sysfsmount);
+		strcat(sysfs, "/class/i2c-adapter");
+		/* Then read from it */
+		dir = opendir(sysfs);
+		if (! dir)
+			goto proc;
+
+		while ((de = readdir(dir)) != NULL) {
+			if (!strcmp(de->d_name, "."))
+				continue;
+			if (!strcmp(de->d_name, ".."))
+				continue;
+
+			strcpy(n, sysfs);
+			strcat(n, "/");
+			strcat(n, de->d_name);
+			strcpy(dirname, n);
+			strcat(n, "/device/name");
+
+printf("opening %s\n", n);
+			if ((f = fopen(n, "r")) != NULL) {
+				char	x[120];
+				fgets(x, 120, f);
+				fclose(f);
+				if((border = index(x, '\n')) != NULL)
+					*border = 0;
+				entry.adapter=strdup(x);
+				if(!strncmp(x, "ISA ", 4)) {
+					entry.number = SENSORS_CHIP_NAME_BUS_ISA;
+					entry.algorithm = "ISA bus algorithm";
+				} else if(!sscanf(de->d_name, "i2c-%x", &entry.number)) {
+					entry.number = SENSORS_CHIP_NAME_BUS_DUMMY;
+					entry.algorithm = "Dummy bus algorithm";
+				} else
+					entry.algorithm = "Unavailable from sysfs";
+printf("adding bus adap %s algo %s number %d\n", entry.adapter, entry.algorithm, entry.number);
+				add_proc_bus(&entry);
+			}
+		}
+		closedir(dir);
 		return 0;
 	}
+
+proc:
 
   f = fopen("/proc/bus/i2c","r");
   if (!f)
