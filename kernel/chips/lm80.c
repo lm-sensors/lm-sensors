@@ -99,13 +99,14 @@ FAN_TO_REG (unsigned rpm, unsigned div)
 extern inline long TEMP_FROM_REG(u16 temp)
 {
   long res;
-  res = ((temp & 0xff00) >> 8) * 10000 + ((temp & 0x10) >> 4) * 5000 +
-        ((temp & 0x20) >> 5) * 2500 + ((temp & 0x40) >> 6) * 1250 +
-        ((temp & 0x80) >> 7) * 625;
-  temp /= 100;
-  if (temp >= 0x80 * 100)
-    temp = - (0x100 * 100 - temp);
-  return temp;
+
+  temp= temp >> 4;
+  if (temp < 0x0800) {
+        res = (625 * (long)temp);
+  } else {
+        res = ((long)temp - 0x01000) * 625;
+  }
+  return res;
 }
 
 #define TEMP_LIMIT_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*100)
@@ -602,13 +603,13 @@ void lm80_temp(struct i2c_client *client, int operation, int ctl_name,
 {
   struct lm80_data *data = client->data;
   if (operation == SENSORS_PROC_REAL_INFO)
-    *nrels_mag = 1;
+    *nrels_mag = 4;
   else if (operation == SENSORS_PROC_REAL_READ) {
     lm80_update_client(client);
-    results[0] = TEMP_LIMIT_FROM_REG(data->temp_hot_max);
-    results[1] = TEMP_LIMIT_FROM_REG(data->temp_hot_hyst);
-    results[2] = TEMP_LIMIT_FROM_REG(data->temp_os_max);
-    results[3] = TEMP_LIMIT_FROM_REG(data->temp_os_hyst);
+    results[0] = TEMP_LIMIT_FROM_REG(data->temp_hot_max) * 10000;
+    results[1] = TEMP_LIMIT_FROM_REG(data->temp_hot_hyst) * 10000;
+    results[2] = TEMP_LIMIT_FROM_REG(data->temp_os_max) * 10000;
+    results[3] = TEMP_LIMIT_FROM_REG(data->temp_os_hyst) * 10000;
     results[4] = TEMP_FROM_REG(data->temp);
     *nrels_mag = 5;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
