@@ -628,7 +628,7 @@ sub add_to_chips_detected
 sub scan_adapter
 {
   my ( $adapter_nr,$adapter_name,$adapter_driver) = @_;
-  my ($chip, $addr, $conf,@chips);
+  my ($chip, $addr, $conf,@chips,$add_addr);
   open FILE,"/dev/i2c-$adapter_nr" or 
        print ("Can't open /dev/i2c-$adapter_nr ($!)\n"), return;
   foreach $addr (0..0x7f) {
@@ -657,6 +657,15 @@ sub scan_adapter
                                   description => $adapter_name,
                                   driver => $adapter_driver,
                                 };
+          foreach $add_addr(@chips) {
+            add_to_chips_detected $$chip{driver},
+                                  { confidence => $conf,
+                                    address => add_$addr,
+                                    chipname =>  $$chip{name},
+                                    description => $adapter_name,
+                                    driver => $adapter_driver,
+                                  };
+          }
         } else {
           print "Failed!\n";
         }
