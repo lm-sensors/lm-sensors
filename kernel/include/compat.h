@@ -104,4 +104,12 @@
 #define PCI_DEVICE_ID_APPLE_HYDRA      0x000e
 #endif
 
+/* New chips that will get defined in the kernel eventually */
+#ifndef PCI_DEVICE_ID_INTEL_82801AA_3
+#define PCI_DEVICE_ID_INTEL_82801AA_3  0x2413
+#endif
+#ifndef PCI_DEVICE_ID_INTEL_82801AB_3
+#define PCI_DEVICE_ID_INTEL_82801AB_3  0x2423
+#endif
+
 #endif /* SENSORS_COMPAT_H */
