@@ -52,8 +52,9 @@
 #define W83781D_REG_FAN(nr) (0x27 + (nr))
 
 #define W83781D_REG_TEMP23 0x50
-#define W83781D_REG_TEMP_OVER23 0x55
 #define W83781D_REG_TEMP_HYST23 0x53
+#define W83781D_REG_TEMP_CONFIG23 0x52
+#define W83781D_REG_TEMP_OVER23 0x55
 #define W83781D_REG_TEMP 0x27
 #define W83781D_REG_TEMP_OVER 0x39
 #define W83781D_REG_TEMP_HYST 0x3A
@@ -656,23 +657,24 @@ void w83781d_init_client(struct i2c_client *client)
   w83781d_write_value(client,W83781D_REG_FAN_MIN(2),FAN_TO_REG(W83781D_INIT_FAN_MIN_2));
   w83781d_write_value(client,W83781D_REG_FAN_MIN(3),FAN_TO_REG(W83781D_INIT_FAN_MIN_3));
   /* Init Temp Sensor1 */
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x01);/* Switch Banks! */
+  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x00);/* Switch Banks! */
   w83781d_write_value(client,W83781D_REG_TEMP_OVER,TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
   w83781d_write_value(client,W83781D_REG_TEMP_HYST,TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
+  w83781d_write_value(client,W83781D_REG_TEMP_CONFIG,0x00);
   /* Init Temp Sensor2 */
+  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x01);/* Switch Banks! */
+  w83781d_write_value(client,W83781D_REG_TEMP_OVER23,TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
+  w83781d_write_value(client,W83781D_REG_TEMP_OVER23 + 1,0);
+  w83781d_write_value(client,W83781D_REG_TEMP_HYST23,TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
+  w83781d_write_value(client,W83781D_REG_TEMP_HYST23 + 1,0);
+  w83781d_write_value(client,W83781D_REG_TEMP_CONFIG23,0x00);
+  /* Init Temp Sensor3 */
   w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x02);/* Switch Banks! */
   w83781d_write_value(client,W83781D_REG_TEMP_OVER23,TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
   w83781d_write_value(client,W83781D_REG_TEMP_OVER23 + 1,0);
   w83781d_write_value(client,W83781D_REG_TEMP_HYST23,TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
   w83781d_write_value(client,W83781D_REG_TEMP_HYST23 + 1,0);
-  w83781d_write_value(client,W83781D_REG_TEMP_CONFIG,0x00);
-  /* Init Temp Sensor3 */
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x04);/* Switch Banks! */
-  w83781d_write_value(client,W83781D_REG_TEMP_OVER23,TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
-  w83781d_write_value(client,W83781D_REG_TEMP_OVER23 + 1,0);
-  w83781d_write_value(client,W83781D_REG_TEMP_HYST23,TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
-  w83781d_write_value(client,W83781D_REG_TEMP_HYST23 + 1,0);
-  w83781d_write_value(client,W83781D_REG_TEMP_CONFIG,0x00);
+  w83781d_write_value(client,W83781D_REG_TEMP_CONFIG23,0x00);
   w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x00);/* Switch Banks! */
 
   /* Start monitoring */
@@ -703,16 +705,17 @@ void w83781d_update_client(struct i2c_client *client)
       data->fan[i-1] = w83781d_read_value(client,W83781D_REG_FAN(i));
       data->fan_min[i-1] = w83781d_read_value(client,W83781D_REG_FAN_MIN(i));
     }
-    w83781d_write_value(client,W83781D_REG_TEMP_SEL,1);/* Switch Banks!! */
     data->temp[0] = w83781d_read_value(client,W83781D_REG_TEMP);
     data->temp_over[0] = w83781d_read_value(client,W83781D_REG_TEMP_OVER);
     data->temp_hyst[0] = w83781d_read_value(client,W83781D_REG_TEMP_HYST);
-    for (i = 1; i <= 2; i++) {
-      w83781d_write_value(client,W83781D_REG_TEMP_SEL,1 << i);/* Switch Banks!! */
-      data->temp[i] = w83781d_read_value(client,W83781D_REG_TEMP23);
-      data->temp_over[i] = w83781d_read_value(client,W83781D_REG_TEMP_OVER23);
-      data->temp_hyst[i] = w83781d_read_value(client,W83781D_REG_TEMP_HYST23);
-    }
+    w83781d_write_value(client,W83781D_REG_TEMP_SEL,1);/* Switch Banks!! */
+    data->temp[1] = w83781d_read_value(client,W83781D_REG_TEMP23);
+    data->temp_over[1] = w83781d_read_value(client,W83781D_REG_TEMP_OVER23);
+    data->temp_hyst[1] = w83781d_read_value(client,W83781D_REG_TEMP_HYST23);
+    w83781d_write_value(client,W83781D_REG_TEMP_SEL,2);/* Switch Banks!! */
+    data->temp[2] = w83781d_read_value(client,W83781D_REG_TEMP23);
+    data->temp_over[2] = w83781d_read_value(client,W83781D_REG_TEMP_OVER23);
+    data->temp_hyst[2] = w83781d_read_value(client,W83781D_REG_TEMP_HYST23);
     w83781d_write_value(client,W83781D_REG_TEMP_SEL,0);/* Switch Banks!! */
     i = w83781d_read_value(client,W83781D_REG_VID_FANDIV);
     data->vid = i & 0x0f;
@@ -798,60 +801,70 @@ void w83781d_temp(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 1;
   else if (operation == SENSORS_PROC_REAL_READ) {
     w83781d_update_client(client);
-    results[0] = TEMP_FROM_REG(data->temp_over[tempnum]);
-    results[1] = TEMP_FROM_REG(data->temp_hyst[tempnum]);
-    results[2] = TEMP_FROM_REG(data->temp[tempnum]);
+    results[0] = TEMP_FROM_REG(data->temp_over[tempnum - 1]);
+    results[1] = TEMP_FROM_REG(data->temp_hyst[tempnum - 1]);
+    results[2] = TEMP_FROM_REG(data->temp[tempnum - 1]);
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (tempnum >1) {
+    if (tempnum == 3) {
+     w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x02);/* Switch Banks!! */
      if (*nrels_mag >= 1) {
-       data->temp_over[tempnum] = TEMP_TO_REG(results[0]);
-       w83781d_write_value(client,W83781D_REG_TEMP_OVER23,data->temp_over[tempnum]);
+       data->temp_over[2] = TEMP_TO_REG(results[0]);
+       w83781d_write_value(client,W83781D_REG_TEMP_OVER23,data->temp_over[2]);
        w83781d_write_value(client,W83781D_REG_TEMP_OVER23 + 1,0);
      }
      if (*nrels_mag >= 2) {
-       data->temp_hyst[tempnum] = TEMP_TO_REG(results[1]);
-       w83781d_write_value(client,W83781D_REG_TEMP_HYST23,data->temp_hyst[tempnum]);
+       data->temp_hyst[2] = TEMP_TO_REG(results[1]);
+       w83781d_write_value(client,W83781D_REG_TEMP_HYST23,data->temp_hyst[2]);
        w83781d_write_value(client,W83781D_REG_TEMP_HYST23 + 1,0);
      }
-    } else {
+     w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x0);/* Switch Banks!! */
+    } else if (tempnum == 2) {
+     w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x01);/* Switch Banks!! */
      if (*nrels_mag >= 1) {
-       data->temp_over[tempnum] = TEMP_TO_REG(results[0]);
-       w83781d_write_value(client,W83781D_REG_TEMP_OVER,data->temp_over[tempnum]);
+       data->temp_over[1] = TEMP_TO_REG(results[0]);
+       w83781d_write_value(client,W83781D_REG_TEMP_OVER23,data->temp_over[1]);
+       w83781d_write_value(client,W83781D_REG_TEMP_OVER23 + 1,0);
      }
      if (*nrels_mag >= 2) {
-       data->temp_hyst[tempnum] = TEMP_TO_REG(results[1]);
-       w83781d_write_value(client,W83781D_REG_TEMP_HYST,data->temp_hyst[tempnum]);
+       data->temp_hyst[1] = TEMP_TO_REG(results[1]);
+       w83781d_write_value(client,W83781D_REG_TEMP_HYST23,data->temp_hyst[1]);
+       w83781d_write_value(client,W83781D_REG_TEMP_HYST23 + 1,0);
+     }
+     w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x0);/* Switch Banks!! */
+    } else {
+     if (*nrels_mag >= 1) {
+       data->temp_over[0] = TEMP_TO_REG(results[0]);
+       w83781d_write_value(client,W83781D_REG_TEMP_OVER,data->temp_over[0]);
+     }
+     if (*nrels_mag >= 2) {
+       data->temp_hyst[0] = TEMP_TO_REG(results[1]);
+       w83781d_write_value(client,W83781D_REG_TEMP_HYST,data->temp_hyst[0]);
      }
     }
   }
 }
 
+/* Change back! */
 
 void w83781d_temp1(struct i2c_client *client, int operation, int ctl_name,
                int *nrels_mag, long *results) {
 
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x01);/* Switch Banks!! */
   w83781d_temp(client,operation,ctl_name,nrels_mag,results,1);
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x0);/* Switch Banks!! */
 }
 
 
 void w83781d_temp2(struct i2c_client *client, int operation, int ctl_name,
                int *nrels_mag, long *results) {
 	       
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x02);/* Switch Banks!! */
   w83781d_temp(client,operation,ctl_name,nrels_mag,results,2);
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x00);/* Switch Banks!! */
 }
 
 
 void w83781d_temp3(struct i2c_client *client, int operation, int ctl_name,
                int *nrels_mag, long *results) {
 	       
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x04);/* Switch Banks!! */
   w83781d_temp(client,operation,ctl_name,nrels_mag,results,3);
-  w83781d_write_value(client,W83781D_REG_TEMP_SEL,0x00);/* Switch Banks!! */
 }
 
 
