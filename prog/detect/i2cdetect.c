@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
   for (i = 0; i < 128; i+=16) {
     printf("%02x: ",i);
     for(j = 0; j < 16; j++) {
-      if (!force && (i+j<0x04 || i+j>0x77)) {
+      if (!force && (i+j<0x03 || i+j>0x77)) {
         printf("   ");
         continue;
       }

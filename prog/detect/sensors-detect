@@ -2418,7 +2418,7 @@ sub scan_adapter
   binmode FILE;
 
   # Now scan each address in turn
-  foreach $addr (0x04..0x77) {
+  foreach $addr (0x03..0x77) {
     # As the not_to_scan list is sorted, we can check it fast
     if (@not_to_scan and $not_to_scan[0] == $addr) {
       shift @not_to_scan;
