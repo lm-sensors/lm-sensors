@@ -38,7 +38,7 @@
 #
 # use the following command line switches
 #  -f, --format            print nice html output
-#  -b, --bodyonly          don't printhtml header
+#  -b, --bodyonly          don't print html header
 #                          (useful for postprocessing the output)
 #  -c, --checksum          decode completely even if checksum fails
 #  -h, --help              display this usage summary
@@ -119,7 +119,7 @@ for (@ARGV) {
     if (/-h/) {
 		print "Usage: $0 [-f|-b|-h]\n\n",
 			"  -f, --format            print nice html output\n",
-			"  -b, --bodyonly          don't printhtml header\n",
+			"  -b, --bodyonly          don't print html header\n",
 			"                          (useful for postprocessing the output)\n",
 			"  -c, --checksum          decode completely even if checksum fails\n",
 			"  -h, --help              display this usage summary\n";
