@@ -172,10 +172,8 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==1?0:((val)==8?3:((val)==4?2:1)))
 
-#if 0
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            205-(val)*5)
-#endif
 
 #define LM87_INIT_IN_0 190
 #define LM87_INIT_IN_1 190
@@ -897,20 +895,9 @@ void lm87_vid(struct i2c_client *client, int operation, int ctl_name,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-
 		lm87_update_client(client);
-                if ((data->vid == 0x1f) || (data->vid == 0x0f)) {
-                   results[0] = 0;
-                }
-                else if (data->vid > 0x0f) {
-                   results[0] = (1275 -
-			(((data->vid - 0x10) * 1000) * 0.025))/10;
-                }
-                else {
-                   results[0] = 200 - ((data->vid * 100) * 0.05);
-                }
-                 
-              *nrels_mag = 1;
+		results[0] = VID_FROM_REG(data->vid);
+		*nrels_mag = 1;
 	}
 }
 
