@@ -352,6 +352,13 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        driver => "i2c-riva",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
+     { 
+       vendid => 0x1166,
+       devid  => 0x0200,
+       func => 0,
+       procid => "ServerWorks South Bridge",
+       match => sub { $_[0] =~ /^ServerWorks tobewritten/ },
+     } , 
 );
 
 use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
