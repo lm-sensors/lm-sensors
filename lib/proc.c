@@ -125,9 +125,16 @@ int sensors_read_proc_chips(void)
 		strcat(n, "/name");
 
 		if ((f = fopen(n, "r")) != NULL) {
-			char	x[120];
-			fscanf(f, "%[a-zA-z0-9_]", x);
+			char x[81];
+			int len = 0;
+			if (!fscanf(f, "%80[a-zA-z0-9_ ]%n", x, &len)) {
+				fclose(f);
+				continue;
+			}
 			fclose(f);
+			if (len >= 10 && !strcmp(x+len-10, " subclient"))
+				continue;
+			
 			/* HACK */ strcat(x, "-*");
 			if ((res = sensors_parse_chip_name(x, &entry.name))) {
 				char	em[NAME_MAX + 20];
