@@ -39,6 +39,7 @@ CONTENTS
 3.6 I get all kind of weird compilation errors?
   3.6A 'No rule to make target xxxx needed by xxxx' - how to fix?
 3.7 It still does not compile or patch
+3.8 'make install' fails on Mandrake kernels
 
 4 Problems
 4.1 Why do my fans report exactly half/double their values by your code
@@ -398,6 +399,12 @@ compilation is not enough, you also need to install it for the header
 files to be found!
     If you want to patch the kernel, you will have to apply the i2c
 patches first!
+
+
+3.8 'make install' fails on Mandrake kernels
+
+    Mandrake uses a non-standard version.h file which confuses our Makefile.
+Edit our Makefile on the 'MODDIR :=' line to hard-code the module directory.
 
 
 
@@ -912,7 +919,7 @@ can not be sure.
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
 
-Rev 2.4 (MDS) Minor updates 20010625
+Rev 2.4 (MDS) Minor updates 20010722
 Rev 2.3 (MDS) General update, 20010224, released with lm_sensors 2.6.0.
 Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 19990920
 Rev 2.1 (Frodo) Corrections for lm_sensors 2.2, 19990112
