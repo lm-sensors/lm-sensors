@@ -1319,192 +1319,179 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #      The function should take three parameters: The ISA address, the
 #      I2C bus number, and the I2C address.
 @superio_ids = (
-     {
+  {
+    enter => [0x87, 0x01, 0x55, 0x55],
+    chips =>
+    [
+      {
 	name => "ITE 8702F Super IO Sensors",
 	driver => "to-be-written",
-	enter => [0x87, 0x01, 0x55, 0x55],
 	devid => 0x8702,
 	logdev => 0x04,
-     }, 
-     {
+      },
+      {
 	name => "ITE 8705F Super IO Sensors",
 	driver => "it87",
-	enter => [0x87, 0x01, 0x55, 0x55],
 	devid => 0x8705,
 	logdev => 0x04,
-     }, 
-     {
+      },
+      {
 	name => "ITE 8712F Super IO Sensors",
 	driver => "it87",
-	enter => [0x87, 0x01, 0x55, 0x55],
 	devid => 0x8712,
 	logdev => 0x04,
-     },
-     {
+      },
+    ],
+  },
+  {
+    enter => [],
+    chips =>
+    [
+      {
 	name => "Nat. Semi. PC87351 Super IO Fan Sensors",
 	driver => "to-be-written",
-	enter => [],
 	devid => 0xe2,
 	logdev => 0x08,
-     }, 
-     {
+      },
+      {
 	name => "Nat. Semi. PC87360 Super IO Fan Sensors",
 	driver => "pc87360-fan",
-	enter => [],
 	devid => 0xe1,
 	logdev => 0x09,
-     }, 
-     {
+      },
+      {
 	name => "Nat. Semi. PC87363 Super IO Fan Sensors",
 	driver => "pc87360-fan",
-	enter => [],
 	devid => 0xe8,
 	logdev => 0x09,
-     }, 
-     {
+      },
+      {
 	name => "Nat. Semi. PC87364 Super IO Fan Sensors",
 	driver => "pc87360-fan",
-	enter => [],
 	devid => 0xe4,
 	logdev => 0x09,
-     }, 
-     {
+      },
+      {
 	name => "Nat. Semi. PC87365 Super IO Sensors",
 	driver => "to-be-written",
-	enter => [],
 	devid => 0xe5,
 	logdev => 0x09, # fans; voltages at 0x0d; temps at 0x0e
-     }, 
-     {
+      },
+      {
 	name => "Nat. Semi. PC87366 Super IO Sensors",
 	driver => "to-be-written",
-	enter => [],
 	devid => 0xe9,
 	logdev => 0x09, # fans; voltages at 0x0d; temps at 0x0e
-     }, 
-     {
+      },
+      {
 	name => "Nat. Semi. PC87372 Super IO Fan Sensors",
 	driver => "to-be-written",
-	enter => [],
 	devid => 0xf0,
 	logdev => 0x09,
-     }, 
-     {
+      },
+      {
 	name => "Nat. Semi. PC8741x Super IO",
 	driver => "not-a-sensor",
-	enter => [],
 	devid => 0xee,
-     }, 
-     {
+      },
+    ],
+  },
+  {
+    enter => [0x55],
+    exit => [0xaa],
+    chips =>
+    [
+      {
 	name => "SMSC 47B27x Super IO Fan Sensors",
 	driver => "smsc47m1",
-	enter => [0x55],
 	devid => 0x51,
 	logdev => 0x0a,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "SMSC 47M10x/13x Super IO Fan Sensors",
 	driver => "smsc47m1",
-	enter => [0x55],
 	devid => 0x59,
 	logdev => 0x0a,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "SMSC 47M14x Super IO Fan Sensors",
 	driver => "smsc47m1",
-	enter => [0x55],
 	devid => 0x5f,
 	logdev => 0x0a,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "SMSC 47M15x/192 Super IO Fan Sensors",
 	driver => "to-be-written",
-	enter => [0x55],
 	devid => 0x60,
 	logdev => 0x0a,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "SMSC 47S42x Super IO Fan Sensors",
 	driver => "to-be-written",
-	enter => [0x55],
 	devid => 0x57,
 	logdev => 0x0a,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "SMSC 47S45x Super IO Fan Sensors",
 	driver => "to-be-written",
-	enter => [0x55],
 	devid => 0x62,
 	logdev => 0x0a,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "SMSC 47M172 Super IO",
 	driver => "not-a-sensor",
-	enter => [0x55],
 	devid => 0x14,
-	exit => [0xaa],
-     }, 
-     {
+      },
+    ],
+  },
+  {
+    enter => [0x87, 0x87],
+    exit => [0xaa],
+    chips =>
+    [
+      {
 	name => "VT1211 Super IO Sensors",
 	driver => "vt1211",
-	enter => [0x87, 0x87],
 	devid => 0x3c,
 	logdev => 0x0b,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "Winbond W83627HF Super IO Sensors",
 	driver => "w83627hf",
-	enter => [0x87, 0x87],
 	devid => 0x52,
 	logdev => 0x0b,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "Winbond W83627THF Super IO Sensors",
 	driver => "w83627hf",
-	enter => [0x87, 0x87],
 	devid => 0x82,
 	logdev => 0x0b,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "Winbond W83637HF Super IO Sensors",
 	driver => "w83627hf",
-	enter => [0x87, 0x87],
 	devid => 0x70,
 	logdev => 0x0b,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "Winbond W83697HF Super IO Sensors",
 	driver => "w83627hf",
-	enter => [0x87, 0x87],
 	devid => 0x60,
 	logdev => 0x0b,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "Winbond W83697SF/UF Super IO PWM",
 	driver => "to-be-written",
-	enter => [0x87, 0x87],
 	devid => 0x68,
 	logdev => 0x0b,
-	exit => [0xaa],
-     }, 
-     {
+      },
+      {
 	name => "Winbond W83L517D Super IO",
 	driver => "not-a-sensor",
-	enter => [0x87, 0x87],
 	devid => 0x61,
-	exit => [0xaa],
-     }, 
+      },
+    ],
+  },
 );
 
 #######################
@@ -2418,11 +2405,11 @@ sub scan_isa_bus
 
 sub exit_superio
 {
-  my ($addrreg, $datareg, $chip, $success) = @_;
+  my ($addrreg, $datareg, $family, $success) = @_;
 
   # If detection succeeded and an exit sequence exists, use it
-  if ($success && defined ($$chip{exit})) {
-    foreach my $byte (@{$$chip{exit}}) {
+  if ($success && defined ($$family{exit})) {
+    foreach my $byte (@{$$family{exit}}) {
       outb($addrreg, $byte);
     }
     return;
@@ -2443,7 +2430,7 @@ sub exit_superio
 sub scan_superio
 {
   my ($addrreg, $datareg) = @_;
-  my ($chip,$val,$addr,$conf);
+  my ($val, $addr);
 
   my %superio = (
     devidreg => 0x20,
@@ -2453,25 +2440,34 @@ sub scan_superio
     basereg => 0x60,
   );
   
-  foreach $chip (@superio_ids) {
-    print "Probing for `$$chip{name}'\n";
+  FAMILY: 
+  foreach my $family (@superio_ids) {
 # write the password
-    foreach $val (@{$$chip{enter}}) {
+    foreach $val (@{$$family{enter}}) {
       outb($addrreg, $val);
     }
+    foreach my $chip (@{$$family{chips}}) {
+      print "Probing for `$$chip{name}'\n";
 # check the device ID
-    outb($addrreg, $superio{devidreg});
-    $val = inb($datareg);
-    if($$chip{devid}>0xff) {
-      outb($addrreg, $superio{devidreg} + 1);
-      $val = ($val << 8) | inb($datareg);
-    }
-    if($val == $$chip{devid}) {
+      outb($addrreg, $superio{devidreg});
+      $val = inb($datareg);
+      if ($val == 0x00 || $val == 0xff) {
+	print "  Failed! (skipping family)\n";
+	exit_superio($addrreg, $datareg, $family, 0);
+	next FAMILY;
+      }
+      if ($$chip{devid}>0xff) {
+        outb($addrreg, $superio{devidreg} + 1);
+        $val = ($val << 8) | inb($datareg);
+      }
+      if ($val != $$chip{devid}) {
+	printf "  Failed! (0x%02x)\n", $val;
+	next;
+      }
       print "  Success...";
 # does it have hardware monitoring capabilities
       if($$chip{driver} eq "not-a-sensor") {
 	print " (no hardware monitoring capabilities)\n";
-	exit_superio($addrreg, $datareg, $chip, 1);
 	next;
       }
 # switch to the sensor logical device
@@ -2482,7 +2478,6 @@ sub scan_superio
       $val = inb($datareg);
       if(!($val & $superio{actmask})) {
 	print " but not activated\n";
-	exit_superio($addrreg, $datareg, $chip, 1);
 	next;
       }
 # Get the IO base register
@@ -2492,7 +2487,6 @@ sub scan_superio
       $addr = ($addr << 8) | inb($datareg);
       if($addr == 0) {
 	print " but no address specified\n";
-	exit_superio($addrreg, $datareg, $chip, 1);
 	next;
       }	        
       printf " found at address 0x%04x\n", $addr;
@@ -2502,15 +2496,8 @@ sub scan_superio
                      };
       add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver},
                                             $new_hash;
-      exit_superio($addrreg, $datareg, $chip, 1);
-    } else {
-      if($val == 0xff || $val == 0xffff || $val == 0) {	
-        print "  Failed!\n";
-      } else {
-        printf "  Failed! (0x%02x)\n", $val;
-      }
-      exit_superio($addrreg, $datareg, $chip, 0);
     }
+    exit_superio($addrreg, $datareg, $family, 1);
   }
 }
 
