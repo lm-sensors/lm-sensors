@@ -878,9 +878,8 @@ int lm78_cleanup(void)
       printk("lm78.o: Driver deregistration failed, module not removed.\n");
       return res;
     }
-  } else
     lm78_initialized --;
-
+  }
   return 0;
 }
 

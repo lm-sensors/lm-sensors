@@ -41,6 +41,11 @@ static void sensors_parse_reals(int *nrels, void *buffer, int bufsize,
                                 long *results, int magnitude);
 static void sensors_write_reals(int nrels,void *buffer,int *bufsize,
                                 long *results, int magnitude);
+static int sensors_proc_chips(ctl_table *ctl, int write, struct file * filp,
+                              void *buffer, size_t *lenp);
+static int sensors_sysctl_chips (ctl_table *table, int *name, int nlen, 
+                                 void *oldval, size_t *oldlenp, void *newval,
+                                 size_t newlen, void **context);
 
 static int sensors_init(void);
 static int sensors_cleanup(void);
@@ -62,6 +67,27 @@ static ctl_table sysctl_table[] = {
   { 0, NULL, NULL, 0, 0555 },
   { 0 }
 };
+
+static ctl_table sensors_proc_dev_sensors[] = {
+  { SENSORS_CHIPS, "chips", NULL, 0, 0644, NULL, &sensors_proc_chips, 
+    &sensors_sysctl_chips },
+  { 0 }
+};
+
+static ctl_table sensors_proc_dev[] = {
+  { DEV_SENSORS, "sensors", NULL, 0, 0555, sensors_proc_dev_sensors },
+  { 0 },
+};
+
+
+static ctl_table sensors_proc[] = {
+  { CTL_DEV, "dev", NULL, 0, 0555, sensors_proc_dev },
+  { 0 }
+};
+
+
+static struct ctl_table_header *sensors_proc_header;
+static int sensors_initialized;
 
 /* This returns a nice name for a new directory; for example lm78-isa-0310
    (for a LM78 chip on the ISA bus at port 0x310), or lm75-i2c-3-4e (for
@@ -207,6 +233,68 @@ void sensors_fill_inode(struct inode *inode, int fill)
 }
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
 
+int sensors_proc_chips(ctl_table *ctl, int write, struct file * filp,
+                       void *buffer, size_t *lenp)
+{
+  char BUF[SENSORS_PREFIX_MAX + 30];
+  int buflen,curbufsize,i;
+  struct ctl_table *client_tbl;
+
+  if (write)
+    return 0;
+
+  /* If buffer is size 0, or we try to read when not at the start, we
+     return nothing. Note that I think writing when not at the start
+     does not work either, but anyway, this is straight from the kernel
+     sources. */
+  if (!*lenp || (filp->f_pos && !write)) {
+    *lenp = 0;
+    return 0;
+  }
+  curbufsize = 0;
+  for (i = 0; i < SENSORS_ENTRY_MAX; i ++)
+    if (sensors_entries[i]) {
+      client_tbl = sensors_entries[i]->ctl_table->child->child;
+      buflen = sprintf(BUF,"%d\t%s\n",client_tbl->ctl_name,
+                       client_tbl->procname);
+      if (buflen + curbufsize > *lenp)
+        buflen=*lenp-curbufsize;
+      copy_to_user(buffer,BUF,buflen);
+      curbufsize += buflen;
+      (char *) buffer += buflen;
+    }
+  *lenp = curbufsize;
+  filp->f_pos += curbufsize;
+  return 0;
+}
+
+int sensors_sysctl_chips (ctl_table *table, int *name, int nlen, void *oldval,
+                          size_t *oldlenp, void *newval, size_t newlen,
+                          void **context)
+{
+  struct sensors_chips_data data;
+  int i,oldlen,nrels,maxels;
+  struct ctl_table *client_tbl;
+
+  if (oldval && oldlenp && ! get_user_data(oldlen,oldlenp) && oldlen) {
+    maxels = oldlen / sizeof(struct sensors_chips_data);
+    nrels = 0;
+    for (i = 0; (i < SENSORS_ENTRY_MAX) && (nrels < maxels); i++)
+      if (sensors_entries[i]) {
+        client_tbl = sensors_entries[i]->ctl_table->child->child;
+        data.sysctl_id = client_tbl->ctl_name;
+        strcpy(data.name,client_tbl->procname);
+        copy_to_user(oldval,&data,sizeof(struct sensors_chips_data));
+        (char *) oldval += sizeof(struct sensors_chips_data);
+        nrels++;
+      }
+    oldlen = nrels * sizeof(struct sensors_chips_data);
+    put_user(oldlen,oldlenp);
+  }
+  return 0;
+}
+
+
 /* This funcion reads or writes a 'real' value (encoded by the combination
    of an integer and a magnitude, the last is the power of ten the value
    should be divided with) to a /proc/sys directory. To use this function,
@@ -262,7 +350,6 @@ int sensors_proc_real(ctl_table *ctl, int write, struct file * filp,
     callback(client,SENSORS_PROC_REAL_READ,ctl->ctl_name,&nrels,results);
 
     /* And write them to buffer, converting to reals */
-    sensors_write_reals(nrels,buffer,lenp,results,mag);
     sensors_write_reals(nrels,buffer,lenp,results,mag);
     filp->f_pos += *lenp;
     return 0;
@@ -477,11 +564,19 @@ void sensors_write_reals(int nrels,void *buffer,int *bufsize,long *results,
 int sensors_init(void) 
 {
   printk("sensors.o version %s (%s)\n",LM_VERSION,LM_DATE);
+  sensors_initialized = 0;
+  if (! (sensors_proc_header = register_sysctl_table(sensors_proc,0)))
+    return -ENOMEM;
+  sensors_initialized ++;
   return 0;
 }
 
 int sensors_cleanup(void)
 {
+  if (sensors_initialized >= 1) {
+    unregister_sysctl_table(sensors_proc_header);
+    sensors_initialized --;
+  }
   return 0;
 }
 

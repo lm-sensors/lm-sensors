@@ -73,9 +73,11 @@ extern int sensors_register_entry(struct i2c_client *client,
                                   const char *prefix, ctl_table *ctl_template);
 extern void sensors_deregister_entry(int id);
 
-
 #endif /* def __KERNEL__ */
 
+
+/* The maximum length of the prefix */
+#define SENSORS_PREFIX_MAX 20
 
 /* Driver IDs */
 #define I2C_DRIVERID_I2CPROC 1001
@@ -89,6 +91,12 @@ extern void sensors_deregister_entry(int id);
 #define DEV_SENSORS 2  /* The id of the lm_sensors directory within the
                           dev table */
 #endif /* def DEV_HWMON */
+
+#define SENSORS_CHIPS 1
+struct sensors_chips_data {
+  int sysctl_id;
+  char name[SENSORS_PREFIX_MAX + 13];
+};
 
 #define LM78_SYSCTL_IN0 1000  /* Volts * 100 */
 #define LM78_SYSCTL_IN1 1001

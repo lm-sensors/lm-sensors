@@ -331,8 +331,8 @@ int lm75_cleanup(void)
       printk("lm75.o: Driver deregistration failed, module not removed.\n");
       return res;
     }
-  } else
     lm75_initialized --;
+  }
 
   return 0;
 }
