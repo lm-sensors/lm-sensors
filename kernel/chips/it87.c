@@ -31,6 +31,13 @@
     type at module load time.
 */
 
+/*
+    michael.hufer@gmx.de Michael Hufer 09/07/03
+    Modified configure (enable/disable) chip reset at module load time.
+    Added ability to read and set fan pwm registers and the smart
+    guardian (sg) features of the chip.
+*/
+
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
@@ -65,6 +72,12 @@ static int update_vbat = 0;
 /* Enable Temp3 as thermal resistor */
 static int temp_type = 0x2a;
 
+/* Reset the registers on init */
+static int reset_it87 = 0;
+
+/* Initialize the registers to default values on init */
+static int init = 1;
+
 /* Many IT87 constants specified below */
 
 /* Length of ISA address segment */
@@ -85,11 +98,24 @@ static int temp_type = 0x2a;
 #define IT87_REG_VID           0x0a
 #define IT87_REG_FAN_DIV       0x0b
 
-/* Monitors: 9 voltage (0 to 7, battery), 3 temp (1 to 3), 3 fan (1 to 3) */
-
 #define IT87_REG_FAN(nr)       (0x0c + (nr))
 #define IT87_REG_FAN_MIN(nr)   (0x0f + (nr))
 #define IT87_REG_FAN_CTRL      0x13
+
+/* pwm and smart guardian registers */
+
+#define IT87_REG_FAN_ONOFF     0x14
+#define IT87_REG_PWM(nr)       (0x14 + (nr))
+#define IT87_REG_SG_TL_OFF(nr) (0x58 + (nr)*8)
+#define IT87_REG_SG_TL_LOW(nr) (0x59 + (nr)*8)
+#define IT87_REG_SG_TL_MED(nr) (0x5a + (nr)*8)
+#define IT87_REG_SG_TL_HI(nr)  (0x5b + (nr)*8)
+#define IT87_REG_SG_TL_OVR(nr) (0x5c + (nr)*8)
+#define IT87_REG_SG_PWM_LOW(nr) (0x5d + (nr)*8)
+#define IT87_REG_SG_PWM_MED(nr) (0x5e + (nr)*8)
+#define IT87_REG_SG_PWM_HI(nr)  (0x5f + (nr)*8)
+
+/* Monitors: 9 voltage (0 to 7, battery), 3 temp (1 to 3), 3 fan (1 to 3) */
 
 #define IT87_REG_VIN(nr)       (0x20 + (nr))
 #define IT87_REG_TEMP(nr)      (0x28 + (nr))
@@ -133,7 +159,17 @@ static inline u8 FAN_TO_REG(long rpm, int div)
                            205-(val)*5)
 #define ALARMS_FROM_REG(val) (val)
 
-#define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
+extern inline u8 DIV_TO_REG(long val)
+{
+	u8 i;
+	for( i = 0; i <= 7; i++ )
+	{
+		if( val>>i == 1 )
+			return i;
+	}
+	return 1;
+}
+/*#define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)*/
 #define DIV_FROM_REG(val) (1 << (val))
 
 /* Initial limits. Use the config file to set better limits. */
@@ -186,11 +222,22 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define IT87_INIT_FAN_MIN_3 3000
 
 #define IT87_INIT_TEMP_HIGH_1 600
-#define IT87_INIT_TEMP_LOW_1  200
+#define IT87_INIT_TEMP_LOW_1  540
 #define IT87_INIT_TEMP_HIGH_2 600
 #define IT87_INIT_TEMP_LOW_2  200
-#define IT87_INIT_TEMP_HIGH_3 600 
+#define IT87_INIT_TEMP_HIGH_3 600
 #define IT87_INIT_TEMP_LOW_3  200
+
+#define IT87_INIT_PWR_TL_OFF  160
+#define IT87_INIT_PWR_TL_LOW  160
+#define IT87_INIT_PWR_TL_MED  480
+#define IT87_INIT_PWR_TL_HI   540
+#define IT87_INIT_PWR_TL_OVR  580
+
+#define IT87_INIT_PWR_LOW     3
+#define IT87_INIT_PWR_MED     4
+#define IT87_INIT_PWR_HI      9
+
 
 /* For each registered IT87, we need to keep some data in memory. That
    data is pointed to by it87_list[NR]->data. The structure itself is
@@ -216,6 +263,10 @@ struct it87_data {
 	u8 fan_div[3];		/* Register encoding, shifted right */
 	u8 vid;			/* Register encoding, combined */
 	u32 alarms;		/* Register encoding, combined */
+	u8 pwm[3];		/* Register value */
+	u8 fan_ctl[2];		/* Register encoding */
+	u8 sg_tl[3][5];		/* Register value */
+	u8 sg_pwm[3][3];	/* Register value */
 };
 
 
@@ -242,6 +293,14 @@ static void it87_vid(struct i2c_client *client, int operation,
 static void it87_alarms(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 static void it87_fan_div(struct i2c_client *client, int operation,
+			 int ctl_name, int *nrels_mag, long *results);
+static void it87_fan_ctl(struct i2c_client *client, int operation,
+			 int ctl_name, int *nrels_mag, long *results);
+static void it87_pwm(struct i2c_client *client, int operation,
+			 int ctl_name, int *nrels_mag, long *results);
+static void it87_sgpwm(struct i2c_client *client, int operation,
+			 int ctl_name, int *nrels_mag, long *results);
+static void it87_sgtl(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver it87_driver = {
@@ -276,6 +335,13 @@ static int it87_id = 0;
 #define IT87_SYSCTL_VID 1300    /* Volts * 100 */
 #define IT87_SYSCTL_FAN_DIV 2000        /* 1, 2, 4 or 8 */
 #define IT87_SYSCTL_ALARMS 2004    /* bitvector */
+
+#define IT87_SYSCTL_PWM1 1401
+#define IT87_SYSCTL_PWM2 1402
+#define IT87_SYSCTL_PWM3 1403
+#define IT87_SYSCTL_FAN_CTL  1501
+#define IT87_SYSCTL_FAN_ON_OFF  1502
+
 
 #define IT87_ALARM_IN0 0x000100
 #define IT87_ALARM_IN1 0x000200
@@ -336,6 +402,28 @@ static ctl_table it87_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &it87_fan_div},
 	{IT87_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &it87_alarms},
+	{IT87_SYSCTL_FAN_CTL, "fan_ctl", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_fan_ctl},
+	{IT87_SYSCTL_FAN_ON_OFF, "fan_on_off", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_fan_ctl},
+	{IT87_SYSCTL_PWM1, "pwm1", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_pwm},
+	{IT87_SYSCTL_PWM2, "pwm2", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_pwm},
+	{IT87_SYSCTL_PWM3, "pwm3", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_pwm},
+	{IT87_SYSCTL_PWM1, "sg_pwm1", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_sgpwm},
+	{IT87_SYSCTL_PWM2, "sg_pwm2", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_sgpwm},
+	{IT87_SYSCTL_PWM3, "sg_pwm3", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_sgpwm},
+	{IT87_SYSCTL_PWM1, "sg_tl1", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_sgtl},
+	{IT87_SYSCTL_PWM2, "sg_tl2", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_sgtl},
+	{IT87_SYSCTL_PWM3, "sg_tl3", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_sgtl},
 	{0}
 };
 
@@ -563,74 +651,81 @@ static int it87_write_value(struct i2c_client *client, u8 reg, u8 value)
 /* Called when we have found a new IT87. It should set limits, etc. */
 static void it87_init_client(struct i2c_client *client)
 {
+	if( init )
+	{
 	/* Reset all except Watchdog values and last conversion values
-	   This sets fan-divs to 2, among others */
-	it87_write_value(client, IT87_REG_CONFIG, 0x80);
-	it87_write_value(client, IT87_REG_VIN_MIN(0),
-			 IN_TO_REG(IT87_INIT_IN_MIN_0));
-	it87_write_value(client, IT87_REG_VIN_MAX(0),
-			 IN_TO_REG(IT87_INIT_IN_MAX_0));
-	it87_write_value(client, IT87_REG_VIN_MIN(1),
-			 IN_TO_REG(IT87_INIT_IN_MIN_1));
-	it87_write_value(client, IT87_REG_VIN_MAX(1),
-			 IN_TO_REG(IT87_INIT_IN_MAX_1));
-	it87_write_value(client, IT87_REG_VIN_MIN(2),
-			 IN_TO_REG(IT87_INIT_IN_MIN_2));
-	it87_write_value(client, IT87_REG_VIN_MAX(2),
-			 IN_TO_REG(IT87_INIT_IN_MAX_2));
-	it87_write_value(client, IT87_REG_VIN_MIN(3),
-			 IN_TO_REG(IT87_INIT_IN_MIN_3));
-	it87_write_value(client, IT87_REG_VIN_MAX(3),
-			 IN_TO_REG(IT87_INIT_IN_MAX_3));
-	it87_write_value(client, IT87_REG_VIN_MIN(4),
-			 IN_TO_REG(IT87_INIT_IN_MIN_4));
-	it87_write_value(client, IT87_REG_VIN_MAX(4),
-			 IN_TO_REG(IT87_INIT_IN_MAX_4));
-	it87_write_value(client, IT87_REG_VIN_MIN(5),
-			 IN_TO_REG(IT87_INIT_IN_MIN_5));
-	it87_write_value(client, IT87_REG_VIN_MAX(5),
-			 IN_TO_REG(IT87_INIT_IN_MAX_5));
-	it87_write_value(client, IT87_REG_VIN_MIN(6),
-			 IN_TO_REG(IT87_INIT_IN_MIN_6));
-	it87_write_value(client, IT87_REG_VIN_MAX(6),
-			 IN_TO_REG(IT87_INIT_IN_MAX_6));
-	it87_write_value(client, IT87_REG_VIN_MIN(7),
-			 IN_TO_REG(IT87_INIT_IN_MIN_7));
-	it87_write_value(client, IT87_REG_VIN_MAX(7),
-			 IN_TO_REG(IT87_INIT_IN_MAX_7));
-        /* Note: Battery voltage does not have limit registers */
-	it87_write_value(client, IT87_REG_FAN_MIN(1),
-			 FAN_TO_REG(IT87_INIT_FAN_MIN_1, 2));
-	it87_write_value(client, IT87_REG_FAN_MIN(2),
-			 FAN_TO_REG(IT87_INIT_FAN_MIN_2, 2));
-	it87_write_value(client, IT87_REG_FAN_MIN(3),
-			 FAN_TO_REG(IT87_INIT_FAN_MIN_3, 2));
-	it87_write_value(client, IT87_REG_TEMP_HIGH(1),
-			 TEMP_TO_REG(IT87_INIT_TEMP_HIGH_1));
-	it87_write_value(client, IT87_REG_TEMP_LOW(1),
-			 TEMP_TO_REG(IT87_INIT_TEMP_LOW_1));
-	it87_write_value(client, IT87_REG_TEMP_HIGH(2),
-			 TEMP_TO_REG(IT87_INIT_TEMP_HIGH_2));
-	it87_write_value(client, IT87_REG_TEMP_LOW(2),
-			 TEMP_TO_REG(IT87_INIT_TEMP_LOW_2));
-	it87_write_value(client, IT87_REG_TEMP_HIGH(3),
-			 TEMP_TO_REG(IT87_INIT_TEMP_HIGH_3));
-	it87_write_value(client, IT87_REG_TEMP_LOW(3),
-			 TEMP_TO_REG(IT87_INIT_TEMP_LOW_3));
+	   This sets fan-divs to 2, among others.
+     It will also reset the automatic temperature controlled fan
+     speed (noise) control the BIOS configured on POST and the
+     fan will be set to propably noisy full speed operation */
+		if( reset_it87 ) {
+			it87_write_value(client, IT87_REG_CONFIG, 0x80);
+		}
+		it87_write_value(client, IT87_REG_VIN_MIN(0),
+				IN_TO_REG(IT87_INIT_IN_MIN_0));
+		it87_write_value(client, IT87_REG_VIN_MAX(0),
+				IN_TO_REG(IT87_INIT_IN_MAX_0));
+		it87_write_value(client, IT87_REG_VIN_MIN(1),
+				IN_TO_REG(IT87_INIT_IN_MIN_1));
+		it87_write_value(client, IT87_REG_VIN_MAX(1),
+				IN_TO_REG(IT87_INIT_IN_MAX_1));
+		it87_write_value(client, IT87_REG_VIN_MIN(2),
+				IN_TO_REG(IT87_INIT_IN_MIN_2));
+		it87_write_value(client, IT87_REG_VIN_MAX(2),
+				IN_TO_REG(IT87_INIT_IN_MAX_2));
+		it87_write_value(client, IT87_REG_VIN_MIN(3),
+				IN_TO_REG(IT87_INIT_IN_MIN_3));
+		it87_write_value(client, IT87_REG_VIN_MAX(3),
+				IN_TO_REG(IT87_INIT_IN_MAX_3));
+		it87_write_value(client, IT87_REG_VIN_MIN(4),
+				IN_TO_REG(IT87_INIT_IN_MIN_4));
+		it87_write_value(client, IT87_REG_VIN_MAX(4),
+				IN_TO_REG(IT87_INIT_IN_MAX_4));
+		it87_write_value(client, IT87_REG_VIN_MIN(5),
+				IN_TO_REG(IT87_INIT_IN_MIN_5));
+		it87_write_value(client, IT87_REG_VIN_MAX(5),
+				IN_TO_REG(IT87_INIT_IN_MAX_5));
+		it87_write_value(client, IT87_REG_VIN_MIN(6),
+				IN_TO_REG(IT87_INIT_IN_MIN_6));
+		it87_write_value(client, IT87_REG_VIN_MAX(6),
+				IN_TO_REG(IT87_INIT_IN_MAX_6));
+		it87_write_value(client, IT87_REG_VIN_MIN(7),
+				IN_TO_REG(IT87_INIT_IN_MIN_7));
+		it87_write_value(client, IT87_REG_VIN_MAX(7),
+				IN_TO_REG(IT87_INIT_IN_MAX_7));
+		/* Note: Battery voltage does not have limit registers */
+		it87_write_value(client, IT87_REG_FAN_MIN(1),
+				FAN_TO_REG(IT87_INIT_FAN_MIN_1, 2));
+		it87_write_value(client, IT87_REG_FAN_MIN(2),
+				FAN_TO_REG(IT87_INIT_FAN_MIN_2, 2));
+		it87_write_value(client, IT87_REG_FAN_MIN(3),
+				FAN_TO_REG(IT87_INIT_FAN_MIN_3, 2));
+		it87_write_value(client, IT87_REG_TEMP_HIGH(1),
+				TEMP_TO_REG(IT87_INIT_TEMP_HIGH_1));
+		it87_write_value(client, IT87_REG_TEMP_LOW(1),
+				TEMP_TO_REG(IT87_INIT_TEMP_LOW_1));
+		it87_write_value(client, IT87_REG_TEMP_HIGH(2),
+				TEMP_TO_REG(IT87_INIT_TEMP_HIGH_2));
+		it87_write_value(client, IT87_REG_TEMP_LOW(2),
+				TEMP_TO_REG(IT87_INIT_TEMP_LOW_2));
+		it87_write_value(client, IT87_REG_TEMP_HIGH(3),
+				TEMP_TO_REG(IT87_INIT_TEMP_HIGH_3));
+		it87_write_value(client, IT87_REG_TEMP_LOW(3),
+				TEMP_TO_REG(IT87_INIT_TEMP_LOW_3));
 
-	/* Enable voltage monitors */
-	it87_write_value(client, IT87_REG_VIN_ENABLE, 0xff);
+		/* Enable voltage monitors */
+		it87_write_value(client, IT87_REG_VIN_ENABLE, 0xff);
 
-	/* Enable Temp1-Temp3 */
-	it87_write_value(client, IT87_REG_TEMP_ENABLE,
-			(it87_read_value(client, IT87_REG_TEMP_ENABLE) & 0xc0)
-			| (temp_type & 0x3f));
+		/* Enable Temp1-Temp3 */
+		it87_write_value(client, IT87_REG_TEMP_ENABLE,
+				(it87_read_value(client, IT87_REG_TEMP_ENABLE) & 0xc0)
+				| (temp_type & 0x3f));
 
-	/* Enable fans */
-	it87_write_value(client, IT87_REG_FAN_CTRL,
-			(it87_read_value(client, IT87_REG_FAN_CTRL) & 0x8f)
-			| 0x70);
-
+		/* Enable fans */
+		it87_write_value(client, IT87_REG_FAN_CTRL,
+				(it87_read_value(client, IT87_REG_FAN_CTRL) & 0x8f)
+				| 0x70);
+	}
 	/* Start monitoring */
 	it87_write_value(client, IT87_REG_CONFIG,
 			 (it87_read_value(client, IT87_REG_CONFIG) & 0xb7)
@@ -648,8 +743,8 @@ static void it87_update_client(struct i2c_client *client)
 	    (jiffies < data->last_updated) || !data->valid) {
 
 		if (update_vbat) {
-                	/* Cleared after each update, so reenable.  Value
-		   	  returned by this read will be previous value */	
+	/* Cleared after each update, so reenable.  Value
+	   returned by this read will be previous value */
 			it87_write_value(client, IT87_REG_CONFIG,
 			   it87_read_value(client, IT87_REG_CONFIG) | 0x40);
 		}
@@ -663,7 +758,7 @@ static void it87_update_client(struct i2c_client *client)
 		}
 		data->in[8] =
 		    it87_read_value(client, IT87_REG_VIN(8));
-		/* Temperature sensor doesn't have limit registers, set
+		/* VBAT sensor doesn't have limit registers, set
 		   to min and max value */
 		data->in_min[8] = 0;
 		data->in_max[8] = 255;
@@ -695,13 +790,25 @@ static void it87_update_client(struct i2c_client *client)
 		i = it87_read_value(client, IT87_REG_FAN_DIV);
 		data->fan_div[0] = i & 0x07;
 		data->fan_div[1] = (i >> 3) & 0x07;
-		data->fan_div[2] = 1;
+		data->fan_div[2] = ( (i&0x40)==0x40 ? 3 : 1 );
 
+		for( i = 1; i <= 3; i++ ) {
+			data->pwm[i-1] = it87_read_value(client, IT87_REG_PWM(i));
+			data->sg_tl[i-1][0] = it87_read_value(client, IT87_REG_SG_TL_OFF(i));
+			data->sg_tl[i-1][1] = it87_read_value(client, IT87_REG_SG_TL_LOW(i));
+			data->sg_tl[i-1][2] = it87_read_value(client, IT87_REG_SG_TL_MED(i));
+			data->sg_tl[i-1][3] = it87_read_value(client, IT87_REG_SG_TL_HI(i));
+			data->sg_tl[i-1][4] = it87_read_value(client, IT87_REG_SG_TL_OVR(i));
+			data->sg_pwm[i-1][0] = it87_read_value(client, IT87_REG_SG_PWM_LOW(i));
+			data->sg_pwm[i-1][1] = it87_read_value(client, IT87_REG_SG_PWM_MED(i));
+			data->sg_pwm[i-1][2] = it87_read_value(client, IT87_REG_SG_PWM_HI(i));
+		}
 		data->alarms =
 			it87_read_value(client, IT87_REG_ALARM1) |
 			(it87_read_value(client, IT87_REG_ALARM2) << 8) |
 			(it87_read_value(client, IT87_REG_ALARM3) << 16);
-
+		data->fan_ctl[0] = it87_read_value(client, IT87_REG_FAN_CTRL);
+		data->fan_ctl[1] = it87_read_value(client, IT87_REG_FAN_ONOFF);
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -763,19 +870,14 @@ void it87_fan(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		it87_update_client(client);
 		results[0] = FAN_FROM_REG(data->fan_min[nr - 1],
-					  DIV_FROM_REG(data->
-						       fan_div[nr - 1]));
-		results[1] =
-		    FAN_FROM_REG(data->fan[nr - 1],
+					  DIV_FROM_REG(data->fan_div[nr - 1]));
+		results[1] = FAN_FROM_REG(data->fan[nr - 1],
 				 DIV_FROM_REG(data->fan_div[nr - 1]));
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			data->fan_min[nr - 1] = FAN_TO_REG(results[0],
-							   DIV_FROM_REG
-							   (data->
-							    fan_div[nr -
-								    1]));
+							   DIV_FROM_REG(data->fan_div[nr - 1]));
 			it87_write_value(client, IT87_REG_FAN_MIN(nr),
 					 data->fan_min[nr - 1]);
 		}
@@ -806,6 +908,93 @@ void it87_temp(struct i2c_client *client, int operation, int ctl_name,
 			data->temp_low[nr - 1] = TEMP_TO_REG(results[1]);
 			it87_write_value(client, IT87_REG_TEMP_LOW(nr),
 					 data->temp_low[nr - 1]);
+		}
+	}
+}
+
+void it87_pwm(struct i2c_client *client, int operation, int ctl_name,
+	       int *nrels_mag, long *results)
+{
+	struct it87_data *data = client->data;
+	int nr = ctl_name - IT87_SYSCTL_PWM1 + 1;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		it87_update_client(client);
+		results[0] = data->pwm[nr - 1];
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->pwm[nr - 1] = results[0];
+			it87_write_value(client, IT87_REG_PWM(nr), data->pwm[nr - 1]);
+		}
+	}
+}
+
+void it87_sgpwm(struct i2c_client *client, int operation, int ctl_name,
+	       int *nrels_mag, long *results)
+{
+	struct it87_data *data = client->data;
+	int nr = ctl_name - IT87_SYSCTL_PWM1 + 1;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		it87_update_client(client);
+		results[0] = data->sg_pwm[nr - 1][0];
+		results[1] = data->sg_pwm[nr - 1][1];
+		results[2] = data->sg_pwm[nr - 1][2];
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->sg_pwm[nr - 1][0] = results[0];
+			it87_write_value(client, IT87_REG_SG_PWM_LOW(nr), data->sg_pwm[nr - 1][0]);
+		}
+		if (*nrels_mag >= 2) {
+			data->sg_pwm[nr - 1][1] = results[1];
+			it87_write_value(client, IT87_REG_SG_PWM_MED(nr), data->sg_pwm[nr - 1][1]);
+		}
+		if (*nrels_mag >= 3) {
+			data->sg_pwm[nr - 1][2] = results[2];
+			it87_write_value(client, IT87_REG_SG_PWM_HI(nr), data->sg_pwm[nr - 1][2]);
+		}
+	}
+}
+
+void it87_sgtl(struct i2c_client *client, int operation, int ctl_name,
+	       int *nrels_mag, long *results)
+{
+	struct it87_data *data = client->data;
+	int nr = ctl_name - IT87_SYSCTL_PWM1 + 1;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		it87_update_client(client);
+		results[0] = TEMP_FROM_REG(data->sg_tl[nr - 1][0]);
+		results[1] = TEMP_FROM_REG(data->sg_tl[nr - 1][1]);
+		results[2] = TEMP_FROM_REG(data->sg_tl[nr - 1][2]);
+		results[3] = TEMP_FROM_REG(data->sg_tl[nr - 1][3]);
+		results[4] = TEMP_FROM_REG(data->sg_tl[nr - 1][4]);
+		*nrels_mag = 5;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->sg_tl[nr - 1][0] = TEMP_TO_REG(results[0]);
+			it87_write_value(client, IT87_REG_SG_TL_OFF(nr), data->sg_pwm[nr - 1][0]);
+		}
+		if (*nrels_mag >= 2) {
+			data->sg_tl[nr - 1][1] = TEMP_TO_REG(results[1]);
+			it87_write_value(client, IT87_REG_SG_TL_LOW(nr), data->sg_pwm[nr - 1][1]);
+		}
+		if (*nrels_mag >= 3) {
+			data->sg_tl[nr - 1][2] = TEMP_TO_REG(results[2]);
+			it87_write_value(client, IT87_REG_SG_TL_MED(nr), data->sg_pwm[nr - 1][2]);
+		}
+		if (*nrels_mag >= 4) {
+			data->sg_tl[nr - 1][3] = TEMP_TO_REG(results[3]);
+			it87_write_value(client, IT87_REG_SG_TL_HI(nr), data->sg_pwm[nr - 1][3]);
+		}
+		if (*nrels_mag >= 5) {
+			data->sg_tl[nr - 1][4] = TEMP_TO_REG(results[4]);
+			it87_write_value(client, IT87_REG_SG_TL_OVR(nr), data->sg_pwm[nr - 1][4]);
 		}
 	}
 }
@@ -848,10 +1037,19 @@ void it87_fan_div(struct i2c_client *client, int operation, int ctl_name,
 		it87_update_client(client);
 		results[0] = DIV_FROM_REG(data->fan_div[0]);
 		results[1] = DIV_FROM_REG(data->fan_div[1]);
-		results[2] = 2;
+		results[2] = DIV_FROM_REG(data->fan_div[2]);;
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		old = it87_read_value(client, IT87_REG_FAN_DIV);
+		if (*nrels_mag >= 3) {
+			data->fan_div[2] = DIV_TO_REG(results[2]);
+			if( data->fan[2]!=3 ) {
+				data->fan_div[2] = 1;
+				old = (old & 0xbf);
+			} else {
+				old = (old | 0x40);
+			}
+		}
 		if (*nrels_mag >= 2) {
 			data->fan_div[1] = DIV_TO_REG(results[1]);
 			old = (old & 0xc3) | (data->fan_div[1] << 3);
@@ -860,6 +1058,28 @@ void it87_fan_div(struct i2c_client *client, int operation, int ctl_name,
 			data->fan_div[0] = DIV_TO_REG(results[0]);
 			old = (old & 0xf8) | data->fan_div[0];
 			it87_write_value(client, IT87_REG_FAN_DIV, old);
+		}
+	}
+}
+
+void it87_fan_ctl(struct i2c_client *client, int operation, int ctl_name,
+	       int *nrels_mag, long *results)
+{
+	struct it87_data *data = client->data;
+	int index = ctl_name - IT87_SYSCTL_FAN_CTL;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		it87_update_client(client);
+		results[0] = data->fan_ctl[index];
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->fan_ctl[index] = results[0];
+			if( index == 0 )
+				it87_write_value(client, IT87_REG_FAN_CTRL, data->fan_ctl[index] );
+			else
+				it87_write_value(client, IT87_REG_FAN_ONOFF, data->fan_ctl[index] );
 		}
 	}
 }
@@ -883,6 +1103,10 @@ MODULE_PARM(update_vbat, "i");
 MODULE_PARM_DESC(update_vbat, "Update vbat if set else return powerup value");
 MODULE_PARM(temp_type, "i");
 MODULE_PARM_DESC(temp_type, "Temperature sensor type, normally leave unset");
+MODULE_PARM(init, "i");
+MODULE_PARM_DESC(init, "Initialize the chip's registers, default yes");
+MODULE_PARM(reset_it87, "i");
+MODULE_PARM_DESC(reset_it87, "Reset the chip's registers, default no");
 
 module_init(sm_it87_init);
 module_exit(sm_it87_exit);

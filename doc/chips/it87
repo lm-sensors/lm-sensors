@@ -62,7 +62,18 @@ Module Parameters
 	thermistor	diode		thermistor	0x2a   ** default
 	thermistor	thermistor	diode		0x1c
 	thermistor	thermistor	thermistor	0x38
-
+* reset_it87: integer 1 if the registers of the chip should be reset at
+  module load time, 0 to not reset the registers. Default is 0.
+* init: integer 1 if the registers should be initialized with the module's
+  default values, 0 skip the initialization. Default is 1.
+  On some boards (e.g. the Shuttle FN41 from the Shuttle XPC Barebone)
+  the BIOS configures it87's smart temperature monitoring fan power
+  adjust feature. A reset/init would unset this and set the power of the
+  fan to maximum speed (which is very noisy). Set 'reset_it87=0' to
+  keep the registers at the preconfigured values.
+  Note: If the registers weren't preconfigured for monitoring by the BIOS
+  the monitoring will not work if you do not reset and initialize the chip's
+  registers at module load time.
 
 Description
 -----------
@@ -112,6 +123,61 @@ miss once-only alarms.
 The IT87xx only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
 
+The fan speed control features can be enabled by setting the bits 0-2 of
+the fan_ctl register to 1. (Note: bits 6-4 of this register must be set to
+1 to enable the fan monitoring).
+0x40 : enable fan speed monitoring for fan3
+0x20 : enable fan speed monitoring for fan2
+0x10 : enable fan speed monitoring for fan1
+0x04 : enable fan smart guardian mode for fan3
+0x02 : enable fan smart guardian mode for fan2
+0x01 : enable fan smart guardian mode for fan1
+If a fans smart guardian bit is not set this fan is in on-off mode
+it can be switched on or off by setting/clearing the corresponding bit 0-2
+of the second fan control register fan_on_off. This register has no effect if
+a fan is in smart guardian mode.
+0x04 : fan3 is on
+0x02 : fan2 is on
+0x01 : fan1 is on
+Bit 7 of the pwm[1-3] registers enables/disables the chips automatic
+temperature control mode for the specified fan. If Bit 7 is set the bits
+1 and 0 encode the number of the temperature sensor used for this feature.
+Possible register values are:
+0x00-0x7f direct power control for the fan speed
+0x80  automatic smart guardian mode use temperatur sensor 1,
+0x81  automatic smart guardian mode use temperatur sensor 2,
+0x82  automatic smart guardian mode use temperatur sensor 3
+In automatic smart guardian mode pwm values for low, medium and high speed
+can be set in sg_pwm[1-3]. The temperature limits for fan off, low, medium,
+hi speed and over temperature are set in sg_tl[1-3]. While the sensors
+temperature is between the low and medium speed value the fan will run in
+low speed. When the sensors temperature is between the medium and high speed
+value the fan spins in medium speed. When the sensors temperature is between
+the high speed and over temperature value the fan spins in high speed.
+If the sensors temperature is higher than the over temperature limit the
+fan will spin with the highest possible speed.
+Example:
+The preconfigured (BIOS set) values of the Shuttle XPC SN41G2 Barebone.
+The MB uses temp2 to monitor the CPU temperature and fan3 as the fan for their
+special ICE heatpipe cooling system.
+---
+$ cat fan_ctl
+116
+$ cat tan_on_off
+215
+$ cat pwm3
+129
+$ cat sg_tl3
+16.0 16.0 48.0 54.0 58.0
+$ cat sg_pwm3
+3 4 9
+---
+Explanation:
+fan_ctl -> 116 = 0x74 = 01110100 : fan monitoring on for all fans, and fan3 is in smart guardian mode.
+fan_on_off -> 215 = 0xd7 =11010111 : all fans are on this setting is ignored for fan3 which is in smart guardian mode
+pwm3 -> 129 = 0x81 = 10000001 : fan3 is in automatic mode and uses temp2 for speed control
+sg_tl3 -> 16.0 16.0 48.0 54.0 58.0 : off, low, med, high, and over temperature limits of fan3
+sg_pwm3 -> 3 4 9 : pwm values for low, medium and high fan speed of fan3.
 
 Chip features
 -------------
