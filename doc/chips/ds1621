@@ -9,6 +9,11 @@ Supported chips:
     Addresses scanned: I2C 0x48 - 0x4f (inclusive)
     Datasheet: Publicly available at the Dallas Semiconductor website
                http://www.dalsemi.com
+  * Dallas Semiconductor DS1625
+    Prefix: `ds1621'
+    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Datasheet: Publicly available at the Dallas Semiconductor website
+               http://www.dalsemi.com
 
 Author: Christian W. Zuckschwerdt <zany@triq.net>
 
@@ -49,6 +54,13 @@ The DS1621 supplies the temperature data in a format common with chips
 like the LM75, LM77 and DS75, DS1775.
 While the DS1621 has three additional bits of accuracy
 (12 vs. 9 for the LM75), the additional bits are not supported.
+
+The driver also supports the DS1625. It does not distinguish the 1625 from
+the 1621. The chip prefix in /proc is always ds1621.
+The difference in the chips is that the 1621 supports additional registers
+for greater accuracy. The driver does not use these registers.
+The DS1625 has been discontinued by Dallas Semi, they recommend the
+DS1621 for new designs.
 
 
 Chip Features

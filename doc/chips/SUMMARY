@@ -59,6 +59,8 @@ adm9240
 
 ds1621
 	ds1621		1	-	-	-	yes	no
+	  (the following chip is detected as a ds1621)
+	ds1625		1	-	-	-	yes	no
 
 gl518sm
         gl518sm (r00)	1	1-4	2	-	yes	no
