@@ -235,7 +235,7 @@ int read_bus_i2c(char *buf, char **start, off_t offset, int len, int unused)
   len = 0;
   for (i = 0; i < I2C_ADAP_MAX; i++)
     if (i2cproc_adapters[i])
-      len += sprintf(buf, "i2c-%d\t%s\t%-32s\t%-32s\n",i,
+      len += sprintf(buf+len, "i2c-%d\t%s\t%-32s\t%-32s\n",i,
                      i2c_is_smbus_adapter(i2cproc_adapters[i])?"smbus":
 #ifdef DEBUG
                        i2c_is_isa_adapter(i2cproc_adapters[i])?"isa":
@@ -385,7 +385,6 @@ int i2cproc_detach_client(struct i2c_client *client)
   char name[8];
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,29)) */
 
-  printk("OK!\n");
 #ifndef DEBUG
   if (i2c_is_isa_client(client))
     return 0;

@@ -194,7 +194,6 @@ END:
 void piix4_do_pause( unsigned int amount )
 {
       current->state = TASK_INTERRUPTIBLE;
-      current->state = TASK_INTERRUPTIBLE;
       schedule_timeout(amount);
 }
 
