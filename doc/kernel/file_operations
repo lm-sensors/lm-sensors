@@ -1,0 +1,91 @@
+This file documents the changes in struct file_operations throughout the 2.1
+kernel series.
+
+Kernels 2.0.x:
+
+struct file_operations {
+        int (*lseek) (struct inode *, struct file *, off_t, int);
+        int (*read) (struct inode *, struct file *, char *, int);
+        int (*write) (struct inode *, struct file *, const char *, int);
+        int (*readdir) (struct inode *, struct file *, void *, filldir_t);
+        int (*select) (struct inode *, struct file *, int, select_table *);
+        int (*ioctl) (struct inode *, struct file *, unsigned int, 
+                      unsigned long);
+        int (*mmap) (struct inode *, struct file *, struct vm_area_struct *);
+        int (*open) (struct inode *, struct file *);
+        void (*release) (struct inode *, struct file *);
+        int (*fsync) (struct inode *, struct file *);
+        int (*fasync) (struct inode *, struct file *, int);
+        int (*check_media_change) (kdev_t dev);
+        int (*revalidate) (kdev_t dev);
+};
+
+
+Kernel 2.1.0:
+
+-       int (*lseek) (struct inode *, struct file *, off_t, int);
++       long long (*llseek) (struct inode *, struct file *, long long, int);
+-       int (*read) (struct inode *, struct file *, char *, int);
++       long (*read) (struct inode *, struct file *, char *, unsigned long);
+-       int (*write) (struct inode *, struct file *, const char *, int);
++       long (*write) (struct inode *, struct file *, const char *, unsigned lon
+
+
+Kernel 2.1.23:
+
+-       int (*select) (struct inode *, struct file *, int, select_table *);
++       unsigned int (*poll) (struct file *, poll_table *);
+[The lock field is added behind the revalidate field]
++       int (*lock) (struct inode *, struct file *, int, struct file_lock *);
+
+
+Kernel 2.1.31:
+
+-       void (*release) (struct inode *, struct file *);
++       int (*release) (struct inode *, struct file *);
+
+
+Kernel 2.1.55:
+
+-       int (*readdir) (struct inode *, struct file *, void *, filldir_t);
++       int (*readdir) (struct file *, void *, filldir_t);
+
+
+Kernel 2.1.56:
+
+-       long long (*llseek) (struct inode *, struct file *, long long, int);
++       long long (*llseek) (struct file *, long long, int);
+-       int (*mmap) (struct inode *, struct file *, struct vm_area_struct *);
++       int (*mmap) (struct file *, struct vm_area_struct *);
+-       int (*fsync) (struct inode *, struct file *);
++       int (*fsync) (struct file *, struct dentry *);
+-       int (*fasync) (struct inode *, struct file *, int);
++       int (*fasync) (struct file *, int);
+-       int (*lock) (struct inode *, struct file *, int, struct file_lock *);
++       int (*lock) (struct file *, int, struct file_lock *);
+
+
+Kernel 2.1.70:
+
+-       long long (*llseek) (struct file *, long long, int);
++       loff_t (*llseek) (struct file *, loff_t, int);
+-       long (*read) (struct inode *, struct file *, char *, unsigned long);
++       ssize_t (*read) (struct file *, char *, size_t, loff_t *);
+-       long (*write) (struct inode *, struct file *, const char *, 
+                       unsigned long);
++       ssize_t (*write) (struct file *, const char *, size_t, loff_t *);
+
+
+Kernel 2.1.72:
+
+-       unsigned int (*poll) (struct file *, poll_table *);
++       unsigned int (*poll) (struct file *, struct poll_table_struct *);
+
+
+Kernel 2.1.118:
+
+[The flush field is added behind the open field -- stupid...]
++       int (*flush) (struct file *);
+
+
+Last kernel checked: 2.2.0-pre4.
