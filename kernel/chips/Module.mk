@@ -33,6 +33,7 @@ KERNELCHIPSTARGETS += $(MODULE_DIR)/smartbatt.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smbus-arp.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/vt8231.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/w83627hf.o
+KERNELCHIPSTARGETS += $(MODULE_DIR)/lm83.o
 
 
 # These targets ARE included in 'mkpatch', except for LTC1710, which we
