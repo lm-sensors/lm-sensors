@@ -28,7 +28,7 @@ SRCTARGETS := $(MODULE_DIR)/smbus.o $(MODULE_DIR)/piix4.o $(MODULE_DIR)/isa.o \
               $(MODULE_DIR)/i2c-proc.o $(MODULE_DIR)/gl518sm.o \
               $(MODULE_DIR)/eeprom.o $(MODULE_DIR)/w83781d.o \
               $(MODULE_DIR)/lm80.o $(MODULE_DIR)/adm1021.o \
-              $(MODULE_DIR)/adm9240.o
+              $(MODULE_DIR)/adm9240.o $(MODULE_DIR)/ltc1710.o
 
 SRCHEADERFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/isa.h \
                $(MODULE_DIR)/smbus.h
