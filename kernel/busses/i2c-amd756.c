@@ -356,7 +356,7 @@ int amd756_transaction(void)
 	return result;
 }
 
-/* Return -1 on error. See smbus.h for more information */
+/* Return -1 on error. */
 s32 amd756_access(struct i2c_adapter * adap, u16 addr,
 		  unsigned short flags, char read_write,
 		  u8 command, int size, union i2c_smbus_data * data)
