@@ -4,10 +4,9 @@
 
 OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
-This is the completely rewritten version of lm_sensors, a collection of
-modules for general SMBus access and hardware monitoring. There are quite
-a few changes compared with 1.x.y versions; 1.x.y versions are now officially
-unsupported.
+This is the completely rewritten version 2 of lm_sensors, a collection of
+modules for general SMBus access and hardware monitoring.
+Version 1 is now officially unsupported.
 
 WARNING! Starting with lm_sensors version 2.5.0, only kernels 2.2.0 and
 later are supported. Use lm_sensors version 2.4.5 if you use an older
@@ -25,14 +24,6 @@ Users of kernel 2.3.34 and later (and also all soon to be 2.4.x) kernels
 will be happy to know that the new I2C implementation has been included 
 in the kernel; you may still need to patch it with the latest version 
 if lm_sensors does not compile.
-
-WARNING! The default module installation directory changed since version
-2.2.1. If you don't change the directory in /etc/modules.conf (or
-/etc/conf.modules), modprobe will probably load the wrong ones.
-
-WARNING! Some things have changed since version 2.1.2. Most notably,
-module piix4 is renamed i2c-piix4, module isa is renamed i2c-isa,
-and module bit-mb is renamed i2c-via. You have been warned.
 
 
 At least the following I2C/SMBus adapters are supported:
@@ -86,7 +77,7 @@ Don't ask us whether we support a particular mainboard; we do not know.
 We *do* know what hardware we support, but usually, it is easier to
 install everything and run sensors-detect. It will tell you what hardware
 you have (and incidentally, what corresponding drivers are needed). You
-could also take a look at http://members.brabant.chello.nl/~a.vankaam/mbm
+could also take a look at http://mbm.livewiredev.com/
 (this lists chips found on many mainboard, but regrettable, not the adapters
 on them) or http://web01.fureai.or.jp/~hirobo/project/reserch_project.html
 (yes, it is japanese; you want the ninth column, and it again lists only
