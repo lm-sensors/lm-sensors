@@ -100,7 +100,7 @@ mtp008
 	mtp008		3	7	3	3 pwm	yes	no
 
 sis5595
-	sis5595 	1	4	2	-	no	yes
+	sis5595 	0-1	4-5	2	-	no	yes
 
 thmc50
 	adm1022		3	2	-	1 dac	yes	no
