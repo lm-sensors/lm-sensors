@@ -16,7 +16,7 @@ MACH=`uname -n`
 RRDB=$(RRDDIR)/sensors.rrd
 SENSDIR=/proc/sys/dev/sensors/$(SENSDEV)
 
-all: sens_day.cgi sens_week.cgi $(SENSDIR)
+all: sens_day.cgi sens_week.cgi summ_week.cgi $(SENSDIR)
 
 %.cgi : %.in Makefile
 	sed -e "s#%%RRDPATH%%#$(RRDPATH)#g;s#%%APACHDIR%%#$(APACHDIR)#g;s#%%RRDDIR%%#$(RRDDIR)#g;s#%%MACH%%#$(MACH)#g" $< > $@
@@ -50,4 +50,4 @@ install: all $(RRDB) $(SENSDIR) $(CRONTAB) $(APACHDIR)/pix
 	@echo '   */5 * * * *    ' /usr/local/bin/sens_update_rrd $(RRDB) $(SENSDEV)
 
 clean:
-	rm -f sens_day.cgi sens_week.cgi
+	rm -f sens_day.cgi sens_week.cgi summ_week.cgi
