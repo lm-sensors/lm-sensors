@@ -50,9 +50,6 @@ If you wish to write a driver for 2.5 only, email us for information.
   Also, please use C99 struct initializers {.foo = blat}
   Please do this _before_ you check in your driver.
 
-* Add sysctl definitions to kernel/include/sensors.h (for chip drivers only).
-  These define the entries in the ctl_table for /proc.
-
 * Meet /proc naming standards in the ctl_table (for chip drivers only).
   See doc/developers/proc for information. Please do not deviate from
   this without discussion.
@@ -75,8 +72,7 @@ If you wish to write a driver for 2.5 only, email us for information.
 
 * Test the module.
   This is usually the boring part...
-  Test with a recent 2.4 kernel, and possibly with an older one
-  (>=2.4.9).
+  Test with a recent 2.4 kernel (>=2.4.9).
 
 * Add detection information to prog/detect/sensors-detect.
   This is a perl script that automatically detects what chips and adapters
