@@ -33,8 +33,12 @@ use POSIX;
 
 # Just in case a root user doesn't have /sbin in his/her path for some reason
 # (was seen once)
-$ENV{PATH} .= '/sbin:'
+$ENV{PATH} = '/sbin:'.$ENV{PATH}
 	unless $ENV{PATH} =~ m,(^|:)/sbin/?(:|$),;
+# Same for /usr/local/sbin since we need i2cdetect which is installed there
+# by default (reported by Lennard Klein)
+$ENV{PATH} = '/usr/local/sbin:'.$ENV{PATH}
+	unless $ENV{PATH} =~ m,(^|:)/usr/local/sbin/?(:|$),;
 
 #########################
 # CONSTANT DECLARATIONS #
