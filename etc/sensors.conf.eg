@@ -596,7 +596,7 @@ chip "gl518sm-*"
   set vin3_max 2.30
   set fan1_off 0
   set fan2_min 0
-  set iterate 0
+# set iterate 2
 
 
 chip "gl520sm-*"
