@@ -1,0 +1,61 @@
+M7101 - SMBus Support for ALi M15x3 based motherboards.
+
+This module was written to enable SMBus support on ALi M15x3 chipset based
+motherboards. Although it was written for and tested on Gigabytes GA-5AX 
+it should work on any M15x3 chipset based board.
+
+Probably most people trying this software on a GA-5AX will be utterly 
+disappointed. We have seen no sensor chips on this board - only DIMMs
+were connected to the SMBus. If you are trying to make lm_sensors read
+temperature and voltage values you will be pretty lost.
+
+CAVEAT: To perform it's task this module needs to manipulate PCI-config
+data and device structures on a very low level. This bears the risk of 
+causing havoc to your system in case anything goes wrong. Use this soft-
+ware absolutely at your own risk.
+
+
+Installation:
+Untar the m7101.tgz file into an appropriate location and cd into the
+m7101 subdirectory. Then type "make" to build the module file 'm7101.o'.
+To insert it type 
+	$ insmod m7101.o 
+as root.
+
+If everything goes well (no error messages) you will see a description like
+the following when doing 'lspci -v':
+
+00:03.0 Non-VGA unclassified device: Acer Laboratories Inc. [ALi] M7101 PMU
+        Flags: medium devsel
+        I/O ports at 4000
+        I/O ports at 5000
+
+and find an entry in the proc filesystem under /proc/bus/pci/00/03.0.
+
+
+Removing the module removes the M7101 device from the proc file system
+and switches the SMBus support off.
+
+The lm_sensors software now should be able to access devices on the 
+motherboard's SMBus through the M7101. 
+
+Values for the ACPI-IO port (normally 0x4000) and the SMBus-IO port
+(normally 0x5000) can be specified using the parameters acpi_io and 
+smbus_io respectively on the insmod command line.
+
+In case the module does not load you might want to switch on debugging
+by uncommenting the second CFLAGS-line (with the -DM7101_DEBUG switch)
+in the Makefile.
+
+This module was written to activate SMBus support. I don't know neither
+have I tested wether it works with the software from the ACPI project.
+
+Note: Egcs compilers with versions below 2.95.2 do not compile properly.
+Use either 2.95.2 or gcc 2.7.2.x.
+
+I have tested this module with 2.2 kernels up to version 2.2.14.
+
+
+I wish to thank Frank Bauer for his help with this module.
+
+Burkhard Kohl (burkhard.kohl@gmx.de)
