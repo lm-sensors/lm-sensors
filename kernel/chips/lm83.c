@@ -389,6 +389,14 @@ static void lm83_update_client(struct i2c_client *client)
 			lm83_read_value(client, LM83_REG_R_REMOTE2_TEMP);
 		data->remote3_temp =
 			lm83_read_value(client, LM83_REG_R_REMOTE3_TEMP);
+		data->local_high =
+			lm83_read_value(client, LM83_REG_R_LOCAL_HIGH);
+		data->remote1_high =
+			lm83_read_value(client, LM83_REG_R_REMOTE1_HIGH);
+		data->remote2_high =
+			lm83_read_value(client, LM83_REG_R_REMOTE2_HIGH);
+		data->remote3_high =
+			lm83_read_value(client, LM83_REG_R_REMOTE3_HIGH);
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -405,8 +413,8 @@ static void lm83_local_temp(struct i2c_client *client, int operation, int
 	else if (operation == SENSORS_PROC_REAL_READ)
 	{
 		lm83_update_client(client);
-		results[0] = TEMP_FROM_REG(data->local_temp);
-		results[1] = TEMP_FROM_REG(data->local_high);
+		results[0] = TEMP_FROM_REG(data->local_high);
+		results[1] = TEMP_FROM_REG(data->local_temp);
 		*nrels_mag = 2;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE)
@@ -429,8 +437,8 @@ static void lm83_remote1_temp(struct i2c_client *client, int operation, int
 	else if (operation == SENSORS_PROC_REAL_READ)
 	{
 		lm83_update_client(client);
-		results[0] = TEMP_FROM_REG(data->remote1_temp);
-		results[1] = TEMP_FROM_REG(data->remote1_high);
+		results[0] = TEMP_FROM_REG(data->remote1_high);
+		results[1] = TEMP_FROM_REG(data->remote1_temp);
 		*nrels_mag = 2;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE)
@@ -453,8 +461,8 @@ static void lm83_remote2_temp(struct i2c_client *client, int operation, int
 	else if (operation == SENSORS_PROC_REAL_READ)
 	{
 		lm83_update_client(client);
-		results[0] = TEMP_FROM_REG(data->remote2_temp);
-		results[1] = TEMP_FROM_REG(data->remote2_high);
+		results[0] = TEMP_FROM_REG(data->remote2_high);
+		results[1] = TEMP_FROM_REG(data->remote2_temp);
 		*nrels_mag = 2;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE)
@@ -477,8 +485,8 @@ static void lm83_remote3_temp(struct i2c_client *client, int operation, int
 	else if (operation == SENSORS_PROC_REAL_READ)
 	{
 		lm83_update_client(client);
-		results[0] = TEMP_FROM_REG(data->remote3_temp);
-		results[1] = TEMP_FROM_REG(data->remote3_high);
+		results[0] = TEMP_FROM_REG(data->remote3_high);
+		results[1] = TEMP_FROM_REG(data->remote3_temp);
 		*nrels_mag = 2;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE)
