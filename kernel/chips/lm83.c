@@ -29,6 +29,7 @@
 #include <linux/slab.h>
 #include <linux/i2c.h>
 #include <linux/i2c-proc.h>
+#include <linux/init.h>
 #include "version.h"
 
 /*
