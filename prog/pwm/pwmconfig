@@ -4,7 +4,7 @@
 # Tests the pwm outputs of sensors and configures fancontrol
 #
 #    Warning!!! This program will stop your fans, one at a time,
-#    for approximately 3 seconds each!!!
+#    for approximately 5 seconds each!!!
 #    This may cause your processor temperature to rise!!!
 #    Verify that all fans are running at normal speed after this
 #    program has exited!!!
@@ -239,7 +239,7 @@ function pwmdetail()
 		then
 			echo "$pwm $S" >> $TMP2
 		fi
-		if [ "$S" = "0" -o "S" = "-1" ]
+		if [ "$S" = "0" -o "$S" = "-1" ]
 		then
 			pwmdisable $P	
 			echo "    Fan Stopped at PWM = $pwm"
