@@ -48,7 +48,7 @@ void help(void)
 {
   fprintf(stderr,"Syntax: i2cdump I2CBUS ADDRESS [MODE] [BANK [BANKREG]]\n");
   fprintf(stderr,"  MODE is 'b[yte]', 'w[ord]', 's[mbusblock], 'i[2cblock]',\n");
-  fprintf(stderr,"       or 'c[onsectutive byte address mode]' (default b)\n");
+  fprintf(stderr,"       or 'c[onsecutive byte address mode]' (default b)\n");
   fprintf(stderr,"  Append MODE with 'p' for PEC checking\n");
   fprintf(stderr,"  I2CBUS is an integer\n");
   fprintf(stderr,"  ADDRESS is an integer 0x00 - 0x7f\n");
