@@ -37,11 +37,11 @@ all :: all-kernel
 
 # Remove sensors.o possibly left from old versions
 install-kernel: all-kernel
-	if [ -n "$(KERNELTARGETS)" ] ; then \
-	  $(MKDIR) $(DESTDIR)$(MODDIR) ; \
-	  $(INSTALL) -o root -g root -m 644 $(KERNELTARGETS) $(DESTDIR)$(MODDIR) ;\
-	fi
-	$(RM) $(DESTDIR)$(MODDIR)/sensors.o
+#	if [ -n "$(KERNELTARGETS)" ] ; then \
+#	  $(MKDIR) $(DESTDIR)$(MODDIR) ; \
+#	  $(INSTALL) -o root -g root -m 644 $(KERNELTARGETS) $(DESTDIR)$(MODDIR) ;\
+#	fi
+	$(RM) $(DESTDIR)$(MODPREF)/misc/sensors.o
 
 install :: install-kernel 
 
