@@ -11,7 +11,7 @@ Supported chips:
   * Genesys Logic GL518SM release 0x80
     Prefix `gl518sm-r80'
     Addresses scanned: I2C 0x2c and 0x2d
-    Datasheet: Not available at all, as far as we know
+    Datasheet: Not available
 
 Author: Frodo Looijaard <frodol@dds.nl>
 
@@ -35,10 +35,6 @@ Module Parameters
   List of adapter,address pairs to scan additionally
 * probe_range: short array (min = 1, max = 48)
   List of adapter,start-addr,end-addr triples to scan additionally
-* readall: int
-  Enable the experimental code, which tries to find the voltages of
-  revision zero chips by slow (10 seconds) interpolation
-
 
 Description
 -----------
@@ -58,24 +54,25 @@ Measurements are guaranteed between -40 degrees and +125 degrees, with
 a resolution of 1 degree.
 
 FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
-triggered if the rotation speed has dropped below a programmable limit. FAN 
-readings can be divided by a programmable divider (1, 2, 4 or 8) to give
-the readings more range or accuracy. This is important because some FANs
-report only one 'tick' each rotation, while others report two - making
-all readings twice as high. Not all RPM values can accurately be represented,
-so some rounding is done. With a divider of 2, the lowest representable
-value is around 1900 RPM.
+triggered if the rotation speed has dropped below a programmable limit.
+In case when you have selected to turn Fan1 off, no Fan1 alarm is triggered
+if measured temperature is below 'over temperature' limit.
 
-Voltage sensors (also known as VIN sensors) report their values in volts.
-An alarm is triggered if the voltage has crossed a programmable minimum 
-or maximum limit. Note that minimum in this case always means 'closest to
+FAN readings can be divided by a programmable divider (1, 2, 4 or 8) to give
+the readings more range or accuracy. This is important because some FANs
+report only one 'tick' each rotation, while others report two.
+Not all RPM values can accurately be represented, so some rounding is done.
+With a divider of 2, the lowest representable value is around 1900 RPM.
+
+Voltage sensors (also known as VIN sensors) report their values in volts. An
+alarm is triggered if the voltage has crossed a programmable minimum or
+maximum limit. Note that minimum in this case always means 'closest to
 zero'; this is important for negative voltage measurements. The VDD input
 measures voltages between 0.000 and 5.865 volt, with a resolution of 0.023
-volt. The other inputs measure voltages between 0.000 and 4.845 volt, with
-a resolution of 0.019 volt. Note that revision 0x00 chips do not support
-reading the current voltage of any input except for VIN3; limit setting
-and alarms work fine, though. Yes, this is weird. There is experimental
-code to compute them by interpolation; see the 'readall' module parameter.
+volt. The other inputs measure voltages between 0.000 and 4.845 volt, with a
+resolution of 0.019 volt. Note that revision 0x00 chips do not support
+reading the current voltage of any input except for VIN3; limit setting and
+alarms work fine, though. There is code to compute them by iterating.
 
 When an alarm goes off, you can be warned by a beeping signal through
 your computer speaker. It is possible to enable all beeping globally,
@@ -90,10 +87,6 @@ you can easily miss once-only alarms.
 
 The GL518SM only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
-
-Not supported is the option to use only one fan, and to enable/disable the 
-speed of that fan automatically as function of the current temperature.
-
 
 Chip Features
 -------------

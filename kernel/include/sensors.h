@@ -434,6 +434,8 @@ struct sensors_chips_data {
 #define GL518_SYSCTL_FAN_DIV 2000  /* 1, 2, 4 or 8 */
 #define GL518_SYSCTL_ALARMS 2001   /* bitvector */
 #define GL518_SYSCTL_BEEP 2002     /* bitvector */
+#define GL518_SYSCTL_FAN1OFF 2003
+#define GL518_SYSCTL_ITERATE 2004
 
 #define GL518_ALARM_VDD 0x01
 #define GL518_ALARM_VIN1 0x02
