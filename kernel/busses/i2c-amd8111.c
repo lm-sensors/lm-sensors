@@ -26,11 +26,6 @@
 #error Your i2c is too old - i2c-2.7.0 or greater required!
 #endif
 
-/* kernel 2.4.9 needs this */
-#ifndef min_t
-#define min_t(type,x,y) min(type,x,y)
-#endif
-
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR ("Vojtech Pavlik <vojtech@suse.cz>");
 MODULE_DESCRIPTION("AMD8111 SMBus 2.0 driver");
