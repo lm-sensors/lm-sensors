@@ -122,7 +122,7 @@ static inline void superio_exit(void)
 #define IN_FROM_REG(val)		(((val) * 297 + 127) / 255)
 #define IN_TO_REG(val)			((val)<0?0:(val)>297?255: \
 					 ((val) * 255 + 148) / 297)
-#define IN_STATUS_FROM_REG(val)		((val) & 0x86)
+#define IN_STATUS_FROM_REG(val)		((val) & 0x97)
 
 /*
  * Temperature registers and conversions
@@ -141,7 +141,7 @@ static inline void superio_exit(void)
 #define TEMP_FROM_REG(val)		((val)&0x80 ? (val) : (val) - 128)
 #define TEMP_TO_REG(val)		((val)<-128?0x80:(val)>127?0x7F: \
 					 (val)<0?(val)+0x80:(val))
-#define TEMP_STATUS_FROM_REG(val)	((val) & 0xCE)
+#define TEMP_STATUS_FROM_REG(val)	((val) & 0xFF)
 
 struct pc87360_data {
 	struct i2c_client client;
@@ -436,6 +436,23 @@ static int pc87360_find(u8 *devid, int *address)
 		}
 
 		address[i] = val;
+
+#ifdef DEBUG
+		if (i==0) { /* Fans */
+			val = superio_inb(0x70)
+			    | (superio_inb(0x71) << 8);
+			
+			printk(KERN_DEBUG "pc87360.o: Fan 1: mon=%d "
+			       "ctrl=%d inv=%d\n", (val>>2)&1, (val>>3)&1,
+			       (val>>4)&1);
+			printk(KERN_DEBUG "pc87360.o: Fan 2: mon=%d "
+			       "ctrl=%d inv=%d\n", (val>>5)&1, (val>>6)&1,
+			       (val>>7)&1);
+			printk(KERN_DEBUG "pc87360.o: Fan 3: mon=%d "
+			       "ctrl=%d inv=%d\n", (val>>8)&1, (val>>9)&1,
+			       (val>>10)&1);
+		}
+#endif
 	}
 
 	superio_exit();
@@ -453,7 +470,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	int err = 0;
 	const char *type_name = "pc87360";
 	const char *client_name = "PC8736x chip";
-	const ctl_table *template = pc87360_dir_table_template;
+	ctl_table *template = pc87360_dir_table_template;
 
 	if (!i2c_is_isa_adapter(adapter)) {
 		return 0;
@@ -596,8 +613,13 @@ static void pc87360_update_client(struct i2c_client *client)
 
 	down(&data->update_lock);
 
-	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
+	if ((jiffies - data->last_updated > HZ * 2) ||
 	    (jiffies < data->last_updated) || !data->valid) {
+#ifdef DEBUG
+		printk(KERN_DEBUG "pc87360.o: Data update\n");
+#endif
+
+		/* Fans */
 		for (i = 0; i < data->fannr; i++) {
 			data->fan[i] = pc87360_read_value(data, 0,
 				       PC87360_REG_FAN(i));
@@ -609,10 +631,14 @@ static void pc87360_update_client(struct i2c_client *client)
 				       PC87360_REG_PWM(i));
 		}
 
+		/* Voltages */
 		for (i = 0; i < data->innr; i++) {
 			pc87360_write_value(data, 1, PC87365_REG_IN_BANK, i);
 			data->in_status[i] = pc87360_read_value(data, 1,
 			                     PC87365_REG_IN_STATUS);
+			/* Clear bits */
+			pc87360_write_value(data, 1, PC87365_REG_IN_STATUS,
+					    data->in_status[i] | 0x86);
 			if (data->in_status[i] & 0x01) {
 				data->in[i] = pc87360_read_value(data, 1,
 					      PC87365_REG_IN);
@@ -627,10 +653,14 @@ static void pc87360_update_client(struct i2c_client *client)
 					   PC87365_REG_IN_ALARMS2) << 8);
 		}
 
+		/* Temperatures */
 		for (i = 0; i < data->tempnr; i++) {
 			pc87360_write_value(data, 2, PC87365_REG_TEMP_BANK, i);
 			data->temp_status[i] = pc87360_read_value(data, 2,
 					       PC87365_REG_TEMP_STATUS);
+			/* Clear bits */
+			pc87360_write_value(data, 2, PC87365_REG_TEMP_STATUS,
+					    data->temp_status[i] | 0xCE);
 			if (data->temp_status[i] & 0x01) {
 				data->temp[i] = pc87360_read_value(data, 2,
 						PC87365_REG_TEMP);
@@ -825,8 +855,8 @@ void pc87365_temp(struct i2c_client *client, int operation, int ctl_name,
 		pc87360_update_client(client);
 		results[0] = TEMP_FROM_REG(data->temp_max[nr]);
 		results[1] = TEMP_FROM_REG(data->temp_min[nr]);
-		results[1] = TEMP_FROM_REG(data->temp_crit[nr]);
-		results[2] = TEMP_FROM_REG(data->temp[nr]);
+		results[2] = TEMP_FROM_REG(data->temp_crit[nr]);
+		results[3] = TEMP_FROM_REG(data->temp[nr]);
 		*nrels_mag = 4;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE) {
@@ -840,8 +870,8 @@ void pc87365_temp(struct i2c_client *client, int operation, int ctl_name,
 		}
 		if (*nrels_mag >= 2) {
 			data->temp_min[nr] = TEMP_TO_REG(results[1]);
-			pc87360_write_value(data, 2, PC87365_REG_TEMP_MAX,
-					    data->temp_max[nr]);
+			pc87360_write_value(data, 2, PC87365_REG_TEMP_MIN,
+					    data->temp_min[nr]);
 		}
 		if (*nrels_mag >= 3) {
 			data->temp_crit[nr] = TEMP_TO_REG(results[2]);
