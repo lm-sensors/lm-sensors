@@ -1505,6 +1505,16 @@ static sensors_chip_feature w83791d_features[] =
     { 0 }
   };
 
+static sensors_chip_feature w83l785ts_features[] =
+  {
+    { SENSORS_W83L785TS_TEMP, "temp", NOMAP, NOMAP,
+                        R, W83L785TS_SYSCTL_TEMP, VALUE(2), 0 },
+    { SENSORS_W83L785TS_TEMP_OVER, "temp_over", SENSORS_W83L785TS_TEMP,
+                        SENSORS_W83L785TS_TEMP, R,
+                        W83L785TS_SYSCTL_TEMP, VALUE(1), 0 },
+    { 0 }
+  };
+
 static sensors_chip_feature adm9240_features[] =
   { 
     { SENSORS_ADM9240_IN0, "2.5V", NOMAP, NOMAP, 
@@ -4789,6 +4799,7 @@ sensors_chip_features sensors_chip_features_list[] =
 		/* Cheat on 83627THF for now - no separate #defines */
  { SENSORS_W83627THF_PREFIX, w83782d_features },
  { SENSORS_W83791D_PREFIX, w83791d_features },
+ { SENSORS_W83L785TS_PREFIX, w83l785ts_features },
  { SENSORS_AS99127F_PREFIX, as99127f_features },
  { SENSORS_ASB100_PREFIX, asb100_features },
  { SENSORS_ADM9240_PREFIX, adm9240_features },

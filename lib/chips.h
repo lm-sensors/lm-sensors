@@ -704,6 +704,14 @@
 #define SENSORS_W83783S_SENS2 92 /* RW */
 
 
+/* W83L785TS-S chips */
+
+#define SENSORS_W83L785TS_PREFIX "w83l785ts"
+
+#define SENSORS_W83L785TS_TEMP		51 /* R */
+#define SENSORS_W83L785TS_TEMP_OVER	52 /* R for now */
+
+
 /* Analog Devices ADM9240 chips */
 
 #define SENSORS_ADM9240_PREFIX "adm9240"

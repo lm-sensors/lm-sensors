@@ -2460,6 +2460,25 @@ void print_w83781d(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_w83l785ts(const sensors_chip_name *name)
+{
+  char *label;
+  double cur, over;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_W83L785TS_TEMP, &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_W83L785TS_TEMP, &cur)
+   && !sensors_get_feature(*name, SENSORS_W83L785TS_TEMP_OVER, &over)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, over, 0, MAXONLY, 0, 0);
+      printf("\n");
+    }
+  } else
+    printf("ERROR: Can't get temperature data!\n");
+  free_the_label(&label);
+}
+
 void print_maxilife(const sensors_chip_name *name)
 {
    char  *label = NULL;
