@@ -1309,14 +1309,9 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #  addrreg: The address register
 #  datareg: The data register
 #  enter: The password sequence to write to the address register
-#  devidreg: The device ID register(s)
 #  devid: The device ID(s) we have to match (base device)
-#  logdevreg: The logical device register
 #  logdev: The logical device containing the sensors
-#  actreg (optional): The activation register within the logical device
-#  actmask (optional): The activation bit in the activation register
-#  basereg: The I/O base register within the logical device
-#  exitseq: Sequence of addr,val pairs which exits config mode
+#  exit (optional): Sequence of addr,val pairs which exits config mode
 #  alias_detect (optional): For chips which can be both on the ISA and the
 #      I2C bus, a function which detectes whether two entries are the same.
 #      The function should take three parameters: The ISA address, the
@@ -2405,6 +2400,13 @@ sub exit_superio
   outb($datareg, 0x02);
 }
 
+# The following are taken from the PNP ISA spec (so it's supposed
+# to be common to all Super I/0 chips):
+#  devidreg: The device ID register(s)
+#  logdevreg: The logical device register
+#  actreg: The activation register within the logical device
+#  actmask: The activation bit in the activation register
+#  basereg: The I/O base register within the logical device
 sub scan_superio
 {
   my ($addrreg, $datareg) = @_;
