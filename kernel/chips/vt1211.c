@@ -269,7 +269,7 @@ static void vt1211_temp(struct i2c_client *client, int operation,
 static int vt1211_id = 0;
 
 static struct i2c_driver vt1211_driver = {
-	/* name */ "SiS 5595",
+	/* name */ "VT1211 sensors driver",
 	/* id */ I2C_DRIVERID_VT1211,
 	/* flags */ I2C_DF_NOTIFY,
 	/* attach_adapter */ &vt1211_attach_adapter,

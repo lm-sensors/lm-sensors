@@ -80,20 +80,20 @@ superio_inb(int reg)
 }
 
 static inline void
-superio_select()
+superio_select(void)
 {
 	outb(DEV, REG);
 	outb(PME, VAL);
 }
 
 static inline void
-superio_enter()
+superio_enter(void)
 {
 	outb(0x55, REG);
 }
 
 static inline void
-superio_exit()
+superio_exit(void)
 {
 	outb(0xAA, REG);
 }
@@ -191,7 +191,7 @@ static void smsc47m1_pwm(struct i2c_client *client, int operation,
 static int smsc47m1_id = 0;
 
 static struct i2c_driver smsc47m1_driver = {
-	/* name */ "SiS 5595",
+	/* name */ "SMSC47M1xx fan driver",
 	/* id */ I2C_DRIVERID_SMSC47M1,
 	/* flags */ I2C_DF_NOTIFY,
 	/* attach_adapter */ &smsc47m1_attach_adapter,
