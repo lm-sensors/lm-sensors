@@ -198,22 +198,6 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
      } ,
      {
        vendid => 0x1039,
-       devid  => 0x0008,
-       func => 0,
-       procid => "Silicon Integrated Systems SIS5595",
-       driver => "i2c-sis5595",
-       match => sub {  $_[0] =~ /^SMBus SIS5595 adapter at [0-9,a-f]{4}/ },
-     } ,
-     {
-       vendid => 0x1039,
-       devid  => 0x0018,
-       func => 0,
-       procid => "Silicon Integrated Systems 85C503/5513 (LPC Bridge)",
-       driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
-     } ,
-     {
-       vendid => 0x1039,
        devid  => 0x5597,
        func => 0,
        procid => "Silicon Integrated Systems SIS5581/5582/5597/5598 (To be written - Do not use 5595 drivers)",
@@ -243,70 +227,6 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
        procid => "Silicon Integrated Systems SIS630",
        driver => "i2c-sis630",
        match => sub { $_[0] =~ /^SMBus SIS630 adapter at [0-9,a-f]{4}/ },
-     } ,
-     {
-       vendid => 0x1039,
-       devid  => 0x0645,
-       func => 0,
-       procid => "Silicon Integrated Systems SIS645",
-       driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
-     } ,
-     {
-       vendid => 0x1039,
-       devid  => 0x0646,
-       func => 0,
-       procid => "Silicon Integrated Systems SIS645DX",
-       driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
-     } ,
-     {
-       vendid => 0x1039,
-       devid  => 0x0648,
-       func => 0,
-       procid => "Silicon Integrated Systems SIS648",
-       driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
-     } ,
-     {
-       vendid => 0x1039,
-       devid  => 0x0650,
-       func => 0,
-       procid => "Silicon Integrated Systems SIS650",
-       driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
-     } ,
-     {
-       vendid => 0x1039,
-       devid  => 0x0651,
-       func => 0,
-       procid => "Silicon Integrated Systems SIS651",
-       driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
-     } ,
-     {
-       vendid => 0x1039,
-       devid  => 0x0735,
-       func => 0,
-       procid => "Silicon Integrated Systems SIS735",
-       driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
-     } ,
-     {
-       vendid => 0x1039,
-       devid  => 0x0745,
-       func => 0,
-       procid => "Silicon Integrated Systems SIS745",
-       driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
-     } ,
-     {
-       vendid => 0x1039,
-       devid  => 0x0746,
-       func => 0,
-       procid => "Silicon Integrated Systems SIS746",
-       driver => "i2c-sis645",
-       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
      } ,
      {
        vendid => 0x1039,
@@ -791,6 +711,61 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters);
        driver => "to-be-written",
        match => sub { 0 },
      } , 
+);
+
+# The following entries used to appear directly in @pci_adapters.
+# Because of the tendency of SiS chipsets to have their real PCI
+# IDs obscured, we have to qualify these with a custom detection
+# routine before we add them to the @pci_adapters list.
+#
+use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
+@pci_adapters_sis5595 = (
+     {
+       vendid => 0x1039,
+       devid  => 0x0008,
+       func => 0,
+       procid => "Silicon Integrated Systems SIS5595",
+       driver => "i2c-sis5595",
+       match => sub {  $_[0] =~ /^SMBus SIS5595 adapter at [0-9,a-f]{4}/ },
+     } ,
+);
+
+@pci_adapters_sis645 = (
+     {
+       vendid => 0x1039,
+       devid  => 0x0008,
+       func => 0,
+       procid => "Silicon Integrated Systems SIS5595",
+       driver => "i2c-sis645",
+       match => sub {  $_[0] =~ /^SiS645 SMBus adapter at [0-9,a-f]{4}/ },
+     } ,
+     {
+       vendid => 0x1039,
+       devid  => 0x0016,
+       func => 1,
+       procid => "Silicon Integrated Systems SMBus Controller",
+       driver => "i2c-sis645",
+       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
+     } ,
+     {
+       vendid => 0x1039,
+       devid  => 0x0018,
+       func => 0,
+       procid => "Silicon Integrated Systems 85C503/5513 (LPC Bridge)",
+       driver => "i2c-sis645",
+       match => sub { $_[0] =~ /^SiS645 SMBus adapter at 0x[0-9,a-f]{4}/ },
+     } ,
+);
+
+@pci_adapters_sis96x = (
+     {
+       vendid => 0x1039,
+       devid  => 0x0016,
+       func => 1,
+       procid => "Silicon Integrated Systems SMBus Controller",
+       driver => "i2c-sis96x",
+       match => sub { $_[0] =~ /^SiS96x SMBus adapter at 0x[0-9,a-f]{4}/ },
+     } ,
 );
 
 use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
@@ -1778,6 +1753,30 @@ sub initialize_conf
   }
 }
 
+# [0] -> VERSION
+# [1] -> PATCHLEVEL
+# [2] -> SUBLEVEL
+# [3] -> EXTRAVERSION
+#
+use vars qw(@kernel_version);
+
+sub initialize_kernel_version
+{
+  `uname -r` =~ /(\d+)\.(\d+)\.(\d+)(.*)/;
+  @kernel_version = ($1, $2, $3, $4);
+}
+
+sub kernel_version_at_least
+{
+  my ($vers, $plvl, $slvl) = @_;
+  return 1 if ($kernel_version[0]  > $vers ||
+                ($kernel_version[0] == $vers && 
+                  ($kernel_version[1]  > $plvl || 
+                    ($kernel_version[1] == $plvl && 
+                      ($kernel_version[2] >= $slvl)))));
+  return 0;
+}
+
 ###########
 # MODULES #
 ###########
@@ -1797,16 +1796,15 @@ sub initialize_modules_list
 # PCI ACCESS #
 ##############
 
-use vars qw(@pci_list);
+use vars qw(%pci_list);
 
-# This function returns a list of hashes. Each hash has some PCI information 
+# This function returns a hash of hashes. Each hash has some PCI information
 # (more than we will ever need, probably). The most important
 # fields are 'bus', 'slot', 'func' (they uniquely identify a PCI device in 
 # a computer) and 'vendid','devid' (they uniquely identify a type of device).
-# /proc/bus/pci/devices is only available on late 2.1 and 2.2 kernels.
 sub read_proc_dev_pci
 {
-  my ($dfn,$vend,@pci_list);
+  my ($dfn,$vend,%pci_list);
   open INPUTFILE, "/proc/bus/pci/devices" or return;
   while (<INPUTFILE>) {
     my $record = {};
@@ -1819,48 +1817,18 @@ sub read_proc_dev_pci
     $record->{func} = $dfn & 0x07;
     $record->{vendid} = $vend >> 16;
     $record->{devid} = $vend & 0xffff;
-  push @pci_list,$record;
+    
+    $pci_list{ sprintf("%04x:%04x",$record->{vendid},$record->{devid}) } =
+	$record;
   }
   close INPUTFILE or return;
-  return @pci_list;
-}
-
-# This function returns a list of hashes. Each hash has some PCI 
-# information. The important fields here are 'bus', 'slot', 'func' (they
-# uniquely identify a PCI device in a computer) and 'desc' (a functional
-# description of the PCI device). If this is an 'unknown device', the
-# vendid and devid fields are set instead.
-sub read_proc_pci
-{
-  my @pci_list;
-  open INPUTFILE, "/proc/pci" or return;
-  while (<INPUTFILE>) {
-    my $record = {};
-    if (($record->{bus},$record->{slot},$record->{func}) = 
-        /^\s*Bus\s*(\S)+\s*,\s*device\s*(\S+)\s*,\s*function\s*(\S+)\s*:\s*$/) {
-      my $desc = <INPUTFILE>;
-      $_ = <INPUTFILE>;
-      if (($desc =~ /Unknown device/) and
-              (($record->{vendid},$record->{devid}) = 
-                         /^\s*Vendor id=(\S+)\.\s*Device id=(\S+)\.$/)) {
-        $record->{vendid} = hex $record->{vendid};
-        $record->{devid} = hex $record->{devid};
-      } else {
-        $record->{desc} = $desc;
-      }
-      push @pci_list,$record;
-    }
-  }
-  close INPUTFILE or return;
-  return @pci_list;
+  return %pci_list;
 }
 
 sub initialize_proc_pci
 {
-  @pci_list = read_proc_dev_pci;
-  @pci_list = read_proc_pci     if not defined @pci_list;
-  die "Can't access either /proc/bus/pci/ or /proc/pci!" 
-                                    if not defined @pci_list;
+  %pci_list = read_proc_dev_pci;
+  die "Can't access /proc/bus/pci/devices!" if not defined %pci_list;
 }
 
 #####################
@@ -1883,12 +1851,57 @@ sub all_available_adapters
   return @res;
 }
 
+sub adapter_pci_detection_sis_96x
+{
+  my $driver="";
+
+  # first, determine which driver if any...
+  if (kernel_version_at_least(2,6,0)) {
+    if (exists $pci_list{"1039:0016"}) {
+      $driver = "i2c-sis96x";
+    } elsif (exists $pci_list{"1039:0008"}) {
+      $driver = "i2c-sis5595";
+    }
+  } elsif (kernel_version_at_least(2,4,0)) {
+    if (exists $pci_list{"1039:0008"}) {
+      if ((exists $pci_list{"1039:0645"}) ||
+          (exists $pci_list{"1039:0646"}) ||
+          (exists $pci_list{"1039:0648"}) ||
+          (exists $pci_list{"1039:0650"}) ||
+          (exists $pci_list{"1039:0651"}) ||
+          (exists $pci_list{"1039:0735"}) ||
+          (exists $pci_list{"1039:0745"}) ||
+          (exists $pci_list{"1039:0746"})) {
+        $driver = "i2c-sis645";
+      } else {
+        $driver = "i2c-sis5595";
+      }
+    } elsif ((exists $pci_list{"1039:0016"}) ||
+             (exists $pci_list{"1039:0018"})) {
+      $driver = "i2c-sis645";
+    }
+  }
+
+  # then, add the appropriate entries to @pci_adapters
+  if ($driver eq "i2c-sis5595") {
+    push @pci_adapters, @pci_adapters_sis5595;
+  } elsif ($driver eq "i2c-sis645") {
+    push @pci_adapters, @pci_adapters_sis645;
+  } elsif ($driver eq "i2c-sis96x") {
+    push @pci_adapters, @pci_adapters_sis96x;
+  }
+}
+
 sub adapter_pci_detection
 {
-  my ($device,$try,@res);
+  my ($key,$device,$try,@res);
   print "Probing for PCI bus adapters...\n";
 
-  foreach $device (@pci_list) {
+  # Custom detection routine for some SiS chipsets
+  adapter_pci_detection_sis_96x();
+
+  # Generic detection loop
+  while ( ($key, $device) = each %pci_list) {
     foreach $try (@pci_adapters) {
       if ((defined($device->{vendid}) and 
            $try->{vendid} == $device->{vendid} and
@@ -3403,7 +3416,7 @@ sub adm1021_detect
 sub sis5595_isa_detect
 {
   my ($addr) = @_;
-  my ($adapter,$try,$local_try);
+  my ($key,$adapter,$try,$local_try);
   my $found = 0;
   foreach $local_try (@pci_adapters) {
     if ($local_try->{procid} eq "Silicon Integrated Systems SIS5595") {
@@ -3415,7 +3428,7 @@ sub sis5595_isa_detect
   return if not $found;
 
   $found = 0;
-  foreach $adapter (@pci_list) {
+  while ( ($key, $adapter) = each %pci_list) {
     if ((defined($adapter->{vendid}) and 
          $try->{vendid} == $adapter->{vendid} and
          $try->{devid} == $adapter->{devid} and
@@ -3439,7 +3452,7 @@ sub sis5595_isa_detect
 sub via686a_isa_detect
 {
   my ($addr) = @_;
-  my ($adapter,$try,$local_try);
+  my ($key,$adapter,$try,$local_try);
   my $found = 0;
   foreach $local_try (@pci_adapters) {
     if ($local_try->{procid} eq "VIA Technologies VT82C686 Apollo ACPI") {
@@ -3451,7 +3464,7 @@ sub via686a_isa_detect
   return if not $found;
 
   $found = 0;
-  foreach $adapter (@pci_list) {
+  while ( ($key, $adapter) = each %pci_list) {
     if ((defined($adapter->{vendid}) and 
          $try->{vendid} == $adapter->{vendid} and
          $try->{devid} == $adapter->{devid} and
@@ -3475,7 +3488,7 @@ sub via686a_isa_detect
 sub via8231_isa_detect
 {
   my ($addr) = @_;
-  my ($adapter,$try,$local_try);
+  my ($key,$adapter,$try,$local_try);
   my $found = 0;
   foreach $local_try (@pci_adapters) {
     if ($local_try->{procid} eq "VIA Technologies VT8231 South Bridge") {
@@ -3487,7 +3500,7 @@ sub via8231_isa_detect
   return if not $found;
 
   $found = 0;
-  foreach $adapter (@pci_list) {
+  while ( ($key, $adapter) = each %pci_list) {
     if ((defined($adapter->{vendid}) and 
          $try->{vendid} == $adapter->{vendid} and
          $try->{devid} == $adapter->{devid} and
@@ -4265,6 +4278,7 @@ sub main
   initialize_conf;
   initialize_proc_pci;
   initialize_modules_list;
+  initialize_kernel_version;
 
   print "\nThis program will help you determine which I2C/SMBus modules you need to\n",
         "load to use lm_sensors most effectively. You need to have i2c and\n",
