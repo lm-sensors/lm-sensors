@@ -56,10 +56,14 @@ at all!
   SMBus emulation on i2c busses. Base algorithm, on which SMBus-only adapters
   rely.
 
-(src) piix4: smbus i2c-core
+(src) i2c-piix4: smbus i2c-core
   PIIX4 SMBus access.
 
-(src) isa: i2c-core
+(src) i2c-via: algo-bit i2c-core
+  VIA VT82C586B bus access. This is often used instead of the PIIX4 as SMBus
+  host.
+
+(src) i2c-isa: i2c-core
   Defines the ISA bus as being a I2C adapter. It isn't, of course; but this is
   often used by sensor client modules, to keep the code small and simple.
 
@@ -87,10 +91,6 @@ at all!
     i2c_debug (i) debug level - 0 off; 1 normal; 2,3 more verbose; 
                   9 bit-protocol
 
-(i2c) bit-mb: algo-bit i2c-core
-  VIA VT82C586B bus access. This is often used instead of the PIIX4 as SMBus
-  host.
-
 (i2c) bit-lp: algo-bit i2c-core
   I2C bus through the parallel port, Philips interface
   Do not insert this module unless you are sure you have this interface;
@@ -108,9 +108,6 @@ at all!
 (i2c) i2c-dev: i2c-core
   /dev interface for I2C adapters. This will be superseded by a module which
   will also implement SMBus access.
-
-(i2c) hw-monitor: ???
-  Old skeleton driver for GL518SM. Superseded by the gl518sm module.
 
 Several other modules are not yet ported by Simon Vogl. They are mostly in
 i2c/old-code.

@@ -11,7 +11,7 @@ MOD_SUB_DIRS = drivers
 #MX_OBJS       = i2c-core.o algo-bit.o i2c-dev.o bit-lp.o bit-velle.o algo-pcf.o
 MX_OBJS       = i2c-core.o algo-bit.o i2c-dev.o
 
-M_OBJS      = bit-lp.o bit-velle.o bit-via.o
+M_OBJS      = bit-lp.o bit-velle.o
 EXTRA_CFLAGS = -Wno-unused
 
 here:

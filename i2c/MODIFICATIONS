@@ -11,6 +11,12 @@ The current version of Simon's code is called mod-19990118.tar.gz.
 
 Here come the changes:
 
+! Renamed #define HW_B_MB to HW_B_VIA in i2c.h
+ 
+* Moved files: bit-via.c and README.bit-via
+  These are now under lm_sensors source tree as
+   kernel/busses/i2c-via.c and doc/busses/i2c-via
+
 * EXPORT_SYMBOL declarations put between #ifdef statements
   They only work if you use the Linux source tree Makefiles. As we want to
   use our own Makefile, we have removed them. This should have almost no

@@ -23,8 +23,8 @@ MODULE_DIR := i2c
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 I2CTARGETS := $(MODULE_DIR)/i2c-core.o  $(MODULE_DIR)/algo-bit.o \
-              $(MODULE_DIR)/bit-lp.o \
-              $(MODULE_DIR)/bit-velle.o $(MODULE_DIR)/bit-via.o
+              $(MODULE_DIR)/bit-lp.o    $(MODULE_DIR)/bit-velle.o
+
 I2CADDTARGETS := $(MODULE_DIR)/i2c-dev.o
 
 I2CHEADERFILES := $(MODULE_DIR)/i2c.h

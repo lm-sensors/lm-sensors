@@ -8,7 +8,6 @@ Currently, the following modules are running in the new mode:
 	algo-bit.c	- Algorithms for bit banging
 	bit-lp.c	- hw part for parallel port adapter, Philips interface
 	bit-velle.c	- hw part for parallel port adapter, Vellemann K9000
-	bit-mb		- VIA Chipset motherboards' SMBus -> see README.bitmb
 
 The other modules, esp. algo-pcf.c still need to be converted. For the
 hw specific mods, this should be relatively easy & quick.

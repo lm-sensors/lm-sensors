@@ -22,7 +22,8 @@ MODULE_DIR := kernel/busses
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-KERNELBUSSESTARGETS := $(MODULE_DIR)/i2c-piix4.o $(MODULE_DIR)/i2c-isa.o
+KERNELBUSSESTARGETS := $(MODULE_DIR)/i2c-piix4.o $(MODULE_DIR)/i2c-isa.o \
+		       $(MODULE_DIR)/i2c-via.o
 
 # Include all dependency files
 INCLUDEFILES += $(KERNELBUSSESTARGETS:.o=.d)
