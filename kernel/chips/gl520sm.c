@@ -248,9 +248,6 @@ static ctl_table gl520_dir_table_template[] = {
 	{0}
 };
 
-/* I choose here for semi-static GL520SM allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
 static int gl520_id = 0;
 
 static int gl520_attach_adapter(struct i2c_adapter *adapter)

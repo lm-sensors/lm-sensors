@@ -156,9 +156,6 @@ static void adm1025_vid(struct i2c_client *client, int operation,
 static void adm1025_vrm(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
-/* I choose here for semi-static ADM1025 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
 static int adm1025_id = 0;
 
 static struct i2c_driver adm1025_driver = {

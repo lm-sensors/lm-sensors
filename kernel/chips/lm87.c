@@ -266,9 +266,6 @@ static void lm87_vid(struct i2c_client *client, int operation,
 static void lm87_vrm(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
-/* I choose here for semi-static LM87 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
 static int lm87_id = 0;
 
 static struct i2c_driver LM87_driver = {

@@ -177,9 +177,6 @@ static ctl_table adm1021_max_dir_table_template[] = {
 	{0}
 };
 
-/* I choose here for semi-static allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
 static int adm1021_id = 0;
 
 static int adm1021_attach_adapter(struct i2c_adapter *adapter)

@@ -184,9 +184,6 @@ static ctl_table saa1064_dir_table_template[] = {
 	{0}
 };
 
-/* I choose here for semi-static SAA1064 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
 static int saa1064_id = 0;
 
 static int saa1064_attach_adapter(struct i2c_adapter *adapter)

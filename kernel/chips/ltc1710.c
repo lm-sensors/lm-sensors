@@ -119,9 +119,6 @@ static ctl_table ltc1710_dir_table_template[] = {
 	{0}
 };
 
-/* I choose here for semi-static LTC1710 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
 static int ltc1710_id = 0;
 
 static int ltc1710_attach_adapter(struct i2c_adapter *adapter)

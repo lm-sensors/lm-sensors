@@ -214,9 +214,6 @@ static void adm9240_analog_out(struct i2c_client *client, int operation,
 static void adm9240_vid(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 
-/* I choose here for semi-static ADM9240 allocation. Complete dynamic
-   allocation could also be used; the code needed for this would probably
-   take more memory than the datastructure takes now. */
 static int adm9240_id = 0;
 
 static struct i2c_driver adm9240_driver = {
