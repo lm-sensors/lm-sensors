@@ -32,27 +32,30 @@ $temp = "mkpatch/.temp";
 sub print_diff
 {
   my ($package_root,$kernel_root,$kernel_file,$package_file) = @_;
-  my ($diff_command,$dummy);
+  my ($diff_command,$package_mtime,$kernel_mtime);
 
   $diff_command = "diff -u";
   if ( -e "$kernel_root/$kernel_file") {
-    $diff_command .= " $kernel_root/$kernel_file ";
-  } else {
-    $diff_command .= " /dev/null ";
-  }
-  if ( -e "$package_root/$package_file") {
-    $diff_command .= " $package_root/$package_file ";
+    $diff_command .= " $kernel_root/$kernel_file";
+    $kernel_mtime = (stat("$kernel_root/$kernel_file"))[9];
   } else {
     $diff_command .= " /dev/null";
+    $kernel_mtime = 0;
+  }
+  if ( -e "$package_root/$package_file") {
+    $diff_command .= " $package_root/$package_file";
+    $package_mtime = (stat("$package_root/$package_file"))[9];
+  } else {
+    $diff_command .= " /dev/null";
+    $package_mtime = 0;
   }
   open INPUT, "$diff_command|" or die "Can't execute `$diff_command'";
-  $dummy = <INPUT>;
-  $dummy = <INPUT>;
-  print "--- linux-old/$kernel_file\t".`date`;
-  print "+++ linux/$kernel_file\t".`date`;
-    
-  while (<INPUT>) {
-    print;
+  if (<INPUT>) {
+    <INPUT>;
+    print "--- linux-old/$kernel_file\t".gmtime($kernel_mtime)."\n".
+          "+++ linux/$kernel_file\t".gmtime($package_mtime)."\n";
+
+    print while <INPUT>;
   }
   close INPUT;
 }
