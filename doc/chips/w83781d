@@ -195,8 +195,8 @@ One user has reported problems with fans stopping
 occasionally.
 
 Note that the individual beep bits are inverted from the other chips.
-That is, in the second entry in the 'beep' file, a '1' bit means
-disable, not enable. This may be changed in the future.
+The driver now takes care of this so that user-space applications
+don't have to know about it.
 
 Known problems:
 	- Problems with diode/thermistor settings (supported?)

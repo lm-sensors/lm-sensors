@@ -207,8 +207,8 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define ALARMS_FROM_REG(val) (val)
 #define PWM_FROM_REG(val) (val)
 #define PWM_TO_REG(val) (SENSORS_LIMIT((val),0,255))
-#define BEEPS_FROM_REG(val) (val)
-#define BEEPS_TO_REG(val) ((val) & 0xffffff)
+#define BEEPS_FROM_REG(val,type) ((type)==as99127f?(val)^0x7FFF:(val))
+#define BEEPS_TO_REG(val,type) ((type)==as99127f?(~(val))&0x7FFF:(val)&0xffffff)
 
 #define BEEP_ENABLE_TO_REG(val)   ((val)?1:0)
 #define BEEP_ENABLE_FROM_REG(val) ((val)?1:0)
@@ -1711,11 +1711,11 @@ void w83781d_beep(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83781d_update_client(client);
 		results[0] = BEEP_ENABLE_FROM_REG(data->beep_enable);
-		results[1] = BEEPS_FROM_REG(data->beeps);
+		results[1] = BEEPS_FROM_REG(data->beeps, data->type);
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 2) {
-			data->beeps = BEEPS_TO_REG(results[1]);
+			data->beeps = BEEPS_TO_REG(results[1], data->type);
 			w83781d_write_value(client, W83781D_REG_BEEP_INTS1,
 					    data->beeps & 0xff);
 			if ((data->type != w83781d) &&
