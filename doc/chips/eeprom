@@ -164,3 +164,39 @@ Notes:
 The script assumes that Perl can be found at /usr/bin/perl.  If different,
 you will need to adjust the first line of the file accordingly, or else
 you will get a strange "decode-vaio.pl: no such file or directory" error.
+
+
+Decode-edid.pl
+
+This Perl script acts as an interface between the eeprom module and
+parse-edid, which is part of read-edid. Read-edid is a tool for gathering
+information on VESA PNP monitors. It is somewhat similar to what our
+ddcmon driver does, except that ddcmon outputs user-oriented data while
+read-edid generates a a computer oriented configuration file (primarily
+for XFree86).
+
+Read-edid is made of two components, get-edid which retrieves binary data
+from the monitor, and parse-edid which decodes the data into useful
+information. Get-edid uses low level functions, and relies on compliance
+of both the video card and the monitor to some standard (DCC as it is
+called). It may not work for everyone. On the other hand, some video
+cards make this information available on an I2C bus and we are able to
+get it using our eeprom module. That's why we wrote this script that
+converts the data as exported by our eeprom module into what parse-edid
+expects from get-edid. That way, users who can't get get-edid to work
+still have a chance to be able to retrieve the wanted information thanks
+to the lm_sensors modules and tools.
+
+Use:
+
+Unload the ddcmon if it was loaded, load the eeprom module instead. Then,
+run the script. The script will try to figure out on which I2C bus and at
+which address is the eeprom, but it may fail. In this case, you can pass
+the parameters to the script. Examples:
+
+  decode-edid.pl 1
+  decode-edid.pl 2 0x50
+
+You will find additional details in the script itself. Read-edid is avilable
+there:
+  http://john.fremlin.de/programs/linux/read-edid/
