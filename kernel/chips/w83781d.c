@@ -1378,7 +1378,11 @@ static void w83781d_init_client(struct i2c_client *client)
 		if (type != w83781d) {
 			/* enable comparator mode for temp2 and temp3 so
 		           alarm indication will work correctly */
-			w83781d_write_value(client, W83781D_REG_IRQ, 0x41);
+			i = w83781d_read_value(client, W83781D_REG_IRQ);
+			if (!(i & 0x40))
+				w83781d_write_value(client, W83781D_REG_IRQ,
+						    i | 0x40);
+
 			for(i = 0; i < 3; i++)
 				data->pwmenable[i] = 1;
 		}

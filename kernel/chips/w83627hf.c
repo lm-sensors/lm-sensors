@@ -916,7 +916,10 @@ static void w83627hf_init_client(struct i2c_client *client)
 		}
 		/* enable comparator mode for temp2 and temp3 so
 	           alarm indication will work correctly */
-		w83627hf_write_value(client, W83781D_REG_IRQ, 0x41);
+		i = w83627hf_read_value(client, W83781D_REG_IRQ);
+		if (!(i & 0x40))
+			w83627hf_write_value(client, W83781D_REG_IRQ,
+					    i | 0x40);
 	}
 
 	/* Start monitoring */
