@@ -640,7 +640,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             lm87_detect ite_detect ite_isa_detect ite_alias_detect
             ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect
             fscscy_detect pcf8591_detect arp_detect ipmi_kcs_detect
-            ipmi_smic_detect );
+            ipmi_smic_detect via8231_isa_detect );
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -895,6 +895,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "via686a",
        isa_addrs => [ 0 ],
        isa_detect => sub { via686a_isa_detect @_ },
+     },
+     {
+       name => "VIA Technologies VT8231 Integrated Sensors",
+       driver => "via686a",
+       isa_addrs => [ 0 ],
+       isa_detect => sub { via8231_isa_detect @_ },
      },
      {
        name => "ITE IT8705F / IT8712F / SiS 950",
@@ -2276,6 +2282,42 @@ sub via686a_isa_detect
   my $found = 0;
   foreach $local_try (@pci_adapters) {
     if ($local_try->{procid} eq "VIA Technologies VT82C686 Apollo ACPI") {
+      $try = $local_try;
+      $found = 1;
+      last;
+    }
+  }
+  return if not $found;
+
+  $found = 0;
+  foreach $adapter (@pci_list) {
+    if ((defined($adapter->{vendid}) and 
+         $try->{vendid} == $adapter->{vendid} and
+         $try->{devid} == $adapter->{devid} and
+         $try->{func} == $adapter->{func}) or
+        (! defined($adapter->{vendid}) and
+         $adapter->{desc} =~ /$try->{procid}/ and
+         $try->{func} == $adapter->{func})) {
+      $found = 1;
+      last;
+    }
+  }
+  return if not $found;
+
+  return 9;
+}
+
+# $_[0]: Address
+# Returns: undef if not detected, (9) if detected.
+# Note: It is already 99% certain this chip exists if we find the PCI
+# entry. The exact address is encoded in PCI space.
+sub via8231_isa_detect
+{
+  my ($addr) = @_;
+  my ($adapter,$try,$local_try);
+  my $found = 0;
+  foreach $local_try (@pci_adapters) {
+    if ($local_try->{procid} eq "VIA Technologies VT8231 South Bridge") {
       $try = $local_try;
       $found = 1;
       last;
