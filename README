@@ -14,9 +14,12 @@ the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
 
 WARNING! Many things have changed sinse version 2.4.0. Most importantly,
-you will need to download the i2c package separately. You can find it
-at the same place as where you downloaded lm_sensors: 
+you need the i2c package.  It should have come bundled with lm_sensors,
+but you may need to download it separately at:
   http://www.netroedge.com/~lm78
+Users of newer 2.3.x (and soon to be 2.4.x) kernels will be happy to know
+that the new I2C implementation has been included in the kernel, but you
+can still patch it with the latest version (see i2c/mkpatch/mkpatch.pl).
 
 WARNING! The default module installation directory changed since version
 2.2.1. If you don't change the directory in /etc/modules.conf (or
