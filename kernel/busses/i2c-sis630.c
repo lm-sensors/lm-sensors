@@ -221,7 +221,7 @@ int sis630_transaction(int size) {
 			"Resetting...\n",temp);
 #endif
 		/* kill smbus transaction */
-		sis630_write(SMBHOST_CNT, 0x02);
+		sis630_write(SMBHOST_CNT, 0x20);
 
 		if ((temp = sis630_read(SMB_CNT) & 0x03) != 0x00) {
 #ifdef DEBUG
