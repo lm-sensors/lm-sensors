@@ -47,10 +47,13 @@ measured. It is suggested to increase the fan divisor in this case.
 PWM values are from 0 to 255.
 
 Temperatures are reported in degrees Celcius. Each temperature measured has
-associated low limit, high limit and overtemperature limit, each of which
-triggers an alarm when crossed.
+associated low, limit and overtemperature limits, each of which triggers an
+alarm when crossed.
 
-Voltages are reported relatively to a relative voltage, either internal or
+The first two temperature channels are external. The third one (PC87366
+only) is internal.
+
+Voltages are reported relatively to a reference voltage, either internal or
 external. Some of them are divided by two internally, you will have to
 compensate in sensors.conf. Each voltage measured has associated low and
 high limit, each of which triggers an alarm when crossed.
