@@ -11,11 +11,31 @@ See TODO in the i2c package.
 KERNEL MODULES
 ==============
 
+* Assistance on how to fix module refcounting is welcome.
+  To my understanding, it does not handle client->adapter->owner
+  correctly now, and it is possible to rmmod adapter while one of its
+  clients is in use.
+
+* mkpatch. Trace back Configure changes from 2.5 tree and
+  have it make clean diffs.
+  Applies to both i2c and sensors.
+
+* ACPI and SMBus host
+ - ACPI subsystem may access SMBus host too. Locks?
+ - On my ancient board using i2c-via, suspend and power switch status
+   seems to be in the same register with SCL and SDA.
+
+* Suspend-to-disk, losing Vcc
+ - Reset i2c client to avoid alarms and SCI interrupts. Currently
+   sensors do not create interrupt with alarms.
+
+* Return from suspend
+ - Reinitialize i2c client.
+
 * 2.4 / 2.5 cleanup
   See adm1021, lm75, i2c-amd756, and i2c-amd8111 in kernel 2.5.54 for examples
-	- Remove inc_use and dec_use in adapters and chips...
+	- Remove inc_use and dec_use in adapters and chips, convert to owner.
 	  Modules shouldn't adjust their own refcounts.
-	  Do we need to move this elsewhere or just remove?
 	- Convert PCI drivers to use pci_driver structs,
 	  registration, etc.
 	- Use module_init and module_exit
@@ -26,6 +46,7 @@ KERNEL MODULES
 	- Remove #ifdef MODULE, THIS_MODULE, MODULE_LICENSE, etc.
 	- Remove EXPORT_NO_SYMBOLS
 	- Remove other 2.1/2.2 #ifdefs
+
 * Handle -1 returns from i2c layer rather than just delivering 0xFF to
   /proc and libsensors; report errors through /proc 'alarms' or
   new 'fail' entry?
