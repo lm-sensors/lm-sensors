@@ -1,9 +1,10 @@
 /*
     adm1025.c - Part of lm_sensors, Linux kernel modules for hardware
                monitoring
-    Add by Gordon Wu <gwu@esoft.com> according to the adm9240.c written by
-    Frodo Looijaard <frodol@dds.nl>
-    and Philip Edelbrock <phil@netroedge.com>
+    Copyright (c) 2000 Chen-Yuan Wu <gwu@esoft.com>
+    Copyright (c) 2003 Jean Delvare <khali@linux-fr.org>
+
+    Based on the adm9240 driver.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +21,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* Supports the Analog Devices ADM1025. See doc/chips/adm1025 for details */
+/* Supports the Analog Devices ADM1025 and the Philips NE1619.
+   See doc/chips/adm1025 for details */
 
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -49,101 +51,80 @@ SENSORS_INSMOD_1(adm1025);
 
 /* Many ADM1025 constants specified below */
 
-#define ADM1025_REG_IN_MAX(nr) (0x2b + (nr) * 2)
-#define ADM1025_REG_IN_MIN(nr) (0x2c + (nr) * 2)
-#define ADM1025_REG_IN(nr) (0x20 + (nr))
 
 /* The ADM1025 registers */
-#define ADM1025_REG_TEST 0x15
+
 /* These are all read-only */
-#define ADM1025_REG_2_5V 0x20
-#define ADM1025_REG_VCCP1 0x21
-#define ADM1025_REG_3_3V 0x22
-#define ADM1025_REG_5V 0x23
-#define ADM1025_REG_12V 0x24
-#define ADM1025_REG_VCC 0x25
-#define ADM1025_REG_RTEMP 0x26
-#define ADM1025_REG_TEMP 0x27
-#define ADM1025_REG_COMPANY_ID 0x3E	/* 0x41 for ADM1025 */
-#define ADM1025_REG_DIE_REV 0x3F
+#define ADM1025_REG_2_5V        0x20 /* not used directly, see   */
+#define ADM1025_REG_VCCP1       0x21 /* ADM1025_REG_IN(nr) below */
+#define ADM1025_REG_3_3V        0x22
+#define ADM1025_REG_5V          0x23
+#define ADM1025_REG_12V         0x24
+#define ADM1025_REG_VCC         0x25
+
+#define ADM1025_REG_RTEMP       0x26 /* not used directly, see     */
+#define ADM1025_REG_LTEMP       0x27 /* ADM1025_REG_TEMP(nr) below */
+
+#define ADM1025_REG_COMPANY_ID  0x3E /* 0x41 for Analog Devices,
+                                        0xA1 for Philips */
+#define ADM1025_REG_DIE_REV     0x3F /* 0x20-0x2F for ADM1025 and compatible */
+
+#define ADM1025_REG_STATUS1     0x41
+#define ADM1025_REG_STATUS2     0x42
+
+#define ADM1025_REG_VID         0x47
+#define ADM1025_REG_VID4        0x49 /* actually R/W
+                                        but we don't write to it */
+
 /* These are read/write */
-#define ADM1025_REG_2_5V_HIGH 0x2B
-#define ADM1025_REG_2_5V_LOW 0x2C
-#define ADM1025_REG_VCCP1_HIGH 0x2D
-#define ADM1025_REG_VCCP1_LOW 0x2E
-#define ADM1025_REG_3_3V_HIGH 0x2F
-#define ADM1025_REG_3_3V_LOW 0x30
-#define ADM1025_REG_5V_HIGH 0x31
-#define ADM1025_REG_5V_LOW 0x32
-#define ADM1025_REG_12V_HIGH 0x33
-#define ADM1025_REG_12V_LOW 0x34
-#define ADM1025_REG_VCC_HIGH 0x35
-#define ADM1025_REG_VCC_LOW 0x36
-#define ADM1025_REG_RTEMP_HIGH 0x37	
-#define ADM1025_REG_RTEMP_LOW 0x38	
-#define ADM1025_REG_TEMP_HIGH 0x39
-#define ADM1025_REG_TEMP_LOW 0x3A
+#define ADM1025_REG_2_5V_HIGH   0x2B /* not used directly, see       */
+#define ADM1025_REG_2_5V_LOW    0x2C /* ADM1025_REG_IN_MAX(nr) and   */
+#define ADM1025_REG_VCCP1_HIGH  0x2D /* ADM1025_REG_IN_MIN(nr) below */
+#define ADM1025_REG_VCCP1_LOW   0x2E
+#define ADM1025_REG_3_3V_HIGH   0x2F
+#define ADM1025_REG_3_3V_LOW    0x30
+#define ADM1025_REG_5V_HIGH     0x31
+#define ADM1025_REG_5V_LOW      0x32
+#define ADM1025_REG_12V_HIGH    0x33
+#define ADM1025_REG_12V_LOW     0x34
+#define ADM1025_REG_VCC_HIGH    0x35
+#define ADM1025_REG_VCC_LOW     0x36
 
-#define ADM1025_REG_CONFIG 0x40
-#define ADM1025_REG_INT1_STAT 0x41
-#define ADM1025_REG_INT2_STAT 0x42
+#define ADM1025_REG_RTEMP_HIGH  0x37 /* not used directly, see         */
+#define ADM1025_REG_RTEMP_LOW   0x38 /* ADM1025_REG_TEMP_MAX(nr) and   */
+#define ADM1025_REG_LTEMP_HIGH  0x39 /* ADM1025_REG_TEMP_MIN(nr) below */
+#define ADM1025_REG_LTEMP_LOW   0x3A
 
-#define ADM1025_REG_VID 0x47
-#define ADM1025_REG_VID4 0x49
+#define ADM1025_REG_CONFIG      0x40
+
+/* Useful macros */
+#define ADM1025_REG_IN(nr)        (ADM1025_REG_2_5V + (nr))
+#define ADM1025_REG_IN_MAX(nr)    (ADM1025_REG_2_5V_HIGH + (nr) * 2)
+#define ADM1025_REG_IN_MIN(nr)    (ADM1025_REG_2_5V_LOW + (nr) * 2)
+#define ADM1025_REG_TEMP(nr)      (ADM1025_REG_RTEMP + (nr))
+#define ADM1025_REG_TEMP_HIGH(nr) (ADM1025_REG_RTEMP_HIGH + (nr) * 2)
+#define ADM1025_REG_TEMP_LOW(nr)  (ADM1025_REG_RTEMP_LOW + (nr) * 2)
 
 /* Conversions. Rounding and limit checking is only done on the TO_REG
    variants. Note that you should be a bit careful with which arguments
    these macros are called: arguments may be evaluated more than once.
    Fixing this is just not worth it. */
-#define IN_TO_REG(val,nr) (SENSORS_LIMIT(((val) & 0xff),0,255))
-#define IN_FROM_REG(val,nr) (val)
+#define IN_TO_REG(val) (SENSORS_LIMIT(((val) & 0xff),0,255))
+#define IN_FROM_REG(val) (val)
 
-#define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
-#define TEMP_LIMIT_FROM_REG(val) TEMP_FROM_REG(val)
-#define TEMP_LIMIT_TO_REG(val) SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
-                                                      ((val)+5)/10), 0, 255)
+#define TEMP_FROM_REG(val) (((val)>=0x80?(val)-0x100:(val))*10)
+#define TEMP_TO_REG(val) SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
+                                                 ((val)+5)/10),0,255)
 
 #define ALARMS_FROM_REG(val) (val)
 
-/* Initial limits */
-#define ADM1025_INIT_IN_0 190
-#define ADM1025_INIT_IN_1 190
-#define ADM1025_INIT_IN_2 190
-#define ADM1025_INIT_IN_3 190
-#define ADM1025_INIT_IN_4 190
-#define ADM1025_INIT_IN_5 190
+/* Initial limits (10% deviation) */
+#define ADM1025_INIT_IN 192
+#define ADM1025_INIT_IN_MIN ((ADM1025_INIT_IN *  9 + 5) / 10)
+#define ADM1025_INIT_IN_MAX ((ADM1025_INIT_IN * 11 + 5) / 10)
 
-#define ADM1025_INIT_IN_PERCENTAGE 10
-
-#define ADM1025_INIT_IN_MIN_0 \
-        (ADM1025_INIT_IN_0 - ADM1025_INIT_IN_0 * ADM1025_INIT_IN_PERCENTAGE / 100)
-#define ADM1025_INIT_IN_MAX_0 \
-        (ADM1025_INIT_IN_0 + ADM1025_INIT_IN_0 * ADM1025_INIT_IN_PERCENTAGE / 100)
-#define ADM1025_INIT_IN_MIN_1 \
-        (ADM1025_INIT_IN_1 - ADM1025_INIT_IN_1 * ADM1025_INIT_IN_PERCENTAGE / 100)
-#define ADM1025_INIT_IN_MAX_1 \
-        (ADM1025_INIT_IN_1 + ADM1025_INIT_IN_1 * ADM1025_INIT_IN_PERCENTAGE / 100)
-#define ADM1025_INIT_IN_MIN_2 \
-        (ADM1025_INIT_IN_2 - ADM1025_INIT_IN_2 * ADM1025_INIT_IN_PERCENTAGE / 100)
-#define ADM1025_INIT_IN_MAX_2 \
-        (ADM1025_INIT_IN_2 + ADM1025_INIT_IN_2 * ADM1025_INIT_IN_PERCENTAGE / 100)
-#define ADM1025_INIT_IN_MIN_3 \
-        (ADM1025_INIT_IN_3 - ADM1025_INIT_IN_3 * ADM1025_INIT_IN_PERCENTAGE / 100)
-#define ADM1025_INIT_IN_MAX_3 \
-        (ADM1025_INIT_IN_3 + ADM1025_INIT_IN_3 * ADM1025_INIT_IN_PERCENTAGE / 100)
-#define ADM1025_INIT_IN_MIN_4 \
-        (ADM1025_INIT_IN_4 - ADM1025_INIT_IN_4 * ADM1025_INIT_IN_PERCENTAGE / 100)
-#define ADM1025_INIT_IN_MAX_4 \
-        (ADM1025_INIT_IN_4 + ADM1025_INIT_IN_4 * ADM1025_INIT_IN_PERCENTAGE / 100)
-#define ADM1025_INIT_IN_MIN_5 \
-        (ADM1025_INIT_IN_5 - ADM1025_INIT_IN_5 * ADM1025_INIT_IN_PERCENTAGE / 100)
-#define ADM1025_INIT_IN_MAX_5 \
-        (ADM1025_INIT_IN_5 + ADM1025_INIT_IN_5 * ADM1025_INIT_IN_PERCENTAGE / 100)
-
-#define ADM1025_INIT_RTEMP_MAX 600
-#define ADM1025_INIT_RTEMP_MIN 0
-#define ADM1025_INIT_TEMP_MAX 600
-#define ADM1025_INIT_TEMP_MIN 0
+#define ADM1025_INIT_TEMP_HIGH 650
+#define ADM1025_INIT_TEMP_LOW 50
 
 /* For each registered ADM1025, we need to keep some data in memory. That
    data is pointed to by adm1025_list[NR]->data. The structure itself is
@@ -154,21 +135,18 @@ struct adm1025_data {
 	enum chips type;
 
 	struct semaphore update_lock;
-	char valid;		/* !=0 if following fields are valid */
-	unsigned long last_updated;	/* In jiffies */
+	char valid;	              /* !=0 if following fields are valid */
+	unsigned long last_updated;   /* In jiffies */
 
-	u8 in[6];		/* Register value */
-	u8 in_max[6];		/* Register value */
-	u8 in_min[6];		/* Register value */
-	u8 rtemp;		/* Register value */
-	u8 rtemp_max;		/* Register value */
-	u8 rtemp_min;		/* Register value */
-	u8 temp;		/* Register value */
-	u8 temp_max;		/* Register value */
-	u8 temp_min;		/* Register value */
-	u16 alarms;		/* Register encoding, combined */
-	u8 analog_out;		/* Register value */
-	u8 vid;			/* Register value combined */
+	u8 in[6];               /* Register value */
+	u8 in_max[6];           /* Register value */
+	u8 in_min[6];           /* Register value */
+	u8 temp[2];             /* Register value */
+	u8 temp_high[2];        /* Register value */
+	u8 temp_low[2];         /* Register value */
+	u16 alarms;             /* Register encoding, combined */
+	u8 analog_out;          /* Register value */
+	u8 vid;                 /* Register value combined */
 	u8 vrm;
 };
 
@@ -177,9 +155,6 @@ static int adm1025_attach_adapter(struct i2c_adapter *adapter);
 static int adm1025_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int adm1025_detach_client(struct i2c_client *client);
-static int adm1025_read_value(struct i2c_client *client, u8 register);
-static int adm1025_write_value(struct i2c_client *client, u8 register,
-			       u8 value);
 static void adm1025_update_client(struct i2c_client *client);
 static void adm1025_init_client(struct i2c_client *client);
 
@@ -188,13 +163,8 @@ static void adm1025_in(struct i2c_client *client, int operation,
 		       int ctl_name, int *nrels_mag, long *results);
 static void adm1025_temp(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
-static void adm1025_rm_temp(struct i2c_client *client, int operation,
-			 int ctl_name, int *nrels_mag, long *results);
 static void adm1025_alarms(struct i2c_client *client, int operation,
 			   int ctl_name, int *nrels_mag, long *results);
-/*static void adm1025_analog_out(struct i2c_client *client, int operation,
-			       int ctl_name, int *nrels_mag,
-			       long *results);*/
 static void adm1025_vid(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 static void adm1025_vrm(struct i2c_client *client, int operation,
@@ -217,27 +187,29 @@ static struct i2c_driver adm1025_driver = {
 /* The /proc/sys entries */
 /* -- SENSORS SYSCTL START -- */
 
-#define ADM1025_SYSCTL_IN0 1000 /* Volts * 100 */
-#define ADM1025_SYSCTL_IN1 1001
-#define ADM1025_SYSCTL_IN2 1002
-#define ADM1025_SYSCTL_IN3 1003
-#define ADM1025_SYSCTL_IN4 1004
-#define ADM1025_SYSCTL_IN5 1005
-#define ADM1025_SYSCTL_RTEMP 1251
-#define ADM1025_SYSCTL_TEMP 1250        /* Degrees Celcius * 100 */
-#define ADM1025_SYSCTL_ALARMS 2001      /* bitvector */
-#define ADM1025_SYSCTL_ANALOG_OUT 2002
-#define ADM1025_SYSCTL_VID 2003
-#define ADM1025_SYSCTL_VRM 2004
+#define ADM1025_SYSCTL_IN0     1000 /* Volts * 100 */
+#define ADM1025_SYSCTL_IN1     1001
+#define ADM1025_SYSCTL_IN2     1002
+#define ADM1025_SYSCTL_IN3     1003
+#define ADM1025_SYSCTL_IN4     1004
+#define ADM1025_SYSCTL_IN5     1005
 
-#define ADM1025_ALARM_IN0 0x0001
-#define ADM1025_ALARM_IN1 0x0002
-#define ADM1025_ALARM_IN2 0x0004
-#define ADM1025_ALARM_IN3 0x0008
-#define ADM1025_ALARM_IN4 0x0100
-#define ADM1025_ALARM_IN5 0x0200
-#define ADM1025_ALARM_RTEMP 0x0020
-#define ADM1025_ALARM_TEMP 0x0010
+#define ADM1025_SYSCTL_RTEMP   1250 /* Degrees Celcius * 10 */
+#define ADM1025_SYSCTL_TEMP    1251
+
+#define ADM1025_SYSCTL_ALARMS  2001 /* bitvector */
+#define ADM1025_SYSCTL_VID     2003 /* Volts * 1000 */
+#define ADM1025_SYSCTL_VRM     2004
+
+#define ADM1025_ALARM_IN0     0x0001
+#define ADM1025_ALARM_IN1     0x0002
+#define ADM1025_ALARM_IN2     0x0004
+#define ADM1025_ALARM_IN3     0x0008
+#define ADM1025_ALARM_IN4     0x0100
+#define ADM1025_ALARM_IN5     0x0200
+#define ADM1025_ALARM_RTEMP   0x0020
+#define ADM1025_ALARM_TEMP    0x0010
+#define ADM1025_ALARM_RFAULT  0x4000
 
 /* -- SENSORS SYSCTL END -- */
 
@@ -259,14 +231,12 @@ static ctl_table adm1025_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &adm1025_in},
 	{ADM1025_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &adm1025_in},
-	{ADM1025_SYSCTL_RTEMP, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &adm1025_rm_temp},
-	{ADM1025_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{ADM1025_SYSCTL_RTEMP, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &adm1025_temp},
+	{ADM1025_SYSCTL_TEMP, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &adm1025_temp},
 	{ADM1025_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &adm1025_alarms},
-/*	{ADM1025_SYSCTL_ANALOG_OUT, "analog_out", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &adm1025_analog_out},*/
 	{ADM1025_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &adm1025_vid},
 	{ADM1025_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
@@ -323,14 +293,16 @@ static int adm1025_detect(struct i2c_adapter *adapter, int address,
 	/* Now, we do the remaining detection. */
 
 	if (kind < 0) {
-		if((adm1025_read_value(new_client,ADM1025_REG_CONFIG) & 0x80) != 0x00)
+		if((i2c_smbus_read_byte_data(new_client,ADM1025_REG_CONFIG) & 0x80) != 0x00)
 			goto ERROR1;
 	}
 
 	/* Determine the chip type. */
 	if (kind <= 0) {
-		i = adm1025_read_value(new_client, ADM1025_REG_COMPANY_ID);
-		if (i == 0x41)
+		i = i2c_smbus_read_byte_data(new_client, ADM1025_REG_COMPANY_ID);
+		if (((i2c_smbus_read_byte_data(new_client, ADM1025_REG_DIE_REV) & 0xf0) == 0x20)
+		 && ((i == 0x41)   /* ADM1025 */
+		  || (i == 0xA1))) /* NE1619 */
 			kind = adm1025;
 		else {
 			if (kind == 0)
@@ -409,117 +381,75 @@ static int adm1025_detach_client(struct i2c_client *client)
 
 }
 
-static int adm1025_read_value(struct i2c_client *client, u8 reg)
-{
-	return 0xFF & i2c_smbus_read_byte_data(client, reg);
-}
-
-static int adm1025_write_value(struct i2c_client *client, u8 reg, u8 value)
-{
-	return i2c_smbus_write_byte_data(client, reg, value);
-}
-
 /* Called when we have found a new ADM1025. It should set limits, etc. */
 static void adm1025_init_client(struct i2c_client *client)
 {
 	struct adm1025_data *data = client->data;
+	u8 reg, nr;
 
 	data->vrm = DEFAULT_VRM;
-	/* Reset all except Watchdog values and last conversion values
-	   This sets fan-divs to 2, among others. This makes most other
-	   initializations unnecessary */
-	adm1025_write_value(client, ADM1025_REG_CONFIG, 0x80);
+	/* Restore power-up default values (configuration and status
+	   registers). This makes some other initializations
+	   unnecessary. Set the chip in standby mode until the
+	   limits are properly set. Note that we take great care not to
+	   change the bits 1-6 of the configuration register, since
+	   they hold data we want to preserve. */
+	reg = i2c_smbus_read_byte_data(client, ADM1025_REG_CONFIG);
+	i2c_smbus_write_byte_data(client, ADM1025_REG_CONFIG, 0x80);
 
-	adm1025_write_value(client, ADM1025_REG_IN_MIN(0),
-			    IN_TO_REG(ADM1025_INIT_IN_MIN_0, 0));
-	adm1025_write_value(client, ADM1025_REG_IN_MAX(0),
-			    IN_TO_REG(ADM1025_INIT_IN_MAX_0, 0));
-	adm1025_write_value(client, ADM1025_REG_IN_MIN(1),
-			    IN_TO_REG(ADM1025_INIT_IN_MIN_1, 1));
-	adm1025_write_value(client, ADM1025_REG_IN_MAX(1),
-			    IN_TO_REG(ADM1025_INIT_IN_MAX_1, 1));
-	adm1025_write_value(client, ADM1025_REG_IN_MIN(2),
-			    IN_TO_REG(ADM1025_INIT_IN_MIN_2, 2));
-	adm1025_write_value(client, ADM1025_REG_IN_MAX(2),
-			    IN_TO_REG(ADM1025_INIT_IN_MAX_2, 2));
-	adm1025_write_value(client, ADM1025_REG_IN_MIN(3),
-			    IN_TO_REG(ADM1025_INIT_IN_MIN_3, 3));
-	adm1025_write_value(client, ADM1025_REG_IN_MAX(3),
-			    IN_TO_REG(ADM1025_INIT_IN_MAX_3, 3));
-	adm1025_write_value(client, ADM1025_REG_IN_MIN(4),
-			    IN_TO_REG(ADM1025_INIT_IN_MIN_4, 4));
-	adm1025_write_value(client, ADM1025_REG_IN_MAX(4),
-			    IN_TO_REG(ADM1025_INIT_IN_MAX_4, 4));
-	adm1025_write_value(client, ADM1025_REG_IN_MIN(5),
-			    IN_TO_REG(ADM1025_INIT_IN_MIN_5, 5));
-	adm1025_write_value(client, ADM1025_REG_IN_MAX(5),
-			    IN_TO_REG(ADM1025_INIT_IN_MAX_5, 5));
+	for (nr = 0; nr < 6; nr++) {
+		i2c_smbus_write_byte_data(client, ADM1025_REG_IN_MIN(nr),
+				    data->in_min[nr] = IN_TO_REG(ADM1025_INIT_IN_MIN));
+		i2c_smbus_write_byte_data(client, ADM1025_REG_IN_MAX(nr),
+				    data->in_max[nr] = IN_TO_REG(ADM1025_INIT_IN_MAX));
+	}
 
-	adm1025_write_value(client, ADM1025_REG_RTEMP_HIGH,
-			    TEMP_LIMIT_TO_REG(ADM1025_INIT_RTEMP_MAX));
-	adm1025_write_value(client, ADM1025_REG_RTEMP_LOW,
-			    TEMP_LIMIT_TO_REG(ADM1025_INIT_RTEMP_MIN));
-	adm1025_write_value(client, ADM1025_REG_TEMP_HIGH,
-			    TEMP_LIMIT_TO_REG(ADM1025_INIT_TEMP_MAX));
-	adm1025_write_value(client, ADM1025_REG_TEMP_LOW,
-			    TEMP_LIMIT_TO_REG(ADM1025_INIT_TEMP_MIN));
+	for (nr = 0; nr < 2; nr++) {
+		i2c_smbus_write_byte_data(client, ADM1025_REG_TEMP_HIGH(nr),
+			    	data->temp_high[nr]=TEMP_TO_REG(ADM1025_INIT_TEMP_HIGH));
+		i2c_smbus_write_byte_data(client, ADM1025_REG_RTEMP_LOW,
+			    	data->temp_low[nr]=TEMP_TO_REG(ADM1025_INIT_TEMP_LOW));
+	}
 
-	/* Start monitoring */
-	adm1025_write_value(client, ADM1025_REG_CONFIG, 0x01);
+	/* Restore configuration and start monitoring */
+	i2c_smbus_write_byte_data(client, ADM1025_REG_CONFIG, (reg|0x01)&0x7F);
 }
 
 static void adm1025_update_client(struct i2c_client *client)
 {
 	struct adm1025_data *data = client->data;
-	u8 i;
+	u8 nr;
 
 	down(&data->update_lock);
 
-	if (
-	    (jiffies - data->last_updated >
-	     (data->type == adm1025 ? HZ / 2 : HZ * 2))
-	    || (jiffies < data->last_updated) || !data->valid) {
-
+	if ((jiffies - data->last_updated > 2 * HZ)
+	 || (jiffies < data->last_updated) || !data->valid) {
 #ifdef DEBUG
 		printk("Starting adm1025 update\n");
 #endif
-		for (i = 0; i <= 5; i++) {
-			data->in[i] =
-			    adm1025_read_value(client, ADM1025_REG_IN(i));
-			data->in_min[i] =
-			    adm1025_read_value(client,
-					       ADM1025_REG_IN_MIN(i));
-			data->in_max[i] =
-			    adm1025_read_value(client,
-					       ADM1025_REG_IN_MAX(i));
+
+		/* Voltages */
+		for (nr = 0; nr < 6; nr++) {
+			data->in[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_IN(nr));
+/*			data->in_min[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_IN_MIN(nr));
+			data->in_max[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_IN_MAX(nr));*/
 		}
-		data->temp =
-		    adm1025_read_value(client, ADM1025_REG_TEMP);
-		data->rtemp =
-		    adm1025_read_value(client, ADM1025_REG_RTEMP);
-#ifdef DEBUG
-		printk("The temp is %2x\n",data->temp);
-#endif
-		data->temp_max =
-		    adm1025_read_value(client, ADM1025_REG_TEMP_HIGH);
-		data->temp_min =
-		    adm1025_read_value(client, ADM1025_REG_TEMP_LOW);
-		data->rtemp_max =
-		    adm1025_read_value(client, ADM1025_REG_RTEMP_HIGH);
-		data->rtemp_min =
-		    adm1025_read_value(client, ADM1025_REG_RTEMP_LOW);
 
-		i = adm1025_read_value(client, ADM1025_REG_VID);
-		data->vid = i & 0x0f;
-		data->vid |=
-		    (adm1025_read_value(client, ADM1025_REG_VID4) & 0x01)
-		    << 4;
+		/* Temperatures */
+		for (nr = 0; nr < 2; nr++) {
+			data->temp[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_TEMP(nr));
+/*			data->temp_high[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_TEMP_HIGH(nr));
+			data->temp_low[nr] = i2c_smbus_read_byte_data(client, ADM1025_REG_TEMP_LOW(nr));*/
+		}
 
-		data->alarms =
-		    adm1025_read_value(client,
-				       ADM1025_REG_INT1_STAT) +
-		    (adm1025_read_value(client, ADM1025_REG_INT2_STAT) <<
-		     8);
+		/* VID */
+		data->vid = (i2c_smbus_read_byte_data(client, ADM1025_REG_VID) & 0x0f)
+		         + ((i2c_smbus_read_byte_data(client, ADM1025_REG_VID4) & 0x01) << 4);
+
+		/* Alarms */
+		data->alarms = (i2c_smbus_read_byte_data(client, ADM1025_REG_STATUS1) & 0x3f)
+		            + ((i2c_smbus_read_byte_data(client, ADM1025_REG_STATUS2) & 0x43) << 8);
+
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -531,7 +461,7 @@ static void adm1025_update_client(struct i2c_client *client)
 /* The next few functions are the call-back functions of the /proc/sys and
    sysctl files. Which function is used is defined in the ctl_table in
    the extra1 field.
-   Each function must return the magnitude (power of 10 to divide the date
+   Each function must return the magnitude (power of 10 to divide the data
    with) if it is called with operation==SENSORS_PROC_REAL_INFO. It must
    put a maximum of *nrels elements in results reflecting the data of this
    file, and set *nrels to the number it actually put in it, if operation==
@@ -544,7 +474,6 @@ static void adm1025_update_client(struct i2c_client *client)
 void adm1025_in(struct i2c_client *client, int operation, int ctl_name,
 		int *nrels_mag, long *results)
 {
-
 	int scales[6] = { 250, 225, 330, 500, 1200, 330 };
 
 	struct adm1025_data *data = client->data;
@@ -554,78 +483,50 @@ void adm1025_in(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		adm1025_update_client(client);
-		results[0] =
-		    IN_FROM_REG(data->in_min[nr], nr) * scales[nr] / 192;
-		results[1] =
-		    IN_FROM_REG(data->in_max[nr], nr) * scales[nr] / 192;
-		results[2] =
-		    IN_FROM_REG(data->in[nr], nr) * scales[nr] / 192;
+		results[0] = (IN_FROM_REG(data->in_min[nr]) * scales[nr] + 96) / 192;
+		results[1] = (IN_FROM_REG(data->in_max[nr]) * scales[nr] + 96) / 192;
+		results[2] = (IN_FROM_REG(data->in[nr]) * scales[nr] + 96) / 192;
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->in_min[nr] =
-			    IN_TO_REG((results[0] * 192) / scales[nr], nr);
-			adm1025_write_value(client, ADM1025_REG_IN_MIN(nr),
+			data->in_min[nr] = IN_TO_REG((results[0] * 192 + scales[nr] / 2)
+					   / scales[nr]);
+			i2c_smbus_write_byte_data(client, ADM1025_REG_IN_MIN(nr),
 					    data->in_min[nr]);
 		}
 		if (*nrels_mag >= 2) {
-			data->in_max[nr] =
-			    IN_TO_REG((results[1] * 192) / scales[nr], nr);
-			adm1025_write_value(client, ADM1025_REG_IN_MAX(nr),
+			data->in_max[nr] = IN_TO_REG((results[1] * 192 + scales[nr] / 2)
+					   / scales[nr]);
+			i2c_smbus_write_byte_data(client, ADM1025_REG_IN_MAX(nr),
 					    data->in_max[nr]);
 		}
 	}
 }
 
-
 void adm1025_temp(struct i2c_client *client, int operation, int ctl_name,
 		  int *nrels_mag, long *results)
 {
 	struct adm1025_data *data = client->data;
-	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 1;
-	else if (operation == SENSORS_PROC_REAL_READ) {
-		adm1025_update_client(client);
-		results[0] = TEMP_LIMIT_FROM_REG(data->temp_max);
-		results[1] = TEMP_LIMIT_FROM_REG(data->temp_min);
-		results[2] = TEMP_FROM_REG(data->temp);
-		*nrels_mag = 3;
-	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		if (*nrels_mag >= 1) {
-			data->temp_max = TEMP_LIMIT_TO_REG(results[0]);
-			adm1025_write_value(client, ADM1025_REG_TEMP_HIGH,
-					    data->temp_max);
-		}
-		if (*nrels_mag >= 2) {
-			data->temp_min = TEMP_LIMIT_TO_REG(results[1]);
-			adm1025_write_value(client, ADM1025_REG_TEMP_LOW,
-					    data->temp_min);
-		}
-	}
-}
+	int nr = ctl_name - ADM1025_SYSCTL_RTEMP;
 
-void adm1025_rm_temp(struct i2c_client *client, int operation, int ctl_name,
-		  int *nrels_mag, long *results)
-{
-	struct adm1025_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 1;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		adm1025_update_client(client);
-		results[0] = TEMP_LIMIT_FROM_REG(data->rtemp_max);
-		results[1] = TEMP_LIMIT_FROM_REG(data->rtemp_min);
-		results[2] = TEMP_FROM_REG(data->rtemp);
+		results[0] = TEMP_FROM_REG(data->temp_high[nr]);
+		results[1] = TEMP_FROM_REG(data->temp_low[nr]);
+		results[2] = TEMP_FROM_REG(data->temp[nr]);
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->rtemp_max = TEMP_LIMIT_TO_REG(results[0]);
-			adm1025_write_value(client, ADM1025_REG_RTEMP_HIGH,
-					    data->rtemp_max);
+			data->temp_high[nr] = TEMP_TO_REG(results[0]);
+			i2c_smbus_write_byte_data(client, ADM1025_REG_TEMP_HIGH(nr),
+					    data->temp_high[nr]);
 		}
 		if (*nrels_mag >= 2) {
-			data->rtemp_min = TEMP_LIMIT_TO_REG(results[1]);
-			adm1025_write_value(client, ADM1025_REG_RTEMP_LOW,
-					    data->rtemp_min);
+			data->temp_low[nr] = TEMP_TO_REG(results[1]);
+			i2c_smbus_write_byte_data(client, ADM1025_REG_TEMP_LOW(nr),
+					    data->temp_low[nr]);
 		}
 	}
 }
@@ -634,6 +535,7 @@ void adm1025_alarms(struct i2c_client *client, int operation, int ctl_name,
 		    int *nrels_mag, long *results)
 {
 	struct adm1025_data *data = client->data;
+
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
@@ -642,27 +544,6 @@ void adm1025_alarms(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 1;
 	}
 }
-/*
-void adm1025_analog_out(struct i2c_client *client, int operation,
-			int ctl_name, int *nrels_mag, long *results)
-{
-	struct adm1025_data *data = client->data;
-
-	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
-	else if (operation == SENSORS_PROC_REAL_READ) {
-		adm1025_update_client(client);
-		results[0] = data->analog_out;
-		*nrels_mag = 1;
-	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		if (*nrels_mag >= 1) {
-			data->analog_out = results[0];
-			adm1025_write_value(client, ADM1025_REG_ANALOG_OUT,
-					    data->analog_out);
-		}
-	}
-}
-*/
 
 void adm1025_vid(struct i2c_client *client, int operation, int ctl_name,
 		 int *nrels_mag, long *results)
@@ -706,8 +587,8 @@ static void __exit sm_adm1025_exit(void)
 
 
 
-MODULE_AUTHOR
-    ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
+MODULE_AUTHOR("Chen-Yuan Wu <gwu@esoft.com>"
+	" and Jean Delvare <khali@linux-fr.org>");
 MODULE_DESCRIPTION("ADM1025 driver");
 
 module_init(sm_adm1025_init);
