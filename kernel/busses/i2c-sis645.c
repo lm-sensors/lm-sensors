@@ -42,6 +42,7 @@
 #include <linux/ioport.h>
 #include <linux/i2c.h>
 #include <linux/init.h>
+#include <linux/mm.h>
 #include <asm/io.h>
 #include "version.h"
 
