@@ -140,7 +140,7 @@ function pwmdetail()
 	type $PLOTTER > /dev/null 2>&1
 	if [ $? -eq 0 ]
 	then
-		echo -n "    Would you like to generate a graphical plot using $PLOTTER (y)? "
+		echo -n "Would you like to generate a graphical plot using $PLOTTER (y)? "
 		read X
 		if [ "$X" = "y" -o "$X" = "Y" -o "$X" = "" ]
 		then
@@ -295,7 +295,7 @@ then
 fi
 
 TEMPS=`echo */temp[1-9]`
-if [ "*/temp[1-9]" = "$TEMPS" ]
+if [ "*/temp[0-9]*" = "$TEMPS" ]
 then
 	echo $0: 'There are no temperature-capable sensor modules installed'
 	exit 1
@@ -345,7 +345,8 @@ function TestMinStart {
 	echo
 	echo 'Now we increase the PWM value in 10-unit-steps.'
 	echo 'Let the fan stop completely, then press return until the'
-	echo 'fan starts spinning. We will use this value +20 to be safe.'
+	echo "fan starts spinning. Then enter 'y'."
+	echo 'We will use this value +20 as the starting speed.'
 	let fanok=0
 	let fanval=0
 	until [ "$fanok" = "1" ]
@@ -355,7 +356,7 @@ function TestMinStart {
 		echo -n "Setting $pwms to $fanval..."
 		echo $fanval > $pwms
 		read FANTEST
-		if [ "$FANTEST" = "y" -o "$FANTEST" = "Y" ] ; then let fanok=1 ; fi
+		if [ "$FANTEST" != "" ] ; then let fanok=1 ; fi
 	done
 	let fanval=fanval+20
 	if [ $fanval -gt 240 ] ; then let fanval=255 ; fi
@@ -367,7 +368,8 @@ function TestMinStop {
         echo
         echo 'Now we decrease the PWM value in 10-unit-steps.'
 	echo 'Let the fan reach full speed, then press return until the'
-	echo 'fan stops spinning. We will use this value +20 as the minimum speed.'
+	echo "fan stops spinning. Then enter 'y'."
+	echo 'We will use this value +20 as the minimum speed.'
         let fanok=0
         let fanval=255
         until [ "$fanok" = "1" ]
@@ -377,7 +379,7 @@ function TestMinStop {
                 echo -n "Setting $pwms to $fanval..."
                 echo $fanval > $pwms
                 read FANTEST
-                if [ "$FANTEST" = "y" -o "$FANTEST" = "Y" ] ; then let fanok=1 ; fi
+		if [ "$FANTEST" != "" ] ; then let fanok=1 ; fi
         done
         let fanval=fanval+20
         if [ $fanval -gt 255 ] ; then let fanval=255 ; fi
@@ -438,6 +440,13 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 
 	"`echo ${pwmactive} |sed -e 's/ /\n/g' | egrep \"${pwms}\"`" )
 		pwmsed=`echo ${pwms} | sed -e 's/\//\\\\\//g'` #escape / for sed
+		echo
+		echo 'Current temperature readings are as follows:'
+		for j in $TEMPS
+		do
+			S=`cat $j | cut -d' ' -f3`
+			echo "$j	$S"
+		done
 		echo
 		echo "Select a temperature sensor as source for ${pwms}:"
 		select tempss in $TEMPS "None (Do not affect this PWM output)"; do
@@ -519,6 +528,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			else
 				MINSTOP="`echo $MINSTOP | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMV}"
 			fi
+			echo
 			break;
 		done ;;
 	

@@ -39,6 +39,8 @@
 #
 #
 
+DEBUG=1
+
 echo $$ > /var/run/fancontrol.pid
 
 function LoadConfig {
@@ -118,17 +120,20 @@ function UpdateFanSpeeds {
 		minso=${AFCMINSTOP[$fcvcount]}
 		
 		tval=`cat ${tsens} |cut -d' ' -f3 |cut -d'.' -f1`
-		pwmpval=`cat ${pwmo}`
+		pwmpval=`cat ${pwmo} | cut -d' ' -f1`
 		
 		# debug info
-		#echo "pwmo=$pwmo"
-		#echo "tsens=$tsens"
-		#echo "mint=$mint"
-		#echo "maxt=$maxt"
-		#echo "minsa=$minsa"
-		#echo "minso=$minso"
-		#echo "tval=$tval"
-		#echo "pwmpval=$pwmpval"
+		if [ "$DEBUG" != "" ]
+		then
+			echo "pwmo=$pwmo"
+			echo "tsens=$tsens"
+			echo "mint=$mint"
+			echo "maxt=$maxt"
+			echo "minsa=$minsa"
+			echo "minso=$minso"
+			echo "tval=$tval"
+			echo "pwmpval=$pwmpval"
+		fi
 		
 		if (( $tval <= $mint ))
 		  then pwmval=0 # at specified mintemp shut fan off
@@ -136,14 +141,18 @@ function UpdateFanSpeeds {
 		  then pwmval=255 # at specified maxtemp switch to 100%
 		else 
 		  # calculate the new value from temperature and settings
-		  pwmval=`calc "((10/(${maxt}-${mint})*(${tval}-${mint}))^2/1000*(${maxt}-${mint})*(255-${minso})+${minso})" |cut -d'.' -f1`
-		  if (( $pwmpval == 0 ))
+		  pwmval=`calc "((10/(${maxt}-${mint})*(${tval}-${mint}))^2/100*(255-${minso})+${minso})" |cut -d'.' -f1`
+		  if [ $pwmpval -eq 0 ]
 		  then # if fan was stopped start it using a safe value
 		  	echo $minsa > $pwmo
 			sleep 1
 		  fi
 		fi
 		echo $pwmval > $pwmo # write new value to pwm output
+		if [ "$DEBUG" != "" ]
+		then
+			echo "new pwmval=$pwmval"
+		fi
 		fcvcount=$fcvcount+1
 	done
 }
