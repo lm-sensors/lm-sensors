@@ -2310,7 +2310,7 @@ static sensors_chip_feature adm1025_features[] =
                          SENSORS_ADM1025_TEMP2, RW, 
                          ADM1025_SYSCTL_TEMP, VALUE(1), 1 },
     { SENSORS_ADM1025_VID, "vid", NOMAP, NOMAP,
-                         R, ADM1025_SYSCTL_VID, VALUE(1), 3 },
+                         R, ADM1025_SYSCTL_VID, VALUE(1), 3 , "in1_ref", 3 },
     { SENSORS_ADM1025_VRM, "vrm", NOMAP, NOMAP,
                          RW, ADM1025_SYSCTL_VRM, VALUE(1), 1 },
     { SENSORS_ADM1025_ALARMS, "alarms", NOMAP, NOMAP, 
