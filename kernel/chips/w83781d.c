@@ -47,6 +47,7 @@
 #include <asm/io.h>
 #include "version.h"
 #include "sensors_vid.h"
+#include "lm75.h"
 
 /* RT Table support #defined so we can take it out if it gets bothersome */
 #define W83781D_RT 1
@@ -201,10 +202,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
                                                  ((val)+5)/10),0,255))
 #define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
-
-#define TEMP_ADD_TO_REG(val)   (SENSORS_LIMIT(((((val) + 2) / 5) << 7),\
-                                              0,0xffff))
-#define TEMP_ADD_FROM_REG(val) (((val) >> 7) * 5)
 
 #define AS99127_TEMP_ADD_TO_REG(val) (SENSORS_LIMIT((((((val) + 2)*4)/10) \
                                                << 7),0,0xffff))
@@ -1644,10 +1641,10 @@ void w83781d_temp_add(struct i2c_client *client, int operation,
 			    AS99127_TEMP_ADD_FROM_REG(data->temp_add[nr]);
 		} else {
 			results[0] =
-			    TEMP_ADD_FROM_REG(data->temp_add_over[nr]);
+			    LM75_TEMP_FROM_REG(data->temp_add_over[nr]);
 			results[1] =
-			    TEMP_ADD_FROM_REG(data->temp_add_hyst[nr]);
-			results[2] = TEMP_ADD_FROM_REG(data->temp_add[nr]);
+			    LM75_TEMP_FROM_REG(data->temp_add_hyst[nr]);
+			results[2] = LM75_TEMP_FROM_REG(data->temp_add[nr]);
 		}
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
@@ -1657,7 +1654,7 @@ void w83781d_temp_add(struct i2c_client *client, int operation,
 				    AS99127_TEMP_ADD_TO_REG(results[0]);
 			else
 				data->temp_add_over[nr] =
-				    TEMP_ADD_TO_REG(results[0]);
+				    LM75_TEMP_TO_REG(results[0]);
 			w83781d_write_value(client,
 					    nr ? W83781D_REG_TEMP3_OVER :
 					    W83781D_REG_TEMP2_OVER,
@@ -1669,7 +1666,7 @@ void w83781d_temp_add(struct i2c_client *client, int operation,
 				    AS99127_TEMP_ADD_TO_REG(results[1]);
 			else
 				data->temp_add_hyst[nr] =
-				    TEMP_ADD_TO_REG(results[1]);
+				    LM75_TEMP_TO_REG(results[1]);
 			w83781d_write_value(client,
 					    nr ? W83781D_REG_TEMP3_HYST :
 					    W83781D_REG_TEMP2_HYST,
