@@ -1,0 +1,51 @@
+Kernel driver `i2c-sis645.o'
+
+Status: Beta
+
+Supported adapters:
+  * Silicon Integrated Systems Corp 645/961 chipset
+
+Author: Mark M. Hoffman <mhoffman@lightlink.com>
+
+Module Parameters
+-----------------
+
+(none)
+
+
+Description
+-----------
+
+This SMBus only driver is known to work on motherboards with the SiS645/SiS961
+chipset combination.  The driver was developed without benefit of a proper
+datasheet from SiS.  The SMBus registers are assumed compatible with those of
+the SiS630, although they are located in a completely different place.  Thanks
+to Alexander Malysh <amalysh@web.de> for providing the SiS630 datasheet (and 
+driver).
+
+The command "lspci" as root should produce something like these lines:
+
+00:00.0 Host bridge: Silicon Integrated Systems [SiS]: Unknown device 0645
+00:02.0 ISA bridge: Silicon Integrated Systems [SiS] 85C503/5513
+00:02.1 SMBus: Silicon Integrated Systems [SiS]: Unknown device 0016
+
+(kernel versions later than 2.4.18 may fill in the "Unknown"s)
+
+If the SMBus line is missing, then the BIOS on the board has disabled the
+device.  This driver is capable of enabling it, as long as the kernel has
+CONFIG_HOTPLUG enabled.  In that case, the SMBus device will appear in "lspci"
+after the driver is loaded.  Note that you need to rebuild lm_sensors AFTER
+running "make config" or equivalent on your kernel, otherwise the i2c-sis645
+driver will not build in this support.
+
+I suspect that this driver could be made to work for the following SiS chipsets
+as well: 648/963, 651/962, 645DX/961, 650/961, 735, 635, and 635T.
+If anyone owns a board with those chips AND is willing to risk crashing &
+burning an otherwise well-behaved kernel in the name of progress... please
+contact me at <mhoffman@lightlink.com> or via the project's mailing list:
+<sensors@stimpy.netroedge.com>.  Please send bug reports and/or success
+stories as well.
+
+The driver does not support SMBus block reads/writes; I may add them if a
+scenario is found where they're needed.
+
