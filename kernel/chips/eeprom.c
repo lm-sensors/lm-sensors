@@ -106,7 +106,9 @@ static ctl_table eeprom_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &eeprom_contents },
   { EEPROM_SYSCTL6, "data80-95", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
-  { EEPROM_SYSCTL7, "data96-127", NULL, 0, 0644, NULL, &sensors_proc_real,
+  { EEPROM_SYSCTL7, "data96-111", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &eeprom_contents },
+  { EEPROM_SYSCTL8, "data112-127", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &eeprom_contents },
   { 0 }
 };
@@ -310,6 +312,7 @@ void eeprom_contents(struct i2c_client *client, int operation, int ctl_name,
   if (ctl_name == EEPROM_SYSCTL5){ base=64; }
   if (ctl_name == EEPROM_SYSCTL6){ base=80; }
   if (ctl_name == EEPROM_SYSCTL7){ base=96; }
+  if (ctl_name == EEPROM_SYSCTL8){ base=112; }
   
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 0;

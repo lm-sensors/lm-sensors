@@ -40,7 +40,7 @@ DECODE_DIMMS.PL
 ---------------
 
 This Perl script attempts to make sense of the first 128 bytes of a SDRAM
-DIMM.  Using the 'Serial Presence Detect (SPD)' Spec (Rev1.2a)** from
+PC-100 DIMM.  Using the 'Serial Presence Detect (SPD)' Spec (Rev1.2a)** from
 Intel.  When finished, it will decode and report all the values defined in
 the spec.  Much of the information is technical timing and interfacing info
 (probably not all used by the Bios or clocking IC. 
@@ -77,7 +77,7 @@ which may not be the case.
 
 
 ------------------------------------------------------------------------
-** PDF is available from Intel or our web site:
+** PDF is available from Intel or our web site (spdsd12a.pdf):
 http://www.netroedge.com/~lm78
 
 "eeprom" doc created Dec. 14, 1998 by Philip Edelbrock

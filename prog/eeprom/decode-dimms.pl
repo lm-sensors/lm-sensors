@@ -2,7 +2,7 @@
 #
 # Copyright 1998, Philip Edelbrock <phil@netroedge.com>
 #
-# Version 0.2
+# Version 0.3
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
 #
@@ -10,12 +10,17 @@
 # and Perl is at /usr/bin/perl
 #
 #
-# Reference: PC SDRAM Serial Presence 
+# References: 
+# PC SDRAM Serial Presence 
 # Detect (SPD) Specification, Intel, 
 # Dec '97, Rev 1.2A
 #
+#
+# Jedec Standards 4.1.x & 4.5.x
+# http://www.jedec.org
+#
 
-print "SDRAM Serial Presence Detect Tester/Decoder\n";
+print "PC-100 DIMM Serial Presence Detect Tester/Decoder\n";
 print "Written by Philip Edelbrock.  Copyright 1998.\n";
 print "Version 0.2\n\n";
 
@@ -26,6 +31,7 @@ $_=`ls /proc/sys/dev/sensors/`;
 for $i ( 0 .. $#dimm_list ) {
 	$_=$dimm_list[$i];
 	if (/^eeprom-/) {
+		$dimm_checksum=0;
 		$dimm_count=$dimm_count + 1;
 		
 		print "\nDecoding EEPROM: /proc/sys/dev/sensors/$dimm_list[$i]\n";
@@ -38,6 +44,8 @@ for $i ( 0 .. $#dimm_list ) {
 
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data0-15`;
 		@bytes=split(" ");
+		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
+		
 		print "\t# of bytes written to SDRAM EEPROM:\t\t$bytes[0]\n";
 
 		print "\tTotal number of bytes in EEPROM:\t\t";
@@ -123,6 +131,7 @@ for $i ( 0 .. $#dimm_list ) {
 # Decode next 16 bytes
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data16-31`;
 		@bytes=split(" ");
+		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
 		
 		print "\tBurst lengths supported:\t\t\t";
 		$temp="";
@@ -265,6 +274,9 @@ for $i ( 0 .. $#dimm_list ) {
 # Decode next 16 bytes (32-47)
 		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data32-47`;
 		@bytes=split(" ");
+		for $j ( 0 .. 15 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
+		
+		print "\t\t----=== The Following are Proposed and Apply to SDRAM DIMMs ===----\n";
 		
 		print "\tCommand and Address Signal Setup Time:\t\t";
 		if ($bytes[0] > 127) { $temp=($bytes[0]-128)>>4; $temp2=-1; } else { $temp=$bytes[0]>>4; $temp2=1;}
@@ -287,7 +299,67 @@ for $i ( 0 .. $#dimm_list ) {
 		print "nS\n";
 
 # That's it for the lower part of an SDRAM EEPROM's memory!
+# Decode next 16 bytes (48-63)
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data48-63`;
+		@bytes=split(" ");
+		for $j ( 0 .. 14 ) { $dimm_checksum = $dimm_checksum + $bytes[$j];  }
 
+		print "\tSPD Revision code:\t\t\t\t$bytes[14]\n";
+		print "\tEEPROM Checksum of bytes 0-62:\t\t\t";
+		printf("0x%.4X (verses calculated: 0x%.4X)\n",$bytes[15],$dimm_checksum);
+		
+# Decode next 16 bytes (64-79)
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data64-79`;
+		@bytes=split(" ");
+		
+		print "\tManufacturer's JEDEC ID Code:\t\t\t";
+		printf("0x%.4X%.4X%.4X%.4X%.4X%.4X%.4X%.4X\n",$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
+		
+		print "\tManufacturing Location Code:\t\t\t";
+		printf("0x%.4X\n",$bytes[8]);
+		
+		print "\tManufacurer's Part Number:\t\t\t\"";
+# Decode next 16 bytes (80-95)
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data80-95`;
+		@bytes2=split(" ");
+		print pack("cccccccccccccccccc",$bytes[9],$bytes[10],$bytes[11],$bytes[12],$bytes[13],$bytes[14],$bytes[15],
+			$bytes2[0],$bytes2[1],$bytes2[2],$bytes2[3],$bytes2[4],$bytes2[5],$bytes2[6],$bytes2[7],$bytes2[8],$bytes2[9]);
+		print "\"\n";
+		
+		print "\tRevision Code:\t\t\t\t\t";
+		printf("0x%.4X%.4X\n",$bytes2[10],$bytes2[11]);
+		
+		print "\tManufacturing Date:\t\t\t\t";
+		printf("0x%.4X%.4X\n",$bytes2[12],$bytes2[13]);
+		
+		print "\tAssembly Serial Number:\t\t\t\t";
+# Decode next 16 bytes (96-111)
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data96-111`;
+		@bytes=split(" ");
+		
+		printf("0x%.4X%.4X%.4X%.4X\n",$bytes2[15],$bytes[0],$bytes[1],$bytes[2]);
+# Decode next 16 bytes (112-127)
+		$_=`cat /proc/sys/dev/sensors/$dimm_list[$i]/data112-127`;
+		@bytes=split(" ");
+		
+		print "\tIntel Specification for Frequency:\t\t";
+		if ($bytes[14] == 102) { print "66MHz\n"; } elsif ($bytes[14] == 100) { print "100MHz\n"; } else { print "Undefined!\n"; }
+		
+		print "\tIntel Spec Details for 100MHz Support:\t\t";
+		$temp="";
+		if (($bytes[15] & 1) > 0) { print "${temp}Intel Concurrent AutoPrecharge\n"; $temp="\t\t\t\t\t\t\t";}
+		if (($bytes[15] & 2) > 0) { print "${temp}CAS Latency = 2\n"; $temp="\t\t\t\t\t\t\t";}
+		if (($bytes[15] & 4) > 0) { print "${temp}CAS Latency = 3\n"; $temp="\t\t\t\t\t\t\t";}
+		if (($bytes[15] & 8) > 0) { print "${temp}Junction Temp A (90 degrees C)\n"; $temp="\t\t\t\t\t\t\t";}
+		if (($bytes[15] & 8) == 0) { print "${temp}Junction Temp B (100 degrees C)\n"; $temp="\t\t\t\t\t\t\t";}
+		if (($bytes[15] & 16) > 0) { print "${temp}CLK 3 Connected\n"; $temp="\t\t\t\t\t\t\t";}
+		if (($bytes[15] & 32) > 0) { print "${temp}CLK 2 Connected\n"; $temp="\t\t\t\t\t\t\t";}
+		if (($bytes[15] & 64) > 0) { print "${temp}CLK 1 Connected\n"; $temp="\t\t\t\t\t\t\t";}
+		if (($bytes[15] & 128) > 0) { print "${temp}CLK 0 Connected\n"; $temp="\t\t\t\t\t\t\t";}
+		if ($bytes[15] > 175) { print "${temp}Double Sided DIMM\n"; $temp="\t\t\t\t\t\t\t";
+			} else {print "${temp}Single Sided DIMM\n"; $temp="\t\t\t\t\t\t\t";}
+		
+		
 	}
 }
 print "\n\nNumber of SDRAM DIMMs detected and decoded: $dimm_count\n";
