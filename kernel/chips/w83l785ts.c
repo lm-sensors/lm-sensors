@@ -52,20 +52,20 @@ SENSORS_INSMOD_1(w83l785ts);
  * Manufacturer ID is 0x5CA3 for Winbond.
  */
 
-#define W83L785TS_REG_MAN_ID1	0x4D
-#define W83L785TS_REG_MAN_ID2	0x4C
-#define W83L785TS_REG_CHIP_ID	0x4E
-#define W83L785TS_REG_CONFIG	0x40
-#define W83L785TS_REG_TYPE	0x52
-#define W83L785TS_REG_TEMP	0x27
-#define W83L785TS_REG_HIGH	0x05
+#define W83L785TS_REG_MAN_ID1		0x4D
+#define W83L785TS_REG_MAN_ID2		0x4C
+#define W83L785TS_REG_CHIP_ID		0x4E
+#define W83L785TS_REG_CONFIG		0x40
+#define W83L785TS_REG_TYPE		0x52
+#define W83L785TS_REG_TEMP		0x27
+#define W83L785TS_REG_TEMP_OVER		0x53 /* not sure about this one */
 
 /*
- * Conversions, initial values and various macros
+ * Conversions
  * The W83L785TS-S uses signed 8-bit values.
  */
 
-#define TEMP_FROM_REG(val)  (val > 127 ? val-256 : val)
+#define TEMP_FROM_REG(val)	(val > 127 ? val-256 : val)
 
 /*
  * Functions declaration
@@ -104,7 +104,7 @@ struct w83l785ts_data {
 	unsigned long last_updated; /* in jiffies */
 
 	/* registers values */
-	u8 temp, temp_high;
+	u8 temp, temp_over;
 };
 
 /*
@@ -307,7 +307,7 @@ static void w83l785ts_update_client(struct i2c_client *client)
 		printk(KERN_DEBUG "w83l785ts.o: Updating data.\n");
 #endif
 		data->temp = i2c_smbus_read_byte_data(client, W83L785TS_REG_TEMP);
-		data->temp_high = i2c_smbus_read_byte_data(client, W83L785TS_REG_HIGH);
+		data->temp_over = i2c_smbus_read_byte_data(client, W83L785TS_REG_TEMP_OVER);
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -324,7 +324,7 @@ static void w83l785ts_temp(struct i2c_client *client, int operation,
 		*nrels_mag = 0; /* magnitude */
 	} else if (operation == SENSORS_PROC_REAL_READ) {
 		w83l785ts_update_client(client);
-		results[0] = TEMP_FROM_REG(data->temp_high);
+		results[0] = TEMP_FROM_REG(data->temp_over);
 		results[1] = TEMP_FROM_REG(data->temp);
 		*nrels_mag = 2;
 	}
