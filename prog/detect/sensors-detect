@@ -1140,6 +1140,7 @@ sub w83781d_isa_detect
   return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
   return if $chip == 1 and  $reg1 != 0x30;
   return if $chip == 2 and  $reg1 != 0x40;
+  return 8;
 }
 
 # $_[0]: Chip to detect (0 = Revision 0x00, 1 = Revision 0x80)
