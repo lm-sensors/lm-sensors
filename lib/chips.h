@@ -828,6 +828,10 @@
 #define SENSORS_EEPROM_NUMROWS 14
 #define SENSORS_EEPROM_BANKS 15
 
+#define SENSORS_EEPROM_VAIO_NAME 128
+/* 129 to 159: reserved, do not use! */
+#define SENSORS_EEPROM_VAIO_SERIAL 160
+/* 161 to 191: reserved, do not use! */
 
 /* Analog Devices LM87 chips */
 

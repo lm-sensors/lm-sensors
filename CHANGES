@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.6.6 (2002????)
+2.6.6 (20021???)
   NOTE: Requires i2c-2.6.6 or newer.
   File doc/busses/i2c-ali1535: Add license, miscellaneous changes
   File doc/busses/i2c-ali15x3: Add license, miscellaneous changes
@@ -28,7 +28,7 @@ ask CVS about it:
   File doc/chips/vt8231: Add license, parameters
   File sensors.conf.eg: Add section for lm75; complete the lm78 section
   Library: Add support for MC1066; add multiple VRM version support for lm87;
-           enhance adm1023 support
+           enhance adm1023 support; initial support for Sony Vaio eeprom
   Makefile: Take kernel source location from /lib/modules/x.x.x/build
   Module adm1021: Add support for MC1066
   Module bmcsensors: New	
@@ -54,7 +54,8 @@ ask CVS about it:
   Program lm_sensors.init: Remove spaces bug; add green/red output
   Program mkpatch: Fix dmi_scan module compile
   Program sensors: Add support for MC1066, Rambus Rimms;
-                   fix w83781d temp3 alarm; fix gl518sm rev 0x00 recognition
+                   fix w83781d temp3 alarm; fix gl518sm rev 0x00 recognition;
+                   initial support for Sony Vaio eeprom
   Program sensors-detect: Add support for MC1066, smart battery;
                           add ACPI method for IBM system detection;
 						  work with old Perl versions again
