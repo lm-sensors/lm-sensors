@@ -754,7 +754,7 @@ sub add_i2c_to_chips_detected
     foreach $detected_entry (@{$main_entry->{detected}}) {
       @entry_addrs = ($detected_entry->{i2c_addr});
       push @entry_addrs, @{$detected_entry->{i2c_sub_addrs}}
-               if exists $datahash->{i2c_sub_addrs};
+               if exists $detected_entry->{i2c_sub_addrs};
       if ($detected_entry->{i2c_devnr} == $datahash->{i2c_devnr} and
           any_list_match \@entry_addrs, \@hash_addrs) {
         if ($detected_entry->{conf} >= $datahash->{conf}) {
