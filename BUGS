@@ -41,6 +41,14 @@ boot until the power is cycled).
 If there are bugs in the i2c bus drivers, or improvements we can make to
 error recovery, we don't know what they are.
 
+On the ASUS P5A motherboard, there are several reports that
+the SMBus will hang and this can only be resolved by
+powering off the computer. It appears to be worse when the board
+gets hot, for example under heavy CPU load, or in the summer.
+There may be electrical problems on this board.
+On the P5A, the W83781D sensor chip is on both the ISA and
+SMBus. Therefore the SMBus hangs can generally be avoided
+by accessing the W83781D on the ISA bus only.
 
 ================================
 IBM Thinkpad laptops and sensors-detect

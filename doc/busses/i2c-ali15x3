@@ -108,8 +108,9 @@ This driver requests the I/O space for only the SMB
 registers. It doesn't use the ACPI region.
 
 On the ASUS P5A motherboard, there are several reports that
-the SMBus will hang
-and this can only be resolved by powering off the computer.
+the SMBus will hang and this can only be resolved by
+powering off the computer. It appears to be worse when the board
+gets hot, for example under heavy CPU load, or in the summer.
 There may be electrical problems on this board.
 On the P5A, the W83781D sensor chip is on both the ISA and
 SMBus. Therefore the SMBus hangs can generally be avoided
