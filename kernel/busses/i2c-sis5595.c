@@ -448,6 +448,7 @@ static int __devinit sis5595_probe(struct pci_dev *dev, const struct pci_device_
 static void __devexit sis5595_remove(struct pci_dev *dev)
 {
 	i2c_del_adapter(&sis5595_adapter);
+	release_region(sis5595_base + SMB_INDEX, 2);
 }
 
 
@@ -468,7 +469,6 @@ static int __init i2c_sis5595_init(void)
 static void __exit i2c_sis5595_exit(void)
 {
 	pci_unregister_driver(&sis5595_driver);
-	release_region(sis5595_base + SMB_INDEX, 2);
 }
 
 

@@ -143,6 +143,7 @@ static void __devexit hydra_remove(struct pci_dev *dev)
 {
 	pdregw(0);	/* clear SCLK_OE and SDAT_OE */
 	i2c_bit_del_bus(&bit_hydra_ops);
+	iounmap((void *) hydra_base);
 }
 
 
@@ -162,7 +163,6 @@ static int __init i2c_hydra_init(void)
 static void __exit i2c_hydra_exit(void)
 {
 	pci_unregister_driver(&hydra_driver);
-	iounmap((void *) hydra_base);
 }
 
 
