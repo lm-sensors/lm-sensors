@@ -26,6 +26,7 @@ ask CVS about it:
   Module pcf8591: new
   Module w83781d: Add W83697HF support
   Program i2cdump: Add i2c block read capability
+  Program init/sensors: New SysV init script
   Program mkpatch.pl: Add support for fscscy, add more help entries
   Program rrd: Install summ_week.cgi
   Program sensors: Add PCF8591 and W83697HF support,
@@ -33,8 +34,7 @@ ask CVS about it:
   Program sensors-detect: Add several Nvidia chips, add PCF8591,
                           fix Via686a and it87 detection,
                           add AMD768, IPMI-BMC-KCS and -SMIC,
-                          fix uninitialized values
-
+                          fix uninitialized values, it87 beats lm78
 
 2.6.2 (20011118)
   Chip Modules (all): malloc.h -> slab.h

@@ -85,6 +85,9 @@ see useful_addresses.html.
   An experimental kernel module to enable the Acer Labs 7101 PCI device.
   See prog/hotplug/README for details.
 
+* prog/init/sensors (shell script, not installed)
+  A SysV init script to be installed in /etc/rc.d/...
+
 * prog/matorb/displayit.pl (written in Perl, not installed)
   A simple Perl script to display a 'screen' on a Matrix Orbital Display.
 
