@@ -33,16 +33,16 @@
 #include <linux/bios32.h>
 #endif
 
+#include <linux/i2c.h>
+#include <linux/i2c-algo-bit.h>
+#include "compat.h"
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
 #else
 #define __init
 #define __initdata
 #endif
-
-#include <linux/i2c.h>
-#include <linux/i2c-algo-bit.h>
-#include "compat.h"
 
 /* PCI device */
 #define VENDOR		PCI_VENDOR_ID_VIA
