@@ -102,7 +102,8 @@ ask CVS about it:
                           Fix "C" format error;
                           Add support for adm1026, 82801EB (ICH5), W83791D;
                           Add support for w83l785ts, nForce2;
-                          Fix UTF-8 incompatibility
+                          Fix UTF-8 incompatibility;
+                          Better support for lm75 
 
 2.7.0 (20021208)
   NOTE: Requires i2c-2.7.0 or newer.

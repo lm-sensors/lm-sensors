@@ -2266,12 +2266,20 @@ sub lm78_alias_detect
 # $_[0]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
-# Returns: undef if not detected, (3) if detected.
+# Returns: undef if not detected, 2 to 6 if detected;
+#   6 means that the LM75 was found in its default power up state;
+#   5 means that the LM75 was found in another known default state;
+#   4 means that the LM75 was found in a probable state (temperatures
+#       make sense);
+#   3 means that the configuration register passes the test;
+#   2 means that the configuration register test failed, so the chipset
+#       is unlikely to be a LM75.
 # Registers used:
+#   0x01: Temperature
 #   0x01: Configuration
 #   0x02: Hysteresis
 #   0x03: Overtemperature Shutdown
-# Detection really sucks! It is only based on the fact that the LM75 has only
+# The first detection step is only based on the fact that the LM75 has only
 # four registers. Any other chip in the valid address range with only four
 # registers will be detected too.
 # Note that register $00 may change, so we can't use the modulo trick on it.
@@ -2288,7 +2296,20 @@ sub lm75_detect
     return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x02) != $hyst;
     return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x03) != $os;
   }
-  return (3);
+  # Default power up state (from specs)
+  return 6
+    if $conf == 0 and ($hyst&0x80ff) == 0x004b and ($os&0x80ff) == 0x0050;
+  # Default state as seen on the Asus TX97-E
+  return 5
+    if $conf == 0 and ($hyst&0x80ff) == 0x002d and ($os&0x80ff) == 0x0034;
+  # Most probable value ranges
+  return 4
+    if ($conf&0xe0) == 0 and (($cur&0x00ff) <= 125 || ($cur&0x00ff) >= 201)
+       and ($hyst&0x00ff) <= 125 and ($os&0x00ff) <= 125 and $hyst<$os;
+  # Unused bits in conf register
+  return 3
+    if ($conf&0xe0) == 0;
+  return 2;
 }
   
 # $_[0]: A reference to the file descriptor to access this chip.
