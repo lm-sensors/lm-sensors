@@ -24,7 +24,7 @@ ask CVS about it:
         Also, mkpatch is probably broken right now.
   File doc/FAQ: Many updates and additions
   File doc/chips/via686a: Claim support for 686b.
-  File sensors.conf.eg: Adjust as99127f in5 (-12V) and temp2 calculations
+  File sensors.conf.eg: Adjust as99127f in5 (-12V) and temp2 calculations;
                         Add lm87 template; enhance help comments in file
   File sensors.c: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
   Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
@@ -35,14 +35,15 @@ ask CVS about it:
   Module i2c-i810: Fixed i2c_i810_init() not found in patched kernel
   Module lm78: Recognize chipid=0x20
   Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
-  Module mtp008: Fix temp2 max initialization
+  Module mtp008: Fix temp initializations;
                  Save BIOS pin configuration of temps and fans
   Module sensors: Disabled, moved to i2c package as i2c-proc.c
   Module via686a: Allow force=9191,address (for A7V/K7V boards)
   Program mkpatch.pl: Fix adm9240 typos, add more chips to Configure.help
   Program sensord: Add -d (debug) and -p (pid-file) options
-  Program sensors: Change reported version from 1.3 to the lm_sensors version.
-                   Fix swapped limit and hysteresis on 9240, 5595, 686a.
+  Program sensors: Change reported version from 1.3 to the lm_sensors version;
+                   Fix swapped limit and hysteresis on 9240, 5595, 686a;
+                   Change mtp008 temps from max/min to limit/hyst.
   Program sensors-detect: Recognize lm78 with chipid=0x20
                           Recognize SMSC Victory66 South Bridge
 

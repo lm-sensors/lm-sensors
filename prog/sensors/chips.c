@@ -77,7 +77,7 @@ void print_temp_info( float cur, float over, float hyst, int minmax )
    if(minmax == MINMAX)
 	printf( "%+3.1f%s   (min = %+3.0f%s, max = %+3.0f%s)",
            n_cur, degv, n_hyst, degv, n_over, degv );
-   else
+   else /* HYST */
 	printf( "%+3.1f%s   (limit = %+3.0f%s, hysteresis = %+3.0f%s)",
            n_cur, degv, n_over, degv, n_hyst, degv );
 }
@@ -1598,7 +1598,7 @@ void print_mtp008(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_MTP008_TEMP1_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX );
+      print_temp_info( cur, max, min, HYST );
       printf(" %s\n", alarms&MTP008_ALARM_TEMP1?"ALARM":"");
     }
   } else
@@ -1611,7 +1611,7 @@ void print_mtp008(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_MTP008_TEMP2_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX );
+      print_temp_info( cur, max, min, HYST );
       printf(" %s\n", alarms&MTP008_ALARM_TEMP2?"ALARM":"");
     }
   } else
@@ -1624,7 +1624,7 @@ void print_mtp008(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_MTP008_TEMP3_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX );
+      print_temp_info( cur, max, min, HYST );
       printf(" %s\n", alarms&MTP008_ALARM_TEMP3?"ALARM":"");
     }
   } else
