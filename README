@@ -8,7 +8,7 @@
 
 OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
-!!! This package is ONLY for 2.6, 2.5, and 2.4 kernels (2.4.9 or later) !!!
+!!! This package is ONLY for 2.6, 2.5, and 2.4 kernels (2.4.10 or later) !!!
 !!! THIS PACKAGE REQUIRES i2c-2.9.0 or later!!!
 
 FOR 2.6/2.5 KERNELS, Use only the userspace tools in this package!
@@ -22,9 +22,10 @@ This is the completely rewritten version 2 of lm_sensors, a collection of
 modules for general SMBus[1] access and hardware monitoring.
 Version 1 is now officially unsupported.
 
-WARNING! This drivers in this package will work on kernels 2.4.9 - 2.4.xx only.
+WARNING! The drivers in this package will work on reasonably recent 2.4
+kernels only (2.4.10 and later).
 Use lm_sensors-2.4.5 for 2.0 kernels.
-Use lm_sensors-2.7.0 for 2.2, 2.3, and 2.4.0 - 2.4.8 kernels.
+Use lm_sensors-2.7.0 for 2.2, 2.3, and 2.4.0 - 2.4.9 kernels.
 Use the drivers already in the kernel for 2.6/2.5 kernels; if you need
 additional drivers in 2.6 please port and submit them to us.
 
@@ -39,15 +40,7 @@ for compilation of this package.
 
 ADDITIONALLY, i2c-2.9.0 is API compatible to i2c releases 2.7.0 and earlier,
 but is not API compatible to i2c releases 2.8.0 - 2.8.8
-due to struct changes.
-
-Users whose systems require additional i2c-related
-kernel modules (bttv, i2c-matrox, rivatv, zoran...)
-will require additional patches for the Linux 2.4.x kernels.
-These patches fix compatibility differences between those modules and
-the 2.9.0 i2c release.
-A complete installation guide is available at
-  http://khali.linux-fr.org/devel/i2c/
+due to struct changes. Versions 2.8.x of i2c are considered deprecated.
 
 See the lm_sensors download page for further guidance:
   http://secure.netroedge.com/~lm78/download.html

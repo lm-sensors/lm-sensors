@@ -10,15 +10,10 @@ This is by far the EASIEST METHOD.
 Other methods are described in INSTALL.
 ------------------------------------------
 
-  * Verify you are running a 2.4 kernel, 2.4.9 or later.
+  * Verify you are running a 2.4 kernel, 2.4.10 or later.
     If you are running a 2.5/2.6 kernel, the ONLY thing you need to
     do is 'make user' and 'make user_install'. Do NOT follow the rest
     of these instructions.
-
-  * Do you require additional i2c-related
-    2.4 kernel modules (bttv, i2c-matrox, rivatv, zoran...) ???
-    See the information in README.
-    Do NOT follow the rest of these instructions.
 
   * Make sure you have the kernel tree corresponding to your current
     kernel in /lib/modules/(uname -r)/build.

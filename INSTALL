@@ -3,7 +3,7 @@
 DETAILED INSTALLATION INSTRUCTIONS
 See QUICKSTART for the simple version.
 
-The driver modules in this package are ONLY for 2.4 kernels 2.4.9 or later !!!
+The driver modules in this package are ONLY for 2.4 kernels 2.4.10 or later!
 
 This package REQUIRES i2c-2.9.0 or later! The i2c subsystem found in the
 Linux 2.4 kernel trees, even the latest ones, is outdated and won't work.
@@ -14,10 +14,6 @@ FOR 2.5/2.6 KERNELS, do not attempt to compile the modules in this package.
     do is 'make user' and 'make user_install'. Do NOT follow the rest
     of these instructions.
 
-IF YOU REQUIRE BTTV AND RELATED MODULES,
-    See the information in README.
-    Do NOT follow the rest of these instructions.
-
 
 =============================================================================
 These are the installation instruction for the lm_sensors package.
@@ -26,7 +22,7 @@ There are two ways in which you can compile and install this package.
 Option 1 is much easier and is recommended.
 
  1. Complete separate from kernel compilation
-    (only for 2.4 kernels 2.4.9 or later)
+    (only for 2.4 kernels 2.4.10 or later)
     This will generate a set of modules which can be inserted and removed
     as needed; nothing will be written into the kernel tree;
 
@@ -57,8 +53,8 @@ NOTE: PLEASE READ THE DOCUMENTATION IN THE DOC SUBDIRECTORY IF YOU GET STUCK!
 Installing the i2c package
 ==========================
 
-This lm_sensors release REQUIRES i2c-2.9.0 or later,
-which is not in kernels through (at least) 2.4.28.
+This lm_sensors release REQUIRES i2c-2.9.0 or later, which is not in
+any 2.4 kernel (and will never be).
 Therefore, you must download and install the i2c package with
 the same version number or higher as this lm_sensors package.
 
@@ -89,7 +85,7 @@ files in /usr/local/include, this will probably go wrong. See below on
 how to fix this.
 
 NOTE: option 3 only works with 2.4 kernels 2.4.13 or later;
-      option 1 and 2 only work with 2.4 kernels 2.4.9 or later.
+      options 1 and 2 only work with 2.4 kernels 2.4.10 or later.
 
 
 Mixing old and new, and using beta drivers (compilation option 1)
