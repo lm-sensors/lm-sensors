@@ -51,7 +51,7 @@ sub print_info
 {
   my ($modname) = @_;
   my (@lines,$line,$option,$type,$desc);
-  print "Author: ", wrap("Author: ","        ",`modinfo -a $modname`), "\n\n";
+  print wrap("Author: ","        ",`modinfo -a $modname`), "\n\n";
   print "Module Parameters\n";
   print "-----------------\n";
   print "\n";

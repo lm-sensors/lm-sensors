@@ -93,7 +93,7 @@ struct adm1021_data {
          unsigned long last_updated; /* In jiffies */
 
          u8 temp,temp_os,temp_hyst; /* Register values */
-         u8 remote_temp,remote_temp_os,remote_temp_hyst,status,die_code; 
+         u8 remote_temp,remote_temp_os,remote_temp_hyst,alarms,die_code; 
 };
 
 #ifdef MODULE
@@ -117,7 +117,7 @@ static void adm1021_temp(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
 static void adm1021_remote_temp(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
-static void adm1021_status(struct i2c_client *client, int operation, int ctl_name,
+static void adm1021_alarms(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
 static void adm1021_die_code(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
@@ -148,8 +148,8 @@ static ctl_table adm1021_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &adm1021_remote_temp },
     {ADM1021_SYSCTL_DIE_CODE, "die_code", NULL, 0, 0444, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &adm1021_die_code },
-    {ADM1021_SYSCTL_STATUS, "status", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &adm1021_status },
+    {ADM1021_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &adm1021_alarms },
   { 0 }
 };
 
@@ -158,8 +158,8 @@ static ctl_table adm1021_max_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &adm1021_temp },
     {ADM1021_SYSCTL_REMOTE_TEMP, "remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &adm1021_remote_temp },
-    {ADM1021_SYSCTL_STATUS, "status", NULL, 0, 0444, NULL, &sensors_proc_real,
-    &sensors_sysctl_real, NULL, &adm1021_status },
+    {ADM1021_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &adm1021_alarms },
   { 0 }
 };
 
@@ -216,6 +216,13 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind)
   new_client->data = data;
   new_client->adapter = adapter;
   new_client->driver = &adm1021_driver;
+
+  /* Now, we do the remaining detection. */
+
+  if (kind < 0) {
+    if ((adm1021_read_value(new_client,ADM1021_REG_STATUS) & 0x03) != 0x00)
+      goto ERROR1;
+  }
 
   /* Determine the chip type. */
   
@@ -393,7 +400,7 @@ void adm1021_update_client(struct i2c_client *client)
     data->remote_temp = adm1021_read_value(client,ADM1021_REG_REMOTE_TEMP);
     data->remote_temp_os = adm1021_read_value(client,ADM1021_REG_REMOTE_TOS_R);
     data->remote_temp_hyst = adm1021_read_value(client,ADM1021_REG_REMOTE_THYST_R);
-    data->status = adm1021_read_value(client,ADM1021_REG_STATUS);
+    data->alarms = adm1021_read_value(client,ADM1021_REG_STATUS) & 0xec;
     if (data->type == adm1021)
       data->die_code = adm1021_read_value(client,ADM1021_REG_DIE_CODE);
     data->last_updated = jiffies;
@@ -467,7 +474,7 @@ void adm1021_die_code(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-void adm1021_status(struct i2c_client *client, int operation, int ctl_name,
+void adm1021_alarms(struct i2c_client *client, int operation, int ctl_name,
                int *nrels_mag, long *results)
 {
   struct adm1021_data *data = client->data;
@@ -475,7 +482,7 @@ void adm1021_status(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     adm1021_update_client(client);
-    results[0] = data->status;
+    results[0] = data->alarms;
     *nrels_mag = 1;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     /* Can't write to it */

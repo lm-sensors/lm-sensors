@@ -232,7 +232,8 @@ sub output_data
   my ($feature,$data,$read_write);
   $feature = $features{$index};
   printf "Chip `%s'\n",$feature->{prefix};
-  print "          LABEL     LABEL CLASS   COMPUTE CLASS ACCESS MAGNITUDE\n";
+  print "             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS ".
+        "MAGNITUDE\n";
   foreach $data (@{$feature->{features}}) {
     $read_write = $data->{mode_read} + 2 * $data->{mode_write};
     if ($read_write == 0) {
@@ -244,16 +245,16 @@ sub output_data
     } else {
       $read_write = "RW";
     }
-    printf "%15s %15s %15s      %2s   %2s\n",
+    printf "%18s %18s %18s     %2s   %2s\n",
            $data->{name}, $feature_name{$data->{logical_mapping}}, 
            $feature_name{$data->{compute_mapping}},
            $read_write,$data->{magnitude};
   }
   print "\n";
-  print "          LABEL                           FEATURE SYMBOL     ".
-        "SYSCTL FILE:OFFSET\n";
+  print "             LABEL                          FEATURE SYMBOL       ".
+        " SYSCTL FILE:NR\n";
   foreach $data (@{$feature->{features}}) {
-    printf "%15s %40s %15s:%1d\n",$data->{name}, $data->{number},
+    printf "%18s %39s %18s:%1d\n",$data->{name}, $data->{number},
            $sysctls{$data->{sysctl}}, $data->{offset}, $data->{magnitude};
   }
 }

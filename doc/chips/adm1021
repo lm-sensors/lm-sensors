@@ -1,3 +1,151 @@
+Kernel driver `adm1021.o'
+=========================
+
+Status: Complete; tested for the ADM1021 and MAX1617, untested for the MAX1617A.
+
+Supported chips:
+  * Analog Devices ADM1021
+    Prefix `adm1021'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Datasheet: Publicly available at the Analog Devices website
+  * Maxim MAX1617
+    Prefix `max1617'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Datasheet: Publicly available at the Maxim website
+  * Maxim MAX1617A
+    Prefix `max1617a'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Datasheet: Publicly available at the Maxim website
+
+
+Author: Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock
+        <phil@netroedge.com>
+
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_adm1021: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `adm1021' chip
+* force_max1617: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `max1617' chip
+* force_max1617a: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `max1617a' chip
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+
+
+Description
+-----------
+
+The chips supported by this driver are very similar. The Maxim MAX1617
+is the oldest; it has the problem that it is not very well detectable.
+The MAX1617A solves that.  The ADM1021 is a straight clone of the MAX1617A.
+From here on, we will refer to all these chips as ADM1021-clones.
+
+ADM1021-clones implement two temperature sensors. One of them is internal,
+and measures the temperature of the chip itself; the other is external
+and is realised in the form of a transistor-like device. A special alarm
+indicates whether the remote sensor is connected.
+
+Each sensor has its own low and high limits. When they are crossed, the 
+corresponding alarm is set and remains on as long as the temperature stays 
+out of range. Temperatures are measured in degrees Celcius. Measurements 
+are possible between -65 and +127 degrees, with a resolution of one degree.
+
+The ADM1021 reports a die code, which is a sort of revision code. This
+can help us pinpoint problems; it is not very useful otherwise.
+
+If an alarm triggers, it will remain triggered until the hardware register
+is read at least once. This means that the cause for the alarm may
+already have disappeared!
+
+This driver  only updates its values each 1.5 seconds; reading it more often
+will do no harm, but will return 'old' values. It is possible to make 
+ADM1021-clones do faster measurements, but there is really no good reason
+for that.
+
+
+Chip Features
+-------------
+
+Chip `adm1021'
+             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
+              temp               NONE               NONE     R     0
+          temp_low               temp               temp     RW    0
+         temp_over               temp               temp     RW    0
+       remote_temp               NONE               NONE     R     0
+   remote_temp_low        remote_temp        remote_temp     RW    0
+  remote_temp_over        remote_temp        remote_temp     RW    0
+            alarms               NONE               NONE     R     0
+          die_code               NONE               NONE     R     0
+
+             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
+              temp                    SENSORS_ADM1021_TEMP               temp:3
+          temp_low               SENSORS_ADM1021_TEMP_HYST               temp:2
+         temp_over               SENSORS_ADM1021_TEMP_OVER               temp:1
+       remote_temp             SENSORS_ADM1021_REMOTE_TEMP        remote_temp:3
+   remote_temp_low        SENSORS_ADM1021_REMOTE_TEMP_HYST        remote_temp:2
+  remote_temp_over        SENSORS_ADM1021_REMOTE_TEMP_OVER        remote_temp:1
+            alarms                  SENSORS_ADM1021_ALARMS             alarms:1
+          die_code                SENSORS_ADM1021_DIE_CODE           die_code:1
+
+
+Chip `max1617'
+             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
+              temp               NONE               NONE     R     0
+          temp_low               temp               temp     RW    0
+         temp_over               temp               temp     RW    0
+       remote_temp               NONE               NONE     R     0
+   remote_temp_low        remote_temp        remote_temp     RW    0
+  remote_temp_over        remote_temp        remote_temp     RW    0
+            alarms               NONE               NONE     R     0
+
+             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
+              temp                    SENSORS_MAX1617_TEMP               temp:3
+          temp_low               SENSORS_MAX1617_TEMP_HYST               temp:2
+         temp_over               SENSORS_MAX1617_TEMP_OVER               temp:1
+       remote_temp             SENSORS_MAX1617_REMOTE_TEMP        remote_temp:3
+   remote_temp_low        SENSORS_MAX1617_REMOTE_TEMP_HYST        remote_temp:2
+  remote_temp_over        SENSORS_MAX1617_REMOTE_TEMP_OVER        remote_temp:1
+            alarms                  SENSORS_MAX1617_ALARMS             alarms:1
+
+
+Chip `max1617a'
+             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
+              temp               NONE               NONE     R     0
+          temp_low               temp               temp     RW    0
+         temp_over               temp               temp     RW    0
+       remote_temp               NONE               NONE     R     0
+   remote_temp_low        remote_temp        remote_temp     RW    0
+  remote_temp_over        remote_temp        remote_temp     RW    0
+            alarms               NONE               NONE     R     0
+
+             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
+              temp                   SENSORS_MAX1617A_TEMP               temp:3
+          temp_low              SENSORS_MAX1617A_TEMP_HYST               temp:2
+         temp_over              SENSORS_MAX1617A_TEMP_OVER               temp:1
+       remote_temp            SENSORS_MAX1617A_REMOTE_TEMP        remote_temp:3
+   remote_temp_low       SENSORS_MAX1617A_REMOTE_TEMP_HYST        remote_temp:2
+  remote_temp_over       SENSORS_MAX1617A_REMOTE_TEMP_OVER        remote_temp:1
+            alarms                 SENSORS_MAX1617A_ALARMS             alarms:1
+
+
+
+Old Documentation (may be outdated)
+-----------------------------------
+
 This file documents the adm1021 directories for the Analog Devices ADM1021
 and MAX1617 temperature sensor chip. Note that this last chip should be
 fully compatible; it is not yet well-tested, though.

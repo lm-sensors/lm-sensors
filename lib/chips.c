@@ -295,28 +295,90 @@ static sensors_chip_feature lm75_features[] =
     { 0 }
   };
 
-
 static sensors_chip_feature adm1021_features[] =
   {
     { SENSORS_ADM1021_TEMP, "temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
-                         SENSORS_MODE_R, ADM1021_SYSCTL_TEMP, VALUE(3), 0 },
+                              SENSORS_MODE_R, ADM1021_SYSCTL_TEMP, VALUE(3), 
+                              0 },
     { SENSORS_ADM1021_TEMP_HYST, "temp_low", SENSORS_ADM1021_TEMP,
                               SENSORS_ADM1021_TEMP, SENSORS_MODE_RW, 
                               ADM1021_SYSCTL_TEMP, VALUE(2), 0 },
     { SENSORS_ADM1021_TEMP_OVER, "temp_over", SENSORS_ADM1021_TEMP,
                               SENSORS_ADM1021_TEMP, SENSORS_MODE_RW,
                               ADM1021_SYSCTL_TEMP, VALUE(1), 0 },
-    { SENSORS_ADM1021_REMOTE_TEMP, "remote_temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
-                         SENSORS_MODE_R, ADM1021_SYSCTL_REMOTE_TEMP, VALUE(3), 0 },
-    { SENSORS_ADM1021_REMOTE_TEMP_HYST, "remote_temp_low", SENSORS_ADM1021_REMOTE_TEMP,
+    { SENSORS_ADM1021_REMOTE_TEMP, "remote_temp", SENSORS_NO_MAPPING, 
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R, 
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(3), 0 },
+    { SENSORS_ADM1021_REMOTE_TEMP_HYST, "remote_temp_low", 
+                              SENSORS_ADM1021_REMOTE_TEMP,
                               SENSORS_ADM1021_REMOTE_TEMP, SENSORS_MODE_RW, 
                               ADM1021_SYSCTL_REMOTE_TEMP, VALUE(2), 0 },
-    { SENSORS_ADM1021_REMOTE_TEMP_OVER, "remote_temp_over", SENSORS_ADM1021_REMOTE_TEMP,
+    { SENSORS_ADM1021_REMOTE_TEMP_OVER, "remote_temp_over", 
+                              SENSORS_ADM1021_REMOTE_TEMP,
                               SENSORS_ADM1021_REMOTE_TEMP, SENSORS_MODE_RW,
                               ADM1021_SYSCTL_REMOTE_TEMP, VALUE(1), 0 },
-    { SENSORS_ADM1021_STATUS, "status", SENSORS_NO_MAPPING,
+    { SENSORS_ADM1021_ALARMS, "alarms", SENSORS_NO_MAPPING,
                               SENSORS_NO_MAPPING, SENSORS_MODE_R,
-                              ADM1021_SYSCTL_STATUS, VALUE(1), 0 },
+                              ADM1021_SYSCTL_ALARMS, VALUE(1), 0 },
+    { SENSORS_ADM1021_DIE_CODE, "die_code", SENSORS_NO_MAPPING,
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                              ADM1021_SYSCTL_DIE_CODE, VALUE(1), 0 },
+    { 0 }
+  };
+
+static sensors_chip_feature max1617_features[] =
+  {
+    { SENSORS_MAX1617_TEMP, "temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                              SENSORS_MODE_R, ADM1021_SYSCTL_TEMP, VALUE(3), 
+                              0 },
+    { SENSORS_MAX1617_TEMP_HYST, "temp_low", SENSORS_MAX1617_TEMP,
+                              SENSORS_MAX1617_TEMP, SENSORS_MODE_RW, 
+                              ADM1021_SYSCTL_TEMP, VALUE(2), 0 },
+    { SENSORS_MAX1617_TEMP_OVER, "temp_over", SENSORS_MAX1617_TEMP,
+                              SENSORS_MAX1617_TEMP, SENSORS_MODE_RW,
+                              ADM1021_SYSCTL_TEMP, VALUE(1), 0 },
+    { SENSORS_MAX1617_REMOTE_TEMP, "remote_temp", SENSORS_NO_MAPPING, 
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R, 
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(3), 0 },
+    { SENSORS_MAX1617_REMOTE_TEMP_HYST, "remote_temp_low", 
+                              SENSORS_MAX1617_REMOTE_TEMP,
+                              SENSORS_MAX1617_REMOTE_TEMP, SENSORS_MODE_RW, 
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(2), 0 },
+    { SENSORS_MAX1617_REMOTE_TEMP_OVER, "remote_temp_over", 
+                              SENSORS_MAX1617_REMOTE_TEMP,
+                              SENSORS_MAX1617_REMOTE_TEMP, SENSORS_MODE_RW,
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(1), 0 },
+    { SENSORS_MAX1617_ALARMS, "alarms", SENSORS_NO_MAPPING,
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                              ADM1021_SYSCTL_ALARMS, VALUE(1), 0 },
+    { 0 }
+  };
+
+static sensors_chip_feature max1617a_features[] =
+  {
+    { SENSORS_MAX1617A_TEMP, "temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                              SENSORS_MODE_R, ADM1021_SYSCTL_TEMP, VALUE(3), 
+                              0 },
+    { SENSORS_MAX1617A_TEMP_HYST, "temp_low", SENSORS_MAX1617A_TEMP,
+                              SENSORS_MAX1617A_TEMP, SENSORS_MODE_RW, 
+                              ADM1021_SYSCTL_TEMP, VALUE(2), 0 },
+    { SENSORS_MAX1617A_TEMP_OVER, "temp_over", SENSORS_MAX1617A_TEMP,
+                              SENSORS_MAX1617A_TEMP, SENSORS_MODE_RW,
+                              ADM1021_SYSCTL_TEMP, VALUE(1), 0 },
+    { SENSORS_MAX1617A_REMOTE_TEMP, "remote_temp", SENSORS_NO_MAPPING, 
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R, 
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(3), 0 },
+    { SENSORS_MAX1617A_REMOTE_TEMP_HYST, "remote_temp_low", 
+                              SENSORS_MAX1617A_REMOTE_TEMP,
+                              SENSORS_MAX1617A_REMOTE_TEMP, SENSORS_MODE_RW, 
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(2), 0 },
+    { SENSORS_MAX1617A_REMOTE_TEMP_OVER, "remote_temp_over", 
+                              SENSORS_MAX1617A_REMOTE_TEMP,
+                              SENSORS_MAX1617A_REMOTE_TEMP, SENSORS_MODE_RW,
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(1), 0 },
+    { SENSORS_MAX1617A_ALARMS, "alarms", SENSORS_NO_MAPPING,
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                              ADM1021_SYSCTL_ALARMS, VALUE(1), 0 },
     { 0 }
   };
 
@@ -1186,6 +1248,8 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_W83783S_PREFIX, w83783s_features },
  { SENSORS_ADM9240_PREFIX, adm9240_features },
  { SENSORS_ADM1021_PREFIX, adm1021_features },
+ { SENSORS_MAX1617_PREFIX, max1617_features },
+ { SENSORS_MAX1617A_PREFIX, max1617a_features },
  { SENSORS_SIS5595_PREFIX, sis5595_features },
  { SENSORS_MAXI_CG_PREFIX, maxi_features },
  { SENSORS_MAXI_CO_PREFIX, maxi_features },

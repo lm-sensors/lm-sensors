@@ -176,7 +176,32 @@
 #define SENSORS_ADM1021_REMOTE_TEMP 54 /* R */
 #define SENSORS_ADM1021_REMOTE_TEMP_HYST 55 /* RW */
 #define SENSORS_ADM1021_REMOTE_TEMP_OVER 56 /* RW */
-#define SENSORS_ADM1021_STATUS 81 /* R */
+#define SENSORS_ADM1021_ALARMS 81 /* R */
+#define SENSORS_ADM1021_DIE_CODE 90 /* R */
+
+/* MAX1617 chips. */
+
+#define SENSORS_MAX1617_PREFIX "max1617"
+
+#define SENSORS_MAX1617_TEMP 51 /* R */
+#define SENSORS_MAX1617_TEMP_HYST 52 /* RW */
+#define SENSORS_MAX1617_TEMP_OVER 53 /* RW */
+#define SENSORS_MAX1617_REMOTE_TEMP 54 /* R */
+#define SENSORS_MAX1617_REMOTE_TEMP_HYST 55 /* RW */
+#define SENSORS_MAX1617_REMOTE_TEMP_OVER 56 /* RW */
+#define SENSORS_MAX1617_ALARMS 81 /* R */
+
+/* MAX1617A chips. */
+
+#define SENSORS_MAX1617A_PREFIX "max1617a"
+
+#define SENSORS_MAX1617A_TEMP 51 /* R */
+#define SENSORS_MAX1617A_TEMP_HYST 52 /* RW */
+#define SENSORS_MAX1617A_TEMP_OVER 53 /* RW */
+#define SENSORS_MAX1617A_REMOTE_TEMP 54 /* R */
+#define SENSORS_MAX1617A_REMOTE_TEMP_HYST 55 /* RW */
+#define SENSORS_MAX1617A_REMOTE_TEMP_OVER 56 /* RW */
+#define SENSORS_MAX1617A_ALARMS 81 /* R */
 
 /* GL518SM revision 0x00 chips. You may also use the revision 0x80 defines,
    but note that some features are unaccessible in revision 0x00. */
