@@ -1411,11 +1411,23 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 <h3 class="section">4.20 Sensors says <span class="samp">Can't access procfs/sysfs file</span></h3>
 
      <ul>
-<li>(Linux 2.6) Did you <span class="command">modprobe i2c_sensor</span>? Check <span class="command">lsmod</span>. 
-<li>(Linux 2.4) Did you <span class="command">modprobe i2c-proc</span>? Check <span class="command">lsmod</span>. 
-<li>If you did <span class="command">sensors -s</span>, did you run it as root? 
-<li>(Linux 2.6) Do you have sysfs support in your kernel (is <span class="file">/sys</span> there and populated)? 
-<li>(Linux 2.4) Do you have procfs support in your kernel (is <span class="file">/proc</span> there and populated)? 
+<li>Linux 2.6
+          <ul>
+<li>Did you <span class="command">modprobe i2c_sensor</span>? Check <span class="command">lsmod</span>. 
+<li>Do you have sysfs support in your kernel and <span class="file">/sys</span> mounted (is <span class="file">/sys</span> there and populated)? 
+Create /sys with <span class="command">mkdir /sys</span> if needed. Then add the following line to <span class="file">/etc/fstab</span>:
+          <pre class="example">               sys              /sys             sysfs       default          0   0</pre>
+          <p>and <span class="command">mount /sys</span>. 
+</ul>
+     <li>Linux 2.4
+          <ul>
+<li>Did you <span class="command">modprobe i2c-proc</span>? Check <span class="command">lsmod</span>. 
+<li>Do you have procfs support in your kernel and <span class="file">/proc</span> mounted (is <span class="file">/proc</span> there and populated)? 
+Create /proc with <span class="command">mkdir /proc</span> if needed. Then add the following line to <span class="file">/etc/fstab</span>:
+          <pre class="example">               proc             /proc            proc        defaults         0   0</pre>
+          <p>and <span class="command">mount /proc</span>. 
+</ul>
+     <li>If you did <span class="command">sensors -s</span>, did you run it as root? 
 </ul>
 
 <div class="node">

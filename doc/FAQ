@@ -959,17 +959,25 @@ address. You must select an address that is not in use.  `cat
 4.20 Sensors says `Can't access procfs/sysfs file'
 ==================================================
 
-   * (Linux 2.6) Did you `modprobe i2c_sensor'? Check `lsmod'.
+   * Linux 2.6
+        * Did you `modprobe i2c_sensor'? Check `lsmod'.
 
-   * (Linux 2.4) Did you `modprobe i2c-proc'? Check `lsmod'.
+        * Do you have sysfs support in your kernel and `/sys' mounted
+          (is `/sys' there and populated)?  Create /sys with `mkdir
+          /sys' if needed. Then add the following line to `/etc/fstab':
+               sys              /sys             sysfs       default          0   0
+          and `mount /sys'.
+
+   * Linux 2.4
+        * Did you `modprobe i2c-proc'? Check `lsmod'.
+
+        * Do you have procfs support in your kernel and `/proc' mounted
+          (is `/proc' there and populated)?  Create /proc with `mkdir
+          /proc' if needed. Then add the following line to `/etc/fstab':
+               proc             /proc            proc        defaults         0   0
+          and `mount /proc'.
 
    * If you did `sensors -s', did you run it as root?
-
-   * (Linux 2.6) Do you have sysfs support in your kernel (is `/sys'
-     there and populated)?
-
-   * (Linux 2.4) Do you have procfs support in your kernel (is `/proc'
-     there and populated)?
 
 4.21 Sensors says `No sensors found!'
 =====================================
