@@ -63,6 +63,7 @@ adm1024
 
 adm1025
 	adm1025		2	6	-	-	yes	no
+	ne1619		2	6	-	-	yes	no
 
 adm1026
 	adm1026		3	17	8	2 pwm+dac yes	no
@@ -131,6 +132,7 @@ lm87
 
 lm90
 	lm90		2	-	-	-	yes	no
+	adm1032		2	-	-	-	yes	no
 
 lm92
 	lm92		1	-	-	-	yes	no
@@ -168,8 +170,9 @@ vt8231
 
 w83627hf
 	w83627hf	3	9	3	2 pwm	no	yes (LPC)
-	w83627thf	3	9	3	2 pwm	no	yes (LPC)
-	w83697hf	2	6	2	2 pwm	no	yes
+	w83627thf	3	7	3	3 pwm	no	yes (LPC)
+	w83637hf	3	7	2	3 pwm	no	yes (LPC)
+	w83697hf	2	8	2	2 pwm	no	yes (LPC)
 
 w83781d
 	as99127f	3	7	3	2 pwm?  yes	no
