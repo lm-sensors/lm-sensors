@@ -28,8 +28,11 @@
 /*
    this just prints out the installed i2c busses in a consistent format, whether
    on a 2.4 kernel using /proc or a 2.6 kernel using /sys.
+   If procfmt == 1, print out exactly /proc/bus/i2c format on stdout.
+   This allows this to be used in a program to emulate /proc/bus/i2c on a
+   sysfs system.
 */
-void print_i2c_busses()
+void print_i2c_busses(int procfmt)
 {
 	FILE *fptr;
 	char s[100];
@@ -46,9 +49,12 @@ void print_i2c_busses()
 	/* look in /proc/bus/i2c */
 	if((fptr = fopen("/proc/bus/i2c", "r"))) {
 		while(fgets(s, 100, fptr)) {
-			if(count++ == 0)
+			if(count++ == 0 && !procfmt)
 				fprintf(stderr,"  Installed I2C busses:\n");
-			fprintf(stderr, "    %s", s);	
+			if(procfmt)
+				printf("%s", s);	
+			else
+				fprintf(stderr, "    %s", s);	
 		}
 		fclose(fptr);
 		goto done;
@@ -114,24 +120,37 @@ found:
 			fclose(f);
 			if((border = index(x, '\n')) != NULL)
 				*border = 0;
-			if(count++ == 0)
+			if(count++ == 0 && !procfmt)
 				fprintf(stderr,"  Installed I2C busses:\n");
 			/* match 2.4 /proc/bus/i2c format as closely as possible */
-			if(!strncmp(x, "ISA ", 4))
-				fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
-				        "dummy", x, "ISA bus algorithm");
-			else if(!sscanf(de->d_name, "i2c-%d", &tmp))
-				fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
-				        "dummy", x, "Dummy bus algorithm");
-			else
-				fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
-				        "unknown", x, "Algorithm unavailable");
+			if(!strncmp(x, "ISA ", 4)) {
+				if(procfmt)
+					printf("%s\t%-10s\t%-32s\t%s\n", de->d_name,
+					        "dummy", x, "ISA bus algorithm");
+				else
+					fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
+					        "dummy", x, "ISA bus algorithm");
+			} else if(!sscanf(de->d_name, "i2c-%d", &tmp)) {
+				if(procfmt)
+					printf("%s\t%-10s\t%-32s\t%s\n", de->d_name,
+					        "dummy", x, "Dummy bus algorithm");
+				else
+					fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
+					        "dummy", x, "Dummy bus algorithm");
+			} else {
+				if(procfmt)
+					printf("%s\t%-10s\t%-32s\t%s\n", de->d_name,
+					        "unknown", x, "Algorithm unavailable");
+				else
+					fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
+					        "unknown", x, "Algorithm unavailable");
+			}
 		}
 	}
 	closedir(dir);
 
 done:
-	if(count == 0)
+	if(count == 0 && !procfmt)
 		fprintf(stderr,"Error: No I2C busses found!\n"
 		               "Be sure you have done 'modprobe i2c-dev'\n"
 		               "and also modprobed your i2c bus drivers\n");

@@ -27,7 +27,7 @@
 #include "i2c-dev.h"
 #include "version.h"
 
-void print_i2c_busses();
+void print_i2c_busses(int);
 void help(void) __attribute__ ((noreturn));
 
 void help(void)
@@ -35,7 +35,7 @@ void help(void)
   fprintf(stderr,"Syntax: i2cset I2CBUS CHIP-ADDRESS DATA-ADDRESS VALUE [MODE]\n");
   fprintf(stderr,"  MODE is 'b[yte]' or 'w[ord]' (default b)\n");
   fprintf(stderr,"  I2CBUS is an integer\n");
-  print_i2c_busses();
+  print_i2c_busses(0);
   exit(1);
 }
 

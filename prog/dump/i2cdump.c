@@ -42,7 +42,7 @@
 #define HAVE_PEC 1
 #endif
 
-void print_i2c_busses();
+void print_i2c_busses(int);
 
 void help(void)
 {
@@ -54,7 +54,7 @@ void help(void)
   fprintf(stderr,"  ADDRESS is an integer 0x00 - 0x7f\n");
   fprintf(stderr,"  BANK and BANKREG are for byte and word accesses (default bank 0, reg 0x4e)\n");
   fprintf(stderr,"  BANK is the command for smbusblock accesses (default 0)\n");
-  print_i2c_busses();
+  print_i2c_busses(0);
 }
 
 int main(int argc, char *argv[])
