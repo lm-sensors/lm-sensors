@@ -17,7 +17,8 @@ Each of these ways will be described below in detail.
 NOTE: OPTION 2 WILL CURRENTLY NOT WORK FOR 2.0 AND OLDER 2.1 KERNELS!
 
 NOTE: IN EACH CASE, YOU WILL HAVE TO GET AND INSTALL THE I2C PACKAGE FIRST!
-      SET COMPILE_KERNEL TO 0 IN THE MAIN MAKEFILE FOR OPTION 2!
+      SET COMPILE_KERNEL TO 0 IN THE MAIN MAKEFILE FOR OPTION 2, UNLESS
+      YOU NEED ALPHA OR BETA DRIVERS (SEE BELOW)
 
 NOTE: PLEASE READ THE DOCUMENTATION IN THE DOC SUBDIRECTORY IF YOU GET STUCK!
 
@@ -53,6 +54,34 @@ i2c header files are in a i2c subdirectory of either /usr/local/include
 options 2 and 3). Especially if you have in the past placed the header
 files in /usr/local/include, this will probably go wrong. See below on
 how to fix this.
+
+
+Mixing old and new, and using beta drivers (compilation option 1)
+=================================================================
+
+It is possible that you are running a previously patched kernel, or
+a very new kernel which already has limited or full i2c or lm_sensors
+support, but you want to use newer versions of the drivers. This is
+possible, but there are some pitfalls.
+
+If had compiled all i2c and lm_sensors drivers as modules, you are 
+in luck. You can simply compile the newest versions of i2c and
+lm_sensors and install them. Just make sure the right modules are
+loaded (best bet: remove the old ones first).
+
+If you have a certain driver compiled into your kernel, you may
+encounter bad problems. We do not guarantee to keep internal kernel
+interfaces unchanged. In plain language, this means that an older driver
+may not work together with a newer driver, and your kernel may crash. 
+On the other hand, if you know what you are doing, compilation will 
+be smart. Drivers that are compiled right into your kernel will not 
+be compiled as a module again.  You could do nothing with them anyway.
+
+Sometimes, you want to patch your kernel, but find that certain alpha
+or beta drivers are not included in the patch. This is on purpose: we
+do not want to polute the kernel tree with things of which we are not
+confident they work. In this case, patch the kernel, compile it, and
+then compile lm_sensors with COMPILE_KERNEL set to 1.
 
 
 Having a proper kernel tree (compilation option 1)
