@@ -19,7 +19,7 @@ if [ "$CONFIG_I2C" = "m" -o "$CONFIG_I2C" = "y" ] ; then
     dep_tristate '  National Semiconductors LM80' CONFIG_SENSORS_LM80 $CONFIG_SENSORS
     dep_tristate '  National Semiconductors LM87' CONFIG_SENSORS_LM87 $CONFIG_SENSORS
     dep_tristate '  Silicon Integrated Systems Corp. SiS5595' CONFIG_SENSORS_SIS5595 $CONFIG_SENSORS
-    dep_tristate '  Texas Instruments THMC50 and compatibles' CONFIG_THMC50 $CONFIG_SENSORS
+    dep_tristate '  Texas Instruments THMC50 and compatibles' CONFIG_SENSORS_THMC50 $CONFIG_SENSORS
     dep_tristate '  VIA 686a Integrated Hardware Monitor' CONFIG_SENSORS_VIA686A $CONFIG_SENSORS
     dep_tristate '  Winbond W83781D, W83782D and W83783S' CONFIG_SENSORS_W83781D $CONFIG_SENSORS
     bool 'Other I2C devices' CONFIG_SENSORS_OTHER 
