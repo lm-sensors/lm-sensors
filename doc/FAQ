@@ -89,6 +89,7 @@ sensor reading results. Why?
   4.24B Sensors-detect says "Can't open /dev/i2c[-/]0"
   4.24C Sensors-detect doesn't find any sensors
 4.25 Sensors says 'Error: Line xxx: zzzzzzz'
+4.26 Sensors only gives the name, adapter, and algorithm for my chip
 
 5. How to Ask for Help  
 5.1 What to do if a module won't insert?
@@ -789,7 +790,7 @@ you can send us your request.
 
 4.21 Sensors says 'No sensors found!'
 
-    Did sensors-detect find sensors? (If not see 4.23C)
+    Did sensors-detect find sensors? (If not see 4.24C)
     Did you do what sensors-detect said?
     Did you 'modprobe' your sensor modules?
     Did you 'modprobe' your I2C adapter modules?
@@ -886,6 +887,21 @@ Run devfs in the kernel to get the /dev/i2c/x files.
     reading the /etc/sensors.conf configuration file. Go to that line
     number and fix it. If you have a parse error, perhaps you have
     to put the feature name in double quotes.
+
+
+4.26 Sensors only gives the name, adapter, and algorithm for my chip
+
+    Sensors only says this, for example, and doesn't
+    provide any actual data at all:
+
+	it87-isa-0290
+	Adapter: ISA adapter
+	Algorithm: ISA algorithm
+
+    Your chip is not currently supported by 'sensors' and so all it
+    does is print out that information. Get the latest release
+    and be sure you are running the 'sensors' program it installed
+    and not some older 'sensors'.
 
 
 5 How to ask for help
