@@ -25,10 +25,6 @@
 #include "i2c.h"
 #include "version.h"
 
-
-/* I wonder why my fan doesn't alarm */
-#define DEGUG_FAN 1
-
 /* Many GL518 constants specified below */
 
 /* The GL518 registers */
@@ -54,15 +50,21 @@
 #define GL518_REG_VIN1 0x14
 #define GL518_REG_VDD 0x15
 
-#define TEMP_TO_REG(val) (((val) / 10 + 119) & 0xff)
+
+/* Conversions. Rounding is only done on the TO_REG variants. */
+#define TEMP_TO_REG(val) (((((val)<0?(val)-5:(val)+5) / 10) + 119) & 0xff)
 #define TEMP_FROM_REG(val) (((val) - 119) * 10)
 
 #define FAN_TO_REG(val,div) \
-		(((val)==0?255:(960000/(2*(val)*(div)))) & 0xff)
-#define FAN_FROM_REG(val,div) ((val)==0?0:(val)==255?0:960000/(2*(val)*(div)))
+ (( (val)==0 ? 255 : ((960000+(val)*(div))/(2*(val)*(div))) ) & 0xff)
+#define FAN_FROM_REG(val,div) \
+ ( (val)==0 ? 0 : (val)==255 ? 0 : (960000/(2*(val)*(div))) )
 
-#define IN_TO_REG(val) ((((val)*10)/19) & 0xff)
+#define IN_TO_REG(val) ((((val)*10+8)/19) & 0xff)
 #define IN_FROM_REG(val) (((val)*19)/10)
+
+#define VDD_TO_REG(val) ((((val)*10+11)/23) & 0xff)
+#define VDD_FROM_REG(val) (((val)*23)/10)
 
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 #define DIV_FROM_REG(val) (1 << (val))
@@ -81,11 +83,11 @@
 #define GL518_INIT_FAN_MIN_1 3000
 #define GL518_INIT_FAN_MIN_2 3000
 
-/* What are sane values for these?!? */
+/* These are somewhat sane */
 #define GL518_INIT_VIN_1 330	/* 3.3 V */
 #define GL518_INIT_VIN_2 286	/* 12 V */
 #define GL518_INIT_VIN_3 260	/* Vcore */
-#define GL518_INIT_VDD 400	/* 5 V */
+#define GL518_INIT_VDD 500	/* 5 V */
 
 #define GL518_INIT_PERCENTAGE 10
 
@@ -314,8 +316,8 @@ int gl518_attach_adapter(struct i2c_adapter *adapter)
                       (IN_TO_REG(GL518_INIT_VIN_MAX_3) << 8) |
                       IN_TO_REG(GL518_INIT_VIN_MIN_3));
     gl518_write_value(new_client,GL518_REG_VDD_LIMIT,
-                      (IN_TO_REG(GL518_INIT_VDD_MAX) << 8) |
-                      IN_TO_REG(GL518_INIT_VDD_MIN));
+                      (VDD_TO_REG(GL518_INIT_VDD_MAX) << 8) |
+                      VDD_TO_REG(GL518_INIT_VDD_MIN));
     /* Clear status register (bit 5=1), start (bit6=1) */
     gl518_write_value(new_client,GL518_REG_CONF,0x24);
     gl518_write_value(new_client,GL518_REG_CONF,0x44);
@@ -443,16 +445,10 @@ void gl518_update_client(struct i2c_client *client)
     data->voltage_max[3] = (val >> 8) & 0xff;
 
     val = gl518_read_value(client,GL518_REG_FAN_COUNT);
-#if DEBUG_FAN
-    printk("fan counts register: 0x%4x\n", val);
-#endif
     data->fan[0] = (val >> 8) & 0xff;
     data->fan[1] = val & 0xff;
 
     val = gl518_read_value(client,GL518_REG_FAN_LIMIT);
-#if DEBUG_FAN
-    printk("fan limits register: 0x%4x\n", val);
-#endif 
     data->fan_min[0] = (val >> 8) & 0xff;
     data->fan_min[1] = val & 0xff;
 
@@ -511,12 +507,15 @@ void gl518_vin(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 2;
   else if (operation == SENSORS_PROC_REAL_READ) {
     gl518_update_client(client);
-    results[0] = IN_FROM_REG(data->voltage_min[nr]);
-    results[1] = IN_FROM_REG(data->voltage_max[nr]);
+    results[0] = nr?IN_FROM_REG(data->voltage_min[nr]):
+                     VDD_FROM_REG(data->voltage_min[nr]);
+    results[1] = nr?IN_FROM_REG(data->voltage_max[nr]):
+                     VDD_FROM_REG(data->voltage_max[nr]);
     if ((data->revision == 0x00) && (nr != 3))
       results[2] = 0;
     else
-      results[2] = IN_FROM_REG(data->voltage[nr]);
+      results[2] = nr?IN_FROM_REG(data->voltage[nr]):
+                      VDD_FROM_REG(data->voltage[nr]);
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     regnr=nr==0?GL518_REG_VDD_LIMIT:nr==1?GL518_REG_VIN1_LIMIT:nr==2?
@@ -524,11 +523,11 @@ void gl518_vin(struct i2c_client *client, int operation, int ctl_name,
     if (*nrels_mag == 1)
       old = gl518_read_value(client,regnr) & 0xff00;
     if (*nrels_mag >= 2) {
-      data->voltage_max[nr] = IN_TO_REG(results[1]);
+      data->voltage_max[nr] = nr?IN_TO_REG(results[1]):VDD_TO_REG(results[1]);
       old = data->voltage_max[nr] << 8;
     }
     if (*nrels_mag >= 1) {
-      data->voltage_min[nr] = IN_TO_REG(results[0]);
+      data->voltage_min[nr] = nr?IN_TO_REG(results[0]):VDD_TO_REG(results[0]);
       old |= data->voltage_min[nr];
       gl518_write_value(client,regnr,old);
     }
@@ -548,7 +547,7 @@ void gl518_fan(struct i2c_client *client, int operation, int ctl_name,
   else if (operation == SENSORS_PROC_REAL_READ) {
     gl518_update_client(client);
     results[0] = FAN_FROM_REG(data->fan_min[nr],
-    		DIV_FROM_REG(data->fan_div[nr]));
+                 DIV_FROM_REG(data->fan_div[nr]));
     results[1] = FAN_FROM_REG(data->fan[nr],DIV_FROM_REG(data->fan_div[nr]));
     *nrels_mag = 2;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {

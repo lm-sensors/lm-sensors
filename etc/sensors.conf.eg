@@ -198,19 +198,17 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*" "sis5595-*"
 
 chip "gl518sm-r00-*" "gl518sm-r80-*"
 
-# Factors and labels taken from GL518SM datasheet, they give
-# reasonable values with my Eisca Fan78
+# Factors and labels taken from GL518SM datasheet, they seem to give
+# reasonable values with EISCA connected Fan78
 
   label vdd "+5V"
   label vin1 "+3.3V"
   label vin2 "+12V"
   label vin3 "Vcore"
 
-# vdd is internally attenuated to 4 volts
-# vin2 depends on external resistors. 
+# vin2 depends on external resistors (4,7k and 15k assumed here) 
 # vin1 and vin3 require no scaling
 
-  compute vdd  (5/4)*@	   ,  @/(5/4)
   compute vin2 (197/47)*@  ,  @/(197/47)
 
   set vdd_min 4.8
