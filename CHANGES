@@ -18,8 +18,17 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.8.4 (2004-??-??)
+  File doc/lm_sensors-FAQ.texi: Update 4.20.
+  File doc/chips/it87: Change hyst to low
+  File doc/chips/w83l785ts: New
+  File etc/sensors.conf.eg: Change it87 hyst to low
   Library: Better 2.6 eeprom support
+           Change it87 hyst to low
   Program decode-vaio.pl: Add sysfs support
+  Program mkpatch: Add max6650, lm83, lm90, asb100 and w83l785ts
+                   Drop linux 2.2 support
+  Program sensors-detect: Fix PATH issues
+  
 
 2.8.3 (20040115)
   File lm_sensors.spec: Update
