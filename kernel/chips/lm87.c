@@ -1081,10 +1081,8 @@ MODULE_LICENSE("GPL");
 #endif
 
 MODULE_AUTHOR
-    ("Frodo Looijaard <frodol@dds.nl>,
-      Philip Edelbrock <phil@netroedge.com>, 
-      Mark Studebaker <mdsxyz123@yahoo.com>,
-      and Stephen Rousset <stephen.rousset@rocketlogix.com>");
+    ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, "
+     "Mark Studebaker <mdsxyz123@yahoo.com>, and Stephen Rousset <stephen.rousset@rocketlogix.com>");
 
 MODULE_DESCRIPTION("LM87 driver");
 
