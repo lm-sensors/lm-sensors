@@ -764,18 +764,14 @@ static void pc87360_init_client(struct i2c_client *client, int use_thermistors)
 	const u8 init_temp[3] = { 2, 2, 1 };
 	u8 reg;
 
-	if (init >= 3 && data->innr) {
+	if (init >= 2 && data->innr) {
 		reg = pc87360_read_value(data, LD_IN, NO_BANK,
 					 PC87365_REG_IN_CONVRATE);
-		if (reg & 0x06) {
-#ifdef DEBUG
-			printk(KERN_DEBUG "pc87360.o: Setting "
-			       "VLM conversion period to 1 second\n");
-#endif		
-			pc87360_write_value(data, LD_IN, NO_BANK,
-					    PC87365_REG_IN_CONVRATE,
-					    (reg & 0xF8) | 0x01);
-		}
+		printk(KERN_INFO "pc87360.o: VLM conversion set to"
+		       "1s period, 160us delay\n");
+		pc87360_write_value(data, LD_IN, NO_BANK,
+				    PC87365_REG_IN_CONVRATE,
+				    (reg & 0xC0) | 0x11);
 	}
 
 	nr = data->innr < 11 ? data->innr : 11;
@@ -884,10 +880,14 @@ static void pc87360_init_client(struct i2c_client *client, int use_thermistors)
 		if (init >= 2) {
 			/* Chip config as documented by National Semi. */
 			pc87360_write_value(data, LD_TEMP, 0xF, 0xA, 0x08);
-			pc87360_write_value(data, LD_TEMP, 0xF, 0xB, 0x04);
-			pc87360_write_value(data, LD_TEMP, 0xF, 0xC, 0x35);
-			pc87360_write_value(data, LD_TEMP, 0xF, 0xD, 0x05);
-			pc87360_write_value(data, LD_TEMP, 0xF, 0xE, 0x05);
+			/* We voluntarily omit the bank here, in case the
+			   sequence itself matters. It shouldn't be a problem,
+			   since nobody else is supposed to access the
+			   device at that point. */
+			pc87360_write_value(data, LD_TEMP, NO_BANK, 0xB, 0x04);
+			pc87360_write_value(data, LD_TEMP, NO_BANK, 0xC, 0x35);
+			pc87360_write_value(data, LD_TEMP, NO_BANK, 0xD, 0x05);
+			pc87360_write_value(data, LD_TEMP, NO_BANK, 0xE, 0x05);
 		}
 	}
 }
