@@ -6,7 +6,7 @@ Generally, the work goes quickly once we have the hardware.
 Evaluation boards are fine. Real computer hardware is much better though,
 because it lets us do real-world testing over a longer period of time.
 In many cases, the way a chipset is integrated in systems must be taken
-into acount in the driver, and evaluation boards don't help much there.
+into account in the driver, and evaluation boards don't help much there.
 Donation of usable computer hardware also supports the project in general,
 so hardware which isn't directly related to the development of a hardware
 monitoring driver, but can be used to build test systems, is welcome too.
@@ -16,7 +16,7 @@ sensors@stimpy.netroedge.com. Thanks!
 
 
 Donations are listed in chronological order. Note that the person mentioned
-is the one who holds the device now, which is not necesarily the one to who
+is the one who holds the device now, which is not necessarily the one to whom
 the donation was sent in the first place.
 
 
@@ -24,41 +24,41 @@ Donation from	Donation and subsequent development work	Date & Person
 -------------	----------------------------------------	-------------
 
 TI		i810 motherboard w/ 366 Celeron			1999-07
-		Drivers developed: i801, i810, w83627hf
+		Drivers developed: i801, i810, w83627hf		??
 
 AMD		various sensor evaluation boards		2000
-		Drivers developed: various
+		Drivers developed: various			??
 
 SiS		SiS 540/630 motherboard w/ 5595			2000-01
-		Drivers developed: sis5595 improvements
+		Drivers developed: sis5595 improvements		Phil
 
 Cendio Systems 	Asus P3B-F w/ AS99127F				2000-05
-		Drivers developed: as99127f improvements
+		Drivers developed: as99127f improvements	MDS
 
 Atipa		SuperMicro 370DLE w/ Serverworks, LM87		2000-09
 		Drivers developed: serverworks support added	Jean Delvare
 		to i2c-piix4; lm87 testing and improvements
 
 Fujitsu		Complete system for general project support	2001-11
-Siemens
+Siemens								Phil (broken)
 Computers
 
 HardData Ltd.	Tyan 2466 w/ 1G Duron; W83627HF and W83782D	2002-05
-		Drivers developed: Tyan 2466 initialization;
+		Drivers developed: Tyan 2466 initialization;	MDS
 		DDR recognition
 
 Intel		SMBus 2.0 system				2002-06
-		Drivers developed: SMBus 2.0 support in
+		Drivers developed: SMBus 2.0 support in		MDS
 		i2c-core and i2c-i801; ADM1025 improvements;
 		82801 improvements; smsc47m1 driver
 
 Via		8231 and two 8233 motherboards			2002-06
-		Drivers developed: VT8231 support in via686a;
+		Drivers developed: VT8231 support in via686a;	MDS
 		vt1211; VT8233A and VT8231 support in
 		i2c-viapro
 
 HP		IPMI system					2002-10
-		Drivers developed: bmcsensors, i2c-ipmi
+		Drivers developed: bmcsensors, i2c-ipmi		MDS
 
 Analog Devices	ADM1032 evaluation board			2003-10
 		Drivers developed: ADM1032 support in lm90;	Jean Delvare
