@@ -1058,7 +1058,7 @@ chip "adm1024-*"
     ignore "Vccp2"
 
 
-chip "it87-*"
+chip "it87-*" "it8705-*" "it8712-*"
 
 # The values below have been tested on Asus CUSI, CUM motherboards.
 
@@ -1117,28 +1117,31 @@ chip "it87-*"
     compute in5 (7.67 * @) - 27.36  ,  (@ + 27.36) / 7.67
     compute in6 (4.33 * @) - 13.64  ,  (@ + 13.64) / 4.33
 #
+# this much simpler version is reported to work for a
+# Eltite Group K7S5A board
+#
+#   compute in5 -(36/10)*@, -@/(36/10)
+#   compute in6 -(56/10)*@, -@/(56/10)
+#
     compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
 
 # Temperature
-
     label temp1       "Temp1/MB"
     set   temp1_over  40
     set   temp1_hyst  20
-
     label temp2       "Temp2/CPU"
     set   temp2_over  45
     set   temp2_hyst  25
-
 #   ignore temp3
     label temp3       "Temp3"
     set   temp3_over  45
     set   temp3_hyst  25
 
 # Fans
-
     set fan1_min 0
     set fan2_min 3000
-    ignore fan3
+#   ignore fan3
+    set fan3_min 3000
 
 # The following is for the Inside Technologies 786LCD which uses either a
 # IT8705F or a SIS950 for monitoring with the SIS630.
