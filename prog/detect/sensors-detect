@@ -245,7 +245,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
 use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect 
             lm80_detect w83781d_detect w83781d_alias_detect
             w83781d_isa_detect gl518sm_detect gl520sm_detect adm9240_detect 
-            adm1021_detect sis5595_isa_detect eeprom_detect
+            adm1021_detect sis5595_isa_detect eeprom_detect via686a_isa_detect
             adm1022_detect ltc1710_detect gl525sm_detect ddcmonitor_detect);
 
 # This is a list of all recognized chips. 
@@ -453,6 +453,12 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        driver => "sis5595",
        isa_addrs => [ 0 ],
        isa_detect => sub { sis5595_isa_detect @_ },
+     },
+     {
+       name => "VIA Technologies VT 82C686 Integrated Sensors",
+       driver => "via686a",
+       isa_addrs => [ 0 ],
+       isa_detect => sub { via686a_isa_detect @_ },
      },
      {
        name => "Serial EEPROM (PC-100 DIMM)",
@@ -1656,6 +1662,42 @@ sub sis5595_isa_detect
   my $found = 0;
   foreach $local_try (@pci_adapters) {
     if ($local_try->{procid} eq "Silicon Integrated Systems SIS5595") {
+      $try = $local_try;
+      $found = 1;
+      last;
+    }
+  }
+  return if not $found;
+
+  $found = 0;
+  foreach $adapter (@pci_list) {
+    if ((defined($adapter->{vendid}) and 
+         $try->{vendid} == $adapter->{vendid} and
+         $try->{devid} == $adapter->{devid} and
+         $try->{func} == $adapter->{func}) or
+        (! defined($adapter->{vendid}) and
+         $adapter->{desc} =~ /$try->{procid}/ and
+         $try->{func} == $adapter->{func})) {
+      $found = 1;
+      last;
+    }
+  }
+  return if not $found;
+
+  return 9;
+}
+
+# $_[0]: Address
+# Returns: undef if not detected, (9) if detected.
+# Note: It is already 99% certain this chip exists if we find the PCI
+# entry. The exact address is encoded in PCI space.
+sub via686a_isa_detect
+{
+  my ($addr) = @_;
+  my ($adapter,$try,$local_try);
+  my $found = 0;
+  foreach $local_try (@pci_adapters) {
+    if ($local_try->{procid} eq "VIA Technologies VT 82C686 Apollo ACPI") {
       $try = $local_try;
       $found = 1;
       last;
