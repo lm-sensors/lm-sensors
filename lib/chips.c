@@ -649,16 +649,16 @@ static sensors_chip_feature lm80_features[] =
                          R, LM80_SYSCTL_TEMP, VALUE(5), 2 },
     { SENSORS_LM80_TEMP_HOT_HYST, "temp_hot_hyst", SENSORS_LM80_TEMP,
                               SENSORS_LM80_TEMP, RW, 
-                              LM80_SYSCTL_TEMP, VALUE(2), 2 },
+                              LM80_SYSCTL_TEMP, VALUE(2), 2, "temp_max1_hyst", 3 },
     { SENSORS_LM80_TEMP_HOT_MAX, "temp_hot_max", SENSORS_LM80_TEMP,
                               SENSORS_LM80_TEMP, RW, 
-                              LM80_SYSCTL_TEMP, VALUE(1), 2 },
+                              LM80_SYSCTL_TEMP, VALUE(1), 2, "temp_max1", 3 },
     { SENSORS_LM80_TEMP_OS_HYST, "temp_os_hyst", SENSORS_LM80_TEMP,
                               SENSORS_LM80_TEMP, RW, 
-                              LM80_SYSCTL_TEMP, VALUE(4), 2 },
+                              LM80_SYSCTL_TEMP, VALUE(4), 2, "temp_crit1_hyst", 3 },
     { SENSORS_LM80_TEMP_OS_MAX, "temp_os_max", SENSORS_LM80_TEMP,
                               SENSORS_LM80_TEMP, RW, 
-                              LM80_SYSCTL_TEMP, VALUE(3), 2 },
+                              LM80_SYSCTL_TEMP, VALUE(3), 2, "temp_crit1", 3 },
     { SENSORS_LM80_FAN1_DIV, "fan1_div", SENSORS_LM80_FAN1, NOMAP,
                              RW, LM80_SYSCTL_FAN_DIV, VALUE(1), 
                              0 },
@@ -4240,7 +4240,7 @@ static sensors_chip_feature vt1211_features[] =
     { SENSORS_VT1211_VRM, "vrm", NOMAP, NOMAP, 
                            RW, VT1211_SYSCTL_VRM, VALUE(1), 1 },
     { SENSORS_VT1211_UCH, "config", NOMAP, NOMAP, 
-                           R, VT1211_SYSCTL_UCH, VALUE(1), 0 },
+                           RW, VT1211_SYSCTL_UCH, VALUE(1), 0 },
     { 0 }
   };
 
@@ -4425,7 +4425,7 @@ static sensors_chip_feature vt8231_features[] =
     { SENSORS_VT8231_VRM, "vrm", NOMAP, NOMAP, 
                            RW, VT8231_SYSCTL_VRM, VALUE(1), 1 },
     { SENSORS_VT8231_UCH, "config", NOMAP, NOMAP, 
-                           R, VT8231_SYSCTL_UCH, VALUE(1), 0 },
+                           RW, VT8231_SYSCTL_UCH, VALUE(1), 0 },
     { 0 }
   };
 
