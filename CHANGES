@@ -21,6 +21,8 @@ ask CVS about it:
   File README.thinkpad: Update 24RF08 status
   File doc/fan-divisors: More info on accuracy
   File doc/lm_sensors-FAQ.texi: Update 4.27
+  File doc/chips/adm1031: New
+  File doc/chips/max1619: New
   File doc/chips/pc87360-fan: Renamed to pc87360
   File doc/chips/pc87360: Big update
   File doc/chips/w83781d: Update AS99127F documentation
@@ -33,15 +35,19 @@ ask CVS about it:
                             Preliminary pc87366 section
                             Add comment on GL520SM application modes
                             Document beep_enable (Aurelien Jarno)
+                            Preliminary max1619 section
+                            Preliminary adm1030 and adm1031 sections
   Library: Fix 2.6 VRM
            Fix 2.6 hyst temp for 2.6 (lm75, lm78 and gl518sm)
            Fully support the PC87360 family
            Support the lm99
            Add version and date strings
+           Support 2.6 max1619
   Makefile: Do not run depmod on staged installs (Peter Breitenlohner)
   Man page i2cdetect.8: document new command line flags
   Man page i2cdump.8: More details on how i2cdump can write to a chip
   Modules (all chip drivers): Rework memory allocation scheme.
+  Module adm1031: New (Alexandre d'Alton)
   Module bmcsensors: Fix oops by creating thread for initialization
   Modules dmi_scan, i2c-piix4: Move IBM detection into dmi_scan
   Modules w83781d.c, smartbatt.c, lm75.c, gl520sm.c, gl518sm.c, ds1621.c,
@@ -57,6 +63,7 @@ ask CVS about it:
   Module lm90: Support LM99 and LM89 
   Module lm92: Support MAX6633, MAX6634, MAX6635 and LM76
                Get rid of useless i2c_probe call
+  Module max1619: New (Alexey Fisher)
   Module p4b_smbus: Add support for mobile versions of the 82801
                     (Axel Thimm)
   Module pc87360-fan: Renamed to pc87360
@@ -123,6 +130,7 @@ ask CVS about it:
                           Support MAX1619
                           Support PC87373 Super-I/O
                           Fix unknown adapters appearing multiple times
+                          Refine MAX6650/MAX6651 detection
 
 
 2.8.6 (20040405)
