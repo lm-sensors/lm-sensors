@@ -166,7 +166,7 @@ use subs qw(lm78_detect lm75_detect lm80_detect w83781d_detect
 
 sub swap_bytes
 {
-  return (($_[0] & 0xff00) >> 8) + (($_[0] & 0x00ff) << 7)
+  return (($_[0] & 0xff00) >> 8) + (($_[0] & 0x00ff) << 8)
 }
 
 # $_[0] is the sought value
@@ -540,7 +540,7 @@ sub scan_adapter
       if (contains $addr, @{$$chip{i2c_addrs}}) {
         print "Probing for $$chip{name}... ";
         if (($conf,@chips) = &{$$chip{i2c_detect}} (\*FILE ,$addr)) {
-          print "Succes!\n",
+          print "Success!\n",
                 "    (confidence $conf, driver `$$chip{driver}'";
           if (@chips) {
             print ", other addresses: @chips)\n";
@@ -591,11 +591,11 @@ sub lm78_detect
   my $reg;
   my ($chip,$file,$addr) = @_;
   return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
-  return unless i2c_smbus_read_byte_data($file,0x40) & 0x80 == 0x00;
+  return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
   $reg = i2c_smbus_read_byte_data($file,0x49);
   return unless ($chip == 0 and $reg == 0x00) or
                     ($chip == 1 and $reg == 0x40) or
-                    ($chip == 2 and $reg & 0xfe == 0xc0);
+                    ($chip == 2 and ($reg & 0xfe) == 0xc0);
   return (7);
 }
 
@@ -639,7 +639,7 @@ sub lm80_detect
 {
   my $i;
   my ($file,$addr) = @_;
-  return if i2c_smbus_read_byte_data($file,$0x02) & 0xc0 != 0;
+  return if (i2c_smbus_read_byte_data($file,$0x02) & 0xc0) != 0;
   for ($i = 0x2a; $i <= 0x3d; $i++) {
     my $reg = i2c_smbus_read_byte_data($file,$i);
     return if i2c_smbus_read_byte_data($file,$i+0x40) != $reg;
@@ -670,14 +670,14 @@ sub w83781d_detect
   return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
   $reg1 = i2c_smbus_read_byte_data($file,0x4e);
   $reg2 = i2c_smbus_read_byte_data($file,0x4f);
-  return unless ($reg1 & 0x80 == 0x00 and $reg2 == 0xa3) or 
-                ($reg1 & 0x80 == 0x80 and $reg2 == 0x5c);
-  return if $reg1 & 0x07 == 0x00 and 
+  return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
+                (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
+  return if ($reg1 & 0x07) == 0x00 and 
             i2c_smbus_read_byte_data($file,0x58) != 0x10;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   @res = (8);
   push @res, ($reg1 & 0x07) + 0x48 if $reg1 & 0x08;
-  push @res, ($reg1 & 0x80) >>4 + 0x48 if $reg1 & 0x80;
+  push @res, (($reg1 & 0x80) >> 4) + 0x48 if $reg1 & 0x80;
   return @res;
 }
 
@@ -696,7 +696,7 @@ sub gl518sm_detect
   my $reg;
   my ($chip,$file,$addr) = @_;
   return unless i2c_smbus_read_byte_data($file,0x00) == 0x80;
-  return unless i2c_smbus_read_byte_data($file,0x03) & 0x80 == 0x00;
+  return unless (i2c_smbus_read_byte_data($file,0x03) & 0x80) == 0x00;
   $reg = i2c_smbus_read_byte_data($file,0x01);
   return unless ($chip == 0 and $reg == 0x00) or
                 ($chip == 1 and $reg == 0x80);
@@ -716,7 +716,7 @@ sub gl520sm_detect
 {
   my ($file,$addr) = @_;
   return unless i2c_smbus_read_byte_data($file,0x00) == 0x20;
-  return unless i2c_smbus_read_byte_data($file,0x03) & 0x80 == 0x00;
+  return unless (i2c_smbus_read_byte_data($file,0x03) & 0x80) == 0x00;
   # The line below must be better checked before I dare to use it.
   # return unless i2c_smbus_read_byte_data($file,0x01) == 0x00;
   return (5);
@@ -735,7 +735,7 @@ sub adm9240_detect
 {
   my ($file,$addr) = @_;
   return unless i2c_smbus_read_byte_data($file,0x3e) == 0x23;
-  return unless i2c_smbus_read_byte_data($file,0x40) & 0x80 == 0x00;
+  return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
   return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
   
   return (8);
@@ -758,7 +758,7 @@ sub adm1021_detect
   return if $chip == 0 and i2c_smbus_read_byte_data($file,0xfe) != 0x41;
   # The remaining things are flaky at best. Perhaps something can be done
   # with the fact that some registers are unreadable?
-  return if i2c_smbus_read_byte_data($file,0x02) & 0x03 != 0;
+  return if (i2c_smbus_read_byte_data($file,0x02) & 0x03) != 0;
   if ($chip == 0) {
     return (6);
   } else {
