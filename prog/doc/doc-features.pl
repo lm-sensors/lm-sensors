@@ -294,8 +294,11 @@ sub output_data
 		'SYSCTL FILE', 'N';
 	foreach my $data (@{$features{$arrayname{$index}}})
 	{
+		print STDERR "Missing sysctl for $data->{sysctl} (index = $index, name = $data->{name})\n"
+			unless defined $sysctl{$data->{sysctl}};
+		
 		printf "\%-21s \%-38s \%16s:\%1d\n",$data->{name}, $data->{number},
-			$sysctl{$data->{sysctl}}, $data->{offset};
+			$sysctl{$data->{sysctl}} || '?', $data->{offset};
 	}
 	print "\n", "\n";
 }
