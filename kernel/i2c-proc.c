@@ -435,7 +435,6 @@ void i2cproc_dec_use(struct i2c_client *client)
 {
 }
 
-
 #ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>");

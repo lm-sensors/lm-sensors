@@ -21,6 +21,7 @@
 #include <linux/malloc.h>
 #include <linux/ctype.h>
 #include <linux/sysctl.h>
+#include <linux/proc_fs.h>
 
 #include "version.h"
 #include "compat.h"
@@ -46,6 +47,12 @@ static int sensors_cleanup(void);
 
 #define SENSORS_ENTRY_MAX 20
 static struct ctl_table_header *sensors_entries[SENSORS_ENTRY_MAX];
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+static struct i2c_client *sensors_clients[SENSORS_ENTRY_MAX];
+static unsigned short sensors_inodes[SENSORS_ENTRY_MAX];
+void sensors_fill_inode(struct inode *inode, int fill);
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
 
 static ctl_table sysctl_table[] = {
   { CTL_DEV, "dev", NULL, 0, 0555 },
@@ -135,6 +142,21 @@ int sensors_register_entry(struct i2c_client *client ,const char *prefix,
 
   sensors_entries[id-256] = new_header;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+  sensors_clients[id-256] = client;
+#ifdef DEBUG
+  if (!new_header || !new_header->ctl_table || 
+      !new_header->ctl_table->child || 
+      !new_header->ctl_table->child->child ||
+      !new_header->ctl_table->child->child->de) {
+    printk("sensors.o: NULL pointer when trying to install fill_inode fix!\n");
+    return id;  
+  }
+#endif /* DEBUG */
+  sensors_inodes[id-256] = new_header->ctl_table->child->child->de->low_ino;
+  new_header->ctl_table->child->child->de->fill_inode = &sensors_fill_inode;
+#endif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+
   return id;
 }
 
@@ -147,9 +169,43 @@ void sensors_deregister_entry(int id)
     unregister_sysctl_table(sensors_entries[id]);
     kfree((void *) (table[4].procname));
     kfree(table);
-    sensors_entries[id] = 0;
+    sensors_entries[id] = NULL;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+    sensors_clients[id-256] = NULL;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
   }
 }
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+void sensors_fill_inode(struct inode *inode, int fill)
+{
+  int i;
+  struct i2c_client *client;
+
+#ifdef DEBUG
+  if (! inode) {
+    printk("sensors.o: Warning: inode NULL in fill_inode()\n");
+    return;
+  }
+#endif /* def DEBUG */
+  
+  for (i = 0; i < SENSORS_ENTRY_MAX; i++) 
+    if (sensors_clients[i] && (sensors_inodes[i] == inode->i_ino))
+      break;
+#ifdef DEBUG
+  if (i == SENSORS_ENTRY_MAX) {
+    printk("sensors.o: Warning: inode (%ld) not found in fill_inode()\n",
+           inode->i_ino);
+    return;
+  }
+#endif /* def DEBUG */
+  client = sensors_clients[i];
+  if (fill)
+    client->driver->inc_use(client);
+  else
+    client->driver->dec_use(client);
+}
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
 
 /* This funcion reads or writes a 'real' value (encoded by the combination
    of an integer and a magnitude, the last is the power of ten the value

@@ -221,11 +221,17 @@ int lm75_command(struct i2c_client *client, unsigned int cmd, void *arg)
 /* Nothing here yet */
 void lm75_inc_use (struct i2c_client *client)
 {
+#ifdef MODULE
+  MOD_INC_USE_COUNT;
+#endif
 }
 
 /* Nothing here yet */
 void lm75_dec_use (struct i2c_client *client)
 {
+#ifdef MODULE
+  MOD_DEC_USE_COUNT;
+#endif
 }
 
 u16 swap_bytes(u16 val)
