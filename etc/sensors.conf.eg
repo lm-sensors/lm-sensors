@@ -360,6 +360,7 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*"
 #    set beep_enable 1
 
 
+
 chip "lm75-*"
 
 # Most boards don't need scaling. Following is
@@ -722,6 +723,74 @@ chip "w83627thf-*" "w83637hf-*"
 #   ignore fan1
     label fan2 "CPU Fan"
 #   ignore fan3
+
+
+# Here are configurations for Winbond W83792AD/D chip.
+chip "w83792d-*"
+
+    label in0 "VCoreA"
+    label in1 "VCoreB"
+    label in2 "VIN0"
+    label in3 "VIN1"
+    label in4 "VIN2"
+    label in5 "VIN3"
+    label in6 "5VCC"
+    label in7 "5VSB"
+    label in8 "VBAT"
+    label fan1 "Fan1"
+    label fan2 "Fan2"
+    label fan3 "Fan3"
+    label fan4 "Fan4"
+    label fan5 "Fan5"
+    label fan6 "Fan6"
+    label fan7 "Fan7"
+    label temp1 "Temp1"
+    label temp2 "Temp2"
+    label temp3 "Temp3"
+
+    set in0_min 1.4
+    set in0_max 1.6
+    set in1_min 1.4
+    set in1_max 1.6
+    set in2_min 3.2
+    set in2_max 3.4
+    set in3_min 3.1
+    set in3_max 3.3
+    set in4_min 1.4
+    set in4_max 1.5
+    set in5_min 2.6
+    set in5_max 2.65
+    set in6_min 5 * 0.95
+    set in6_max 5 * 1.05
+    set in7_min 5 * 0.95
+    set in7_max 5 * 1.05
+    set in8_min 3 * 0.95
+    set in8_max 3 * 1.05
+
+    #set fan1_div 4
+    #set fan1_min 1500
+    set fan2_div 4
+    set fan2_min 1500
+    #set fan3_min 1300
+    #set fan4_min 1500
+    #set fan5_min 1500
+    #set fan6_min 1500
+    #set fan7_min 1500
+
+    set temp1_over 42
+    set temp1_hyst 37
+    set temp2_over 43
+    set temp2_hyst 38
+    set temp3_over 45
+    set temp3_hyst 40
+
+    #ignore fan1
+    #ignore fan3
+    #ignore fan4
+    #ignore fan5
+    #ignore fan6
+    #ignore fan7
+    #ignore temp3
 
 
 chip "as99127f-*"

@@ -361,6 +361,7 @@ struct match matches[] = {
 	{ "w83637hf", print_w83781d },
 	{ "w83697hf", print_w83781d },
 	{ "w83791d", print_w83781d },
+        { "w83792d", print_w83792d },
 	{ "w83l785ts", print_w83l785ts },
 	{ "as99127f", print_w83781d },
 	{ "maxilife", print_maxilife },
