@@ -189,7 +189,7 @@ int smbus_master_xfer (struct smbus_adapter *adap, struct i2c_msg msgs[],
   printk("smbus.o: smbus_master_xfer called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
-  return 0;
+  return -1;
 }
 
 /* Algorithm slave_send call-back implementation. Can't do that... */
@@ -198,7 +198,7 @@ int smbus_slave_send (struct smbus_adapter *adap, char *data, int len)
   printk("smbus.o: smbus_slave_send called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
-  return 0;
+  return -1;
 }
 
 /* Algorithm slave_recv call-back implementation. Can't do that... */
@@ -207,7 +207,7 @@ int smbus_slave_recv (struct smbus_adapter *adap, char *data, int len)
   printk("smbus.o: smbus_slave_recv called for adapter `%s' "
          "(no i2c level access possible!)\n",
          adap->name);
-  return 0;
+  return -1;
 }
 
 /* Here we can put additional calls to modify the workings of the algorithm.
