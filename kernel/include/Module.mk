@@ -20,8 +20,13 @@
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := kernel/include
 
-KERNELINCLUDEFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/i2c-isa.h 
-                      
+KERNELINCLUDEFILES := 
+ifneq ($(shell if grep -q '^CONFIG_SENSORS=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELINCLUDEFILES += $(MODULE_DIR)/sensors.h
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_ISA=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELINCLUDEFILES += $(MODULE_DIR)/isa.h
+endif
 
 install-all-kernel-include:
 	$(MKDIR) $(SYSINCLUDEDIR)

@@ -22,12 +22,24 @@ MODULE_DIR := kernel/busses
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-KERNELBUSSESTARGETS := $(MODULE_DIR)/i2c-piix4.o $(MODULE_DIR)/i2c-isa.o \
-		       $(MODULE_DIR)/i2c-via.o $(MODULE_DIR)/i2c-ali15x3.o \
-                       $(MODULE_DIR)/i2c-hydra.o $(MODULE_DIR)/i2c-voodoo3.o \
-                       $(MODULE_DIR)/i2c-viapro.o $(MODULE_DIR)/i2c-i801.o
-
-KERNELBUSSESOLD := bit-via.o bit-mb.o isa.o piix4.o
+KERNELBUSSESTARGETS := $(MODULE_DIR)/i2c-i801.o \
+                       $(MODULE_DIR)/i2c-viapro.o \
+                       $(MODULE_DIR)/i2c-voodoo3.o
+ifneq ($(shell if grep -q '^CONFIG_I2C_ALI15X3=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ali15x3.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_HYDRA=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-hydra.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_ISA=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-isa.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_PIIX4=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-piix4.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_VIA=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-via.o
+endif
 
 # Include all dependency files
 INCLUDEFILES += $(KERNELBUSSESTARGETS:.o=.d)
@@ -36,7 +48,6 @@ all-kernel-busses: $(KERNELBUSSESTARGETS)
 all :: all-kernel-busses
 
 install-kernel-busses: all-kernel-busses
-	$(RM) $(addprefix $(MODDIR)/,$(KERNELBUSSESOLD))
 	$(MKDIR) $(MODDIR) 
 	$(INSTALL) -o root -g root -m 644 $(KERNELBUSSESTARGETS) $(MODDIR)
 install :: install-kernel-busses

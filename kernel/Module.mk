@@ -22,7 +22,10 @@ MODULE_DIR := kernel
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-KERNELTARGETS := $(MODULE_DIR)/sensors.o
+KERNELTARGETS := 
+ifneq ($(shell if grep -q '^CONFIG_SENSORS=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELTARGETS += $(MODULE_DIR)/sensors.o
+endif
 
 # Include all dependency files
 INCLUDEFILES += $(KERNELTARGETS:.o=.d)

@@ -32,11 +32,9 @@ LINUX=/usr/src/linux
 LINUX_HEADERS=$(LINUX)/include
 
 # Determine whether we need to compile the kernel modules, or only the
-# user-space utilities.
-COMPILE_KERNEL := $(shell if test -d $(LINUX)/drivers/sensors ; \
-                          then echo 0; else echo 1; fi)
+# user-space utilities. By default, the kernel modules are compiled.
 #COMPILE_KERNEL := 0
-#COMPILE_KERNEL := 1
+COMPILE_KERNEL := 1
 
 # If you have installed the i2c header at some other place (like 
 # /usr/local/include/linux), set that directory here. Please check this out

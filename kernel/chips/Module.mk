@@ -22,14 +22,39 @@ MODULE_DIR := kernel/chips
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-KERNELCHIPSTARGETS := $(MODULE_DIR)/adm1021.o $(MODULE_DIR)/adm9240.o \
-	              $(MODULE_DIR)/eeprom.o $(MODULE_DIR)/gl518sm.o \
-        	      $(MODULE_DIR)/lm75.o $(MODULE_DIR)/lm78.o \
-        	      $(MODULE_DIR)/lm80.o $(MODULE_DIR)/ltc1710.o \
-        	      $(MODULE_DIR)/w83781d.o $(MODULE_DIR)/sis5595.o \
-        	      $(MODULE_DIR)/maxilife.o $(MODULE_DIR)/bt869.o \
-		      $(MODULE_DIR)/matorb.o $(MODULE_DIR)/gl520sm.o \
+KERNELCHIPSTARGETS := $(MODULE_DIR)/bt869.o $(MODULE_DIR)/gl520sm.o \
+                      $(MODULE_DIR)/matorb.o $(MODULE_DIR)/maxilife.o \
                       $(MODULE_DIR)/thmc50.o
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM1021=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/adm1021.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_ADM9240=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/adm9240.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_EEPROM=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/eeprom.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_GL518SM=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/gl518sm.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM75=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/lm75.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM78=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/lm78.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_LM80=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/lm80.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_LTC1710=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/ltc1710.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_SIS5595=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/sis5595.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_W83781D=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/w83781d.o
+endif
 
 # Include all dependency files
 INCLUDEFILES += $(KERNELCHIPSTARGETS:.o=.d)
