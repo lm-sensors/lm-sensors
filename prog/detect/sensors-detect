@@ -1153,10 +1153,16 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        isa_detect => sub { ite_isa_detect 0, @_ },
      } ,
      {
-       name => "Serial EEPROM",
+       name => "SPD EEPROM",
        driver => "eeprom",
        i2c_addrs => [0x50..0x57],
-       i2c_detect => sub { eeprom_detect @_ },
+       i2c_detect => sub { eeprom_detect 0, @_ },
+     },
+     {
+       name => "Sony Vaio EEPROM",
+       driver => "eeprom",
+       i2c_addrs => [0x57],
+       i2c_detect => sub { eeprom_detect 1, @_ },
      },
      {
        name => "LTC1710",
@@ -3057,42 +3063,59 @@ sub ite_alias_detect
   return 1;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
-# $_[1]: Address
-# Returns: 8 for a memory eeprom, 6 or 8 for a Sony Vaio eeprom,
-#          1 or 2 for an unknown eeprom
+# $_[0]: Chip to detect (0 = SPD EEPROM, 1 = Sony Vaio EEPROM)
+# $_[1]: A reference to the file descriptor to access this chip
+# $_[2]: Address
+# Returns: 8 for a memory eeprom, 4 to 9 for a Sony Vaio eeprom,
+#          1 for an unknown eeprom
 # Registers used:
-#   0-63: PC-100 Data and Checksum
-#   2-5, 128-131: Sony Vaio Data
+#   0-63: SPD Data and Checksum
+#   0x80-0x83: Sony Vaio Data ("PCG-")
+#   0xe2, 0xe5, 0xe8, 0xeb, Oxee: Sony Vaio Timestamp constant bytes.
+#   0x1a-0x1c: Sony Vaio MAC address
+# This detection function is a bit tricky; this is to workaround
+# wrong misdetection messages that would else arise.
 sub eeprom_detect
 {
-  my ($file,$addr) = @_;
-  # Check the checksum for validity (only works for PC-100 DIMMs)
+  my ($chip,$file,$addr) = @_;
+
+  # Check the checksum for validity (works for most DIMMs and RIMMs)
   my $checksum = 0;
   for (my $i = 0; $i <= 62; $i ++) {
     $checksum += i2c_smbus_read_byte_data($file,$i);
   }
   $checksum &= 255;
   return 8
-    if (i2c_smbus_read_byte_data($file,63) == $checksum);
-  # Even if checksum test fails, it still may be an eeprom
-  if (i2c_smbus_read_byte_data($file,2) == 0
-   && i2c_smbus_read_byte_data($file,3) == 0
-   && i2c_smbus_read_byte_data($file,4) == 0
-   && i2c_smbus_read_byte_data($file,5) == 0)
-  {
-    if (i2c_smbus_read_byte_data($file,128) == ord 'P'
-     && i2c_smbus_read_byte_data($file,129) == ord 'C'
-     && i2c_smbus_read_byte_data($file,130) == ord 'G'
-     && i2c_smbus_read_byte_data($file,131) == ord '-')
-    {
-      # Sony Vaio
-      return 8 if ($addr == 0x57);
-      return 6;
-    }
-    return 2;
+    if $chip == 0 and i2c_smbus_read_byte_data($file,63) == $checksum;
+
+  # Look for a Sony Vaio EEPROM
+  my $vaioconf = 1;
+  $vaioconf += 4
+    if i2c_smbus_read_byte_data($file,0x80) == 0x50
+    && i2c_smbus_read_byte_data($file,0x81) == 0x43
+    && i2c_smbus_read_byte_data($file,0x82) == 0x47
+    && i2c_smbus_read_byte_data($file,0x83) == 0x2d;
+  $vaioconf += 5
+    if i2c_smbus_read_byte_data($file,0xe2) == 0x2f
+    && i2c_smbus_read_byte_data($file,0xe5) == 0x2f
+    && i2c_smbus_read_byte_data($file,0xe8) == 0x20
+    && i2c_smbus_read_byte_data($file,0xeb) == 0x3a
+    && i2c_smbus_read_byte_data($file,0xee) == 0x3a;
+  $vaioconf += 3
+    if i2c_smbus_read_byte_data($file,0x1a) == 0x08
+    && i2c_smbus_read_byte_data($file,0x1b) == 0x00
+    && i2c_smbus_read_byte_data($file,0x1c) == 0x46;
+  $vaioconf = 9
+    if $vaioconf > 9;
+
+  if ($vaioconf > 1) {
+    return if $chip != 1;
+    return $vaioconf;
   }
+
+  # Even if all tests fail, it still may be an eeprom
+  return if $chip != 0;
+  # Default to SPD EEPROM
   return 1;
 }
 
