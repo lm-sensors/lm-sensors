@@ -121,6 +121,7 @@ sub gen_Documentation_Configure_help
            m@Texas Instruments THMC50 / Analog Devices ADM1022@ or
            m@Via VT82C686A/B@ or
            m@Winbond W83781D, W83782D, W83783S, W83627HF, AS99127F@ or
+           m@Winbond W83627HF, W83627THF, W83697HF@ or
            m@Winbond W83L785TS-S@ or
            m@EEprom \(DIMM\) reader@) {
       $_ = <INPUT>;
@@ -592,6 +593,17 @@ CONFIG_SENSORS_W83781D
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Winbond W83627HF, W83627THF, W83697HF
+CONFIG_SENSORS_W83627HF
+  If you say yes here you get support for the Winbond W836x7 series 
+  of sensor chips: the Winbond W83627HF, W83627THF and W83697HF. This
+  can also be built as a module which can be inserted and removed
+  while the kernel is running.
+
+  You will also need the latest user-space utilities: you can find
+  them in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
+
 Winbond W83L785TS-S
 CONFIG_SENSORS_W83L785TS
   If you say yes here you get support for the Winbond W83L785TS-S
@@ -911,6 +923,7 @@ obj-$(CONFIG_SENSORS_VIA686A)	+= via686a.o
 obj-$(CONFIG_SENSORS_VT1211)	+= vt1211.o
 obj-$(CONFIG_SENSORS_VT8231)	+= vt8231.o
 obj-$(CONFIG_SENSORS_W83781D)	+= w83781d.o
+obj-$(CONFIG_SENSORS_W83627HF)	+= w83627hf.o
 obj-$(CONFIG_SENSORS_W83L785TS)	+= w83l785ts.o
 
 include $(TOPDIR)/Rules.make

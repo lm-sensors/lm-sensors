@@ -54,6 +54,7 @@ kernel/chips/via686a.c		drivers/sensors/via686a.c
 kernel/chips/vt1211.c		drivers/sensors/vt1211.c
 kernel/chips/vt8231.c		drivers/sensors/vt8231.c
 kernel/chips/w83781d.c		drivers/sensors/w83781d.c
+kernel/chips/w83627hf.c		drivers/sensors/w83627hf.c
 kernel/chips/w83l785ts.c		drivers/sensors/w83l785ts.c
 kernel/include/sensors_compat.h	include/linux/sensors_compat.h
 kernel/include/sensors_vid.h	include/linux/sensors_vid.h
