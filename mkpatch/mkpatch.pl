@@ -488,8 +488,8 @@ CONFIG_SENSORS_LM87
 National Semiconductor LM90
 CONFIG_SENSORS_LM90
   If you say yes here you get support for the National Semiconductor
-  LM90 and Analog Devices ADM1032 sensor chips.  This can also be
-  built as a module.
+  LM90, LM89 and LM99, and Analog Devices ADM1032 sensor chips.  This
+  can also be built as a module.
 
   You will also need the latest user-space utilities: you can find
   them in the lm_sensors package, which you can download at

@@ -135,7 +135,10 @@ lm87
 
 lm90
 	lm90		2	-	-	-	yes	no
+	lm99		2	-	-	-	yes	no
 	adm1032		2	-	-	-	yes	no
+	(lm89 is detected as an lm99)
+	lm89		2	-	-	-	yes	no
 
 lm92
 	(all are reported as an "lm92")

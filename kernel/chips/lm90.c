@@ -1,7 +1,7 @@
 /*
  * lm90.c - Part of lm_sensors, Linux kernel modules for hardware
  *          monitoring
- * Copyright (C) 2003  Jean Delvare <khali@linux-fr.org>
+ * Copyright (C) 2003-2004  Jean Delvare <khali@linux-fr.org>
  *
  * Based on the lm83 driver. The LM90 is a sensor chip made by National
  * Semiconductor. It reports up to two temperatures (its own plus up to
@@ -9,6 +9,17 @@
  * temperature) and a 3-4 deg accuracy. Complete datasheet can be
  * obtained from National's website at:
  *   http://www.national.com/pf/LM/LM90.html
+ *
+ * This driver also supports the LM89 and LM99, two other sensor chips
+ * made by National Semiconductor. Both have an increased remote
+ * temperature measurement accuracy (1 degree), and the LM99
+ * additionally shifts remote temperatures (measured and limits) by 16
+ * degrees, which allows for higher temperatures measurement. The
+ * driver doesn't handle it since it can be done easily in user-space.
+ * Complete datasheets can be obtained from National's website at:
+ *   http://www.national.com/pf/LM/LM89.html
+ *   http://www.national.com/pf/LM/LM99.html
+ * Note that there is no way to differenciate between both chips.
  *
  * This driver also supports the ADM1032, a sensor chip made by Analog
  * Devices. That chip is similar to the LM90, with a few differences
@@ -49,9 +60,11 @@
 /*
  * Addresses to scan
  * Address is fully defined internally and cannot be changed.
+ * LM89, LM90, LM99 and ADM1032 have address 0x4c.
+ * LM89-1, and LM99-1 have address 0x4d.
  */
 
-static unsigned short normal_i2c[] = { 0x4c, SENSORS_I2C_END };
+static unsigned short normal_i2c[] = { 0x4c, 0x4d, SENSORS_I2C_END };
 static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
 static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
@@ -60,7 +73,7 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
  * Insmod parameters
  */
 
-SENSORS_INSMOD_2(lm90, adm1032);
+SENSORS_INSMOD_3(lm90, adm1032, lm99);
 
 /*
  * The LM90 registers
@@ -325,18 +338,30 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 		
 		if (man_id == 0x01) /* National Semiconductor */
 		{
-			if (chip_id >= 0x21 && chip_id < 0x30 /* LM90 */
-			 && (kind == 0 /* skip detection */
-			  || ((i2c_smbus_read_byte_data(new_client,
-				LM90_REG_R_CONFIG2) & 0xF8) == 0x00
-			   && reg_convrate <= 0x09)))
+			u8 reg_config2;
+
+			reg_config2 = i2c_smbus_read_byte_data(new_client,
+				LM90_REG_R_CONFIG2);
+
+			if (kind == 0 /* skip detection */
+			 || ((reg_config2 & 0xF8) == 0x00
+			  && reg_convrate <= 0x09))
 			{
-				kind = lm90;
+				if (address == 0x4C
+				 && (chip_id & 0xF0) == 0x20) /* LM90 */
+				{
+					kind = lm90;
+				}
+				else if ((chip_id & 0xF0) == 0x30) /* LM89/LM99 */
+				{
+					kind = lm99;
+				}
 			}
 		}
 		else if (man_id == 0x41) /* Analog Devices */
 		{
-			if ((chip_id & 0xF0) == 0x40 /* ADM1032 */
+			if (address == 0x4C
+			 && (chip_id & 0xF0) == 0x40 /* ADM1032 */
 			 && (kind == 0 /* skip detection */
 			  || (reg_config1 & 0x3F) == 0x00))
 			{
@@ -360,6 +385,11 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	{
 		type_name = "adm1032";
 		client_name = "ADM1032 chip";
+	}
+	else if (kind == lm99)
+	{
+		type_name = "lm99";
+		client_name = "LM99 chip";
 	}
 	else
 	{
