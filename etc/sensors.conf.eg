@@ -2039,6 +2039,14 @@ chip "pc87366-*"
    compute in8   @*2, @/2
    compute in10  @*2, @/2
 
+   set in7_min   3.3 * 0.95
+   set in7_max   3.3 * 1.05
+   set in10_min  3.3 * 0.95
+   set in10_max  3.3 * 1.05
+
+# Ignore voltages that are not monitored by your motherboard
+#   ignore in9
+
 # Temperature inputs
 
    label temp1       "CPU0 Temp"
