@@ -103,8 +103,6 @@ static inline long TEMP_FROM_REG(u16 temp)
                                                       ((val)+50)/100), \
                                              0,255)
 
-#define ALARMS_FROM_REG(val) (val)
-
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 
@@ -547,7 +545,7 @@ void lm80_alarms(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm80_update_client(client);
-		results[0] = ALARMS_FROM_REG(data->alarms);
+		results[0] = data->alarms;
 		*nrels_mag = 1;
 	}
 }
