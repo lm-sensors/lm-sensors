@@ -5,7 +5,7 @@
 #include <unistd.h>                                                             
 #include <fcntl.h>                                                              
 #include <time.h>
-#include "i2c-dev.h"
+#include <linux/i2c-dev.h>
 
 
 #define MAX_BLK_SIZE 64
