@@ -2653,7 +2653,6 @@ void print_fscpos(const sensors_chip_name *name)
   double voltage, temp,state,fan,min_rpm;
  int valid;
 
-  printf("Chip: fujitsu siemens poseidon\n");
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_TEMP1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP1,&temp) &&
       !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP1_STATE,&state)) { 
@@ -2701,7 +2700,7 @@ void print_fscpos(const sensors_chip_name *name)
 	else if (fan < min_rpm)
 		printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
-	      printf("\t%+6.0f RPM \n",fan);
+	      printf("\t%6.0f RPM \n",fan);
     }
   }
   free_the_label(&label);
@@ -2716,7 +2715,7 @@ void print_fscpos(const sensors_chip_name *name)
 	else if (fan < min_rpm)
 		printf("\t%6.0f RPM (not present or faulty)\n",fan);
 	else
-	      printf("\t%+6.0f RPM \n",fan);
+	      printf("\t%6.0f RPM \n",fan);
     }
   }
   free_the_label(&label);
@@ -2728,7 +2727,7 @@ void print_fscpos(const sensors_chip_name *name)
 	if((int) state & 0x02)
 		printf("\tfaulty\n");
 	else
-	      printf("\t%+6.0f RPM \n",fan);
+	      printf("\t%6.0f RPM \n",fan);
     }
   }
   free_the_label(&label);
