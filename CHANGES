@@ -35,15 +35,16 @@ ask CVS about it:
   Module fscscy: implement min/max for voltages and fans
   Module i2c-amd756: Add support for AMD768
   Module i2c-i810: Add support for 810E
+  Module i2c-keywest: Big update, sync with kernel 2.4.18
   Module i2c-piix4: Check for uninitialized base address
-  Module i2c-sis5595: Blacklist 735
+  Module i2c-sis5595: Blacklist 645, 735
   Module i2c-viapro: Check for uninitialized base address
   Module gl518sm: Standardize /proc entries in0-3
   Module lm87: Fix in0, in1, in5 initial limits; ain[1,2] -> in[6,7];
                fan -> fan1; fix temp2 limit writes
   Module pcf8574: Add support for PCF8574A; /proc interface changed
   Module pcf8591: new
-  Module sis5595: Blacklist 735
+  Module sis5595: Blacklist 645, 735
   Module w83781d: Add W83697HF support; allow force_subclients parameter
                   for Tyan 2460
   Programs decode-dimms.pl, decode-xeon.pl: Update for new /proc names
@@ -52,6 +53,7 @@ ask CVS about it:
                    add text output
   Program init/sensors: New SysV init script
   Program mkpatch.pl: Add support for fscscy, add more help entries
+  Program p4b_smbus: new
   Program rrd: Install summ_week.cgi
   Program sensors: Add PCF8591, W83697HF, ADM1023 support,
                    clean up chassis intrusion prints
