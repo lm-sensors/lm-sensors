@@ -871,6 +871,7 @@
 #define SENSORS_LM87_TEMP3_HYST      58 /* RW */
 #define SENSORS_LM87_TEMP3_OVER      59 /* RW */
 #define SENSORS_LM87_VID             61 /* R */
+#define SENSORS_LM87_VRM             62 /* RW */
 #define SENSORS_LM87_FAN1_DIV        71 /* RW */
 #define SENSORS_LM87_FAN2_DIV        72 /* RW */
 #define SENSORS_LM87_ALARMS          81 /* R */

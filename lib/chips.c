@@ -329,6 +329,34 @@ static sensors_chip_feature adm1021_features[] =
     { 0 }
   };
 
+static sensors_chip_feature adm1023_features[] =
+  {
+    { SENSORS_ADM1021_TEMP, "temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                              SENSORS_MODE_R, ADM1021_SYSCTL_TEMP, VALUE(3), 
+                              0 },
+    { SENSORS_ADM1021_TEMP_HYST, "temp_low", SENSORS_ADM1021_TEMP,
+                              SENSORS_ADM1021_TEMP, SENSORS_MODE_RW, 
+                              ADM1021_SYSCTL_TEMP, VALUE(2), 0 },
+    { SENSORS_ADM1021_TEMP_OVER, "temp_over", SENSORS_ADM1021_TEMP,
+                              SENSORS_ADM1021_TEMP, SENSORS_MODE_RW,
+                              ADM1021_SYSCTL_TEMP, VALUE(1), 0 },
+    { SENSORS_ADM1021_REMOTE_TEMP, "remote_temp", SENSORS_NO_MAPPING, 
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R, 
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(4), 3 },
+    { SENSORS_ADM1021_REMOTE_TEMP_HYST, "remote_temp_low", 
+                              SENSORS_ADM1021_REMOTE_TEMP,
+                              SENSORS_ADM1021_REMOTE_TEMP, SENSORS_MODE_RW, 
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(2), 3 },
+    { SENSORS_ADM1021_REMOTE_TEMP_OVER, "remote_temp_over", 
+                              SENSORS_ADM1021_REMOTE_TEMP,
+                              SENSORS_ADM1021_REMOTE_TEMP, SENSORS_MODE_RW,
+                              ADM1021_SYSCTL_REMOTE_TEMP, VALUE(1), 3 },
+    { SENSORS_ADM1021_ALARMS, "alarms", SENSORS_NO_MAPPING,
+                              SENSORS_NO_MAPPING, SENSORS_MODE_R,
+                              ADM1021_SYSCTL_ALARMS, VALUE(1), 0 },
+    { 0 }
+  };
+
 static sensors_chip_feature max1617_features[] =
   {
     { SENSORS_MAX1617_TEMP, "temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
@@ -2136,7 +2164,9 @@ static sensors_chip_feature lm87_features[] =
                          SENSORS_LM87_TEMP3, SENSORS_MODE_RW, 
                          LM87_SYSCTL_TEMP3, VALUE(1), 1 },
     { SENSORS_LM87_VID, "vid", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
-                         SENSORS_MODE_R, LM87_SYSCTL_VID, VALUE(1), 2 },
+                         SENSORS_MODE_R, LM87_SYSCTL_VID, VALUE(1), 3 },
+    { SENSORS_LM87_VRM, "vrm", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_RW, LM87_SYSCTL_VRM, VALUE(1), 1 },
 /* Ho hum, this will be wrong if fan1 is disabled, but fan2 isn't.. fix?? */
     { SENSORS_LM87_FAN1_DIV, "fan1_div", SENSORS_LM87_FAN1, 
                          SENSORS_NO_MAPPING, SENSORS_MODE_RW, 
@@ -3000,8 +3030,8 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_LM84_PREFIX, adm1021_features },
 		/* Cheat on GL523 for now - no separate #defines */
  { SENSORS_GL523_PREFIX, adm1021_features },
-		/* Cheat on 1023,THMC10 for now - no separate #defines */
- { SENSORS_ADM1023_PREFIX, adm1021_features },
+ { SENSORS_ADM1023_PREFIX, adm1023_features },
+		/* Cheat on THMC10 for now - no separate #defines */
  { SENSORS_THMC10_PREFIX, adm1021_features },
  { SENSORS_SIS5595_PREFIX, sis5595_features },
  { SENSORS_MAXI_CG_PREFIX, maxi_cg_features },
