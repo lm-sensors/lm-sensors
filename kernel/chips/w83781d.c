@@ -217,8 +217,8 @@ extern inline u8 DIV_TO_REG(long val, enum chips type)
 }
 
 /* Initial limits */
-#define W83781D_INIT_IN_0 (vid==350?280:vid)
-#define W83781D_INIT_IN_1 (vid==350?280:vid)
+#define W83781D_INIT_IN_0 (vid==3500?280:vid/10)
+#define W83781D_INIT_IN_1 (vid==3500?280:vid/10)
 #define W83781D_INIT_IN_2 330
 #define W83781D_INIT_IN_3 (((500)   * 100)/168)
 #define W83781D_INIT_IN_4 (((1200)  * 10)/38)
