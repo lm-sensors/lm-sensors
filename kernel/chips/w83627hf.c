@@ -310,7 +310,6 @@ struct w83627hf_data {
 	u32 beeps;		/* Register encoding, combined */
 	u8 beep_enable;		/* Boolean */
 	u8 pwm[3];		/* Register value */
-	u8 pwmenable[3];	/* bool */
 	u16 sens[3];		/* 782D/783S only.
 				   1 = pentium diode; 2 = 3904 diode;
 				   3000-5000 = thermistor beta.
@@ -919,10 +918,6 @@ static void w83627hf_init_client(struct i2c_client *client)
 			break;
 	}
 
-	data->pwmenable[0] = 1;
-	data->pwmenable[1] = 1;
-	data->pwmenable[2] = 1;
-
 	if(init) {
 		/* Enable temp2 */
 		tmp = w83627hf_read_value(client, W83781D_REG_TEMP2_CONFIG);
@@ -1347,8 +1342,7 @@ void w83627hf_pwm(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83627hf_update_client(client);
 		results[0] = data->pwm[nr - 1];
-		results[1] = data->pwmenable[nr - 1];
-		*nrels_mag = 2;
+		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			if (data->type == w83627thf) {
