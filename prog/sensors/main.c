@@ -28,7 +28,7 @@
 #include "chips.h"
 
 #define PROGRAM "sensors"
-#define VERSION "1.1"
+#define VERSION "1.2"
 #define DEFAULT_CONFIG_FILE_NAME "sensors.conf"
 
 static char *config_file_name;
