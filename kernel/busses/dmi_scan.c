@@ -18,6 +18,11 @@
 #include "version.h"
 #include "dmi_scan.h"
 
+/* for 2.2 kernels */
+#ifndef isa_memcpy_fromio
+#define isa_memcpy_fromio(a,b,c)        memcpy_fromio((a),(b),(c))
+#endif
+
 struct dmi_header
 {
 	u8	type;
