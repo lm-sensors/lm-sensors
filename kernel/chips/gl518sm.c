@@ -417,6 +417,7 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 	data->quit_thread = 0;
 	data->thread = NULL;
 	data->alarm_mask = 0xff;
+	data->voltage[0]=data->voltage[1]=data->voltage[2]=0;
 	gl518_init_client((struct i2c_client *) new_client);
 	return 0;
 
