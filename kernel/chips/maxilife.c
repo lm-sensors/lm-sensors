@@ -304,8 +304,10 @@ static void maxi_dec_use(struct i2c_client *client);
 
 static int maxi_read_value(struct i2c_client *client, u8 register);
 static int maxi_read_token(struct i2c_client *client, u16 token);
+#ifndef NOWRITE
 static int maxi_write_value(struct i2c_client *client, u8 register,
 			    u8 value);
+#endif
 static int maxi_write_token_loop(struct i2c_client *client, u16 token,
 				 u8 len, u8 * values);
 
@@ -594,7 +596,6 @@ int maxi_detect(struct i2c_adapter *adapter, int address,
 
 	for (i = 0; i < 4; i++)
 		for (j = 0; j < 17; j++)
-			
 			    ((struct maxi_data *) (new_client->data))->
 			    lcd[i][j] = (u8) 0;
 
@@ -743,11 +744,13 @@ int maxi_read_token(struct i2c_client *client, u16 token)
 	return value;
 }
 
+#ifndef NOWRITE
 /* Write byte to specified register (-1 in case of error, 0 otherwise). */
 int maxi_write_value(struct i2c_client *client, u8 reg, u8 value)
 {
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
+#endif
 
 /* Write a set of len byte values to MaxiLife token (-1 in case of error, 0 otherwise). */
 int maxi_write_token_loop(struct i2c_client *client, u16 token, u8 len,
@@ -971,9 +974,8 @@ void maxi_update_client(struct i2c_client *client)
 void maxi99_update_client(struct i2c_client *client,
 			  enum sensor_type sensor, int which)
 {
-	static last_updated[6][6];	/* sensor, which */
+	static unsigned long last_updated[6][6];	/* sensor, which */
 	struct maxi_data *data = client->data;
-	int i;
 
 	down(&data->update_lock);
 
