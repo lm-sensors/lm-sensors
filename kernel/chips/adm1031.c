@@ -3,7 +3,8 @@
               monitoring
   Based on lm75.c and lm85.c
   Supports Analog Devices ADM1030 and ADM1031
-  Copyright (C) 2004 Alexandre d'Alton <alex@alexdalton.org>
+  Copyright (C) 2004 Alexandre d'Alton <alex@alexdalton.org> and
+                     Jean Delvare <khali@linux-fr.org>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -224,7 +225,7 @@ static int adm1031_id = 0;
 
 #define FAN_DIV_FROM_REG(reg)		(1 << (((reg)&0xc0) >> 6))
 
-#define AUTO_TEMP_OFF_FROM_REG(reg)	(((((reg) >> 3) & 0x1f) << 2) - 5)
+#define AUTO_TEMP_MIN_FROM_REG(reg)	(((reg) >> 3) * 4)
 
 
 static int adm1031_attach_adapter(struct i2c_adapter *adapter)
@@ -521,44 +522,27 @@ static int trust_fan_readings(struct adm1031_data * data, int chan)
 
 	if (data->conf1 & ADM1031_CONF1_AUTO_MODE) {
 		switch(data->conf1 & 0x60) {
-		case 0x00: /* remote temp1 controls fan1 remote temp2
-			      controls fan2 */
-			res = chan == 0 ? data->temp[1] >
-			      AUTO_TEMP_OFF_FROM_REG(data->auto_temp[1]) :
-			      data->temp[2] >
-			      AUTO_TEMP_OFF_FROM_REG(data->auto_temp[2]);
+		case 0x00: /* temp2 controls fan1, temp3 controls fan2 */
+			res = data->temp[chan+1] >=
+			      AUTO_TEMP_MIN_FROM_REG(data->auto_temp[chan+1]);
 			break;
-		case 0x20: /* remote temp1 controls both fans*/
-			if (data->chip_type == adm1030)
-				res = 0;
-			else
-				res = data->temp[1] >
-				      AUTO_TEMP_OFF_FROM_REG(data->auto_temp[1]);
+		case 0x20: /* temp2 controls both fans */
+			res = data->temp[1] >=
+			      AUTO_TEMP_MIN_FROM_REG(data->auto_temp[1]);
 			break;
-		case 0x40: /* remote temp2 controls both fans*/
-			if (data->chip_type == adm1030)
-				res = 0;
-			else
-				res = data->temp[2] >
-				      AUTO_TEMP_OFF_FROM_REG(data->auto_temp[2]);
+		case 0x40: /* temp3 controls both fans */
+			res = data->temp[2] >=
+			      AUTO_TEMP_MIN_FROM_REG(data->auto_temp[2]);
 			break;
-		case 0x60: /* max controls both fans */
-			if (data->chip_type == adm1030){
-				res = data->temp[0] >
-				      AUTO_TEMP_OFF_FROM_REG(data->auto_temp[0])
-				      || data->temp[1] >
-				      AUTO_TEMP_OFF_FROM_REG(data->auto_temp[1]);
-			} else {
-				res = data->temp[0] >
-				      AUTO_TEMP_OFF_FROM_REG(data->auto_temp[0])
-				      || data->temp[1] >
-				      AUTO_TEMP_OFF_FROM_REG(data->auto_temp[1])
-				      || data->temp[2] >
-				      AUTO_TEMP_OFF_FROM_REG(data->auto_temp[2]);
-			}
-			break;
-		default:
-			res = 0;
+		case 0x60: /* max of temp1, temp2 and temp3 controls both
+			      fans */
+			res = data->temp[0] >=
+			      AUTO_TEMP_MIN_FROM_REG(data->auto_temp[0])
+			      || data->temp[1] >=
+			      AUTO_TEMP_MIN_FROM_REG(data->auto_temp[1])
+			      || (data->chip_type == adm1031
+				  && data->temp[2] >=
+				  AUTO_TEMP_MIN_FROM_REG(data->auto_temp[2]));
 			break;
 		}
 	} else {
