@@ -23,8 +23,8 @@ PROGDETECTDIR := $(MODULE_DIR)
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-PROGDETECTTARGETS := $(MODULE_DIR)/i2cdetect
-PROGDETECTSOURCES := $(MODULE_DIR)/i2cdetect.c
+PROGDETECTTARGETS := $(MODULE_DIR)/i2cdetect $(MODULE_DIR)/dmidecode
+PROGDETECTSOURCES := $(MODULE_DIR)/i2cdetect.c $(MODULE_DIR)/dmidecode.c
 PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect
 
 # Include all dependency files. We use '.rd' to indicate this will create
