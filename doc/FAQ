@@ -101,6 +101,7 @@ sensor reading results. Why?
 6.3 How to donate hardware to the project
 6.4 How to join the project mailing list
 6.5 How to (not) access mailing list archives
+6.6 How to submit a patch
 
 7. Version 1 specific questions
 7.1 My manufacturer swears that my mainboard has an SMBus, but your code 
@@ -921,6 +922,7 @@ detected chip type. That way, we have some positive feedback, too!
 6.2 How to get CVS access
 
     For anonymous CVS read access, see the instructions on our download page.
+    Sorry, we don't have automatically generated CVS tarballs.
     For write access, run the script doc/developers/genpasswd.pl in
     our package and follow the instructions. Let us know what part
     of the package you would like to work on.
@@ -936,9 +938,18 @@ detected chip type. That way, we have some positive feedback, too!
     Send us email <sensors@stimpy.netroedge.com>. Sorry, no automated
     subscribe/unsubscribe service.
 
+
 6.5 How to (not) access mailing list archives
 
     Sorry, there is no archive.
+
+
+6.6 How to submit a patch
+
+    Check out the latest from CVS, then copy the directory to another
+    directory, and make your changes. Generate the diff with
+    'diff -u2 -r DIR1 DIR2'. Or you can generate the diff in CVS with
+    'cvs diff -u2'. Send us the patch in an email and tell us what it does.
 
 
 7. Version 1 specific questions
