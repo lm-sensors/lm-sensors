@@ -130,7 +130,7 @@ static inline void superio_exit(void)
 
 #define FAN_FROM_REG(val,div)		((val)==0?0: \
 					 480000/((val)*(div)))
-#define FAN_TO_REG(val,div)		((val)<=0?255: \
+#define FAN_TO_REG(val,div)		((val)*(div)<=1875?255: \
 					 480000/((val)*(div)))
 #define FAN_DIV_FROM_REG(val)		(1 << ((val >> 5) & 0x03))
 #define FAN_DIV_TO_REG(val)		((val)==8?0x60:(val)==4?0x40: \
