@@ -70,9 +70,6 @@ struct eeprom_data {
 	unsigned long last_updated[8];	/* In jiffies, 8 slices */
 
 	u8 data[EEPROM_SIZE];	/* Register values */
-#if 0
-	u8 memtype;
-#endif
 	u8 nature;
 };
 
