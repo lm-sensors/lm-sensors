@@ -932,16 +932,19 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "SMBus 2.0 ARP-Capable Device??",
+       driver => "to-be-written",
        i2c_addrs => [0x61],
        i2c_detect => sub { arp_detect @_},
      },
      {
        name => "IPMI BMC KCS",
+       driver => "to-be-written",
        isa_addrs => [ 0x0ca0 ],
        isa_detect => sub { ipmi_kcs_detect @_ },
      },
      {
        name => "IPMI BMC SMIC",
+       driver => "to-be-written",
        isa_addrs => [ 0x0ca8 ],
        isa_detect => sub { ipmi_smic_detect @_ },
      },
