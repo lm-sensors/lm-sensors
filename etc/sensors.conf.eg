@@ -22,7 +22,7 @@
 # example, and the real parts. Search for '####' if you want to skip
 # to the real stuff.
 #
-# Hash marks introduce comments, which continue until the end of a line
+# Hash marks introduce comments, which continue until the end of a line.
 #
 # Identifiers consisting of only digits and letters can be used
 # unquoted; other identifiers must be quoted. Escape characters within
@@ -57,7 +57,7 @@
 # when running 'sensors -s'.
 #
 # Unfortunately, feature names starting with a number must be in
-# double quotes or you get 'parse error, expecting 'NAME''.
+# double quotes or you get "parse error, expecting 'NAME'".
 #
 # If you have trouble, verify the features in lib/chips.c!!!
 #
@@ -155,6 +155,36 @@
 #  	compute in5 -(210/60.4)*@  ,  -@/(210/60.4)
 #  	compute in6 -(90.9/60.4)*@ ,  -@/(90.9/60.4)
 #
+# NOTE: On many motherboards, the -5V and -12V sensors are not connected.
+# Add ignore lines so these readings will not be displayed. For example:
+#	ignore in5
+#	ignore in6
+#
+#
+# TEMPERATURE COMPUTATION EXAMPLES
+# --------------------------------
+# There are two common ways to adjust temperature readings.
+# One is to adjust by a constant. The other is to change the
+# temperature sensor type.
+#
+# Add 5 degrees to temperature sensor 1:
+#	compute temp1 @+5,@-5
+#
+# Sensor type adjustments (certain chips only):
+# ...Set temp1 to processor's thermal diode:
+#	set sensor1 1 (Winbond chips)
+#	set sensor1 3 (IT87xx and MTP008 chips)
+#
+# ...Set temp1 sensor to 3904 transistor:
+#	set sensor1 2 (Winbond chips)
+#
+# ...Set temp1 to thermistor:
+#	set sensor1 3435 (Winbond chips)
+#	set sensor1 2 (IT87xx and MTP008 chips)
+#
+# Often, a temperature sensor is disconnected; disable it with an ignore line:
+#	ignore temp3
+#
 #
 # SET LINES
 # ---------
@@ -233,6 +263,7 @@
 # or disable them using:
 #
 # 	set beep_enable 0
+#
 #
 ##########################################################################
 #### Here begins the real configuration file
