@@ -368,6 +368,8 @@ void do_a_print(sensors_chip_name name)
     print_bmc(&name);
   else if (!strcmp(name.prefix,"adm1026"))
     print_adm1026(&name);
+  else if (!strcmp(name.prefix,"lm83"))
+    print_lm83(&name);
   else
     print_unknown_chip(&name);
   printf("\n");

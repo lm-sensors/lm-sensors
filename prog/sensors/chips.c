@@ -4073,6 +4073,61 @@ void print_adm1026(const sensors_chip_name *name)
 
 }
 
+void print_lm83(const sensors_chip_name *name)
+{
+  char *label;
+  double cur,high;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM83_LOCAL_TEMP,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM83_LOCAL_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM83_LOCAL_HIGH,&high))  {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, high, 0, MAXONLY, 0, 0);
+      printf( "\n" );
+    }
+  } else
+    printf("ERROR: Can't get local temperature data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM83_REMOTE1_TEMP,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM83_REMOTE1_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM83_REMOTE1_HIGH,&high))  {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, high, 0, MAXONLY, 0, 0);
+      printf( "\n" );
+    }
+  } else
+    printf("ERROR: Can't get remote temperature 1 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM83_REMOTE2_TEMP,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM83_REMOTE2_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM83_REMOTE2_HIGH,&high))  {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, high, 0, MAXONLY, 0, 0);
+      printf( "\n" );
+    }
+  } else
+    printf("ERROR: Can't get remote temperature 2 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM83_REMOTE3_TEMP,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM83_REMOTE3_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM83_REMOTE3_HIGH,&high))  {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, high, 0, MAXONLY, 0, 0);
+      printf( "\n" );
+    }
+  } else
+    printf("ERROR: Can't get remote temperature 3 data!\n");
+  free_the_label(&label);
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;
