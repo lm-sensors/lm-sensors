@@ -202,7 +202,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        func => 0,
        procid => "Silicon Integrated Systems SIS5581/5582/5597/5598 (To be written - Do not use 5595 drivers)",
        driver => "to-be-written",
-       match => sub { $_[0] =~ /dontmatchthis/ },
+       match => sub { 0 },
      } ,
      {
        vendid => 0x1039,
@@ -210,7 +210,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        func => 0,
        procid => "Silicon Integrated Systems SIS5598 (To be written - Do not use 5595 drivers)",
        driver => "to-be-written",
-       match => sub { $_[0] =~ /dontmatchthis/ },
+       match => sub { 0 },
      } ,
      {
        vendid => 0x1039,
@@ -218,7 +218,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        func => 0,
        procid => "Silicon Integrated Systems SIS540 (To be written - Do not use 5595 drivers)",
        driver => "to-be-written",
-       match => sub { $_[0] =~ /dontmatchthis/ },
+       match => sub { 0 },
      } ,
      {
        vendid => 0x1039,
@@ -372,7 +372,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0519,
        func   => 0,
        procid => "MGA 2064W [Millennium]",
-       driver => "<DISABLED>", # "i2c-matroxfb",
+       driver => "i2c-matroxfb",
        match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
      },
      {
@@ -380,7 +380,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x051a,
        func   => 0,
        procid => "MGA 1064SG [Mystique]",
-       driver => "<DISABLED>", # "i2c-matroxfb",
+       driver => "i2c-matroxfb",
        match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
      },
      {
@@ -388,7 +388,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x051b,
        func   => 0,
        procid => "MGA 2164W [Millennium II]",
-       driver => "<DISABLED>", # "i2c-matroxfb",
+       driver => "i2c-matroxfb",
        match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
      },
      {
@@ -396,7 +396,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x051e,
        func   => 0,
        procid => "MGA 1064SG [Mystique] AGP",
-       driver => "<DISABLED>", # "i2c-matroxfb",
+       driver => "i2c-matroxfb",
        match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
      },
      {
@@ -404,7 +404,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x051f,
        func   => 0,
        procid => "MGA 2164W [Millennium II] AGP",
-       driver => "<DISABLED>", # "i2c-matroxfb",
+       driver => "i2c-matroxfb",
        match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
      },
      {
@@ -412,7 +412,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x1000,
        func   => 0,
        procid => "MGA G100 [Productiva]",
-       driver => "<DISABLED>", # "i2c-matroxfb",
+       driver => "i2c-matroxfb",
        match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
      },
      {
@@ -420,7 +420,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x1001,
        func   => 0,
        procid => "MGA G100 [Productiva] AGP",
-       driver => "<DISABLED>", # "i2c-matroxfb",
+       driver => "i2c-matroxfb",
        match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
      },
      {
@@ -428,7 +428,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0520,
        func   => 0,
        procid => "MGA G200",
-       driver => "<DISABLED>", # "i2c-matroxfb",
+       driver => "i2c-matroxfb",
        match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
      },
      {
@@ -436,7 +436,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0521,
        func   => 0,
        procid => "MGA G200 AGP",
-       driver => "<DISABLED>", # "i2c-matroxfb",
+       driver => "i2c-matroxfb",
        match  => sub { $_[0] =~ /^DDC:fb[0-9]{1,2}/ },
      },
      {
@@ -444,7 +444,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0525,
        func   => 0,
        procid => "MGA G400 AGP",
-       driver => "<DISABLED>", # "i2c-matroxfb",
+       driver => "i2c-matroxfb",
        match  => sub { $_[0] =~ /^(DDC,MAVEN):fb[0-9]{1,2}/ },
      },
      {
@@ -500,7 +500,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0018,
        func => 0,
        procid => "RIVA 128",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -508,7 +508,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0020,
        func => 0,
        procid => "RIVA TNT",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -516,7 +516,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0028,
        func => 0,
        procid => "RIVA TNT2",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -524,7 +524,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0029,
        func => 0,
        procid => "RIVA UTNT2",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -532,7 +532,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x002c,
        func => 0,
        procid => "RIVA VTNT2",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -540,7 +540,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x002d,
        func => 0,
        procid => "RIVA UVTNT2",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -548,7 +548,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x00a0,
        func => 0,
        procid => "RIVA ITNT2",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -556,7 +556,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0100,
        func => 0,
        procid => "GeForce SDR",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -564,7 +564,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0101,
        func => 0,
        procid => "GeForce DDR",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -572,7 +572,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0102,
        func => 0,
        procid => "Quadro",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -580,7 +580,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0150,
        func => 0,
        procid => "GeForce2 GTS",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -588,7 +588,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0110,
        func => 0,
        procid => "GeForce2 MX",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -596,7 +596,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0111,
        func => 0,
        procid => "GeForce2 MX2",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -604,7 +604,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0113,
        func => 0,
        procid => "Quadro2 MXR",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -612,7 +612,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0151,
        func => 0,
        procid => "GeForce2 GTS2",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -620,7 +620,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0152,
        func => 0,
        procid => "GeForce2 Ultra",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -628,7 +628,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        devid  => 0x0153,
        func => 0,
        procid => "Quadro2 Pro",
-       driver => "<DISABLED>", # "i2c-riva",
+       driver => "rivatv",
        match => sub { $_[0] =~ /^NVIDIA display/ },
      } , 
      { 
@@ -685,7 +685,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        func => 0,
        procid => "S3 Savage 3D",
        driver => "to-be-written",
-       match => sub { $_[0] =~ /^dontmatchthis/ },
+       match => sub { 0 },
      } , 
      { 
        vendid => 0x5333,
@@ -693,7 +693,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        func => 0,
        procid => "S3 Savage 3D MV",
        driver => "to-be-written",
-       match => sub { $_[0] =~ /^dontmatchthis/ },
+       match => sub { 0 },
      } , 
      { 
        vendid => 0x5333,
@@ -725,7 +725,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        func => 0,
        procid => "S3 ProSavage KM",
        driver => "to-be-written",
-       match => sub { $_[0] =~ /^dontmatchthis/ },
+       match => sub { 0 },
      } , 
      { 
        vendid => 0x5333,
@@ -733,7 +733,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        func => 0,
        procid => "S3 Savage MX MV",
        driver => "to-be-written",
-       match => sub { $_[0] =~ /^dontmatchthis/ },
+       match => sub { 0 },
      } , 
      { 
        vendid => 0x5333,
@@ -741,7 +741,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        func => 0,
        procid => "S3 Savage MX",
        driver => "to-be-written",
-       match => sub { $_[0] =~ /^dontmatchthis/ },
+       match => sub { 0 },
      } , 
      { 
        vendid => 0x5333,
@@ -749,7 +749,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        func => 0,
        procid => "S3 Savage IX MV",
        driver => "to-be-written",
-       match => sub { $_[0] =~ /^dontmatchthis/ },
+       match => sub { 0 },
      } , 
      { 
        vendid => 0x5333,
@@ -757,7 +757,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        func => 0,
        procid => "S3 Savage IX",
        driver => "to-be-written",
-       match => sub { $_[0] =~ /^dontmatchthis/ },
+       match => sub { 0 },
      } , 
 );
 
@@ -3233,6 +3233,8 @@ sub generate_modprobes
     foreach $adap (@adapters) {
       if ($adap->{driver} eq "UNKNOWN") {
         $modprobes .= "# modprobe unknown adapter ".$adap->{adapname}." using ". $adap->{algoname}."\n";
+      } elsif ($adap->{driver} eq "DISABLED") {
+        $modprobes .= "# modprobe disabled adapter ".$adap->{adapname}." using ". $adap->{algoname}."\n";
       } else {
         $modprobes .= "modprobe $adap->{driver}\n" if (defined($adap->{nr_later}) and $adap->{nr_later} == $i) and not $modprobes =~ /modprobe $adap->{driver}\n/;
       }
@@ -3529,7 +3531,7 @@ sub main
   } else {
     print " We will now try to load each adapter module in turn.\n";
     foreach $adapter (@adapters) {
-      next if $adapter eq "<DISABLED>";
+      next if $adapter eq "DISABLED";
       if (contains $adapter, @modules_list) {
         print "Module `$adapter' already loaded.\n";
       } else {
@@ -3537,9 +3539,8 @@ sub main
         unless (<STDIN> =~ /^\s*[Nn]/) {
           if (system ("modprobe", $adapter)) {
             print "Loading failed... skipping.\n";
-            if ($adapter eq "i2c-riva") {
-              print "** Note: i2c-riva module is available at \n";
-              print "** http://drama.obuda.kando.hu/~fero/cgi-bin/rivatv.shtml\n"; 
+            if ($adapter eq "rivatv") {
+              print "** Note: rivatv module is available at http://rivatv.sourceforge.net/\n"; 
             }
           } else {
             print "Module loaded succesfully.\n";
