@@ -888,23 +888,23 @@ void it87_sgtl(struct i2c_client *client, int operation, int ctl_name,
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			data->sg_tl[nr - 1][0] = TEMP_TO_REG(results[0]);
-			it87_write_value(client, IT87_REG_SG_TL_OFF(nr), data->sg_pwm[nr - 1][0]);
+			it87_write_value(client, IT87_REG_SG_TL_OFF(nr), data->sg_tl[nr - 1][0]);
 		}
 		if (*nrels_mag >= 2) {
 			data->sg_tl[nr - 1][1] = TEMP_TO_REG(results[1]);
-			it87_write_value(client, IT87_REG_SG_TL_LOW(nr), data->sg_pwm[nr - 1][1]);
+			it87_write_value(client, IT87_REG_SG_TL_LOW(nr), data->sg_tl[nr - 1][1]);
 		}
 		if (*nrels_mag >= 3) {
 			data->sg_tl[nr - 1][2] = TEMP_TO_REG(results[2]);
-			it87_write_value(client, IT87_REG_SG_TL_MED(nr), data->sg_pwm[nr - 1][2]);
+			it87_write_value(client, IT87_REG_SG_TL_MED(nr), data->sg_tl[nr - 1][2]);
 		}
 		if (*nrels_mag >= 4) {
 			data->sg_tl[nr - 1][3] = TEMP_TO_REG(results[3]);
-			it87_write_value(client, IT87_REG_SG_TL_HI(nr), data->sg_pwm[nr - 1][3]);
+			it87_write_value(client, IT87_REG_SG_TL_HI(nr), data->sg_tl[nr - 1][3]);
 		}
 		if (*nrels_mag >= 5) {
 			data->sg_tl[nr - 1][4] = TEMP_TO_REG(results[4]);
-			it87_write_value(client, IT87_REG_SG_TL_OVR(nr), data->sg_pwm[nr - 1][4]);
+			it87_write_value(client, IT87_REG_SG_TL_OVR(nr), data->sg_tl[nr - 1][4]);
 		}
 	}
 }

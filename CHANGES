@@ -16,6 +16,10 @@ ask CVS about it:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
 -----------------------------------------------------------------------------
+
+2.8.2 (2004????)
+  Module it87: Fix sg_tlx /proc entries
+
 2.8.2 (20031211)
   IMPORTANT: Limit initialization removed from all chip drivers!
              If you didn't run 'sensors -s' in the past you may need to now!
@@ -50,6 +54,7 @@ ask CVS about it:
                add it87 sensor type support
   Module lm90: Add ADM1032 support
   Module w83781d: Fix 791d and 627hf detection
+  Module w83627hf: Add VID support
   Program dmidecode: Remove (sensors-detect doesn't need it anymore)
   Program eeprog: New
   Programs i2cdetect, i2cdump, i2cset: add -v (version) option;
