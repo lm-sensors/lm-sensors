@@ -189,6 +189,7 @@ ignore_statement:	IGNORE function_name
 			  new_el.name = $2;
 			  ignore_add_el(&new_el);
 			}
+;
 
 chip_statement:	  CHIP chip_name_list
 		  { sensors_chip new_el;
