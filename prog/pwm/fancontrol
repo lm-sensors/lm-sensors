@@ -2,7 +2,7 @@
 #
 # Simple script implementing a temperature dependent fan speed control
 #
-# Version 0.62
+# Version 0.63
 #
 # Usage: fancontrol [CONFIGFILE]
 #
@@ -160,7 +160,7 @@ function restorefans()
 	exit 1
 }
 
-trap restorefans SIGHUP SIGINT SIGQUIT
+trap restorefans SIGHUP SIGINT SIGQUIT SIGTERM SIGKILL
 
 # function doing all the math
 function calc () {
