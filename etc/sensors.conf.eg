@@ -343,7 +343,7 @@ chip "sis5595-*"
 #    set temp_over 40	
 #    set temp_hyst 37	
 
-chip "w83782d-*" "w83783s-*" "w83627hf-*"
+chip "w83782d-*" "w83783s-*" "w83627hf-*" "w83697hf-*"
 
 # Same as above for w83781d except that in5 and in6 are computed differently.
 # Rather than an internal inverting op amp, the 82d/83s use standard positive

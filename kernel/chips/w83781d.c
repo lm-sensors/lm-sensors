@@ -1,7 +1,7 @@
 /*
     w83781d.c - Part of lm_sensors, Linux kernel modules for hardware
                 monitoring
-    Copyright (c) 1998, 1999, 2000  Frodo Looijaard <frodol@dds.nl>,
+    Copyright (c) 1998 - 2001  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>,
     and Mark Studebaker <mdsxyz123@yahoo.com>
 
@@ -29,6 +29,7 @@
     w83627hf	9	3	2	3	0x20	0x5ca3	yes	yes(LPC)
     w83782d	9	3	2-4	3	0x30	0x5ca3	yes	yes
     w83783s	5-6	3	2	1-2	0x40	0x5ca3	yes	no
+    w83697hf	6	2	2	2	0x60	0x5ca3	no	yes(LPC)
 
 */
 
@@ -45,10 +46,6 @@
 #include "version.h"
 #include "sensors.h"
 #include <linux/init.h>
-
-#ifdef MODULE_LICENSE
-MODULE_LICENSE("GPL");
-#endif
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,2,18)) || \
     (LINUX_VERSION_CODE == KERNEL_VERSION(2,3,0))
@@ -69,13 +66,13 @@ static unsigned int normal_isa[] = { 0x0290, SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_5(w83781d, w83782d, w83783s, w83627hf, as99127f);
+SENSORS_INSMOD_6(w83781d, w83782d, w83783s, w83627hf, as99127f, w83697hf);
 
 static int init = 1;
 MODULE_PARM(init, "i");
 MODULE_PARM_DESC(init, "Set to zero to bypass chip initialization");
 
-/* Many W83781D constants specified below */
+/* Constants specified below */
 
 /* Length of ISA address segment */
 #define W83781D_EXTENT 8
@@ -693,6 +690,46 @@ static ctl_table w83783s_dir_table_template[] = {
 	{0}
 };
 
+/* similar to w83783s but no fan3, no vid */
+static ctl_table w83697hf_dir_table_template[] = {
+	{W83781D_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_in},
+	/* no in1 to maintain compatibility with 781d and 782d. */
+	{W83781D_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_in},
+	{W83781D_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_in},
+	{W83781D_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_in},
+	{W83781D_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_in},
+	{W83781D_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_in},
+	{W83781D_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_fan},
+	{W83781D_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_fan},
+	{W83781D_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_temp},
+	{W83781D_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_temp_add},
+	{W83781D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_fan_div},
+	{W83781D_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_alarms},
+	{W83781D_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_beep},
+	{W83781D_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_pwm},
+	{W83781D_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_pwm},
+	{W83781D_SYSCTL_SENS1, "sensor1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_sens},
+	{W83781D_SYSCTL_SENS2, "sensor2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83781d_sens},
+	{0}
+};
+
 
 /* This function is called when:
      * w83781d_driver is inserted (when this module is loaded), for each
@@ -827,10 +864,12 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 			kind = w83627hf;
 		else if (val1 == 0x30 && vendid == asus && !is_isa)
 			kind = as99127f;
+		else if (val1 == 0x60 && vendid == winbond && is_isa)
+			kind = w83697hf;
 		else {
 			if (kind == 0)
 				printk
-				    ("w83781d.o: Ignoring 'force' parameter for unknown chip at"
+				    (KERN_WARNING "w83781d.o: Ignoring 'force' parameter for unknown chip at"
 				     "adapter %d, address 0x%02x\n",
 				     i2c_adapter_id(adapter), address);
 			goto ERROR1;
@@ -852,9 +891,12 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 	} else if (kind == as99127f) {
 		type_name = "as99127f";
 		client_name = "AS99127F chip";
+	} else if (kind == w83697hf) {
+		type_name = "w83697hf";
+		client_name = "W83697HF chip";
 	} else {
 #ifdef DEBUG
-		printk("w83781d.o: Internal error: unknown kind (%d)?!?",
+		printk(KERN_ERR "w83781d.o: Internal error: unknown kind (%d)?!?",
 		       kind);
 #endif
 		goto ERROR1;
@@ -889,7 +931,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 		if (kind != w83783s) {
 			data->lm75[1].addr = 0x48 + ((val1 >> 4) & 0x07);
 			if(data->lm75[0].addr == data->lm75[1].addr) {
-				printk("w83781d.o: Duplicate addresses 0x%x for subclients.\n",
+				printk(KERN_ERR "w83781d.o: Duplicate addresses 0x%x for subclients.\n",
 					data->lm75[0].addr);
 				goto ERROR5;
 			}
@@ -913,7 +955,7 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 			strcpy(data->lm75[i].name, client_name);
 			data->lm75[i].id = w83781d_id++;
 			if ((err = i2c_attach_client(&(data->lm75[i])))) {
-				printk("w83781d.o: Subclient %d registration at address 0x%x failed.\n",
+				printk(KERN_ERR "w83781d.o: Subclient %d registration at address 0x%x failed.\n",
 				       i, data->lm75[i].addr);
 				if (i == 1)
 					goto ERROR6;
@@ -930,12 +972,14 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client,
 					type_name,
-					kind == as99127f ?
+					(kind == as99127f) ?
 					   as99127f_dir_table_template :
-					kind == w83781d ?
+					(kind == w83781d) ?
 					   w83781d_dir_table_template :
-					kind == w83783s ?
+					(kind == w83783s) ?
 					   w83783s_dir_table_template :
+					(kind == w83697hf) ?
+					   w83697hf_dir_table_template :
 					(is_isa || kind == w83627hf) ?
 					   w83782d_isa_dir_table_template :
 					   w83782d_i2c_dir_table_template,
@@ -987,7 +1031,7 @@ int w83781d_detach_client(struct i2c_client *client)
 
 	if ((err = i2c_detach_client(client))) {
 		printk
-		    ("w83781d.o: Client deregistration failed, client not detached.\n");
+		    (KERN_ERR "w83781d.o: Client deregistration failed, client not detached.\n");
 		return err;
 	}
 
@@ -1209,10 +1253,12 @@ void w83781d_init_client(struct i2c_client *client)
 		w83781d_write_value(client, W83781D_REG_BEEP_INTS2, 0);
 	}
 
-	vid = w83781d_read_value(client, W83781D_REG_VID_FANDIV) & 0x0f;
-	vid |=
-	    (w83781d_read_value(client, W83781D_REG_CHIPID) & 0x01) << 4;
-	vid = VID_FROM_REG(vid);
+	if (type != w83697hf) {
+		vid = w83781d_read_value(client, W83781D_REG_VID_FANDIV) & 0x0f;
+		vid |=
+		    (w83781d_read_value(client, W83781D_REG_CHIPID) & 0x01) << 4;
+		vid = VID_FROM_REG(vid);
+	}
 
 	if ((type != w83781d) && (type != as99127f)) {
 		tmp = w83781d_read_value(client, W83781D_REG_SCFG1);
@@ -1227,7 +1273,7 @@ void w83781d_init_client(struct i2c_client *client)
 				else
 					data->sens[i - 1] = 2;
 			}
-			if ((type == w83783s) && (i == 2))
+			if ((type == w83783s || type == w83697hf) && (i == 2))
 				break;
 		}
 	}
@@ -1265,7 +1311,7 @@ void w83781d_init_client(struct i2c_client *client)
 				    IN_TO_REG(W83781D_INIT_IN_MIN_0));
 		w83781d_write_value(client, W83781D_REG_IN_MAX(0),
 				    IN_TO_REG(W83781D_INIT_IN_MAX_0));
-		if (type != w83783s) {
+		if (type != w83783s && type != w83697hf) {
 			w83781d_write_value(client, W83781D_REG_IN_MIN(1),
 					    IN_TO_REG(W83781D_INIT_IN_MIN_1));
 			w83781d_write_value(client, W83781D_REG_IN_MAX(1),
@@ -1322,8 +1368,10 @@ void w83781d_init_client(struct i2c_client *client)
 				    FAN_TO_REG(W83781D_INIT_FAN_MIN_1, 2));
 		w83781d_write_value(client, W83781D_REG_FAN_MIN(2),
 				    FAN_TO_REG(W83781D_INIT_FAN_MIN_2, 2));
-		w83781d_write_value(client, W83781D_REG_FAN_MIN(3),
+		if (type != w83697hf) {
+			w83781d_write_value(client, W83781D_REG_FAN_MIN(3),
 				    FAN_TO_REG(W83781D_INIT_FAN_MIN_3, 2));
+		}
 
 		w83781d_write_value(client, W83781D_REG_TEMP_OVER,
 				    TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
@@ -1354,7 +1402,7 @@ void w83781d_init_client(struct i2c_client *client)
 			w83781d_write_value(client, W83781D_REG_TEMP3_HYST,
 					    AS99127_TEMP_ADD_TO_REG
 					    (W83781D_INIT_TEMP3_HYST));
-		} else if (type != w83783s) {
+		} else if (type != w83783s && type != w83697hf) {
 			w83781d_write_value(client, W83781D_REG_TEMP3_OVER,
 					    TEMP_ADD_TO_REG
 					    (W83781D_INIT_TEMP3_OVER));
@@ -1362,7 +1410,7 @@ void w83781d_init_client(struct i2c_client *client)
 					    TEMP_ADD_TO_REG
 					    (W83781D_INIT_TEMP3_HYST));
 		}
-		if (type != w83783s) {
+		if (type != w83783s && type != w83697hf) {
 			w83781d_write_value(client, W83781D_REG_TEMP3_CONFIG,
 					    0x00);
 		}
@@ -1391,10 +1439,11 @@ void w83781d_update_client(struct i2c_client *client)
 	    (jiffies < data->last_updated) || !data->valid) {
 
 #ifdef DEBUG
-		printk("Starting w83781d update\n");
+		printk(KERN_DEBUG "Starting device update\n");
 #endif
 		for (i = 0; i <= 8; i++) {
-			if ((data->type == w83783s) && (i == 1))
+			if ((data->type == w83783s || data->type == w83697hf)
+			    && (i == 1))
 				continue;	/* 783S has no in1 */
 			data->in[i] =
 			    w83781d_read_value(client, W83781D_REG_IN(i));
@@ -1423,6 +1472,7 @@ void w83781d_update_client(struct i2c_client *client)
 				if (((data->type == w83783s)
 				     || (data->type == w83627hf)
 				     || (data->type == as99127f)
+				     || (data->type == w83697hf)
 				     || ((data->type == w83782d)
 				        && i2c_is_isa_client(client)))
 				    && i == 2)
@@ -1441,7 +1491,7 @@ void w83781d_update_client(struct i2c_client *client)
 		    w83781d_read_value(client, W83781D_REG_TEMP2_OVER);
 		data->temp_add_hyst[0] =
 		    w83781d_read_value(client, W83781D_REG_TEMP2_HYST);
-		if (data->type != w83783s) {
+		if (data->type != w83783s && data->type != w83697hf) {
 			data->temp_add[1] =
 			    w83781d_read_value(client, W83781D_REG_TEMP3);
 			data->temp_add_over[1] =
@@ -1450,20 +1500,24 @@ void w83781d_update_client(struct i2c_client *client)
 			    w83781d_read_value(client, W83781D_REG_TEMP3_HYST);
 		}
 		i = w83781d_read_value(client, W83781D_REG_VID_FANDIV);
-		data->vid = i & 0x0f;
-		data->vid |=
-		    (w83781d_read_value(client, W83781D_REG_CHIPID) & 0x01)
-		    << 4;
+		if (data->type != w83697hf) {
+			data->vid = i & 0x0f;
+			data->vid |=
+			    (w83781d_read_value(client, W83781D_REG_CHIPID) & 0x01)
+			    << 4;
+		}
 		data->fan_div[0] = (i >> 4) & 0x03;
 		data->fan_div[1] = (i >> 6) & 0x03;
-		data->fan_div[2] = (w83781d_read_value(client,
-						       W83781D_REG_PIN) >>
-				    6) & 0x03;
+		if (data->type != w83697hf) {
+			data->fan_div[2] = (w83781d_read_value(client,
+					       W83781D_REG_PIN) >> 6) & 0x03;
+		}
 		if ((data->type != w83781d) && (data->type != as99127f)) {
 			i = w83781d_read_value(client, W83781D_REG_VBAT);
 			data->fan_div[0] |= (i >> 3) & 0x04;
 			data->fan_div[1] |= (i >> 4) & 0x04;
-			data->fan_div[2] |= (i >> 5) & 0x04;
+			if (data->type != w83697hf)
+				data->fan_div[2] |= (i >> 5) & 0x04;
 		}
 		data->alarms =
 		    w83781d_read_value(client,
@@ -1706,6 +1760,7 @@ void w83781d_beep(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
+/* w83697hf only has two fans */
 void w83781d_fan_div(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results)
 {
@@ -1718,8 +1773,12 @@ void w83781d_fan_div(struct i2c_client *client, int operation,
 		w83781d_update_client(client);
 		results[0] = DIV_FROM_REG(data->fan_div[0]);
 		results[1] = DIV_FROM_REG(data->fan_div[1]);
-		results[2] = DIV_FROM_REG(data->fan_div[2]);
-		*nrels_mag = 3;
+		if (data->type == w83697hf) {
+			*nrels_mag = 2;
+		} else {
+			results[2] = DIV_FROM_REG(data->fan_div[2]);
+			*nrels_mag = 3;
+		}
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		old = w83781d_read_value(client, W83781D_REG_VID_FANDIV);
 		/* w83781d and as99127f don't have extended divisor bits */
@@ -1727,7 +1786,7 @@ void w83781d_fan_div(struct i2c_client *client, int operation,
 			old3 =
 			    w83781d_read_value(client, W83781D_REG_VBAT);
 		}
-		if (*nrels_mag >= 3) {
+		if (*nrels_mag >= 3 && data->type != w83697hf) {
 			data->fan_div[2] =
 			    DIV_TO_REG(results[2], data->type);
 			old2 = w83781d_read_value(client, W83781D_REG_PIN);
@@ -1850,7 +1909,7 @@ void w83781d_sens(struct i2c_client *client, int operation, int ctl_name,
 				break;
 			default:
 				printk
-				    ("w83781d.o: Invalid sensor type %ld; must be 1, 2, or %d\n",
+				    (KERN_ERR "w83781d.o: Invalid sensor type %ld; must be 1, 2, or %d\n",
 				     results[0], W83781D_DEFAULT_BETA);
 				break;
 			}
@@ -1891,12 +1950,12 @@ int __init sensors_w83781d_init(void)
 {
 	int res;
 
-	printk("w83781d.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk(KERN_INFO "w83781d.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	w83781d_initialized = 0;
 
 	if ((res = i2c_add_driver(&w83781d_driver))) {
 		printk
-		    ("w83781d.o: Driver registration failed, module not inserted.\n");
+		    (KERN_ERR "w83781d.o: Driver registration failed, module not inserted.\n");
 		w83781d_cleanup();
 		return res;
 	}
@@ -1911,7 +1970,7 @@ int __init w83781d_cleanup(void)
 	if (w83781d_initialized >= 1) {
 		if ((res = i2c_del_driver(&w83781d_driver))) {
 			printk
-			    ("w83781d.o: Driver deregistration failed, module not removed.\n");
+			    (KERN_ERR "w83781d.o: Driver deregistration failed, module not removed.\n");
 			return res;
 		}
 		w83781d_initialized--;
@@ -1927,6 +1986,10 @@ MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, "
 	      "Philip Edelbrock <phil@netroedge.com>, "
 	      "and Mark Studebaker <mdsxyz123@yahoo.com>");
 MODULE_DESCRIPTION("W83781D driver");
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
+
 
 int init_module(void)
 {

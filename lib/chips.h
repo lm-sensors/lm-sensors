@@ -431,8 +431,10 @@
 
 
 /* Winbond W83783S chips */
+/* Cheat on 697HF for now - no separate #defines */
 
 #define SENSORS_W83783S_PREFIX "w83783s"
+#define SENSORS_W83697HF_PREFIX "w83697hf"
 
 #define SENSORS_W83783S_IN0 1 /* R */
 #define SENSORS_W83783S_IN1 2 /* R */

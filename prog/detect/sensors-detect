@@ -645,7 +645,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      } ,
      {
        name => "Winbond W83697HF",
-       driver => "Unwritten (W83697HF)",
+       driver => "w83781d",
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect 5, @_ },
      } ,

@@ -5,6 +5,7 @@ Status: W83781D support is complete and well-tested.
         W83782D support is complete and well-tested.
         W83783S support is complete but has not been well-tested.
         W83627HF support is complete but has not been well-tested.
+        W83697HF support is complete but has not been well-tested.
         AS99127F support is BETA and has known problems due to lack of a
 		 chip datasheet. SEE BELOW.
 
@@ -24,6 +25,10 @@ Supported chips:
   * Winbond W83627HF
     Prefix 'w83627hf'
     Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
+    Datasheet: Publicly available at the Winbond website
+  * Winbond W83697HF
+    Prefix 'w83697hf'
+    Addresses scanned: ISA 0x290 (8 I/O ports)
     Datasheet: Publicly available at the Winbond website
   * Asus AS99127F
     Prefix 'as99127f'

@@ -66,7 +66,7 @@ At least the following hardware sensor chips are supported:
   TelCom TCN75
   TI THMC10 and THMC50
   VIA Technologies VT82C686A/B embedded sensors
-  Winbond W83781D, W83782D, W83783S, and W83627HF
+  Winbond W83781D, W83782D, W83783S, W83627HF, and W83697HF
 
 
 We also support some miscellaneous chips:
