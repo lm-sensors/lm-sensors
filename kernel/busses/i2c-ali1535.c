@@ -434,14 +434,16 @@ int ali1535_transaction(void)
 /* 
     take consequent actions for error conditions
  */
-	if (temp & ALI1535_STS_ERR) {
-	  /* issue "timeout" to reset all devices on bus */
-	  outb_p(ALI1535_T_OUT,SMBHSTTYP);
-	}
-        else if (!(temp & ALI1535_STS_DONE)) {
+        if (!(temp & ALI1535_STS_DONE)) {
 	  /* issue "kill" to reset host controller */
 	  outb_p(ALI1535_KILL,SMBHSTTYP);
+	  outb_p(0xFF,SMBHSTSTS);
 	}	  
+	else if (temp & ALI1535_STS_ERR) {
+	  /* issue "timeout" to reset all devices on bus */
+	  outb_p(ALI1535_T_OUT,SMBHSTTYP);
+	  outb_p(0xFF,SMBHSTSTS);
+	}
         
 	return result;
 }
@@ -642,6 +644,7 @@ int __init ali1535_cleanup(void)
 
 #ifdef RLX
 EXPORT_SYMBOL(ali1535_smba);
+EXPORT_SYMBOL(ali1535_access);
 #else
 EXPORT_NO_SYMBOLS;
 #endif
