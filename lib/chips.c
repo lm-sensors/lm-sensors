@@ -419,7 +419,7 @@ static sensors_chip_feature max1617a_features[] =
 static sensors_chip_feature gl518_features[] =
   {
     { SENSORS_GL518_VDD, "vdd", NOMAP,NOMAP,
-                            R, GL518_SYSCTL_VDD, VALUE(3), 2 },
+                            R, GL518_SYSCTL_VDD, VALUE(3), 2, "in0", 3 },
     { SENSORS_GL518_VIN1, "vin1", NOMAP,NOMAP,
                              R, GL518_SYSCTL_VIN1, VALUE(3), 
                              2 },
@@ -430,7 +430,7 @@ static sensors_chip_feature gl518_features[] =
                              R, GL518_SYSCTL_VIN3, VALUE(3), 2 },
     { SENSORS_GL518_VDD_MIN, "vdd_min", SENSORS_GL518_VDD,
                                 SENSORS_GL518_VDD, RW,
-                                GL518_SYSCTL_VDD, VALUE(1), 2 },
+                                GL518_SYSCTL_VDD, VALUE(1), 2 , "in_min0", 3 },
     { SENSORS_GL518_VIN1_MIN, "vin1_min", SENSORS_GL518_VIN1, 
                                  SENSORS_GL518_VIN1, RW,
                                  GL518_SYSCTL_VIN1, VALUE(1), 2 },
@@ -442,7 +442,7 @@ static sensors_chip_feature gl518_features[] =
                                  GL518_SYSCTL_VIN3, VALUE(1), 2 },
     { SENSORS_GL518_VDD_MAX, "vdd_max", SENSORS_GL518_VDD,
                                 SENSORS_GL518_VDD, RW,
-                                GL518_SYSCTL_VDD, VALUE(2), 2 },
+                                GL518_SYSCTL_VDD, VALUE(2), 2 , "in_max0", 3 },
     { SENSORS_GL518_VIN1_MAX, "vin1_max", SENSORS_GL518_VIN1, 
                                  SENSORS_GL518_VIN1, RW,
                                  GL518_SYSCTL_VIN1, VALUE(2), 2 },

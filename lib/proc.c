@@ -427,6 +427,9 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 		in%d_max -> in_max%d
 		in%d_min -> in_min%d
 		in%d -> in_input%d
+		vin%d_max -> in_max%d
+		vin%d_min -> in_min%d
+		vin%d -> in_input%d
 		temp%d_over -> temp_max%d
 		temp%d_hyst -> temp_hyst%d
 		temp%d_max -> temp_max%d
@@ -525,6 +528,22 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 		return 0;
 	}
 	if(sscanf(name, "in%d%c", &num, &check) == 1) {
+		sprintf(sysname, "in_input%d", num);
+		*sysmag = INMAG;
+		return 0;
+	}
+
+	if(sscanf(name, "vin%d_mi%c%c", &num, &last, &check) == 2 && last == 'n') {
+		sprintf(sysname, "in_min%d", num);
+		*sysmag = INMAG;
+		return 0;
+	}
+	if(sscanf(name, "vin%d_ma%c%c", &num, &last, &check) == 2 && last == 'x') {
+		sprintf(sysname, "in_max%d", num);
+		*sysmag = INMAG;
+		return 0;
+	}
+	if(sscanf(name, "vin%d%c", &num, &check) == 1) {
 		sprintf(sysname, "in_input%d", num);
 		*sysmag = INMAG;
 		return 0;
