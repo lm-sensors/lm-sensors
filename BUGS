@@ -2,6 +2,9 @@ Except for many unimplemented things (listed in the TODO file), there may be
 true bugs too. If you experience any problems, do not hesitate to mail
 lm78@stimpy.netroedge.com. But read the documentation first, please!
 
+Pre-2.1.58 /proc directory Oops
+===============================
+
 There is a problem in pre 2.1.58 kernels that can make the kernel Oops. You
 can trigger this Oops if you have opened any file, or are in any directory,
 created by a module. If you remove the module at such a moment, successive
@@ -15,6 +18,45 @@ Alan Cox (alan@lxorguk.ukuu.org.uk), the maintainer of 2.0 kernels, has
 said he will consider patches that backport this 2.1 feature; perhaps it
 will be in 2.0.37. Until then, be careful when you unload modules.
 
-Module cdrom.o in all 2.2 kernels conflicts with our sensors.o module. Patches
-to correct this are being created. At this moment, make sure cdrom.o never
-gets unloaded, or you will almost certainly receive an Oops!
+
+2.2.x cdrom.o Oops
+==================
+
+Module cdrom.o in all 2.2 kernels conflicts with our sensors.o module.
+You can get an Oops if cdrom.o is unloaded after sensors.o was loaded.
+Below is a small diff that you can apply to the kernel to correct this.
+Another solution is to make sure cdrom.o is never unloaded, or to make
+sure it is not a module but compiled into the kernel proper.
+
+The diff corrects a long-standing /proc bug. It will go into kernel 2.2.2
+or later in a somewhat modified form. It was written by Jens Axboe 
+<axboe@image.dk>.
+
+-----cut here-----
+--- virgin/kernel/sysctl.c      Sat Jan  9 07:54:16 1999
++++ linux/kernel/sysctl.c       Mon Feb  1 23:44:58 1999
+@@ -559,12 +559,12 @@
+                        unregister_proc_table(table->child, de);
+                }
+                /* Don't unregister proc directories which still have
+-                  entries... */
+-               if (!((de->mode & S_IFDIR) && de->subdir)) {
++                  entries or are still being used... */
++               if (!((de->mode & S_IFDIR) && de->subdir) && !de->count)
+{
+                        proc_unregister(root, de->low_ino);
+                        table->de = NULL;
+                        kfree(de);
+-               } 
++               }
+        }
+ }
+-----cut here-----
+
+
+Kernel i2c conflict
+===================
+
+An older version of the i2c modules is distributed in 2.2 and late 2.1
+kernels. If you try to use it at the same moment as our i2c modules, you
+may get into trouble. There is no nice solution for this yet.

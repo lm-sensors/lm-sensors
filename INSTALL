@@ -2,6 +2,10 @@ Please read this file thoroughly before you try to install and run things. It
 will safe you many headaches. Installation is not really difficult, but there
 are a few pitfalls.
 
+ALWAYS READ THE `BUGS' FILE! This file contains a list of known 
+incompatibilities with this package. Most are highly kernel-dependent and
+usually not fatal, but still.
+
 COMPILATION AND INSTALLATION
 ============================
 
