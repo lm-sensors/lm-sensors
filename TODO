@@ -37,4 +37,5 @@ Many, many things. Most notably:
 * Some library routines are pretty inefficient right now
 * Test SIS5595(/91/98) sensor support. Write generic i2c support. 
   Thomas Dickel <Thomas.Dickel@mni.fh-giessen.de> owns one SIS5595.
-  The sensor data must be added to lib/chips
+* Make GL518SM rev 00 voltage iteration run as a kernel thread.
+  Add libsensors support for the new readable registers.

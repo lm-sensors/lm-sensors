@@ -1,7 +1,8 @@
 /*
     gl518sm.c - Part of lm_sensors, Linux kernel modules for hardware
                 monitoring
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>,
+                              Kyösti Mälkki <kmalkki@cc.hut.fi>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 */
 
 #include <linux/module.h>
@@ -24,6 +26,11 @@
 #include "sensors.h"
 #include "i2c.h"
 #include "version.h"
+#include "compat.h"
+
+/* Defining this will enable debug messages for the voltage iteration
+   code used with rev 0 ICs */
+#undef DEBUG_VIN
 
 /* Many GL518 constants specified below */
 
@@ -52,6 +59,7 @@
 
 
 /* Conversions. Rounding is only done on the TO_REG variants. */
+
 #define TEMP_TO_REG(val) (((((val)<0?(val)-5:(val)+5) / 10) + 119) & 0xff)
 #define TEMP_FROM_REG(val) (((val) - 119) * 10)
 
@@ -118,6 +126,8 @@ struct gl518_data {
          struct semaphore update_lock;
          char valid;                 /* !=0 if following fields are valid */
          unsigned long last_updated; /* In jiffies */
+         unsigned long last_updated_v00; 
+	                             /* In jiffies (used only by rev00 chips) */
 
          u8 voltage[4];              /* Register values; [0] = VDD */
          u8 voltage_min[4];          /* Register values; [0] = VDD */
@@ -129,12 +139,17 @@ struct gl518_data {
          u8 temp_hyst;               /* Register values */
          u8 alarms,beeps;            /* Register value */
          u8 fan_div[2];              /* Register encoding, shifted right */
-	 u8 beep_enable;             /* Boolean */
+	 u8 beep_enable;             /* Boolean */	 
 };
+
+/* load time parameter that says if we want to spend 10 seconds for
+   reading all voltages from a GL518 rev 0, or if we want to read zeros */
+int readall = 0;
 
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
+MODULE_PARM(readall,"i");
 #endif /* MODULE */
 
 static int gl518_init(void);
@@ -424,12 +439,8 @@ void gl518_update_client(struct i2c_client *client)
     printk("Starting gl518 update\n");
 #endif
 
-    if (data->revision != 0x00) {
-      data->voltage[0] = gl518_read_value(client,GL518_REG_VDD);
-      data->voltage[1] = gl518_read_value(client,GL518_REG_VIN1);
-      data->voltage[2] = gl518_read_value(client,GL518_REG_VIN2);
-    }
-    data->voltage[3] = gl518_read_value(client,GL518_REG_VIN3);
+    data->alarms = gl518_read_value(client,GL518_REG_INT);
+    data->beeps = gl518_read_value(client,GL518_REG_ALARM);
 
     val = gl518_read_value(client,GL518_REG_VDD_LIMIT);
     data->voltage_min[0] = val & 0xff;
@@ -444,6 +455,19 @@ void gl518_update_client(struct i2c_client *client)
     data->voltage_min[3] = val & 0xff;
     data->voltage_max[3] = (val >> 8) & 0xff;
 
+    if (data->revision != 0x00) {
+      data->voltage[0] = gl518_read_value(client,GL518_REG_VDD);
+      data->voltage[1] = gl518_read_value(client,GL518_REG_VIN1);
+      data->voltage[2] = gl518_read_value(client,GL518_REG_VIN2);
+    } else {
+      if (!readall) {
+        data->voltage[0] = 0;
+        data->voltage[1] = 0;
+        data->voltage[2] = 0;
+      }
+    }
+    data->voltage[3] = gl518_read_value(client,GL518_REG_VIN3);
+
     val = gl518_read_value(client,GL518_REG_FAN_COUNT);
     data->fan[0] = (val >> 8) & 0xff;
     data->fan[1] = val & 0xff;
@@ -455,9 +479,6 @@ void gl518_update_client(struct i2c_client *client)
     data->temp = gl518_read_value(client,GL518_REG_TEMP);
     data->temp_over = gl518_read_value(client,GL518_REG_TEMP_OVER);
     data->temp_hyst = gl518_read_value(client,GL518_REG_TEMP_HYST);
-
-    data->alarms = gl518_read_value(client,GL518_REG_INT);
-    data->beeps = gl518_read_value(client,GL518_REG_ALARM);
 
     val = gl518_read_value(client,GL518_REG_MISC);
     data->fan_div[0] = (val >> 6) & 0x03;
@@ -471,6 +492,116 @@ void gl518_update_client(struct i2c_client *client)
   up(&data->update_lock);
 }
 
+/* Similar to gl518_update_client() but updates vdd, vin1, vin2 values 
+   by doing slow and multiple comparisons for the GL518SM rev 00 that
+   lacks support for direct reading of these values.
+   (added by Ludovic Drolez (ldrolez@usa.net) */
+
+void gl518_update_client_rev00(struct i2c_client *client)
+{
+  struct gl518_data *data = client->data;
+  struct wait_queue *wait = NULL;
+  int j, min, max[3], delta;
+
+  down(&data->update_lock);
+
+#ifndef DEBUG_VIN
+  /* as that update is slow, we consider the data valid for 30 seconds */
+  if (jiffies - data->last_updated_v00 > 30*HZ ) {
+#else
+  if (jiffies - data->last_updated_v00 > HZ+HZ/2 ) {
+#endif
+
+     /* disable audible alarm */
+     gl518_write_value(client,GL518_REG_CONF,
+                        (gl518_read_value(client,GL518_REG_CONF) & 0xfb));
+
+    min = 1;
+    max[0] = VDD_TO_REG(GL518_INIT_VDD);
+    max[1] = IN_TO_REG(GL518_INIT_VIN_1); 
+    max[2] = IN_TO_REG(GL518_INIT_VIN_2);
+    delta = 32;
+    do {		        
+      gl518_write_value(client,GL518_REG_VDD_LIMIT,(max[0] << 8) | min);
+      gl518_write_value(client,GL518_REG_VIN1_LIMIT,(max[1] << 8) | min);
+      gl518_write_value(client,GL518_REG_VIN2_LIMIT,(max[2] << 8) | min);
+
+      /* we wait now 1.5 seconds before comparing */
+      current->state = TASK_INTERRUPTIBLE;
+      schedule_timeout(HZ + HZ/2);
+
+      /* read comparators */	
+      j = gl518_read_value(client,GL518_REG_INT);
+      if ((j & 1) == 0) {
+        max[0] = max[0] - delta;    
+      } else {
+        max[0] = max[0] + delta;
+      }
+      if ((j & 2) == 0) {
+        max[1] = max[1] - delta;    
+      } else {
+        max[1] = max[1] + delta;
+      }
+      if ((j & 4) == 0) {
+        max[2] = max[2] - delta;    
+      } else {
+        max[2] = max[2] + delta;
+      }
+      delta >>= 1;
+#ifdef DEBUG_VIN
+      printk("Iterations: %3d %3d %3d \n", max[0], max[1], max[2]);
+#endif
+    } while (delta != 0);
+    
+    /* do a final comparison to get to least significant bit */
+    gl518_write_value(client,GL518_REG_VDD_LIMIT,(max[0] << 8) | min);
+    gl518_write_value(client,GL518_REG_VIN1_LIMIT,(max[1] << 8) | min);
+    gl518_write_value(client,GL518_REG_VIN2_LIMIT,(max[2] << 8) | min);
+ 
+    /* we wait now 1.5 seconds before comparing */
+    current->state = TASK_INTERRUPTIBLE;
+    schedule_timeout(HZ + HZ/2);
+
+    /* read comparators */	
+    j = gl518_read_value(client,GL518_REG_INT);
+    if ((j & 1) == 0) max[0]--;
+    if ((j & 2) == 0) max[1]--;
+    if ((j & 4) == 0) max[2]--;
+
+#ifdef DEBUG_VIN
+  if (data->revision) {
+     printk("Avdd: Meter: %3d, Search: %3d, Diff: %3d mV\n",
+     	     data->voltage[0], max[0], (max[0] - data->voltage[0]) * 23);
+     printk("Vin1: Meter: %3d, Search: %3d, Diff: %3d mV\n",
+     	     data->voltage[1], max[1], (max[1] - data->voltage[1]) * 19);
+     printk("Vin2: Meter: %3d, Search: %3d, Diff: %3d mV\n",
+     	     data->voltage[2], max[2], (max[2] - data->voltage[2]) * 19);
+  } else
+     printk("No voltage meter to read on rev 00 ICs\n");     
+#endif  
+
+    /* update voltages values */    
+    data->voltage[0] = max[0];
+    data->voltage[1] = max[1];
+    data->voltage[2] = max[2];
+    
+    /* restore original comparator values */
+    gl518_write_value(client,GL518_REG_VDD_LIMIT,
+                      (data->voltage_max[0] << 8) | data->voltage_min[0]);
+    gl518_write_value(client,GL518_REG_VIN1_LIMIT,
+                      (data->voltage_max[1] << 8) | data->voltage_min[1]);
+    gl518_write_value(client,GL518_REG_VIN2_LIMIT,
+                      (data->voltage_max[2] << 8) | data->voltage_min[2]);
+
+    data->last_updated_v00 = jiffies;
+    
+    /* reset audible alarm state */
+    gl518_write_value(client,GL518_REG_CONF,
+           (gl518_read_value(client,GL518_REG_CONF) & 0xfb) | 
+           (data->beep_enable << 2));
+  }
+  up(&data->update_lock);
+}
 
 void gl518_temp(struct i2c_client *client, int operation, int ctl_name,
                 int *nrels_mag, long *results)
@@ -507,15 +638,19 @@ void gl518_vin(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 2;
   else if (operation == SENSORS_PROC_REAL_READ) {
     gl518_update_client(client);
+#ifndef DEBUG_VIN    
+    if ((data->revision == 0x00) && (nr != 3) && readall)
+       /* only update VDD, VIN1, VIN2 voltages */
+       gl518_update_client_rev00(client);
+#else
+    gl518_update_client_rev00(client);
+#endif
     results[0] = nr?IN_FROM_REG(data->voltage_min[nr]):
-                     VDD_FROM_REG(data->voltage_min[nr]);
+                    VDD_FROM_REG(data->voltage_min[nr]);
     results[1] = nr?IN_FROM_REG(data->voltage_max[nr]):
-                     VDD_FROM_REG(data->voltage_max[nr]);
-    if ((data->revision == 0x00) && (nr != 3))
-      results[2] = 0;
-    else
-      results[2] = nr?IN_FROM_REG(data->voltage[nr]):
-                      VDD_FROM_REG(data->voltage[nr]);
+                    VDD_FROM_REG(data->voltage_max[nr]);
+    results[2] = nr?IN_FROM_REG(data->voltage[nr]):
+                    VDD_FROM_REG(data->voltage[nr]);
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     regnr=nr==0?GL518_REG_VDD_LIMIT:nr==1?GL518_REG_VIN1_LIMIT:nr==2?
@@ -677,4 +812,3 @@ int cleanup_module(void)
 }
 
 #endif /* MODULE */
-
