@@ -18,7 +18,9 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.5.6 (2001????)
+  File doc/FAQ: Updates
   Module lm78: Recognize chipid=0x20
+  Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
   Module sensors: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
   Module via686a: Allow force=9191,address (for A7V/K7V boards)
   Program mkpatch.pl: Fix adm9240 typos
