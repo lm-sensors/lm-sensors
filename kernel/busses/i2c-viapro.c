@@ -264,6 +264,8 @@ static s32 vt596_access(struct i2c_adapter *adap, u16 addr,
 		break;
 	case VT596_BLOCK_DATA:
 		data->block[0] = inb_p(SMBHSTDAT0);
+		if (data->block[0] > 32)
+			data->block[0] = 32;
 		i = inb_p(SMBHSTCNT);	/* Reset SMBBLKDAT */
 		for (i = 1; i <= data->block[0]; i++)
 			data->block[i] = inb_p(SMBBLKDAT);
