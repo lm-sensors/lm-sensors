@@ -109,16 +109,17 @@ int piix4_setup(void)
   PIIX4_dev = NULL;
   do
     PIIX4_dev = pci_find_device(PCI_VENDOR_ID_INTEL, 
-                                PCI_DEVICE_ID_INTEL_82371AB_0, PIIX4_dev);
+                                PCI_DEVICE_ID_INTEL_82371AB_3, PIIX4_dev);
   while(PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 3);
   if(PIIX4_dev == NULL) {
 #else /* LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54) */
   for (i = 0; 
        ! (res = pcibios_find_device(PCI_VENDOR_ID_INTEL,
-                                    PCI_DEVICE_ID_INTEL_82371AB_0,
+                                    PCI_DEVICE_ID_INTEL_82371AB_3,
                                     i,&PIIX4_bus, &PIIX4_devfn)) && 
          PCI_FUNC(PIIX4_devfn) != 3; 
        i++);
+     
   if (res) {
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
     printk("piix4.o: Error: Can't detect PIIX4, function 3!\n");
@@ -399,11 +400,11 @@ int piix4_cleanup(void)
       printk("piix4.o: smbus_del_adapter failed, module not removed\n");
       return res;
     } else
-      piix4_initialized=0;
+      piix4_initialized--;
   }
   if (piix4_initialized >= 1) {
     release_region(piix4_smba, 8);
-    piix4_initialized=0;
+    piix4_initialized--;
   }
   return 0;
 }
