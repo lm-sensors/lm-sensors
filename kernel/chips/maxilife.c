@@ -239,7 +239,6 @@ enum sensor_type { fan, temp, vid, pll, lcd, alarm };
    SMBus and not on the ISA bus. */
 struct maxi_data {
 	struct i2c_client client;
-	struct semaphore lock;
 	int sysctl_id;
 	enum maxi_type type;
 
@@ -605,7 +604,6 @@ int maxi_detect(struct i2c_adapter *adapter, int address,
 	new_client->id = maxi_id++;
 
 	data->valid = 0;
-	init_MUTEX(&data->lock);
 	init_MUTEX(&data->update_lock);
 
 	/* Tell i2c-core that a new client has arrived */
