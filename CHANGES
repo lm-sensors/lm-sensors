@@ -20,17 +20,18 @@ ask CVS about it:
 2.5.5 (2000????)
   Chip modules (all): Update mutex definition (works now for new 2.2 kernels)
   File sensors.conf.eg: Add mtp008 entries
-  Library: Add mtp008 support
+  Library: Add ds1621, mtp008 support
   Module adm1021: Add support for adm1021a / adm1023
-  Module i2c-ali1535: Enhance error checking and recovery; add mutex
   Module ddcmon: allow force and force_ddcmon parameters
+  Module ds1621: new
+  Module i2c-ali1535: Enhance error checking and recovery; add mutex
   Module lm87: update voltage calculations
   Module mtp008: new
   Module pcf8574: change update time to 5 seconds
   Module w83781d: fix beep setting via /proc
   Program mkpatch.pl: more fixes
-  Program sensors: Add mtp008 support, add -f (Fahrenheit) option
-  Program sensors-detect: Add mtp008 detection
+  Program sensors: Add ds1621, mtp008 support, add -f (Fahrenheit) option
+  Program sensors-detect: Add ds1621, mtp008 detection
 
 2.5.4 (20001012)
   Module i2c-viapro: Add support for Via 596B (0x3051)

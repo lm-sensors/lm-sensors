@@ -56,6 +56,9 @@ adm9240
 	ds1780		1	6	2	1 dac	yes	no
 	lm81		1	6	2	1 dac	yes	no
 
+ds1621
+	ds1621		1	-	-	-	yes	no
+
 gl518sm
         gl518sm (r00)	1	1-4	2	-	yes	no
         gl518sm (r80)	1	4	2	-	yes	no

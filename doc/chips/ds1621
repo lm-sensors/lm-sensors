@@ -1,0 +1,68 @@
+Kernel driver `ds1621.o'
+=====================
+
+Status: Complete and tested, alarms experimental
+
+Supported chips: 
+  * Dallas Semiconductor DS1621
+    Prefix: `ds1621'
+    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Datasheet: Publicly available at the Dallas Semiconductor website
+               http://www.dalsemi.com
+
+Author: Christian W. Zuckschwerdt <zany@triq.net>
+
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_ds1621: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `ds1621' chip
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+
+
+Description
+-----------
+
+The DS1621 implements one temperature sensor. Limits can be set through the
+Overtemperature register and Hysteresis register. Each value can be 
+set and read to half-degree accuracy.
+An alarm is issued when the temperature gets higher then the Overtemperature
+value; or drops below the Hysteresis value.
+
+It stays on until reset by the kernel module.
+
+All temperatures are in degrees Celcius, and are guaranteed within a 
+range of -55 to +125 degrees.
+
+The DS1621 supplies the temperature data in a format common with chips
+like the LM75, LM77 and DS75, DS1775.
+While the DS1621 has three additional bits of accuracy
+(12 vs. 9 for the LM75), the additional bits are not supported.
+
+
+Chip Features
+-------------
+
+Chip `ds1621'
+          LABEL     LABEL CLASS   COMPUTE CLASS ACCESS MAGNITUDE
+           temp            NONE            NONE      R     1
+      temp_hyst            temp            temp      RW    1
+      temp_over            temp            temp      RW    1
+         alarms            NONE            NONE      R     0
+
+          LABEL                           FEATURE SYMBOL     SYSCTL FILE:OFFSET
+           temp                      SENSORS_DS1621_TEMP            temp:3
+      temp_hyst                 SENSORS_DS1621_TEMP_HYST            temp:2
+      temp_over                 SENSORS_DS1621_TEMP_OVER            temp:1
+         alarms                    SENSORS_DS1621_ALARMS          alarms:1

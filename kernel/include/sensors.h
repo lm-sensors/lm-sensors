@@ -402,6 +402,7 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
 #define I2C_DRIVERID_LM87 1021
 #define I2C_DRIVERID_PCF8574 1022
 #define I2C_DRIVERID_MTP008 1023
+#define I2C_DRIVERID_DS1621 1024
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -814,6 +815,12 @@ struct sensors_chips_data {
 #define MTP008_ALARM_TEMP1	0x0010
 #define MTP008_ALARM_TEMP2	0x0100
 #define MTP008_ALARM_TEMP3	0x0200
+
+#define DS1621_SYSCTL_TEMP 1200	/* Degrees Celcius * 10 */
+#define DS1621_SYSCTL_ALARMS 2001	/* bitvector */
+#define DS1621_ALARM_TEMP_HIGH 0x40
+#define DS1621_ALARM_TEMP_LOW 0x20
+#define DS1621_SYSCTL_ENABLE 2002
 
 #endif				/* def SENSORS_SENSORS_H */
 

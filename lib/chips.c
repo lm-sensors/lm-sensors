@@ -1972,6 +1972,21 @@ static sensors_chip_feature mtp008_features[] =
     { 0 }
   };
 
+static sensors_chip_feature ds1621_features[] =
+  {
+    { SENSORS_DS1621_TEMP, "temp", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_R, DS1621_SYSCTL_TEMP, VALUE(3), 1 },
+    { SENSORS_DS1621_TEMP_HYST, "temp_hyst", SENSORS_DS1621_TEMP,
+                              SENSORS_DS1621_TEMP, SENSORS_MODE_RW, 
+                              DS1621_SYSCTL_TEMP, VALUE(2), 1 },
+    { SENSORS_DS1621_TEMP_OVER, "temp_over", SENSORS_DS1621_TEMP,
+                              SENSORS_DS1621_TEMP, SENSORS_MODE_RW, 
+                              DS1621_SYSCTL_TEMP, VALUE(1), 1 },
+    { SENSORS_DS1621_ALARMS, "alarms", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                           SENSORS_MODE_R, DS1621_SYSCTL_ALARMS, VALUE(1), 0 },
+    { 0 }
+  };
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -2014,5 +2029,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_EEPROM_PREFIX, eeprom_features },
  { SENSORS_LM87_PREFIX, lm87_features },
  { SENSORS_MTP008_PREFIX, mtp008_features },
+ { SENSORS_DS1621_PREFIX, ds1621_features },
  { 0 }
 };

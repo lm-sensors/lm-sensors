@@ -901,4 +901,13 @@
 #define SENSORS_MTP008_ALARMS          81 /* R */
 #define SENSORS_MTP008_BEEP            82 /* RW */
 
+/* DS1621 chips. */
+
+#define SENSORS_DS1621_PREFIX "ds1621"
+
+#define SENSORS_DS1621_TEMP 51 /* R */
+#define SENSORS_DS1621_TEMP_HYST 52 /* RW */
+#define SENSORS_DS1621_TEMP_OVER 53 /* RW */
+#define SENSORS_DS1621_ALARMS 81 /* R */
+
 #endif /* def LIB_SENSORS_CHIPS_H */

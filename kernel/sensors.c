@@ -922,6 +922,9 @@ extern int sensors_adm1021_init(void);
 #ifdef CONFIG_SENSORS_ADM9240
 extern int sensors_adm9024_init(void);
 #endif
+#ifdef CONFIG_SENSORS_DS1621
+extern int sensors_ds1621_init(void);
+#endif
 #ifdef CONFIG_SENSORS_GL518SM
 extern int sensors_gl518sm_init(void);
 #endif
@@ -955,6 +958,9 @@ int __init sensors_init_all(void)
 #endif
 #ifdef CONFIG_SENSORS_ADM9024
 	sensors_adm9024_init();
+#endif
+#ifdef CONFIG_SENSORS_DS1621
+	sensors_ds1621_init();
 #endif
 #ifdef CONFIG_SENSORS_GL518SM
 	sensors_gl518sm_init();

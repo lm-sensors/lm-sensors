@@ -105,6 +105,43 @@ int sensors_get_label_and_valid(sensors_chip_name name, int feature, char **labe
   return err;
 }
 
+void print_ds1621(const sensors_chip_name *name)
+{
+  char *label;
+  double cur,hyst,over;
+  int alarms, valid;
+
+  if (!sensors_get_feature(*name,SENSORS_LM78_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_DS1621_TEMP,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_DS1621_TEMP,&cur) &&
+      !sensors_get_feature(*name,SENSORS_DS1621_TEMP_HYST,&hyst) &&
+      !sensors_get_feature(*name,SENSORS_DS1621_TEMP_OVER,&over))  {
+    if (valid) {
+      print_label(label,10);
+      printf("%6.1f C (high limit: %6.1f C, low limit: %6.1f C)   ",
+             cur,over,hyst);
+      if (alarms & (DS1621_ALARM_TEMP_HIGH | DS1621_ALARM_TEMP_LOW)) {
+        printf("ALARM (");
+        if (alarms & DS1621_ALARM_TEMP_LOW) {
+          printf("LOW");
+        }
+        if (alarms & DS1621_ALARM_TEMP_HIGH)
+          printf("%sHIGH",(alarms & DS1621_ALARM_TEMP_LOW)?",":"");
+        printf(")");
+      }
+      printf("\n");
+    }
+  } else
+    printf("ERROR: Can't get temperature data!\n");
+  free_the_label(&label);
+}
+
 void print_lm75(const sensors_chip_name *name)
 {
   char *label;

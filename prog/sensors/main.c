@@ -260,6 +260,8 @@ void do_a_print(sensors_chip_name name)
     printf(" ERROR: Can't get adapter or algorithm?!?\n");
   if (do_unknown)
     print_unknown_chip(&name);
+  else if (!strcmp(name.prefix,"ds1621"))
+    print_ds1621(&name);
   else if (!strcmp(name.prefix,"lm75"))
     print_lm75(&name);
   else if (!strcmp(name.prefix,"adm1021") || !strcmp(name.prefix,"max1617") ||
