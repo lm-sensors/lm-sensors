@@ -2080,8 +2080,9 @@ void print_w83781d(const sensors_chip_name *name)
   char *label = NULL;
   double cur,min,max,fdiv,sens;
   int alarms,beeps;
-  int is82d, is83s, is697hf, is627thf, valid;
+  int is81d, is82d, is83s, is697hf, is627thf, valid;
 
+  is81d = !strcmp(name->prefix,"w83781d");
   is82d = (!strcmp(name->prefix,"w83782d")) ||
           (!strcmp(name->prefix,"w83627hf")) ||
           (!strcmp(name->prefix,"w83637hf")) ||
@@ -2343,8 +2344,12 @@ void print_w83781d(const sensors_chip_name *name)
         if(!is82d) {
           print_label(label,10);
           print_temp_info( cur, max, min, HYST, 1, 0);
-          printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP3 ?"ALARM":"     ",
-                 beeps&W83781D_ALARM_TEMP3?"(beep)":"");
+          if (!is81d)
+            printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP3?"ALARM":"     ",
+                   beeps&W83781D_ALARM_TEMP3?"(beep)":"");
+          else
+            printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP23?"ALARM":"     ",
+                   beeps&W83781D_ALARM_TEMP23?"(beep)":"");
         } else {
           if(!sensors_get_feature(*name,SENSORS_W83781D_SENS3,&sens)) {
             print_label(label,10);

@@ -599,11 +599,56 @@ fmtTemps_W83781D
 }
 
 static const char *w83781d_names[] = {
-  SENSORS_W83781D_PREFIX, SENSORS_AS99127F_PREFIX, NULL
+  SENSORS_W83781D_PREFIX, NULL
 };
 
-/* TODO: beeps inverted for as99127f */
 static const FeatureDescriptor w83781d_features[] = {
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN0, W83781D_ALARM_IN0,
+    { SENSORS_W83781D_IN0, SENSORS_W83781D_IN0_MIN, SENSORS_W83781D_IN0_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN1, W83781D_ALARM_IN1,
+    { SENSORS_W83781D_IN1, SENSORS_W83781D_IN1_MIN, SENSORS_W83781D_IN1_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN2, W83781D_ALARM_IN2,
+    { SENSORS_W83781D_IN2, SENSORS_W83781D_IN2_MIN, SENSORS_W83781D_IN2_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN3, W83781D_ALARM_IN3,
+    { SENSORS_W83781D_IN3, SENSORS_W83781D_IN3_MIN, SENSORS_W83781D_IN3_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN4, W83781D_ALARM_IN4,
+    { SENSORS_W83781D_IN4, SENSORS_W83781D_IN4_MIN, SENSORS_W83781D_IN4_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN5, W83781D_ALARM_IN5,
+    { SENSORS_W83781D_IN5, SENSORS_W83781D_IN5_MIN, SENSORS_W83781D_IN5_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN6, W83781D_ALARM_IN6,
+    { SENSORS_W83781D_IN6, SENSORS_W83781D_IN6_MIN, SENSORS_W83781D_IN6_MAX, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN1, W83781D_ALARM_FAN1,
+    { SENSORS_W83781D_FAN1, SENSORS_W83781D_FAN1_MIN, SENSORS_W83781D_FAN1_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN2, W83781D_ALARM_FAN2,
+    { SENSORS_W83781D_FAN2, SENSORS_W83781D_FAN2_MIN, SENSORS_W83781D_FAN2_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN3, W83781D_ALARM_FAN3,
+    { SENSORS_W83781D_FAN3, SENSORS_W83781D_FAN3_MIN, SENSORS_W83781D_FAN3_DIV, -1 } },
+  { fmtTemps_W83781D, rrdF0, DataType_temperature, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
+    { SENSORS_W83781D_TEMP1, SENSORS_W83781D_TEMP1_OVER, SENSORS_W83781D_TEMP1_HYST, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, W83781D_ALARM_TEMP23, W83781D_ALARM_TEMP23,
+    { SENSORS_W83781D_TEMP2, SENSORS_W83781D_TEMP2_OVER, SENSORS_W83781D_TEMP2_HYST, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, W83781D_ALARM_TEMP23, W83781D_ALARM_TEMP23,
+    { SENSORS_W83781D_TEMP3, SENSORS_W83781D_TEMP3_OVER, SENSORS_W83781D_TEMP3_HYST, -1 } },
+  { fmtVolt_3, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_W83781D_VID, -1 } },
+  { fmtChassisIntrusionDetection, NULL, DataType_other, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
+    { SENSORS_W83781D_ALARMS, -1 } },
+  { fmtSoundAlarm, NULL, DataType_other, 0, 0,
+    { SENSORS_W83781D_BEEP_ENABLE, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor w83781d_chip = {
+  w83781d_names, w83781d_features, SENSORS_W83781D_ALARMS, SENSORS_W83781D_BEEPS
+};
+
+/** AS99127F **/
+
+static const char *as99127f_names[] = {
+  SENSORS_AS99127F_PREFIX, NULL
+};
+
+static const FeatureDescriptor as99127f_features[] = {
   { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN0, W83781D_ALARM_IN0,
     { SENSORS_W83781D_IN0, SENSORS_W83781D_IN0_MIN, SENSORS_W83781D_IN0_MAX, -1 } },
   { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN1, W83781D_ALARM_IN1,
@@ -639,8 +684,8 @@ static const FeatureDescriptor w83781d_features[] = {
   { NULL }
 };
 
-static const ChipDescriptor w83781d_chip = {
-  w83781d_names, w83781d_features, SENSORS_W83781D_ALARMS, SENSORS_W83781D_BEEPS
+static const ChipDescriptor as99127f_chip = {
+  as99127f_names, as99127f_features, SENSORS_W83781D_ALARMS, SENSORS_W83781D_BEEPS
 };
 
 /** W83782D **/
@@ -975,6 +1020,7 @@ const ChipDescriptor * const knownChips[] = {
   &maxilife_chip,
   &sis5595_chip,
   &via686a_chip,
+  &as99127f_chip,
   &w83781d_chip,
   &w83782d_chip,
   &w83783s_chip,
