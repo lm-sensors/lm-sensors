@@ -310,6 +310,7 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
 #define I2C_DRIVERID_BT869 1013
 #define I2C_DRIVERID_MAXILIFE 1014
 #define I2C_DRIVERID_MATORB 1015
+#define I2C_DRIVERID_GL520 1016
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -438,6 +439,31 @@ struct sensors_chips_data {
 #define GL518_ALARM_TEMP 0x10
 #define GL518_ALARM_FAN1 0x20
 #define GL518_ALARM_FAN2 0x40
+
+#define GL520_SYSCTL_VDD  1000     /* Volts * 100 */
+#define GL520_SYSCTL_VIN1 1001
+#define GL520_SYSCTL_VIN2 1002
+#define GL520_SYSCTL_VIN3 1003
+#define GL520_SYSCTL_VIN4 1004
+#define GL520_SYSCTL_FAN1 1101     /* RPM */
+#define GL520_SYSCTL_FAN2 1102
+#define GL520_SYSCTL_TEMP1 1200     /* Degrees Celcius * 10 */
+#define GL520_SYSCTL_TEMP2 1201     /* Degrees Celcius * 10 */
+#define GL520_SYSCTL_VID 1300    
+#define GL520_SYSCTL_FAN_DIV 2000  /* 1, 2, 4 or 8 */
+#define GL520_SYSCTL_ALARMS 2001   /* bitvector */
+#define GL520_SYSCTL_BEEP 2002     /* bitvector */
+#define GL520_SYSCTL_CONFIG 2003
+
+#define GL520_ALARM_VDD 0x01
+#define GL520_ALARM_VIN1 0x02
+#define GL520_ALARM_VIN2 0x04
+#define GL520_ALARM_VIN3 0x08
+#define GL520_ALARM_TEMP1 0x10
+#define GL520_ALARM_FAN1 0x20
+#define GL520_ALARM_FAN2 0x40
+#define GL520_ALARM_TEMP2 0x80
+#define GL520_ALARM_VIN4 0x80
 
 #define EEPROM_SYSCTL1 1000
 #define EEPROM_SYSCTL2 1001
