@@ -847,7 +847,7 @@ chip "lm80-*"
 # V5: +5V)
 #   R3 = R4 * (Vs - Vin) / (Vin - V5)
 
-# Here are the official LM78 and LM79 data sheet values.
+# Here are the official LM80 data sheet values.
 #       Vs      R1,R3   R2,R4    Vin
 #       +2.5V    23.7    75     +1.9
 #       +3.3V    22.1    30     +1.9
@@ -875,7 +875,7 @@ chip "lm80-*"
     compute in6 (36/16.2)*(@ - in0) + @,  (@ + in0 * 36/16.2) / (1 + 36/16.2)
 
     set in0_min 5 * 0.95
-    set in0_max 5 * 0.95
+    set in0_max 5 * 1.05
 # What is your VTT? It is probably not this value...
     set in1_min 2*0.95
     set in1_max 2*1.05
