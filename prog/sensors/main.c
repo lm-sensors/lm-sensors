@@ -52,7 +52,7 @@ static const char *sprintf_chip_name(sensors_chip_name name);
 #define CHIPS_MAX 20
 sensors_chip_name chips[CHIPS_MAX];
 int chips_count=0;
-int do_sets, do_unknown, fahrenheit, hide_adapter;
+int do_sets, do_unknown, fahrenheit, hide_adapter, hide_unknown;
 
 void print_short_help(void)
 {
@@ -67,6 +67,7 @@ void print_long_help(void)
   printf("  -s, --set             Execute `set' statements too (root only)\n");
   printf("  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n");
   printf("  -A, --no-adapter      Do not show adapter and algorithm for each chip\n");
+  printf("  -U, --no-unknown      Do not show unknown chips\n");
   printf("  -u, --unknown         Treat chips as unknown ones (testing only)\n");
   printf("  -v, --version         Display the program version\n");
   printf("\n");
@@ -158,6 +159,7 @@ int main (int argc, char *argv[])
     { "version", no_argument, NULL, 'v'},
     { "fahrenheit", no_argument, NULL, 'f' },
     { "no-adapter", no_argument, NULL, 'A' },
+    { "no-unknown", no_argument, NULL, 'U' },
     { "config-file", required_argument, NULL, 'c' },
     { "unknown", no_argument, NULL, 'u' },
     { 0,0,0,0 }
@@ -167,7 +169,7 @@ int main (int argc, char *argv[])
   do_sets = 0;
   hide_adapter = 0;
   while (1) {
-    c = getopt_long(argc,argv,"hsvfAc:u",long_opts,NULL);
+    c = getopt_long(argc,argv,"hsvfAUc:u",long_opts,NULL);
     if (c == EOF)
       break;
     switch(c) {
@@ -192,6 +194,9 @@ int main (int argc, char *argv[])
       break;
     case 'A':
       hide_adapter = 1;
+      break;
+    case 'U':
+      hide_unknown = 1;
       break;
     case 'u':
       do_unknown = 1;
@@ -400,6 +405,14 @@ void do_a_print(sensors_chip_name name)
 		   !strcmp(name.prefix, "w83697hf"))
 			return;
 
+  /* do we know how to display it? */
+  for(m = matches; m->prefix != NULL; m++) {
+    if(!strcmp(name.prefix, m->prefix)) break;
+  }
+
+  if(m->prefix==NULL && hide_unknown)
+    return;
+
   printf("%s\n",sprintf_chip_name(name));
   adap = sensors_get_adapter_name(name.bus);
   if (adap && !hide_adapter)
@@ -412,14 +425,10 @@ void do_a_print(sensors_chip_name name)
   if (do_unknown)
     print_unknown_chip(&name);
   else {
-    for(m = matches; m->prefix != NULL; m++) {
-	if(!strcmp(name.prefix, m->prefix)) {
-	    m->fn(&name);
-	    break;
-	}
-    }
     if(m->prefix == NULL)
 	print_unknown_chip(&name);
+    else
+	m->fn(&name);
   }
   printf("\n");
 }
