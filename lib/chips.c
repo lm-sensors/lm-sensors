@@ -879,7 +879,7 @@ static sensors_chip_feature w83782d_features[] =
     { SENSORS_W83782D_FAN2_DIV, "fan2_div", SENSORS_W83782D_FAN2, 
                          SENSORS_NO_MAPPING, SENSORS_MODE_RW, 
                          W83781D_SYSCTL_FAN_DIV, VALUE(2), 0 },
-    { SENSORS_W83781D_FAN3_DIV, "fan3_div", SENSORS_W83781D_FAN3, 
+    { SENSORS_W83782D_FAN3_DIV, "fan3_div", SENSORS_W83781D_FAN3, 
                          SENSORS_NO_MAPPING, SENSORS_MODE_R, 
                          W83781D_SYSCTL_FAN_DIV, VALUE(3), 0 },
     { SENSORS_W83782D_ALARMS, "alarms", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING, 
