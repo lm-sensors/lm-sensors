@@ -12,6 +12,9 @@ KERNEL MODULES
 * ALL: cleanup_module is void; check also that cleaning up is done
   properly, now we know that the module will be unloaded whatever we
   do.
+* gl518sm: using iterate==2 causes a tread to be started. this thread remains
+  even after setting iterate==1 and/or removing the gl518sm module
+  <koenig@uranus.tat.physik.uni-tuebingen.de>
 * LM78 detection: Tom Webster has proven that the reset bit in the 
   id register can be one (strange!)
 * maxilife.c: Introduce new insmod variables
