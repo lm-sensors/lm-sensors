@@ -140,6 +140,18 @@ The W8378* only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
 
 
+AS99127F PROBLEMS
+-----------------
+The as99127f support was developed without the benefit of a datasheet.
+In most cases it is treated as a w83782d.
+Known problems:
+	- Fans read about 30% low.
+	- -12V readings a little high (-9.5V to -10.5V)
+	- Problems with diode/thermistor settings (supported?)
+
+These will not be fixed unless we get a datasheet.
+
+
 Chip Features
 -------------
 
