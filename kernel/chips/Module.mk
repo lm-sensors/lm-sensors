@@ -26,6 +26,7 @@ KERNELCHIPSDIR := $(MODULE_DIR)
 # These targets are NOT included in 'mkpatch' ...
 KERNELCHIPSTARGETS :=  \
                       $(MODULE_DIR)/adm1024.o \
+                      $(MODULE_DIR)/fscpos.o \
                       $(MODULE_DIR)/it87.o \
                       $(MODULE_DIR)/maxilife.o \
                       $(MODULE_DIR)/mtp008.o

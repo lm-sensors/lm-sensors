@@ -62,3 +62,5 @@ problems.
   Author of the DEC Tsunami bus driver.
 * Christophe Gauthron <chrisg@0-in.com>
   Author of the IT87 driver.
+* Hermann Jung <hej@odn.de>
+  Author of the fscpos driver.

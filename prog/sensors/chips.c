@@ -2647,6 +2647,116 @@ void print_it87(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_fscpos(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double voltage, temp,state,fan,min_rpm;
+ int valid;
+
+  printf("Chip: fujitsu siemens poseidon\n");
+  if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_TEMP1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP1,&temp) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP1_STATE,&state)) { 
+    if (valid) {
+      print_label(label,10);
+	if((int) state & 0x01)
+	      printf("\t%+6.2f C \n",temp);
+	else
+		printf("\tfailed\n");
+    }
+  }
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_TEMP2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP2,&temp) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP2_STATE,&state)) { 
+    if (valid) {
+      print_label(label,10);
+	if((int) state & 0x01)
+	      printf("\t%+6.2f C \n",temp);
+	else
+		printf("\tfailed\n");
+    }
+  }
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_TEMP3,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP3,&temp) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP3_STATE,&state)) { 
+    if (valid) {
+      print_label(label,10);
+	if((int) state & 0x01)
+	      printf("\t%+6.2f C \n",temp);
+	else
+		printf("\tfailed\n");
+    }
+  }
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_FAN1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_FAN1,&fan) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_FAN1_MIN,&min_rpm) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_FAN1_STATE,&state)) { 
+    if (valid) {
+      print_label(label,10);
+	if((int) state & 0x02)
+		printf("\tfaulty\n");
+	else if (fan < min_rpm)
+		printf("\t%6.0f RPM (not present or faulty)\n",fan);
+	else
+	      printf("\t%+6.0f RPM \n",fan);
+    }
+  }
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_FAN2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_FAN2,&fan) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_FAN2_MIN,&min_rpm) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_FAN2_STATE,&state)) { 
+    if (valid) {
+      print_label(label,10);
+	if((int) state & 0x02)
+		printf("\tfaulty\n");
+	else if (fan < min_rpm)
+		printf("\t%6.0f RPM (not present or faulty)\n",fan);
+	else
+	      printf("\t%+6.0f RPM \n",fan);
+    }
+  }
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_FAN3,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_FAN3,&fan) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_FAN3_STATE,&state)) { 
+    if (valid) {
+      print_label(label,10);
+	if((int) state & 0x02)
+		printf("\tfaulty\n");
+	else
+	      printf("\t%+6.0f RPM \n",fan);
+    }
+  }
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_VOLTAGE1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_VOLTAGE1,&voltage)) {
+    if (valid) {
+      print_label(label,10);
+      printf("\t%+6.2f V\n",voltage);
+    }
+  }
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_VOLTAGE2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_VOLTAGE2,&voltage)) {
+    if (valid) {
+      print_label(label,10);
+      printf("\t%+6.2f V\n",voltage);
+    }
+  }
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_VOLTAGE3,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_FSCPOS_VOLTAGE3,&voltage)) {
+    if (valid) {
+      print_label(label,10);
+      printf("\t%+6.2f V\n",voltage);
+    }
+  }
+  free_the_label(&label);
+}
 
 void print_unknown_chip(const sensors_chip_name *name)
 {

@@ -1117,3 +1117,24 @@ chip "it87-*"
 #    set fan1_min 3000
 #    ignore fan2
 #    ignore fan3
+
+#
+#    values for the fujitsu siemens poseidon chip
+#
+# Temperature
+
+    label temp1       "Temp1/CPU"
+    label temp2       "Temp2/MB"
+    label temp3       "Temp2/AUX"
+
+# Fans
+
+    label  fan1       "Fan1"
+    ignore  fan2     
+    ignore  fan3    
+
+# Voltage
+ 
+    label volt12      "12 V"
+    label volt5       " 5 V"
+    label voltbatt    " 3.3 V"
