@@ -2566,16 +2566,23 @@ sub ds1621_detect
 # How to detect this beast? 
 sub lm80_detect
 {
-  my $i;
+  my ($i,$reg);
   my ($file,$addr) = @_;
   return if (i2c_smbus_read_byte_data($file,0x02) & 0xc0) != 0;
   for ($i = 0x2a; $i <= 0x3d; $i++) {
-    my $reg = i2c_smbus_read_byte_data($file,$i);
+    $reg = i2c_smbus_read_byte_data($file,$i);
     return if i2c_smbus_read_byte_data($file,$i+0x40) != $reg;
     return if i2c_smbus_read_byte_data($file,$i+0x80) != $reg;
     return if i2c_smbus_read_byte_data($file,$i+0xc0) != $reg;
   }
-  return (3);
+  
+  # If all limits and readings have the same value, it's obviously
+  # a misdetection
+  for ($i = 0x2a; $i < 0x3d; $i++) {
+    return 3 if i2c_smbus_read_byte_data($file,$i) != $reg;
+  }
+  
+  return;
 }
 
 # $_[0]: Chip to detect
@@ -3841,7 +3848,7 @@ sub system_safeness_by_dmi
   unless ($opened)
   {
     print " Could not find dmidecode, which should have been installed with lm_sensors.\n",
-          " Runing dmidecode would help us determining your system vendor, which allows\n",
+          " Running dmidecode would help us determining your system vendor, which allows\n",
           " safer operations. Please provide one of the following:\n  ";
     print join ("\n  ", @dmidecode);
     print "\n You can still go on, but you are encouraged to fix the problem first.\n\n";
@@ -4064,7 +4071,7 @@ sub main
         "lm_sensors installed before running this program.\n";
   print "Also, you need to be `root', or at least have access to the $dev_i2c*\n",
         "files, for most things.\n";
-  print "If you have patched your kernel and have some drivers built-in, you can\n",
+  print "If you have patched your kernel and have some drivers built in, you can\n",
         "safely answer NO if asked to load some modules. In this case, things may\n",
         "seem a bit confusing, but they will still work.\n\n";
 
