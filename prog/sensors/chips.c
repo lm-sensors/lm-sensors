@@ -28,6 +28,10 @@
 static char *spacestr(int n);
 static void print_label(const char *label, int space);
 static void free_the_label(char **label);
+static void print_temp_info( float, float, float );
+static inline float deg_ctof( float );
+
+extern int fahrenheit;
 
 char *spacestr(int n)
 {
@@ -37,6 +41,38 @@ char *spacestr(int n)
     buf[i]=' ';
   buf[n] = '\0';
   return buf;
+}
+
+inline float deg_ctof( float cel )
+{
+   return ( cel * ( 9.0F / 5.0F ) + 32.0F );
+}
+
+void print_temp_info( float cur, float over, float hyst )
+{
+   char degv[5];
+
+   float n_cur, 
+         n_over, 
+	 n_hyst;
+
+   if ( fahrenheit )
+   {
+      sprintf( degv, "%cF", 176 );
+      n_cur  = deg_ctof( cur  );
+      n_over = deg_ctof( over );
+      n_hyst = deg_ctof( hyst );
+   }
+   else
+   {
+      sprintf( degv, "%cC", 176 );
+      n_cur  = cur;
+      n_over = over;
+      n_hyst = hyst;
+   }
+
+   printf( "%+3.0f%s     (limit = %+3.0f%s,  hysteresis = %+3.0f%s)",
+           n_cur, degv, n_over, degv, n_hyst, degv );
 }
 
 void print_label(const char *label, int space)
@@ -81,8 +117,8 @@ void print_lm75(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM75_TEMP_OVER,&over))  {
     if (valid) {
       print_label(label,10);
-      printf("%6.1f C (limit: %6.1f C, hysteresis: %6.1f C)\n",
-             cur,over,hyst);
+      print_temp_info( cur, over, hyst );
+      printf( "\n" );
     }
   } else
     printf("ERROR: Can't get temperature data!\n");
@@ -108,8 +144,7 @@ void print_adm1021(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1021_TEMP_OVER,&over))  {
     if (valid) {
       print_label(label,10);
-      printf("%4.0f C (limit: %4.0f C, hysteresis: %4.0f C)    ",
-             cur,over,hyst);
+      print_temp_info( cur, over, hyst );
       if (alarms & (ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW)) {
         printf("ALARM (");
         i = 0;
@@ -134,8 +169,7 @@ void print_adm1021(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1021_REMOTE_TEMP_OVER,&over))  {
     if (valid) {
       print_label(label,10);
-      printf("%4.0f C (limit: %4.0f C, hysteresis: %4.0f C)    ",
-             cur,over,hyst);
+      print_temp_info( cur, over, hyst );
       if (alarms & (ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW |
                     ADM1021_ALARM_RTEMP_NA)) {
         printf("ALARM (");
@@ -191,7 +225,7 @@ void print_adm9240(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM9240_IN0_MAX,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+      printf( "%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&ADM9240_ALARM_IN0?"ALARM":"");
     }
   } else
@@ -289,8 +323,8 @@ void print_adm9240(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM9240_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.0f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
-             cur,max,min, alarms&ADM9240_ALARM_TEMP?"ALARM":"");
+      print_temp_info( cur, min, max );
+      printf( " %s\n", alarms & ADM9240_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get TEMP data!\n");
@@ -408,8 +442,8 @@ void print_sis5595(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_SIS5595_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.0f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
-             cur,max,min, alarms&SIS5595_ALARM_TEMP?"ALARM":"");
+      print_temp_info( cur, min, max );
+      printf( " %s\n", alarms & SIS5595_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get TEMP data!\n");
@@ -530,8 +564,8 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.1f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
-             cur,max,min, alarms&VIA686A_ALARM_TEMP?"ALARM":"");
+      print_temp_info( cur, min, max );
+      printf(" %s\n", alarms & VIA686A_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get TEMP data!\n");
@@ -542,8 +576,8 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP2_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.1f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
-             cur,max,min, alarms&VIA686A_ALARM_TEMP2?"ALARM":"");
+      print_temp_info( cur, min, max );
+      printf(" %s\n", alarms & VIA686A_ALARM_TEMP2 ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get TEMP2 data!\n");
@@ -554,8 +588,8 @@ void print_via686a(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_VIA686A_TEMP3_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.1f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
-             cur,max,min, alarms&VIA686A_ALARM_TEMP3?"ALARM":"");
+      print_temp_info( cur, min, max );
+      printf(" %s\n", alarms & VIA686A_ALARM_TEMP3 ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get TEMP3 data!\n");
@@ -705,8 +739,8 @@ void print_lm78(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM78_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.0f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
-             cur,max,min, alarms&LM78_ALARM_TEMP?"ALARM":"");
+      print_temp_info( cur, max, min );
+      printf( " %s\n", alarms & LM78_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get TEMP data!\n");
@@ -898,8 +932,8 @@ void print_gl518(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_GL518_TEMP_HYST,&min)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.0f C     (limit = %+3.0f C,  hysteresis = %+3.0f C) %s  %s\n",
-             cur,max,min, alarms&GL518_ALARM_TEMP?"ALARM":"     ",
+      print_temp_info( cur, max, min );
+      printf("%s  %s\n", alarms&GL518_ALARM_TEMP?"ALARM":"     ",
              beeps&GL518_ALARM_TEMP?"(beep)":"");
     }
   } else
@@ -1012,8 +1046,8 @@ void print_adm1025(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1025_TEMP1_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.0f C   (limit = %+3.0f C, hysteresis = %+3.0f C) %s\n",
-           cur,max,min, alarms&ADM1025_ALARM_TEMP?"ALARM":"");
+      print_temp_info( cur, max, min );
+      printf(" %s\n", alarms&ADM1025_ALARM_TEMP?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get TEMP data!\n");
@@ -1152,10 +1186,21 @@ void print_lm80(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM80_TEMP_OS_MAX,&max2)) {
     if (valid) {
       print_label(label,10);
-      printf("%+3.2f C (hot:limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
+
+      if ( fahrenheit )
+      {
+      printf("%+3.2f°C (hot:limit = %+3.0f°F,  hysteresis = %+3.0f°F) %s\n",
+           deg_ctof(cur),deg_ctof(max),deg_ctof(min), alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
+    printf("         (os: limit = %+3.0f°F,  hysteresis = %+3.0f°F) %s\n",
+           deg_ctof(max2),deg_ctof(min2), alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
+      }
+      else
+      {
+      printf("%+3.2f °C (hot:limit = %+3.0f°C,  hysteresis = %+3.0f°C) %s\n",
            cur,max,min, alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
-    printf("         (os: limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
+    printf("         (os: limit = %+3.0f°C,  hysteresis = %+3.0f°C) %s\n",
            max2,min2, alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
+      }
     }
   } else
     printf("ERROR: Can't get TEMP data!\n");
@@ -1317,8 +1362,8 @@ void print_mtp008(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_MTP008_TEMP1_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+6.0f C  (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
-             cur,max,min, alarms&MTP008_ALARM_TEMP1?"ALARM":"");
+      print_temp_info( cur, max, min );
+      printf(" %s\n", alarms&MTP008_ALARM_TEMP1?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get TEMP1 data!\n");
@@ -1330,8 +1375,8 @@ void print_mtp008(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_MTP008_TEMP2_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+6.0f C  (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
-             cur,max,min, alarms&MTP008_ALARM_TEMP2?"ALARM":"");
+      print_temp_info( cur, max, min );
+      printf(" %s\n", alarms&MTP008_ALARM_TEMP2?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get TEMP2 data!\n");
@@ -1343,8 +1388,8 @@ void print_mtp008(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_MTP008_TEMP3_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+6.0f C  (limit = %+3.0f C,  hysteresis = %+3.0f C) %s\n",
-             cur,max,min, alarms&MTP008_ALARM_TEMP3?"ALARM":"");
+      print_temp_info( cur, max, min );
+      printf(" %s\n", alarms&MTP008_ALARM_TEMP3?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get TEMP3 data!\n");
@@ -1507,7 +1552,7 @@ void print_w83781d(const sensors_chip_name *name)
              beeps&W83782D_ALARM_IN8?"(beep)":"");
       }
     } else
-      printf("ERROR: Can't get IN6 data!\n");
+      printf("ERROR: Can't get IN8 data!\n");
     free_the_label(&label);
   }
 
@@ -1558,15 +1603,14 @@ void print_w83781d(const sensors_chip_name *name)
     if (valid) {
       if((!is82d) && (!is83s)) {
         print_label(label,10);
-        printf("%+3.0f C   (limit = %+3.0f C, hysteresis = %+3.0f C) %s  %s\n",
-               cur,max,min, alarms&W83781D_ALARM_TEMP1 ?"ALARM":"     ",
+        print_temp_info( cur, max, min );
+        printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP1 ?"ALARM":"     ",
                beeps&W83781D_ALARM_TEMP1?"(beep)":"");
       } else {
         if(!sensors_get_feature(*name,SENSORS_W83781D_SENS1,&sens)) {
           print_label(label,10);
-          printf(
-  "%+3.0f C  (limit = %+3.0f C, hysteresis = %+3.0f C, sensor = %s) %s  %s\n",
-                 cur,max,min,
+          print_temp_info( cur, max, min );
+          printf( " sensor = %s   %s   %s\n",
                  (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                  "3904 transistor":"thermistor",
                  alarms&W83781D_ALARM_TEMP1?"ALARM":"     ",
@@ -1587,15 +1631,14 @@ void print_w83781d(const sensors_chip_name *name)
     if (valid) {
       if((!is82d) && (!is83s)) {
         print_label(label,10);
-        printf("%+3.1f C   (limit = %+3.1f C, hysteresis = %+3.1f C) %s  %s\n",
-               cur,max,min, alarms&W83781D_ALARM_TEMP23 ?"ALARM":"     ",
-               beeps&W83781D_ALARM_TEMP23?"(beep)":"");
+        print_temp_info( cur, max, min );
+        printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP2 ?"ALARM":"     ",
+               beeps&W83781D_ALARM_TEMP2?"(beep)":"");
       } else {
         if(!sensors_get_feature(*name,SENSORS_W83781D_SENS2,&sens)) {
           print_label(label,10);
-          printf(
-  "%+3.1f C  (limit = %+3.1f C, hysteresis = %+3.1f C, sensor = %s) %s  %s\n",
-                 cur,max,min,
+          print_temp_info( cur, max, min );
+          printf( " sensor = %s   %s   %s\n",
                  (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                  "3904 transistor":"thermistor",
                  alarms&W83781D_ALARM_TEMP2?"ALARM":"     ",
@@ -1617,15 +1660,14 @@ void print_w83781d(const sensors_chip_name *name)
       if (valid) {
         if(!is82d) {
           print_label(label,10);
-          printf("%+3.1f C   (limit = %+3.1f C, hysteresis = %+3.1f C) %s  %s\n",
-                 cur,max,min, alarms&W83781D_ALARM_TEMP23 ?"ALARM":"     ",
-                 beeps&W83781D_ALARM_TEMP23?"(beep)":"");
+          print_temp_info( cur, max, min );
+          printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP2 ?"ALARM":"     ",
+                 beeps&W83781D_ALARM_TEMP3?"(beep)":"");
         } else {
           if(!sensors_get_feature(*name,SENSORS_W83781D_SENS3,&sens)) {
             print_label(label,10);
-            printf(
-  "%+3.1f C  (limit = %+3.1f C, hysteresis = %+3.1f C, sensor = %s) %s  %s\n",
-                   cur,max,min,
+            print_temp_info( cur, max, min );
+            printf( " sensor = %s   %s   %s\n",
                    (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                    "3904 transistor":"thermistor",
                    alarms&W83781D_ALARM_TEMP3?"ALARM":"     ",
@@ -1691,8 +1733,8 @@ void print_maxilife(const sensors_chip_name *name)
        !sensors_get_feature(*name, SENSORS_MAXI_CG_TEMP1_HYST, &min)) {
       if (valid && (cur || max || min)) {
          print_label(label, 12);
-         printf("%+3.1f C     (limit = %+3.1f C, hysteresis = %+3.1f C)\n",
-                cur, max, min);
+	 print_temp_info( cur, max, min );
+         printf("\n");
       }
    } else
       printf("ERROR: Can't get TEMP1 data!\n");
@@ -1704,8 +1746,8 @@ void print_maxilife(const sensors_chip_name *name)
        !sensors_get_feature(*name, SENSORS_MAXI_CG_TEMP2_HYST, &min)) {
       if (valid && (cur || max || min)) {
          print_label(label, 12);
-         printf("%+3.1f C     (limit = %+3.1f C, hysteresis = %+3.1f C) %s\n",
-                cur, max, min, alarms&MAXI_ALARM_TEMP2 ? "ALARM" : "");
+	 print_temp_info( cur, max, min );
+         printf(" %s\n", alarms&MAXI_ALARM_TEMP2 ? "ALARM" : "");
       }
    } else
       printf("ERROR: Can't get TEMP2 data!\n");
@@ -1717,8 +1759,8 @@ void print_maxilife(const sensors_chip_name *name)
        !sensors_get_feature(*name, SENSORS_MAXI_CG_TEMP3_HYST, &min)) {
       if (valid && (cur || max || min)) {
          print_label(label, 12);
-         printf("%+3.1f C     (limit = %+3.1f C, hysteresis = %+3.1f C)\n",
-                cur, max, min);
+	 print_temp_info( cur, max, min );
+         printf("\n");
       }
    } else
       printf("ERROR: Can't get TEMP3 data!\n");
@@ -1730,8 +1772,8 @@ void print_maxilife(const sensors_chip_name *name)
        !sensors_get_feature(*name, SENSORS_MAXI_CG_TEMP4_HYST, &min)) {
       if (valid && (cur || max || min)) {
          print_label(label, 12);
-         printf("%+3.1f C     (limit = %+3.1f C, hysteresis = %+3.1f C) %s\n",
-                cur, max, min, alarms&MAXI_ALARM_TEMP4 ? "ALARM" : "");
+	 print_temp_info( cur, max, min );
+         printf(" %s\n", alarms&MAXI_ALARM_TEMP4 ? "ALARM" : "");
       }
    } else
       printf("ERROR: Can't get TEMP4 data!\n");
@@ -1743,8 +1785,8 @@ void print_maxilife(const sensors_chip_name *name)
        !sensors_get_feature(*name, SENSORS_MAXI_CG_TEMP5_HYST, &min)) {
       if (valid && (cur || max || min)) {
          print_label(label, 12);
-         printf("%+3.1f C     (limit = %+3.1f C, hysteresis = %+3.1f C) %s\n",
-                cur, max, min, alarms&MAXI_ALARM_TEMP5 ? "ALARM" : "");
+	 print_temp_info( cur, max, min );
+         printf(" %s\n", alarms&MAXI_ALARM_TEMP5 ? "ALARM" : "");
       }
    } else
       printf("ERROR: Can't get TEMP5 data!\n");
