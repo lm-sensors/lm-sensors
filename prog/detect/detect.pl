@@ -795,10 +795,10 @@ sub add_isa_to_chips_detected
         not exists $new_misdetected_ref->[$j]->{isa_addr} and
         defined $alias_detect and
         $new_misdetected_ref->[$j]->{chip_type} eq $datahash->{chip_type}) {
-      my $file = open FILE,"/dev/i2c-$new_misdetected_ref->[$j]->{devnr}" or 
-                 print("Can't open ",
-                       "/dev/i2c-$new_misdetected_ref->[$j]->{devnr}?!?\n"),
-                 next;
+      open FILE,"/dev/i2c-$new_misdetected_ref->[$j]->{devnr}" or 
+           print("Can't open ",
+                 "/dev/i2c-$new_misdetected_ref->[$j]->{devnr}?!?\n"),
+           next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_misdetected_ref->[$j]->{address})) {
         $new_misdetected_ref->[$j] = { %$new_misdetected_ref->[$j],
@@ -813,16 +813,17 @@ sub add_isa_to_chips_detected
     if (exists $new_detected_ref->[$j]->{address} and
         not exists $new_detected_ref->[$j]->{isa_addr} and
         $new_detected_ref->[$j]->{chip_type} eq $datahash->{chip_type}) {
-      my $file = open FILE,"/dev/i2c-$new_detected_ref->[$j]->{devnr}" or 
-                 print("Can't open ",
-                       "/dev/i2c-$new_detected_ref->[$j]->{devnr}?!?\n"),
-                 next;
+      open FILE,"/dev/i2c-$new_detected_ref->[$j]->{devnr}" or 
+           print("Can't open ",
+                 "/dev/i2c-$new_detected_ref->[$j]->{devnr}?!?\n"),
+           next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_detected_ref->[$j]->{address})) {
         $new_detected_ref->[$j]->{isa_addr} = $datahash->{isa_addr};
         ($datahash) = splice (@$new_detected_ref, $j, 1);
         last;
       }
+      close FILE;
     }
   }
         
@@ -1013,7 +1014,7 @@ sub lm78_alias_detect
   my $readproc = sub { isa_read_byte $isa_addr + 5, $isa_addr + 6, @_ };
   return 0 unless &$readproc(0x48) == $i2c_addr;
   for ($i = 0x2b; $i <= 0x3d; $i ++) {
-    return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($i);
+    return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($file,$i);
   }
   return 1;
 }
@@ -1115,7 +1116,7 @@ sub w83781d_alias_detect
   my $readproc = sub { isa_read_byte $isa_addr + 5, $isa_addr + 6, @_ };
   return 0 unless &$readproc(0x48) == $i2c_addr;
   for ($i = 0x2b; $i <= 0x3d; $i ++) {
-    return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($i);
+    return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($file,$i);
   }
   return 1;
 }
