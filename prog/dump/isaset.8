@@ -1,4 +1,4 @@
-.TH ISASET 8 "April 2004"
+.TH ISASET 8 "July 2004"
 .SH "NAME"
 i2cset \- set ISA registers
 
@@ -8,18 +8,18 @@ i2cset \- set ISA registers
 .I datareg
 .I address
 .I value
-(for I\u2\dC-like access)
+#for I2C-like access
 .br
 .B isaset
 .BI "-f " address
 .I value
-(for flat address space)
+#for flat address space
 
 .SH DESCRIPTION
 isaset is a small helper program to set registers visible through the ISA
 bus.
 
-.SH OPTIONS (I\u2\dC-like access mode)
+.SH OPTIONS (I2C-like access mode)
 Exactly four options must be provided to isaset. \fIaddrreg\fR contains the
 ISA address of the address register for the chip to probe; \fIdatareg\fR
 contains the address of the data register. Both addresses are integers between

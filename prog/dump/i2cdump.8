@@ -1,6 +1,6 @@
-.TH I2CDUMP 8 "March 2004"
+.TH I2CDUMP 8 "July 2004"
 .SH NAME
-i2cdump \- examine I\u2\dC registers
+i2cdump \- examine I2C registers
 
 .SH SYNOPSIS
 .B i2cdump
@@ -11,16 +11,16 @@ i2cdump \- examine I\u2\dC registers
 
 .SH DESCRIPTION
 i2cdump is a small helper program to examine registers
-visible through the I\u2\dC bus.
+visible through the I2C bus.
 
 .SH OPTIONS
 At least two options must be provided to i2cdump. \fIi2cbus\fR indicates the
-number of the I\u2\dC bus to be scanned. This number should correspond to one
+number of the I2C bus to be scanned. This number should correspond to one
 of the busses listed by \fIi2cdetect -l\fR. \fIaddress\fR indicates the
 address to be scanned on that bus, and is an integer between 0x00 and 0x7F. The
 \fImode\fR parameter, if specified, is one of the letters \fBb\fP, \fBw\fP,
 \fBs\fP, or \fBi\fP, corresponding to a read size of a single byte, a 16-bit
-word, an SMBus block, an I\u2\dC block, respectively. The \fBc\fP mode is a
+word, an SMBus block, an I2C block, respectively. The \fBc\fP mode is a
 little different, it reads all bytes consecutively, and is useful for chips that
 have an address auto-increment feature. A \fBp\fP can also be appended to the
 \fImode\fR parameter to enable PEC. If the \fImode\fR parameter is omitted,

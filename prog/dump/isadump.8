@@ -1,4 +1,4 @@
-.TH ISADUMP 8 "April 2004"
+.TH ISADUMP 8 "July 2004"
 .SH NAME
 isadump \- examine ISA registers
 
@@ -7,20 +7,20 @@ isadump \- examine ISA registers
 .I addrreg
 .I datareg
 .RI [ "bank " [ bankreg ]]
-(for I\u2\dC-like access)
+#for I2C-like access
 .br
 .B isadump
 .BI "-f " address
 .RI [ "range " [ "bank " [ bankreg ]]]
-(for flat address space)
+#for flat address space
 
 .SH DESCRIPTION
 isadump is a small helper program to examine registers visible through the ISA
 bus. It is intended to probe any chip that lives on the ISA bus working with an
-address register and a data register (I\u2\dC-like access) or a flat range (of up
+address register and a data register (I2C-like access) or a flat range (of up
 to 256 bytes).
 
-.SH OPTIONS (I\u2\dC-like access mode)
+.SH OPTIONS (I2C-like access mode)
 At least two options must be provided to isadump. \fIaddrreg\fR contains the
 ISA address of the address register for the chip to probe; \fIdatareg\fR
 contains the address of the data register. Both addresses are integers between
