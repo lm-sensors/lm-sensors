@@ -373,11 +373,11 @@ sub gen_drivers_Makefile
       $_ = <INPUT> if m@^$@;
       redo MAIN;
     } 
-    if (m@^subdir.*CONFIG_I2C@) {
+    if (m@^subdir.*CONFIG_SENSORS@) {
       $_ = <INPUT>;
       redo MAIN;
     }
-    if (m@^include \$\(TOPDIR\)/Rules.make$@) {
+    if (!$pr2 and (m@^include \$\(TOPDIR\)/Rules.make$@ or m@^subdir-\$\(CONFIG_ACPI@)) {
       $pr2 = 1;
       if ($new_style) {
       print OUTPUT <<'EOF';
