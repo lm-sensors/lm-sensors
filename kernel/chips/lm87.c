@@ -516,7 +516,7 @@ void LM87_init_client(struct i2c_client *client)
 	 * 	bit 0 - Configures Fan 1/AIN 1 input (1 = AIN)
 	 * 	bit 2 - Configures 2.5V/D2 input     (1 = 2nd Therm.) 
 	 */
-	LM87_write_value(client, LM87_REG_CHANNEL_MODE, 0x03);
+	LM87_write_value(client, LM87_REG_CHANNEL_MODE, 0x05);
 
 
 	LM87_write_value(client, LM87_REG_IN_MIN(1),
