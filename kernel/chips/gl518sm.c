@@ -268,7 +268,7 @@ static int gl518_detect(struct i2c_adapter *adapter, int address, int kind)
      at this moment; sensors_detect really won't call us. */
 #ifdef DEBUG
   if (i2c_is_isa_adapter(adapter)) {
-    printk("gl518sm.o: gl518sm_detect called for an ISA bus adapter?!?\n");
+    printk("gl518sm.o: gl518_detect called for an ISA bus adapter?!?\n");
     return 0;
   }
 #endif
@@ -279,7 +279,7 @@ static int gl518_detect(struct i2c_adapter *adapter, int address, int kind)
 
   /* OK. For now, we presume we have a valid client. We now create the
      client structure, even though we cannot fill it completely yet.
-     But it allows us to access gl518sm_{read,write}_value. */
+     But it allows us to access gl518_{read,write}_value. */
 
   if (! (new_client = kmalloc(sizeof(struct i2c_client) +
                                sizeof(struct gl518_data),
@@ -301,7 +301,8 @@ static int gl518_detect(struct i2c_adapter *adapter, int address, int kind)
         (gl518_read_value(new_client,GL518_REG_CONF) & 0x80))
       goto ERROR1;
   }
-  
+
+  /* Determine the chip type. */
   if (kind <= 0) {
     i = gl518_read_value(new_client,GL518_REG_REVISION);
     if (i == 0x00)
