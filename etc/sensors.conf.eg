@@ -201,9 +201,6 @@ chip "gl518sm-r00-*" "gl518sm-r80-*"
 # The below declaration is from the data sheet. We have no idea how these
 # chips are typically used. Please contact us if you own one.
   label vdd "+5V"
-  compute vdd @ * 2.5, @ / 2.5
-
-
 
 chip "lm80-*"
     

@@ -15,6 +15,7 @@ ask CVS about it:
 
 2.1.2 (199801??)
   Modules lm80.o, w83781d.o: fan-related Segmentation fault corrected
+  Module gl518sm.o: yet more bug fixes. It should at long last be usable now
 
 2.1.1 (19990107)
   Module i2c-proc.o: Hack to make /proc/bus/ possible for kernels 2.0.35
