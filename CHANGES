@@ -29,6 +29,7 @@ ask CVS about it:
   Module it87: Merge alarm_* /proc entries to alarms
   Module sis5595: Fix support for rev B0
   Module via686a: Make limit initializations reliable
+  Module w83781d: Allow init=0 parameter to bypass initialization
   Program isadump: Add flat address space (PCI) support
   Program mkpatch.pl: Add support for i2c-ali1535, adm1024, ds1621,
                       fscpos, it87, maxilife, mtp008

@@ -71,6 +71,10 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 /* Insmod parameters */
 SENSORS_INSMOD_5(w83781d, w83782d, w83783s, w83627hf, as99127f);
 
+static int init = 1;
+MODULE_PARM(init, "i");
+MODULE_PARM_DESC(init, "Set to zero to bypass chip initialization");
+
 /* Many W83781D constants specified below */
 
 /* Length of ISA address segment */
@@ -1189,8 +1193,8 @@ void w83781d_init_client(struct i2c_client *client)
 	int type = data->type;
 	u8 tmp;
 
-	if(type != as99127f) { /* this resets registers we don't have
-			          documentation for on the as99127f */
+	if(init && type != as99127f) { /* this resets registers we don't have
+			                  documentation for on the as99127f */
 		/* save this register */
 		i = w83781d_read_value(client, W83781D_REG_BEEP_CONFIG);
 		/* Reset all except Watchdog values and last conversion values
@@ -1236,7 +1240,7 @@ void w83781d_init_client(struct i2c_client *client)
    that the others support it as well....
 */
 
-	if (type == w83781d) {
+	if (init && type == w83781d) {
 		u16 k = 0;
 /*
     Auto-indexing doesn't seem to work...
@@ -1256,115 +1260,117 @@ void w83781d_init_client(struct i2c_client *client)
 	}
 #endif				/* W83781D_RT */
 
-	w83781d_write_value(client, W83781D_REG_IN_MIN(0),
-			    IN_TO_REG(W83781D_INIT_IN_MIN_0));
-	w83781d_write_value(client, W83781D_REG_IN_MAX(0),
-			    IN_TO_REG(W83781D_INIT_IN_MAX_0));
-	if (type != w83783s) {
-		w83781d_write_value(client, W83781D_REG_IN_MIN(1),
-				    IN_TO_REG(W83781D_INIT_IN_MIN_1));
-		w83781d_write_value(client, W83781D_REG_IN_MAX(1),
-				    IN_TO_REG(W83781D_INIT_IN_MAX_1));
-	}
+	if(init) {
+		w83781d_write_value(client, W83781D_REG_IN_MIN(0),
+				    IN_TO_REG(W83781D_INIT_IN_MIN_0));
+		w83781d_write_value(client, W83781D_REG_IN_MAX(0),
+				    IN_TO_REG(W83781D_INIT_IN_MAX_0));
+		if (type != w83783s) {
+			w83781d_write_value(client, W83781D_REG_IN_MIN(1),
+					    IN_TO_REG(W83781D_INIT_IN_MIN_1));
+			w83781d_write_value(client, W83781D_REG_IN_MAX(1),
+					    IN_TO_REG(W83781D_INIT_IN_MAX_1));
+		}
 
-	w83781d_write_value(client, W83781D_REG_IN_MIN(2),
-			    IN_TO_REG(W83781D_INIT_IN_MIN_2));
-	w83781d_write_value(client, W83781D_REG_IN_MAX(2),
-			    IN_TO_REG(W83781D_INIT_IN_MAX_2));
-	w83781d_write_value(client, W83781D_REG_IN_MIN(3),
-			    IN_TO_REG(W83781D_INIT_IN_MIN_3));
-	w83781d_write_value(client, W83781D_REG_IN_MAX(3),
-			    IN_TO_REG(W83781D_INIT_IN_MAX_3));
-	w83781d_write_value(client, W83781D_REG_IN_MIN(4),
-			    IN_TO_REG(W83781D_INIT_IN_MIN_4));
-	w83781d_write_value(client, W83781D_REG_IN_MAX(4),
-			    IN_TO_REG(W83781D_INIT_IN_MAX_4));
-	if (type == w83781d || type == as99127f) {
-		w83781d_write_value(client, W83781D_REG_IN_MIN(5),
-				    IN_TO_REG(W83781D_INIT_IN_MIN_5));
-		w83781d_write_value(client, W83781D_REG_IN_MAX(5),
-				    IN_TO_REG(W83781D_INIT_IN_MAX_5));
-	} else {
-		w83781d_write_value(client, W83781D_REG_IN_MIN(5),
-				    IN_TO_REG(W83782D_INIT_IN_MIN_5));
-		w83781d_write_value(client, W83781D_REG_IN_MAX(5),
-				    IN_TO_REG(W83782D_INIT_IN_MAX_5));
-	}
-	if (type == w83781d || type == as99127f) {
-		w83781d_write_value(client, W83781D_REG_IN_MIN(6),
-				    IN_TO_REG(W83781D_INIT_IN_MIN_6));
-		w83781d_write_value(client, W83781D_REG_IN_MAX(6),
-				    IN_TO_REG(W83781D_INIT_IN_MAX_6));
-	} else {
-		w83781d_write_value(client, W83781D_REG_IN_MIN(6),
-				    IN_TO_REG(W83782D_INIT_IN_MIN_6));
-		w83781d_write_value(client, W83781D_REG_IN_MAX(6),
-				    IN_TO_REG(W83782D_INIT_IN_MAX_6));
-	}
-	if ((type == w83782d) || (type == w83627hf)) {
-		w83781d_write_value(client, W83781D_REG_IN_MIN(7),
-				    IN_TO_REG(W83781D_INIT_IN_MIN_7));
-		w83781d_write_value(client, W83781D_REG_IN_MAX(7),
-				    IN_TO_REG(W83781D_INIT_IN_MAX_7));
-		w83781d_write_value(client, W83781D_REG_IN_MIN(8),
-				    IN_TO_REG(W83781D_INIT_IN_MIN_8));
-		w83781d_write_value(client, W83781D_REG_IN_MAX(8),
-				    IN_TO_REG(W83781D_INIT_IN_MAX_8));
-		w83781d_write_value(client, W83781D_REG_VBAT,
-		    (w83781d_read_value(client, W83781D_REG_VBAT) | 0x01));
-	}
-	w83781d_write_value(client, W83781D_REG_FAN_MIN(1),
-			    FAN_TO_REG(W83781D_INIT_FAN_MIN_1, 2));
-	w83781d_write_value(client, W83781D_REG_FAN_MIN(2),
-			    FAN_TO_REG(W83781D_INIT_FAN_MIN_2, 2));
-	w83781d_write_value(client, W83781D_REG_FAN_MIN(3),
-			    FAN_TO_REG(W83781D_INIT_FAN_MIN_3, 2));
+		w83781d_write_value(client, W83781D_REG_IN_MIN(2),
+				    IN_TO_REG(W83781D_INIT_IN_MIN_2));
+		w83781d_write_value(client, W83781D_REG_IN_MAX(2),
+				    IN_TO_REG(W83781D_INIT_IN_MAX_2));
+		w83781d_write_value(client, W83781D_REG_IN_MIN(3),
+				    IN_TO_REG(W83781D_INIT_IN_MIN_3));
+		w83781d_write_value(client, W83781D_REG_IN_MAX(3),
+				    IN_TO_REG(W83781D_INIT_IN_MAX_3));
+		w83781d_write_value(client, W83781D_REG_IN_MIN(4),
+				    IN_TO_REG(W83781D_INIT_IN_MIN_4));
+		w83781d_write_value(client, W83781D_REG_IN_MAX(4),
+				    IN_TO_REG(W83781D_INIT_IN_MAX_4));
+		if (type == w83781d || type == as99127f) {
+			w83781d_write_value(client, W83781D_REG_IN_MIN(5),
+					    IN_TO_REG(W83781D_INIT_IN_MIN_5));
+			w83781d_write_value(client, W83781D_REG_IN_MAX(5),
+					    IN_TO_REG(W83781D_INIT_IN_MAX_5));
+		} else {
+			w83781d_write_value(client, W83781D_REG_IN_MIN(5),
+					    IN_TO_REG(W83782D_INIT_IN_MIN_5));
+			w83781d_write_value(client, W83781D_REG_IN_MAX(5),
+					    IN_TO_REG(W83782D_INIT_IN_MAX_5));
+		}
+		if (type == w83781d || type == as99127f) {
+			w83781d_write_value(client, W83781D_REG_IN_MIN(6),
+					    IN_TO_REG(W83781D_INIT_IN_MIN_6));
+			w83781d_write_value(client, W83781D_REG_IN_MAX(6),
+					    IN_TO_REG(W83781D_INIT_IN_MAX_6));
+		} else {
+			w83781d_write_value(client, W83781D_REG_IN_MIN(6),
+					    IN_TO_REG(W83782D_INIT_IN_MIN_6));
+			w83781d_write_value(client, W83781D_REG_IN_MAX(6),
+					    IN_TO_REG(W83782D_INIT_IN_MAX_6));
+		}
+		if ((type == w83782d) || (type == w83627hf)) {
+			w83781d_write_value(client, W83781D_REG_IN_MIN(7),
+					    IN_TO_REG(W83781D_INIT_IN_MIN_7));
+			w83781d_write_value(client, W83781D_REG_IN_MAX(7),
+					    IN_TO_REG(W83781D_INIT_IN_MAX_7));
+			w83781d_write_value(client, W83781D_REG_IN_MIN(8),
+					    IN_TO_REG(W83781D_INIT_IN_MIN_8));
+			w83781d_write_value(client, W83781D_REG_IN_MAX(8),
+					    IN_TO_REG(W83781D_INIT_IN_MAX_8));
+			w83781d_write_value(client, W83781D_REG_VBAT,
+			    (w83781d_read_value(client, W83781D_REG_VBAT) | 0x01));
+		}
+		w83781d_write_value(client, W83781D_REG_FAN_MIN(1),
+				    FAN_TO_REG(W83781D_INIT_FAN_MIN_1, 2));
+		w83781d_write_value(client, W83781D_REG_FAN_MIN(2),
+				    FAN_TO_REG(W83781D_INIT_FAN_MIN_2, 2));
+		w83781d_write_value(client, W83781D_REG_FAN_MIN(3),
+				    FAN_TO_REG(W83781D_INIT_FAN_MIN_3, 2));
 
-	w83781d_write_value(client, W83781D_REG_TEMP_OVER,
-			    TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
-	w83781d_write_value(client, W83781D_REG_TEMP_HYST,
-			    TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
+		w83781d_write_value(client, W83781D_REG_TEMP_OVER,
+				    TEMP_TO_REG(W83781D_INIT_TEMP_OVER));
+		w83781d_write_value(client, W83781D_REG_TEMP_HYST,
+				    TEMP_TO_REG(W83781D_INIT_TEMP_HYST));
 
-	if (type == as99127f) {
-		w83781d_write_value(client, W83781D_REG_TEMP2_OVER,
-				    AS99127_TEMP_ADD_TO_REG
-				    (W83781D_INIT_TEMP2_OVER));
-		w83781d_write_value(client, W83781D_REG_TEMP2_HYST,
-				    AS99127_TEMP_ADD_TO_REG
-				    (W83781D_INIT_TEMP2_HYST));
-	} else {
-		w83781d_write_value(client, W83781D_REG_TEMP2_OVER,
-				    TEMP_ADD_TO_REG
-				    (W83781D_INIT_TEMP2_OVER));
-		w83781d_write_value(client, W83781D_REG_TEMP2_HYST,
-				    TEMP_ADD_TO_REG
-				    (W83781D_INIT_TEMP2_HYST));
-	}
-	w83781d_write_value(client, W83781D_REG_TEMP2_CONFIG, 0x00);
+		if (type == as99127f) {
+			w83781d_write_value(client, W83781D_REG_TEMP2_OVER,
+					    AS99127_TEMP_ADD_TO_REG
+					    (W83781D_INIT_TEMP2_OVER));
+			w83781d_write_value(client, W83781D_REG_TEMP2_HYST,
+					    AS99127_TEMP_ADD_TO_REG
+					    (W83781D_INIT_TEMP2_HYST));
+		} else {
+			w83781d_write_value(client, W83781D_REG_TEMP2_OVER,
+					    TEMP_ADD_TO_REG
+					    (W83781D_INIT_TEMP2_OVER));
+			w83781d_write_value(client, W83781D_REG_TEMP2_HYST,
+					    TEMP_ADD_TO_REG
+					    (W83781D_INIT_TEMP2_HYST));
+		}
+		w83781d_write_value(client, W83781D_REG_TEMP2_CONFIG, 0x00);
 
-	if (type == as99127f) {
-		w83781d_write_value(client, W83781D_REG_TEMP3_OVER,
-				    AS99127_TEMP_ADD_TO_REG
-				    (W83781D_INIT_TEMP3_OVER));
-		w83781d_write_value(client, W83781D_REG_TEMP3_HYST,
-				    AS99127_TEMP_ADD_TO_REG
-				    (W83781D_INIT_TEMP3_HYST));
-	} else if (type != w83783s) {
-		w83781d_write_value(client, W83781D_REG_TEMP3_OVER,
-				    TEMP_ADD_TO_REG
-				    (W83781D_INIT_TEMP3_OVER));
-		w83781d_write_value(client, W83781D_REG_TEMP3_HYST,
-				    TEMP_ADD_TO_REG
-				    (W83781D_INIT_TEMP3_HYST));
-	}
-	if (type != w83783s) {
-		w83781d_write_value(client, W83781D_REG_TEMP3_CONFIG,
-				    0x00);
-	}
-	/* enable PWM2 control (can't hurt since PWM reg should have been
-           reset to 0xff) */
-	if (type != w83781d) {
-		w83781d_write_value(client, W83781D_REG_PWMCLK12, 0x19);
+		if (type == as99127f) {
+			w83781d_write_value(client, W83781D_REG_TEMP3_OVER,
+					    AS99127_TEMP_ADD_TO_REG
+					    (W83781D_INIT_TEMP3_OVER));
+			w83781d_write_value(client, W83781D_REG_TEMP3_HYST,
+					    AS99127_TEMP_ADD_TO_REG
+					    (W83781D_INIT_TEMP3_HYST));
+		} else if (type != w83783s) {
+			w83781d_write_value(client, W83781D_REG_TEMP3_OVER,
+					    TEMP_ADD_TO_REG
+					    (W83781D_INIT_TEMP3_OVER));
+			w83781d_write_value(client, W83781D_REG_TEMP3_HYST,
+					    TEMP_ADD_TO_REG
+					    (W83781D_INIT_TEMP3_HYST));
+		}
+		if (type != w83783s) {
+			w83781d_write_value(client, W83781D_REG_TEMP3_CONFIG,
+					    0x00);
+		}
+		/* enable PWM2 control (can't hurt since PWM reg should have
+	           been reset to 0xff) */
+		if (type != w83781d) {
+			w83781d_write_value(client, W83781D_REG_PWMCLK12, 0x19);
+		}
 	}
 
 	/* Start monitoring */

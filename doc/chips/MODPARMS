@@ -12,6 +12,7 @@ SUMMARY
 		ignore_range=bus,startaddress,endaddress
 		probe=bus,address
 		probe_range=bus,startaddress,endaddress
+		init=[0,1] (default 1)
 
 	All arguments are in decimal unless prefixed by "0x".
 
@@ -87,6 +88,12 @@ very strange results...
 `force_addr' is a parameter used for PCI sensor adapters.
 It is used to program the base address of the sensor registers.
 This is required if the BIOS does not initialize the base address.
+
+`init' is used to tell a driver to bypass initializing a chip.
+This may be necessary if the BIOS has initialized the chip a certain way
+and the driver should not overwrite that initialization.
+The default is 1, so the only useful value is `init=0'.
+This parameter is not supported by most drivers.
 
 ==================================
 EXAMPLE

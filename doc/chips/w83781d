@@ -59,6 +59,9 @@ Module Parameters
   List of adapter,address pairs to scan additionally
 * probe_range: short array (min = 1, max = 48)
   List of adapter,start-addr,end-addr triples to scan additionally
+* init=[0,1] (default 1)
+  Use 'init=0' to bypass initializing the chip.
+  Try this if your computer crashes when you load the module.
 
 
 Description
