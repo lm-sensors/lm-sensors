@@ -144,12 +144,16 @@ static void fscher_init_client(struct i2c_client *client);
 
 static void fscher_in(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
+static void fscher_pwm(struct i2c_client *client, int operation,
+                       int ctl_name, int *nrels_mag, long *results);
+static void fscher_pwm_internal(struct i2c_client *client, int operation,
+                                int ctl_name, int *nrels_mag, long *results, 
+                                int nr, int reg_min);
 static void fscher_fan(struct i2c_client *client, int operation,
                        int ctl_name, int *nrels_mag, long *results);
 static void fscher_fan_internal(struct i2c_client *client, int operation,
                                 int ctl_name, int *nrels_mag, long *results, 
-                                int nr, int reg_state, int reg_min,
-                                int res_ripple);
+                                int nr, int reg_state, int res_ripple);
 static void fscher_temp(struct i2c_client *client, int operation,
 		      	int ctl_name, int *nrels_mag, long *results);
 static void fscher_volt(struct i2c_client *client, int operation,
@@ -172,11 +176,11 @@ static struct i2c_driver fscher_driver = {
 #define FSCHER_SYSCTL_VOLT0    1000       /* 12 volt supply */
 #define FSCHER_SYSCTL_VOLT1    1001       /* 5 volt supply */
 #define FSCHER_SYSCTL_VOLT2    1002       /* batterie voltage */
-#define FSCHER_SYSCTL_FAN0     1101       /* state, min, ripple, actual value
+#define FSCHER_SYSCTL_FAN0     1101       /* state, ripple, actual value
                                              fan 0 */
-#define FSCHER_SYSCTL_FAN1     1102       /* state, min, ripple, actual value
+#define FSCHER_SYSCTL_FAN1     1102       /* state, ripple, actual value
                                              fan 1 */
-#define FSCHER_SYSCTL_FAN2     1103       /* state, min, ripple, actual value
+#define FSCHER_SYSCTL_FAN2     1103       /* state, ripple, actual value
                                              fan 2 */
 #define FSCHER_SYSCTL_TEMP0    1201       /* state and value of sensor 0,
                                              cpu die */
@@ -184,6 +188,9 @@ static struct i2c_driver fscher_driver = {
                                              motherboard */
 #define FSCHER_SYSCTL_TEMP2    1203       /* state and value of sensor 2,
                                              chassis */
+#define FSCHER_SYSCTL_PWM0     1301       /* min fan 0 */
+#define FSCHER_SYSCTL_PWM1     1302       /* min fan 1 */
+#define FSCHER_SYSCTL_PWM2     1303       /* min fan 2 */
 #define FSCHER_SYSCTL_REV      2000       /* revision */
 #define FSCHER_SYSCTL_EVENT    2001       /* global event status */
 #define FSCHER_SYSCTL_CONTROL  2002       /* global control byte */
@@ -221,6 +228,12 @@ static ctl_table fscher_dir_table_template[] = {
    &i2c_sysctl_real, NULL, &fscher_fan},
   {FSCHER_SYSCTL_FAN2, "fan3", NULL, 0, 0644, NULL, &i2c_proc_real,
    &i2c_sysctl_real, NULL, &fscher_fan},
+  {FSCHER_SYSCTL_PWM0, "pwm1", NULL, 0, 0644, NULL, &i2c_proc_real,
+   &i2c_sysctl_real, NULL, &fscher_pwm},
+  {FSCHER_SYSCTL_PWM1, "pwm2", NULL, 0, 0644, NULL, &i2c_proc_real,
+   &i2c_sysctl_real, NULL, &fscher_pwm},
+  {FSCHER_SYSCTL_PWM2, "pwm3", NULL, 0, 0644, NULL, &i2c_proc_real,
+   &i2c_sysctl_real, NULL, &fscher_pwm},
   {FSCHER_SYSCTL_WDOG, "wdog", NULL, 0, 0644, NULL, &i2c_proc_real,
    &i2c_sysctl_real, NULL, &fscher_wdog},
   {0}
@@ -539,6 +552,7 @@ void fscher_volt(struct i2c_client *client, int operation, int ctl_name,
                  int *nrels_mag, long *results)
 {
   struct fscher_data *data = client->data;
+
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 2;
   else if (operation == SENSORS_PROC_REAL_READ) {
@@ -564,25 +578,65 @@ void fscher_volt(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-void fscher_fan(struct i2c_client *client, int operation, int ctl_name,
+void fscher_pwm(struct i2c_client *client, int operation, int ctl_name,
                 int *nrels_mag, long *results)
 {
 
   switch(ctl_name) {
+  case FSCHER_SYSCTL_PWM0:
+    fscher_pwm_internal(client,operation,ctl_name,nrels_mag,results,
+                        0,FSCHER_REG_FAN0_MIN);
+    break;
+  case FSCHER_SYSCTL_PWM1:
+    fscher_pwm_internal(client,operation,ctl_name,nrels_mag,results,
+                        1,FSCHER_REG_FAN1_MIN);
+    break;
+  case FSCHER_SYSCTL_PWM2:
+    fscher_pwm_internal(client,operation,ctl_name,nrels_mag,results,
+                        2,FSCHER_REG_FAN2_MIN);
+    break;
+  default:
+    printk("fscher: illegal pwm nr %d\n",ctl_name);
+  }
+}
+			
+void fscher_pwm_internal(struct i2c_client *client, int operation,
+                         int ctl_name, int *nrels_mag, long *results,
+                         int nr, int reg_min)
+{
+  struct fscher_data *data = client->data;
+
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    fscher_update_client(client);
+    results[0] = data->fan_min[nr];
+    *nrels_mag = 1;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if(*nrels_mag >= 1) {  
+      data->fan_min[nr] = results[0];
+      printk("fscher: writing value 0x%02x to fan%d_min\n",
+             data->fan_min[nr],nr);
+      fscher_write_value(client,reg_min,data->fan_min[nr]);
+    }
+  }
+}
+
+void fscher_fan(struct i2c_client *client, int operation, int ctl_name,
+                int *nrels_mag, long *results)
+{
+  switch(ctl_name) {
   case FSCHER_SYSCTL_FAN0:
     fscher_fan_internal(client,operation,ctl_name,nrels_mag,results,
-                        0,FSCHER_REG_FAN0_STATE,FSCHER_REG_FAN0_MIN,
-                        FSCHER_REG_FAN0_RIPPLE);
+                        0,FSCHER_REG_FAN0_STATE, FSCHER_REG_FAN0_RIPPLE);
     break;
   case FSCHER_SYSCTL_FAN1:
     fscher_fan_internal(client,operation,ctl_name,nrels_mag,results,
-                        1,FSCHER_REG_FAN1_STATE,FSCHER_REG_FAN1_MIN,
-                        FSCHER_REG_FAN1_RIPPLE);
+                        1,FSCHER_REG_FAN1_STATE, FSCHER_REG_FAN1_RIPPLE);
     break;
   case FSCHER_SYSCTL_FAN2:
     fscher_fan_internal(client,operation,ctl_name,nrels_mag,results,
-                        2,FSCHER_REG_FAN2_STATE,FSCHER_REG_FAN2_MIN,
-                        FSCHER_REG_FAN2_RIPPLE);
+                        2,FSCHER_REG_FAN2_STATE, FSCHER_REG_FAN2_RIPPLE);
     break;
   default:
     printk("fscher: illegal fan nr %d\n",ctl_name);
@@ -593,7 +647,7 @@ void fscher_fan(struct i2c_client *client, int operation, int ctl_name,
 
 void fscher_fan_internal(struct i2c_client *client, int operation,
                          int ctl_name, int *nrels_mag, long *results,
-                         int nr, int reg_state, int reg_min, int reg_ripple)
+                         int nr, int reg_state, int reg_ripple)
 {
   struct fscher_data *data = client->data;
 
@@ -602,10 +656,9 @@ void fscher_fan_internal(struct i2c_client *client, int operation,
   else if (operation == SENSORS_PROC_REAL_READ) {
     fscher_update_client(client);
     results[0] = data->fan_status[nr] & 0x04;
-    results[1] = data->fan_min[nr];
-    results[2] = data->fan_ripple[nr] & 0x03;
-    results[3] = RPM_FROM_REG(data->fan_act[nr]);
-    *nrels_mag = 4;
+    results[1] = data->fan_ripple[nr] & 0x03;
+    results[2] = RPM_FROM_REG(data->fan_act[nr]);
+    *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if(*nrels_mag >= 1) {
       data->fan_status[nr] = results[0] & 0x04;
@@ -613,18 +666,12 @@ void fscher_fan_internal(struct i2c_client *client, int operation,
              data->fan_status[nr],nr);
       fscher_write_value(client,reg_state,data->fan_status[nr]);
     }
-    if(*nrels_mag >= 2) {  
-      data->fan_min[nr] = results[1];
-      printk("fscher: writing value 0x%02x to fan%d_min\n",
-             data->fan_min[nr],nr);
-      fscher_write_value(client,reg_min,data->fan_min[nr]);
-    }
-    if(*nrels_mag >= 3) {
-      if((results[2] & 0x03) == 0) {
+    if(*nrels_mag >= 2) {
+      if((results[1] & 0x03) == 0) {
         printk("fscher: fan%d ripple 0 not allowed\n",nr);
         return;
       }
-      data->fan_ripple[nr] = results[2] & 0x03;
+      data->fan_ripple[nr] = results[1] & 0x03;
       printk("fscher: writing value 0x%02x to fan%d_ripple\n",
              data->fan_ripple[nr],nr);
       fscher_write_value(client,reg_ripple,data->fan_ripple[nr]);
