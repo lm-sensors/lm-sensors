@@ -33,16 +33,13 @@
 
 
 /* Addresses to scan */
-static unsigned short normal_i2c[] = { 0x0b, SENSORS_I2C_END };
-static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
+static unsigned short normal_i2c[] = { SENSORS_I2C_END };
+static unsigned short normal_i2c_range[] = { 0x0b, SENSORS_I2C_END };
 static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
 SENSORS_INSMOD_1(smartbatt);
-
-/* Conversions */
-#define TEMP_FROM_REG(r) (r - 2732)  /* tenths of degree kelvin to celsius */
 
 /* The SMARTBATT registers */
 #define SMARTBATT_REG_MODE 0x03
@@ -52,10 +49,16 @@ SENSORS_INSMOD_1(smartbatt);
 #define SMARTBATT_REG_AVGI 0x0b
 #define SMARTBATT_REG_RELCHG 0x0d
 #define SMARTBATT_REG_ABSCHG 0x0e
+#define SMARTBATT_REG_REMCAP 0x0f
+#define SMARTBATT_REG_CHGCAP 0x10
 #define SMARTBATT_REG_RUNTIME_E 0x11
 #define SMARTBATT_REG_AVGTIME_E 0x12
 #define SMARTBATT_REG_AVGTIME_F 0x13
+#define SMARTBATT_REG_CHGI 0x14
+#define SMARTBATT_REG_CHGV 0x15
 #define SMARTBATT_REG_STATUS 0x16
+#define SMARTBATT_REG_CYCLECT 0x17
+#define SMARTBATT_REG_DESCAP 0x18
 #define SMARTBATT_REG_DESV 0x19
 #define SMARTBATT_REG_DATE 0x1b
 #define SMARTBATT_REG_SERIAL 0x1c
@@ -63,8 +66,9 @@ SENSORS_INSMOD_1(smartbatt);
 #define SMARTBATT_REG_NAME 0x21
 #define SMARTBATT_REG_CHEM 0x22
 
+#define BATTERY_STRING_MAX	64
 #define COMM_TIMEOUT 16
-#define BATTERY_STRING_MAX	33
+
 
 /* Each client has this additional data */
 struct smartbatt_data {
@@ -77,16 +81,17 @@ struct smartbatt_data {
 	char manufacturer[BATTERY_STRING_MAX];
 	char device[BATTERY_STRING_MAX];
 	char chemistry[BATTERY_STRING_MAX];
+#endif
 	int  serial;
 	struct {
 		unsigned int day:5;	/* Day (1-31) */
 		unsigned int month:4;	/* Month (1-12) */
 		unsigned int year:7;	/* Year (1980 + 0-127) */
 	} manufacture_date;
-#endif
-	u16 temp, v, desv, i, avgi;	/* Register values */
-	u16 rte, ate, atf, alarms;	/* Register values */
-	u16 relchg, abschg;		/* Register values */
+	u16 mode, temp, v, i, avgi;	/* Register values */
+	u16 relchg, abschg, remcap, chgcap;	/* Register values */
+	u16 rte, ate, atf, chgi, chgv;	/* Register values */
+	u16 status, cyclect, descap, desv;	/* Register values */
 };
 
 static int smartbatt_attach_adapter(struct i2c_adapter *adapter);
@@ -95,9 +100,9 @@ static int smartbatt_detect(struct i2c_adapter *adapter, int address,
 static void smartbatt_init_client(struct i2c_client *client);
 static int smartbatt_detach_client(struct i2c_client *client);
 
-static u16 swap_bytes(u16 val);
-static int sb_read(struct i2c_client *client, u8 reg);
+static int smartbatt_read(struct i2c_client *client, u8 reg);
 #if 0
+static u16 swap_bytes(u16 val);
 static int smartbatt_write_value(struct i2c_client *client, u8 reg, u16 value);
 #endif
 static void smartbatt_temp(struct i2c_client *client, int operation,
@@ -111,6 +116,10 @@ static void smartbatt_time(struct i2c_client *client, int operation,
 static void smartbatt_alarms(struct i2c_client *client, int operation,
 		      int ctl_name, int *nrels_mag, long *results);
 static void smartbatt_charge(struct i2c_client *client, int operation,
+		      int ctl_name, int *nrels_mag, long *results);
+static void smartbatt_status(struct i2c_client *client, int operation,
+		      int ctl_name, int *nrels_mag, long *results);
+static void smartbatt_error(struct i2c_client *client, int operation,
 		      int ctl_name, int *nrels_mag, long *results);
 static void smartbatt_update_client(struct i2c_client *client);
 
@@ -127,12 +136,53 @@ static struct i2c_driver smartbatt_driver = {
 
 
 /* -- SENSORS SYSCTL START -- */
+
+/* Status Register Bits */
+/* * * * * * Alarm Bits * * * * */ 
+#define SMARTBATT_OVER_CHARGED_ALARM 0x8000 
+#define SMARTBATT_TERMINATE_CHARGE_ALARM 0x4000 
+#define SMARTBATT_OVER_TEMP_ALARM 0x1000 
+#define SMARTBATT_TERMINATE_DISCHARGE_ALARM 0x0800 
+#define SMARTBATT_REMAINING_CAPACITY_ALARM  0x0200 
+#define SMARTBATT_REMAINING_TIME_ALARM 0x0100 
+/* * * * * * Status Bits * * * * */
+#define SMARTBATT_INITIALIZED 0x0080 
+#define SMARTBATT_DISCHARGING 0x0040 
+#define SMARTBATT_FULLY_CHARGED 0x0020 
+#define SMARTBATT_FULLY_DISCHARGED 0x0010 
+/* * * * * * Error Bits * * * * */ 
+#define SMARTBATT_OK 0x0000 
+#define SMARTBATT_BUSY 0x0001 
+#define SMARTBATT_RESERVED_COMMAND 0x0002 
+#define SMARTBATT_UNSUPPORTED_COMMAND 0x0003 
+#define SMARTBATT_ACCESS_DENIED 0x0004 
+#define SMARTBATT_OVER_UNDERFLOW 0x0005 
+#define SMARTBATT_BAD_SIZE 0x0006 
+#define SMARTBATT_UNKNOWN_ERROR 0x0007
+
+#define SMARTBATT_ALARM (SMARTBATT_OVER_CHARGED_ALARM \
+		| SMARTBATT_TERMINATE_CHARGE_ALARM | SMARTBATT_OVER_TEMP_ALARM \
+		| SMARTBATT_TERMINATE_DISCHARGE_ALARM \
+		| SMARTBATT_REMAINING_CAPACITY_ALARM \
+		| SMARTBATT_REMAINING_TIME_ALARM)
+
+#define SMARTBATT_STATUS (SMARTBATT_INITIALIZED | SMARTBATT_DISCHARGING \
+		| SMARTBATT_FULLY_CHARGED | SMARTBATT_FULLY_DISCHARGED )
+
+#define SMARTBATT_ERROR (SMARTBATT_BUSY | SMARTBATT_RESERVED_COMMAND \
+		| SMARTBATT_UNSUPPORTED_COMMAND | SMARTBATT_ACCESS_DENIED \
+		| SMARTBATT_OVER_UNDERFLOW | SMARTBATT_BAD_SIZE\
+		| SMARTBATT_UNKNOWN_ERROR)
+
+
 #define SMARTBATT_SYSCTL_I 1001
 #define SMARTBATT_SYSCTL_V 1002
 #define SMARTBATT_SYSCTL_TEMP 1003
 #define SMARTBATT_SYSCTL_TIME 1004
 #define SMARTBATT_SYSCTL_ALARMS 1005
-#define SMARTBATT_SYSCTL_CHARGE 1006
+#define SMARTBATT_SYSCTL_STATUS 1006
+#define SMARTBATT_SYSCTL_ERROR 1007
+#define SMARTBATT_SYSCTL_CHARGE 1008
 
 /* -- SENSORS SYSCTL END -- */
 
@@ -152,6 +202,10 @@ static ctl_table smartbatt_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &smartbatt_time},
 	{SMARTBATT_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &smartbatt_alarms},
+	{SMARTBATT_SYSCTL_STATUS, "status", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smartbatt_status},
+	{SMARTBATT_SYSCTL_ERROR, "error", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smartbatt_error},
 	{SMARTBATT_SYSCTL_CHARGE, "charge", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &smartbatt_charge},
 	{0}
@@ -204,10 +258,10 @@ int smartbatt_detect(struct i2c_adapter *adapter, int address,
 	new_client->driver = &smartbatt_driver;
 	new_client->flags = 0;
 
-	/* Now, we do the remaining detection. It is lousy. */
+	/* Lousy detection. Check the temp, voltage, and current registers */
 	if (kind < 0) {
 		for (i = 0x08; i <= 0x0a; i++)
-			if (i2c_smbus_read_word_data(new_client, i) != 0xff)
+			if (i2c_smbus_read_word_data(new_client, i) == 0xffff)
 				goto ERROR1;
 	}
 
@@ -267,15 +321,22 @@ static int smartbatt_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-
+#if 0
+/*   Why swap bytes?  */
 static u16 swap_bytes(u16 val)
 {
 	return (val >> 8) | (val << 8);
 }
+#endif
 
-static int sb_read(struct i2c_client *client, u8 reg)
-{
-	return swap_bytes(i2c_smbus_read_word_data(client, reg));
+static int smartbatt_read(struct i2c_client *client, u8 reg)
+{ 
+	int n = COMM_TIMEOUT;
+	int val;
+	do { 
+		val = i2c_smbus_read_word_data(client, reg);
+	} while ((val == -1) && (n-- > 0));
+	return val;
 }
 
 #if 0
@@ -285,53 +346,53 @@ static int smartbatt_write_value(struct i2c_client *client, u8 reg, u16 value)
 }
 #endif
 
-#if 0
-/* this is code from battery.c. No strings support yet in i2c-proc.c so
-   all we could do is print this out at startup if we wanted.
-*/
-int
-static battery_info(int fd, struct battery_info *info)
+#define COMM_TIMEOUT 16
+static void get_battery_info(struct i2c_client *client)
 {
-  int n;
+  struct smartbatt_data *data = client->data;
   int val;
 
+  down(&data->update_lock);
+  data->chgcap = smartbatt_read(client, SMARTBATT_REG_CHGCAP);
+  data->descap = smartbatt_read(client, SMARTBATT_REG_DESCAP);
+  data->desv = smartbatt_read(client, SMARTBATT_REG_DESV);
   /* ManufactureDate */
-  val = sb_read(SMARTBATT_REG_DATE);
-  info->manufacture_date.day=val & 0x1F;
-  info->manufacture_date.month=(val >> 5) & 0x0F;
-  info->manufacture_date.year=(val >> 9) & 0x7F;
+  val = smartbatt_read(client, SMARTBATT_REG_DATE);
+  data->manufacture_date.day=val & 0x1F;
+  data->manufacture_date.month=(val >> 5) & 0x0F;
+  data->manufacture_date.year=(val >> 9) & 0x7F;
 
   /* SerialNumber */
-  info->serial = sb_read(SMARTBATT_REG_SERIAL
-
+  data->serial = smartbatt_read(client, SMARTBATT_REG_SERIAL);
+#if 0
   /* ManufacturerName */
-  n = COMM_TIMEOUT;
+  n=COMM_TIMEOUT;
   do {
-    val = i2c_smbus_read_block_data(fd, 0x20, info->manufacturer);
+    val = i2c_smbus_read_block_data(client, 0x20, data->manufacturer);
   } while ((val == -1) && (n-- > 0));
-  info->manufacturer[val]=0;	
+  data->manufacturer[val]=0;	
 
   /* DeviceName */
-  n = COMM_TIMEOUT;
+  n=COMM_TIMEOUT;
   do {
-    val = i2c_smbus_read_block_data(fd, 0x21, info->device);
+    val = i2c_smbus_read_block_data(client, 0x21, data->device);
   } while ((val == -1) && (n-- > 0));
-  info->device[val]=0;	
+  data->device[val]=0;	
 
   /* DeviceChemistry */
-  n = COMM_TIMEOUT;
+  n=COMM_TIMEOUT;
   do {
-    val = i2c_smbus_read_block_data(fd, 0x22, info->chemistry);
+    val = i2c_smbus_read_block_data(client, 0x22, data->chemistry);
   } while ((val == -1) && (n-- > 0));
-  info->chemistry[val]=0;	
-
-  return 0;
-}
+  data->chemistry[val]=0;	
 #endif
+  up(&data->update_lock);
+
+}
 
 static void smartbatt_init_client(struct i2c_client *client)
 {
-
+	get_battery_info( client );
 }
 
 static void smartbatt_update_client(struct i2c_client *client)
@@ -342,17 +403,21 @@ static void smartbatt_update_client(struct i2c_client *client)
 
 	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
 	    (jiffies < data->last_updated) || !data->valid) {
-		data->temp = sb_read(client, SMARTBATT_REG_TEMP);
-		data->i = sb_read(client, SMARTBATT_REG_I);
-		data->avgi = sb_read(client, SMARTBATT_REG_AVGI);
-		data->v = sb_read(client, SMARTBATT_REG_V);
-		data->desv = sb_read(client, SMARTBATT_REG_DESV);
-		data->ate = sb_read(client, SMARTBATT_REG_AVGTIME_E);
-		data->atf = sb_read(client, SMARTBATT_REG_AVGTIME_F);
-		data->rte = sb_read(client, SMARTBATT_REG_RUNTIME_E);
-		data->alarms = sb_read(client, SMARTBATT_REG_STATUS);
-		data->relchg = sb_read(client, SMARTBATT_REG_RELCHG);
-		data->abschg = sb_read(client, SMARTBATT_REG_ABSCHG);
+		data->mode = smartbatt_read(client, SMARTBATT_REG_MODE);
+		data->temp = smartbatt_read(client, SMARTBATT_REG_TEMP);
+		data->i = smartbatt_read(client, SMARTBATT_REG_I);
+		data->avgi = smartbatt_read(client, SMARTBATT_REG_AVGI);
+		data->v = smartbatt_read(client, SMARTBATT_REG_V);
+		data->chgi = smartbatt_read(client, SMARTBATT_REG_CHGI);
+		data->chgv = smartbatt_read(client, SMARTBATT_REG_CHGV);
+		data->ate = smartbatt_read(client, SMARTBATT_REG_AVGTIME_E);
+		data->atf = smartbatt_read(client, SMARTBATT_REG_AVGTIME_F);
+		data->rte = smartbatt_read(client, SMARTBATT_REG_RUNTIME_E);
+		data->status = smartbatt_read(client, SMARTBATT_REG_STATUS);
+		data->cyclect = smartbatt_read(client, SMARTBATT_REG_CYCLECT);
+		data->relchg = smartbatt_read(client, SMARTBATT_REG_RELCHG);
+		data->abschg = smartbatt_read(client, SMARTBATT_REG_ABSCHG);
+		data->remcap = smartbatt_read(client, SMARTBATT_REG_REMCAP);
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -366,10 +431,10 @@ void smartbatt_temp(struct i2c_client *client, int operation, int ctl_name,
 {
 	struct smartbatt_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 1;
+		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		smartbatt_update_client(client);
-		results[0] = TEMP_FROM_REG(data->temp);
+		results[0] = data->temp;
 		*nrels_mag = 1;
 	}
 }
@@ -379,12 +444,13 @@ void smartbatt_i(struct i2c_client *client, int operation, int ctl_name,
 {
 	struct smartbatt_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 3;
+		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		smartbatt_update_client(client);
-		results[0] = data->avgi;
-		results[1] = data->i;
-		*nrels_mag = 2;
+		results[0] = data->chgi;
+		results[1] = data->avgi;
+		results[2] = data->i;
+		*nrels_mag = 3;
 	}
 }
 
@@ -393,10 +459,10 @@ void smartbatt_v(struct i2c_client *client, int operation, int ctl_name,
 {
 	struct smartbatt_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 3;
+		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		smartbatt_update_client(client);
-		results[0] = data->desv;
+		results[0] = data->chgv;
 		results[1] = data->v;
 		*nrels_mag = 2;
 	}
@@ -425,7 +491,33 @@ void smartbatt_alarms(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		smartbatt_update_client(client);
-		results[0] = data->alarms;
+		results[0] = data->status & SMARTBATT_ALARM;
+		*nrels_mag = 1;
+	}
+}
+
+void smartbatt_status(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct smartbatt_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		smartbatt_update_client(client);
+		results[0] = data->status & SMARTBATT_STATUS;
+		*nrels_mag = 1;
+	}
+}
+
+void smartbatt_error(struct i2c_client *client, int operation, int ctl_name,
+		 int *nrels_mag, long *results)
+{
+	struct smartbatt_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		smartbatt_update_client(client);
+		results[0] = data->status & SMARTBATT_ERROR;
 		*nrels_mag = 1;
 	}
 }
@@ -440,7 +532,9 @@ void smartbatt_charge(struct i2c_client *client, int operation, int ctl_name,
 		smartbatt_update_client(client);
 		results[0] = data->relchg;
 		results[1] = data->abschg;
-		*nrels_mag = 2;
+		results[2] = data->chgi;
+		results[3] = data->chgv;
+		*nrels_mag = 4;
 	}
 }
 

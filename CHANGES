@@ -30,6 +30,7 @@ ask CVS about it:
                remove initialization of temp_type and fan_ctl;
                remove init and temp_type module parameters
   Module lm90: Handle hysteresis differently
+  Module smartbatt: Fix detection
   Module w83781d: Fix negative voltages
   Module w83l785ts: New
   Program eeprog: Make 8 bit mode the default
