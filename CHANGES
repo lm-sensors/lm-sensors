@@ -28,7 +28,8 @@ ask CVS about it:
   File doc/chips/vt8231: Add license, parameters
   File sensors.conf.eg: Add section for lm75; complete the lm78 section
   Library: Add support for MC1066; add multiple VRM version support for lm87;
-           enhance adm1023 support; initial support for Sony Vaio eeprom
+           enhance adm1023 support; initial support for Sony Vaio eeprom;
+           add support for bmcsensors; add hacks for additional dummy drivers
   Makefile: Take kernel source location from /lib/modules/x.x.x/build
   Module adm1021: Add support for MC1066
   Module bmcsensors: New	
@@ -53,14 +54,14 @@ ask CVS about it:
                         handle unknown prefix with suggestion
   Program lm_sensors.init: Remove spaces bug; add green/red output
   Program mkpatch: Fix dmi_scan module compile
+  Program sensord: (v0.6.2) Add sanity limits to newly-created RRD.
   Program sensors: Add support for MC1066, Rambus Rimms;
                    fix w83781d temp3 alarm; fix gl518sm rev 0x00 recognition;
                    initial support for Sony Vaio eeprom
-  Program sensors-detect: Add support for MC1066, smart battery;
+  Program sensors-detect: Add support for MC1066, smart battery, 8235, IPMI;
                           add ACPI method for IBM system detection;
-						  work with old Perl versions again;
-						  initial support for Sony Vaio eeprom
-  Program sensord: (v0.6.2) Add sanity limits to newly-created RRD.
+                          work with old Perl versions again;
+                          initial support for Sony Vaio eeprom
 
 2.6.5 (20020915)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
