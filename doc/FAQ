@@ -11,7 +11,7 @@ CONTENTS
 1. PC and Sensor Overview
 1.1 What sensors are available on my PC?
 1.2 What can a sensor chip like the "LM78" do? 
-1.3 Where do I find out more about any of these LMxx chips?
+1.3 Where do I find out more about any of these sensor chips?
 
 2. Sensor and Bus Basics
 2.1 How are these sensors read?
@@ -34,6 +34,7 @@ CONTENTS
   3.4B The min and max for the readings in 'sensors' are incorrect!
   3.4C The min and max settings in /etc/sensors.conf didn't take effect!
   3.4D One sensor isn't hooked up on my board!
+  3.4E I need help with sensors.conf!
 3.5 What about the 'No such file or directory' warnings when I compile it?
 3.6 I get all kind of weird compilation errors?
 3.7 It still does not compile or patch
@@ -65,6 +66,7 @@ sensor reading results. Why?
   4.17A Bad readings from the AS99127F!
   4.17B Bad readings from the VIA 686A!
   4.17C Bad readings from the MTP008!
+  4.17D Bad temperature readings from the SIS5595!
 4.18 How do I configure two chips (LM87) differently?
 4.19 Dmesg says Upgrade BIOS! I don't want to!
 4.20 Sensors says 'Can't access /proc file'
@@ -78,6 +80,7 @@ sensor reading results. Why?
   4.24A Sensors-detect says "Couldn't open /proc/bus/i2c?!?"
   4.24B Sensors-detect says "Can't open /dev/i2c[-/]0"
   4.24C Sensors-detect doesn't find any sensors
+4.25 Sensors says 'Error: Line xxx: zzzzzzz'
 
 5 How to Ask for Help  
 5.1 What to do if a module won't insert?
@@ -183,8 +186,10 @@ talk to pure I2C devices.
 The "ISA Bus" exists in your computer even if you don't have ISA slots;
 it is simply a memory-mapped area, 64KB in size (0x0000 - 0xFFFF)
 where many "legacy" functions, such as keyboard and interrupt controllers,
-are found. See the file /proc/ioports for a list of devices living on
-the "ISA Bus" in your system.
+are found. It isn't necessarily a separate physical bus.
+See the file /proc/ioports for a list of devices living on
+the "ISA Bus" in your system. If you don't like the term "ISA Bus"
+think "I/O Space".
 
 
 2.4 What sensors do processors have?
@@ -354,6 +359,11 @@ a template.
 
     Use an 'ignore' line in /etc/sensors.conf so it isn't
 displayed in 'sensors'.
+
+
+3.4E I need help with sensors.conf!
+
+    There is detailed help at the top of that file.
 
 
 3.5 What about the 'No such file or directory' warnings when I compile it?
@@ -613,6 +623,14 @@ If your sensor type does not match the default, you will have to change it.
 See doc/chips/mtp008 for details.
 
 
+4.17D Bad temperature readings from the SIS5595!
+
+    This chip can use multiple thermistor types and there are also
+two different versions of the chip. We are trying to get the driver
+working better and develop formulas for different thermistors
+but we aren't there yet. Sorry.
+
+
 4.18 How do I configure two chips (LM87) differently?
 
     There is a SuperMicro board with two LM87's on it that are
@@ -631,13 +649,17 @@ For example, both CPU temperatures go to one LM87.
     If the problem is a PCI device is not present in 'lspci', the solution
 is complex. For the ALI M7101 device, there is a solution which uses the
 2.4 kernel's 'hotplug' facility. See prog/hotplug in our package.
-For other PCI devices, you can try to modify the m7101 solution in prog/hotplug.
+For other PCI devices, you can try to modify
+the m7101 solution in prog/hotplug.
     If the problem is a PCI device whose base address is not set,
-you may be able to set the address with a force parameter. For the via686a
-driver, use the command line 'modprobe via686a force=9191,0xADDRESS' where
-ADDRESS is the I/O address (cat /proc/ioports to verify you don't have
-a conflict). Other drivers (for example sis5595) generally do not
-support the force parameter. Sorry. You can send us your request.
+you may be able to set the address with a force parameter. The via686a
+and sis5595 chip drivers, and some bus drivers, support the command line
+'modprobe via686a force_addr=0xADDRESS' where ADDRESS
+is the I/O address (cat /proc/ioports to verify you don't have
+a conflict). Other drivers generally do not
+support the force_addr parameter. Sorry. Check the documentation
+for your driver in doc/[chips,busses] and if we don't suupport it
+you can send us your request.
 
 
 4.20 Sensors says 'Can't access /proc file'
@@ -737,6 +759,13 @@ Run devfs in the kernel to get the /dev/i2c/x files.
 	2) Check the manufacturer's website.
 	3) Check the Motherboard Monitor website
 	   (see useful_addresses.html) for a good cross-reference.
+
+4.25 Sensors says 'Error: Line xxx: zzzzzzz'
+
+    These are errors from the libsensors library in
+    reading the /etc/sensors.conf configuration file. Go to that line
+    number and fix it. If you have a parse error, perhaps you have
+    to put the feature name in double quotes.
 
 
 5 How to ask for help
