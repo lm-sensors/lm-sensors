@@ -76,20 +76,40 @@ sub gen_Documentation_Configure_help
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   MAIN: while(<INPUT>) {
-    if (m@I2C mainboard interfaces@ or 
+    if (m@I2C mainboard interfaces@ or
+           m@Acer Labs ALI 1535@ or
            m@Acer Labs ALI 1533 and 1543C@ or
+           m@AMD 756/766@ or
            m@Apple Hydra Mac I/O@ or
+           m@Intel I801@ or
+           m@Intel I810/I815 based Mainboard@ or
            m@Intel 82371AB PIIX4\(E\)@ or
+           m@Silicon Integrated Systems Corp. SiS5595 based Mainboard@ or
            m@VIA Technologies, Inc. VT82C586B@ or
+           m@VIA Technologies, Inc. VT82C596, 596B, 686A/B, 8233@ or
+           m@3DFX Banshee / Voodoo3@ or
+           m@DEC Tsunami 21272@ or
            m@Pseudo ISA adapter \(for hardware sensors modules\)@ or
            m@Analog Devices ADM1021 and compatibles@ or
+           m@Analog Devices ADM1024@ or
+           m@Analog Devices ADM1025@ or
            m@Analog Devices ADM9240 and compatibles@ or
+           m@Dallas DS1621 and DS1625@ or
+           m@Fujitsu-Siemens Poseidon@ or
+           m@Fujitsu-Siemens Scylla@ or
            m@Genesys Logic GL518SM@ or
-           m@National Semiconductors LM75@ or
+           m@Genesys Logic GL520SM@ or
+           m@HP Maxilife@ or
+           m@ITE 8705, 8712, Sis950@ or
+           m@Myson MTP008@ or
+           m@National Semiconductors LM75 and compatibles@ or
            m@National Semiconductors LM78@ or
            m@National Semiconductors LM80@ or
-           m@Silicon Integrated Systems Corp. SiS5595@ or
-           m@Winbond W83781D, W83782D and W83783S@ or
+           m@National Semiconductors LM87@ or
+           m@Silicon Integrated Systems Corp. SiS5595 Sensor@ or
+           m@Texas Instruments THMC50 / Analog Devices ADM1022@ or
+           m@Via VT82C686A/B@ or
+           m@Winbond W83781D, W83782D, W83783S, W83627HF, AS99127F@ or
            m@EEprom \(DIMM\) reader@) {
       $_ = <INPUT>;
       $_ = <INPUT>;
@@ -143,7 +163,7 @@ CONFIG_I2C_I801
   built as a module which can be inserted and removed while the kernel
   is running.
 
-Intel I810/I815
+Intel I810/I815 based Mainboard
 CONFIG_I2C_I810
   If you say yes to this option, support will be included for the 
   Intel I810/I815 mainboard I2C interfaces. The I2C busses these chips
@@ -161,7 +181,7 @@ CONFIG_I2C_PIIX4
   built as a module which can be inserted and removed while the kernel
   is running.
 
-Silicon Integrated Systems Corp. SiS5595
+Silicon Integrated Systems Corp. SiS5595 based Mainboard
 CONFIG_I2C_SIS5595
   If you say yes to this option, support will be included for the 
   SiS5595 mainboard I2C interfaces. For integrated sensors on the
@@ -273,6 +293,19 @@ CONFIG_SENSORS_FSCPOS
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Fujitsu-Siemens Scylla
+CONFIG_SENSORS_FSCSCY
+  If you say yes here you get support for the Fujitsu-Siemens Scylla
+  sensor chip.  This can also be built as a module. This driver may/should
+  also work with the following Fujitsu-Siemens chips: "Poseidon",
+  "Poseidon II" and "Hydra". You may have to force loading of the module
+  for motherboards in these cases. Be careful - those motherboards have
+  not been tested with this driver.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu
+
 Genesys Logic GL518SM
 CONFIG_SENSORS_GL518SM
   If you say yes here you get support for Genesys Logic GL518SM sensor
@@ -320,7 +353,7 @@ CONFIG_SENSORS_MTP008
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-National Semiconductor LM75 and compatibles
+National Semiconductors LM75 and compatibles
 CONFIG_SENSORS_LM75 
   If you say yes here you get support for National Semiconductor LM75
   sensor chips and clones: Dallas Semi DS75 and DS1775, TelCon
@@ -331,7 +364,7 @@ CONFIG_SENSORS_LM75
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-National Semiconductor LM78
+National Semiconductors LM78
 CONFIG_SENSORS_LM78
   If you say yes here you get support for National Semiconductor LM78
   sensor chips family: the LM78-J and LM79. Many clone chips will
@@ -343,7 +376,7 @@ CONFIG_SENSORS_LM78
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-National Semiconductor LM80
+National Semiconductors LM80
 CONFIG_SENSORS_LM80
   If you say yes here you get support for National Semiconductor LM80
   sensor chips. This can also be built as a module which can be 
@@ -353,7 +386,7 @@ CONFIG_SENSORS_LM80
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-National Semiconductor LM87
+National Semiconductors LM87
 CONFIG_SENSORS_LM87
   If you say yes here you get support for National Semiconductor LM87
   sensor chips. This can also be built as a module which can be 
@@ -363,7 +396,7 @@ CONFIG_SENSORS_LM87
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
-Silicon Integrated Systems Corp. SiS5595
+Silicon Integrated Systems Corp. SiS5595 Sensor
 CONFIG_SENSORS_SIS5595
   If you say yes here you get support for the integrated sensors in 
   SiS5595 South Bridges. This can also be built as a module 
@@ -757,6 +790,7 @@ obj-$(CONFIG_SENSORS_DDCMON)	+= ddcmon.o
 obj-$(CONFIG_SENSORS_DS1621)	+= ds1621.o
 obj-$(CONFIG_SENSORS_EEPROM)	+= eeprom.o
 obj-$(CONFIG_SENSORS_FSCPOS)	+= fscpos.o
+obj-$(CONFIG_SENSORS_FSCSCY)	+= fscscy.o
 obj-$(CONFIG_SENSORS_GL518SM)	+= gl518sm.o
 obj-$(CONFIG_SENSORS_GL520SM)	+= gl520sm.o
 obj-$(CONFIG_SENSORS_IT87)	+= it87.o
@@ -864,6 +898,14 @@ ifeq ($(CONFIG_SENSORS_FSCPOS),y)
 else
   ifeq ($(CONFIG_SENSORS_FSCPOS),m)
     M_OBJS += fscpos.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_FSCSCY),y)
+  L_OBJS += fscscy.o
+else
+  ifeq ($(CONFIG_SENSORS_FSCSCY),m)
+    M_OBJS += fscscy.o
   endif
 endif
 
