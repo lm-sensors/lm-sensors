@@ -74,14 +74,22 @@ SENSORS_INSMOD_1(lm83);
 #define LM83_REG_W_REMOTE3_HIGH  0x52
 
 /*
- * Conversions and initial values
+ * Conversions, initial values and various macros
  * The LM83 uses normal signed 8-bit values. We use the default initial
  * values.
  */
 
 #define TEMP_FROM_REG(val)  (val > 127 ? val-256 : val)
 #define TEMP_TO_REG(val)    (val < 0 ? val+256 : val)
+
 #define LM83_INIT_HIGH      127
+
+static const u8 LM83_REG_W_HIGH[] = {
+	LM83_REG_W_LOCAL_HIGH,
+	LM83_REG_W_REMOTE1_HIGH,
+	LM83_REG_W_REMOTE2_HIGH,
+	LM83_REG_W_REMOTE3_HIGH
+};
 
 /*
  * Functions declaration
@@ -92,15 +100,7 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	short flags, int kind);
 static void lm83_init_client(struct i2c_client *client);
 static int lm83_detach_client(struct i2c_client *client);
-static int lm83_read_value(struct i2c_client *client, u8 reg);
-static int lm83_write_value(struct i2c_client *client, u8 reg, u8 value);
-static void lm83_local_temp(struct i2c_client *client, int operation, int
-	ctl_name, int *nrels_mag, long *results);
-static void lm83_remote1_temp(struct i2c_client *client, int operation, int
-	ctl_name, int *nrels_mag, long *results);
-static void lm83_remote2_temp(struct i2c_client *client, int operation, int
-	ctl_name, int *nrels_mag, long *results);
-static void lm83_remote3_temp(struct i2c_client *client, int operation, int
+static void lm83_temp(struct i2c_client *client, int operation, int
 	ctl_name, int *nrels_mag, long *results);
 
 /*
@@ -129,10 +129,7 @@ struct lm83_data
 	unsigned long last_updated; /* in jiffies */
 
 	/* registers values */
-	u8 local_temp, local_high;
-	u8 remote1_temp, remote1_high;
-	u8 remote2_temp, remote2_high;
-	u8 remote3_temp, remote3_high;
+	u8 temp[4], temp_high[4];
 };
 
 /*
@@ -153,13 +150,13 @@ struct lm83_data
 static ctl_table lm83_dir_table_template[] =
 {
 	{LM83_SYSCTL_LOCAL_TEMP, "temp1", NULL, 0, 0644, NULL,
-	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_local_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_temp},
 	{LM83_SYSCTL_REMOTE1_TEMP, "temp2", NULL, 0, 0644, NULL,
-	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_remote1_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_temp},
 	{LM83_SYSCTL_REMOTE2_TEMP, "temp3", NULL, 0, 0644, NULL,
-	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_remote2_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_temp},
 	{LM83_SYSCTL_REMOTE3_TEMP, "temp4", NULL, 0, 0644, NULL,
-	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_remote3_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_temp},
 	{0}
 };
 
@@ -242,11 +239,11 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 
 	if (kind < 0) /* detection */
 	{
-		if (((lm83_read_value(new_client, LM83_REG_R_STATUS1)
+		if (((i2c_smbus_read_byte_data(new_client, LM83_REG_R_STATUS1)
 		      & 0xA8) != 0x00)
-		||  ((lm83_read_value(new_client, LM83_REG_R_STATUS2)
+		||  ((i2c_smbus_read_byte_data(new_client, LM83_REG_R_STATUS2)
 		      & 0x48) != 0x00)
-		||  ((lm83_read_value(new_client, LM83_REG_R_CONFIG)
+		||  ((i2c_smbus_read_byte_data(new_client, LM83_REG_R_CONFIG)
 		      & 0x41) != 0x00))
 		{
 #ifdef DEBUG
@@ -262,7 +259,7 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	{
 		unsigned char man_id;
 
-		man_id = lm83_read_value(new_client, LM83_REG_R_MAN_ID);
+		man_id = i2c_smbus_read_byte_data(new_client, LM83_REG_R_MAN_ID);
 		if (man_id == 0x01) /* National Semiconductor */
 			kind = lm83;
 	}
@@ -333,13 +330,13 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 
 static void lm83_init_client(struct i2c_client *client)
 {
-	lm83_write_value(client, LM83_REG_W_LOCAL_HIGH,
+	i2c_smbus_write_byte_data(client, LM83_REG_W_LOCAL_HIGH,
 	                 TEMP_TO_REG(LM83_INIT_HIGH));
-	lm83_write_value(client, LM83_REG_W_REMOTE1_HIGH,
+	i2c_smbus_write_byte_data(client, LM83_REG_W_REMOTE1_HIGH,
 	                 TEMP_TO_REG(LM83_INIT_HIGH));
-	lm83_write_value(client, LM83_REG_W_REMOTE2_HIGH,
+	i2c_smbus_write_byte_data(client, LM83_REG_W_REMOTE2_HIGH,
 	                 TEMP_TO_REG(LM83_INIT_HIGH));
-	lm83_write_value(client, LM83_REG_W_REMOTE3_HIGH,
+	i2c_smbus_write_byte_data(client, LM83_REG_W_REMOTE3_HIGH,
 	                 TEMP_TO_REG(LM83_INIT_HIGH));
 }
 
@@ -359,16 +356,6 @@ static int lm83_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-static int lm83_read_value(struct i2c_client *client, u8 reg)
-{
-	return i2c_smbus_read_byte_data(client, reg);
-}
-
-static int lm83_write_value(struct i2c_client *client, u8 reg, u8 value)
-{
-	return i2c_smbus_write_byte_data(client, reg, value);
-}
-
 static void lm83_update_client(struct i2c_client *client)
 {
 	struct lm83_data *data = client->data;
@@ -381,22 +368,22 @@ static void lm83_update_client(struct i2c_client *client)
 #ifdef DEBUG
 		printk("lm83.o: Updating LM83 data.\n");
 #endif
-		data->local_temp =
-			lm83_read_value(client, LM83_REG_R_LOCAL_TEMP);
-		data->remote1_temp =
-			lm83_read_value(client, LM83_REG_R_REMOTE1_TEMP);
-		data->remote2_temp =
-			lm83_read_value(client, LM83_REG_R_REMOTE2_TEMP);
-		data->remote3_temp =
-			lm83_read_value(client, LM83_REG_R_REMOTE3_TEMP);
-		data->local_high =
-			lm83_read_value(client, LM83_REG_R_LOCAL_HIGH);
-		data->remote1_high =
-			lm83_read_value(client, LM83_REG_R_REMOTE1_HIGH);
-		data->remote2_high =
-			lm83_read_value(client, LM83_REG_R_REMOTE2_HIGH);
-		data->remote3_high =
-			lm83_read_value(client, LM83_REG_R_REMOTE3_HIGH);
+		data->temp[0] =
+			i2c_smbus_read_byte_data(client, LM83_REG_R_LOCAL_TEMP);
+		data->temp[1] =
+			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE1_TEMP);
+		data->temp[2] =
+			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE2_TEMP);
+		data->temp[3] =
+			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE3_TEMP);
+		data->temp_high[0] =
+			i2c_smbus_read_byte_data(client, LM83_REG_R_LOCAL_HIGH);
+		data->temp_high[1] =
+			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE1_HIGH);
+		data->temp_high[2] =
+			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE2_HIGH);
+		data->temp_high[3] =
+			i2c_smbus_read_byte_data(client, LM83_REG_R_REMOTE3_HIGH);
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -404,98 +391,28 @@ static void lm83_update_client(struct i2c_client *client)
 	up(&data->update_lock);
 }
 
-static void lm83_local_temp(struct i2c_client *client, int operation, int
+static void lm83_temp(struct i2c_client *client, int operation, int
 	ctl_name, int *nrels_mag, long *results)
 {
 	struct lm83_data *data = client->data;
-	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
-	else if (operation == SENSORS_PROC_REAL_READ)
-	{
-		lm83_update_client(client);
-		results[0] = TEMP_FROM_REG(data->local_high);
-		results[1] = TEMP_FROM_REG(data->local_temp);
-		*nrels_mag = 2;
-	}
-	else if (operation == SENSORS_PROC_REAL_WRITE)
-	{
-		if (*nrels_mag >= 1)
-		{
-			data->local_high = TEMP_TO_REG(results[0]);
-			lm83_write_value(client, LM83_REG_W_LOCAL_HIGH,
-					    data->local_high);
-		}
-	}
-}
+	int nr = ctl_name - LM83_SYSCTL_LOCAL_TEMP;
 
-static void lm83_remote1_temp(struct i2c_client *client, int operation, int
-	ctl_name, int *nrels_mag, long *results)
-{
-	struct lm83_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
+		*nrels_mag = 0; /* magnitude */
 	else if (operation == SENSORS_PROC_REAL_READ)
 	{
 		lm83_update_client(client);
-		results[0] = TEMP_FROM_REG(data->remote1_high);
-		results[1] = TEMP_FROM_REG(data->remote1_temp);
+		results[0] = TEMP_FROM_REG(data->temp_high[nr]);
+		results[1] = TEMP_FROM_REG(data->temp[nr]);
 		*nrels_mag = 2;
 	}
 	else if (operation == SENSORS_PROC_REAL_WRITE)
 	{
 		if (*nrels_mag >= 1)
 		{
-			data->remote1_high = TEMP_TO_REG(results[0]);
-			lm83_write_value(client, LM83_REG_W_REMOTE1_HIGH,
-					    data->remote1_high);
-		}
-	}
-}
-
-static void lm83_remote2_temp(struct i2c_client *client, int operation, int
-	ctl_name, int *nrels_mag, long *results)
-{
-	struct lm83_data *data = client->data;
-	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
-	else if (operation == SENSORS_PROC_REAL_READ)
-	{
-		lm83_update_client(client);
-		results[0] = TEMP_FROM_REG(data->remote2_high);
-		results[1] = TEMP_FROM_REG(data->remote2_temp);
-		*nrels_mag = 2;
-	}
-	else if (operation == SENSORS_PROC_REAL_WRITE)
-	{
-		if (*nrels_mag >= 1)
-		{
-			data->remote2_high = TEMP_TO_REG(results[0]);
-			lm83_write_value(client, LM83_REG_W_REMOTE2_HIGH,
-					    data->remote2_high);
-		}
-	}
-}
-
-static void lm83_remote3_temp(struct i2c_client *client, int operation, int
-	ctl_name, int *nrels_mag, long *results)
-{
-	struct lm83_data *data = client->data;
-	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
-	else if (operation == SENSORS_PROC_REAL_READ)
-	{
-		lm83_update_client(client);
-		results[0] = TEMP_FROM_REG(data->remote3_high);
-		results[1] = TEMP_FROM_REG(data->remote3_temp);
-		*nrels_mag = 2;
-	}
-	else if (operation == SENSORS_PROC_REAL_WRITE)
-	{
-		if (*nrels_mag >= 1)
-		{
-			data->remote3_high = TEMP_TO_REG(results[0]);
-			lm83_write_value(client, LM83_REG_W_REMOTE3_HIGH,
-					    data->remote3_high);
+			data->temp_high[nr] = TEMP_TO_REG(results[0]);
+			i2c_smbus_write_byte_data(client, LM83_REG_W_HIGH[nr],
+					    data->temp_high[nr]);
 		}
 	}
 }
