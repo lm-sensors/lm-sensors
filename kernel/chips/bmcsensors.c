@@ -35,7 +35,7 @@
 
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
 static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
-static unsigned int normal_isa[] = { 0, SENSORS_ISA_END };
+static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 SENSORS_INSMOD_1(bmcsensors);
@@ -76,6 +76,7 @@ static void bmcsensors_dec_use(struct i2c_client *client);
 static void bmcsensors_update_client(struct i2c_client *client);
 static void bmcsensors_init_client(struct i2c_client *client);
 static int bmcsensors_find(int *address);
+static void bmcsensors_reserve_sdr(void);
 
 
 static void bmcsensors_all(struct i2c_client *client, int operation,
@@ -162,8 +163,11 @@ static unsigned char rx_msg_data[IPMI_MAX_MSG_LENGTH + 50]; /* sloppy */
 int rx_msg_data_offset;
 static long msgid;		/* message ID */
 static u16 resid;
+static u16 nextrecord;
+int errorcount;
 
-enum states {STATE_INIT, STATE_RESERVE, STATE_SDR, STATE_SDRPARTIAL, STATE_READING, STATE_DONE};
+enum states {STATE_INIT, STATE_RESERVE, STATE_SDR, STATE_SDRPARTIAL,
+             STATE_READING, STATE_UNCANCEL, STATE_DONE};
 int state;
 static int receive_counter;
 
@@ -183,11 +187,10 @@ static int receive_counter;
 #define STYPE_CURR	0x03
 #define STYPE_FAN	0x04
 
-/* get rid of this ***************/
-#define STYPE_MAX	0x29		/* the last sensor type we are interested in */
-static u8 bmcs_count[STYPE_MAX + 1] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const u8 bmcs_max[STYPE_MAX + 1] = {
-0, 10, 10, 10, 10, 0, 0, 0}; /* more zeros*/
+/* do we really need maximums per-type? */
+#define STYPE_MAX	4		/* the last sensor type we are interested in */
+static u8 bmcs_count[STYPE_MAX + 1] = {0,0,0,0,0};
+static const u8 bmcs_max[STYPE_MAX + 1] = {0, 20, 20, 20, 20};
 
 /************************************/
 
@@ -292,21 +295,21 @@ static void bmcsensors_select_thresholds(int i)
 	if(sdrd[i].lim1 >= 0)
 		printk(KERN_INFO "bmcsensors.o: sensor %d: using %s for upper limit\n",
 			i, threshold_text[sdrd[i].lim1]);
-/*
+#ifdef DEBUG
 	else
 		printk(KERN_INFO "bmcsensors.o: sensor %d: no readable upper limit\n", i);
-*/
+#endif
 	if(sdrd[i].lim2 >= 0)
 		printk(KERN_INFO "bmcsensors.o: sensor %d: using %s for lower limit\n",
 			i, threshold_text[sdrd[i].lim2]);
-/*
+#ifdef DEBUG
 	else
 		printk(KERN_INFO "bmcsensors.o: sensor %d: no readable lower limit\n", i);
-*/
+#endif
 }
 
 /* After we have received all the SDR entries and picked out the ones
-   we are interested in, build a table of the /proc entries and register.
+   we are interested in, build a table of the /proc entries and register with i2c.
 */
 static void bmcsensors_build_proc_table()
 {
@@ -364,21 +367,24 @@ static void bmcsensors_build_proc_table()
 			i, sdrd[i].stype, sdrd[i].format,
 			sdrd[i].m, sdrd[i].b,sdrd[i].k & 0xf, sdrd[i].k >> 4,
 			sdrd[i].capab, sdrd[i].thresh_mask);
-		if(sdrd[i].id_length) {
+		if(sdrd[i].id_length > 0) {
 			ipmi_sprintf(id, sdrd[i].id, sdrd[i].string_type, sdrd[i].id_length);
 			printk(KERN_INFO "bmcsensors.o: sensors.conf: label %s \"%s\"\n",
 				bmcsensors_dir_table[i].procname, id);
 		}
 		bmcsensors_select_thresholds(i);
 		if(sdrd[i].linear != 0) {
-			printk(KERN_INFO "bmcsensors.o: sensor %d: nonlinear function 0x%.2x unsupported\n",
-				i, sdrd[i].linear);
+			printk(KERN_INFO
+			       "bmcsensors.o: sensor %d: nonlinear function 0x%.2x unsupported, expect bad results\n",
+			       i, sdrd[i].linear);
 		}
 		if((sdrd[i].format & 0x03) == 0x02) {
-			printk(KERN_INFO "bmcsensors.o: sensor %d: 1's complement format unsupported\n",
+			printk(KERN_INFO
+			       "bmcsensors.o: sensor %d: 1's complement format unsupported, expect bad results\n",
 				i);
 		} else if((sdrd[i].format & 0x03) == 0x03) {
-			printk(KERN_INFO "bmcsensors.o: sensor %d: threshold sensor only, no readings available",
+			printk(KERN_INFO
+			       "bmcsensors.o: sensor %d: threshold sensor only, no readings available",
 				i);
 		}
 		if(sdrd[i].lim1_write || sdrd[i].lim2_write)
@@ -389,8 +395,8 @@ static void bmcsensors_build_proc_table()
 	bmcsensors_dir_table[sdrd_count].ctl_name = 0;
 
 	if ((i = i2c_register_entry(&bmc_client, "bmc",
-					bmcsensors_dir_table,
-					THIS_MODULE)) < 0) {
+				    bmcsensors_dir_table,
+				    THIS_MODULE)) < 0) {
 		printk(KERN_INFO "bmcsensors.o: i2c registration failed.\n");
 		kfree(bmcsensors_dir_table);
 		kfree(bmcsensors_proc_name_pool);
@@ -425,21 +431,23 @@ static int bmcsensors_rcv_reading_msg(struct ipmi_msg *msg)
 		receive_counter = 0;
 		return STATE_DONE;
 	}
-	bmcsensors_get_reading(&bmc_client, receive_counter); /* don't really need to pass client */
+	/* don't really need to pass client */
+	bmcsensors_get_reading(&bmc_client, receive_counter);
 	return STATE_READING; 
 }
 
-/* Process a SDR response */
+/* Process an SDR response, save the SDR's we like in the sdrd table */
 static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 {
-	u16 record, nextrecord;
-	int version, type, length, owner, lun, number, entity, instance, init;
+	u16 record;
+	int type, length, owner, lun, number, entity, instance, init;
 	int stype, code;
 	int id_length;
 	int i;
 	int rstate = STATE_SDR;
 	struct ipmi_msg txmsg;
 	unsigned char * data;
+	u8 id[SDR_MAX_UNPACKED_ID_LENGTH];
 
 
 	if(msg->data[0] != 0) {
@@ -449,7 +457,9 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 			printk(KERN_INFO "bmcsensors.o: IPMI buffers too small, giving up\n");
 			return STATE_DONE;
 		}
+#ifdef DEBUG
 		printk(KERN_INFO "bmcsensors.o: Reducing SDR request size to %d\n", ipmi_sdr_partial_size);
+#endif
 		bmcsensors_get_sdr(resid, 0, 0);
 		return STATE_SDR;
 	}
@@ -476,81 +486,114 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 	}
 
 	nextrecord = (data[2] << 8) | data[1];
-	version = data[5];
 	type = data[6];
 	if(type == 1 || type == 2) {		/* known SDR type */
 /*
+		version = data[5];
 		owner = data[8];
 		lun = data[9];
 		entity = data[11];
 		init = data[13];
 */
 		stype = data[15];
-
 		if(stype <= STYPE_MAX) {	/* known sensor type */
 			if(bmcs_count[stype] >= bmcs_max[stype]) {
-				if(bmcs_max[stype] > 0) {
-					printk(KERN_INFO "bmcsensors.o: Limit of %d exceeded for sensor type 0x%x\n", bmcs_max[stype], stype);
+				if(bmcs_max[stype] > 0)
+					printk(KERN_INFO
+					       "bmcsensors.o: Limit of %d exceeded for sensor type 0x%x\n",
+					       bmcs_max[stype], stype);
 #ifdef DEBUG
-				} else {
-					printk(KERN_INFO "bmcsensors.o: Ignoring unsupported sensor type 0x%x\n", stype);
+				else
+					printk(KERN_INFO
+					       "bmcsensors.o: Ignoring unsupported sensor type 0x%x\n",
+					       stype);
 #endif
-				}
+			} else if(sdrd_count >= MAX_SDR_ENTRIES) {
+				printk(KERN_INFO
+				       "bmcsensors.o: Limit of %d exceeded for total sensors\n",
+				       MAX_SDR_ENTRIES);
+				nextrecord = 0xffff;
+			} else if(data[16] != 0x01) {
+				if(type == 1)
+					ipmi_sprintf(id, &data[51], data[50] >> 6, data[50] & 0x1f);
+				else
+					ipmi_sprintf(id, &data[35], data[34] >> 6, data[34] & 0x1f);
+				printk(KERN_INFO
+				       "bmcsensors.o: skipping non-threshold sensor \"%s\"\n",
+				       id);
 			} else {
-				if(sdrd_count >= MAX_SDR_ENTRIES) {
-					printk(KERN_INFO "bmcsensors.o: Limit of %d exceeded for total sensors\n", MAX_SDR_ENTRIES);
+				/* add entry to sdrd table */
+				sdrd[sdrd_count].stype = stype;
+				sdrd[sdrd_count].number = data[10];
+				sdrd[sdrd_count].capab = data[14];
+				sdrd[sdrd_count].thresh_mask = (((u16) data[22]) << 8) | data[21];
+				if(type == 1) {
+					sdrd[sdrd_count].format = data[24] >> 6;
+					sdrd[sdrd_count].linear = data[26] & 0x7f;
+					sdrd[sdrd_count].m = data[27];
+					sdrd[sdrd_count].m |= ((u16) (data[28] & 0xc0)) << 2;
+					if(sdrd[sdrd_count].m & 0x0200)
+						sdrd[sdrd_count].m |= 0xfc00;	/* sign extend */
+					sdrd[sdrd_count].b = data[29];
+					sdrd[sdrd_count].b |= ((u16) (data[30] & 0xc0)) << 2;
+					if(sdrd[sdrd_count].b & 0x0200)
+						sdrd[sdrd_count].b |= 0xfc00;	/* sign extend */
+					sdrd[sdrd_count].k = data[32];
+					sdrd[sdrd_count].nominal = data[34];
+					for(i = 0; i < SDR_LIMITS; i++)		/* assume readable */
+						sdrd[sdrd_count].limits[i] = data[39 + i];
+					sdrd[sdrd_count].string_type = data[50] >> 6;
+					id_length = data[50] & 0x1f;
+					memcpy(sdrd[sdrd_count].id, &data[51], id_length);
+					sdrd[sdrd_count].id_length = id_length;
 				} else {
-					/* add SDR database entry */
-					sdrd[sdrd_count].stype = stype;
-					sdrd[sdrd_count].number = data[10];
-					sdrd[sdrd_count].capab = data[14];
-					sdrd[sdrd_count].thresh_mask = (data[22] << 8) | data[21];
-					if(type == 1) {
-						sdrd[sdrd_count].format = data[24] >> 6;
-						sdrd[sdrd_count].linear = data[26] & 0x7f;
-						sdrd[sdrd_count].m = data[27];
-						sdrd[sdrd_count].m |= ((u16) (data[28] & 0xc0)) << 2;
-						if(sdrd[sdrd_count].m & 0x0200)
-							sdrd[sdrd_count].m |= 0xfc00;	/* sign extend */
-						sdrd[sdrd_count].b = data[29];
-						sdrd[sdrd_count].b |= ((u16) (data[30] & 0xc0)) << 2;
-						if(sdrd[sdrd_count].b & 0x0200)
-							sdrd[sdrd_count].b |= 0xfc00;	/* sign extend */
-						sdrd[sdrd_count].k = data[32];
-						sdrd[sdrd_count].nominal = data[34];
-						for(i = 0; i < SDR_LIMITS; i++)		/* assume readable */
-							sdrd[sdrd_count].limits[i] = data[39 + i];
-						sdrd[sdrd_count].string_type = data[50] >> 6;
-						id_length = data[50] & 0x1f;
-						if(id_length > 0)
-							memcpy(sdrd[sdrd_count].id, &data[51], id_length);
-						sdrd[sdrd_count].id_length = id_length;
-					} else {
-						sdrd[sdrd_count].m = 1;
-						sdrd[sdrd_count].b = 0;
-						sdrd[sdrd_count].k = 0;
-						sdrd[sdrd_count].string_type = data[34] >> 6;
-						id_length = data[34] & 0x1f;
-						if(id_length > 0)
-							memcpy(sdrd[sdrd_count].id, &data[35], id_length);
-						sdrd[sdrd_count].id_length = id_length;
-						/* limits?? */
-					}
-					bmcs_count[stype]++;
-					sdrd_count++;
+					sdrd[sdrd_count].m = 1;
+					sdrd[sdrd_count].b = 0;
+					sdrd[sdrd_count].k = 0;
+					sdrd[sdrd_count].string_type = data[34] >> 6;
+					id_length = data[34] & 0x1f;
+					if(id_length > 0)
+						memcpy(sdrd[sdrd_count].id, &data[35], id_length);
+					sdrd[sdrd_count].id_length = id_length;
+					/* limits?? */
 				}
+				bmcs_count[stype]++;
+				sdrd_count++;
 			}
 		}
+#ifdef DEBUG
+	/* peek at the other SDR types */
+	} else if(type == 0x10 || type == 0x11 || type == 0x12) {
+		ipmi_sprintf(id, data + 19, data[18]>>6, data[18] & 0x1f);
+		if(type == 0x10) {
+			printk(KERN_INFO "bmcsensors.o: Generic Device acc=0x%x; slv=0x%x; lun=0x%x; type=0x%x; \"%s\"\n",
+				data[8], data[9], data[10], data[13], id);
+		else if(type == 0x11) {
+			printk(KERN_INFO "bmcsensors.o: FRU Device acc=0x%x; slv=0x%x; log=0x%x; ch=0x%x; type=0x%x; \"%s\"\n",
+				data[8], data[9], data[10], data[11], data[13], id);
+		} else {
+			printk(KERN_INFO "bmcsensors.o: Mgmt Ctllr Device slv=0x%x; \"%s\"\n",
+				data[8], id);
+		}
+	} else if(type == 0x14) {
+		printk(KERN_INFO "bmcsensors.o: Message Channel Info Records:\n");
+		for(i = 0; i < 8; i++) {
+			printk(KERN_INFO "bmcsensors.o: Channel %d info 0x%x\n",
+				i, data[9 + i]);
+		}
+	} else {
+		printk(KERN_INFO "bmcsensors.o: Skipping SDR type 0x%x\n", type);
+#endif
 	}
 			
 	if(nextrecord == 0xFFFF) {
-		rstate = STATE_READING;
 		if(sdrd_count == 0) {
 			printk(KERN_INFO "bmcsensors.o: No recognized sensors found.\n");
+			rstate = STATE_DONE;
+			/* unregister?? */
 		} else {
-			printk(KERN_INFO "bmcsensors.o: found %d temp, %d volt, %d current, %d fan sensors\n",
-bmcs_count[1], bmcs_count[2], bmcs_count[3], bmcs_count[4]);
 			bmcsensors_build_proc_table();
+			rstate = STATE_READING;
 		}
 	} else {
 		bmcsensors_get_sdr(resid, nextrecord, 0);
@@ -565,7 +608,10 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 	switch(state) {
 		case STATE_INIT:
 		case STATE_RESERVE:
-			resid = (msg->data[2] << 8) || msg->data[1];
+			resid = (((u16)msg->data[2]) << 8) || msg->data[1];
+#ifdef DEBUG
+			printk(KERN_INFO "bmcsensors.o: Got first resid 0x%.4x\n", resid);
+#endif
 			bmcsensors_get_sdr(resid, 0, 0);
 			state = STATE_SDR;
 			break;
@@ -577,6 +623,16 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 
 		case STATE_READING:
 			state = bmcsensors_rcv_reading_msg(msg);
+			break;
+
+		case STATE_UNCANCEL:
+			resid = (((u16)msg->data[2]) << 8) || msg->data[1];
+#ifdef DEBUG
+			printk(KERN_INFO "bmcsensors.o: Got new resid 0x%.4x\n", resid);
+#endif
+			rx_msg_data_offset = 0;
+			bmcsensors_get_sdr(resid, nextrecord, 0);
+			state = STATE_SDR;
 			break;
 
 		case STATE_DONE:
@@ -592,9 +648,20 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 static void bmcsensors_msg_handler(struct ipmi_recv_msg *msg,
 				   void * handler_data)
 {
-	if (msg->msg.data[0] != 0 && msg->msg.data[0] != 0xca) {
-		printk(KERN_ERR "BMCsensors response: Error %x on cmd %x; state = %d; probably fatal.\n",
-		       msg->msg.data[0], msg->msg.cmd, state);
+	if(state == STATE_SDR && msg->msg.data[0] == 0xc5) {
+		/* )(*&@(*&#@$ reservation cancelled, get new resid */
+		if(errorcount++ > 200) {
+			printk(KERN_ERR
+			       "bmcsensors.o: Too many reservations cancelled, giving up\n");
+			state = STATE_DONE;
+		} else {
+			bmcsensors_reserve_sdr();
+			state = STATE_UNCANCEL;
+		}
+	} else if (msg->msg.data[0] != 0 && msg->msg.data[0] != 0xca) {
+		printk(KERN_ERR
+		       "bmcsensors.o: Error 0x%x on cmd 0x%x/0x%x; state = %d; probably fatal.\n",
+		       msg->msg.data[0], msg->msg.netfn & 0xfe, msg->msg.cmd, state);
 	} else {
 		bmcsensors_rcv_msg(&(msg->msg));
 	}       
@@ -610,9 +677,6 @@ static void bmcsensors_send_message(struct ipmi_msg * msg)
 	printk(KERN_INFO "bmcsensors.o: Send BMC msg, cmd: 0x%x\n",
 		       msg->cmd);
 #endif
-/*
-	bmcclient_i2c_send_message(&bmc_client, msgid++, msg);
-*/
 	bmc_client.adapter->algo->slave_send((struct i2c_adapter *) &bmc_client,
 	                                     (char *) msg, msgid++);
 
