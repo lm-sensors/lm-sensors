@@ -82,9 +82,9 @@ ask CVS about it:
                           Fix DS1621 detection
                           Add W83627EHF detection
                           Add ATI SMBus detection
-                          Add VT1211 alias detection	
+                          Add VT1211 alias detection
                           Warn if chip modules not found
-                          Add i2c-ipmi to list if bmcsensors is on it			
+                          Add i2c-ipmi to list if bmcsensors is on it
                           Add PC87591 detection
                           Search for correct udev db file name
                           Add nForce3 250Gb and nForce4 detection
@@ -262,7 +262,7 @@ ask CVS about it:
   Module i2c-piix4: Don't blacklist IBM with Serverworks chip
   Module i2c-sis645: Add support for SiS655
   Module it87: Discard non-standard Super-I/O exit sequence (Bjorn Mork)
-  Module lm90: Support LM99 and LM89 
+  Module lm90: Support LM99 and LM89
   Module lm92: Support MAX6633, MAX6634, MAX6635 and LM76
                Get rid of useless i2c_probe call
   Module max1619: New (Alexey Fisher)
@@ -458,7 +458,7 @@ ask CVS about it:
                    Cleanup FSC chips prints
   Program sensors-detect: Fix PATH issues
                           Correctly point to the fscher driver
-  
+
 
 2.8.3 (20040115)
   File lm_sensors.spec: Update
@@ -628,7 +628,7 @@ ask CVS about it:
                           Handle the one-address-many-chips-same-driver
                           case
 
-                          
+
 2.8.0 (20030714)
   NOTE: Requires i2c-2.8.0 or newer!!!
   Dropped all kernel 2.2 and 2.3 compatibility; 2.4.9 or later required;
@@ -743,7 +743,7 @@ ask CVS about it:
   Makefile: Take kernel source location from /lib/modules/x.x.x/build;
             add flags for x86_64 compiles
   Module adm1021: Add support for MC1066
-  Module bmcsensors: New	
+  Module bmcsensors: New
   Module dmi_scan: Rename symbol duplicated in kernel; apply fixes from
                    kernel 2.5.43; fix 2.2 kernel compiles
   Module gl518sm: Iterate allowed only for rev 0x00
@@ -935,8 +935,8 @@ ask CVS about it:
                       fscpos, it87, maxilife, mtp008
   Program sensors: Fix w83781d temp precision
   Program sensors-detect: Add ALI1535, Via VT8233, it87 (i2c),
-                          Fujitsu Poseidon and Scylla,  
-                          Intel 82443MX and 82801CA/CAM detection,			
+                          Fujitsu Poseidon and Scylla,
+                          Intel 82443MX and 82801CA/CAM detection,
                           add ITE 8172G detection (driver in kernel 2.4.10)
 
 2.6.1 (20010830)
@@ -1154,7 +1154,7 @@ ask CVS about it:
   Updates and fixes for device detection
 
 2.4.0 (19990920)
-  Too much to list. 
+  Too much to list.
   i2c and smbus parts are split off to a separate i2c package.
   New drivers and other stuff.
 
@@ -1183,7 +1183,7 @@ ask CVS about it:
   Module i2c-proc: Buffer overflow removed: `less /proc/bus-i2c-0' now works
   Module w83781d: Removed deadlock (mutex was not initialized)
   Documentation: A few glitches removed
-  Makefile: default module installation directory is now 
+  Makefile: default module installation directory is now
             /lib/modules/current/extra/misc
   Program sensors-detect: PPC Hydra now detected
   Program sensors: Now prints complete GL518SM information
@@ -1210,7 +1210,7 @@ ask CVS about it:
   Module i2c-dev: Small bug removed if DEBUG=1 was used
   Module sis5595: Now compiles for 2.0 kernels
   Module adm1021: Detection corrected
-  
+
 2.2.0 (19990216)
   All: Set copyrights to include 1999
   All: Small bugfixes
@@ -1228,7 +1228,7 @@ ask CVS about it:
   Program doc-features: NEW
   Program sensors: Added man-page
   Document BUGS: Added cdrom bug and kernel i2c conflict
-  
+
 2.1.2 (19990116)
   Modules lm80.o, w83781d.o: fan-related Segmentation fault corrected
   Module gl518sm.o: yet more bug fixes. It should at long last be usable now
@@ -1251,7 +1251,7 @@ ask CVS about it:
   Module gl518sm.o: new procfile beep, several small updates
   Modules: Now use pin readings, no more scaling within the kernel (use the
            library instead)
-  
+
 2.0.2 (19981214)
   Module eeprom.o: NEW
   Program decode-dimms: NEW
