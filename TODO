@@ -12,11 +12,8 @@ I2C CODE CHANGES
 KERNEL MODULES
 ==============
 
-* linux/Documentation/devices.txt lists i2c0, i2c1 etc. instead of i2c-0, i2c-1
 * LM78 detection: Tom Webster has proven that the reset bit in the 
   id register can be one (strange!)
-* Check for kernel 2.0.8 warnings
-* Increase use count of adapter driver if directory of chip is entered
 * maxilife.c: Introduce new insmod variables
 * maxilife.c: Round REG_TO_VID correctly
 * icspll.c: Rewrite. The current implementation simply can't work at all.
@@ -26,24 +23,10 @@ KERNEL MODULES
   Also, alarms seem to give strange results
   sometimes, and there are some other minor problems, as indicated by
   Jonathan Bradshaw <jonathan@NrgUp.Com>
-* Create wait-queues for bus locking instead of pure semaphores in the i2c
-  base modules, to make it more interactive (right now one process can 
-  monopolize the entire adapter)
-* Find some solution for block reads in smbus-on-i2c emulation code
-  We need a hack in the i2c level code for this :-(
-* At least the bit-lp and bit-velle modules do no detection on loading;
-  ask Simon whether this is possible to add.
 * Support 10-bit addresses. At this moment, they are supported nowhere, except
   in Simon Vogl's i2c modules.
-* Change the i2c modules to keep the namespace clean (EXPORT_SYMBOL does not
-  work for us; many static declarations need to be added; better ask Simon
-  Vogl first)
-* Make it SMP-safe: there are no spinlocks yet. They are needed at many
-  places, probably (everywhere where global vars are accessed). This must be
-  done for the i2c modules, too.
 * Better general locking, or at least a once-over to check no race-conditions
   remain. This is part of the SMP-safeness, and can better be done at once.
-* Register which i2c addresses are used (a la ISA) for each adapter.
 * Test SIS5595(/91/98) sensor support. Write generic i2c support. 
   Thomas Dickel <Thomas.Dickel@mni.fh-giessen.de> owns one SIS5595.
 * adm9240: check whether the current voltage computations are correct.
@@ -53,6 +36,11 @@ KERNEL MODULES
   something completely different from the description at page 25.
 * gl518sm: Assume that new values are close to old values, so start with
   trying to use a small range near the old values (already partially done)
+* lm78: Quote (gtoumi@messel.emse.fr)
+  exept the ALARM signals in front of non-working/non-presents fans : 
+  using the smbus adapter, the program sensors show the ALARM signal, 
+  but not when it uses the isa adapter
+
 
 LIBRARY
 =======
