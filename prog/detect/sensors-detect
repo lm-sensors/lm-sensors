@@ -3110,7 +3110,7 @@ sub lm83_detect
 # $_[2]: Address
 # Returns: undef if not detected, 4, 6 or 8 if detected.
 #   The Maxim chips have a low confidence value (4)
-#   because the die revision codes are not known.
+#   because they don't have a die revision register.
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
@@ -3153,9 +3153,11 @@ sub lm90_detect
     return 8 if ($cid & 0xf0) == 0x40; # ADM1032
   }
   if ($chip == 4) {
-    return if ($conf & 0x1f) != 0;
+    return if ($conf & 0x1f) != ($mid & 0x0f); # No low nibble,
+                                               # returns previous low nibble
     return if $rate > 0x09;
     return if $mid != 0x4d;     # Maxim
+    return if $cid != 0x4d;     # No register, returns previous value
     return 4;
   }
   if ($chip == 5) {
