@@ -261,21 +261,13 @@ else
 	-/sbin/depmod -a -b $(DESTDIR)
 endif
 	@echo "*** Installation successful!"
-	@echo "*** Important notes:"
-	@echo "*** 1* The libsensors configuration file ($(ETCDIR)/sensors.conf) is never"
+	@echo "*** Important note:"
+	@echo "***  * The libsensors configuration file ($(ETCDIR)/sensors.conf) is never"
 	@echo "***    overwritten by our installation process, so that you won't lose"
 	@echo "***    your personal settings in that file. You still can get our latest"
 	@echo "***    default config file in etc/sensors.conf.eg and manually copy it to"
 	@echo "***    $(ETCDIR)/sensors.conf if you want. You will then want to edit it"
 	@echo "***    to fit your needs again."
-	@echo "*** 2* The dmidecode tool ($(SBINDIR)/dmidecode) is not necessarily"
-	@echo "***    overwritten either, because we don't distribute the latest version."
-	@echo "***    If you know you have an old one (1.7 or earlier), you should copy"
-	@echo "***    our version (prog/detect/dmidecode) to $(SBINDIR)/dmidecode. Our"
-	@echo "***    installation process relies on a simple date comparison to decide"
-	@echo "***    wether or not it should overwrite the file, but the trick may"
-	@echo "***    fail if for any reason you installed an old verion of dmidecode"
-	@echo "***    at a time a newer version was available."
 
 clean::
 	$(RM) lm_sensors-*
