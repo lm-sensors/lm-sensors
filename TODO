@@ -16,6 +16,8 @@ KERNEL MODULES
   correctly now, and it is possible to rmmod adapter while one of its
   clients is in use.
 
+* "uninstall" Makefile target.
+
 * mkpatch. Trace back Configure changes from 2.5 tree and
   have it make clean diffs.
   Applies to both i2c and sensors.
