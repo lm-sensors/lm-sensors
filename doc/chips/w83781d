@@ -154,7 +154,8 @@ Known problems:
 	  value, so there is no fix. The workaround is to use the
           force_CHIP parameter.
 	  (modprobe w83781d force_CHIP=BUS,0x2d where CHIP is the chip name
-	   and BUS is your i2c bus number)
+	   and BUS is your i2c bus number -
+	   cat /proc/bus/i2c to see a list of bus numbers)
 
 
 AS99127F PROBLEMS

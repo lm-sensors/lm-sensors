@@ -69,6 +69,7 @@ sensor reading results. Why?
   4.17B Bad readings from the VIA 686A!
   4.17C Bad readings from the MTP008!
   4.17D Bad temperature readings from the SIS5595!
+  4.17E Bad readings from a w8378[12]d!
 4.18 How do I configure two chips (LM87) differently?
 4.19 Dmesg says Upgrade BIOS! I don't want to!
 4.20 Sensors says 'Can't access /proc file'
@@ -645,6 +646,21 @@ See doc/chips/mtp008 for details.
 two different versions of the chip. We are trying to get the driver
 working better and develop formulas for different thermistors
 but we aren't there yet. Sorry.
+Also, many times the chip isn't really a sis5595 but it was
+misidentified. We are working on improving that too.
+
+
+4.17E Bad readings from a w8378[12]d!
+
+    Do you own an ASUS motherboard?  Perhaps your chip is being
+misidentified.  Look on the motherboard (or at
+http://mbm.livewiredev.com) for a 'Winbond' or Asus chip.
+Often the real device is an Asus as99127f. If so, the driver can be
+forced to recognize the as99127f with
+'force_as99127f=BUS,0x2d' where BUS is your i2c bus number.
+Cat /proc/bus/i2c to see a list of bus numbers.
+Read the w83781d module documentation (doc/chips/w83781d)
+for more details.
 
 
 4.18 How do I configure two chips (LM87) differently?
