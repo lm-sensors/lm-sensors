@@ -80,7 +80,7 @@ User Interface
 #PROCHOT:
 
 The LM93 can monitor two #PROCHOT signals.  The results are found in the
-/proc files prochot1 and prochot2.  There are two values per file: the first
+/proc files prochot1 and prochot2.  There are three values per file: the first
 value is the user limit.  The second value is the current reading for the
 most recent complete time interval.  The third value is something like a
 2 period exponential moving average (but not quite - check the datasheet).
@@ -155,12 +155,109 @@ that this parameter has implications for the Smart Tach Mode (see above).
 
 PWM Output Frequencies: 12, 36, 48, 60, 72, 84, 96, 22500 (h/w default)
 
+Automatic PWM:
+
+The LM93 is capable of complex automatic fan control, with many different
+points of configuration.  To start, each PWM output can be bound to any 
+combination of eight control sources.  The final PWM is the largest of all
+individual control sources to which the PWM output is bound.
+
+The eight control sources are: temp1-temp4 (aka "zones" in the datasheet),
+#PROCHOT 1 & 2, and #VRDHOT 1 & 2.  The bindings are expressed as a bitmask
+in the /proc files pwm<n>_auto_channels, where a "1" enables the binding, and
+ a "0" disables it. The h/w default is 0x0f (all temperatures bound).
+
+	0x01 - Temp 1
+	0x02 - Temp 2
+	0x04 - Temp 3
+	0x08 - Temp 4
+	0x10 - #PROCHOT 1
+	0x20 - #PROCHOT 2
+	0x40 - #VRDHOT 1
+	0x80 - #VRDHOT 2
+
+The function y = f(x) takes a source temperature x to a PWM output y.  This
+function of the LM93 is derived from a base temperature and a table of 12
+temperature offsets.  The base temperature is expressed in degrees C in the
+/proc files temp<n>_auto_base.  The offsets are expressed in cumulative
+degrees C, with all 12 values in the files temp<n>_auto_offsets. E.g. if the
+base temperature is 40C:
+
+     offset #	temp<n>_auto_offsets	range		pwm
+	 1		0		-		 25.00%
+	 2		0		-		 28.57%
+	 3		1		40C - 41C	 32.14%
+	 4		1		41C - 42C	 35.71%
+	 5		2		42C - 44C	 39.29%
+	 6		2		44C - 46C	 42.86%
+	 7		2		48C - 50C	 46.43%
+	 8		2		50C - 52C	 50.00%
+	 9		2		52C - 54C	 53.57%
+	10		2		54C - 56C	 57.14%
+	11		2		56C - 58C	 71.43%
+	12		2		58C - 60C	 85.71%
+					> 60C		100.00%
+	
+Valid offsets are in the range 0C <= x <= 7.5C in 0.5C increments.
+
+There is an independent base temperature for each temperature channel. Note,
+however, there are only two tables of offsets: one each for temp[12] and
+temp[34].  Therefore, any change to e.g. temp1_auto_offsets will also affect
+temp2_auto_offsets.
+
+The LM93 can also apply hysteresis to the offset table, to prevent unwanted
+oscillation between two steps in the offsets table.  These values are found in
+the /proc files temp<n>_auto_offset_hyst.  There is just one value; it has the
+same representation as in temp<n>_auto_offsets.
+
+If a temperature reading falls below the base value for that channel, the LM93
+will use the minimum PWM value.  These values are found in the /proc files
+temp<n>_auto_pwm_min.  Note, there are only two minimums: one each for temp[12]
+and temp[34].  Therefore, any change to e.g. temp1_auto_pwm_min will also
+affect temp2_auto_pwm_min.
+
+PWM Spin-Up Cycle:
+
+A spin-up cycle occurs when a PWM output is commanded from 0% duty cycle to
+some value > 0%.  The LM93 supports a minimum duty cycle during spin-up.  These
+values are found in the /proc files pwm<n>_auto_spinup_min. There is one value
+per file; it has the same representation as other PWM duty cycle values. The
+duration of the spin-up cycle is also configurable.  These values are  found in
+the /proc files pwm<n>_auto_spinup_time. There is one value per file; it is
+the spin-up time in seconds.  The available spin-up times are constrained by
+the hardware.  Selecting a value which is not available will cause the driver
+to use the next largest value.
+
+Spin-up Durations: 0 (disabled, h/w default), 0.1, 0.25, 0.4, 0.7, 1.0, 2.0, 4.0
+
+#PROCHOT and #VRDHOT PWM Ramping:
+
+If the #PROCHOT or #VRDHOT signals are asserted while bound to a PWM output
+channel, the LM93 will ramp the PWM output up to 100% duty cycle in discrete
+steps. The duration of each step is configurable. There are two files, with
+one value each in seconds: pwm_auto_prochot_ramp and pwm_auto_vrdhot_ramp.
+The available ramp times are constrained by the hardware.  Selecting a value
+which is not available will cause the driver to use the next largest value.
+
+Ramp Times: 0 (disabled, h/w default) to 0.75 in 0.05 second intervals
+
+Fan Boost:
+
+For each temperature channel, there is a boost temperature: if the channel
+exceeds this limit, the LM93 will immediately drive both PWM outputs to 100%.
+This limit is expressed in degrees C in the /proc files temp<n>_auto_boost.
+There is also a hysteresis temperature for this function: after the boost
+limit is reached, the temperature channel must drop below this value before
+the boost function is disabled.  This temperature is also expressed in degrees
+C in the /proc files temp<n>_auto_boost_hyst.
+
 GPIO Pins:
 
 The LM93 can monitor the logic level of four dedicated GPIO pins as well as the
 four tach input pins.  GPIO0-GPIO3 correspond to (fan) tach 1-4, respectively.
 All eight GPIOs are read by reading the bitmask in the /proc file gpio.  The
 LSB is GPIO0, and the MSB is GPIO7.
+
 
 LM93 Unique /proc Files
 -----------------------
@@ -179,6 +276,25 @@ LM93 Unique /proc Files
 	vrdhot<n>		0 means negated, 1 means asserted
 
 	fan<n>_smart_tach	enable or disable smart tach mode
+
+	pwm<n>_auto_spinup_min	minimum duty cycle during spin-up
+
+	pwm<n>_auto_spinup_time	duration of spin-up
+
+	pwm_auto_prochot_ramp	ramp time per step when #PROCHOT asserted
+
+	pwm_auto_vrdhot_ramp	ramp time per step when #VRDHOT asserted
+
+	temp<n>_auto_base	temperature channel base
+
+	temp<n>_auto_offsets	temperature channel offsets
+
+	temp<n>_auto_offset_hyst
+				temperature channel offset hysteresis
+
+	temp<n>_auto_boost	temperature channel boost (PWMs to 100%) limit
+
+	temp<n>_auto_boost_hyst	temperature channel boost hysteresis
 
 	gpio			input state of 8 GPIO pins; read-only
 

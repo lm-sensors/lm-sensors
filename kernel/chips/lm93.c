@@ -42,6 +42,7 @@
 #include <asm/bitops.h>
 #include "version.h"
 #include "sensors_vid.h"
+#include "lm93.h"
 
 #ifndef I2C_DRIVERID_LM93
 #define I2C_DRIVERID_LM93 1049
@@ -76,86 +77,6 @@ MODULE_PARM_DESC(vccp_limit_type, "Configures in7 and in8 limit modes");
 		I2C_FUNC_SMBUS_WORD_DATA | I2C_FUNC_SMBUS_BLOCK_DATA)
 #define LM93_SMBUS_FUNC_MIN  (I2C_FUNC_SMBUS_BYTE_DATA | \
 		I2C_FUNC_SMBUS_WORD_DATA)
-
-/* LM93 REGISTER ADDRESSES */
-
-/* miscellaneous */
-#define LM93_REG_MFR_ID			0x3e
-#define LM93_REG_VER			0x3f
-#define LM93_REG_STATUS_CONTROL		0xe2
-#define LM93_REG_CONFIG			0xe3
-#define LM93_REG_SLEEP_CONTROL		0xe4
-
-/* alarm values start here */
-#define LM93_REG_HOST_ERROR_1		0x48
-
-/* voltage inputs: in1-in16 (nr => 0-15) */
-#define LM93_REG_IN(nr)			(0x56 + (nr))
-#define LM93_REG_IN_MIN(nr)		(0x90 + (nr) * 2)
-#define LM93_REG_IN_MAX(nr)		(0x91 + (nr) * 2)
-
-/* temperature inputs: temp1-temp3 (nr => 0-2) */
-#define LM93_REG_TEMP(nr)		(0x50 + (nr))
-#define LM93_REG_TEMP_MIN(nr)		(0x78 + (nr) * 2)
-#define LM93_REG_TEMP_MAX(nr)		(0x79 + (nr) * 2)
-
-/* temp[1-4]_auto_boost (nr => 0-3) */
-#define LM93_REG_TEMP_FAN_BOOST(nr)	(0x80 + (nr))
-
-/* #PROCHOT inputs: prochot1-prochot2 (nr => 0-1) */
-#define LM93_REG_PROCHOT_CUR(nr)	(0x67 + (nr) * 2)
-#define LM93_REG_PROCHOT_AVG(nr)	(0x68 + (nr) * 2)
-#define LM93_REG_PROCHOT_MAX(nr)	(0xb0 + (nr))
-
-/* fan tach inputs: fan1-fan4 (nr => 0-3) */
-#define LM93_REG_FAN(nr)		(0x6e + (nr) * 2)
-#define LM93_REG_FAN_MIN(nr)		(0xb4 + (nr) * 2)
-
-/* pwm outputs: pwm1-pwm2 (nr => 0-1, reg => 0-3) */
-#define LM93_REG_PWM_CTL(nr,reg)	(0xc8 + (reg) + (nr) * 4)
-#define LM93_PWM_CTL1	0
-#define LM93_PWM_CTL2	1
-#define LM93_PWM_CTL3	2
-#define LM93_PWM_CTL4	3
-
-/* GPIO input state */
-#define LM93_REG_GPI			0x6b
-
-/* vid inputs: vid1-vid2 (nr => 0-1) */
-#define LM93_REG_VID(nr)		(0x6c + (nr))
-
-/* vccp1 & vccp2: VID relative inputs (nr => 0-1) */
-#define LM93_REG_VCCP_LIMIT_OFF(nr)	(0xb2 + (nr))
-
-/* temp[1-4]_auto_boost_hyst */
-#define LM93_REG_BOOST_HYST_12		0xc0
-#define LM93_REG_BOOST_HYST_34		0xc1
-
-/* temp[1-4]_auto_pwm_[min|hyst] */
-#define LM93_REG_MIN_PWM_HYST_12	0xc3
-#define LM93_REG_MIN_PWM_HYST_34	0xc4
-
-/* prochot_override & prochot_interval */
-#define LM93_REG_PROCHOT_OVERRIDE	0xc6
-#define LM93_REG_PROCHOT_INTERVAL	0xc7
-
-/* temp[1-4]_auto_base (nr => 0-3) */
-#define LM93_REG_TEMP_BASE(nr)		(0xd0 + (nr))
-
-/* temp[1-4]_auto_offsets (step => 0-11) */
-#define LM93_REG_TEMP_OFFSET(step)	(0xd4 + (step))
-
-/* #PROCHOT & #VRDHOT PWM ramp control */
-#define LM93_REG_PWM_RAMP_CTL		0xbf
-
-/* miscellaneous */
-#define LM93_REG_SFC1		0xbc
-#define LM93_REG_SFC2		0xbd
-#define LM93_REG_SF_TACH_TO_PWM	0xe0
-
-/* LM93 REGISTER VALUES */
-#define LM93_MFR_ID		0x73
-#define LM93_MFR_ID_PROTOTYPE	0x72
 
 /* LM93 BLOCK READ COMMANDS */
 static const struct { u8 cmd; u8 len; } lm93_block_read_cmds[12] = {
@@ -289,6 +210,65 @@ static int LM93_TEMP_FROM_REG(u8 reg)
 	return (s8)reg * 10;
 }
 
+/* Determine 4-bit temperature offset resolution */
+static int LM93_TEMP_OFFSET_MODE_FROM_REG(u8 sfc2, int nr)
+{
+	/* mode: 0 => 1C/bit, nonzero => 0.5C/bit */
+	return sfc2 & (nr < 2 ? 0x10 : 0x20);
+}
+
+#define LM93_TEMP_OFFSET_MIN  (  0)
+#define LM93_TEMP_OFFSET_MAX0 (150)
+#define LM93_TEMP_OFFSET_MAX1 ( 75)
+
+/* This function is common to all 4-bit temperature offsets
+   returns 4 bits right justified
+   mode 0 => 1C/bit, mode !0 => 0.5C/bit */
+static u8 LM93_TEMP_OFFSET_TO_REG(int off, int mode)
+{
+	int factor = mode ? 5 : 10;
+
+	off = SENSORS_LIMIT(off, LM93_TEMP_OFFSET_MIN,
+		mode ? LM93_TEMP_OFFSET_MAX1 : LM93_TEMP_OFFSET_MAX0);
+	return (u8)((off + factor/2) / factor);
+}
+
+/* This function is common to all 4-bit temperature offsets
+   reg is 4 bits right justified
+   mode 0 => 1C/bit, mode !0 => 0.5C/bit */
+static int LM93_TEMP_OFFSET_FROM_REG(u8 reg, int mode)
+{
+	return (reg & 0x0f) * (mode ? 5 : 10);
+}
+
+/* TEMP: 1/10 degrees C (0C to +15C (mode 0) or +7.5C (mode non-zero))
+   REG: 1.0C/bit (mode 0) or 0.5C/bit (mode non-zero)
+   0 <= nr <= 3 */
+static u8 LM93_TEMP_AUTO_OFFSET_TO_REG(u8 old, int off, int nr, int mode)
+{
+	u8 new = LM93_TEMP_OFFSET_TO_REG(off, mode);
+
+	/* temp1-temp2 (nr=0,1) use lower nibble */
+	if (nr < 2)
+		return (old & 0xf0) | (new & 0x0f);
+
+	/* temp3-temp4 (nr=2,3) use upper nibble */
+	else
+		return (new << 4 & 0xf0) | (old & 0x0f);
+}
+
+/* 0 <= nr <= 3 */
+static int LM93_TEMP_AUTO_OFFSET_FROM_REG(u8 reg, int nr, int mode)
+{
+	/* temp1-temp2 (nr=0,1) use lower nibble */
+	if (nr < 2)
+		return LM93_TEMP_OFFSET_FROM_REG(reg & 0x0f, mode);
+
+	/* temp3-temp4 (nr=2,3) use upper nibble */
+	else
+		return LM93_TEMP_OFFSET_FROM_REG(reg >> 4 & 0x0f, mode);
+}
+
 /* RPM: (82.5 to 1350000)
    REG: 14-bits, LE, *left* justified */
 static u16 LM93_FAN_TO_REG(long rpm)
@@ -302,17 +282,13 @@ static u16 LM93_FAN_TO_REG(long rpm)
 		count = SENSORS_LIMIT((1350000 + rpm) / rpm, 1, 0x3ffe);
 	}
 
-	/* <TODO> is this byte-order correct? */
 	regs = count << 2;
 	return cpu_to_le16(regs);
 }
 
 static int LM93_FAN_FROM_REG(u16 regs)
 {
-	/* <TODO> is this byte-order correct? */
 	const u16 count = le16_to_cpu(regs) >> 2;
-
-	/* <TODO> do we need further divider of 2 here? */
 	return count==0 ? -1 : count==0x3fff ? 0: 1350000 / count;
 }
 
@@ -368,7 +344,7 @@ static u8 LM93_INTERVAL_TO_REG(long interval)
 }
 
 /* PWM: 0-255 per sensors documentation
-   REG: 0-13 as mapped below... *left* justified */
+   REG: 0-13 as mapped below... right justified */
 typedef enum { LM93_PWM_MAP_HI_FREQ, LM93_PWM_MAP_LO_FREQ } pwm_freq_t;
 static int lm93_pwm_map[2][14] = {
 	{
@@ -393,7 +369,7 @@ static int lm93_pwm_map[2][14] = {
 
 static int LM93_PWM_FROM_REG(u8 reg, pwm_freq_t freq)
 {
-	return lm93_pwm_map[freq][reg >> 4 & 0x0f];
+	return lm93_pwm_map[freq][reg & 0x0f];
 }
 
 /* round up to nearest match */
@@ -405,7 +381,7 @@ static u8 LM93_PWM_TO_REG(int pwm, pwm_freq_t freq)
 			break;
 
 	/* can fall through with i==13 */
-	return (u8)(i << 4);
+	return (u8)i;
 }
 
 /* PWM FREQ: HZ
@@ -510,6 +486,9 @@ struct lm93_data {
 	/* pwm control registers (2 pwms, 4 regs) */
 	u8 block9[2][4];
 
+	/* auto/pwm base temp and offset temp registers */
+	struct { u8 base[4]; u8 offset[12]; } block10;
+
 	/* master config register */
 	u8 config;
 
@@ -530,6 +509,18 @@ struct lm93_data {
 
 	/* #PROCHOT intervals (register format) */
 	u8 prochot_interval;
+
+	/* Fan Boost Temperatures (register format) */
+	u8 boost[4];
+
+	/* Fan Boost Hysteresis (register format) */
+	u8 boost_hyst[2];
+
+	/* Temperature Zone Min. PWM & Hysteresis (register format) */
+	u8 auto_pwm_min_hyst[2];
+
+	/* #PROCHOT & #VRDHOT PWM Ramp Control */
+	u8 pwm_ramp_ctl;
 
 	/* miscellaneous setup regs */
 	u8 sfc1;
@@ -570,6 +561,26 @@ static void lm93_fan(struct i2c_client *client, int operation,
 static void lm93_pwm(struct i2c_client *client, int operation,
 		int ctl_name, int *nrels_mag, long *results);
 static void lm93_pwm_freq(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
+static void lm93_pwm_auto_chan(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
+static void lm93_pwm_auto_spinup_min(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
+static void lm93_pwm_auto_spinup_time(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
+static void lm93_pwm_auto_ramp(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
+static void lm93_temp_auto_base(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
+static void lm93_temp_auto_offsets(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
+static void lm93_temp_auto_boost(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
+static void lm93_temp_auto_boost_hyst(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
+static void lm93_temp_auto_pwm_min(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
+static void lm93_temp_auto_offset_hyst(struct i2c_client *client, int operation,
 		int ctl_name, int *nrels_mag, long *results);
 static void lm93_fan_smart_tach(struct i2c_client *client, int operation,
 		int ctl_name, int *nrels_mag, long *results);
@@ -622,9 +633,35 @@ static int lm93_id = 0;
 #define LM93_SYSCTL_IN16 	1016
 
 /* degrees celcius * 10 */
-#define LM93_SYSCTL_TEMP1	1101
-#define LM93_SYSCTL_TEMP2	1102
-#define LM93_SYSCTL_TEMP3	1103
+#define LM93_SYSCTL_TEMP1			1101
+#define LM93_SYSCTL_TEMP2			1102
+#define LM93_SYSCTL_TEMP3			1103
+
+#define LM93_SYSCTL_TEMP1_AUTO_BASE		1111
+#define LM93_SYSCTL_TEMP2_AUTO_BASE		1112
+#define LM93_SYSCTL_TEMP3_AUTO_BASE		1113
+
+#define LM93_SYSCTL_TEMP1_AUTO_OFFSETS		1121
+#define LM93_SYSCTL_TEMP2_AUTO_OFFSETS		1122
+#define LM93_SYSCTL_TEMP3_AUTO_OFFSETS		1123
+
+#define LM93_SYSCTL_TEMP1_AUTO_BOOST		1131
+#define LM93_SYSCTL_TEMP2_AUTO_BOOST		1132
+#define LM93_SYSCTL_TEMP3_AUTO_BOOST		1133
+
+#define LM93_SYSCTL_TEMP1_AUTO_BOOST_HYST	1141
+#define LM93_SYSCTL_TEMP2_AUTO_BOOST_HYST	1142
+#define LM93_SYSCTL_TEMP3_AUTO_BOOST_HYST	1143
+
+/* 0 => off, 255 => 100% */
+#define LM93_SYSCTL_TEMP1_AUTO_PWM_MIN		1151
+#define LM93_SYSCTL_TEMP2_AUTO_PWM_MIN		1152
+#define LM93_SYSCTL_TEMP3_AUTO_PWM_MIN		1153
+
+/* degrees celcius * 10 */
+#define LM93_SYSCTL_TEMP1_AUTO_OFFSET_HYST	1161
+#define LM93_SYSCTL_TEMP2_AUTO_OFFSET_HYST	1162
+#define LM93_SYSCTL_TEMP3_AUTO_OFFSET_HYST	1163
 
 /* rotations/minute */
 #define LM93_SYSCTL_FAN1	1201
@@ -643,12 +680,28 @@ static int lm93_id = 0;
 #define LM93_SYSCTL_VID2	1302
 
 /* 0 => off, 255 => 100% */
-#define LM93_SYSCTL_PWM1	1401
-#define LM93_SYSCTL_PWM2	1402
+#define LM93_SYSCTL_PWM1			1401
+#define LM93_SYSCTL_PWM2			1402
 
 /* Hz */
-#define LM93_SYSCTL_PWM1_FREQ	1403
-#define LM93_SYSCTL_PWM2_FREQ	1404
+#define LM93_SYSCTL_PWM1_FREQ			1411
+#define LM93_SYSCTL_PWM2_FREQ			1412
+
+/* bitvector */
+#define LM93_SYSCTL_PWM1_AUTO_CHANNELS		1421
+#define LM93_SYSCTL_PWM2_AUTO_CHANNELS		1422
+
+/* Hz */
+#define LM93_SYSCTL_PWM1_AUTO_SPINUP_MIN	1431
+#define LM93_SYSCTL_PWM2_AUTO_SPINUP_MIN	1432
+
+/* seconds */
+#define LM93_SYSCTL_PWM1_AUTO_SPINUP_TIME	1441
+#define LM93_SYSCTL_PWM2_AUTO_SPINUP_TIME	1442
+
+/* seconds */
+#define LM93_SYSCTL_PWM_AUTO_PROCHOT_RAMP	1451
+#define LM93_SYSCTL_PWM_AUTO_VRDHOT_RAMP	1452
 
 /* 0 => 0%, 255 => > 99.6% */
 #define LM93_SYSCTL_PROCHOT1	1501
@@ -726,11 +779,43 @@ static int lm93_id = 0;
 	0644, NULL, &i2c_proc_real, &i2c_sysctl_real, NULL, &lm93_in}
 #define LM93_SYSCTL_TEMP(nr) {LM93_SYSCTL_TEMP##nr, "temp" #nr, NULL, 0, \
 	0644, NULL, &i2c_proc_real, &i2c_sysctl_real, NULL, &lm93_temp}
+#define LM93_SYSCTL_TEMP_AUTO_BASE(nr) {LM93_SYSCTL_TEMP##nr##_AUTO_BASE, \
+	"temp" #nr "_auto_base", NULL, 0, 0644, NULL, &i2c_proc_real, \
+	&i2c_sysctl_real, NULL, &lm93_temp_auto_base}
+#define LM93_SYSCTL_TEMP_AUTO_OFFSETS(nr) {LM93_SYSCTL_TEMP##nr##_AUTO_OFFSETS,\
+	"temp" #nr "_auto_offsets", NULL, 0, 0644, NULL, &i2c_proc_real, \
+	&i2c_sysctl_real, NULL, &lm93_temp_auto_offsets}
+#define LM93_SYSCTL_TEMP_AUTO_BOOST(nr) { LM93_SYSCTL_TEMP##nr##_AUTO_BOOST, \
+	"temp" #nr "_auto_boost", NULL, 0, 0644, NULL, &i2c_proc_real, \
+	&i2c_sysctl_real, NULL, &lm93_temp_auto_boost}
+#define LM93_SYSCTL_TEMP_AUTO_BOOST_HYST(nr) { \
+	LM93_SYSCTL_TEMP##nr##_AUTO_BOOST_HYST, "temp" #nr "_auto_boost_hyst", \
+	NULL, 0, 0644, NULL, &i2c_proc_real, &i2c_sysctl_real, NULL, \
+	&lm93_temp_auto_boost_hyst}
+#define LM93_SYSCTL_TEMP_AUTO_PWM_MIN(nr) { \
+	LM93_SYSCTL_TEMP##nr##_AUTO_PWM_MIN, "temp" #nr "_auto_pwm_min", \
+	NULL, 0, 0644, NULL, &i2c_proc_real, &i2c_sysctl_real, NULL, \
+	&lm93_temp_auto_pwm_min}
+#define LM93_SYSCTL_TEMP_AUTO_OFFSET_HYST(nr) { \
+	LM93_SYSCTL_TEMP##nr##_AUTO_OFFSET_HYST,"temp" #nr "_auto_offset_hyst",\
+	NULL, 0, 0644, NULL, &i2c_proc_real, &i2c_sysctl_real, NULL, \
+	&lm93_temp_auto_offset_hyst}
 #define LM93_SYSCTL_PWM(nr)  {LM93_SYSCTL_PWM##nr, "pwm" #nr, NULL, 0, \
 	0644, NULL, &i2c_proc_real, &i2c_sysctl_real, NULL, &lm93_pwm}
 #define LM93_SYSCTL_PWM_FREQ(nr)  {LM93_SYSCTL_PWM##nr##_FREQ, \
 	"pwm" #nr "_freq", NULL, 0, 0644, NULL, &i2c_proc_real, \
 	&i2c_sysctl_real, NULL, &lm93_pwm_freq}
+#define LM93_SYSCTL_PWM_AUTO_CHAN(nr)  {LM93_SYSCTL_PWM##nr##_AUTO_CHANNELS, \
+	"pwm" #nr "_auto_channels", NULL, 0, 0644, NULL, &i2c_proc_real, \
+	&i2c_sysctl_real, NULL, &lm93_pwm_auto_chan}
+#define LM93_SYSCTL_PWM_AUTO_SPINUP_MIN(nr) { \
+	LM93_SYSCTL_PWM##nr##_AUTO_SPINUP_MIN, "pwm" #nr "_auto_spinup_min", \
+	NULL, 0, 0644, NULL, &i2c_proc_real, &i2c_sysctl_real, NULL, \
+	&lm93_pwm_auto_spinup_min}
+#define LM93_SYSCTL_PWM_AUTO_SPINUP_TIME(nr) { \
+	LM93_SYSCTL_PWM##nr##_AUTO_SPINUP_TIME, "pwm" #nr "_auto_spinup_time", \
+	NULL, 0, 0644, NULL, &i2c_proc_real, &i2c_sysctl_real, NULL, \
+	&lm93_pwm_auto_spinup_time}
 #define LM93_SYSCTL_FAN(nr)  {LM93_SYSCTL_FAN##nr, "fan" #nr, NULL, 0, \
 	0644, NULL, &i2c_proc_real, &i2c_sysctl_real, NULL, &lm93_fan}
 #define LM93_SYSCTL_VID(nr)  {LM93_SYSCTL_VID##nr, "vid" #nr, NULL, 0, \
@@ -764,6 +849,30 @@ static ctl_table lm93_dir_table_template[] = {
 	LM93_SYSCTL_TEMP(2),
 	LM93_SYSCTL_TEMP(3),
 
+	LM93_SYSCTL_TEMP_AUTO_BASE(1),
+	LM93_SYSCTL_TEMP_AUTO_BASE(2),
+	LM93_SYSCTL_TEMP_AUTO_BASE(3),
+
+	LM93_SYSCTL_TEMP_AUTO_OFFSETS(1),
+	LM93_SYSCTL_TEMP_AUTO_OFFSETS(2),
+	LM93_SYSCTL_TEMP_AUTO_OFFSETS(3),
+
+	LM93_SYSCTL_TEMP_AUTO_BOOST(1),
+	LM93_SYSCTL_TEMP_AUTO_BOOST(2),
+	LM93_SYSCTL_TEMP_AUTO_BOOST(3),
+
+	LM93_SYSCTL_TEMP_AUTO_BOOST_HYST(1),
+	LM93_SYSCTL_TEMP_AUTO_BOOST_HYST(2),
+	LM93_SYSCTL_TEMP_AUTO_BOOST_HYST(3),
+
+	LM93_SYSCTL_TEMP_AUTO_PWM_MIN(1),
+	LM93_SYSCTL_TEMP_AUTO_PWM_MIN(2),
+	LM93_SYSCTL_TEMP_AUTO_PWM_MIN(3),
+
+	LM93_SYSCTL_TEMP_AUTO_OFFSET_HYST(1),
+	LM93_SYSCTL_TEMP_AUTO_OFFSET_HYST(2),
+	LM93_SYSCTL_TEMP_AUTO_OFFSET_HYST(3),
+
 	LM93_SYSCTL_FAN(1),
 	LM93_SYSCTL_FAN(2),
 	LM93_SYSCTL_FAN(3),
@@ -779,6 +888,23 @@ static ctl_table lm93_dir_table_template[] = {
 
 	LM93_SYSCTL_PWM_FREQ(1),
 	LM93_SYSCTL_PWM_FREQ(2),
+
+	LM93_SYSCTL_PWM_AUTO_CHAN(1),
+	LM93_SYSCTL_PWM_AUTO_CHAN(2),
+
+	LM93_SYSCTL_PWM_AUTO_SPINUP_MIN(1),
+	LM93_SYSCTL_PWM_AUTO_SPINUP_MIN(2),
+
+	LM93_SYSCTL_PWM_AUTO_SPINUP_TIME(1),
+	LM93_SYSCTL_PWM_AUTO_SPINUP_TIME(2),
+
+	{LM93_SYSCTL_PWM_AUTO_PROCHOT_RAMP, "pwm_auto_prochot_ramp", NULL, 0,
+	0644, NULL, &i2c_proc_real, &i2c_sysctl_real, NULL,
+	&lm93_pwm_auto_ramp},
+
+	{LM93_SYSCTL_PWM_AUTO_VRDHOT_RAMP, "pwm_auto_vrdhot_ramp", NULL, 0,
+	0644, NULL, &i2c_proc_real, &i2c_sysctl_real, NULL,
+	&lm93_pwm_auto_ramp},
 
 	LM93_SYSCTL_VID(1),
 	LM93_SYSCTL_VID(2),
@@ -1104,8 +1230,8 @@ static void lm93_update_client_common(struct lm93_data *data,
 {
 	int i;
 
-	/* temp1 - temp3: limits */
-	for (i = 0; i < 3; i++) {
+	/* temp1 - temp4: limits */
+	for (i = 0; i < 4; i++) {
 		data->temp_lim[i].min =
 			lm93_read_byte(client, LM93_REG_TEMP_MIN(i));
 		data->temp_lim[i].max =
@@ -1140,6 +1266,23 @@ static void lm93_update_client_common(struct lm93_data *data,
 	data->prochot_interval = lm93_read_byte(client,
 			LM93_REG_PROCHOT_INTERVAL);
 
+	/* Fan Boost Termperature registers */
+	for (i = 0; i < 4; i++)
+		data->boost[i] = lm93_read_byte(client, LM93_REG_BOOST(i));
+
+	/* Fan Boost Temperature Hyst. registers */
+	data->boost_hyst[0] = lm93_read_byte(client, LM93_REG_BOOST_HYST_12);
+	data->boost_hyst[1] = lm93_read_byte(client, LM93_REG_BOOST_HYST_34);
+
+	/* Temperature Zone Min. PWM & Hysteresis registers */
+	data->auto_pwm_min_hyst[0] =
+			lm93_read_byte(client, LM93_REG_PWM_MIN_HYST_12);
+	data->auto_pwm_min_hyst[1] =
+			lm93_read_byte(client, LM93_REG_PWM_MIN_HYST_34);
+
+	/* #PROCHOT & #VRDHOT PWM Ramp Control register */
+	data->pwm_ramp_ctl = lm93_read_byte(client, LM93_REG_PWM_RAMP_CTL);
+
 	/* misc setup registers */
 	data->sfc1 = lm93_read_byte(client, LM93_REG_SFC1);
 	data->sfc2 = lm93_read_byte(client, LM93_REG_SFC2);
@@ -1157,7 +1300,7 @@ static void lm93_update_client_full(struct lm93_data *data,
 	lm93_read_block(client, 3, (u8 *)(data->block3));
 	lm93_read_block(client, 7, (u8 *)(data->block7));
 
-	/* temp1 - temp3: values */
+	/* temp1 - temp4: values */
 	lm93_read_block(client, 2, (u8 *)(data->block2));
 
 	/* prochot1 - prochot2: values */
@@ -1172,6 +1315,9 @@ static void lm93_update_client_full(struct lm93_data *data,
 
 	/* alarm values */
 	lm93_read_block(client, 1, (u8 *)(&data->block1));
+
+	/* auto/pwm registers */
+	lm93_read_block(client, 10, (u8 *)(&data->block10));
 
 	lm93_update_client_common(data, client);
 }
@@ -1195,7 +1341,7 @@ static void lm93_update_client_min(struct lm93_data *data,
 			lm93_read_byte(client, LM93_REG_IN_MAX(i));
 	}
 
-	/* temp1 - temp3: values */
+	/* temp1 - temp4: values */
 	for (i = 0; i < 4; i++) {
 		data->block2[i] =
 			lm93_read_byte(client, LM93_REG_TEMP(i));
@@ -1221,15 +1367,26 @@ static void lm93_update_client_min(struct lm93_data *data,
 	for (i = 0; i < 2; i++) {
 		for (j = 0; j < 4; j++) {
 			data->block9[i][j] =
-				lm93_read_word(client, LM93_REG_PWM_CTL(i,j));
+				lm93_read_byte(client, LM93_REG_PWM_CTL(i,j));
 		}
 	}
 
 	/* alarm values */
-	ptr = &data->block1;
-	for (i = 0, ptr = &data->block1; i < 8; i++) {
+	for (i = 0, ptr = (u8 *)(&data->block1); i < 8; i++) {
 		*(ptr + i) =
 			lm93_read_byte(client, LM93_REG_HOST_ERROR_1 + i);
+	}
+
+	/* auto/pwm (base temp) registers */
+	for (i = 0; i < 4; i++) {
+		data->block10.base[i] =
+			lm93_read_byte(client, LM93_REG_TEMP_BASE(i));
+	}
+
+	/* auto/pwm (offset temp) registers */
+	for (i = 0; i < 12; i++) {
+		data->block10.offset[i] =
+			lm93_read_byte(client, LM93_REG_TEMP_OFFSET(i));
 	}
 
 	lm93_update_client_common(data, client);
@@ -1352,6 +1509,274 @@ void lm93_temp(struct i2c_client *client, int operation, int ctl_name,
 					 data->temp_lim[nr].min);
 		}
 		up(&data->update_lock);
+	}
+}
+
+void lm93_temp_auto_base(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results)
+{
+	struct lm93_data *data = client->data;
+	int nr = ctl_name - LM93_SYSCTL_TEMP1_AUTO_BASE;
+
+	if (0 > nr || nr > 2)
+		return; /* ERROR */
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		lm93_update_client(client);
+		results[0] = LM93_TEMP_FROM_REG(data->block10.base[nr]);
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		down(&data->update_lock);
+		if (*nrels_mag >= 1) {
+			data->block10.base[nr] = LM93_TEMP_TO_REG(results[0]);
+			lm93_write_byte(client, LM93_REG_TEMP_BASE(nr),
+					data->block10.base[nr]);
+		}
+		up(&data->update_lock);
+	}
+}
+
+void lm93_temp_auto_offsets(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results)
+{
+	struct lm93_data *data = client->data;
+	int nr = ctl_name - LM93_SYSCTL_TEMP1_AUTO_OFFSETS;
+	int ii;
+
+	if (0 > nr || nr > 2)
+		return; /* ERROR */
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		int mode;
+		lm93_update_client(client);
+
+		/* mode: 0 => 1C/bit, nonzero => 0.5C/bit */
+		mode = LM93_TEMP_OFFSET_MODE_FROM_REG(data->sfc2, nr);
+
+		for (ii = 0; ii < 12; ii++) {
+			results[ii] = LM93_TEMP_AUTO_OFFSET_FROM_REG(
+				data->block10.offset[ii], nr, mode);
+		}
+		*nrels_mag = 12;
+	}
+	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		/* we only care about the first 12 values */
+		int nrels = *nrels_mag > 12 ? 12 : *nrels_mag;
+
+		down(&data->update_lock);
+
+		/* force 0.5C/bit mode */
+		data->sfc2 = lm93_read_byte(client, LM93_REG_SFC2);
+		data->sfc2 |= ((nr < 2) ? 0x10 : 0x20);
+		lm93_write_byte(client, LM93_REG_SFC2, data->sfc2);
+
+		for (ii = 0; ii < nrels; ii++) {
+			data->block10.offset[ii] = LM93_TEMP_AUTO_OFFSET_TO_REG(
+				data->block10.offset[ii], results[ii], nr, 1);
+			lm93_write_byte(client, LM93_REG_TEMP_OFFSET(ii),
+				data->block10.offset[ii]);
+		}
+		up(&data->update_lock);
+	}
+}
+
+void lm93_temp_auto_boost(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results)
+{
+	struct lm93_data *data = client->data;
+	int nr = ctl_name - LM93_SYSCTL_TEMP1_AUTO_BOOST;
+
+	if (0 > nr || nr > 2)
+		return; /* ERROR */
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		lm93_update_client(client);
+		results[0] = LM93_TEMP_FROM_REG(data->boost[nr]);
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		down(&data->update_lock);
+		if (*nrels_mag >= 1) {
+			data->boost[nr] = LM93_TEMP_TO_REG(results[0]);
+			lm93_write_byte(client, LM93_REG_BOOST(nr),
+					data->boost[nr]);
+		}
+		up(&data->update_lock);
+	}
+
+}
+
+static u8 LM93_AUTO_BOOST_HYST_TO_REG(struct lm93_data *data, long hyst,
+		int nr, int mode)
+{
+	u8 reg = LM93_TEMP_OFFSET_TO_REG(
+			(LM93_TEMP_FROM_REG(data->boost[nr]) - hyst), mode);
+
+	switch (nr) {
+	case 0:
+		reg = (data->boost_hyst[0] & 0xf0) | (reg & 0x0f);
+		break;
+	case 1:
+		reg = (reg << 4 & 0xf0) | (data->boost_hyst[0] & 0x0f);
+		break;
+	case 2:
+		reg = (data->boost_hyst[1] & 0xf0) | (reg & 0x0f);
+		break;
+	case 3:
+	default:
+		reg = (reg << 4 & 0xf0) | (data->boost_hyst[1] & 0x0f);
+		break;
+	}
+
+	return reg;
+}
+
+static int LM93_AUTO_BOOST_HYST_FROM_REGS(struct lm93_data *data, int nr,
+		int mode)
+{
+	u8 reg;
+
+	switch (nr) {
+	case 0:
+		reg = data->boost_hyst[0] & 0x0f;
+		break;
+	case 1:
+		reg = data->boost_hyst[0] >> 4 & 0x0f;
+		break;
+	case 2:
+		reg = data->boost_hyst[1] & 0x0f;
+		break;
+	case 3:
+	default:
+		reg = data->boost_hyst[1] >> 4 & 0x0f;
+		break;
+	}
+
+	return LM93_TEMP_FROM_REG(data->boost[nr]) -
+			LM93_TEMP_OFFSET_FROM_REG(reg, mode);
+}
+
+void lm93_temp_auto_boost_hyst(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results)
+{
+	struct lm93_data *data = client->data;
+	int nr = ctl_name - LM93_SYSCTL_TEMP1_AUTO_BOOST_HYST;
+
+	if (0 > nr || nr > 2)
+		return; /* ERROR */
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		int mode;
+		lm93_update_client(client);
+
+		/* mode: 0 => 1C/bit, nonzero => 0.5C/bit */
+		mode = LM93_TEMP_OFFSET_MODE_FROM_REG(data->sfc2, nr);
+
+		results[0] = LM93_AUTO_BOOST_HYST_FROM_REGS(data, nr, mode);
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			down(&data->update_lock);
+
+			/* force 0.5C/bit mode */
+			data->sfc2 = lm93_read_byte(client, LM93_REG_SFC2);
+			data->sfc2 |= ((nr < 2) ? 0x10 : 0x20);
+			lm93_write_byte(client, LM93_REG_SFC2, data->sfc2);
+
+			data->boost_hyst[nr/2] =
+					LM93_AUTO_BOOST_HYST_TO_REG(data,
+					results[0], nr, 1);
+			lm93_write_byte(client, LM93_REG_BOOST_HYST(nr),
+					data->boost_hyst[nr/2]);
+			up(&data->update_lock);
+		}
+	}
+}
+
+void lm93_temp_auto_pwm_min(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results)
+{
+	struct lm93_data *data = client->data;
+	int nr = ctl_name - LM93_SYSCTL_TEMP1_AUTO_PWM_MIN;
+	u8 reg, ctl4;
+
+	if (0 > nr || nr > 2)
+		return; /* ERROR */
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		lm93_update_client(client);
+		reg = data->auto_pwm_min_hyst[nr/2] >> 4 & 0x0f;
+		ctl4 = data->block9[nr][LM93_PWM_CTL4];
+		results[0] = LM93_PWM_FROM_REG(reg, (ctl4 & 0x07) ?
+				LM93_PWM_MAP_LO_FREQ : LM93_PWM_MAP_HI_FREQ);
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			down(&data->update_lock);
+			reg = lm93_read_byte(client, LM93_REG_PWM_MIN_HYST(nr));
+			ctl4 = lm93_read_byte(
+				client, LM93_REG_PWM_CTL(nr,LM93_PWM_CTL4));
+			reg = (reg & 0x0f) | 
+				LM93_PWM_TO_REG(results[0], (ctl4 & 0x07) ?
+					LM93_PWM_MAP_LO_FREQ :
+					LM93_PWM_MAP_HI_FREQ) << 4;
+
+			data->auto_pwm_min_hyst[nr/2] = reg;
+			lm93_write_byte(client, LM93_REG_PWM_MIN_HYST(nr), reg);
+			up(&data->update_lock);
+		}
+	}
+}
+
+void lm93_temp_auto_offset_hyst(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results)
+{
+	struct lm93_data *data = client->data;
+	int nr = ctl_name - LM93_SYSCTL_TEMP1_AUTO_OFFSET_HYST;
+
+	if (0 > nr || nr > 2)
+		return; /* ERROR */
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		int mode;
+		lm93_update_client(client);
+
+		/* mode: 0 => 1C/bit, nonzero => 0.5C/bit */
+		mode = LM93_TEMP_OFFSET_MODE_FROM_REG(data->sfc2, nr);
+
+		results[0] = LM93_TEMP_OFFSET_FROM_REG(
+				data->auto_pwm_min_hyst[nr/2], mode);
+
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			u8 reg;
+			down(&data->update_lock);
+
+			/* force 0.5C/bit mode */
+			data->sfc2 = lm93_read_byte(client, LM93_REG_SFC2);
+			data->sfc2 |= ((nr < 2) ? 0x10 : 0x20);
+			lm93_write_byte(client, LM93_REG_SFC2, data->sfc2);
+
+			reg = data->auto_pwm_min_hyst[nr/2];
+			reg = (reg & 0xf0) | 
+				(LM93_TEMP_OFFSET_TO_REG(results[0], 1) & 0x0f);
+
+			data->auto_pwm_min_hyst[nr/2] = reg;
+			lm93_write_byte(client, LM93_REG_PWM_MIN_HYST(nr), reg);
+			up(&data->update_lock);
+		}
 	}
 }
 
@@ -1621,14 +2046,14 @@ void lm93_prochot_interval(struct i2c_client *client, int operation,
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		down(&data->update_lock);
+		data->prochot_interval = lm93_read_byte(client,
+				LM93_REG_PROCHOT_INTERVAL);
 		if (*nrels_mag >= 2) {
-			results[1] = SENSORS_LIMIT(results[1], 0, 9);
 			data->prochot_interval =
-				(LM93_INTERVAL_TO_REG(results[1] << 4)) |
+				(LM93_INTERVAL_TO_REG(results[1]) << 4) |
 				(data->prochot_interval & 0x0f);
 		}
 		if (*nrels_mag >= 1) {
-			results[0] = SENSORS_LIMIT(results[0], 0, 9);
 			data->prochot_interval =
 				(data->prochot_interval & 0xf0) |
 				LM93_INTERVAL_TO_REG(results[0]);
@@ -1691,6 +2116,7 @@ void lm93_pwm(struct i2c_client *client, int operation, int ctl_name,
 		ctl2 = data->block9[nr][LM93_PWM_CTL2];
 		ctl4 = data->block9[nr][LM93_PWM_CTL4];
 		results[1] = (ctl2 & 0x01) ? 1 : 0;
+		ctl2 = ctl2 >> 4 & 0x0f;
 		if (results[1]) /* show user commanded value if enabled */
 			results[0] = data->pwm_override[nr];
 		else /* show present h/w value if manual pwm disabled */
@@ -1708,7 +2134,7 @@ void lm93_pwm(struct i2c_client *client, int operation, int ctl_name,
 			ctl2 = (ctl2 & 0x0f) | 
 				LM93_PWM_TO_REG(results[0], (ctl4 & 0x07) ?
 					LM93_PWM_MAP_LO_FREQ :
-					LM93_PWM_MAP_HI_FREQ);
+					LM93_PWM_MAP_HI_FREQ) << 4;
 			if (*nrels_mag >= 2) {
 				if (results[1])
 					ctl2 |= 0x01;
@@ -1717,8 +2143,8 @@ void lm93_pwm(struct i2c_client *client, int operation, int ctl_name,
 			}
 			/* save user commanded value */
 			data->pwm_override[nr] =
-				LM93_PWM_FROM_REG(ctl2, (ctl4 & 0x07) ?
-					LM93_PWM_MAP_LO_FREQ :
+				LM93_PWM_FROM_REG(ctl2 >> 4 & 0x0f,
+					(ctl4 & 0x07) ?  LM93_PWM_MAP_LO_FREQ :
 					LM93_PWM_MAP_HI_FREQ);
 			lm93_write_byte(client,
 				LM93_REG_PWM_CTL(nr,LM93_PWM_CTL2), ctl2);
@@ -1759,6 +2185,184 @@ void lm93_pwm_freq(struct i2c_client *client, int operation, int ctl_name,
 
 			lm93_write_byte(client,
 				LM93_REG_PWM_CTL(nr,LM93_PWM_CTL4), ctl4);
+			up(&data->update_lock);
+		}
+	}
+}
+
+void lm93_pwm_auto_chan(struct i2c_client *client, int operation, int ctl_name,
+	int *nrels_mag, long *results)
+{
+	struct lm93_data *data = client->data;
+	int nr = ctl_name - LM93_SYSCTL_PWM1_AUTO_CHANNELS;
+
+	if (0 > nr || nr > 1)
+		return; /* ERROR */
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		lm93_update_client(client);
+		results[0] = data->block9[nr][LM93_PWM_CTL1];
+		*nrels_mag = 1;
+	}
+	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			down(&data->update_lock);
+			data->block9[nr][LM93_PWM_CTL1] = 
+				SENSORS_LIMIT(results[0], 0, 255);
+			lm93_write_byte(client,
+				LM93_REG_PWM_CTL(nr,LM93_PWM_CTL1),
+				data->block9[nr][LM93_PWM_CTL1]);
+			up(&data->update_lock);
+		}
+	}
+}
+
+void lm93_pwm_auto_spinup_min(struct i2c_client *client, int operation,
+	int ctl_name, int *nrels_mag, long *results)
+{
+	struct lm93_data *data = client->data;
+	int nr = ctl_name - LM93_SYSCTL_PWM1_AUTO_SPINUP_MIN;
+	u8 ctl3, ctl4;
+
+	if (0 > nr || nr > 1)
+                return; /* ERROR */
+                                                                                
+	if (operation == SENSORS_PROC_REAL_INFO)
+                *nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		lm93_update_client(client);
+		ctl3 = data->block9[nr][LM93_PWM_CTL3];
+		ctl4 = data->block9[nr][LM93_PWM_CTL4];
+		results[0] = LM93_PWM_FROM_REG(ctl3 & 0x0f, (ctl4 & 0x07) ?
+				LM93_PWM_MAP_LO_FREQ : LM93_PWM_MAP_HI_FREQ);
+		*nrels_mag = 1;
+	}
+	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			down(&data->update_lock);
+			ctl3 = lm93_read_byte(client,
+				LM93_REG_PWM_CTL(nr, LM93_PWM_CTL3));
+			ctl4 = lm93_read_byte(client,
+				LM93_REG_PWM_CTL(nr, LM93_PWM_CTL4));
+			ctl3 = (ctl3 & 0xf0) | 
+				LM93_PWM_TO_REG(results[0], (ctl4 & 0x07) ?
+					LM93_PWM_MAP_LO_FREQ :
+					LM93_PWM_MAP_HI_FREQ);
+			data->block9[nr][LM93_PWM_CTL3] = ctl3;
+			lm93_write_byte(client,
+				LM93_REG_PWM_CTL(nr, LM93_PWM_CTL3), ctl3);
+			up(&data->update_lock);
+		}
+	}
+}
+
+/* TIME: 1/100 seconds
+ * REG: 0-7 as mapped below */
+static int lm93_spinup_time_map[8] = {
+	0, 10, 25, 40, 70, 100, 200, 400,
+};
+
+static int LM93_SPINUP_TIME_FROM_REG(u8 reg)
+{
+	return lm93_spinup_time_map[reg >> 5 & 0x07];
+}
+
+/* round up to nearest match */
+static u8 LM93_SPINUP_TIME_TO_REG(int time)
+{
+	int i;
+	for (i = 0; i < 7; i++)
+		if (time <= lm93_spinup_time_map[i])
+			break;
+
+	/* can fall through with i==8 */
+	return (u8)i;
+}
+
+void lm93_pwm_auto_spinup_time(struct i2c_client *client, int operation,
+	int ctl_name, int *nrels_mag, long *results)
+{
+	struct lm93_data *data = client->data;
+	int nr = ctl_name - LM93_SYSCTL_PWM1_AUTO_SPINUP_TIME;
+
+	if (0 > nr || nr > 1)
+                return; /* ERROR */
+                                                                                
+	if (operation == SENSORS_PROC_REAL_INFO)
+                *nrels_mag = 2;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		lm93_update_client(client);
+		results[0] = LM93_SPINUP_TIME_FROM_REG(
+				data->block9[nr][LM93_PWM_CTL3]);
+		*nrels_mag = 1;
+	}
+	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			u8 ctl3;
+			down(&data->update_lock);
+			ctl3 = lm93_read_byte(client,
+					LM93_REG_PWM_CTL(nr, LM93_PWM_CTL3));
+			ctl3 = (ctl3 & 0x1f) | (LM93_SPINUP_TIME_TO_REG(
+				results[0]) << 5 & 0xe0);
+			data->block9[nr][LM93_PWM_CTL3] = ctl3;
+			lm93_write_byte(client,
+				LM93_REG_PWM_CTL(nr, LM93_PWM_CTL3), ctl3);
+			up(&data->update_lock);
+		}
+	}
+}
+
+#define LM93_RAMP_MIN 0
+#define LM93_RAMP_MAX 75
+
+/* RAMP: 1/100 seconds
+   REG: 50mS/bit 4-bits right justified */
+static u8 LM93_RAMP_TO_REG(int ramp)
+{
+	ramp = SENSORS_LIMIT(ramp, LM93_RAMP_MIN, LM93_RAMP_MAX);
+	return (u8)((ramp + 2) / 5);
+}
+
+static int LM93_RAMP_FROM_REG(u8 reg)
+{
+	return (reg & 0x0f) * 5;
+}
+	
+void lm93_pwm_auto_ramp(struct i2c_client *client, int operation,
+	int ctl_name, int *nrels_mag, long *results)
+{
+	struct lm93_data *data = client->data;
+
+	if (!(ctl_name == LM93_SYSCTL_PWM_AUTO_PROCHOT_RAMP ||
+		ctl_name == LM93_SYSCTL_PWM_AUTO_VRDHOT_RAMP))
+                return; /* ERROR */
+                                                                                
+	if (operation == SENSORS_PROC_REAL_INFO)
+                *nrels_mag = 2;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		lm93_update_client(client);
+		if (ctl_name == LM93_SYSCTL_PWM_AUTO_PROCHOT_RAMP)
+			results[0] = LM93_RAMP_FROM_REG(
+					data->pwm_ramp_ctl >> 4 & 0x0f);
+		else
+			results[0] = LM93_RAMP_FROM_REG(
+					data->pwm_ramp_ctl & 0x0f);
+		*nrels_mag = 1;
+	}
+	else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			u8 ramp;
+			down(&data->update_lock);
+			ramp = lm93_read_byte(client, LM93_REG_PWM_RAMP_CTL);
+			if (ctl_name == LM93_SYSCTL_PWM_AUTO_PROCHOT_RAMP)
+				ramp = (ramp & 0x0f) | (LM93_RAMP_TO_REG(
+						results[0]) << 4 & 0xf0);
+			else
+				ramp = (ramp & 0xf0) | (LM93_RAMP_TO_REG(
+						results[0]) & 0x0f);
+			lm93_write_byte(client, LM93_REG_PWM_RAMP_CTL, ramp);
 			up(&data->update_lock);
 		}
 	}
