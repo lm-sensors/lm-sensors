@@ -12,6 +12,9 @@ The current version of Simon's code is called mod-19990118.tar.gz.
 Here come the changes:
 
 ! Renamed #define HW_B_MB to HW_B_VIA in i2c.h
+
+! Added '#include <linux/page.h>' to i2c.h, to make it compile with 2.2 
+  kernels.
  
 * Moved files: bit-via.c and README.bit-via
   These are now under lm_sensors source tree as
@@ -22,6 +25,8 @@ Here come the changes:
   use our own Makefile, we have removed them. This should have almost no
   influence on the resulting object code; a few more functions may be
   exported, but this should do no harm.
+
+# Made i2c-core a bit quieter
 
 * New file: Module.mk
   The Makefile fragment we use to compile the files in this directory.
