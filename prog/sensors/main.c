@@ -259,18 +259,31 @@ int do_the_real_work(int *error)
 int do_a_set(sensors_chip_name name)
 {
   int res;
+
+  /* skip i2c subclients since sysfs doesn't hide these... */
+  if(name.bus >= 0)
+	if(name.addr >= 0x48 && name.addr <= 0x4f)
+		if(!strcmp(name.prefix, "as99127f") ||
+		   !strcmp(name.prefix, "w83781d") ||
+		   !strcmp(name.prefix, "w83782d") ||
+		   !strcmp(name.prefix, "w83783s") ||
+		   !strcmp(name.prefix, "w83791d") ||
+		   !strcmp(name.prefix, "w83627hf") ||
+		   !strcmp(name.prefix, "w83697hf"))
+			return 0;
+
   if ((res = sensors_do_chip_sets(name))) {
     if (res == -SENSORS_ERR_PROC) {
       fprintf(stderr,"%s: %s for writing;\n",sprintf_chip_name(name),
               sensors_strerror(res));
       fprintf(stderr,"Run as root?\n");
-      return(1);
+      return 1;
     } else {
       fprintf(stderr,"%s: %s\n",sprintf_chip_name(name),
               sensors_strerror(res));
     }
   }
-  return(0);
+  return 0;
 }
 
 const char *sprintf_chip_name(sensors_chip_name name)
