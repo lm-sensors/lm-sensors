@@ -785,7 +785,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             ipmi_smic_detect via8231_isa_detect lm85_detect smartbatt_detect
             adm1026_detect w83l785ts_detect lm83_detect lm90_detect
             saa1064_detect w83l784r_detect mozart_detect max6650_detect
-			fscher_detect);
+			fscher_detect adm1029_detect adm1031_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1140,6 +1140,24 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "to-be-written",
        i2c_addrs => [0x4c],
        i2c_detect => sub { lm90_detect 4, @_ },
+     },
+     {
+       name => "Analog Devices ADM1029",
+       driver => "to-be-written",
+       i2c_addrs => [0x28..0x2f],
+       i2c_detect => sub { adm1029_detect 0, @_ },
+     },
+     {
+       name => "Analog Devices ADM1030",
+       driver => "to-be-written",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { adm1031_detect 0, @_ },
+     },
+     {
+       name => "Analog Devices ADM1031",
+       driver => "to-be-written",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { adm1031_detect 1, @_ },
      },
      {
        name => "Analog Devices ADM1022",
@@ -2611,6 +2629,97 @@ sub lm90_detect
     return if ($conf & 0x1f) != 0;
 	return if $mid != 0x4d;     # Maxim
 	return 3;
+  }
+  return;
+}
+
+# $_[0]: Chip to detect
+#   (0 = ADM1029)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, 3 to 9 if detected.
+# Registers used:
+#   0x02, 0x03: Fan support
+#   0x05: GPIO config
+#   0x07, 0x08, 0x09: Fan config
+#   0x0d: Manufacturer ID
+#   0x0e: Chip ID / die revision
+sub adm1029_detect
+{
+  my ($chip, $file, $addr) = @_;
+  my $mid = i2c_smbus_read_byte_data($file, 0x0d);
+  my $cid = i2c_smbus_read_byte_data($file, 0x0e);
+  my $fansc = i2c_smbus_read_byte_data($file, 0x02);
+  my $fanss = i2c_smbus_read_byte_data($file, 0x03);
+  my $gpio = i2c_smbus_read_byte_data($file, 0x05);
+  my $fanas = i2c_smbus_read_byte_data($file, 0x07);
+  my $fanhps = i2c_smbus_read_byte_data($file, 0x08);
+  my $fanfs = i2c_smbus_read_byte_data($file, 0x09);
+  my $confidence = 3;
+
+  if ($chip == 0) {
+    return if $mid != 0x41;     # Analog Devices
+    $confidence++ if ($cid & 0xF0) == 0x00; # ADM1029
+    $confidence+=2 if ($fansc & 0xFC) == 0x00
+                   && ($fanss & 0xFC) == 0x00;
+    $confidence+=2 if ($fanas & 0xFC) == 0x00
+                   && ($fanhps & 0xFC) == 0x00
+                   && ($fanfs & 0xFC) == 0x00;
+    $confidence++ if ($gpio & 0x80) == 0x00;
+    return $confidence;
+  }
+  return;
+}
+
+# $_[0]: Chip to detect
+#   (0 = ADM1030, 1=ADM1031)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, 3 to 7 (ADM1031) or 9 (ADM1030)
+#          if detected.
+# Registers used:
+#   0x01: Config 2
+#   0x03: Status 2
+#   0x0d, 0x0e, 0x0f: Temperature offsets
+#   0x22: Fan speed config
+#   0x3d: Chip ID
+#   0x3e: Manufacturer ID
+#   0x3f: Die revision
+sub adm1031_detect
+{
+  my ($chip, $file, $addr) = @_;
+  my $mid = i2c_smbus_read_byte_data($file, 0x3e);
+  my $cid = i2c_smbus_read_byte_data($file, 0x3d);
+  my $drev = i2c_smbus_read_byte_data($file, 0x3f);
+  my $conf2 = i2c_smbus_read_byte_data($file, 0x01);
+  my $stat2 = i2c_smbus_read_byte_data($file, 0x03);
+  my $fsc = i2c_smbus_read_byte_data($file, 0x22);
+  my $lto = i2c_smbus_read_byte_data($file, 0x0d);
+  my $r1to = i2c_smbus_read_byte_data($file, 0x0e);
+  my $r2to = i2c_smbus_read_byte_data($file, 0x0f);
+  my $confidence = 3;
+
+  if ($chip == 0) {
+    return if $mid != 0x41;     # Analog Devices
+    return if $cid != 0x30;     # ADM1030
+    $confidence++ if ($drev & 0x70) == 0x00;
+    $confidence++ if ($conf2 & 0x4A) == 0x00;
+    $confidence++ if ($stat2 & 0x3F) == 0x00;
+    $confidence++ if ($fsc & 0xF0) == 0x00;
+    $confidence++ if ($lto & 0x70) == 0x00;
+    $confidence++ if ($r1to & 0x70) == 0x00;
+    return $confidence;
+  }
+  if ($chip == 1) {
+    return if $mid != 0x41;     # Analog Devices
+    return if $cid != 0x31;     # ADM1031
+    $confidence++ if ($drev & 0x70) == 0x00;
+    $confidence++ if ($lto & 0x70) == 0x00;
+    $confidence++ if ($r1to & 0x70) == 0x00;
+    $confidence++ if ($r2to & 0x70) == 0x00;
+    return $confidence;
   }
   return;
 }
