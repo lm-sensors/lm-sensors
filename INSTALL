@@ -48,8 +48,8 @@ NOTE: PLEASE READ THE DOCUMENTATION IN THE DOC SUBDIRECTORY IF YOU GET STUCK!
 Installing the i2c package
 ==========================
 
-This lm_sensors release REQUIRES
-i2c-2.8.0 or later, which is not in kernels through 2.4.21.
+This lm_sensors release REQUIRES i2c-2.8.0 or later,
+which is not in kernels through (at least) 2.4.22.
 Therefore, you must download and install the i2c package with
 the same version number or higher as this lm_sensors package.
 
