@@ -90,7 +90,7 @@ sub gen_Documentation_Configure_help
            m@National Semiconductors LM80@ or
            m@Silicon Integrated Systems Corp. SiS5595@ or
            m@Winbond W83781D, W83782D and W83783S@ or
-           m@EEprom \(DIMM\) reader@ {
+           m@EEprom \(DIMM\) reader@) {
       $_ = <INPUT>;
       $_ = <INPUT>;
       $_ = <INPUT> while not m@^\S@ and not eof(INPUT);
