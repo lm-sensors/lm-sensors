@@ -26,6 +26,12 @@
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)
+#include <linux/kcomp.h>
+#define MAX_PCI_DEVS	8
+static struct pci_dev *amd8111_devs[MAX_PCI_DEVS] = { NULL, /* ... */ };
+static void *amd8111_drvdata[MAX_PCI_DEVS];
+static int amd8111_devcnt = 0;
+
 #define min_t(t, x, y)	(((x)<(y))?(x):(y))
 #define __devinit
 #define __devexit
@@ -45,7 +51,24 @@ struct pci_driver {
         void (*remove)(struct pci_dev *dev);
 };
 #define PCI_ANY_ID	0xffff
-#define IORESOURCE_IO 0x00000100
+
+static void *pci_get_drvdata(struct pci_dev *dev)
+{
+        int i;
+        for (i = 0; i < amd8111_devcnt; i++)
+                if (amd8111_devs[i] == dev)
+                        return amd8111_drvdata[i];
+        return NULL;
+}
+
+static void pci_set_drvdata(struct pci_dev *dev, void *driver_data)
+{
+        int i;
+        for (i = 0; i < amd8111_devcnt; i++)
+                if (amd8111_devs[i] == dev)
+                        amd8111_drvdata[i] = driver_data;
+}
+
 #endif
 
 #ifdef MODULE_LICENSE
@@ -377,7 +400,7 @@ static int __devinit amd8111_probe(struct pci_dev *dev, const struct pci_device_
 	if (~pci_resource_flags(dev, 0) & IORESOURCE_IO)
 		return -1;
 
-	if (!(smbus = (void*)kmalloc(sizeof(struct amd_smbus), GFP_KERNEL)))
+	if (!(smbus = kmalloc(sizeof(struct amd_smbus), GFP_KERNEL)))
 		return -1;
 	memset(smbus, 0, sizeof(struct amd_smbus));
 
@@ -425,7 +448,7 @@ static int __devinit amd8111_probe(struct pci_dev *dev, const struct pci_device_
 
 static void __devexit amd8111_remove(struct pci_dev *dev)
 {
-	struct amd_smbus *smbus = (void*) pci_get_drvdata(dev);
+	struct amd_smbus *smbus = pci_get_drvdata(dev);
 	if (i2c_del_adapter(&smbus->adapter)) {
 		printk(KERN_WARNING "i2c-amd8111.c: Failed to unregister adapter.\n");
 		return;
@@ -440,10 +463,7 @@ static struct pci_device_id amd8111_id_table[] __devinitdata =
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)
 
-static struct pci_dev *amd8111_devs[8] = { NULL, /* ... */ };
-static int amd8111_devcnt = 0;
-
-int i2c_amd_8111_init(void)
+int i2c_amd8111_init(void)
 {
 	struct pci_dev *pci;
 	struct pci_device_id *id;
@@ -459,19 +479,17 @@ int i2c_amd_8111_init(void)
 	return found ? 0 : -ENODEV;
 }
 
-#ifdef MODULE
-int init_module(void)
+int __init amd8111_init(void)
 {
         return i2c_amd8111_init();
 }
 
-int cleanup_module(void)
+void __exit amd8111_exit(void)
 {
 	int i;
 	for (i = 0; i < amd8111_devcnt; i++)
 		amd8111_remove(amd8111_devs[i]);
 }
-#endif 
 
 #else
 
@@ -492,7 +510,11 @@ void __exit amd8111_exit(void)
 	pci_unregister_driver(&amd8111_driver);
 }
 
+
+MODULE_DEVICE_TABLE(pci, amd8111_id_table);
+
+#endif
+
 module_init(amd8111_init);
 module_exit(amd8111_exit);
 
-#endif
