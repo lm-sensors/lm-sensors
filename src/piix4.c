@@ -62,6 +62,14 @@
 #define MAX_TIMEOUT 500
 #define  ENABLE_INT9 0
 
+/* PIIX4 constants */
+#define PIIX4_QUICK      0x00
+#define PIIX4_BYTE       0x04
+#define PIIX4_BYTE_DATA  0x08
+#define PIIX4_WORD_DATA  0x0C
+#define PIIX4_BLOCK_DATA 0x14
+
+
 static int piix4_init(void);
 static int piix4_cleanup(void);
 static int piix4_setup(void);
@@ -204,10 +212,17 @@ int piix4_transaction(void)
   int result=0;
   int timeout=0;
 
+#ifdef DEBUG
+  printk("piix4.o: Transaction: CNT=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, "
+         "DAT1=%02x\n",
+         inb_p(SMBHSTCNT),inb_p(SMBHSTCMD),inb_p(SMBHSTADD),inb_p(SMBHSTDAT0),
+         inb_p(SMBHSTDAT1));
+#endif
+
   /* Make sure the SMBus host is ready to start transmitting */
   if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-    printk("piix4.o: SMBus busy (%02x). Resetting... ",temp);
+    printk("piix4.o: SMBus busy (%02x). Resetting... \n",temp);
 #endif
     outb_p(temp, SMBHSTSTS);
     if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
@@ -225,16 +240,11 @@ int piix4_transaction(void)
   /* start the transaction by setting bit 6 */
   outb_p(inb(SMBHSTCNT) | 0x040, SMBHSTCNT); 
 
-  /* Wait for a fraction of a second! (See PIIX4 docs errata) */
-  piix4_do_pause(1);
-
-  /* Poll Host_busy bit */
-  temp=inb_p(SMBHSTSTS) & 0x01;
-  while (temp & (timeout++ < MAX_TIMEOUT)) {
-    /* Wait for a while and try again*/
+  /* We will always wait for a fraction of a second! (See PIIX4 docs errata) */
+  do {
     piix4_do_pause(1);
-    temp = inb_p(SMBHSTSTS) & 0x01;
-  }
+    temp=inb_p(SMBHSTSTS);
+  } while ((temp & 0x01) && (timeout++ < MAX_TIMEOUT));
 
   /* If the SMBus is still busy, we give up */
   if (timeout >= MAX_TIMEOUT) {
@@ -244,9 +254,7 @@ int piix4_transaction(void)
 #endif
   }
 
-  temp = inb_p(SMBHSTSTS);
-
-  if (temp  & 0x10) {
+  if (temp & 0x10) {
     result = -1;
 #ifdef DEBUG
     printk("piix4.o: Error: Failed bus transaction\n");
@@ -284,22 +292,26 @@ s32 piix4_access(u8 addr, char read_write,
 {
   int i,len;
 
-  outb_p((size & 0x1C) + (ENABLE_INT9 & 1), SMBHSTCNT);
-
   switch(size) {
+    case SMBUS_PROC_CALL:
+      printk("piix4.o: SMBUS_PROC_CALL not supported!\n");
+      return -1;
     case SMBUS_QUICK:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
+      size = PIIX4_QUICK;
       break;
     case SMBUS_BYTE:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
       if (read_write == SMBUS_WRITE)
         outb_p(command, SMBHSTCMD);
+      size = PIIX4_BYTE;
       break;
     case SMBUS_BYTE_DATA:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
       outb_p(command, SMBHSTCMD);
       if (read_write == SMBUS_WRITE)
         outb_p(data->byte,SMBHSTDAT0);
+      size = PIIX4_BYTE_DATA;
       break;
     case SMBUS_WORD_DATA:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
@@ -308,6 +320,7 @@ s32 piix4_access(u8 addr, char read_write,
         outb_p(data->word & 0xff,SMBHSTDAT0);
         outb_p((data->word & 0xff00) >> 8,SMBHSTDAT1);
       }
+      size = PIIX4_WORD_DATA;
       break;
     case SMBUS_BLOCK_DATA:
       outb_p(((addr & 0x7f) << 1) | (read_write & 0x01), SMBHSTADD);
@@ -322,32 +335,34 @@ s32 piix4_access(u8 addr, char read_write,
         i = inb_p(SMBHSTCNT); /* Reset SMBBLKDAT */
         for (i = 1; i <= len; i ++)
           outb_p(data->block[i],SMBBLKDAT);
-        break;
       }
+      size = PIIX4_BLOCK_DATA;
+      break;
   }
+
+  outb_p((size & 0x1C) + (ENABLE_INT9 & 1), SMBHSTCNT);
 
   if (piix4_transaction()) /* Error in transaction */ 
     return -1; 
   
-
-  if ((read_write == SMBUS_WRITE) || (size == SMBUS_QUICK))
+  if ((read_write == SMBUS_WRITE) || (size == PIIX4_QUICK))
     return 0;
   
 
   switch(size) {
-    case SMBUS_BYTE: /* Where is the result put? I assume here it is in
+    case PIIX4_BYTE: /* Where is the result put? I assume here it is in
                         SMBHSTDAT0 but it might just as well be in the
                         SMBHSTCMD. No clue in the docs */
  
       data->byte = inb_p(SMBHSTDAT0);
       break;
-    case SMBUS_BYTE_DATA:
+    case PIIX4_BYTE_DATA:
       data->byte = inb_p(SMBHSTDAT0);
       break;
-    case SMBUS_WORD_DATA:
+    case PIIX4_WORD_DATA:
       data->word = inb_p(SMBHSTDAT0) + (inb_p(SMBHSTDAT1) << 8);
       break;
-    case SMBUS_BLOCK_DATA:
+    case PIIX4_BLOCK_DATA:
       data->block[0] = inb_p(SMBHSTDAT0);
       i = inb_p(SMBHSTCNT); /* Reset SMBBLKDAT */
       for (i = 1; i <= data->block[0]; i++)

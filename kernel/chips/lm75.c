@@ -122,7 +122,7 @@ int lm75_attach_adapter(struct i2c_adapter *adapter)
     /* Later on, we will keep a list of registered addresses for each
        adapter, and check whether they are used here */
     
-    if (smbus_read_byte_data(adapter,address,LM75_REG_CONF) == 0xff)
+    if (smbus_read_byte_data(adapter,address,LM75_REG_CONF) < 0)
       continue;
 
     /* Real detection code goes here */
@@ -167,6 +167,7 @@ int lm75_attach_adapter(struct i2c_adapter *adapter)
                                       lm75_dir_table_template)) < 0)
       goto ERROR3;
     data->sysctl_id = err;
+    err = 0;
 
     /* Initialize the LM75 chip */
     lm75_write_value(new_client,LM75_REG_TEMP_OS,LM75_INIT_TEMP_OS);
