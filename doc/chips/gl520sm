@@ -102,10 +102,10 @@ Chip `gl520sm'
           fan2_min               fan2               fan2     RW    0
              temp1               NONE               NONE     R     1
              temp2               NONE               NONE     R     1
-        temp_hyst1              temp1              temp1     RW    1
-        temp_hyst2              temp2              temp2     RW    1
-        temp_over1              temp1              temp1     RW    1
-        temp_over2              temp2              temp2     RW    1
+        temp1_hyst              temp1              temp1     RW    1
+        temp2_hyst              temp2              temp2     RW    1
+        temp1_over              temp1              temp1     RW    1
+        temp2_over              temp2              temp2     RW    1
           fan1_div               fan1               NONE     RW    0
           fan2_div               fan2               NONE     RW    0
             alarms               NONE               NONE     R     0
@@ -135,10 +135,10 @@ Chip `gl520sm'
           fan2_min               SENSORS_GL520_FAN2_MIN               fan2:1
              temp1                  SENSORS_GL520_TEMP1              temp1:3
              temp2                  SENSORS_GL520_TEMP2              temp2:3
-        temp_hyst1             SENSORS_GL520_TEMP1_HYST              temp1:2
-        temp_hyst2             SENSORS_GL520_TEMP2_HYST              temp2:2
-        temp_over1             SENSORS_GL520_TEMP1_OVER              temp1:1
-        temp_over2             SENSORS_GL520_TEMP2_OVER              temp2:1
+        temp1_hyst             SENSORS_GL520_TEMP1_HYST              temp1:2
+        temp2_hyst             SENSORS_GL520_TEMP2_HYST              temp2:2
+        temp1_over             SENSORS_GL520_TEMP1_OVER              temp1:1
+        temp2_over             SENSORS_GL520_TEMP2_OVER              temp2:1
           fan1_div               SENSORS_GL520_FAN1_DIV            fan_div:1
           fan2_div               SENSORS_GL520_FAN2_DIV            fan_div:2
             alarms                 SENSORS_GL520_ALARMS             alarms:1
