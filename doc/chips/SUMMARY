@@ -9,23 +9,30 @@ Driver  Chip		#temp	#vin	#fanin	pwm/dac	i2c	ISA
 adm1021
 	adm1021		2	-	-	-	yes	no
 	max1617		2	-	-	-	yes	no
+	max1617		2	-	-	-	yes	no
 
 adm9240
 	adm9240		1	6	5	1 dac	yes	no
 	ds1780		1	6	5	1 dac	yes	no
 
 gl518sm
-        gl518smR00	1	1	2	-	yes	no
-        gl518smR80	1	4	2	-	yes	no
+        gl518sm-r00	1	1/4	2	-	yes	no
+        gl518sm-r80	1	4	2	-	yes	no
 
 lm75
 	lm75		1	-	-	-	yes	no
 
 lm78
 	lm78		1	7	3	-	yes	yes
+	lm78-j		1	7	3	-	yes	yes
+	lm79		1	7	3	-	yes	yes
 
 lm80
 	lm80		1	7	2	-	yes	no
+
+
+maxilife
+	maxilife	5	4	3	-	yes	no
 
 sis5595
 	sis5595 	1	7	3	-	no	yes

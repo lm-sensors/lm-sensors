@@ -1,0 +1,63 @@
+All chip drivers have a few insmod module parameters in common. These
+parameters can be used when a module is inserted, to give some additional
+information about how it should function. In this case, they tell where
+the module should look for what chips. Usually, you don't need them, and
+if you do, you are often told by sensors-detect which ones you need.
+
+I2C/SMBus adapters are numbered in the order they are inserted. If you want
+to know what number an adapter has, please make sure module `i2c-proc' is 
+inserted, and look at file /proc/bus/i2c. The ISA bus always has the
+symbolic number 9191 (`I' is the ninth letter of the alphabet, `S' the
+nineteenth and `A' the first). If you want 'any I2C bus', use '-1' 
+(or 65535).
+
+Each adapter has a number of addresses on I2C/SMBus adapters and/or the
+ISA bus that are always scanned if no insmod parameters are given. The
+parameters below override those addresses that are scanned by default.
+
+All insmod parameters described below take lists of positive integers
+(unsigned, in the range of 0 to 65535) as their arguments.  Integers
+are separated by comma's, and may be given as ordinary decimal numbers,
+as octal numbers (by starting them with a `0') or as hexadecimal numbers
+(by starting them with a `0x'). More information can be found by
+entering `man insmod'.
+
+`force', `force_*', `ignore' and `probe' parameters take pairs of numbers.
+Each first (odd) number is a bus number, each second (even) number is
+an (I2C or ISA) address.
+
+`ignore_range' and `probe_range' parameters take triples of numbers.
+Each first number is a bus number, each second number is the start address
+of a range, and each third number is the end address of a range. Ranges
+are always inclusive.
+
+`probe' and `probe_range' parameters tell the module to scan additional 
+addresses for a specific bus. These are treated just as the ordinary
+addresses scanned. This is useful for some chips that can be anywhere;
+to keep loading time (and false detections) down, only the most common
+addresses are scanned by default.
+
+`ignore' and `ignore_range' parameters tell the module not to scan
+specific addresses. They overrule the default addresses and any 
+addresses specified by `probe' and `probe_range' statements.
+
+The `force' parameter tells the module a supported chip is found at
+a specific address. It overrules all previously mentioned parameters.
+Sometimes, a chip can be in a specific internal state that makes
+detection impossible. If you specify it with the `force' parameter,
+it is first put into a recognizable state. Also, some detection routines
+are skipped. If the module supports several chips, it will still try
+to determine what chip is found on that address. If it can't determine
+this, the address will still not be used.
+
+There is a `force_*' parameter for each type of chip supported by a
+module. This is the strongest statement possible - it says that a
+specific type of chip is found on a specific address, and the module
+will skip all detection and recognition routines. This can lead to
+very strange results...
+
+An example:
+  insmod lm78 force_lm79=9191,0x390 ignore=0,0x2d,1,0x20 probe_range=-1,0,0x7f
+  # ISA address 0x390 contains a LM79
+  # Scan all I2C addresses (from 0 to 0x7f) for all I2C adapters
+  # But skip address 0x2d on adapter 0, and address 0x20 on adapter 1
