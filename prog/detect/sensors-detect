@@ -1082,8 +1082,8 @@ sub scan_adapter
       next;
     }
 
-    i2c_set_slave_addr(\*FILE,$addr) or print("Can't set address to $_?!?\n"), 
-                                     next;
+    i2c_set_slave_addr(\*FILE,$addr) or 
+        printf("Client at address 0x%02x can not be probed - unload all client drivers first!\n",$addr), next;
 
     next unless i2c_smbus_write_quick(\*FILE,$SMBUS_WRITE) >= 0;
     printf "Client found at address 0x%02x\n",$addr;

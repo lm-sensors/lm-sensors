@@ -87,9 +87,14 @@ int main(int argc, char *argv[])
     printf("%02x: ",i);
     for(j = 0; j < 16; j++) {
       if (ioctl(file,I2C_SLAVE,i+j) < 0) {
-        fprintf(stderr,"Error: Could not set address to %d: %s\n",i+j,
-                strerror(errno));
-        exit(1);
+        if (errno == EBUSY) {
+          printf("UU ");
+          continue;
+        } else {
+          fprintf(stderr,"Error: Could not set address to %02x: %s\n",i+j,
+                  strerror(errno));
+          exit(1);
+        }
       }
 
       res = i2c_smbus_write_quick(file, I2C_SMBUS_WRITE);

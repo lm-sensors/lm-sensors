@@ -213,9 +213,6 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
   if (! i2c_check_functionality(adapter,I2C_FUNC_SMBUS_BYTE_DATA))
     goto ERROR0;
 
-  /* We need address registration for the I2C bus too. That is not yet
-     implemented. */
-
   /* OK. For now, we presume we have a valid client. We now create the
      client structure, even though we cannot fill it completely yet.
      But it allows us to access adm1021_{read,write}_value. */

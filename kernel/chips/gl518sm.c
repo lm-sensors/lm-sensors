@@ -317,9 +317,6 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
                                         I2C_FUNC_SMBUS_WORD_DATA))
     goto ERROR0;
 
-  /* We need address registration for the I2C bus too. That is not yet
-     implemented. */
-
   /* OK. For now, we presume we have a valid client. We now create the
      client structure, even though we cannot fill it completely yet.
      But it allows us to access gl518_{read,write}_value. */

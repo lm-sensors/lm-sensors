@@ -25,6 +25,7 @@
 #include <linux/ctype.h>
 #include <linux/sysctl.h>
 #include <linux/proc_fs.h>
+#include <linux/ioport.h>
 
 #include "version.h"
 #include <linux/i2c.h>
@@ -613,6 +614,9 @@ int sensors_detect(struct i2c_adapter *adapter,
   for (addr = 0x00; 
        addr <= (is_isa?0xffff:0x7f); 
        addr ++) {
+    if ((is_isa && check_region(addr,1)) || 
+        (!is_isa && i2c_check_addr(adapter,addr)))
+      continue;
 
     /* If it is in one of the force entries, we don't do any detection
        at all */

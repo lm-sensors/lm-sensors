@@ -25,7 +25,7 @@ KERNEL MODULES
   in Simon Vogl's i2c modules.
 * Better general locking, or at least a once-over to check no race-conditions
   remain. This is part of the SMP-safeness, and can better be done at once.
-* Test SIS5595(/91/98) sensor support. Write generic i2c support. 
+* Test SIS5595(/91/98) sensor support and SMBus support
   Thomas Dickel <Thomas.Dickel@mni.fh-giessen.de> owns one SIS5595.
 * adm9240: check whether the current voltage computations are correct.
   Probably not, as they are different from the datasheet specifications.

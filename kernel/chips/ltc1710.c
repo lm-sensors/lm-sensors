@@ -172,9 +172,6 @@ int ltc1710_detect(struct i2c_adapter *adapter, int address,
   if (! i2c_check_functionality(adapter,I2C_FUNC_SMBUS_BYTE))
     goto ERROR0;
 
-  /* Here, we have to do the address registration check for the I2C bus.
-     But that is not yet implemented. */
-
   /* OK. For now, we presume we have a valid client. We now create the
      client structure, even though we cannot fill it completely yet.
      But it allows us to access ltc1710_{read,write}_value. */
