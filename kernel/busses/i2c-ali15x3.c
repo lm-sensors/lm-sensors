@@ -72,16 +72,7 @@
 #include "version.h"
 #include "compat.h"
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))
-#include <linux/bios32.h>
-#endif
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init 
-#define __initdata 
-#endif
 
 #undef FORCE_ALI15X3_ENABLE
 
@@ -194,12 +185,7 @@ int ali15x3_setup(void)
   int error_return=0;
   unsigned char temp;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   struct pci_dev *ALI15X3_dev;
-#else
-  unsigned char ALI15X3_bus, ALI15X3_devfn = 0;
-  int res;
-#endif
 
   /* First check whether we can access PCI at all */
   if (pci_present() == 0) {
@@ -209,18 +195,10 @@ int ali15x3_setup(void)
   }
 
   /* Look for the ALI15X3, M7101 device */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   ALI15X3_dev = NULL;
   ALI15X3_dev = pci_find_device(PCI_VENDOR_ID_AL, 
                                 PCI_DEVICE_ID_AL_M7101, ALI15X3_dev);
   if(ALI15X3_dev == NULL) {
-#else /* LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54) */
-    res = pcibios_find_device(PCI_VENDOR_ID_AL,
-                                    PCI_DEVICE_ID_AL_M7101,
-                                    0,&ALI15X3_bus, &ALI15X3_devfn);
-     
-  if (res) {
-#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
     printk("i2c-ali15x3.o: Error: Can't detect ali15x3!\n");
     error_return=-ENODEV;
     goto END;

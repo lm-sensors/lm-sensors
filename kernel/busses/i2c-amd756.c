@@ -38,16 +38,7 @@
 #include "version.h"
 #include "compat.h"
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))
-#include <linux/bios32.h>
-#endif
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
 
 /* AMD756 SMBus address offsets */
 #define SMB_GLOBAL_STATUS      (0xE0 + amd756_smba)
@@ -144,12 +135,7 @@ int amd756_setup(void)
   int error_return=0;
   unsigned char temp;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   struct pci_dev *AMD756_dev;
-#else
-  unsigned char AMD756_bus, AMD756_devfn;
-  int i,res;
-#endif
 
   /* First check whether we can access PCI at all */
   if (pci_present() == 0) {
@@ -159,7 +145,6 @@ int amd756_setup(void)
   }
 
   /* Look for the AMD756, function 3 */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   /* Note: we keep on searching until we have found 'function 3' */
   AMD756_dev = NULL;
   do
@@ -167,16 +152,6 @@ int amd756_setup(void)
                                 PCI_DEVICE_ID_AMD_756, AMD756_dev);
   while (AMD756_dev && (PCI_FUNC(AMD756_dev->devfn) != 3));
   if(AMD756_dev == NULL) {
-#else /* LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54) */
-  for (i = 0; 
-       ! (res = pcibios_find_device(PCI_VENDOR_ID_INTEL,
-                                    PCI_DEVICE_ID_INTEL_82371AB_3,
-                                    i,&AMD756_bus, &AMD756_devfn)) && 
-         PCI_FUNC(AMD756_devfn) != 3; 
-       i++);
-     
-  if (res) {
-#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
     printk("i2c-amd756.o: Error: Can't detect AMD756, function 3!\n");
     error_return=-ENODEV;
     goto END;

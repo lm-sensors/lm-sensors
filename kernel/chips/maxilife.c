@@ -53,13 +53,7 @@ static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 #include "i2c-isa.h"
 #include "compat.h"
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
-
 
 
 #undef AUTODETECT          /* try to autodetect MaxiLife version */

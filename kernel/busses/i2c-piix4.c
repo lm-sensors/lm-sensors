@@ -33,16 +33,7 @@
 #include "version.h"
 #include "compat.h"
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))
-#include <linux/bios32.h>
-#endif
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
 
 /* PIIX4 SMBus address offsets */
 #define SMBHSTSTS (0 + piix4_smba)
@@ -149,12 +140,7 @@ int piix4_setup(void)
   int error_return=0;
   unsigned char temp;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   struct pci_dev *PIIX4_dev;
-#else
-  unsigned char PIIX4_bus, PIIX4_devfn;
-  int i,res;
-#endif
 
   /* First check whether we can access PCI at all */
   if (pci_present() == 0) {
@@ -164,7 +150,6 @@ int piix4_setup(void)
   }
 
   /* Look for the PIIX4, function 3 */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   /* Note: we keep on searching until we have found 'function 3' */
   PIIX4_dev = NULL;
   do
@@ -172,16 +157,6 @@ int piix4_setup(void)
                                 PCI_DEVICE_ID_INTEL_82371AB_3, PIIX4_dev);
   while(PIIX4_dev && (PCI_FUNC(PIIX4_dev->devfn) != 3));
   if(PIIX4_dev == NULL) {
-#else /* LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54) */
-  for (i = 0; 
-       ! (res = pcibios_find_device(PCI_VENDOR_ID_INTEL,
-                                    PCI_DEVICE_ID_INTEL_82371AB_3,
-                                    i,&PIIX4_bus, &PIIX4_devfn)) && 
-         PCI_FUNC(PIIX4_devfn) != 3; 
-       i++);
-     
-  if (res) {
-#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
     printk("i2c-piix4.o: Error: Can't detect PIIX4, function 3!\n");
     error_return=-ENODEV;
     goto END;

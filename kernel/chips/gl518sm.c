@@ -29,12 +29,7 @@
 #include "version.h"
 #include "compat.h"
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
 
 #ifdef __SMP__
 #include <linux/smp_lock.h>
@@ -156,10 +151,8 @@ struct gl518_data {
          struct semaphore update_lock;
 
          int iterate_lock;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,68)
          int quit_thread;
          struct task_struct *thread;
-#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1)
 	 wait_queue_head_t wq;
 #else
@@ -406,10 +399,8 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
   /* Initialize the GL518SM chip */
   data->iterate = 0;
   data->iterate_lock = 0;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,68)
   data->quit_thread = 0;
   data->thread = NULL;
-#endif
   data->alarm_mask = 0xff;
   gl518_init_client((struct i2c_client *) new_client);
   return 0;
@@ -492,12 +483,10 @@ int gl518_detach_client(struct i2c_client *client)
   }
   gl518_list[i] = NULL;
   
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,68)
   if (data->thread) {
     data->quit_thread = 1;
     wake_up_interruptible(&data->wq);
   }
-#endif
 
   kfree(client);
 
@@ -651,7 +640,6 @@ void gl518_update_client_rev00(struct i2c_client *client)
   } 
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,68)
 int gl518_update_thread(void *c)
 {
   struct i2c_client *client = c;
@@ -694,7 +682,6 @@ int gl518_update_thread(void *c)
   data->quit_thread = 0;
   return 0;
 }
-#endif
 
 /* This updates vdd, vin1, vin2 values by doing slow and multiple
    comparisons for the GL518SM rev 00 that lacks support for direct
@@ -734,11 +721,9 @@ void gl518_update_iterate(struct i2c_client *client)
     for (i=0; i<3; i++)
       gl518_write_value(client, VIN_REG(i), max[i] << 8 | min[i]);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,68)
     if ((data->thread) && 
        ((data->quit_thread) || signal_pending(current))) 
       goto finish;
-#endif
 
     /* we wait now 1.5 seconds before comparing */
     current->state = TASK_INTERRUPTIBLE;
@@ -1007,7 +992,6 @@ void gl518_iterate(struct i2c_client *client, int operation, int ctl_name,
       }
       data->valid=0;
       
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,68)
       if ((data->iterate != 2) && (data->thread)) {
          data->quit_thread = 1;
          wake_up_interruptible(&data->wq);
@@ -1019,7 +1003,6 @@ void gl518_iterate(struct i2c_client *client, int operation, int ctl_name,
 #endif
          kernel_thread(gl518_update_thread, (void*) client, 0);
       }
-#endif
     }
   }
 }

@@ -29,20 +29,11 @@
 #include <asm/io.h>
 #include <linux/types.h>
 
-#if LINUX_VERSION_CODE < 0x020136 /* 2.1.54 */
-#include <linux/bios32.h>
-#endif
-
 #include <linux/i2c.h>
 #include <linux/i2c-algo-bit.h>
 #include "compat.h"
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
 
 /* PCI device */
 #define VENDOR		PCI_VENDOR_ID_VIA
@@ -127,7 +118,6 @@ static struct i2c_adapter bit_via_ops = {
 
 
 /* When exactly was the new pci interface introduced? */
-#if LINUX_VERSION_CODE >= 0x020136 /* 2.1.54 */
 static int find_via(void)
 {
 	struct pci_dev *s_bridge;
@@ -167,49 +157,6 @@ static int find_via(void)
 	pm_io_base &= (0xff<<8);
 	return 0;
 }
-
-#else
-
-static int find_via(void)
-{
-	unsigned char VIA_bus, VIA_devfn;
-	u16 base;
-	u8 rev;
-	
-	if (! pcibios_present())
-		return -ENODEV;
-		
-	if(pcibios_find_device(VENDOR, DEVICE, 0, &VIA_bus, &VIA_devfn))
-	{
-		printk("vt82c586b not found\n");
-		return -ENODEV;
-	}
-	
-	if ( PCIBIOS_SUCCESSFUL != 
-		pcibios_read_config_byte(VIA_bus, VIA_devfn,
-					PM_CFG_REVID, &rev))
-		return -ENODEV;
-
-	switch(rev)
-	{
-		case 0x00:	base = PM_CFG_IOBASE0;
-				break;
-		case 0x01:
-		case 0x10:	base = PM_CFG_IOBASE1;
-				break;
-				
-		default	:	base = PM_CFG_IOBASE1;
-				/* later revision */	
-	}	
-
-	if ( PCIBIOS_SUCCESSFUL !=
-                pcibios_read_config_word(VIA_bus, VIA_devfn, base, &pm_io_base))
-		return -ENODEV;
-
-	pm_io_base &= (0xff<<8);
-	return 0;
-}
-#endif
 
 #ifdef MODULE
 static

@@ -27,9 +27,6 @@
 #include <linux/ioport.h>
 #include <linux/sysctl.h>
 #include <linux/pci.h>
-#if LINUX_VERSION_CODE < 0x020136 /* 2.1.54 */
-#include <linux/bios32.h>
-#endif
 #include <asm/errno.h>
 #include <asm/io.h>
 #include <linux/types.h>
@@ -39,13 +36,7 @@
 #include "sensors.h"
 #include "compat.h"
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
-
 
 /* Addresses to scan.
    Note that we can't determine the ISA address until we have initialized
@@ -274,25 +265,15 @@ int sis5595_attach_adapter(struct i2c_adapter *adapter)
 /* Locate SiS bridge and correct base address for SIS5595 */
 int sis5595_find_sis(int *address)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   struct pci_dev *s_bridge;
-#else
-  unsigned char SIS_bus, SIS_devfn;
-#endif
   u16 val;
 
   if (! pci_present())
     return -ENODEV;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   if (! (s_bridge = pci_find_device(
                    PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_503, NULL)))
 		
-#else
-  if(pcibios_find_device(
-                PCI_VENDOR_ID_SI, PCI_DEVICE_ID_SI_503, 0,
-                &SIS_bus, &SIS_devfn))
-#endif
     return -ENODEV;
 
 

@@ -38,16 +38,7 @@
 #include "version.h"
 #include "compat.h"
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))
-#include <linux/bios32.h>
-#endif
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
 
 /* SIS5595 SMBus registers */
 #define SMB_STS_LO 0x00
@@ -150,12 +141,7 @@ int sis5595_setup(void)
 {
   int error_return=0;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   struct pci_dev *SIS5595_dev;
-#else
-  unsigned char SIS5595_bus, SIS5595_devfn;
-  int i,res;
-#endif
 
   /* First check whether we can access PCI at all */
   if (pci_present() == 0) {
@@ -165,15 +151,9 @@ int sis5595_setup(void)
   }
 
   /* Look for the SIS5595, function 3 */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   SIS5595_dev = NULL;
   if (!(SIS5595_dev = pci_find_device(PCI_VENDOR_ID_SI, 
                               PCI_DEVICE_ID_SI_503, SIS5595_dev))) {
-#else /* LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54) */
-  if ((res =  pcibios_find_device(PCI_VENDOR_ID_SI,
-                                    PCI_DEVICE_ID_SI_503,
-                                    i,&SIS5595_bus, &SIS5595_devfn))) {
-#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
     printk("i2c-sis5595.o: Error: Can't detect SIS5595!\n");
     error_return=-ENODEV;
     goto END;

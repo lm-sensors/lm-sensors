@@ -47,12 +47,7 @@
 #include "sensors.h"
 #include "compat.h"
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
 
 /* RT Table support #defined so we can take it out if it gets bothersome */
 #define W83781D_RT 1

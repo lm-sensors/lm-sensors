@@ -42,26 +42,11 @@
 #include "version.h"
 #include "compat.h"
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))
-#include <linux/bios32.h>
-#endif
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
 
 /* 3DFX defines */
-#ifndef PCI_VENDOR_ID_3DFX
-#define PCI_VENDOR_ID_3DFX 0x121a
-#endif
 #ifndef PCI_DEVICE_ID_3DFX_VOODOO3
 #define PCI_DEVICE_ID_3DFX_VOODOO3 0x05
-#endif
-#ifndef PCI_DEVICE_ID_3DFX_BANSHEE
-#define PCI_DEVICE_ID_3DFX_BANSHEE 0x03
 #endif
 
 #ifdef MODULE
@@ -680,11 +665,8 @@ void config_v3(struct pci_dev *dev)
         /* map Voodoo3 memory */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,13)
         cadr = dev->resource[0].start;
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54)
-        cadr = dev->base_address[0];
 #else
-        pcibios_read_config_dword(dev->bus->number, dev->devfn,
-                                  PCI_BASE_ADDRESS_0,&cadr);
+        cadr = dev->base_address[0];
 #endif
         cadr&=PCI_BASE_ADDRESS_MEM_MASK;
         mem=ioremap(cadr, 0x1000);

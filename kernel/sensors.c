@@ -33,11 +33,7 @@
 #include "sensors.h"
 #include "compat.h"
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init 
-#endif
 
 #ifdef MODULE
 extern int init_module(void);
@@ -62,14 +58,12 @@ static int __init sensors_init(void);
 #define SENSORS_ENTRY_MAX 20
 static struct ctl_table_header *sensors_entries[SENSORS_ENTRY_MAX];
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
 static struct i2c_client *sensors_clients[SENSORS_ENTRY_MAX];
 static unsigned short sensors_inodes[SENSORS_ENTRY_MAX];
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1)
 static void sensors_fill_inode(struct inode *inode, int fill);
 static void sensors_dir_fill_inode(struct inode *inode, int fill);
-#endif
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
+#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1) */
 
 static ctl_table sysctl_table[] = {
   { CTL_DEV, "dev", NULL, 0, 0555 },
@@ -183,7 +177,6 @@ int sensors_register_entry(struct i2c_client *client ,const char *prefix,
 
   sensors_entries[id-256] = new_header;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
   sensors_clients[id-256] = client;
 #ifdef DEBUG
   if (!new_header || !new_header->ctl_table || 
@@ -200,7 +193,6 @@ int sensors_register_entry(struct i2c_client *client ,const char *prefix,
 #else
   new_header->ctl_table->child->child->de->fill_inode = &sensors_dir_fill_inode;
 #endif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,27))
-#endif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
 
   return id;
 }
@@ -218,13 +210,10 @@ void sensors_deregister_entry(int id)
     kfree(temp);
     kfree(table);
     sensors_entries[id] = NULL;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
     sensors_clients[id] = NULL;
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
   }
 }
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
 /* Monitor access for /proc/sys/dev/sensors; make unloading sensors.o 
    impossible if some process still uses it or some file in it */
 void sensors_fill_inode(struct inode *inode, int fill)
@@ -266,7 +255,6 @@ void sensors_dir_fill_inode(struct inode *inode, int fill)
   else
     client->driver->dec_use(client);
 }
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
 
 int sensors_proc_chips(ctl_table *ctl, int write, struct file * filp,
                        void *buffer, size_t *lenp)
@@ -777,7 +765,7 @@ int __init sensors_init(void)
     return -ENOMEM;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1))
   sensors_proc_header->ctl_table->child->de->owner = THIS_MODULE;
-#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+#else
   sensors_proc_header->ctl_table->child->de->fill_inode = &sensors_fill_inode;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1)) */
   sensors_initialized ++;

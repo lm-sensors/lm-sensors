@@ -35,12 +35,7 @@
 #include "sensors.h"
 #include "i2c-isa.h"
 #include "version.h"
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
 
 
 /* Many constants specified below */

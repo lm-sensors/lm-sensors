@@ -39,10 +39,6 @@
 #include "version.h"
 #include "compat.h"
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))
-#include <linux/bios32.h>
-#endif
-
 /* I801 SMBus address offsets */
 #define SMBHSTSTS (0 + i801_smba)
 #define SMBHSTCNT (2 + i801_smba)
@@ -138,12 +134,7 @@ int i801_setup(void)
   int error_return=0;
   unsigned char temp;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   struct pci_dev *I801_dev;
-#else
-  unsigned char I801_bus, I801_devfn;
-  int i,res;
-#endif
 
   /* First check whether we can access PCI at all */
   if (pci_present() == 0) {
@@ -154,7 +145,6 @@ int i801_setup(void)
 
   /* Look for the I801, function 3 */
   /* Have to check for both the 82801AA and 82801AB */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   /* Note: we keep on searching until we have found 'function 3' */
   I801_dev = NULL;
   do
@@ -168,23 +158,6 @@ int i801_setup(void)
     while(I801_dev && (PCI_FUNC(I801_dev->devfn) != 3));
   }
   if(I801_dev == NULL) {
-#else /* LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54) */
-  for (i = 0; 
-       ! (res = pcibios_find_device(PCI_VENDOR_ID_INTEL,
-                                    PCI_DEVICE_ID_INTEL_82801AA_3,
-                                    i,&I801_bus, &I801_devfn)) && 
-         PCI_FUNC(I801_devfn) != 3; 
-       i++);
-  if (res) {
-    for (i = 0; 
-         ! (res = pcibios_find_device(PCI_VENDOR_ID_INTEL,
-                                      PCI_DEVICE_ID_INTEL_82801AB_3,
-                                      i,&I801_bus, &I801_devfn)) && 
-           PCI_FUNC(I801_devfn) != 3; 
-         i++);
-  }
-  if (res) {
-#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
     printk("i2c-i801.o: Error: Can't detect I801, function 3!\n");
     error_return=-ENODEV;
     goto END;

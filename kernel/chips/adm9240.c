@@ -62,12 +62,7 @@
 #include "i2c-isa.h"
 #include "sensors.h"
 #include "compat.h"
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
 
 
 /* Addresses to scan */

@@ -33,17 +33,7 @@
 #include "version.h"
 #include "compat.h"
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))
-#include <linux/bios32.h>
-#endif
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
 #include <linux/init.h>
-#else
-#define __init
-#define __initdata
-#endif
-
 
 #ifndef PCI_DEVICE_ID_VIA_82C596_3
 #define PCI_DEVICE_ID_VIA_82C596_3 0x3050
@@ -166,12 +156,7 @@ int vt596_setup(void)
   int error_return=0;
   unsigned char temp;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   struct pci_dev *VT596_dev;
-#else
-  unsigned char VT596_bus, VT596_devfn;
-  int i,res;
-#endif
 
   /* First check whether we can access PCI at all */
   if (pci_present() == 0) {
@@ -181,7 +166,6 @@ int vt596_setup(void)
   }
 
   /* Look for the VT596 function 3   _or_  VT686 function 4 */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54))
   VT596_dev = NULL;
   VT596_dev = pci_find_device(PCI_VENDOR_ID_VIA, 
                               PCI_DEVICE_ID_VIA_82C596_3, VT596_dev);
@@ -190,24 +174,6 @@ int vt596_setup(void)
                                 PCI_DEVICE_ID_VIA_82C686_4, VT596_dev);
 
   if (VT596_dev == NULL) {
-#else /* LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54) */
-  for (i = 0; 
-       ! (res = pcibios_find_device(PCI_VENDOR_ID_VIA,
-                                    PCI_DEVICE_ID_VIA_82C596_3,
-                                    i,&VT596_bus, &VT596_devfn)) && 
-         PCI_FUNC(VT596_devfn) != 3; 
-       i++);
-  
-  if (res)
-    for (i = 0; 
-       ! (res = pcibios_find_device(PCI_VENDOR_ID_VIA,
-                                    PCI_DEVICE_ID_VIA_82C686_4,
-                                    i,&VT596_bus, &VT596_devfn)) && 
-         PCI_FUNC(VT596_devfn) != 4; 
-       i++);
-
-  if (res) {
-#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,54) */
     printk("i2c-viapro.o: Error: Can't detect vt82c596 or vt82c686");
     error_return=-ENODEV;
     goto END;
