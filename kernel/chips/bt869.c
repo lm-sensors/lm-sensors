@@ -32,7 +32,7 @@
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {SENSORS_I2C_END};
 
-/* also can be on 0x45 */
+/* found only at 0x44 or 0x45 */
 static unsigned short normal_i2c_range[] = {0x44,0x45,SENSORS_I2C_END};
 static unsigned int normal_isa[] = {SENSORS_ISA_END};
 static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
@@ -65,8 +65,9 @@ struct bt869_data {
 
          u8 status[3]; /* Register values */
          u16 res[2]; /* Resolution XxY */
-         u8 ntsc; /* Resolution XxY */
-         u8 half; /* Resolution XxY */
+         u8 ntsc; /* 1=NTSC, 0=PAL */
+         u8 half; /* go half res */
+         u8 colorbars; /* turn on/off colorbar calibration screen */
 };
 
 #ifdef MODULE
@@ -94,6 +95,8 @@ static void bt869_ntsc(struct i2c_client *client, int operation, int ctl_name,
 static void bt869_res(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
 static void bt869_half(struct i2c_client *client, int operation, int ctl_name,
+                      int *nrels_mag, long *results);
+static void bt869_colorbars(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
 static void bt869_update_client(struct i2c_client *client);
 
@@ -124,6 +127,8 @@ static ctl_table bt869_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &bt869_res },
   { BT869_SYSCTL_HALF, "half", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &bt869_half },
+  { BT869_SYSCTL_COLORBARS, "colorbars", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &bt869_colorbars },
   { 0 }
 };
 
@@ -325,9 +330,11 @@ void bt869_init_client(struct i2c_client *client)
   struct bt869_data *data = client->data;
   
     /* Initialize the bt869 chip */
-    bt869_write_value(client,0x06C,0x80); 
     bt869_write_value(client,0x0ba,0x80); 
-    bt869_write_value(client,0x0D6, 0x80);
+ //   bt869_write_value(client,0x0D6, 0x00);
+    /* Be a slave to the clock on the Voodoo3 */
+    bt869_write_value(client,0xa0,0x80);
+    bt869_write_value(client,0xba,0x20);
     /* depth =16bpp */
     bt869_write_value(client,0x0C6, 0x001);
     bt869_write_value(client,0xC4,1);
@@ -335,8 +342,8 @@ void bt869_init_client(struct i2c_client *client)
     data->res[1]=480;
     data->ntsc=1;
     data->half=0;
+    data->colorbars=0;
     
-    /* Todo: setup the proper modes */
 }
 
 void bt869_update_client(struct i2c_client *client)
@@ -347,35 +354,44 @@ void bt869_update_client(struct i2c_client *client)
 
   if ((jiffies - data->last_updated > HZ+HZ/2 ) ||
       (jiffies < data->last_updated) || ! data->valid) {
-
 #ifdef DEBUG
     printk("Starting bt869 update\n");
 #endif
-
 /* Set values of device */
     if ((data->res[0] == 640) && (data->res[1] == 480)) {
-      bt869_write_value(client,0xD6,(0 + (! data->ntsc))<<2);
+      bt869_write_value(client,0xB8,(! data->ntsc));
+      bt869_write_value(client,0xa0,0x80 + 0x0C);
+      printk("bt869.o: writing into config -->0x%X\n",(0 + (! data->ntsc)));
     } else if ((data->res[0] == 800) && (data->res[1] == 600)) {
-      bt869_write_value(client,0xD6,(2 + (! data->ntsc))<<2);
+      bt869_write_value(client,0xB8,(2 + (! data->ntsc)));
+      bt869_write_value(client,0xa0,0x80 + 0x11);
+      printk("bt869.o: writing into config -->0x%X\n",(2 + (! data->ntsc)));
     } else {
-      bt869_write_value(client,0xD6,(0 + (! data->ntsc))<<2);
+      bt869_write_value(client,0xB8,(! data->ntsc));
+      bt869_write_value(client,0xa0,0x80 + 0x0C);
+      printk("bt869.o: writing into config -->0x%X\n",(0 + (! data->ntsc)));
       printk("bt869.o:  Warning: arbitrary resolutions not supported yet.  Using 640x480.\n");
+      data->res[0] = 640;
+      data->res[1] = 480;
     }
-    bt869_write_value(client,0xD4,data->half);
-    
-    
-/* Get status */
+//    bt869_write_value(client,0xD4,data->half<<6);
+    /* Be a slave to the clock on the Voodoo3 */
+    bt869_write_value(client,0xba,0x20);
+    /* depth =16bpp */
+    bt869_write_value(client,0x0C6, 0x001);
     bt869_write_value(client,0xC4,1);
+
+/* Get status */
+    bt869_write_value(client,0xC4,1 | (data->colorbars << 2));
     data->status[0] = bt869_read_value(client,1);
-    bt869_write_value(client,0xC4,0x41);
+    bt869_write_value(client,0xC4,0x41 | (data->colorbars << 2));
     data->status[1] = bt869_read_value(client,1);
-    bt869_write_value(client,0xC4,0x81);
+    bt869_write_value(client,0xC4,0x81 | (data->colorbars << 2));
     data->status[2] = bt869_read_value(client,1);
-    bt869_write_value(client,0xC4,0x0C1);
+    bt869_write_value(client,0xC4,0x0C1 | (data->colorbars << 2));
     data->last_updated = jiffies;
     data->valid = 1;
   }
-
   up(&data->update_lock);
 }
 
@@ -412,6 +428,7 @@ void bt869_ntsc(struct i2c_client *client, int operation, int ctl_name,
     if (*nrels_mag >= 1) {
       data->ntsc = (results[0] > 0);
     }
+    bt869_update_client(client);
   }
 }
 
@@ -434,6 +451,7 @@ void bt869_res(struct i2c_client *client, int operation, int ctl_name,
     if (*nrels_mag >= 2) {
       data->res[1] = results[1];
     }
+    bt869_update_client(client);
   }
 }
 
@@ -451,6 +469,25 @@ void bt869_half(struct i2c_client *client, int operation, int ctl_name,
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       data->half = (results[0] > 0);
+      bt869_update_client(client);
+    }
+  }
+}
+
+void bt869_colorbars(struct i2c_client *client, int operation, int ctl_name,
+               int *nrels_mag, long *results)
+{
+  struct bt869_data *data = client->data;
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    bt869_update_client(client);
+    results[0] = data->colorbars;
+    *nrels_mag = 1;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 1) {
+      data->colorbars = (results[0] > 0);
+      bt869_update_client(client);
     }
   }
 }
