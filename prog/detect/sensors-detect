@@ -41,7 +41,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
 # This is the list of SMBus or I2C adapters we recognize by their PCI
 # signature. This is an easy and fast way to determine which SMBus or I2C
 # adapters should be present.
-# Each entry must have a vindid (Vendor ID), devid (Device ID), func (PCI
+# Each entry must have a vendid (Vendor ID), devid (Device ID), func (PCI
 # Function) and procid (string as appears in /proc/pci; see linux/driver/pci,
 # either pci.c or oldproc.c). If no driver is written yet, omit the 
 # driver (Driver Name) field. The match (Match Description) field should
@@ -54,7 +54,15 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        func => 3,
        procid => "Intel 82371AB PIIX4 ACPI",
        driver => "i2c-piix4",
-       match => sub { $_[0] =~ /^SMBus PIIX4 adapter at [0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SMBus PIIX4 adapter at / },
+     } , 
+     { 
+       vendid => 0x8086,
+       devid  => 0x719b,
+       func => 3,
+       procid => "Intel 82443MX Mobile",
+       driver => "i2c-piix4",
+       match => sub { $_[0] =~ /^SMBus PIIX4 adapter at / },
      } , 
      { 
        vendid => 0x8086,
@@ -417,9 +425,9 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        vendid => 0x1166,
        devid  => 0x0200,
        func => 0,
-       procid => "ServerWorks South Bridge",
+       procid => "ServerWorks OSB4 South Bridge",
        driver => "i2c-piix4",
-       match => sub { $_[0] =~ /^SMBus OSB4/ },
+       match => sub { $_[0] =~ /^SMBus PIIX4 adapter at / },
      } , 
      { 
        vendid => 0x1055,
@@ -427,15 +435,15 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        func => 0,
        procid => "SMSC Victory66 South Bridge",
        driver => "i2c-piix4",
-       match => sub { $_[0] =~ /^SMBus SMSC adapter at / },
+       match => sub { $_[0] =~ /^SMBus PIIX4 adapter at / },
      } , 
      { 
        vendid => 0x1166,
        devid  => 0x0201,
        func => 0,
-       procid => "ServerWorks South Bridge",
+       procid => "ServerWorks CSB5 South Bridge",
        driver => "i2c-piix4",
-       match => sub { $_[0] =~ /^SMBus CSB5 adapter at / },
+       match => sub { $_[0] =~ /^SMBus PIIX4 adapter at / },
      } , 
 );
 
@@ -2206,7 +2214,7 @@ FAILURE:
 # $_[0]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
-# Returns: undef if not detected, (2) if detected.
+# Returns: undef if not detected, (8) if detected.
 # Registers used:
 #   0x00-0x02: Identification
 sub fscpos_detect
@@ -2214,16 +2222,15 @@ sub fscpos_detect
   my ($file,$addr) = @_;
   # check the first 3 registers
   if (i2c_smbus_read_byte_data($file,0x00) != 0x50) {
-  	return (0);
+  	return;
   }
   if (i2c_smbus_read_byte_data($file,0x01) != 0x45) {
-  	return (0);
+  	return;
   }
   if (i2c_smbus_read_byte_data($file,0x02) != 0x47) {
-  	return (0);
+  	return;
   }
-  # no poseidon chip
-  return (1);
+  return (8);
 }
 
 ################
@@ -2525,9 +2532,9 @@ sub main
         " we choose the one with the highest confidence value in that case.\n",
         " If you found that the adapter hung after probing a certain address, ",
         "you can\n",
-        " specify that address to remain unprobed. If you have a PIIX4, that ",
+        " specify that address to remain unprobed. That ",
         "often\n",
-        " includes addresses 0x69 and/or 0x6a.\n";
+        " includes address 0x69 (clock chip).\n";
 
   my ($inp,@not_to_scan,$inp2);
   open INPUTFILE,"/proc/bus/i2c" or die "Couldn't open /proc/bus/i2c?!?";
