@@ -119,8 +119,9 @@ void print_adm1021(const sensors_chip_name *name)
         }
         if (alarms & ADM1021_ALARM_TEMP_HIGH)
           printf("%sHIGH",i?",":"");
-        printf(")\n");
+        printf(")");
       }
+      printf("\n");
     }
   } else
     printf("ERROR: Can't get temperature data!\n");
