@@ -1,0 +1,52 @@
+(This is based on mails from Philip and William, and edited by Frodo)
+
+1) Go to the directory where you want lm_sensors (and lm_sensors2?)
+   directory/ies to reside with the project source code.  A good choice is
+   your home directory.
+
+2) Assuming you have cvs installed (many distributions do include it).
+   Type:
+     cvs -d :pserver:anon@penn.netroedge.com:/home/cvs login
+   And type in "anonymous" at the password prompt.
+
+3) Then to check out a project (in this case 'lm_sensors'), type:
+     cvs -d :pserver:anon@penn.netroedge.com:/home/cvs checkout lm_sensors
+   or:
+     cvs -d :pserver:anon@penn.netroedge.com:/home/cvs checkout lm_sensors2
+
+4) Now you have a directory named "lm_sensors" (or lm_sensors2) with all
+   the files in it. In a day or two when there have been some changes to
+   some of the files, you can do something like this to update your files
+   to the CVS archive's (be sure to be inside the lm_sensors directory for
+   this to work):
+     cvs update
+
+If you want to be able to commit changes yourself, you need a real login
+(as opposed to the anon login used above). Contact Philip Edelbrock
+<phil@netroedge.com> for this.
+
+Some often-used CVS commands:
+
+* login again (usually not needed)
+    cvs -z3 login
+* get the most recent versions of the sources
+    cvs -z3 update
+* commit your changes
+    cvs -z3 commit
+
+When you commit, it will bring up an editor (probably vi) and ask you to
+summarize your changes. Be verbose! I've also set things up so that everybody
+gets an email whenever somebody checks in some changes which tells them the
+names of the changed files and also the log message; I can turn this off for
+you if you find it annoying.
+
+It might be a good idea to browse the CVS documentation; you can do lots of
+neat stuff like set watches on files. Also if you encounter conflicts you'll
+need to know what to do. There is a short manpage, and a rather extensive
+info manual (try 'info cvs').
+
+Be warned that using the CVS archive is dangerous; this is beta code at best.
+Sometimes files are committed with known bugs. This is usually reported in
+the commit logs or on our mailing list; non-developers will receive neither
+(though you can ask cvs to show the logs, even if you only have a anon
+acount).
