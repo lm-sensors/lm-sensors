@@ -1,0 +1,48 @@
+This is the completely rewritten version of lm_sensors, a collection of
+modules for general SMBus access and hardware monitoring. There are quite
+a few changes compared with 1.x.y versions; read doc/version-2 for the
+most interesting ones.
+
+SMBus, also known as System Management Bus, is a protocol for communicating
+through a I2C ('I squared C') bus. Many modern mainboards have a System
+Management Bus. There are a lot of devices which can be connected to a
+SMBus; the most notable are modern memory chips with EEPROM memories and
+chips for hardware monitoring.
+
+Most modern mainboards incorporate some form of hardware monitoring chips.
+These chips read things like chip temperatures, fan rotation speeds and
+voltage levels. There are quite a few different chips which can be used
+by mainboard builders for approximately the same results.
+
+Hardware monitoring chips are often connected to the SMBus, but often they
+can also be connected to the ISA bus. The modules in this package usually
+support both ways of accessing them.
+
+Because the SMBus is just a special case of the generalized I2C bus, we
+can simulate the SMBus protocol on plain I2C busses. These busses are
+sometimes used in other parts of your computer. If a supported chips is
+attached to one of these additional busses, they can be used too.
+
+Please read INSTALL before trying to compile and install these modules.
+There is a lot of additional documentation in the doc/ subdirectory.
+Amnong these is a list of supported busses and chips. Regrettably, there
+are too many mainboards to keep a list of busses and chips used on them.
+We will provide a user-space utility which probes for the presence of
+chips and busses in one of the next releases.
+
+The developers of this package can be reached through the email address
+<lm78@stimpy.netroedge.com>. Do not hesitate to mail us if you have questions,
+suggestions, problems, want to contribute, or just want to report it works
+for you. But please try to read the documentation first before you ask
+any questions!
+
+The latest version of this package can always be found on our homepage:
+http://www.netroedge.com/~lm78. Pre-release  versions can be retrieved
+through anonymous CVS; see doc/cvs for more information.
+
+This whole package is copyright (c) 1998 by Frodo Looijaard and Philip
+Edelbrock, except for (almost) everything in the i2c directory, which
+is copyright (c) 1995-1998 by Simon Vogl. See the individual files for
+more exact copyright information.  This package may be distributed
+according to the GNU General Public License (GPL), as included in the
+file COPYING.

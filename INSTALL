@@ -1,0 +1,73 @@
+Basic installation is uncomplicated. Run 'make all', followed by an optional
+'make install'. Everything is compiled using the Makefile in the root of
+this package. Some interesting variables:
+
+* SMP
+  This must be set to 1 if your kernel was compiled with SMP set to 1. There
+  is a sort of magic invocation which tries to check this; it will fail if
+  you do not have the correct kernel tree in /usr/src/linux. If you set it,
+  a '-D__SMP__' argument will be added to all module compiles.
+* MODVER
+  This must be set to 1 if your kernel was compiled with CONFIG_MODVERSIONS
+  enabled. There is some magic which tries to retrieve this information
+  from /usr/include/linux/config.h and /usr/include/linux/autoconf.h.
+* I2C
+  If you already have Simon Vogl's i2c package installed, you may not have
+  to compile the version included in this package. In that case, check
+  the file i2c/MODIFICATIONS in this package to see what versions are
+  OK.
+* WARN, DEBUG
+  These options should only be needed if you are an active developer of
+  this package.
+* MODDIR
+  The directory where 'make install' installs your modules.
+* INCLUDEDIR
+  The directory where 'make install' installs your include files.
+
+Warning! In newer 2.1 kernels, there is support for I2C. This support is
+NOT compatible with this module! Actually, Simon Vogl's modules (which
+ARE compatible) is scheduled to replace the current support. If you
+actually use these modules, you have a problem; they can not coexist
+with Simon's modules. Theoretically, you should be able to replace
+the old modules with the new stuff in our i2c directory, recompile
+the kernel, and then compile our modules with I2C=0. If you try
+this, please share the results with us!
+
+Please make sure that /usr/include/linux and /usr/include/asm are symlinks 
+into the kernel tree which corresponds with the kernel version you are using
+now (or more exactly, the kernel which you will use the compiled modules 
+with). If the tree and the running kernel do not match, you will either
+be unable to insert the modules at all, or you can expect strange 
+behaviour (probably leading to crashes).
+
+When you have compiled this package, you will be left with a lot of modules.
+It can be tricky to know which modules you need to insert. For this reason,
+I suggest you go the 'modprobe' way, as described within doc/modules.
+If you just want to run a test without installing them, try the following:
+  insmod i2c/i2c-core.o
+  insmod src/i2c-proc.o
+  insmod src/smbus.o
+  insmod src/sensors.o
+  insmod src/isa.o
+  insmod src/piix4.o  # Or whatever SMBus controller you have
+  insmod src/lm78.o   # Or whatever hardware monitoring chip you have
+Now you should have new directories under /proc/sys/dev/sensors and some files
+beginning with i2c in /proc/bus.
+
+If you have installed the modules, as described within doc/modules, you can
+do 'modprobe piix4 && modprobe lm78 && modprobe i2c-proc' (the last is
+optional) from any directory to reach the same situation.
+
+Where version 1 of this package had the human-readable /proc/sensors file,
+this version will include a user-space program which gathers all data
+and displays it in a comparable format. Regrettably, this program is not
+yet finished. To understand the files that are present now, read doc/lm78, 
+doc/lm75 etc.
+
+One of the next releases of this package will have a user-space probe program,
+which tells you which chips and busses are present, and which modules you
+will have to load. At this moment, just try to load the modules; if no chip
+or bus is detected, the module will fail to insert.
+
+Please examine the files in the doc subdirectory for more information, or
+try to mail us at <lm78@stimpy.netroedge.com>. Good luck!

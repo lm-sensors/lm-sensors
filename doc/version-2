@@ -1,0 +1,14 @@
+There have been many, many changes between version 1 and version 2 of this
+package. Some of the more important ones:
+
+* Fully modular setup. This makes it much easier to support new hardware,
+  and consumes less kernel memory.
+* Full support for I2C busses. This includes the VIA chipset I2C bus. If it
+  is supported by Simon Vogl, it is supported by us.
+* Many things which were done in kernel space are now done in user space.
+  The most obvious result is the absence of /proc/sensors. Use instead the
+  supplied program.
+* No more limits on the number of chips.
+* All detected chips get their own directory under /proc/sys/dev/sensors
+* /proc/bus contains a list of all I2C/SMBus adapters found
+* All code has been completely rewritten.

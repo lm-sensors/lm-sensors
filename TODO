@@ -1,5 +1,8 @@
 Many, many things. Most notably:
 
+* kmalloc with GFP_KERNEL can cause a context switch! Check whether this is
+  safe everywhere it is used.
+* Write doc/lm78, as well as some other docs
 * Support 10-bit addresses. At this moment, they are supported nowhere, except
   in Simon Vogl's i2c modules.
 * Change the i2c modules to keep the namespace clean (EXPORT_SYMBOL does not
