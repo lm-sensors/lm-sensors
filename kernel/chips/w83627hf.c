@@ -857,21 +857,6 @@ static void w83627hf_init_client(struct i2c_client *client)
 	int type = data->type;
 	u8 tmp;
 
-	if(init) {
-		/* save this register */
-		i = w83627hf_read_value(client, W83781D_REG_BEEP_CONFIG);
-		/* Reset all except Watchdog values and last conversion values
-		   This sets fan-divs to 2, among others */
-		w83627hf_write_value(client, W83781D_REG_CONFIG, 0x80);
-		/* Restore the register and disable power-on abnormal beep.
-		   This saves FAN 1/2/3 input/output values set by BIOS. */
-		w83627hf_write_value(client, W83781D_REG_BEEP_CONFIG, i | 0x80);
-		/* Disable master beep-enable (reset turns it on).
-		   Individual beeps should be reset to off but for some reason
-		   disabling this bit helps some people not get beeped */
-		w83627hf_write_value(client, W83781D_REG_BEEP_INTS2, 0);
-	}
-
 	/* Minimize conflicts with other winbond i2c-only clients...  */
 	/* disable i2c subclients... how to disable main i2c client?? */
 	/* force i2c address to relatively uncommon address */
