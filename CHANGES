@@ -44,6 +44,7 @@ ask CVS about it:
   Module via686a: Allow force=9191,address (for A7V/K7V boards)
   Module w83781d: Don't reinitialize as99127f chip; this may cause fan/temp
                   reading changes
+  Programs i2cdetect, i2cdump: add devfs /dev/i2c/x support
   Program mkpatch.pl: Fix adm9240 typos, add more chips to Configure.help,
                       remove ltc1710
   Program sens_update_rrd: new
