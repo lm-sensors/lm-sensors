@@ -65,6 +65,7 @@ sensor reading results. Why?
   4.17A Bad readings from the AS99127F!
   4.17B Bad readings from the VIA 686A!
   4.17C Bad readings from the MTP008!
+4.18 How do I configure two chips (LM87) differently?
 4.19 Dmesg says Upgrade BIOS! I don't want to!
 4.20 Sensors says 'Can't access /proc file'
 4.21 Sensors says 'No sensors found!'
@@ -411,7 +412,7 @@ readings.
 
 4.3 Why do I have two Vcore readings, I have only one processor!
 
-    The LM78 family has seven voltage sensors. The default way of
+    The LM78 has seven voltage sensors. The default way of
 connecting them is used in the configuration file. This includes a VCore2,
 even if you do not have one. You can easily edit the configuration file
 to give it another name, or (in upcoming versions) to make this reading
@@ -612,6 +613,19 @@ If your sensor type does not match the default, you will have to change it.
 See doc/chips/mtp008 for details.
 
 
+4.18 How do I configure two chips (LM87) differently?
+
+    There is a SuperMicro board with two LM87's on it that are
+not hooked up in the same way, so they need different defaults.
+For example, both CPU temperatures go to one LM87.
+
+    Make two different sections in /etc/sensors.conf as follows:
+	chip "lm87-i2c-*-2c"
+		put configuration for the chip at 0x2c here
+	chip "lm87-i2c-*-2d"
+		put configuration for the chip at 0x2d here
+
+
 4.19 Dmesg says Upgrade BIOS! I don't want to!
 
     If the problem is a PCI device is not present in 'lspci', the solution
@@ -687,13 +701,15 @@ prog/eeprom/decode-dimms.pl to get more information than you ever wanted.
     These are often 'shadows' of you EEPROMs on your SDRAM DIMMs
 at addresses 0x50 - 0x57. They aren't really there. If you try and
 do a 'i2cdump' on them you won't get anything. This is probably
-caused by some timing problem on your motherboard or on the DIMMs.x
+caused by some timing problem on your motherboard or on the DIMMs.
 We don't know the exact cause.
 
 
 4.24 Sensors-detect doesn't work at all
 
-    It could be many things. What was the problem? See below.
+    It could be many things. What was the problem? See below
+    in questions 4.24 A-C.
+
 
 4.24A Sensors-detect says "Couldn't open /proc/bus/i2c?!?"
 
@@ -854,7 +870,7 @@ can not be sure.
 
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
-Rev 2.3 (MDS) General update, 20010219
+Rev 2.3 (MDS) General update, 20010224
 Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 19990920
 Rev 2.1 (Frodo) Corrections for lm_sensors 2.2, 19990112
 Rev 2.0 (Frodo) Major revision for lm_sensors 2.1, 19981229
