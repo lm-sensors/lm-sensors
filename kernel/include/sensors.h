@@ -468,4 +468,39 @@
 #define DS1621_ALARM_TEMP_LOW 0x20
 #define DS1621_SYSCTL_ENABLE 2002
 
+#define IT87_SYSCTL_IN0 1000    /* Volts * 100 */
+#define IT87_SYSCTL_IN1 1001
+#define IT87_SYSCTL_IN2 1002
+#define IT87_SYSCTL_IN3 1003
+#define IT87_SYSCTL_IN4 1004
+#define IT87_SYSCTL_IN5 1005
+#define IT87_SYSCTL_IN6 1006
+#define IT87_SYSCTL_IN7 1007
+#define IT87_SYSCTL_FAN1 1101   /* Rotations/min */
+#define IT87_SYSCTL_FAN2 1102
+#define IT87_SYSCTL_FAN3 1103
+#define IT87_SYSCTL_TEMP1 1200  /* Degrees Celcius * 10 */
+#define IT87_SYSCTL_TEMP2 1201  /* Degrees Celcius * 10 */
+#define IT87_SYSCTL_TEMP3 1202  /* Degrees Celcius * 10 */
+#define IT87_SYSCTL_VID 1300    /* Volts * 100 */
+#define IT87_SYSCTL_FAN_DIV 2000        /* 1, 2, 4 or 8 */
+#define IT87_SYSCTL_ALARMS_FAN  2001    /* bitvector */
+#define IT87_SYSCTL_ALARMS_VIN  2002    /* bitvector */
+#define IT87_SYSCTL_ALARMS_TEMP 2003    /* bitvector */
+
+#define IT87_ALARM_IN0 0x0001
+#define IT87_ALARM_IN1 0x0002
+#define IT87_ALARM_IN2 0x0004
+#define IT87_ALARM_IN3 0x0008
+#define IT87_ALARM_IN4 0x0010
+#define IT87_ALARM_IN5 0x0020
+#define IT87_ALARM_IN6 0x0040
+#define IT87_ALARM_IN7 0x0080
+#define IT87_ALARM_FAN1 0x0001
+#define IT87_ALARM_FAN2 0x0002
+#define IT87_ALARM_FAN3 0x0004
+#define IT87_ALARM_TEMP1 0x0001
+#define IT87_ALARM_TEMP2 0x0002
+#define IT87_ALARM_TEMP3 0x0004
+
 #endif				/* def SENSORS_SENSORS_H */
