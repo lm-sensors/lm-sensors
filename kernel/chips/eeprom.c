@@ -172,7 +172,7 @@ static int eeprom_attach_adapter(struct i2c_adapter *adapter)
 int eeprom_detect(struct i2c_adapter *adapter, int address,
 		  unsigned short flags, int kind)
 {
-	int i, cs;
+	int i;
 	struct i2c_client *new_client;
 	struct eeprom_data *data;
 	int err = 0;
@@ -212,9 +212,9 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 	/* Now, we do the remaining detection. It is not there, unless you force
 	   the checksum to work out. */
 	if (checksum) {
+		int cs = 0;
 		/* prevent 24RF08 corruption */
 		i2c_smbus_write_quick(new_client, 0);
-		cs = 0;
 		for (i = 0; i <= 0x3e; i++)
 			cs += i2c_smbus_read_byte_data(new_client, i);
 		cs &= 0xff;
