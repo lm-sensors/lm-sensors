@@ -31,6 +31,7 @@ ask CVS about it:
                    Fix PWM in w83627thf
                    Preserve other bits when forcing temp2/3 to comparator mode
   Module w83781d: Preserve other bits when forcing temp2/3 to comparator mode
+                  Remove asb100 support
   Modules asb100.c, fscher.c, lm90.c, max6650.c, w83l785ts.c:
           Define driver ID if i2c-id.h doesn't have it yet.
   Modules i2c-ali1535.c, i2c-hydra.c, i2c-i801.c, i2c-sis5595.c:
@@ -46,6 +47,7 @@ ask CVS about it:
            Fix vt1211 and vt8231 uch_config not being writable
            Add 2.6 lm80 support
            Add w83637hf support
+           Remove in6 and temp1 from vt1211 and vt8231
 
 
 2.8.4 (20040207)
