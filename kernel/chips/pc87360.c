@@ -130,7 +130,7 @@ static inline void superio_exit(void)
 
 #define FAN_FROM_REG(val,div)		((val)==0?0: \
 					 480000/((val)*(div)))
-#define FAN_TO_REG(val,div)		((val)*(div)<=1875?255: \
+#define FAN_TO_REG(val,div)		((val)<=100?0: \
 					 480000/((val)*(div)))
 #define FAN_DIV_FROM_REG(val)		(1 << ((val >> 5) & 0x03))
 #define FAN_DIV_TO_REG(val)		((val)==8?0x60:(val)==4?0x40: \
@@ -761,6 +761,46 @@ static void pc87360_init_client(struct i2c_client *client)
 	}
 }
 
+static void pc87360_autodiv(struct pc87360_data *data, int nr)
+{
+	/* Increase clock divider if needed and possible */
+	if ((data->fan_status[nr] & 0x04) /* overflow flag */
+	 || (data->fan[nr] >= 224)) { /* next to overflow */
+		if ((data->fan_status[nr] & 0x60) != 0x60) {
+			data->fan_status[nr] += 0x20;
+			data->fan_min[nr] >>= 1;
+			data->fan[nr] >>= 1;
+			pc87360_write_value(data, LD_FAN, NO_BANK,
+					    PC87360_REG_FAN_MIN(nr),
+					    data->fan_min[nr]);
+#ifdef DEBUG
+			printk(KERN_DEBUG "pc87360.o: Increasing "
+			       "clock divider to %d for fan %d\n",
+			       FAN_DIV_FROM_REG(data->fan_status[nr]),
+			       nr+1);
+#endif
+		}
+	} else
+	/* Decrease clock divider if needed and possible */
+	if (data->fan[nr] < 85 /* bad accuracy */
+	 && !(data->fan_min[nr] & 0x80)) {
+		if ((data->fan_status[nr] & 0x60) != 0x00) {
+			data->fan_status[nr] -= 0x20;
+			data->fan_min[nr] <<= 1;
+			data->fan[nr] <<= 1;
+			pc87360_write_value(data, LD_FAN, NO_BANK,
+					    PC87360_REG_FAN_MIN(nr),
+					    data->fan_min[nr]);
+#ifdef DEBUG
+			printk(KERN_DEBUG "pc87360.o: Decreasing "
+			       "clock divider to %d for fan %d\n",
+			       FAN_DIV_FROM_REG(data->fan_status[nr]),
+			       nr+1);
+#endif
+		}
+	}
+}
+
 static void pc87360_update_client(struct i2c_client *client)
 {
 	struct pc87360_data *data = client->data;
@@ -785,42 +825,8 @@ static void pc87360_update_client(struct i2c_client *client)
 				data->fan_min[i] = pc87360_read_value(data,
 						   LD_FAN, NO_BANK,
 						   PC87360_REG_FAN_MIN(i));
-				/* Increase clock divider if needed */
-				if ((data->fan_status[i] & 0x60) != 0x60
-				 && ((data->fan_status[i] & 0x04)
-				  || (data->fan[i] & 0xE0) == 0xE0)) {
-					data->fan_status[i] += 0x20;
-					data->fan_min[i] >>= 1;
-					data->fan[i] >>= 1;
-					pc87360_write_value(data, LD_FAN, NO_BANK,
-							    PC87360_REG_FAN_MIN(i),
-							    data->fan_min[i]);
-#ifdef DEBUG
-					printk(KERN_DEBUG "pc87360.o: Increasing "
-					       "clock divider to %d for fan %d\n",
-					       FAN_DIV_FROM_REG(data->fan_status[i]),
-					       i+1);
-#endif
-				} else
-				/* Decrease clock divider if possible */
-				if ((data->fan_status[i] & 0x60) != 0x00
-				 && !(data->fan_status[i] & 0x04)
-				 && data->fan[i] <= 0x50) {
-					data->fan_status[i] -= 0x20;
-					data->fan_min[i] = (data->fan_min[i] & 0x80)
-							   ? 255 :
-							   (data->fan_min[i] << 1);
-					data->fan[i] <<= 1;
-					pc87360_write_value(data, LD_FAN, NO_BANK,
-							    PC87360_REG_FAN_MIN(i),
-							    data->fan_min[i]);
-#ifdef DEBUG
-					printk(KERN_DEBUG "pc87360.o: Decreasing "
-					       "clock divider to %d for fan %d\n",
-					       FAN_DIV_FROM_REG(data->fan_status[i]),
-					       i+1);
-#endif
-				}
+				/* Change clock divider if needed */
+				pc87360_autodiv(data, i);
 				/* Clear bits and write new divider */
 				pc87360_write_value(data, LD_FAN, NO_BANK,
 						    PC87360_REG_FAN_STATUS(i),
@@ -931,11 +937,23 @@ void pc87360_fan(struct i2c_client *client, int operation, int ctl_name,
 		if (nr >= data->fannr)
 			return;
 		if (*nrels_mag >= 1) {
-			data->fan_min[nr] = FAN_TO_REG(results[0],
-					    FAN_DIV_FROM_REG(data->fan_status[nr]));
+			int fan_min = FAN_TO_REG(results[0],
+				      FAN_DIV_FROM_REG(data->fan_status[nr]));
+			/* If it wouldn't fit, change clock divisor */
+			while (fan_min > 255
+			    && (data->fan_status[nr] & 0x60) != 0x60) {
+				fan_min >>= 1;
+				data->fan[nr] >>= 1;
+				data->fan_status[nr] += 0x20;
+			}
+			data->fan_min[nr] = fan_min > 255 ? 255 : fan_min;
 			pc87360_write_value(data, LD_FAN, NO_BANK,
 					    PC87360_REG_FAN_MIN(nr),
 					    data->fan_min[nr]);
+			/* Write new divider, preserve alarm bits */
+			pc87360_write_value(data, LD_FAN, NO_BANK,
+					    PC87360_REG_FAN_STATUS(nr),
+					    data->fan_status[nr] & 0xF9);
 		}
 	}
 }
