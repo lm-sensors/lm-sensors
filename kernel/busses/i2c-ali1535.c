@@ -253,7 +253,7 @@ int ali1535_setup(void)
 	pci_read_config_byte(ALI1535_dev, SMBCFG, &temp);
 	if ((temp & ALI1535_SMBIO_EN) == 0) {
 		printk
-		    ("SMBUS: Error: SMB device not enabled - upgrade BIOS?\n");
+		    ("i2c-ali1535.o: SMB device not enabled - upgrade BIOS?\n");
 		error_return = -ENODEV;
 		goto END;
 	}
@@ -262,7 +262,7 @@ int ali1535_setup(void)
 	pci_read_config_byte(ALI1535_dev, SMBHSTCFG, &temp);
 	if ((temp & 1) == 0) {
 		printk
-		    ("SMBUS: Error: Host SMBus controller not enabled - upgrade BIOS?\n");
+		    ("i2c-ali1535.o: SMBus controller not enabled - upgrade BIOS?\n");
 		error_return = -ENODEV;
 		goto END;
 	}
