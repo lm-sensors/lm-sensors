@@ -7,11 +7,23 @@ Supported chips:
   * National Semiconductor LM75
     Prefix: `lm75'
     Addresses scanned: I2C 0x48 - 0x4f (inclusive)
-    Datasheet: Publicly available at the National Semiconductors website
+    Datasheet: Publicly available at the National Semiconductor website
+               http://www.national.com
   * National Semiconductor LM77
     Prefix: `lm75'
     Addresses scanned: I2C 0x48 - 0x4b (inclusive)
-    Datasheet: Publicly available at the National Semiconductors website
+    Datasheet: Publicly available at the National Semiconductor website
+               http://www.national.com
+  * Dallas Semiconductor DS75
+    Prefix: `lm75'
+    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Datasheet: Publicly available at the Dallas Semiconductor website
+               http://www.dalsemi.com
+  * Dallas Semiconductor DS1775
+    Prefix: `lm75'
+    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Datasheet: Publicly available at the Dallas Semiconductor website
+               http://www.dalsemi.com
 
 Author: Frodo Looijaard <frodol@dds.nl>
 
@@ -54,6 +66,12 @@ the temperature of the processor(s).
 
 The LM77 is supported as well. It is not distinguished from an LM75
 and the two additional registers in the LM77 are not supported.
+The prefix in the /proc directory is still 'lm75'.
+
+The DS75 and DS1775 are supported as well.
+They are not distinguished from an LM75. While these chips
+have three additional bits of accuracy (12 vs. 9 for the LM75),
+the additional bits are not supported.
 The prefix in the /proc directory is still 'lm75'.
 
 

@@ -63,8 +63,10 @@ gl525sm-to-be-written
 
 lm75
 	lm75		1	-	-	-	yes	no
+	  (the following chips are detected as an lm75)
+	ds75		1	-	-	-	yes	no
+	ds1775		1	-	-	-	yes	no
 	lm77		1	-	-	-	yes	no
-	  (lm77 detected as an lm75)
 
 lm78
 	lm78		1	7	3	-	yes	yes
