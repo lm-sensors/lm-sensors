@@ -1,10 +1,12 @@
 /*
     voodoo3.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl> and
-    Philip Edelbrock <phil@netroedge.com>
+    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>,
+    Philip Edelbrock <phil@netroedge.com> and 
+    Ralph Metzler <rjkm@thp.uni-koeln.de>
     
-    Based on code written by Ralph  Metzler <rjkm@thp.uni-koeln.de>
+    Based on code written by Ralph Metzler <rjkm@thp.uni-koeln.de> and
+    Simon Vogl
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -225,32 +227,32 @@ ENDREAD: Voodoo3_I2CStop();
 
 int Voodoo3_I2CWrite(int addr,int command,int data)
 {
-int temp=0;
+int result=0;
 
         Voodoo3_I2CStart();
         if (Voodoo3_I2CSendByte(addr)) { 
 #ifdef DEBUG
 	  printk("i2c-voodoo3: No Ack on addr WriteByte to addr 0x%X\n",addr);
 #endif
-	  temp=-1;
+	  result=-1;
 	  goto ENDWRITE; }
         if (Voodoo3_I2CSendByte(command)) {
 #ifdef DEBUG
 	  printk("i2c-voodoo3: No Ack on command WriteByte to addr 0x%X\n",addr);
 #endif
-	  temp=-1;
+	  result=-1;
 	  goto ENDWRITE; }
         if (Voodoo3_I2CSendByte(data)) {
 #ifdef DEBUG
 	  printk("i2c-voodoo3: No Ack on data WriteByte to addr 0x%X\n",addr);
 #endif
  	}
-	temp=-1;
+	result=-1;
 ENDWRITE: Voodoo3_I2CStop();
 #ifdef DEBUG
 	printk("i2c-voodoo3: Byte write at addr:0x%X command:0x%X data:0x%X\n",addr,command,data);
 #endif
-	return temp;
+	return result;
 }
 
 void config_v3(struct pci_dev *dev, int num)
@@ -265,6 +267,7 @@ void config_v3(struct pci_dev *dev, int num)
         /* Enable TV out mode, Voodoo3_I2C bus, etc. */
         *((unsigned int *)(mem+0x70))=0x8160;
         *((unsigned int *)(mem+0x78))=0xcf980020;
+	printk("i2c-voodoo3: Using Banshee/Voodoo3 at 0x%X\n",mem);
 }
 
 
@@ -277,20 +280,25 @@ static int voodoo3_setup(void)
 {
         struct pci_dev *dev = pci_devices;
         int result=0;
+	int flag=0;
 
         v3_num=0;
 
         while (dev)
         {
                 if (dev->vendor == PCI_VENDOR_ID_3DFX)
-                        if (dev->device == PCI_DEVICE_ID_3DFX_VOODOO3)
-                                config_v3(dev,v3_num++);                  
+                        if (dev->device == PCI_DEVICE_ID_3DFX_VOODOO3) {
+			  if (!flag) {
+                                config_v3(dev,v3_num++);
+			  } else { v3_num++; }
+			  flag=1;
+			}
                 if (result)
                         return result;
                 dev = dev->next;
         }
-        if(v3_num) {
-                printk(KERN_INFO "v3tv: %d Voodoo3(s) found.\n", v3_num);
+        if(v3_num > 0) {
+                printk(KERN_INFO "i2c-voodoo3: %d Banshee/Voodoo3(s) found.\n", v3_num);
 		return 0;
         } else {
                 printk(KERN_INFO "v3tv: No Voodoo3 found.\n");
