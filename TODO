@@ -11,6 +11,32 @@ See TODO in the i2c package.
 KERNEL MODULES
 ==============
 
+* Harmonize 'smart fan' support.
+  The following drivers support pwm. The ones that support
+  automatic or smart fan support are identified.
+  We have a /proc standard for manual PWM support that allows
+  for /proc based applications like pwmconfig and fancontrol
+  in our package.
+  Without a /proc standard for smart fan support such applications
+  are much more difficult.
+
+	Driver		Manual PWM	Smart fan
+	adm1026		standard	not supported
+	asb100		standard	??
+	it87		non-std		yes
+	lm85		standard	yes
+	vt1211		doesn't work	not supported
+	w83627hf	standard        not supported
+	w83781d		standard	not supported (791 only)
+
+  The following drivers are for chips that have manual PWM only.
+
+	Driver		Manual PWM
+	mtp008		standard
+	smsc47m1	standard
+	vt8231		standard
+	w83781d (except 791d)	standard
+
 * Assistance on how to fix module refcounting is welcome.
   To my understanding, it does not handle client->adapter->owner
   correctly now, and it is possible to rmmod adapter while one of its
@@ -36,7 +62,8 @@ KERNEL MODULES
 
 * Handle -1 returns from i2c layer rather than just delivering 0xFF to
   /proc and libsensors; report errors through /proc 'alarms' or
-  new 'fail' entry?
+  new 'fail' entry? See adm1021 for a partial example.
+
 * Add string function in sensors.o
 * ALL: cleanup_module is void; check also that cleaning up is done
   properly, now we know that the module will be unloaded whatever we
@@ -97,7 +124,6 @@ PROGRAMS
 ========
 
 * Sensors program needs to print a + before lm75 temperatures
-* Sensors program needs to be extended for many new chips
 
 
 OTHERS
