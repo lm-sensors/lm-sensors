@@ -369,21 +369,7 @@ ERROR1:
 
 static int lm92_attach_adapter (struct i2c_adapter *adapter)
 {
-	int result;
-	struct i2c_client_address_data lm92_client_data = {
-		normal_i2c:			addr_data.normal_i2c,
-		normal_i2c_range:	addr_data.normal_i2c_range,
-		probe:				addr_data.probe,
-		probe_range:		addr_data.probe_range,
-		ignore:				addr_data.ignore,
-		ignore_range:		addr_data.ignore_range,
-		force:				addr_data.forces->force
-	};
-
-	if (!(result = i2c_probe (adapter,&lm92_client_data,lm92_detect)))
-		result = i2c_detect (adapter,&addr_data,lm92_detect);
-
-	return (result);
+	return i2c_detect (adapter,&addr_data,lm92_detect);
 }
 
 static int lm92_detach_client (struct i2c_client *client)
