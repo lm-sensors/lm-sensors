@@ -2008,13 +2008,13 @@ void print_w83781d(const sensors_chip_name *name)
     if (valid) {
       if((!is82d) && (!is83s)) {
         print_label(label,10);
-        print_temp_info( cur, max, min, HYST, 1, 0);
+        print_temp_info( cur, max, min, HYST, 0, 0);
         printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP1 ?"ALARM":"     ",
                beeps&W83781D_ALARM_TEMP1?"(beep)":"");
       } else {
         if(!sensors_get_feature(*name,SENSORS_W83781D_SENS1,&sens)) {
           print_label(label,10);
-          print_temp_info( cur, max, min, HYST, 1, 0);
+          print_temp_info( cur, max, min, HYST, 0, 0);
           printf( " sensor = %s   %s   %s\n",
                  (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                  "3904 transistor":"thermistor",
@@ -2036,13 +2036,13 @@ void print_w83781d(const sensors_chip_name *name)
     if (valid) {
       if((!is82d) && (!is83s)) {
         print_label(label,10);
-        print_temp_info( cur, max, min, HYST, 0, 0);
+        print_temp_info( cur, max, min, HYST, 1, 0);
         printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP2 ?"ALARM":"     ",
                beeps&W83781D_ALARM_TEMP2?"(beep)":"");
       } else {
         if(!sensors_get_feature(*name,SENSORS_W83781D_SENS2,&sens)) {
           print_label(label,10);
-          print_temp_info( cur, max, min, HYST, 0, 0);
+          print_temp_info( cur, max, min, HYST, 1, 0);
           printf( " sensor = %s   %s   %s\n",
                  (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                  "3904 transistor":"thermistor",
@@ -2065,13 +2065,13 @@ void print_w83781d(const sensors_chip_name *name)
       if (valid) {
         if(!is82d) {
           print_label(label,10);
-          print_temp_info( cur, max, min, HYST, 0, 0);
+          print_temp_info( cur, max, min, HYST, 1, 0);
           printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP2 ?"ALARM":"     ",
                  beeps&W83781D_ALARM_TEMP3?"(beep)":"");
         } else {
           if(!sensors_get_feature(*name,SENSORS_W83781D_SENS3,&sens)) {
             print_label(label,10);
-            print_temp_info( cur, max, min, HYST, 0, 0);
+            print_temp_info( cur, max, min, HYST, 1, 0);
             printf( " sensor = %s   %s   %s\n",
                    (((int)sens)==1)?"PII/Celeron diode":(((int)sens)==2)?
                    "3904 transistor":"thermistor",

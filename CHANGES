@@ -33,6 +33,7 @@ ask CVS about it:
   Program isadump: Add flat address space (PCI) support
   Program mkpatch.pl: Add support for i2c-ali1535, adm1024, ds1621,
                       fscpos, it87, maxilife, mtp008
+  Program sensors: Fix w83781d temp precision
   Program sensors-detect: Add ALI1535, Via VT8233, it87 (i2c),
                           Intel 82443MX and 82801CA/CAM detection,			
                           add ITE 8172G detection (driver in kernel 2.4.10)
