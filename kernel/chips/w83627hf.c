@@ -199,12 +199,12 @@ static const u8 BIT_SCFG1[] = { 0x02, 0x04, 0x08 };
 static const u8 BIT_SCFG2[] = { 0x10, 0x20, 0x40 };
 #define W83781D_DEFAULT_BETA 3435
 
-/* Conversions. Rounding and limit checking is only done on the TO_REG
+/* Conversions. Limit checking is only done on the TO_REG
    variants. Note that you should be a bit careful with which arguments
    these macros are called: arguments may be evaluated more than once.
    Fixing this is just not worth it. */
 #define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 8)/16),0,255))
-#define IN_FROM_REG(val) (((val) * 16) / 10)
+#define IN_FROM_REG(val) (((val) * 16 + 5) / 10)
 
 static inline u8 FAN_TO_REG(long rpm, int div)
 {

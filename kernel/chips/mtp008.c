@@ -102,7 +102,7 @@ SENSORS_INSMOD_1(mtp008);
 #define PIIDIODE	3
 
 /*
- * Conversion routines and macros.  Rounding and limit checking is only done on
+ * Conversion routines and macros.  Limit checking is only done on
  * the TO_REG variants.
  *
  * Note that IN values are expressed as 100 times the actual voltage to avoid
@@ -110,7 +110,7 @@ SENSORS_INSMOD_1(mtp008);
  * 409 (0V to 4.096V).
  */
 #define IN_TO_REG(val)		(SENSORS_LIMIT((((val) * 10 + 8) / 16), 0, 255))
-#define IN_FROM_REG(val)	(((val) * 16) / 10)
+#define IN_FROM_REG(val)	(((val) * 16 + 5) / 10)
 
 /*
  * The fan cotation count (as stored in the register) is calculated using the
