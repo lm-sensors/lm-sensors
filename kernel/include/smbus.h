@@ -36,7 +36,7 @@
 union smbus_data { 
         __u8 byte;
         __u16 word;
-        __u8 block[32];
+        __u8 block[33];	/* block[0] is used for length */
 };
 
 /* smbus_access read or write markers */

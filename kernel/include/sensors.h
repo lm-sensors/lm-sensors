@@ -99,6 +99,7 @@ extern void sensors_deregister_entry(int id);
 #define I2C_DRIVERID_ADM9240 1009
 #define I2C_DRIVERID_LTC1710 1010
 #define I2C_DRIVERID_SIS5595 1011
+#define I2C_DRIVERID_ICSPLL 1012
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -259,4 +260,6 @@ struct sensors_chips_data {
 #define LM80_ALARM_CHAS 0x1000
 #define LM80_ALARM_BTI 0x0200
 #define LM80_ALARM_INT_IN 0x0080
+
+#define ICSPLL_SYSCTL1 1000
 #endif /* def SENSORS_SENSORS_H */
