@@ -367,7 +367,7 @@ EOF
 
 # This generates diffs for drivers/i2c/Config.in
 # Several adapter drivers that are included in the lm_sensors package are
-# added at the bottom.
+# added at the first and onlu sensors marker.
 # Of course, care is taken old lines are removed.
 # $_[0]: sensors package root (like /tmp/sensors)
 # $_[1]: Linux kernel tree (like /usr/src/linux)
@@ -382,13 +382,12 @@ sub gen_drivers_i2c_Config_in
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
-    if (m@CONFIG_I2C_MAINBOARD@) {
-      $_ = <INPUT> while not m@^  fi$@;
-      $_ = <INPUT>;
-      $_ = <INPUT> if m@^$@;
-    }
-    if (m@^fi@) {
-      print OUTPUT << 'EOF'
+    if (m@sensors code starts here@) {
+      print OUTPUT;
+      while (<INPUT>) {
+        last if m@sensors code ends here@;
+      }
+      print OUTPUT << 'EOF';
   bool 'I2C mainboard interfaces' CONFIG_I2C_MAINBOARD 
   if [ "$CONFIG_I2C_MAINBOARD" = "y" ]; then
     dep_tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI5X3 $CONFIG_I2C_MAINBOARD
@@ -424,14 +423,12 @@ sub gen_drivers_i2c_Makefile
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
-    while (m@CONFIG_I2C_ALI5X3@ or m@CONFIG_I2C_HYDRA@ or m@CONFIG_I2C_PIIX4@ or
-        m@CONFIG_I2C_VIA@ or m@CONFIG_I2C_ISA@) {
-      $_ = <INPUT> while not m@^endif@;
-      $_ = <INPUT>;
-      $_ = <INPUT> if m@^$@;
-    }
-    if (m@Rules.make@) {
-      print OUTPUT << 'EOF'
+    if (m@sensors code starts here@) {
+      print OUTPUT;
+      while (<INPUT>) {
+        last if m@sensors code ends here@;
+      }
+      print OUTPUT << 'EOF';
 ifeq ($(CONFIG_I2C_ALI5X3),y)
   L_OBJS += i2c-ali5x3.o
 else 
@@ -492,21 +489,20 @@ sub gen_drivers_i2c_i2c_core_c
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "drivers/i2c/i2c-core.c";
   my $package_file = $temp;
-  my $right_place = 0;
+  my $patch_nr = 1;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
-    while (m@CONFIG_I2C_ALI5X3@ or m@CONFIG_I2C_HYDRA@ or m@CONFIG_I2C_PIIX4@ or
-        m@CONFIG_I2C_VIA@ or m@CONFIG_I2C_ISA@) {
-      $_ = <INPUT> while not m@#endif@;
-      $_ = <INPUT>;
-    }
-    if (m@^int __init i2c_init_all@) {
-      $right_place = 1;
-      print OUTPUT << 'EOF';
+    if (m@sensors code starts here@) {
+      print OUTPUT;
+      while (<INPUT>) {
+        last if m@sensors code ends here@;
+      }
+      if ($patch_nr == 1) {
+        print OUTPUT << 'EOF';
 #ifdef CONFIG_I2C_ALI5X3
 	extern int i2c_ali5x3_init(void);
 #endif
@@ -523,8 +519,7 @@ sub gen_drivers_i2c_i2c_core_c
 	extern int i2c_isa_init(void);
 #endif
 EOF
-    }
-    if ($right_place and m@return 0;@) {
+      } elsif ($patch_nr == 2) {
       print OUTPUT << 'EOF';
 #ifdef CONFIG_I2C_ALI5X3
 	i2c_ali5x3_init();
@@ -542,6 +537,8 @@ EOF
 	i2c_isa_init();
 #endif
 EOF
+      }
+      $patch_nr ++;
     }
     print OUTPUT;
   }
