@@ -1708,7 +1708,7 @@ void w83781d_beep(struct i2c_client *client, int operation, int ctl_name,
 		} else if (*nrels_mag >= 1)
 			val =
 			    w83781d_read_value(client,
-					       W83781D_REG_BEEP_INTS1) &
+					       W83781D_REG_BEEP_INTS2) &
 			    0x7f;
 		if (*nrels_mag >= 1) {
 			data->beep_enable = BEEP_ENABLE_TO_REG(results[0]);
