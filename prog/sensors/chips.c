@@ -2554,6 +2554,15 @@ void print_it87(const sensors_chip_name *name)
   } else
     printf("ERROR: Can't get IN7 data!\n");
   free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_IT87_IN8,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_IT87_IN8,&cur)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V\n", cur);
+    }
+  } else 
+    printf("ERROR: Can't get IN8 data!\n");
+  free_the_label(&label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_FAN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_FAN1,&cur) &&

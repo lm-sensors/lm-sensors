@@ -2146,6 +2146,8 @@ static sensors_chip_feature it87_features[] =
                         SENSORS_MODE_R, IT87_SYSCTL_IN6, VALUE(3), 2 },
     { SENSORS_IT87_IN7, "in7", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
                         SENSORS_MODE_R, IT87_SYSCTL_IN7, VALUE(3), 2 },
+    { SENSORS_IT87_IN8, "in8", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                        SENSORS_MODE_R, IT87_SYSCTL_IN8, VALUE(3), 2 },
     { SENSORS_IT87_IN0_MIN, "in0_min", SENSORS_IT87_IN0, SENSORS_IT87_IN0,
                             SENSORS_MODE_RW, IT87_SYSCTL_IN0, VALUE(1), 2 },
     { SENSORS_IT87_IN1_MIN, "in1_min", SENSORS_IT87_IN1, SENSORS_IT87_IN1,

@@ -981,6 +981,7 @@
 #define SENSORS_IT87_IN5 6 /* R */
 #define SENSORS_IT87_IN6 7 /* R */
 #define SENSORS_IT87_IN7 8 /* R */
+#define SENSORS_IT87_IN8 9 /* R */
 #define SENSORS_IT87_IN0_MIN 11 /* RW */
 #define SENSORS_IT87_IN1_MIN 12 /* RW */
 #define SENSORS_IT87_IN2_MIN 13 /* RW */

@@ -24,6 +24,13 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/*
+    djg@pdp8.net David Gesswein 7/18/01
+    Modified to fix bug with not all alarms enabled.
+    Added ability to read battery voltage and select temperature sensor
+    type at module load time.
+*/
+
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/malloc.h>
@@ -56,6 +63,16 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 /* Insmod parameters */
 SENSORS_INSMOD_1(it87);
 
+
+/* Update battery voltage after every reading if true */
+static int update_vbat = 0;
+
+
+/* Enable Temp1 as thermal resistor */
+/* Enable Temp2 as thermal diode */
+/* Enable Temp3 as thermal resistor */
+static int temp_type = 0x2a;
+
 /* Many IT87 constants specified below */
 
 /* Length of ISA address segment */
@@ -76,7 +93,7 @@ SENSORS_INSMOD_1(it87);
 #define IT87_REG_VID           0x0a
 #define IT87_REG_FAN_DIV       0x0b
 
-/* Monitors: 8 voltage (0 to 7), 3 temp (1 to 3), 3 fan (1 to 3) */
+/* Monitors: 9 voltage (0 to 7, battery), 3 temp (1 to 3), 3 fan (1 to 3) */
 
 #define IT87_REG_FAN(nr)       (0x0c + (nr))
 #define IT87_REG_FAN_MIN(nr)   (0x0f + (nr))
@@ -201,9 +218,9 @@ struct it87_data {
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 
-	u8 in[8];		/* Register value */
-	u8 in_max[8];		/* Register value */
-	u8 in_min[8];		/* Register value */
+	u8 in[9];		/* Register value */
+	u8 in_max[9];		/* Register value */
+	u8 in_min[9];		/* Register value */
 	u8 fan[3];		/* Register value */
 	u8 fan_min[3];		/* Register value */
 	u8 temp[3];		/* Register value */
@@ -296,6 +313,8 @@ static ctl_table it87_dir_table_template[] = {
 	{IT87_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &it87_in},
 	{IT87_SYSCTL_IN7, "in7", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_in},
+	{IT87_SYSCTL_IN8, "in8", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &it87_in},
 	{IT87_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &it87_fan},
@@ -606,6 +625,7 @@ void it87_init_client(struct i2c_client *client)
 			 IN_TO_REG(IT87_INIT_IN_MIN_7));
 	it87_write_value(client, IT87_REG_VIN_MAX(7),
 			 IN_TO_REG(IT87_INIT_IN_MAX_7));
+        /* Note: Battery voltage does not have limit registers */
 	it87_write_value(client, IT87_REG_FAN_MIN(1),
 			 FAN_TO_REG(IT87_INIT_FAN_MIN_1, 2));
 	it87_write_value(client, IT87_REG_FAN_MIN(2),
@@ -628,11 +648,10 @@ void it87_init_client(struct i2c_client *client)
 	/* Enable voltage monitors */
 	it87_write_value(client, IT87_REG_VIN_ENABLE, 0xff);
 
-	/* Enable Temo1 as thermal resistor */
-	/* Enable Temp2 as thermal diode */
+	/* Enable Temp1-Temp3 */
 	it87_write_value(client, IT87_REG_TEMP_ENABLE,
 			(it87_read_value(client, IT87_REG_TEMP_ENABLE) & 0xc0)
-			| 0x0a);
+			| (temp_type & 0x3f));
 
 	/* Enable fans */
 	it87_write_value(client, IT87_REG_FAN_CTRL,
@@ -642,8 +661,7 @@ void it87_init_client(struct i2c_client *client)
 	/* Start monitoring */
 	it87_write_value(client, IT87_REG_CONFIG,
 			 (it87_read_value(client, IT87_REG_CONFIG) & 0xb7)
-			 | 0x01);
-
+			 | (update_vbat ? 0x41 : 0x01));
 }
 
 void it87_update_client(struct i2c_client *client)
@@ -656,6 +674,12 @@ void it87_update_client(struct i2c_client *client)
 	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
 	    (jiffies < data->last_updated) || !data->valid) {
 
+		if (update_vbat) {
+                	/* Cleared after each update, so reenable.  Value
+		   	  returned by this read will be previous value */	
+			it87_write_value(client, IT87_REG_CONFIG,
+			   it87_read_value(client, IT87_REG_CONFIG) | 0x40);
+		}
 		for (i = 0; i <= 7; i++) {
 			data->in[i] =
 			    it87_read_value(client, IT87_REG_VIN(i));
@@ -664,6 +688,13 @@ void it87_update_client(struct i2c_client *client)
 			data->in_max[i] =
 			    it87_read_value(client, IT87_REG_VIN_MAX(i));
 		}
+		data->in[8] =
+		    it87_read_value(client, IT87_REG_VIN(8));
+		/* Temperature sensor doesn't have limit registers, set
+		   to min and max value */
+		data->in_min[8] = 0;
+		data->in_max[8] = 255;
+                
 		for (i = 1; i <= 3; i++) {
 			data->fan[i - 1] =
 			    it87_read_value(client, IT87_REG_FAN(i));
@@ -696,7 +727,7 @@ void it87_update_client(struct i2c_client *client)
 		data->alarms_fan =
 			it87_read_value(client, IT87_REG_ALARM1) & 0x7;
 		data->alarms_vin =
-			it87_read_value(client, IT87_REG_ALARM2) & 0xf;
+			it87_read_value(client, IT87_REG_ALARM2) & 0xff;
 		data->alarms_temp =
 			it87_read_value(client, IT87_REG_ALARM3) & 0x7;
 
@@ -926,6 +957,10 @@ EXPORT_NO_SYMBOLS;
 
 MODULE_AUTHOR("Chris Gauthron <chrisg@0-in.com>");
 MODULE_DESCRIPTION("IT8705F, IT8712F, Sis950 driver");
+MODULE_PARM(update_vbat, "i");
+MODULE_PARM_DESC(update_vbat, "Update vbat if set else return powerup value");
+MODULE_PARM(temp_type, "i");
+MODULE_PARM_DESC(temp_type, "Temperature sensor type, normally leave unset");
 
 int init_module(void)
 {

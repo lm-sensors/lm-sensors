@@ -122,6 +122,8 @@
 # formula (Rin,Rf: resistor values, Vs: read voltage, Vin: pin voltage)
 #	Rin = (Vs * Rf) / Vin
 #
+# Note: Some chips use a different formula, see it87 section for example.
+#
 # Here are the official LM78 and LM79 data sheet values.
 # 	      Vs     R1,Rin   R2,Rf    Vin
 # 	in3   +5.0      6.8    10     +2.98
@@ -1023,15 +1025,23 @@ chip "it87-*"
     set in5_max -12 * 1.05
     set in6_min -5 * 0.95
     set in6_max -5 * 1.05
-    set in6_min -5 * 0.95
-    set in6_max -5 * 1.05
+    set in7_min 5 * 0.95
+    set in7_max 5 * 1.05
 
     # vid not monitored by IT8705F
     ignore  vid
 
+# For this family of chips the negative voltage equation is different from
+# the lm78.  The chip uses two external resistor for scaling but one is
+# tied to a positive reference voltage.  See ITE8705F datasheet (SIS950
+# data sheet is wrong)
+# Vs = (1 + Rin/Rf) * Vin - (Rin/Rf) * Vref.
+# Vref = 4.096 volts, Vin is voltage measured, Vs is actual voltage.
+
     compute in2 (1 + 1)*@ ,       @/(1 + 1)
     compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
     compute in4 ((30/10) +1)*@  , @/((30/10) +1)
+# Since these have the wrong equation form they are probably not correct
     compute in5 -(72/10)*@  ,     -@/(72/10)
     compute in6 -(56/10)*@ ,      -@/(56/10)
     compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
@@ -1054,3 +1064,56 @@ chip "it87-*"
     set fan2_min 3000
     ignore fan3
 
+# The following is for the Inside Technologies 786LCD which uses either a
+# IT8705F or a SIS950 for monitoring with the SIS630.
+# You will need to load the it87 module as follows to select the correct
+# temperature sensor type.
+# modprobe it87 temp_type=0x31
+# The sensors-detect program reports lm78 and a sis5595 and lists the it87 as
+# a misdetect.  Don't do the modprobe for the lm78 or sis5595 as suggested.
+#
+# delete or comment out above it87 section and uncomment the following.
+#chip "it87-*"
+#    label in0 "VCore 1"
+#    label in1 "VCore 2"
+#    label in2 "+3.3V"
+#    label in3 "+5V"
+#    label in4 "+12V"
+#    label in5 "3.3 Stdby"
+#    label in6 "-12V"
+#    label in7 "Stdby"
+#    label in8 "VBat"
+    # in0 will depend on your processor VID value, set to voltage specified in
+    # bios setup screen
+#    set in0_min 1.7 * 0.95
+#    set in0_max 1.7 * 1.05
+#    set in1_min 2.4
+#    set in1_max 2.6
+#    set in2_min 3.3 * 0.95
+#    set in2_max 3.3 * 1.05
+#    set in3_min 5.0 * 0.95
+#    set in3_max 5.0 * 1.05
+    # +- 12V are very poor tolerance on this board. Verified with voltmeter
+#    set in4_min 12 * 0.90
+#    set in4_max 12 * 1.10
+#    set in5_min 3.3 * 0.95
+#    set in5_max 3.3 * 1.05
+#    set in6_max -12 * 0.90
+#    set in6_min -12 * 1.10
+#    set in7_min 5 * 0.95
+#    set in7_max 5 * 1.05
+    # vid not monitored by IT8705F
+#    ignore  vid
+
+#    compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+#    compute in4 ((30/10) +1)*@  , @/((30/10) +1)
+#    compute in6 (1+232/56)*@ - 4.096*232/56, (@ + 4.096*232/56)/(1+232/56)
+#    compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+    # Temperature
+#    label temp1       "CPU Temp"
+#    ignore temp2
+#    ignore temp3
+    # Fans
+#    set fan1_min 3000
+#    ignore fan2
+#    ignore fan3
