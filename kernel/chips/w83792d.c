@@ -227,6 +227,8 @@ static inline u8 FAN_TO_REG(long rpm, int div)
                              ((((nr)==6)||((nr)==7))?(val*6):(val*4)))
 #define IN_TO_REG(nr,val) (((nr)<=1)?(val/2): \
                            ((((nr)==6)||((nr)==7))?(val/6):(val/4)))
+#define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
+#define TEMP_TO_REG(val) (SENSORS_LIMIT((val>=0)?((val)/10):((val)/10+256), 0, 255))
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
 #define DIV_FROM_REG(val) (1 << (val))
 
@@ -1062,18 +1064,18 @@ void w83792d_temp(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_READ) {
 		w83792d_update_client(client);
-		results[0] = (data->temp1[1]) * 10;
-		results[1] = (data->temp1[2]) * 10;
-		results[2] = (data->temp1[0]) * 10;
+		results[0] = TEMP_FROM_REG(data->temp1[1]);
+		results[1] = TEMP_FROM_REG(data->temp1[2]);
+		results[2] = TEMP_FROM_REG(data->temp1[0]);
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->temp1[1] = SENSORS_LIMIT(results[0]/10, 0, 255);
+			data->temp1[1] = TEMP_TO_REG(results[0]);
 			w83792d_write_value(client, W83792D_REG_TEMP1_OVER,
 					    data->temp1[1]);
 		}
 		if (*nrels_mag >= 2) {
-			data->temp1[2] = SENSORS_LIMIT(results[1]/10, 0, 255);
+			data->temp1[2] = TEMP_TO_REG(results[1]);
 			w83792d_write_value(client, W83792D_REG_TEMP1_HYST,
 					    data->temp1[2]);
 		}
@@ -1097,15 +1099,15 @@ void w83792d_temp_add(struct i2c_client *client, int operation,
 		for (i=0; i<3; i++) {
 			j = (i==0) ? 2 : ((i==1)?0:1);
 			if (((data->temp_add[nr][i*2+1]) && 0x80) == 0) {
-				results[j] = (data->temp_add[nr][i*2])*10;
+				results[j] = TEMP_FROM_REG(data->temp_add[nr][i*2]);
 			} else {
-				results[j] = (data->temp_add[nr][i*2])*10 + 5;
+				results[j] = TEMP_FROM_REG(data->temp_add[nr][i*2]) + 5;
 			}
 		}
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		data->temp_add[nr][2] = SENSORS_LIMIT(results[0]/10, 0, 255);
-		data->temp_add[nr][4] = SENSORS_LIMIT(results[1]/10, 0, 255);
+		data->temp_add[nr][2] = TEMP_TO_REG(results[0]);
+		data->temp_add[nr][4] = TEMP_TO_REG(results[1]);
 		w83792d_write_value(client,
 				     W83792D_REG_TEMP_ADD[nr][2],
 				     data->temp_add[nr][2]);
