@@ -24,13 +24,19 @@ ask CVS about it:
   Makefile: Take kernel source location from /lib/modules/x.x.x/build
   Module adm1021: Add support for MC1066
   Module dmi_scan: Rename symbol duplicated in kernel
+  Module i2c-amd756: Configure base address for nForce support;
+                     check for uninitialized base address
   Module i2c-sis630: added support for SiS730
   Module i2c-sis645: improved support for SiS645/961
                      added support for SiS645DX/961 and SiS735
+  Module i2c-viapro: VT8233A (new ID 0x3177)
   Module lm87: Add multiple VRM version support
   Module w83781d: Fix in0/in1 initialization
+  Program dmidecode: Fix read bug
+  Program lm_sensors.init: remove spaces bug, add green/red output
   Program mkpatch: Fix dmi_scan module compile
-  Program sensors: Add support for MC1066; fix w83781d temp3 alarm
+  Program sensors: Add support for MC1066, Rambus Rimms;
+                   fix w83781d temp3 alarm
   Program sensors-detect: Add support for MC1066
 
 2.6.5 (20020915)
