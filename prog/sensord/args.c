@@ -3,7 +3,7 @@
  *
  * A daemon that periodically logs sensor information to syslog.
  *
- * Copyright (c) 1999-2001 Merlin Hughes <merlin@merlin.org>
+ * Copyright (c) 1999-2002 Merlin Hughes <merlin@merlin.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,11 +34,15 @@
 int isDaemon = 0;
 const char *sensorsCfgFile = "sensors.conf";
 const char *pidFile = "/var/run/sensord.pid";
+const char *rrdFile = NULL;
+const char *cgiDir = NULL;
 int scanTime = 60;
 int logTime = 30 * 60;
+int rrdTime = 5 * 60;
 int syslogFacility = LOG_LOCAL4;
 int doScan = 0;
 int doSet = 0;
+int doCGI = 0;
 int debug = 0;
 sensors_chip_name chipNames[MAX_CHIP_NAMES];
 int numChipNames = 0;
@@ -92,24 +96,32 @@ parseFacility
 static const char *daemonSyntax =
   "  -i, --interval <time>     -- interval between scanning alarms (default 60s)\n"
   "  -l, --log-interval <time> -- interval between logging sensors (default 30m)\n"
-  "  -f, --syslog-facility <f> -- syslog facility to use (default local4)\n"
+  "  -t, --rrd-interval <time> -- interval between updating RRD file (default 5m)\n"
+  "  -r, --rrd-file <file>     -- RRD file (default <none>)\n"
   "  -c, --config-file <file>  -- configuration file (default sensors.conf)\n"
   "  -p, --pid-file <file>     -- PID file (default /var/run/sensord.pid)\n"
+  "  -f, --syslog-facility <f> -- syslog facility to use (default local4)\n"
+  "  -g, --rrd-cgi <img-dir>   -- output an RRD CGI script and exit\n"
   "  -d, --debug               -- display some debug information\n"
   "  -v, --version             -- display version and exit\n"
   "  -h, --help                -- display help and exit\n"
   "\n"
-  "Specify a value of 0 for either interval to disable that operation;\n"
+  "Specify a value of 0 for any interval to disable that operation;\n"
   "for example, specify --log-interval 0 to only scan for alarms."
   "\n"
   "If no path is specified, a list of directories is examined for the config file;\n"
   "specify the filename `-' to read the config file from stdin.\n"
   "\n"
-  "If no chips are specified, all chip info will be printed.\n";
+  "If no chips are specified, all chip info will be printed.\n"
+  "\n"
+  "If unspecified, no RRD (round robin database) is used. If specified and the\n"
+  "file does not exist, it will be created. For RRD updates to be successful,\n"
+  "the RRD file configuration must EXACTLY match the sensors that are used.\n";
 
 static const char *appSyntax =
   "  -a, --alarm-scan          -- only scan for alarms\n"
   "  -s, --set                 -- execute set statements too (root only)\n"
+  "  -r, --rrd-file <file>     -- only update RRD file\n"
   "  -c, --config-file <file>  -- configuration file (default sensors.conf)\n"
   "  -d, --debug               -- display some debug information\n"
   "  -v, --version             -- display version and exit\n"
@@ -120,25 +132,29 @@ static const char *appSyntax =
   "\n"
   "If no chips are specified, all chip info will be printed.\n";
 
-static const char *daemonShortOptions = "i:l:f:c:p:dvh";
+static const char *daemonShortOptions = "i:l:t:f:r:c:p:dvhg:";
 
 static const struct option daemonLongOptions[] = {
   { "interval", required_argument, NULL, 'i' },
   { "log-interval", required_argument, NULL, 'l' },
+  { "rrd-interval", required_argument, NULL, 't' },
   { "syslog-facility", required_argument, NULL, 'f' },
+  { "rrd-file", required_argument, NULL, 'r' },
   { "config-file", required_argument, NULL, 'c' },
   { "pid-file", required_argument, NULL, 'p' },
+  { "rrd-cgi", required_argument, NULL, 'g' },
   { "debug", no_argument, NULL, 'd' },
   { "version", no_argument, NULL, 'v' },
   { "help", no_argument, NULL, 'h' },
   { NULL, 0, NULL, 0 }
 };
 
-static const char *appShortOptions = "asc:dvh";
+static const char *appShortOptions = "asr:c:dvh";
 
 static const struct option appLongOptions[] = {
   { "alarm-scan", no_argument, NULL, 'a' },
   { "set", no_argument, NULL, 's' },
+  { "rrd-file", required_argument, NULL, 'r' },
   { "config-file", required_argument, NULL, 'c' },
   { "debug", no_argument, NULL, 'd' },
   { "version", no_argument, NULL, 'v' },
@@ -167,6 +183,10 @@ parseArgs
         if ((logTime = parseTime (optarg)) < 0)
           return -1;
         break;
+      case 't':
+        if ((rrdTime = parseTime (optarg)) < 0)
+          return -1;
+        break;
       case 'f':
         if ((syslogFacility = parseFacility (optarg)) < 0)
           return -1;
@@ -185,8 +205,17 @@ parseArgs
         if ((pidFile = strdup (optarg)) == NULL)
           return -1;
         break;
+      case 'r':
+        if ((rrdFile = strdup (optarg)) == NULL)
+          return -1;
+        break;
       case 'd':
         debug = 1;
+        break;
+      case 'g':
+        doCGI = 1;
+        if ((cgiDir = strdup (optarg)) == NULL)
+          return -1;
         break;
       case 'v':
         printf ("sensord version %s\n", version);
@@ -213,8 +242,28 @@ parseArgs
     return -1;
   }
   
-  if (!logTime && !scanTime) {
-    fprintf (stderr, "Error: No logging or alarm scanning.\n");
+  if (rrdFile && doSet) {
+    fprintf (stderr, "Error: Incompatible --set and --rrd-file.\n");
+    return -1;
+  }
+  
+  if (doScan && rrdFile) {
+    fprintf (stderr, "Error: Incompatible --rrd-file and --alarm-scan.\n");
+    return -1;
+  }
+
+  if (doCGI && !rrdFile) {
+    fprintf (stderr, "Error: Incompatible --rrd-cgi without --rrd-file.\n");
+    return -1;
+  }
+  
+  if (rrdFile && !rrdTime) {
+    fprintf (stderr, "Error: Incompatible --rrd-file without --rrd-interval.\n");
+    return -1;
+  }
+  
+  if (!logTime && !scanTime && !rrdFile) {
+    fprintf (stderr, "Error: No logging, alarm or RRD scanning.\n");
     return -1;
   }
 

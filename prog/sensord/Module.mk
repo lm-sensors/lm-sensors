@@ -27,17 +27,17 @@ PROGSENSORDMAN1FILES := $(MODULE_DIR)/sensord.8
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 PROGSENSORDTARGETS := $(MODULE_DIR)/sensord
-PROGSENSORDSOURCES := $(MODULE_DIR)/args.c $(MODULE_DIR)/chips.c $(MODULE_DIR)/lib.c $(MODULE_DIR)/sense.c $(MODULE_DIR)/sensord.c
+PROGSENSORDSOURCES := $(MODULE_DIR)/args.c $(MODULE_DIR)/chips.c $(MODULE_DIR)/lib.c $(MODULE_DIR)/rrd.c $(MODULE_DIR)/sense.c $(MODULE_DIR)/sensord.c
 
 # Include all dependency files. We use '.rd' to indicate this will create
 # executables.
 INCLUDEFILES += $(PROGSENSORDSOURCES:.c=.rd)
 
 $(PROGSENSORDTARGETS): $(PROGSENSORDSOURCES:.c=.ro) lib/$(LIBSHBASENAME)
-	$(CC) -o $@ $(PROGSENSORDSOURCES:.c=.ro) -Llib -lsensors
+	$(CC) -o $@ $(PROGSENSORDSOURCES:.c=.ro) -Llib -lsensors -lrrd
 
 all-prog-sensord: $(PROGSENSORDTARGETS)
-all :: all-prog-sensord
+# all :: all-prog-sensord
 
 install-prog-sensord: all-prog-sensord
 	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGSENSORDMAN1DIR)

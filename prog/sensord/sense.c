@@ -3,7 +3,7 @@
  *
  * A daemon that periodically logs sensor information to syslog.
  *
- * Copyright (c) 1999-2001 Merlin Hughes <merlin@merlin.org>
+ * Copyright (c) 1999-2002 Merlin Hughes <merlin@merlin.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,17 +31,41 @@
 #define DO_READ 0
 #define DO_SCAN 1
 #define DO_SET 2
+#define DO_RRD 3
 
-static int
-getLabelAndValid
-(sensors_chip_name name, int feature, char **label, int *valid) {
+int
+getValid
+(sensors_chip_name name, int feature, int *valid) {
   int err;
-  err = sensors_get_label (name, feature, label);
-  if (!err)
-    err = sensors_get_ignored (name, feature);
+  err = sensors_get_ignored (name, feature);
   if (err >= 0) {
     *valid = err;
     err = 0;
+  }
+  return err;
+}
+
+int
+getLabel
+(sensors_chip_name name, int feature, char **label) {
+  int err;
+  err = sensors_get_label (name, feature, label);
+  return err;
+}
+
+int
+getRawLabel
+(sensors_chip_name name, int feature, const char **label) {
+  const sensors_feature_data *rawFeature;
+  int nr1 = 0, nr2 = 0, err = 0;
+  do {
+    rawFeature = sensors_get_all_features (name, &nr1, &nr2);
+  } while (rawFeature && (rawFeature->number != feature));
+  /* TODO: Ensure labels match RRD construct and are not repeated! */
+  if (!rawFeature) {
+    err = -1;
+  } else {
+    *label = rawFeature->name;
   }
   return err;
 }
@@ -88,16 +112,19 @@ readUnknownChip
     int valid = 0;
     double value;
     
-    if (getLabelAndValid (*chip, sensor->number, &label, &valid)) {
-      sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, sensor->name);
+    if (getValid (*chip, sensor->number, &valid)) {
+      sensorLog (LOG_ERR, "Error getting sensor validity: %s/%s", chip->prefix, sensor->name);
       ret = 20;
+    } else if (getLabel (*chip, sensor->number, &label)) {
+      sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, sensor->name);
+      ret = 21;
     } else if (!valid) {
       /* skip invalid */
     } else if (!(sensor->mode & SENSORS_MODE_R)) {
       sensorLog (LOG_INFO, "%s: %s", sensor->name, label);
     } else if ((ret = sensors_get_feature (*chip, sensor->number, &value))) {
       sensorLog (LOG_ERR, "Error getting sensor data: %s/%s: %s", chip->prefix, sensor->name, sensors_strerror (ret));
-      ret = 21;
+      ret = 22;
     } else {
       sensorLog (LOG_INFO, "  %s%s: %.2f", (sensor->mapping == SENSORS_NO_MAPPING) ? "" : "-", label, value);
     }
@@ -145,7 +172,10 @@ doKnownChip
 
     if ((action == DO_SCAN) && !alarm) {
       continue;
-    } else if (getLabelAndValid (*chip, labelNumber, &label, &valid)) {
+    } else if (getValid (*chip, labelNumber, &valid)) {
+      sensorLog (LOG_ERR, "Error getting sensor validity: %s/#%d", chip->prefix, labelNumber);
+      ret = 22;
+    } else if (getLabel (*chip, labelNumber, &label)) {
       sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
       ret = 22;
     } else if (valid) {
@@ -158,12 +188,19 @@ doKnownChip
         }
       }
       if (ret == 0) {
-        const char *formatted = feature->format (values, alarm, beep);
-        if (formatted) {
-          if (action == DO_READ) {
-            sensorLog (LOG_INFO, "  %s: %s", label, formatted);
-          } else {
-            sensorLog (LOG_ALERT, "Sensor alarm: Chip %s: %s: %s", chipName (chip), label, formatted);
+        if (action == DO_RRD) { // arse = "N:"
+          if (feature->rrd) {
+            const char *rrded = feature->rrd (values);
+            strcat (strcat (rrdBuff, ":"), rrded ? rrded : "U");
+          }
+        } else {
+          const char *formatted = feature->format (values, alarm, beep);
+          if (formatted) {
+            if (action == DO_READ) {
+              sensorLog (LOG_INFO, "  %s: %s", label, formatted);
+            } else {
+              sensorLog (LOG_ALERT, "Sensor alarm: Chip %s: %s: %s", chipName (chip), label, formatted);
+            }
           }
         }
       }
@@ -216,10 +253,9 @@ doChips
   int i = 0, j, ret = 0;
 
   while ((ret == 0) && ((chip = sensors_get_detected_chips (&i)) != NULL)) {
-    for (j = 0; j < numChipNames; ++ j) {
+    for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
       if (sensors_match_chip (*chip, chipNames[j])) {
         ret = doChip (chip, action);
-        break;
       }
     }
   }
@@ -244,7 +280,7 @@ scanChips
 (void) {
   int ret = 0;
 
-  sensorLog (LOG_DEBUG, "sensor sweeep started");
+  sensorLog (LOG_DEBUG, "sensor sweep started"); /* only logged in debug mode */
   ret = doChips (DO_SCAN);
   sensorLog (LOG_DEBUG, "sensor sweep finished");
 
@@ -263,3 +299,18 @@ setChips
   return ret;
 }
 
+/* TODO: loadavg entry */
+
+int
+rrdChips
+(void) {
+  int ret = 0;
+
+  strcpy (rrdBuff, "N");
+
+  sensorLog (LOG_DEBUG, "sensor rrd started"); 
+  ret = doChips (DO_RRD);
+  sensorLog (LOG_DEBUG, "sensor rrd finished");
+
+  return ret;
+}

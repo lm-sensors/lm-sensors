@@ -3,7 +3,7 @@
  *
  * A daemon that periodically logs sensor information to syslog.
  *
- * Copyright (c) 1999-2001 Merlin Hughes <merlin@merlin.org>
+ * Copyright (c) 1999-2002 Merlin Hughes <merlin@merlin.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,6 +134,27 @@ fmtIntDashInt
   return fmtExtra (alarm, beep);
 }
 
+static const char *
+rrdF0
+(const double values[]) {
+  sprintf (buff, "%.0f", values[0]);
+  return buff;
+}
+
+static const char *
+rrdF1
+(const double values[]) {
+  sprintf (buff, "%.1f", values[0]);
+  return buff;
+}
+
+static const char *
+rrdF2
+(const double values[]) {
+  sprintf (buff, "%.2f", values[0]);
+  return buff;
+}
+
 /** LM75 **/
 
 static const char *lm75_names[] = {
@@ -141,7 +162,7 @@ static const char *lm75_names[] = {
 };
 
 static const FeatureDescriptor lm75_features[] = {
-  { fmtTemps_1, 0, 0,
+  { fmtTemps_1, rrdF1, DataType_temperature, 0, 0,
     { SENSORS_LM75_TEMP, SENSORS_LM75_TEMP_HYST, SENSORS_LM75_TEMP_OVER, -1 } },
   { NULL }
 };
@@ -157,11 +178,11 @@ static const char *adm1021_names[] = {
 };
 
 static const FeatureDescriptor adm1021_features[] = {
-  { fmtTemps_0, ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW, 0, /* TODO!! */
+  { fmtTemps_0, rrdF0, DataType_temperature, ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW, 0, /* TODO!! */
     { SENSORS_ADM1021_TEMP, SENSORS_ADM1021_TEMP_OVER, SENSORS_ADM1021_TEMP_HYST, -1 } },
-  { fmtTemps_0, ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW | ADM1021_ALARM_RTEMP_NA, 0, /* TODO!! */
+  { fmtTemps_0, rrdF0, DataType_temperature, ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW | ADM1021_ALARM_RTEMP_NA, 0, /* TODO!! */
     { SENSORS_ADM1021_REMOTE_TEMP, SENSORS_ADM1021_REMOTE_TEMP_OVER, SENSORS_ADM1021_REMOTE_TEMP_HYST, -1 } },
-  { fmtValu_0, 0, 0,
+  { fmtValu_0, NULL, DataType_other, 0, 0,
     { SENSORS_ADM1021_DIE_CODE, -1 } },
   { NULL }
 };
@@ -177,9 +198,9 @@ static const char *max1617_names[] = {
 };
 
 static const FeatureDescriptor max1617_features[] = {
-  { fmtTemps_0, ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW, 0, /* TODO!! */
+  { fmtTemps_0, rrdF0, DataType_temperature, ADM1021_ALARM_TEMP_HIGH | ADM1021_ALARM_TEMP_LOW, 0, /* TODO!! */
     { SENSORS_MAX1617_TEMP, SENSORS_MAX1617_TEMP_OVER, SENSORS_MAX1617_TEMP_HYST, -1 } },
-  { fmtTemps_0, ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW | ADM1021_ALARM_RTEMP_NA, 0, /* TODO!! */
+  { fmtTemps_0, rrdF0, DataType_temperature, ADM1021_ALARM_RTEMP_HIGH | ADM1021_ALARM_RTEMP_LOW | ADM1021_ALARM_RTEMP_NA, 0, /* TODO!! */
     { SENSORS_MAX1617_REMOTE_TEMP, SENSORS_MAX1617_REMOTE_TEMP_OVER, SENSORS_MAX1617_REMOTE_TEMP_HYST, -1 } },
   { NULL }
 };
@@ -195,27 +216,27 @@ static const char *adm9240_names[] = {
 };
 
 static const FeatureDescriptor adm9240_features[] = {
-  { fmtVolts_2, ADM9240_ALARM_IN0, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM9240_ALARM_IN0, 0,
     { SENSORS_ADM9240_IN0, SENSORS_ADM9240_IN0_MIN, SENSORS_ADM9240_IN0_MAX, -1 } },
-  { fmtVolts_2, ADM9240_ALARM_IN1, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM9240_ALARM_IN1, 0,
     { SENSORS_ADM9240_IN1, SENSORS_ADM9240_IN1_MIN, SENSORS_ADM9240_IN1_MAX, -1 } },
-  { fmtVolts_2, ADM9240_ALARM_IN2, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM9240_ALARM_IN2, 0,
     { SENSORS_ADM9240_IN2, SENSORS_ADM9240_IN2_MIN, SENSORS_ADM9240_IN2_MAX, -1 } },
-  { fmtVolts_2, ADM9240_ALARM_IN3, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM9240_ALARM_IN3, 0,
     { SENSORS_ADM9240_IN3, SENSORS_ADM9240_IN3_MIN, SENSORS_ADM9240_IN3_MAX, -1 } },
-  { fmtVolts_2, ADM9240_ALARM_IN4, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM9240_ALARM_IN4, 0,
     { SENSORS_ADM9240_IN4, SENSORS_ADM9240_IN4_MIN, SENSORS_ADM9240_IN4_MAX, -1 } },
-  { fmtVolts_2, ADM9240_ALARM_IN5, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM9240_ALARM_IN5, 0,
     { SENSORS_ADM9240_IN5, SENSORS_ADM9240_IN5_MIN, SENSORS_ADM9240_IN5_MAX, -1 } },
-  { fmtFans_0, ADM9240_ALARM_FAN1, 0,
+  { fmtFans_0, rrdF0, DataType_rpm, ADM9240_ALARM_FAN1, 0,
     { SENSORS_ADM9240_FAN1, SENSORS_ADM9240_FAN1_MIN, SENSORS_ADM9240_FAN1_DIV, -1 } },
-  { fmtFans_0, ADM9240_ALARM_FAN2, 0,
+  { fmtFans_0, rrdF0, DataType_rpm, ADM9240_ALARM_FAN2, 0,
     { SENSORS_ADM9240_FAN2, SENSORS_ADM9240_FAN2_MIN, SENSORS_ADM9240_FAN2_DIV, -1 } },
-  { fmtTemps_0, ADM9240_ALARM_TEMP, 0,
+  { fmtTemps_0, rrdF0, DataType_temperature, ADM9240_ALARM_TEMP, 0,
     { SENSORS_ADM9240_TEMP, SENSORS_ADM9240_TEMP_OVER, SENSORS_ADM9240_TEMP_HYST, -1 } },
-  { fmtVolt_2, 0, 0,
+  { fmtVolt_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_ADM9240_VID, -1 } },
-  { fmtChassisIntrusionDetection, ADM9240_ALARM_CHAS, 0,
+  { fmtChassisIntrusionDetection, NULL, DataType_other, ADM9240_ALARM_CHAS, 0,
     { SENSORS_ADM9240_ALARMS, -1 } },
   { NULL }
 };
@@ -231,33 +252,33 @@ static const char *lm78_names[] = {
 };
 
 static const FeatureDescriptor lm78_features[] = {
-  { fmtVolts_2, LM78_ALARM_IN0, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN0, 0,
     { SENSORS_LM78_IN0, SENSORS_LM78_IN0_MIN, SENSORS_LM78_IN0_MAX, -1 } },
-  { fmtVolts_2, LM78_ALARM_IN1, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN1, 0,
     { SENSORS_LM78_IN1, SENSORS_LM78_IN1_MIN, SENSORS_LM78_IN1_MAX, -1 } },
-  { fmtVolts_2, LM78_ALARM_IN2, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN2, 0,
     { SENSORS_LM78_IN2, SENSORS_LM78_IN2_MIN, SENSORS_LM78_IN2_MAX, -1 } },
-  { fmtVolts_2, LM78_ALARM_IN3, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN3, 0,
     { SENSORS_LM78_IN3, SENSORS_LM78_IN3_MIN, SENSORS_LM78_IN3_MAX, -1 } },
-  { fmtVolts_2, LM78_ALARM_IN4, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN4, 0,
     { SENSORS_LM78_IN4, SENSORS_LM78_IN4_MIN, SENSORS_LM78_IN4_MAX, -1 } },
-  { fmtVolts_2, LM78_ALARM_IN5, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN5, 0,
     { SENSORS_LM78_IN5, SENSORS_LM78_IN5_MIN, SENSORS_LM78_IN5_MAX, -1 } },
-  { fmtVolts_2, LM78_ALARM_IN6, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM78_ALARM_IN6, 0,
     { SENSORS_LM78_IN6, SENSORS_LM78_IN6_MIN, SENSORS_LM78_IN6_MAX, -1 } },
-  { fmtFans_0, LM78_ALARM_FAN1, 0,
+  { fmtFans_0, rrdF0, DataType_rpm, LM78_ALARM_FAN1, 0,
     { SENSORS_LM78_FAN1, SENSORS_LM78_FAN1_MIN, SENSORS_LM78_FAN1_DIV, -1 } },
-  { fmtFans_0, LM78_ALARM_FAN2, 0,
+  { fmtFans_0, rrdF0, DataType_rpm, LM78_ALARM_FAN2, 0,
     { SENSORS_LM78_FAN2, SENSORS_LM78_FAN2_MIN, SENSORS_LM78_FAN2_DIV, -1 } },
-  { fmtFans_0, LM78_ALARM_FAN3, 0,
+  { fmtFans_0, rrdF0, DataType_rpm, LM78_ALARM_FAN3, 0,
     { SENSORS_LM78_FAN3, SENSORS_LM78_FAN3_MIN, SENSORS_LM78_FAN3_DIV, -1 } },
-  { fmtTemps_0, LM78_ALARM_TEMP, 0,
+  { fmtTemps_0, rrdF0, DataType_rpm, LM78_ALARM_TEMP, 0,
     { SENSORS_LM78_TEMP, SENSORS_LM78_TEMP_OVER, SENSORS_LM78_TEMP_HYST, -1 } },
-  { fmtBoardTemperatureInput, LM78_ALARM_BTI, 0,
+  { fmtBoardTemperatureInput, NULL, DataType_other, LM78_ALARM_BTI, 0,
     { SENSORS_LM78_ALARMS, -1 } },
-  { fmtChassisIntrusionDetection, LM78_ALARM_CHAS, 0,
+  { fmtChassisIntrusionDetection, NULL, DataType_other, LM78_ALARM_CHAS, 0,
     { SENSORS_LM78_ALARMS, -1 } },
-  { fmtVolt_2, 0, 0,
+  { fmtVolt_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_LM78_VID, -1 } },
   { NULL }
 };
@@ -273,21 +294,21 @@ static const char *sis5595_names[] = {
 };
 
 static const FeatureDescriptor sis5595_features[] = {
-  { fmtVolts_2, SIS5595_ALARM_IN0, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, SIS5595_ALARM_IN0, 0,
     { SENSORS_SIS5595_IN0, SENSORS_SIS5595_IN0_MIN, SENSORS_SIS5595_IN0_MAX, -1 } },
-  { fmtVolts_2, SIS5595_ALARM_IN1, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, SIS5595_ALARM_IN1, 0,
     { SENSORS_SIS5595_IN1, SENSORS_SIS5595_IN1_MIN, SENSORS_SIS5595_IN1_MAX, -1 } },
-  { fmtVolts_2, SIS5595_ALARM_IN2, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, SIS5595_ALARM_IN2, 0,
     { SENSORS_SIS5595_IN2, SENSORS_SIS5595_IN2_MIN, SENSORS_SIS5595_IN2_MAX, -1 } },
-  { fmtVolts_2, SIS5595_ALARM_IN3, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, SIS5595_ALARM_IN3, 0,
     { SENSORS_SIS5595_IN3, SENSORS_SIS5595_IN3_MIN, SENSORS_SIS5595_IN3_MAX, -1 } },
-  { fmtFans_0, SIS5595_ALARM_FAN1, 0,
+  { fmtFans_0, rrdF0, DataType_rpm, SIS5595_ALARM_FAN1, 0,
     { SENSORS_SIS5595_FAN1, SENSORS_SIS5595_FAN1_MIN, SENSORS_SIS5595_FAN1_DIV, -1 } },
-  { fmtFans_0, SIS5595_ALARM_FAN2, 0,
+  { fmtFans_0, rrdF0, DataType_rpm, SIS5595_ALARM_FAN2, 0,
     { SENSORS_SIS5595_FAN2, SENSORS_SIS5595_FAN2_MIN, SENSORS_SIS5595_FAN2_DIV, -1 } },
-  { fmtTemps_0, SIS5595_ALARM_TEMP, 0,
+  { fmtTemps_0, rrdF0, DataType_temperature, SIS5595_ALARM_TEMP, 0,
     { SENSORS_SIS5595_TEMP, SENSORS_SIS5595_TEMP_OVER, SENSORS_SIS5595_TEMP_HYST, -1 } },
-  { fmtBoardTemperatureInput, SIS5595_ALARM_BTI, 0,
+  { fmtBoardTemperatureInput, NULL, DataType_other, SIS5595_ALARM_BTI, 0,
     { SENSORS_SIS5595_ALARMS, -1 } },
   { NULL }
 };
@@ -303,25 +324,25 @@ static const char *via686a_names[] = {
 };
 
 static const FeatureDescriptor via686a_features[] = {
-  { fmtVolts_2, VIA686A_ALARM_IN0, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, VIA686A_ALARM_IN0, 0,
     { SENSORS_VIA686A_IN0, SENSORS_VIA686A_IN0_MIN, SENSORS_VIA686A_IN0_MAX, -1 } },
-  { fmtVolts_2, VIA686A_ALARM_IN1, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, VIA686A_ALARM_IN1, 0,
     { SENSORS_VIA686A_IN1, SENSORS_VIA686A_IN1_MIN, SENSORS_VIA686A_IN1_MAX, -1 } },
-  { fmtVolts_2, VIA686A_ALARM_IN2, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, VIA686A_ALARM_IN2, 0,
     { SENSORS_VIA686A_IN2, SENSORS_VIA686A_IN2_MIN, SENSORS_VIA686A_IN2_MAX, -1 } },
-  { fmtVolts_2, VIA686A_ALARM_IN3, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, VIA686A_ALARM_IN3, 0,
     { SENSORS_VIA686A_IN3, SENSORS_VIA686A_IN3_MIN, SENSORS_VIA686A_IN3_MAX, -1 } },
-  { fmtVolts_2, VIA686A_ALARM_IN4, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, VIA686A_ALARM_IN4, 0,
     { SENSORS_VIA686A_IN4, SENSORS_VIA686A_IN4_MIN, SENSORS_VIA686A_IN4_MAX, -1 } },
-  { fmtFans_0, VIA686A_ALARM_FAN1, 0,
+  { fmtFans_0, rrdF0, DataType_rpm, VIA686A_ALARM_FAN1, 0,
     { SENSORS_VIA686A_FAN1, SENSORS_VIA686A_FAN1_MIN, SENSORS_VIA686A_FAN1_DIV, -1 } },
-  { fmtFans_0, VIA686A_ALARM_FAN2, 0,
+  { fmtFans_0, rrdF0, DataType_rpm, VIA686A_ALARM_FAN2, 0,
     { SENSORS_VIA686A_FAN2, SENSORS_VIA686A_FAN2_MIN, SENSORS_VIA686A_FAN2_DIV, -1 } },
-  { fmtTemps_1, VIA686A_ALARM_TEMP, 0,
+  { fmtTemps_1, rrdF1, DataType_temperature, VIA686A_ALARM_TEMP, 0,
     { SENSORS_VIA686A_TEMP, SENSORS_VIA686A_TEMP_OVER, SENSORS_VIA686A_TEMP_HYST, -1 } },
-  { fmtTemps_1, VIA686A_ALARM_TEMP2, 0,
+  { fmtTemps_1, rrdF1, DataType_temperature, VIA686A_ALARM_TEMP2, 0,
     { SENSORS_VIA686A_TEMP2, SENSORS_VIA686A_TEMP2_OVER, SENSORS_VIA686A_TEMP2_HYST, -1 } },
-  { fmtTemps_1, VIA686A_ALARM_TEMP3, 0,
+  { fmtTemps_1, rrdF1, DataType_temperature, VIA686A_ALARM_TEMP3, 0,
     { SENSORS_VIA686A_TEMP3, SENSORS_VIA686A_TEMP3_OVER, SENSORS_VIA686A_TEMP3_HYST, -1 } },
   { NULL }
 };
@@ -344,29 +365,29 @@ static const char *lm80_names[] = {
 };
 
 static const FeatureDescriptor lm80_features[] = {
-  { fmtVolts_2, LM80_ALARM_IN0, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM80_ALARM_IN0, 0,
     { SENSORS_LM80_IN0, SENSORS_LM80_IN0_MIN, SENSORS_LM80_IN0_MAX, -1 } },
-  { fmtVolts_2, LM80_ALARM_IN1, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM80_ALARM_IN1, 0,
     { SENSORS_LM80_IN1, SENSORS_LM80_IN1_MIN, SENSORS_LM80_IN1_MAX, -1 } },
-  { fmtVolts_2, LM80_ALARM_IN2, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM80_ALARM_IN2, 0,
     { SENSORS_LM80_IN2, SENSORS_LM80_IN2_MIN, SENSORS_LM80_IN2_MAX, -1 } },
-  { fmtVolts_2, LM80_ALARM_IN3, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM80_ALARM_IN3, 0,
     { SENSORS_LM80_IN3, SENSORS_LM80_IN3_MIN, SENSORS_LM80_IN3_MAX, -1 } },
-  { fmtVolts_2, LM80_ALARM_IN4, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM80_ALARM_IN4, 0,
     { SENSORS_LM80_IN4, SENSORS_LM80_IN4_MIN, SENSORS_LM80_IN4_MAX, -1 } },
-  { fmtVolts_2, LM80_ALARM_IN5, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM80_ALARM_IN5, 0,
     { SENSORS_LM80_IN5, SENSORS_LM80_IN5_MIN, SENSORS_LM80_IN5_MAX, -1 } },
-  { fmtVolts_2, LM80_ALARM_IN6, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, LM80_ALARM_IN6, 0,
     { SENSORS_LM80_IN6, SENSORS_LM80_IN6_MIN, SENSORS_LM80_IN6_MAX, -1 } },
-  { fmtFans_0, LM80_ALARM_FAN1, 0,
+  { fmtFans_0, rrdF0, DataType_rpm, LM80_ALARM_FAN1, 0,
     { SENSORS_LM80_FAN1, SENSORS_LM80_FAN1_MIN, SENSORS_LM80_FAN1_DIV, -1 } },
-  { fmtFans_0, LM80_ALARM_FAN2, 0,
+  { fmtFans_0, rrdF0, DataType_rpm, LM80_ALARM_FAN2, 0,
     { SENSORS_LM80_FAN2, SENSORS_LM80_FAN2_MIN, SENSORS_LM80_FAN2_DIV, -1 } },
-  { fmtTemps_LM80, LM80_ALARM_TEMP_HOT, 0,
+  { fmtTemps_LM80, rrdF2, DataType_temperature, LM80_ALARM_TEMP_HOT, 0,
     { SENSORS_LM80_TEMP, SENSORS_LM80_TEMP_HOT_MAX, SENSORS_LM80_TEMP_HOT_HYST, SENSORS_LM80_TEMP_OS_MAX, SENSORS_LM80_TEMP_OS_HYST, -1 } },
-  { fmtBoardTemperatureInput, LM80_ALARM_BTI, 0,
+  { fmtBoardTemperatureInput, NULL, DataType_other, LM80_ALARM_BTI, 0,
     { SENSORS_LM80_ALARMS, -1 } },
-  { fmtChassisIntrusionDetection, LM80_ALARM_CHAS, 0,
+  { fmtChassisIntrusionDetection, NULL, DataType_other, LM80_ALARM_CHAS, 0,
     { SENSORS_LM80_ALARMS, -1 } },
   { NULL }
 };
@@ -394,21 +415,21 @@ static const char *gl518_names[] = {
 };
 
 static const FeatureDescriptor gl518_features[] = {
-  { fmtVolts_2, GL518_ALARM_VDD, GL518_ALARM_VDD,
+  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VDD, GL518_ALARM_VDD,
     { SENSORS_GL518_VDD, SENSORS_GL518_VDD_MIN, SENSORS_GL518_VDD_MAX, -1 } },
-  { fmtVolts_2, GL518_ALARM_VIN1, GL518_ALARM_VIN1,
+  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VIN1, GL518_ALARM_VIN1,
     { SENSORS_GL518_VIN1, SENSORS_GL518_VIN1_MIN, SENSORS_GL518_VIN1_MAX, -1 } },
-  { fmtVolts_2, GL518_ALARM_VIN2, GL518_ALARM_VIN2,
+  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VIN2, GL518_ALARM_VIN2,
     { SENSORS_GL518_VIN2, SENSORS_GL518_VIN2_MIN, SENSORS_GL518_VIN2_MAX, -1 } },
-  { fmtVolts_2, GL518_ALARM_VIN3, GL518_ALARM_VIN3,
+  { fmtVolts_2, rrdF2, DataType_voltage, GL518_ALARM_VIN3, GL518_ALARM_VIN3,
     { SENSORS_GL518_VIN3, SENSORS_GL518_VIN3_MIN, SENSORS_GL518_VIN3_MAX, -1 } },
-  { fmtFans_0, GL518_ALARM_FAN1, GL518_ALARM_FAN1,
+  { fmtFans_0, rrdF0, DataType_rpm, GL518_ALARM_FAN1, GL518_ALARM_FAN1,
     { SENSORS_GL518_FAN1, SENSORS_GL518_FAN1_MIN, SENSORS_GL518_FAN1_DIV, -1 } },
-  { fmtFans_0, GL518_ALARM_FAN2, GL518_ALARM_FAN2,
+  { fmtFans_0, rrdF0, DataType_rpm, GL518_ALARM_FAN2, GL518_ALARM_FAN2,
     { SENSORS_GL518_FAN2, SENSORS_GL518_FAN2_MIN, SENSORS_GL518_FAN2_DIV, -1 } },
-  { fmtTemps_0, GL518_ALARM_TEMP, GL518_ALARM_TEMP,
+  { fmtTemps_0, rrdF0, DataType_temperature, GL518_ALARM_TEMP, GL518_ALARM_TEMP,
     { SENSORS_GL518_TEMP, SENSORS_GL518_TEMP_OVER, SENSORS_GL518_TEMP_HYST, -1 } },
-  { fmtSoundAlarm, 0, 0,
+  { fmtSoundAlarm, NULL, DataType_other, 0, 0,
     { SENSORS_GL518_BEEP_ENABLE, -1 } },
   { NULL }
 };
@@ -424,19 +445,19 @@ static const char *adm1025_names[] = {
 };
 
 static const FeatureDescriptor adm1025_features[] = {
-  { fmtVolts_2, ADM1025_ALARM_IN0, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN0, 0,
     { SENSORS_ADM1025_IN0, SENSORS_ADM1025_IN0_MIN, SENSORS_ADM1025_IN0_MAX, -1 } },
-  { fmtVolts_2, ADM1025_ALARM_IN1, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN1, 0,
     { SENSORS_ADM1025_IN1, SENSORS_ADM1025_IN1_MIN, SENSORS_ADM1025_IN1_MAX, -1 } },
-  { fmtVolts_2, ADM1025_ALARM_IN2, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN2, 0,
     { SENSORS_ADM1025_IN2, SENSORS_ADM1025_IN2_MIN, SENSORS_ADM1025_IN2_MAX, -1 } },
-  { fmtVolts_2, ADM1025_ALARM_IN3, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN3, 0,
     { SENSORS_ADM1025_IN3, SENSORS_ADM1025_IN3_MIN, SENSORS_ADM1025_IN3_MAX, -1 } },
-  { fmtVolts_2, ADM1025_ALARM_IN4, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN4, 0,
     { SENSORS_ADM1025_IN4, SENSORS_ADM1025_IN4_MIN, SENSORS_ADM1025_IN4_MAX, -1 } },
-  { fmtVolts_2, ADM1025_ALARM_IN5, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN5, 0,
     { SENSORS_ADM1025_IN5, SENSORS_ADM1025_IN5_MIN, SENSORS_ADM1025_IN5_MAX, -1 } },
-  { fmtTemps_1, ADM1025_ALARM_TEMP, 0,
+  { fmtTemps_1, rrdF1, DataType_temperature, ADM1025_ALARM_TEMP, 0,
     { SENSORS_ADM1025_TEMP1, SENSORS_ADM1025_TEMP1_OVER, SENSORS_ADM1025_TEMP1_HYST, -1 } },
   { NULL }
 };
@@ -453,37 +474,37 @@ static const char *w83781d_names[] = {
 
 /* TODO: flags inverted for as99127f */
 static const FeatureDescriptor w83781d_features[] = {
-  { fmtVolts_2, W83781D_ALARM_IN0, W83781D_ALARM_IN0,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN0, W83781D_ALARM_IN0,
     { SENSORS_W83781D_IN0, SENSORS_W83781D_IN0_MIN, SENSORS_W83781D_IN0_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN1, W83781D_ALARM_IN1,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN1, W83781D_ALARM_IN1,
     { SENSORS_W83781D_IN1, SENSORS_W83781D_IN1_MIN, SENSORS_W83781D_IN1_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN2, W83781D_ALARM_IN2,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN2, W83781D_ALARM_IN2,
     { SENSORS_W83781D_IN2, SENSORS_W83781D_IN2_MIN, SENSORS_W83781D_IN2_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN3, W83781D_ALARM_IN3,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN3, W83781D_ALARM_IN3,
     { SENSORS_W83781D_IN3, SENSORS_W83781D_IN3_MIN, SENSORS_W83781D_IN3_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN4, W83781D_ALARM_IN4,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN4, W83781D_ALARM_IN4,
     { SENSORS_W83781D_IN4, SENSORS_W83781D_IN4_MIN, SENSORS_W83781D_IN4_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN5, W83781D_ALARM_IN5,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN5, W83781D_ALARM_IN5,
     { SENSORS_W83781D_IN5, SENSORS_W83781D_IN5_MIN, SENSORS_W83781D_IN5_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN6, W83781D_ALARM_IN6,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN6, W83781D_ALARM_IN6,
     { SENSORS_W83781D_IN6, SENSORS_W83781D_IN6_MIN, SENSORS_W83781D_IN6_MAX, -1 } },
-  { fmtFans_0, W83781D_ALARM_FAN1, W83781D_ALARM_FAN1,
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN1, W83781D_ALARM_FAN1,
     { SENSORS_W83781D_FAN1, SENSORS_W83781D_FAN1_MIN, SENSORS_W83781D_FAN1_DIV, -1 } },
-  { fmtFans_0, W83781D_ALARM_FAN2, W83781D_ALARM_FAN2,
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN2, W83781D_ALARM_FAN2,
     { SENSORS_W83781D_FAN2, SENSORS_W83781D_FAN2_MIN, SENSORS_W83781D_FAN2_DIV, -1 } },
-  { fmtFans_0, W83781D_ALARM_FAN3, W83781D_ALARM_FAN3,
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN3, W83781D_ALARM_FAN3,
     { SENSORS_W83781D_FAN3, SENSORS_W83781D_FAN3_MIN, SENSORS_W83781D_FAN3_DIV, -1 } },
-  { fmtTemps_0, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
+  { fmtTemps_0, rrdF0, DataType_temperature, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
     { SENSORS_W83781D_TEMP1, SENSORS_W83781D_TEMP1_OVER, SENSORS_W83781D_TEMP1_HYST, -1 } },
-  { fmtTemps_1, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
+  { fmtTemps_1, rrdF1, DataType_temperature, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
     { SENSORS_W83781D_TEMP2, SENSORS_W83781D_TEMP2_OVER, SENSORS_W83781D_TEMP2_HYST, -1 } },
-  { fmtTemps_1, W83781D_ALARM_TEMP3, W83781D_ALARM_TEMP3,
+  { fmtTemps_1, rrdF1, DataType_temperature, W83781D_ALARM_TEMP3, W83781D_ALARM_TEMP3,
     { SENSORS_W83781D_TEMP3, SENSORS_W83781D_TEMP3_OVER, SENSORS_W83781D_TEMP3_HYST, -1 } },
-  { fmtVolt_2, 0, 0,
+  { fmtVolt_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_W83781D_VID, -1 } },
-  { fmtChassisIntrusionDetection, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
+  { fmtChassisIntrusionDetection, NULL, DataType_other, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
     { SENSORS_W83781D_ALARMS, -1 } },
-  { fmtSoundAlarm, 0, 0,
+  { fmtSoundAlarm, NULL, DataType_other, 0, 0,
     { SENSORS_W83781D_BEEP_ENABLE, -1 } },
   { NULL }
 };
@@ -523,41 +544,41 @@ static const char *w83782d_names[] = {
 };
 
 static const FeatureDescriptor w83782d_features[] = {
-  { fmtVolts_2, W83781D_ALARM_IN0, W83781D_ALARM_IN0,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN0, W83781D_ALARM_IN0,
     { SENSORS_W83782D_IN0, SENSORS_W83782D_IN0_MIN, SENSORS_W83782D_IN0_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN1, W83781D_ALARM_IN1,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN1, W83781D_ALARM_IN1,
     { SENSORS_W83782D_IN1, SENSORS_W83782D_IN1_MIN, SENSORS_W83782D_IN1_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN2, W83781D_ALARM_IN2,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN2, W83781D_ALARM_IN2,
     { SENSORS_W83782D_IN2, SENSORS_W83782D_IN2_MIN, SENSORS_W83782D_IN2_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN3, W83781D_ALARM_IN3,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN3, W83781D_ALARM_IN3,
     { SENSORS_W83782D_IN3, SENSORS_W83782D_IN3_MIN, SENSORS_W83782D_IN3_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN4, W83781D_ALARM_IN4,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN4, W83781D_ALARM_IN4,
     { SENSORS_W83782D_IN4, SENSORS_W83782D_IN4_MIN, SENSORS_W83782D_IN4_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN5, W83781D_ALARM_IN5,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN5, W83781D_ALARM_IN5,
     { SENSORS_W83782D_IN5, SENSORS_W83782D_IN5_MIN, SENSORS_W83782D_IN5_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN6, W83781D_ALARM_IN6,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN6, W83781D_ALARM_IN6,
     { SENSORS_W83782D_IN6, SENSORS_W83782D_IN6_MIN, SENSORS_W83782D_IN6_MAX, -1 } },
-  { fmtVolts_2, W83782D_ALARM_IN7, W83782D_ALARM_IN7,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83782D_ALARM_IN7, W83782D_ALARM_IN7,
     { SENSORS_W83782D_IN7, SENSORS_W83782D_IN7_MIN, SENSORS_W83782D_IN7_MAX, -1 } },
-  { fmtVolts_2, W83782D_ALARM_IN8, W83782D_ALARM_IN8,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83782D_ALARM_IN8, W83782D_ALARM_IN8,
     { SENSORS_W83782D_IN8, SENSORS_W83782D_IN8_MIN, SENSORS_W83782D_IN8_MAX, -1 } },
-  { fmtFans_0, W83781D_ALARM_FAN1, W83781D_ALARM_FAN1,
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN1, W83781D_ALARM_FAN1,
     { SENSORS_W83782D_FAN1, SENSORS_W83782D_FAN1_MIN, SENSORS_W83782D_FAN1_DIV, -1 } },
-  { fmtFans_0, W83781D_ALARM_FAN2, W83781D_ALARM_FAN2,
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN2, W83781D_ALARM_FAN2,
     { SENSORS_W83782D_FAN2, SENSORS_W83782D_FAN2_MIN, SENSORS_W83782D_FAN2_DIV, -1 } },
-  { fmtFans_0, W83781D_ALARM_FAN3, W83781D_ALARM_FAN3,
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN3, W83781D_ALARM_FAN3,
     { SENSORS_W83782D_FAN3, SENSORS_W83782D_FAN3_MIN, SENSORS_W83782D_FAN3_DIV, -1 } },
-  { fmtTemps_W8378x_0, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
+  { fmtTemps_W8378x_0, rrdF0, DataType_temperature, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
     { SENSORS_W83782D_TEMP1, SENSORS_W83782D_TEMP1_OVER, SENSORS_W83782D_TEMP1_HYST, SENSORS_W83782D_SENS1, -1 } },
-  { fmtTemps_W8378x_1, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
+  { fmtTemps_W8378x_1, rrdF1, DataType_temperature, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
     { SENSORS_W83782D_TEMP2, SENSORS_W83782D_TEMP2_OVER, SENSORS_W83782D_TEMP2_HYST, SENSORS_W83782D_SENS2, -1 } },
-  { fmtTemps_W8378x_1, W83781D_ALARM_TEMP3, W83781D_ALARM_TEMP3,
+  { fmtTemps_W8378x_1, rrdF1, DataType_temperature, W83781D_ALARM_TEMP3, W83781D_ALARM_TEMP3,
     { SENSORS_W83782D_TEMP3, SENSORS_W83782D_TEMP3_OVER, SENSORS_W83782D_TEMP3_HYST, SENSORS_W83782D_SENS3, -1 } },
-  { fmtVolt_2, 0, 0,
+  { fmtVolt_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_W83782D_VID, -1 } },
-  { fmtChassisIntrusionDetection, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
+  { fmtChassisIntrusionDetection, NULL, DataType_other, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
     { SENSORS_W83781D_ALARMS, -1 } },
-  { fmtSoundAlarm, 0, 0,
+  { fmtSoundAlarm, NULL, DataType_other, 0, 0,
     { SENSORS_W83781D_BEEP_ENABLE, -1 } },
   { NULL }
 };
@@ -573,31 +594,31 @@ static const char *w83783s_names[] = {
 };
 
 static const FeatureDescriptor w83783s_features[] = {
-  { fmtVolts_2, W83781D_ALARM_IN0, W83781D_ALARM_IN0,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN0, W83781D_ALARM_IN0,
     { SENSORS_W83783S_IN0, SENSORS_W83783S_IN0_MIN, SENSORS_W83783S_IN0_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN2, W83781D_ALARM_IN2,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN2, W83781D_ALARM_IN2,
     { SENSORS_W83783S_IN2, SENSORS_W83783S_IN2_MIN, SENSORS_W83783S_IN2_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN3, W83781D_ALARM_IN3,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN3, W83781D_ALARM_IN3,
     { SENSORS_W83783S_IN3, SENSORS_W83783S_IN3_MIN, SENSORS_W83783S_IN3_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN4, W83781D_ALARM_IN4,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN4, W83781D_ALARM_IN4,
     { SENSORS_W83783S_IN4, SENSORS_W83783S_IN4_MIN, SENSORS_W83783S_IN4_MAX, -1 } },
-  { fmtVolts_2, W83781D_ALARM_IN5, W83781D_ALARM_IN5,
+  { fmtVolts_2, rrdF2, DataType_voltage, W83781D_ALARM_IN5, W83781D_ALARM_IN5,
     { SENSORS_W83783S_IN5, SENSORS_W83783S_IN5_MIN, SENSORS_W83783S_IN5_MAX, -1 } },
-  { fmtFans_0, W83781D_ALARM_FAN1, W83781D_ALARM_FAN1,
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN1, W83781D_ALARM_FAN1,
     { SENSORS_W83783S_FAN1, SENSORS_W83783S_FAN1_MIN, SENSORS_W83783S_FAN1_DIV, -1 } },
-  { fmtFans_0, W83781D_ALARM_FAN2, W83781D_ALARM_FAN2,
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN2, W83781D_ALARM_FAN2,
     { SENSORS_W83783S_FAN2, SENSORS_W83783S_FAN2_MIN, SENSORS_W83783S_FAN2_DIV, -1 } },
-  { fmtFans_0, W83781D_ALARM_FAN3, W83781D_ALARM_FAN3,
+  { fmtFans_0, rrdF0, DataType_rpm, W83781D_ALARM_FAN3, W83781D_ALARM_FAN3,
     { SENSORS_W83783S_FAN3, SENSORS_W83783S_FAN3_MIN, SENSORS_W83783S_FAN3_DIV, -1 } },
-  { fmtTemps_W8378x_0, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
+  { fmtTemps_W8378x_0, rrdF0, DataType_temperature, W83781D_ALARM_TEMP1, W83781D_ALARM_TEMP1,
     { SENSORS_W83783S_TEMP1, SENSORS_W83783S_TEMP1_OVER, SENSORS_W83783S_TEMP1_HYST, SENSORS_W83783S_SENS1, -1 } },
-  { fmtTemps_W8378x_1, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
+  { fmtTemps_W8378x_1, rrdF1, DataType_temperature, W83781D_ALARM_TEMP2, W83781D_ALARM_TEMP2,
     { SENSORS_W83783S_TEMP2, SENSORS_W83783S_TEMP2_OVER, SENSORS_W83783S_TEMP2_HYST, SENSORS_W83783S_SENS2, -1 } },
-  { fmtVolt_2, 0, 0,
+  { fmtVolt_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_W83783S_VID, -1 } },
-  { fmtChassisIntrusionDetection, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
+  { fmtChassisIntrusionDetection, NULL, DataType_other, W83781D_ALARM_CHAS, W83781D_ALARM_CHAS,
     { SENSORS_W83781D_ALARMS, -1 } },
-  { fmtSoundAlarm, 0, 0,
+  { fmtSoundAlarm, NULL, DataType_other, 0, 0,
     { SENSORS_W83781D_BEEP_ENABLE, -1 } },
   { NULL }
 };
@@ -617,6 +638,14 @@ fmtTemps_Maxilife
 }
 
 static const char *
+rrdTemps_Maxilife
+(const double values[]) {
+  if (!values[0] && !values[1] && !values[2])
+    return NULL;
+  return rrdF1 (values);
+}
+
+static const char *
 fmtFans_Maxilife
 (const double values[], int alarm, int beep) {
   if (!values[0] && !values[1] && !values[2])
@@ -630,11 +659,32 @@ fmtFans_Maxilife
 }
 
 static const char *
+rrdFans_Maxilife
+(const double values[]) {
+  if (!values[0] && !values[1] && !values[2])
+    return NULL;
+  if (values[0] < 0) {
+    return NULL;
+  } else {
+    sprintf (buff, "%.0f", values[0] / values[2]);
+    return buff;
+  }
+}
+
+static const char *
 fmtMHz_Maxilife
 (const double values[], int alarm, int beep) {
   if (!values[0] && !values[1] && !values[2])
     return NULL;
   return fmtMHz_2 (values, alarm, beep);
+}
+
+static const char *
+rrdMHz_Maxilife
+(const double values[]) {
+  if (!values[0] && !values[1] && !values[2])
+    return NULL;
+  return rrdF2 (values);
 }
 
 static const char *
@@ -645,36 +695,44 @@ fmtVolts_Maxilife
   return fmtVolts_2 (values, alarm, beep);
 }
 
+static const char *
+rrdVolts_Maxilife
+(const double values[]) {
+  if (!values[0] && !values[1] && !values[2])
+    return NULL;
+  return rrdF2 (values);
+}
+
 static const char *maxilife_names[] = {
   SENSORS_MAXI_CG_PREFIX, SENSORS_MAXI_CO_PREFIX, SENSORS_MAXI_AS_PREFIX, NULL
 };
 
 static const FeatureDescriptor maxilife_features[] = {
-  { fmtTemps_Maxilife, 0, 0,
+  { fmtTemps_Maxilife, rrdTemps_Maxilife, DataType_temperature, 0, 0,
     { SENSORS_MAXI_CG_TEMP1, SENSORS_MAXI_CG_TEMP1_MAX, SENSORS_MAXI_CG_TEMP1_HYST, -1 } },
-  { fmtTemps_Maxilife, MAXI_ALARM_TEMP2, 0,
+  { fmtTemps_Maxilife, rrdTemps_Maxilife, DataType_temperature, MAXI_ALARM_TEMP2, 0,
     { SENSORS_MAXI_CG_TEMP2, SENSORS_MAXI_CG_TEMP2_MAX, SENSORS_MAXI_CG_TEMP2_HYST, -1 } },
-  { fmtTemps_Maxilife, 0, 0,
+  { fmtTemps_Maxilife, rrdTemps_Maxilife, DataType_temperature, 0, 0,
     { SENSORS_MAXI_CG_TEMP3, SENSORS_MAXI_CG_TEMP3_MAX, SENSORS_MAXI_CG_TEMP3_HYST, -1 } },
-  { fmtTemps_Maxilife, MAXI_ALARM_TEMP4, 0,
+  { fmtTemps_Maxilife, rrdTemps_Maxilife, DataType_temperature, MAXI_ALARM_TEMP4, 0,
     { SENSORS_MAXI_CG_TEMP4, SENSORS_MAXI_CG_TEMP4_MAX, SENSORS_MAXI_CG_TEMP4_HYST, -1 } },
-  { fmtTemps_Maxilife, MAXI_ALARM_TEMP5, 0,
+  { fmtTemps_Maxilife, rrdTemps_Maxilife, DataType_temperature, MAXI_ALARM_TEMP5, 0,
     { SENSORS_MAXI_CG_TEMP5, SENSORS_MAXI_CG_TEMP5_MAX, SENSORS_MAXI_CG_TEMP4_HYST, -1 } },
-  { fmtFans_Maxilife, MAXI_ALARM_FAN1, 0,
+  { fmtFans_Maxilife, rrdFans_Maxilife, DataType_rpm, MAXI_ALARM_FAN1, 0,
     { SENSORS_MAXI_CG_FAN1, SENSORS_MAXI_CG_FAN1_MIN, SENSORS_MAXI_CG_FAN1_DIV, -1 } },
-  { fmtFans_Maxilife, MAXI_ALARM_FAN2, 0,
+  { fmtFans_Maxilife, rrdFans_Maxilife, DataType_rpm, MAXI_ALARM_FAN2, 0,
     { SENSORS_MAXI_CG_FAN2, SENSORS_MAXI_CG_FAN2_MIN, SENSORS_MAXI_CG_FAN2_DIV, -1 } },
-  { fmtFans_Maxilife, MAXI_ALARM_FAN3, 0,
+  { fmtFans_Maxilife, rrdFans_Maxilife, DataType_rpm, MAXI_ALARM_FAN3, 0,
     { SENSORS_MAXI_CG_FAN3, SENSORS_MAXI_CG_FAN3_MIN, SENSORS_MAXI_CG_FAN3_DIV, -1 } },
-  { fmtMHz_Maxilife, MAXI_ALARM_PLL, 0,
+  { fmtMHz_Maxilife, rrdMHz_Maxilife, DataType_mhz, MAXI_ALARM_PLL, 0,
     { SENSORS_MAXI_CG_PLL, SENSORS_MAXI_CG_PLL_MIN, SENSORS_MAXI_CG_PLL_MAX, -1 } },
-  { fmtVolts_Maxilife, MAXI_ALARM_VID1, 0,
+  { fmtVolts_Maxilife, rrdVolts_Maxilife, DataType_voltage, MAXI_ALARM_VID1, 0,
     { SENSORS_MAXI_CG_VID1, SENSORS_MAXI_CG_VID1_MIN, SENSORS_MAXI_CG_VID1_MAX, -1 } },
-  { fmtVolts_Maxilife, MAXI_ALARM_VID2, 0,
+  { fmtVolts_Maxilife, rrdVolts_Maxilife, DataType_voltage, MAXI_ALARM_VID2, 0,
     { SENSORS_MAXI_CG_VID2, SENSORS_MAXI_CG_VID2_MIN, SENSORS_MAXI_CG_VID2_MAX, -1 } },
-  { fmtVolts_Maxilife, MAXI_ALARM_VID3, 0,
+  { fmtVolts_Maxilife, rrdVolts_Maxilife, DataType_voltage, MAXI_ALARM_VID3, 0,
     { SENSORS_MAXI_CG_VID3, SENSORS_MAXI_CG_VID3_MIN, SENSORS_MAXI_CG_VID3_MAX, -1 } },
-  { fmtVolts_Maxilife, MAXI_ALARM_VID4, 0,
+  { fmtVolts_Maxilife, rrdVolts_Maxilife, DataType_voltage, MAXI_ALARM_VID4, 0,
     { SENSORS_MAXI_CG_VID4, SENSORS_MAXI_CG_VID4_MIN, SENSORS_MAXI_CG_VID4_MAX, -1 } },
   { NULL }
 };
@@ -714,9 +772,9 @@ static const char *eeprom_names[] = {
 };
 
 static const FeatureDescriptor eeprom_features[] = {
-  { fmtType_EEPROM, 0, 0,
+  { fmtType_EEPROM, NULL, DataType_other, 0, 0,
     { SENSORS_EEPROM_TYPE, -1 } },
-  { fmtRowCol_EEPROM, 0, 0,
+  { fmtRowCol_EEPROM, NULL, DataType_other, 0, 0,
     { SENSORS_EEPROM_ROWADDR, SENSORS_EEPROM_COLADDR, SENSORS_EEPROM_NUMROWS, -1 } },
   { NULL }
 };
@@ -747,15 +805,15 @@ static const char *ddcmon_names[] = {
 };
 
 static const FeatureDescriptor ddcmon_features[] = {
-  { fmtID_DDCMON, 0, 0,
+  { fmtID_DDCMON, NULL, DataType_other, 0, 0,
     { SENSORS_DDCMON_ID, -1 } },
-  { fmtInt, 0, 0,
+  { fmtInt, NULL, DataType_other, 0, 0,
     { SENSORS_DDCMON_SERIAL, -1 } },
-  { fmtIntCrossInt, 0, 0,
+  { fmtIntCrossInt, NULL, DataType_other, 0, 0,
     { SENSORS_DDCMON_VERSIZE, SENSORS_DDCMON_HORSIZE, -1 } },
-  { fmtIntDashInt, 0, 0,
+  { fmtIntDashInt, NULL, DataType_other, 0, 0,
     { SENSORS_DDCMON_VERSYNCMIN, SENSORS_DDCMON_VERSYNCMAX, -1 } },
-  { fmtIntDashInt, 0, 0,
+  { fmtIntDashInt, NULL, DataType_other, 0, 0,
     { SENSORS_DDCMON_HORSYNCMIN, SENSORS_DDCMON_HORSYNCMAX, -1 } },
   { NULL }
 };

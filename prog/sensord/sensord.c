@@ -3,7 +3,7 @@
  *
  * A daemon that periodically logs sensor information to syslog.
  *
- * Copyright (c) 1999-2001 Merlin Hughes <merlin@merlin.org>
+ * Copyright (c) 1999-2002 Merlin Hughes <merlin@merlin.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <limits.h>
 #include <string.h>
 #include <signal.h>
 #include <syslog.h>
@@ -74,14 +75,14 @@ static int
 sensord
 (void) {
   int ret = 0;
-  int scanValue = 0, logValue = 0;
+  int scanValue = 0, logValue = 0, rrdValue = 0;
 
   sensorLog (LOG_INFO, "sensord started");
 
   while (!done && (ret == 0)) {
     if (ret == 0)
       ret = reloadLib ();
-    if ((ret == 0) && scanTime) {
+    if ((ret == 0) && scanTime) { /* should I scan on the read cycle? */
       ret = scanChips ();
       if (scanValue <= 0)
         scanValue += scanTime;
@@ -90,18 +91,19 @@ sensord
       ret = readChips ();
       logValue += logTime;
     }
+    if ((ret == 0) && rrdTime && rrdFile && (rrdValue <= 0)) {
+      ret = rrdUpdate ();
+      rrdValue += rrdTime;
+    }
     if (!done && (ret == 0)) {
-      int sleepTime;
-      if (!logTime) {
-        sleepTime = scanValue;
-      } else if (!scanTime) {
-        sleepTime = logValue;
-      } else {
-        sleepTime = (scanValue < logValue) ? scanValue : logValue;
-      }
+      int a = logTime ? logValue : INT_MAX;
+      int b = scanTime ? scanValue : INT_MAX;
+      int c = (rrdTime && rrdFile) ? rrdValue : INT_MAX;
+      int sleepTime = (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
       sleep (sleepTime);
       scanValue -= sleepTime;
       logValue -= sleepTime;
+      rrdValue -= sleepTime;
     }
   }
 
@@ -111,15 +113,18 @@ sensord
 }
 
 static void
+openLog
+(void) {
+  openlog ("sensord", 0, syslogFacility);
+  logOpened = 1; 
+}
+
+static void
 daemonize
 (void) {
   int pid;
   struct stat fileStat;
   FILE *file;
-
-  openlog ("sensord", 0, syslogFacility);
-  
-  logOpened = 1;
 
   if (chdir ("/") < 0) {
     perror ("chdir()");
@@ -182,8 +187,16 @@ main
   if (initLib () ||
       loadLib ())
     exit (EXIT_FAILURE);
+
+  if (isDaemon)
+    openLog ();
+  if (rrdFile)
+    ret = rrdInit ();
   
-  if (isDaemon) {
+  if (ret) {
+  } else if (doCGI) {
+    ret = rrdCGI ();
+  } else if (isDaemon) {
     daemonize ();
     ret = sensord ();
     undaemonize ();
@@ -192,6 +205,8 @@ main
       ret = setChips ();
     else if (doScan)
       ret = scanChips ();
+    else if (rrdFile)
+      ret = rrdUpdate ();
     else
       ret = readChips ();
   }
