@@ -4081,19 +4081,19 @@ static sensors_chip_feature fscscy_features[] =
   static sensors_chip_feature pcf8591_features[] =
   {
     { SENSORS_PCF8591_AIN_CONF, "ain_conf", NOMAP, NOMAP,
-                              RW, PCF8591_SYSCTL_AIN_CONF, VALUE(1), 0 },
+                      RW, PCF8591_SYSCTL_AIN_CONF, VALUE(1), 0 },
     { SENSORS_PCF8591_CH0, "ch0", NOMAP, NOMAP,
-                         R, PCF8591_SYSCTL_CH0, VALUE(1), 0 },
+                      R, PCF8591_SYSCTL_CH0, VALUE(1), 0, "in0_input", 3 },
     { SENSORS_PCF8591_CH1, "ch1", NOMAP, NOMAP,
-                         R, PCF8591_SYSCTL_CH1, VALUE(1), 0 },
+                      R, PCF8591_SYSCTL_CH1, VALUE(1), 0, "in1_input", 3 },
     { SENSORS_PCF8591_CH2, "ch2", NOMAP, NOMAP,
-                         R, PCF8591_SYSCTL_CH2, VALUE(1), 0 },
+                      R, PCF8591_SYSCTL_CH2, VALUE(1), 0, "in2_input", 3 },
     { SENSORS_PCF8591_CH3, "ch3", NOMAP, NOMAP,
-                         R, PCF8591_SYSCTL_CH3, VALUE(1), 0 },
+                      R, PCF8591_SYSCTL_CH3, VALUE(1), 0, "in3_input", 3 },
     { SENSORS_PCF8591_AOUT_ENABLE, "aout_enable", NOMAP, NOMAP,
-                                 RW, PCF8591_SYSCTL_AOUT_ENABLE, VALUE(1), 0 },
+                      RW, PCF8591_SYSCTL_AOUT_ENABLE, VALUE(1), 0, "out0_enable", 0 },
     { SENSORS_PCF8591_AOUT, "aout", NOMAP, NOMAP,
-                          RW, PCF8591_SYSCTL_AOUT, VALUE(1), 0 },
+                      RW, PCF8591_SYSCTL_AOUT, VALUE(1), 0, "out0_output", 3 },
     { 0 }
   };
 
