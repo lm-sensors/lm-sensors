@@ -89,11 +89,17 @@ Checklist for mkpatch support, after the driver is tested and stable:
 
 * Add .c file to mkpatch/FILES.
 
+* Add makefile entry in mkpatch/mkpatch.pl.
+
 * Add config help to mkpatch/mkpatch.pl.
 
-* Add config entry to mkpatch/Config.in.
+* Add config entry to mkpatch/Config.in (chip drivers only)
 
-* Add initialization call to bottom of kernel/sensors.c.
+* Add config entry in mkpatch/mkpatch.pl (bus drivers only)
+
+* Add initialization call to kernel/sensors.c (chip drivers only)
+
+* Add initialization call in mkpatch/mkpatch.pl (bus drivers only)
 
 * Move .o reference in kernel/[chips,busses]/Module.mk
   from first to second section.
