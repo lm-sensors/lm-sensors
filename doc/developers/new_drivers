@@ -1,0 +1,38 @@
+* Contact us first.
+  You are of course free to write your own drivers, but it is smart to
+  check first nobody else is already working on it.
+* Write the new driver. 
+  For a chip driver, use lm78.c as template. For an SMBus-only adapter, 
+  use i2c-piix4.c. Use i2c-via.c for an I2C-level adapter.
+  Usually, we make all prefixes start with the driver name. This is not
+  really necessary, as these symbols will not be exported anyway. But by
+  doing this, you are sure you do not shadow any global kernel names.
+  Remember that you want to output the direct measurements done by the
+  chip. If these sensor values need scaling, this should be done through
+  the configuration file.
+* Add the driver to the Makefile.
+  Usually, you can just add it to KERNEL{CHIPS,DRIVERS}TARGETS in the
+  Module.mk file in the directory itself.
+* Make sure it compiles cleanly.
+  If you compile with 'make WARN=1', you usually get many additional
+  warnings. Please resolve these too, even if you know they are
+  harmless. Do the same with 'make DEBUG=1 WARN=1' if you use debugging
+  information. Remember, things put between #ifdef DEBUG #endif may never
+  stop the driver from functioning; they should just output additional
+  information.
+* Check for external symbols
+  'nm --extern --defined' should only output symbols starting with __module,
+  cleanup_module, init_module and some kernel versioning symbols. Mark all
+  other symbols as static in your source file.
+* Test the module
+  This is usually the boring part...
+* Add detection information to prog/detect/sensors-detect
+  This is a perl script that automatically detects what chips and adapters
+  are present. Contact Frodo if you need help.
+* Add chip information to lib/chips.{c,h} for chip drivers
+  Until you have done this, the chip will be invisible for user-level
+  programs. Again, contact Frodo if you need help with this.
+* Add entries to etc/sensors.conf.eg
+  If needed, you can set defaults here.
+* Add a dedicated procedure to prog/sensors/chips.[ch]
+  This makes the included sensors program pretty-print your chip information.
