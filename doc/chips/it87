@@ -42,11 +42,8 @@ Module Parameters
   boards the battery voltage is always fed to the chip so can be read at 
   any time.  Excessive reading may decrease battery life but no information 
   is given in the datasheet.
-* temp_type: integer bit mask (no longer supported; see below)
-  As of release 2.8.2 the sensor type can be set at runtime. See below.
 * reset: integer 1 if the registers of the chip should be reset at
   module load time, 0 to not reset the registers. Default is 0.
-* init: (no longer supported)
 
 Description
 -----------
