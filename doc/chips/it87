@@ -62,6 +62,7 @@ Module Parameters
 	thermistor	diode		thermistor	0x2a   ** default
 	thermistor	thermistor	diode		0x1c
 	thermistor	thermistor	thermistor	0x38
+  As of release 2.8.2 the sensor type can be set at runtime. See below.
 * reset_it87: integer 1 if the registers of the chip should be reset at
   module load time, 0 to not reset the registers. Default is 0.
 * init: integer 1 if the registers should be initialized with the module's
@@ -122,6 +123,12 @@ miss once-only alarms.
 
 The IT87xx only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
+
+The sensor type can be set at runtime as of release 2.8.2.
+To change sensor x to a thermistor, 'echo 2 > sensorx'
+where x is 1, 2, or 3.
+To change sensor x to a thermal diode, 'echo 3 > sensorx'.
+Any other value is invalid.
 
 The fan speed control features can be enabled by setting the bits 0-2 of
 the fan_ctl register to 1. (Note: bits 6-4 of this register must be set to

@@ -30,6 +30,7 @@ ask CVS about it:
   Module i2c-sis630: Sync with 2.6.0-X driver version
   Module it87: Add pwm and "smart guardian" support
   Module lm90: Add ADM1032 support
+  Module w83781d: Fix 791d and 627hf detection
   Program pwmconfig: Handle multiple fans controlled by a single pwm
   Program sensors: Add ADM1032 support
   Program sensors-detect: Prefer Super I/O drivers;

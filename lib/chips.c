@@ -3766,6 +3766,12 @@ static sensors_chip_feature it87_features[] =
                               0 },
     { SENSORS_IT87_ALARMS, "alarms", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
                            SENSORS_MODE_R, IT87_SYSCTL_ALARMS, VALUE(1), 0 },
+    { SENSORS_IT87_SENS1, "sensor1", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_RW, IT87_SYSCTL_SENS1, VALUE(1), 0 },
+    { SENSORS_IT87_SENS2, "sensor2", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_RW, IT87_SYSCTL_SENS2, VALUE(1), 0 },
+    { SENSORS_IT87_SENS3, "sensor3", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING,
+                         SENSORS_MODE_RW, IT87_SYSCTL_SENS3, VALUE(1), 0 },
     { 0 }
   };
 

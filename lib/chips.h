@@ -1399,6 +1399,9 @@
 #define SENSORS_IT87_ALARMS_VIN 82 /* R */
 #define SENSORS_IT87_ALARMS_TEMP 83 /* R */
 #define SENSORS_IT87_ALARMS 84 /* R */
+#define SENSORS_IT87_SENS1 91 /* RW */
+#define SENSORS_IT87_SENS2 92 /* RW */
+#define SENSORS_IT87_SENS3 93 /* RW */
 
 
 /* fsc poseidon chip */

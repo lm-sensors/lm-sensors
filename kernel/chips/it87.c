@@ -132,6 +132,10 @@ static int init = 1;
 
 #define IT87_REG_CHIPID        0x58
 
+/* sensor pin types */
+#define INVALID		0
+#define THERMISTOR	2
+#define PIIDIODE	3
 
 /* Conversions. Rounding and limit checking is only done on the TO_REG 
    variants. Note that you should be a bit careful with which arguments
@@ -267,6 +271,8 @@ struct it87_data {
 	u8 fan_ctl[2];		/* Register encoding */
 	u8 sg_tl[3][5];		/* Register value */
 	u8 sg_pwm[3][3];	/* Register value */
+	u8 sens[3];		/* 2 = Thermistor,
+				   3 = PII/Celeron diode */
 };
 
 
@@ -301,6 +307,8 @@ static void it87_pwm(struct i2c_client *client, int operation,
 static void it87_sgpwm(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
 static void it87_sgtl(struct i2c_client *client, int operation,
+			 int ctl_name, int *nrels_mag, long *results);
+static void it87_sens(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver it87_driver = {
@@ -341,7 +349,9 @@ static int it87_id = 0;
 #define IT87_SYSCTL_PWM3 1403
 #define IT87_SYSCTL_FAN_CTL  1501
 #define IT87_SYSCTL_FAN_ON_OFF  1502
-
+#define IT87_SYSCTL_SENS1 1601	/* 1, 2, or Beta (3000-5000) */
+#define IT87_SYSCTL_SENS2 1602
+#define IT87_SYSCTL_SENS3 1603
 
 #define IT87_ALARM_IN0 0x000100
 #define IT87_ALARM_IN1 0x000200
@@ -424,6 +434,12 @@ static ctl_table it87_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &it87_sgtl},
 	{IT87_SYSCTL_PWM3, "sg_tl3", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &it87_sgtl},
+	{IT87_SYSCTL_SENS1, "sensor1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_sens},
+	{IT87_SYSCTL_SENS2, "sensor2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_sens},
+	{IT87_SYSCTL_SENS3, "sensor3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &it87_sens},
 	{0}
 };
 
@@ -735,7 +751,7 @@ static void it87_init_client(struct i2c_client *client)
 static void it87_update_client(struct i2c_client *client)
 {
 	struct it87_data *data = client->data;
-	int i;
+	int i, tmp, tmp2;
 
 	down(&data->update_lock);
 
@@ -809,6 +825,18 @@ static void it87_update_client(struct i2c_client *client)
 			(it87_read_value(client, IT87_REG_ALARM3) << 16);
 		data->fan_ctl[0] = it87_read_value(client, IT87_REG_FAN_CTRL);
 		data->fan_ctl[1] = it87_read_value(client, IT87_REG_FAN_ONOFF);
+
+		tmp = it87_read_value(client, IT87_REG_TEMP_ENABLE);
+		for(i = 0; i < 3; i++) {
+			tmp2 = (tmp >> i) & 0x09;
+			if(tmp2 == 0x01)
+				data->sens[i] = PIIDIODE;
+			else if(tmp2 == 0x09)
+				data->sens[i] = THERMISTOR;
+			else
+				data->sens[i] = INVALID;
+		}
+
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -1080,6 +1108,46 @@ void it87_fan_ctl(struct i2c_client *client, int operation, int ctl_name,
 				it87_write_value(client, IT87_REG_FAN_CTRL, data->fan_ctl[index] );
 			else
 				it87_write_value(client, IT87_REG_FAN_ONOFF, data->fan_ctl[index] );
+		}
+	}
+}
+
+void it87_sens(struct i2c_client *client, int operation, int ctl_name,
+		  int *nrels_mag, long *results)
+{
+	struct it87_data *data = client->data;
+	int nr = 1 + ctl_name - IT87_SYSCTL_SENS1;
+	u8 tmp, val1, val2;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		results[0] = data->sens[nr - 1];
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			val1 = 0x01 << (nr - 1);
+			val2 = 0x08 << (nr - 1);
+			tmp = it87_read_value(client, IT87_REG_TEMP_ENABLE);
+			switch (results[0]) {
+			case PIIDIODE:
+				tmp &= ~ val2;
+				tmp |= val1;
+				break;
+			case THERMISTOR:
+				tmp &= ~ val1;
+				tmp |= val2;
+				break;
+			default:
+				printk
+				    (KERN_ERR
+				     "it87.o: Invalid sensor type %ld; must be 2 (thermistor) or 3 (diode)\n",
+				     results[0]);
+				return;
+			}
+			it87_write_value(client,
+					 IT87_REG_TEMP_ENABLE, tmp);
+			data->sens[nr - 1] = results[0];
 		}
 	}
 }

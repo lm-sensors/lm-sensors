@@ -3019,7 +3019,7 @@ void print_eeprom(const sensors_chip_name *name)
 void print_it87(const sensors_chip_name *name)
 {
   char *label = NULL;
-  double cur, min, max, fdiv;
+  double cur, min, max, fdiv, sens;
   int alarms, valid;
 
   if (!sensors_get_feature(*name,SENSORS_IT87_ALARMS, &cur)) {
@@ -3176,10 +3176,13 @@ void print_it87(const sensors_chip_name *name)
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_TEMP1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_TEMP1,&cur) &&
       !sensors_get_feature(*name,SENSORS_IT87_TEMP1_LOW,&min) &&
+      !sensors_get_feature(*name,SENSORS_IT87_SENS1,&sens) &&
       !sensors_get_feature(*name,SENSORS_IT87_TEMP1_HIGH,&max)) {
     if (valid) {
       print_label(label,10);
       print_temp_info( cur, max, min, MINMAX, 0, 0);
+      printf(" sensor = %s  ", (((int)sens)==3) ? "diode" :
+                             (((int)sens)==2) ? "thermistor" : "invalid");
       printf( " %s\n", alarms & IT87_ALARM_TEMP1 ? "ALARM" : "" );
     }
   } else
@@ -3188,10 +3191,13 @@ void print_it87(const sensors_chip_name *name)
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_TEMP2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_TEMP2,&cur) &&
       !sensors_get_feature(*name,SENSORS_IT87_TEMP2_LOW,&min) &&
+      !sensors_get_feature(*name,SENSORS_IT87_SENS2,&sens) &&
       !sensors_get_feature(*name,SENSORS_IT87_TEMP2_HIGH,&max)) {
     if (valid) {
       print_label(label,10);
       print_temp_info( cur, max, min, MINMAX, 0, 0);
+      printf(" sensor = %s  ", (((int)sens)==3) ? "diode" :
+                             (((int)sens)==2) ? "thermistor" : "invalid");
       printf( " %s\n", alarms & IT87_ALARM_TEMP2 ? "ALARM" : "" );
     }
   } else
@@ -3200,10 +3206,13 @@ void print_it87(const sensors_chip_name *name)
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_TEMP3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_TEMP3,&cur) &&
       !sensors_get_feature(*name,SENSORS_IT87_TEMP3_LOW,&min) &&
+      !sensors_get_feature(*name,SENSORS_IT87_SENS3,&sens) &&
       !sensors_get_feature(*name,SENSORS_IT87_TEMP3_HIGH,&max)) {
     if (valid) {
       print_label(label,10);
       print_temp_info( cur, max, min, MINMAX, 0, 0);
+      printf(" sensor = %s  ", (((int)sens)==3) ? "diode" :
+                             (((int)sens)==2) ? "thermistor" : "invalid");
       printf( " %s\n", alarms & IT87_ALARM_TEMP3 ? "ALARM" : "" );
     }
   } else
