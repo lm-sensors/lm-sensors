@@ -23,7 +23,7 @@ At least the following hardware sensor chips are supported:
   Analog Devices ADM1021 and ADM9240
   SiS Southbridge (integrated in the chipset; the I2C adapter will also be
     supported in the near future)
-  Maxtor MAX1617 and MAX1617A
+  Maxim MAX1617 and MAX1617A
   Dallas Semiconductor DS1780
   Hewlett Packard Maxilife (several revisions)
 
