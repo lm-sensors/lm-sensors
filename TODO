@@ -48,5 +48,3 @@ PROGRAMS
 
 * Sensors program needs to print a + before lm75 temperatures
 * Sensors program needs to be extended for many new chips
-* prog/doc/doc-features.pl: slightly better layout, command-line parameters
-  and sort features before printing them.

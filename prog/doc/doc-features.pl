@@ -296,8 +296,8 @@ sub main {
   initialize;
   my ($base_dir,@prefixes) = scan_arguments @_;
   scan_all $base_dir;
-  print "Module Parameters\n";
-  print "-----------------\n\n";
+  print "Chip Features\n";
+  print "-------------\n\n";
   if (@prefixes) {
     foreach $prefix (@prefixes) {
       foreach $el (keys %features) {

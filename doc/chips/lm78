@@ -20,7 +20,7 @@ Supported chips:
 Author: Frodo Looijaard <frodol@dds.nl>
 
 
-Insmod Parameters
+Module Parameters
 -----------------
 
 * force: short array (min = 1, max = 48)
@@ -108,8 +108,8 @@ The LM7* only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
 
 
-Module Parameters
------------------
+Chip features
+-------------
 
 Chip `lm78'
           LABEL     LABEL CLASS   COMPUTE CLASS ACCESS MAGNITUDE
