@@ -41,7 +41,8 @@ ask CVS about it:
   Module mtp008: Fix temp initializations;
                  Save BIOS pin configuration of temps and fans
   Module sensors: Disabled, moved to i2c package as i2c-proc.c
-  Module sis5595: Fix temp, add in4 for chip revision 0xc0.
+  Module sis5595: Fix temp, add in4 for chip revision 0xc0;
+                  Allow force_addr=0xaddr
   Module via686a: Allow force_addr=0xaddr (for A7V/K7V boards)
   Module w83781d: Don't reinitialize as99127f chip; this may cause fan/temp
                   reading changes

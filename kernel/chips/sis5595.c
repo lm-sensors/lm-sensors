@@ -53,6 +53,13 @@
 #define THIS_MODULE NULL
 #endif
 
+/* If force_addr is set to anything different from 0, we forcibly enable
+   the device at the given address. */
+static int force_addr = 0;
+MODULE_PARM(force_addr, "i");
+MODULE_PARM_DESC(force_addr,
+		 "Initialize the base address of the sensors");
+
 /* Addresses to scan.
    Note that we can't determine the ISA address until we have initialized
    our module */
@@ -128,9 +135,12 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
 
-#define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
-                                                 ((val)+5)/10),0,255))
-#define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
+/* Version 1 datasheet temp=.83*reg + 52.12 */
+#define TEMP_FROM_REG(val) (((((val)>=0x80?(val)-0x100:(val))*83)+5212)/10)
+/* inverse 1.20*val - 62.77 */
+#define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?\
+				((((val)*12)-6327)/100):\
+                                ((((val)*12)-6227)/100)),0,255))
 
 #define ALARMS_FROM_REG(val) (val)
 
@@ -301,7 +311,6 @@ int sis5595_attach_adapter(struct i2c_adapter *adapter)
 int sis5595_find_sis(int *address)
 {
 	u16 val;
-	char c;
 
 	if (!pci_present())
 		return -ENODEV;
@@ -316,19 +325,14 @@ int sis5595_find_sis(int *address)
 	    pci_read_config_word(s_bridge, SIS5595_BASE_REG, &val))
 		return -ENODEV;
 
-	*address = (val & 0xfff8);
-	if(*address == 0) {
-		printk("sis5595.o: Sensor base address uninitialized - upgrade BIOS?\n");
+	*address = val & ~(SIS5595_EXTENT - 1);
+	if (*address == 0 && force_addr == 0) {
+		printk("sis5595.o: base address not set - upgrade BIOS or use force_addr=0xaddr\n");
 		return -ENODEV;
 	}
+	if (force_addr)
+		*address = force_addr;	/* so detect will get called */
 
-	if (PCIBIOS_SUCCESSFUL !=
-	    pci_read_config_byte(s_bridge, SIS5595_ENABLE_REG, &c))
-		return -ENODEV;
-	if((c & 0x80) == 0) {
-		printk("sis5595.o: Sensors not enabled - upgrade BIOS?\n");
-		return -ENODEV;
-	}
 	return 0;
 }
 
@@ -342,6 +346,7 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 	const char *type_name = "sis5595";
 	const char *client_name = "SIS5595 chip";
 	char val;
+	u16 a;
 
 	/* Make sure we are probing the ISA bus!!  */
 	if (!i2c_is_isa_adapter(adapter)) {
@@ -350,9 +355,43 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 		return 0;
 	}
 
+	if(force_addr)
+		address = force_addr & ~(SIS5595_EXTENT - 1);
 	if (check_region(address, SIS5595_EXTENT)) {
 		printk("sis5595.o: region 0x%x already in use!\n", address);
 		return -ENODEV;
+	}
+	if(force_addr) {
+		printk("sis5595.o: forcing ISA address 0x%04X\n", address);
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_write_config_word(s_bridge, SIS5595_BASE_REG, address))
+			return -ENODEV;
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_read_config_word(s_bridge, SIS5595_BASE_REG, &a))
+			return -ENODEV;
+		if ((a & ~(SIS5595_EXTENT - 1)) != address) {
+			/* doesn't work for some chips? */
+			printk("sis5595.o: force address failed\n");
+			return -ENODEV;
+		}
+	}
+
+	if (PCIBIOS_SUCCESSFUL !=
+	    pci_read_config_byte(s_bridge, SIS5595_ENABLE_REG, &val))
+		return -ENODEV;
+	if((val & 0x80) == 0) {
+		printk("sis5595.o: enabling sensors\n");
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_write_config_byte(s_bridge, SIS5595_ENABLE_REG,
+		                      val | 0x80))
+			return -ENODEV;
+		if (PCIBIOS_SUCCESSFUL !=
+		    pci_read_config_byte(s_bridge, SIS5595_ENABLE_REG, &val))
+			return -ENODEV;
+		if((val & 0x80) == 0) {	/* doesn't work for some chips! */
+			printk("sis5595.o: sensors enable failed - not supported?\n");
+			return -ENODEV;
+		}
 	}
 
 	if (!(new_client = kmalloc(sizeof(struct i2c_client) +

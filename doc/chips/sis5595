@@ -19,7 +19,12 @@ Author: Kyösti Mälkki <kmalkki@cc.hut.fi>
 
 Module Parameters
 -----------------
-None
+force_addr=0xaddr	Set the I/O base address. Useful for boards
+			that don't set the address in the BIOS. Does not do a
+			PCI force; the device must still be present in lspci.
+			Don't use this unless the driver complains that the
+			base address is not set.
+			Example: 'modprobe sis5595 force_addr=0x290'
 
 
 Description
@@ -80,6 +85,10 @@ miss once-only alarms.
 The Sis5595 only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
 
+Problems
+--------
+Some chips refuse to be enabled. We don't know why.
+The driver will recognize this and print a message in dmesg.
 
 Chip Features
 -------------
