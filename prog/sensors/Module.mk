@@ -33,8 +33,10 @@ PROGSENSORSSOURCES := $(MODULE_DIR)/main.c $(MODULE_DIR)/chips.c
 # executables.
 INCLUDEFILES += $(PROGSENSORSSOURCES:.c=.rd)
 
+LIBICONV := $(shell if /sbin/ldconfig -p | grep -q libiconv\\.so ; then echo \-liconv; else echo; fi)
+
 $(PROGSENSORSTARGETS): $(PROGSENSORSSOURCES:.c=.ro) lib/$(LIBSHBASENAME)
-	$(CC) $(EXLDFLAGS) -o $@ $(PROGSENSORSSOURCES:.c=.ro) -Llib -lsensors
+	$(CC) $(EXLDFLAGS) -o $@ $(PROGSENSORSSOURCES:.c=.ro) $(LIBICONV) -Llib -lsensors
 
 all-prog-sensors: $(PROGSENSORSTARGETS)
 user :: all-prog-sensors
