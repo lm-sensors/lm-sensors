@@ -51,7 +51,7 @@ SENSORS_INSMOD_6(adm1021,max1617,max1617a,thmc10,lm84,gl523sm);
 #define ADM1021_REG_TEMP 0x00
 #define ADM1021_REG_REMOTE_TEMP 0x01
 #define ADM1021_REG_STATUS 0x02
-#define ADM1021_REG_MAN_ID 0x0FE  /* 0x41 = AMD, 0x49 = TI, 0x4D = Maxim */
+#define ADM1021_REG_MAN_ID 0x0FE  /* 0x41 = AMD, 0x49 = TI, 0x4D = Maxim, 0x23 = Genesys */
 #define ADM1021_REG_DEV_ID 0x0FF /* ADM1021 */
 #define ADM1021_REG_DIE_CODE 0x0FF /* MAX1617A */
 /* These use different addresses for reading/writing */
@@ -248,13 +248,14 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
       kind = adm1021;
     else if (i == 0x49)
       kind = thmc10;
-    else if (i == 0x00)
-      kind = lm84;
     else if (i == 0x23)
       kind = gl523sm;
     else if ((i== 0x4d) && 
              (adm1021_read_value(new_client,ADM1021_REG_DEV_ID) == 0x01))
       kind = max1617a;
+    /* LM84 Mfr ID in a different place */
+    else if (adm1021_read_value(new_client,ADM1021_REG_CONV_RATE_R) == 0x00)
+      kind = lm84;
     else 
       kind = max1617;
   }

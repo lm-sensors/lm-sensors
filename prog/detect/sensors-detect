@@ -1438,7 +1438,9 @@ sub adm1022_detect
 # $_[2]: Address
 # Returns: undef if not detected, (6) or (3) if detected.
 # Registers used:
+#   0x04: Company ID (LM84 only)
 #   0xfe: Company ID
+#   0xff: Revision (Maxim only)
 #   0x02: Status
 # Note: Especially the Maxim has very bad detection; we give it a low 
 # confidence value.
@@ -1448,7 +1450,7 @@ sub adm1021_detect
   my ($chip, $file,$addr) = @_;
   return if $chip == 0 and i2c_smbus_read_byte_data($file,0xfe) != 0x41;
   return if $chip == 3 and i2c_smbus_read_byte_data($file,0xfe) != 0x49;
-  return if $chip == 4 and i2c_smbus_read_byte_data($file,0xfe) != 0x00;
+  return if $chip == 4 and i2c_smbus_read_byte_data($file,0x04) != 0x00;
   return if $chip == 5 and i2c_smbus_read_byte_data($file,0xfe) != 0x23;
   return if $chip == 2 and i2c_smbus_read_byte_data($file,0xfe) != 0x4d and
                            i2c_smbus_read_byte_data($file,0xff) != 0x01;
