@@ -346,14 +346,16 @@ static ctl_table lm87_dir_table_template[] = {
 	  &sensors_sysctl_real, NULL, &lm87_in},
 	{LM87_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &sensors_proc_real,
 	  &sensors_sysctl_real, NULL, &lm87_in},
-	{LM87_SYSCTL_FAN, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{LM87_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &sensors_proc_real,
 	  &sensors_sysctl_real, NULL, &lm87_fan},
-        {LM87_SYSCTL_FRNT_TEMP, "temp1", NULL,
+	{LM87_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &sensors_proc_real,
+	  &sensors_sysctl_real, NULL, &lm87_fan},
+	{LM87_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
+	  &sensors_sysctl_real, NULL, &lm87_temp},
+	{LM87_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
+	  &sensors_sysctl_real, NULL, &lm87_temp},
+        {LM87_SYSCTL_TEMP3, "temp3", NULL,
 	  0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_temp},
-	{LM87_SYSCTL_CPU_TEMP, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
-	  &sensors_sysctl_real, NULL, &lm87_temp},
-	{LM87_SYSCTL_INT_TEMP, "temp3", NULL, 0, 0644, NULL, &sensors_proc_real,
 	  &sensors_sysctl_real, NULL, &lm87_temp},
 	{LM87_SYSCTL_FAN_DIV, "fan_div", NULL,
 	  0, 0644, NULL, &sensors_proc_real,
@@ -730,7 +732,10 @@ void lm87_fan(struct i2c_client *client, int operation, int ctl_name,
 		 int *nrels_mag, long *results)
 {
 	struct lm87_data *data = client->data;
-	int nr = ctl_name - LM87_SYSCTL_FAN + 1; /* not sure +1 needed */
+/*
+  need to fix this function to handle both fans
+	int nr = ctl_name - LM87_SYSCTL_FAN + 1;
+*/
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
@@ -765,19 +770,19 @@ void lm87_temp(struct i2c_client *client, int operation, int ctl_name,
 	   lm87_update_client(client);
 
 	   /* find out which temp. is being requested */
-	   if (ctl_name == LM87_SYSCTL_FRNT_TEMP) 
+	   if (ctl_name == LM87_SYSCTL_TEMP3) 
 	   {
 		results[0] = TEMP_LIMIT_FROM_REG(data->front_amb_temp_max);
 		results[1] = TEMP_LIMIT_FROM_REG(data->front_amb_temp_min);
 		results[2] = TEMP_FROM_REG(data->front_amb_temp);
 	   }
-	   else if(ctl_name == LM87_SYSCTL_CPU_TEMP)
+	   else if(ctl_name == LM87_SYSCTL_TEMP2)
 	   {
 		results[0] = TEMP_LIMIT_FROM_REG(data->cpu_temp_max);
 		results[1] = TEMP_LIMIT_FROM_REG(data->cpu_temp_min);
 		results[2] = TEMP_FROM_REG(data->cpu_temp);
 	   }
-	   else if(ctl_name == LM87_SYSCTL_INT_TEMP)
+	   else if(ctl_name == LM87_SYSCTL_TEMP1)
 	   {
 		results[0] = TEMP_LIMIT_FROM_REG(data->int_temp_max);
 		results[1] = TEMP_LIMIT_FROM_REG(data->int_temp_min);
@@ -786,36 +791,36 @@ void lm87_temp(struct i2c_client *client, int operation, int ctl_name,
 	   *nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-	           if (ctl_name == LM87_SYSCTL_FRNT_TEMP) {
+	           if (ctl_name == LM87_SYSCTL_TEMP3) {
 			data->front_amb_temp_max =
 			                     TEMP_LIMIT_TO_REG(results[0]);
 			lm87_write_value(client, LM87_REG_2_5V_EXT_TEMP_2_HIGH,
 					    data->front_amb_temp_max);
 		   }
-		   if (ctl_name == LM87_SYSCTL_CPU_TEMP) {
+		   if (ctl_name == LM87_SYSCTL_TEMP2) {
 			data->cpu_temp_max = TEMP_LIMIT_TO_REG(results[0]);
 			lm87_write_value(client, LM87_REG_EXT_TEMP_1_HIGH,
 					    data->int_temp_max);
 		   }
-		   if (ctl_name == LM87_SYSCTL_INT_TEMP) {
+		   if (ctl_name == LM87_SYSCTL_TEMP1) {
 			data->int_temp_max = TEMP_LIMIT_TO_REG(results[0]);
 			lm87_write_value(client, LM87_REG_INT_TEMP_HIGH,
 					    data->int_temp_max);
 	           }
 		}
 		if (*nrels_mag >= 2) {
-	           if (ctl_name == LM87_SYSCTL_FRNT_TEMP) {
+	           if (ctl_name == LM87_SYSCTL_TEMP3) {
 			data->front_amb_temp_min =
 			                  TEMP_LIMIT_TO_REG(results[0]);
 			lm87_write_value(client, LM87_REG_2_5V_EXT_TEMP_2_LOW,
 					    data->front_amb_temp_min);
 		   }
-		   if (ctl_name == LM87_SYSCTL_CPU_TEMP) {
+		   if (ctl_name == LM87_SYSCTL_TEMP2) {
 			data->cpu_temp_min = TEMP_LIMIT_TO_REG(results[0]);
 			lm87_write_value(client, LM87_REG_EXT_TEMP_1_LOW,
 					    data->int_temp_min);
 		   }
-		   if (ctl_name == LM87_SYSCTL_INT_TEMP) {
+		   if (ctl_name == LM87_SYSCTL_TEMP1) {
 			data->int_temp_min = TEMP_LIMIT_TO_REG(results[1]);
 			lm87_write_value(client, LM87_REG_INT_TEMP_LOW,
 					    data->int_temp_min);

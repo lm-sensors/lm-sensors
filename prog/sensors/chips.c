@@ -1277,6 +1277,167 @@ void print_lm80(const sensors_chip_name *name)
   free_the_label(&label);
 }
 
+void print_lm87(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur,min,max,fdiv;
+  int alarms,valid;
+
+  if (!sensors_get_feature(*name,SENSORS_LM87_ALARMS,&cur))
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_IN0,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN0,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN0_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN0_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+             cur,min,max,alarms&LM87_ALARM_IN0?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN0 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_IN1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN1_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN1_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+             cur,min,max,alarms&LM87_ALARM_IN1?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_IN2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN2_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN2_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+             cur,min,max,alarms&LM87_ALARM_IN2?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN2 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_IN3,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN3_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN3_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+             cur,min,max,alarms&LM87_ALARM_IN3?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN3 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_IN4,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN4,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN4_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN4_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+             cur,min,max,alarms&LM87_ALARM_IN4?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN4 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_IN5,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN5,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN5_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM87_IN5_MAX,&max)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+             cur,min,max,alarms&LM87_ALARM_IN5?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get IN5 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_FAN1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_FAN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM87_FAN1_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_LM87_FAN1_MIN,&min)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+             cur,min,fdiv, alarms&LM87_ALARM_FAN1?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get FAN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_FAN2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_FAN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM87_FAN2_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_LM87_FAN2_MIN,&min)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
+             cur,min,fdiv, alarms&LM87_ALARM_FAN2 ?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get FAN2 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_TEMP1,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_TEMP1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM87_TEMP1_HYST,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM87_TEMP1_OVER,&max)) {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, max, min, MINMAX );
+      printf(" %s\n", alarms&LM87_ALARM_TEMP1?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get TEMP1 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_TEMP2,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_TEMP2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM87_TEMP2_HYST,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM87_TEMP2_OVER,&max)) {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, max, min, MINMAX );
+      printf(" %s\n", alarms&LM87_ALARM_TEMP2?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get TEMP2 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_TEMP3,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_TEMP3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_LM87_TEMP3_HYST,&min) &&
+      !sensors_get_feature(*name,SENSORS_LM87_TEMP3_OVER,&max)) {
+    if (valid) {
+      print_label(label,10);
+      print_temp_info( cur, max, min, MINMAX );
+      printf(" %s\n", alarms&LM87_ALARM_TEMP3?"ALARM":"");
+    }
+  } else
+    printf("ERROR: Can't get TEMP3 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label_and_valid(*name,SENSORS_LM87_VID,&label,&valid) &&
+      !sensors_get_feature(*name,SENSORS_LM87_VID,&cur)) {
+    if (valid) {
+      print_label(label,10);
+      printf("%+6.2f V\n",cur);
+    }
+  }
+  free_the_label(&label);
+}
+
 void print_mtp008(const sensors_chip_name *name)
 {
   char *label = NULL;
