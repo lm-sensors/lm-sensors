@@ -319,7 +319,7 @@ int adm9240_attach_adapter(struct i2c_adapter *adapter)
 {
   int address,err,temp;
   struct i2c_client *new_client;
-  char *type_name,*client_name;
+  const char *type_name,*client_name;
 
   err = 0;
   /* Make sure we aren't probing the ISA bus!! */
@@ -337,7 +337,7 @@ int adm9240_attach_adapter(struct i2c_adapter *adapter)
     if (temp == 0x23)  {
       type_name = "adm9240";
       client_name = "ADM9240 chip";
-    } else if (temp == 0xDA)	
+    } else if (temp == 0xDA) {  
       type_name = "ds1780";
       client_name = "DS1780 chip";
     }
