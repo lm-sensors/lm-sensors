@@ -48,7 +48,7 @@ typedef struct sensors_chip_name {
     assume anything will be initialized properly. */
 extern int sensors_init(FILE *input);
 
-/* Strictly optional clean-up function: You can't access anything after
+/* Clean-up function: You can't access anything after
    this, until the next sensors_init() call! */
 extern void sensors_cleanup(void);
 

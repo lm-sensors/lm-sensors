@@ -59,7 +59,7 @@ libsensors \- publically accessible functions provided by the sensors library
 
 .B void sensors_cleanup(void);
 .br
-Strictly optional clean-up function: You can't access anything after this, until the next sensors_init() call!
+Clean-up function: You can't access anything after this, until the next sensors_init() call!
 .br
 
 \fBint sensors_parse_chip_name(const char *orig_name,
