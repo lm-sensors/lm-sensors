@@ -60,6 +60,8 @@ lm_sensors 2.6.5 or later on IBM Thinkpads, because:
    and IBM will not release the programming interface to the
    controller. So lm_sensors isn't useful on Thinkpads anyway.
 
+You may want to try ACPI instead, it should let you get some information
+about temperatures and fan status.
 
 As described above, our 2.6.5 and later releases "blacklists" all IBM
 systems. Our next step is to refine the system detection so that only
