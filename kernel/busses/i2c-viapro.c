@@ -37,6 +37,9 @@
 #ifndef PCI_DEVICE_ID_VIA_82C596_3
 #define PCI_DEVICE_ID_VIA_82C596_3 0x3050
 #endif
+#ifndef PCI_DEVICE_ID_VIA_82C596B_3
+#define PCI_DEVICE_ID_VIA_82C596B_3	0x3051
+#endif
 #ifndef PCI_DEVICE_ID_VIA_82C686_4
 #define PCI_DEVICE_ID_VIA_82C686_4 0x3057
 #endif
@@ -172,6 +175,11 @@ int vt596_setup(void)
 	if (VT596_dev == NULL)
 		VT596_dev = pci_find_device(PCI_VENDOR_ID_VIA,
 					    PCI_DEVICE_ID_VIA_82C686_4,
+					    VT596_dev);
+
+	if (VT596_dev == NULL)
+		VT596_dev = pci_find_device(PCI_VENDOR_ID_VIA,
+					    PCI_DEVICE_ID_VIA_82C596B_3,
 					    VT596_dev);
 
 	if (VT596_dev == NULL) {

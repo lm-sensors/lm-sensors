@@ -98,6 +98,14 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
      } ,
      { 
        vendid => 0x1106,
+       devid  => 0x3051,
+       func => 3,
+       procid => "VIA Technologies VT 82C596B ACPI",
+       driver => "i2c-viapro",
+       match => sub { $_[0] =~ /^SMBus vt82c596 adapter at [0-9,a-f]{4}/ },
+     } ,
+     { 
+       vendid => 0x1106,
        devid  => 0x3057,
        func => 4,
        procid => "VIA Technologies VT 82C686 Apollo ACPI",

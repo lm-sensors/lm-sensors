@@ -17,8 +17,11 @@ ask CVS about it:
 
 -----------------------
 
-2.5.4 or 2.6.0 (2000????)
+2.5.4 (2000????)
+  Module i2c-viapro: Add support for Via 596B (0x3051)
   Program m7101: moved to CVS tree, updated for 2.4.0 kernels
+  Program mkpatch.pl: fixed infinite loop
+  Program sensors-detect: Detect Via 596B (0x3051)
 
 2.5.3 (20001008)
   NOTE: i2c 2.5.3 MUST BE be compiled and installed first.
