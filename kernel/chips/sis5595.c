@@ -411,8 +411,9 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 	/* Reserve the ISA region */
 	request_region(address, SIS5595_EXTENT, type_name);
 
-	pci_read_config_byte(s_bridge, SIS5595_PIN_REG, &(data->revision));
-	if(data->revision < 0xc0) {
+	/* Check revision and pin registers to determine whether 3 or 4 voltages */
+	pci_read_config_byte(s_bridge, SIS5595_REVISION_REG, &(data->revision));
+	if(data->revision < 0xb0) {
 		data->maxins = 3;
 	} else {
 		pci_read_config_byte(s_bridge, SIS5595_PIN_REG, &val);
