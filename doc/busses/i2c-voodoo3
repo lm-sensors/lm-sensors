@@ -1,0 +1,71 @@
+Kernel driver `i2c-voodoo3.o'
+
+Status: 'Beta' and still under development and testing
+
+Supported adapters:
+  * 3dfx Voodoo3 based cards
+  * Voodoo Banshee based cards?
+
+Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
+        <phil@netroedge.com>, and Ralph Metzler 
+	<rjkm@thp.uni-koeln.de>
+
+Main contact: Philip Edelbrock <phil@netroedge.com>
+	
+The code is based upon Ralph's test code (he did the hard stuff ;')
+
+
+Module Parameters
+-----------------
+
+(none)
+
+
+Description
+-----------
+
+The 3dfx Voodoo3 chip contains an I2C interface/driver (aka a I2C 'master'
+or 'host').  The intent by 3dfx was to allow manufacturers to add extra
+chips to the video card such as a TV-out chip such as the BT869 or possibly
+even I2C based temperature sensors like the ADM1021 or LM75.
+
+The 'feature' set of this driver is based on the i2c-piix4 (SMBus)
+features.  I.e., SMBus byte reads and writes, as well as detected faults in
+transmission.  Quick reads/writes, block transactions, word transactions,
+are yet unwritten but are probably not too hard to add.
+
+
+Stability
+---------
+Seems to be stable on the test machine, but needs more testing on other
+machines.
+
+
+Supported Devices
+-----------------
+Specifically, this driver was written and tested on the '3dfx Voodoo3 AGP
+3000' which has a tv-out feature (s-video or composite).  According to the
+docs and discussions, this code should work for any Voodoo3 based cards as
+well as Voodoo Banshee based cards.  Voodoo Banshee cards, however, are not
+probed or detected until I can find a test user to help out in the testing,
+so please contact me (phil@netroedge.com) if you have a Banshee and want 
+to help.
+	
+Features
+--------
+This driver controls the I2C controller of the Voodoo3 chip.  'byte read'
+transactions and 'data_byte write' transactions are supported, but all else
+is not (but is probably easy to add if the need arises).
+
+Issues
+------
+Probably many, but it seems to work OK on my system. :')
+
+
+External Device Connection
+--------------------------
+The digital video input jumpers give availability to the I2C bus. 
+Specifically, pins 13 and 25 (bottom row middle, and bottom right-end) are
+the I2C clock and I2C data lines, respectively. +5V and GND are probably
+also easily available making the addition of extra I2C/SMBus devices easy
+to implement.

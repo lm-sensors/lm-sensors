@@ -56,8 +56,8 @@ I2C := 1
 
 # Uncomment the second line if you are a developer. This will enable many
 # additional warnings at compile-time
-WARN := 0
-#WARN := 1
+#WARN := 0
+WARN := 1
 
 # Uncomment the second line if you want to get (loads of) debug information.
 # Not recommended, unless you are actually debugging the code

@@ -52,8 +52,6 @@
 #define PCI_DEVICE_ID_3DFX_VOODOO3 0x05
 #endif
 
-/* insmod parameters */
-
 static int voodoo3_init(void);
 static int voodoo3_cleanup(void);
 static int voodoo3_setup(void);
@@ -72,7 +70,7 @@ static unsigned int state=0xcf980020;
 static unsigned char *mem;
 static int v3_num;
 
-inline outlong(int off,unsigned int dat)
+inline void outlong(int off,unsigned int dat)
 {
         *((unsigned int*)(mem+off))=dat;
 }
@@ -83,7 +81,7 @@ inline unsigned int readlong(int off)
         return *((unsigned int*)(mem+off));
 }
 
-inline out(void)
+inline void out(void)
 {
         outlong(0x78,state);
         udelay(10);

@@ -86,7 +86,6 @@ static int bt869_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
 static void bt869_inc_use (struct i2c_client *client);
 static void bt869_dec_use (struct i2c_client *client);
-static u16 swap_bytes(u16 val);
 static int bt869_read_value(struct i2c_client *client, u8 reg);
 static int bt869_write_value(struct i2c_client *client, u8 reg, u16 value);
 static void bt869_status(struct i2c_client *client, int operation, int ctl_name,
@@ -155,7 +154,7 @@ int bt869_attach_adapter(struct i2c_adapter *adapter)
 /* This function is called by sensors_detect */
 int bt869_detect(struct i2c_adapter *adapter, int address, int kind)
 {
-  int i,cur,conf,hyst,os;
+  int i,cur;
   struct i2c_client *new_client;
   struct bt869_data *data;
   int err=0;
@@ -307,11 +306,6 @@ void bt869_dec_use (struct i2c_client *client)
 #ifdef MODULE
   MOD_DEC_USE_COUNT;
 #endif
-}
-
-u16 swap_bytes(u16 val)
-{
-  return (val >> 8) | (val << 8);
 }
 
 /* All registers are byte-sized.

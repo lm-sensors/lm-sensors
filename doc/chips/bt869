@@ -1,0 +1,94 @@
+Kernel driver `bt869.o'
+======================
+
+Status: 'Beta' and needs further development and testing
+
+Supported chips: 
+  * Brooktree BT869 Video Modulator chips
+    Prefix: `bt869'
+    Addresses scanned: I2C 0x44 - 0x45 (inclusive)
+    Datasheet: Publicly available at the brooktree web site
+    (www.brooktree.com)
+
+Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
+	<phil@netroege.com> and Ralph Metzler <rjkm@thp.uni-koeln.de>
+
+Main Contact: Philip Edelbrock <phil@netroedge.com>
+
+Module Parameters
+-----------------
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_bt869: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `bt869' chip
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+
+
+Description
+-----------
+This driver provides some access to the Brooktree bt869 found on some video
+cards (like the 'Voodoo3 3000').  Typically, the output can be either an
+s-video connection or composite video.  Resolutions supported using the
+chip's built in configurations are 640x480 or 800x600.  Other possible
+implementations may allow for double resolutions with some decimations
+(e.g., a monitor running at 1280x960 but the TV out getting every other
+pixel for 640x480).
+
+
+Driver Features
+---------------
+Stanards: (US) NTSC or PAL (PAL untested)
+Resultions: 640x480 and 800x600
+Depths: 16 bit or 32 (I forgot if 24 bit worked OK, it probably does)
+Colorbars: Switch on the built-in color bar generator. (FYI- using a blue
+filter, you should see only alternating bright stripes of equal brightness.
+Adjust your TV's color and saturation if this isn't the case.)
+
+In your XF86Config file, you should have these entries for NTSC output:
+
+ModeLine "640x480NTSC"  28.195793   640  656  658  784   480  520  525  600
+ModeLine "800x600NTSC"  38.769241   800  812  814  880   600  646  649  735
+
+or for PAL (untested),
+
+ModeLine "640x480PAL"   29.50       640  675  678  944   480  530  535  625
+ModeLine "800x600PAL"   36.00       800  818  820  960   600  653  655  750
+
+Also, don't forget to add these modes to the resolutions list in the
+'screen' sections of XF86Config.  You can change modes on the fly in X by
+pressing (usually) ctrl-alt-+ or ctrl-alt-(minus)  with + and - being the
+keys on your numeric 10-key pad.
+
+BTW- My monitor doesn't like these entries very much, and as I've read:
+don't run your monitor out of spec or else it will burst into fire.  So,
+having the monitor turned on while in any of these modes is at your own
+risk.  (I've never heard of a monitor breaking from this, but it seems to
+be fashionable to warn about it.)
+
+
+Chip Features
+-------------
+The chip is very flexible and customizable for many standards.  Right now
+the driver sticks with the chip's built in NTSC and PAL standards.  It also
+does some other wacky stuff like closed-captioning, Macro-vision
+copy-protection, and other things.  Check out the datasheet for more info.
+
+
+Issues
+------
+The depth register doesn't seem to do much?  If you have troubles or
+aren't sure the output is working, turn the color-bars on.  If they display
+OK, then the chip is syncing correctly.  The next thing to try is the depth
+setting.  Lastly, turning off your computer and back on with your TV
+connected but you monitor not, may force the video card to configure and
+use the BT869 as your primary output device (all bets are off once X is
+started).  Let me know if you have problems which you can't figure out 
+(phil@netroedge.com).
