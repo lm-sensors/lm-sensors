@@ -22,9 +22,9 @@ Atmel or otherwise.
 We have made several changes in release 2.6.5 to minimize the
 chance of corruption:
 
-1) Sensors-detect now accesses ACPI and DMI information in the BIOS to
-   identify the system manufacturer. If the system manufacturer is IBM,
-   sensors-detect will print a message and exit.
+1) Sensors-detect now accesses VPD information in the BIOS to identify IBM
+   system. If the system manufacturer is IBM, sensors-detect will print a
+   message and exit.
 
 2) The sequence of probes in sensors-detect has been changed so that
    24RF08 eeproms are not corrupted. This *should* prevent corruption
@@ -44,8 +44,9 @@ chance of corruption:
    eeproms in non-IBM systems.
    We do not have any reports of this corruption mechanism in releases
    2.6.4 or earlier but have verified that it can happen.
-   There is no issue unless the eeprom
-   module is loaded with checksum=1, which is not the default.
+   There is no issue unless the eeprom module is loaded with checksum=1,
+   which is not the default.
+   The ddcmon driver was changed in the same way, just in case.
 
 Even with these changes, we still DO NOT RECOMMEND INSTALLING
 lm_sensors 2.6.5 or later on IBM Thinkpads, because:
@@ -99,7 +100,7 @@ Joe in Australia's Thinkpad Password Recovery Site
 http://www.ja.olm.net/unlock
 
 Atmel 24RF08 Datasheet
-http://www.atmel.com/atmel/products/prod227.htm
+http://www.atmel.com/dyn/products/product_card.asp?part_id=2370
 
 
 (*) 'Write Quick 0' is not an actual write and should never generate
