@@ -1382,8 +1382,11 @@ sub print_chips_report
   }
 }
 
+# $_[0]: 1 if ISA bus is prefered, 0 for SMBus
 sub generate_modprobes
 {
+  my ($prefer_isa) = @_;
+
   my ($chip,$detection,%adapters,$nr,@optionlist);
   my $modprobes = "";
   my $configfile = "";
@@ -1401,10 +1404,12 @@ sub generate_modprobes
     foreach $detection (@{$chip->{detected}}) {
       %adapters->{$detection->{i2c_driver}} = $nr ++
             if exists $detection->{i2c_driver} and 
-               not exists %adapters->{$detection->{i2c_driver}};
+               not exists %adapters->{$detection->{i2c_driver}} and
+               not (exists $detection->{isa_addr} and $prefer_isa);
       %adapters->{"i2c-isa"} = $nr ++ 
             if exists $detection->{isa_addr} and 
-               not exists %adapters->{"i2c-isa"};
+               not exists %adapters->{"i2c-isa"} and
+               not (exists $detection->{i2c_driver} and not $prefer_isa);
     }
   }
   foreach $detection (keys %adapters) {
@@ -1415,6 +1420,8 @@ sub generate_modprobes
   $modprobes .= "# I2C chip drivers\n";
   foreach $chip (@chips_detected) {
     next if not @{$chip->{detected}};
+
+    # Handle misdetects
     $modprobes .= "modprobe $chip->{driver}\n";
     @optionlist = ();
     foreach $detection (@{$chip->{misdetected}}) {
@@ -1426,6 +1433,22 @@ sub generate_modprobes
            if exists $detection->{isa_addr} and
               exists %adapters->{"i2c-isa"};
     }
+
+    # Handle aliases
+    foreach $detection (@{$chip->{detected}}) {
+      if (exists $detection->{i2c_driver} and 
+          exists $detection->{isa_addr} and
+          exists %adapters->{$detection->{i2c_driver}} and
+          exists %adapters->{"i2c-isa"}) {
+        if ($prefer_isa) {
+          push @optionlist,%adapters->{$detection->{i2c_driver}},
+                           $detection->{i2c_addr};
+        } else {
+          push @optionlist, -1, $detection->{isa_addr}
+        }
+      }
+    }
+
     next if not @optionlist;
     $configfile .= "options $chip->{driver}";
     $configfile .= sprintf " ignore=0x%02x",shift @optionlist 
@@ -1614,6 +1637,9 @@ sub main
   }
 
   print "\n Now follows a summary of the probes I have just done.\n";
+  print " Just press ENTER to continue: ";
+  <STDIN>;
+
   my ($chip,$data);
   foreach $chip (@chips_detected) {
     print "\nDriver `$$chip{driver}' ";
@@ -1640,8 +1666,19 @@ sub main
     }
   }
 
-  my ($modprobes,$configfile) = generate_modprobes;
-  print "\n\nTo load everything that is needed, add this to some /etc/rc* ",
+  print "\n\n",
+        " I will now generate the commands needed to load the I2C modules.\n",
+        " Sometimes, a chip is available both through the ISA bus and an ",
+        "I2C bus.\n",
+        " ISA bus access is faster, but you need to load an additional driver ",
+        "module\n",
+        " for it. If you have the choice, do you want to use the ISA bus or ",
+        "the\n",
+        " I2C/SMBus (ISA/smbus)? ";
+  my $use_isa = not <STDIN> =~ /\s*[Ss]/;
+     
+  my ($modprobes,$configfile) = generate_modprobes $use_isa;
+  print "\nTo load everything that is needed, add this to some /etc/rc* ",
         "file:\n\n";
   print "#----cut here----\n";
   print $modprobes;
