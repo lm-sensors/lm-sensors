@@ -40,6 +40,7 @@
 	5597		0008		5597
 	5598		0008		5597/5598
 	 630		0008		0630
+	 645		0008		0645
 	 730		0008		0730
 	 735		0008		0735
 */
@@ -116,6 +117,7 @@ static int blacklist[] = {
 						  use the 5511 ID for recognition */
 			PCI_DEVICE_ID_SI_5597,
 			PCI_DEVICE_ID_SI_5598,
+			0x645,
 			0x735,
                           0 };
 /*
