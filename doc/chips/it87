@@ -97,16 +97,18 @@ The IT87xx only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
 
 The sensor type can be set at runtime as of release 2.8.2.
-To change sensor x to a thermistor, 'echo 2 > sensorx'
-where x is 1, 2, or 3.
-To change sensor x to a thermal diode, 'echo 3 > sensorx'.
-Any other value is invalid.
+To change sensor N to a thermistor, 'echo 2 > sensorN'
+where N is 1, 2, or 3.
+To change sensor N to a thermal diode, 'echo 3 > sensorN'.
+Give 0 for unused sensor. Any other value is invalid.
 To configure this at startup, put the following lines in the it87 section
 of /etc/sensors.conf.
-2 = thermistor; 3 = thermal diode
+2 = thermistor; 3 = thermal diode; 0 = unused
 	   set sensor1 3
 	   set sensor2 3
 	   set sensor3 3
+If you set a sensor to 0, you'll also want to ignore its value:
+	   ignore sensorN
 
 The fan speed control features can be enabled by setting the bits 0-2 of
 the fan_ctl register to 1. (Note: bits 6-4 of this register must be set to
