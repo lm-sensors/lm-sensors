@@ -22,7 +22,7 @@ use strict;
 use vars qw($temp);
 $temp = "mkpatch/.temp";
 
-# Generate a diff between the old kernel file and the new I2C file. We
+# Generate a diff between the old kernel file and the new lm_sensors file. We
 # arrange the headers to tell us the old tree was under directory
 # `linux-old', and the new tree under `linux'.
 # $_[0]: sensors package root (like /tmp/sensors)
