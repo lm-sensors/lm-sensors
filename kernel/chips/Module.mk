@@ -75,14 +75,14 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_EEPROM=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/eeprom.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_FSCHER=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/fscher.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_FSCPOS=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/fscpos.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_FSCSCY=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/fscscy.o
-endif
-ifneq ($(shell if grep -q '^CONFIG_SENSORS_FSCHER=y' $(LINUX)/.config; then echo 1; fi),1)
-KERNELCHIPSTARGETS += $(MODULE_DIR)/fscher.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_GL518SM=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/gl518sm.o
@@ -123,6 +123,9 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_MTP008=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/mtp008.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_PC87360=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/pc87360.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_PCA9540=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/pca9540.o
 endif
@@ -137,9 +140,6 @@ KERNELCHIPSTARGETS += $(MODULE_DIR)/sis5595.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_SMSC47M1=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smsc47m1.o
-endif
-ifneq ($(shell if grep -q '^CONFIG_SENSORS_PC87360=y' $(LINUX)/.config; then echo 1; fi),1)
-KERNELCHIPSTARGETS += $(MODULE_DIR)/pc87360.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_THMC50=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/thmc50.o
