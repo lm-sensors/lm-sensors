@@ -1,21 +1,3 @@
-START-INFO-DIR-ENTRY
-* lm_sensors-FAQ: (lm_sensors-FAQ)           The lm_sensors FAQ
-END-INFO-DIR-ENTRY
-
-Short Contents
-**************
-
-lm_sensors
-1 PC and Sensor Overview
-2 Sensor and Bus Basics
-3 Installation and Management
-4 Problems
-5 How to Ask for Help
-6 How to Contribute
-7 Version 1 Specific Questions
-Appendix A Revision History of This Document
-
-
 Table of Contents
 *****************
 
@@ -114,6 +96,7 @@ lm_sensors
     4.31.2 Tyan 2460, 2462
     4.31.3 Tyan 2466
     4.31.4 Tyan 2688
+  4.32 Problems on particular systems
 
 5 How to Ask for Help
   5.1 What to send us when asking for help
@@ -1203,6 +1186,11 @@ above the temperature reading. Put the new limits in
    For board hangs, see support ticket 721 for information.  Also *Note
 Inserting modules hangs my board: Section 4.29.
 
+4.32 Problems on particular systems
+===================================
+
+   For IBM systems, see `README.thinkpad'.
+
 5 How to Ask for Help
 *********************
 
@@ -1492,3 +1480,4 @@ Appendix A Revision History of This Document
    * Rev 1.1 Modifications by Philip Edelbrock, 19980809
 
    * Rev 1.0 Written by Philip Edelbrock, 19980803
+

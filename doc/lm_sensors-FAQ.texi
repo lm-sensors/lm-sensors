@@ -567,6 +567,7 @@ to work.
 * Section 4.29::        Inserting modules hangs my board
 * Section 4.30::        Inserting modules slows down my board
 * Section 4.31::        Problems on particular motherboards
+* Section 4.32::        Problems on particular systems
 @end menu
 
 
@@ -1173,7 +1174,7 @@ temperature limits are above the temperature reading. Put
 the new limits in @file{/etc/sensors.conf} and run @command{sensors -s}.
 
 
-@node Section 4.31, , Section 4.30, Problems
+@node Section 4.31, Section 4.32, Section 4.30, Problems
 @section Problems on particular motherboards
 
 The following boards have unique problems and solutions.
@@ -1202,6 +1203,12 @@ See support tickets 941, 840, and 841 for information.
 
 For board hangs, see support ticket 721 for information.
 Also @ref{Section 4.29, Inserting modules hangs my board}.
+
+
+@node Section 4.32, , Section 4.31, Problems
+@section Problems on particular systems
+
+For IBM systems, see @file{README.thinkpad}.
 
 
 @node Help, Contribute, Problems, Top
