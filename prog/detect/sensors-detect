@@ -940,7 +940,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      } ,
      {
        name => "Asus ASB100 Bach",
-       driver => "w83781d",
+       driver => "asb100",
        i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { w83781d_detect 6, @_},
      } ,

@@ -19,7 +19,8 @@ ask CVS about it:
 2.8.2 (???)
   IMPORTANT: Limit initialization removed from all chip drivers!
              If you didn't run 'sensors -s' in the past you may need to now!
-  File sensors.conf.eg: Change lm75 scaling back to 1
+  File sensors.conf.eg: Change lm75 scaling back to 1;
+                        Add example for asb100
   Library: Fix bmcsensors scaling, increase number of sensors;
            Add w83627thf support; Advance version to 3.0.0;
            Add hermes, ADM1032, ASB100 support;
@@ -67,6 +68,7 @@ ask CVS about it:
                           Reduce lm80 misdetects; remove PCFxxxx "detection"
                           Detect VT8237 (KT600)
                           Use VPD instead of DMI+ACPI for Thinkpad detection
+                          Suggest new asb100 driver instead of w83781d
 
 
 2.8.1 (20031005)
