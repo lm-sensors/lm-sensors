@@ -343,13 +343,17 @@ sub gen_drivers_Makefile
   my $sensors_present;
   my $pr1 = 0;
   my $pr2 = 0;
+  my $new_style = 0;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   MAIN: while(<INPUT>) {
-    if (m@^ALL_SUB_DIRS\s*:=@) {
+    if (m@^mod-subdirs\s*:=@) {
+      $new_style = 1;
+    }
+    if ((! $new_style and m@^ALL_SUB_DIRS\s*:=@) or m@^nid0subdirs\s*:=@) {
       $pr1 = 1;
       $sensors_present = 0;
       while (m@\\$@) {
@@ -363,14 +367,23 @@ sub gen_drivers_Makefile
       $_ = <INPUT>;
       redo MAIN;
     } 
-    if (m@CONFIG_SENSORS@) {
+    if (m@^ifeq.*CONFIG_SENSORS@) {
       $_ = <INPUT> while not m@^endif@;
       $_ = <INPUT>;
       $_ = <INPUT> if m@^$@;
       redo MAIN;
     } 
+    if (m@^subdir.*CONFIG_I2C@) {
+      $_ = <INPUT>;
+      redo MAIN;
+    }
     if (m@^include \$\(TOPDIR\)/Rules.make$@) {
       $pr2 = 1;
+      if ($new_style) {
+      print OUTPUT <<'EOF';
+subdir-$(CONFIG_SENSORS) 	+= sensors
+EOF
+      } else {
       print OUTPUT <<'EOF';
 ifeq ($(CONFIG_SENSORS),y)
 SUB_DIRS += sensors
@@ -382,6 +395,7 @@ else
 endif
 
 EOF
+      }
     }
     print OUTPUT;
   }
