@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.0 (2004????)
+  Module lm93: Added module parameter for VID pin input thresholds.
 
 
 2.8.8 (20041007)

@@ -98,6 +98,7 @@
 /* miscellaneous */
 #define LM93_REG_SFC1		0xbc
 #define LM93_REG_SFC2		0xbd
+#define LM93_REG_GPI_VID_CTL	0xbe
 #define LM93_REG_SF_TACH_TO_PWM	0xe0
 
 /* LM93 REGISTER VALUES */

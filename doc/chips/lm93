@@ -29,6 +29,12 @@ Module Parameters
   time (even though the hardware is capable of enabling both).  There's
   not a compelling use case for enabling both at once, anyway.  The default
   is "0,0".
+* vid_agtl: integer
+  A "0" configures the VID pins for V(ih) = 2.1V min, V(il) = 0.8V max.
+  A "1" configures the VID pins for V(ih) = 0.8V min, V(il) = 0.4V max.
+  (The latter setting is referred to as AGTL+ Compatible in the datasheet.)
+  I.e. this parameter controls the VID pin input thresholds; if your VID
+  inputs are not working, trying changing this.  The default value is "0".
 
 (common among sensor drivers)
 * force: short array (min = 1, max = 48)

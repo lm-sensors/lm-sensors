@@ -66,11 +66,15 @@ MODULE_PARM_DESC(disable_block,
 
 static int init = 1;
 MODULE_PARM(init, "i");
-MODULE_PARM_DESC(init, "Set to zero to bypass chip initialization");
+MODULE_PARM_DESC(init, "Set to zero to bypass most chip initialization");
 
 static int vccp_limit_type[2] /* = {0,0} */ ;
 MODULE_PARM(vccp_limit_type, "2-2i");
 MODULE_PARM_DESC(vccp_limit_type, "Configures in7 and in8 limit modes");
+
+static int vid_agtl = 0;
+MODULE_PARM(vid_agtl, "i");
+MODULE_PARM_DESC(vid_agtl, "Configures VID pin input thresholds");
 
 /* -- SENSORS SYSCTL START -- */
 /* volts * 100 */
@@ -2112,9 +2116,15 @@ static ctl_table lm93_dir_table_template[] = {
 static void lm93_init_client(struct i2c_client *client)
 {
 	int i;
-	u8 reg = lm93_read_byte(client, LM93_REG_CONFIG);
+	u8 reg;
+
+	/* configure VID pin input thresholds */
+	reg = lm93_read_byte(client, LM93_REG_GPI_VID_CTL);
+	lm93_write_byte(client, LM93_REG_GPI_VID_CTL,
+			reg | (vid_agtl ? 0x03 : 0x00));
 
 	/* start monitoring */
+	reg = lm93_read_byte(client, LM93_REG_CONFIG);
 	lm93_write_byte(client, LM93_REG_CONFIG, reg | 0x01);
 
 	if (init) {
