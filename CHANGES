@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.6.6 (20021???)
+2.6.6 (200211??)
   NOTE: Requires i2c-2.6.6 or newer.
   File doc/busses/i2c-ali1535: Add license, miscellaneous changes
   File doc/busses/i2c-ali15x3: Add license, miscellaneous changes
@@ -37,7 +37,10 @@ ask CVS about it:
                    kernel 2.5.43
   Module gl518sm: Iterate allowed only for rev 0x00
   Module i2c-amd756: Configure base address for nForce support;
-                     check for uninitialized base address
+                     check for uninitialized base address;
+                     add support for amd8111 (SMBus 1.0)
+  Module i2c-amd8111: New (SMBus 2.0)
+  Module i2c-ipmb: New
   Module i2c-ipmi: New
   Module i2c-sis630: Add support for SiS730
   Module i2c-sis645: Improve support for SiS645/961;
@@ -58,7 +61,8 @@ ask CVS about it:
   Program sensors: Add support for MC1066, Rambus Rimms;
                    fix w83781d temp3 alarm; fix gl518sm rev 0x00 recognition;
                    initial support for Sony Vaio eeprom
-  Program sensors-detect: Add support for MC1066, smart battery, 8235, IPMI;
+  Program sensors-detect: Add support for MC1066, smart battery, 8235,
+                          IPMI, AMD8111;
                           add ACPI method for IBM system detection;
                           work with old Perl versions again;
                           initial support for Sony Vaio eeprom

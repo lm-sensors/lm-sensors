@@ -40,7 +40,8 @@ See the lm_sensors download page for guidance:
 
 At least the following I2C/SMBus adapters are supported:
   Acer Labs M1533, M1535, and M1543C
-  AMD 756, 766, and 768
+  AMD 756, 766, 768 and 8111
+  AMD 8111 SMBus 2.0
   Apple Hydra (used on some PPC machines)
   DEC 21272/21274 (Tsunami/Typhoon - on Alpha boards)
   Intel I801 ICH/ICH0/ICH2/ICH3 (used in Intel 810, 810E, 815E, 820, 840 chipsets)
@@ -53,7 +54,7 @@ At least the following I2C/SMBus adapters are supported:
   SMSC Victory66
   3Dfx Voodoo 3 and Banshee
   VIA Technologies VT82C586B, VT82C596A/B, VT82C686A/B, VT8231,
-                   VT8233, and VT8233A.
+                   VT8233, VT8233A, and VT8235.
 
 
 At least the following hardware sensor chips are supported:

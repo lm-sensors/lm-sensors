@@ -1,0 +1,44 @@
+Kernel driver `i2c-adm8111.o'
+
+Status: Untested.
+
+Supported adapters:
+    * AMD-8111 SMBus 2.0 PCI interface
+    * Possibly any other interface that implements the ACPI 2.0 EC interface
+    Datasheets: Publicly available at AMD and ACPI websites
+
+Author: Vojtech Pavlik <vojtech@suse.cz>
+
+
+Module Parameters
+-----------------
+
+None.
+
+Description
+-----------
+
+If you see something like this:
+
+00:07.2 SMBus: Advanced Micro Devices [AMD] AMD-8111 SMBus 2.0 (rev 02)
+        Subsystem: Advanced Micro Devices [AMD] AMD-8111 SMBus 2.0
+        Flags: medium devsel, IRQ 19
+        I/O ports at d400 [size=32]
+
+in your 'lspci -v', then this driver is for your chipset.
+
+Process Call Support
+--------------------
+
+The chip supports it, but it's not implemented in the driver at the moment.
+
+SMBus 2.0 Support
+-----------------
+
+The chip supports SMBus 2.0, however the only extension the driver
+supports is PEC. Slave mode or host notification are not implemented.
+
+
+Note that for the 8111, there are two SMBus adapters. The SMBus 2.0 adapter is
+supported by this driver, and the SMBus 1.0 adapter is supported
+by the i2c-amd756 driver.

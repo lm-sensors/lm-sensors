@@ -303,6 +303,22 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters @dmidecode);
        driver => "i2c-amd756",
        match => sub { $_[0] =~ /^SMBus AMD768 adapter at [0-9,a-f]{4}/ },
      },
+     { 
+       vendid => 0x1022,
+       devid  => 0x746b,
+       func => 3,
+       procid => "AMD-8111 ACPI",
+       driver => "i2c-amd756",
+       match => sub { $_[0] =~ /^SMBus AMD8111 adapter at [0-9,a-f]{4}/ },
+     },
+     { 
+       vendid => 0x1022,
+       devid  => 0x746a,
+       func => 2,
+       procid => "AMD-8111 SMBus 2.0",
+       driver => "i2c-amd8111",
+       match => sub { $_[0] =~ /^SMBus2 AMD8111 adapter at [0-9,a-f]{4}/ },
+     },
      {
        vendid => 0x102b,
        devid  => 0x0519,

@@ -26,6 +26,7 @@ KERNELBUSSESDIR := $(MODULE_DIR)
 # These targets are NOT included in 'mkpatch' ...
 KERNELBUSSESTARGETS :=
 ifeq ($(shell if grep -q '^CONFIG_IPMI_HANDLER=' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ipmb.o
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ipmi.o
 endif
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-sis630.o
@@ -40,6 +41,9 @@ KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-ali15x3.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_AMD756=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-amd756.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_AMD8111=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-amd8111.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_HYDRA=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-hydra.o
