@@ -22,7 +22,8 @@ PROGPWMTARGETS := $(MODULE_DIR)/fancontrol \
                   $(MODULE_DIR)/pwmconfig
 
 install-prog-pwm: $(PROGPWMTARGETS)
-	$(INSTALL) -o root -g root -m 755 $(PROGPWMTARGETS) $(SBINDIR)
+	$(MKDIR) $(DESTDIR)$(SBINDIR)
+	$(INSTALL) -o root -g root -m 755 $(PROGPWMTARGETS) $(DESTDIR)$(SBINDIR)
 
 user_install :: install-prog-pwm
 
