@@ -19,6 +19,8 @@
 # Version 0.1  2003-07-17  Jean Delvare <khali@linux-fr.org>
 # Version 0.2  2003-07-22  Jean Delvare <khali@linux-fr.org>
 #  Use print instead of syswrite.
+# Version 0.3  2003-08-24  Jean Delvare <khali@linux-fr.org>
+#  Fix data block length (128 bytes instead of 256).
 #
 # EEPROM data decoding for EDID. EDID (Extended Display Identification
 # Data) is a VESA standard which allows storing (on manufacturer's side)
@@ -96,7 +98,7 @@ sub edid_decode
 	delete $SIG{__WARN__};
 	binmode PIPE;
 	
-	for (my $i=0; $i<=0xf0; $i+=0x10)
+	for (my $i=0; $i<=0x70; $i+=0x10)
 	{
 		my $file = sprintf '%02x', $i;
 		my $output = '';
@@ -113,7 +115,6 @@ sub edid_decode
 		print PIPE $output;
 	}
 
-	print PIPE "\n"; # keep the customer satifsied
 	close PIPE;
 }
 
@@ -132,7 +133,7 @@ if ( defined $bus
   && -r "/proc/sys/dev/sensors/eeprom-i2c-$bus-$address" )
 {
 	print STDERR
-		"decode-edid: decode-edid version 0.1\n";
+		"decode-edid: decode-edid version 0.3\n";
 	edid_decode ($bus, $address);
 }
 else
