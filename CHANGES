@@ -18,8 +18,20 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.8.3 (2004????)
+  File lm_sensors.spec: Update
   Library: Add 2.6 eeprom support
-  Module it87: Fix sg_tlx writes
+  Makefiles: remove -o and -g arguments to install; add DESTDIR where missing
+  Module i2c-amd756: Fix byte writes
+  Module it87: Fix sg_tlx writes; fix sensor type reporting;
+               add 8712 Super I/O detection
+  Module w83781d: Fix negative voltages
+  Module w83l785ts: New
+  Program eeprog: Make 8 bit mode the default
+  Program fancontrol: Improvements, fixes, support 2.6 kernels
+  Program mkpatch: Add lm75.h
+  Program pwmconfig: Improvements, fixes, support 2.6 kernels
+  Program sensors-detect: Add 8712 Super I/O detection;
+                          add W83L785TS detection
 
 
 2.8.2 (20031211)
@@ -54,6 +66,7 @@ ask CVS about it:
   Module i2c-viapro: Add support for Via 8237
   Module it87: Add pwm and "smart guardian" support;
                add it87 sensor type support
+  Module lm75: Fix negative voltages
   Module lm90: Add ADM1032 support
   Module w83781d: Fix 791d and 627hf detection
   Module w83627hf: Add VID support
