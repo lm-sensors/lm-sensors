@@ -10,9 +10,11 @@ From lowest-level to the highest-level, the access methods are:
 
 	1) Character device access to the i2c bus driver
 	   via /dev/i2c-x
-	2) I2C bus access functions as defined in <linux/i2c-dev.h>
-	3) /proc access to the chip device driver
+	2) I2C bus access functions as defined in kernel/include/i2c-dev.h
+	3A) /proc access to the chip device driver
+	3B) sysfs access to the chip device driver
 	4) libsensors library
+	5) sensors program
 
 
 Details:
@@ -26,6 +28,7 @@ Details:
    sources.
 
    This method does not use a chip device driver at all.
+   However it does require the i2c-dev module.
    The driver must set an individual chip address on the bus via
    an ioctl, so it must use locking if multiple devices on the
    bus are being accessed. No access is provided for non-i2c
@@ -37,11 +40,17 @@ Details:
 
 2. Direct /dev access using inline functions
 --------------------------------------------
-   I2C bus access inline functions as defined in <linux/i2c-dev.h>
+   I2C bus access inline functions as defined in kernel/include/i2c-dev.h,
    and in doc/dev-interface in the i2c package or
    Documentation/i2c/dev-interface in the linux kernel sources.
+   Note that these used to be defined in <linux/i2c-dev.h> in the kernel
+   source tree. However, userspace applications are not supposed to	
+   include kernel headers, so the inline functions were removed from
+   the kernel file in recent kernels. Use the header file in this package
+   instead.
 
    This method does not use a chip device driver at all.
+   However it does require the i2c-dev module.
    The driver must set an individual chip address on the bus via
    an ioctl, so it must use locking if multiple devices on the
    bus are being accessed. No access is provided for non-i2c
@@ -51,13 +60,13 @@ Details:
    prog/dump/i2cdump.c, and prog/dump/i2cset.c.
 
 
-3. /proc access
----------------
+3A. /proc access (2.4 kernels)
+-----------------------------
    Chip drivers using the i2c-proc module create subdirectories in
    /proc/sys/dev/sensors which can be accessed directly by applications.
    Naming and content standards for the entries in these subdirectories
    is documented in the file doc/developers/proc. Note that these
-   standards are only loosely followed.
+   standards may not be strictly followed.
 
    If a new driver adheres to these standards then an application may
    be able to support new devices on-the-fly.
@@ -78,8 +87,42 @@ Details:
 
    For examples of programs using /proc accesses, see
    prog/eeprom/decode-dimms.pl, prog/matorb/displayit.pl,
-   prog/maxilife/writelcd.sh, prog/rrd/sens_update_rrd.
+   prog/maxilife/writelcd.sh, prog/rrd/sens_update_rrd,
+   prog/pwm/fancontrol, and prog/pwm/pwmconfig.
    Also search freshmeat for sensors applications.
+
+
+3B. sysfs access (2.6 kernels)
+------------------------------
+   Chip drivers using the i2c-sensor module create subdirectories in
+   the sysfs filesystem (usually /sys) which can be accessed
+   directly by applications.
+   Naming and content standards for the entries in these subdirectories
+   is documented in the file Documentation/i2c/sysfs-interface in the
+   2.6 kernel source tree. Note that these standards may not be
+   strictly followed.
+
+   If a new driver adheres to these standards then an application may
+   be able to support new devices on-the-fly.
+
+   sysfs access provides a method to read and write sensor values
+   for any driver using i2c-sensor, including ISA chip drivers.
+
+   This method may also works well for shell and perl scripts
+   written to access a specific device. Note that sysfs is
+   standard in 2.6 kernels.
+
+   Note that most drivers provide only raw sensor readings via /sys;
+   many readings must be scaled or adjusted, and these adjustments
+   must often be changed by the user. An application using /proc must
+   generally provide adjustment facilities and the requirements
+   of the adjustments can be quite complex. If you need adjustment
+   facilities, consider the libsensors library, below.
+
+   For an examples of a program using /sys accesses, see gkrellm.
+   See also lib/proc.c and prog/dump/i2cbusses.c for examples.
+   The sysfsutils package may also be helpful.
+   Also search freshmeat for sensors and sysfs applications.
 
 
 4. libsensors library
@@ -89,8 +132,9 @@ Details:
    so that your application sees adjusted (scaled) values using settings
    provided by the user. Other facilities are sensor renaming, limit setting,
    and ignoring individual sensors.
+   The libsensors library supports both 2.4 and 2.6 kernels.
 
-   Unfortunately there is no documentation for libsensors. See the
+   Unfortunately there is little documentation for libsensors. See the
    'sensors' application in prog/sensors for an example. The source
    for libsensors is in the lib/ directory. Another example
    is in prog/sensord. Also search freshmeat for sensors applications.
@@ -103,3 +147,13 @@ Details:
    to the library, even to the shared version, if the application itself
    does not fall under the GPL. This may or may not be changed in the future.
    Contact us if you wish to discuss your application.
+
+   For an examples of a program using libsensors accesses, see
+   prog/sensors/sensors. Also search freshmeat for sensors applications.
+
+5. sensors program
+------------------
+   The 'sensors' program is a text-based application that uses libsensors.
+   The output is fairly standardized; therefore this output could be
+   used by other applications.
+   One simple method is 'sensors|grep ALARM'.

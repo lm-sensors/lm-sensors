@@ -1,0 +1,11 @@
+sysfs access (2.6 kernels)
+--------------------------
+
+In the 2.6 kernel, chip drivers using the
+i2c-sensor module create subdirectories in
+the sysfs filesystem (usually /sys) which can be accessed
+directly by applications.
+
+Naming and content standards for the entries in these subdirectories
+is documented in the file Documentation/i2c/sysfs-interface in the
+2.6 kernel source tree.
