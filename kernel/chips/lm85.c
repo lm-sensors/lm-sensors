@@ -629,6 +629,7 @@ static ctl_table lm85_specific[] = {
 		&i2c_proc_real, &i2c_sysctl_real, NULL, &lm85_spinup_ctl},
 	{LM85_SYSCTL_TACH_MODE, "tach_mode", NULL, 0, 0644, NULL,
 		&i2c_proc_real, &i2c_sysctl_real, NULL, &lm85_tach_mode},
+/*	{0} The doc generator needs this. */ 
 };
 #define CTLTBL_LM85 (sizeof(lm85_specific)/sizeof(lm85_specific[0]))
 
@@ -645,6 +646,7 @@ static ctl_table adm1027_specific[] = {
 		&i2c_proc_real, &i2c_sysctl_real, NULL, &adm1027_fan_ppr},
 	{ADM1027_SYSCTL_ALARM_MASK, "alarm_mask", NULL, 0, 0644, NULL,
 		&i2c_proc_real, &i2c_sysctl_real, NULL, &adm1027_alarm_mask},
+/*	{0} The doc generator needs this. */ 
 };
 #define CTLTBL_ADM1027 (sizeof(adm1027_specific)/sizeof(adm1027_specific[0]))
 
@@ -657,6 +659,7 @@ static ctl_table adt7463_specific[] = {
 		&i2c_proc_real, &i2c_sysctl_real, NULL, &adt7463_tmin_ctl},
 	{ADT7463_SYSCTL_THERM_SIGNAL, "therm_signal", NULL, 0, 0644, NULL,
 		&i2c_proc_real, &i2c_sysctl_real, NULL, &adt7463_therm_signal},
+/*	{0} The doc generator needs this. */ 
 };
 #define CTLTBL_ADT7463 (sizeof(adt7463_specific)/sizeof(adt7463_specific[0]))
 
