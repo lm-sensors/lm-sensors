@@ -17,6 +17,10 @@ ask CVS about it:
 
 -----------------------
 
+2.5.5 (2000????)
+  Module adm1021: Add support for adm1023
+  Program mkpatch.pl: more fixes
+
 2.5.4 (20001012)
   Module i2c-viapro: Add support for Via 596B (0x3051)
   Program m7101: moved to CVS tree, updated for 2.4.0 kernels

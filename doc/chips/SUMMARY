@@ -38,6 +38,8 @@ Driver  Chips		#temp	#vin	#fanin	pwm/dac	I2C	ISA
 ---------------------------------------------------------------------
 adm1021
 	adm1021		2	-	-	-	yes	no
+	adm1021a	2	-	-	-	yes	no
+	adm1023		2	-	-	-	yes	no
 	gl523sm		2	-	-	-	yes	no
 	lm84		2	-	-	-	yes	no
 	max1617		2	-	-	-	yes	no
