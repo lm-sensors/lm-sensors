@@ -176,6 +176,7 @@ and<br>
 <li><a href="#Section%206.5">6.5 How to access mailing list archives</a>
 <li><a href="#Section%206.6">6.6 How to submit a patch</a>
 <li><a href="#Section%206.7">6.7 How to REALLY help</a>
+<li><a href="#Section%206.8">6.8 How to block spam on the project mailing list</a>
 </ul>
 <li><a name="toc_Version%201%20Specifics"></a>
     <a href="#Version%201%20Specifics">7 Version 1 Specific Questions</a>
@@ -1798,6 +1799,7 @@ Up:<a rel=up accesskey=u href="#Top">Top</a>
 <li><a accesskey=5 href="#Section%206.5">Section 6.5</a>:   How to access mailing list archives
 <li><a accesskey=6 href="#Section%206.6">Section 6.6</a>:   How to submit a patch
 <li><a accesskey=7 href="#Section%206.7">Section 6.7</a>:   How to REALLY help
+<li><a accesskey=8 href="#Section%206.8">Section 6.8</a>:   How to block spam on the project mailing list
 </ul>
 
 <p><hr>
@@ -1877,6 +1879,7 @@ directory, and make your changes. Generate the diff with
 
 <p><hr>
 Node:<a name="Section%206.7">Section 6.7</a>,
+Next:<a rel=next accesskey=n href="#Section%206.8">Section 6.8</a>,
 Previous:<a rel=previous accesskey=p href="#Section%206.6">Section 6.6</a>,
 Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
 <br>
@@ -1894,6 +1897,24 @@ Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
 
 <p>Send us email <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a> if you can help. 
 No experience necessary :)
+
+<p><hr>
+Node:<a name="Section%206.8">Section 6.8</a>,
+Previous:<a rel=previous accesskey=p href="#Section%206.7">Section 6.7</a>,
+Up:<a rel=up accesskey=u href="#Contribute">Contribute</a>
+<br>
+
+<h3>6.8 How to block spam on the project mailing list</h3>
+
+<p>Sorry, we know the spam is a hassle.  It would be nice to have a
+moderator who can screen everything, but that takes too much time and
+delays emails.  Right now there is a procmail script which tags likely
+spam and puts in a X-SBClass: header.  If it is followed by 'Spam', then
+it is almost certainly spam, if it is followed by 'Blocked', then it
+scores high as being potential spam.  You should be able to set some
+rules in your mail client to throw those emails into a seperate folder. 
+It's not bullet proof (some legit mails get tagged wrong, and vice
+versa), but it seems to be about 95% accurate in our experience.
 
 <p><hr>
 Node:<a name="Version%201%20Specifics">Version 1 Specifics</a>,

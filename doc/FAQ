@@ -133,6 +133,7 @@ lm_sensors
   6.5 How to access mailing list archives
   6.6 How to submit a patch
   6.7 How to REALLY help
+  6.8 How to block spam on the project mailing list
 
 7 Version 1 Specific Questions
   7.1 My manufacturer swears that my mainboard has an SMBus, but your code reports that it can't find it.  What's wrong?
@@ -1370,6 +1371,19 @@ Send us the patch in an email and tell us what it does.
 
    Send us email <sensors@stimpy.netroedge.com> if you can help.  No
 experience necessary :)
+
+6.8 How to block spam on the project mailing list
+=================================================
+
+   Sorry, we know the spam is a hassle.  It would be nice to have a
+moderator who can screen everything, but that takes too much time and
+delays emails.  Right now there is a procmail script which tags likely
+spam and puts in a X-SBClass: header.  If it is followed by 'Spam', then
+it is almost certainly spam, if it is followed by 'Blocked', then it
+scores high as being potential spam.  You should be able to set some
+rules in your mail client to throw those emails into a seperate folder.
+It's not bullet proof (some legit mails get tagged wrong, and vice
+versa), but it seems to be about 95% accurate in our experience.
 
 7 Version 1 Specific Questions
 ******************************
