@@ -351,10 +351,16 @@ s32 sis5595_access(struct i2c_adapter * adap, u16 addr,
 		     I2C_SMBUS_PROC_CALL) ? SIS5595_PROC_CALL :
 		    SIS5595_WORD_DATA;
 		break;
+/*
 	case I2C_SMBUS_BLOCK_DATA:
 		printk("sis5595.o: Block data not yet implemented!\n");
 		return -1;
 		break;
+*/
+	default:
+		printk
+		    (KERN_WARNING "sis5595.o: Unsupported transaction %d\n", size);
+		return -1;
 	}
 
 	sis5595_write(SMB_CTL_LO, ((size & 0x0E)));

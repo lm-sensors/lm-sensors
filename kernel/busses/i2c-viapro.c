@@ -195,10 +195,6 @@ static s32 vt596_access(struct i2c_adapter *adap, u16 addr,
 	int i, len;
 
 	switch (size) {
-	case I2C_SMBUS_PROC_CALL:
-		dev_info(&vt596_adapter,
-			 "I2C_SMBUS_PROC_CALL not supported!\n");
-		return -1;
 	case I2C_SMBUS_QUICK:
 		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
 		       SMBHSTADD);
@@ -246,6 +242,9 @@ static s32 vt596_access(struct i2c_adapter *adap, u16 addr,
 		}
 		size = VT596_BLOCK_DATA;
 		break;
+	default:
+		dev_warn(&vt596_adapter, "Unsupported transaction %d\n", size);
+		return -1;
 	}
 
 	outb_p((size & 0x1C) + (ENABLE_INT9 & 1), SMBHSTCNT);

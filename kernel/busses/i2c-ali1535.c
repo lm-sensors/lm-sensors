@@ -413,11 +413,6 @@ s32 ali1535_access(struct i2c_adapter * adap, u16 addr,
 	outb_p(0xFF, SMBHSTSTS);
 
 	switch (size) {
-	case I2C_SMBUS_PROC_CALL:
-		printk
-		    ("i2c-ali1535.o: I2C_SMBUS_PROC_CALL not supported!\n");
-		result = -1;
-		goto EXIT;
 	case I2C_SMBUS_QUICK:
 		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
 		       SMBHSTADD);
@@ -474,6 +469,11 @@ s32 ali1535_access(struct i2c_adapter * adap, u16 addr,
 				outb_p(data->block[i], SMBBLKDAT);
 		}
 		break;
+	default:
+		printk
+		    (KERN_WARNING "i2c-ali1535.o: Unsupported transaction %d\n", size);
+		result = -1;
+		goto EXIT;
 	}
 
 	if (ali1535_transaction())	/* Error in transaction */
