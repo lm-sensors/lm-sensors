@@ -86,7 +86,7 @@ rmm    from lm_sensors-2.3.3:
  * some shorter definitions for the ICHx PCI device IDs
  */
 
-#define ICH4 0x2440
+#define ICH2 0x2440
 #define ICH2_SMBUS 0x2443
 
 #define ICH4 0x24c0
