@@ -24,9 +24,14 @@ ask CVS about it:
   File etc/sensors.conf.eg: Add comments about BP6 voltages
                             Add comment on Asus A7V8X-X VCore
                             Misc fixes to lm80 section
+                            Update via686a section
+                            New lm99 section
+                            Add section for LM85-like chips
+                            Preliminary pc87366 section
   Library: Fix 2.6 VRM
            Fix 2.6 hyst temp for 2.6 (lm75, lm78 and gl518sm)
            Fully support the PC87360 family
+           Support the lm99
   Makefile: Do not run depmod on staged installs (Peter Breitenlohner)
   Man page i2cdetect.8: document new command line flags
   Man page i2cdump.8: More details on how i2cdump can write to a chip
@@ -36,6 +41,7 @@ ask CVS about it:
   Modules w83781d.c, smartbatt.c, lm75.c, gl520sm.c, gl518sm.c, ds1621.c,
           asb100.c, lm92.c: Use swab16
   Module i2c-sis645: Add support for SiS655
+  Module lm90: Support LM99 and LM89 
   Module lm92: Support MAX6633, MAX6634, MAX6635 and LM76
   Module p4b_smbus: Add support for mobile versions of the 82801
                     (Axel Thimm)
@@ -45,18 +51,23 @@ ask CVS about it:
                       Correctly set the chip name depending on the type
                       Add voltage and temperature support
                       Fix fan speed computation
+                      Retrieve fans configuration from Super-I/O space
+                      Export pwm_enable (read-only)
+                      Clear fan alarms after we read them
   Module thmc50: Fix address range
   Module via686a: Fix voltage roundings
+                  Simplify temperature conversions
   Module w83781d: Drop PWM support for as99127f
   Program i2cdetect: Adapt probing method to address
                      Add -q and -r flags to force probing methods
-  Program isadump: Misc improvements
+  Program isadump: Major improvements
   Program isaset: New
   Program mkpatch: Patch dmi_scan.c in kernel instead of adding our own
                    module
                    Include i2c-nforce2
   Program sensors: Fully support the PC87360 family
                    Fix lm80 temperature alarms
+                   Support the lm99
   Program sensors-detect: Rework Super I/O detection
                           Support SiS655/SiS96x
                           Support ADT7461 and ADT7467
@@ -70,6 +81,8 @@ ask CVS about it:
                           Drop LTC1710 support
                           Use byte reads for probing on ranges 0x30-0x37 and
                           0x50-0x5F
+                          Improve LM89 and LM99 support
+                          Support GeForce FX 5900 video cards
 
 
 2.8.6 (20040405)
