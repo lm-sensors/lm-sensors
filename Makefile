@@ -245,6 +245,10 @@ ifneq ($(MAKECMDGOALS),clean)
 include $(INCLUDEFILES)
 endif
 
+# Man pages
+MANPAGES := $(LIBMAN3FILES) $(LIBMAN5FILES) $(PROGDETECTMAN8FILES) $(PROGDUMPMAN8FILES) \
+            $(PROGSENSORSMAN1FILES) prog/sensord/sensord.8
+
 # Making the dependency files - done automatically!
 dep : 
 
@@ -316,6 +320,17 @@ $(LINUX)/.config:
 	@echo "  (3) Do *NOT* 'make dep' or 'make config'."
 	@echo
 	@exit 1
+
+# Generate html man pages to be copied to the lm_sensors website.
+# This uses the man2html from here
+# http://ftp.math.utah.edu/pub/sgml/
+# which works directly from the nroff source
+manhtml:
+	$(MKDIR) html
+	cp $(MANPAGES) html
+	cd html ; \
+	man2html *.[1-8] ; \
+	$(RM) *.[1-8]
 
 # Here, we define all implicit rules we want to use.
 
