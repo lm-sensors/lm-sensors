@@ -17,7 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-#define RCSID "$Id: i2c.c,v 1.7 1998/09/28 06:45:38 i2c Exp i2c $"
+#define RCSID "$Id: i2c-core.c,v 1.1 1998/11/02 20:29:27 frodo Exp $"
 /* ------------------------------------------------------------------------- */
 
 #include <linux/module.h>
@@ -441,6 +441,7 @@ MODULE_DESCRIPTION("I2C-Bus main module");
 MODULE_PARM(i2c_debug, "i");
 MODULE_PARM_DESC(i2c_debug,"debug level");
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0))
 EXPORT_SYMBOL(i2c_add_algorithm);
 EXPORT_SYMBOL(i2c_del_algorithm);
 EXPORT_SYMBOL(i2c_add_adapter);
@@ -454,7 +455,7 @@ EXPORT_SYMBOL(i2c_master_send);
 EXPORT_SYMBOL(i2c_master_recv);
 EXPORT_SYMBOL(i2c_control);
 EXPORT_SYMBOL(i2c_transfer);
-
+#endif
 
 int init_module(void) 
 {
