@@ -278,30 +278,45 @@ sub gen_Makefile
   my ($package_root,$kernel_root) = @_;
   my $kernel_file = "Makefile";
   my $package_file = $temp;
+  my $type = 0;
+  my $pr1 = 0;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   MAIN: while(<INPUT>) {
-    if (m@CONFIG_SENSORS@) {
+    $type = 1 if (m@^DRIVERS-\$@);
+    if (m@DRIVERS-\$\(CONFIG_SENSORS\)@) {
+      $_ = <INPUT>;
+      redo MAIN;
+    } elsif (m@CONFIG_SENSORS@) {
       $_ = <INPUT> while not m@endif@;
       $_ = <INPUT>;
       $_ = <INPUT> if m@^$@;
       redo MAIN;
     }
-    if (m@include arch/\$\(ARCH\)/Makefile@) {
+    if ($type == 1 and m@^DRIVERS \+= \$\(DRIVERS-y\)@) {
+      print OUTPUT <<'EOF';
+DRIVERS-$(CONFIG_SENSORS) += drivers/sensors/sensors.a
+EOF
+      $pr1 = 1;
+    }
+    if ($type == 0 and m@include arch/\$\(ARCH\)/Makefile@) {
       print OUTPUT <<'EOF';
 ifeq ($(CONFIG_SENSORS),y)
 DRIVERS := $(DRIVERS) drivers/sensors/sensors.a
 endif
 
 EOF
+      $pr1 = 1;
     }
     print OUTPUT;
   }
   close INPUT;
   close OUTPUT;
+  die "Automatic patch generation for `Makefile' failed.\n".
+      "Contact the authors please!" if $pr1 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
