@@ -677,6 +677,14 @@ use vars qw(@pci_adapters @chip_ids @superio_ids @undetectable_adapters @dmideco
        match => sub { $_[0] =~ /^SMBus PIIX4 adapter at / },
      } , 
      { 
+       vendid => 0x1166,
+       devid  => 0x0203,
+       func => 0,
+       procid => "ServerWorks CSB6 South Bridge",
+       driver => "i2c-piix4",
+       match => sub { $_[0] =~ /^SMBus PIIX4 adapter at / },
+     } , 
+     { 
        vendid => 0x1283,
        devid  => 0x8172,
        func => 0,

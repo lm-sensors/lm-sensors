@@ -20,10 +20,11 @@ ask CVS about it:
   Library: Fix bmcsensors scaling, increase number of sensors;
            Add w83627thf support; Advance version to 2.0.2
   Makefiles: Install burntest, fancontrol, pwmconfig, decode-*.pl
-  Module i2c-sis630: sync with 2.6.0-X driver version. 
   Module bmcsensors: Fix voltage scaling, voltage and fan limits
+  Module i2c-piix4: Add support for CSB6
+  Module i2c-sis630: sync with 2.6.0-X driver version. 
   Program sensors-detect: Prefer Super I/O drivers;
-                          Fix w83627hf detection
+                          Fix w83627hf detection; detect CSB6
 
 
 2.8.1 (20031005)
