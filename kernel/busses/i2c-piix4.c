@@ -190,16 +190,18 @@ void dmi_scan_machine(void);
 #define IBM_SIGNATURE		"IBM"
 static int __init ibm_dmi_probe(void)
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,99)
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,99)
+	extern int is_unsafe_smbus;
+	return is_unsafe_smbus;
+#else
 	dmi_scan_machine();
-#endif
 	if(dmi_ident[DMI_SYS_VENDOR] == NULL)
 		return 0;
 	if(strncmp(dmi_ident[DMI_SYS_VENDOR], IBM_SIGNATURE,
 	           strlen(IBM_SIGNATURE)) == 0)
 		return 1;
 	return 0;
+#endif
 }
 #endif
 
