@@ -18,7 +18,7 @@
 MODULE_DIR := prog/pwm
 PROGPWMDIR := $(MODULE_DIR)
 
-PROGPWMTARGETS := $(MODULE_DIR)/burntest $(MODULE_DIR)/fancontrol \
+PROGPWMTARGETS := $(MODULE_DIR)/fancontrol \
                   $(MODULE_DIR)/pwmconfig
 
 install-prog-pwm: $(PROGPWMTARGETS)
