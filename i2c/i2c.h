@@ -31,7 +31,11 @@
 #include <asm/spinlock.h>	/* for spinlock_t */
 #else
 #include <asm/page.h> /* Needed for 2.2 kernels */
+#if LINUX_VERSION_CODE < 0x020019
+#include <linux/sched.h>
+#else
 #include <asm/semaphore.h>
+#endif
 #endif
 /* --- General options ------------------------------------------------	*/
 

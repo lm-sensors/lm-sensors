@@ -58,7 +58,11 @@ union smbus_data {
 #ifdef I2C_SPINLOCK
 #include <asm/spinlock.h>
 #else
+#if LINUX_VERSION_CODE < 0x020019
+#include <linux/sched.h>
+#else
 #include <asm/semaphore.h>
+#endif
 #endif
 
 #ifdef LM_SENSORS					/* TBD */

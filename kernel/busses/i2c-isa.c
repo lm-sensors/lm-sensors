@@ -27,11 +27,17 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 
+#include "compat.h"
+
 #include "i2c.h"
 #ifdef I2C_SPINLOCK
 #include <asm/spinlock.h>
 #else
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,0,19)
+#include <linux/sched.h>
+#else
 #include <asm/semaphore.h>
+#endif
 #endif
 
 #include "version.h"

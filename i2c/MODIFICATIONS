@@ -19,6 +19,9 @@ Here come the changes:
 
 ! Changed to init_MUTEX and a compatibility line in i2c-core.c
 
+! i2c.h now includes <linux/schedule.h> instead of <asm/semaphore.h> for old
+  2.0 kernels
+
 * Algo-bit now scans the bus before registering the adapter.
 
 * Bit-lp and bit-velle don't increase module usage counts

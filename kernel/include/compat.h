@@ -94,8 +94,14 @@
 #endif
 
 /* For old 2.0 kernels */
-#ifndef PCI_DEVICE_ID_VIA_82C586_3  
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,0,34))
 #define PCI_DEVICE_ID_VIA_82C586_3  0x3040
+#define PCI_DEVICE_ID_AL_M7101 0x7101
+#endif
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,0,31))
+#define PCI_DEVICE_ID_INTEL_82371AB_3  0x7113
+#define PCI_VENDOR_ID_APPLE            0x106b
+#define PCI_DEVICE_ID_APPLE_HYDRA      0x000e
 #endif
 
 #endif /* SENSORS_COMPAT_H */
