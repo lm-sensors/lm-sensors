@@ -18,25 +18,12 @@
 # Note that MODULE_DIR (the directory in which this file resides) is a
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
-MODULE_DIR := kernel
+MODULE_DIR := kernel/include
 
-# Regrettably, even 'simply expanded variables' will not put their currently
-# defined value verbatim into the command-list of rules...
-KERNELTARGETS := $(MODULE_DIR)/smbus.o \
-                 $(MODULE_DIR)/i2c-proc.o \
-                 $(MODULE_DIR)/i2c-dev.o $(MODULE_DIR)/sensors.o
+KERNELINCLUDEHEADERFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/isa.h \
+                            $(MODULE_DIR)/smbus.h $(MODULE_DIR)/i2c-dev.h
 
-# Include all dependency files
-INCLUDEFILES += $(KERNELTARGETS:.o=.d)
-
-all-kernel: $(KERNELTARGETS)
-all :: all-kernel
-
-install-kernel: all-kernel
-	$(MKDIR) $(MODDIR)
-	$(INSTALL) -o root -g root -m 644 $(KERNELTARGETS) $(MODDIR)
-install :: install-kernel
-
-clean-kernel:
-	$(RM) $(KERNELTARGETS) $(KERNELTARGETS:.o=.d)
-clean :: clean-kernel
+install-all-kernel-include:
+	$(MKDIR) $(SYSINCLUDEDIR)
+	$(INSTALL) -o root -g root -m 644 $(SRCHEADERFILES) $(SYSINCLUDEDIR)
+install :: install-all-kernel-include

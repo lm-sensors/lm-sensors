@@ -22,23 +22,19 @@ MODULE_DIR := kernel/busses
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-SRCTARGETS := $(MODULE_DIR)/i2c-piix4.o $(MODULE_DIR)/i2c-isa.o
-
-SRCHEADERFILES := $(MODULE_DIR)/../include/sensors.h $(MODULE_DIR)/../include/isa.h \
-                  $(MODULE_DIR)/../include/smbus.h $(MODULE_DIR)/../include/i2c-dev.h
+KERNELBUSSESTARGETS := $(MODULE_DIR)/i2c-piix4.o $(MODULE_DIR)/i2c-isa.o
 
 # Include all dependency files
-INCLUDEFILES += $(SRCTARGETS:.o=.d)
+INCLUDEFILES += $(KERNELBUSSESTARGETS:.o=.d)
 
-all-src: $(SRCTARGETS)
-all :: all-src
+all-kernel-busses: $(KERNELBUSSESTARGETS)
+all :: all-kernel-busses
 
-install-src-busses: all-src
-	$(MKDIR) $(MODDIR) $(SYSINCLUDEDIR)
-	$(INSTALL) -o root -g root -m 644 $(SRCTARGETS) $(MODDIR)
-	$(INSTALL) -o root -g root -m 644 $(SRCHEADERFILES) $(SYSINCLUDEDIR)
-install :: install-src-busses
+install-kernel-busses: all-kernel-busses
+	$(MKDIR) $(MODDIR) 
+	$(INSTALL) -o root -g root -m 644 $(KERNELBUSSESTARGETS) $(MODDIR)
+install :: install-kernel-busses
 
-clean-src-busses:
-	$(RM) $(SRCTARGETS) $(SRCTARGETS:.o=.d)
-clean :: clean-src-busses
+clean-kernel-busses:
+	$(RM) $(KERNELBUSSESTARGETS) $(KERNELBUSSESTARGETS:.o=.d)
+clean :: clean-kernel-busses

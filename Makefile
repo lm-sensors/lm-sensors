@@ -39,7 +39,9 @@ MODVER := $(shell if cat /usr/include/linux/config.h /usr/include/linux/autoconf
 # i2c modules. WARNING! If the i2c module version does not match the 
 # smbus/sensor module versions, you will get into severe problems.
 # If you want to use a self-compiled version of the i2c modules, make
-# sure <linux/i2c.h> contains the *correct* i2c header file!
+# sure <linux/i2c.h> contains the *correct* i2c header file! The stock
+# Linux 2.1.xxx and 2.2.x modules are *not* good enough; you really need
+# Simon Vogl's version!
 I2C := 1
 #I2C := 0
 
@@ -102,7 +104,8 @@ LIBINCLUDEDIR := $(INCLUDEDIR)/sensors
 # to do this. 
 
 # The subdirectories we need to build things in 
-SRCDIRS := kernel lib prog/sensors prog/dump etc
+SRCDIRS := kernel kernel/busses kernel/chips kernel/include lib prog/sensors \
+           prog/dump etc
 ifeq ($(I2C),1)
 SRCDIRS += i2c i2c/detect i2c/drivers i2c/eeprom
 endif

@@ -22,27 +22,23 @@ MODULE_DIR := kernel/chips
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-SRCTARGETS := $(MODULE_DIR)/adm1021.o $(MODULE_DIR)/adm9240.o \
-	      $(MODULE_DIR)/eeprom.o $(MODULE_DIR)/gl518sm.o \
-	      $(MODULE_DIR)/lm75.o $(MODULE_DIR)/lm78.o \
-	      $(MODULE_DIR)/lm80.o $(MODULE_DIR)/ltc1710.o \
-	      $(MODULE_DIR)/w83781d.o
-
-SRCHEADERFILES := $(MODULE_DIR)/../include/sensors.h $(MODULE_DIR)/../include/isa.h \
-                  $(MODULE_DIR)/../include/smbus.h $(MODULE_DIR)/../include/i2c-dev.h
+KERNELCHIPSTARGETS := $(MODULE_DIR)/adm1021.o $(MODULE_DIR)/adm9240.o \
+	              $(MODULE_DIR)/eeprom.o $(MODULE_DIR)/gl518sm.o \
+        	      $(MODULE_DIR)/lm75.o $(MODULE_DIR)/lm78.o \
+        	      $(MODULE_DIR)/lm80.o $(MODULE_DIR)/ltc1710.o \
+        	      $(MODULE_DIR)/w83781d.o
 
 # Include all dependency files
-INCLUDEFILES += $(SRCTARGETS:.o=.d)
+INCLUDEFILES += $(KERNELCHIPSTARGETS:.o=.d)
 
-all-src: $(SRCTARGETS)
-all :: all-src
+all-kernel-chips: $(KERNELCHIPSTARGETS)
+all :: all-kernel-chips
 
-install-src-chips: all-src
-	$(MKDIR) $(MODDIR) $(SYSINCLUDEDIR)
-	$(INSTALL) -o root -g root -m 644 $(SRCTARGETS) $(MODDIR)
-	$(INSTALL) -o root -g root -m 644 $(SRCHEADERFILES) $(SYSINCLUDEDIR)
-install :: install-src-chips
+install-kernel-chips: all-kernel-chips
+	$(MKDIR) $(MODDIR) 
+	$(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(MODDIR)
+install :: install-kernel-chips
 
-clean-src-chips:
-	$(RM) $(SRCTARGETS) $(SRCTARGETS:.o=.d)
-clean :: clean-src-chips
+clean-kernel-chips:
+	$(RM) $(KERNELCHIPSTARGETS) $(KERNELCHIPSTARGETS:.o=.d)
+clean :: clean-kernel-chips
