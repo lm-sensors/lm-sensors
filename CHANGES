@@ -17,15 +17,22 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 2.8.2 (???)
+  File sensors.conf.eg: Change lm75 scaling back to 1
   Library: Fix bmcsensors scaling, increase number of sensors;
-           Add w83627thf support; Advance version to 2.0.2
-  Makefiles: Install burntest, fancontrol, pwmconfig, decode-*.pl
+           Add w83627thf support; Advance version to 2.0.2;
+           Add hermes, ADM1032, ASB100 support
+  Makefiles: Install fancontrol, pwmconfig, decode-*.pl
+  Module asb100: New
   Module bmcsensors: Fix voltage scaling, voltage and fan limits
+  Module fscher: New (Fujitsu-Siemens Hermes driver)
   Module i2c-piix4: Add support for CSB6
   Module i2c-sis630: Sync with 2.6.0-X driver version
-  Module fscher: New (Fujitsu-Siemens Hermes driver)
+  Module it87: Add pwm and "smart guardian" support
+  Module lm90: Add ADM1032 support
+  Program sensors: Add ADM1032 support
   Program sensors-detect: Prefer Super I/O drivers;
-                          Fix w83627hf detection; detect CSB6
+                          Fix W83627HF and W83791D detection; detect CSB6;
+                          Detect ADM1029,30,31,32
 
 
 2.8.1 (20031005)
