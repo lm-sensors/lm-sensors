@@ -21,6 +21,7 @@ ask CVS about it:
   File README.thinkpad: Update
   File doc/chips/lm63: New
   File kernel/chips/Module.mk: Resync module list with mkpatch
+  Module bmcsensors: Support function 1/x
   Module i2c-ipmb: Remove from build since it doesn't work
   Module lm63: New driver for the National Semiconductor LM63
   Module lm83: Use signed types for temperatures

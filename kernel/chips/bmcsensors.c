@@ -249,6 +249,7 @@ static void bmcsensors_select_thresholds(struct sdrdata * sd)
 {
 	u8 capab = sd->capab;
 	u16 mask = sd->thresh_mask;
+	int tmp;
 
 	sd->lim1 = -1;
 	sd->lim2 = -1;
@@ -296,7 +297,13 @@ static void bmcsensors_select_thresholds(struct sdrdata * sd)
 		}
 	}
 
-	/* fixme swap lim1/lim2 if m < 0 */
+	/* swap lim1/lim2 if m < 0 or function is 1/x (but not both!) */
+	if(m < 0 && sd->linear != 7 || m >= 0 && sd->linear == 7) {
+		tmp = sd->lim1;
+		sd->lim1 = sd->lim2;
+		sd->lim2 = tmp;
+	}
+
 	if(sd->lim1 >= 0)
 		printk(KERN_INFO "bmcsensors.o: using %s for upper limit\n",
 			threshold_text[sd->lim1]);
@@ -380,7 +387,7 @@ static void bmcsensors_build_proc_table()
 				bmcsensors_dir_table[i].procname, id);
 		}
 		bmcsensors_select_thresholds(sdrd + i);
-		if(sdrd[i].linear != 0) {
+		if(sdrd[i].linear != 0 && sdrd[i].linear != 7) {
 			printk(KERN_INFO
 			       "bmcsensors.o: sensor %d: nonlinear function 0x%.2x unsupported, expect bad results\n",
 			       i, sdrd[i].linear);
@@ -926,6 +933,7 @@ static int decplaces(struct sdrdata *sd)
 }
 
 /* convert a raw value to a reading. IMPI V1.5 Section 30 */
+/* 1/x is the only "linearization function" supported */
 static long conv_val(int value, struct sdrdata *sd)
 {
 	u8 k1, k2;
@@ -939,10 +947,23 @@ static long conv_val(int value, struct sdrdata *sd)
 	else
 		r += sd->b / exps[16 - k1];
 	r *= exps[decplaces(sd)];
-	if(k2 < 8)
-		r *= exps[k2];
-	else
-		r /= exps[16 - k2];
+	if(k2 < 8) {
+		if(sd->linear != 7)
+			r *= exps[k2];
+		else
+			// this will always truncate to 0: r = 1 / (exps[k2] * r);
+			r = 0;
+	} else {
+		if(sd->linear != 7)
+			r /= exps[16 - k2];
+		else {
+			if(r != 0)
+				// 1 / x * 10 ** (-m) == 10 ** m / x
+				r = exps[16 - k2] / r;
+			else
+				r = 0;
+		}
+	}
 	return r;
 }
 

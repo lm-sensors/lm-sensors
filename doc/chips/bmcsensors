@@ -116,7 +116,7 @@ Threshold setting is not yet supported.
 
 1's and 2's complement formats not yet supported.
 
-Non-linear conversions not supported.
+Non-linear conversions not supported, except for 1/x.
 
 Fan divs are not supported (or required) - should the driver
 export a fan_div entry (1 1 1 ...) for compatibility?
