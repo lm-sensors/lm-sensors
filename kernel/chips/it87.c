@@ -567,6 +567,9 @@ int it87_detect(struct i2c_adapter *adapter, int address,
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 
+	/* The IT8705F doesn't have VID capability */
+	data->vid = 0x1f;
+
 	/* Tell the I2C layer a new client has arrived */
 	if ((err = i2c_attach_client(new_client)))
 		goto ERROR3;
@@ -744,13 +747,9 @@ static void it87_update_client(struct i2c_client *client)
 			    it87_read_value(client, IT87_REG_TEMP_LOW(i));
 		}
 
-		/* The 8705 does not have VID capability */
 		if (data->type == it8712) {
 			data->vid = it87_read_value(client, IT87_REG_VID);
 			data->vid &= 0x1f;
-		}
-		else  {
-			data->vid = 0x1f;
 		}
 
 		i = it87_read_value(client, IT87_REG_FAN_DIV);
