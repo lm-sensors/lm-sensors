@@ -92,11 +92,15 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
 #      written yet.
 #  i2c_addrs (optional): For I2C chips, the range of valid I2C addresses to
 #      probe.
+#  i2c_driver_addrs (optional): For I2C chips, the range of valid I2C
+#      addresses probed by the kernel driver. Strictly optional.
 #  i2c_detect (optional): For I2C chips, the function to call to detect
 #      this chip. The function should take two parameters: an open file
 #      descriptor to access the bus, and the I2C address to probe.
 #  isa_addrs (optional): For ISA chips, the range of valid port addresses to
 #      probe.
+#  isa_driver_addrs (optional): For ISA chips, the range of valid ISA
+#      addresses probed by the kernel driver. Strictly optional.
 #  isa_detect (optional): For ISA chips, the function to call to detect
 #      this chip. The function should take one parameter: the ISA address
 #      to probe.
@@ -109,6 +113,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        name => "National Semiconductors LM78",
        driver => "lm78",
        i2c_addrs => [0x00..0x7f], 
+       i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { lm78_detect 0, @_},
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect 0, @_ },
@@ -118,6 +123,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        name => "National Semiconductors LM78-J",
        driver => "lm78",
        i2c_addrs => [0x00..0x7f],
+       i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { lm78_detect 1, @_ },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect 1, @_ },
@@ -127,6 +133,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        name => "National Semiconductors LM79",
        driver => "lm78",
        i2c_addrs => [0x00..0x7f],
+       i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { lm78_detect 2, @_ },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect 2, @_ },
@@ -711,8 +718,12 @@ use vars qw(@chips_detected);
 #       (if this is an I2C detection)
 #  with field 'i2c_sub_addrs', containing a reference to a list of
 #       other I2C addresses (if this is an I2C detection)
+#  with field 'i2c_extra' if this is an I2C detection and the address
+#       is not normally probed by the kernel driver
 #  with field 'isa_addr' containing the ISA address this chip is on 
 #       (if this is an ISA detection)
+#  with field 'isa_extra' if this is an ISA detection and the address
+#       is not normally probed by the kernel driver
 #  with field 'conf', containing the confidence level of this detection
 #  with field 'chipname', containing the chip name
 
@@ -841,6 +852,8 @@ sub add_isa_to_chips_detected
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_misdetected_ref->[$i]->{i2c_addr})) {
         $new_misdetected_ref->[$i]->{isa_addr} = $datahash->{isa_addr};
+        $new_misdetected_ref->[$i]->{isa_extra} = $datahash->{isa_extra} 
+               if exists $datahash->{isa_extra};
         close FILE;
         return;
       }
@@ -865,6 +878,8 @@ sub add_isa_to_chips_detected
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_detected_ref->[$i]->{i2c_addr})) {
         $new_detected_ref->[$i]->{isa_addr} = $datahash->{isa_addr};
+        $new_detected_ref->[$i]->{isa_extra} = $datahash->{isa_extra} 
+               if exists $datahash->{isa_extra};
         ($datahash) = splice (@$new_detected_ref, $i, 1);
         close FILE;
         last;
@@ -955,6 +970,9 @@ sub scan_adapter
             my @chips_copy = @chips;
             $new_hash->{i2c_sub_addrs} = \@chips_copy;
           }
+          $new_hash->{i2c_extra} = 0 
+                 if exists $chip->{i2c_driver_addrs} and
+                    not contains( $addr , @{$chip->{i2c_driver_addrs}});
           add_i2c_to_chips_detected $$chip{driver}, $new_hash;
         } else {
           print "Failed!\n";
@@ -980,11 +998,14 @@ sub scan_isa_bus
       print("Failed!\n"), next if not defined $conf;
       print "Success!\n";
       printf "    (confidence %d, driver `%s')\n", $conf, $$chip{driver};
-      add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver}, 
-                                { conf => $conf,
-                                  isa_addr => $addr,
-                                  chipname =>  $$chip{name},
-                                };
+      my $new_hash = { conf => $conf,
+                       isa_addr => $addr,
+                       chipname =>  $$chip{name}
+                     };
+      $new_hash->{isa_extra} = 0 
+             if exists $chip->{isa_driver_addrs} and
+                not contains ($addr, @{$chip->{isa_driver_addrs}});
+      add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver},$new_hash;
     }
   }
 }
@@ -1401,7 +1422,7 @@ sub generate_modprobes
 {
   my ($prefer_isa) = @_;
 
-  my ($chip,$detection,%adapters,$nr,$i,@optionlist);
+  my ($chip,$detection,%adapters,$nr,$i,@optionlist,@probelist);
   my $modprobes = "";
   my $configfile = "";
 
@@ -1437,10 +1458,24 @@ sub generate_modprobes
   $modprobes .= "# I2C chip drivers\n";
   foreach $chip (@chips_detected) {
     next if not @{$chip->{detected}};
-
-    # Handle misdetects
     $modprobes .= "modprobe $chip->{driver}\n";
     @optionlist = ();
+    @probelist = ();
+
+    # Handle detects out-of-range
+    foreach $detection (@{$chip->{detected}}) {
+      push @probelist, %adapters->{$detection->{i2c_driver}},
+                       $detection->{i2c_addr}
+           if exists $detection->{i2c_driver} and
+              exists %adapters->{$detection->{i2c_driver}} and
+              exists $detection->{i2c_extra};
+      push @probelist, -1, $detection->{isa_addr}
+           if exists $detection->{isa_addr} and
+              exists %adapters->{"i2c-isa"} and
+              exists $detection->{isa_extra};
+    }
+
+    # Handle misdetects
     foreach $detection (@{$chip->{misdetected}}) {
       push @optionlist, %adapters->{$detection->{i2c_driver}},
                        $detection->{i2c_addr}
@@ -1466,12 +1501,18 @@ sub generate_modprobes
       }
     }
 
-    next if not @optionlist;
+    next if not (@probelist or @optionlist);
     $configfile .= "options $chip->{driver}";
-    $configfile .= sprintf " ignore=0x%02x",shift @optionlist 
-                if @optionlist;
-    $configfile .= sprintf ",0x%02x",shift @optionlist 
-                while @optionlist;
+    $configfile .= sprintf " ignore=%d,0x%02x",shift @optionlist, 
+                                               shift @optionlist
+                  if @optionlist;
+    $configfile .= sprintf ",%d,0x%02x",shift @optionlist, shift @optionlist
+                  while @optionlist;
+    $configfile .= sprintf " probe=%d,0x%02x",shift @probelist,
+                                              shift @probelist
+                  if @probelist;
+    $configfile .= sprintf ",%d,0x%02x",shift @probelist, shift @probelist
+                  while @probelist;
     $configfile .= "\n";
   }
 
