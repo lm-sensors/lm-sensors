@@ -43,6 +43,9 @@
 #define MODULE_PARM_DESC(no,description)
 #endif
 #endif /* def MODULE */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,13)
+#define THIS_MODULE NULL
+#endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0)
 #define EXPORT_SYMBOL(noexport)

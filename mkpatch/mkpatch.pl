@@ -740,6 +740,15 @@ sub main
 
 EOF
 
+        if (`grep THIS_MODULE "$package_root/$package_file"`) {
+          print OUTPUT << 'EOF';
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,13)
+/* This is safe, because we won't use it for any kernels below 2.3.27 */
+#define THIS_MODULE NULL
+#endif
+
+EOF
+        }
         if (`grep KERNEL_VERSION "$package_root/$package_file"`) {
           print OUTPUT << 'EOF';
 #include <linux/version.h>
