@@ -1,7 +1,7 @@
 Kernel driver `it87.o'
 ======================
 
-Status: Beta
+Status: Complete, stable
 
 Supported chips:
   * IT8705F
@@ -45,6 +45,7 @@ Module Parameters
 * reset: integer 1 if the registers of the chip should be reset at
   module load time, 0 to not reset the registers. Default is 0.
 
+
 Description
 -----------
 
@@ -57,16 +58,16 @@ input, used to report the Vcore voltage of the Pentium processor.
 These chips are 'Super I/O chips', supporting floppy disks, infrared ports,
 joysticks and other miscellaneous stuff. For hardware monitoring,
 they include an 'environmnent controller' with 3 temperature sensors,
-3 FAN rotation speed sensors, 8 voltage sensors, and associated alarms.
+3 fan rotation speed sensors, 8 voltage sensors, and associated alarms.
 
 Temperatures are measured in degrees Celcius. An alarm is triggered once
 when the Overtemperature Shutdown limit is crossed; it is triggered again
 as soon as it drops below the Hysteresis value.
 
-FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
-triggered if the rotation speed has dropped below a programmable limit. FAN 
+Fan rotation speeds are reported in RPM (rotations per minute). An alarm is
+triggered if the rotation speed has dropped below a programmable limit. Fan 
 readings can be divided by a programmable divider (1, 2, 4 or 8) to give
-the readings more range or accuracy. This is important because some FANs
+the readings more range or accuracy. This is important because some Fans
 report only one 'tick' each rotation, while others report two - making
 all readings twice as high. Not all RPM values can accurately be represented,
 so some rounding is done. With a divider of 2, the lowest representable
@@ -100,68 +101,78 @@ To change sensor N to a thermal diode, 'echo 3 > sensorN'.
 Give 0 for unused sensor. Any other value is invalid.
 To configure this at startup, put the following lines in the it87 section
 of /etc/sensors.conf.
-2 = thermistor; 3 = thermal diode; 0 = unused
-	   set sensor1 3
-	   set sensor2 3
-	   set sensor3 3
+(2 = thermistor; 3 = thermal diode; 0 = unused)
+	set sensor1 3
+	set sensor2 3
+	set sensor3 3
+
 If you set a sensor to 0, you'll also want to ignore its value:
-	   ignore tempN
+	ignore tempN
 
 The fan speed control features can be enabled by setting the bits 0-2 of
 the fan_ctl register to 1. (Note: bits 6-4 of this register must be set to
 1 to enable the fan monitoring).
-0x40 : enable fan speed monitoring for fan3
-0x20 : enable fan speed monitoring for fan2
-0x10 : enable fan speed monitoring for fan1
-0x04 : enable fan smart guardian mode for fan3
-0x02 : enable fan smart guardian mode for fan2
-0x01 : enable fan smart guardian mode for fan1
-If a fans smart guardian bit is not set this fan is in on-off mode
-it can be switched on or off by setting/clearing the corresponding bit 0-2
+	0x40 : enable fan speed monitoring for fan3
+	0x20 : enable fan speed monitoring for fan2
+	0x10 : enable fan speed monitoring for fan1
+	0x04 : enable fan smart guardian mode for fan3
+	0x02 : enable fan smart guardian mode for fan2
+	0x01 : enable fan smart guardian mode for fan1
+
+If a fan's smart guardian bit is not set this fan is in on-off mode.
+It can be switched on or off by setting/clearing the corresponding bit 0-2
 of the second fan control register fan_on_off. This register has no effect if
 a fan is in smart guardian mode.
-0x04 : fan3 is on
-0x02 : fan2 is on
-0x01 : fan1 is on
-Bit 7 of the pwm[1-3] registers enables/disables the chips automatic
+	0x04 : fan3 is on
+	0x02 : fan2 is on
+	0x01 : fan1 is on
+
+Bit 7 of the pwm[1-3] registers enables/disables the chip's automatic
 temperature control mode for the specified fan. If Bit 7 is set the bits
 1 and 0 encode the number of the temperature sensor used for this feature.
 Possible register values are:
-0x00-0x7f direct power control for the fan speed
-0x80  automatic smart guardian mode use temperatur sensor 1,
-0x81  automatic smart guardian mode use temperatur sensor 2,
-0x82  automatic smart guardian mode use temperatur sensor 3
+	0x00-0x7f direct power control for the fan speed
+	0x80  automatic smart guardian mode use temperature sensor 1
+	0x81  automatic smart guardian mode use temperature sensor 2
+	0x82  automatic smart guardian mode use temperature sensor 3
+
 In automatic smart guardian mode pwm values for low, medium and high speed
 can be set in sg_pwm[1-3]. The temperature limits for fan off, low, medium,
-hi speed and over temperature are set in sg_tl[1-3]. While the sensors
+hi speed and over temperature are set in sg_tl[1-3]. While the sensor's
 temperature is between the low and medium speed value the fan will run in
-low speed. When the sensors temperature is between the medium and high speed
-value the fan spins in medium speed. When the sensors temperature is between
+low speed. When the sensor's temperature is between the medium and high speed
+value the fan spins in medium speed. When the sensor's temperature is between
 the high speed and over temperature value the fan spins in high speed.
-If the sensors temperature is higher than the over temperature limit the
+If the sensor's temperature is higher than the over temperature limit the
 fan will spin with the highest possible speed.
+
 Example:
 The preconfigured (BIOS set) values of the Shuttle XPC SN41G2 Barebone.
 The MB uses temp2 to monitor the CPU temperature and fan3 as the fan for their
 special ICE heatpipe cooling system.
----
-$ cat fan_ctl
-116
-$ cat tan_on_off
-215
-$ cat pwm3
-129
-$ cat sg_tl3
-16.0 16.0 48.0 54.0 58.0
-$ cat sg_pwm3
-3 4 9
----
+	$ cat fan_ctl
+	116
+	$ cat tan_on_off
+	215
+	$ cat pwm3
+	129
+	$ cat sg_tl3
+	16.0 16.0 48.0 54.0 58.0
+	$ cat sg_pwm3
+	3 4 9
+
 Explanation:
-fan_ctl -> 116 = 0x74 = 01110100 : fan monitoring on for all fans, and fan3 is in smart guardian mode.
-fan_on_off -> 215 = 0xd7 =11010111 : all fans are on this setting is ignored for fan3 which is in smart guardian mode
-pwm3 -> 129 = 0x81 = 10000001 : fan3 is in automatic mode and uses temp2 for speed control
-sg_tl3 -> 16.0 16.0 48.0 54.0 58.0 : off, low, med, high, and over temperature limits of fan3
-sg_pwm3 -> 3 4 9 : pwm values for low, medium and high fan speed of fan3.
+	fan_ctl -> 116 = 0x74 = 01110100 : fan monitoring on for all fans,
+		and fan3 is in smart guardian mode.
+	fan_on_off -> 215 = 0xd7 =11010111 : all fans are on this setting is
+		ignored for fan3 which is in smart guardian mode
+	pwm3 -> 129 = 0x81 = 10000001 : fan3 is in automatic mode and uses
+		temp2 for speed control
+	sg_tl3 -> 16.0 16.0 48.0 54.0 58.0 : off, low, med, high, and
+		over temperature limits of fan3
+	sg_pwm3 -> 3 4 9 : pwm values for low, medium and high fan speed of fan3.
+
+
 
 Chip features
 -------------
