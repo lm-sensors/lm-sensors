@@ -30,6 +30,7 @@
 #ifdef I2C_SPINLOCK
 #include <asm/spinlock.h>	/* for spinlock_t */
 #else
+#include <asm/page.h> /* Needed for 2.2 kernels */
 #include <asm/semaphore.h>
 #endif
 /* --- General options ------------------------------------------------	*/
