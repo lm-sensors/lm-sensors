@@ -35,6 +35,8 @@ Steps which apply to only one type of driver are noted.
   See Documentation/CodingStyle in the kernel source.
   Be sure and use 8 column tabs.
   Also, please do not use // comments.
+  Also, please do not go past column 80.
+  Please do this _before_ you check in your driver.
 
 * Meet /proc naming standards in the ctl_table (for chip drivers only).
   See doc/developers/proc for information.
