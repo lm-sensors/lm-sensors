@@ -32,11 +32,10 @@
 #include <asm/errno.h>
 #include <asm/io.h>
 #include <linux/types.h>
-#include "smbus.h"
+#include <linux/i2c.h>
 #include "version.h"
 #include "i2c-isa.h"
 #include "sensors.h"
-#include "i2c.h"
 #include "compat.h"
 
 /* Addresses to scan.

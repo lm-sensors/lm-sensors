@@ -20,18 +20,13 @@
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := kernel/include
 
-KERNELINCLUDEFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/i2c-isa.h \
-                      $(MODULE_DIR)/smbus.h $(MODULE_DIR)/i2c-dev.h
+KERNELINCLUDEFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/i2c-isa.h 
+                      
 
 install-all-kernel-include:
 	$(MKDIR) $(SYSINCLUDEDIR)
-	for file in $(KERNELINCLUDEFILES) ; do \
-	  $(RM) $$file.install; \
-	  $(GREP) -v '/\* TBD \*/' $$file > $$file.install; \
-	  $(INSTALL) -o root -g root -m 644 $$file.install \
-                    $(SYSINCLUDEDIR)/`basename $$file`; \
-	  $(RM) $$file.install; \
-	done
+	$(INSTALL) -o root -g root -m 644 $(KERNELINCLUDEFILES) $(SYSINCLUDEDIR)
+
 install :: install-all-kernel-include
 
 clean-all-kernel-include:

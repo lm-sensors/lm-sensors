@@ -22,9 +22,7 @@ MODULE_DIR := kernel
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-KERNELTARGETS := $(MODULE_DIR)/smbus.o \
-                 $(MODULE_DIR)/i2c-proc.o \
-                 $(MODULE_DIR)/i2c-dev.o $(MODULE_DIR)/sensors.o
+KERNELTARGETS := $(MODULE_DIR)/sensors.o
 
 # Include all dependency files
 INCLUDEFILES += $(KERNELTARGETS:.o=.d)

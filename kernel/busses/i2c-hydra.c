@@ -31,8 +31,8 @@
 #include <asm/system.h>
 #include <linux/types.h>
 
-#include "i2c.h"
-#include "algo-bit.h"
+#include <linux/i2c.h>
+#include <linux/i2c-algo-bit.h>
 #include "compat.h"
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,1,54))

@@ -74,7 +74,7 @@
 #include <linux/stddef.h>
 #include <linux/sched.h>
 #include <linux/ioport.h>
-#include "smbus.h"
+#include <linux/i2c.h>
 #include "version.h"
 #include "compat.h"
 

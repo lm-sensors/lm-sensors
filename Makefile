@@ -26,6 +26,12 @@
 # Debian, you may want to change this to something like /usr/src/linux/include.
 LINUX_HEADERS=/usr/include
 
+# If you have installed the i2c header at some other place (like 
+# /usr/local/include/linux), set that directory here. Please check this out
+# if you get strange compilation errors; the default Linux i2c headers
+# may be used mistakenly.
+I2C_HEADERS=/usr/local/include
+
 # The location of linux itself. This is only used to determine whether you
 # use a SMP kernel in the magic invocation just below.
 LINUX=/usr/src/linux
@@ -43,16 +49,6 @@ SMP := $(shell if grep -q '^SMP[[:space:]]*=' $(LINUX)/Makefile || \
 MODVER := $(shell if cat $(LINUX_HEADERS)/linux/config.h $(LINUX_HEADERS)/linux/autoconf.h 2>/dev/null | grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_MODVERSIONS[[:space:]]*1'; then echo 1; else echo 0; fi)
 #MODVER := 0
 #MODVER := 1
-
-# Uncomment the second line if you do not want to compile the included
-# i2c modules. WARNING! If the i2c module version does not match the 
-# smbus/sensor module versions, you will get into severe problems.
-# If you want to use a self-compiled version of the i2c modules, make
-# sure <linux/i2c.h> contains the *correct* i2c header file! The stock
-# Linux 2.1.xxx and 2.2.x modules are *not* good enough; you really need
-# Simon Vogl's version!
-I2C := 1
-#I2C := 0
 
 # Uncomment the second line if you are a developer. This will enable many
 # additional warnings at compile-time
@@ -129,9 +125,6 @@ MANGRP := root
 # The subdirectories we need to build things in 
 SRCDIRS := kernel kernel/busses kernel/chips kernel/include lib prog/sensors \
            prog/dump prog/detect etc
-ifeq ($(I2C),1)
-SRCDIRS += i2c i2c/detect i2c/drivers i2c/eeprom
-endif
 
 # Some often-used commands with default options
 MKDIR := mkdir -p
@@ -149,7 +142,7 @@ GREP := grep
 # create non-kernel object files (which are linked into executables).
 # ARCFLAGS are used to create archive object files (static libraries), and
 # LIBCFLAGS are for shared library objects.
-CFLAGS := -I. -Ii2c -Ikernel/include -I$(LINUX_HEADERS) -O2 -DLM_SENSORS
+CFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS) -I$(LINUX_HEADERS) -O2 
 
 ifeq ($(DEBUG),1)
 CFLAGS += -DDEBUG
@@ -158,10 +151,6 @@ endif
 ifeq ($(WARN),1)
 CFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
           -Wcast-align -Wwrite-strings -Wnested-externs -Winline
-endif
-
-ifeq ($(I2C),1)
-CFLAGS += -DI2C
 endif
 
 MODCFLAGS := $(CFLAGS) -D__KERNEL__ -DMODULE -fomit-frame-pointer

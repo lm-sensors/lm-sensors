@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "kernel/include/i2c-dev.h"
+#include <linux/i2c-dev.h>
 
 void help(void)
 {

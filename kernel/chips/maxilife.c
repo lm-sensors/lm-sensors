@@ -46,10 +46,9 @@ static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 #include <asm/errno.h>
 #include <asm/io.h>
 #include <linux/types.h>
-#include "smbus.h"
+#include <linux/i2c.h>
 #include "version.h"
 #include "sensors.h"
-#include "i2c.h"
 #include "compat.h"
 
 
