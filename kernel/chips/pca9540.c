@@ -68,7 +68,7 @@ static void pca9540_channel(struct i2c_client *client, int operation,
 /* This is the driver that will be inserted */
 static struct i2c_driver pca9540_driver = {
 	.owner		= THIS_MODULE,
-	.name		= "PCA9540 sensor chip driver",
+	.name		= "PCA9540 chip driver",
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= pca9540_attach_adapter,
 	.detach_client	= pca9540_detach_client,
@@ -122,8 +122,11 @@ int pca9540_detect(struct i2c_adapter *adapter, int address,
 
 	/* The detection is very weak. */
 	if (kind < 0) {
-		if (i2c_smbus_read_byte(new_client) & 0xf8)
-		{
+		u8 reg = i2c_smbus_read_byte(new_client);
+		if ((reg & 0xfa) != 0x00
+		 || reg != i2c_smbus_read_byte(new_client)
+		 || reg != i2c_smbus_read_byte(new_client)
+		 || reg != i2c_smbus_read_byte(new_client)) {
 			err = -ENODEV;
 			goto ERROR1;
 		}
