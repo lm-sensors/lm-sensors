@@ -66,6 +66,12 @@
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 #define DIV_FROM_REG(val) (1 << (val))
 
+#define BEEP_ENABLE_TO_REG(val) ((val)?0:1)
+#define BEEP_ENABLE_FROM_REG(val) ((val)?0:1)
+
+#define BEEPS_TO_REG(val) ((val) & 0x7f)
+#define BEEPS_FROM_REG(val) (val)
+
 /* Initial values */
 #define GL518_INIT_TEMP_OVER 600
 #define GL518_INIT_TEMP_HYST 500
@@ -116,8 +122,9 @@ struct gl518_data {
          u8 temp;                    /* Register values */
          u8 temp_over;               /* Register values */
          u8 temp_hyst;               /* Register values */
-         u8 alarms;                  /* Register value */
+         u8 alarms,beeps;            /* Register value */
          u8 fan_div[2];              /* Register encoding, shifted right */
+	 u8 beep_enable;             /* Boolean */
 };
 
 #ifdef MODULE
@@ -148,6 +155,8 @@ static void gl518_fan_div(struct i2c_client *client, int operation,
                           int ctl_name, int *nrels_mag, long *results);
 static void gl518_alarms(struct i2c_client *client, int operation, 
                          int ctl_name, int *nrels_mag, long *results);
+static void gl518_beep(struct i2c_client *client, int operation, int ctl_name, 
+                int *nrels_mag, long *results);
 
 /* This is the driver that will be inserted */
 static struct i2c_driver gl518_driver = {
@@ -185,6 +194,8 @@ static ctl_table gl518_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &gl518_fan_div },
   { GL518_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &gl518_alarms },
+  { GL518_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &gl518_beep },
   { 0 }
 };
 
@@ -279,6 +290,8 @@ int gl518_attach_adapter(struct i2c_adapter *adapter)
     /* No noisy output (bit 2=1), Comparator mode (bit 3=0), two fans (bit4=0),
        standby mode (bit6=0) */
     gl518_write_value(new_client,GL518_REG_CONF,0x04); 
+    /* Never interrupts */
+    gl518_write_value(new_client,GL518_REG_MASK,0x00);
     gl518_write_value(new_client,GL518_REG_TEMP_HYST,
                       TEMP_TO_REG(GL518_INIT_TEMP_HYST));
     gl518_write_value(new_client,GL518_REG_TEMP_OVER,
@@ -438,11 +451,13 @@ void gl518_update_client(struct i2c_client *client)
     data->temp_over = gl518_read_value(client,GL518_REG_TEMP_OVER);
     data->temp_hyst = gl518_read_value(client,GL518_REG_TEMP_HYST);
 
-    data->alarms = gl518_read_value(client,GL518_REG_ALARM);
+    data->alarms = gl518_read_value(client,GL518_REG_INT);
+    data->beeps = gl518_read_value(client,GL518_REG_ALARM);
 
     val = gl518_read_value(client,GL518_REG_MISC);
     data->fan_div[0] = (val >> 4) & 0x03;
     data->fan_div[1] = (val >> 6) & 0x03;
+    data->beep_enable = (gl518_read_value(client,GL518_REG_CONF) >> 2) & 1;
 
     data->last_updated = jiffies;
     data->valid = 1;
@@ -552,6 +567,31 @@ void gl518_alarms(struct i2c_client *client, int operation, int ctl_name,
     gl518_update_client(client);
     results[0] = data->alarms;
     *nrels_mag = 1;
+  }
+}
+
+void gl518_beep(struct i2c_client *client, int operation, int ctl_name, 
+                int *nrels_mag, long *results)
+{
+  struct gl518_data *data = client->data;
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    gl518_update_client(client);
+    results[0] = BEEP_ENABLE_FROM_REG(data->beep_enable);
+    results[1] = BEEPS_FROM_REG(data->beeps);
+    *nrels_mag = 2;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 1) {
+      data->beep_enable = BEEP_ENABLE_TO_REG(results[0]);
+      gl518_write_value(client,GL518_REG_CONF,
+                        (gl518_read_value(client,GL518_REG_CONF) & 0xfb) | 
+                         (data->beep_enable << 2));
+    }
+    if (*nrels_mag >= 2) {
+      data->beeps = BEEPS_TO_REG(results[1]);
+      gl518_write_value(client,GL518_REG_ALARM,data->beeps);
+    }
   }
 }
 

@@ -31,6 +31,11 @@ Within each LM78 directory, you can find the following files:
   - LM78_ALARM_FAN[1-2]
     Gets triggered when the corresponding FAN value drops below its limit.
   If accessed through sysctl, this value is a long.
+* beep (GL518_SYSCTL_BEEP)
+  Two numbers. The first is 0 if all sound signals are disabled; it is 1 if
+  they are enabled. The second number determines which alarms will cause
+  a sound signal, if the first number is set to 1. The encoding of the
+  second number is the same as that in alarms.
 * fan[1-2] (GL518_SYSCTL_FAN[1-2])
   A list of two numbers. The first is the minimum fan rotation limit; the
   second is the current fan rotation speed. Both are in RPM (rotation per

@@ -360,6 +360,12 @@ static sensors_chip_feature gl518r00_features[] =
     { SENSORS_GL518R00_ALARMS, "alarms", SENSORS_NO_MAPPING,
                                SENSORS_NO_MAPPING, SENSORS_MODE_R,
                                GL518_SYSCTL_FAN_DIV, VALUE(3), 0 },
+    { SENSORS_GL518R00_BEEP_ENABLE, "beep_enable", SENSORS_GL518R00_ALARMS,
+                               SENSORS_NO_MAPPING, SENSORS_MODE_RW,
+                               GL518_SYSCTL_BEEP, VALUE(1), 0 },
+    { SENSORS_GL518R00_BEEPS, "beeps", SENSORS_GL518R00_ALARMS,
+                               SENSORS_GL518R00_ALARMS, SENSORS_MODE_RW,
+                               GL518_SYSCTL_BEEP, VALUE(2), 0 },
     { 0 }
   };
 
@@ -429,6 +435,12 @@ static sensors_chip_feature gl518r80_features[] =
     { SENSORS_GL518R80_ALARMS, "alarms", SENSORS_NO_MAPPING,
                                SENSORS_NO_MAPPING, SENSORS_MODE_R,
                                GL518_SYSCTL_FAN_DIV, VALUE(3), 0 },
+    { SENSORS_GL518R80_BEEP_ENABLE, "beep_enable", SENSORS_GL518R80_ALARMS,
+                               SENSORS_NO_MAPPING, SENSORS_MODE_RW,
+                               GL518_SYSCTL_BEEP, VALUE(1), 0 },
+    { SENSORS_GL518R80_BEEPS, "beeps", SENSORS_GL518R80_ALARMS,
+                               SENSORS_GL518R80_ALARMS, SENSORS_MODE_RW,
+                               GL518_SYSCTL_BEEP, VALUE(2), 0 },
     { 0 }
   };
 
