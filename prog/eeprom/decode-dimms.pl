@@ -184,6 +184,8 @@ for my $i ( 0 .. $#dimm_list ) {
 		$l = "Fundemental Memory type";
 		if ($bytes[2] == 2) { printl $l, "EDO"; }
 		elsif ($bytes[2] == 4) { printl $l, "SDRAM"; }
+		elsif ($bytes[2] == 7) { printl $l, "DDR"; }
+		elsif ($bytes[2] == 17) { printl $l, "Rambus"; }
 		else { printl $l, "???"; }
 
 		$l = "Number of Row Address Bits (SDRAM only)";
