@@ -32,7 +32,8 @@ ask CVS about it:
   File sensors.c: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
   Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
   Include file sensors.h: Most contents moved to i2c-proc.h in i2c package
-  Library: Fix/standardize some lm87 and mtp008 entries, add sis5595 in4
+  Library: Fix/standardize some lm87 and mtp008 entries; add sis5595 in4;
+           Add support for maxilife-nba.
   Chip Modules (all ISA): Remove #include "i2c-isa.h"
   Module adm1021: Fix lm84 and gl523sm support
   Module i2c-i801: Chip detection cleanup

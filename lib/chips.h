@@ -586,6 +586,7 @@
 #define SENSORS_MAXI_CG_PREFIX "maxilife-cg"
 #define SENSORS_MAXI_CO_PREFIX "maxilife-co"
 #define SENSORS_MAXI_AS_PREFIX "maxilife-as"
+#define SENSORS_MAXI_NBA_PREFIX "maxilife-nba"
 
 #define SENSORS_MAXI_CG_FAN1 1 /* R */
 #define SENSORS_MAXI_CG_FAN2 2 /* R */

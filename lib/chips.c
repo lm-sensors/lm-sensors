@@ -2060,6 +2060,8 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_MAXI_CG_PREFIX, maxi_cg_features },
  { SENSORS_MAXI_CO_PREFIX, maxi_co_features },
  { SENSORS_MAXI_AS_PREFIX, maxi_as_features },
+		/* Cheat on NBA for now - no separate #defines */
+ { SENSORS_MAXI_NBA_PREFIX, maxi_as_features },
  { SENSORS_THMC50_PREFIX, thmc50_features },
 		/* Cheat on ADM1022 for now - no separate #defines */
  { SENSORS_ADM1022_PREFIX, thmc50_features },
