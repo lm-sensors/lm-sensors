@@ -33,8 +33,8 @@ void print_i2c_busses()
 {
 	FILE *fptr;
 	char s[100];
-	struct dirent *de, *dde, *ddde;
-	DIR *dir, *ddir, *dddir;
+	struct dirent *de, *dde;
+	DIR *dir, *ddir;
 	FILE *f;
 	char *border;
 	char dev[NAME_MAX], fstype[NAME_MAX], sysfs[NAME_MAX], n[NAME_MAX];
@@ -89,7 +89,7 @@ void print_i2c_busses()
 		f = fopen(n, "r");
 		if(f == NULL) {
 			/* non-ISA is much harder */
-			sprintf(n, "%s/%s/driver", sysfs, de->d_name);
+			sprintf(n, "%s/%s/device", sysfs, de->d_name);
 			if(!(ddir = opendir(n)))
 				continue;       	
 			while ((dde = readdir(ddir)) != NULL) {
@@ -97,24 +97,11 @@ void print_i2c_busses()
 					continue;
 				if (!strcmp(dde->d_name, ".."))
 					continue;
-				/* hope it's a link to a PCI device */
-				if(index(dde->d_name, ':')) {
-					sprintf(n, "%s/%s/driver/%s",
+				if ((!strncmp(dde->d_name, "i2c-", 4))) {
+					sprintf(n, "%s/%s/device/%s/name",
 					        sysfs, de->d_name, dde->d_name);
-					if(!(dddir = opendir(n)))
-						continue;       	
-					while ((ddde = readdir(dddir)) != NULL) {
-						if (!strcmp(ddde->d_name, "."))
-							continue;
-						if (!strcmp(ddde->d_name, ".."))
-							continue;
-						if ((!strncmp(ddde->d_name, "i2c-", 4))) {
-							sprintf(n, "%s/%s/driver/%s/%s/name",
-							        sysfs, de->d_name, dde->d_name, ddde->d_name);
-							if((f = fopen(n, "r")))
-								goto found;
-						}
-					}
+					if((f = fopen(n, "r")))
+						goto found;
 				}
 			}
 		}
