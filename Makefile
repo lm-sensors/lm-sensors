@@ -80,7 +80,7 @@ PREFIX := /usr/local
 # This is the directory into which the modules will be installed.
 # The magic invocation will return something like this:
 #   /lib/modules/2.2.15-ac9/extra/misc
-MODDIR := /lib/modules/`sed -ne '1,4 { s/.*= *\(.*\)/\1/; 1,2 s/.*/&./; p; };' <$(LINUX)/Makefile | tr -d '\n'`/misc
+MODDIR := /lib/modules/`grep UTS_RELEASE $(LINUX_HEADERS)/linux/version.h|cut -f 2 -d'"'`/extra/misc
 
 # This is the directory where sensors.conf will be installed, if no other
 # configuration file is found
@@ -232,7 +232,7 @@ version:
 .SUFFIXES:
 
 # We need to create dependency files. Tricky. We sed rule puts dir/file.d and
-# dir/file.c # in front of the dependency file rule.
+# dir/file.c in front of the dependency file rule.
 
 # .o files are used for modules
 %.o: %.c
