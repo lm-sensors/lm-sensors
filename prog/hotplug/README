@@ -1,4 +1,6 @@
 M7101 - SMBus Support for ALi M15x3 based motherboards.
+For Asus P4B motherboards, use the p4b_smbus module;
+see the file README.p4b.
 
 --------------------------------------------------------
 Quick Start (2.4 kernels only):

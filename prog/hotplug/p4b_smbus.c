@@ -4,7 +4,8 @@
  * Initialize the I801SMBus device on ASUS P4B Bords
  */
 /*
-    Copyright (c) 2002 Ilja Rauhut <IljaRauhut@web.de>,
+    Copyright (c) 2002 Ilja Rauhut <IljaRauhut@web.de> and
+    Klaus Woltereck <kw42@gmx.net>,
 
     Based on the m7101.c hotplug example by:
 
@@ -38,6 +39,8 @@
  * Warning, this module does not work with egcs < 2.95.2, use 
  * gcc > 2.7.2 or egcs >= 2.95.2. 
  *
+ *
+ * June 21, 2002, added support for the ICH4, code clean up -- Klaus
  */
 
 
@@ -84,17 +87,34 @@ rmm    from lm_sensors-2.3.3:
 #define SMB_IO_SIZE  0xF
 #define SMB_BASE 0x20
 
+
+/*
+ * some shorter definitions for the ICHx PCI device IDs
+ */
+
+#define ICH2 PCI_DEVICE_ID_INTEL_82801BA_0
+#define ICH2_SMBUS PCI_DEVICE_ID_INTEL_82801BA_3
+
+
+#ifndef PCI_DEVICE_ID_INTEL_82801DB_0
+#define PCI_DEVICE_ID_INTEL_82801DB_0 0x24c0
+#define PCI_DEVICE_ID_INTEL_82801DB_3 0x24c3
+#endif
+
+#define ICH4 PCI_DEVICE_ID_INTEL_82801DB_0
+#define ICH4_SMBUS PCI_DEVICE_ID_INTEL_82801DB_3
+
 /* status, used to indicate that io space needs to be freed */
 static struct pci_dev *i801smbus = NULL;
 static int i801smbus_inserted = FALSE;
-extern void cleanup_module();
+extern void cleanup_module(void);
  
 static rwlock_t i801smbus_lock = RW_LOCK_UNLOCKED;
 static unsigned long i801smbus_lock_flags = 0;
 
 /* 
  * Checks whether SMBus is enabled and turns it on in case they are not. 
- * It's done by clearing Bit 8 and 4 in i801 config space F2h, PCI-Device 0x8086:0x2440
+ * It's done by clearing Bit 8 and 4 in i801 config space F2h, PCI-Device 0x8086:0x2440(ICH2)/0x24c0(ICH4)
  */
 static int
 i801smbus_enable(struct pci_dev *dev){
@@ -145,13 +165,13 @@ static int i801smbus_build(struct pci_dev **i801smbus, struct pci_bus *bus)
 	for  (id = 0, devfn = 0; devfn < 0xFF; devfn++) {
 		(*i801smbus)->devfn = devfn;
 	    	ret = pci_read_config_word(*i801smbus, PCI_DEVICE_ID, &id);
-		if (ret == 0 && 0x2443 == id) {
+		if (ret == 0 && (ICH2_SMBUS == id || ICH4_SMBUS == id)) {
 		    	pci_read_config_word(*i801smbus, PCI_VENDOR_ID, &vid);
 			if(vid == 0x8086)
 				break;
 		}
 	}
-	if (0x2443 != id) {	
+	if (!(ICH2_SMBUS == id || ICH4_SMBUS == id)) {	
 		DBG("i801smbus: i801smbus not found although i801 present - strange.\n");
 		return -EACCES;
 	} else {
@@ -163,7 +183,7 @@ static int i801smbus_build(struct pci_dev **i801smbus, struct pci_bus *bus)
 
         (*i801smbus)->vendor = 0x8086;
         (*i801smbus)->hdr_type = PCI_HEADER_TYPE_NORMAL;
-        (*i801smbus)->device = 0x2443;
+        (*i801smbus)->device = id;
  
 	return(pci_setup_device(*i801smbus));
 }
@@ -187,21 +207,42 @@ int init_module(void)
 	}
 
 	/* We want to be sure that the i801smbus is not present yet. */
-	dev = pci_find_device(0x8086,0x2443, NULL);
+	dev = pci_find_device(0x8086, ICH2_SMBUS, NULL);
 
 	if (dev) 
 	  {
-	    printk("i801smbus: SMBus already actve\n");
+	    printk("i801smbus: SMBus already active\n");
+	    return -EPERM;
+	  }
+	
+	dev = pci_find_device(0x8086, ICH4_SMBUS, NULL);
+
+	if (dev) 
+	  {
+	    printk("i801smbus: SMBus already active\n");
 	    return -EPERM;
 	  }
 	
 	/* Are we operating a i801 chipset */
-	dev = pci_find_device(0x8086,0x2440, NULL);
+	dev = pci_find_device(0x8086, ICH2, NULL);
 	if (NULL == dev) 
 	  {
-	    printk("INTEL ICH2 type 82801BA not found.\n");
-	    return -ENODEV ;
+	    dev = pci_find_device(0x8086, ICH4, NULL);
+	    if (NULL == dev) 
+	      {
+		printk("INTEL ICH2/4 (82801AB/DB) not found.\n");
+		return -ENODEV ;
+	      }
+	    else
+	      {
+		printk("found Intel ICH4 (82801DB).\n");
+	      }
 	  }
+	else
+	  {
+	    printk("found Intel ICH2 (82801AB).\n");
+	  }
+
 	/* we need the bus pointer later */
 	bus = dev->bus;
 
@@ -229,7 +270,7 @@ int init_module(void)
 }
 
 
-void cleanup_module()
+void cleanup_module(void)
 {
 	write_lock_irqsave(i801smbus_lock, i801smbus_lock_flags);
 	if (i801smbus_inserted) {
@@ -254,7 +295,8 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Ilja Rauhut <IljaRauhut@web.de>, "
               "Burkhard Kohl <bku@buks.ipn.de>, "
 	      "Frank Bauer <frank.bauer@nikocity.de>, "
-	      "and Mark Studebaker <mdsxyz123@yahoo.com>");
+	      "Mark Studebaker <mdsxyz123@yahoo.com>,"
+              "and Klaus Woltereck <kw42@gmx.net>");
 MODULE_DESCRIPTION("i801smbus PCI Inserter");
 
 #endif				/* MODULE */

@@ -5,14 +5,18 @@ This is just a quick and dirty hack to get the hardware monitoring working
 on the ASUS P4B board under Linux.
 It works by turning on the SMBus PCI device.
 It is implemented as a module, p4b_smbus.o.
+It only works with the ICH2 (82801BA) and ICH4 (82801DB).
 
-ASUS switches off the SMBus PCI Device in the i801 ICH2 chip. I spoke two times
+ASUS switches off the SMBus PCI Device
+in the i801 ICH2/4 chip. I spoke two times
 with the German support and learned that: "We do not want the users to be
 irritated by just another PCI Device in the Win98 device manager."
 Really funny :-).
 
 What does the module do?
 ------------------------
+(Note: the following instructions assume the ICH2. For the ICH4,
+the PCI IDs are 24C0 and 24C3)
 
 It turnes off (!) the bits number 8 and 3 in the LPC register of the ICH2.
 This you can also try as root with setpci and pcitweak.
@@ -38,7 +42,7 @@ The device is activated, but not included in /proc/pci and
 What are the system requirements?
 ---------------------------------
 
-- Obviously a board with Intel i801BA ICH2 with broken bios.
+- Obviously a board with Intel i801BA/DB ICH2/4 with broken bios.
 - A linux working with a 2.4 kernel AND hotplug support in it! 
 - A installed kernel tree and gcc.
 - i2c and sensor modules installed.
