@@ -34,10 +34,10 @@ else
 endif
 
 ifeq ($(CONFIG_SENSORS_ADM9024),y)
-  L_OBJS += adm9024.o
+  L_OBJS += adm9240.o
 else
   ifeq ($(CONFIG_SENSORS_ADM9024),m)
-    M_OBJS += adm9024.o
+    M_OBJS += adm9240.o
   endif
 endif
 
