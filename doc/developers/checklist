@@ -9,6 +9,8 @@ release:
   functionality is added, and patch if only bugs are fixed.
   `cvs diff -r Vx-y-z lib' is your friend.
 - Update CHANGES
+- Verify i2c dependency instructions in README, QUICKSTART, and INSTALL,
+  update if necessary
 - Update lm_sensors.lsm and send it to the LSM by mailing it to 
   lsm@execpc.com with the subject `add' (no quotes).
 - update lm_sensors2/version.h and i2c/kernel/i2c.h, and cvs commit it
