@@ -2699,7 +2699,7 @@ sub w83781d_detect
   return if $chip == 4 and  $reg1 != 0x31;
   return if $chip == 5 and  $reg1 != 0x31;
   return if $chip == 6 and  $reg1 != 0x31;
-  return if $chip == 7 and  $reg1 != 0x70;
+  return if $chip == 7 and  $reg1 != 0x71;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   @res = (8);
   @res = (7) # Asus chips were always seen at 0x2d
