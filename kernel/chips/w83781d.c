@@ -970,8 +970,8 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 			 && (val2 != 0x94))
 		     || ((val1 & 0x80) && (val2 != 0x5c) && (val2 != 0x12)
 			 && (val2 != 0x06)))) {
-			goto ERROR1;
 			err = -ENODEV;
+			goto ERROR1;
 		}
 		/* If Winbond SMBus, check address at 0x48. Asus doesn't support
 		   except maybe (hopefully) for the as99127f rev.2 */
