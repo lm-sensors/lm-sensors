@@ -885,11 +885,17 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 			err = -ENOMEM;
 			goto ERROR4;
 		}
-		val1 =
-		    w83781d_read_value(new_client,
-				       W83781D_REG_I2C_SUBADDR);
+		val1 = w83781d_read_value(new_client,
+				          W83781D_REG_I2C_SUBADDR);
 		data->lm75[0].addr = 0x48 + (val1 & 0x07);
-		data->lm75[1].addr = 0x48 + ((val1 >> 4) & 0x07);
+		if (kind != w83783s) {
+			data->lm75[1].addr = 0x48 + ((val1 >> 4) & 0x07);
+			if(data->lm75[0].addr == data->lm75[1].addr) {
+				printk("w83781d.o: Duplicate addresses 0x%x for subclients.\n",
+					data->lm75[i].addr);
+				goto ERROR5;
+			}
+		}
 		if (kind == w83781d)
 			client_name = "W83781D subclient";
 		else if (kind == w83782d)
@@ -909,6 +915,8 @@ int w83781d_detect(struct i2c_adapter *adapter, int address,
 			strcpy(data->lm75[i].name, client_name);
 			data->lm75[i].id = w83781d_id++;
 			if ((err = i2c_attach_client(&(data->lm75[i])))) {
+				printk("w83781d.o: Subclient %d registration at address 0x%x failed.\n",
+				       i, data->lm75[i].addr);
 				if (i == 1)
 					goto ERROR6;
 				else

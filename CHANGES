@@ -24,6 +24,7 @@ ask CVS about it:
   File doc/FAQ: Many, many updates and additions
   File doc/busses/i2c-sis5595: new
   File doc/busses/i2c-tsunami: new
+  File doc/chips/it87: new
   File doc/chips/via686a: Claim support for 686b.
   File README.thinkpad: new
   File sensors.conf.eg: Adjust as99127f in5 (-12V) and temp2 calculations;
@@ -37,7 +38,8 @@ ask CVS about it:
            Add support for maxilife-nba and amd1024;
            Change from sensors_* to i2c_* globals for new i2c-proc.[ch]
   Chip Modules (all ISA): Remove #include "i2c-isa.h"
-  Chip Modules (all): Change from sensors_* to i2c_* globals for new i2c-proc.[ch]
+  Chip Modules (all): Change from sensors_* to i2c_* globals
+                      for new i2c-proc.[ch]
   Makefiles: enhance to support Alpha architecture
   Module adm1021: Fix lm84 and gl523sm support
   Module adm1024: new
@@ -60,7 +62,8 @@ ask CVS about it:
                   Allow force_addr=0xaddr
   Module via686a: Allow force_addr=0xaddr (for A7V/K7V boards)
   Module w83781d: Don't reinitialize as99127f chip; this may cause fan/temp
-                  reading changes
+                  reading changes; Add messages for subclient
+                  registration failure
   Programs i2cdetect, i2cdump: add devfs /dev/i2c/x support
   Program i2cset: new
   Program isadump: fix for Alpha arch. compiles
