@@ -4855,6 +4855,8 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_PC87360_PREFIX, pc87360_features }, 
  { SENSORS_PC87363_PREFIX, pc87360_features }, 
  { SENSORS_PC87364_PREFIX, pc87364_features }, 
+ { SENSORS_PC87365_PREFIX, pc87364_features }, 
+ { SENSORS_PC87366_PREFIX, pc87364_features }, 
  { SENSORS_LM92_PREFIX, lm92_features }, 
  { SENSORS_VT8231_PREFIX, vt8231_features }, 
  { SENSORS_BMC_PREFIX, bmc_features }, 

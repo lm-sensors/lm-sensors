@@ -413,6 +413,8 @@ struct match matches[] = {
 	{ "pc87360", print_pc87360 },
 	{ "pc87363", print_pc87360 },
 	{ "pc87364", print_pc87364 },
+	{ "pc87365", print_pc87364 },
+	{ "pc87366", print_pc87364 },
 	{ "lm92", print_lm92 },
 	{ "vt8231", print_vt8231 },
 	{ "bmc", print_bmc },
