@@ -27,6 +27,7 @@ ask CVS about it:
   Module ddcmon: allow force and force_ddcmon parameters
   Module ds1621: new
   Module i2c-ali1535: Enhance error checking and recovery; add mutex
+  Module i2c-i810: Add "dummy write" before reads per Intel prog. ref.
   Module lm87: update voltage calculations
   Module mtp008: new
   Module pcf8574: change update time to 5 seconds
