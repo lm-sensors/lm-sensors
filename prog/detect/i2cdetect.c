@@ -45,7 +45,9 @@ int main(int argc, char *argv[])
 {
   char *end;
   int i,j,res,i2cbus,file;
-  char filename[20];
+  char filename1[20];
+  char filename2[20];
+  char *filename;
   long funcs;
   
 
@@ -66,11 +68,18 @@ int main(int argc, char *argv[])
     help();
   }
 
-  sprintf(filename,"/dev/i2c-%d",i2cbus);
-  if ((file = open(filename,O_RDWR)) < 0) {
-    fprintf(stderr,"Error: Could not open file `%s': %s\n",filename,
-            strerror(errno));
-    exit(1);
+  sprintf(filename1,"/dev/i2c-%d",i2cbus);
+  sprintf(filename2,"/dev/i2c%d",i2cbus);
+  if ((file = open(filename1,O_RDWR)) < 0) {
+    if ((file = open(filename2,O_RDWR)) < 0) {
+      fprintf(stderr,"Error: Could not open file `%s' or `%s': %s\n",filename1,
+              filename2,strerror(errno));
+      exit(1);
+    } else {
+       filename = filename2;
+    }
+  } else {
+    filename = filename1;
   }
 
   if (ioctl(file,I2C_FUNCS,&funcs) < 0) {
