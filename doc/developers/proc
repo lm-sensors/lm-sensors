@@ -121,13 +121,13 @@ sensor[1-3]  1	Sensor type selection.
 		Integers 1,2,3, or thermistor Beta value (3435); read/write.
 
 temp,
-temp[1-3]  3	Temperature max, min or hysteresis, and input value.
+temp[1-4]  3	Temperature max, min or hysteresis, and input value.
 	       	Floating point values XXX.X or XXX.XX in degrees Celcius.
 		'temp' is used if there is only one temperature sensor on the
 		chip; for multiple temps. start with 'temp1'.
 		Temp1 is generally the sensor inside the chip itself,
 		generally reported as "motherboard temperature".
-		Temp2 and temp3 are generally sensors external to the chip
+		Temp2 to temp4 are generally sensors external to the chip
 		itself, for example the thermal diode inside the CPU or a
 		termistor nearby. The second value is preferably a hysteresis
 		value, reported as a absolute temperature, NOT a delta from
