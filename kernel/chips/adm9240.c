@@ -165,49 +165,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            205-(val)*5)
 
-/* Initial limits */
-#define ADM9240_INIT_IN_0 190
-#define ADM9240_INIT_IN_1 190
-#define ADM9240_INIT_IN_2 190
-#define ADM9240_INIT_IN_3 190
-#define ADM9240_INIT_IN_4 190
-#define ADM9240_INIT_IN_5 190
-
-#define ADM9240_INIT_IN_PERCENTAGE 10
-
-#define ADM9240_INIT_IN_MIN_0 \
-        (ADM9240_INIT_IN_0 - ADM9240_INIT_IN_0 * ADM9240_INIT_IN_PERCENTAGE / 100)
-#define ADM9240_INIT_IN_MAX_0 \
-        (ADM9240_INIT_IN_0 + ADM9240_INIT_IN_0 * ADM9240_INIT_IN_PERCENTAGE / 100)
-#define ADM9240_INIT_IN_MIN_1 \
-        (ADM9240_INIT_IN_1 - ADM9240_INIT_IN_1 * ADM9240_INIT_IN_PERCENTAGE / 100)
-#define ADM9240_INIT_IN_MAX_1 \
-        (ADM9240_INIT_IN_1 + ADM9240_INIT_IN_1 * ADM9240_INIT_IN_PERCENTAGE / 100)
-#define ADM9240_INIT_IN_MIN_2 \
-        (ADM9240_INIT_IN_2 - ADM9240_INIT_IN_2 * ADM9240_INIT_IN_PERCENTAGE / 100)
-#define ADM9240_INIT_IN_MAX_2 \
-        (ADM9240_INIT_IN_2 + ADM9240_INIT_IN_2 * ADM9240_INIT_IN_PERCENTAGE / 100)
-#define ADM9240_INIT_IN_MIN_3 \
-        (ADM9240_INIT_IN_3 - ADM9240_INIT_IN_3 * ADM9240_INIT_IN_PERCENTAGE / 100)
-#define ADM9240_INIT_IN_MAX_3 \
-        (ADM9240_INIT_IN_3 + ADM9240_INIT_IN_3 * ADM9240_INIT_IN_PERCENTAGE / 100)
-#define ADM9240_INIT_IN_MIN_4 \
-        (ADM9240_INIT_IN_4 - ADM9240_INIT_IN_4 * ADM9240_INIT_IN_PERCENTAGE / 100)
-#define ADM9240_INIT_IN_MAX_4 \
-        (ADM9240_INIT_IN_4 + ADM9240_INIT_IN_4 * ADM9240_INIT_IN_PERCENTAGE / 100)
-#define ADM9240_INIT_IN_MIN_5 \
-        (ADM9240_INIT_IN_5 - ADM9240_INIT_IN_5 * ADM9240_INIT_IN_PERCENTAGE / 100)
-#define ADM9240_INIT_IN_MAX_5 \
-        (ADM9240_INIT_IN_5 + ADM9240_INIT_IN_5 * ADM9240_INIT_IN_PERCENTAGE / 100)
-
-#define ADM9240_INIT_FAN_MIN_1 3000
-#define ADM9240_INIT_FAN_MIN_2 3000
-
-#define ADM9240_INIT_TEMP_OS_MAX 600
-#define ADM9240_INIT_TEMP_OS_HYST 500
-#define ADM9240_INIT_TEMP_HOT_MAX 700
-#define ADM9240_INIT_TEMP_HOT_HYST 600
-
 /* For each registered ADM9240, we need to keep some data in memory. That
    data is pointed to by adm9240_list[NR]->data. The structure itself is
    dynamically allocated, at the same time when a new adm9240 client is
@@ -507,45 +464,6 @@ static int adm9240_write_value(struct i2c_client *client, u8 reg, u8 value)
 /* Called when we have found a new ADM9240. It should set limits, etc. */
 static void adm9240_init_client(struct i2c_client *client)
 {
-	/* Reset all except Watchdog values and last conversion values
-	   This sets fan-divs to 2, among others. This makes most other
-	   initializations unnecessary */
-	adm9240_write_value(client, ADM9240_REG_CONFIG, 0x80);
-
-	adm9240_write_value(client, ADM9240_REG_IN_MIN(0),
-			    IN_TO_REG(ADM9240_INIT_IN_MIN_0, 0));
-	adm9240_write_value(client, ADM9240_REG_IN_MAX(0),
-			    IN_TO_REG(ADM9240_INIT_IN_MAX_0, 0));
-	adm9240_write_value(client, ADM9240_REG_IN_MIN(1),
-			    IN_TO_REG(ADM9240_INIT_IN_MIN_1, 1));
-	adm9240_write_value(client, ADM9240_REG_IN_MAX(1),
-			    IN_TO_REG(ADM9240_INIT_IN_MAX_1, 1));
-	adm9240_write_value(client, ADM9240_REG_IN_MIN(2),
-			    IN_TO_REG(ADM9240_INIT_IN_MIN_2, 2));
-	adm9240_write_value(client, ADM9240_REG_IN_MAX(2),
-			    IN_TO_REG(ADM9240_INIT_IN_MAX_2, 2));
-	adm9240_write_value(client, ADM9240_REG_IN_MIN(3),
-			    IN_TO_REG(ADM9240_INIT_IN_MIN_3, 3));
-	adm9240_write_value(client, ADM9240_REG_IN_MAX(3),
-			    IN_TO_REG(ADM9240_INIT_IN_MAX_3, 3));
-	adm9240_write_value(client, ADM9240_REG_IN_MIN(4),
-			    IN_TO_REG(ADM9240_INIT_IN_MIN_4, 4));
-	adm9240_write_value(client, ADM9240_REG_IN_MAX(4),
-			    IN_TO_REG(ADM9240_INIT_IN_MAX_4, 4));
-	adm9240_write_value(client, ADM9240_REG_IN_MIN(5),
-			    IN_TO_REG(ADM9240_INIT_IN_MIN_5, 5));
-	adm9240_write_value(client, ADM9240_REG_IN_MAX(5),
-			    IN_TO_REG(ADM9240_INIT_IN_MAX_5, 5));
-	adm9240_write_value(client, ADM9240_REG_FAN1_MIN,
-			    FAN_TO_REG(ADM9240_INIT_FAN_MIN_1, 2));
-	adm9240_write_value(client, ADM9240_REG_FAN2_MIN,
-			    FAN_TO_REG(ADM9240_INIT_FAN_MIN_2, 2));
-	adm9240_write_value(client, ADM9240_REG_TOS,
-			    TEMP_LIMIT_TO_REG(ADM9240_INIT_TEMP_OS_MAX));
-	adm9240_write_value(client, ADM9240_REG_THYST,
-			    TEMP_LIMIT_TO_REG(ADM9240_INIT_TEMP_OS_HYST));
-	adm9240_write_value(client, ADM9240_REG_TEMP_CONFIG, 0x00);
-
 	/* Start monitoring */
 	adm9240_write_value(client, ADM9240_REG_CONFIG, 0x01);
 }
