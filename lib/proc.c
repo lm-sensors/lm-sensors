@@ -411,7 +411,7 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 	Returns the sysfs name and magnitude for a given feature.
 	First looks for a sysfs name and magnitude in the feature structure.
 	These should be added in chips.c for all non-standard feature names.
-        If that fails, converts common /proc feature names
+	If that fails, converts common /proc feature names
 	to their sysfs equivalent, and uses common sysfs magnitude.
 	Common magnitudes are #defined above.
 	Common conversions are as follows:
@@ -424,8 +424,11 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 		temp%d_over -> temp_max%d (to be changed after kernel patch)
 		temp%d_hyst -> temp_min%d ("")
 		temp%d_max -> temp_max%d
+		temp%d_high -> temp_max%d
 		temp%d_min -> temp_min%d
+		temp%d_low -> temp_min%d
 		temp%d -> temp_input%d
+		tcrit%d -> temp_crit%d
 	AND all conversions listed in the matches[] structure below.
 
 	If that fails, returns old /proc feature name and magnitude.
@@ -450,7 +453,7 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	struct match matches[] = {
 		{ "beeps", "beep_mask", 0 },
 		{ "pwm", "pwm1", 0 },
-		{ "rempte_temp", "temp_input2", TEMPMAG },
+		{ "remote_temp", "temp_input2", TEMPMAG },
 		{ "remote_temp_hyst", "temp_hyst2", TEMPMAG },
 		{ "remote_temp_low", "temp_min2", TEMPMAG },
 		{ "remote_temp_over", "temp_max2", TEMPMAG },
@@ -541,8 +544,23 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 		*sysmag = TEMPMAG;
 		return 0;
 	}
+	if(sscanf(name, "temp%d_lo%c%c", &num, &last, &check) == 2 && last == 'w') {
+		sprintf(sysname, "temp_min%d", num);
+		*sysmag = TEMPMAG;
+		return 0;
+	}
 	if(sscanf(name, "temp%d_ma%c%c", &num, &last, &check) == 2 && last == 'x') {
 		sprintf(sysname, "temp_max%d", num);
+		*sysmag = TEMPMAG;
+		return 0;
+	}
+	if(sscanf(name, "temp%d_hig%c%c", &num, &last, &check) == 2 && last == 'h') {
+		sprintf(sysname, "temp_max%d", num);
+		*sysmag = TEMPMAG;
+		return 0;
+	}
+	if(sscanf(name, "tcrit%d%c", &num, &check) == 1) {
+		sprintf(sysname, "temp_crit%d", num);
 		*sysmag = TEMPMAG;
 		return 0;
 	}

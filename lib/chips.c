@@ -729,7 +729,7 @@ static sensors_chip_feature lm90_features[] =
       RW, LM90_SYSCTL_REMOTE_TCRIT, VALUE(1), 0 },
     { SENSORS_LM90_TCRIT_HYST, "hyst",
       NOMAP, NOMAP,
-      RW, LM90_SYSCTL_HYST, VALUE(1), 0 },
+      RW, LM90_SYSCTL_HYST, VALUE(1), 0, "temp_hyst2", 3 },
     { SENSORS_LM90_ALARMS, "alarms",
       NOMAP, NOMAP,
       R, LM90_SYSCTL_ALARMS, VALUE(1), 0 },
