@@ -26,11 +26,12 @@ ask CVS about it:
   File doc/chips/maxilife: Add license, parameters, features
   File doc/chips/smartbatt: Complete rewrite
   File doc/chips/vt8231: Add license, parameters
+  File sensors.conf.eg: Add section for lm75; complete the lm78 section
   Library: Add support for MC1066; add multiple VRM version support for lm87;
            enhance adm1023 support
   Makefile: Take kernel source location from /lib/modules/x.x.x/build
   Module adm1021: Add support for MC1066
-  Module dmi_scan: Rename symbol duplicated in kernel; Apply fixes from
+  Module dmi_scan: Rename symbol duplicated in kernel; apply fixes from
                    kernel 2.5.43
   Module gl518sm: Iterate allowed only for rev 0x00
   Module i2c-amd756: Configure base address for nForce support;
