@@ -8,7 +8,7 @@ Supported chips:
     Prefix `adm1021'
     Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
     Datasheet: Publicly available at the Analog Devices website
-  * Analog Devices ADM1023
+  * Analog Devices ADM1021A/ADM1023
     Prefix `adm1023'
     Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
     Datasheet: Publicly available at the Analog Devices website
