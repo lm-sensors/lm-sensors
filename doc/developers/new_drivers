@@ -74,7 +74,7 @@ If you wish to write a driver for 2.5 only, email us for information.
 
 * Test the module.
   This is usually the boring part...
-  Test with a recent 2.4 kernel (>=2.4.9).
+  Test with a recent 2.4 kernel.
 
 * Add detection information to prog/detect/sensors-detect.
   This is a perl script that automatically detects what chips and adapters
