@@ -1787,6 +1787,7 @@ sub initialize_conf
 {
   my $use_devfs = 0;
   open(local *INPUTFILE, "/proc/mounts") or die "Can't access /proc/mounts!";
+  local $_;
   while (<INPUTFILE>) {
     if (m@^\w+ /dev devfs @) {
       $use_devfs = 1;
@@ -1847,6 +1848,7 @@ use vars qw(%modules_list);
 sub initialize_modules_list
 {
   open(local *INPUTFILE, "/proc/modules") or return;
+  local $_;
   while (<INPUTFILE>) {
     tr/_/-/;
     $modules_list{$1} = 1 if m/^(\S*)/;
@@ -1867,20 +1869,21 @@ sub read_proc_dev_pci
 {
   my ($dfn,$vend,%pci_list);
   open(local *INPUTFILE, "/proc/bus/pci/devices") or return;
+  local $_;
   while (<INPUTFILE>) {
-    my $record = {};
-    ($dfn,$vend,$record->{irq},$record->{base_addr0},$record->{base_addr1},
-          $record->{base_addr2},$record->{base_addr3},$record->{base_addr4},
-          $record->{base_addr5},$record->{rom_base_addr}) = 
+    my %record;
+    ($dfn,$vend,$record{irq},$record{base_addr0},$record{base_addr1},
+          $record{base_addr2},$record{base_addr3},$record{base_addr4},
+          $record{base_addr5},$record{rom_base_addr}) = 
           map { oct "0x$_" } (split) [0..9];
-    $record->{bus} = $dfn >> 8;
-    $record->{slot} = ($dfn & 0xf8) >> 3;
-    $record->{func} = $dfn & 0x07;
-    $record->{vendid} = $vend >> 16;
-    $record->{devid} = $vend & 0xffff;
+    $record{bus} = $dfn >> 8;
+    $record{slot} = ($dfn & 0xf8) >> 3;
+    $record{func} = $dfn & 0x07;
+    $record{vendid} = $vend >> 16;
+    $record{devid} = $vend & 0xffff;
     
-    $pci_list{ sprintf("%04x:%04x",$record->{vendid},$record->{devid}) } =
-	$record;
+    $pci_list{ sprintf("%04x:%04x",$record{vendid},$record{devid}) } =
+	\%record;
   }
   return %pci_list;
 }
@@ -1894,16 +1897,6 @@ sub initialize_proc_pci
 #####################
 # ADAPTER DETECTION #
 #####################
-
-sub all_available_adapters
-{
-  my @res;
-  foreach my $adapter (@pci_adapters) {
-    push @res, $adapter->{driver}
-      if exists $modules_list{$adapter->{driver}};
-  }
-  return @res;
-}
 
 sub adapter_pci_detection_sis_96x
 {
@@ -1997,42 +1990,23 @@ sub find_adapter_driver
 
 # This should really go into a separate module/package.
 
-# To do: support i2c-level access (through sysread/syswrite, probably).
-# I can't test this at all (PIIX4 does not support this), so I have not
-# included it.
-
-use vars qw($IOCTL_I2C_RETRIES $IOCTL_I2C_TIMEOUT $IOCTL_I2C_UDELAY 
-            $IOCTL_I2C_MDELAY $IOCTL_I2C_SLAVE $IOCTL_I2C_TENBIT 
-            $IOCTL_I2C_SMBUS);
-
 # These are copied from <linux/i2c.h> and <linux/smbus.h>
 
-# For bit-adapters:
-$IOCTL_I2C_RETRIES = 0x0701;
-$IOCTL_I2C_TIMEOUT = 0x0702;
-$IOCTL_I2C_UDELAY = 0x0705;
-$IOCTL_I2C_MDELAY = 0x0706;
-
-# General ones:
-$IOCTL_I2C_SLAVE = 0x0703;
-$IOCTL_I2C_TENBIT = 0x0704;
-$IOCTL_I2C_SMBUS = 0x0720;
-
-
-
-use vars qw($SMBUS_READ $SMBUS_WRITE $SMBUS_QUICK $SMBUS_BYTE $SMBUS_BYTE_DATA 
-            $SMBUS_WORD_DATA $SMBUS_PROC_CALL $SMBUS_BLOCK_DATA);
+use constant IOCTL_I2C_SLAVE    => 0x0703;
+use constant IOCTL_I2C_TENBIT   => 0x0704;
+use constant IOCTL_I2C_SMBUS    => 0x0720;
 
 # These are copied from <linux/smbus.h>
 
-$SMBUS_READ = 1;
-$SMBUS_WRITE = 0;
-$SMBUS_QUICK = 0;
-$SMBUS_BYTE = 1;
-$SMBUS_BYTE_DATA  = 2;
-$SMBUS_WORD_DATA  = 3;
-$SMBUS_PROC_CALL = 4;
-$SMBUS_BLOCK_DATA = 5;
+use constant SMBUS_READ         => 1;
+use constant SMBUS_WRITE        => 0;
+
+use constant SMBUS_QUICK        => 0;
+use constant SMBUS_BYTE         => 1;
+use constant SMBUS_BYTE_DATA    => 2;
+use constant SMBUS_WORD_DATA    => 3;
+use constant SMBUS_PROC_CALL    => 4;
+use constant SMBUS_BLOCK_DATA   => 5;
 
 # Select the device to communicate with through its address.
 # $_[0]: Reference to an opened filehandle
@@ -2041,7 +2015,7 @@ $SMBUS_BLOCK_DATA = 5;
 sub i2c_set_slave_addr
 {
   my ($file,$addr) = @_;
-  ioctl $file, $IOCTL_I2C_SLAVE, $addr or return 0;
+  ioctl $file, IOCTL_I2C_SLAVE, $addr or return 0;
   return 1;
 }
 
@@ -2050,9 +2024,9 @@ sub i2c_set_slave_addr
 # Exact calling conventions are intricate; read i2c-dev.c if you really need
 # to know.
 # $_[0]: Reference to an opened filehandle
-# $_[1]: $SMBUS_READ for reading, $SMBUS_WRITE for writing
+# $_[1]: SMBUS_READ for reading, SMBUS_WRITE for writing
 # $_[2]: Command (usually register number)
-# $_[3]: Transaction kind ($SMBUS_BYTE, $SMBUS_BYTE_DATA, etc.)
+# $_[3]: Transaction kind (SMBUS_BYTE, SMBUS_BYTE_DATA, etc.)
 # $_[4]: Reference to an array used for input/output of data
 # Returns: 0 on failure, 1 on success.
 # Note that we need to get back to Integer boundaries through the 'x2'
@@ -2063,8 +2037,8 @@ sub i2c_smbus_access
   my ($file,$read_write,$command,$size,$data) = @_;
   my $data_array = pack "C32", @$data;
   my $ioctl_data = pack "C2x2Ip", ($read_write,$command,$size,$data_array);
-  ioctl $file, $IOCTL_I2C_SMBUS, $ioctl_data or return 0;
-  $_[4] = [ unpack "C32",$data_array ];
+  ioctl $file, IOCTL_I2C_SMBUS, $ioctl_data or return 0;
+  @{$_[4]} = unpack "C32",$data_array;
   return 1;
 }
 
@@ -2074,8 +2048,8 @@ sub i2c_smbus_access
 sub i2c_smbus_write_quick
 {
   my ($file,$value) = @_;
-  my $data = [];
-  i2c_smbus_access $file, $value, 0, $SMBUS_QUICK, $data 
+  my @data;
+  i2c_smbus_access $file, $value, 0, SMBUS_QUICK, \@data
          or return -1;
   return 0;
 }
@@ -2085,10 +2059,10 @@ sub i2c_smbus_write_quick
 sub i2c_smbus_read_byte
 {
   my ($file) = @_;
-  my $data = [];
-  i2c_smbus_access $file, $SMBUS_READ, 0, $SMBUS_BYTE, $data 
+  my @data;
+  i2c_smbus_access $file, SMBUS_READ, 0, SMBUS_BYTE, \@data
          or return -1;
-  return $$data[0];
+  return $data[0];
 }
 
 # $_[0]: Reference to an opened filehandle
@@ -2097,8 +2071,8 @@ sub i2c_smbus_read_byte
 sub i2c_smbus_write_byte
 {
   my ($file,$command) = @_;
-  my $data = [$command];
-  i2c_smbus_access $file, $SMBUS_WRITE, 0, $SMBUS_BYTE, $data 
+  my @data = ($command);
+  i2c_smbus_access $file, SMBUS_WRITE, 0, SMBUS_BYTE, \@data
          or return -1;
   return 0;
 }
@@ -2109,10 +2083,10 @@ sub i2c_smbus_write_byte
 sub i2c_smbus_read_byte_data
 {
   my ($file,$command) = @_;
-  my $data = [];
-  i2c_smbus_access $file, $SMBUS_READ, $command, $SMBUS_BYTE_DATA, $data 
+  my @data;
+  i2c_smbus_access $file, SMBUS_READ, $command, SMBUS_BYTE_DATA, \@data
          or return -1;
-  return $$data[0];
+  return $data[0];
 }
   
 # $_[0]: Reference to an opened filehandle
@@ -2122,8 +2096,8 @@ sub i2c_smbus_read_byte_data
 sub i2c_smbus_write_byte_data
 {
   my ($file,$command,$value) = @_;
-  my $data = [$value];
-  i2c_smbus_access $file, $SMBUS_WRITE, $command, $SMBUS_BYTE_DATA, $data 
+  my @data = ($value);
+  i2c_smbus_access $file, SMBUS_WRITE, $command, SMBUS_BYTE_DATA, \@data
          or return -1;
   return 0;
 }
@@ -2136,10 +2110,10 @@ sub i2c_smbus_write_byte_data
 sub i2c_smbus_read_word_data
 {
   my ($file,$command) = @_;
-  my $data = [];
-  i2c_smbus_access $file, $SMBUS_READ, $command, $SMBUS_WORD_DATA, $data 
+  my @data;
+  i2c_smbus_access $file, SMBUS_READ, $command, SMBUS_WORD_DATA, \@data
          or return -1;
-  return $$data[0] + 256 * $$data[1];
+  return $data[0] + 256 * $data[1];
 }
 
 # $_[0]: Reference to an opened filehandle
@@ -2151,53 +2125,9 @@ sub i2c_smbus_read_word_data
 sub i2c_smbus_write_word_data
 {
   my ($file,$command,$value) = @_;
-  my $data = [$value & 0xff, $value >> 8];
-  i2c_smbus_access $file, $SMBUS_WRITE, $command, $SMBUS_WORD_DATA, $data 
+  my @data = ($value & 0xff, $value >> 8);
+  i2c_smbus_access $file, SMBUS_WRITE, $command, SMBUS_WORD_DATA, \@data
          or return -1;
-  return 0;
-}
-
-# $_[0]: Reference to an opened filehandle
-# $_[1]: Command byte (usually register number)
-# $_[2]: Word to write
-# Returns: -1 on failure, read word on success.
-# Note: some devices use the wrong endiannes; use swap_bytes to correct for 
-# this.
-sub i2c_smbus_process_call
-{
-  my ($file,$command,$value) = @_;
-  my $data = [$value & 0xff, $value >> 8];
-  i2c_smbus_access $file, $SMBUS_WRITE, $command, $SMBUS_PROC_CALL, $data 
-         or return -1;
-  return $$data[0] + 256 * $$data[1];
-}
-
-# $_[0]: Reference to an opened filehandle
-# $_[1]: Command byte (usually register number)
-# Returns: Undefined on failure, a list of read bytes on success
-# Note: some devices use the wrong endiannes; use swap_bytes to correct for 
-# this.
-sub i2c_smbus_read_block_data
-{
-  my ($file,$command) = @_;
-  my $data = [];
-  i2c_smbus_access $file, $SMBUS_READ, $command, $SMBUS_BLOCK_DATA, $data 
-         or return;
-  shift @$data;
-  return @$data;
-}
-
-# $_[0]: Reference to an opened filehandle
-# $_[1]: Command byte (usually register number)
-# @_[2..]: List of values to write
-# Returns: -1 on failure, 0 on success.
-# Note: some devices use the wrong endiannes; use swap_bytes to correct for 
-# this.
-sub i2c_smbus_write_block_data
-{
-  my ($file,$command,@data) = @_;
-  i2c_smbus_access $file, $SMBUS_WRITE, $command, $SMBUS_BLOCK_DATA, \@data 
-         or return;
   return 0;
 }
 
@@ -2218,9 +2148,9 @@ sub i2c_probe
     # this, because they ack on write only, but this is probably better since
     # some EEPROMs write-protect themselves permanently on almost any write to
     # their page protection address.
-    return i2c_smbus_access($file, $SMBUS_READ, 0, $SMBUS_BYTE, $data);
+    return i2c_smbus_access($file, SMBUS_READ, 0, SMBUS_BYTE, $data);
   } else {
-    return i2c_smbus_access($file, $SMBUS_WRITE, 0, $SMBUS_QUICK, $data);
+    return i2c_smbus_access($file, SMBUS_WRITE, 0, SMBUS_QUICK, $data);
   }
 }
 
@@ -2506,11 +2436,11 @@ sub scan_adapter
     printf "Client found at address 0x%02x\n",$addr;
 
     foreach $chip (@chip_ids) {
-      if (exists $$chip{i2c_addrs} and contains $addr, @{$$chip{i2c_addrs}}) {
-        print "Probing for `$$chip{name}'... ";
-        if (($conf,@chips) = &{$$chip{i2c_detect}} (\*FILE ,$addr)) {
+      if (exists $chip->{i2c_addrs} and contains $addr, @{$chip->{i2c_addrs}}) {
+        print "Probing for `$chip->{name}'... ";
+        if (($conf,@chips) = &{$chip->{i2c_detect}} (\*FILE ,$addr)) {
           print "Success!\n",
-                "    (confidence $conf, driver `$$chip{driver}')";
+                "    (confidence $conf, driver `$chip->{driver}')";
           if (@chips) {
             print ", other addresses:";
             @chips = sort @chips;
@@ -2521,7 +2451,7 @@ sub scan_adapter
           printf "\n";
           $new_hash = { conf => $conf,
                         i2c_addr => $addr,
-                        chipname =>  $$chip{name},
+                        chipname => $chip->{name},
                         i2c_adap => $adapter_name,
                         i2c_algo => $algorithm_name,
                         i2c_driver => $adapter_driver,
@@ -2534,7 +2464,7 @@ sub scan_adapter
           $new_hash->{i2c_extra} = 0 
                  if exists $chip->{i2c_driver_addrs} and
                     not contains( $addr , @{$chip->{i2c_driver_addrs}});
-          add_i2c_to_chips_detected $$chip{driver}, $new_hash;
+          add_i2c_to_chips_detected $chip->{driver}, $new_hash;
         } else {
           print "Failed!\n";
         }
@@ -2547,26 +2477,26 @@ sub scan_isa_bus
 {
   my ($chip,$addr,$conf);
   foreach $chip (@chip_ids) {
-    next if not exists $$chip{isa_addrs} or not exists $$chip{isa_detect};
-    print "Probing for `$$chip{name}'\n";
-    foreach $addr (@{$$chip{isa_addrs}}) {
+    next if not exists $chip->{isa_addrs} or not exists $chip->{isa_detect};
+    print "Probing for `$chip->{name}'\n";
+    foreach $addr (@{$chip->{isa_addrs}}) {
       if ($addr) {
         printf "  Trying address 0x%04x... ", $addr;
       } else {
         print "  Trying general detect... ";
       }
-      $conf = &{$$chip{isa_detect}} ($addr);
+      $conf = &{$chip->{isa_detect}} ($addr);
       print("Failed!\n"), next if not defined $conf;
       print "Success!\n";
-      printf "    (confidence %d, driver `%s')\n", $conf, $$chip{driver};
+      printf "    (confidence %d, driver `%s')\n", $conf, $chip->{driver};
       my $new_hash = { conf => $conf,
                        isa_addr => $addr,
-                       chipname =>  $$chip{name}
+                       chipname => $chip->{name}
                      };
       $new_hash->{isa_extra} = 0 
              if exists $chip->{isa_driver_addrs} and
                 not contains ($addr, @{$chip->{isa_driver_addrs}});
-      $new_hash = add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver},
+      $new_hash = add_isa_to_chips_detected $chip->{alias_detect},$chip->{driver},
                                             $new_hash;
       if ($new_hash) {
         printf "    Alias of the chip on I2C bus `%s', address 0x%04x\n",
@@ -2581,8 +2511,8 @@ sub exit_superio
   my ($addrreg, $datareg, $family, $success) = @_;
 
   # If detection succeeded and an exit sequence exists, use it
-  if ($success && defined ($$family{exit})) {
-    foreach my $byte (@{$$family{exit}}) {
+  if ($success && defined ($family->{exit})) {
+    foreach my $byte (@{$family->{exit}}) {
       outb($addrreg, $byte);
     }
     return;
@@ -2616,11 +2546,11 @@ sub scan_superio
   FAMILY: 
   foreach my $family (@superio_ids) {
 # write the password
-    foreach $val (@{$$family{enter}}) {
+    foreach $val (@{$family->{enter}}) {
       outb($addrreg, $val);
     }
-    foreach my $chip (@{$$family{chips}}) {
-      print "Probing for `$$chip{name}'\n";
+    foreach my $chip (@{$family->{chips}}) {
+      print "Probing for `$chip->{name}'\n";
 # check the device ID
       outb($addrreg, $superio{devidreg});
       $val = inb($datareg);
@@ -2629,23 +2559,23 @@ sub scan_superio
 	exit_superio($addrreg, $datareg, $family, 0);
 	next FAMILY;
       }
-      if ($$chip{devid}>0xff) {
+      if ($chip->{devid}>0xff) {
         outb($addrreg, $superio{devidreg} + 1);
         $val = ($val << 8) | inb($datareg);
       }
-      if ($val != $$chip{devid}) {
+      if ($val != $chip->{devid}) {
 	printf "  Failed! (0x%02x)\n", $val;
 	next;
       }
       print "  Success...";
 # does it have hardware monitoring capabilities
-      if($$chip{driver} eq "not-a-sensor") {
+      if($chip->{driver} eq "not-a-sensor") {
 	print " (no hardware monitoring capabilities)\n";
 	next;
       }
 # switch to the sensor logical device
       outb($addrreg, $superio{logdevreg});
-      outb($datareg, $$chip{logdev});
+      outb($datareg, $chip->{logdev});
 # check the activation register
       outb($addrreg, $superio{actreg});
       $val = inb($datareg);
@@ -2665,9 +2595,9 @@ sub scan_superio
       printf " found at address 0x%04x\n", $addr;
       my $new_hash = { conf => 9,
                        isa_addr => $addr,
-                       chipname =>  $$chip{name}
+                       chipname => $chip->{name}
                      };
-      add_isa_to_chips_detected $$chip{alias_detect},$$chip{driver},
+      add_isa_to_chips_detected $chip->{alias_detect},$chip->{driver},
                                             $new_hash;
     }
     exit_superio($addrreg, $datareg, $family, 1);
@@ -3966,7 +3896,7 @@ sub eeprom_detect
 	# check for 'shadow' write-protect register at 0x30-0x37
 	# could be dangerous
 	i2c_set_slave_addr($file,$addr - 0x20);
-	if(i2c_smbus_write_quick($file,$SMBUS_WRITE) >= 0 &&
+	if(i2c_smbus_write_quick($file, SMBUS_WRITE) >= 0 &&
 	   i2c_smbus_read_byte_data($file,0x80) == -1) {
 		i2c_set_slave_addr($file,$addr);
 		if($checksum == 0) {
@@ -4518,6 +4448,7 @@ sub generate_modprobes
   # Collect all loaded adapters
   # i2cdetect -l either cats /proc/bus/i2c or scans sysfs for the same information
   open(local *INPUTFILE, "i2cdetect -l |") or die "Couldn't find i2cdetect program!!";
+  local $_;
   while (<INPUTFILE>) {
     my ($dev_nr,$type,$adap,$algo) = /^i2c-(\S+)\s+(\S+)\s+(.*?)\s*\t\s*(.*?)\s+$/;
     next if ($type eq "dummy");
@@ -4815,6 +4746,7 @@ sub main
   my ($inp,@not_to_scan,$inp2);
   # i2cdetect -l either cats /proc/bus/i2c or scans sysfs for the same information
   open(local *INPUTFILE, "i2cdetect -l |") or die "Couldn't find i2cdetect program!!";
+  local $_;
   while (<INPUTFILE>) {
     my ($dev_nr,$type,$adap,$algo) = /^i2c-(\S+)\s+(\S+)\s+(.*?)\s*\t\s*(.*?)\s+$/;
     next if ($type eq "dummy");
@@ -4888,25 +4820,25 @@ sub main
 
   my ($chip,$data);
   foreach $chip (@chips_detected) {
-    print "\nDriver `$$chip{driver}' ";
-    if (@{$$chip{detected}}) {
-      if (@{$$chip{misdetected}}) {
+    print "\nDriver `$chip->{driver}' ";
+    if (@{$chip->{detected}}) {
+      if (@{$chip->{misdetected}}) {
         print "(should be inserted but causes problems):\n";
       } else {
         print "(should be inserted):\n";
       }
     } else {
-      if (@{$$chip{misdetected}}) {
+      if (@{$chip->{misdetected}}) {
         print "(may not be inserted):\n";
       } else {
         print "(should not be inserted, but is harmless):\n";
       }
     }
-    if (@{$$chip{detected}}) {
+    if (@{$chip->{detected}}) {
       print "  Detects correctly:\n";
       print_chips_report $chip->{detected};
     }
-    if (@{$$chip{misdetected}}) {
+    if (@{$chip->{misdetected}}) {
       print "  Misdetects:\n";
       print_chips_report $chip->{misdetected};
     }
