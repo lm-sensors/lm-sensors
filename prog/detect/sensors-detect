@@ -644,8 +644,24 @@ use vars qw(@pci_adapters @chip_ids @superio_ids);
        procid => "nVidia Corporation nForce2 SMBus (MCP)",
        driver => "i2c-nforce2",
        match => sub { $_[0] =~ /^SMBus nForce2 adapter at / },
-     } , 
-     { 
+     }, 
+     {
+       vendid => 0x10de,
+       devid  => 0x0084,
+       func => 1,
+       procid => "nVidia Corporation nForce2 Ultra 400 SMBus (MCP)",
+       driver => "i2c-nforce2",
+       match => sub { $_[0] =~ /^SMBus nForce2 adapter at / },
+     }, 
+     {
+       vendid => 0x10de,
+       devid  => 0x00D4,
+       func => 1,
+       procid => "nVidia Corporation nForce3 Pro150 SMBus (MCP)",
+       driver => "i2c-nforce2",
+       match => sub { $_[0] =~ /^SMBus nForce2 adapter at / },
+     }, 
+     {
        vendid => 0x1166,
        devid  => 0x0200,
        func => 0,
