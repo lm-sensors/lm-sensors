@@ -1,6 +1,7 @@
 /*
     i2cdump.c - Part of i2cdump, a user-space program to dump I2C registers
-    Copyright (c) 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (c) 2000  Frodo Looijaard <frodol@dds.nl>, and
+    Mark D. Studebaker <mdsxyz123@yahoo.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +32,7 @@ void help(void)
   char s[100];
 
   fprintf(stderr,"Syntax: i2cdump I2CBUS ADDRESS [MODE] [BANK [BANKREG]]\n");
-  fprintf(stderr,"  MODE may be 'b' or 'w' (default b)\n");
+  fprintf(stderr,"  MODE is 'b[yte]', 'w[ord]', 's[mbusblock], or 'i[2cblock]' (default b)\n");
   fprintf(stderr,"  I2CBUS is an integer\n");
   if((fptr = fopen("/proc/bus/i2c", "r"))) {
     fprintf(stderr,"  Installed I2C busses:\n");
@@ -50,7 +51,9 @@ int main(int argc, char *argv[])
   char filename1[20];
   char filename2[20];
   char *filename;
-  
+  long funcs;
+  unsigned char cblock[256];  
+  int block[256];  
 
   if (argc < 2) {
     fprintf(stderr,"Error: No i2c-bus specified!\n");
@@ -92,8 +95,12 @@ int main(int argc, char *argv[])
     size = I2C_SMBUS_BYTE_DATA;
   else if (!strcmp(argv[3],"w"))
     size = I2C_SMBUS_WORD_DATA;
+  else if (!strcmp(argv[3],"s"))
+    size = I2C_SMBUS_BLOCK_DATA;
+  else if (!strcmp(argv[3],"i"))
+    size = I2C_SMBUS_I2C_BLOCK_DATA;
   else {
-    fprintf(stderr,"Error: Third argument not recognized!\n");
+    fprintf(stderr,"Error: Invalid mode!\n");
     help();
     exit(1);
   }
@@ -156,6 +163,48 @@ int main(int argc, char *argv[])
     filename = filename1;
   }
   
+  /* check adapter functionality */
+  if (ioctl(file,I2C_FUNCS,&funcs) < 0) {
+    fprintf(stderr,
+            "Error: Could not get the adapter functionality matrix: %s\n",
+            strerror(errno));
+    exit(1);
+  }
+
+  switch(size) {
+     case I2C_SMBUS_BYTE_DATA:
+	if (! (funcs & I2C_FUNC_SMBUS_READ_BYTE_DATA)) {
+	   fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	   fprintf(stderr, " does not have byte read capability\n");
+	   exit(1);
+	}       
+	break;
+
+     case I2C_SMBUS_WORD_DATA:
+	if (! (funcs & I2C_FUNC_SMBUS_READ_WORD_DATA)) {
+	   fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	   fprintf(stderr, " does not have word read capability\n");
+	   exit(1);
+	}       
+	break;
+
+     case I2C_SMBUS_BLOCK_DATA:
+	if (! (funcs & I2C_FUNC_SMBUS_READ_BLOCK_DATA)) {
+	   fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	   fprintf(stderr, " does not have smbus block read capability\n");
+	   exit(1);
+	}       
+	break;
+
+     case I2C_SMBUS_I2C_BLOCK_DATA:
+	if (! (funcs & I2C_FUNC_SMBUS_READ_I2C_BLOCK)) {
+	   fprintf(stderr, "Error: Adapter for i2c bus %d", i2cbus);
+	   fprintf(stderr, " does not have i2c block read capability\n");
+	   exit(1);
+	}       
+	break;
+
+  }
   /* use FORCE so that we can look at registers even when
      a driver is also running */
   if (ioctl(file,I2C_SLAVE_FORCE,address) < 0) {
@@ -167,7 +216,9 @@ int main(int argc, char *argv[])
   fprintf(stderr,"  WARNING! This program can confuse your I2C bus, "
           "cause data loss and worse!\n");
   fprintf(stderr,"  I will probe file %s, address 0x%x, mode %s\n",
-          filename,address,size == I2C_SMBUS_BYTE_DATA?"byte":"word");
+          filename,address,size == I2C_SMBUS_BLOCK_DATA ? "smbus block" :
+                                   I2C_SMBUS_I2C_BLOCK_DATA ? "i2c block" :
+                                   I2C_SMBUS_BYTE_DATA ? "byte" : "word");
   if(bank) 	
     fprintf(stderr,"  Probing bank %d using bank register 0x%02x.\n",
             bank, bankreg);
@@ -179,12 +230,40 @@ int main(int argc, char *argv[])
     i2c_smbus_write_byte_data(file,bankreg,bank | 0x80);
   }
 
-  if (size == I2C_SMBUS_BYTE_DATA) {
+  /* handle all but word data */
+  if (size != I2C_SMBUS_WORD_DATA) {
+
+    /* do the block transaction */
+    if(size == I2C_SMBUS_BLOCK_DATA || size == I2C_SMBUS_I2C_BLOCK_DATA) {
+      if(size == I2C_SMBUS_BLOCK_DATA) {
+        res = i2c_smbus_read_block_data(file,0,cblock);
+      } else if(size == I2C_SMBUS_I2C_BLOCK_DATA) {
+/*
+        res = i2c_smbus_read_i2c_block_data(file,0,cblock);
+*/
+        fprintf(stderr, "Error: I2C block read unimplemented\n");
+        exit(1);
+      }
+      if(res < 0) {
+        fprintf(stderr, "Error: Block read failed, return code %d\n", res);
+        exit(1);
+      }
+      if(res >= 256)
+        res = 256;
+      for (i = 0; i < res; i++)
+        block[i] = cblock[i];
+      for (i = res; i < 256; i++)
+        block[i] = -1;
+    }
+
     printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
     for (i = 0; i < 256; i+=16) {
       printf("%02x: ",i);
       for(j = 0; j < 16; j++) {
-        res = i2c_smbus_read_byte_data(file,i+j);
+        if(size == I2C_SMBUS_BYTE_DATA)
+          res = i2c_smbus_read_byte_data(file,i+j);
+        else
+          res = block[i+j];
         if (res < 0)
           printf("XX ");
         else
