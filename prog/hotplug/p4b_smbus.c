@@ -1,7 +1,7 @@
 /*
  * p4b_smbus.c
  *
- * Initialize the I801SMBus device on ASUS P4B Bords
+ * Initialize the SMBus device on ICH2/2-M/4/4-M (82801BA/BAM/DB/DBM)
  */
 /*
     Copyright (c) 2002 Ilja Rauhut <IljaRauhut@web.de> and
@@ -41,6 +41,9 @@
  *
  *
  * June 21, 2002, added support for the ICH4, code clean up -- Klaus
+ *
+ * Apr 13, 2004, modified for ICH4-M (82801DBM) -- Axel Thimm <Axel.Thimm@ATrpms.net>
+ *               bugfix: register F2/bit 8 on ICH2* is bit 0 on ICH4*
  */
 
 
@@ -87,9 +90,11 @@ rmm    from lm_sensors-2.3.3:
  */
 
 #define ICH2 0x2440
+#define ICH2_M 0x244c
 #define ICH2_SMBUS 0x2443
 
 #define ICH4 0x24c0
+#define ICH4_M 0x24cc
 #define ICH4_SMBUS 0x24c3
 
 /* status, used to indicate that io space needs to be freed */
@@ -102,18 +107,24 @@ static unsigned long i801smbus_lock_flags = 0;
 
 /* 
  * Checks whether SMBus is enabled and turns it on in case they are not. 
- * It's done by clearing Bit 8 and 3 in i801 config space F2h, PCI-Device 0x8086:0x2440(ICH2)/0x24c0(ICH4)
+ * It's done by modifying the i801 function disable register, F2h.
+ * ICH2(-M): PCI-Device 0x8086:0x2440(0x244c)
+ *           Bit 3: Disables SMBus Host Controller function.
+ *           Bit 8: allows SMBus I/O space to be accessible when Bit 3 is set.
+ * ICH4(-M): PCI-Device 0x8086:0x24c0(0x24cc)
+ *           Bit 3: Disables SMBus Host Controller function.
+ *           Bit 0: allows SMBus I/O space to be accessible when Bit 3 is set.
  */
 static int
-i801smbus_enable(struct pci_dev *dev){
+i801smbus_enable(struct pci_dev *dev, u16 testmask, u16 mask){
 	u16  val   = 0;
 
 	pci_read_config_word(dev, 0xF2, &val);
 	DBG("i801smbus: i801smbus config byte reading 0x%X.\n", val);
-	if (val & 0x008) {
-		pci_write_config_word(dev, 0xF2, val & 0xfef7);
+	if (val & testmask) {
+		pci_write_config_word(dev, 0xF2, val & mask);
 		pci_read_config_word(dev, 0xF2, &val);
-		if(val & 0x008) 
+		if(val & testmask) 
 		  {
 		    DBG("i801smbus: i801smbus config byte locked:-(\n");
 		    return -EIO;
@@ -185,6 +196,7 @@ int init_module(void)
 	struct pci_bus *bus = NULL;
 	struct pci_dev *dev = NULL;
 	int ret = 0;
+	u16 testmask = 0, mask = 0;
 
 	DBG("i801smbus: init_module().\n");
 
@@ -212,30 +224,41 @@ int init_module(void)
 	  }
 	
 	/* Are we operating a i801 chipset */
-	dev = pci_find_device(0x8086, ICH2, NULL);
-	if (NULL == dev) 
+	if ((dev = pci_find_device(0x8086, ICH2, NULL)) != 0)
 	  {
-	    dev = pci_find_device(0x8086, ICH4, NULL);
-	    if (NULL == dev) 
-	      {
-		printk("i801smbus: INTEL ICH2/4 (82801AB/DB) not found.\n");
-		return -ENODEV ;
-	      }
-	    else
-	      {
-		printk("i801smbus: found Intel ICH4 (82801DB).\n");
-	      }
+	    printk("i801smbus: found Intel ICH2 (82801BA).\n");
+	    testmask = 0x008;
+	    mask = 0xfef7;
+	  }
+	else if ((dev = pci_find_device(0x8086, ICH2_M, NULL)) != 0)
+	  {
+	    printk("i801smbus: found Intel ICH2-M (82801BAM).\n");
+	    testmask = 0x008;
+	    mask = 0xfef7;
+	  }
+	else if ((dev = pci_find_device(0x8086, ICH4, NULL)) != 0)
+	  {
+	    printk("i801smbus: found Intel ICH4 (82801DB).\n");
+	    testmask = 0x008;
+	    mask = 0xfff6;
+	  }
+	else if ((dev = pci_find_device(0x8086, ICH4_M, NULL)) != 0)
+	  {
+	    printk("i801smbus: found Intel ICH4-M (82801DBM).\n");
+	    testmask = 0x008;
+	    mask = 0xfff6;
 	  }
 	else
 	  {
-	    printk("i801smbus: found Intel ICH2 (82801AB).\n");
+	    printk("i801smbus: INTEL ICH2/2-M/4/4-M (82801BA/BAM/DB/DBM) not found.\n");
+	    return -ENODEV ;
 	  }
 
 	/* we need the bus pointer later */
 	bus = dev->bus;
 
 
-	if ( (ret = i801smbus_enable(dev)) ) 
+	if ( (ret = i801smbus_enable(dev, testmask, mask)) ) 
 	  {
 	    printk("i801smbus: Unable to turn on i801smbus device - sorry!\n");
 	    return ret;
