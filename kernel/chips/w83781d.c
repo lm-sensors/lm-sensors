@@ -28,14 +28,6 @@
     w83782d	9	3	2-4	3	0x30	yes	yes
     w83783s	5-6	3	2	1-2	0x40	yes	no
 
-    To do:
-     782d/783s PWM enable, clock select, duty cycle
-     782d beep 3 register
-     782d programmable pins
-     783s pin is programmable for -5V or temp1; defaults to -5V,
-          no control in driver so temp1 doesn't work.
-     783s temp2 (labeled as temp1 in data sheet) at different location
-          than 781d/782d, not implemented yet.
 */
 
 #include <linux/module.h>
@@ -103,6 +95,16 @@
 #define W83781D_REG_CHIPMAN 0x4F
 #define W83781D_REG_PIN 0x4B
 
+/* PWM 782D (1-4) and 783S (1-2) only */
+#define W83781D_REG_PWM1 0x5B		/* 782d and 783s datasheets disagree on which is which. */
+#define W83781D_REG_PWM2 0x5A		/* We follow 782d datasheet convention here */
+#define W83781D_REG_PWM3 0x5E
+#define W83781D_REG_PWM4 0x5F
+#define W83781D_REG_PWMCLK12 0x5C
+#define W83781D_REG_PWMCLK34 0x45C
+const u8 regpwm[] = {W83781D_REG_PWM1, W83781D_REG_PWM2, W83781D_REG_PWM3, W83781D_REG_PWM4};
+#define W83781D_REG_PWM(nr) (regpwm[(nr) - 1])
+
 #define W83781D_WCHIPID 0x10
 #define W83782D_WCHIPID 0x30
 #define W83783S_WCHIPID 0x40
@@ -125,6 +127,8 @@
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            (val)>=0x06?0:205-(val)*5)
 #define ALARMS_FROM_REG(val) (val)
+#define PWM_FROM_REG(val) (val)
+#define PWM_TO_REG(val) ((val) & 0xff)
 #define BEEPS_FROM_REG(val) (val)
 #define BEEPS_TO_REG(val) ((val) & 0xffff)
 
@@ -281,6 +285,7 @@ struct w83781d_data {
          u16 beeps;                  /* Register encoding, combined */
          u8 beep_enable;             /* Boolean */
          u8 wchipid;                 /* Register value */
+         u8 pwm[4];                  /* Register value */				
 };
 
 
@@ -324,6 +329,8 @@ static void w83781d_beep(struct i2c_client *client, int operation, int ctl_name,
                       int *nrels_mag, long *results);
 static void w83781d_fan_div(struct i2c_client *client, int operation,
                             int ctl_name, int *nrels_mag, long *results);
+static void w83781d_pwm(struct i2c_client *client, int operation,
+                        int ctl_name, int *nrels_mag, long *results);
 
 /* I choose here for semi-static W83781D allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -430,6 +437,14 @@ static ctl_table w83782d_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &w83781d_alarms },
   { W83781D_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_beep },
+  { W83781D_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_pwm },
+  { W83781D_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_pwm },
+  { W83781D_SYSCTL_PWM3, "pwm3", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_pwm },
+  { W83781D_SYSCTL_PWM4, "pwm4", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_pwm },
   { 0 }
 };
 
@@ -465,6 +480,10 @@ static ctl_table w83783s_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &w83781d_alarms },
   { W83781D_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_beep },
+  { W83781D_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_pwm },
+  { W83781D_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_pwm },
   { 0 }
 };
 
@@ -1032,6 +1051,13 @@ void w83781d_update_client(struct i2c_client *client)
       data->fan[i-1] = w83781d_read_value(client,W83781D_REG_FAN(i));
       data->fan_min[i-1] = w83781d_read_value(client,W83781D_REG_FAN_MIN(i));
     }
+    if(data->wchipid != W83781D_WCHIPID) {
+      for (i = 1; i <= 4; i++) {
+        data->pwm[i-1] = w83781d_read_value(client,W83781D_REG_PWM(i));
+        if(data->wchipid == W83783S_WCHIPID  &&  i == 2)
+          break;
+      }
+    }
     data->temp = w83781d_read_value(client,W83781D_REG_TEMP);
     data->temp_over = w83781d_read_value(client,W83781D_REG_TEMP_OVER);
     data->temp_hyst = w83781d_read_value(client,W83781D_REG_TEMP_HYST);
@@ -1269,6 +1295,26 @@ void w83781d_fan_div(struct i2c_client *client, int operation, int ctl_name,
       data->fan_div[2] = DIV_TO_REG(results[2]);
       w83781d_write_value(client,W83781D_REG_PIN,
                           w83781d_read_value(client,W83781D_REG_PIN));
+    }
+  }
+}
+
+void w83781d_pwm(struct i2c_client *client, int operation, int ctl_name,
+                 int *nrels_mag, long *results)
+{
+  struct w83781d_data *data = client->data;
+  int nr = 1 + ctl_name - W83781D_SYSCTL_PWM1;
+
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    w83781d_update_client(client);
+    results[0] = PWM_FROM_REG(data->pwm[nr-1]);
+    *nrels_mag = 1;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 1) {
+      data->pwm[nr-1] = PWM_TO_REG(results[0]);
+      w83781d_write_value(client,W83781D_REG_PWM(nr),data->pwm[nr-1]);
     }
   }
 }

@@ -162,6 +162,10 @@ struct sensors_chips_data {
 #define W83781D_SYSCTL_TEMP2 1201 /* Degrees Celcius * 10 */
 #define W83781D_SYSCTL_TEMP3 1202 /* Degrees Celcius * 10 */
 #define W83781D_SYSCTL_VID 1300 /* Volts * 100 */
+#define W83781D_SYSCTL_PWM1 1401
+#define W83781D_SYSCTL_PWM2 1402
+#define W83781D_SYSCTL_PWM3 1403
+#define W83781D_SYSCTL_PWM4 1404
 #define W83781D_SYSCTL_FAN_DIV 2000 /* 1, 2, 4 or 8 */
 #define W83781D_SYSCTL_ALARMS 2001 /* bitvector */
 #define W83781D_SYSCTL_BEEP 2002 /* bitvector */
