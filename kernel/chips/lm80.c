@@ -70,31 +70,42 @@ SENSORS_INSMOD_1(lm80);
 #define LM80_REG_RES 0x06
 
 
-/* Conversions. Rounding is only done on the TO_REG variants. */
-#define IN_TO_REG(val,nr) ((val) & 0xff)
+/* Conversions. Rounding and limit checking is only done on the TO_REG
+   variants. Note that you should be a bit careful with which arguments
+   these macros are called: arguments may be evaluated more than once.
+   Fixing this is just not worth it. */
+
+#define IN_TO_REG(val,nr) (SENSORS_LIMIT((val),0,255))
 #define IN_FROM_REG(val,nr) (val)
 
-static inline unsigned char
-FAN_TO_REG (unsigned rpm, unsigned divisor)
+extern inline unsigned char
+FAN_TO_REG (unsigned rpm, unsigned div)
 {
-  unsigned val;
-  
   if (rpm == 0)
-      return 255;
-
-  val = (1350000 + rpm * divisor / 2) / (rpm * divisor);
-  if (val > 255)
-      val = 255;
-  return val;
+    return 255;
+  rpm = SENSORS_LIMIT(rpm,1,1000000);
+  return SENSORS_LIMIT((1350000 + rpm*div/2) / (rpm*div),1,254);
 }
 #define FAN_FROM_REG(val,div) ((val)==0?-1:\
                                (val)==255?0:1350000/((div)*(val)))
 
-#define TEMP_FROM_REG(val) lm80_temp_from_reg(val)
+extern inline long TEMP_FROM_REG(u16 temp)
+{
+  long res;
+  res = ((temp & 0xff00) >> 8) * 10000 + ((temp & 0x10) >> 4) * 5000 +
+        ((temp & 0x20) >> 5) * 2500 + ((temp & 0x40) >> 6) * 1250 +
+        ((temp & 0x80) >> 7) * 625;
+  temp /= 100;
+  if (temp >= 0x80 * 100)
+    temp = - (0x100 * 100 - temp);
+  return temp;
+}
 
-#define TEMP_LIMIT_TO_REG(val) (((val)<0?(((val)-50)/100)&0xff:\
-                                           ((val)+50)/100) & 0xff)
 #define TEMP_LIMIT_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*100)
+
+#define TEMP_LIMIT_TO_REG(val) SENSORS_LIMIT(((val)<0?(((val)-50)/100):\
+                                                      ((val)+50)/100), \
+                                             0,255)
 
 #define ALARMS_FROM_REG(val) (val) 
 
@@ -190,8 +201,6 @@ static int lm80_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
 static void lm80_inc_use (struct i2c_client *client);
 static void lm80_dec_use (struct i2c_client *client);
-
-static long lm80_temp_from_reg(u16 regs);
 
 static int lm80_read_value(struct i2c_client *client, u8 register);
 static int lm80_write_value(struct i2c_client *client, u8 register, u8 value);
@@ -425,18 +434,6 @@ void lm80_dec_use (struct i2c_client *client)
 #endif
 }
  
-
-long lm80_temp_from_reg(u16 temp)
-{
-  long res;
-  res = ((temp & 0xff00) >> 8) * 10000 + ((temp & 0x10) >> 4) * 5000 +
-        ((temp & 0x20) >> 5) * 2500 + ((temp & 0x40) >> 6) * 1250 +
-        ((temp & 0x80) >> 7) * 625;
-  temp /= 100;
-  if (temp >= 0x80 * 100)
-    temp = - (0x100 * 100 - temp);
-  return temp;
-}
 
 int lm80_read_value(struct i2c_client *client, u8 reg)
 {

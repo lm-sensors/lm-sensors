@@ -67,31 +67,30 @@ SENSORS_INSMOD_2(gl518sm_r00,gl518sm_r80);
 #define GL518_REG_VDD 0x15
 
 
-/* Conversions. Rounding is only done on the TO_REG variants. */
+/* Conversions. Rounding and limit checking is only done on the TO_REG
+   variants. Note that you should be a bit careful with which arguments
+   these macros are called: arguments may be evaluated more than once.
+   Fixing this is just not worth it. */
 
-#define TEMP_TO_REG(val) (((((val)<0?(val)-5:(val)+5) / 10) + 119) & 0xff)
+#define TEMP_TO_REG(val) (SENSORS_LIMIT(((((val)<0?(val)-5:(val)+5) / 10)+119),\
+                                        0,255))
 #define TEMP_FROM_REG(val) (((val) - 119) * 10)
 
-static inline unsigned char
-FAN_TO_REG (unsigned rpm, unsigned divisor)
+extern inline u8 FAN_TO_REG(long rpm, int div)
 {
-  unsigned val;
-  
   if (rpm == 0)
-      return 255;
-
-  val = (960000 + rpm * divisor) / (2 * rpm * divisor);
-  if (val > 255)
-      val = 255;
-  return val;
+    return 255;
+  rpm = SENSORS_LIMIT(rpm,1,1000000);
+  return SENSORS_LIMIT((960000 + rpm*div/2) / (rpm*div),1,254);
 }
-#define FAN_FROM_REG(val,div) \
- ( (val)==0 ? 0 : (val)==255 ? 0 : (960000/(2*(val)*(div))) )
 
-#define IN_TO_REG(val) ((((val)*10+8)/19) & 0xff)
+#define FAN_FROM_REG(val,div) \
+ ( (val)==0 ? 0 : (val)==255 ? 0 : (960000/((val)*(div))) )
+
+#define IN_TO_REG(val) (SENSORS_LIMIT((((val)*10+8)/19),0,255))
 #define IN_FROM_REG(val) (((val)*19)/10)
 
-#define VDD_TO_REG(val) ((((val)*10+11)/23) & 0xff)
+#define VDD_TO_REG(val) (SENSORS_LIMIT((((val)*10+11)/23),0,255))
 #define VDD_FROM_REG(val) (((val)*23)/10)
 
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)

@@ -64,9 +64,13 @@ SENSORS_INSMOD_3(adm1021,max1617,max1617a);
 #define ADM1021_REG_ONESHOT 0x0F
 
 
+/* Conversions. Rounding and limit checking is only done on the TO_REG
+   variants. Note that you should be a bit careful with which arguments
+   these macros are called: arguments may be evaluated more than once.
+   Fixing this is just not worth it. */
 /* Conversions  note: 1021 uses normal integer signed-byte format*/
 #define TEMP_FROM_REG(val) (val > 127 ? val-256 : val)
-#define TEMP_TO_REG(val)   (val < 0 ? val+256 : val)
+#define TEMP_TO_REG(val)   (SENSORS_LIMIT((val < 0 ? val+256 : val),0,255))
 
 /* Initial values */
 

@@ -137,36 +137,36 @@ static const u8 BIT_SCFG2[] = {0x10, 0x04, 0x08};
 #define W83781D_REG_RT_IDX 0x50
 #define W83781D_REG_RT_VAL 0x51
 
-/* Conversions. Rounding is only done on the TO_REG variants. */
-#define IN_TO_REG(val,nr) (((val) * 10 + 8)/16)
-#define IN_FROM_REG(val,nr) (((val) * 16) / 10)
+/* Conversions. Rounding and limit checking is only done on the TO_REG
+   variants. Note that you should be a bit careful with which arguments
+   these macros are called: arguments may be evaluated more than once.
+   Fixing this is just not worth it. */
+#define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 8)/16),0,255))
+#define IN_FROM_REG(val) (((val) * 16) / 10)
 
-static inline unsigned char
-FAN_TO_REG (unsigned rpm, unsigned divisor)
+extern inline u8 FAN_TO_REG(long rpm, int div)
 {
-  unsigned val;
-  
   if (rpm == 0)
-      return 255;
-
-  val = (1350000 + rpm * divisor / 2) / (rpm * divisor);
-  if (val > 255)
-      val = 255;
-  return val;
+    return 255;
+  rpm = SENSORS_LIMIT(rpm,1,1000000);
+  return SENSORS_LIMIT((1350000 + rpm*div/2) / (rpm*div),1,254);
 }
+
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
 
-#define TEMP_TO_REG(val) (((val)<0?(((val)-5)/10)&0xff:((val)+5)/10) & 0xff)
+#define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
+                                                 ((val)+5)/10),0,255))
 #define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
 
-#define TEMP_ADD_TO_REG(val)   (((((val) + 2) / 5) << 7) & 0xff80)
+#define TEMP_ADD_TO_REG(val)   (SENSORS_LIMIT(((((val) + 2) / 5) << 7),\
+                                              0,0xffff))
 #define TEMP_ADD_FROM_REG(val) (((val) >> 7) * 5)
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            (val)>=0x06?0:205-(val)*5)
 #define ALARMS_FROM_REG(val) (val)
 #define PWM_FROM_REG(val) (val)
-#define PWM_TO_REG(val) ((val) & 0xff)
+#define PWM_TO_REG(val) (SENSORS_LIMIT((val),0,255))
 #define BEEPS_FROM_REG(val) (val)
 #define BEEPS_TO_REG(val) ((val) & 0xffff)
 
@@ -1015,59 +1015,59 @@ void w83781d_init_client(struct i2c_client *client)
 #endif
 
   w83781d_write_value(client,W83781D_REG_IN_MIN(0),
-                      IN_TO_REG(W83781D_INIT_IN_MIN_0,0));
+                      IN_TO_REG(W83781D_INIT_IN_MIN_0));
   w83781d_write_value(client,W83781D_REG_IN_MAX(0),
-                      IN_TO_REG(W83781D_INIT_IN_MAX_0,0));
+                      IN_TO_REG(W83781D_INIT_IN_MAX_0));
   if(type != w83783s) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(1),
-                        IN_TO_REG(W83781D_INIT_IN_MIN_1,1));
+                        IN_TO_REG(W83781D_INIT_IN_MIN_1));
     w83781d_write_value(client,W83781D_REG_IN_MAX(1),
-                        IN_TO_REG(W83781D_INIT_IN_MAX_1,1));
+                        IN_TO_REG(W83781D_INIT_IN_MAX_1));
   }
 
   w83781d_write_value(client,W83781D_REG_IN_MIN(2),
-                      IN_TO_REG(W83781D_INIT_IN_MIN_2,2));
+                      IN_TO_REG(W83781D_INIT_IN_MIN_2));
   w83781d_write_value(client,W83781D_REG_IN_MAX(2),
-                      IN_TO_REG(W83781D_INIT_IN_MAX_2,2));
+                      IN_TO_REG(W83781D_INIT_IN_MAX_2));
   w83781d_write_value(client,W83781D_REG_IN_MIN(3),
-                      IN_TO_REG(W83781D_INIT_IN_MIN_3,3));
+                      IN_TO_REG(W83781D_INIT_IN_MIN_3));
   w83781d_write_value(client,W83781D_REG_IN_MAX(3),
-                      IN_TO_REG(W83781D_INIT_IN_MAX_3,3));
+                      IN_TO_REG(W83781D_INIT_IN_MAX_3));
   w83781d_write_value(client,W83781D_REG_IN_MIN(4),
-                      IN_TO_REG(W83781D_INIT_IN_MIN_4,4));
+                      IN_TO_REG(W83781D_INIT_IN_MIN_4));
   w83781d_write_value(client,W83781D_REG_IN_MAX(4),
-                      IN_TO_REG(W83781D_INIT_IN_MAX_4,4));
+                      IN_TO_REG(W83781D_INIT_IN_MAX_4));
   if (type == w83781d) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(5),
-                        IN_TO_REG(W83781D_INIT_IN_MIN_5,5));
+                        IN_TO_REG(W83781D_INIT_IN_MIN_5));
     w83781d_write_value(client,W83781D_REG_IN_MAX(5),
-                        IN_TO_REG(W83781D_INIT_IN_MAX_5,5));
+                        IN_TO_REG(W83781D_INIT_IN_MAX_5));
   } else {
     w83781d_write_value(client,W83781D_REG_IN_MIN(5),
-                        IN_TO_REG(W83782D_INIT_IN_MIN_5,5));
+                        IN_TO_REG(W83782D_INIT_IN_MIN_5));
     w83781d_write_value(client,W83781D_REG_IN_MAX(5),
-                        IN_TO_REG(W83782D_INIT_IN_MAX_5,5));
+                        IN_TO_REG(W83782D_INIT_IN_MAX_5));
   }
   if (type == w83781d) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(6),
-                        IN_TO_REG(W83781D_INIT_IN_MIN_6,6));
+                        IN_TO_REG(W83781D_INIT_IN_MIN_6));
     w83781d_write_value(client,W83781D_REG_IN_MAX(6),
-                        IN_TO_REG(W83781D_INIT_IN_MAX_6,6));
+                        IN_TO_REG(W83781D_INIT_IN_MAX_6));
   } else {
     w83781d_write_value(client,W83781D_REG_IN_MIN(6),
-                        IN_TO_REG(W83782D_INIT_IN_MIN_6,6));
+                        IN_TO_REG(W83782D_INIT_IN_MIN_6));
     w83781d_write_value(client,W83781D_REG_IN_MAX(6),
-                        IN_TO_REG(W83782D_INIT_IN_MAX_6,6));
+                        IN_TO_REG(W83782D_INIT_IN_MAX_6));
   }
   if (type == w83782d) {
     w83781d_write_value(client,W83781D_REG_IN_MIN(7),
-                        IN_TO_REG(W83781D_INIT_IN_MIN_7,7));
+                        IN_TO_REG(W83781D_INIT_IN_MIN_7));
     w83781d_write_value(client,W83781D_REG_IN_MAX(7),
-                        IN_TO_REG(W83781D_INIT_IN_MAX_7,7));
+                        IN_TO_REG(W83781D_INIT_IN_MAX_7));
     w83781d_write_value(client,W83781D_REG_IN_MIN(8),
-                        IN_TO_REG(W83781D_INIT_IN_MIN_8,8));
+                        IN_TO_REG(W83781D_INIT_IN_MIN_8));
     w83781d_write_value(client,W83781D_REG_IN_MAX(8),
-                        IN_TO_REG(W83781D_INIT_IN_MAX_8,8));
+                        IN_TO_REG(W83781D_INIT_IN_MAX_8));
   }
   w83781d_write_value(client,W83781D_REG_FAN_MIN(1),
                       FAN_TO_REG(W83781D_INIT_FAN_MIN_1,2));
@@ -1196,17 +1196,17 @@ void w83781d_in(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 2;
   else if (operation == SENSORS_PROC_REAL_READ) {
     w83781d_update_client(client);
-    results[0] = IN_FROM_REG(data->in_min[nr],nr);
-    results[1] = IN_FROM_REG(data->in_max[nr],nr);
-    results[2] = IN_FROM_REG(data->in[nr],nr);
+    results[0] = IN_FROM_REG(data->in_min[nr]);
+    results[1] = IN_FROM_REG(data->in_max[nr]);
+    results[2] = IN_FROM_REG(data->in[nr]);
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
       if (*nrels_mag >= 1) {
-        data->in_min[nr] = IN_TO_REG(results[0],nr);
+        data->in_min[nr] = IN_TO_REG(results[0]);
         w83781d_write_value(client,W83781D_REG_IN_MIN(nr),data->in_min[nr]);
       }
       if (*nrels_mag >= 2) {
-        data->in_max[nr] = IN_TO_REG(results[1],nr);
+        data->in_max[nr] = IN_TO_REG(results[1]);
         w83781d_write_value(client,W83781D_REG_IN_MAX(nr),data->in_max[nr]);
       }
   }

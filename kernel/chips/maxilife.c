@@ -80,34 +80,33 @@ static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 #define MAXI_REG_BIOS_CTRL     0x2a
 #define MAXI_REG_LED_STATE     0x96
 
-/* Conversions */
+/* Conversions. Rounding and limit checking is only done on the TO_REG
+   variants. Note that you should be a bit careful with which arguments
+   these macros are called: arguments may be evaluated more than once.
+   Fixing this is just not worth it. */
+
                                /* 0xfe: fan off, 0xff: stopped (alarm) */
                                /* 19531 / val * 60 == 1171860 / val */
 #define FAN_FROM_REG(val)      ((val)==0xfe ? -1 : (val)==0xff ? 0 : \
-                                (1171860 / (val)))
-static inline unsigned char
-FAN_TO_REG (unsigned rpm)
-{
-  unsigned val;
-  
-  if (rpm == 0)
-      return 255;
+                                (val)==0x00 ? -1 : (1171860 / (val)))
 
-  val = 1171860 / rpm;
-  if (val > 255)
-      val = 255;
-  return val;
+extern inline u8 FAN_TO_REG(long rpm)
+{
+  if (rpm == 0)
+    return 255;
+  rpm = SENSORS_LIMIT(rpm,1,1000000);
+  return SENSORS_LIMIT((1171860 + rpm/2) / (rpm),1,254);
 }
 
 #define TEMP_FROM_REG(val)     ((val) * 5)
-#define TEMP_TO_REG(val)       ((val) / 5)
+#define TEMP_TO_REG(val)       (SENSORS_LIMIT((val+2) / 5),0,0xff)
 #define PLL_FROM_REG(val)      (((val) * 1000) / 32)
-#define PLL_TO_REG(val)        (((val) * 32) / 1000)
+#define PLL_TO_REG(val)        (SENSORS_LIMIT((((val) * 32 + 500) / 1000),\
+                                              0,0xff))
 #define VID_FROM_REG(val)      ((val) ? (((val) * 27390) / 256) + 3208 : 0)
-#define VID_TO_REG(val)        ((((val) - 3208) * 256) / 27390)
+#define VID_TO_REG(val)        (SENSORS_LIMIT((((val) - 3208) * 256) / 27390, \
+                                              0,255))
 #define ALARMS_FROM_REG(val)   (val)
-
-
 
 #ifdef MODULE
 extern int init_module(void);

@@ -123,36 +123,38 @@ SENSORS_INSMOD_2(adm9240,ds1780);
 #define ADM9240_REG_VID4 0x49
 #define ADM9240_REG_TEMP_CONFIG 0x4B
 
-/* Conversions. Rounding is only done on the TO_REG variants. */
-#define IN_TO_REG(val,nr) ((val) & 0xff)
+/* Conversions. Rounding and limit checking is only done on the TO_REG
+   variants. Note that you should be a bit careful with which arguments
+   these macros are called: arguments may be evaluated more than once.
+   Fixing this is just not worth it. */
+#define IN_TO_REG(val,nr) (SENSORS_LIMIT(((val) & 0xff),0,255))
 #define IN_FROM_REG(val,nr) (val)
 
-static inline unsigned char
-FAN_TO_REG (unsigned rpm, unsigned divisor)
+extern inline u8 FAN_TO_REG(long rpm, int div)
 {
-  unsigned val;
-  
   if (rpm == 0)
-      return 255;
-
-  val = (1350000 + rpm * divisor / 2) / (rpm * divisor);
-  if (val > 255)
-      val = 255;
-  return val;
+    return 255;
+  rpm = SENSORS_LIMIT(rpm,1,1000000);
+  return SENSORS_LIMIT((1350000 + rpm*div/2) / (rpm*div),1,254);
 }
+
 #define FAN_FROM_REG(val,div) ((val)==0?-1:\
                                (val)==255?0:1350000/((div)*(val)))
 
-#define TEMP_FROM_REG(val) adm9240_temp_from_reg(val)
+#define TEMP_FROM_REG(temp) \
+   ((temp)<256?((((temp)&0x1fe) >> 1) * 10)      + ((temp) & 1) * 5:  \
+               ((((temp)&0x1fe) >> 1) -255) * 10 - ((temp) & 1) * 5)  \
 
-#define TEMP_LIMIT_TO_REG(val) (((val)<0?(((val)-50)/100)&0xff:\
-                                           ((val)+50)/100) & 0xff)
 #define TEMP_LIMIT_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*100)
+
+#define TEMP_LIMIT_TO_REG(val) SENSORS_LIMIT(((val)<0?(((val)-50)/100):\
+                                                      ((val)+50)/100), \
+                                             0,255)
 
 #define ALARMS_FROM_REG(val) (val) 
 
-#define DIV_FROM_REG(val) (1 << val)
-#define DIV_TO_REG(val) (val==1?0:(val==2?1:(val==4?2:3)))
+#define DIV_FROM_REG(val) (1 << (val))
+#define DIV_TO_REG(val) ((val)==1?0:((val)==8?3:((val)==4?2:1)))
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            (val)>=0x06?0:205-(val)*5)
@@ -242,8 +244,6 @@ static int adm9240_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
 static void adm9240_inc_use (struct i2c_client *client);
 static void adm9240_dec_use (struct i2c_client *client);
-
-static long adm9240_temp_from_reg(u16 regs);
 
 static int adm9240_read_value(struct i2c_client *client, u8 register);
 static int adm9240_write_value(struct i2c_client *client, u8 register, u8 value);
@@ -500,15 +500,6 @@ void adm9240_dec_use (struct i2c_client *client)
 #endif
 }
  
-
-long adm9240_temp_from_reg(u16 temp)
-{
-  if (temp < 256)
-   return (((temp & 0x1fe) >> 1) * 10) + ((temp & 1) * 5);
-  else
-   return ((((temp & 0x01fe) >> 1) - 255) * 10) - ((temp & 1) * 5);
-}
-
 int adm9240_read_value(struct i2c_client *client, u8 reg)
 {
   return 0xFF & smbus_read_byte_data(client->adapter,client->addr, reg);

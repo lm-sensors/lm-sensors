@@ -43,9 +43,12 @@ SENSORS_INSMOD_1(lm75);
 #define LM75_REG_TEMP_HYST 0x02
 #define LM75_REG_TEMP_OS 0x03
 
-/* Conversions */
+/* Conversions. Rounding and limit checking is only done on the TO_REG
+   variants. Note that you should be a bit careful with which arguments
+   these macros are called: arguments may be evaluated more than once.
+   Fixing this is just not worth it. */
 #define TEMP_FROM_REG(val) (((val) >> 7) * 5)
-#define TEMP_TO_REG(val)   (((((val) + 2) / 5) << 7) & 0xff80)
+#define TEMP_TO_REG(val)   (SENSORS_LIMIT(((((val) + 2) / 5) << 7),0,0xffff))
 
 /* Initial values */
 #define LM75_INIT_TEMP_OS 600
