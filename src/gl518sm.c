@@ -66,6 +66,8 @@
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 #define DIV_FROM_REG(val) (1 << (val))
 
+#define ALARMS_FROM_REG(val) val
+
 #define BEEP_ENABLE_TO_REG(val) ((val)?0:1)
 #define BEEP_ENABLE_FROM_REG(val) ((val)?0:1)
 
@@ -565,7 +567,7 @@ void gl518_alarms(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     gl518_update_client(client);
-    results[0] = data->alarms;
+    results[0] = ALARMS_FROM_REG(data->alarms);
     *nrels_mag = 1;
   }
 }

@@ -1,4 +1,3 @@
-
 /*
     lm78.c - Part of lm_sensors, Linux kernel modules for hardware
              monitoring

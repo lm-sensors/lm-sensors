@@ -87,6 +87,7 @@ extern void sensors_deregister_entry(int id);
 #define I2C_DRIVERID_GL518 1004
 #define I2C_DRIVERID_EEPROM 1005
 #define I2C_DRIVERID_W83781D 1006
+#define I2C_DRIVERID_LM80 1007
 
 /* Sysctl IDs */
 #ifdef DEV_HWMON
@@ -198,4 +199,31 @@ struct sensors_chips_data {
 #define EEPROM_SYSCTL7 1006
 #define EEPROM_SYSCTL8 1007
 
+#define LM80_SYSCTL_IN0 1000  /* Volts * 100 */
+#define LM80_SYSCTL_IN1 1001
+#define LM80_SYSCTL_IN2 1002
+#define LM80_SYSCTL_IN3 1003
+#define LM80_SYSCTL_IN4 1004
+#define LM80_SYSCTL_IN5 1005
+#define LM80_SYSCTL_IN6 1006
+#define LM80_SYSCTL_FAN1 1101 /* Rotations/min */
+#define LM80_SYSCTL_FAN2 1102
+#define LM80_SYSCTL_TEMP 1250 /* Degrees Celcius * 100 */
+#define LM80_SYSCTL_FAN_DIV 2000 /* 1, 2, 4 or 8 */
+#define LM80_SYSCTL_ALARMS 2001 /* bitvector */
+
+#define LM80_ALARM_IN0 0x0001
+#define LM80_ALARM_IN1 0x0002
+#define LM80_ALARM_IN2 0x0004
+#define LM80_ALARM_IN3 0x0008
+#define LM80_ALARM_IN4 0x0010
+#define LM80_ALARM_IN5 0x0020
+#define LM80_ALARM_IN6 0x0040
+#define LM80_ALARM_FAN1 0x0400
+#define LM80_ALARM_FAN2 0x0800
+#define LM80_ALARM_TEMP_HOT 0x0100
+#define LM80_ALARM_TEMP_OS 0x2000
+#define LM80_ALARM_CHAS 0x1000
+#define LM80_ALARM_BTI 0x0200
+#define LM80_ALARM_INT_IN 0x0080
 #endif /* def SENSORS_SENSORS_H */
