@@ -664,7 +664,10 @@ you can send us your request.
 
 4.20 Sensors says 'Can't access /proc file'
 
-    Did you 'modprobe sensors'? Check 'lsmod'.
+    (release 2.6.0 and later) Did you 'modprobe i2c-proc'? Check 'lsmod'.
+    (release 2.5.5 and earlier) Did you 'modprobe sensors'? Check 'lsmod'.
+    If you did 'sensors -s', did you run it as root?
+    Do you have /proc support in your kernel (is /proc there?)
 
 
 4.21 Sensors says 'No sensors found!'
@@ -675,7 +678,6 @@ you can send us your request.
     Did you 'modprobe' your I2C adapter modules?
     Did you 'modprobe i2c-isa' if you have ISA sensor chips?
     Check 'lsmod'.
-
 
 
 4.22 Sensors output is not correct!
