@@ -22,6 +22,7 @@ ask CVS about it:
   File sensors.conf.eg: Improved adm1025 section
                         Default temp labels for as99127f
                         Improved lm83 section
+                        Better support for Asus A7V8X-X
   File doc/chips/SUMMARY: Add SMSC manufacturer ID
   File doc/chips/adm1025: Add decent documentation (almost new)
   File doc/chips/lm83: Known motherboards list update, misc updates
@@ -38,11 +39,14 @@ ask CVS about it:
                      do_pause functions
   Module i2c-ali15x3: Fix resource leak (Daniele Bellucci)
   Module i2c-nforce2: Cleanups
+  Module i2c-i810: Use readl/writel for portable access to PCI memory
   Module i2c-piix4: Force CPCI735 bug workaround (Tom Rini)
+  Module i2c-savage4: Use readl/writel for portable access to PCI memory
   Module i2c-sis630: Fix detection
                      Add block data read/write support
   Module i2c-sis645: Detection method change/bugfix
   Module i2c-viapro: Prevent buffer overrun (Sergey Vlasov)
+  Module i2c-voodoo3: Use readl/writel for portable access to PCI memory
   Module adm1025: Major driver update
                   Add support for Philips NE1619
                   Simplify the driver a lot (unified voltages, unified
@@ -89,12 +93,16 @@ ask CVS about it:
                           Add support for AS19927F rev.2, ASB100 Bach
                           Add support for Asus Mozart-2 (3 types)
                           Add support for NE1619
+                          Add support for FSC Hermes
                           Make sure /sbin is in the user's path
                           Fix EEPROM detection
                           Automatic module.conf and /dev/i2c* detection
                           Improve LM82 and LM83 detection
                           Handle "to-be-written" cleanly
                           Add detection for 47M14x Super I/O
+						  Handle the one-address-many-chips-same-driver
+                          case
+
                           
 2.8.0 (20030714)
   NOTE: Requires i2c-2.8.0 or newer!!!
