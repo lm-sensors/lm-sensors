@@ -79,7 +79,7 @@ lm78
 lm80
 	lm80		1	7	2	-	yes	no
 
-lm87-to-be-written
+lm87
         lm87	 	2-3	6-8	0-2	1 pwm	yes	no
 
 maxilife
@@ -131,6 +131,9 @@ ltc1710
 
 matorb
 	Matrox Orbital LCD displays
+
+pcf8574
+	Simple eight-bit parallel I/O
 
 
 -----------------------------------------------------------------------------
