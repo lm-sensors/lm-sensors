@@ -1595,11 +1595,15 @@ chip "fscher-*"
     label in1         "+5V"
     label in2         "Battery"
 
-# Compute Voltages using mainboard dependant MRO-values (see doc/chips/fscher)
+# Compute Voltages using mainboard dependant MRO-values
+# (see doc/chips/fscher)
 #                           M    R             O               O                  M    R
     compute in0       (@ * (49 * 33) / 255) + (0 / 100), (@ - (0 / 100)) * 255 / (49 * 33)
     compute in1       (@ * (20 * 33) / 255) + (0 / 100), (@ - (0 / 100)) * 255 / (20 * 33)
     compute in2       (@ * (10 * 33) / 255) + (0 / 100), (@ - (0 / 100)) * 255 / (10 * 33)
+
+# Read documentation before enabling pwm settings (see doc/chips/fscher)
+# WARNING: IMPROPER VALUES MAY DAMAGE YOUR SYSTEM DUE TO OVERHEATING!
 
 # Allow fans to turn off
 #    set pwm1          0
