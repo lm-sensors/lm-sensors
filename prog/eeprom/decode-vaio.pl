@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Copyright (C) 2002-2004 Jean Delvare <khali@linux-fr.org>
+# Copyright (C) 2002-2005 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,8 +37,10 @@
 #  Added some documentation.
 # Version 1.1  2004-01-17  Jean Delvare <khali@linux-fr.org>
 #  Added support for Linux 2.5/2.6 (i.e. sysfs).
-# Version 1.1  2004-11-28  Jean Delvare <khali@linux-fr.org>
+# Version 1.2  2004-11-28  Jean Delvare <khali@linux-fr.org>
 #  Support bus number 0 to 4 instead of only 0.
+# Version 1.3  2005-01-18  Jean Delvare <khali@linux-fr.org>
+#  Revision might be a Service Tag.
 #
 # EEPROM data decoding for Sony Vaio laptops. 
 #
@@ -64,12 +66,13 @@
 #   PCG-U1       : OK
 #   PCG-Z600LEK  : No EEPROM
 #   PCG-Z600NE   : No EEPROM
+#   VGN-S260     : OK
 # Any feedback appreciated anyway.
 #
 # Thanks to Werner Heuser, Carsten Blume, Christian Gennerat, Joe Wreschnig,
-# Xavier Roche, Sebastien Lefevre, Lars Heer, Steve Dobson and others for
-# their precious help.
-#
+# Xavier Roche, Sebastien Lefevre, Lars Heer, Steve Dobson, Kent Hunt and
+# others for their precious help.
+
 
 use strict;
 use Fcntl qw(:DEFAULT :seek);
@@ -179,7 +182,9 @@ sub vaio_decode
 	print_item('Machine Name', decode_string($bus, $addr, 128, 32));
 	print_item('Serial Number', decode_string($bus, $addr, 192, 32));
 	print_item('UUID', decode_uuid($bus, $addr, 16));
-	print_item('Revision', decode_string($bus, $addr, 160, 10));
+	my $revision = decode_string($bus, $addr, 160, 10);
+	print_item(length($revision) > 2 ? 'Service Tag' : 'Revision',
+		   $revision);
 	print_item('Model Name', 'PCG-'.decode_string($bus, $addr, 170, 4));
 	print_item('OEM Data', decode_string($bus, $addr, 32, 16));
 	print_item('Timestamp', decode_string($bus, $addr, 224, 32));
@@ -188,8 +193,8 @@ sub vaio_decode
 BEGIN
 {
 	print("Sony Vaio EEPROM Decoder\n");
-	print("Copyright (c) 2002-2004  Jean Delvare\n");
-	print("Version 1.1\n\n");
+	print("Copyright (C) 2002-2005  Jean Delvare\n");
+	print("Version 1.3\n\n");
 }
 
 END
