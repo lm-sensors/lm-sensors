@@ -3649,7 +3649,7 @@ void print_vt8231(const sensors_chip_name *name)
 void print_bmc(const sensors_chip_name *name)
 {
   char *label = NULL;
-  double cur,min,max,fdiv;
+  double cur,min,max;
   int alarms, valid, i;
 
 /*
@@ -3682,14 +3682,11 @@ void print_bmc(const sensors_chip_name *name)
   for(i = 0; i < BMC_MAX_FANS; i++) {
 	  if (!sensors_get_label_and_valid(*name,SENSORS_BMC_FAN1+i,&label,&valid) &&
 	      !sensors_get_feature(*name,SENSORS_BMC_FAN1+i,&cur) &&
-/*
-	      !sensors_get_feature(*name,SENSORS_BMC_FAN1_DIV+i,&fdiv) &&
-*/
 	      !sensors_get_feature(*name,SENSORS_BMC_FAN1_MIN+i,&min)) {
 	    if (valid) {
 	      print_label(label,10);
-	      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
-	             cur,min,fdiv, alarms&BMC_ALARM_FAN1?"ALARM":"");
+	      printf("%4.0f RPM  (min = %4.0f RPM)                  %s\n",
+	             cur,min,alarms&BMC_ALARM_FAN1?"ALARM":"");
 	    }
 	  }
 	  free_the_label(&label);

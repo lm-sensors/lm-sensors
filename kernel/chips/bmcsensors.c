@@ -129,6 +129,7 @@ struct sdrdata {
 	u8 number;
 	u8 capab;
 	u16 thresh_mask;
+	u8 format;
 	u8 linear;
 	s16 m;
 	s16 b;
@@ -232,8 +233,8 @@ static const char * threshold_text[] = {
 	"lower non-recoverable threshold",
 	"lower critical threshold",
 	"lower non-critical threshold",
-	"positive-going hysteresis", /* not used */
-	"negative-going hysteresis"
+	"positive-going hysteresis",
+	"negative-going hysteresis"	/* unused */
 };
 
 /* select two out of the 8 possible readable thresholds, and place indexes into the limits
@@ -269,8 +270,8 @@ static void bmcsensors_select_thresholds(int i)
 
 		/* select lower threshold */
 		if(((capab & 0x30) == 0x10) ||	/* readable hysteresis ? */
-		   ((capab & 0x30) == 0x20))	/* neg hyst */
-			sdrd[i].lim2 = 7;
+		   ((capab & 0x30) == 0x20))	/* pos hyst */
+			sdrd[i].lim2 = 6;
 		else if(mask & 0x02) {		/* lower crit */
 			sdrd[i].lim2 = 4;
 			if((capab & 0x0c) == 0x08 && (mask & 0x0200))
@@ -358,17 +359,28 @@ static void bmcsensors_build_proc_table()
 				continue;
 		}
 		sdrd[i].sysctl = bmcsensors_dir_table[i].ctl_name;
-		if(sdrd[i].linear != 0) {
-			printk(KERN_INFO "bmcsensors.o: sensor %d: (type 0x%x) nonlinear function 0x%.2x unsupported\n",
-				i, sdrd[i].stype, sdrd[i].linear);
-		}
-		ipmi_sprintf(id, sdrd[i].id, sdrd[i].string_type, sdrd[i].id_length);
-		printk(KERN_INFO "bmcsensors.o: registering sensor %d: '%s' (type 0x%.2x) as %s "
-			"(m=%d; b=%d; k1=%d; k2=%d; cap=0x%.2x; mask=0x%.4x)\n",
-			i, id, sdrd[i].stype, bmcsensors_dir_table[i].procname,
+		printk(KERN_INFO "bmcsensors.o: registering sensor %d: (type 0x%.2x) "
+			"(fmt=%d; m=%d; b=%d; k1=%d; k2=%d; cap=0x%.2x; mask=0x%.4x)\n",
+			i, sdrd[i].stype, sdrd[i].format,
 			sdrd[i].m, sdrd[i].b,sdrd[i].k & 0xf, sdrd[i].k >> 4,
 			sdrd[i].capab, sdrd[i].thresh_mask);
+		if(sdrd[i].id_length) {
+			ipmi_sprintf(id, sdrd[i].id, sdrd[i].string_type, sdrd[i].id_length);
+			printk(KERN_INFO "bmcsensors.o: sensors.conf: label %s \"%s\"\n",
+				bmcsensors_dir_table[i].procname, id);
+		}
 		bmcsensors_select_thresholds(i);
+		if(sdrd[i].linear != 0) {
+			printk(KERN_INFO "bmcsensors.o: sensor %d: nonlinear function 0x%.2x unsupported\n",
+				i, sdrd[i].linear);
+		}
+		if((sdrd[i].format & 0x03) == 0x02) {
+			printk(KERN_INFO "bmcsensors.o: sensor %d: 1's complement format unsupported\n",
+				i);
+		} else if((sdrd[i].format & 0x03) == 0x03) {
+			printk(KERN_INFO "bmcsensors.o: sensor %d: threshold sensor only, no readings available",
+				i);
+		}
 		if(sdrd[i].lim1_write || sdrd[i].lim2_write)
 			bmcsensors_dir_table[i].mode = 0644;
 		else
@@ -494,6 +506,7 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 					sdrd[sdrd_count].capab = data[14];
 					sdrd[sdrd_count].thresh_mask = (data[22] << 8) | data[21];
 					if(type == 1) {
+						sdrd[sdrd_count].format = data[24] >> 6;
 						sdrd[sdrd_count].linear = data[26] & 0x7f;
 						sdrd[sdrd_count].m = data[27];
 						sdrd[sdrd_count].m |= ((u16) (data[28] & 0xc0)) << 2;
@@ -528,24 +541,6 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 				}
 			}
 		}
-/*
-				} else {
-					printk(KERN_INFO "bmcsensors.o: Ignoring sensor type 0x%x\n", stype);
-				}
-*/
-			/*
-				printk(KERN_INFO "bmcsensors.o: STATE_SDR: record = 0x%x; version = 0x%x, type = 0x%x; length=0x%x\n",
-				record, version, type, length);
-				printk(KERN_INFO "bmcsensors.o: STATE_SDR: owner = 0x%x; lun = 0x%x, number = 0x%x; entity=0x%x\n",
-				owner, lun, number, entity);
-				printk(KERN_INFO "bmcsensors.o: STATE_SDR: instance = 0x%x; init = 0x%x, capab = 0x%x; stype=0x%x\n",
-				instance, init, capab, stype);
-				printk(KERN_INFO "bmcsensors.o: STATE_SDR: code = 0x%x\n",
-				code);
-				printk(KERN_INFO "bmcsensors.o: STATE_SDR: next = 0x%x\n", nextrecord);
-			} else {
-				printk(KERN_INFO "bmcsensors.o: unknown STATE_SDR type 0x%x\n", type);
-			*/
 	}
 			
 	if(nextrecord == 0xFFFF) {
@@ -615,7 +610,11 @@ static void bmcsensors_send_message(struct ipmi_msg * msg)
 	printk(KERN_INFO "bmcsensors.o: Send BMC msg, cmd: 0x%x\n",
 		       msg->cmd);
 #endif
+/*
 	bmcclient_i2c_send_message(&bmc_client, msgid++, msg);
+*/
+	bmc_client.adapter->algo->slave_send((struct i2c_adapter *) &bmc_client,
+	                                     (char *) msg, msgid++);
 
 }
 
@@ -660,18 +659,11 @@ void bmcsensors_get_reading(struct i2c_client *client, int i)
 
 int bmcsensors_attach_adapter(struct i2c_adapter *adapter)
 {
-/*
-  not really i2c or isa so i2c_detect not required
-*/
-	printk(KERN_INFO "bmcsensors.o: in bmcsensors_detect() for ID %x\n",
-		adapter->algo->id);
-
-	if(adapter->algo->id != I2C_ALGO_IPMI) {
+	if(adapter->algo->id != I2C_ALGO_IPMI)
 		return 0;
-	}
 
 	if(bmcsensors_initialized >= 2) {
-		printk(KERN_INFO "bmcsensors.o: limit of 1\n");
+		printk(KERN_INFO "bmcsensors.o: Additional IPMI adapter not supported\n");
 		return 0;
 	}
 
@@ -686,9 +678,6 @@ int bmcsensors_detect(struct i2c_adapter *adapter, int address,
 	bmc_client.id = 0;
 	bmc_client.adapter = adapter;
 	bmc_data.valid = 0;
-/*
-	init_MUTEX(bmc_data.update_lock);
-*/
 
 	if ((err = i2c_attach_client(&bmc_client))) {
 		printk(KERN_ERR "attach client error in bmcsensors_detect()\n");
@@ -696,7 +685,6 @@ int bmcsensors_detect(struct i2c_adapter *adapter, int address,
 	}
 	bmcsensors_initialized = 2;
 
-	/* initialize some key data */
 	state = STATE_INIT;
 	sdrd_count = 0;
 	receive_counter = 0;
@@ -775,7 +763,6 @@ void bmcsensors_update_client(struct i2c_client *client)
 		/* don't start an update cycle if one already in progress */
 		if(state != STATE_READING) {
 			state = STATE_READING;
-			printk(KERN_DEBUG "bmcsensors.o: Starting update\n");
 			bmcsensors_get_reading(client, 0);
 		}
 	}
@@ -818,10 +805,11 @@ static long convert_value(u8 value, int i)
 	u8 k1, k2;
 	long r;
 
+/* fixme signed/unsigned */
+	r = value * sdrd[i].m;
+
 	k1 = sdrd[i].k & 0x0f;
 	k2 = sdrd[i].k >> 4;
-
-	r = value * sdrd[i].m;
 	if(k1 < 8)
 		r += sdrd[i].b * exps[k1];
 	else
@@ -866,11 +854,13 @@ void bmcsensors_all(struct i2c_client *client, int operation, int ctl_name,
 				results[0] = convert_value(sdrd[i].limits[sdrd[i].lim1], i);
 			else
 				results[0] = 0;
-			if(sdrd[i].lim2 >= 0)
-				results[1] = convert_value(sdrd[i].limits[sdrd[i].lim2], i);
-			else
-				results[1] = 0;
 			results[2] = convert_value(sdrd[i].reading, i);
+			if(sdrd[i].lim2 >= 0) {
+				results[1] = convert_value(sdrd[i].limits[sdrd[i].lim2], i);
+				if(sdrd[i].lim2 == 6) /* pos. threshold */
+					results[1] = results[2] - results[1];
+			} else
+				results[1] = 0;
 			*nrels_mag = 3;
 		}
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
