@@ -59,6 +59,10 @@ motherboards do actually have an LM83, please contact us.
     Iwill       MPX2
     Soltek      SL-75DRV5
 
+A Gigabyte GA-7VRXP (rev 2.0) motherboard was reported to have an LM90
+instead of the expected LM83. The same could be true for the GA-7VAX. More
+information will be given here as soon as we know more.
+
 Note that the driver is untested so far. We really want testers! If you
 want to help, please contact us.
 
