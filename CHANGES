@@ -25,6 +25,8 @@ ask CVS about it:
   Program sensors-detect: detect Intel 82815
   Program sensors-detect: detect ITE IT8705F / IT8712F (no driver yet)
   Program sensors-detect: detect National LM87 (no driver yet)
+  Program sensors-detect: detect nVidia devices supported by i2c-riva.o
+  Program sensors-detect: Improve error reporting
 
 2.5.2 (20000709)
   File sensors.conf.eg: Fix lm80 in8 calculation
