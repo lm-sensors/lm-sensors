@@ -27,51 +27,57 @@
 
 #define A_BUNCH 16
 
-void sensors_malloc_array(void **list, int *num_el, int *max_el, int el_size)
+void sensors_malloc_array(void *list, int *num_el, int *max_el, int el_size)
 {
-  *list = malloc(el_size*A_BUNCH);
-  if (! *list)
+  void **my_list = (void **)list;
+
+  *my_list = malloc(el_size*A_BUNCH);
+  if (! *my_list)
     sensors_fatal_error("sensors_malloc_array","Allocating new elements");
   *max_el = A_BUNCH;
   *num_el = 0;
 }
 
-void sensors_free_array(void **list, int *num_el, int *max_el)
+void sensors_free_array(void *list, int *num_el, int *max_el)
 {
-  free(*list);
-  *list = NULL;
+  void **my_list = (void **)list;
+
+  free(*my_list);
+  *my_list = NULL;
   *num_el = 0;
   *max_el = 0;
 }
 
-void sensors_add_array_el(const void *el, void **list, int *num_el,
+void sensors_add_array_el(const void *el, void *list, int *num_el,
                           int *max_el, int el_size)
 {
   int new_max_el;
+  void **my_list = (void *)list;
   if (*num_el + 1 > *max_el) {
     new_max_el = *max_el + A_BUNCH;
-    *list = realloc(*list,new_max_el * el_size);
-    if (! *list)
+    *my_list = realloc(*my_list,new_max_el * el_size);
+    if (! *my_list)
       sensors_fatal_error("sensors_add_array_el","Allocating new elements");
     *max_el = new_max_el;
   }
-  memcpy(((char *) *list) + *num_el * el_size, el, el_size);
+  memcpy(((char *) *my_list) + *num_el * el_size, el, el_size);
   (*num_el) ++;
 }
 
-void sensors_add_array_els(const void *els, int nr_els, void **list, 
+void sensors_add_array_els(const void *els, int nr_els, void *list, 
                            int *num_el, int *max_el, int el_size)
 {
   int new_max_el;
+  void **my_list = (void *)list;
   if (*num_el + nr_els > *max_el) {
     new_max_el = (*max_el + nr_els + A_BUNCH);
     new_max_el -= new_max_el % A_BUNCH;
-    *list = realloc(*list,new_max_el * el_size);
-    if (! *list)
+    *my_list = realloc(*my_list,new_max_el * el_size);
+    if (! *my_list)
       sensors_fatal_error("sensors_add_array_els","Allocating new elements");
     *max_el = new_max_el;
   }
-  memcpy(((char *)*list) + *num_el * el_size, els, el_size * nr_els);
+  memcpy(((char *)*my_list) + *num_el * el_size, els, el_size * nr_els);
   *num_el += nr_els;
 }
 

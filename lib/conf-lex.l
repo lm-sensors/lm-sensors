@@ -32,15 +32,15 @@ static char *buffer;
 
 char sensors_lex_error[100];
 
-#define buffer_malloc() sensors_malloc_array((void **) &buffer,&buffer_count,\
+#define buffer_malloc() sensors_malloc_array(&buffer,&buffer_count,\
                                              &buffer_max,1)
-#define buffer_free() sensors_free_array((void **) &buffer,&buffer_count,\
+#define buffer_free() sensors_free_array(&buffer,&buffer_count,\
                                          &buffer_max)
-#define buffer_add_char(c) sensors_add_array_el(c,(void **) &buffer,\
+#define buffer_add_char(c) sensors_add_array_el(c,&buffer,\
                                                 &buffer_count,\
                                                 &buffer_max,1)
 #define buffer_add_string(s) sensors_add_array_els(s,strlen(s),\
-                                                   (void **) &buffer, \
+                                                   &buffer, \
                                                    &buffer_count,&buffer_max,1)
 
 %}

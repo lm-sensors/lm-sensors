@@ -449,7 +449,7 @@ int sensors_do_this_chip_sets(sensors_chip_name name)
           break;
       if (j != feature_count)
         continue;
-      sensors_add_array_el(&feature_nr,(void **)&feature_list,&feature_count,
+      sensors_add_array_el(&feature_nr,&feature_list,&feature_count,
                         &feature_max, sizeof(int));
 
       res = sensors_eval_expr(name,chip->sets[i].value,0,&value);

@@ -60,13 +60,13 @@ int foundsysfs=0;
 char sysfsmount[NAME_MAX];
 
 #define add_proc_chips(el) sensors_add_array_el(el,\
-                                       (void **) &sensors_proc_chips,\
+                                       &sensors_proc_chips,\
                                        &sensors_proc_chips_count,\
                                        &sensors_proc_chips_max,\
                                        sizeof(struct sensors_proc_chips_entry))
 
 #define add_proc_bus(el) sensors_add_array_el(el,\
-                                       (void **) &sensors_proc_bus,\
+                                       &sensors_proc_bus,\
                                        &sensors_proc_bus_count,\
                                        &sensors_proc_bus_max,\
                                        sizeof(struct sensors_bus))

@@ -41,38 +41,38 @@ static sensors_expr *malloc_expr(void);
 static sensors_chip *current_chip = NULL;
 
 #define bus_add_el(el) sensors_add_array_el(el,\
-                                      (void **) &sensors_config_busses,\
+                                      &sensors_config_busses,\
                                       &sensors_config_busses_count,\
                                       &sensors_config_busses_max,\
                                       sizeof(sensors_bus))
 #define label_add_el(el) sensors_add_array_el(el,\
-                                        (void **) &current_chip->labels,\
+                                        &current_chip->labels,\
                                         &current_chip->labels_count,\
                                         &current_chip->labels_max,\
                                         sizeof(sensors_label));
 #define set_add_el(el) sensors_add_array_el(el,\
-                                      (void **) &current_chip->sets,\
+                                      &current_chip->sets,\
                                       &current_chip->sets_count,\
                                       &current_chip->sets_max,\
                                       sizeof(sensors_set));
 #define compute_add_el(el) sensors_add_array_el(el,\
-                                          (void **) &current_chip->computes,\
+                                          &current_chip->computes,\
                                           &current_chip->computes_count,\
                                           &current_chip->computes_max,\
                                           sizeof(sensors_compute));
 #define ignore_add_el(el) sensors_add_array_el(el,\
-                                          (void **) &current_chip->ignores,\
+                                          &current_chip->ignores,\
                                           &current_chip->ignores_count,\
                                           &current_chip->ignores_max,\
                                           sizeof(sensors_ignore));
 #define chip_add_el(el) sensors_add_array_el(el,\
-                                       (void **) &sensors_config_chips,\
+                                       &sensors_config_chips,\
                                        &sensors_config_chips_count,\
                                        &sensors_config_chips_max,\
                                        sizeof(sensors_chip));
 
 #define fits_add_el(el,list) sensors_add_array_el(el,\
-                                                  (void **) &(list).fits,\
+                                                  &(list).fits,\
                                                   &(list).fits_count,\
                                                   &(list).fits_max, \
 		                                  sizeof(sensors_chip_name));
