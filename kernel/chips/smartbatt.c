@@ -431,10 +431,10 @@ void smartbatt_temp(struct i2c_client *client, int operation, int ctl_name,
 {
 	struct smartbatt_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
+		*nrels_mag = 1;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		smartbatt_update_client(client);
-		results[0] = data->temp;
+		results[0] = data->temp - 2731; /* convert from Kelvin */
 		*nrels_mag = 1;
 	}
 }
@@ -444,7 +444,7 @@ void smartbatt_i(struct i2c_client *client, int operation, int ctl_name,
 {
 	struct smartbatt_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
+		*nrels_mag = 3;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		smartbatt_update_client(client);
 		results[0] = data->chgi;
@@ -459,7 +459,7 @@ void smartbatt_v(struct i2c_client *client, int operation, int ctl_name,
 {
 	struct smartbatt_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
+		*nrels_mag = 3;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		smartbatt_update_client(client);
 		results[0] = data->chgv;
