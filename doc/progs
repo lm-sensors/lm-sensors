@@ -119,12 +119,9 @@ see useful_addresses.html.
   This script creates the /dev/i2c-* files. Please check the source before
   you run it, as you may need to set some variables first.
 
-* prog/pwm/pwmtest (shell script, not installed)
-  This script tests the pwm (pulse width modulation) outputs of sensors
-  for their effect on the fans.
-
 * prog/pwm/pwmconfig (shell script, not installed)
-  Extended version of pwmtest, helps setup configfile for fancontrol
+  Formerly pwmtest, tests the pwm (pulse width modulation) outputs of sensors
+  for their effect on the fans and helps to setup the configfile for fancontrol.
 
 * prog/pwm/fancontrol (shell script, not installed)
   Controls fanspeeds responding to changes on temperature sensors.
