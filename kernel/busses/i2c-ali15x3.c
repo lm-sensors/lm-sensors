@@ -36,23 +36,13 @@
     For an overview of these chips see http://www.acerlabs.com
 
     The M1533/M1543C devices appear as FOUR separate devices
-    on the PCI bus. An output of lspci -v will show something similar
+    on the PCI bus. An output of lspci will show something similar
     to the following:
 
-	00:02.0 USB Controller: Acer Laboratories Inc. M5237 (rev 03) (prog-if 10)
-		Flags: bus master, medium devsel, latency 0, IRQ 12
-		Memory at dd800000 (32-bit, non-prefetchable)
-
+	00:02.0 USB Controller: Acer Laboratories Inc. M5237
 	00:03.0 Bridge: Acer Laboratories Inc. M7101
-		Subsystem: Unknown device 10b9:7101
-		Flags: medium devsel
-
-	00:07.0 ISA bridge: Acer Laboratories Inc. M1533 (rev c3)
-		Flags: bus master, medium devsel, latency 0
-
-	00:0f.0 IDE interface: Acer Laboratories Inc. M5229 (rev c1) (prog-if fa)
-		Flags: bus master, medium devsel, latency 32, IRQ ?
-		I/O ports at b800
+	00:07.0 ISA bridge: Acer Laboratories Inc. M1533
+	00:0f.0 IDE interface: Acer Laboratories Inc. M5229
 
     The SMB controller is part of the 7101 device, which is an
     ACPI-compliant Power Management Unit (PMU).
