@@ -65,11 +65,12 @@
 
 
 /* Conversions. Rounding is only done on the TO_REG variants. */
-#define IN_TO_REG(val,nr)  (((val) * 10 + 8)/16)
-#define IN_FROM_REG(val,nr) (((val) *  16) / 10)
+#define IN_TO_REG(val)  (((val) * 10 + 8)/16)
+#define IN_FROM_REG(val) (((val) *  16) / 10)
 
-#define FAN_TO_REG(val) ((val)==0?255:((1350000+(val))/((val)*2)) & 0xff)
-#define FAN_FROM_REG(val) ((val)==0?-1:(val)==255?0:1350000/((val)*2))
+#define FAN_TO_REG(val,div) ((val)==0?255:((1350000+(val))/\
+                            ((val)*2*(div))) & 0xff)
+#define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*2*(div)))
 
 #define TEMP_TO_REG(val) (((val)<0?(((val)-5)/10)&0xff:((val)+5)/10) & 0xff)
 #define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
@@ -660,23 +661,26 @@ void lm78_init_client(struct i2c_client *client)
     vid |= 0x10;
   vid = VID_FROM_REG(vid);
 
-  lm78_write_value(client,LM78_REG_IN_MIN(0),IN_TO_REG(LM78_INIT_IN_MIN_0,0));
-  lm78_write_value(client,LM78_REG_IN_MAX(0),IN_TO_REG(LM78_INIT_IN_MAX_0,0));
-  lm78_write_value(client,LM78_REG_IN_MIN(1),IN_TO_REG(LM78_INIT_IN_MIN_1,1));
-  lm78_write_value(client,LM78_REG_IN_MAX(1),IN_TO_REG(LM78_INIT_IN_MAX_1,1));
-  lm78_write_value(client,LM78_REG_IN_MIN(2),IN_TO_REG(LM78_INIT_IN_MIN_2,2));
-  lm78_write_value(client,LM78_REG_IN_MAX(2),IN_TO_REG(LM78_INIT_IN_MAX_2,2));
-  lm78_write_value(client,LM78_REG_IN_MIN(3),IN_TO_REG(LM78_INIT_IN_MIN_3,3));
-  lm78_write_value(client,LM78_REG_IN_MAX(3),IN_TO_REG(LM78_INIT_IN_MAX_3,3));
-  lm78_write_value(client,LM78_REG_IN_MIN(4),IN_TO_REG(LM78_INIT_IN_MIN_4,4));
-  lm78_write_value(client,LM78_REG_IN_MAX(4),IN_TO_REG(LM78_INIT_IN_MAX_4,4));
-  lm78_write_value(client,LM78_REG_IN_MIN(5),IN_TO_REG(LM78_INIT_IN_MIN_5,5));
-  lm78_write_value(client,LM78_REG_IN_MAX(5),IN_TO_REG(LM78_INIT_IN_MAX_5,5));
-  lm78_write_value(client,LM78_REG_IN_MIN(6),IN_TO_REG(LM78_INIT_IN_MIN_6,6));
-  lm78_write_value(client,LM78_REG_IN_MAX(6),IN_TO_REG(LM78_INIT_IN_MAX_6,6));
-  lm78_write_value(client,LM78_REG_FAN_MIN(1),FAN_TO_REG(LM78_INIT_FAN_MIN_1));
-  lm78_write_value(client,LM78_REG_FAN_MIN(2),FAN_TO_REG(LM78_INIT_FAN_MIN_2));
-  lm78_write_value(client,LM78_REG_FAN_MIN(3),FAN_TO_REG(LM78_INIT_FAN_MIN_3));
+  lm78_write_value(client,LM78_REG_IN_MIN(0),IN_TO_REG(LM78_INIT_IN_MIN_0));
+  lm78_write_value(client,LM78_REG_IN_MAX(0),IN_TO_REG(LM78_INIT_IN_MAX_0));
+  lm78_write_value(client,LM78_REG_IN_MIN(1),IN_TO_REG(LM78_INIT_IN_MIN_1));
+  lm78_write_value(client,LM78_REG_IN_MAX(1),IN_TO_REG(LM78_INIT_IN_MAX_1));
+  lm78_write_value(client,LM78_REG_IN_MIN(2),IN_TO_REG(LM78_INIT_IN_MIN_2));
+  lm78_write_value(client,LM78_REG_IN_MAX(2),IN_TO_REG(LM78_INIT_IN_MAX_2));
+  lm78_write_value(client,LM78_REG_IN_MIN(3),IN_TO_REG(LM78_INIT_IN_MIN_3));
+  lm78_write_value(client,LM78_REG_IN_MAX(3),IN_TO_REG(LM78_INIT_IN_MAX_3));
+  lm78_write_value(client,LM78_REG_IN_MIN(4),IN_TO_REG(LM78_INIT_IN_MIN_4));
+  lm78_write_value(client,LM78_REG_IN_MAX(4),IN_TO_REG(LM78_INIT_IN_MAX_4));
+  lm78_write_value(client,LM78_REG_IN_MIN(5),IN_TO_REG(LM78_INIT_IN_MIN_5));
+  lm78_write_value(client,LM78_REG_IN_MAX(5),IN_TO_REG(LM78_INIT_IN_MAX_5));
+  lm78_write_value(client,LM78_REG_IN_MIN(6),IN_TO_REG(LM78_INIT_IN_MIN_6));
+  lm78_write_value(client,LM78_REG_IN_MAX(6),IN_TO_REG(LM78_INIT_IN_MAX_6));
+  lm78_write_value(client,LM78_REG_FAN_MIN(1),
+                   FAN_TO_REG(LM78_INIT_FAN_MIN_1,2));
+  lm78_write_value(client,LM78_REG_FAN_MIN(2),
+                   FAN_TO_REG(LM78_INIT_FAN_MIN_2,2));
+  lm78_write_value(client,LM78_REG_FAN_MIN(3),
+                   FAN_TO_REG(LM78_INIT_FAN_MIN_3,2));
   lm78_write_value(client,LM78_REG_TEMP_OVER,TEMP_TO_REG(LM78_INIT_TEMP_OVER));
   lm78_write_value(client,LM78_REG_TEMP_HYST,TEMP_TO_REG(LM78_INIT_TEMP_HYST));
 
@@ -752,17 +756,17 @@ void lm78_in(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 2;
   else if (operation == SENSORS_PROC_REAL_READ) {
     lm78_update_client(client);
-    results[0] = IN_FROM_REG(data->in_min[nr],nr);
-    results[1] = IN_FROM_REG(data->in_max[nr],nr);
-    results[2] = IN_FROM_REG(data->in[nr],nr);
+    results[0] = IN_FROM_REG(data->in_min[nr]);
+    results[1] = IN_FROM_REG(data->in_max[nr]);
+    results[2] = IN_FROM_REG(data->in[nr]);
     *nrels_mag = 3;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
       if (*nrels_mag >= 1) {
-        data->in_min[nr] = IN_TO_REG(results[0],nr);
+        data->in_min[nr] = IN_TO_REG(results[0]);
         lm78_write_value(client,LM78_REG_IN_MIN(nr),data->in_min[nr]);
       }
       if (*nrels_mag >= 2) {
-        data->in_max[nr] = IN_TO_REG(results[1],nr);
+        data->in_max[nr] = IN_TO_REG(results[1]);
         lm78_write_value(client,LM78_REG_IN_MAX(nr),data->in_max[nr]);
       }
   }
@@ -778,12 +782,15 @@ void lm78_fan(struct i2c_client *client, int operation, int ctl_name,
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
     lm78_update_client(client);
-    results[0] = FAN_FROM_REG(data->fan_min[nr-1]);
-    results[1] = FAN_FROM_REG(data->fan[nr-1]);
+    results[0] = FAN_FROM_REG(data->fan_min[nr-1],
+                 DIV_FROM_REG(data->fan_min[nr-1]));
+    results[1] = FAN_FROM_REG(data->fan[nr-1],
+                 DIV_FROM_REG(data->fan_min[nr-1]));
     *nrels_mag = 2;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
-      data->fan_min[nr-1] = FAN_TO_REG(results[0]);
+      data->fan_min[nr-1] = FAN_TO_REG(results[0],
+                            DIV_FROM_REG(data->fan_div[nr-1]));
       lm78_write_value(client,LM78_REG_FAN_MIN(nr),data->fan_min[nr-1]);
     }
   }
