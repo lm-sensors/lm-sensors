@@ -1811,7 +1811,7 @@ void print_lm87(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM87_VID,&cur)) {
     if (valid) {
       print_label(label,10);
-      printf("%+6.2f V\n",cur);
+      printf("%+6.3f V\n", cur);
     }
   }
   free_the_label(&label);
