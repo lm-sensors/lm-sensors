@@ -49,9 +49,8 @@ At least the following I2C/SMBus adapters are supported:
   Intel 82443MX (440MX)
   NVidia nForce
   ServerWorks OSB4, CSB5
-  SiS 5595
-  SiS 645
-  SMSC Victory66, 74M1xx
+  SiS 5595, 630, 645
+  SMSC Victory66
   3Dfx Voodoo 3 and Banshee
   VIA Technologies VT82C586B, VT82C596A/B, VT82C686A/B, VT8231,
                    VT8233, and VT8233A.
@@ -68,24 +67,25 @@ At least the following hardware sensor chips are supported:
   Intel Xeon processor embedded sensors
   ITE IT8705F, IT8712F embedded sensors
   Maxim MAX1617 and MAX1617A
+  Microchip TC1068, TCM1617, TCN75
   Myson MTP008
   National Semiconductor LM75, LM77, LM78, LM78-J, LM79,
                          LM80, LM81, LM84, LM87, and LM92
   Philips NE1617, NE1617A
   SiS 5595, 950 embedded sensors
   SMSC 47M1xx embedded sensors
-  TelCom TCN75
   TI THMC10 and THMC50
   VIA Technologies VT1211 and VT82C686A/B embedded sensors
   Winbond W83781D, W83782D, W83783S, W83627HF, and W83697HF
 
 
 We also support some miscellaneous chips:
-  Linear Technologies LTC1710
-  SDRAM Dimms with Serial Presence Detect EEPROMs
+  Dallas DS1307 real time clock
   Intel Xeon processor embedded EEPROMs
-  DDC Monitor embedded EEPROMs
+  Linear Technologies LTC1710
   Philips Semiconductors PCF8574, PCF8591  
+  DDC Monitor embedded EEPROMs
+  SDRAM Dimms with Serial Presence Detect EEPROMs
 
 
 See our New Drivers page http://www.lm-sensors.nu/~lm78/newdrivers.html

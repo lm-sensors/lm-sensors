@@ -23,9 +23,10 @@ ask CVS about it:
   Library: Fix fan3_div writes for w8378* and it87; add vt8231
   Module dmi_scan: new
   Module ds1621: Fix enable/disable
+  Module eeprom: Do not corrupt 24RF08's when checksum=1
   Module i2c-i801: Check for uninitialized base address;
                    enable if not enabled
-  Module i2c-piix4: Refuse to load on IBM systems
+  Module i2c-piix4: Refuse to load on IBM systems to prevent 24RF08 corruption
   Module i2c-sis630: new
   Module i2c-sis645: new
   Module lm92: Fix in-kernel initialization

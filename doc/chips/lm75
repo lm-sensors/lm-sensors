@@ -24,6 +24,11 @@ Supported chips:
     Addresses scanned: I2C 0x48 - 0x4f (inclusive)
     Datasheet: Publicly available at the Dallas Semiconductor website
                http://www.dalsemi.com
+  * Microchip (TelCom) TCN75
+    Prefix: `lm75'
+    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Datasheet: Publicly available at the Microchip website
+               http://www.microchip.com
 
 Author: Frodo Looijaard <frodol@dds.nl>
 
@@ -74,6 +79,7 @@ have three additional bits of accuracy (12 vs. 9 for the LM75),
 the additional bits are not supported.
 The prefix in the /proc directory is still 'lm75'.
 
+The TCN75 is supported as well, and is not distinguished from an LM75.
 
 Chip Features
 -------------

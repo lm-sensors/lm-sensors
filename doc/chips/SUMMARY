@@ -47,6 +47,8 @@ adm1021
 	lm84		2	-	-	-	yes	no
 	max1617		2	-	-	-	yes	no
 	max1617a	2	-	-	-	yes	no
+	tc1068		2	-	-	-	yes	no
+	tcm1617		2	-	-	-	yes	no
 	thmc10		2	-	-	-	yes	no
 	  (xeon - no detection - requires force_adm1021 parameter)
 	xeon		1	-	-	-	yes	no
