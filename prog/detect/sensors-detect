@@ -2198,7 +2198,7 @@ sub via686a_isa_detect
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, (7) if detected.
+# Returns: undef if not detected, 8 if detected (tops LM78).
 # Registers used:
 #   0x00: Configuration
 #   0x48: Full I2C Address
@@ -2212,12 +2212,12 @@ sub ite_detect
   return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
   return unless (i2c_smbus_read_byte_data($file,0x00) & 0x80) == 0x00;
   return unless i2c_smbus_read_byte_data($file,0x58) == 0x90;
-  return (7);
+  return (8);
 }
 
 # $_[0]: Chip to detect (0 = ..., 1 = ...)
 # $_[1]: Address
-# Returns: undef if not detected, 7 if detected.
+# Returns: undef if not detected, 8 if detected (tops LM78).
 # Note: Only address 0x290 is scanned at this moment.
 sub ite_isa_detect
 {
@@ -2236,7 +2236,7 @@ sub ite_isa_detect
   return unless (&$readproc(0x00) & 0x80) == 0x00;
   my $reg = &$readproc(0x58);
   return unless ($reg == 0x90);
-  return 7;
+  return 8;
 }
 
 
