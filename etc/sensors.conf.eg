@@ -2265,3 +2265,8 @@ chip "adm1031-*"
 
    set fan1_min 2000
    set fan2_min 2000
+
+
+chip "w83l785ts-*"
+
+   label temp1 "CPU Diode"
