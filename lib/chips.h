@@ -1267,4 +1267,21 @@
 #define SENSORS_VT8231_VRM 83 /* RW */
 #define SENSORS_VT8231_UCH 84 /* RW */
 
+#define SENSORS_BMC_PREFIX "bmc"
+
+/* quantity of each sensor is unknown, so just define the
+   first one of each and keep them 100 apart. */
+#define SENSORS_BMC_ALARMS 1 /* R */
+#define SENSORS_BMC_IN1 101 /* R */
+#define SENSORS_BMC_IN1_MIN 201 /* RW */
+#define SENSORS_BMC_IN1_MAX 301 /* RW */
+#define SENSORS_BMC_FAN1 1001 /* R */
+#define SENSORS_BMC_FAN1_MIN 1101 /* RW */
+#define SENSORS_BMC_TEMP1 2001 /* R */
+#define SENSORS_BMC_TEMP1_MIN 2101 /* RW */
+#define SENSORS_BMC_TEMP1_MAX 2201 /* RW */
+#define SENSORS_BMC_CURR1 3001 /* R */
+#define SENSORS_BMC_CURR1_MIN 3101 /* RW */
+#define SENSORS_BMC_CURR1_MAX 3201 /* RW */
+
 #endif /* def LIB_SENSORS_CHIPS_H */
