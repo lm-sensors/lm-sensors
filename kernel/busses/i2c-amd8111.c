@@ -30,6 +30,7 @@
 #define __devinit
 #define __devexit
 #define __devinitdata
+#define __devexit_p(x)	x
 struct pci_device_id {
         unsigned int vendor, device;
         unsigned int subvendor, subdevice;
@@ -233,8 +234,6 @@ s32 amd8111_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 			protocol |= AMD_SMB_PRTCL_BYTE_DATA;
 			break;
 
-		case I2C_SMBUS_WORD_DATA_PEC:
-			protocol |= AMD_SMB_PRTCL_PEC;
 		case I2C_SMBUS_WORD_DATA:
 			amd_ec_write(smbus, AMD_SMB_CMD, command);
 			if (read_write == I2C_SMBUS_WRITE) {
@@ -244,8 +243,6 @@ s32 amd8111_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 			protocol |= AMD_SMB_PRTCL_WORD_DATA | pec;
 			break;
 
-		case I2C_SMBUS_BLOCK_DATA_PEC:
-			protocol |= AMD_SMB_PRTCL_PEC;
 		case I2C_SMBUS_BLOCK_DATA:
 			amd_ec_write(smbus, AMD_SMB_CMD, command);
 			if (read_write == I2C_SMBUS_WRITE) {
@@ -267,8 +264,6 @@ s32 amd8111_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 			protocol |= AMD_SMB_PRTCL_I2C_BLOCK_DATA;
 			break;
 
-		case I2C_SMBUS_PROC_CALL_PEC:
-			protocol |= AMD_SMB_PRTCL_PEC;
 		case I2C_SMBUS_PROC_CALL:
 			amd_ec_write(smbus, AMD_SMB_CMD, command);
 			amd_ec_write(smbus, AMD_SMB_DATA, data->word);
@@ -277,8 +272,6 @@ s32 amd8111_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 			read_write = I2C_SMBUS_READ;
 			break;
 
-		case I2C_SMBUS_BLOCK_PROC_CALL_PEC:
-			protocol |= AMD_SMB_PRTCL_PEC;
 		case I2C_SMBUS_BLOCK_PROC_CALL:
 			protocol |= pec;
 			len = min_t(u8, data->block[0], 31);
@@ -289,6 +282,13 @@ s32 amd8111_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 			protocol = AMD_SMB_PRTCL_BLOCK_PROC_CALL | pec;
 			read_write = I2C_SMBUS_READ;
 			break;
+
+		case I2C_SMBUS_WORD_DATA_PEC:
+		case I2C_SMBUS_BLOCK_DATA_PEC:
+		case I2C_SMBUS_PROC_CALL_PEC:
+		case I2C_SMBUS_BLOCK_PROC_CALL_PEC:
+			printk(KERN_WARNING "i2c-amd8111.c: Unexpected software PEC transaction %d\n.", size);
+			return -1;
 
 		default:
 			printk(KERN_WARNING "i2c-amd8111.c: Unsupported transaction %d\n", size);
@@ -325,18 +325,14 @@ s32 amd8111_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 			break;
 
 		case I2C_SMBUS_WORD_DATA:
-		case I2C_SMBUS_WORD_DATA_PEC:
 		case I2C_SMBUS_PROC_CALL:
-		case I2C_SMBUS_PROC_CALL_PEC:
 			amd_ec_read(smbus, AMD_SMB_DATA, temp + 0);
 			amd_ec_read(smbus, AMD_SMB_DATA + 1, temp + 1);
 			data->word = (temp[1] << 8) | temp[0];
 			break;
 
 		case I2C_SMBUS_BLOCK_DATA:
-		case I2C_SMBUS_BLOCK_DATA_PEC:
 		case I2C_SMBUS_BLOCK_PROC_CALL:
-		case I2C_SMBUS_BLOCK_PROC_CALL_PEC:
 			amd_ec_read(smbus, AMD_SMB_BCNT, &len);
 			len = min_t(u8, len, 32);
 		case I2C_SMBUS_I2C_BLOCK_DATA:
@@ -362,10 +358,8 @@ void amd8111_dec(struct i2c_adapter *adapter)
 u32 amd8111_func(struct i2c_adapter *adapter)
 {
 	return	I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE | I2C_FUNC_SMBUS_BYTE_DATA |
-		I2C_FUNC_SMBUS_WORD_DATA | I2C_FUNC_SMBUS_WORD_DATA_PEC |
-		I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_BLOCK_DATA_PEC |
-		I2C_FUNC_SMBUS_PROC_CALL | I2C_FUNC_SMBUS_PROC_CALL_PEC |
-		I2C_FUNC_SMBUS_BLOCK_PROC_CALL | I2C_FUNC_SMBUS_BLOCK_PROC_CALL_PEC |
+		I2C_FUNC_SMBUS_WORD_DATA | I2C_FUNC_SMBUS_BLOCK_DATA |
+		I2C_FUNC_SMBUS_PROC_CALL | I2C_FUNC_SMBUS_BLOCK_PROC_CALL |
 		I2C_FUNC_SMBUS_I2C_BLOCK | I2C_FUNC_SMBUS_HWPEC_CALC;
 }
 
@@ -485,7 +479,7 @@ static struct pci_driver amd8111_driver = {
 	.name = "amd8111 smbus 2.0",
 	.id_table = amd8111_id_table,
 	.probe = amd8111_probe,
-	.remove = amd8111_remove,
+	.remove = __devexit_p(amd8111_remove),
 };
 
 int __init amd8111_init(void)
