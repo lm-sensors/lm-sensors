@@ -35,7 +35,7 @@
    divided. */
 
 
-#define VALUE(x) (x-1) * sizeof(double)
+#define VALUE(x) (x-1) * sizeof(long)
 
 static sensors_chip_feature lm78_features[] =
   { 

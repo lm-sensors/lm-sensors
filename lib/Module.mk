@@ -35,12 +35,14 @@ LIBSHSONAME := libsensors.so.$(LIBMAINVER)
 LIBTARGETS := $(MODULE_DIR)/$(LIBSTLIBNAME) $(MODULE_DIR)/$(LIBSHLIBNAME)
 
 LIBCSOURCES := $(MODULE_DIR)/data.c $(MODULE_DIR)/general.c \
-               $(MODULE_DIR)/error.c $(MODULE_DIR)/chips.c
+               $(MODULE_DIR)/error.c $(MODULE_DIR)/chips.c \
+               $(MODULE_DIR)/proc.c $(MODULE_DIR)/access.c
 LIBOTHEROBJECTS := $(MODULE_DIR)/conf-parse.o $(MODULE_DIR)/conf-lex.o
 LIBSHOBJECTS := $(LIBCSOURCES:.c=.lo) $(LIBOTHEROBJECTS:.o=.lo)
 LIBSTOBJECTS := $(LIBCSOURCES:.c=.ao) $(LIBOTHEROBJECTS:.o=.ao)
+LIBEXTRACLEAN := $(MODULE_DIR)/conf_parse.h
 
-LIBHEADERFILES := $(MODULE_DIR)/error.h
+LIBHEADERFILES := $(MODULE_DIR)/error.h $(MODULE_DIR)/sensors.h
 
 # How to create the shared library
 $(MODULE_DIR)/$(LIBSHLIBNAME): $(LIBSHOBJECTS)
@@ -75,5 +77,5 @@ install :: install-lib
 clean-lib:
 	$(RM) $(LIBTARGETS) $(LIBSHOBJECTS) $(LIBSTOBJECTS)
 	$(RM) $(LIBSHOBJECTS:.lo=.ld) $(LIBSTOBJECTS:.ao=.ad)
-	$(RM) $(LIBOTHEROBJECTS:.o=.c) $(MODULE_DIR)/conf-parse.h
+	$(RM) $(LIBOTHEROBJECTS:.o=.c) $(LIBEXTRACLEAN)
 clean :: clean-lib

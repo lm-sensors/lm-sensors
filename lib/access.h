@@ -20,6 +20,9 @@
 #ifndef LIB_SENSORS_ACCESS_H
 #define LIB_SENSORS_ACCESS_H
 
+#include "sensors.h"
+#include "data.h"
+
 typedef struct sensors_chip_feature {
   int number;
   const char *name;
@@ -44,5 +47,27 @@ typedef struct sensors_chip_features {
 #define SENSORS_NO_MAPPING -1
 
 extern sensors_chip_features sensors_chip_features_list[];
+
+/* Returns, one by one, a pointer to all sensor_chip structs of the
+   config file which match with the given chip name. Last should be
+   the value returned by the last call, or NULL if this is the first
+   call. Returns NULL if no more matches are found. Do not modify
+   the struct the return value points to!
+   Note that this visits the list of chips from last to first. Usually,
+   you want the match that was latest in the config file. */
+extern sensors_chip *sensors_for_all_config_chips(sensors_chip_name chip_name,
+                                                  sensors_chip *last);
+
+/* Look up a resource in the intern chip list, and return a pointer to it.
+   Do not modify the struct the return value points to! Returns NULL if
+   not found. */
+extern sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix,
+                                                       int feature);
+
+/* Look up a resource in the intern chip list, and return a pointer to it.
+   Do not modify the struct the return value points to! Returns NULL if
+   not found.*/
+extern sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
+                                                         const char *feature);
 
 #endif /* def LIB_SENSORS_ACCESS_H */
