@@ -256,13 +256,13 @@ static struct i2c_driver gl518_driver = {
    is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table gl518_dir_table_template[] = {
-	{GL518_SYSCTL_VIN1, "vin1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{GL518_SYSCTL_VIN1, "in1", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &gl518_vin},
-	{GL518_SYSCTL_VIN2, "vin2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{GL518_SYSCTL_VIN2, "in2", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &gl518_vin},
-	{GL518_SYSCTL_VIN3, "vin3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{GL518_SYSCTL_VIN3, "in3", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &gl518_vin},
-	{GL518_SYSCTL_VDD, "vdd", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{GL518_SYSCTL_VDD, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &gl518_vin},
 	{GL518_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &gl518_fan},

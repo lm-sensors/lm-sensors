@@ -28,6 +28,7 @@ ask CVS about it:
   Module i2c-i810: Add support for 810E
   Module i2c-piix4: Check for uninitialized base address
   Module i2c-viapro: Check for uninitialized base address
+  Module gl518sm: Standardize /proc entries in0-3
   Module lm87: Fix in0, in1, in5 initial limits; ain[1,2] -> in[6,7];
                fan -> fan1; fix temp2 limit writes
   Module pcf8591: new

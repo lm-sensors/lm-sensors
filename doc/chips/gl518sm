@@ -40,6 +40,11 @@ Module Parameters
 Description
 -----------
 
+IMPORTANT: in0, in1, and in2 values (+5, +3, and +12) CANNOT be read
+           unless you use the slow 'iterate' method. Limits will still
+           work even when iterate=0. See below. This is a limitation
+           of the chip, not the driver.
+
 This driver supports the Genesys Logic GL518SM chip. There are at least
 two revision of this chip, which we call revision 0x00 and 0x80. Revision
 0x80 chips support the reading of voltages directly, 0x00 only for VIN3.
