@@ -19,15 +19,19 @@ ask CVS about it:
 
 2.8.6 (2004????)
   File doc/chips/pca9540: New
+  File etc/sensors.conf.eg: Update pcf8591 default configuration
   Library: Switch to new sysfs naming standard
            Fix gcc 3.3 warnings (Philipp Thomas)
-           Support 2.6 ds1621
+           Support 2.6 ds1621 and pcf8591
+           Change pcf8591 magnitudes
   Makefile: Install shared library 755
   Man pages i2cdump.8, i2cset.8, isadump.8: New (Debian team)
   Man pages i2cdetect.8, sensors-detect.8: New (Debian team)
   Modules ds1621, pcf8591: Check for capabilities before using them
                            (Aurelien Jarno)
-  Module pcf8574: Cleanups
+  Modules pcf8574, pcf8591: Cleanups
+  Module adm1021: Better detection and initialization
+  Module eeprom: Fix bogus init (Ralf Roesch)
   Module pca9540: New driver for the Philips PCA9540
   Module smsc47m1: Support the LPC47B27x
   Programs i2cdetect, i2cdump, i2cset: Fix incorrect bus names if possible
@@ -35,12 +39,14 @@ ask CVS about it:
   Program sensord: Prevent null pointer dereference (Tim Toohey)
   Program sensors: Print the degree symbol in the terminal's current locale
                    (Aurelien Jarno)
+                   Update pcf8591 print to support 2.6 driver
   Program sensors-detect: Support Maxim MAX6900, ALi M5879, Philips PCA9540
                           Improved SiS chips support
                           Add a white list of IBM systems
                           Drop support of undetectable adapters
                           Fix smart battery detection
                           Add smart battery charger and manager detection
+                          Rework adm1021 and clones detection
   Program sensors-detect-stat.pl: New
 
 
