@@ -215,6 +215,7 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 	}
 
 	data = (struct eeprom_data *) (new_client + 1);
+	memset(data, 0xff, EEPROM_SIZE);
 	new_client->addr = address;
 	new_client->data = data;
 	new_client->adapter = adapter;
@@ -334,7 +335,7 @@ int eeprom_write_value(struct i2c_client *client, u8 reg, u8 value)
 void eeprom_update_client(struct i2c_client *client)
 {
 	struct eeprom_data *data = client->data;
-	int i;
+	int i, j;
 
 	down(&data->update_lock);
 
@@ -349,23 +350,28 @@ void eeprom_update_client(struct i2c_client *client)
 		                            I2C_FUNC_SMBUS_READ_I2C_BLOCK))
 		{
 			for (i=0; i<EEPROM_SIZE; i+=I2C_SMBUS_I2C_BLOCK_MAX)
-				if(i2c_smbus_read_i2c_block_data(client,
+				if (i2c_smbus_read_i2c_block_data(client,
 				                           i, data->data + i)
 				                    != I2C_SMBUS_I2C_BLOCK_MAX)
-					break;
+					goto DONE;
 		} else {
 			if (i2c_smbus_write_byte(client, 0)) {
 #ifdef DEBUG
 				printk("eeprom read start has failed!\n");
 #endif
+				goto DONE;
 			}
-			for (i = 0; i < EEPROM_SIZE; i++)
-				data->data[i] = (u8) i2c_smbus_read_byte(client);
+			for (i = 0; i < EEPROM_SIZE; i++) {
+				j = i2c_smbus_read_byte(client);
+				if (j < 0)
+					goto DONE;
+				data->data[i] = (u8) j;
+			}
 		}
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
-
+DONE:
 	up(&data->update_lock);
 }
 
