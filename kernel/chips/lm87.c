@@ -61,6 +61,11 @@ SENSORS_INSMOD_1(LM87);
 #define LM87_REG_IN_MIN(nr) (0x2c + (nr) * 2)
 #define LM87_REG_IN(nr) (0x20 + (nr))
 
+#define AIN1     0
+#define VCCP1    1
+#define VCCP2    5
+
+/* Initial limits */
 
 /*
  * LM87 register definition
@@ -166,10 +171,11 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==1?0:((val)==8?3:((val)==4?2:1)))
 
+#if 0
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            205-(val)*5)
+#endif
 
-/* Initial limits */
 #define LM87_INIT_IN_0 190
 #define LM87_INIT_IN_1 190
 #define LM87_INIT_IN_2 190
@@ -215,11 +221,11 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define LM87_INIT_IN_MAX_5 \
         (LM87_INIT_IN_5 + ((LM87_INIT_IN_5 * LM87_INIT_IN_PERCENTAGE) / 100))
 
-#define LM87_INIT_FAN_MIN 4000
+#define LM87_INIT_FAN_MIN 3000
 
-#define LM87_INIT_EXT_TEMP_MAX 800
+#define LM87_INIT_EXT_TEMP_MAX 600
 #define LM87_INIT_EXT_TEMP_MIN 50
-#define LM87_INIT_INT_TEMP_MAX 700
+#define LM87_INIT_INT_TEMP_MAX 600
 #define LM87_INIT_INT_TEMP_MIN 50
 
 #ifdef MODULE
@@ -570,10 +576,9 @@ void LM87_update_client(struct i2c_client *client)
 
 	down(&data->update_lock);
 
-	if (
-	    (jiffies - data->last_updated >
-	     (data->type == LM87 ? HZ / 2 : HZ * 2))
-	    || (jiffies < data->last_updated) || !data->valid) {
+	if ((jiffies - data->last_updated > HZ) ||  /* 1 sec cache */
+            (jiffies < data->last_updated)      || 
+             !data->valid) {
 
 #ifdef DEBUG
 		printk("Starting LM87 update\n");
@@ -673,7 +678,7 @@ void LM87_in(struct i2c_client *client, int operation, int ctl_name,
 	 *   The 2.5V is 50% sampled for our application, so check
 	 *   against 1.25V value.
 	 ************************************************************/
-	int scales[6] = { 260, 260, 344, 520, 1250, 260 };
+	int scales[6] = { 260, 200, 344, 520, 1250, 260 };
 
 	struct LM87_data *data = client->data;
 	int nr = ctl_name - LM87_SYSCTL_IN0;
@@ -682,12 +687,23 @@ void LM87_in(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		LM87_update_client(client);
+
 		results[0] =
 		    IN_FROM_REG(data->in_min[nr], nr) * scales[nr] / 192;
 		results[1] =
 		    IN_FROM_REG(data->in_max[nr], nr) * scales[nr] / 192;
-		results[2] =
-		    IN_FROM_REG(data->in[nr], nr) * scales[nr] / 192;
+ 
+                if (nr == AIN1) {
+                   results[2] = ((data->in[nr] * 10) * 98) / 1000;
+                }
+                else if (nr == VCCP1 || nr == VCCP2) {
+                   results[2] = ((data->in[nr] * 10) * 141) / 1000;
+                }
+                else {
+		   results[2] =
+		       IN_FROM_REG(data->in[nr], nr) * scales[nr] / 192;
+                }
+
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
@@ -865,12 +881,23 @@ void LM87_vid(struct i2c_client *client, int operation, int ctl_name,
 {
 	struct LM87_data *data = client->data;
 
+
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
+
 		LM87_update_client(client);
-		results[0] = VID_FROM_REG(data->vid);
-		*nrels_mag = 1;
+                if ((data->vid == 0x1f) || (data->vid == 0x0f)) {
+                   results[0] = 0;
+                }
+                else if (data->vid > 0x0f) {
+                   results[0] = (1275 - (((data->vid - 0x10) * 1000) * 0.025))/10;
+                }
+                else {
+                   results[0] = 200 - ((data->vid * 100) * 0.05);
+                }
+                 
+              *nrels_mag = 1;
 	}
 }
 
@@ -913,6 +940,7 @@ EXPORT_NO_SYMBOLS;
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, 
       and Stephen Rousset <stephen.rousset@rocketlogix.com>");
+
 MODULE_DESCRIPTION("LM87 driver");
 
 int init_module(void)
