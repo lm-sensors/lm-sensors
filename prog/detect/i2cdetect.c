@@ -26,20 +26,15 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "i2c-dev.h"
+#include "version.h"
+
+void print_i2c_busses();
 
 void help(void)
 {
-  FILE *fptr;
-  char s[100];
-
-  fprintf(stderr,"Syntax: i2cdetect I2CBUS\n");
-  fprintf(stderr,"  I2CBUS is an integer\n");
-  if((fptr = fopen("/proc/bus/i2c", "r"))) {
-    fprintf(stderr,"  Installed I2C busses:\n");
-    while(fgets(s, 100, fptr))
-      fprintf(stderr, "    %s", s);	
-    fclose(fptr);
-  }
+	fprintf(stderr,"Syntax: i2cdetect I2CBUS\n");
+	fprintf(stderr,"  I2CBUS is an integer\n");
+	print_i2c_busses();
 }
 
 int main(int argc, char *argv[])
@@ -57,6 +52,11 @@ int main(int argc, char *argv[])
   if (argc < 2) {
     fprintf(stderr,"Error: No i2c-bus specified!\n");
     help();
+    exit(1);
+  }
+
+  if((!strcmp(argv[1], "-v")) || (!strcmp(argv[1], "-V"))) {
+    fprintf(stderr,"i2cdetect version %s\n", LM_VERSION);
     exit(1);
   }
 

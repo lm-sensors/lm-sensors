@@ -24,11 +24,12 @@ PROGDUMPDIR := $(MODULE_DIR)
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
 PROGDUMPTARGETS := $(MODULE_DIR)/isadump $(MODULE_DIR)/i2cdump \
-		   $(MODULE_DIR)/i2cset
+		   $(MODULE_DIR)/i2cset $(MODULE_DIR)/isaset
 PROGDUMPSOURCES := $(MODULE_DIR)/isadump.c  $(MODULE_DIR)/i2cdump.c \
-		   $(MODULE_DIR)/i2cset.c
+		   $(MODULE_DIR)/i2cset.c $(MODULE_DIR)/isaset.c \
+		   $(MODULE_DIR)/i2cbusses.c
 PROGDUMPBININSTALL := $(MODULE_DIR)/isadump $(MODULE_DIR)/i2cdump \
-		   $(MODULE_DIR)/i2cset
+		   $(MODULE_DIR)/i2cset $(MODULE_DIR)/isaset
 
 # Include all dependency files. We use '.rd' to indicate this will create
 # executables.
@@ -36,6 +37,12 @@ INCLUDEFILES += $(PROGDUMPSOURCES:.c=.rd)
 
 all-prog-dump: $(PROGDUMPTARGETS)
 user :: all-prog-dump
+
+$(MODULE_DIR)/i2cdump: $(MODULE_DIR)/i2cdump.ro $(MODULE_DIR)/i2cbusses.ro
+	$(CC) -o $@ $^
+
+$(MODULE_DIR)/i2cset: $(MODULE_DIR)/i2cset.ro $(MODULE_DIR)/i2cbusses.ro
+	$(CC) -o $@ $^
 
 install-prog-dump: all-prog-dump
 	mkdir -p $(DESTDIR)$(SBINDIR)

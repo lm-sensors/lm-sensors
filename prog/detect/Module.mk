@@ -35,6 +35,9 @@ INCLUDEFILES += $(PROGDETECTSOURCES:.c=.rd)
 all-prog-detect: $(PROGDETECTTARGETS)
 user :: all-prog-detect
 
+$(MODULE_DIR)/i2cdetect: $(MODULE_DIR)/i2cdetect.ro prog/dump/i2cbusses.ro
+	$(CC) -o $@ $^
+
 install-prog-detect: all-prog-detect
 	mkdir -p $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -o root -g root -m 755 $(PROGDETECTSBININSTALL) $(DESTDIR)$(SBINDIR)

@@ -1,6 +1,6 @@
 /*
     i2cset.c - A user-space program to write an I2C register.
-    Copyright (c) 2001  Frodo Looijaard <frodol@dds.nl>, and
+    Copyright (c) 2001-2003  Frodo Looijaard <frodol@dds.nl>, and
     Mark D. Studebaker <mdsxyz123@yahoo.com>
 
     This program is free software; you can redistribute it and/or modify
@@ -25,23 +25,17 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "i2c-dev.h"
+#include "version.h"
 
+void print_i2c_busses();
 void help(void) __attribute__ ((noreturn));
 
 void help(void)
 {
-  FILE *fptr;
-  char s[100];
-
   fprintf(stderr,"Syntax: i2cset I2CBUS CHIP-ADDRESS DATA-ADDRESS VALUE [MODE]\n");
   fprintf(stderr,"  MODE is 'b[yte]' or 'w[ord]' (default b)\n");
   fprintf(stderr,"  I2CBUS is an integer\n");
-  if((fptr = fopen("/proc/bus/i2c", "r"))) {
-    fprintf(stderr,"  Installed I2C busses:\n");
-    while(fgets(s, 100, fptr))
-      fprintf(stderr, "    %s", s);	
-    fclose(fptr);
-  }
+  print_i2c_busses();
   exit(1);
 }
 
@@ -56,6 +50,11 @@ int main(int argc, char *argv[])
   char filename3[20];
   char *filename;
   long funcs;
+
+  if(argc >= 2 && ((!strcmp(argv[1], "-v")) || (!strcmp(argv[1], "-V")))) {
+    fprintf(stderr,"i2cset version %s\n", LM_VERSION);
+    exit(1);
+  }
 
   if (argc < 5)
     help();

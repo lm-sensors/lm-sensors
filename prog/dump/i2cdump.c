@@ -1,6 +1,6 @@
 /*
     i2cdump.c - Part of i2cdump, a user-space program to dump I2C registers
-    Copyright (c) 2002  Frodo Looijaard <frodol@dds.nl>, and
+    Copyright (c) 2002-2003  Frodo Looijaard <frodol@dds.nl>, and
     Mark D. Studebaker <mdsxyz123@yahoo.com>
 
     This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "i2c-dev.h"
+#include "version.h"
 
 /*
    We don't use this #define but it was put into i2c.h at the same time as
@@ -41,11 +42,10 @@
 #define HAVE_PEC 1
 #endif
 
+void print_i2c_busses();
+
 void help(void)
 {
-  FILE *fptr;
-  char s[100];
-
   fprintf(stderr,"Syntax: i2cdump I2CBUS ADDRESS [MODE] [BANK [BANKREG]]\n");
   fprintf(stderr,"  MODE is 'b[yte]', 'w[ord]', 's[mbusblock], or 'i[2cblock]' (default b)\n");
   fprintf(stderr,"  Append MODE with 'p' for PEC checking\n");
@@ -53,12 +53,7 @@ void help(void)
   fprintf(stderr,"  ADDRESS is an integer 0x00 - 0x7f\n");
   fprintf(stderr,"  BANK and BANKREG are for byte and word accesses (default bank 0, reg 0x4e)\n");
   fprintf(stderr,"  BANK is the command for smbusblock accesses (default 0)\n");
-  if((fptr = fopen("/proc/bus/i2c", "r"))) {
-    fprintf(stderr,"  Installed I2C busses:\n");
-    while(fgets(s, 100, fptr))
-      fprintf(stderr, "    %s", s);	
-    fclose(fptr);
-  }
+  print_i2c_busses();
 }
 
 int main(int argc, char *argv[])
@@ -79,6 +74,11 @@ int main(int argc, char *argv[])
   if (argc < 2) {
     fprintf(stderr,"Error: No i2c-bus specified!\n");
     help();
+    exit(1);
+  }
+
+  if((!strcmp(argv[1], "-v")) || (!strcmp(argv[1], "-V"))) {
+    fprintf(stderr,"i2cdump version %s\n", LM_VERSION);
     exit(1);
   }
 
