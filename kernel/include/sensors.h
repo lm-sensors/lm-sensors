@@ -352,6 +352,12 @@ struct sensors_chips_data {
 #define W83781D_SYSCTL_PWM2 1402
 #define W83781D_SYSCTL_PWM3 1403
 #define W83781D_SYSCTL_PWM4 1404
+#define W83781D_SYSCTL_SENS1 1501   /* 1, 2, or Beta (3000-5000) */
+#define W83781D_SYSCTL_SENS2 1502
+#define W83781D_SYSCTL_SENS3 1503
+#define W83781D_SYSCTL_RT1   1601   /* 32-entry table */
+#define W83781D_SYSCTL_RT2   1602   /* 32-entry table */
+#define W83781D_SYSCTL_RT3   1603   /* 32-entry table */
 #define W83781D_SYSCTL_FAN_DIV 2000 /* 1, 2, 4 or 8 */
 #define W83781D_SYSCTL_ALARMS 2001 /* bitvector */
 #define W83781D_SYSCTL_BEEP 2002 /* bitvector */

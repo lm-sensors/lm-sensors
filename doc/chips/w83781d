@@ -18,7 +18,24 @@ w83783s: untested
 
 /PROC ENTRIES
 -------------
-Varies depending on chip type.
+Varies depending on chip type. Most are identical to the lm78 entries.
+See the lm78 documentation for details.
+
+Additional entries:
+	pwm[1-4]: (782d/783s only)
+	  Controls the speed of the fans with PWM (Pulse Width Modulation)
+	  Valid values:
+	    0 - 255. 255 = max speed.
+
+	sensor[1-3]: (782d/783s only)
+	  Controls the sensor type. To change to a different
+	  sensor type, for example, do 'echo 2 > sensor1'.
+	  Valid values:
+	       1: Pentium II / Celeron diode
+	       2: 2N3904 Transistor in a diode configuration
+	    3435: Thermistor with Beta = 3435. Beta is a measure
+	          of sensitivity to temperature.
+
 
 The driver only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
@@ -31,7 +48,6 @@ TO DO:
  783s temp2 (labeled as temp1 in data sheet) at different location
       than 781d/782d, not implemented yet.
  781d R-T table
- 782d/783s undocumented thermistor/PII/3904 select bits for pins 38-40
  782d/783s clock speed select
 
 

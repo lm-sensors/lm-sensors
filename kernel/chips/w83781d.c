@@ -45,6 +45,9 @@
 #include "i2c.h"
 #include "compat.h"
 
+/* RT Table support experimental - define this to enable */
+#undef W83781D_RT
+
 /* Many W83781D constants specified below */
 
 /* Length of ISA address segment */
@@ -104,6 +107,19 @@
 #define W83781D_REG_PWMCLK34 0x45C
 const u8 regpwm[] = {W83781D_REG_PWM1, W83781D_REG_PWM2, W83781D_REG_PWM3, W83781D_REG_PWM4};
 #define W83781D_REG_PWM(nr) (regpwm[(nr) - 1])
+
+/* The following are undocumented in the data sheets however we
+   received the information in an email from Winbond tech support */
+/* Sensor selection 782D/783S only */
+#define W83781D_REG_SCFG1 0x5D
+const u8 BIT_SCFG1[] = {0x02, 0x04, 0x08};
+#define W83781D_REG_SCFG2 0x59
+const u8 BIT_SCFG2[] = {0x10, 0x04, 0x08};
+#define W83781D_DEFAULT_BETA 3435
+
+/* RT Table registers */
+#define W83781D_REG_RT_IDX 0x50
+#define W83781D_REG_RT_VAL 0x51
 
 #define W83781D_WCHIPID 0x10
 #define W83782D_WCHIPID 0x30
@@ -297,6 +313,13 @@ struct w83781d_data {
          u8 beep_enable;             /* Boolean */
          u8 wchipid;                 /* Register value */
          u8 pwm[4];                  /* Register value */				
+         u16 sens[3];                /* 782D/783S only.
+					1 = pentium diode; 2 = 3904 diode;
+                                        3000-5000 = thermistor beta.
+                                        Default = 3435. Other Betas unimplemented */
+#ifdef W83781D_RT
+         u8 rt[3][32];               /* Register value */
+#endif
 };
 
 
@@ -342,6 +365,12 @@ static void w83781d_fan_div(struct i2c_client *client, int operation,
                             int ctl_name, int *nrels_mag, long *results);
 static void w83781d_pwm(struct i2c_client *client, int operation,
                         int ctl_name, int *nrels_mag, long *results);
+static void w83781d_sens(struct i2c_client *client, int operation,
+                        int ctl_name, int *nrels_mag, long *results);
+#ifdef W83781D_RT
+static void w83781d_rt(struct i2c_client *client, int operation,
+                        int ctl_name, int *nrels_mag, long *results);
+#endif
 
 /* I choose here for semi-static W83781D allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -406,6 +435,14 @@ static ctl_table w83781d_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &w83781d_alarms },
   { W83781D_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_beep },
+#ifdef W83781D_RT
+  { W83781D_SYSCTL_RT1, "rt1", NULL, 0, 0444, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_rt },
+  { W83781D_SYSCTL_RT2, "rt2", NULL, 0, 0444, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_rt },
+  { W83781D_SYSCTL_RT3, "rt3", NULL, 0, 0444, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_rt },
+#endif
   { 0 }
 };
 
@@ -453,6 +490,12 @@ static ctl_table w83782d_isa_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &w83781d_pwm },
   { W83781D_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_pwm },
+  { W83781D_SYSCTL_SENS1, "sensor1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_sens },
+  { W83781D_SYSCTL_SENS2, "sensor2", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_sens },
+  { W83781D_SYSCTL_SENS3, "sensor3", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_sens },
   { 0 }
 };
 
@@ -504,6 +547,12 @@ static ctl_table w83782d_i2c_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &w83781d_pwm },
   { W83781D_SYSCTL_PWM4, "pwm4", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_pwm },
+  { W83781D_SYSCTL_SENS1, "sensor1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_sens },
+  { W83781D_SYSCTL_SENS2, "sensor2", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_sens },
+  { W83781D_SYSCTL_SENS3, "sensor3", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_sens },
   { 0 }
 };
 
@@ -543,6 +592,10 @@ static ctl_table w83783s_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &w83781d_pwm },
   { W83781D_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &w83781d_pwm },
+  { W83781D_SYSCTL_SENS1, "sensor1", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_sens },
+  { W83781D_SYSCTL_SENS2, "sensor2", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &w83781d_sens },
   { 0 }
 };
 
@@ -988,9 +1041,12 @@ int w83781d_write_value(struct i2c_client *client, u16 reg, u16 value)
 /* Called when we have found a new W83781D. It should set limits, etc. */
 void w83781d_init_client(struct i2c_client *client)
 {
+  struct w83781d_data *data = client->data;
   int vid,wchipid;
+  int i;
+  u8 tmp;
 
-  wchipid = ((struct w83781d_data *) (client->data))->wchipid;
+  wchipid = data->wchipid;
   /* Reset all except Watchdog values and last conversion values
      This sets fan-divs to 2, among others */
   w83781d_write_value(client,W83781D_REG_CONFIG,0x80);
@@ -998,6 +1054,47 @@ void w83781d_init_client(struct i2c_client *client)
   vid = w83781d_read_value(client,W83781D_REG_VID_FANDIV) & 0x0f;
   vid |= (w83781d_read_value(client,W83781D_REG_CHIPID) & 0x01) << 4;
   vid = VID_FROM_REG(vid);
+
+  if(wchipid != W83781D_WCHIPID) {
+    tmp = w83781d_read_value(client,W83781D_REG_SCFG1);
+    for (i = 1; i <= 3; i++) {
+      if(!(tmp & BIT_SCFG1[i-1])) {
+        data->sens[i-1] = W83781D_DEFAULT_BETA;
+      } else {
+        if(w83781d_read_value(client,W83781D_REG_TEMP) & BIT_SCFG2[i-1])
+          data->sens[i-1] = 1;
+        else
+          data->sens[i-1] = 2;
+      }
+      if(data->wchipid == W83783S_WCHIPID && i == 2)
+        break;
+    }
+  }
+
+#ifdef W83781D_RT
+/*
+   Fill up the RT Tables.
+   We assume that they are 32 bytes long, in order for temp 1-3.
+   Data sheet documentation is sparse.
+   We also assume that it is only for the 781D although I suspect
+   that the 782D/783D support it as well....
+*/
+
+  if(wchipid == W83781D_WCHIPID) {
+/*
+    Auto-indexing doesn't seem to work...
+    w83781d_write_value(client,W83781D_REG_RT_IDX,0);
+*/
+    for (i = 0; i < 3; i++) {
+      int j;
+      for (j = 0; j < 32; j++) {
+        u16 k = 0;
+        w83781d_write_value(client,W83781D_REG_RT_IDX,k++);
+        data->rt[i][j] = w83781d_read_value(client,W83781D_REG_RT_VAL);
+      }
+    }
+  }
+#endif
 
   w83781d_write_value(client,W83781D_REG_IN_MIN(0),
                       IN_TO_REG(W83781D_INIT_IN_MIN_0,0));
@@ -1381,6 +1478,67 @@ void w83781d_pwm(struct i2c_client *client, int operation, int ctl_name,
     }
   }
 }
+
+void w83781d_sens(struct i2c_client *client, int operation, int ctl_name,
+                 int *nrels_mag, long *results)
+{
+  struct w83781d_data *data = client->data;
+  int nr = 1 + ctl_name - W83781D_SYSCTL_SENS1;
+  u8 tmp;
+
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    results[0] = data->sens[nr-1];
+    *nrels_mag = 1;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 1) {
+      switch(results[0]) {
+        case 1:				/* PII/Celeron diode */
+          tmp = w83781d_read_value(client,W83781D_REG_SCFG1);
+          w83781d_write_value(client,W83781D_REG_SCFG1, tmp | BIT_SCFG2[nr-1]);
+          tmp = w83781d_read_value(client,W83781D_REG_SCFG2);
+          w83781d_write_value(client,W83781D_REG_SCFG2, tmp | BIT_SCFG2[nr-1]);
+          data->sens[nr-1] = results[0];
+          break;
+        case 2:				/* 3904 */
+          tmp = w83781d_read_value(client,W83781D_REG_SCFG1);
+          w83781d_write_value(client,W83781D_REG_SCFG1, tmp | BIT_SCFG2[nr-1]);
+          tmp = w83781d_read_value(client,W83781D_REG_SCFG2);
+          w83781d_write_value(client,W83781D_REG_SCFG2, tmp & ~ BIT_SCFG2[nr-1]);
+          data->sens[nr-1] = results[0];
+          break;
+        case W83781D_DEFAULT_BETA: 	/* thermistor */
+          tmp = w83781d_read_value(client,W83781D_REG_SCFG1);
+          w83781d_write_value(client,W83781D_REG_SCFG1, tmp & ~ BIT_SCFG2[nr-1]);
+          data->sens[nr-1] = results[0];
+          break;
+        default:
+          printk("w83781d.o: Invalid sensor type %ld; must be 1, 2, or %d\n", results[0], W83781D_DEFAULT_BETA);
+          break;
+      }
+    }
+  }
+}
+
+#ifdef W83781D_RT
+void w83781d_rt(struct i2c_client *client, int operation, int ctl_name,
+                 int *nrels_mag, long *results)
+{
+  struct w83781d_data *data = client->data;
+  int nr = 1 + ctl_name - W83781D_SYSCTL_RT1;
+  int i;
+
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    for(i = 0; i < 32; i++) {
+      results[i] = data->rt[nr-1][i];
+    }
+    *nrels_mag = 32;
+  }
+}
+#endif
 
 int w83781d_init(void)
 {

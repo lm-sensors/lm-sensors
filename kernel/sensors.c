@@ -334,7 +334,7 @@ int sensors_sysctl_chips (ctl_table *table, int *name, int nlen, void *oldval,
 int sensors_proc_real(ctl_table *ctl, int write, struct file * filp,
                       void *buffer, size_t *lenp)
 {
-#define MAX_RESULTS 20
+#define MAX_RESULTS 32
   int mag,nrels=MAX_RESULTS;
   long results[MAX_RESULTS];
   sensors_real_callback callback = ctl -> extra1;
