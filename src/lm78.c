@@ -225,7 +225,7 @@ static struct i2c_client *lm78_list[MAX_LM78_NR];
 /* The driver. I choose to use type i2c_driver, as at is identical to both
    smbus_driver and isa_driver, and clients could be of either kind */
 static struct i2c_driver lm78_driver = {
-  /* name */		"LM78 sensor chip driver",
+  /* name */		"LM78(-J) and LM79 sensor driver",
   /* id */		I2C_DRIVERID_LM78,
   /* flags */		DF_NOTIFY,
   /* attach_adapter */  &lm78_attach_adapter,
@@ -463,7 +463,7 @@ int lm78_detect_smbus(struct i2c_adapter *adapter)
       type = lm78j;
       type_name = "lm78-j";
       client_name = "LM78-J chip";
-    } else if (err == 0x80) {
+    } else if (err == 0xc0) {
       type = lm79;
       type_name = "lm79";
       client_name = "LM79 chip";
