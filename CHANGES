@@ -19,12 +19,18 @@ ask CVS about it:
 
 2.8.0 (2003????)
   NOTE: Requires i2c-2.7.0 or newer.
+  Dropped all kernel 2.2 and 2.3 compatibility
   File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
   Library: Add support for exponents and logarithms for vt1211/vt8235 temps
   Makefiles: Generate warnings if new library won't be found by ld.so;
              Modules now install in kernel/drivers/i2c/[busses,chips]
-  Module adm1021: Ignore failed reads and report old value
-  Modules ddcmon, eeprom: Use i2c block reads if possible
+  Module adm1021: Ignore failed reads and report old value;
+                  merge changes from kernel 2.5.54
+  Modules ddcmon, eeprom: Use i2c block reads if possible;
+                          better error handling
+  Module lm75: merge changes from kernel 2.5.54
+  Module i2c-amd756: merge changes from kernel 2.5.54
+  Module i2c-amd8111: merge changes from kernel 2.5.54
   Module i2c-i810.c: Fix for some chips
   Modules mtp008, smsc47m1, vt1211, vt8231, w83781d: Standardize and improve
           pwm and pwm enable support; update docs
