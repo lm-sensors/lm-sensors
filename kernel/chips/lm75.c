@@ -106,7 +106,7 @@ static int lm75_attach_adapter(struct i2c_adapter *adapter)
 int lm75_detect(struct i2c_adapter *adapter, int address,
 		unsigned short flags, int kind)
 {
-	int i, cur, conf, hyst, os;
+	int i;
 	struct i2c_client *new_client;
 	struct lm75_data *data;
 	int err = 0;
@@ -141,22 +141,42 @@ int lm75_detect(struct i2c_adapter *adapter, int address,
 	new_client->driver = &lm75_driver;
 	new_client->flags = 0;
 
-	/* Now, we do the remaining detection. It is lousy. */
+	/* Now, we do the remaining detection. There is no identification-
+	   dedicated register so we have to rely on several tricks:
+	   unused bits, registers cycling over 8-address boundaries,
+	   addresses 0x04-0x07 returning the last read value.
+	   The cycling+unused addresses combination is not tested,
+	   since it would significantly slow the detection down and would
+	   hardly add any value. */
 	if (kind < 0) {
+		int cur, conf, hyst, os;
+
+		/* Unused addresses */
 		cur = i2c_smbus_read_word_data(new_client, 0);
 		conf = i2c_smbus_read_byte_data(new_client, 1);
 		hyst = i2c_smbus_read_word_data(new_client, 2);
+		if (i2c_smbus_read_word_data(new_client, 4) != hyst
+		 || i2c_smbus_read_word_data(new_client, 5) != hyst
+		 || i2c_smbus_read_word_data(new_client, 6) != hyst
+		 || i2c_smbus_read_word_data(new_client, 7) != hyst)
+		 	goto error1;
 		os = i2c_smbus_read_word_data(new_client, 3);
-		for (i = 0; i <= 0x1f; i++)
-			if (
-			    (i2c_smbus_read_byte_data
-			     (new_client, i * 8 + 1) != conf)
-			    ||
-			    (i2c_smbus_read_word_data
-			     (new_client, i * 8 + 2) != hyst)
-			    ||
-			    (i2c_smbus_read_word_data
-			     (new_client, i * 8 + 3) != os))
+		if (i2c_smbus_read_word_data(new_client, 4) != os
+		 || i2c_smbus_read_word_data(new_client, 5) != os
+		 || i2c_smbus_read_word_data(new_client, 6) != os
+		 || i2c_smbus_read_word_data(new_client, 7) != os)
+		 	goto error1;
+
+		/* Unused bits */
+		if ((conf & 0xe0) || (cur & 0x7f00) || (hyst & 0x7f00)
+		 || (os & 0x7f00))
+		 	goto error1;
+
+		/* Addresses cycling */
+		for (i = 8; i < 0xff; i += 8)
+			if (i2c_smbus_read_byte_data(new_client, i + 1) != conf
+			 || i2c_smbus_read_word_data(new_client, i + 2) != hyst
+			 || i2c_smbus_read_word_data(new_client, i + 3) != os)
 				goto error1;
 	}
 
