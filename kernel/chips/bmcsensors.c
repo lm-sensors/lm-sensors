@@ -32,6 +32,10 @@
 #include <asm/io.h>
 #include "version.h"
 
+/*
+#define DEBUG 1
+*/
+
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
 static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
 static unsigned int normal_isa[] = { SENSORS_ISA_END };
@@ -562,7 +566,7 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 		if(type == 0x10) {
 			printk(KERN_INFO "bmcsensors.o: Generic Device acc=0x%x; slv=0x%x; lun=0x%x; type=0x%x; \"%s\"\n",
 				data[8], data[9], data[10], data[13], id);
-		else if(type == 0x11) {
+		} else if(type == 0x11) {
 			printk(KERN_INFO "bmcsensors.o: FRU Device acc=0x%x; slv=0x%x; log=0x%x; ch=0x%x; type=0x%x; \"%s\"\n",
 				data[8], data[9], data[10], data[11], data[13], id);
 		} else {
