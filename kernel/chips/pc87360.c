@@ -1,6 +1,6 @@
 /*
- *  pc87360-fan.c - Part of lm_sensors, Linux kernel modules
- *                  for hardware monitoring
+ *  pc87360.c - Part of lm_sensors, Linux kernel modules
+ *              for hardware monitoring
  *  Copyright (C) 2004 Jean Delvare <khali@linux-fr.org> 
  *
  *  Copied from smsc47m1.c:
@@ -19,6 +19,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ *  Supports the following chips:
+ *
+ *  Chip	#vin	#fan	#pwm	#temp	devid
+ *  PC87360	-	2	2	-	0xE1
+ *  PC87363	-	2	2	-	0xE8
+ *  PC87364	-	3	3	-	0xE4
+ *  PC87365	11	3	3	2	0xE5
+ *  PC87366	11	3	3	3	0xE9
  */
 
 #include <linux/module.h>
@@ -36,7 +45,7 @@ static unsigned int normal_isa[] = { 0x0000, SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 static u8 devid;
 
-SENSORS_INSMOD_3(pc87360,pc87363,pc87364);
+SENSORS_INSMOD_5(pc87360, pc87363, pc87364, pc87365, pc87366);
 
 /* modified from kernel/include/traps.c */
 #define REG	0x2e	/* The register to read/write */
@@ -72,16 +81,19 @@ static inline void superio_exit(void)
 /*
  * The PC87360 (device id 0xE1) and PC87363 (device id 0xE8) monitor and
  * control two fans.
- * The PC87364 (device id 0xE4) monitors and controls three fans.
+ * The PC87364 (device id 0xE4), PC87365 (device id 0xE5) and PC87366
+ * (device id 0xE9) monitor and control three fans.
  */
-#define PC87360_DEVID_MATCH(id) ((id) == 0xE1 || (id) == 0xE8 || (id) == 0xE4)
+#define PC87360_DEVID_MATCH(id)	((id) == 0xE1 || (id) == 0xE8 || \
+				 (id) == 0xE4 || (id) == 0xE5 || \
+				 (id) == 0xE9)
 
 #define PC87360_BASE_REG	0x60
 #define PC87360_ACTIVATE_REG	0x30
 
 #define PC87360_EXTENT		0x10
 
-/* nr has to be 0 or 1 (PC87360 and PC87363) or 2 (PC87364) */
+/* nr has to be 0 or 1 (PC87360/87363) or 2 (PC87364/87365/87366) */
 #define PC87360_REG_PRESCALE(nr)	(0x00 + 2 * (nr))
 #define PC87360_REG_PWM(nr)		(0x01 + 2 * (nr))
 #define PC87360_REG_FAN_MIN(nr)		(0x06 + 3 * (nr))
@@ -139,7 +151,7 @@ static int pc87360_id = 0;
 
 static struct i2c_driver pc87360_driver = {
 	.owner		= THIS_MODULE,
-	.name		= "PC8736x fan monitor",
+	.name		= "PC8736x hardware monitor",
 	.flags		= I2C_DF_NOTIFY,
 	.attach_adapter	= pc87360_attach_adapter,
 	.detach_client	= pc87360_detach_client,
@@ -149,14 +161,14 @@ static struct i2c_driver pc87360_driver = {
 
 #define PC87360_SYSCTL_FAN1		1101 /* Rotations/min */
 #define PC87360_SYSCTL_FAN2		1102
-#define PC87360_SYSCTL_FAN3		1103 /* PC87364 only */
+#define PC87360_SYSCTL_FAN3		1103 /* not for PC87360/PC87363 */
 #define PC87360_SYSCTL_FAN_DIV		1201 /* 1, 2, 4 or 8 */
 #define PC87360_SYSCTL_FAN1_STATUS	1301 /* bit field */
 #define PC87360_SYSCTL_FAN2_STATUS	1302
-#define PC87360_SYSCTL_FAN3_STATUS	1303 /* PC87364 only */
+#define PC87360_SYSCTL_FAN3_STATUS	1303 /* not for PC87360/PC87363 */
 #define PC87360_SYSCTL_PWM1		1401 /* 0-255 */
 #define PC87360_SYSCTL_PWM2		1402
-#define PC87360_SYSCTL_PWM3		1403 /* PC87364 only */
+#define PC87360_SYSCTL_PWM3		1403 /* not for PC87360/PC87363 */
 
 #define PC87360_ALARM_FAN_READY		0x01
 #define PC87360_ALARM_FAN_LOW		0x02
@@ -182,7 +194,7 @@ static ctl_table pc87360_dir_table_template[] = { /* PC87363 too */
 	{0}
 };
 
-static ctl_table pc87364_dir_table_template[] = {
+static ctl_table pc87364_dir_table_template[] = { /* PC87365 and PC87366 too */
 	{PC87360_SYSCTL_FAN1, "fan1", NULL, 0, 0444, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &pc87360_fan},
 	{PC87360_SYSCTL_FAN2, "fan2", NULL, 0, 0444, NULL,
@@ -227,7 +239,7 @@ static int pc87360_find(int *address, u8 *devid)
 
 	val = superio_inb(PC87360_ACTIVATE_REG);
 	if (!(val & 0x01)) {
-		printk("pc87360-fan.o: device not activated\n");
+		printk("pc87360.o: device not activated\n");
 		superio_exit();
 		return -ENODEV;
 	}
@@ -236,7 +248,7 @@ static int pc87360_find(int *address, u8 *devid)
 	    | superio_inb(PC87360_BASE_REG + 1);
 	*address = val & ~(PC87360_EXTENT - 1);
 	if (*address == 0) {
-		printk("pc87360-fan.o: base address not set\n");
+		printk("pc87360.o: base address not set\n");
 		superio_exit();
 		return -ENODEV;
 	}
@@ -260,7 +272,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	}
 
 	if (check_region(address, PC87360_EXTENT)) {
-		printk("pc87360-fan.o: region 0x%x already in use!\n", address);
+		printk("pc87360.o: region 0x%x already in use!\n", address);
 		return -ENODEV;
 	}
 
@@ -278,9 +290,16 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 	new_client->driver = &pc87360_driver;
 	new_client->flags = 0;
 
-	data->fannr = (devid == 0xe4) ? 3 : 2;
+	data->fannr = 2;
 
-	request_region(address, PC87360_EXTENT, "pc87360-fan");
+	switch (devid) {
+		case 0xe4:
+		case 0xe5:
+		case 0xe9:
+			data->fannr = 3;
+	}
+
+	request_region(address, PC87360_EXTENT, "pc87360");
 	strcpy(new_client->name, client_name);
 
 	new_client->id = pc87360_id++;
@@ -292,7 +311,7 @@ int pc87360_detect(struct i2c_adapter *adapter, int address,
 
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 				    type_name,
-				    (devid == 0xe4) ?
+				    (data->fannr == 3) ?
 				    pc87364_dir_table_template :
 				    pc87360_dir_table_template)) < 0) {
 		err = i;
@@ -318,7 +337,7 @@ static int pc87360_detach_client(struct i2c_client *client)
 	i2c_deregister_entry(((struct pc87360_data *) (client->data))->sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {
-		printk("pc87360-fan.o: Client deregistration failed, "
+		printk("pc87360.o: Client deregistration failed, "
 		       "client not detached.\n");
 		return err;
 	}
@@ -444,10 +463,10 @@ static int __init pc87360_init(void)
 {
 	int addr;
 
-	printk("pc87360-fan.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk("pc87360.o version %s (%s)\n", LM_VERSION, LM_DATE);
 
 	if (pc87360_find(&addr, &devid)) {
-		printk("pc87360-fan.o: PC8736x not detected, module not inserted.\n");
+		printk("pc87360.o: PC8736x not detected, module not inserted.\n");
 		return -ENODEV;
 	}
 	normal_isa[0] = addr;
@@ -462,7 +481,7 @@ static void __exit pc87360_exit(void)
 
 
 MODULE_AUTHOR("Jean Delvare <khali@linux-fr.org>");
-MODULE_DESCRIPTION("PC8736x fan monitor");
+MODULE_DESCRIPTION("PC8736x hardware monitor");
 MODULE_LICENSE("GPL");
 
 module_init(pc87360_init);
