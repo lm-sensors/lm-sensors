@@ -232,9 +232,9 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 	if (address == 0x57)
 	{
 		if (i2c_smbus_read_byte_data(new_client, 0x80) == 'P'
-    	 && i2c_smbus_read_byte_data(new_client, 0x81) == 'C'
-    	 && i2c_smbus_read_byte_data(new_client, 0x82) == 'G'
-    	 && i2c_smbus_read_byte_data(new_client, 0x83) == '-')
+		 && i2c_smbus_read_byte_data(new_client, 0x81) == 'C'
+		 && i2c_smbus_read_byte_data(new_client, 0x82) == 'G'
+		 && i2c_smbus_read_byte_data(new_client, 0x83) == '-')
 			data->nature = NATURE_VAIO;
 	}
 
