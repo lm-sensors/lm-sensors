@@ -26,7 +26,7 @@ SRCDIRS := kernel/busses kernel/chips
 # defined value verbatim into the command-list of rules...
 SRCTARGETS := $(MODULE_DIR)/smbus.o \
               $(MODULE_DIR)/i2c-proc.o \
-              $(MODULE_DIR)/i2c-dev.o
+              $(MODULE_DIR)/i2c-dev.o $(MODULE_DIR)/sensors.o
 
 SRCHEADERFILES := $(MODULE_DIR)/include/sensors.h $(MODULE_DIR)/include/isa.h \
                   $(MODULE_DIR)/include/smbus.h $(MODULE_DIR)/include/i2c-dev.h
