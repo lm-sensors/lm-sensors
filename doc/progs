@@ -89,6 +89,11 @@ see useful_addresses.html.
   An experimental kernel module to enable the Acer Labs 7101 PCI device.
   See prog/hotplug/README for details.
 
+* prog/hotplug/p4b_smbus.o (kernel module, not installed)
+  An experimental kernel module to enable the i801 2443 PCI device
+  on Asus P4B boards.
+  See prog/hotplug/README.p4b for details.
+
 * prog/init/sensors (shell script, not installed)
   A SysV init script to be installed in /etc/rc.d/...
 

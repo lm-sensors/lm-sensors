@@ -1,0 +1,69 @@
+What is it?
+-----------
+
+This is just a quick and dirty hack to get the hardware monitoring working
+on the ASUS P4B board under Linux.
+ASUS switches of the SMBus PCI Device in the i801 ICH2 chip. I spoke two times
+with the German support an learned that: "We do not want the users to be
+irritated by just another PCI Device in the Win98 device manager."
+Really funny :-).
+
+What does the module do?
+------------------------
+
+It turnes off (!) the bits number 8 and 3 in the LPC register of the ICH2.
+This you can also try as root with setpci and pcitweak.
+First do a:
+
+setpci -d 8086:2440 f2.w
+
+You will get an hex number VAL - in my case 148 (Hex)-, where you have to 
+erase the two bits - in my case you get 40 (Hex).
+Then do a:
+
+setpci -d 8086:2440 f2.w=VAL
+
+Running "lspci -n" you will not see any new device, but with "pcitweak -l" you
+should get a line similar to this in the output:
+
+PCI: 00:1f:3: chip 8086,2443 card 1043,8028 rev 12 class 0c,05,00 hdr 00
+
+The important thing is the "8086,2443" here.
+The device is activated, but not included in /proc/pci and 
+/proc/bus/pci/devices. This is the reason for running the module.
+
+What are the system requirements?
+---------------------------------
+
+- Obviously a board with Intel i801BA ICH2 with broken bios.
+- A linux working with a 2.4 kernel AND hotplug support in it! 
+- A installed kernel tree and gcc.
+- i2c and sensor modules installed.
+
+How to install?
+---------------
+
+Simply do a:
+
+make -f Makefile.p4b
+insmod p4b_smbus.o
+modprobe  i2c-core
+modprobe  i2c-i801
+modprobe  i2c-dev
+modprobe  i2c-proc
+
+Then run your sensor:
+
+modprobe  w83781d
+
+What should i never do?
+-----------------------
+
+Do not try to do a "rmmod p4b_smbus" before a "rmmod i2c-i801".
+The other way around should be okay. Otherwise you remove the PCI device
+without notifying the i2c driver.
+
+
+-------------------------------
+Ilja Rauhut <IljaRauhut@web.de>
+ 

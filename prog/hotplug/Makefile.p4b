@@ -1,0 +1,35 @@
+# pcwd Kernel Module Makefile
+# 
+
+VERSION=1.40
+
+VER = $(shell uname -r)
+INCLUDEDIR= /lib/modules/$(VER)/build/include
+
+CFLAGS= -D__KERNEL__ -DMODULE -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -fno-strict-aliasing -I$(INCLUDEDIR)
+
+OBJS = p4b_smbus.o
+
+all: $(OBJS)
+
+install:
+	$(MAKE)
+	install -d /lib/modules/$(VER)/kernel/drivers/char
+	install -c p4bsmbus.o /lib/modules/$(VER)/kernel/drivers/char
+#	test ! -x /dev/watchdog || mknod -m 600 /dev/watchdog c 10 130
+#	test ! -x /dev/temperature || mknod -m 600 /dev/temperature c 10 131
+
+inst:
+	$(MAKE)
+	rmmod p4b_smbus
+	install -d /lib/modules/$(VER)/kernel/drivers/char
+	install -c p4b_smbus.o /lib/modules/$(VER)/kernel/drivers/char
+	depmod -a
+#	modprobe p4b_smbus
+
+clean:
+	rm -f *.o *~ core
+
+cleandist:
+	rm -f *.o *~ core
+
