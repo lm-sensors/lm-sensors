@@ -206,14 +206,12 @@ void print_lm78(const sensors_chip_name *name)
   free_the_label(&label);
     
   if (!sensors_get_label(*name,SENSORS_LM78_ALARMS,&label)) {
-    if (alarms & LM78_ALARM_BTI) {
-      print_label(label,10);
-      printf("Board temperature input (a LM75 perhaps?)    ALARM\n");
-    }
-    if (alarms & LM78_ALARM_CHAS) {
-      print_label(label,10);
-      printf("Chassis intrusion detection                  ALARM\n");
-    }
+    print_label(label,10);
+    printf("Board temperature input (usually LM75 chips)   %s\n",
+           alarms & LM78_ALARM_BTI?"ALARM":"");
+    print_label(label,10);
+    printf("Chassis intrusion detection                    %s\n",
+           alarms & LM78_ALARM_CHAS?"ALARM":"     ");
   }
   free_the_label(&label);
 }
@@ -247,7 +245,7 @@ void print_gl518(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_GL518R00_VDD_MAX,&max)) {
       print_label(label,10);
       printf("          (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
-             min,max,alarms&GL518_ALARM_VDD?"ALARM":"",
+             min,max,alarms&GL518_ALARM_VDD?"ALARM":"     ",
              beeps&GL518_ALARM_VDD?"(beep)":"");
     } else
       printf("ERROR: Can't get VDD data!\n");
@@ -258,7 +256,7 @@ void print_gl518(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN1_MAX,&max)) {
       print_label(label,10);
       printf("          (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
-             min,max,alarms&GL518_ALARM_VIN1?"ALARM":"",
+             min,max,alarms&GL518_ALARM_VIN1?"ALARM":"     ",
              beeps&GL518_ALARM_VIN1?"(beep)":"");
     } else
       printf("ERROR: Can't get VIN1 data!\n");
@@ -268,7 +266,7 @@ void print_gl518(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN2_MAX,&max)) {
       print_label(label,10);
       printf("          (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
-             min,max,alarms&GL518_ALARM_VIN2?"ALARM":"",
+             min,max,alarms&GL518_ALARM_VIN2?"ALARM":"     ",
              beeps&GL518_ALARM_VIN2?"(beep)":"");
     } else
       printf("ERROR: Can't get IN2 data!\n");
@@ -280,7 +278,7 @@ void print_gl518(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_GL518R00_VDD_MAX,&max)) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
-             cur,min,max,alarms&GL518_ALARM_VDD?"ALARM":"",
+             cur,min,max,alarms&GL518_ALARM_VDD?"ALARM":"     ",
              beeps&GL518_ALARM_VDD?"(beep)":"");
     } else
       printf("ERROR: Can't get VDD data!\n");
@@ -291,7 +289,7 @@ void print_gl518(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN1_MAX,&max)) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
-             cur,min,max,alarms&GL518_ALARM_VIN1?"ALARM":"",
+             cur,min,max,alarms&GL518_ALARM_VIN1?"ALARM":"     ",
              beeps&GL518_ALARM_VIN1?"(beep)":"");
     } else
       printf("ERROR: Can't get VIN1 data!\n");
@@ -302,7 +300,7 @@ void print_gl518(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_GL518R00_VIN2_MAX,&max)) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
-             cur,min,max,alarms&GL518_ALARM_VIN2?"ALARM":"",
+             cur,min,max,alarms&GL518_ALARM_VIN2?"ALARM":"     ",
              beeps&GL518_ALARM_VIN2?"(beep)":"");
     } else
       printf("ERROR: Can't get IN2 data!\n");
@@ -315,7 +313,7 @@ void print_gl518(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_GL518R00_VIN3_MAX,&max)) {
     print_label(label,10);
     printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s  %s\n",
-           cur,min,max,alarms&GL518_ALARM_VIN3?"ALARM":"",
+           cur,min,max,alarms&GL518_ALARM_VIN3?"ALARM":"     ",
            beeps&GL518_ALARM_VIN3?"(beep)":"");
 
   } else
@@ -328,7 +326,7 @@ void print_gl518(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_GL518R00_FAN1_MIN,&min)) {
     print_label(label,10);
     printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s  %s\n",
-           cur,min,fdiv, alarms&GL518_ALARM_FAN1?"ALARM":"",
+           cur,min,fdiv, alarms&GL518_ALARM_FAN1?"ALARM":"     ",
            beeps&GL518_ALARM_FAN1?"(beep)":"");
   } else
     printf("ERROR: Can't get FAN1 data!\n");
@@ -339,7 +337,7 @@ void print_gl518(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_GL518R00_FAN2_MIN,&min)) {
     print_label(label,10);
     printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s  %s\n",
-           cur,min,fdiv, alarms&GL518_ALARM_FAN2?"ALARM":"",
+           cur,min,fdiv, alarms&GL518_ALARM_FAN2?"ALARM":"     ",
            beeps&GL518_ALARM_FAN2?"(beep)":"");
   } else
     printf("ERROR: Can't get FAN2 data!\n");
@@ -351,7 +349,7 @@ void print_gl518(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_GL518R00_TEMP_OVER,&max)) {
     print_label(label,10);
     printf("%+3.0f C     (limit = %+3.0f C,  hysteris = %+3.0f C) %s  %s\n",
-           cur,max,min, alarms&GL518_ALARM_TEMP?"ALARM":"",
+           cur,max,min, alarms&GL518_ALARM_TEMP?"ALARM":"     ",
            beeps&GL518_ALARM_TEMP?"(beep)":"");
   } else
     printf("ERROR: Can't get TEMP data!\n");
@@ -526,5 +524,200 @@ void print_lm80(const sensors_chip_name *name)
       printf("Chassis intrusion detection                  ALARM\n");
     }
   }
+  free_the_label(&label);
+}
+
+void print_w83781d(const sensors_chip_name *name)
+{
+  char *label = NULL;
+  double cur,min,max,fdiv;
+  int alarms,beeps;
+
+  if (!sensors_get_feature(*name,SENSORS_W83781D_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
+
+  if (!sensors_get_feature(*name,SENSORS_W83781D_BEEPS,&cur)) 
+    beeps = cur + 0.5;
+  else {
+    printf("ERROR: Can't get beep data!\n");
+    beeps = 0;
+  }
+
+  if (!sensors_get_label(*name,SENSORS_W83781D_IN0,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN0,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN0_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN0_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
+           cur,min,max,alarms&W83781D_ALARM_IN0?"ALARM":"     ",
+           beeps&W83781D_ALARM_IN0?"(beep)":"");
+  } else
+    printf("ERROR: Can't get IN0 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_W83781D_IN1,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN1_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN1_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
+           cur,min,max,alarms&W83781D_ALARM_IN1?"ALARM":"     ",
+           beeps&W83781D_ALARM_IN1?"(beep)":"");
+  } else
+    printf("ERROR: Can't get IN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_W83781D_IN2,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN2_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN2_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
+           cur,min,max,alarms&W83781D_ALARM_IN2?"ALARM":"     ",
+           beeps&W83781D_ALARM_IN2?"(beep)":"");
+  } else
+    printf("ERROR: Can't get IN2 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_W83781D_IN3,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN3_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN3_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
+           cur,min,max,alarms&W83781D_ALARM_IN3?"ALARM":"     ",
+           beeps&W83781D_ALARM_IN3?"(beep)":"");
+  } else
+    printf("ERROR: Can't get IN3 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_W83781D_IN4,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN4,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN4_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN4_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
+           cur,min,max,alarms&W83781D_ALARM_IN4?"ALARM":"     ",
+           beeps&W83781D_ALARM_IN4?"(beep)":"");
+  } else
+    printf("ERROR: Can't get IN4 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_W83781D_IN5,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN5,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN5_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN5_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
+           cur,min,max,alarms&W83781D_ALARM_IN5?"ALARM":"     ",
+           beeps&W83781D_ALARM_IN5?"(beep)":"");
+  } else
+    printf("ERROR: Can't get IN5 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_W83781D_IN6,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN6,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN6_MIN,&min) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_IN6_MAX,&max)) {
+    print_label(label,10);
+    printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
+           cur,min,max,alarms&W83781D_ALARM_IN6?"ALARM":"     ",
+           beeps&W83781D_ALARM_IN6?"(beep)":"");
+  } else
+    printf("ERROR: Can't get IN6 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_W83781D_FAN1,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_FAN1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_FAN1_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_FAN1_MIN,&min)) {
+    print_label(label,10);
+    printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)              %s  %s\n",
+           cur,min,fdiv, alarms&W83781D_ALARM_FAN1?"ALARM":"     ",
+           beeps&W83781D_ALARM_FAN1?"(beep)":"");
+  } else
+    printf("ERROR: Can't get FAN1 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_W83781D_FAN2,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_FAN2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_FAN2_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_FAN2_MIN,&min)) {
+    print_label(label,10);
+    printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)              %s  %s\n",
+           cur,min,fdiv, alarms&W83781D_ALARM_FAN2?"ALARM":"     ",
+           beeps&W83781D_ALARM_FAN2?"(beep)":"");
+  } else
+    printf("ERROR: Can't get FAN2 data!\n");
+  free_the_label(&label);
+  if (!sensors_get_label(*name,SENSORS_W83781D_FAN3,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_FAN3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_FAN3_DIV,&fdiv) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_FAN3_MIN,&min)) {
+    print_label(label,10);
+    printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)              %s  %s\n",
+           cur,min,fdiv, alarms&W83781D_ALARM_FAN3?"ALARM":"     ",
+           beeps&W83781D_ALARM_FAN3?"(beep)":"");
+  } else
+    printf("ERROR: Can't get FAN3 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_W83781D_TEMP1,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_TEMP1,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_TEMP1_HYST,&min) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_TEMP1_OVER,&max)) {
+    print_label(label,10);
+    printf("%+3.0f C     (limit = %+3.0f C,  hysteris = %+3.0f C)   %s  %s\n",
+           cur,max,min, alarms&W83781D_ALARM_TEMP1?"ALARM":"     ",
+           beeps&W83781D_ALARM_TEMP1?"(beep)":"");
+  } else
+    printf("ERROR: Can't get TEMP2 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_W83781D_TEMP2,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_TEMP2,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_TEMP2_HYST,&min) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_TEMP2_OVER,&max)) {
+    print_label(label,10);
+    printf("%+3.1f C   (limit = %+3.1f C, hysteris = %+3.1f C) %s  %s\n",
+           cur,max,min, alarms&W83781D_ALARM_TEMP23?"ALARM":"     ",
+           beeps&W83781D_ALARM_TEMP23?"(beep)":"");
+  } else
+    printf("ERROR: Can't get TEMP2 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_W83781D_TEMP3,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_TEMP3,&cur) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_TEMP3_HYST,&min) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_TEMP3_OVER,&max)) {
+    print_label(label,10);
+    printf("%+3.1f C   (limit = %+3.1f C, hysteris = %+3.1f C) %s  %s\n",
+           cur,max,min, alarms&W83781D_ALARM_TEMP23?"ALARM":"     ",
+           beeps&W83781D_ALARM_TEMP23?"(beep)":"");
+  } else
+    printf("ERROR: Can't get TEMP3 data!\n");
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_W83781D_VID,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_VID,&cur)) {
+    print_label(label,10);
+    printf("%+5.2f V\n",cur);
+  }
+  free_the_label(&label);
+    
+  if (!sensors_get_label(*name,SENSORS_W83781D_ALARMS,&label)) {
+    print_label(label,10);
+    printf("Chassis intrusion detection                      %s  %s\n",
+           alarms & W83781D_ALARM_CHAS?"ALARM":"     ",
+           beeps & W83781D_ALARM_CHAS?"(beep)":"");
+  }
+  free_the_label(&label);
+
+  if (!sensors_get_label(*name,SENSORS_W83781D_BEEP_ENABLE,&label) &&
+      !sensors_get_feature(*name,SENSORS_W83781D_BEEP_ENABLE,&cur)) {
+    print_label(label,10);
+    if (cur < 0.5) 
+      printf("Sound alarm disabled\n");
+    else
+      printf("Sound alarm enabled\n");
+  } else
+    printf("ERROR: Can't get BEEP data!\n");
   free_the_label(&label);
 }
