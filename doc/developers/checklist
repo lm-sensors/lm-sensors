@@ -1,0 +1,8 @@
+CHECKLIST FOR NEW RELEASES
+==========================
+
+* Update CHANGES
+* Update lm_sensors.lsm
+* Do a `make package'
+* Do a `cvs commit' (to commit the new version.h)
+* Tag the release using CVS

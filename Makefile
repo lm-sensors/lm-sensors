@@ -213,6 +213,7 @@ package: version clean
 	                            tar rvf $$lmpackage.tar -T -; \
         gzip -9 $$lmpackage.tar ;\
         $(RM) $$lmpackage.tar $$lmpackage
+	cat doc/developers/checklist
 
 version:
 	$(RM) version.h
