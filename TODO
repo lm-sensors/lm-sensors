@@ -1,6 +1,5 @@
 Many, many things. Most notably:
 
-* Fix /proc permissions to 0444 for read-only files.
 * Sensors program needs to print a + before lm75 temperatures
 * Timer chips - block read problems?
 * LM78 detection: bit 5 reg 0x49 may be one?!?
@@ -10,8 +9,8 @@ Many, many things. Most notably:
 * Create wait-queues for bus locking instead of pure semaphores, to make
   it more interactive
 * Check for block read/writes in smbus-on-i2c emulation code
-* Fans give overflow if small values are written to them in /proc; other 
-  features may too.
+* Better bounds checking for writes to /proc; fan_min values now checked
+  but other features may need too.
 * At least the bit-lp and bit-velle modules do no detection on loading;
   ask Simon whether this is possible to add.
 * kmalloc with GFP_KERNEL can cause a context switch! Check whether this is
