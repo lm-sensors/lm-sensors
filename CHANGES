@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.5.5 (2000????)
+  NOTE: i2c 2.5.5 MUST BE be compiled and installed first.
   Chip modules (all): Update mutex definition (works now for new 2.2 kernels)
   File sensors.conf.eg: Add mtp008 entries, adm1025 entries
   Library: Add ds1621, mtp008 support
@@ -28,6 +29,7 @@ ask CVS about it:
   Module ds1621: new
   Module i2c-ali1535: Enhance error checking and recovery; add mutex
   Module i2c-i810: Add "dummy write" before reads per Intel prog. ref.
+  Module i2c-osb4: new
   Module lm87: update voltage calculations
   Module mtp008: new
   Module pcf8574: change update time to 5 seconds
