@@ -2,7 +2,8 @@ Kernel driver `i2c-i801.o'
 
 Status: Tested and stable.
         Block reads/writes lightly tested.
-	ICH4 HW PEC support Beta.
+	HW PEC support Beta.
+	I2C Block Read support Beta.
 
 Supported adapters:
   * Intel 82801AA and 82801AB (ICH and ICH0 - part of the
@@ -10,13 +11,14 @@ Supported adapters:
   * Intel 82801BA (ICH2 - part of the '815E' chipset)
   * Intel 82801CA/CAM (ICH3)
   * Intel 82801DB (ICH4)
-  * Intel 82801EB (ICH5)
+  * Intel 82801EB/ER (ICH5)
   * Intel 6300ESB
-  * Intel ICH6
+  * Intel 82801FB/FR/FW/FRW (ICH6)
+  * Intel ICH7
     Datasheets: Publicly available at the Intel website
 
-Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
-        <phil@netroedge.com>, and Mark Studebaker <mdsxyz123@yahoo.com>
+Authors: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
+         <phil@netroedge.com>, and Mark Studebaker <mdsxyz123@yahoo.com>
 
 
 Module Parameters
@@ -30,7 +32,8 @@ Description
 -----------
 
 The ICH (properly known as the 82801AA), ICH0 (82801AB),
-ICH2 (82801BA) and ICH3 (82801CA/CAM) are Intel chips that are a part of
+ICH2 (82801BA), ICH3 (82801CA/CAM) and later devices
+are Intel chips that are a part of
 Intel's '810' chipset for Celeron-based PCs,
 '810E' chipset for Pentium-based PCs, '815E' chipset, and others.
 
@@ -67,10 +70,12 @@ Not supported.
 I2C Block Read Support
 ----------------------
 
-The devices support a special 3-byte address (command code
+The ICH4 supports a special 3-byte address (command code
 plus 2 more bytes) I2C block read.
 The driver and the kernel i2c protocol stack do not
 support this.
+The ICH5 and higher support a standard 1-byte address (command code)
+I2C block read. The driver does support this.
 
 
 SMBus 2.0 Support

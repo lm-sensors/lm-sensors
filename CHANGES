@@ -30,6 +30,9 @@ ask CVS about it:
   Module bmcsensors: Support function 1/x
   Module i2c-amd756: Display the real bus name
   Module i2c-amd756-s4882: New; SMBus multiplexing on the Tyan S4882
+  Module i2c-i801: Support i2c block read (ICH5 and higher)
+                   Add PEC support for ICH6
+                   Add support for ICH7
   Module i2c-ipmb: Remove from build since it doesn't work
   Module icspll: Fix compilation
   Module lm63: New driver for the National Semiconductor LM63
@@ -62,7 +65,7 @@ ask CVS about it:
                    Simplify the configuration file opening code
   Program sensors-detect: Improve LM63 detection
                           Discard IBM Thinkpad detection code
-                          Add PCA9556, LPC47B397 detection
+                          Add PCA9556, LPC47B397, ICH7 detection
 
 
 2.8.8 (20041007)
