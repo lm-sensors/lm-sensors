@@ -207,7 +207,7 @@ printk("bt869.o:  probing address %d .\n",address);
 	new_client->addr,0xC4,0);         /* set status bank 0 */
   cur = i2c_smbus_read_byte(adapter,address);
   printk("bt869.o: address 0x%X testing-->0x%X\n",address,cur);
-  if ((cur | 0x20) != 0x22)
+  if ((cur & 0xE0) != 0x20)
       goto ERROR1;
       
   /* Determine the chip type */
