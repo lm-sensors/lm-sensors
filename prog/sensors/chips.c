@@ -1269,12 +1269,13 @@ void print_adm1025(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_ADM1025_TEMP1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_ADM1025_TEMP1,&cur) &&
-      !sensors_get_feature(*name,SENSORS_ADM1025_TEMP1_HYST,&min) &&
-      !sensors_get_feature(*name,SENSORS_ADM1025_TEMP1_OVER,&max)) {
+      !sensors_get_feature(*name,SENSORS_ADM1025_TEMP1_LOW,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_TEMP1_HIGH,&max)) {
     if (valid) {
       print_label(label,10);
       print_temp_info( cur, max, min, MINMAX, 1, 0);
-      printf(" %s\n", alarms&ADM1025_ALARM_TEMP?"ALARM":"");
+      printf(" %s\n", alarms&ADM1025_ALARM_RFAULT?"FAULT":
+                      alarms&ADM1025_ALARM_RTEMP?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get TEMP1 data!\n");
@@ -1282,12 +1283,12 @@ void print_adm1025(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_ADM1025_TEMP2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_ADM1025_TEMP2,&cur) &&
-      !sensors_get_feature(*name,SENSORS_ADM1025_TEMP2_HYST,&min) &&
-      !sensors_get_feature(*name,SENSORS_ADM1025_TEMP2_OVER,&max)) {
+      !sensors_get_feature(*name,SENSORS_ADM1025_TEMP2_LOW,&min) &&
+      !sensors_get_feature(*name,SENSORS_ADM1025_TEMP2_HIGH,&max)) {
     if (valid) {
       print_label(label,10);
       print_temp_info( cur, max, min, MINMAX, 1, 0);
-      printf(" %s\n", alarms&ADM1025_ALARM_RTEMP ? "ALARM":"");
+      printf(" %s\n", alarms&ADM1025_ALARM_TEMP ? "ALARM":"");
     }
   } else
     printf("ERROR: Can't get TEMP2 data!\n");
