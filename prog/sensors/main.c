@@ -303,19 +303,6 @@ int do_a_set(sensors_chip_name name)
 {
   int res;
 
-  /* skip i2c subclients since sysfs doesn't hide these... */
-  if(name.bus >= 0)
-	if(name.addr >= 0x48 && name.addr <= 0x4f)
-		if(!strcmp(name.prefix, "as99127f") ||
-		   !strcmp(name.prefix, "asb100") ||
-		   !strcmp(name.prefix, "w83781d") ||
-		   !strcmp(name.prefix, "w83782d") ||
-		   !strcmp(name.prefix, "w83783s") ||
-		   !strcmp(name.prefix, "w83791d") ||
-		   !strcmp(name.prefix, "w83627hf") ||
-		   !strcmp(name.prefix, "w83697hf"))
-			return 0;
-
   if ((res = sensors_do_chip_sets(name))) {
     if (res == -SENSORS_ERR_PROC) {
       fprintf(stderr,"%s: %s for writing;\n",sprintf_chip_name(name),
@@ -422,19 +409,6 @@ void do_a_print(sensors_chip_name name)
 {
   const char *algo,*adap;
   struct match *m;
-
-  /* skip i2c subclients since sysfs doesn't hide these... */
-  if(name.bus >= 0)
-	if(name.addr >= 0x48 && name.addr <= 0x4f)
-		if(!strcmp(name.prefix, "as99127f") ||
-		   !strcmp(name.prefix, "asb100") ||
-		   !strcmp(name.prefix, "w83781d") ||
-		   !strcmp(name.prefix, "w83782d") ||
-		   !strcmp(name.prefix, "w83783s") ||
-		   !strcmp(name.prefix, "w83791d") ||
-		   !strcmp(name.prefix, "w83627hf") ||
-		   !strcmp(name.prefix, "w83697hf"))
-			return;
 
   /* do we know how to display it? */
   for(m = matches; m->prefix != NULL; m++) {
