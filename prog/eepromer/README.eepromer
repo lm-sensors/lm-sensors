@@ -1,0 +1,25 @@
+Simple program for storing data to I2C EEPROM
+tested only on 24C256
+
+!!!!!!!!!!!!!!!!!!!!!!!!Warning!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+This program is intended for use on eeproms using external busses such as 
+i2c-pport.
+Do not use this on your SDRAM DIMM EEPROMS unless you REALLY REALLY 
+know what you are doing!!!!!!!!!!! 
+Doing so will render your SDRAM USELESS  and leave your system UNBOOTABLE!!!
+
+
+
+
+
+
+
+eepromer:
+	-r  read
+	-w  write
+	-e  erase
+	-p  print "super block of EEPROM" (date and size stored data)
+
+Daniel Smolik
+marvin@sitour.cz

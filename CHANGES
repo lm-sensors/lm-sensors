@@ -35,6 +35,7 @@ ask CVS about it:
                   remove support for module
   Module sis5595: Recognize unsupported chips and refuse to load
   Module w83781d: Fix fan speed for as99127f (broken by 2.6.0)
+  Program eepromer: new
   Program mkpatch.pl: Fix dependencies on i2c-proc; disallow compilation
                       of sensors.c as a module in kernel
   Program sensors: it87 updates
