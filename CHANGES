@@ -22,7 +22,8 @@ ask CVS about it:
   Module i2c-piix4: Refuse to load on IBM systems
   Module lm92: Fix in-kernel initialization
   Program mkpatch: Add Config.in entries for, lm92,
-                   pcf8574, pcf8591, smsc47m1, vt1211
+                   pcf8574, pcf8591, smsc47m1, vt1211;
+                   add dmi_scan
   Program sensors: Add /usr/local/etc to config file path
   Program sensord: Add /usr/local/etc to config file path;
                    add support for logging loadavg in RRD;

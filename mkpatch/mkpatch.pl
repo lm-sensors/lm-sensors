@@ -1162,7 +1162,7 @@ obj-$(CONFIG_I2C_HYDRA)			+= i2c-hydra.o
 obj-$(CONFIG_I2C_I801)			+= i2c-i801.o
 obj-$(CONFIG_I2C_I810)			+= i2c-i810.o
 obj-$(CONFIG_I2C_ISA)			+= i2c-isa.o
-obj-$(CONFIG_I2C_PIIX4)			+= i2c-piix4.o
+obj-$(CONFIG_I2C_PIIX4)			+= i2c-piix4.o dmi_scan.o
 obj-$(CONFIG_I2C_SIS5595)		+= i2c-sis5595.o
 obj-$(CONFIG_I2C_SAVAGE4)		+= i2c-savage4.o
 obj-$(CONFIG_I2C_TSUNAMI)		+= i2c-tsunami.o
@@ -1229,10 +1229,10 @@ else
 endif
 
 ifeq ($(CONFIG_I2C_PIIX4),y)
-  L_OBJS += i2c-piix4.o
+  L_OBJS += i2c-piix4.o dmi_scan.o
 else 
   ifeq ($(CONFIG_I2C_PIIX4),m)
-    M_OBJS += i2c-piix4.o
+    M_OBJS += i2c-piix4.o dmi_scan.o
   endif
 endif
 
@@ -1248,7 +1248,7 @@ ifeq ($(CONFIG_I2C_SAVAGE4),y)
   L_OBJS += i2c-savage4.o
 else 
   ifeq ($(CONFIG_I2C_SAVAGE4),m)
-    M_OBJS += i2c-savage4.o
+    M_OBJS += i2c-SAVAGE4.o
   endif
 endif
 
