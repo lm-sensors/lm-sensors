@@ -9,8 +9,8 @@ usually not fatal, but still.
 COMPILATION AND INSTALLATION
 ============================
 
-Basic installation is uncomplicated. Run 'make all', followed by an optional
-'make install'. Everything is compiled using the Makefile in the root of
+Basic installation is uncomplicated. Run `make all', followed by an optional
+`make install'. Everything is compiled using the Makefile in the root of
 this package. 
 
 You need flex and bison (reportedly a version newer than 1.22). You must
@@ -30,7 +30,7 @@ Some interesting Makefile variables:
   This must be set to 1 if your kernel was compiled with SMP set to 1. There
   is a sort of magic invocation which tries to check this; it will fail if
   you do not have the correct kernel tree in /usr/src/linux. If you set it,
-  a '-D__SMP__' argument will be added to all module compiles.
+  a `-D__SMP__' argument will be added to all module compiles.
 * MODVER
   This must be set to 1 if your kernel was compiled with CONFIG_MODVERSIONS
   enabled. There is some magic which tries to retrieve this information
@@ -46,19 +46,19 @@ Some interesting Makefile variables:
 * PREFIX (/usr/local)
   The prefix which is added to most directory locations below.
 * MODDIR (/lib/modules/extra/misc)
-  The directory where 'make install' installs your modules.
+  The directory where `make install' installs your modules.
 * ETCDIR (/etc)
-  The directory where 'make install' installs the example configuration file
+  The directory where `make install' installs the example configuration file
   if none is found there.
 * LIBDIR ($(PREFIX)/lib)
-  The directory where 'make install' installs the shared and static libraries.
+  The directory where `make install' installs the shared and static libraries.
 * BINDIR ($(PREFIX)/bin)
-  The directory where 'make install' installs all executables.
+  The directory where `make install' installs all executables.
 * SBINDIR ($(PREFIX)/sbin)
-  The directory where 'make install' installs all system programs (programs
+  The directory where `make install' installs all system programs (programs
   which can only be run by root).
 * INCLUDEDIR ($(PREFIX)/include)
-  The base directory where 'make install' installs your include files.
+  The base directory where `make install' installs your include files.
   Actually, SYSINCLUDEDIR ($(INCLUDEDIR)/linux) is used for kernel header
   files, and LIBINCLUDEDIR ($(INCLUDEDIR)/sensors) is used for library
   header files.
@@ -85,10 +85,13 @@ with). If the tree and the running kernel do not match, you will either
 be unable to insert the modules at all, or you can expect strange 
 behaviour (probably leading to crashes).
 
-If you do a 'make install', remember to do a 'depmod -a' and a 'ldconfig'
-to make sure the new modules and shared libraries are recognized.
+If you do a `make install', remember to do a `depmod -a' and a `ldconfig'
+to make sure the new modules and shared libraries are recognized. If you
+set PREFIX to anything different from `/' or `/usr' (it is `usr/local'
+by default), check whether /etc/ld.so.conf contains the library directory
+(like `/usr/local/lib') before you do the `ldconfig'.
 
-Do no worry about the 'No such file or directory' warnings when you compile
+Do no worry about the `No such file or directory' warnings when you compile
 the package the first time. They are harmless.
 
 
@@ -97,7 +100,7 @@ TESTING AND RUNNING
 
 When you have compiled this package, you will be left with a lot of modules.
 It can be tricky to know which modules you need to insert. For this reason,
-I suggest you go the 'modprobe' way, as described within doc/modules.
+I suggest you go the `modprobe' way, as described within doc/modules.
 
 If you just want to run a test without installing them, try the following:
   insmod i2c/i2c-core.o
@@ -117,10 +120,10 @@ do:
 (the last is optional) from any directory to reach the same situation.
 
 But instead of doing any of the above things, please read doc/modules and
-do a 'make install'. After that, you can run 'sensors-detect'. This Perl
+do a `make install'. After that, you can run `sensors-detect'. This Perl
 program will detect all hardware available on your system, and tell you
 what drivers you need to insert. First check whether you have /dev/i2c-*
-files (at least 4 of them), and if not, create them by running 'mkdev.sh'
+files (at least 4 of them), and if not, create them by running `mkdev.sh'
 in directory prog/mkdev.
 
 Do not panic if some (or all) of the values in the /proc/sys/dev/sensors/*/*
@@ -134,7 +137,7 @@ This package contains a library of functions which can be used to
 access sensor data in a more programmer-friendly way. It will be built as
 both a shared and a static library, and installed in your LIB directory
 (normally /usr/local/lib). It needs a configuration file, which is usually
-called 'sensors.conf', and can be placed in /etc, /usr/lib/sensors,
+called `sensors.conf', and can be placed in /etc, /usr/lib/sensors,
 /usr/local/lib/sensors, /usr/lib, or /usr/local/lib.
 
 Note that if you already have a config file, it is NOT overwritten! You
@@ -143,11 +146,11 @@ as the example config file may be updated.
 
 Where version 1 of this package had the human-readable /proc/sensors file,
 this version includes a user-space program which gathers all data
-and displays it in a comparable format. This program is called 'sensors'.
+and displays it in a comparable format. This program is called `sensors'.
 Everybody can use it to read sensors values; only root can use it to
 set minimum and maximum values (using the `-s' switch).
 
-If you want to run 'sensors' without installing the package, you must
+If you want to run `sensors' without installing the package, you must
 use the following command to make it able to find its shared library:
   (bash) export LD_LIBRARY_PATH=/WHEREVER/lm_sensors-2.X.Y/lib:$LD_LIBRARY_PATH
   (tcsh) setenv LD_LIBRARYPATH /WHEREVER/lm_sensors-2.X.Y/lib:$LD_LIBRARY_PATH
