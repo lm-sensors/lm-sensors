@@ -70,7 +70,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        func => 3,
        procid => "Intel 82801AB ICH0",
        driver => "i2c-i801",
-       match => sub { $_[0] =~ /^SMBus i801AB adapter at [0-9,a-f]{4}/ },
+       match => sub { $_[0] =~ /^SMBus I801 adapter at [0-9,a-f]{4}/ },
      } , 
      { 
        vendid => 0x1106,
