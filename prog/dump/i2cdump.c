@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
  
-  fprintf(stderr,"  WARNING! Running this program can confuse your I2C bus, "
+  fprintf(stderr,"  WARNING! This program can confuse your I2C bus, "
           "cause data loss and worse!\n");
   fprintf(stderr,"  I will probe file %s, address %x, mode %s\n",
           filename,address,size == SMBUS_BYTE_DATA?"byte":"word");
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     for (i = 0; i < 256; i+=8) {
       printf("%02x: ",i);
       for(j = 0; j < 8; j++) {
-        res = i2c_smbus_read_byte_data(file,i+j);
+        res = i2c_smbus_read_word_data(file,i+j);
         if (res < 0)
           printf("XXXX ");
         else

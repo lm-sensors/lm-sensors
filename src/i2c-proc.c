@@ -301,7 +301,8 @@ int i2cproc_bus_read(struct inode * inode, struct file * file,char * buf,
         if ((client = i2cproc_adapters[i]->clients[j]))
           /* Filter out dummy clients */
 #ifndef DEBUG
-          if (client->driver->id != I2C_DRIVERID_I2CPROC)
+          if ((client->driver->id != I2C_DRIVERID_I2CPROC) &&
+              (client->driver->id != I2C_DRIVERID_I2CDEV))
 #endif /* ndef DEBUG */
             len += sprintf(kbuf+len,"%x\t%-32s\t%-32s\n",
 #ifdef DEBUG

@@ -232,7 +232,7 @@ int i2cdev_ioctl (struct inode *inode, struct file *file, unsigned int cmd,
                   unsigned long arg)
 {
   struct i2c_client *client = (struct i2c_client *)file->private_data;
-  struct i2c_smbus_data *data_arg;
+  struct i2c_smbus_data data_arg;
   union smbus_data temp;
   int ver,datasize,res;
 
@@ -254,53 +254,56 @@ int i2cdev_ioctl (struct inode *inode, struct file *file, unsigned int cmd,
       printk("i2c-dev.o: ioctl I2C_TENBIT not (yet) supported!\n");
       return -EINVAL;
     case I2C_SMBUS:
-      if (! (data_arg = (struct i2c_smbus_data *) arg)) {
+      if (! arg) {
 #ifdef DEBUG
         printk("i2c-dev.o: NULL argument pointer in ioctl I2C_SMBUS.\n");
 #endif
         return -EINVAL;
       }
-      if (verify_area(VERIFY_READ,data_arg,sizeof(struct i2c_smbus_data))) {
+      if (verify_area(VERIFY_READ,(struct i2c_smbus_data *) arg,
+          sizeof(struct i2c_smbus_data))) {
 #ifdef DEBUG
-        printk("i2c-dev.o: invalid argument pointer (%p) "
-               "in IOCTL I2C_SMBUS.\n", data_arg);
+        printk("i2c-dev.o: invalid argument pointer (%ld) "
+               "in IOCTL I2C_SMBUS.\n", arg);
 #endif
         return -EINVAL;
       }
-      if ((data_arg->size != SMBUS_BYTE) && 
-          (data_arg->size != SMBUS_QUICK) &&
-          (data_arg->size != SMBUS_BYTE_DATA) && 
-          (data_arg->size != SMBUS_WORD_DATA) &&
-          (data_arg->size != SMBUS_PROC_CALL) &&
-          (data_arg->size != SMBUS_BLOCK_DATA)) {
+      copy_from_user(&data_arg,(struct i2c_smbus_data *) arg,
+                     sizeof(struct i2c_smbus_data));
+      if ((data_arg.size != SMBUS_BYTE) && 
+          (data_arg.size != SMBUS_QUICK) &&
+          (data_arg.size != SMBUS_BYTE_DATA) && 
+          (data_arg.size != SMBUS_WORD_DATA) &&
+          (data_arg.size != SMBUS_PROC_CALL) &&
+          (data_arg.size != SMBUS_BLOCK_DATA)) {
 #ifdef DEBUG
         printk("i2c-dev.o: size out of range (%x) in ioctl I2C_SMBUS.\n",
-               data_arg->size);
+               data_arg.size);
 #endif
         return -EINVAL;
       }
       /* Note that SMBUS_READ and SMBUS_WRITE are 0 and 1, so the check is
          valid if size==SMBUS_QUICK too. */
-      if ((data_arg->read_write != SMBUS_READ) && 
-          (data_arg->read_write != SMBUS_WRITE)) {
+      if ((data_arg.read_write != SMBUS_READ) && 
+          (data_arg.read_write != SMBUS_WRITE)) {
 #ifdef DEBUG
         printk("i2c-dev.o: read_write out of range (%x) in ioctl I2C_SMBUS.\n",
-               data_arg->read_write);
+               data_arg.read_write);
 #endif
         return -EINVAL;
       }
 
       /* Note that command values are always valid! */
 
-      if ((data_arg->size == SMBUS_QUICK) ||
-          ((data_arg->size == SMBUS_BYTE) && 
-           (data_arg->read_write == SMBUS_WRITE)))
+      if ((data_arg.size == SMBUS_QUICK) ||
+          ((data_arg.size == SMBUS_BYTE) && 
+           (data_arg.read_write == SMBUS_WRITE)))
         /* These are special: we do not use data */
         return smbus_access(client->adapter, client->addr, 
-                            data_arg->read_write, data_arg->command,
-                            data_arg->size, NULL);
+                            data_arg.read_write, data_arg.command,
+                            data_arg.size, NULL);
 
-      if (data_arg->data == NULL) {
+      if (data_arg.data == NULL) {
 #ifdef DEBUG
         printk("i2c-dev.o: data is NULL pointer in ioctl I2C_SMBUS.\n");
 #endif
@@ -309,31 +312,31 @@ int i2cdev_ioctl (struct inode *inode, struct file *file, unsigned int cmd,
 
       /* This seems unlogical but it is not: if the user wants to read a
          value, we must write that value to user memory! */
-      ver = (data_arg->read_write == SMBUS_WRITE)?VERIFY_READ:VERIFY_WRITE;
+      ver = (data_arg.read_write == SMBUS_WRITE)?VERIFY_READ:VERIFY_WRITE;
 
-      if ((data_arg->size == SMBUS_BYTE_DATA) || (data_arg->size == SMBUS_BYTE))
-        datasize = sizeof(data_arg->data->byte);
-      else if (data_arg->size == SMBUS_WORD_DATA)
-        datasize = sizeof(data_arg->data->word);
+      if ((data_arg.size == SMBUS_BYTE_DATA) || (data_arg.size == SMBUS_BYTE))
+        datasize = sizeof(data_arg.data->byte);
+      else if (data_arg.size == SMBUS_WORD_DATA)
+        datasize = sizeof(data_arg.data->word);
       else /* size == SMBUS_BLOCK_DATA */
-        datasize = sizeof(data_arg->data->block);
+        datasize = sizeof(data_arg.data->block);
 
-      if (verify_area(ver,data_arg->data,datasize)) {
+      if (verify_area(ver,data_arg.data,datasize)) {
 #ifdef DEBUG
         printk("i2c-dev.o: invalid pointer data (%p) in ioctl I2C_SMBUS.\n",
-               data_arg->data);
+               data_arg.data);
 #endif
         return -EINVAL;
       }
-      if (data_arg->read_write == SMBUS_WRITE) {
-        copy_from_user(&temp,data_arg->data,datasize);
-        return smbus_access(client->adapter,client->addr,data_arg->read_write,
-                            data_arg->command,data_arg->size,&temp);
+      if (data_arg.read_write == SMBUS_WRITE) {
+        copy_from_user(&temp,data_arg.data,datasize);
+        return smbus_access(client->adapter,client->addr,data_arg.read_write,
+                            data_arg.command,data_arg.size,&temp);
       } else {
-        res = smbus_access(client->adapter,client->addr,data_arg->read_write,
-                           data_arg->command,data_arg->size,&temp);
+        res = smbus_access(client->adapter,client->addr,data_arg.read_write,
+                           data_arg.command,data_arg.size,&temp);
         if (!res)
-          copy_to_user(data_arg->data,&temp,datasize);
+          copy_to_user(data_arg.data,&temp,datasize);
         return res;
       }
     default:
@@ -406,7 +409,7 @@ int i2cdev_attach_adapter(struct i2c_adapter *adap)
   }
   if (i2c_is_isa_adapter(adap)) {
 #ifdef DEBUG
-    printk("i2c-dev.o: Can't open ISA adapter!\n");
+    printk("i2c-dev.o: Can't attach ISA adapter!\n");
 #endif
     return 0;
   }
@@ -422,7 +425,7 @@ int i2cdev_attach_adapter(struct i2c_adapter *adap)
     return res;
   }
   i2cdev_clients[i] = client;
-  printk("i2cdev.o: Registered '%s' as minor %d\n",adap->name,i);
+  printk("i2c-dev.o: Registered '%s' as minor %d\n",adap->name,i);
   return 0;
 }
 
