@@ -1521,10 +1521,12 @@ chip "lm83-*"
 # should be higher than each of the high limits above
 #   set tcrit 85
 
-chip "lm90-*"
+chip "lm90-*" "adm1032-*"
 
    label temp1 "M/B Temp"
    label temp2 "CPU Temp"
+   label tcrit1 "M/B Crit"
+   label tcrit2 "CPU Crit"
 
 # change high and low limits to fit your needs
 #   set temp1_low  10

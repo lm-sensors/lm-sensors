@@ -1,7 +1,7 @@
 Kernel driver `lm90.o'
 =====================
 
-Status: Complete but untested
+Status: Complete and reasonably tested
 
 Supported chips: 
   * National Semiconductor LM90
@@ -9,6 +9,11 @@ Supported chips:
     Addresses scanned: I2C 0x4c
     Datasheet: Publicly available at the National Semiconductor website
                http://www.national.com/pf/LM/LM90.html
+  * Analog Devices ADM1032
+    Prefix: `adm1032'
+    Addresses scanned: I2C 0x4c
+    Datasheet: Publicly available at the Analog Devices website
+               http://products.analog.com/products/info.asp?product=ADM1032
 
 
 Author: Jean Delvare <khali@linux-fr.org>
@@ -24,6 +29,9 @@ Module Parameters
 * force_lm90: short array (min = 1, max = 48)
   List of adapter,address pairs which are unquestionably assumed to contain
   a `lm90' chip
+* force_adm1032: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `adm1032' chip
 * probe: short array (min = 1, max = 48)
   List of adapter,address pairs to scan additionally
 * probe_range: short array (min = 1, max = 48)
@@ -40,30 +48,33 @@ Description
 The LM90 is a digital temperature sensor. It senses its own temperature as
 well as the temperature of up to one external diode. It is compatible
 with many other devices such as the LM86, the LM89, the ADM1032, the
-MAX6657 and the MAX6658. The particularity of the LM90 over the LM84 for
-example is that it features critical limits with hysteresis, and an
+MAX6657 and the MAX6658. Of these, only the ADM1032 is officially
+supported for now, but the others can probably be successfully forced.
+
+The specificity of this family of chipsets over the ADM1021/LM84
+family is that it features critical limits with hysteresis, and an
 increased resolution of the remote temperature measurement.
 
-Using the adm1021 or lm83 drivers for a LM90 should work, but the extra
-features won't be supported.
+The different chipsets of the family are not stricly identical, although
+very similar. This driver doesn't handle any specific feature for now,
+but could if there ever was a need for it. For reference, here comes a
+non-exhaustive list of specific features:
 
-The LM90 is found on many motherboards, too many for an exhaustive listing.
-A list of confirmed motherboards follows. If you think the list is wrong or
-want to add a specific motherboard to it, contact us.
+LM90:
+  * Filter and alert configuration register at 0xBF.
+  * ALERT is triggered by temperatures over critical limits.
 
-Confirmed motherboards:
-    Gigabyte    GA-7VAX
-    Gigabyte    GA-7VRXP
+ADM1032:
+  * Consecutive alert register at 0x22.
+  * Conversion averaging.
+  * Up to 64 conversions/s.
+  * ALERT is triggered by open remote sensor.
 
-The driver is untested so far. We want testers! Let us know if you want to
-help.
-
-All temperature values are given in degrees Celcius. Local and remote
-temperatures are given within a range of +25 to +125 degrees. Resolution
+All temperature values are given in degrees Celcius. Resolution
 is 1.0 degree for the local temperature, 0.125 degree for the remote
-temperature. Accuracy is guaranteed to 4.0 degrees, but should reach
-1.5 degree (local) and 3.0 degrees (remote) under typical conditions (see
-the datasheet for more details).
+temperature. According to the datasheets, the ADM1032 has a better
+range and accuracy than the LM90 (but is also way more expensive).
+See the datasheets for details.
 
 Each sensor has its own high and low limits, plus a critical limit.
 Additionally, there is a relative hysteresis value common to both critical
@@ -78,6 +89,32 @@ Chip Features
 -------------
 
 Chip 'lm90'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp1                 -                     -                       R-     0
+temp1_high            temp1                 temp1                   RW     0
+temp1_low             temp1                 temp1                   RW     0
+temp2                 -                     -                       R-     1
+temp2_high            temp2                 temp2                   RW     1
+temp2_low             temp2                 temp2                   RW     1
+tcrit1                temp1                 temp1                   RW     0
+tcrit2                temp2                 temp2                   RW     0
+hyst                  -                     -                       RW     0
+alarms                -                     -                       R-     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp1                 SENSORS_LM90_LOCAL_TEMP                           temp1:3
+temp1_high            SENSORS_LM90_LOCAL_HIGH                           temp1:1
+temp1_low             SENSORS_LM90_LOCAL_LOW                            temp1:2
+temp2                 SENSORS_LM90_REMOTE_TEMP                          temp2:3
+temp2_high            SENSORS_LM90_REMOTE_HIGH                          temp2:1
+temp2_low             SENSORS_LM90_REMOTE_LOW                           temp2:2
+tcrit1                SENSORS_LM90_LOCAL_TCRIT                         tcrit1:1
+tcrit2                SENSORS_LM90_REMOTE_TCRIT                        tcrit2:1
+hyst                  SENSORS_LM90_TCRIT_HYST                            hyst:1
+alarms                SENSORS_LM90_ALARMS                              alarms:1
+
+Chip 'adm1032'
 
 LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
 temp1                 -                     -                       R-     0

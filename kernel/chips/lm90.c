@@ -10,6 +10,16 @@
  * obtained from National's website at:
  *   http://www.national.com/pf/LM/LM90.html
  *
+ * This driver also supports the ADM1032, a sensor chip made by Analog
+ * Devices. That chip is similar to the LM90, with a few differences
+ * that are not handled by this driver. Complete datasheet can be
+ * obtained from Analog's website at:
+ *   http://products.analog.com/products/info.asp?product=ADM1032
+ *
+ * Since the LM90 was the first chipset supported by this driver, most
+ * comments will refer to this chipset, but are actually general and
+ * concern all supported chipsets, unless mentioned otherwise.
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -46,11 +56,10 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
  * Insmod parameters
  */
 
-SENSORS_INSMOD_1(lm90);
+SENSORS_INSMOD_2(lm90, adm1032);
 
 /*
  * The LM90 registers
- * Manufacturer ID is 0x01 for National Semiconductor.
  */
 
 #define LM90_REG_R_MAN_ID        0xFE
@@ -137,7 +146,7 @@ static void lm90_alarms(struct i2c_client *client, int operation,
  
 static struct i2c_driver lm90_driver = {
 	.owner          = THIS_MODULE,
-	.name           = "LM90 sensor driver",
+	.name           = "LM90/ADM1032 sensor driver",
 	.id             = I2C_DRIVERID_LM90,
 	.flags          = I2C_DF_NOTIFY,
 	.attach_adapter = lm90_attach_adapter,
@@ -234,6 +243,7 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	int err = 0;
 	const char *type_name = "";
 	const char *client_name = "";
+	u8 reg_config1, reg_convrate;
 
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter))
@@ -274,8 +284,7 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	/*
 	 * Now we do the remaining detection. A negative kind means that
 	 * the driver was loaded with no force parameter (default), so we
-	 * must both detect and identify the chip (actually there is only
-	 * one possible kind of chip for now, LM90). A zero kind means that
+	 * must both detect and identify the chip. A zero kind means that
 	 * the driver was loaded with the force parameter, the detection
 	 * step shall be skipped. A positive kind means that the driver
 	 * was loaded with the force parameter and a given kind of chip is
@@ -283,17 +292,17 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	 * are skipped.
 	 */
 
+	reg_config1 = i2c_smbus_read_byte_data(new_client,
+		LM90_REG_R_CONFIG1);
+	reg_convrate = i2c_smbus_read_byte_data(new_client,
+		LM90_REG_R_CONVRATE);
 	if (kind < 0) /* detection */
 	{
-		if (((i2c_smbus_read_byte_data(new_client, LM90_REG_R_CONFIG1)
-		      & 0x2A) != 0x00)
-		||  (i2c_smbus_read_byte_data(new_client, LM90_REG_R_CONVRATE)
-			 > 9)
-		||  ((i2c_smbus_read_byte_data(new_client, LM90_REG_R_CONFIG2)
-		      & 0xF8) != 0x00))
+		if ((reg_config1 & 0x2A) != 0x00
+		 || reg_convrate > 0x0A)
 		{
 #ifdef DEBUG
-			printk("lm90.o: LM90 detection failed at 0x%02x.\n",
+			printk("lm90.o: Detection failed at 0x%02x.\n",
 				address);
 #endif
 			goto ERROR1;
@@ -308,8 +317,17 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 		chip_id = i2c_smbus_read_byte_data(new_client, LM90_REG_R_CHIP_ID);
 		if (man_id == 0x01) /* National Semiconductor */
 		{
-			if (chip_id >= 0x21 && chip_id < 0x30)
+			if (chip_id >= 0x21 && chip_id < 0x30 /* LM90 */
+			 && i2c_smbus_read_byte_data(new_client,
+			    LM90_REG_R_CONFIG2 & 0xF8) == 0x00
+			 && reg_convrate <= 0x09)
 				kind = lm90;
+		}
+		else if (man_id == 0x41) /* Analog Devices */
+		{
+			if ((chip_id & 0xF0) == 0x40 /* ADM1032 */
+			 && (reg_config1 & 0x3F) == 0x00)
+				kind = adm1032;
 		}
 	}
 
@@ -323,6 +341,11 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	{
 		type_name = "lm90";
 		client_name = "LM90 chip";
+	}
+	else if (kind == adm1032)
+	{
+		type_name = "adm1032";
+		client_name = "ADM1032 chip";
 	}
 	else
 	{
@@ -447,7 +470,7 @@ static void lm90_update_client(struct i2c_client *client)
 	{
 		u8 oldh, newh;
 #ifdef DEBUG
-		printk("lm90.o: Updating LM90 data.\n");
+		printk("lm90.o: Updating data.\n");
 #endif
 
 		data->local_temp =
@@ -680,7 +703,7 @@ static void __exit sm_lm90_exit(void)
 }
 
 MODULE_AUTHOR("Jean Delvare <khali@linux-fr.org>");
-MODULE_DESCRIPTION("LM90 sensor driver");
+MODULE_DESCRIPTION("LM90/ADM1032 sensor driver");
 MODULE_LICENSE("GPL");
 
 module_init(sm_lm90_init);
