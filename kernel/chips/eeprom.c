@@ -24,6 +24,7 @@
 #include <linux/i2c.h>
 #include <linux/i2c-proc.h>
 #include <linux/init.h>
+#include <linux/sched.h> /* for capable() */
 #include "version.h"
 
 MODULE_LICENSE("GPL");
@@ -55,6 +56,10 @@ MODULE_PARM_DESC(checksum,
 #define EIGHT_K		4
 #define SIXTEEN_K	5
 
+/* possible natures */
+#define NATURE_UNKNOWN 0
+#define NATURE_VAIO 1
+
 /* Size of EEPROM in bytes */
 #define EEPROM_SIZE 256
 
@@ -70,6 +75,7 @@ struct eeprom_data {
 #if 0
 	int memtype;
 #endif
+	int nature;
 };
 
 
@@ -222,20 +228,16 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 			goto ERROR1;
 	}
 
-	/* Ignore Vaio EEPROMs with a password set, unless forced.
+	data->nature = NATURE_UNKNOWN;
+	/* Detect the Vaio nature of EEPROMs.
 	   We use the "PCG-" prefix as the signature. */
-	if (kind < 0 && address == 0x57)
+	if (address == 0x57)
 	{
 		if (i2c_smbus_read_byte_data(new_client, 0x80) == 'P'
     	 && i2c_smbus_read_byte_data(new_client, 0x81) == 'C'
     	 && i2c_smbus_read_byte_data(new_client, 0x82) == 'G'
-    	 && i2c_smbus_read_byte_data(new_client, 0x83) == '-'
-		 && i2c_smbus_read_byte_data(new_client, 0x00) != 0x00)
-		{
-	 		printk("eeprom.o: Protecting Sony Vaio password, use force to"
-			       "override\n");
-			goto ERROR1;
-		}
+    	 && i2c_smbus_read_byte_data(new_client, 0x83) == '-')
+			data->nature = NATURE_VAIO;
 	}
 
 	/* Determine the chip type - only one kind supported! */
@@ -361,71 +363,31 @@ void eeprom_contents(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results)
 {
 	int i;
-	int base = 0;
+	int nr = ctl_name - EEPROM_SYSCTL1;
 	struct eeprom_data *data = client->data;
-
-	switch (ctl_name) {
-		case EEPROM_SYSCTL2:
-			base = 16;
-			break;
-		case EEPROM_SYSCTL3:
-			base = 32;
-			break;
-		case EEPROM_SYSCTL4:
-			base = 48;
-			break;
-		case EEPROM_SYSCTL5:
-			base = 64;
-			break;
-		case EEPROM_SYSCTL6:
-			base = 80;
-			break;
-		case EEPROM_SYSCTL7:
-			base = 96;
-			break;
-		case EEPROM_SYSCTL8:
-			base = 112;
-			break;
-		case EEPROM_SYSCTL9:
-			base = 128;
-			break;
-		case EEPROM_SYSCTL10:
-			base = 144;
-			break;
-		case EEPROM_SYSCTL11:
-			base = 160;
-			break;
-		case EEPROM_SYSCTL12:
-			base = 176;
-			break;
-		case EEPROM_SYSCTL13:
-			base = 192;
-			break;
-		case EEPROM_SYSCTL14:
-			base = 208;
-			break;
-		case EEPROM_SYSCTL15:
-			base = 224;
-			break;
-		case EEPROM_SYSCTL16:
-			base = 240;
-			break;
-	}
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		eeprom_update_client(client);
-		for (i = 0; i < 16; i++) {
-			results[i] = data->data[i + base];
-		}
+		/* Hide Vaio security settings to regular users */
+		if (nr == 0 && data->nature == NATURE_VAIO
+		 && !capable(CAP_SYS_ADMIN))
+			for (i = 0; i < 16; i++)
+				results[i] = 0;
+		else
+			for (i = 0; i < 16; i++)
+				results[i] = data->data[i + nr * 16];
 #ifdef DEBUG
-		printk("eeprom.o: 0x%X EEPROM Contents (base %d): ",
-		       client->addr, base);
-		for (i = 0; i < 16; i++) {
-			printk(" 0x%X", data->data[i + base]);
+		printk("eeprom.o: 0x%X EEPROM contents (row %d):",
+		       client->addr, nr + 1);
+		if (nr == 0 && data->nature == NATURE_VAIO)
+		 	printk(" <hidden for security reasons>\n");
+		else {
+			for (i = 0; i < 16; i++)
+				printk(" 0x%02X", data->data[i + nr * 16]);
+			printk("\n");
 		}
-		printk(" .\n");
 #endif
 		*nrels_mag = 16;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
