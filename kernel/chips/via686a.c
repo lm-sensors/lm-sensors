@@ -80,7 +80,7 @@ static unsigned int normal_isa[] = { 0x0000, SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_1(via686a);
+SENSORS_INSMOD_2(via686a, vt8231);
 
 /*
    The Via 686a southbridge has a LM78-like chip integrated on the same IC.
@@ -856,8 +856,7 @@ void via686a_fan(struct i2c_client *client, int operation, int ctl_name,
 		results[0] = FAN_FROM_REG(data->fan_min[nr - 1],
 					  DIV_FROM_REG(data->fan_div
 						       [nr - 1]));
-		results[1] =
-		    FAN_FROM_REG(data->fan[nr - 1],
+		results[1] = FAN_FROM_REG(data->fan[nr - 1],
 				 DIV_FROM_REG(data->fan_div[nr - 1]));
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
