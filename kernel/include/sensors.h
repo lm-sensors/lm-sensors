@@ -620,5 +620,16 @@
 #define VT1211_ALARM_TEMP6 VT1211_ALARM_IN3
 #define VT1211_ALARM_TEMP7 VT1211_ALARM_IN4
 
+#define LM92_SYSCTL_ALARMS		2001	/* high, low, critical */
+#define LM92_SYSCTL_TEMP		1200	/* high, low, critical, hysterisis, input */
+
+#define LM92_ALARM_TEMP_HIGH	0x01
+#define LM92_ALARM_TEMP_LOW		0x02
+#define LM92_ALARM_TEMP_CRIT	0x04
+#define LM92_TEMP_HIGH			0x08
+#define LM92_TEMP_LOW			0x10
+#define LM92_TEMP_CRIT			0x20
+#define LM92_TEMP_HYST			0x40
+#define LM92_TEMP_INPUT			0x80
 
 #endif				/* def SENSORS_SENSORS_H */
