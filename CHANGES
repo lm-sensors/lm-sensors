@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.5.5 (2001????)
+2.5.5 (20010115)
   NOTE: i2c 2.5.5 MUST BE be compiled and installed first, UNLESS
         you have kernel 2.4.0-prerelease or greater.
   Chip modules (all): Update mutex definition (works now for new 2.2 kernels)
