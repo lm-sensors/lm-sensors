@@ -13,6 +13,11 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
+2.5.2 (200007??)
+  Programs: understand /dev/i2c* files (instead of /dev/i2c-*) too.
+  Program sensors-detect: more robustness in case of unknown i2c adapters
+  Module w83781d: W83783S no longer crashes on unloading
+
 2.5.1 (20000618)
   Library: Add adm1025 support
   Module adm1025: new
