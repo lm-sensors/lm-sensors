@@ -13,6 +13,10 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
+2.5.1 (2000????)
+  Module w83781d: Improve w83783s support
+  Program sensors-detect: Fix i801 detection
+
 2.5.0 (20000312)
   Dropped all kernel 2.0 and 2.1 compatibility
   Module i2c-i810: new
