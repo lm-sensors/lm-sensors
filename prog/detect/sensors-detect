@@ -292,13 +292,13 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      },
      {
        name => "Analog Devices ADM1022",
-# driver to be written
+       driver => "thmc50",
        i2c_addrs => [0x2c..0x2f],
        i2c_detect => sub { adm1022_detect 0, @_ },
      },
      {
        name => "Texas Instruments THMC50",
-# driver to be written
+       driver => "thmc50",
        i2c_addrs => [0x2c..0x2f],
        i2c_detect => sub { adm1022_detect 1, @_ },
      },

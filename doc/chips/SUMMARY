@@ -42,10 +42,6 @@ adm1021
 	thmc10		2	-	-	-	yes	no
 	xeon		1	-	-	-	yes	no
 
-adm1022 (to-be-written)
-	adm1022		3	2	-	1 dac	yes	no
-	thmc50		3	2	-	1 dac	yes	no
-
 adm9240
 	adm9240		1	6	2	1 dac	yes	no
 	ds1780		1	6	2	1 dac	yes	no
@@ -76,6 +72,10 @@ maxilife
 
 sis5595
 	sis5595 	1	7	3	-	no	yes
+
+thmc50
+	adm1022		3	2	-	1 dac	yes	no
+	thmc50		3	2	-	1 dac	yes	no
 
 w83781d
 	w83781d		3	7	3	-	yes	yes
@@ -118,6 +118,7 @@ COMPANY ID LIST
 Many SMBus chips have a company ID at location 0x3E or 0xFE.
 
 Here is a partial list.
+This may help identify a chip after doing a 'i2cdump [bus] [address] b'.
 
 0x01	National
 0x23	AMD
