@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.6.5 (2002????)
+  Module i2c-piix4: Refuse to load on IBM systems
   Program sensors: Add /usr/local/etc to config file path
 
 2.6.4 (20020719)

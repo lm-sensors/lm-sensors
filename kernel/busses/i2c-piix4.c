@@ -1,7 +1,7 @@
 /*
     piix4.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl> and
+    Copyright (c) 1998 - 2002 Frodo Looijaard <frodol@dds.nl> and
     Philip Edelbrock <phil@netroedge.com>
 
     This program is free software; you can redistribute it and/or modify
@@ -39,6 +39,7 @@
 #include <linux/i2c.h>
 #include "version.h"
 #include <linux/init.h>
+#include <linux/apm_bios.h>
 
 /* Note: We assume all devices are identical
          to the Intel PIIX4; we only mention it during detection.   */
@@ -179,6 +180,125 @@ static struct i2c_adapter piix4_adapter = {
 static int __initdata piix4_initialized;
 static unsigned short piix4_smba = 0;
 
+/* The following DMI section is used to detect IBM Thinkpad laptops,
+   whose AT24RF08 serial eeproms on the PIIX4 SMBus get corrupted.
+   We refuse to load on those systems.
+   From drivers/char/i8k.c (retabbed), which was
+   stolen from arch/i386/kernel/dmi_scan.c */
+
+static char system_vendor[48] = "?";
+typedef struct {
+	u8	type;
+	u8	length;
+	u16	handle;
+} DMIHeader;
+#define IBM_SIGNATURE		"IBM"
+
+static char* __init dmi_string(DMIHeader *dmi, u8 s)
+{
+	u8 *p;
+
+	if (!s)
+		return "";
+	s--;
+
+	p = (u8 *)dmi + dmi->length;
+	while (s > 0) {
+		p += strlen(p);
+		p++;
+		s--;
+	}
+
+	return p;
+}
+
+static void __init dmi_decode(DMIHeader *dmi)
+{
+	u8 *data = (u8 *) dmi;
+	char *p;
+
+	switch (dmi->type) {
+		case 1:	/* System Information */
+			p = dmi_string(dmi,data[4]);
+			if (*p)
+				strncpy(system_vendor, p, sizeof(system_vendor));
+			break;
+	}
+}
+
+static int __init dmi_table(u32 base, int len, int num, void (*fn)(DMIHeader*))
+{
+	u8 *buf;
+	u8 *data;
+	DMIHeader *dmi;
+	int i = 1;
+
+	buf = ioremap(base, len);
+	if (buf == NULL)
+		return -1;
+	data = buf;
+
+/*
+ * Stop when we see al the items the table claimed to have
+ * or we run off the end of the table (also happens)
+ */
+	while ((i<num) && ((data-buf) < len)) {
+		dmi = (DMIHeader *)data;
+/*
+ * Avoid misparsing crud if the length of the last
+ * record is crap
+ */
+		if ((data-buf+dmi->length) >= len)
+			break;
+		fn(dmi);
+		data += dmi->length;
+/*
+ * Don't go off the end of the data if there is
+ * stuff looking like string fill past the end
+ */
+		while (((data-buf) < len) && (*data || data[1]))
+			data++;
+		data += 2;
+		i++;
+	}
+	iounmap(buf);
+	return 0;
+}
+
+static int __init dmi_iterate(void (*decode)(DMIHeader *))
+{
+	unsigned char buf[20];
+	long fp = 0x000e0000L;
+	fp -= 16;
+
+	while (fp < 0x000fffffL) {
+		fp += 16;
+		isa_memcpy_fromio(buf, fp, 20);
+		if (memcmp(buf, "_DMI_", 5)==0) {
+			u16 num  = buf[13]<<8  | buf[12];
+			u16 len  = buf [7]<<8  | buf [6];
+			u32 base = buf[11]<<24 | buf[10]<<16 |
+			           buf[9]<<8 | buf[8];
+			if (dmi_table(base, len, num, decode)==0)
+				return 0;
+		}
+	}
+	return -1;
+}
+/* end of DMI code */
+
+/*
+ * Get DMI information.
+ */
+static int __init ibm_dmi_probe(void)
+{
+	if (dmi_iterate(dmi_decode) != 0)
+		return 0;
+	if (strncmp(system_vendor,IBM_SIGNATURE,strlen(IBM_SIGNATURE)) == 0)
+		return 1;
+	return 0;
+}
+
 /* Detect whether a PIIX4 can be found, and initialize it, where necessary.
    Note the differences between kernels with the old PCI BIOS interface and
    newer kernels with the real PCI interface. In compat.h some things are
@@ -215,6 +335,14 @@ int piix4_setup(void)
 	}
 	printk(KERN_INFO "i2c-piix4.o: Found %s device\n", num->name);
 
+	if(ibm_dmi_probe()) {
+		printk
+		  (KERN_ERR "i2c-piix4.o: IBM Laptop detected; this module may corrupt\n");
+		printk
+		  (KERN_ERR "             your serial eeprom! Refusing to load module!\n");
+		 error_return = -EPERM;
+		 goto END;
+	}
 
 /* Determine the address of the SMBus areas */
 	if (force_addr) {
@@ -511,8 +639,7 @@ int __init i2c_piix4_init(void)
 	}
 	piix4_initialized = 0;
 	if ((res = piix4_setup())) {
-		printk
-		    (KERN_ERR "i2c-piix4.o: Device not detected, module not inserted.\n");
+		printk(KERN_ERR "i2c-piix4.o: Module insertion failed.\n");
 		piix4_cleanup();
 		return res;
 	}
