@@ -13,6 +13,11 @@ FOR 2.5/2.6 KERNELS, do not attempt to compile this package.
     do is 'make user' and 'make user_install'. Do NOT follow the rest
     of these instructions.
 
+IF YOU REQUIRE  BTTV AND RELATED MODULES,
+    See the information in README.
+    Do NOT follow the rest of these instructions.
+
+
 =============================================================================
 These are the installation instruction for the lm_sensors package.
 
