@@ -441,25 +441,20 @@ void config_v3(struct pci_dev *dev, int num)
    defined to make the transition easier. */
 static int voodoo3_setup(void)
 {
-        struct pci_dev *dev = pci_devices;
-        int result=0;
-	int flag=0;
+        struct pci_dev *dev;
 
         v3_num=0;
 
-        while (dev)
-        {
-                if (dev->vendor == PCI_VENDOR_ID_3DFX)
-                        if (dev->device == PCI_DEVICE_ID_3DFX_VOODOO3) {
-			  if (!flag) {
-                                config_v3(dev,v3_num++);
-			  } else { v3_num++; }
-			  flag=1;
-			}
-                if (result)
-                        return result;
-                dev = dev->next;
-        }
+	dev = NULL;
+	do {
+		dev = pci_find_device(PCI_VENDOR_ID_3DFX,
+		                           PCI_DEVICE_ID_3DFX_VOODOO3,dev);
+		if(dev && !v3_num) {
+			config_v3(dev,v3_num++);
+		} else
+			v3_num++;
+	} while(dev);
+
         if(v3_num > 0) {
                 printk(KERN_INFO "i2c-voodoo3: %d Banshee/Voodoo3(s) found.\n", v3_num);
 		return 0;
