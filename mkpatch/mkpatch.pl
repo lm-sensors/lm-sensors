@@ -99,6 +99,7 @@ sub gen_Documentation_Configure_help
            m@Analog Devices ADM1025@ or
            m@Analog Devices ADM1026@ or
            m@Analog Devices ADM9240 and compatibles@ or
+           m@Asus ASB100@ or
            m@Dallas DS1621 and DS1625@ or
            m@Fujitsu-Siemens Poseidon@ or
            m@Fujitsu-Siemens Scylla@ or
@@ -120,6 +121,7 @@ sub gen_Documentation_Configure_help
            m@Texas Instruments THMC50 / Analog Devices ADM1022@ or
            m@Via VT82C686A/B@ or
            m@Winbond W83781D, W83782D, W83783S, W83627HF, AS99127F@ or
+           m@Winbond W83L785TS-S@ or
            m@EEprom \(DIMM\) reader@) {
       $_ = <INPUT>;
       $_ = <INPUT>;
@@ -313,6 +315,15 @@ CONFIG_SENSORS_ADM9240
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
+
+Asus ASB100
+CONFIG_SENSORS_ASB100
+  If you say yes here you get support for the Asus ASB100 (aka
+  "Bach") sensor chip.  This can also be built as a module.
+
+  You will also need the latest user-space utilities: you can find
+  them in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Dallas DS1621 and DS1625
 CONFIG_SENSORS_DS1621
@@ -580,6 +591,15 @@ CONFIG_SENSORS_W83781D
   You will also need the latest user-space utilties: you can find them
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
+
+Winbond W83L785TS-S
+CONFIG_SENSORS_W83L785TS
+  If you say yes here you get support for the Winbond W83L785TS-S
+  sensor chip.  This can also be built as a module.
+
+  You will also need the latest user-space utilities: you can find
+  them in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 EEprom (DIMM) reader
 CONFIG_SENSORS_EEPROM
@@ -865,6 +885,7 @@ obj-$(CONFIG_SENSORS_ADM1024)	+= adm1024.o
 obj-$(CONFIG_SENSORS_ADM1025)	+= adm1025.o
 obj-$(CONFIG_SENSORS_ADM1026)	+= adm1026.o
 obj-$(CONFIG_SENSORS_ADM9240)	+= adm9240.o
+obj-$(CONFIG_SENSORS_ASB100)	+= asb100.o
 obj-$(CONFIG_SENSORS_BT869)	+= bt869.o
 obj-$(CONFIG_SENSORS_DDCMON)	+= ddcmon.o
 obj-$(CONFIG_SENSORS_DS1621)	+= ds1621.o
@@ -894,6 +915,7 @@ obj-$(CONFIG_SENSORS_VIA686A)	+= via686a.o
 obj-$(CONFIG_SENSORS_VT1211)	+= vt1211.o
 obj-$(CONFIG_SENSORS_VT8231)	+= vt8231.o
 obj-$(CONFIG_SENSORS_W83781D)	+= w83781d.o
+obj-$(CONFIG_SENSORS_W83L785TS)	+= w83l785ts.o
 
 include $(TOPDIR)/Rules.make
 

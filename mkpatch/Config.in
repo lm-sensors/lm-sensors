@@ -17,6 +17,7 @@ if [ "$CONFIG_I2C_PROC" = "m" -o "$CONFIG_I2C_PROC" = "y" ] ; then
     dep_tristate '  Analog Devices ADM1025' CONFIG_SENSORS_ADM1025 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Analog Devices ADM1026' CONFIG_SENSORS_ADM1026 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Analog Devices ADM9240 and compatibles' CONFIG_SENSORS_ADM9240 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  Asus ASB100' CONFIG_SENSORS_ASB100 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Dallas DS1621 and DS1625' CONFIG_SENSORS_DS1621 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Fujitsu-Siemens Poseidon' CONFIG_SENSORS_FSCPOS $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  Fujitsu-Siemens Scylla' CONFIG_SENSORS_FSCSCY $CONFIG_I2C $CONFIG_I2C_PROC
@@ -41,6 +42,7 @@ if [ "$CONFIG_I2C_PROC" = "m" -o "$CONFIG_I2C_PROC" = "y" ] ; then
     dep_tristate '  VIA VT1211 Integrated Sensors' CONFIG_SENSORS_VT1211 $CONFIG_I2C $CONFIG_I2C_PROC $CONFIG_I2C_ISA
     dep_tristate '  VIA VT8231 Integrated Sensors' CONFIG_SENSORS_VT8231 $CONFIG_I2C $CONFIG_I2C_PROC $CONFIG_I2C_ISA
     dep_tristate '  Winbond W83781D, W83782D, W83783S, W83627HF, Asus AS99127F' CONFIG_SENSORS_W83781D $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  Winbond W83L785TS-S' CONFIG_SENSORS_W83L785TS $CONFIG_I2C $CONFIG_I2C_PROC
     bool 'Other I2C devices' CONFIG_SENSORS_OTHER 
     if [ "$CONFIG_SENSORS_OTHER" = "y" ] ; then
       dep_tristate '  Brooktree BT869 Video Modulator' CONFIG_SENSORS_BT869 $CONFIG_I2C $CONFIG_I2C_PROC

@@ -22,6 +22,7 @@ kernel/chips/adm1024.c		drivers/sensors/adm1024.c
 kernel/chips/adm1025.c		drivers/sensors/adm1025.c
 kernel/chips/adm1026.c		drivers/sensors/adm1026.c
 kernel/chips/adm9240.c		drivers/sensors/adm9240.c
+kernel/chips/asb100.c		drivers/sensors/asb100.c
 kernel/chips/bt869.c		drivers/sensors/bt869.c
 kernel/chips/ddcmon.c		drivers/sensors/ddcmon.c
 kernel/chips/ds1621.c		drivers/sensors/ds1621.c
@@ -53,6 +54,7 @@ kernel/chips/via686a.c		drivers/sensors/via686a.c
 kernel/chips/vt1211.c		drivers/sensors/vt1211.c
 kernel/chips/vt8231.c		drivers/sensors/vt8231.c
 kernel/chips/w83781d.c		drivers/sensors/w83781d.c
+kernel/chips/w83l785ts.c		drivers/sensors/w83l785ts.c
 kernel/include/sensors_compat.h	include/linux/sensors_compat.h
 kernel/include/sensors_vid.h	include/linux/sensors_vid.h
 mkpatch/Config.in		drivers/sensors/Config.in
