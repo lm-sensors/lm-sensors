@@ -322,7 +322,7 @@ static void eeprom_update_client(struct i2c_client *client, u8 slice)
 	 || (jiffies < data->last_updated[slice])) {
 
 #ifdef DEBUG
-		printk("Starting eeprom update, slice %u\n", slice);
+		printk(KERN_DEBUG "eeprom.o: Starting update, slice %u\n", slice);
 #endif
 
 		if (i2c_check_functionality(client->adapter,
@@ -378,7 +378,7 @@ void eeprom_contents(struct i2c_client *client, int operation,
 			for (i = 0; i < 16; i++)
 				results[i] = data->data[i + nr * 16];
 #ifdef DEBUG
-		printk("eeprom.o: 0x%X EEPROM contents (row %d):",
+		printk(KERN_DEBUG "eeprom.o: 0x%X EEPROM contents (row %d):",
 		       client->addr, nr + 1);
 		if (nr == 0 && data->nature == NATURE_VAIO)
 		 	printk(" <hidden for security reasons>\n");
