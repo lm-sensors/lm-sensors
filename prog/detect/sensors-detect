@@ -3154,18 +3154,25 @@ sub adm1021_detect
     # match reasonable expectations
     my $misdetect = 0;
     # Negative temperatures
-    $misdetect++ if ((my $lte=i2c_smbus_read_byte_data($file,0x00)) > 128);
-    $misdetect++ if ((my $rte=i2c_smbus_read_byte_data($file,0x01)) > 128);
+    $misdetect++ if ((my $lte=i2c_smbus_read_byte_data($file,0x00)) & 0x80);
+    $misdetect++ if ((my $rte=i2c_smbus_read_byte_data($file,0x01)) & 0x80);
     # Negative high limits
-    $misdetect++ if ((my $lhi=i2c_smbus_read_byte_data($file,0x05)) >= 128);
-    $misdetect++ if ((my $rhi=i2c_smbus_read_byte_data($file,0x07)) >= 128);
+	my ($lhi, $rhi);
+    if (($lhi=i2c_smbus_read_byte_data($file,0x05)) & 0x80)
+    {
+      $misdetect++;
+      $lhi-=256;
+    }
+    if (($rhi=i2c_smbus_read_byte_data($file,0x07)) & 0x80)
+    {
+      $misdetect++;
+      $rhi-=256;
+    }
     # Low limits over high limits
-    $lhi-=256 if $lhi >= 128;
-    $rhi-=256 if $rhi >= 128;
     my $llo=i2c_smbus_read_byte_data($file,0x06);
     my $rlo=i2c_smbus_read_byte_data($file,0x08);
-    $llo-=256 if $llo >= 128;
-    $rlo-=256 if $rlo >= 128;
+    $llo-=256 if ($llo & 0x80);
+    $rlo-=256 if ($rlo & 0x80);
     $misdetect++ if $llo > $lhi;
     $misdetect++ if $rlo > $rhi;
     return if $misdetect >= 4;
