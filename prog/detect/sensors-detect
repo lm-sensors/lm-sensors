@@ -119,6 +119,13 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        driver => "i2c-hydra",
        match => sub { $_[0] =~ /^Hydra i2c/ },
      },
+     { 
+       vendid => 0x1022,
+       devid  => 0x740b,
+       func => 3,
+       procid => "AMD-756 Athlon ACPI",
+# driver to be written
+     },
 );
 
 use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect 
