@@ -1,15 +1,18 @@
-# Hardware sensors configuration file
+# Sensors configuration file used by 'libsensors'
+#------------------------------------------------
 #
 ##########################################################################
+#                                                                        #
 # HELPFUL HINT:                                                          #
 #	The 'set' lines (generally for min and max values)               #
 #	do not take effect until you run 'sensors -s' as root !!!        #
 #	We suggest you put 'sensors -s' in a /etc/rc.d/... file          #
 #	to be run at boot time after the modules are inserted !!!        #
+#                                                                        #
 ##########################################################################
 #
-# This configuration file will be used by all applications linked to 
-# libsensors.
+# This configuration file will be used by all userspace applications
+# linked to libsensors. It is NOT used by the lm_sensors drivers directly.
 
 # This config file consists of two parts: the heavily commented LM78
 # example, and the real parts. Search for '####' if you want to skip
@@ -112,6 +115,8 @@
 # Ignore statements tell certain features are not wanted. User programs can
 # still read them if they really want, though; this is just an advisory
 # marking. 'in0' would also invalidate 'in0_max' and 'in0_min'.
+# 'ignore' does not disable anything in the actual sensor chip; it
+# simply advises the user program to not access that data.
 #
 #ignore in0
 
