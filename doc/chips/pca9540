@@ -1,0 +1,76 @@
+Kernel driver `pca9540.o'
+=========================
+
+Status: Complete but untested
+
+Supported chips:
+  * Philips PCA9540
+    Prefix: `pca9540'
+    Addresses scanned: I2C 0x70
+    Datasheet: Publicly available at the Philips Semiconductors website
+               http://www.semiconductors.philips.com/pip/PCA9540.html
+
+Authors: Jean Delvare <khali@linux-fr.org>
+
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_pca9540: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to
+  contain a `pca9540' chip
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+
+Note that the force and force_pca9540 parameters are equivalent here.
+
+
+Description (from the Philips web site)
+---------------------------------------
+
+The PCA9540 is a 1-of-2 bi-directional translating multiplexer, controlled
+via the I2C bus. The SCL/SDA upstream pair fans out to two SCL/SDA downstream
+pairs, or channels. Only one SCL/SDA channel is selected at a time,
+determined by the contents of the programmable control register.
+
+
+Accessing the PCA9540
+---------------------
+
+The PCA9540 is almost impossible to detect. We are lucky that no other
+known chip lives at address 0x70.
+
+Beware that the PCA9540 has a single internal register. It does work with
+READ BYTE and WRITE BYTE commands, contrary to regular chips which use
+READ BYTE DATA and WRITE BYTE DATA. Using i2cdump on the PCA9540 will
+actually *write* to it and leave its internal register to value 0x07 (i.e.
+no downstream channel selected).
+
+
+/proc Interface
+---------------
+
+There is a single read/write file, named "channel".
+
+ 0 = no downstream channel selected
+ 1 = first downstream channel selected
+ 2 = second downstream channel selected
+
+
+Chip Features
+-------------
+
+Chip `pca9540'
+          LABEL     LABEL CLASS   COMPUTE CLASS ACCESS MAGNITUDE
+        channel            NONE            NONE     RW     0
+
+          LABEL                   FEATURE SYMBOL     SYSCTL FILE:OFFSET
+        channel          SENSORS_PCA9540_CHANNEL         channel:1
