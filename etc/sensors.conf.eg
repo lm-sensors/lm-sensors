@@ -624,8 +624,8 @@ chip "w83697hf-*"
 #    set in2_max 1.5 * 1.05
 #    set in5_min 3.3 * 0.95
 #    set in5_max 3.3 * 1.05
-#    set in6_min 2.5 * 0.95 # 2.6 on Epox?
-#    set in6_max 2.5 * 1.05 # 2.6 on Epox?
+#    set in6_min 2.5 * 0.95 # 2.6 on Epox
+#    set in6_max 2.5 * 1.05 # 2.6 on Epox
 #    set in7_min 3.0 * 0.90
 #    set in7_max 3.0 * 1.10
 #    set in8_min 5 * 0.90
