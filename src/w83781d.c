@@ -213,7 +213,7 @@ struct w83781d_data {
          u8 temp;
          u8 temp_over;               /* Register value */
          u8 temp_hyst;               /* Register value */
-         u8 temp_add[2];             /* Register value */
+         u16 temp_add[2];             /* Register value */
          u16 temp_add_over[2];       /* Register value */
          u16 temp_add_hyst[2];       /* Register value */
          u8 fan_div[3];              /* Register encoding, shifted right */
