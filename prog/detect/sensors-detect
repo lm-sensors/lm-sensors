@@ -779,7 +779,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             saa1064_detect w83l784r_detect mozart_detect max6650_detect
             fscher_detect adm1029_detect adm1031_detect max6900_detect
             m5879_detect pca9540_detect smartbatt_mgr_detect
-            smartbatt_chgr_detect);
+            smartbatt_chgr_detect adt7467_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -857,16 +857,22 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { lm85_detect 0x01, @_},
      },
      {
-       name => "Analog Devices ADM1027 or ADT7463",
+       name => "Analog Devices ADM1027, ADT7460 or ADT7463",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { lm85_detect 0x41, @_},
      },
      {
-       name => "SMSC EMC6D100 and EMC6D101",
+       name => "SMSC EMC6D100 or EMC6D101",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { lm85_detect 0x5c, @_},
+     },
+     {
+       name => "Analog Devices ADT7467",
+       driver => "to-be-written",
+       i2c_addrs => [0x2e],
+       i2c_detect => sub { adt7467_detect 0, @_},
      },
      {
        name => "National Semiconductor LM87",
@@ -1140,6 +1146,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "to-be-written",
        i2c_addrs => [0x4c],
        i2c_detect => sub { lm90_detect 4, @_ },
+     },
+     {
+       name => "Analog Devices ADT7461",
+       driver => "to-be-written",
+       i2c_addrs => [0x4c],
+       i2c_detect => sub { lm90_detect 5, @_ },
      },
      {
        name => "Analog Devices ADM1029",
@@ -2788,7 +2800,8 @@ sub lm83_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = LM90, 1=LM89, 2=LM86, 3=ADM1032, 4=MAX6657/MAX6658)
+#   (0 = LM90, 1=LM89, 2=LM86, 3=ADM1032, 4=MAX6657/MAX6658,
+#    5 = ADT7461)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -2833,6 +2846,11 @@ sub lm90_detect
     return if ($conf & 0x1f) != 0;
 	return if $mid != 0x4d;     # Maxim
 	return 3;
+  }
+  if ($chip == 5) {
+    return if ($conf & 0x1b) != 0;
+    return if $mid != 0x41;     # Analog Devices
+    return 8 if $cid == 0x61;   # ADT7461
   }
   return;
 }
@@ -2928,12 +2946,39 @@ sub adm1031_detect
   return;
 }
 
+# $_[0]: Chip to detect
+#   (0 = ADT7467)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, 5 if detected.
+# Registers used:
+#   0x3d: Chip ID
+#   0x3e: Manufacturer ID
+#   0x3f: Die revision
+sub adt7467_detect
+{
+  my ($chip, $file, $addr) = @_;
+  my $mid = i2c_smbus_read_byte_data($file, 0x3e);
+  my $cid = i2c_smbus_read_byte_data($file, 0x3d);
+  my $drev = i2c_smbus_read_byte_data($file, 0x3f);
+
+  if ($chip == 0) {
+    return if $mid != 0x41;     # Analog Devices
+    return if $cid != 0x68;     # ADT7467
+    return if ($drev & 0xf0) != 0x70;
+    return 5;
+  }
+  return
+}
+
 # $_[0]: Vendor to check for
-#   (0x01 = National Semi, 0x41 = Analog Dev)
+#   (0x01 = National Semi, 0x41 = Analog Dev, 0x5c = SMSC)
 # $_[1]: A reference to the file descriptor to access this chip.
 # #_[2]: Base address.
-# Returns: undef if not detected, (7) if detected.
+# Returns: undef if not detected, (7) or (8) if detected.
 # Registers used: 0x3e == Vendor register.
+#                 0x3d == Device ID register (Analog Devices only).
 #		  0x3f == Version/Stepping register.
 # Constants used: 0x01 == National Semiconductor Vendor Id.
 #                 0x41 == Analog Devices Vendor Id.
@@ -2945,6 +2990,13 @@ sub lm85_detect
   my ($vendor,$file,$addr) = @_;
   return if (i2c_smbus_read_byte_data($file,0x3e)) != $vendor ;
   return if (i2c_smbus_read_byte_data($file,0x3f) & 0xf0) != 0x60;
+
+  if ($vendor == 0x41) # Analog Devices
+  {
+    return if i2c_smbus_read_byte_data($file, 0x3d) != 0x27;
+    return (8);
+  }
+
   return (7);
 }
 
