@@ -713,7 +713,7 @@ static void it87_update_client(struct i2c_client *client)
 			tmp2 = (tmp >> i) & 0x09;
 			if(tmp2 == 0x01)
 				data->sens[i] = PIIDIODE;
-			else if(tmp2 == 0x09)
+			else if(tmp2 == 0x08)
 				data->sens[i] = THERMISTOR;
 			else
 				data->sens[i] = INVALID;
