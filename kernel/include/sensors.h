@@ -178,23 +178,39 @@ struct sensors_address_data {
                           SENSORS_I2C_END, SENSORS_I2C_END, SENSORS_I2C_END, \
                           SENSORS_I2C_END, SENSORS_I2C_END, SENSORS_I2C_END}
 
+/* This is ugly. We need to evaluate SENSORS_MAX_OPTS before it is 
+   stringified */
 #define SENSORS_MODPARM_AUX1(x) "1-" #x "h"
 #define SENSORS_MODPARM_AUX(x) SENSORS_MODPARM_AUX1(x)
 #define SENSORS_MODPARM SENSORS_MODPARM_AUX(SENSORS_MAX_OPTS)
 
-#define SENSORS_CONCAT(x,y) x ## y
-#define MODULE_PARM1(x,y) MODULE_PARM(x,y)
+/* SENSORS_MODULE_PARM creates a module parameter, and puts it in the
+   module header */
+#define SENSORS_MODULE_PARM(var,desc) \
+  static unsigned short var[SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
+  MODULE_PARM(var,SENSORS_MODPARM); \
+  MODULE_PARM_DESC(var,desc)
+
+/* SENSORS_MODULE_PARM creates a 'force_*' module parameter, and puts it in
+   the module header */
+#define SENSORS_MODULE_PARM_FORCE(name) \
+  SENSORS_MODULE_PARM(force_ ## name, \
+                      "List of adapter,address pairs which are unquestionably" \
+                      " assumed to contain a `" # name "' chip")
+                         
 
 /* This defines several insmod variables, and the addr_data structure */
 #define SENSORS_INSMOD \
-  MODULE_PARM(probe,SENSORS_MODPARM); \
-  static unsigned short probe[SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
-  MODULE_PARM(probe_range,SENSORS_MODPARM); \
-  static unsigned short probe_range[SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
-  MODULE_PARM(ignore,SENSORS_MODPARM); \
-  static unsigned short ignore[SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
-  MODULE_PARM(ignore_range,SENSORS_MODPARM); \
-  static unsigned short ignore_range [SENSORS_MAX_OPTS]  = SENSORS_DEFAULTS; \
+  SENSORS_MODULE_PARM(probe, \
+                      "List of adapter,address pairs to scan additionally"); \
+  SENSORS_MODULE_PARM(probe_range, \
+                      "List of adapter,start-addr,end-addr triples to scan " \
+                      "additionally"); \
+  SENSORS_MODULE_PARM(ignore, \
+                      "List of adapter,address pairs not to scan"); \
+  SENSORS_MODULE_PARM(ignore_range, \
+                      "List of adapter,start-addr,end-addr triples not to " \
+                      "scan"); \
   static struct sensors_address_data addr_data = \
                                        {normal_i2c, normal_i2c_range, \
                                         normal_isa, normal_isa_range, \
@@ -202,22 +218,24 @@ struct sensors_address_data {
                                         ignore, ignore_range, \
                                         forces}
 
-/* The following functions assume the existence of an enum with the chip
-   names as elements. The first element of the enum should be any_chip */
+/* The following functions create an enum with the chip names as elements. 
+   The first element of the enum is any_chip. These are the only macros
+   a module will want to use. */
 
 #define SENSORS_INSMOD_0 \
   enum chips { any_chip }; \
-  MODULE_PARM(force,SENSORS_MODPARM); \
-  static unsigned short force[SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
+  SENSORS_MODULE_PARM(force, \
+                      "List of adapter,address pairs to boldly assume " \
+                      "to be present"); \
   static struct sensors_force_data forces[] = {{force,any_chip},{NULL}}; \
   SENSORS_INSMOD
 
 #define SENSORS_INSMOD_1(chip1) \
   enum chips { any_chip, chip1 }; \
-  MODULE_PARM(force,SENSORS_MODPARM); \
-  static unsigned short force[SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
-  MODULE_PARM1(SENSORS_CONCAT(force_,chip1),SENSORS_MODPARM); \
-  static unsigned short force_ ## chip1 [SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
+  SENSORS_MODULE_PARM(force, \
+                      "List of adapter,address pairs to boldly assume " \
+                      "to be present"); \
+  SENSORS_MODULE_PARM_FORCE(chip1); \
   static struct sensors_force_data forces[] = {{force,any_chip},\
                                                  {force_ ## chip1,chip1}, \
                                                  {NULL}}; \
@@ -225,28 +243,25 @@ struct sensors_address_data {
 
 #define SENSORS_INSMOD_2(chip1,chip2) \
   enum chips { any_chip, chip1, chip2 }; \
-  MODULE_PARM(force,SENSORS_MODPARM); \
-  static unsigned short force[SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
-  MODULE_PARM1(SENSORS_CONCAT(force_,chip1),SENSORS_MODPARM); \
-  static unsigned short force_ ## chip1 [SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
-  MODULE_PARM1(SENSORS_CONCAT(force_,chip2),SENSORS_MODPARM); \
-  static unsigned short force_ ## chip2 [SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
+  SENSORS_MODULE_PARM(force, \
+                      "List of adapter,address pairs to boldly assume " \
+                      "to be present"); \
+  SENSORS_MODULE_PARM_FORCE(chip1); \
+  SENSORS_MODULE_PARM_FORCE(chip2); \
   static struct sensors_force_data forces[] = {{force,any_chip}, \
-                                                 {force_ ## chip1,chip2}, \
-                                                 {force_ ## chip2,nr2}, \
+                                                 {force_ ## chip1,chip1}, \
+                                                 {force_ ## chip2,chip2}, \
                                                  {NULL}}; \
   SENSORS_INSMOD
 
 #define SENSORS_INSMOD_3(chip1,chip2,chip3) \
   enum chips { any_chip, chip1, chip2, chip3 }; \
-  MODULE_PARM(force,SENSORS_MODPARM); \
-  static unsigned short force[SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
-  MODULE_PARM1(SENSORS_CONCAT(force_,chip1),SENSORS_MODPARM); \
-  static unsigned short force_ ## chip1 [SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
-  MODULE_PARM1(SENSORS_CONCAT(force_,chip2),SENSORS_MODPARM); \
-  static unsigned short force_ ## chip2 [SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
-  MODULE_PARM1(SENSORS_CONCAT(force_,chip3),SENSORS_MODPARM); \
-  static unsigned short force_ ## chip3 [SENSORS_MAX_OPTS] = SENSORS_DEFAULTS; \
+  SENSORS_MODULE_PARM(force, \
+                      "List of adapter,address pairs to boldly assume " \
+                      "to be present"); \
+  SENSORS_MODULE_PARM_FORCE(chip1); \
+  SENSORS_MODULE_PARM_FORCE(chip2); \
+  SENSORS_MODULE_PARM_FORCE(chip3); \
   static struct sensors_force_data forces[] = {{force,any_chip}, \
                                                  {force_ ## chip1,chip1}, \
                                                  {force_ ## chip2,chip2}, \
