@@ -213,17 +213,23 @@ int sensors_read_proc_bus(void)
 				entry.adapter=strdup(x);
 				if(!strncmp(x, "ISA ", 4)) {
 					entry.number = SENSORS_CHIP_NAME_BUS_ISA;
-					entry.algorithm = "ISA bus algorithm";
+					entry.algorithm = strdup("ISA bus algorithm");
 				} else if(!sscanf(de->d_name, "i2c-%d", &entry.number)) {
 					entry.number = SENSORS_CHIP_NAME_BUS_DUMMY;
-					entry.algorithm = "Dummy bus algorithm";
+					entry.algorithm = strdup("Dummy bus algorithm");
 				} else
-					entry.algorithm = "Unavailable from sysfs";
+					entry.algorithm = strdup("Unavailable from sysfs");
+				if (entry.algorithm == NULL)
+					goto FAT_ERROR_SYS;
 				add_proc_bus(&entry);
 			}
 		}
 		closedir(dir);
 		return 0;
+FAT_ERROR_SYS:
+		sensors_fatal_error("sensors_read_proc_bus", "Allocating entry");
+		closedir(dir);
+		return -SENSORS_ERR_PROC;
 	}
 
 proc:
