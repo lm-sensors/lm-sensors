@@ -40,7 +40,7 @@ MODULE_LICENSE("GPL");
 #define init_MUTEX(s) do { *(s) = MUTEX; } while(0)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,13)
+#ifndef THIS_MODULE
 #define THIS_MODULE NULL
 #endif
 

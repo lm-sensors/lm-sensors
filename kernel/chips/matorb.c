@@ -40,7 +40,7 @@ MODULE_LICENSE("GPL");
 #endif
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,13)
+#ifndef THIS_MODULE
 #define THIS_MODULE NULL
 #endif
 
