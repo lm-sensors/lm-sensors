@@ -17,6 +17,8 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 2.8.2 (???)
+  IMPORTANT: Limit initialization removed from all chip drivers!
+             If you didn't run 'sensors -s' in the past you may need to now!
   File sensors.conf.eg: Change lm75 scaling back to 1
   Library: Fix bmcsensors scaling, increase number of sensors;
            Add w83627thf support; Advance version to 3.0.0;

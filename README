@@ -8,11 +8,13 @@
 
 OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 
-           !!! This package is ONLY for 2.4 kernels 2.4.9 or later !!!
-           !!! THIS PACKAGE REQUIRES i2c-2.8.0 or later!!!
+!!! This package is ONLY for 2.6, 2.5, and 2.4 kernels (2.4.9 or later) !!!
+!!! THIS PACKAGE REQUIRES i2c-2.8.1 or later!!!
 
-FOR 2.5 KERNELS, Do not attempt to compile this package.
-                 Use the drivers already in the 2.5 kernel development tree.
+FOR 2.6/2.5 KERNELS, Use only the userspace tools in this package.
+Build and install them with 'make user' and 'make user_install'.
+The kernel modules in this package will not compile for 2.6/2.5;
+use the drivers already in the 2.5 kernel development tree.
 
 =============================================================================
 
@@ -20,22 +22,26 @@ This is the completely rewritten version 2 of lm_sensors, a collection of
 modules for general SMBus access and hardware monitoring.
 Version 1 is now officially unsupported.
 
-WARNING! This package will work on kernels 2.4.9 - 2.4.xx only.
+WARNING! This drivers in this package will work on kernels 2.4.9 - 2.4.xx only.
 Use lm_sensors-2.4.5 for 2.0 kernels.
 Use lm_sensors-2.7.0 for 2.2, 2.3, and 2.4.0 - 2.4.8 kernels.
-Use the drivers already in the kernel for 2.5 kernels; if you need
-additional drivers in 2.5 please port and submit them to us.
+Use the drivers already in the kernel for 2.6/2.5 kernels; if you need
+additional drivers in 2.6 please port and submit them to us.
 
-WARNING! You must get the latest i2c package, i2c-2.8.0,
+HOWEVER, the userspace tools in this package will work for
+2.4, 2.5, and 2.6 kernels.
+
+WARNING! You must have at least i2c-2.8.1.
 EVEN IF your kernel does contain i2c support!!!!!!!!!
+You may wish to get the latest i2c package, i2c-2.8.2,
 
 The I2C package in existing 2.4 kernels is NOT sufficient
 for compilation of this package.
 
-ADDITIONALLY, i2c-2.8.0 is not API compatible to earlier i2c
+ADDITIONALLY, i2c-2.8.1 is not API compatible to earlier i2c
 releases due to struct changes; therefore you must NOT ENABLE
 any other i2c drivers (e.g. bttv) in the kernel.
-Do NOT use lm-sensors 2.8.0 or i2c-2.8.0 if you require bttv.
+Do NOT use lm-sensors 2.8.1 or i2c-2.8.1 if you require bttv.
 
 See the lm_sensors download page for further guidance:
   http://secure.netroedge.com/~lm78/download.html
@@ -164,7 +170,7 @@ The latest version of this package can always be found on our homepage:
 http://secure.netroedge.com/~lm78. Pre-release versions can be retrieved
 through anonymous CVS; see doc/cvs for more information.
 
-This whole package is copyright (c) 1998 - 2002 by Frodo Looijaard and
+This whole package is copyright (c) 1998 - 2003 by Frodo Looijaard and
 Philip Edelbrock, except for a few drivers written by
 other people. See the individual files for more exact copyright information.  
 This package may be distributed according to the GNU General Public License 

@@ -3,12 +3,15 @@
 DETAILED INSTALLATION INSTRUCTIONS
 See QUICKSTART for the simple version.
 
-This package is ONLY for 2.4 kernels 2.4.9 or later !!!
+The driver modules in this package are ONLY for 2.4 kernels 2.4.9 or later !!!
 
-This package REQUIRES i2c-2.8.0 or later!!!
+This package REQUIRES i2c-2.8.1 or later!!!
 
-FOR 2.5 KERNELS, Do not attempt to compile this package.
-                 Use the drivers already in the 2.5 kernel development tree.
+FOR 2.5/2.6 KERNELS, do not attempt to compile this package.
+    Use the drivers already in the 2.5/2.6 kernel tree.
+    If you are running a 2.5/2.6 kernel, the ONLY thing you need to
+    do is 'make user' and 'make user_install'. Do NOT follow the rest
+    of these instructions.
 
 =============================================================================
 These are the installation instruction for the lm_sensors package.

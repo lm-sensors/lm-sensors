@@ -11,6 +11,9 @@ Other methods are described in INSTALL.
 ------------------------------------------
 
   * Verify you are running a 2.4 kernel, 2.4.9 or later.
+    If you are running a 2.5/2.6 kernel, the ONLY thing you need to
+    do is 'make user' and 'make user_install'. Do NOT follow the rest
+    of these instructions.
 
   * Make sure you have the kernel tree corresponding to your current
     kernel in /lib/modules/(uname -r)/build.
@@ -25,7 +28,7 @@ Other methods are described in INSTALL.
     you MUST remove them (as root) with `rmmod'.
 
   * Download, build, and install the latest i2c package,
-    (i2c-2.8.0 or later).
+    (i2c-2.8.1 or later).
     Quickstart for i2c: make; make install; depmod -a
 
   * Go back to the lm_sensors directory. Do `make'.
