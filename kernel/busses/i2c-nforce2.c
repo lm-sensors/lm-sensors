@@ -111,7 +111,9 @@ struct nforce2_smbus {
 static s32 nforce2_access(struct i2c_adapter *adap, u16 addr,
 		       unsigned short flags, char read_write,
 		       u8 command, int size, union i2c_smbus_data *data);
+#if 0
 static void nforce2_do_pause(unsigned int amount);
+#endif
 /*
 static int nforce2_block_transaction(union i2c_smbus_data *data,
 				  char read_write, int i2c_enable);
@@ -128,13 +130,14 @@ static struct i2c_algorithm smbus_algorithm = {
 
 
 
+#if 0
 /* Internally used pause function */
 void nforce2_do_pause(unsigned int amount)
 {
 	current->state = TASK_INTERRUPTIBLE;
 	schedule_timeout(amount);
 }
-
+#endif
 
 /* Return -1 on error. See smbus.h for more information */
 s32 nforce2_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
@@ -383,7 +386,6 @@ static int __devinit nforce2_probe(struct pci_dev *dev, const struct pci_device_
 
 static void __devexit nforce2_remove(struct pci_dev *dev)
 {
-	int res;
 	struct nforce2_smbus *smbuses = (void*) pci_get_drvdata(dev);
 
 	if (smbuses[0].base) {

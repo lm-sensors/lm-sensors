@@ -176,8 +176,6 @@ static void __init dmi_save_ident(struct dmi_header *dm, int slot, int string)
 
 static void __init dmi_decode(struct dmi_header *dm)
 {
-	u8 *data = (u8 *)dm;
-	
 	switch(dm->type)
 	{
 		case  0:
