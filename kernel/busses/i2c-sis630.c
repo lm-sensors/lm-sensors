@@ -452,11 +452,20 @@ int sis630_setup(void) {
 #endif
 
 	/* Everything is happy, let's grab the memory and set things up. */
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,3,14)
 	if (!request_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION, "sis630-smbus")){
 		printk(KERN_ERR "i2c-sis630.o: SMBus registers 0x%04x-0x%04x "
 			"already in use!\n",acpi_base + SMB_STS, acpi_base + SMB_SAA);
 		return -ENODEV;
 	}
+#else
+	if (check_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION) < 0){
+		printk(KERN_ERR "i2c-sis630.o: SMBus registers 0x%04x-0x%04x "
+			"already in use!\n",acpi_base + SMB_STS, acpi_base + SMB_SAA);
+		return -ENODEV;
+	}
+	request_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION, "sis630-smbus");
+#endif
 
 	return 0;
 }

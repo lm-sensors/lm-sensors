@@ -326,10 +326,18 @@ static int __devinit amd8111_probe(struct pci_dev *dev, const struct pci_device_
 	smbus->base = pci_resource_start(dev, 0);
 	smbus->size = pci_resource_len(dev, 0);
 
-	if (!request_region(smbus->base, smbus->size, "amd81111 SMBus 2.0")) {
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,3,14)
+	if (!request_region(smbus->base, smbus->size, "amd8111 SMBus 2.0")) {
 		kfree(smbus);
 		return -1;
 	}
+#else
+	if (check_region(smbus->base, smbus->size) < 0) {
+		kfree(smbus);
+		return -1;
+	}
+	request_region(smbus->base, smbus->size, "amd8111 SMBus 2.0");
+#endif
 
 	sprintf(smbus->adapter.name, "SMBus2 AMD8111 adapter at %04x", smbus->base);
 	smbus->adapter.id = I2C_ALGO_SMBUS | I2C_HW_SMBUS_AMD8111;
@@ -355,7 +363,7 @@ static void __devexit amd8111_remove(struct pci_dev *dev)
 {
 	struct amd_smbus *smbus = pci_get_drvdata(dev);
 	if (i2c_del_adapter(&smbus->adapter)) {
-		printk(KERN_WARNING "i2c-amd81111.c: Failed to unregister adapter.\n");
+		printk(KERN_WARNING "i2c-amd8111.c: Failed to unregister adapter.\n");
 		return;
 	}
 	release_region(smbus->base, smbus->size);

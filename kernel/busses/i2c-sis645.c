@@ -332,12 +332,22 @@ static int sis645_setup(void)
 	printk("i2c-sis645.o: SiS645 SMBus base address: 0x%04x\n", sis645_smbus_base);
 
 	/* Everything is happy, let's grab the memory and set things up. */
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,3,14)
 	if (!request_region(sis645_smbus_base, SIS645_SMB_IOREGION, "sis645-smbus")) {
 		printk
 		    ("i2c-sis645.o: SMBus registers 0x%04x-0x%04x already in use!\n",
 		     sis645_smbus_base, sis645_smbus_base + SIS645_SMB_IOREGION - 1);
 		return -EINVAL;
 	}
+#else
+	if (check_region(sis645_smbus_base, SIS645_SMB_IOREGION) < 0) {
+		printk
+		    ("i2c-sis645.o: SMBus registers 0x%04x-0x%04x already in use!\n",
+		     sis645_smbus_base, sis645_smbus_base + SIS645_SMB_IOREGION - 1);
+		return -EINVAL;
+	}
+	request_region(sis645_smbus_base, SIS645_SMB_IOREGION, "sis645-smbus");
+#endif
 
 	return(0);
 }
