@@ -16,5 +16,4 @@ kernel/chips/w83781d.c		drivers/sensors/w83781d.c
 kernel/chips/eeprom.c		drivers/sensors/eeprom.c
 kernel/include/i2c-isa.h	include/linux/i2c-isa.h
 kernel/include/sensors.h	include/linux/sensors.h
-mkpatch/Makefile		drivers/sensors/Makefile
 mkpatch/Config.in		drivers/sensors/Config.in

@@ -285,8 +285,10 @@ sub gen_Makefile
         or die "Can't open `$kernel_root/$kernel_file'";
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
+  `grep -q -s 'i2c\.o' "$kernel_root/$kernel_file"`;
+  $type = 2 if ! $?;
   MAIN: while(<INPUT>) {
-    $type = 1 if (m@^DRIVERS-\$@);
+    $type = 1 if !$type and (m@^DRIVERS-\$@);
     if (m@DRIVERS-\$\(CONFIG_SENSORS\)@) {
       $_ = <INPUT>;
       redo MAIN;
@@ -299,6 +301,12 @@ sub gen_Makefile
     if ($type == 1 and m@^DRIVERS \+= \$\(DRIVERS-y\)@) {
       print OUTPUT <<'EOF';
 DRIVERS-$(CONFIG_SENSORS) += drivers/sensors/sensors.a
+EOF
+      $pr1 = 1;
+    }
+    if ($type == 2 and m@^DRIVERS \+= \$\(DRIVERS-y\)@) {
+      print OUTPUT <<'EOF';
+DRIVERS-$(CONFIG_SENSORS) += drivers/sensors/sensors.o
 EOF
       $pr1 = 1;
     }
@@ -534,6 +542,164 @@ EOF
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
+sub gen_drivers_sensors_Makefile
+{
+  my ($package_root,$kernel_root) = @_;
+  my $kernel_file = "drivers/sensors/Makefile";
+  my $package_file = $temp;
+  my $use_new_format;
+  `grep -q -s 'i2c\.o' "$kernel_root/drivers/i2c/Makefile"`;
+  $use_new_format = ! $?;
+
+  open OUTPUT,">$package_root/$package_file"
+        or die "Can't open $package_root/$package_file";
+  if ($use_new_format) {
+    print OUTPUT <<'EOF';
+#
+# Makefile for the kernel hardware sensors drivers.
+#
+
+MOD_LIST_NAME := SENSORS_MODULES
+O_TARGET := sensors.o
+
+export-objs	:= sensors.o
+
+obj-$(CONFIG_SENSORS)		+= sensors.o
+obj-$(CONFIG_SENSORS_ADM1021)	+= adm1021.o
+obj-$(CONFIG_SENSORS_ADM9024)	+= adm9024.o
+obj-$(CONFIG_SENSORS_EEPROM)	+= eeprom.o
+obj-$(CONFIG_SENSORS_GL518SM)	+= gl518sm.o
+obj-$(CONFIG_SENSORS_LM75)	+= lm75.o
+obj-$(CONFIG_SENSORS_LM78)	+= lm78.o
+obj-$(CONFIG_SENSORS_LM80)	+= lm80.o
+obj-$(CONFIG_SENSORS_LTC1710)	+= ltc1710.o
+obj-$(CONFIG_SENSORS_SIS5595)	+= sis5595.o
+obj-$(CONFIG_SENSORS_W83781D)	+= w83781d.o
+
+O_OBJS          := $(filter-out $(export-objs), $(obj-y))
+OX_OBJS         := $(filter     $(export-objs), $(obj-y))
+M_OBJS          := $(sort $(filter-out  $(export-objs), $(obj-m)))
+MX_OBJS         := $(sort $(filter      $(export-objs), $(obj-m)))
+
+include $(TOPDIR)/Rules.make
+
+EOF
+  } else {
+    print OUTPUT <<'EOF';
+#
+# Makefile for the kernel hardware sensors drivers.
+#
+
+SUB_DIRS     :=
+MOD_SUB_DIRS := $(SUB_DIRS)
+ALL_SUB_DIRS := $(SUB_DIRS)
+MOD_LIST_NAME := SENSORS_MODULES
+
+L_TARGET := sensors.a
+MX_OBJS :=  
+M_OBJS  := 
+LX_OBJS :=
+L_OBJS  := 
+
+# -----
+# i2c core components
+# -----
+
+ifeq ($(CONFIG_SENSORS),y)
+  LX_OBJS += sensors.o
+else
+  ifeq ($(CONFIG_SENSORS),m)
+    MX_OBJS += sensors.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_ADM1021),y)
+  L_OBJS += adm1021.o
+else
+  ifeq ($(CONFIG_SENSORS_ADM1021),m)
+    M_OBJS += adm1021.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_ADM9024),y)
+  L_OBJS += adm9240.o
+else
+  ifeq ($(CONFIG_SENSORS_ADM9024),m)
+    M_OBJS += adm9240.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_EEPROM),y)
+  L_OBJS += eeprom.o
+else
+  ifeq ($(CONFIG_SENSORS_EEPROM),m)
+    M_OBJS += eeprom.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_GL518SM),y)
+  L_OBJS += gl518sm.o
+else
+  ifeq ($(CONFIG_SENSORS_GL518SM),m)
+    M_OBJS += gl518sm.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_LM75),y)
+  L_OBJS += lm75.o
+else
+  ifeq ($(CONFIG_SENSORS_LM75),m)
+    M_OBJS += lm75.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_LM78),y)
+  L_OBJS += lm78.o
+else
+  ifeq ($(CONFIG_SENSORS_LM78),m)
+    M_OBJS += lm78.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_LM80),y)
+  L_OBJS += lm80.o
+else
+  ifeq ($(CONFIG_SENSORS_LM80),m)
+    M_OBJS += lm80.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_LTC1710),y)
+  L_OBJS += ltc1710.o
+else
+  ifeq ($(CONFIG_SENSORS_LTC1710),m)
+    M_OBJS += ltc1710.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_SIS5595),y)
+  L_OBJS += sis5595.o
+else
+  ifeq ($(CONFIG_SENSORS_SIS5595),m)
+    M_OBJS += sis5595.o
+  endif
+endif
+
+ifeq ($(CONFIG_SENSORS_W83781D),y)
+  L_OBJS += w83781d.o
+else
+  ifeq ($(CONFIG_SENSORS_W83781D),m)
+    M_OBJS += w83781d.o
+  endif
+endif
+
+include $(TOPDIR)/Rules.make
+EOF
+  }  
+  close OUTPUT;
+  print_diff $package_root,$kernel_root,$kernel_file,$package_file;
+}
+
 # This generates diffs for drivers/i2c/Makefile.
 # Lines to add correct files to M_OBJS and/or L_OBJS are added just before
 # Rules.make is included
@@ -546,19 +712,30 @@ sub gen_drivers_i2c_Makefile
   my $kernel_file = "drivers/i2c/Makefile";
   my $package_file = $temp;
   my $pr1 = 0;
+  my $new_format = 0;
 
   open INPUT,"$kernel_root/$kernel_file"
         or die "Can't open `$kernel_root/$kernel_file'";
   open OUTPUT,">$package_root/$package_file"
         or die "Can't open $package_root/$package_file";
   while(<INPUT>) {
+    $new_format = 1 if m@i2c\.o@;
     if (m@sensors code starts here@) {
       $pr1 ++;
       print OUTPUT;
       while (<INPUT>) {
         last if m@sensors code ends here@;
       }
-      print OUTPUT << 'EOF';
+      if ($new_format) {
+        print OUTPUT << 'EOF';
+obj-$(CONFIG_I2C_ALI15X3)		+= i2c-ali15x3.o
+obj-$(CONFIG_I2C_ALI15X3)		+= i2c-hydra.o
+obj-$(CONFIG_I2C_ALI15X3)		+= i2c-piix4.o
+obj-$(CONFIG_I2C_ALI15X3)		+= i2c-via.o
+obj-$(CONFIG_I2C_ALI15X3)		+= i2c-isa.o
+EOF
+      } else {
+        print OUTPUT << 'EOF';
 ifeq ($(CONFIG_I2C_ALI15X3),y)
   L_OBJS += i2c-ali15x3.o
 else 
@@ -600,6 +777,7 @@ else
 endif
 
 EOF
+      }
     }
     print OUTPUT;
   }
@@ -706,8 +884,8 @@ sub gen_MAINTAINERS
 SENSORS DRIVERS
 P:      Frodo Looijaard
 M:      frodol@dds.nl
-P:	Philip Edelbrock
-M:	phil@netroedge.com
+P:      Philip Edelbrock
+M:      phil@netroedge.com
 L:      sensors@stimpy.netroedge.com
 W:      http://www.lm-sensors.nu/
 S:      Maintained
@@ -790,6 +968,7 @@ sub main
 
   gen_Makefile $package_root, $kernel_root;
   gen_drivers_Makefile $package_root, $kernel_root;
+  gen_drivers_sensors_Makefile $package_root, $kernel_root;
   gen_drivers_char_Config_in $package_root, $kernel_root;
   gen_drivers_char_mem_c $package_root, $kernel_root;
   gen_drivers_i2c_Config_in $package_root, $kernel_root;
