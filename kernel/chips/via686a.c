@@ -143,7 +143,7 @@ extern inline long IN_FROM_REG(u8 val, int inNum)
   // val is guaranteed to be positive, so we can achieve the effect of rounding
   // by adding 0.5.  Or, to avoid fp math, we do (...*10+5)/10.
   // Since we need to scale up by 100 anyway, we don't need to /100 at the end.
-  if (inNum<=1) 
+  if (inNum<=1)
     return (long)(((250000*val+13300)/210240*10+5)/10); // was 210240, 205240 works better
   else if (inNum==2)
     return (long)(((250000*val+13300)/157370*10+5)/10); // was 157370, 154370 works better
@@ -288,10 +288,8 @@ extern inline long TEMP_FROM_REG10(u16 val)
 #define VIA686A_INIT_IN_0 200
 #define VIA686A_INIT_IN_1 250
 #define VIA686A_INIT_IN_2 330
-#define VIA686A_INIT_IN_3 (((500)   * 100)/168)
-#define VIA686A_INIT_IN_4 (((1200)  * 10)/38)
-//#define VIA686A_INIT_IN_3 500
-//#define VIA686A_INIT_IN_4 1200
+#define VIA686A_INIT_IN_3 500
+#define VIA686A_INIT_IN_4 1200
 
 #define VIA686A_INIT_IN_PERCENTAGE 10
 
@@ -782,12 +780,12 @@ void via686a_temp(struct i2c_client *client, int operation, int ctl_name,
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			data->temp_over[nr] = TEMP_TO_REG(results[0]);
-			via686a_write_value(client, VIA686A_REG_TEMP_OVER(nr),
+			via686a_write_value(client, VIA686A_REG_TEMP_OVER(nr+1),
 					    data->temp_over[nr]);
 		}
 		if (*nrels_mag >= 2) {
 			data->temp_hyst[nr] = TEMP_TO_REG(results[1]);
-			via686a_write_value(client, VIA686A_REG_TEMP_HYST(nr),
+			via686a_write_value(client, VIA686A_REG_TEMP_HYST(nr+1),
 					    data->temp_hyst[nr]);
 		}
 	}
