@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <locale.h>
 #include <langinfo.h>
+#include <iconv.h>
 
 #include "lib/sensors.h" 
 #include "lib/error.h"
@@ -154,6 +155,31 @@ void close_config_file(void)
   free(config_file_name);
 }
 
+static void set_degstr(void)
+{
+  /* Size hardcoded for better performance.
+     Don't forget to count the trailing \0! */
+  size_t deg_latin1_size = 3;
+  char *deg_latin1_text[2] = {"\260C", "\260F"};
+  const char *deg_default_text[2] = {" C", " F"};
+  size_t nconv;
+  size_t degstr_size = sizeof(degstr);
+  char *degstr_ptr = degstr;
+
+  iconv_t cd = iconv_open(nl_langinfo(CODESET), "ISO-8859-1");
+  if (cd != (iconv_t) -1) {
+    nconv = iconv(cd, &(deg_latin1_text[fahrenheit]), &deg_latin1_size,
+                  &degstr_ptr, &degstr_size);
+    iconv_close(cd);
+    
+    if (nconv != (size_t) -1)
+      return;	   
+  }
+
+  /* There was an error during the conversion, use the default text */
+  strcpy(degstr, deg_default_text[fahrenheit]);
+}
+
 int main (int argc, char *argv[])
 {
   int c,res,i,error;
@@ -253,15 +279,7 @@ int main (int argc, char *argv[])
   close_config_file();
 
   /* build the degrees string */
-  if (strcmp(nl_langinfo(CODESET), "UTF-8") == 0)
-    sprintf(degstr, "%c%c", 0xc2, 0xb0);
-  else
-    sprintf(degstr, "%c", 176);
-  if (fahrenheit) {
-    strcat(degstr, "F");
-  } else {
-    strcat(degstr, "C");
-  }
+  set_degstr();
 
   if(do_the_real_work(&error)) {
     sensors_cleanup();
