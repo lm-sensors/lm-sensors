@@ -78,14 +78,19 @@ at all!
 
 (i2c) bit-mb: algo-bit i2c-core
   VIA VT82C586B bus access. This is often used instead of the PIIX4 as SMBus
+  host.
 
 (i2c) bit-lp: algo-bit i2c-core
   I2C bus through the parallel port, Philips interface
+  Do not insert this module unless you are sure you have this interface;
+  it will block your parallel port, and cause fake devices to appear.
   Module parameters:
     base (i) Base address of parallel port
 
 (i2c) bit-velle: algo-bit i2c-core
   I2C bus through the parallel port, Vellemann K9000 interface
+  Do not insert this module unless you are sure you have this interface;
+  it will block your parallel port, and cause fake devices to appear.
   Module parameters:
     base (i) Base address of parallel port
 

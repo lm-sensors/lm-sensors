@@ -158,7 +158,7 @@ int piix4_setup(void)
    things after enabling this. :') Check for Bios updates before
    resorting to this.  */
   if ((temp & 1) == 0) {
-    pcibios_write_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
+    pci_write_config_byte_united(PIIX4_dev, PIIX4_bus, PIIX4_devfn,
                                      SMBHSTCFG, temp | 1);
     printk("piix4.0: WARNING: PIIX4 SMBus interface has been FORCEFULLY "
            "ENABLED!!\n");

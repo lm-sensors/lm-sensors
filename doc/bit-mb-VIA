@@ -1,0 +1,20 @@
+(From a recent mailing of Kyösti Mälkki)
+
+Read i2c/README.bitmb.
+Your /proc/pci or lspci must show VT82C586B (note the last B)
+to make it work. This is an upgraded version of VT82C586/A with USB and
+ACPI support. The i2c-lines are accessed through the ACPI part.
+
+This is my PCI bus data:
+
+00:07.3 Bridge: VIA Technologies, Inc. VT82C586B ACPI (rev 10)
+        Flags: medium devsel
+
+South bridge VT82C586B is in these chipsets: MVP3, VP3, VP2/97, VPX/97
+
+I don't see the last two PCI devices if USB is not enabled in BIOS setup.
+BTW, my motherboard is FIC VA-503+.
+
+Hope this helps for now, I will write better documentation some day.
+
+
