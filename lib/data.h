@@ -127,10 +127,10 @@ typedef struct sensors_proc_chips_entry {
 
 /* Internal data about a single chip feature.
    name is the string name used to refer to this feature (both in config
-    files and through user functions);
+     files and through user functions);
    number is the internal feature number, used in many functions to refer
      to this feature
-   logical_mapping is either SENSORS_NO_MAPPING is this is feature is the
+   logical_mapping is either SENSORS_NO_MAPPING if this is feature is the
      main element of category; or it is the number of a feature with which
      this feature is logically grouped (a group could be fan, fan_max and
      fan_div)
@@ -138,11 +138,11 @@ typedef struct sensors_proc_chips_entry {
      feature whose compute line will be inherited (a group could be fan and
      fan_max, but not fan_div)
     mode is SENSORS_MODE_NO_RW, SENSORS_MODE_R, SENSORS_MODE_W or
-      SENSORS_MODE_RW, for unaccessible, readable, writable, and both readable
-      and writable.
+     SENSORS_MODE_RW, for unaccessible, readable, writable, and both readable
+     and writable.
     sysctl is the SYSCTL id of the file the value can be found in;
-    offset is the (byte) offset of the place this feature can be found;
-    Divide the read value by 10**scaling to get the real value */
+     offset is the (byte) offset of the place this feature can be found;
+     Divide the read value by 10**scaling to get the real value */
 typedef struct sensors_chip_feature {
   int number;
   const char *name;

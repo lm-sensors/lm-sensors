@@ -66,4 +66,6 @@ problems.
   Author of the fscpos driver.
 * Aurelien Jarno <aurelien@aurel32.net>
   Author of the pcf8591 driver.
+* Abraham vd Merwe <abraham@2d3d.co.za>
+  Author of the LM92 driver.
 
