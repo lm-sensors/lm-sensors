@@ -9,7 +9,7 @@ Of course the program is provided without warranty of any kind.
 #include <fcntl.h>
 #include <string.h>
 #include <time.h>
-#include "i2c-dev.h"
+#include <linux/i2c-dev.h>
 
 /*
   this program can read 24C16 (and probably smaller ones, too)
@@ -22,7 +22,9 @@ Of course the program is provided without warranty of any kind.
 #define DEFAULT_EEPROM_ADDR  0x50         /* the 24C16 sits on i2c address 0x50 */
 #define DEFAULT_NUM_PAGES    8            /* we default to a 24C16 eeprom which has 8 pages */
 #define BYTES_PER_PAGE       256          /* one eeprom page is 256 byte */
-#define MAX_BYTES            16           /* max number of bytes to write in one piece */
+#define MAX_BYTES            8            /* max number of bytes to write in one chunk */
+       /* ... note: 24C02 and 24C01 only allow 8 bytes to be written in one chunk.   *
+        *  if you are going to write 24C04,8,16 you can change this to 16            */
 
 /* write len bytes (stored in buf) to eeprom at address addr, page-offset offset */
 /* if len=0 (buf may be NULL in this case) you can reposition the eeprom's read-pointer */
@@ -264,11 +266,11 @@ int main(int argc, char **argv){
 		for(j=0;j<sizeof(buf);j++)
 		    buf[j]=0;
 	    }
-	    for(j=0;j<MAX_BYTES;j++)
+            for(j=0;j<(BYTES_PER_PAGE/MAX_BYTES);j++)
 		if(eeprom_write(d,addr+i,j*MAX_BYTES,buf+(j*MAX_BYTES),MAX_BYTES)<0)
 		    exit(1);
 	} else {
-	    for(j=0;j<MAX_BYTES;j++)
+            for(j=0;j<(BYTES_PER_PAGE/MAX_BYTES);j++)
 		if(eeprom_read(d,addr+i,j*MAX_BYTES,buf+(j*MAX_BYTES),MAX_BYTES)<0)
 		    exit(1);
 	}
