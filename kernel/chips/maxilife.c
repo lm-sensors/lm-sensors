@@ -427,9 +427,9 @@ int maxi_detect(struct i2c_adapter *adapter, int address,
 {
 	struct i2c_client *new_client;
 	struct maxi_data *data;
-	enum maxi_type type;
+	enum maxi_type type = 0;
 	int i, j, err = 0;
-	const char *type_name, *client_name;
+	const char *type_name = NULL, *client_name = NULL;
 
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
 		goto ERROR0;
