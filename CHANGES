@@ -18,7 +18,10 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.5.5 (2001????)
+>>>>>>> 1.80
   NOTE: i2c 2.5.5 MUST BE be compiled and installed first.
+  mkpatch now adds many more modules
+  mkpatch only works with 2.2 and 2.4 kernels anymore
   Chip modules (all): Update mutex definition (works now for new 2.2 kernels)
   File sensors.conf.eg: Add mtp008 entries, adm1025 entries
   Library: Add ds1621, mtp008 support

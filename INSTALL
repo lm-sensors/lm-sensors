@@ -239,9 +239,10 @@ Patching the kernel (compilation option 2)
 ==========================================
 
 There is a special script which should be able to generate diffs against
-any 2.2 or 2.3 kernel. Please report any problems to our
-mailinglist. Note that it may fail, and probably silently, if you have
-applied other patches to your kernel tree, or for very new kernels.
+any 2.2 or 2.4 kernel. Note that 2.3 kernels are no longer supported for
+this compilation option (choose option 1 instead). Please report any 
+problems to our mailinglist. Note that it may fail, and probably silently, 
+if you have applied other patches to your kernel tree, or for very new kernels.
 It *is* safe to run it if your kernel already has the lm_sensors drivers.
 It will only work if you applied the i2c patches first.
 
