@@ -77,6 +77,10 @@ see useful_addresses.html.
   It will only work for the installed eeprom module from the src/ directory,
   not for the old one in the i2c/drivers/ directory.
 
+* prog/eeprom/decode-vaio.pl (written in Perl 5, not installed)
+  This program decodes the information in a Sony Vaio laptop
+  identification eeprom at 0x57.
+
 * prog/eepromer/eepromer (written in C, not installed)
   This program reads and writes eeproms.
   Danger: Do not use this to write your DRAM DIMM eeproms.

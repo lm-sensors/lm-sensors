@@ -39,6 +39,7 @@ ask CVS about it:
                fan -> fan1; fix temp2 limit writes
   Module pcf8591: new
   Module w83781d: Add W83697HF support
+  Program decode-vaio.pl: new
   Program i2cdump: Add i2c block read capability (requires i2c-2.6.3)
   Program init/sensors: New SysV init script
   Program mkpatch.pl: Add support for fscscy, add more help entries
