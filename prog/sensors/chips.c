@@ -4690,14 +4690,14 @@ void print_unknown_chip(const sensors_chip_name *name)
   a=b=0;
   while((data=sensors_get_all_features(*name,&a,&b))) {
     if (sensors_get_label_and_valid(*name,data->number,&label,&valid)) {
-      printf("ERROR: Can't get feature `%s' data!",data->name);
+      printf("ERROR: Can't get feature `%s' data!\n",data->name);
       continue;
     }
     if (! valid)
       continue;
     if (data->mode & SENSORS_MODE_R) {
       if(sensors_get_feature(*name,data->number,&val)) {
-        printf("ERROR: Can't get feature `%s' data!",data->name);
+        printf("ERROR: Can't get feature `%s' data!\n",data->name);
         continue;
       }
       if (data->mapping != SENSORS_NO_MAPPING)
@@ -4705,7 +4705,7 @@ void print_unknown_chip(const sensors_chip_name *name)
       else
         printf("%s: %.2f (%s)\n",label,val,data->name);
     } else 
-      printf("(%s)",label);
+      printf("(%s)\n",label);
   }
 }
 
