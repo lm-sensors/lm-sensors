@@ -109,9 +109,19 @@ static u32 i2c_ipmi_func(struct i2c_adapter *adapter)
 
 /************** Message Sending **************/
 
+static int find_client(struct i2c_client * client)
+{
+	int i;
+
+	for (i = 0; i < I2C_CLIENT_MAX; i++)
+		if (client == i2c_ipmi_adapter.clients[i])
+			return i;
+	return -1;
+}
+
 static void ipmi_i2c_send_message(int id, struct ipmi_msg * msg)
 {
-	ipmi_request(i2c_ipmi_user, &address, id, msg, 0);
+	ipmi_request(i2c_ipmi_user, &address, (long) id, msg, 0);
 }
 
 /* This is the message send function exported to the client
@@ -123,10 +133,21 @@ static int bmcclient_i2c_send_message(struct i2c_adapter *clnt,
 {
 	struct ipmi_msg *msg = (struct ipmi_msg *) mesg;
 	struct i2c_client *client = (struct i2c_client *) clnt;
+        int clientid;
+	
+#ifdef DEBUG
+	if(msg->data == NULL)
+		printk(KERN_INFO "i2c-ipmi.o: Send 0x%x\n", msg->cmd);
+	else
+		printk(KERN_INFO "i2c-ipmi.o: Send 0x%x 0x%x 0x%x\n", msg->cmd, msg->data[0], msg->data[1]);
+#endif
+	/* save the client number in the upper 8 bits of the message id */
+	if((clientid = find_client(client)) < 0) {
+		printk(KERN_WARNING "i2c-ipmi.o: Request from unknown client\n");
+		return -1;      
+	}
 
-	/* todo: keep track of multiple clients and save callback for each */
-	id = (id & 0xffffff) | 0x1000000;
-	rcv_callback = client->driver->command;
+	id = (id & 0xffffff) | (clientid << 24);
 	ipmi_i2c_send_message(id, msg);
 	return 0;
 }
@@ -137,18 +158,25 @@ static void ipmi_i2c_msg_handler(struct ipmi_recv_msg *msg,
 				  void            *handler_data)
 {
 	int rcvid = msg->msgid & 0xffffff;
-	int client = (msg->msgid >> 24) & 0xf;
+	int clientid = (msg->msgid >> 24) & 0xff;
 
 #ifdef DEBUG
 	if (msg->msg.data[0] != 0)
-		printk(KERN_WARNING "IPMI BMC response: Error 0x%x on cmd 0x%x/0x%x\n",
+		printk(KERN_WARNING "i2c-ipmi.o: Error 0x%x on cmd 0x%x/0x%x\n",
 		       msg->msg.data[0], msg->msg.netfn, msg->msg.cmd);
 #endif
-	/* todo: keep track of multiple clients */
-	if(client == 1 && rcv_callback != NULL)
-		(*rcv_callback)(NULL, client, msg);
-	else
+	/* Protect ourselves here; verify the client and its callback
+	   since the client may have gone away since
+	   the message was sent! */
+	if(clientid < I2C_CLIENT_MAX &&
+	   i2c_ipmi_adapter.clients[clientid] != NULL &&
+	   i2c_ipmi_adapter.clients[clientid]->driver->command != NULL)
+	   	(* i2c_ipmi_adapter.clients[clientid]->driver->command)
+		     (i2c_ipmi_adapter.clients[clientid], rcvid, msg);
+	else {
+		printk(KERN_WARNING "i2c-ipmi.o: Response for unknown client\n");
 		ipmi_free_recv_msg(msg);
+	}
 }
 
 static struct ipmi_user_hndl ipmi_hndlrs =
