@@ -84,7 +84,7 @@ Hardware monitoring chips</li>
 <ul>
 <li>
 <a href="http://www.analog.com">Analog Devices</a></li>
-<br>Sensor <a href="http://products.analog.com/products_html/list_gen_100_2_1.html">datax
+<br>Sensor <a href="http://products.analog.com/products_html/list_gen_100_2_1.html">data
 sheets</a>
 
 <li>
@@ -128,8 +128,8 @@ sheets</a>
 <br>data sheets
 
 <li>
-<a href="http://www.via.com.tw">VIA 686A</a></li>
-<br>VIA chip which includes integrated sensors. There is
+<a href="http://www.via.com.tw">VIA</a></li>
+<br>VIA bridges and chips which include integrated sensors. There is
 a separate <a href="http://www.via.com.tw/support/datasheets.html">section
 with datasheets</a>.
 
@@ -151,7 +151,9 @@ Other protocol information</li>
 monitor chip reading</ul>
 
 <li>
-Hardware Monitoring Applications using the lm_sensors package</li>
+Hardware Monitoring Applications using the lm_sensors package.
+Also see the prog/ directory in the lm_sensors package for sample applications.
+</li>
 <ul>
 
 <li><a href=http://freshmeat.net/search/?q=lm_sensors>Freshmeat search for "Lm_sensors" brings up a good starter list</a></li>
@@ -159,7 +161,8 @@ Hardware Monitoring Applications using the lm_sensors package</li>
 <li>
 <a href="http://stimpy.netroedge.com/tellerstats/">A web-based
 hardware monitor (tellerstats)</a></li>
-<br>This is created by Phil Edelbrock, one of our main project contributors (Now defunc, but still viewable)
+<br>This is created by Phil Edelbrock, one of our main project contributors (Now defunct, but still viewable).
+An updated version is now included in the lm_sensors package.
 
 <li>
 <a href="http://krypton.mankato.msus.edu/~turnet1/"> 
@@ -193,6 +196,10 @@ sensor reading. Requires fam and fam++.
 <a href="http://www.brendy.addr.com/linux/gnomesensors/">GnomeSensors</a></li>
 <br>Brendon Humphrey's Gnome display program for lm_sensors.
 Nice. Recommended.
+
+<li>
+<a href="http://digilander.iol.it/robang/gsensor/">Gsensor</a></li>
+<br> GTK app. In Italian.
 
 <li>
 <a href="http://www.brendy.addr.com/linux/klm/klm_home.html">klm</a></li>
@@ -284,9 +291,17 @@ Other useful tools</li>
 <ul>
 <li>
 <a href="http://users.ev1.net/~redelm/">CPUBURN</a></li>
-
 <br>CPU-heating program to stress-test marginally-cooled systems and test
-lm_sensors.</ul>
+lm_sensors. Recommended.
+
+<li>
+<a href="http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool">Round Robin Database (RRDTool)</a></li>
+<br>
+The RRD tool is a database for readings taken over time, such as sensor data.
+The lm_sensors package contains scripts to create and update an RRD database
+and graphically display the data on webpages.
+
+</ul>
 
 <li>
 White Papers and Other things</li>
