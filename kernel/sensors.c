@@ -63,8 +63,10 @@ static struct ctl_table_header *sensors_entries[SENSORS_ENTRY_MAX];
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
 static struct i2c_client *sensors_clients[SENSORS_ENTRY_MAX];
 static unsigned short sensors_inodes[SENSORS_ENTRY_MAX];
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,1)
 static void sensors_fill_inode(struct inode *inode, int fill);
 static void sensors_dir_fill_inode(struct inode *inode, int fill);
+#endif
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
 
 static ctl_table sysctl_table[] = {
@@ -124,9 +126,14 @@ int sensors_create_name(char **name, const char *prefix,
    ctl_template should be a template of the newly created directory. It is
    copied in memory. The extra2 field of each file is set to point to client.
    If any driver wants subdirectories within the newly created directory,
-   this function must be updated! */
+   this function must be updated! 
+   controlling_mod is the controlling module. It should usually be
+   THIS_MODULE when calling. Note that this symbol is not defined in
+   kernels before 2.3.13; define it to NULL in that case. We will not use it
+   for anything older than 2.3.27 anyway. */
 int sensors_register_entry(struct i2c_client *client ,const char *prefix, 
-                           ctl_table *ctl_template)
+                           ctl_table *ctl_template,
+			   struct module *controlling_mod)
 {
   int i,res,len,id;
   ctl_table *new_table;
@@ -186,7 +193,11 @@ int sensors_register_entry(struct i2c_client *client ,const char *prefix,
   }
 #endif /* DEBUG */
   sensors_inodes[id-256] = new_header->ctl_table->child->child->de->low_ino;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,27))
+  new_header->ctl_table->child->child->de->owner = controlling_mod;
+#else
   new_header->ctl_table->child->child->de->fill_inode = &sensors_dir_fill_inode;
+#endif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,27))
 #endif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
 
   return id;
@@ -759,9 +770,11 @@ int __init sensors_init(void)
   sensors_initialized = 0;
   if (! (sensors_proc_header = register_sysctl_table(sensors_proc,0)))
     return -ENOMEM;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1))
+  sensors_proc_header->ctl_table->child->de->owner = THIS_MODULE;
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58))
   sensors_proc_header->ctl_table->child->de->fill_inode = &sensors_fill_inode;
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,58)) */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1)) */
   sensors_initialized ++;
   return 0;
 }

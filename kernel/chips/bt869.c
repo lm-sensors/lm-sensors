@@ -237,7 +237,8 @@ printk("bt869.o:  probing address %d .\n",address);
 
   /* Register a new directory entry with module sensors */
   if ((i = sensors_register_entry(new_client,type_name,
-                                  bt869_dir_table_template)) < 0) {
+                                  bt869_dir_table_template,
+				  THIS_MODULE)) < 0) {
     err = i;
     goto ERROR4;
   }

@@ -155,8 +155,11 @@ struct gl518_data {
          int quit_thread;
          struct task_struct *thread;
 #endif
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1)
+	 wait_queue_head_t wq;
+#else
          struct wait_queue *wq;
-         
+#endif
          char valid;                 /* !=0 if following fields are valid */
          unsigned long last_updated; /* In jiffies */
          unsigned long last_updated_v00; 
@@ -391,7 +394,8 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
   /* Register a new directory entry with module sensors */
   if ((i = sensors_register_entry((struct i2c_client *) new_client,
                                   type_name,
-                                  gl518_dir_table_template)) < 0) {
+                                  gl518_dir_table_template,
+				  THIS_MODULE)) < 0) {
     err = i;
     goto ERROR4;
   }
@@ -661,7 +665,11 @@ int gl518_update_thread(void *c)
 	current->fs->umask = 0;
 	strcpy(current->comm,"gl518sm");
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1)
+	init_waitqueue_head(&(data->wq));
+#else
 	data->wq     = NULL;
+#endif
 	data->thread = current;
 
 #ifdef __SMP__
@@ -1002,7 +1010,11 @@ void gl518_iterate(struct i2c_client *client, int operation, int ctl_name,
          data->quit_thread = 1;
          wake_up_interruptible(&data->wq);
       } else if ((data->iterate==2) && (! data->thread)) {
-         data->wq = NULL;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,1)
+ 	 init_waitqueue_head(&(data->wq));
+#else
+	 data->wq     = NULL;
+#endif
          kernel_thread(gl518_update_thread, (void*) client, 0);
       }
 #endif

@@ -70,8 +70,11 @@ extern int sensors_proc_real(ctl_table *ctl, int write, struct file * filp,
    copied in memory. The extra2 field of each file is set to point to client.
    If any driver wants subdirectories within the newly created directory,
    these functions must be updated! */
-extern int sensors_register_entry(struct i2c_client *client,
-                                  const char *prefix, ctl_table *ctl_template);
+extern int sensors_register_entry(struct i2c_client *client ,
+		                  const char *prefix,
+                                  ctl_table *ctl_template, 
+       			          struct module *controlling_mod);
+
 extern void sensors_deregister_entry(int id);
 
 
