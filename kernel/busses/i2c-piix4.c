@@ -65,6 +65,9 @@ struct sd {
 #define SMBSLVEVT (0xA + piix4_smba)
 #define SMBSLVDAT (0xC + piix4_smba)
 
+/* count for request_region */
+#define SMBIOSIZE 8
+
 /* PCI Address Constants */
 #define SMBBA     0x090
 #define SMBHSTCFG 0x0D2
@@ -107,7 +110,6 @@ MODULE_PARM_DESC(fix_hstcfg,
 
 static int piix4_transaction(void);
 
-
 static unsigned short piix4_smba = 0;
 
 #ifdef CONFIG_X86
@@ -118,7 +120,7 @@ static unsigned short piix4_smba = 0;
 void dmi_scan_mach(void);
 #endif
 
-static int __init ibm_dmi_probe(void)
+static int __devinit ibm_dmi_probe(void)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,34)
 	extern int is_unsafe_smbus;
@@ -140,9 +142,9 @@ static int __init ibm_dmi_probe(void)
    Note the differences between kernels with the old PCI BIOS interface and
    newer kernels with the real PCI interface. In compat.h some things are
    defined to make the transition easier. */
-static int piix4_setup(struct pci_dev *PIIX4_dev, const struct pci_device_id *id)
+static int __devinit piix4_setup(struct pci_dev *PIIX4_dev,
+				const struct pci_device_id *id)
 {
-	int error_return = 0;
 	unsigned char temp;
 
 	/* match up the function */
@@ -153,16 +155,14 @@ static int piix4_setup(struct pci_dev *PIIX4_dev, const struct pci_device_id *id
 
 #ifdef CONFIG_X86
 	if(ibm_dmi_probe()) {
-		printk
-		  (KERN_ERR "i2c-piix4.o: IBM Laptop detected; this module may corrupt\n");
-		printk
-		  (KERN_ERR "             your serial eeprom! Refusing to load module!\n");
-		 error_return = -EPERM;
-		 goto END;
+		printk(KERN_ERR "i2c-piix4.o: IBM Laptop detected; this module "
+			"may corrupt your serial eeprom! Refusing to load "
+			"module!\n");
+		return -EPERM;
 	}
 #endif
 
-/* Determine the address of the SMBus areas */
+	/* Determine the address of the SMBus areas */
 	if (force_addr) {
 		piix4_smba = force_addr & 0xfff0;
 		force = 0;
@@ -170,17 +170,17 @@ static int piix4_setup(struct pci_dev *PIIX4_dev, const struct pci_device_id *id
 		pci_read_config_word(PIIX4_dev, SMBBA, &piix4_smba);
 		piix4_smba &= 0xfff0;
 		if(piix4_smba == 0) {
-			printk(KERN_ERR "i2c-piix4.o: SMB base address uninitialized - upgrade BIOS or use force_addr=0xaddr\n");
+			printk(KERN_ERR "i2c-piix4.o: SMB base address "
+				"uninitialized - upgrade BIOS or use "
+				"force_addr=0xaddr\n");
 			return -ENODEV;
 		}
 	}
 
-	if (check_region(piix4_smba, 8)) {
-		printk
-		    (KERN_ERR "i2c-piix4.o: SMB region 0x%x already in use!\n",
-		     piix4_smba);
-		error_return = -ENODEV;
-		goto END;
+	if (!request_region(piix4_smba, SMBIOSIZE, "piix4-smbus")) {
+		printk(KERN_ERR "i2c-piix4.o: SMB region 0x%x already in "
+			"use!\n", piix4_smba);
+		return -ENODEV;
 	}
 
 	pci_read_config_byte(PIIX4_dev, SMBHSTCFG, &temp);
@@ -189,68 +189,66 @@ static int piix4_setup(struct pci_dev *PIIX4_dev, const struct pci_device_id *id
 	   in an undefined state (causing I2C to act very strangely). */
 	if (temp & 0x02) {
 		if (fix_hstcfg) {
-			printk(KERN_INFO "i2c-piix4.o: Working around buggy BIOS (I2C)\n");
+			printk(KERN_INFO "i2c-piix4.o: Working around buggy "
+				"BIOS (I2C)\n");
 			temp &= 0xfd;
 			pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp);
 		} else {
-			printk(KERN_INFO "i2c-piix4.o: Unusual config register value\n");
-			printk(KERN_INFO "i2c-piix4.o: Try using fix_hstcfg=1 if you "
-			       "experience problems\n");
+			printk(KERN_INFO "i2c-piix4.o: Unusual config register "
+				"value\n");
+			printk(KERN_INFO "i2c-piix4.o: Try using fix_hstcfg=1 "
+				"if you experience problems\n");
 		}
 	}
 
-/* If force_addr is set, we program the new address here. Just to make
-   sure, we disable the PIIX4 first. */
+	/* If force_addr is set, we program the new address here. Just to make
+	   sure, we disable the PIIX4 first. */
 	if (force_addr) {
 		pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp & 0xfe);
 		pci_write_config_word(PIIX4_dev, SMBBA, piix4_smba);
 		pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp | 0x01);
-		printk
-		    (KERN_INFO "i2c-piix4.o: WARNING: SMBus interface set to new "
-		     "address %04x!\n", piix4_smba);
+		printk(KERN_INFO "i2c-piix4.o: WARNING: SMBus interface set to "
+			"new address %04x!\n", piix4_smba);
 	} else if ((temp & 1) == 0) {
 		if (force) {
-/* This should never need to be done, but has been noted that
-   many Dell machines have the SMBus interface on the PIIX4
-   disabled!? NOTE: This assumes I/O space and other allocations WERE
-   done by the Bios!  Don't complain if your hardware does weird 
-   things after enabling this. :') Check for Bios updates before
-   resorting to this.  */
+			/* This should never need to be done, but has been
+			 * noted that many Dell machines have the SMBus
+			 * interface on the PIIX4 disabled!? NOTE: This assumes
+			 * I/O space and other allocations WERE done by the
+			 * Bios!  Don't complain if your hardware does weird
+			 * things after enabling this. :') Check for Bios
+			 * updates before resorting to this.
+			 */
 			pci_write_config_byte(PIIX4_dev, SMBHSTCFG,
 					      temp | 1);
-			printk
-			    (KERN_NOTICE "i2c-piix4.o: WARNING: SMBus interface has been FORCEFULLY "
-			     "ENABLED!\n");
+			printk(KERN_NOTICE "i2c-piix4.o: WARNING: SMBus "
+				"interface has been FORCEFULLY ENABLED!\n");
 		} else {
-			printk
-			    (KERN_ERR "i2c-piix4.o: Host SMBus controller not enabled!\n");
-			error_return = -ENODEV;
-			goto END;
+			printk(KERN_ERR "i2c-piix4.o: Host SMBus controller "
+				"not enabled!\n");
+			release_region(piix4_smba, SMBIOSIZE);
+			piix4_smba = 0;
+			return -ENODEV;
 		}
 	}
 
-	/* Everything is happy, let's grab the memory and set things up. */
-	request_region(piix4_smba, 8, "piix4-smbus");
-
 #ifdef DEBUG
 	if ((temp & 0x0E) == 8)
-		printk
-		    (KERN_DEBUG "i2c-piix4.o: Using Interrupt 9 for SMBus.\n");
+		printk(KERN_DEBUG "i2c-piix4.o: Using Interrupt 9 for "
+			"SMBus.\n");
 	else if ((temp & 0x0E) == 0)
-		printk
-		    (KERN_DEBUG "i2c-piix4.o: Using Interrupt SMI# for SMBus.\n");
+		printk(KERN_DEBUG "i2c-piix4.o: Using Interrupt SMI# "
+			"for SMBus.\n");
 	else
-		printk
-		    (KERN_ERR "i2c-piix4.o: Illegal Interrupt configuration (or code out "
-		     "of date)!\n");
+		printk(KERN_ERR "i2c-piix4.o: Illegal Interrupt configuration "
+			"(or code out of date)!\n");
 
 	pci_read_config_byte(PIIX4_dev, SMBREV, &temp);
 	printk(KERN_DEBUG "i2c-piix4.o: SMBREV = 0x%X\n", temp);
 	printk(KERN_DEBUG "i2c-piix4.o: SMBA = 0x%X\n", piix4_smba);
 #endif				/* DEBUG */
 
-      END:
-	return error_return;
+	return 0;
 }
 
 
@@ -508,7 +506,8 @@ static struct pci_device_id piix4_ids[] __devinitdata = {
 	{ 0, }
 };
 
-static int __devinit piix4_probe(struct pci_dev *dev, const struct pci_device_id *id)
+static int __devinit piix4_probe(struct pci_dev *dev,
+				const struct pci_device_id *id)
 {
 	int retval;
 
@@ -519,16 +518,23 @@ static int __devinit piix4_probe(struct pci_dev *dev, const struct pci_device_id
 	sprintf(piix4_adapter.name, "SMBus PIIX4 adapter at %04x",
 		piix4_smba);
 
-	retval = i2c_add_adapter(&piix4_adapter);
+	if ((retval = i2c_add_adapter(&piix4_adapter))) {
+		printk(KERN_ERR "i2c-piix4.o: Couldn't register adapter!\n");
+		release_region(piix4_smba, SMBIOSIZE);
+		piix4_smba = 0;
+	}
 
 	return retval;
 }
 
 static void __devexit piix4_remove(struct pci_dev *dev)
 {
-	i2c_del_adapter(&piix4_adapter);
+	if (piix4_smba) {
+		i2c_del_adapter(&piix4_adapter);
+		release_region(piix4_smba, SMBIOSIZE);
+		piix4_smba = 0;
+	}
 }
-
 
 static struct pci_driver piix4_driver = {
 	.name		= "piix4 smbus",
@@ -543,15 +549,13 @@ static int __init i2c_piix4_init(void)
 	return pci_module_init(&piix4_driver);
 }
 
-
 static void __exit i2c_piix4_exit(void)
 {
 	pci_unregister_driver(&piix4_driver);
-	release_region(piix4_smba, 8);
 }
 
-MODULE_AUTHOR
-    ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
+MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and "
+		"Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("PIIX4 SMBus driver");
 MODULE_LICENSE("GPL");
 
