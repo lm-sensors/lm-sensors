@@ -316,6 +316,10 @@ static struct i2c_adapter amd756_adapter = {
 };
 
 enum chiptype { AMD756, AMD766, AMD768, NFORCE, AMD8111 };
+static const char* chipname[] = {
+	"AMD756", "AMD766", "AMD768",
+	"nVidia nForce", "AMD8111",
+};
 
 static struct pci_device_id amd756_ids[] __devinitdata = {
 	{PCI_VENDOR_ID_AMD, 0x740B, PCI_ANY_ID, PCI_ANY_ID, 0, 0, AMD756 },
@@ -375,8 +379,8 @@ static int __devinit amd756_probe(struct pci_dev *pdev,
 	printk(KERN_DEBUG DRV_NAME ": AMD756_smba = 0x%X\n", amd756_ioport);
 #endif
 
-	sprintf(amd756_adapter.name,
-		"SMBus AMD756 adapter at %04x", amd756_ioport);
+	sprintf(amd756_adapter.name, "SMBus %s adapter at %04x",
+		chipname[id->driver_data], amd756_ioport);
 
 	error = i2c_add_adapter(&amd756_adapter);
 	if (error) {
