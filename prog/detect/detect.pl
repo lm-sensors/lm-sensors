@@ -153,13 +153,13 @@ use subs qw(lm78_detect lm75_detect lm80_detect w83781d_detect
      },
      {
        name => "Analog Devices ADM1021",
-       driver => "adm9240",
+       driver => "adm1021",
        i2c_addrs => [0x18..0x1b,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 0, @_ },
      },
      {
        name => "Maxim MAX1617",
-       driver => "adm9240",
+       driver => "adm1021",
        i2c_addrs => [0x18..0x1b,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 1, @_ },
      },
@@ -778,7 +778,8 @@ sub lm80_detect
 #   0x4a: I2C addresses of emulated LM75 chips
 #   0x4e: Vendor ID byte selection, and bank selection
 #   0x4f: Vendor ID
-#   0x58: Device ID (only when in bank 0)
+#   0x58: Device ID (only when in bank 0); both 0x10 and 0x11 is seen
+#         though Winbond documents 0x10 only.
 # Note: Fails if the W83781D is not in bank 0 (may succeed for bank 2; bank 1
 # leaves almost all registers in an undefined state, too bad).
 # Note: Detection overrules a previous LM78 detection
@@ -792,7 +793,7 @@ sub w83781d_detect
   return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
                 (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
   return if ($reg1 & 0x07) == 0x00 and 
-            i2c_smbus_read_byte_data($file,0x58) != 0x10;
+            (i2c_smbus_read_byte_data($file,0x58) & 0xfe) != 0x10;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   @res = (8);
   push @res, ($reg1 & 0x07) + 0x48 if $reg1 & 0x08;
