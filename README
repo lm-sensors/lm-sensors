@@ -1,3 +1,4 @@
+
 This is the completely rewritten version of lm_sensors, a collection of
 modules for general SMBus access and hardware monitoring. There are quite
 a few changes compared with 1.x.y versions; read doc/version-2 for the
