@@ -70,6 +70,8 @@ ds1621
 
 fscpos
 	fscpos		3	3	3	-	yes	no
+fscscy
+	fscscy		4	3	6	-	yes	no
 
 gl518sm
         gl518sm (r00)	1	1-4	2	-	yes	no
