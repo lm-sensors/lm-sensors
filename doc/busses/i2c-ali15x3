@@ -1,6 +1,7 @@
 Kernel driver `i2c-ali5x3.o'
 
-Status: Complete and tested
+Status: Complete and tested.
+        Block reads/writes untested (not used by any current chip driver).
 
 Supported adapters:
   * Acer Labs, Inc. ALI 1533 and 1543C

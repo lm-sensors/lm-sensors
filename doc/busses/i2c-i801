@@ -1,6 +1,7 @@
 Kernel driver `i2c-i801.o'
 
-Status: Beta
+Status: Beta.
+        Block reads/writes untested (not used by any current chip driver).
 
 Supported adapters:
   * Intel 82801AA and 82801AB (ICH and ICH0 - part of the '810' chipset)
@@ -26,8 +27,21 @@ The ICH (properly known as the 82801AA) and ICH0 (82801AB)
 are Intel chips that are a part of Intel's '810' chipset
 which is designed for Celeron-based PCs.
 
-They are quite similar to Intel's PIIX4 chip, at least in the
-SMBus controller.
+The ICH contains up to SEVEN separate PCI functions
+in TWO logical PCI devices.
+An output of lspci will show something similar to the following:
+
+  00:1e.0 PCI bridge: Intel Corporation: Unknown device 2418 (rev 01)
+  00:1f.0 ISA bridge: Intel Corporation: Unknown device 2410 (rev 01)
+  00:1f.1 IDE interface: Intel Corporation: Unknown device 2411 (rev 01)
+  00:1f.2 USB Controller: Intel Corporation: Unknown device 2412 (rev 01)
+  00:1f.3 Unknown class [0c05]: Intel Corporation: Unknown device 2413 (rev 01)
+
+The SMBus controller is function 3 in device 1f.
+Class 0c05 is SMBus Serial Controller.
+
+The ICH chips are quite similar to Intel's PIIX4 chip,
+at least in the SMBus controller.
 
 See the file i2c-piix4 for details.
 
