@@ -200,7 +200,7 @@ struct lm90_data
 	u16 remote_temp, remote_high, remote_low; /* combined */
 	u8 local_crit, remote_crit;
 	u8 hyst; /* linked to two sysctl files (hyst1 RW, hyst2 RO) */
-	u16 alarms; /* bitvector, combined */
+	u8 alarms; /* bitvector */
 };
 
 /*
