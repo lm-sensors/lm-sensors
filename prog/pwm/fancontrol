@@ -119,7 +119,7 @@ function pwmdisable()
 	if [ "$SYSFS" = "1" ]
 	then
 		echo $MAX > $1
-		ENABLE=${1/pwm/pwm_enable}
+		ENABLE=${1}_enable
 		if [ -f $ENABLE ]
 		then
 			echo 0 > $ENABLE
@@ -134,7 +134,7 @@ function pwmenable()
 {
 	if [ "$SYSFS" = "1" ]
 	then
-		ENABLE=${1/pwm/pwm_enable}
+		ENABLE=${1}_enable
 		if [ -f $ENABLE ]
 		then
 			echo 1 > $ENABLE
