@@ -168,7 +168,7 @@ no other hardware configuration options for the LM85.
 The lm85 driver detects both LM85B and LM85C revisions of the chip.
 See the datasheet for a complete description of the differences.
 Other than identifying the chip, the driver behaves no differently
-with regard to these two chips.  The LM85C is recommended for new
+with regard to these two chips.  The LM85B is recommended for new
 designs.
 
 The ADM1027 and ADT7463 chips have an optional SMBALERT output that
