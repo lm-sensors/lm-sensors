@@ -41,6 +41,9 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_AMD756=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-amd756.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_I2C_AMD756_S4882=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-amd756-s4882.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_I2C_AMD8111=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELBUSSESTARGETS += $(MODULE_DIR)/i2c-amd8111.o
 endif
