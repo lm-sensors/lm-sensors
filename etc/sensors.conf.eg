@@ -1189,6 +1189,9 @@ chip "adm1025-*" "ne1619-*"
     label in4 "+12V"
     label in5 "VCC"
 
+# Adjust this if your vid is wrong; see doc/vid
+#   set vrm 9.0
+
 # Tolerate a 5% deviance for CPU power-supply
     set in1_min vid * 0.95
     set in1_max vid * 1.05
@@ -1211,9 +1214,6 @@ chip "adm1025-*" "ne1619-*"
 # VCC is the power-supply voltage of the ADM1025 chipset, generally
 # redundant with +3.3V so you may want to hide it.
 #   ignore in5
-
-# Adjust this if your vid is wrong; see doc/vid
-    set vrm 9.0
 
 # Temperatures
     label temp1 "CPU Temp"
