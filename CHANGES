@@ -29,12 +29,17 @@ ask CVS about it:
   Module i2c-amd756: Add nVidia nForce support; fix block read length;
                      reliability improvements
   Module i2c-savage4: new
-  Module i2c-viapro: Add support for VT8233A (0x3147)
-  Module w83781d: Add multiple VRM version support
+  Module i2c-viapro: Add support for VT8231 (0x8235), VT8233A (0x3147)
+  Module via686a: Add support for VT8231 sensors
+  Module w83781d: Add multiple VID version support
   Program eeprom: new
   Program mkpatch: Install new sensors_vid.h
-  Program sensord: Major update, add rrd support
-  Program sensors-detect: Add VT8233A, several S3 devices; fix perl warnings
+  Program rrd: Fix swapped CPU and MB temps in summ_week.cgi
+  Program sensord: Major update, now requires rrd source;
+                   not compiled by default
+  Program sensors: Recognize DDR SDRAM
+  Program sensors-detect: Add VT8231, VT8233A, several S3 devices;
+                          fix perl warnings
 
 2.6.3 (20020322)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
