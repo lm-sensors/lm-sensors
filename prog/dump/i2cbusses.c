@@ -20,10 +20,15 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
 #include <dirent.h>
+#include <fcntl.h>
+#include <errno.h>
+#include "i2cbusses.h"
 
 /*
    this just prints out the installed i2c busses in a consistent format, whether
@@ -162,4 +167,32 @@ done:
 		fprintf(stderr,"Error: No I2C busses found!\n"
 		               "Be sure you have done 'modprobe i2c-dev'\n"
 		               "and also modprobed your i2c bus drivers\n");
+}
+
+int open_i2c_dev(const int i2cbus, char *filename)
+{
+	int file;
+
+	sprintf(filename, "/dev/i2c/%d", i2cbus);
+	file = open(filename, O_RDWR);
+
+	if (file < 0 && errno == ENOENT) {
+		sprintf(filename, "/dev/i2c-%d", i2cbus);
+		file = open(filename, O_RDWR);
+	}
+
+	if (file < 0) {
+		if (errno == ENOENT) {
+			fprintf(stderr, "Error: Could not open file "
+			        "`/dev/i2c-%d' or `/dev/i2c/%d': %s\n",
+			        i2cbus, i2cbus, strerror(ENOENT));
+		} else {
+			fprintf(stderr, "Error: Could not open file "
+			        "`%s': %s\n", filename, strerror(errno));
+			if (errno == EACCES)
+				fprintf(stderr, "Run as root?\n");
+		}
+	}
+	
+	return file;
 }

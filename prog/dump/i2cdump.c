@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <fcntl.h>
+#include "i2cbusses.h"
 #include "i2c-dev.h"
 #include "version.h"
 
@@ -42,8 +42,6 @@
 #ifdef I2C_FUNC_SMBUS_BLOCK_DATA_PEC
 #define HAVE_PEC 1
 #endif
-
-void print_i2c_busses(int);
 
 void help(void)
 {
@@ -64,11 +62,8 @@ int main(int argc, char *argv[])
 {
 	char *end;
 	int i, j, res, res2, i2cbus, address, size, file;
-	int e1, e2;
 	int bank = 0, bankreg = 0x4E;
-	char filename1[20];
-	char filename2[20];
-	char *filename;
+	char filename[20];
 	long funcs;
 	unsigned char cblock[256];
 	int block[256];
@@ -174,42 +169,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/*
-	 * Try both variants and give the correct error message
-	 * upon failure
-	 */
-
-	sprintf(filename1, "/dev/i2c-%d", i2cbus);
-	sprintf(filename2, "/dev/i2c/%d", i2cbus);
-	if ((file = open(filename1, O_RDWR)) < 0) {
-		e1 = errno;
-		if ((file = open(filename2, O_RDWR)) < 0) {
-			e2 = errno;
-			if (e1 == ENOENT && e2 == ENOENT) {
-				fprintf(stderr, "Error: Could not open file "
-				        "`%s' or `%s': %s\n", filename1,
-				        filename2, strerror(ENOENT));
-			}
-			if (e1 != ENOENT) {
-				fprintf(stderr, "Error: Could not open file "
-				        "`%s': %s\n", filename1,
-				        strerror(e1));
-				if (e1 == EACCES)
-					fprintf(stderr, "Run as root?\n");
-			}
-			if (e2 != ENOENT) {
-				fprintf(stderr, "Error: Could not open file "
-				        "`%s' : %s\n", filename2,
-				        strerror(e2));
-				if (e2 == EACCES)
-					fprintf(stderr, "Run as root?\n");
-			}
-			exit(1);
-		} else {
-			filename = filename2;
-		}
-	} else {
-		filename = filename1;
+	file = open_i2c_dev(i2cbus, filename);
+	if (file < 0) {
+		exit(1);
 	}
 
 	/* check adapter functionality */

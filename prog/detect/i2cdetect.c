@@ -25,15 +25,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <fcntl.h>
+#include "../dump/i2cbusses.h"
 #include "i2c-dev.h"
 #include "version.h"
 
 #define MODE_AUTO	0
 #define MODE_QUICK	1
 #define MODE_READ	2
-
-void print_i2c_busses(int);
 
 void help(void)
 {
@@ -47,23 +45,6 @@ void help(void)
 	        "  i2cdetect -l lists installed busses only\n");
 
 	print_i2c_busses(0);
-}
-
-int open_i2c_dev(const int i2cbus, char *filename)
-{
-	int file;
-
-	sprintf(filename, "/dev/i2c-%d", i2cbus);
-	file = open(filename, O_RDWR);
-
-	if (file >= 0 || errno != ENOENT) {
-		return file;
-	}
-
-	sprintf(filename, "/dev/i2c/%d", i2cbus);
-	file = open(filename, O_RDWR);
-	
-	return file;
 }
 
 int scan_i2c_bus(int file, const int mode, const int first, const int last)
@@ -231,15 +212,6 @@ int main(int argc, char *argv[])
 
   file = open_i2c_dev(i2cbus, filename);
   if (file < 0) {
-    if (errno == ENOENT) {
-      fprintf(stderr, "Error: Could not open file `/dev/i2c-%d' or `/dev/i2c/%d': %s\n",
-              i2cbus, i2cbus, strerror(ENOENT));
-    } else {
-      fprintf(stderr, "Error: Could not open file `%s': %s\n",
-              filename, strerror(errno));
-      if (errno == EACCES)
-        fprintf(stderr, "Run as root?\n");
-    }
     exit(1);
   }
 
