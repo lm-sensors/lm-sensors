@@ -57,10 +57,12 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
 SENSORS_INSMOD_1(w83792d);
+SENSORS_MODULE_PARM(force_subclients, "List of subclient addresses: " \
+                      "{bus, clientaddr, subclientaddr1, subclientaddr2}");
 
-static int init = 1;
+static int init;
 MODULE_PARM(init, "i");
-MODULE_PARM_DESC(init, "Set to zero to bypass chip initialization");
+MODULE_PARM_DESC(init, "Set to one for chip initialization");
 
 /* Enable/Disable w83792d debugging output */
 /* #define W83792D_DEBUG 1 */
@@ -69,6 +71,7 @@ MODULE_PARM_DESC(init, "Set to zero to bypass chip initialization");
 #define W83792D_REG_CONFIG 0x40
 #define W83792D_REG_I2C_ADDR 0x48
 #define W83792D_REG_CHIPID 0x49   /* contains version ID: A/B/C */
+#define W83792D_REG_I2C_SUBADDR 0x4A
 #define W83792D_REG_IRQ 0x4C
 #define W83792D_REG_BANK 0x4E
 #define W83792D_REG_CHIPMAN 0x4F  /* contains the vendor ID */
@@ -244,6 +247,9 @@ struct w83792d_data {
 	struct semaphore update_lock;
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
+
+	struct i2c_client *lm75;	/* for secondary I2C addresses */
+	/* pointer to array of 2 subclients */
 
 	u8 in[9];		/* Register value */
 	u8 in_max[9];		/* Register value */
@@ -458,7 +464,7 @@ static int w83792d_attach_adapter(struct i2c_adapter *adapter)
 static int w83792d_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind)
 {
-	int i, val1 = 0, val2 = 0;
+	int i, val1 = 0, val2 = 0, id;
 	struct i2c_client *new_client;
 	struct w83792d_data *data;
 	int err = 0;
@@ -569,12 +575,59 @@ static int w83792d_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR1;
 	}
 
+	/* attach secondary i2c lm75-like clients */
+	if (!(data->lm75 = kmalloc(2 * sizeof(struct i2c_client),
+				   GFP_KERNEL))) {
+		err = -ENOMEM;
+		goto ERROR2;
+	}
+	id = i2c_adapter_id(adapter);
+	if(force_subclients[0] == id && force_subclients[1] == address) {
+		if(force_subclients[2] < 0x48 || force_subclients[2] > 0x4b) {
+			printk(KERN_ERR "w83792d.o: Invalid subclient address %d; must be 0x48-0x4b\n",
+			        force_subclients[2]);
+			goto ERROR5;
+		}
+		if(force_subclients[3] < 0x4c || force_subclients[3] > 0x4f) {
+			printk(KERN_ERR "w83792d.o: Invalid subclient address %d; must be 0x4c-0x4f\n",
+			        force_subclients[3]);
+			goto ERROR5;
+		}
+		w83792d_write_value(new_client,
+		                    W83792D_REG_I2C_SUBADDR,
+		                    0x40 | (force_subclients[2] & 0x03) |
+		                    ((force_subclients[3] & 0x03) <<4));
+		data->lm75[0].addr = force_subclients[2];
+		data->lm75[1].addr = force_subclients[3];
+	} else {
+		val1 = w83792d_read_value(new_client,
+				          W83792D_REG_I2C_SUBADDR);
+		data->lm75[0].addr = 0x48 + (val1 & 0x03);
+		data->lm75[1].addr = 0x4c + ((val1 >> 4) & 0x03);
+	}
+	client_name = "W83792D subclient";
+
+
+	for (i = 0; i <= 1; i++) {
+		data->lm75[i].data = NULL;	/* store all data in w83792d */
+		data->lm75[i].adapter = adapter;
+		data->lm75[i].driver = &w83792d_driver;
+		data->lm75[i].flags = 0;
+		strcpy(data->lm75[i].name, client_name);
+		if ((err = i2c_attach_client(&(data->lm75[i])))) {
+			printk(KERN_ERR "w83792d.o: Subclient %d registration at address 0x%x failed.\n",
+			       i, data->lm75[i].addr);
+			if (i == 1)
+				goto ERROR6;
+			goto ERROR5;
+		}
+	}
+
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
 				    w83792d_dir_table_template, THIS_MODULE)) < 0) {
 		err = i;
-		LEAVE()
-		goto ERROR2;
+		goto ERROR7;
 	}
 	data->sysctl_id = i;
 
@@ -583,8 +636,18 @@ static int w83792d_detect(struct i2c_adapter *adapter, int address,
 	LEAVE()
 	return 0;
 
-/* OK, this is not exactly good programming practice, usually.
-   But it is very code-efficient in this case. */
+      ERROR7:
+	i2c_detach_client(&
+			  (((struct
+			     w83792d_data *) (new_client->data))->
+			   lm75[1]));
+      ERROR6:
+	i2c_detach_client(&
+			  (((struct
+			     w83792d_data *) (new_client->data))->
+			   lm75[0]));
+      ERROR5:
+	kfree(((struct w83792d_data *) (new_client->data))->lm75);
       ERROR2:
 	i2c_detach_client(new_client);
       ERROR1:
@@ -608,6 +671,9 @@ static int w83792d_detach_client(struct i2c_client *client)
 		LEAVE()
 		return err;
 	}
+	i2c_detach_client(&(data->lm75[0]));
+	i2c_detach_client(&(data->lm75[1]));
+	kfree(data->lm75);
 	kfree(data);
 
 	LEAVE()
@@ -639,30 +705,30 @@ static void w83792d_init_client(struct i2c_client *client)
 
 	if (init) {
 		w83792d_write_value(client, W83792D_REG_CONFIG, 0x80);
-		/* data->vrm = 90; */ /* maybe need to be modified! */
-
-		/* Clear the bit6 of W83792D_REG_VID_IN_B(set it into 0):
-		   W83792D_REG_VID_IN_B bit6 = 0: the high/low limit of
-		     vin0/vin1 can be modified by user;
-		   W83792D_REG_VID_IN_B bit6 = 1: the high/low limit of
-		     vin0/vin1 auto-updated, can NOT be modified by user. */
-		vid_in_b = w83792d_read_value(client, W83792D_REG_VID_IN_B);
-		w83792d_write_value(client, W83792D_REG_VID_IN_B,
-				    vid_in_b & 0xbf);
-
-		temp2_cfg = w83792d_read_value(client, W83792D_REG_TEMP_ADD[0][6]);
-		temp3_cfg = w83792d_read_value(client, W83792D_REG_TEMP_ADD[1][6]);
-		w83792d_write_value(client, W83792D_REG_TEMP_ADD[0][6],
-				    temp2_cfg & 0xe6);
-		w83792d_write_value(client, W83792D_REG_TEMP_ADD[1][6],
-				    temp3_cfg & 0xe6);
-
-		/* enable comparator mode for temp2 and temp3 so
-		   alarm indication will work correctly */
-		i = w83792d_read_value(client, W83792D_REG_IRQ);
-		if (!(i & 0x40))
-			w83792d_write_value(client, W83792D_REG_IRQ, i|0x40);
 	}
+	/* data->vrm = 90; */ /* maybe need to be modified! */
+
+	/* Clear the bit6 of W83792D_REG_VID_IN_B(set it into 0):
+	   W83792D_REG_VID_IN_B bit6 = 0: the high/low limit of
+	     vin0/vin1 can be modified by user;
+	   W83792D_REG_VID_IN_B bit6 = 1: the high/low limit of
+	     vin0/vin1 auto-updated, can NOT be modified by user. */
+	vid_in_b = w83792d_read_value(client, W83792D_REG_VID_IN_B);
+	w83792d_write_value(client, W83792D_REG_VID_IN_B,
+			    vid_in_b & 0xbf);
+
+	temp2_cfg = w83792d_read_value(client, W83792D_REG_TEMP_ADD[0][6]);
+	temp3_cfg = w83792d_read_value(client, W83792D_REG_TEMP_ADD[1][6]);
+	w83792d_write_value(client, W83792D_REG_TEMP_ADD[0][6],
+			    temp2_cfg & 0xe6);
+	w83792d_write_value(client, W83792D_REG_TEMP_ADD[1][6],
+			    temp3_cfg & 0xe6);
+
+	/* enable comparator mode for temp2 and temp3 so
+	   alarm indication will work correctly */
+	i = w83792d_read_value(client, W83792D_REG_IRQ);
+	if (!(i & 0x40))
+		w83792d_write_value(client, W83792D_REG_IRQ, i|0x40);
 
 	/* Start monitoring */
 	w83792d_write_value(client, W83792D_REG_CONFIG, (w83792d_read_value(
