@@ -233,6 +233,26 @@ sub contains
   return 0;
 }
 
+sub parse_not_to_scan
+{
+  my ($min,$max,$to_parse) = @_;
+  my @ranges = split /\s*,\s*/, $to_parse;
+  my @res = ();
+  my $range;
+  foreach $range (@ranges) {
+    my ($start,$end) = split /\s*-s*/, $range;
+    $start = oct $start if $start =~ /^0/;
+    if (defined $end) {
+      $end = oct $end if $end =~ /^0/;
+      $start = $min if $start < $min;
+      $end = $max if $end > $max;
+      push @res, ($start+0..$end+0);
+    } else {
+      push @res, $start+0 if $start >= $min and $start <= $max;
+    }
+  }
+  return sort { $a <=> $b } @res;
+}
 
 ###################
 # I/O port access #
@@ -831,11 +851,17 @@ sub add_isa_to_chips_detected
 # $_[3]: The driver of the adapter
 sub scan_adapter
 {
-  my ( $adapter_nr,$adapter_name,$algorithm_name,$adapter_driver) = @_;
+  my ( $adapter_nr,$adapter_name,$algorithm_name,$adapter_driver, 
+       $not_to_scan) = @_;
   my ($chip, $addr, $conf,@chips,$add_addr);
+  my @not_to_scan = @$not_to_scan;
   open FILE,"/dev/i2c-$adapter_nr" or 
        print ("Can't open /dev/i2c-$adapter_nr ($!)\n"), return;
   foreach $addr (0..0x7f) {
+    if (@not_to_scan and $not_to_scan[0] == $addr) {
+      shift @not_to_scan;
+      next;
+    }
     i2c_set_slave_addr(\*FILE,$addr) or print("Can't set address to $_?!?\n"), 
                                      next;
     next unless i2c_smbus_read_byte(\*FILE) >= 0;
@@ -1358,16 +1384,34 @@ sub main
         "hang halfway\n",
         " through; we can't really help that. Also, some chips will be double ",
         "detected;\n",
-        " choose the one with the highest confidence value in that case.\n";
+        " choose the one with the highest confidence value in that case.\n",
+        " If you found that the adapter hung after probing a certain address, ",
+        "you can\n",
+        " specify that address to remain unprobed.\n";
 
+  my ($inp,@not_to_scan,$inp2);
   open INPUTFILE,"/proc/bus/i2c" or die "Couldn't open /proc/bus/i2c?!?";
   while (<INPUTFILE>) {
     print "\n";
     my ($dev_nr,$adap,$algo) = /^i2c-(\S+)\s+\S+\s+(.*?)\s*\t\s*(.*?)\s+$/;
     print "Next adapter: $adap ($algo)\n";
-    print "Do you want to scan it? (YES/no): ";
-    scan_adapter $dev_nr, $adap, $algo, find_adapter_driver($adap,$algo)
-                                              unless <STDIN> =~ /^\s*[Nn]/;
+    print "Do you want to scan it? (YES/no/selectively): ";
+    
+    $inp = <STDIN>;
+    @not_to_scan=();
+    if ($inp =~ /^\s*[Ss]/) {
+      print "Please enter one or more addresses not to scan. Separate them ",
+            "with comma's.\n",
+            "You can specify a range by using dashes. Addresses may be ",
+            "decimal (like 54)\n",
+            "or hexadecimal (like 0x33).\n",
+            "Addresses: ";
+      $inp2 = <STDIN>;
+      chop $inp2;
+      @not_to_scan = parse_not_to_scan 0,0x7f,$inp2;
+    }
+    scan_adapter $dev_nr, $adap, $algo, find_adapter_driver($adap,$algo),
+                 \@not_to_scan   unless $inp =~ /^\s*[Nn]/;
   }
 
   print "\n Some chips are also accessible through the ISA bus. ISA probes ",
