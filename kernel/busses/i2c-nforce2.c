@@ -24,6 +24,7 @@
 /*
     SUPPORTED DEVICES	PCI ID
     nForce2 MCP		0064       
+    nForce3 Pro150 MCP	00D4
 
     This driver supports the 2 SMBuses that are included in the MCP2 of the
     nForce2 chipset.
@@ -55,6 +56,10 @@ MODULE_DESCRIPTION("nForce2 SMBus driver");
 
 #ifndef PCI_DEVICE_ID_NVIDIA_NFORCE2_SMBUS
 #define PCI_DEVICE_ID_NVIDIA_NFORCE2_SMBUS   0x0064
+#endif
+
+#ifndef PCI_DEVICE_ID_NVIDIA_NFORCE3_SMBUS
+#define PCI_DEVICE_ID_NVIDIA_NFORCE3_SMBUS   0x00D4
 #endif
 
 
@@ -292,6 +297,8 @@ u32 nforce2_func(struct i2c_adapter *adapter)
 
 static struct pci_device_id nforce2_ids[] = {
 	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_NFORCE2_SMBUS,
+	       	PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_NFORCE3_SMBUS,
 	       	PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
 	{ 0 }
 };
