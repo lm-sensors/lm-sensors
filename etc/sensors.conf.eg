@@ -2047,13 +2047,16 @@ chip "pc87366-*"
    compute in8   @*2, @/2
    compute in10  @*2, @/2
 
-   set in7_min   3.3 * 0.95
-   set in7_max   3.3 * 1.05
-   set in10_min  3.3 * 0.95
-   set in10_max  3.3 * 1.05
-
-# Ignore voltages that are not monitored by your motherboard
-#   ignore in9
+# These are the operating conditions as recommended by National
+# Semiconductor
+   set in7_min   3.0
+   set in7_max   3.6
+   set in8_min   3.0
+   set in8_max   3.6
+   set in9_min   2.4
+   set in9_max   3.6
+   set in10_min  3.0
+   set in10_max  3.6
 
 # Temperature inputs
 
@@ -2069,7 +2072,28 @@ chip "pc87366-*"
 #   ignore temp1
 #   ignore temp2
 
+   set temp1_min    0
+   set temp1_max   70
+   set temp1_crit  85
+   set temp2_min    0
+   set temp2_max   70
+   set temp2_crit  85
+   set temp3_min    0
+   set temp3_max   70
+   set temp3_crit  85
+
 # Fan inputs
 
 # Ignore fans you don't have
+#   ignore fan2
 #   ignore fan3
+
+# Increase clock dividers if you have very low speed fans and readings
+# overflow
+#   set fan1_div 8
+#   set fan2_div 8
+#   set fan3_div 8
+
+   set fan1_min 2000
+   set fan2_min 2000
+   set fan3_min 2000
