@@ -404,6 +404,12 @@ chip "w83782d-*" "w83627hf-*"
     label in7 "V5SB"
     label in8 "VBat"
 
+# Abit BP6 motherboard has a few differences. VCore1 and VCore2 are the core
+# voltages of the two processors. Vtt is memory bus termination resistors
+# voltage.
+#    label in1 "Vtt"
+#    label in8 "VCore2"
+
     compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
     compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
     compute in5 (5.14 * @) - 14.91  ,  (@ + 14.91) / 5.14
