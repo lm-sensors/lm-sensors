@@ -52,13 +52,6 @@ contact me at <amalysh@web.de> or via the project's mailing list:
 stories as well.
 
 
-TO DOs
------------
-* The driver does not support SMBus block reads/writes. It's implemented but 
-yet not in CVS tree , because of missing hardware for testing. If you have hardware 
-and willing to test SMBus block r/w support , please contact me at <amalysh@web.de>.
-
-
 Thank Yous
 -----------
 Philip Edelbrock <phil@netroedge.com>
