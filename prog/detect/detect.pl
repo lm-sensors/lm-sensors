@@ -129,6 +129,20 @@ use subs qw(lm78_detect lm75_detect lm80_detect w83781d_detect
        isa_addrs => [0x290],  # Theoretically anyway, but this will do
      } ,
      {
+       name => "Winbond W83782D",
+       driver => "w83781d",
+       i2c_addrs => [0x00..0x7f], 
+       i2c_detect => sub { w83781d_detect 1, @_},
+       isa_addrs => [0x290],  # Theoretically anyway, but this will do
+     } ,
+     {
+       name => "Winbond W83783S",
+       driver => "w83781d",
+       i2c_addrs => [0x00..0x7f], 
+       i2c_detect => sub { w83781d_detect 2, @_},
+       isa_addrs => [0x290],  # Theoretically anyway, but this will do
+     } ,
+     {
        name => "Genesys Logic GL518SM Revision 0x00",
        driver => "gl518sm",
        i2c_addrs => [0x4c, 0x4d],
@@ -187,6 +201,39 @@ sub contains
   return 0;
 }
 
+
+###################
+# I/O port access #
+###################
+
+sub initialize_io
+{
+  sysopen IOPORTS, "/dev/port", 2;
+}
+
+# $_[0]: port to read
+# Returns: -1 on failure, read value on success.
+sub inb
+{
+  my ($res,$nrchars);
+  sysseek IOPORTS, $_[0], 0 or return -1;
+  $nrchars = sysread IOPORTS, $res, 1;
+  return -1 if not defined $nrchars or $nrchars != 1;
+  $res = unpack "C",$res ;
+  return $res;
+}
+
+# $_[0]: port to write
+# $_[1]: value to write
+# Returns: -1 on failure, 0 on success.
+sub outb
+{
+  my $towrite = pack "C", $_[1];
+  sysseek IOPORTS, $_[0], 0 or return -1;
+  my $nrchars = syswrite IOPORTS, $towrite, 1;
+  return -1 if not defined $nrchars or $nrchars != 1;
+  return 0;
+}
 
 ###########
 # MODULES #
@@ -657,7 +704,7 @@ sub scan_adapter
           foreach $add_addr(@chips) {
             add_to_chips_detected $$chip{driver},
                                   { confidence => $conf,
-                                    address => add_$addr,
+                                    address => $addr,
                                     chipname =>  $$chip{name},
                                     description => $adapter_name,
                                     driver => $adapter_driver,
@@ -765,9 +812,10 @@ sub lm80_detect
   return (3);
 }
   
-# $_[0]: A reference to the file descriptor to access this chip.
+# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83783S)
+# $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
-# $_[1]: Address
+# $_[2]: Address
 # Returns: undef if not detected, (8,addr1,addr2) if detected, but only
 #          if the LM75 chip emulation is enabled.
 # Registers used:
@@ -775,10 +823,9 @@ sub lm80_detect
 #   0x4a: I2C addresses of emulated LM75 chips
 #   0x4e: Vendor ID byte selection, and bank selection
 #   0x4f: Vendor ID
-#   0x58: Device ID (only when in bank 0); both 0x10 and 0x11 is seen
-#         though Winbond documents 0x10 only.
-# Note: Fails if the W83781D is not in bank 0 (may succeed for bank 2; bank 1
-# leaves almost all registers in an undefined state, too bad).
+#   0x58: Device ID (only when in bank 0); both 0x10 and 0x11 is seen for
+#         W83781D though Winbond documents 0x10 only.
+# Note: Fails if the W8378xD is not in bank 0!
 # Note: Detection overrules a previous LM78 detection
 sub w83781d_detect
 {
@@ -789,8 +836,11 @@ sub w83781d_detect
   $reg2 = i2c_smbus_read_byte_data($file,0x4f);
   return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
                 (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
-  return if ($reg1 & 0x07) == 0x00 and 
-            (i2c_smbus_read_byte_data($file,0x58) & 0xfe) != 0x10;
+  return if ($reg1 & 0x07) == 0x00;
+  $reg1 = i2c_smbus_read_byte_data($file,0x58);
+  return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
+  return if $chip == 1 and  $reg1 != 0x30;
+  return if $chip == 2 and  $reg1 != 0x40;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   @res = (8);
   push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;
