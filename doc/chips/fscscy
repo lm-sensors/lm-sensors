@@ -52,7 +52,8 @@ Specification BMC Poseidon based Systemboard' by Fujitsu Siemens and the
 The scylla chip implements a hardware based system management,
 e.g. for controlling fan speed and core voltage.
 There is also a watchdog counter on the chip which can trigger
-an alarm and even shutdown the system.
+an alarm and even shutdown the system. See above for more details about using
+the watchdog feature.
 
 The chip provides four temperature values (cpu0/1, motherboard and auxiliary),
 three current values (12 volt, 5 volt and battery) and up to
@@ -75,6 +76,60 @@ Voltage sensors (also known as IN sensors) report their values in volts.
 
 All values are reported as final values from the driver. 
 There is no need for further calculations.
+
+
+Using The Watchdog
+------------------
+
+This part was mostly contributed by A'rpi <arpi@thot.banki.hu>. Thanks!
+I (Jean Delvare) edited the text for greater clarity, mainly to integrate
+the e-mail exchange I and A'rpi had as a sequel of the original report.
+Here it goes.
+
+I've spent few hours experiencing with the watchdog feature of the Fujitsu
+Siemens server board (don't ask the model name, what I know is that it uses
+Serverworks CSB5 chipset) using lm_sensors' fscscy driver.
+
+OK, so there is /proc/sys/dev/sensors/fscscy-i2c-0-73/wdog, containing 3
+8-bit values for the 3 watchdog registers.
+
+The first one is the time counter, it counts backwards. It's in 2 seconds
+base, so writting 30 there means 60 seconds delay. It seems the whole range
+(0 to 255) is supported, so up to 510 seconds (8.5 minutes). Writting 0 means
+immediate hardware reset. The value you can read back is the same as you wrote
+there, not the current value of the counter (as I expected).
+
+The second number is supposed to be a state register. It doesn't matter what
+value I put there. It's always 0. Even if I write a non-zero value there, i got
+0 back. Maybe it's non-zero at the moment of reset :)
+
+The third is the control register, with 5th (value 16), 6th (value 32) and 8th
+(value 128) bits used only. If I write 16 or 144 (128+16), it means system
+reset when the counter reaches 0. If I add 32 (for a value of 48 or 176), no
+reset will occure.
+
+So, the world's simplest watchdog using this mainboard:
+
+while true ; do
+  echo 30 0 16 > /proc/sys/dev/sensors/fscscy-i2c-0-73/wdog
+  sleep 10
+done
+
+It does hardware reset after 1 minute, if this script is killed or system
+hang-up occurs. Adjust the 30 and 10 values according to you needs, but
+remember you must sleep less than the reset countdown time (here, 30*2-10
+gives us a 50 seconds margin, which is more than enough).
+
+Also note that BIOS has a strange setting, named 'OS Boot Retry Count', set
+to 0 by default, it changes watchdog behaviour to power off instead of reset.
+(0=poweroff 1..7=reset). It took me a while to find this. This behavior is
+probably related to the "Reset Limit" parameter defined by the ACPI
+specification (3.3.24 System Reset (Type 23)). It sets how many unintentional
+resets can be performed in a row before giving up (and shut down).
+
+Please add the above to the documentation (doc/chips/fscscy), so i can save
+a few hours of resetting for other people :)
+
 
 Chip Features
 -------------
