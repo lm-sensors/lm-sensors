@@ -63,13 +63,14 @@ then
 	exit 1
 fi
 
-if [ "$SYSFS" = "1" ]
-then
-	MATCH='*/fan[1-9]_pwm'
-else
-	MATCH='*/pwm[1-9]'
-fi
+MATCH='*/pwm[1-9]'
 PWM=`echo $MATCH`
+if [ "$SYSFS" = "1" -a "$MATCH" = "$PWM" ]
+then
+	# Deprecated naming scheme (used in kernels 2.6.5 to 2.6.9)
+	MATCH='*/fan[1-9]_pwm'
+	PWM=`echo $MATCH`
+fi
 if [ "$MATCH" = "$PWM" ]
 then
 	echo $0: 'There are no pwm-capable sensor modules installed'
