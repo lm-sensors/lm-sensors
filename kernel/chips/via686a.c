@@ -4,7 +4,10 @@
                 
     Copyright (c) 1998, 1999,2000  Frodo Looijaard <frodol@dds.nl>,
                         Kyösti Mälkki <kmalkki@cc.hut.fi>,
-                    and Mark Studebaker <mdsxyz123@yahoo.com>
+			Mark Studebaker <mdsxyz123@yahoo.com>,
+			and Bob Dougherty <bobd@stanford.edu>
+    (Some conversion-factor data were contributed by Jonathan Teh Soon Yew <j.teh@iname.com>
+    and Alex van Kaam <darkside@chello.nl>.)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -82,7 +85,8 @@ SENSORS_INSMOD_1(via686a);
 #define VIA686A_REG_FAN_MIN(nr) (0x3a + (nr))
 #define VIA686A_REG_FAN(nr)     (0x28 + (nr))
 
-static const u8 regtemp[] = {0x20, 0x21, 0x19};
+//static const u8 regtemp[] = {0x20, 0x21, 0x19};
+static const u8 regtemp[] = {0x20, 0x21, 0x1f};
 static const u8 regover[] = {0x39, 0x3d, 0x1d};
 static const u8 reghyst[] = {0x3a, 0x3e, 0x1e};
 /* temps numbered 1-3 */
@@ -97,12 +101,46 @@ static const u8 reghyst[] = {0x3a, 0x3e, 0x1e};
 #define VIA686A_REG_FANDIV 0x47
 #define VIA686A_REG_CONFIG 0x40
 
+#define ROUND_INT(val) ((val)<0?((val)-0.5):((val)+0.5))
+
 /* Conversions. Rounding and limit checking is only done on the TO_REG
    variants. */
 
-/************** VOLTAGE CONVERSIONS FIXME *************/
-#define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 8)/16),0,255))
-#define IN_FROM_REG(val) (((val) *  16) / 10)
+/********* VOLTAGE CONVERSIONS (Bob Dougherty) ********/
+// From HWMon.cpp (Copyright 1998-2000 Jonathan Teh Soon Yew):
+// voltagefactor[0]=1.25/2628;		// Vccp
+// voltagefactor[1]=1.25/2628;		// +2.5V
+// voltagefactor[2]=1.67/2628;		// +3.3V
+// voltagefactor[3]=2.6/2628;		// +5V
+// voltagefactor[4]=6.3/2628;		// +12V
+// in[i]=(data[i+2]*25.0+133)*voltagefactor[i];
+// 
+// These get us close, but they don't completely agree with what my BIOS says-
+// they are all a bit low.
+extern inline u8 IN_TO_REG(long val, int inNum)
+{
+  // there's an extra /100 hidden in the conversion factors here
+  if (inNum<=1)
+    return (u8)SENSORS_LIMIT(ROUND_INT(0.04*(val/0.047565-133)),0,255);
+  else if (inNum==2)
+    return (u8)SENSORS_LIMIT(ROUND_INT(0.04*(val/0.063546-133)),0,255);
+  else if (inNum==3)
+    return (u8)SENSORS_LIMIT(ROUND_INT(0.04*(val/0.098935-133)),0,255);
+  else 
+    return (u8)SENSORS_LIMIT(ROUND_INT(0.04*(val/0.23973-133)),0,255);
+}
+extern inline long IN_FROM_REG(u8 val, int inNum)
+{
+   // use 2500.0 instead of 25.0 because we nneed to multiply val by 100
+  if (inNum<=1) 
+    return (long)ROUND_INT((2500.0*val+133)*0.00047565);
+  else if (inNum==2)
+    return (long)ROUND_INT((2500.0*val+133)*0.00063546);
+  else if (inNum==3)
+    return (long)ROUND_INT((2500.0*val+133)*0.00098935);
+  else 
+    return (long)ROUND_INT((2500.0*val+133)*0.0023973);
+}
 
 extern inline u8 FAN_TO_REG(long rpm, int div)
 {
@@ -115,13 +153,74 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
 
-/********** TEMP CONVERSIONS FIXME ************/
-#define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
-                                                 ((val)+5)/10),0,255))
+/******** TEMP CONVERSIONS (Bob Dougherty) *********/
+// linear fits from HWMon.cpp (Copyright 1998-2000 Jonathan Teh Soon Yew)
+//	if(temp<169)
+//		return double(temp)*0.427-32.08;
+//	else if(temp>=169 && temp<=202)
+//		return double(temp)*0.582-58.16;
+//	else
+//		return double(temp)*0.924-127.33;
+//
+// A fifth-order polynomial fits the unofficial data (provided by Alex van Kaam <darkside@chello.nl>)
+// a bit better.  It also give more reasonable numbers on my machine (ie. they agree with what my
+// BIOS tells me).  Here's the fifth-order fit to the 10-bit data:
+// temp = 6.500371171990e-09*val^5 +-4.006529810457e-06*val^4 +9.830610857874e-04*val^3 +
+// -1.187047495730e-01*val^2 +8.700574403605e+00*val +-2.836026823804e+02
+// 
+// Alas, neither work well because of precision limits in our math (?!?), so
+// I came up with a pretty good piecewise-2nd-order:
+// 
+// For 8-bit readings:
+//   0-59: -0.00831398*val*val + 1.46882437*val - 63.66742250
+//   60:179: 0.00056874*val*val + 0.29665581*val - 23.7538571
+//   180-255: 0.01275451*val*val - 4.39034916*val + 428.14343750
+// 
+// For 10-bit readings:
+//   0-283: -0.00051962*val*val + 0.36720609*val - 63.6674225
+//   284:763: 0.00004141*val*val + 0.06853503*val + -22.48959243
+//   764-1023: 0.00087626*val*val + -1.23656143*val + 488.97355989
+// 
+// To convert the other way (temp to 8-bit reg val): 
+//   <0: 0.01864022*val*val + 2.12242751*val + 290.16637347
+//   0-55: -0.00714790*val*val + 2.60844692*val + 70.67197155
+//   >55: -0.00991559*val*val + 2.48774551*val + 85.21011594
+
+// Converting temps to register values
+extern inline u8 TEMP_TO_REG(long val)
+{
+  val /= 10;
+  if (val<0x00) // val<0
+    return (u8)SENSORS_LIMIT(ROUND_INT(0.01864022*val*val + 2.12242751*val + 72.54159337),0,255);
+  else if (val<0x37) // val<55
+    return (u8)SENSORS_LIMIT(ROUND_INT(-0.00714790*val*val + 2.60844692*val + 70.67197155),0,255);
+  else
+    return (u8)SENSORS_LIMIT(ROUND_INT(-0.00991559*val*val + 2.48774551*val + 85.21011594),0,255);
+
+}
+
 /* for 8-bit temperature hyst and over registers */
-#define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
+extern inline long TEMP_FROM_REG(u8 val)
+{
+  if (val<0x47) // val<71
+    return (long)ROUND_INT(10.0*(-0.00831398*val*val + 1.46882437*val - 63.66742250));
+  else if (val<0xbf) // val<191
+    return (long)ROUND_INT(10.0*(0.00056874*val*val + 0.29665581*val - 23.7538571));
+  else
+    return (long)ROUND_INT(10.0*(0.01275451*val*val - 4.39034916*val + 428.14343750));
+}
+
 /* for 10-bit temperature readings */
-#define TEMP_FROM_REG10(val) (((val)>0x80?(val)-0x100:(val))*10)
+extern inline long TEMP_FROM_REG10(u16 val)
+{
+  if (val<0x011c)  // val<284
+    return (long)ROUND_INT(10.0*(-0.00051962*val*val + 0.36720609*val - 63.6674225));
+  else if (val<0x02fc) //val<764
+    return (long)ROUND_INT(10.0*(0.00004141*val*val + 0.06853503*val + -22.48959243));
+  else
+    return (long)ROUND_INT(10.0*(0.00087626*val*val + -1.23656143*val + 488.97355989));
+ 
+}
 
 #define ALARMS_FROM_REG(val) (val)
 
@@ -134,6 +233,8 @@ extern inline u8 FAN_TO_REG(long rpm, int div)
 #define VIA686A_INIT_IN_2 330
 #define VIA686A_INIT_IN_3 (((500)   * 100)/168)
 #define VIA686A_INIT_IN_4 (((1200)  * 10)/38)
+//#define VIA686A_INIT_IN_3 500
+//#define VIA686A_INIT_IN_4 1200
 
 #define VIA686A_INIT_IN_PERCENTAGE 10
 
@@ -447,25 +548,25 @@ void via686a_init_client(struct i2c_client *client)
 	via686a_write_value(client, VIA686A_REG_CONFIG, 0x80);
 
 	via686a_write_value(client, VIA686A_REG_IN_MIN(0),
-			    IN_TO_REG(VIA686A_INIT_IN_MIN_0));
+			    IN_TO_REG(VIA686A_INIT_IN_MIN_0, 0));
 	via686a_write_value(client, VIA686A_REG_IN_MAX(0),
-			    IN_TO_REG(VIA686A_INIT_IN_MAX_0));
+			    IN_TO_REG(VIA686A_INIT_IN_MAX_0, 0));
 	via686a_write_value(client, VIA686A_REG_IN_MIN(1),
-			    IN_TO_REG(VIA686A_INIT_IN_MIN_1));
+			    IN_TO_REG(VIA686A_INIT_IN_MIN_1, 1));
 	via686a_write_value(client, VIA686A_REG_IN_MAX(1),
-			    IN_TO_REG(VIA686A_INIT_IN_MAX_1));
+			    IN_TO_REG(VIA686A_INIT_IN_MAX_1, 1));
 	via686a_write_value(client, VIA686A_REG_IN_MIN(2),
-			    IN_TO_REG(VIA686A_INIT_IN_MIN_2));
+			    IN_TO_REG(VIA686A_INIT_IN_MIN_2, 2));
 	via686a_write_value(client, VIA686A_REG_IN_MAX(2),
-			    IN_TO_REG(VIA686A_INIT_IN_MAX_2));
+			    IN_TO_REG(VIA686A_INIT_IN_MAX_2, 2));
 	via686a_write_value(client, VIA686A_REG_IN_MIN(3),
-			    IN_TO_REG(VIA686A_INIT_IN_MIN_3));
+			    IN_TO_REG(VIA686A_INIT_IN_MIN_3, 3));
 	via686a_write_value(client, VIA686A_REG_IN_MAX(3),
-			    IN_TO_REG(VIA686A_INIT_IN_MAX_3));
+			    IN_TO_REG(VIA686A_INIT_IN_MAX_3, 3));
 	via686a_write_value(client, VIA686A_REG_IN_MIN(4),
-			    IN_TO_REG(VIA686A_INIT_IN_MIN_4));
+			    IN_TO_REG(VIA686A_INIT_IN_MIN_4, 4));
 	via686a_write_value(client, VIA686A_REG_IN_MAX(4),
-			    IN_TO_REG(VIA686A_INIT_IN_MAX_4));
+			    IN_TO_REG(VIA686A_INIT_IN_MAX_4, 4));
 	via686a_write_value(client, VIA686A_REG_FAN_MIN(1),
 			    FAN_TO_REG(VIA686A_INIT_FAN_MIN, 2));
 	via686a_write_value(client, VIA686A_REG_FAN_MIN(2),
@@ -507,7 +608,7 @@ void via686a_update_client(struct i2c_client *client)
 		}
 		for (i = 1; i <= 3; i++) {
 			data->temp[i - 1] = via686a_read_value(client,
-			                         VIA686A_REG_TEMP(i)) << 2;
+			                    VIA686A_REG_TEMP(i)) << 2;
 			data->temp_over[i - 1] = via686a_read_value(client,
 			                         VIA686A_REG_TEMP_OVER(i));
 			data->temp_hyst[i - 1] = via686a_read_value(client,
@@ -520,6 +621,7 @@ void via686a_update_client(struct i2c_client *client)
 			           VIA686A_REG_TEMP_LOW23) & 0x30) >> 4;
 		data->temp[2] |= (via686a_read_value(client,
 			           VIA686A_REG_TEMP_LOW23) & 0xc0) >> 6;
+	       
 		i = via686a_read_value(client, VIA686A_REG_FANDIV);
 		data->fan_div[0] = (i >> 4) & 0x03;
 		data->fan_div[1] = i >> 6;
@@ -556,18 +658,18 @@ void via686a_in(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		via686a_update_client(client);
-		results[0] = IN_FROM_REG(data->in_min[nr]);
-		results[1] = IN_FROM_REG(data->in_max[nr]);
-		results[2] = IN_FROM_REG(data->in[nr]);
+		results[0] = IN_FROM_REG(data->in_min[nr], nr);
+		results[1] = IN_FROM_REG(data->in_max[nr], nr);
+		results[2] = IN_FROM_REG(data->in[nr], nr);
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->in_min[nr] = IN_TO_REG(results[0]);
+			data->in_min[nr] = IN_TO_REG(results[0], nr);
 			via686a_write_value(client, VIA686A_REG_IN_MIN(nr),
 					    data->in_min[nr]);
 		}
 		if (*nrels_mag >= 2) {
-			data->in_max[nr] = IN_TO_REG(results[1]);
+			data->in_max[nr] = IN_TO_REG(results[1], nr);
 			via686a_write_value(client, VIA686A_REG_IN_MAX(nr),
 					    data->in_max[nr]);
 		}
