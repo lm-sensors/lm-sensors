@@ -20,11 +20,13 @@ mechanism has never been reported to us on any other eeprom,
 Atmel or otherwise.
 
 We have made several changes in release 2.6.5 to minimize the
-chance of corruption:
+chance of corruption. Later evolutions were made and the current state is:
 
-1) Sensors-detect now accesses VPD information in the BIOS to identify IBM
-   system. If the system manufacturer is IBM, sensors-detect will print a
-   message and exit.
+1) Sensors-detect accesses VPD information in the BIOS to identify IBM
+   systems. If it finds the VPD structure (which is IBM-proprietary),
+   sensors-detect will print a message and exit, unless the system is
+   listed in a growing white-list. We add system signatures to the list
+   when users report that a given model has been tested to be safe.
 
 2) The sequence of probes in sensors-detect has been changed so that
    24RF08 eeproms are not corrupted. This *should* prevent corruption
@@ -35,8 +37,7 @@ chance of corruption:
    in the BIOS to identify the system manufacturer. If the system
    manufacturer is IBM, i2c-piix4 will print a message and exit.
    As the 24RF08 is on the PIIX4 SMBus, this prevents access to
-   the 24RF08, even if sensors-detect is bypassed or sensors-detect
-   does not recognize the system as IBM.
+   the 24RF08, even if sensors-detect was not used.
 
 4) The sequence of probes in the eeprom module (when loaded with
    checksum=1) has been changed so that 24RF08 eeproms will
@@ -44,8 +45,6 @@ chance of corruption:
    eeproms in non-IBM systems.
    We do not have any reports of this corruption mechanism in releases
    2.6.4 or earlier but have verified that it can happen.
-   There is no issue unless the eeprom module is loaded with checksum=1,
-   which is not the default.
    The ddcmon driver was changed in the same way, just in case.
 
 Even with these changes, we still DO NOT RECOMMEND INSTALLING
@@ -54,7 +53,7 @@ lm_sensors 2.6.5 or later on IBM Thinkpads, because:
 1) While these changes will dramatically reduce the chance of 24RF08
    corruption, these changes have not been heavily tested.
 
-2) lm_sensors won't run on IBM systems because of these changes.
+2) lm_sensors won't run on most IBM systems because of these changes.
 
 3) IBM Thinkpads contain a proprietary Embedded Controller which
    is used to access sensors. This controller is not on the SMBus,
@@ -64,20 +63,21 @@ lm_sensors 2.6.5 or later on IBM Thinkpads, because:
 You may want to try ACPI instead, it should let you get some information
 about temperatures and fan status.
 
-As described above, our 2.6.5 and later releases "blacklists" all IBM
-systems. Our next step is to refine the system detection so that only
-those models containing 24RF08's are blacklisted. We are working
-with IBM on a method of querying the MTM (Machine Type and Model)
-and comparing the MTM with a list of 24RF08-containing systems.
-After this change (which will be documented in our CHANGES file
-and this document), users of IBM systems without the
-24RF08 and the proprietary Embedded Controller should be
-able to safely use lm_sensors.
+As described above, our 2.6.5 release "blacklisted" all IBM
+systems. We were planning to refine refine the system detection so that
+only those models containing 24RF08's are blacklisted. But it looks like
+we will not get sufficient cooperation from IBM to implement a reliable
+blacklist. For this reason, we will now be using the other approach:
+a "white list" of known-to-be-safe systems. This is the only safe way.
 
-We would very much like to support IBM systems which contain
-non-proprietary sensor devices. Unfortunately, until we have
-a reliable identification method implemented, we must
-blacklist all IBM systems to minimize the chance of eeprom corruption.
+Systems will be added to the white list at a slow rate, on user report.
+Basically, users wanting to use lm_sensors on their IBM systems, either
+because they know for sure that the system doesn't have the 24RF08 chip,
+or because they like playing with fire, have to bypass the securities we
+have implemented, and then report (hopefully) success, then we add their
+system signature to the white list. Note that this list is only
+implemented in sensors-detect at the moment, not the i2c-piix4 bus
+driver.
 
 We do not have any reports of 24RF08 eeproms on non-IBM systems.
 If there are any such systems with 24RF08 eeproms, these changes will
@@ -97,10 +97,13 @@ The Linux Thinkpad Mailing List
 http://www.bm-soft.com/~bm/tp_mailing.html
 
 Joe in Australia's Thinkpad Password Recovery Site
-http://www.ja.olm.net/unlock
+http://www.ja.axxs.net/unlock/
 
 Atmel 24RF08 Datasheet
 http://www.atmel.com/dyn/products/product_card.asp?part_id=2370
+
+Site in the US that sells replacement AT24RF08 chips for all models
+http://www.pwcrack.com/
 
 
 (*) 'Write Quick 0' is not an actual write and should never generate
