@@ -25,7 +25,7 @@
 */
 
 /*
-   Supports AMD756 and AMD766.
+   Supports AMD756, AMD766, and AMD768.
    Note: we assume there can only be one device, with one SMBus interface.
 */
 
@@ -54,6 +54,7 @@ MODULE_LICENSE("GPL");
 
 static int supported[] = {PCI_DEVICE_ID_AMD_756,
                           PCI_DEVICE_ID_AMD_766,
+			  0x7443, /* AMD768 */
                           0 };
 
 /* AMD756 SMBus address offsets */

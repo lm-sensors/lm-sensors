@@ -5,6 +5,7 @@ Status: Complete and somewhat tested
 Supported adapters:
   * AMD 756
   * AMD 766
+  * AMD 768
     Datasheets: Publicly available on AMD website
 
 
@@ -17,4 +18,4 @@ Module Parameters
 Description
 -----------
 
-This driver supports the AMD 756 and 766 Peripheral Bus Controllers.
+This driver supports the AMD 756, 766, and 768 Peripheral Bus Controllers.

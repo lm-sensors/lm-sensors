@@ -222,6 +222,14 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        driver => "i2c-amd756",
        match => sub { $_[0] =~ /^SMBus AMD7X6 adapter at [0-9,a-f]{4}/ },
      },
+     { 
+       vendid => 0x1022,
+       devid  => 0x7443,
+       func => 3,
+       procid => "AMD-768 System Management",
+       driver => "i2c-amd756",
+       match => sub { $_[0] =~ /^SMBus AMD7X6 adapter at [0-9,a-f]{4}/ },
+     },
      {
        vendid => 0x102b,
        devid  => 0x0519,
