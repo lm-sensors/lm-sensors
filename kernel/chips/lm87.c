@@ -287,8 +287,10 @@ static void lm87_init_client(struct i2c_client *client);
 
 static void lm87_in(struct i2c_client *client, int operation,
 		       int ctl_name, int *nrels_mag, long *results);
+#if defined (LM87_AIN1) || defined (LM87_AIN2)
 static void lm87_ain(struct i2c_client *client, int operation,
 		       int ctl_name, int *nrels_mag, long *results);
+#endif
 static void lm87_fan(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 static void lm87_temp(struct i2c_client *client, int operation,
@@ -776,6 +778,7 @@ void lm87_in(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
+#if defined (LM87_AIN1) || defined (LM87_AIN2)
 void lm87_ain(struct i2c_client *client, int operation, int ctl_name,
 		int *nrels_mag, long *results)
 {
@@ -820,6 +823,7 @@ void lm87_ain(struct i2c_client *client, int operation, int ctl_name,
 		}
 	}
 }
+#endif
 
 void lm87_fan(struct i2c_client *client, int operation, int ctl_name,
 		 int *nrels_mag, long *results)
