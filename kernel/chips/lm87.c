@@ -492,10 +492,11 @@ static int lm87_read_value(struct i2c_client *client, u8 reg)
 
 		printk(KERN_WARNING "lm87.o: Read byte data failed, "
 		       "address 0x%02x\n", reg);
-		mdelay(i);
+		mdelay(i + 3);
 	}
 
 	/* <TODO> what to return in case of error? */
+	printk(KERN_ERR "lm87.o: All read byte retries failed!!\n");
 	return 0;
 }
 
