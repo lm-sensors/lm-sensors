@@ -46,7 +46,7 @@ static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
 /* Insmod parameters */
-SENSORS_INSMOD_6(adm1021, max1617, max1617a, thmc10, lm84, gl523sm);
+SENSORS_INSMOD_7(adm1021, adm1023, max1617, max1617a, thmc10, lm84, gl523sm);
 
 /* adm1021 constants specified below */
 
@@ -56,13 +56,20 @@ SENSORS_INSMOD_6(adm1021, max1617, max1617a, thmc10, lm84, gl523sm);
 #define ADM1021_REG_REMOTE_TEMP 0x01
 #define ADM1021_REG_STATUS 0x02
 #define ADM1021_REG_MAN_ID 0x0FE	/* 0x41 = AMD, 0x49 = TI, 0x4D = Maxim, 0x23 = Genesys */
-#define ADM1021_REG_DEV_ID 0x0FF	/* ADM1021 */
+#define ADM1021_REG_DEV_ID 0x0FF	/* ADM1021 = 0x0X, ADM1023 = 0x3X */
 #define ADM1021_REG_DIE_CODE 0x0FF	/* MAX1617A */
 /* These use different addresses for reading/writing */
 #define ADM1021_REG_CONFIG_R 0x03
 #define ADM1021_REG_CONFIG_W 0x09
 #define ADM1021_REG_CONV_RATE_R 0x04
 #define ADM1021_REG_CONV_RATE_W 0x0A
+/* These are for the ADM1023's additional precision on the remote temp sensor */
+#define ADM1021_REG_REM_TEMP_PREC 0x010
+#define ADM1021_REG_REM_OFFSET 0x011
+#define ADM1021_REG_REM_OFFSET_PREC 0x012
+#define ADM1021_REG_REM_TOS_PREC 0x013
+#define ADM1021_REG_REM_THYST_PREC 0x014
+/* limits */
 #define ADM1021_REG_TOS_R 0x05
 #define ADM1021_REG_TOS_W 0x0B
 #define ADM1021_REG_REMOTE_TOS_R 0x07
@@ -105,6 +112,9 @@ struct adm1021_data {
 
 	u8 temp, temp_os, temp_hyst;	/* Register values */
 	u8 remote_temp, remote_temp_os, remote_temp_hyst, alarms, die_code;
+        /* Special values for ADM1023 only */
+	u8 remote_temp_prec, remote_temp_os_prec, remote_temp_hyst_prec, 
+	   remote_temp_offset, remote_temp_offset_prec;
 };
 
 #ifdef MODULE
@@ -182,7 +192,6 @@ static ctl_table adm1021_max_dir_table_template[] = {
 	{0}
 };
 
-
 /* Used by init/cleanup */
 static int __initdata adm1021_initialized = 0;
 
@@ -251,6 +260,9 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	if (kind <= 0) {
 		i = adm1021_read_value(new_client, ADM1021_REG_MAN_ID);
 		if (i == 0x41)
+		  if ((adm1021_read_value (new_client, ADM1021_REG_DEV_ID) & 0x0F0) == 0x030)
+			kind = adm1023;
+		  else
 			kind = adm1021;
 		else if (i == 0x49)
 			kind = thmc10;
@@ -278,6 +290,9 @@ static int adm1021_detect(struct i2c_adapter *adapter, int address,
 	} else if (kind == adm1021) {
 		type_name = "adm1021";
 		client_name = "ADM1021 chip";
+	} else if (kind == adm1023) {
+		type_name = "adm1023";
+		client_name = "ADM1023 chip";
 	} else if (kind == thmc10) {
 		type_name = "thmc10";
 		client_name = "THMC10 chip";
@@ -429,6 +444,18 @@ void adm1021_update_client(struct i2c_client *client)
 			data->die_code =
 			    adm1021_read_value(client,
 					       ADM1021_REG_DIE_CODE);
+		if (data->type == adm1023) {
+		  data->remote_temp_prec =
+		    adm1021_read_value(client, ADM1021_REG_REM_TEMP_PREC);
+		  data->remote_temp_os_prec =
+		    adm1021_read_value(client, ADM1021_REG_REM_TOS_PREC);
+		  data->remote_temp_hyst_prec =
+		    adm1021_read_value(client, ADM1021_REG_REM_THYST_PREC);
+		  data->remote_temp_offset =
+		    adm1021_read_value(client, ADM1021_REG_REM_OFFSET);
+		  data->remote_temp_offset_prec =
+		    adm1021_read_value(client, ADM1021_REG_REM_OFFSET_PREC);
+		}
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -466,27 +493,71 @@ void adm1021_temp(struct i2c_client *client, int operation, int ctl_name,
 void adm1021_remote_temp(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results)
 {
+int prec=0;
 	struct adm1021_data *data = client->data;
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
+		if (data->type == adm1023) { *nrels_mag = 3; }
+                 else { *nrels_mag = 0; }
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		adm1021_update_client(client);
 		results[0] = TEMP_FROM_REG(data->remote_temp_os);
 		results[1] = TEMP_FROM_REG(data->remote_temp_hyst);
 		results[2] = TEMP_FROM_REG(data->remote_temp);
-		*nrels_mag = 3;
+		if (data->type == adm1023) {
+		  results[0]=results[0]*1000 + 
+		   ((data->remote_temp_os_prec >> 5) * 125);
+		  results[1]=results[1]*1000 + 
+		   ((data->remote_temp_hyst_prec >> 5) * 125);
+		  results[2]=(TEMP_FROM_REG(data->remote_temp_offset)*1000) + 
+                   ((data->remote_temp_offset_prec >> 5) * 125);
+		  results[3]=TEMP_FROM_REG(data->remote_temp)*1000 + 
+		   ((data->remote_temp_prec >> 5) * 125);
+ 		  *nrels_mag = 4;
+		} else {
+ 		  *nrels_mag = 3;
+		}
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
+			if (data->type == adm1023) {
+			  prec=((results[0]-((results[0]/1000)*1000))/125)<<5;
+			  adm1021_write_value(client,
+                                            ADM1021_REG_REM_TOS_PREC,
+                                            prec);
+			  results[0]=results[0]/1000;
+			  data->remote_temp_os_prec=prec;
+			}
 			data->remote_temp_os = TEMP_TO_REG(results[0]);
 			adm1021_write_value(client,
 					    ADM1021_REG_REMOTE_TOS_W,
 					    data->remote_temp_os);
 		}
 		if (*nrels_mag >= 2) {
+			if (data->type == adm1023) {
+			  prec=((results[1]-((results[1]/1000)*1000))/125)<<5;
+			  adm1021_write_value(client,
+                                            ADM1021_REG_REM_THYST_PREC,
+                                            prec);
+			  results[1]=results[1]/1000;
+			  data->remote_temp_hyst_prec=prec;
+			}
 			data->remote_temp_hyst = TEMP_TO_REG(results[1]);
 			adm1021_write_value(client,
 					    ADM1021_REG_REMOTE_THYST_W,
 					    data->remote_temp_hyst);
+		}
+		if (*nrels_mag >= 3) {
+			if (data->type == adm1023) {
+			  prec=((results[2]-((results[2]/1000)*1000))/125)<<5;
+			  adm1021_write_value(client,
+                                            ADM1021_REG_REM_OFFSET_PREC,
+                                            prec);
+			  results[2]=results[2]/1000;
+			  data->remote_temp_offset_prec=prec;
+			  data->remote_temp_offset=results[2];
+			  adm1021_write_value(client,
+                                            ADM1021_REG_REM_OFFSET,
+                                            data->remote_temp_offset);
+			}
 		}
 	}
 }

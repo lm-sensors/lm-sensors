@@ -324,6 +324,29 @@ struct sensors_address_data {
                                                  {NULL}}; \
   SENSORS_INSMOD
 
+#define SENSORS_INSMOD_7(chip1,chip2,chip3,chip4,chip5,chip6,chip7) \
+  enum chips { any_chip, chip1, chip2, chip3, chip4, chip5, chip6, chip7 }; \
+  SENSORS_MODULE_PARM(force, \
+                      "List of adapter,address pairs to boldly assume " \
+                      "to be present"); \
+  SENSORS_MODULE_PARM_FORCE(chip1); \
+  SENSORS_MODULE_PARM_FORCE(chip2); \
+  SENSORS_MODULE_PARM_FORCE(chip3); \
+  SENSORS_MODULE_PARM_FORCE(chip4); \
+  SENSORS_MODULE_PARM_FORCE(chip5); \
+  SENSORS_MODULE_PARM_FORCE(chip6); \
+  SENSORS_MODULE_PARM_FORCE(chip7); \
+  static struct sensors_force_data forces[] = {{force,any_chip}, \
+                                                 {force_ ## chip1,chip1}, \
+                                                 {force_ ## chip2,chip2}, \
+                                                 {force_ ## chip3,chip3}, \
+                                                 {force_ ## chip4,chip4}, \
+                                                 {force_ ## chip5,chip5}, \
+                                                 {force_ ## chip6,chip6}, \
+                                                 {force_ ## chip7,chip7}, \
+                                                 {NULL}}; \
+  SENSORS_INSMOD
+
 typedef int sensors_found_addr_proc(struct i2c_adapter *adapter,
 				    int addr, unsigned short flags,
 				    int kind);
