@@ -124,9 +124,11 @@ s32 smbus_access_i2c(struct i2c_adapter * adapter, u8 addr, char read_write,
     num = 1; /* Special case: The read/write field is used as data */
     break;
   case SMBUS_BYTE:
-    if (read_write == SMBUS_READ)
+    if (read_write == SMBUS_READ) {
       /* Special case: only a read! */
       msg[0].flags = I2C_M_RD;
+      num = 1;
+    }
     break;
   case SMBUS_BYTE_DATA:
     if (read_write == SMBUS_READ)
