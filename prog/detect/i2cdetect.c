@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
         exit(1);
       }
 
-      res = i2c_smbus_read_byte(file);
+      res = i2c_smbus_write_quick(file, I2C_SMBUS_WRITE);
       if (res < 0)
         printf("XX ");
       else
