@@ -178,6 +178,12 @@ OCTESC		(1[0-7]{0,2})|([2-7][0-7]?)|(0[1-7][0-7]?)|(00[1-7])
 <MIDDLE>"@"	{
 		  return '@';
 		}
+<MIDDLE>"^"	{
+		  return '^';
+		}
+<MIDDLE>"`"	{
+		  return '`';
+		}
 
  /* Quoted string */
 <MIDDLE>\"	{

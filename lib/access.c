@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "access.h"
 #include "sensors.h"
 #include "data.h"
@@ -394,6 +395,14 @@ int sensors_eval_expr(sensors_chip_name chipname, const sensors_expr *expr,
     return 0;
   case sensors_negate:
     *result = -res1;
+    return 0;
+  case sensors_exp:
+    *result = exp(res1);
+    return 0;
+  case sensors_log:
+    if (res1 < 0.0)
+      return -SENSORS_ERR_DIV_ZERO;
+    *result = log(res1);
     return 0;
   }
   return 0;

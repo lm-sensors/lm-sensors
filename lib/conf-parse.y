@@ -102,6 +102,7 @@ static sensors_chip *current_chip = NULL;
 %left <nothing> '-' '+'
 %left <nothing> '*' '/'
 %left <nothing> NEG
+%right <nothing> '^' '`'
 
 %token <nothing> ','
 %token <nothing> EOL
@@ -272,6 +273,20 @@ expression:	  FLOAT
 		  }
 		| '(' expression ')'
 		  { $$ = $2; }
+		| '^' expression
+		  { $$ = malloc_expr(); 
+		    $$->kind = sensors_kind_sub;
+		    $$->data.subexpr.op = sensors_exp;
+		    $$->data.subexpr.sub1 = $2;
+		    $$->data.subexpr.sub2 = NULL;
+		  }
+		| '`' expression
+		  { $$ = malloc_expr(); 
+		    $$->kind = sensors_kind_sub;
+		    $$->data.subexpr.op = sensors_log;
+		    $$->data.subexpr.sub1 = $2;
+		    $$->data.subexpr.sub2 = NULL;
+		  }
 ;
 
 i2cbus_name:	  NAME

@@ -29,7 +29,7 @@
 /* Kinds of expression operators recognized */
 typedef enum sensors_operation { 
   sensors_add, sensors_sub, sensors_multiply, sensors_divide, 
-  sensors_negate } sensors_operation;
+  sensors_negate, sensors_exp, sensors_log } sensors_operation;
 
 /* An expression can have several forms */
 typedef enum sensors_expr_kind {
