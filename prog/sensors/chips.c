@@ -1408,7 +1408,7 @@ void print_lm80(const sensors_chip_name *name)
       print_label("",10);
       printf("         (os:  limit = %+3.0f%s, hyst = %+3.0f%s) %s\n",
              max2, degstr, min2, degstr,
-             alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
+             alarms&LM80_ALARM_TEMP_OS?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get TEMP data!\n");
