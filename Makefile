@@ -68,7 +68,7 @@ DEBUG := 0
 PREFIX := /usr/local
 
 # This is the directory into which the modules will be installed.
-MODDIR := /lib/modules/extra/misc
+MODDIR := /lib/modules/current/extra/misc
 
 # This is the directory where sensors.conf will be installed, if no other
 # configuration file is found
