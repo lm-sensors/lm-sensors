@@ -549,7 +549,7 @@ void adm9240_update_client(struct i2c_client *client)
 
   down(&data->update_lock);
 
-  if ((jiffies - data->last_updated > 2*HZ ) ||
+  if ((jiffies - data->last_updated > (data->type == adm9240?HZ/2:HZ*2) ) ||
       (jiffies < data->last_updated) || ! data->valid) {
 
 #ifdef DEBUG
