@@ -1001,40 +1001,46 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { adm1021_detect 0, @_ },
      },
      {
-       name => "Maxim MAX1617",
+       name => "Analog Devices ADM1021A/ADM1023",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 1, @_ },
      },
      {
-       name => "Maxim MAX1617A",
+       name => "Maxim MAX1617",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 2, @_ },
      },
      {
-       name => "TI THMC10",
+       name => "Maxim MAX1617A",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 3, @_ },
      },
      {
-       name => "National Semiconductor LM84",
+       name => "TI THMC10",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 4, @_ },
      },
      {
-       name => "Genesys Logic GL523SM",
+       name => "National Semiconductor LM84",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 5, @_ },
      },
      {
-       name => "Onsemi MC1066",
+       name => "Genesys Logic GL523SM",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { adm1021_detect 6, @_ },
+     },
+     {
+       name => "Onsemi MC1066",
+       driver => "adm1021",
+       i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
+       i2c_detect => sub { adm1021_detect 7, @_ },
      },
      {
        name => "National Semiconductor LM83",
@@ -2675,39 +2681,40 @@ sub adm1024_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = ADM1021, 1 = MAX1617, 2 = MAX1617A, 3 = THMC10, 4 = LM84, 5 = GL523, 6 = MC1066,
-#   7 = LM83)
+#   (0 = ADM1021, 1 = ADM1021A/ADM1023, 2 = MAX1617, 3 = MAX1617A, 4 = THMC10,
+#    5 = LM84, 6 = GL523, 7 = MC1066)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, (6) or (3) if detected.
+# Returns: undef if not detected, 3 if simply detected, 6 if detected and
+#          manufacturer ID matches, 7 if detected and manufacturer ID and
+#          revision match
 # Registers used:
 #   0x04: Company ID (LM84 only)
-#   0xfe: Company ID
-#   0xff: Revision (Maxim only)
+#   0xfe: Company ID (all but LM84 and MAX1617)
+#   0xff: Revision (ADM1021, ADM1021A/ADM1023 and MAX1617A)
 #   0x02: Status
-# Note: Especially the Maxim has very bad detection; we give it a low 
+# Note: Especially the MAX1617 has very bad detection; we give it a low 
 # confidence value.
 sub adm1021_detect
 {
-  my $reg;
   my ($chip, $file,$addr) = @_;
-  return if $chip == 0 and i2c_smbus_read_byte_data($file,0xfe) != 0x41;
-  return if $chip == 3 and i2c_smbus_read_byte_data($file,0xfe) != 0x49;
-  return if $chip == 4 and i2c_smbus_read_byte_data($file,0x04) != 0x00;
-  return if $chip == 7 and i2c_smbus_read_byte_data($file,0xfe) != 0x01;
-  return if $chip == 5 and i2c_smbus_read_byte_data($file,0xfe) != 0x23;
-  return if $chip == 2 and i2c_smbus_read_byte_data($file,0xfe) != 0x4d and
+  return if $chip == 0 and i2c_smbus_read_byte_data($file,0xfe) != 0x41 ||
+                          (i2c_smbus_read_byte_data($file,0xff) & 0xf0) != 0x00;
+  return if $chip == 1 and i2c_smbus_read_byte_data($file,0xfe) != 0x41 ||
+                          (i2c_smbus_read_byte_data($file,0xff) & 0xf0) != 0x30;
+  return if $chip == 4 and i2c_smbus_read_byte_data($file,0xfe) != 0x49;
+  return if $chip == 5 and i2c_smbus_read_byte_data($file,0x04) != 0x00;
+  return if $chip == 6 and i2c_smbus_read_byte_data($file,0xfe) != 0x23;
+  return if $chip == 3 and i2c_smbus_read_byte_data($file,0xfe) != 0x4d ||
                            i2c_smbus_read_byte_data($file,0xff) != 0x01;
-  return if $chip == 6 and i2c_smbus_read_byte_data($file,0xfe) != 0x54;
+  return if $chip == 7 and i2c_smbus_read_byte_data($file,0xfe) != 0x54;
   # The remaining things are flaky at best. Perhaps something can be done
   # with the fact that some registers are unreadable?
   return if (i2c_smbus_read_byte_data($file,0x02) & 0x03) != 0;
-  if ($chip == 1) {
-    return (3);
-  } else {
-    return (6);
-  }
+  return 3 if $chip == 2;
+  return 7 if $chip <= 3;
+  return 6;
 }
 
 # $_[0]: Address
