@@ -213,12 +213,12 @@ CONFIG_I2C_PIIX4
   built as a module which can be inserted and removed while the kernel
   is running.
 
-Nvidia Nforce2 based Mainboard
+Nvidia Nforce2/Nforce3 based Mainboard
 CONFIG_I2C_NFORCE2
   If you say yes to this option, support will be included for the 
-  Nvidia Nforce2 family of mainboard I2C interfaces. This can also be
-  built as a module which can be inserted and removed while the kernel
-  is running.
+  Nvidia Nforce2 and Nforce3 families of mainboard I2C interfaces.
+  This can also be built as a module which can be inserted and removed
+  while the kernel is running.
 
 Silicon Integrated Systems Corp. SiS5595 based Mainboard
 CONFIG_I2C_SIS5595
@@ -895,7 +895,7 @@ sub gen_drivers_i2c_Config_in
     dep_tristate '  Intel 82801AA, AB, BA, DB' CONFIG_I2C_I801 $CONFIG_I2C
     dep_tristate '  Intel i810AA/AB/E and i815' CONFIG_I2C_I810 $CONFIG_I2C_ALGOBIT
     dep_tristate '  Intel 82371AB PIIX4(E), 443MX, ServerWorks OSB4/CSB5, SMSC Victory66' CONFIG_I2C_PIIX4 $CONFIG_I2C
-    dep_tristate '  Nvidia Nforce2' CONFIG_I2C_NFORCE2 $CONFIG_I2C
+    dep_tristate '  Nvidia Nforce2/Nforce3' CONFIG_I2C_NFORCE2 $CONFIG_I2C
     dep_tristate '  SiS 5595' CONFIG_I2C_SIS5595 $CONFIG_I2C
     dep_tristate '  SiS 630/730' CONFIG_I2C_SIS630 $CONFIG_I2C
     dep_tristate '  SiS 645/961,645DX/961,735' CONFIG_I2C_SIS645 $CONFIG_I2C $CONFIG_HOTPLUG
