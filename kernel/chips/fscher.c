@@ -436,6 +436,7 @@ void fscher_in(struct i2c_client *client, int operation, int ctl_name,
       results[0] = data->revision ;
       break;
     case FSCHER_SYSCTL_EVENT:
+      /* bits 6, 5 and 2 are reserved => mask with 0x9b */
       results[0] = data->global_event & 0x9b;
       break;
     case FSCHER_SYSCTL_CONTROL:
