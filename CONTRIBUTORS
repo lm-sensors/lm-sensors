@@ -23,7 +23,11 @@ problems.
 * Kyösti Mälkki <kmalkki@cc.hut.fi>
   Author of the i2c-via and sis5595 drivers.
 * Mark D. Studebaker <mds@eng.paradyne.com>
-  Author of the i2c-ali15x3 driver, as well as other drivers.
+  Author of the i2c-ali15x3 bus driver and the i2c-i810 bus driver.
+  Added w83782d, w83783s, and w83627hf support to the w83781d driver.
+  Added max1617 support to the adm1021 driver.
+  Added lm81 support to the adm9240 driver.
+  Author of the decode-xeon.pl xeon EEPROM decoder.
 * Geert Uytterhoeven <geert@linux-m68k.org>
   Author of the i2c-hydra driver.
 * Adrian Baugh <adrian.baugh@keble.ox.ac.uk>

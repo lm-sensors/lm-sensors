@@ -150,7 +150,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
 #      I2C bus number, and the I2C address.
 @chip_ids = (
      {
-       name => "National Semiconductors LM78",
+       name => "National Semiconductor LM78",
        driver => "lm78",
        i2c_addrs => [0x00..0x7f], 
        i2c_driver_addrs => [0x20..0x2f], 
@@ -160,7 +160,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        alias_detect => sub { lm78_alias_detect 0, @_ },
      } ,
      {
-       name => "National Semiconductors LM78-J",
+       name => "National Semiconductor LM78-J",
        driver => "lm78",
        i2c_addrs => [0x00..0x7f],
        i2c_driver_addrs => [0x20..0x2f], 
@@ -170,7 +170,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        alias_detect => sub { lm78_alias_detect 1, @_ },
      } ,
      {
-       name => "National Semiconductors LM79",
+       name => "National Semiconductor LM79",
        driver => "lm78",
        i2c_addrs => [0x00..0x7f],
        i2c_driver_addrs => [0x20..0x2f], 
@@ -180,13 +180,13 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        alias_detect => sub { lm78_alias_detect 2, @_ },
      } ,
      {
-       name => "National Semiconductors LM75",
+       name => "National Semiconductor LM75",
        driver => "lm75",
        i2c_addrs => [0x48..0x4f],
        i2c_detect => sub { lm75_detect @_},
      } ,
      {
-       name => "National Semiconductors LM80",
+       name => "National Semiconductor LM80",
        driver => "lm80",
        i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { lm80_detect @_} ,
@@ -257,6 +257,12 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        driver => "adm9240",
        i2c_addrs => [0x2c..0x2f],
        i2c_detect => sub { adm9240_detect 1, @_ }
+     },
+     {
+       name => "National Semiconductor LM81",
+       driver => "adm9240",
+       i2c_addrs => [0x2c..0x2f],
+       i2c_detect => sub { adm9240_detect 2, @_ }
      },
      {
        name => "Analog Devices ADM1021",
@@ -1346,7 +1352,7 @@ sub gl520sm_detect
   return (5);
 }
 
-# $_[0]: Chip to detect (0 = ADM9240, 1 = DS1780)
+# $_[0]: Chip to detect (0 = ADM9240, 1 = DS1780, 2 = LM81)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -1362,7 +1368,8 @@ sub adm9240_detect
   my ($chip, $file,$addr) = @_;
   $reg = i2c_smbus_read_byte_data($file,0x3e);
   return unless ($chip == 0 and $reg == 0x23) or
-                ($chip == 1 and $reg == 0xda);
+                ($chip == 1 and $reg == 0xda) or
+                ($chip == 2 and $reg == 0x01);
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
   return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
   

@@ -19,6 +19,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/* Supports ADM9240, DS1780, and LM81. See doc/chips/adm9240 for details */
+
 /* 
 	A couple notes about the ADM9240:
 
@@ -74,7 +76,7 @@ static unsigned int normal_isa[] = {SENSORS_ISA_END};
 static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
 
 /* Insmod parameters */
-SENSORS_INSMOD_2(adm9240,ds1780);
+SENSORS_INSMOD_3(adm9240,ds1780,lm81);
 
 /* Many ADM9240 constants specified below */
 
@@ -96,6 +98,7 @@ SENSORS_INSMOD_2(adm9240,ds1780);
 #define ADM9240_REG_FAN1 0x28
 #define ADM9240_REG_FAN2 0x29
 #define ADM9240_REG_COMPANY_ID 0x3E  /* 0x23 for ADM9240; 0xDA for DS1780 */
+                                     /* 0x01 for LM81 */
 #define ADM9240_REG_DIE_REV 0x3F
 /* These are read/write */
 #define ADM9240_REG_2_5V_HIGH 0x2B
@@ -110,6 +113,8 @@ SENSORS_INSMOD_2(adm9240,ds1780);
 #define ADM9240_REG_12V_LOW 0x34
 #define ADM9240_REG_VCCP2_HIGH 0x35
 #define ADM9240_REG_VCCP2_LOW 0x36
+#define ADM9240_REG_TCRIT_LIMIT 0x37  /* LM81 only - not supported */
+#define ADM9240_REG_LOW_LIMIT 0x38    /* LM81 only - not supported */
 #define ADM9240_REG_TOS 0x39
 #define ADM9240_REG_THYST 0x3A
 #define ADM9240_REG_FAN1_MIN 0x3B
@@ -127,6 +132,8 @@ SENSORS_INSMOD_2(adm9240,ds1780);
 #define ADM9240_REG_I2C_ADDR 0x48
 #define ADM9240_REG_VID4 0x49
 #define ADM9240_REG_TEMP_CONFIG 0x4B
+#define ADM9240_REG_EXTMODE1 0x4C     /* LM81 only - not supported */
+#define ADM9240_REG_EXTMODE2 0x4D     /* LM81 only - not supported */
 
 /* Conversions. Rounding and limit checking is only done on the TO_REG
    variants. Note that you should be a bit careful with which arguments
@@ -390,6 +397,8 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind)
       kind = adm9240;
     else if (i == 0xda)
       kind = ds1780;
+    else if (i == 0x01)
+      kind = lm81;
     else {
       if (kind == 0)
         printk("adm9240.o: Ignoring 'force' parameter for unknown chip at "
@@ -404,6 +413,9 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind)
   } else if (kind == ds1780) {
     type_name = "ds1780";
     client_name = "DS1780 chip";
+  } else if (kind == lm81) {
+    type_name = "lm81";
+    client_name = "LM81 chip";
   } else {
 #ifdef DEBUG
     printk("adm9240.o: Internal error: unknown kind (%d)?!?",kind);

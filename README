@@ -23,12 +23,12 @@ and module bit-mb is renamed i2c-via. You have been warned.
 
 At least the following SMBus adapters are supported:
   Intel PIIX4 (used in most Intel chipsets)
-  Intel ICH (used Intel 810 chipsets for Celeron processors)
+  Intel ICH (used in Intel 810 chipsets for Celeron processors)
   Acer Labs M1541 and M1543C (used in the Aladdin IV, V and Pro 2 chipsets)
   VIA Technologies 82C586B (used in most VIA chipsets)
 
 At least the following hardware sensor chips are supported:
-  National Semicoductor LM75, LM78, LM78-J, LM79 and LM80
+  National Semicoductor LM75, LM78, LM78-J, LM79. LM80, and LM81
   Winbond W83781D, W83782D, W83783S, and W83627HF
   Genesys Logic GL518SM (several revisions)
   Analog Devices ADM1021 and ADM9240
@@ -42,6 +42,7 @@ At least the following hardware sensor chips are supported:
 We also support some miscellaneous chips:
   Linear Technologies LTC1710
   Dimms with EEPROMs
+  Intel Xeon processor embedded EEPROMs
 
 We could use some testers of hardware. If you own a specific monitoring
 chip or I2C bus, and are willing to help us out, please contact us - even

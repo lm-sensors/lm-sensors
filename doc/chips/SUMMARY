@@ -4,13 +4,17 @@ This is a summary of the sensor and non-sensor chips supported
 by this package. It summarizes the features of each supported chip.
 
 For further information on a particular chip, see the documentation
-in this directory.
+in this directory. Data sheets are generally available on the
+manufacturer's web site.
 
-To determine what chips you have on your system,
+To determine what chips you have in your system,
 run prog/detect/sensors-detect.
 
+If your sensor chip is not detected or supported by this package,
+please send mail to lm78@stimpy.netroedge.com.
 
-
+---------------------------------------------------------------------
+---------------------------------------------------------------------
 
 SENSOR CHIPS
 -------------
@@ -26,8 +30,9 @@ adm1021
 	xeon		1	-	-	-	yes	no
 
 adm9240
-	adm9240		1	6	5	1 dac	yes	no
-	ds1780		1	6	5	1 dac	yes	no
+	adm9240		1	6	2	1 dac	yes	no
+	ds1780		1	6	2	1 dac	yes	no
+	lm81		1	6	2	1 dac	yes	no
 
 gl518sm
         gl518sm (r00)	1	1/4	2	-	yes	no
@@ -48,7 +53,9 @@ lm80
 	lm80		1	7	2	-	yes	no
 
 maxilife
-	maxilife	5	4	3	-	yes	no
+	maxilife-as	5	4	3	-	yes	no
+	maxilife-co	5	4	3	-	yes	no
+	maxilife-cg	5	4	3	-	yes	no
 
 sis5595
 	sis5595 	1	7	3	-	no	yes
