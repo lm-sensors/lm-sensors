@@ -21,6 +21,11 @@
 # You need a full complement of GNU utilities to run this Makefile succesfully;
 # most notably, you need bash, GNU make, flex and bison.
 
+# If your /bin/sh is not bash, change the below definition so that make can
+# find bash. Or you can hope your sh-like shell understands all scripts.
+# I think so, but I have not tested it.
+# SHELL=/usr/bin/bash
+
 # The location of your kernel headers (which should be the linux and asm
 # subdirectories). For most people, the below works perfectly. If you use 
 # Debian, you may want to change this to something like /usr/src/linux/include.
@@ -102,10 +107,6 @@ MANDIR := $(PREFIX)/man
 # as which manual pages are installed.
 MANOWN := root
 MANGRP := root
-
-# If your /bin/sh is not bash, change the below definition so that make can
-# find bash.
-# SHELL=/usr/bin/bash
 
 ##################################################
 # Below this, nothing should need to be changed. #
