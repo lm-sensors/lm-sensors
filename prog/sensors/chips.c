@@ -55,6 +55,7 @@ inline float deg_ctof( float cel )
 #define MAXONLY 2
 #define CRIT 3
 #define SINGLE 4
+#define HYSTONLY 5
 /* minmax = 0 for limit/hysteresis, 1 for max/min, 2 for max only;
    curprec and limitprec are # of digits after decimal point
    for the current temp and the limits */
@@ -72,31 +73,35 @@ void print_temp_info(float n_cur, float n_over, float n_hyst,
       sprintf(degv, "%cC", 176);
    }
 
-/* use %* to pass size and precision as arguments */
+/* use %* to pass precision as an argument */
    if(minmax == MINMAX)
-	printf( "%+6.*f%s  (low = %+*.*f%s, high = %+*.*f%s)        ",
+	printf("%+6.*f%s  (low  = %+5.*f%s, high = %+5.*f%s)  ",
             curprec, n_cur, degv,
-	    limitprec + 4, limitprec, n_hyst, degv,
-	    limitprec + 4, limitprec, n_over, degv);
+	    limitprec, n_hyst, degv,
+	    limitprec, n_over, degv);
    else if(minmax == MAXONLY)
-	printf( "%+6.*f%s  (limit = %+*.*f%s)                      ",
+	printf("%+6.*f%s  (high = %+5.*f%s)                    ",
 	    curprec, n_cur, degv,
-	    limitprec + 4, limitprec, n_over, degv);
+	    limitprec, n_over, degv);
    else if(minmax == CRIT)
-	printf( "%+6.*f%s  (limit = %+*.*f%s, critical = %+*.*f%s)  ",
+	printf("%+6.*f%s  (high = %+5.*f%s, crit = %+5.*f%s)  ",
 	    curprec, n_cur, degv,
-	    limitprec + 4, limitprec, n_over, degv,
-	    limitprec + 4, limitprec, n_hyst, degv);
+	    limitprec, n_over, degv,
+	    limitprec, n_hyst, degv);
    else if(minmax == HYST)
-	printf( "%+6.*f%s  (limit = %+*.*f%s, hysteresis = %+*.*f%s)",
+	printf("%+6.*f%s  (high = %+5.*f%s, hyst = %+5.*f%s)  ",
 	    curprec, n_cur, degv,
-	    limitprec + 4, limitprec, n_over, degv,
-	    limitprec + 4, limitprec, n_hyst, degv);
+	    limitprec, n_over, degv,
+	    limitprec, n_hyst, degv);
    else if(minmax == SINGLE)
-	printf( "%+6.*f%s",
+	printf("%+6.*f%s",
 	    curprec, n_cur, degv);
+   else if(minmax == HYSTONLY)
+	printf( "%+6.*f%s  (hyst = %+5.*f%s)                   ",
+	    curprec, n_cur, degv,
+	    limitprec, n_over, degv);
    else
-	printf( "unknown temperature mode!");
+	printf("Unknown temperature mode!");
 }
 
 void print_label(const char *label, int space)
@@ -4521,9 +4526,9 @@ void print_lm90(const sensors_chip_name *name)
     if (valid) {
       print_label(label, 10);
       print_temp_info(cur, high, low, MINMAX, 0, 0);
-      printf(" %s\n", alarms&LM90_ALARM_LOCAL_CRIT?"CRITICAL":
-      	alarms&(LM90_ALARM_LOCAL_HIGH|LM90_ALARM_LOCAL_LOW)?"ALARM":
-        "");
+      printf(" %s\n",
+        alarms&LM90_ALARM_LOCAL_CRIT?"CRITICAL":
+      	alarms&(LM90_ALARM_LOCAL_HIGH|LM90_ALARM_LOCAL_LOW)?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get local temperature data!\n");
@@ -4537,10 +4542,10 @@ void print_lm90(const sensors_chip_name *name)
     if (valid) {
       print_label(label, 10);
       print_temp_info(cur, high, low, MINMAX, 1, 1);
-      printf(" %s\n", alarms&LM90_ALARM_REMOTE_OPEN?"DISCONNECT":
+      printf(" %s\n",
+        alarms&LM90_ALARM_REMOTE_OPEN?"DISCONNECT":
         alarms&LM90_ALARM_REMOTE_CRIT?"CRITICAL":
-      	alarms&(LM90_ALARM_REMOTE_HIGH|LM90_ALARM_REMOTE_LOW)?"ALARM":
-        "");
+      	alarms&(LM90_ALARM_REMOTE_HIGH|LM90_ALARM_REMOTE_LOW)?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get remote temperature data!\n");
@@ -4548,10 +4553,11 @@ void print_lm90(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name, SENSORS_LM90_LOCAL_TCRIT,
       &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_LM90_LOCAL_TCRIT, &cur)) {
+   && !sensors_get_feature(*name, SENSORS_LM90_LOCAL_TCRIT, &high)
+   && !sensors_get_feature(*name, SENSORS_LM90_TCRIT_HYST, &low)) {
     if (valid) {
       print_label(label, 10);
-      print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+      print_temp_info(high, high-low, 0, HYSTONLY, 0, 0);
       printf("\n");
     }
   } else
@@ -4560,26 +4566,15 @@ void print_lm90(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name, SENSORS_LM90_REMOTE_TCRIT,
       &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_LM90_REMOTE_TCRIT, &cur)) {
+   && !sensors_get_feature(*name, SENSORS_LM90_REMOTE_TCRIT, &high)
+   && !sensors_get_feature(*name, SENSORS_LM90_TCRIT_HYST, &low)) {
     if (valid) {
       print_label(label, 10);
-      print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+      print_temp_info(high, high-low, 0, HYSTONLY, 0, 0);
       printf("\n");
     }
   } else
     printf("ERROR: Can't get remote tcrit data!\n");
-  free_the_label(&label);
-
-  if (!sensors_get_label_and_valid(*name, SENSORS_LM90_TCRIT_HYST,
-      &label, &valid)
-   && !sensors_get_feature(*name, SENSORS_LM90_TCRIT_HYST, &cur)) {
-    if (valid) {
-      print_label(label, 10);
-      print_temp_info(cur, 0, 0, SINGLE, 0, 0);
-      printf("\n");
-    }
-  } else
-    printf("ERROR: Can't get hysteresis data!\n");
   free_the_label(&label);
 }
 
