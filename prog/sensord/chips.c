@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sensord.h"
 #include "lib/chips.h"
@@ -31,7 +32,7 @@
  *
  * The following chips from prog/sensors are not (yet) supported:
  *
- * lm87 mtp008 it87 fscpos fscscy pcf8591 vt1211 smsc47m1 lm92 adm1024
+ * lm87 mtp008 fscpos fscscy pcf8591 vt1211 smsc47m1 lm92 adm1024 lm83
  */
 
 /* NB: missing from sensors (and this) but in lib/chips.h:
@@ -79,6 +80,13 @@ fmtTemps_1
 (const double values[], int alarm, int beep) {
   sprintf (buff, "%.1f C (limit = %.1f C, hysteresis = %.1f C)", values[0], values[1], values[2]);
   return fmtExtra (alarm, beep);
+}
+
+static const char *
+fmtTemps_minmax_0
+(const double values[], int alarm, int beep) {
+ sprintf (buff, "%.0f C (min = %.0f C, max = %.0f C)", values[0], values[1], values[2]);
+ return fmtExtra (alarm, beep);
 }
 
 static const char *
@@ -499,9 +507,9 @@ static const FeatureDescriptor adm1025_features[] = {
   { fmtVolts_2, rrdF2, DataType_voltage, ADM1025_ALARM_IN5, 0,
     { SENSORS_ADM1025_IN5, SENSORS_ADM1025_IN5_MIN, SENSORS_ADM1025_IN5_MAX, -1 } },
   { fmtTemps_ADM1025, rrdF1, DataType_temperature, ADM1025_ALARM_TEMP, 0,
-    { SENSORS_ADM1025_TEMP1, SENSORS_ADM1025_TEMP1_HYST, SENSORS_ADM1025_TEMP1_OVER, -1 } }, /* hyst=min, over=max */
+    { SENSORS_ADM1025_TEMP1, SENSORS_ADM1025_TEMP1_LOW, SENSORS_ADM1025_TEMP1_HIGH, -1 } },
   { fmtTemps_ADM1025, rrdF1, DataType_temperature, ADM1025_ALARM_RTEMP, 0,
-    { SENSORS_ADM1025_TEMP2, SENSORS_ADM1025_TEMP2_HYST, SENSORS_ADM1025_TEMP2_OVER, -1 } }, /* hyst=min, over=max */
+    { SENSORS_ADM1025_TEMP2, SENSORS_ADM1025_TEMP2_LOW, SENSORS_ADM1025_TEMP2_HIGH, -1 } },
   { NULL }
 };
 
@@ -552,6 +560,44 @@ static const FeatureDescriptor lm80_features[] = {
 
 static const ChipDescriptor lm80_chip = {
   lm80_names, lm80_features, SENSORS_LM80_ALARMS, 0
+};
+
+/** IT87 (thanks to Mike Black) **/
+
+static const char *it87_names[] = {
+  SENSORS_IT87_PREFIX, NULL
+};
+
+static const FeatureDescriptor it87_features[] = {
+  { fmtVolts_2, rrdF2, DataType_voltage, IT87_ALARM_IN0, 0,
+    { SENSORS_IT87_IN0, SENSORS_IT87_IN0_MIN, SENSORS_IT87_IN0_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, IT87_ALARM_IN1, 0,
+    { SENSORS_IT87_IN1, SENSORS_IT87_IN1_MIN, SENSORS_IT87_IN1_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, IT87_ALARM_IN2, 0,
+    { SENSORS_IT87_IN2, SENSORS_IT87_IN2_MIN, SENSORS_IT87_IN2_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, IT87_ALARM_IN3, 0,
+    { SENSORS_IT87_IN3, SENSORS_IT87_IN3_MIN, SENSORS_IT87_IN3_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, IT87_ALARM_IN4, 0,
+    { SENSORS_IT87_IN4, SENSORS_IT87_IN4_MIN, SENSORS_IT87_IN4_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, IT87_ALARM_IN5, 0,
+    { SENSORS_IT87_IN5, SENSORS_IT87_IN5_MIN, SENSORS_IT87_IN5_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, IT87_ALARM_IN6, 0,
+    { SENSORS_IT87_IN6, SENSORS_IT87_IN6_MIN, SENSORS_IT87_IN6_MAX, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, IT87_ALARM_FAN1, 0,
+    { SENSORS_IT87_FAN1, SENSORS_IT87_FAN1_MIN, SENSORS_IT87_FAN1_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, IT87_ALARM_FAN2, 0,
+    { SENSORS_IT87_FAN2, SENSORS_IT87_FAN2_MIN, SENSORS_IT87_FAN2_DIV, -1 } },
+  { fmtTemps_minmax_0, rrdF1, DataType_temperature, IT87_ALARM_TEMP1, 0,
+    { SENSORS_IT87_TEMP1, SENSORS_IT87_TEMP1_LOW, SENSORS_IT87_TEMP1_HIGH, -1 } },
+  { fmtTemps_minmax_0, rrdF1, DataType_temperature, IT87_ALARM_TEMP2, 0,
+    { SENSORS_IT87_TEMP2, SENSORS_IT87_TEMP2_LOW, SENSORS_IT87_TEMP2_HIGH, -1 } },
+  { fmtTemps_minmax_0, rrdF1, DataType_temperature, IT87_ALARM_TEMP3, 0,
+    { SENSORS_IT87_TEMP3, SENSORS_IT87_TEMP3_LOW, SENSORS_IT87_TEMP3_HIGH, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor it87_chip = {
+  it87_names, it87_features, SENSORS_IT87_ALARMS, 0
 };
 
 /** W83781D **/
@@ -990,5 +1036,6 @@ const ChipDescriptor * const knownChips[] = {
   &w83782d_chip,
   &w83783s_chip,
   &w83697hf_chip,
+  &it87_chip,
   NULL
 };
