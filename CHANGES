@@ -17,7 +17,7 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.6.3 (2002????)
+2.6.3 (200203??)
   NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
   Chip modules (most): Allow THIS_MODULE definition for kernels 2.2.18+
   File doc/chips/it87: add more temp_type help
@@ -59,7 +59,7 @@ ask CVS about it:
                    clean up chassis intrusion prints
   Program sensors-detect: Add several Nvidia chips, add PCF8591, add 810E;
                           fix Via686a and it87 detection;
-                          add AMD768, IPMI-BMC-KCS and -SMIC;
+                          add AMD768, IPMI-BMC-KCS and -SMIC; add Via 8231;
                           fix uninitialized values; it87 beats lm78
 
 2.6.2 (20011118)
