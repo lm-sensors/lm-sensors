@@ -147,16 +147,13 @@ all :: all-kernel-chips
 #
 install-kernel-chips: all-kernel-chips
 	if [ -n "$(KERNELCHIPSTARGETS)" ] ; then \
-	  if [ -d "$(DESTDIR)$(MODPREF)/kernel" ] ; then \
-	    $(MKDIR) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/chips ; \
-	    $(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/chips ; \
-	    for i in $(KERNELCHIPSTARGETS) ; do \
-	      $(RM) $(DESTDIR)$(MODPREF)/misc/`basename $$i` $(DESTDIR)$(MODPREF)/kernel/drivers/sensors/`basename $$i` ; \
-	    done \
-	  else \
-	    $(MKDIR) $(DESTDIR)$(MODPREF)/misc ; \
-	    $(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(DESTDIR)$(MODPREF)/misc ; \
-	  fi \
+	  $(MKDIR) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/chips ; \
+	  $(INSTALL) -o root -g root -m 644 $(KERNELCHIPSTARGETS) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/chips ; \
+	  for i in $(KERNELCHIPSTARGETS) ; do \
+	    $(RM) $(DESTDIR)$(MODPREF)/misc/`basename $$i` $(DESTDIR)$(MODPREF)/kernel/drivers/sensors/`basename $$i` \
+	          $(DESTDIR)$(MODPREF)/kernel/drivers/sensors/`basename $$i`.gz $(DESTDIR)$(MODPREF)/kernel/drivers/chips/`basename $$i`.gz ; \
+	  done ; \
+	  $(RMDIR) $(DESTDIR)$(MODPREF)/misc 2> /dev/null || true ; \
 	fi
 
 install :: install-kernel-chips

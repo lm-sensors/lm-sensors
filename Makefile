@@ -163,6 +163,7 @@ SRCDIRS += lib prog/sensors prog/dump prog/detect ${PROG_EXTRA:%=prog/%} etc
 
 # Some often-used commands with default options
 MKDIR := mkdir -p
+RMDIR := rmdir
 RM := rm -f
 CC := gcc
 BISON := bison

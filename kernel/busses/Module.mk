@@ -104,16 +104,13 @@ all :: all-kernel-busses
 #
 install-kernel-busses: all-kernel-busses
 	if [ -n "$(KERNELBUSSESTARGETS)" ] ; then \
-	  if [ -d "$(DESTDIR)$(MODPREF)/kernel" ] ; then \
-	    $(MKDIR) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/busses ; \
-	    $(INSTALL) -o root -g root -m 644 $(KERNELBUSSESTARGETS) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/busses ; \
-	    for i in $(KERNELBUSSESTARGETS) ; do \
-	      $(RM) $(DESTDIR)$(MODPREF)/misc/`basename $$i` $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/`basename $$i` ; \
-	    done \
-	  else \
-	    $(MKDIR) $(DESTDIR)$(MODPREF)/misc ; \
-	    $(INSTALL) -o root -g root -m 644 $(KERNELBUSSESTARGETS) $(DESTDIR)$(MODPREF)/misc ; \
-	  fi \
+	  $(MKDIR) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/busses ; \
+	  $(INSTALL) -o root -g root -m 644 $(KERNELBUSSESTARGETS) $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/busses ; \
+	  for i in $(KERNELBUSSESTARGETS) ; do \
+	    $(RM) $(DESTDIR)$(MODPREF)/misc/`basename $$i` $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/`basename $$i` \
+	          $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/`basename $$i`.gz $(DESTDIR)$(MODPREF)/kernel/drivers/i2c/busses/`basename $$i`.gz ; \
+	  done ; \
+	  $(RMDIR) $(DESTDIR)$(MODPREF)/misc 2> /dev/null || true ; \
 	fi
 
 install :: install-kernel-busses
