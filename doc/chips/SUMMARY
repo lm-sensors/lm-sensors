@@ -50,12 +50,12 @@ adm1021
 	tc1068		2	-	-	-	yes	no
 	tcm1617		2	-	-	-	yes	no
 	thmc10		2	-	-	-	yes	no
+	mc1066		2	-	-	-	yes	no
 	  (xeon - no detection - requires force_adm1021 parameter)
 	xeon		1	-	-	-	yes	no
 	  (the following chips are detected as a max1617)
 	ne1617		2	-	-	-	yes	no
 	ne1617a		2	-	-	-	yes	no
-	mc1066		2	-	-	-	yes	no
 
 adm1024
 	adm1024		3	6	-	1 dac	yes	no
@@ -67,6 +67,9 @@ adm9240
 	adm9240		1	6	2	1 dac	yes	no
 	ds1780		1	6	2	1 dac	yes	no
 	lm81		1	6	2	1 dac	yes	no
+
+bmcsensors
+	bmcsensors	?	?	?	-	no	no
 
 ds1621
 	ds1621		1	-	-	-	yes	no
@@ -124,6 +127,9 @@ mtp008
 
 sis5595
 	sis5595 	0-1	4-5	2	-	no	yes
+
+smartbatt
+	smartbatt	1	1	-	-	yes	no
 
 smsc74m1
 	smsc74m1 	-	-	2	2	no	yes (LPC)
@@ -207,13 +213,13 @@ This may help identify a chip after doing a 'i2cdump [bus] [address]'.
 0x49	TI
 0x4D	Maxim
 0x50, 0x45, 0x47   Fujitsu-Siemens (at 0x00, 0x01, 0x02)
+0x54	On Semi
 0x5CA3	Winbond (at 0x4F)
 0x90	ITE (at 0x58)
 0xA3	Winbond (at 0x4F)
 0xAC	Myson (at 0x58)
 0xC3	Asus (at 0x4F)
 0xDA	Dallas
-0x54	Onsemi
 
 
 ------------------
