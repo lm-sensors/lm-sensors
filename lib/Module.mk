@@ -110,7 +110,8 @@ install-lib: all-lib
 		 echo '         Run the following command: /sbin/ldconfig' ; \
 	     echo '******************************************************************************' ; \
 	fi
-	$(INSTALL) -m 644 $(LIBTARGETS) $(DESTDIR)$(LIBDIR)
+	$(INSTALL) -m 644 $(LIB_DIR)/$(LIBSTLIBNAME) $(DESTDIR)$(LIBDIR)
+	$(INSTALL) -m 755 $(LIB_DIR)/$(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)
 	$(LN) $(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)
 	$(LN) $(LIBSHSONAME) $(DESTDIR)$(LIBDIR)/$(LIBSHBASENAME)
 	@if [ "$(DESTDIR)$(LIBDIR)" != "/usr/lib" -a "$(DESTDIR)$(LIBDIR)" != "/lib" ] ; then \
