@@ -26,6 +26,15 @@
 #include "i2c-isa.h"
 #include "version.h"
 
+/* Addresses to scan */
+static unsigned short normal_i2c[] = {SENSORS_I2C_END};
+static unsigned short normal_i2c_range[] = {0x48,0x4f,SENSORS_I2C_END};
+static unsigned int normal_isa[] = {SENSORS_ISA_END};
+static unsigned int normal_isa_range[] = {SENSORS_ISA_END};
+
+/* Insmod parameters */
+SENSORS_INSMOD_1(lm75);
+
 /* Many LM75 constants specified below */
 
 /* The LM75 registers */
@@ -61,6 +70,8 @@ extern int cleanup_module(void);
 static int lm75_init(void);
 static int lm75_cleanup(void);
 static int lm75_attach_adapter(struct i2c_adapter *adapter);
+static int lm75_detect(struct i2c_adapter *adapter, int address, int kind);
+static void lm75_init_client(struct i2c_client *client);
 static int lm75_detach_client(struct i2c_client *client);
 static int lm75_command(struct i2c_client *client, unsigned int cmd,
                         void *arg);
@@ -100,110 +111,134 @@ static ctl_table lm75_dir_table_template[] = {
 /* Used by init/cleanup */
 static int lm75_initialized = 0;
 
-/* I choose here for semi-static LM78 allocation. Complete dynamic
+/* I choose here for semi-static LM75 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
    take more memory than the datastructure takes now. */
-#define MAX_LM75_NR 8
+#define MAX_LM75_NR 16
 static struct i2c_client *lm75_list[MAX_LM75_NR];
 
 
 int lm75_attach_adapter(struct i2c_adapter *adapter)
 {
-  int address,err,i;
+  return sensors_detect(adapter,&addr_data,lm75_detect);
+}
+
+/* This function is called by sensors_detect */
+int lm75_detect(struct i2c_adapter *adapter, int address, int kind)
+{
+  int i,cur,conf,hyst,os;
   struct i2c_client *new_client;
   struct lm75_data *data;
+  int err=0;
+  const char *type_name,*client_name;
 
-  err = 0;
-  /* Make sure we aren't probing the ISA bus!! */
-  if (i2c_is_isa_adapter(adapter)) return 0;
+  /* Make sure we aren't probing the ISA bus!! This is just a safety check
+     at this moment; sensors_detect really won't call us. */
+#ifdef DEBUG
+  if (i2c_is_isa_adapter(adapter)) {
+    printk("lm75.o: lm75_detect called for an ISA bus adapter?!?\n");
+    return 0;
+  }
+#endif
 
-  /* OK, this is no detection. I know. It will do for now, though.  */
+  /* Here, we have to do the address registration check for the I2C bus.
+     But that is not yet implemented. */
 
-  /* Set err only if a global error would make registering other clients
-     impossible too (like out-of-memory). */
-  for (address = 0x48; (! err) && (address <= 0x4f); address ++) {
+  /* OK. For now, we presume we have a valid client. We now create the
+     client structure, even though we cannot fill it completely yet.
+     But it allows us to access lm75_{read,write}_value. */
+  if (! (new_client = kmalloc(sizeof(struct i2c_client) +
+                              sizeof(struct lm75_data),
+                              GFP_KERNEL))) {
+    err = -ENOMEM;
+    goto ERROR0;
+  }
 
-    /* Later on, we will keep a list of registered addresses for each
-       adapter, and check whether they are used here */
-    
-    if (smbus_read_byte_data(adapter,address,LM75_REG_CONF) < 0)
-      continue;
+  data = (struct lm75_data *) (((struct i2c_client *) new_client) + 1);
+  new_client->addr = address;
+  new_client->data = data;
+  new_client->adapter = adapter;
+  new_client->driver = &lm75_driver;
 
-    /* Real detection code goes here */
-
-    /* Allocate space for a new client structure */
-    if (! (new_client =  kmalloc(sizeof(struct i2c_client) +
-                                sizeof(struct lm75_data),
-                               GFP_KERNEL))) {
-      err = -ENOMEM;
-      continue;
-    }
-
-    /* Find a place in our global list */
-    for (i = 0; i < MAX_LM75_NR; i++)
-      if (! lm75_list[i])
-         break;
-    if (i == MAX_LM75_NR) {
-      err = -ENOMEM;
-      printk("lm75.o: No empty slots left, recompile and heighten "
-             "MAX_LM75_NR!\n");
+  /* Now, we do the remaining detection. It is lousy. */
+  cur = smbus_read_word_data(adapter,address,0);
+  conf = smbus_read_byte_data(adapter,address,1);
+  hyst = smbus_read_word_data(adapter,address,2);
+  os = smbus_read_word_data(adapter,address,3);
+  if ((hyst & 0x7f00) || (os & 0x7f00) || (cur & 0x7f00))
+    goto ERROR1;
+  for (i = 0; i <= 0x1f; i++) 
+    if ((smbus_read_byte_data(adapter,address,i*8+1) != conf) ||
+        (smbus_read_word_data(adapter,address,i*8+2) != hyst) ||
+        (smbus_read_word_data(adapter,address,i*8+3) != os))
       goto ERROR1;
-    }
-    lm75_list[i] = new_client;
-    
-    /* Fill the new client structure with data */
-    data = (struct lm75_data *) (new_client + 1);
-    new_client->data = data;
-    new_client->id = i;
-    new_client->addr = address;
-    new_client->adapter = adapter;
-    new_client->driver = &lm75_driver;
-    strcpy(new_client->name,"LM75 chip");
-    data->valid = 0;
-    data->update_lock = MUTEX;
-    
-    /* Tell i2c-core a new client has arrived */
-    if ((err = i2c_attach_client(new_client)))
-      goto ERROR2;
-    
-    /* Register a new directory entry with module sensors */
-    if ((err = sensors_register_entry(new_client,"lm75",
-                                      lm75_dir_table_template)) < 0)
-      goto ERROR3;
-    data->sysctl_id = err;
-    err = 0;
+  
+  /* Determine the chip type - only one kind supported! */
+  if (kind <= 0)
+    kind = lm75;
 
-    /* Initialize the LM75 chip */
-    lm75_write_value(new_client,LM75_REG_TEMP_OS,
-                     TEMP_TO_REG(LM75_INIT_TEMP_OS));
-    lm75_write_value(new_client,LM75_REG_TEMP_HYST,
-                     TEMP_TO_REG(LM75_INIT_TEMP_HYST));
-    lm75_write_value(new_client,LM75_REG_CONF,0);
+  if (kind == lm75) {
+    type_name = "lm75";
+    client_name = "LM75 chip";
+  } else {
+#ifdef DEBUG
+    printk("lm75.o: Internal error: unknown kind (%d)?!?",kind);
+#endif
+    goto ERROR1;
+  }
+  
+  /* Fill in the remaining client fields and put it into the global list */
+  strcpy(new_client->name,client_name);
 
-    continue;
+  /* Find a place in our global list */
+  for (i = 0; i < MAX_LM75_NR; i++)
+    if (! lm75_list[i])
+       break;
+  if (i == MAX_LM75_NR) {
+    err = -ENOMEM;
+    printk("lm75.o: No empty slots left, recompile and heighten "
+           "MAX_LM75_NR!\n");
+    goto ERROR2;
+  }
+  lm75_list[i] = new_client;
+  new_client->id = i;
+  data->valid = 0;
+  data->update_lock = MUTEX;
+    
+  /* Tell the I2C layer a new client has arrived */
+  if ((err = i2c_attach_client(new_client)))
+    goto ERROR3;
+
+  /* Register a new directory entry with module sensors */
+  if ((i = sensors_register_entry(new_client,type_name,
+                                  lm75_dir_table_template)) < 0) {
+    err = i;
+    goto ERROR4;
+  }
+  data->sysctl_id = i;
+
+  lm75_init_client((struct i2c_client *) new_client);
+  return 0;
+
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
+ERROR4:
+  i2c_detach_client(new_client);
 ERROR3:
-    i2c_detach_client(new_client);
+  for (i = 0; i < MAX_LM75_NR; i++)
+    if (new_client == lm75_list[i])
+      lm75_list[i] = NULL;
 ERROR2:
-    lm75_list[i] = NULL;
 ERROR1:
-    kfree(new_client);
-  }
+  kfree(new_client);
+ERROR0:
   return err;
 }
 
 int lm75_detach_client(struct i2c_client *client)
 {
   int err,i;
-  for (i = 0; i < MAX_LM75_NR; i++)
-    if (client == lm75_list[i])
-      break;
-  if ((i == MAX_LM75_NR)) {
-    printk("lm75.o: Client to detach not found.\n");
-    return -ENOENT;
-  }
 
   sensors_deregister_entry(((struct lm75_data *)(client->data))->sysctl_id);
 
@@ -212,8 +247,17 @@ int lm75_detach_client(struct i2c_client *client)
     return err;
   }
 
+  for (i = 0; i < MAX_LM75_NR; i++)
+    if (client == lm75_list[i])
+      break;
+  if ((i == MAX_LM75_NR)) {
+    printk("lm75.o: Client to detach not found.\n");
+    return -ENOENT;
+  }
   lm75_list[i] = NULL;
+
   kfree(client);
+
   return 0;
 }
 
@@ -266,6 +310,16 @@ int lm75_write_value(struct i2c_client *client, u8 reg, u16 value)
   else
     return smbus_write_word_data(client->adapter,client->addr,reg,
            swap_bytes(value));
+}
+
+void lm75_init_client(struct i2c_client *client)
+{
+    /* Initialize the LM75 chip */
+    lm75_write_value(client,LM75_REG_TEMP_OS,
+                     TEMP_TO_REG(LM75_INIT_TEMP_OS));
+    lm75_write_value(client,LM75_REG_TEMP_HYST,
+                     TEMP_TO_REG(LM75_INIT_TEMP_HYST));
+    lm75_write_value(client,LM75_REG_CONF,0);
 }
 
 void lm75_update_client(struct i2c_client *client)

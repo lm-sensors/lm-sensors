@@ -607,6 +607,10 @@ int sensors_detect(struct i2c_adapter *adapter,
         if (((adapter_id == this_force->force[j]) || 
              ((this_force->force[j] == SENSORS_ANY_I2C_BUS) && !is_isa)) &&
             (addr == this_force->force[j+1])) {
+#ifdef DEBUG
+          printk("sensors.o: found force parameter for adapter %d, addr %04x\n",
+                 adapter_id,addr);
+#endif
           if ((err = found_proc(adapter,addr,this_force->kind)))
             return err;
           found = 1;
@@ -624,6 +628,10 @@ int sensors_detect(struct i2c_adapter *adapter,
       if (((adapter_id == address_data->ignore[i]) || 
            ((address_data->ignore[i] == SENSORS_ANY_I2C_BUS) && !is_isa)) &&
           (addr == address_data->ignore[i+1])) {
+#ifdef DEBUG
+          printk("sensors.o: found ignore parameter for adapter %d, "
+                 "addr %04x\n", adapter_id,addr);
+#endif
         found = 1;
       }
     }
@@ -633,8 +641,13 @@ int sensors_detect(struct i2c_adapter *adapter,
       if (((adapter_id == address_data->ignore_range[i]) ||
            ((address_data->ignore_range[i]==SENSORS_ANY_I2C_BUS) & !is_isa)) &&
           (addr >= address_data->ignore_range[i+1]) &&
-          (addr <= address_data->ignore_range[i+2]))
+          (addr <= address_data->ignore_range[i+2])) {
+#ifdef DEBUG
+          printk("sensors.o: found ignore_range parameter for adapter %d, "
+                 "addr %04x\n", adapter_id,addr);
+#endif
         found = 1;
+      }
     }
     if (found) 
       continue;
@@ -646,15 +659,24 @@ int sensors_detect(struct i2c_adapter *adapter,
            !found && (address_data->normal_isa[i] != SENSORS_ISA_END);
            i += 1) {
         if (addr == address_data->normal_isa[i]) {
+#ifdef DEBUG
+          printk("sensors.o: found normal isa entry for adapter %d, " 
+                 "addr %04x\n", adapter_id,addr);
+#endif
           found = 1;
+        }
       }
       for (i = 0;
            !found && (address_data->normal_isa_range[i] != SENSORS_ISA_END);
            i += 3) {
-         if ((addr >= address_data->normal_isa_range[i]) &&
-             (addr <= address_data->normal_isa_range[i+1]) &&
-             ((addr - address_data->normal_isa_range[i]) % 
-                                  address_data->normal_isa_range[i+2] == 0));
+        if ((addr >= address_data->normal_isa_range[i]) &&
+            (addr <= address_data->normal_isa_range[i+1]) &&
+            ((addr - address_data->normal_isa_range[i]) % 
+                                 address_data->normal_isa_range[i+2] == 0)) {
+#ifdef DEBUG
+          printk("sensors.o: found normal isa_range entry for adapter %d, "
+                 "addr %04x", adapter_id,addr);
+#endif
           found = 1;
         }
       }
@@ -664,12 +686,21 @@ int sensors_detect(struct i2c_adapter *adapter,
            i += 1) {
         if (addr == address_data->normal_i2c[i]) {
           found = 1;
+#ifdef DEBUG
+          printk("sensors.o: found normal i2c entry for adapter %d, "
+                 "addr %02x", adapter_id,addr);
+#endif
+        }
       }
       for (i = 0;
            !found && (address_data->normal_i2c_range[i] != SENSORS_I2C_END);
            i += 2) {
          if ((addr >= address_data->normal_i2c_range[i]) &&
-             (addr <= address_data->normal_i2c_range[i+1]))
+             (addr <= address_data->normal_i2c_range[i+1])) {
+#ifdef DEBUG
+          printk("sensors.o: found normal i2c_range entry for adapter %d, "
+                 "addr %04x\n", adapter_id,addr);
+#endif
           found = 1;
         }
       }
@@ -681,16 +712,25 @@ int sensors_detect(struct i2c_adapter *adapter,
       if (((adapter_id == address_data->probe[i]) ||
            ((address_data->probe[i] == SENSORS_ANY_I2C_BUS) & !is_isa)) &&
           (addr == address_data->probe[i+1])) {
+#ifdef DEBUG
+        printk("sensors.o: found probe parameter for adapter %d, "
+                 "addr %04x\n", adapter_id,addr);
+#endif
         found = 1;
       }
+    }
     for (i = 0;
          !found && (address_data->probe_range[i] != SENSORS_I2C_END);
          i += 3) {
       if (((adapter_id == address_data->probe_range[i]) ||
            ((address_data->probe_range[i] == SENSORS_ANY_I2C_BUS) & !is_isa)) &&
           (addr >= address_data->probe_range[i+1]) &&
-          (addr <= address_data->probe_range[i+2])) 
+          (addr <= address_data->probe_range[i+2])) {
         found = 1;
+#ifdef DEBUG
+        printk("sensors.o: found probe_range parameter for adapter %d, "
+                 "addr %04x\n", adapter_id,addr);
+#endif
       }
     }
     if (!found) 

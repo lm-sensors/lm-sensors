@@ -307,10 +307,16 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
   const char *client_name = "";
   int is_isa = i2c_is_isa_adapter(adapter);
 
-
-  if (kind < 0) {
   /* We need address registration for the I2C bus too. That is not yet
      implemented. */
+  if (is_isa) {
+    if (check_region(address,LM78_EXTENT))
+      goto ERROR0;
+  }
+
+  /* Probe whether there is anything available on this address. Already
+     done for SMBus clients */
+  if (kind < 0) {
     if (is_isa) {
 
 #define REALLY_SLOW_IO
@@ -393,8 +399,12 @@ int lm78_detect(struct i2c_adapter *adapter, int address, int kind)
   } else if (kind == lm79) {
     type_name = "lm79";
     client_name = "LM79 chip";
-  } else
+  } else {
+#ifdef DEBUG
+    printk("lm78.o: Internal error: unknown kind (%d)?!?",kind);
+#endif
     goto ERROR1;
+  }
 
   /* Reserve the ISA region */
   if (is_isa)
