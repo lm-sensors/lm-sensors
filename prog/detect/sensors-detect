@@ -81,7 +81,7 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
 use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect 
             lm80_detect w83781d_detect w83781d_alias_detect
             w83781d_isa_detect gl518sm_detect gl520sm_detect adm9240_detect 
-            adm1021_detect sis5595_isa_detect );
+            adm1021_detect sis5595_isa_detect eeprom_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -209,6 +209,12 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
        driver => "sis5595",
        isa_addrs => [ 0 ],
        isa_detect => sub { sis5595_isa_detect @_ },
+     },
+     {
+       name => "Serial EEPROM",
+       driver => "eeprom",
+       i2c_addrs => [0x50..0x57],
+       i2c_detect => sub { eeprom_detect 0, @_ },
      }
 );
 
@@ -1279,6 +1285,17 @@ sub sis5595_isa_detect
   return (9);
 }
 
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, (5) if detected.
+# Registers used:
+#   0x??: PC-100 Checksum
+sub eeprom_detect
+{
+  my ($file,$addr) = @_;
+  return (1);
+}
 ################
 # MAIN PROGRAM #
 ################
