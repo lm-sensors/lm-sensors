@@ -1,5 +1,8 @@
 Many, many things. Most notably:
 
+* Merge newest Simon Vogl archive
+* Merge man-pages
+* Rename some public kernel header files
 * Fans give overflow if small values are written to them.
 * At least the bit-lp and bit-velle modules do no detection on loading;
   ask Simon whether this is possible to add.

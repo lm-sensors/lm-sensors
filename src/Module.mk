@@ -32,7 +32,7 @@ SRCTARGETS := $(MODULE_DIR)/smbus.o $(MODULE_DIR)/piix4.o $(MODULE_DIR)/isa.o \
               $(MODULE_DIR)/i2c-dev.o
 
 SRCHEADERFILES := $(MODULE_DIR)/sensors.h $(MODULE_DIR)/isa.h \
-               $(MODULE_DIR)/smbus.h
+                  $(MODULE_DIR)/smbus.h $(MODULE_DIR)/i2c-dev.h
 
 # Include all dependency files
 INCLUDEFILES += $(SRCTARGETS:.o=.d)

@@ -255,7 +255,7 @@ extern inline s32 smbus_read_block_data(struct i2c_adapter * adapter,
   }
 }
 
-extern inline int smbus_write_block_data(struct i2c_adapter * adapter,
+extern inline s32 smbus_write_block_data(struct i2c_adapter * adapter,
                                          u8 addr, u8 command, u8 length,
                                          u8 *values)
 {
