@@ -1506,6 +1506,34 @@ sub isa_write_byte
   outb $_[1],$_[3];
 }
 
+#################
+# AUTODETECTION #
+#################
+
+use vars qw($modules_conf $dev_i2c);
+
+sub initialize_conf
+{
+  if (-f '/etc/modules.conf') {
+    $modules_conf = '/etc/modules.conf';
+  } elsif (-f '/etc/conf.modules') {
+    $modules_conf = '/etc/conf.modules';
+  } else { # default
+    $modules_conf = '/etc/modules.conf';
+  }
+
+  if (-c '/dev/i2c-0') {
+    $dev_i2c = '/dev/i2c-';
+  } elsif (-c '/dev/i2c/0') {
+    $dev_i2c = '/dev/i2c/';
+  } elsif (-c '/dev/i2c0') {
+    $dev_i2c = '/dev/i2c';
+  } else { # default
+    print "No i2c device files found. Use prog/mkdev/mkdev.sh to create them.\n";
+    exit -1;
+  }
+}
+
 ###########
 # MODULES #
 ###########
@@ -2017,16 +2045,13 @@ sub add_isa_to_chips_detected
         not exists $new_misdetected_ref->[$i]->{isa_addr} and
         defined $alias_detect and
         $new_misdetected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
-      open FILE,"/dev/i2c-$new_misdetected_ref->[$i]->{i2c_devnr}" or
-        open FILE,"/dev/i2c$new_misdetected_ref->[$i]->{i2c_devnr}" or
-          open FILE,"/dev/i2c/$new_misdetected_ref->[$i]->{i2c_devnr}" or
-             print("Can't open ",
-                   "/dev/i2c[-/]$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
-             next;
+      open FILE,"$dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}" or
+        print("Can't open $dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
+        next;
       binmode FILE;
       i2c_set_slave_addr \*FILE,$new_misdetected_ref->[$i]->{i2c_addr} or
            print("Can't set I2C address for ",
-                 "/dev/i2c[-/]$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
+                 "$dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_misdetected_ref->[$i]->{i2c_addr})) {
@@ -2046,16 +2071,13 @@ sub add_isa_to_chips_detected
         not exists $new_detected_ref->[$i]->{isa_addr} and
         defined $alias_detect and
         $new_detected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
-      open FILE,"/dev/i2c-$new_detected_ref->[$i]->{i2c_devnr}" or
-        open FILE,"/dev/i2c$new_detected_ref->[$i]->{i2c_devnr}" or
-          open FILE,"/dev/i2c/$new_detected_ref->[$i]->{i2c_devnr}" or
-             print("Can't open ",
-                   "/dev/i2c[-/]$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
-             next;
+      open FILE,"$dev_i2c$new_detected_ref->[$i]->{i2c_devnr}" or
+        print("Can't open $dev_i2c$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
+        next;
       binmode FILE;
       i2c_set_slave_addr \*FILE,$new_detected_ref->[$i]->{i2c_addr} or
            print("Can't set I2C address for ",
-                 "/dev/i2c[-/]$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
+                 "$dev_i2c$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_detected_ref->[$i]->{i2c_addr})) {
@@ -2119,10 +2141,8 @@ sub scan_adapter
   # As we modify it, we need a copy
   my @not_to_scan = @$not_to_scan;
 
-  open FILE,"/dev/i2c-$adapter_nr" or 
-    open FILE,"/dev/i2c$adapter_nr" or 
-      open FILE,"/dev/i2c/$adapter_nr" or 
-         (print "Can't open /dev/i2c[-/]$adapter_nr\n"), return;
+  open FILE,"$dev_i2c$adapter_nr" or 
+    (print "Can't open $dev_i2c$adapter_nr\n"), return;
   binmode FILE;
 
   # Now scan each address in turn
@@ -3690,29 +3710,18 @@ sub main
 {
   my (@adapters,$res,$did_adapter_detection,$detect_others,$adapter);
 
+  initialize_conf;
   initialize_proc_pci;
   initialize_modules_list;
 
-  print " This program will help you to determine which I2C/SMBus modules you ",
-        "need to\n",
-        " load to use lm_sensors most effectively.\n";
-  print " You need to have done a `make install', issued a `depmod -a' and ",
-        "made sure\n",
-        " `/etc/conf.modules' (or `/etc/modules.conf') contains the ",
-        "appropriate\n",
-        " module path before you can use some functions of this utility. ",
-        "Read\n",
-        " doc/modules for more information.\n";
-  print " Also, you need to be `root', or at least have access to the ",
-        "/dev/i2c[-/]* files\n",
-        " for some things. You can use prog/mkdev/mkdev.sh to create these ",
-        "/dev files\n",
-        " if you do not have them already.\n";
-  print " If you have patched your kernel and have some drivers built-in ",
-        "you can\n",
-        " safely answer NO if asked to load some modules. In this case, ",
-        "things may\n",
-        " seem a bit confusing, but they will still work.\n\n";
+  print "\nThis program will help you determine which I2C/SMBus modules you need to\n",
+        "load to use lm_sensors most effectively. You need to have i2c and\n",
+        "lm_sensors installed before running this program.\n";
+  print "Also, you need to be `root', or at least have access to the $dev_i2c*\n",
+        "files, for most things.\n";
+  print "If you have patched your kernel and have some drivers built-in, you can\n",
+        "safely answer NO if asked to load some modules. In this case, things may\n",
+        "seem a bit confusing, but they will still work.\n\n";
 
   unless (safe_system_vendor ())
   {
@@ -3789,18 +3798,15 @@ sub main
     if ($> != 0) {
       print " i2c-dev is not loaded. As you are not root, we will just hope ",
             "you edited\n",
-            " `/etc/conf.modules' (or `/etc/modules.conf') for automatic ",
-            "loading of\n",
-            " this module. If not, you won't be able to open any /dev/i2c[-/]* ",
-            "file.\n";
+            " `$modules_conf' for automatic loading of\n",
+            " this module. If not, you won't be able to open any $dev_i2c* file.\n";
     } else {
       print " i2c-dev is not loaded. Do you want to load it now? (YES/no): ";
       if (<STDIN> =~ /^\s*[Nn]/) {
         print " Well, you will know best. We will just hope you edited ",
-              "`/etc/conf.modules'\n",
-              " (or `/etc/modules.conf') for automatic loading of this ",
-              "module. If not,\n",
-              " you won't be able to open any /dev/i2c[-/]* file (unless you",
+              "`$modules_conf'\n",
+              " for automatic loading of this module. If not,\n",
+              " you won't be able to open any $dev_i2c* file (unless you",
               "have it built-in\n",
               " into your kernel)\n";
       } elsif (system "modprobe","i2c-dev") {
@@ -3934,8 +3940,8 @@ sub main
   my $use_isa = not <STDIN> =~ /\s*[Ss]/;
      
   my ($modprobes,$configfile) = generate_modprobes $use_isa;
-  print "\nTo make the sensors modules behave correctly, add these lines to either\n",
-        "/etc/modules.conf or /etc/conf.modules:\n\n";
+  print "\nTo make the sensors modules behave correctly, add these lines to\n",
+        "$modules_conf:\n\n";
   print "#----cut here----\n";
   print $configfile;
   print "#----cut here----\n";
