@@ -1362,7 +1362,7 @@ chip "adm1024-*"
     ignore "Vccp2"
 
 
-chip "it87-*" "it8705-*" "it8712-*"
+chip "it87-*"
 
 # The values below have been tested on Asus CUSI, CUM motherboards.
 
@@ -1426,7 +1426,7 @@ chip "it87-*" "it8705-*" "it8712-*"
     compute in6 (4.33 * @) - 13.64  ,  (@ + 13.64) / 4.33
 #
 # this much simpler version is reported to work for a
-# Eltite Group K7S5A board
+# Elite Group K7S5A board
 #
 #   compute in5 -(36/10)*@, -@/(36/10)
 #   compute in6 -(56/10)*@, -@/(56/10)
