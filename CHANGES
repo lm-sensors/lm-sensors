@@ -17,6 +17,10 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
+2.8.4 (2004-??-??)
+  Library: Better 2.6 eeprom support
+  Program decode-vaio.pl: Add sysfs support
+
 2.8.3 (20040115)
   File lm_sensors.spec: Update
   Library: Add 2.6 eeprom, lm90 support
