@@ -28,6 +28,7 @@
 /* This interfaces to the I2C bus of the Voodoo3 to gain access to
     the BT869 and possibly other I2C devices. */
 
+#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/pci.h>
 #include <asm/io.h>

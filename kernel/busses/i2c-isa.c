@@ -24,6 +24,7 @@
    the SMBus and the ISA bus very much easier. See lm78.c for an example
    of this. */
 
+#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
 

@@ -21,13 +21,13 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <linux/version.h>
 #include <linux/kernel.h>
 #include <linux/ioport.h>
 #include <linux/module.h>
 #include <linux/pci.h>
 #include <asm/io.h>
 #include <linux/types.h>
-#include <linux/version.h>
 
 #if LINUX_VERSION_CODE < 0x020136 /* 2.1.54 */
 #include <linux/bios32.h>

@@ -38,6 +38,7 @@
 static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 
 
+#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/malloc.h>
 #include <linux/proc_fs.h>
