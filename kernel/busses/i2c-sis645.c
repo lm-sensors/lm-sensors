@@ -67,6 +67,11 @@ MODULE_LICENSE("GPL");
 #define PCI_DEVICE_ID_SI_646 0x0646
 #endif
 
+/* SiS650 north bridge */
+#ifndef PCI_DEVICE_ID_SI_650
+#define PCI_DEVICE_ID_SI_650 0x0650
+#endif
+
 /* SiS735 combo chipset */
 #ifndef PCI_DEVICE_ID_SI_735
 #define PCI_DEVICE_ID_SI_735 0x0735
@@ -271,6 +276,8 @@ static int sis645_setup(void)
 				PCI_DEVICE_ID_SI_645, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
 				PCI_DEVICE_ID_SI_646, NULL))
+			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
+				PCI_DEVICE_ID_SI_650, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
 				PCI_DEVICE_ID_SI_735, NULL))) {
 			printk("i2c-sis645.o: Error: Can't find suitable host bridge!\n");
