@@ -54,12 +54,14 @@
 #   PCG-GR214EP  : OK
 #   PCG-GRX316G  : OK
 #   PCG-GRX570   : OK
+#   PCG-GRX600K  : OK
+#   PCG-U1       : OK
 #   PCG-Z600LEK  : No EEPROM
 #   PCG-Z600NE   : No EEPROM
 # Any feedback appreciated anyway.
 #
 # Thanks to Werner Heuser, Carsten Blume, Christian Gennerat, Joe Wreschnig,
-# Xavier Roche, Sebastien Lefevre, Philippe H., Lars Heer and Steve Dobson
+# Xavier Roche, Sebastien Lefevre, Lars Heer and Steve Dobson and others
 # for their precious help.
 #
 
