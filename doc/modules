@@ -3,17 +3,19 @@ Managing Modules
 
 The hardcore way is to insmod each of them by hand. This is not very
 practical, though. It is better to install them in a subdirectory that
-modprobe examines. /lib/modules/current/extra/misc comes to mind.
+modprobe examines. /lib/modules/current/extra/misc comes to mind, or
+perhaps /lib/modules/`uname -r`/extra/misc (depending on your distribution).
 You need to add this path to your /etc/modules.conf (or /etc/conf.modules,
 which file is used depends on your distribution):
-  (modules-2.0.0):
+  (modules-2.0.0, modutils-2.3.x):
     path[misc]=/lib/modules/current/extra/misc
   (modutils-2.1.x):
     path=/lib/modules/current/extra
-Do always a 'depmod -a' after changing either your configuration file or 
+Do always a `depmod -a' after changing either your configuration file or 
 changing a module in one of the module directories; you also need to do
 a 'killall -HUP kerneld' if you still use kerneld (kernel 2.2.x usually
-uses kmod).
+uses kmod); this command is probably not even needed for kerneld, so
+don't worry about it too much).
 
 Now you can do 'modprobe lm78', and all dependent modules are loaded
 automatically. You could, of course, add this statement (and related
@@ -36,5 +38,3 @@ as follows:
 
 With the above, the managing of all those modules is suddenly no problem
 at all!
-
-
