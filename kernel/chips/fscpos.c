@@ -288,28 +288,20 @@ int fscpos_detect(struct i2c_adapter *adapter, int address,
 	new_client->driver = &fscpos_driver;
 	new_client->flags = 0;
 
-	/* Now, we do the remaining detection.  */
-	if (fscpos_read_value(new_client, FSCPOS_REG_IDENT_0) != 0x50)
-		goto ERROR1;
-	if (fscpos_read_value(new_client, FSCPOS_REG_IDENT_1) != 0x45)
-		goto ERROR1;
-	if (fscpos_read_value(new_client, FSCPOS_REG_IDENT_2) != 0x47)
-		goto ERROR1;
-
-	/* Determine the chip type - only one kind supported! */
-	if (kind <= 0)
-		kind = fscpos;
-
-	if (kind == fscpos) {
-		type_name = "fscpos";
-		client_name = "fsc poseidon chip";
-	} else {
-#ifdef DEBUG
-		printk("fscpos.o: Internal error: unknown kind (%d)?!?",
-		       kind);
-#endif
-		goto ERROR1;
+	/* Do the remaining detection unless force or force_fscpos parameter */
+	if (kind < 0) {
+		if (fscpos_read_value(new_client, FSCPOS_REG_IDENT_0) != 0x50)
+			goto ERROR1;
+		if (fscpos_read_value(new_client, FSCPOS_REG_IDENT_1) != 0x45)
+			goto ERROR1;
+		if (fscpos_read_value(new_client, FSCPOS_REG_IDENT_2) != 0x47)
+			goto ERROR1;
 	}
+
+	kind = fscpos;
+
+	type_name = "fscpos";
+	client_name = "fsc poseidon chip";
 
 	/* Fill in the remaining client fields and put it into the global list */
 	strcpy(new_client->name, client_name);
