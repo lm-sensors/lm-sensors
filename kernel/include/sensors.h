@@ -425,7 +425,6 @@ struct sensors_chips_data {
 #define GL518_SYSCTL_FAN1 1101     /* RPM */
 #define GL518_SYSCTL_FAN2 1102
 #define GL518_SYSCTL_TEMP 1200     /* Degrees Celcius * 10 */
-#define GL518_SYSCTL_VID 1300    
 #define GL518_SYSCTL_FAN_DIV 2000  /* 1, 2, 4 or 8 */
 #define GL518_SYSCTL_ALARMS 2001   /* bitvector */
 #define GL518_SYSCTL_BEEP 2002     /* bitvector */
@@ -453,7 +452,8 @@ struct sensors_chips_data {
 #define GL520_SYSCTL_FAN_DIV 2000  /* 1, 2, 4 or 8 */
 #define GL520_SYSCTL_ALARMS 2001   /* bitvector */
 #define GL520_SYSCTL_BEEP 2002     /* bitvector */
-#define GL520_SYSCTL_CONFIG 2003
+#define GL520_SYSCTL_FAN1OFF 2003
+#define GL520_SYSCTL_CONFIG 2004
 
 #define GL520_ALARM_VDD 0x01
 #define GL520_ALARM_VIN1 0x02

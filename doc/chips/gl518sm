@@ -5,15 +5,16 @@ Status: Complete and well-tested
 
 Supported chips:
   * Genesys Logic GL518SM release 0x00
-    Prefix `gl518sm-r00'
+    Prefix `gl518sm'
     Addresses scanned: I2C 0x2c and 0x2d
     Datasheet: Not openly available
   * Genesys Logic GL518SM release 0x80
-    Prefix `gl518sm-r80'
+    Prefix `gl518sm'
     Addresses scanned: I2C 0x2c and 0x2d
-    Datasheet: Not available
+    Datasheet: Not openly available
 
-Author: Frodo Looijaard <frodol@dds.nl>
+Author: Frodo Looijaard <frodol@dds.nl>,
+        Kyösti Mälkki <kmalkki@cc.hut.fi>
 
 
 Module Parameters
@@ -91,7 +92,7 @@ will do no harm, but will return 'old' values.
 Chip Features
 -------------
 
-Chip `gl518sm-r00'
+Chip `gl518sm'
              LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
                vdd               NONE               NONE     R     2
               vin1               NONE               NONE     R     2
@@ -118,84 +119,29 @@ Chip `gl518sm-r00'
        beep_enable             alarms               NONE     RW    0
              beeps             alarms             alarms     RW    0
 
-             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
-               vdd                    SENSORS_GL518R00_VDD                vdd:3
-              vin1                   SENSORS_GL518R00_VIN1               vin1:3
-              vin2                   SENSORS_GL518R00_VIN2               vin2:3
-              vin3                   SENSORS_GL518R00_VIN3               vin3:3
-           vdd_min                SENSORS_GL518R00_VDD_MIN                vdd:1
-          vin1_min               SENSORS_GL518R00_VIN1_MIN               vin1:1
-          vin2_min               SENSORS_GL518R00_VIN2_MIN               vin2:1
-          vin3_min               SENSORS_GL518R00_VIN3_MIN               vin3:1
-           vdd_max                SENSORS_GL518R00_VDD_MAX                vdd:2
-          vin1_max               SENSORS_GL518R00_VIN1_MAX               vin1:2
-          vin2_max               SENSORS_GL518R00_VIN2_MAX               vin2:2
-          vin3_max               SENSORS_GL518R00_VIN3_MAX               vin3:2
-              fan1                   SENSORS_GL518R00_FAN1               fan1:2
-              fan2                   SENSORS_GL518R00_FAN2               fan2:2
-          fan1_min               SENSORS_GL518R00_FAN1_MIN               fan1:1
-          fan2_min               SENSORS_GL518R00_FAN2_MIN               fan2:1
-              temp                   SENSORS_GL518R00_TEMP               temp:3
-         temp_hyst              SENSORS_GL518R00_TEMP_HYST               temp:2
-         temp_over              SENSORS_GL518R00_TEMP_OVER               temp:1
-          fan1_div               SENSORS_GL518R00_FAN1_DIV            fan_div:1
-          fan2_div               SENSORS_GL518R00_FAN2_DIV            fan_div:2
-            alarms                 SENSORS_GL518R00_ALARMS             alarms:1
-       beep_enable            SENSORS_GL518R00_BEEP_ENABLE               beep:1
-             beeps                  SENSORS_GL518R00_BEEPS               beep:2
-
-
-Chip `gl518sm-r80'
-             LABEL        LABEL CLASS      COMPUTE CLASS ACCESS MAGNITUDE
-               vdd               NONE               NONE     R     2
-              vin1               NONE               NONE     R     2
-              vin2               NONE               NONE     R     2
-              vin3               NONE               NONE     R     2
-           vdd_min                vdd                vdd     RW    2
-          vin1_min               vin1               vin1     RW    2
-          vin2_min               vin2               vin2     RW    2
-          vin3_min               vin3               vin3     RW    2
-           vdd_max                vdd                vdd     RW    2
-          vin1_max               vin1               vin1     RW    2
-          vin2_max               vin2               vin2     RW    2
-          vin3_max               vin3               vin3     RW    2
-              fan1               NONE               NONE     R     0
-              fan2               NONE               NONE     R     0
-          fan1_min               fan1               fan1     RW    0
-          fan2_min               fan2               fan2     RW    0
-              temp               NONE               NONE     R     1
-         temp_hyst               temp               temp     RW    1
-         temp_over               temp               temp     RW    1
-          fan1_div               fan1               NONE     RW    0
-          fan2_div               fan2               NONE     RW    0
-            alarms               NONE               NONE     R     0
-       beep_enable             alarms               NONE     RW    0
-             beeps             alarms             alarms     RW    0
-
-             LABEL                          FEATURE SYMBOL        SYSCTL FILE:NR
-               vdd                    SENSORS_GL518R80_VDD                vdd:3
-              vin1                   SENSORS_GL518R80_VIN1               vin1:3
-              vin2                   SENSORS_GL518R80_VIN2               vin2:3
-              vin3                   SENSORS_GL518R80_VIN3               vin3:3
-           vdd_min                SENSORS_GL518R80_VDD_MIN                vdd:1
-          vin1_min               SENSORS_GL518R80_VIN1_MIN               vin1:1
-          vin2_min               SENSORS_GL518R80_VIN2_MIN               vin2:1
-          vin3_min               SENSORS_GL518R80_VIN3_MIN               vin3:1
-           vdd_max                SENSORS_GL518R80_VDD_MAX                vdd:2
-          vin1_max               SENSORS_GL518R80_VIN1_MAX               vin1:2
-          vin2_max               SENSORS_GL518R80_VIN2_MAX               vin2:2
-          vin3_max               SENSORS_GL518R80_VIN3_MAX               vin3:2
-              fan1                   SENSORS_GL518R80_FAN1               fan1:2
-              fan2                   SENSORS_GL518R80_FAN2               fan2:2
-          fan1_min               SENSORS_GL518R80_FAN1_MIN               fan1:1
-          fan2_min               SENSORS_GL518R80_FAN2_MIN               fan2:1
-              temp                   SENSORS_GL518R80_TEMP               temp:3
-         temp_hyst              SENSORS_GL518R80_TEMP_HYST               temp:2
-         temp_over              SENSORS_GL518R80_TEMP_OVER               temp:1
-          fan1_div               SENSORS_GL518R80_FAN1_DIV            fan_div:1
-          fan2_div               SENSORS_GL518R80_FAN2_DIV            fan_div:2
-            alarms                 SENSORS_GL518R80_ALARMS             alarms:1
-       beep_enable            SENSORS_GL518R80_BEEP_ENABLE               beep:1
-             beeps                  SENSORS_GL518R80_BEEPS               beep:2
-
+             LABEL                        FEATURE SYMBOL        SYSCTL FILE:NR
+               vdd                    SENSORS_GL518_VDD                vdd:3
+              vin1                   SENSORS_GL518_VIN1               vin1:3
+              vin2                   SENSORS_GL518_VIN2               vin2:3
+              vin3                   SENSORS_GL518_VIN3               vin3:3
+           vdd_min                SENSORS_GL518_VDD_MIN                vdd:1
+          vin1_min               SENSORS_GL518_VIN1_MIN               vin1:1
+          vin2_min               SENSORS_GL518_VIN2_MIN               vin2:1
+          vin3_min               SENSORS_GL518_VIN3_MIN               vin3:1
+           vdd_max                SENSORS_GL518_VDD_MAX                vdd:2
+          vin1_max               SENSORS_GL518_VIN1_MAX               vin1:2
+          vin2_max               SENSORS_GL518_VIN2_MAX               vin2:2
+          vin3_max               SENSORS_GL518_VIN3_MAX               vin3:2
+              fan1                   SENSORS_GL518_FAN1               fan1:2
+              fan2                   SENSORS_GL518_FAN2               fan2:2
+          fan1_min               SENSORS_GL518_FAN1_MIN               fan1:1
+          fan2_min               SENSORS_GL518_FAN2_MIN               fan2:1
+              temp                   SENSORS_GL518_TEMP               temp:3
+         temp_hyst              SENSORS_GL518_TEMP_HYST               temp:2
+         temp_over              SENSORS_GL518_TEMP_OVER               temp:1
+          fan1_div               SENSORS_GL518_FAN1_DIV            fan_div:1
+          fan2_div               SENSORS_GL518_FAN2_DIV            fan_div:2
+            alarms                 SENSORS_GL518_ALARMS             alarms:1
+       beep_enable            SENSORS_GL518_BEEP_ENABLE               beep:1
+             beeps                  SENSORS_GL518_BEEPS               beep:2
 

@@ -200,6 +200,8 @@ static void gl520_alarms(struct i2c_client *client, int operation,
                          int ctl_name, int *nrels_mag, long *results);
 static void gl520_beep(struct i2c_client *client, int operation, int ctl_name, 
                 int *nrels_mag, long *results);
+static void gl520_fan1off(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
 static void gl520_config(struct i2c_client *client, int operation,
 		int ctl_name, int *nrels_mag, long *results);
 
@@ -247,6 +249,8 @@ static ctl_table gl520_dir_table_template[] = {
     &sensors_sysctl_real, NULL, &gl520_alarms },
   { GL520_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &gl520_beep },
+  { GL520_SYSCTL_FAN1OFF, "fan1off", NULL, 0, 0644, NULL, &sensors_proc_real,
+    &sensors_sysctl_real, NULL, &gl520_fan1off },
   { GL520_SYSCTL_CONFIG, "config", NULL, 0, 0644, NULL, &sensors_proc_real,
     &sensors_sysctl_real, NULL, &gl520_config },
   { 0 }
@@ -742,6 +746,25 @@ void gl520_vid(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
+void gl520_fan1off(struct i2c_client *client, int operation, int ctl_name, 
+                int *nrels_mag, long *results)
+{
+  int old;
+  if (operation == SENSORS_PROC_REAL_INFO)
+    *nrels_mag = 0;
+  else if (operation == SENSORS_PROC_REAL_READ) {
+    results[0] = ((gl520_read_value(client, GL520_REG_MISC) & 0x04) !=0);
+    *nrels_mag = 1;
+  } else if (operation == SENSORS_PROC_REAL_WRITE) {
+    if (*nrels_mag >= 1) {
+      old = gl520_read_value(client, GL520_REG_MISC) & 0xfb;
+      if (results[0])
+        old |= 0x04;
+      gl520_write_value(client,GL520_REG_MISC,old);
+    }
+  }
+}
+
 void gl520_config(struct i2c_client *client, int operation, int ctl_name, 
                 int *nrels_mag, long *results)
 {
@@ -749,21 +772,14 @@ void gl520_config(struct i2c_client *client, int operation, int ctl_name,
   if (operation == SENSORS_PROC_REAL_INFO)
     *nrels_mag = 0;
   else if (operation == SENSORS_PROC_REAL_READ) {
-    results[0] = ((gl520_read_value(client, GL520_REG_CONF) & 0x10) !=0);
-    results[1] = ((gl520_read_value(client, GL520_REG_MISC) & 0x08) !=0);
-    *nrels_mag = 2;
+    results[0] = ((gl520_read_value(client, GL520_REG_CONF) & 0x10)==0);
+    *nrels_mag = 1;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
     if (*nrels_mag >= 1) {
       old = gl520_read_value(client, GL520_REG_CONF) & 0xef;
-      if (results[1])
+      if (! results[1])
         old |= 0x10;
       gl520_write_value(client,GL520_REG_CONF,old);
-    }
-    if (*nrels_mag >= 2) {
-      old = gl520_read_value(client, GL520_REG_MISC) & 0xf7;
-      if (results[0])
-        old |= 0x08;
-      gl520_write_value(client,GL520_REG_MISC,old);
     }
   }
 }

@@ -275,6 +275,40 @@ chip "gl518sm-*"
   set vin2_max 13.0
   set vin3_min 2.10
   set vin3_max 2.30
+  set fan1_off 0
+  set iterate 0
+
+chip "gl520sm-*"
+
+# Factors and labels taken from GL520SM datasheet
+
+  label vdd "+5V"
+  label vin1 "+3.3V"
+  label vin2 "+12V"
+  label vin3 "Vcore"
+  label vin4 "-12V"
+
+# vin1 and vin3 require no scaling
+# vin2 depends on external resistors (4,7k and 15k assumed)
+ 
+# vin4 = ((R1+R2)/R2)*@ - (R1/R2)*vdd
+#
+#       -12 --| R1 |---t---| R2 |-- +5 
+#                      |
+#                    vin4
+#
+
+  compute vin2 (197/47)*@  ,  @/(197/47)
+  compute vin4 (5*@)-(4*vdd) , (@+4*vdd)/5
+
+  set vdd_min 4.8
+  set vdd_max 5.2
+  set vin1_min 3.20
+  set vin1_max 3.40
+  set vin2_min 11.0
+  set vin2_max 13.0
+  set vin3_min 2.10
+  set vin3_max 2.30
 
 chip "lm80-*"
     
