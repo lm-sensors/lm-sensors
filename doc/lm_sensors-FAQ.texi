@@ -555,7 +555,7 @@ to work.
 * Section 4.17::        Bad readings from particular chips
 * Section 4.18::        How do I configure two chips (LM87) differently?
 * Section 4.19::        Dmesg says @samp{Upgrade BIOS}! I don't want to!
-* Section 4.20::        Sensors says @samp{Can't access @file{/proc} file}
+* Section 4.20::        Sensors says @samp{Can't access procfs/sysfs file}
 * Section 4.21::        Sensors says @samp{No sensors found!}
 * Section 4.22::        Sensors output is not correct!
 * Section 4.23::        What is at I2C address XXX?
@@ -977,7 +977,7 @@ is the I/O address. You must select an address that is not in use.
 
 
 @node Section 4.20, Section 4.21, Section 4.19, Problems
-@section Sensors says @samp{Can't access @file{/proc} file}
+@section Sensors says @samp{Can't access procfs/sysfs file}
 
 @itemize
 @item (release 2.6.0 and later) Did you @command{modprobe i2c-proc}? Check @command{lsmod}.
