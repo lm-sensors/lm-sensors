@@ -135,7 +135,8 @@ int main (int argc, char *argv[])
     { "help", no_argument, NULL, 'h' },
     { "set", no_argument, NULL, 's' },
     { "version", no_argument, NULL, 'v'},
-    { "config-file", required_argument, NULL, 'c' }
+    { "config-file", required_argument, NULL, 'c' },
+    { 0,0,0,0 }
   };
 
   do_sets = 0;
