@@ -260,8 +260,8 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
 #  name: The full chip name
-#  driver (optional): The driver name (without .o extension). Omit if none is
-#      written yet.
+#  driver: The driver name (without .o extension). Put in something like
+#      "Unwritten: <drivername>" if it is not yet available.
 #  i2c_addrs (optional): For I2C chips, the range of valid I2C addresses to
 #      probe. Recommend avoiding 0x69 because of clock chips.
 #  i2c_driver_addrs (optional): For I2C chips, the range of valid I2C
@@ -325,7 +325,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      },
      {
        name => "National Semiconductor LM87",
-#        driver => "xxxxxxx",
+       driver => "Unwritten (LM87)",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { lm87_detect @_} ,
      },
@@ -375,7 +375,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      } ,
      {
        name => "Winbond W83697HF",
-#       driver => "w83781d",
+       driver => "Unwritten (W83697HF)"
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect 5, @_ },
      } ,
@@ -399,7 +399,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      },
      {
        name => "Genesys Logic GL525SM",
-#        driver => "xxxxxxx",
+       driver => "Unwritten (GL525SM)",
        i2c_addrs => [0x2d],
        i2c_detect => sub { gl525sm_detect @_} ,
      },
@@ -489,7 +489,7 @@ use subs qw(lm78_detect lm78_isa_detect lm78_alias_detect lm75_detect
      },
      {
        name => "ITE IT8705F / IT8712F",
-#        driver => "xxxxxxx",
+       driver => "Unwritten (IT87xxF)",
        i2c_addrs => [0x00..0x68,0x6a..0x7f], 
        i2c_driver_addrs => [0x20..0x2f], 
        i2c_detect => sub { ite_detect 0, @_},
