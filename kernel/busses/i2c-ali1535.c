@@ -592,17 +592,10 @@ static int __init i2c_ali1535_init(void)
 	return pci_module_init(&ali1535_driver);
 }
 
-
 static void __exit i2c_ali1535_exit(void)
 {
 	pci_unregister_driver(&ali1535_driver);
 }
-
-#ifdef RLX
-EXPORT_SYMBOL(ali1535_smba);
-EXPORT_SYMBOL(ali1535_access);
-EXPORT_SYMBOL(i2c_ali1535_sem);
-#endif
 
 MODULE_AUTHOR
     ("Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>, "
@@ -612,4 +605,3 @@ MODULE_LICENSE("GPL");
 
 module_init(i2c_ali1535_init);
 module_exit(i2c_ali1535_exit);
-
