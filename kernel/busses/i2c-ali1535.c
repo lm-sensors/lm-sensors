@@ -57,6 +57,7 @@
 #include <linux/module.h>
 #include <linux/pci.h>
 #include <asm/io.h>
+#include <asm/semaphore.h>
 #include <linux/kernel.h>
 #include <linux/stddef.h>
 #include <linux/sched.h>
@@ -183,6 +184,7 @@ static struct i2c_adapter ali1535_adapter = {
 
 static int __initdata ali1535_initialized;
 static unsigned short ali1535_smba = 0;
+DECLARE_MUTEX(i2c_ali1535_sem);
 
 
 /* Detect whether a ALI1535 can be found, and initialize it, where necessary.
@@ -456,7 +458,9 @@ s32 ali1535_access(struct i2c_adapter * adap, u16 addr,
 	int i, len;
 	int temp;
 	int timeout;
+	s32 result = 0;
 
+	down(&i2c_ali1535_sem);
 /* make sure SMBus is idle */
 	temp = inb_p(SMBHSTSTS);
 	for (timeout = 0;
@@ -477,7 +481,8 @@ s32 ali1535_access(struct i2c_adapter * adap, u16 addr,
 	case I2C_SMBUS_PROC_CALL:
 		printk
 		    ("i2c-ali1535.o: I2C_SMBUS_PROC_CALL not supported!\n");
-		return -1;
+		result = -1;
+		goto EXIT;
 	case I2C_SMBUS_QUICK:
 		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
 		       SMBHSTADD);
@@ -537,11 +542,16 @@ s32 ali1535_access(struct i2c_adapter * adap, u16 addr,
 	}
 
 	if (ali1535_transaction())	/* Error in transaction */
-		return -1;
+	  {
+		result = -1;
+		goto EXIT;
+          }
 
 	if ((read_write == I2C_SMBUS_WRITE) || (size == ALI1535_QUICK))
-		return 0;
-
+	  {
+		result = 0;
+		goto EXIT;
+          }
 
 	switch (size) {
 	case ALI1535_BYTE:	/* Result put in SMBHSTDAT0 */
@@ -569,7 +579,9 @@ s32 ali1535_access(struct i2c_adapter * adap, u16 addr,
 		}
 		break;
 	}
-	return 0;
+EXIT:
+	up(&i2c_ali1535_sem);
+	return result;
 }
 
 void ali1535_inc(struct i2c_adapter *adapter)
@@ -645,6 +657,7 @@ int __init ali1535_cleanup(void)
 #ifdef RLX
 EXPORT_SYMBOL(ali1535_smba);
 EXPORT_SYMBOL(ali1535_access);
+EXPORT_SYMBOL(i2c_ali1535_sem);
 #else
 EXPORT_NO_SYMBOLS;
 #endif
