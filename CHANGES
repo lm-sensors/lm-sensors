@@ -19,14 +19,18 @@ ask CVS about it:
 
 2.6.6 (2002????)
   NOTE: Requires i2c-2.6.6!!!
-  Library: Add support for MC1066
+  Library: Add support for MC1066; add multiple VRM version support for lm87;
+           enhance adm1023 support
+  Makefile: Take kernel source location from /lib/modules/x.x.x/build
   Module adm1021: Add support for MC1066
   Module dmi_scan: Rename symbol duplicated in kernel
   Module i2c-sis630: added support for SiS730
   Module i2c-sis645: improved support for SiS645/961
                      added support for SiS645DX/961 and SiS735
+  Module lm87: Add multiple VRM version support
+  Module w83781d: Fix in0/in1 initialization
   Program mkpatch: Fix dmi_scan module compile
-  Program sensors: Add support for MC1066
+  Program sensors: Add support for MC1066; fix w83781d temp3 alarm
   Program sensors-detect: Add support for MC1066
 
 2.6.5 (20020915)
