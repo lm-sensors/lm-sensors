@@ -19,6 +19,7 @@
 */
 
 #include <linux/module.h>
+#include <linux/kernel.h>
 #include <linux/malloc.h>
 #include <linux/ctype.h>
 #include <linux/sysctl.h>
@@ -30,10 +31,16 @@
 #include "sensors.h"
 #include "compat.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init 
+#endif
 
 #ifdef MODULE
 extern int init_module(void);
 extern int cleanup_module(void);
+static int sensors_cleanup(void);
 #endif /* MODULE */
 
 static int sensors_create_name(char **name, const char *prefix,
@@ -48,8 +55,7 @@ static int sensors_sysctl_chips (ctl_table *table, int *name, int nlen,
                                  void *oldval, size_t *oldlenp, void *newval,
                                  size_t newlen, void **context);
 
-static int sensors_init(void);
-static int sensors_cleanup(void);
+static int __init sensors_init(void);
 
 #define SENSORS_ENTRY_MAX 20
 static struct ctl_table_header *sensors_entries[SENSORS_ENTRY_MAX];
@@ -742,7 +748,7 @@ int sensors_detect(struct i2c_adapter *adapter,
   return 0;
 }
       
-int sensors_init(void) 
+int __init sensors_init(void) 
 {
   printk("sensors.o version %s (%s)\n",LM_VERSION,LM_DATE);
   sensors_initialized = 0;
@@ -755,6 +761,17 @@ int sensors_init(void)
   return 0;
 }
 
+EXPORT_SYMBOL(sensors_deregister_entry);
+EXPORT_SYMBOL(sensors_detect);
+EXPORT_SYMBOL(sensors_proc_real);
+EXPORT_SYMBOL(sensors_register_entry);
+EXPORT_SYMBOL(sensors_sysctl_real);
+
+#ifdef MODULE
+
+MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>");
+MODULE_DESCRIPTION("LM78 driver");
+
 int sensors_cleanup(void)
 {
   if (sensors_initialized >= 1) {
@@ -763,11 +780,6 @@ int sensors_cleanup(void)
   }
   return 0;
 }
-
-#ifdef MODULE
-
-MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>");
-MODULE_DESCRIPTION("LM78 driver");
 
 int init_module(void)
 {

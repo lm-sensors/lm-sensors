@@ -36,6 +36,11 @@
 #include <linux/bios32.h>
 #endif
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
 
 /* PIIX4 SMBus address offsets */
 #define SMBHSTSTS (0 + piix4_smba)
@@ -85,8 +90,8 @@ MODULE_PARM(force_addr,"i");
 MODULE_PARM_DESC(force_addr,"Forcibly enable the PIIX4 at the given address. "
                             "EXTREMELY DANGEROUS!");
 
-static int piix4_init(void);
-static int piix4_cleanup(void);
+static int __init piix4_init(void);
+static int __init piix4_cleanup(void);
 static int piix4_setup(void);
 static s32 piix4_access(struct i2c_adapter *adap, u8 addr, char read_write,
                         u8 command, int size, union i2c_smbus_data * data);
@@ -121,7 +126,7 @@ static struct i2c_adapter piix4_adapter = {
   NULL,
 };
 
-static int piix4_initialized;
+static int __init piix4_initialized;
 static unsigned short piix4_smba = 0;
 
 
@@ -435,7 +440,7 @@ void piix4_dec(struct i2c_adapter *adapter)
 	MOD_DEC_USE_COUNT;
 }
 
-int piix4_init(void)
+int __init piix4_init(void)
 {
   int res;
   printk("piix4.o version %s (%s)\n",LM_VERSION,LM_DATE);
@@ -464,7 +469,7 @@ int piix4_init(void)
   return 0;
 }
 
-int piix4_cleanup(void)
+int __init piix4_cleanup(void)
 {
   int res;
   if (piix4_initialized >= 2)
@@ -481,6 +486,8 @@ int piix4_cleanup(void)
   }
   return 0;
 }
+
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

@@ -33,6 +33,12 @@
 #include <linux/bios32.h>
 #endif
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
 #include <linux/i2c.h>
 #include <linux/i2c-algo-bit.h>
 #include "compat.h"
@@ -204,7 +210,7 @@ static int find_via(void)
 }
 #endif
 
-static int init_i2c_via(void)
+static int __init init_i2c_via(void)
 {
 	if (find_via() < 0) {
 		printk("Error while reading PCI configuration\n");
@@ -231,6 +237,8 @@ static int init_i2c_via(void)
 		return -ENODEV;
 	}
 }
+
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 MODULE_AUTHOR("Kyösti Mälkki <kmalkki@cc.hut.fi>");

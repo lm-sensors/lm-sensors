@@ -44,6 +44,12 @@
 #include <linux/bios32.h>
 #endif
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
 /* 3DFX defines */
 #ifndef PCI_VENDOR_ID_3DFX
 #define PCI_VENDOR_ID_3DFX 0x121a
@@ -52,8 +58,8 @@
 #define PCI_DEVICE_ID_3DFX_VOODOO3 0x05
 #endif
 
-static int voodoo3_init(void);
-static int voodoo3_cleanup(void);
+static int __init voodoo3_init(void);
+static int __init voodoo3_cleanup(void);
 static int voodoo3_setup(void);
 static s32 voodoo3_access(struct i2c_adapter *adap, u8 addr, char read_write,
                         u8 command, int size, union i2c_smbus_data * data);
@@ -72,20 +78,6 @@ static int Voodoo3_I2CWrite_word(int addr,int command,long data);
 static void config_v3(struct pci_dev *dev, int num);
 static void voodoo3_inc(struct i2c_adapter *adapter);
 static void voodoo3_dec(struct i2c_adapter *adapter);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #ifdef MODULE
 extern int init_module(void);
@@ -113,7 +105,7 @@ static struct i2c_adapter voodoo3_adapter = {
  NULL,
 };
 
-static int voodoo3_initialized;
+static int __init voodoo3_initialized;
 static unsigned short voodoo3_smba = 0;
 static unsigned int state=0xcf980020;
 static unsigned char *mem;
@@ -533,7 +525,7 @@ void voodoo3_dec(struct i2c_adapter *adapter)
 	MOD_DEC_USE_COUNT;
 }
 
-int voodoo3_init(void)
+int __init voodoo3_init(void)
 {
   int res;
   printk("i2c-voodoo3.o version %s (%s)\n",LM_VERSION,LM_DATE);
@@ -562,7 +554,7 @@ int voodoo3_init(void)
   return 0;
 }
 
-int voodoo3_cleanup(void)
+int __init voodoo3_cleanup(void)
 {
   int res;
   
@@ -581,10 +573,13 @@ int voodoo3_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
+
 #ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com> and Ralph Metzler <rjkm@thp.uni-koeln.de>");
 MODULE_DESCRIPTION("Voodoo3 I2C/SMBus driver");
+
 
 int init_module(void)
 {

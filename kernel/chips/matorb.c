@@ -30,6 +30,13 @@
 #include "version.h"
 #include "compat.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
+
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {0x2E,SENSORS_I2C_END};
 static unsigned short normal_i2c_range[] = {SENSORS_I2C_END};
@@ -57,8 +64,8 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int matorb_init(void);
-static int matorb_cleanup(void);
+static int __init matorb_init(void);
+static int __init matorb_cleanup(void);
 static int matorb_attach_adapter(struct i2c_adapter *adapter);
 static int matorb_detect(struct i2c_adapter *adapter, int address, int kind);
 static void matorb_init_client(struct i2c_client *client);
@@ -97,7 +104,7 @@ static ctl_table matorb_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int matorb_initialized = 0;
+static int __init matorb_initialized = 0;
 
 /* I choose here for semi-static MATORB allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -317,7 +324,7 @@ int i;
   }
 }
 
-int matorb_init(void)
+int __init matorb_init(void)
 {
   int res;
 
@@ -332,7 +339,7 @@ int matorb_init(void)
   return 0;
 }
 
-int matorb_cleanup(void)
+int __init matorb_cleanup(void)
 {
   int res;
 
@@ -347,6 +354,7 @@ int matorb_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

@@ -51,6 +51,13 @@ static const char *version_str = "1.00 25/2/99 Fons Rademakers";
 #include "sensors.h"
 #include "compat.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
+
 
 #undef AUTODETECT          /* try to autodetect MaxiLife version */
 #define NOWRITE             /* don't allow writing to MaxiLife registers */
@@ -151,8 +158,8 @@ struct maxi_data {
 };
 
 
-static int  maxi_init(void);
-static int  maxi_cleanup(void);
+static int __init maxi_init(void);
+static int __init maxi_cleanup(void);
 
 static int  maxi_attach_adapter(struct i2c_adapter *adapter);
 static int  maxi_detect_smbus(struct i2c_adapter *adapter);
@@ -205,7 +212,7 @@ static struct i2c_driver maxi_driver = {
 };
 
 /* Used by maxi_init/cleanup */
-static int maxi_initialized = 0;
+static int __init maxi_initialized = 0;
 
 /* Default firmware version. Use module option "maxi_version"
    to set desired version. Auto detect is not yet working */
@@ -709,7 +716,7 @@ void maxi_alarms(struct i2c_client *client, int operation, int ctl_name,
    }
 }
 
-int maxi_init(void)
+int __init maxi_init(void)
 {
    int res;
 
@@ -726,7 +733,7 @@ int maxi_init(void)
    return 0;
 }
 
-int maxi_cleanup(void)
+int __init maxi_cleanup(void)
 {
    int res;
 
@@ -740,6 +747,7 @@ int maxi_cleanup(void)
    return 0;
 }
 
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

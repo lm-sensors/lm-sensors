@@ -36,6 +36,13 @@
 #include <linux/bios32.h>
 #endif
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
+
 #ifndef PCI_DEVICE_ID_VIA_82C596_3
 #define PCI_DEVICE_ID_VIA_82C596_3 0x3050
 #endif
@@ -100,8 +107,8 @@ MODULE_PARM(force_addr,"i");
 MODULE_PARM_DESC(force_addr,"Forcibly enable the VT82C596 SMBus at the given address. "
                             "EXTREMELY DANGEROUS!");
 
-static int vt596_init(void);
-static int vt596_cleanup(void);
+static int __init vt596_init(void);
+static int __init vt596_cleanup(void);
 static int vt596_setup(void);
 static s32 vt596_access(struct i2c_adapter *adap, u8 addr, char read_write,
                         u8 command, int size, union i2c_smbus_data * data);
@@ -136,7 +143,7 @@ static struct i2c_adapter vt596_adapter = {
   NULL,
 };
 
-static int vt596_initialized;
+static int __init vt596_initialized;
 static unsigned short vt596_smba = 0;
 
 
@@ -470,7 +477,7 @@ void vt596_dec(struct i2c_adapter *adapter)
 	MOD_DEC_USE_COUNT;
 }
 
-int vt596_init(void)
+int __init vt596_init(void)
 {
   int res;
   printk("via2.o version %s (%s)\n",LM_VERSION,LM_DATE);
@@ -499,7 +506,7 @@ int vt596_init(void)
   return 0;
 }
 
-int vt596_cleanup(void)
+int __init vt596_cleanup(void)
 {
   int res;
   if (vt596_initialized >= 2)
@@ -517,10 +524,13 @@ int vt596_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
+
 #ifdef MODULE
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
 MODULE_DESCRIPTION("vt82c596 SMBus driver");
+
 
 int init_module(void)
 {

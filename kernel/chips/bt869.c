@@ -28,6 +28,12 @@
 #include "i2c-isa.h"
 #include "version.h"
 #include "compat.h"
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
 
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {SENSORS_I2C_END};
@@ -76,8 +82,8 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int bt869_init(void);
-static int bt869_cleanup(void);
+static int __init bt869_init(void);
+static int __init bt869_cleanup(void);
 static int bt869_attach_adapter(struct i2c_adapter *adapter);
 static int bt869_detect(struct i2c_adapter *adapter, int address, int kind);
 static void bt869_init_client(struct i2c_client *client);
@@ -137,7 +143,7 @@ static ctl_table bt869_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int bt869_initialized = 0;
+static int __init bt869_initialized = 0;
 
 /* I choose here for semi-static bt869 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -518,7 +524,7 @@ void bt869_depth(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int bt869_init(void)
+int __init bt869_init(void)
 {
   int res;
 
@@ -533,7 +539,7 @@ int bt869_init(void)
   return 0;
 }
 
-int bt869_cleanup(void)
+int __init bt869_cleanup(void)
 {
   int res;
 
@@ -548,6 +554,7 @@ int bt869_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

@@ -28,6 +28,13 @@
 #include "version.h"
 #include "compat.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
+
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {0x2c,0x2d,SENSORS_I2C_END};
 static unsigned short normal_i2c_range[] = {SENSORS_I2C_END};
@@ -171,8 +178,8 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int gl520_init(void);
-static int gl520_cleanup(void);
+static int __init gl520_init(void);
+static int __init gl520_cleanup(void);
 static int gl520_attach_adapter(struct i2c_adapter *adapter);
 static int gl520_detect(struct i2c_adapter *adapter, int address, int kind);
 static void gl520_init_client(struct i2c_client *client);
@@ -257,7 +264,7 @@ static ctl_table gl520_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int gl520_initialized = 0;
+static int __init gl520_initialized = 0;
 
 /* I choose here for semi-static GL520SM allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -784,7 +791,7 @@ void gl520_config(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int gl520_init(void)
+int __init gl520_init(void)
 {
   int res;
 
@@ -799,7 +806,7 @@ int gl520_init(void)
   return 0;
 }
 
-int gl520_cleanup(void)
+int __init gl520_cleanup(void)
 {
   int res;
 
@@ -814,6 +821,7 @@ int gl520_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

@@ -26,6 +26,13 @@
 #include "version.h"
 #include "compat.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
+
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {SENSORS_I2C_END};
 static unsigned short normal_i2c_range[] = {0x48,0x4f,SENSORS_I2C_END};
@@ -70,8 +77,8 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int lm75_init(void);
-static int lm75_cleanup(void);
+static int __init lm75_init(void);
+static int __init lm75_cleanup(void);
 static int lm75_attach_adapter(struct i2c_adapter *adapter);
 static int lm75_detect(struct i2c_adapter *adapter, int address, int kind);
 static void lm75_init_client(struct i2c_client *client);
@@ -112,7 +119,7 @@ static ctl_table lm75_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int lm75_initialized = 0;
+static int __init lm75_initialized = 0;
 
 /* I choose here for semi-static LM75 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -371,7 +378,7 @@ void lm75_temp(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int lm75_init(void)
+int __init lm75_init(void)
 {
   int res;
 
@@ -386,7 +393,7 @@ int lm75_init(void)
   return 0;
 }
 
-int lm75_cleanup(void)
+int __init lm75_cleanup(void)
 {
   int res;
 
@@ -401,6 +408,7 @@ int lm75_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

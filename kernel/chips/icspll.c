@@ -34,6 +34,12 @@
 #include "sensors.h"
 #include "i2c-isa.h"
 #include "version.h"
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
 
 /* Many constants specified below */
 
@@ -57,8 +63,8 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int icspll_init(void);
-static int icspll_cleanup(void);
+static int __init icspll_init(void);
+static int __init icspll_cleanup(void);
 
 static int icspll_attach_adapter(struct i2c_adapter *adapter);
 static int icspll_detach_client(struct i2c_client *client);
@@ -104,7 +110,7 @@ static ctl_table icspll_dir_table_template[] = {
 static u8 tempdata[MAXBLOCK_SIZE];
 
 /* Used by init/cleanup */
-static int icspll_initialized = 0;
+static int __init icspll_initialized = 0;
 
 /* I choose here for semi-static allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -313,7 +319,7 @@ void icspll_contents(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int icspll_init(void)
+int __init icspll_init(void)
 {
   int res;
 
@@ -328,7 +334,7 @@ int icspll_init(void)
   return 0;
 }
 
-int icspll_cleanup(void)
+int __init icspll_cleanup(void)
 {
   int res;
 
@@ -343,6 +349,7 @@ int icspll_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

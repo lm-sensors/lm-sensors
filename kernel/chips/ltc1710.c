@@ -49,6 +49,13 @@
 #include "version.h"
 #include "compat.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
+
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {SENSORS_I2C_END};
 static unsigned short normal_i2c_range[] = {0x58,0x5a,SENSORS_I2C_END};
@@ -81,8 +88,8 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int ltc1710_init(void);
-static int ltc1710_cleanup(void);
+static int __init ltc1710_init(void);
+static int __init ltc1710_cleanup(void);
 static int ltc1710_attach_adapter(struct i2c_adapter *adapter);
 static int ltc1710_detect(struct i2c_adapter *adapter, int address, int kind);
 static int ltc1710_detach_client(struct i2c_client *client);
@@ -123,7 +130,7 @@ static ctl_table ltc1710_dir_table_template[] = {
 };
 
 /* Used by init/cleanup */
-static int ltc1710_initialized = 0;
+static int __init ltc1710_initialized = 0;
 
 /* I choose here for semi-static LTC1710 allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -347,7 +354,7 @@ void ltc1710_switch2(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int ltc1710_init(void)
+int __init ltc1710_init(void)
 {
   int res;
 
@@ -362,7 +369,7 @@ int ltc1710_init(void)
   return 0;
 }
 
-int ltc1710_cleanup(void)
+int __init ltc1710_cleanup(void)
 {
   int res;
 
@@ -377,6 +384,7 @@ int ltc1710_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

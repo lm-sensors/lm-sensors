@@ -27,6 +27,12 @@
 #include "version.h"
 #include "compat.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {SENSORS_I2C_END};
 static unsigned short normal_i2c_range[] = {0x18,0x1a,0x29,0x2b,
@@ -101,8 +107,8 @@ extern int init_module(void);
 extern int cleanup_module(void);
 #endif /* MODULE */
 
-static int adm1021_init(void);
-static int adm1021_cleanup(void);
+static int __init adm1021_init(void);
+static int __init adm1021_cleanup(void);
 static int adm1021_attach_adapter(struct i2c_adapter *adapter);
 static int adm1021_detect(struct i2c_adapter *adapter, int address, int kind);
 static void adm1021_init_client(struct i2c_client *client);
@@ -165,7 +171,7 @@ static ctl_table adm1021_max_dir_table_template[] = {
 
 
 /* Used by init/cleanup */
-static int adm1021_initialized = 0;
+static int __init adm1021_initialized = 0;
 
 /* I choose here for semi-static allocation. Complete dynamic
    allocation could also be used; the code needed for this would probably
@@ -489,7 +495,7 @@ void adm1021_alarms(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int adm1021_init(void)
+int __init adm1021_init(void)
 {
   int res;
 
@@ -504,7 +510,7 @@ int adm1021_init(void)
   return 0;
 }
 
-int adm1021_cleanup(void)
+int __init adm1021_cleanup(void)
 {
   int res;
 
@@ -519,6 +525,7 @@ int adm1021_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

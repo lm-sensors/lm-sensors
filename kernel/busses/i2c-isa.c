@@ -29,14 +29,20 @@
 
 #include <linux/i2c.h>
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
 #include "version.h"
 #include "i2c-isa.h"
 
 static void isa_inc_use (struct i2c_adapter *adapter);
 static void isa_dec_use (struct i2c_adapter *adapter);
 
-static int isa_init(void);
-static int isa_cleanup(void);
+static int __init isa_init(void);
+static int __init isa_cleanup(void);
 
 #ifdef MODULE
 extern int init_module(void);
@@ -66,7 +72,7 @@ static struct i2c_adapter isa_adapter = {
 };
 
 /* Used in isa_init/cleanup */
-static int isa_initialized;
+static int __init isa_initialized;
 
 void isa_inc_use (struct i2c_adapter *adapter)
 {
@@ -82,7 +88,7 @@ void isa_dec_use (struct i2c_adapter *adapter)
 #endif
 }
 
-int isa_init(void)
+int __init isa_init(void)
 {
   int res;
   printk("i2c-isa.o version %s (%s)\n",LM_VERSION,LM_DATE);
@@ -110,7 +116,7 @@ int isa_init(void)
   return 0;
 }
 
-int isa_cleanup(void)
+int __init isa_cleanup(void)
 {
   int res;
   if (isa_initialized >= 2)
@@ -131,6 +137,8 @@ int isa_cleanup(void)
   }
   return 0;
 }
+
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

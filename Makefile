@@ -153,7 +153,8 @@ CFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
           -Wcast-align -Wwrite-strings -Wnested-externs -Winline
 endif
 
-MODCFLAGS := $(CFLAGS) -D__KERNEL__ -DMODULE -fomit-frame-pointer
+MODCFLAGS := $(CFLAGS) -D__KERNEL__ -DMODULE -fomit-frame-pointer 
+MODCFLAGS := $(MODCFLAGS) -DEXPORT_SYMTAB
 PROGCFLAGS := $(CFLAGS)
 ARCFLAGS := $(CFLAGS)
 LIBCFLAGS := $(CFLAGS) -fpic

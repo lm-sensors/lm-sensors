@@ -32,6 +32,13 @@
 #include "sensors.h"
 #include "compat.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
+
 /* Addresses to scan */
 static unsigned short normal_i2c[] = {SENSORS_I2C_END};
 static unsigned short normal_i2c_range[] = {0x20,0x2f,SENSORS_I2C_END};
@@ -195,8 +202,8 @@ struct lm78_data {
 };
 
 
-static int lm78_init(void);
-static int lm78_cleanup(void);
+static int __init lm78_init(void);
+static int __init lm78_cleanup(void);
 
 static int lm78_attach_adapter(struct i2c_adapter *adapter);
 static int lm78_detect(struct i2c_adapter *adapter, int address, int kind);
@@ -243,7 +250,7 @@ static struct i2c_driver lm78_driver = {
 };
 
 /* Used by lm78_init/cleanup */
-static int lm78_initialized = 0;
+static int __init lm78_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected LM78. This is just a template;
@@ -780,7 +787,7 @@ void lm78_fan_div(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int lm78_init(void)
+int __init lm78_init(void)
 {
   int res;
 
@@ -796,7 +803,7 @@ int lm78_init(void)
   return 0;
 }
 
-int lm78_cleanup(void)
+int __init lm78_cleanup(void)
 {
   int res;
 
@@ -810,6 +817,7 @@ int lm78_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

@@ -44,6 +44,12 @@
 #include "sensors.h"
 #include "compat.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
+
 /* RT Table support #defined so we can take it out if it gets bothersome */
 #define W83781D_RT 1
 
@@ -348,8 +354,8 @@ struct w83781d_data {
 };
 
 
-static int w83781d_init(void);
-static int w83781d_cleanup(void);
+static int __init w83781d_init(void);
+static int __init w83781d_cleanup(void);
 
 static int w83781d_attach_adapter(struct i2c_adapter *adapter);
 static int w83781d_detect(struct i2c_adapter *adapter, int address, int kind);
@@ -409,7 +415,7 @@ static struct i2c_driver w83781d_driver = {
 };
 
 /* Used by w83781d_init/cleanup */
-static int w83781d_initialized = 0;
+static int __init w83781d_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected W83781D. This is just a template;
@@ -1479,7 +1485,7 @@ void w83781d_rt(struct i2c_client *client, int operation, int ctl_name,
 }
 #endif
 
-int w83781d_init(void)
+int __init w83781d_init(void)
 {
   int res;
 
@@ -1495,7 +1501,7 @@ int w83781d_init(void)
   return 0;
 }
 
-int w83781d_cleanup(void)
+int __init w83781d_cleanup(void)
 {
   int res;
 
@@ -1509,6 +1515,7 @@ int w83781d_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 
@@ -1528,6 +1535,3 @@ int cleanup_module(void)
 
 #endif /* MODULE */
 
-
-
-    

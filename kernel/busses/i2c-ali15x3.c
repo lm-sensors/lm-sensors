@@ -82,6 +82,12 @@
 #include <linux/bios32.h>
 #endif
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init 
+#endif
+
 /* undefine this if separate ACPI software is accessing the
    registers at the offset defined at 0x10.
 */
@@ -143,8 +149,8 @@
 #define ALI15X3_STS_ERR		0xE0	/* all the bad error bits */
 
 
-static int ali15x3_init(void);
-static int ali15x3_cleanup(void);
+static int __init ali15x3_init(void);
+static int __init ali15x3_cleanup(void);
 static int ali15x3_setup(void);
 static s32 ali15x3_access(struct i2c_adapter *adap, u8 addr, char read_write,
                         u8 command, int size, union i2c_smbus_data * data);
@@ -179,7 +185,7 @@ static struct i2c_adapter ali15x3_adapter = {
   NULL,
 };
 
-static int ali15x3_initialized;
+static int __init ali15x3_initialized;
 #ifdef MAP_ACPI
 static unsigned short ali15x3_acpia = 0;
 #endif
@@ -598,7 +604,7 @@ void ali15x3_dec(struct i2c_adapter *adapter)
 	MOD_DEC_USE_COUNT;
 }
 
-int ali15x3_init(void)
+int __init ali15x3_init(void)
 {
   int res;
   printk("ali15x3.o version %s (%s)\n",LM_VERSION,LM_DATE);
@@ -630,7 +636,7 @@ int ali15x3_init(void)
   return 0;
 }
 
-int ali15x3_cleanup(void)
+int __init ali15x3_cleanup(void)
 {
   int res;
   if (ali15x3_initialized >= 2)
@@ -650,6 +656,8 @@ int ali15x3_cleanup(void)
   }
   return 0;
 }
+
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

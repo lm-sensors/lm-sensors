@@ -59,6 +59,11 @@
 #include "i2c-isa.h"
 #include "sensors.h"
 #include "compat.h"
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
 
 
 /* Addresses to scan */
@@ -233,8 +238,8 @@ struct adm9240_data {
 };
 
 
-static int adm9240_init(void);
-static int adm9240_cleanup(void);
+static int __init adm9240_init(void);
+static int __init adm9240_cleanup(void);
 
 static int adm9240_attach_adapter(struct i2c_adapter *adapter);
 static int adm9240_detect(struct i2c_adapter *adapter, int address, int kind);
@@ -283,7 +288,7 @@ static struct i2c_driver adm9240_driver = {
 };
 
 /* Used by adm9240_init/cleanup */
-static int adm9240_initialized = 0;
+static int __init adm9240_initialized = 0;
 
 /* The /proc/sys entries */
 /* These files are created for each detected ADM9240. This is just a template;
@@ -748,7 +753,7 @@ void adm9240_vid(struct i2c_client *client, int operation, int ctl_name,
   }
 }
 
-int adm9240_init(void)
+int __init adm9240_init(void)
 {
   int res;
 
@@ -764,7 +769,7 @@ int adm9240_init(void)
   return 0;
 }
 
-int adm9240_cleanup(void)
+int __init adm9240_cleanup(void)
 {
   int res;
 
@@ -778,6 +783,7 @@ int adm9240_cleanup(void)
   return 0;
 }
 
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 

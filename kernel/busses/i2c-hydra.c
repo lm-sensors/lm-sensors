@@ -39,6 +39,11 @@
 #include <linux/bios32.h>
 #endif
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,53)
+#include <linux/init.h>
+#else
+#define __init
+#endif
 
 /* PCI device */
 #define VENDOR		PCI_VENDOR_ID_APPLE
@@ -171,7 +176,7 @@ static int find_hydra(void)
 	return 0;
 }
 
-int init_i2c_hydra(void)
+int __init init_i2c_hydra(void)
 {
 	if (find_hydra() < 0) {
 		printk("Error while reading PCI configuration\n");
@@ -189,6 +194,8 @@ int init_i2c_hydra(void)
 		return -ENODEV;
 	}
 }
+
+EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 MODULE_AUTHOR("Geert Uytterhoeven <geert@linux-m68k.org>");
