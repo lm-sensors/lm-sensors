@@ -1090,8 +1090,7 @@ chip "it87-*"
     set in6_max -5 * 1.05
     set in7_min 5 * 0.95
     set in7_max 5 * 1.05
-    set in8_min 3.0 * 0.80
-    set in8_max 3.0 * 1.20
+    #the chip does not support in8 min/max
 
     # vid is not monitored by IT8705F
     # and is not supported by driver at this time
