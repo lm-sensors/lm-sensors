@@ -118,7 +118,7 @@ static bmcsensors_initialized;
 
 
 #define MAX_SDR_ENTRIES 50
-#define SDR_LIMITS 13
+#define SDR_LIMITS 8
 #define SDR_MAX_ID_LENGTH 16
 #define SDR_MAX_UNPACKED_ID_LENGTH ((SDR_MAX_ID_LENGTH * 4 / 3) + 2)
 struct sdrdata {
@@ -127,11 +127,16 @@ struct sdrdata {
 	/* retrieved from SDR, not expected to change */
 	u8 stype;
 	u8 number;
+	u8 capab;
+	u16 thresh_mask;
 	u8 linear;
 	s16 m;
 	s16 b;
 	u8 k;
+	u8 nominal;
 	u8 limits[SDR_LIMITS];
+	int lim1, lim2;
+	u8 lim1_write, lim2_write;
 	u8 string_type;
 	u8 id_length;
 	u8 id[SDR_MAX_ID_LENGTH];
@@ -220,9 +225,80 @@ static void ipmi_sprintf(u8 * to, u8 * from, u8 type, u8 length)
 	}
 }
 
+static const char * threshold_text[] = {
+	"upper non-recoverable threshold",
+	"upper critical threshold",
+	"upper non-critical threshold",
+	"lower non-recoverable threshold",
+	"lower critical threshold",
+	"lower non-critical threshold",
+	"positive-going hysteresis", /* not used */
+	"negative-going hysteresis"
+};
 
+/* select two out of the 8 possible readable thresholds, and place indexes into the limits
+   array into lim1 and lim2. Set writable flags */
+static void bmcsensors_select_thresholds(int i)
+{
+	u8 capab = sdrd[i].capab;
+	u16 mask = sdrd[i].thresh_mask;
 
+	sdrd[i].lim1 = -1;
+	sdrd[i].lim2 = -1;
+	sdrd[i].lim1_write = 0;
+	sdrd[i].lim2_write = 0;
 
+	if(((capab & 0x0c) == 0x04) ||	/* readable thresholds ? */
+	   ((capab & 0x0c) == 0x08)) {
+		/* select upper threshold */
+		if(mask & 0x10) {			/* upper crit */
+			sdrd[i].lim1 = 1;
+			if((capab & 0x0c) == 0x08 && (mask & 0x1000))
+				sdrd[i].lim1_write = 1;
+		}
+		else if(mask & 0x20) {		/* upper non-recov */
+			sdrd[i].lim1 = 0;
+			if((capab & 0x0c) == 0x08 && (mask & 0x2000))
+				sdrd[i].lim1_write = 1;
+		}
+		else if(mask & 0x08) {		/* upper non-crit */
+			sdrd[i].lim1 = 2;
+			if((capab & 0x0c) == 0x08 && (mask & 0x0800))
+				sdrd[i].lim1_write = 1;
+		}
+
+		/* select lower threshold */
+		if(((capab & 0x30) == 0x10) ||	/* readable hysteresis ? */
+		   ((capab & 0x30) == 0x20))	/* neg hyst */
+			sdrd[i].lim2 = 7;
+		else if(mask & 0x02) {		/* lower crit */
+			sdrd[i].lim2 = 4;
+			if((capab & 0x0c) == 0x08 && (mask & 0x0200))
+				sdrd[i].lim2_write = 1;
+		}
+		else if(mask & 0x04) {		/* lower non-recov */
+			sdrd[i].lim2 = 3;
+			if((capab & 0x0c) == 0x08 && (mask & 0x0400))
+				sdrd[i].lim2_write = 1;
+		}
+		else if(mask & 0x01) {		/* lower non-crit */
+			sdrd[i].lim2 = 5;
+			if((capab & 0x0c) == 0x08 && (mask & 0x0100))
+				sdrd[i].lim2_write = 1;
+		}
+	}
+
+	if(sdrd[i].lim1 >= 0)
+		printk(KERN_INFO "bmcsensors.o: sensor %d: using %s for upper limit\n",
+			i, threshold_text[sdrd[i].lim1]);
+	else
+		printk(KERN_INFO "bmcsensors.o: sensor %d: no readable upper limit\n", i);
+	if(sdrd[i].lim2 >= 0)
+		printk(KERN_INFO "bmcsensors.o: sensor %d: using %s for lower limit\n",
+			i, threshold_text[sdrd[i].lim2]);
+	else
+		printk(KERN_INFO "bmcsensors.o: sensor %d: no readable lower limit\n", i);
+}
 
 /* After we have received all the SDR entries and picked out the ones
    we are interested in, build a table of the /proc entries and register.
@@ -247,7 +323,6 @@ static void bmcsensors_build_proc_table()
 		bmcsensors_dir_table[i].procname = bmcsensors_proc_name_pool + (i * MAX_PROCNAME_SIZE);
 		bmcsensors_dir_table[i].data = NULL;
 		bmcsensors_dir_table[i].maxlen = 0;
-		bmcsensors_dir_table[i].mode = 0644;
 		bmcsensors_dir_table[i].child = NULL;
 		bmcsensors_dir_table[i].proc_handler = &i2c_proc_real;
 		bmcsensors_dir_table[i].strategy = &i2c_sysctl_real;
@@ -284,10 +359,16 @@ static void bmcsensors_build_proc_table()
 				i, sdrd[i].stype, sdrd[i].linear);
 		}
 		ipmi_sprintf(id, sdrd[i].id, sdrd[i].string_type, sdrd[i].id_length);
-		printk(KERN_INFO "bmcsensors.o: registering sensor %d: '%s' (type 0x%x) as %s "
-			"(m=%d; b=%d; k1=%d; k2=%d)\n",
+		printk(KERN_INFO "bmcsensors.o: registering sensor %d: '%s' (type 0x%.2x) as %s "
+			"(m=%d; b=%d; k1=%d; k2=%d; cap=0x%.2x; mask=0x%.4x)\n",
 			i, id, sdrd[i].stype, bmcsensors_dir_table[i].procname,
-			sdrd[i].m, sdrd[i].b,sdrd[i].k & 0xf, sdrd[i].k >> 4);
+			sdrd[i].m, sdrd[i].b,sdrd[i].k & 0xf, sdrd[i].k >> 4,
+			sdrd[i].capab, sdrd[i].thresh_mask);
+		bmcsensors_select_thresholds(i);
+		if(sdrd[i].lim1_write || sdrd[i].lim2_write)
+			bmcsensors_dir_table[i].mode = 0644;
+		else
+			bmcsensors_dir_table[i].mode = 0444;
 	}
 	bmcsensors_dir_table[sdrd_count].ctl_name = 0;
 
@@ -337,7 +418,7 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 {
 	u16 record, nextrecord;
 	int version, type, length, owner, lun, number, entity, instance, init;
-	int capab, stype, code;
+	int stype, code;
 	int id_length;
 	int i;
 	int rstate = STATE_SDR;
@@ -382,11 +463,12 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 	version = data[5];
 	type = data[6];
 	if(type == 1 || type == 2) {		/* known SDR type */
+/*
 		owner = data[8];
 		lun = data[9];
 		entity = data[11];
 		init = data[13];
-		capab = data[14];
+*/
 		stype = data[15];
 
 		if(stype <= STYPE_MAX) {	/* known sensor type */
@@ -405,6 +487,8 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 					/* add SDR database entry */
 					sdrd[sdrd_count].stype = stype;
 					sdrd[sdrd_count].number = data[10];
+					sdrd[sdrd_count].capab = data[14];
+					sdrd[sdrd_count].thresh_mask = (data[22] << 8) | data[21];
 					if(type == 1) {
 						sdrd[sdrd_count].linear = data[26] & 0x7f;
 						sdrd[sdrd_count].m = data[27];
@@ -416,8 +500,9 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 						if(sdrd[sdrd_count].b & 0x0200)
 							sdrd[sdrd_count].b |= 0xfc00;	/* sign extend */
 						sdrd[sdrd_count].k = data[32];
-						for(i = 0; i < SDR_LIMITS; i++)
-							sdrd[sdrd_count].limits[i] = data[34 + i];
+						sdrd[sdrd_count].nominal = data[34];
+						for(i = 0; i < SDR_LIMITS; i++)		/* assume readable */
+							sdrd[sdrd_count].limits[i] = data[39 + i];
 						sdrd[sdrd_count].string_type = data[50] >> 6;
 						id_length = data[50] & 0x1f;
 						if(id_length > 0)
@@ -432,6 +517,7 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 						if(id_length > 0)
 							memcpy(sdrd[sdrd_count].id, &data[35], id_length);
 						sdrd[sdrd_count].id_length = id_length;
+						/* limits?? */
 					}
 					bmcs_count[stype]++;
 					sdrd_count++;
@@ -489,7 +575,6 @@ static void bmcsensors_rcv_msg(struct ipmi_msg *msg)
 		case STATE_SDRPARTIAL:
 			state = bmcsensors_rcv_sdr_msg(msg, state);
 			break;
-
 
 		case STATE_READING:
 			state = bmcsensors_rcv_reading_msg(msg);
@@ -713,7 +798,7 @@ int find_sdrd(int sysctl)
 /* IPMI V1.5 Section 30 */
 static const int exps[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000};
 
-static int decplaces(i)
+static int decplaces(int i)
 {
 	u8 k2;
 
@@ -724,7 +809,7 @@ static int decplaces(i)
 		return 16 - k2;
 }
 
-static long convert_reading(i)
+static long convert_value(u8 value, int i)
 {
 	u8 k1, k2;
 	long r;
@@ -732,7 +817,7 @@ static long convert_reading(i)
 	k1 = sdrd[i].k & 0x0f;
 	k2 = sdrd[i].k >> 4;
 
-	r = sdrd[i].reading * sdrd[i].m;
+	r = value * sdrd[i].m;
 	if(k1 < 8)
 		r += sdrd[i].b * exps[k1];
 	else
@@ -765,8 +850,25 @@ void bmcsensors_all(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = decplaces(i);
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		bmcsensors_update_client(client);
-		results[0] = convert_reading(i);
-		*nrels_mag = 1;
+		if(sdrd[i].stype == STYPE_FAN) { /* lower limit only */
+			if(sdrd[i].lim2 >= 0)
+				results[0] = convert_value(sdrd[i].limits[sdrd[i].lim2], i);
+			else
+				results[0] = 0;
+			results[1] = convert_value(sdrd[i].reading, i);
+			*nrels_mag = 2;
+		} else {
+			if(sdrd[i].lim1 >= 0)
+				results[0] = convert_value(sdrd[i].limits[sdrd[i].lim1], i);
+			else
+				results[0] = 0;
+			if(sdrd[i].lim2 >= 0)
+				results[1] = convert_value(sdrd[i].limits[sdrd[i].lim2], i);
+			else
+				results[1] = 0;
+			results[2] = convert_value(sdrd[i].reading, i);
+			*nrels_mag = 3;
+		}
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 		}
@@ -784,68 +886,6 @@ void bmcsensors_alarms(struct i2c_client *client, int operation, int ctl_name,
 		bmcsensors_update_client(client);
 		results[0] = data->alarms;
 		*nrels_mag = 1;
-	}
-#endif
-}
-
-void bmcsensors_fan_div(struct i2c_client *client, int operation,
-		     int ctl_name, int *nrels_mag, long *results)
-{
-	struct bmcsensors_data *data = client->data;
-	int old;
-
-#if 0
-	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
-	else if (operation == SENSORS_PROC_REAL_READ) {
-		bmcsensors_update_client(client);
-		results[0] = DIV_FROM_REG(data->fan_div[0]);
-		results[1] = DIV_FROM_REG(data->fan_div[1]);
-		*nrels_mag = 2;
-	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		old = bmcsensors_read_value(client, BMCSENSORS_REG_FANDIV);
-		if (*nrels_mag >= 2) {
-			data->fan_div[1] = DIV_TO_REG(results[1]);
-			old = (old & 0x3f) | (data->fan_div[1] << 6);
-		}
-		if (*nrels_mag >= 1) {
-			data->fan_div[0] = DIV_TO_REG(results[0]);
-			old = (old & 0xcf) | (data->fan_div[0] << 4);
-			bmcsensors_write_value(client, BMCSENSORS_REG_FANDIV, old);
-		}
-	}
-#endif
-}
-
-void bmcsensors_pwm(struct i2c_client *client, int operation, int ctl_name,
-		 int *nrels_mag, long *results)
-{
-	struct bmcsensors_data *data = client->data;
-#if 0
-	int nr = 1 + ctl_name - BMCSENSORS_SYSCTL_PWM1;
-
-	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 0;
-	else if (operation == SENSORS_PROC_REAL_READ) {
-		bmcsensors_update_client(client);
-		results[0] = PWM_FROM_REG(data->pwm[nr - 1]);
-		results[1] = data->pwm[nr - 1] >> 7;
-		*nrels_mag = 2;
-	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		if (*nrels_mag >= 1) {
-			data->pwm[nr - 1] &= 0x80;
-			data->pwm[nr - 1] |= PWM_TO_REG(results[0]);
-			if (*nrels_mag >= 2) {
-				if(results[1] && (!(data->pwm[nr-1] & 0x80))) {
-					/* output PWM */
-					bmcsensors_write_value(client,
-					          BMCSENSORS_REG_PPIN(nr), 0x04);
-					data->pwm[nr - 1] |= 0x80;
-				}
-			}
-			bmcsensors_write_value(client, BMCSENSORS_REG_PWM(nr),
-					    data->pwm[nr - 1]);
-		}
 	}
 #endif
 }
