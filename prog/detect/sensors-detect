@@ -3108,8 +3108,8 @@ sub lm83_detect
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, 3, 6 or 8 if detected.
-#   The Maxim chips have a low confidence value (3)
+# Returns: undef if not detected, 4, 6 or 8 if detected.
+#   The Maxim chips have a low confidence value (4)
 #   because the die revision codes are not known.
 # Registers used:
 #   0x03: Configuration
@@ -3156,7 +3156,7 @@ sub lm90_detect
     return if ($conf & 0x1f) != 0;
     return if $rate > 0x09;
     return if $mid != 0x4d;     # Maxim
-    return 3;
+    return 4;
   }
   if ($chip == 5) {
     return if ($conf & 0x1b) != 0;
