@@ -123,6 +123,22 @@ use vars qw(@pci_adapters @chip_ids @superio_ids);
        match => sub { $_[0] =~ /^SMBus I801 adapter at [0-9,a-f]{4}/ },
      } , 
      { 
+       vendid => 0x8086,
+       devid  => 0x25A4,
+       func => 3,
+       procid => "Intel 6300ESB",
+       driver => "i2c-i801",
+       match => sub { $_[0] =~ /^SMBus I801 adapter at [0-9,a-f]{4}/ },
+     } , 
+     { 
+       vendid => 0x8086,
+       devid  => 0x266A,
+       func => 3,
+       procid => "Intel ICH6",
+       driver => "i2c-i801",
+       match => sub { $_[0] =~ /^SMBus I801 adapter at [0-9,a-f]{4}/ },
+     } , 
+     { 
        vendid => 0x1106,
        devid  => 0x3040,
        func => 3,

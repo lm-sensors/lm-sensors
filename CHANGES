@@ -34,6 +34,7 @@ ask CVS about it:
            Fix 2.6 hyst temp for 2.6 (lm75, lm78 and gl518sm)
            Fully support the PC87360 family
            Support the lm99
+           Add version and date strings
   Makefile: Do not run depmod on staged installs (Peter Breitenlohner)
   Man page i2cdetect.8: document new command line flags
   Man page i2cdump.8: More details on how i2cdump can write to a chip
@@ -45,6 +46,7 @@ ask CVS about it:
   Module gl520sm: Less agressive initialization process
                   Fix temp1 limits being unsettable in application
                   Ensure that temp2 and in4 are not used at the same time
+  Module i2c-i801: Support 6300ESB and ICH6
   Module i2c-sis645: Add support for SiS655
   Module lm90: Support LM99 and LM89 
   Module lm92: Support MAX6633, MAX6634, MAX6635 and LM76
@@ -63,7 +65,7 @@ ask CVS about it:
                       Do not read fan data when monitoring is disabled
                       Do not include SENSORS_INSMOD stuff
                       New module parameter: init
-  Module smsc47m1: Lock on reads and writes
+  Module smsc47m1: Lock on reads and writes; many fixes
   Module thmc50: Fix address range
   Module via686a: Fix voltage roundings
                   Simplify temperature conversions
@@ -86,11 +88,12 @@ ask CVS about it:
                    Support the lm99
                    Do not invert AS99127F beep bits anymore
                    Fix W83781D temp3 alarm (Aurelien Jarno)
+                   Print library version string
   Program sensors-detect: Rework Super I/O detection
                           Support SiS655/SiS96x
                           Support ADT7461 and ADT7467
                           Better support for ADM1027, ADT7460 and ADT7463
-                          Explicitely support ADM1028
+                          Explicitly support ADM1028
                           Scan all logical devices of PC87365 and PC87366
                           Detect LM92, LM76, MAX6633, MAX6634, MAX6635
                           Detect eeproms with software write protect (not

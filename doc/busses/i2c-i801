@@ -10,6 +10,9 @@ Supported adapters:
   * Intel 82801BA (ICH2 - part of the '815E' chipset)
   * Intel 82801CA/CAM (ICH3)
   * Intel 82801DB (ICH4)
+  * Intel 82801EB (ICH5)
+  * Intel 6300ESB
+  * Intel ICH6
     Datasheets: Publicly available at the Intel website
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
@@ -73,7 +76,7 @@ support this.
 SMBus 2.0 Support
 -----------------
 
-The 82801DB (ICH4) supports several SMBus 2.0 features.
+The 82801DB (ICH4) and later chips support several SMBus 2.0 features.
 Kernel and driver support are as follows:
 
 Feature		Kernel		Driver
@@ -83,10 +86,10 @@ Block PEC	yes		yes
 Hardware PEC	yes		yes
 
 
-Other ICH4 Features
--------------------
+Other ICH4 and later Features
+-----------------------------
 
-The following additional ICH4 features are also _not_ supported:
+The following additional features are also _not_ supported:
 
 32 Byte buffer
 
