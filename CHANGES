@@ -13,7 +13,7 @@ ask CVS about it:
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
-2.3.1 (199904??)
+2.3.1 (19990501)
   All: Now compiles on PPC
   Module i2c-hydra: NEW
   Module i2c-proc: Buffer overflow removed: `less /proc/bus-i2c-0' now works
@@ -23,6 +23,7 @@ ask CVS about it:
             /lib/modules/current/extra/misc
   Program sensors-detect: PPC Hydra now detected
   Program sensors: Now prints complete GL518SM information
+  Program sensors: SIS5595, ADM1021, MAX1617(A), ADM9240, DS1780 added
 
 2.3.0 (19990422)
   All: Many, many changes and improvements
