@@ -15,13 +15,15 @@ problems.
 * Frodo Looijaard <frodol@dds.nl>
   Took up the development of Alex' lm78 module. Large pieces of code were
   written by him. Designed lm_sensors version 2, and wrote most of its
-  core code.
+  core code, including many drivers.
 * William Morgan <wmorgan@cmu.edu>
   Helped with some patches in lm_sensors version 1. He provided us with
   the original CVS archive, and even managed to explain to us how to use
   it.
 * Kyösti Mälkki <kmalkki@cc.hut.fi>
-  Author of the i2c-via and sis5595 driver.
+  Author of the i2c-via and sis5595 drivers.
+* Mark D. Studebaker <mds@eng.paradyne.com>
+  Author of the i2c-ali15x3 driver.
 
 * Simon Vogl <simon@tk.uni-linz.ac.at>
   Wrote the new i2c kernel driver. This driver is indispensable for the

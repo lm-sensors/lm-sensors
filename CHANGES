@@ -7,13 +7,30 @@ ask CVS about it:
   * Determine which tags are valid, by running this command from the
     project root directory:
       cvs status -v -l Makefile
-    Valid tags are usually like form V-2-1-0 for version 2.1.0
+    Valid tags are usually like form V2-1-0 for version 2.1.0
   * Ask cvs for the difference between two versions:
       cvs diff -r TAG1 -r TAG2 DIFF-OPTIONS
     for example:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
-2.1.2 (19980116)
+2.2.0 (199902??)
+  All: Set copyrights to include 1999
+  All: Small bugfixes
+  I2C: Upgraded to newest archive of Simon Vogl
+  Module i2c-dev: NEW
+  Module i2c-ali15x3: NEW
+  Module i2c-via: This is old module bit-mb, now moved to the main lm_sensors
+     directories, and somewhat improved
+  Module sis5595: NEW
+  Modules: Renamed all bus modules to i2c-*, new directory lay-out
+  Library: Support for new chip drivers, several small bugs fixed
+  Library manual pages: NEW
+  Program i2cdetect: Moved to detect directory
+  Program detect.pl: NEW
+  Program doc-features: NEW
+  Program sensors: Added man-page
+  
+2.1.2 (19990116)
   Modules lm80.o, w83781d.o: fan-related Segmentation fault corrected
   Module gl518sm.o: yet more bug fixes. It should at long last be usable now
   Documentation in doc/kernel: NEW

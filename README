@@ -1,4 +1,3 @@
-
 This is the completely rewritten version of lm_sensors, a collection of
 modules for general SMBus access and hardware monitoring. There are quite
 a few changes compared with 1.x.y versions; read doc/version-2 for the
@@ -8,9 +7,18 @@ WARNING! If you downloaded this package through our CVS archive, you walk
 the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
 
-We expect many updates and new releases the next few weeks (with both bug
-fixes and new features), so check http://www.netroedge.com/~lm78 (our
-homepage) often.
+At least the following SMBus adapters are supported:
+  Intel PIIX4 (used in most Intel chipsets)
+  Acer Labs M1541 and M1543C (used in the Aladdin IV, V and Pro 2 chipsets)
+  VIA Technologies 82C586B (used in most VIA chipsets)
+
+At least the following hardware sensor chips are supported:
+  National Semicoductor LM75, LM78, LM78-J, LM79 and LM80
+  Winbond W83781D
+  Genesys Logic GL518SM
+  Analog Devices ADM1021 and ADM9240
+  SiS Southbridge (integrated in the chipset; the I2C adapter will also be
+    supported in the near future)
 
 We could use some testers of hardware. If you own a specific monitoring
 chip or I2C bus, and are willing to help us out, please contact us - even
@@ -58,12 +66,12 @@ The latest version of this package can always be found on our homepage:
 http://www.netroedge.com/~lm78. Pre-release  versions can be retrieved
 through anonymous CVS; see doc/cvs for more information.
 
-This whole package is copyright (c) 1998, 1999-1999 by Frodo Looijaard and Philip
-Edelbrock, except for (almost) everything in the i2c directory, which
-is copyright (c) 1995-1999 by Simon Vogl. See the individual files for
-more exact copyright information.  This package may be distributed
-according to the GNU General Public License (GPL), as included in the
-file COPYING.
+This whole package is copyright (c) 1998, 1999 by Frodo Looijaard and 
+Philip Edelbrock, except for (almost) everything in the i2c directory, which
+is copyright (c) 1995-1999 by Simon Vogl, and a few drivers written by
+other people. See the individual files for more exact copyright information.  
+This package may be distributed according to the GNU General Public License 
+(GPL), as included in the file COPYING.
 
 Note that at this moment, libsensors falls under the GPL, not the LGPL.
 In more human language, that means it is FORBIDDEN to link any application

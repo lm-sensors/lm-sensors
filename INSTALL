@@ -38,19 +38,25 @@ this package. Some interesting variables:
 * BINDIR ($(PREFIX)/bin)
   The directory where 'make install' installs all executables.
 * INCLUDEDIR ($(PREFIX)/include)
-  The basic directory where 'make install' installs your include files.
+  The base directory where 'make install' installs your include files.
   Actually, SYSINCLUDEDIR ($(INCLUDEDIR)/linux) is used for kernel header
   files, and LIBINCLUDEDIR ($(INCLUDEDIR)/sensors) is used for library
   header files.
+* MANDIR ($(PREFIX)/man)
+  The base directory where manual pages are installed. 
+* MANOWN, MANGRP (root, root)
+  Owner and group of installed manual pages
 
-Warning! In newer 2.1 kernels, there is support for I2C. This support is
-NOT compatible with this module! Actually, Simon Vogl's modules package 
+Warning! In 2.2 and newer 2.1 kernels, there is support for I2C. This support 
+is NOT compatible with this module! Actually, Simon Vogl's modules package 
 (which IS compatible) is scheduled to replace the current support. If you
 actually use these modules, you have a problem; they can not coexist
 with Simon's modules. Theoretically, you should be able to replace
 the old modules in the kernel tree with the new stuff in our i2c directory,
 recompile the kernel, and then compile our modules with I2C=0. If you try
-this, please share the results with us!
+this, please share the results with us! There have also been some rumors
+about the peaceful coexistence of both sets of modules, but others found
+some problems with it.
 
 Please make sure that /usr/include/linux and /usr/include/asm are symlinks 
 into the kernel tree which corresponds with the kernel version you are using
@@ -68,18 +74,24 @@ It can be tricky to know which modules you need to insert. For this reason,
 I suggest you go the 'modprobe' way, as described within doc/modules.
 If you just want to run a test without installing them, try the following:
   insmod i2c/i2c-core.o
-  insmod src/i2c-proc.o
-  insmod src/smbus.o
-  insmod src/sensors.o
-  insmod src/isa.o
-  insmod src/piix4.o  # Or whatever SMBus controller you have
-  insmod src/lm78.o   # Or whatever hardware monitoring chip you have
+  insmod kernel/i2c-proc.o
+  insmod kernel/i2c-dev.o
+  insmod kernel/smbus.o
+  insmod kernel/sensors.o
+  insmod kernel/busses/isa.o
+  insmod kernel/busses/piix4.o # Or whatever SMBus controller you have
+  insmod kernel/chips/lm78.o   # Or whatever hardware monitoring chip you have
 Now you should have new directories under /proc/sys/dev/sensors and some files
 beginning with i2c in /proc/bus.
 
 If you have installed the modules, as described within doc/modules, you can
 do 'modprobe isa && modprobe piix4 && modprobe lm78 && modprobe i2c-proc' 
 (the last is optional) from any directory to reach the same situation.
+
+There is a program 'detect.pl' in prog/detect which should tell you at least
+what bus driver you should insert. This program is not completely failsafe,
+but it may at least help. It will be expanded to cover chip detection too,
+in the future.
 
 Do not panic if some (or all) of the values in the /proc/sys/dev/sensors/*/*
 files do not seem to correspond to anything in earlier versions. Starting
@@ -93,15 +105,17 @@ access sensor data in a more programmer-friendly way. It will be built as
 both a shared and a static library, and installed in your LIB directory
 (normally /usr/local/lib). It needs a configuration file, which is usually
 called 'sensors.conf', and can be placed in /etc, /usr/lib/sensors,
-/usr/local/lib/sensors, /usr/lib, or /usr/local/lib. [NOTE: No real
-config file documentation is written yet. A relatively well-commented
-example can be found in the etc directory.]
+/usr/local/lib/sensors, /usr/lib, or /usr/local/lib.
+
+Note that if you already have a config file, it is NOT overwritten! You
+may still want to do this by hand (`cp etc/sensors.conf.eg /etc/sensors.conf')
+as the example config file may be updated.
 
 Where version 1 of this package had the human-readable /proc/sensors file,
 this version includes a user-space program which gathers all data
 and displays it in a comparable format. This program is called 'sensors'.
 Everybody can use it to read sensors values; only root can use it to
-set minimum and maximum values.
+set minimum and maximum values (using the `-s' switch).
 
 If you want to run 'sensors' without installing the package, you must
 use the following command to make it able to find its shared library:
@@ -109,13 +123,6 @@ use the following command to make it able to find its shared library:
   (tcsh) setenv LD_LIBRARYPATH /WHEREVER/lm_sensors-2.X.Y/lib:$LD_LIBRARY_PATH
 Replace /WHEREVER/lm_sensors-2.X.Y with the base directory of the package
 source code.
-
-One of the next releases of this package will have a user-space probe program,
-which tells you which chips and busses are present, and which modules you
-will have to load. At this moment, just try to load the modules; if no chip
-or bus is detected, the module will fail to insert. [NOTE: not true for
-the bit-lp.o and bit-elv.o drivers. Don't try them without expecting 
-fake devices]
 
 Please examine the files in the doc subdirectory for more information, 
 especially about individual driver. You can always mail us at 

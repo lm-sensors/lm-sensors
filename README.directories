@@ -12,9 +12,10 @@ The directories within this package:
 * i2c
   Simon Vogl's i2c module, including any necessary patches, excluding any
   files which are removed by 'make clean'.
+* kernel
+  The kernel modules: general SMBus drivers, and specific chip and adapter
+  drivers.
 * lib
   The user-space sensors support library code
 * prog
   Several supporting programs, some of them use the library, some do not.
-* src
-  Our own module code.
