@@ -1447,7 +1447,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      }, 
      {
 	name => "SMSC 47B27x Super IO Fan Sensors",
-	driver => "to-be-written",
+	driver => "smsc47m1",
 	addrreg => 0x2e,
 	datareg => 0x2f,
 	enter => [0x55],
@@ -3888,7 +3888,7 @@ sub arp_detect
 # $_[0]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
-# Returns: 1
+# Returns: 3
 sub smartbatt_detect
 {
   my ($file,$addr) = @_;
