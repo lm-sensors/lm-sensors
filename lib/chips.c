@@ -1162,6 +1162,9 @@ static sensors_chip_feature lm93_features[] = {
 	SENSORS_LM93_TEMP_MIN_MAX(3),
 	SENSORS_LM93_VID(1),
 	SENSORS_LM93_VID(2),
+	{ SENSORS_LM93_ALARMS, "alarms", NOMAP, 
+		NOMAP, R,
+		LM93_SYSCTL_ALARMS, VALUE(1), 0 },
 	{ 0 }
 };
 
