@@ -88,6 +88,7 @@ sub gen_Documentation_Configure_help
            m@Intel I801@ or
            m@Intel I810/I815 based Mainboard@ or
            m@Intel 82371AB PIIX4\(E\)@ or
+           m@Nvidia Nforce2@ or
            m@Silicon Integrated Systems Corp. SiS5595 based Mainboard@ or
            m@VIA Technologies, Inc. VT82C586B@ or
            m@VIA Technologies, Inc. VT82C596, 596B, 686A/B, 8233@ or
@@ -198,6 +199,13 @@ CONFIG_I2C_PIIX4
   Intel PIIX4, PIIX4E, and 443MX, Serverworks OSB4/CSB5,
   and SMSC Victory66 mainboard
   I2C interfaces. This can also be
+  built as a module which can be inserted and removed while the kernel
+  is running.
+
+Nvidia Nforce2 based Mainboard
+CONFIG_I2C_NFORCE2
+  If you say yes to this option, support will be included for the 
+  Nvidia Nforce2 family of mainboard I2C interfaces. This can also be
   built as a module which can be inserted and removed while the kernel
   is running.
 
@@ -851,6 +859,7 @@ sub gen_drivers_i2c_Config_in
     dep_tristate '  Intel 82801AA, AB, BA, DB' CONFIG_I2C_I801 $CONFIG_I2C
     dep_tristate '  Intel i810AA/AB/E and i815' CONFIG_I2C_I810 $CONFIG_I2C_ALGOBIT
     dep_tristate '  Intel 82371AB PIIX4(E), 443MX, ServerWorks OSB4/CSB5, SMSC Victory66' CONFIG_I2C_PIIX4 $CONFIG_I2C
+    dep_tristate '  Nvidia Nforce2' CONFIG_I2C_NFORCE2 $CONFIG_I2C
     dep_tristate '  SiS 5595' CONFIG_I2C_SIS5595 $CONFIG_I2C
     dep_tristate '  SiS 630/730' CONFIG_I2C_SIS630 $CONFIG_I2C
     dep_tristate '  SiS 645/961,645DX/961,735' CONFIG_I2C_SIS645 $CONFIG_I2C $CONFIG_HOTPLUG
@@ -966,6 +975,7 @@ obj-$(CONFIG_I2C_HYDRA)			+= i2c-hydra.o
 obj-$(CONFIG_I2C_I801)			+= i2c-i801.o
 obj-$(CONFIG_I2C_I810)			+= i2c-i810.o
 obj-$(CONFIG_I2C_ISA)			+= i2c-isa.o
+obj-$(CONFIG_I2C_NFORCE2)		+= i2c-nforce2.o
 obj-$(CONFIG_I2C_PIIX4)			+= i2c-piix4.o
 obj-$(CONFIG_I2C_SIS5595)		+= i2c-sis5595.o
 obj-$(CONFIG_I2C_SIS630)		+= i2c-sis630.o

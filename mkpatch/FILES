@@ -6,6 +6,7 @@ kernel/busses/i2c-hydra.c	drivers/i2c/i2c-hydra.c
 kernel/busses/i2c-i801.c	drivers/i2c/i2c-i801.c
 kernel/busses/i2c-i810.c	drivers/i2c/i2c-i810.c
 kernel/busses/i2c-isa.c		drivers/i2c/i2c-isa.c
+kernel/busses/i2c-nforce2.c     drivers/i2c/i2c-nforce2.c
 kernel/busses/i2c-piix4.c	drivers/i2c/i2c-piix4.c
 kernel/busses/i2c-savage4.c	drivers/i2c/i2c-savage4.c
 kernel/busses/i2c-sis5595.c	drivers/i2c/i2c-sis5595.c
