@@ -1341,63 +1341,94 @@ chip "adm1021-*" "adm1023-*" "max1617-*" "max1617a-*" "thmc10-*" "lm84-*" "gl523
 #   set remote_temp_over	70
 
 chip "vt1211-*"
-
-    label in0 "unused"
-    label in1 "+2.5V"
+#
+# temp1 and in6 are not implemented in vt1211
+# temp4-7 (thermistor) cacluations unimplemented here - requires logarithms :(
+#
+#							1 for temp, 0 for volt.
+#	Sensor		Voltage Mode	Temp Mode	config bit
+#	--------	------------	---------	--------------	
+#	Reading 1			temp3
+#	UCH1/Reading2	in0		temp2		0x04 (4)
+#	UCH2		in1		temp4		0x08 (8)
+#	UCH3		in2		temp5		0x10 (16)
+#	UCH4		in3		temp6		0x20 (32)
+#	UCH5		in4		temp7		0x40 (64)
+#	3.3V		in5
+#
+# set uch1-2 to temp mode, uch3-5 to voltage mode
+#
+    ignore temp1	
+    ignore in6
+    set config 12
+    ignore in0
+    ignore in1
+    ignore temp5	
+    ignore temp6	
+    ignore temp7	
+#
+#   label in0 "unused"
+#   label in1 "unused"
     label in2 "VCore1"
     label in3 "+5V"
     label in4 "+12V"
     label in5 "+3.3V"
-    label in6 "VCore2"
+#   label in6 "VCore2"
 
-    label temp1 "1211 Temp"
-    label temp2 "MB Temp"
+#   label temp1 "1211 Temp"
+    label temp2 "MB1 Temp"
     label temp3 "Proc Temp"
-
+    label temp4 "MB2 Temp"
 #
 #   All voltage calculations have the form
 #       ((@ * 100) - 3) / (K * 95.8), (@ * K * 0.958) + .03 
 #   where K = R2 / (R1 + R2).
-#   Use the following K values based on input voltage:
-#	voltage		K
-#	2.5		0.8333
-#	3.3		0.6296
-#	3.5 (Vcore)	0.5952
-#	5.0		0.4167
-#	12.0		0.1754
+#   Use the following K values based on input voltage.
+#   This of course assumes the mobo has the resistors
+#   recommended by Via in the datasheet.
+#	Voltage			K
+#	VCore			1.0
+#	2.5			0.8333
+#	3.3 (in5 internal)	0.6296
+#	3.5 (3.3V ext.)		0.5952
+#	5.0			0.4167
+#	12.0			0.1754
 #
-    compute in0 ((@ * 100) - 3) / (0.5952 * 95.8), (@ * 0.5952 * 0.958) + .03 
-    compute in1 ((@ * 100) - 3) / (0.8333 * 95.8), (@ * 0.8333 * 0.958) + .03 
+#   compute in0 ((@ * 100) - 3) / (0.5952 * 95.8), (@ * 0.5952 * 0.958) + .03 
+#   compute in1 ((@ * 100) - 3) / (0.8333 * 95.8), (@ * 0.8333 * 0.958) + .03 
     compute in2 ((@ * 100) - 3) / (0.5952 * 95.8), (@ * 0.5952 * 0.958) + .03 
     compute in3 ((@ * 100) - 3) / (0.4167 * 95.8), (@ * 0.4167 * 0.958) + .03 
     compute in4 ((@ * 100) - 3) / (0.1754 * 95.8), (@ * 0.1754 * 0.958) + .03 
     compute in5 ((@ * 100) - 3) / (0.6296 * 95.8), (@ * 0.6296 * 0.958) + .03 
-    compute in6 ((@ * 100) - 3) / (0.5952 * 95.8), (@ * 0.5952 * 0.958) + .03 
+#   compute in6 ((@ * 100) - 3) / (0.5952 * 95.8), (@ * 0.5952 * 0.958) + .03 
 
-    set in1_min 2.5 * 0.95
-    set in1_max 2.5 * 1.05
-    set in1_min 2.5 * 0.95
-    set in1_max 2.5 * 1.05
-    set in2_min 2.0 * 0.97
-    set in2_max 2.0 * 1.03
+    set vrm 9.1
+#   set in0_min 2.5 * 0.95
+#   set in0_max 2.5 * 1.05
+#   set in1_min 2.5 * 0.95
+#   set in1_max 2.5 * 1.05
+    set in2_min vid * 0.97
+    set in2_max vid * 1.03
     set in3_min 5.0 * 0.95
     set in3_max 5.0 * 1.05
     set in4_min 12.0 * 0.90
     set in4_max 12.0 * 1.10
     set in5_min 3.3 * 0.95
     set in5_max 3.3 * 1.05
-    set in6_min 2.0 * 0.97
-    set in6_max 2.0 * 1.03
+#   set in6_min 2.0 * 0.97
+#   set in6_max 2.0 * 1.03
 
-    compute temp1  (@ - 65) / 0.9686,  (@ * 0.9686) + 65
+#   compute temp1  (@ - 65) / 0.9686,  (@ * 0.9686) + 65
     compute temp3  (@ - 65) / 0.9686,  (@ * 0.9686) + 65
 
-    set temp1_hyst 40
-    set temp1_over 45
+#   set temp1_hyst 40
+#   set temp1_over 45
     set temp2_hyst 55
     set temp2_over 60
     set temp3_hyst 60
     set temp3_over 65
+    set temp4_hyst 60
+    set temp4_over 65
 
     set fan1_min 3000
     set fan2_min 3000

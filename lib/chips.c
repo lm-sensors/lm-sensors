@@ -2762,7 +2762,11 @@ static sensors_chip_feature vt1211_features[] =
     { SENSORS_VT1211_ALARMS, "alarms", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING, 
                            SENSORS_MODE_R, VT1211_SYSCTL_ALARMS, VALUE(1), 0 },
     { SENSORS_VT1211_VID, "vid", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING, 
-                           SENSORS_MODE_R, VT1211_SYSCTL_VID, VALUE(1), 0 },
+                           SENSORS_MODE_R, VT1211_SYSCTL_VID, VALUE(1), 3 },
+    { SENSORS_VT1211_VRM, "vrm", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING, 
+                           SENSORS_MODE_R, VT1211_SYSCTL_VRM, VALUE(1), 1 },
+    { SENSORS_VT1211_UCH, "config", SENSORS_NO_MAPPING, SENSORS_NO_MAPPING, 
+                           SENSORS_MODE_R, VT1211_SYSCTL_UCH, VALUE(1), 0 },
     { 0 }
   };
 
