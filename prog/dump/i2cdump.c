@@ -73,11 +73,11 @@ int main(int argc, char *argv[])
 
   if (argc < 4) {
     fprintf(stderr,"Warning: no size specified (using byte-data access)\n");
-    size = SMBUS_BYTE_DATA;
+    size = I2C_SMBUS_BYTE_DATA;
   } else if (!strcmp(argv[3],"b"))
-    size = SMBUS_BYTE_DATA;
+    size = I2C_SMBUS_BYTE_DATA;
   else if (!strcmp(argv[3],"w"))
-    size = SMBUS_WORD_DATA;
+    size = I2C_SMBUS_WORD_DATA;
   else {
     fprintf(stderr,"Error: Third argument not recognized!\n");
     help();
@@ -100,11 +100,11 @@ int main(int argc, char *argv[])
   fprintf(stderr,"  WARNING! This program can confuse your I2C bus, "
           "cause data loss and worse!\n");
   fprintf(stderr,"  I will probe file %s, address 0x%x, mode %s\n",
-          filename,address,size == SMBUS_BYTE_DATA?"byte":"word");
+          filename,address,size == I2C_SMBUS_BYTE_DATA?"byte":"word");
   fprintf(stderr,"  You have five seconds to reconsider and press CTRL-C!\n\n");
   sleep(5);
 
-  if (size == SMBUS_BYTE_DATA) {
+  if (size == I2C_SMBUS_BYTE_DATA) {
     printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
     for (i = 0; i < 256; i+=16) {
       printf("%02x: ",i);
