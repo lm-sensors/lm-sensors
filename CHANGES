@@ -17,6 +17,10 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
+2.8.7 (2004xxxx)
+  Module i2c-sis645: Add support for SiS655
+
+
 2.8.6 (20040405)
   File README.thinkpad: Update status
   File doc/chips/pca9540: New
@@ -54,7 +58,7 @@ ask CVS about it:
                           Add smart battery charger and manager detection
                           Rework adm1021 and clones detection
                           The PC87360, PC87363 and PC87364 Super I/O chips
-						  now have a (preliminary) driver
+                          now have a (preliminary) driver
                           Rework Super I/O detection
                           Better support of devfs
   Program sensors-detect-stat.pl: New

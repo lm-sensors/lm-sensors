@@ -5,7 +5,7 @@ Status: Beta
 Supported adapters:
   * Silicon Integrated Systems Corp (SiS)
     Any combination of these host bridges:
-	645, 645DX (aka 646), 648, 650, 651, 735, 745, 746
+	645, 645DX (aka 646), 648, 650, 651, 655, 735, 745, 746
     and these south bridges:
     	961, 962, 963(L)
 
@@ -78,6 +78,8 @@ Robert Zwerus <arzie@dds.nl>
  - testing for SiS645DX
 Kianusch Sayah Karadji <kianusch@sk-tech.net>
  - patch for SiS645DX/962
+Ken Healy
+ - patch for Sis655
 
 To anyone else who has written w/ feedback, thanks!
 

@@ -30,6 +30,10 @@
     http://www2.lm-sensors.nu/~lm78/download.html
 */
 
+/*   25th March 2004
+     Support for Sis655 chipsets added by Ken Healy
+*/
+
 /*
     Note: we assume there can only be one SiS645 with one SMBus interface
 */
@@ -69,6 +73,11 @@
 /* SiS651 north bridge (defined in 2.4.21)*/
 #ifndef PCI_DEVICE_ID_SI_651
 #define PCI_DEVICE_ID_SI_651 0x0651
+#endif
+
+/* SiS655 north bridge (defined in 2.4.22)*/
+#ifndef PCI_DEVICE_ID_SI_655
+#define PCI_DEVICE_ID_SI_655 0x0655
 #endif
 
 /* SiS746 north bridge (defined in 2.4.21) */
@@ -260,6 +269,8 @@ static int __devinit sis645_hotplug_smbus(void)
 				PCI_DEVICE_ID_SI_650, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
 				PCI_DEVICE_ID_SI_651, NULL))
+			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
+				PCI_DEVICE_ID_SI_655, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
 				PCI_DEVICE_ID_SI_735, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
