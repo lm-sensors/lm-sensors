@@ -22,6 +22,9 @@
 */
 
 /* 
+   SiS southbridge has a LM78-like chip integrated on the same IC.
+   This driver is a customized copy of lm78.c
+
     Supports following revisions:
 	Version		PCI ID		PCI Revision
 	1		1039/0008	AF or less
@@ -79,19 +82,15 @@ static int blacklist[] = {
 			PCI_DEVICE_ID_SI_540,
 			PCI_DEVICE_ID_SI_550,
 			PCI_DEVICE_ID_SI_630,
+			PCI_DEVICE_ID_SI_645,
 			PCI_DEVICE_ID_SI_730,
+			PCI_DEVICE_ID_SI_735,
 			PCI_DEVICE_ID_SI_5511, /* 5513 chip has the 0008 device but
 						  that ID shows up in other chips so we
 						  use the 5511 ID for recognition */
 			PCI_DEVICE_ID_SI_5597,
 			PCI_DEVICE_ID_SI_5598,
-			0x645,
-			0x735,
                           0 };
-/*
-   SiS southbridge has a LM78-like chip integrated on the same IC.
-   This driver is a customized copy of lm78.c
-*/
 
 /* Many SIS5595 constants specified below */
 
@@ -144,9 +143,8 @@ static int blacklist[] = {
 
 static inline u8 FAN_TO_REG(long rpm, int div)
 {
-	if (rpm == 0)
+	if (rpm <= 0)
 		return 255;
-	rpm = SENSORS_LIMIT(rpm, 1, 1000000);
 	return SENSORS_LIMIT((1350000 + rpm * div / 2) / (rpm * div), 1,
 			     254);
 }
@@ -159,8 +157,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?\
 				((((val)*12)-6327)/100):\
                                 ((((val)*12)-6227)/100)),0,255))
-
-#define ALARMS_FROM_REG(val) (val)
 
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
@@ -186,8 +182,8 @@ struct sis5595_data {
 	u8 fan[2];		/* Register value */
 	u8 fan_min[2];		/* Register value */
 	u8 temp;		/* Register value */
-	u8 temp_over;		/* Register value  - really max */
-	u8 temp_hyst;		/* Register value  - really min */
+	u8 temp_over;		/* Register value */
+	u8 temp_hyst;		/* Register value */
 	u8 fan_div[2];		/* Register encoding, shifted right */
 	u16 alarms;		/* Register encoding, combined */
 };
@@ -399,17 +395,14 @@ int sis5595_detect(struct i2c_adapter *adapter, int address,
 	/* Reserve the ISA region */
 	request_region(address, SIS5595_EXTENT, type_name);
 
-	/* Check revision and pin registers to determine whether 3 or 4 voltages */
+	/* Check revision and pin registers to determine whether 4 or 5 voltages */
 	pci_read_config_byte(s_bridge, SIS5595_REVISION_REG, &(data->revision));
-	if(data->revision < REV2MIN) {
-		data->maxins = 3;
-	} else {
+	/* 4 voltages, 1 temp */
+	data->maxins = 3;
+	if (data->revision >= REV2MIN) {
 		pci_read_config_byte(s_bridge, SIS5595_PIN_REG, &val);
-		if(val & 0x80)
-			/* 3 voltages, 1 temp */
-			data->maxins = 3;
-		else
-			/* 4 voltages, no temps */
+		if (!(val & 0x80))
+			/* 5 voltages, no temp */
 			data->maxins = 4;
 	}
 
@@ -669,7 +662,7 @@ void sis5595_alarms(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		sis5595_update_client(client);
-		results[0] = ALARMS_FROM_REG(data->alarms);
+		results[0] = data->alarms;
 		*nrels_mag = 1;
 	}
 }

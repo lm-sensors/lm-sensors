@@ -78,9 +78,8 @@ SENSORS_INSMOD_3(lm78, lm78j, lm79);
 
 static inline u8 FAN_TO_REG(long rpm, int div)
 {
-	if (rpm == 0)
+	if (rpm <= 0)
 		return 255;
-	rpm = SENSORS_LIMIT(rpm, 1, 1000000);
 	return SENSORS_LIMIT((1350000 + rpm * div / 2) / (rpm * div), 1,
 			     254);
 }
@@ -93,7 +92,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            205-(val)*5)
-#define ALARMS_FROM_REG(val) (val)
 
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 #define DIV_FROM_REG(val) (1 << (val))
@@ -655,7 +653,7 @@ void lm78_alarms(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm78_update_client(client);
-		results[0] = ALARMS_FROM_REG(data->alarms);
+		results[0] = data->alarms;
 		*nrels_mag = 1;
 	}
 }
