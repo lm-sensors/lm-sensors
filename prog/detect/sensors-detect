@@ -2543,7 +2543,7 @@ sub scan_superio
                                             $new_hash;
       exit_superio($chip, 1);
     } else {
-      if($val == 0xff || $val == 0xffff) {	
+      if($val == 0xff || $val == 0xffff || $val == 0) {	
         print "  Failed!\n";
       } else {
         printf "  Failed! (0x%02x)\n", $val;
