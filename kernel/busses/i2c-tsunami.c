@@ -100,40 +100,43 @@ static int bit_tsunami_getsda(void *data)
 }
 
 static struct i2c_algo_bit_data tsunami_i2c_bit_data = {
-	
-	bit_tsunami_setsda,
-	bit_tsunami_setscl,
-	bit_tsunami_getsda,
-	bit_tsunami_getscl,
-	10, 10, HZ/2	/* delays/timeout */
+	.setsda		= bit_tsunami_setsda,
+	.setscl		= bit_tsunami_setscl,
+	.getsda		= bit_tsunami_getsda,
+	.getscl		= bit_tsunami_getscl,
+	.udelay		= 10,
+	.mdelay		= 10,
+	.timeout	= HZ/2
 };
 
 static struct i2c_adapter tsunami_i2c_adapter = {
 	.owner		= THIS_MODULE,
 	.name		= "I2C Tsunami/Typhoon adapter",
 	.id		= I2C_HW_B_TSUNA,
-	.algo_data		= &tsunami_i2c_bit_data,
+	.algo_data	= &tsunami_i2c_bit_data,
 };
 
 
+#if 0
 static struct pci_driver tsunami_driver = {
 	.name		= "tsunami smbus",
 	.id_table	= tsunami_ids,
 	.probe		= tsunami_probe,
 	.remove		= __devexit_p(tsunami_remove),
 };
+#endif
 
 static int __init i2c_tsunami_init(void)
 {
 	printk("i2c-tsunami.o version %s (%s)\n", LM_VERSION, LM_DATE);
 
 	if (hwrpb->sys_type != ST_DEC_TSUNAMI) {
-		printk("i2c-tsunami.o: not Tsunami based system (%d), module not inserted.\n", hwrpb->sys_type);
+		printk("i2c-tsunami.o: not Tsunami based system (%ld), module not inserted.\n", hwrpb->sys_type);
 		return -ENXIO;
 	} else {
-		printk("i2c-tsunami.o: using Cchip MPD at 0x%lx.\n", &TSUNAMI_cchip->mpd);
+		printk("i2c-tsunami.o: using Cchip MPD at 0x%lx.\n", (long) &TSUNAMI_cchip->mpd);
 	}
-	i2c_bit_add_bus(&tsunami_i2c_adapter);
+	return i2c_bit_add_bus(&tsunami_i2c_adapter);
 }
 
 
