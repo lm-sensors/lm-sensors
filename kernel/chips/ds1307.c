@@ -25,6 +25,7 @@
 #include <linux/i2c.h>
 #include <linux/i2c-proc.h>
 #include <asm/semaphore.h>
+#include "version.h"
 #include "ds1307.h"
 
 #define BCD_TO_BIN(x) (((x) & 15) + ((x) >> 4) * 10)
@@ -325,7 +326,7 @@ static struct i2c_driver ds1307 = {
 
 static int __init sm_ds1307_init(void)
 {
-	printk ("Dallas Semiconductor DS1307 Real-Time Clock driver (V0.03)\n");
+	printk("ds1307.o version %s (%s)\n", LM_VERSION, LM_DATE);
 	return i2c_add_driver(&ds1307);
 }
 

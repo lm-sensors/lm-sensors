@@ -956,7 +956,8 @@ static struct pci_driver via686a_pci_driver = {
 
 static int __init sm_via686a_init(void)
 {
-       return pci_module_init(&via686a_pci_driver);
+	printk("via686a.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	return pci_module_init(&via686a_pci_driver);
 }
 
 static void __exit sm_via686a_exit(void)
