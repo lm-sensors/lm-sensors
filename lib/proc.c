@@ -131,7 +131,7 @@ int sensors_read_proc_chips(void)
 				return res;
 			}
 			entry.name.busname = strdup(dirname);
-			sscanf(de->d_name, "%x-%x", &entry.name.bus, &entry.name.addr);
+			sscanf(de->d_name, "%d-%x", &entry.name.bus, &entry.name.addr);
 			/* find out if ISA or not */
 			sprintf(n, "%s/class/i2c-adapter/i2c-%d/device/name",
 			        sysfsmount, entry.name.bus);
@@ -211,7 +211,7 @@ int sensors_read_proc_bus(void)
 				if(!strncmp(x, "ISA ", 4)) {
 					entry.number = SENSORS_CHIP_NAME_BUS_ISA;
 					entry.algorithm = "ISA bus algorithm";
-				} else if(!sscanf(de->d_name, "i2c-%x", &entry.number)) {
+				} else if(!sscanf(de->d_name, "i2c-%d", &entry.number)) {
 					entry.number = SENSORS_CHIP_NAME_BUS_DUMMY;
 					entry.algorithm = "Dummy bus algorithm";
 				} else
@@ -385,26 +385,26 @@ int getsysname(const sensors_chip_feature *feature, char *sysname, int *sysmag)
 	char check; /* used to verify end of string */
 	int num;
 	
-struct match {
-	const char * name, * sysname;
-	const int sysmag;
-};
+	struct match {
+		const char * name, * sysname;
+		const int sysmag;
+	};
 
-struct match *m;
+	struct match *m;
 
-struct match matches[] = {
-	{ "beeps", "beep_mask", 0 },
-	{ "pwm", "pwm1", 0 },
-	{ "rempte_temp", "temp_input2", TEMPMAG },
-	{ "remote_temp_hyst", "temp_hyst2", TEMPMAG },
-	{ "remote_temp_low", "temp_min2", TEMPMAG },
-	{ "remote_temp_over", "temp_max2", TEMPMAG },
-	{ "temp", "temp_input1", TEMPMAG },
-	{ "temp_hyst", "temp_min1", TEMPMAG },		/* kernel patch pending for hyst */
-	{ "temp_low", "temp_min1", TEMPMAG },
-	{ "temp_over", "temp_max1", TEMPMAG },
-	{ NULL, NULL }
-};
+	struct match matches[] = {
+		{ "beeps", "beep_mask", 0 },
+		{ "pwm", "pwm1", 0 },
+		{ "rempte_temp", "temp_input2", TEMPMAG },
+		{ "remote_temp_hyst", "temp_hyst2", TEMPMAG },
+		{ "remote_temp_low", "temp_min2", TEMPMAG },
+		{ "remote_temp_over", "temp_max2", TEMPMAG },
+		{ "temp", "temp_input1", TEMPMAG },
+		{ "temp_hyst", "temp_min1", TEMPMAG },		/* kernel patch pending for hyst */
+		{ "temp_low", "temp_min1", TEMPMAG },
+		{ "temp_over", "temp_max1", TEMPMAG },
+		{ NULL, NULL }
+	};
 
 
 /* use override in feature structure if present */
