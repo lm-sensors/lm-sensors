@@ -21,8 +21,14 @@
 */
 
 /*
-    This driver supports the Intel 82801AA, 82801AB, and 82801BA
-    I/O Controller Hubs (ICH). They are similar to the PIIX4 and are part
+    SUPPORTED DEVICES	PCI ID
+    82801AA		2413           
+    82801AB		2423           
+    82801BA		2443           
+    82801CA/CAM		2483           
+
+    This driver supports several versions of Intel's I/O Controller Hubs (ICH).
+    For SMBus support, they are similar to the PIIX4 and are part
     of Intel's '810' and other chipsets.
     See the doc/busses/i2c-i801 file for details.
 */
@@ -50,10 +56,12 @@
 #ifndef PCI_DEVICE_ID_INTEL_82801BA_2
 #define PCI_DEVICE_ID_INTEL_82801BA_2   0x2443
 #endif
+#define PCI_DEVICE_ID_INTEL_82801CA_SMBUS	0x2483
 
 static int supported[] = {PCI_DEVICE_ID_INTEL_82801AA_3,
                           PCI_DEVICE_ID_INTEL_82801AB_3,
                           PCI_DEVICE_ID_INTEL_82801BA_2,
+			  PCI_DEVICE_ID_INTEL_82801CA_SMBUS,
                           0 };
 
 /* I801 SMBus address offsets */

@@ -7,6 +7,7 @@ Supported adapters:
   * Intel 82801AA and 82801AB (ICH and ICH0 - part of the
     '810' and '810E' chipsets)
   * Intel 82801BA (ICH2 - part of the '815E' chipset)
+  * Intel 82801CA/CAM (ICH3)
     Datasheets: Publicly available at the Intel website
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
@@ -26,11 +27,11 @@ Description
 -----------
 
 The ICH (properly known as the 82801AA), ICH0 (82801AB),
-and ICH2 (82801BA) are Intel chips that are a part of
+ICH2 (82801BA) and ICH3 (82801CA/CAM) are Intel chips that are a part of
 Intel's '810' chipset for Celeron-based PCs,
-'810E' chipset for Pentium-based PCs, and newer '815E' chipset.
+'810E' chipset for Pentium-based PCs, '815E' chipset, and others.
 
-The ICH chips contain about SEVEN separate PCI functions
+The ICH chips contain at least SEVEN separate PCI functions
 in TWO logical PCI devices.
 An output of lspci will show something similar to the following:
 

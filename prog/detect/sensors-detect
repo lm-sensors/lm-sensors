@@ -89,6 +89,14 @@ use vars qw(@pci_adapters @chip_ids @undetectable_adapters);
        match => sub { $_[0] =~ /^SMBus I801 adapter at [0-9,a-f]{4}/ },
      } , 
      { 
+       vendid => 0x8086,
+       devid  => 0x2483,
+       func => 3,
+       procid => "Intel 82801CA/CAM ICH3",
+       driver => "i2c-i801",
+       match => sub { $_[0] =~ /^SMBus I801 adapter at [0-9,a-f]{4}/ },
+     } , 
+     { 
        vendid => 0x1106,
        devid  => 0x3040,
        func => 3,

@@ -35,7 +35,7 @@ At least the following I2C/SMBus adapters are supported:
   AMD 756, 766
   Apple Hydra (used on some PPC machines)
   DEC 21272/21274 (Tsunami/Typhoon - on Alpha boards)
-  Intel I801 ICH/ICH0/ICH2 (used in Intel 810, 810E, 815E, 820, 840 chipsets)
+  Intel I801 ICH/ICH0/ICH2/ICH3 (used in Intel 810, 810E, 815E, 820, 840 chipsets)
   Intel PIIX4 (used in many Intel chipsets)
   Intel I810/I815 GMCH
   Intel 82443MX (440MX)
