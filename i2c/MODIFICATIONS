@@ -7,6 +7,8 @@ of the i2c code and not compile the version in here.
   be applied! If there are changes like this in this list, you *must*
   use our version of the i2c module!
 
+The current version of Simon's code is called mod-19990118.tar.gz.
+
 Here come the changes:
 
 * EXPORT_SYMBOL declarations put between #ifdef statements
@@ -14,14 +16,6 @@ Here come the changes:
   use our own Makefile, we have removed them. This should have almost no
   influence on the resulting object code; a few more functions may be
   exported, but this should do no harm.
-
-* bit-mb.c: Linux 2.0.x fixes
-  Some small changes to make this file compile with 2.0 kernels. These
-  changes will probably be included in the next i2c version.
-
-* algo-bit.c, i2c-core.c: Debugging level turned down
-  The transfer functions are now on debug level 2, to keep the noise within
-  acceptable limits.
 
 * New file: Module.mk
   The Makefile fragment we use to compile the files in this directory.
@@ -32,16 +26,3 @@ Here come the changes:
 * Removed files: object files and executables
   Everywhere, remakeable files are removed, to keep the source distribution
   small and lean.
-
-! i2c-core.c: i2c_del_adapter() change
-  Replaced
-    i2c_detach_client(client);
-  with:
-    client->driver->detach_client(client);
-
-! i2c-core.c, i2c-core.h: function i2c_adapter_id added
-  We needed a function that would return a low, unique identifier for each
-  adapter. Putting it anywhere else would have created new, unneeded
-  module dependencies.
-
-! bit-mb.c: removed spurious semicolon

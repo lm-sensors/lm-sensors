@@ -28,7 +28,7 @@
 #include <linux/kernel.h>
 
 #include "i2c.h"
-#ifdef SPINLOCK
+#ifdef I2C_SPINLOCK
 #include <asm/spinlock.h>
 #else
 #include <asm/semaphore.h>

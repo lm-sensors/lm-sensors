@@ -88,5 +88,4 @@ clean-lib:
 	$(RM) $(LIBTARGETS) $(LIBSHOBJECTS) $(LIBSTOBJECTS)
 	$(RM) $(LIBSHOBJECTS:.lo=.ld) $(LIBSTOBJECTS:.ao=.ad)
 	$(RM) $(LIBOTHEROBJECTS:.o=.c) $(LIBEXTRACLEAN)
-	$(RM) 
 clean :: clean-lib

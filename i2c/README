@@ -13,6 +13,11 @@ Currently, the following modules are running in the new mode:
 The other modules, esp. algo-pcf.c still need to be converted. For the
 hw specific mods, this should be relatively easy & quick.
 
+*
+* NOTE: The algo-pcf part is currently in the works, thanks to Hans Berglund
+* 	(hb@mailhost.spacetec.no).
+*
+
 A simple driver example is in drivers -- a piece of code to access EEPROMs.
 
 Simon (simon@tk.uni-linz.ac.at)

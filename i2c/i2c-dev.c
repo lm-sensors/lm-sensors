@@ -17,7 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-#define RCSID "$Id: i2c-dev.c,v 1.6 1998/09/28 06:45:38 i2c Exp i2c $"
+#define RCSID "$Id: i2c-dev.c,v 1.7 1998/12/30 08:36:08 i2c Exp i2c $"
 /* ------------------------------------------------------------------------- */
 
 #include <linux/kernel.h>
@@ -183,7 +183,7 @@ int i2c_read (struct inode *inode, struct file *file, char *buf, int count)
 #else
 	memcpy_tofs(buf,tmp,count);
 #endif
-
+	kfree(tmp);
 	return ret;
 }
 
@@ -337,9 +337,7 @@ struct i2c_driver driver = {
 MODULE_AUTHOR("Simon G. Vogl <simon@tk.uni-linz.ac.at>");
 MODULE_DESCRIPTION("I2C-Bus character device interface");
 
-#ifndef LM_SENSORS
 EXPORT_NO_SYMBOLS;
-#endif
 
 int init_module(void) 
 {

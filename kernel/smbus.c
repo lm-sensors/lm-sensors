@@ -23,7 +23,7 @@
 #include <linux/stddef.h>
 
 #include "i2c.h"
-#ifdef SPINLOCK
+#ifdef I2C_SPINLOCK
 #include <asm/spinlock.h>
 #else
 #include <asm/semaphore.h>
@@ -76,14 +76,14 @@ s32 smbus_access (struct i2c_adapter * adapter, u8 addr, char read_write,
 {
   int res;
   if ((adapter->id & ALGO_MASK) == ALGO_SMBUS) {
-#ifdef SPINLOCK
+#ifdef I2C_SPINLOCK
     spin_lock_irqsave(&adapter->lock,adapter->lockflags);
 #else
     down(&adapter->lock);
 #endif
     res = ((struct smbus_adapter *) adapter) -> 
            smbus_access(addr,read_write,command,size,data);
-#ifdef SPINLOCK
+#ifdef I2C_SPINLOCK
     spin_unlock_irqrestore(&adapter->lock,adapter->lockflags);
 #else
     up(&adapter->lock);

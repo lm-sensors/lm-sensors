@@ -35,8 +35,8 @@
 */
 #include <asm/types.h>
 
-/* SPINLOCK is defined in i2c.h. */
-#ifdef SPINLOCK
+/* I2C_SPINLOCK is defined in i2c.h. */
+#ifdef I2C_SPINLOCK
 #include <asm/spinlock.h>
 #else
 #include <asm/semaphore.h>
@@ -104,14 +104,14 @@ struct isa_algorithm {
 
 /* An adapter is a specifc instance of a bus: for each detected bus, there will
    be an adapter. Its operation is controlled by an algorithm.
-   SPINLOCK must be the same as declared in i2c.h.
+   I2C_SPINLOCK must be the same as declared in i2c.h.
    This structure is essentially the same as i2c_algorithm. */
 struct isa_adapter {
   char name[32];
   unsigned int id;
   struct isa_algorithm *algo;
   void *data;
-#ifdef SPINLOCK
+#ifdef I2C_SPINLOCK
   spinlock_t lock;
   unsigned long lockflags;
 #else

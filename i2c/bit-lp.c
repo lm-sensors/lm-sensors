@@ -17,7 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-static char rcsid[] = "$Id: bit-lp.c,v 1.5 1998/09/28 06:45:38 i2c Exp i2c $";
+static char rcsid[] = "$Id: bit-lp.c,v 1.6 1998/12/30 08:36:08 i2c Exp i2c $";
 /* ------------------------------------------------------------------------- */
 
 #include <linux/kernel.h>
@@ -151,9 +151,7 @@ MODULE_DESCRIPTION("I2C-Bus adapter routines for Philips parallel port adapter")
 
 MODULE_PARM(base, "i");
 
-#ifndef LM_SENSORS
 EXPORT_NO_SYMBOLS;
-#endif
 
 int init_module(void) 
 {

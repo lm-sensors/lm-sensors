@@ -17,7 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-#define RCSID "$Id: i2c.c,v 1.7 1998/09/28 06:45:38 i2c Exp i2c $"
+#define RCSID "$Id: i2c-core.c,v 1.1 1998/12/30 08:36:08 i2c Exp i2c $"
 /* ------------------------------------------------------------------------- */
 
 #include <linux/module.h>
@@ -30,8 +30,8 @@
 /* ----- global defines ---------------------------------------------------- */
 
 /* exclusive access to the bus */
-/*#define SPINLOCK*/
-#ifdef SPINLOCK
+/*#define I2C_SPINLOCK*/
+#ifdef I2C_SPINLOCK
 #define I2C_LOCK(adap) spin_lock_irqsave(&adap->lock,adap->lockflags)
 #define I2C_UNLOCK(adap) spin_unlock_irqrestore(&adap->lock,adap->lockflags)
 #else
@@ -135,7 +135,7 @@ int i2c_add_adapter(struct i2c_adapter *adap)
 	adap_count++;
 
 	/* init data types */
-#ifdef SPINLOCK
+#ifdef I2C_SPINLOCK
 	adap->lock = (spinlock_t)SPIN_LOCK_UNLOCKED;
 #else
 	adap->lock = MUTEX;
@@ -173,8 +173,8 @@ int i2c_del_adapter(struct i2c_adapter *adap)
 			 * flag, as _all_ clients that reside on the adapter
 			 * must be deleted, as this would cause invalid states.
 			 */
-			/* i2c_detach_client(client); */
 			client->driver->detach_client(client);
+			/* i2c_detach_client(client); --- frodo */
 	}
 	/* all done, now unregister */
 	adapters[i] = NULL;
@@ -336,7 +336,7 @@ int i2c_transfer(struct i2c_adapter * adap, struct i2c_msg msgs[],int num)
 {
 	int ret;
 
-	DEB2(printk("master_xfer: %s with %d msgs.\n",adap->name,num));
+	DEB(printk("master_xfer: %s with %d msgs.\n",adap->name,num));
 
 	I2C_LOCK(adap);
 	ret = adap->algo->master_xfer(adap,msgs,num);
@@ -355,7 +355,7 @@ int i2c_master_send(struct i2c_client *client,const char *buf ,int count)
 	msg.len = count;
 	(const char *)msg.buf = buf;
 
-	DEB2(printk("master_send: writing %d bytes on %s.\n",
+	DEB(printk("master_send: writing %d bytes on %s.\n",
 		count,client->adapter->name));
 
 	I2C_LOCK(adap);
@@ -379,7 +379,7 @@ int i2c_master_recv(struct i2c_client *client, char *buf ,int count)
 	msg.len = count;
 	msg.buf = buf;
 
-	DEB2(printk("master_recv: reading %d bytes on %s.\n",
+	DEB(printk("master_recv: reading %d bytes on %s.\n",
 		count,client->adapter->name));
 
 	I2C_LOCK(adap);
@@ -435,7 +435,9 @@ int i2c_probe(struct i2c_client *client, int low_addr, int hi_addr)
         I2C_UNLOCK(client->adapter);
         return (i <= hi_addr) ? i : -1;
 }
-
+/* +++ frodo
+ * return id number for a specific adapter
+ */
 int i2c_adapter_id(struct i2c_adapter *adap)
 {
 	int i;
@@ -445,15 +447,12 @@ int i2c_adapter_id(struct i2c_adapter *adap)
 	return -1;
 }
 
-
-
 #ifdef MODULE
 MODULE_AUTHOR("Simon G. Vogl <simon@tk.uni-linz.ac.at>");
 MODULE_DESCRIPTION("I2C-Bus main module");
 MODULE_PARM(i2c_debug, "i");
 MODULE_PARM_DESC(i2c_debug,"debug level");
 
-#ifndef LM_SENSORS
 EXPORT_SYMBOL(i2c_add_algorithm);
 EXPORT_SYMBOL(i2c_del_algorithm);
 EXPORT_SYMBOL(i2c_add_adapter);
@@ -467,7 +466,6 @@ EXPORT_SYMBOL(i2c_master_send);
 EXPORT_SYMBOL(i2c_master_recv);
 EXPORT_SYMBOL(i2c_control);
 EXPORT_SYMBOL(i2c_transfer);
-#endif
 
 
 int init_module(void) 

@@ -24,7 +24,7 @@ MODULE_DIR := i2c
 # defined value verbatim into the command-list of rules...
 I2CTARGETS := $(MODULE_DIR)/i2c-core.o  $(MODULE_DIR)/algo-bit.o \
               $(MODULE_DIR)/bit-lp.o \
-              $(MODULE_DIR)/bit-velle.o $(MODULE_DIR)/bit-mb.o
+              $(MODULE_DIR)/bit-velle.o $(MODULE_DIR)/bit-via.o
 I2CADDTARGETS := $(MODULE_DIR)/i2c-dev.o
 
 I2CHEADERFILES := $(MODULE_DIR)/i2c.h

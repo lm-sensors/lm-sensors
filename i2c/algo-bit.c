@@ -17,7 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-static char alg_rcsid[] = "$Id: algo-bit.c,v 1.7 1998/09/28 06:45:38 i2c Exp i2c $";
+static char alg_rcsid[] = "$Id: algo-bit.c,v 1.8 1998/12/30 08:36:08 i2c Exp i2c $";
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -70,7 +70,7 @@ static char alg_rcsid[] = "$Id: algo-bit.c,v 1.7 1998/09/28 06:45:38 i2c Exp i2c
 
 /* module parameters:
  */
-int i2c_debug=0;
+int i2c_debug=1;
 int bit_test=0;	/* see if the line-setting functions work	*/
 int bit_scan=0;	/* have a look at what's hanging 'round		*/
 
@@ -639,10 +639,8 @@ MODULE_PARM_DESC(bit_scan, "Scan for active chips on the bus");
 MODULE_PARM_DESC(i2c_debug,"debug level - 0 off; 1 normal; 2,3 more verbose; 9 bit-protocol");
 
 
-#ifndef LM_SENSORS
 EXPORT_SYMBOL(i2c_bit_add_bus);
 EXPORT_SYMBOL(i2c_bit_del_bus);
-#endif
 
 
 int init_module(void) 

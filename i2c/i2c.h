@@ -25,9 +25,9 @@
 #ifdef __KERNEL__
 
 /* define spinlock to use spinlocks for sync., else use semaphores*/
-/*#define SPINLOCK*/
+/*#define I2C_SPINLOCK*/
 
-#ifdef SPINLOCK
+#ifdef I2C_SPINLOCK
 #include <asm/spinlock.h>	/* for spinlock_t */
 #else
 #include <asm/semaphore.h>
@@ -194,7 +194,7 @@ struct i2c_adapter {
 			/* and can be set via the i2c_ioctl call	*/
 
 			/* data fields that are valid for all devices	*/
-#ifdef SPINLOCK
+#ifdef I2C_SPINLOCK
 	spinlock_t lock;/* used to access the adapter exclusively	*/
 	unsigned long lockflags;
 #else
@@ -214,17 +214,6 @@ struct i2c_adapter {
  */
 #define DF_NOTIFY	0x01		/* notify on bus (de/a)ttaches 	*/
 
-
-#if 0 /* deprecate! */
-/*flags for the client struct:
- */
-#define CF_TEN	0x100000	/* we have a ten bit chip address	*/
-#define CF_TEN0	0x100000	/* herein lie the first 2 bits 		*/
-#define CF_TEN1	0x110000
-#define CF_TEN2	0x120000
-#define CF_TEN3	0x130000
-#define TENMASK	0x130000
-#endif
 
 /* ----- functions exported by i2c.o */
 
@@ -253,9 +242,9 @@ extern int i2c_probe(struct i2c_client *client, int low_addr, int hi_addr);
  */
 extern int i2c_control(struct i2c_client *,unsigned int, unsigned long);
 
-
 /* This call returns a unique low identifier for each registered adapter,
-   or -1 if the adapter was not regisitered. */
+ * or -1 if the adapter was not regisitered. 
+ */
 extern int i2c_adapter_id(struct i2c_adapter *adap);
 
 #endif /* __KERNEL__ */
@@ -304,7 +293,16 @@ extern int i2c_adapter_id(struct i2c_adapter *adap);
 #define I2C_DRIVERID_MSP3400     1
 #define I2C_DRIVERID_TUNER       2
 #define I2C_DRIVERID_VIDEOTEXT   3
-#define I2C_DRIVERID_GL518SM     4
+#define I2C_DRIVERID_GL518SM     4	/* hardware monitor cpu temp.	*/
+#define I2C_DRIVERID_TEA6420	 5	/* audio matrix switch		*/
+#define I2C_DRIVERID_TEA6415	 6	/* video matrix switch		*/
+#define I2C_DRIVERID_TDA9840	 7	/* stereo sound processor	*/
+#define I2C_DRIVERID_SAA7111	 8	/* video input processor	*/
+
+#define I2C_DRIVERID_EXP0	0xF0	/* experimental use id's	*/
+#define I2C_DRIVERID_EXP1	0xF1
+#define I2C_DRIVERID_EXP2	0xF2
+#define I2C_DRIVERID_EXP3	0xF3
 
 /*
  * ---- Adapter types ----------------------------------------------------
@@ -313,11 +311,13 @@ extern int i2c_adapter_id(struct i2c_adapter *adap);
  * interface types, as a PCF 8584 needs other care than a bit adapter.
  */
 
-#define ALGO_NONE	0x00000
-#define ALGO_BIT	0x10000	/* bit style adapters			*/
-#define ALGO_PCF	0x20000	/* PCF 8584 style adapters		*/
+#define ALGO_NONE	0x000000
+#define ALGO_BIT	0x010000	/* bit style adapters		*/
+#define ALGO_PCF	0x020000	/* PCF 8584 style adapters	*/
 
-#define ALGO_MASK	0xf0000	/* Mask for algorithms			*/
+#define ALGO_EXP	0x800000	/* experimental			*/
+
+#define ALGO_MASK	0xff0000	/* Mask for algorithms		*/
 #define ALGO_SHIFT	0x10	/* right shift to get index values 	*/
 
 #define I2C_HW_ADAPS	0x10000	/* number of different hw implements per*/

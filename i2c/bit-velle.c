@@ -17,9 +17,12 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.		     */
 /* ------------------------------------------------------------------------- */
-static char rcsid[] = "$Id: bit-velle.c,v 1.3 1998/09/15 18:50:04 i2c Exp $";
+static char rcsid[] = "$Id: bit-velle.c,v 1.4 1998/12/30 08:36:08 i2c Exp i2c $";
 /*
  * $Log: bit-velle.c,v $
+ * Revision 1.4  1998/12/30 08:36:08  i2c
+ * *** empty log message ***
+ *
  * Revision 1.3  1998/09/15 18:50:04  i2c
  * *** empty log message ***
  *
