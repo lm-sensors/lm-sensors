@@ -26,9 +26,10 @@
 #include "lib/sensors.h" 
 #include "lib/error.h"
 #include "chips.h"
+#include "version.h"
 
 #define PROGRAM "sensors"
-#define VERSION "1.3"
+#define VERSION LM_VERSION
 #define DEFAULT_CONFIG_FILE_NAME "sensors.conf"
 
 static char *config_file_name;
