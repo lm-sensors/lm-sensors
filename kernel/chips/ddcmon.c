@@ -185,13 +185,17 @@ int ddcmon_detect(struct i2c_adapter *adapter, int address,
 
 	/* Now, we do the remaining detection. */
 	/* Verify the first 8 locations 0x00FFFFFFFFFFFF00 */
-	for(i = 0; i < 8; i++) {
-		cs = i2c_smbus_read_byte_data(new_client, i);
-		if(i == 0 || i == 7) {
-			if(cs != 0)
+	/* Allow force and force_ddcmon arguments */
+	if(kind < 0)
+	{
+		for(i = 0; i < 8; i++) {
+			cs = i2c_smbus_read_byte_data(new_client, i);
+			if(i == 0 || i == 7) {
+				if(cs != 0)
+					goto ERROR1;
+			} else if(cs != 0xff)
 				goto ERROR1;
-		} else if(cs != 0xff)
-			goto ERROR1;
+		}
 	}
 
 	type_name = "ddcmon";
