@@ -221,6 +221,19 @@
 # yet supported; spaces at the end are ignored, though.
 #
 #
+# BEEPS
+# -----
+# Some chips support alarms with beep warnings. When an alarm is triggered
+# you can be warned by a beeping signal through your computer speaker. It
+# is possible to enable beeps for all alarms on a chip using the following 
+# line:
+#
+# 	set beep_enable 1
+#
+# or disable them using:
+#
+# 	set beep_enable 0
+#
 ##########################################################################
 #### Here begins the real configuration file
 
@@ -311,6 +324,9 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*"
 # generally show the M/B temperature while the lm75 temp sensor will show
 # the CPU temperature.
 #    label temp "M/B Temp"
+
+# Uncomment the following line to enable beeps for all alarms on this chip
+#    set beep_enable 1
 
 
 chip "lm75-*"
