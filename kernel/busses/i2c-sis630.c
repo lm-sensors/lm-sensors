@@ -22,6 +22,11 @@
 
 /*
    Changes:
+   21.09.2002
+	Added high_clock module option.If this option is set 
+	used Host Master Clock 56KHz (default 14KHz).For now we are save old Host 
+	Master Clock and after transaction completed restore (otherwise
+	it's confuse BIOS and hung Laptop).
    18.09.2002
 	Added SIS730 as supported
    24.08.2002
@@ -38,6 +43,7 @@
 /*
    Supports:
 	SIS 630
+	SIS 730
 
    Note: we assume there can only be one device, with one SMBus interface.
 */
@@ -129,8 +135,11 @@ static struct sd supported[] = {
 /* If force is set to anything different from 0, we forcibly enable the
    SIS630. DANGEROUS! */
 static int force = 0;
+static int high_clock = 0;
 MODULE_PARM(force, "i");
 MODULE_PARM_DESC(force, "Forcibly enable the SIS630. DANGEROUS!");
+MODULE_PARM(high_clock, "i");
+MODULE_PARM_DESC(high_clock, "Set Host Master Clock to 56KHz (default 14KHz).");
 
 
 #ifdef MODULE
@@ -198,6 +207,7 @@ int sis630_transaction(int size) {
         int temp;
         int result = 0;
         int timeout = 0;
+	u8 oldclock;
 
         /*
 	  Make sure the SMBus host is ready to start transmitting.
@@ -223,8 +233,14 @@ int sis630_transaction(int size) {
 		}
         }
 
-	/* disable timeout interrupt , don't set Host Master Clock to 56KHz (it's hung my Laptop)*/
-	sis630_write(SMB_CNT, 0x00);
+	/* save old clock, so we can prevent machine to hung */
+	oldclock = sis630_read(SMB_CNT);
+
+	/* disable timeout interrupt , set Host Master Clock to 56KHz if requested */
+	if (high_clock > 0)
+		sis630_write(SMB_CNT, 0x20);
+	else
+		sis630_write(SMB_CNT, 0x00);
 
 	/* clear all sticky bits */
 	temp = sis630_read(SMB_STS);
@@ -259,13 +275,26 @@ int sis630_transaction(int size) {
                 result = -1;
                 printk(KERN_ERR "i2c-sis630.o: Bus collision! "
 			"SMBus may be locked until next hard reset (or not...)\n");
-		/* TBD: Datasheet say:
-		   the software should clear this bit and restart SMBUS operation
+		/* 
+		   TBD: Datasheet say:
+		   	the software should clear this bit and restart SMBUS operation
 		*/
         }
 
         /* clear all status "sticky" bits */
 	sis630_write(SMB_STS, temp);
+
+	/* restore old Host Master Clock */
+	if (!(oldclock & 0x20)) {
+#ifdef DEBUG
+		printk(KERN_DEBUG "i2c-sis630.o: SMB_CNT before clock restore 0x%02x\n", sis630_read(SMB_CNT));
+#endif
+		oldclock = sis630_read(SMB_CNT) & ~0x20;
+		sis630_write(SMB_CNT,oldclock);
+#ifdef DEBUG
+		printk(KERN_DEBUG "i2c-sis630.o: SMB_CNT after clock restore 0x%02x\n", sis630_read(SMB_CNT));
+#endif
+	}
 
         return result;
 }
