@@ -1295,7 +1295,7 @@ chip "fscscy-*"
 
 chip "pcf8591-*"
 #
-#    values for the Philips PCF8574 chip
+#    values for the Philips PCF8591 chip
 #
 # Analog inputs
 
