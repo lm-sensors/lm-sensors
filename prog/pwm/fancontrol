@@ -75,11 +75,11 @@ function LoadConfig {
 	do
 		AFCPWM[$fcvcount]=`echo $fcv |cut -d'=' -f1`
 		AFCTEMP[$fcvcount]=`echo $fcv |cut -d'=' -f2`
-		AFCFAN[$fcvcount]=`echo $FCFANS |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
-		AFCMINTEMP[$fcvcount]=`echo $MINTEMP |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
-		AFCMAXTEMP[$fcvcount]=`echo $MAXTEMP |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
-		AFCMINSTART[$fcvcount]=`echo $MINSTART |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
-		AFCMINSTOP[$fcvcount]=`echo $MINSTOP |sed -s 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		AFCFAN[$fcvcount]=`echo $FCFANS |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		AFCMINTEMP[$fcvcount]=`echo $MINTEMP |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		AFCMAXTEMP[$fcvcount]=`echo $MAXTEMP |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		AFCMINSTART[$fcvcount]=`echo $MINSTART |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		AFCMINSTOP[$fcvcount]=`echo $MINSTOP |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
 		echo
 		echo "Settings for ${AFCPWM[$fcvcount]}:"
 		echo "  Depends on ${AFCTEMP[$fcvcount]}"
