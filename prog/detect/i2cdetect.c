@@ -46,6 +46,7 @@ void help(void)
 	        "RECOMMENDED)\n"
 	        "  If provided, FIRST and LAST limit the probing range.\n"
 	        "  With -l, lists installed busses only\n");
+	print_i2c_busses(0);
 }
 
 int scan_i2c_bus(int file, const int mode, const int first, const int last)
