@@ -1,5 +1,7 @@
 This package could not have been created without the help of many, many people.
-The most notable contributors are listed below.
+The most notable contributors are listed below. You are probably best of
+to mail <lm78@stimpy.netroedge.com> if you have questions, suggestions or
+problems.
 
 * Alexander Larsson <alla@lysator.liu.se>
   Wrote the original lm78 module; lm_sensors version 1 was no more than an
@@ -12,7 +14,8 @@ The most notable contributors are listed below.
   developers of the current package.
 * Frodo Looijaard <frodol@dds.nl>
   Took up the development of Alex' lm78 module. Large pieces of code were
-  written by him. Designed lm_sensors version 2.
+  written by him. Designed lm_sensors version 2, and wrote most of its
+  core code.
 * William Morgan <wmorgan@cmu.edu>
   Helped with some patches in lm_sensors version 1. He provided us with
   the original CVS archive, and even managed to explain to us how to use

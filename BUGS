@@ -1,0 +1,16 @@
+Except for many unimplemented things (listed in the TODO file), there may be
+true bugs too. If you experience any problems, do not hesitate to mail
+lm78@stimpy.netroedge.com. But read the documentation first, please!
+
+There is a problem in pre 2.1.58 kernels that can make the kernel Oops. You
+can trigger this Oops if you have opened any file, or are in any directory,
+created by a module. If you remove the module at such a moment, successive
+access to those files or directories will make the kernel complain through
+an Oops. There is really no good way to solve this. Stock kernel modules
+exhibit the same problem, by the way. Kernels from 2.1.58 onwards have new
+fill_inode() semantics; using this function, we can increase the module use
+count while a module file or directory is accessed. This solves the problem,
+because it makes it impossible to remove the module.
+Alan Cox (alan@lxorguk.ukuu.org.uk), the maintainer of 2.0 kernels, has
+said he will consider patches that backport this 2.1 feature; perhaps it
+will be in 2.0.37. Until then, be careful when you unload modules.

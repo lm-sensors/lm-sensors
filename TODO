@@ -1,15 +1,18 @@
 Many, many things. Most notably:
 
-* Support 10-bit addresses. At this moment, they are supported nowhere 
+* Support 10-bit addresses. At this moment, they are supported nowhere, except
+  in Simon Vogl's i2c modules.
 * Change the i2c modules to keep the namespace clean (EXPORT_SYMBOL does not
   work for us; many static declarations need to be added; better ask Simon
   Vogl first)
 * Make it SMP-safe: there are no spinlocks yet. They are needed at many
-  places, probably (everywhere where global vars are accessed).
+  places, probably (everywhere where global vars are accessed). This must be
+  done for the i2c modules, too.
 * Extend sensors.c with a file /proc/sys/dev/sensors/chips, which lists
   all directories under /proc/sys/dev/sensors with their SYSCTL id
   (needed for good sysctl access).
-* Write smbus_access_i2c in smbus.c
+* Extend the mod_inc_use/mod_dec_use through the fill_inode trick, for all
+  new /proc files.
 * Make lm78.c detect 'double hits', (same chip connected to both SMBus and
   ISA).
 * Better lm78/lm75 detection; insmod-time paramters to set addresses 

@@ -60,6 +60,9 @@ sensors: i2c-core
   General purpose routines for sensor client modules
 
 lm78: sensors smbus i2c-core
-  LM78 (and LM78-J, LM79) chip driver
+  LM78, LM78-J and LM79 chip driver
+
+lm75: sensors smbus i2c-core
+  LM75 chip driver
 
 (To do: i2c modules)
