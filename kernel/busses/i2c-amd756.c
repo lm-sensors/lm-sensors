@@ -161,7 +161,7 @@ static int amd756_transaction(void)
 
 	if (temp & GS_COL_STS) {
 		result = -1;
-		printk(KERN_WARNING DRV_NAME " SMBus collision!\n");
+		printk(KERN_WARNING DRV_NAME ": SMBus collision!\n");
 	}
 
 	if (temp & GS_TO_STS) {
@@ -170,7 +170,7 @@ static int amd756_transaction(void)
 	}
 
 	if (temp & GS_HCYC_STS)
-		pr_debug(DRV_NAME " SMBus protocol success!\n");
+		pr_debug(DRV_NAME ": SMBus protocol success!\n");
 
 	outw_p(GS_CLEAR_STS, SMB_GLOBAL_STATUS);
 
@@ -374,7 +374,7 @@ static int __devinit amd756_probe(struct pci_dev *pdev,
 #endif
 
 	sprintf(amd756_adapter.name,
-		"SMBus AMD7xx adapter at %04x", amd756_ioport);
+		"SMBus AMD756 adapter at %04x", amd756_ioport);
 
 	error = i2c_add_adapter(&amd756_adapter);
 	if (error) {
@@ -397,7 +397,7 @@ static void __devexit amd756_remove(struct pci_dev *dev)
 }
 
 static struct pci_driver amd756_driver = {
-	.name		= "amd7xx smbus",
+	.name		= "amd756 smbus",
 	.id_table	= amd756_ids,
 	.probe		= amd756_probe,
 	.remove		= __devexit_p(amd756_remove),
