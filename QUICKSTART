@@ -1,6 +1,9 @@
+LM_SENSORS QUICK INSTALLATION INSTRUCTIONS
+------------------------------------------
+
 NOTE: PLEASE SKIM THE INSTALL DOCUMENT, OR BETTER YET READ IT CAREFULLY!
-The instructions in this document will only work if you have a standard
-system, and may cause problems.
+The instructions in this document will generally work if you have a standard
+system, but not always!!
 
 Quickstart:
 
@@ -9,33 +12,34 @@ Quickstart:
     compile your own from a 'vanilla' tree (get one from
     ftp://ftp.kernel/org/pub/linux/kernel/).
 
-  * Install the latest i2c package. This may be necessary even if
-    you have a 2.4 kernel.
+  * Download, build, and install the latest i2c package.
+    This is not necessary if you are using lm_sensors 2.5.5
+    with a 2.4 kernel.
 
   * Do `make'.
     The warnings about .d files at the start are harmless.
-    If you have compile problems, you probably skipped step 2.
+    If you have compile problems, you probably should not have skipped step 2.
     Go back and install the latest i2c package.
 
   * Do (as root) `make install'.
 
-  * Do a `depmod -a'.
+  * Do (as root) `depmod -a'.
 
   * Add  the line
       /usr/local/lib 
     to /etc/ld.so.conf if it is not there yet.
 
-  * Do a `ldconfig'.
+  * Do (as root) `ldconfig'.
 
-  * Run `prog/mkdev/mkdev.sh' to create the device files
+  * Run (as root) `prog/mkdev/mkdev.sh' to create the device files.
 
-  * Run `prog/detect/sensors-detect' to detect your hardware, put
-    the lines it suggests into /etc/conf.modules or /etc/modules.conf
-    (whichever one exists) and enter the modprobe lines it suggests.
+  * Run (as root) `prog/detect/sensors-detect' to detect your hardware,
+    put the lines it suggests into /etc/modules.conf
+    and enter the modprobe lines sensors-detect suggests.
     Add the line `sensors -s' after the modprobe lines.
 
-  * Reboot or else type in the modprobe lines and `sensors -s'
+  * Reboot, or else type in the modprobe lines and `sensors -s'.
 
   * Run `sensors' to see your output.
 
-  * That's all folks!
+  * That's it! If you have problems, read the INSTALL document.
