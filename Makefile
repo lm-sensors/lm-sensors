@@ -183,10 +183,13 @@ SED := sed
 # ARCPPFLAGS/ARCFLAGS are used to create archive object files (static libraries).
 # LIBCPPFLAGS/LIBCFLAGS are for shared library objects.
 ALL_CPPFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS)
-ALL_CFLAGS := -Wall -O2 
+ALL_CFLAGS := -Wall
 
 ifeq ($(DEBUG),1)
 ALL_CPPFLAGS += -DDEBUG
+ALL_CFLAGS += -O -g
+else
+ALL_CFLAGS += -O2
 endif
 
 ifeq ($(WARN),1)
