@@ -98,11 +98,6 @@ superio_enter(void)
 static inline void
 superio_exit(void)
 {
-	/* safety precaution in case we put some other super IO chip
-	   in config mode by accident */
-	outb(0xAA, REG); 
-
-	/* documented exit sequence */
 	outb(0x02, REG);
 	outb(0x02, VAL);
 }
