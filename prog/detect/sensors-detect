@@ -1863,7 +1863,7 @@ sub adm1025_detect
   $reg = i2c_smbus_read_byte_data($file,0x3e);
   return unless ($reg == 0x41);
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
-  return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xc0) == 0x20;
+  return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xf0) == 0x20;
   return (8);
 }
 
@@ -1883,7 +1883,7 @@ sub adm1024_detect
   $reg = i2c_smbus_read_byte_data($file,0x3e);
   return unless ($reg == 0x41);
   return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
-  return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xe0) == 0x20;
+  return unless (i2c_smbus_read_byte_data($file,0x3f) & 0xf0) == 0x10;
   return (8);
 }
 
