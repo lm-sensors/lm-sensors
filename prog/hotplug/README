@@ -1,12 +1,15 @@
 M7101 - SMBus Support for ALi M15x3 based motherboards.
 
 --------------------------------------------------------
-Quick Start:
+Quick Start (2.4 kernels only):
+
 	"lspci" to verify that 7101 device is not present
 	"make"
 	(as root) "make install"
 	(as root) "insmod m7101"
 	"lspci" to verify that 7101 device is present
+
+--------------------------------------------------------
 --------------------------------------------------------
 
 Version 0.2 for 2.4.0-testx kernels.
@@ -15,6 +18,27 @@ Mark D. Studebaker <mdsxyz123@yahoo.com>
 *** You must have 'Support for hot-pluggable devices' enabled
 *** in your kernel (under 'general setup') for this module to work!!
 
+For 2.2 and early 2.3 kernels you must use version 0.1;
+version 0.2 will not work.
+Version 0.1 does not use the kernel hotplug facility.
+Obtain version 0.1 here:
+
+	README:            http://www.netroedge.com/~lm78/misc/README-m7101.txt
+	source and README: http://www.netroedge.com/~lm78/misc/m7101-0.1.tar.gz
+
+
+
+--------------------------------------------------------
+Notes below for the 0.2 version, MDS.
+--------------------------------------------------------
+Default I/O addresses are 0xe800 for SMBus and 0xec00 for ACPI.
+
+These can be changed at module insertion.
+For example:
+	insmod m7101 smb_io=0x5000 acpi_io=0x4000
+
+
+--------------------------------------------------------
 Notes below from the 0.1 version, B. Kohl.
 --------------------------------------------------------
 
