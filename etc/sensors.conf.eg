@@ -1728,7 +1728,14 @@ chip "vt1211-*" "vt8231-*"
     ignore temp5
     ignore temp6
     ignore temp7
-#
+
+# IMPORTANT: If you get "ERROR: Can't get TEMPX data!" from "sensors",
+# where X is 2, 4, 5, 6 or 7, although you have this UCH set to
+# temperature, this generally means that this UCH isn't (physically)
+# used for temperature, so you should add an ignore statement for tempX
+# and change the "config" value to reflect the fact that this UCH is
+# probably used for voltage.
+
 #   label in0 "unused"
 #   label in1 "unused"
     label in2 "VCore1"
