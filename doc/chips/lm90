@@ -19,11 +19,26 @@ Supported chips:
     Addresses scanned: I2C 0x4c and 0x4d
     Datasheet: Publicly available at the National Semiconductor website
                http://www.national.com/pf/LM/LM99.html
+  * National Semiconductor LM86
+    Prefix: `lm86'
+    Addresses scanned: I2C 0x4c
+    Datasheet: Publicly available at the National Semiconductor website
+               http://www.national.com/pf/LM/LM86.html
   * Analog Devices ADM1032
     Prefix: `adm1032'
     Addresses scanned: I2C 0x4c
     Datasheet: Publicly available at the Analog Devices website
                http://products.analog.com/products/info.asp?product=ADM1032
+  * Maxim MAX6657
+    Prefix: `max6657'
+    Addresses scanned: I2C 0x4c
+    Datasheet: Publicly available at the Maxim website
+               http://www.maxim-ic.com/quick_view2.cfm/qv_pk/2578
+  * Maxim MAX6658
+    Prefix: `max6657'
+    Addresses scanned: I2C 0x4c
+    Datasheet: Publicly available at the Maxim website
+               http://www.maxim-ic.com/quick_view2.cfm/qv_pk/2578
 
 
 Author: Jean Delvare <khali@linux-fr.org>
@@ -45,6 +60,12 @@ Module Parameters
 * force_lm99: short array (min = 1, max = 48)
   List of adapter,address pairs which are unquestionably assumed to contain
   a `lm99' chip
+* force_lm86: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `lm86' chip
+* force_max6657: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `max6657' chip
 * probe: short array (min = 1, max = 48)
   List of adapter,address pairs to scan additionally
 * probe_range: short array (min = 1, max = 48)
@@ -61,8 +82,7 @@ Description
 The LM90 is a digital temperature sensor. It senses its own temperature as
 well as the temperature of up to one external diode. It is compatible
 with many other devices such as the LM86, the LM89, the LM99, the ADM1032,
-the MAX6657 and the MAX6658. Of these, only the ADM1032, LM89 and LM99 are
-supported for now, but the others can be forced (and later added).
+the MAX6657 and the MAX6658, all of which are supported by this driver.
 
 The specificity of this family of chipsets over the ADM1021/LM84
 family is that it features critical limits with hysteresis, and an
@@ -77,7 +97,7 @@ LM90:
   * Filter and alert configuration register at 0xBF.
   * ALERT is triggered by temperatures over critical limits.
 
-LM89:
+LM86 and LM89:
   * Same as LM90
   * Better external channel accuracy
   
@@ -90,6 +110,9 @@ ADM1032:
   * Conversion averaging.
   * Up to 64 conversions/s.
   * ALERT is triggered by open remote sensor.
+
+MAX6657 and MAX6658:
+  * Remote sensor type selecion
 
 All temperature values are given in degrees Celcius. Resolution
 is 1.0 degree for the local temperature, 0.125 degree for the remote
@@ -110,7 +133,7 @@ other second; reading them more often will do no harm, but will return
 Chip Features
 -------------
 
-Chips 'lm90', adm1032' and 'lm99'
+Chips 'lm90', adm1032', 'lm99', 'lm86' and 'max6657'
 
 LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
 temp1                 -                     -                       R-     0

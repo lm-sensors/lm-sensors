@@ -21,11 +21,26 @@
  *   http://www.national.com/pf/LM/LM99.html
  * Note that there is no way to differenciate between both chips.
  *
+ * This driver also supports the LM86, another sensor chip made by
+ * National Semiconductor. It is exactly similar to the LM90 except it
+ * has a higher accuracy.
+ * Complete datasheet can be obtained from National's website at:
+ *   http://www.national.com/pf/LM/LM86.html
+ *
  * This driver also supports the ADM1032, a sensor chip made by Analog
  * Devices. That chip is similar to the LM90, with a few differences
  * that are not handled by this driver. Complete datasheet can be
  * obtained from Analog's website at:
  *   http://products.analog.com/products/info.asp?product=ADM1032
+ * Among others, it has a higher accuracy than the LM90, much like the
+ * LM86 does.
+ *
+ * This driver also supports the MAX6657 and MAX6658, sensor chips made
+ * by Maxim. These chips are similar to the LM86. Complete datasheet
+ * can be obtained at Maxim's website at:
+ *   http://www.maxim-ic.com/quick_view2.cfm/qv_pk/2578
+ * Note that there is no way to differenciate between both chips (but
+ * no need either).
  *
  * Since the LM90 was the first chipset supported by this driver, most
  * comments will refer to this chipset, but are actually general and
@@ -60,7 +75,7 @@
 /*
  * Addresses to scan
  * Address is fully defined internally and cannot be changed.
- * LM89, LM90, LM99 and ADM1032 have address 0x4c.
+ * LM86, LM89, LM90, LM99, ADM1032, MAX6657 and MAX6658 have address 0x4c.
  * LM89-1, and LM99-1 have address 0x4d.
  */
 
@@ -73,7 +88,7 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
  * Insmod parameters
  */
 
-SENSORS_INSMOD_3(lm90, adm1032, lm99);
+SENSORS_INSMOD_5(lm90, adm1032, lm99, lm86, max6657);
 
 /*
  * The LM90 registers
@@ -260,7 +275,6 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	int err = 0;
 	const char *type_name = "";
 	const char *client_name = "";
-	u8 reg_config1=0, reg_convrate=0;
 
 #ifdef DEBUG
 	if (i2c_is_isa_adapter(adapter))
@@ -309,32 +323,22 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	 * are skipped.
 	 */
 
-	if (kind < 0) /* detection */
-	{
-		reg_config1 = i2c_smbus_read_byte_data(new_client,
-			LM90_REG_R_CONFIG1);
-		reg_convrate = i2c_smbus_read_byte_data(new_client,
-			LM90_REG_R_CONVRATE);
+	/* Default to an LM90 if forced */
+	if (kind == 0)
+		kind = lm90;
 
-		if ((reg_config1 & 0x2A) != 0x00
-		 || reg_convrate > 0x0A)
-		{
-#ifdef DEBUG
-			printk(KERN_DEBUG "lm90.o: Detection failed at 0x%02x.\n",
-				address);
-#endif
-			goto ERROR1;
-		}
-	}
-
-	if (kind <= 0) /* identification */
+	if (kind < 0) /* detection and identification */
 	{
-		u8 man_id, chip_id;
+		u8 man_id, chip_id, reg_config1, reg_convrate;
 
 		man_id = i2c_smbus_read_byte_data(new_client,
 			LM90_REG_R_MAN_ID);
 		chip_id = i2c_smbus_read_byte_data(new_client,
 			LM90_REG_R_CHIP_ID);
+		reg_config1 = i2c_smbus_read_byte_data(new_client,
+			LM90_REG_R_CONFIG1);
+		reg_convrate = i2c_smbus_read_byte_data(new_client,
+			LM90_REG_R_CONVRATE);
 		
 		if (man_id == 0x01) /* National Semiconductor */
 		{
@@ -343,30 +347,34 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 			reg_config2 = i2c_smbus_read_byte_data(new_client,
 				LM90_REG_R_CONFIG2);
 
-			if (kind == 0 /* skip detection */
-			 || ((reg_config2 & 0xF8) == 0x00
-			  && reg_convrate <= 0x09))
+			if ((reg_config1 & 0x2A) == 0x00
+			 && (reg_config2 & 0xF8) == 0x00
+			 && reg_convrate <= 0x09)
 			{
 				if (address == 0x4C
 				 && (chip_id & 0xF0) == 0x20) /* LM90 */
-				{
 					kind = lm90;
-				}
 				else if ((chip_id & 0xF0) == 0x30) /* LM89/LM99 */
-				{
 					kind = lm99;
-				}
+				else if (address == 0x4C
+				 && (chip_id & 0xF0) == 0x10) /* LM86 */
+					kind = lm99;
 			}
 		}
 		else if (man_id == 0x41) /* Analog Devices */
 		{
 			if (address == 0x4C
 			 && (chip_id & 0xF0) == 0x40 /* ADM1032 */
-			 && (kind == 0 /* skip detection */
-			  || (reg_config1 & 0x3F) == 0x00))
-			{
+			 && (reg_config1 & 0x3F) == 0x00
+			 && reg_convrate <= 0x0A)
 				kind = adm1032;
-			}
+		}
+		else if (man_id == 0x4D) /* Maxim */
+		{
+			if (address == 0x4C
+			 && (reg_config1 & 0x1F) == 0
+			 && reg_convrate <= 0x09)
+				kind = max6657;
 		}
 	}
 
@@ -390,6 +398,16 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	{
 		type_name = "lm99";
 		client_name = "LM99 chip";
+	}
+	else if (kind == lm86)
+	{
+		type_name = "lm86";
+		client_name = "LM86 chip";
+	}
+	else if (kind == max6657)
+	{
+		type_name = "max6657";
+		client_name = "MAX6657 chip";
 	}
 	else
 	{

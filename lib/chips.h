@@ -475,11 +475,13 @@
 #define SENSORS_LM85_ZONE3_RANGE           100  /* RW -- zone3_range  */
 #define SENSORS_LM85_ZONE3_SMOOTH          101  /* RW -- zone3_smooth  */
 
-/* LM89/LM90/LM99/ADM1032 chips */
+/* LM86/LM89/LM90/LM99/ADM1032/MAX6657 chips */
 
 #define SENSORS_LM90_PREFIX "lm90"
 #define SENSORS_ADM1032_PREFIX "adm1032"
 #define SENSORS_LM99_PREFIX "lm99"
+#define SENSORS_LM86_PREFIX "lm86"
+#define SENSORS_MAX6657_PREFIX "max6657"
 
 #define SENSORS_LM90_LOCAL_TEMP 51 /* R */
 #define SENSORS_LM90_LOCAL_HIGH 52 /* RW */
