@@ -1,7 +1,7 @@
 /*
     pcf8591.c - Part of lm_sensors, Linux kernel modules for hardware
              monitoring
-    Copyright (c) 2001  Aurelien Jarno <aurelien.jarno@laposte.net>
+    Copyright (c) 2001  Aurelien Jarno <aurelien@aurel32.net>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 #include <linux/version.h>
 #include <linux/module.h>
-#include <linux/malloc.h>
+#include <linux/slab.h>
 #include <linux/i2c.h>
 #include "sensors.h"
 #include "version.h"
@@ -527,7 +527,7 @@ EXPORT_NO_SYMBOLS;
 
 #ifdef MODULE
 
-MODULE_AUTHOR("Aurelien Jarno <Aurelien Jarno@laposte.net>");
+MODULE_AUTHOR("Aurelien Jarno <aurelien@aurel32.net>");
 MODULE_DESCRIPTION("PCF8591 driver");
 #ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");

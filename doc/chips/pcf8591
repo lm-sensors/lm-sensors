@@ -10,9 +10,8 @@ Supported chips:
     Datasheet: Publicly available at the Philips Semiconductor website
                http://semiconductors.philips.com/
 
-Author: Aurelien Jarno <aurelien.jarno@laposte.net>
-valueable contributions by Jan M. Sendler <sendler@sendler.de>
-
+Author: Aurelien Jarno <aurelien@aurel32.net>
+valuable contributions by Jan M. Sendler <sendler@sendler.de>
 
 Module Parameters
 -----------------
