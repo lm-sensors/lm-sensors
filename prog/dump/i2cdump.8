@@ -1,0 +1,51 @@
+.TH I2CDUMP 8 "March 2004"
+.SH NAME
+i2cdump \- Examine I\u2\dC registers
+
+.SH SYNOPSIS
+.B i2cdump
+.I i2cbus
+.I address
+.RI [ mode ]
+.RI [ "bank " [ bankreg ]]
+
+.SH DESCRIPTION
+i2cdump is a small helper program to examine registers
+visible through the I\u2\dC bus.
+
+.SH OPTIONS
+At least two options must be provided to i2cdump. \fIi2cbus\fR indicates the
+number of the I\u2\dC bus to be scanned. This number should correspond to one
+of the busses listed by \fIi2cdetect -l\fR. \fIaddress\fR indicates the
+address to be scanned on that bus, and is an integer between 0x00 and 0x7F. The
+\fImode\fR parameter, if specified, is one of the letters \fBb\fP, \fBw\fP,
+\fBs\fP, or \fBi\fP, corresponding to a read size of a single byte, a 16-bit
+word, an SMBus block, an I\u2\dC block, respectively. The \fBc\fP mode is a
+little different, it reads all bytes consecutively, and is useful for chips that
+have an address auto-increment feature. A \fBp\fP can also be appended to the
+\fImode\fR parameter to enable PEC. If the \fImode\fR parameter is omitted,
+i2cdump defaults to byte access without PEC.
+.PP
+The \fIbank\fR and \fIbankreg\fR parameters are useful on the W83781D and
+similar chips (at the time of writing, all Winbond and Asus chips).
+\fIbank\fR is an integer between 0 and 7, and \fIbankreg\fR is an integer
+between 0x00 and 0xFF (default value: 0x4E). The W83781D data sheet has more
+information on bank selection.
+
+.SH WARNING
+i2cdump can be dangerous if used improperly. On some chips that do not support
+read data commands, i2cdump can actually WRITE to the chip. Do not use i2cdump
+on random addresses. Anyway, it is of little use unless you have an idea of
+what you are looking for and have some general knowledge about hardware
+monitoring chips internals.
+
+.SH CONFORMING TO
+lm_sensors-2.x
+
+.SH SEE ALSO
+isadump(8), i2cset(8)
+
+.SH AUTHOR
+This manual page was originally written by David Z Maze <dmaze@debian.org> for
+the Debian GNU/Linux system. It was then reviewed by the lm_sensors team and
+is now part of the lm_sensors source distribution.

@@ -1,0 +1,48 @@
+.TH I2CSET 8 "March 2004"
+.SH "NAME"
+i2cset \- Set I\u2\dC registers
+
+.SH SYNOPSIS
+.B i2cset
+.I i2cbus
+.I chip-address
+.I data-address
+.I value
+.RI [ mode ]
+
+.SH DESCRIPTION
+i2cset is a small helper program to set registers visible through the I\u2\dC
+bus.
+
+.SH OPTIONS
+There are four required options to i2cset. \fIi2cbus\fR indicates the number
+of the I\u2\dC bus to be scanned.  This number should correspond to one of
+the busses listed by \fIi2cdetect -l\fR. \fIchip-address\fR specifies the
+address of the chip on that bus, and is an integer between 0x00 and 0x7F.
+\fIdata-address\fR specifies the address on that chip to write to, and is an
+integer between 0x00 and 0xFF. \fIvalue\fR is the value to write to that
+location on the chip.
+.PP
+The \fImode\fR parameter, if specified, is one of the letters \fBb\fP or
+\fBw\fP, corresponding to a write size of a single byte or a 16-bit word,
+respectively. If the \fImode\fR parameter is omitted, i2cset defaults to byte
+mode. The \fIvalue\fR provided must be within range for the specified data
+type (0x00-0xFF for bytes, 0x0000-0xFFFF for words).
+
+.SH WARNING
+i2cset can be extremely dangerous if used improperly. It can confuse your
+I\u2\dC bus, cause data loss, or have more serious side effects. Writing to
+a serial EEPROM on a memory DIMM (chip addresses between 0x50 and 0x57) may
+DESTROY your memory, leaving your system unbootable!  Be extremely careful
+using this program.
+
+.SH CONFORMING TO
+lm_sensors-2.x
+
+.SH SEE ALSO
+i2cdump(8)
+
+.SH AUTHOR
+This manual page was originally written by David Z Maze <dmaze@debian.org> for
+the Debian GNU/Linux system. It was then reviewed by the lm_sensors team and
+is now part of the lm_sensors source distribution.
