@@ -168,8 +168,6 @@ int lm75_detect(struct i2c_adapter *adapter, int address, int kind)
   conf = smbus_read_byte_data(adapter,address,1);
   hyst = smbus_read_word_data(adapter,address,2);
   os = smbus_read_word_data(adapter,address,3);
-  if ((hyst & 0x7f00) || (os & 0x7f00) || (cur & 0x7f00))
-    goto ERROR1;
   for (i = 0; i <= 0x1f; i++) 
     if ((smbus_read_byte_data(adapter,address,i*8+1) != conf) ||
         (smbus_read_word_data(adapter,address,i*8+2) != hyst) ||

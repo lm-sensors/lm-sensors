@@ -1146,7 +1146,6 @@ sub lm75_detect
   my $conf = i2c_smbus_read_byte_data($file,0x01);
   my $hyst = i2c_smbus_read_word_data($file,0x02);
   my $os = i2c_smbus_read_word_data($file,0x03);
-  return if $hyst & 0x7f00 or $os & 0x7f00 or $cur & 0x7f00;
   for ($i = 0x00; $i <= 0x1f; $i += 1) {
     return if i2c_smbus_read_byte_data($file,($i * 0x08) + 0x01) != $conf;
     return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x02) != $hyst;
