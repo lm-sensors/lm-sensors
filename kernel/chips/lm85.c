@@ -351,11 +351,6 @@ static int ZONE_TO_REG( int zone )
 #define LM85_DATA_INTERVAL  (1 * HZ)
 #define LM85_CONFIG_INTERVAL  (5 * 60 * HZ)
 
-#ifdef MODULE
-extern int init_module(void);
-extern int cleanup_module(void);
-#endif				/* MODULE */
-
 /* There are some complications in a module like this.  There might be
    several LM85 chips available (well, actually, that is probably never
    done; but it is a clean illustration of how to handle a case like
@@ -1890,56 +1885,24 @@ void adt7463_therm_signal(struct i2c_client *client, int operation,
 	}
 }
 
-static int __initdata lm85_initialized = 0;
-
-int __init sensors_lm85_init(void)
+static int __init sm_lm85_init(void)
 {
-	int res;
-
-	printk("lm85: Version %s (%s)\n", LM_VERSION, LM_DATE);
-	lm85_initialized = 0;
-
-	if ((res = i2c_add_driver(&lm85_driver))) {
-		printk("lm85: Driver registration failed, module not inserted.\n");
-		lm85_cleanup();
-		return res;
-	}
-	lm85_initialized++;
-	return 0;
+	printk("lm85 version %s (%s)\n", LM_VERSION, LM_DATE);
+	return i2c_add_driver(&lm85_driver);
 }
 
-int __init lm85_cleanup(void)
+static void __exit sm_lm85_exit(void)
 {
-	int res;
-
-	if (lm85_initialized >= 1) {
-		if ((res = i2c_del_driver(&lm85_driver))) {
-			printk("lm85: Driver deregistration failed, module not removed.\n");
-			return res;
-		}
-		lm85_initialized--;
-	}
-	return 0;
+	i2c_del_driver(&lm85_driver);
 }
-
-
-#ifdef MODULE
 
 /* Thanks to Richard Barrington for adding the LM85 to sensors-detect.
  * Thanks to Margit Schubert-While <margitsw@t-online.de> for help with
  *     post 2.7.0 CVS changes
  */
+MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Philip Pokorny <ppokorny@penguincomputing.com");
 MODULE_DESCRIPTION("LM85-B, LM85-C driver");
 
-int init_module(void)
-{
-	return sensors_lm85_init();
-}
-
-int cleanup_module(void)
-{
-	return lm85_cleanup();
-}
-
-#endif				/* MODULE */
+module_init(sm_lm85_init);
+module_exit(sm_lm85_exit);
