@@ -188,6 +188,7 @@ int main (int argc, char *argv[])
     for(i = optind; i < argc; i++) 
       if ((res = sensors_parse_chip_name(argv[i],chips+chips_count))) {
         fprintf(stderr,"Parse error in chip name `%s'\n",argv[i]);
+        print_short_help();
         exit(1);
       } else if (++chips_count == CHIPS_MAX) {
         fprintf(stderr,"Too many chips on command line!\n");
