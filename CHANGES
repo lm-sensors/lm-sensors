@@ -30,7 +30,9 @@ ask CVS about it:
            Add support for 2.6 adt7461 (James Chapman)
            Add support for 2.6 lm92
            Add support for 2.6 vt1211
+           Add preliminary support for 2.6 w83627ehf
   Makefile: Support mips, sparc32 and sparc64 (Aurelien Jarno)
+            Use -fno-strict-aliasing on all architectures
   Man pages pwmconfig, fancontrol: New (Aurelien Jarno)
   Module bmcsensors: Fix compile error
                      Support IPMI V0.9 (Yani Ioannou/Vladislav Bogdanov)
@@ -46,6 +48,7 @@ ask CVS about it:
                Limit I2C address range
                Support VID on the IT8712F
   Module lm75: Only initialize CMP/INT bit
+  Module lm78: Fix bug with setting negative temperature limits
   Module lm85: Properly differenciate between ADM1027 and ADT7463
   Module lm90: Fix MAX6657, MAX6658 and MAX6659 detection
   Module lm93: Fix IN10 (+5V) scaling
@@ -72,7 +75,7 @@ ask CVS about it:
                    No errors on missing pc87360 fans
                    Add gl520sm support (Maarten Deprez)
                    Improve vt1211 error/ignore handling (Michael Carland)
-                   Support w83792d.
+                   Support w83792d, w83627ehf
   Program sensors-detect: Fix MAX6657, MAX6658 and MAX6659 detection
                           Improve IT8705F and IT8712F detection
                           Improve udev detection
@@ -82,6 +85,10 @@ ask CVS about it:
                           Add VT1211 alias detection	
                           Warn if chip modules not found
                           Add i2c-ipmi to list if bmcsensors is on it			
+                          Add PC87591 detection
+                          Search for correct udev db file name
+                          Add nForce3 250Gb and nForce4 detection
+
 
 2.9.0 (20041228)
   NOTE: Requires i2c-2.9.0 or newer!
