@@ -86,6 +86,9 @@ MODULE_PARM_DESC(vccp_limit_type, "Configures in7 and in8 limit modes");
 #define LM93_REG_CONFIG			0xe3
 #define LM93_REG_SLEEP_CONTROL		0xe4
 
+/* alarm values start here */
+#define LM93_REG_HOST_ERROR_1		0x48
+
 /* voltage inputs: in1-in16 (nr => 0-15) */
 #define LM93_REG_IN(nr)			(0x56 + (nr))
 #define LM93_REG_IN_MIN(nr)		(0x90 + (nr) * 2)
@@ -1167,6 +1170,9 @@ static void lm93_update_client_full(struct lm93_data *data,
 	/* pmw control registers */
 	lm93_read_block(client, 9, (u8 *)(data->block9));
 
+	/* alarm values */
+	lm93_read_block(client, 1, (u8 *)(&data->block1));
+
 	lm93_update_client_common(data, client);
 }
 
@@ -1175,6 +1181,7 @@ static void lm93_update_client_min(struct lm93_data *data,
 		struct i2c_client *client)
 {
 	int i,j;
+	u8 *ptr;
 
 	pr_debug("lm93.o: starting device update (block data disabled)\n");
 
@@ -1216,6 +1223,13 @@ static void lm93_update_client_min(struct lm93_data *data,
 			data->block9[i][j] =
 				lm93_read_word(client, LM93_REG_PWM_CTL(i,j));
 		}
+	}
+
+	/* alarm values */
+	ptr = &data->block1;
+	for (i = 0, ptr = &data->block1; i < 8; i++) {
+		*(ptr + i) =
+			lm93_read_word(client, LM93_REG_HOST_ERROR_1 + i);
 	}
 
 	lm93_update_client_common(data, client);
