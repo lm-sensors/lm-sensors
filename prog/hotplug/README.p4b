@@ -3,8 +3,11 @@ What is it?
 
 This is just a quick and dirty hack to get the hardware monitoring working
 on the ASUS P4B board under Linux.
-ASUS switches of the SMBus PCI Device in the i801 ICH2 chip. I spoke two times
-with the German support an learned that: "We do not want the users to be
+It works by turning on the SMBus PCI device.
+It is implemented as a module, p4b_smbus.o.
+
+ASUS switches off the SMBus PCI Device in the i801 ICH2 chip. I spoke two times
+with the German support and learned that: "We do not want the users to be
 irritated by just another PCI Device in the Win98 device manager."
 Really funny :-).
 
