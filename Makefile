@@ -215,6 +215,20 @@ MODCFLAGS += -fno-strict-aliasing -fno-common -fomit-frame-pointer -mno-red-zone
 	     -mcmodel=kernel -fno-reorder-blocks -finline-limit=2000 -fno-strength-reduce
 endif
 
+ifeq ($(MACHINE),mips)
+MODCFLAGS += -mabi=32 -mips3 -Wa,-32 -Wa,-mips3 -Wa,--trap
+endif
+
+ifeq ($(MACHINE),sparc32)
+MODCFLAGS += -m32 -pipe -mno-fpu -fcall-used-g5 -fcall-used-g7
+endif
+
+ifeq ($(MACHINE),sparc64)
+MODCFLAGS += -m64 -pipe -mno-fpu -mcpu=ultrasparc -mcmodel=medlow \
+	     -ffixed-g4 -fcall-used-g5 -fcall-used-g7 -Wno-sign-compare \
+	     -Wa,--undeclared-regs
+endif
+
 ifeq ($(SMP),1)
 MODCPPFLAGS += -D__SMP__
 endif
