@@ -29,6 +29,7 @@ ask CVS about it:
   File sensors.c: Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
   Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
   Include file sensors.h: Most contents moved to i2c-proc.h in i2c package
+  Library: Fix some lm87 entries
   Chip Modules (all ISA): Remove #include "i2c-isa.h"
   Module i2c-i801: Chip detection cleanup
   Module lm78: Recognize chipid=0x20
