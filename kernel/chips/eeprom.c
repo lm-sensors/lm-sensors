@@ -151,8 +151,6 @@ static ctl_table eeprom_dir_table_template[] = {
 	{0}
 };
 
-static int eeprom_id = 0;
-
 static int eeprom_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, eeprom_detect);
@@ -166,20 +164,17 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 	struct i2c_client *new_client;
 	struct eeprom_data *data;
 	int err = 0;
-	const char *type_name, *client_name;
+	const char *type_name;
 
-	/* Make sure we aren't probing the ISA bus!! This is just a safety check
-	   at this moment; i2c_detect really won't call us. */
-#ifdef DEBUG
-	if (i2c_is_isa_adapter(adapter)) {
-		printk
-		    ("eeprom.o: eeprom_detect called for an ISA bus adapter?!?\n");
-		return 0;
-	}
-#endif
-
-	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
-		    goto ERROR0;
+	/* There are three ways we can read the EEPROM data:
+	   (1) I2C block reads (faster, but unsupported by most adapters)
+	   (2) Consecutive byte reads (100% overhead)
+	   (3) Regular byte data reads (200% overhead)
+	   The third method is not implemented by this driver because all
+	   known adapters support at least the second. */
+	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_READ_BYTE_DATA
+					    | I2C_FUNC_SMBUS_BYTE))
+		goto ERROR0;
 
 	/* OK. For now, we presume we have a valid client. We now create the
 	   client structure, even though we cannot fill it completely yet.
@@ -200,43 +195,29 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 	/* prevent 24RF08 corruption */
 	i2c_smbus_write_quick(new_client, 0);
 
-	data->nature = NATURE_UNKNOWN;
-	/* Detect the Vaio nature of EEPROMs.
-	   We use the "PCG-" prefix as the signature. */
-	if (address == 0x57)
-	{
-		if (i2c_smbus_read_byte_data(new_client, 0x80) == 'P'
-		 && i2c_smbus_read_byte_data(new_client, 0x81) == 'C'
-		 && i2c_smbus_read_byte_data(new_client, 0x82) == 'G'
-		 && i2c_smbus_read_byte_data(new_client, 0x83) == '-')
-			data->nature = NATURE_VAIO;
-	}
-
-	/* Determine the chip type - only one kind supported! */
-	if (kind <= 0)
-		kind = eeprom;
-
-	if (kind == eeprom) {
-		type_name = "eeprom";
-		client_name = "EEPROM chip";
-	} else {
-#ifdef DEBUG
-		printk("eeprom.o: Internal error: unknown kind (%d)?!?",
-		       kind);
-#endif
-		goto ERROR1;
-	}
+	type_name = "eeprom";
 
 	/* Fill in the remaining client fields and put it into the global list */
-	strcpy(new_client->name, client_name);
-
-	new_client->id = eeprom_id++;
+	strcpy(new_client->name, "EEPROM chip");
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
+	data->nature = NATURE_UNKNOWN;
 
 	/* Tell the I2C layer a new client has arrived */
 	if ((err = i2c_attach_client(new_client)))
 		goto ERROR3;
+
+	/* Detect the Vaio nature of EEPROMs.
+	   We use the "PCG-" prefix as the signature. */
+	if (address == 0x57) {
+		if (i2c_smbus_read_byte_data(new_client, 0x80) == 'P'
+		 && i2c_smbus_read_byte(new_client) == 'C'
+		 && i2c_smbus_read_byte(new_client) == 'G'
+		 && i2c_smbus_read_byte(new_client) == '-')
+			printk(KERN_INFO "Vaio EEPROM detected, "
+			       "enabling password protection\n");
+			data->nature = NATURE_VAIO;
+	}
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client, type_name,
@@ -249,13 +230,9 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 
 	return 0;
 
-/* OK, this is not exactly good programming practice, usually. But it is
-   very code-efficient in this case. */
-
       ERROR4:
 	i2c_detach_client(new_client);
       ERROR3:
-      ERROR1:
 	kfree(data);
       ERROR0:
 	return err;
