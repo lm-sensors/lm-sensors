@@ -200,10 +200,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
                                                  ((val)+5)/10),0,255))
 #define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
 
-#define AS99127_TEMP_ADD_TO_REG(val) (SENSORS_LIMIT((((((val) + 2)*4)/10) \
-                                               << 7),0,0xffff))
-#define AS99127_TEMP_ADD_FROM_REG(val) ((((val) >> 7) * 10) / 4)
-
 #define ALARMS_FROM_REG(val) (val)
 #define PWM_FROM_REG(val) (val)
 #define PWM_TO_REG(val) (SENSORS_LIMIT((val),0,255))
@@ -1588,43 +1584,22 @@ void w83781d_temp_add(struct i2c_client *client, int operation,
 		*nrels_mag = 1;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83781d_update_client(client);
-		if (data->type == as99127f) {
-			results[0] =
-			    AS99127_TEMP_ADD_FROM_REG(data->
-						      temp_add_over[nr]);
-			results[1] =
-			    AS99127_TEMP_ADD_FROM_REG(data->
-						      temp_add_hyst[nr]);
-			results[2] =
-			    AS99127_TEMP_ADD_FROM_REG(data->temp_add[nr]);
-		} else {
-			results[0] =
-			    LM75_TEMP_FROM_REG(data->temp_add_over[nr]);
-			results[1] =
-			    LM75_TEMP_FROM_REG(data->temp_add_hyst[nr]);
-			results[2] = LM75_TEMP_FROM_REG(data->temp_add[nr]);
-		}
+		results[0] = LM75_TEMP_FROM_REG(data->temp_add_over[nr]);
+		results[1] = LM75_TEMP_FROM_REG(data->temp_add_hyst[nr]);
+		results[2] = LM75_TEMP_FROM_REG(data->temp_add[nr]);
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			if (data->type == as99127f)
-				data->temp_add_over[nr] =
-				    AS99127_TEMP_ADD_TO_REG(results[0]);
-			else
-				data->temp_add_over[nr] =
-				    LM75_TEMP_TO_REG(results[0]);
+			data->temp_add_over[nr] =
+			    LM75_TEMP_TO_REG(results[0]);
 			w83781d_write_value(client,
 					    nr ? W83781D_REG_TEMP3_OVER :
 					    W83781D_REG_TEMP2_OVER,
 					    data->temp_add_over[nr]);
 		}
 		if (*nrels_mag >= 2) {
-			if (data->type == as99127f)
-				data->temp_add_hyst[nr] =
-				    AS99127_TEMP_ADD_TO_REG(results[1]);
-			else
-				data->temp_add_hyst[nr] =
-				    LM75_TEMP_TO_REG(results[1]);
+			data->temp_add_hyst[nr] =
+			    LM75_TEMP_TO_REG(results[1]);
 			w83781d_write_value(client,
 					    nr ? W83781D_REG_TEMP3_HYST :
 					    W83781D_REG_TEMP2_HYST,

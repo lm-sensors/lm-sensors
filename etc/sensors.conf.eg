@@ -750,24 +750,24 @@ chip "as99127f-*"
 #   compute in5 (5.14 * @) - 14.91 , (@ + 14.91) / 5.14
 #   compute in6 (3.14 * @) -  7.71 , (@ +  7.71) / 3.14
 
-# Depending on your motherboard, you have to choose between three formulae
-# for temp2. Quoting Artur Gawryszczak:
-# "I guess, that the formula "temp2 (@*30/43)+25, (@-25)*43/30" is correct
+# Depending on your motherboard, you may have to use any of two formulae
+# for temp2. Quoting Artur Gawryszczak (edited to reflect subsequent fixes
+# to the driver):
+# "I guess, that the formula "(@*15/43)+25, (@-25)*43/15" is correct
 # for those Asus motherboards, which get CPU temperature from internal 
-# thermal diode (Pentium Coppermine, and above), and "temp2 @*2.0, @/2.0" 
-# is correct for Athlon/Duron boards, which use a thermistor in the 
-# socket."
-# The third formula was found and reported by Victor G. Marimon.
-# Asus CUV4X, Asus A7V8X
-#   compute temp2 (@*30/43)+25, (@-25)*43/30
+# thermal diode (Pentium Coppermine, and above), while no formula is needed
+# for Athlon/Duron boards, which use a thermistor in the socket."
+# An alternative formula was then found and reported by Victor G. Marimon.
+
 # Asus A7V133, Asus A7M266
-    compute temp2 @*2.0, @/2.0
+#   No compute line is needed
+# Asus CUV4X, Asus A7V8X
+#   compute temp2 (@*15/43)+25, (@-25)*43/15
 # Asus CUSL2, Asus CUV266-DLS
-#   compute temp2 (@*60/43)+25, (@-25)*43/60
+#   compute temp2 (@*30/43)+25, (@-25)*43/30
 
 # See comments above if temp3 looks bad. What works for temp2 is likely
-# to work for temp3.
-    compute temp3 @*2.0, @/2.0
+# to work for temp3 for dual-CPU boards.
 
 # Most Asus boards have temperatures settled like that:
     label temp1 "M/B Temp"
