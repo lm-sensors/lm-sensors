@@ -603,10 +603,11 @@ void gl518_update_client_rev00(struct i2c_client *client)
 
   if (data->iterate == 1) {    /* 10 sec delay */
     /* as that update is slow, we consider the data valid for 30 seconds */
-    if ((jiffies - data->last_updated_v00 > 30*HZ) || (data->alarms & 7)) {
+    if ((jiffies - data->last_updated_v00 > 30*HZ) || (data->alarms & 7) 
+         || (! data->valid)) {
       gl518_update_vins(client);
       for (i=0; i<4; i++)
-        data->voltage[4]=data->iter_voltage[i];
+        data->voltage[i]=data->iter_voltage[i];
     }
   } else if (data->iterate == 2) {   /* show results of last iteration */
     for (i=0; i<4; i++)
@@ -902,10 +903,14 @@ void gl518_iterate(struct i2c_client *client, int operation, int ctl_name,
     results[0] = data->iterate;
     *nrels_mag = 1;
   } else if (operation == SENSORS_PROC_REAL_WRITE) {
-    if (*nrels_mag >= 1)
+    if ((*nrels_mag >= 1) && (data->iterate!=results[0])) {
+      for (i=0; i<4; i++) {
+        data->voltage[i] = 0;
+        data->iter_voltage[i] = 105; /* bogus */
+      }
       data->iterate=results[0];
-    for (i=0; i<4; i++)
-      data->voltage[i] = 0;
+      data->valid=0;
+    }
   }
 }
 
