@@ -16,6 +16,9 @@ ask CVS about it:
       cvs diff -r V2-0-0 -r V2-0-1 -u
 
 -----------------------------------------------------------------------------
+2.8.2 (???)
+  Module i2c-sis630: sync with 2.6.0-X driver version. 
+
 
 2.8.1 (20031005)
   NOTE: Requires i2c-2.8.1 or newer!

@@ -25,10 +25,10 @@
    	Fixed the typo in sis630_access (Thanks to Mark M. Hoffman)
 	Changed sis630_transaction.(Thanks to Mark M. Hoffman)
    18.09.2002
-	Added SIS730 as supported
+	Added SIS730 as supported.
    21.09.2002
 	Added high_clock module option.If this option is set
-	used Host Master Clock 56KHz (default 14KHz).For now we are save old Host
+	used Host Master Clock 56KHz (default 14KHz).For now we save old Host
 	Master Clock and after transaction completed restore (otherwise
 	it's confuse BIOS and hung Machine).
    24.09.2002
@@ -102,22 +102,22 @@
 #define SIS630_BLOCK_DATA 0x05
 
 /* insmod parameters */
-
 static int high_clock = 0;
+static int force = 0;
 MODULE_PARM(high_clock, "i");
 MODULE_PARM_DESC(high_clock, "Set Host Master Clock to 56KHz (default 14KHz).");
-
-#if 0
-/* If force is set to anything different from 0, we forcibly enable the
-   SIS630. DANGEROUS! */
-static int force = 0;
 MODULE_PARM(force, "i");
 MODULE_PARM_DESC(force, "Forcibly enable the SIS630. DANGEROUS!");
-#endif
 
-
+/* acpi base address */
 static unsigned short acpi_base = 0;
 
+/* supported chips */
+static int supported[] = {
+	PCI_DEVICE_ID_SI_630,
+	PCI_DEVICE_ID_SI_730,
+	0 /* terminates the list */
+};
 
 static inline u8 sis630_read(u8 reg) {
 	return inb(acpi_base + reg);
@@ -289,6 +289,10 @@ static int sis630_block_data(union i2c_smbus_data * data, int read_write) {
 			if (len == 0)
 				data->block[0] = sis630_read(SMB_COUNT);
 
+			/* just to be sure */
+			if (data->block[0] > 32)
+				data->block[0] = 32;
+
 			DBG("block data read len=0x%x\n", data->block[0]);
 
 			for (i=0; i < 8 && len < data->block[0]; i++,len++) {
@@ -386,19 +390,24 @@ static u32 sis630_func(struct i2c_adapter *adapter) {
 		I2C_FUNC_SMBUS_BLOCK_DATA;
 }
 
-static int sis630_setup(struct pci_dev *dummy) {
+static int __devinit sis630_setup(struct pci_dev *sis630_dev) {
 	unsigned char b;
-	struct pci_dev *sis630_dev = NULL;
+	struct pci_dev *dummy = NULL;
+	int i;
 
-        /*
-	   We need ISA brigde and not pci device passed in.
-        */
-	if (!(sis630_dev = pci_find_device(PCI_VENDOR_ID_SI,
-                                            PCI_DEVICE_ID_SI_503,
-                                            sis630_dev))) {
-            printk(KERN_ERR "i2c-sis630.o: Error: Can't detect 85C503/5513 ISA bridge!\n");
-            return -ENODEV;
-        }
+	/* check for supported SiS devices */
+	for (i=0; supported[i] > 0; i++) {
+		if ((dummy = pci_find_device(PCI_VENDOR_ID_SI, supported[i], dummy)))
+			break; /* found */
+	}
+
+	if (!dummy && force > 0) {
+		printk(KERN_ERR "i2c-sis630.o: WARNING: Can't detect SIS630 compatible device, but "
+			"loading because of force option enabled\n");
+	}
+	else if (!dummy) {
+		return -ENODEV;
+	}
 
 	/*
 	   Enable ACPI first , so we can accsess reg 74-75
@@ -430,6 +439,7 @@ static int sis630_setup(struct pci_dev *dummy) {
 	if (!request_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION, "sis630-smbus")){
 		printk(KERN_ERR "i2c-sis630.o: SMBus registers 0x%04x-0x%04x "
 			"already in use!\n",acpi_base + SMB_STS, acpi_base + SMB_SAA);
+		acpi_base = 0; /* reset acpi_base */
 		return -ENODEV;
 	}
 
@@ -455,13 +465,7 @@ static struct i2c_adapter sis630_adapter = {
 static struct pci_device_id sis630_ids[] __devinitdata = {
 	{
 		.vendor =	PCI_VENDOR_ID_SI,
-		.device =	PCI_DEVICE_ID_SI_630,
-		.subvendor =	PCI_ANY_ID,
-		.subdevice =	PCI_ANY_ID,
-	},
-	{
-		.vendor =	PCI_VENDOR_ID_SI,
-		.device =	PCI_DEVICE_ID_SI_730,
+		.device =	PCI_DEVICE_ID_SI_503,
 		.subvendor =	PCI_ANY_ID,
 		.subdevice =	PCI_ANY_ID,
 	},
@@ -470,10 +474,8 @@ static struct pci_device_id sis630_ids[] __devinitdata = {
 
 static int __devinit sis630_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
-
 	if (sis630_setup(dev)) {
 		printk(KERN_ERR "i2c-sis630.o: SIS630 comp. bus not detected, module not inserted.\n");
-
 		return -ENODEV;
 	}
 
@@ -485,7 +487,11 @@ static int __devinit sis630_probe(struct pci_dev *dev, const struct pci_device_i
 
 static void __devexit sis630_remove(struct pci_dev *dev)
 {
-	i2c_del_adapter(&sis630_adapter);
+	if (acpi_base) {
+		i2c_del_adapter(&sis630_adapter);
+		release_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION);
+		acpi_base = 0;
+	}
 }
 
 
@@ -506,7 +512,6 @@ static int __init i2c_sis630_init(void)
 static void __exit i2c_sis630_exit(void)
 {
 	pci_unregister_driver(&sis630_driver);
-	release_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION);
 }
 
 
