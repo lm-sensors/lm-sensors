@@ -46,9 +46,6 @@ only sense the temperature of one external diode.
 Using the adm1021 driver for a LM83 should work, but only two temperatures
 will be reported instead of four.
 
-Alarms and critical temperature (common to all four temperature readings)
-are not handled by this driver yet, but should be someday.
-
 The LM83 is only found on a handful of motherboards. Both a confirmed
 list and an unconfirmed list follow. If you can confirm or infirm the
 fact that any of these motherboards do actually have an LM83, please

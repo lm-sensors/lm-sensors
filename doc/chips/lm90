@@ -1,0 +1,104 @@
+Kernel driver `lm90.o'
+=====================
+
+Status: Complete but untested
+
+Supported chips: 
+  * National Semiconductor LM90
+    Prefix: `lm90'
+    Addresses scanned: I2C 0x4c
+    Datasheet: Publicly available at the National Semiconductor website
+               http://www.national.com/pf/LM/LM90.html
+
+
+Author: Jean Delvare <khali@linux-fr.org>
+
+License: GPL
+
+
+Module Parameters
+-----------------
+
+* force: short array (min = 1, max = 48)
+  List of adapter,address pairs to boldly assume to be present
+* force_lm90: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `lm90' chip
+* probe: short array (min = 1, max = 48)
+  List of adapter,address pairs to scan additionally
+* probe_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples to scan additionally
+* ignore: short array (min = 1, max = 48)
+  List of adapter,address pairs not to scan
+* ignore_range: short array (min = 1, max = 48)
+  List of adapter,start-addr,end-addr triples not to scan
+
+
+Description
+-----------
+
+The LM90 is a digital temperature sensor. It senses its own temperature as
+well as the temperature of up to one external diode. It is compatible
+with many other devices such as the LM86, the LM89, the ADM1032, the
+MAX6657 and the MAX6658. The particularity of the LM90 over the LM84 for
+example is that it features critical limits with hysteresis, and an
+increased resolution of the remote temperature measurement.
+
+Using the adm1021 or lm83 drivers for a LM90 should work, but the extra
+features won't be supported.
+
+The LM90 is found on many motherboards, too many for an exhaustive listing.
+A list of confirmed motherboards follows. If you think the list is wrong or
+want to add a specific motherboard to it, contact us.
+
+Confirmed motherboards:
+    Gigabyte    GA-7VAX
+    Gigabyte    GA-7VRXP
+
+The driver is untested so far. We want testers! Let us know if you want to
+help.
+
+All temperature values are given in degrees Celcius. Local and remote
+temperatures are given within a range of +25 to +125 degrees. Resolution
+is 1.0 degree for the local temperature, 0.125 degree for the remote
+temperature. Accuracy is guaranteed to 4.0 degrees, but should reach
+1.5 degree (local) and 3.0 degrees (remote) under typical conditions (see
+the datasheet for more details).
+
+Each sensor has its own high and low limits, plus a critical limit.
+Additionally, there is a relative hysteresis value common to both critical
+values.
+
+The lm90 driver will not update its values more frequently than every
+other second; reading them more often will do no harm, but will return
+'old' values.
+
+
+Chip Features
+-------------
+
+Chip 'lm90'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp1                 -                     -                       R-     0
+temp1_high            temp1                 temp1                   RW     0
+temp1_low             temp1                 temp1                   RW     0
+temp2                 -                     -                       R-     1
+temp2_high            temp2                 temp2                   RW     1
+temp2_low             temp2                 temp2                   RW     1
+tcrit1                temp1                 temp1                   RW     0
+tcrit2                temp2                 temp2                   RW     0
+hyst                  -                     -                       RW     0
+alarms                -                     -                       R-     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp1                 SENSORS_LM90_LOCAL_TEMP                           temp1:3
+temp1_high            SENSORS_LM90_LOCAL_HIGH                           temp1:1
+temp1_low             SENSORS_LM90_LOCAL_LOW                            temp1:2
+temp2                 SENSORS_LM90_REMOTE_TEMP                          temp2:3
+temp2_high            SENSORS_LM90_REMOTE_HIGH                          temp2:1
+temp2_low             SENSORS_LM90_REMOTE_LOW                           temp2:2
+tcrit1                SENSORS_LM90_LOCAL_TCRIT                         tcrit1:1
+tcrit2                SENSORS_LM90_REMOTE_TCRIT                        tcrit2:1
+hyst                  SENSORS_LM90_TCRIT_HYST                            hyst:1
+alarms                SENSORS_LM90_ALARMS                              alarms:1
