@@ -459,11 +459,17 @@ int i2cproc_command(struct i2c_client *client, unsigned int cmd,
 /* Nothing here yet */
 void i2cproc_inc_use(struct i2c_client *client)
 {
+#ifdef MODULE
+  MOD_INC_USE_COUNT;
+#endif
 }
 
 /* Nothing here yet */
 void i2cproc_dec_use(struct i2c_client *client)
 {
+#ifdef MODULE
+  MOD_DEC_USE_COUNT;
+#endif
 }
 
 #ifdef MODULE

@@ -81,6 +81,7 @@ extern void sensors_deregister_entry(int id);
 #define SENSORS_PREFIX_MAX 20
 
 /* Driver IDs */
+#define I2C_DRIVERID_I2CDEV 1000
 #define I2C_DRIVERID_I2CPROC 1001
 #define I2C_DRIVERID_LM78 1002
 #define I2C_DRIVERID_LM75 1003

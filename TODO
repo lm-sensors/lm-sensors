@@ -1,5 +1,6 @@
 Many, many things. Most notably:
 
+* Fans give overflow if small values are written to them.
 * At least the bit-lp and bit-velle modules do no detection on loading;
   ask Simon whether this is possible to add.
 * kmalloc with GFP_KERNEL can cause a context switch! Check whether this is
@@ -12,10 +13,13 @@ Many, many things. Most notably:
 * Make it SMP-safe: there are no spinlocks yet. They are needed at many
   places, probably (everywhere where global vars are accessed). This must be
   done for the i2c modules, too.
+* Better general locking, or at least a once-over to check no race-conditions
+  remain.
 * Make lm78.c detect 'double hits', (same chip connected to both SMBus and
   ISA).
 * Better chip detection; insmod-time paramters to set addresses 
   (difficult, because of all i2c busses!).
+* At least one case report that unused port addresses do not return 0xff
 * Registrate which i2c addresses are used (a la ISA) for each adapter.
 * Rename i2c-proc.c to i2c-user.c, and extend it with /dev entries;
   or, create a better i2c-dev.c, that understands SMBus commands.
