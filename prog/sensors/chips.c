@@ -2722,17 +2722,25 @@ void print_eeprom(const sensors_chip_name *name)
 		if (valid) {
 			type = (int) a;
 			switch (type) {
+				case 1:
+					print_label(label, 24);
+					printf("DRDRAM RIMM\n");
+					break;
+				case 2:
+					print_label(label, 24);
+					printf("EDO\n");
+					break;
 				case 4:
 					print_label(label, 24);
-					printf("SDRAM DIMM SPD\n");
+					printf("SDR SDRAM DIMM\n");
 					break;
 				case 7:
 					print_label(label, 24);
-					printf("DDR SDRAM DIMM SPD\n");
+					printf("DDR SDRAM DIMM\n");
 					break;
 				case 17:
 					print_label(label, 24);
-					printf("RAMBUS RIMM SPD\n");
+					printf("RAMBUS RIMM\n");
 					break;
 				case 0:   /* Sony Vaio EEPROM? */
 				case 255: /* EDID EEPROM? */
@@ -2826,6 +2834,9 @@ void print_eeprom(const sensors_chip_name *name)
 		print_label(label, 24);
 		if (type == 17) { /* RAMBUS */
 			i = (((int) a) & 0x0f) + (((int) a) >> 4) + (((int) c) & 0x07) - 13;
+			k = 1;
+		} else if (type == 1) { /* DRDRAM */
+			i = (((int) b) & 0x0f) + (((int) b) >> 4) + (((int) c) & 0x07) - 13;
 			k = 1;
 		} else { /* SDRAM */
 			i = (((int) a) & 0x0f) + (((int) b) & 0x0f) - 17;
