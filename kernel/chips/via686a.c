@@ -509,33 +509,6 @@ static int via686a_attach_adapter(struct i2c_adapter *adapter)
 	return i2c_detect(adapter, &addr_data, via686a_detect);
 }
 
-/* Locate chip and get correct base address */
-static int via686a_find(int *address)
-{
-	u16 val;
-
-	if (!pci_present())
-		return -ENODEV;
-
-	if (!(s_bridge = pci_find_device(PCI_VENDOR_ID_VIA,
-					 PCI_DEVICE_ID_VIA_82C686_4,
-					 NULL)))
-		return -ENODEV;
-
-	if (PCIBIOS_SUCCESSFUL !=
-	    pci_read_config_word(s_bridge, VIA686A_BASE_REG, &val))
-		return -ENODEV;
-	*address = val & ~(VIA686A_EXTENT - 1);
-	if (*address == 0 && force_addr == 0) {
-		printk("via686a.o: base address not set - upgrade BIOS or use force_addr=0xaddr\n");
-		return -ENODEV;
-	}
-	if (force_addr)
-		*address = force_addr;	/* so detect will get called */
-
-	return 0;
-}
-
 int via686a_detect(struct i2c_adapter *adapter, int address,
 		   unsigned short flags, int kind)
 {
