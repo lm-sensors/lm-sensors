@@ -149,10 +149,10 @@ sub scan_kernel_chip
 			last if $line =~ m/;/;
 		}
 		
-		while (shift @tokens ne '{') { die unless @tokens }
+		while (shift @tokens ne '{') { die "Tokenization in $chip" unless @tokens }
 		for (;;)
 		{
-			while (shift @tokens ne '{') { die unless @tokens }
+			while (shift @tokens ne '{') { die "Tokenization in $chip" unless @tokens }
 			my $val = shift @tokens;
 			last if $val eq '0';
 			die "Parse error: ',' expected after '$val' within $chip"
