@@ -41,3 +41,6 @@ Intel		SMBus 2.0 system				6/02
 Via		8231 and two 8233 motherboards			6/02
 		Drivers developed: VT8231 support in via686a;
 		vt1211; VT8233A and VT8231 support in i2c-viapro
+
+HP		IPMI system					10/02
+		Drivers developed: IPMI
