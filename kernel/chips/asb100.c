@@ -26,10 +26,14 @@
 */
 
 /*
-    This driver supports the hardware sensor chip: Asus ASB100(A) BACH
+    This driver supports the hardware sensor chips: Asus ASB100 and
+    ASB100-A "BACH".
+
+    ASB100-A supports pwm1, while plain ASB100 does not.  There is no known
+    way for the driver to tell which one is there.
 
     Chip	#vin	#fanin	#pwm	#temp	wchipid	vendid	i2c	ISA
-    asb100	7	3	0	4	0x31	0x0694	yes	no
+    asb100	7	3	1	4	0x31	0x0694	yes	no
 */
 
 //#define DEBUG 1
@@ -102,7 +106,9 @@ static const u16 asb100_reg_temp_hyst[] = {0, 0x3a, 0x153, 0x253, 0x19};
 #define ASB100_REG_BEEP_INTS1	0x56
 #define ASB100_REG_BEEP_INTS2	0x57
 #define ASB100_REG_WCHIPID	0x58
-#define ASB100_REG_DIODE	0x59
+
+/* bit 7 -> enable, bits 0-3 -> duty cycle */
+#define ASB100_REG_PWM1		0x59
 
 /* <TODO> Does this exist on ASB100? */
 /* The following are undocumented in the data sheets however we
@@ -186,6 +192,19 @@ static int LM75_TEMP_FROM_REG(u16 reg)
 	return ((s16)reg / 128) * 5;
 }
 
+/* PWM: 0 - 255 per sensors documentation
+   REG: (6.25% duty cycle per bit) */
+static u8 ASB100_PWM_TO_REG(int pwm)
+{
+	pwm = SENSORS_LIMIT(pwm, 0, 255);
+	return (u8)(pwm / 16);
+}
+
+static int ASB100_PWM_FROM_REG(u8 reg)
+{
+	return reg * 16;
+}
+
 #define ALARMS_FROM_REG(val) (val)
 #define BEEPS_FROM_REG(val) (val)
 #define BEEPS_TO_REG(val) ((val) & 0xffffff)
@@ -228,6 +247,7 @@ struct asb100_data {
 	u16 temp_over[4];	/* Register value (0 and 3 are u8 only) */
 	u16 temp_hyst[4];	/* Register value (0 and 3 are u8 only) */
 	u8 fan_div[3];		/* Register encoding, right justified */
+	u8 pwm;			/* Register encoding */
 	u8 vid;			/* Register encoding, combined */
 	u32 alarms;		/* Register encoding, combined */
 	u32 beeps;		/* Register encoding, combined */
@@ -263,6 +283,8 @@ static void asb100_beep(struct i2c_client *client, int operation,
 		int ctl_name, int *nrels_mag, long *results);
 static void asb100_fan_div(struct i2c_client *client, int operation,
 		int ctl_name, int *nrels_mag, long *results);
+static void asb100_pwm(struct i2c_client *client, int operation,
+		int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver asb100_driver = {
 	.owner		= THIS_MODULE,
@@ -295,6 +317,8 @@ static struct i2c_driver asb100_driver = {
 
 #define ASB100_SYSCTL_VID	1300	/* Volts * 1000 */
 #define ASB100_SYSCTL_VRM	1301
+
+#define ASB100_SYSCTL_PWM1	1401	/* 0-255 => 0-100% duty cycle */
 
 #define ASB100_SYSCTL_FAN_DIV	2000	/* 1, 2, 4 or 8 */
 #define ASB100_SYSCTL_ALARMS	2001	/* bitvector */
@@ -362,7 +386,8 @@ static ctl_table asb100_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &asb100_alarms},
 	{ASB100_SYSCTL_BEEP, "beep", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &asb100_beep},
-
+	{ASB100_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &asb100_pwm},
 	{0}
 };
 
@@ -784,6 +809,9 @@ static void asb100_update_client(struct i2c_client *client)
 		data->fan_div[2] = (asb100_read_value(client,
 				ASB100_REG_PIN) >> 6) & 0x03;
 
+		/* PWM */
+		data->pwm = asb100_read_value(client, ASB100_REG_PWM1);
+
 		/* alarms */
 		data->alarms = asb100_read_value(client, ASB100_REG_ALARM1) +
 			(asb100_read_value(client, ASB100_REG_ALARM2) << 8);
@@ -1040,6 +1068,33 @@ void asb100_fan_div(struct i2c_client *client, int operation,
 			data->fan_div[0] = DIV_TO_REG(results[0]);
 			old = (old & 0xcf) | ((data->fan_div[0] & 0x03) << 4);
 			asb100_write_value(client, ASB100_REG_VID_FANDIV, old);
+		}
+	}
+}
+
+void asb100_pwm(struct i2c_client *client, int operation, int ctl_name,
+		int *nrels_mag, long *results)
+{
+	struct asb100_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		asb100_update_client(client);
+		results[0] = ASB100_PWM_FROM_REG(data->pwm & 0x0f);
+		results[1] = (data->pwm & 0x80) ? 1 : 0;
+		*nrels_mag = 2;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		u8 val = data->pwm;
+		if (*nrels_mag >= 1) {
+			val = 0x0f & ASB100_PWM_TO_REG(results[0]);
+			if (*nrels_mag >= 2) {
+				if (results[1])
+					val |= 0x80;
+				else
+					val &= ~0x80;
+			}
+			asb100_write_value(client, ASB100_REG_PWM1, val);
 		}
 	}
 }
