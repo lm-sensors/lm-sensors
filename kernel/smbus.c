@@ -157,7 +157,7 @@ s32 smbus_access_i2c(struct i2c_adapter * adapter, u8 addr, char read_write,
         return -1;
       }
       for (i = 1; i <= msg[1].len; i++)
-        msgbuf0[i] = data->block[1];
+        msgbuf0[i] = data->block[i];
     }
     break;
   default:
