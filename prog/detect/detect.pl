@@ -946,8 +946,10 @@ sub scan_adapter
                         i2c_driver => $adapter_driver,
                         i2c_devnr => $adapter_nr,
                       };
-          my @chips_copy = @chips, $new_hash->{i2c_sub_addrs} = \@chips_copy 
-                           if (@chips);
+          if (@chips) {
+            my @chips_copy = @chips;
+            $new_hash->{i2c_sub_addrs} = \@chips_copy;
+          }
           add_i2c_to_chips_detected $$chip{driver}, $new_hash;
         } else {
           print "Failed!\n";
@@ -1078,13 +1080,15 @@ sub lm75_detect
 {
   my $i;
   my ($file,$addr) = @_;
+  my $cur = i2c_smbus_read_word_data($file,0x00);
   my $conf = i2c_smbus_read_byte_data($file,0x01);
   my $hyst = i2c_smbus_read_word_data($file,0x02);
   my $os = i2c_smbus_read_word_data($file,0x03);
-  for ($i = 0x00; $i <= 0xF; $i += 1) {
-    return if i2c_smbus_read_byte_data($file,($i * 0x10) + 0x01) != $conf;
-    return if i2c_smbus_read_word_data($file,($i * 0x10) + 0x02) != $hyst;
-    return if i2c_smbus_read_word_data($file,($i * 0x10) + 0x03) != $os;
+  return if $hyst & 0x7f00 or $os & 0x7f00 or $cur & 0x7f00;
+  for ($i = 0x00; $i <= 0x1f; $i += 1) {
+    return if i2c_smbus_read_byte_data($file,($i * 0x08) + 0x01) != $conf;
+    return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x02) != $hyst;
+    return if i2c_smbus_read_word_data($file,($i * 0x08) + 0x03) != $os;
   }
   return (3);
 }
