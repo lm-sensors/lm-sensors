@@ -54,6 +54,8 @@ sensors_chip_name chips[CHIPS_MAX];
 int chips_count=0;
 int do_sets, do_unknown, fahrenheit, show_algorithm, hide_adapter, hide_unknown;
 
+char degstr[5]; /* store the correct string to print degrees */
+
 void print_short_help(void)
 {
   printf("Try `%s -h' for more information\n",PROGRAM);
@@ -244,6 +246,14 @@ int main (int argc, char *argv[])
   }
 
   close_config_file();
+
+  /* build the degrees string */
+  sprintf(degstr, "%c", 176);
+  if (fahrenheit) {
+    strcat(degstr, "F");
+  } else {
+    strcat(degstr, "C");
+  }
 
   if(do_the_real_work(&error)) {
     sensors_cleanup();

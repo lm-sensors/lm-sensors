@@ -34,6 +34,7 @@ static void print_temp_info(float, float, float, int, int, int);
 static inline float deg_ctof( float );
 
 extern int fahrenheit;
+extern char degstr[5];
 
 char *spacestr(int n)
 {
@@ -62,44 +63,39 @@ inline float deg_ctof( float cel )
 void print_temp_info(float n_cur, float n_over, float n_hyst,
                      int minmax, int curprec, int limitprec)
 {
-   char degv[5];
-
    if (fahrenheit) {
-      sprintf(degv, "%cF", 176);
       n_cur  = deg_ctof(n_cur);
       n_over = deg_ctof(n_over);
       n_hyst = deg_ctof(n_hyst);
-   } else {
-      sprintf(degv, "%cC", 176);
    }
 
 /* use %* to pass precision as an argument */
    if(minmax == MINMAX)
 	printf("%+6.*f%s  (low  = %+5.*f%s, high = %+5.*f%s)  ",
-            curprec, n_cur, degv,
-	    limitprec, n_hyst, degv,
-	    limitprec, n_over, degv);
+	    curprec, n_cur, degstr,
+	    limitprec, n_hyst, degstr,
+	    limitprec, n_over, degstr);
    else if(minmax == MAXONLY)
 	printf("%+6.*f%s  (high = %+5.*f%s)                    ",
-	    curprec, n_cur, degv,
-	    limitprec, n_over, degv);
+	    curprec, n_cur, degstr,
+	    limitprec, n_over, degstr);
    else if(minmax == CRIT)
 	printf("%+6.*f%s  (high = %+5.*f%s, crit = %+5.*f%s)  ",
-	    curprec, n_cur, degv,
-	    limitprec, n_over, degv,
-	    limitprec, n_hyst, degv);
+	    curprec, n_cur, degstr,
+	    limitprec, n_over, degstr,
+	    limitprec, n_hyst, degstr);
    else if(minmax == HYST)
 	printf("%+6.*f%s  (high = %+5.*f%s, hyst = %+5.*f%s)  ",
-	    curprec, n_cur, degv,
-	    limitprec, n_over, degv,
-	    limitprec, n_hyst, degv);
+	    curprec, n_cur, degstr,
+	    limitprec, n_over, degstr,
+	    limitprec, n_hyst, degstr);
    else if(minmax == SINGLE)
 	printf("%+6.*f%s",
-	    curprec, n_cur, degv);
+	    curprec, n_cur, degstr);
    else if(minmax == HYSTONLY)
 	printf( "%+6.*f%s  (hyst = %+5.*f%s)                   ",
-	    curprec, n_cur, degv,
-	    limitprec, n_over, degv);
+	    curprec, n_cur, degstr,
+	    limitprec, n_over, degstr);
    else
 	printf("Unknown temperature mode!");
 }
@@ -1408,22 +1404,22 @@ void print_lm80(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM80_TEMP_OS_HYST,&min2) &&
       !sensors_get_feature(*name,SENSORS_LM80_TEMP_OS_MAX,&max2)) {
     if (valid) {
-      print_label(label,10);
+      if (fahrenheit) {
+        cur = deg_ctof(cur);
+        max = deg_ctof(max);
+        min = deg_ctof(min);
+        max2 = deg_ctof(max2);
+        min2 = deg_ctof(min2);
+      }
 
-      if ( fahrenheit )
-      {
-      printf("%+3.2f°C (hot:limit = %+3.0f°F,  hysteresis = %+3.0f°F) %s\n",
-           deg_ctof(cur),deg_ctof(max),deg_ctof(min), alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
-    printf("         (os: limit = %+3.0f°F,  hysteresis = %+3.0f°F) %s\n",
-           deg_ctof(max2),deg_ctof(min2), alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
-      }
-      else
-      {
-      printf("%+3.2f °C (hot:limit = %+3.0f°C,  hysteresis = %+3.0f°C) %s\n",
-           cur,max,min, alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
-    printf("         (os: limit = %+3.0f°C,  hysteresis = %+3.0f°C) %s\n",
-           max2,min2, alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
-      }
+      print_label(label,10);
+      printf("%+6.2f%s (hot: limit = %+3.0f%s, hyst = %+3.0f%s) %s\n",
+             cur, degstr, max, degstr, min, degstr,
+             alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
+      print_label("",10);
+      printf("         (os:  limit = %+3.0f%s, hyst = %+3.0f%s) %s\n",
+             max2, degstr, min2, degstr,
+             alarms&LM80_ALARM_TEMP_HOT?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get TEMP data!\n");
@@ -4019,23 +4015,20 @@ void print_smsc47m1(const sensors_chip_name *name)
 
 static void lm92_print_temp (float n_cur,float n_high,float n_low,float n_crit,float n_hyst)
 {
-	char suffix[5];
-
 	if (fahrenheit) {
-		sprintf (suffix,"%cF",176);
 		n_cur = deg_ctof (n_cur);
 		n_high = deg_ctof (n_high);
 		n_low = deg_ctof (n_low);
 		n_crit = deg_ctof (n_crit);
 		n_hyst = deg_ctof (n_hyst);
-	} else sprintf (suffix,"%cC",176);
+	}
 
 	printf ("%+6.4f%s (high = %+6.4f%s, low = %+6.4f%s, crit = %+6.4f%s, hyst = %+6.4f%s)",
-			n_cur,suffix,
-			n_high,suffix,
-			n_low,suffix,
-			n_crit,suffix,
-			n_hyst,suffix);
+			n_cur, degstr,
+			n_high, degstr,
+			n_low, degstr,
+			n_crit, degstr,
+			n_hyst, degstr);
 }
 
 void print_lm92 (const sensors_chip_name *name)
