@@ -1,0 +1,67 @@
+This file documents the adm1021 directories for the Analog Devices ADM1021
+temperature sensor chip.
+
+There will be one directory created for each detected ADm1021 chip. As
+ADM1021 chips can only be on a SMBus, they will be called adm1021-i2c-?-??, with
+the first question mark being the number of the i2c bus (see /proc/bus/i2c
+for a list of them, if i2c-proc is loaded), and the SMBus (I2C) address
+of the chip at the end. An ADM1021 is uniquely characterised with these
+two numbers. /proc/sys/dev/sensors/chips contains the SYSCTL values for
+all chip directories.
+
+Within each LM75 directory, you can find the following files:
+* die_code (ADM1021_SYSCTL_DIE_CODE)
+  Silicon die (mask) revision code.  This driver was written using a sample
+  device of die code 3.  Normally this kind of information isn't reported
+  in its own proc file, but for a device this simple I didn't think it
+  would hurt.
+* status (ADM1021_SYSCTL_STATUS)
+  This is an intergral number composed of 8-bits, which indicate the
+  different alarms and conversion status's of the adm1021.  Here is what
+  each bit indicates:
+  7 BUSY 1 When ADC Converting.
+  6 LHIGH# 1 When Local High Temp Limit Tripped.
+  5 LLOW# 1 When Local Low Temp Limit Tripped.
+  4 RHIGH# 1 When Remote High Temp Limit Tripped.
+  3 RLOW# 1 When Remote Low Temp Limit Tripped.
+  2 OPEN# 1 When Remote Sensor Open-Circuit. (i.e., no connected remote sensor)
+  1-0 Reserved.
+Note: # - These flags stay high until the status register is read or they are reset by POR.
+* temp (ADM1021_SYSCTL_TEMP)
+  A list of three numbers. The first number is the Overtemperature Shutdown
+  value, the second number is Low limit value, and the third number is the
+  current temperature. The first two values can be modified. Each value can
+  be set and read to full-degree accuracy. All values are in degrees Celcius.
+  An alarm is issued (usually to a connected ADM9240) when the temperature 
+  gets higher then the Overtemperature Shutdown value; it stays on until
+  the temperature falls back below the Overtemperature Shutdown value. 
+  NOTE: This is different than the way most remote temperature sensors work
+  (e.g. the LM75), they usually use the lower limit to clear the alarm set
+  from initially going above the Overtemperature limit.  Instead, the
+  ADM1021 acts much the way that voltage limits work on, say, the LM78 or
+  ADM9240.  A disadvantage to this is that the alarm doesn't have a
+  hysteresis (like a shmidt-trigger or thermostat) type of function for
+  doing things like controlling over-heat fans and such.  Instead, the
+  lower limit can be used to signal an alarm if (goodness forbid!) the
+  computer gets too cold.
+  If accessed through sysctl, this is a list of longs, each being the
+  temperature times 10.
+* remote_temp (ADM1021_SYSCTL_REMOTE_TEMP)
+  Works exactly the same way as 'temp', but uses an external temperature
+  probe for the sensing.  The temperature probe is of a silicon diode type
+  and not of a thermal-resistive type.  A probe can easily be made from a
+  common transister (see the ADM1021 for qualification specs) by shorting
+  the base to the collector.  From the docs: "Transistors such as 2N3904,
+  2N3906 or equivalents in SOT-23 package are suitable to use."
+
+The data for each ADM1021 is updated each 1.5 seconds, but only if it is actually
+read.  And, any alarms triggered between reads which always be present in
+the next read just after the alarm was triggered (regardless if the alarm
+situation has been resolved or not).
+
+This driver was written and is maintained by Philip Edelbrock
+<phil@netroedge.com>.  Please send corrections/comments to him.  For
+further technical information on this chip, please get the Acrobat PDF
+documentation available from www.analog.com.  We'd also like to thank
+Analog Devices for helping us with correspondance and free samples to make
+this driver (and other Analog Devices drivers) possible.
