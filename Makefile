@@ -102,7 +102,7 @@ LIBINCLUDEDIR := $(INCLUDEDIR)/sensors
 # to do this. 
 
 # The subdirectories we need to build things in 
-SRCDIRS := src lib prog/sensors etc
+SRCDIRS := src lib prog/sensors prog/dump etc
 ifeq ($(I2C),1)
 SRCDIRS += i2c i2c/detect i2c/drivers i2c/eeprom
 endif
