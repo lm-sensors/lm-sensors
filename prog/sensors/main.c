@@ -69,9 +69,17 @@ void print_long_help(void)
   printf("  -u, --unknown         Treat chips as unknown ones (testing only)\n");
   printf("  -v, --version         Display the program version\n");
   printf("\n");
-  printf("By default, a list of directories is examined for the config file `sensors.conf'\n");
-  printf("Use `-' after `-c' to read the config file from stdin\n");
-  printf("If no chips are specified, all chip info will be printed\n");
+  printf("By default, a list of directories is examined for config file `sensors.conf'.\n");
+  printf("Use `-' after `-c' to read the config file from stdin.\n");
+  printf("If no chips are specified, all chip info will be printed.\n");
+  printf("Example chip names:\n");
+  printf("\tlm78-i2c-0-2d\t*-i2c-0-2d\n");
+  printf("\tlm78-i2c-0-*\t*-i2c-0-*\n");
+  printf("\tlm78-i2c-*-2d\t*-i2c-*-2d\n");
+  printf("\tlm78-i2c-*-*\t*-i2c-*-*\n");
+  printf("\tlm78-isa-0290\t*-isa-0290\n");
+  printf("\tlm78-isa-*\t*-isa-*\n");
+  printf("\tlm78-*\n");
 }
 
 void print_version(void)
