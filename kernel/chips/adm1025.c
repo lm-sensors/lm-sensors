@@ -2,7 +2,6 @@
     adm1025.c - Part of lm_sensors, Linux kernel modules for hardware
                monitoring
     Add by Gordon Wu <gwu@esoft.com> according to the adm9240.c written by
-
     Frodo Looijaard <frodol@dds.nl>
     and Philip Edelbrock <phil@netroedge.com>
 
@@ -21,7 +20,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* Supports ADM10250. See doc/chips/adm9240 for details */
+/* Supports the Analog Devices ADM1025. See doc/chips/adm1025 for details */
 
 #include <linux/version.h>
 #include <linux/module.h>
@@ -107,20 +106,12 @@ SENSORS_INSMOD_1(adm1025);
 #define IN_TO_REG(val,nr) (SENSORS_LIMIT(((val) & 0xff),0,255))
 #define IN_FROM_REG(val,nr) (val)
 
-/* #define TEMP_FROM_REG(temp) \
-   ((temp)<256?((((temp)&0x1fe) >> 1) * 10)      + ((temp) & 1) * 5:  \
-               ((((temp)&0x1fe) >> 1) -255) * 10 - ((temp) & 1) * 5)  \
-*/
-#define TEMP_FROM_REG(temp) (((temp)>0x7f?(-temp):(temp))*10)
-
-#define TEMP_LIMIT_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
-
+#define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
+#define TEMP_LIMIT_FROM_REG(val) TEMP_FROM_REG(val)
 #define TEMP_LIMIT_TO_REG(val) SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
-                                                      ((val)+5)/10), \
-                                             0,255)
+                                                      ((val)+5)/10), 0, 255)
 
 #define ALARMS_FROM_REG(val) (val)
-
 
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            205-(val)*5)
@@ -161,9 +152,9 @@ SENSORS_INSMOD_1(adm1025);
         (ADM1025_INIT_IN_5 + ADM1025_INIT_IN_5 * ADM1025_INIT_IN_PERCENTAGE / 100)
 
 #define ADM1025_INIT_RTEMP_MAX 600
-#define ADM1025_INIT_RTEMP_MIN 500
+#define ADM1025_INIT_RTEMP_MIN 0
 #define ADM1025_INIT_TEMP_MAX 600
-#define ADM1025_INIT_TEMP_MIN 500
+#define ADM1025_INIT_TEMP_MIN 0
 
 #ifdef MODULE
 extern int init_module(void);
@@ -185,10 +176,10 @@ struct adm1025_data {
 	u8 in[6];		/* Register value */
 	u8 in_max[6];		/* Register value */
 	u8 in_min[6];		/* Register value */
-	int rtemp;		/* Register value */
+	u8 rtemp;		/* Register value */
 	u8 rtemp_max;		/* Register value */
-	u8 rtemp_min;		/* Register encoding, shifted right */
-	int temp;		/* Temp, shifted right */
+	u8 rtemp_min;		/* Register value */
+	u8 temp;		/* Register value */
 	u8 temp_max;		/* Register value */
 	u8 temp_min;		/* Register value */
 	u16 alarms;		/* Register encoding, combined */
@@ -225,6 +216,8 @@ static void adm1025_in(struct i2c_client *client, int operation,
 		       int ctl_name, int *nrels_mag, long *results);
 static void adm1025_temp(struct i2c_client *client, int operation,
 			 int ctl_name, int *nrels_mag, long *results);
+static void adm1025_rm_temp(struct i2c_client *client, int operation,
+			 int ctl_name, int *nrels_mag, long *results);
 static void adm1025_alarms(struct i2c_client *client, int operation,
 			   int ctl_name, int *nrels_mag, long *results);
 /*static void adm1025_analog_out(struct i2c_client *client, int operation,
@@ -259,21 +252,21 @@ static int __initdata adm1025_initialized = 0;
    is done through one of the 'extra' fields which are initialized 
    when a new copy is allocated. */
 static ctl_table adm1025_dir_table_template[] = {
-	{ADM1025_SYSCTL_IN0, "2.5V", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM1025_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1025_in},
-	{ADM1025_SYSCTL_IN1, "Vccp1", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM1025_SYSCTL_IN1, "in1", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1025_in},
-	{ADM1025_SYSCTL_IN2, "3.3V", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM1025_SYSCTL_IN2, "in2", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1025_in},
-	{ADM1025_SYSCTL_IN3, "5V", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM1025_SYSCTL_IN3, "in3", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1025_in},
-	{ADM1025_SYSCTL_IN4, "12V", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM1025_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1025_in},
-	{ADM1025_SYSCTL_IN5, "Vcc", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM1025_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1025_in},
-	/*{ADM1025_SYSCTL_RTEMP, "Remote_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
-	 &sensors_sysctl_real, NULL, &adm1025_rm_temp},*/
-	{ADM1025_SYSCTL_TEMP, "Local_temp", NULL, 0, 0644, NULL, &sensors_proc_real,
+	{ADM1025_SYSCTL_RTEMP, "temp2", NULL, 0, 0644, NULL, &sensors_proc_real,
+	 &sensors_sysctl_real, NULL, &adm1025_rm_temp},
+	{ADM1025_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1025_temp},
 	{ADM1025_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &sensors_proc_real,
 	 &sensors_sysctl_real, NULL, &adm1025_alarms},
@@ -523,6 +516,8 @@ void adm1025_update_client(struct i2c_client *client)
 		}
 		data->temp =
 		    adm1025_read_value(client, ADM1025_REG_TEMP);
+		data->rtemp =
+		    adm1025_read_value(client, ADM1025_REG_RTEMP);
 #ifdef DEBUG
 		printk("The temp is %2x\n",data->temp);
 #endif
@@ -530,6 +525,10 @@ void adm1025_update_client(struct i2c_client *client)
 		    adm1025_read_value(client, ADM1025_REG_TEMP_HIGH);
 		data->temp_min =
 		    adm1025_read_value(client, ADM1025_REG_TEMP_LOW);
+		data->rtemp_max =
+		    adm1025_read_value(client, ADM1025_REG_RTEMP_HIGH);
+		data->rtemp_min =
+		    adm1025_read_value(client, ADM1025_REG_RTEMP_LOW);
 
 		i = adm1025_read_value(client, ADM1025_REG_VID);
 		data->vid = i & 0x0f;
@@ -622,6 +621,32 @@ void adm1025_temp(struct i2c_client *client, int operation, int ctl_name,
 			data->temp_min = TEMP_LIMIT_TO_REG(results[1]);
 			adm1025_write_value(client, ADM1025_REG_TEMP_LOW,
 					    data->temp_min);
+		}
+	}
+}
+
+void adm1025_rm_temp(struct i2c_client *client, int operation, int ctl_name,
+		  int *nrels_mag, long *results)
+{
+	struct adm1025_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		adm1025_update_client(client);
+		results[0] = TEMP_LIMIT_FROM_REG(data->rtemp_max);
+		results[1] = TEMP_LIMIT_FROM_REG(data->rtemp_min);
+		results[2] = TEMP_FROM_REG(data->rtemp);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->temp_max = TEMP_LIMIT_TO_REG(results[0]);
+			adm1025_write_value(client, ADM1025_REG_RTEMP_HIGH,
+					    data->rtemp_max);
+		}
+		if (*nrels_mag >= 2) {
+			data->temp_min = TEMP_LIMIT_TO_REG(results[1]);
+			adm1025_write_value(client, ADM1025_REG_RTEMP_LOW,
+					    data->rtemp_min);
 		}
 	}
 }
