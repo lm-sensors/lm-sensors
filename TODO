@@ -3,6 +3,7 @@ Many, many things. Most notably:
 KERNEL MODULES
 ==============
 
+* Increase use count of adapter driver if directory of chip is entered
 * maxilife.c: Introduce new insmod variables
 * maxilife.c: Round REG_TO_VID correctly
 * icspll.c: Rewrite. The current implementation simply can't work at all.
