@@ -37,7 +37,7 @@ echo 'physically verify that the fans have been to full speed'
 echo 'after the program has completed.'
 echo
 
-DELAY=5 # 3 seconds delay is too short for large, thus I increased it to 5
+DELAY=5 # 3 seconds delay is too short for large fans, thus I increased it to 5
 
 DIR=/proc/sys/dev/sensors
 if [ ! -d $DIR ]

@@ -2,7 +2,7 @@
 #
 # Simple script implementing a temperature dependent fan speed control
 #
-# Version 0.5
+# Version 0.6
 #
 # Usage: fancontrol [CONFIGFILE]
 #
@@ -11,6 +11,8 @@
 #
 # Please send me any comments/suggestions to: marius.reiner@hdev.de Thanks!
 #
+# The latest version of this script is available at:
+# http://www.hdev.de/fancontrol/fancontrol.html
 #
 # Please be careful when using the fan control features of your mainboard, in
 # addition to the risk of burning your CPU, at higher temperatures there will
@@ -114,6 +116,7 @@ function UpdateFanSpeeds {
 		maxt=${AFCMAXTEMP[$fcvcount]}
 		minsa=${AFCMINSTART[$fcvcount]}
 		minso=${AFCMINSTOP[$fcvcount]}
+		
 		tval=`cat ${tsens} |cut -d' ' -f3 |cut -d'.' -f1`
 		pwmpval=`cat ${pwmo}`
 		
