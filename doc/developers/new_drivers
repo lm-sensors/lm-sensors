@@ -5,6 +5,9 @@ Don't be intimidated by the list, it's just here so we don't
 forget anything.
 We are more than happy to help you with any part of the process.
 
+There are two types of drivers, chip and bus.
+Steps which apply to only one type of driver are noted.
+
 
 * Contact us first.
   You are of course free to write your own drivers, but it is smart to
@@ -66,12 +69,18 @@ We are more than happy to help you with any part of the process.
   see also the comments in etc/sensors.conf.eg for help.
   Contact us if you need more assistance.
 
-* Add entries to etc/sensors.conf.eg (for chip drivers only).
-  If needed, you can set defaults here.
+* Add alarm definitions to kernel/include/sensors.h (for chip drivers only).
+  These define the bits in the 'alarms' entry in /proc.	
 
 * Add a procedure to prog/sensors/chips.[ch] (for chip drivers only).
   This is a function specific for your driver that
   makes the included 'sensors' program pretty-print your chip information.
+
+* Add a call to the procedure in prog/sensors/main.c (for chip drivers only).
+  Put it at the bottom of do_a_print().
+
+* Add entries to etc/sensors.conf.eg (for chip drivers only).
+  If needed, you can set defaults here.
 
 * Add the name of the device to the README file.
 
