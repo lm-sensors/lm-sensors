@@ -7,8 +7,8 @@ and the libsensors source for further information.
 
 An alternative method that some programs use is to access the /proc
 files directly. This document briefly describes the standards that
-the drivers follow, so that an application program can access
-this data in a simple and consistent way.
+the drivers follow, so that an application program can scan for
+entries and access this data in a simple and consistent way.
 
 Note that not all chip drivers adhere to this standard.
 We will attempt to migrate older drivers to this standard,
@@ -24,17 +24,20 @@ for the user to label or bind /proc entries for display.
 Sensor chips often have unused inputs that should be ignored
 by user programs.
 
-As each chip gets its own directory under /proc/sys/dev/sensors.
+Each chip gets its own directory under /proc/sys/dev/sensors.
 The format is either chip-i2c-bus-hexaddress or chip-isa-hexaddress.
 (Exception - chip lm78-j has a '-' in it - should this be changed??)
+New dummy drivers may present chips as chip-busname-hexaddress.
 
 All /proc values are integers or floating point numbers.
 There is no facility in the lm_sensors package for drivers
-to output general strings via /proc.
+to output general strings via /proc. This facility may be added
+in the future.
 
 Guidelines for new entries:
 	- If there are multiple values, some r/w and some r/o,
-	  put the r/w ones first
+	  put the r/w ones first.
+	- Additional non-standard values should be after the standard values.
 
 
 -------------------------------------------------------------------------
@@ -46,7 +49,7 @@ Entry	Values	Function
 -----	------	--------
 alarms	  1	Alarm bitmask.
 		Read only.
-		Integer representation of one, two, or three bytes.
+		Integer representation of one to four bytes.
 		A '1' bit means an alarm.
 		Chips should be programmed for 'comparator' mode so that
 		the alarm will 'come back' after you read the register
@@ -62,6 +65,13 @@ beep	  2     Beep/interrupt enable and bitmask.
 		The second value is a bitmask, with the
 		same format as 'alarms' with same bit locations.
 		
+curr[1-n]  3	Current max, min or hysteresis, and input value.
+	       	Floating point values XXX.X or XXX.XX in Amps.
+		The second value is preferably a hysteresis value,
+		reported as a absolute current, NOT a delta from
+		the max value.
+		First two values are read/write and third is read only.
+
 fan[1-3]  2	Fan minimum and input value.
 		Two integers indicating RPM.
 		First value is read/write and second is read only.
@@ -94,8 +104,9 @@ in[0-8]   3	Voltage min, max, and input value.
 			in7	varies
 			in8	varies
 
-pwm[1-3]  1- 2	Pulse width modulation fan control.
-		Integer 0 - 100, read/write.
+pwm[1-3]  1-2	Pulse width modulation fan control.
+		Integer 0 - 255, read/write.
+		255 is max or 100%.
 		Corresponds to the fans 1-3.
 		Second value, if present, is an enable (0 or 1)
 
@@ -106,11 +117,15 @@ temp,
 temp[1-3]  3	Temperature max, min or hysteresis, and input value.
 	       	Floating point values XXX.X or XXX.XX in degrees Celcius.
 		'temp' is used if there is only one temperature sensor on the
-		chip. Temp1 is generally the sensor inside the chip itself,
+		chip; for multiple temps. start with 'temp1'.
+		Temp1 is generally the sensor inside the chip itself,
 		generally reported as "motherboard temperature".
-		Temp2 and temp3 are generally external sensors, 
-		the thermal diode inside the CPU, generally reported as
-		"CPU temperature".
+		Temp2 and temp3 are generally sensors external to the chip
+		itself, for example the thermal diode inside the CPU or a
+		termistor nearby. The second value is preferably a hysteresis
+		value, reported as a absolute temperature, NOT a delta from
+		the max value.
+		First two values are read/write and third is read only.
 
 vid	   1	CPU core voltage.
 		Read only.
