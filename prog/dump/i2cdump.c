@@ -31,7 +31,7 @@
    i2c_smbus_read_i2c_block_data() was implemented (i2c 2.6.3),
    so we use it as a version check.
 */
-#if defined(I2C_FUNC_SMBUS_READ_I2C_BLOCK_2)
+#ifdef I2C_FUNC_SMBUS_READ_I2C_BLOCK_2 
 #define USE_I2C_BLOCK 1
 #else
 #define USE_I2C_BLOCK 0
@@ -57,7 +57,7 @@ void help(void)
 int main(int argc, char *argv[])
 {
   char *end;
-  int i,j,res,i2cbus,address,size,file;
+  int i,j,res,res2,i2cbus,address,size,file;
   int e1, e2, e3;
   int bank = 0, bankreg = 0x4E;
   char filename1[20];
@@ -269,7 +269,13 @@ int main(int argc, char *argv[])
         res = i2c_smbus_read_block_data(file,0,cblock);
       } else if(size == I2C_SMBUS_I2C_BLOCK_DATA) {
 #if USE_I2C_BLOCK
-        res = i2c_smbus_read_i2c_block_data(file,0,cblock);
+        res = 0;
+        for (i = 0; i < 256; i+=32) {
+          res2 = i2c_smbus_read_i2c_block_data(file, i, cblock+i);
+          if(res2 <= 0)
+            break;
+          res += res2;
+        }
 #else
         fprintf(stderr, "Error: I2C block read unimplemented\n");
         exit(1);
