@@ -1,0 +1,31 @@
+This is some documenation for the ltc1710 driver for the Linear
+Technologies LTC1710.
+
+The LTC1710 is a simple dual switch device with a SMBus interface.  It can
+switch a supply voltage to either of its two output pins independantly
+from the built-in SMBus interface.
+
+For each sensed LTC1710 there is a directory which looks something like:
+ltc1710-i2c-1-59
+
+For each directory there are the following files:
+
+* switch1 (LTC1710_SYSCTL_SWITCH_1)
+  Simply contains either a 1 or 0 depending on whether the switch is
+  currently turned on or off.
+* switch2 (LTC1710_SYSCTL_SWITCH_2)
+  Works the same way as switch1, but is for the second switch.
+
+Some notes: The LTC1710 is a *very* simple I2C/SMBus device.  It does not
+support reads, so the status of the switches isn't polled, but rather
+remembered.  The LTC1710 has enough 'umph' to drive 300mA with only 0.4 Ohm
+impedence (in an 'on' state).  This works well for LEDs, or to drive other
+devices (MOSFETs and such) which can multiply the switching effect.  The
+LTC1710 also contains an emergency over-temperature shut-off in the case
+of too much current flow.  Switch 2 switches the Vcc voltage on/off, but
+Switch 1 switches the voltage present on pin 1 (0V to Vcc).
+
+This driver was written and maintained by Philip Edelbrock
+<phil@netroedge.com>.  Please send comments/suggestions/corrections to him.
+For more technical information on the LTC1710, please get the Acrobat PDF
+from http://www.linear-tech.com/
