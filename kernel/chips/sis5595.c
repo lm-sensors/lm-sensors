@@ -26,6 +26,21 @@
 	Version		PCI ID		PCI Revision
 	1		1039/0008	01
 	2		1039/0008	C0
+
+   Note: these chips contain a 0008 device which is incompatible with the
+         5595. We recognize these by the presence of the listed
+         "blacklist" PCI ID and refuse to load.
+
+   NOT SUPPORTED	PCI ID		BLACKLIST PCI ID	
+	 540		0008		0540
+	 550		0008		0550
+	5513		0008		5511
+	5581		0008		5597
+	5582		0008		5597
+	5597		0008		5597
+	5598		0008		5597/5598
+	 630		0008		0630
+	 730		0008		0730
 */
 
 #include <linux/version.h>
@@ -71,6 +86,33 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 /* Insmod parameters */
 SENSORS_INSMOD_1(sis5595);
 
+#ifndef PCI_DEVICE_ID_SI_540
+#define PCI_DEVICE_ID_SI_540		0x0540
+#endif
+#ifndef PCI_DEVICE_ID_SI_550
+#define PCI_DEVICE_ID_SI_550		0x0550
+#endif
+#ifndef PCI_DEVICE_ID_SI_630
+#define PCI_DEVICE_ID_SI_630		0x0630
+#endif
+#ifndef PCI_DEVICE_ID_SI_730
+#define PCI_DEVICE_ID_SI_730		0x0730
+#endif
+#ifndef PCI_DEVICE_ID_SI_5598
+#define PCI_DEVICE_ID_SI_5598		0x5598
+#endif
+
+static int blacklist[] = {
+			PCI_DEVICE_ID_SI_540,
+			PCI_DEVICE_ID_SI_550,
+			PCI_DEVICE_ID_SI_630,
+			PCI_DEVICE_ID_SI_730,
+			PCI_DEVICE_ID_SI_5511, /* 5513 chip has the 0008 device but
+						  that ID shows up in other chips so we
+						  use the 5511 ID for recognition */
+			PCI_DEVICE_ID_SI_5597,
+			PCI_DEVICE_ID_SI_5598,
+                          0 };
 /*
    SiS southbridge has a LM78-like chip integrated on the same IC.
    This driver is a customized copy of lm78.c
@@ -311,6 +353,7 @@ int sis5595_attach_adapter(struct i2c_adapter *adapter)
 int sis5595_find_sis(int *address)
 {
 	u16 val;
+	int *i;
 
 	if (!pci_present())
 		return -ENODEV;
@@ -320,6 +363,13 @@ int sis5595_find_sis(int *address)
 			     NULL)))
 		return -ENODEV;
 
+	/* Look for imposters */
+	for(i = blacklist; *i != 0; i++) {
+		if (pci_find_device(PCI_VENDOR_ID_SI, *i, NULL)) {
+			printk("sis5595.o: Error: Looked for SIS5595 but found unsupported device %.4X\n", *i);
+			return -ENODEV;
+		}
+	}
 
 	if (PCIBIOS_SUCCESSFUL !=
 	    pci_read_config_word(s_bridge, SIS5595_BASE_REG, &val))

@@ -21,6 +21,27 @@
 
 /* Note: we assume there can only be one SIS5595 with one SMBus interface */
 
+/*
+   Note: all have mfr. ID 0x1039.
+   SUPPORTED		PCI ID		
+	5595		0008
+
+   Note: these chips contain a 0008 device which is incompatible with the
+         5595. We recognize these by the presence of the listed
+         "blacklist" PCI ID and refuse to load.
+
+   NOT SUPPORTED	PCI ID		BLACKLIST PCI ID	
+	 540		0008		0540
+	 550		0008		0550
+	5513		0008		5511
+	5581		0008		5597
+	5582		0008		5597
+	5597		0008		5597
+	5598		0008		5597/5598
+	 630		0008		0630
+	 730		0008		0730
+*/
+
 /* TO DO: 
  * Add Block Transfers (ugly, but supported by the adapter)
  * Add adapter resets
@@ -38,6 +59,34 @@
 #include "version.h"
 
 #include <linux/init.h>
+
+#ifndef PCI_DEVICE_ID_SI_540
+#define PCI_DEVICE_ID_SI_540		0x0540
+#endif
+#ifndef PCI_DEVICE_ID_SI_550
+#define PCI_DEVICE_ID_SI_550		0x0550
+#endif
+#ifndef PCI_DEVICE_ID_SI_630
+#define PCI_DEVICE_ID_SI_630		0x0630
+#endif
+#ifndef PCI_DEVICE_ID_SI_730
+#define PCI_DEVICE_ID_SI_730		0x0730
+#endif
+#ifndef PCI_DEVICE_ID_SI_5598
+#define PCI_DEVICE_ID_SI_5598		0x5598
+#endif
+
+static int blacklist[] = {
+			PCI_DEVICE_ID_SI_540,
+			PCI_DEVICE_ID_SI_550,
+			PCI_DEVICE_ID_SI_630,
+			PCI_DEVICE_ID_SI_730,
+			PCI_DEVICE_ID_SI_5511, /* 5513 chip has the 0008 device but
+						  that ID shows up in other chips so we
+						  use the 5511 ID for recognition */
+			PCI_DEVICE_ID_SI_5597,
+			PCI_DEVICE_ID_SI_5598,
+                          0 };
 
 /* Length of ISA address segment */
 #define SIS5595_EXTENT 8
@@ -152,6 +201,7 @@ int sis5595_setup(void)
 	u16 a;
 	u8 val;
 	struct pci_dev *SIS5595_dev;
+	int *i;
 
 	/* First check whether we can access PCI at all */
 	if (pci_present() == 0) {
@@ -166,6 +216,14 @@ int sis5595_setup(void)
 					    SIS5595_dev))) {
 		printk("i2c-sis5595.o: Error: Can't detect SIS5595!\n");
 		return -ENODEV;
+	}
+
+	/* Look for imposters */
+	for(i = blacklist; *i != 0; i++) {
+		if (pci_find_device(PCI_VENDOR_ID_SI, *i, NULL)) {
+			printk("i2c-sis5595.o: Error: Looked for SIS5595 but found unsupported device %.4X\n", *i);
+			return -ENODEV;
+		}
 	}
 
 /* Determine the address of the SMBus areas */
