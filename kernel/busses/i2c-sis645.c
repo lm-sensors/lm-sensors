@@ -34,6 +34,8 @@
     Note: we assume there can only be one SiS645 with one SMBus interface
 */
 
+/* #define DEBUG 1 */
+
 #include <linux/module.h>
 #include <linux/pci.h>
 #include <linux/kernel.h>
@@ -257,7 +259,9 @@ static int __devinit sis645_probe(struct pci_dev *dev, const struct pci_device_i
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
 				PCI_DEVICE_ID_SI_735, NULL))
 			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
-				PCI_DEVICE_ID_SI_745, NULL))) {
+				PCI_DEVICE_ID_SI_745, NULL))
+			&& (NULL == pci_find_device(PCI_VENDOR_ID_SI,
+				PCI_DEVICE_ID_SI_746, NULL))) {
 			printk(KERN_ERR DRV_NAME ": Can't find suitable host bridge!\n");
 			return -ENODEV;
 		}
@@ -280,15 +284,15 @@ static int __devinit sis645_probe(struct pci_dev *dev, const struct pci_device_i
 		return -ENODEV;
 
 #else /* CONFIG_HOTPLUG */
-		if (ret = sis645_enable_smbus(dev)) {
+		if ((ret = sis645_enable_smbus(dev))) {
 			return ret;
 		}
 
-		if (ret = sis645_build_dev(&SIS645_SMBUS_dev, dev)) {
+		if ((ret = sis645_build_dev(&SIS645_SMBUS_dev, dev))) {
 			return ret;
 		}
 
-		if (ret = pci_enable_device(SIS645_SMBUS_dev)) {
+		if ((ret = pci_enable_device(SIS645_SMBUS_dev))) {
 			printk(KERN_ERR DRV_NAME ": Can't pci_enable SMBus device!"
 				" (0x%08x)\n", ret);
 			return ret;
@@ -406,7 +410,7 @@ static int sis645_transaction(int size)
 
 	/* Finish up by resetting the bus */
 	sis645_write(SMB_STS, temp);
-	if (temp = sis645_read(SMB_STS)) {
+	if ((temp = sis645_read(SMB_STS))) {
 #ifdef DEBUG
 		printk(KERN_DEBUG DRV_NAME ": Failed reset at end of transaction!"
 				" (0x%02x)\n", temp);
