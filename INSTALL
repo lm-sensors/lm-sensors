@@ -64,6 +64,9 @@ options 2 and 3). Especially if you have in the past placed the header
 files in /usr/local/include, this will probably go wrong. See below on
 how to fix this.
 
+NOTE: option 3 only works with 2.2 and 2.4 (2.4.0 and later) kernels;
+      option 1 and 2 also work with 2.3 kernels.
+
 
 Mixing old and new, and using beta drivers (compilation option 1)
 =================================================================
@@ -239,12 +242,13 @@ Patching the kernel (compilation option 2)
 ==========================================
 
 There is a special script which should be able to generate diffs against
-any 2.2 or 2.4 kernel. Note that 2.3 kernels are no longer supported for
-this compilation option (choose option 1 instead). Please report any 
-problems to our mailinglist. Note that it may fail, and probably silently, 
-if you have applied other patches to your kernel tree, or for very new kernels.
-It *is* safe to run it if your kernel already has the lm_sensors drivers.
-It will only work if you applied the i2c patches first.
+any 2.2 or 2.4 kernel (2.4.0 or later). Note that 2.3 kernels are no 
+longer supported for this compilation option (choose option 1 instead). 
+Please report any problems to our mailinglist. Note that it may fail, 
+and probably silently, if you have applied other patches to your kernel \
+tree, or for very new kernels.  It *is* safe to run it if your kernel 
+already has the lm_sensors drivers.  It will only work if you applied the 
+i2c patches first.
 
 ** Only a subset of the modules in lm_sensors are patched into the        **
 ** kernel by the script. See the file mkpatch/FILES to see if the         **

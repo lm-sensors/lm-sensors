@@ -22,9 +22,11 @@ WARNING! Many things have changed since version 2.4.0. Most importantly,
 you need the i2c package.  It may have come bundled with lm_sensors,
 but you may need to download it separately at:
   http://www.netroedge.com/~lm78
+
 Kernels 2.3.34 and later, and all 2.4.x kernels, contain the
 new I2C package; however, you may still need to download and install
 the latest I2C version if lm_sensors does not compile.
+>>>>>>> 1.51
 
 
 At least the following I2C/SMBus adapters are supported:
