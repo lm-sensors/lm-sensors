@@ -604,8 +604,12 @@ static int w83792d_detect(struct i2c_adapter *adapter, int address,
 	} else {
 		val1 = w83792d_read_value(new_client,
 				          W83792D_REG_I2C_SUBADDR);
-		data->lm75[0].addr = 0x48 + (val1 & 0x03);
-		data->lm75[1].addr = 0x4c + ((val1 >> 4) & 0x03);
+		data->lm75[0].addr = 0x48 + (val1 & 0x07);
+		data->lm75[1].addr = 0x48 + ((val1 >> 4) & 0x07);
+		if (data->lm75[0].addr == data->lm75[1].addr)
+			printk(KERN_WARNING "w83792d: Subclients have the same "
+			       "address (0x%02x)! Use force_subclients.\n",
+			       data->lm75[0].addr);
 	}
 	client_name = "W83792D subclient";
 
