@@ -901,7 +901,8 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             m5879_detect pca9540_detect smartbatt_mgr_detect
             smartbatt_chgr_detect adt7467_detect lm92_detect max1619_detect
             lm93_detect lm77_detect lm63_detect pca9556_detect
-            w83791sd_detect vt1211_i2c_detect vt1211_alias_detect);
+            w83791sd_detect vt1211_i2c_detect vt1211_alias_detect
+            smsc47m192_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1471,7 +1472,13 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "to-be-written",
        i2c_addrs => [0x2c..0x2d],
        i2c_detect => sub { m5879_detect @_},
-     } ,
+     },
+     {
+       name => "SMSC LPC47M15x or LPC47M192",
+       driver => "to-be-written",
+       i2c_addrs => [0x2c..0x2d],
+       i2c_detect => sub { smsc47m192_detect @_ },
+     },
      {
        name => "Philips Semiconductors SAA1064",
        driver => "saa1064",
@@ -4360,6 +4367,25 @@ sub m5879_detect
        and (i2c_smbus_read_byte_data($file, 0x58) & 0xEF) == 0;
 
   return (7);
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, 5 or 6 if detected.
+# Registers used:
+#   0x3E: Manufacturer ID
+#   0x3F: Version/Stepping
+#   0x47: VID (3 reserved bits)
+#   0x49: VID4 (7 reserved bits)
+sub smsc47m192_detect
+{
+  my ($file, $addr) = @_;
+  return unless i2c_smbus_read_byte_data($file, 0x3E) == 0x55
+           and (i2c_smbus_read_byte_data($file, 0x3F) & 0xF0) == 0x20
+           and (i2c_smbus_read_byte_data($file, 0x47) & 0x70) == 0x00
+           and (i2c_smbus_read_byte_data($file, 0x49) & 0xFE) == 0x80;
+  return ($addr == 0x2d ? 6 : 5);
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
