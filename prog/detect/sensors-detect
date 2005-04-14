@@ -1050,7 +1050,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "Winbond W83792D",
-       driver => "to-be-written",
+       driver => "w83792d",
        i2c_addrs => [0x2c..0x2f],
        i2c_detect => sub { w83781d_detect 8, @_},
      },
