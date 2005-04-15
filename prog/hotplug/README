@@ -2,6 +2,14 @@ M7101 - SMBus Support for ALi M15x3 based motherboards.
 For Asus P4B motherboards, use the p4b_smbus module;
 see the file README.p4b.
 
+NOTE:
+This module is for 2.4 kernels only. For 2.6 kernels,
+activation is handled by the code in drivers/pci/quirks.c
+in the kernel source. If you have the latest 2.6 kernel and
+the quirks code does not activate your SMBus, try adding support
+in quirks.c, recompile and test your new kernel, and then
+submit a patch to us. Contact us if you need assistance.
+
 --------------------------------------------------------
 Quick Start (2.4 kernels only):
 

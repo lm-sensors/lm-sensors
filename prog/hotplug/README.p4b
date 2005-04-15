@@ -1,6 +1,14 @@
 What is it?
 -----------
 
+NOTE:
+This module is for 2.4 kernels only. For 2.6 kernels,
+activation is handled by the code in drivers/pci/quirks.c
+in the kernel source. If you have the latest 2.6 kernel and
+the quirks code does not activate your SMBus, try adding support
+in quirks.c, recompile and test your new kernel, and then
+submit a patch to us. Contact us if you need assistance.
+
 This is just a quick and dirty hack to get the hardware monitoring working
 on the ASUS P4B board under Linux.
 It works by turning on the SMBus PCI device.
