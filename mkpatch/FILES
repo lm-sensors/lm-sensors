@@ -1,5 +1,6 @@
 kernel/busses/i2c-ali1535.c	drivers/i2c/i2c-ali1535.c
 kernel/busses/i2c-ali15x3.c	drivers/i2c/i2c-ali15x3.c
+kernel/busses/i2c-ali1563.c	drivers/i2c/i2c-ali1563.c
 kernel/busses/i2c-amd756.c	drivers/i2c/i2c-amd756.c
 kernel/busses/i2c-amd756-s4882.c	drivers/i2c/i2c-amd756-s4882.c
 kernel/busses/i2c-amd8111.c	drivers/i2c/i2c-amd8111.c
@@ -61,6 +62,7 @@ kernel/chips/via686a.c		drivers/sensors/via686a.c
 kernel/chips/vt1211.c		drivers/sensors/vt1211.c
 kernel/chips/vt8231.c		drivers/sensors/vt8231.c
 kernel/chips/w83781d.c		drivers/sensors/w83781d.c
+kernel/chips/w83792d.c		drivers/sensors/w83792d.c
 kernel/chips/w83627hf.c		drivers/sensors/w83627hf.c
 kernel/chips/w83l785ts.c	drivers/sensors/w83l785ts.c
 kernel/chips/xeontemp.c		drivers/sensors/xeontemp.c

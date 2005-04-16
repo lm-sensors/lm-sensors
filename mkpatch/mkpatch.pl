@@ -83,6 +83,7 @@ sub gen_Documentation_Configure_help
     if (m@I2C mainboard interfaces@ or
            m@Acer Labs ALI 1535@ or
            m@Acer Labs ALI 1533 and 1543C@ or
+           m@Acer Labs ALI 1563@ or
            m@AMD 756/766/768/8111@ or
            m@SMBus multiplexing on the Tyan S4882@ or
            m@AMD 8111 SMBus 2.0@ or
@@ -131,6 +132,7 @@ sub gen_Documentation_Configure_help
            m@Texas Instruments THMC50 / Analog Devices ADM1022@ or
            m@Via VT82C686A/B@ or
            m@Winbond W83781D, W83782D, W83783S, W83627HF, AS99127F@ or
+           m@Winbond W83792D@ or
            m@Winbond W83627HF, W83627THF, W83697HF@ or
            m@Winbond W83L785TS-S@ or
            m@EEprom \(DIMM\) reader@) {
@@ -164,6 +166,12 @@ CONFIG_I2C_ALI15X3
   Labs ALI 1533 and 1543C mainboard I2C interfaces. This can also be 
   built as a module which can be inserted and removed while the kernel
   is running.
+
+Acer Labs ALI 1563
+CONFIG_I2C_ALI1563
+  If you say yes to this option, support will be included for the Acer
+  Labs ALI M1563 mainboard SMBus interface. This can also be built as a
+  module.
 
 AMD 756/766/768/8111 and nVidia nForce
 CONFIG_I2C_AMD756
@@ -688,6 +696,15 @@ CONFIG_SENSORS_W83781D
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu
 
+Winbond W83792D
+CONFIG_SENSORS_W83792D
+  If you say yes here you get support for the Winbond W83792D
+  sensor chips.
+
+  You will also need the latest user-space utilties: you can find them
+  in the lm_sensors package, which you can download at 
+  http://www.lm-sensors.nu/
+
 Winbond W83627HF, W83627THF, W83697HF
 CONFIG_SENSORS_W83627HF
   If you say yes here you get support for the Winbond W836x7 series 
@@ -937,6 +954,7 @@ sub gen_drivers_i2c_Config_in
   if [ "$CONFIG_I2C_MAINBOARD" = "y" ]; then
     dep_tristate '  Acer Labs ALI 1535' CONFIG_I2C_ALI1535 $CONFIG_I2C
     dep_tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 $CONFIG_I2C
+    dep_tristate '  Acer Labs ALI 1563' CONFIG_I2C_ALI1563 $CONFIG_I2C
     dep_tristate '  Apple Hydra Mac I/O' CONFIG_I2C_HYDRA $CONFIG_I2C_ALGOBIT
     dep_tristate '  AMD 756/766/768/8111 and nVidia nForce' CONFIG_I2C_AMD756 $CONFIG_I2C
     if [ "$CONFIG_I2C_AMD756" != "n" ]; then
@@ -1028,6 +1046,7 @@ obj-$(CONFIG_SENSORS_VIA686A)	+= via686a.o
 obj-$(CONFIG_SENSORS_VT1211)	+= vt1211.o
 obj-$(CONFIG_SENSORS_VT8231)	+= vt8231.o
 obj-$(CONFIG_SENSORS_W83781D)	+= w83781d.o
+obj-$(CONFIG_SENSORS_W83792D)	+= w83792d.o
 obj-$(CONFIG_SENSORS_W83627HF)	+= w83627hf.o
 obj-$(CONFIG_SENSORS_W83L785TS)	+= w83l785ts.o
 obj-$(CONFIG_SENSORS_XEONTEMP)	+= xeontemp.o
@@ -1068,6 +1087,7 @@ export-objs	+= i2c-amd756.o
 
 obj-$(CONFIG_I2C_ALI1535)		+= i2c-ali1535.o
 obj-$(CONFIG_I2C_ALI15X3)		+= i2c-ali15x3.o
+obj-$(CONFIG_I2C_ALI1563)		+= i2c-ali1563.o
 obj-$(CONFIG_I2C_AMD756)		+= i2c-amd756.o
 obj-$(CONFIG_I2C_AMD756_S4882)		+= i2c-amd756-s4882.o
 obj-$(CONFIG_I2C_AMD8111)		+= i2c-amd8111.o
