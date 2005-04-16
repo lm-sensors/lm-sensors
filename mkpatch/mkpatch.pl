@@ -1309,6 +1309,9 @@ sub main
   gen_Documentation_Configure_help $package_root, $kernel_root;
   gen_MAINTAINERS $package_root, $kernel_root;
   gen_dmi_scan $package_root, $kernel_root;
+
+  # Clear temporary file
+  unlink("$package_root/$temp");
 }
 
 main;
