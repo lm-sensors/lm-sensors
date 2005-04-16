@@ -35,7 +35,6 @@ KERNELCHIPSTARGETS += $(MODULE_DIR)/mic74.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/saa1064.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smartbatt.o
 KERNELCHIPSTARGETS += $(MODULE_DIR)/smbus-arp.o
-KERNELCHIPSTARGETS += $(MODULE_DIR)/w83792d.o
 
 
 # These targets ARE included in 'mkpatch'
@@ -167,6 +166,9 @@ KERNELCHIPSTARGETS += $(MODULE_DIR)/vt1211.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_VT8231=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/vt8231.o
+endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_W83792D=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/w83792d.o
 endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_W83627HF=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/w83627hf.o
