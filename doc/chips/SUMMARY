@@ -233,6 +233,9 @@ w83781d
 w83l785ts
 	w83l785ts	1	-	-	-	yes	no
 
+w83792d
+	w83792d		3	9	7	3 pwm	yes	no
+
 xeontemp
 	xeontemp	1	-	-	-	yes	no
 
