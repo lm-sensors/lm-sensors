@@ -4510,7 +4510,7 @@ void print_pc87366(const sensors_chip_name *name)
      && !sensors_get_feature(*name, SENSORS_PC87360_IN0_MAX + i, &max)) {
       if (valid) {
         print_label(label, 10);
-        printf("%+6.2f V  (min = %+6.2f V, max = %6.2f V)       %s\n",
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s\n",
                cur, min, max,
                status&(PC87365_STATUS_IN_MIN
                       |PC87365_STATUS_IN_MAX)?"ALARM":"");
