@@ -4460,8 +4460,7 @@ void print_pc87360(const sensors_chip_name *name)
              status&PC87360_STATUS_FAN_OVERFLOW?"OVERFLOW":
              status&PC87360_STATUS_FAN_LOW?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get FAN2 data!\n");
+  }
   free_the_label(&label);
 }
 
