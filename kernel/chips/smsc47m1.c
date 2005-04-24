@@ -134,7 +134,7 @@ struct smsc47m1_data {
 	u8 fan_min[2];		/* Register value */
 	u8 fan_div[2];		/* Register encoding, shifted right */
 	u8 alarms;		/* Register encoding */
-	u8 pwm[2];		/* Register value (bit 7 is enable) */
+	u8 pwm[2];		/* Register value (bit 0 is disable) */
 };
 
 
@@ -455,21 +455,18 @@ void smsc47m1_pwm(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		smsc47m1_update_client(client);
 		results[0] = PWM_FROM_REG(data->pwm[nr - 1]);
-		results[1] = data->pwm[nr - 1] & 0x01;
+		results[1] = !(data->pwm[nr - 1] & 0x01);
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->pwm[nr - 1] &= 0x81;
+			data->pwm[nr - 1] = smsc47m1_read_value(client,
+					    SMSC47M1_REG_PWM(nr)) & 0x81;
 			data->pwm[nr - 1] |= PWM_TO_REG(results[0]);
 			if (*nrels_mag >= 2) {
-				if(results[1] && (data->pwm[nr-1] & 0x01)) {
+				if (results[1]) {
 					/* enable PWM */
-/* hope BIOS did it already
-					smsc47m1_write_value(client,
-					          SMSC47M1_REG_PPIN(nr), 0x04);
-*/
 					data->pwm[nr - 1] &= 0xfe;
-				} else if((!results[1]) && (!(data->pwm[nr-1] & 0x01))) {
+				} else {
 					/* disable PWM */
 					data->pwm[nr - 1] |= 0x01;
 				}
