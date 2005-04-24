@@ -8,7 +8,7 @@
 #
 #################################################################
 #
-#    Copyright 2001 Mark D. Studebaker <mdsxyz123@yahoo.com>
+#    Copyright 2001,2005 Mark D. Studebaker <mdsxyz123@yahoo.com>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,53 +29,100 @@
 if [ $# -ne 2 ]
 then
 	echo "usage: $0 database.rrd sensor"
-	echo "       sensor example: w83781d-isa-0290"
+	echo "       sensor example: w83781d-isa-0290 (2.4) or 0-0290 (2.6)"
 	exit 1
 fi
 #
 RRDPATH=/usr/local/rrdtool/bin
 RRDB=$1
-#
+
 SENSDIR=/proc/sys/dev/sensors
-#
+SDIR=/sys/bus/i2c/devices
+if [ ! -d $SENSDIR ]
+then
+	if [ ! -d $SDIR ]
+	then
+		echo $0: 'No sensors found! (modprobe sensor modules?)'
+		exit 1
+	else
+		SYSFS=1
+		SENSDIR=$SDIR
+	fi	
+fi
+
 SENSDEV=$2
 SENS=$SENSDIR/$SENSDEV
 if [ ! -r $SENS ]
 then
+	echo $0: 'No sensors found! (modprobe sensor modules?)'
 	exit 1
 fi
 
 STRING=N
-#
-# Get the second value from these sensor files
-#
-SENSORS="fan1 fan2 fan3"
-for i in $SENSORS
-do
-	V="`cat $SENSDIR/$SENSDEV/$i 2> /dev/null`"
-	if [ $? -ne 0 ]
-	then
-		STRING="${STRING}:U"
-	else
-		V="`echo $V | cut -d ' ' -f 2`"
-		STRING="${STRING}:${V}"
-	fi
-done
-#
-# Get the third value from these sensor files
-#
-SENSORS="temp1 temp2 temp3 in0 in1 in2 in3 in4 in5 in6"
-for i in $SENSORS
-do
-	V="`cat $SENSDIR/$SENSDEV/$i 2> /dev/null`"
-	if [ $? -ne 0 ]
-	then
-		STRING="${STRING}:U"
-	else
-		V="`echo $V | cut -d ' ' -f 3`"
-		STRING="${STRING}:${V}"
-	fi
-done
+if [ "$SYSFS" = "1" ]
+then
+	#
+	# Get the value from these sensor files (/sys)
+	#
+	SENSORS="fan1 fan2 fan3"
+	for i in $SENSORS
+	do
+		V="`cat $SENSDIR/$SENSDEV/${i}_input 2> /dev/null`"
+		if [ $? -ne 0 ]
+		then
+			STRING="${STRING}:U"
+		else
+			STRING="${STRING}:${V}"
+		fi
+	done
+	#
+	# Get the value from these sensor files (/sys) and divide by 1000
+	#
+	SENSORS="temp1 temp2 temp3 in0 in1 in2 in3 in4 in5 in6"
+	for i in $SENSORS
+	do
+		V="`cat $SENSDIR/$SENSDEV/${i}_input 2> /dev/null`"
+		if [ $? -ne 0 ]
+		then
+			STRING="${STRING}:U"
+		else
+			V=`echo "3k0 ${V/-/_} 1000/p"|dc`
+			STRING="${STRING}:${V}"
+		fi
+	done
+else
+	#
+	# Get the second value from these sensor files (/proc)
+	#
+	SENSORS="fan1 fan2 fan3"
+	for i in $SENSORS
+	do
+		V="`cat $SENSDIR/$SENSDEV/$i 2> /dev/null`"
+		if [ $? -ne 0 ]
+		then
+			STRING="${STRING}:U"
+		else
+			V="`echo $V | cut -d ' ' -f 2`"
+			STRING="${STRING}:${V}"
+		fi
+	done
+	#
+	# Get the third value from these sensor files (/proc)
+	#
+	SENSORS="temp1 temp2 temp3 in0 in1 in2 in3 in4 in5 in6"
+	for i in $SENSORS
+	do
+		V="`cat $SENSDIR/$SENSDEV/$i 2> /dev/null`"
+		if [ $? -ne 0 ]
+		then
+			STRING="${STRING}:U"
+		else
+			V="`echo $V | cut -d ' ' -f 3`"
+			STRING="${STRING}:${V}"
+		fi
+	done
+fi
+
 #
 # Get the first value from these /proc files
 #

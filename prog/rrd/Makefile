@@ -2,19 +2,24 @@
 # Edit the following for your setup
 #
 USER=apache
+# CRONTAB not used
 #CRONTAB=/var/spool/cron/tabs/$(USER)
 RRDPATH=/usr/local/rrdtool/bin
 BINPATH=/usr/local/bin
 RRDDIR=/var/lib/sensors-rrd
 APACHE=/var/www/html
 APACHDIR=$(APACHE)/senspix
-SENSDEV=bmc-ipmi-0000
 MACH=`uname -n`
-#
+# 2.4 kernels
+#SENSDEV=w83781d-isa-0290
+#SENSDIR=/proc/sys/dev/sensors/$(SENSDEV)
+# 2.6 kernels
+SENSDEV=0-0290
+SENSDIR=/sys/bus/i2c/devices/$(SENSDEV)
+################################################
 # Everything below here should be fine
 #
 RRDB=$(RRDDIR)/sensors.rrd
-SENSDIR=/proc/sys/dev/sensors/$(SENSDEV)
 
 all: sens_day.cgi sens_week.cgi summ_week.cgi $(SENSDIR)
 

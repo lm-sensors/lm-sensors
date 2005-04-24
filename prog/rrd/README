@@ -63,7 +63,8 @@ INSTALLATION INSTRUCTIONS
 			APACHDIR=$(APACHE)/senspix
 		The sensor device in your system
 		(isa recommended over i2c if both are available)
-			SENSDEV=w83781d-isa-0290
+			SENSDEV=w83781d-isa-0290 (2.4 kernel - look in /proc/sys/dev/sensors)
+			SENSDEV=0-0290           (2.6 kernel - look in /sys/i2c/bus/devices)
 	- make
 	- (as root) make install, which does the following.
 	  If you don't want it to do this, install by hand!!!
