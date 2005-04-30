@@ -839,7 +839,7 @@ chip "as99127f-*"
 #   compute temp2 (@*30/43)+25, (@-25)*43/30
 
 # See comments above if temp3 looks bad. What works for temp2 is likely
-# to work for temp3 for dual-CPU boards.
+# to work for temp3 for dual-CPU boards, such as the CUV4X-D.
 
 # Most Asus boards have temperatures settled like that:
     label temp1 "M/B Temp"
@@ -849,7 +849,8 @@ chip "as99127f-*"
 #   label temp1 "CPU Temp"
 #   label temp2 "M/B Temp"
 
-# Most boards have no temp3 by default
+# Most boards have no temp3 by default, except for dual-CPU boards.
+#   label temp3 "CPU 2 Temp"
 #   ignore temp3
 
 # adjust this if your vid is wrong; see doc/vid
