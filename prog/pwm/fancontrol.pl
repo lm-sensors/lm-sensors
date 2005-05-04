@@ -157,7 +157,6 @@ while(1)
 1;
 
 ################################################################ 
-loadconfig($)
 sub loadconfig($)
 {
    my $file = shift;
@@ -215,7 +214,6 @@ $minstop);
 
 
 ################################################################ 
-pwmdisable($)
 sub pwmdisable($)
 {
    my $p = shift;
@@ -257,7 +255,6 @@ sub pwmdisable($)
 
 
 ################################################################# 
-pwmenable($)
 sub pwmenable($)
 {
    my $p = shift;
@@ -291,7 +288,6 @@ sub pwmenable($)
 
 
 ################################################################ 
-restorefans()
 sub restorefans()
 {
    $SIG{TERM} = 'IGNORE';
@@ -314,7 +310,6 @@ sub restorefans()
 
 
 ############################################################ 
-UpdateFanSpeeds()
 sub UpdateFanSpeeds()
 {
    my $fcvcount = 0;
