@@ -97,7 +97,11 @@ static int find_client(struct i2c_client * client)
 
 static void ipmi_i2c_send_message(int id, struct ipmi_msg * msg)
 {
+#ifdef IPMI_RESPONSE_RESPONSE_TYPE
+	ipmi_request(i2c_ipmi_user, &address, (long) id, msg, NULL, 0);
+#else
 	ipmi_request(i2c_ipmi_user, &address, (long) id, msg, 0);
+#endif
 }
 
 /* This is the message send function exported to the client

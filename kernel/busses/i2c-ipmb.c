@@ -87,7 +87,12 @@ static void ipmb_i2c_send_message(struct ipmi_addr *address,
 {
 	int err;
 
-	if((err = ipmi_request(i2c_ipmb_user, address, id, msg, 0)))
+#ifdef IPMI_RESPONSE_RESPONSE_TYPE
+	err = ipmi_request(i2c_ipmb_user, address, id, msg, NULL, 0);
+#else
+	err = ipmi_request(i2c_ipmb_user, address, id, msg, 0);
+#endif
+	if (err)
 		printk(KERN_INFO "i2c-ipmb.o: ipmi_request error %d\n",
 			err);
 }
