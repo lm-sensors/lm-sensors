@@ -10,7 +10,8 @@ There are two types of drivers, chip and bus.
 Steps which apply to only one type of driver are noted.
 
 These instructions are for 2.4-kernel-compatible drivers.
-If you wish to write a driver for 2.5 only, email us for information.
+If you wish to write a driver for 2.6 only, not all of the following
+steps apply.
 
 ---------------------------------------------------------------------
 
@@ -73,8 +74,12 @@ If you wish to write a driver for 2.5 only, email us for information.
   other symbols as static in your source file.
 
 * Test the module.
-  This is usually the boring part...
   Test with a recent 2.4 kernel.
+  For bus drivers, use i2cdetect and i2cdump. For i2cdump, test all supported
+  bus access modes (see i2cdump man page).
+  For chip drivers, cat all files in applicable /proc or /sys directory
+  and check for problems. Write all supported settings.
+  Check ALARM indications.
 
 * Add detection information to prog/detect/sensors-detect.
   This is a perl script that automatically detects what chips and adapters
@@ -95,11 +100,15 @@ If you wish to write a driver for 2.5 only, email us for information.
   This is a function specific for your driver that
   makes the included 'sensors' program pretty-print your chip information.
 
-* Add a call to the procedure in prog/sensors/main.c (for chip drivers only).
-  Put it at the bottom of do_a_print().
+* Add an line for the procedure in the matches[] table in
+  prog/sensors/main.c (for chip drivers only).
+  This tells sensors to call your new procedure when the chip name matches.
 
 * Add entries to etc/sensors.conf.eg (for chip drivers only).
   If needed, you can set defaults here.
+
+* Test the userspace apps (sensors-detect and sensors).
+  Test setting limits with sensors -s.
 
 * Add the name of the device to the README file.
 
@@ -108,6 +117,8 @@ If you wish to write a driver for 2.5 only, email us for information.
 * Add entries to the CHANGES file. Please keep in alphabetical order.
 
 * Write a doc/chips/xxx or doc/busses/xxx file.
+
+* Add entry to doc/chips/SUMMARY (for chip drivers only).
 
 * Clearly specify licensing and copyright.
   Make sure the GPL boilerplate and your name
@@ -123,10 +134,11 @@ If you wish to write a driver for 2.5 only, email us for information.
   you started), then submit the changes to us as a patch against CVS,
   or check them in.
 
-* If you want to have your driver integrated to Linux 2.5, you have to
+* If you want to have your driver integrated to Linux 2.6, you have to
   port your driver to the new sysfs interface. Once done and preferably
   after testing, submit a patch to the Linux kernel mailing list
-  <linux-kernel at vger dot kernel dot org> and Greg KH (greg at kroah
+  <linux-kernel at vger dot kernel dot org>, our mailing list
+  <sensors at stimpy dot netroedge.com>,and Greg KH (greg at kroah
   dot com).
 
 ---------------------------------------------------------------------
