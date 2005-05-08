@@ -18,6 +18,14 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.2 (2005????)
+  Driver i2c-ali1563: New
+  Driver smsc47m1: Fix PWM enable polarity on read
+  Man page isaset.8: Fix typos
+  Program mkpatch: Include i2c-ali1563
+                   Include w83792d
+  Program sensors: Support the VAIO "VGN" prefix for eeprom
+  Program sensors-detect: Add SMSC LPC47M15x/LPC47M192 SMBus detection
+                          Advertise the w83792d driver
 
 
 2.9.1 (20050412)
