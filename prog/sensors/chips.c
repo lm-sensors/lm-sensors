@@ -3289,12 +3289,12 @@ void print_eeprom(const sensors_chip_name *name)
 			for (i = 0; i < 4; i++)
 	            if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a))
 					buffer[i] = (char) a;
-			if (strncmp(buffer, "PCG-", 4) == 0)
-			{
+			if (strncmp(buffer, "PCG-", 4) == 0
+			 || strncmp(buffer, "VGN-", 4) == 0) {
 				/* must be a real Sony Vaio EEPROM */
 				memset(buffer + 4, '\0', 29);
 				for (a = 1; i < 32 && a != 0; i++) /* stop at first zero */
-	            	if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a)
+					if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a)
 					 && a != 0)
 						buffer[i] = (char) a;
 				print_label(label, 24);
