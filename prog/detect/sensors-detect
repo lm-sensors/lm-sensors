@@ -132,6 +132,14 @@ use vars qw(@pci_adapters @chip_ids @superio_ids);
      } , 
      { 
        vendid => 0x8086,
+       devid  => 0x269B,
+       func => 3,
+       procid => "Intel Enterprise Southbridge - ESB2",
+       driver => "i2c-i801",
+       match => sub { $_[0] =~ /^SMBus I801 adapter at [0-9a-f]{4}/ },
+     },
+     {
+       vendid => 0x8086,
        devid  => 0x266A,
        func => 3,
        procid => "Intel 82801FB ICH6",
