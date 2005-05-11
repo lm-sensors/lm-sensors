@@ -2010,7 +2010,7 @@ static sensors_chip_feature adm9240_features[] =
                          ADM9240_SYSCTL_TEMP, VALUE(1), 1, "temp1_max", 3 },
 
     { SENSORS_ADM9240_VID, "vid", NOMAP, NOMAP,
-                         R, ADM9240_SYSCTL_VID, VALUE(1), 2, "in1_ref", 3 },
+                         R, ADM9240_SYSCTL_VID, VALUE(1), 2 },
     { SENSORS_ADM9240_FAN1_DIV, "fan1_div", SENSORS_ADM9240_FAN1, 
                          NOMAP, RW, 
                          ADM9240_SYSCTL_FAN_DIV, VALUE(1), 0 },
@@ -2021,7 +2021,7 @@ static sensors_chip_feature adm9240_features[] =
                          R, ADM9240_SYSCTL_ALARMS, VALUE(1), 0 },
     { SENSORS_ADM9240_ANALOG_OUT, "analog_out", NOMAP,
                          NOMAP, RW,
-                         ADM9240_SYSCTL_ANALOG_OUT, VALUE(1), 0 },
+                         ADM9240_SYSCTL_ANALOG_OUT, VALUE(1), 0, "aout_output", 3 },
     { 0 }
   };
 
@@ -2658,8 +2658,8 @@ static sensors_chip_feature adm1025_features[] =
     { SENSORS_ADM1025_TEMP2_HIGH, "temp2_high", SENSORS_ADM1025_TEMP2,
                          SENSORS_ADM1025_TEMP2, RW, 
                          ADM1025_SYSCTL_TEMP, VALUE(1), 1 },
-    { SENSORS_ADM1025_VID, "vid", NOMAP, NOMAP,
-                         R, ADM1025_SYSCTL_VID, VALUE(1), 3 , "in1_ref", 3 },
+    { SENSORS_ADM1025_VID, "vid", NOMAP, NOMAP, R, ADM1025_SYSCTL_VID,
+	    		VALUE(1), 3, "cpu0_vid", 3, "in1_ref" },
     { SENSORS_ADM1025_VRM, "vrm", NOMAP, NOMAP,
                          RW, ADM1025_SYSCTL_VRM, VALUE(1), 1 },
     { SENSORS_ADM1025_ALARMS, "alarms", NOMAP, NOMAP, 
@@ -2682,7 +2682,7 @@ static sensors_chip_feature adm1026_features[] = {
 		SENSORS_ADM1026_GPIO, NOMAP, R,
 		ADM1026_SYSCTL_GPIO_MASK, VALUE(1), 0 },
     { SENSORS_ADM1026_VID, "vid",
-		NOMAP, NOMAP, RW,
+		NOMAP, NOMAP, R,
 		ADM1026_SYSCTL_VID, VALUE(1), 3 },
     { SENSORS_ADM1026_VRM, "vrm",
 		NOMAP, NOMAP, RW,
