@@ -327,7 +327,7 @@ static struct i2c_driver pc87360_driver = {
 #define PC87365_STATUS_IN_MIN		0x02
 #define PC87365_STATUS_IN_MAX		0x04
 
-#define PC87365_SYSCTL_TEMP1		3101 /* degrees Celcius */
+#define PC87365_SYSCTL_TEMP1		3101 /* degrees Celsius */
 #define PC87365_SYSCTL_TEMP2		3102
 #define PC87365_SYSCTL_TEMP3		3103 /* not for PC87365 */
 #define PC87365_SYSCTL_TEMP1_STATUS	3301 /* bit field */

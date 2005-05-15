@@ -173,7 +173,7 @@ static struct i2c_driver lm80_driver = {
 #define LM80_SYSCTL_IN6 1006
 #define LM80_SYSCTL_FAN1 1101	/* Rotations/min */
 #define LM80_SYSCTL_FAN2 1102
-#define LM80_SYSCTL_TEMP 1250	/* Degrees Celcius * 100 */
+#define LM80_SYSCTL_TEMP 1250	/* Degrees Celsius * 100 */
 #define LM80_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
 #define LM80_SYSCTL_ALARMS 2001	/* bitvector */
 

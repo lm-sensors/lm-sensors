@@ -234,7 +234,7 @@ static struct i2c_driver sis5595_driver = {
 #define SIS5595_SYSCTL_IN4 1004
 #define SIS5595_SYSCTL_FAN1 1101	/* Rotations/min */
 #define SIS5595_SYSCTL_FAN2 1102
-#define SIS5595_SYSCTL_TEMP 1200	/* Degrees Celcius * 10 */
+#define SIS5595_SYSCTL_TEMP 1200	/* Degrees Celsius * 10 */
 #define SIS5595_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
 #define SIS5595_SYSCTL_ALARMS 2001	/* bitvector */
 

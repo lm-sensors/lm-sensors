@@ -41,7 +41,7 @@ The LM87 implements up to three temperature sensors, up to two FAN
 rotation speed sensors, up to seven voltage sensors, alarms, and some
 miscellaneous stuff.
 
-Temperatures are measured in degrees Celcius. Each input has a high
+Temperatures are measured in degrees Celsius. Each input has a high
 and low alarm settings.  A high limit produces an alarm when the value
 goes above it, and an alarm is also produced when the value goes below
 the low limit.

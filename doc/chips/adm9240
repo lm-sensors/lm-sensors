@@ -58,7 +58,7 @@ the speed with which they update their sensor readings.
 The chips implement six voltage sensors, a temperature sensor,
 two FAN rotation speed sensors, VID lines and some miscellaneous stuff.
 
-Temperatures are measured in degrees Celcius. An alarm is triggered whenever
+Temperatures are measured in degrees Celsius. An alarm is triggered whenever
 the temperature is above the hot limit, and will continue to be generated
 until the temperature has dropped beneath the hysteresis limit. Measurements
 are guaranteed between -40 and +125 degrees. The current temperature

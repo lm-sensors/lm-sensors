@@ -84,7 +84,7 @@ CPU. The two other sensors must be used to measure the temperature of
 two other points of the motherboard. We suspect these points to be the
 north and south bridges, but this couldn't be confirmed.
 
-All temperature values are given in degrees Celcius. Local temperature
+All temperature values are given in degrees Celsius. Local temperature
 is given within a range of 0 to +85 degrees. Remote temperatures are
 given within a range of 0 to +125 degrees. Resolution is 1.0 degree,
 accuracy is guaranteed to 3.0 degrees (see the datasheet for more

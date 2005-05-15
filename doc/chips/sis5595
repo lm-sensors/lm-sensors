@@ -64,7 +64,7 @@ set by the BIOS.
 If the temperature function is enabled, in4 will return 0.
 If the in4 function is enabled, temp will return 0.
 
-Temperatures are measured in degrees Celcius. An alarm is triggered once
+Temperatures are measured in degrees Celsius. An alarm is triggered once
 when the max is crossed; it is also triggered
 when it drops below the min value.
 Measurements are guaranteed

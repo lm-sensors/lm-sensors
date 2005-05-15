@@ -55,7 +55,7 @@ they include an 'environmnent controller' with 3 temperature sensors,
 3 fan rotation speed sensors, 8 voltage sensors, and associated alarms.
 The IT8712F additionally features VID inputs.
 
-Temperatures are measured in degrees Celcius. An alarm is triggered once
+Temperatures are measured in degrees Celsius. An alarm is triggered once
 when the Overtemperature Shutdown limit is crossed; it is triggered again
 as soon as it drops below the Hysteresis value.
 

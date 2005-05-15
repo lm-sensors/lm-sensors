@@ -40,7 +40,7 @@ System Hardware Monitor'.
 The LM80 implements one temperature sensor, two FAN rotation speed sensors,
 seven voltage sensors, alarms, and some miscellaneous stuff.
 
-Temperatures are measured in degrees Celcius. There are two sets of limits
+Temperatures are measured in degrees Celsius. There are two sets of limits
 which operate independently. When the HOT Temperature Limit is crossed,
 this will cause an alarm that will be reasserted until the temperature
 drops below the HOT Hysteresis. The Overtemperature Shotdown (OS) limits

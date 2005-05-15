@@ -107,12 +107,12 @@ two on the W83783S), three FAN rotation speed sensors, voltage sensors
 (seven on the W83781D, nine on the W83782D and six on the W83783S), VID
 lines, alarms with beep warnings, and some miscellaneous stuff.
 
-Temperatures are measured in degrees Celcius. There is always one main
+Temperatures are measured in degrees Celsius. There is always one main
 temperature sensor, and one (W83783S) or two (W83781D and W83782D) other
 sensors.  An alarm is triggered for the main sensor once when the 
 Overtemperature Shutdown limit is crossed; it is triggered again as soon as 
 it drops below the Hysteresis value. A more useful behaviour 
-can be found by setting the Hysteresis value to +127 degrees Celcius; in 
+can be found by setting the Hysteresis value to +127 degrees Celsius; in 
 this case, alarms are issued during all the time when the actual temperature
 is above the Overtemperature Shutdown value. The driver sets the
 hysteresis value for temp1 to 127 at initialization.

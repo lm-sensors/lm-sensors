@@ -229,9 +229,9 @@ static struct i2c_driver adm1024_driver = {
 #define ADM1024_SYSCTL_IN5 1005
 #define ADM1024_SYSCTL_FAN1 1101	/* Rotations/min */
 #define ADM1024_SYSCTL_FAN2 1102
-#define ADM1024_SYSCTL_TEMP 1250	/* Degrees Celcius * 100 */
-#define ADM1024_SYSCTL_TEMP1 1290	/* Degrees Celcius */
-#define ADM1024_SYSCTL_TEMP2 1295	/* Degrees Celcius */
+#define ADM1024_SYSCTL_TEMP 1250	/* Degrees Celsius * 100 */
+#define ADM1024_SYSCTL_TEMP1 1290	/* Degrees Celsius */
+#define ADM1024_SYSCTL_TEMP2 1295	/* Degrees Celsius */
 #define ADM1024_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
 #define ADM1024_SYSCTL_ALARMS 2001	/* bitvector */
 #define ADM1024_SYSCTL_ANALOG_OUT 2002

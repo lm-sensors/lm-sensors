@@ -323,12 +323,12 @@ static int maxi_version = cristal;
 #define MAXI_SYSCTL_FAN2   1102	/* Rotations/min */
 #define MAXI_SYSCTL_FAN3   1103	/* Rotations/min */
 #define MAXI_SYSCTL_FAN4   1104	/* Rotations/min */
-#define MAXI_SYSCTL_TEMP1  1201	/* Degrees Celcius */
-#define MAXI_SYSCTL_TEMP2  1202	/* Degrees Celcius */
-#define MAXI_SYSCTL_TEMP3  1203	/* Degrees Celcius */
-#define MAXI_SYSCTL_TEMP4  1204	/* Degrees Celcius */
-#define MAXI_SYSCTL_TEMP5  1205	/* Degrees Celcius */
-#define MAXI_SYSCTL_TEMP6  1206	/* Degrees Celcius */
+#define MAXI_SYSCTL_TEMP1  1201	/* Degrees Celsius */
+#define MAXI_SYSCTL_TEMP2  1202	/* Degrees Celsius */
+#define MAXI_SYSCTL_TEMP3  1203	/* Degrees Celsius */
+#define MAXI_SYSCTL_TEMP4  1204	/* Degrees Celsius */
+#define MAXI_SYSCTL_TEMP5  1205	/* Degrees Celsius */
+#define MAXI_SYSCTL_TEMP6  1206	/* Degrees Celsius */
 #define MAXI_SYSCTL_PLL    1301	/* MHz */
 #define MAXI_SYSCTL_VID1   1401	/* Volts / 6.337, for nba just Volts */
 #define MAXI_SYSCTL_VID2   1402	/* Volts */

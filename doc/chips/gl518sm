@@ -58,7 +58,7 @@ The GL518SM implements one temperature sensor, two FAN rotation speed
 sensors, and four voltage sensors. It can report alarms through the
 computer speakers.
 
-Temperatures are measured in degrees Celcius. An alarm goes off while the
+Temperatures are measured in degrees Celsius. An alarm goes off while the
 temperature is above the over temperature limit, and has not yet dropped
 below the hysteresis limit. The alarm always reflects the current situation.
 Measurements are guaranteed between -10 degrees and +110 degrees, with

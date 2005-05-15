@@ -185,7 +185,7 @@ static struct i2c_driver lm78_driver = {
 #define LM78_SYSCTL_FAN1 1101	/* Rotations/min */
 #define LM78_SYSCTL_FAN2 1102
 #define LM78_SYSCTL_FAN3 1103
-#define LM78_SYSCTL_TEMP 1200	/* Degrees Celcius * 10 */
+#define LM78_SYSCTL_TEMP 1200	/* Degrees Celsius * 10 */
 #define LM78_SYSCTL_VID 1300	/* Volts * 100 */
 #define LM78_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
 #define LM78_SYSCTL_ALARMS 2001	/* bitvector */

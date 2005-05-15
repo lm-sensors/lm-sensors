@@ -269,9 +269,9 @@ static struct i2c_driver LM87_driver = {
 #define LM87_SYSCTL_AIN2       1007
 #define LM87_SYSCTL_FAN1       1102
 #define LM87_SYSCTL_FAN2       1103
-#define LM87_SYSCTL_TEMP1      1250 /* Degrees Celcius * 10 */
-#define LM87_SYSCTL_TEMP2      1251 /* Degrees Celcius * 10 */
-#define LM87_SYSCTL_TEMP3      1252 /* Degrees Celcius * 10 */
+#define LM87_SYSCTL_TEMP1      1250 /* Degrees Celsius * 10 */
+#define LM87_SYSCTL_TEMP2      1251 /* Degrees Celsius * 10 */
+#define LM87_SYSCTL_TEMP3      1252 /* Degrees Celsius * 10 */
 #define LM87_SYSCTL_FAN_DIV    2000 /* 1, 2, 4 or 8 */
 #define LM87_SYSCTL_ALARMS     2001 /* bitvector */
 #define LM87_SYSCTL_ANALOG_OUT 2002

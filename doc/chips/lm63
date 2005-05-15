@@ -44,7 +44,7 @@ Description
 The LM63 is a digital temperature sensor with integrated fan monitoring
 and control.
 
-All temperature values are given in degrees Celcius. Resolution is 1.0
+All temperature values are given in degrees Celsius. Resolution is 1.0
 degree for the local temperature, 0.125 degree for the remote temperature.
 
 The fan speed is measured using a tachometer. Contrary to most chips which

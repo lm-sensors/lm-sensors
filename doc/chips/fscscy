@@ -59,7 +59,7 @@ The chip provides four temperature values (cpu0/1, motherboard and auxiliary),
 three current values (12 volt, 5 volt and battery) and up to
 six fans (power supply, cpu and auxiliary). 
 
-Temperatures are measured in degrees Celcius. The resolution is 1 degree.
+Temperatures are measured in degrees Celsius. The resolution is 1 degree.
 In addition to state and actual temperature, the temperature sensors also export
 a LIMIT temperature for each sensor. The meaning of the information itself is
 obvious. The rest is guesswork. It likely triggers an alarm/event as soon as it is
@@ -106,7 +106,7 @@ value I put there. It's always 0. Even if I write a non-zero value there, i got
 The third is the control register, with 5th (value 16), 6th (value 32) and 8th
 (value 128) bits used only. If I write 16 or 144 (128+16), it means system
 reset when the counter reaches 0. If I add 32 (for a value of 48 or 176), no
-reset will occure.
+reset will occur.
 
 So, the world's simplest watchdog using this mainboard:
 

@@ -228,7 +228,7 @@ static struct i2c_driver adm9240_driver = {
 #define ADM9240_SYSCTL_IN5 1005
 #define ADM9240_SYSCTL_FAN1 1101	/* Rotations/min */
 #define ADM9240_SYSCTL_FAN2 1102
-#define ADM9240_SYSCTL_TEMP 1250	/* Degrees Celcius * 100 */
+#define ADM9240_SYSCTL_TEMP 1250	/* Degrees Celsius * 100 */
 #define ADM9240_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
 #define ADM9240_SYSCTL_ALARMS 2001	/* bitvector */
 #define ADM9240_SYSCTL_ANALOG_OUT 2002

@@ -1889,7 +1889,7 @@ chip "lm99-*"
 
 # note #1: only the LM99 needs this; for a LM89, comment the compute line
 # out
-# note #2: there is no way for us to differenciate between a LM89 and a
+# note #2: there is no way for us to differentiate between a LM89 and a
 # LM99; you have to know what you have; LM99 are frequently found on
 # graphics cards, most notably nVidia ones
    compute temp2 @+16, @-16
@@ -2265,7 +2265,7 @@ chip "pc87366-*"
 
 # 3435 is the thermistor beta.
 # This assumes that the thermistor forms a resistor divider with a resistor
-# equal to its nominal value at 25 degres Celcius. If not, change the values.
+# equal to its nominal value at 25 degres Celsius. If not, change the values.
 # We also assume that you have a working in10 (which is forcibly enabled by
 # default). If not, use 3.3 instead, but you lose accuracy.
 

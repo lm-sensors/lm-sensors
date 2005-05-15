@@ -34,7 +34,7 @@ The driver implements three temperature sensors, seven FAN rotation speed
 sensors, nine voltage sensors, and the Smart Fan I(Thermal Cruise mode)
 and Smart Fan II sensors.
 
-Temperatures are measured in degrees Celcius. There is one main temperature
+Temperatures are measured in degrees Celsius. There is one main temperature
 sensor, and two other sensors. A alarm is triggered when the measured
 temperture is higher than the Overtemperature or below the Hysteresis value.
 This is NOT correct, I misunderstand the Hysteresis value when I implement

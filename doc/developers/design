@@ -529,7 +529,7 @@ routines.
 
 As an example, I will here implement our old LM78 access function:
 
-/* The SMBus locks itself, but ISA access must be locked explicitely!
+/* The SMBus locks itself, but ISA access must be locked explicitly!
    We ignore the LM78 BUSY flag at this moment - it could lead to deadlocks,
    would slow down the LM78 access and should not be necessary.
    There are some ugly typecasts here, but the good new is - they should

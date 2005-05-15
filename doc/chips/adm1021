@@ -115,7 +115,7 @@ indicates whether the remote sensor is connected.
 
 Each sensor has its own low and high limits. When they are crossed, the 
 corresponding alarm is set and remains on as long as the temperature stays 
-out of range. Temperatures are measured in degrees Celcius. Measurements 
+out of range. Temperatures are measured in degrees Celsius. Measurements 
 are possible between -65 and +127 degrees, with a resolution of one degree.
 
 The ADM1021 reports a die code, which is a sort of revision code. This
@@ -379,7 +379,7 @@ Within each ADM1021 or MAX1617  directory, you can find the following files:
   A list of three numbers. The first number is the Overtemperature Shutdown
   value, the second number is Low limit value, and the third number is the
   current temperature. The first two values can be modified. Each value can
-  be set and read to full-degree accuracy. All values are in degrees Celcius.
+  be set and read to full-degree accuracy. All values are in degrees Celsius.
   An alarm is issued (usually to a connected ADM9240) when the temperature 
   gets higher then the Overtemperature Shutdown value; it stays on until
   the temperature falls back below the Overtemperature Shutdown value. 

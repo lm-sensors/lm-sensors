@@ -79,7 +79,7 @@ static struct i2c_driver lm75_driver = {
 
 /* -- SENSORS SYSCTL START -- */
 
-#define LM75_SYSCTL_TEMP 1200	/* Degrees Celcius * 10 */
+#define LM75_SYSCTL_TEMP 1200	/* Degrees Celsius * 10 */
 
 /* -- SENSORS SYSCTL END -- */
 

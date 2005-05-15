@@ -45,7 +45,7 @@ This driver implements support for the National Semiconductors LM92
 temperature sensor.
 
 Each LM92 temperature sensor supports a single temperature sensor.
-Temperatures are exported to proc in degrees celsius * 10000 (in other
+Temperatures are exported to proc in degrees Celsius * 10000 (in other
 words temperatures are accurate to 4 decimal places). There are alarms
 for high, low, and critical thresholds. There's also an hysteresis to
 control the thresholds for resetting alarms.

@@ -121,8 +121,8 @@ static struct i2c_driver thmc50_driver = {
 
 /* -- SENSORS SYSCTL START -- */
 
-#define THMC50_SYSCTL_TEMP 1200	/* Degrees Celcius */
-#define THMC50_SYSCTL_REMOTE_TEMP 1201	/* Degrees Celcius */
+#define THMC50_SYSCTL_TEMP 1200	/* Degrees Celsius */
+#define THMC50_SYSCTL_REMOTE_TEMP 1201	/* Degrees Celsius */
 #define THMC50_SYSCTL_INTER 1202
 #define THMC50_SYSCTL_INTER_MASK 1203
 #define THMC50_SYSCTL_DIE_CODE 1204

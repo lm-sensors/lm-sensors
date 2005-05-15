@@ -63,7 +63,7 @@ mkpatch does several things:
   * For each file pair as specified in FILES, it creates a diff between
     them, but before that is done, it changes `#include' lines in the
     lm_sensors file as specified in INCLUDES
-  * It handles several special files, that have to be scanned explicitely
+  * It handles several special files, that have to be scanned explicitly
     to generate diffs to for them
 
 The generated diffs have specific headers. It will seem as if the old

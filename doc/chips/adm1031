@@ -51,7 +51,7 @@ ADM1030 and ADM1031 are digital temperature sensors and fan controllers.
 They sense their own temperature as well as the temperature of up to one
 (ADM1030) or two (ADM1031) external diodes.
 
-All temperature values are given in degrees Celcius. Resolution
+All temperature values are given in degrees Celsius. Resolution
 is 0.5 degree for the local temperature, 0.125 degree for the remote
 temperatures.
 

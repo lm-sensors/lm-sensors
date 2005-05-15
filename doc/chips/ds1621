@@ -195,7 +195,7 @@ DS1621 is "running" or if in 1SHOT mode it is "shooting". In fact, the
 value returned here is the negated DONE bit, just like a "BUSY"
 flag. This means, that the "1" tells you that the values in REG_COUNT
 and REG_SLOPE are not valid. "0", on the other hand, means that the
-continous conversion had been stopped long enough to provide valid
+continuous conversion had been stopped long enough to provide valid
 readings and that one shot has successfully been fi- red,
 respectively. - Writing accepts "1" to start continuous conversion or
 to pull the trigger in 1SHOT mode, and "0" stops continuous conversion
@@ -208,7 +208,7 @@ Last, but best try writing "0" to the "continuous" file and after that
 "1" to the "enable" file. This gives you the precise temperature with
 two digits after the radix (decimal point).
 The precise results are only updated if the DONE bit was set, thus you
-have to stop continous conversion early enough prior to reading,
+have to stop continuous conversion early enough prior to reading,
 i. e. 1000ms. And, on the other hand, you shouldn't forget to fire off
 1SHOT in order to get the actual temperature rather than that of the
 day before yesterday. So read enable before any of these.

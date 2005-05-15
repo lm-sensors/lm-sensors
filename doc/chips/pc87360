@@ -110,7 +110,7 @@ speed readings. No explanation nor fix could be found.
 Temperature Monitoring
 ----------------------
 
-Temperatures are reported in degrees Celcius. Each temperature measured has
+Temperatures are reported in degrees Celsius. Each temperature measured has
 associated low, high and overtemperature limits, each of which triggers an
 alarm when crossed.
 

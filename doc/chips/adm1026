@@ -56,7 +56,7 @@ sensors (8-bit), an analog output and a PWM output along with limit,
 alarm and mask bits for all of the above.  There is even 8k bytes of
 EEPROM memory on chip.
 
-Temperatures are measured in degrees Celcius.  There are two external
+Temperatures are measured in degrees Celsius.  There are two external
 sensor inputs and one internal sensor.  Each sensor has a high and low
 limit.  If the limit is exceeded, an interrupt (#SMBALERT) can be
 generated.  The interrupts can be masked.  In addition, there are

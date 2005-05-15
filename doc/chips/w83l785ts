@@ -45,7 +45,7 @@ far suggest that the two possible limits are actually 95 and 110
 degrees C. The datasheet is rather poor and obviously inaccurate
 on several points including this one.
 
-All temperature values are given in degrees Celcius. Resolution
+All temperature values are given in degrees Celsius. Resolution
 is 1.0 degree. See the datasheet for details.
 
 The w83l785ts driver will not update its values more frequently than

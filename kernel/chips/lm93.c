@@ -95,7 +95,7 @@ MODULE_PARM_DESC(vid_agtl, "Configures VID pin input thresholds");
 #define LM93_SYSCTL_IN15 			1015
 #define LM93_SYSCTL_IN16 			1016
 
-/* degrees celcius * 10 */
+/* degrees Celsius * 10 */
 #define LM93_SYSCTL_TEMP1			1101
 #define LM93_SYSCTL_TEMP2			1102
 #define LM93_SYSCTL_TEMP3			1103
@@ -121,7 +121,7 @@ MODULE_PARM_DESC(vid_agtl, "Configures VID pin input thresholds");
 #define LM93_SYSCTL_TEMP2_AUTO_PWM_MIN		1152
 #define LM93_SYSCTL_TEMP3_AUTO_PWM_MIN		1153
 
-/* degrees celcius * 10 */
+/* degrees Celsius * 10 */
 #define LM93_SYSCTL_TEMP1_AUTO_OFFSET_HYST	1161
 #define LM93_SYSCTL_TEMP2_AUTO_OFFSET_HYST	1162
 #define LM93_SYSCTL_TEMP3_AUTO_OFFSET_HYST	1163

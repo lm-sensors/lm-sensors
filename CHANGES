@@ -65,7 +65,7 @@ ask CVS about it:
                Support VID on the IT8712F
   Module lm75: Only initialize CMP/INT bit
   Module lm78: Fix bug with setting negative temperature limits
-  Module lm85: Properly differenciate between ADM1027 and ADT7463
+  Module lm85: Properly differentiate between ADM1027 and ADT7463
                Add EMC6D102 support
   Module lm90: Fix MAX6657, MAX6658 and MAX6659 detection
                Add limited ADT7461 support

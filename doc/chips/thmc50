@@ -46,7 +46,7 @@ register and Hysteresis register. Each value can be set and read to half-degree
 accuracy.  An alarm is issued (usually to a connected LM78) when the 
 temperature gets higher then the Overtemperature Shutdown value; it stays on 
 until the temperature falls below the Hysteresis value. All temperatures are in 
-degrees Celcius, and are guaranteed within a range of -55 to +125 degrees.
+degrees Celsius, and are guaranteed within a range of -55 to +125 degrees.
 
 The THMC50 only updates its values each 1.5 seconds; reading it more often
 will do no harm, but will return 'old' values.
@@ -65,7 +65,7 @@ temp1 (internal) -- 	Three fields: [temp-os,rw] [temp-hyst,rw] [temp,ro]
 temp2 (remote)   -- 	Three fields: [temp-os,rw] [temp-hyst,rw] [temp,ro]
 
 temp-os, temp-hyst, and temp are whole degree integers representing degrees
-celcius.
+Celsius.
 
 analog_out --	One field: [output-value,rw]
 

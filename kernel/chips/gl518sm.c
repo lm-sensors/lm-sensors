@@ -189,7 +189,7 @@ static struct i2c_driver gl518_driver = {
 #define GL518_SYSCTL_VIN3 1003
 #define GL518_SYSCTL_FAN1 1101	/* RPM */
 #define GL518_SYSCTL_FAN2 1102
-#define GL518_SYSCTL_TEMP 1200	/* Degrees Celcius * 10 */
+#define GL518_SYSCTL_TEMP 1200	/* Degrees Celsius * 10 */
 #define GL518_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
 #define GL518_SYSCTL_ALARMS 2001	/* bitvector */
 #define GL518_SYSCTL_BEEP 2002	/* bitvector */

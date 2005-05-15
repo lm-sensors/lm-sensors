@@ -65,7 +65,7 @@ set and read to half-degree accuracy.
 An alarm is issued (usually to a connected LM78) when the temperature
 gets higher then the Overtemperature Shutdown value; it stays on until
 the temperature falls below the Hysteresis value.
-All temperatures are in degrees Celcius, and are guaranteed within a 
+All temperatures are in degrees Celsius, and are guaranteed within a 
 range of -55 to +125 degrees.
 
 The LM75 only updates its values each 1.5 seconds; reading it more often

@@ -185,8 +185,8 @@ static struct i2c_driver gl520_driver = {
 #define GL520_SYSCTL_VIN4 1004
 #define GL520_SYSCTL_FAN1 1101	/* RPM */
 #define GL520_SYSCTL_FAN2 1102
-#define GL520_SYSCTL_TEMP1 1200	/* Degrees Celcius * 10 */
-#define GL520_SYSCTL_TEMP2 1201	/* Degrees Celcius * 10 */
+#define GL520_SYSCTL_TEMP1 1200	/* Degrees Celsius * 10 */
+#define GL520_SYSCTL_TEMP2 1201	/* Degrees Celsius * 10 */
 #define GL520_SYSCTL_VID 1300
 #define GL520_SYSCTL_FAN_DIV 2000	/* 1, 2, 4 or 8 */
 #define GL520_SYSCTL_ALARMS 2001	/* bitvector */

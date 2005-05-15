@@ -308,9 +308,9 @@ static struct i2c_driver it87_driver = {
 #define IT87_SYSCTL_FAN1 1101   /* Rotations/min */
 #define IT87_SYSCTL_FAN2 1102
 #define IT87_SYSCTL_FAN3 1103
-#define IT87_SYSCTL_TEMP1 1200  /* Degrees Celcius * 10 */
-#define IT87_SYSCTL_TEMP2 1201  /* Degrees Celcius * 10 */
-#define IT87_SYSCTL_TEMP3 1202  /* Degrees Celcius * 10 */
+#define IT87_SYSCTL_TEMP1 1200  /* Degrees Celsius * 10 */
+#define IT87_SYSCTL_TEMP2 1201  /* Degrees Celsius * 10 */
+#define IT87_SYSCTL_TEMP3 1202  /* Degrees Celsius * 10 */
 #define IT87_SYSCTL_VID 1300    /* Volts * 100 */
 #define IT87_SYSCTL_FAN_DIV 2000        /* 1, 2, 4 or 8 */
 #define IT87_SYSCTL_ALARMS 2004    /* bitvector */

@@ -124,7 +124,7 @@ static struct i2c_driver ds1621_driver = {
 };
 
 /* -- SENSORS SYSCTL START -- */
-#define DS1621_SYSCTL_TEMP 1200	/* Degrees Celcius * 10 */
+#define DS1621_SYSCTL_TEMP 1200	/* Degrees Celsius * 10 */
 #define DS1621_SYSCTL_ALARMS 2001	/* bitvector */
 #define DS1621_ALARM_TEMP_HIGH 0x40
 #define DS1621_ALARM_TEMP_LOW 0x20

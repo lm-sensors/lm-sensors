@@ -138,7 +138,7 @@ MAX6659
   * Selectable address
   * Second critical temperature limit
 
-All temperature values are given in degrees Celcius. Resolution
+All temperature values are given in degrees Celsius. Resolution
 is 1.0 degree for the local temperature, 0.125 degree for the remote
 temperature.
 

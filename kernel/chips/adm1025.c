@@ -174,7 +174,7 @@ static struct i2c_driver adm1025_driver = {
 #define ADM1025_SYSCTL_IN4     1004
 #define ADM1025_SYSCTL_IN5     1005
 
-#define ADM1025_SYSCTL_RTEMP   1250 /* Degrees Celcius * 10 */
+#define ADM1025_SYSCTL_RTEMP   1250 /* Degrees Celsius * 10 */
 #define ADM1025_SYSCTL_TEMP    1251
 
 #define ADM1025_SYSCTL_ALARMS  2001 /* bitvector */
