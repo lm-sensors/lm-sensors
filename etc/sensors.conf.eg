@@ -1475,8 +1475,8 @@ chip "adm9240-*" "ds1780-*" "lm81-*"
 #   set "12V_max" xxx
 #   set Vccp2_max xxx
 #
-#   set fan1_div xxx
-#   set fan2_div xxx
+#   set fan1_div xxx	Note: do not uncomment with kernel 2.6 driver
+#   set fan2_div xxx	Note: do not uncomment with kernel 2.6 driver
 #   set fan1_min xxx
 #   set fan2_min xxx
 #   set temp1_hyst xxx
