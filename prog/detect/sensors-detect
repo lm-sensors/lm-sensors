@@ -1702,6 +1702,13 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	driver => "not-a-sensor",
 	devid => 0xee,
       },
+      {
+	# This one actually has sensors but we don't know the logical
+	# device number(s) yet
+	name => "Nat. Semi. PCPC87427 Super IO",
+	driver => "not-a-sensor",
+	devid => 0xf2,
+      },
     ],
   },
   {
