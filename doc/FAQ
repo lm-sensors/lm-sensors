@@ -1395,13 +1395,19 @@ you'll be CC'd on all replies.
 6.5 How to access mailing list archives
 =======================================
 
-The mailing list archive is at:
-`http://archives.andrew.net.au/lm-sensors'.  It contains messages since
-October 28, 2001.  There is another mailing list archive at:
+The primary mailing list archive is at:
+`http://lists.lm-sensors.org/pipermail/lm-sensors/'.  It contains
+messages since October 28, 2001.
+
+   There is another mailing list archive at:
 `http://news.gmane.org/gmane.linux.drivers.sensors'.  It contains
 messages since December 31, 2004.  This archive may also be accessed
 via a news reader: `nntp://news.gmane.org/gmane.linux.drivers.sensors'
 and RSS: `http://rss.gmane.org/gmane.linux.drivers.sensors'.
+
+   And last there is a legacy archive at:
+`http://archives.andrew.net.au/lm-sensors'.  It contains messages from
+October 28, 2001 through May 16, 2005.
 
 6.6 How to submit a patch
 =========================
