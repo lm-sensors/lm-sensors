@@ -1,8 +1,8 @@
 <html lang="en">
 <head>
-<title>Sensors FAQ for lm_sensors version 2.14</title>
+<title>Sensors FAQ for lm_sensors version 2.15</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="Sensors FAQ for lm_sensors version 2.14">
+<meta name="description" content="Sensors FAQ for lm_sensors version 2.15">
 <meta name="generator" content="makeinfo 4.7">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
@@ -19,12 +19,13 @@
 --></style>
 </head>
 <body>
-<h1 class="settitle">Sensors FAQ for lm_sensors version 2.14</h1>
+<h1 class="settitle">Sensors FAQ for lm_sensors version 2.15</h1>
 Copyright (C) 1998 - 2005<br>
 Frodo Looijaard,<br>
-<a href="mailto:phil..at..netroedge.com">Philip Edelbrock</a>,<br>
+Philip Edelbrock,<br>
+Mark D. Studebaker<br>
 and<br>
-<a href="mailto:mdsxyz123..at..yahoo.com">Mark Studebaker</a><br>
+Jean Delvare<br>
 
    <div class="shortcontents">
 <h2>Short Contents</h2>
@@ -129,7 +130,6 @@ and<br>
 <li><a href="#Section-4_002e17">4.17.7 Bad readings from LM75!</a>
 <li><a href="#Section-4_002e17">4.17.8 Bad readings from LM78!</a>
 <li><a href="#Section-4_002e17">4.17.9 Bad readings from LM80!</a>
-<li><a href="#Section-4_002e17">4.17.10 Bad readings from it87!</a>
 </li></ul>
 <li><a href="#Section-4_002e18">4.18 How do I configure two chips (LM87) differently?</a>
 <li><a href="#Section-4_002e19">4.19 Dmesg says <span class="samp">Upgrade BIOS</span>! I don't want to!</a>
@@ -186,7 +186,7 @@ and<br>
 <li><a href="#Section-6_002e1">6.1 How to write a driver</a>
 <li><a href="#Section-6_002e2">6.2 How to get CVS access</a>
 <li><a href="#Section-6_002e3">6.3 How to donate hardware to the project</a>
-<li><a href="#Section-6_002e4">6.4 How to join the project mailing list</a>
+<li><a href="#Section-6_002e4">6.4 How to join the project mailing lists</a>
 <li><a href="#Section-6_002e5">6.5 How to access mailing list archives</a>
 <li><a href="#Section-6_002e6">6.6 How to submit a patch</a>
 <li><a href="#Section-6_002e7">6.7 How to REALLY help</a>
@@ -1338,15 +1338,6 @@ do not recogize or support. Figure out what you really have See <a href="#Sectio
 <p>The LM80 detection is poor and other hardware is often misdetected
 as an LM80. Figure out what you really have See <a href="#Section-3_002e2_002e1">What chips are on motherboard XYZ</a>.
 
-   <p><a name="Bad-readings-from-it87"></a>
-
-<h4 class="subsection">4.17.10 Bad readings from it87!</h4>
-
-<p>The it87 temperature sesnsors are configured, unfortunately,
-in a way different from w83781d. They cannot be configured from
-<span class="file">/etc/sensors.conf</span>; they must be set at modprobe insertion with
-<span class="command">modprobe it87 temp_type=0xXX</span>. See <span class="file">doc/chips/it87</span> for details.
-
 <div class="node">
 <p><hr>
 <a name="Section-4_002e18"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e19">Section 4.19</a>,
@@ -1793,7 +1784,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
 <h3 class="section">5.1 What to send us when asking for help</h3>
 
 <p>We are always willing to answer questions if things don't work out. 
-Please email <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a>, and not the individual authors,
+Post your question to our <a href="http://lists.lm-sensors.org/mailman/listinfo/lm-sensors">discussion list</a>,
+and not the individual authors,
 unless you have something private to say.
 
    <p>Instead of using email, you can also use the web-based support
@@ -1921,7 +1913,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
 <h3 class="section">5.7 How do I update a ticket?</h3>
 
 <p>You can't. Only developers can. Follow up by emailing us
-at <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a> and reference your ticket number
+and reference your ticket number
 in the subject. Please don't enter a new ticket with
 follow-up information, email us instead. Thanks.
 
@@ -1934,7 +1926,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
 
 <h3 class="section">5.8 How do I follow up on a ticket?</h3>
 
-<p>Follow up by emailing us at <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a>
+<p>Follow up by emailing us
 and reference your ticket number in the subject.
 
 <div class="node">
@@ -1980,8 +1972,10 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
 
 <h3 class="section">6.2 How to get CVS access</h3>
 
-<p>For anonymous CVS read access, see the instructions on our download page. 
-Sorry, we don't have automatically generated CVS tarballs.
+<p>For anonymous CVS read access, see the instructions on our
+<a href="http://www2.lm-sensors.nu/~lm78/download.html#cvs">download page</a>. 
+Alternatively, <a href="http://www2.lm-sensors.nu/~lm78/download.html#snapshots">nightly snapshots</a>
+of the CVS repositories are available.
 
    <p>For write access, run the script <span class="command">doc/developers/genpasswd.pl</span> in
 our package and follow the instructions. Let us know what part
@@ -1997,7 +1991,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
 
 <h3 class="section">6.3 How to donate hardware to the project</h3>
 
-<p>Send us email <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a>.
+<p><a href="http://www2.lm-sensors.nu/~lm78/author.html#contact">Contact us</a>.
 
 <div class="node">
 <p><hr>
@@ -2007,16 +2001,16 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
 <br>
 </div>
 
-<h3 class="section">6.4 How to join the project mailing list</h3>
+<h3 class="section">6.4 How to join the project mailing lists</h3>
 
-<p>Send us email <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a>. Sorry,
-there is no automated subscribe/unsubscribe service yet
-(but we're seriously thinking of switching to majordomo). 
-Therefore there may be some delay before your request is processed. 
-Please note that you do NOT need to be subscribed to the list
-in order to post. If you simply need help as a user, post your
-detailed problem and questions directly. Don't worry, you'll be
-CC'd on all replies.
+<p>There are two lists you can subscribe to:
+
+     <ul>
+<li>A <a href="http://lists.lm-sensors.org/mailman/listinfo/lm-sensors">general discussion list</a>,
+meant for both development and user support. You do not need to be subscribed to post. 
+<li>A <a href="http://lists.lm-sensors.org/mailman/listinfo/lm-sensors-commit">CVS commits list</a>,
+for watching the changes made to the CVS repositories. This list is read-only. 
+</ul>
 
 <div class="node">
 <p><hr>
@@ -2073,13 +2067,14 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
      <ul>
 <li>Answering email
 <li>Answering support tickets
-<li>Submitting patches to Linus, etc. 
+<li>Porting drivers to Linux 2.6
 <li>Creating a sensors.conf database
-<li>Creating RPM's
+<li>Reviewing patches
 </ul>
 
-   <p>Send us email <a href="mailto:sensors@stimpy.netroedge.com">sensors@stimpy.netroedge.com</a> if you can help. 
-No experience necessary :)
+   <p>If you are willing to help, simply join our
+<a href="http://lists.lm-sensors.org/mailman/listinfo/lm-sensors">discussion list</a>,
+and we'll help you help us.
 
 <div class="node">
 <p><hr>
@@ -2222,28 +2217,33 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <h2 class="appendix">Appendix A Revision History of This Document</h2>
 
      <ul>
-<li>Rev 2.10 (MDS) Various updates, 20040103
-<li>Rev 2.9 (CP) Converted to Gnu texinfo format, 20020910
-<li>Rev 2.8 (MDS) Minor updates 20020710, released with lm_sensors 2.6.4
-<li>Rev 2.7 (MDS) Minor updates 20020425
-<li>Rev 2.6 (MDS) Minor updates 20020115, released with lm_sensors 2.6.3
-<li>Rev 2.5 (MDS) Minor updates 20011111, released with lm_sensors 2.6.2
-<li>Rev 2.4 (MDS) Minor updates 20010722
-<li>Rev 2.3 (MDS) General update, 20010224, released with lm_sensors 2.6.0. 
-<li>Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 19990920
-<li>Rev 2.1 (Frodo) Corrections for lm_sensors 2.2, 19990112
-<li>Rev 2.0 (Frodo) Major revision for lm_sensors 2.1, 19981229
-<li>Rev 1.10 (Frodo) Modified 3.8, updated some other things, 19980924
-<li>Rev 1.9 (Frodo) Added 3.15, 19980906
-<li>Rev 1.8 (Frodo) Added 3.14, 19980905
-<li>Rev 1.7 (Phil) Added 3.13 and some other minor changes, 19980901
-<li>Rev 1.6 (Frodo) Added 4, 4.1, 4.2, 4.3, 4.4, 4.5, 19980901
-<li>Rev 1.5 (Frodo) Added 2.3, 2.4, 3.9, 3.10, 3.11, 19980826
-<li>Rev 1.4 (Frodo) Added some more Winbond information, and 3.5-3.8, 19980817
-<li>Rev 1.3 Added info on the Winbond chip, 19980816
-<li>Rev 1.2 Adapation by Frodo Looijaard, 19980810
-<li>Rev 1.1 Modifications by Philip Edelbrock, 19980809
-<li>Rev 1.0 Written by Philip Edelbrock, 19980803
+<li>Rev 2.15 (JD) Updates, including mailing-list change, 2005-05-21
+<li>Rev 2.14 (MDS) Updated 4.12, 2004-11-26
+<li>Rev 2.13 (JD) Added 4.6.1, updated 4.7, 2004-06-23
+<li>Rev 2.12 (JD) Updated 4.27, 2004-04-11
+<li>Rev 2.11 (JD) Various updates, 2004-01-18
+<li>Rev 2.10 (MDS) Various updates, 2004-01-03
+<li>Rev 2.9 (CP) Converted to Gnu texinfo format, 2002-09-10
+<li>Rev 2.8 (MDS) Minor updates 2002-07-10, released with lm_sensors 2.6.4
+<li>Rev 2.7 (MDS) Minor updates 2002-04-25
+<li>Rev 2.6 (MDS) Minor updates 2002-01-15, released with lm_sensors 2.6.3
+<li>Rev 2.5 (MDS) Minor updates 2001-11-11, released with lm_sensors 2.6.2
+<li>Rev 2.4 (MDS) Minor updates 2001-07-22
+<li>Rev 2.3 (MDS) General update, 2001-02-24, released with lm_sensors 2.6.0. 
+<li>Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 1999-09-20
+<li>Rev 2.1 (Frodo) Corrections for lm_sensors 2.2, 1999-01-12
+<li>Rev 2.0 (Frodo) Major revision for lm_sensors 2.1, 1998-12-29
+<li>Rev 1.10 (Frodo) Modified 3.8, updated some other things, 1998-09-24
+<li>Rev 1.9 (Frodo) Added 3.15, 1998-09-06
+<li>Rev 1.8 (Frodo) Added 3.14, 1998-09-05
+<li>Rev 1.7 (Phil) Added 3.13 and some other minor changes, 1998-09-01
+<li>Rev 1.6 (Frodo) Added 4, 4.1, 4.2, 4.3, 4.4, 4.5, 1998-09-01
+<li>Rev 1.5 (Frodo) Added 2.3, 2.4, 3.9, 3.10, 3.11, 1998-08-26
+<li>Rev 1.4 (Frodo) Added some more Winbond information, and 3.5-3.8, 1998-08-17
+<li>Rev 1.3 (Phil) Added info on the Winbond chip, 1998-08-16
+<li>Rev 1.2 (Frodo) Adapation, 1998-08-10
+<li>Rev 1.1 (Phil) Modifications, 1998-08-09
+<li>Rev 1.0 (Phil) First version, 1998-08-03
 </ul>
 
 </body></html>

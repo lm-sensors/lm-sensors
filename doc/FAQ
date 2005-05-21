@@ -80,7 +80,6 @@ lm_sensors
     4.17.7 Bad readings from LM75!
     4.17.8 Bad readings from LM78!
     4.17.9 Bad readings from LM80!
-    4.17.10 Bad readings from it87!
   4.18 How do I configure two chips (LM87) differently?
   4.19 Dmesg says `Upgrade BIOS'! I don't want to!
     4.19.1 Dmesg says `use force_addr=0xaddr'! What address do I use?
@@ -122,7 +121,7 @@ lm_sensors
   6.1 How to write a driver
   6.2 How to get CVS access
   6.3 How to donate hardware to the project
-  6.4 How to join the project mailing list
+  6.4 How to join the project mailing lists
   6.5 How to access mailing list archives
   6.6 How to submit a patch
   6.7 How to REALLY help
@@ -908,14 +907,6 @@ The LM80 detection is poor and other hardware is often misdetected as
 an LM80. Figure out what you really have *Note What chips are on
 motherboard XYZ: Section 3.2.1.
 
-4.17.10 Bad readings from it87!
--------------------------------
-
-The it87 temperature sesnsors are configured, unfortunately, in a way
-different from w83781d. They cannot be configured from
-`/etc/sensors.conf'; they must be set at modprobe insertion with
-`modprobe it87 temp_type=0xXX'. See `doc/chips/it87' for details.
-
 4.18 How do I configure two chips (LM87) differently?
 =====================================================
 
@@ -1257,8 +1248,9 @@ and via686a together unless you have a recent kernel.
 ========================================
 
 We are always willing to answer questions if things don't work out.
-Please email <sensors@stimpy.netroedge.com>, and not the individual
-authors, unless you have something private to say.
+Post your question to our discussion list
+(http://lists.lm-sensors.org/mailman/listinfo/lm-sensors), and not the
+individual authors, unless you have something private to say.
 
    Instead of using email, you can also use the web-based support area,
 at `http://secure.netroedge.com/~lm78/support.html'. You will be helped
@@ -1347,16 +1339,15 @@ detected chip type. That way, we have some positive feedback, too!
 5.7 How do I update a ticket?
 =============================
 
-You can't. Only developers can. Follow up by emailing us at
-<sensors@stimpy.netroedge.com> and reference your ticket number in the
-subject. Please don't enter a new ticket with follow-up information,
-email us instead. Thanks.
+You can't. Only developers can. Follow up by emailing us and reference
+your ticket number in the subject. Please don't enter a new ticket with
+follow-up information, email us instead. Thanks.
 
 5.8 How do I follow up on a ticket?
 ===================================
 
-Follow up by emailing us at <sensors@stimpy.netroedge.com> and
-reference your ticket number in the subject.
+Follow up by emailing us and reference your ticket number in the
+subject.
 
 6 How to Contribute
 *******************
@@ -1370,7 +1361,10 @@ See `doc/developers/new_drivers' in our package for instructions.
 =========================
 
 For anonymous CVS read access, see the instructions on our download
-page.  Sorry, we don't have automatically generated CVS tarballs.
+page (http://www2.lm-sensors.nu/~lm78/download.html#cvs).
+Alternatively, nightly snapshots
+(http://www2.lm-sensors.nu/~lm78/download.html#snapshots) of the CVS
+repositories are available.
 
    For write access, run the script `doc/developers/genpasswd.pl' in
 our package and follow the instructions. Let us know what part of the
@@ -1379,18 +1373,22 @@ package you would like to work on.
 6.3 How to donate hardware to the project
 =========================================
 
-Send us email <sensors@stimpy.netroedge.com>.
+Contact us (http://www2.lm-sensors.nu/~lm78/author.html#contact).
 
-6.4 How to join the project mailing list
-========================================
+6.4 How to join the project mailing lists
+=========================================
 
-Send us email <sensors@stimpy.netroedge.com>. Sorry, there is no
-automated subscribe/unsubscribe service yet (but we're seriously
-thinking of switching to majordomo).  Therefore there may be some delay
-before your request is processed.  Please note that you do NOT need to
-be subscribed to the list in order to post. If you simply need help as
-a user, post your detailed problem and questions directly. Don't worry,
-you'll be CC'd on all replies.
+There are two lists you can subscribe to:
+
+   * A general discussion list
+     (http://lists.lm-sensors.org/mailman/listinfo/lm-sensors), meant
+     for both development and user support. You do not need to be
+     subscribed to post.
+
+   * A CVS commits list
+     (http://lists.lm-sensors.org/mailman/listinfo/lm-sensors-commit),
+     for watching the changes made to the CVS repositories. This list
+     is read-only.
 
 6.5 How to access mailing list archives
 =======================================
@@ -1425,14 +1423,15 @@ Believe it or not, what we really need help with are:
 
    * Answering support tickets
 
-   * Submitting patches to Linus, etc.
+   * Porting drivers to Linux 2.6
 
    * Creating a sensors.conf database
 
-   * Creating RPM's
+   * Reviewing patches
 
-   Send us email <sensors@stimpy.netroedge.com> if you can help.  No
-experience necessary :)
+   If you are willing to help, simply join our discussion list
+(http://lists.lm-sensors.org/mailman/listinfo/lm-sensors), and we'll
+help you help us.
 
 6.8 How to get release announcements
 ====================================
@@ -1516,52 +1515,63 @@ can not be sure.
 Appendix A Revision History of This Document
 ********************************************
 
-   * Rev 2.10 (MDS) Various updates, 20040103
+   * Rev 2.15 (JD) Updates, including mailing-list change, 2005-05-21
 
-   * Rev 2.9 (CP) Converted to Gnu texinfo format, 20020910
+   * Rev 2.14 (MDS) Updated 4.12, 2004-11-26
 
-   * Rev 2.8 (MDS) Minor updates 20020710, released with lm_sensors
+   * Rev 2.13 (JD) Added 4.6.1, updated 4.7, 2004-06-23
+
+   * Rev 2.12 (JD) Updated 4.27, 2004-04-11
+
+   * Rev 2.11 (JD) Various updates, 2004-01-18
+
+   * Rev 2.10 (MDS) Various updates, 2004-01-03
+
+   * Rev 2.9 (CP) Converted to Gnu texinfo format, 2002-09-10
+
+   * Rev 2.8 (MDS) Minor updates 2002-07-10, released with lm_sensors
      2.6.4
 
-   * Rev 2.7 (MDS) Minor updates 20020425
+   * Rev 2.7 (MDS) Minor updates 2002-04-25
 
-   * Rev 2.6 (MDS) Minor updates 20020115, released with lm_sensors
+   * Rev 2.6 (MDS) Minor updates 2002-01-15, released with lm_sensors
      2.6.3
 
-   * Rev 2.5 (MDS) Minor updates 20011111, released with lm_sensors
+   * Rev 2.5 (MDS) Minor updates 2001-11-11, released with lm_sensors
      2.6.2
 
-   * Rev 2.4 (MDS) Minor updates 20010722
+   * Rev 2.4 (MDS) Minor updates 2001-07-22
 
-   * Rev 2.3 (MDS) General update, 20010224, released with lm_sensors
+   * Rev 2.3 (MDS) General update, 2001-02-24, released with lm_sensors
      2.6.0.
 
-   * Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 19990920
+   * Rev 2.2 (Frodo) Corrections for lm_sensors 2.4, 1999-09-20
 
-   * Rev 2.1 (Frodo) Corrections for lm_sensors 2.2, 19990112
+   * Rev 2.1 (Frodo) Corrections for lm_sensors 2.2, 1999-01-12
 
-   * Rev 2.0 (Frodo) Major revision for lm_sensors 2.1, 19981229
+   * Rev 2.0 (Frodo) Major revision for lm_sensors 2.1, 1998-12-29
 
-   * Rev 1.10 (Frodo) Modified 3.8, updated some other things, 19980924
+   * Rev 1.10 (Frodo) Modified 3.8, updated some other things,
+     1998-09-24
 
-   * Rev 1.9 (Frodo) Added 3.15, 19980906
+   * Rev 1.9 (Frodo) Added 3.15, 1998-09-06
 
-   * Rev 1.8 (Frodo) Added 3.14, 19980905
+   * Rev 1.8 (Frodo) Added 3.14, 1998-09-05
 
-   * Rev 1.7 (Phil) Added 3.13 and some other minor changes, 19980901
+   * Rev 1.7 (Phil) Added 3.13 and some other minor changes, 1998-09-01
 
-   * Rev 1.6 (Frodo) Added 4, 4.1, 4.2, 4.3, 4.4, 4.5, 19980901
+   * Rev 1.6 (Frodo) Added 4, 4.1, 4.2, 4.3, 4.4, 4.5, 1998-09-01
 
-   * Rev 1.5 (Frodo) Added 2.3, 2.4, 3.9, 3.10, 3.11, 19980826
+   * Rev 1.5 (Frodo) Added 2.3, 2.4, 3.9, 3.10, 3.11, 1998-08-26
 
    * Rev 1.4 (Frodo) Added some more Winbond information, and 3.5-3.8,
-     19980817
+     1998-08-17
 
-   * Rev 1.3 Added info on the Winbond chip, 19980816
+   * Rev 1.3 (Phil) Added info on the Winbond chip, 1998-08-16
 
-   * Rev 1.2 Adapation by Frodo Looijaard, 19980810
+   * Rev 1.2 (Frodo) Adapation, 1998-08-10
 
-   * Rev 1.1 Modifications by Philip Edelbrock, 19980809
+   * Rev 1.1 (Phil) Modifications, 1998-08-09
 
-   * Rev 1.0 Written by Philip Edelbrock, 19980803
+   * Rev 1.0 (Phil) First version, 1998-08-03
 
