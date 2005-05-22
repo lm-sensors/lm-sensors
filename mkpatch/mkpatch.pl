@@ -1139,7 +1139,7 @@ sub gen_MAINTAINERS
     if (not $done and (m@SGI VISUAL WORKSTATION 320 AND 540@)) {
       print OUTPUT <<'EOF';
 SENSORS DRIVERS
-L:      sensors@stimpy.netroedge.com
+L:      lm-sensors@lm-sensors.org
 W:      http://www.lm-sensors.nu/
 S:      Maintained
 
