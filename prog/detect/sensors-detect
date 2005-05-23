@@ -1423,12 +1423,11 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { ite_detect 0, @_ },
        isa_addrs => [0x290],
        isa_detect => sub { ite_isa_detect 0, @_ },
-     } ,
+       alias_detect => sub { ite_alias_detect 0, @_ },
+     },
      {
        name => "ITE IT8705F / SiS 950",
        driver => "it87",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { ite_detect 1, @_ },
        isa_addrs => [0x290],
        isa_detect => sub { ite_isa_detect 1, @_ },
      } ,
@@ -1593,6 +1592,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	driver => "it87",
 	devid => 0x8712,
 	logdev => 0x04,
+	alias_detect => sub { ite_alias_detect 0, @_ },
       },
     ],
   },
@@ -4082,7 +4082,7 @@ sub via8231_isa_detect
   return 9;
 }
 
-# $_[0]: Chip to detect (0 = IT8712F, 1 = IT8705F/SiS950)
+# $_[0]: Chip to detect (0 = IT8712F)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -4099,11 +4099,10 @@ sub ite_detect
   my $reg;
   my ($chip,$file,$addr) = @_;
   return unless i2c_smbus_read_byte_data($file,0x48) == $addr;
-  return unless (i2c_smbus_read_byte_data($file,0x00) & 0x80) == 0x00;
+  return unless (i2c_smbus_read_byte_data($file, 0x00) & 0x90) == 0x10;
   return unless i2c_smbus_read_byte_data($file,0x58) == 0x90;
   return if $chip == 0 and i2c_smbus_read_byte_data($file,0x5b) != 0x12;
-  return if $chip == 1 and i2c_smbus_read_byte_data($file,0x5b) == 0x12;
-  return (7 + ($chip == 0));
+  return (7 + ($addr == 0x2d));
 }
 
 # $_[0]: Chip to detect (0 = IT8712F, 1 = IT8705F/SiS950)
@@ -4111,6 +4110,7 @@ sub ite_detect
 # Returns: undef if not detected, 7 or 8 if detected (tops LM78).
 # Registers used:
 #   0x00: Configuration
+#   0x48: Full I2C Address (IT8712F only)
 #   0x58: Mfr ID
 #   0x5b: Device ID (IT8712F only)
 # Note: Only address 0x290 is scanned at this moment.
@@ -4128,7 +4128,7 @@ sub ite_isa_detect
     return;
   }
   my $readproc = sub { isa_read_byte $addr + 5, $addr + 6, @_ };
-  return unless (&$readproc(0x00) & 0x80) == 0x00;
+  return unless (&$readproc(0x00) & 0x90) == 0x10;
   return unless &$readproc(0x58) == 0x90;
   return if $chip == 0 and &$readproc(0x5b) != 0x12;
   return if $chip == 1 and &$readproc(0x5b) == 0x12;
@@ -4140,11 +4140,19 @@ sub ite_isa_detect
     return if (($val2 & 0x80) && $val == 0x5c)
            or (!($val2 & 0x80) && $val == 0xa3);
   }
-  return (7 + ($chip == 0));
+
+  # I2C address must be possible
+  if ($chip == 0) {
+    my $i2caddr = &$readproc(0x48);
+    return if ($i2caddr < 0x03 || $i2caddr > 0x77);
+    return (7 + ($i2caddr == 0x2d));
+  }
+
+  return (7);
 }
 
 
-# $_[0]: Chip to detect (0 = ..., 1 = ...)
+# $_[0]: Chip to detect (0 = IT8712F)
 # $_[1]: ISA address
 # $_[2]: I2C file handle
 # $_[3]: I2C address
@@ -4154,7 +4162,7 @@ sub ite_alias_detect
   my $i;
   my $readproc = sub { isa_read_byte $isa_addr + 5, $isa_addr + 6, @_ };
   return 0 unless &$readproc(0x48) == $i2c_addr;
-  for ($i = 0x2b; $i <= 0x3d; $i ++) {
+  for ($i = 0x30; $i <= 0x45; $i++) {
     return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($file,$i);
   }
   return 1;
