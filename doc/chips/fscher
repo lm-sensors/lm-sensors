@@ -10,7 +10,7 @@ Status: Stable
 
 Supported chips:
   * Fujitsu-Siemens Hermes chip
-    Prefix `fscher'
+    Prefix: 'fscher'
     Addresses scanned: I2C 0x73 
 
 Author: Reinhard Nissl <rnissl@gmx.de> based on work from Hermann Jung

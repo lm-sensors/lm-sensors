@@ -6,6 +6,7 @@ Status: Beta, PC87366 well tested, other chips untested.
 Supported chips:
   * National Semiconductor PC87360, PC87363, PC87364, PC87365 and PC87366
     Addresses scanned: none, address read from Super I/O config space
+    Prefixes: 'pc87360', 'pc87363', 'pc87364', 'pc87365', 'pc87366'
     Datasheets:
 	http://www.national.com/pf/PC/PC87360.html
 	http://www.national.com/pf/PC/PC87363.html
@@ -46,11 +47,11 @@ PC87364 chip has monitoring and PWM control for a third fan.
 
 The National Semiconductor PC87365 and PC87366 Super I/O chips are complete
 hardware monitoring chipsets, not only controling and monitoring three fans,
-but also monitoring eleven voltage inputs and two (PC87365) or six
-(PC87366) remote temperatures.
+but also monitoring eleven voltage inputs and two (PC87365) or up to four
+(PC87366) temperatures.
 
-The driver assumes that no more than one chip is present, and the standard
-Super I/O address is used (0x2E/0x2F).
+The driver assumes that no more than one chip is present, and one of the
+standard Super I/O addresses is used (0x2E/0x2F or 0x4E/0x4F).
 
 
 Fan Monitoring
@@ -59,8 +60,6 @@ Fan Monitoring
 Fan rotation speeds are reported in RPM (revolutions per minute). An alarm
 is triggered if the rotation speed has dropped below a programmable limit.
 A different alarm is triggered if the fan speed is too low to be measured.
-It is suggested to increase the fan divider (which is really a clock
-divider) in this case.
 
 Fan readings are affected by a programmable clock divider, giving the
 readings more range or accuracy. Usually, users have to learn how it works,
@@ -148,7 +147,7 @@ room for per motherboard specificities, unfortunately. Even worse,
 motherboard manufacturers don't seem to care about National Semiconductor's
 recommendations.
 
-Each voltage measured has associated low and high limit, each of which
+Each voltage measured has associated low and high limits, each of which
 triggers an alarm when crossed.
 
 When available, VID inputs are used to provide the nominal CPU Core voltage.

@@ -5,8 +5,8 @@ Status: Complete and lightly tested
 
 Supported chips: 
   * National Semiconductor LM83
-    Prefix: `lm83'
-    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Prefix: 'lm83'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e
     Datasheet: Publicly available at the National Semiconductor website
                http://www.national.com/pf/LM/LM83.html
 
@@ -66,7 +66,7 @@ The fact that the LM83 is only scarcely used can be easily explained.
 Most motherboards come with more than just temperature sensors for
 health monitoring. They also have voltage and fan rotation speed
 sensors. This means that temperature-only chips are usually used as
-secondary chips coupled with another chip such as an IT87 or similar
+secondary chips coupled with another chip such as an IT8705F or similar
 chip, which provides more features. Since systems usually need three
 temperature sensors (motherboard, processor, power supply) and primary
 chips provide some temperature sensors, the secondary chip, if needed,

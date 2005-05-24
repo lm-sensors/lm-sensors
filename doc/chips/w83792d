@@ -6,8 +6,8 @@ Status: W83792D support is complete and well-tested.
 
 Supported chips:
   * Winbond W83792D
-    Prefix 'w83792d'
-    Addresses scanned: I2C 0x2c - 0x2f (inclusive)
+    Prefix: 'w83792d'
+    Addresses scanned: I2C 0x2c - 0x2f
     Datasheet: Available to LM_Sensors group, sent by Chunhao Huang
 
 
@@ -30,7 +30,7 @@ an internal state that allows no clean access. If you know the address
 of the chip, use a 'force' parameter; this will put it into a more
 well-behaved state first.
 
-The driver implements three temperature sensors, seven FAN rotation speed
+The driver implements three temperature sensors, seven fan rotation speed
 sensors, nine voltage sensors, and the Smart Fan I(Thermal Cruise mode)
 and Smart Fan II sensors.
 
@@ -42,8 +42,8 @@ this driver. It will be fixed later: An alarm is triggered when the
 Overtemperature Shutdown limit is crossed; it is triggered again as soon as
 it drops below the Hysteresis value.
 
-FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
-triggered if the rotation speed has dropped below a programmable limit. FAN 
+Fan rotation speeds are reported in RPM (rotations per minute). An alarm is
+triggered if the rotation speed has dropped below a programmable limit. Fan 
 readings can be divided by a programmable divider(1, 2, 4, 8, 16, 32, 64 or
 128) to give the readings more range or accuracy. This driver modify the
 fan divisor automatically to get the reasonable RPM rotation range.

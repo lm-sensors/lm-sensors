@@ -5,35 +5,35 @@ Status: Complete and well-tested
 
 Supported chips: 
   * National Semiconductor LM75
-    Prefix: `lm75'
-    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Prefix: 'lm75'
+    Addresses scanned: I2C 0x48 - 0x4f
     Datasheet: Publicly available at the National Semiconductor website
-               http://www.national.com
+               http://www.national.com/
   * Dallas Semiconductor DS75
-    Prefix: `lm75'
-    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Prefix: 'lm75'
+    Addresses scanned: I2C 0x48 - 0x4f
     Datasheet: Publicly available at the Maxim website
-               http://www.maxim-ic.com
+               http://www.maxim-ic.com/
   * Dallas Semiconductor DS1775
-    Prefix: `lm75'
-    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Prefix: 'lm75'
+    Addresses scanned: I2C 0x48 - 0x4f
     Datasheet: Publicly available at the Maxim website
-               http://www.maxim-ic.com
+               http://www.maxim-ic.com/
   * Maxim MAX6625, MAX6626
-    Prefix: `lm75'
-    Addresses scanned: I2C 0x48 - 0x4b (inclusive)
+    Prefix: 'lm75'
+    Addresses scanned: I2C 0x48 - 0x4b
     Datasheet: Publicly available at the Maxim website
-               http://www.maxim-ic.com
+               http://www.maxim-ic.com/
   * Microchip (TelCom) TCN75
-    Prefix: `lm75'
-    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Prefix: 'lm75'
+    Addresses scanned: I2C 0x48 - 0x4f
     Datasheet: Publicly available at the Microchip website
-               http://www.microchip.com
+               http://www.microchip.com/
   * Texas Instruments TMP100, TMP101
-    Prefix: `lm75'
-    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Prefix: 'lm75'
+    Addresses scanned: I2C 0x48 - 0x4f
     Datasheet: Publicly available at the TI website
-               http://www.ti.com
+               http://www.ti.com/
 
 Author: Frodo Looijaard <frodol@dds.nl>
 

@@ -4,15 +4,26 @@ Kernel driver `lm85.o'
 Status: Complete and somewhat tested
 
 Supported chips:
-  * National Semiconductors LM85 (B and C versions)
-    Prefix `lm85'
+  * National Semiconductor LM85 (B and C versions)
+    Prefix: 'lm85'
     Addresses scanned: I2C 0x2c, 0x2d, 0x2e
+    Datasheet: http://www.national.com/pf/LM/LM85.html
   * Analog Devices ADM1027
-    Prefix `adm1027'
+    Prefix: 'adm1027'
     Addresses scanned: I2C 0x2c, 0x2d, 0x2e
+    Datasheet: http://www.analog.com/en/prod/0,,766_825_ADM1027,00.html
   * Analog Devices ADT7463
-    Prefix 'adt7463'
+    Prefix: 'adt7463'
     Addresses scanned: I2C 0x2c, 0x2d, 0x2e
+    Datasheet: http://www.analog.com/en/prod/0,,766_825_ADT7463,00.html
+  * SMSC EMC6D100, SMSC EMC6D101
+    Prefix: 'emc6d100'
+    Addresses scanned: I2C 0x2c, 0x2d, 0x2e
+    Datasheet: http://www.smsc.com/main/tools/discontinued/6d100.pdf
+  * SMSC EMC6D102, SMSC EMC6D101
+    Prefix: 'emc6d102'
+    Addresses scanned: I2C 0x2c, 0x2d, 0x2e
+    Datasheet: http://www.smsc.com/main/catalog/emc6d102.html
 
 Authors:
       Philip Pokorny <ppokorny@penguincomputing.com>
@@ -52,8 +63,9 @@ Module Parameters
 Description
 -----------
 
-This driver implements support for the National Semiconductors LM85
-and compatible chips including the Analog Devices ADM1027 and ADT7463.
+This driver implements support for the National Semiconductor LM85
+and compatible chips including the Analog Devices ADM1027 and ADT7463,
+and SMSC EMC6D100, EMC6D101 and EMC6D102.
 
 The LM85 uses the 2-wire interface compatible with the SMBUS 2.0
 specification.  Using an analog to digital converter it measures three
@@ -87,7 +99,7 @@ corresponding high/low limit values.  The LM85 will signal an ALARM if
 any measured value exceeds either limit.
 
 The LM85 samples all inputs continuously.  The lm85 driver will not
-read the lm85 more often than once a second.  Further, configuration
+read the registers more often than once a second.  Further, configuration
 data is only read once each 5 minutes.  There is twice as much config
 data as measurements, so this would seem to be a worthwhile
 optimization.
@@ -253,7 +265,7 @@ cause the next smaller value to be used.  Setting the time constant to
 * PWM Control
 
 There are three PWM outputs.  The LM85 datasheet suggests that the
-PWM3 output control both FAN3 and FAN4.  Each PWM can be individually
+pwm3 output control both fan3 and fan4.  Each PWM can be individually
 configured and assigned to a zone for it's control value.  Each PWM can be
 configured individually according to the following options.
 

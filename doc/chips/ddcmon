@@ -5,7 +5,7 @@ Status: As complete as we want it to be, lightly tested
 
 Supported chips:
   * Any DDC Monitor EDID EEPROM chip at 0x50
-    Prefix `ddcmon'
+    Prefix: 'ddcmon'
     Addresses scanned: I2C 0x50
     Standards: available for purchase from VESA http://www.vesa.org
     Datasheets: Publicly available from Atmel (www.atmel.com),

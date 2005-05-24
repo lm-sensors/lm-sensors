@@ -5,8 +5,8 @@ Status: Beta
 
 Supported chips:
   * Micrel MIC74
-    Prefix: `mic74'
-    Addresses scanned: I2C 0x20 - 0x27 (inclusive)
+    Prefix: 'mic74'
+    Addresses scanned: I2C 0x20 - 0x27
     Datasheet: Publicly available at the Micrel website
                http://www.micrel.com/
 

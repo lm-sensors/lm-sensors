@@ -4,9 +4,10 @@ Kernel driver `lm87.o'
 Status: Complete and somewhat tested
 
 Supported chips:
-  * National Semiconductors LM87
-    Prefix `lm87'
-    Addresses scanned: I2C 0x2c - 0x2f (inclusive)
+  * National Semiconductor LM87
+    Prefix: 'lm87'
+    Addresses scanned: I2C 0x2c - 0x2f
+    Datasheet: http://www.national.com/pf/LM/LM87.html
 
 Authors: Frodo Looijaard <frodol@dds.nl>,
       Philip Edelbrock <phil@netroedge.com>, 
@@ -35,9 +36,9 @@ Module Parameters
 Description
 -----------
 
-This driver implements support for the National Semiconductors LM87.
+This driver implements support for the National Semiconductor LM87.
 
-The LM87 implements up to three temperature sensors, up to two FAN
+The LM87 implements up to three temperature sensors, up to two fan
 rotation speed sensors, up to seven voltage sensors, alarms, and some
 miscellaneous stuff.
 
@@ -46,14 +47,12 @@ and low alarm settings.  A high limit produces an alarm when the value
 goes above it, and an alarm is also produced when the value goes below
 the low limit.
 
-FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
-triggered if the rotation speed has dropped below a programmable limit. FAN 
+Fan rotation speeds are reported in RPM (rotations per minute). An alarm is
+triggered if the rotation speed has dropped below a programmable limit. Fan 
 readings can be divided by a programmable divider (1, 2, 4 or 8) to give
-the readings more range or accuracy. This is important because some FANs
-report only one 'tick' each rotation, while others report two - making
-all readings twice as high. Not all RPM values can accurately be represented,
-so some rounding is done. With a divider of 2, the lowest representable
-value is around 2600 RPM.
+the readings more range or accuracy. Not all RPM values can accurately be
+represented, so some rounding is done. With a divider of 2, the lowest
+representable value is around 2600 RPM.
 
 Voltage sensors (also known as IN sensors) report their values in
 volts. An alarm is triggered if the voltage has crossed a programmable
@@ -65,10 +64,10 @@ If an alarm triggers, it will remain triggered until the hardware register
 is read at least once. This means that the cause for the alarm may 
 already have disappeared!  Note that in the current implementation, all
 hardware registers are read whenever any data is read (unless it is less
-than 2.0 seconds since the last update). This means that you can easily
+than 1.0 second since the last update). This means that you can easily
 miss once-only alarms.
 
-The LM87 only updates its values each 1.0 seconds; reading it more
+The lm87 driver only updates its values each 1.0 seconds; reading it more
 often will do no harm, but will return 'old' values.
 
 

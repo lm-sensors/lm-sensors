@@ -8,8 +8,8 @@ Status: Complete; Beta.
 
 Supported chips:
   * Myson MTP008
-    Prefix `mtp008'
-    Addresses scanned: I2C 0x2c - 0x2e (inclusive)
+    Prefix: 'mtp008'
+    Addresses scanned: I2C 0x2c - 0x2e
     Datasheet: Publicly available at the Myson website
 
 Author: Kris Van Hees <aedil@alchar.org>

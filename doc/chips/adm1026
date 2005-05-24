@@ -5,7 +5,7 @@ Status: In development
 
 Supported chips:
   * Analog Devices ADM1026
-    Prefix `adm1026'
+    Prefix: 'adm1026'
     Addresses scanned: I2C 0x2c, 0x2d, 0x2e
 
 Author: Philip Pokorny <ppokorny@penguincomputing.com>
@@ -64,7 +64,7 @@ over-temp limits for each sensor.  If this limit is exceeded, the
 #THERM output will be asserted.  The current temperature and limits
 have a resolution of 1 degree.
 
-FAN rotation speeds are reported in RPM (rotations per minute) but
+Fan rotation speeds are reported in RPM (rotations per minute) but
 measured in counts of a 22.5kHz internal clock.  Each fan has a high
 limit which corresponds to a minimum fan speed.  If the limit is
 exceeded, an interrupt can be generated.  Each fan can be programmed

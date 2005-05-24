@@ -5,7 +5,7 @@ Status: Beta
 
 Supported chips:
   * Via VT8231 South Bridge
-    Prefix `vt8231'
+    Prefix: 'vt8231'
 	Addresses scanned: none, address read from PCI space
 
 Author: Mark D. Studebaker <mdsxyz123@yahoo.com>
@@ -61,14 +61,12 @@ Set the uch_config bit (in /proc) to 0 for voltage and 1 for temperature.
 Voltages will read 0 if set for temperature.
 Temperatures will read a really low number if set for voltage.
 
-FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
-triggered if the rotation speed has dropped below a programmable limit. FAN 
+Fan rotation speeds are reported in RPM (rotations per minute). An alarm is
+triggered if the rotation speed has dropped below a programmable limit. Fan 
 readings can be divided by a programmable divider (1, 2, 4 or 8) to give
-the readings more range or accuracy. This is important because some FANs
-report only one 'tick' each rotation, while others report two - making
-all readings twice as high. Not all RPM values can accurately be represented,
-so some rounding is done. With a divider of 2, the lowest representable
-value is around 2600 RPM.
+the readings more range or accuracy. Not all RPM values can accurately be
+represented, so some rounding is done. With a divider of 2, the lowest
+representable value is around 2600 RPM.
 
 PWM values are from 0 to 255. The first value in the /proc entry is
 the pwm value; the second is the enable (0 or 1).

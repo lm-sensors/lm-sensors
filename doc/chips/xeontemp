@@ -5,7 +5,7 @@ Status: Complete; tested for most devices except Xeon.
 
 Supported chips:
   * Intel Xeon and other processors
-    Prefix `xeontemp'
+    Prefix: 'xeontemp'
     Addresses scanned: I2C 0x18, 0x1a, 0x29, 0x2b, 0x4c, 0x4e
     Datasheets: Publicly available at the Intel website
                 See the adm1021 document for additional references

@@ -6,7 +6,7 @@ Status: 'Beta', but it's so simple that it may be in its final state
 Supported devices: 
   * Matrix-Orbital (www.matrix-orbital.com) displays.  Developed and
     	tested on the LCD2041V, but should work with all their displays.
-    Prefix: `matorb'
+    Prefix: 'matorb'
     Addresses scanned: I2C 0x2E
     Datasheet: Publicly available at the Matrix-Orbital web site
     (www.matrix-orbital.com)

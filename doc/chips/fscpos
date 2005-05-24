@@ -10,7 +10,7 @@ Status: Beta
 
 Supported chips:
   * Fujitsu Siemens Poseidon chip
-    Prefix `fscpos'
+    Prefix: 'fscpos'
     Addresses scanned: I2C 0x73 
 
 Author: Hermann Jung <hej@odn.de>
@@ -49,7 +49,7 @@ three fans (power supply, cpu and auxiliary).
 
 Temperatures are measured in degrees Celsius. The resolution is 1 degree.
 
-FAN rotation speeds are reported in RPM (rotations per minute). 
+Fan rotation speeds are reported in RPM (rotations per minute). 
 The value can be divided by a programmable divider (1, 2, 4 or 8) which 
 is stored on the chip.
 

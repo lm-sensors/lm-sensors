@@ -5,16 +5,16 @@ Status: Complete
 
 Supported chips:
   * Philips PCF8574
-    Prefix: `pcf8574'
-    Addresses scanned: I2C 0x20 - 0x27 (inclusive)
+    Prefix: 'pcf8574'
+    Addresses scanned: I2C 0x20 - 0x27
     Datasheet: Publicly available at the Philips Semiconductors website
-               http://semiconductors.philips.com/
+               http://www.semiconductors.philips.com/pip/PCF8574P.html
 
  * Philips PCF8574A
-    Prefix: `pcf8574a'
-    Addresses scanned: I2C 0x38 - 0x3f (inclusive)
+    Prefix: 'pcf8574a'
+    Addresses scanned: I2C 0x38 - 0x3f
     Datasheet: Publicly available at the Philips Semiconductors website
-               http://semiconductors.philips.com/
+               http://www.semiconductors.philips.com/pip/PCF8574P.html
 
 Authors: Frodo Looijaard <frodol@dds.nl>,
          Philip Edelbrock <phil@netroedge.com>,
@@ -59,7 +59,7 @@ Accessing PCF8574(A) via /proc interface
 
 ! Be careful !
 The PCF8574(A) is plainly impossible to detect ! Stupid chip.
-So every chip with adress in the interval [20..27] and (38..3f) are
+So every chip with adress in the interval [20..27] and [38..3f] is
 detected as PCF8574(A). If you have other chips in this address
 range, the workaround is to load this module after the one
 for your others chips.
@@ -82,9 +82,9 @@ value, that is to say 0.
 The write file is read/write. Writing a value outputs it on the I/O
 port. Reading return the last written value.
 
-On module initialization the chip is configured as eight I/Os input (all
+On module initialization the chip is configured as eight inputs (all
 outputs to 1), so you can connect any circuit to the PCF8574(A) without
-to be afraid of short-circuit.
+being afraid of short-circuit.
 
 
 Chip Features

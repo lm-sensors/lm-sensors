@@ -5,7 +5,7 @@ Status: Alpha
 
 Supported chips:
   * IPMI BMC
-    Prefix `bmc'
+    Prefix: 'bmc'
 	Requires dummy adapter i2c-ipmi;
 	Driver will be registered as bmc-ipmi-0000.
 

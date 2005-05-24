@@ -5,10 +5,10 @@ Status: Testing;
 
 Supported chips:
   * Philips SAA1064
-    Prefix: `saa1064'
-    Addresses scanned: I2C 0x38 - 0x3b (inclusive)
-    Datasheet: Publicly available at the Philips Semiconductor website
-               http://semiconductors.philips.com/
+    Prefix: 'saa1064'
+    Addresses scanned: I2C 0x38 - 0x3b
+    Datasheet: Publicly available at the Philips Semiconductors website
+               http://www.semiconductors.philips.com/
                http://www.philipslogic.com/products/i2c/pdf/saa1064.pdf
 
 
@@ -61,7 +61,7 @@ bright, test, disp and refresh
 The bright, test and disp files are read-write. 
 
 Writing bright sets the output current to the LEDs connected to the
-chip and thus the brightness. Range is from 0 to 7 (inclusive). Reading
+chip and thus the brightness. Range is from 0 to 7. Reading
 gives you the last known value.
 
 Writing test sets the segment test mode (all LEDs lit regardless of 

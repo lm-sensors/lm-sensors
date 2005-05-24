@@ -5,8 +5,8 @@ Status: Complete and well-tested
 
 Supported chips:
   * Any EEPROM chip in the designated address range
-    Prefix `eeprom'
-    Addresses scanned: I2C 0x50 - 0x57 (inclusive)
+    Prefix: 'eeprom'
+    Addresses scanned: I2C 0x50 - 0x57
     Datasheets: Publicly available from:
                 Atmel (www.atmel.com),
                 Catalyst (www.catsemi.com),

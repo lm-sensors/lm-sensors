@@ -5,21 +5,21 @@ Status: Beta.
 
 Supported chips:
   * Winbond W83627HF (ISA accesses ONLY)
-    Prefix 'w83627hf'
+    Prefix: 'w83627hf'
     Addresses scanned: ISA address retrieved from Super I/O registers
-    Datasheet: Publicly available at the Winbond website
-  * Winbond W83627THF (ISA accesses ONLY)
-    Prefix 'w83627thf'
+    Datasheet: http://www.winbond.com/PDF/sheet/w83627hf.pdf
+  * Winbond W83627THF
+    Prefix: 'w83627thf'
     Addresses scanned: ISA address retrieved from Super I/O registers
-    Datasheet: Publicly available at the Winbond website
-  * Winbond W83697HF (ISA accesses ONLY)
-    Prefix 'w83697hf'
+    Datasheet: http://www.winbond.com/PDF/sheet/w83627thf.pdf
+  * Winbond W83697HF
+    Prefix: 'w83697hf'
     Addresses scanned: ISA address retrieved from Super I/O registers
-    Datasheet: Publicly available at the Winbond website
-  * Winbond W83637HF (ISA accesses ONLY)
-    Prefix 'w83637hf'
+    Datasheet: http://www.winbond.com/PDF/sheet/w83697hf.pdf
+  * Winbond W83637HF
+    Prefix: 'w83637hf'
     Addresses scanned: ISA address retrieved from Super I/O registers
-    Datasheet: Publicly available at the Winbond website
+    Datasheet: http://www.winbond.com/PDF/sheet/w83637hf.pdf
 
 Authors: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>,
          and Mark Studebaker <mdsxyz123@yahoo.com>
@@ -31,16 +31,21 @@ Module Parameters
 * force: short array (min = 1, max = 48)
   List of adapter,address pairs to boldly assume to be present
 * force_addr: int
-  Program the Super I/O register for the sensors ISA base address
+  Initialize the ISA address of the sensors
+* force_i2c: int
+  Initialize the I2C address of the sensors
 * force_w83627hf: short array (min = 1, max = 48)
   List of adapter,address pairs which are unquestionably assumed to contain
-  a `w83781d' chip
-* force_w83627thf:
-  Ditto
-* force_w83697hf:
-  Ditto
-* force_w83637hf:
-  Ditto
+  a `w83627hf' chip
+* force_w83627thf: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `w83627thf' chip
+* force_w83697hf: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `w83697hf' chip
+* force_w83637hf: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `w83637hf' chip
 * ignore: short array (min = 1, max = 48)
   List of adapter,address pairs not to scan
 * ignore_range: short array (min = 1, max = 48)
@@ -77,7 +82,7 @@ possible or even likely that your mainboard maker has routed these signals
 to a specific set of general purpose IO pins (the Asus P4C800-E is one such
 board).  The w83627thf driver now interprets these as VID.  If the VID on
 your board doesn't work, first see doc/vid in the lm_sensors package.  If
-that still doesn't help, email us at sensors@stimpy.netroedge.com.
+that still doesn't help, email us at lm-sensors@lm-sensors.org.
 
 For further information on this driver, /proc values, etc.
 see the w83781d driver documentation.

@@ -5,12 +5,12 @@ Status: Complete, known to work but not heavily tested
 
 Supported chips:
   * Analog Devices ADM1025
-    Prefix `adm1025'
-    Addresses scanned: I2C 0x2c - 0x2e (inclusive)
+    Prefix: 'adm1025'
+    Addresses scanned: I2C 0x2c - 0x2e
     Datasheet: Publicly available at the Analog Devices website
   * Philips NE1619
-    Prefix `ne1619'
-    Addresses scanned: I2C 0x2c - 0x2d (inclusive)
+    Prefix: 'ne1619'
+    Addresses scanned: I2C 0x2c - 0x2d
     Datasheet: Publicly available at the Philips website
 
 The NE1619 presents some differences with the original ADM1025:

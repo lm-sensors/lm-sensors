@@ -5,16 +5,16 @@ Status: Complete and tested
 
 Supported chips:
   * Analog Devices ADM9240
-    Prefix `adm9240'
-    Addresses scanned: I2C 0x2c - 0x2f (inclusive)
+    Prefix: 'adm9240'
+    Addresses scanned: I2C 0x2c - 0x2f
     Datasheet: Publicly available at the Analog Devices website
   * Dallas Semiconductor DS1780
-    Prefix `ds1780'
-    Addresses scanned: I2C 0x2c - 0x2f (inclusive)
+    Prefix: 'ds1780'
+    Addresses scanned: I2C 0x2c - 0x2f
     Datasheet: Publicly available at the Dallas Semiconductor website
   * National Semiconductor LM81
-    Prefix `lm81'
-    Addresses scanned: I2C 0x2c - 0x2f (inclusive)
+    Prefix: 'lm81'
+    Addresses scanned: I2C 0x2c - 0x2f
     Datasheet: Publicly available at the National Semiconductor website
 
 
@@ -56,7 +56,7 @@ identical, except for the manufacturer IDs encoded in two registers, and
 the speed with which they update their sensor readings.
 
 The chips implement six voltage sensors, a temperature sensor,
-two FAN rotation speed sensors, VID lines and some miscellaneous stuff.
+two fan rotation speed sensors, VID lines and some miscellaneous stuff.
 
 Temperatures are measured in degrees Celsius. An alarm is triggered whenever
 the temperature is above the hot limit, and will continue to be generated
@@ -64,14 +64,12 @@ until the temperature has dropped beneath the hysteresis limit. Measurements
 are guaranteed between -40 and +125 degrees. The current temperature
 has a resolution of 0.5 degrees, the limits of 1 degree.
 
-FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
-triggered if the rotation speed has dropped below a programmable limit. FAN
+Fan rotation speeds are reported in RPM (rotations per minute). An alarm is
+triggered if the rotation speed has dropped below a programmable limit. Fan
 readings can be divided by a programmable divider (1, 2, 4 or 8) to give
-the readings more range or accuracy. This is important because some FANs
-report only one 'tick' each rotation, while others report two - making
-all readings twice as high. Not all RPM values can accurately be represented,
-so some rounding is done. With a divider of 2, the lowest representable
-value is around 2600 RPM.
+the readings more range or accuracy. Not all RPM values can accurately be
+represented, so some rounding is done. With a divider of 2, the lowest
+representable value is around 2600 RPM.
 
 Voltage sensors (also known as IN sensors) report their values in volts.
 An alarm is triggered if the voltage has crossed a programmable minimum
@@ -87,7 +85,7 @@ value 3.50 V here.
 
 The analog output can be programmed separatedly. It can take values
 between 0 and 255. What it actually does is mainboard-dependent; it
-might influence the FAN-speed. Please report to us whether this is
+might influence the fan speed. Please report to us whether this is
 the case with your ADM9240.
 
 In addition to the alarms described above, the CHAS alarm triggers
@@ -368,8 +366,8 @@ Within each ADM9240 directory, you can find the following files:
   If accessed through sysctl, this is a list of longs.
 * fan_div (LM78_SYSCTL_FAN_DIV)
   A list of two numbers, one for each fan. Each number can be either 1, 2,
-  4 or 8. It is the internal scaling factor used for the FAN rotations. If
-  you change this number, the FAN readings get more or less detailed, but
+  4 or 8. It is the internal scaling factor used for the fan rotations. If
+  you change this number, the fan readings get more or less detailed, but
   the range in which they can be read too. Higher numbers give better 
   resolution, but less range. The first two numbers can be changed, the
   third not.

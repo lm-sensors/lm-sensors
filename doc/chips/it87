@@ -5,15 +5,18 @@ Status: Complete, stable
 
 Supported chips:
   * IT8705F
-    Addresses scanned: I2C 0x28 - 0x2f (inclusive), ISA autodetected
+    Prefix: 'it87'
+    Addresses scanned: I2C 0x28 - 0x2f, ISA autodetected
     Datasheet: Publicly available at the ITE website
-               http://www.ite.com.tw
+               http://www.ite.com.tw/
   * IT8712F
-    Addresses scanned: I2C 0x28 - 0x2f (inclusive), ISA autodetected
+    Prefix: 'it8712'
+    Addresses scanned: I2C 0x28 - 0x2f, ISA autodetected
     Datasheet: Publicly available at the ITE website
-               http://www.ite.com.tw
-  * Sis950   [clone of IT8705F]
-    Addresses scanned: ISA 0x290
+               http://www.ite.com.tw/
+  * SiS950   [clone of IT8705F]
+    Prefix: 'it87'
+    Addresses scanned: I2C 0x28 - 0x2f, ISA autodetected
     Datasheet: No longer publicly available
 
 Author: Christophe Gauthron <chrisg@0-in.com>
@@ -56,17 +59,14 @@ they include an 'environmnent controller' with 3 temperature sensors,
 The IT8712F additionally features VID inputs.
 
 Temperatures are measured in degrees Celsius. An alarm is triggered once
-when the Overtemperature Shutdown limit is crossed; it is triggered again
-as soon as it drops below the Hysteresis value.
+when the Overtemperature Shutdown limit is crossed.
 
 Fan rotation speeds are reported in RPM (rotations per minute). An alarm is
 triggered if the rotation speed has dropped below a programmable limit. Fan 
 readings can be divided by a programmable divider (1, 2, 4 or 8) to give
-the readings more range or accuracy. This is important because some Fans
-report only one 'tick' each rotation, while others report two - making
-all readings twice as high. Not all RPM values can accurately be represented,
-so some rounding is done. With a divider of 2, the lowest representable
-value is around 2600 RPM.
+the readings more range or accuracy. Not all RPM values can accurately be
+represented, so some rounding is done. With a divider of 2, the lowest
+representable value is around 2600 RPM.
 
 Voltage sensors (also known as IN sensors) report their values in volts.
 An alarm is triggered if the voltage has crossed a programmable minimum 

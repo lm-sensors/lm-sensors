@@ -5,16 +5,16 @@ Status: Complete; tested for most devices except Xeon.
 
 Supported chips:
   * Analog Devices ADM1021
-    Prefix `adm1021'
-    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Prefix: 'adm1021'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e
     Datasheet: Publicly available at the Analog Devices website
   * Analog Devices ADM1021A/ADM1023
-    Prefix `adm1023'
-    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Prefix: 'adm1023'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e
     Datasheet: Publicly available at the Analog Devices website
   * Genesys Logic GL523SM
-    Prefix `gl523sm'
-    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Prefix: 'gl523sm'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e
     Datasheet:
   * Intel Xeon Processor
     Prefix - any other - may require 'force_adm1021' parameter -
@@ -23,32 +23,32 @@ Supported chips:
     Datasheet: Publicly available at Intel website
     Status: Alpha, untested.
   * Maxim MAX1617
-    Prefix `max1617'
-    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Prefix: 'max1617'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e
     Datasheet: Publicly available at the Maxim website
   * Maxim MAX1617A
-    Prefix `max1617a'
-    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Prefix: 'max1617a'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e
     Datasheet: Publicly available at the Maxim website
   * National Semiconductor LM84
-    Prefix `lm84'
-    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Prefix: 'lm84'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e
     Datasheet: Publicly available at the National Semiconductor website
   * Philips NE1617
-    Prefix `max1617' (probably detected as a max1617)
-    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Prefix: 'max1617' (probably detected as a max1617)
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e
     Datasheet: Publicly available at the Philips website
   * Philips NE1617A
-    Prefix `max1617' (probably detected as a max1617)
-    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Prefix: 'max1617' (probably detected as a max1617)
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e
     Datasheet: Publicly available at the Philips website
   * TI THMC10
-    Prefix `thmc10'
-    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Prefix: 'thmc10'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e
     Datasheet: Publicly available at the TI website
   * Onsemi MC1066
-    Prefix `mc1066'
-    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e (inclusive)
+    Prefix: 'mc1066'
+    Addresses scanned: I2C 0x18 - 0x1a, 0x29 - 0x2b, 0x4c - 0x4e
     Datasheet: Publicly available at the Onsemi website
 
 

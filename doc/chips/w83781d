@@ -12,32 +12,32 @@ Status: W83781D support is complete and well-tested.
 
 Supported chips:
   * Winbond W83781D
-    Prefix 'w83781d'
-    Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
-    Datasheet: Publicly available at the Winbond website (www.winbond.com.tw)
+    Prefix: 'w83781d'
+    Addresses scanned: I2C 0x20 - 0x2f, ISA 0x290 (8 I/O ports)
+    Datasheet: http://www.winbond-usa.com/products/winbond_products/pdfs/PCIC/w83781d.pdf
   * Winbond W83782D
-    Prefix 'w83782d'
-    Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
-    Datasheet: Publicly available at the Winbond website
+    Prefix: 'w83782d'
+    Addresses scanned: I2C 0x20 - 0x2f, ISA 0x290 (8 I/O ports)
+    Datasheet: http://www.winbond.com/PDF/sheet/w83782d.pdf
   * Winbond W83783S
-    Prefix 'w83783s'
+    Prefix: 'w83783s'
     Addresses scanned: I2C 0x2d
-    Datasheet: Publicly available at the Winbond website
+    Datasheet: http://www.winbond-usa.com/products/winbond_products/pdfs/PCIC/w83783s.pdf
   * Winbond W83791D
-    Prefix 'w83791d'
-    Addresses scanned: I2C 0x2c - 0x2f (inclusive)
-    Datasheet: Publicly available at the Winbond website
+    Prefix: 'w83791d'
+    Addresses scanned: I2C 0x2c - 0x2f
+    Datasheet: http://www.winbond-usa.com/products/winbond_products/pdfs/PCIC/w83791d.pdf
   * Winbond W83627HF
-    Prefix 'w83627hf'
-    Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
-    Datasheet: Publicly available at the Winbond website
+    Prefix: 'w83627hf'
+    Addresses scanned: I2C 0x20 - 0x2f, ISA 0x290 (8 I/O ports)
+    Datasheet: http://www.winbond.com/PDF/sheet/w83627hf.pdf
   * Winbond W83697HF
-    Prefix 'w83697hf'
+    Prefix: 'w83697hf'
     Addresses scanned: ISA 0x290 (8 I/O ports)
-    Datasheet: Publicly available at the Winbond website
+    Datasheet: http://www.winbond.com/PDF/sheet/w83697hf.pdf
   * Asus AS99127F
-    Prefix 'as99127f'
-    Addresses scanned: I2C 0x28 - 0x2f (inclusive)
+    Prefix: 'as99127f'
+    Addresses scanned: I2C 0x28 - 0x2f
     Datasheet: Unavailable from Asus
 
 
@@ -89,7 +89,7 @@ Description
 -----------
 
 This driver implements support for the Winbond W83781D, W83782D,
-W8783S, and W83627HF chips, and the Asus AS99127F chips.
+W83783S, W83791D, W83627HF and W83698HF chips, and the Asus AS99127F chips.
 We will refer to them collectively as W8378* chips.
 
 There is quite some difference between these chips, but they are similar
@@ -103,7 +103,7 @@ of the chip, use a 'force' parameter; this will put them into a more
 well-behaved state first.
 
 The W8378* implements temperature sensors (three on the W83781D and W83782D,
-two on the W83783S), three FAN rotation speed sensors, voltage sensors
+two on the W83783S), three fan rotation speed sensors, voltage sensors
 (seven on the W83781D, nine on the W83782D and six on the W83783S), VID
 lines, alarms with beep warnings, and some miscellaneous stuff.
 
@@ -125,15 +125,13 @@ other sensors!  Temperatures are guaranteed within a range of -55 to +125
 degrees. The main temperature sensors has a resolution of 1 degree; the other 
 sensor(s) of 0.5 degree.
 
-FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
-triggered if the rotation speed has dropped below a programmable limit. FAN 
+Fan rotation speeds are reported in RPM (rotations per minute). An alarm is
+triggered if the rotation speed has dropped below a programmable limit. Fan 
 readings can be divided by a programmable divider (1, 2, 4 or 8 for the
 W83781D; 1, 2, 4, 8, 16, 32, 64 or 128 for the others) to give
-the readings more range or accuracy. This is important because some FANs
-report only one 'tick' each rotation, while others report two - making
-all readings twice as high. Not all RPM values can accurately be represented,
-so some rounding is done. With a divider of 2, the lowest representable
-value is around 2600 RPM.
+the readings more range or accuracy. Not all RPM values can accurately be
+represented, so some rounding is done. With a divider of 2, the lowest
+representable value is around 2600 RPM.
 
 Voltage sensors (also known as IN sensors) report their values in volts.
 An alarm is triggered if the voltage has crossed a programmable minimum 
@@ -156,7 +154,7 @@ rt interface, but this is not very useful, because these tables are
 under NDA.
 
 In addition to the alarms described above, there is a CHAS alarm on the
-chips which triggers if your computer case is open. 
+chips which triggers if your computer case is open.
 
 When an alarm goes off, you can be warned by a beeping signal through
 your computer speaker. It is possible to enable all beeping globally,
@@ -171,18 +169,6 @@ miss once-only alarms.
 
 The chips only update values each 1.5 seconds; reading them more often
 will do no harm, but will return 'old' values.
-
-
-W8378* PROBLEMS
------------------
-Known problems:
-	- Some chips are misidentified.
-	  This is caused by the chip having the wrong WCHIPID register
-	  value, so there is no fix. The workaround is to use the
-          force_CHIP parameter.
-	  (modprobe w83781d force_CHIP=BUS,0x2d where CHIP is the chip name
-	   and BUS is your i2c bus number -
-	   cat /proc/bus/i2c to see a list of bus numbers)
 
 
 AS99127F PROBLEMS
@@ -569,9 +555,6 @@ NOTES:
 
   782d has pwm1-2 for isa, pwm1-4 for i2c. (pwm3-4 share pins with
        the isa pins)
-
-  781d allowable values for fan_div are 1,2,4,8.
-  782d/783s allowable values for fan_div are 1,2,4,8,16,32,64,128.
 
 
 

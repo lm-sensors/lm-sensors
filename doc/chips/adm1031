@@ -6,13 +6,13 @@ Status: Driver supports basic temp and fan readings, min/max/crit settings
 
 Supported chips: 
   * Analog Devices ADM1030
-    Prefix: `adm1030'
+    Prefix: 'adm1030'
     Addresses scanned: I2C 0x2c to 0x2e
     Datasheet: Publicly available at the Analog Devices website
                http://products.analog.com/products/info.asp?product=ADM1030
 
   * Analog Devices ADM1031
-    Prefix: `adm1031'
+    Prefix: 'adm1031'
     Addresses scanned: I2C 0x2c to 0x2e
     Datasheet: Publicly available at the Analog Devices website
                http://products.analog.com/products/info.asp?product=ADM1031

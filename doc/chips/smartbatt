@@ -5,7 +5,7 @@ Status: Alpha
 
 Supported chips:
   * Smart batteries
-    Prefix `smartbatt'
+    Prefix: 'smartbatt'
 	Address scanned: 0x0b
 	Datasheet: Smart Battery Data Specification Revision 1.1
         http://www.sbs-forum.org/

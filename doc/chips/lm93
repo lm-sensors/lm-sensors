@@ -5,7 +5,7 @@ Status: In progress
 
 Supported chips:
   * National Semiconductor LM93
-    Prefix 'lm93'
+    Prefix: 'lm93'
     Addresses scanned: I2C 0x2c-0x2e
 
 Author:

@@ -5,8 +5,8 @@ Status: Complete and well-tested
 
 Supported chips:
   * Linear Technologies LTC1710
-    Prefix 'ltc1710'
-    Addresses scanned: I2C 0x58 - 0x5a (inclusive)
+    Prefix: 'ltc1710'
+    Addresses scanned: I2C 0x58 - 0x5a
     Datasheet: Publicly available at the Linear Technologies website
 
 Author: Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock

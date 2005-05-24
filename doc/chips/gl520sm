@@ -5,7 +5,7 @@ Status: Complete but experimental
 
 Supported chips:
   * Genesys Logic GL520SM release 0x00
-    Prefix `gl520sm'
+    Prefix: 'gl520sm'
     Addresses scanned: I2C 0x2c and 0x2d
     Datasheet: Not openly available
 
@@ -32,7 +32,7 @@ Description
 
 This driver supports the Genesys Logic GL520SM chip.
 
-The GL520SM implements one temperature sensor, two FAN rotation speed
+The GL520SM implements one temperature sensor, two fan rotation speed
 sensors, four voltage sensors and the cpu VID lines. In addition, one input
 can be configured as either a temperature or voltage sensor.
 The sensor can report alarms through the computer speakers.
@@ -43,16 +43,15 @@ below the hysteresis limit. The alarm always reflects the current situation.
 Measurements are guaranteed between 0 degrees and +110 degrees, with
 a resolution of +-3 degrees.
 
-FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
+Fan rotation speeds are reported in RPM (rotations per minute). An alarm is
 triggered if the rotation speed has dropped below a programmable limit.
 In case when you have selected to turn Fan1 off, no Fan1 alarm is triggered
 if measured temperature is below 'over temperature' limit.
 
-FAN readings can be divided by a programmable divider (1, 2, 4 or 8) to give
-the readings more range or accuracy. This is important because some FANs
-report only one 'tick' each rotation, while others report two.
-Not all RPM values can accurately be represented, so some rounding is done.
-With a divider of 2, the lowest representable value is around 1900 RPM.
+Fan readings can be divided by a programmable divider (1, 2, 4 or 8) to give
+the readings more range or accuracy. Not all RPM values can accurately be
+represented, so some rounding is done. With a divider of 2, the lowest
+representable value is around 1900 RPM.
 
 Voltage sensors (also known as VIN sensors) report their values in volts. An
 alarm is triggered if the voltage has crossed a programmable minimum or

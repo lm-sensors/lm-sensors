@@ -5,10 +5,10 @@ Status: Status: Complete; Beta.
 
 Supported chips:
   * Philips PCF8591
-    Prefix: `pcf8591'
-    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
-    Datasheet: Publicly available at the Philips Semiconductor website
-               http://semiconductors.philips.com/
+    Prefix: 'pcf8591'
+    Addresses scanned: I2C 0x48 - 0x4f
+    Datasheet: Publicly available at the Philips Semiconductors website
+               http://www.semiconductors.philips.com/pip/PCF8591P.html
 
 Author: Aurelien Jarno <aurelien@aurel32.net>
 valuable contributions by Jan M. Sendler <sendler@sendler.de>
@@ -33,7 +33,7 @@ Module Parameters
 
 Description
 -----------
-The PCF8591 is an 8-bit A/D and D/A converter (4 analog input and one
+The PCF8591 is an 8-bit A/D and D/A converter (4 analog inputs and one
 analog ouput) for the I2C bus produced by Philips Semiconductors. It
 is designed to provide a byte I2C interface to up to 4 separate devices.
 
@@ -51,7 +51,7 @@ differential inputs :
         Pins AIN2 is the positive differential input for channel 3
         Pins AIN3 is the negative differential input for channel 3
 
-- mode 3 : four differential inputs
+- mode 3 : two differential inputs
         Pins AIN0 is the positive differential input for channel 0
         Pins AIN1 is the negative differential input for channel 0
         Pins AIN2 is the positive differential input for channel 1
@@ -65,7 +65,7 @@ Accessing PCF8591 via /proc interface
 
 ! Be careful !
 The PCF8591 is plainly impossible to detect ! Stupid chip.
-So every chip with adress in the interval [48..4f] are
+So every chip with adress in the interval [48..4f] is
 detected as PCF8591. If you have other chips in this address
 range, the workaround is to load this module after the one
 for your others chips.
@@ -91,12 +91,12 @@ configuration, channel ch2 and/or ch3 may are not used by the chip
 and so read as 0. Values range are from 0 to 255 for single
 ended inputs and -128 to +127 for differential inputs (8-bit ADC).
 
-The aout_enable is rw. Reading gives "0" for analog output enabled and
-"1" for analog output disabled. Writing accepts "0" and "1" accordingly.
+The aout_enable is rw. Reading gives "1" for analog output enabled and
+"0" for analog output disabled. Writing accepts "0" and "1" accordingly.
 
 The aout is rw. Writing a number between 0 and 255 (8-bit DAC), send
 the value to the digital-to-analog converter. Note that a voltage will
-only appears on AOUT pin if aout_enable equals 1. Reading return the last
+only appears on AOUT pin if aout_enable equals 1. Reading returns the last
 value written.
 
 On module initialization the chip is configured as followed :

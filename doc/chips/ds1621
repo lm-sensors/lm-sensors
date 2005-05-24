@@ -5,13 +5,13 @@ Status: Complete and tested; enhanced features experimental
 
 Supported chips: 
   * Dallas Semiconductor DS1621
-    Prefix: `ds1621'
-    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Prefix: 'ds1621'
+    Addresses scanned: I2C 0x48 - 0x4f
     Datasheet: Publicly available at the Dallas Semiconductor website
                http://www.dalsemi.com/
   * Dallas Semiconductor DS1625
-    Prefix: `ds1621'
-    Addresses scanned: I2C 0x48 - 0x4f (inclusive)
+    Prefix: 'ds1621'
+    Addresses scanned: I2C 0x48 - 0x4f
     Datasheet: Publicly available at the Dallas Semiconductor website
                http://www.dalsemi.com/
 

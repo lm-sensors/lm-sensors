@@ -5,21 +5,21 @@ Status: Mostly done and tested
 
 Supported chips:
   * Hewlett Packard Maxilife Revision AS 00.01 for Single Pentium II Slot 1
-    Prefix `maxilife-as'
-    Addresses scanned: I2C 0x10 - 0x14 (inclusive)
+    Prefix: 'maxilife-as'
+    Addresses scanned: I2C 0x10 - 0x14
     Datasheet: Only available under NDA
   * Hewlett Packard Maxilife Revision CO 00.03 for Dual Xeon Slot 2
-    Prefix `maxilife-co'
-    Addresses scanned: I2C 0x10 - 0x14 (inclusive)
+    Prefix: 'maxilife-co'
+    Addresses scanned: I2C 0x10 - 0x14
     Datasheet: Only available under NDA
   * Hewlett Packard Maxilife Revision CG 00.04 for Dual Pentium II Slot 1
-    Prefix `maxilife-cg'
-    Addresses scanned: I2C 0x10 - 0x14 (inclusive)
+    Prefix: 'maxilife-cg'
+    Addresses scanned: I2C 0x10 - 0x14
     Datasheet: Only available under NDA
   * Hewlett Packard NBA (New BIOS Architecture) for newer machines,
         for example Kayak XU800 and XM600.
-    Prefix `maxilife-nba'
-    Addresses scanned: I2C 0x10 - 0x14 (inclusive)
+    Prefix: 'maxilife-nba'
+    Addresses scanned: I2C 0x10 - 0x14
     Datasheet: Only available under NDA
     
 Author: Fons Rademakers <Fons.Rademakers@cern.ch>

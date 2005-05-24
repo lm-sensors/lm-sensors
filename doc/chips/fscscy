@@ -12,7 +12,7 @@ Status: Beta
 
 Supported chips:
   * Fujitsu Siemens Scylla chip
-    Prefix `fscscy'
+    Prefix: 'fscscy'
     Addresses scanned: I2C 0x73 
 
 Author: Martin Knoblauch <mkn@teraport.de>
@@ -68,7 +68,7 @@ the cautios kind he did not implement writing the LIMIT resister. The driver its
 keeps track of the minimum and maximum temperatures since module load. The more often
 the module is accessed, the more meaningful these values are. 
 
-FAN rotation speeds are reported in RPM (rotations per minute). 
+Fan rotation speeds are reported in RPM (rotations per minute). 
 The value can be divided by a programmable divider (1, 2, 4 or 8) which 
 is stored on the chip.
 

@@ -5,11 +5,11 @@ Status: Complete and well-tested
 
 Supported chips:
   * Genesys Logic GL518SM release 0x00
-    Prefix `gl518sm'
+    Prefix: 'gl518sm'
     Addresses scanned: I2C 0x2c and 0x2d
     Datasheet: http://www.genesyslogic.com/pdf
   * Genesys Logic GL518SM release 0x80
-    Prefix `gl518sm'
+    Prefix: 'gl518sm'
     Addresses scanned: I2C 0x2c and 0x2d
     Datasheet: http://www.genesyslogic.com/pdf
 
@@ -54,7 +54,7 @@ This driver supports the Genesys Logic GL518SM chip. There are at least
 two revision of this chip, which we call revision 0x00 and 0x80. Revision
 0x80 chips support the reading of voltages directly, 0x00 only for VIN3.
 
-The GL518SM implements one temperature sensor, two FAN rotation speed
+The GL518SM implements one temperature sensor, two fan rotation speed
 sensors, and four voltage sensors. It can report alarms through the
 computer speakers.
 
@@ -64,15 +64,14 @@ below the hysteresis limit. The alarm always reflects the current situation.
 Measurements are guaranteed between -10 degrees and +110 degrees, with
 a resolution of +-3 degrees.
 
-FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
+Fan rotation speeds are reported in RPM (rotations per minute). An alarm is
 triggered if the rotation speed has dropped below a programmable limit.
 In case when you have selected to turn Fan1 off, no Fan1 alarm is triggered.
 
-FAN readings can be divided by a programmable divider (1, 2, 4 or 8) to give
-the readings more range or accuracy. This is important because some FANs
-report only one 'tick' each rotation, while others report two.
-Not all RPM values can accurately be represented, so some rounding is done.
-With a divider of 2, the lowest representable value is around 1900 RPM.
+Fan readings can be divided by a programmable divider (1, 2, 4 or 8) to give
+the readings more range or accuracy. Not all RPM values can accurately be
+represented, so some rounding is done. With a divider of 2, the lowest
+representable value is around 1900 RPM.
 
 Voltage sensors (also known as VIN sensors) report their values in volts. An
 alarm is triggered if the voltage has crossed a programmable minimum or

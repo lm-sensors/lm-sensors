@@ -5,8 +5,8 @@ Status: 'Beta' and needs further development and testing
 
 Supported chips: 
   * Brooktree BT869 Video Modulator chips
-    Prefix: `bt869'
-    Addresses scanned: I2C 0x44 - 0x45 (inclusive)
+    Prefix: 'bt869'
+    Addresses scanned: I2C 0x44 - 0x45
     Datasheet: Publicly available at the brooktree web site
     (www.brooktree.com)
 

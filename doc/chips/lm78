@@ -4,18 +4,18 @@ Kernel driver `lm78.o'
 Status: Complete and well-tested
 
 Supported chips:
-  * National Semiconductors LM78
-    Prefix `lm78'
-    Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
-    Datasheet: Publicly available at the National Semiconductors website
-  * National Semiconductors LM78-J
-    Prefix `lm78-j'
-    Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
-    Datasheet: Publicly available at the National Semiconductors website
-  * National Semiconductors LM79
-    Prefix `lm79'
-    Addresses scanned: I2C 0x20 - 0x2f (inclusive), ISA 0x290 (8 I/O ports)
-    Datasheet: Publicly available at the National Semiconductors website
+  * National Semiconductor LM78
+    Prefix: 'lm78'
+    Addresses scanned: I2C 0x20 - 0x2f, ISA 0x290 (8 I/O ports)
+    Datasheet: Publicly available at the National Semiconductor website
+  * National Semiconductor LM78-J
+    Prefix: 'lm78-j'
+    Addresses scanned: I2C 0x20 - 0x2f, ISA 0x290 (8 I/O ports)
+    Datasheet: Publicly available at the National Semiconductor website
+  * National Semiconductor LM79
+    Prefix: 'lm79'
+    Addresses scanned: I2C 0x20 - 0x2f, ISA 0x290 (8 I/O ports)
+    Datasheet: Publicly available at the National Semiconductor website
     
 Author: Frodo Looijaard <frodol@dds.nl>
 
@@ -47,7 +47,7 @@ Module Parameters
 Description
 -----------
 
-This driver implements support for the National Semiconductors LM78, LM78-J
+This driver implements support for the National Semiconductor LM78, LM78-J
 and LM79. They are described as `Microprocessor System Hardware Monitors'.
 
 There is almost no difference between the three supported chips. Functionally, 
@@ -55,7 +55,7 @@ the LM78 and LM78-J are exactly identical. The LM79 has one more VID line,
 which is used to report the lower voltages newer Pentium processors use.
 From here on, LM7* means either of these three types.
 
-The LM7* implements one temperature sensor, three FAN rotation speed sensors,
+The LM7* implements one temperature sensor, three fan rotation speed sensors,
 seven voltage sensors, VID lines, alarms, and some miscellaneous stuff.
 
 Temperatures are measured in degrees Celsius. An alarm is triggered once
@@ -66,14 +66,12 @@ this case, alarms are issued during all the time when the actual temperature
 is above the Overtemperature Shutdown value. Measurements are guaranteed
 between -55 and +125 degrees, with a resolution of 1 degree.
 
-FAN rotation speeds are reported in RPM (rotations per minute). An alarm is
-triggered if the rotation speed has dropped below a programmable limit. FAN 
+Fan rotation speeds are reported in RPM (rotations per minute). An alarm is
+triggered if the rotation speed has dropped below a programmable limit. Fan 
 readings can be divided by a programmable divider (1, 2, 4 or 8) to give
-the readings more range or accuracy. This is important because some FANs
-report only one 'tick' each rotation, while others report two - making
-all readings twice as high. Not all RPM values can accurately be represented,
-so some rounding is done. With a divider of 2, the lowest representable
-value is around 2600 RPM.
+the readings more range or accuracy. Not all RPM values can accurately be
+represented, so some rounding is done. With a divider of 2, the lowest
+representable value is around 2600 RPM.
 
 Voltage sensors (also known as IN sensors) report their values in volts.
 An alarm is triggered if the voltage has crossed a programmable minimum 

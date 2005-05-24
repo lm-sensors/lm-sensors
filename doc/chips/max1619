@@ -5,8 +5,8 @@ Status: New
 
 Supported chips: 
   * Maxim MAX1619
-    Prefix: `max1619'
-    Addresses scanned: I2C 0x18-0x1a, 0x29-0x2b, 0x4c-0x4e (inclusive)
+    Prefix: 'max1619'
+    Addresses scanned: I2C 0x18-0x1a, 0x29-0x2b, 0x4c-0x4e
     Datasheet: Publicly available at the Maxim website
                http://pdfserv.maxim-ic.com/en/ds/MAX1619.pdf
 

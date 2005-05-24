@@ -5,7 +5,7 @@ Status: Complete but untested
 
 Supported chips:
   * Philips PCA9540
-    Prefix: `pca9540'
+    Prefix: 'pca9540'
     Addresses scanned: I2C 0x70
     Datasheet: Publicly available at the Philips Semiconductors website
                http://www.semiconductors.philips.com/pip/PCA9540.html
