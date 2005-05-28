@@ -196,7 +196,7 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 //
 // Alas, none of the elegant function-fit solutions will work because we 
 // aren't allowed to use floating point in the kernel and doing it with 
-// integers doesn't rpovide enough precision.  So we'll do boring old 
+// integers doesn't provide enough precision.  So we'll do boring old 
 // look-up table stuff.  The unofficial data (see below) have effectively 
 // 7-bit resolution (they are rounded to the nearest degree).  I'm assuming 
 // that the transfer function of the device is monotonic and smooth, so a 
