@@ -131,9 +131,9 @@ sub gen_Documentation_Configure_help
            m@Silicon Integrated Systems Corp. SiS5595 Sensor@ or
            m@Texas Instruments THMC50 / Analog Devices ADM1022@ or
            m@Via VT82C686A/B@ or
-           m@Winbond W83781D, W83782D, W83783S, W83627HF, AS99127F@ or
+           m@Winbond W83781D, W83782D, W83783S@ or
            m@Winbond W83792D@ or
-           m@Winbond W83627HF, W83627THF, W83697HF@ or
+           m@Winbond W83627HF, W83627THF@ or
            m@Winbond W83L785TS-S@ or
            m@EEprom \(DIMM\) reader@) {
       $_ = <INPUT>;
@@ -686,15 +686,14 @@ CONFIG_SENSORS_VT8231
 
 Winbond W83781D, W83782D, W83783S, W83627HF, AS99127F
 CONFIG_SENSORS_W83781D
-  If you say yes here you get support for the Winbond W8378x series 
-  of sensor chips: the W83781D, W83782D, W83783S and W83682HF,
-  and the similar Asus AS99127F. This
-  can also be built as a module which can be inserted and removed
-  while the kernel is running.
+  If you say yes here you get support for the Winbond W8378x series
+  of sensor chips: the W83781D, W83782D, W83783S and W83627HF,
+  and the similar Asus AS99127F. This can also be built as a module
+  which can be inserted and removed while the kernel is running.
 
   You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Winbond W83792D
 CONFIG_SENSORS_W83792D
@@ -705,11 +704,11 @@ CONFIG_SENSORS_W83792D
   in the lm_sensors package, which you can download at 
   http://www.lm-sensors.nu/
 
-Winbond W83627HF, W83627THF, W83697HF
+Winbond W83627HF, W83627THF, W83637HF, W83697HF
 CONFIG_SENSORS_W83627HF
-  If you say yes here you get support for the Winbond W836x7 series 
-  of sensor chips: the Winbond W83627HF, W83627THF and W83697HF. This
-  can also be built as a module which can be inserted and removed
+  If you say yes here you get support for the Winbond W836x7 series
+  of sensor chips: the W83627HF, W83627THF, W83637HF and W83697HF.
+  This can also be built as a module which can be inserted and removed
   while the kernel is running.
 
   You will also need the latest user-space utilities: you can find
