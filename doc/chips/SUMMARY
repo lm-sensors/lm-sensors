@@ -308,6 +308,7 @@ This may help identify a chip after doing a 'i2cdump [bus] [address]'.
 0x4D	Maxim
 0x54	On Semi
 0x5C    SMSC
+0x55    SMSC 
 0x5CA3	Winbond (at 0x4F)
 0x90	ITE (at 0x58)
 0xA1    Philips
