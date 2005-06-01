@@ -716,6 +716,7 @@
 /*#define SENSORS_W83792D_VID 61 */   /* R */
 /*#define SENSORS_W83792D_VRM 62 */   /* RW */
 #define SENSORS_W83792D_CHASSIS 63    /* R */
+#define SENSORS_W83792D_ALARMS 64     /* R */
 
 #define SENSORS_W83792D_FAN1_DIV 71 /* RW */
 #define SENSORS_W83792D_FAN2_DIV 72 /* RW */

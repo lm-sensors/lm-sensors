@@ -26,12 +26,10 @@
        calculation method to in6-in7(measured value, limits) is a little
        different between C and B version. C or B version can be identified
        by CR[0x49h].
-    3. Maybe there is some bug in temp3, because temp3 measured value
-       usually seems wrong.
-    4. The function of chassis open detection need further test.
-    5. The function of vid and vrm has not been finished, because I'm NOT
+    3. The function of chassis open detection need further test.
+    4. The function of vid and vrm has not been finished, because I'm NOT
        very familiar with them. If someone can finish it, that's good,
-       then please delete this note 5.
+       then please delete this note 4.
 */
 
 /*
@@ -170,6 +168,7 @@ static const u8 W83792D_REG_FAN_DIV[4] = {
 	0x9E	/* contains FAN7 Divisor. */
 };
 
+#define W83792D_REG_ALARM1 0x41		/* Interrupt Status for Temp1-Temp3 */
 #define W83792D_REG_CASE_OPEN 0x42	/* Bit 5: Case Open status bit */
 #define W83792D_REG_CASE_OPEN_CLR 0x44	/* Bit 7: Case Open CLR_CHS/Reset bit */
 
@@ -224,9 +223,9 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 }
 
 #define IN_FROM_REG(nr,val) (((nr)<=1)?(val*2): \
-                             ((((nr)==6)||((nr)==7))?(val*6):(val*4)))
+				((((nr)==6)||((nr)==7))?(val*6):(val*4)))
 #define IN_TO_REG(nr,val) (((nr)<=1)?(val/2): \
-                           ((((nr)==6)||((nr)==7))?(val/6):(val/4)))
+				((((nr)==6)||((nr)==7))?(val/6):(val/4)))
 #define TEMP_FROM_REG(val) (((val)>0x80?(val)-0x100:(val))*10)
 #define TEMP_TO_REG(val) (SENSORS_LIMIT((val>=0)?((val)/10):((val)/10+256), 0, 255))
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
@@ -268,6 +267,7 @@ struct w83792d_data {
 				   although 792 chip has 7 set of pwm. */
 	u8 pwm_flag[7];		/* indicates PWM or DC mode: 1->PWM; 0->DC */
 	/* u8 vrm;		 VRM version */
+	u8 alarms;		/* interrupt status for temp1-temp3 */
 	u8 chassis[2];		/* [0]->Chassis status, [1]->CLR_CHS */
 	u8 thermal_cruise[3];	/* Smart FanI: Fan1,2,3 target value */
 	u8 fan_tolerance[3];	/* Fan1,2,3 tolerance(Smart Fan I/II) */
@@ -302,6 +302,8 @@ static void w83792d_temp_add(struct i2c_client *client, int operation,
 static void w83792d_vrm(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results); */
 static void w83792d_fan_div(struct i2c_client *client, int operation,
+			    int ctl_name, int *nrels_mag, long *results);
+static void w83792d_alarms(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 static void w83792d_chassis(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
@@ -359,6 +361,7 @@ static struct i2c_driver w83792d_driver = {
 #define W83792D_SYSCTL_FAN_CFG 1500	/* control Fan Mode */
 #define W83792D_SYSCTL_FAN_DIV 1501
 #define W83792D_SYSCTL_CHASSIS 1502	/* control Case Open */
+#define W83792D_SYSCTL_ALARMS 1503	/* only for temp1-3 */
 
 #define W83792D_SYSCTL_THERMAL_CRUISE 1600	/* Smart Fan I: target value */
 #define W83792D_SYSCTL_FAN_TOLERANCE 1601	/* Smart Fan I/II: tolerance */
@@ -368,6 +371,10 @@ static struct i2c_driver w83792d_driver = {
 #define W83792D_SYSCTL_SF2_LEVELS_FAN1 1605	/* Smart Fan II: Fan1 levels */
 #define W83792D_SYSCTL_SF2_LEVELS_FAN2 1606	/* Smart Fan II: Fan2 levels */
 #define W83792D_SYSCTL_SF2_LEVELS_FAN3 1607	/* Smart Fan II: Fan3 levels */
+
+#define W83792D_ALARM_TEMP1 0x04
+#define W83792D_ALARM_TEMP2 0x08
+#define W83792D_ALARM_TEMP3 0x10
 
 /* -- SENSORS SYSCTL END -- */
 
@@ -417,6 +424,8 @@ static ctl_table w83792d_dir_table_template[] =
 	 &i2c_sysctl_real, NULL, &w83792d_vid}, */
 	{W83792D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83792d_fan_div},
+	{W83792D_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &w83792d_alarms},
 	{W83792D_SYSCTL_CHASSIS, "chassis", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &w83792d_chassis},
 	{W83792D_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL, &i2c_proc_real,
@@ -730,11 +739,12 @@ static void w83792d_init_client(struct i2c_client *client)
 	w83792d_write_value(client, W83792D_REG_TEMP_ADD[1][6],
 			    temp3_cfg & 0xe6);
 
-	/* enable comparator mode for temp2 and temp3 so
-	   alarm indication will work correctly */
+	/* Enable comparator mode for temperature sensors so alarm indication
+	   will work correctly. Note that in W83792D, only the temps support
+	   comparator mode, while voltages and fans only support interrupt
+	   mode */
 	i = w83792d_read_value(client, W83792D_REG_IRQ);
-	if (!(i & 0x40))
-		w83792d_write_value(client, W83792D_REG_IRQ, i|0x40);
+	w83792d_write_value(client, W83792D_REG_IRQ, i & 0x3f);
 
 	/* Start monitoring */
 	w83792d_write_value(client, W83792D_REG_CONFIG, (w83792d_read_value(
@@ -813,6 +823,9 @@ static void w83792d_update_client(struct i2c_client *client)
 		data->vid |=
 		    (w83792d_read_value(client, W83792D_REG_CHIPID) & 0x01)
 		    << 4;   */
+
+		/* Update the Interrupt Status of temp1-temp3 */
+		data->alarms = w83792d_read_value(client, W83792D_REG_ALARM1);
 
 		/* Update CaseOpen status and it's CLR_CHS. */
 		data->chassis[0] = (w83792d_read_value(client, 
@@ -1102,43 +1115,39 @@ void w83792d_temp_add(struct i2c_client *client, int operation,
 		w83792d_update_client(client);
 		for (i=0; i<3; i++) {
 			j = (i==0) ? 2 : ((i==1)?0:1);
-			if (((data->temp_add[nr][i*2+1]) && 0x80) == 0) {
-				results[j] = TEMP_FROM_REG(data->temp_add[nr][i*2]);
-			} else {
+			if ((data->temp_add[nr][i*2+1]) & 0x80) {
 				results[j] = TEMP_FROM_REG(data->temp_add[nr][i*2]) + 5;
+			} else {
+				results[j] = TEMP_FROM_REG(data->temp_add[nr][i*2]);
 			}
 		}
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		data->temp_add[nr][2] = TEMP_TO_REG(results[0]);
-		data->temp_add[nr][4] = TEMP_TO_REG(results[1]);
-		w83792d_write_value(client,
-				     W83792D_REG_TEMP_ADD[nr][2],
-				     data->temp_add[nr][2]);
-		w83792d_write_value(client,
-				     W83792D_REG_TEMP_ADD[nr][4],
-				     data->temp_add[nr][4]);
-		if ((results[0]%10) == 0) {
+		if (*nrels_mag >= 1) {
+			data->temp_add[nr][2] = TEMP_TO_REG(results[0]);
 			w83792d_write_value(client,
-				W83792D_REG_TEMP_ADD[nr][3],
-				w83792d_read_value(client,
-					W83792D_REG_TEMP_ADD[nr][3])&0x7f);
-		} else { /* consider the 0.5 degree */
-			w83792d_write_value(client,
-				W83792D_REG_TEMP_ADD[nr][3],
-				w83792d_read_value(client,
-					W83792D_REG_TEMP_ADD[nr][3])|0x80);
+					     W83792D_REG_TEMP_ADD[nr][2],
+					     data->temp_add[nr][2]);
+			if ((results[0]%10) == 0) {
+				w83792d_write_value(client,
+					W83792D_REG_TEMP_ADD[nr][3], 0x00);
+			} else { /* consider the 0.5 degree */
+				w83792d_write_value(client,
+					W83792D_REG_TEMP_ADD[nr][3], 0x80);
+			}
 		}
-		if ((results[1]%10) == 0) {
+		if (*nrels_mag >= 2) {
+			data->temp_add[nr][4] = TEMP_TO_REG(results[1]);
 			w83792d_write_value(client,
-				W83792D_REG_TEMP_ADD[nr][5],
-				w83792d_read_value(client,
-					W83792D_REG_TEMP_ADD[nr][5])&0x7f);
-		} else { /* consider the 0.5 degree */
-			w83792d_write_value(client,
-				W83792D_REG_TEMP_ADD[nr][5],
-				w83792d_read_value(client,
-					W83792D_REG_TEMP_ADD[nr][5])|0x80);
+					     W83792D_REG_TEMP_ADD[nr][4],
+					     data->temp_add[nr][4]);
+			if ((results[1]%10) == 0) {
+				w83792d_write_value(client,
+					W83792D_REG_TEMP_ADD[nr][5], 0x00);
+			} else { /* consider the 0.5 degree */
+				w83792d_write_value(client,
+					W83792D_REG_TEMP_ADD[nr][5], 0x80);
+			}
 		}
 	}
 }
@@ -1356,6 +1365,22 @@ void w83792d_sf2_levels(struct i2c_client *client, int operation,
 	}
 }
 
+/* Read/Write interrupt status of temperature sensors */
+void w83792d_alarms(struct i2c_client *client, int operation, int ctl_name,
+		    int *nrels_mag, long *results)
+{
+	struct w83792d_data *data = client->data;
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		w83792d_update_client(client);
+		/* In W83792D, only the temps support comparator mode,
+		   while voltages and fans only support interrupt mode */
+		results[0] = (data->alarms) & 0x1c;
+		*nrels_mag = 1;
+	}
+}
+
 /* Read/Write Chassis status and Reset Chassis. */
 void w83792d_chassis(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results)
@@ -1484,7 +1509,7 @@ static void __exit sm_w83792d_exit(void)
 }
 
 
-MODULE_AUTHOR("Chunhao Huang @ Winbond");
+MODULE_AUTHOR("Chunhao Huang @ Winbond <huang0@winbond.com.tw>");
 MODULE_DESCRIPTION("W83792AD/D driver for linux-2.4");
 MODULE_LICENSE("GPL");
 

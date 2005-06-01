@@ -2516,8 +2516,16 @@ void print_w83781d(const sensors_chip_name *name)
 void print_w83792d(const sensors_chip_name *name)
 {
   char *label = NULL;
+  int alarms;
   double cur,min,max,fdiv;
   int valid = 0;
+
+  if (!sensors_get_feature(*name,SENSORS_W83792D_ALARMS,&cur)) 
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarm data!\n");
+    alarms = 0;
+  }
 
   if (!sensors_get_label_and_valid(*name,SENSORS_W83792D_IN0,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_W83792D_IN0,&cur) &&
@@ -2738,7 +2746,7 @@ void print_w83792d(const sensors_chip_name *name)
         printf(" %s\n", (cur>max)?"ALARM":"");
       }else{
         print_temp_info( cur, max, min, HYST, 1, 1);
-        printf(" %s\n", ((cur<min)||(cur>max))?"ALARM":"");
+        printf(" %s\n", (alarms&W83792D_ALARM_TEMP1)?"ALARM":"");
       }
     }
   } else
@@ -2752,7 +2760,7 @@ void print_w83792d(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       print_temp_info( cur, max, min, HYST, 1, 1);
-      printf(" %s\n", ((cur<min)||(cur>max))?"ALARM":"");
+      printf(" %s\n", (alarms&W83792D_ALARM_TEMP2)?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get TEMP2 data!\n");
@@ -2765,7 +2773,7 @@ void print_w83792d(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       print_temp_info( cur, max, min, HYST, 1, 1);
-      printf(" %s\n", ((cur<min)||(cur>max))?"ALARM":"");
+      printf(" %s\n", (alarms&W83792D_ALARM_TEMP3)?"ALARM":"");
     }
   } else
     printf("ERROR: Can't get TEMP3 data!\n");

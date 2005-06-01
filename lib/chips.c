@@ -1857,6 +1857,8 @@ static sensors_chip_feature w83792d_features[] =
     { SENSORS_W83792D_FAN7_DIV, "fan7_div", SENSORS_W83792D_FAN7, 
                          NOMAP, RW, 
                          W83792D_SYSCTL_FAN_DIV, VALUE(7), 0 },
+    { SENSORS_W83792D_ALARMS, "alarms", NOMAP, NOMAP, 
+                         R, W83792D_SYSCTL_ALARMS, VALUE(1), 0 },
     { 0 }
   };
 
