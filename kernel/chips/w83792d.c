@@ -168,7 +168,9 @@ static const u8 W83792D_REG_FAN_DIV[4] = {
 	0x9E	/* contains FAN7 Divisor. */
 };
 
-#define W83792D_REG_ALARM1 0x41		/* Interrupt Status for Temp1-Temp3 */
+#define W83792D_REG_ALARM1 0xA9		/* realtime status register1 */
+#define W83792D_REG_ALARM2 0xAA		/* realtime status register2 */
+#define W83792D_REG_ALARM3 0xAB		/* realtime status register3 */
 #define W83792D_REG_CASE_OPEN 0x42	/* Bit 5: Case Open status bit */
 #define W83792D_REG_CASE_OPEN_CLR 0x44	/* Bit 7: Case Open CLR_CHS/Reset bit */
 
@@ -267,7 +269,7 @@ struct w83792d_data {
 				   although 792 chip has 7 set of pwm. */
 	u8 pwm_flag[7];		/* indicates PWM or DC mode: 1->PWM; 0->DC */
 	/* u8 vrm;		 VRM version */
-	u8 alarms;		/* interrupt status for temp1-temp3 */
+	u32 alarms;		/* realtime status register encoding,combined */
 	u8 chassis[2];		/* [0]->Chassis status, [1]->CLR_CHS */
 	u8 thermal_cruise[3];	/* Smart FanI: Fan1,2,3 target value */
 	u8 fan_tolerance[3];	/* Fan1,2,3 tolerance(Smart Fan I/II) */
@@ -361,7 +363,7 @@ static struct i2c_driver w83792d_driver = {
 #define W83792D_SYSCTL_FAN_CFG 1500	/* control Fan Mode */
 #define W83792D_SYSCTL_FAN_DIV 1501
 #define W83792D_SYSCTL_CHASSIS 1502	/* control Case Open */
-#define W83792D_SYSCTL_ALARMS 1503	/* only for temp1-3 */
+#define W83792D_SYSCTL_ALARMS 1503
 
 #define W83792D_SYSCTL_THERMAL_CRUISE 1600	/* Smart Fan I: target value */
 #define W83792D_SYSCTL_FAN_TOLERANCE 1601	/* Smart Fan I/II: tolerance */
@@ -372,9 +374,25 @@ static struct i2c_driver w83792d_driver = {
 #define W83792D_SYSCTL_SF2_LEVELS_FAN2 1606	/* Smart Fan II: Fan2 levels */
 #define W83792D_SYSCTL_SF2_LEVELS_FAN3 1607	/* Smart Fan II: Fan3 levels */
 
-#define W83792D_ALARM_TEMP1 0x04
-#define W83792D_ALARM_TEMP2 0x08
-#define W83792D_ALARM_TEMP3 0x10
+#define W83792D_ALARM_IN0 0x0001
+#define W83792D_ALARM_IN1 0x0002
+#define W83792D_ALARM_IN2 0x0100
+#define W83792D_ALARM_IN3 0x0200
+#define W83792D_ALARM_IN4 0x0400
+#define W83792D_ALARM_IN5 0x0800
+#define W83792D_ALARM_IN6 0x1000
+#define W83792D_ALARM_IN7 0x80000
+#define W83792D_ALARM_IN8 0x100000
+#define W83792D_ALARM_TEMP1 0x0004
+#define W83792D_ALARM_TEMP2 0x0008
+#define W83792D_ALARM_TEMP3 0x0010
+#define W83792D_ALARM_FAN1 0x0020
+#define W83792D_ALARM_FAN2 0x0040
+#define W83792D_ALARM_FAN3 0x0080
+#define W83792D_ALARM_FAN4 0x200000
+#define W83792D_ALARM_FAN5 0x400000
+#define W83792D_ALARM_FAN6 0x800000
+#define W83792D_ALARM_FAN7 0x8000
 
 /* -- SENSORS SYSCTL END -- */
 
@@ -713,7 +731,7 @@ static int w83792d_write_value(struct i2c_client *client, u8 reg, u8 value)
 /* Called when we have found a new W83792D. It should set limits, etc. */
 static void w83792d_init_client(struct i2c_client *client)
 {
-	int temp2_cfg, temp3_cfg, i;
+	int temp2_cfg, temp3_cfg;
 	u8 vid_in_b;
 
 	ENTER()
@@ -738,13 +756,6 @@ static void w83792d_init_client(struct i2c_client *client)
 			    temp2_cfg & 0xe6);
 	w83792d_write_value(client, W83792D_REG_TEMP_ADD[1][6],
 			    temp3_cfg & 0xe6);
-
-	/* Enable comparator mode for temperature sensors so alarm indication
-	   will work correctly. Note that in W83792D, only the temps support
-	   comparator mode, while voltages and fans only support interrupt
-	   mode */
-	i = w83792d_read_value(client, W83792D_REG_IRQ);
-	w83792d_write_value(client, W83792D_REG_IRQ, i & 0x3f);
 
 	/* Start monitoring */
 	w83792d_write_value(client, W83792D_REG_CONFIG, (w83792d_read_value(
@@ -824,8 +835,10 @@ static void w83792d_update_client(struct i2c_client *client)
 		    (w83792d_read_value(client, W83792D_REG_CHIPID) & 0x01)
 		    << 4;   */
 
-		/* Update the Interrupt Status of temp1-temp3 */
-		data->alarms = w83792d_read_value(client, W83792D_REG_ALARM1);
+		/* Update the realtime status */
+		data->alarms = w83792d_read_value(client, W83792D_REG_ALARM1) +
+			(w83792d_read_value(client, W83792D_REG_ALARM2) << 8) +
+			(w83792d_read_value(client, W83792D_REG_ALARM3) << 16);
 
 		/* Update CaseOpen status and it's CLR_CHS. */
 		data->chassis[0] = (w83792d_read_value(client, 
@@ -1365,7 +1378,7 @@ void w83792d_sf2_levels(struct i2c_client *client, int operation,
 	}
 }
 
-/* Read/Write interrupt status of temperature sensors */
+/* get reatime status of all sensors items: voltage, temp, fan */
 void w83792d_alarms(struct i2c_client *client, int operation, int ctl_name,
 		    int *nrels_mag, long *results)
 {
@@ -1374,9 +1387,7 @@ void w83792d_alarms(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83792d_update_client(client);
-		/* In W83792D, only the temps support comparator mode,
-		   while voltages and fans only support interrupt mode */
-		results[0] = (data->alarms) & 0x1c;
+		results[0] = data->alarms;
 		*nrels_mag = 1;
 	}
 }
