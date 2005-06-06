@@ -56,7 +56,7 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 /* Insmod parameters */
 SENSORS_INSMOD_1(w83792d);
 SENSORS_MODULE_PARM(force_subclients, "List of subclient addresses: " \
-                      "{bus, clientaddr, subclientaddr1, subclientaddr2}");
+		    "{bus, clientaddr, subclientaddr1, subclientaddr2}");
 
 static int init;
 MODULE_PARM(init, "i");
@@ -596,23 +596,23 @@ static int w83792d_detect(struct i2c_adapter *adapter, int address,
 	if(force_subclients[0] == id && force_subclients[1] == address) {
 		if(force_subclients[2] < 0x48 || force_subclients[2] > 0x4b) {
 			printk(KERN_ERR "w83792d.o: Invalid subclient address %d; must be 0x48-0x4b\n",
-			        force_subclients[2]);
+			       force_subclients[2]);
 			goto ERROR5;
 		}
 		if(force_subclients[3] < 0x4c || force_subclients[3] > 0x4f) {
 			printk(KERN_ERR "w83792d.o: Invalid subclient address %d; must be 0x4c-0x4f\n",
-			        force_subclients[3]);
+			       force_subclients[3]);
 			goto ERROR5;
 		}
 		w83792d_write_value(new_client,
-		                    W83792D_REG_I2C_SUBADDR,
-		                    0x40 | (force_subclients[2] & 0x03) |
-		                    ((force_subclients[3] & 0x03) <<4));
+				    W83792D_REG_I2C_SUBADDR,
+				    0x40 | (force_subclients[2] & 0x03) |
+				    ((force_subclients[3] & 0x03) <<4));
 		data->lm75[0].addr = force_subclients[2];
 		data->lm75[1].addr = force_subclients[3];
 	} else {
 		val1 = w83792d_read_value(new_client,
-				          W83792D_REG_I2C_SUBADDR);
+					  W83792D_REG_I2C_SUBADDR);
 		data->lm75[0].addr = 0x48 + (val1 & 0x07);
 		data->lm75[1].addr = 0x48 + ((val1 >> 4) & 0x07);
 		if (data->lm75[0].addr == data->lm75[1].addr)
@@ -1039,12 +1039,12 @@ void w83792d_fan(struct i2c_client *client, int operation, int ctl_name,
 					 (data->fan[nr])==0xff) {
 					(data->fan_div[nr])++;
 					results[1] = FAN_FROM_REG(data->fan[nr],
-					             DIV_FROM_REG(data->fan_div[nr]));
+						     DIV_FROM_REG(data->fan_div[nr]));
 				} else if ((data->fan_div[nr])>0 &&
 					  (data->fan[nr])<0x78) {
 					(data->fan_div[nr])--;
 					results[1] = FAN_FROM_REG(data->fan[nr],
-					             DIV_FROM_REG(data->fan_div[nr]));
+						     DIV_FROM_REG(data->fan_div[nr]));
 				}
 
 				tmp_reg = w83792d_read_value(client,
