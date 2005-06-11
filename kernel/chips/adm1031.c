@@ -313,7 +313,7 @@ adm1031_detect(struct i2c_adapter *adapter, int address,
 exit_detach:
 	i2c_detach_client(new_client);
 exit_free:
-	kfree(new_client);
+	kfree(data);
 exit:
 	return err;
 }
@@ -328,7 +328,7 @@ static int adm1031_detach_client(struct i2c_client *client)
 		return ret;
 	}
 
-	kfree(client);
+	kfree(data);
 	return 0;
 }
 
