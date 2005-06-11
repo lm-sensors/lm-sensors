@@ -2316,7 +2316,7 @@ static int lm93_detach_client(struct i2c_client *client)
 			"client not detached.\n");
 		return err;
 	}
-
+	kfree(data);
 	return 0;
 }
 
