@@ -19,6 +19,7 @@ ask CVS about it:
 
 2.9.2 (2005????)
   Man page isaset.8: Fix typos
+  Module adm1031: Fix broken kfree() calls
   Module i2c-ali1563: New (2.6 backport by Winbond)
   Modules i2c-ipmb, i2c-ipmi: Support ipmi_request() additional argument
   Module lm93: Fix memory leak
