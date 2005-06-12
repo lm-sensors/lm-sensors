@@ -18,6 +18,8 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.2 (2005????)
+  File doc/chips/*: Big update (2.6 backport)
+  Library: Drop ds1780-specific code (now use adm9240)
   Man page isaset.8: Fix typos
   Module adm1031: Fix broken kfree() calls
   Module i2c-ali1563: New (2.6 backport by Winbond)
@@ -31,6 +33,8 @@ ask CVS about it:
   Program sensors: Support the VAIO "VGN" prefix for eeprom
   Program sensors-detect: Add SMSC LPC47M15x/LPC47M192 SMBus detection
                           Advertise the w83792d driver
+                          Improve IT8705F and IT8712F detection
+                          Merge LM82 and LM83 detection
 
 
 2.9.1 (20050412)
