@@ -1279,13 +1279,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { max1619_detect 0, @_ },
      },
      {
-       name => "National Semiconductor LM82",
-       driver => "to-be-written",
-       i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
-       i2c_detect => sub { lm83_detect 1, @_ },
-     },
-     {
-       name => "National Semiconductor LM83",
+       name => "National Semiconductor LM82/LM83",
        driver => "lm83",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
        i2c_detect => sub { lm83_detect 0, @_ },
@@ -3213,11 +3207,11 @@ sub lm80_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = LM83, 1 = LM82)
+#   (0 = LM82/LM83)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, 5 to 8 if detected.
+# Returns: undef if not detected, 4 to 8 if detected.
 # Registers used:
 #   0x02: Status 1
 #   0x03: Configuration
@@ -3228,13 +3222,17 @@ sub lm80_detect
 # We can use the LM84 Company ID register because the LM83 and the LM82 are
 # compatible with the LM84.
 # The LM83 chip ID is missing from the datasheet and was contributed by
-# Magnus Forsstrom.
+# Magnus Forsstrom: 0x03.
+# At least some revisions of the LM82 seem to be repackaged LM83, so they
+# have the same chip ID, and temp2/temp4 will be stuck in "OPEN" state.
+# For this reason, we don't even try to distinguish between both chips.
+# Thanks to Ben Gardner for reporting.
 sub lm83_detect
 {
   my ($chip, $file) = @_;
   return if i2c_smbus_read_byte_data($file,0xfe) != 0x01;
-  return if $chip == 0 and i2c_smbus_read_byte_data($file,0xff) != 0x03;
-  return if $chip == 1 and i2c_smbus_read_byte_data($file,0xff) != 0x01;
+  my $chipid = i2c_smbus_read_byte_data($file,0xff);
+  return if $chipid != 0x01 && $chipid != 0x03;
 
   my $confidence = 4;
   $confidence++
@@ -3244,8 +3242,7 @@ sub lm83_detect
   $confidence++
     if i2c_smbus_read_byte_data($file,0x04) == 0x00;
   $confidence++
-    if $chip == 0
-    && (i2c_smbus_read_byte_data($file,0x35) & 0x48) == 0x00;
+    if (i2c_smbus_read_byte_data($file,0x35) & 0x48) == 0x00;
 
   return $confidence;
 }
