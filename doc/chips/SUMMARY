@@ -18,7 +18,7 @@ please send mail to sensors@stimpy.netroedge.com.
 Please include the following in your mail:
 	- The output of (as root) 'prog/detect/sensors-detect'
 	- The output of (as root) 'prog/detect/i2cdetect 1'
- 	      (assuming your smbus adapter is on bus 1 -
+	      (assuming your smbus adapter is on bus 1 -
 	      run 'i2cdetect' with no arguments to list the busses).
 	- The output of (as root) 'prog/dump/i2cdump X 0xXX'
 	      X = the bus number
@@ -36,7 +36,7 @@ See also ../FAQ for assistance.
 SUPPORTED SENSOR CHIPS
 ----------------------
 
-			Included Sensors	Controls Busses	
+			Included Sensors	Controls Busses
 			----------------------	-------  -----------
 Driver  Chips		#temp	#vin	#fanin	pwm/dac	I2C	ISA
 ---------------------------------------------------------------------
@@ -98,11 +98,11 @@ fscscy
 	fscscy		4	3	6	-	yes	no
 
 gl518sm
-        gl518sm (r00)	1	1-4	2	-	yes	no
-        gl518sm (r80)	1	4	2	-	yes	no
+	gl518sm (r00)	1	1-4	2	-	yes	no
+	gl518sm (r80)	1	4	2	-	yes	no
 
 gl520sm
-        gl520sm 	1-2	4-5	2	-	yes	no
+	gl520sm		1-2	4-5	2	-	yes	no
 
 it87
 	it8712		3	8	3	3 pwm	yes	yes
@@ -139,7 +139,7 @@ lm85
 	adt7463		3	5	4	3 pwm	yes	no
 
 lm87
-        lm87	 	2-3	6-8	0-2	1 pwm	yes	no
+	lm87		2-3	6-8	0-2	1 pwm	yes	no
 
 lm90
 	lm90		2	-	-	-	yes	no
@@ -188,7 +188,7 @@ pc87360
 	pc87366		3-4	11	3	3 pwm	no	yes (LPC)
 
 sis5595
-	sis5595 	0-1	4-5	2	-	no	yes
+	sis5595		0-1	4-5	2	-	no	yes
 
 smartbatt
 	smartbatt	1	1	-	-	yes	no
@@ -206,8 +206,8 @@ thmc50
 	thmc50		3	2	-	1 dac	yes	no
 
 via686a
-	via686a 	3	5	2	-	no	yes
-	vt8231	 	3	5	2	-	no	yes
+	via686a		3	5	2	-	no	yes
+	vt8231		3	5	2	-	no	yes
 
 vt1211
 	vt1211		2-7	2-7	2	2	no	yes (LPC)
@@ -307,17 +307,17 @@ This may help identify a chip after doing a 'i2cdump [bus] [address]'.
 0x49	TI
 0x4D	Maxim
 0x54	On Semi
-0x5C    SMSC
-0x55    SMSC 
+0x5C	SMSC
+0x55	SMSC
 0x5CA3	Winbond (at 0x4F)
 0x90	ITE (at 0x58)
-0xA1    Philips
+0xA1	Philips
 0xA3	Winbond (at 0x4F)
 0xAC	Myson (at 0x58)
 0xC3	Asus (at 0x4F)
 0xDA	Dallas
 
-[A-Z]{3} at 0x00-0x02:   Fujitsu-Siemens
+[A-Z]{3} at 0x00-0x02: Fujitsu-Siemens
 
 
 ------------------
