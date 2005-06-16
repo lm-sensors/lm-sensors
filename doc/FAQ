@@ -685,6 +685,11 @@ motherboard manufacturers don't think they're worth monitoring (they
 are mostly unused these days). You can just add `ignore inN' lines to
 `/etc/sensors.conf' to hide them.
 
+   Another possibility is that these lines are used to monitor different
+voltages. Only the motherboard manufacturer can tell for sure. Taking a
+look at what voltage values the BIOS displays may provide valuable
+hints though.
+
 4.7 What are VID lines? Why is the VID reading wrong?
 =====================================================
 

@@ -700,6 +700,11 @@ motherboard manufacturers don't think they're worth monitoring
 (they are mostly unused these days). You can just add
 @command{ignore inN} lines to @file{/etc/sensors.conf} to hide them.
 
+Another possibility is that these lines are used to monitor different
+voltages. Only the motherboard manufacturer can tell for sure. Taking
+a look at what voltage values the BIOS displays may provide valuable
+hints though.
+
 
 @node Section 4.7, Section 4.8, Section 4.6, Problems
 @section What are VID lines? Why is the VID reading wrong?
