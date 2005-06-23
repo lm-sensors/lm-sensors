@@ -176,9 +176,6 @@ int eeprom_detect(struct i2c_adapter *adapter, int address,
 					    | I2C_FUNC_SMBUS_BYTE))
 		goto ERROR0;
 
-	/* OK. For now, we presume we have a valid client. We now create the
-	   client structure, even though we cannot fill it completely yet.
-	   But it allows us to access eeprom_{read,write}_value. */
 	if (!(data = kmalloc(sizeof(struct eeprom_data), GFP_KERNEL))) {
 		err = -ENOMEM;
 		goto ERROR0;
