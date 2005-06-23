@@ -506,7 +506,7 @@ static int bmcsensors_rcv_sdr_msg(struct ipmi_msg *msg, int state)
 	}
 
 	nextrecord = (data[2] << 8) | data[1];
-	/* printk(KERN_INFO "bmcsensors.o: nextrecord %d \n", nextrecord); */
+	/* printk(KERN_INFO "bmcsensors.o: nextrecord %d\n", nextrecord); */
 
 
 	type = data[6];

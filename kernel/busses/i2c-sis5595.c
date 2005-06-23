@@ -241,7 +241,7 @@ int sis5595_transaction(void)
 	     sis5595_read(SMB_STS_LO) + (sis5595_read(SMB_STS_HI) << 8)) !=
 	    0x00) {
 #ifdef DEBUG
-		printk("i2c-sis5595.o: SMBus busy (%04x). Resetting... \n",
+		printk("i2c-sis5595.o: SMBus busy (%04x). Resetting...\n",
 		       temp);
 #endif
 		sis5595_write(SMB_STS_LO, temp & 0xff);

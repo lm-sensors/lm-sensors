@@ -254,7 +254,7 @@ int piix4_transaction(void)
 	/* Make sure the SMBus host is ready to start transmitting */
 	if ((temp = inb_p(SMBHSTSTS)) != 0x00) {
 #ifdef DEBUG
-		printk(KERN_DEBUG "i2c-piix4.o: SMBus busy (%02x). Resetting... \n",
+		printk(KERN_DEBUG "i2c-piix4.o: SMBus busy (%02x). Resetting...\n",
 		       temp);
 #endif
 		outb_p(temp, SMBHSTSTS);

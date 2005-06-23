@@ -127,7 +127,7 @@ static int amd756_transaction(void)
 
 	/* Make sure the SMBus host is ready to start transmitting */
 	if ((temp = inw_p(SMB_GLOBAL_STATUS)) & (GS_HST_STS | GS_SMB_STS)) {
-		pr_debug(DRV_NAME ": SMBus busy (%04x). Waiting... \n", temp);
+		pr_debug(DRV_NAME ": SMBus busy (%04x). Waiting...\n", temp);
 		do {
 			i2c_delay(1);
 			temp = inw_p(SMB_GLOBAL_STATUS);
