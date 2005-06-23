@@ -186,7 +186,7 @@ $minstop);
    unless (defined($interval))
      { die("Some settings missing ..."); }
 
-   print("\nCommon settings: \n");
+   print("\nCommon settings:\n");
    print("  INTERVAL=$interval\n");
 
    my $fcvcount = 0;

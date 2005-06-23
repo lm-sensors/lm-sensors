@@ -134,7 +134,7 @@ dump_dev_data(struct pci_dev *dev, int address_data)
 					dev->resource[2].start, dev->resource[3].start);
 			printk("m7101: resource[4]: 0x%08lx   resource[5]: 0x%08lx\n",
 					dev->resource[4].start, dev->resource[5].start);
-			printk("m7101: rom_address:     0x%08lx  \n",
+			printk("m7101: rom_address:     0x%08lx\n",
 					dev->resource[PCI_ROM_RESOURCE].start);
 		}
 	}
