@@ -346,6 +346,11 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*"
 #    set temp3_over 52
 #    set temp3_hyst 47
 
+# Examples of fan low speed limits
+#    set fan1_min 3000
+#    set fan2_min 3000
+#    set fan3_min 3000
+
 # Ignore fans you don't actually have
 #    ignore fan1
 #    ignore fan2
