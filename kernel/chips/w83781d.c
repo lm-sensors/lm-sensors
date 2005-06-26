@@ -891,10 +891,10 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 			kind = w83697hf;
 		else {
 			if (kind == 0)
-				printk
-				    (KERN_WARNING "w83781d.o: Ignoring 'force' parameter for unknown chip at"
-				     "adapter %d, address 0x%02x\n",
-				     i2c_adapter_id(adapter), address);
+				printk(KERN_WARNING "w83781d.o: Ignoring "
+				       "'force' parameter for unknown chip "
+				       "at adapter %d, address 0x%02x\n",
+				       i2c_adapter_id(adapter), address);
 			goto ERROR1;
 		}
 	}

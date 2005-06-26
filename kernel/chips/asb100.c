@@ -1006,7 +1006,7 @@ static void __exit asb100_exit(void)
 
 MODULE_AUTHOR(	"Mark M. Hoffman <mhoffman@lightlink.com>, "
 		"Frodo Looijaard <frodol@dds.nl>, "
-		"Philip Edelbrock <phil@netroedge.com>, and"
+		"Philip Edelbrock <phil@netroedge.com>, and "
 		"Mark Studebaker <mdsxyz123@yahoo.com>");
 
 MODULE_DESCRIPTION("ASB100 'Bach' driver");
