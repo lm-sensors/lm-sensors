@@ -12,7 +12,7 @@
  *	This driver is based on a mix of the 15x3, 1535, and i801 drivers,
  *	with a little help from the ALi 1563 spec.
  *
- *	Chunhao Huang <huang0@winbond.com.tw>
+ *	Chunhao Huang / Winbond
  *	Backport to linux-2.4 from linux-2.6 on Mar.2005
  *
  *	This file is released under the GPLv2
@@ -459,7 +459,7 @@ static void __exit ali1563_exit(void)
 
 module_exit(ali1563_exit);
 
-MODULE_AUTHOR("Patrick Mochel <mochel@digitalimplant.org>, Chunhao Huang <huang0@winbond.com.tw>");
+MODULE_AUTHOR("Patrick Mochel <mochel@digitalimplant.org>, Chunhao Huang");
 MODULE_DESCRIPTION("ALi M1563 southbridge driver for linux-2.4, backported by Chunhao Huang from linux-2.6");
 MODULE_LICENSE("GPL");
 

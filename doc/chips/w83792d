@@ -11,7 +11,7 @@ Supported chips:
     Datasheet: Available to LM_Sensors group, sent by Chunhao Huang
 
 
-Author: Chunhao Huang @ Winbond <huang0@winbond.com.tw>
+Author: Chunhao Huang @ Winbond
 
 
 Module Parameters
@@ -264,6 +264,6 @@ additional entries for chassis intrusion detection:
  
 Author/Maintainer
 -----------------
-Original 792D support: Chunhao Huang(huang0@winbond.com.tw)
+Original 792D support: Chunhao Huang
 subclients register added by: Mark D. Studebaker(mdsxyz123@yahoo.com)
 and modified by Jean Delvare <khali@linux-fr.org>.

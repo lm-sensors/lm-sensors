@@ -2,7 +2,7 @@
     w83792d.c - Part of lm_sensors, Linux kernel modules for hardware
                 monitoring
     Copyright (c) 2004, 2005 Winbond Electronics Corp.
-                  Chunhao Huang <huang0@winbond.com.tw>
+                  Chunhao Huang
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1521,7 +1521,7 @@ static void __exit sm_w83792d_exit(void)
 }
 
 
-MODULE_AUTHOR("Chunhao Huang @ Winbond <huang0@winbond.com.tw>");
+MODULE_AUTHOR("Chunhao Huang @ Winbond");
 MODULE_DESCRIPTION("W83792AD/D driver for linux-2.4");
 MODULE_LICENSE("GPL");
 
