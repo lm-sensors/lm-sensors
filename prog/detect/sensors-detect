@@ -1079,7 +1079,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      } ,
      {
        name => "Winbond W83627EHF",
-       driver => "to-be-written",
+       driver => "w83627ehf",
        i2c_addrs => [0x28..0x2f], 
        i2c_detect => sub { w83781d_detect 9, @_},
        isa_addrs => [0x290],
@@ -1826,7 +1826,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
     [
       {
 	name => "Winbond W83627EHF Super IO Sensors",
-	driver => "to-be-written",
+	driver => "w83627ehf",
 	# Datasheet says 0x886x but 0x8853 was seen, thus the broader mask
 	devid => 0x8840,
 	devid_mask => 0xFFC0,
