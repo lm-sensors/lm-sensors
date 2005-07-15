@@ -20,6 +20,7 @@ ask CVS about it:
 2.9.2 (2005????)
   File doc/chips/*: Big update (2.6 backport)
   Library: Drop ds1780-specific code (now use adm9240)
+           Fix memory leak in sensors_get_label()
   Man page isaset.8: Fix typos
   Module adm1031: Fix broken kfree() calls
   Module i2c-ali1563: New (2.6 backport by Winbond)
