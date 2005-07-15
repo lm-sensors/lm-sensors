@@ -32,6 +32,10 @@
 #  stop decoding on checksum error by default (--checksum option forces)
 # Version 0.8  2005-06-20  Burkart Lingner <burkart@bollchen.de>
 #  adapted to Kernel 2.6's /sys filesystem
+# Version 0.9  2005-07-15  Jean Delvare <khali@linux-fr.org>
+#  fix perl warning
+#  fix typo
+#  refactor some code
 #
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
@@ -56,7 +60,9 @@
 #
 
 use strict;
-use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck);
+use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs);
+
+$use_sysfs = -d '/sys/bus';
 
 sub printl ($$) # print a line w/ label and value
 {
@@ -120,7 +126,7 @@ sub printh ($) # print header w/ given text
 
 sub readspd16 ($$) { # reads 16 bytes from SPD-EEPROM
 	my ($offset, $dimm_i) = @_;
-	if (-e "/sys/bus/i2c/drivers/eeprom") {
+	if ($use_sysfs) {
 		# Kernel 2.6 with sysfs
 		open (HANDLE, "/sys/bus/i2c/drivers/eeprom/$dimm_i/eeprom")
 			or die "Cannot open /sys/bus/i2c/drivers/eeprom/$dimm_i/eeprom";
@@ -136,25 +142,8 @@ sub readspd16 ($$) { # reads 16 bytes from SPD-EEPROM
 		return @bytes;
 	} else {
 		# Kernel 2.4 with procfs
-		if ($offset == 0) {		# bytes 0..15
-			$_=`cat /proc/sys/dev/sensors/$dimm_i/00`;
-		} elsif ($offset == 16) {	# bytes 16..31
-			$_=`cat /proc/sys/dev/sensors/$dimm_i/10`;
-		} elsif ($offset == 32) {	# bytes 32..47
-			$_=`cat /proc/sys/dev/sensors/$dimm_i/20`;
-		} elsif ($offset == 48) {	# bytes 48..63
-			$_=`cat /proc/sys/dev/sensors/$dimm_i/30`;
-		} elsif ($offset == 64) {	# bytes 64..79
-			$_=`cat /proc/sys/dev/sensors/$dimm_i/40`;
-		} elsif ($offset == 80) {	# bytes 80..95
-			$_=`cat /proc/sys/dev/sensors/$dimm_i/50`;
-		} elsif ($offset == 96) {	# bytes 96..111
-			$_=`cat /proc/sys/dev/sensors/$dimm_i/60`;
-		} elsif ($offset == 112) {	# bytes 112..127
-			$_=`cat /proc/sys/dev/sensors/$dimm_i/70`;
-		} else {			# illegal offset
-			$_='255 'x15 . '255';
-		}
+		$offset = sprintf('%02x', $offset);
+		$_ = `cat /proc/sys/dev/sensors/$dimm_i/$offset`;
 		return split(" ");
 	}
 }
@@ -187,31 +176,30 @@ if ($opt_body)
 printh '
 PC DIMM Serial Presence Detect Tester/Decoder
 By Philip Edelbrock, Christian Zuckschwerdt, Burkart Lingner and others
-Version 2.6.6
+Version 2.9.2
 ';
 
 
 my $dimm_count=0;
-if (-e "/sys/bus/i2c/drivers/eeprom") { $_=`ls /sys/bus/i2c/drivers/eeprom`; }
+if ($use_sysfs) { $_=`ls /sys/bus/i2c/drivers/eeprom`; }
 else { $_=`ls /proc/sys/dev/sensors/`; }
 my @dimm_list=split();
 
 for my $i ( 0 .. $#dimm_list ) {
 	$_=$dimm_list[$i];
-	if ((-e "/sys/bus/i2c/drivers/eeprom" && /^\d+-\d+$/) || /^eeprom-/) {
+	if (($use_sysfs && /^\d+-\d+$/)
+	 || (!$use_sysfs && /^eeprom-/)) {
 		my $dimm_checksum=0;
 		$dimm_count += 1;
 		
 		print "<b><u><br><br>" if $opt_html;
-		if (-e "/sys/bus/i2c/drivers/eeprom") {
-			printl2 "Decoding EEPROM", "/sys/bus/i2c/drivers/eeprom/$dimm_list[$i]";
-		} else {
-			printl2 "Decoding EEPROM", "/proc/sys/dev/sensors/$dimm_list[$i]";
-		}
+		printl2 "Decoding EEPROM", ($use_sysfs ?
+			"/sys/bus/i2c/drivers/eeprom/$dimm_list[$i]" :
+			"/proc/sys/dev/sensors/$dimm_list[$i]");
 		print "</u></b>" if $opt_html;
 		print "<table border=1>\n" if $opt_html;
-		if ((-e "/sys/bus/i2c/drivers/eeprom" && /^[^-]+-([^-]+)$/)
-		 || /^[^-]+-[^-]+-[^-]+-([^-]+)$/) {
+		if (($use_sysfs && /^[^-]+-([^-]+)$/)
+		 || (!$use_sysfs && /^[^-]+-[^-]+-[^-]+-([^-]+)$/)) {
 			my $dimm_num=$1 - 49;
 			printl "Guessing DIMM is in", "bank $dimm_num";
 		}
@@ -439,7 +427,7 @@ for my $i ( 0 .. $#dimm_list ) {
 		
 		prints "The Following are Required (for SDRAMs)";
 		
-		$l = "Minumum Row Precharge Time";
+		$l = "Minimum Row Precharge Time";
 		if ($bytes[11] == 0) { printl $l, "Undefined!"; }
 		else { printl $l, "$bytes[11]nS"; }
 		
@@ -513,7 +501,7 @@ for my $i ( 0 .. $#dimm_list ) {
 		$l = "Manufacturer's JEDEC ID Code";
 		$temp = sprintf("0x%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X\n",$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
 		printl $l, $temp;
-		$temp = pack("c8",
+		$temp = pack("C8",
 			$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
 		printl $l, "(\"$temp\")";
 		
@@ -525,7 +513,7 @@ for my $i ( 0 .. $#dimm_list ) {
 # Decode next 16 bytes (80-95)
 		my @bytes2= readspd16(80, $dimm_list[$i]);
 
-		$temp = pack("c18",$bytes[9],$bytes[10],$bytes[11],$bytes[12],$bytes[13],$bytes[14],$bytes[15],
+		$temp = pack("C18",$bytes[9],$bytes[10],$bytes[11],$bytes[12],$bytes[13],$bytes[14],$bytes[15],
 			$bytes2[0],$bytes2[1],$bytes2[2],$bytes2[3],$bytes2[4],$bytes2[5],$bytes2[6],$bytes2[7],$bytes2[8],$bytes2[9],$bytes2[10]);
 		printl $l, $temp;
 		
