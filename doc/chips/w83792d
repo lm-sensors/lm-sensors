@@ -8,16 +8,25 @@ Supported chips:
   * Winbond W83792D
     Prefix: 'w83792d'
     Addresses scanned: I2C 0x2c - 0x2f
-    Datasheet: Available to LM_Sensors group, sent by Chunhao Huang
+    Datasheet: http://www.winbond.com.tw/E-WINBONDHTM/partner/PDFresult.asp?Pname=1035
 
-
-Author: Chunhao Huang @ Winbond
+Author: Chunhao Huang
+Contact: DZShen <DZShen@Winbond.com.tw>
 
 
 Module Parameters
 -----------------
 
-<TODO: fill in here>
+* init int 
+  (default 1)
+  Use 'init=0' to bypass initializing the chip.
+  Try this if your computer crashes when you load the module.
+
+* force_subclients=bus,caddr,saddr,saddr
+  This is used to force the i2c addresses for subclients of
+  a certain chip. Example usage is `force_subclients=0,0x2f,0x4a,0x4b'
+  to force the subclients of chip 0x2f on bus 0 to i2c addresses
+  0x4a and 0x4b.
 
 
 Description
@@ -25,51 +34,75 @@ Description
 
 This driver implements support for the Winbond W83792AD/D.
 
-Detection of the chip can sometimes be foiled because it can be in
-an internal state that allows no clean access. If you know the address
-of the chip, use a 'force' parameter; this will put it into a more
-well-behaved state first.
+Detection of the chip can sometimes be foiled because it can be in an
+internal state that allows no clean access (Bank with ID register is not
+currently selected). If you know the address of the chip, use a 'force'
+parameter; this will put it into a more well-behaved state first.
 
 The driver implements three temperature sensors, seven fan rotation speed
-sensors, nine voltage sensors, and the Smart Fan I(Thermal Cruise mode)
-and Smart Fan II sensors.
+sensors, nine voltage sensors, and two automatic fan regulation
+strategies called: Smart Fan I (Thermal Cruise mode) and Smart Fan II.
+Automatic fan control mode is possible only for fan1-fan3. Fan4-fan7 can run
+synchronized with selected fan (fan1-fan3). This functionality and manual PWM
+control for fan4-fan7 is not yet implemented.
 
-Temperatures are measured in degrees Celsius. There is one main temperature
-sensor, and two other sensors. A alarm is triggered when the measured
-temperture is higher than the Overtemperature or below the Hysteresis value.
-This is NOT correct, I misunderstand the Hysteresis value when I implement
-this driver. It will be fixed later: An alarm is triggered when the
-Overtemperature Shutdown limit is crossed; it is triggered again as soon as
-it drops below the Hysteresis value.
+Temperatures are measured in degrees Celsius and measurement resolution is 1
+degC for temp1 and 0.5 degC for temp2 and temp3. An alarm is triggered when
+the temperature gets higher than the Overtemperature Shutdown value; it stays
+on until the temperature falls below the Hysteresis value.
 
 Fan rotation speeds are reported in RPM (rotations per minute). An alarm is
 triggered if the rotation speed has dropped below a programmable limit. Fan 
-readings can be divided by a programmable divider(1, 2, 4, 8, 16, 32, 64 or
-128) to give the readings more range or accuracy. This driver modify the
+readings can be divided by a programmable divider (1, 2, 4, 8, 16, 32, 64 or
+128) to give the readings more range or accuracy. This driver modifies the
 fan divisor automatically to get the reasonable RPM rotation range.
 
 Voltage sensors (also known as IN sensors) report their values in volts.
 An alarm is triggered if the voltage has crossed a programmable minimum 
 or maximum limit.
 
-All the alarm triggers is "software-level" instead of "hardware-level",
-which means the alarm is triggered when "sensors" program find the measured
-value exceed the limits, while in traditional chip drivers of lm_sensors,
-alarm is triggered by the hardware interrupt status registers.
-After a discusion with lm_sensors group, the "software-level" alarm method
-to temperature may be modified in the future, but the alarm of voltage and
-fan will not be modified, because W83792AD/D does NOT support it.
+Alarms are provided as output from "realtime status register". Following bits
+are defined:
 
+bit - alarm on:
+0  - in0
+1  - in1
+2  - temp1
+3  - temp2
+4  - temp3
+5  - fan1
+6  - fan2
+7  - fan3
+8  - in2
+9  - in3
+10 - in4
+11 - in5
+12 - in6
+13 - VID change
+14 - chassis
+15 - fan7
+16 - tart1
+17 - tart2
+18 - tart3
+19 - in7
+20 - in8
+21 - fan4
+22 - fan5
+23 - fan6
 
-In addition to the alarms described above, there is a CHAS alarm on the
-chips which triggers if your computer case is open. 
+Tart will be asserted while target temperature cannot be achieved after 3 minutes
+of full speed rotation of corresponding fan. 
+
+In addition to the alarms described above, there is a CHAS alarm on the chips
+which triggers if your computer case is open (This one is latched, contrary
+to realtime alarms).
 
 The chips only update values each 3 seconds; reading them more often will
 do no harm, but will return 'old' values.
 
 
 W83792D PROBLEMS
------------------
+----------------
 Known problems:
 	- This driver is only for Winbond W83792D C version device, there
 	  are also some motherboards with B version W83792D device. The 
@@ -77,8 +110,11 @@ Known problems:
 	  different between C and B version. C or B version can be identified
 	  by CR[0x49h].
 	- The function of vid and vrm has not been finished, because I'm NOT
-	  very familiar with them. If someone can finish it, that's good,
-	- The function of chassis open detection need further test.
+	  very familiar with them. Adding support is welcome.
+	- The function of chassis open detection needs more tests.
+	- If you have ASUS server board and chip was not found: Then you will
+	  need to upgrade to latest (or beta) BIOS. If it does not help please
+	  contact us.
 
 
 Chip Features
@@ -260,10 +296,3 @@ additional entries for chassis intrusion detection:
             normal. The second item in this entry is used to clear the
             detected chassis intrusion interrupt and reset the chassis status
             to normal.
-
- 
-Author/Maintainer
------------------
-Original 792D support: Chunhao Huang
-subclients register added by: Mark D. Studebaker(mdsxyz123@yahoo.com)
-and modified by Jean Delvare <khali@linux-fr.org>.
