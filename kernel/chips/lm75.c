@@ -257,10 +257,10 @@ static void lm75_init_client(struct i2c_client *client)
 {
 	int i;
 
-	/* Enable if in shutdown */
+	/* Enable if in shutdown mode */
 	i = lm75_read_value(client, LM75_REG_CONF);
-	if(i >= 0 && ((u8) i) & 0x01)
-		lm75_write_value(client, LM75_REG_CONF, ((u8) i) & 0xfe);
+	if (i >= 0 && (i & 0x01))
+		lm75_write_value(client, LM75_REG_CONF, i & 0xfe);
 }
 
 static void lm75_update_client(struct i2c_client *client)
