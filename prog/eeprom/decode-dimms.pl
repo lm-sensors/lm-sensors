@@ -222,6 +222,7 @@ for my $i ( 0 .. $#dimm_list ) {
 		if ($bytes[2] == 2) { printl $l, "EDO"; }
 		elsif ($bytes[2] == 4) { printl $l, "SDR SDRAM"; }
 		elsif ($bytes[2] == 7) { printl $l, "DDR SDRAM"; }
+		elsif ($bytes[2] == 8) { printl $l, "DDR2 SDRAM"; }
 		elsif ($bytes[2] == 17) { printl $l, "Rambus [UNSUPPORTED]"; }
 		elsif ($bytes[2] == 1) { printl $l, "Direct Rambus [UNSUPPORTED]"; }
 		else { printl $l, "???"; }
@@ -262,6 +263,22 @@ for my $i ( 0 .. $#dimm_list ) {
 		my $temp=($bytes[9] >> 4) + ($bytes[9] & 0xf) * 0.1;
 		printl $l, "${temp}ns";
 		
+		if (($bytes[2] == 7) || ($bytes[2] == 8)) {
+			my $mul = 2;
+			my $ddr = "DDR";
+			if ($bytes[2] == 8) {
+				$mul = 4;
+				$ddr = "DDR2";
+			} 
+			my $ddrclk = $mul * (1000/$temp);
+			my $tbits = ($bytes[7]*256) + $bytes[6];
+			if (($bytes[11] == 2) ||  ($bytes[11] == 1)) { $tbits = $tbits - 8;}
+			my $pcclk = int ($ddrclk * $tbits / 8);
+			$pcclk = $pcclk - ($pcclk % 100);
+			$ddrclk = int ($ddrclk);
+			printl "Maximum module speed", "$ddr ${ddrclk}MHz (PC${pcclk})";
+		}
+	
 		$l = "Access Time (SDRAM)";
 		$temp=($bytes[10] >> 4) + ($bytes[10] & 0xf) * 0.1;
 		printl $l, "${temp}ns";
