@@ -28,6 +28,8 @@ ask CVS about it:
   Module lm93: Fix memory leak
   Module smsc47m1: Fix PWM enable polarity on read
   Program decode-dimms.pl: Support Linux 2.6 (Burkart Lingner)
+  			   Added DDR/DDR2 frequency reporting in convenient
+			   form of DDRxxx PCyyyy
   Program fancontrol.pl: Fix compile errors
   Program mkpatch: Include i2c-ali1563
                    Include w83792d
