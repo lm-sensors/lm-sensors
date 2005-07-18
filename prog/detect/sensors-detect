@@ -48,6 +48,7 @@ $ENV{PATH} = '/usr/local/sbin:'.$ENV{PATH}
 use vars qw(@pci_adapters @chip_ids @superio_ids $revision);
 
 $revision = '$Revision$ ($Date$)';
+$revision =~ s/\$\w+: (.*?) \$/\1/g;
 
 # This is the list of SMBus or I2C adapters we recognize by their PCI
 # signature. This is an easy and fast way to determine which SMBus or I2C
