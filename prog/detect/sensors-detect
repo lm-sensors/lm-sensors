@@ -45,7 +45,9 @@ $ENV{PATH} = '/usr/local/sbin:'.$ENV{PATH}
 # CONSTANT DECLARATIONS #
 #########################
 
-use vars qw(@pci_adapters @chip_ids @superio_ids);
+use vars qw(@pci_adapters @chip_ids @superio_ids $revision);
+
+$revision = '$Revision$ ($Date$)';
 
 # This is the list of SMBus or I2C adapters we recognize by their PCI
 # signature. This is an easy and fast way to determine which SMBus or I2C
@@ -4996,6 +4998,7 @@ sub main
   initialize_modules_list;
   initialize_kernel_version;
 
+  print "# sensors-detect revision $revision\n";
   print "\nThis program will help you determine which I2C/SMBus modules you need to\n",
         "load to use lm_sensors most effectively. You need to have i2c and\n",
         "lm_sensors installed before running this program.\n";
