@@ -148,7 +148,6 @@ static int smsc47m1_write_value(struct i2c_client *client, u8 register,
 			       u8 value);
 static void smsc47m1_update_client(struct i2c_client *client);
 static void smsc47m1_init_client(struct i2c_client *client);
-static int smsc47m1_find(int *address);
 
 
 static void smsc47m1_fan(struct i2c_client *client, int operation,
@@ -202,7 +201,7 @@ static int smsc47m1_attach_adapter(struct i2c_adapter *adapter)
 	return i2c_detect(adapter, &addr_data, smsc47m1_detect);
 }
 
-static int smsc47m1_find(int *address)
+static int __init smsc47m1_find(int *address)
 {
 	u16 val;
 

@@ -250,7 +250,6 @@ struct it87_data {
 
 
 static int it87_attach_adapter(struct i2c_adapter *adapter);
-static int it87_find(int *address);
 static int it87_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int it87_detach_client(struct i2c_client *client);
@@ -424,7 +423,7 @@ static int it87_attach_adapter(struct i2c_adapter *adapter)
 	return i2c_detect(adapter, &addr_data, it87_detect);
 }
 
-static int it87_find(int *address)
+static int __init it87_find(int *address)
 {
 	int err = -ENODEV;
 	u16 devid;

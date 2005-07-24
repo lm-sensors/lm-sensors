@@ -468,7 +468,7 @@ static int pc87360_attach_adapter(struct i2c_adapter *adapter)
 	return i2c_detect(adapter, &addr_data, pc87360_detect);
 }
 
-static int pc87360_find(int sioaddr, u8 *devid, int *address)
+static int __init pc87360_find(int sioaddr, u8 *devid, int *address)
 {
 	u16 val;
 	int i;

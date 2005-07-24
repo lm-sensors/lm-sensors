@@ -200,7 +200,6 @@ static int sis5595_write_value(struct i2c_client *client, u8 register,
 			       u8 value);
 static void sis5595_update_client(struct i2c_client *client);
 static void sis5595_init_client(struct i2c_client *client);
-static int sis5595_find_sis(int *address);
 
 
 static void sis5595_in(struct i2c_client *client, int operation,
@@ -286,7 +285,7 @@ static int sis5595_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* Locate SiS bridge and correct base address for SIS5595 */
-static int sis5595_find_sis(int *address)
+static int __init sis5595_find_sis(int *address)
 {
 	u16 val;
 	int *i;

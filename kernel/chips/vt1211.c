@@ -210,7 +210,6 @@ static inline void vt1211_write_value(struct i2c_client *client, u8 register,
 			       u8 value);
 static void vt1211_update_client(struct i2c_client *client);
 static void vt1211_init_client(struct i2c_client *client);
-static int vt1211_find(int *address);
 
 
 static void vt1211_fan(struct i2c_client *client, int operation,
@@ -344,7 +343,7 @@ static int vt1211_attach_adapter(struct i2c_adapter *adapter)
 	return i2c_detect(adapter, &addr_data, vt1211_detect);
 }
 
-static int vt1211_find(int *address)
+static int __init vt1211_find(int *address)
 {
 	u16 val;
 

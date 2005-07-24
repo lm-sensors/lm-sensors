@@ -169,7 +169,6 @@ static inline void vt8231_write_value(struct i2c_client *client, u8 register,
 			       u8 value);
 static void vt8231_update_client(struct i2c_client *client);
 static void vt8231_init_client(struct i2c_client *client);
-static int vt8231_find(int *address);
 
 
 static void vt8231_fan(struct i2c_client *client, int operation,
@@ -306,7 +305,7 @@ static int vt8231_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* Locate chip and get correct base address */
-static int vt8231_find(int *address)
+static int __init vt8231_find(int *address)
 {
 	u16 val;
 

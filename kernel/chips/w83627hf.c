@@ -587,7 +587,7 @@ static int w83627hf_attach_adapter(struct i2c_adapter *adapter)
 	return i2c_detect(adapter, &addr_data, w83627hf_detect);
 }
 
-static int w83627hf_find(int sioaddr, int *address)
+static int __init w83627hf_find(int sioaddr, int *address)
 {
 	u16 val;
 
