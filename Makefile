@@ -86,6 +86,16 @@ CC := gcc
 #   /lib/modules/2.4.29
 MODPREF := /lib/modules/$(shell $(CC) -I$(LINUX_HEADERS) -E etc/config.c | grep uts_release |cut -f 2 -d'"')
 
+# Prevent 2.6+ users from using improper targets, as this won't work.
+ifeq (,$(findstring /2.4., $(MODPREF)))
+    ifeq (, $(MAKECMDGOALS))
+        $(error For 2.6 kernels and later, use "make user")
+    endif
+    ifeq (install, $(MAKECMDGOALS))
+        $(error For 2.6 kernels and later, use "make user_install")
+    endif
+endif
+
 # This is the directory where sensors.conf will be installed, if no other
 # configuration file is found
 ETCDIR := /etc
