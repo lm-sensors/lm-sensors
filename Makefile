@@ -320,7 +320,7 @@ clean::
 	$(RM) lm_sensors-*
 
 user_uninstall::
-	
+
 uninstall :: user_uninstall
 	@echo "*** Note:"
 	@echo "***  * Kernel modules were not uninstalled."
@@ -419,7 +419,7 @@ manhtml:
 
 %.d: %.c $(LINUX)/.config
 	$(CC) -M -MG $(MODCPPFLAGS) $(MODCFLAGS) $< | \
-       	$(SED) -e 's@^\(.*\)\.o:@$*.d $*.o: Makefile '`dirname $*.d`/Module.mk' @' > $@
+	$(SED) -e 's@^\(.*\)\.o:@$*.d $*.o: Makefile '`dirname $*.d`/Module.mk' @' > $@
 
 
 
@@ -429,7 +429,7 @@ manhtml:
 
 %.rd: %.c
 	$(CC) -M -MG $(PROGCPPFLAGS) $(PROGCFLAGS) $< | \
-       	$(SED) -e 's@^\(.*\)\.o:@$*.rd $*.ro: Makefile '`dirname $*.rd`/Module.mk' @' > $@
+	$(SED) -e 's@^\(.*\)\.o:@$*.rd $*.ro: Makefile '`dirname $*.rd`/Module.mk' @' > $@
 
 
 %: %.ro
@@ -442,7 +442,7 @@ manhtml:
 
 %.ad: %.c
 	$(CC) -M -MG $(ARCPPFLAGS) $(ARCFLAGS) $< | \
-       	$(SED) -e 's@^\(.*\)\.o:@$*.ad $*.ao: Makefile '`dirname $*.ad`/Module.mk' @' > $@
+	$(SED) -e 's@^\(.*\)\.o:@$*.ad $*.ao: Makefile '`dirname $*.ad`/Module.mk' @' > $@
 
 
 # .lo files are used for shared libraries
@@ -451,7 +451,7 @@ manhtml:
 
 %.ld: %.c
 	$(CC) -M -MG $(LIBCPPFLAGS) $(LIBCFLAGS) $< | \
-       	$(SED) -e 's@^\(.*\)\.o:@$*.ld $*.lo: Makefile '`dirname $*.ld`/Module.mk' @' > $@
+	$(SED) -e 's@^\(.*\)\.o:@$*.ld $*.lo: Makefile '`dirname $*.ld`/Module.mk' @' > $@
 
 
 # Flex and Bison
