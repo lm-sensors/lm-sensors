@@ -326,22 +326,9 @@ static int ZONE_TO_REG( int zone )
 #define PPR_TO_REG(val,fan) (SENSORS_LIMIT((val)-1,0,3)<<(fan *2))
 #define PPR_FROM_REG(val,fan) ((((val)>>(fan * 2))&0x03)+1)
 
-/* sensors_vid.h defines vid_from_reg() */
-#define VID_FROM_REG(val,vrm) (vid_from_reg((val),(vrm)))
-
-#define ALARMS_FROM_REG(val) (val)
-
 /* When converting to REG, we need to fixup the carry-over bit */
 #define INTMASK_FROM_REG(val) (val)
 #define INTMASK_TO_REG(val) (SENSORS_LIMIT((val)|((val)&0xff00?0x80:0),0,65535))
-
-/* Unlike some other drivers we DO NOT set initial limits.  Use
- * the config file to set limits.  Some users have reported
- * motherboards shutting down when we set limits in a previous
- * version of this driver.  This may be caused by APM/ACPI
- * detecting an out-of-limit condition when we had the wrong
- * limits set.
- */
 
 /* Typically used with Pentium 4 systems v9.1 VRM spec */
 #define LM85_INIT_VRM  91
@@ -1446,7 +1433,7 @@ void lm85_vid(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 3;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm85_update_client(client);
-		results[0] = VID_FROM_REG((data->vid)&0x3f,data->vrm);
+		results[0] = vid_from_reg((data->vid)&0x3f, data->vrm);
 		*nrels_mag = 1;
 	}
 }
@@ -1485,7 +1472,7 @@ void lm85_alarms(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm85_update_client(client);
-		results[0] = ALARMS_FROM_REG(data->alarms);
+		results[0] = data->alarms;
 		*nrels_mag = 1;
 	}
 }
