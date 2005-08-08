@@ -62,7 +62,7 @@ void help(void)
 int main(int argc, char *argv[])
 {
 	char *end;
-	int i, j, res, res2, i2cbus, address, size, file;
+	int i, j, res, i2cbus, address, size, file;
 	int bank = 0, bankreg = 0x4E;
 	char filename[20];
 	long funcs;
@@ -361,13 +361,11 @@ int main(int argc, char *argv[])
 				      cblock);
 			} else {
 #if USE_I2C_BLOCK
-				res = 0;
-				for (i = 0; i < 256; i+=32) {
-					res2 = i2c_smbus_read_i2c_block_data(file,
-					       i, cblock+i);
-					if (res2 <= 0)
+				for (res = 0; res < 256; res += i) {
+					i = i2c_smbus_read_i2c_block_data(file,
+						res, cblock + res);
+					if (i <= 0)
 						break;
-					res += res2;
 				}
 #else
 				fprintf(stderr, "Error: I2C block read "
