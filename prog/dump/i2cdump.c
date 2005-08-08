@@ -66,7 +66,6 @@ int main(int argc, char *argv[])
 	int bank = 0, bankreg = 0x4E;
 	char filename[20];
 	long funcs;
-	unsigned char cblock[256];
 	int block[256];
 	int pec = 0;
 	int flags = 0;
@@ -356,6 +355,8 @@ int main(int argc, char *argv[])
 		/* do the block transaction */
 		if (size == I2C_SMBUS_BLOCK_DATA
 		 || size == I2C_SMBUS_I2C_BLOCK_DATA) {
+			unsigned char cblock[288];
+
 			if (size == I2C_SMBUS_BLOCK_DATA) {
 				res = i2c_smbus_read_block_data(file, bank,
 				      cblock);
