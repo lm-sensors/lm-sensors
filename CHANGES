@@ -21,15 +21,19 @@ ask CVS about it:
   File doc/chips/*: Big update (2.6 backport)
   Library: Drop ds1780-specific code (now use adm9240)
            Fix memory leak in sensors_get_label()
+  Makefile: Detect 2.6+ kernels and check targets
   Man page isaset.8: Fix typos
   Module adm1031: Fix broken kfree() calls
   Module i2c-ali1563: New (2.6 backport by Winbond)
   Modules i2c-ipmb, i2c-ipmi: Support ipmi_request() additional argument
   Module lm93: Fix memory leak
   Module smsc47m1: Fix PWM enable polarity on read
+  Modules it87, pc87360, sis5595, smsc47m1, vt1211, vt8231,
+          w83627hf.c: Tag find function __init
   Program decode-dimms.pl: Support Linux 2.6 (Burkart Lingner)
   			   Added DDR/DDR2 frequency reporting in convenient
 			   form of DDRxxx PCyyyy
+  Program i2cdump: Properly handle short i2c block reads
   Program fancontrol.pl: Fix compile errors
   Program mkpatch: Include i2c-ali1563
                    Include w83792d
