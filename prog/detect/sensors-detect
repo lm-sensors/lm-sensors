@@ -171,7 +171,7 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        func => 3,
        procid => "VIA Technologies VT82C596 Apollo ACPI",
        driver => "i2c-viapro",
-       match => sub { $_[0] =~ /^SMBus Via Pro adapter at/ },
+       match => sub { $_[0] =~ /^SMBus V(IA|ia) Pro adapter at/ },
      } ,
      { 
        vendid => 0x1106,
@@ -179,7 +179,7 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        func => 3,
        procid => "VIA Technologies VT82C596B ACPI",
        driver => "i2c-viapro",
-       match => sub { $_[0] =~ /^SMBus Via Pro adapter at/ },
+       match => sub { $_[0] =~ /^SMBus V(IA|ia) Pro adapter at/ },
      } ,
      { 
        vendid => 0x1106,
@@ -187,7 +187,7 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        func => 4,
        procid => "VIA Technologies VT82C686 Apollo ACPI",
        driver => "i2c-viapro",
-       match => sub { $_[0] =~ /^SMBus Via Pro adapter at/ },
+       match => sub { $_[0] =~ /^SMBus V(IA|ia) Pro adapter at/ },
      } ,
      { 
        vendid => 0x1106,
@@ -195,7 +195,7 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        func => 0,
        procid => "VIA Technologies VT8233 VLink South Bridge",
        driver => "i2c-viapro",
-       match => sub { $_[0] =~ /^SMBus Via Pro adapter at/ },
+       match => sub { $_[0] =~ /^SMBus V(IA|ia) Pro adapter at/ },
      } ,
      { 
        vendid => 0x1106,
@@ -203,7 +203,7 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        func => 0,
        procid => "VIA Technologies VT8233A South Bridge",
        driver => "i2c-viapro",
-       match => sub { $_[0] =~ /^SMBus Via Pro adapter at/ },
+       match => sub { $_[0] =~ /^SMBus V(IA|ia) Pro adapter at/ },
      } ,
      { 
        vendid => 0x1106,
@@ -211,7 +211,7 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        func => 0,
        procid => "VIA Technologies VT8233A/8235 South Bridge",
        driver => "i2c-viapro",
-       match => sub { $_[0] =~ /^SMBus Via Pro adapter at/ },
+       match => sub { $_[0] =~ /^SMBus V(IA|ia) Pro adapter at/ },
      } ,
      {
        vendid => 0x1106,
@@ -219,7 +219,7 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        func => 0,
        procid => "VIA Technologies VT8237 South Bridge",
        driver => "i2c-viapro",
-       match => sub { $_[0] =~ /^SMBus Via Pro adapter at/ },
+       match => sub { $_[0] =~ /^SMBus V(IA|ia) Pro adapter at/ },
      } ,
      { 
        vendid => 0x1106,
@@ -227,7 +227,7 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        func => 4,
        procid => "VIA Technologies VT8231 South Bridge",
        driver => "i2c-viapro",
-       match => sub { $_[0] =~ /^SMBus Via Pro adapter at/ },
+       match => sub { $_[0] =~ /^SMBus V(IA|ia) Pro adapter at/ },
      } ,
      {
        vendid => 0x1039,
