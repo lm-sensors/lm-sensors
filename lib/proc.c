@@ -71,7 +71,7 @@ char sysfsmount[NAME_MAX];
                                        &sensors_proc_bus_max,\
                                        sizeof(struct sensors_bus))
 
-int getsysname(const sensors_chip_feature *feature, char *sysname,
+static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	int *sysmag, char *altsysname);
 
 /* return value: <0 on error, 0 if chip is ignored, 1 if chip is added
@@ -126,7 +126,7 @@ int sensors_read_proc_chips(void)
 	struct dirent *de;
 	DIR *dir;
 	FILE *f;
-	char dev[NAME_MAX], fstype[NAME_MAX], sysfs[NAME_MAX], n[NAME_MAX];
+	char sysfs[NAME_MAX], n[NAME_MAX];
 	char dirname[NAME_MAX];
 	int res;
 
@@ -140,8 +140,10 @@ int sensors_read_proc_chips(void)
 	if ((f = fopen("/proc/mounts", "r")) == NULL)
 		goto proc;
 	while (fgets(n, NAME_MAX, f)) {
-		sscanf(n, "%[^ ] %[^ ] %[^ ] %*s\n", dev, sysfs, fstype);
-		if (strcasecmp(fstype, "sysfs") == 0) {
+		char *fstype = dirname; /* alias to keep the code readable */
+
+		if (sscanf(n, "%*[^ ] %[^ ] %[^ ] %*s\n", sysfs, fstype) == 2
+		 && !strcasecmp(fstype, "sysfs")) {
 			foundsysfs++;
 			break;
 		}
@@ -185,7 +187,6 @@ int sensors_read_proc_chips(void)
 			}
 			strncpy(n, sysfs, ++l);
 			strcpy(n + l, p_lnk); 
-			printf("%s\n", n);
 		}
 		strcpy(dirname, n);
 		id = rindex(n, '/');
@@ -523,7 +524,7 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 	References: doc/developers/proc in the lm_sensors package;
 	            Documentation/i2c/sysfs_interface in the kernel
 */
-int getsysname(const sensors_chip_feature *feature, char *sysname,
+static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	int *sysmag, char *altsysname)
 {
 	const char * name = feature->name;
