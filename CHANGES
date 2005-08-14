@@ -21,6 +21,8 @@ ask CVS about it:
   File doc/chips/*: Big update (2.6 backport)
   Library: Drop ds1780-specific code (now use adm9240)
            Fix memory leak in sensors_get_label()
+           Support /sys/class/hwmon (Linux 2.6.14+)
+           Limit stack usage in sensors_read_proc_chips()
   Makefile: Detect 2.6+ kernels and check targets
   Man page isaset.8: Fix typos
   Module adm1031: Fix broken kfree() calls
