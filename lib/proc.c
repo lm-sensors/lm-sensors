@@ -74,6 +74,52 @@ char sysfsmount[NAME_MAX];
 int getsysname(const sensors_chip_feature *feature, char *sysname,
 	int *sysmag, char *altsysname);
 
+/* return value: <0 on error, 0 if chip is ignored, 1 if chip is added
+   Warning: name is overwritten */
+static int sensors_read_one_sysfs_chip(char *name, char *dirname, char *id)
+{
+	FILE *f;
+	char x[51];
+	int len;
+	sensors_proc_chips_entry entry;
+
+	if ((f = fopen(name, "r")) == NULL)
+		return -SENSORS_ERR_PROC;
+		
+	if (fscanf(f, "%50[a-zA-z0-9_ ]%n", x, &len) != 1) {
+		fclose(f);
+		return -SENSORS_ERR_CHIP_NAME;
+	}
+	fclose(f);
+
+	/* We don't care about subclients */
+	if (len >= 10 && !strcmp(x + len - 10, " subclient"))
+		return 0;
+
+	/* Fill in the entry fields */
+	entry.name.prefix = strdup(x);
+	if (entry.name.prefix == NULL)
+		return -SENSORS_ERR_PARSE; /* No better error :( */
+	entry.name.busname = strdup(dirname);
+	if (entry.name.prefix == NULL)
+		return -SENSORS_ERR_PARSE; /* No better error :( */
+	sscanf(id, "%d-%x", &entry.name.bus, &entry.name.addr);
+
+	/* Find out if ISA or not */
+	sprintf(name, "%s/class/i2c-adapter/i2c-%d/device/name",
+		sysfsmount, entry.name.bus);
+	if ((f = fopen(name, "r")) != NULL) {
+		if (fgets(x, 5, f) != NULL
+		 && !strncmp(x, "ISA ", 4))
+			entry.name.bus = SENSORS_CHIP_NAME_BUS_ISA;
+		fclose(f);
+	}
+
+	add_proc_chips(&entry);
+	
+	return 1;
+}
+
 /* This reads /proc/sys/dev/sensors/chips into memory */
 int sensors_read_proc_chips(void)
 {
@@ -103,10 +149,59 @@ int sensors_read_proc_chips(void)
 	fclose(f);
 	if (! foundsysfs)
 		goto proc;
+
+	/* Try /sys/class/hwmon first (Linux 2.6.14 and up) */
 	strcpy(sysfsmount, sysfs);
+	strcat(sysfs, "/class/hwmon");
+
+	dir = opendir(sysfs);
+	if (! dir)
+		goto oldsys;
+
+	while ((de = readdir(dir)) != NULL) {
+		char lnk[NAME_MAX];
+		char *id;
+
+		if (de->d_name[0] == '.')
+			continue;
+
+		sprintf(n, "%s/%s", sysfs, de->d_name);
+		strcpy(dirname, n);
+		strcat(n, "/device");
+		if ((res = readlink(n, lnk, NAME_MAX)) < 0)
+			continue;
+		lnk[res] = '\0';
+
+		if (lnk[0] == '/') /* absolute link (unlikely) */
+			strcpy(n, lnk);
+		else if (strncmp(lnk, "../", 3)) /* simple relative link */
+			sprintf(n, "%s/%s/%s", sysfs, de->d_name, lnk);
+		else { /* relative link with ../s, can be simplified */
+			char *p_lnk = lnk + 3;
+			int l = strlen(sysfs) - 1;
+			while (!strncmp(p_lnk, "../", 3)) {
+				p_lnk += 3;
+				while (l && sysfs[--l] != '/') ;
+			}
+			strncpy(n, sysfs, ++l);
+			strcpy(n + l, p_lnk); 
+			printf("%s\n", n);
+		}
+		strcpy(dirname, n);
+		id = rindex(n, '/');
+		id++;
+		strcat(n, "/name");
+
+		sensors_read_one_sysfs_chip(n, dirname, id);
+	}
+	closedir(dir);
+	return 0;
+
+oldsys:
+	/* Fall back to /sys/bus/i2c (Linux 2.5 to 2.6.13) */
+	strcpy(sysfs, sysfsmount);
 	strcat(sysfs, "/bus/i2c/devices");
 
-	/* Then read from it */
 	dir = opendir(sysfs);
 	if (! dir)
 		goto proc;
@@ -125,38 +220,7 @@ int sensors_read_proc_chips(void)
 		strcpy(dirname, n);
 		strcat(n, "/name");
 
-		if ((f = fopen(n, "r")) != NULL) {
-			char x[81];
-			int len = 0;
-			if (!fscanf(f, "%80[a-zA-z0-9_ ]%n", x, &len)) {
-				fclose(f);
-				continue;
-			}
-			fclose(f);
-			if (len >= 10 && !strcmp(x+len-10, " subclient"))
-				continue;
-			
-			/* HACK */ strcat(x, "-*");
-			if ((res = sensors_parse_chip_name(x, &entry.name))) {
-				char	em[NAME_MAX + 20];
-				strcpy(em, "Parsing ");
-				strcat(em, n);
-				sensors_parse_error(em, 0);
-				return res;
-			}
-			entry.name.busname = strdup(dirname);
-			sscanf(de->d_name, "%d-%x", &entry.name.bus, &entry.name.addr);
-			/* find out if ISA or not */
-			sprintf(n, "%s/class/i2c-adapter/i2c-%d/device/name",
-			        sysfsmount, entry.name.bus);
-			if ((f = fopen(n, "r")) != NULL) {
-				fgets(x, 5, f);
-				fclose(f);
-				if(!strncmp(x, "ISA ", 4))
-					entry.name.bus = SENSORS_CHIP_NAME_BUS_ISA;
-			}
-			add_proc_chips(&entry);
-		}
+		sensors_read_one_sysfs_chip(n, dirname, de->d_name);
 	}
 	closedir(dir);
 	return 0;
