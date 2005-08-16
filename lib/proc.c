@@ -142,19 +142,22 @@ int sensors_read_proc_chips(void)
 	while (fgets(n, NAME_MAX, f)) {
 		char *fstype = dirname; /* alias to keep the code readable */
 
-		if (sscanf(n, "%*[^ ] %[^ ] %[^ ] %*s\n", sysfs, fstype) == 2
-		 && !strcasecmp(fstype, "sysfs")) {
+		if (sscanf(n, "%*[^ ] %[^ ] %[^ ] %*s\n", sysfsmount, fstype)
+				== 2 && !strcasecmp(fstype, "sysfs")) {
 			foundsysfs++;
 			break;
 		}
 	}
 	fclose(f);
-	if (! foundsysfs)
+	if (!foundsysfs) {
+		memset(sysfsmount, '\0', sizeof(sysfsmount));
 		goto proc;
+	}
 
 	/* Try /sys/class/hwmon first (Linux 2.6.14 and up) */
-	strcpy(sysfsmount, sysfs);
-	strcat(sysfs, "/class/hwmon");
+	strncpy(sysfs, sysfsmount, sizeof(sysfs) - 1);
+	sysfs[sizeof(sysfs) - 1] = '\0';
+	strncat(sysfs, "/class/hwmon", sizeof(sysfs) - strlen(sysfs) - 1);
 
 	dir = opendir(sysfs);
 	if (! dir)
@@ -200,8 +203,9 @@ int sensors_read_proc_chips(void)
 
 oldsys:
 	/* Fall back to /sys/bus/i2c (Linux 2.5 to 2.6.13) */
-	strcpy(sysfs, sysfsmount);
-	strcat(sysfs, "/bus/i2c/devices");
+	strncpy(sysfs, sysfsmount, sizeof(sysfs) - 1);
+	sysfs[sizeof(sysfs) - 1] = '\0';
+	strncat(sysfs, "/bus/i2c/devices", sizeof(sysfs) - strlen(sysfs) - 1);
 
 	dir = opendir(sysfs);
 	if (! dir)
