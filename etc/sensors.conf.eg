@@ -772,31 +772,20 @@ chip "w83792d-*"
     set in8_min 3 * 0.95
     set in8_max 3 * 1.05
 
-    #set fan1_div 4
-    #set fan1_min 1500
-    set fan2_div 4
-    set fan2_min 1500
-    #set fan3_min 1300
-    #set fan4_min 1500
-    #set fan5_min 1500
-    #set fan6_min 1500
-    #set fan7_min 1500
+# fan1 adjustments examples
 
-    set temp1_over 42
-    set temp1_hyst 37
-    set temp2_over 43
-    set temp2_hyst 38
-    set temp3_over 45
-    set temp3_hyst 40
+#   set fan1_div 4
+#   set fan1_min 1500
 
-    #ignore fan1
-    #ignore fan3
-    #ignore fan4
-    #ignore fan5
-    #ignore fan6
-    #ignore fan7
-    #ignore temp3
+# temp2 limits examples
 
+#    set temp2_over 42
+#    set temp2_hyst 37
+
+# ignore examples
+
+#    ignore fan7
+#    ignore temp3
 
 chip "as99127f-*"
 
