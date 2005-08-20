@@ -465,9 +465,11 @@ function TestMinStop {
 function SaveConfig {
 	echo
 	echo "Saving configuration to $FCCONFIG..."
-	egrep -v '(INTERVAL|FCTEMPS|FCFANS|MAXTEMP|MINTEMP|MINSTART|MINSTOP)' $FCCONFIG >/tmp/fancontrol
-	echo -e "INTERVAL=$INTERVAL\nFCTEMPS=$FCTEMPS\nFCFANS=$FCFANS\nMINTEMP=$MINTEMP\nMAXTEMP=$MAXTEMP\nMINSTART=$MINSTART\nMINSTOP=$MINSTOP" >>/tmp/fancontrol
-	mv /tmp/fancontrol $FCCONFIG
+	tmpfile=`tempfile` || { echo "$0: Cannot create temporary file" >&2; exit 1;  }
+	trap " [ -f \"$tmpfile\" ] && /bin/rm -f -- \"$tmpfile\"" 0 1 2 3 13 15
+	egrep -v '(INTERVAL|FCTEMPS|FCFANS|MAXTEMP|MINTEMP|MINSTART|MINSTOP)' $FCCONFIG >$tmpfile
+	echo -e "INTERVAL=$INTERVAL\nFCTEMPS=$FCTEMPS\nFCFANS=$FCFANS\nMINTEMP=$MINTEMP\nMAXTEMP=$MAXTEMP\nMINSTART=$MINSTART\nMINSTOP=$MINSTOP" >>$tmpfile
+	mv $tmpfile $FCCONFIG
 	#check if file was written correctly
 	echo 'Configuration saved'
 }
