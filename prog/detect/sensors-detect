@@ -1737,7 +1737,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
       },
       {
 	name => "SMSC 47M15x/192 Super IO Fan Sensors",
-	driver => "to-be-written",
+	driver => "smsc47m1",
 	devid => 0x60,
 	logdev => 0x0a,
       },
