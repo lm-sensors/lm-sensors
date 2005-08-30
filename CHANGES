@@ -39,6 +39,7 @@ ask CVS about it:
   Program fancontrol.pl: Fix compile errors
   Program mkpatch: Include i2c-ali1563
                    Include w83792d
+  Program pwmconfig: Fix unsafe temporary file use
   Program rrd: Support 2.6 kernels
   Program sensord: Support pc87360 (Henrik Brix Andersen)
   Program sensors: Support the VAIO "VGN" prefix for eeprom
