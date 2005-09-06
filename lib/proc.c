@@ -93,6 +93,10 @@ static int sensors_read_one_sysfs_chip(char *name, char *dirname, char *id)
 	if (len >= 10 && !strcmp(x + len - 10, " subclient"))
 		return 0;
 
+	/* also, ignore eeproms for all 2.6.x kernels */
+	if (!strcmp(x, "eeprom"))
+		return 0;
+
 	/* Fill in the entry fields */
 	entry.name.prefix = strdup(x);
 	if (entry.name.prefix == NULL)
