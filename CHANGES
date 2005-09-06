@@ -17,7 +17,9 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.9.2 (2005????)
+2.9.3 (2005????)
+
+2.9.2 (20050906)
   File doc/chips/*: Big update (2.6 backport)
   Library: Drop ds1780-specific code (now use adm9240)
            Fix memory leak in sensors_get_label()
