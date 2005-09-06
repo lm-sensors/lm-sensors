@@ -108,6 +108,7 @@ lm_sensors
   4.32 Problems on particular systems
   4.33 Problems on 2.6 kernels
     4.33.1 i2c-viapro and via686a
+    4.33.2 Where are my EEPROMs?
 5 How to Ask for Help
   5.1 What to send us when asking for help
   5.2 What to do if a module won't insert?
@@ -1246,6 +1247,25 @@ integrated sensors driver for VIA bridges). This caused the second
 loaded driver to silently fail working. So do not load both i2c-viapro
 and via686a together unless you have a recent kernel.
 
+4.33.2 Where are my EEPROMs?
+----------------------------
+
+The 2.6.14-rc1 kernel introduced the hwmon class, which groups all
+hardware monitoring drivers in a logical way. The goal was to help
+libsensors grab the relevant sensors information in /sys. In particular:
+   * libsensors will no more need to know about the underlying bus types
+     (I2C/SMBus, ISA or other);
+
+   * libsensors will no more list non-hardware monitoring chips.
+   This explains why EEPROMs are no more displayed by `sensors': they
+are no hardware monitoring chips. The medium term plan is to drop
+eeprom support for all Linux 2.6 kernels, as it didn't fit well in the
+library code in the first place.
+
+   Note that you can still obtain information about your EEPROMs by
+using the dedicated perl scripts in `prog/eeprom': `ddcmon',
+`decode-dimms.pl', `decode-edid.pl' and `decode-vaio.pl'.
+
 5 How to Ask for Help
 *********************
 
@@ -1519,6 +1539,8 @@ can not be sure.
 
 Appendix A Revision History of This Document
 ********************************************
+
+   * Rev 2.16 (JD) Added 4.33.2, 2005-09-06
 
    * Rev 2.15 (JD) Updates, including mailing-list change, 2005-05-21
 

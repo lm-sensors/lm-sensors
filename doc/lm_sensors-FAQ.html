@@ -1,8 +1,8 @@
 <html lang="en">
 <head>
-<title>Sensors FAQ for lm_sensors version 2.15</title>
+<title>Sensors FAQ for lm_sensors version 2.16</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="Sensors FAQ for lm_sensors version 2.15">
+<meta name="description" content="Sensors FAQ for lm_sensors version 2.16">
 <meta name="generator" content="makeinfo 4.7">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
@@ -19,7 +19,7 @@
 --></style>
 </head>
 <body>
-<h1 class="settitle">Sensors FAQ for lm_sensors version 2.15</h1>
+<h1 class="settitle">Sensors FAQ for lm_sensors version 2.16</h1>
 Copyright (C) 1998 - 2005<br>
 Frodo Looijaard,<br>
 Philip Edelbrock,<br>
@@ -168,6 +168,7 @@ Jean Delvare<br>
 <li><a href="#Section-4_002e33">4.33 Problems on 2.6 kernels</a>
 <ul>
 <li><a href="#Section-4_002e33">4.33.1 i2c-viapro and via686a</a>
+<li><a href="#Section-4_002e33">4.33.2 Where are my EEPROMs?</a>
 </li></ul>
 </li></ul>
 <li><a name="toc_Help" href="#Help">5 How to Ask for Help</a>
@@ -1758,6 +1759,26 @@ sensors driver for VIA bridges). This caused the second loaded driver to
 silently fail working. So do not load both i2c-viapro and via686a together
 unless you have a recent kernel.
 
+<h4 class="subsection">4.33.2 Where are my EEPROMs?</h4>
+
+<p>The 2.6.14-rc1 kernel introduced the hwmon class, which groups all
+hardware monitoring drivers in a logical way. The goal was to help
+libsensors grab the relevant sensors information in /sys. In particular:
+     <ul>
+<li>libsensors will no more need to know about the underlying bus types
+(I2C/SMBus, ISA or other);
+<li>libsensors will no more list non-hardware monitoring chips. 
+</ul>
+   This explains why EEPROMs are no more displayed by <span class="command">sensors</span>:
+they are no hardware monitoring chips. The medium term plan is to drop
+eeprom support for all Linux 2.6 kernels, as it didn't fit well in
+the library code in the first place.
+
+   <p>Note that you can still obtain information about your EEPROMs by using
+the dedicated perl scripts in <span class="file">prog/eeprom</span>: <span class="command">ddcmon</span>,
+<span class="command">decode-dimms.pl</span>, <span class="command">decode-edid.pl</span> and
+<span class="command">decode-vaio.pl</span>.
+
 <div class="node">
 <p><hr>
 <a name="Help"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Contribute">Contribute</a>,
@@ -2222,6 +2243,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <h2 class="appendix">Appendix A Revision History of This Document</h2>
 
      <ul>
+<li>Rev 2.16 (JD) Added 4.33.2, 2005-09-06
 <li>Rev 2.15 (JD) Updates, including mailing-list change, 2005-05-21
 <li>Rev 2.14 (MDS) Updated 4.12, 2004-11-26
 <li>Rev 2.13 (JD) Added 4.6.1, updated 4.7, 2004-06-23

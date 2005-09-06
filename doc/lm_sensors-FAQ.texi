@@ -1258,8 +1258,8 @@ For IBM systems, see @file{README.thinkpad}.
 @section Problems on 2.6 kernels
 
 Not all drivers have been ported to 2.6. If your favorite driver is not
-in 2.6, the reason is that nobody has ported it.
-Please don't bother asking us why it is not in 2.6.
+in 2.6, the reason is that nobody has ported it, or the ported code did
+not get a proper review yet.
 If you would like to port the driver, see the file
 Documentation/i2c/porting-clients in the 2.6 kernel tree for help,
 then send us the ported driver when you are done.
@@ -1270,6 +1270,25 @@ i2c-viapro (the SMBus driver for VIA bridges) and via686a (the integrated
 sensors driver for VIA bridges). This caused the second loaded driver to 
 silently fail working. So do not load both i2c-viapro and via686a together 
 unless you have a recent kernel.
+
+@subsection Where are my EEPROMs?
+The 2.6.14-rc1 kernel introduced the hwmon class, which groups all
+hardware monitoring drivers in a logical way. The goal was to help
+libsensors grab the relevant sensors information in /sys. In particular:
+@itemize
+@item libsensors will no more need to know about the underlying bus types
+(I2C/SMBus, ISA or other);
+@item libsensors will no more list non-hardware monitoring chips.
+@end itemize
+This explains why EEPROMs are no more displayed by @command{sensors}:
+they are no hardware monitoring chips. The medium term plan is to drop
+eeprom support for all Linux 2.6 kernels, as it didn't fit well in
+the library code in the first place.
+
+Note that you can still obtain information about your EEPROMs by using
+the dedicated perl scripts in @file{prog/eeprom}: @command{ddcmon},
+@command{decode-dimms.pl}, @command{decode-edid.pl} and
+@command{decode-vaio.pl}.
 
 
 @node Help, Contribute, Problems, Top
@@ -1591,6 +1610,7 @@ can not be sure.
 @appendix Revision History of This Document
 
 @itemize
+@item Rev 2.16 (JD) Added 4.33.2, 2005-09-06
 @item Rev 2.15 (JD) Updates, including mailing-list change, 2005-05-21
 @item Rev 2.14 (MDS) Updated 4.12, 2004-11-26
 @item Rev 2.13 (JD) Added 4.6.1, updated 4.7, 2004-06-23
