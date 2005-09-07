@@ -73,11 +73,8 @@
 MODULE_AUTHOR("Benjamin Herrenschmidt <benh@kernel.crashing.org>");
 MODULE_DESCRIPTION("I2C driver for Apple's Keywest");
 MODULE_LICENSE("GPL");
-MODULE_PARM(probe, "i");
 MODULE_PARM(debug, "i");
 
-
-int probe = 0;
 int debug = 0;
 
 static struct keywest_iface *ifaces = NULL;
@@ -550,15 +547,6 @@ create_iface(struct device_node* np)
 			printk("i2c-keywest.c: Adapter %s registration failed\n",
 				chan->adapter.name);
 			chan->adapter.data = NULL;
-		}
-		if (probe) {
-			printk("Probe: ");
-			for (addr = 0x00; addr <= 0x7f; addr++) {
-				if (i2c_smbus_xfer(&chan->adapter,addr,
-				    0,0,0,I2C_SMBUS_QUICK,NULL) >= 0)
-					printk("%02x ", addr);
-			}
-			printk("\n");
 		}
 	}
 
