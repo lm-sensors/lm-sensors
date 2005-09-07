@@ -254,7 +254,7 @@ kbuild_2_4_nostdinc := -nostdinc $(shell LC_ALL=C $(CC) -print-search-dirs | sed
 
 MODCPPFLAGS += -D__KERNEL__ -DMODULE -DEXPORT_SYMTAB -fomit-frame-pointer $(ALL_CPPFLAGS) -I$(LINUX_HEADERS) $(kbuild_2_4_nostdinc)
 MODCFLAGS += $(ALL_CFLAGS)
-PROGCPPFLAGS := -DETCDIR="\"$(ETCDIR)\"" $(ALL_CPPFLAGS)
+PROGCPPFLAGS := -DETCDIR="\"$(ETCDIR)\"" $(ALL_CPPFLAGS) -Wundef
 PROGCFLAGS := $(ALL_CFLAGS)
 ARCPPFLAGS := $(ALL_CPPFLAGS)
 ARCFLAGS := $(ALL_CFLAGS)
