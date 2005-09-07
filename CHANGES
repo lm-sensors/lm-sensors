@@ -18,6 +18,11 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.3 (2005????)
+  Makefile: Compile user-space programs with -Wundef
+  Module w83781d: Drop W83697HF support (Grand Coady)
+  Module i2c-keywest: Remove bus probing code (2.6 backport)
+  Module i2c-nforce2: Remove dead code (2.6 backport)
+
 
 2.9.2 (20050906)
   File doc/chips/*: Big update (2.6 backport)
