@@ -67,6 +67,7 @@
 #   PCG-Z600LEK  : No EEPROM
 #   PCG-Z600NE   : No EEPROM
 #   VGN-S260     : OK
+#   VGN-S4M/S    : OK
 # Any feedback appreciated anyway.
 #
 # Thanks to Werner Heuser, Carsten Blume, Christian Gennerat, Joe Wreschnig,
