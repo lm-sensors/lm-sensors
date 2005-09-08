@@ -136,10 +136,11 @@ steps apply.
 
 * If you want to have your driver integrated to Linux 2.6, you have to
   port your driver to the new sysfs interface. Once done and preferably
-  after testing, submit a patch to the Linux kernel mailing list
-  <linux-kernel at vger dot kernel dot org>, our mailing list
-  <sensors at stimpy dot netroedge.com>,and Greg KH (greg at kroah
-  dot com).
+  after testing, submit a patch to our mailing list: see
+  http://secure.netroedge.com/~lm78/author.html
+  Make sure to check the current status for your driver first:
+  http://secure.netroedge.com/~lm78/kernel26.html
+  http://secure.netroedge.com/~lm78/newdrivers.html
 
 ---------------------------------------------------------------------
 Checklist for us to do on the webpage:

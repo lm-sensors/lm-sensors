@@ -79,14 +79,9 @@ INSTALLATION INSTRUCTIONS
 		to test
 
 
-What to do for help
--------------------
+TROUBLESHOOTING
+---------------
 	RRD problems: See the RRD documentation
-
-	lm_sensors problems: See the lm_sensors FAQ and other documentation,
-		enter a support ticket on our
-		web page http://www.lm-sensors.nu or email us at
-		sensors@stimpy.netroedge.com
 
 	Cron problems: check the cron logs, maybe your cron format
 		is different or you need to signal the cron daemon?
@@ -102,11 +97,6 @@ What to do for help
 		the directory add a .htaccess file to the directory
 		including the line
 			Options ExecCGI 
-
-	Problems with these scripts:
-		Enter a support ticket on our
-		web page http://www.lm-sensors.nu or email us at
-		sensors@stimpy.netroedge.com
 
 	Removing the "RRDTOOL / TOBI OETIKER" tag in RRD graphs:
 		Comment out the line 

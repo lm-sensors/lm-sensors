@@ -13,7 +13,7 @@ run prog/detect/sensors-detect.
 
 If your sensor chip is not detected by sensors-detect
 or supported by this package,
-please send mail to sensors@stimpy.netroedge.com.
+please send mail (see http://secure.netroedge.com/~lm78/author.html)
 
 Please include the following in your mail:
 	- The output of (as root) 'prog/detect/sensors-detect'

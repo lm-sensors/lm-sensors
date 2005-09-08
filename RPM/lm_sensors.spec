@@ -47,8 +47,7 @@ Docdir: %{prefix}/doc
 Requires: %{name}-drivers >= %{ver}
 Url: http://www.netroedge.com/~lm78/
 
-##For officially distributed packages, please sign below
-##Packager: Lm_sensors Group <sensors@stimpy.netroedge.com> 
+#Packager: Your Name <your@address>
 
 %package drivers
 Summary: Chip and bus drivers for general SMBus access and hardware monitoring.

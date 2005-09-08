@@ -71,8 +71,3 @@ Sensor selection is as follows:
 	1	Analog input (not for temperature sensing)	2,3
 	2	Thermistor					1,2,3
 	3	Pentium diode					1,2
-
-
-Maintainer
------------------
-Send requests to the sensors@stimpy.netroedge.com mailing list.

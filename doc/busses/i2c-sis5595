@@ -54,6 +54,3 @@ A BUS driver is used by other CHIP drivers to access chips on the bus.
 
 To install this driver, simply do
   # modprobe i2c-sis5595
-
-This driver is ALPHA!!!
-Please send feedback to us at sensors@stimpy.netroedge.com.
