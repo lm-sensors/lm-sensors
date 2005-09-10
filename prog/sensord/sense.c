@@ -84,16 +84,12 @@ chipName
 static int
 idChip
 (const sensors_chip_name *chip) {
-  const char *adapter, *algorithm;
+  const char *adapter;
 
   sensorLog (LOG_INFO, "Chip: %s", chipName (chip));
   adapter = sensors_get_adapter_name (chip->bus);
   if (adapter)
     sensorLog (LOG_INFO, "Adapter: %s", adapter);
-  algorithm = sensors_get_algorithm_name (chip->bus);
-  if (algorithm)
-    sensorLog (LOG_INFO, "Algorithm: %s", algorithm);
-  /* assert adapter || algorithm */
   
   return 0;
 }
