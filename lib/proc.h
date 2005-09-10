@@ -34,4 +34,7 @@ extern int sensors_read_proc(sensors_chip_name name, int feature,
 extern int sensors_write_proc(sensors_chip_name name, int feature,
                               double value);
 
+/* Linux 2.6 uses sysfs, some code needs to know */
+extern int foundsysfs;
+
 #endif

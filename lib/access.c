@@ -120,8 +120,6 @@ const sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
    if there are wildcards. */
 int sensors_chip_name_has_wildcards(sensors_chip_name chip)
 {
-  extern int foundsysfs;
-
   if(foundsysfs) {
     if (chip.prefix == SENSORS_CHIP_NAME_PREFIX_ANY)
       return 1;
