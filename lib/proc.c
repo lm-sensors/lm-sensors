@@ -17,11 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* for open() */
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
 #include <stddef.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -367,14 +362,13 @@ int sensors_get_chip_id(sensors_chip_name name)
   
 /* This reads a feature /proc or /sys file.
    Sysfs uses a one-value-per file system...
-   except for eeprom, which puts the entire eeprom into one file.
 */
 int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 {
 	int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
 	const sensors_chip_feature *the_feature;
 	int buflen = BUF_LEN;
-	int mag, eepromoffset, fd, ret=0;
+	int mag;
 
 	if(!foundsysfs)
 		if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
@@ -386,42 +380,18 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 		FILE *f;
 		strcpy(n, name.busname);
 		strcat(n, "/");
-		/* total hack for eeprom */
-		if (! strcmp(name.prefix, "eeprom")){
-			strcat(n, "eeprom");
-			/* we use unbuffered I/O to benefit from eeprom driver
-			   optimization */
-			if ((fd = open(n, O_RDONLY)) >= 0) {
-				eepromoffset =
-				  (the_feature->offset / sizeof(long))  +
-				  (16 * (the_feature->sysctl - EEPROM_SYSCTL1));
-				if (lseek(fd, eepromoffset, SEEK_SET) < 0
-				 || read(fd, &ret, 1) != 1) {
-					close(fd);
-					return -SENSORS_ERR_PROC;
-				}
-				close(fd);
-				*value = ret;
-				return 0;
-			} else
-				return -SENSORS_ERR_PROC;
-		} else {
-			strcpy(altn, n);
-			/* use rindex to append sysname to n */
-			getsysname(the_feature, rindex(n, '\0'), &mag, rindex(altn, '\0'));
-			if ((f = fopen(n, "r")) != NULL
-			 || (f = fopen(altn, "r")) != NULL) {
-				fscanf(f, "%lf", value);
-				fclose(f);
-				for (; mag > 0; mag --)
-					*value /= 10.0;
-		//		fprintf(stderr, "Feature %s value %lf scale %d offset %d\n",
-		//			the_feature->name, *value,
-		//			the_feature->scaling, the_feature->offset);
-				return 0;
-			} else
-				return -SENSORS_ERR_PROC;
-		}
+		strcpy(altn, n);
+		/* use rindex to append sysname to n */
+		getsysname(the_feature, rindex(n, '\0'), &mag, rindex(altn, '\0'));
+		if ((f = fopen(n, "r")) != NULL
+		 || (f = fopen(altn, "r")) != NULL) {
+			fscanf(f, "%lf", value);
+			fclose(f);
+			for (; mag > 0; mag --)
+				*value /= 10.0;
+			return 0;
+		} else
+			return -SENSORS_ERR_PROC;
 	} else {
 		sysctl_name[3] = the_feature->sysctl;
 		if (sysctl(sysctl_name, 4, buf, &buflen, NULL, 0))
