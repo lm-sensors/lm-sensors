@@ -169,7 +169,7 @@ done:
 		               "and also modprobed your i2c bus drivers\n");
 }
 
-int open_i2c_dev(const int i2cbus, char *filename)
+int open_i2c_dev(const int i2cbus, char *filename, const int quiet)
 {
 	int file;
 
@@ -181,7 +181,7 @@ int open_i2c_dev(const int i2cbus, char *filename)
 		file = open(filename, O_RDWR);
 	}
 
-	if (file < 0) {
+	if (file < 0 && !quiet) {
 		if (errno == ENOENT) {
 			fprintf(stderr, "Error: Could not open file "
 			        "`/dev/i2c-%d' or `/dev/i2c/%d': %s\n",

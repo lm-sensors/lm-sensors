@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 		help();
 	}
 
-	file = open_i2c_dev(i2cbus, filename);
+	file = open_i2c_dev(i2cbus, filename, 0);
 	if (file < 0) {
 		exit(1);
 	}

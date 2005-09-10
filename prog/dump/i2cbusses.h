@@ -23,6 +23,6 @@
 
 void print_i2c_busses(int procfmt);
 
-int open_i2c_dev(const int i2cbus, char *filename);
+int open_i2c_dev(const int i2cbus, char *filename, const int quiet);
 
 #endif
