@@ -24,11 +24,59 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <limits.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
 #include "i2cbusses.h"
+#include "i2c-dev.h"
+
+enum adt { adt_dummy, adt_isa, adt_i2c, adt_smbus, adt_unknown };
+
+struct adap_type {
+	const char *funcs;
+	const char* algo;
+};
+
+static struct adap_type adap_types[5] = {
+	{ .funcs	= "dummy",
+	  .algo		= "Dummy bus algorithm", },
+	{ .funcs	= "isa",
+	  .algo		= "ISA bus algorithm", },
+	{ .funcs	= "i2c",
+	  .algo		= "Algorithm unavailable", },
+	{ .funcs	= "smbus",
+	  .algo		= "Non-I2C SMBus adapter", },
+	{ .funcs	= "unknown",
+	  .algo		= "Algorithm unavailable", },
+};
+
+static enum adt i2c_get_funcs(int i2cbus)
+{
+	long funcs;
+	int file;
+	char filename[20];
+	enum adt ret;
+
+	file = open_i2c_dev(i2cbus, filename, 1);
+	if (file < 0)
+		return adt_unknown;
+
+	if (ioctl(file, I2C_FUNCS, &funcs) < 0)
+		ret = adt_unknown;
+	else if (funcs & I2C_FUNC_I2C)
+		ret = adt_i2c;
+	else if (funcs & (I2C_FUNC_SMBUS_BYTE |
+			  I2C_FUNC_SMBUS_BYTE_DATA |
+			  I2C_FUNC_SMBUS_WORD_DATA))
+		ret = adt_smbus;
+	else
+		ret = adt_dummy;
+
+	close(file);
+	return ret;
+}
 
 /*
    this just prints out the installed i2c busses in a consistent format, whether
@@ -47,7 +95,6 @@ void print_i2c_busses(int procfmt)
 	char *border;
 	char dev[NAME_MAX], fstype[NAME_MAX], sysfs[NAME_MAX], n[NAME_MAX];
 	int foundsysfs = 0;
-	int tmp;
 	int count=0;
 
 
@@ -127,6 +174,8 @@ void print_i2c_busses(int procfmt)
 
 found:
 		if (f != NULL) {
+			int i2cbus;
+			enum adt type;
 			char	x[120];
 
 			fgets(x, 120, f);
@@ -137,27 +186,20 @@ found:
 				fprintf(stderr,"  Installed I2C busses:\n");
 			/* match 2.4 /proc/bus/i2c format as closely as possible */
 			if(!strncmp(x, "ISA ", 4)) {
-				if(procfmt)
-					printf("%s\t%-10s\t%-32s\t%s\n", de->d_name,
-					        "dummy", x, "ISA bus algorithm");
-				else
-					fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
-					        "dummy", x, "ISA bus algorithm");
-			} else if(!sscanf(de->d_name, "i2c-%d", &tmp)) {
-				if(procfmt)
-					printf("%s\t%-10s\t%-32s\t%s\n", de->d_name,
-					        "dummy", x, "Dummy bus algorithm");
-				else
-					fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
-					        "dummy", x, "Dummy bus algorithm");
+				type = adt_isa;
+			} else if(!sscanf(de->d_name, "i2c-%d", &i2cbus)) {
+				type = adt_dummy;
 			} else {
-				if(procfmt)
-					printf("%s\t%-10s\t%-32s\t%s\n", de->d_name,
-					        "unknown", x, "Algorithm unavailable");
-				else
-					fprintf(stderr, "    %s\t%-10s\t%-32s\t%s\n", de->d_name,
-					        "unknown", x, "Algorithm unavailable");
+				/* Attempt to probe for adapter capabilities */
+				type = i2c_get_funcs(i2cbus);
 			}
+
+			if (procfmt)
+				printf("%s\t%-10s\t%-32s\t%s\n", de->d_name,
+					adap_types[type].funcs, x, adap_types[type].algo);
+			else
+				fprintf(stderr, "    %s\t%-10s\t%s\n", de->d_name,
+					adap_types[type].funcs, x);
 		}
 	}
 	closedir(dir);
