@@ -226,17 +226,20 @@ int sensors_substitute_chip(sensors_chip_name *name,int lineno)
     return -SENSORS_ERR_BUS_NAME;
   }
 
+  /* We used to compare both the adapter and the algorithm names for
+     bus matching, but Linux 2.6 has no more names for algorithms, and
+     it was redundant anyway. So we now only rely on the adapter name. */
   for (j = 0; j < sensors_proc_bus_count; j++) {
     if (!strcmp(sensors_config_busses[i].adapter,
-                sensors_proc_bus[j].adapter) &&
-        !strcmp(sensors_config_busses[i].algorithm,
-                sensors_proc_bus[j].algorithm)) 
-      break;
+                sensors_proc_bus[j].adapter)) {
+      name->bus = sensors_proc_bus[j].number;
+      return 0;
+    }
   }
 
-  /* Well, if we did not find anything, j = sensors_proc_bus_count; so if
-     we set this chip's bus number to j, it will never be matched. Good. */
-  name->bus = j;
+  /* We did not find anything. sensors_proc_bus_count is not a valid
+     bus number, so it will never be matched. Good. */
+  name->bus = sensors_proc_bus_count;
   return 0;
 }
 
