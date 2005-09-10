@@ -206,7 +206,7 @@ ALL_CFLAGS += -O2
 endif
 
 ifeq ($(WARN),1)
-ALL_CFLAGS += -W -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
+ALL_CFLAGS += -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
             -Wcast-align -Wwrite-strings -Wnested-externs -Winline
 endif
 
@@ -255,7 +255,7 @@ kbuild_2_4_nostdinc := -nostdinc $(shell LC_ALL=C $(CC) -print-search-dirs | sed
 MODCPPFLAGS += -D__KERNEL__ -DMODULE -DEXPORT_SYMTAB -fomit-frame-pointer $(ALL_CPPFLAGS) -I$(LINUX_HEADERS) $(kbuild_2_4_nostdinc)
 MODCFLAGS += $(ALL_CFLAGS)
 PROGCPPFLAGS := -DETCDIR="\"$(ETCDIR)\"" $(ALL_CPPFLAGS) -Wundef
-PROGCFLAGS := $(ALL_CFLAGS)
+PROGCFLAGS := $(ALL_CFLAGS) -W
 ARCPPFLAGS := $(ALL_CPPFLAGS)
 ARCFLAGS := $(ALL_CFLAGS)
 LIBCPPFLAGS := $(ALL_CPPFLAGS)
