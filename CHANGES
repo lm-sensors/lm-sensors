@@ -18,10 +18,18 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.3 (2005????)
-  Makefile: Compile user-space programs with -Wundef
+  Library: Fix bus matching code for Linux 2.6 (Karsten Petersen)
+  Makefile: Compile user-space programs with -Wundef and -W
   Module w83781d: Drop W83697HF support (Grand Coady)
   Module i2c-keywest: Remove bus probing code (2.6 backport)
   Module i2c-nforce2: Remove dead code (2.6 backport)
+  Programs i2cdetect, i2cdump, i2cset: Stop printing the algorithm name
+                                       Print the correct bus type if bus
+                                       functionality can be queried
+  Program sensord: Do not log algorithm names
+  Program sensors-detect: Drop algorithm names
+                          Do not rely on i2cdetect -l printing algo names
+                          Simplify adapter name matching mechanism
 
 
 2.9.2 (20050906)
