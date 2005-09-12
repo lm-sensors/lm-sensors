@@ -528,7 +528,6 @@ create_iface(struct device_node* np)
 
 	for (i=0; i<nchan; i++) {
 		struct keywest_chan* chan = &iface->channels[i];
-		u8 addr;
 		
 		sprintf(chan->adapter.name, "%s %d", np->parent->name, i);
 		chan->iface = iface;
