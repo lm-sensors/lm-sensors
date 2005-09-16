@@ -1005,52 +1005,6 @@ static const ChipDescriptor asb100_chip = {
   asb100_names, asb100_features, 0, 0
 };
 
-/** EEPROM **/
-
-static const char *
-fmtType_EEPROM
-(const double values[], int alarm, int beep) {
-  if ((int) values[0] == 4)
-    sprintf (buff, "SDRAM DIMM SPD");
-  else if ((int) values[0] == 7)
-    sprintf (buff, "DDR SDRAM DIMM SPD");
-  else
-    sprintf (buff, "Invalid"); /* N.B: sensors just returns, aborting further tests; I don't.. */
-  return fmtExtra (alarm, beep);
-}
-
-static const char *
-fmtRowCol_EEPROM
-(const double values[], int alarm, int beep) {
-  int row = (int) values[0];
-  int col = (int) values[1];
-  int num = (int) values[2];
-  int banks = (int) values[3];
-  int foo = (row & 0xf) + (col & 0xf) + 17;
-  if ((foo > 0) && (foo <= 12) && (num <= 8) && (banks <= 8)) {
-    sprintf (buff, "%d", (1 << foo) * num * banks);
-  } else {
-    sprintf (buff, "Invalid %d %d %d %d", row, col, num, banks);
-  }
-  return buff;
-}
-
-static const char *eeprom_names[] = {
-  SENSORS_EEPROM_PREFIX, NULL
-};
-
-static const FeatureDescriptor eeprom_features[] = {
-  { fmtType_EEPROM, NULL, DataType_other, 0, 0,
-    { SENSORS_EEPROM_TYPE, -1 } },
-  { fmtRowCol_EEPROM, NULL, DataType_other, 0, 0,
-    { SENSORS_EEPROM_ROWADDR, SENSORS_EEPROM_COLADDR, SENSORS_EEPROM_NUMROWS, SENSORS_EEPROM_BANKS, -1 } },
-  { NULL }
-};
-
-static const ChipDescriptor eeprom_chip = {
-  eeprom_names, eeprom_features, 0, 0
-};
-
 /** PC87360 **/
 
 static const char *
@@ -1145,7 +1099,6 @@ const ChipDescriptor * const knownChips[] = {
   &adm1025_chip,
   &adm9240_chip,
   &ds1621_chip,
-  &eeprom_chip,
   &gl518_chip,
   &lm75_chip,
   &lm78_chip,
