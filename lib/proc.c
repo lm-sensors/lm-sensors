@@ -214,68 +214,11 @@ proc:
 
 int sensors_read_proc_bus(void)
 {
-	struct dirent *de;
-	DIR *dir;
-	FILE *f;
-	char line[255];
-	char *border;
-	sensors_bus entry;
-	int lineno;
-	char sysfs[NAME_MAX], n[NAME_MAX];
-	char dirname[NAME_MAX];
-
-	if (sensors_found_sysfs) {
-		strncpy(sysfs, sensors_sysfs_mount, sizeof(sysfs) - 1);
-		sysfs[sizeof(sysfs) - 1] = 0;
-		strncat(sysfs, "/class/i2c-adapter",
-				sizeof(sysfs) - strlen(sysfs) - 1);
-
-		/* Then read from it */
-		dir = opendir(sysfs);
-		if (! dir)
-			goto proc;
-
-		while ((de = readdir(dir)) != NULL) {
-			if (!strcmp(de->d_name, "."))
-				continue;
-			if (!strcmp(de->d_name, ".."))
-				continue;
-
-			strcpy(n, sysfs);
-			strcat(n, "/");
-			strcat(n, de->d_name);
-			strcpy(dirname, n);
-			strcat(n, "/device/name");
-
-			if ((f = fopen(n, "r")) != NULL) {
-				char	x[120];
-				fgets(x, 120, f);
-				fclose(f);
-				if((border = index(x, '\n')) != NULL)
-					*border = 0;
-				entry.adapter=strdup(x);
-				if(!strncmp(x, "ISA ", 4)) {
-					entry.number = SENSORS_CHIP_NAME_BUS_ISA;
-					entry.algorithm = strdup("ISA bus algorithm");
-				} else if(!sscanf(de->d_name, "i2c-%d", &entry.number)) {
-					entry.number = SENSORS_CHIP_NAME_BUS_DUMMY;
-					entry.algorithm = strdup("Dummy bus algorithm");
-				} else
-					entry.algorithm = strdup("Unavailable from sysfs");
-				if (entry.algorithm == NULL)
-					goto FAT_ERROR_SYS;
-				sensors_add_proc_bus(&entry);
-			}
-		}
-		closedir(dir);
-		return 0;
-FAT_ERROR_SYS:
-		sensors_fatal_error("sensors_read_proc_bus", "Allocating entry");
-		closedir(dir);
-		return -SENSORS_ERR_PROC;
-	}
-
-proc:
+  FILE *f;
+  char line[255];
+  char *border;
+  sensors_bus entry;
+  int lineno;
 
   f = fopen("/proc/bus/i2c","r");
   if (!f)
