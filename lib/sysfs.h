@@ -26,6 +26,8 @@ extern char sensors_sysfs_mount[];
 
 extern int sensors_init_sysfs(void);
 
+extern int sensors_read_sysfs_chips(void);
+
 extern int sensors_read_sysfs_bus(void);
 
 #endif /* !SENSORS_LIB_SYSFS_H */

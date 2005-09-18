@@ -41,13 +41,11 @@ int sensors_init(FILE *input)
 {
   int res;
   sensors_cleanup();
-  if ((res = sensors_read_proc_chips()))
-    return res;
   if (sensors_init_sysfs()) {
-    if ((res = sensors_read_sysfs_bus()))
+    if ((res = sensors_read_sysfs_chips()) || (res = sensors_read_sysfs_bus()))
       return res;
   } else {
-    if ((res = sensors_read_proc_bus()))
+    if ((res = sensors_read_proc_chips()) || (res = sensors_read_proc_bus()))
       return res;
   }
   sensors_yyin = input;
