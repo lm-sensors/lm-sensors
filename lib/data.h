@@ -182,9 +182,17 @@ extern sensors_proc_chips_entry *sensors_proc_chips;
 extern int sensors_proc_chips_count;
 extern int sensors_proc_chips_max;
 
+#define sensors_add_proc_chips(el) sensors_add_array_el( \
+	(el), &sensors_proc_chips, &sensors_proc_chips_count,\
+	&sensors_proc_chips_max, sizeof(struct sensors_proc_chips_entry))
+
 extern sensors_bus *sensors_proc_bus;
 extern int sensors_proc_bus_count;
 extern int sensors_proc_bus_max;
+
+#define sensors_add_proc_bus(el) sensors_add_array_el( \
+	(el), &sensors_proc_bus, &sensors_proc_bus_count,\
+	&sensors_proc_bus_max, sizeof(struct sensors_bus))
 
 extern sensors_chip_features sensors_chip_features_list[];
 

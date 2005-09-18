@@ -45,18 +45,6 @@ static int sensors_get_chip_id(sensors_chip_name name);
 int foundsysfs=0;
 char sysfsmount[NAME_MAX];
 
-#define add_proc_chips(el) sensors_add_array_el(el,\
-                                       &sensors_proc_chips,\
-                                       &sensors_proc_chips_count,\
-                                       &sensors_proc_chips_max,\
-                                       sizeof(struct sensors_proc_chips_entry))
-
-#define add_proc_bus(el) sensors_add_array_el(el,\
-                                       &sensors_proc_bus,\
-                                       &sensors_proc_bus_count,\
-                                       &sensors_proc_bus_max,\
-                                       sizeof(struct sensors_bus))
-
 static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	int *sysmag, char *altsysname);
 
@@ -105,7 +93,7 @@ static int sensors_read_one_sysfs_chip(char *name, char *dirname, char *id)
 		fclose(f);
 	}
 
-	add_proc_chips(&entry);
+	sensors_add_proc_chips(&entry);
 	
 	return 1;
 }
@@ -234,7 +222,7 @@ proc:
       return res;
     }
     entry.sysctl = ((struct i2c_chips_data *) bufptr)->sysctl_id;
-    add_proc_chips(&entry);
+    sensors_add_proc_chips(&entry);
     bufptr += sizeof(struct i2c_chips_data);
     buflen -= sizeof(struct i2c_chips_data);
     lineno++;
@@ -291,7 +279,7 @@ int sensors_read_proc_bus(void)
 					entry.algorithm = strdup("Unavailable from sysfs");
 				if (entry.algorithm == NULL)
 					goto FAT_ERROR_SYS;
-				add_proc_bus(&entry);
+				sensors_add_proc_bus(&entry);
 			}
 		}
 		closedir(dir);
@@ -330,7 +318,7 @@ proc:
       goto ERROR;
     sensors_strip_of_spaces(entry.algorithm);
     sensors_strip_of_spaces(entry.adapter);
-    add_proc_bus(&entry);
+    sensors_add_proc_bus(&entry);
     lineno++;
   }
   fclose(f);
