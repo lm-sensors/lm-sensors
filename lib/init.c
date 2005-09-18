@@ -25,6 +25,7 @@
 #include "error.h"
 #include "access.h"
 #include "conf.h"
+#include "sysfs.h"
 
 static void free_proc_chips_entry(sensors_proc_chips_entry entry);
 static void free_chip_name(sensors_chip_name name);
@@ -40,6 +41,7 @@ int sensors_init(FILE *input)
 {
   int res;
   sensors_cleanup();
+  sensors_init_sysfs();
   if ((res = sensors_read_proc_chips()))
     return res;
   if ((res = sensors_read_proc_bus()))

@@ -29,6 +29,7 @@
 #include "general.h"
 #include <limits.h>
 #include <dirent.h>
+#include "sysfs.h"
 
 /* OK, this proves one thing: if there are too many chips detected, we get in
    trouble. The limit is around 4096/sizeof(struct sensors_chip_data), which
@@ -41,9 +42,6 @@
 static char buf[BUF_LEN];
 
 static int sensors_get_chip_id(sensors_chip_name name);
-
-int foundsysfs=0;
-char sysfsmount[NAME_MAX];
 
 static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	int *sysmag, char *altsysname);
@@ -85,7 +83,7 @@ static int sensors_read_one_sysfs_chip(char *name, char *dirname, char *id)
 
 	/* Find out if ISA or not */
 	sprintf(name, "%s/class/i2c-adapter/i2c-%d/device/name",
-		sysfsmount, entry.name.bus);
+		sensors_sysfs_mount, entry.name.bus);
 	if ((f = fopen(name, "r")) != NULL) {
 		if (fgets(x, 5, f) != NULL
 		 && !strncmp(x, "ISA ", 4))
@@ -103,7 +101,6 @@ int sensors_read_proc_chips(void)
 {
 	struct dirent *de;
 	DIR *dir;
-	FILE *f;
 	char sysfs[NAME_MAX], n[NAME_MAX];
 	char dirname[NAME_MAX];
 	int res;
@@ -114,26 +111,11 @@ int sensors_read_proc_chips(void)
 	sensors_proc_chips_entry entry;
 	int lineno;
 
-	/* First figure out where sysfs was mounted */
-	if ((f = fopen("/proc/mounts", "r")) == NULL)
+	if (!sensors_found_sysfs)
 		goto proc;
-	while (fgets(n, NAME_MAX, f)) {
-		char *fstype = dirname; /* alias to keep the code readable */
-
-		if (sscanf(n, "%*[^ ] %[^ ] %[^ ] %*s\n", sysfsmount, fstype)
-				== 2 && !strcasecmp(fstype, "sysfs")) {
-			foundsysfs++;
-			break;
-		}
-	}
-	fclose(f);
-	if (!foundsysfs) {
-		memset(sysfsmount, '\0', sizeof(sysfsmount));
-		goto proc;
-	}
 
 	/* Try /sys/class/hwmon first (Linux 2.6.14 and up) */
-	strncpy(sysfs, sysfsmount, sizeof(sysfs) - 1);
+	strncpy(sysfs, sensors_sysfs_mount, sizeof(sysfs) - 1);
 	sysfs[sizeof(sysfs) - 1] = '\0';
 	strncat(sysfs, "/class/hwmon", sizeof(sysfs) - strlen(sysfs) - 1);
 
@@ -181,7 +163,7 @@ int sensors_read_proc_chips(void)
 
 oldsys:
 	/* Fall back to /sys/bus/i2c (Linux 2.5 to 2.6.13) */
-	strncpy(sysfs, sysfsmount, sizeof(sysfs) - 1);
+	strncpy(sysfs, sensors_sysfs_mount, sizeof(sysfs) - 1);
 	sysfs[sizeof(sysfs) - 1] = '\0';
 	strncat(sysfs, "/bus/i2c/devices", sizeof(sysfs) - strlen(sysfs) - 1);
 
@@ -242,9 +224,12 @@ int sensors_read_proc_bus(void)
 	char sysfs[NAME_MAX], n[NAME_MAX];
 	char dirname[NAME_MAX];
 
-	if(foundsysfs) {
-		strcpy(sysfs, sysfsmount);
-		strcat(sysfs, "/class/i2c-adapter");
+	if (sensors_found_sysfs) {
+		strncpy(sysfs, sensors_sysfs_mount, sizeof(sysfs) - 1);
+		sysfs[sizeof(sysfs) - 1] = 0;
+		strncat(sysfs, "/class/i2c-adapter",
+				sizeof(sysfs) - strlen(sysfs) - 1);
+
 		/* Then read from it */
 		dir = opendir(sysfs);
 		if (! dir)
@@ -352,12 +337,12 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 	int buflen = BUF_LEN;
 	int mag;
 
-	if(!foundsysfs)
+	if (!sensors_found_sysfs)
 		if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
 			return sysctl_name[2];
 	if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if(foundsysfs) {
+	if (sensors_found_sysfs) {
 		char n[NAME_MAX], altn[NAME_MAX];
 		FILE *f;
 		strcpy(n, name.busname);
@@ -394,12 +379,12 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 	int buflen = BUF_LEN;
 	int mag;
  
-	if(!foundsysfs)
+	if (!sensors_found_sysfs)
 		if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
 			return sysctl_name[2];
 	if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if(foundsysfs) {
+	if (sensors_found_sysfs) {
 		char n[NAME_MAX], altn[NAME_MAX];
 		FILE *f;
 		strcpy(n, name.busname);

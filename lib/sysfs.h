@@ -1,6 +1,6 @@
 /*
-    proc.h - Part of libsensors, a Linux library for reading sensor data.
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    sysfs.h - part of libsensors, a library for reading Linux sensor data
+    Copyright (C) Mark M. Hoffman <mhoffman@lightlink.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,21 +17,13 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef SENSORS_LIB_PROC_H
-#define SENSORS_LIB_PROC_H
+#ifndef SENSORS_LIB_SYSFS_H
+#define SENSORS_LIB_SYSFS_H
 
-/* Read /proc/sys/dev/sensors/chips */
-extern int sensors_read_proc_chips(void);
+extern int sensors_found_sysfs;
 
-/* Read /proc/bus/i2c */
-extern int sensors_read_proc_bus(void);
+extern char sensors_sysfs_mount[];
 
-/* Read a value out of a /proc file */
-extern int sensors_read_proc(sensors_chip_name name, int feature, 
-                             double *value);
+extern int sensors_init_sysfs(void);
 
-/* Write a value to a /proc file */
-extern int sensors_write_proc(sensors_chip_name name, int feature,
-                              double value);
-
-#endif
+#endif /* !SENSORS_LIB_SYSFS_H */
