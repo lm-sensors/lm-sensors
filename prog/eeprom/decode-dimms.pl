@@ -36,6 +36,9 @@
 #  fix perl warning
 #  fix typo
 #  refactor some code
+# Version 1.0  2005-09-18  Jean Delvare <khali@linux-fr.org>
+#  add large lookup tables for manufacturer names (based on data
+#  provided by Rudolf Marek)
 #
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
@@ -60,9 +63,205 @@
 #
 
 use strict;
-use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs);
+use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs @vendors);
+
+@vendors = (
+["AMD", "AMI", "Fairchild", "Fujitsu",
+ "GTE", "Harris", "Hitachi", "Inmos",
+ "Intel", "I.T.T.", "Intersil", "Monolithic Memories",
+ "Mostek", "Freescale (formerly Motorola)", "National", "NEC",
+ "RCA", "Raytheon", "Conexant (Rockwell)", "Seeq",
+ "Philips Semi. (Signetics)", "Synertek", "Texas Instruments", "Toshiba",
+ "Xicor", "Zilog", "Eurotechnique", "Mitsubishi",
+ "Lucent (AT&T)", "Exel", "Atmel", "SGS/Thomson",
+ "Lattice Semi.", "NCR", "Wafer Scale Integration", "IBM",
+ "Tristar", "Visic", "Intl. CMOS Technology", "SSSI",
+ "MicrochipTechnology", "Ricoh Ltd.", "VLSI", "Micron Technology",
+ "Hyundai Electronics", "OKI Semiconductor", "ACTEL", "Sharp",
+ "Catalyst", "Panasonic", "IDT", "Cypress",
+ "DEC", "LSI Logic", "Zarlink (formerly Plessey)", "UTMC",
+ "Thinking Machine", "Thomson CSF", "Integrated CMOS (Vertex)", "Honeywell",
+ "Tektronix", "Sun Microsystems", "SST", "ProMos/Mosel Vitelic",
+ "Infineon (formerly Siemens)", "Macronix", "Xerox", "Plus Logic",
+ "SunDisk", "Elan Circuit Tech.", "European Silicon Str.", "Apple Computer",
+ "Xilinx", "Compaq", "Protocol Engines", "SCI",
+ "Seiko Instruments", "Samsung", "I3 Design System", "Klic",
+ "Crosspoint Solutions", "Alliance Semiconductor", "Tandem", "Hewlett-Packard",
+ "Intg. Silicon Solutions", "Brooktree", "New Media", "MHS Electronic",
+ "Performance Semi.", "Winbond Electronic", "Kawasaki Steel", "Bright Micro",
+ "TECMAR", "Exar", "PCMCIA", "LG Semi (formerly Goldstar)",
+ "Northern Telecom", "Sanyo", "Array Microsystems", "Crystal Semiconductor",
+ "Analog Devices", "PMC-Sierra", "Asparix", "Convex Computer",
+ "Quality Semiconductor", "Nimbus Technology", "Transwitch", "Micronas (ITT Intermetall)",
+ "Cannon", "Altera", "NEXCOM", "QUALCOMM",
+ "Sony", "Cray Research", "AMS(Austria Micro)", "Vitesse",
+ "Aster Electronics", "Bay Networks (Synoptic)", "Zentrum or ZMD", "TRW",
+ "Thesys", "Solbourne Computer", "Allied-Signal", "Dialog",
+ "Media Vision", "Level One Communication"],
+["Cirrus Logic", "National Instruments", "ILC Data Device", "Alcatel Mietec",
+ "Micro Linear", "Univ. of NC", "JTAG Technologies", "Loral",
+ "Nchip", "Galileo Tech", "Bestlink Systems", "Graychip",
+ "GENNUM", "VideoLogic", "Robert Bosch", "Chip Express",
+ "DATARAM", "United Microelec Corp.", "TCSI", "Smart Modular",
+ "Hughes Aircraft", "Lanstar Semiconductor", "Qlogic", "Kingston",
+ "Music Semi", "Ericsson Components", "SpaSE", "Eon Silicon Devices",
+ "Programmable Micro Corp", "DoD", "Integ. Memories Tech.", "Corollary Inc.",
+ "Dallas Semiconductor", "Omnivision", "EIV(Switzerland)", "Novatel Wireless",
+ "Zarlink (formerly Mitel)", "Clearpoint", "Cabletron", "Silicon Technology",
+ "Vanguard", "Hagiwara Sys-Com", "Vantis", "Celestica",
+ "Century", "Hal Computers", "Rohm Company Ltd.", "Juniper Networks",
+ "Libit Signal Processing", "Ramtron", "Tundra Semiconductor", "Adaptec Inc.",
+ "LightSpeed Semi.", "ZSP Corp.", "AMIC Technology", "Adobe Systems",
+ "Dynachip", "PNY Electronics", "Newport Digital", "MMC Networks",
+ "T Square", "Seiko Epson", "Broadcom", "Viking Components",
+ "V3 Semiconductor", "Flextronics (formerly Orbit)", "Suwa Electronics", "Transmeta",
+ "Micron CMS", "American Computer & Digital Components Inc", "Enhance 3000 Inc", "Tower Semiconductor",
+ "CPU Design", "Price Point", "Maxim Integrated Product", "Tellabs",
+ "Centaur Technology", "Unigen Corporation", "Transcend Information", "Memory Card Technology",
+ "CKD Corporation Ltd.", "Capital Instruments, Inc.", "Aica Kogyo, Ltd.", "Linvex Technology",
+ "MSC Vertriebs GmbH", "AKM Company, Ltd.", "Dynamem, Inc.", "NERA ASA",
+ "GSI Technology", "Dane-Elec (C Memory)", "Acorn Computers", "Lara Technology",
+ "Oak Technology, Inc.", "Itec Memory", "Tanisys Technology", "Truevision",
+ "Wintec Industries", "Super PC Memory", "MGV Memory", "Galvantech",
+ "Gadzoox Nteworks", "Multi Dimensional Cons.", "GateField", "Integrated Memory System",
+ "Triscend", "XaQti", "Goldenram", "Clear Logic",
+ "Cimaron Communications", "Nippon Steel Semi. Corp.", "Advantage Memory", "AMCC",
+ "LeCroy", "Yamaha Corporation", "Digital Microwave", "NetLogic Microsystems",
+ "MIMOS Semiconductor", "Advanced Fibre", "BF Goodrich Data.", "Epigram",
+ "Acbel Polytech Inc.", "Apacer Technology", "Admor Memory", "FOXCONN",
+ "Quadratics Superconductor", "3COM"],
+["Camintonn Corporation", "ISOA Incorporated", "Agate Semiconductor", "ADMtek Incorporated",
+ "HYPERTEC", "Adhoc Technologies", "MOSAID Technologies", "Ardent Technologies",
+ "Switchcore", "Cisco Systems, Inc.", "Allayer Technologies", "WorkX AG",
+ "Oasis Semiconductor", "Novanet Semiconductor", "E-M Solutions", "Power General",
+ "Advanced Hardware Arch.", "Inova Semiconductors GmbH", "Telocity", "Delkin Devices",
+ "Symagery Microsystems", "C-Port Corporation", "SiberCore Technologies", "Southland Microsystems",
+ "Malleable Technologies", "Kendin Communications", "Great Technology Microcomputer", "Sanmina Corporation",
+ "HADCO Corporation", "Corsair", "Actrans System Inc.", "ALPHA Technologies",
+ "Silicon Laboratories, Inc. (Cygnal)", "Artesyn Technologies", "Align Manufacturing", "Peregrine Semiconductor",
+ "Chameleon Systems", "Aplus Flash Technology", "MIPS Technologies", "Chrysalis ITS",
+ "ADTEC Corporation", "Kentron Technologies", "Win Technologies", "Tachyon Semiconductor (formerly ASIC Designs Inc.)",
+ "Extreme Packet Devices", "RF Micro Devices", "Siemens AG", "Sarnoff Corporation",
+ "Itautec Philco SA", "Radiata Inc.", "Benchmark Elect. (AVEX)", "Legend",
+ "SpecTek Incorporated", "Hi/fn", "Enikia Incorporated", "SwitchOn Networks",
+ "AANetcom Incorporated", "Micro Memory Bank", "ESS Technology", "Virata Corporation",
+ "Excess Bandwidth", "West Bay Semiconductor", "DSP Group", "Newport Communications",
+ "Chip2Chip Incorporated", "Phobos Corporation", "Intellitech Corporation", "Nordic VLSI ASA",
+ "Ishoni Networks", "Silicon Spice", "Alchemy Semiconductor", "Agilent Technologies",
+ "Centillium Communications", "W.L. Gore", "HanBit Electronics", "GlobeSpan",
+ "Element 14", "Pycon", "Saifun Semiconductors", "Sibyte, Incorporated",
+ "MetaLink Technologies", "Feiya Technology", "I & C Technology", "Shikatronics",
+ "Elektrobit", "Megic", "Com-Tier", "Malaysia Micro Solutions",
+ "Hyperchip", "Gemstone Communications", "Anadigm (formerly Anadyne)", "3ParData",
+ "Mellanox Technologies", "Tenx Technologies", "Helix AG", "Domosys",
+ "Skyup Technology", "HiNT Corporation", "Chiaro", "MCI Computer GMBH",
+ "Exbit Technology A/S", "Integrated Technology Express", "AVED Memory", "Legerity",
+ "Jasmine Networks", "Caspian Networks", "nCUBE", "Silicon Access Networks",
+ "FDK Corporation", "High Bandwidth Access", "MultiLink Technology", "BRECIS",
+ "World Wide Packets", "APW", "Chicory Systems", "Xstream Logic",
+ "Fast-Chip", "Zucotto Wireless", "Realchip", "Galaxy Power",
+ "eSilicon", "Morphics Technology", "Accelerant Networks", "Silicon Wave",
+ "SandCraft", "Elpida"],
+["Solectron", "Optosys Technologies", "Buffalo (Formerly Melco)", "TriMedia Technologies",
+ "Cyan Technologies", "Global Locate", "Optillion", "Terago Communications",
+ "Ikanos Communications", "Princeton Technology", "Nanya Technology", "Elite Flash Storage",
+ "Mysticom", "LightSand Communications", "ATI Technologies", "Agere Systems",
+ "NeoMagic", "AuroraNetics", "Golden Empire", "Mushkin",
+ "Tioga Technologies", "Netlist", "TeraLogic", "Cicada Semiconductor",
+ "Centon Electronics", "Tyco Electronics", "Magis Works", "Zettacom",
+ "Cogency Semiconductor", "Chipcon AS", "Aspex Technology", "F5 Networks",
+ "Programmable Silicon Solutions", "ChipWrights", "Acorn Networks", "Quicklogic",
+ "Kingmax Semiconductor", "BOPS", "Flasys", "BitBlitz Communications",
+ "eMemory Technology", "Procket Networks", "Purple Ray", "Trebia Networks",
+ "Delta Electronics", "Onex Communications", "Ample Communications", "Memory Experts Intl",
+ "Astute Networks", "Azanda Network Devices", "Dibcom", "Tekmos",
+ "API NetWorks", "Bay Microsystems", "Firecron Ltd", "Resonext Communications",
+ "Tachys Technologies", "Equator Technology", "Concept Computer", "SILCOM",
+ "3Dlabs", "c't Magazine", "Sanera Systems", "Silicon Packets",
+ "Viasystems Group", "Simtek", "Semicon Devices Singapore", "Satron Handelsges",
+ "Improv Systems", "INDUSYS GmbH", "Corrent", "Infrant Technologies",
+ "Ritek Corp", "empowerTel Networks", "Hypertec", "Cavium Networks",
+ "PLX Technology", "Massana Design", "Intrinsity", "Valence Semiconductor",
+ "Terawave Communications", "IceFyre Semiconductor", "Primarion", "Picochip Designs Ltd",
+ "Silverback Systems", "Jade Star Technologies", "Pijnenburg Securealink", "MemorySolutioN",
+ "Cambridge Silicon Radio", "Swissbit", "Nazomi Communications", "eWave System",
+ "Rockwell Collins", "PAION", "Alphamosaic Ltd", "Sandburst",
+ "SiCon Video", "NanoAmp Solutions", "Ericsson Technology", "PrairieComm",
+ "Mitac International", "Layer N Networks", "Atsana Semiconductor", "Allegro Networks",
+ "Marvell Semiconductors", "Netergy Microelectronic", "NVIDIA", "Internet Machines",
+ "Peak Electronics", "Litchfield Communication", "Accton Technology", "Teradiant Networks",
+ "Europe Technologies", "Cortina Systems", "RAM Components", "Raqia Networks",
+ "ClearSpeed", "Matsushita Battery", "Xelerated", "SimpleTech",
+ "Utron Technology", "Astec International", "AVM gmbH", "Redux Communications",
+ "Dot Hill Systems", "TeraChip"],
+["T-RAM Incorporated", "Innovics Wireless", "Teknovus", "KeyEye Communications",
+ "Runcom Technologies", "RedSwitch", "Dotcast", "Silicon Mountain Memory",
+ "Signia Technologies", "Pixim", "Galazar Networks", "White Electronic Designs",
+ "Patriot Scientific", "Neoaxiom Corporation", "3Y Power Technology", "Europe Technologies",
+ "Potentia Power Systems", "C-guys Incorporated", "Digital Communications Technology Incorporated", "Silicon-Based Technology",
+ "Fulcrum Microsystems", "Positivo Informatica Ltd", "XIOtech Corporation", "PortalPlayer",
+ "Zhiying Software", "Direct2Data", "Phonex Broadband", "Skyworks Solutions",
+ "Entropic Communications", "Pacific Force Technology", "Zensys A/S", "Legend Silicon Corp.",
+ "sci-worx GmbH", "Oasis Silicon Systems", "Renesas Technology", "Raza Microelectronics",
+ "Phyworks", "MediaTek", "Non-cents Productions", "US Modular",
+ "Wintegra Ltd", "Mathstar", "StarCore", "Oplus Technologies",
+ "Mindspeed", "Just Young Computer", "Radia Communications", "OCZ",
+ "Emuzed", "LOGIC Devices", "Inphi Corporation", "Quake Technologies",
+ "Vixel", "SolusTek", "Kongsberg Maritime", "Faraday Technology",
+ "Altium Ltd.", "Insyte", "ARM Ltd.", "DigiVision",
+ "Vativ Technologies", "Endicott Interconnect Technologies", "Pericom", "Bandspeed",
+ "LeWiz Communications", "CPU Technology", "Ramaxel Technology", "DSP Group",
+ "Axis Communications", "Legacy Electronics", "Chrontel", "Powerchip Semiconductor",
+ "MobilEye Technologies", "Excel Semiconductor", "A-DATA Technology", "VirtualDigm",
+ "G Skill Intl", "Quanta Computer", "Yield Microelectronics", "Afa Technologies",
+ "WEI-HEH Electronics", "Ceva", "iStor Networks", "Advance Modules",
+ "Microsoft", "Open-Silicon", "Goal Semiconductor", "ARC International",
+ "Simmtec", "Metanoia", "Key Stream", "Lowrance Electronics",
+ "Adimos", "SiGe Semiconductor", "Fodus Communications", "Credence Systems Corp.",
+ "Genesis Microchip Inc.", "Vihana, Inc.", "WIS Technologies", "GateChange Technologies",
+ "High Density Devices AS", "Synopsys", "Gigaram", "Enigma Semiconductor Inc.",
+ "Century Micro Inc.", "Icera Semiconductor", "Mediaworks Integrated Systems", "O'Neil Product Development",
+ "Supreme Top Technology Ltd.", "MicroDisplay Corporation", "Team Group Inc.", "Sinett Corporation",
+ "Toshiba Corporation", "Tensilica", "SiRF Technology", "Bacoc Inc.",
+ "SMaL Camera Technologies", "Thomson SC", "Airgo Networks", "Wisair Ltd.",
+ "SigmaTel", "Arkados", "Compete IT gmbH Co. KG", "Eudar Technology Inc.",
+ "Focus Enhancements", "Xyratex"],
+["Specular Networks", "PDP Systems", "U-Chip Technology Corp.", "Silicon Optix"]);
 
 $use_sysfs = -d '/sys/bus';
+
+sub manufacturer(@)
+{
+	my @bytes = @_;
+	my $ai = 0;
+	my $first;
+	
+	while (defined($first = shift(@bytes)) && $first == 0x7F) {
+		$ai++;
+	}
+
+	if (defined $first && defined $vendors[$ai][($first & 0x7F) - 1]) {
+		return ($vendors[$ai][($first & 0x7F) - 1], \@bytes);
+	}
+
+	return ("Unknown", \@bytes);
+}
+
+sub manufacturer_data(@)
+{
+	my $hex = "";
+	my $asc = "";
+	my $all_0 = 1;
+
+	foreach my $byte (@_) {
+		$hex .= sprintf("\%02X ", $byte);
+		$asc .= ($byte >= 32 && $byte < 127) ? chr($byte) : '?';
+		$all_0 = 0 if $byte != 0 && $byte != 0xff;
+	}
+
+	return if $all_0;
+	return "$hex(\"$asc\")";
+}
 
 sub printl ($$) # print a line w/ label and value
 {
@@ -176,7 +375,7 @@ if ($opt_body)
 printh '
 PC DIMM Serial Presence Detect Tester/Decoder
 By Philip Edelbrock, Christian Zuckschwerdt, Burkart Lingner and others
-Version 2.9.2
+Version 2.9.3
 ';
 
 
@@ -515,12 +714,15 @@ for my $i ( 0 .. $#dimm_list ) {
 # Decode next 16 bytes (64-79)
 		@bytes = readspd16(64, $dimm_list[$i]);
 		
-		$l = "Manufacturer's JEDEC ID Code";
-		$temp = sprintf("0x%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X\n",$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
+		$l = "Manufacturer";
+		# $extra is a reference to an array containing up to
+		# 7 extra bytes from the Manufacturer field. Sometimes
+		# these bytes are filled with interesting data.
+		($temp, my $extra) = manufacturer(@bytes[0..7]);
 		printl $l, $temp;
-		$temp = pack("C8",
-			$bytes[0],$bytes[1],$bytes[2],$bytes[3],$bytes[4],$bytes[5],$bytes[6],$bytes[7]);
-		printl $l, "(\"$temp\")";
+		$l = "Custom Manufacturer Data";
+		$temp = manufacturer_data(@{$extra});
+		printl $l, $temp if defined $temp;
 		
 		$l = "Manufacturing Location Code";
 		$temp = sprintf("0x%.2X\n",$bytes[8]);
