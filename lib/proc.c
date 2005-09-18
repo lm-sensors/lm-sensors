@@ -40,12 +40,6 @@
 
 static char buf[BUF_LEN];
 
-sensors_proc_chips_entry *sensors_proc_chips;
-int sensors_proc_chips_count, sensors_proc_chips_max;
-
-sensors_bus *sensors_proc_bus;
-int sensors_proc_bus_count, sensors_proc_bus_max;
-
 static int sensors_get_chip_id(sensors_chip_name name);
 
 int foundsysfs=0;

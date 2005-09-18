@@ -36,6 +36,14 @@ sensors_bus *sensors_config_busses = NULL;
 int sensors_config_busses_count = 0;
 int sensors_config_busses_max = 0;
 
+sensors_proc_chips_entry *sensors_proc_chips = NULL;
+int sensors_proc_chips_count = 0;
+int sensors_proc_chips_max = 0;
+
+sensors_bus *sensors_proc_bus = NULL;
+int sensors_proc_bus_count = 0;
+int sensors_proc_bus_max = 0;
+
 static int sensors_substitute_chip(sensors_chip_name *name,int lineno);
 
 /* Wow, this must be one of the ugliest functions I have ever written.
