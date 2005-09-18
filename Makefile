@@ -86,6 +86,19 @@ CC := gcc
 #   /lib/modules/2.4.29
 MODPREF := /lib/modules/$(shell $(CC) -I$(LINUX_HEADERS) -E etc/config.c | grep uts_release |cut -f 2 -d'"')
 
+# When building userspace for use with 2.4.x series kernels, we turn off
+# sysfs support by default.  You can override this (e.g. if you want
+# to build binaries that work for both 2.4.x, and 2.6.x and above)
+# by uncommenting the line after the next endif.  Keep in mind, if and only
+# if you do this: you will need to install the libsysfs libraries on your
+# kernel 2.4.x systems also.
+ifeq (,$(findstring /2.4., $(MODPREF)))
+	SYSFS_SUPPORT := 1
+else
+	SYSFS_SUPPORT :=
+endif
+#SYSFS_SUPPORT := 1
+
 # Prevent 2.6+ users from using improper targets, as this won't work.
 ifeq (,$(findstring /2.4., $(MODPREF)))
     ifeq (, $(MAKECMDGOALS))
@@ -257,8 +270,14 @@ MODCFLAGS += $(ALL_CFLAGS)
 PROGCPPFLAGS := -DETCDIR="\"$(ETCDIR)\"" $(ALL_CPPFLAGS) -Wundef
 PROGCFLAGS := $(ALL_CFLAGS)
 ARCPPFLAGS := $(ALL_CPPFLAGS)
+ifdef SYSFS_SUPPORT
+ARCPPFLAGS := $(ARCPPFLAGS) -DSYSFS_SUPPORT
+endif
 ARCFLAGS := $(ALL_CFLAGS)
 LIBCPPFLAGS := $(ALL_CPPFLAGS)
+ifdef SYSFS_SUPPORT
+LIBCPPFLAGS := $(LIBCPPFLAGS) -DSYSFS_SUPPORT
+endif
 LIBCFLAGS := -fpic $(ALL_CFLAGS)
 
 .PHONY: all clean install version package dep
