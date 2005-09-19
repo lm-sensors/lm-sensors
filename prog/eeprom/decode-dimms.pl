@@ -37,8 +37,9 @@
 #  fix typo
 #  refactor some code
 # Version 1.0  2005-09-18  Jean Delvare <khali@linux-fr.org>
-#  add large lookup tables for manufacturer names (based on data
-#  provided by Rudolf Marek)
+#  add large lookup tables for manufacturer names, based on data
+#  provided by Rudolf Marek, taken from:
+#  http://www.jedec.org/download/search/JEP106r.pdf
 #
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
@@ -226,7 +227,17 @@ use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs @vendors)
  "SMaL Camera Technologies", "Thomson SC", "Airgo Networks", "Wisair Ltd.",
  "SigmaTel", "Arkados", "Compete IT gmbH Co. KG", "Eudar Technology Inc.",
  "Focus Enhancements", "Xyratex"],
-["Specular Networks", "PDP Systems", "U-Chip Technology Corp.", "Silicon Optix"]);
+["Specular Networks", "PDP Systems", "U-Chip Technology Corp.", "Silicon Optix",
+ "Greenfield Networks", "CompuRAM GmbH", "Stargen, Inc.", "NetCell Corporation",
+ "Excalibrus Technologies Ltd", "SCM Microsystems", "Xsigo Systems, Inc.", "CHIPS & Systems Inc",
+ "Tier 1 Multichip Solutions", "CWRL Labs", "Teradici", "Gigaram, Inc.",
+ "g2 Microsystems", "PowerFlash Semiconductor", "P.A. Semi, Inc.", "NovaTech Solutions, S.A.",
+ "c2 Microsystems, Inc.", "Level5 Networks", "COS Memory AG", "Innovasic Semiconductor",
+ "02IC Co. Ltd", "Tabula, Inc.", "Crucial Technology", "Chelsio Communications",
+ "Solarflare Communications", "Xambala Inc.", "EADS Astrium", "ATO Semicon Co. Ltd.",
+ "Imaging Works, Inc.", "Astute Networks, Inc.", "Tzero", "Emulex",
+ "Power-One", "Pulse~LINK Inc.", "Hon Hai Precision Industry", "White Rock Networks Inc.",
+ "Telegent Systems USA, Inc."]);
 
 $use_sysfs = -d '/sys/bus';
 
