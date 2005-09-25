@@ -232,8 +232,8 @@ int main (int argc, char *argv[])
     if (res == -SENSORS_ERR_PROC)
       fprintf(stderr,
               "Unable to find i2c bus information;\n"
-              "For 2.6 kernels, make sure you have mounted sysfs and done\n"
-              "'modprobe i2c_sensor'!\n"
+              "For 2.6 kernels, make sure you have mounted sysfs and libsensors\n"
+              "was compiled with sysfs support!\n"
               "For older kernels, make sure you have done 'modprobe i2c-proc'!\n");
     exit(1);
   }
