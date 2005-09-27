@@ -45,8 +45,6 @@ struct i2c_msg {
 #define I2C_M_NO_RD_ACK		0x0800
 	short len;		/* msg length				*/
 	char *buf;		/* pointer to msg data			*/
-	int err;
-	short done;
 };
 
 /* To determine what functionality is present */
