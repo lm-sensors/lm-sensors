@@ -1,4 +1,4 @@
-.TH I2CSET 8 "August 2004"
+.TH I2CSET 8 "September 2005"
 .SH "NAME"
 i2cset \- set I2C registers
 
@@ -40,9 +40,10 @@ location on the chip.
 .PP
 The \fImode\fR parameter, if specified, is one of the letters \fBb\fP or
 \fBw\fP, corresponding to a write size of a single byte or a 16-bit word,
-respectively. If the \fImode\fR parameter is omitted, i2cset defaults to byte
-mode. The \fIvalue\fR provided must be within range for the specified data
-type (0x00-0xFF for bytes, 0x0000-0xFFFF for words).
+respectively. A \fBp\fP can also be appended to the \fImode\fR parameter to
+enable PEC. If the \fImode\fR parameter is omitted, i2cset defaults to byte
+mode without PEC. The \fIvalue\fR provided must be within range for the
+specified data type (0x00-0xFF for bytes, 0x0000-0xFFFF for words).
 .PP
 The \fImask\fR parameter, if specified, describes which bits of \fIvalue\fR
 will be actually written to \fIdata-address\fR. Bits set to 1 in the mask

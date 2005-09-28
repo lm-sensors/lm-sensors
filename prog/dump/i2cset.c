@@ -2,7 +2,7 @@
     i2cset.c - A user-space program to write an I2C register.
     Copyright (C) 2001-2003  Frodo Looijaard <frodol@dds.nl>, and
                              Mark D. Studebaker <mdsxyz123@yahoo.com>
-    Copyright (C) 2004       The lm_sensors group
+    Copyright (C) 2004-2005  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ void help(void)
 	        "VALUE [MODE] [MASK]\n"
 	        "        i2cset -V\n"
 	        "  MODE is 'b[yte]' or 'w[ord]' (default b)\n"
+	        "  Append 'p' to MODE for PEC checking\n"
 	        "  I2CBUS is an integer\n");
 	print_i2c_busses(0);
 	exit(1);
@@ -49,6 +50,7 @@ int main(int argc, char *argv[])
 	int e1;
 	char filename[20];
 	long funcs;
+	int pec = 0;
 	int flags = 0;
 	int yes = 0, version = 0;
 
@@ -101,11 +103,13 @@ int main(int argc, char *argv[])
 	if (argc < flags + 6) {
 		fprintf(stderr, "No size specified (using byte-data access)\n");
 		size = I2C_SMBUS_BYTE_DATA;
-	} else if (!strcmp(argv[flags+5], "b"))
+	} else if (argv[flags+5][0] == 'b') {
 		size = I2C_SMBUS_BYTE_DATA;
-	else if (!strcmp(argv[flags+5], "w"))
+		pec = argv[flags+5][1] == 'p';
+	} else if (argv[flags+5][0] == 'w') {
 		size = I2C_SMBUS_WORD_DATA;
-	else {
+		pec = argv[flags+5][1] == 'p';
+	} else {
 		fprintf(stderr, "Error: Invalid mode!\n");
 		help();
 	}
@@ -163,6 +167,18 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	if (pec) {
+		if (ioctl(file, I2C_PEC, 1) < 0) {
+			fprintf(stderr, "Error: Could not set PEC: %s\n",
+			        strerror(errno));
+			exit(1);
+		}
+		if (!(funcs & (I2C_FUNC_SMBUS_HWPEC_CALC | I2C_FUNC_I2C))) {
+			fprintf(stderr, "Warning: Adapter for i2c bus %d does "
+			        "not seem to actually support PEC\n", i2cbus);
+		}
+	}
+
 	if (!yes) {
 		char s[2];
 		int dont = 0;
@@ -183,6 +199,8 @@ int main(int argc, char *argv[])
 		        "%s.\n", filename, address, daddress, value,
 			vmask ? " (masked)" : "",
 			size == I2C_SMBUS_BYTE_DATA ? "byte" : "word");
+		if (pec)
+			fprintf(stderr, "PEC checking enabled.\n");
 
 		fprintf(stderr, "Continue? [%s] ", dont ? "y/N" : "Y/n");
 		fflush(stderr);
@@ -245,7 +263,31 @@ int main(int argc, char *argv[])
 		res = i2c_smbus_read_word_data(file, daddress);
 	} else {
 		res = i2c_smbus_read_byte_data(file, daddress);
+		if (res < 0 && pec && (funcs & I2C_FUNC_SMBUS_READ_BYTE)) {
+			fprintf(stderr, "Warning - read_byte_data with PEC "
+				"failed, trying read_byte with PEC\n");
+			res = i2c_smbus_read_byte(file);
+		}
 	}
+
+	if (res < 0 && pec) {
+		/* Try again without PEC */
+		fprintf(stderr, "Warning - readback with PEC failed, "
+			"trying without\n");
+		e1++;
+
+		if (ioctl(file, I2C_PEC, 0) < 0) {
+			fprintf(stderr, "Error: Could not clear PEC: %s\n",
+			        strerror(errno));
+			exit(1);
+		}		
+
+		if (size == I2C_SMBUS_WORD_DATA)
+			res = i2c_smbus_read_word_data(file, daddress);
+		else
+			res = i2c_smbus_read_byte_data(file, daddress);
+	}
+	close(file);
 
 	if (res < 0) {
 		fprintf(stderr, "Warning - readback failed\n");
