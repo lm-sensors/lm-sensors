@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	if (argc + flags < 5)
+	if (argc < flags + 5)
 		help();
 
 	i2cbus = strtol(argv[flags+1], &end, 0);
@@ -167,18 +167,6 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (pec) {
-		if (ioctl(file, I2C_PEC, 1) < 0) {
-			fprintf(stderr, "Error: Could not set PEC: %s\n",
-			        strerror(errno));
-			exit(1);
-		}
-		if (!(funcs & (I2C_FUNC_SMBUS_HWPEC_CALC | I2C_FUNC_I2C))) {
-			fprintf(stderr, "Warning: Adapter for i2c bus %d does "
-			        "not seem to actually support PEC\n", i2cbus);
-		}
-	}
-
 	if (!yes) {
 		char s[2];
 		int dont = 0;
@@ -248,6 +236,18 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	if (pec) {
+		if (ioctl(file, I2C_PEC, 1) < 0) {
+			fprintf(stderr, "Error: Could not set PEC: %s\n",
+			        strerror(errno));
+			exit(1);
+		}
+		if (!(funcs & (I2C_FUNC_SMBUS_HWPEC_CALC | I2C_FUNC_I2C))) {
+			fprintf(stderr, "Warning: Adapter for i2c bus %d does "
+			        "not seem to actually support PEC\n", i2cbus);
+		}
+	}
+
 	e1 = 0;
 	if (size == I2C_SMBUS_WORD_DATA) {
 		res = i2c_smbus_write_word_data(file, daddress, value);
@@ -259,33 +259,19 @@ int main(int argc, char *argv[])
 		e1++;
 	}
 
+	if (pec) {
+		if (ioctl(file, I2C_PEC, 0) < 0) {
+			fprintf(stderr, "Error: Could not clear PEC: %s\n",
+				strerror(errno));
+			close(file);
+			exit(e1);
+		}
+	}
+
 	if (size == I2C_SMBUS_WORD_DATA) {
 		res = i2c_smbus_read_word_data(file, daddress);
 	} else {
 		res = i2c_smbus_read_byte_data(file, daddress);
-		if (res < 0 && pec && (funcs & I2C_FUNC_SMBUS_READ_BYTE)) {
-			fprintf(stderr, "Warning - read_byte_data with PEC "
-				"failed, trying read_byte with PEC\n");
-			res = i2c_smbus_read_byte(file);
-		}
-	}
-
-	if (res < 0 && pec) {
-		/* Try again without PEC */
-		fprintf(stderr, "Warning - readback with PEC failed, "
-			"trying without\n");
-		e1++;
-
-		if (ioctl(file, I2C_PEC, 0) < 0) {
-			fprintf(stderr, "Error: Could not clear PEC: %s\n",
-			        strerror(errno));
-			exit(1);
-		}		
-
-		if (size == I2C_SMBUS_WORD_DATA)
-			res = i2c_smbus_read_word_data(file, daddress);
-		else
-			res = i2c_smbus_read_byte_data(file, daddress);
 	}
 	close(file);
 
