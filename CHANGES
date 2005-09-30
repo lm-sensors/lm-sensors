@@ -18,15 +18,26 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.3 (2005????)
+  File i2c-dev.h: Fix union i2c_smbus_data definition
+                  Sync i2c_msg definition with i2c.h (Hideki Iwamoto)
+                  Add missing parentheses around macros
+                  Drop I2C_FUNC_SMBUS_EMUL
   Library: Big update to use libsysfs.  More TODO though.
-  Library: Fix bus matching code for Linux 2.6 (Karsten Petersen)
+           Fix bus matching code for Linux 2.6 (Karsten Petersen)
   Makefile: Compile user-space programs with -Wundef
   Module w83781d: Drop W83697HF support (Grant Coady)
   Module i2c-keywest: Remove bus probing code (2.6 backport)
   Module i2c-nforce2: Remove dead code (2.6 backport)
+  Program decode-dimms.pl: Add lookup tables for manufacturer names
+  Program i2cdump: Drop now useless #ifdef tests
+                   Fix capability check for continuous byte mode
+  Program i2cget: New
+  Program i2cset: Add PEC support
+                  Fix argc check
   Programs i2cdetect, i2cdump, i2cset: Stop printing the algorithm name
                                        Print the correct bus type if bus
                                        functionality can be queried
+  Program isadump: Display the real addresses in flat mode
   Program sensord: Do not log algorithm names
                    Drop EEPROM support (Aurelien Jarno)
   Program sensors-detect: Drop algorithm names
