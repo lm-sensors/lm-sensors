@@ -282,9 +282,14 @@ int main(int argc, char *argv[])
 	if (bank >= 0)
 		oldbank = set_bank(flat, addrreg, datareg, bank, bankreg);
 
+	if (flat)
+		printf("  ");
 	printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
 	for (i = 0; i < range; i += 16) {
-		printf("%c0: ", hexchar(i/16));
+		if (flat)
+			printf("%04x: ", addrreg + i);
+		else
+			printf("%02x: ", i);
 
 		/* It was noticed that Winbond Super-I/O chips
 		   would leave the configuration mode after
