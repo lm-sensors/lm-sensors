@@ -41,8 +41,6 @@
 
 static char buf[BUF_LEN];
 
-static int sensors_get_chip_id(sensors_chip_name name);
-
 static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	int *sysmag, char *altsysname);
 
@@ -126,7 +124,7 @@ ERROR:
     
 
 /* This returns the first detected chip which matches the name */
-int sensors_get_chip_id(sensors_chip_name name)
+static int sensors_get_chip_id(sensors_chip_name name)
 {
   int i;
   for (i = 0; i < sensors_proc_chips_count; i++)
