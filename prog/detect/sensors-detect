@@ -997,7 +997,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { lm85_detect 0x5c, @_},
      },
      {
-       name => "Analog Devices ADT7467",
+       name => "Analog Devices ADT7467 or ADT7468",
        driver => "to-be-written",
        i2c_addrs => [0x2e],
        i2c_detect => sub { adt7467_detect 0, @_},
@@ -1293,7 +1293,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
        name => "Analog Devices ADM1032",
        driver => "lm90",
-       i2c_addrs => [0x4c],
+       i2c_addrs => [0x4c..0x4d],
        i2c_detect => sub { lm90_detect 3, @_ },
      },
      {
@@ -1335,7 +1335,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      {
        name => "Analog Devices ADT7461",
        driver => "lm90",
-       i2c_addrs => [0x4c],
+       i2c_addrs => [0x4c..0x4d],
        i2c_detect => sub { lm90_detect 5, @_ },
      },
      {
@@ -3432,11 +3432,11 @@ sub adm1031_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = ADT7467)
+#   (0 = ADT7467/ADT7468)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
-# Returns: undef if not detected, 5 if detected.
+# Returns: undef if not detected, 5 or 7 if detected.
 # Registers used:
 #   0x3d: Chip ID
 #   0x3e: Manufacturer ID
@@ -3452,6 +3452,7 @@ sub adt7467_detect
     return if $mid != 0x41;     # Analog Devices
     return if $cid != 0x68;     # ADT7467
     return if ($drev & 0xf0) != 0x70;
+    return 7 if ($drev == 0x71 || $drev == 0x72);
     return 5;
   }
   return
