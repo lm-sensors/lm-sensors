@@ -237,6 +237,38 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 #define INMAG 3
 #define TEMPMAG 3
 
+/* The following are used in getsysname() below */
+struct match {
+	const char * name, * sysname;
+	const int sysmag;
+	const char * altsysname;
+};
+
+static const struct match matches[] = {
+	{ "beeps", "beep_mask", 0 },
+	{ "pwm", "fan1_pwm", 0 },
+	{ "vid", "cpu0_vid", INMAG, "in0_ref" },
+	{ "remote_temp", "temp2_input", TEMPMAG },
+	{ "remote_temp_hyst", "temp2_max_hyst", TEMPMAG },
+	{ "remote_temp_low", "temp2_min", TEMPMAG },
+	{ "remote_temp_over", "temp2_max", TEMPMAG },
+	{ "temp", "temp1_input", TEMPMAG },
+	{ "temp_hyst", "temp1_max_hyst", TEMPMAG },
+	{ "temp_low", "temp1_min", TEMPMAG },
+	{ "temp_over", "temp1_max", TEMPMAG },
+	{ "temp_high", "temp1_max", TEMPMAG },
+	{ "temp_crit", "temp1_crit", TEMPMAG },
+	{ "pwm1", "pwm1", 0, "fan1_pwm" },
+	{ "pwm2", "pwm2", 0, "fan2_pwm" },
+	{ "pwm3", "pwm3", 0, "fan3_pwm" },
+	{ "pwm4", "pwm4", 0, "fan4_pwm" },
+	{ "pwm1_enable", "pwm1_enable", 0, "fan1_pwm_enable" },
+	{ "pwm2_enable", "pwm2_enable", 0, "fan2_pwm_enable" },
+	{ "pwm3_enable", "pwm3_enable", 0, "fan3_pwm_enable" },
+	{ "pwm4_enable", "pwm4_enable", 0, "fan4_pwm_enable" },
+	{ NULL, NULL }
+};
+
 /*
 	Returns the sysfs name and magnitude for a given feature.
 	First looks for a sysfs name and magnitude in the feature structure.
@@ -265,7 +297,7 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 		temp%d_state -> temp%d_status
 		temp%d -> temp%d_input
 		sensor%d -> temp%d_type
-	AND all conversions listed in the matches[] structure below.
+	AND all conversions listed in the matches[] structure above.
 
 	If that fails, returns old /proc feature name and magnitude.
 
@@ -279,40 +311,7 @@ static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	char last;
 	char check; /* used to verify end of string */
 	int num;
-	
-	struct match {
-		const char * name, * sysname;
-		const int sysmag;
-		const char * altsysname;
-	};
-
-	struct match *m;
-
-	struct match matches[] = {
-		{ "beeps", "beep_mask", 0 },
-		{ "pwm", "fan1_pwm", 0 },
-		{ "vid", "cpu0_vid", INMAG, "in0_ref" },
-		{ "remote_temp", "temp2_input", TEMPMAG },
-		{ "remote_temp_hyst", "temp2_max_hyst", TEMPMAG },
-		{ "remote_temp_low", "temp2_min", TEMPMAG },
-		{ "remote_temp_over", "temp2_max", TEMPMAG },
-		{ "temp", "temp1_input", TEMPMAG },
-		{ "temp_hyst", "temp1_max_hyst", TEMPMAG },
-		{ "temp_low", "temp1_min", TEMPMAG },
-		{ "temp_over", "temp1_max", TEMPMAG },
-		{ "temp_high", "temp1_max", TEMPMAG },
-		{ "temp_crit", "temp1_crit", TEMPMAG },
-		{ "pwm1", "pwm1", 0, "fan1_pwm" },
-		{ "pwm2", "pwm2", 0, "fan2_pwm" },
-		{ "pwm3", "pwm3", 0, "fan3_pwm" },
-		{ "pwm4", "pwm4", 0, "fan4_pwm" },
-		{ "pwm1_enable", "pwm1_enable", 0, "fan1_pwm_enable" },
-		{ "pwm2_enable", "pwm2_enable", 0, "fan2_pwm_enable" },
-		{ "pwm3_enable", "pwm3_enable", 0, "fan3_pwm_enable" },
-		{ "pwm4_enable", "pwm4_enable", 0, "fan4_pwm_enable" },
-		{ NULL, NULL }
-	};
-
+	const struct match *m;
 
 /* default to a non-existent alternate name (should rarely be tried) */
 	strcpy(altsysname, "_");
