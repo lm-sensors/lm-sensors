@@ -1303,6 +1303,7 @@ the dedicated perl scripts in @file{prog/eeprom}: @command{ddcmon},
 * Section 5.6::  What if it just works like a charm?
 * Section 5.7::  How do I update a ticket?
 * Section 5.8::  How do I follow up on a ticket?
+* Section 5.9::  Why did you decide not to support undocumented chips?
 @end menu
 
 
@@ -1408,11 +1409,81 @@ in the subject. Please don't enter a new ticket with
 follow-up information, email us instead. Thanks.
 
 
-@node Section 5.8, , Section 5.7, Help
+@node Section 5.8, Section 5.9, Section 5.7, Help
 @section How do I follow up on a ticket?
 
 Follow up by emailing us
 and reference your ticket number in the subject.
+
+
+@node Section 5.9, , Section 5.8, Help
+@section Why did you decide not to support undocumented chips?
+
+There are several reasons why we are generally not interested in writing
+drivers for undocumented chips:
+
+@itemize
+@item Writing a driver without a datasheet is much harder, as you have to
+guess most things. Remember that, most of the time, we write drivers for fun
+and for free, so there is no reason we would write a driver in conditions
+that promise more pain than fun.
+@item If we hit a problem, we are certain never to get any support from the
+chip manufacturer. This means that we may spend days on code which will
+finally never work.
+@item There are several chips out there which are fully documented and lack
+a driver. This is natural for us to give these the priority when we
+finally have some spare time to spend on driver coding.
+@item Hardware monitoring chips are not toys. Misprogramming them can
+result in data loss or hardware breakage. This is obviously more likely
+to happen with undocumented chips. This is a responsability we do not
+want to endorse (the GPL is pretty clear than we are not legally
+liable, but still).
+@end itemize
+
+There are also several reasons why we do not want to support such drivers,
+even if they were written by other people:
+
+@itemize
+@item Problems are much more likely to happen with such drivers.
+This means increased needs of support. User support if very
+time-consuming and we are usually short of time.
+@item Support should be done by the driver author (as only him/her knows
+the driver and chip) but in the reality of facts, people will always ask
+us for help if the driver is part of our package. Redirecting all user
+requests to the driver's author manually is boring.
+@item The lack of datasheet usually results in an original driver which
+works relatively fine for its author, but will happen not to work
+completely for other users. This means that the driver will need many
+more additions and fixes than other drivers do, resulting in an increased
+maitainance workload, which we can hardly afford. Of course this too should
+be handled by the original driver author, but we never know whether he/she
+will actually do the work.
+@end itemize
+
+Lastly, there are other considerations, some of which are deliberately
+political:
+
+@itemize
+@item We do not want to trick hardware buyers into thinking that a chip is
+fully supported under Linux when in fact it is only partly supported by a
+driver which was written without a datasheet. Clearly stating that such
+chips are not supported makes it much easier for anyone who really needs
+fully working hardware monitoring under Linux to avoid motherboards with
+these partly supported chips.
+@item Drivers written without a datasheet are a pain for developers and
+users, but are a complete win for the manufacturers of these chips:
+they don't have to write the driver, they don't have to help us,
+they don't have to support the users, and they still sell their
+hardware. We do not want to encourage such a selfish behavior.
+@end itemize
+
+That being said, authors of such drivers can still submit their code to
+the Linux kernel folks for inclusion into Linux 2.6. Their driver may be
+accepted there, under conditions.
+
+If such a driver is ever accepted into the Linux 2.6 tree, and someone
+provides a patch to libsensors and/or sensors to add support for this
+driver, we will apply it. This generic code is unlikely to cause trouble.
 
 
 @node Contribute, Version 1 Specifics, Help, Top
@@ -1427,7 +1498,6 @@ and reference your ticket number in the subject.
 * Section 6.6::  How to submit a patch
 * Section 6.7::  How to REALLY help
 * Section 6.8::  How to get release announcements
-* Section 6.9::  How to block spam on the project mailing list
 @end menu
 
 
@@ -1514,7 +1584,7 @@ If you are willing to help, simply join our
 and we'll help you help us.
 
 
-@node Section 6.8, Section 6.9, Section 6.7, Contribute
+@node Section 6.8, , Section 6.7, Contribute
 @section How to get release announcements
 
 We don't have a separate release announcement mailing list;
@@ -1522,19 +1592,6 @@ however, we put all our releases on freshmeat: @uref{http://freshmeat.net}
 and you can register on our freshmeat project page  @uref{http://freshmeat.net/projects/lm_sensors}
 to 'subscribe to new releases' and then freshmeat
 will email you announcement.
-
-@node Section 6.9, , Section 6.8, Contribute
-@section How to block spam on the project mailing list
-
-Sorry, we know the spam is a hassle.  It would be nice to have a 
-moderator who can screen everything, but that takes too much time and 
-delays emails.  Right now there is a procmail script which tags likely 
-spam and puts in a X-SBClass: header.  If it is followed by 'Spam', then 
-it is almost certainly spam, if it is followed by 'Blocked', then it 
-scores high as being potential spam.  You should be able to set some 
-rules in your mail client to throw those emails into a seperate folder.  
-It's not bullet proof (some legit mails get tagged wrong, and vice 
-versa), but it seems to be about 95% accurate in our experience.
 
 
 @node Version 1 Specifics, Document Revisions, Contribute, Top
@@ -1610,6 +1667,8 @@ can not be sure.
 @appendix Revision History of This Document
 
 @itemize
+@item Rev 2.17 (JD) Added 5.9 (why we don't support undocumented chips),
+	removed 6.9 (doesn't apply to the new mailing list), 2005-10-05
 @item Rev 2.16 (JD) Added 4.33.2, 2005-09-06
 @item Rev 2.15 (JD) Updates, including mailing-list change, 2005-05-21
 @item Rev 2.14 (MDS) Updated 4.12, 2004-11-26

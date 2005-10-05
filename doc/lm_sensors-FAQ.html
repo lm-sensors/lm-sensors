@@ -1,8 +1,8 @@
 <html lang="en">
 <head>
-<title>Sensors FAQ for lm_sensors version 2.16</title>
+<title>Sensors FAQ for lm_sensors version 2.17</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="Sensors FAQ for lm_sensors version 2.16">
+<meta name="description" content="Sensors FAQ for lm_sensors version 2.17">
 <meta name="generator" content="makeinfo 4.7">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
@@ -19,7 +19,7 @@
 --></style>
 </head>
 <body>
-<h1 class="settitle">Sensors FAQ for lm_sensors version 2.16</h1>
+<h1 class="settitle">Sensors FAQ for lm_sensors version 2.17</h1>
 Copyright (C) 1998 - 2005<br>
 Frodo Looijaard,<br>
 Philip Edelbrock,<br>
@@ -181,6 +181,7 @@ Jean Delvare<br>
 <li><a href="#Section-5_002e6">5.6 What if it just works like a charm?</a>
 <li><a href="#Section-5_002e7">5.7 How do I update a ticket?</a>
 <li><a href="#Section-5_002e8">5.8 How do I follow up on a ticket?</a>
+<li><a href="#Section-5_002e9">5.9 Why did you decide not to support undocumented chips?</a>
 </li></ul>
 <li><a name="toc_Contribute" href="#Contribute">6 How to Contribute</a>
 <ul>
@@ -192,7 +193,6 @@ Jean Delvare<br>
 <li><a href="#Section-6_002e6">6.6 How to submit a patch</a>
 <li><a href="#Section-6_002e7">6.7 How to REALLY help</a>
 <li><a href="#Section-6_002e8">6.8 How to get release announcements</a>
-<li><a href="#Section-6_002e9">6.9 How to block spam on the project mailing list</a>
 </li></ul>
 <li><a name="toc_Version-1-Specifics" href="#Version-1-Specifics">7 Version 1 Specific Questions</a>
 <ul>
@@ -1745,8 +1745,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 <h3 class="section">4.33 Problems on 2.6 kernels</h3>
 
 <p>Not all drivers have been ported to 2.6. If your favorite driver is not
-in 2.6, the reason is that nobody has ported it. 
-Please don't bother asking us why it is not in 2.6. 
+in 2.6, the reason is that nobody has ported it, or the ported code did
+not get a proper review yet. 
 If you would like to port the driver, see the file
 Documentation/i2c/porting-clients in the 2.6 kernel tree for help,
 then send us the ported driver when you are done.
@@ -1798,6 +1798,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a accesskey="6" href="#Section-5_002e6">Section 5.6</a>:   What if it just works like a charm? 
 <li><a accesskey="7" href="#Section-5_002e7">Section 5.7</a>:   How do I update a ticket? 
 <li><a accesskey="8" href="#Section-5_002e8">Section 5.8</a>:   How do I follow up on a ticket? 
+<li><a accesskey="9" href="#Section-5_002e9">Section 5.9</a>:   Why did you decide not to support undocumented chips? 
 </ul>
 
 <div class="node">
@@ -1945,7 +1946,8 @@ follow-up information, email us instead. Thanks.
 
 <div class="node">
 <p><hr>
-<a name="Section-5_002e8"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e7">Section 5.7</a>,
+<a name="Section-5_002e8"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e9">Section 5.9</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e7">Section 5.7</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
 <br>
 </div>
@@ -1954,6 +1956,81 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
 
 <p>Follow up by emailing us
 and reference your ticket number in the subject.
+
+<div class="node">
+<p><hr>
+<a name="Section-5_002e9"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e8">Section 5.8</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
+<br>
+</div>
+
+<h3 class="section">5.9 Why did you decide not to support undocumented chips?</h3>
+
+<p>There are several reasons why we are generally not interested in writing
+drivers for undocumented chips:
+
+     <ul>
+<li>Writing a driver without a datasheet is much harder, as you have to
+guess most things. Remember that, most of the time, we write drivers for fun
+and for free, so there is no reason we would write a driver in conditions
+that promise more pain than fun. 
+<li>If we hit a problem, we are certain never to get any support from the
+chip manufacturer. This means that we may spend days on code which will
+finally never work. 
+<li>There are several chips out there which are fully documented and lack
+a driver. This is natural for us to give these the priority when we
+finally have some spare time to spend on driver coding. 
+<li>Hardware monitoring chips are not toys. Misprogramming them can
+result in data loss or hardware breakage. This is obviously more likely
+to happen with undocumented chips. This is a responsability we do not
+want to endorse (the GPL is pretty clear than we are not legally
+liable, but still). 
+</ul>
+
+   <p>There are also several reasons why we do not want to support such drivers,
+even if they were written by other people:
+
+     <ul>
+<li>Problems are much more likely to happen with such drivers. 
+This means increased needs of support. User support if very
+time-consuming and we are usually short of time. 
+<li>Support should be done by the driver author (as only him/her knows
+the driver and chip) but in the reality of facts, people will always ask
+us for help if the driver is part of our package. Redirecting all user
+requests to the driver's author manually is boring. 
+<li>The lack of datasheet usually results in an original driver which
+works relatively fine for its author, but will happen not to work
+completely for other users. This means that the driver will need many
+more additions and fixes than other drivers do, resulting in an increased
+maitainance workload, which we can hardly afford. Of course this too should
+be handled by the original driver author, but we never know whether he/she
+will actually do the work. 
+</ul>
+
+   <p>Lastly, there are other considerations, some of which are deliberately
+political:
+
+     <ul>
+<li>We do not want to trick hardware buyers into thinking that a chip is
+fully supported under Linux when in fact it is only partly supported by a
+driver which was written without a datasheet. Clearly stating that such
+chips are not supported makes it much easier for anyone who really needs
+fully working hardware monitoring under Linux to avoid motherboards with
+these partly supported chips. 
+<li>Drivers written without a datasheet are a pain for developers and
+users, but are a complete win for the manufacturers of these chips:
+they don't have to write the driver, they don't have to help us,
+they don't have to support the users, and they still sell their
+hardware. We do not want to encourage such a selfish behavior. 
+</ul>
+
+   <p>That being said, authors of such drivers can still submit their code to
+the Linux kernel folks for inclusion into Linux 2.6. Their driver may be
+accepted there, under conditions.
+
+   <p>If such a driver is ever accepted into the Linux 2.6 tree, and someone
+provides a patch to libsensors and/or sensors to add support for this
+driver, we will apply it. This generic code is unlikely to cause trouble.
 
 <div class="node">
 <p><hr>
@@ -1974,7 +2051,6 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a accesskey="6" href="#Section-6_002e6">Section 6.6</a>:   How to submit a patch
 <li><a accesskey="7" href="#Section-6_002e7">Section 6.7</a>:   How to REALLY help
 <li><a accesskey="8" href="#Section-6_002e8">Section 6.8</a>:   How to get release announcements
-<li><a accesskey="9" href="#Section-6_002e9">Section 6.9</a>:   How to block spam on the project mailing list
 </ul>
 
 <div class="node">
@@ -2104,8 +2180,7 @@ and we'll help you help us.
 
 <div class="node">
 <p><hr>
-<a name="Section-6_002e8"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e9">Section 6.9</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-6_002e7">Section 6.7</a>,
+<a name="Section-6_002e8"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-6_002e7">Section 6.7</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
 <br>
 </div>
@@ -2117,25 +2192,6 @@ however, we put all our releases on freshmeat: <a href="http://freshmeat.net">ht
 and you can register on our freshmeat project page  <a href="http://freshmeat.net/projects/lm_sensors">http://freshmeat.net/projects/lm_sensors</a>
 to 'subscribe to new releases' and then freshmeat
 will email you announcement.
-
-<div class="node">
-<p><hr>
-<a name="Section-6_002e9"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-6_002e8">Section 6.8</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
-<br>
-</div>
-
-<h3 class="section">6.9 How to block spam on the project mailing list</h3>
-
-<p>Sorry, we know the spam is a hassle.  It would be nice to have a
-moderator who can screen everything, but that takes too much time and
-delays emails.  Right now there is a procmail script which tags likely
-spam and puts in a X-SBClass: header.  If it is followed by 'Spam', then
-it is almost certainly spam, if it is followed by 'Blocked', then it
-scores high as being potential spam.  You should be able to set some
-rules in your mail client to throw those emails into a seperate folder. 
-It's not bullet proof (some legit mails get tagged wrong, and vice
-versa), but it seems to be about 95% accurate in our experience.
 
 <div class="node">
 <p><hr>
@@ -2243,6 +2299,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <h2 class="appendix">Appendix A Revision History of This Document</h2>
 
      <ul>
+<li>Rev 2.17 (JD) Added 5.9 (why we don't support undocumented chips),
+	removed 6.9 (doesn't apply to the new mailing list), 2005-10-05
 <li>Rev 2.16 (JD) Added 4.33.2, 2005-09-06
 <li>Rev 2.15 (JD) Updates, including mailing-list change, 2005-05-21
 <li>Rev 2.14 (MDS) Updated 4.12, 2004-11-26
