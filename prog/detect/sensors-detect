@@ -1749,6 +1749,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
         devid => 0x6f,
         logdev => 0x08,
       },
+      {
+        name => "SMSC SCH5307-NS Super IO",
+        driver => "smsc47b397",
+        devid => 0x81,
+        logdev => 0x08,
+      },
     ],
   },
   {
