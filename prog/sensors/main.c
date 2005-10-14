@@ -24,7 +24,11 @@
 #include <errno.h>
 #include <locale.h>
 #include <langinfo.h>
+
+#ifndef __UCLIBC__
 #include <iconv.h>
+#define HAVE_ICONV
+#endif
 
 #include "lib/sensors.h" 
 #include "lib/error.h"
@@ -116,11 +120,13 @@ void close_config_file(const char* config_file_name)
 
 static void set_degstr(void)
 {
+  const char *deg_default_text[2] = {" C", " F"};
+
+#ifdef HAVE_ICONV
   /* Size hardcoded for better performance.
      Don't forget to count the trailing \0! */
   size_t deg_latin1_size = 3;
   char *deg_latin1_text[2] = {"\260C", "\260F"};
-  const char *deg_default_text[2] = {" C", " F"};
   size_t nconv;
   size_t degstr_size = sizeof(degstr);
   char *degstr_ptr = degstr;
@@ -134,6 +140,7 @@ static void set_degstr(void)
     if (nconv != (size_t) -1)
       return;	   
   }
+#endif /* HAVE_ICONV */
 
   /* There was an error during the conversion, use the default text */
   strcpy(degstr, deg_default_text[fahrenheit]);
