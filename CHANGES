@@ -29,6 +29,7 @@ ask CVS about it:
   Module i2c-keywest: Remove bus probing code (2.6 backport)
   Module i2c-nforce2: Remove dead code (2.6 backport)
   Program decode-dimms.pl: Add lookup tables for manufacturer names
+                           Fix rounding error in PCxxxx speed computation
   Program i2cdump: Drop now useless #ifdef tests
                    Fix capability check for continuous byte mode
   Program i2cget: New
@@ -40,9 +41,15 @@ ask CVS about it:
   Program isadump: Display the real addresses in flat mode
   Program sensord: Do not log algorithm names
                    Drop EEPROM support (Aurelien Jarno)
+  Program sensors: Drop free_the_label
+                   Fix compilation with uclibc (no iconv)
   Program sensors-detect: Drop algorithm names
                           Do not rely on i2cdetect -l printing algo names
                           Simplify adapter name matching mechanism
+                          New address for ADM1032, ADT7461
+                          Improve ADT7467, ADT7468 support
+                          Fix MAX6659 reported driver
+                          Add Fintek F71805F detection
 
 
 2.9.2 (20050906)
