@@ -1304,7 +1304,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "Maxim MAX6659",
-       driver => "to-be-written",
+       driver => "lm90",
        i2c_addrs => [0x4d..0x4e], # 0x4c is handled above
        i2c_detect => sub { lm90_detect 4, @_ },
      },
@@ -1814,6 +1814,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	name => "Winbond W83L517D Super IO",
 	driver => "not-a-sensor",
 	devid => 0x61,
+      },
+      {
+	name => "Fintek F71805F Super IO Sensors",
+	driver => "to-be-written",
+	devid => 0x0406,
+	logdev => 0x04,
       },
     ],
   },
@@ -2771,7 +2777,7 @@ sub scan_superio
         $val = ($val << 8) | inb($datareg);
       }
       if (($val & ($chip->{devid_mask} || 0xffff)) != $chip->{devid}) {
-	printf "  Failed! (0x%02x)\n", $val;
+	printf "  Failed! (0x%0*x)\n", $chip->{devid}>0xff ? 4 : 2, $val;
 	next;
       }
       print "  Success...";
