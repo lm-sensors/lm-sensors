@@ -484,6 +484,7 @@ for my $i ( 0 .. $#dimm_list ) {
 			my $tbits = ($bytes[7]*256) + $bytes[6];
 			if (($bytes[11] == 2) ||  ($bytes[11] == 1)) { $tbits = $tbits - 8;}
 			my $pcclk = int ($ddrclk * $tbits / 8);
+			$pcclk += 100 if ($pcclk % 100) >= 50; # Round properly
 			$pcclk = $pcclk - ($pcclk % 100);
 			$ddrclk = int ($ddrclk);
 			printl "Maximum module speed", "$ddr ${ddrclk}MHz (PC${pcclk})";
