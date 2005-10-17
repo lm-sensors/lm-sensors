@@ -21,10 +21,9 @@ steps apply.
   You are of course free to write your own drivers, but it is smart to
   check first nobody else is already working on it, in case the
   New Drivers page is out of date.
-  You will also need to ask us to have an ID reserved in
-  i2c-id.h in the i2c package.
   Tell us it's OK to put your name on the "New Drivers" page.
-  Ask to be put on the mailing list so you get project updates.
+
+* Consider subscribing to the mailing list.
 
 * Check out our latest code from CVS.
   You should use this as a base for your development.
