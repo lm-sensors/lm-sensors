@@ -362,7 +362,7 @@ static int __devinit amd8111_probe(struct pci_dev *dev, const struct pci_device_
 	if (~pci_resource_flags(dev, 0) & IORESOURCE_IO)
 		return -1;
 
-	if (!(smbus = (void*)kmalloc(sizeof(struct amd_smbus), GFP_KERNEL)))
+	if (!(smbus = kmalloc(sizeof(struct amd_smbus), GFP_KERNEL)))
 		return -1;
 	memset(smbus, 0, sizeof(struct amd_smbus));
 
