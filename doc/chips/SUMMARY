@@ -1,36 +1,45 @@
 SUMMARY OF SUPPORTED CHIPS
 ==========================
 
-This is a summary of the sensor and non-sensor chips supported
-by this package. It lists the features of each supported chip.
+This is a summary of the sensor and non-sensor chips supported by this
+package. It lists the features of each supported chip. For further
+information on a particular driver, see the documentation in this
+directory.
 
-For further information on a particular chip, see the documentation
-in this directory. Data sheets are generally available on the
-manufacturer's web site.
+To determine what chips you have in your system, run 'sensors-detect'.
 
-To determine what chips you have in your system,
-run prog/detect/sensors-detect.
+If your sensor chip is not detected by sensors-detect, please contact us
+(see http://secure.netroedge.com/~lm78/author.html). Only contact us
+if you know for sure that your system includes a sensor chip (for
+example if you have technical documentation mentioning it, or if the
+BIOS setup screen presents monitoring values, or if you can get
+hardware monitoring to work using a different OS). Do *not* contact us
+if you have no proof that your system includes sensors. Such systems
+tend to be rare these days, but do still exist. This is especially true
+of laptops. If there are no sensors, there's nothing we can do.
 
-If your sensor chip is not detected by sensors-detect
-or supported by this package,
-please send mail (see http://secure.netroedge.com/~lm78/author.html)
+If you contact us, please include the following in your mail:
+ - The output of (as root) 'sensors-detect'. Make sure you unloaded
+   every chip driver beforehand (check that the sensors-detect script
+   does not complain that it couldn't probe some I2C addresses on any
+   given bus).
+ - Dumps of the chips that might be hardware monitoring chips. To get
+   these, follow the following steps:
+   1* Run 'i2cdetect -l'. This will list all available I2C (or SMBus)
+      busses on your system.
+   2* For each bus listed, run (as root) 'i2cdetect N' where N is the
+      bus number.
+   3* For each bus, if there is anything in the ranges 0x20-0x2f or
+      0x48-0x4f, dump the contents of that chip with (as root)
+      'i2cdump N 0xXX', where N is the bus number and XX is the
+      responsive address. Chips in other address ranges are way less
+      likely to be hardware monitoring chips. In particular, do not
+      send dumps of addresses 0x08, 0x0c, 0x10, 0x30-0x37, 0x42, 0x44,
+      0x50-0x5f, 0x61 and 0x69. These are *not* hadware monitoring
+      chips.
+ - The part numbers of the chips on your motherboard you think are the
+   sensor chips.
 
-Please include the following in your mail:
-	- The output of (as root) 'prog/detect/sensors-detect'
-	- The output of (as root) 'prog/detect/i2cdetect 1'
-	      (assuming your smbus adapter is on bus 1 -
-	      run 'i2cdetect' with no arguments to list the busses).
-	- The output of (as root) 'prog/dump/i2cdump X 0xXX'
-	      X = the bus number
-	      XX = the address of each chip you see in the output
-	      of i2cdetect. (run once for each chip)
-	- Part numbers of chips on your motherboard you think are
-	      the sensor chips (look at your motherboard)
-
-See also ../FAQ for assistance.
-
-
------------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 
 SUPPORTED SENSOR CHIPS
