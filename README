@@ -53,7 +53,7 @@ be the first to profit from new drivers and other changes. Have fun!
 =============================================================================
 
 At least the following I2C/SMBus adapters are supported:
-  Acer Labs M1533, M1535, and M1543C
+  Acer Labs M1533, M1535, M1543C and M1563
   AMD 756, 766, 768 and 8111
   AMD 8111 SMBus 2.0
   Apple Hydra (used on some PPC machines)
@@ -83,10 +83,10 @@ At least the following hardware sensor chips are supported:
   Intel Xeon processor embedded sensors
   ITE IT8705F, IT8712F embedded sensors
   Maxim MAX1617, MAX1617A, MAX1619, MAX6650, MAX6651,
-        MAX6633, MAX6634, MAX6635, MAX6657, MAX6658
+        MAX6633, MAX6634, MAX6635, MAX6657, MAX6658, MAX6659
   Microchip TC1068, TCM1617, TCN75
   Myson MTP008
-  National Semiconductor LM75, LM76, LM78, LM78-J, LM79,
+  National Semiconductor LM63, LM75, LM76, LM78, LM78-J, LM79,
                          LM80, LM81, LM83, LM84, LM85, LM86, LM87,
                          LM89, LM90, LM92, LM93, LM99, PC87360,
                          PC87363, PC87364, PC87365, PC87366

@@ -146,6 +146,10 @@ lm85
 	lm85		3	5	4	3 pwm	yes	no
 	adm1027		3	5	4	3 pwm	yes	no
 	adt7463		3	5	4	3 pwm	yes	no
+	emc6d100	3	8	4	3 pwm	yes	no
+	(emc6d101 is reported as emc6d100)
+	emc6d101	3	8	4	3 pwm	yes	no
+	emc6d102	3	8	4	3 pwm	yes	no
 
 lm87
 	lm87		2-3	6-8	0-2	1 pwm	yes	no
@@ -297,7 +301,6 @@ smbus-arp
 
 
 -----------------------------------------------------------------------------
------------------------------------------------------------------------------
 
 COMPANY ID LIST
 ---------------
@@ -329,4 +332,4 @@ This may help identify a chip after doing a 'i2cdump [bus] [address]'.
 
 
 ------------------
-Copyright (c) 2001-2004 The lm_sensors group
+Copyright (c) 2001-2005 The lm_sensors group
