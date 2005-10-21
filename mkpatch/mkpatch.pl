@@ -150,20 +150,20 @@ CONFIG_I2C_MAINBOARD
   basically the same as I2C but which uses only a subset of the I2C
   protocol.
 
-  You will also want the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also want the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Acer Labs ALI 1535
 CONFIG_I2C_ALI1535
   If you say yes to this option, support will be included for the Acer
-  Labs ALI 1535 mainboard I2C interface. This can also be 
+  Labs ALI 1535 mainboard I2C interface. This can also be
   built as a module.
 
 Acer Labs ALI 1533 and 1543C
 CONFIG_I2C_ALI15X3
   If you say yes to this option, support will be included for the Acer
-  Labs ALI 1533 and 1543C mainboard I2C interfaces. This can also be 
+  Labs ALI 1533 and 1543C mainboard I2C interfaces. This can also be
   built as a module which can be inserted and removed while the kernel
   is running.
 
@@ -191,19 +191,19 @@ CONFIG_I2C_AMD756_S4882
 AMD 8111 SMBus 2.0
 CONFIG_I2C_AMD8111
   If you say yes to this option, support will be included for the AMD
-  8111 mainboard SMBus 2.0 interface. This can also be 
+  8111 mainboard SMBus 2.0 interface. This can also be
   built as a module which can be inserted and removed while the kernel
   is running.
 
 Apple Hydra Mac I/O
 CONFIG_I2C_HYDRA
-  If you say yes to this option, support will be included for the 
-  Hydra mainboard I2C interface. This can also be built as a module 
+  If you say yes to this option, support will be included for the
+  Hydra mainboard I2C interface. This can also be built as a module
   which can be inserted and removed while the kernel is running.
 
 Intel I801
 CONFIG_I2C_I801
-  If you say yes to this option, support will be included for the 
+  If you say yes to this option, support will be included for the
   Intel I801 mainboard I2C interfaces. "I810" mainboard sensor chips are
   generally located on the I801's I2C bus. This can also be
   built as a module which can be inserted and removed while the kernel
@@ -211,7 +211,7 @@ CONFIG_I2C_I801
 
 Intel I810/I815 based Mainboard
 CONFIG_I2C_I810
-  If you say yes to this option, support will be included for the 
+  If you say yes to this option, support will be included for the
   Intel I810/I815 mainboard I2C interfaces. The I2C busses these chips
   are generally used only for video devices. For "810" mainboard sensor
   chips, use the I801 I2C driver instead. This can also be
@@ -220,7 +220,7 @@ CONFIG_I2C_I810
 
 Intel 82371AB PIIX4(E) / ServerWorks OSB4 and CSB5
 CONFIG_I2C_PIIX4
-  If you say yes to this option, support will be included for the 
+  If you say yes to this option, support will be included for the
   Intel PIIX4, PIIX4E, and 443MX, Serverworks OSB4/CSB5,
   and SMSC Victory66 mainboard
   I2C interfaces. This can also be
@@ -229,14 +229,14 @@ CONFIG_I2C_PIIX4
 
 Nvidia Nforce2/Nforce3 based Mainboard
 CONFIG_I2C_NFORCE2
-  If you say yes to this option, support will be included for the 
+  If you say yes to this option, support will be included for the
   Nvidia Nforce2 and Nforce3 families of mainboard I2C interfaces.
   This can also be built as a module which can be inserted and removed
   while the kernel is running.
 
 Silicon Integrated Systems Corp. SiS5595 based Mainboard
 CONFIG_I2C_SIS5595
-  If you say yes to this option, support will be included for the 
+  If you say yes to this option, support will be included for the
   SiS5595 mainboard I2C interfaces. For integrated sensors on the
   Sis5595, use CONFIG_SENSORS_SIS5595. This can also be
   built as a module which can be inserted and removed while the kernel
@@ -245,7 +245,7 @@ CONFIG_I2C_SIS5595
 Silicon Integrated Systems Corp. SiS630/730 based Mainboard
 CONFIG_I2C_SIS630
   If you say yes to this option, support will be included for the SiS 630
-  and 730 mainboard I2C interfaces. This can also be built as a module 
+  and 730 mainboard I2C interfaces. This can also be built as a module
   which can be inserted and removed while the kernel is running.
 
 Silicon Integrated Systems Corp. SiS645/961,645DX/961,735 based Mainboard
@@ -257,8 +257,8 @@ CONFIG_I2C_SIS645
 VIA Technologies, Inc. VT82C586B
 CONFIG_I2C_VIA
   If you say yes to this option, support will be included for the VIA
-  Technologies I2C adapter found on some motherboards. This can also 
-  be built as a module which can be inserted and removed while the 
+  Technologies I2C adapter found on some motherboards. This can also
+  be built as a module which can be inserted and removed while the
   kernel is running.
 
 VIA Technologies, Inc. VT82C596, 596B, 686A/B, 8233, 8235
@@ -266,12 +266,12 @@ CONFIG_I2C_VIAPRO
   If you say yes to this option, support will be included for the VIA
   Technologies I2C adapter on these chips. For integrated sensors on the
   Via 686A/B, use CONFIG_SENSORS_VIA686A. This can also be
-  be built as a module which can be inserted and removed while the 
+  be built as a module which can be inserted and removed while the
   kernel is running.
 
 3DFX Banshee / Voodoo3
 CONFIG_I2C_VOODOO3
-  If you say yes to this option, support will be included for the 
+  If you say yes to this option, support will be included for the
   3DFX Banshee and Voodoo3 I2C interfaces. The I2C busses on the these
   chips are generally used only for video devices.
   This can also be
@@ -288,34 +288,34 @@ CONFIG_I2C_TSUNAMI
 Pseudo ISA adapter (for hardware sensors modules)
 CONFIG_I2C_ISA
   This provides support for accessing some hardware sensor chips over
-  the ISA bus rather than the I2C or SMBus. If you want to do this, 
-  say yes here. This feature can also be built as a module which can 
+  the ISA bus rather than the I2C or SMBus. If you want to do this,
+  say yes here. This feature can also be built as a module which can
   be inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Analog Devices ADM1021 and compatibles
 CONFIG_SENSORS_ADM1021
-  If you say yes here you get support for Analog Devices ADM1021 
+  If you say yes here you get support for Analog Devices ADM1021
   and ADM1023 sensor chips and clones: Maxim MAX1617 and MAX1617A,
   Genesys Logic GL523SM, National Semi LM84, TI THMC10 and Onsemi
   MC1066. This can also be built as a module which can be inserted
   and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Analog Devices ADM1024
 CONFIG_SENSORS_ADM1024
   If you say yes here you get support for Analog Devices ADM1024 sensor
   chips.  This can also be built as a module.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Analog Devices ADM1025
 CONFIG_SENSORS_ADM1025
@@ -323,9 +323,9 @@ CONFIG_SENSORS_ADM1025
   chips.  This can also be built as a module which can be inserted and
   removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Analog Devices ADM1026
 CONFIG_SENSORS_ADM1026
@@ -333,9 +333,9 @@ CONFIG_SENSORS_ADM1026
   chips.  This can also be built as a module which can be inserted and
   removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Analog Devices ADM1030, ADM1031
 CONFIG_SENSORS_ADM1031
@@ -343,21 +343,21 @@ CONFIG_SENSORS_ADM1031
   ADM1031 sensor chips.  This can also be built as a module which can
   be inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
+  You will also need the latest user-space utilities: you can find them
   in the lm_sensors package, which you can download at
   http://www.lm-sensors.nu/
 
 Analog Devices ADM9240 and compatibles
 CONFIG_SENSORS_ADM9240
-  If you say yes here you get support for Analog Devices ADM9240 
+  If you say yes here you get support for Analog Devices ADM9240
   sensor chips and clones: the Dallas Semiconductor DS1780 and
-  the National Semiconductor LM81. This can also be built as a 
+  the National Semiconductor LM81. This can also be built as a
   module which can be inserted and removed while the kernel is
   running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Asus ASB100
 CONFIG_SENSORS_ASB100
@@ -373,16 +373,16 @@ CONFIG_SENSORS_DS1621
   If you say yes here you get support for the Dallas DS1621 and DS1625x
   sensor chips.  This can also be built as a module.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Fujitsu-Siemens Hermes
 CONFIG_SENSORS_FSCHER
   If you say yes here you get support for the Fujitsu-Siemens Hermes
   sensor chip.  This can also be built as a module.
 
-  You will also need the latest user-space utilties: you can find them
+  You will also need the latest user-space utilities: you can find them
   in the lm_sensors package, which you can download at
   http://www.lm-sensors.nu/
 
@@ -391,9 +391,9 @@ CONFIG_SENSORS_FSCPOS
   If you say yes here you get support for the Fujitsu-Siemens Poseidon
   sensor chip.  This can also be built as a module.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Fujitsu-Siemens Scylla
 CONFIG_SENSORS_FSCSCY
@@ -404,9 +404,9 @@ CONFIG_SENSORS_FSCSCY
   for motherboards in these cases. Be careful - those motherboards have
   not been tested with this driver.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Genesys Logic GL518SM
 CONFIG_SENSORS_GL518SM
@@ -414,9 +414,9 @@ CONFIG_SENSORS_GL518SM
   chips.  This can also be built as a module which can be inserted and
   removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Genesys Logic GL520SM
 CONFIG_SENSORS_GL520SM
@@ -424,18 +424,18 @@ CONFIG_SENSORS_GL520SM
   chips.  This can also be built as a module which can be inserted and
   removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 HP Maxilife
 CONFIG_SENSORS_MAXILIFE
   If you say yes here you get support for the HP Maxilife
   sensor chip.  This can also be built as a module.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Intel Xeon Thermal Sensor
 CONFIG_SENSORS_XEONTEMP
@@ -444,7 +444,7 @@ CONFIG_SENSORS_XEONTEMP
   can be inserted and removed while the kernel is running.
 
   You will also need the latest user-space utilities: you can find them
-  in the lm_sensors package, which you can download at 
+  in the lm_sensors package, which you can download at
   http://www.lm-sensors.nu/
 
 ITE 8705, 8712, Sis950
@@ -452,16 +452,16 @@ CONFIG_SENSORS_IT87
   If you say yes here you get support for the ITE 8705 and 8712 and
   SiS950 sensor chips.  This can also be built as a module.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Maxim MAX1619
 CONFIG_SENSORS_MAX1619
   If you say yes here you get support for the Maxim MAX1619 sensor
   chips.  This can also be built as a module.
 
-  You will also need the latest user-space utilties: you can find them
+  You will also need the latest user-space utilities: you can find them
   in the lm_sensors package, which you can download at
   http://www.lm-sensors.nu/
 
@@ -470,18 +470,18 @@ CONFIG_SENSORS_MAX6650
   If you say yes here you get support for the Maxim MAX6650 and
   MAX6651 sensor chips.  This can also be built as a module.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Myson MTP008
 CONFIG_SENSORS_MTP008
   If you say yes here you get support for the Myson MTP008
   sensor chip.  This can also be built as a module.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 National Semiconductor LM63
 CONFIG_SENSORS_LM63
@@ -489,43 +489,43 @@ CONFIG_SENSORS_LM63
   sensor chips.  This can also be built as a module which can be inserted
   and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
+  You will also need the latest user-space utilities: you can find them
   in the lm_sensors package, which you can download at
   http://www.lm-sensors.nu/
 
 National Semiconductor LM75 and compatibles
-CONFIG_SENSORS_LM75 
+CONFIG_SENSORS_LM75
   If you say yes here you get support for National Semiconductor LM75
   sensor chips and clones: Dallas Semiconductor DS75 and DS1775 (in
   9-bit precision mode), and TelCom (now Microchip) TCN75. This can
   also be built as a module which can be inserted and removed while
   the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 National Semiconductor LM78
 CONFIG_SENSORS_LM78
   If you say yes here you get support for National Semiconductor LM78
   sensor chips family: the LM78-J and LM79. Many clone chips will
   also work at least somewhat with this driver. This can also be built
-  as a module which can be inserted and removed while the kernel is 
+  as a module which can be inserted and removed while the kernel is
   running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 National Semiconductor LM80
 CONFIG_SENSORS_LM80
   If you say yes here you get support for National Semiconductor LM80
-  sensor chips. This can also be built as a module which can be 
+  sensor chips. This can also be built as a module which can be
   inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 National Semiconductor LM83
 CONFIG_SENSORS_LM83
@@ -544,19 +544,19 @@ CONFIG_SENSORS_LM85
   can also be built as a module which can be inserted and removed
   while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 National Semiconductor LM87
 CONFIG_SENSORS_LM87
   If you say yes here you get support for National Semiconductor LM87
-  sensor chips. This can also be built as a module which can be 
+  sensor chips. This can also be built as a module which can be
   inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 National Semiconductor LM90
 CONFIG_SENSORS_LM90
@@ -571,12 +571,12 @@ CONFIG_SENSORS_LM90
 National Semiconductor LM92
 CONFIG_SENSORS_LM92
   If you say yes here you get support for National Semiconductor LM92
-  sensor chips. This can also be built as a module which can be 
+  sensor chips. This can also be built as a module which can be
   inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 National Semiconductor LM93
 CONFIG_SENSORS_LM93
@@ -584,7 +584,7 @@ CONFIG_SENSORS_LM93
   sensor chips.  This can also be built as a module which can be inserted
   and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
+  You will also need the latest user-space utilities: you can find them
   in the lm_sensors package, which you can download at
   http://www.lm-sensors.nu/
 
@@ -597,51 +597,51 @@ CONFIG_SENSORS_PC87360
   running.
 
   You will also need the latest user-space utilities: you can find them
-  in the lm_sensors package, which you can download at 
+  in the lm_sensors package, which you can download at
   http://www.lm-sensors.nu/
 
 Philips PCF8574
 CONFIG_SENSORS_PCF8574
   If you say yes here you get support for the Philips PCF8574
   I2C 8-bit Parallel I/O device.
-  This can also be built as a module which can be 
+  This can also be built as a module which can be
   inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Philips PCF8591
 CONFIG_SENSORS_PCF8591
   If you say yes here you get support for the Philips PCF8591
   I2C Quad D/A + Single A/D I/O device.
-  This can also be built as a module which can be 
+  This can also be built as a module which can be
   inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Silicon Integrated Systems Corp. SiS5595 Sensor
 CONFIG_SENSORS_SIS5595
-  If you say yes here you get support for the integrated sensors in 
-  SiS5595 South Bridges. This can also be built as a module 
+  If you say yes here you get support for the integrated sensors in
+  SiS5595 South Bridges. This can also be built as a module
   which can be inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 SMSC47M1xx Super I/O Fan Support
 CONFIG_SENSORS_SMSC47M1
   If you say yes here you get support for the integrated fan
   monitoring and control in the SMSC 47M1xx Super I/O chips.
-  This can also be built as a module 
+  This can also be built as a module
   which can be inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Texas Instruments THMC50 / Analog Devices ADM1022
 CONFIG_SENSORS_THMC50
@@ -650,39 +650,39 @@ CONFIG_SENSORS_THMC50
   This can also be built as a module which
   can be inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Via VT82C686A/B
 CONFIG_SENSORS_VIA686A
-  If you say yes here you get support for the integrated sensors in 
-  Via 686A/B South Bridges. This can also be built as a module 
+  If you say yes here you get support for the integrated sensors in
+  Via 686A/B South Bridges. This can also be built as a module
   which can be inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Via VT1211 Sensors
 CONFIG_SENSORS_VT1211
-  If you say yes here you get support for the integrated sensors in 
-  the Via VT1211 Super I/O device. This can also be built as a module 
+  If you say yes here you get support for the integrated sensors in
+  the Via VT1211 Super I/O device. This can also be built as a module
   which can be inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Via VT8231 Sensors
 CONFIG_SENSORS_VT8231
-  If you say yes here you get support for the integrated sensors in 
-  the Via VT8231 device. This can also be built as a module 
+  If you say yes here you get support for the integrated sensors in
+  the Via VT8231 device. This can also be built as a module
   which can be inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 Winbond W83781D, W83782D, W83783S, W83627HF, AS99127F
 CONFIG_SENSORS_W83781D
@@ -691,7 +691,7 @@ CONFIG_SENSORS_W83781D
   and the similar Asus AS99127F. This can also be built as a module
   which can be inserted and removed while the kernel is running.
 
-  You will also need the latest user-space utilties: you can find them
+  You will also need the latest user-space utilities: you can find them
   in the lm_sensors package, which you can download at
   http://www.lm-sensors.nu/
 
@@ -700,8 +700,8 @@ CONFIG_SENSORS_W83792D
   If you say yes here you get support for the Winbond W83792D
   sensor chips.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
   http://www.lm-sensors.nu/
 
 Winbond W83627HF, W83627THF, W83637HF, W83697HF
@@ -726,15 +726,15 @@ CONFIG_SENSORS_W83L785TS
 
 EEprom (DIMM) reader
 CONFIG_SENSORS_EEPROM
-  If you say yes here you get read-only access to the EEPROM data 
+  If you say yes here you get read-only access to the EEPROM data
   available on modern memory DIMMs, and which could theoretically
-  also be available on other devices. This can also be built as a 
-  module which can be inserted and removed while the kernel is 
+  also be available on other devices. This can also be built as a
+  module which can be inserted and removed while the kernel is
   running.
 
-  You will also need the latest user-space utilties: you can find them
-  in the lm_sensors package, which you can download at 
-  http://www.lm-sensors.nu
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
 
 EOF
     }
@@ -747,7 +747,7 @@ EOF
 
 
 # This generates diffs for the main Linux Makefile.
-# Three lines which add drivers/sensors/sensors.a to the DRIVERS list are 
+# Three lines which add drivers/sensors/sensors.a to the DRIVERS list are
 # put just before the place where the architecture Makefile is included.
 # Of course, care is taken old lines are removed.
 # $_[0]: sensors package root (like /tmp/sensors)
@@ -803,7 +803,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for main `Makefile' failed.\n".
-      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 == 0;
+      "See our home page http://www.lm-sensors.nu/ for assistance!" if $pr1 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -845,13 +845,13 @@ sub gen_drivers_Makefile
       print OUTPUT;
       $_ = <INPUT>;
       redo MAIN;
-    } 
+    }
     if (m@^ifeq.*CONFIG_SENSORS@) {
       $_ = <INPUT> while not m@^endif@;
       $_ = <INPUT>;
       $_ = <INPUT> if m@^$@;
       redo MAIN;
-    } 
+    }
     if (m@^subdir.*CONFIG_SENSORS@) {
       $_ = <INPUT>;
       redo MAIN;
@@ -881,7 +881,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `drivers/Makefile' failed.\n".
-      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 == 0 or $pr2 == 0;
+      "See our home page http://www.lm-sensors.nu/ for assistance!" if $pr1 == 0 or $pr2 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -920,10 +920,10 @@ sub gen_drivers_char_Config_in
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `drivers/char/Config.in' failed.\n".
-      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 == 0;
+      "See our home page http://www.lm-sensors.nu/ for assistance!" if $pr1 == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
- 
+
 # This generates diffs for drivers/i2c/Config.in
 # Several adapter drivers that are included in the lm_sensors package are
 # added at the first and onlu sensors marker.
@@ -949,7 +949,7 @@ sub gen_drivers_i2c_Config_in
         last if m@sensors code ends here@;
       }
       print OUTPUT << 'EOF';
-  bool 'I2C mainboard interfaces' CONFIG_I2C_MAINBOARD 
+  bool 'I2C mainboard interfaces' CONFIG_I2C_MAINBOARD
   if [ "$CONFIG_I2C_MAINBOARD" = "y" ]; then
     dep_tristate '  Acer Labs ALI 1535' CONFIG_I2C_ALI1535 $CONFIG_I2C
     dep_tristate '  Acer Labs ALI 1533 and 1543C' CONFIG_I2C_ALI15X3 $CONFIG_I2C
@@ -984,7 +984,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `drivers/i2c/Config.in' failed.\n".
-      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 != 1;
+      "See our home page http://www.lm-sensors.nu/ for assistance!" if $pr1 != 1;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -1111,7 +1111,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `drivers/i2c/Makefile' failed.\n".
-      "See our home page http://www.lm-sensors.nu for assistance!" if $pr1 != 1;
+      "See our home page http://www.lm-sensors.nu/ for assistance!" if $pr1 != 1;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -1150,7 +1150,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `MAINTAINERS' failed.\n".
-      "See our home page http://www.lm-sensors.nu for assistance!" if $done == 0;
+      "See our home page http://www.lm-sensors.nu/ for assistance!" if $done == 0;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -1177,11 +1177,11 @@ EOF
     }
     if ($done == 1 && m/^\s*\* Check for a Sony Vaio system\s*$/) {
       print OUTPUT <<'EOF';
- * Don't access SMBus on IBM systems which get corrupted eeproms 
+ * Don't access SMBus on IBM systems which get corrupted eeproms
  */
 
 static __init int disable_smbus(struct dmi_blacklist *d)
-{   
+{
 	if (is_unsafe_smbus == 0) {
 		is_unsafe_smbus = 1;
 		printk(KERN_INFO "%s machine detected. Disabling SMBus accesses.\n", d->ident);
@@ -1207,7 +1207,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `$kernel_file' failed.\n".
-      "See our home page http://www.lm-sensors.nu for assistance!" if $done != 3;
+      "See our home page http://www.lm-sensors.nu/ for assistance!" if $done != 3;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 
   $kernel_file = "arch/i386/kernel/i386_ksyms.c";
@@ -1231,7 +1231,7 @@ EOF
   close INPUT;
   close OUTPUT;
   die "Automatic patch generation for `$kernel_file' failed.\n".
-      "See our home page http://www.lm-sensors.nu for assistance!" if $done != 1;
+      "See our home page http://www.lm-sensors.nu/ for assistance!" if $done != 1;
   print_diff $package_root,$kernel_root,$kernel_file,$package_file;
 }
 
@@ -1244,32 +1244,32 @@ sub main
 
   # --> Read the command-lineo
   $package_root = $ARGV[0];
-  die "Package root `$package_root' is not found\n" 
+  die "Package root `$package_root' is not found\n"
         unless -d "$package_root/mkpatch";
   $kernel_root = $ARGV[1];
-  die "Kernel root `$kernel_root' is not found\n" 
+  die "Kernel root `$kernel_root' is not found\n"
         unless -f "$kernel_root/Rules.make";
 
   # --> Read FILES
-  open INPUT, "$package_root/mkpatch/FILES" 
+  open INPUT, "$package_root/mkpatch/FILES"
         or die "Can't open `$package_root/mkpatch/FILES'";
   while (<INPUT>) {
     ($data0,$data1) = /(\S+)\s+(\S+)/;
     $files{$data0} = $data1;
-  } 
+  }
   close INPUT;
 
   # --> Read INCLUDES
-  open INPUT, "$package_root/mkpatch/INCLUDES" 
+  open INPUT, "$package_root/mkpatch/INCLUDES"
         or die "Can't open `$package_root/mkpatch/INCLUDES'";
   while (<INPUT>) {
     ($data0,$data1) = /(\S+)\s+(\S+)/;
     $includes{$data0} = $data1;
     $sedscript .= 's,(#\s*include\s*)'.$data0.'(\s*),\1'."$data1".'\2, ; ';
-  } 
+  }
   close INPUT;
 
-  die "First apply the i2c patches to `$kernel_root'!" 
+  die "First apply the i2c patches to `$kernel_root'!"
        if ! -d "$kernel_root/drivers/i2c";
 
   # --> Read "version.h"
@@ -1277,10 +1277,10 @@ sub main
         or die "Can't open `$package_root/version.h'";
   $version_string .= $_ while <INPUT>;
   close INPUT;
- 
+
   # --> Start generating
   foreach $package_file (sort keys %files) {
-    open INPUT,"$package_root/$package_file" 
+    open INPUT,"$package_root/$package_file"
           or die "Can't open `$package_root/$package_file'";
     open OUTPUT,">$package_root/$temp"
           or die "Can't open `$package_root/$temp'";
