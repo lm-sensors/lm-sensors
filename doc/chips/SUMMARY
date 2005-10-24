@@ -207,12 +207,14 @@ smartbatt
 	smartbatt	1	1	-	-	yes	no
 
 smsc47m1
+	(all are reported as a "smsc47m1")
 	smsc47b27x	-	-	2	2	no	yes (LPC)
 	smsc47m10x	-	-	2	2	no	yes (LPC)
 	smsc47m13x	-	-	2	2	no	yes (LPC)
 	smsc47m14x	-	-	2	2	no	yes (LPC)
 	smsc47m15x	-	-	2	2	no	yes (LPC)
 	smsc47m192	-	-	2	2	no	yes (LPC)
+	smsc47m997	-	-	2	2	no	yes (LPC)
 
 thmc50
 	adm1022		3	2	-	1 dac	yes	no

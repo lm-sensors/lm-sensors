@@ -1463,7 +1463,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { m5879_detect @_},
      },
      {
-       name => "SMSC LPC47M15x or LPC47M192",
+       name => "SMSC LPC47M15x, LPC47M192 or LPC47M997",
        driver => "to-be-written",
        i2c_addrs => [0x2c..0x2d],
        i2c_detect => sub { smsc47m192_detect @_ },
@@ -1721,7 +1721,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	logdev => 0x0a,
       },
       {
-	name => "SMSC 47M15x/192 Super IO Fan Sensors",
+	name => "SMSC 47M15x/192/997 Super IO Fan Sensors",
 	driver => "smsc47m1",
 	devid => 0x60,
 	logdev => 0x0a,

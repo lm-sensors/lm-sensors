@@ -85,6 +85,8 @@ superio_exit(void)
  * LPC47B27x (device id 0x51) have fan control.
  * The 47M15x and 47M192 chips "with hardware monitoring block"
  * can do much more besides (device id 0x60).
+ * The LPC47M997 is undocumented, but seems to be compatible with
+ * the LPC47M192, and has the same device id.
  */
 #define SMSC_DEVID_MATCH(id) ((id) == 0x51 || (id) == 0x59 || (id) == 0x5F || (id) == 0x60)
 
