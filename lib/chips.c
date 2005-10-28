@@ -5415,6 +5415,7 @@ static sensors_chip_feature smsc47b397_features[] =
 	SENSORS_SMSC47B397_FAN(2),
 	SENSORS_SMSC47B397_FAN(3),
 	SENSORS_SMSC47B397_FAN(4),
+	{ 0 }
 };
 
 sensors_chip_features sensors_chip_features_list[] =
