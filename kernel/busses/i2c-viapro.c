@@ -312,8 +312,8 @@ static struct i2c_adapter vt596_adapter = {
 	.dec_use	= vt596_dec,
 };
 
-static int __devinit vt596_probe(struct pci_dev *pdev,
-				 const struct pci_device_id *id)
+static int __init vt596_probe(struct pci_dev *pdev,
+			      const struct pci_device_id *id)
 {
 	unsigned char temp;
 	int error = -ENODEV;
@@ -404,12 +404,6 @@ static int __devinit vt596_probe(struct pci_dev *pdev,
 	return error;
 }
 
-static void __devexit vt596_remove(struct pci_dev *pdev)
-{
-	i2c_del_adapter(&vt596_adapter);
-	release_region(vt596_smba, 8);
-}
-
 /* 8233A is undefined before kernel 2.4.19 */
 #ifndef PCI_DEVICE_ID_VIA_8233A
 #define PCI_DEVICE_ID_VIA_8233A	0x3147
@@ -422,7 +416,7 @@ static void __devexit vt596_remove(struct pci_dev *pdev)
 #ifndef PCI_DEVICE_ID_VIA_8237
 #define PCI_DEVICE_ID_VIA_8237	0x3227
 #endif
-static struct pci_device_id vt596_ids[] __devinitdata = {
+static struct pci_device_id vt596_ids[] __initdata = {
 	{
 		.vendor		= PCI_VENDOR_ID_VIA,
 		.device 	= PCI_DEVICE_ID_VIA_82C596_3,
@@ -482,25 +476,12 @@ static struct pci_device_id vt596_ids[] __devinitdata = {
 	{ 0, }
 };
 
-/* Don't register driver to avoid driver conflicts */
-/*
-static struct pci_driver vt596_driver = {
-	.name		= "vt596 smbus",
-	.id_table	= vt596_ids,
-	.probe		= vt596_probe,
-	.remove		= __devexit_p(vt596_remove),
-};
-*/
-
 static int __init i2c_vt596_init(void)
 {
 	struct pci_dev *dev;
 	const struct pci_device_id *id;
 
 	printk("i2c-viapro.o version %s (%s)\n", LM_VERSION, LM_DATE);
-/*
-	return pci_module_init(&vt596_driver);
-*/
 	pci_for_each_dev(dev) {
 		id = pci_match_device(vt596_ids, dev);
 		if(id)
@@ -513,10 +494,8 @@ static int __init i2c_vt596_init(void)
 
 static void __exit i2c_vt596_exit(void)
 {
-/*
-	pci_unregister_driver(&vt596_driver);
-*/
-	vt596_remove(NULL);
+	i2c_del_adapter(&vt596_adapter);
+	release_region(vt596_smba, 8);
 }
 
 MODULE_AUTHOR(
