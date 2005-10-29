@@ -186,8 +186,6 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int adm9240_detach_client(struct i2c_client *client);
 
-static int adm9240_read_value(struct i2c_client *client, u8 reg);
-static int adm9240_write_value(struct i2c_client *client, u8 reg, u8 value);
 static void adm9240_update_client(struct i2c_client *client);
 static void adm9240_init_client(struct i2c_client *client);
 
@@ -321,17 +319,18 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
 
 	if (kind < 0) {
 		if (
-		    ((adm9240_read_value
+		    ((i2c_smbus_read_byte_data
 		      (new_client, ADM9240_REG_CONFIG) & 0x80) != 0x00)
 		    ||
-		    (adm9240_read_value(new_client, ADM9240_REG_I2C_ADDR)
+		    (i2c_smbus_read_byte_data(new_client, ADM9240_REG_I2C_ADDR)
 		     != address))
 			goto ERROR1;
 	}
 
 	/* Determine the chip type. */
 	if (kind <= 0) {
-		i = adm9240_read_value(new_client, ADM9240_REG_COMPANY_ID);
+		i = i2c_smbus_read_byte_data(new_client,
+					     ADM9240_REG_COMPANY_ID);
 		if (i == 0x23)
 			kind = adm9240;
 		else if (i == 0xda)
@@ -420,21 +419,11 @@ static int adm9240_detach_client(struct i2c_client *client)
 }
 
 
-static int adm9240_read_value(struct i2c_client *client, u8 reg)
-{
-	return i2c_smbus_read_byte_data(client, reg);
-}
-
-static int adm9240_write_value(struct i2c_client *client, u8 reg, u8 value)
-{
-	return i2c_smbus_write_byte_data(client, reg, value);
-}
-
 /* Called when we have found a new ADM9240. */
 static void adm9240_init_client(struct i2c_client *client)
 {
 	/* Start monitoring */
-	adm9240_write_value(client, ADM9240_REG_CONFIG, 0x01);
+	i2c_smbus_write_byte_data(client, ADM9240_REG_CONFIG, 0x01);
 }
 
 static void adm9240_update_client(struct i2c_client *client)
@@ -454,46 +443,47 @@ static void adm9240_update_client(struct i2c_client *client)
 #endif
 		for (i = 0; i <= 5; i++) {
 			data->in[i] =
-			    adm9240_read_value(client, ADM9240_REG_IN(i));
+			    i2c_smbus_read_byte_data(client,
+			    			     ADM9240_REG_IN(i));
 			data->in_min[i] =
-			    adm9240_read_value(client,
-					       ADM9240_REG_IN_MIN(i));
+			    i2c_smbus_read_byte_data(client,
+						     ADM9240_REG_IN_MIN(i));
 			data->in_max[i] =
-			    adm9240_read_value(client,
-					       ADM9240_REG_IN_MAX(i));
+			    i2c_smbus_read_byte_data(client,
+						     ADM9240_REG_IN_MAX(i));
 		}
 		data->fan[0] =
-		    adm9240_read_value(client, ADM9240_REG_FAN1);
+		    i2c_smbus_read_byte_data(client, ADM9240_REG_FAN1);
 		data->fan_min[0] =
-		    adm9240_read_value(client, ADM9240_REG_FAN1_MIN);
+		    i2c_smbus_read_byte_data(client, ADM9240_REG_FAN1_MIN);
 		data->fan[1] =
-		    adm9240_read_value(client, ADM9240_REG_FAN2);
+		    i2c_smbus_read_byte_data(client, ADM9240_REG_FAN2);
 		data->fan_min[1] =
-		    adm9240_read_value(client, ADM9240_REG_FAN2_MIN);
+		    i2c_smbus_read_byte_data(client, ADM9240_REG_FAN2_MIN);
 		data->temp =
-		    (adm9240_read_value(client, ADM9240_REG_TEMP) << 1) +
-		    ((adm9240_read_value
+		    (i2c_smbus_read_byte_data(client, ADM9240_REG_TEMP) << 1) +
+		    ((i2c_smbus_read_byte_data
 		      (client, ADM9240_REG_TEMP_CONFIG) & 0x80) >> 7);
 		data->temp_os_max =
-		    adm9240_read_value(client, ADM9240_REG_TOS);
+		    i2c_smbus_read_byte_data(client, ADM9240_REG_TOS);
 		data->temp_os_hyst =
-		    adm9240_read_value(client, ADM9240_REG_THYST);
+		    i2c_smbus_read_byte_data(client, ADM9240_REG_THYST);
 
-		i = adm9240_read_value(client, ADM9240_REG_VID_FAN_DIV);
+		i = i2c_smbus_read_byte_data(client, ADM9240_REG_VID_FAN_DIV);
 		data->fan_div[0] = (i >> 4) & 0x03;
 		data->fan_div[1] = (i >> 6) & 0x03;
 		data->vid = i & 0x0f;
 		data->vid |=
-		    (adm9240_read_value(client, ADM9240_REG_VID4) & 0x01)
+		    (i2c_smbus_read_byte_data(client, ADM9240_REG_VID4) & 0x01)
 		    << 4;
 
 		data->alarms =
-		    adm9240_read_value(client,
-				       ADM9240_REG_INT1_STAT) +
-		    (adm9240_read_value(client, ADM9240_REG_INT2_STAT) <<
+		    i2c_smbus_read_byte_data(client,
+					     ADM9240_REG_INT1_STAT) +
+		    (i2c_smbus_read_byte_data(client, ADM9240_REG_INT2_STAT) <<
 		     8);
 		data->analog_out =
-		    adm9240_read_value(client, ADM9240_REG_ANALOG_OUT);
+		    i2c_smbus_read_byte_data(client, ADM9240_REG_ANALOG_OUT);
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -539,14 +529,16 @@ void adm9240_in(struct i2c_client *client, int operation, int ctl_name,
 		if (*nrels_mag >= 1) {
 			data->in_min[nr] =
 			    IN_TO_REG((results[0] * 192) / scales[nr], nr);
-			adm9240_write_value(client, ADM9240_REG_IN_MIN(nr),
-					    data->in_min[nr]);
+			i2c_smbus_write_byte_data(client,
+						  ADM9240_REG_IN_MIN(nr),
+						  data->in_min[nr]);
 		}
 		if (*nrels_mag >= 2) {
 			data->in_max[nr] =
 			    IN_TO_REG((results[1] * 192) / scales[nr], nr);
-			adm9240_write_value(client, ADM9240_REG_IN_MAX(nr),
-					    data->in_max[nr]);
+			i2c_smbus_write_byte_data(client,
+						  ADM9240_REG_IN_MAX(nr),
+						  data->in_max[nr]);
 		}
 	}
 }
@@ -575,11 +567,10 @@ void adm9240_fan(struct i2c_client *client, int operation, int ctl_name,
 							   (data->
 							    fan_div[nr -
 								    1]));
-			adm9240_write_value(client,
-					    nr ==
-					    1 ? ADM9240_REG_FAN1_MIN :
-					    ADM9240_REG_FAN2_MIN,
-					    data->fan_min[nr - 1]);
+			i2c_smbus_write_byte_data(client, nr == 1 ?
+						  ADM9240_REG_FAN1_MIN :
+						  ADM9240_REG_FAN2_MIN,
+						  data->fan_min[nr - 1]);
 		}
 	}
 }
@@ -600,13 +591,13 @@ void adm9240_temp(struct i2c_client *client, int operation, int ctl_name,
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			data->temp_os_max = TEMP_LIMIT_TO_REG(results[0]);
-			adm9240_write_value(client, ADM9240_REG_TOS,
-					    data->temp_os_max);
+			i2c_smbus_write_byte_data(client, ADM9240_REG_TOS,
+						  data->temp_os_max);
 		}
 		if (*nrels_mag >= 2) {
 			data->temp_os_hyst = TEMP_LIMIT_TO_REG(results[1]);
-			adm9240_write_value(client, ADM9240_REG_THYST,
-					    data->temp_os_hyst);
+			i2c_smbus_write_byte_data(client, ADM9240_REG_THYST,
+						  data->temp_os_hyst);
 		}
 	}
 }
@@ -638,7 +629,8 @@ void adm9240_fan_div(struct i2c_client *client, int operation,
 		results[1] = DIV_FROM_REG(data->fan_div[1]);
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		old = adm9240_read_value(client, ADM9240_REG_VID_FAN_DIV);
+		old = i2c_smbus_read_byte_data(client,
+					       ADM9240_REG_VID_FAN_DIV);
 		if (*nrels_mag >= 2) {
 			data->fan_div[1] = DIV_TO_REG(results[1]);
 			old = (old & 0x3f) | (data->fan_div[1] << 6);
@@ -646,8 +638,9 @@ void adm9240_fan_div(struct i2c_client *client, int operation,
 		if (*nrels_mag >= 1) {
 			data->fan_div[0] = DIV_TO_REG(results[0]);
 			old = (old & 0xcf) | (data->fan_div[0] << 4);
-			adm9240_write_value(client,
-					    ADM9240_REG_VID_FAN_DIV, old);
+			i2c_smbus_write_byte_data(client,
+						  ADM9240_REG_VID_FAN_DIV,
+						  old);
 		}
 	}
 }
@@ -666,8 +659,9 @@ void adm9240_analog_out(struct i2c_client *client, int operation,
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
 			data->analog_out = results[0];
-			adm9240_write_value(client, ADM9240_REG_ANALOG_OUT,
-					    data->analog_out);
+			i2c_smbus_write_byte_data(client,
+						  ADM9240_REG_ANALOG_OUT,
+						  data->analog_out);
 		}
 	}
 }
