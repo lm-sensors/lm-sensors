@@ -103,6 +103,32 @@ static struct i2c_adapter vt596_adapter;
 #define FEATURE_I2CBLOCK	(1<<0)
 static unsigned int vt596_features;
 
+#ifdef DEBUG
+static void vt596_dump_regs(const char *msg, u8 size)
+{
+	dev_dbg(&vt596_adapter, "%s: STS=%02x CNT=%02x CMD=%02x ADD=%02x "
+		"DAT=%02x,%02x\n", msg, inb_p(SMBHSTSTS), inb_p(SMBHSTCNT),
+		inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
+		inb_p(SMBHSTDAT1));
+
+	if (size == VT596_BLOCK_DATA
+	 || size == VT596_I2C_BLOCK_DATA) {
+		int i;
+
+		dev_dbg(&vt596_adapter, "BLK=");
+		for (i = 0; i < I2C_SMBUS_BLOCK_MAX / 2; i++)
+			printk("%02x,", inb_p(SMBBLKDAT));
+		printk("\n");
+		dev_dbg(&vt596_adapter, "    ");
+		for (; i < I2C_SMBUS_BLOCK_MAX - 1; i++)
+			printk("%02x,", inb_p(SMBBLKDAT));
+		printk("%02x\n", inb_p(SMBBLKDAT));
+	}
+}
+#else
+static inline void vt596_dump_regs(const char *msg, u8 size) { }
+#endif
+
 /* Return -1 on error, 0 on success */
 static int vt596_transaction(u8 size)
 {
@@ -110,10 +136,7 @@ static int vt596_transaction(u8 size)
 	int result = 0;
 	int timeout = 0;
 
-	dev_dbg(&vt596_adapter, "Transaction (pre): CNT=%02x, CMD=%02x, "
-		"ADD=%02x, DAT0=%02x, DAT1=%02x\n", inb_p(SMBHSTCNT),
-		inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
-		inb_p(SMBHSTDAT1));
+	vt596_dump_regs("Transaction (pre)", size);
 
 	/* Make sure the SMBus host is ready to start transmitting */
 	if ((temp = inb_p(SMBHSTSTS)) & 0x1F) {
@@ -169,10 +192,7 @@ static int vt596_transaction(u8 size)
 	if (temp & 0x1F)
 		outb_p(temp, SMBHSTSTS);
 
-	dev_dbg(&vt596_adapter, "Transaction (post): CNT=%02x, CMD=%02x, "
-		"ADD=%02x, DAT0=%02x, DAT1=%02x\n", inb_p(SMBHSTCNT),
-		inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
-		inb_p(SMBHSTDAT1));
+	vt596_dump_regs("Transaction (post)", size);
 
 	return result;
 }
