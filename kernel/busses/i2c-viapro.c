@@ -104,7 +104,7 @@ static struct i2c_adapter vt596_adapter;
 static unsigned int vt596_features;
 
 /* Return -1 on error, 0 on success */
-static int vt596_transaction(void)
+static int vt596_transaction(u8 size)
 {
 	int temp;
 	int result = 0;
@@ -130,7 +130,7 @@ static int vt596_transaction(void)
 	}
 
 	/* Start the transaction by setting bit 6 */
-	outb_p(inb(SMBHSTCNT) | 0x40, SMBHSTCNT);
+	outb_p(0x40 | size, SMBHSTCNT);
 
 	/* We will always wait for a fraction of a second */
 	do {
@@ -146,8 +146,7 @@ static int vt596_transaction(void)
 
 	if (temp & 0x10) {
 		result = -1;
-		dev_err(&vt596_adapter, "Transaction failed (0x%02x)\n",
-			inb_p(SMBHSTCNT) & 0x3C);
+		dev_err(&vt596_adapter, "Transaction failed (0x%02x)\n", size);
 	}
 
 	if (temp & 0x08) {
@@ -156,10 +155,9 @@ static int vt596_transaction(void)
 	}
 
 	if (temp & 0x04) {
-		int size = inb_p(SMBHSTCNT) & 0x3C;
 		int read = inb_p(SMBHSTADD) & 0x01;
 		result = -1;
-		/* The quick and receive byte command are used to probe
+		/* The quick and receive byte commands are used to probe
 		   for chips, so errors are expected, and we don't
 		   want to frighten the user. */
 		if (!((size == VT596_QUICK && !read) ||
@@ -234,9 +232,8 @@ static s32 vt596_access(struct i2c_adapter *adap, u16 addr,
 	}
 
 	outb_p(((addr & 0x7f) << 1) | read_write, SMBHSTADD);
-	outb_p((size & 0x3C), SMBHSTCNT);
 
-	if (vt596_transaction()) /* Error in transaction */
+	if (vt596_transaction(size)) /* Error in transaction */
 		return -1;
 
 	if ((read_write == I2C_SMBUS_WRITE) || (size == VT596_QUICK))
