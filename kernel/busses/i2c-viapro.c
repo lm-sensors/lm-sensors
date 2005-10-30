@@ -97,7 +97,6 @@ MODULE_PARM_DESC(force_addr,
 		 "EXTREMELY DANGEROUS!");
 
 
-static struct pci_driver vt596_driver;
 static struct i2c_adapter vt596_adapter;
 
 #define FEATURE_I2CBLOCK	(1<<0)
@@ -361,7 +360,7 @@ static int __init vt596_probe(struct pci_dev *pdev,
 	}
 
 found:
-	if (!request_region(vt596_smba, 8, vt596_driver.name)) {
+	if (!request_region(vt596_smba, 8, "viapro-smbus")) {
 		dev_err(pdev, "SMBus region 0x%x already in use!\n",
 		        vt596_smba);
 		return -ENODEV;
