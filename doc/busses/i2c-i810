@@ -4,6 +4,7 @@ Status: Stable
 
 Supported adapters:
   * Intel 82810, 82810-DC100, 82810E, and 82815 (GMCH)
+  * Intel 82845G (GMCH)
 
 Author: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock
         <phil@netroedge.com>,
