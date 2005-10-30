@@ -115,12 +115,13 @@ static struct i2c_adapter vt586b_adapter = {
 };
 
 
-static struct pci_device_id vt586b_ids[] __devinitdata = {
+static struct pci_device_id vt586b_ids[] __initdata = {
 	{ PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_82C586_3, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
 	{ 0, }
 };
 
-static int __devinit vt586b_probe(struct pci_dev *dev, const struct pci_device_id *id)
+static int __init vt586b_probe(struct pci_dev *dev,
+			       const struct pci_device_id *id)
 {
 	u16 base;
 	u8 rev;
@@ -167,33 +168,12 @@ static int __devinit vt586b_probe(struct pci_dev *dev, const struct pci_device_i
 	return 0;
 }
 
-static void __devexit vt586b_remove(struct pci_dev *dev)
-{
-	i2c_bit_del_bus(&vt586b_adapter);
-	release_region(I2C_DIR, IOSPACE);
-	pm_io_base = 0;
-}
-
-
-/* Don't register driver to avoid driver conflicts */
-/*
-static struct pci_driver vt586b_driver = {
-	.name		= "vt586b smbus",
-	.id_table	= vt586b_ids,
-	.probe		= vt586b_probe,
-	.remove		= __devexit_p(vt586b_remove),
-};
-*/
-
 static int __init i2c_vt586b_init(void)
 {
 	struct pci_dev *dev;
 	const struct pci_device_id *id;
 
 	printk("i2c-via.o version %s (%s)\n", LM_VERSION, LM_DATE);
-/*
-	return pci_module_init(&vt586b_driver);
-*/
 	pci_for_each_dev(dev) {
 		id = pci_match_device(vt586b_ids, dev);
 		if(id)
@@ -206,10 +186,8 @@ static int __init i2c_vt586b_init(void)
 
 static void __exit i2c_vt586b_exit(void)
 {
-/*
-	pci_unregister_driver(&vt586b_driver);
-*/
-	vt586b_remove(NULL);
+	i2c_bit_del_bus(&vt586b_adapter);
+	release_region(I2C_DIR, IOSPACE);
 }
 
 
