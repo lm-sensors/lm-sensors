@@ -110,6 +110,7 @@ MODULE_PARM_DESC(fix_hstcfg,
 static int piix4_transaction(void);
 
 static unsigned short piix4_smba = 0;
+static struct pci_driver piix4_driver;
 
 #ifdef CONFIG_X86
 /*
@@ -162,7 +163,7 @@ static int __devinit piix4_setup(struct pci_dev *PIIX4_dev,
 		}
 	}
 
-	if (!request_region(piix4_smba, SMBIOSIZE, "piix4-smbus")) {
+	if (!request_region(piix4_smba, SMBIOSIZE, piix4_driver.name)) {
 		printk(KERN_ERR "i2c-piix4.o: SMB region 0x%x already in "
 			"use!\n", piix4_smba);
 		return -ENODEV;
@@ -448,7 +449,6 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter piix4_adapter = {
-	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_PIIX4,
 	.algo		= &smbus_algorithm,
 	.inc_use	= piix4_inc,

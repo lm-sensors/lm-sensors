@@ -138,6 +138,7 @@
 #define	ALI1535_SMBIO_EN	0x04	/* SMB I/O Space enable        */
 
 
+static struct pci_driver ali1535_driver;
 static unsigned short ali1535_smba = 0;
 DECLARE_MUTEX(i2c_ali1535_sem);
 
@@ -201,7 +202,7 @@ int ali1535_setup(struct pci_dev *ALI1535_dev)
 	pci_write_config_byte(ALI1535_dev, SMBCLK, 0x20);
 
 	/* Everything is happy, let's grab the memory and set things up. */
-	request_region(ali1535_smba, ALI1535_SMB_IOSIZE, "ali1535-smb");
+	request_region(ali1535_smba, ALI1535_SMB_IOSIZE, ali1535_driver.name);
 
 #ifdef DEBUG
 /*
@@ -468,7 +469,6 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter ali1535_adapter = {
-	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_ALI1535,
 	.algo		= &smbus_algorithm,
 	.inc_use	= ali1535_inc,

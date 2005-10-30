@@ -149,6 +149,7 @@ static int i801_block_transaction(union i2c_smbus_data *data,
 				  char read_write, int command);
 
 static unsigned short i801_smba;
+static struct pci_driver i801_driver;
 static struct pci_dev *I801_dev;
 static int isich4;	/* is PEC supported? */
 static int isich5;	/* is i2c block read supported? */
@@ -187,7 +188,7 @@ static int i801_setup(struct pci_dev *dev)
 		}
 	}
 
-	if (!request_region(i801_smba, (isich4 ? 16 : 8), "i801-smbus")) {
+	if (!request_region(i801_smba, (isich4 ? 16 : 8), i801_driver.name)) {
 		dev_err(dev, "I801_smb region 0x%x already in use!\n",
 			i801_smba);
 		error_return = -EBUSY;
@@ -615,7 +616,6 @@ static struct i2c_algorithm smbus_algorithm = {
 static struct i2c_adapter i801_adapter = {
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_I801,
 	.algo		= &smbus_algorithm,
-	.name		= "unset",
 	.inc_use	= i801_inc,
 	.dec_use	= i801_dec,
 };

@@ -66,6 +66,7 @@
 #define HST_CNTL2_BLOCK		0x05
 #define HST_CNTL2_SIZEMASK	0x38
 
+static struct pci_driver ali1563_pci_driver;
 static unsigned short ali1563_smba;
 
 static int ali1563_transaction(struct i2c_adapter * a)
@@ -362,7 +363,8 @@ static int __devinit ali1563_setup(struct pci_dev * dev)
 		printk(KERN_WARNING "ali1563: ali1563_smba Uninitialized\n");
 		goto Err;
 	}
-	if (!request_region(ali1563_smba,ALI1563_SMB_IOSIZE,"i2c-ali1563")) {
+	if (!request_region(ali1563_smba, ALI1563_SMB_IOSIZE,
+			    ali1563_pci_driver.name)) {
 		printk(KERN_WARNING "ali1563: Could not allocate I/O space");
 		goto Err;
 	}
@@ -399,7 +401,6 @@ static struct i2c_algorithm ali1563_algorithm = {
 };
 
 static struct i2c_adapter ali1563_adapter = {
-	.name		= "unset",
 	.algo		= &ali1563_algorithm,
 	.inc_use	= ali1563_inc,
 	.dec_use	= ali1563_dec,
@@ -438,7 +439,7 @@ static struct pci_device_id ali1563_ids[] __devinitdata = {
 };
 
 static struct pci_driver ali1563_pci_driver = {
- 	.name		= "ali1563 driver",
+ 	.name		= "ali1563 smbus",
 	.id_table	= ali1563_ids,
  	.probe		= ali1563_probe,
 	.remove		= __devexit_p(ali1563_remove),

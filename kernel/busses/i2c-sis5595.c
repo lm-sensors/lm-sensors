@@ -134,6 +134,7 @@ MODULE_PARM_DESC(force_addr,
 
 static int sis5595_transaction(void);
 
+static struct pci_driver sis5595_driver;
 static unsigned short sis5595_base = 0;
 
 static u8 sis5595_read(u8 reg)
@@ -223,7 +224,7 @@ int sis5595_setup(struct pci_dev *SIS5595_dev)
 	}
 
 	/* Everything is happy, let's grab the memory and set things up. */
-	request_region(sis5595_base + SMB_INDEX, 2, "sis5595-smbus");
+	request_region(sis5595_base + SMB_INDEX, 2, sis5595_driver.name);
 	return(0);
 }
 
@@ -425,7 +426,6 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter sis5595_adapter = {
-	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS5595,
 	.algo		= &smbus_algorithm,
 	.inc_use	= sis5595_inc,

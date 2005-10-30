@@ -323,7 +323,6 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 struct i2c_adapter amd756_smbus = {
-	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_AMD756,
 	.algo		= &smbus_algorithm,
 	.inc_use	= amd756_inc,

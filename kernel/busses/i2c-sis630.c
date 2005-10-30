@@ -102,6 +102,8 @@
 #define SIS630_PCALL      0x04
 #define SIS630_BLOCK_DATA 0x05
 
+static struct pci_driver sis630_driver;
+
 /* insmod parameters */
 static int high_clock = 0;
 static int force = 0;
@@ -451,7 +453,8 @@ static int __devinit sis630_setup(struct pci_dev *sis630_dev) {
 	DBG("ACPI base at 0x%04x\n", acpi_base);
 
 	/* Everything is happy, let's grab the memory and set things up. */
-	if (!request_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION, "sis630-smbus")){
+	if (!request_region(acpi_base + SMB_STS, SIS630_SMB_IOREGION,
+			    sis630_driver.name)){
 		printk(KERN_ERR "i2c-sis630.o: SMBus registers 0x%04x-0x%04x "
 			"already in use!\n",acpi_base + SMB_STS, acpi_base + SMB_SAA);
 		acpi_base = 0; /* reset acpi_base */
@@ -470,7 +473,6 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter sis630_adapter = {
-	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS630,
 	.algo		= &smbus_algorithm,
 	.inc_use	= sis630_inc,

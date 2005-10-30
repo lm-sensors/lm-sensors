@@ -133,6 +133,7 @@ MODULE_PARM(force_addr, "i");
 MODULE_PARM_DESC(force_addr,
 		 "Initialize the base address of the i2c controller");
 
+static struct pci_driver ali15x3_driver;
 static unsigned short ali15x3_smba = 0;
 
 static int ali15x3_setup(struct pci_dev *ALI15X3_dev)
@@ -169,7 +170,8 @@ static int ali15x3_setup(struct pci_dev *ALI15X3_dev)
 	if(force_addr)
 		ali15x3_smba = force_addr & ~(ALI15X3_SMB_IOSIZE - 1);
 
-	if (!request_region(ali15x3_smba, ALI15X3_SMB_IOSIZE, "ali15x3-smb")) {
+	if (!request_region(ali15x3_smba, ALI15X3_SMB_IOSIZE,
+			    ali15x3_driver.name)) {
 		dev_err(ALI15X3_dev,
 			"ALI15X3_smb region 0x%x already in use!\n",
 			ali15x3_smba);
@@ -485,7 +487,6 @@ static struct i2c_algorithm smbus_algorithm = {
 static struct i2c_adapter ali15x3_adapter = {
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_ALI15X3,
 	.algo		= &smbus_algorithm,
-	.name		= "unset",
 	.inc_use	= ali15x3_inc,
 	.dec_use	= ali15x3_dec,
 };

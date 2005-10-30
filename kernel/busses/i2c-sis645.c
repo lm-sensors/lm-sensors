@@ -142,6 +142,7 @@
 #define SIS645_PROC_CALL  0x04
 #define SIS645_BLOCK_DATA 0x05
 
+static struct pci_driver sis645_driver;
 static struct i2c_adapter sis645_adapter;
 static u16 sis645_smbus_base = 0;
 
@@ -488,7 +489,6 @@ static struct i2c_algorithm smbus_algorithm = {
 };
 
 static struct i2c_adapter sis645_adapter = {
-	.name		= "unset",
 	.id		= I2C_ALGO_SMBUS | I2C_HW_SMBUS_SIS645,
 	.algo		= &smbus_algorithm,
 	.inc_use	= sis645_inc,
@@ -532,7 +532,8 @@ static int __devinit sis645_probe(struct pci_dev *dev,
 			sis645_smbus_base);
 
 	/* Everything is happy, let's grab the memory and set things up. */
-	if (!request_region(sis645_smbus_base, SMB_IOSIZE, "sis645-smbus")) {
+	if (!request_region(sis645_smbus_base, SMB_IOSIZE,
+			    sis645_driver.name)) {
 		dev_err(dev, "SMBus registers 0x%04x-0x%04x "
 			"already in use!\n", sis645_smbus_base,
 			sis645_smbus_base + SMB_IOSIZE - 1);
