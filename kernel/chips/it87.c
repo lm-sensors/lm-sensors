@@ -2,9 +2,9 @@
     it87.c - Part of lm_sensors, Linux kernel modules for hardware
              monitoring.
 
-    Supports: IT8705F  Super I/O chip w/LPC interface & SMBus
+    Supports: IT8705F  Super I/O chip w/LPC interface
               IT8712F  Super I/O chip w/LPC interface & SMBus
-              Sis950   A clone of the IT8705F
+              SiS950   A clone of the IT8705F
 
     Copyright (c) 2001 Chris Gauthron <chrisg@0-in.com> 
     Largely inspired by lm78.c of the same package
@@ -434,7 +434,7 @@ static int __init it87_find(int *address)
 		goto exit;
 
 	superio_select();
-	if (!(superio_inb(IT87_ACT_REG)) & 0x01) {
+	if (!(superio_inb(IT87_ACT_REG) & 0x01)) {
 		printk(KERN_INFO "it87: Device not activated, skipping\n");
 		goto exit;
 	}
@@ -455,8 +455,8 @@ exit:
 }
 
 /* This function is called by i2c_detect */
-int it87_detect(struct i2c_adapter *adapter, int address,
-		unsigned short flags, int kind)
+static int it87_detect(struct i2c_adapter *adapter, int address,
+		       unsigned short flags, int kind)
 {
 	int i;
 	struct i2c_client *new_client;
@@ -1118,7 +1118,6 @@ static void __exit sm_it87_exit(void)
 {
 	i2c_del_driver(&it87_driver);
 }
-
 
 
 MODULE_AUTHOR("Chris Gauthron <chrisg@0-in.com>");
