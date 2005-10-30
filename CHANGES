@@ -18,6 +18,8 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.3 (2005????)
+  File doc/busses/i2c-viapro: Update (2.6 backport)
+  File doc/chips/via686a: Update (2.6 backport)
   File i2c-dev.h: Fix union i2c_smbus_data definition
                   Sync i2c_msg definition with i2c.h (Hideki Iwamoto)
                   Add missing parentheses around macros
@@ -25,9 +27,26 @@ ask CVS about it:
   Library: Big update to use libsysfs.  More TODO though.
            Fix bus matching code for Linux 2.6 (Karsten Petersen)
   Makefile: Compile user-space programs with -Wundef
-  Module w83781d: Drop W83697HF support (Grant Coady)
+  Module i2c-i810: Documentation update, PCI IDs cleanup
   Module i2c-keywest: Remove bus probing code (2.6 backport)
   Module i2c-nforce2: Remove dead code (2.6 backport)
+  Module i2c-via: Remove dead code
+  Module i2c-viapro: Remove dead code
+                     Support I2C block read (2.6 backport)
+                     Code cleanups (2.6 backport)
+                     Improve debug register dump (2.6 backport)
+  Modules i2c-ali1535, i2c-ali1563, i2c-ali15x3, i2c-amd756, i2c-amd8111,
+          i2c-i801, i2c-nforce2, i2c-piix4, i2c-sis5595, i2c-sis630,
+          i2c-sis645: Use pci_driver name to request I/O region; do
+                      not initialize i2c_adapter name to "unset" (2.6
+                      backport)
+  Module adm9240: Cleanups (2.6 backport)
+  Module it87: Minor cleanups
+  Module lm90: Support the ADM1032-2 and ADT7461-2 (2.6 backport)
+  Module via686a: Cleanups
+  Module w83627hf: Drop useless initialization step (2.6 backport)
+  Module w83781d: Drop W83697HF support (Grant Coady)
+  Module w83l785ts: Minor cleanup (2.6 backport)
   Program decode-dimms.pl: Add lookup tables for manufacturer names
                            Fix rounding error in PCxxxx speed computation
   Program i2cdump: Drop now useless #ifdef tests
