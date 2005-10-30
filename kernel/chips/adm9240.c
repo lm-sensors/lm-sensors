@@ -6,7 +6,7 @@
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or 
+    the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -21,30 +21,28 @@
 
 /* Supports ADM9240, DS1780, and LM81. See doc/chips/adm9240 for details */
 
-/* 
+/*
 	A couple notes about the ADM9240:
 
 * It claims to be 'LM7x' register compatible.  This must be in reference
-  to only the LM78, because it is missing stuff to emulate LM75's as well. 
+  to only the LM78, because it is missing stuff to emulate LM75's as well.
   (like the Winbond W83781 does)
- 
-* This driver was written from rev. 0 of the PDF, but it seems well 
+
+* This driver was written from rev. 0 of the PDF, but it seems well
   written and complete (unlike the W83781 which is horrible and has
-  supposidly gone through a few revisions.. rev 0 of that one must
+  supposedly gone through a few revisions.. rev 0 of that one must
   have been in crayon on construction paper...)
-  
+
 * All analog inputs can range from 0 to 2.5, eventhough some inputs are
-  marked as being 5V, 12V, etc.  I don't have any real voltages going 
-  into my prototype, so I'm not sure that things are computed right, 
+  marked as being 5V, 12V, etc.  I don't have any real voltages going
+  into my prototype, so I'm not sure that things are computed right,
   but at least the limits seem to be working OK.
-  
+
 * Another curiousity is that the fan_div seems to be read-only.  I.e.,
   any written value to it doesn't seem to make any difference.  The
   fan_div seems to be 'stuck' at 2 (which isn't a bad value in most cases).
-  
-  
-  --Phil
 
+  --Phil
 */
 
 #include <linux/module.h>
@@ -248,7 +246,7 @@ static struct i2c_driver adm9240_driver = {
 /* These files are created for each detected ADM9240. This is just a template;
    though at first sight, you might think we could use a statically
    allocated list, we need some way to get back to the parent - which
-   is done through one of the 'extra' fields which are initialized 
+   is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 static ctl_table adm9240_dir_table_template[] = {
 	{ADM9240_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
@@ -339,10 +337,10 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
 			kind = lm81;
 		else {
 			if (kind == 0)
-				printk
-				    ("adm9240.o: Ignoring 'force' parameter for unknown chip at "
-				     "adapter %d, address 0x%02x\n",
-				     i2c_adapter_id(adapter), address);
+				printk("adm9240.o: Ignoring 'force' "
+				       "parameter for unknown chip at "
+				       "adapter %d, address 0x%02x\n",
+				       i2c_adapter_id(adapter), address);
 			goto ERROR1;
 		}
 	}
@@ -364,7 +362,8 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
 		goto ERROR1;
 	}
 
-	/* Fill in the remaining client fields and put it into the global list */
+	/* Fill in the remaining client fields and put it into the global
+	   list */
 	strcpy(new_client->name, client_name);
 	data->type = kind;
 	data->valid = 0;
@@ -408,8 +407,8 @@ static int adm9240_detach_client(struct i2c_client *client)
 				 sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {
-		printk
-		    ("adm9240.o: Client deregistration failed, client not detached.\n");
+		printk("adm9240.o: Client deregistration failed, "
+		       "client not detached\n");
 		return err;
 	}
 
@@ -692,9 +691,8 @@ static void __exit sm_adm9240_exit(void)
 }
 
 
-
-MODULE_AUTHOR
-    ("Frodo Looijaard <frodol@dds.nl> and Philip Edelbrock <phil@netroedge.com>");
+MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> "
+	      "and Philip Edelbrock <phil@netroedge.com>");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("ADM9240 driver");
 
