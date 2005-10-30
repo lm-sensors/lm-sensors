@@ -76,7 +76,7 @@ SENSORS_INSMOD_1(w83l785ts);
  * The W83L785TS-S uses signed 8-bit values.
  */
 
-#define TEMP_FROM_REG(val)	(val & 0x80 ? val-0x100 : val)
+#define TEMP_FROM_REG(val)	(val)
 
 /*
  * Functions declaration
@@ -116,7 +116,7 @@ struct w83l785ts_data {
 	unsigned long last_updated; /* in jiffies */
 
 	/* registers values */
-	u8 temp, temp_over;
+	s8 temp, temp_over;
 };
 
 /*
