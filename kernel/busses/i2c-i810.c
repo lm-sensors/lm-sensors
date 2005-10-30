@@ -32,6 +32,7 @@
    i810AB		7123           
    i810E		7125           
    i815			1132           
+   i845G		2562
 */
 
 
@@ -47,9 +48,10 @@
 
 MODULE_LICENSE("GPL");
 
-#ifndef PCI_DEVICE_ID_INTEL_82815_2
-#define PCI_DEVICE_ID_INTEL_82815_2   0x1132
-#endif
+/* Not defined by any Linux 2.4 kernel */
+#define PCI_DEVICE_ID_INTEL_82810E_IG	0x7125
+#define PCI_DEVICE_ID_INTEL_82815_CGC	0x1132
+#define PCI_DEVICE_ID_INTEL_82845G_IG	0x2562
 
 /* GPIO register locations */
 #define I810_IOCONTROL_OFFSET 0x5000
@@ -238,19 +240,19 @@ static struct pci_device_id i810_ids[] __devinitdata = {
 	},
 	{
 		.vendor =	PCI_VENDOR_ID_INTEL,
-		.device =	0x7125,
+		.device =	PCI_DEVICE_ID_INTEL_82810E_IG,
 		.subvendor =	PCI_ANY_ID,
 		.subdevice =	PCI_ANY_ID,
 	},
 	{
 		.vendor =	PCI_VENDOR_ID_INTEL,
-		.device =	PCI_DEVICE_ID_INTEL_82815_2,
+		.device =	PCI_DEVICE_ID_INTEL_82815_CGC,
 		.subvendor =	PCI_ANY_ID,
 		.subdevice =	PCI_ANY_ID,
 	},
 	{
 		.vendor =	PCI_VENDOR_ID_INTEL,
-		.device =	0x2562,
+		.device =	PCI_DEVICE_ID_INTEL_82845G_IG,
 		.subvendor =	PCI_ANY_ID,
 		.subdevice =	PCI_ANY_ID,
 	},
