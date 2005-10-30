@@ -60,7 +60,7 @@ At least the following I2C/SMBus adapters are supported:
   DEC 21272/21274 (Tsunami/Typhoon - on Alpha boards)
   Intel I801 ICH/ICH0/ICH2/ICH3/ICH4/ICH5/ICH6 (82801xx), 6300ESB, ICH7
   Intel PIIX4 (used in many Intel chipsets)
-  Intel I810/I815 GMCH
+  Intel I810/I810E/I815/I845G GMCH
   Intel 82443MX (440MX)
   NVidia nForce, nForce2, nForce3, nForce4
   ServerWorks OSB4, CSB5, CSB6
@@ -68,7 +68,7 @@ At least the following I2C/SMBus adapters are supported:
   SMSC Victory66
   3Dfx Voodoo 3 and Banshee
   VIA Technologies VT82C586B, VT82C596A/B, VT82C686A/B, VT8231,
-                   VT8233, VT8233A, VT8235 and VT8237
+                   VT8233, VT8233A, VT8235 and VT8237R
 
 
 At least the following hardware sensor chips are supported:
