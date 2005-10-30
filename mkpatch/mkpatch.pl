@@ -212,11 +212,12 @@ CONFIG_I2C_I801
 Intel I810/I815 based Mainboard
 CONFIG_I2C_I810
   If you say yes to this option, support will be included for the
-  Intel I810/I815 mainboard I2C interfaces. The I2C busses these chips
-  are generally used only for video devices. For "810" mainboard sensor
-  chips, use the I801 I2C driver instead. This can also be
-  built as a module which can be inserted and removed while the kernel
-  is running.
+  Intel I810/I810E/I815/I845G mainboard I2C interfaces. The I2C busses
+  of these chips are generally used only for video devices. For "810"
+  mainboard sensor chips, use the I801 I2C driver instead.
+  
+  This can also be built as a module which can be inserted and removed
+  while the kernel is running.
 
 Intel 82371AB PIIX4(E) / ServerWorks OSB4 and CSB5
 CONFIG_I2C_PIIX4
