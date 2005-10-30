@@ -356,7 +356,7 @@ static int fscher_write_value(struct i2c_client *client, u8 reg, u8 value)
   return i2c_smbus_write_byte_data(client, reg, value);
 }
 
-/* Called when we have found a new FSCHER. It should set limits, etc. */
+/* Called when we have found a new FSCHER. */
 static void fscher_init_client(struct i2c_client *client)
 {
   struct fscher_data *data = client->data;

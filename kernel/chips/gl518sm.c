@@ -392,7 +392,7 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 }
 
 
-/* Called when we have found a new GL518SM. It should set limits, etc. */
+/* Called when we have found a new GL518SM. */
 static void gl518_init_client(struct i2c_client *client)
 {
 	/* Power-on defaults (bit 7=1) */

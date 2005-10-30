@@ -1006,7 +1006,7 @@ int lm85_write_value(struct i2c_client *client, u16 reg, int value)
 	return res ;
 }
 
-/* Called when we have found a new LM85. It should set limits, etc. */
+/* Called when we have found a new LM85. */
 void lm85_init_client(struct i2c_client *client)
 {
 	int value;

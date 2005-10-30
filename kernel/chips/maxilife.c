@@ -792,7 +792,7 @@ int maxi_write_token_loop(struct i2c_client *client, u16 token, u8 len,
 					 MAXI_STAT_IDLE);
 }
 
-/* Called when we have found a new MaxiLife. It should set limits, etc. */
+/* Called when we have found a new MaxiLife. */
 static void maxi_init_client(struct i2c_client *client)
 {
 	struct maxi_data *data = client->data;

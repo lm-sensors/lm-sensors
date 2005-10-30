@@ -341,7 +341,7 @@ static int fscpos_write_value(struct i2c_client *client, u8 reg, u8 value)
 	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
-/* Called when we have found a new FSCPOS. It should set limits, etc. */
+/* Called when we have found a new FSCPOS. */
 static void fscpos_init_client(struct i2c_client *client)
 {
 	struct fscpos_data *data = client->data;
