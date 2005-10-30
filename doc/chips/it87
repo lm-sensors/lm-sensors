@@ -6,7 +6,7 @@ Status: Complete, stable
 Supported chips:
   * IT8705F
     Prefix: 'it87'
-    Addresses scanned: I2C 0x28 - 0x2f, ISA autodetected
+    Addresses scanned: ISA autodetected
     Datasheet: Publicly available at the ITE website
                http://www.ite.com.tw/
   * IT8712F
@@ -16,7 +16,7 @@ Supported chips:
                http://www.ite.com.tw/
   * SiS950   [clone of IT8705F]
     Prefix: 'it87'
-    Addresses scanned: I2C 0x28 - 0x2f, ISA autodetected
+    Addresses scanned: ISA autodetected
     Datasheet: No longer publicly available
 
 Author: Christophe Gauthron <chrisg@0-in.com>
