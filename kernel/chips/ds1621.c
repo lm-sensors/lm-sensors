@@ -159,8 +159,8 @@ static int ds1621_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* This function is called by i2c_detect */
-int ds1621_detect(struct i2c_adapter *adapter, int address,
-		unsigned short flags, int kind)
+static int ds1621_detect(struct i2c_adapter *adapter, int address,
+			 unsigned short flags, int kind)
 {
 	int i, conf, temp;
 	struct i2c_client *new_client;

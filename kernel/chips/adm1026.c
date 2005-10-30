@@ -603,14 +603,14 @@ static ctl_table adm1026_common[] = {
      * the module is loaded
      * a new adapter is loaded
  */
-int adm1026_attach_adapter(struct i2c_adapter *adapter)
+static int adm1026_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, adm1026_detect);
 }
 
 /* This function is called by i2c_detect */
-int adm1026_detect(struct i2c_adapter *adapter, int address,
-		unsigned short flags, int kind)
+static int adm1026_detect(struct i2c_adapter *adapter, int address,
+			  unsigned short flags, int kind)
 {
 	int i;
 	int company, verstep ;
@@ -769,7 +769,7 @@ int adm1026_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int adm1026_detach_client(struct i2c_client *client)
+static int adm1026_detach_client(struct i2c_client *client)
 {
 	int err;
 	int id ;
@@ -788,7 +788,7 @@ int adm1026_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-int adm1026_read_value(struct i2c_client *client, u8 reg)
+static int adm1026_read_value(struct i2c_client *client, u8 reg)
 {
 	int res;
 
@@ -803,7 +803,7 @@ int adm1026_read_value(struct i2c_client *client, u8 reg)
 	return res ;
 }
 
-int adm1026_write_value(struct i2c_client *client, u8 reg, int value)
+static int adm1026_write_value(struct i2c_client *client, u8 reg, int value)
 {
 	int res ;
 
@@ -819,7 +819,7 @@ int adm1026_write_value(struct i2c_client *client, u8 reg, int value)
 }
 
 /* Called when we have found a new ADM1026. */
-void adm1026_init_client(struct i2c_client *client)
+static void adm1026_init_client(struct i2c_client *client)
 {
 	int value ;
 	int i;
@@ -918,7 +918,7 @@ void adm1026_init_client(struct i2c_client *client)
 
 }
 
-void adm1026_print_gpio(struct i2c_client *client)
+static void adm1026_print_gpio(struct i2c_client *client)
 {
 	struct adm1026_data *data = client->data;
 	int  i ;
@@ -952,7 +952,7 @@ void adm1026_print_gpio(struct i2c_client *client)
 	}
 }
 
-void adm1026_fixup_gpio(struct i2c_client *client)
+static void adm1026_fixup_gpio(struct i2c_client *client)
 {
 	struct adm1026_data *data = client->data;
 	int  i ;
@@ -1027,7 +1027,7 @@ void adm1026_fixup_gpio(struct i2c_client *client)
 	adm1026_print_gpio(client);
 }
 
-void adm1026_update_client(struct i2c_client *client)
+static void adm1026_update_client(struct i2c_client *client)
 {
 	struct adm1026_data *data = client->data;
 	int i;

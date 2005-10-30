@@ -232,8 +232,8 @@ static int lm80_attach_adapter(struct i2c_adapter *adapter)
 	return i2c_detect(adapter, &addr_data, lm80_detect);
 }
 
-int lm80_detect(struct i2c_adapter *adapter, int address,
-		unsigned short flags, int kind)
+static int lm80_detect(struct i2c_adapter *adapter, int address,
+		       unsigned short flags, int kind)
 {
 	int i, cur;
 	struct i2c_client *new_client;

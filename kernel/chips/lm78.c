@@ -256,8 +256,8 @@ static int lm78_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* This function is called by i2c_detect */
-int lm78_detect(struct i2c_adapter *adapter, int address,
-		unsigned short flags, int kind)
+static int lm78_detect(struct i2c_adapter *adapter, int address,
+		       unsigned short flags, int kind)
 {
 	int i;
 	struct i2c_client *new_client;

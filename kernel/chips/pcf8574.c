@@ -120,8 +120,8 @@ static int pcf8574_attach_adapter(struct i2c_adapter *adapter)
 }
 
 /* This function is called by i2c_detect */
-int pcf8574_detect(struct i2c_adapter *adapter, int address,
-		   unsigned short flags, int kind)
+static int pcf8574_detect(struct i2c_adapter *adapter, int address,
+			  unsigned short flags, int kind)
 {
 	int i;
 	struct i2c_client *new_client;

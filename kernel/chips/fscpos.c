@@ -223,8 +223,8 @@ static int fscpos_attach_adapter(struct i2c_adapter *adapter)
 	return i2c_detect(adapter, &addr_data, fscpos_detect);
 }
 
-int fscpos_detect(struct i2c_adapter *adapter, int address,
-		unsigned short flags, int kind)
+static int fscpos_detect(struct i2c_adapter *adapter, int address,
+			 unsigned short flags, int kind)
 {
 	int i;
 	struct i2c_client *new_client;

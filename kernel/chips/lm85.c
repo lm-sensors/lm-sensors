@@ -693,14 +693,14 @@ static ctl_table emc6d100_specific[] = {
      * lm85_driver is inserted (when this module is loaded), for each
        available adapter
      * when a new adapter is inserted (and lm85_driver is still present) */
-int lm85_attach_adapter(struct i2c_adapter *adapter)
+static int lm85_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, lm85_detect);
 }
 
 /* This function is called by i2c_detect */
-int lm85_detect(struct i2c_adapter *adapter, int address,
-		unsigned short flags, int kind)
+static int lm85_detect(struct i2c_adapter *adapter, int address,
+		       unsigned short flags, int kind)
 {
 	int i;
 	int company, verstep ;
@@ -921,7 +921,7 @@ int lm85_detect(struct i2c_adapter *adapter, int address,
 	return err;
 }
 
-int lm85_detach_client(struct i2c_client *client)
+static int lm85_detach_client(struct i2c_client *client)
 {
 	int err;
 	int id ;
@@ -940,7 +940,7 @@ int lm85_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-int lm85_read_value(struct i2c_client *client, u16 reg)
+static int lm85_read_value(struct i2c_client *client, u16 reg)
 {
 	int res;
 
@@ -974,7 +974,7 @@ int lm85_read_value(struct i2c_client *client, u16 reg)
 	return res ;
 }
 
-int lm85_write_value(struct i2c_client *client, u16 reg, int value)
+static int lm85_write_value(struct i2c_client *client, u16 reg, int value)
 {
 	int res ;
 
@@ -1007,7 +1007,7 @@ int lm85_write_value(struct i2c_client *client, u16 reg, int value)
 }
 
 /* Called when we have found a new LM85. */
-void lm85_init_client(struct i2c_client *client)
+static void lm85_init_client(struct i2c_client *client)
 {
 	int value;
 	struct lm85_data *data = client->data;
@@ -1091,7 +1091,7 @@ void lm85_init_client(struct i2c_client *client)
 
 }
 
-void lm85_update_client(struct i2c_client *client)
+static void lm85_update_client(struct i2c_client *client)
 {
 	struct lm85_data *data = client->data;
 	int i;
