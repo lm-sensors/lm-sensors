@@ -144,10 +144,9 @@ static int vt596_transaction(u8 size)
 
 		outb_p(temp, SMBHSTSTS);
 		if ((temp = inb_p(SMBHSTSTS)) & 0x1F) {
-			dev_dbg(&vt596_adapter, "Failed! (0x%02x)\n", temp);
+			dev_err(&vt596_adapter, "SMBus reset failed! "
+				"(0x%02x)\n", temp);
 			return -1;
-		} else {
-			dev_dbg(&vt596_adapter, "Successful!\n");
 		}
 	}
 
@@ -180,8 +179,8 @@ static int vt596_transaction(u8 size)
 		int read = inb_p(SMBHSTADD) & 0x01;
 		result = -1;
 		/* The quick and receive byte commands are used to probe
-		   for chips, so errors are expected, and we don't
-		   want to frighten the user. */
+		   for chips, so errors are expected, and we don't want
+		   to frighten the user. */
 		if (!((size == VT596_QUICK && !read) ||
 		      (size == VT596_BYTE && read)))
 			dev_err(&vt596_adapter, "Transaction error!\n");
@@ -515,9 +514,9 @@ static void __exit i2c_vt596_exit(void)
 	release_region(vt596_smba, 8);
 }
 
-MODULE_AUTHOR(
-    "Frodo Looijaard <frodol@dds.nl> and "
-    "Philip Edelbrock <phil@netroedge.com>");
+MODULE_AUTHOR("Kyosti Malkki <kmalkki@cc.hut.fi>, "
+	      "Mark D. Studebaker <mdsxyz123@yahoo.com> and "
+	      "Jean Delvare <khali@linux-fr.org>");
 MODULE_DESCRIPTION("vt82c596 SMBus driver");
 MODULE_LICENSE("GPL");
 
