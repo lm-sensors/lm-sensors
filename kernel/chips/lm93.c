@@ -276,9 +276,7 @@ static int lm93_id = 0;
 
 struct lm93_data {
 	struct i2c_client client;
-	struct semaphore lock;
 	int sysctl_id;
-	enum chips type;
 
 	struct semaphore update_lock;
 	unsigned long last_updated;	/* In jiffies */
@@ -2227,7 +2225,6 @@ static int lm93_detect(struct i2c_adapter *adapter, int address,
 
 	client = &data->client;
 	client->addr = address;
-	init_MUTEX(&data->lock);
 	client->data = data;
 	client->adapter = adapter;
 	client->driver = &lm93_driver;
@@ -2266,7 +2263,6 @@ static int lm93_detect(struct i2c_adapter *adapter, int address,
 		client->name, i2c_adapter_id(client->adapter), client->addr);
 
 	/* housekeeping */
-	data->type = kind;
 	data->valid = 0;
 	data->update = update;
 	init_MUTEX(&data->update_lock);
