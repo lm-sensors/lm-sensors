@@ -1621,11 +1621,6 @@ chip "it87-*" "it8712-*"
 
 # The following is for the Inside Technologies 786LCD which uses either a
 # IT8705F or a SIS950 for monitoring with the SIS630.
-# You will need to load the it87 module as follows to select the correct
-# temperature sensor type.
-# modprobe it87 temp_type=0x31
-# The sensors-detect program reports lm78 and a sis5595 and lists the it87 as
-# a misdetect.  Don't do the modprobe for the lm78 or sis5595 as suggested.
 #
 # delete or comment out above it87 section and uncomment the following.
 #chip "it87-*"
