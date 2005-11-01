@@ -68,16 +68,10 @@ table based. The LM93 includes a digital filter that can be invoked to smooth
 temperature readings for better control of fan speed. The LM93 has four
 tachometer inputs to measure fan speed. Limit and status registers for all
 measured values are included. The LM93 builds upon the functionality of
-previous motherboard management ASICs and uses some of the LM85 s features
+previous motherboard management ASICs and uses some of the LM85's features
 (i.e. smart tachometer mode). It also adds measurement and control support
 for dynamic Vccp monitoring and PROCHOT. It is designed to monitor a dual
 processor Xeon class motherboard with a minimum of external components.
-
-
-Driver Description
-------------------
-
-This driver implements support for the National Semiconductor LM93.
 
 
 User Interface
@@ -97,7 +91,7 @@ The monitoring intervals for the two #PROCHOT signals is also configurable.
 These intervals can be found in the /proc file prochot_interval.  There are
 two values in this file: one each for #P1_PROCHOT and #P2_PROCHOT, res-
 pectively.  Selecting a value not in this list will cause the driver to
-use the next largest interval.  The available intervals are:
+use the next largest interval.  The available intervals are (in seconds):
 
 #PROCHOT intervals: 0.73, 1.46, 2.9, 5.8, 11.7, 23.3, 46.6, 93.2, 186, 372
 
@@ -107,7 +101,7 @@ assert #P2_PROCHOT, and vice-versa.  This mode is enabled by writing a
 non-zero integer to the /proc file prochot_short.
 
 The LM93 can also override the #PROCHOT pins by driving a PWM signal onto
-one or both of them.  When overridden, the signal has a period of 3.56 mS,
+one or both of them.  When overridden, the signal has a period of 3.56 ms,
 a minimum pulse width of 5 clocks (at 22.5kHz => 6.25% duty cycle), and
 a maximum pulse width of 80 clocks (at 22.5kHz => 99.88% duty cycle).
 
@@ -159,7 +153,7 @@ frequency values are constrained by the hardware.  Selecting a value which is
 not available will cause the driver to use the next largest value.  Also note
 that this parameter has implications for the Smart Tach Mode (see above).
 
-PWM Output Frequencies: 12, 36, 48, 60, 72, 84, 96, 22500 (h/w default)
+PWM Output Frequencies: 12, 36, 48, 60, 72, 84, 96, 22500 Hz (h/w default)
 
 Automatic PWM:
 
@@ -171,7 +165,7 @@ individual control sources to which the PWM output is bound.
 The eight control sources are: temp1-temp4 (aka "zones" in the datasheet),
 #PROCHOT 1 & 2, and #VRDHOT 1 & 2.  The bindings are expressed as a bitmask
 in the /proc files pwm<n>_auto_channels, where a "1" enables the binding, and
- a "0" disables it. The h/w default is 0x0f (all temperatures bound).
+a "0" disables it. The h/w default is 0x0f (all temperatures bound).
 
 	0x01 - Temp 1
 	0x02 - Temp 2
