@@ -59,8 +59,14 @@ Prints a help text
 Evaluates all `set' statements in the configuration file. You must probably
 be `root' to do this. If this parameter is not specified, no `set' statement
 is evaluated.
+.IP -a
+Show the algorithm for each chipset. Note that algorithms are no more named
+since Linux 2.6, so this option is deprecated and will probably go away in
+a near future.
 .IP -A
-Do not show adapter and algorithm for each chipset.
+Do not show the adapter for each chipset.
+.IP -U
+Hide unknown chips.
 .IP -u
 Treats all chips as unknown ones. Output will be of much lower quality;
 this option is only added for testing purposes.
