@@ -2090,4 +2090,24 @@
 #define SENSORS_SMSC47B397_FAN3		0x13 /* R */
 #define SENSORS_SMSC47B397_FAN4		0x14 /* R */
 
+/* Fintek F71805F chip */
+#define SENSORS_F71805F_PREFIX		"f71805f"
+
+/* in n from 0 to 8 */
+#define SENSORS_F71805F_IN(n)		(1 + (n))
+#define SENSORS_F71805F_IN_MIN(n)	(16 + (n))
+#define SENSORS_F71805F_IN_MAX(n)	(31 + (n))
+/* fan n from 1 to 3 */
+#define SENSORS_F71805F_FAN(n)		(50 + (n))
+#define SENSORS_F71805F_FAN_MIN(n)	(60 + (n))
+/* temp n from 1 to 3 */
+#define SENSORS_F71805F_TEMP(n)		(80 + (n))
+#define SENSORS_F71805F_TEMP_MAX(n)	(90 + (n))
+#define SENSORS_F71805F_TEMP_HYST(n)	(100 + (n))
+#define SENSORS_F71805F_TEMP_TYPE(n)	(110 + (n))
+/* alarms */
+#define SENSORS_F71805F_ALARMS_IN	200
+#define SENSORS_F71805F_ALARMS_FAN	201
+#define SENSORS_F71805F_ALARMS_TEMP	202
+
 #endif /* def LIB_SENSORS_CHIPS_H */

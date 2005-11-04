@@ -78,7 +78,8 @@ if you have questions, suggestions or problems.
   Author of the i2c-sis630 bus driver.
   Added Onsemi MC1066 support to the adm1021 driver.
 * Jean Delvare <khali@linux-fr.org>
-  Author of the lm63, lm83, lm90, pc87360 and w83l785ts chip drivers.
+  Author of the lm63, lm83, lm90 and w83l785ts SMBus chip drivers.
+  Author of the f71805f and pc87360 Super-I/O chip drivers.
   Author of the i2c-amd756-s4882 and pca9540 SMBus multiplexing drivers.
   Author of the decode-vaio.pl Vaio EEPROM decoder.
   Author of the decode-edid.pl EDID data decoder.

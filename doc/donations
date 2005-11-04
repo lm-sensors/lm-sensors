@@ -85,3 +85,6 @@ Wincor Nixdorf	Seagate Barracuda 7200.7 160GB harddisk drive	2004-10
 
 Aweta		Intel Server system				2005-09
 		Drivers developed: PC87431 (IPMI SMB)		MDS
+
+Barracuda	Jetway K8M8MS, Sempron 2600+, 256 MB RAM	2005-10
+Networks	Drivers developed: f71805f			Jean Delvare

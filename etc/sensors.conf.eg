@@ -2366,3 +2366,67 @@ chip "w83627ehf-*"
    set temp2_over  45
    set temp2_hyst  40
 
+
+# Fintek F71805F/FG configuration
+# This is the recommended wiring and resistor values from the F71805F/FG
+# datasheet. Your motherboard manufacturer may or may not have followed
+# these.
+chip "f71805f-*"
+# Voltages
+   label in0 "+3.3V"
+   label in1 "Vtt1.2V"
+   label in2 "Vram"
+   label in3 "Vchip"
+   label in4 "+5V"
+   label in5 "+12V"
+   label in6 "Vcc1.5V"
+   label in7 "Vcore"
+   label in8 "5VSB"
+
+   # in0 is scaled internally
+   compute in2  @*(1+100/100), @/(1+100/100)
+   compute in3  @*(1+100/47),  @/(1+100/47)
+   compute in4  @*(1+200/47),  @/(1+200/47)
+   compute in5  @*(1+200/20),  @/(1+200/20)
+   compute in8  @*(1+200/47),  @/(1+200/47)
+
+   set in0_min  3.3 * 0.95
+   set in0_max  3.3 * 1.05
+   #set in1_min  1.2 * 0.95
+   #set in1_max  1.2 * 1.05
+   #set in2_min  2.5 * 0.95
+   #set in2_max  2.6 * 1.05
+   #set in3_min  3.3 * 0.95
+   #set in3_max  3.3 * 1.05
+   #set in4_min  5.0 * 0.95
+   #set in4_max  5.0 * 1.05
+   #set in5_min 12.0 * 0.95
+   #set in5_max 12.0 * 1.05
+   #set in6_min  1.5 * 0.95
+   #set in6_max  1.5 * 1.05
+   # in7 nominal value depends on the CPU model
+   #set in7_min  1.4 * 0.95
+   #set in7_max  1.4 * 1.05
+   #set in8_min  5.0 * 0.95
+   #set in8_max  5.0 * 1.05
+
+# Fans
+   label fan1 "CPU Fan"
+   label fan2 "Sys Fan"
+   label fan3 "Aux Fan"
+
+   #set fan1_min 2100
+   #set fan2_min 1400
+   #set fan3_min 1400
+
+# Temperatures
+   label temp1 "CPU Temp"
+   label temp2 "Sys Temp"
+   label temp3 "Aux Temp"
+
+   #set temp1_max   60
+   #set temp1_hyst  58
+   #set temp2_max   50
+   #set temp2_hyst  48
+   #set temp3_max   50
+   #set temp3_hyst  48

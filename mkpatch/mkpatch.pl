@@ -106,6 +106,7 @@ sub gen_Documentation_Configure_help
            m@Analog Devices ADM9240 and compatibles@ or
            m@Asus ASB100@ or
            m@Dallas DS1621 and DS1625@ or
+           m@Fintek F71805F@ or
            m@Fujitsu-Siemens Hermes@ or
            m@Fujitsu-Siemens Poseidon@ or
            m@Fujitsu-Siemens Scylla@ or
@@ -373,6 +374,16 @@ Dallas DS1621 and DS1625
 CONFIG_SENSORS_DS1621
   If you say yes here you get support for the Dallas DS1621 and DS1625x
   sensor chips.  This can also be built as a module.
+
+  You will also need the latest user-space utilities: you can find them
+  in the lm_sensors package, which you can download at
+  http://www.lm-sensors.nu/
+
+Fintek F71805F
+CONFIG_SENSORS_F71805F
+  If you say yes here you get support for the hardware monitoring
+  features of the Fintek F71805F/FG Super-I/O chip.  This can also be
+  built as a module.
 
   You will also need the latest user-space utilities: you can find them
   in the lm_sensors package, which you can download at
@@ -1016,6 +1027,7 @@ obj-$(CONFIG_SENSORS_BT869)	+= bt869.o
 obj-$(CONFIG_SENSORS_DDCMON)	+= ddcmon.o
 obj-$(CONFIG_SENSORS_DS1621)	+= ds1621.o
 obj-$(CONFIG_SENSORS_EEPROM)	+= eeprom.o
+obj-$(CONFIG_SENSORS_FSCHER)	+= f71085f.o
 obj-$(CONFIG_SENSORS_FSCHER)	+= fscher.o
 obj-$(CONFIG_SENSORS_FSCPOS)	+= fscpos.o
 obj-$(CONFIG_SENSORS_FSCSCY)	+= fscscy.o

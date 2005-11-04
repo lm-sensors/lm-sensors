@@ -71,6 +71,9 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_EEPROM=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/eeprom.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_F71805F=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/f71805f.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_FSCHER=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/fscher.o
 endif

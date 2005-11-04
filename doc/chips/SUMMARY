@@ -97,6 +97,9 @@ ds1621
 	  (the following chip is detected as a ds1621)
 	ds1625		1	-	-	-	yes	no
 
+f71805f
+	f71805f		9	3	3	-	no	yes
+
 fscher
 	fscher		3	3	3	-	yes	no
 

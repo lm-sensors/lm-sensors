@@ -29,6 +29,7 @@ kernel/chips/bt869.c		drivers/sensors/bt869.c
 kernel/chips/ddcmon.c		drivers/sensors/ddcmon.c
 kernel/chips/ds1621.c		drivers/sensors/ds1621.c
 kernel/chips/eeprom.c		drivers/sensors/eeprom.c
+kernel/chips/f71805f.c		drivers/sensors/f71805f.c
 kernel/chips/fscher.c		drivers/sensors/fscher.c
 kernel/chips/fscpos.c		drivers/sensors/fscpos.c
 kernel/chips/fscscy.c		drivers/sensors/fscscy.c

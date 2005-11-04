@@ -5768,6 +5768,86 @@ void print_smsc47b397(const sensors_chip_name *name)
     PRINT_SMSC47B397_FAN(ii, name);
 }
 
+void print_f71805f(const sensors_chip_name *name)
+{
+  char *label;
+  double cur, min, max;
+  int alarms, valid, i;
+
+  if (!sensors_get_feature(*name, SENSORS_F71805F_ALARMS_IN, &cur))
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarms_in data!\n");
+    alarms = 0;
+  }
+
+  for (i = 0; i < 9; i++) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_F71805F_IN(i),
+        &label, &valid)
+     && !sensors_get_feature(*name, SENSORS_F71805F_IN(i), &cur)
+     && !sensors_get_feature(*name, SENSORS_F71805F_IN_MIN(i), &min)
+     && !sensors_get_feature(*name, SENSORS_F71805F_IN_MAX(i), &max)) {
+      if (valid) {
+        print_label(label, 10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)  %s\n",
+               cur, min, max, (alarms & (1 << i)) ? "ALARM" : "");
+      }
+    } else
+      printf("ERROR: Can't get in%d data!\n", i);
+    free(label);
+  }
+
+  if (!sensors_get_feature(*name, SENSORS_F71805F_ALARMS_FAN, &cur))
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarms_fan data!\n");
+    alarms = 0;
+  }
+
+  for (i = 1; i <= 3; i++) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_F71805F_FAN(i),
+        &label, &valid)
+     && !sensors_get_feature(*name, SENSORS_F71805F_FAN(i), &cur)
+     && !sensors_get_feature(*name, SENSORS_F71805F_FAN_MIN(i), &min)) {
+      if (valid) {
+        print_label(label, 10);
+        printf("%4.0f RPM  (min = %4.0f RPM)                  %s\n",
+               cur, min, (alarms & (1 << (i - 1))) ? "ALARM" : "");
+      }
+    } else
+      printf("ERROR: Can't get fan%d data!\n", i);
+    free(label);
+  }
+
+  if (!sensors_get_feature(*name, SENSORS_F71805F_ALARMS_TEMP, &cur))
+    alarms = cur + 0.5;
+  else {
+    printf("ERROR: Can't get alarms_temp data!\n");
+    alarms = 0;
+  }
+
+  for (i = 1; i <= 3; i++) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_F71805F_TEMP(i),
+        &label, &valid)
+     && !sensors_get_feature(*name, SENSORS_F71805F_TEMP(i), &cur)
+     && !sensors_get_feature(*name, SENSORS_F71805F_TEMP_MAX(i), &max)
+     && !sensors_get_feature(*name, SENSORS_F71805F_TEMP_HYST(i), &min)) {
+      if (valid) {
+        print_label(label, 10);
+        print_temp_info(cur, max, min, HYST, 0, 0);
+        printf("%5s", (alarms & (1 << (i - 1))) ? "ALARM" : "");
+        if (!sensors_get_feature(*name, SENSORS_F71805F_TEMP_TYPE(i), &cur)) {
+          int sensor = cur + 0.5;
+          printf("  [%s]", sensor == 3 ? "diode" : "thermistor");
+        }
+	printf("\n");
+      }
+    } else
+      printf("ERROR: Can't get temp%d data!\n", i);
+    free(label);
+  }
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;
