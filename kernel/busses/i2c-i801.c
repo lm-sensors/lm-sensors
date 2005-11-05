@@ -145,8 +145,8 @@ MODULE_PARM_DESC(force_addr,
 		 "EXTREMELY DANGEROUS!");
 
 static int i801_transaction(void);
-static int i801_block_transaction(union i2c_smbus_data *data,
-				  char read_write, int command);
+static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
+				  int command, int hwpec);
 
 static unsigned short i801_smba;
 static struct pci_driver i801_driver;
@@ -298,7 +298,7 @@ static int i801_transaction(void)
 
 /* All-inclusive block transaction function */
 static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
-				  int command)
+				  int command, int hwpec)
 {
 	int i, len;
 	int smbcmd;
@@ -446,7 +446,7 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 	}
 
 #ifdef HAVE_PEC
-	if(isich4 && command == I2C_SMBUS_BLOCK_DATA_PEC) {
+	if (hwpec && command == I2C_SMBUS_BLOCK_DATA) {
 		/* wait for INTR bit as advised by Intel */
 		timeout = 0;
 		do {
@@ -518,11 +518,6 @@ static s32 i801_access(struct i2c_adapter * adap, u16 addr,
 		break;
 	case I2C_SMBUS_BLOCK_DATA:
 	case I2C_SMBUS_I2C_BLOCK_DATA:
-#ifdef HAVE_PEC
-	case I2C_SMBUS_BLOCK_DATA_PEC:
-		if(hwpec && size == I2C_SMBUS_BLOCK_DATA)
-			size = I2C_SMBUS_BLOCK_DATA_PEC;
-#endif
 		outb_p(((addr & 0x7f) << 1) | (read_write & 0x01),
 		       SMBHSTADD);
 		outb_p(command, SMBHSTCMD);
@@ -542,7 +537,7 @@ static s32 i801_access(struct i2c_adapter * adap, u16 addr,
 	}
 #endif
 	if(block)
-		ret = i801_block_transaction(data, read_write, size);
+		ret = i801_block_transaction(data, read_write, size, hwpec);
 	else {
 		outb_p(xact | ENABLE_INT9, SMBHSTCNT);
 		ret = i801_transaction();

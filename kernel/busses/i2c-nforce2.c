@@ -208,13 +208,6 @@ s32 nforce2_access(struct i2c_adapter * adap, u16 addr, unsigned short flags,
 			printk(KERN_WARNING "i2c-nforce2.o: I2C_SMBUS_BLOCK_PROC_CALL not supported!\n");
 			return -1;
 
-		case I2C_SMBUS_WORD_DATA_PEC:
-		case I2C_SMBUS_BLOCK_DATA_PEC:
-		case I2C_SMBUS_PROC_CALL_PEC:
-		case I2C_SMBUS_BLOCK_PROC_CALL_PEC:
-			printk(KERN_WARNING "i2c-nforce2.c: Unexpected software PEC transaction %d\n.", size);
-			return -1;
-
 		default:
 			printk(KERN_WARNING "i2c-nforce2.c: Unsupported transaction %d\n", size);
 			return -1;
