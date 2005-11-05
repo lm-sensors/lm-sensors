@@ -24,10 +24,13 @@ ask CVS about it:
                   Sync i2c_msg definition with i2c.h (Hideki Iwamoto)
                   Add missing parentheses around macros
                   Drop I2C_FUNC_SMBUS_EMUL
+                  Drop I2C_FUNC_SMBUS_*_PEC
+                  Drop I2C_SMBUS_*_PEC
   Library: Big update to use libsysfs.  More TODO though.
            Fix bus matching code for Linux 2.6 (Karsten Petersen)
            Add f71805f support
   Makefile: Compile user-space programs with -Wundef
+  Module i2c-i801: Simplify the hardware PEC code
   Module i2c-i810: Documentation update, PCI IDs cleanup
   Module i2c-keywest: Remove bus probing code (2.6 backport)
   Module i2c-nforce2: Remove dead code (2.6 backport)
@@ -41,10 +44,14 @@ ask CVS about it:
           i2c-sis645: Use pci_driver name to request I/O region; do
                       not initialize i2c_adapter name to "unset" (2.6
                       backport)
+  Modules i2c-amd8111, i2c-i801, i2c-nforce2: Drop software PEC code
+                                              (2.6 backport)
   Module adm9240: Cleanups (2.6 backport)
   Module f71805f: New, supports the Fintek F71805F/FG Super-I/O
   Module it87: Minor cleanups
   Module lm90: Support the ADM1032-2 and ADT7461-2 (2.6 backport)
+               Separate the register read function
+               Add PEC support for the ADM1032
   Module via686a: Cleanups
   Module w83627hf: Drop useless initialization step (2.6 backport)
   Module w83781d: Drop W83697HF support (Grant Coady)
