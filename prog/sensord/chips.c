@@ -1040,46 +1040,46 @@ static const FeatureDescriptor pc87360_features[] = {
   { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
     { SENSORS_PC87360_FAN3, SENSORS_PC87360_FAN3_MIN, SENSORS_PC87360_FAN3_DIV, -1 } },
 
-  { fmtTemps_PC87360_0, rrdF0, DataType_temperature, SENSORS_PC87360_ALARMS_TEMP, 0,
+  { fmtTemps_PC87360_0, rrdF0, DataType_temperature, 3 << 0, 0,
     { SENSORS_PC87360_TEMP1, SENSORS_PC87360_TEMP1_MIN, SENSORS_PC87360_TEMP1_MAX,
       SENSORS_PC87360_TEMP1_CRIT, -1 } },
-  { fmtTemps_PC87360_0, rrdF0, DataType_temperature, SENSORS_PC87360_ALARMS_TEMP, 0,
+  { fmtTemps_PC87360_0, rrdF0, DataType_temperature, 3 << 2, 0,
     { SENSORS_PC87360_TEMP2, SENSORS_PC87360_TEMP2_MIN, SENSORS_PC87360_TEMP2_MAX,
       SENSORS_PC87360_TEMP2_CRIT, -1 } },
-  { fmtTemps_PC87360_0, rrdF0, DataType_temperature, SENSORS_PC87360_ALARMS_TEMP, 0,
+  { fmtTemps_PC87360_0, rrdF0, DataType_temperature, 3 << 4, 0,
     { SENSORS_PC87360_TEMP3, SENSORS_PC87360_TEMP3_MIN, SENSORS_PC87360_TEMP3_MAX,
       SENSORS_PC87360_TEMP3_CRIT, -1 } },
-  { fmtTemps_PC87360_1, rrdF1, DataType_temperature, SENSORS_PC87360_ALARMS_TEMP, 0,
+  { fmtTemps_PC87360_1, rrdF1, DataType_temperature, 0, 0,
     { SENSORS_PC87360_TEMP4, SENSORS_PC87360_TEMP4_MIN, SENSORS_PC87360_TEMP4_MAX,
       SENSORS_PC87360_TEMP4_CRIT, -1 } },
-  { fmtTemps_PC87360_1, rrdF1, DataType_temperature, SENSORS_PC87360_ALARMS_TEMP, 0,
+  { fmtTemps_PC87360_1, rrdF1, DataType_temperature, 0, 0,
     { SENSORS_PC87360_TEMP5, SENSORS_PC87360_TEMP5_MIN, SENSORS_PC87360_TEMP5_MAX,
       SENSORS_PC87360_TEMP5_CRIT, -1 } },
-  { fmtTemps_PC87360_1, rrdF1, DataType_temperature, SENSORS_PC87360_ALARMS_TEMP, 0,
+  { fmtTemps_PC87360_1, rrdF1, DataType_temperature, 0, 0,
     { SENSORS_PC87360_TEMP6, SENSORS_PC87360_TEMP6_MIN, SENSORS_PC87360_TEMP6_MAX,
       SENSORS_PC87360_TEMP6_CRIT, -1 } },
 
-  { fmtVolts_2, rrdF2, DataType_voltage, SENSORS_PC87360_ALARMS_IN, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_PC87360_IN0, SENSORS_PC87360_IN0_MIN, SENSORS_PC87360_IN0_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, SENSORS_PC87360_ALARMS_IN, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_PC87360_IN1, SENSORS_PC87360_IN1_MIN, SENSORS_PC87360_IN1_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, SENSORS_PC87360_ALARMS_IN, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_PC87360_IN2, SENSORS_PC87360_IN2_MIN, SENSORS_PC87360_IN2_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, SENSORS_PC87360_ALARMS_IN, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_PC87360_IN3, SENSORS_PC87360_IN3_MIN, SENSORS_PC87360_IN3_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, SENSORS_PC87360_ALARMS_IN, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_PC87360_IN4, SENSORS_PC87360_IN4_MIN, SENSORS_PC87360_IN4_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, SENSORS_PC87360_ALARMS_IN, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_PC87360_IN5, SENSORS_PC87360_IN5_MIN, SENSORS_PC87360_IN5_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, SENSORS_PC87360_ALARMS_IN, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_PC87360_IN6, SENSORS_PC87360_IN6_MIN, SENSORS_PC87360_IN6_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, SENSORS_PC87360_ALARMS_IN, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_PC87360_IN7, SENSORS_PC87360_IN7_MIN, SENSORS_PC87360_IN7_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, SENSORS_PC87360_ALARMS_IN, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_PC87360_IN8, SENSORS_PC87360_IN8_MIN, SENSORS_PC87360_IN8_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, SENSORS_PC87360_ALARMS_IN, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_PC87360_IN9, SENSORS_PC87360_IN9_MIN, SENSORS_PC87360_IN9_MAX, -1 } },
-  { fmtVolts_2, rrdF2, DataType_voltage, SENSORS_PC87360_ALARMS_IN, 0,
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_PC87360_IN10, SENSORS_PC87360_IN10_MIN, SENSORS_PC87360_IN10_MAX, -1 } },
 
   { fmtVolt_3, rrdF3, DataType_voltage, 0, 0,
@@ -1088,8 +1088,8 @@ static const FeatureDescriptor pc87360_features[] = {
 };
 
 static const ChipDescriptor pc87360_chip = {
-  /* No room for SENSORS_PC87360_ALARMS_TEMP */
-  pc87360_names, pc87360_features, SENSORS_PC87360_ALARMS_IN, 0
+  /* No room for SENSORS_PC87360_ALARMS_IN */
+  pc87360_names, pc87360_features, SENSORS_PC87360_ALARMS_TEMP, 0
 };
 
 /** W83627EHF **/
