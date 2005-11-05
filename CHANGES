@@ -62,6 +62,8 @@ ask CVS about it:
   Program isadump: Display the real addresses in flat mode
   Program sensord: Do not log algorithm names
                    Drop EEPROM support (Aurelien Jarno)
+                   Add W83627EHF, F71805F/FG support
+                   Fix PC87365/PC87366 alarms
   Program sensors: Drop free_the_label
                    Fix compilation with uclibc (no iconv)
                    Add f71805f support
