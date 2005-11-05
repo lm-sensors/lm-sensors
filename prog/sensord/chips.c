@@ -1122,6 +1122,51 @@ static const ChipDescriptor w83627ehf_chip = {
   w83627ehf_names, w83627ehf_features, 0, 0
 };
 
+/** F71805F **/
+
+static const char *f71805f_names[] = {
+  SENSORS_F71805F_PREFIX, NULL
+};
+
+static const FeatureDescriptor f71805f_features[] = {
+  { fmtVolts_2, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_F71805F_IN(0), SENSORS_F71805F_IN_MIN(0), SENSORS_F71805F_IN_MAX(0), -1 } },
+  { fmtVolts_2, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_F71805F_IN(1), SENSORS_F71805F_IN_MIN(1), SENSORS_F71805F_IN_MAX(1), -1 } },
+  { fmtVolts_2, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_F71805F_IN(2), SENSORS_F71805F_IN_MIN(2), SENSORS_F71805F_IN_MAX(2), -1 } },
+  { fmtVolts_2, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_F71805F_IN(3), SENSORS_F71805F_IN_MIN(3), SENSORS_F71805F_IN_MAX(3), -1 } },
+  { fmtVolts_2, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_F71805F_IN(4), SENSORS_F71805F_IN_MIN(4), SENSORS_F71805F_IN_MAX(4), -1 } },
+  { fmtVolts_2, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_F71805F_IN(5), SENSORS_F71805F_IN_MIN(5), SENSORS_F71805F_IN_MAX(5), -1 } },
+  { fmtVolts_2, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_F71805F_IN(6), SENSORS_F71805F_IN_MIN(6), SENSORS_F71805F_IN_MAX(6), -1 } },
+  { fmtVolts_2, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_F71805F_IN(7), SENSORS_F71805F_IN_MIN(7), SENSORS_F71805F_IN_MAX(7), -1 } },
+  { fmtVolts_2, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_F71805F_IN(8), SENSORS_F71805F_IN_MIN(8), SENSORS_F71805F_IN_MAX(8), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_F71805F_FAN(1), SENSORS_F71805F_FAN_MIN(1), -1, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_F71805F_FAN(2), SENSORS_F71805F_FAN_MIN(2), -1, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_F71805F_FAN(3), SENSORS_F71805F_FAN_MIN(3), -1, -1 } },
+  { fmtTemps_0, rrdF0, DataType_temperature, 1 << 0, 0,
+    { SENSORS_F71805F_TEMP(1), SENSORS_F71805F_TEMP_MAX(1), SENSORS_F71805F_TEMP_HYST(1), -1 } },
+  { fmtTemps_0, rrdF0, DataType_temperature, 1 << 1, 0,
+    { SENSORS_F71805F_TEMP(2), SENSORS_F71805F_TEMP_MAX(2), SENSORS_F71805F_TEMP_HYST(2), -1 } },
+  { fmtTemps_0, rrdF0, DataType_temperature, 1 << 2, 0,
+    { SENSORS_F71805F_TEMP(3), SENSORS_F71805F_TEMP_MAX(3), SENSORS_F71805F_TEMP_HYST(3), -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor f71805f_chip = {
+  /* No room for SENSORS_F71805F_ALARMS_IN nor SENSORS_F71805F_ALARMS_FAN */
+  f71805f_names, f71805f_features, SENSORS_F71805F_ALARMS_TEMP, 0
+};
+
 /** ALL **/
 
 const ChipDescriptor * const knownChips[] = {
@@ -1146,5 +1191,6 @@ const ChipDescriptor * const knownChips[] = {
   &asb100_chip,
   &pc87360_chip,
   &w83627ehf_chip,
+  &f71805f_chip,
   NULL
 };
