@@ -1092,6 +1092,36 @@ static const ChipDescriptor pc87360_chip = {
   pc87360_names, pc87360_features, SENSORS_PC87360_ALARMS_IN, 0
 };
 
+/** W83627EHF **/
+
+static const char *w83627ehf_names[] = {
+  SENSORS_W83627EHF_PREFIX, NULL
+};
+
+static const FeatureDescriptor w83627ehf_features[] = {
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83627EHF_FAN1, SENSORS_W83627EHF_FAN1_MIN, SENSORS_W83627EHF_FAN1_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83627EHF_FAN2, SENSORS_W83627EHF_FAN2_MIN, SENSORS_W83627EHF_FAN2_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83627EHF_FAN3, SENSORS_W83627EHF_FAN3_MIN, SENSORS_W83627EHF_FAN3_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83627EHF_FAN4, SENSORS_W83627EHF_FAN4_MIN, SENSORS_W83627EHF_FAN4_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83627EHF_FAN5, SENSORS_W83627EHF_FAN5_MIN, SENSORS_W83627EHF_FAN5_DIV, -1 } },
+  { fmtTemps_0, rrdF0, DataType_temperature, 0, 0,
+    { SENSORS_W83627EHF_TEMP1, SENSORS_W83627EHF_TEMP1_OVER, SENSORS_W83627EHF_TEMP1_HYST, -1 } },
+  { fmtTemps_1, rrdF1, DataType_temperature, 0, 0,
+    { SENSORS_W83627EHF_TEMP2, SENSORS_W83627EHF_TEMP2_OVER, SENSORS_W83627EHF_TEMP2_HYST, -1 } },
+  { fmtTemps_1, rrdF1, DataType_temperature, 0, 0,
+    { SENSORS_W83627EHF_TEMP3, SENSORS_W83627EHF_TEMP3_OVER, SENSORS_W83627EHF_TEMP3_HYST, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor w83627ehf_chip = {
+  w83627ehf_names, w83627ehf_features, 0, 0
+};
+
 /** ALL **/
 
 const ChipDescriptor * const knownChips[] = {
@@ -1115,5 +1145,6 @@ const ChipDescriptor * const knownChips[] = {
   &it87_chip,
   &asb100_chip,
   &pc87360_chip,
+  &w83627ehf_chip,
   NULL
 };
