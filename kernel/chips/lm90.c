@@ -159,10 +159,10 @@ SENSORS_INSMOD_6(lm90, adm1032, lm99, lm86, max6657, adt7461);
 #define HYST_TO_REG(val)	((val) <= 0 ? 0 : \
 				 (val) >= 31 ? 31 : (val))
 
-/* 
+/*
  * ADT7461 is almost identical to LM90 except that attempts to write
  * values that are outside the range 0 < temp < 127 are treated as
- * the boundary value. 
+ * the boundary value.
  */
 
 #define TEMP1_TO_REG_ADT7461(val) ((val) <= 0 ? 0 : \
@@ -211,8 +211,7 @@ static struct i2c_driver lm90_driver = {
  * Client data (each client gets its own)
  */
 
-struct lm90_data
-{
+struct lm90_data {
 	struct i2c_client client;
 	int sysctl_id;
 
@@ -284,9 +283,8 @@ static int lm90_read_reg(struct i2c_client* client, u8 reg, u8 *value)
 
 	err = i2c_smbus_read_byte_data(client, reg);
 
-	if (err < 0)
-	{
-		printk("lm90.o: Register 0x%02x read failed (%d)\n",
+	if (err < 0) {
+		printk(KERN_WARNING "lm90: Register 0x%02x read failed (%d)\n",
 		       reg, err);
 		return err;
 	}
@@ -313,26 +311,16 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	const char *type_name = "";
 	const char *client_name = "";
 
+	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA)) {
 #ifdef DEBUG
-	if (i2c_is_isa_adapter(adapter))
-	{
-		printk("lm90.o: Called for an ISA bus adapter, aborting.\n");
-		return 0;
-	}
-#endif
-
-	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
-	{
-#ifdef DEBUG
-		printk("lm90.o: I2C bus doesn't support byte read mode, "
-		       "skipping.\n");
+		printk(KERN_DEBUG "lm90: adapter doesn't support byte mode, "
+		       "skipping\n");
 #endif
 		return 0;
 	}
 
-	if (!(data = kmalloc(sizeof(struct lm90_data), GFP_KERNEL)))
-	{
-		printk("lm90.o: Out of memory in lm90_detect (new_client).\n");
+	if (!(data = kmalloc(sizeof(struct lm90_data), GFP_KERNEL))) {
+		printk(KERN_ERR "lm90: Out of memory in lm90_detect\n");
 		return -ENOMEM;
 	}
 
@@ -364,8 +352,7 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	if (kind == 0)
 		kind = lm90;
 
-	if (kind < 0) /* detection and identification */
-	{
+	if (kind < 0) { /* detection and identification */
 		u8 man_id, chip_id, reg_config1, reg_convrate;
 
 		if (lm90_read_reg(new_client, LM90_REG_R_MAN_ID,
@@ -376,20 +363,18 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 		 		  &reg_config1) < 0
 		 || lm90_read_reg(new_client, LM90_REG_R_CONVRATE,
 		 		  &reg_convrate) < 0)
-			goto ERROR1;
-		
-		if (man_id == 0x01) /* National Semiconductor */
-		{
+			goto exit_free;
+
+		if (man_id == 0x01) { /* National Semiconductor */
 			u8 reg_config2;
 
 			if (lm90_read_reg(new_client, LM90_REG_R_CONFIG2,
 					  &reg_config2) < 0)
-				goto ERROR1;
+				goto exit_free;
 
 			if ((reg_config1 & 0x2A) == 0x00
 			 && (reg_config2 & 0xF8) == 0x00
-			 && reg_convrate <= 0x09)
-			{
+			 && reg_convrate <= 0x09) {
 				if (address == 0x4C
 				 && (chip_id & 0xF0) == 0x20) /* LM90 */
 					kind = lm90;
@@ -399,9 +384,8 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 				 && (chip_id & 0xF0) == 0x10) /* LM86 */
 					kind = lm99;
 			}
-		}
-		else if (man_id == 0x41) /* Analog Devices */
-		{
+		} else
+		if (man_id == 0x41) { /* Analog Devices */
 			if ((chip_id & 0xF0) == 0x40 /* ADM1032 */
 			 && (reg_config1 & 0x3F) == 0x00
 			 && reg_convrate <= 0x0A)
@@ -409,11 +393,10 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 			else
 			if (chip_id == 0x51 /* ADT7461 */
 			 && (reg_config1 & 0x1F) == 0x00 /* check compat mode */
-			 && reg_convrate <= 0x0A) 
+			 && reg_convrate <= 0x0A)
 				kind = adt7461;
-		}
-		else if (man_id == 0x4D) /* Maxim */
-		{
+		} else
+		if (man_id == 0x4D) { /* Maxim */
  			/*
  			 * The Maxim variants do NOT have a chip_id register.
  			 * Reading from that address will return the last read
@@ -430,46 +413,32 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 		}
 	}
 
-	if (kind <= 0) /* identification failed */
-	{
-		printk("lm90.o: Unsupported chip.\n");
-		goto ERROR1;
+	if (kind <= 0) { /* identification failed */
+		printk(KERN_INFO "lm90: Unsupported chip\n");
+		goto exit_free;
 	}
 
-	if (kind == lm90)
-	{
+	if (kind == lm90) {
 		type_name = "lm90";
 		client_name = "LM90 chip";
-	}
-	else if (kind == adm1032)
-	{
+	} else if (kind == adm1032) {
 		type_name = "adm1032";
 		client_name = "ADM1032 chip";
-	}
-	else if (kind == lm99)
-	{
+	} else if (kind == lm99) {
 		type_name = "lm99";
 		client_name = "LM99 chip";
-	}
-	else if (kind == lm86)
-	{
+	} else if (kind == lm86) {
 		type_name = "lm86";
 		client_name = "LM86 chip";
-	}
-	else if (kind == max6657)
-	{
+	} else if (kind == max6657) {
 		type_name = "max6657";
 		client_name = "MAX6657 chip";
-	}
-	else if (kind == adt7461)
-	{
+	} else if (kind == adt7461) {
 		type_name = "adt7461";
 		client_name = "ADT7561 chip";
-	}
-	else
-	{
-		printk("lm90.o: Unknown kind %d.\n", kind);
-		goto ERROR1;
+	} else {
+		printk(KERN_ERR "lm90: Unknown kind %d\n", kind);
+		goto exit_free;
 	}
 
 	/*
@@ -486,12 +455,9 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	 * Tell the I2C layer a new client has arrived.
 	 */
 
-	if ((err = i2c_attach_client(new_client)))
-	{
-#ifdef DEBUG
-		printk("lm90.o: Failed attaching client.\n");
-#endif
-		goto ERROR1;
+	if ((err = i2c_attach_client(new_client))) {
+		printk(KERN_ERR "lm90: Failed to attach client (%d)\n", err);
+		goto exit_free;
 	}
 
 	/*
@@ -499,12 +465,10 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	 */
 
 	if ((err = i2c_register_entry(new_client, type_name,
-	     lm90_dir_table_template, THIS_MODULE)) < 0)
-	{
-#ifdef DEBUG
-		printk("lm90.o: Failed registering directory entry.\n");
-#endif
-		goto ERROR2;
+	     lm90_dir_table_template, THIS_MODULE)) < 0) {
+		printk(KERN_ERR "lm90: Failed to register directory entry "
+		       "(%d)\n", err);
+		goto exit_detach;
 	}
 	data->sysctl_id = err;
 
@@ -515,9 +479,9 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	lm90_init_client(new_client);
 	return 0;
 
-	ERROR2:
+exit_detach:
 	i2c_detach_client(new_client);
-	ERROR1:
+exit_free:
 	kfree(data);
 	return err;
 }
@@ -532,9 +496,8 @@ static void lm90_init_client(struct i2c_client *client)
 
 	i2c_smbus_write_byte_data(client, LM90_REG_W_CONVRATE,
 		5); /* 2 Hz */
-	if (lm90_read_reg(client, LM90_REG_R_CONFIG1, &config) < 0)
-	{
-		printk("lm90.o: Initialization failed!\n");
+	if (lm90_read_reg(client, LM90_REG_R_CONFIG1, &config) < 0) {
+		printk(KERN_ERR "lm90: Initialization failed!\n");
 		return;
 	}
 	if (config & 0x40)
@@ -548,10 +511,9 @@ static int lm90_detach_client(struct i2c_client *client)
 	int err;
 
 	i2c_deregister_entry(((struct lm90_data *) (client->data))->sysctl_id);
-	if ((err = i2c_detach_client(client)))
-	{
-		printk("lm90.o: Client deregistration failed, client not "
-		       "detached.\n");
+	if ((err = i2c_detach_client(client))) {
+		printk(KERN_ERR "lm90: Client deregistration failed, client "
+		       "not detached (%d)\n", err);
 		return err;
 	}
 
@@ -566,11 +528,10 @@ static void lm90_update_client(struct i2c_client *client)
 	down(&data->update_lock);
 
 	if ((jiffies - data->last_updated > HZ * 2) ||
-	    (jiffies < data->last_updated) || !data->valid)
-	{
+	    (jiffies < data->last_updated) || !data->valid) {
 		u8 oldh, newh, l;
 #ifdef DEBUG
-		printk("lm90.o: Updating data.\n");
+		printk(KERN_DEBUG "lm90: Updating register values\n");
 #endif
 
 		lm90_read_reg(client, LM90_REG_R_LOCAL_TEMP,
@@ -630,18 +591,14 @@ static void lm90_local_temp(struct i2c_client *client, int operation,
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0; /* magnitude */
-	else if (operation == SENSORS_PROC_REAL_READ)
-	{
+	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm90_update_client(client);
 		results[0] = TEMP1_FROM_REG(data->local_high);
 		results[1] = TEMP1_FROM_REG(data->local_low);
 		results[2] = TEMP1_FROM_REG(data->local_temp);
 		*nrels_mag = 3;
-	}
-	else if (operation == SENSORS_PROC_REAL_WRITE)
-	{
-		if (*nrels_mag >= 1)
-		{
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
 			if (data->kind == adt7461)
 				data->local_high = TEMP1_TO_REG_ADT7461(results[0]);
 			else
@@ -649,8 +606,7 @@ static void lm90_local_temp(struct i2c_client *client, int operation,
 			i2c_smbus_write_byte_data(client, LM90_REG_W_LOCAL_HIGH,
 				data->local_high);
 		}
-		if (*nrels_mag >= 2)
-		{
+		if (*nrels_mag >= 2) {
 			if (data->kind == adt7461)
 				data->local_low = TEMP1_TO_REG_ADT7461(results[1]);
 			else
@@ -668,32 +624,27 @@ static void lm90_remote_temp(struct i2c_client *client, int operation,
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 1; /* magnitude */
-	else if (operation == SENSORS_PROC_REAL_READ)
-	{
+	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm90_update_client(client);
 		results[0] = TEMP2_FROM_REG(data->remote_high);
 		results[1] = TEMP2_FROM_REG(data->remote_low);
 		results[2] = TEMP2_FROM_REG(data->remote_temp);
 		*nrels_mag = 3;
-	}
-	else if (operation == SENSORS_PROC_REAL_WRITE)
-	{
-		if (*nrels_mag >= 1)
-		{
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
 			if (data->kind == adt7461)
 				data->remote_high = TEMP2_TO_REG_ADT7461(results[0]);
-			else 
+			else
 				data->remote_high = TEMP2_TO_REG(results[0]);
 			i2c_smbus_write_byte_data(client, LM90_REG_W_REMOTE_HIGHH,
 				data->remote_high >> 8);
 			i2c_smbus_write_byte_data(client, LM90_REG_W_REMOTE_HIGHL,
 				data->remote_high & 0xFF);
 		}
-		if (*nrels_mag >= 2)
-		{
+		if (*nrels_mag >= 2) {
 			if (data->kind == adt7461)
 				data->remote_low = TEMP2_TO_REG_ADT7461(results[1]);
-			else 
+			else
 				data->remote_low = TEMP2_TO_REG(results[1]);
 			i2c_smbus_write_byte_data(client, LM90_REG_W_REMOTE_LOWH,
 				data->remote_low >> 8);
@@ -710,16 +661,12 @@ static void lm90_local_tcrit(struct i2c_client *client, int operation,
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0; /* magnitude */
-	else if (operation == SENSORS_PROC_REAL_READ)
-	{
+	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm90_update_client(client);
 		results[0] = TEMP1_FROM_REG(data->local_crit);
 		*nrels_mag = 1;
-	}
-	else if (operation == SENSORS_PROC_REAL_WRITE)
-	{
-		if (*nrels_mag >= 1)
-		{
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
 			if (data->kind == adt7461)
 				data->local_crit = TEMP1_TO_REG_ADT7461(results[0]);
 			else
@@ -737,16 +684,12 @@ static void lm90_remote_tcrit(struct i2c_client *client, int operation,
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0; /* magnitude */
-	else if (operation == SENSORS_PROC_REAL_READ)
-	{
+	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm90_update_client(client);
 		results[0] = TEMP1_FROM_REG(data->remote_crit);
 		*nrels_mag = 1;
-	}
-	else if (operation == SENSORS_PROC_REAL_WRITE)
-	{
-		if (*nrels_mag >= 1)
-		{
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
 			if (data->kind == adt7461)
 				data->remote_crit = TEMP1_TO_REG_ADT7461(results[0]);
 			else
@@ -779,17 +722,13 @@ static void lm90_local_hyst(struct i2c_client *client, int operation,
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0; /* magnitude */
-	else if (operation == SENSORS_PROC_REAL_READ)
-	{
+	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm90_update_client(client);
 		results[0] = TEMP1_FROM_REG(data->local_crit) -
 			TEMP1_FROM_REG(data->hyst);
 		*nrels_mag = 1;
-	}
-	else if (operation == SENSORS_PROC_REAL_WRITE)
-	{
-		if (*nrels_mag >= 1)
-		{
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
 			data->hyst = HYST_TO_REG(data->local_crit - results[0]);
 			i2c_smbus_write_byte_data(client, LM90_REG_W_TCRIT_HYST,
 				data->hyst);
@@ -804,8 +743,7 @@ static void lm90_remote_hyst(struct i2c_client *client, int operation,
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0; /* magnitude */
-	else if (operation == SENSORS_PROC_REAL_READ)
-	{
+	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm90_update_client(client);
 		results[0] = TEMP1_FROM_REG(data->remote_crit) -
 			TEMP1_FROM_REG(data->hyst);
@@ -820,8 +758,7 @@ static void lm90_alarms(struct i2c_client *client, int operation,
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0; /* magnitude */
-	else if (operation == SENSORS_PROC_REAL_READ)
-	{
+	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm90_update_client(client);
 		results[0] = data->alarms;
 		*nrels_mag = 1;
@@ -830,7 +767,8 @@ static void lm90_alarms(struct i2c_client *client, int operation,
 
 static int __init sm_lm90_init(void)
 {
-	printk(KERN_INFO "lm90.o version %s (%s)\n", LM_VERSION, LM_DATE);
+	printk(KERN_INFO "lm90 driver version %s (%s)\n", LM_VERSION,
+	       LM_DATE);
 	return i2c_add_driver(&lm90_driver);
 }
 
