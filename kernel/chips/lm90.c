@@ -194,6 +194,8 @@ static void lm90_remote_hyst(struct i2c_client *client, int operation,
 	int ctl_name, int *nrels_mag, long *results);
 static void lm90_alarms(struct i2c_client *client, int operation,
 	int ctl_name, int *nrels_mag, long *results);
+static void adm1032_pec(struct i2c_client *client, int operation,
+	int ctl_name, int *nrels_mag, long *results);
 
 /*
  * Driver data (common to all clients)
@@ -242,6 +244,7 @@ struct lm90_data {
 #define LM90_SYSCTL_LOCAL_HYST    1207
 #define LM90_SYSCTL_REMOTE_HYST   1208
 #define LM90_SYSCTL_ALARMS        1210
+#define LM90_SYSCTL_PEC           1214
 
 #define LM90_ALARM_LOCAL_HIGH     0x40
 #define LM90_ALARM_LOCAL_LOW      0x20
@@ -273,15 +276,54 @@ static ctl_table lm90_dir_table_template[] =
 	{0}
 };
 
+static ctl_table adm1032_dir_table_template[] =
+{
+	{LM90_SYSCTL_LOCAL_TEMP, "temp1", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_local_temp},
+	{LM90_SYSCTL_REMOTE_TEMP, "temp2", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_remote_temp},
+	{LM90_SYSCTL_LOCAL_TCRIT, "tcrit1", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_local_tcrit},
+	{LM90_SYSCTL_REMOTE_TCRIT, "tcrit2", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_remote_tcrit},
+	{LM90_SYSCTL_LOCAL_HYST, "hyst1", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_local_hyst},
+	{LM90_SYSCTL_REMOTE_HYST, "hyst2", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_remote_hyst},
+	{LM90_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm90_alarms},
+	{LM90_SYSCTL_PEC, "pec", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &adm1032_pec},
+	{0}
+};
+
 /*
  * Real code
  */
 
+/* The ADM1032 supports PEC but not on write byte transactions, so we need
+   to explicitely ask for a transaction without PEC. */
+static inline s32 adm1032_write_byte(struct i2c_client *client, u8 value)
+{
+	return i2c_smbus_xfer(client->adapter, client->addr,
+			      client->flags & ~I2C_CLIENT_PEC,
+			      I2C_SMBUS_WRITE, value, I2C_SMBUS_BYTE, NULL);
+}
+
+/* It is assumed that client->update_lock is held (unless we are in
+   detection or initialization steps). This matters when PEC is enabled,
+   because we don't want the address pointer to change between the write
+   byte and the read byte transactions. */
 static int lm90_read_reg(struct i2c_client* client, u8 reg, u8 *value)
 {
 	int err;
 
-	err = i2c_smbus_read_byte_data(client, reg);
+ 	if (client->flags & I2C_CLIENT_PEC) {
+ 		err = adm1032_write_byte(client, reg);
+ 		if (err >= 0)
+ 			err = i2c_smbus_read_byte(client);
+ 	} else
+ 		err = i2c_smbus_read_byte_data(client, reg);
 
 	if (err < 0) {
 		printk(KERN_WARNING "lm90: Register 0x%02x read failed (%d)\n",
@@ -424,6 +466,12 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	} else if (kind == adm1032) {
 		type_name = "adm1032";
 		client_name = "ADM1032 chip";
+		/* The ADM1032 supports PEC, but only if combined
+		   transactions are not used. */
+		if (i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE)) {
+			new_client->flags |= I2C_CLIENT_PEC;
+			printk(KERN_DEBUG "lm90: Enabling PEC for ADM1032\n");
+		}
 	} else if (kind == lm99) {
 		type_name = "lm99";
 		client_name = "LM99 chip";
@@ -465,6 +513,8 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	 */
 
 	if ((err = i2c_register_entry(new_client, type_name,
+	     (new_client->flags & I2C_CLIENT_PEC) ?
+	     adm1032_dir_table_template :
 	     lm90_dir_table_template, THIS_MODULE)) < 0) {
 		printk(KERN_ERR "lm90: Failed to register directory entry "
 		       "(%d)\n", err);
@@ -762,6 +812,29 @@ static void lm90_alarms(struct i2c_client *client, int operation,
 		lm90_update_client(client);
 		results[0] = data->alarms;
 		*nrels_mag = 1;
+	}
+}
+
+/* pec used for ADM1032 only */
+static void adm1032_pec(struct i2c_client *client, int operation,
+	int ctl_name, int *nrels_mag, long *results)
+{
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0; /* magnitude */
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		results[0] = !!(client->flags & I2C_CLIENT_PEC);
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			switch (results[0]) {
+			case 0:
+				client->flags &= ~I2C_CLIENT_PEC;
+				break;
+			case 1:
+				client->flags |= I2C_CLIENT_PEC;
+				break;
+			}
+		}
 	}
 }
 
