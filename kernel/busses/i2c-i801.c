@@ -445,8 +445,7 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 			goto END;
 	}
 
-#ifdef HAVE_PEC
-	if (hwpec && command == I2C_SMBUS_BLOCK_DATA) {
+	if (hwpec) {
 		/* wait for INTR bit as advised by Intel */
 		timeout = 0;
 		do {
@@ -460,7 +459,6 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		}
 		outb_p(temp, SMBHSTSTS); 
 	}
-#endif
 	result = 0;
 END:
 	if (command == I2C_SMBUS_I2C_BLOCK_DATA &&
@@ -481,8 +479,9 @@ static s32 i801_access(struct i2c_adapter * adap, u16 addr,
 	int ret, xact = 0;
 
 #ifdef HAVE_PEC
-	if(isich4)
-		hwpec = (flags & I2C_CLIENT_PEC) != 0;
+	hwpec = isich4 && (flags & I2C_CLIENT_PEC)
+		&& size != I2C_SMBUS_QUICK
+		&& size != I2C_SMBUS_I2C_BLOCK_DATA;
 #endif
 
 	switch (size) {
@@ -529,13 +528,9 @@ static s32 i801_access(struct i2c_adapter * adap, u16 addr,
 		return -1;
 	}
 
-#ifdef HAVE_PEC
-	if(isich4 && hwpec) {
-		if(size != I2C_SMBUS_QUICK &&
-		   size != I2C_SMBUS_I2C_BLOCK_DATA)
-			outb_p(1, SMBAUXCTL);	/* enable HW PEC */
-	}
-#endif
+	if (hwpec)
+		outb_p(1, SMBAUXCTL);	/* enable hardware PEC */
+
 	if(block)
 		ret = i801_block_transaction(data, read_write, size, hwpec);
 	else {
@@ -543,13 +538,8 @@ static s32 i801_access(struct i2c_adapter * adap, u16 addr,
 		ret = i801_transaction();
 	}
 
-#ifdef HAVE_PEC
-	if(isich4 && hwpec) {
-		if(size != I2C_SMBUS_QUICK &&
-		   size != I2C_SMBUS_I2C_BLOCK_DATA)
-			outb_p(0, SMBAUXCTL);
-	}
-#endif
+	if (hwpec)
+		outb_p(0, SMBAUXCTL);	/* disable hardware PEC */
 
 	if(block)
 		return ret;
