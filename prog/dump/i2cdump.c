@@ -183,74 +183,35 @@ int main(int argc, char *argv[])
 
 	switch(size) {
 	case I2C_SMBUS_BYTE:
-		if (pec) {
-			if (!(funcs & I2C_FUNC_SMBUS_BYTE_PEC)) {
-				fprintf(stderr, "Error: Adapter for i2c bus "
-				        "%d does not have byte w/ PEC "
-				        "capability\n", i2cbus);
-				exit(1);
-			}
-		} else {
-			if (!(funcs & I2C_FUNC_SMBUS_BYTE)) {
-				fprintf(stderr, "Error: Adapter for i2c bus "
-				        "%d does not have byte capability\n",
-				        i2cbus);
-				exit(1);
-			}
+		if (!((funcs & I2C_FUNC_SMBUS_BYTE) == I2C_FUNC_SMBUS_BYTE)) {
+			fprintf(stderr, "Error: Adapter for i2c bus %d does "
+				"not have byte capability\n", i2cbus);
+			exit(1);
 		}
 		break;
 
 	case I2C_SMBUS_BYTE_DATA:
-		if (pec) {
-			if (!(funcs & I2C_FUNC_SMBUS_READ_BYTE_DATA_PEC)) {
-				fprintf(stderr, "Error: Adapter for i2c bus "
-				        "%d does not have byte read w/ PEC "
-				        "capability\n", i2cbus);
-				exit(1);
-			}
-		} else {
-			if (!(funcs & I2C_FUNC_SMBUS_READ_BYTE_DATA)) {
-				fprintf(stderr, "Error: Adapter for i2c bus "
-				        "%d does not have byte read "
-				        "capability\n", i2cbus);
-				exit(1);
-			}
+		if (!(funcs & I2C_FUNC_SMBUS_READ_BYTE_DATA)) {
+			fprintf(stderr, "Error: Adapter for i2c bus %d does "
+				"not have byte read capability\n", i2cbus);
+			exit(1);
 		}
 		break;
 
 	case I2C_SMBUS_WORD_DATA:
-		if (pec) {
-			if (!(funcs & I2C_FUNC_SMBUS_READ_WORD_DATA_PEC)) {
-				fprintf(stderr, "Error: Adapter for i2c bus "
-				        "%d does not have word read w/ PEC "
-					"capability\n", i2cbus);
-				exit(1);
-			}
-		} else {
-			if (!(funcs & I2C_FUNC_SMBUS_READ_WORD_DATA)) {
-				fprintf(stderr, "Error: Adapter for i2c bus "
-				        "%d does not have word read "
-				        "capability\n", i2cbus);
-				exit(1);
-			}
+		if (!(funcs & I2C_FUNC_SMBUS_READ_WORD_DATA)) {
+			fprintf(stderr, "Error: Adapter for i2c bus %d does "
+				"not have word read capability\n", i2cbus);
+			exit(1);
 		}
 		break;
 
 	case I2C_SMBUS_BLOCK_DATA:
-		if (pec) {
-			if (!(funcs & I2C_FUNC_SMBUS_READ_BLOCK_DATA_PEC)) {
-				fprintf(stderr, "Error: Adapter for i2c bus "
-				        "%d does not have smbus block read "
-					"w/ PEC capability\n", i2cbus);
-				exit(1);
-			}
-		} else {
-			if (!(funcs & I2C_FUNC_SMBUS_READ_BLOCK_DATA)) {
-				fprintf(stderr, "Error: Adapter for i2c bus "
-				        "%d does not have smbus block read "
-				        "capability\n", i2cbus);
-				exit(1);
-			}
+		if (!(funcs & I2C_FUNC_SMBUS_READ_BLOCK_DATA)) {
+			fprintf(stderr, "Error: Adapter for i2c bus %d does "
+				"not have smbus block read capability\n",
+				i2cbus);
+			exit(1);
 		}
 		break;
 
@@ -277,6 +238,10 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "Error: Could not set PEC: %s\n",
 			        strerror(errno));
 			exit(1);
+		}
+		if (!(funcs & (I2C_FUNC_SMBUS_HWPEC_CALC | I2C_FUNC_I2C))) {
+			fprintf(stderr, "Warning: Adapter for i2c bus %d does "
+			        "not seem to actually support PEC\n", i2cbus);
 		}
 	}
 

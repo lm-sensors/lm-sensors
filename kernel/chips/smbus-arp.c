@@ -185,7 +185,7 @@ int smbusarp_detect(struct i2c_adapter *adapter, int address,
 	if ((!i2c_check_functionality(adapter,
 	        I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_HWPEC_CALC)) &&
 	    (!i2c_check_functionality(adapter,
-	        I2C_FUNC_SMBUS_BLOCK_DATA_PEC)))
+	        I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_I2C)))
 		return(0);
 
 	if (!(data = kmalloc(sizeof(struct arp_data), GFP_KERNEL))) {

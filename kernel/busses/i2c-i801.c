@@ -91,7 +91,7 @@
 #define PCI_DEVICE_ID_INTEL_ICH7_17	0x27da
 #endif
 
-#ifdef I2C_FUNC_SMBUS_BLOCK_DATA_PEC
+#ifdef I2C_CLIENT_PEC
 #define HAVE_PEC
 #endif
 
@@ -595,9 +595,7 @@ static u32 i801_func(struct i2c_adapter *adapter)
 	    I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA |
 	    I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_WRITE_I2C_BLOCK
 #ifdef HAVE_PEC
-	     | (isich4 ? I2C_FUNC_SMBUS_BLOCK_DATA_PEC |
-	                 I2C_FUNC_SMBUS_HWPEC_CALC
-	               : 0)
+	     | (isich4 ? I2C_FUNC_SMBUS_HWPEC_CALC : 0)
 #endif
 #if 0
 	     | (isich5 ? I2C_FUNC_SMBUS_READ_I2C_BLOCK
