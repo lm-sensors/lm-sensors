@@ -1,7 +1,7 @@
 /*
  * lm90.c - Part of lm_sensors, Linux kernel modules for hardware
  *          monitoring
- * Copyright (C) 2003-2004  Jean Delvare <khali@linux-fr.org>
+ * Copyright (C) 2003-2005  Jean Delvare <khali@linux-fr.org>
  *
  * Based on the lm83 driver. The LM90 is a sensor chip made by National
  * Semiconductor. It reports up to two temperatures (its own plus up to
@@ -278,6 +278,23 @@ static ctl_table lm90_dir_table_template[] =
  * Real code
  */
 
+static int lm90_read_reg(struct i2c_client* client, u8 reg, u8 *value)
+{
+	int err;
+
+	err = i2c_smbus_read_byte_data(client, reg);
+
+	if (err < 0)
+	{
+		printk("lm90.o: Register 0x%02x read failed (%d)\n",
+		       reg, err);
+		return err;
+	}
+	*value = err;
+
+	return 0;
+}
+
 static int lm90_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, lm90_detect);
@@ -351,21 +368,23 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	{
 		u8 man_id, chip_id, reg_config1, reg_convrate;
 
-		man_id = i2c_smbus_read_byte_data(new_client,
-			LM90_REG_R_MAN_ID);
-		chip_id = i2c_smbus_read_byte_data(new_client,
-			LM90_REG_R_CHIP_ID);
-		reg_config1 = i2c_smbus_read_byte_data(new_client,
-			LM90_REG_R_CONFIG1);
-		reg_convrate = i2c_smbus_read_byte_data(new_client,
-			LM90_REG_R_CONVRATE);
+		if (lm90_read_reg(new_client, LM90_REG_R_MAN_ID,
+				  &man_id) < 0
+		 || lm90_read_reg(new_client, LM90_REG_R_CHIP_ID,
+		 		  &chip_id) < 0
+		 || lm90_read_reg(new_client, LM90_REG_R_CONFIG1,
+		 		  &reg_config1) < 0
+		 || lm90_read_reg(new_client, LM90_REG_R_CONVRATE,
+		 		  &reg_convrate) < 0)
+			goto ERROR1;
 		
 		if (man_id == 0x01) /* National Semiconductor */
 		{
 			u8 reg_config2;
 
-			reg_config2 = i2c_smbus_read_byte_data(new_client,
-				LM90_REG_R_CONFIG2);
+			if (lm90_read_reg(new_client, LM90_REG_R_CONFIG2,
+					  &reg_config2) < 0)
+				goto ERROR1;
 
 			if ((reg_config1 & 0x2A) == 0x00
 			 && (reg_config2 & 0xF8) == 0x00
@@ -513,7 +532,11 @@ static void lm90_init_client(struct i2c_client *client)
 
 	i2c_smbus_write_byte_data(client, LM90_REG_W_CONVRATE,
 		5); /* 2 Hz */
-	config = i2c_smbus_read_byte_data(client, LM90_REG_R_CONFIG1);
+	if (lm90_read_reg(client, LM90_REG_R_CONFIG1, &config) < 0)
+	{
+		printk("lm90.o: Initialization failed!\n");
+		return;
+	}
 	if (config & 0x40)
 		i2c_smbus_write_byte_data(client, LM90_REG_W_CONFIG1,
 			config & 0xBF); /* run */
@@ -545,19 +568,23 @@ static void lm90_update_client(struct i2c_client *client)
 	if ((jiffies - data->last_updated > HZ * 2) ||
 	    (jiffies < data->last_updated) || !data->valid)
 	{
-		u8 oldh, newh;
+		u8 oldh, newh, l;
 #ifdef DEBUG
 		printk("lm90.o: Updating data.\n");
 #endif
 
-		data->local_temp =
-			i2c_smbus_read_byte_data(client, LM90_REG_R_LOCAL_TEMP);
-		data->local_high =
-			i2c_smbus_read_byte_data(client, LM90_REG_R_LOCAL_HIGH);
-		data->local_low =
-			i2c_smbus_read_byte_data(client, LM90_REG_R_LOCAL_LOW);
-		data->local_crit =
-			i2c_smbus_read_byte_data(client, LM90_REG_R_LOCAL_CRIT);
+		lm90_read_reg(client, LM90_REG_R_LOCAL_TEMP,
+			      &data->local_temp);
+		lm90_read_reg(client, LM90_REG_R_LOCAL_HIGH,
+			      &data->local_high);
+		lm90_read_reg(client, LM90_REG_R_LOCAL_LOW,
+			      &data->local_low);
+		lm90_read_reg(client, LM90_REG_R_LOCAL_CRIT,
+			      &data->local_crit);
+		lm90_read_reg(client, LM90_REG_R_REMOTE_CRIT,
+			      &data->remote_crit);
+		lm90_read_reg(client, LM90_REG_R_TCRIT_HYST,
+			      &data->hyst);
 
 		/*
 		 * There is a trick here. We have to read two registers to
@@ -574,37 +601,20 @@ static void lm90_update_client(struct i2c_client *client)
 		 * byte again, and now we believe we have a correct reading.
 		 */
 
-		oldh =
-			i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_TEMPH);
-		data->remote_temp =
-			i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_TEMPL);
-		newh =
-			i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_TEMPH);
-		if (newh != oldh)
-		{
-			data->remote_temp =
-				i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_TEMPL);
-#ifdef DEBUG
-			oldh = /* actually newer */
-				i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_TEMPH);
-			if (newh != oldh)
-				printk("lm90.o: Remote temperature may be wrong.\n");
-#endif
-		}
-		data->remote_temp |= (newh << 8);
-		data->remote_high =
-			(i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_HIGHH) << 8)
-			+ i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_HIGHL);
-		data->remote_low =
-			(i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_LOWH) << 8)
-			+ i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_LOWL);
-		data->remote_crit =
-			i2c_smbus_read_byte_data(client, LM90_REG_R_REMOTE_CRIT);
+		if (lm90_read_reg(client, LM90_REG_R_REMOTE_TEMPH, &oldh) == 0
+		 && lm90_read_reg(client, LM90_REG_R_REMOTE_TEMPL, &l) == 0
+		 && lm90_read_reg(client, LM90_REG_R_REMOTE_TEMPH, &newh) == 0
+		 && (newh == oldh
+		  || lm90_read_reg(client, LM90_REG_R_REMOTE_TEMPL, &l) == 0))
+			data->remote_temp = (newh << 8) | l;
 
-		data->hyst =
-			i2c_smbus_read_byte_data(client, LM90_REG_R_TCRIT_HYST);
-		data->alarms =
-			i2c_smbus_read_byte_data(client, LM90_REG_R_STATUS);
+		if (lm90_read_reg(client, LM90_REG_R_REMOTE_LOWH, &newh) == 0
+		 && lm90_read_reg(client, LM90_REG_R_REMOTE_LOWL, &l) == 0)
+			data->remote_low = (newh << 8) | l;
+		if (lm90_read_reg(client, LM90_REG_R_REMOTE_HIGHH, &newh) == 0
+		 && lm90_read_reg(client, LM90_REG_R_REMOTE_HIGHL, &l) == 0)
+			data->remote_high = (newh << 8) | l;
+		lm90_read_reg(client, LM90_REG_R_STATUS, &data->alarms);
 
 		data->last_updated = jiffies;
 		data->valid = 1;
