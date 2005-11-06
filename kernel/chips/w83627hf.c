@@ -173,9 +173,9 @@ superio_exit(void)
 #define W83781D_REG_BANK 0x4E
 
 #define W83781D_REG_CONFIG 0x40
-#define W83781D_REG_ALARM1 0x41
-#define W83781D_REG_ALARM2 0x42
-#define W83781D_REG_ALARM3 0x450
+#define W83781D_REG_ALARM1 0x459
+#define W83781D_REG_ALARM2 0x45A
+#define W83781D_REG_ALARM3 0x45B
 
 #define W83781D_REG_IRQ 0x4C
 #define W83781D_REG_BEEP_CONFIG 0x4D
@@ -939,13 +939,6 @@ static void w83627hf_init_client(struct i2c_client *client)
 					W83781D_REG_TEMP3_CONFIG, tmp & 0xfe);
 			}
 		}
-
-		/* enable comparator mode for temp2 and temp3 so
-	           alarm indication will work correctly */
-		i = w83627hf_read_value(client, W83781D_REG_IRQ);
-		if (!(i & 0x40))
-			w83627hf_write_value(client, W83781D_REG_IRQ,
-					    i | 0x40);
 	}
 
 	/* Start monitoring */
@@ -968,7 +961,7 @@ static void w83627hf_update_client(struct i2c_client *client)
 			/* skip missing sensors */
 			if (((data->type == w83697hf) && (i == 1)) ||
 			    ((data->type == w83627thf || data->type == w83637hf) &&
-			     (i == 4 || i == 5)))
+			     (i == 5 || i == 6)))
 				continue;
 			data->in[i] =
 			    w83627hf_read_value(client, W83781D_REG_IN(i));
@@ -1282,11 +1275,15 @@ void w83627hf_fan_div(struct i2c_client *client, int operation,
 			*nrels_mag = 3;
 		}
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		unsigned long min = 0;
+
 		old = w83627hf_read_value(client, W83781D_REG_VID_FANDIV);
 		/* w83627hf doesn't have extended divisor bits */
 			old3 =
 			    w83627hf_read_value(client, W83781D_REG_VBAT);
 		if (*nrels_mag >= 3 && data->type != w83697hf) {
+			min = FAN_FROM_REG(data->fan_min[2],
+				DIV_FROM_REG(data->fan_div[2]));
 			data->fan_div[2] =
 			    DIV_TO_REG(results[2]);
 			old2 = w83627hf_read_value(client, W83781D_REG_PIN);
@@ -1296,8 +1293,14 @@ void w83627hf_fan_div(struct i2c_client *client, int operation,
 				old3 =
 				    (old3 & 0x7f) |
 				    ((data->fan_div[2] & 0x04) << 5);
+			data->fan_min[2] = FAN_TO_REG(min,
+				DIV_FROM_REG(data->fan_div[2]));
+			w83627hf_write_value(client, W83781D_REG_FAN_MIN(3),
+				data->fan_min[2]);
 		}
 		if (*nrels_mag >= 2) {
+			min = FAN_FROM_REG(data->fan_min[1],
+				DIV_FROM_REG(data->fan_div[1]));
 			data->fan_div[1] =
 			    DIV_TO_REG(results[1]);
 			old =
@@ -1305,8 +1308,14 @@ void w83627hf_fan_div(struct i2c_client *client, int operation,
 				old3 =
 				    (old3 & 0xbf) |
 				    ((data->fan_div[1] & 0x04) << 4);
+			data->fan_min[1] = FAN_TO_REG(min,
+				DIV_FROM_REG(data->fan_div[1]));
+			w83627hf_write_value(client, W83781D_REG_FAN_MIN(2),
+				data->fan_min[1]);
 		}
 		if (*nrels_mag >= 1) {
+			min = FAN_FROM_REG(data->fan_min[0],
+				DIV_FROM_REG(data->fan_div[0]));
 			data->fan_div[0] =
 			    DIV_TO_REG(results[0]);
 			old =
@@ -1319,6 +1328,10 @@ void w83627hf_fan_div(struct i2c_client *client, int operation,
 				w83627hf_write_value(client,
 						    W83781D_REG_VBAT,
 						    old3);
+			data->fan_min[0] = FAN_TO_REG(min,
+				DIV_FROM_REG(data->fan_div[0]));
+			w83627hf_write_value(client, W83781D_REG_FAN_MIN(1),
+				data->fan_min[0]);
 		}
 	}
 }
