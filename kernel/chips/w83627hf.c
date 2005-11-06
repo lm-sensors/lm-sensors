@@ -244,14 +244,14 @@ static inline u8 FAN_TO_REG(long rpm, int div)
    REG: 1C/bit, two's complement */
 static u8 TEMP_TO_REG(int temp)
 {
-        int ntemp = SENSORS_LIMIT(temp, TEMP_MIN, TEMP_MAX);
-        ntemp += (ntemp<0 ? -5 : 5);
-        return (u8)(ntemp / 10);
+	int ntemp = SENSORS_LIMIT(temp, TEMP_MIN, TEMP_MAX);
+	ntemp += (ntemp<0 ? -5 : 5);
+	return (u8)(ntemp / 10);
 }
-                                                                                
+
 static int TEMP_FROM_REG(u8 reg)
 {
-        return (s8)reg * 10;
+	return (s8)reg * 10;
 }
 
 #define FAN_FROM_REG(val,div) ((val)==0?-1:(val)==255?0:1350000/((val)*(div)))
@@ -312,7 +312,7 @@ struct w83627hf_data {
 	u16 sens[3];		/* 782D/783S only.
 				   1 = pentium diode; 2 = 3904 diode;
 				   3000-5000 = thermistor beta.
-				   Default = 3435. 
+				   Default = 3435.
 				   Other Betas unimplemented */
 	u8 vrm;
 	u8 vrm_ovt;		/* Register value, 627thf & 637hf only */
@@ -420,7 +420,7 @@ static struct i2c_driver w83627hf_driver = {
 /* These files are created for each detected chip. This is just a template;
    though at first sight, you might think we could use a statically
    allocated list, we need some way to get back to the parent - which
-   is done through one of the 'extra' fields which are initialized 
+   is done through one of the 'extra' fields which are initialized
    when a new copy is allocated. */
 
 /* without pwm3-4 */
@@ -654,7 +654,7 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 		kind = w83627thf;
 	else if(val == W637_DEVID)
 		kind = w83637hf;
-		
+
 	superio_select(W83627HF_LD_HWM);
 	if((val = 0x01 & superio_inb(WINB_ACT_REG)) == 0)
 		superio_outb(WINB_ACT_REG, 1);
@@ -730,13 +730,13 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 /* OK, this is not exactly good programming practice, usually. But it is
    very code-efficient in this case. */
 
-      ERROR7:
+ERROR7:
 	i2c_detach_client(new_client);
-      ERROR3:
+ERROR3:
 	release_region(address, WINB_EXTENT);
-      ERROR1:
+ERROR1:
 	kfree(data);
-      ERROR0:
+ERROR0:
 	return err;
 }
 
@@ -761,9 +761,9 @@ static int w83627hf_detach_client(struct i2c_client *client)
 
 
 /*
-   ISA access must always be locked explicitly! 
+   ISA access must always be locked explicitly!
    We ignore the W83781D BUSY flag at this moment - it could lead to deadlocks,
-   would slow down the W83781D access and should not be necessary. 
+   would slow down the W83781D access and should not be necessary.
    There are some ugly typecasts here, but the good news is - they should
    nowhere else be necessary! */
 static int w83627hf_read_value(struct i2c_client *client, u16 reg)
@@ -1279,20 +1279,17 @@ void w83627hf_fan_div(struct i2c_client *client, int operation,
 
 		old = w83627hf_read_value(client, W83781D_REG_VID_FANDIV);
 		/* w83627hf doesn't have extended divisor bits */
-			old3 =
-			    w83627hf_read_value(client, W83781D_REG_VBAT);
+		old3 = w83627hf_read_value(client, W83781D_REG_VBAT);
 		if (*nrels_mag >= 3 && data->type != w83697hf) {
 			min = FAN_FROM_REG(data->fan_min[2],
 				DIV_FROM_REG(data->fan_div[2]));
-			data->fan_div[2] =
-			    DIV_TO_REG(results[2]);
+			data->fan_div[2] = DIV_TO_REG(results[2]);
 			old2 = w83627hf_read_value(client, W83781D_REG_PIN);
-			old2 =
-			    (old2 & 0x3f) | ((data->fan_div[2] & 0x03) << 6);
+			old2 = (old2 & 0x3f)
+			     | ((data->fan_div[2] & 0x03) << 6);
 			w83627hf_write_value(client, W83781D_REG_PIN, old2);
-				old3 =
-				    (old3 & 0x7f) |
-				    ((data->fan_div[2] & 0x04) << 5);
+			old3 = (old3 & 0x7f)
+			     | ((data->fan_div[2] & 0x04) << 5);
 			data->fan_min[2] = FAN_TO_REG(min,
 				DIV_FROM_REG(data->fan_div[2]));
 			w83627hf_write_value(client, W83781D_REG_FAN_MIN(3),
@@ -1301,13 +1298,11 @@ void w83627hf_fan_div(struct i2c_client *client, int operation,
 		if (*nrels_mag >= 2) {
 			min = FAN_FROM_REG(data->fan_min[1],
 				DIV_FROM_REG(data->fan_div[1]));
-			data->fan_div[1] =
-			    DIV_TO_REG(results[1]);
-			old =
-			    (old & 0x3f) | ((data->fan_div[1] & 0x03) << 6);
-				old3 =
-				    (old3 & 0xbf) |
-				    ((data->fan_div[1] & 0x04) << 4);
+			data->fan_div[1] = DIV_TO_REG(results[1]);
+			old = (old & 0x3f)
+			    | ((data->fan_div[1] & 0x03) << 6);
+			old3 = (old3 & 0xbf)
+			     | ((data->fan_div[1] & 0x04) << 4);
 			data->fan_min[1] = FAN_TO_REG(min,
 				DIV_FROM_REG(data->fan_div[1]));
 			w83627hf_write_value(client, W83781D_REG_FAN_MIN(2),
@@ -1316,18 +1311,15 @@ void w83627hf_fan_div(struct i2c_client *client, int operation,
 		if (*nrels_mag >= 1) {
 			min = FAN_FROM_REG(data->fan_min[0],
 				DIV_FROM_REG(data->fan_div[0]));
-			data->fan_div[0] =
-			    DIV_TO_REG(results[0]);
-			old =
-			    (old & 0xcf) | ((data->fan_div[0] & 0x03) << 4);
+			data->fan_div[0] = DIV_TO_REG(results[0]);
+			old = (old & 0xcf)
+			    | ((data->fan_div[0] & 0x03) << 4);
 			w83627hf_write_value(client, W83781D_REG_VID_FANDIV,
-					    old);
-				old3 =
-				    (old3 & 0xdf) |
-				    ((data->fan_div[0] & 0x04) << 3);
-				w83627hf_write_value(client,
-						    W83781D_REG_VBAT,
-						    old3);
+					     old);
+			old3 = (old3 & 0xdf)
+			     | ((data->fan_div[0] & 0x04) << 3);
+			w83627hf_write_value(client, W83781D_REG_VBAT,
+					     old3);
 			data->fan_min[0] = FAN_TO_REG(min,
 				DIV_FROM_REG(data->fan_div[0]));
 			w83627hf_write_value(client, W83781D_REG_FAN_MIN(1),
