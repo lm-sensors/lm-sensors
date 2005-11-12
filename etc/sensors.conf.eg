@@ -1981,7 +1981,9 @@ chip "vt1211-*" "vt8231-*"
     compute in4 ((@ * 100) - 3) / (0.1754 * 95.8), (@ * 0.1754 * 0.958) + .03
     compute in5 ((@ * 100) - 3) / (0.6296 * 95.8), (@ * 0.6296 * 0.958) + .03
 
-    set vrm 9.1
+# adjust this if your vid is wrong; see doc/vid
+#   set vrm 9.1
+
 #   set in0_min 2.5 * 0.95
 #   set in0_max 2.5 * 1.05
 #   set in1_min 2.5 * 0.95
@@ -2051,7 +2053,8 @@ chip "smsc47m1-*"
 # This example was tested vs. Asus P4S333
 #
 chip "asb100-*"
-    set vrm 9.0
+# adjust this if your vid is wrong; see doc/vid
+    #set vrm 9.0
 
     label in0 "VCore 1"
     set in0_min vid * 0.95
@@ -2171,7 +2174,8 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
 #   ignore fan4
 
 # Set VRM version
-   set vrm  9.1   # Pentium 4
+# adjust this if your vid is wrong; see doc/vid
+#   set vrm  9.1   # Pentium 4
 
 # Set voltage limits
    set in0_min  1.5 * 0.95

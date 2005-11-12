@@ -51,8 +51,6 @@
     to avoid floating point in the kernel.
 */
 
-#define DEFAULT_VRM	82
-
 static inline int vid_from_reg(int val, int vrm)
 {
 	int vid;

@@ -548,7 +548,7 @@ static void lm87_init_client(struct i2c_client *client)
 #endif
 	);
 
-	data->vrm = DEFAULT_VRM;
+	data->vrm = 82;
 
 	/* Start monitoring */
 	reg = lm87_read_value(client, LM87_REG_CONFIG);

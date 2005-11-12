@@ -479,7 +479,7 @@ static void vt1211_init_client(struct i2c_client *client)
 {
 	struct vt1211_data *data = client->data;
 
-	data->vrm = DEFAULT_VRM;
+	data->vrm = 91;
 	/* set "default" interrupt mode for alarms, which isn't the default */
 	vt1211_write_value(client, VT1211_REG_TEMP1_CONFIG, 0);
 	vt1211_write_value(client, VT1211_REG_TEMP2_CONFIG, 0);

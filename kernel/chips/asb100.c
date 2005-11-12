@@ -59,7 +59,7 @@ static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
 static unsigned int normal_isa[] = { SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
-/* default VRM to 9.0 instead of 8.2 */
+/* default VRM to 9.0 */
 #define ASB100_DEFAULT_VRM 90
 
 /* Insmod parameters */

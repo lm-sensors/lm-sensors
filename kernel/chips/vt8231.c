@@ -451,7 +451,7 @@ static void vt8231_init_client(struct i2c_client *client)
 {
 	struct vt8231_data *data = client->data;
 
-	data->vrm = DEFAULT_VRM;
+	data->vrm = 91;
 	/* set "default" interrupt mode for alarms, which isn't the default */
 	vt8231_write_value(client, VT8231_REG_TEMP1_CONFIG, 0);
 	vt8231_write_value(client, VT8231_REG_TEMP2_CONFIG, 0);
