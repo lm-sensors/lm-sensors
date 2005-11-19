@@ -2099,12 +2099,12 @@ chip "vt8231-*"
 # '^' is the e**x operator; '`' is the ln(x) operator
 # (valid in library version 1.4.0 / lm_sensors 2.7.1 or higher)
 # This assumes that the thermistor forms a resistor divider with a resistor
-# equal to its nominal value @ 25C.
+# equal to its nominal value at 25 degrees C.
 
-    compute temp2  3435 / (` (1 / (1 - @ / 2.2) - 1) + 3435 / 298.15) - 273.15, \
-                   2.2 * (1 - 1 / (1 + (^ (3435 / (273.15 + @) - 3435 / 298.15))))
-    compute temp3  3435 / (` (1 / (1 - @ / 2.2) - 1) + 3435 / 298.15) - 273.15, \
-                   2.2 * (1 - 1 / (1 + (^ (3435 / (273.15 + @) - 3435 / 298.15))))
+    compute temp2  1 / (1 / 298.15 - (` (2.2 / @ - 1)) / 3435) - 273.15, \
+                   2.2 / (1 + (^ (3435 / 298.15 - 3435 / (273.15 + @))))
+    compute temp3  1 / (1 / 298.15 - (` (2.2 / @ - 1)) / 3435) - 273.15, \
+                   2.2 / (1 + (^ (3435 / 298.15 - 3435 / (273.15 + @))))
 
 #    set temp2_hyst 40
 #    set temp2_over 45
