@@ -1918,9 +1918,9 @@ chip "lm63-*"
 #   set fan1_min         2000
 
 
-chip "vt1211-*" "vt8231-*"
+chip "vt1211-*"
 #
-# temp1 and in6 are not implemented in vt1211 / vt8231
+# temp1 and in6 are not implemented in vt1211
 #
 #							1 for temp, 0 for volt.
 #	Sensor		Voltage Mode	Temp Mode	config bit
@@ -1935,7 +1935,7 @@ chip "vt1211-*" "vt8231-*"
 #
 # set uch1-2 to temp mode, uch3-5 to voltage mode
 #
-    set config 12
+#   set config 12
     ignore in0
     ignore in1
     ignore temp5
@@ -2026,6 +2026,93 @@ chip "vt1211-*" "vt8231-*"
 
     set fan1_min 3000
     set fan2_min 3000
+
+chip "vt8231-*"
+#
+#							1 for temp, 0 for volt.
+#	Sensor		Voltage Mode	Temp Mode	config bit
+#	--------	------------	---------	--------------
+#	Reading 1			temp1
+#	UCH1		in0		temp2		0x04 (4)
+#	UCH2		in1		temp3		0x08 (8)
+#	UCH3		in2		temp4		0x10 (16)
+#	UCH4		in3		temp5		0x20 (32)
+#	UCH5		in4		temp6		0x40 (64)
+#	3.3V		in5
+#
+# Hardware default is UCH1 in temp mode, UCH2-5 in voltage mode
+# Note that the Linux 2.6 driver will not let you change the channel
+# configuration. In theory, the BIOS should have done it properly.
+#   set config 4
+
+#    ignore in0
+#    ignore temp3
+#    ignore temp4
+#    ignore temp5
+#    ignore temp6
+
+    label in1 "+2.5V"
+    label in2 "VCore"
+    label in3 "+5V"
+    label in4 "+12V"
+    label in5 "+3.3V"
+
+    label temp1 "CPU Temp"
+    label temp2 "M/B Temp"
+
+# Here are the resistor values as recommended by VIA:
+#   Voltage			R1	R2
+#   VCore			no scaling
+#    2.5			2k	10k
+#    3.5 (3.3V ext.)		6.8k	10k
+#    5.0			14k	10k
+#   12.0			47k	10k
+
+#   compute in0  @ * (1 + 6.8 / 10),  @ / (1 + 6.8 / 10)
+    compute in1  @ * (1 +   2 / 10),  @ / (1 +   2 / 10)
+    compute in3  @ * (1 +  14 / 10),  @ / (1 +  14 / 10)
+    compute in4  @ * (1 +  47 / 10),  @ / (1 +  47 / 10)
+# in5 is scaled internally so scaling is done by the driver.
+
+#   set in0_min 2.5 * 0.95
+#   set in0_max 2.5 * 1.05
+#   set in1_min 2.5 * 0.95
+#   set in1_max 2.5 * 1.05
+# Replace "2.0" with your nominal CPU voltage for in2.
+#   set in2_min 2.0 * 0.95
+#   set in2_max 2.0 * 1.05
+#   set in3_min 5.0 * 0.95
+    set in3_max 5.0 * 1.05
+    set in4_min 12.0 * 0.95
+    set in4_max 12.0 * 1.05
+    set in5_min 3.3 * 0.95
+    set in5_max 3.3 * 1.05
+
+# For Intel CPU:
+    compute temp1  (@ - 65) / 0.9686,  (@ * 0.9686) + 65
+
+# For VIA EPIA CPU (provided by Roger Lucas):
+#   compute temp1  (@ - 45) / 0.7809,  (@ * 0.7809) + 45
+
+# Thermistor calculations
+# 3435 is the thermistor beta, 2.2 is the reference voltage.
+# '^' is the e**x operator; '`' is the ln(x) operator
+# (valid in library version 1.4.0 / lm_sensors 2.7.1 or higher)
+# This assumes that the thermistor forms a resistor divider with a resistor
+# equal to its nominal value @ 25C.
+
+    compute temp2  3435 / (` (1 / (1 - @ / 2.2) - 1) + 3435 / 298.15) - 273.15, \
+                   2.2 * (1 - 1 / (1 + (^ (3435 / (273.15 + @) - 3435 / 298.15))))
+    compute temp3  3435 / (` (1 / (1 - @ / 2.2) - 1) + 3435 / 298.15) - 273.15, \
+                   2.2 * (1 - 1 / (1 + (^ (3435 / (273.15 + @) - 3435 / 298.15))))
+
+#    set temp2_hyst 40
+#    set temp2_over 45
+#    set temp3_hyst 60
+#    set temp3_over 65
+
+#    set fan1_min 3000
+#    set fan2_min 3000
 
 chip "bmc-*"
 #

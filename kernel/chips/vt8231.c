@@ -54,22 +54,19 @@ SENSORS_INSMOD_1(vt8231);
 #define VT8231_REG_PWM_CTL 0x51
 
 /* The VT8231 registers */
-/* We define the sensors as follows. Somewhat convoluted to minimize
-   changes from via686a.
+/* We define the sensors as follows.
 	Sensor		Voltage Mode	Temp Mode
 	--------	------------	---------
-	Reading 1			temp3
-	Reading 3			temp1	not in vt8231
-	UCH1/Reading2	in0		temp2
-	UCH2		in1		temp4
-	UCH3		in2		temp5
-	UCH4		in3		temp6
-	UCH5		in4		temp7
+	Reading 1			temp1
+	UCH1		in0		temp2
+	UCH2		in1		temp3
+	UCH3		in2		temp4
+	UCH4		in3		temp5
+	UCH5		in4		temp6
 	3.3V		in5
-	-12V		in6			not in vt8231
 */
 
-/* ins numbered 0-6 */
+/* ins numbered 0-5 */
 #define VT8231_REG_IN_MAX(nr) ((nr)==0 ? 0x3d : 0x29 + ((nr) * 2))
 #define VT8231_REG_IN_MIN(nr) ((nr)==0 ? 0x3e : 0x2a + ((nr) * 2))
 #define VT8231_REG_IN(nr)     (0x21 + (nr))
@@ -78,17 +75,16 @@ SENSORS_INSMOD_1(vt8231);
 #define VT8231_REG_FAN_MIN(nr) (0x3a + (nr))
 #define VT8231_REG_FAN(nr)     (0x28 + (nr))
 
-static const u8 regtemp[] = { 0x20, 0x21, 0x1f, 0x22, 0x23, 0x24, 0x25 };
-static const u8 regover[] = { 0x39, 0x3d, 0x1d, 0x2b, 0x2d, 0x2f, 0x31 };
-static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e, 0x2c, 0x2e, 0x30, 0x32 };
+static const u8 regtemp[] = { 0x1f, 0x21, 0x22, 0x23, 0x24, 0x25 };
+static const u8 regover[] = { 0x39, 0x3d, 0x2b, 0x2d, 0x2f, 0x31 };
+static const u8 reghyst[] = { 0x3a, 0x3e, 0x2c, 0x2e, 0x30, 0x32 };
 
-/* temps numbered 1-7 */
+/* temps numbered 1-6 */
 #define VT8231_REG_TEMP(nr)		(regtemp[(nr) - 1])
 #define VT8231_REG_TEMP_OVER(nr)	(regover[(nr) - 1])
 #define VT8231_REG_TEMP_HYST(nr)	(reghyst[(nr) - 1])
-#define VT8231_REG_TEMP_LOW3	0x4b	/* bits 7-6 */
-#define VT8231_REG_TEMP_LOW2	0x49	/* bits 5-4 */
-#define VT8231_REG_TEMP_LOW47	0x4d
+#define VT8231_REG_TEMP_LOW12		0x49
+#define VT8231_REG_TEMP_LOW36		0x4d
 
 #define VT8231_REG_CONFIG 0x40
 #define VT8231_REG_ALARM1 0x41
@@ -99,24 +95,35 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e, 0x2c, 0x2e, 0x30, 0x32 };
 #define VT8231_REG_TEMP1_CONFIG 0x4b
 #define VT8231_REG_TEMP2_CONFIG 0x4c
 
-/* temps 1-7; voltages 0-6 */
+/* temps 1-6; voltages 0-5 */
 #define ISTEMP(i, ch_config) ((i) == 1 ? 1 : \
-			      (i) == 3 ? 1 : \
-			      (i) == 2 ? ((ch_config) >> 1) & 0x01 : \
-			                 ((ch_config) >> ((i)-1)) & 0x01)
-#define ISVOLT(i, ch_config) ((i) > 4 ? 1 : !(((ch_config) >> ((i)+2)) & 0x01))
+			      ((ch_config) >> (i)) & 0x01)
+#define ISVOLT(i, ch_config) ((i) == 5 ? 1 : \
+			      !(((ch_config) >> ((i)+2)) & 0x01))
 
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 #define PWM_FROM_REG(val) (val)
 #define PWM_TO_REG(val) SENSORS_LIMIT((val), 0, 255)
 
+/* Used for temp1 (diode) */
 #define TEMP_FROM_REG(val) ((val)*10)
 #define TEMP_FROM_REG10(val) (((val)*10)/4)
 #define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
                                                  ((val)+5)/10),0,255))
-#define IN_FROM_REG(val) /*(((val)*10+5)/10)*/ (val)
-#define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 5)/10),0,255))
+
+/* Used for temp2-temp6 (thermistor) */
+#define THERM_FROM_REG(reg)	(((253 * 4 - (reg)) * 55 + 105) / 210)
+#define THERM_TO_REG(val)	(253 - ((val) * 210 + 110) / 220)
+
+/* Used for in0-in4 */
+#define IN_FROM_REG(val)	((((val) - 3) * 1000 + 479) / 958)
+#define IN_TO_REG(val)		SENSORS_LIMIT(((val) * 958 + 500) \
+					      / 1000 + 3, 0, 255)
+/* Used for in5 (scaled internally) */
+#define IN5_FROM_REG(val)	((((val) - 3) * 54000 + 16286) / 32572)
+#define IN5_TO_REG(val)		SENSORS_LIMIT(((val) * 32572 + 27000) \
+					      / 54000 + 3, 0, 255)
 
 
 /********* FAN RPM CONVERSIONS ********/
@@ -142,12 +149,12 @@ struct vt8231_data {
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 
-	u8 in[7];		/* Register value */
-	u8 in_max[7];		/* Register value */
-	u8 in_min[7];		/* Register value */
-	u16 temp[7];		/* Register value 10 bit */
-	u8 temp_over[7];	/* Register value */
-	u8 temp_hyst[7];	/* Register value */
+	u8 in[6];		/* Register value */
+	u8 in_max[6];		/* Register value */
+	u8 in_min[6];		/* Register value */
+	u16 temp[6];		/* Register value 10 bit */
+	u8 temp_over[6];	/* Register value */
+	u8 temp_hyst[6];	/* Register value */
 	u8 fan[2];		/* Register value */
 	u8 fan_min[2];		/* Register value */
 	u8 fan_div[2];		/* Register encoding, shifted right */
@@ -179,6 +186,8 @@ static void vt8231_fan_div(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 static void vt8231_in(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
+static void vt8231_in5(struct i2c_client *client, int operation,
+			int ctl_name, int *nrels_mag, long *results);
 static void vt8231_pwm(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 static void vt8231_vid(struct i2c_client *client, int operation,
@@ -189,6 +198,8 @@ static void vt8231_uch(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 static void vt8231_temp(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
+static void vt8231_therm(struct i2c_client *client, int operation,
+			 int ctl_name, int *nrels_mag, long *results);
 
 static struct i2c_driver vt8231_driver = {
 	.name		= "VT8231 sensors driver",
@@ -205,7 +216,6 @@ static struct i2c_driver vt8231_driver = {
 #define VT8231_SYSCTL_IN3 1003
 #define VT8231_SYSCTL_IN4 1004
 #define VT8231_SYSCTL_IN5 1005
-#define VT8231_SYSCTL_IN6 1006
 #define VT8231_SYSCTL_FAN1 1101
 #define VT8231_SYSCTL_FAN2 1102
 #define VT8231_SYSCTL_TEMP 1200
@@ -214,7 +224,6 @@ static struct i2c_driver vt8231_driver = {
 #define VT8231_SYSCTL_TEMP4 1203
 #define VT8231_SYSCTL_TEMP5 1204
 #define VT8231_SYSCTL_TEMP6 1205
-#define VT8231_SYSCTL_TEMP7 1206
 #define VT8231_SYSCTL_VID	1300
 #define VT8231_SYSCTL_PWM1	1401
 #define VT8231_SYSCTL_PWM2	1402
@@ -231,16 +240,14 @@ static struct i2c_driver vt8231_driver = {
 #define VT8231_ALARM_FAN1 0x40
 #define VT8231_ALARM_FAN2 0x80
 #define VT8231_ALARM_IN4 0x100
-#define VT8231_ALARM_IN6 0x200
 #define VT8231_ALARM_TEMP2 0x800
 #define VT8231_ALARM_CHAS 0x1000
-#define VT8231_ALARM_TEMP3 0x8000
 /* duplicates */
-#define VT8231_ALARM_IN0 VT8231_ALARM_TEMP
-#define VT8231_ALARM_TEMP4 VT8231_ALARM_IN1
-#define VT8231_ALARM_TEMP5 VT8231_ALARM_IN2
-#define VT8231_ALARM_TEMP6 VT8231_ALARM_IN3
-#define VT8231_ALARM_TEMP7 VT8231_ALARM_IN4
+#define VT8231_ALARM_IN0 VT8231_ALARM_TEMP2
+#define VT8231_ALARM_TEMP3 VT8231_ALARM_IN1
+#define VT8231_ALARM_TEMP4 VT8231_ALARM_IN2
+#define VT8231_ALARM_TEMP5 VT8231_ALARM_IN3
+#define VT8231_ALARM_TEMP6 VT8231_ALARM_IN4
 
 /* -- SENSORS SYSCTL END -- */
 
@@ -256,26 +263,19 @@ static ctl_table vt8231_dir_table_template[] = {
 	{VT8231_SYSCTL_IN4, "in4", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &vt8231_in},
 	{VT8231_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &vt8231_in},
-/*
-    not in 8231
-	{VT8231_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &vt8231_in},
-	{VT8231_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &vt8231_temp},
-*/
+	 &i2c_sysctl_real, NULL, &vt8231_in5},
+	{VT8231_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_temp},
 	{VT8231_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL,
-	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_therm},
 	{VT8231_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL,
-	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_therm},
 	{VT8231_SYSCTL_TEMP4, "temp4", NULL, 0, 0644, NULL,
-	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_therm},
 	{VT8231_SYSCTL_TEMP5, "temp5", NULL, 0, 0644, NULL,
-	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_therm},
 	{VT8231_SYSCTL_TEMP6, "temp6", NULL, 0, 0644, NULL,
-	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_temp},
-	{VT8231_SYSCTL_TEMP7, "temp7", NULL, 0, 0644, NULL,
-	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_temp},
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt8231_therm},
 	{VT8231_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &vt8231_fan},
 	{VT8231_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
@@ -485,33 +485,25 @@ static void vt8231_update_client(struct i2c_client *client)
 			data->fan_min[i - 1] = vt_rdval(client,
 						     VT8231_REG_FAN_MIN(i));
 		}
-		for (i = 2; i <= 7; i++) {
+		for (i = 1; i <= 6; i++) {
 			if(ISTEMP(i, data->uch_config)) {
 				data->temp[i - 1] = vt_rdval(client,
 					             VT8231_REG_TEMP(i)) << 2;
 				switch(i) {
 					case 1:
-						/* ? */
-						j = 0;
+						j = (vt_rdval(client,
+						  VT8231_REG_TEMP_LOW12) &
+						                    0xc0) >> 6;
 						break;
 					case 2:
 						j = (vt_rdval(client,
-						  VT8231_REG_TEMP_LOW2) &
+						  VT8231_REG_TEMP_LOW12) &
 						                    0x30) >> 4;
 						break;
-					case 3:
-						j = (vt_rdval(client,
-						  VT8231_REG_TEMP_LOW3) &
-						                    0xc0) >> 6;
-						break;
-					case 4:
-					case 5:
-					case 6:
-					case 7:
 					default:
 						j = (vt_rdval(client,
-						  VT8231_REG_TEMP_LOW47) >>
-						            ((i-4)*2)) & 0x03;	
+						  VT8231_REG_TEMP_LOW36) >>
+						            ((i-3)*2)) & 0x03;	
 						break;
 	
 				}
@@ -577,6 +569,33 @@ void vt8231_in(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
+void vt8231_in5(struct i2c_client *client, int operation, int ctl_name,
+		int *nrels_mag, long *results)
+{
+	struct vt8231_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 2;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		vt8231_update_client(client);
+		results[0] = IN5_FROM_REG(data->in_min[5]);
+		results[1] = IN5_FROM_REG(data->in_max[5]);
+		results[2] = IN5_FROM_REG(data->in[5]);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->in_min[5] = IN5_TO_REG(results[0]);
+			vt8231_write_value(client, VT8231_REG_IN_MIN(5),
+					    data->in_min[5]);
+		}
+		if (*nrels_mag >= 2) {
+			data->in_max[5] = IN5_TO_REG(results[1]);
+			vt8231_write_value(client, VT8231_REG_IN_MAX(5),
+					    data->in_max[5]);
+		}
+	}
+}
+
 void vt8231_fan(struct i2c_client *client, int operation, int ctl_name,
 		 int *nrels_mag, long *results)
 {
@@ -610,25 +629,54 @@ void vt8231_temp(struct i2c_client *client, int operation, int ctl_name,
 		  int *nrels_mag, long *results)
 {
 	struct vt8231_data *data = client->data;
-	int nr = ctl_name - VT8231_SYSCTL_TEMP;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 1;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		vt8231_update_client(client);
-		results[0] = TEMP_FROM_REG(data->temp_over[nr]);
-		results[1] = TEMP_FROM_REG(data->temp_hyst[nr]);
-		results[2] = TEMP_FROM_REG10(data->temp[nr]);
+		results[0] = TEMP_FROM_REG(data->temp_over[0]);
+		results[1] = TEMP_FROM_REG(data->temp_hyst[0]);
+		results[2] = TEMP_FROM_REG10(data->temp[0]);
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->temp_over[nr] = TEMP_TO_REG(results[0]);
+			data->temp_over[0] = TEMP_TO_REG(results[0]);
+			vt8231_write_value(client,
+					    VT8231_REG_TEMP_OVER(1),
+					    data->temp_over[0]);
+		}
+		if (*nrels_mag >= 2) {
+			data->temp_hyst[0] = TEMP_TO_REG(results[1]);
+			vt8231_write_value(client,
+					    VT8231_REG_TEMP_HYST(1),
+					    data->temp_hyst[0]);
+		}
+	}
+}
+
+void vt8231_therm(struct i2c_client *client, int operation, int ctl_name,
+		  int *nrels_mag, long *results)
+{
+	struct vt8231_data *data = client->data;
+	int nr = ctl_name - VT8231_SYSCTL_TEMP;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 2;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		vt8231_update_client(client);
+		results[0] = THERM_FROM_REG(data->temp_over[nr] * 4);
+		results[1] = THERM_FROM_REG(data->temp_hyst[nr] * 4);
+		results[2] = THERM_FROM_REG(data->temp[nr]);
+		*nrels_mag = 3;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			data->temp_over[nr] = THERM_TO_REG(results[0]);
 			vt8231_write_value(client,
 					    VT8231_REG_TEMP_OVER(nr + 1),
 					    data->temp_over[nr]);
 		}
 		if (*nrels_mag >= 2) {
-			data->temp_hyst[nr] = TEMP_TO_REG(results[1]);
+			data->temp_hyst[nr] = THERM_TO_REG(results[1]);
 			vt8231_write_value(client,
 					    VT8231_REG_TEMP_HYST(nr + 1),
 					    data->temp_hyst[nr]);

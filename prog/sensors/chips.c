@@ -4649,8 +4649,7 @@ void print_vt8231(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&VT8231_ALARM_IN0?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN0 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_IN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_IN1,&cur) &&
@@ -4661,8 +4660,7 @@ void print_vt8231(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&VT8231_ALARM_IN1?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN1 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_IN2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_IN2,&cur) &&
@@ -4673,8 +4671,7 @@ void print_vt8231(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&VT8231_ALARM_IN2?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN2 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_IN3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_IN3,&cur) &&
@@ -4685,8 +4682,7 @@ void print_vt8231(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&VT8231_ALARM_IN3?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN3 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_IN4,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_IN4,&cur) &&
@@ -4697,8 +4693,7 @@ void print_vt8231(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&VT8231_ALARM_IN4?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN4 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_IN5,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_IN5,&cur) &&
@@ -4738,7 +4733,19 @@ void print_vt8231(const sensors_chip_name *name)
     printf("ERROR: Can't get FAN2 data!\n");
   free(label);
 
-  /* no temp 1 */
+  if (!sensors_get_label_and_valid(*name, SENSORS_VT8231_TEMP,
+                                   &label, &valid) &&
+      !sensors_get_feature(*name, SENSORS_VT8231_TEMP, &cur) &&
+      !sensors_get_feature(*name, SENSORS_VT8231_TEMP_HYST, &min) &&
+      !sensors_get_feature(*name, SENSORS_VT8231_TEMP_OVER, &max)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, max, min, HYST, 1, 0);
+      printf(" %s\n", alarms & VT8231_ALARM_TEMP ? "ALARM" : "");
+    }
+  } else
+    printf("ERROR: Can't get TEMP1 data!\n");
+  free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_TEMP2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_TEMP2,&cur) &&
       !sensors_get_feature(*name,SENSORS_VT8231_TEMP2_HYST,&min) &&
@@ -4748,8 +4755,7 @@ void print_vt8231(const sensors_chip_name *name)
       print_temp_info( cur, max, min, HYST, 1, 0);
       printf(" %s\n", alarms & VT8231_ALARM_TEMP2 ? "ALARM" : "" );
     }
-  } else
-    printf("ERROR: Can't get TEMP2 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_TEMP3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_TEMP3,&cur) &&
@@ -4760,8 +4766,7 @@ void print_vt8231(const sensors_chip_name *name)
       print_temp_info( cur, max, min, HYST, 1, 0);
       printf(" %s\n", alarms & VT8231_ALARM_TEMP3 ? "ALARM" : "" );
     }
-  } else
-    printf("ERROR: Can't get TEMP3 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_TEMP4,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_TEMP4,&cur) &&
@@ -4772,8 +4777,7 @@ void print_vt8231(const sensors_chip_name *name)
       print_temp_info( cur, max, min, HYST, 1, 0);
       printf(" %s\n", alarms & VT8231_ALARM_TEMP4 ? "ALARM" : "" );
     }
-  } else
-    printf("ERROR: Can't get TEMP4 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_TEMP5,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_TEMP5,&cur) &&
@@ -4784,8 +4788,7 @@ void print_vt8231(const sensors_chip_name *name)
       print_temp_info( cur, max, min, HYST, 1, 0);
       printf(" %s\n", alarms & VT8231_ALARM_TEMP5 ? "ALARM" : "" );
     }
-  } else
-    printf("ERROR: Can't get TEMP5 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_TEMP6,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_VT8231_TEMP6,&cur) &&
@@ -4796,20 +4799,7 @@ void print_vt8231(const sensors_chip_name *name)
       print_temp_info( cur, max, min, HYST, 1, 0);
       printf(" %s\n", alarms & VT8231_ALARM_TEMP6 ? "ALARM" : "" );
     }
-  } else
-    printf("ERROR: Can't get TEMP6 data!\n");
-  free(label);
-  if (!sensors_get_label_and_valid(*name,SENSORS_VT8231_TEMP7,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_VT8231_TEMP7,&cur) &&
-      !sensors_get_feature(*name,SENSORS_VT8231_TEMP7_HYST,&min) &&
-      !sensors_get_feature(*name,SENSORS_VT8231_TEMP7_OVER,&max)) {
-    if (valid) {
-      print_label(label,10);
-      print_temp_info( cur, max, min, HYST, 1, 0);
-      printf(" %s\n", alarms & VT8231_ALARM_TEMP7 ? "ALARM" : "" );
-    }
-  } else
-    printf("ERROR: Can't get TEMP7 data!\n");
+  }
   free(label);
 
   print_vid_info(name, SENSORS_VT8231_VID, SENSORS_VT8231_VRM);
