@@ -2106,10 +2106,10 @@ chip "vt8231-*"
     compute temp3  1 / (1 / 298.15 - (` (2.2 / @ - 1)) / 3435) - 273.15, \
                    2.2 / (1 + (^ (3435 / 298.15 - 3435 / (273.15 + @))))
 
+#    set temp1_hyst 60
+#    set temp1_over 65
 #    set temp2_hyst 40
 #    set temp2_over 45
-#    set temp3_hyst 60
-#    set temp3_over 65
 
 #    set fan1_min 3000
 #    set fan2_min 3000
