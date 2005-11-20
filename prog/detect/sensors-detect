@@ -2169,15 +2169,11 @@ sub adapter_pci_detection
   # Generic detection loop
   while ( ($key, $device) = each %pci_list) {
     foreach $try (@pci_adapters) {
-      if ((defined($device->{vendid}) and 
-           $try->{vendid} == $device->{vendid} and
-           $try->{devid} == $device->{devid} and
-           $try->{func} == $device->{func}) or
-          (! defined($device->{vendid}) and
-           $device->{desc} =~ /$try->{procid}/ and
-           $try->{func} == $device->{func})) {
+      if ($try->{vendid} == $device->{vendid} &&
+          $try->{devid} == $device->{devid} &&
+          $try->{func} == $device->{func}) {
         printf "Use driver `%s' for device %02x:%02x.%x: %s\n",
-               $try->{driver}?$try->{driver}:"<To Be Written>",
+               $try->{driver},
                $device->{bus},$device->{slot},$device->{func},$try->{procid};
         push @res,$try->{driver};
       }
