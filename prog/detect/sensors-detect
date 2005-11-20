@@ -2175,6 +2175,14 @@ sub adapter_pci_detection
         printf "Use driver `%s' for device %02x:%02x.%x: %s\n",
                $try->{driver},
                $device->{bus},$device->{slot},$device->{func},$try->{procid};
+        if ($try->{driver} eq "to-be-tested") {
+          print "\nWe are currently looking for testers for this adapter!\n".
+                "Please see http://secure.netroedge.com/~lm78/newdrivers.html\n".
+                "and/or contact us if you want to help.\n\n";
+          print "Continue... ";
+          <STDIN>;
+          print "\n";
+        }
         push @res,$try->{driver};
       }
     }
@@ -5013,6 +5021,7 @@ sub main
     print "We will now try to load each adapter module in turn.\n";
     foreach $adapter (@adapters) {
       next if $adapter eq "DISABLED";
+      next if $adapter eq "to-be-tested";
       if (exists($modules_list{$adapter})) {
         print "Module `$adapter' already loaded.\n";
       } else {
