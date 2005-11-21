@@ -1019,7 +1019,7 @@ void it87_fan_div(struct i2c_client *client, int operation, int ctl_name,
 		old = it87_read_value(client, IT87_REG_FAN_DIV);
 		if (*nrels_mag >= 3) {
 			data->fan_div[2] = DIV_TO_REG(results[2]);
-			if( data->fan[2]!=3 ) {
+			if (data->fan_div[2] != 3) {
 				data->fan_div[2] = 1;
 				old = (old & 0xbf);
 			} else {
