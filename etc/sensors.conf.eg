@@ -1525,11 +1525,14 @@ chip "it87-*" "it8712-*"
 # this case.
 # compute in0 -0.05+@ , @+0.05
 
-# If 3.3V reads 2X too high (Soyo Dragon and Asus A7V8X-X, for example),
-# comment out following line.
-    compute in2   2*@ , @/2
-#
+# If 3.3V reads around 1.65V, uncomment the following line:
+#    compute in2   2*@ , @/2
+
     compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
+# A number of Gigabyte boards (GA-8IPE1000Pro, GA-8KNXP, GA-7N400-L) use
+# a different resistor combination for +5V:
+#    compute in3 ((10/10)+1)*@ ,  @/((10/10)+1)
+
     compute in4 ((30/10) +1)*@  , @/((30/10) +1)
 # For this family of chips the negative voltage equation is different from
 # the lm78.  The chip uses two external resistor for scaling but one is
