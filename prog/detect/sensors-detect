@@ -1003,6 +1003,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { adt7467_detect 0, @_},
      },
      {
+       name => "Analog Devices ADT7476",
+       driver => "to-be-written",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { adt7467_detect 1, @_},
+     },
+     {
        name => "National Semiconductor LM87",
        driver => "lm87",
        i2c_addrs => [0x2c..0x2e],
@@ -3448,7 +3454,7 @@ sub adm1031_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = ADT7467/ADT7468)
+#   (0 = ADT7467/ADT7468, 1 = ADT7674)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -3469,6 +3475,13 @@ sub adt7467_detect
     return if $cid != 0x68;     # ADT7467
     return if ($drev & 0xf0) != 0x70;
     return 7 if ($drev == 0x71 || $drev == 0x72);
+    return 5;
+  }
+  if ($chip == 1) {
+    return if $mid != 0x41;     # Analog Devices
+    return if $cid != 0x76;     # ADT7476
+    return if ($drev & 0xf0) != 0x60;
+    return 7 if ($drev == 0x69);
     return 5;
   }
   return
