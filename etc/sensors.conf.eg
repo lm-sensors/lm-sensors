@@ -1145,8 +1145,8 @@ chip "via686a-*"
 
 # Johannes Drechsel-Burkhard <jdb@chello.at> notes that on his MSI K7T Pro,
 # temp1 is the CPU temp and temp2 is the SYS temp. Hugo van der Merwe notes
-# the same for his Gigabyte GA-7DXC, and Olivier Martin for his Gigabyte
-# GA-7ZM.
+# the same for his Gigabyte GA-7DXC, Olivier Martin for his Gigabyte
+# GA-7ZM and Patrick Thomson for his Chaintech CT-5ATA. 
 
     label temp1 "SYS Temp"
     label temp2 "CPU Temp"
