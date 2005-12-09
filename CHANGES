@@ -51,6 +51,7 @@ ask CVS about it:
   Module adm9240: Cleanups (2.6 backport)
   Module f71805f: New, supports the Fintek F71805F/FG Super-I/O
   Module it87: Minor cleanups
+               Fix fan3_div setting bug (Anton V. Staaf)
   Module lm90: Support the ADM1032-2 and ADT7461-2 (2.6 backport)
                Separate the register read function
                Add PEC support for the ADM1032
@@ -59,6 +60,8 @@ ask CVS about it:
                    Fix in4 for W83627THF and W83637HF (Yuan Mu)
                    Fix alarms (Yuan Mu)
                    Preserve fan min on fan div change (Yuan Mu)
+                   Properly handle W83627THF without VID (Yuan Mu)
+                   Fix in0 limit settings in "VRM9" mode (Yuan Mu)
   Module w83781d: Drop W83697HF support (Grant Coady)
   Module w83l785ts: Minor cleanup (2.6 backport)
   Modules vt1211, vt8231: Change default VRM to 9.1
@@ -87,6 +90,7 @@ ask CVS about it:
                           Improve ADT7467, ADT7468 support
                           Fix MAX6659 reported driver
                           Add Fintek F71805F detection
+                          Add Analog Devices ADT7476 detection
 
 
 2.9.2 (20050906)
