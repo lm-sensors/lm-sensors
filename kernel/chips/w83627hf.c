@@ -1077,7 +1077,7 @@ void w83627hf_in(struct i2c_client *client, int operation, int ctl_name,
 		if (*nrels_mag >= 2) {
 			if (nr == 0 && (data->vrm_ovt & 0x01))
 				/* use VRM9 calculation */
-				data->in_min[0] = IN_TO_REG_VRM9(results[1]);
+				data->in_max[0] = IN_TO_REG_VRM9(results[1]);
 			else
 				/* use VRM8 (standard) calculation */
 				data->in_max[nr] = IN_TO_REG(results[1]);
