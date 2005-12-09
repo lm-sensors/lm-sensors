@@ -468,6 +468,14 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        driver => "i2c-i810",
        match => qr/^I810/,
      } , 
+     {
+       vendid => 0x8086,
+       devid  => 0x2562,
+       func => 0,
+       procid => "Intel 82845G GMCH",
+       driver => "i2c-i810",
+       match => qr/^I810/,
+     },
      { 
        vendid => 0x12d2,
        devid  => 0x0018,
