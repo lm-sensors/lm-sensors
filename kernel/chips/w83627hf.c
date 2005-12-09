@@ -817,7 +817,7 @@ static int w83627thf_read_gpio5(struct i2c_client *client)
 
 	/* Make sure the pins are configured for input
 	   There must be at least five (VRM 9), and possibly 6 (VRM 10) */
-	sel = superio_inb(W83627THF_GPIO5_IOSR);
+	sel = superio_inb(W83627THF_GPIO5_IOSR) & 0x3f;
 	if ((sel & 0x1f) != 0x1f) {
 #ifdef DEBUG
 		printk(KERN_DEBUG "w83627hf: GPIO5 not configured for "
@@ -887,7 +887,7 @@ static void w83627hf_init_client(struct i2c_client *client)
 		int hi = w83627hf_read_value(client, W83781D_REG_CHIPID);
 		data->vid = (lo & 0x0f) | ((hi & 0x01) << 4);
 	} else if (w83627thf == data->type) {
-		data->vid = w83627thf_read_gpio5(client) & 0x3f;
+		data->vid = w83627thf_read_gpio5(client);
 	}
 
 	/* Read VRM & OVT Config only once */
@@ -1184,8 +1184,10 @@ void w83627hf_vid(struct i2c_client *client, int operation, int ctl_name,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 3;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		w83627hf_update_client(client);
-		results[0] = vid_from_reg(data->vid, data->vrm);
+		if (data->vid == 0xff)
+			results[0] = 0;
+		else
+			results[0] = vid_from_reg(data->vid, data->vrm);
 		*nrels_mag = 1;
 	}
 }
