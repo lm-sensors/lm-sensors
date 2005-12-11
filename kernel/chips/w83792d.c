@@ -816,7 +816,7 @@ static void w83792d_update_client(struct i2c_client *client)
 			pwm_array_tmp[i] = w83792d_read_value(client,
 						W83792D_REG_PWM[i]);
 			data->pwm[i] = pwm_array_tmp[i] & 0x0f;
-			data->pwm_flag[1] = (pwm_array_tmp[i] >> 7) & 0x01;
+			data->pwm_flag[i] = pwm_array_tmp[i] >> 7;
 		}
 		data->fan_cfg = w83792d_read_value(client, W83792D_REG_FAN_CFG);
 
