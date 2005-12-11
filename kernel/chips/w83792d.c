@@ -1407,7 +1407,7 @@ static void w83792d_pwm(struct i2c_client *client, int operation, int ctl_name,
 {
 	struct w83792d_data *data = client->data;
 	int nr = ctl_name - W83792D_SYSCTL_PWM1;
-	u8 pwm_to_reg = 0, pwm_mask;
+	u8 pwm_mask;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
@@ -1416,8 +1416,7 @@ static void w83792d_pwm(struct i2c_client *client, int operation, int ctl_name,
 		results[0] = data->pwm[nr];
 		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		pwm_to_reg = SENSORS_LIMIT(results[0], 0, 15);
-		data->pwm[nr] = pwm_to_reg;
+		data->pwm[nr] = SENSORS_LIMIT(results[0], 0, 15);
 		pwm_mask = w83792d_read_value(client,W83792D_REG_PWM[nr]) & 0xf0;
 		w83792d_write_value(client,W83792D_REG_PWM[nr],pwm_mask|data->pwm[nr]);
 	}
