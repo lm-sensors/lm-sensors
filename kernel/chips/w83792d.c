@@ -22,7 +22,7 @@
     1. This driver is only for 2.4 kernel(2.4.10 or later), 2.6 kernel
        need a different driver.
     2. This driver is only for Winbond W83792D C version device, there
-       are also some motherboards with B version W83792D device. The 
+       are also some motherboards with B version W83792D device. The
        calculation method to in6-in7(measured value, limits) is a little
        different between C and B version. C or B version can be identified
        by CR[0x49h].
@@ -354,7 +354,7 @@ static struct i2c_driver w83792d_driver = {
 #define W83792D_SYSCTL_TEMP1 1200
 #define W83792D_SYSCTL_TEMP2 1201
 #define W83792D_SYSCTL_TEMP3 1202
-/*#define W83792D_SYSCTL_VID 1300	
+/*#define W83792D_SYSCTL_VID 1300
 #define W83792D_SYSCTL_VRM 1301*/
 #define W83792D_SYSCTL_PWM_FLAG 1400
 #define W83792D_SYSCTL_PWM1 1401
@@ -842,7 +842,7 @@ static void w83792d_update_client(struct i2c_client *client)
 			(w83792d_read_value(client, W83792D_REG_ALARM3) << 16);
 
 		/* Update CaseOpen status and it's CLR_CHS. */
-		data->chassis[0] = (w83792d_read_value(client, 
+		data->chassis[0] = (w83792d_read_value(client,
 					W83792D_REG_CASE_OPEN)
 				    >> 5) & 0x01;
 		data->chassis[1] = (w83792d_read_value(client,
@@ -1340,7 +1340,7 @@ void w83792d_sf2_points(struct i2c_client *client, int operation,
 
 /* Smart Fan II Duty Cycle1/2/3 of Fan1/2/3.
    Notice that: The Non-Stop can NOT be modified by user,
-   because it is related with some physical characters, 
+   because it is related with some physical characters,
    usually set by BIOS. User's modification to it may lead to
    Fan's stop, then bring danger. */
 void w83792d_sf2_levels(struct i2c_client *client, int operation,
