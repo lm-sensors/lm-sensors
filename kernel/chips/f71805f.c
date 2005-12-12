@@ -301,7 +301,7 @@ static int f71805f_detect(struct i2c_adapter *adapter, int address,
 {
 	struct i2c_client *client;
 	struct f71805f_data *data;
-	int err = 0;
+	int err;
 
 	if (!request_region(address, REGION_LENGTH, f71805f_driver.name)) {
 		err = -EBUSY;
@@ -329,6 +329,9 @@ static int f71805f_detect(struct i2c_adapter *adapter, int address,
 	if ((err = i2c_attach_client(client)))
 		goto exit_free;
 
+	/* Initialize the F71805F chip */
+	f71805f_init_client(client);
+
 	/* Register a new directory entry in /proc */
 	err = i2c_register_entry(client, "f71805f",
 				 f71805f_dir_table_template, THIS_MODULE);
@@ -336,8 +339,6 @@ static int f71805f_detect(struct i2c_adapter *adapter, int address,
 		goto exit_detach;
 	data->sysctl_id = err;
 
-	/* Initialize the F71805F chip */
-	f71805f_init_client(client);
 	return 0;
 
 exit_detach:
