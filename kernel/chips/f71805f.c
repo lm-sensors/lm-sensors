@@ -278,8 +278,8 @@ static void f71805f_init_client(struct i2c_client *client)
 
 	reg = f71805f_read8(client, F71805F_REG_START);
 	if ((reg & 0x41) != 0x01) {
-		printk(KERN_DEBUG "%s: Starting monitoring operations\n",
-		       DRVNAME);
+		printk(KERN_DEBUG DRVNAME ": Starting monitoring "
+		       "operations\n");
 		f71805f_write8(client,
 			       F71805F_REG_START, (reg | 0x01) & ~0x40);
 	}
@@ -362,8 +362,8 @@ static int f71805f_detach_client(struct i2c_client *client)
 
 	i2c_deregister_entry(data->sysctl_id);
 	if ((err = i2c_detach_client(client))) {
-		printk(KERN_ERR "%s: Client deregistration failed, "
-		       "client not detached\n", DRVNAME);
+		printk(KERN_ERR DRVNAME ": Client deregistration failed, "
+		       "client not detached\n");
 		return err;
 	}
 
@@ -704,28 +704,28 @@ static int __init f71805f_find(int sioaddr, unsigned int *address)
 
 	devid = superio_inw(sioaddr, SIO_REG_DEVID);
 	if (devid != SIO_F71805F_ID) {
-		printk(KERN_INFO "%s: Unsupported Fintek device, "
-		       "skipping\n", DRVNAME);
+		printk(KERN_INFO DRVNAME ": Unsupported Fintek device, "
+		       "skipping\n");
 		goto exit;
 	}
 
 	superio_select(sioaddr, F71805F_LD_HWM);
 	if (!(superio_inb(sioaddr, SIO_REG_ENABLE) & 0x01)) {
-		printk(KERN_WARNING "%s: Device not activated, skipping\n",
-		       DRVNAME);
+		printk(KERN_WARNING DRVNAME ": Device not activated, "
+		       "skipping\n");
 		goto exit;
 	}
 
 	*address = superio_inw(sioaddr, SIO_REG_ADDR);
 	if (*address == 0) {
-		printk(KERN_WARNING "%s: Base address not set, skipping\n",
-		       DRVNAME);
+		printk(KERN_WARNING DRVNAME ": Base address not set, "
+		       "skipping\n");
 		goto exit;
 	}
 
 	err = 0;
-	printk(KERN_INFO "%s: Found F71805F chip at %#x, revision %u\n",
-	       DRVNAME, *address, superio_inb(sioaddr, SIO_REG_DEVREV));
+	printk(KERN_INFO DRVNAME ": Found F71805F chip at %#x, revision %u\n",
+	       *address, superio_inb(sioaddr, SIO_REG_DEVREV));
 
 exit:
 	superio_exit(sioaddr);
