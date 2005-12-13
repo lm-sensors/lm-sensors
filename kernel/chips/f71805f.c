@@ -45,9 +45,6 @@ SENSORS_INSMOD_1(f71805f);
  * Super-I/O constants and functions
  */
 
-static int REG;		/* The register to read from/write to */
-static int VAL;		/* The value to read/write */
-
 #define F71805F_LD_HWM		0x04
 
 #define SIO_REG_LDSEL		0x07	/* Logical device select */
@@ -59,41 +56,41 @@ static int VAL;		/* The value to read/write */
 #define SIO_F71805F_ID		0x0406
 
 static inline int
-superio_inb(int reg)
+superio_inb(int base, int reg)
 {
-	outb(reg, REG);
-	return inb(VAL);
+	outb(reg, base);
+	return inb(base + 1);
 }
 
 static int
-superio_inw(int reg)
+superio_inw(int base, int reg)
 {
 	int val;
-	outb(reg++, REG);
-	val = inb(VAL) << 8;
-	outb(reg, REG);
-	val |= inb(VAL);
+	outb(reg++, base);
+	val = inb(base + 1) << 8;
+	outb(reg, base);
+	val |= inb(base + 1);
 	return val;
 }
 
 static inline void
-superio_select(int ld)
+superio_select(int base, int ld)
 {
-	outb(SIO_REG_LDSEL, REG);
-	outb(ld, VAL);
+	outb(SIO_REG_LDSEL, base);
+	outb(ld, base + 1);
 }
 
 static inline void
-superio_enter(void)
+superio_enter(int base)
 {
-	outb(0x87, REG);
-	outb(0x87, REG);
+	outb(0x87, base);
+	outb(0x87, base);
 }
 
 static inline void
-superio_exit(void)
+superio_exit(int base)
 {
-	outb(0xaa, REG);
+	outb(0xaa, base);
 }
 
 /*
@@ -697,22 +694,20 @@ static int __init f71805f_find(int sioaddr, unsigned int *address)
 	int err = -ENODEV;
 	u16 devid;
 
-	REG = sioaddr;
-	VAL = sioaddr + 1;
-	superio_enter();
+	superio_enter(sioaddr);
 
-	devid = superio_inw(SIO_REG_DEVID);
+	devid = superio_inw(sioaddr, SIO_REG_DEVID);
 	if (devid != SIO_F71805F_ID)
 		goto exit;
 
-	superio_select(F71805F_LD_HWM);
-	if (!(superio_inb(SIO_REG_ENABLE) & 0x01)) {
+	superio_select(sioaddr, F71805F_LD_HWM);
+	if (!(superio_inb(sioaddr, SIO_REG_ENABLE) & 0x01)) {
 		printk(KERN_WARNING "%s: Device not activated, skipping\n",
 		       DRVNAME);
 		goto exit;
 	}
 
-	*address = superio_inw(SIO_REG_ADDR);
+	*address = superio_inw(sioaddr, SIO_REG_ADDR);
 	if (*address == 0) {
 		printk(KERN_WARNING "%s: Base address not set, skipping\n",
 		       DRVNAME);
@@ -721,10 +716,10 @@ static int __init f71805f_find(int sioaddr, unsigned int *address)
 
 	err = 0;
 	printk(KERN_INFO "%s: Found F71805F chip at %#x, revision %u\n",
-	       DRVNAME, *address, superio_inb(SIO_REG_DEVREV));
+	       DRVNAME, *address, superio_inb(sioaddr, SIO_REG_DEVREV));
 
 exit:
-	superio_exit();
+	superio_exit(sioaddr);
 	return err;
 }
 
