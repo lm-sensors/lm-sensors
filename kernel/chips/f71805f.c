@@ -50,9 +50,11 @@ SENSORS_INSMOD_1(f71805f);
 #define SIO_REG_LDSEL		0x07	/* Logical device select */
 #define SIO_REG_DEVID		0x20	/* Device ID (2 bytes) */
 #define SIO_REG_DEVREV		0x22	/* Device revision */
+#define SIO_REG_MANID		0x23	/* Fintek ID (2 bytes) */
 #define SIO_REG_ENABLE		0x30	/* Logical device enable */
 #define SIO_REG_ADDR		0x60	/* Logical device address (2 bytes) */
 
+#define SIO_FINTEK_ID		0x1934
 #define SIO_F71805F_ID		0x0406
 
 static inline int
@@ -696,9 +698,16 @@ static int __init f71805f_find(int sioaddr, unsigned int *address)
 
 	superio_enter(sioaddr);
 
-	devid = superio_inw(sioaddr, SIO_REG_DEVID);
-	if (devid != SIO_F71805F_ID)
+	devid = superio_inw(sioaddr, SIO_REG_MANID);
+	if (devid != SIO_FINTEK_ID)
 		goto exit;
+
+	devid = superio_inw(sioaddr, SIO_REG_DEVID);
+	if (devid != SIO_F71805F_ID) {
+		printk(KERN_INFO "%s: Unsupported Fintek device, "
+		       "skipping\n", DRVNAME);
+		goto exit;
+	}
 
 	superio_select(sioaddr, F71805F_LD_HWM);
 	if (!(superio_inb(sioaddr, SIO_REG_ENABLE) & 0x01)) {
