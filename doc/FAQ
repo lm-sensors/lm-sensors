@@ -8,7 +8,6 @@ lm_sensors
 4 Problems
 5 How to Ask for Help
 6 How to Contribute
-7 Version 1 Specific Questions
 Appendix A Revision History of This Document
 
 
@@ -128,11 +127,6 @@ lm_sensors
   6.6 How to submit a patch
   6.7 How to REALLY help
   6.8 How to get release announcements
-7 Version 1 Specific Questions
-  7.1 My manufacturer swears that my mainboard has an SMBus, but your code reports that it can't find it.  What's wrong?
-  7.2 The modules won't load, saying 'SMBus not detected'.
-  7.3 I try to read `/proc/sensors', and I get a "No sensor data yet (try again in a few moments)" message. Why?
-  7.4 On my Dell, a LM80 is detected, but all readings are 0!
 Appendix A Revision History of This Document
 
 
@@ -1539,65 +1533,10 @@ register on our freshmeat project page
 `http://freshmeat.net/projects/lm_sensors' to 'subscribe to new
 releases' and then freshmeat will email you announcement.
 
-7 Version 1 Specific Questions
-******************************
-
-Note: Version 1 is very very old and is not recommended.
-
-7.1 My manufacturer swears that my mainboard has an SMBus, but your code reports that it can't find it.  What's wrong?
-======================================================================================================================
-
-Currently, our code only assumes that an SMBus exists if it originates
-from the Intel PIIX4 (82371AB).  If your computer doesn't have one, or
-if your SMBus originates from a different SMBus 'host', then you are
-out of luck. :'( Our experience is, though, that most machines have a
-PIIX4, and that it is where the SMBus is hosted.
-
-   Regarding the VIA chip set(s):
-
-   Right now, the SMBus code depends on the Intel PIIX4 chip to handle
-SMBus transactions.  The VIA chip set is NOT supported at this time
-because it forces much of the SMBus protocol to be implemented by
-software.
-
-   To implement the SMBus correctly with the VIA chip, it needs to be
-written at a low level to be quick.  A more attractive alternative is to
-use the Bios SMBus interface (not always available nor standard).
-
-   Version 2 supports the VIA chipset, and will support other chipsets.
-Version 1 never will.
-
-7.2 The modules won't load, saying 'SMBus not detected'.
-========================================================
-
-This should no longer be an issue in 1.4.10 and later; it will continue
-loading, but it won't support SMBus-connected devices, of course.
-
-7.3 I try to read `/proc/sensors', and I get a "No sensor data yet (try again in a few moments)" message. Why?
-==============================================================================================================
-
-It takes about 1.5 seconds for the LM78 to update all its sensor
-values.  If we would try to read it before it finished that, you would
-get old garbage instead. So you have to wait 1.5 seconds after the
-module is inserted before you can access `/proc/sensors'.
-
-   Module versions 1.3.7 and later let the process sleep if it tries to
-access sensor data right after insertion time, and do not display this
-message anymore.
-
-7.4 On my Dell, a LM80 is detected, but all readings are 0!
-===========================================================
-
-This is a bug we have only observed on Dell computers. There is
-probably a problem with the way the SMBus is accessed; but it is not yet
-clear whether the problem is in our code or with the Dells.
-
-   There are very probably no sensor chips at all on your computer; but
-until somebody contacts Dell about this and tells us the results, we
-can not be sure.
-
 Appendix A Revision History of This Document
 ********************************************
+
+   * Rev 2.18 (JD) Removed version 1 specifics part, 2005-12-17
 
    * Rev 2.17 (JD) Added 5.9 (why we don't support undocumented chips),
      removed 6.9 (doesn't apply to the new mailing list), 2005-10-05
