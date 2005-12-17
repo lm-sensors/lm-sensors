@@ -18,6 +18,7 @@ ask CVS about it:
 -----------------------------------------------------------------------------
 
 2.9.3 (2005????)
+  File doc/lm_sensors-FAQ.texi: Remove version 1 specifics part
   File doc/busses/i2c-viapro: Update (2.6 backport)
   File doc/chips/via686a: Update (2.6 backport)
   File etc/sensors.conf.eg: Do not set vrm by default
@@ -63,6 +64,9 @@ ask CVS about it:
                    Properly handle W83627THF without VID (Yuan Mu)
                    Fix in0 limit settings in "VRM9" mode (Yuan Mu)
   Module w83781d: Drop W83697HF support (Grant Coady)
+  Module w83792d: Bug fixes and code cleanups (Yuan Mu, 2.6 backport)
+                  Fix fan control mode (PWM/DC) reporting
+                  Fix fan div auto-adjust (Yuan Mu)
   Module w83l785ts: Minor cleanup (2.6 backport)
   Modules vt1211, vt8231: Change default VRM to 9.1
   Program decode-dimms.pl: Add lookup tables for manufacturer names
@@ -91,6 +95,7 @@ ask CVS about it:
                           Fix MAX6659 reported driver
                           Add Fintek F71805F detection
                           Add Analog Devices ADT7476 detection
+                          Add Intel 82845G detection
 
 
 2.9.2 (20050906)
