@@ -1021,15 +1021,8 @@ static void w83792d_in(struct i2c_client *client, int operation, int ctl_name,
 static void w83792d_set_fan_div(struct i2c_client *client, int nr, u8 newdiv)
 {
 	struct w83792d_data *data = client->data;
-	int min = 0;
-	int old = 0;
-	u8 tmp = 0;
-
-	newdiv = SENSORS_LIMIT(newdiv, 0, 7);
-
-	if (newdiv == data->fan_div[nr]) {
-		return;
-	}
+	int min, old;
+	u8 tmp;
 
 	min = FAN_FROM_REG(data->fan_min[nr], DIV_FROM_REG(data->fan_div[nr]));
 	old = FAN_FROM_REG(data->fan[nr], DIV_FROM_REG(data->fan_div[nr]));
@@ -1056,11 +1049,12 @@ static void w83792d_fan(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83792d_update_client(client);
-		results[0] = FAN_FROM_REG(data->fan_min[nr],
+		if (data->has_fan & (1 << nr)) {
+			results[0] = FAN_FROM_REG(data->fan_min[nr],
 					DIV_FROM_REG(data->fan_div[nr]));
-		results[1] = FAN_FROM_REG(data->fan[nr],
+			results[1] = FAN_FROM_REG(data->fan[nr],
 					DIV_FROM_REG(data->fan_div[nr]));
-		if (!(data->has_fan & (1 << nr))) {
+		} else {
 			results[0] = 0;
 			results[1] = 0;
 		}
