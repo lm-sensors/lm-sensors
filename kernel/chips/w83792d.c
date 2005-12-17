@@ -306,6 +306,8 @@ static void w83792d_temp_add(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results);
 static void w83792d_vrm(struct i2c_client *client, int operation,
 			int ctl_name, int *nrels_mag, long *results); */
+static void w83792d_set_fan_div(struct i2c_client *client,
+				int nr, u8 newdiv);
 static void w83792d_fan_div(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 static void w83792d_alarms(struct i2c_client *client, int operation,
@@ -443,7 +445,7 @@ static ctl_table w83792d_dir_table_template[] =
 	 &i2c_sysctl_real, NULL, &w83792d_temp_add},
 	/*{W83792D_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83792d_vid}, */
-	{W83792D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	{W83792D_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0444, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83792d_fan_div},
 	{W83792D_SYSCTL_ALARMS, "alarms", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &w83792d_alarms},
@@ -832,6 +834,21 @@ static void w83792d_update_client(struct i2c_client *client)
 		data->fan_div[5] = (reg_array_tmp[2] >> 4) & 0x07;
 		data->fan_div[6] = reg_array_tmp[3] & 0x07;
 
+		for (i = 0; i < 7; i++) {
+			if (!(data->has_fan & (1 << i)))
+				continue;
+			if (data->fan[i] == 0xff && data->fan_div[i] < 7)
+				w83792d_set_fan_div(client, i, 7);
+			else if (data->fan[i] < 0x70 && data->fan_div[i] > 0) {
+				w83792d_set_fan_div(client, i,
+							data->fan_div[i] - 1);
+			} else if (data->fan[i] > 0xf8 &&
+						data->fan_div[i] < 7) {
+				w83792d_set_fan_div(client, i,
+							data->fan_div[i] + 1);
+			}
+		}
+
 		/* Update the Temperature1 measured value and limits */
 		data->temp1[0] = w83792d_read_value(client, W83792D_REG_TEMP1);
 		data->temp1[1] = w83792d_read_value(client, W83792D_REG_TEMP1_OVER);
@@ -1001,13 +1018,38 @@ static void w83792d_in(struct i2c_client *client, int operation, int ctl_name,
 	}
 }
 
+static void w83792d_set_fan_div(struct i2c_client *client, int nr, u8 newdiv)
+{
+	struct w83792d_data *data = client->data;
+	int min = 0;
+	int old = 0;
+	u8 tmp = 0;
+
+	newdiv = SENSORS_LIMIT(newdiv, 0, 7);
+
+	if (newdiv == data->fan_div[nr]) {
+		return;
+	}
+
+	min = FAN_FROM_REG(data->fan_min[nr], DIV_FROM_REG(data->fan_div[nr]));
+	old = FAN_FROM_REG(data->fan[nr], DIV_FROM_REG(data->fan_div[nr]));
+	data->fan_div[nr] = newdiv;
+	tmp = w83792d_read_value(client, W83792D_REG_FAN_DIV[nr >> 1]);
+	tmp &= (nr & 1) ? 0x8f : 0xf8;
+	tmp |= (nr & 1) ? ((newdiv << 4) & 0x70) : (newdiv & 0x07);
+	w83792d_write_value(client, W83792D_REG_FAN_DIV[nr >> 1], tmp);
+	data->fan_min[nr] = FAN_TO_REG(min, DIV_FROM_REG(data->fan_div[nr]));
+	data->fan[nr] = FAN_TO_REG(old, DIV_FROM_REG(data->fan_div[nr]));
+	w83792d_write_value(client, W83792D_REG_FAN_MIN[nr],
+				data->fan_min[nr]);
+}
+
 /* read/write fan meaured value and limits */
 static void w83792d_fan(struct i2c_client *client, int operation, int ctl_name,
 		 int *nrels_mag, long *results)
 {
 	struct w83792d_data *data = client->data;
 	int nr = ctl_name - W83792D_SYSCTL_FAN1;
-	u8 tmp_reg, tmp_fan_div;
 
 	/* result[0]: low limit, result[1]: measured value */
 	if (operation == SENSORS_PROC_REAL_INFO)
@@ -1015,44 +1057,13 @@ static void w83792d_fan(struct i2c_client *client, int operation, int ctl_name,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83792d_update_client(client);
 		results[0] = FAN_FROM_REG(data->fan_min[nr],
-				  DIV_FROM_REG(data->fan_div[nr]));
-		/* adjust Fan Divisor, then change RPM */
-		do {
-			w83792d_update_client(client);
-			if ((data->fan[nr]>0x50) && (data->fan[nr]<0xff)) {
-			/* optimal case. 0x50 and 0xff are experience data */
-				results[1] = FAN_FROM_REG(data->fan[nr],
-						DIV_FROM_REG(data->fan_div[nr]));
-				break; /* go out of the do-while loop. */
-			} else {
-				if (((data->fan_div[nr])>=0x07 &&
-					(data->fan[nr])==0xff) ||
-				    ((data->fan_div[nr])<=0 &&
-					(data->fan[nr])<0x78)) {
-					results[1] = 0;
-					break;
-				} else if ((data->fan_div[nr])<0x07 &&
-					 (data->fan[nr])==0xff) {
-					(data->fan_div[nr])++;
-					results[1] = FAN_FROM_REG(data->fan[nr],
-						     DIV_FROM_REG(data->fan_div[nr]));
-				} else if ((data->fan_div[nr])>0 &&
-					  (data->fan[nr])<0x78) {
-					(data->fan_div[nr])--;
-					results[1] = FAN_FROM_REG(data->fan[nr],
-						     DIV_FROM_REG(data->fan_div[nr]));
-				}
-
-				tmp_reg = w83792d_read_value(client,
-						W83792D_REG_FAN_DIV[nr/2]);
-				tmp_reg &= (nr%2 == 0) ? 0xf8 : 0x8f;
-				tmp_fan_div = (nr%2 == 0) ? (data->fan_div[nr])
-					: (((data->fan_div[nr])<<4)&0x70);
-				w83792d_write_value(client,
-						    W83792D_REG_FAN_DIV[nr/2],
-						    tmp_reg|tmp_fan_div);
-			}
-		} while (0);
+					DIV_FROM_REG(data->fan_div[nr]));
+		results[1] = FAN_FROM_REG(data->fan[nr],
+					DIV_FROM_REG(data->fan_div[nr]));
+		if (!(data->has_fan & (1 << nr))) {
+			results[0] = 0;
+			results[1] = 0;
+		}
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1 && (data->has_fan & (1 << nr))) {
@@ -1183,9 +1194,7 @@ static void w83792d_fan_div(struct i2c_client *client, int operation,
 		     int ctl_name, int *nrels_mag, long *results)
 {
 	struct w83792d_data *data = client->data;
-	int i=0, j=0;
-	u8 temp_reg=0, k=1, fan_div_reg=0;
-	u8 tmp_fan_div;
+	int i = 0;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
@@ -1195,27 +1204,6 @@ static void w83792d_fan_div(struct i2c_client *client, int operation,
 			results[i] = DIV_FROM_REG(data->fan_div[i]);
 		}
 		*nrels_mag = 7;
-	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		if (*nrels_mag < 7) {
-			return;
-		}
-		for (i=0; i<7; i++) {
-			temp_reg = SENSORS_LIMIT(results[i], 1, 128);
-			for (k=0,j=0; j<7; j++) {
-				temp_reg = temp_reg>>1;
-				if (temp_reg == 0)
-					break;
-				k++;
-			}
-			fan_div_reg = w83792d_read_value(client,
-					W83792D_REG_FAN_DIV[i/2]);
-			fan_div_reg &= (i%2 == 0) ? 0xf8 : 0x8f;
-			tmp_fan_div = (i%2 == 0) ? (k&0x07)
-					: ((k<<4)&0x70);
-			w83792d_write_value(client,
-					W83792D_REG_FAN_DIV[i/2],
-					fan_div_reg|tmp_fan_div);
-		}
 	}
 }
 
