@@ -360,7 +360,8 @@ sub readspd16 ($$) { # reads 16 bytes from SPD-EEPROM
 
 for (@ARGV) {
     if (/-h/) {
-		print "Usage: $0 [-f|-b|-h]\n\n",
+		print "Usage: $0 [-c] [-f [-b]]\n",
+			"       $0 -h\n\n",
 			"  -f, --format            print nice html output\n",
 			"  -b, --bodyonly          don't print html header\n",
 			"                          (useful for postprocessing the output)\n",
