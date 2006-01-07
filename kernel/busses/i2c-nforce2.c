@@ -28,6 +28,7 @@
     nForce3 Pro150 MCP		00D4
     nForce3 250Gb MCP		00E4
     nForce4 MCP			0052
+    nForce4 MCP-04		0034
 
     This driver supports the 2 SMBuses that are included in the MCP of the
     nForce2/3/4 chipsets.
@@ -71,6 +72,10 @@ MODULE_DESCRIPTION("nForce2 SMBus driver");
 
 #ifndef PCI_DEVICE_ID_NVIDIA_NFORCE4_SMBUS
 #define PCI_DEVICE_ID_NVIDIA_NFORCE4_SMBUS	0x0052
+#endif
+
+#ifndef PCI_DEVICE_ID_NVIDIA_NFORCE_MPC04_SMBUS
+#define PCI_DEVICE_ID_NVIDIA_NFORCE_MPC04_SMBUS	0x0034
 #endif
 
 
@@ -295,6 +300,8 @@ static struct pci_device_id nforce2_ids[] = {
 	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_NFORCE3S_SMBUS,
 	       	PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
 	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_NFORCE4_SMBUS,
+	       	PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_NFORCE_MPC04_SMBUS,
 	       	PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
 	{ 0 }
 };

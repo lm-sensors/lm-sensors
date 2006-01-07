@@ -17,6 +17,7 @@ Supported adapters:
 
     * nVidia nForce4 SMBus PCI interface
       (10de:0052, included in nForce4 MCP)
+      (10de:0034, included in nForce4 MCP-04)
       Datasheet: same as for nForce2 SMBus PCI interface
 
 Author: Hans-Frieder Vogt <hfvogt@arcor.de>
