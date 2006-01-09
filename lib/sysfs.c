@@ -71,23 +71,26 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 	if (!entry.name.busname)
 		sensors_fatal_error(__FUNCTION__, "out of memory");
 
-	if (sscanf(dev->name, "%d-%x", &entry.name.bus, &entry.name.addr) != 2)
+	if (sscanf(dev->name, "%d-%x", &entry.name.bus, &entry.name.addr) == 2) {
+		/* find out if legacy ISA or not */
+		snprintf(bus_path, sizeof(bus_path),
+				"%s/class/i2c-adapter/i2c-%d/device/name",
+				sensors_sysfs_mount, entry.name.bus);
+
+		if ((bus_attr = sysfs_open_attribute(bus_path))) {
+			if (sysfs_read_attribute(bus_attr))
+				return -SENSORS_ERR_PARSE;
+
+			if (bus_attr->value && !strncmp(bus_attr->value, "ISA ", 4))
+				entry.name.bus = SENSORS_CHIP_NAME_BUS_ISA;
+
+			sysfs_close_attribute(bus_attr);
+		}
+	} else if (sscanf(dev->name, "%*[a-z0-9_].%d", &entry.name.addr) == 1) {
+		/* must be new ISA (platform driver) */
+		entry.name.bus = SENSORS_CHIP_NAME_BUS_ISA;
+	} else
 		return -SENSORS_ERR_PARSE;
-
-	/* find out if ISA or not */
-	snprintf(bus_path, sizeof(bus_path),
-			"%s/class/i2c-adapter/i2c-%d/device/name",
-			sensors_sysfs_mount, entry.name.bus);
-
-	if ((bus_attr = sysfs_open_attribute(bus_path))) {
-		if (sysfs_read_attribute(bus_attr))
-			return -SENSORS_ERR_PARSE;
-
-		if (bus_attr->value && !strncmp(bus_attr->value, "ISA ", 4))
-			entry.name.bus = SENSORS_CHIP_NAME_BUS_ISA;
-
-		sysfs_close_attribute(bus_attr);
-	}
 
 	sensors_add_proc_chips(&entry);
 
