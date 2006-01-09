@@ -245,7 +245,6 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 
 struct w83792d_data {
 	struct i2c_client client;
-	struct semaphore lock;
 	int sysctl_id;
 	enum chips type;
 
@@ -280,15 +279,25 @@ struct w83792d_data {
 	u8 sf2_levels[3][4];	/* Smart FanII: Fan1,2,3 duty cycle levels */
 };
 
+/* Read the w83792d register value, only use bank 0 of the 792 chip */
+static inline int
+w83792d_read_value(struct i2c_client *client, u8 reg)
+{
+	return i2c_smbus_read_byte_data(client, reg);
+}
+
+/* Write value into the w83792d registers, only use bank 0 of the 792 chip */
+static inline int
+w83792d_write_value(struct i2c_client *client, u8 reg, u8 value)
+{
+	return i2c_smbus_write_byte_data(client, reg, value);
+}
 
 static int w83792d_attach_adapter(struct i2c_adapter *adapter);
 static int w83792d_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int w83792d_detach_client(struct i2c_client *client);
 
-static inline int w83792d_read_value(struct i2c_client *client, u8 reg);
-static inline int w83792d_write_value(struct i2c_client *client, u8 reg,
-				      u8 value);
 static void w83792d_init_client(struct i2c_client *client);
 static void w83792d_update_client(struct i2c_client *client);
 #ifdef W83792D_DEBUG
@@ -731,20 +740,6 @@ static int w83792d_detach_client(struct i2c_client *client)
 
 	LEAVE()
 	return 0;
-}
-
-/* Read the w83792d register value, only use bank 0 of the 792 chip */
-static inline int
-w83792d_read_value(struct i2c_client *client, u8 reg)
-{
-	return i2c_smbus_read_byte_data(client, reg);
-}
-
-/* Write value into the w83792d registers, only use bank 0 of the 792 chip */
-static inline int
-w83792d_write_value(struct i2c_client *client, u8 reg, u8 value)
-{
-	return i2c_smbus_write_byte_data(client, reg, value);
 }
 
 /* Called when we have found a new W83792D. */
