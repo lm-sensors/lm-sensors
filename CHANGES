@@ -17,10 +17,11 @@ ask CVS about it:
 
 -----------------------------------------------------------------------------
 
-2.9.3 (2005????)
+2.10.0 (2005????)
   File doc/lm_sensors-FAQ.texi: Remove version 1 specifics part
   File doc/busses/i2c-viapro: Update (2.6 backport)
   File doc/chips/via686a: Update (2.6 backport)
+  File doc/chips/w83627hf: W83627THF VID clarification (2.6 backport)
   File etc/sensors.conf.eg: Do not set vrm by default
   File i2c-dev.h: Fix union i2c_smbus_data definition
                   Sync i2c_msg definition with i2c.h (Hideki Iwamoto)
@@ -31,12 +32,15 @@ ask CVS about it:
   File sensors_vid.h: Drop default VRM
   Library: Big update to use libsysfs.  More TODO though.
            Fix bus matching code for Linux 2.6 (Karsten Petersen)
-           Add f71805f support
+           Add f71805f, w83687thf support
+           Add platform drivers support
   Makefile: Compile user-space programs with -Wundef
   Module i2c-i801: Simplify the hardware PEC code
+                   Always set PEC mode explicitly before each transaction
   Module i2c-i810: Documentation update, PCI IDs cleanup
   Module i2c-keywest: Remove bus probing code (2.6 backport)
   Module i2c-nforce2: Remove dead code (2.6 backport)
+                      Add the ID of the nForce4 MCP-04 (2.6 backport)
   Module i2c-via: Remove dead code
   Module i2c-viapro: Remove dead code
                      Support I2C block read (2.6 backport)
@@ -63,6 +67,7 @@ ask CVS about it:
                    Preserve fan min on fan div change (Yuan Mu)
                    Properly handle W83627THF without VID (Yuan Mu)
                    Fix in0 limit settings in "VRM9" mode (Yuan Mu)
+                   Add W83687THF support
   Module w83781d: Drop W83697HF support (Grant Coady)
   Module w83792d: Bug fixes and code cleanups (Yuan Mu, 2.6 backport)
                   Fix fan control mode (PWM/DC) reporting
@@ -80,13 +85,14 @@ ask CVS about it:
                                        Print the correct bus type if bus
                                        functionality can be queried
   Program isadump: Display the real addresses in flat mode
+  Program mkpatch: Include f71805f
   Program sensord: Do not log algorithm names
                    Drop EEPROM support (Aurelien Jarno)
                    Add W83627EHF, F71805F/FG support
                    Fix PC87365/PC87366 alarms
   Program sensors: Drop free_the_label
                    Fix compilation with uclibc (no iconv)
-                   Add f71805f support
+                   Add f71805f, w83687thf support
   Program sensors-detect: Drop algorithm names
                           Do not rely on i2cdetect -l printing algo names
                           Simplify adapter name matching mechanism
