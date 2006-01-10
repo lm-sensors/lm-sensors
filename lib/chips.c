@@ -5568,6 +5568,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_W83627THF_PREFIX, w83782d_features },
 		/* Cheat on 83637HF for now - no separate #defines */
  { SENSORS_W83637HF_PREFIX, w83782d_features },
+ { SENSORS_W83687THF_PREFIX, w83782d_features }, /* Same as W83627THF */
  { SENSORS_W83791D_PREFIX, w83791d_features },
  { SENSORS_W83792D_PREFIX, w83792d_features },
  { SENSORS_W83L785TS_PREFIX, w83l785ts_features },

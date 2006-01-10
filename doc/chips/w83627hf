@@ -20,6 +20,10 @@ Supported chips:
     Prefix: 'w83637hf'
     Addresses scanned: ISA address retrieved from Super I/O registers
     Datasheet: http://www.winbond.com/PDF/sheet/w83637hf.pdf
+  * Winbond W83687THF
+    Prefix: 'w83687thf'
+    Addresses scanned: ISA address retrieved from Super I/O registers
+    Datasheet: Provided by Winbond on request
 
 Authors: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock <phil@netroedge.com>,
          and Mark Studebaker <mdsxyz123@yahoo.com>
@@ -46,6 +50,9 @@ Module Parameters
 * force_w83637hf: short array (min = 1, max = 48)
   List of adapter,address pairs which are unquestionably assumed to contain
   a `w83637hf' chip
+* force_w83687thf: short array (min = 1, max = 48)
+  List of adapter,address pairs which are unquestionably assumed to contain
+  a `w83687thf' chip
 * ignore: short array (min = 1, max = 48)
   List of adapter,address pairs not to scan
 * ignore_range: short array (min = 1, max = 48)
@@ -63,8 +70,8 @@ Description
 -----------
 
 This driver implements support for ISA accesses *only* for
-the Winbond W83627HF, W83627THF, W83697HF and W83637HF Super I/O chips.
-We will refer to them collectively as Winbond chips.
+the Winbond W83627HF, W83627THF, W83697HF, W83637HF and W83687THF
+Super I/O chips. We will refer to them collectively as Winbond chips.
 
 This driver supports ISA accesses, which should be more reliable
 than i2c accesses. Also, for Tyan boards which contain both a

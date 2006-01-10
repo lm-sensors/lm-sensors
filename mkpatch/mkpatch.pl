@@ -716,12 +716,12 @@ CONFIG_SENSORS_W83792D
   in the lm_sensors package, which you can download at
   http://www.lm-sensors.nu/
 
-Winbond W83627HF, W83627THF, W83637HF, W83697HF
+Winbond W83627HF, W83627THF, W83637HF, W83687THF, W83697HF
 CONFIG_SENSORS_W83627HF
   If you say yes here you get support for the Winbond W836x7 series
-  of sensor chips: the W83627HF, W83627THF, W83637HF and W83697HF.
-  This can also be built as a module which can be inserted and removed
-  while the kernel is running.
+  of sensor chips: the W83627HF, W83627THF, W83637HF, W83687THF and
+  W83697HF. This can also be built as a module which can be inserted
+  and removed while the kernel is running.
 
   You will also need the latest user-space utilities: you can find
   them in the lm_sensors package, which you can download at

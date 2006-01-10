@@ -235,8 +235,9 @@ vt8231
 
 w83627hf
 	w83627hf	3	9	3	2 pwm	no	yes (LPC)
-	w83627thf	3	7	3	3 pwm	no	yes (LPC)
+	w83627thf	3	7	3	3 dac	no	yes (LPC)
 	w83637hf	3	7	2	3 pwm	no	yes (LPC)
+	w83687thf	3	7	3	3 pw/da	no	yes (LPC)
 	w83697hf	2	8	2	2 pwm	no	yes (LPC)
 
 w83781d
