@@ -294,9 +294,6 @@ struct w83627hf_data {
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 
-	struct i2c_client *lm75;	/* for secondary I2C addresses */
-	/* pointer to array of 2 subclients */
-
 	u8 in[9];		/* Register value */
 	u8 in_max[9];		/* Register value */
 	u8 in_min[9];		/* Register value */
@@ -716,8 +713,6 @@ int w83627hf_detect(struct i2c_adapter *adapter, int address,
 	/* Tell the I2C layer a new client has arrived */
 	if ((err = i2c_attach_client(new_client)))
 		goto ERROR3;
-
-	data->lm75 = NULL;
 
 	/* Register a new directory entry with module sensors */
 	if ((i = i2c_register_entry(new_client,
