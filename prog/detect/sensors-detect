@@ -2148,6 +2148,7 @@ sub adapter_pci_detection_sis_96x
           (exists $pci_list{"1039:0650"}) ||
           (exists $pci_list{"1039:0651"}) ||
           (exists $pci_list{"1039:0655"}) ||
+          (exists $pci_list{"1039:0661"}) ||
           (exists $pci_list{"1039:0735"}) ||
           (exists $pci_list{"1039:0745"}) ||
           (exists $pci_list{"1039:0746"})) {
