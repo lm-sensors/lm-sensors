@@ -1143,12 +1143,6 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { w83l785ts_detect 0, @_},
      } ,
      {
-       name => "Winbond W83697HF",
-       driver => "w83781d",
-       isa_addrs => [0x290],
-       isa_detect => sub { w83781d_isa_detect 5, @_ },
-     } ,
-     {
        name => "Genesys Logic GL518SM Revision 0x00",
        driver => "gl518sm",
        i2c_addrs => [0x2c, 0x2d],
@@ -3676,7 +3670,7 @@ sub w83781d_alias_detect
 }
 
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83627HF,
-#                        5 = W83697HF, 9 = W83627EHF)
+#                        9 = W83627EHF)
 # $_[1]: Address
 # Returns: undef if not detected, (8) if detected.
 sub w83781d_isa_detect
@@ -3704,7 +3698,6 @@ sub w83781d_isa_detect
   return if $chip == 0 and  $reg1 != 0x10;
   return if $chip == 1 and  $reg1 != 0x30;
   return if $chip == 3 and  $reg1 != 0x20;
-  return if $chip == 5 and  $reg1 != 0x60;
   return if $chip == 9 and  $reg1 != 0x88; # Datasheet says 0xA1
                                            # but seems to be wrong
   return 8;
