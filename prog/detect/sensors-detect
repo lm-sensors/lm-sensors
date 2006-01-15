@@ -906,7 +906,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             smartbatt_chgr_detect adt7467_detect lm92_detect max1619_detect
             lm93_detect lm77_detect lm63_detect pca9556_detect
             w83791sd_detect vt1211_i2c_detect vt1211_alias_detect
-            smsc47m192_detect);
+            smsc47m192_detect ite_overclock_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1421,6 +1421,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        isa_addrs => [0x290],
        isa_detect => sub { ite_isa_detect 1, @_ },
      } ,
+     {
+       name => "ITE IT8201R/IT8203R/IT8206R/IT8266R overclocking controller",
+       driver => "to-be-written",
+       i2c_addrs => [0x37, 0x4e],
+       i2c_detect => sub { ite_overclock_detect @_ },
+     },
      {
        name => "SPD EEPROM",
        driver => "eeprom",
@@ -4099,6 +4105,27 @@ sub via8231_isa_detect
   return if not $found;
 
   return 9;
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[1]: Address (unused)
+# Returns: undef if not detected, 8 if detected.
+# Registers used:
+#   0x28: User ID
+#   0x29: User ID2
+#   0x2A: Version ID
+
+sub ite_overclock_detect
+{
+  my ($file, $addr) = @_;
+
+  my $uid1 = i2c_smbus_read_byte_data($file, 0x28);
+  my $uid2 = i2c_smbus_read_byte_data($file, 0x29);
+  return if $uid1 != 0x83
+         || $uid2 != 0x12;
+
+  return 8;
 }
 
 # $_[0]: Chip to detect (0 = IT8712F)
