@@ -2019,7 +2019,9 @@ sub initialize_conf
       }
     }
     close INPUTFILE;
-  } else {
+  }
+  
+  if (!$use_udev) {
     # Try some known default udev db locations, just in case
     if (-e '/dev/.udev.tdb' || -e '/dev/.udev'
      || -e '/dev/.udevdb' || -e '/dev/.udevdb') {
