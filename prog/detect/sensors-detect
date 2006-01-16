@@ -1423,8 +1423,8 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      } ,
      {
        name => "ITE IT8201R/IT8203R/IT8206R/IT8266R overclocking controller",
-       driver => "to-be-written",
-       i2c_addrs => [0x37, 0x4e],
+       driver => "not-a-sensor",
+       i2c_addrs => [0x4e],
        i2c_detect => sub { ite_overclock_detect @_ },
      },
      {
@@ -4110,9 +4110,8 @@ sub via8231_isa_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address (unused)
-# Returns: undef if not detected, 8 if detected.
+# Returns: undef if not detected, 6 if detected.
 # Registers used:
 #   0x28: User ID
 #   0x29: User ID2
@@ -4127,7 +4126,7 @@ sub ite_overclock_detect
   return if $uid1 != 0x83
          || $uid2 != 0x12;
 
-  return 8;
+  return 6;
 }
 
 # $_[0]: Chip to detect (0 = IT8712F)
