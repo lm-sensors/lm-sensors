@@ -1,4 +1,4 @@
-&=============================================================================
+=============================================================================
 
      FOR QUICK INSTALLATION INSTRUCTIONS SEE THE 'QUICKSTART' FILE.
      FOR FULL INSTALLATION INSTRUCTIONS SEE THE 'INSTALL' FILE.
@@ -11,7 +11,7 @@ OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 !!! This package is ONLY for 2.6, 2.5, and 2.4 kernels (2.4.10 or later) !!!
 !!! THIS PACKAGE REQUIRES i2c-2.9.0 or later!!!
 
-FOR 2.6/2.5 KERNELS, Use only the userspace tools in this package!
+FOR 2.6/2.5 KERNELS, use only the userspace tools in this package!
 Build and install them with 'make user' and 'make user_install'.
 The kernel modules in this package will not compile for 2.6/2.5;
 use the drivers already in the 2.6 kernel.
@@ -131,9 +131,9 @@ We *do* know what hardware we support, but usually, it is easier to
 install everything and run sensors-detect. It will tell you what hardware
 you have (and incidentally, what corresponding drivers are needed). You
 could also take a look at http://mbm.livewiredev.com/
-(this lists chips found on many mainboard, but regrettable, not the adapters
+(this lists chips found on many mainboard, but regrettably not the adapters
 on them) or http://web01.fureai.or.jp/~hirobo/project/reserch_project.html
-(yes, it is japanese; you want the ninth column, and it again lists only
+(yes, it is Japanese; you want the ninth column, and it again lists only
 chips, not adapters).
 
 
@@ -148,9 +148,10 @@ These chips read things like chip temperatures, fan rotation speeds and
 voltage levels. There are quite a few different chips which can be used by
 mainboard builders for approximately the same results.
 
-Hardware monitoring chips are often connected to the SMBus, but often they
-can also be connected to the ISA bus. The modules in this package usually
-support both ways of accessing them.
+Hardware monitoring chips often have an SMBus or I2C interface. Some are
+connected to ISA bus instead. Some of them can do both, in which case we
+either support both access methods (old drivers) or only support ISA
+access (new drivers) as it is faster.
 
 Because the SMBus is just a special case of the generalized I2C bus, we can
 simulate the SMBus protocol on plain I2C busses. These busses are sometimes
