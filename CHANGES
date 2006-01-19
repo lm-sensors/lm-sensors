@@ -30,6 +30,9 @@ ask CVS about it:
                   Drop I2C_FUNC_SMBUS_*_PEC
                   Drop I2C_SMBUS_*_PEC
   File sensors_vid.h: Drop default VRM
+  Library: NOTE: libsensors(3) will no longer see eeprom (SPD) chips
+           This is intentional.  Use decode-dimms.pl if you still
+           need your memory SPD data.
   Library: Big update to use libsysfs.  More TODO though.
            Fix bus matching code for Linux 2.6 (Karsten Petersen)
            Add f71805f, w83687thf support
