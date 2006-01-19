@@ -1,21 +1,5 @@
 lm_sensors CHANGES file
 -----------------------
-This is a list of the most important changes in 2.x versions. It is by
-no means complete, listing only the most significant changes.
-The ultimate way to know what has changed is to run diff, or even neater,
-ask CVS about it:
-
-  * Checkout the archive (see doc/cvs for how you can do this)
-  * Determine which tags are valid, by running this command from the
-    project root directory:
-      cvs status -v -l Makefile
-    Valid tags are usually of the form V2-1-0 for version 2.1.0
-  * Ask cvs for the difference between two versions:
-      cvs diff -r TAG1 -r TAG2 DIFF-OPTIONS
-    for example:
-      cvs diff -r V2-0-0 -r V2-0-1 -u
-
------------------------------------------------------------------------------
 
 2.10.0 (2005????)
   File doc/lm_sensors-FAQ.texi: Remove version 1 specifics part
