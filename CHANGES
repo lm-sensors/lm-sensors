@@ -105,6 +105,10 @@ ask CVS about it:
                           Add Fintek F71805F detection
                           Add Analog Devices ADT7476 detection
                           Add Intel 82845G detection
+                          Add IT8201R/IT8203R/IT8206R/IT8266R detection
+                          Fix udev detection in some corner case
+                          Improve DS1621 detection
+                          Always prefer ISA access over SMBus access
 
 
 2.9.2 (20050906)
