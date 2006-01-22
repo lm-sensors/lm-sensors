@@ -276,62 +276,62 @@ sub manufacturer_data(@)
 
 sub printl ($$) # print a line w/ label and value
 {
-   my ($label, $value) = @_;
-   if ($opt_html) {
-       $label =~ s/</\&lt;/sg;
-       $label =~ s/>/\&gt;/sg;
-       $label =~ s/\n/<br>\n/sg;
-       $value =~ s/</\&lt;/sg;
-       $value =~ s/>/\&gt;/sg;
-       $value =~ s/\n/<br>\n/sg;
-       print "<tr><td valign=top>$label</td><td>$value</td></tr>\n";
-   } else {
-       $value =~ s%\n%\n\t\t%sg;
-       print "$label\t$value\n";
-   }
+	my ($label, $value) = @_;
+	if ($opt_html) {
+		$label =~ s/</\&lt;/sg;
+		$label =~ s/>/\&gt;/sg;
+		$label =~ s/\n/<br>\n/sg;
+		$value =~ s/</\&lt;/sg;
+		$value =~ s/>/\&gt;/sg;
+		$value =~ s/\n/<br>\n/sg;
+		print "<tr><td valign=top>$label</td><td>$value</td></tr>\n";
+	} else {
+		$value =~ s%\n%\n\t\t%sg;
+		print "$label\t$value\n";
+	}
 }
 
 sub printl2 ($$) # print a line w/ label and value (outside a table)
 {
-   my ($label, $value) = @_;
-   if ($opt_html) {
-       $label =~ s/</\&lt;/sg;
-       $label =~ s/>/\&gt;/sg;
-       $label =~ s/\n/<br>\n/sg;
-       $value =~ s/</\&lt;/sg;
-       $value =~ s/>/\&gt;/sg;
-       $value =~ s/\n/<br>\n/sg;
-       print "$label: $value\n";
-   } else {
-       $value =~ s%\n%\n\t\t%sg;
-       print "$label\t$value\n";
-   }
+	my ($label, $value) = @_;
+	if ($opt_html) {
+		$label =~ s/</\&lt;/sg;
+		$label =~ s/>/\&gt;/sg;
+		$label =~ s/\n/<br>\n/sg;
+		$value =~ s/</\&lt;/sg;
+		$value =~ s/>/\&gt;/sg;
+		$value =~ s/\n/<br>\n/sg;
+		print "$label: $value\n";
+	} else {
+		$value =~ s%\n%\n\t\t%sg;
+		print "$label\t$value\n";
+	}
 }
 
 sub prints ($) # print seperator w/ given text
 {
-   my ($label) = @_;
-   if ($opt_html) {
-       $label =~ s/</\&lt;/sg;
-       $label =~ s/>/\&gt;/sg;
-       $label =~ s/\n/<br>\n/sg;
-       print "<tr><td align=center colspan=2><b>$label</b></td></tr>\n";
-   } else {
-       print "\n---=== $label ===---\n";
-   }
+	my ($label) = @_;
+	if ($opt_html) {
+		$label =~ s/</\&lt;/sg;
+		$label =~ s/>/\&gt;/sg;
+		$label =~ s/\n/<br>\n/sg;
+		print "<tr><td align=center colspan=2><b>$label</b></td></tr>\n";
+	} else {
+		print "\n---=== $label ===---\n";
+	}
 }
 
 sub printh ($) # print header w/ given text
 {
-   my ($label) = @_;
-   if ($opt_html) {
-       $label =~ s/</\&lt;/sg;
-       $label =~ s/>/\&gt;/sg;
-       $label =~ s/\n/<br>\n/sg;
-       print "<h1>$label</h1>\n";
-   } else {
-	print "\n$label\n";
-   }
+	my ($label) = @_;
+	if ($opt_html) {
+		$label =~ s/</\&lt;/sg;
+		$label =~ s/>/\&gt;/sg;
+		$label =~ s/\n/<br>\n/sg;
+		print "<h1>$label</h1>\n";
+	} else {
+		print "\n$label\n";
+	}
 }
 
 sub readspd16 ($$) { # reads 16 bytes from SPD-EEPROM
