@@ -286,8 +286,9 @@ sub printl ($$) # print a line w/ label and value
 		$value =~ s/\n/<br>\n/sg;
 		print "<tr><td valign=top>$label</td><td>$value</td></tr>\n";
 	} else {
-		$value =~ s%\n%\n\t\t%sg;
-		print "$label\t$value\n";
+		my @values = split /\n/, $value;
+		printf "%-47s %-32s\n", $label, shift @values;
+		printf "%-47s %-32s\n", "", $_ foreach (@values);
 	}
 }
 
@@ -301,11 +302,8 @@ sub printl2 ($$) # print a line w/ label and value (outside a table)
 		$value =~ s/</\&lt;/sg;
 		$value =~ s/>/\&gt;/sg;
 		$value =~ s/\n/<br>\n/sg;
-		print "$label: $value\n";
-	} else {
-		$value =~ s%\n%\n\t\t%sg;
-		print "$label\t$value\n";
 	}
+	print "$label: $value\n";
 }
 
 sub prints ($) # print seperator w/ given text
@@ -384,11 +382,9 @@ if ($opt_body)
 		  "</head><body>\n";
 }
 
-printh '
-PC DIMM Serial Presence Detect Tester/Decoder
+printh 'PC DIMM Serial Presence Detect Tester/Decoder
 By Philip Edelbrock, Christian Zuckschwerdt, Burkart Lingner and others
-Version 2.9.3
-';
+Version 2.9.3';
 
 
 my $dimm_count=0;
@@ -403,8 +399,8 @@ for my $i ( 0 .. $#dimm_list ) {
 		my $dimm_checksum=0;
 		$dimm_count += 1;
 		
-		print "<b><u><br><br>" if $opt_html;
-		printl2 "Decoding EEPROM", ($use_sysfs ?
+		print "<b><u>" if $opt_html;
+		printl2 "\n\nDecoding EEPROM", ($use_sysfs ?
 			"/sys/bus/i2c/drivers/eeprom/$dimm_list[$i]" :
 			"/proc/sys/dev/sensors/$dimm_list[$i]");
 		print "</u></b>" if $opt_html;
@@ -789,8 +785,6 @@ for my $i ( 0 .. $#dimm_list ) {
 		print "</table>\n" if $opt_html;
 	}
 }
-print '<br><br>' if $opt_html;
-printl2 "Number of SDRAM DIMMs detected and decoded", $dimm_count;
+printl2 "\n\nNumber of SDRAM DIMMs detected and decoded", $dimm_count;
 
 print "</body></html>\n" if $opt_body;
-print "\nTry '$0 --format' for html output.\n" unless $opt_html;
