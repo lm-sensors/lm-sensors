@@ -40,6 +40,11 @@
 #  add large lookup tables for manufacturer names, based on data
 #  provided by Rudolf Marek, taken from:
 #  http://www.jedec.org/download/search/JEP106r.pdf
+# Version 1.1  2006-01-22  Jean Delvare <khali@linux-fr.org>
+#  improve the text output, making it hopefully clearer
+#  read eeprom by 64-byte blocks, this allows some code cleanups
+#  use sysopen/sysread instead of open/read for better performance
+#  verify checksum before decoding anything
 #
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
@@ -382,8 +387,9 @@ if ($opt_body)
 }
 
 printh 'PC DIMM Serial Presence Detect Tester/Decoder
-By Philip Edelbrock, Christian Zuckschwerdt, Burkart Lingner and others
-Version 2.9.3';
+By Philip Edelbrock, Christian Zuckschwerdt, Burkart Lingner,
+Jean Delvare and others
+Version 2.10.0';
 
 
 my $dimm_count=0;
@@ -395,9 +401,6 @@ for my $i ( 0 .. $#dimm_list ) {
 	$_=$dimm_list[$i];
 	if (($use_sysfs && /^\d+-\d+$/)
 	 || (!$use_sysfs && /^eeprom-/)) {
-		my $dimm_checksum=0;
-		$dimm_count += 1;
-		
 		print "<b><u>" if $opt_html;
 		printl2 "\n\nDecoding EEPROM", ($use_sysfs ?
 			"/sys/bus/i2c/drivers/eeprom/$dimm_list[$i]" :
@@ -413,14 +416,22 @@ for my $i ( 0 .. $#dimm_list ) {
 		prints "The Following is Required Data and is Applicable to all DIMM Types";
 
 		my @bytes = readspd64(0, $dimm_list[$i]);
-		for my $j (0 .. 62) {
-			$dimm_checksum = $dimm_checksum + $bytes[$j];
-		}
+		my $dimm_checksum = 0;
+		$dimm_checksum += $bytes[$_] foreach (0 .. 62);
 		$dimm_checksum &= 0xff;
+
+		my $l = "EEPROM Checksum of bytes 0-62";
+		printl $l, ($bytes[63] == $dimm_checksum ?
+			sprintf("OK (0x%.2X)", $bytes[63]):
+			sprintf("Bad\n(found 0x%.2X, calculated 0x%.2X)\n",
+				$bytes[63], $dimm_checksum));
+
+		next unless $bytes[63] == $dimm_checksum or $opt_igncheck;
 		
+		$dimm_count++;
 		printl "# of bytes written to SDRAM EEPROM",$bytes[0];
 
-		my $l = "Total number of bytes in EEPROM";
+		$l = "Total number of bytes in EEPROM";
 		if ($bytes[1] <= 13) {
 			printl $l, 2**$bytes[1];
 		} elsif ($bytes[1] == 0) {
@@ -706,13 +717,7 @@ for my $i ( 0 .. $#dimm_list ) {
 # That's it for the lower part of an SDRAM EEPROM's memory!
 # Decode next 16 bytes (48-63)
 		printl "SPD Revision code ", sprintf("%x", $bytes[62]);
-		$l = "EEPROM Checksum of bytes 0-62";
-		printl $l, ($bytes[63] == $dimm_checksum ?
-			sprintf("OK (0x%.2X)", $bytes[63]):
-			sprintf("Bad (found 0x%.2X, calculated 0x%.2X)\n",
-				$bytes[63], $dimm_checksum));
 
-		if($bytes[63]==$dimm_checksum || $opt_igncheck) {
 # Decode next 48 bytes (64-111)
 		@bytes = readspd64(64, $dimm_list[$i]);
 		
@@ -766,7 +771,6 @@ for my $i ( 0 .. $#dimm_list ) {
 		if ($bytes[63] > 175) { $temp .= "Double Sided DIMM\n"; }
 		else { $temp .= "Single Sided DIMM\n";}
 		printl $l, $temp;
-		}
 		
 		print "</table>\n" if $opt_html;
 	}
