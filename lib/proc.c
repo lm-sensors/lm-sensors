@@ -17,18 +17,20 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <sys/types.h>
+#include <sys/sysctl.h>
 #include <stddef.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/sysctl.h>
+#include <limits.h>
+#include <dirent.h>
+
 #include "kernel/include/sensors.h"
 #include "data.h"
 #include "error.h"
 #include "access.h"
 #include "general.h"
-#include <limits.h>
-#include <dirent.h>
 #include "sysfs.h"
 
 /* OK, this proves one thing: if there are too many chips detected, we get in
@@ -50,7 +52,7 @@ int sensors_read_proc_chips(void)
   int res;
 
   int name[3] = { CTL_DEV, DEV_SENSORS, SENSORS_CHIPS };
-  int buflen = BUF_LEN;
+  size_t buflen = BUF_LEN;
   char *bufptr = buf;
   sensors_proc_chips_entry entry;
   int lineno;
@@ -140,7 +142,7 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 {
 	int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
 	const sensors_chip_feature *the_feature;
-	int buflen = BUF_LEN;
+	size_t buflen = BUF_LEN;
 	int mag;
 
 	if (!sensors_found_sysfs)
@@ -182,7 +184,7 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 {
 	int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
 	const sensors_chip_feature *the_feature;
-	int buflen = BUF_LEN;
+	size_t buflen = BUF_LEN;
 	int mag;
  
 	if (!sensors_found_sysfs)
