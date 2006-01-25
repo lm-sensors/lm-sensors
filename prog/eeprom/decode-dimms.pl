@@ -243,7 +243,12 @@ use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs @vendors)
  "Solarflare Communications", "Xambala Inc.", "EADS Astrium", "ATO Semicon Co. Ltd.",
  "Imaging Works, Inc.", "Astute Networks, Inc.", "Tzero", "Emulex",
  "Power-One", "Pulse~LINK Inc.", "Hon Hai Precision Industry", "White Rock Networks Inc.",
- "Telegent Systems USA, Inc."]);
+ "Telegent Systems USA, Inc.", "Atrua Technologies, Inc.", "Acbel Polytech Inc.",
+ "eRide Inc.","ULi Electronics Inc.", "Magnum Semiconductor Inc.", "neoOne Technology, Inc.",
+ "Connex Technology, Inc.", "Stream Processors, Inc.", "Focus Enhancements", "Telecis Wireless, Inc.",
+ "uNav Microelectronics", "Tarari, Inc.", "Ambric, Inc.", "Newport Media, Inc.", "VMTS",
+ "Enuclia Semiconductor, Inc.", "Virtium Technology Inc.", "Solid State System Co., Ltd.", "Kian Tech LLC",
+ "Artimi", "Power Quotient International", "Avago Technologies"]);
 
 $use_sysfs = -d '/sys/bus';
 
