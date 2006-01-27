@@ -4311,8 +4311,19 @@ void print_vt1211(const sensors_chip_name *name)
       printf("ERROR: Can't get FAN2 data!\n");
   }
   free(label);
-
-  /* no temp 1 */
+  if (sensors_get_label_and_valid(*name,SENSORS_VT1211_TEMP1,&label,&valid)) {
+    printf("ERROR: Can't get TEMP1 config!\n");
+  } else if (valid) {
+    if(!(err = sensors_get_feature(*name,SENSORS_VT1211_TEMP1,&cur)) &&
+       !(err = sensors_get_feature(*name,SENSORS_VT1211_TEMP1_HYST,&min)) &&
+       !(err = sensors_get_feature(*name,SENSORS_VT1211_TEMP1_OVER,&max))) {
+      print_label(label,10);
+      print_temp_info( cur, max, min, HYST, 1, 0);
+      printf(" %s\n", alarms & VT1211_ALARM_TEMP1 ? "ALARM" : "" );
+    } else
+      printf("ERROR: Can't get TEMP1 data!\n");
+  }
+  free(label);
   if (sensors_get_label_and_valid(*name,SENSORS_VT1211_TEMP2,&label,&valid)) {
     printf("ERROR: Can't get TEMP2 config!\n");
   } else if (valid) {

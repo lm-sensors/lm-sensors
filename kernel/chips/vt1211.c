@@ -99,8 +99,8 @@ superio_exit(void)
    changes from via686a.
 	Sensor		Voltage Mode	Temp Mode
 	--------	------------	---------
-	Reading 1			temp3
-	Reading 3			temp1	not in vt1211
+	Reading 1			temp3   Intel thermal diode
+	Reading 3			temp1   VT1211 internal thermal diode
 	UCH1/Reading2	in0		temp2
 	UCH2		in1		temp4
 	UCH3		in2		temp5
@@ -249,7 +249,7 @@ static struct i2c_driver vt1211_driver = {
 #define VT1211_SYSCTL_IN6 1006
 #define VT1211_SYSCTL_FAN1 1101
 #define VT1211_SYSCTL_FAN2 1102
-#define VT1211_SYSCTL_TEMP 1200
+#define VT1211_SYSCTL_TEMP1 1200
 #define VT1211_SYSCTL_TEMP2 1201
 #define VT1211_SYSCTL_TEMP3 1202
 #define VT1211_SYSCTL_TEMP4 1203
@@ -268,7 +268,7 @@ static struct i2c_driver vt1211_driver = {
 #define VT1211_ALARM_IN2 0x02
 #define VT1211_ALARM_IN5 0x04
 #define VT1211_ALARM_IN3 0x08
-#define VT1211_ALARM_TEMP 0x10
+#define VT1211_ALARM_TEMP1 0x10
 #define VT1211_ALARM_FAN1 0x40
 #define VT1211_ALARM_FAN2 0x80
 #define VT1211_ALARM_IN4 0x100
@@ -277,7 +277,7 @@ static struct i2c_driver vt1211_driver = {
 #define VT1211_ALARM_CHAS 0x1000
 #define VT1211_ALARM_TEMP3 0x8000
 /* duplicates */
-#define VT1211_ALARM_IN0 VT1211_ALARM_TEMP
+#define VT1211_ALARM_IN0 VT1211_ALARM_TEMP2
 #define VT1211_ALARM_TEMP4 VT1211_ALARM_IN1
 #define VT1211_ALARM_TEMP5 VT1211_ALARM_IN2
 #define VT1211_ALARM_TEMP6 VT1211_ALARM_IN3
@@ -302,9 +302,9 @@ static ctl_table vt1211_dir_table_template[] = {
     datasheet says these are reserved
 	{VT1211_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &vt1211_in},
-	{VT1211_SYSCTL_TEMP, "temp1", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &vt1211_temp},
 */
+	{VT1211_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt1211_temp},
 	{VT1211_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt1211_temp},
 	{VT1211_SYSCTL_TEMP3, "temp3", NULL, 0, 0644, NULL,
@@ -513,7 +513,7 @@ static void vt1211_update_client(struct i2c_client *client)
 			data->fan_min[i - 1] = vt_rdval(client,
 						     VT1211_REG_FAN_MIN(i));
 		}
-		for (i = 2; i <= 7; i++) {
+		for (i = 1; i <= 7; i++) {
 			if(ISTEMP(i, data->uch_config)) {
 				data->temp[i - 1] = vt_rdval(client,
 					             VT1211_REG_TEMP(i)) << 2;
@@ -638,7 +638,7 @@ void vt1211_temp(struct i2c_client *client, int operation, int ctl_name,
 		  int *nrels_mag, long *results)
 {
 	struct vt1211_data *data = client->data;
-	int nr = ctl_name - VT1211_SYSCTL_TEMP;
+	int nr = ctl_name - VT1211_SYSCTL_TEMP1;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 1;
