@@ -434,23 +434,44 @@ for my $i ( 0 .. $#dimm_list ) {
 		next unless $bytes[63] == $dimm_checksum or $opt_igncheck;
 		
 		$dimm_count++;
-		printl "# of bytes written to SDRAM EEPROM",$bytes[0];
+		# Simple heuristic to detect Rambus
+		my $is_rambus = $bytes[0] < 4;
+		my $temp;
+		if ($is_rambus) {
+			if ($bytes[0] == 1) { $temp = "0.7"; }
+			elsif ($bytes[0] == 2) { $temp = "1.0"; }
+			elsif ($bytes[0] == 0 || $bytes[0] == 255) { $temp = "Invalid"; }
+			else { $temp = "Reserved"; }
+			printl "SPD Revision", $temp;
+		} else {
+			printl "# of bytes written to SDRAM EEPROM",
+			       $bytes[0];
+		}
 
 		$l = "Total number of bytes in EEPROM";
-		if ($bytes[1] <= 13) {
+		if ($bytes[1] <= 14) {
 			printl $l, 2**$bytes[1];
 		} elsif ($bytes[1] == 0) {
 			printl $l, "RFU"; 
 		} else { printl $l, "ERROR!"; }
 
 		$l = "Fundamental Memory type";
-		if ($bytes[2] == 2) { printl $l, "EDO"; }
-		elsif ($bytes[2] == 4) { printl $l, "SDR SDRAM"; }
-		elsif ($bytes[2] == 7) { printl $l, "DDR SDRAM"; }
-		elsif ($bytes[2] == 8) { printl $l, "DDR2 SDRAM"; }
-		elsif ($bytes[2] == 17) { printl $l, "Rambus [UNSUPPORTED]"; }
-		elsif ($bytes[2] == 1) { printl $l, "Direct Rambus [UNSUPPORTED]"; }
-		else { printl $l, "???"; }
+		if ($is_rambus) {
+			if ($bytes[2] == 1) { $temp = "Direct Rambus"; }
+			elsif ($bytes[2] == 17) { $temp = "Rambus"; }
+			else { $temp = "Unknown"; }
+		} else {
+			if ($bytes[2] == 1) { $temp = "FPM DRAM"; }
+			elsif ($bytes[2] == 2) { $temp = "EDO"; }
+			elsif ($bytes[2] == 3) { $temp = "Pipelined Nibble"; }
+			elsif ($bytes[2] == 4) { $temp = "SDR SDRAM"; }
+			elsif ($bytes[2] == 5) { $temp = "Multiplexed ROM"; }
+			elsif ($bytes[2] == 6) { $temp = "DDR SGRAM"; }
+			elsif ($bytes[2] == 7) { $temp = "DDR SDRAM"; }
+			elsif ($bytes[2] == 8) { $temp = "DDR2 SDRAM"; }
+			else { $temp = "Unknown"; }
+		}
+		printl $l, $temp;
 
 		$l = "Number of Row Address Bits (SDRAM only)";
 		if ($bytes[3] == 0) { printl $l, "Undefined!" } 		
@@ -472,7 +493,7 @@ for my $i ( 0 .. $#dimm_list ) {
 
 		$l = "Data Width (SDRAM only)";
 		if ($bytes[7] > 1) { printl $l, "Undefined!" } else {
-			my $temp=($bytes[7]*256) + $bytes[6];
+			$temp = ($bytes[7] * 256) + $bytes[6];
 			printl $l, $temp; }
 
 		$l = "Module Interface Signal Levels";
@@ -485,7 +506,7 @@ for my $i ( 0 .. $#dimm_list ) {
 		else { printl $l, "Undefined!";}
 		
 		$l = "Cycle Time (SDRAM) highest CAS latency";
-		my $temp=($bytes[9] >> 4) + ($bytes[9] & 0xf) * 0.1;
+		$temp = ($bytes[9] >> 4) + ($bytes[9] & 0xf) * 0.1;
 		printl $l, "${temp}ns";
 		
 		if (($bytes[2] == 7) || ($bytes[2] == 8)) {
@@ -736,8 +757,12 @@ for my $i ( 0 .. $#dimm_list ) {
 		$temp = manufacturer_data(@{$extra});
 		printl $l, $temp if defined $temp;
 		
+		# Try the location code as ASCII first, as earlier specifications
+		# suggested this. As newer specifications don't mention it anymore,
+		# we still fall back to binary.
 		$l = "Manufacturing Location Code";
-		$temp = sprintf("0x%.2X\n",$bytes[8]);
+		$temp = (chr($bytes[8]) =~ m/^[\w\d]$/) ? chr($bytes[8])
+		      : sprintf("0x%.2X", $bytes[8]);
 		printl $l, $temp;
 		
 		$l = "Manufacurer's Part Number";
