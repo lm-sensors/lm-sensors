@@ -285,6 +285,18 @@ sub manufacturer_data(@)
 	return "$hex(\"$asc\")";
 }
 
+sub part_number(@)
+{
+	my $asc = "";
+	my $byte;
+
+	while (defined ($byte = shift) && $byte >= 32 && $byte < 127) {
+		$asc .= chr($byte);
+	}
+
+	return ($asc eq "") ? "Undefined" : $asc;
+}
+
 sub printl ($$) # print a line w/ label and value
 {
 	my ($label, $value) = @_;
@@ -765,8 +777,8 @@ for my $i ( 0 .. $#dimm_list ) {
 		      : sprintf("0x%.2X", $bytes[8]);
 		printl $l, $temp;
 		
-		$l = "Manufacurer's Part Number";
-		$temp = pack("C18", @bytes[9..26]);
+		$l = "Part Number";
+		$temp = part_number(@bytes[9..26]);
 		printl $l, $temp;
 		
 		$l = "Revision Code";
