@@ -2002,6 +2002,7 @@ chip "vt1211-*"
     set in5_min 3.3 * 0.95
     set in5_max 3.3 * 1.05
 
+    compute temp1  (@ - 65) / 0.9686,  (@ * 0.9686) + 65
     compute temp3  (@ - 65) / 0.9686,  (@ * 0.9686) + 65
 #
 # thermistor calculations.
