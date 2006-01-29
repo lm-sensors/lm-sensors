@@ -21,6 +21,8 @@ lm_sensors CHANGES file
            Fix bus matching code for Linux 2.6 (Karsten Petersen)
            Add f71805f, w83687thf support
            Add platform drivers support
+           Fix sysctl warnings on x86_64
+           Restore vt1211 temp1
   Makefile: Compile user-space programs with -Wundef
   Module i2c-i801: Simplify the hardware PEC code
                    Always set PEC mode explicitly before each transaction
@@ -60,9 +62,16 @@ lm_sensors CHANGES file
                   Fix fan control mode (PWM/DC) reporting
                   Fix fan div auto-adjust (Yuan Mu)
   Module w83l785ts: Minor cleanup (2.6 backport)
+  Module vt1211: Restore temp1
   Modules vt1211, vt8231: Change default VRM to 9.1
   Program decode-dimms.pl: Add lookup tables for manufacturer names
                            Fix rounding error in PCxxxx speed computation
+                           Improve text output
+                           Improve speed under Linux 2.6
+                           Verify checksum before decoding anything
+                           Improve manufacturing location decoding
+                           Improve memory type detection
+                           Improve part number decoding
   Program i2cdump: Drop now useless #ifdef tests
                    Fix capability check for continuous byte mode
   Program i2cget: New
