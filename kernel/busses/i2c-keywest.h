@@ -1,6 +1,8 @@
 #ifndef __I2C_KEYWEST_H__
 #define __I2C_KEYWEST_H__
 
+#include <asm/semaphore.h>
+
 /* The Tumbler audio equalizer can be really slow sometimes */
 #define POLL_TIMEOUT		(2*HZ)
 

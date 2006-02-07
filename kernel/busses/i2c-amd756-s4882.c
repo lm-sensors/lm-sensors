@@ -38,6 +38,7 @@
 #include <linux/slab.h>
 #include <linux/init.h>
 #include <linux/i2c.h>
+#include <asm/semaphore.h>
 
 #define DRV_NAME	"i2c-amd756-s4882"
 
