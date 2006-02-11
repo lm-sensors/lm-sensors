@@ -1,7 +1,7 @@
 lm_sensors CHANGES file
 -----------------------
 
-2.10.0 (2005????)
+2.10.0 (200602??)
   File doc/lm_sensors-FAQ.texi: Remove version 1 specifics part
   File doc/busses/i2c-viapro: Update (2.6 backport)
   File doc/chips/via686a: Update (2.6 backport)
@@ -81,6 +81,7 @@ lm_sensors CHANGES file
                                        Print the correct bus type if bus
                                        functionality can be queried
   Program isadump: Display the real addresses in flat mode
+  Program mkdev.sh: Silently skip already existing nodes
   Program mkpatch: Include f71805f
   Program sensord: Do not log algorithm names
                    Drop EEPROM support (Aurelien Jarno)
