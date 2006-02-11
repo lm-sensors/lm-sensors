@@ -23,8 +23,10 @@ fi
 i=0;
 
 while [ $i -lt $NUMBER ] ; do
-	echo /dev/i2c-$i
-	mknod -m $MODE /dev/i2c-$i c 89 $i || exit
-	chown "$OUSER:$OGROUP" /dev/i2c-$i || exit
+	if [ ! -c /dev/i2c-$i ] ; then
+		echo /dev/i2c-$i
+		mknod -m $MODE /dev/i2c-$i c 89 $i || exit
+		chown "$OUSER:$OGROUP" /dev/i2c-$i || exit
+	fi
 	i=$[$i + 1]
 done
