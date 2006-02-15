@@ -1,6 +1,8 @@
 lm_sensors CHANGES file
 -----------------------
 
+2.10.1 (2006????)
+
 2.10.0 (20060214)
   File doc/lm_sensors-FAQ.texi: Remove version 1 specifics part
   File doc/busses/i2c-viapro: Update (2.6 backport)
