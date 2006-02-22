@@ -732,6 +732,14 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        driver => "i2c-piix4",
        match => qr/^SMBus PIIX4 adapter at /,
      } , 
+     {
+       vendid => 0x1166,
+       devid  => 0x0205,
+       func => 0,
+       procid => "ServerWorks HT-1000 South Bridge",
+       driver => "i2c-piix4",
+       match => qr/^SMBus PIIX4 adapter at /,
+     },
      { 
        vendid => 0x1283,
        devid  => 0x8172,
