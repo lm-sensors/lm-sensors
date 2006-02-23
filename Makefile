@@ -47,18 +47,16 @@ LINUX_HEADERS := $(LINUX)/include
 I2C_HEADERS := /usr/local/include
 #I2C_HEADERS := $(LINUX_HEADERS)
 
-# Uncomment the third line on SMP systems if the magic invocation fails.
+ifneq ($(MAKECMDGOALS),user)
+ifneq ($(MAKECMDGOALS),user_install)
+ifneq ($(MAKECMDGOALS),user_uninstall)
 SMP := $(shell if grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_SMP[[:space:]]*1' $(LINUX_HEADERS)/linux/autoconf.h ; \
                then echo 1; else echo 0; fi)
-#SMP := 0
-#SMP := 1
-
-# Uncomment the second or third line if the magic invocation fails.
-# We need to know whether CONFIG_MODVERSIONS is defined.
 MODVER := $(shell if grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_MODVERSIONS[[:space:]]*1' $(LINUX_HEADERS)/linux/autoconf.h ; \
                   then echo 1; else echo 0; fi)
-#MODVER := 0
-#MODVER := 1
+endif
+endif
+endif
 
 # Uncomment the second line if you are a developer. This will enable many
 # additional warnings at compile-time
