@@ -22,6 +22,7 @@
 
 #include <string.h>
 #include <limits.h>
+#include <errno.h>
 #include <sysfs/libsysfs.h>
 #include "data.h"
 #include "error.h"
@@ -171,12 +172,14 @@ int sensors_read_sysfs_bus(void)
 	int ret = 0;
 
 	if (!(cls = sysfs_open_class("i2c-adapter"))) {
-		ret = -SENSORS_ERR_PROC;
+		if (errno && errno != ENOENT)
+			ret = -SENSORS_ERR_PROC;
 		goto exit0;
 	}
 
 	if (!(clsdevs = sysfs_get_class_devices(cls))) {
-		ret = -SENSORS_ERR_PROC;
+		if (errno)
+			ret = -SENSORS_ERR_PROC;
 		goto exit1;
 	}
 
