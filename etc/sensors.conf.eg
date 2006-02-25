@@ -1802,8 +1802,8 @@ chip "pcf8591-*"
 
 chip "adm1021-*" "adm1023-*" "max1617-*" "max1617a-*" "thmc10-*" "lm84-*" "gl523sm-*" "mc1066-*"
 
-   label temp 		"Board"
-   label remote_temp	"CPU"
+   label temp 		"Board Temp"
+   label remote_temp	"CPU Temp"
 #   set temp_low		40
 #   set temp_over		70
 #   set remote_temp_low		40
@@ -2234,9 +2234,9 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
    label in4   "V12"
 
 # Temperature inputs
-   label temp1  "CPU"
-   label temp2  "Board"
-   label temp3  "Remote"
+   label temp1  "CPU Temp"
+   label temp2  "Board Temp"
+   label temp3  "Remote Temp"
 
 # Fan inputs
    label fan1   "CPU_Fan"
