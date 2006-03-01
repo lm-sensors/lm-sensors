@@ -1842,6 +1842,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	devid => 0x0406,
 	logdev => 0x04,
       },
+      {
+	name => "Fintek F71872F/FG Super IO Sensors",
+	driver => "f71805f",
+	devid => 0x0341,
+	logdev => 0x04,
+      },
     ],
   },
   {
