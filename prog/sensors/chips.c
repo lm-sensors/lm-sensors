@@ -2612,10 +2612,11 @@ void print_w83792d(const sensors_chip_name *name)
     printf("ERROR: Can't get IN6 data!\n");
   free(label);
 
-  if (!sensors_get_label_and_valid(*name,SENSORS_W83782D_IN7,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_W83782D_IN7,&cur) &&
-      !sensors_get_feature(*name,SENSORS_W83782D_IN7_MIN,&min) &&
-      !sensors_get_feature(*name,SENSORS_W83782D_IN7_MAX,&max)) {
+  if (!sensors_get_label_and_valid(*name, SENSORS_W83792D_IN7,
+                                   &label, &valid) &&
+      !sensors_get_feature(*name, SENSORS_W83792D_IN7, &cur) &&
+      !sensors_get_feature(*name, SENSORS_W83792D_IN7_MIN, &min) &&
+      !sensors_get_feature(*name, SENSORS_W83792D_IN7_MAX, &max)) {
     if (valid) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s\n",
@@ -2625,10 +2626,11 @@ void print_w83792d(const sensors_chip_name *name)
     printf("ERROR: Can't get IN7 data!\n");
   free(label);
 
-  if (!sensors_get_label_and_valid(*name,SENSORS_W83782D_IN8,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_W83782D_IN8,&cur) &&
-      !sensors_get_feature(*name,SENSORS_W83782D_IN8_MIN,&min) &&
-      !sensors_get_feature(*name,SENSORS_W83782D_IN8_MAX,&max)) {
+  if (!sensors_get_label_and_valid(*name, SENSORS_W83792D_IN8,
+                                   &label, &valid) &&
+      !sensors_get_feature(*name, SENSORS_W83792D_IN8, &cur) &&
+      !sensors_get_feature(*name, SENSORS_W83792D_IN8_MIN, &min) &&
+      !sensors_get_feature(*name, SENSORS_W83792D_IN8_MAX, &max)) {
     if (valid) {
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s\n",
