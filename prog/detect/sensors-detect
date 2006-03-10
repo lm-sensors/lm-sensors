@@ -2108,10 +2108,9 @@ sub initialize_modules_list
 
 use vars qw(%pci_list);
 
-# This function returns a hash of hashes. Each hash has some PCI information
-# (more than we will ever need, probably). The most important
-# fields are 'bus', 'slot', 'func' (they uniquely identify a PCI device in 
-# a computer) and 'vendid','devid' (they uniquely identify a type of device).
+# This function returns a hash of hashes. Each hash has some PCI information:
+# 'bus', 'slot' and 'func' uniquely identify a PCI device in a computer;
+# 'vendid' and 'devid' uniquely identify a type of device.
 sub read_proc_dev_pci
 {
   my ($dfn,$vend,%pci_list);
@@ -2119,10 +2118,7 @@ sub read_proc_dev_pci
   local $_;
   while (<INPUTFILE>) {
     my %record;
-    ($dfn,$vend,$record{irq},$record{base_addr0},$record{base_addr1},
-          $record{base_addr2},$record{base_addr3},$record{base_addr4},
-          $record{base_addr5},$record{rom_base_addr}) = 
-          map { oct "0x$_" } (split) [0..9];
+    ($dfn, $vend) = map { hex } (split) [0..1];
     $record{bus} = $dfn >> 8;
     $record{slot} = ($dfn & 0xf8) >> 3;
     $record{func} = $dfn & 0x07;
