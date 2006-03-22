@@ -2813,9 +2813,27 @@ void print_w83627ehf(const sensors_chip_name *name)
 {
   char *label;
   int i, valid;
+  double cur, min, div, max, alarm, over, hyst;
+
+
+  for (i = 0; i < 10; i++) {
+    if (!sensors_get_label_and_valid(*name,SENSORS_W83627EHF_IN0+i,
+        &label,&valid)
+      && !sensors_get_feature(*name,SENSORS_W83627EHF_IN0+i,&cur)
+      && !sensors_get_feature(*name,SENSORS_W83627EHF_IN0_MIN+i,&min)
+      && !sensors_get_feature(*name,SENSORS_W83627EHF_IN0_MAX+i,&max)
+      && !sensors_get_feature(*name,SENSORS_W83627EHF_IN0_ALARM+i,&alarm)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V) %s\n",
+               cur,min,max,alarm ? "ALARM" : "");
+      }
+    } else
+      printf("ERROR: Can't get IN%d data!\n",i + 1);
+    free(label);
+  }
 
   for (i = 0; i < 5; i++) {
-    double cur, min, div;
     if (!sensors_get_label_and_valid(*name, SENSORS_W83627EHF_FAN1+i,
         &label, &valid)
      && !sensors_get_feature(*name, SENSORS_W83627EHF_FAN1+i, &cur)
@@ -2833,7 +2851,6 @@ void print_w83627ehf(const sensors_chip_name *name)
   }
 
   for (i = 0; i < 3; i++) {
-    double cur, over, hyst;
     if (!sensors_get_label_and_valid(*name, SENSORS_W83627EHF_TEMP1+i,
         &label, &valid)
      && !sensors_get_feature(*name, SENSORS_W83627EHF_TEMP1+i, &cur)
