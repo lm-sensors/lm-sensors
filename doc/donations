@@ -88,3 +88,9 @@ Aweta		Intel Server system				2005-09
 
 Barracuda	Jetway K8M8MS, Sempron 2600+, 256 MB RAM	2005-10
 Networks	Drivers developed: f71805f			Jean Delvare
+
+Winbond		Celeron CPU, 512MB RAM				2006-03
+		W83792D watchdog and VID support		Rudolf Marek
+
+ASUSTeK		ASUS P5MT-S					2006-03
+		Platform for W83792D related development	Rudolf Marek
