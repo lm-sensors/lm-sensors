@@ -2815,7 +2815,6 @@ void print_w83627ehf(const sensors_chip_name *name)
   int i, valid;
   double cur, min, div, max, alarm, over, hyst;
 
-
   for (i = 0; i < 10; i++) {
     if (!sensors_get_label_and_valid(*name,SENSORS_W83627EHF_IN0+i,
         &label,&valid)
@@ -2828,8 +2827,9 @@ void print_w83627ehf(const sensors_chip_name *name)
         printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V) %s\n",
                cur,min,max,alarm ? "ALARM" : "");
       }
-    } else
-      printf("ERROR: Can't get IN%d data!\n",i + 1);
+    }
+    /* Earlier versions of the driver did not have voltage support, so we
+       keep quiet on error */
     free(label);
   }
 
@@ -2843,7 +2843,11 @@ void print_w83627ehf(const sensors_chip_name *name)
         printf("%4.0f RPM  (min = %4.0f RPM", cur, min);
         if (!sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_DIV+i, &div))
           printf(", div = %1.0f", div);
-        printf(")\n");
+        printf(")");
+        if (!sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_ALARM+i,
+                                 &alarm) && alarm)
+          printf(" ALARM");
+        printf("\n");
       }
     } else if (i < 3)
       printf("ERROR: Can't get FAN%d data!\n", i + 1);
@@ -2859,6 +2863,9 @@ void print_w83627ehf(const sensors_chip_name *name)
       if (valid) {
         print_label(label,10);
         print_temp_info(cur, over, hyst, HYST, i ? 1 : 0, i ? 1 : 0);
+        if (!sensors_get_feature(*name, SENSORS_W83627EHF_TEMP1_ALARM+i,
+                                 &alarm) && alarm)
+          printf(" ALARM");
         printf("\n");
       }
     } else
