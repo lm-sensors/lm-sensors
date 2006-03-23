@@ -825,21 +825,24 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        devid  => 0x4353,
        func => 0,
        procid => "ATI Technologies Inc ATI SMBus",
-       driver => "to-be-tested",
+       driver => "i2c-piix4",
+       match => qr/^SMBus PIIX4 adapter at /,
      } , 
      { 
        vendid => 0x1002,
        devid  => 0x4363,
        func => 0,
        procid => "ATI Technologies Inc ATI SMBus",
-       driver => "to-be-tested",
+       driver => "i2c-piix4",
+       match => qr/^SMBus PIIX4 adapter at /,
      } , 
      { 
        vendid => 0x1002,
        devid  => 0x4372,
        func => 0,
        procid => "ATI Technologies Inc ATI SMBus",
-       driver => "to-be-tested",
+       driver => "i2c-piix4",
+       match => qr/^SMBus PIIX4 adapter at /,
      } , 
 );
 
