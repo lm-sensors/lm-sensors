@@ -63,7 +63,7 @@ At least the following I2C/SMBus adapters are supported:
   Intel I810/I810E/I815/I845G GMCH
   Intel 82443MX (440MX)
   NVidia nForce, nForce2, nForce3, nForce4
-  ServerWorks OSB4, CSB5, CSB6
+  ServerWorks OSB4, CSB5, CSB6, HT-1000
   SiS 5595, 630, 645, 655, 730
   SMSC Victory66
   3Dfx Voodoo 3 and Banshee

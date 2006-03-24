@@ -220,12 +220,11 @@ CONFIG_I2C_I810
   This can also be built as a module which can be inserted and removed
   while the kernel is running.
 
-Intel 82371AB PIIX4(E) / ServerWorks OSB4 and CSB5
+Intel 82371AB PIIX4(E), ServerWorks OSB4, CSB5, CSB6, HT-1000
 CONFIG_I2C_PIIX4
   If you say yes to this option, support will be included for the
-  Intel PIIX4, PIIX4E, and 443MX, Serverworks OSB4/CSB5,
-  and SMSC Victory66 mainboard
-  I2C interfaces. This can also be
+  Intel PIIX4, PIIX4E, 443MX, Serverworks OSB4, CSB5, CSB6 and
+  HT-1000, and SMSC Victory66 mainboard I2C interfaces. This can also be
   built as a module which can be inserted and removed while the kernel
   is running.
 

@@ -22,7 +22,7 @@
 /*
    Supports:
 	Intel PIIX4, 440MX
-	Serverworks OSB4, CSB5, CSB6
+	Serverworks OSB4, CSB5, CSB6, HT-1000
 	SMSC Victory66
 
    Note: we assume there can only be one device, with one SMBus interface.
@@ -459,6 +459,8 @@ static struct i2c_adapter piix4_adapter = {
 #define PCI_DEVICE_ID_SERVERWORKS_CSB6 0x0203
 #endif
 
+#define PCI_DEVICE_ID_SERVERWORKS_HT1000SB 0x0205
+
 static struct pci_device_id piix4_ids[] __devinitdata = {
 	{
 		.vendor =	PCI_VENDOR_ID_INTEL,
@@ -484,6 +486,13 @@ static struct pci_device_id piix4_ids[] __devinitdata = {
 	{
 		.vendor =	PCI_VENDOR_ID_SERVERWORKS,
 		.device =	PCI_DEVICE_ID_SERVERWORKS_CSB6,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+		.driver_data =	0,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_SERVERWORKS,
+		.device =	PCI_DEVICE_ID_SERVERWORKS_HT1000SB,
 		.subvendor =	PCI_ANY_ID,
 		.subdevice =	PCI_ANY_ID,
 		.driver_data =	0,
