@@ -2141,6 +2141,59 @@ chip "smsc47m1-*"
 #    set fan1_min 3000
 #    set fan2_min 3000
 
+chip "smsc47m192-*"
+
+# Temperature and voltage input from SMSC LPC47M192 and LPC47M997 chips
+# This example works on a Gigabyte K8U motherboard
+# Voltages are scaled internally, no computations needed
+
+    label in0 "+2.5V"
+    set in0_min  2.5 * 0.95
+    set in0_max  2.5 * 1.05
+
+    label in1 "VCore"
+    set in1_min  vid * 0.95
+    set in1_max  vid * 1.05
+
+    label in2 "+3.3V"
+    set in2_min  3.3 * 0.95
+    set in2_max  3.3 * 1.05
+
+    label in3 "+5V"
+    set in3_min  5.0 * 0.95
+    set in3_max  5.0 * 1.05
+
+    label in4 "+12V"
+    set in4_min  12.0 * 0.95
+    set in4_max  12.0 * 1.05
+
+    label in5 "VCC"
+    set in5_min  3.3 * 0.95
+    set in5_max  3.3 * 1.05
+
+    label in6 "+1.5V"
+    set in6_min  1.5 * 0.95
+    set in6_max  1.5 * 1.05
+#   ignore in6
+
+    label in7 "+1.8V"
+    set in7_min  1.8 * 0.95
+    set in7_max  1.8 * 1.05
+#   Haven't yet heard from any board that has 1.8V connected, so
+#   this might be more appropriate:
+#   ignore in7
+    
+    label temp1 "Chip Temp"
+#    set temp1_min   0
+#    set temp1_max   60
+
+    label temp2 "CPU Temp"
+#    set temp2_min   0
+#    set temp2_max   60
+
+    label temp3 "Sys Temp"
+#    set temp3_min   0
+#    set temp3_max   60
 
 #
 # This example was tested vs. Asus P4S333

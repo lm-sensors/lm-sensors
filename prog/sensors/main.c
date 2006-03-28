@@ -388,6 +388,7 @@ struct match matches[] = {
 	{ "fscher", print_fscher },
 	{ "pcf8591", print_pcf8591 },
 	{ "vt1211", print_vt1211 },
+	{ "smsc47m192", print_smsc47m192 },
 	{ "smsc47m1", print_smsc47m1 },
 	{ "pc87360", print_pc87360 },
 	{ "pc87363", print_pc87360 },

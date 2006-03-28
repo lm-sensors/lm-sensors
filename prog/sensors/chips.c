@@ -4460,6 +4460,57 @@ void print_smsc47m1(const sensors_chip_name *name)
   }
 }
 
+void print_smsc47m192(const sensors_chip_name *name)
+{
+  char *label;
+  double cur, min, max;
+  int valid, i;
+
+  for (i=0; i<8; i++) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_SMSC47M192_IN(i),
+                                     &label, &valid) &&
+        !sensors_get_feature(*name, SENSORS_SMSC47M192_IN(i), &cur) &&
+        !sensors_get_feature(*name, SENSORS_SMSC47M192_IN_MIN(i), &min) &&
+        !sensors_get_feature(*name, SENSORS_SMSC47M192_IN_MAX(i), &max)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   ", cur, min, max);
+        if (!sensors_get_feature(*name, SENSORS_SMSC47M192_IN_ALARM(i), &cur))
+          if (cur > 0.5)
+            printf("ALARM");
+        printf("\n");
+      }
+    } else
+      if (i!=4) /* Chip may have +12V input used for VID instead */
+        printf("ERROR: Can't get IN%d data!\n", i);
+    free(label);
+  }
+  for (i=1; i<=3; i++) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_SMSC47M192_TEMP(i),
+                                     &label, &valid) &&
+        !sensors_get_feature(*name, SENSORS_SMSC47M192_TEMP(i), &cur) &&
+        !sensors_get_feature(*name, SENSORS_SMSC47M192_TEMP_MIN(i), &min) &&
+        !sensors_get_feature(*name, SENSORS_SMSC47M192_TEMP_MAX(i), &max)) {
+      if (valid) {
+        print_label(label,10);
+        print_temp_info( cur, max, min, MINMAX, 1, 0);
+        if (i > 1 && !sensors_get_feature(*name,
+                                SENSORS_SMSC47M192_TEMP_FAULT(i), &cur)) {
+           if (cur > 0.5)
+             printf("FAULT");
+        } else
+        if (!sensors_get_feature(*name, SENSORS_SMSC47M192_TEMP_ALARM(i), &cur))
+          if (cur > 0.5)
+            printf("ALARM");
+        printf("\n");
+      }
+    } else
+      printf("ERROR: Can't get TEMP%d data!\n", i);
+    free(label);
+  }
+  print_vid_info(name, SENSORS_SMSC47M192_VID, SENSORS_SMSC47M192_VRM);
+}
+
 void print_pc87360(const sensors_chip_name *name)
 {
   char *label;

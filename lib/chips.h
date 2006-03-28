@@ -1795,6 +1795,21 @@
 #define SENSORS_SMSC47M1_FAN2_DIV 76 /* RW */
 #define SENSORS_SMSC47M1_ALARMS 81 /* R */
 
+#define SENSORS_SMSC47M192_PREFIX "smsc47m192"
+
+#define SENSORS_SMSC47M192_IN(n)		(1 + (n))	/* R */
+#define SENSORS_SMSC47M192_IN_MIN(n)		(21 + (n))	/* RW */
+#define SENSORS_SMSC47M192_IN_MAX(n)		(41 + (n))	/* RW */
+#define SENSORS_SMSC47M192_IN_ALARM(n)		(61 + (n))	/* R */
+#define SENSORS_SMSC47M192_TEMP(n)		(100 + (n))	/* R */
+#define SENSORS_SMSC47M192_TEMP_MAX(n)		(120 + (n))	/* RW */
+#define SENSORS_SMSC47M192_TEMP_MIN(n)		(140 + (n))	/* RW */
+#define SENSORS_SMSC47M192_TEMP_OFFSET(n)	(160 + (n))	/* RW */
+#define SENSORS_SMSC47M192_TEMP_ALARM(n)	(180 + (n))	/* R */
+#define SENSORS_SMSC47M192_TEMP_FAULT(n)	(200 + (n))	/* R */
+#define SENSORS_SMSC47M192_VID			301		/* R */
+#define SENSORS_SMSC47M192_VRM			302		/* RW */
+
 #define SENSORS_PC87360_PREFIX "pc87360"
 #define SENSORS_PC87363_PREFIX "pc87363"
 #define SENSORS_PC87364_PREFIX "pc87364"

@@ -1489,7 +1489,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
      },
      {
        name => "SMSC LPC47M15x, LPC47M192 or LPC47M997",
-       driver => "to-be-written",
+       driver => "smsc47m192",
        i2c_addrs => [0x2c..0x2d],
        i2c_detect => sub { smsc47m192_detect @_ },
      },
