@@ -2,6 +2,20 @@ lm_sensors CHANGES file
 -----------------------
 
 2.10.1 (2006????)
+  File etc/sensors.conf.eg: Add an smsc47m192 section
+  Library: Fix device scan when no i2c support is present
+           Add support for W83627EHF voltage inputs and alarms
+           Add support for the smsc47m192 driver
+  Makefile: Don't grep autoconf.h on user-space targets
+  Module i2c-piix4: Add ServerWorks HT-1000 support (2.6 backport)
+  Module w83781d: Use real-time alarm registers when possible (2.6 backport)
+  Program mkpatch: Fix typo breaking f71805f
+  Program sensors: No error messages on missing w83792d fan4-7 (Yuan Mu)
+                   Add smsc47m192 support
+  Program sensors-detect: Add ServerWorks HT-1000 SMBus detection
+                          Add ATI IXP200/300/400 SMBus detection
+                          Prevent warning on 64-bit PCI addresses
+
 
 2.10.0 (20060214)
   File doc/lm_sensors-FAQ.texi: Remove version 1 specifics part
