@@ -1780,6 +1780,11 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
         devid => 0x81,
         logdev => 0x08,
       },
+      {
+        name => "SMSC LPC47M584-NC Super IO",
+        # No datasheet
+        devid => 0x76,
+      },
     ],
   },
   {
@@ -2815,6 +2820,10 @@ sub scan_superio
       }
       print "  Success...";
 # does it have hardware monitoring capabilities
+      if (!exists $chip->{driver}) {
+	print " (no information available)\n";
+	next;
+      }
       if($chip->{driver} eq "not-a-sensor") {
 	print " (no hardware monitoring capabilities)\n";
 	next;
