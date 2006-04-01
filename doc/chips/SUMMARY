@@ -319,6 +319,7 @@ This may help identify a chip after doing a 'i2cdump [bus] [address]'.
 0x00	National (on LM84)
 0x01	National
 0x12C3	Asus (at 0x4F)
+0x1934	Fintek (at 0x5D-0x5E)
 0x23	Analog Devices
 0x41	Analog Devices (also at 0x16)
 0x49	TI
