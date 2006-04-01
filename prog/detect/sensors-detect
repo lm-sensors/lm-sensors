@@ -917,7 +917,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             smartbatt_chgr_detect adt7467_detect lm92_detect max1619_detect
             lm93_detect lm77_detect lm63_detect pca9556_detect
             w83791sd_detect vt1211_i2c_detect vt1211_alias_detect
-            smsc47m192_detect ite_overclock_detect);
+            smsc47m192_detect ite_overclock_detect fintek_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1331,7 +1331,13 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        name => "National Semiconductor LM63",
        driver => "lm63",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { lm63_detect @_ },
+       i2c_detect => sub { lm63_detect 1, @_ },
+     },
+     {
+       name => "Fintek F75363SG",
+       driver => "lm63", # Not yet
+       i2c_addrs => [0x4c],
+       i2c_detect => sub { lm63_detect 2, @_ },
      },
      {
        name => "National Semiconductor LM92",
@@ -1492,6 +1498,30 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "smsc47m192",
        i2c_addrs => [0x2c..0x2d],
        i2c_detect => sub { smsc47m192_detect @_ },
+     },
+     {
+       name => "Fintek F75111R/RG/N (GPIO)",
+       driver => "to-be-written",
+       i2c_addrs => [0x4e], # 0x37 not probed
+       i2c_detect => sub { fintek_detect 1, @_ },
+     },
+     {
+       name => "Fintek F75121R/F75122R/RG (VID+GPIO)",
+       driver => "to-be-written",
+       i2c_addrs => [0x4e], # 0x37 not probed
+       i2c_detect => sub { fintek_detect 2, @_ },
+     },
+     {
+       name => "Fintek F75375S/SP",
+       driver => "to-be-written",
+       i2c_addrs => [0x2d..0x2e],
+       i2c_detect => sub { fintek_detect 4, @_ },
+     },
+     {
+       name => "Fintek F75387SG/RG",
+       driver => "to-be-written",
+       i2c_addrs => [0x2d..0x2e],
+       i2c_detect => sub { fintek_detect 5, @_ },
      },
      {
        name => "Philips Semiconductors SAA1064",
@@ -1855,6 +1885,11 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	driver => "f71805f",
 	devid => 0x0341,
 	logdev => 0x04,
+      },
+      {
+	name => "Fintek F81218D Super IO",
+	driver => "not-a-sensor",
+	devid => 0x0206,
       },
     ],
   },
@@ -3358,29 +3393,38 @@ sub lm90_detect
   return;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
+# $_[0]: Chip to detect
+#   (1 = LM63, 2 = F75363SG)
+# $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
-# $_[1]: Address (unused)
+# $_[2]: Address (unused)
 # Returns: undef if not detected, 8 if detected.
 # Registers used:
 #   0xfe: Manufacturer ID
 #   0xff: Chip ID / die revision
-#   0x03: Configuration (two unused bits)
-#   0x16: Alert mask (three unused bits)
+#   0x03: Configuration (two or three unused bits)
+#   0x16: Alert mask (two or three unused bits)
 #   0x03-0x0e: Mirrored registers (five pairs)
 sub lm63_detect
 {
-  my ($file, $addr) = @_;
+  my ($chip, $file, $addr) = @_;
 
   my $mid = i2c_smbus_read_byte_data($file, 0xfe);
   my $cid = i2c_smbus_read_byte_data($file, 0xff);
-  return if $mid != 0x01    # National Semiconductor
-         || $cid != 0x41;   # LM63
-
   my $conf = i2c_smbus_read_byte_data($file, 0x03);
   my $mask = i2c_smbus_read_byte_data($file, 0x16);
-  return if ($conf & 0x18) != 0x00
-         || ($mask & 0xa4) != 0xa4;
+
+  if ($chip == 1) {
+    return if $mid != 0x01    # National Semiconductor
+           || $cid != 0x41;   # LM63
+    return if ($conf & 0x18) != 0x00
+           || ($mask & 0xa4) != 0xa4;
+  } elsif ($chip == 2) {
+    return if $mid != 0x23    # Fintek
+           || $cid != 0x20;   # F75363SG
+    return if ($conf & 0x1a) != 0x00
+           || ($mask & 0x84) != 0x00;  
+  }
 
   # For compatibility with the LM86, some registers are mirrored
   # to alternative locations
@@ -4477,6 +4521,39 @@ sub smsc47m192_detect
            and (i2c_smbus_read_byte_data($file, 0x47) & 0x70) == 0x00
            and (i2c_smbus_read_byte_data($file, 0x49) & 0xFE) == 0x80;
   return ($addr == 0x2d ? 6 : 5);
+}
+
+# $_[0]: Chip to detect
+#   (1 = F75111R/RG/N, 2 = F75121R/F75122R/RG, 4 = F75375S/SG,
+#    5 = F75387SG/RG)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We assume an i2c_set_slave_addr was already done.
+# $_[2]: Address (unused)
+# Returns: undef if not detected, 7 if detected.
+# Registers used:
+#   0x5A-0x5B: Chip ID
+#   0x5D-0x5E: Vendor ID
+sub fintek_detect
+{
+  my ($chip, $file, $addr) = @_;
+  my $chipid = (i2c_smbus_read_byte_data($file, 0x5A) << 8)
+             | i2c_smbus_read_byte_data($file, 0x5B);
+  my $vendid = (i2c_smbus_read_byte_data($file, 0x5D) << 8)
+             | i2c_smbus_read_byte_data($file, 0x5E);
+
+  return unless $vendid == 0x1934; # Fintek ID
+
+  if ($chip == 1) { # F75111R/RG/N
+    return unless $chipid == 0x0300;
+  } elsif ($chip == 2) { # F75121R/F75122R/RG
+    return unless $chipid == 0x0301;
+  } elsif ($chip == 4) { # F75375S/SG
+    return unless $chipid == 0x0306;
+  } elsif ($chip == 5) { # F75387SG/RG
+    return unless $chipid == 0x0410;
+  }
+
+  return 7;
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
