@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 {
 	char *end;
 	int i, j, res, i2cbus, address, size, file;
-	int bank = 0, bankreg = 0x4E;
+	int bank = 0, bankreg = 0x4E, old_bank = 0;
 	char filename[20];
 	long funcs;
 	int block[256];
@@ -279,7 +279,14 @@ int main(int argc, char *argv[])
 
 	/* See Winbond w83781d data sheet for bank details */
 	if (bank && size != I2C_SMBUS_BLOCK_DATA) {
-		i2c_smbus_write_byte_data(file, bankreg, bank | 0x80);
+		old_bank = i2c_smbus_read_byte_data(file, bankreg);
+		if (old_bank >= 0)
+			res = i2c_smbus_write_byte_data(file, bankreg,
+				bank | (old_bank & 0xf0));
+		if (old_bank < 0 || res < 0) {
+			fprintf(stderr, "Error: Bank switching failed\n");
+			exit(1);
+		}
 	}
 
 	/* handle all but word data */
@@ -376,7 +383,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	if (bank && size != I2C_SMBUS_BLOCK_DATA) {
-		i2c_smbus_write_byte_data(file, bankreg, 0x80);
+		i2c_smbus_write_byte_data(file, bankreg, old_bank);
 	}
 	exit(0);
 }
