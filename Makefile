@@ -82,7 +82,8 @@ CC := gcc
 # This is the main modules directory into which the modules will be installed.
 # The magic invocation will return something like this:
 #   /lib/modules/2.4.29
-MODPREF := /lib/modules/$(shell $(CC) -I$(LINUX_HEADERS) -E etc/config.c | grep uts_release |cut -f 2 -d'"')
+KERNELVERSION := $(shell $(CC) -I$(LINUX_HEADERS) -E etc/config.c | grep uts_release | cut -f 2 -d'"')
+MODPREF := /lib/modules/$(KERNELVERSION)
 
 # When building userspace for use with 2.4.x series kernels, we turn off
 # sysfs support by default.  You can override this (e.g. if you want
@@ -319,7 +320,9 @@ user_install::
 all :: user
 install :: all user_install
 ifeq ($(DESTDIR),)
-	-/sbin/depmod -a
+	-if [ -r $(MODPREF)/build/System.map -a -x /sbin/depmod ] ; then \
+	  /sbin/depmod -a -F $(MODPREF)/build/System.map $(KERNELVERSION) ; \
+	fi
 else
 	@echo "*** This is a \`staged' install using \"$(DESTDIR)\" as prefix."
 	@echo "***"
