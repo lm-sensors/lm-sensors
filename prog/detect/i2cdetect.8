@@ -1,4 +1,4 @@
-.TH I2CDETECT 8 "September 2004"
+.TH I2CDETECT 8 "April 2006"
 .SH NAME
 i2cdetect \- detect I2C chips
 
@@ -7,6 +7,10 @@ i2cdetect \- detect I2C chips
 .RI [ -y ]
 .RI [ -a ]
 .RI [ -q | -r ]
+.I i2cbus
+.br
+.B i2cdetect
+.I -F
 .I i2cbus
 .br
 .B i2cdetect
@@ -20,6 +24,9 @@ i2cdetect is a userspace program to scan an I2C bus for devices. It
 outputs a table with the list of detected devices on the specified bus.
 \fIi2cbus\fR indicates the number of the I2C bus to be scanned, and
 should correspond to one of the busses listed by \fIi2cdetect -l\fR.
+.PP
+i2cdetect can also be used to query the functionalities of an I2C bus
+(see option \fB-F\fP.)
 
 .SH WARNING
 This program can confuse your I2C bus, cause data loss and worse!
@@ -46,6 +53,9 @@ Use SMBus "read byte" commands for probing (by default, the command
 used is the one believed to be the safest for each address). 
 Not recommended. This is known to lock SMBus on various write-only
 chips (most notably clock chips at address 0x69).
+.TP
+.B "\-F"
+Display the list of functionalities implemented by the adapter and exit.
 .TP
 .B "\-V"
 Display the version and exit.

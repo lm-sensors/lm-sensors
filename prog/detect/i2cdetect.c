@@ -31,11 +31,13 @@
 #define MODE_AUTO	0
 #define MODE_QUICK	1
 #define MODE_READ	2
+#define MODE_FUNC	3
 
 void help(void)
 {
 	fprintf(stderr,
 	        "Syntax: i2cdetect [-y] [-a] [-q|-r] I2CBUS [FIRST LAST]\n"
+	        "        i2cdetect -F I2CBUS\n"
 	        "        i2cdetect -l\n"
 	        "        i2cdetect -V\n"
 	        "  I2CBUS is an integer\n"
@@ -111,6 +113,56 @@ int scan_i2c_bus(int file, const int mode, const int first, const int last)
 	return 0;
 }
 
+struct func
+{
+	long value;
+	const char* name;
+};
+
+static const struct func all_func[] = {
+	{ .value = I2C_FUNC_I2C,
+	  .name = "I2C" },
+	{ .value = I2C_FUNC_SMBUS_QUICK,
+	  .name = "SMBus Quick Command" },
+	{ .value = I2C_FUNC_SMBUS_WRITE_BYTE,
+	  .name = "SMBus Send Byte" },
+	{ .value = I2C_FUNC_SMBUS_READ_BYTE,
+	  .name = "SMBus Receive Byte" },
+	{ .value = I2C_FUNC_SMBUS_WRITE_BYTE_DATA,
+	  .name = "SMBus Write Byte" },
+	{ .value = I2C_FUNC_SMBUS_READ_BYTE_DATA,
+	  .name = "SMBus Read Byte" },
+	{ .value = I2C_FUNC_SMBUS_WRITE_WORD_DATA,
+	  .name = "SMBus Write Word" },
+	{ .value = I2C_FUNC_SMBUS_READ_WORD_DATA,
+	  .name = "SMBus Read Word" },
+	{ .value = I2C_FUNC_SMBUS_PROC_CALL,
+	  .name = "SMBus Process Call" },
+	{ .value = I2C_FUNC_SMBUS_WRITE_BLOCK_DATA,
+	  .name = "SMBus Block Write" },
+	{ .value = I2C_FUNC_SMBUS_READ_BLOCK_DATA,
+	  .name = "SMBus Block Read" },
+	{ .value = I2C_FUNC_SMBUS_BLOCK_PROC_CALL,
+	  .name = "SMBus Block Process Call" },
+	{ .value = I2C_FUNC_SMBUS_HWPEC_CALC,
+	  .name = "SMBus PEC" },
+	{ .value = I2C_FUNC_SMBUS_WRITE_I2C_BLOCK,
+	  .name = "I2C Block Write" },
+	{ .value = I2C_FUNC_SMBUS_READ_I2C_BLOCK,
+	  .name = "I2C Block Read" },
+	{ }
+};
+
+void print_functionality(long funcs)
+{
+	int i;
+	
+	for (i = 0; all_func[i].value; i++) {
+		printf("%-32s %s\n", all_func[i].name,
+		       (funcs & all_func[i].value) ? "yes" : "no");
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	char *end;
@@ -128,6 +180,14 @@ int main(int argc, char *argv[])
 		case 'V': version = 1; break;
 		case 'y': yes = 1; break;
 		case 'l': list = 1; break;
+		case 'F':
+			if (mode != MODE_AUTO && mode != MODE_FUNC) {
+				fprintf(stderr, "Error: Different modes "
+				        "specified!\n");
+				exit(1);
+			}
+			mode = MODE_FUNC;
+			break;
 		case 'r': 
 			if (mode == MODE_QUICK) {
 				fprintf(stderr, "Error: Different modes "
@@ -186,7 +246,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* read address range if present */
-	if (argc == flags + 4) {
+	if (argc == flags + 4 && mode != MODE_FUNC) {
 		int tmp;
 
 		tmp = strtol(argv[flags+2], &end, 0);
@@ -234,6 +294,15 @@ int main(int argc, char *argv[])
 		close(file);
 		exit(1);
 	}
+
+	/* Special case, we only list the implemented functionalities */
+	if (mode == MODE_FUNC) {
+		close(file);
+		printf("Functionalities implemented by %s:\n", filename);
+		print_functionality(funcs);
+		exit(0);
+	}
+
 	if (mode != MODE_READ && !(funcs & I2C_FUNC_SMBUS_QUICK)) {
 		fprintf(stderr, "Error: Can't use SMBus Quick Write command "
 		        "on this bus (ISA bus?)\n");
