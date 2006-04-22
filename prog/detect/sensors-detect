@@ -2312,13 +2312,10 @@ sub find_adapter_driver
 
 # This should really go into a separate module/package.
 
-# These are copied from <linux/i2c.h> and <linux/smbus.h>
+# These are copied from <linux/i2c-dev.h>
 
 use constant IOCTL_I2C_SLAVE    => 0x0703;
-use constant IOCTL_I2C_TENBIT   => 0x0704;
 use constant IOCTL_I2C_SMBUS    => 0x0720;
-
-# These are copied from <linux/smbus.h>
 
 use constant SMBUS_READ         => 1;
 use constant SMBUS_WRITE        => 0;
@@ -2327,8 +2324,6 @@ use constant SMBUS_QUICK        => 0;
 use constant SMBUS_BYTE         => 1;
 use constant SMBUS_BYTE_DATA    => 2;
 use constant SMBUS_WORD_DATA    => 3;
-use constant SMBUS_PROC_CALL    => 4;
-use constant SMBUS_BLOCK_DATA   => 5;
 
 # Select the device to communicate with through its address.
 # $_[0]: Reference to an opened filehandle
@@ -2388,18 +2383,6 @@ sub i2c_smbus_read_byte
 }
 
 # $_[0]: Reference to an opened filehandle
-# $_[1]: Byte to write
-# Returns: -1 on failure, 0 on success.
-sub i2c_smbus_write_byte
-{
-  my ($file,$command) = @_;
-  my @data = ($command);
-  i2c_smbus_access $file, SMBUS_WRITE, 0, SMBUS_BYTE, \@data
-         or return -1;
-  return 0;
-}
-
-# $_[0]: Reference to an opened filehandle
 # $_[1]: Command byte (usually register number)
 # Returns: -1 on failure, the read byte on success.
 sub i2c_smbus_read_byte_data
@@ -2413,19 +2396,6 @@ sub i2c_smbus_read_byte_data
   
 # $_[0]: Reference to an opened filehandle
 # $_[1]: Command byte (usually register number)
-# $_[2]: Byte to write
-# Returns: -1 on failure, 0 on success.
-sub i2c_smbus_write_byte_data
-{
-  my ($file,$command,$value) = @_;
-  my @data = ($value);
-  i2c_smbus_access $file, SMBUS_WRITE, $command, SMBUS_BYTE_DATA, \@data
-         or return -1;
-  return 0;
-}
-
-# $_[0]: Reference to an opened filehandle
-# $_[1]: Command byte (usually register number)
 # Returns: -1 on failure, the read word on success.
 # Note: some devices use the wrong endiannes; use swap_bytes to correct for 
 # this.
@@ -2436,21 +2406,6 @@ sub i2c_smbus_read_word_data
   i2c_smbus_access $file, SMBUS_READ, $command, SMBUS_WORD_DATA, \@data
          or return -1;
   return $data[0] + 256 * $data[1];
-}
-
-# $_[0]: Reference to an opened filehandle
-# $_[1]: Command byte (usually register number)
-# $_[2]: Byte to write
-# Returns: -1 on failure, 0 on success.
-# Note: some devices use the wrong endiannes; use swap_bytes to correct for 
-# this.
-sub i2c_smbus_write_word_data
-{
-  my ($file,$command,$value) = @_;
-  my @data = ($value & 0xff, $value >> 8);
-  i2c_smbus_access $file, SMBUS_WRITE, $command, SMBUS_WORD_DATA, \@data
-         or return -1;
-  return 0;
 }
 
 # $_[0]: Reference to an opened filehandle
