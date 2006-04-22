@@ -917,7 +917,8 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             smartbatt_chgr_detect adt7467_detect lm92_detect max1619_detect
             lm93_detect lm77_detect lm63_detect pca9556_detect
             w83791sd_detect vt1211_i2c_detect vt1211_alias_detect
-            smsc47m192_detect ite_overclock_detect fintek_detect);
+            smsc47m192_detect ite_overclock_detect fintek_detect
+            w83793_detect);
 
 # This is a list of all recognized chips. 
 # Each entry must have the following fields:
@@ -1074,6 +1075,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "w83792d",
        i2c_addrs => [0x2c..0x2f],
        i2c_detect => sub { w83781d_detect 8, @_},
+     },
+     {
+       name => "Winbond W83793R/G",
+       driver => "to-be-written",
+       i2c_addrs => [0x2c..0x2f],
+       i2c_detect => sub { w83793_detect 0, @_ },
      },
      {
        name => "Winbond W83791SD",
@@ -3688,6 +3695,45 @@ sub w83781d_detect
   return @res if $chip == 9; # No subclients
   push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;
   push @res, (($reg1 & 0x70) >> 4) + 0x48 unless ($reg1 & 0x80 or $chip == 2);
+  return @res;
+}
+  
+# $_[0]: Chip to detect (0 = W83793)
+# $_[1]: A reference to the file descriptor to access this chip.
+# $_[2]: Address
+# Returns: undef if not detected
+#          6 if detected and bank different from 0
+#          (8,addr1,addr2) if detected, band is 0 and LM75 chip emulation
+#          is enabled
+# Registers used:
+#   0x0b: Full I2C Address
+#   0x0c: I2C addresses of emulated LM75 chips
+#   0x00: Vendor ID byte selection, and bank selection(Bank 0,1,2)
+#   0x0d: Vendor ID(Bank 0,1,2)
+#   0x0e: Device ID(Bank 0,1,2)
+sub w83793_detect
+{
+  my ($bank, $reg, @res);
+  my ($chip, $file, $addr) = @_;
+
+  $bank = i2c_smbus_read_byte_data($file, 0x00);
+  $reg = i2c_smbus_read_byte_data($file, 0x0d);
+
+  return unless (($bank & 0x80) == 0x00 and $reg == 0xa3) or 
+                (($bank & 0x80) == 0x80 and $reg == 0x5c);
+
+  $reg = i2c_smbus_read_byte_data($file, 0x0e);
+  return if $chip == 0 and $reg != 0x7b;
+
+# If bank 0 is selected, we can do more checks
+  return 6 unless ($bank & 0x07) == 0;
+  $reg = i2c_smbus_read_byte_data($file, 0x0b);
+  return unless ($reg == ($addr << 1));
+
+  $reg = i2c_smbus_read_byte_data($file, 0x0c);
+  @res = (8);
+  push @res, ($reg & 0x07) + 0x48 unless $reg & 0x08;
+  push @res, (($reg & 0x70) >> 4) + 0x48 unless $reg & 0x80;
   return @res;
 }
 
