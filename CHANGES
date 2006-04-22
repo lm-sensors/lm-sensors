@@ -7,14 +7,22 @@ lm_sensors CHANGES file
            Add support for W83627EHF voltage inputs and alarms
            Add support for the smsc47m192 driver
   Makefile: Don't grep autoconf.h on user-space targets
+  Makefile: Fix depmod on non-running kernel version
   Module i2c-piix4: Add ServerWorks HT-1000 support (2.6 backport)
   Module w83781d: Use real-time alarm registers when possible (2.6 backport)
+  Program i2cdetect: Add a mode to print adapter functionalities
+  Program i2cdump: Restore bank after bank switching
+                   Add new mode W (read word on even register addresses)
   Program mkpatch: Fix typo breaking f71805f
   Program sensors: No error messages on missing w83792d fan4-7 (Yuan Mu)
                    Add smsc47m192 support
   Program sensors-detect: Add ServerWorks HT-1000 SMBus detection
                           Add ATI IXP200/300/400 SMBus detection
                           Prevent warning on 64-bit PCI addresses
+                          Add Fintek F75363SG, F75111R/RG/N, F75121R,
+                           F75122R/RG, F75373S/SG, F75375S/SP, F75383S/M,
+                           F75384S/M, F75387SG/RG and F81218D detection
+                          Add Winbond W83793R/G detection
 
 
 2.10.0 (20060214)
