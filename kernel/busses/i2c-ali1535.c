@@ -62,7 +62,6 @@
 #include <linux/i2c.h>
 #include <linux/init.h>
 #include <asm/io.h>
-#include <asm/semaphore.h>
 #include "version.h"
 #include "sensors_compat.h"
 
@@ -140,7 +139,6 @@
 
 static struct pci_driver ali1535_driver;
 static unsigned short ali1535_smba = 0;
-DECLARE_MUTEX(i2c_ali1535_sem);
 
 
 /* Detect whether a ALI1535 can be found, and initialize it, where necessary.
@@ -259,8 +257,6 @@ s32 ali1535_access(struct i2c_adapter * adap, u16 addr,
 	s32 result = 0;
 	int timeout = 0;
 	int oldsize = size;
-
-	down(&i2c_ali1535_sem);
 
 repeat:
 	if(timeout++ > MAX_TRY_HEROS) {
@@ -436,7 +432,6 @@ repeat:
 		break;
 	}
 EXIT:
-	up(&i2c_ali1535_sem);
 	return result;
 }
 
