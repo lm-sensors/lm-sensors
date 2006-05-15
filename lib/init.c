@@ -106,6 +106,11 @@ void free_chip(sensors_chip chip)
 {
   int i;
 
+  for (i = 0; i < chip.chips.fits_count; i++)
+    free_chip_name(chip.chips.fits[i]);
+  free(chip.chips.fits);
+  chip.chips.fits_count = chip.chips.fits_max = 0;
+
   for (i = 0; i < chip.labels_count; i++)
     free_label(chip.labels[i]);
   free(chip.labels);
