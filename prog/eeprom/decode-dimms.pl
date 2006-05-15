@@ -47,6 +47,9 @@
 #  verify checksum before decoding anything
 # Version 1.2  2006-05-15  Jean Delvare <khali@linux-fr.org>
 #  implement per-memory-type decoding
+#  don't decode revision code, manufacturing date and assembly serial
+#  number where not set
+#  decode the manufacturing date to an ISO8601 date
 #
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
@@ -257,6 +260,22 @@ use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs
 
 $use_sysfs = -d '/sys/bus';
 
+# We consider that no data was written to this area of the SPD EEPROM if
+# all bytes read 0x00 or all bytes read 0xff
+sub spd_written(@)
+{
+	my $all_00 = 1;
+	my $all_ff = 1;
+	
+	foreach my $b (@_) {
+		$all_00 = 0 unless $b == 0x00;
+		$all_ff = 0 unless $b == 0xff;
+		return 1 unless $all_00 or $all_ff;
+	}
+
+	return 0;
+}
+
 sub manufacturer(@)
 {
 	my @bytes = @_;
@@ -278,15 +297,14 @@ sub manufacturer_data(@)
 {
 	my $hex = "";
 	my $asc = "";
-	my $all_0 = 1;
+
+	return unless spd_written(@_);
 
 	foreach my $byte (@_) {
 		$hex .= sprintf("\%02X ", $byte);
 		$asc .= ($byte >= 32 && $byte < 127) ? chr($byte) : '?';
-		$all_0 = 0 if $byte != 0 && $byte != 0xff;
 	}
 
-	return if $all_0;
 	return "$hex(\"$asc\")";
 }
 
@@ -849,17 +867,27 @@ for my $i ( 0 .. $#dimm_list ) {
 		$temp = part_number(@bytes[9..26]);
 		printl $l, $temp;
 		
-		$l = "Revision Code";
-		$temp = sprintf("0x%.2X%.2X\n", @bytes[27..28]);
-		printl $l, $temp;
+		if (spd_written(@bytes[27..28])) {
+			$l = "Revision Code";
+			$temp = sprintf("0x%02X%02X\n", @bytes[27..28]);
+			printl $l, $temp;
+		}
 		
-		$l = "Manufacturing Date";
-		$temp = sprintf("0x%.2X%.2X\n", @bytes[29..30]);
-		printl $l, $temp;
+		if (spd_written(@bytes[29..30])) {
+			$l = "Manufacturing Date";
+			# Note that this will break in year 2080
+			$temp = sprintf("%d%02X-W%02X\n",
+					$bytes[29] >= 0x80 ? 19 : 20,
+					@bytes[29..30]);
+			printl $l, $temp;
+		}
 		
-		$l = "Assembly Serial Number";
-		$temp = sprintf("0x%.2X%.2X%.2X%.2X\n", @bytes[31..34]);
-		printl $l, $temp;
+		if (spd_written(@bytes[31..34])) {
+			$l = "Assembly Serial Number";
+			$temp = sprintf("0x%02X%02X%02X%02X\n",
+					@bytes[31..34]);
+			printl $l, $temp;
+		}
 
 # Next 27 bytes (99-125) are manufacturer specific, can't decode
 
