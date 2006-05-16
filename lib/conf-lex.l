@@ -47,7 +47,6 @@ char sensors_lex_error[100];
 
 /* Scanner for configuration files */
 
-%option noyywrap
 %option nodefault
 %option yylineno
 %option nounput
@@ -269,3 +268,10 @@ OCTESC		(1[0-7]{0,2})|([2-7][0-7]?)|(0[1-7][0-7]?)|(00[1-7])
 		}
 
 %%
+
+int sensors_yywrap(void)
+{
+  yy_delete_buffer(YY_CURRENT_BUFFER);
+  return 1;
+}
+
