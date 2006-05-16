@@ -17,6 +17,8 @@ lm_sensors CHANGES file
   Module w83781d: Use real-time alarm registers when possible (2.6 backport)
   Program decode-dimms.pl: Decode depending on the memory type
                            Decode the manufacturing date to an ISO8601 date
+                           Add the memory size computation and provide brief
+                           timing characteritics for SDRAM/DDR/DDR2 memory
   Program i2cdetect: Add a mode to print adapter functionalities
   Program i2cdump: Restore bank after bank switching
                    Add new mode W (read word on even register addresses)
