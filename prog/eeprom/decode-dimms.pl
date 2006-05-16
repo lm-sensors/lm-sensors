@@ -384,6 +384,47 @@ sub decode_sdr_sdram($)
 	my $bytes = shift;
 	my ($l, $temp);
 
+#size computation
+
+	my $a = $bytes->[3];
+	my $b = $bytes->[4];
+	my $c = $bytes->[5];
+	my $d = $bytes->[17];
+	my $k=0;
+	my $ii=0;
+	
+	$ii = (($a) & 0x0f) + (( $b) & 0x0f) - 17;
+	if (( $c <= 8) && ( $d <= 8)) {
+		 $k = ( $c) * ( $d);
+	}
+	
+	if($ii > 0 && $ii <= 12 && $k > 0) {
+		printl "Size", ((1 << $ii) * $k) . "MB"; }
+	else { 
+		printl "INVALID SIZE", $a . "," . $b . "," . $c . "," . $d;
+	}
+
+	my $highestCAS = 0;
+	my $trcd;
+	my $trp;
+	my $tras;
+	my $ctime = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
+
+	if ($bytes->[18] & 1) { $highestCAS = 1; }
+	if ($bytes->[18] & 2) { $highestCAS = 2; }
+	if ($bytes->[18] & 4) { $highestCAS = 3; }
+	if ($bytes->[18] & 8) { $highestCAS = 4; }
+	if ($bytes->[18] & 16) { $highestCAS = 5; }
+	if ($bytes->[18] & 32) { $highestCAS = 6; }
+	if ($bytes->[18] & 64) { $highestCAS = 7; }
+	if ($bytes->[18] & 128) { $highestCAS = 8; }
+
+	$trcd =$bytes->[29];
+	$trp =$bytes->[27];;
+	$tras =$bytes->[30];
+
+	printl "tCL-tRCD-tRP-tRAS:" ,  $highestCAS .  "-" . ($trcd/$ctime) . "-" . ($trp/$ctime) . "-" . ($tras/$ctime);
+
 	$l = "Number of Row Address Bits";
 	if ($bytes->[3] == 0) { printl $l, "Undefined!"; }
 	elsif ($bytes->[3] == 1) { printl $l, "1/16"; }
@@ -650,6 +691,48 @@ sub decode_ddr_sdram($)
 	$pcclk = $pcclk - ($pcclk % 100);
 	$ddrclk = int ($ddrclk);
 	printl $l, "${ddrclk}MHz (PC${pcclk})";
+
+#size computation
+
+	my $a = $bytes->[3];
+	my $b = $bytes->[4];
+	my $c = $bytes->[5];
+	my $d = $bytes->[17];
+	my $k=0;
+	my $ii=0;
+	
+	$ii = (($a) & 0x0f) + (( $b) & 0x0f) - 17;
+	if (( $c <= 8) && ( $d <= 8)) {
+		 $k = ( $c) * ( $d);
+	}
+	
+	if($ii > 0 && $ii <= 12 && $k > 0) {
+		printl "Size", ((1 << $ii) * $k) . "MB"; }
+	else { 
+		printl "INVALID SIZE", $a . "," . $b . "," . $c . "," . $d;
+	}
+
+	my $highestCAS = 0;
+	my $trcd;
+	my $trp;
+	my $tras;
+	my $ctime = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
+
+	if ($bytes->[18] & 1) { $highestCAS = 1; }
+	if ($bytes->[18] & 2) { $highestCAS = 1.5; }
+	if ($bytes->[18] & 4) { $highestCAS = 2; }
+	if ($bytes->[18] & 8) { $highestCAS = 2.5; }
+	if ($bytes->[18] & 16) { $highestCAS = 3.5; }
+	if ($bytes->[18] & 32) { $highestCAS = 4; }
+	if ($bytes->[18] & 64) { $highestCAS = 4.5; }
+	if ($bytes->[18] & 128) { $highestCAS = 5; }
+	
+	$trcd =($bytes->[29] >> 2)+(($bytes->[29] & 3)*0.25);
+	$trp =($bytes->[27] >> 2)+(($bytes->[27] & 3)*0.25);
+	$tras = $bytes->[30];
+
+	printl "tCL-tRCD-tRP-tRAS:" ,  $highestCAS .  "-" . ($trcd/$ctime) . "-" . ($trp/$ctime) . "-" . ($tras/$ctime);
+
 }
 
 # Parameter: bytes 0-63
@@ -668,6 +751,42 @@ sub decode_ddr2_sdram($)
 	$pcclk = $pcclk - ($pcclk % 100);
 	$ddrclk = int ($ddrclk);
 	printl $l, "${ddrclk}MHz (PC${pcclk})";
+
+#size computation
+	my $a = $bytes->[3];
+	my $b = $bytes->[4];
+	my $c = $bytes->[5];
+	my $d = $bytes->[17];
+	my $k=0;
+	my $ii=0;
+
+	$ii = ($a & 0x0f) + ($b & 0x0f) - 17;
+	$k = (($c & 0x7) + 1) * $d;
+	
+	if($ii > 0 && $ii <= 12 && $k > 0) {
+		printl "Size", ((1 << $ii) * $k) . "MB"; 
+	} else {
+		printl "INVALID SIZE", $a . "," . $b . "," . $c . "," . $d;
+	}
+
+	my $highestCAS = 0;
+	my $trcd;
+	my $trp;
+	my $tras;
+	my $ctime = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
+
+	if ($bytes->[18] & 4) { $highestCAS = 2; }
+	if ($bytes->[18] & 8) { $highestCAS = 3; }
+	if ($bytes->[18] & 16) { $highestCAS = 4; }
+	if ($bytes->[18] & 32) { $highestCAS = 5; }
+	
+	$trcd =($bytes->[29] >> 2)+(($bytes->[29] & 3)*0.25);
+	$trp =($bytes->[27] >> 2)+(($bytes->[27] & 3)*0.25);
+	$tras =$bytes->[30];
+
+	printl "tCL-tRCD-tRP-tRAS:" ,  $highestCAS .  "-" . ($trcd/$ctime) . "-" . ($trp/$ctime) . "-" . ($tras/$ctime);
+
+
 }
 
 %decode_callback = (
