@@ -26,6 +26,7 @@
 #include "access.h"
 #include "conf.h"
 #include "sysfs.h"
+#include "scanner.h"
 
 static void free_proc_chips_entry(sensors_proc_chips_entry entry);
 static void free_chip_name(sensors_chip_name name);
@@ -48,7 +49,8 @@ int sensors_init(FILE *input)
     if ((res = sensors_read_proc_chips()) || (res = sensors_read_proc_bus()))
       return res;
   }
-  sensors_yyin = input;
+  if ((res = sensors_scanner_init(input)))
+    return -SENSORS_ERR_PARSE;
   if ((res = sensors_yyparse()))
     return -SENSORS_ERR_PARSE;
   if ((res = sensors_substitute_busses()));
@@ -59,6 +61,8 @@ int sensors_init(FILE *input)
 void sensors_cleanup(void)
 {
   int i;
+
+  sensors_scanner_exit();
 
   for (i = 0; i < sensors_proc_chips_count; i++)
     free_proc_chips_entry(sensors_proc_chips[i]);

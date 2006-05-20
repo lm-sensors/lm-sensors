@@ -25,6 +25,7 @@
 #include "data.h"
 #include "conf-parse.h"
 #include "error.h"
+#include "scanner.h"
 
 static int buffer_count;
 static int buffer_max;
@@ -48,6 +49,7 @@ char sensors_lex_error[100];
 /* Scanner for configuration files */
 
 %option nodefault
+%option noyywrap
 %option yylineno
 %option nounput
 
@@ -269,9 +271,30 @@ OCTESC		(1[0-7]{0,2})|([2-7][0-7]?)|(0[1-7][0-7]?)|(00[1-7])
 
 %%
 
-int sensors_yywrap(void)
+/*
+	Do the buffer handling manually.  This allows us to scan as many
+	config files as we need to, while cleaning up properly after each
+	one.  The "BEGIN(0)" line ensures that we start in the default state,
+	even if e.g. the previous config file was syntactically broken.
+
+	Returns 0 if successful, !0 otherwise.
+*/
+
+static YY_BUFFER_STATE scan_buf = (YY_BUFFER_STATE)0;
+
+int sensors_scanner_init(FILE *input)
 {
-  yy_delete_buffer(YY_CURRENT_BUFFER);
-  return 1;
+	BEGIN(0);
+	if (!(scan_buf = sensors_yy_create_buffer(input, YY_BUF_SIZE)))
+		return -1;
+
+	sensors_yy_switch_to_buffer(scan_buf);
+	return 0;
+}
+
+void sensors_scanner_exit(void)
+{
+	sensors_yy_delete_buffer(scan_buf);
+	scan_buf = (YY_BUFFER_STATE)0;
 }
 
