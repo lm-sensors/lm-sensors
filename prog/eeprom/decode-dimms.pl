@@ -256,7 +256,11 @@ use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs
  "Connex Technology, Inc.", "Stream Processors, Inc.", "Focus Enhancements", "Telecis Wireless, Inc.",
  "uNav Microelectronics", "Tarari, Inc.", "Ambric, Inc.", "Newport Media, Inc.", "VMTS",
  "Enuclia Semiconductor, Inc.", "Virtium Technology Inc.", "Solid State System Co., Ltd.", "Kian Tech LLC",
- "Artimi", "Power Quotient International", "Avago Technologies"]);
+ "Artimi", "Power Quotient International", "Avago Technologies", "ADTechnology", "Sigma Designs",
+ "SiCortex, Inc.", "Ventura Technology Group", "eASIC", "M.H.S. SAS", "Micro Star International", 
+ "Rapport Inc.", "Makway International", "Broad Reach Engineering Co.", 
+ "Semiconductor Mfg Intl Corp", "SiConnect", "FCI USA Inc.", "Validity Sensors", 
+ "Coney Technology Co. Ltd.", "Spans Logic", "Neterion Inc."]);
 
 $use_sysfs = -d '/sys/bus';
 
