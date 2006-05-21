@@ -50,6 +50,16 @@
 #  don't decode revision code, manufacturing date and assembly serial
 #  number where not set
 #  decode the manufacturing date to an ISO8601 date
+# Version 1.3  2006-05-21  Jean Delvare <khali@linux-fr.org>
+#  detect undefined manufacturer code and handle it properly
+#  round up timing data
+#  minor display adjustments
+#  group cycle and access times, display the CAS value for each (SDRAM)
+#  refactor some bitfield tests into loops (SDRAM)
+#  display latencies and burst length on a single line (SDRAM)
+#  don't display manufacturing location when undefined
+#  check that the manufacturing date is proper BCD, else fall back to
+#  hexadecimal display
 #
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
@@ -76,6 +86,7 @@
 require 5.004;
 
 use strict;
+use POSIX;
 use Fcntl qw(:DEFAULT :seek);
 use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs
 	    @vendors %decode_callback);
@@ -280,21 +291,36 @@ sub spd_written(@)
 	return 0;
 }
 
+sub parity($)
+{
+	my $n = shift;
+	my $parity = 0;
+
+	while ($n) {
+		$parity++ if ($n & 1);
+		$n >>= 1;
+	}
+
+	return ($parity & 1);
+}
+
 sub manufacturer(@)
 {
 	my @bytes = @_;
 	my $ai = 0;
 	my $first;
+
+	return ("Undefined", []) unless spd_written(@bytes);
 	
 	while (defined($first = shift(@bytes)) && $first == 0x7F) {
 		$ai++;
 	}
 
-	if (defined $first && defined $vendors[$ai][($first & 0x7F) - 1]) {
-		return ($vendors[$ai][($first & 0x7F) - 1], \@bytes);
-	}
+	return ("Invalid", []) unless defined $first;
+	return ("Invalid", [$first, @bytes]) if parity($first) != 1;
+	return ("Unknown", \@bytes) unless (($first & 0x7F) - 1 <= $vendors[$ai]);
 
-	return ("Unknown", \@bytes);
+	return ($vendors[$ai][($first & 0x7F) - 1], \@bytes);
 }
 
 sub manufacturer_data(@)
@@ -403,31 +429,30 @@ sub decode_sdr_sdram($)
 	}
 	
 	if($ii > 0 && $ii <= 12 && $k > 0) {
-		printl "Size", ((1 << $ii) * $k) . "MB"; }
+		printl "Size", ((1 << $ii) * $k) . " MB"; }
 	else { 
 		printl "INVALID SIZE", $a . "," . $b . "," . $c . "," . $d;
 	}
 
-	my $highestCAS = 0;
+	my @cas;
+	for ($ii = 0; $ii < 6; $ii++) {
+		push(@cas, $ii + 1) if ($bytes->[18] & (1 << $ii));
+	}
+
 	my $trcd;
 	my $trp;
 	my $tras;
 	my $ctime = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
 
-	if ($bytes->[18] & 1) { $highestCAS = 1; }
-	if ($bytes->[18] & 2) { $highestCAS = 2; }
-	if ($bytes->[18] & 4) { $highestCAS = 3; }
-	if ($bytes->[18] & 8) { $highestCAS = 4; }
-	if ($bytes->[18] & 16) { $highestCAS = 5; }
-	if ($bytes->[18] & 32) { $highestCAS = 6; }
-	if ($bytes->[18] & 64) { $highestCAS = 7; }
-	if ($bytes->[18] & 128) { $highestCAS = 8; }
-
 	$trcd =$bytes->[29];
 	$trp =$bytes->[27];;
 	$tras =$bytes->[30];
 
-	printl "tCL-tRCD-tRP-tRAS:" ,  $highestCAS .  "-" . ($trcd/$ctime) . "-" . ($trp/$ctime) . "-" . ($tras/$ctime);
+	printl "tCL-tRCD-tRP-tRAS",
+		$cas[$#cas] . "-" .
+		ceil($trcd/$ctime) . "-" .
+		ceil($trp/$ctime) . "-" .
+		ceil($tras/$ctime);
 
 	$l = "Number of Row Address Bits";
 	if ($bytes->[3] == 0) { printl $l, "Undefined!"; }
@@ -463,14 +488,6 @@ sub decode_sdr_sdram($)
 	elsif ($bytes->[8] == 4) { printl $l, "SSTL 2.5"; }
 	elsif ($bytes->[8] == 255) { printl $l, "New Table"; }
 	else { printl $l, "Undefined!"; }
-
-	$l = "Cycle Time highest CAS latency";
-	$temp = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
-	printl $l, "$temp ns";
-
-	$l = "Access Time";
-	$temp = ($bytes->[10] >> 4) + ($bytes->[10] & 0xf) * 0.1;
-	printl $l, "$temp ns";
 
 	$l = "Module Configuration Type";
 	if ($bytes->[11] == 0) { printl $l, "No Parity"; }
@@ -517,16 +534,13 @@ sub decode_sdr_sdram($)
 	prints "The Following Apply to SDRAM DIMMs ONLY";
 
 	$l = "Burst lengths supported";
-	$temp = "";
-	if ($bytes->[16] & 1) { $temp .= "Burst Length = 1\n"; }
-	if ($bytes->[16] & 2) { $temp .= "Burst Length = 2\n"; }
-	if ($bytes->[16] & 4) { $temp .= "Burst Length = 4\n"; }
-	if ($bytes->[16] & 8) { $temp .= "Burst Length = 8\n"; }
-	if ($bytes->[16] & 16) { $temp .= "Undefined! (bit 4)\n"; }
-	if ($bytes->[16] & 32) { $temp .= "Undefined! (bit 5)\n"; }
-	if ($bytes->[16] & 64) { $temp .= "Undefined! (bit 6)\n"; }
-	if ($bytes->[16] & 128) { $temp .= "Burst Length = Page\n"; }
-	if ($bytes->[16] == 0) { $temp .= "(None Supported)\n"; }
+	my @array;
+	for ($ii = 0; $ii < 4; $ii++) {
+		push(@array, 1 << $ii) if ($bytes->[16] & (1 << $ii));
+	}
+	push(@array, "Page") if ($bytes->[16] & 128);
+	if (@array) { $temp = join ', ', @array; }
+	else { $temp = "None"; }
 	printl $l, $temp;
 
 	$l = "Number of Device Banks";
@@ -534,43 +548,67 @@ sub decode_sdr_sdram($)
 	else { printl $l, $bytes->[17]; }
 
 	$l = "Supported CAS Latencies";
-	$temp = "";
-	if ($bytes->[18] & 1) { $temp .= "CAS Latency = 1\n"; }
-	if ($bytes->[18] & 2) { $temp .= "CAS Latency = 2\n"; }
-	if ($bytes->[18] & 4) { $temp .= "CAS Latency = 3\n"; }
-	if ($bytes->[18] & 8) { $temp .= "CAS Latency = 4\n"; }
-	if ($bytes->[18] & 16) { $temp .= "CAS Latency = 5\n"; }
-	if ($bytes->[18] & 32) { $temp .= "CAS Latency = 6\n"; }
-	if ($bytes->[18] & 64) { $temp .= "CAS Latency = 7\n"; }
-	if ($bytes->[18] & 128) { $temp .= "Undefined (bit 7)\n"; }
-	if ($bytes->[18] == 0) { $temp .= "(None Supported)\n"; }
+	if (@cas) { $temp = join ', ', @cas; }
+	else { $temp = "None"; }
 	printl $l, $temp;
 
 	$l = "Supported CS Latencies";
-	$temp = "";
-	if ($bytes->[19] & 1) { $temp .= "CS Latency = 0\n"; }
-	if ($bytes->[19] & 2) { $temp .= "CS Latency = 1\n"; }
-	if ($bytes->[19] & 4) { $temp .= "CS Latency = 2\n"; }
-	if ($bytes->[19] & 8) { $temp .= "CS Latency = 3\n"; }
-	if ($bytes->[19] & 16) { $temp .= "CS Latency = 4\n"; }
-	if ($bytes->[19] & 32) { $temp .= "CS Latency = 5\n"; }
-	if ($bytes->[19] & 64) { $temp .= "CS Latency = 6\n"; }
-	if ($bytes->[19] & 128) { $temp .= "Undefined (bit 7)\n"; }
-	if ($bytes->[19] == 0) { $temp .= "(None Supported)\n"; }
+	@array = ();
+	for ($ii = 0; $ii < 6; $ii++) {
+		push(@array, $ii) if ($bytes->[19] & (1 << $ii));
+	}
+	if (@array) { $temp = join ', ', @array; }
+	else { $temp = "None"; }
 	printl $l, $temp;
 
 	$l = "Supported WE Latencies";
-	$temp = "";
-	if ($bytes->[20] & 1) { $temp .= "WE Latency = 0\n"; }
-	if ($bytes->[20] & 2) { $temp .= "WE Latency = 1\n"; }
-	if ($bytes->[20] & 4) { $temp .= "WE Latency = 2\n"; }
-	if ($bytes->[20] & 8) { $temp .= "WE Latency = 3\n"; }
-	if ($bytes->[20] & 16) { $temp .= "WE Latency = 4\n"; }
-	if ($bytes->[20] & 32) { $temp .= "WE Latency = 5\n"; }
-	if ($bytes->[20] & 64) { $temp .= "WE Latency = 6\n"; }
-	if ($bytes->[20] & 128) { $temp .= "Undefined (bit 7)\n"; }
-	if ($bytes->[20] == 0) { $temp .= "(None Supported)\n"; }
+	@array = ();
+	for ($ii = 0; $ii < 6; $ii++) {
+		push(@array, $ii) if ($bytes->[20] & (1 << $ii));
+	}
+	if (@array) { $temp = join ', ', @array; }
+	else { $temp = "None"; }
 	printl $l, $temp;
+
+	if (@cas >= 1) {
+		$l = "Cycle Time (CAS ".$cas[$#cas].")";
+		$temp = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
+		printl $l, "$temp ns";
+
+		$l = "Access Time (CAS ".$cas[$#cas].")";
+		$temp = ($bytes->[10] >> 4) + ($bytes->[10] & 0xf) * 0.1;
+		printl $l, "$temp ns";
+	}
+
+	if (@cas >= 2 && spd_written(@$bytes[23..24])) {
+		$l = "Cycle Time (CAS ".$cas[$#cas-1].")";
+		$temp = $bytes->[23] >> 4;
+		if ($temp == 0) { printl $l, "Undefined!"; }
+		else {
+			if ($temp < 4 ) { $temp=$temp + 15; }
+			printl $l, $temp + (($bytes->[23] & 0xf) * 0.1) . " ns";
+		}
+
+		$l = "Access Time (CAS ".$cas[$#cas-1].")";
+		$temp = $bytes->[24] >> 4;
+		if ($temp == 0) { printl $l, "Undefined!"; }
+		else {
+			if ($temp < 4 ) { $temp=$temp + 15; }
+			printl $l, $temp + (($bytes->[24] & 0xf) * 0.1) . " ns";
+		}
+	}
+
+	if (@cas >= 3 && spd_written(@$bytes[25..26])) {
+		$l = "Cycle Time (CAS ".$cas[$#cas-2].")";
+		$temp = $bytes->[25] >> 2;
+		if ($temp == 0) { printl $l, "Undefined!"; }
+		else { printl $l, $temp + ($bytes->[25] & 0x3) * 0.25 . " ns"; }
+
+		$l = "Access Time (CAS ".$cas[$#cas-2].")";
+		$temp = $bytes->[26] >> 2;
+		if ($temp == 0) { printl $l, "Undefined!"; }
+		else { printl $l, $temp + ($bytes->[26] & 0x3) * 0.25 . " ns"; }
+	}
 
 	$l = "SDRAM Module Attributes";
 	$temp = "";
@@ -598,34 +636,6 @@ sub decode_sdr_sdram($)
 	if ($bytes->[22] & 64) { $temp .= "Undefined (bit 6)\n"; }
 	if ($bytes->[22] & 128) { $temp .= "Undefined (bit 7)\n"; }
 	printl $l, $temp;
-
-	$l = "SDRAM Cycle Time (2nd highest CAS)";
-	$temp = $bytes->[23] >> 4;
-	if ($temp == 0) { printl $l, "Undefined!"; }
-	else {
-		if ($temp < 4 ) { $temp=$temp + 15; }
-		printl $l, $temp + (($bytes->[23] & 0xf) * 0.1) . " ns";
-	}
-
-	$l = "SDRAM Access from Clock Time (2nd highest CAS)";
-	$temp = $bytes->[24] >> 4;
-	if ($temp == 0) { printl $l, "Undefined!"; }
-	else {
-		if ($temp < 4 ) { $temp=$temp + 15; }
-		printl $l, $temp + (($bytes->[24] & 0xf) * 0.1) . " ns";
-	}
-
-	prints "The Following are Optional (may be Bogus)";
-
-	$l = "SDRAM Cycle Time (3rd highest CAS)";
-	$temp = $bytes->[25] >> 2;
-	if ($temp == 0) { printl $l, "Undefined!"; }
-	else { printl $l, $temp + ($bytes->[25] & 0x3) * 0.25 . " ns"; }
-
-	$l = "SDRAM Access from Clock Time (3rd highest CAS)";
-	$temp = $bytes->[26] >> 2;
-	if ($temp == 0) { printl $l, "Undefined!"; }
-	else { printl $l, $temp + ($bytes->[26] & 0x3) * 0.25 . " ns"; }
 
 	prints "The Following are Required (for SDRAMs)";
 
@@ -711,7 +721,7 @@ sub decode_ddr_sdram($)
 	}
 	
 	if($ii > 0 && $ii <= 12 && $k > 0) {
-		printl "Size", ((1 << $ii) * $k) . "MB"; }
+		printl "Size", ((1 << $ii) * $k) . " MB"; }
 	else { 
 		printl "INVALID SIZE", $a . "," . $b . "," . $c . "," . $d;
 	}
@@ -735,8 +745,11 @@ sub decode_ddr_sdram($)
 	$trp =($bytes->[27] >> 2)+(($bytes->[27] & 3)*0.25);
 	$tras = $bytes->[30];
 
-	printl "tCL-tRCD-tRP-tRAS:" ,  $highestCAS .  "-" . ($trcd/$ctime) . "-" . ($trp/$ctime) . "-" . ($tras/$ctime);
-
+	printl "tCL-tRCD-tRP-tRAS",
+		$highestCAS . "-" .
+		ceil($trcd/$ctime) . "-" .
+		ceil($trp/$ctime) . "-" .
+		ceil($tras/$ctime);
 }
 
 # Parameter: bytes 0-63
@@ -768,7 +781,7 @@ sub decode_ddr2_sdram($)
 	$k = (($c & 0x7) + 1) * $d;
 	
 	if($ii > 0 && $ii <= 12 && $k > 0) {
-		printl "Size", ((1 << $ii) * $k) . "MB"; 
+		printl "Size", ((1 << $ii) * $k) . " MB"; 
 	} else {
 		printl "INVALID SIZE", $a . "," . $b . "," . $c . "," . $d;
 	}
@@ -788,9 +801,11 @@ sub decode_ddr2_sdram($)
 	$trp =($bytes->[27] >> 2)+(($bytes->[27] & 3)*0.25);
 	$tras =$bytes->[30];
 
-	printl "tCL-tRCD-tRP-tRAS:" ,  $highestCAS .  "-" . ($trcd/$ctime) . "-" . ($trp/$ctime) . "-" . ($tras/$ctime);
-
-
+	printl "tCL-tRCD-tRP-tRAS",
+		$highestCAS . "-" .
+		ceil($trcd/$ctime) . "-" .
+		ceil($trp/$ctime) . "-" .
+		ceil($tras/$ctime);
 }
 
 %decode_callback = (
@@ -824,7 +839,7 @@ sub decode_intel_spec_freq($)
 	if ($bytes->[63] & 64) { $temp .= "CLK 1 Connected\n"; }
 	if ($bytes->[63] & 128) { $temp .= "CLK 0 Connected\n"; }
 	if (($bytes->[63] & 192) == 192) { $temp .= "Double-sided DIMM\n"; }
-	else { $temp .= "Single-sided DIMM\n"; }
+	elsif (($bytes->[63] & 192) != 0) { $temp .= "Single-sided DIMM\n"; }
 	printl $l, $temp;
 }
 
@@ -978,13 +993,15 @@ for my $i ( 0 .. $#dimm_list ) {
 		$temp = manufacturer_data(@{$extra});
 		printl $l, $temp if defined $temp;
 		
-		# Try the location code as ASCII first, as earlier specifications
-		# suggested this. As newer specifications don't mention it anymore,
-		# we still fall back to binary.
-		$l = "Manufacturing Location Code";
-		$temp = (chr($bytes[8]) =~ m/^[\w\d]$/) ? chr($bytes[8])
-		      : sprintf("0x%.2X", $bytes[8]);
-		printl $l, $temp;
+		if (spd_written($bytes[8])) {
+			# Try the location code as ASCII first, as earlier specifications
+			# suggested this. As newer specifications don't mention it anymore,
+			# we still fall back to binary.
+			$l = "Manufacturing Location Code";
+			$temp = (chr($bytes[8]) =~ m/^[\w\d]$/) ? chr($bytes[8])
+			      : sprintf("0x%.2X", $bytes[8]);
+			printl $l, $temp;
+		}
 		
 		$l = "Part Number";
 		$temp = part_number(@bytes[9..26]);
@@ -998,10 +1015,20 @@ for my $i ( 0 .. $#dimm_list ) {
 		
 		if (spd_written(@bytes[29..30])) {
 			$l = "Manufacturing Date";
-			# Note that this will break in year 2080
-			$temp = sprintf("%d%02X-W%02X\n",
-					$bytes[29] >= 0x80 ? 19 : 20,
-					@bytes[29..30]);
+			# In theory the year and week are in BCD format, but
+			# this is not always true in practice :(
+			if (($bytes[29] & 0xf0) <= 0x90
+			 && ($bytes[29] & 0x0f) <= 0x09
+			 && ($bytes[30] & 0xf0) <= 0x90
+			 && ($bytes[30] & 0x0f) <= 0x09) {
+				# Note that this heuristic will break in year 2080
+				$temp = sprintf("%d%02X-W%02X\n",
+						$bytes[29] >= 0x80 ? 19 : 20,
+						@bytes[29..30]);
+			} else {
+				$temp = sprintf("0x%02X%02X\n",
+						@bytes[29..30]);
+			}
 			printl $l, $temp;
 		}
 		
