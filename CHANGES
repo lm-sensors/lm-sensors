@@ -13,6 +13,7 @@ lm_sensors CHANGES file
   Module i2c-amd756-s4882: Improve static semaphore initialization
                            (2.6 backport)
   Module i2c-i801: Disable PEC mode after every transaction (2.6 backport)
+                   Add ICH8 support (2.6 backport)
   Module i2c-piix4: Add ServerWorks HT-1000 support (2.6 backport)
   Module w83781d: Use real-time alarm registers when possible (2.6 backport)
   Program decode-dimms.pl: Decode depending on the memory type
