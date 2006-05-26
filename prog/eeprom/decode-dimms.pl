@@ -419,23 +419,19 @@ sub decode_sdr_sdram($)
 	my ($l, $temp);
 
 #size computation
-
-	my $a = $bytes->[3];
-	my $b = $bytes->[4];
-	my $c = $bytes->[5];
-	my $d = $bytes->[17];
 	my $k=0;
 	my $ii=0;
 	
-	$ii = (($a) & 0x0f) + (( $b) & 0x0f) - 17;
-	if (( $c <= 8) && ( $d <= 8)) {
-		 $k = ( $c) * ( $d);
+	$ii = ($bytes->[3] & 0x0f) + ($bytes->[4] & 0x0f) - 17;
+	if (($bytes->[5] <= 8) && ($bytes->[17] <= 8)) {
+		 $k = $bytes->[5] * $bytes->[17];
 	}
 	
 	if($ii > 0 && $ii <= 12 && $k > 0) {
 		printl "Size", ((1 << $ii) * $k) . " MB"; }
 	else { 
-		printl "INVALID SIZE", $a . "," . $b . "," . $c . "," . $d;
+		printl "INVALID SIZE", $bytes->[3] . "," . $bytes->[4] . "," .
+				       $bytes->[5] . "," . $bytes->[17];
 	}
 
 	my @cas;
@@ -576,8 +572,7 @@ sub decode_sdr_sdram($)
 
 	if (@cas >= 1) {
 		$l = "Cycle Time (CAS ".$cas[$#cas].")";
-		$temp = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
-		printl $l, "$temp ns";
+		printl $l, "$ctime ns";
 
 		$l = "Access Time (CAS ".$cas[$#cas].")";
 		$temp = ($bytes->[10] >> 4) + ($bytes->[10] & 0xf) * 0.1;
@@ -711,7 +706,6 @@ sub decode_ddr_sdram($)
 	printl $l, "${ddrclk}MHz (PC${pcclk})";
 
 #size computation
-
 	my $k=0;
 	my $ii=0;
 	
@@ -824,20 +818,17 @@ sub decode_ddr2_sdram($)
 	printl $l, "${ddrclk}MHz (PC${pcclk})";
 
 #size computation
-	my $a = $bytes->[3];
-	my $b = $bytes->[4];
-	my $c = $bytes->[5];
-	my $d = $bytes->[17];
 	my $k=0;
 	my $ii=0;
 
-	$ii = ($a & 0x0f) + ($b & 0x0f) - 17;
-	$k = (($c & 0x7) + 1) * $d;
+	$ii = ($bytes->[3] & 0x0f) + ($bytes->[4] & 0x0f) - 17;
+	$k = (($bytes->[5] & 0x7) + 1) * $bytes->[17];
 	
 	if($ii > 0 && $ii <= 12 && $k > 0) {
 		printl "Size", ((1 << $ii) * $k) . " MB"; 
 	} else {
-		printl "INVALID SIZE", $a . "," . $b . "," . $c . "," . $d;
+		printl "INVALID SIZE", $bytes->[3] . "," . $bytes->[4] . "," .
+				       $bytes->[5] . "," . $bytes->[17];
 	}
 
 	my $highestCAS = 0;
@@ -862,10 +853,48 @@ sub decode_ddr2_sdram($)
 		ceil($tras/$ctime);
 }
 
+# Parameter: bytes 0-63
+sub decode_direct_rambus($)
+{
+	my $bytes = shift;
+
+#size computation
+	my $ii;
+
+	$ii = ($bytes->[4] & 0x0f) + ($bytes->[4] >> 4) + ($bytes->[5] & 0x07) - 13;
+	
+	if ($ii > 0 && $ii < 16) {
+		printl "Size", (1 << $ii) . " MB";
+	} else {
+		printl "INVALID SIZE", sprintf("0x%02x, 0x%02x",
+					       $bytes->[4], $bytes->[5]);
+	}
+}
+
+# Parameter: bytes 0-63
+sub decode_rambus($)
+{
+	my $bytes = shift;
+
+#size computation
+	my $ii;
+	
+	$ii = ($bytes->[3] & 0x0f) + ($bytes->[3] >> 4) + ($bytes->[5] & 0x07) - 13;
+	
+	if ($ii > 0 && $ii < 16) {
+		printl "Size", (1 << $ii) . " MB";
+	} else {
+		printl "INVALID SIZE", sprintf("0x%02x, 0x%02x",
+					       $bytes->[3], $bytes->[5]);
+	}
+}
+
 %decode_callback = (
 	"SDR SDRAM"	=> \&decode_sdr_sdram,
 	"DDR SDRAM"	=> \&decode_ddr_sdram,
 	"DDR2 SDRAM"	=> \&decode_ddr2_sdram,
+	"Direct Rambus"	=> \&decode_direct_rambus,
+	"Rambus"	=> \&decode_rambus,
 );
 
 # Parameter: bytes 64-127
