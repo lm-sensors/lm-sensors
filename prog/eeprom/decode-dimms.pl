@@ -404,16 +404,20 @@ sub prints ($) # print seperator w/ given text
 	}
 }
 
-sub printh ($) # print header w/ given text
+sub printh ($$) # print header w/ given text
 {
-	my ($label) = @_;
+	my ($header, $sub) = @_;
 	if ($opt_html) {
-		$label =~ s/</\&lt;/sg;
-		$label =~ s/>/\&gt;/sg;
-		$label =~ s/\n/<br>\n/sg;
-		print "<h1>$label</h1>\n";
+		$header =~ s/</\&lt;/sg;
+		$header =~ s/>/\&gt;/sg;
+		$header =~ s/\n/<br>\n/sg;
+		$sub =~ s/</\&lt;/sg;
+		$sub =~ s/>/\&gt;/sg;
+		$sub =~ s/\n/<br>\n/sg;
+		print "<h1>$header</h1>\n";
+		print "<p>$sub</p>\n";
 	} else {
-		print "\n$label\n";
+		print "\n$header\n$sub\n";
 	}
 }
 
@@ -1066,8 +1070,8 @@ if ($opt_body)
 		  "</head><body>\n";
 }
 
-printh 'PC DIMM Serial Presence Detect Tester/Decoder
-By Philip Edelbrock, Christian Zuckschwerdt, Burkart Lingner,
+printh 'Memory Serial Presence Detect Decoder',
+'By Philip Edelbrock, Christian Zuckschwerdt, Burkart Lingner,
 Jean Delvare and others
 Version 2.10.1';
 
