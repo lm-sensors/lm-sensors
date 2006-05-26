@@ -3311,7 +3311,7 @@ void print_eeprom(const sensors_chip_name *name)
 		if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_NAME, &label, &valid)
 		 && valid) {
 			for (i = 0; i < 4; i++)
-	            if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a))
+				if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a))
 					buffer[i] = (char) a;
 			if (strncmp(buffer, "PCG-", 4) == 0
 			 || strncmp(buffer, "VGN-", 4) == 0) {
@@ -3338,6 +3338,9 @@ void print_eeprom(const sensors_chip_name *name)
 					printf("ERROR: data Vaio 3\n");
 				free(label);
 
+				printf("Note that eeprom support will be dropped from "
+				       "libsensors soon.\nPlease use the decode-vaio.pl "
+				       "script instead.\n");
 				return;
 			}
 		} else
@@ -3353,7 +3356,7 @@ void print_eeprom(const sensors_chip_name *name)
 		if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_SHUTTLE, &label, &valid)
 		 && valid) {
 			for (i = 0; i < 3; i++)
-	            if (!sensors_get_feature(*name, SENSORS_EEPROM_SHUTTLE+i, &a))
+				if (!sensors_get_feature(*name, SENSORS_EEPROM_SHUTTLE+i, &a))
 					buffer[i] = (unsigned char) a;
 			if (buffer[0] == 0x00
 			 && buffer[1] == 0x30
@@ -3361,7 +3364,7 @@ void print_eeprom(const sensors_chip_name *name)
 			{
 				/* must be a real Shuttle EEPROM */
 				for (i = 4; i < 6; i++)
-	            	if (!sensors_get_feature(*name, SENSORS_EEPROM_SHUTTLE+i, &a))
+					if (!sensors_get_feature(*name, SENSORS_EEPROM_SHUTTLE+i, &a))
 						buffer[i] = (unsigned char) a;
 
 				print_label(label, 24);
@@ -3471,6 +3474,10 @@ void print_eeprom(const sensors_chip_name *name)
 	} else
 		printf("ERROR: data 2\n");
 	free(label);
+
+	printf("Note that eeprom support will be dropped from "
+	       "libsensors soon.\nPlease use the decode-dimms.pl "
+	       "script instead.\n");
 }
 
 void print_it87(const sensors_chip_name *name)
