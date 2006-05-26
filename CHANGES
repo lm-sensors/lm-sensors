@@ -19,7 +19,9 @@ lm_sensors CHANGES file
   Program decode-dimms.pl: Decode depending on the memory type
                            Decode the manufacturing date to an ISO8601 date
                            Add the memory size computation and provide brief
-                           timing characteritics for SDRAM/DDR/DDR2 memory
+                            timing characteritics for SDRAM/DDR/DDR2 memory
+                           Add memory size computation for Rambus memory
+                           Various output cleanups and fixes
   Program i2cdetect: Add a mode to print adapter functionalities
   Program i2cdump: Restore bank after bank switching
                    Add new mode W (read word on even register addresses)
