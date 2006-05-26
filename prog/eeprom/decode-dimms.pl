@@ -64,6 +64,8 @@
 #  fix latencies decoding (SDRAM)
 #  fix CAS latency decoding (DDR SDRAM)
 #  decode latencies, timings and module height (DDR SDRAM)
+#  decode size (Direct Rambus, Rambus)
+#  decode latencies and timings (DDR2 SDRAM)
 #
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
@@ -800,6 +802,31 @@ sub decode_ddr_sdram($)
 	}
 }
 
+sub ddr2_sdram_ctime($)
+{
+	my $byte = shift;
+	my $ctime;
+	
+	$ctime = $byte >> 4;
+	if (($byte & 0xf) <= 9) { $ctime += ($byte & 0xf) * 0.1; }
+	elsif (($byte & 0xf) == 10) { $ctime += 0.25; }
+	elsif (($byte & 0xf) == 11) { $ctime += 0.33; }
+	elsif (($byte & 0xf) == 12) { $ctime += 0.66; }
+	elsif (($byte & 0xf) == 13) { $ctime += 0.75; }
+
+	return $ctime;
+}
+
+sub ddr2_sdram_atime($)
+{
+	my $byte = shift;
+	my $atime;
+	
+	$atime = ($byte >> 4) * 0.1 + ($byte & 0xf) * 0.01;
+
+	return $atime;
+}
+
 # Parameter: bytes 0-63
 sub decode_ddr2_sdram($)
 {
@@ -832,15 +859,20 @@ sub decode_ddr2_sdram($)
 	}
 
 	my $highestCAS = 0;
+	my %cas;
+	for ($ii = 2; $ii < 7; $ii++) {
+		if ($bytes->[18] & (1 << $ii)) {
+			$highestCAS = $ii;
+			$cas{$highestCAS}++;
+		}
+	}
+
 	my $trcd;
 	my $trp;
 	my $tras;
-	my $ctime = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
-
-	if ($bytes->[18] & 4) { $highestCAS = 2; }
-	if ($bytes->[18] & 8) { $highestCAS = 3; }
-	if ($bytes->[18] & 16) { $highestCAS = 4; }
-	if ($bytes->[18] & 32) { $highestCAS = 5; }
+	my $ctime;
+	
+	$ctime = ddr2_sdram_ctime($bytes->[9]);
 	
 	$trcd =($bytes->[29] >> 2)+(($bytes->[29] & 3)*0.25);
 	$trp =($bytes->[27] >> 2)+(($bytes->[27] & 3)*0.25);
@@ -851,6 +883,33 @@ sub decode_ddr2_sdram($)
 		ceil($trcd/$ctime) . "-" .
 		ceil($trp/$ctime) . "-" .
 		ceil($tras/$ctime);
+
+# latencies
+	if (keys %cas) { $temp = join ', ', sort { $b <=> $a } keys %cas; }
+	else { $temp = "None"; }
+	printl "Supported CAS Latencies", $temp;
+
+# timings
+	if (exists $cas{$highestCAS}) {
+		printl "Minimum Cycle Time (CAS $highestCAS)",
+		       "$ctime ns";
+		printl "Maximum Access Time (CAS $highestCAS)",
+		       ddr2_sdram_atime($bytes->[10]) . " ns";
+	}
+
+	if (exists $cas{$highestCAS-1} && spd_written(@$bytes[23..24])) {
+		printl "Minimum Cycle Time (CAS ".($highestCAS-1).")",
+		       ddr2_sdram_ctime($bytes->[23]) . " ns";
+		printl "Maximum Access Time (CAS ".($highestCAS-1).")",
+		       ddr2_sdram_atime($bytes->[24]) . " ns";
+	}
+
+	if (exists $cas{$highestCAS-2} && spd_written(@$bytes[25..26])) {
+		printl "Minimum Cycle Time (CAS ".($highestCAS-2).")",
+		       ddr2_sdram_ctime($bytes->[25]) . " ns";
+		printl "Maximum Access Time (CAS ".($highestCAS-2).")",
+		       ddr2_sdram_atime($bytes->[26]) . " ns";
+	}
 }
 
 # Parameter: bytes 0-63
