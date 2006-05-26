@@ -66,6 +66,9 @@
 #  decode latencies, timings and module height (DDR SDRAM)
 #  decode size (Direct Rambus, Rambus)
 #  decode latencies and timings (DDR2 SDRAM)
+#  SPD revision decoding depends on memory type
+#  use more user-friendly labels
+#  fix HTML formatted output on checksum error
 #
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
@@ -420,7 +423,13 @@ sub decode_sdr_sdram($)
 	my $bytes = shift;
 	my ($l, $temp);
 
+# SPD revision
+	printl "SPD Revision", $bytes->[62];
+
 #size computation
+
+	prints "Memory Characteristics";
+
 	my $k=0;
 	my $ii=0;
 	
@@ -533,8 +542,6 @@ sub decode_sdr_sdram($)
 	if ($bytes->[15] == 0) { printl $l, "Undefined!"; }
 	else { printl $l, $bytes->[15]; }
 
-	prints "The Following Apply to SDRAM DIMMs ONLY";
-
 	$l = "Burst lengths supported";
 	my @array;
 	for ($ii = 0; $ii < 4; $ii++) {
@@ -638,8 +645,6 @@ sub decode_sdr_sdram($)
 	if ($bytes->[22] & 128) { $temp .= "Undefined (bit 7)\n"; }
 	printl $l, $temp;
 
-	prints "The Following are Required (for SDRAMs)";
-
 	$l = "Minimum Row Precharge Time";
 	if ($bytes->[27] == 0) { printl $l, "Undefined!"; }
 	else { printl $l, "$bytes->[27] ns"; }
@@ -656,8 +661,6 @@ sub decode_sdr_sdram($)
 	if ($bytes->[30] == 0) { printl $l, "Undefined!"; }
 	else { printl $l, "$bytes->[30] ns"; }
 
-	prints "The Following are Required and Apply to ALL DIMMs";
-
 	$l = "Row Densities";
 	$temp = "";
 	if ($bytes->[31] & 1) { $temp .= "4 MByte\n"; }
@@ -671,23 +674,29 @@ sub decode_sdr_sdram($)
 	if ($bytes->[31] == 0) { $temp .= "(Undefined! -- None Reported!)\n"; }
 	printl $l, $temp;
 
-	prints "The Following are Proposed and Apply to SDRAM DIMMs";
+	if (($bytes->[32] & 0xf) <= 9) {
+		$l = "Command and Address Signal Setup Time";
+		$temp = (($bytes->[32] & 0x7f) >> 4) + ($bytes->[32] & 0xf) * 0.1;
+		printl $l, (($bytes->[32] >> 7) ? -$temp : $temp) . " ns";
+	}
 
-	$l = "Command and Address Signal Setup Time";
-	$temp = (($bytes->[32] & 0x7f) >> 4) + ($bytes->[32] & 0xf) * 0.1;
-	printl $l, (($bytes->[32] >> 7) ? -$temp : $temp) . " ns";
+	if (($bytes->[33] & 0xf) <= 9) {
+		$l = "Command and Address Signal Hold Time";
+		$temp = (($bytes->[33] & 0x7f) >> 4) + ($bytes->[33] & 0xf) * 0.1;
+		printl $l, (($bytes->[33] >> 7) ? -$temp : $temp) . " ns";
+	}
 
-	$l = "Command and Address Signal Hold Time";
-	$temp = (($bytes->[33] & 0x7f) >> 4) + ($bytes->[33] & 0xf) * 0.1;
-	printl $l, (($bytes->[33] >> 7) ? -$temp : $temp) . " ns";
+	if (($bytes->[34] & 0xf) <= 9) {
+		$l = "Data Signal Setup Time";
+		$temp = (($bytes->[34] & 0x7f) >> 4) + ($bytes->[34] & 0xf) * 0.1;
+		printl $l, (($bytes->[34] >> 7) ? -$temp : $temp) . " ns";
+	}
 
-	$l = "Data Signal Setup Time";
-	$temp = (($bytes->[34] & 0x7f) >> 4) + ($bytes->[34] & 0xf) * 0.1;
-	printl $l, (($bytes->[34] >> 7) ? -$temp : $temp) . " ns";
-
-	$l = "Data Signal Hold Time";
-	$temp = (($bytes->[35] & 0x7f) >> 4) + ($bytes->[35] & 0xf) * 0.1;
-	printl $l, (($bytes->[35] >> 7) ? -$temp : $temp) . " ns";
+	if (($bytes->[35] & 0xf) <= 9) {
+		$l = "Data Signal Hold Time";
+		$temp = (($bytes->[35] & 0x7f) >> 4) + ($bytes->[35] & 0xf) * 0.1;
+		printl $l, (($bytes->[35] >> 7) ? -$temp : $temp) . " ns";
+	}
 }
 
 # Parameter: bytes 0-63
@@ -695,6 +704,15 @@ sub decode_ddr_sdram($)
 {
 	my $bytes = shift;
 	my ($l, $temp);
+
+# SPD revision
+	if ($bytes->[62] != 0xff) {
+		printl "SPD Revision", ($bytes->[62] >> 4) . "." .
+				       ($bytes->[62] & 0xf);
+	}
+
+# speed
+	prints "Memory Characteristics";
 
 	$l = "Maximum module speed";
 	$temp = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
@@ -833,6 +851,15 @@ sub decode_ddr2_sdram($)
 	my $bytes = shift;
 	my ($l, $temp);
 
+# SPD revision
+	if ($bytes->[62] != 0xff) {
+		printl "SPD Revision", ($bytes->[62] >> 4) . "." .
+				       ($bytes->[62] & 0xf);
+	}
+
+# speed
+	prints "Memory Characteristics";
+
 	$l = "Maximum module speed";
 	$temp = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
 	my $ddrclk = 4 * (1000 / $temp);
@@ -918,6 +945,8 @@ sub decode_direct_rambus($)
 	my $bytes = shift;
 
 #size computation
+	prints "Memory Characteristics";
+
 	my $ii;
 
 	$ii = ($bytes->[4] & 0x0f) + ($bytes->[4] >> 4) + ($bytes->[5] & 0x07) - 13;
@@ -936,6 +965,8 @@ sub decode_rambus($)
 	my $bytes = shift;
 
 #size computation
+	prints "Memory Characteristics";
+
 	my $ii;
 	
 	$ii = ($bytes->[3] & 0x0f) + ($bytes->[3] >> 4) + ($bytes->[5] & 0x07) - 13;
@@ -962,14 +993,16 @@ sub decode_intel_spec_freq($)
 	my $bytes = shift;
 	my ($l, $temp);
 
-	$l = "Intel Specification for Frequency";
+	prints "Intel Specification";
+
+	$l = "Frequency";
 	if ($bytes->[62] == 0x66) { $temp = "66MHz\n"; }
 	elsif ($bytes->[62] == 100) { $temp = "100MHz or 133MHz\n"; }
 	elsif ($bytes->[62] == 133) { $temp = "133MHz\n"; }
 	else { $temp = "Undefined!\n"; }
 	printl $l, $temp;
 
-	$l = "Intel Spec Details for 100MHz Support";
+	$l = "Details for 100MHz Support";
 	$temp="";
 	if ($bytes->[63] & 1) { $temp .= "Intel Concurrent Auto-precharge\n"; }
 	if ($bytes->[63] & 2) { $temp .= "CAS Latency = 2\n"; }
@@ -1061,7 +1094,7 @@ for my $i ( 0 .. $#dimm_list ) {
 		}
 
 # Decode first 3 bytes (0-2)
-		prints "The Following is Required Data and is Applicable to all DIMM Types";
+		prints "SPD EEPROM Information";
 
 		my @bytes = readspd64(0, $dimm_list[$i]);
 		my $dimm_checksum = 0;
@@ -1074,7 +1107,10 @@ for my $i ( 0 .. $#dimm_list ) {
 			sprintf("Bad\n(found 0x%.2X, calculated 0x%.2X)\n",
 				$bytes[63], $dimm_checksum));
 
-		next unless $bytes[63] == $dimm_checksum or $opt_igncheck;
+		unless ($bytes[63] == $dimm_checksum or $opt_igncheck) {
+			print "</table>\n" if $opt_html;
+			next;
+		}
 		
 		$dimm_count++;
 		# Simple heuristic to detect Rambus
@@ -1115,14 +1151,13 @@ for my $i ( 0 .. $#dimm_list ) {
 		}
 		printl $l, $type;
 
-# Decode next 59 bytes (3-61, depend on memory type)
+# Decode next 61 bytes (3-63, depend on memory type)
 		$decode_callback{$type}->(\@bytes)
 			if exists $decode_callback{$type};
 
-# Decode next 2 bytes (62-63)
-		printl "SPD Revision code ", sprintf("%x", $bytes[62]);
-
 # Decode next 35 bytes (64-98, common to all memory types)
+		prints "Manufacturing Information";
+
 		@bytes = readspd64(64, $dimm_list[$i]);
 		
 		$l = "Manufacturer";
