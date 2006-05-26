@@ -60,6 +60,10 @@
 #  don't display manufacturing location when undefined
 #  check that the manufacturing date is proper BCD, else fall back to
 #  hexadecimal display
+# Version 1.4  2006-05-26  Jean Delvare <khali@linux-fr.org>
+#  fix latencies decoding (SDRAM)
+#  fix CAS latency decoding (DDR SDRAM)
+#  decode latencies, timings and module height (DDR SDRAM)
 #
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
@@ -435,7 +439,7 @@ sub decode_sdr_sdram($)
 	}
 
 	my @cas;
-	for ($ii = 0; $ii < 6; $ii++) {
+	for ($ii = 0; $ii < 7; $ii++) {
 		push(@cas, $ii + 1) if ($bytes->[18] & (1 << $ii));
 	}
 
@@ -554,7 +558,7 @@ sub decode_sdr_sdram($)
 
 	$l = "Supported CS Latencies";
 	@array = ();
-	for ($ii = 0; $ii < 6; $ii++) {
+	for ($ii = 0; $ii < 7; $ii++) {
 		push(@array, $ii) if ($bytes->[19] & (1 << $ii));
 	}
 	if (@array) { $temp = join ', ', @array; }
@@ -563,7 +567,7 @@ sub decode_sdr_sdram($)
 
 	$l = "Supported WE Latencies";
 	@array = ();
-	for ($ii = 0; $ii < 6; $ii++) {
+	for ($ii = 0; $ii < 7; $ii++) {
 		push(@array, $ii) if ($bytes->[20] & (1 << $ii));
 	}
 	if (@array) { $temp = join ', ', @array; }
@@ -708,39 +712,35 @@ sub decode_ddr_sdram($)
 
 #size computation
 
-	my $a = $bytes->[3];
-	my $b = $bytes->[4];
-	my $c = $bytes->[5];
-	my $d = $bytes->[17];
 	my $k=0;
 	my $ii=0;
 	
-	$ii = (($a) & 0x0f) + (( $b) & 0x0f) - 17;
-	if (( $c <= 8) && ( $d <= 8)) {
-		 $k = ( $c) * ( $d);
+	$ii = ($bytes->[3] & 0x0f) + ($bytes->[4] & 0x0f) - 17;
+	if (($bytes->[5] <= 8) && ($bytes->[17] <= 8)) {
+		 $k = $bytes->[5] * $bytes->[17];
 	}
 	
 	if($ii > 0 && $ii <= 12 && $k > 0) {
 		printl "Size", ((1 << $ii) * $k) . " MB"; }
 	else { 
-		printl "INVALID SIZE", $a . "," . $b . "," . $c . "," . $d;
+		printl "INVALID SIZE", $bytes->[3] . ", " . $bytes->[4] . ", " .
+				       $bytes->[5] . ", " . $bytes->[17];
 	}
 
 	my $highestCAS = 0;
+	my %cas;
+	for ($ii = 0; $ii < 7; $ii++) {
+		if ($bytes->[18] & (1 << $ii)) {
+			$highestCAS = 1+$ii*0.5;
+			$cas{$highestCAS}++;
+		}
+	}
+
 	my $trcd;
 	my $trp;
 	my $tras;
 	my $ctime = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
 
-	if ($bytes->[18] & 1) { $highestCAS = 1; }
-	if ($bytes->[18] & 2) { $highestCAS = 1.5; }
-	if ($bytes->[18] & 4) { $highestCAS = 2; }
-	if ($bytes->[18] & 8) { $highestCAS = 2.5; }
-	if ($bytes->[18] & 16) { $highestCAS = 3.5; }
-	if ($bytes->[18] & 32) { $highestCAS = 4; }
-	if ($bytes->[18] & 64) { $highestCAS = 4.5; }
-	if ($bytes->[18] & 128) { $highestCAS = 5; }
-	
 	$trcd =($bytes->[29] >> 2)+(($bytes->[29] & 3)*0.25);
 	$trp =($bytes->[27] >> 2)+(($bytes->[27] & 3)*0.25);
 	$tras = $bytes->[30];
@@ -750,6 +750,60 @@ sub decode_ddr_sdram($)
 		ceil($trcd/$ctime) . "-" .
 		ceil($trp/$ctime) . "-" .
 		ceil($tras/$ctime);
+
+# latencies
+	if (keys %cas) { $temp = join ', ', sort { $b <=> $a } keys %cas; }
+	else { $temp = "None"; }
+	printl "Supported CAS Latencies", $temp;
+
+	my @array;
+	for ($ii = 0; $ii < 7; $ii++) {
+		push(@array, $ii) if ($bytes->[19] & (1 << $ii));
+	}
+	if (@array) { $temp = join ', ', @array; }
+	else { $temp = "None"; }
+	printl "Supported CS Latencies", $temp;
+
+	@array = ();
+	for ($ii = 0; $ii < 7; $ii++) {
+		push(@array, $ii) if ($bytes->[20] & (1 << $ii));
+	}
+	if (@array) { $temp = join ', ', @array; }
+	else { $temp = "None"; }
+	printl "Supported WE Latencies", $temp;
+
+# timings
+	if (exists $cas{$highestCAS}) {
+		printl "Minimum Cycle Time (CAS $highestCAS)",
+		       "$ctime ns";
+
+		printl "Maximum Access Time (CAS $highestCAS)",
+		       (($bytes->[10] >> 4) * 0.1 + ($bytes->[10] & 0xf) * 0.01) . " ns";
+	}
+
+	if (exists $cas{$highestCAS-0.5} && spd_written(@$bytes[23..24])) {
+		printl "Minimum Cycle Time (CAS ".($highestCAS-0.5).")",
+		       (($bytes->[23] >> 4) + ($bytes->[23] & 0xf) * 0.1) . " ns";
+
+		printl "Maximum Access Time (CAS ".($highestCAS-0.5).")",
+		       (($bytes->[24] >> 4) * 0.1 + ($bytes->[24] & 0xf) * 0.01) . " ns";
+	}
+
+	if (exists $cas{$highestCAS-1} && spd_written(@$bytes[25..26])) {
+		printl "Minimum Cycle Time (CAS ".($highestCAS-1).")",
+		       (($bytes->[25] >> 4) + ($bytes->[25] & 0xf) * 0.1) . " ns";
+
+		printl "Maximum Access Time (CAS ".($highestCAS-1).")",
+		       (($bytes->[26] >> 4) * 0.1 + ($bytes->[26] & 0xf) * 0.01) . " ns";
+	}
+
+# module attributes
+	if ($bytes->[47] & 0x03) {
+		if (($bytes->[47] & 0x03) == 0x01) { $temp = "1.125\" to 1.25\""; }
+		elsif (($bytes->[47] & 0x03) == 0x02) { $temp = "1.7\""; }
+		elsif (($bytes->[47] & 0x03) == 0x03) { $temp = "Other"; }
+		printl "Module Height", $temp;
+	}
 }
 
 # Parameter: bytes 0-63
