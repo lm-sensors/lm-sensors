@@ -252,7 +252,7 @@ struct w83792d_data {
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 
-	struct i2c_client *lm75;	/* for secondary I2C addresses */
+	struct i2c_client *lm75[2];	/* for secondary I2C addresses */
 	/* pointer to array of 2 subclients */
 
 	u8 in[9];		/* Register value */
@@ -504,10 +504,101 @@ static int w83792d_attach_adapter(struct i2c_adapter *adapter)
 	return i_tmp;
 }
 
+static int 
+w83792d_create_subclient(struct i2c_adapter *adapter,
+				struct i2c_client *new_client, int addr,
+				struct i2c_client **sub_cli) 
+{
+	int err;
+	struct i2c_client *sub_client;
+	
+	(*sub_cli) = sub_client = kmalloc(sizeof(struct i2c_client), GFP_KERNEL);
+	if (!(sub_client)) {
+		return -ENOMEM;
+	}
+	memset(sub_client, 0x00, sizeof(struct i2c_client));
+	sub_client->addr = 0x48 + addr;
+	sub_client->data = NULL;
+	sub_client->adapter = adapter;
+	sub_client->driver = &w83792d_driver;
+	sub_client->flags = 0;
+	strcpy(sub_client->name, "w83792d subclient");
+	if ((err = i2c_attach_client(sub_client))) {
+		printk(KERN_ERR "w83792: subclient registration "
+			"at address 0x%x failed\n", sub_client->addr);
+		kfree(sub_client);
+		return err;
+	}
+	return 0;
+}
+
+static int
+w83792d_detect_subclients(struct i2c_adapter *adapter, int address, int kind,
+		struct i2c_client *new_client)
+{
+	int i, id, err;
+	u8 val;
+	struct w83792d_data *data = new_client->data;
+
+	data->lm75[0] = NULL;
+	data->lm75[1] = NULL;
+
+	id = i2c_adapter_id(adapter);
+	if (force_subclients[0] == id && force_subclients[1] == address) {
+		for (i = 2; i <= 3; i++) {
+			if (force_subclients[i] < 0x48 ||
+			    force_subclients[i] > 0x4f) {
+				printk(KERN_ERR "w83792d: invalid subclient "
+					"address %d; must be 0x48-0x4f\n",
+					force_subclients[i]);
+				err = -ENODEV;
+				goto ERROR_SC_0;
+			}
+		}
+		w83792d_write_value(new_client, W83792D_REG_I2C_SUBADDR,
+					(force_subclients[2] & 0x07) |
+					((force_subclients[3] & 0x07) << 4));
+	}
+
+	val = w83792d_read_value(new_client, W83792D_REG_I2C_SUBADDR);
+	if (!(val & 0x08)) {
+		err = w83792d_create_subclient(adapter, new_client, val & 0x7,
+						&data->lm75[0]);
+		if (err < 0)
+			goto ERROR_SC_0;
+	}
+	if (!(val & 0x80)) {
+		if ((data->lm75[0] != NULL) &&
+			((val & 0x7) == ((val >> 4) & 0x7))) {
+			printk(KERN_ERR "w83792d: duplicate addresses 0x%x, "
+				"use force_subclient\n", data->lm75[0]->addr);
+			err = -ENODEV;
+			goto ERROR_SC_1;
+		}
+		err = w83792d_create_subclient(adapter, new_client,
+						(val >> 4) & 0x7, &data->lm75[1]);
+		if (err < 0)
+			goto ERROR_SC_1;
+	}
+
+	return 0;
+
+/* Undo inits in case of errors */
+
+ERROR_SC_1:
+	if (data->lm75[0] != NULL) {
+		i2c_detach_client(data->lm75[0]);
+		kfree(data->lm75[0]);
+	}
+ERROR_SC_0:
+	return err;
+}
+
+
 static int w83792d_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind)
 {
-	int i, val1 = 0, val2 = 0, id;
+	int i, val1 = 0, val2 = 0;
 	struct i2c_client *new_client;
 	struct w83792d_data *data;
 	int err = 0;
@@ -618,58 +709,10 @@ static int w83792d_detect(struct i2c_adapter *adapter, int address,
 		LEAVE()
 		goto ERROR1;
 	}
-
-	/* attach secondary i2c lm75-like clients */
-	if (!(data->lm75 = kmalloc(2 * sizeof(struct i2c_client),
-				   GFP_KERNEL))) {
-		err = -ENOMEM;
-		goto ERROR2;
-	}
-	id = i2c_adapter_id(adapter);
-	if(force_subclients[0] == id && force_subclients[1] == address) {
-		if(force_subclients[2] < 0x48 || force_subclients[2] > 0x4b) {
-			printk(KERN_ERR "w83792d.o: Invalid subclient address %d; must be 0x48-0x4b\n",
-			       force_subclients[2]);
-			goto ERROR5;
-		}
-		if(force_subclients[3] < 0x4c || force_subclients[3] > 0x4f) {
-			printk(KERN_ERR "w83792d.o: Invalid subclient address %d; must be 0x4c-0x4f\n",
-			       force_subclients[3]);
-			goto ERROR5;
-		}
-		w83792d_write_value(new_client,
-				    W83792D_REG_I2C_SUBADDR,
-				    0x40 | (force_subclients[2] & 0x03) |
-				    ((force_subclients[3] & 0x03) <<4));
-		data->lm75[0].addr = force_subclients[2];
-		data->lm75[1].addr = force_subclients[3];
-	} else {
-		val1 = w83792d_read_value(new_client,
-					  W83792D_REG_I2C_SUBADDR);
-		data->lm75[0].addr = 0x48 + (val1 & 0x07);
-		data->lm75[1].addr = 0x48 + ((val1 >> 4) & 0x07);
-		if (data->lm75[0].addr == data->lm75[1].addr)
-			printk(KERN_WARNING "w83792d: Subclients have the same "
-			       "address (0x%02x)! Use force_subclients.\n",
-			       data->lm75[0].addr);
-	}
-	client_name = "W83792D subclient";
-
-
-	for (i = 0; i <= 1; i++) {
-		data->lm75[i].data = NULL;	/* store all data in w83792d */
-		data->lm75[i].adapter = adapter;
-		data->lm75[i].driver = &w83792d_driver;
-		data->lm75[i].flags = 0;
-		strcpy(data->lm75[i].name, client_name);
-		if ((err = i2c_attach_client(&(data->lm75[i])))) {
-			printk(KERN_ERR "w83792d.o: Subclient %d registration at address 0x%x failed.\n",
-			       i, data->lm75[i].addr);
-			if (i == 1)
-				goto ERROR6;
-			goto ERROR5;
-		}
-	}
+	
+ 	if ((err = w83792d_detect_subclients(adapter, address,
+ 			kind, new_client)))
+ 		goto ERROR2;
 
 	/* Read GPIO enable register to check if pins for fan 4,5 are used as
 	   GPIO */
@@ -689,7 +732,7 @@ static int w83792d_detect(struct i2c_adapter *adapter, int address,
 	if ((i = i2c_register_entry(new_client, type_name,
 				    w83792d_dir_table_template, THIS_MODULE)) < 0) {
 		err = i;
-		goto ERROR7;
+		goto ERROR3;
 	}
 	data->sysctl_id = i;
 
@@ -698,23 +741,20 @@ static int w83792d_detect(struct i2c_adapter *adapter, int address,
 	LEAVE()
 	return 0;
 
-      ERROR7:
-	i2c_detach_client(&
-			  (((struct
-			     w83792d_data *) (new_client->data))->
-			   lm75[1]));
-      ERROR6:
-	i2c_detach_client(&
-			  (((struct
-			     w83792d_data *) (new_client->data))->
-			   lm75[0]));
-      ERROR5:
-	kfree(((struct w83792d_data *) (new_client->data))->lm75);
-      ERROR2:
+ERROR3:
+	if (data->lm75[0] != NULL) {
+		i2c_detach_client(data->lm75[0]);
+		kfree(data->lm75[0]);
+	}
+	if (data->lm75[1] != NULL) {
+		i2c_detach_client(data->lm75[1]);
+		kfree(data->lm75[1]);
+	}
+ERROR2:
 	i2c_detach_client(new_client);
-      ERROR1:
+ERROR1:
 	kfree(data);
-      ERROR0:
+ERROR0:
 
 	LEAVE()
 	return err;
@@ -726,19 +766,24 @@ static int w83792d_detach_client(struct i2c_client *client)
 	struct w83792d_data *data = client->data;
 	ENTER()
 
-	i2c_deregister_entry(data->sysctl_id);
+	/* remove sysctl table (primary client only) */
+	if ((data))
+		i2c_deregister_entry(data->sysctl_id);
 
 	if ((err = i2c_detach_client(client))) {
 		printk(KERN_ERR "w83792d: Client deregistration failed, client not detached.\n");
 		LEAVE()
 		return err;
 	}
-	i2c_detach_client(&(data->lm75[0]));
-	i2c_detach_client(&(data->lm75[1]));
-	kfree(data->lm75);
-	kfree(data);
 
-	LEAVE()
+	if (data) {
+		/* primary client */
+		kfree(data);
+	} else {
+		/* subclients */
+		kfree(client);
+	}
+
 	return 0;
 }
 
