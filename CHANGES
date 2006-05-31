@@ -97,6 +97,7 @@ lm_sensors CHANGES file
   Module w83792d: Bug fixes and code cleanups (Yuan Mu, 2.6 backport)
                   Fix fan control mode (PWM/DC) reporting
                   Fix fan div auto-adjust (Yuan Mu)
+                  Fix the subclient handling
   Module w83l785ts: Minor cleanup (2.6 backport)
   Module vt1211: Restore temp1
   Modules vt1211, vt8231: Change default VRM to 9.1
