@@ -72,5 +72,6 @@ extern void print_max6650(const sensors_chip_name *name);
 extern void print_adm1031(const sensors_chip_name *name);
 extern void print_smsc47b397(const sensors_chip_name *name);
 extern void print_f71805f(const sensors_chip_name *name);
+extern void print_abituguru(const sensors_chip_name *name);
 
 #endif /* def PROG_SENSORS_CHIPS_H */

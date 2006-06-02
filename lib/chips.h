@@ -2168,4 +2168,23 @@
 #define SENSORS_F71805F_ALARMS_FAN	201
 #define SENSORS_F71805F_ALARMS_TEMP	202
 
+/* Abit uGuru chip */
+#define SENSORS_ABITUGURU_PREFIX "abituguru"
+
+/* in n from 0 to 10 */
+#define SENSORS_ABITUGURU_IN(n)			(0x01 + (n)) /* R */
+#define SENSORS_ABITUGURU_IN_MIN(n)		(0x11 + (n)) /* RW */
+#define SENSORS_ABITUGURU_IN_MIN_ALARM(n)	(0x21 + (n)) /* R */
+#define SENSORS_ABITUGURU_IN_MAX(n)		(0x31 + (n)) /* RW */
+#define SENSORS_ABITUGURU_IN_MAX_ALARM(n)	(0x41 + (n)) /* R */
+/* temp n from 1 to 7 */
+#define SENSORS_ABITUGURU_TEMP(n)		(0x50 + (n)) /* R */
+#define SENSORS_ABITUGURU_TEMP_ALARM(n)		(0x60 + (n)) /* R */
+#define SENSORS_ABITUGURU_TEMP_MAX(n)		(0x70 + (n)) /* RW */
+#define SENSORS_ABITUGURU_TEMP_CRIT(n)		(0x80 + (n)) /* RW */
+/* fan n from 1 to 6 */
+#define SENSORS_ABITUGURU_FAN(n)		(0x90 + (n)) /* R */
+#define SENSORS_ABITUGURU_FAN_ALARM(n)		(0xA0 + (n)) /* R */
+#define SENSORS_ABITUGURU_FAN_MIN(n)		(0xB0 + (n)) /* RW */
+
 #endif /* def LIB_SENSORS_CHIPS_H */

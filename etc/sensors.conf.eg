@@ -2617,3 +2617,62 @@ chip "f71805f-*"
    #set temp2_hyst  48
    #set temp3_max   50
    #set temp3_hyst  48
+
+
+# Abit Uguru sensor part configuration.
+# The Abit Uguru is relativly straight forward to configure.
+# label statements:
+# The voltage (in) temp and fan sensors are usualy in the same order as listed
+# in the BIOS, but not always!
+# compute statements:
+# The temp and fan sensors don't need any compute statements. Most voltage
+# inputs are directly connected to the IC and thus don't need an compute line
+# because the 0-3494 mV voltage given by the kernel driver is correct. The sen-
+# sors for higher voltages however are connect through a divider and measure
+# ranges of: 0-4361mV, 0-6248mV or 0-14510mV. Thus the measured voltages must
+# be multiplied by resp. 1.248, 1.788 or 4.153. 3.3 volt sources use the 1.248
+# mutiplier, 5 volt the 1.788 and 12 volt the 4.153.
+# set statements:
+# The Abit BIOS sets reasonable treshholds and allows changing them, thus
+# set statements may be ommited. The abituguru kernel driver does support
+# them if you want to add them.
+#
+# The configuration below is for the Kv8Pro and AV8 this is the default as this
+# driver is developed and tested on a Kv8Pro.
+# Configurations for many other Abit boards can be found at:
+# http://www.lm-sensors.org/trac/wiki/Configurations/Abit
+# If your motherboard isn't listed there and you create a configuration for it
+# please add it there.
+
+chip "abituguru-*"
+
+   label in0 "CPU Core Voltage"
+   label in1 "DDR Voltage"
+   label in2 "DDR VTT Voltage"
+   label in3 "NB Voltage"
+   label in4 "SB Voltage"
+   label in5 "HyperTransport Voltage"
+   label in6 "AGP VDDQ Voltage"
+   label in7 "ATX +5V"
+   compute in7 @*1.788 , @/1.788
+   label in8 "ATX +3.3V"
+   compute in8 @*1.248 , @/1.248
+   label in9 "Standby Voltage (+5V)"
+   compute in9 @*1.788 , @/1.788
+   label in10 "3VDual Voltage"
+   compute in10 @*1.248 , @/1.248
+
+   label temp1 "CPU Temperature"
+   label temp2 "SYS Temperature"
+   label temp3 "PWM Temperature"
+   ignore temp4
+   ignore temp5
+   ignore temp6
+   ignore temp7
+
+   label fan1 "CPU FAN Speed"
+   label fan2 "NB FAN Speed"
+   label fan3 "SYS FAN Speed"
+   label fan4 "AUX1 FAN Speed"
+   label fan5 "AUX2 FAN Speed"
+   ignore fan6

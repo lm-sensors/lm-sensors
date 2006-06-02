@@ -5931,6 +5931,116 @@ void print_f71805f(const sensors_chip_name *name)
   }
 }
 
+/* print_abituguru_in()
+ *   where in, in_min, in_min_alarm, in_max and in_max_alarm are sensors
+ *   feature IDs
+ */
+static void print_abituguru_in(const sensors_chip_name *name, int in,
+  int in_min, int in_min_alarm, int in_max, int in_max_alarm)
+{
+  char *label;
+  double cur, min, max, alarm_low, alarm_high;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, in, &label, &valid)) {
+    if (valid) {
+      if (!sensors_get_feature(*name, in, &cur) &&
+          !sensors_get_feature(*name, in_min, &min) &&
+          !sensors_get_feature(*name, in_max, &max) &&
+          !sensors_get_feature(*name, in_min_alarm, &alarm_low) &&
+          !sensors_get_feature(*name, in_max_alarm, &alarm_high)) {
+        print_label(label, 23);
+        printf("%+6.2f V (min %+6.2f V, max %+6.2f V)",
+               cur, min, max);
+        if (alarm_low || alarm_high) {
+          printf(" ALARM (");
+          if (alarm_low)
+            printf("LOW");
+          if (alarm_high)
+            printf("%sHIGH", (alarm_low) ? "," : "");
+          printf(")");
+        }
+        printf("\n");
+      } else
+        printf("ERROR: Can't get IN data! (0x%04x)\n", in);
+    }
+    free(label);
+  }
+}
+
+/* print_abituguru_temp()
+ * where temp, temp_alarm, temp_max, and temp_crit are sensors feature IDs
+ */
+static void print_abituguru_temp(const sensors_chip_name *name, int temp,
+	int temp_alarm, int temp_max, int temp_crit)
+{
+  char *label;
+  double cur, alarm, max, crit;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, temp, &label, &valid)) {
+    if (valid) {
+      if (!sensors_get_feature(*name, temp, &cur) &&
+          !sensors_get_feature(*name, temp_alarm, &alarm) &&
+          !sensors_get_feature(*name, temp_max, &max) &&
+          !sensors_get_feature(*name, temp_crit, &crit)) {
+        print_label(label, 23);
+        print_temp_info(cur, max, crit, CRIT, 0, 0);
+        if (alarm)
+          printf(" ALARM\n");
+        else
+          printf("\n");
+      } else
+        printf("ERROR: Can't get TEMP data! (0x%04x)\n", temp);
+    }
+    free(label);
+  }
+}
+
+/* print_abituguru_fan()
+ *   where fan, fan_alarm and fan_min are sensors feature IDs
+ */
+static void print_abituguru_fan(const sensors_chip_name *name, int fan,
+	int fan_alarm, int fan_min)
+{
+  char *label;
+  double cur, alarm, min;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, fan, &label, &valid)) {
+    if (valid) {
+      if (!sensors_get_feature(*name, fan, &cur) &&
+          !sensors_get_feature(*name, fan_alarm, &alarm) &&
+          !sensors_get_feature(*name, fan_min, &min)) {
+        print_label(label, 23);
+        printf("%4.0f RPM (min %4.0f RPM)               %s\n",
+               cur, min, alarm ? "ALARM" : "");
+      } else
+        printf("ERROR: Can't get FAN data! (0x%04x)\n", fan);
+    }
+    free(label);
+  }
+}
+
+void print_abituguru(const sensors_chip_name *name)
+{
+  int i;
+
+  for (i=0; i<11; i++)
+    print_abituguru_in(name, SENSORS_ABITUGURU_IN(i),
+      SENSORS_ABITUGURU_IN_MIN(i), SENSORS_ABITUGURU_IN_MIN_ALARM(i),
+      SENSORS_ABITUGURU_IN_MAX(i), SENSORS_ABITUGURU_IN_MAX_ALARM(i));
+
+  for (i=1; i<=7; i++)
+    print_abituguru_temp(name, SENSORS_ABITUGURU_TEMP(i),
+      SENSORS_ABITUGURU_TEMP_ALARM(i), SENSORS_ABITUGURU_TEMP_MAX(i),
+      SENSORS_ABITUGURU_TEMP_CRIT(i));
+
+  for (i=1; i<=6; i++)
+    print_abituguru_fan(name, SENSORS_ABITUGURU_FAN(i),
+      SENSORS_ABITUGURU_FAN_ALARM(i), SENSORS_ABITUGURU_FAN_MIN(i));
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;
