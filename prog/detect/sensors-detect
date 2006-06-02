@@ -1107,6 +1107,15 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        alias_detect => sub { w83781d_alias_detect 9, @_ },
      },
      {
+       name => "Winbond W83627DHG",
+       driver => "to-be-tested",
+       i2c_addrs => [0x28..0x2f], 
+       i2c_detect => sub { w83781d_detect 10, @_},
+       isa_addrs => [0x290],
+       isa_detect => sub { w83781d_isa_detect 10, @_ },
+       alias_detect => sub { w83781d_alias_detect 10, @_ },
+     },
+     {
        name => "Asus AS99127F (rev.1)",
        driver => "w83781d",
        i2c_addrs => [0x28..0x2f],
@@ -1939,6 +1948,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 	# broader mask. W83627EHG was seen with ID 0x8863.
 	devid => 0x8840,
 	devid_mask => 0xFFC0,
+	logdev => 0x0b,
+      },
+	name => "Winbond W83627DHG Super IO Sensors",
+	driver => "w83627ehf",
+	devid => 0xA020,
+	devid_mask => 0xFFF0,
 	logdev => 0x0b,
       },
     ]
@@ -3593,7 +3608,7 @@ sub lm87_detect
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 2 = W83783S,
 #                        3 = W83627HF, 4 = AS99127F (rev.1),
 #                        5 = AS99127F (rev.2), 6 = ASB100, 7 = W83791D,
-#                        8 = W83792D, 9 = W83627EHF)
+#                        8 = W83792D, 9 = W83627EHF 10 = W83627DHG)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -3644,6 +3659,7 @@ sub w83781d_detect
   return if $chip == 7 and  $reg1 != 0x71;
   return if $chip == 8 and  $reg1 != 0x7a;
   return if $chip == 9 and  $reg1 != 0xa1;
+  return if $chip == 10 and  $reg1 != 0xa2;
   $reg1 = i2c_smbus_read_byte_data($file,0x4a);
   # Default address is 0x2d
   @res = ($addr != 0x2d) ? (7) : (8);
@@ -3751,7 +3767,7 @@ sub mozart_detect
 }
 
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83627HF,
-#                        9 = W83627EHF)
+#                        9 = W83627EHF 10 = W83627DHG)
 # $_[1]: ISA address
 # $_[2]: I2C file handle
 # $_[3]: I2C address
@@ -3768,7 +3784,7 @@ sub w83781d_alias_detect
 }
 
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83627HF,
-#                        9 = W83627EHF)
+#                        9 = W83627EHF 10 = W83627DHG)
 # $_[1]: Address
 # Returns: undef if not detected, (8) if detected.
 sub w83781d_isa_detect
@@ -3792,12 +3808,13 @@ sub w83781d_isa_detect
   return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or 
                 (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
   return unless ($reg1 & 0x07) == 0x00;
-  $reg1 = &$read_proc(0x58) & 0xfe;
-  return if $chip == 0 and  $reg1 != 0x10;
-  return if $chip == 1 and  $reg1 != 0x30;
-  return if $chip == 3 and  $reg1 != 0x20;
-  return if $chip == 9 and  $reg1 != 0x88; # Datasheet says 0xA1
-                                           # but seems to be wrong
+  $reg1 = &$read_proc(0x58);
+  return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
+  return if $chip == 1 and  ($reg1 & 0xfe) != 0x30;
+  return if $chip == 3 and  ($reg1 & 0xfe) != 0x20;
+  return if $chip == 9 and  !($reg1 == 0x88 or $reg1 == 0xa1);
+  return if $chip == 10 and  $reg1 != 0xa2;
+
   return 8;
 }
 
