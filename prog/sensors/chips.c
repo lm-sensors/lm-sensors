@@ -6067,6 +6067,7 @@ void print_unknown_chip(const sensors_chip_name *name)
         printf("%s: %.2f (%s)\n",label,val,data->name);
     } else 
       printf("(%s)\n",label);
+    free(label);
   }
 }
 
