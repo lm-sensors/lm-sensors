@@ -253,7 +253,6 @@ struct w83792d_data {
 	unsigned long last_updated;	/* In jiffies */
 
 	struct i2c_client *lm75[2];	/* for secondary I2C addresses */
-	/* pointer to array of 2 subclients */
 
 	u8 in[9];		/* Register value */
 	u8 in_max[9];		/* Register value */
