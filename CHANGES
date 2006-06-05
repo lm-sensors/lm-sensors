@@ -17,6 +17,7 @@ lm_sensors CHANGES file
   Module i2c-piix4: Add ServerWorks HT-1000 support (2.6 backport)
   Module i2c-viapro: Fix compilation with kernels < 2.4.21
   Module w83781d: Use real-time alarm registers when possible (2.6 backport)
+  Module w83792d: Fix PWM range (2.6 backport)
   Program decode-dimms.pl: Decode depending on the memory type
                            Decode the manufacturing date to an ISO8601 date
                            Add the memory size computation and provide brief

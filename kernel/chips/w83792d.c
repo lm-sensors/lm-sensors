@@ -1434,10 +1434,10 @@ static void w83792d_pwm(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		w83792d_update_client(client);
-		results[0] = data->pwm[nr];
+		results[0] = data->pwm[nr] << 4;
 		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-		data->pwm[nr] = SENSORS_LIMIT(results[0], 0, 15);
+		data->pwm[nr] = SENSORS_LIMIT(results[0], 0, 255) >> 4;
 		pwm_mask = w83792d_read_value(client,W83792D_REG_PWM[nr]) & 0xf0;
 		w83792d_write_value(client,W83792D_REG_PWM[nr],pwm_mask|data->pwm[nr]);
 	}
