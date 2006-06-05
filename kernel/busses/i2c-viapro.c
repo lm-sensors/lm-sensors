@@ -49,6 +49,19 @@
 #include "version.h"
 #include "sensors_compat.h"
 
+/* 8233A is undefined before kernel 2.4.19 */
+#ifndef PCI_DEVICE_ID_VIA_8233A
+#define PCI_DEVICE_ID_VIA_8233A	0x3147
+#endif
+/* 8235 is undefined before kernel 2.4.21 */
+#ifndef PCI_DEVICE_ID_VIA_8235
+#define PCI_DEVICE_ID_VIA_8235	0x3177
+#endif
+/* 8237 is undefined before kernel 2.4.21 */
+#ifndef PCI_DEVICE_ID_VIA_8237
+#define PCI_DEVICE_ID_VIA_8237	0x3227
+#endif
+
 #define SMBBA1		0x90
 #define SMBBA2		0x80
 #define SMBBA3		0xD0
@@ -420,18 +433,6 @@ release_region:
 	return error;
 }
 
-/* 8233A is undefined before kernel 2.4.19 */
-#ifndef PCI_DEVICE_ID_VIA_8233A
-#define PCI_DEVICE_ID_VIA_8233A	0x3147
-#endif
-/* 8235 is undefined before kernel 2.4.20 */
-#ifndef PCI_DEVICE_ID_VIA_8235
-#define PCI_DEVICE_ID_VIA_8235	0x3177
-#endif
-/* 8237 is undefined before kernel 2.4.21 */
-#ifndef PCI_DEVICE_ID_VIA_8237
-#define PCI_DEVICE_ID_VIA_8237	0x3227
-#endif
 static struct pci_device_id vt596_ids[] __initdata = {
 	{
 		.vendor		= PCI_VENDOR_ID_VIA,
