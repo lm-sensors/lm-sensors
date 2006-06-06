@@ -7,6 +7,7 @@ lm_sensors CHANGES file
            Add support for W83627EHF voltage inputs and alarms
            Add support for the smsc47m192 driver
            Fix all memory leaks (yeah!)
+           Fix no sensors being reported as an error
   Makefile: Don't grep autoconf.h on user-space targets
   Makefile: Fix depmod on non-running kernel version
   Module i2c-ali1535: Drop redundant semaphore (2.6 backport)

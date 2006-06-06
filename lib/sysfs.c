@@ -112,7 +112,8 @@ static int sensors_read_sysfs_chips_compat(void)
 	}
 
 	if (!(devs = sysfs_get_bus_devices(bus))) {
-		ret = -SENSORS_ERR_PROC;
+		if (errno)
+			ret = -SENSORS_ERR_PROC;
 		goto exit1;
 	}
 
@@ -142,7 +143,8 @@ int sensors_read_sysfs_chips(void)
 	}
 
 	if (!(clsdevs = sysfs_get_class_devices(cls))) {
-		ret = -SENSORS_ERR_PROC;
+		if (errno)
+			ret = -SENSORS_ERR_PROC;
 		goto exit;
 	}
 
