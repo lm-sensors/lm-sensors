@@ -126,6 +126,8 @@ static int amd756_transaction(void)
 	       inw_p(SMB_HOST_ADDRESS), inb_p(SMB_HOST_DATA));
 
 	/* Make sure the SMBus host is ready to start transmitting */
+	/* And wait for the SMBus controller to settle down (avoids hang) */
+	msleep(1);
 	if ((temp = inw_p(SMB_GLOBAL_STATUS)) & (GS_HST_STS | GS_SMB_STS)) {
 		pr_debug(DRV_NAME ": SMBus busy (%04x). Waiting...\n", temp);
 		do {
