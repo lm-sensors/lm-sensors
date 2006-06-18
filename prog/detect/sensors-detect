@@ -1065,12 +1065,6 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { w83781d_detect 2, @_},
      } ,
      {
-       name => "Winbond W83791D",
-       driver => "w83781d",
-       i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { w83781d_detect 7, @_},
-     },
-     {
        name => "Winbond W83792D",
        driver => "w83792d",
        i2c_addrs => [0x2c..0x2f],
@@ -1624,6 +1618,23 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        i2c_detect => sub { smartbatt_detect @_},
      },
 );
+
+# Special case chip information goes here and would be included in
+# the chip_special_cases routine below
+use vars qw($chip_kern24_w83791d $chip_kern26_w83791d);
+$chip_kern24_w83791d = {
+	name => "Winbond W83791D",
+	driver => "w83781d",
+	i2c_addrs => [0x2c..0x2f],
+	i2c_detect => sub { w83781d_detect 7, @_ },
+};
+
+$chip_kern26_w83791d = {
+	name => "Winbond W83791D",
+	driver => "w83791d",
+	i2c_addrs => [0x2c..0x2f],
+	i2c_detect => sub { w83781d_detect 7, @_ },
+};
 
 # This is a list of all recognized superio chips. 
 # Each entry must have the following fields:
@@ -2900,6 +2911,21 @@ sub scan_superio
 ##################
 # CHIP DETECTION #
 ##################
+
+# This routine allows you to select which chips are optionally added to the
+# chip detection list. The most common use is to allow for different chip
+# detection/drivers based on different linux kernels
+# This routine follows the pattern of the SiS adapter special cases
+sub chip_special_cases
+{
+	# Based on the kernel, add the appropriate chip structure to the
+	# chip_ids detection list
+	if (kernel_version_at_least(2, 6, 0)) {
+		push @chip_ids, $chip_kern26_w83791d;
+	} else {
+		push @chip_ids, $chip_kern24_w83791d;
+	}
+}
 
 # Each function returns a confidence value. The higher this value, the more
 # sure we are about this chip. A Winbond W83781D, for example, will be
@@ -5260,6 +5286,10 @@ sub main
       }
     }
   }
+
+  # Before looking for chips, make sure any special case chips are
+  # added to the chip_ids list
+  chip_special_cases();
 
   print "\n We are now going to do the adapter probings. Some adapters may ",
         "hang halfway\n",

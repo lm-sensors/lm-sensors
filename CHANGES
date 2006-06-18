@@ -40,6 +40,7 @@ lm_sensors CHANGES file
                            F75122R/RG, F75373S/SG, F75375S/SP, F75383S/M,
                            F75384S/M, F75387SG/RG and F81218D detection
                           Add Winbond W83793R/G detection
+                          Handle the W83791D driver difference between kernels
 
 
 2.10.0 (20060214)
