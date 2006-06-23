@@ -12,6 +12,10 @@
  * Since the datasheet omits to give the chip stepping code, I give it
  * here: 0x03 (at register 0xff).
  *
+ * Also supports the LM82 temp sensor, which is basically a stripped down
+ * model of the LM83.  Datasheet is here:
+ * http://www.national.com/pf/LM/LM82.html
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -50,7 +54,7 @@ static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
  * Insmod parameters
  */
 
-SENSORS_INSMOD_1(lm83);
+SENSORS_INSMOD_2(lm83, lm82);
 
 /*
  * The LM83 registers
@@ -200,6 +204,19 @@ static ctl_table lm83_dir_table_template[] =
 	{0}
 };
 
+static ctl_table lm82_dir_table_template[] =
+{
+	{LM83_SYSCTL_LOCAL_TEMP, "temp1", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_temp},
+	{LM83_SYSCTL_REMOTE2_TEMP, "temp3", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_temp},
+	{LM83_SYSCTL_TCRIT, "tcrit", NULL, 0, 0644, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_tcrit},
+	{LM83_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL,
+	 &i2c_proc_real, &i2c_sysctl_real, NULL, &lm83_alarms},
+	{0}
+};
+
 /*
  * Real code
  */
@@ -301,6 +318,8 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 		{
 			if (chip_id == 0x03)
 				kind = lm83;
+			else if (chip_id == 0x01)
+				kind = lm82;
 		}
 	}
 
@@ -314,6 +333,11 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	{
 		type_name = "lm83";
 		client_name = "LM83 chip";
+	}
+	else if (kind == lm82)
+	{
+		type_name = "lm82";
+		client_name = "LM82 chip";
 	}
 	else
 	{
@@ -346,8 +370,10 @@ static int lm83_detect(struct i2c_adapter *adapter, int address, unsigned
 	 * Register a new directory entry.
 	 */
 
-	if ((err = i2c_register_entry(new_client, type_name,
-	     lm83_dir_table_template, THIS_MODULE)) < 0)
+	if ((kind == lm83 && (err = i2c_register_entry(new_client, type_name,
+	     lm83_dir_table_template, THIS_MODULE)) < 0) ||
+	    (kind == lm82 && (err = i2c_register_entry(new_client, type_name,
+	     lm82_dir_table_template, THIS_MODULE)) < 0))
 	{
 #ifdef DEBUG
 		printk("lm83.o: Failed registering directory entry.\n");

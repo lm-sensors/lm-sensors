@@ -144,6 +144,7 @@ lm80
 
 lm83
 	lm83		4	-	-	-	yes	no
+	lm82		2	-	-	-	yes	no
 
 lm85
 	lm85		3	5	4	3 pwm	yes	no

@@ -36,7 +36,7 @@ if [ "$CONFIG_I2C_PROC" = "m" -o "$CONFIG_I2C_PROC" = "y" ] ; then
     dep_tristate '  National Semiconductor LM75 and compatibles' CONFIG_SENSORS_LM75 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductor LM78' CONFIG_SENSORS_LM78 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductor LM80' CONFIG_SENSORS_LM80 $CONFIG_I2C $CONFIG_I2C_PROC
-    dep_tristate '  National Semiconductor LM83' CONFIG_SENSORS_LM83 $CONFIG_I2C $CONFIG_I2C_PROC
+    dep_tristate '  National Semiconductor LM83 and compatibles' CONFIG_SENSORS_LM83 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductor LM85, Analog Devices ADM1027' CONFIG_SENSORS_LM85 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductor LM87' CONFIG_SENSORS_LM87 $CONFIG_I2C $CONFIG_I2C_PROC
     dep_tristate '  National Semiconductor LM90 and compatibles' CONFIG_SENSORS_LM90 $CONFIG_I2C $CONFIG_I2C_PROC

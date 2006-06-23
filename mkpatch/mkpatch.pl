@@ -538,10 +538,10 @@ CONFIG_SENSORS_LM80
   in the lm_sensors package, which you can download at
   http://www.lm-sensors.nu/
 
-National Semiconductor LM83
+National Semiconductor LM83 and compatibles
 CONFIG_SENSORS_LM83
   If you say yes here you get support for the National Semiconductor
-  LM83 sensor chip.  This can also be built as a module.
+  LM82 and LM83 sensor chips.  This can also be built as a module.
 
   You will also need the latest user-space utilities: you can find
   them in the lm_sensors package, which you can download at
