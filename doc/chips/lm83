@@ -135,3 +135,21 @@ temp4                 SENSORS_LM83_REMOTE3_TEMP                         temp4:2
 temp4_high            SENSORS_LM83_REMOTE3_HIGH                         temp4:1
 tcrit                 SENSORS_LM83_TCRIT                                tcrit:1
 alarms                SENSORS_LM83_ALARMS                              alarms:1
+
+Chip 'lm82'
+
+LABEL                 LABEL CLASS           COMPUTE CLASS          MODE  MAGN
+temp1                 -                     -                       R-     0
+temp1_high            temp1                 temp1                   RW     0
+temp3                 -                     -                       R-     0
+temp3_high            temp3                 temp3                   RW     0
+tcrit                 -                     -                       RW     0
+alarms                -                     -                       R-     0
+
+LABEL                 FEATURE SYMBOL                              SYSCTL FILE:N
+temp1                 SENSORS_LM83_LOCAL_TEMP                           temp1:2
+temp1_high            SENSORS_LM83_LOCAL_HIGH                           temp1:1
+temp3                 SENSORS_LM83_REMOTE2_TEMP                         temp3:2
+temp3_high            SENSORS_LM83_REMOTE2_HIGH                         temp3:1
+tcrit                 SENSORS_LM83_TCRIT                                tcrit:1
+alarms                SENSORS_LM83_ALARMS                              alarms:1
