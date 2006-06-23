@@ -103,11 +103,6 @@ MODULE_PARM_DESC(force_addr,
 		 "Forcibly enable the PIIX4 at the given address. "
 		 "EXTREMELY DANGEROUS!");
 
-static int fix_hstcfg = 0;
-MODULE_PARM(fix_hstcfg, "i");
-MODULE_PARM_DESC(fix_hstcfg,
-		 "Fix config register. Needed on some boards (Force CPCI735).");
-
 static int piix4_transaction(void);
 
 static unsigned short piix4_smba = 0;
@@ -172,22 +167,6 @@ static int __devinit piix4_setup(struct pci_dev *PIIX4_dev,
 
 	pci_read_config_byte(PIIX4_dev, SMBHSTCFG, &temp);
 
-	/* Some BIOS will set up the chipset incorrectly and leave a register
-	   in an undefined state (causing I2C to act very strangely). */
-	if (temp & 0x02) {
-		if (fix_hstcfg) {
-			printk(KERN_INFO "i2c-piix4.o: Working around buggy "
-				"BIOS (I2C)\n");
-			temp &= 0xfd;
-			pci_write_config_byte(PIIX4_dev, SMBHSTCFG, temp);
-		} else {
-			printk(KERN_INFO "i2c-piix4.o: Unusual config register "
-				"value\n");
-			printk(KERN_INFO "i2c-piix4.o: Try using fix_hstcfg=1 "
-				"if you experience problems\n");
-		}
-	}
-
 	/* If force_addr is set, we program the new address here. Just to make
 	   sure, we disable the PIIX4 first. */
 	if (force_addr) {
@@ -220,7 +199,7 @@ static int __devinit piix4_setup(struct pci_dev *PIIX4_dev,
 	}
 
 #ifdef DEBUG
-	if ((temp & 0x0E) == 8)
+	if (((temp & 0x0E) == 8) || ((temp & 0x0E) == 2))
 		printk(KERN_DEBUG "i2c-piix4.o: Using Interrupt 9 for "
 			"SMBus.\n");
 	else if ((temp & 0x0E) == 0)
