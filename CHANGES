@@ -16,6 +16,7 @@ lm_sensors CHANGES file
   Module i2c-i801: Disable PEC mode after every transaction (2.6 backport)
                    Add ICH8 support (2.6 backport)
   Module i2c-piix4: Add ServerWorks HT-1000 support (2.6 backport)
+                    Add ATI IXP200, IXP300, IXP400 support (2.6 backport)
   Module i2c-viapro: Fix compilation with kernels < 2.4.21
   Module lm83: Add LM82 support (2.6 backport)
   Module w83781d: Use real-time alarm registers when possible (2.6 backport)

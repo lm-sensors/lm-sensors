@@ -57,6 +57,7 @@ At least the following I2C/SMBus adapters are supported:
   AMD 756, 766, 768 and 8111
   AMD 8111 SMBus 2.0
   Apple Hydra (used on some PPC machines)
+  ATI IXP200, IXP300, IXP400
   DEC 21272/21274 (Tsunami/Typhoon - on Alpha boards)
   Intel I801 ICH/ICH0/ICH2/ICH3/ICH4/ICH5/ICH6 (82801xx), 6300ESB, ICH7
   Intel PIIX4 (used in many Intel chipsets)
