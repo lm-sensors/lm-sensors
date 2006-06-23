@@ -868,6 +868,34 @@ $revision =~ s/\$\w+: (.*?) \$/$1/g;
        driver => "i2c-piix4",
        match => qr/^SMBus PIIX4 adapter at /,
      } , 
+     {
+       vendid => 0x100B,
+       devid => 0x0500,
+       procid => "SCx200 Bridge",
+       driver => "scx200_acb",
+       match => qr/^(NatSemi SCx200 ACCESS\.bus|SCx200 ACB\d+) /,
+     },
+     {
+       vendid => 0x100B,
+       devid => 0x0510,
+       procid => "SC1100 Bridge",
+       driver => "scx200_acb",
+       match => qr/^(NatSemi SCx200 ACCESS\.bus|SCx200 ACB\d+) /,
+     },
+     {
+       vendid => 0x100B,
+       devid => 0x002B,
+       procid => "CS5535 ISA bridge",
+       driver => "scx200_acb",
+       match => qr/^CS5535 ACB\d+ /,
+     },
+     {
+       vendid => 0x1022,
+       devid => 0x2090,
+       procid => "CS5536 [Geode companion] ISA",
+       driver => "scx200_acb",
+       match => qr/^CS553[56] ACB\d+ /,
+     },
 );
 
 # The following entries used to appear directly in @pci_adapters.
@@ -2322,7 +2350,7 @@ sub adapter_pci_detection
     foreach $try (@pci_adapters) {
       if ($try->{vendid} == $device->{vendid} &&
           $try->{devid} == $device->{devid} &&
-          $try->{func} == $device->{func}) {
+          (!defined($try->{func}) || $try->{func} == $device->{func})) {
         printf "Use driver `%s' for device %02x:%02x.%x: %s\n",
                $try->{driver},
                $device->{bus},$device->{slot},$device->{func},$try->{procid};
