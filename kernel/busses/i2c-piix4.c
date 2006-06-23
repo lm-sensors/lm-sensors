@@ -137,7 +137,7 @@ static int __devinit piix4_setup(struct pci_dev *PIIX4_dev,
 
 #ifdef CONFIG_X86
 	if(ibm_dmi_probe() && PIIX4_dev->vendor == PCI_VENDOR_ID_INTEL) {
-		printk(KERN_ERR "i2c-piix4.o: IBM Laptop detected; this module "
+		printk(KERN_ERR "i2c-piix4.o: IBM system detected; this module "
 			"may corrupt your serial eeprom! Refusing to load "
 			"module!\n");
 		return -EPERM;
