@@ -67,7 +67,7 @@ PIIX/PIIX3 does not implement an SMBus or I2C bus, so you can't use this
 driver on those mainboards.
 
 The ServerWorks Southbridges, the Intel 440MX,
-and the Victory766 are identical to the PIIX4 in I2C/SMBus support.
+and the Victory66 are identical to the PIIX4 in I2C/SMBus support.
 
 If you own Force CPCI735 motherboard or other OSB4 based systems you may need
 to change the SMBus Interrupt Select register so the SMBus controller uses
