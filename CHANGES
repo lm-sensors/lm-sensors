@@ -18,6 +18,7 @@ lm_sensors CHANGES file
                    Add ICH8 support (2.6 backport)
                    Fix block transaction poll loops (2.6 backport)
                    Remove PCI function check (2.6 backport)
+                   Cleanups (2.6 backport)
   Module i2c-nforce2: Add nForce4 MCP51, MCP55 support (2.6 backport)
   Module i2c-piix4: Add ServerWorks HT-1000 support (2.6 backport)
                     Add ATI IXP200, IXP300, IXP400 support (2.6 backport)

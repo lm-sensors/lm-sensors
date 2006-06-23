@@ -1,5 +1,5 @@
 /*
-    i801.c - Part of lm_sensors, Linux kernel modules for hardware
+    i2c-i801.c - Part of lm_sensors, Linux kernel modules for hardware
               monitoring
     Copyright (c) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>, and Mark D. Studebaker
@@ -161,9 +161,8 @@ static struct pci_dev *I801_dev;
 static int isich4;	/* is PEC supported? */
 static int isich5;	/* is i2c block read supported? */
 
-static int i801_setup(struct pci_dev *dev)
+static int __devinit i801_setup(struct pci_dev *dev)
 {
-	int error_return = 0;
 	unsigned char temp;
 
 	I801_dev = dev;
@@ -179,7 +178,7 @@ static int i801_setup(struct pci_dev *dev)
 		isich4 = 0;
 	isich5 = isich4 && dev->device != PCI_DEVICE_ID_INTEL_82801DB_3;
 
-	/* Determine the address of the SMBus areas */
+	/* Determine the address of the SMBus area */
 	if (force_addr) {
 		i801_smba = force_addr & 0xfff0;
 	} else {
@@ -195,8 +194,7 @@ static int i801_setup(struct pci_dev *dev)
 	if (!request_region(i801_smba, (isich4 ? 16 : 8), i801_driver.name)) {
 		dev_err(dev, "I801_smb region 0x%x already in use!\n",
 			i801_smba);
-		error_return = -EBUSY;
-		goto END;
+		return -EBUSY;
 	}
 
 	pci_read_config_byte(I801_dev, SMBHSTCFG, &temp);
@@ -206,17 +204,20 @@ static int i801_setup(struct pci_dev *dev)
 	/* If force_addr is set, we program the new address here. Just to make
 	   sure, we disable the device first. */
 	if (force_addr) {
-		pci_write_config_byte(I801_dev, SMBHSTCFG, temp & 0xfe);
+		pci_write_config_byte(I801_dev, SMBHSTCFG,
+				      temp & ~SMBHSTCFG_HST_EN);
 		pci_write_config_word(I801_dev, SMBBA, i801_smba);
-		pci_write_config_byte(I801_dev, SMBHSTCFG, temp | 0x01);
+		pci_write_config_byte(I801_dev, SMBHSTCFG,
+				      temp | SMBHSTCFG_HST_EN);
 		dev_warn(dev, "WARNING: I801 SMBus interface set to "
 			"new address %04x!\n", i801_smba);
-	} else if ((temp & 1) == 0) {
-		pci_write_config_byte(I801_dev, SMBHSTCFG, temp | 1);
+	} else if (!(temp & SMBHSTCFG_HST_EN)) {
+		pci_write_config_byte(I801_dev, SMBHSTCFG,
+				      temp | SMBHSTCFG_HST_EN);
 		dev_warn(dev, "enabling SMBus device\n");
 	}
 
-	if (temp & 0x02)
+	if (temp & SMBHSTCFG_SMB_SMI_EN)
 		dev_dbg(dev, "I801 using Interrupt SMI# for SMBus.\n");
 	else
 		dev_dbg(dev, "I801 using PCI Interrupt for SMBus.\n");
@@ -225,8 +226,7 @@ static int i801_setup(struct pci_dev *dev)
 	dev_dbg(dev, "SMBREV = 0x%X\n", temp);
 	dev_dbg(dev, "I801_smba = 0x%X\n", i801_smba);
 
-END:
-	return error_return;
+	return 0;
 }
 
 
@@ -680,12 +680,10 @@ static struct pci_device_id i801_ids[] __devinitdata = {
 
 static int __devinit i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
+	int err;
 
-	if (i801_setup(dev)) {
-		dev_warn(dev,
-			"I801 not detected, module not inserted.\n");
-		return -ENODEV;
-	}
+	if ((err = i801_setup(dev)))
+		return err;
 
 	snprintf(i801_adapter.name, 32,
 		"SMBus I801 adapter at %04x", i801_smba);
