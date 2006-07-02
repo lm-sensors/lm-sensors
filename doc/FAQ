@@ -1131,7 +1131,7 @@ are running the `sensors' program it installed and not some older
 
    * (Linux 2.6) Make sure you are using one of the recommended
      kernel/lm_sensors combination
-     (http://secure.netroedge.com/~lm78/kernel26.html).
+     (http://www.lm-sensors.org/wiki/Kernel2.6).
 
    * You have a `libsensors'/`sensors' mismatch.  `sensors' is unable to
      get a data entry from `libsensors'. You probably have an old
@@ -1272,7 +1272,7 @@ Post your question to our discussion list
 individual authors, unless you have something private to say.
 
    Instead of using email, you can also use the web-based support area,
-at `http://secure.netroedge.com/~lm78/support.html'. You will be helped
+at `http://www.lm-sensors.org/wiki/FeedbackAndSupport'. You will be helped
 just as fast, and others may profit from the answer too. You will be
 emailed automatically when your question has been answered.
 

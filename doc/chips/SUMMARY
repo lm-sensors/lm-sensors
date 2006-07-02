@@ -9,7 +9,7 @@ directory.
 To determine what chips you have in your system, run 'sensors-detect'.
 
 If your sensor chip is not detected by sensors-detect, please contact us
-(see http://secure.netroedge.com/~lm78/author.html). Only contact us
+(see http://www.lm-sensors.org/wiki/AuthorsAndContributors). Only contact us
 if you know for sure that your system includes a sensor chip (for
 example if you have technical documentation mentioning it, or if the
 BIOS setup screen presents monitoring values, or if you can get

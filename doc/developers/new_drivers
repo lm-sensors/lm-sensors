@@ -136,10 +136,10 @@ steps apply.
 * If you want to have your driver integrated to Linux 2.6, you have to
   port your driver to the new sysfs interface. Once done and preferably
   after testing, submit a patch to our mailing list: see
-  http://secure.netroedge.com/~lm78/author.html
+  http://www.lm-sensors.org/wiki/AuthorsAndContributors
   Make sure to check the current status for your driver first:
-  http://secure.netroedge.com/~lm78/kernel26.html
-  http://secure.netroedge.com/~lm78/newdrivers.html
+  http://www.lm-sensors.org/wiki/Kernel2.6
+  http://www.lm-sensors.org/wiki/NewDrivers
 
 ---------------------------------------------------------------------
 Checklist for us to do on the webpage:

@@ -2356,7 +2356,7 @@ sub adapter_pci_detection
                $device->{bus},$device->{slot},$device->{func},$try->{procid};
         if ($try->{driver} eq "to-be-tested") {
           print "\nWe are currently looking for testers for this adapter!\n".
-                "Please see http://secure.netroedge.com/~lm78/newdrivers.html\n".
+                "Please see http://www.lm-sensors.org/wiki/NewDrivers\n".
                 "and/or contact us if you want to help.\n\n";
           print "Continue... ";
           <STDIN>;
@@ -5190,7 +5190,7 @@ sub generate_modprobes
        #check return value from modprobe in case modprobe -l isn't supported
        if((($? >> 8) == 0) && ! $modulefound) {
          $modprobes .= "# Warning: the required module $chip->{driver} is not currently installed on your system.\n";
-         $modprobes .= "# For status of 2.6 kernel ports see http://secure.netroedge.com/~lm78/supported.html\n";
+         $modprobes .= "# For status of 2.6 kernel ports see http://www.lm-sensors.org/wiki/SupportedDevices\n";
          $modprobes .= "# If driver is built-in to the kernel, or unavailable, comment out the following line.\n";
        }
        $modprobes .= "modprobe $chip->{driver}\n";
@@ -5421,7 +5421,7 @@ sub main
 	" http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/doc/lm_sensors-FAQ.html\n",
 	" (FAQ #4.24.3) for further information.\n",
 	" If you find out what chips are on your board, see\n",
-	" http://secure.netroedge.com/~lm78/newdrivers.html for driver status.\n";
+	" http://www.lm-sensors.org/wiki/NewDrivers for driver status.\n";
     exit;
   }
 

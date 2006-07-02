@@ -43,7 +43,7 @@ but is not API compatible to i2c releases 2.8.0 - 2.8.8
 due to struct changes. Versions 2.8.x of i2c are considered deprecated.
 
 See the lm_sensors download page for further guidance:
-  http://secure.netroedge.com/~lm78/download.html
+  http://www.lm-sensors.org/wiki/Download
 
 
 WARNING! If you downloaded this package through our CVS archive, you walk
@@ -114,7 +114,7 @@ We also support some miscellaneous chips:
 
 
 The list above may be out of date;
-see our New Drivers page http://www.lm-sensors.nu/~lm78/newdrivers.html
+see our New Drivers page at http://www.lm-sensors.org/wiki/NewDrivers
 for the latest information on supported devices.
 You may also refer to doc/chips/SUMMARY for details on what each chip
 can monitor.
@@ -167,14 +167,14 @@ On the other hand, we provide a program called 'sensors-detect' which
 tries to figure out what hardware is available on your system.
 
 The developers of this package can be reached through a mailing-list
-(see http://secure.netroedge.com/~lm78/author.html). Do not hesitate
+(see http://www.lm-sensors.org/wiki/AuthorsAndContributors). Do not hesitate
 to mail us if you have questions, suggestions, problems, want to
 contribute, or just want to report it works for you. But please try to
 read the documentation and FAQ before you ask any questions!
 
 The latest version of this package can always be found on our homepage:
-http://secure.netroedge.com/~lm78/. Pre-release versions can be retrieved
-through anonymous CVS; see doc/cvs for more information.
+http://www.lm-sensors.org. Pre-release versions can be retrieved
+through anonymous SVN; see doc/svn for details.
 
 This package may be distributed according to the GNU General Public
 License (GPL), as included in the file COPYING.
