@@ -46,7 +46,7 @@ See the lm_sensors download page for further guidance:
   http://www.lm-sensors.org/wiki/Download
 
 
-WARNING! If you downloaded this package through our CVS archive, you walk
+WARNING! If you downloaded this package through our SVN archive, you walk
 the cutting edge. Things may not even compile! On the other hand, you will
 be the first to profit from new drivers and other changes. Have fun!
 

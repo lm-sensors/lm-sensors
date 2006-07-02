@@ -32,7 +32,7 @@ There are several interesting targets defined through this Makefile:
     Regenerate version.h, using the current date for the date-stamp, and
     a user-supplied version number.
   * package
-    Create a .tar.gz file containing everything except the CVS directories.
+    Create a .tar.gz file containing everything except the SVN directories.
   * src/lm78.o, i2c/i2c-core.o, ...
     You can of course also specify one or more targets to make.
 

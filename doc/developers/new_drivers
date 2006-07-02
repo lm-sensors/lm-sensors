@@ -25,7 +25,7 @@ steps apply.
 
 * Consider subscribing to the mailing list.
 
-* Check out our latest code from CVS.
+* Check out our latest code from SVN.
   You should use this as a base for your development.
   See instructions on our download page.
 
@@ -124,14 +124,9 @@ steps apply.
   (or if applicable your company's name) is at the top of the
   new driver so we know you are giving it to us under the GPL.
 
-* Get CVS write access if you want to check in your driver yourself.
-  Do this by running the script doc/developers/genpasswd.pl and following
-  the instructions it gives you.
-
-* Submit the changes to us, or check them in.
-  Do a 'cvs update' to get in sync (things will have changed since
-  you started), then submit the changes to us as a patch against CVS,
-  or check them in.
+* Submit the changes to us.
+  Do a 'svn update' to get in sync (things will have changed since
+  you started), then submit the changes to us as a patch against SVN.
 
 * If you want to have your driver integrated to Linux 2.6, you have to
   port your driver to the new sysfs interface. Once done and preferably

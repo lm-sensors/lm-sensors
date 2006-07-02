@@ -1,7 +1,5 @@
 The directories within this package:
 
-* CVS
-  The CVS directories. Do not touch these!
 * doc
   Documentation about the modules within this package, and all other things.
 * etc

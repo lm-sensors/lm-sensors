@@ -15,7 +15,7 @@
 #
 # The latest version of this script is available at:
 # http://www.hdev.de/fancontrol/fancontrol.html
-# or in the CVS version of lm_sensors
+# or in the SVN version of lm_sensors
 #
 # For configuration instructions and warnings please see fancontrol.txt, which
 # can be found in the doc/ directory or at the website mentioned above.

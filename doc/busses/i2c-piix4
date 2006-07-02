@@ -97,5 +97,4 @@ Thinkpad laptops, but desktop systems may also be affected. We have no list
 of all affected systems, so the only safe solution was to prevent access to
 the SMBus on all IBM systems (detected using DMI data.)
 
-For additional information, read:
-http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/README.thinkpad
+For additional information, read README.thinkpad.

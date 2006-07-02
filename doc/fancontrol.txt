@@ -7,7 +7,7 @@ Introduction
 fancontrol is a shellscript for use with lm_sensors. It reads its
 configuration from a file, then calculates fan speeds from temperatures and
 sets the corresponding pwm outputs to the computed values.  It is included in
-lm_sensors since 2.8.0, the latest version is always available through CVS or
+lm_sensors since 2.8.0, the latest version is always available through SVN or
 at http://www.hdev.de/fancontrol/ For easy configuration, there's a script
 named pwmconfig which lets you interactively write your configuration file for
 fancontrol. Alternatively you can write this file yourself using the

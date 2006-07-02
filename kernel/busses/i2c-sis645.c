@@ -26,8 +26,8 @@
     The register definitions are based on the SiS630.
     The method for *finding* the registers is based on trial and error.
 
-    A history of changes to this file is available by anonymous CVS:
-    http://www2.lm-sensors.nu/~lm78/download.html
+    A history of changes to this file is available by SVN:
+    http://www.lm-sensors.org/wiki/Download
 */
 
 /*   25th March 2004

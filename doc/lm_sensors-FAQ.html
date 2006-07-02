@@ -3,7 +3,7 @@
 <title>Sensors FAQ for lm_sensors version 2.18</title>
 <meta http-equiv="Content-Type" content="text/html">
 <meta name="description" content="Sensors FAQ for lm_sensors version 2.18">
-<meta name="generator" content="makeinfo 4.7">
+<meta name="generator" content="makeinfo 4.8">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <meta http-equiv="Content-Style-Type" content="text/css">
@@ -14,8 +14,9 @@
   pre.smallformat  { font-family:inherit; font-size:smaller }
   pre.smallexample { font-size:smaller }
   pre.smalllisp    { font-size:smaller }
-  span.sc { font-variant:small-caps }
-  span.roman { font-family: serif; font-weight: normal; } 
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
 --></style>
 </head>
 <body>
@@ -71,23 +72,23 @@ Jean Delvare<br>
 <li><a href="#Section-3_002e2">3.2.4 Anybody working on a driver for chip XYZ?</a>
 </li></ul>
 <li><a href="#Section-3_002e3">3.3 Which modules should I insert?</a>
-<li><a href="#Section-3_002e4">3.4 Do I need the configuration file <span class="file">/etc/sensors.conf</span>?</a>
+<li><a href="#Section-3_002e4">3.4 Do I need the configuration file <samp><span class="file">/etc/sensors.conf</span></samp>?</a>
 <ul>
-<li><a href="#Section-3_002e4">3.4.1 The labels for the voltage and temperature readings in <span class="command">sensors</span> are incorrect!</a>
-<li><a href="#Section-3_002e4">3.4.2 The min and max for the readings in <span class="command">sensors</span> are incorrect!</a>
-<li><a href="#Section-3_002e4">3.4.3 The min and max settings in <span class="file">/etc/sensors.conf</span> didn't take effect!</a>
+<li><a href="#Section-3_002e4">3.4.1 The labels for the voltage and temperature readings in <samp><span class="command">sensors</span></samp> are incorrect!</a>
+<li><a href="#Section-3_002e4">3.4.2 The min and max for the readings in <samp><span class="command">sensors</span></samp> are incorrect!</a>
+<li><a href="#Section-3_002e4">3.4.3 The min and max settings in <samp><span class="file">/etc/sensors.conf</span></samp> didn't take effect!</a>
 <li><a href="#Section-3_002e4">3.4.4 One sensor isn't hooked up on my board!</a>
-<li><a href="#Section-3_002e4">3.4.5 I need help with <span class="file">sensors.conf</span>!</a>
-<li><a href="#Section-3_002e4">3.4.6 Do you have a database of <span class="file">sensors.conf</span> entries for specific boards?</a>
+<li><a href="#Section-3_002e4">3.4.5 I need help with <samp><span class="file">sensors.conf</span></samp>!</a>
+<li><a href="#Section-3_002e4">3.4.6 Do you have a database of <samp><span class="file">sensors.conf</span></samp> entries for specific boards?</a>
 </li></ul>
-<li><a href="#Section-3_002e5">3.5 What about the <span class="samp">No such file or directory</span> warnings when I compile?</a>
+<li><a href="#Section-3_002e5">3.5 What about the `<samp><span class="samp">No such file or directory</span></samp>' warnings when I compile?</a>
 <li><a href="#Section-3_002e6">3.6 I get all kinds of weird compilation errors?</a>
 <ul>
-<li><a href="#Section-3_002e6">3.6.1 <span class="samp">No rule to make target xxxx needed by xxxx</span> - how to fix?</a>
+<li><a href="#Section-3_002e6">3.6.1 `<samp><span class="samp">No rule to make target xxxx needed by xxxx</span></samp>' - how to fix?</a>
 </li></ul>
 <li><a href="#Section-3_002e7">3.7 It still does not compile or patch!</a>
-<li><a href="#Section-3_002e8">3.8 <span class="command">make install</span> fails on Mandrake kernels</a>
-<li><a href="#Section-3_002e9">3.9 I get unresolved symbols when I <span class="command">modprobe</span> modules (Red Hat especially)</a>
+<li><a href="#Section-3_002e8">3.8 <samp><span class="command">make install</span></samp> fails on Mandrake kernels</a>
+<li><a href="#Section-3_002e9">3.9 I get unresolved symbols when I <samp><span class="command">modprobe</span></samp> modules (Red Hat especially)</a>
 <li><a href="#Section-3_002e10">3.10 I2C_DRIVERID_ADM1024 undefined (Red Hat especially)</a>
 </li></ul>
 <li><a name="toc_Problems" href="#Problems">4 Problems</a>
@@ -111,7 +112,7 @@ Jean Delvare<br>
 <li><a href="#Section-4_002e10">4.10 Can I be alerted when an ALARM occurs?</a>
 <li><a href="#Section-4_002e11">4.11 SMBus transactions on my PIIX4 simply don't work (timeouts happen).  Why?</a>
 <li><a href="#Section-4_002e12">4.12 My BIOS reports a much higher CPU temperature than your modules!</a>
-<li><a href="#Section-4_002e13">4.13 I try to read the raw <span class="file">/proc</span> files, but the values are strange?!?</a>
+<li><a href="#Section-4_002e13">4.13 I try to read the raw <samp><span class="file">/proc</span></samp> files, but the values are strange?!?</a>
 <li><a href="#Section-4_002e14">4.14 How do I set new limits?</a>
 <ul>
 <li><a href="#Section-4_002e14">4.14.1 I set new limits and it didn't work?</a>
@@ -131,12 +132,12 @@ Jean Delvare<br>
 <li><a href="#Section-4_002e17">4.17.9 Bad readings from LM80!</a>
 </li></ul>
 <li><a href="#Section-4_002e18">4.18 How do I configure two chips (LM87) differently?</a>
-<li><a href="#Section-4_002e19">4.19 Dmesg says <span class="samp">Upgrade BIOS</span>! I don't want to!</a>
+<li><a href="#Section-4_002e19">4.19 Dmesg says `<samp><span class="samp">Upgrade BIOS</span></samp>'! I don't want to!</a>
 <ul>
-<li><a href="#Section-4_002e19">4.19.1 Dmesg says <span class="samp">use force_addr=0xaddr</span>! What address do I use?</a>
+<li><a href="#Section-4_002e19">4.19.1 Dmesg says `<samp><span class="samp">use force_addr=0xaddr</span></samp>'! What address do I use?</a>
 </li></ul>
-<li><a href="#Section-4_002e20">4.20 Sensors says <span class="samp">Can't access procfs/sysfs file</span></a>
-<li><a href="#Section-4_002e21">4.21 Sensors says <span class="samp">No sensors found!</span></a>
+<li><a href="#Section-4_002e20">4.20 Sensors says `<samp><span class="samp">Can't access procfs/sysfs file</span></samp>'</a>
+<li><a href="#Section-4_002e21">4.21 Sensors says `<samp><span class="samp">No sensors found!</span></samp>'</a>
 <li><a href="#Section-4_002e22">4.22 Sensors output is not correct!</a>
 <li><a href="#Section-4_002e23">4.23 What is at I2C address XXX?</a>
 <ul>
@@ -150,9 +151,9 @@ Jean Delvare<br>
 <li><a href="#Section-4_002e24">4.24.2 Sensors-detect says "Can't open /dev/i2c[-/]0"</a>
 <li><a href="#Section-4_002e24">4.24.3 Sensors-detect doesn't find any sensors!</a>
 </li></ul>
-<li><a href="#Section-4_002e25">4.25 Sensors says <span class="samp">Error: Line xxx: zzzzzzz</span></a>
+<li><a href="#Section-4_002e25">4.25 Sensors says `<samp><span class="samp">Error: Line xxx: zzzzzzz</span></samp>'</a>
 <li><a href="#Section-4_002e26">4.26 Sensors only gives the name, adapter, and algorithm for my chip</a>
-<li><a href="#Section-4_002e27">4.27 Sensors says <span class="samp">ERROR: Can't get xxxxx data!</span></a>
+<li><a href="#Section-4_002e27">4.27 Sensors says `<samp><span class="samp">ERROR: Can't get xxxxx data!</span></samp>'</a>
 <li><a href="#Section-4_002e28">4.28 Sensors doesn't find any sensors, just eeproms.</a>
 <li><a href="#Section-4_002e29">4.29 Inserting modules hangs my board</a>
 <li><a href="#Section-4_002e30">4.30 Inserting modules slows down my board</a>
@@ -185,7 +186,7 @@ Jean Delvare<br>
 <li><a name="toc_Contribute" href="#Contribute">6 How to Contribute</a>
 <ul>
 <li><a href="#Section-6_002e1">6.1 How to write a driver</a>
-<li><a href="#Section-6_002e2">6.2 How to get CVS access</a>
+<li><a href="#Section-6_002e2">6.2 How to get SVN access</a>
 <li><a href="#Section-6_002e3">6.3 How to donate hardware to the project</a>
 <li><a href="#Section-6_002e4">6.4 How to join the project mailing lists</a>
 <li><a href="#Section-6_002e5">6.5 How to access mailing list archives</a>
@@ -199,9 +200,10 @@ Jean Delvare<br>
 
 <div class="node">
 <p><hr>
-<a name="Top"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Overview">Overview</a>,
+<a name="Top"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Overview">Overview</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
-<br>
+
 </div>
 
 <h2 class="unnumbered">lm_sensors</h2>
@@ -222,10 +224,11 @@ is not in standard 2.2-vintage kernels.
 
 <div class="node">
 <p><hr>
-<a name="Overview"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Basics">Basics</a>,
+<a name="Overview"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Basics">Basics</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Top">Top</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-<br>
+
 </div>
 
 <h2 class="chapter">1 PC and Sensor Overview</h2>
@@ -238,9 +241,11 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 
 <div class="node">
 <p><hr>
-<a name="Section-1_002e1"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-1_002e2">Section 1.2</a>,
+<a name="Section-1.1"></a>
+<a name="Section-1_002e1"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-1_002e2">Section 1.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Overview">Overview</a>
-<br>
+
 </div>
 
 <h3 class="section">1.1 What sensors are available on my PC?</h3>
@@ -258,10 +263,12 @@ a chip with similar functions.
 
 <div class="node">
 <p><hr>
-<a name="Section-1_002e2"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-1_002e3">Section 1.3</a>,
+<a name="Section-1.2"></a>
+<a name="Section-1_002e2"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-1_002e3">Section 1.3</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-1_002e1">Section 1.1</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Overview">Overview</a>
-<br>
+
 </div>
 
 <h3 class="section">1.2 What can a sensor chip like the "LM78" do?</h3>
@@ -283,13 +290,15 @@ the processor.
 SMBus.
 
    <p>Most other sensor chips have comparable functionality. Each supported
-chip is documented in the <span class="file">doc/chips</span> directory.
+chip is documented in the <samp><span class="file">doc/chips</span></samp> directory.
 
 <div class="node">
 <p><hr>
-<a name="Section-1_002e3"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-1_002e2">Section 1.2</a>,
+<a name="Section-1.3"></a>
+<a name="Section-1_002e3"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-1_002e2">Section 1.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Overview">Overview</a>
-<br>
+
 </div>
 
 <h3 class="section">1.3 Where do I find out more about any of these chips?</h3>
@@ -306,15 +315,16 @@ of sensor chips. Their websites are:
   <li><a href="http://www.national.com">http://www.national.com</a>
 </ul>
 
-   <p>Please see the file <a href="http://www2.lm-sensors.nu/~lm78/useful_addresses.html">http://www2.lm-sensors.nu/~lm78/useful_addresses.html</a>
+   <p>Please see the file <a href="http://www.lm-sensors.org/wiki/UsefulLinks">http://www.lm-sensors.org/wiki/UsefulLinks</a>
 for links to other companies' websites.
 
 <div class="node">
 <p><hr>
-<a name="Basics"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Installation">Installation</a>,
+<a name="Basics"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Installation">Installation</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Overview">Overview</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-<br>
+
 </div>
 
 <h2 class="chapter">2 Sensor and Bus Basics</h2>
@@ -330,15 +340,17 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 
 <div class="node">
 <p><hr>
-<a name="Section-2_002e1"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-2_002e2">Section 2.2</a>,
+<a name="Section-2.1"></a>
+<a name="Section-2_002e1"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-2_002e2">Section 2.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Basics">Basics</a>
-<br>
+
 </div>
 
 <h3 class="section">2.1 How are these sensors read?</h3>
 
 <p>Sensor chips reside on either the ISA bus, the SMBus, or both. 
-See the file <span class="file">doc/chips/SUMMARY</span> in our package for a list.
+See the file <samp><span class="file">doc/chips/SUMMARY</span></samp> in our package for a list.
 
    <p>To communicate with chips on the ISA bus, the software uses
 simple I/O reads and writes.
@@ -348,10 +360,12 @@ use an SMBus interface device, explained below.
 
 <div class="node">
 <p><hr>
-<a name="Section-2_002e2"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-2_002e3">Section 2.3</a>,
+<a name="Section-2.2"></a>
+<a name="Section-2_002e2"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-2_002e3">Section 2.3</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-2_002e1">Section 2.1</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Basics">Basics</a>
-<br>
+
 </div>
 
 <h3 class="section">2.2 What is the SMBus? And the I2C bus?</h3>
@@ -376,10 +390,12 @@ talk to pure I2C devices.
 
 <div class="node">
 <p><hr>
-<a name="Section-2_002e3"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-2_002e4">Section 2.4</a>,
+<a name="Section-2.3"></a>
+<a name="Section-2_002e3"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-2_002e4">Section 2.4</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-2_002e2">Section 2.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Basics">Basics</a>
-<br>
+
 </div>
 
 <h3 class="section">2.3 I don't have an ISA bus!</h3>
@@ -389,16 +405,18 @@ The "ISA Bus" exists in your computer even if you don't have ISA slots;
 it is simply a memory-mapped area, 64KB in size (0x0000 - 0xFFFF)
 where many "legacy" functions, such as keyboard and interrupt controllers,
 are found. It isn't necessarily a separate physical bus. 
-See the file <span class="file">/proc/ioports</span> for a list of devices living on
+See the file <samp><span class="file">/proc/ioports</span></samp> for a list of devices living on
 the "ISA Bus" in your system. If you don't like the term "ISA Bus"
 think "I/O Space".
 
 <div class="node">
 <p><hr>
-<a name="Section-2_002e4"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-2_002e5">Section 2.5</a>,
+<a name="Section-2.4"></a>
+<a name="Section-2_002e4"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-2_002e5">Section 2.5</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-2_002e3">Section 2.3</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Basics">Basics</a>
-<br>
+
 </div>
 
 <h3 class="section">2.4 What sensors do processors have?</h3>
@@ -410,7 +428,7 @@ because it is directly on the die. Newer temperature sensor chips,
 like the Analog Devices ADM1021 and clones, and the Winbond chips,
 have circuitry for measuring the the electrical properties of
 an external diode and converting this data to a temperature. 
-Any sensor chip listed in <span class="file">doc/chips/SUMMARY</span> in our package which
+Any sensor chip listed in <samp><span class="file">doc/chips/SUMMARY</span></samp> in our package which
 has support for more than one temperature supports external temperature sensing.
 
    <p>Older motherboards and processors without this feature generally use
@@ -437,10 +455,12 @@ interface on the P2 Xeon SEC.
 
 <div class="node">
 <p><hr>
-<a name="Section-2_002e5"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-2_002e6">Section 2.6</a>,
+<a name="Section-2.5"></a>
+<a name="Section-2_002e5"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-2_002e6">Section 2.6</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-2_002e4">Section 2.4</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Basics">Basics</a>
-<br>
+
 </div>
 
 <h3 class="section">2.5 How often are the sensor values updated?</h3>
@@ -455,9 +475,11 @@ read the values again, you will get the 'old' values again.
 
 <div class="node">
 <p><hr>
-<a name="Section-2_002e6"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-2_002e5">Section 2.5</a>,
+<a name="Section-2.6"></a>
+<a name="Section-2_002e6"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-2_002e5">Section 2.5</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Basics">Basics</a>
-<br>
+
 </div>
 
 <h3 class="section">2.6 How are alarms triggered?</h3>
@@ -467,7 +489,7 @@ it crosses some pre-determined limits.  There are two sorts of interrupts
 which can be generated by sensor chips if this happens (it depends a bit on
 the actual chip if both are supported; the LM80, for example, has only
 IRQ interrupts): IRQ interrupts and SMI interrupts.  IRQ stands for
-Interrupt Request and are the interrupt lines you can find in <span class="file">/proc/interrupts</span>. 
+Interrupt Request and are the interrupt lines you can find in <samp><span class="file">/proc/interrupts</span></samp>. 
 SMI stands for System Management Interrupt, and is a special interrupt which
 puts the processor in a secure environment independent of any other things
 running.  SMI is currently not supported by the Linux kernel.  IRQs are
@@ -481,10 +503,11 @@ persists after that, the bits will be set on the next scanning sweep, etc.
 
 <div class="node">
 <p><hr>
-<a name="Installation"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Problems">Problems</a>,
+<a name="Installation"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Problems">Problems</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Basics">Basics</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-<br>
+
 </div>
 
 <h2 class="chapter">3 Installation and Management</h2>
@@ -493,20 +516,22 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a accesskey="1" href="#Section-3_002e1">Section 3.1</a>:      Why so many modules, and how do I cope with them? 
 <li><a accesskey="2" href="#Section-3_002e2">Section 3.2</a>:      How do I know which chips I own? 
 <li><a accesskey="3" href="#Section-3_002e3">Section 3.3</a>:      Which modules should I insert? 
-<li><a accesskey="4" href="#Section-3_002e4">Section 3.4</a>:      Do I need the configuration file <span class="file">/etc/sensors.conf</span>? 
-<li><a accesskey="5" href="#Section-3_002e5">Section 3.5</a>:      What about the <span class="samp">No such file or directory</span> warnings
+<li><a accesskey="4" href="#Section-3_002e4">Section 3.4</a>:      Do I need the configuration file <samp><span class="file">/etc/sensors.conf</span></samp>? 
+<li><a accesskey="5" href="#Section-3_002e5">Section 3.5</a>:      What about the `<samp><span class="samp">No such file or directory</span></samp>' warnings
 <li><a accesskey="6" href="#Section-3_002e6">Section 3.6</a>:      I get all kinds of weird compilation errors? 
 <li><a accesskey="7" href="#Section-3_002e7">Section 3.7</a>:      It still does not compile or patch! 
-<li><a accesskey="8" href="#Section-3_002e8">Section 3.8</a>:      <span class="command">make install</span> fails on Mandrake kernels
-<li><a accesskey="9" href="#Section-3_002e9">Section 3.9</a>:      I get unresolved symbols when I <span class="command">modprobe</span> modules
+<li><a accesskey="8" href="#Section-3_002e8">Section 3.8</a>:      <samp><span class="command">make install</span></samp> fails on Mandrake kernels
+<li><a accesskey="9" href="#Section-3_002e9">Section 3.9</a>:      I get unresolved symbols when I <samp><span class="command">modprobe</span></samp> modules
 <li><a href="#Section-3_002e10">Section 3.10</a>:     I2C_DRIVERID_ADM1024 undefined (Red Hat especially)
 </ul>
 
 <div class="node">
 <p><hr>
-<a name="Section-3_002e1"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e2">Section 3.2</a>,
+<a name="Section-3.1"></a>
+<a name="Section-3_002e1"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e2">Section 3.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
-<br>
+
 </div>
 
 <h3 class="section">3.1 Why so many modules, and how do I cope with them?</h3>
@@ -517,26 +542,28 @@ space. On the other hand, it can be a bit confusing at first.
 
    <p>Here are two simple guidelines:
      <ul>
-  <li>Run <span class="command">sensors-detect</span> and do what it tells you. 
-  <li>Always use <span class="command">modprobe</span>, not <span class="command">insmod</span>. 
+  <li>Run <samp><span class="command">sensors-detect</span></samp> and do what it tells you. 
+  <li>Always use <samp><span class="command">modprobe</span></samp>, not <samp><span class="command">insmod</span></samp>. 
 </ul>
 
-   <p>Further information is in <span class="file">doc/modules</span>.
+   <p>Further information is in <samp><span class="file">doc/modules</span></samp>.
 
    <p><a name="How-do-I-know-which-chips-I-own"></a>
 <div class="node">
 <p><hr>
-<a name="Section-3_002e2"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e3">Section 3.3</a>,
+<a name="Section-3.2"></a>
+<a name="Section-3_002e2"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e3">Section 3.3</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-3_002e1">Section 3.1</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
-<br>
+
 </div>
 
 <h3 class="section">3.2 How do I know which chips I own?</h3>
 
 <p>We have an excellent program that scans all your hardware. 
-It is called <span class="file">sensors-detect</span> and is installed in <span class="file">/usr/local/sbin</span>
-by <span class="command">make install</span>. Just execute this script, and it will tell you.
+It is called <samp><span class="file">sensors-detect</span></samp> and is installed in <samp><span class="file">/usr/local/sbin</span></samp>
+by <samp><span class="command">make install</span></samp>. Just execute this script, and it will tell you.
 
    <p>Chip detection in the drivers is fairly good. That means that it is
 usually harmless to insert more chip drivers than you need. However, this
@@ -562,8 +589,8 @@ for candidates, then see <a href="#Help">Help</a>)
 <li>Look at your motherboard. 
 <li>Check the manufacturer's website or ask their support
 <li>Check the <a href="http://mbm.livewiredev.com/">Motherboard Monitor</a> website and the
-<a href="http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/doc/useful_addresses.html">"links"</a>
-page on <a href="http://www2.lm-sensors.nu/~lm78/">our website</a> some good cross-references.
+<a href="http://www.lm-sensors.org/wiki/UsefulLinks">"links"</a>
+page on <a href="http://www.lm-sensors.org">our website</a> some good cross-references.
         </ol>
 
    <p><a name="Section-3_002e2_002e2"></a>
@@ -578,151 +605,161 @@ page on <a href="http://www2.lm-sensors.nu/~lm78/">our website</a> some good cro
 
 <p>This we have good answers for.
      <ul>
-<li>Sorted by Manufacturer:   <span class="file">README</span>
-<li>Sorted by Manufacturer:   <a href="http://www2.lm-sensors.nu/~lm78/supported.html">http://www2.lm-sensors.nu/~lm78/supported.html</a>
-<li>Sorted by Sensor Driver:  <span class="file">doc/chips/SUMMARY</span>
-<li>Newest Driver Status:     <a href="http://www2.lm-sensors.nu/~lm78/newdrivers.html">http://www2.lm-sensors.nu/~lm78/newdrivers.html</a>
+<li>Sorted by Manufacturer:   <samp><span class="file">README</span></samp>
+<li>Sorted by Manufacturer:   <a href="http://www.lm-sensors.org/wiki/SupportedDevices">http://www.lm-sensors.org/wiki/SupportedDevices</a>
+<li>Sorted by Sensor Driver:  <samp><span class="file">doc/chips/SUMMARY</span></samp>
+<li>Newest Driver Status:     <a href="http://www.lm-sensors.org/wiki/NewDrivers">http://www.lm-sensors.org/wiki/NewDrivers</a>
 </ul>
 
    <p><a name="Section-3_002e2_002e4"></a>
 
 <h4 class="subsection">3.2.4 Anybody working on a driver for chip XYZ?</h4>
 
-<p>Newest Driver Status: <a href="http://www2.lm-sensors.nu/~lm78/newdrivers.html">http://www2.lm-sensors.nu/~lm78/newdrivers.html</a>
+<p>Newest Driver Status: <a href="http://www.lm-sensors.org/wiki/NewDrivers">http://www.lm-sensors.org/wiki/NewDrivers</a>
 
 <div class="node">
 <p><hr>
-<a name="Section-3_002e3"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e4">Section 3.4</a>,
+<a name="Section-3.3"></a>
+<a name="Section-3_002e3"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e4">Section 3.4</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-3_002e2">Section 3.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
-<br>
+
 </div>
 
 <h3 class="section">3.3 Which modules should I insert?</h3>
 
-<p><span class="command">sensors-detect</span> will tell you. Take the <span class="command">modprobe</span> lines it
-recommends and paste them into the appropriate <span class="file">/etc/rc.d/xxxx</span> file
+<p><samp><span class="command">sensors-detect</span></samp> will tell you. Take the <samp><span class="command">modprobe</span></samp> lines it
+recommends and paste them into the appropriate <samp><span class="file">/etc/rc.d/xxxx</span></samp> file
 to be executed at startup.
 
    <p>You need one module for each sensor chip and bus adapter you own;
-if there are sensor chips on the ISA bus, you also need <span class="file">i2c-isa.o</span>. 
+if there are sensor chips on the ISA bus, you also need <samp><span class="file">i2c-isa.o</span></samp>. 
 for each type of chip you own. That's all. On my computer, I could use the
 following lines:
      <ul>
-<li><span class="command">modprobe i2c-isa</span>
-<li><span class="command">modprobe i2c-piix4</span>
-<li><span class="command">modprobe lm78</span>
-<li><span class="command">modprobe lm75</span>
-<li><span class="command">modprobe i2c-dev</span>
-<li><span class="command">sensors -s</span>
+<li><samp><span class="command">modprobe i2c-isa</span></samp>
+<li><samp><span class="command">modprobe i2c-piix4</span></samp>
+<li><samp><span class="command">modprobe lm78</span></samp>
+<li><samp><span class="command">modprobe lm75</span></samp>
+<li><samp><span class="command">modprobe i2c-dev</span></samp>
+<li><samp><span class="command">sensors -s</span></samp>
 </ul>
 
 <div class="node">
 <p><hr>
-<a name="Section-3_002e4"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e5">Section 3.5</a>,
+<a name="Section-3.4"></a>
+<a name="Section-3_002e4"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e5">Section 3.5</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-3_002e3">Section 3.3</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
-<br>
+
 </div>
 
-<h3 class="section">3.4 Do I need the configuration file <span class="file">/etc/sensors.conf</span>?</h3>
+<h3 class="section">3.4 Do I need the configuration file <samp><span class="file">/etc/sensors.conf</span></samp>?</h3>
 
-<p>Yes, for any applications that use <span class="file">libsensors,</span> including the
-<span class="command">sensors</span> application included in our package. 
+<p>Yes, for any applications that use <samp><span class="file">libsensors,</span></samp> including the
+<samp><span class="command">sensors</span></samp> application included in our package. 
 It tells libsensors how to translate the values the chip
 measures to real-world values. This is especially important for voltage
 inputs. The default configuration file should usually do the trick. 
-It is automatically installed as <span class="file">/etc/sensors.conf</span>, but it will not
+It is automatically installed as <samp><span class="file">/etc/sensors.conf</span></samp>, but it will not
 overwrite any existing file with that name.
 
    <p><a name="Section-3_002e4_002e1"></a>
 
-<h4 class="subsection">3.4.1 The labels for the voltage and temperature readings in <span class="command">sensors</span> are incorrect!</h4>
+<h4 class="subsection">3.4.1 The labels for the voltage and temperature readings in <samp><span class="command">sensors</span></samp> are incorrect!</h4>
 
 <p>Every motherboard is different. You can customize the labels
-in the file <span class="file">/etc/sensors.conf</span>. That's why it exists! 
-The default labelling (in <span class="file">lib/chips.c</span> and <span class="file">/etc/sensors.conf</span>) is just
+in the file <samp><span class="file">/etc/sensors.conf</span></samp>. That's why it exists! 
+The default labelling (in <samp><span class="file">lib/chips.c</span></samp> and <samp><span class="file">/etc/sensors.conf</span></samp>) is just
 a template.
 
    <p><a name="Section-3_002e4_002e2"></a>
 
-<h4 class="subsection">3.4.2 The min and max for the readings in <span class="command">sensors</span> are incorrect!</h4>
+<h4 class="subsection">3.4.2 The min and max for the readings in <samp><span class="command">sensors</span></samp> are incorrect!</h4>
 
-<p>You can customize them in the file <span class="file">/etc/sensors.conf</span>. See above.
+<p>You can customize them in the file <samp><span class="file">/etc/sensors.conf</span></samp>. See above.
 
    <p><a name="Section-3_002e4_002e3"></a>
 
-<h4 class="subsection">3.4.3 The min and max settings in <span class="file">/etc/sensors.conf</span> didn't take effect!</h4>
+<h4 class="subsection">3.4.3 The min and max settings in <samp><span class="file">/etc/sensors.conf</span></samp> didn't take effect!</h4>
 
-<p>You forgot to run <span class="command">sensors -s</span>. See above.
+<p>You forgot to run <samp><span class="command">sensors -s</span></samp>. See above.
 
    <p><a name="Section-3_002e4_002e4"></a>
 
 <h4 class="subsection">3.4.4 One sensor isn't hooked up on my board!</h4>
 
-<p>Use an <span class="command">ignore</span> line in <span class="file">/etc/sensors.conf</span> so it isn't
-displayed in <span class="command">sensors</span>.
+<p>Use an <samp><span class="command">ignore</span></samp> line in <samp><span class="file">/etc/sensors.conf</span></samp> so it isn't
+displayed in <samp><span class="command">sensors</span></samp>.
 
    <p><a name="Section-3_002e4_002e5"></a>
 
-<h4 class="subsection">3.4.5 I need help with <span class="file">sensors.conf</span>!</h4>
+<h4 class="subsection">3.4.5 I need help with <samp><span class="file">sensors.conf</span></samp>!</h4>
 
 <p>There is detailed help at the top of that file.
 
    <p><a name="Section-3_002e4_002e6"></a>
 
-<h4 class="subsection">3.4.6 Do you have a database of <span class="file">sensors.conf</span> entries for specific boards?</h4>
+<h4 class="subsection">3.4.6 Do you have a database of <samp><span class="file">sensors.conf</span></samp> entries for specific boards?</h4>
 
 <p>No. Good idea though. If you would like to set one up on your website
 send us mail and we will set up a link to it.
 
 <div class="node">
 <p><hr>
-<a name="Section-3_002e5"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e6">Section 3.6</a>,
+<a name="Section-3.5"></a>
+<a name="Section-3_002e5"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e6">Section 3.6</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-3_002e4">Section 3.4</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
-<br>
+
 </div>
 
-<h3 class="section">3.5 What about the <span class="samp">No such file or directory</span> warnings when I compile?</h3>
+<h3 class="section">3.5 What about the `<samp><span class="samp">No such file or directory</span></samp>' warnings when I compile?</h3>
 
 <p>Don't worry about them. The dependency files (which tell which
 files should be recompiled when certain files change) are created
-dynamically. They are not distributed with the package. The <span class="command">make</span> program
+dynamically. They are not distributed with the package. The <samp><span class="command">make</span></samp> program
 notices they are not there, and warns about that - and the first thing
 it will do is generate them. So all is well.
 
 <div class="node">
 <p><hr>
-<a name="Section-3_002e6"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e7">Section 3.7</a>,
+<a name="Section-3.6"></a>
+<a name="Section-3_002e6"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e7">Section 3.7</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-3_002e5">Section 3.5</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
-<br>
+
 </div>
 
 <h3 class="section">3.6 I get all kinds of weird compilation errors?</h3>
 
 <p>Check that the correct i2c header files are used. Depending on
-how you installed, they should be under either <span class="file">/usr/local/include</span> or
-<span class="file">/usr/src/linux*/include</span>. Try to edit the <span class="file">Makefile</span> for the other setting.
+how you installed, they should be under either <samp><span class="file">/usr/local/include</span></samp> or
+<samp><span class="file">/usr/src/linux*/include</span></samp>. Try to edit the <samp><span class="file">Makefile</span></samp> for the other setting.
 
    <p><a name="Section-3_002e6_002e1"></a>
 
-<h4 class="subsection">3.6.1 <span class="samp">No rule to make target xxxx needed by xxxx</span> - how to fix?</h4>
+<h4 class="subsection">3.6.1 `<samp><span class="samp">No rule to make target xxxx needed by xxxx</span></samp>' - how to fix?</h4>
 
      <ul>
-<li>See <a href="#Section-3_002e6">I get all kinds of weird compilation errors</a>, also try <span class="command">make clean</span> in <span class="file">lm_sensors</span>. 
-<li>If that doesn't work, try <span class="command">make clean</span> in <span class="file">i2c</span>. 
-<li>If that doesn't work, try <span class="command">make clean</span> in the kernel. 
-<li>Also make sure <span class="file">/usr/include/linux</span> points to <span class="file">/usr/src/linux/include/linux</span>. 
+<li>See <a href="#Section-3_002e6">I get all kinds of weird compilation errors</a>, also try <samp><span class="command">make clean</span></samp> in <samp><span class="file">lm_sensors</span></samp>. 
+<li>If that doesn't work, try <samp><span class="command">make clean</span></samp> in <samp><span class="file">i2c</span></samp>. 
+<li>If that doesn't work, try <samp><span class="command">make clean</span></samp> in the kernel. 
+<li>Also make sure <samp><span class="file">/usr/include/linux</span></samp> points to <samp><span class="file">/usr/src/linux/include/linux</span></samp>. 
 </ul>
 
 <div class="node">
 <p><hr>
-<a name="Section-3_002e7"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e8">Section 3.8</a>,
+<a name="Section-3.7"></a>
+<a name="Section-3_002e7"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e8">Section 3.8</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-3_002e6">Section 3.6</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
-<br>
+
 </div>
 
 <h3 class="section">3.7 It still does not compile or patch!</h3>
@@ -736,48 +773,52 @@ patches first!
 
 <div class="node">
 <p><hr>
-<a name="Section-3_002e8"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e9">Section 3.9</a>,
+<a name="Section-3.8"></a>
+<a name="Section-3_002e8"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e9">Section 3.9</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-3_002e7">Section 3.7</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
-<br>
+
 </div>
 
-<h3 class="section">3.8 <span class="command">make install</span> fails on Mandrake kernels</h3>
+<h3 class="section">3.8 <samp><span class="command">make install</span></samp> fails on Mandrake kernels</h3>
 
-<p>Mandrake uses a non-standard <span class="file">version.h</span> file which confuses our <span class="file">Makefile</span>. 
-Edit our <span class="file">Makefile</span> on the <code>MODDIR :=</code> line to hard-code the module directory.
+<p>Mandrake uses a non-standard <samp><span class="file">version.h</span></samp> file which confuses our <samp><span class="file">Makefile</span></samp>. 
+Edit our <samp><span class="file">Makefile</span></samp> on the <code>MODDIR :=</code> line to hard-code the module directory.
 
 <div class="node">
 <p><hr>
-<a name="Section-3_002e9"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e10">Section 3.10</a>,
+<a name="Section-3.9"></a>
+<a name="Section-3_002e9"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-3_002e10">Section 3.10</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-3_002e8">Section 3.8</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
-<br>
+
 </div>
 
-<h3 class="section">3.9 I get unresolved symbols when I <span class="command">modprobe</span> modules (Red Hat especially)</h3>
+<h3 class="section">3.9 I get unresolved symbols when I <samp><span class="command">modprobe</span></samp> modules (Red Hat especially)</h3>
 
 <p>Example:
 <pre class="example">     *** Unresolved symbols in /lib/modules/2.4.5/kernel/drivers/i2c/i2c-i810.o
      i2c_bit_add_bus_R8c3bc60e
      i2c_bit_del_bus_R92b18f49
 </pre>
-   <p>You can also run <span class="command">depmod -a -e</span> to see all unresolved symbols.
+   <p>You can also run <samp><span class="command">depmod -a -e</span></samp> to see all unresolved symbols.
 
    <p>These are module versioning problems. Generally you did not compile
 against the kernel you are running. Sometimes the Red Hat source you
 have is not for the kernel you are running. 
 You must compile our package against the source for the kernel you
-are running with something like <span class="command">make LINUX=/usr/src/linux-2.4.14</span>.
+are running with something like <samp><span class="command">make LINUX=/usr/src/linux-2.4.14</span></samp>.
 
    <p>Try the following to be sure:
 
      <ul>
-<li><span class="command">nm --extern MODULE.o</span>
+<li><samp><span class="command">nm --extern MODULE.o</span></samp>
 Filter out the kernel symbols, like <code>kmalloc</code>, <code>printk</code> etc. and note the
 number code behind them, like <code>printk_R1b7d4074</code>. If there is no numeric
 code after them, note this too. 
-<li><span class="command">grep SYMBOL /proc/ksyms</span>
+<li><samp><span class="command">grep SYMBOL /proc/ksyms</span></samp>
 Substitute SYMBOL by the basename of the symbols above, like <code>kmalloc</code>,
 <code>printk</code> etc. Note the number code behind them, or the lack thereof. 
 <li>Compare both sets of symbols. Are they the same? If so, the problem
@@ -787,9 +828,11 @@ versioning problem.
 
 <div class="node">
 <p><hr>
-<a name="Section-3_002e10"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-3_002e9">Section 3.9</a>,
+<a name="Section-3.10"></a>
+<a name="Section-3_002e10"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-3_002e9">Section 3.9</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
-<br>
+
 </div>
 
 <h3 class="section">3.10 I2C_DRIVERID_ADM1024 undefined (Red Hat especially)</h3>
@@ -800,30 +843,31 @@ structure.  When you update kernels, they may persist.  To get rid of
 these obsolete header files, at a command prompt:
 
      <ol type=1 start=1>
-<li><span class="command">rpm -qa | grep i2c</span>
-<li>Look for <span class="file">kernel-i2c,</span> or a similar rpm in the output
+<li><samp><span class="command">rpm -qa | grep i2c</span></samp>
+<li>Look for <samp><span class="file">kernel-i2c,</span></samp> or a similar rpm in the output
 <li>&lt;as root&gt;
-<span class="command">rpm -ev kernel-i2c</span> (or the name of the similar package)
+<samp><span class="command">rpm -ev kernel-i2c</span></samp> (or the name of the similar package)
 If this complains about dependencies, you can try adding
-<span class="command">--nodeps</span>, but this *MAY* break something else.  Not likely,
+<samp><span class="command">--nodeps</span></samp>, but this *MAY* break something else.  Not likely,
 as you have upgraded kernels, and nothing should be using the
 old i2c stuff anymore anyway.  Just don't use it with abandon. 
-<li>Try (in the build directory of <span class="file">lm_sensors)</span>
-     <pre class="example">          <span class="command">make clean</span>
-          <span class="command">make</span>
+<li>Try (in the build directory of <samp><span class="file">lm_sensors)</span></samp>
+     <pre class="example">          <samp><span class="command">make clean</span></samp>
+          <samp><span class="command">make</span></samp>
      </pre>
      <li><em>If</em> you still have problems, you may have to replace the include
-paths in the <span class="file">.c/.h</span> files with absolute paths to the header files. 
+paths in the <samp><span class="file">.c/.h</span></samp> files with absolute paths to the header files. 
 More of a workaround than a real fix, but at least you can get it
 to work.
         </ol>
 
 <div class="node">
 <p><hr>
-<a name="Problems"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Help">Help</a>,
+<a name="Problems"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Help">Help</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Installation">Installation</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-<br>
+
 </div>
 
 <h2 class="chapter">4 Problems</h2>
@@ -841,21 +885,21 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a href="#Section-4_002e10">Section 4.10</a>:         Can I be alerted when an ALARM occurs? 
 <li><a href="#Section-4_002e11">Section 4.11</a>:         SMBus transactions on my PIIX4 simply don't work. Why? 
 <li><a href="#Section-4_002e12">Section 4.12</a>:         My BIOS reports a higher CPU temperature than you! 
-<li><a href="#Section-4_002e13">Section 4.13</a>:         I read strange values from the raw <span class="file">/proc</span> files! 
+<li><a href="#Section-4_002e13">Section 4.13</a>:         I read strange values from the raw <samp><span class="file">/proc</span></samp> files! 
 <li><a href="#Section-4_002e14">Section 4.14</a>:         How do I set new limits? 
 <li><a href="#Section-4_002e15">Section 4.15</a>:         Some sensors are doubly detected? 
 <li><a href="#Section-4_002e16">Section 4.16</a>:         I ran sensors-detect, but now I get strange readings?! 
 <li><a href="#Section-4_002e17">Section 4.17</a>:         Bad readings from particular chips
 <li><a href="#Section-4_002e18">Section 4.18</a>:         How do I configure two chips (LM87) differently? 
-<li><a href="#Section-4_002e19">Section 4.19</a>:         Dmesg says <span class="samp">Upgrade BIOS</span>! I don't want to! 
-<li><a href="#Section-4_002e20">Section 4.20</a>:         Sensors says <span class="samp">Can't access procfs/sysfs file</span>
-<li><a href="#Section-4_002e21">Section 4.21</a>:         Sensors says <span class="samp">No sensors found!</span>
+<li><a href="#Section-4_002e19">Section 4.19</a>:         Dmesg says `<samp><span class="samp">Upgrade BIOS</span></samp>'! I don't want to! 
+<li><a href="#Section-4_002e20">Section 4.20</a>:         Sensors says `<samp><span class="samp">Can't access procfs/sysfs file</span></samp>'
+<li><a href="#Section-4_002e21">Section 4.21</a>:         Sensors says `<samp><span class="samp">No sensors found!</span></samp>'
 <li><a href="#Section-4_002e22">Section 4.22</a>:         Sensors output is not correct! 
 <li><a href="#Section-4_002e23">Section 4.23</a>:         What is at I2C address XXX? 
 <li><a href="#Section-4_002e24">Section 4.24</a>:         Sensors-detect doesn't work at all
-<li><a href="#Section-4_002e25">Section 4.25</a>:         Sensors says <span class="samp">Error: Line xxx: zzzzzzz</span>
+<li><a href="#Section-4_002e25">Section 4.25</a>:         Sensors says `<samp><span class="samp">Error: Line xxx: zzzzzzz</span></samp>'
 <li><a href="#Section-4_002e26">Section 4.26</a>:         Sensors only gives the name, adapter, and algorithm! 
-<li><a href="#Section-4_002e27">Section 4.27</a>:         Sensors says <span class="samp">ERROR: Can't get xxxxx data!</span>
+<li><a href="#Section-4_002e27">Section 4.27</a>:         Sensors says `<samp><span class="samp">ERROR: Can't get xxxxx data!</span></samp>'
 <li><a href="#Section-4_002e28">Section 4.28</a>:         Sensors doesn't find any sensors, just eeproms. 
 <li><a href="#Section-4_002e29">Section 4.29</a>:         Inserting modules hangs my board
 <li><a href="#Section-4_002e30">Section 4.30</a>:         Inserting modules slows down my board
@@ -866,9 +910,11 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e1"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e2">Section 4.2</a>,
+<a name="Section-4.1"></a>
+<a name="Section-4_002e1"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e2">Section 4.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.1 My fans report exactly half/double their values compared to the BIOS?</h3>
@@ -877,14 +923,14 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 properly interpret some of the readings without knowing what the hardware
 configuration is.  Some fans report one 'tick' each rotation, some report
 two 'ticks' each rotation. It is easy to resolve this through the
-configuration file <span class="file">/etc/sensors.conf</span>:
+configuration file <samp><span class="file">/etc/sensors.conf</span></samp>:
 
 <pre class="example">     chip lm78-*             # Or whatever chip this relates to
      compute fan1 2*@,@/2    # This will double the fan1 reading
                              # -- or --
      compute fan1 @/2,2*@    # This will halve the fan1 reading
 </pre>
-   <p>See <span class="file">doc/fan-divisors</span> in our package for further information.
+   <p>See <samp><span class="file">doc/fan-divisors</span></samp> in our package for further information.
 
    <p><a name="Fans-sometimes_002falways-read-0_0021"></a>
 
@@ -892,7 +938,7 @@ configuration file <span class="file">/etc/sensors.conf</span>:
 
 <p>You may not have a three-wire fan, which is required.
 
-   <p>You may need to increase the 'fan divisor'. See <span class="file">doc/fan-divisors</span>
+   <p>You may need to increase the 'fan divisor'. See <samp><span class="file">doc/fan-divisors</span></samp>
 in our package for further information.
 
    <p><a name="I-doubled-the-fan-divisor-and-the-fan-still-reads-7000"></a>
@@ -900,16 +946,18 @@ in our package for further information.
 <h4 class="subsection">4.1.2 I doubled the fan divisor and the fan still reads 7000!</h4>
 
 <p>Believe it or not, doubling the 'fan divisor' will not halve
-the fan reading. You have to add a compute line in <span class="file">/etc/sensors.conf</span>. 
+the fan reading. You have to add a compute line in <samp><span class="file">/etc/sensors.conf</span></samp>. 
 See <a href="#Section-4_002e1">My fans report exactly half/double their values compared to the BIOS</a>,
-and see <span class="file">doc/fan-divisors</span> in our package for further information.
+and see <samp><span class="file">doc/fan-divisors</span></samp> in our package for further information.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e2"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e3">Section 4.3</a>,
+<a name="Section-4.2"></a>
+<a name="Section-4_002e2"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e3">Section 4.3</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e1">Section 4.1</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.2 Why do my two LM75's report "-48 degrees"?</h3>
@@ -924,10 +972,12 @@ readings.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e3"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e4">Section 4.4</a>,
+<a name="Section-4.3"></a>
+<a name="Section-4_002e3"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e4">Section 4.4</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e2">Section 4.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.3 Why do I have two Vcore readings, I have only one processor!</h3>
@@ -936,7 +986,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 connecting them is used in the configuration file. This includes a VCore2,
 even if you do not have one. You can easily edit the configuration file
 to give it another name, or make this reading disappear using
-an <span class="command">ignore</span> line.
+an <samp><span class="command">ignore</span></samp> line.
 
    <p>Note that Vcore2 is often the same as Vcore on motherboards which
 only support one processor. Another possibility is that Vcore2 is not
@@ -947,16 +997,18 @@ different.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e4"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e5">Section 4.5</a>,
+<a name="Section-4.4"></a>
+<a name="Section-4_002e4"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e5">Section 4.5</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e3">Section 4.3</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.4 How do those ALARMS work? The current value is within range but there is still an ALARM warning!</h3>
 
-<p>The ALARM indications in <span class="command">sensors</span> are those reported by the
-sensor chip itself. They are NOT calculated by <span class="command">sensors</span>. <span class="command">sensors</span>
+<p>The ALARM indications in <samp><span class="command">sensors</span></samp> are those reported by the
+sensor chip itself. They are NOT calculated by <samp><span class="command">sensors</span></samp>. <samp><span class="command">sensors</span></samp>
 simply reads the ALARM bits and reports them.
 
    <p>An ALARM will go off when a minimum or maximum limit is crossed. 
@@ -972,15 +1024,17 @@ value is still out of range.
 a problem and report it to the user. Voltage or temperature spikes
 get detected without having to read the sensor chip hundreds of times
 a second. The implemetation details depend a bit on the kind of chip. 
-See the specific chip documentation in <span class="file">doc/chips</span> and the
+See the specific chip documentation in <samp><span class="file">doc/chips</span></samp> and the
 chip datasheet for more information.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e5"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e6">Section 4.6</a>,
+<a name="Section-4.5"></a>
+<a name="Section-4_002e5"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e6">Section 4.6</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e4">Section 4.4</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.5 My voltage readings seem to drift a bit. Is something wrong?</h3>
@@ -996,10 +1050,12 @@ reason to worry.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e6"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e7">Section 4.7</a>,
+<a name="Section-4.6"></a>
+<a name="Section-4_002e6"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e7">Section 4.7</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e5">Section 4.5</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.6 Some measurements are way out of range. What happened?</h3>
@@ -1016,14 +1072,14 @@ non-standard way. You can use the configuration file to describe how this
 measurement should be interpreted; see the comments the example file for
 more information.
 
-   <p><a name="_002d5V-and-_002d12V-readings-are-way-out-of-range_0021"></a>
+   <p><a name="g_t_002d5V-and-_002d12V-readings-are-way-out-of-range_0021"></a>
 
 <h4 class="subsection">4.6.1 -5V and -12V readings are way out of range!</h4>
 
 <p>It's very frequent that negative voltage lines are not wired because
 motherboard manufacturers don't think they're worth monitoring
 (they are mostly unused these days). You can just add
-<span class="command">ignore inN</span> lines to <span class="file">/etc/sensors.conf</span> to hide them.
+<samp><span class="command">ignore inN</span></samp> lines to <samp><span class="file">/etc/sensors.conf</span></samp> to hide them.
 
    <p>Another possibility is that these lines are used to monitor different
 voltages. Only the motherboard manufacturer can tell for sure. Taking
@@ -1032,10 +1088,12 @@ hints though.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e7"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e8">Section 4.8</a>,
+<a name="Section-4.7"></a>
+<a name="Section-4_002e7"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e8">Section 4.8</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e6">Section 4.6</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.7 What are VID lines? Why is the VID reading wrong?</h3>
@@ -1044,22 +1102,24 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 supported for most processors, however they are not always
 correctly connected to the sensor chip, so the readings may be invalid. 
 A reading of 0V, +3.5V or +2.05V is especially suspect. 
-If this is the case, add a line <span class="command">ignore vid</span> to <span class="file">/etc/sensors.conf</span>,
+If this is the case, add a line <samp><span class="command">ignore vid</span></samp> to <samp><span class="file">/etc/sensors.conf</span></samp>,
 and change the min and max settings for the Processor Core voltage
 (often in0_min and in0_max) in that file so that they don't depend on vid.
 
    <p>The CPU nominal voltage is computed from VID lines according to a formula
 that depends on the CPU type. Most chips that report a VID value can be
 configured to use either VRM 8.2 (for Pentium III) or VRM 9.0 (for Pentium 4
-and Athlon). You chose which one you want through <span class="file">/etc/sensors.conf</span>. 
-See <span class="file">doc/vid</span> for more information.
+and Athlon). You chose which one you want through <samp><span class="file">/etc/sensors.conf</span></samp>. 
+See <samp><span class="file">doc/vid</span></samp> for more information.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e8"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e9">Section 4.9</a>,
+<a name="Section-4.8"></a>
+<a name="Section-4_002e8"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e9">Section 4.9</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e7">Section 4.7</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.8 I read sensor values several times a second, but they are only updated only each second or so. Why?</h3>
@@ -1071,10 +1131,12 @@ at all).
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e9"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e10">Section 4.10</a>,
+<a name="Section-4.9"></a>
+<a name="Section-4_002e9"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e10">Section 4.10</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e8">Section 4.8</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.9 It sometimes seems to take almost a second before I see the sensor reading results. Why?</h3>
@@ -1086,10 +1148,12 @@ while we are waiting for the transaction to finish.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e10"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e11">Section 4.11</a>,
+<a name="Section-4.10"></a>
+<a name="Section-4_002e10"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e11">Section 4.11</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e9">Section 4.9</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.10 Can I be alerted when an ALARM occurs?</h3>
@@ -1109,14 +1173,16 @@ might be quite hard to do.
    <p>Your best bet would be to poll the alarm file with a user-land daemon
 which alerts you if an alarm is raised. I am not aware of any program which
 does the job, though you might want to examine one of the graphical monitor
-programs under X, see <a href="http://www2.lm-sensors.nu/~lm78/useful_addresses.html">http://www2.lm-sensors.nu/~lm78/useful_addresses.html</a> for addresses.
+programs under X, see <a href="http://www.lm-sensors.org/wiki/UsefulLinks">http://www.lm-sensors.org/wiki/UsefulLinks</a> for addresses.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e11"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e12">Section 4.12</a>,
+<a name="Section-4.11"></a>
+<a name="Section-4_002e11"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e12">Section 4.12</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e10">Section 4.10</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.11 SMBus transactions on my PIIX4 simply don't work (timeouts happen).  Why?</h3>
@@ -1133,10 +1199,12 @@ written to, but lock things up when they are read.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e12"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e13">Section 4.13</a>,
+<a name="Section-4.12"></a>
+<a name="Section-4_002e12"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e13">Section 4.13</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e11">Section 4.11</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.12 My BIOS reports a much higher CPU temperature than your modules!</h3>
@@ -1164,45 +1232,51 @@ makes sense.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e13"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e14">Section 4.14</a>,
+<a name="Section-4.13"></a>
+<a name="Section-4_002e13"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e14">Section 4.14</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e12">Section 4.12</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
-<h3 class="section">4.13 I try to read the raw <span class="file">/proc</span> files, but the values are strange?!?</h3>
+<h3 class="section">4.13 I try to read the raw <samp><span class="file">/proc</span></samp> files, but the values are strange?!?</h3>
 
 <p>Remember, these values do not take the configuration file
-<span class="file">compute</span> lines in account. This is especially obvious for voltage readings
+<samp><span class="file">compute</span></samp> lines in account. This is especially obvious for voltage readings
 (usually called in? or vin?). Use a program linked to libsensors (like
-the provided <span class="command">sensors</span> program) instead.
+the provided <samp><span class="command">sensors</span></samp> program) instead.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e14"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e15">Section 4.15</a>,
+<a name="Section-4.14"></a>
+<a name="Section-4_002e14"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e15">Section 4.15</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e13">Section 4.13</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.14 How do I set new limits?</h3>
 
-<p>Change the limit values in <span class="file">/etc/sensors.conf</span> and then run
-<span class="command">sensors -s</span>.
+<p>Change the limit values in <samp><span class="file">/etc/sensors.conf</span></samp> and then run
+<samp><span class="command">sensors -s</span></samp>.
 
    <p><a name="I-set-new-limits-and-it-didnt-work"></a>
 
 <h4 class="subsection">4.14.1 I set new limits and it didn't work?</h4>
 
-<p>You forgot to run <span class="command">sensors -s</span>. Put it in a <span class="file">/etc/rc.d/...</span> file
+<p>You forgot to run <samp><span class="command">sensors -s</span></samp>. Put it in a <samp><span class="file">/etc/rc.d/...</span></samp> file
 after the modprobe lines to run at startup.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e15"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e16">Section 4.16</a>,
+<a name="Section-4.15"></a>
+<a name="Section-4_002e15"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e16">Section 4.16</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e14">Section 4.14</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.15 Some sensors are doubly detected?</h3>
@@ -1215,14 +1289,16 @@ sensors can be detected to both the ISA and the SMBus (and if you have
 loaded the approprate adapter drivers, it will be detected on both), and
 some chips simulate other chips (the Winbond W83781D simulates LM75 chips
 on the SMBus, for example). Remove the offending adapter or chip driver, or
-run sensors-detect and add the <span class="command">ignore=</span> modprobe parameters it suggests.
+run sensors-detect and add the <samp><span class="command">ignore=</span></samp> modprobe parameters it suggests.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e16"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e17">Section 4.17</a>,
+<a name="Section-4.16"></a>
+<a name="Section-4_002e16"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e17">Section 4.17</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e15">Section 4.15</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.16 I ran sensors-detect, but now I get very strange readings?!?</h3>
@@ -1237,16 +1313,18 @@ scan the PIIX4.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e17"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e18">Section 4.18</a>,
+<a name="Section-4.17"></a>
+<a name="Section-4_002e17"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e18">Section 4.18</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e16">Section 4.16</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.17 Bad readings from particular chips</h3>
 
 <p>See below for some particularly troublesome chips. 
-Also be sure and check <span class="file">doc/chips/xxxxx</span> for the particular driver.
+Also be sure and check <samp><span class="file">doc/chips/xxxxx</span></samp> for the particular driver.
 
    <p><a name="Bad-readings-from-the-AS99127F"></a>
 
@@ -1255,7 +1333,7 @@ Also be sure and check <span class="file">doc/chips/xxxxx</span> for the particu
 <p>The Asus AS99127F is a modified version of the Winbond W83781D. 
 Asus will not release a datasheet. The driver was developed by tedious
 experimentation. We've done the best we can. If you want to make adjustments
-to the readings please edit <span class="file">/etc/sensors.conf.</span> Please don't ask us to
+to the readings please edit <samp><span class="file">/etc/sensors.conf.</span></samp> Please don't ask us to
 fix the driver. Ask Asus to release a datasheet.
 
    <p><a name="Bad-readings-from-the-VIA-686A"></a>
@@ -1265,9 +1343,9 @@ fix the driver. Ask Asus to release a datasheet.
 <p>The Via 686A datasheet is incomplete. 
 Via will not release details. The driver was developed by tedious
 experimentation. We've done the best we can. If you want to make adjustments
-to the readings please edit <span class="file">/etc/sensors.conf.</span> Please don't ask us to
+to the readings please edit <samp><span class="file">/etc/sensors.conf.</span></samp> Please don't ask us to
 fix the driver. Ask Via to release a better datasheet. 
-Also, don't forget to <span class="command">modprobe i2c-isa</span>.
+Also, don't forget to <samp><span class="command">modprobe i2c-isa</span></samp>.
 
    <p><a name="Bad-readings-from-the-MTP008"></a>
 
@@ -1275,7 +1353,7 @@ Also, don't forget to <span class="command">modprobe i2c-isa</span>.
 
 <p>The MTP008 has programmable temperature sensor types. 
 If your sensor type does not match the default, you will have to change it. 
-See <span class="file">doc/chips/mtp008</span> for details. 
+See <samp><span class="file">doc/chips/mtp008</span></samp> for details. 
 Also, MTP008 chips seem to randomly refuse to respond, for
 unknown reasons. You can see this as 'XX' entries in i2cdump.
 
@@ -1299,9 +1377,9 @@ misidentified.  Look on the motherboard (or at
 <a href="http://mbm.livewiredev.com">http://mbm.livewiredev.com</a>) for a 'Winbond' or Asus chip. 
 Often the real device is an Asus as99127f. If so, the driver can be
 forced to recognize the as99127f with
-<span class="command">force_as99127f=BUS,0x2d</span> where <code>BUS</code> is your i2c bus number. 
+<samp><span class="command">force_as99127f=BUS,0x2d</span></samp> where <code>BUS</code> is your i2c bus number. 
 Cat /proc/bus/i2c to see a list of bus numbers. 
-Read the w83781d module documentation (<span class="file">doc/chips/w83781d</span>)
+Read the w83781d module documentation (<samp><span class="file">doc/chips/w83781d</span></samp>)
 for more details.
 
    <p><a name="Bus-hangs-on-Ali-1543-on-Asus-P5A-boards"></a>
@@ -1310,7 +1388,7 @@ for more details.
 
 <p>The SMBus tends to hang on this board and it seems to get worse
 at higher temperatures. Use ISA accesses to reliably use the w83781d
-monitor chip on this board and use the <span class="command">ignore=1,0x2d</span> or similar option
+monitor chip on this board and use the <samp><span class="command">ignore=1,0x2d</span></samp> or similar option
 to the w83781d module to prevent i2c accesses.
 
    <p><a name="Bad-readings-from-LM75"></a>
@@ -1337,10 +1415,12 @@ as an LM80. Figure out what you really have See <a href="#Section-3_002e2_002e1"
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e18"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e19">Section 4.19</a>,
+<a name="Section-4.18"></a>
+<a name="Section-4_002e18"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e19">Section 4.19</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e17">Section 4.17</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.18 How do I configure two chips (LM87) differently?</h3>
@@ -1349,103 +1429,111 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 not hooked up in the same way, so they need different defaults. 
 For example, both CPU temperatures go to one LM87.
 
-   <p>Make two different sections in <span class="file">/etc/sensors.conf</span> as follows:
+   <p>Make two different sections in <samp><span class="file">/etc/sensors.conf</span></samp> as follows:
 <pre class="example">     chip "lm87-i2c-*-2c"
          put configuration for the chip at 0x2c here
      chip "lm87-i2c-*-2d"
          put configuration for the chip at 0x2d here
 </pre>
-   <p>There is a commented example in <span class="file">sensors.conf.eg</span> which should
+   <p>There is a commented example in <samp><span class="file">sensors.conf.eg</span></samp> which should
 be helpful.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e19"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e20">Section 4.20</a>,
+<a name="Section-4.19"></a>
+<a name="Section-4_002e19"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e20">Section 4.20</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e18">Section 4.18</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
-<h3 class="section">4.19 Dmesg says <span class="samp">Upgrade BIOS</span>! I don't want to!</h3>
+<h3 class="section">4.19 Dmesg says `<samp><span class="samp">Upgrade BIOS</span></samp>'! I don't want to!</h3>
 
-<p>If the problem is a PCI device is not present in <span class="command">lspci</span>, the solution
+<p>If the problem is a PCI device is not present in <samp><span class="command">lspci</span></samp>, the solution
 is complex. For the ALI M7101 device, there is a solution which uses the
-2.4 kernel's <span class="command">hotplug</span> facility. See <span class="file">prog/hotplug</span> in our package. 
+2.4 kernel's <samp><span class="command">hotplug</span></samp> facility. See <samp><span class="file">prog/hotplug</span></samp> in our package. 
 For other PCI devices, you can try to modify
-the m7101 solution in <span class="file">prog/hotplug</span>.
+the m7101 solution in <samp><span class="file">prog/hotplug</span></samp>.
 
-   <p>If dmesg says <span class="samp">try force_addr</span>, see below. Other drivers generally do not
+   <p>If dmesg says `<samp><span class="samp">try force_addr</span></samp>', see below. Other drivers generally do not
 support the force_addr parameter. Sorry. Check the documentation
-for your driver in <span class="file">doc/[chips,busses]</span> and if we don't support it
+for your driver in <samp><span class="file">doc/[chips,busses]</span></samp> and if we don't support it
 you can send us your request.
 
    <p><a name="Dmesg-says-use-force_005faddr_003d0xaddr_0021-What-address-do-I-use"></a>
 
-<h4 class="subsection">4.19.1 Dmesg says <span class="samp">use force_addr=0xaddr</span>! What address do I use?</h4>
+<h4 class="subsection">4.19.1 Dmesg says `<samp><span class="samp">use force_addr=0xaddr</span></samp>'! What address do I use?</h4>
 
 <p>If the problem is a PCI device whose base address is not set,
 you may be able to set the address with a force parameter. The via686a
 and sis5595 chip drivers, and some bus drivers, support the command line
-<span class="command">modprobe via686a force_addr=0xADDRESS</span> where ADDRESS
+<samp><span class="command">modprobe via686a force_addr=0xADDRESS</span></samp> where ADDRESS
 is the I/O address. You must select an address that is not in use. 
-<span class="command">cat /proc/ioports</span> to check (carefully) for conflicts. A high number like
+<samp><span class="command">cat <samp>/proc/ioports</samp></span></samp> to check (carefully) for conflicts. A high number like
 0xf000 is generally safe.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e20"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e21">Section 4.21</a>,
+<a name="Section-4.20"></a>
+<a name="Section-4_002e20"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e21">Section 4.21</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e19">Section 4.19</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
-<h3 class="section">4.20 Sensors says <span class="samp">Can't access procfs/sysfs file</span></h3>
+<h3 class="section">4.20 Sensors says `<samp><span class="samp">Can't access procfs/sysfs file</span></samp>'</h3>
 
      <ul>
 <li>Linux 2.6
           <ul>
-<li>Did you <span class="command">modprobe i2c_sensor</span>? Check <span class="command">lsmod</span>. 
-<li>Do you have sysfs support in your kernel and <span class="file">/sys</span> mounted (is <span class="file">/sys</span> there and populated)? 
-Create /sys with <span class="command">mkdir /sys</span> if needed. Then add the following line to <span class="file">/etc/fstab</span>:
+<li>Did you <samp><span class="command">modprobe i2c_sensor</span></samp>? Check <samp><span class="command">lsmod</span></samp>. 
+<li>Do you have sysfs support in your kernel and <samp><span class="file">/sys</span></samp> mounted (is <samp><span class="file">/sys</span></samp> there and populated)? 
+Create /sys with <samp><span class="command">mkdir /sys</span></samp> if needed. Then add the following line to <samp><span class="file">/etc/fstab</span></samp>:
           <pre class="example">               sys              /sys             sysfs       default          0   0</pre>
-          <p>and <span class="command">mount /sys</span>. 
+          <p>and <samp><span class="command">mount /sys</span></samp>. 
 </ul>
      <li>Linux 2.4
           <ul>
-<li>Did you <span class="command">modprobe i2c-proc</span>? Check <span class="command">lsmod</span>. 
-<li>Do you have procfs support in your kernel and <span class="file">/proc</span> mounted (is <span class="file">/proc</span> there and populated)? 
-Create /proc with <span class="command">mkdir /proc</span> if needed. Then add the following line to <span class="file">/etc/fstab</span>:
+<li>Did you <samp><span class="command">modprobe i2c-proc</span></samp>? Check <samp><span class="command">lsmod</span></samp>. 
+<li>Do you have procfs support in your kernel and <samp><span class="file">/proc</span></samp> mounted (is <samp><span class="file">/proc</span></samp> there and populated)? 
+Create /proc with <samp><span class="command">mkdir /proc</span></samp> if needed. Then add the following line to <samp><span class="file">/etc/fstab</span></samp>:
           <pre class="example">               proc             /proc            proc        defaults         0   0</pre>
-          <p>and <span class="command">mount /proc</span>. 
+          <p>and <samp><span class="command">mount /proc</span></samp>. 
 </ul>
-     <li>If you did <span class="command">sensors -s</span>, did you run it as root? 
+     <li>If you did <samp><span class="command">sensors -s</span></samp>, did you run it as root? 
 </ul>
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e21"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e22">Section 4.22</a>,
+<a name="Section-4.21"></a>
+<a name="Section-4_002e21"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e22">Section 4.22</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e20">Section 4.20</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
-<h3 class="section">4.21 Sensors says <span class="samp">No sensors found!</span></h3>
+<h3 class="section">4.21 Sensors says `<samp><span class="samp">No sensors found!</span></samp>'</h3>
 
      <ul>
-<li>Did <span class="command">sensors-detect</span> find sensors? (If not see <a href="#Sensors_002ddetect-doesnt-find-any-sensors">Sensors-detect doesnt find any sensors</a>)
-<li>Did you do what <span class="command">sensors-detect</span> said? 
-<li>Did you <span class="command">modprobe</span> your sensor modules? 
-<li>Did you <span class="command">modprobe</span> your I2C adapter modules? 
-<li>Did you <span class="command">modprobe i2c-isa</span> if you have ISA sensor chips? 
-<li>Check <span class="command">lsmod</span>. 
+<li>Did <samp><span class="command">sensors-detect</span></samp> find sensors? (If not see <a href="#Sensors_002ddetect-doesnt-find-any-sensors">Sensors-detect doesnt find any sensors</a>)
+<li>Did you do what <samp><span class="command">sensors-detect</span></samp> said? 
+<li>Did you <samp><span class="command">modprobe</span></samp> your sensor modules? 
+<li>Did you <samp><span class="command">modprobe</span></samp> your I2C adapter modules? 
+<li>Did you <samp><span class="command">modprobe i2c-isa</span></samp> if you have ISA sensor chips? 
+<li>Check <samp><span class="command">lsmod</span></samp>. 
 </ul>
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e22"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e23">Section 4.23</a>,
+<a name="Section-4.22"></a>
+<a name="Section-4_002e22"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e23">Section 4.23</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e21">Section 4.21</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.22 Sensors output is not correct!</h3>
@@ -1463,23 +1551,25 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 <li>One particular sensor readings:
           <ul>
 <li>Maybe it isn't hooked up? - tell 'sensors' to ignore it. See <a href="#Section-3_002e4_002e4">One sensor isnt hooked up on my board</a>. 
-<li>Maybe it is hooked up differently on your motherboard? - adjust <span class="file">sensors.conf</span> calculation. 
+<li>Maybe it is hooked up differently on your motherboard? - adjust <samp><span class="file">sensors.conf</span></samp> calculation. 
 </ul>
      </ul>
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e23"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e24">Section 4.24</a>,
+<a name="Section-4.23"></a>
+<a name="Section-4_002e23"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e24">Section 4.24</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e22">Section 4.22</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.23 What is at I2C address XXX?</h3>
 
-<p>In general, we don't know. Start by running <span class="command">sensors-detect</span>. 
-If it doesn't recognize it, try running <span class="command">i2cdump</span>. A partial list
-of manufacturers' IDs are at the bottom of <span class="file">doc/chips/SUMMARY</span>.
+<p>In general, we don't know. Start by running <samp><span class="command">sensors-detect</span></samp>. 
+If it doesn't recognize it, try running <samp><span class="command">i2cdump</span></samp>. A partial list
+of manufacturers' IDs are at the bottom of <samp><span class="file">doc/chips/SUMMARY</span></samp>.
 
    <p><a name="What-is-at-I2C-address-0x69"></a>
 
@@ -1488,7 +1578,7 @@ of manufacturers' IDs are at the bottom of <span class="file">doc/chips/SUMMARY<
 <p>A clock chip. Often, accessing these clock chips in the wrong
 way will instantly crash your computer. Sensors-detect carefully
 avoids these chips. If you really really want to play with your clock
-chip you can look at <span class="file">kernel/chips/icspll.c</span> in our package. But we
+chip you can look at <samp><span class="file">kernel/chips/icspll.c</span></samp> in our package. But we
 do not recommend it. You have been warned.
 
    <p><a name="What-is-at-I2C-addresses-0x50-_002d-0x57"></a>
@@ -1496,8 +1586,8 @@ do not recommend it. You have been warned.
 <h4 class="subsection">4.23.2 What is at I2C addresses 0x50 - 0x57?</h4>
 
 <p>EEPROMs on your SDRAM DIMMs. Load the eeprom module to
-look at some basic data in <span class="command">sensors</span> or use the program
-<span class="command">prog/eeprom/decode-dimms.pl</span> to get more information than you ever wanted.
+look at some basic data in <samp><span class="command">sensors</span></samp> or use the program
+<samp><span class="command">prog/eeprom/decode-dimms.pl</span></samp> to get more information than you ever wanted.
 
    <p><a name="What-is-at-I2C-addresses-0x30-_002d-0x37"></a>
 
@@ -1507,17 +1597,19 @@ look at some basic data in <span class="command">sensors</span> or use the progr
 at addresses 0x50 - 0x57. They are the 'software write-protect'
 registers of the SDRAM Serial Presence Detect EEPROMs. 
 If you try and
-do a <span class="command">i2cdump</span> on them to read the location, you won't get anything,
+do a <samp><span class="command">i2cdump</span></samp> on them to read the location, you won't get anything,
 because they contain a single write-only register. 
 This register can be used to permanently
 write-protect the contents of the eeprom.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e24"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e25">Section 4.25</a>,
+<a name="Section-4.24"></a>
+<a name="Section-4_002e24"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e25">Section 4.25</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e23">Section 4.23</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.24 Sensors-detect doesn't work at all</h3>
@@ -1535,10 +1627,10 @@ was not loaded and you did not run sensors-detect as root.
 
 <h4 class="subsection">4.24.2 Sensors-detect says "Can't open /dev/i2c[-/]0"</h4>
 
-<p>Your <span class="file">/dev/i2c-0,</span> <span class="file">/dev/i2c0</span>, or <span class="file">/dev/i2c/0</span> files do not exist
-or you did not run <span class="command">sensors-detect</span> as root. 
-Run the script <span class="command">prog/mkdev/mkdev.sh</span> to create the <span class="file">/dev/i2c-x</span> files. 
-Run <span class="command">devfs</span> in the kernel to get the <span class="file">/dev/i2c/x</span> files.
+<p>Your <samp><span class="file">/dev/i2c-0,</span></samp> <samp><span class="file">/dev/i2c0</span></samp>, or <samp><span class="file">/dev/i2c/0</span></samp> files do not exist
+or you did not run <samp><span class="command">sensors-detect</span></samp> as root. 
+Run the script <samp><span class="command">prog/mkdev/mkdev.sh</span></samp> to create the <samp><span class="file">/dev/i2c-x</span></samp> files. 
+Run <samp><span class="command">devfs</span></samp> in the kernel to get the <samp><span class="file">/dev/i2c/x</span></samp> files.
 
    <p><a name="Sensors_002ddetect-doesnt-find-any-sensors"></a>
 
@@ -1560,83 +1652,91 @@ Run <span class="command">devfs</span> in the kernel to get the <span class="fil
         </ol>
 
    <p>When you know what chips you have, check the
-<a href="http://www2.lm-sensors.nu/~lm78/newdrivers.html">Newest Driver Status</a> web page to
+<a href="http://www.lm-sensors.org/wiki/NewDrivers">Newest Driver Status</a> web page to
 see if support has been added for your chip in a later release or in CVS.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e25"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e26">Section 4.26</a>,
+<a name="Section-4.25"></a>
+<a name="Section-4_002e25"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e26">Section 4.26</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e24">Section 4.24</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
-<h3 class="section">4.25 Sensors says <span class="samp">Error: Line xxx: zzzzzzz</span></h3>
+<h3 class="section">4.25 Sensors says `<samp><span class="samp">Error: Line xxx: zzzzzzz</span></samp>'</h3>
 
 <p>These are errors from the libsensors library in
-reading the <span class="file">/etc/sensors.conf</span> configuration file. Go to that line
+reading the <samp><span class="file">/etc/sensors.conf</span></samp> configuration file. Go to that line
 number and fix it. If you have a parse error, perhaps you have
 to put the feature name in double quotes.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e26"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e27">Section 4.27</a>,
+<a name="Section-4.26"></a>
+<a name="Section-4_002e26"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e27">Section 4.27</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e25">Section 4.25</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.26 Sensors only gives the name, adapter, and algorithm for my chip</h3>
 
-<p>If <span class="command">sensors</span> only says this, for example, and doesn't
+<p>If <samp><span class="command">sensors</span></samp> only says this, for example, and doesn't
 provide any actual data at all:
 
 <pre class="example">     it87-isa-0290
      Adapter: ISA adapter
      Algorithm: ISA algorithm
 </pre>
-   <p>Your chip is not currently supported by <span class="command">sensors</span> and so all it
+   <p>Your chip is not currently supported by <samp><span class="command">sensors</span></samp> and so all it
 does is print out that information. Get the latest release
-and be sure you are running the <span class="command">sensors</span> program it installed
-and not some older <span class="command">sensors</span>.
+and be sure you are running the <samp><span class="command">sensors</span></samp> program it installed
+and not some older <samp><span class="command">sensors</span></samp>.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e27"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e28">Section 4.28</a>,
+<a name="Section-4.27"></a>
+<a name="Section-4_002e27"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e28">Section 4.28</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e26">Section 4.26</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
-<h3 class="section">4.27 Sensors says <span class="samp">ERROR: Can't get xxxxx data!</span></h3>
+<h3 class="section">4.27 Sensors says `<samp><span class="samp">ERROR: Can't get xxxxx data!</span></samp>'</h3>
 
      <ul>
 <li>(Linux 2.6) Make sure you are using one of the
 <a href="http://www.lm-sensors.org/wiki/Kernel2.6">recommended kernel/lm_sensors combination</a>. 
-<li>You have a <span class="file">libsensors</span>/<span class="command">sensors</span> mismatch. 
-<span class="command">sensors</span> is unable to
-get a data entry from <span class="file">libsensors</span>. You probably have an
-old <span class="file">libsensors</span> in your <span class="file">/etc/ld.so.conf</span> path. 
-Make sure you did (as root) a <span class="command">make install</span> (Linux 2.4) or
-<span class="command">make user_install</span> (Linux 2.6) followed by a <span class="command">ldconfig</span>. 
-Then check the output of <span class="command">ldconfig -v | grep libsensors</span> to
-verify that there is only ONE <span class="file">libsensors</span> entry and that it matches
-the <span class="file">libsensors</span> that was built in the <span class="file">lib/</span> directory in <span class="file">lm_sensors2</span>. 
+<li>You have a <samp><span class="file">libsensors</span></samp>/<samp><span class="command">sensors</span></samp> mismatch. 
+<samp><span class="command">sensors</span></samp> is unable to
+get a data entry from <samp><span class="file">libsensors</span></samp>. You probably have an
+old <samp><span class="file">libsensors</span></samp> in your <samp><span class="file">/etc/ld.so.conf</span></samp> path. 
+Make sure you did (as root) a <samp><span class="command">make install</span></samp> (Linux 2.4) or
+<samp><span class="command">make user_install</span></samp> (Linux 2.6) followed by a <samp><span class="command">ldconfig</span></samp>. 
+Then check the output of <samp><span class="command">ldconfig -v | grep libsensors</span></samp> to
+verify that there is only ONE <samp><span class="file">libsensors</span></samp> entry and that it matches
+the <samp><span class="file">libsensors</span></samp> that was built in the <samp><span class="file">lib/</span></samp> directory in <samp><span class="file">lm_sensors2</span></samp>. 
 </ul>
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e28"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e29">Section 4.29</a>,
+<a name="Section-4.28"></a>
+<a name="Section-4_002e28"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e29">Section 4.29</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e27">Section 4.27</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.28 Sensors doesn't find any sensors, just eeproms.</h3>
 
-<p>See <a href="#Section-4_002e24">Sensors-detect doesnt work at all</a>, if <span class="command">sensors-detect</span> failed to find any sensors.
+<p>See <a href="#Section-4_002e24">Sensors-detect doesnt work at all</a>, if <samp><span class="command">sensors-detect</span></samp> failed to find any sensors.
 
-   <p>If <span class="command">sensors-detect</span> did find sensors, did you insert your modules? For chips on the ISA
+   <p>If <samp><span class="command">sensors-detect</span></samp> did find sensors, did you insert your modules? For chips on the ISA
 bus, did you insert i2c-isa?
 
    <p>See <a href="#Section-5_002e2">What to do if a module wont insert</a>, if the modules didn't insert,
@@ -1644,10 +1744,12 @@ also <a href="#Section-4_002e21">Sensors says No sensors found</a>.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e29"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e30">Section 4.30</a>,
+<a name="Section-4.29"></a>
+<a name="Section-4_002e29"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e30">Section 4.30</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e28">Section 4.28</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.29 Inserting modules hangs my board</h3>
@@ -1656,17 +1758,19 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
      <ol type=1 start=1>
 <li>Bus driver problems. Insert the bus driver first, before you have inserted any chip drivers, to verify. 
 <li>Wrong chip driver. Verify that you have a chip supported by the chip driver, see <a href="#Section-3_002e2_002e1">What chips are on motherboard XYZ</a>. 
-<li>The chip driver is reinitializing the chip, which undoes critical initialization done by the BIOS.  Try the parameter <span class="command">init=0</span> for the w83781d driver; this is the only driver supporting this parameter. 
-<li>Some chips on the bus don't like to be probed at all.  After inserting the bus driver (but not the chip drivers), run <span class="command">i2cdetect</span> on the bus, then <span class="command">i2cdump</span> on each address responding to <span class="command">i2cdetect</span>. This may find the culprit.  Do not <span class="command">i2cdump address 0x69</span>, the clock chip. 
-<li>The chip driver is incorrectly finding a second chip on the bus and is accessing it. For example, with the Tyan 2688 with a w83781d at 0x29, use <span class="command">modprobe ignore_range=0,0x00,0x28,0,0x2a,0x7f</span> to prevent access to other addresses. (<span class="command">init=0</span> also req'd for the Tyan 2688).
+<li>The chip driver is reinitializing the chip, which undoes critical initialization done by the BIOS.  Try the parameter <samp><span class="command">init=0</span></samp> for the w83781d driver; this is the only driver supporting this parameter. 
+<li>Some chips on the bus don't like to be probed at all.  After inserting the bus driver (but not the chip drivers), run <samp><span class="command">i2cdetect</span></samp> on the bus, then <samp><span class="command">i2cdump</span></samp> on each address responding to <samp><span class="command">i2cdetect</span></samp>. This may find the culprit.  Do not <samp><span class="command">i2cdump address 0x69</span></samp>, the clock chip. 
+<li>The chip driver is incorrectly finding a second chip on the bus and is accessing it. For example, with the Tyan 2688 with a w83781d at 0x29, use <samp><span class="command">modprobe ignore_range=0,0x00,0x28,0,0x2a,0x7f</span></samp> to prevent access to other addresses. (<samp><span class="command">init=0</span></samp> also req'd for the Tyan 2688).
         </ol>
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e30"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e31">Section 4.31</a>,
+<a name="Section-4.30"></a>
+<a name="Section-4_002e30"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e31">Section 4.31</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e29">Section 4.29</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.30 Inserting modules slows down my board</h3>
@@ -1675,14 +1779,16 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 the sensor chip. This triggers hardware on the board which
 automatically slows down the CPU clock. Be sure that your
 temperature limits are above the temperature reading. Put
-the new limits in <span class="file">/etc/sensors.conf</span> and run <span class="command">sensors -s</span>.
+the new limits in <samp><span class="file">/etc/sensors.conf</span></samp> and run <samp><span class="command">sensors -s</span></samp>.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e31"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e32">Section 4.32</a>,
+<a name="Section-4.31"></a>
+<a name="Section-4_002e31"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e32">Section 4.32</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e30">Section 4.30</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.31 Problems on particular motherboards</h3>
@@ -1693,7 +1799,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 
 <h4 class="subsection">4.31.1 Asus P4B</h4>
 
-<p>See <span class="file">prog/hotplug/README.p4b</span> if your SMBus master is not found.
+<p>See <samp><span class="file">prog/hotplug/README.p4b</span></samp> if your SMBus master is not found.
 
    <p><a name="Tyan-2460-2462"></a>
 
@@ -1716,21 +1822,25 @@ Also <a href="#Section-4_002e29">Inserting modules hangs my board</a>.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e32"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e33">Section 4.33</a>,
+<a name="Section-4.32"></a>
+<a name="Section-4_002e32"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e33">Section 4.33</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e31">Section 4.31</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.32 Problems on particular systems</h3>
 
-<p>For IBM systems, see <span class="file">README.thinkpad</span>.
+<p>For IBM systems, see <samp><span class="file">README.thinkpad</span></samp>.
 
 <div class="node">
 <p><hr>
-<a name="Section-4_002e33"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e32">Section 4.32</a>,
+<a name="Section-4.33"></a>
+<a name="Section-4_002e33"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e32">Section 4.32</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-<br>
+
 </div>
 
 <h3 class="section">4.33 Problems on 2.6 kernels</h3>
@@ -1760,22 +1870,23 @@ libsensors grab the relevant sensors information in /sys. In particular:
 (I2C/SMBus, ISA or other);
 <li>libsensors will no more list non-hardware monitoring chips. 
 </ul>
-   This explains why EEPROMs are no more displayed by <span class="command">sensors</span>:
+   This explains why EEPROMs are no more displayed by <samp><span class="command">sensors</span></samp>:
 they are no hardware monitoring chips. The medium term plan is to drop
 eeprom support for all Linux 2.6 kernels, as it didn't fit well in
 the library code in the first place.
 
    <p>Note that you can still obtain information about your EEPROMs by using
-the dedicated perl scripts in <span class="file">prog/eeprom</span>: <span class="command">ddcmon</span>,
-<span class="command">decode-dimms.pl</span>, <span class="command">decode-edid.pl</span> and
-<span class="command">decode-vaio.pl</span>.
+the dedicated perl scripts in <samp><span class="file">prog/eeprom</span></samp>: <samp><span class="command">ddcmon</span></samp>,
+<samp><span class="command">decode-dimms.pl</span></samp>, <samp><span class="command">decode-edid.pl</span></samp> and
+<samp><span class="command">decode-vaio.pl</span></samp>.
 
 <div class="node">
 <p><hr>
-<a name="Help"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Contribute">Contribute</a>,
+<a name="Help"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Contribute">Contribute</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Problems">Problems</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-<br>
+
 </div>
 
 <h2 class="chapter">5 How to Ask for Help</h2>
@@ -1794,9 +1905,11 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 
 <div class="node">
 <p><hr>
-<a name="Section-5_002e1"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e2">Section 5.2</a>,
+<a name="Section-5.1"></a>
+<a name="Section-5_002e1"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e2">Section 5.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
-<br>
+
 </div>
 
 <h3 class="section">5.1 What to send us when asking for help</h3>
@@ -1807,8 +1920,7 @@ and not the individual authors,
 unless you have something private to say.
 
    <p>Instead of using email, you can also use the web-based support
-area, at <a href="http://www.lm-sensors.org/wiki/FeedbackAndSupport">
-http://www.lm-sensors.org/wiki/FeedbackAndSupport</a>. You will be helped
+area, at <a href="http://www.lm-sensors.org/wiki/FeedbackAndSupport">http://www.lm-sensors.org/wiki/FeedbackAndSupport</a>. You will be helped
 just as fast, and others may profit from the answer too. You will be
 emailed automatically when your question has been answered.
 
@@ -1816,24 +1928,24 @@ emailed automatically when your question has been answered.
 
      <ul>
 <li>The dmesg or syslog output if applicable
-<li>The output of (as root) <span class="command">prog/detect/sensors-detect</span>
-<li>The output of <span class="command">lsmod</span>
+<li>The output of (as root) <samp><span class="command">prog/detect/sensors-detect</span></samp>
+<li>The output of <samp><span class="command">lsmod</span></samp>
 <li>If a PCI chip problem:
           <ul>
-<li>The output of <span class="command">lspci -n</span>
+<li>The output of <samp><span class="command">lspci -n</span></samp>
 </ul>
      <li>If an I2C sensor chip problem:
           <ul>
-<li>The output of (as root) <span class="command">prog/detect/i2cdetect X</span>
-where X = the bus number (run <span class="command">i2cdetect</span> with no arguments to list the busses)
-(please send this only if it's not all <span class="samp">XX</span>)
-<li>The output of (as root) <span class="command">prog/dump/i2cdump X 0xXX</span>
-where XX = the address of each chip you see in the output of <span class="command">i2cdetect</span>. (run once for each chip)
-(please send this only if it's not all <span class="samp">ff</span>)
+<li>The output of (as root) <samp><span class="command">prog/detect/i2cdetect X</span></samp>
+where X = the bus number (run <samp><span class="command">i2cdetect</span></samp> with no arguments to list the busses)
+(please send this only if it's not all `<samp><span class="samp">XX</span></samp>')
+<li>The output of (as root) <samp><span class="command">prog/dump/i2cdump X 0xXX</span></samp>
+where XX = the address of each chip you see in the output of <samp><span class="command">i2cdetect</span></samp>. (run once for each chip)
+(please send this only if it's not all `<samp><span class="samp">ff</span></samp>')
 </ul>
      <li>If an ISA sensor chip problem:
           <ul>
-<li>The output of (as root) <span class="command">prog/dump/isadump 0x295 0x296</span> (only if it's not all <span class="samp">XX</span>)
+<li>The output of (as root) <samp><span class="command">prog/dump/isadump 0x295 0x296</span></samp> (only if it's not all `<samp><span class="samp">XX</span></samp>')
 </ul>
      <li>Part numbers of chips on your motherboard you think are the sensor chips (look at your motherboard)
 <li>Motherboard type
@@ -1843,49 +1955,55 @@ where XX = the address of each chip you see in the output of <span class="comman
 
 <div class="node">
 <p><hr>
-<a name="Section-5_002e2"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e3">Section 5.3</a>,
+<a name="Section-5.2"></a>
+<a name="Section-5_002e2"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e3">Section 5.3</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e1">Section 5.1</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
-<br>
+
 </div>
 
 <h3 class="section">5.2 What to do if a module won't insert?</h3>
 
-<p>Did you use <span class="command">modprobe</span> instead of <span class="command">insmod</span>??? Don't use insmod.
+<p>Did you use <samp><span class="command">modprobe</span></samp> instead of <samp><span class="command">insmod</span></samp>??? Don't use insmod.
 
-   <p>Were there unresolved symbols? Did you run <span class="command">depmod -a</span>? Run
-<span class="command">depmod -a -e</span> to see where the symbol problem is.
+   <p>Were there unresolved symbols? Did you run <samp><span class="command">depmod -a</span></samp>? Run
+<samp><span class="command">depmod -a -e</span></samp> to see where the symbol problem is.
 
-   <p>ALWAYS inspect the output of <span class="command">dmesg</span>. That's where the error
-messages come out!!! Don't rely on the generic message from <span class="command">modprobe</span>. 
+   <p>ALWAYS inspect the output of <samp><span class="command">dmesg</span></samp>. That's where the error
+messages come out!!! Don't rely on the generic message from <samp><span class="command">modprobe</span></samp>. 
 If you still can't figure it out, send us the information
 listed above.
 
 <div class="node">
 <p><hr>
-<a name="Section-5_002e3"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e4">Section 5.4</a>,
+<a name="Section-5.3"></a>
+<a name="Section-5_002e3"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e4">Section 5.4</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e2">Section 5.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
-<br>
+
 </div>
 
 <h3 class="section">5.3 What to do if it inserts, but nothing happens?</h3>
 
-<p>For an ISA sensor chip, did you also <span class="command">modprobe i2c-isa</span>? It must be inserted.
+<p>For an ISA sensor chip, did you also <samp><span class="command">modprobe i2c-isa</span></samp>? It must be inserted.
 
-   <p>For an I2C sensor chip, did you also <span class="command">modprobe i2c-xxx</span> where xxx is your
+   <p>For an I2C sensor chip, did you also <samp><span class="command">modprobe i2c-xxx</span></samp> where xxx is your
 I2C bus adapter? It must be inserted.
 
-   <p>Always inspect the output of <span class="command">dmesg</span>. That's where the error
+   <p>Always inspect the output of <samp><span class="command">dmesg</span></samp>. That's where the error
 messages come out. If you still can't figure it out, send us the information
 listed above.
 
 <div class="node">
 <p><hr>
-<a name="Section-5_002e4"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e5">Section 5.5</a>,
+<a name="Section-5.4"></a>
+<a name="Section-5_002e4"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e5">Section 5.5</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e3">Section 5.3</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
-<br>
+
 </div>
 
 <h3 class="section">5.4 What to do if I read only bogus information?</h3>
@@ -1898,10 +2016,12 @@ please send us the usual information (see <a href="#Help">Help</a>)
 
 <div class="node">
 <p><hr>
-<a name="Section-5_002e5"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e6">Section 5.6</a>,
+<a name="Section-5.5"></a>
+<a name="Section-5_002e5"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e6">Section 5.6</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e4">Section 5.4</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
-<br>
+
 </div>
 
 <h3 class="section">5.5 What to do if you have other problems?</h3>
@@ -1910,10 +2030,12 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
 
 <div class="node">
 <p><hr>
-<a name="Section-5_002e6"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e7">Section 5.7</a>,
+<a name="Section-5.6"></a>
+<a name="Section-5_002e6"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e7">Section 5.7</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e5">Section 5.5</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
-<br>
+
 </div>
 
 <h3 class="section">5.6 What if it just works like a charm?</h3>
@@ -1923,10 +2045,12 @@ detected chip type. That way, we have some positive feedback, too!
 
 <div class="node">
 <p><hr>
-<a name="Section-5_002e7"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e8">Section 5.8</a>,
+<a name="Section-5.7"></a>
+<a name="Section-5_002e7"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e8">Section 5.8</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e6">Section 5.6</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
-<br>
+
 </div>
 
 <h3 class="section">5.7 How do I update a ticket?</h3>
@@ -1938,10 +2062,12 @@ follow-up information, email us instead. Thanks.
 
 <div class="node">
 <p><hr>
-<a name="Section-5_002e8"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e9">Section 5.9</a>,
+<a name="Section-5.8"></a>
+<a name="Section-5_002e8"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-5_002e9">Section 5.9</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e7">Section 5.7</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
-<br>
+
 </div>
 
 <h3 class="section">5.8 How do I follow up on a ticket?</h3>
@@ -1951,9 +2077,11 @@ and reference your ticket number in the subject.
 
 <div class="node">
 <p><hr>
-<a name="Section-5_002e9"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e8">Section 5.8</a>,
+<a name="Section-5.9"></a>
+<a name="Section-5_002e9"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-5_002e8">Section 5.8</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Help">Help</a>
-<br>
+
 </div>
 
 <h3 class="section">5.9 Why did you decide not to support undocumented chips?</h3>
@@ -2026,17 +2154,18 @@ driver, we will apply it. This generic code is unlikely to cause trouble.
 
 <div class="node">
 <p><hr>
-<a name="Contribute"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Document-Revisions">Document Revisions</a>,
+<a name="Contribute"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Document-Revisions">Document Revisions</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Help">Help</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-<br>
+
 </div>
 
 <h2 class="chapter">6 How to Contribute</h2>
 
 <ul class="menu">
 <li><a accesskey="1" href="#Section-6_002e1">Section 6.1</a>:   How to write a driver
-<li><a accesskey="2" href="#Section-6_002e2">Section 6.2</a>:   How to get CVS access
+<li><a accesskey="2" href="#Section-6_002e2">Section 6.2</a>:   How to get SVN access
 <li><a accesskey="3" href="#Section-6_002e3">Section 6.3</a>:   How to donate hardware to the project
 <li><a accesskey="4" href="#Section-6_002e4">Section 6.4</a>:   How to join the project mailing list
 <li><a accesskey="5" href="#Section-6_002e5">Section 6.5</a>:   How to access mailing list archives
@@ -2047,52 +2176,56 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 
 <div class="node">
 <p><hr>
-<a name="Section-6_002e1"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e2">Section 6.2</a>,
+<a name="Section-6.1"></a>
+<a name="Section-6_002e1"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e2">Section 6.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
-<br>
+
 </div>
 
 <h3 class="section">6.1 How to write a driver</h3>
 
-<p>See <span class="file">doc/developers/new_drivers</span> in our package for instructions.
+<p>See <samp><span class="file">doc/developers/new_drivers</span></samp> in our package for instructions.
 
 <div class="node">
 <p><hr>
-<a name="Section-6_002e2"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e3">Section 6.3</a>,
+<a name="Section-6.2"></a>
+<a name="Section-6_002e2"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e3">Section 6.3</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-6_002e1">Section 6.1</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
-<br>
+
 </div>
 
-<h3 class="section">6.2 How to get CVS access</h3>
+<h3 class="section">6.2 How to get SVN access</h3>
 
-<p>For anonymous CVS read access, see the instructions on our
-<a href="http://www2.lm-sensors.nu/~lm78/download.html#cvs">download page</a>. 
-Alternatively, <a href="http://www2.lm-sensors.nu/~lm78/download.html#snapshots">nightly snapshots</a>
-of the CVS repositories are available.
+<p>For anonymous SVN read access, see the instructions on our
+<a href="http://www.lm-sensors.org/wiki/Download">download page</a>.
 
-   <p>For write access, run the script <span class="command">doc/developers/genpasswd.pl</span> in
-our package and follow the instructions. Let us know what part
-of the package you would like to work on.
+   <p>For write access, please contact us.
 
 <div class="node">
 <p><hr>
-<a name="Section-6_002e3"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e4">Section 6.4</a>,
+<a name="Section-6.3"></a>
+<a name="Section-6_002e3"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e4">Section 6.4</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-6_002e2">Section 6.2</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
-<br>
+
 </div>
 
 <h3 class="section">6.3 How to donate hardware to the project</h3>
 
-<p><a href="http://www2.lm-sensors.nu/~lm78/author.html#contact">Contact us</a>.
+<p><a href="http://www.lm-sensors.org/wiki/FeedbackAndSupport">Contact us</a>.
 
 <div class="node">
 <p><hr>
-<a name="Section-6_002e4"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e5">Section 6.5</a>,
+<a name="Section-6.4"></a>
+<a name="Section-6_002e4"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e5">Section 6.5</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-6_002e3">Section 6.3</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
-<br>
+
 </div>
 
 <h3 class="section">6.4 How to join the project mailing lists</h3>
@@ -2108,10 +2241,12 @@ for watching the changes made to the CVS repositories. This list is read-only.
 
 <div class="node">
 <p><hr>
-<a name="Section-6_002e5"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e6">Section 6.6</a>,
+<a name="Section-6.5"></a>
+<a name="Section-6_002e5"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e6">Section 6.6</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-6_002e4">Section 6.4</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
-<br>
+
 </div>
 
 <h3 class="section">6.5 How to access mailing list archives</h3>
@@ -2134,25 +2269,29 @@ It contains messages from October 28, 2001 through May 16, 2005.
 
 <div class="node">
 <p><hr>
-<a name="Section-6_002e6"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e7">Section 6.7</a>,
+<a name="Section-6.6"></a>
+<a name="Section-6_002e6"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e7">Section 6.7</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-6_002e5">Section 6.5</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
-<br>
+
 </div>
 
 <h3 class="section">6.6 How to submit a patch</h3>
 
 <p>Check out the latest from CVS, then copy the directory to another
 directory, and make your changes. Generate the diff with
-<span class="command">diff -u2 -r DIR1 DIR2</span>. Or you can generate the diff in CVS with
-<span class="command">cvs diff -u2</span>. Send us the patch in an email and tell us what it does.
+<samp><span class="command">diff -u2 -r DIR1 DIR2</span></samp>. Or you can generate the diff in CVS with
+<samp><span class="command">cvs diff -u2</span></samp>. Send us the patch in an email and tell us what it does.
 
 <div class="node">
 <p><hr>
-<a name="Section-6_002e7"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e8">Section 6.8</a>,
+<a name="Section-6.7"></a>
+<a name="Section-6_002e7"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Section-6_002e8">Section 6.8</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-6_002e6">Section 6.6</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
-<br>
+
 </div>
 
 <h3 class="section">6.7 How to REALLY help</h3>
@@ -2172,9 +2311,11 @@ and we'll help you help us.
 
 <div class="node">
 <p><hr>
-<a name="Section-6_002e8"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-6_002e7">Section 6.7</a>,
+<a name="Section-6.8"></a>
+<a name="Section-6_002e8"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-6_002e7">Section 6.7</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Contribute">Contribute</a>
-<br>
+
 </div>
 
 <h3 class="section">6.8 How to get release announcements</h3>
@@ -2187,9 +2328,10 @@ will email you announcement.
 
 <div class="node">
 <p><hr>
-<a name="Document-Revisions"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Contribute">Contribute</a>,
+<a name="Document-Revisions"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Contribute">Contribute</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-<br>
+
 </div>
 
 <h2 class="appendix">Appendix A Revision History of This Document</h2>

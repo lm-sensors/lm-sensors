@@ -120,7 +120,7 @@ lm_sensors
   5.9 Why did you decide not to support undocumented chips?
 6 How to Contribute
   6.1 How to write a driver
-  6.2 How to get CVS access
+  6.2 How to get SVN access
   6.3 How to donate hardware to the project
   6.4 How to join the project mailing lists
   6.5 How to access mailing list archives
@@ -192,9 +192,8 @@ selection of sensor chips. Their websites are:
 
    * `http://www.national.com'
 
-   Please see the file
-`http://www2.lm-sensors.nu/~lm78/useful_addresses.html' for links to
-other companies' websites.
+   Please see the file `http://www.lm-sensors.org/wiki/UsefulLinks' for
+links to other companies' websites.
 
 2 Sensor and Bus Basics
 ***********************
@@ -358,9 +357,8 @@ for candidates, then *note Help::)
 
   4. Check the Motherboard Monitor (http://mbm.livewiredev.com/)
      website and the "links"
-     (http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/doc/useful_addresses.html)
-     page on our website (http://www2.lm-sensors.nu/~lm78/) some good
-     cross-references.
+     (http://www.lm-sensors.org/wiki/UsefulLinks) page on our website
+     (http://www.lm-sensors.org) some good cross-references.
 
 3.2.2 Do you support motherboard XYZ?
 -------------------------------------
@@ -375,17 +373,17 @@ This we have good answers for.
    * Sorted by Manufacturer:   `README'
 
    * Sorted by Manufacturer:
-     `http://www2.lm-sensors.nu/~lm78/supported.html'
+     `http://www.lm-sensors.org/wiki/SupportedDevices'
 
    * Sorted by Sensor Driver:  `doc/chips/SUMMARY'
 
    * Newest Driver Status:
-     `http://www2.lm-sensors.nu/~lm78/newdrivers.html'
+     `http://www.lm-sensors.org/wiki/NewDrivers'
 
 3.2.4 Anybody working on a driver for chip XYZ?
 -----------------------------------------------
 
-Newest Driver Status: `http://www2.lm-sensors.nu/~lm78/newdrivers.html'
+Newest Driver Status: `http://www.lm-sensors.org/wiki/NewDrivers'
 
 3.3 Which modules should I insert?
 ==================================
@@ -738,7 +736,7 @@ Linux might be quite hard to do.
 which alerts you if an alarm is raised. I am not aware of any program
 which does the job, though you might want to examine one of the
 graphical monitor programs under X, see
-`http://www2.lm-sensors.nu/~lm78/useful_addresses.html' for addresses.
+`http://www.lm-sensors.org/wiki/UsefulLinks' for addresses.
 
 4.11 SMBus transactions on my PIIX4 simply don't work (timeouts happen).  Why?
 ==============================================================================
@@ -1100,8 +1098,8 @@ Either
      website.
 
    When you know what chips you have, check the Newest Driver Status
-(http://www2.lm-sensors.nu/~lm78/newdrivers.html) web page to see if
-support has been added for your chip in a later release or in CVS.
+(http://www.lm-sensors.org/wiki/NewDrivers) web page to see if support
+has been added for your chip in a later release or in CVS.
 
 4.25 Sensors says `Error: Line xxx: zzzzzzz'
 ============================================
@@ -1272,9 +1270,9 @@ Post your question to our discussion list
 individual authors, unless you have something private to say.
 
    Instead of using email, you can also use the web-based support area,
-at `http://www.lm-sensors.org/wiki/FeedbackAndSupport'. You will be helped
-just as fast, and others may profit from the answer too. You will be
-emailed automatically when your question has been answered.
+at `http://www.lm-sensors.org/wiki/FeedbackAndSupport'. You will be
+helped just as fast, and others may profit from the answer too. You
+will be emailed automatically when your question has been answered.
 
    Here's what you should send us:
 
@@ -1448,23 +1446,18 @@ cause trouble.
 
 See `doc/developers/new_drivers' in our package for instructions.
 
-6.2 How to get CVS access
+6.2 How to get SVN access
 =========================
 
-For anonymous CVS read access, see the instructions on our download
-page (http://www2.lm-sensors.nu/~lm78/download.html#cvs).
-Alternatively, nightly snapshots
-(http://www2.lm-sensors.nu/~lm78/download.html#snapshots) of the CVS
-repositories are available.
+For anonymous SVN read access, see the instructions on our download
+page (http://www.lm-sensors.org/wiki/Download).
 
-   For write access, run the script `doc/developers/genpasswd.pl' in
-our package and follow the instructions. Let us know what part of the
-package you would like to work on.
+   For write access, please contact us.
 
 6.3 How to donate hardware to the project
 =========================================
 
-Contact us (http://www2.lm-sensors.nu/~lm78/author.html#contact).
+Contact us (http://www.lm-sensors.org/wiki/FeedbackAndSupport).
 
 6.4 How to join the project mailing lists
 =========================================

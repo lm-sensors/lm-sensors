@@ -118,7 +118,7 @@ of sensor chips. Their websites are:
   @item @uref{http://www.national.com}
 @end itemize
 
-Please see the file @uref{http://www2.lm-sensors.nu/~lm78/useful_addresses.html}
+Please see the file @uref{http://www.lm-sensors.org/wiki/UsefulLinks}
 for links to other companies' websites.
 
 
@@ -318,8 +318,8 @@ If that doesn't work:
 @item Look at your motherboard.
 @item Check the manufacturer's website or ask their support
 @item Check the @uref{http://mbm.livewiredev.com/, Motherboard Monitor} website and the
-@uref{http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/doc/useful_addresses.html, "links"}
-page on @uref{http://www2.lm-sensors.nu/~lm78/, our website} some good cross-references.
+@uref{http://www.lm-sensors.org/wiki/UsefulLinks, "links"}
+page on @uref{http://www.lm-sensors.org, our website} some good cross-references.
 @end enumerate
 
 
@@ -335,16 +335,16 @@ We don't support boards, we support chips. @xref{Section 3.2.1, What chips are o
 This we have good answers for.
 @itemize
 @item Sorted by Manufacturer:   @file{README}
-@item Sorted by Manufacturer:   @uref{http://www2.lm-sensors.nu/~lm78/supported.html}
+@item Sorted by Manufacturer:   @uref{http://www.lm-sensors.org/wiki/SupportedDevices}
 @item Sorted by Sensor Driver:  @file{doc/chips/SUMMARY}
-@item Newest Driver Status:     @uref{http://www2.lm-sensors.nu/~lm78/newdrivers.html}
+@item Newest Driver Status:     @uref{http://www.lm-sensors.org/wiki/NewDrivers}
 @end itemize
 
 
 @anchor{Section 3.2.4}
 @subsection Anybody working on a driver for chip XYZ?
 
-Newest Driver Status: @uref{http://www2.lm-sensors.nu/~lm78/newdrivers.html}
+Newest Driver Status: @uref{http://www.lm-sensors.org/wiki/NewDrivers}
 
 
 @node Section 3.3, Section 3.4, Section 3.2, Installation
@@ -759,7 +759,7 @@ might be quite hard to do.
 Your best bet would be to poll the alarm file with a user-land daemon
 which alerts you if an alarm is raised. I am not aware of any program which
 does the job, though you might want to examine one of the graphical monitor
-programs under X, see @uref{http://www2.lm-sensors.nu/~lm78/useful_addresses.html} for addresses.
+programs under X, see @uref{http://www.lm-sensors.org/wiki/UsefulLinks} for addresses.
 
 
 @node Section 4.11, Section 4.12, Section 4.10, Problems
@@ -1131,7 +1131,7 @@ But in any case you should figure out what is on the board:
 @end enumerate
 
 When you know what chips you have, check the
-@uref{http://www2.lm-sensors.nu/~lm78/newdrivers.html, Newest Driver Status} web page to
+@uref{http://www.lm-sensors.org/wiki/NewDrivers, Newest Driver Status} web page to
 see if support has been added for your chip in a later release or in CVS.
 
 
@@ -1490,7 +1490,7 @@ driver, we will apply it. This generic code is unlikely to cause trouble.
 
 @menu
 * Section 6.1::  How to write a driver
-* Section 6.2::  How to get CVS access
+* Section 6.2::  How to get SVN access
 * Section 6.3::  How to donate hardware to the project
 * Section 6.4::  How to join the project mailing list
 * Section 6.5::  How to access mailing list archives
@@ -1507,22 +1507,18 @@ See @file{doc/developers/new_drivers} in our package for instructions.
 
 
 @node Section 6.2, Section 6.3, Section 6.1, Contribute
-@section How to get CVS access
+@section How to get SVN access
 
-For anonymous CVS read access, see the instructions on our
-@uref{http://www2.lm-sensors.nu/~lm78/download.html#cvs, download page}.
-Alternatively, @uref{http://www2.lm-sensors.nu/~lm78/download.html#snapshots, nightly snapshots}
-of the CVS repositories are available.
+For anonymous SVN read access, see the instructions on our
+@uref{http://www.lm-sensors.org/wiki/Download, download page}.
 
-For write access, run the script @command{doc/developers/genpasswd.pl} in
-our package and follow the instructions. Let us know what part
-of the package you would like to work on.
+For write access, please contact us.
 
 
 @node Section 6.3, Section 6.4, Section 6.2, Contribute
 @section How to donate hardware to the project
 
-@uref{http://www2.lm-sensors.nu/~lm78/author.html#contact, Contact us}.
+@uref{http://www.lm-sensors.org/wiki/FeedbackAndSupport, Contact us}.
 
 
 @node Section 6.4, Section 6.5, Section 6.3, Contribute

@@ -5417,8 +5417,8 @@ sub main
     print "\n Sorry, no chips were detected.\n",
         " Either your sensors are not supported, or they are\n",
 	" connected to an I2C bus adapter that we do not support.\n",
-	" See doc/FAQ, doc/lm_sensors-FAQ.html, or\n",
-	" http://www2.lm-sensors.nu/~lm78/cvs/lm_sensors2/doc/lm_sensors-FAQ.html\n",
+	" See doc/FAQ, doc/lm_sensors-FAQ.html, and\n",
+	" http://www.lm-sensors.org/wiki/FAQ\n",
 	" (FAQ #4.24.3) for further information.\n",
 	" If you find out what chips are on your board, see\n",
 	" http://www.lm-sensors.org/wiki/NewDrivers for driver status.\n";
