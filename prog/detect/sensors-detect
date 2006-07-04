@@ -2191,7 +2191,7 @@ sub initialize_conf
   if (!$use_udev) {
     # Try some known default udev db locations, just in case
     if (-e '/dev/.udev.tdb' || -e '/dev/.udev'
-     || -e '/dev/.udevdb' || -e '/dev/.udevdb') {
+     || -e '/dev/.udevdb') {
       $use_udev = 1;
       $dev_i2c = '/dev/i2c-';
     }
