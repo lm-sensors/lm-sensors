@@ -1495,6 +1495,12 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        alias_detect => sub { ite_alias_detect 0, @_ },
      },
      {
+       name => "ITE IT8716F",
+       driver => "to-be-tested",
+       isa_addrs => [0x290],
+       isa_detect => sub { ite_isa_detect 2, @_ },
+     },
+     {
        name => "ITE IT8705F / SiS 950",
        driver => "it87",
        isa_addrs => [0x290],
@@ -1733,6 +1739,12 @@ $chip_kern26_w83791d = {
 	devid => 0x8712,
 	logdev => 0x04,
 	alias_detect => sub { ite_alias_detect 0, @_ },
+      },
+      {
+	name => "ITE IT8716F Super IO Sensors",
+	driver => "to-be-tested",
+	devid => 0x8716,
+	logdev => 0x04,
       },
     ],
   },
@@ -4324,7 +4336,7 @@ sub ite_overclock_detect
 #   0x00: Configuration
 #   0x48: Full I2C Address
 #   0x58: Mfr ID
-#   0x5b: Device ID (IT8712F only)
+#   0x5b: Device ID (not on IT8705)
 # Note that this function is always called through a closure, so the
 # arguments are shifted by one place.
 sub ite_detect
@@ -4338,32 +4350,41 @@ sub ite_detect
   return (7 + ($addr == 0x2d));
 }
 
-# $_[0]: Chip to detect (0 = IT8712F, 1 = IT8705F/SiS950)
+# $_[0]: Chip to detect (0 = IT8712F, 1 = IT8705F/SiS950, 2 = IT8716F)
 # $_[1]: Address
 # Returns: undef if not detected, 7 or 8 if detected (tops LM78).
 # Registers used:
 #   0x00: Configuration
 #   0x48: Full I2C Address (IT8712F only)
 #   0x58: Mfr ID
-#   0x5b: Device ID (IT8712F only)
+#   0x5b: Device ID (not IT8705F)
 # Note: Only address 0x290 is scanned at this moment.
 sub ite_isa_detect
 {
   my ($chip,$addr) = @_ ;
-  my $val = inb ($addr + 1);
-  return if inb ($addr + 2) != $val or inb ($addr + 3) != $val or 
-            inb ($addr + 7) != $val;
+  my $val;
 
-  $val = inb($addr + 5) & 0x7f;
-  outb($addr+5, ~$val & 0xff);
-  if ((inb ($addr+5) & 0x7f) != (~ $val & 0x7f)) {
-    outb($addr+5,$val);
-    return;
+  if ($chip == 2) {
+	$val = inb ($addr + 6);
+	return if inb ($addr + 4) != $val or inb ($addr + 6) != $val or 
+		  inb ($addr + 7) != $val;
+  } else {
+	  $val = inb ($addr + 1);
+	  return if inb ($addr + 2) != $val or inb ($addr + 3) != $val or 
+		    inb ($addr + 7) != $val;
+	  $val = inb($addr + 5) & 0x7f;
+	  outb($addr+5, ~$val & 0xff);
+	  if ((inb ($addr+5) & 0x7f) != (~ $val & 0x7f)) {
+		outb($addr+5,$val);
+		return;
+	}
   }
+
   my $readproc = sub { isa_read_byte $addr + 5, $addr + 6, @_ };
   return unless (&$readproc(0x00) & 0x90) == 0x10;
   return unless &$readproc(0x58) == 0x90;
   return if $chip == 0 and &$readproc(0x5b) != 0x12;
+  return if $chip == 2 and &$readproc(0x5b) != 0x12;
   return if $chip == 1 and &$readproc(0x5b) == 0x12;
 
   # Explcitely prevents misdetection of W83627THF
