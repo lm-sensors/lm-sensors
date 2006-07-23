@@ -4,6 +4,7 @@ lm_sensors CHANGES file
 2.10.1 (2006????)
   File doc/busses/i2c-piix4: Update (2.6 backport)
   File etc/sensors.conf.eg: Add an smsc47m192 section
+                            Comment out all set statements
   Library: Fix device scan when no i2c support is present
            Add support for W83627EHF voltage inputs and alarms
            Add support for the smsc47m192 driver
