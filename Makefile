@@ -279,7 +279,7 @@ LIBCPPFLAGS := $(LIBCPPFLAGS) -DSYSFS_SUPPORT
 endif
 LIBCFLAGS := -fpic $(ALL_CFLAGS)
 
-.PHONY: all clean install version package dep
+.PHONY: all clean install version package
 
 # Make all the default rule
 all::
@@ -293,7 +293,7 @@ ifneq ($(MAKECMDGOALS),user_uninstall)
 ifneq ($(MAKECMDGOALS),help)
 ifneq ($(MAKECMDGOALS),package)
 ifneq ($(MAKECMDGOALS),userpackage)
-include $(INCLUDEFILES)
+-include $(INCLUDEFILES)
 endif
 endif
 endif
@@ -304,9 +304,6 @@ endif
 # Man pages
 MANPAGES := $(LIBMAN3FILES) $(LIBMAN5FILES) $(PROGDETECTMAN8FILES) $(PROGDUMPMAN8FILES) \
             $(PROGSENSORSMAN1FILES) $(PROGPWMMAN8FILES) prog/sensord/sensord.8
-
-# Making the dependency files - done automatically!
-dep : 
 
 user ::
 user_install::
@@ -395,7 +392,6 @@ help:
 	@echo '  user_uninstall: remove userspace programs'
 	@echo '  clean: cleanup'
 	@echo '  package: create a distribution package'
-	@echo 'Note: make dep is automatic'
 
 $(LINUX)/.config:
 	@echo
@@ -429,7 +425,7 @@ manhtml:
 
 .SUFFIXES:
 
-# We need to create dependency files. Tricky. We sed rule puts dir/file.d and
+# We need to create dependency files. Tricky. The sed rule puts dir/file.d and
 # dir/file.c in front of the dependency file rule.
 
 # .o files are used for modules

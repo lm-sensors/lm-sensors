@@ -24,10 +24,6 @@ There are several interesting targets defined through this Makefile:
     any other target).
   * clean-i2c, clean-src, ...
     Remove anything which can be regenerated from the designated directory.
-  * dep
-    Do nothing, but generate any missing .d files. The command
-    'make clean && make dep' canbe useful in this case ('make clean dep' 
-    will not work, due to technical reasons!).
   * version
     Regenerate version.h, using the current date for the date-stamp, and
     a user-supplied version number.

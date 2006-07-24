@@ -11,7 +11,8 @@ lm_sensors CHANGES file
            Fix all memory leaks (yeah!)
            Fix no sensors being reported as an error
   Makefile: Don't grep autoconf.h on user-space targets
-  Makefile: Fix depmod on non-running kernel version
+            Fix depmod on non-running kernel version
+            Silent errors on missing dependency files
   Module i2c-ali1535: Drop redundant semaphore (2.6 backport)
   Module i2c-amd756-s4882: Improve static semaphore initialization
                            (2.6 backport)
