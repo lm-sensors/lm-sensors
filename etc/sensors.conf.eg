@@ -2283,8 +2283,6 @@ chip "asb100-*"
 #
 chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
 
-#   set temp1_max 50
-
 # Voltage inputs
    label in0   "V1.5"      # AGP on Intel S845WD1-E
    label in1   "VCore"
