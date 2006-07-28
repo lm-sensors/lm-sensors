@@ -5479,6 +5479,13 @@ sub main
       print "  Misdetects:\n";
       print_chips_report $chip->{misdetected};
     }
+
+    # People are easily confused
+    if ($chip->{driver} eq "eeprom") {
+      print "\n  EEPROMs are *NOT* sensors! They are data storage chips commonly\n",
+            "  found on memory modules (SPD), in monitors (EDID), or in some\n",
+            "  laptops, for example.\n";
+    }
   }
 
   print "\n\n",
