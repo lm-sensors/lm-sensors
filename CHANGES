@@ -53,6 +53,7 @@ lm_sensors CHANGES file
                           Handle the W83791D driver difference between kernels
                           Add nForce4 MCP04, MCP51 and MCP55 detection
                           Add AMD Geode devices detection
+                          Add NatSemi/Winbond PC87427 detection
 
 
 2.10.0 (20060214)

@@ -1855,11 +1855,16 @@ $chip_kern26_w83791d = {
 	devid => 0xee,
       },
       {
-	# This one actually has sensors but we don't know the logical
-	# device number(s) yet
-	name => "Nat. Semi. PC87427 Super IO",
-	driver => "not-a-sensor",
+	name => "Nat. Semi. PC87427 Super IO Fan Sensors",
+	driver => "to-be-written",
 	devid => 0xf2,
+	logdev => 0x08,
+      },
+      {
+	name => "Nat. Semi. PC87427 Super IO Health Sensors",
+	driver => "to-be-written",
+	devid => 0xf2,
+	logdev => 0x14,
       },
     ],
   },
