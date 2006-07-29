@@ -31,6 +31,7 @@ require 5.004;
 use strict;
 use Fcntl;
 use POSIX;
+use File::Basename;
 
 # Just in case a root user doesn't have /sbin in his/her path for some reason
 # (was seen once)
@@ -2175,7 +2176,7 @@ sub isa_write_byte
 # AUTODETECTION #
 #################
 
-use vars qw($modules_conf $dev_i2c);
+use vars qw($modules_conf $dev_i2c $sysfs_root);
 
 sub initialize_conf
 {
@@ -2186,7 +2187,9 @@ sub initialize_conf
     if (m@^\w+ /dev devfs @) {
       $use_devfs = 1;
       $dev_i2c = '/dev/i2c/';
-      last;
+    }
+    if (m@^\S+ (/\w+) sysfs @) {
+      $sysfs_root = $1;
     }
   }
   close INPUTFILE;
@@ -2260,7 +2263,7 @@ sub kernel_version_at_least
 # MODULES #
 ###########
 
-use vars qw(%modules_list);
+use vars qw(%modules_list %modules_supported);
 
 sub initialize_modules_list
 {
@@ -2270,6 +2273,42 @@ sub initialize_modules_list
     tr/_/-/;
     $modules_list{$1} = 1 if m/^(\S*)/;
   }
+}
+
+sub initialize_modules_supported
+{
+  foreach my $chip (@chip_ids) {
+    $modules_supported{$chip->{driver}}++;
+  }
+}
+
+#################
+# SYSFS HELPERS #
+#################
+
+# From a sysfs device path, return the driver name, or undef
+sub sysfs_device_driver($)
+{
+  my $device = shift;
+  
+  my $link = readlink("$device/driver");
+  return unless defined $link;
+  return basename($link);
+}
+
+# From a sysfs device path and an attribute name, return the attribute
+# value, or undef
+sub sysfs_device_attribute($$)
+{
+  my ($device, $attr) = @_;
+  my $value;
+
+  open(local *FILE, "$device/$attr") or return;
+  return unless defined($value = <FILE>);
+  close(FILE);
+
+  chomp($value);
+  return $value;
 }
 
 ##############
@@ -2798,8 +2837,47 @@ sub scan_adapter
       next;
     }
 
-    i2c_set_slave_addr(\*FILE,$addr) or 
-        printf("Client at address 0x%02x can not be probed - unload all client drivers first!\n",$addr), next;
+    if (!i2c_set_slave_addr(\*FILE, $addr)) {
+      # If the address is busy, in Linux 2.6 we can find out which driver
+      # is using it, and we assume it is the right one. In Linux 2.4 we
+      # just give up and warn the user.
+      my ($device, $driver);
+      if (defined($sysfs_root)) {
+        $device = sprintf("/sys/bus/i2c/devices/\%d-\%04x",
+                             $adapter_nr, $addr);
+        $driver = sysfs_device_driver($device);
+      }
+      if (defined($driver)) {
+        $new_hash = {
+          conf => 6, # Arbitrary confidence
+          i2c_addr => $addr,
+          chipname => sysfs_device_attribute($device, "name") || "unknown",
+          i2c_adap => $adapter_name,
+          i2c_driver => $adapter_driver,
+          i2c_devnr => $adapter_nr,
+        };
+        $new_hash->{i2c_extra} = 0 
+            if exists $chip->{i2c_driver_addrs} and
+               not contains($addr, @{$chip->{i2c_driver_addrs}});
+
+        printf "Client found at address 0x\%02x\n", $addr;
+        printf "Handled by driver `\%s' (already loaded), chip type `\%s'\n",
+               $driver, $new_hash->{chipname};
+
+        # Only add it to the list if this is something we would have
+        # detected, else we end up with random i2c chip drivers listed
+        # (for example media/video drivers.)
+        if (exists $modules_supported{$driver}) {
+          add_i2c_to_chips_detected($driver, $new_hash);
+        } else {
+          print "    (note: this is NOT a sensor chip!)\n";
+        }    
+      } else {
+        printf("Client at address 0x%02x can not be probed - ".
+               "unload all client drivers first!\n", $addr);
+      }
+      next;
+    }
 
     next unless i2c_probe(\*FILE, $addr);
     printf "Client found at address 0x%02x\n",$addr;
@@ -5284,6 +5362,7 @@ sub main
   initialize_conf;
   initialize_proc_pci;
   initialize_modules_list;
+  initialize_modules_supported;
   initialize_kernel_version;
 
   print "# sensors-detect revision $revision\n";

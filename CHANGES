@@ -54,6 +54,8 @@ lm_sensors CHANGES file
                           Add nForce4 MCP04, MCP51 and MCP55 detection
                           Add AMD Geode devices detection
                           Add NatSemi/Winbond PC87427 detection
+                          Get driver information for busy addresses from
+                           sysfs (2.6 only)
 
 
 2.10.0 (20060214)
