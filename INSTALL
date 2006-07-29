@@ -317,7 +317,7 @@ number %d. The script prog/mkdev/mkdev.sh will create the files for you.
 There is a special scanning program installed called sensors-detect. It
 will scan all available I2C and SMBus adapters for all known devices,
 and give you a list of what modules you need to insert. It is written in
-Perl, and you will need at least Perl 5.004 to run it succesfully.
+Perl, and you will need at least Perl 5.004 to run it successfully.
 
 If `sensors' returns some error message about not being able to load
 libsensors, you have to add the directory in which it is installed

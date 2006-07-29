@@ -2425,7 +2425,7 @@ sub adapter_pci_detection
   if (! @res) {
     print ("Sorry, no PCI bus adapters found.\n");
   } else {
-    printf ("Probe succesfully concluded.\n");
+    printf ("Probe successfully concluded.\n");
   }
   return @res;
 }
@@ -5407,7 +5407,7 @@ sub main
               print "** Note: rivatv module is available at http://rivatv.sourceforge.net/\n"; 
             }
           } else {
-            print "Module loaded succesfully.\n";
+            print "Module loaded successfully.\n";
           }
         }
       }
@@ -5439,7 +5439,7 @@ sub main
       } elsif (system "modprobe","i2c-dev") {
         print " Loading failed, expect problems later on.\n";
       } else {
-        print " Module loaded succesfully.\n";
+        print " Module loaded successfully.\n";
       }
     }
   }
@@ -5568,7 +5568,7 @@ sub main
   }
 
   print "\n\n",
-        "I will now generate the commands needed to load the I2C modules.\n";
+        "I will now generate the commands needed to load the required modules.\n";
      
   my ($modprobes, $configfile) = generate_modprobes 1;	# 1 == prefer ISA
   print "\nTo make the sensors modules behave correctly, add these lines to\n",
