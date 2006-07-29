@@ -5465,7 +5465,7 @@ sub main
   local $_;
   while (<INPUTFILE>) {
     my ($dev_nr, $type, $adap) = /^i2c-(\d+)\s+(\S+)\s+(.*?) *(\t|$)/;
-    next if ($type eq "dummy");
+    next if ($type eq "dummy" || $type eq "isa");
     print "\n";
     print "Next adapter: $adap\n";
     print "Do you want to scan it? (YES/no/selectively): ";
