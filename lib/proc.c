@@ -160,11 +160,12 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 		getsysname(the_feature, rindex(n, '\0'), &mag, rindex(altn, '\0'));
 		if ((f = fopen(n, "r")) != NULL
 		 || (f = fopen(altn, "r")) != NULL) {
-			fscanf(f, "%lf", value);
+			int res = fscanf(f, "%lf", value);
 			fclose(f);
+			if (res != 1)
+				return -SENSORS_ERR_PROC;
 			for (; mag > 0; mag --)
 				*value /= 10.0;
-			return 0;
 		} else
 			return -SENSORS_ERR_PROC;
 	} else {
