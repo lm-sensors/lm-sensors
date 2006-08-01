@@ -156,8 +156,8 @@ int confirm(const char *filename, int address, int size, int daddress, int pec)
 
 	fprintf(stderr, "Continue? [%s] ", dont ? "y/N" : "Y/n");
 	fflush(stderr);
-	fgets(s, 2, stdin);
-	if ((s[0] != '\n' || dont) && s[0] != 'y' && s[0] != 'Y') {
+	if (!fgets(s, 2, stdin)
+	 || ((s[0] != '\n' || dont) && s[0] != 'y' && s[0] != 'Y')) {
 		fprintf(stderr, "Aborting on user request.\n");
 		return 0;
 	}

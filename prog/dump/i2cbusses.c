@@ -177,9 +177,14 @@ found:
 			int i2cbus;
 			enum adt type;
 			char	x[120];
+			char *px;
 
-			fgets(x, 120, f);
+			px = fgets(x, 120, f);
 			fclose(f);
+			if (!px) {
+				fprintf(stderr, "%s: read error\n", n);
+				continue;
+			}
 			if((border = index(x, '\n')) != NULL)
 				*border = 0;
 			if(count++ == 0 && !procfmt)

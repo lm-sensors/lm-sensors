@@ -179,8 +179,8 @@ int main(int argc, char *argv[])
 
 		fprintf(stderr, "Continue? [Y/n] ");
 		fflush(stderr);
-		fgets(s, 2, stdin);
-		if (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y') {
+		if (!fgets(s, 2, stdin)
+		 || (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y')) {
 			fprintf(stderr, "Aborting on user request.\n");
 			exit(0);
 		}
@@ -234,8 +234,8 @@ int main(int argc, char *argv[])
 
 			fprintf(stderr, "Continue? [Y/n] ");
 			fflush(stderr);
-			fgets(s, 2, stdin);
-			if (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y') {
+			if (!fgets(s, 2, stdin)
+			 || (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y')) {
 				fprintf(stderr, "Aborting on user request.\n");
 				exit(0);
 			}
