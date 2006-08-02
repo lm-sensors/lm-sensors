@@ -983,15 +983,11 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #      Put in exactly "use-isa-instead" if no i2c driver will be written.
 #  i2c_addrs (optional): For I2C chips, the range of valid I2C addresses to
 #      probe. Recommend avoiding 0x69 because of clock chips.
-#  i2c_driver_addrs (optional): For I2C chips, the range of valid I2C
-#      addresses probed by the kernel driver. Strictly optional.
 #  i2c_detect (optional): For I2C chips, the function to call to detect
 #      this chip. The function should take two parameters: an open file
 #      descriptor to access the bus, and the I2C address to probe.
 #  isa_addrs (optional): For ISA chips, the range of valid port addresses to
 #      probe.
-#  isa_driver_addrs (optional): For ISA chips, the range of valid ISA
-#      addresses probed by the kernel driver. Strictly optional.
 #  isa_detect (optional): For ISA chips, the function to call to detect
 #      this chip. The function should take one parameter: the ISA address
 #      to probe.
@@ -2595,12 +2591,8 @@ use vars qw(@chips_detected);
 #       (if this is an I2C detection)
 #  with field 'i2c_sub_addrs', containing a reference to a list of
 #       other I2C addresses (if this is an I2C detection)
-#  with field 'i2c_extra' if this is an I2C detection and the address
-#       is not normally probed by the kernel driver
 #  with field 'isa_addr' containing the ISA address this chip is on 
 #       (if this is an ISA detection)
-#  with field 'isa_extra' if this is an ISA detection and the address
-#       is not normally probed by the kernel driver
 #  with field 'conf', containing the confidence level of this detection
 #  with field 'chipname', containing the chip name
 
@@ -2742,8 +2734,6 @@ sub add_isa_to_chips_detected
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_misdetected_ref->[$i]->{i2c_addr})) {
         $new_misdetected_ref->[$i]->{isa_addr} = $datahash->{isa_addr};
-        $new_misdetected_ref->[$i]->{isa_extra} = $datahash->{isa_extra} 
-               if exists $datahash->{isa_extra};
         return $new_misdetected_ref->[$i]; 
       }
     }
@@ -2766,8 +2756,6 @@ sub add_isa_to_chips_detected
       if (&$alias_detect ($datahash->{isa_addr},\*FILE,
                           $new_detected_ref->[$i]->{i2c_addr})) {
         $new_detected_ref->[$i]->{isa_addr} = $datahash->{isa_addr};
-        $new_detected_ref->[$i]->{isa_extra} = $datahash->{isa_extra} 
-               if exists $datahash->{isa_extra};
         ($datahash) = splice (@$new_detected_ref, $i, 1);
         $isalias=1;
         last;
@@ -2856,9 +2844,6 @@ sub scan_adapter
           i2c_driver => $adapter_driver,
           i2c_devnr => $adapter_nr,
         };
-        $new_hash->{i2c_extra} = 0 
-            if exists $chip->{i2c_driver_addrs} and
-               not contains($addr, @{$chip->{i2c_driver_addrs}});
 
         printf "Client found at address 0x\%02x\n", $addr;
         printf "Handled by driver `\%s' (already loaded), chip type `\%s'\n",
@@ -2907,9 +2892,6 @@ sub scan_adapter
             my @chips_copy = @chips;
             $new_hash->{i2c_sub_addrs} = \@chips_copy;
           }
-          $new_hash->{i2c_extra} = 0 
-                 if exists $chip->{i2c_driver_addrs} and
-                    not contains( $addr , @{$chip->{i2c_driver_addrs}});
           add_i2c_to_chips_detected $chip->{driver}, $new_hash;
         } else {
           print "Failed!\n";
@@ -2939,9 +2921,6 @@ sub scan_isa_bus
                        isa_addr => $addr,
                        chipname => $chip->{name}
                      };
-      $new_hash->{isa_extra} = 0 
-             if exists $chip->{isa_driver_addrs} and
-                not contains ($addr, @{$chip->{isa_driver_addrs}});
       $new_hash = add_isa_to_chips_detected $chip->{alias_detect},$chip->{driver},
                                             $new_hash;
       if ($new_hash) {
@@ -5298,17 +5277,6 @@ sub generate_modprobes
          $modprobes .= "# If driver is built-in to the kernel, or unavailable, comment out the following line.\n";
        }
        $modprobes .= "modprobe $chip->{driver}\n";
-    }
-
-    # Handle detects at addresses normally not probed
-    foreach $detection (@{$chip->{detected}}) {
-      push @probelist, $adapters[$detection->{i2c_devnr}]->{nr_later},
-                       $detection->{i2c_addr}
-           if exists $detection->{i2c_addr} and
-              exists $detection->{i2c_extra};
-      push @probelist, -1, $detection->{isa_addr}
-           if exists $detection->{isa_addr} and
-              exists $detection->{isa_extra};
     }
 
     # Handle misdetects
