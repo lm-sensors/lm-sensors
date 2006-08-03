@@ -3602,39 +3602,48 @@ void print_it87(const sensors_chip_name *name)
 
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_FAN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_FAN1,&cur) &&
-      !sensors_get_feature(*name,SENSORS_IT87_FAN1_DIV,&fdiv) &&
       !sensors_get_feature(*name,SENSORS_IT87_FAN1_MIN,&min)) {
     if (valid) {
       print_label(label,10);
-      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
-             cur,min,fdiv, alarms&IT87_ALARM_FAN1?"ALARM":"");
+      printf("%4.0f RPM  (min = %4.0f RPM", cur, min);
+      /* fan1_div is optional */
+      if (!sensors_get_feature(*name, SENSORS_IT87_FAN1_DIV, &fdiv))
+        printf(", div = %1.0f)", fdiv);
+      else
+        printf(")         ");
+      printf("          %s\n", alarms&IT87_ALARM_FAN1?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get FAN1 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_FAN2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_FAN2,&cur) &&
-      !sensors_get_feature(*name,SENSORS_IT87_FAN2_DIV,&fdiv) &&
       !sensors_get_feature(*name,SENSORS_IT87_FAN2_MIN,&min)) {
     if (valid) {
       print_label(label,10);
-      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
-             cur,min,fdiv, alarms&IT87_ALARM_FAN2?"ALARM":"");
+      printf("%4.0f RPM  (min = %4.0f RPM", cur, min);
+      /* fan2_div is optional */
+      if (!sensors_get_feature(*name, SENSORS_IT87_FAN2_DIV, &fdiv))
+        printf(", div = %1.0f)", fdiv);
+      else
+        printf(")         ");
+      printf("          %s\n", alarms&IT87_ALARM_FAN2?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get FAN2 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_FAN3,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_FAN3,&cur) &&
-      !sensors_get_feature(*name,SENSORS_IT87_FAN3_DIV,&fdiv) &&
       !sensors_get_feature(*name,SENSORS_IT87_FAN3_MIN,&min)) {
     if (valid) {
       print_label(label,10);
-      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
-             cur,min,fdiv, alarms&IT87_ALARM_FAN3?"ALARM":"");
+      printf("%4.0f RPM  (min = %4.0f RPM", cur, min);
+      /* fan3_div is optional */
+      if (!sensors_get_feature(*name, SENSORS_IT87_FAN3_DIV, &fdiv))
+        printf(", div = %1.0f)", fdiv);
+      else
+        printf(")         ");
+      printf("          %s\n", alarms&IT87_ALARM_FAN3?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get FAN3 data!\n");
+  }
   free(label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_TEMP1,&label,&valid) &&

@@ -1678,6 +1678,74 @@ chip "it87-*" "it8712-*"
 #    ignore fan3
 
 
+chip "it8716-*"
+
+# Voltages
+
+    label  in0  "VCore"
+    label  in2  "+3.3V"
+    label  in3  "+5V"
+    label  in4  "+12V"
+    label  in7  "5VSB"
+    label  in8  "VBat"
+
+    compute in3  ((6.8/10)+1)*@ , @/((6.8/10)+1)
+    compute in4  ((30/10)+1)*@  , @/((30/10)+1)
+    compute in7  ((6.8/10)+1)*@ , @/((6.8/10)+1)
+
+# If vid (nominal CPU voltage) isn't correct, hardcode the correct value
+# instead.
+#    set in0_min  vid * 0.95
+#    set in0_max  vid * 1.05
+#    set in2_min  3.3 * 0.95
+#    set in2_max  3.3 * 1.05
+#    set in3_min    5 * 0.95
+#    set in3_max    5 * 1.05
+#    set in4_min   12 * 0.95
+#    set in4_max   12 * 1.05
+#    set in7_min    5 * 0.95
+#    set in7_max    5 * 1.05
+# The chip does not support in8 min/max
+
+# Temperatures
+
+# If you are lucky, the BIOS has set the proper sensor types for you.
+# If your temperature readings are completely whacky you probably
+# need to change the sensor types. Adujst and uncomment the
+# appropriate lines below.
+#
+# 2 = thermistor; 3 = thermal diode; 0 = unused
+#   set sensor1  3
+#   set sensor2  3
+#   set sensor3  3
+
+# If a given sensor isn't used, you will probably want to ignore it
+# as well (see ignore statement right below).
+# The CPU sensor can be any of temp1, temp2 or temp3 - it's motherboard
+# dependent. Same for the motherboard temperature.
+
+#   label  temp1  "CPU Temp"
+#   label  temp2  "M/B Temp"
+#   ignore temp3
+
+#   set temp1_over  60
+#   set temp1_low   10
+#   set temp2_over  50
+#   set temp2_low   10
+
+# Fans
+
+# The CPU fan can be any of fan1, fan2 or fan3 - it's motherboard
+# dependent. Same for the case fan.
+
+#   label  fan1 "CPU Fan"
+#   label  fan2 "Case Fan"
+#   ignore fan3
+
+#   set fan1_min 2000
+#   set fan2_min 2000
+
+
 chip "fscpos-*"
 # Fujitsu-Siemens Poseidon chip
 

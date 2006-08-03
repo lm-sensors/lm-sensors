@@ -381,6 +381,7 @@ struct match matches[] = {
 	{ "maxilife-nba", print_maxilife },
 	{ "it87", print_it87 },
 	{ "it8712", print_it87 },
+	{ "it8716", print_it87 },
 	{ "ddcmon", print_ddcmon },
 	{ "eeprom", print_eeprom },
 	{ "fscpos", print_fscpos },
