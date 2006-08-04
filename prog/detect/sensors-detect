@@ -1743,6 +1743,12 @@ $chip_kern26_w83791d = {
 	devid => 0x8716,
 	logdev => 0x04,
       },
+      {
+	name => "ITE IT8718F Super IO Sensors",
+	driver => "it87",
+	devid => 0x8718,
+	logdev => 0x04,
+      },
     ],
   },
   {
