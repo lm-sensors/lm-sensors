@@ -57,9 +57,11 @@ lm_sensors CHANGES file
                           Handle the W83791D driver difference between kernels
                           Add nForce4 MCP04, MCP51 and MCP55 detection
                           Add AMD Geode devices detection
+                          Add ITE IT8716F and IT8718F detection
                           Add NatSemi/Winbond PC87427 detection
                           Get driver information for busy addresses from
                            sysfs (2.6 only)
+                          Drop the ISA IT87xxF detection
 
 
 2.10.0 (20060214)

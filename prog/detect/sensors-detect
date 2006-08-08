@@ -959,7 +959,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
             adm1025_detect w83781d_isa_detect gl518sm_detect gl520sm_detect
             adm9240_detect adm1021_detect sis5595_isa_detect eeprom_detect
             via686a_isa_detect adm1022_detect gl525sm_detect
-            lm87_detect ite_detect ite_isa_detect ite_alias_detect
+            lm87_detect ite_detect ite_alias_detect
             ddcmonitor_detect ds1621_detect adm1024_detect fscpos_detect
             fscscy_detect arp_detect ipmi_kcs_detect
             ipmi_smic_detect via8231_isa_detect lm85_detect smartbatt_detect
@@ -1487,22 +1487,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
        driver => "it87",
        i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { ite_detect 0, @_ },
-       isa_addrs => [0x290],
-       isa_detect => sub { ite_isa_detect 0, @_ },
-       alias_detect => sub { ite_alias_detect 0, @_ },
      },
-     {
-       name => "ITE IT8716F",
-       driver => "it87",
-       isa_addrs => [0x290],
-       isa_detect => sub { ite_isa_detect 2, @_ },
-     },
-     {
-       name => "ITE IT8705F / SiS 950",
-       driver => "it87",
-       isa_addrs => [0x290],
-       isa_detect => sub { ite_isa_detect 1, @_ },
-     } ,
      {
        name => "ITE IT8201R/IT8203R/IT8206R/IT8266R overclocking controller",
        driver => "not-a-sensor",
@@ -4416,61 +4401,6 @@ sub ite_detect
   return unless i2c_smbus_read_byte_data($file,0x58) == 0x90;
   return if $chip == 0 and i2c_smbus_read_byte_data($file,0x5b) != 0x12;
   return (7 + ($addr == 0x2d));
-}
-
-# $_[0]: Chip to detect (0 = IT8712F, 1 = IT8705F/SiS950, 2 = IT8716F)
-# $_[1]: Address
-# Returns: undef if not detected, 7 or 8 if detected (tops LM78).
-# Registers used:
-#   0x00: Configuration
-#   0x48: Full I2C Address (IT8712F only)
-#   0x58: Mfr ID
-#   0x5b: Device ID (not IT8705F)
-# Note: Only address 0x290 is scanned at this moment.
-sub ite_isa_detect
-{
-  my ($chip,$addr) = @_ ;
-  my $val;
-
-  if ($chip == 2) {
-	$val = inb ($addr + 6);
-	return if inb ($addr + 4) != $val or inb ($addr + 6) != $val or 
-		  inb ($addr + 7) != $val;
-  } else {
-	  $val = inb ($addr + 1);
-	  return if inb ($addr + 2) != $val or inb ($addr + 3) != $val or 
-		    inb ($addr + 7) != $val;
-	  $val = inb($addr + 5) & 0x7f;
-	  outb($addr+5, ~$val & 0xff);
-	  if ((inb ($addr+5) & 0x7f) != (~ $val & 0x7f)) {
-		outb($addr+5,$val);
-		return;
-	}
-  }
-
-  my $readproc = sub { isa_read_byte $addr + 5, $addr + 6, @_ };
-  return unless (&$readproc(0x00) & 0x90) == 0x10;
-  return unless &$readproc(0x58) == 0x90;
-  return if $chip == 0 and &$readproc(0x5b) != 0x12;
-  return if $chip == 2 and &$readproc(0x5b) != 0x12;
-  return if $chip == 1 and &$readproc(0x5b) == 0x12;
-
-  # Explcitely prevents misdetection of W83627THF
-  if ($chip == 1) {
-    my $val2 = &$readproc(0x4e);
-    $val = &$readproc(0x4f);
-    return if (($val2 & 0x80) && $val == 0x5c)
-           or (!($val2 & 0x80) && $val == 0xa3);
-  }
-
-  # I2C address must be possible
-  if ($chip == 0) {
-    my $i2caddr = &$readproc(0x48);
-    return if ($i2caddr < 0x03 || $i2caddr > 0x77);
-    return (7 + ($i2caddr == 0x2d));
-  }
-
-  return (7);
 }
 
 
