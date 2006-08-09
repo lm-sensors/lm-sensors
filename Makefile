@@ -280,7 +280,7 @@ LIBCPPFLAGS := $(LIBCPPFLAGS) -DSYSFS_SUPPORT
 endif
 LIBCFLAGS := -fpic $(ALL_CFLAGS)
 
-.PHONY: all clean install version package
+.PHONY: all user clean install user_install uninstall user_uninstall version package
 
 # Make all the default rule
 all::
