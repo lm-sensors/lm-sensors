@@ -2437,6 +2437,7 @@ sub find_adapter_driver
 # These are copied from <linux/i2c-dev.h>
 
 use constant IOCTL_I2C_SLAVE    => 0x0703;
+use constant IOCTL_I2C_FUNCS    => 0x0705;
 use constant IOCTL_I2C_SMBUS    => 0x0720;
 
 use constant SMBUS_READ         => 1;
@@ -2446,6 +2447,23 @@ use constant SMBUS_QUICK        => 0;
 use constant SMBUS_BYTE         => 1;
 use constant SMBUS_BYTE_DATA    => 2;
 use constant SMBUS_WORD_DATA    => 3;
+
+use constant I2C_FUNC_SMBUS_QUICK	=> 0x00010000;
+use constant I2C_FUNC_SMBUS_READ_BYTE	=> 0x00020000;
+
+# Get the i2c adapter's functionalities
+# $_[0]: Reference to an opened filehandle
+# Returns: -1 on failure, functionality bitfield on success.
+sub i2c_get_funcs($)
+{
+  my $file = shift;
+  my $funcs;
+
+  ioctl $file, IOCTL_I2C_FUNCS, $funcs='' or return -1;
+  $funcs = unpack "L", $funcs;
+
+  return $funcs;
+}
 
 # Select the device to communicate with through its address.
 # $_[0]: Reference to an opened filehandle
@@ -2532,13 +2550,14 @@ sub i2c_smbus_read_word_data
 
 # $_[0]: Reference to an opened filehandle
 # $_[1]: Address
+# $_[2]: Functionalities of this i2c adapter
 # Returns: 1 on successful probing, 0 else.
 # This function is meant to prevent AT24RF08 corruption and write-only
 # chips locks. This is done by choosing the best probing method depending
 # on the address range.
-sub i2c_probe
+sub i2c_probe($$$)
 {
-  my ($file, $addr) = @_;
+  my ($file, $addr, $funcs) = @_;
   my $data = [];
   if (($addr >= 0x50 && $addr <= 0x5F)
    || ($addr >= 0x30 && $addr <= 0x37)) {
@@ -2547,8 +2566,10 @@ sub i2c_probe
     # this, because they ack on write only, but this is probably better since
     # some EEPROMs write-protect themselves permanently on almost any write to
     # their page protection address.
+    return 0 unless ($funcs & I2C_FUNC_SMBUS_READ_BYTE);
     return i2c_smbus_access($file, SMBUS_READ, 0, SMBUS_BYTE, $data);
   } else {
+    return 0 unless ($funcs & I2C_FUNC_SMBUS_QUICK);
     return i2c_smbus_access($file, SMBUS_WRITE, 0, SMBUS_QUICK, $data);
   }
 }
@@ -2799,7 +2820,7 @@ sub add_isa_to_chips_detected
 sub scan_adapter
 {
   my ($adapter_nr, $adapter_name, $adapter_driver, $not_to_scan) = @_;
-  my ($chip, $addr, $conf,@chips,$new_hash,$other_addr);
+  my ($funcs, $chip, $addr, $conf, @chips, $new_hash, $other_addr);
 
   # As we modify it, we need a copy
   my @not_to_scan = @$not_to_scan;
@@ -2807,6 +2828,21 @@ sub scan_adapter
   open(local *FILE, "$dev_i2c$adapter_nr") or 
     (print "Can't open $dev_i2c$adapter_nr\n"), return;
   binmode FILE;
+
+  # Can we probe this adapter?
+  $funcs = i2c_get_funcs(\*FILE);
+  if ($funcs < 0) {
+    print "Adapter failed to provide its functionalities, skipping.\n";
+    return;
+  }
+  if (!($funcs & (I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_READ_BYTE))) {
+    print "Adapter cannot be probed, skipping.\n";
+    return;
+  }
+  if (~$funcs & (I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_READ_BYTE)) {
+    print "Adapter doesn't support all probing functions.\n",
+          "Some addresses won't be probed.\n";
+  }
 
   # Now scan each address in turn
   foreach $addr (0x03..0x77) {
@@ -2855,7 +2891,7 @@ sub scan_adapter
       next;
     }
 
-    next unless i2c_probe(\*FILE, $addr);
+    next unless i2c_probe(\*FILE, $addr, $funcs);
     printf "Client found at address 0x%02x\n",$addr;
 
     foreach $chip (@chip_ids) {

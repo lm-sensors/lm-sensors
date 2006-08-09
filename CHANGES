@@ -62,6 +62,7 @@ lm_sensors CHANGES file
                           Get driver information for busy addresses from
                            sysfs (2.6 only)
                           Drop the ISA IT87xxF detection
+                          Check i2c adapter functionalities before probing
 
 
 2.10.0 (20060214)
