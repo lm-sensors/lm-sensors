@@ -547,7 +547,7 @@ static const ChipDescriptor lm80_chip = {
 
 static const char *it87_names[] = {
   SENSORS_IT87_PREFIX, SENSORS_IT8712_PREFIX,
-  SENSORS_IT8716_PREFIX, NULL
+  SENSORS_IT8716_PREFIX, SENSORS_IT8718_PREFIX, NULL
 };
 
 static const FeatureDescriptor it87_features[] = {
@@ -568,11 +568,11 @@ static const FeatureDescriptor it87_features[] = {
   { fmtVolts_2, rrdF2, DataType_voltage, IT87_ALARM_IN7, 0,
     { SENSORS_IT87_IN7, SENSORS_IT87_IN7_MIN, SENSORS_IT87_IN7_MAX, -1 } },
   { fmtFans_0, rrdF0, DataType_rpm, IT87_ALARM_FAN1, 0,
-    { SENSORS_IT87_FAN1, SENSORS_IT87_FAN1_MIN, SENSORS_IT87_FAN1_DIV, -1 } },
+    { SENSORS_IT87_FAN1, SENSORS_IT87_FAN1_MIN, -1 } },
   { fmtFans_0, rrdF0, DataType_rpm, IT87_ALARM_FAN2, 0,
-    { SENSORS_IT87_FAN2, SENSORS_IT87_FAN2_MIN, SENSORS_IT87_FAN2_DIV, -1 } },
+    { SENSORS_IT87_FAN2, SENSORS_IT87_FAN2_MIN, -1 } },
   { fmtFans_0, rrdF0, DataType_rpm, IT87_ALARM_FAN3, 0,
-    { SENSORS_IT87_FAN3, SENSORS_IT87_FAN3_MIN, SENSORS_IT87_FAN3_DIV, -1 } },
+    { SENSORS_IT87_FAN3, SENSORS_IT87_FAN3_MIN, -1 } },
   { fmtTemps_minmax_0, rrdF1, DataType_temperature, IT87_ALARM_TEMP1, 0,
     { SENSORS_IT87_TEMP1, SENSORS_IT87_TEMP1_LOW, SENSORS_IT87_TEMP1_HIGH, -1 } },
   { fmtTemps_minmax_0, rrdF1, DataType_temperature, IT87_ALARM_TEMP2, 0,

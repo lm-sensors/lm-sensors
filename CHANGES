@@ -11,7 +11,7 @@ lm_sensors CHANGES file
            Add support for the smsc47m192 driver
            Fix all memory leaks (yeah!)
            Fix no sensors being reported as an error
-           Add support for the IT8716F chip
+           Add support for the IT8716F and IT8718F chips
   Makefile: Don't grep autoconf.h on user-space targets
             Fix depmod on non-running kernel version
             Silent errors on missing dependency files
@@ -45,7 +45,7 @@ lm_sensors CHANGES file
                    Add smsc47m192 support
                    Add abituguru support (Hans de Goede)
                    Fix memory leak when printing an unknown chip
-                   Add it8716 support
+                   Add it8716 and it8718 support
                    Make each it87 fan and fan div optional
   Program sensors-detect: Add ServerWorks HT-1000 SMBus detection
                           Add ATI IXP200/300/400 SMBus detection
