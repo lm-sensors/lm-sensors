@@ -1514,7 +1514,7 @@ use subs qw(mtp008_detect lm78_detect lm78_isa_detect lm78_alias_detect
 #       i2c_detect => sub { eeprom_detect 2, @_ },
 #     },
      {
-       name => "DDC monitor",
+       name => "EDID EEPROM",
        driver => "eeprom",
        i2c_addrs => [0x50],
        i2c_detect => sub { ddcmonitor_detect @_ },
