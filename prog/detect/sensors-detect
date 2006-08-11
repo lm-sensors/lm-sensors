@@ -5168,7 +5168,7 @@ sub generate_modprobes
   local $_;
   while (<INPUTFILE>) {
     my ($dev_nr, $type, $adap) = /^i2c-(\d+)\s+(\S+)\s+(.*?) *(\t|$)/;
-    next if ($type eq "dummy");
+    next if ($type eq "dummy" || $type eq "isa");
     $adapters[$dev_nr]->{driver} = find_adapter_driver($adap);
     $adapters[$dev_nr]->{adapname} = $adap;
   }
@@ -5216,7 +5216,9 @@ sub generate_modprobes
       last;
     }
   }
-  $modprobes .= "modprobe i2c-isa\n" if ($isa);
+  # i2c-isa is loaded automatically (as a dependency) since 2.6.14,
+  # and will soon be gone.
+  $modprobes .= "modprobe i2c-isa\n" if ($isa && !kernel_version_at_least(2, 6, 18));
   if ($bmcsensors) {
     $modprobes .= "# You must also install and load the IPMI modules\n";
     $modprobes .= "modprobe i2c-ipmi\n";
