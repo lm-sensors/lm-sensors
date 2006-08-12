@@ -290,11 +290,13 @@ int main(int argc, char *argv[])
 
 	/* See Winbond w83781d data sheet for bank details */
 	if (bank && size != I2C_SMBUS_BLOCK_DATA) {
-		old_bank = i2c_smbus_read_byte_data(file, bankreg);
-		if (old_bank >= 0)
+		res = i2c_smbus_read_byte_data(file, bankreg);
+		if (res >= 0) {
+			old_bank = res;
 			res = i2c_smbus_write_byte_data(file, bankreg,
 				bank | (old_bank & 0xf0));
-		if (old_bank < 0 || res < 0) {
+		}
+		if (res < 0) {
 			fprintf(stderr, "Error: Bank switching failed\n");
 			exit(1);
 		}
