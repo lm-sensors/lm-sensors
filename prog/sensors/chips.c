@@ -3539,8 +3539,7 @@ void print_it87(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&IT87_ALARM_IN3?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN3 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_IN4,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_IN4,&cur) &&
@@ -3563,8 +3562,7 @@ void print_it87(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&IT87_ALARM_IN5?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN5 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_IN6,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_IN6,&cur) &&
@@ -3575,8 +3573,7 @@ void print_it87(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&IT87_ALARM_IN6?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN6 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_IN7,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_IN7,&cur) &&
@@ -3587,8 +3584,7 @@ void print_it87(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&IT87_ALARM_IN7?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN7 data!\n");
+  }
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_IN8,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_IN8,&cur)) {
