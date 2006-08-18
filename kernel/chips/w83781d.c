@@ -135,7 +135,7 @@ MODULE_PARM_DESC(init, "Set to zero to bypass chip initialization");
 #define W83781D_REG_CHIPMAN 0x4F
 #define W83781D_REG_PIN 0x4B
 
-/* 782D/783S only */
+/* 782D/783S/791D only */
 #define W83781D_REG_VBAT 0x5D
 
 /* PWM 782D (1-4) and 783S (1-2) only */
@@ -387,14 +387,24 @@ static struct i2c_driver w83781d_driver = {
 #define W83781D_ALARM_IN6 0x0400
 #define W83782D_ALARM_IN7 0x10000
 #define W83782D_ALARM_IN8 0x20000
+#define W83791D_ALARM_IN7 0x080000	/* 791D only */
+#define W83791D_ALARM_IN8 0x100000	/* 791D only */
+#define W83791D_ALARM_IN9 0x004000	/* 791D only */
 #define W83781D_ALARM_FAN1 0x0040
 #define W83781D_ALARM_FAN2 0x0080
 #define W83781D_ALARM_FAN3 0x0800
+#define W83791D_ALARM_FAN4 0x200000	/* 791D only */
+#define W83791D_ALARM_FAN5 0x400000	/* 791D only */
 #define W83781D_ALARM_TEMP1 0x0010
 #define W83781D_ALARM_TEMP23 0x0020	/* 781D only */
-#define W83781D_ALARM_TEMP2 0x0020	/* 782D/783S */
-#define W83781D_ALARM_TEMP3 0x2000	/* 782D only */
-#define W83781D_ALARM_CHAS 0x1000
+#define W83781D_ALARM_TEMP2 0x0020	/* 782D/783S/791D */
+#define W83781D_ALARM_TEMP3 0x2000	/* 782D/791D */
+#define W83781D_ALARM_CHAS 0x1000	/* 782D/791D */
+
+#define W83791D_BEEP_IN1 0x002000	/* 791D only */
+#define W83791D_BEEP_IN7 0x010000	/* 791D only */
+#define W83791D_BEEP_IN8 0x020000	/* 791D only */
+#define W83791D_BEEP_TEMP3 0x000002	/* 791D only */
 
 /* -- SENSORS SYSCTL END -- */
 

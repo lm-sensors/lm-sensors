@@ -2187,7 +2187,8 @@ void print_w83781d(const sensors_chip_name *name)
   char *label;
   double cur,min,max,fdiv,sens;
   int alarms,beeps;
-  int is81d, is82d, is83s, is697hf, is627thf, valid;
+  int beep_mask;
+  int is81d, is82d, is83s, is91d, is697hf, is627thf, valid;
 
   is81d = !strcmp(name->prefix,"w83781d");
   is82d = (!strcmp(name->prefix,"w83782d")) ||
@@ -2196,6 +2197,7 @@ void print_w83781d(const sensors_chip_name *name)
           (!strcmp(name->prefix, "w83627thf")) ||
           (!strcmp(name->prefix, "w83687thf"));
   is83s = !strcmp(name->prefix,"w83783s");
+  is91d = !strcmp(name->prefix,"w83791d");
   is627thf = (!strcmp(name->prefix,"w83627thf")) ||
              (!strcmp(name->prefix, "w83637hf")) ||
              (!strcmp(name->prefix, "w83687thf"));
@@ -2234,10 +2236,16 @@ void print_w83781d(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_W83781D_IN1_MIN,&min) &&
         !sensors_get_feature(*name,SENSORS_W83781D_IN1_MAX,&max)) {
       if (valid) {
+        /* for the w83791d, beep mask is different than the alarm mask */
+        if (is91d)
+          beep_mask = W83791D_BEEP_IN1;
+        else
+          beep_mask = W83781D_ALARM_IN1;
+
         print_label(label,10);
         printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
              cur,min,max,alarms&W83781D_ALARM_IN1?"ALARM":"     ",
-             beeps&W83781D_ALARM_IN1?"(beep)":"");
+             beeps&beep_mask?"(beep)":"");
       }
     } else
       printf("ERROR: Can't get IN1 data!\n");
@@ -2339,6 +2347,48 @@ void print_w83781d(const sensors_chip_name *name)
     free(label);
   }
 
+  if (is91d) {
+    if (!sensors_get_label_and_valid(*name,SENSORS_W83791D_IN7,&label,&valid) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_IN7,&cur) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_IN7_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_IN7_MAX,&max)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
+             cur,min,max,alarms&W83791D_ALARM_IN7?"ALARM":"     ",
+             beeps&W83791D_BEEP_IN7?"(beep)":"");
+      }
+    } else
+      printf("ERROR: Can't get IN7 data!\n");
+    free(label);
+    if (!sensors_get_label_and_valid(*name,SENSORS_W83791D_IN8,&label,&valid) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_IN8,&cur) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_IN8_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_IN8_MAX,&max)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
+             cur,min,max,alarms&W83791D_ALARM_IN8?"ALARM":"     ",
+             beeps&W83791D_BEEP_IN8?"(beep)":"");
+      }
+    } else
+      printf("ERROR: Can't get IN8 data!\n");
+    free(label);
+    if (!sensors_get_label_and_valid(*name,SENSORS_W83791D_IN9,&label,&valid) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_IN9,&cur) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_IN9_MIN,&min) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_IN9_MAX,&max)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)       %s  %s\n",
+             cur,min,max,alarms&W83791D_ALARM_IN9?"ALARM":"     ",
+             beeps&W83791D_ALARM_IN9?"(beep)":"");
+      }
+    } else
+      printf("ERROR: Can't get IN9 data!\n");
+    free(label);
+  }
+
   if (!sensors_get_label_and_valid(*name,SENSORS_W83781D_FAN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_W83781D_FAN1,&cur) &&
       !sensors_get_feature(*name,SENSORS_W83781D_FAN1_DIV,&fdiv) &&
@@ -2379,6 +2429,35 @@ void print_w83781d(const sensors_chip_name *name)
       }
     } else
       printf("ERROR: Can't get FAN3 data!\n");
+    free(label);
+  }
+
+  if(is91d) {
+    if (!sensors_get_label_and_valid(*name,SENSORS_W83791D_FAN4,&label,&valid) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_FAN4,&cur) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_FAN4_DIV,&fdiv) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_FAN4_MIN,&min)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)              %s  %s\n",
+             cur,min,fdiv, alarms&W83791D_ALARM_FAN4?"ALARM":"     ",
+             beeps&W83791D_ALARM_FAN4?"(beep)":"");
+      }
+    } else
+      printf("ERROR: Can't get FAN4 data!\n");
+    free(label);
+    if (!sensors_get_label_and_valid(*name,SENSORS_W83791D_FAN5,&label,&valid) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_FAN5,&cur) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_FAN5_DIV,&fdiv) &&
+        !sensors_get_feature(*name,SENSORS_W83791D_FAN5_MIN,&min)) {
+      if (valid) {
+        print_label(label,10);
+        printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)              %s  %s\n",
+             cur,min,fdiv, alarms&W83791D_ALARM_FAN5?"ALARM":"     ",
+             beeps&W83791D_ALARM_FAN5?"(beep)":"");
+      }
+    } else
+      printf("ERROR: Can't get FAN5 data!\n");
     free(label);
   }
 
@@ -2453,10 +2532,15 @@ void print_w83781d(const sensors_chip_name *name)
         if(!is82d) {
           print_label(label,10);
           print_temp_info( cur, max, min, HYST, 1, 0);
-          if (!is81d)
+          if (!is81d) {
+            /* for the w83791d, beep mask is different than the alarm mask */
+            if (is91d)
+              beep_mask = W83791D_BEEP_TEMP3;
+            else
+              beep_mask = W83781D_ALARM_TEMP3;
             printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP3?"ALARM":"     ",
-                   beeps&W83781D_ALARM_TEMP3?"(beep)":"");
-          else
+                   beeps&beep_mask?"(beep)":"");
+          } else
             printf(" %s  %s\n", alarms&W83781D_ALARM_TEMP23?"ALARM":"     ",
                    beeps&W83781D_ALARM_TEMP23?"(beep)":"");
         } else {

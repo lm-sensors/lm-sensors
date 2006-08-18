@@ -30,6 +30,7 @@ lm_sensors CHANGES file
   Module i2c-viapro: Fix compilation with kernels < 2.4.21
   Module lm83: Add LM82 support (2.6 backport)
   Module w83781d: Use real-time alarm registers when possible (2.6 backport)
+                  Add specific alarm and beep defines for the W83791D
   Module w83792d: Fix PWM range (2.6 backport)
   Program decode-dimms.pl: Decode depending on the memory type
                            Decode the manufacturing date to an ISO8601 date
@@ -47,6 +48,7 @@ lm_sensors CHANGES file
                    Fix memory leak when printing an unknown chip
                    Add it8716 and it8718 support
                    Make each it87 fan and fan div optional
+                   Print missing w83791d values
   Program sensors-detect: Add ServerWorks HT-1000 SMBus detection
                           Add ATI IXP200/300/400 SMBus detection
                           Prevent warning on 64-bit PCI addresses
