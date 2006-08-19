@@ -315,6 +315,8 @@ const char *sprintf_chip_name(sensors_chip_name name)
 
   if (name.bus == SENSORS_CHIP_NAME_BUS_ISA)
     snprintf(buf,BUF_SIZE,"%s-isa-%04x",name.prefix,name.addr);
+  else if (name.bus == SENSORS_CHIP_NAME_BUS_PCI)
+    snprintf(buf,BUF_SIZE,"%s-pci-%04x",name.prefix,name.addr);
   else if (name.bus == SENSORS_CHIP_NAME_BUS_DUMMY)
     snprintf(buf,BUF_SIZE,"%s-%s-%04x",name.prefix,name.busname,name.addr);
   else
