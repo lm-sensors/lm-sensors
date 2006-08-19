@@ -420,6 +420,7 @@ struct match matches[] = {
 	{ "smsc47b397", print_smsc47b397 },
 	{ "f71805f", print_f71805f },
  	{ "abituguru", print_abituguru },
+ 	{ "k8temp", print_k8temp },
 	{ NULL, NULL }
 };
 

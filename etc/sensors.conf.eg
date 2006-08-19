@@ -2753,3 +2753,10 @@ chip "abituguru-*"
    label fan4 "AUX1 FAN Speed"
    label fan5 "AUX2 FAN Speed"
    ignore fan6
+
+chip "k8temp-*"
+
+   label temp1 "Core0 Temp"
+   label temp2 "Core0 Temp"
+   label temp3 "Core1 Temp"
+   label temp4 "Core1 Temp"

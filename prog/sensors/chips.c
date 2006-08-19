@@ -6132,6 +6132,26 @@ void print_abituguru(const sensors_chip_name *name)
       SENSORS_ABITUGURU_FAN_ALARM(i), SENSORS_ABITUGURU_FAN_MIN(i));
 }
 
+void print_k8temp(const sensors_chip_name *name)
+{
+  char *label;
+  double cur;
+  int valid, i;
+
+  for (i = 0; i < 4; i++) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_K8TEMP_TEMP1+i, &label, &valid)
+	 && !sensors_get_feature(*name, SENSORS_K8TEMP_TEMP1+i, &cur)) {
+    	   if (valid) {
+      	 	print_label(label, 10);
+      	        print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+      		printf("\n");
+    	   }
+   }
+   free(label);
+ }
+}
+
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;

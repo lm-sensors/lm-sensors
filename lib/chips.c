@@ -5841,6 +5841,20 @@ static sensors_chip_feature abituguru_features[] =
 };
 
 
+static sensors_chip_feature k8temp_features[] =
+  {
+    { SENSORS_K8TEMP_TEMP1, "temp1", NOMAP, NOMAP,
+                       R, NOSYSCTL, VALUE(1), 0 },
+    { SENSORS_K8TEMP_TEMP2, "temp2", NOMAP, NOMAP,
+                       R, NOSYSCTL, VALUE(1), 0 },
+    { SENSORS_K8TEMP_TEMP3, "temp3", NOMAP, NOMAP,
+                       R, NOSYSCTL, VALUE(1), 0 },
+    { SENSORS_K8TEMP_TEMP4, "temp4", NOMAP, NOMAP,
+                       R, NOSYSCTL, VALUE(1), 0 },
+    { 0 }
+  };
+
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -5945,5 +5959,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_SMSC47B397_PREFIX, smsc47b397_features },
  { SENSORS_F71805F_PREFIX, f71805f_features },
  { SENSORS_ABITUGURU_PREFIX, abituguru_features },
+ { SENSORS_K8TEMP_PREFIX, k8temp_features },
  { 0 }
 };

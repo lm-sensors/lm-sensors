@@ -2189,4 +2189,11 @@
 #define SENSORS_ABITUGURU_FAN_ALARM(n)		(0xA0 + (n)) /* R */
 #define SENSORS_ABITUGURU_FAN_MIN(n)		(0xB0 + (n)) /* RW */
 
+/* K8TEMP */
+#define SENSORS_K8TEMP_PREFIX "k8temp"
+#define SENSORS_K8TEMP_TEMP1	0x01 /* R */
+#define SENSORS_K8TEMP_TEMP2	0x02 /* R */
+#define SENSORS_K8TEMP_TEMP3	0x03 /* R */
+#define SENSORS_K8TEMP_TEMP4	0x04 /* R */
+
 #endif /* def LIB_SENSORS_CHIPS_H */
