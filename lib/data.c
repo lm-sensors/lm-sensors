@@ -144,6 +144,10 @@ DONE:;
     res->bus = SENSORS_CHIP_NAME_BUS_ISA;
     if (part2)
       *(part2-1) = '-';
+  } else if (!strcmp(part3,"pci")) {
+    res->bus = SENSORS_CHIP_NAME_BUS_PCI;
+    if (part2)
+      *(part2-1) = '-';
   } else if (part2 && !strcmp(part2,"i2c") && !strcmp(part3,"*"))
     res->bus = SENSORS_CHIP_NAME_BUS_ANY_I2C;
   else if (part2 && !strcmp(part2,"i2c")) {
@@ -263,6 +267,7 @@ int sensors_substitute_busses(void)
     chips = &sensors_config_chips[i].chips;
     for(j = 0; j < chips->fits_count; j++)
       if ((chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ISA) &&
+          (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_PCI) &&
           (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_DUMMY) &&
           (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY) &&
           (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY_I2C))

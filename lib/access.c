@@ -46,6 +46,10 @@ int sensors_match_chip(sensors_chip_name chip1, sensors_chip_name chip2)
 		    (chip2.bus == SENSORS_CHIP_NAME_BUS_ISA))
 			return 0;
 
+		if ((chip1.bus == SENSORS_CHIP_NAME_BUS_PCI) ||
+		    (chip2.bus == SENSORS_CHIP_NAME_BUS_PCI))
+			return 0;
+
 		if ((chip1.bus != SENSORS_CHIP_NAME_BUS_ANY_I2C) &&
 		    (chip2.bus != SENSORS_CHIP_NAME_BUS_ANY_I2C))
 			return 0;
@@ -303,6 +307,8 @@ const char *sensors_get_adapter_name(int bus_nr)
 
 	if (bus_nr == SENSORS_CHIP_NAME_BUS_ISA)
 		return "ISA adapter";
+	if (bus_nr == SENSORS_CHIP_NAME_BUS_PCI)
+		return "PCI adapter";
 	if (bus_nr == SENSORS_CHIP_NAME_BUS_DUMMY)
 		return "Dummy adapter";
 	for (i = 0; i < sensors_proc_bus_count; i++)
@@ -317,6 +323,8 @@ const char *sensors_get_algorithm_name(int bus_nr)
 
 	if (bus_nr == SENSORS_CHIP_NAME_BUS_ISA)
 		return "ISA algorithm";
+	if (bus_nr == SENSORS_CHIP_NAME_BUS_PCI)
+		return "PCI algorithm";
 	if (bus_nr == SENSORS_CHIP_NAME_BUS_DUMMY)
 		return "Dummy algorithm";
 	for (i = 0; i < sensors_proc_bus_count; i++)
