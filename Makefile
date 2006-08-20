@@ -294,7 +294,7 @@ ifneq ($(MAKECMDGOALS),user_uninstall)
 ifneq ($(MAKECMDGOALS),help)
 ifneq ($(MAKECMDGOALS),package)
 ifneq ($(MAKECMDGOALS),userpackage)
--include $(INCLUDEFILES)
+include $(INCLUDEFILES)
 endif
 endif
 endif
