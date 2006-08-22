@@ -53,7 +53,7 @@ Intel		SMBus 2.0 system				2002-06
 		i2c-core and i2c-i801; ADM1025 improvements;
 		82801 improvements; smsc47m1 driver
 
-Via		8231 and two 8233 motherboards			2002-06
+VIA		8231 and two 8233 motherboards			2002-06
 		Drivers developed: VT8231 support in via686a;	MDS
 		vt1211; VT8233A and VT8231 support in
 		i2c-viapro
@@ -73,7 +73,7 @@ Analog Devices	ADM1025 evaluation board			2004-01
 		Drivers developed: adm1025 testing and		Jean Delvare
 		improvements; adm1025 ported to Linux 2.6
 
-Analog Devices	ADT7467/8 evaluation boards			2004-01
+Analog Devices	ADT7467/8 evaluation board			2004-01
 		Drivers developed: nothing yet			Jean Delvare
 
 Analog Devices	ADM1031 evaluation board			2004-04
@@ -94,3 +94,8 @@ Winbond		Celeron CPU, 512MB RAM				2006-03
 
 ASUSTeK		ASUS P5MT-S					2006-03
 		Platform for W83792D related development	Rudolf Marek
+
+Winbond		Asus P4P800-X, Pentium 4 2.8 GHz, 512 MB RAM	2006-08
+		This board has an (hidden) Intel 82801EB	Jean Delvare
+		(ICH5) SMBus with SPD EEPROMs connected, and
+		a Winbond W83627THF hardware monitoring chip.
