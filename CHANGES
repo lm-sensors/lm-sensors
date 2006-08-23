@@ -66,6 +66,7 @@ lm_sensors CHANGES file
                           Drop the ISA IT87xxF detection
                           Check i2c adapter functionalities before probing
                           Add Intel ICH8 SMBus detection
+                          Add AMD K8 thermal sensors detection
 
 
 2.10.0 (20060214)

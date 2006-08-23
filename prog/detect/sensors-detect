@@ -1587,6 +1587,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { fintek_detect(7, @_); },
      },
      {
+       name => "AMD K8 thermal sensors",
+       driver => "k8temp",
+       isa_addrs => [ 0 ],
+       isa_detect => sub { k8temp_pci_detect(); },
+     },
+     {
        name => "Philips Semiconductors SAA1064",
        driver => "saa1064",
        i2c_addrs => [0x38..0x3b],
@@ -5080,6 +5086,13 @@ sub vt1211_alias_detect
     return 0 unless inb($isa_addr + $i) == i2c_smbus_read_byte_data($file,$i);
   }
   return 1;
+}
+
+# Returns: undef if not detected, (9) if detected.
+sub k8temp_pci_detect
+{
+	return unless exists $pci_list{'1022:1103'};
+	return 9;
 }
 
 
