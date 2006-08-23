@@ -1451,19 +1451,19 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        name => "Silicon Integrated Systems SIS5595",
        driver => "sis5595",
        isa_addrs => [ 0 ],
-       isa_detect => sub { sis5595_isa_detect(@_); },
+       isa_detect => sub { sis5595_pci_detect(); },
      },
      {
        name => "VIA Technologies VT82C686 Integrated Sensors",
        driver => "via686a",
        isa_addrs => [ 0 ],
-       isa_detect => sub { via686a_isa_detect(@_); },
+       isa_detect => sub { via686a_pci_detect(); },
      },
      {
        name => "VIA Technologies VT8231 Integrated Sensors",
        driver => "vt8231",
        isa_addrs => [ 0 ],
-       isa_detect => sub { via8231_isa_detect(@_); },
+       isa_detect => sub { via8231_pci_detect(); },
      },
      {
        name => "VIA VT1211 (I2C)",
@@ -4283,114 +4283,6 @@ sub max1619_detect
   return 7;
 }
 
-# $_[0]: Address
-# Returns: undef if not detected, (9) if detected.
-# Note: It is already 99% certain this chip exists if we find the PCI
-# entry. The exact address is encoded in PCI space.
-sub sis5595_isa_detect
-{
-  my ($addr) = @_;
-  my ($key,$adapter,$try,$local_try);
-  my $found = 0;
-  foreach $local_try (@pci_adapters) {
-    if ($local_try->{procid} eq "Silicon Integrated Systems SIS5595") {
-      $try = $local_try;
-      $found = 1;
-      last;
-    }
-  }
-  return if not $found;
-
-  $found = 0;
-  while ( ($key, $adapter) = each %pci_list) {
-    if ((defined($adapter->{vendid}) and 
-         $try->{vendid} == $adapter->{vendid} and
-         $try->{devid} == $adapter->{devid} and
-         $try->{func} == $adapter->{func}) or
-        (! defined($adapter->{vendid}) and
-         $adapter->{desc} =~ /$try->{procid}/ and
-         $try->{func} == $adapter->{func})) {
-      $found = 1;
-      last;
-    }
-  }
-  return if not $found;
-
-  return 9;
-}
-
-# $_[0]: Address
-# Returns: undef if not detected, (9) if detected.
-# Note: It is already 99% certain this chip exists if we find the PCI
-# entry. The exact address is encoded in PCI space.
-sub via686a_isa_detect
-{
-  my ($addr) = @_;
-  my ($key,$adapter,$try,$local_try);
-  my $found = 0;
-  foreach $local_try (@pci_adapters) {
-    if ($local_try->{procid} eq "VIA Technologies VT82C686 Apollo ACPI") {
-      $try = $local_try;
-      $found = 1;
-      last;
-    }
-  }
-  return if not $found;
-
-  $found = 0;
-  while ( ($key, $adapter) = each %pci_list) {
-    if ((defined($adapter->{vendid}) and 
-         $try->{vendid} == $adapter->{vendid} and
-         $try->{devid} == $adapter->{devid} and
-         $try->{func} == $adapter->{func}) or
-        (! defined($adapter->{vendid}) and
-         $adapter->{desc} =~ /$try->{procid}/ and
-         $try->{func} == $adapter->{func})) {
-      $found = 1;
-      last;
-    }
-  }
-  return if not $found;
-
-  return 9;
-}
-
-# $_[0]: Address
-# Returns: undef if not detected, (9) if detected.
-# Note: It is already 99% certain this chip exists if we find the PCI
-# entry. The exact address is encoded in PCI space.
-sub via8231_isa_detect
-{
-  my ($addr) = @_;
-  my ($key,$adapter,$try,$local_try);
-  my $found = 0;
-  foreach $local_try (@pci_adapters) {
-    if ($local_try->{procid} eq "VIA Technologies VT8231 South Bridge") {
-      $try = $local_try;
-      $found = 1;
-      last;
-    }
-  }
-  return if not $found;
-
-  $found = 0;
-  while ( ($key, $adapter) = each %pci_list) {
-    if ((defined($adapter->{vendid}) and 
-         $try->{vendid} == $adapter->{vendid} and
-         $try->{devid} == $adapter->{devid} and
-         $try->{func} == $adapter->{func}) or
-        (! defined($adapter->{vendid}) and
-         $adapter->{desc} =~ /$try->{procid}/ and
-         $try->{func} == $adapter->{func})) {
-      $found = 1;
-      last;
-    }
-  }
-  return if not $found;
-
-  return 9;
-}
-
 # $_[0]: A reference to the file descriptor to access this chip.
 # $_[1]: Address (unused)
 # Returns: undef if not detected, 6 if detected.
@@ -5086,6 +4978,36 @@ sub vt1211_alias_detect
     return 0 unless inb($isa_addr + $i) == i2c_smbus_read_byte_data($file,$i);
   }
   return 1;
+}
+
+
+######################
+# PCI CHIP DETECTION #
+######################
+
+# Returns: undef if not detected, (7) or (9) if detected.
+# The address is encoded in PCI space. We could decode it and print it.
+# For Linux 2.4 we should probably check for invalid matches (SiS645).
+sub sis5595_pci_detect
+{
+	return unless exists $pci_list{'1039:0008'};
+	return (kernel_version_at_least(2, 6, 0) ? 9 : 7);
+}
+
+# Returns: undef if not detected, (9) if detected.
+# The address is encoded in PCI space. We could decode it and print it.
+sub via686a_pci_detect
+{
+	return unless exists $pci_list{'1106:3057'};
+	return 9;
+}
+
+# Returns: undef if not detected, (9) if detected.
+# The address is encoded in PCI space. We could decode it and print it.
+sub via8231_pci_detect
+{
+	return unless exists $pci_list{'1106:8235'};
+	return 9;
 }
 
 # Returns: undef if not detected, (9) if detected.

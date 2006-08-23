@@ -67,6 +67,7 @@ lm_sensors CHANGES file
                           Check i2c adapter functionalities before probing
                           Add Intel ICH8 SMBus detection
                           Add AMD K8 thermal sensors detection
+                          Simplify detection of SiS5595, VIA686 and VT8231
 
 
 2.10.0 (20060214)
