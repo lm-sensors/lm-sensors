@@ -55,7 +55,7 @@ lm_sensors CHANGES file
                           Add Fintek F75363SG, F75111R/RG/N, F75121R,
                            F75122R/RG, F75373S/SG, F75375S/SP, F75383S/M,
                            F75384S/M, F75387SG/RG and F81218D detection
-                          Add Winbond W83793R/G detection
+                          Add Winbond W83793R/G and W83627DHG detection
                           Handle the W83791D driver difference between kernels
                           Add nForce4 MCP04, MCP51 and MCP55 detection
                           Add AMD Geode devices detection
