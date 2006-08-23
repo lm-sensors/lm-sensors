@@ -5227,7 +5227,7 @@ sub generate_modprobes
   }
 
   # Now determine the chip probe lines
-  $modprobes .= "# I2C chip drivers\n";
+  $modprobes .= "# Chip drivers\n";
   foreach $chip (@chips_detected) {
     next if not @{$chip->{detected}};
     if ($chip->{driver} eq "to-be-written") {
@@ -5430,13 +5430,14 @@ sub main
                  \@not_to_scan   unless $inp =~ /^\s*[Nn]/;
   }
 
-  print "\nSome chips are also accessible through the ISA bus. ISA probes are\n".
+  print "\nSome chips are also accessible through the ISA I/O ports. ISA probes are\n".
         "typically a bit more dangerous, as we have to write to I/O ports to do\n".
-        "this. This is usually safe though.\n\n";
+	"this. This is usually safe though.\n".
+        "Yes, you do have ISA I/O ports even if you do not have any ISA slots!\n\n";
   if ($> != 0) {
     print "As you are not root, we shall skip this step.\n";
   } else {
-    print "Do you want to scan the ISA bus? (YES/no): ";
+    print "Do you want to scan the ISA I/O ports? (YES/no): ";
     unless (<STDIN> =~ /^\s*n/i) {
       initialize_ioports();
       scan_isa_bus();
