@@ -65,6 +65,7 @@ lm_sensors CHANGES file
                            sysfs (2.6 only)
                           Drop the ISA IT87xxF detection
                           Check i2c adapter functionalities before probing
+                          Add Intel ICH8 SMBus detection
 
 
 2.10.0 (20060214)
