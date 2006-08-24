@@ -7,12 +7,14 @@ lm_sensors CHANGES file
   File etc/sensors.conf.eg: Add an smsc47m192 section
                             Comment out all set statements
                             Add an it8716 section
+                            Add a w83793 section
   Library: Fix device scan when no i2c support is present
            Add support for W83627EHF voltage inputs and alarms
            Add support for the smsc47m192 driver
            Fix all memory leaks (yeah!)
            Fix no sensors being reported as an error
            Add support for the IT8716F and IT8718F chips
+           Add support for the W83793 chip (Yuan Mu)
   Makefile: Don't grep autoconf.h on user-space targets
             Fix depmod on non-running kernel version
   Module i2c-ali1535: Drop redundant semaphore (2.6 backport)
@@ -49,6 +51,7 @@ lm_sensors CHANGES file
                    Add it8716 and it8718 support
                    Make each it87 fan and fan div optional
                    Print missing w83791d values
+                   Add w83793 support (Yuan Mu)
   Program sensors-detect: Add ServerWorks HT-1000 SMBus detection
                           Add ATI IXP200/300/400 SMBus detection
                           Prevent warning on 64-bit PCI addresses

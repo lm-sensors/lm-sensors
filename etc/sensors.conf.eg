@@ -793,6 +793,39 @@ chip "w83792d-*"
 #    ignore fan7
 #    ignore temp3
 
+
+# Here are configurations for Winbond W83793 chip.
+chip "w83793-*"
+
+    label in0 "VCoreA"
+    label in1 "VCoreB"
+    label in2 "Vtt"
+    label in5 "+3.3V"
+    label in6 "+12V"
+    label in7 "+5V"
+    label in8 "5VSB"
+    label in9 "VBAT"
+
+    compute in6 12*@ ,  @/12
+
+    label temp1 "CPU1 Temp"
+    label temp2 "CPU2 Temp"
+    
+# fan1 adjustments examples
+
+#   set fan1_min 1500
+
+# temp2 limits examples
+
+#   set temp2_max       45
+#   set temp2_max_hyst  40
+
+# ignore examples
+
+#    ignore fan7
+#    ignore temp3
+
+
 chip "as99127f-*"
 
 # Asus won't release a datasheet so this is guesswork.

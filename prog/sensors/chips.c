@@ -2958,6 +2958,66 @@ void print_w83627ehf(const sensors_chip_name *name)
   }
 }
 
+void print_w83793(const sensors_chip_name *name)
+{
+  char *label;
+  int i, valid;
+  double cur, min, max, over, hyst, alarm;
+
+  for (i = 0; i < 10; i++) {
+    if (!sensors_get_label_and_valid(*name,SENSORS_W83793_IN(i),
+                                     &label, &valid) &&
+        !sensors_get_feature(*name, SENSORS_W83793_IN(i), &cur) &&
+        !sensors_get_feature(*name, SENSORS_W83793_IN_MIN(i), &min) &&
+        !sensors_get_feature(*name, SENSORS_W83793_IN_MAX(i), &max) &&
+        !sensors_get_feature(*name, SENSORS_W83793_IN_ALARM(i), &alarm)) {
+      if (valid) {
+        print_label(label, 10);
+        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+               cur, min, max, alarm ? "ALARM" : "");
+      }
+    } else
+      printf("ERROR: Can't get IN%d data!\n", i);
+    free(label);
+  }
+
+  for (i = 1; i <= 12; i++) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_W83793_FAN(i),
+                                     &label, &valid) &&
+        !sensors_get_feature(*name, SENSORS_W83793_FAN(i), &cur) &&
+        !sensors_get_feature(*name, SENSORS_W83793_FAN_MIN(i), &min) &&
+        !sensors_get_feature(*name, SENSORS_W83793_FAN_ALARM(i), &alarm)) {
+      if (valid) {
+        print_label(label, 10);
+        printf("%4.0f RPM  (min = %4.0f RPM)                   %s\n",
+               cur, min, alarm ? "ALARM" : "");
+      }
+    } else if (i <= 5)
+      printf("ERROR: Can't get FAN%d data!\n", i);
+    free(label);
+  }
+
+  for (i = 1; i <= 6; i++) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_W83793_TEMP(i),
+                                     &label, &valid) &&
+        !sensors_get_feature(*name, SENSORS_W83793_TEMP(i), &cur) &&
+        !sensors_get_feature(*name, SENSORS_W83793_TEMP_CRIT(i), &over) &&
+        !sensors_get_feature(*name, SENSORS_W83793_TEMP_CRIT_HYST(i), &hyst) &&
+        !sensors_get_feature(*name, SENSORS_W83793_TEMP_ALARM(i), &alarm)) {
+      if (valid) {
+        print_label(label, 10);
+        print_temp_info(cur, over, hyst, HYST, i <= 4 ? 1 : 0, i <= 4 ? 1 : 0);
+        printf(" %s\n", alarm ? "ALARM" : "");
+      }
+    } else
+      printf("ERROR: Can't get TEMP%d data!\n", i);
+    free(label);
+  }
+
+  print_vid_info(name, SENSORS_W83793_VID0, SENSORS_W83793_VRM);
+  print_vid_info(name, SENSORS_W83793_VID1, SENSORS_W83793_VRM);
+}
+
 void print_maxilife(const sensors_chip_name *name)
 {
    char  *label;

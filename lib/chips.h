@@ -728,6 +728,29 @@
 #define SENSORS_W83792D_FAN7_DIV 77 /* RW */
 
 
+/* Winbond W83793R chip */
+#define SENSORS_W83793_PREFIX "w83793"
+
+#define SENSORS_W83793_IN(n)		(0 + (n))  /* n(0-9) R */
+#define SENSORS_W83793_IN_MIN(n)	(20 + (n)) /* n(0-9) RW */
+#define SENSORS_W83793_IN_MAX(n)	(40 + (n)) /* n(0-9) RW */
+#define SENSORS_W83793_IN_ALARM(n)	(60 + (n)) /* n(0-9) R */
+
+#define SENSORS_W83793_FAN(n)		(80 + (n))  /* n(1-12) R */
+#define SENSORS_W83793_FAN_MIN(n)	(100 + (n)) /* n(1-12) RW */
+#define SENSORS_W83793_FAN_ALARM(n)	(120 + (n)) /* n(1-12) R */
+
+
+#define SENSORS_W83793_TEMP(n)		(140 + (n)) /* n(1-6) R */
+#define SENSORS_W83793_TEMP_CRIT(n)	(160 + (n)) /* n(1-6) RW */
+#define SENSORS_W83793_TEMP_CRIT_HYST(n) (180 + (n)) /* n(1-6) RW */
+#define SENSORS_W83793_TEMP_ALARM(n)	(200 + (n)) /* n(1-6) R */
+
+#define SENSORS_W83793_VID0		221 /* R */
+#define SENSORS_W83793_VID1		222 /* R */
+#define SENSORS_W83793_VRM		230 /* RW */
+#define SENSORS_W83793_CHASSIS		240 /* RW */
+
 
 #define SENSORS_AS99127F_PREFIX "as99127f"
 

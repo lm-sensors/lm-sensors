@@ -42,6 +42,7 @@ extern void print_lm80(const sensors_chip_name *name);
 extern void print_lm85(const sensors_chip_name *name);
 extern void print_w83781d(const sensors_chip_name *name);
 extern void print_w83792d(const sensors_chip_name *name);
+extern void print_w83793(const sensors_chip_name *name);
 extern void print_w83l785ts(const sensors_chip_name *name);
 extern void print_w83627ehf(const sensors_chip_name *name);
 extern void print_maxilife(const sensors_chip_name *name);
