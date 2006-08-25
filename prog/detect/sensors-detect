@@ -2384,11 +2384,10 @@ sub adapter_pci_detection
   adapter_pci_detection_sis_96x();
 
   # Generic detection loop
-  while ( ($key, $device) = each %pci_list) {
-    foreach $try (@pci_adapters) {
-      if ($try->{vendid} == $device->{vendid} &&
-          $try->{devid} == $device->{devid} &&
-          (!defined($try->{func}) || $try->{func} == $device->{func})) {
+  foreach $try (@pci_adapters) {
+    $key = sprintf("%04x:%04x", $try->{vendid}, $try->{devid});
+    if (exists $pci_list{$key}) {
+        $device = $pci_list{$key};
         printf "Use driver `%s' for device %02x:%02x.%x: %s\n",
                $try->{driver},
                $device->{bus},$device->{slot},$device->{func},$try->{procid};
@@ -2401,7 +2400,6 @@ sub adapter_pci_detection
           print "\n";
         }
         push @res,$try->{driver};
-      }
     }
   }
   if (! @res) {
