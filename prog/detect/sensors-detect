@@ -4,6 +4,7 @@
 #    sensors-detect - Detect PCI bus and chips
 #    Copyright (C) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
 #    Copyright (C) 2000 - 2004  The lm_sensors team
+#    Copyright (C) 2005 - 2006  Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
