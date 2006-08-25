@@ -1111,7 +1111,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "Winbond W83793R/G",
-       driver => "to-be-written",
+       driver => "w83793",
        i2c_addrs => [0x2c..0x2f],
        i2c_detect => sub { w83793_detect(0, @_); },
      },
@@ -2876,7 +2876,7 @@ sub scan_adapter
         if (exists $modules_supported{$driver}) {
           add_i2c_to_chips_detected($driver, $new_hash);
         } else {
-          print "    (note: this is NOT a sensor chip!)\n";
+          print "    (note: this is probably NOT a sensor chip!)\n";
         }    
       } else {
         printf("Client at address 0x%02x can not be probed - ".
