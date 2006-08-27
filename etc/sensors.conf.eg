@@ -878,7 +878,7 @@ chip "as99127f-*"
     label temp1 "M/B Temp"
     label temp2 "CPU Temp"
 # However, some boards have them swapped (A7N8X Deluxe rev.2,
-# A7N8X-E Deluxe rev.2, A7N8X-X, CUV4X):
+# A7N8X-E Deluxe rev.2, CUV4X):
 #   label temp1 "CPU Temp"
 #   label temp2 "M/B Temp"
 
@@ -915,10 +915,6 @@ chip "as99127f-*"
 #    set temp2_hyst 47
 #    set temp3_over 52
 #    set temp3_hyst 47
-
-# The A7N8X-X board is known to need this:
-# (reported by Roberto Sebastiano <robs@multiplayer.it>)
-#    compute fan1  @/2,  2*@
 
 
 chip "gl518sm-*"
