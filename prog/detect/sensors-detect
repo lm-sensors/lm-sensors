@@ -3127,7 +3127,7 @@ sub lm78_detect
 
 # $_[0]: Chip to detect (0 = LM78, 1 = LM78-J, 2 = LM79)
 # $_[1]: Address
-# Returns: undef if not detected, 7 if detected.
+# Returns: undef if not detected, 6 if detected.
 # Note: Only address 0x290 is scanned at this moment.
 sub lm78_isa_detect
 {
@@ -3148,6 +3148,11 @@ sub lm78_isa_detect
   return unless ($chip == 0 and ($reg == 0x00 or $reg == 0x20)) or
                 ($chip == 1 and $reg == 0x40) or
                 ($chip == 2 and ($reg & 0xfe) == 0xc0);
+
+  # Explicitely prevent misdetection of Winbond chips
+  $reg = &$readproc(0x4f);
+  return if $reg == 0xa3 || $reg == 0x5c;
+
   return 6;
 }
 
