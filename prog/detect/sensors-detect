@@ -1056,10 +1056,42 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { lm85_detect(0x5c, @_); },
      },
      {
+       name => "Analog Devices ADT7462",
+       driver => "to-be-written",
+       # The datasheet says addresses 0x5C and 0x58, but I guess these are
+       # left-aligned values
+       i2c_addrs => [0x2c, 0x2e],
+       i2c_detect => sub { adt7467_detect(2, @_); },
+     },
+     {
+       name => "Analog Devices ADT7466",
+       driver => "to-be-written",
+       i2c_addrs => [0x4c],
+       i2c_detect => sub { adt7467_detect(3, @_); },
+     },
+     {
        name => "Analog Devices ADT7467 or ADT7468",
        driver => "to-be-written",
        i2c_addrs => [0x2e],
        i2c_detect => sub { adt7467_detect(0, @_); },
+     },
+     {
+       name => "Analog Devices ADT7470",
+       driver => "to-be-written",
+       i2c_addrs => [0x2c, 0x2e, 0x2f],
+       i2c_detect => sub { adt7467_detect(4, @_); },
+     },
+     {
+       name => "Analog Devices ADT7473",
+       driver => "to-be-written",
+       i2c_addrs => [0x2e],
+       i2c_detect => sub { adt7473_detect(0, @_); },
+     },
+     {
+       name => "Analog Devices ADT7475",
+       driver => "to-be-written",
+       i2c_addrs => [0x2e],
+       i2c_detect => sub { adt7473_detect(1, @_); },
      },
      {
        name => "Analog Devices ADT7476",
@@ -1429,6 +1461,18 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        driver => "adm1031",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { adm1031_detect(1, @_); },
+     },
+     {
+       name => "Analog Devices ADM1033",
+       driver => "to-be-written",
+       i2c_addrs => [0x50..0x53],
+       i2c_detect => sub { adm1034_detect(0, @_); },
+     },
+     {
+       name => "Analog Devices ADM1034",
+       driver => "to-be-written",
+       i2c_addrs => [0x50..0x53],
+       i2c_detect => sub { adm1034_detect(1, @_); },
      },
      {
        name => "Analog Devices ADM1022",
@@ -3709,7 +3753,41 @@ sub adm1031_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = ADT7467/ADT7468, 1 = ADT7674)
+#   (0 = ADM1033, 1 = ADM1034)
+# $_[1]: A reference to the file descriptor to access this chip.
+# $_[2]: Address (unused)
+# Returns: undef if not detected, 4 or 6 if detected.
+# Registers used:
+#   0x3d: Chip ID
+#   0x3e: Manufacturer ID
+#   0x3f: Die revision
+sub adm1034_detect
+{
+  my ($chip, $file, $addr) = @_;
+  my $mid = i2c_smbus_read_byte_data($file, 0x3e);
+  my $cid = i2c_smbus_read_byte_data($file, 0x3d);
+  my $drev = i2c_smbus_read_byte_data($file, 0x3f);
+
+  if ($chip == 0) {
+    return if $mid != 0x41;     # Analog Devices
+    return if $cid != 0x33;     # ADM1033
+    return if ($drev & 0xf8) != 0x00;
+    return 6 if $drev == 0x02;
+    return 4;
+  }
+  if ($chip == 1) {
+    return if $mid != 0x41;     # Analog Devices
+    return if $cid != 0x34;     # ADM1034
+    return if ($drev & 0xf8) != 0x00;
+    return 6 if $drev == 0x02;
+    return 4;
+  }
+  return
+}
+
+# $_[0]: Chip to detect
+#   (0 = ADT7467/ADT7468, 1 = ADT7476, 2 = ADT7462, 3 = ADT7466,
+#    4 = ADT7470)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -3737,6 +3815,54 @@ sub adt7467_detect
     return if $cid != 0x76;     # ADT7476
     return if ($drev & 0xf0) != 0x60;
     return 7 if ($drev == 0x69);
+    return 5;
+  }
+  if ($chip == 2) {
+    return if $mid != 0x41;     # Analog Devices
+    return if $cid != 0x62;     # ADT7462
+    return if ($drev & 0xf0) != 0x00;
+    return 7 if ($drev == 0x04);
+    return 5;
+  }
+  if ($chip == 3) {
+    return if $mid != 0x41;     # Analog Devices
+    return if $cid != 0x66;     # ADT7466
+    return if ($drev & 0xf0) != 0x00;
+    return 7 if ($drev == 0x02);
+    return 5;
+  }
+  if ($chip == 4) {
+    return if $mid != 0x41;     # Analog Devices
+    return if $cid != 0x70;     # ADT7470
+    return if ($drev & 0xf0) != 0x00;
+    return 7 if ($drev == 0x00);
+    return 5;
+  }
+  return
+}
+
+# $_[0]: Chip to detect
+#   (0 = ADT7473, 1 = ADT7475)
+# $_[1]: A reference to the file descriptor to access this chip.
+# $_[2]: Address (unused)
+# Returns: undef if not detected, 5 if detected.
+# Registers used:
+#   0x3d: Chip ID
+#   0x3e: Manufacturer ID
+sub adt7473_detect
+{
+  my ($chip, $file, $addr) = @_;
+  my $mid = i2c_smbus_read_byte_data($file, 0x3e);
+  my $cid = i2c_smbus_read_byte_data($file, 0x3d);
+
+  if ($chip == 0) {
+    return if $mid != 0x41;     # Analog Devices
+    return if $cid != 0x73;     # ADT7473
+    return 5;
+  }
+  if ($chip == 1) {
+    return if $mid != 0x41;     # Analog Devices
+    return if $cid != 0x75;     # ADT7475
     return 5;
   }
   return
