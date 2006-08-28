@@ -15,6 +15,7 @@ lm_sensors CHANGES file
            Fix no sensors being reported as an error
            Add support for the IT8716F and IT8718F chips
            Add support for the W83793 chip (Yuan Mu)
+           Map the 2.6 adm1026's fan8 to fan0
   Makefile: Don't grep autoconf.h on user-space targets
             Fix depmod on non-running kernel version
   Module i2c-ali1535: Drop redundant semaphore (2.6 backport)
