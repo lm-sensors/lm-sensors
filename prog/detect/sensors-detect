@@ -5247,6 +5247,12 @@ sub main
 {
   my (@adapters,$res,$did_adapter_detection,$adapter);
 
+  # We won't go very far if not root
+  unless ($> == 0) {
+    print "You need to be root to run this script.\n";
+    exit -1;
+  }
+
   initialize_conf;
   initialize_proc_pci;
   initialize_modules_list;
@@ -5257,8 +5263,6 @@ sub main
   print "\nThis program will help you determine which I2C/SMBus modules you need to\n",
         "load to use lm_sensors most effectively. You need to have i2c and\n",
         "lm_sensors installed before running this program.\n";
-  print "Also, you need to be `root', or at least have access to the $dev_i2c*\n",
-        "files, for most things.\n";
   print "If you have patched your kernel and have some drivers built in, you can\n",
         "safely answer NO if asked to load some modules. In this case, things may\n",
         "seem a bit confusing, but they will still work.\n\n";
@@ -5266,7 +5270,6 @@ sub main
         "questions, unless you know what you're doing.\n\n";
 
   print " We can start with probing for (PCI) I2C or SMBus adapters.\n";
-  print " You do not need any special privileges for this.\n";
   print " Do you want to probe now? (YES/no): ";
   @adapters = adapter_pci_detection 
                         if ($did_adapter_detection = not <STDIN> =~ /\s*[Nn]/);
@@ -5276,9 +5279,6 @@ sub main
   if (not $did_adapter_detection) {
     print "As you skipped adapter detection, we will only scan already loaded\n".
           "adapter modules.\n";
-  } elsif ($> != 0) {
-    print "As you are not root, we can't load adapter modules. We will only scan\n".
-          "already loaded adapters.\n";
   } else {
     print "We will now try to load each adapter module in turn.\n";
     foreach $adapter (@adapters) {
@@ -5310,25 +5310,13 @@ sub main
   if (exists($modules_list{"i2c-dev"})) {
     print "i2c-dev is already loaded.\n";
   } else {
-    if ($> != 0) {
-      print " i2c-dev is not loaded. As you are not root, we will just hope ",
-            "you edited\n",
-            " `$modules_conf' for automatic loading of\n",
-            " this module. If not, you won't be able to open any $dev_i2c* file.\n";
+    print "i2c-dev is not loaded. Do you want to load it now? (YES/no): ";
+    if (<STDIN> =~ /^\s*n/i) {
+      print "Well, you will know best.\n";
+    } elsif (system "modprobe", "i2c-dev") {
+      print "Loading failed, expect problems later on.\n";
     } else {
-      print " i2c-dev is not loaded. Do you want to load it now? (YES/no): ";
-      if (<STDIN> =~ /^\s*[Nn]/) {
-        print " Well, you will know best. We will just hope you edited ",
-              "`$modules_conf'\n",
-              " for automatic loading of this module. If not,\n",
-              " you won't be able to open any $dev_i2c* file (unless you",
-              "have it built-in\n",
-              " into your kernel)\n";
-      } elsif (system "modprobe","i2c-dev") {
-        print " Loading failed, expect problems later on.\n";
-      } else {
-        print " Module loaded successfully.\n";
-      }
+      print "Module loaded successfully.\n";
     }
   }
 
@@ -5378,33 +5366,25 @@ sub main
         "typically a bit more dangerous, as we have to write to I/O ports to do\n".
 	"this. This is usually safe though.\n".
         "Yes, you do have ISA I/O ports even if you do not have any ISA slots!\n\n";
-  if ($> != 0) {
-    print "As you are not root, we shall skip this step.\n";
-  } else {
-    print "Do you want to scan the ISA I/O ports? (YES/no): ";
-    unless (<STDIN> =~ /^\s*n/i) {
-      initialize_ioports();
-      scan_isa_bus();
-      close_ioports();
-    }
+  print "Do you want to scan the ISA I/O ports? (YES/no): ";
+  unless (<STDIN> =~ /^\s*n/i) {
+    initialize_ioports();
+    scan_isa_bus();
+    close_ioports();
   }
 
   print "\nSome Super I/O chips may also contain sensors. Super I/O probes are\n".
         "typically a bit more dangerous, as we have to write to I/O ports to do\n".
         "this. This is usually safe though.\n\n";
-  if ($> != 0) {
-    print "As you are not root, we shall skip this step.\n";
-  } else {
-    print "Do you want to scan for Super I/O sensors? (YES/no): ";
+  print "Do you want to scan for Super I/O sensors? (YES/no): ";
+  unless (<STDIN> =~ /^\s*n/i) {
+    initialize_ioports();
+    scan_superio(0x2e, 0x2f);
+    print "\nDo you want to scan for secondary Super I/O sensors? (YES/no): ";
     unless (<STDIN> =~ /^\s*n/i) {
-      initialize_ioports();
-      scan_superio(0x2e, 0x2f);
-      print "\nDo you want to scan for secondary Super I/O sensors? (YES/no): ";
-      unless (<STDIN> =~ /^\s*n/i) {
-        scan_superio(0x4e, 0x4f);
-      }
-      close_ioports();
+      scan_superio(0x4e, 0x4f);
     }
+    close_ioports();
   }
 
   if(! @chips_detected) {
@@ -5480,18 +5460,15 @@ sub main
   my $have_sysconfig = -d '/etc/sysconfig';
   print "\nDo you want to generate /etc/sysconfig/lm_sensors? (".
     ($have_sysconfig?"YES/no":"yes/NO")."): ";
-  if ($> != 0) {
-    print "\nAs you are not root, we shall skip this step.\n";
-  } else {
-    $_ = <STDIN>;
-    if (($have_sysconfig and not m/^\s*[Nn]/) or m/^\s*[Yy]/) {
-      unless ($have_sysconfig) {
-        mkdir '/etc/sysconfig', 0777
-          or die "Sorry, can't create /etc/sysconfig ($!)?!?";
-      }
-      open(local *SYSCONFIG, ">/etc/sysconfig/lm_sensors")
-        or die "Sorry, can't create /etc/sysconfig/lm_sensors ($!)?!?";
-      print SYSCONFIG <<'EOT';
+  $_ = <STDIN>;
+  if (($have_sysconfig and not m/^\s*n/i) or m/^\s*y/i) {
+    unless ($have_sysconfig) {
+      mkdir '/etc/sysconfig', 0777
+        or die "Sorry, can't create /etc/sysconfig ($!)";
+    }
+    open(local *SYSCONFIG, ">/etc/sysconfig/lm_sensors")
+      or die "Sorry, can't create /etc/sysconfig/lm_sensors ($!)";
+    print SYSCONFIG <<'EOT';
 #    /etc/sysconfig/sensors - Defines modules loaded by /etc/rc.d/init.d/lm_sensors
 #    Copyright (c) 1998 - 2001  Frodo Looijaard <frodol@dds.nl>
 #
@@ -5523,20 +5500,19 @@ sub main
 # List the modules that are to be loaded for your system
 #
 EOT
-      print SYSCONFIG
-       "# Generated by sensors-detect on " . scalar localtime() . "\n";
-      my @modules = grep /^modprobe /, split "\n", $modprobes;
-      my $i = 0;
-      my $sysconfig = "";
-      foreach (@modules) {
-        s/^modprobe //;
-        $sysconfig .= "MODULE_$i=$_\n";
-        $i++;
-      }
-      print SYSCONFIG $sysconfig;
-      print "Copy prog/init/lm_sensors.init to /etc/rc.d/init.d/lm_sensors\n";
-      print "for initialization at boot time.\n";
+    print SYSCONFIG
+      "# Generated by sensors-detect on " . scalar localtime() . "\n";
+    my @modules = grep /^modprobe /, split "\n", $modprobes;
+    my $i = 0;
+    my $sysconfig = "";
+    foreach (@modules) {
+      s/^modprobe //;
+      $sysconfig .= "MODULE_$i=$_\n";
+      $i++;
     }
+    print SYSCONFIG $sysconfig;
+    print "Copy prog/init/lm_sensors.init to /etc/rc.d/init.d/lm_sensors\n";
+    print "for initialization at boot time.\n";
   }
 }
 
