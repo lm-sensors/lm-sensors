@@ -5259,21 +5259,21 @@ sub main
   initialize_modules_supported;
   initialize_kernel_version;
 
-  print "# sensors-detect revision $revision\n";
-  print "\nThis program will help you determine which I2C/SMBus modules you need to\n",
-        "load to use lm_sensors most effectively. You need to have i2c and\n",
-        "lm_sensors installed before running this program.\n";
-  print "If you have patched your kernel and have some drivers built in, you can\n",
-        "safely answer NO if asked to load some modules. In this case, things may\n",
-        "seem a bit confusing, but they will still work.\n\n";
-  print "It is generally safe and recommended to accept the default answers to all\n",
-        "questions, unless you know what you're doing.\n\n";
+  print "# sensors-detect revision $revision\n\n";
 
-  print " We can start with probing for (PCI) I2C or SMBus adapters.\n";
-  print " Do you want to probe now? (YES/no): ";
+  print "This program will help you determine which kernel modules you need\n",
+        "to load to use lm_sensors most effectively. It is generally safe\n",
+        "and recommended to accept the default answers to all questions,\n",
+        "unless you know what you're doing.\n";
+  print "You need to have i2c and lm_sensors installed before running this\n",
+        "program.\n"
+    unless kernel_version_at_least(2, 6, 0);
+  print "\n";
+
+  print "We can start with probing for (PCI) I2C or SMBus adapters.\n";
+  print "Do you want to probe now? (YES/no): ";
   @adapters = adapter_pci_detection 
                         if ($did_adapter_detection = not <STDIN> =~ /\s*[Nn]/);
-
   print "\n";
 
   if (not $did_adapter_detection) {
@@ -5305,12 +5305,11 @@ sub main
   print "If you have undetectable or unsupported adapters, you can have them\n".
         "scanned by manually loading the modules before running this script.\n\n";
 
-  print " To continue, we need module `i2c-dev' to be loaded.\n";
-  print " If it is built-in into your kernel, you can safely skip this.\n";
-  if (exists($modules_list{"i2c-dev"})) {
-    print "i2c-dev is already loaded.\n";
-  } else {
-    print "i2c-dev is not loaded. Do you want to load it now? (YES/no): ";
+  if (!exists($modules_list{"i2c-dev"}) && ! -e "/sys/class/i2c-dev") {
+    print "To continue, we need module `i2c-dev' to be loaded.\n";
+    print "If it is built-in into your kernel, you can safely skip this.\n"
+      unless kernel_version_at_least(2, 6, 0);
+    print "Do you want to load `i2c-dev' now? (YES/no): ";
     if (<STDIN> =~ /^\s*n/i) {
       print "Well, you will know best.\n";
     } elsif (system "modprobe", "i2c-dev") {
@@ -5318,22 +5317,18 @@ sub main
     } else {
       print "Module loaded successfully.\n";
     }
+    print "\n";
   }
 
   # Before looking for chips, make sure any special case chips are
   # added to the chip_ids list
   chip_special_cases();
 
-  print "\n We are now going to do the adapter probings. Some adapters may ",
-        "hang halfway\n",
-        " through; we can't really help that. Also, some chips will be double ",
-        "detected;\n",
-        " we choose the one with the highest confidence value in that case.\n",
-        " If you found that the adapter hung after probing a certain address, ",
-        "you can\n",
-        " specify that address to remain unprobed. That ",
-        "often\n",
-        " includes address 0x69 (clock chip).\n";
+  print "We are now going to do the I2C/SMBus adapter probings. Some chips may\n",
+        "be double detected; we choose the one with the highest confidence value\n",
+        "in that case.\n",
+        "If you found that the adapter hung after probing a certain address, you\n",
+        "can specify that address to remain unprobed.\n";
 
   my ($inp,@not_to_scan,$inp2);
   # i2cdetect -l either cats /proc/bus/i2c or scans sysfs for the same information
@@ -5361,21 +5356,21 @@ sub main
     scan_adapter $dev_nr, $adap, find_adapter_driver($adap),
                  \@not_to_scan   unless $inp =~ /^\s*[Nn]/;
   }
+  print "\n";
 
-  print "\nSome chips are also accessible through the ISA I/O ports. ISA probes are\n".
-        "typically a bit more dangerous, as we have to write to I/O ports to do\n".
-	"this. This is usually safe though.\n".
-        "Yes, you do have ISA I/O ports even if you do not have any ISA slots!\n\n";
+  print "Some chips are also accessible through the ISA I/O ports. We have to\n".
+        "write to arbitrary I/O ports to do this. This is usually safe though.\n".
+        "Yes, you do have ISA I/O ports even if you do not have any ISA slots!\n";
   print "Do you want to scan the ISA I/O ports? (YES/no): ";
   unless (<STDIN> =~ /^\s*n/i) {
     initialize_ioports();
     scan_isa_bus();
     close_ioports();
   }
+  print "\n";
 
-  print "\nSome Super I/O chips may also contain sensors. Super I/O probes are\n".
-        "typically a bit more dangerous, as we have to write to I/O ports to do\n".
-        "this. This is usually safe though.\n\n";
+  print "Some Super I/O chips may also contain sensors. We have to write to\n".
+        "standard I/O ports to do this. This is usually safe.\n";
   print "Do you want to scan for Super I/O sensors? (YES/no): ";
   unless (<STDIN> =~ /^\s*n/i) {
     initialize_ioports();
@@ -5386,21 +5381,21 @@ sub main
     }
     close_ioports();
   }
+  print "\n";
 
   if(! @chips_detected) {
-    print "\n Sorry, no chips were detected.\n",
-        " Either your sensors are not supported, or they are\n",
-	" connected to an I2C bus adapter that we do not support.\n",
-	" See doc/FAQ, doc/lm_sensors-FAQ.html, and\n",
-	" http://www.lm-sensors.org/wiki/FAQ\n",
-	" (FAQ #4.24.3) for further information.\n",
-	" If you find out what chips are on your board, see\n",
-	" http://www.lm-sensors.org/wiki/NewDrivers for driver status.\n";
+    print "Sorry, no sensors were detected.\n",
+          "Either your sensors are not supported, or they are connected to an\n",
+          "I2C or SMBus adapter that is not supported. See doc/FAQ,\n",
+          "doc/lm_sensors-FAQ.html or http://www.lm-sensors.org/wiki/FAQ\n",
+          "(FAQ #4.24.3) for further information.\n",
+          "If you find out what chips are on your board, see\n",
+          "http://www.lm-sensors.org/wiki/NewDrivers for driver status.\n";
     exit;
   }
 
-  print "\n Now follows a summary of the probes I have just done.\n";
-  print " Just press ENTER to continue: ";
+  print "Now follows a summary of the probes I have just done.\n".
+        "Just press ENTER to continue: ";
   <STDIN>;
 
   my ($chip,$data);
@@ -5435,30 +5430,35 @@ sub main
             "  laptops, for example.\n";
     }
   }
+  print "\n";
 
-  print "\n\n",
-        "I will now generate the commands needed to load the required modules.\n";
+  print "I will now generate the commands needed to load the required modules.\n".
+        "Just press ENTER to continue: ";
+  <STDIN>;
      
+  print "\n";
   my ($modprobes, $configfile) = generate_modprobes 1;	# 1 == prefer ISA
-  print "\nTo make the sensors modules behave correctly, add these lines to\n",
+  print "To make the sensors modules behave correctly, add these lines to\n".
         "$modules_conf:\n\n";
-  print "#----cut here----\n";
-  print $configfile;
-  print "#----cut here----\n";
-  print "\nTo load everything that is needed, add this to some /etc/rc* ",
-        "file:\n\n";
-  print "#----cut here----\n";
-  print $modprobes;
-  print "# sleep 2 # optional\n",
-        "/usr/local/bin/sensors -s # recommended\n";
-  print "#----cut here----\n";
-  print "\nWARNING! If you have some things built into your kernel, the list above\n",
-        "will contain too many modules. Skip the appropriate ones! You really should\n",
-        "try these commands right now to make sure everything is working properly.\n",
-        "Monitoring programs won't work until it's done.\n";
+  print "#----cut here----\n".
+        $configfile.
+        "#----cut here----\n\n";
+
+  print "To load everything that is needed, add this to some /etc/rc* file:\n\n";
+  print "#----cut here----\n".
+        $modprobes.
+        "# sleep 2 # optional\n".
+        "/usr/local/bin/sensors -s # recommended\n".
+        "#----cut here----\n\n";
+
+  print "If you have some drivers built into your kernel, the list above will\n".
+        "contain too many modules. Skip the appropriate ones! You really\n".
+        "should try these commands right now to make sure everything is\n".
+        "working properly. Monitoring programs won't work until the needed\n".
+        "modules are loaded.\n\n";
   
   my $have_sysconfig = -d '/etc/sysconfig';
-  print "\nDo you want to generate /etc/sysconfig/lm_sensors? (".
+  print "Do you want to generate /etc/sysconfig/lm_sensors? (".
     ($have_sysconfig?"YES/no":"yes/NO")."): ";
   $_ = <STDIN>;
   if (($have_sysconfig and not m/^\s*n/i) or m/^\s*y/i) {
