@@ -31,6 +31,7 @@ lm_sensors CHANGES file
                     Add ATI IXP200, IXP300, IXP400 support (2.6 backport)
                     Drop the fix_hstcfg parameter (2.6 backport)
   Module i2c-viapro: Fix compilation with kernels < 2.4.21
+                     Add VT8237A and VT8251
   Module lm83: Add LM82 support (2.6 backport)
   Module w83781d: Use real-time alarm registers when possible (2.6 backport)
                   Add specific alarm and beep defines for the W83791D
@@ -76,6 +77,7 @@ lm_sensors CHANGES file
                            ADT7466, ADT7470, ADT7473 and ADT7475 detection
                           Check for root user at startup
                           Attempt to be slighly more user-friendly
+                          Add VT8237A and VT8251
 
 
 2.10.0 (20060214)

@@ -34,6 +34,8 @@
    VT8233A            0x3147             yes?
    VT8235             0x3177             yes
    VT8237R            0x3227             yes
+   VT8237A            0x3337             yes
+   VT8251             0x3287             yes
 
    Note: we assume there can only be one device, with one SMBus interface.
 */
@@ -60,6 +62,14 @@
 /* 8237 is undefined before kernel 2.4.21 */
 #ifndef PCI_DEVICE_ID_VIA_8237
 #define PCI_DEVICE_ID_VIA_8237	0x3227
+#endif
+/* 8237A is undefined as for the kernel 2.4.33 */
+#ifndef PCI_DEVICE_ID_VIA_8237A
+#define PCI_DEVICE_ID_VIA_8237A	0x3337
+#endif
+/* 8251 is undefined as for the kernel 2.4.33 */
+#ifndef PCI_DEVICE_ID_VIA_8251
+#define PCI_DEVICE_ID_VIA_8251	0x3287
 #endif
 
 #define SMBBA1		0x90
@@ -408,7 +418,9 @@ found:
 	dev_dbg(pdev, "VT596_smba = 0x%X\n", vt596_smba);
 
 	switch (id->device) {
+	case PCI_DEVICE_ID_VIA_8251:
 	case PCI_DEVICE_ID_VIA_8237:
+	case PCI_DEVICE_ID_VIA_8237A:
 	case PCI_DEVICE_ID_VIA_8235:
 	case PCI_DEVICE_ID_VIA_8233A:
 	case PCI_DEVICE_ID_VIA_8233_0:
@@ -485,10 +497,24 @@ static struct pci_device_id vt596_ids[] __initdata = {
 	},
 	{
 		.vendor		= PCI_VENDOR_ID_VIA,
+		.device 	= PCI_DEVICE_ID_VIA_8237A,
+		.subvendor	= PCI_ANY_ID,
+		.subdevice	= PCI_ANY_ID,
+		.driver_data	= SMBBA3
+	},
+	{
+		.vendor		= PCI_VENDOR_ID_VIA,
 		.device 	= PCI_DEVICE_ID_VIA_8231_4,
 		.subvendor	= PCI_ANY_ID,
 		.subdevice	= PCI_ANY_ID,
 		.driver_data	= SMBBA1,
+	},
+	{
+		.vendor		= PCI_VENDOR_ID_VIA,
+		.device 	= PCI_DEVICE_ID_VIA_8251,
+		.subvendor	= PCI_ANY_ID,
+		.subdevice	= PCI_ANY_ID,
+		.driver_data	= SMBBA3
 	},
 	{ 0, }
 };
