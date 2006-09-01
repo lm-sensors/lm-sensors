@@ -5092,9 +5092,7 @@ sub print_chips_report
         printf "ISA bus address 0x%04x (Busdriver `i2c-isa')\n", 
                $data->{isa_addr};
       } else {
-        print "ISA bus, undetermined address (Busdriver `i2c-isa')\n".
-              "    Hint: Try forcing the chip address. Consult the documentation\n".
-              "          of particular chip for details and address value.\n";
+        print "ISA bus, undetermined address (Busdriver `i2c-isa')\n";
       }
     }
     printf "    Chip `%s' (confidence: %d)\n",
@@ -5210,11 +5208,11 @@ sub generate_modprobes
        close INPUTFILE;
        #check return value from modprobe in case modprobe -l isn't supported
        if((($? >> 8) == 0) && ! $modulefound) {
-         $modprobes .= "# Warning: the required module $chip->{driver} is not currently installed on\n".
-                       "# your system. For status of 2.6 kernel ports see\n".
+         $modprobes .= "# Warning: the required module $chip->{driver} is not currently installed\n".
+                       "# on your system. For status of 2.6 kernel ports see\n".
                        "# http://www.lm-sensors.org/wiki/SupportedDevices and\n".
-		       "# http://www.lm-sensors.org/wiki/SupportedDevices. If driver is built\n".
-	               "# into the kernel, or unavailable, comment out the following line.\n";
+                       "# http://www.lm-sensors.org/wiki/NewDrivers. If driver is built\n".
+                       "# into the kernel, or unavailable, comment out the following line.\n";
        }
        $modprobes .= "modprobe $chip->{driver}\n";
     }
