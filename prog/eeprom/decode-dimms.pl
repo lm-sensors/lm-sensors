@@ -1077,9 +1077,16 @@ Version 2.10.1';
 
 
 my $dimm_count=0;
-if ($use_sysfs) { $_=`ls /sys/bus/i2c/drivers/eeprom`; }
-else { $_=`ls /proc/sys/dev/sensors/`; }
-my @dimm_list=split();
+my @dimm_list;
+my $dir;
+if ($use_sysfs) { $dir = '/sys/bus/i2c/drivers/eeprom'; }
+else { $dir = '/proc/sys/dev/sensors'; }
+if (-d $dir) {
+	@dimm_list = split(/\s+/, `ls $dir`);
+} elsif (! -d '/sys/module/eeprom') {
+	print "No EEPROM found, are you sure the eeprom module is loaded?\n";
+	exit;
+}
 
 for my $i ( 0 .. $#dimm_list ) {
 	$_=$dimm_list[$i];
