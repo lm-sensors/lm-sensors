@@ -1430,7 +1430,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { ite_detect(0, @_); },
      },
      {
-       name => "ITE IT8201R/IT8203R/IT8206R/IT8266R overclocking controller",
+       name => "ITE IT8201R/IT8203R/IT8206R/IT8266R",
        driver => "not-a-sensor",
        i2c_addrs => [0x4e],
        i2c_detect => sub { ite_overclock_detect(@_); },
@@ -1643,6 +1643,7 @@ $chip_kern26_w83791d = {
 #      I2C bus number, and the I2C address.
 @superio_ids = (
   {
+    family => "ITE",
     enter =>
     {
       0x2e => [0x87, 0x01, 0x55, 0x55],
@@ -1684,6 +1685,7 @@ $chip_kern26_w83791d = {
     ],
   },
   {
+    family => "National Semiconductor",
     enter =>
     {
       0x2e => [],
@@ -1804,12 +1806,12 @@ $chip_kern26_w83791d = {
     ],
   },
   {
+    family => "SMSC",
     enter =>
     {
       0x2e => [0x55],
       0x4e => [0x55],
     },
-    exit => [0xaa],
     chips =>
     [
       {
@@ -1873,12 +1875,12 @@ $chip_kern26_w83791d = {
     ],
   },
   {
+    family => "VIA/Winbond/Fintek",
     enter =>
     {
       0x2e => [0x87, 0x87],
       0x4e => [0x87, 0x87],
     },
-    exit => [0xaa],
     chips =>
     [
       {
@@ -1925,6 +1927,22 @@ $chip_kern26_w83791d = {
 	logdev => 0x0b,
       },
       {
+	name => "Winbond W83627EHF/EHG Super IO Sensors",
+	driver => "w83627ehf",
+	# W83627EHF datasheet says 0x886x but 0x8853 was seen, thus the
+	# broader mask. W83627EHG was seen with ID 0x8863.
+	devid => 0x8840,
+	devid_mask => 0xFFC0,
+	logdev => 0x0b,
+      },
+      {
+	name => "Winbond W83627DHG Super IO Sensors",
+	driver => "w83627ehf",
+	devid => 0xA020,
+	devid_mask => 0xFFF0,
+	logdev => 0x0b,
+      },
+      {
 	name => "Winbond W83L517D Super IO",
 	driver => "not-a-sensor",
 	devid => 0x61,
@@ -1948,32 +1966,6 @@ $chip_kern26_w83791d = {
       },
     ],
   },
-  {
-    enter =>
-    {
-      0x2e => [0x87, 0x87],
-      0x4e => [0x87, 0x87],
-    },
-    chips =>
-    [
-      {
-	name => "Winbond W83627EHF/EHG Super IO Sensors",
-	driver => "w83627ehf",
-	# W83627EHF datasheet says 0x886x but 0x8853 was seen, thus the
-	# broader mask. W83627EHG was seen with ID 0x8863.
-	devid => 0x8840,
-	devid_mask => 0xFFC0,
-	logdev => 0x0b,
-      },
-      {
-	name => "Winbond W83627DHG Super IO Sensors",
-	driver => "w83627ehf",
-	devid => 0xA020,
-	devid_mask => 0xFFF0,
-	logdev => 0x0b,
-      },
-    ]
-  }
 );
 
 #######################
@@ -2899,21 +2891,74 @@ sub scan_isa_bus
   }
 }
 
+use vars qw(%superio);
+
+%superio = (
+  devidreg => 0x20,
+  logdevreg => 0x07,
+  actreg => 0x30,
+  actmask => 0x01,
+  basereg => 0x60,
+);
+
 sub exit_superio
 {
-  my ($addrreg, $datareg, $family, $success) = @_;
+  my ($addrreg, $datareg) = @_;
 
-  # If detection succeeded and an exit sequence exists, use it
-  if ($success && defined ($family->{exit})) {
-    foreach my $byte (@{$family->{exit}}) {
-      outb($addrreg, $byte);
-    }
+  # Some chips (SMSC, Winbond) want this
+  outb($addrreg, 0xaa);
+
+  # Return to "Wait For Key" state (PNP-ISA spec)
+  outb($addrreg, 0x02);
+  outb($datareg, 0x02);
+}
+
+sub probe_superio($$$)
+{
+  my ($addrreg, $datareg, $chip) = @_;
+  my ($val, $addr);
+
+  printf "\%-60s",  "Found `$chip->{name}'";
+
+  # Does it have hardware monitoring capabilities?
+  if (!exists $chip->{driver}) {
+    print "\n    (no information available)\n";
+    return;
+  }
+  if ($chip->{driver} eq "not-a-sensor") {
+    print "\n    (no hardware monitoring capabilities)\n";
     return;
   }
 
-  # Else return to "Wait For Key" state (PNP-ISA spec)
-  outb($addrreg, 0x02);
-  outb($datareg, 0x02);
+  # Switch to the sensor logical device
+  outb($addrreg, $superio{logdevreg});
+  outb($datareg, $chip->{logdev});
+
+  # Check the activation register
+  outb($addrreg, $superio{actreg});
+  $val = inb($datareg);
+  if (!($val & $superio{actmask})) {
+    print "\n    (but not activated)\n";
+    return;
+  }
+
+  # Get the IO base register
+  outb($addrreg, $superio{basereg});
+  $addr = inb($datareg);
+  outb($addrreg, $superio{basereg} + 1);
+  $addr = ($addr << 8) | inb($datareg);
+  if ($addr == 0) {
+    print "\n    (but no address specified)\n";
+    return;
+  }
+  print "Success!\n";
+  printf "    (address 0x\%x, driver `%s')\n", $addr, $chip->{driver};
+  my $new_hash = { conf => 9,
+                   isa_addr => $addr,
+                   chipname => $chip->{name}
+                 };
+  add_isa_to_chips_detected $chip->{alias_detect},$chip->{driver},
+                                        $new_hash;
 }
 
 # The following are taken from the PNP ISA spec (so it's supposed
@@ -2926,82 +2971,40 @@ sub exit_superio
 sub scan_superio
 {
   my ($addrreg, $datareg) = @_;
-  my ($val, $addr, $name);
+  my ($val, $found);
 
-  my %superio = (
-    devidreg => 0x20,
-    logdevreg => 0x07,
-    actreg => 0x30,
-    actmask => 0x01,
-    basereg => 0x60,
-  );
-  
   printf("Probing for Super-I/O at 0x\%x/0x\%x\n", $addrreg, $datareg);
 
   FAMILY: 
   foreach my $family (@superio_ids) {
+    printf("\%-60s", "Trying family `$family->{family}'... ");
 # write the password
     foreach $val (@{$family->{enter}->{$addrreg}}) {
       outb($addrreg, $val);
     }
-    foreach my $chip (@{$family->{chips}}) {
-      $name = $chip->{name};
-      $name =~ s/ Super IO//;
-      printf("\%-60s", sprintf("Probing for `\%s'... ", $name));
-# check the device ID
-      outb($addrreg, $superio{devidreg});
-      $val = inb($datareg);
-      if ($val == 0x00 || $val == 0xff) {
-	print "No\n";
-	exit_superio($addrreg, $datareg, $family, 0);
-	next FAMILY;
-      }
-      if ($chip->{devid}>0xff) {
-        outb($addrreg, $superio{devidreg} + 1);
-        $val = ($val << 8) | inb($datareg);
-      }
-      if (($val & ($chip->{devid_mask} || 0xffff)) != $chip->{devid}) {
-        printf "No (0x%0*x)\n", $chip->{devid}>0xff ? 4 : 2, $val;
-	next;
-      }
-      print "Success!\n";
-# does it have hardware monitoring capabilities
-      if (!exists $chip->{driver}) {
-	print "    (no information available)\n";
-	next;
-      }
-      if($chip->{driver} eq "not-a-sensor") {
-	print "    (no hardware monitoring capabilities)\n";
-	next;
-      }
-# switch to the sensor logical device
-      outb($addrreg, $superio{logdevreg});
-      outb($datareg, $chip->{logdev});
-# check the activation register
-      outb($addrreg, $superio{actreg});
-      $val = inb($datareg);
-      if(!($val & $superio{actmask})) {
-	print "    (but not activated)\n";
-	next;
-      }
-# Get the IO base register
-      outb($addrreg, $superio{basereg});
-      $addr = inb($datareg);
-      outb($addrreg, $superio{basereg} + 1);
-      $addr = ($addr << 8) | inb($datareg);
-      if($addr == 0) {
-	print "    (but no address specified)\n";
-	next;
-      }	        
-      printf "    (address 0x\%x, driver `%s')\n", $addr, $chip->{driver};
-      my $new_hash = { conf => 9,
-                       isa_addr => $addr,
-                       chipname => $chip->{name}
-                     };
-      add_isa_to_chips_detected $chip->{alias_detect},$chip->{driver},
-                                            $new_hash;
+# did it work?
+    outb($addrreg, $superio{devidreg});
+    $val = inb($datareg);
+    outb($addrreg, $superio{devidreg} + 1);
+    $val = ($val << 8) | inb($datareg);
+    if ($val == 0x0000 || $val == 0xffff) {
+      print "No\n";
+      next FAMILY;
     }
-    exit_superio($addrreg, $datareg, $family, 1);
+    print "Yes\n";
+
+    $found = 0;
+    foreach my $chip (@{$family->{chips}}) {
+      if (($chip->{devid} > 0xff && ($val & ($chip->{devid_mask} || 0xffff)) == $chip->{devid})
+       || ($chip->{devid} <= 0xff && ($val >> 8) == $chip->{devid})) {
+        probe_superio($addrreg, $datareg, $chip);
+      	$found++;
+      }
+    }
+
+    printf("  Found unknown chip with ID 0x%04x\n", $val)
+        unless $found;
+    exit_superio($addrreg, $datareg);
   }
 }
 
@@ -5207,9 +5210,11 @@ sub generate_modprobes
        close INPUTFILE;
        #check return value from modprobe in case modprobe -l isn't supported
        if((($? >> 8) == 0) && ! $modulefound) {
-         $modprobes .= "# Warning: the required module $chip->{driver} is not currently installed on your system.\n";
-         $modprobes .= "# For status of 2.6 kernel ports see http://www.lm-sensors.org/wiki/SupportedDevices\n";
-         $modprobes .= "# If driver is built-in to the kernel, or unavailable, comment out the following line.\n";
+         $modprobes .= "# Warning: the required module $chip->{driver} is not currently installed on\n".
+                       "# your system. For status of 2.6 kernel ports see\n".
+                       "# http://www.lm-sensors.org/wiki/SupportedDevices and\n".
+		       "# http://www.lm-sensors.org/wiki/SupportedDevices. If driver is built\n".
+	               "# into the kernel, or unavailable, comment out the following line.\n";
        }
        $modprobes .= "modprobe $chip->{driver}\n";
     }
