@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Copyright (C) 2003-2004 Jean Delvare <khali@linux-fr.org>
+# Copyright (C) 2003-2006 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #  Fix data block length (128 bytes instead of 256).
 # Version 1.0  2004-02-08  Jean Delvare <khali@linux-fr.org>
 #  Added support for Linux 2.5/2.6 (i.e. sysfs).
+# Version 1.1  2006-09-01  Jean Delvare <khali@linux-fr.org>
+#  Append /usr/sbin or /usr/local/sbin to $PATH if needed.
 #
 # EEPROM data decoding for EDID. EDID (Extended Display Identification
 # Data) is a VESA standard which allows storing (on manufacturer's side)
@@ -50,6 +52,15 @@ use Fcntl qw(:DEFAULT :seek);
 use vars qw($bus $address);
 use constant PROCFS => 1;
 use constant SYSFS  => 2;
+
+# parse-edid will typically be installed in /usr/sbin or /usr/local/sbin
+# even though regular users can run it
+$ENV{PATH} .= ':/usr/local/sbin'
+	if $ENV{PATH} !~ m,(^|:)/usr/local/sbin/?(:|$),
+	&& -x '/usr/local/sbin/parse-edid';
+$ENV{PATH} .= ':/usr/sbin'
+	if $ENV{PATH} !~ m,(^|:)/usr/sbin/?(:|$),
+	&& -x '/usr/sbin/parse-edid';
 
 sub edid_valid_procfs
 {
@@ -193,7 +204,7 @@ $bus = bus_detect(8) unless defined $bus;
 if(defined $bus)
 {
 	print STDERR
-		"decode-edid: decode-edid version 1.0\n";
+		"decode-edid: decode-edid version 1.1\n";
 	if (-r "/proc/sys/dev/sensors/eeprom-i2c-$bus-$address")
 	{
 		edid_decode ($bus, $address, PROCFS);
