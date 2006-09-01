@@ -5484,7 +5484,8 @@ sub main
     open(local *SYSCONFIG, ">/etc/sysconfig/lm_sensors")
       or die "Sorry, can't create /etc/sysconfig/lm_sensors ($!)";
     print SYSCONFIG <<'EOT';
-#    /etc/sysconfig/sensors - Defines modules loaded by /etc/rc.d/init.d/lm_sensors
+#    /etc/sysconfig/lm_sensors - Defines modules loaded by
+#                                /etc/init.d/lm_sensors
 #    Copyright (c) 1998 - 2001  Frodo Looijaard <frodol@dds.nl>
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -5503,10 +5504,10 @@ sub main
 #
 #
 # See also the lm_sensors homepage at:
-#     http://www2.lm-sensors.nu/~lm78/index.html
+#     http://www.lm-sensors.org/
 #
-# This file is used by /etc/rc.d/init.d/lm_sensors and defines the modules to
-# be loaded/unloaded. This file is sourced into /etc/rc.d/init.d/lm_sensors.
+# This file is used by /etc/init.d/lm_sensors and defines the modules to
+# be loaded/unloaded. This file is sourced into /etc/init.d/lm_sensors.
 #
 # The format of this file is a shell script that simply defines the modules
 # in order as normal variables with the special names:
@@ -5526,8 +5527,10 @@ EOT
       $i++;
     }
     print SYSCONFIG $sysconfig;
-    print "Copy prog/init/lm_sensors.init to /etc/rc.d/init.d/lm_sensors\n";
-    print "for initialization at boot time.\n";
+
+    print "Copy prog/init/lm_sensors.init to /etc/init.d/lm_sensors\n".
+          "for initialization at boot time.\n"
+      unless -f "/etc/init.d/lm_sensors";
   }
 }
 
