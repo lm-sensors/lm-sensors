@@ -51,6 +51,7 @@ use vars qw(@pci_adapters @chip_ids @superio_ids $revision);
 
 $revision = '$Revision$ ($Date$)';
 $revision =~ s/\$\w+: (.*?) \$/$1/g;
+$revision =~ s/ \([^()]*\)//;
 
 # This is the list of SMBus or I2C adapters we recognize by their PCI
 # signature. This is an easy and fast way to determine which SMBus or I2C
@@ -1405,13 +1406,13 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        isa_detect => sub { sis5595_pci_detect(); },
      },
      {
-       name => "VIA Technologies VT82C686 Integrated Sensors",
+       name => "VIA VT82C686 Integrated Sensors",
        driver => "via686a",
        isa_addrs => [ 0 ],
        isa_detect => sub { via686a_pci_detect(); },
      },
      {
-       name => "VIA Technologies VT8231 Integrated Sensors",
+       name => "VIA VT8231 Integrated Sensors",
        driver => "vt8231",
        isa_addrs => [ 0 ],
        isa_detect => sub { via8231_pci_detect(); },
@@ -1650,19 +1651,19 @@ $chip_kern26_w83791d = {
     chips =>
     [
       {
-	name => "ITE 8702F Super IO Sensors",
+	name => "ITE IT8702F Super IO Sensors",
 	driver => "to-be-written",
 	devid => 0x8702,
 	logdev => 0x04,
       },
       {
-	name => "ITE 8705F Super IO Sensors",
+	name => "ITE IT8705F Super IO Sensors",
 	driver => "it87",
 	devid => 0x8705,
 	logdev => 0x04,
       },
       {
-	name => "ITE 8712F Super IO Sensors",
+	name => "ITE IT8712F Super IO Sensors",
 	driver => "it87",
 	devid => 0x8712,
 	logdev => 0x04,
@@ -1812,43 +1813,43 @@ $chip_kern26_w83791d = {
     chips =>
     [
       {
-	name => "SMSC 47B27x Super IO Fan Sensors",
+	name => "SMSC LPC47B27x Super IO Fan Sensors",
 	driver => "smsc47m1",
 	devid => 0x51,
 	logdev => 0x0a,
       },
       {
-	name => "SMSC 47M10x/13x Super IO Fan Sensors",
+	name => "SMSC LPC47M10x/13x Super IO Fan Sensors",
 	driver => "smsc47m1",
 	devid => 0x59,
 	logdev => 0x0a,
       },
       {
-	name => "SMSC 47M14x Super IO Fan Sensors",
+	name => "SMSC LPC47M14x Super IO Fan Sensors",
 	driver => "smsc47m1",
 	devid => 0x5f,
 	logdev => 0x0a,
       },
       {
-	name => "SMSC 47M15x/192/997 Super IO Fan Sensors",
+	name => "SMSC LPC47M15x/192/997 Super IO Fan Sensors",
 	driver => "smsc47m1",
 	devid => 0x60,
 	logdev => 0x0a,
       },
       {
-	name => "SMSC 47S42x Super IO Fan Sensors",
+	name => "SMSC LPC47S42x Super IO Fan Sensors",
 	driver => "to-be-written",
 	devid => 0x57,
 	logdev => 0x0a,
       },
       {
-	name => "SMSC 47S45x Super IO Fan Sensors",
+	name => "SMSC LPC47S45x Super IO Fan Sensors",
 	driver => "to-be-written",
 	devid => 0x62,
 	logdev => 0x0a,
       },
       {
-	name => "SMSC 47M172 Super IO",
+	name => "SMSC LPC47M172 Super IO",
 	driver => "not-a-sensor",
 	devid => 0x14,
       },
@@ -1881,7 +1882,7 @@ $chip_kern26_w83791d = {
     chips =>
     [
       {
-	name => "VT1211 Super IO Sensors",
+	name => "VIA VT1211 Super IO Sensors",
 	driver => "vt1211",
 	devid => 0x3c,
 	logdev => 0x0b,
@@ -2840,7 +2841,7 @@ sub scan_adapter
 
     foreach $chip (@chip_ids) {
       if (exists $chip->{i2c_addrs} and contains $addr, @{$chip->{i2c_addrs}}) {
-        print "Probing for `$chip->{name}'... ";
+        printf("\%-60s", sprintf("Probing for `\%s'... ", $chip->{name}));
         if (($conf,@chips) = &{$chip->{i2c_detect}} (\*FILE ,$addr)) {
           print "Success!\n",
                 "    (confidence $conf, driver `$chip->{driver}')";
@@ -2865,7 +2866,7 @@ sub scan_adapter
           }
           add_i2c_to_chips_detected $chip->{driver}, $new_hash;
         } else {
-          print "Failed!\n";
+          print "No\n";
         }
       }
     }
@@ -2877,15 +2878,11 @@ sub scan_isa_bus
   my ($chip,$addr,$conf);
   foreach $chip (@chip_ids) {
     next if not exists $chip->{isa_addrs} or not exists $chip->{isa_detect};
-    print "Probing for `$chip->{name}'\n";
     foreach $addr (@{$chip->{isa_addrs}}) {
-      if ($addr) {
-        printf "  Trying address 0x%04x... ", $addr;
-      } else {
-        print "  Trying general detect... ";
-      }
+      printf("\%-60s", sprintf("Probing for `\%s'\%s... ", $chip->{name},
+                               $addr ? sprintf(" at 0x\%x", $addr) : ''));
       $conf = &{$chip->{isa_detect}} ($addr);
-      print("Failed!\n"), next if not defined $conf;
+      print("No\n"), next if not defined $conf;
       print "Success!\n";
       printf "    (confidence %d, driver `%s')\n", $conf, $chip->{driver};
       my $new_hash = { conf => $conf,
@@ -2929,7 +2926,7 @@ sub exit_superio
 sub scan_superio
 {
   my ($addrreg, $datareg) = @_;
-  my ($val, $addr);
+  my ($val, $addr, $name);
 
   my %superio = (
     devidreg => 0x20,
@@ -2939,6 +2936,8 @@ sub scan_superio
     basereg => 0x60,
   );
   
+  printf("Probing for Super-I/O at 0x\%x/0x\%x\n", $addrreg, $datareg);
+
   FAMILY: 
   foreach my $family (@superio_ids) {
 # write the password
@@ -2946,12 +2945,14 @@ sub scan_superio
       outb($addrreg, $val);
     }
     foreach my $chip (@{$family->{chips}}) {
-      print "Probing for `$chip->{name}'\n";
+      $name = $chip->{name};
+      $name =~ s/ Super IO//;
+      printf("\%-60s", sprintf("Probing for `\%s'... ", $name));
 # check the device ID
       outb($addrreg, $superio{devidreg});
       $val = inb($datareg);
       if ($val == 0x00 || $val == 0xff) {
-	print "  Failed! (skipping family)\n";
+	print "No\n";
 	exit_superio($addrreg, $datareg, $family, 0);
 	next FAMILY;
       }
@@ -2960,17 +2961,17 @@ sub scan_superio
         $val = ($val << 8) | inb($datareg);
       }
       if (($val & ($chip->{devid_mask} || 0xffff)) != $chip->{devid}) {
-	printf "  Failed! (0x%0*x)\n", $chip->{devid}>0xff ? 4 : 2, $val;
+        printf "No (0x%0*x)\n", $chip->{devid}>0xff ? 4 : 2, $val;
 	next;
       }
-      print "  Success...";
+      print "Success!\n";
 # does it have hardware monitoring capabilities
       if (!exists $chip->{driver}) {
-	print " (no information available)\n";
+	print "    (no information available)\n";
 	next;
       }
       if($chip->{driver} eq "not-a-sensor") {
-	print " (no hardware monitoring capabilities)\n";
+	print "    (no hardware monitoring capabilities)\n";
 	next;
       }
 # switch to the sensor logical device
@@ -2980,7 +2981,7 @@ sub scan_superio
       outb($addrreg, $superio{actreg});
       $val = inb($datareg);
       if(!($val & $superio{actmask})) {
-	print " but not activated\n";
+	print "    (but not activated)\n";
 	next;
       }
 # Get the IO base register
@@ -2989,10 +2990,10 @@ sub scan_superio
       outb($addrreg, $superio{basereg} + 1);
       $addr = ($addr << 8) | inb($datareg);
       if($addr == 0) {
-	print " but no address specified\n";
+	print "    (but no address specified)\n";
 	next;
       }	        
-      printf " found at address 0x%04x\n", $addr;
+      printf "    (address 0x\%x, driver `%s')\n", $addr, $chip->{driver};
       my $new_hash = { conf => 9,
                        isa_addr => $addr,
                        chipname => $chip->{name}
@@ -5339,10 +5340,10 @@ sub main
   chip_special_cases();
 
   print "We are now going to do the I2C/SMBus adapter probings. Some chips may\n",
-        "be double detected; we choose the one with the highest confidence value\n",
-        "in that case.\n",
-        "If you found that the adapter hung after probing a certain address, you\n",
-        "can specify that address to remain unprobed.\n";
+        "be double detected; we choose the one with the highest confidence\n",
+        "value in that case.\n",
+        "If you found that the adapter hung after probing a certain address,\n",
+        "you can specify that address to remain unprobed.\n";
 
   my ($inp,@not_to_scan,$inp2);
   # i2cdetect -l either cats /proc/bus/i2c or scans sysfs for the same information
@@ -5373,7 +5374,7 @@ sub main
   print "\n";
 
   print "Some chips are also accessible through the ISA I/O ports. We have to\n".
-        "write to arbitrary I/O ports to do this. This is usually safe though.\n".
+        "write to arbitrary I/O ports to probe them. This is usually safe though.\n".
         "Yes, you do have ISA I/O ports even if you do not have any ISA slots!\n";
   print "Do you want to scan the ISA I/O ports? (YES/no): ";
   unless (<STDIN> =~ /^\s*n/i) {
@@ -5384,15 +5385,12 @@ sub main
   print "\n";
 
   print "Some Super I/O chips may also contain sensors. We have to write to\n".
-        "standard I/O ports to do this. This is usually safe.\n";
+        "standard I/O ports to probe them. This is usually safe.\n";
   print "Do you want to scan for Super I/O sensors? (YES/no): ";
   unless (<STDIN> =~ /^\s*n/i) {
     initialize_ioports();
     scan_superio(0x2e, 0x2f);
-    print "\nDo you want to scan for secondary Super I/O sensors? (YES/no): ";
-    unless (<STDIN> =~ /^\s*n/i) {
-      scan_superio(0x4e, 0x4f);
-    }
+    scan_superio(0x4e, 0x4f);
     close_ioports();
   }
   print "\n";
