@@ -1182,6 +1182,7 @@ chip "via686a-*"
 # temp1 is the CPU temp and temp2 is the SYS temp. Hugo van der Merwe notes
 # the same for his Gigabyte GA-7DXC, Olivier Martin for his Gigabyte
 # GA-7ZM and Patrick Thomson for his Chaintech CT-5ATA. 
+# Thomas Anglmaier notes: on Epox EP-7kxa temp2 is CPU and temp1 is SYS.
 
     label temp1 "SYS Temp"
     label temp2 "CPU Temp"
