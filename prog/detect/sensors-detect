@@ -1570,7 +1570,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "SMBus 2.0 ARP-Capable Device",
-       driver => "smbus-arp",
+       driver => "not-a-sensor",
        i2c_addrs => [0x61],
        i2c_detect => sub { arp_detect(@_); },
      },
