@@ -1561,13 +1561,14 @@ void print_lm85(const sensors_chip_name *name)
   char *label;
   double cur, min, max;
   int alarms, alarm_mask = 0, valid;
-  int is85, is1027, is6d100;
+  int is85, is1027, is7463, is6d100;
 
   is85 = !strcmp(name->prefix,"lm85")
          || !strcmp(name->prefix,"lm85b")
          || !strcmp(name->prefix,"lm85c") ;
   is1027 = !strcmp(name->prefix,"adm1027")
            || !strcmp(name->prefix,"adt7463") ;
+  is7463 = !strcmp(name->prefix, "adt7463");
   is6d100 = !strcmp(name->prefix,"emc6d100") ;
 
   if (!sensors_get_feature(*name,SENSORS_LM85_ALARMS,&cur)) 
@@ -1649,7 +1650,7 @@ void print_lm85(const sensors_chip_name *name)
       if (is1027) { printf(alarm_mask&LM85_ALARM_IN4?" MASKED":""); }
       putchar( '\n' );
     }
-  } else
+  } else if (!is7463)
     printf("ERROR: Can't get IN4 data!\n");
   free(label);
 

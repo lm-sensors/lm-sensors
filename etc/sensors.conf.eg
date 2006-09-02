@@ -2392,6 +2392,7 @@ chip "asb100-*"
 chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
 
 # Voltage inputs
+# Depending on the hardware setup, the ADT7463 may not have in4.
    label in0   "V1.5"      # AGP on Intel S845WD1-E
    label in1   "VCore"
    label in2   "V3.3"

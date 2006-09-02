@@ -55,6 +55,7 @@ lm_sensors CHANGES file
                    Make each it87 fan and fan div optional
                    Print missing w83791d values
                    Add w83793 support (Yuan Mu)
+                   The adt7463 may not have in4 (#2119)
   Program sensors-detect: Add ServerWorks HT-1000 SMBus detection
                           Add ATI IXP200/300/400 SMBus detection
                           Prevent warning on 64-bit PCI addresses
