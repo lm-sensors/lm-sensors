@@ -5473,8 +5473,9 @@ sub main
         "modules are loaded.\n\n";
   
   my $have_sysconfig = -d '/etc/sysconfig';
-  print "Do you want to generate /etc/sysconfig/lm_sensors? (".
-    ($have_sysconfig?"YES/no":"yes/NO")."): ";
+  printf "Do you want to \%s /etc/sysconfig/lm_sensors? (\%s): ",
+         (-e '/etc/sysconfig/lm_sensors' ? 'overwrite' : 'generate'),
+         ($have_sysconfig ? 'YES/no' : 'yes/NO');
   $_ = <STDIN>;
   if (($have_sysconfig and not m/^\s*n/i) or m/^\s*y/i) {
     unless ($have_sysconfig) {
