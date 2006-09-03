@@ -2795,7 +2795,7 @@ sub scan_adapter
       # just give up and warn the user.
       my ($device, $driver);
       if (defined($sysfs_root)) {
-        $device = sprintf("/sys/bus/i2c/devices/\%d-\%04x",
+        $device = sprintf("$sysfs_root/bus/i2c/devices/\%d-\%04x",
                              $adapter_nr, $addr);
         $driver = sysfs_device_driver($device);
       }
@@ -5323,7 +5323,8 @@ sub main
   print "If you have undetectable or unsupported adapters, you can have them\n".
         "scanned by manually loading the modules before running this script.\n\n";
 
-  if (!exists($modules_list{"i2c-dev"}) && ! -e "/sys/class/i2c-dev") {
+  if (!exists($modules_list{"i2c-dev"})
+   && !(defined $sysfs_root && -e "$sysfs_root/class/i2c-dev")) {
     print "To continue, we need module `i2c-dev' to be loaded.\n";
     print "If it is built-in into your kernel, you can safely skip this.\n"
       unless kernel_version_at_least(2, 6, 0);
