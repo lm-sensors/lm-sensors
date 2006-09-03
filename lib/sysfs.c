@@ -199,7 +199,8 @@ int sensors_read_sysfs_bus(void)
 		if (!(attr = sysfs_get_device_attr(dev, "name")))
 			continue;
 
-		entry.adapter = strdup(attr->value);
+		/* NB: attr->value[attr->len-1] == '\n'; chop that off */
+		entry.adapter = strndup(attr->value, attr->len - 1);
 		if (!entry.adapter)
 			sensors_fatal_error(__FUNCTION__, "out of memory");
 
