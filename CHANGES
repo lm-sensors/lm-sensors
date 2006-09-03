@@ -78,8 +78,9 @@ lm_sensors CHANGES file
                           Add Analog Devices ADM1033, ADM1034, ADT7462,
                            ADT7466, ADT7470, ADT7473 and ADT7475 detection
                           Check for root user at startup
-                          Attempt to be slighly more user-friendly
+                          Attempt to be slightly more user-friendly
                           Add VT8237A and VT8251
+                          Remove detection of nVidia graphics adapters
 
 
 2.10.0 (20060214)
