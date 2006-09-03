@@ -689,7 +689,7 @@ Mozart-2:
 
 # Voltages:
 
-This is where there is a diffrence between AS99127F rev.1 and 2.
+This is where there is a difference between AS99127F rev.1 and 2.
 Remark: The difference is similar to the difference between
   W83781D and W83782D.
 
@@ -756,7 +756,7 @@ the limit, the fan runs at full speed. We have no clue as to what the limit
 represents. Note that there seem to be some inertia in this mode, speed
 changes may need some time to trigger. Also, an hysteresis mechanism is
 suspected since walking through all the values increasingly and then
-decreasingly led to slighlty different limits.
+decreasingly led to slightly different limits.
 
 When bit 7 is set, bits 3-0 seem to hold a threshold value, while bits 6-4
 would not be significant. If the value is below a given limit, the fan runs
@@ -782,7 +782,7 @@ found out the following values do work as a form of coarse pwm:
 
 0x80 - seems to turn fans off after some time(1-2 minutes)... might be
 some form of auto-fan-control based on temp? hmm (Qfan? this mobo is an
-old ASUS, it isn't marketed as Qfan. Maybe some beta pre-attemp at Qfan
+old ASUS, it isn't marketed as Qfan. Maybe some beta pre-attempt at Qfan
 that was dropped at the BIOS)
 0x81 - off
 0x82 - slightly "on-ner" than off, but my fans do not get to move. I can
