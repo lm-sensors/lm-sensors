@@ -917,21 +917,15 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      } ,
      {
        name => "Winbond W83627EHF",
-       driver => "w83627ehf",
+       driver => "use-isa-instead",
        i2c_addrs => [0x28..0x2f], 
        i2c_detect => sub { w83781d_detect(9, @_); },
-       isa_addrs => [0x290],
-       isa_detect => sub { w83781d_isa_detect(9, @_); },
-       alias_detect => sub { w83781d_alias_detect(9, @_); },
      },
      {
        name => "Winbond W83627DHG",
-       driver => "to-be-tested",
+       driver => "use-isa-instead",
        i2c_addrs => [0x28..0x2f], 
        i2c_detect => sub { w83781d_detect(10, @_); },
-       isa_addrs => [0x290],
-       isa_detect => sub { w83781d_isa_detect(10, @_); },
-       alias_detect => sub { w83781d_alias_detect(10, @_); },
      },
      {
        name => "Asus AS99127F (rev.1)",
@@ -1780,6 +1774,7 @@ $chip_kern26_w83791d = {
 	devid => 0x8840,
 	devid_mask => 0xFFC0,
 	logdev => 0x0b,
+	alias_detect => sub { w83781d_alias_detect(9, @_); },
       },
       {
 	name => "Winbond W83627DHG Super IO Sensors",
@@ -1787,6 +1782,7 @@ $chip_kern26_w83791d = {
 	devid => 0xA020,
 	devid_mask => 0xFFF0,
 	logdev => 0x0b,
+	alias_detect => sub { w83781d_alias_detect(10, @_); },
       },
       {
 	name => "Winbond W83L517D Super IO",
