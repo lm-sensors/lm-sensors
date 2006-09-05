@@ -2085,13 +2085,49 @@ sub sysfs_device_attribute($$)
 
 use vars qw(%pci_list);
 
-# This function returns a hash of hashes. Each hash has some PCI information:
+# This function returns a list of hashes. Each hash has some PCI information:
+# 'domain', 'bus', 'slot' and 'func' uniquely identify a PCI device in a
+# computer; 'vendid' and 'devid' uniquely identify a type of device.
+# 'class' lets us spot unknown SMBus adapters.
+# This function is used when sysfs is available (Linux 2.6).
+sub read_sys_dev_pci($)
+{
+  my $devices = shift;
+  my ($dev, @pci_list);
+
+  opendir(local *DEVICES, "$devices")
+    or die "$devices: $!";
+
+  while (defined($dev = readdir(DEVICES))) {
+    my %record;
+    next unless $dev =~
+      m/^(?:([\da-f]+):)?([\da-f]+):([\da-f]+)\.([\da-f]+)$/;
+
+    $record{domain} = hex $1;
+    $record{bus} = hex $2;
+    $record{slot} = hex $3;
+    $record{func} = hex $4;
+
+    $record{vendid} = oct sysfs_device_attribute("$devices/$dev", "vendor");
+    $record{devid} = oct sysfs_device_attribute("$devices/$dev", "device");
+    $record{class} = (oct sysfs_device_attribute("$devices/$dev", "class"))
+                     >> 8;
+
+    push @pci_list, \%record;
+  }
+
+  return \@pci_list;
+}
+
+# This function returns a list of hashes. Each hash has some PCI information:
 # 'bus', 'slot' and 'func' uniquely identify a PCI device in a computer;
 # 'vendid' and 'devid' uniquely identify a type of device.
+# This function is used when sysfs is not available (Linux 2.4).
 sub read_proc_dev_pci
 {
-  my ($dfn,$vend,%pci_list);
-  open(local *INPUTFILE, "/proc/bus/pci/devices") or return;
+  my ($dfn, $vend, @pci_list);
+  open(local *INPUTFILE, "/proc/bus/pci/devices")
+    or die "/proc/bus/pci/devices: $!";
   local $_;
   while (<INPUTFILE>) {
     my %record;
@@ -2102,16 +2138,27 @@ sub read_proc_dev_pci
     $record{vendid} = $vend >> 16;
     $record{devid} = $vend & 0xffff;
     
-    $pci_list{ sprintf("%04x:%04x",$record{vendid},$record{devid}) } =
-	\%record;
+    push @pci_list, \%record;
   }
-  return %pci_list;
+  return \@pci_list;
 }
 
 sub initialize_proc_pci
 {
-  %pci_list = read_proc_dev_pci;
-  die "Can't access /proc/bus/pci/devices!" if not defined %pci_list;
+  my $pci_list;
+
+  if (defined $sysfs_root) {
+    $pci_list = read_sys_dev_pci("$sysfs_root/bus/pci/devices");
+  } else {
+    $pci_list = read_proc_dev_pci();
+  }
+
+  # Note that we lose duplicate devices at this point, but we don't
+  # really care. What matters to us is which unique devices are present,
+  # not how many of each.
+  %pci_list = map {
+    sprintf("%04x:%04x", $_->{vendid}, $_->{devid}) => $_
+  } @{$pci_list};
 }
 
 #####################
@@ -2174,9 +2221,14 @@ sub adapter_pci_detection
     $key = sprintf("%04x:%04x", $try->{vendid}, $try->{devid});
     if (exists $pci_list{$key}) {
         $device = $pci_list{$key};
-        printf "Use driver `%s' for device %02x:%02x.%x: %s\n",
+        printf "Use driver `\%s' for device \%s: \%s\n",
                $try->{driver},
-               $device->{bus},$device->{slot},$device->{func},$try->{procid};
+               (defined $device->{domain} ?
+                sprintf("\%04x:\%02x:\%02x.\%x", $device->{domain},
+                        $device->{bus}, $device->{slot}, $device->{func}) :
+                sprintf("\%02x:\%02x.\%x",
+                        $device->{bus}, $device->{slot}, $device->{func})),
+               $try->{procid};
         if ($try->{driver} eq "to-be-tested") {
           print "\nWe are currently looking for testers for this adapter!\n".
                 "Please see http://www.lm-sensors.org/wiki/NewDrivers\n".

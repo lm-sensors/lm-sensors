@@ -81,6 +81,7 @@ lm_sensors CHANGES file
                           Attempt to be slightly more user-friendly
                           Add VT8237A and VT8251
                           Remove detection of nVidia graphics adapters
+                          Use sysfs for PCI device enumeration
 
 
 2.10.0 (20060214)
