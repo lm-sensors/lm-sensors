@@ -1471,19 +1471,23 @@ $chip_kern26_w83791d = {
 #      Put in "not-a-sensor" if the chip doesn't have hardware monitoring
 #      capabilities (listing such chips here removes the need of manual
 #      lookup when people report them).
-#  enter: The password sequence to write to the address register
 #  devid: The device ID(s) we have to match (base device)
 #  devid_mask (optional): Bitmask to apply before checking the device ID
 #  logdev: The logical device containing the sensors
-#  exit (optional): Sequence to write to the address register to exit config
-#      mode. If not provided, a default reset operation is performed.
 #  alias_detect (optional): For chips which can be both on the ISA and the
 #      I2C bus, a function which detectes whether two entries are the same.
 #      The function should take three parameters: The ISA address, the
 #      I2C bus number, and the I2C address.
+# Entries are grouped by family. Each family entry has the following fields:
+#  family: The family name
+#  guess (optional): Typical logical device address. This lets us do
+#      generic probing if we fail to recognize the chip.
+#  enter: The password sequence to write to the address register
+#  chips: Array of chips
 @superio_ids = (
   {
     family => "ITE",
+    guess => 0x290,
     enter =>
     {
       0x2e => [0x87, 0x01, 0x55, 0x55],
@@ -1716,6 +1720,7 @@ $chip_kern26_w83791d = {
   },
   {
     family => "VIA/Winbond/Fintek",
+    guess => 0x290,
     enter =>
     {
       0x2e => [0x87, 0x87],
@@ -2831,6 +2836,38 @@ sub exit_superio
   outb($datareg, 0x02);
 }
 
+# Guess if an unknown Super-I/O chip has sensors
+sub guess_superio_ld($$$)
+{
+  my ($addrreg, $datareg, $typical_addr) = @_;
+  my ($oldldn, $ldn, $addr);
+
+  # Save logical device number
+  outb($addrreg, $superio{logdevreg});
+  $oldldn = inb($datareg);
+
+  for ($ldn = 0; $ldn < 16; $ldn++) {
+    # Select logical device
+    outb($addrreg, $superio{logdevreg});
+    outb($datareg, $ldn);
+
+    # Read base I/O address
+    outb($addrreg, $superio{basereg});
+    $addr = inb($datareg) << 8;
+    outb($addrreg, $superio{basereg} + 1);
+    $addr |= inb($datareg);
+    next unless ($addr & 0xfff8) == $typical_addr;
+
+    printf "    (logical device \%X has address 0x\%x, could be sensors)\n",
+           $ldn, $addr;
+    last;
+  }
+
+  # Be nice, restore original logical device
+  outb($addrreg, $superio{logdevreg});
+  outb($datareg, $oldldn);
+}
+
 sub probe_superio($$$)
 {
   my ($addrreg, $datareg, $chip) = @_;
@@ -2920,8 +2957,13 @@ sub scan_superio
       }
     }
 
-    printf("  Found unknown chip with ID 0x%04x\n", $val)
-        unless $found;
+    if (!$found) {
+      printf("Found unknown chip with ID 0x%04x\n", $val);
+      # Guess if a logical device could correspond to sensors
+      guess_superio_ld($addrreg, $datareg, $family->{guess})
+        if defined $family->{guess};
+    }
+
     exit_superio($addrreg, $datareg);
   }
 }

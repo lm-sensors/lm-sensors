@@ -83,6 +83,7 @@ lm_sensors CHANGES file
                           Remove detection of nVidia graphics adapters
                           Use sysfs for PCI device enumeration
                           Add generic PCI SMBus adapter detection
+                          Add generic Super-I/O logical device detection
 
 
 2.10.0 (20060214)
