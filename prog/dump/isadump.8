@@ -53,7 +53,7 @@ register at 0x2F.
 .PP
 The \fIbank\fR and \fIbankreg\fR parameters are useful on the Winbond chips
 as well as on Super-I/O chips.
-\fIbank\fR is an integer between 0 and 15, and \fIbankreg\fR is an integer
+\fIbank\fR is an integer between 0 and 31, and \fIbankreg\fR is an integer
 between 0x00 and 0xFF (default value: 0x4E for Winbond chips, 0x07
 for Super-I/O chips). The W83781D datasheet has more information on bank
 selection.
@@ -68,7 +68,7 @@ and the address is forcibly aligned on a 256-byte boundary.
 .PP
 The \fIbank\fR and \fIbankreg\fR parameters are useful on the National
 Semiconductor PC87365 and PC87366 Super-I/O chips.
-\fIbank\fR is an integer between 0 and 15, and \fIbankreg\fR is an integer
+\fIbank\fR is an integer between 0 and 31, and \fIbankreg\fR is an integer
 between 0x00 and 0xFF (default value: 0x09; must fit in the specified
 range). See the PC87365 datasheet for more information on bank selection.
 
