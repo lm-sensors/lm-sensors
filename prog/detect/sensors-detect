@@ -1639,7 +1639,7 @@ $chip_kern26_w83791d = {
 	name => "Nat. Semi. PC87427 Super IO Fan Sensors",
 	driver => "to-be-written",
 	devid => 0xf2,
-	logdev => 0x08,
+	logdev => 0x09,
       },
       {
 	name => "Nat. Semi. PC87427 Super IO Health Sensors",
