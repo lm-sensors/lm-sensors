@@ -5150,11 +5150,11 @@ sub generate_modprobes
   $modprobes .= "# Chip drivers\n";
   foreach $chip (@chips_detected) {
     next if not @{$chip->{detected}};
+    next if $chip->{driver} eq "not-a-sensor";    
+    next if $chip->{driver} eq "use-isa-instead";
     if ($chip->{driver} eq "to-be-written") {
       $modprobes .= "# no driver for $chip->{detected}[0]{chipname} yet\n";
-    } elsif ($chip->{driver} eq "use-isa-instead") {
-      $modprobes .= "# no I2C driver for $chip->{detected}[0]{chipname} use ISA driver instead\n";
-    } elsif ($chip->{driver} ne "not-a-sensor") {
+    } else {
        # need the * for 2.4 kernels, won't necessarily be an exact match
        open(local *INPUTFILE, "modprobe -l $chip->{driver}\\* 2>/dev/null |");
        local $_;
@@ -5373,6 +5373,8 @@ sub main
 
   my ($chip,$data);
   foreach $chip (@chips_detected) {
+    next if $chip->{driver} eq "not-a-sensor";
+    next if $chip->{driver} eq "use-isa-instead";
     print "\nDriver `$chip->{driver}' ";
     if (@{$chip->{detected}}) {
       if (@{$chip->{misdetected}}) {
