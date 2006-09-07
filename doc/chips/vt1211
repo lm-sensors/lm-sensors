@@ -28,8 +28,7 @@ contains voltage/temperature monitoring and
 PWM control circuitry for two fans.
 
 We define the sensors as follows. Somewhat convoluted to minimize
-changes from via686a. Temp1 and in6 are unimplemented in the vt1211
-chip but are included in the driver.
+changes from via686a.
 
 	Sensor		Voltage Mode	Temp Mode	uch_config bit
 	--------	------------	---------	--------------	
@@ -41,7 +40,6 @@ chip but are included in the driver.
 	UCH4		in3		temp6		0x20 (32)
 	UCH5		in4		temp7		0x40 (64)
 	3.3V		in5
-	-12V		in6
 
 As noted above, 5 of the sensors are "universal channels" and can
 be set for either voltage or temperature.

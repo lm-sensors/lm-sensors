@@ -229,7 +229,7 @@ via686a
 	vt8231		3	5	2	-	no	yes
 
 vt1211
-	vt1211		2-7	2-7	2	2	no	yes (LPC)
+	vt1211		2-7	1-6	2	2	no	yes (LPC)
 
 vt8231
 	vt8231		2-7	2-7	2	2	no	yes

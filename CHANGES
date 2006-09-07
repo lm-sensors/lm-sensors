@@ -33,6 +33,7 @@ lm_sensors CHANGES file
   Module i2c-viapro: Fix compilation with kernels < 2.4.21
                      Add VT8237A and VT8251
   Module lm83: Add LM82 support (2.6 backport)
+  Module vt1211: The VT1211 has no in6
   Module w83781d: Use real-time alarm registers when possible (2.6 backport)
                   Add specific alarm and beep defines for the W83791D
   Module w83792d: Fix PWM range (2.6 backport)
@@ -57,6 +58,7 @@ lm_sensors CHANGES file
                    Print missing w83791d values
                    Add w83793 support (Yuan Mu)
                    The adt7463 may not have in4 (#2119)
+                   Hide more vt1211 missing input errors
   Program sensors-detect: Add ServerWorks HT-1000 SMBus detection
                           Add ATI IXP200/300/400 SMBus detection
                           Prevent warning on 64-bit PCI addresses

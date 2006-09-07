@@ -4423,7 +4423,7 @@ void print_vt1211(const sensors_chip_name *name)
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&VT1211_ALARM_IN2?"ALARM":"");
-    } else
+    } else if (err != -SENSORS_ERR_PROC)
       printf("ERROR: Can't get IN2 data!\n");
   }
   free(label);
@@ -4436,7 +4436,7 @@ void print_vt1211(const sensors_chip_name *name)
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&VT1211_ALARM_IN3?"ALARM":"");
-    } else
+    } else if (err != -SENSORS_ERR_PROC)
       printf("ERROR: Can't get IN3 data!\n");
   }
   free(label);
@@ -4449,7 +4449,7 @@ void print_vt1211(const sensors_chip_name *name)
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&VT1211_ALARM_IN4?"ALARM":"");
-    } else
+    } else if (err != -SENSORS_ERR_PROC)
       printf("ERROR: Can't get IN4 data!\n");
   }
   free(label);
@@ -4462,10 +4462,10 @@ void print_vt1211(const sensors_chip_name *name)
       print_label(label,10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&VT1211_ALARM_IN5?"ALARM":"");
-    } else
-      printf("ERROR: Can't get IN5 data!\n");
+    }
   }
   free(label);
+
   if (sensors_get_label_and_valid(*name,SENSORS_VT1211_FAN1,&label,&valid)) {
     printf("ERROR: Can't get FAN1 config!\n");
   } else if (valid) {
@@ -4492,6 +4492,7 @@ void print_vt1211(const sensors_chip_name *name)
       printf("ERROR: Can't get FAN2 data!\n");
   }
   free(label);
+
   if (sensors_get_label_and_valid(*name,SENSORS_VT1211_TEMP1,&label,&valid)) {
     printf("ERROR: Can't get TEMP1 config!\n");
   } else if (valid) {
@@ -4527,7 +4528,7 @@ void print_vt1211(const sensors_chip_name *name)
       print_label(label,10);
       print_temp_info( cur, max, min, HYST, 1, 0);
       printf(" %s\n", alarms & VT1211_ALARM_TEMP3 ? "ALARM" : "" );
-    } else
+    } else if (err != -SENSORS_ERR_PROC)
       printf("ERROR: Can't get TEMP3 data!\n");
   }
   free(label);
@@ -4540,7 +4541,7 @@ void print_vt1211(const sensors_chip_name *name)
       print_label(label,10);
       print_temp_info( cur, max, min, HYST, 1, 0);
       printf(" %s\n", alarms & VT1211_ALARM_TEMP4 ? "ALARM" : "" );
-    } else
+    } else if (err != -SENSORS_ERR_PROC)
       printf("ERROR: Can't get TEMP4 data!\n");
   }
   free(label);

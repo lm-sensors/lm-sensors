@@ -107,10 +107,9 @@ superio_exit(void)
 	UCH4		in3		temp6
 	UCH5		in4		temp7
 	3.3V		in5
-	-12V		in6			not in vt1211
 */
 
-/* ins numbered 0-6 */
+/* ins numbered 0-5 */
 #define VT1211_REG_IN_MAX(nr) ((nr)==0 ? 0x3d : 0x29 + ((nr) * 2))
 #define VT1211_REG_IN_MIN(nr) ((nr)==0 ? 0x3e : 0x2a + ((nr) * 2))
 #define VT1211_REG_IN(nr)     (0x21 + (nr))
@@ -140,7 +139,7 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e, 0x2c, 0x2e, 0x30, 0x32 };
 #define VT1211_REG_TEMP1_CONFIG 0x4b
 #define VT1211_REG_TEMP2_CONFIG 0x4c
 
-/* temps 1-7; voltages 0-6 */
+/* temps 1-7; voltages 0-5 */
 #define ISTEMP(i, ch_config) ((i) == 1 ? 1 : \
 			      (i) == 3 ? 1 : \
 			      (i) == 2 ? ((ch_config) >> 1) & 0x01 : \
@@ -183,9 +182,9 @@ struct vt1211_data {
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 
-	u8 in[7];		/* Register value */
-	u8 in_max[7];		/* Register value */
-	u8 in_min[7];		/* Register value */
+	u8 in[6];		/* Register value */
+	u8 in_max[6];		/* Register value */
+	u8 in_min[6];		/* Register value */
 	u16 temp[7];		/* Register value 10 bit */
 	u8 temp_over[7];	/* Register value */
 	u8 temp_hyst[7];	/* Register value */
@@ -246,7 +245,6 @@ static struct i2c_driver vt1211_driver = {
 #define VT1211_SYSCTL_IN3 1003
 #define VT1211_SYSCTL_IN4 1004
 #define VT1211_SYSCTL_IN5 1005
-#define VT1211_SYSCTL_IN6 1006
 #define VT1211_SYSCTL_FAN1 1101
 #define VT1211_SYSCTL_FAN2 1102
 #define VT1211_SYSCTL_TEMP1 1200
@@ -272,7 +270,6 @@ static struct i2c_driver vt1211_driver = {
 #define VT1211_ALARM_FAN1 0x40
 #define VT1211_ALARM_FAN2 0x80
 #define VT1211_ALARM_IN4 0x100
-#define VT1211_ALARM_IN6 0x200
 #define VT1211_ALARM_TEMP2 0x800
 #define VT1211_ALARM_CHAS 0x1000
 #define VT1211_ALARM_TEMP3 0x8000
@@ -298,11 +295,6 @@ static ctl_table vt1211_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &vt1211_in},
 	{VT1211_SYSCTL_IN5, "in5", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &vt1211_in},
-/*
-    datasheet says these are reserved
-	{VT1211_SYSCTL_IN6, "in6", NULL, 0, 0644, NULL, &i2c_proc_real,
-	 &i2c_sysctl_real, NULL, &vt1211_in},
-*/
 	{VT1211_SYSCTL_TEMP1, "temp1", NULL, 0, 0644, NULL,
 	 &i2c_proc_real, &i2c_sysctl_real, NULL, &vt1211_temp},
 	{VT1211_SYSCTL_TEMP2, "temp2", NULL, 0, 0644, NULL,

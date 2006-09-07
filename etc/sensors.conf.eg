@@ -2038,8 +2038,6 @@ chip "lm63-*"
 
 chip "vt1211-*"
 #
-# in6 is not implemented in vt1211
-#
 #							1 for temp, 0 for volt.
 #	Sensor		Voltage Mode	Temp Mode	config bit
 #	--------	------------	---------	--------------
