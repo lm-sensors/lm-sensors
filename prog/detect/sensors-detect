@@ -3958,8 +3958,7 @@ sub w83781d_alias_detect
   return 1;
 }
 
-# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83627HF,
-#                        9 = W83627EHF 10 = W83627DHG)
+# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83627HF)
 # $_[1]: Address
 # Returns: undef if not detected, (8) if detected.
 sub w83781d_isa_detect
@@ -3987,8 +3986,6 @@ sub w83781d_isa_detect
   return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
   return if $chip == 1 and  ($reg1 & 0xfe) != 0x30;
   return if $chip == 3 and  ($reg1 & 0xfe) != 0x20;
-  return if $chip == 9 and  !($reg1 == 0x88 or $reg1 == 0xa1);
-  return if $chip == 10 and  $reg1 != 0xa2;
 
   return 8;
 }
