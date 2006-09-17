@@ -33,12 +33,6 @@ Mark D. Studebaker <mdsxyz123@yahoo.com>
 For 2.2 and early 2.3 kernels you must use version 0.1;
 version 0.2 will not work.
 Version 0.1 does not use the kernel hotplug facility.
-Obtain version 0.1 here:
-
-	README:            http://www.netroedge.com/~lm78/misc/README-m7101.txt
-	source and README: http://www.netroedge.com/~lm78/misc/m7101-0.1.tar.gz
-
-
 
 --------------------------------------------------------
 Notes below for the 0.2 version, MDS.

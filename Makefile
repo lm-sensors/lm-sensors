@@ -418,7 +418,7 @@ manhtml:
 	cp $(MANPAGES) html
 	cd html ; \
 	export LOGNAME=sensors ; \
-	export HOSTNAME=stimpy.netroedge.com ; \
+	export HOSTNAME=www.lm-sensors.org ; \
 	man2html *.[1-8] ; \
 	$(RM) *.[1-8]
 

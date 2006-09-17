@@ -41,11 +41,11 @@ Version: %{ver}
 Release: 1
 Group: Applications/System
 Copyright: GPL
-Source0: http://www.lm-sensors.nu/lm-sensors/archive/%{name}-%{ver}.tar.gz
+Source0: http://dl.lm-sensors.org/lm-sensors/releases/%{name}-%{ver}.tar.gz
 Buildroot: /var/tmp/%{name}
 Docdir: %{prefix}/doc
 Requires: %{name}-drivers >= %{ver}
-Url: http://www.netroedge.com/~lm78/
+Url: http://www.lm-sensors.org
 
 #Packager: Your Name <your@address>
 

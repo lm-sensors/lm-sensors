@@ -3,7 +3,7 @@
 # sensors is used for monitoring motherboard sensor values.
 #
 # See also the lm_sensors homepage at:
-#     http://www2.lm-sensors.nu/~lm78/index.html
+#     http://www.lm-sensors.org
 #
 # This file is used by /etc/rc.d/init.d/lm_sensors and defines the modules to be 
 # loaded/unloaded. This file is sourced into /etc/rc.d/init.d/lm_sensors.

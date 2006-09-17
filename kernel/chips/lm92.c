@@ -9,7 +9,7 @@
  * Sensor.
  *
  * Based on code from the lm-sensors project which is available
- * at http://www.lm-sensors.nu/. lm87.c have been particularly
+ * at http://www.lm-sensors.org/. lm87.c have been particularly
  * helpful (:
  *
  * This source code is free software; you can redistribute it and/or

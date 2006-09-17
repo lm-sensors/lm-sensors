@@ -15,6 +15,6 @@ Keywords: kernel module SMBus sensors LM78 health
 Author: frodol@dds.nl (Frodo Looijaard)
         phil@netroedge.com (Philip Edelbrock)
 	and other great contributors
-Primary-site: http://www.lm-sensors.nu/
+Primary-site: http://www.lm-sensors.org/
 Copying-policy: GPL
 End

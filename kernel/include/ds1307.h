@@ -10,7 +10,7 @@
  * Clock.
  *
  * Based on code from the lm-sensors project which is available
- * at http://www.lm-sensors.nu/ and Russell King's PCF8583 Real-Time
+ * at http://www.lm-sensors.org/ and Russell King's PCF8583 Real-Time
  * Clock driver (linux/drivers/acorn/char/pcf8583.c).
  *
  * This source code is free software; you can redistribute it and/or

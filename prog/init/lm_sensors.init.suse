@@ -30,7 +30,7 @@
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 # See also the lm_sensors homepage at:
-#     http://www2.lm-sensors.nu/~lm78/index.html
+#     http://www.lm-sensors.org
 
 # It uses a config file /etc/sysconfig/sensors that contains the modules to
 # be loaded/unloaded. That file is sourced into this one.
