@@ -16,6 +16,7 @@ lm_sensors CHANGES file
            Add support for the IT8716F and IT8718F chips
            Add support for the W83793 chip (Yuan Mu)
            Map the 2.6 adm1026's fan8 to fan0
+           Missing sysfs busses and classes are not errors
   Makefile: Don't grep autoconf.h on user-space targets
             Fix depmod on non-running kernel version
   Module i2c-ali1535: Drop redundant semaphore (2.6 backport)
@@ -59,6 +60,7 @@ lm_sensors CHANGES file
                    Add w83793 support (Yuan Mu)
                    The adt7463 may not have in4 (#2119)
                    Hide more vt1211 missing input errors
+                   Clearer error messages when no sensors found
   Program sensors-detect: Add ServerWorks HT-1000 SMBus detection
                           Add ATI IXP200/300/400 SMBus detection
                           Prevent warning on 64-bit PCI addresses

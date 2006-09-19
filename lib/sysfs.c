@@ -112,12 +112,13 @@ static int sensors_read_sysfs_chips_compat(void)
 	int ret = 0;
 
 	if (!(bus = sysfs_open_bus("i2c"))) {
-		ret = -SENSORS_ERR_PROC;
+		if (errno && errno != ENOENT)
+			ret = -SENSORS_ERR_PROC;
 		goto exit0;
 	}
 
 	if (!(devs = sysfs_get_bus_devices(bus))) {
-		if (errno)
+		if (errno && errno != ENOENT)
 			ret = -SENSORS_ERR_PROC;
 		goto exit1;
 	}
@@ -148,7 +149,7 @@ int sensors_read_sysfs_chips(void)
 	}
 
 	if (!(clsdevs = sysfs_get_class_devices(cls))) {
-		if (errno)
+		if (errno && errno != ENOENT)
 			ret = -SENSORS_ERR_PROC;
 		goto exit;
 	}
@@ -185,7 +186,7 @@ int sensors_read_sysfs_bus(void)
 	}
 
 	if (!(clsdevs = sysfs_get_class_devices(cls))) {
-		if (errno)
+		if (errno && errno != ENOENT)
 			ret = -SENSORS_ERR_PROC;
 		goto exit1;
 	}

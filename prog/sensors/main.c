@@ -238,10 +238,9 @@ int main (int argc, char *argv[])
     fprintf(stderr,"%s\n",sensors_strerror(res));
     if (res == -SENSORS_ERR_PROC)
       fprintf(stderr,
-              "Unable to find i2c bus information;\n"
+              "Kernel interface access error\n"
               "For 2.6 kernels, make sure you have mounted sysfs and libsensors\n"
-              "was compiled with sysfs support!\n"
-              "For older kernels, make sure you have done 'modprobe i2c-proc'!\n");
+              "was compiled with sysfs support!\n");
     exit(1);
   }
 
@@ -256,7 +255,10 @@ int main (int argc, char *argv[])
     exit(error);
   } else {
     if(chips[0].prefix == SENSORS_CHIP_NAME_PREFIX_ANY)
-	    fprintf(stderr,"No sensors found!\n");
+	    fprintf(stderr,
+	            "No sensors found!\n"
+	            "Make sure you loaded all the kernel drivers you need.\n"
+	            "Try sensors-detect to find out which these are.\n");
     else
 	    fprintf(stderr,"Specified sensor(s) not found!\n");
     sensors_cleanup();
