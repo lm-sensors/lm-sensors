@@ -3067,6 +3067,10 @@ sub lm78_isa_detect
   $reg = &$readproc(0x4f);
   return if $reg == 0xa3 || $reg == 0x5c;
 
+  # Explicitely prevent misdetection of ITE chips
+  $reg = &$readproc(0x58);
+  return if $reg == 0x90;
+
   return 6;
 }
 
