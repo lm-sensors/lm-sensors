@@ -49,6 +49,8 @@ lm_sensors CHANGES file
   Program i2cdump: Restore bank after bank switching
                    Add new mode W (read word on even register addresses)
   Program mkpatch: Fix typo breaking f71805f
+                   Turn warnings on (-w), and fix them
+                   Print a usage message on missing command line parameters
   Program pwmconfig: Use mktemp instead of tempfile
   Program sensors: No error messages on missing w83792d fan4-7 (Yuan Mu)
                    Add smsc47m192 support

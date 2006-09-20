@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 #    mkpatch - Create patches against the Linux kernel
 #    Copyright (C) 1999  Frodo Looijaard <frodol@dds.nl>
@@ -1250,17 +1250,25 @@ EOF
 }
 
 
+sub usage
+{
+  print "Usage: $0 package_root kernel_root\n";
+  exit 1;
+}
+
 # Main function
 sub main
 {
   my ($package_root,$kernel_root,%files,%includes,$package_file,$kernel_file);
   my ($diff_command,$dummy,$data0,$data1,$sedscript,$version_string);
 
-  # --> Read the command-lineo
+  # --> Read the command-line
   $package_root = $ARGV[0];
+  usage() unless defined $package_root;
   die "Package root `$package_root' is not found\n"
         unless -d "$package_root/mkpatch";
   $kernel_root = $ARGV[1];
+  usage() unless defined $kernel_root;
   die "Kernel root `$kernel_root' is not found\n"
         unless -f "$kernel_root/Rules.make";
 
@@ -1279,7 +1287,7 @@ sub main
   while (<INPUT>) {
     ($data0,$data1) = /(\S+)\s+(\S+)/;
     $includes{$data0} = $data1;
-    $sedscript .= 's,(#\s*include\s*)'.$data0.'(\s*),\1'."$data1".'\2, ; ';
+    $sedscript .= 's,(#\s*include\s*)'.$data0.'(\s*),$1'."$data1".'$2, ; ';
   }
   close INPUT;
 
