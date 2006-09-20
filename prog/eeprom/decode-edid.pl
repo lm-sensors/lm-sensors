@@ -129,7 +129,7 @@ sub bus_detect
 				return $i;
 			}
 		}
-		elsif (-r "/sys/bus/i2c/devices/$i-0050")
+		elsif (-r "/sys/bus/i2c/devices/$i-0050/eeprom")
 		{
 			if (edid_valid_sysfs($i, '50'))
 			{
