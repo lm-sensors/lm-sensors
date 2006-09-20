@@ -46,6 +46,7 @@ lm_sensors CHANGES file
                            Add memory size computation for Rambus memory
                            Various output cleanups and fixes
   Program decode-edid.pl: Add /usr/sbin or /usr/local/sbin to $PATH if needed
+  Program decode-vaio.pl: Detect and skip false positives
   Program i2cdetect: Add a mode to print adapter functionalities
   Program i2cdump: Restore bank after bank switching
                    Add new mode W (read word on even register addresses)

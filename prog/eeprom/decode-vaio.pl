@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Copyright (C) 2002-2005 Jean Delvare <khali@linux-fr.org>
+# Copyright (C) 2002-2006 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,6 +41,8 @@
 #  Support bus number 0 to 4 instead of only 0.
 # Version 1.3  2005-01-18  Jean Delvare <khali@linux-fr.org>
 #  Revision might be a Service Tag.
+# Version 1.4  2006-09-20  Jean Delvare <khali@linux-fr.org>
+#  Detect and skip false positives (e.g. EDID EEPROMs).
 #
 # EEPROM data decoding for Sony Vaio laptops. 
 #
@@ -180,7 +182,11 @@ sub vaio_decode
 {
 	my ($bus,$addr) = @_;
 	
-	print_item('Machine Name', decode_string($bus, $addr, 128, 32));
+	my $name = decode_string($bus, $addr, 128, 32);
+	# Simple heuristic to skip false positives
+	return 0 unless $name =~ m/^[A-Z-]{4}/;
+
+	print_item('Machine Name', $name);
 	print_item('Serial Number', decode_string($bus, $addr, 192, 32));
 	print_item('UUID', decode_uuid($bus, $addr, 16));
 	my $revision = decode_string($bus, $addr, 160, 10);
@@ -189,13 +195,14 @@ sub vaio_decode
 	print_item('Model Name', 'PCG-'.decode_string($bus, $addr, 170, 4));
 	print_item('OEM Data', decode_string($bus, $addr, 32, 16));
 	print_item('Timestamp', decode_string($bus, $addr, 224, 32));
+	return 1;
 }
 
 BEGIN
 {
 	print("Sony Vaio EEPROM Decoder\n");
-	print("Copyright (C) 2002-2005  Jean Delvare\n");
-	print("Version 1.3\n\n");
+	print("Copyright (C) 2002-2006  Jean Delvare\n");
+	print("Version 1.4\n\n");
 }
 
 END
@@ -208,8 +215,7 @@ for (my $i = 0, $found=0; $i <= 4 && !$found; $i++)
 	if (-r "/sys/bus/i2c/devices/$i-0057/eeprom")
 	{
 		$sysfs = 1;
-		vaio_decode($i, '57');
-		$found++;
+		$found += vaio_decode($i, '57');
 	}
 	elsif (-r "/proc/sys/dev/sensors/eeprom-i2c-$i-57")
 	{
@@ -221,8 +227,7 @@ for (my $i = 0, $found=0; $i <= 4 && !$found; $i++)
 		else
 		{
 			$sysfs = 0;
-			vaio_decode($i, '57');
-			$found++;
+			$found += vaio_decode($i, '57');
 		}
 	}
 }
