@@ -160,6 +160,8 @@ user_install :: install-lib
 user_uninstall::
 	$(RM) $(REMOVELIBST) $(REMOVELIBSH) $(REMOVELNSO) $(REMOVELNBS) 
 	$(RM) $(REMOVELIBHF) $(REMOVEMAN3) $(REMOVEMAN5)
+# Remove directory if empty, ignore failure
+	$(RMDIR) $(DESTDIR)$(LIBINCLUDEDIR) 2> /dev/null || true
 
 clean-lib:
 	$(RM) $(LIB_DIR)/*.ld $(LIB_DIR)/*.ad

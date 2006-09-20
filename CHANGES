@@ -19,6 +19,7 @@ lm_sensors CHANGES file
            Missing sysfs busses and classes are not errors
   Makefile: Don't grep autoconf.h on user-space targets
             Fix depmod on non-running kernel version
+            Remove empty include directories on make user_uninstall
   Module i2c-ali1535: Drop redundant semaphore (2.6 backport)
   Module i2c-amd756-s4882: Improve static semaphore initialization
                            (2.6 backport)
