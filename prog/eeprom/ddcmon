@@ -439,11 +439,11 @@ sub print_edid
 	my ($bus, $address) = @_;
 	my $bytes;
 
-	if (-r "/sys/bus/i2c/devices/$bus-00$address")
+	if (-r "/sys/bus/i2c/devices/$bus-00$address/eeprom")
 	{
 		$bytes = get_edid_sysfs($bus, $address);
 	}
-	elsif (-r "/proc/sys/dev/sensors/eeprom-i2c-$bus-$address")
+	elsif (-r "/proc/sys/dev/sensors/eeprom-i2c-$bus-$address/00")
 	{
 		$bytes = get_edid_procfs($bus, $address);
 	}
