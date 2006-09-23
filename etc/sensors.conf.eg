@@ -2037,107 +2037,129 @@ chip "lm63-*"
 
 
 chip "vt1211-*"
-#
+
 #							1 for temp, 0 for volt.
 #	Sensor		Voltage Mode	Temp Mode	config bit
 #	--------	------------	---------	--------------
-#	Reading 1			temp3
-#	Reading 3			temp1   	
-#	UCH1/Reading2	in0		temp2		0x04 (4)
+#	Reading 1			temp1
+#	Reading 3			temp2   	
+#	UCH1/Reading2	in0		temp3		0x04 (4)
 #	UCH2		in1		temp4		0x08 (8)
 #	UCH3		in2		temp5		0x10 (16)
 #	UCH4		in3		temp6		0x20 (32)
 #	UCH5		in4		temp7		0x40 (64)
 #	3.3V		in5
-#
-# set uch1-2 to temp mode, uch3-5 to voltage mode
-#
-#   set config 12
-    ignore in0
-    ignore in1
+
+# Set uch1-2 to temp mode, uch3-5 to voltage mode. This works only 
+# for the 2.4 driver. For the 2.6 driver use the uch_config module parameter.
+# If the value doesn't match the hardware wiring, you'll get weird readings!
+#    set config 12
+
+# The 2.6 driver will automatically ignore the inputs which are not
+# configured, but the 2.4 driver will not so you'll need to add ignore
+# statements depending on the config value above.
+#   ignore in0
+#   ignore in1
+#   ignore temp3
+#   ignore temp4
     ignore temp5
     ignore temp6
     ignore temp7
 
-# IMPORTANT: If you get "ERROR: Can't get TEMPX data!" from "sensors",
-# where X is 2, 4, 5, 6 or 7, although you have this UCH set to
-# temperature, this generally means that this UCH isn't (physically)
-# used for temperature, so you should add an ignore statement for tempX
-# and change the "config" value to reflect the fact that this UCH is
-# probably used for voltage.
-
-#   label in0 "unused"
-#   label in1 "unused"
-    label in2 "VCore1"
+    label in0 "+3.3V"
+    label in1 "+2.5V"
+    label in2 "VCore"
     label in3 "+5V"
     label in4 "+12V"
     label in5 "+3.3V"
 
-    label temp1 "Int Temp"
-    label temp2 "MB1 Temp"
-    label temp3 "Proc Temp"
-    label temp4 "MB2 Temp"
-#
-#   All voltage calculations have the form
-#       ((@ * 100) - 3) / (K * 95.8), (@ * K * 0.958) + .03
-#   where K = R2 / (R1 + R2).
-#   Use the following K values based on input voltage.
-#   This of course assumes the mobo has the resistors
-#   recommended by Via in the datasheet.
-#	Voltage			K
-#	VCore			1.0
-#	2.5			0.8333
-#	3.3 (in5 internal)	0.6296
-#	3.5 (3.3V ext.)		0.5952
-#	5.0			0.4167
-#	12.0			0.1754
-#
-#   compute in0 ((@ * 100) - 3) / (0.5952 * 95.8), (@ * 0.5952 * 0.958) + .03
-#   compute in1 ((@ * 100) - 3) / (0.8333 * 95.8), (@ * 0.8333 * 0.958) + .03
-    compute in2 ((@ * 100) - 3) / (0.5952 * 95.8), (@ * 0.5952 * 0.958) + .03
-    compute in3 ((@ * 100) - 3) / (0.4167 * 95.8), (@ * 0.4167 * 0.958) + .03
-    compute in4 ((@ * 100) - 3) / (0.1754 * 95.8), (@ * 0.1754 * 0.958) + .03
-    compute in5 ((@ * 100) - 3) / (0.6296 * 95.8), (@ * 0.6296 * 0.958) + .03
+    label temp1 "CPU Temp"
+    label temp2 "Int Temp"
 
-# adjust this if your vid is wrong; see doc/vid
+    label fan1 "Case Fan"
+    label fan2 "CPU Fan"
+
+# All voltage calculations have the form
+#    compute inX  @ * (1 + R1 / R2), @ / (1 + R1 / R2)
+#
+# The following are the resistor values as recommended by VIA
+#	Voltage		R1	R2
+#	-------		----	----
+#	VCore	 	-	-	(no scaling)
+#	 3.3		6.8k	10k
+#	 2.5		2k	10k
+#	 5.0		14k	10k
+#	12.0		47k	10k
+#
+# The VT1211 internal 3.3V (in5) is scaled by the driver and doesn't
+# need to be adjusted here. VCore doesn't need scaling at all.
+
+    compute in0  @ * (1 + 6.8 / 10),  @ / (1 + 6.8 / 10)
+    compute in1  @ * (1 +   2 / 10),  @ / (1 +   2 / 10)
+    compute in3  @ * (1 +  14 / 10),  @ / (1 +  14 / 10)
+    compute in4  @ * (1 +  47 / 10),  @ / (1 +  47 / 10)
+
+# Adjust this if your vid is wrong (for 2.4 only); see doc/vid
 #   set vrm 9.1
 
-#   set in0_min 2.5 * 0.95
-#   set in0_max 2.5 * 1.05
+#   set in0_min 3.3 * 0.95
+#   set in0_max 3.3 * 1.05
 #   set in1_min 2.5 * 0.95
 #   set in1_max 2.5 * 1.05
+# If your vid is wrong, hardcode the CPU voltage (e.g. 1.4)
 #   set in2_min vid * 0.97
 #   set in2_max vid * 1.03
 #   set in3_min 5.0 * 0.95
 #   set in3_max 5.0 * 1.05
 #   set in4_min 12.0 * 0.90
 #   set in4_max 12.0 * 1.10
-#   set in5_min 3.3 * 0.95
-#   set in5_max 3.3 * 1.05
+    set in5_min 3.3 * 0.95
+    set in5_max 3.3 * 1.05
 
-    compute temp1  (@ - 65) / 0.9686,  (@ * 0.9686) + 65
-    compute temp3  (@ - 65) / 0.9686,  (@ * 0.9686) + 65
+# The temperature calculations are of the form
+#    compute tempX  (@ - Offset) / Gain, (@ * Gain) + Offset
 #
-# thermistor calculations.
-# 3435 is the thermistor beta.
-# '^' is the e**x operator; '`' is the ln(x) operator
-# (valid in library version 1.4.0 / lm_sensors 2.7.1 or higher)
-# This assumes that the thermistor forms a resistor divider with a resistor
-# equal to its nominal value @ 25C. If not, the math gets even harder.
+# The following are the gain and offset values as recommended by VIA
+#	Diode Type	Gain	Offset
+#	----------	----	------
+# 	Intel CPU	0.9528	88.638
+#			0.9686	65.000	*)
+#	VIA C3 Ezra	0.9528	83.869
+#	VIA C3 Ezra-T	0.9528	73.869
 #
-    compute temp2  (1 / (((1 / 3435) * (` ((253 - @) / (@ - 43)))) + (1 / 298.15)))  - 273.15, \
-                   253 - (210 / (1 + (1 / (^ (((3435 * (25 - @)) / ((@ + 273.15) * 298.15)))))))
-    compute temp4  (1 / (((1 / 3435) * (` ((253 - @) / (@ - 43)))) + (1 / 298.15)))  - 273.15, \
-                   253 - (210 / (1 + (1 / (^ (((3435 * (25 - @)) / ((@ + 273.15) * 298.15)))))))
-    compute temp5  (1 / (((1 / 3435) * (` ((253 - @) / (@ - 43)))) + (1 / 298.15)))  - 273.15, \
-                   253 - (210 / (1 + (1 / (^ (((3435 * (25 - @)) / ((@ + 273.15) * 298.15)))))))
-    compute temp6  (1 / (((1 / 3435) * (` ((253 - @) / (@ - 43)))) + (1 / 298.15)))  - 273.15, \
-                   253 - (210 / (1 + (1 / (^ (((3435 * (25 - @)) / ((@ + 273.15) * 298.15)))))))
-    compute temp7  (1 / (((1 / 3435) * (` ((253 - @) / (@ - 43)))) + (1 / 298.15)))  - 273.15, \
-                   253 - (210 / (1 + (1 / (^ (((3435 * (25 - @)) / ((@ + 273.15) * 298.15)))))))
+# *) These are the values from the previous sensors.conf. I don't know
+# where they came from or how they got derived.
+#
+# The VT1211 internal temperature (temp2) is scaled by the driver
+# and doesn't need to be adjusted here.
 
-#    set temp2_hyst 40
-#    set temp2_over 45
+    compute temp1  (@ - 73.869) / 0.9528,  (@ * 0.9528) + 73.869
+
+# The thermistor calculations are of the form
+#    compute tempX  1 / (1 / 298.15 - (` Vmax / @ - 1)) / B) - 273.15, \
+#                   Vmax / (1 + (^ (B / 298.15 - B / (273.15 + @))))
+#
+# B is the thermistor beta value, Vmax is the reference voltage, '^' is the
+# exp() operator and '`' is the ln() operator.
+# Given B = 3435 and Vmax = 2.2V and assuming that the thermistor forms a
+# resistor divider with a resistor equal to the thermistor's nominal value at
+# 25 degrees C, the following compute lines can be used:
+
+    compute temp3  1 / (1 / 298.15 - (` (2.2 / @ - 1)) / 3435) - 273.15, \
+                   2.2 / (1 + (^ (3435 / 298.15 - 3435 / (273.15 + @))))
+    compute temp4  1 / (1 / 298.15 - (` (2.2 / @ - 1)) / 3435) - 273.15, \
+                   2.2 / (1 + (^ (3435 / 298.15 - 3435 / (273.15 + @))))
+    compute temp5  1 / (1 / 298.15 - (` (2.2 / @ - 1)) / 3435) - 273.15, \
+                   2.2 / (1 + (^ (3435 / 298.15 - 3435 / (273.15 + @))))
+    compute temp6  1 / (1 / 298.15 - (` (2.2 / @ - 1)) / 3435) - 273.15, \
+                   2.2 / (1 + (^ (3435 / 298.15 - 3435 / (273.15 + @))))
+    compute temp7  1 / (1 / 298.15 - (` (2.2 / @ - 1)) / 3435) - 273.15, \
+                   2.2 / (1 + (^ (3435 / 298.15 - 3435 / (273.15 + @))))
+
+#    set temp1_hyst 80
+#    set temp1_over 85
+#    set temp2_hyst 60
+#    set temp2_over 65
 #    set temp3_hyst 60
 #    set temp3_over 65
 #    set temp4_hyst 40

@@ -99,9 +99,9 @@ superio_exit(void)
    changes from via686a.
 	Sensor		Voltage Mode	Temp Mode
 	--------	------------	---------
-	Reading 1			temp3   Intel thermal diode
-	Reading 3			temp1   VT1211 internal thermal diode
-	UCH1/Reading2	in0		temp2
+	Reading 1			temp1   Intel thermal diode
+	Reading 3			temp2   VT1211 internal thermal diode
+	UCH1/Reading2	in0		temp3
 	UCH2		in1		temp4
 	UCH3		in2		temp5
 	UCH4		in3		temp6
@@ -118,16 +118,16 @@ superio_exit(void)
 #define VT1211_REG_FAN_MIN(nr) (0x3a + (nr))
 #define VT1211_REG_FAN(nr)     (0x28 + (nr))
 
-static const u8 regtemp[] = { 0x20, 0x21, 0x1f, 0x22, 0x23, 0x24, 0x25 };
-static const u8 regover[] = { 0x39, 0x3d, 0x1d, 0x2b, 0x2d, 0x2f, 0x31 };
-static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e, 0x2c, 0x2e, 0x30, 0x32 };
+static const u8 regtemp[] = { 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25 };
+static const u8 regover[] = { 0x39, 0x1d, 0x3d, 0x2b, 0x2d, 0x2f, 0x31 };
+static const u8 reghyst[] = { 0x3a, 0x1e, 0x3e, 0x2c, 0x2e, 0x30, 0x32 };
 
 /* temps numbered 1-7 */
 #define VT1211_REG_TEMP(nr)		(regtemp[(nr) - 1])
 #define VT1211_REG_TEMP_OVER(nr)	(regover[(nr) - 1])
 #define VT1211_REG_TEMP_HYST(nr)	(reghyst[(nr) - 1])
-#define VT1211_REG_TEMP_LOW3	0x4b	/* bits 7-6 */
-#define VT1211_REG_TEMP_LOW2	0x49	/* bits 5-4 */
+#define VT1211_REG_TEMP_LOW1	0x4b	/* bits 7-6 */
+#define VT1211_REG_TEMP_LOW3	0x49	/* bits 5-4 */
 #define VT1211_REG_TEMP_LOW47	0x4d
 
 #define VT1211_REG_CONFIG 0x40
@@ -140,10 +140,8 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e, 0x2c, 0x2e, 0x30, 0x32 };
 #define VT1211_REG_TEMP2_CONFIG 0x4c
 
 /* temps 1-7; voltages 0-5 */
-#define ISTEMP(i, ch_config) ((i) == 1 ? 1 : \
-			      (i) == 3 ? 1 : \
-			      (i) == 2 ? ((ch_config) >> 1) & 0x01 : \
-			                 ((ch_config) >> ((i)-1)) & 0x01)
+#define ISTEMP(i, ch_config) ((i) <= 2 ? 1 : \
+			      ((ch_config) >> ((i)-1)) & 1)
 #define ISVOLT(i, ch_config) ((i) > 4 ? 1 : !(((ch_config) >> ((i)+2)) & 0x01))
 
 #define DIV_FROM_REG(val) (1 << (val))
@@ -151,13 +149,33 @@ static const u8 reghyst[] = { 0x3a, 0x3e, 0x1e, 0x2c, 0x2e, 0x30, 0x32 };
 #define PWM_FROM_REG(val) (val)
 #define PWM_TO_REG(val) SENSORS_LIMIT((val), 0, 255)
 
-#define TEMP_FROM_REG(val) ((val)*10)
-#define TEMP_FROM_REG10(val) (((val)*10)/4)
-#define TEMP_TO_REG(val) (SENSORS_LIMIT(((val)<0?(((val)-5)/10):\
-                                                 ((val)+5)/10),0,255))
-#define IN_FROM_REG(val) /*(((val)*10+5)/10)*/ (val)
-#define IN_TO_REG(val)  (SENSORS_LIMIT((((val) * 10 + 5)/10),0,255))
+/* temp1 (i = 1) is an Intel thermal diode which is scaled in user space.
+   temp2 (i = 2) is the internal temp diode so it's scaled in the driver
+   according to some measurements taken on an EPIA M10000.
+   temp3-7 are thermistor based so the driver returns the voltage measured at
+   the pin (range 0V - 2.2V). */
+#define TEMP_FROM_REG(i, reg)	((i) == 1 ? (reg) * 10 : \
+				 (i) == 2 ? (reg) < 51 ? 0 : \
+				 ((reg) - 51) * 10 : \
+				 ((253 - (reg)) * 2200 + 105) / 210)
+/* for 10-bit temp values */
+#define TEMP_FROM_REG10(i, reg)	((i) == 1 ? (reg) * 10 / 4 : \
+				 (i) == 2 ? (reg) < 204 ? 0 : \
+				 ((reg) - 204) * 10 / 4 : \
+				 ((1012 - (reg)) * 550 + 105) / 210)
+#define TEMP_TO_REG(i, val)	SENSORS_LIMIT( \
+				 ((i) == 1 ? ((val) + 5) / 10 : \
+				  (i) == 2 ? ((val) + 5) / 10 + 51 : \
+				  253 - ((val) * 210 + 1100) / 2200), 0, 255)
 
+/* in5 (i = 5) is special. It's the internal 3.3V so it's scaled in the
+   driver according to the VT1211 BIOS porting guide */
+#define IN_FROM_REG(i, reg)	((reg) < 3 ? 0 : (i) == 5 ? \
+				 (((reg) - 3) * 15882 + 4790) / 9580 : \
+				 (((reg) - 3) * 10000 + 4790) / 9580)
+#define IN_TO_REG(i, val)	(SENSORS_LIMIT((i) == 5 ? \
+				 ((val) * 9580 + 7941) / 15882 + 3 : \
+				 ((val) * 9580 + 5000) / 10000 + 3, 0, 255))
 
 /********* FAN RPM CONVERSIONS ********/
 /* But this chip saturates back at 0, not at 255 like all the other chips.
@@ -270,11 +288,11 @@ static struct i2c_driver vt1211_driver = {
 #define VT1211_ALARM_FAN1 0x40
 #define VT1211_ALARM_FAN2 0x80
 #define VT1211_ALARM_IN4 0x100
-#define VT1211_ALARM_TEMP2 0x800
+#define VT1211_ALARM_TEMP3 0x800
 #define VT1211_ALARM_CHAS 0x1000
-#define VT1211_ALARM_TEMP3 0x8000
+#define VT1211_ALARM_TEMP2 0x8000
 /* duplicates */
-#define VT1211_ALARM_IN0 VT1211_ALARM_TEMP2
+#define VT1211_ALARM_IN0 VT1211_ALARM_TEMP3
 #define VT1211_ALARM_TEMP4 VT1211_ALARM_IN1
 #define VT1211_ALARM_TEMP5 VT1211_ALARM_IN2
 #define VT1211_ALARM_TEMP6 VT1211_ALARM_IN3
@@ -511,29 +529,22 @@ static void vt1211_update_client(struct i2c_client *client)
 					             VT1211_REG_TEMP(i)) << 2;
 				switch(i) {
 					case 1:
-						/* ? */
-						j = 0;
+						j = (vt_rdval(client,
+						  VT1211_REG_TEMP_LOW1) >>
+							6) & 3;
 						break;
 					case 2:
-						j = (vt_rdval(client,
-						  VT1211_REG_TEMP_LOW2) &
-						                    0x30) >> 4;
+						j = 0;
 						break;
 					case 3:
 						j = (vt_rdval(client,
-						  VT1211_REG_TEMP_LOW3) &
-						                    0xc0) >> 6;
+						  VT1211_REG_TEMP_LOW3) >>
+							4) & 3;
 						break;
-					case 4:
-					case 5:
-					case 6:
-					case 7:
 					default:
 						j = (vt_rdval(client,
 						  VT1211_REG_TEMP_LOW47) >>
 						            ((i-4)*2)) & 0x03;	
-						break;
-	
 				}
 				data->temp[i - 1] |= j;
 				data->temp_over[i - 1] = vt_rdval(client,
@@ -579,18 +590,18 @@ void vt1211_in(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		vt1211_update_client(client);
-		results[0] = IN_FROM_REG(data->in_min[nr]);
-		results[1] = IN_FROM_REG(data->in_max[nr]);
-		results[2] = IN_FROM_REG(data->in[nr]);
+		results[0] = IN_FROM_REG(nr, data->in_min[nr]);
+		results[1] = IN_FROM_REG(nr, data->in_max[nr]);
+		results[2] = IN_FROM_REG(nr, data->in[nr]);
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->in_min[nr] = IN_TO_REG(results[0]);
+			data->in_min[nr] = IN_TO_REG(nr, results[0]);
 			vt1211_write_value(client, VT1211_REG_IN_MIN(nr),
 					    data->in_min[nr]);
 		}
 		if (*nrels_mag >= 2) {
-			data->in_max[nr] = IN_TO_REG(results[1]);
+			data->in_max[nr] = IN_TO_REG(nr, results[1]);
 			vt1211_write_value(client, VT1211_REG_IN_MAX(nr),
 					    data->in_max[nr]);
 		}
@@ -633,22 +644,22 @@ void vt1211_temp(struct i2c_client *client, int operation, int ctl_name,
 	int nr = ctl_name - VT1211_SYSCTL_TEMP1;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
-		*nrels_mag = 1;
+		*nrels_mag = nr < 2 ? 1 : 3;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		vt1211_update_client(client);
-		results[0] = TEMP_FROM_REG(data->temp_over[nr]);
-		results[1] = TEMP_FROM_REG(data->temp_hyst[nr]);
-		results[2] = TEMP_FROM_REG10(data->temp[nr]);
+		results[0] = TEMP_FROM_REG(nr + 1, data->temp_over[nr]);
+		results[1] = TEMP_FROM_REG(nr + 1, data->temp_hyst[nr]);
+		results[2] = TEMP_FROM_REG10(nr + 1, data->temp[nr]);
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->temp_over[nr] = TEMP_TO_REG(results[0]);
+			data->temp_over[nr] = TEMP_TO_REG(nr + 1, results[0]);
 			vt1211_write_value(client,
 					    VT1211_REG_TEMP_OVER(nr + 1),
 					    data->temp_over[nr]);
 		}
 		if (*nrels_mag >= 2) {
-			data->temp_hyst[nr] = TEMP_TO_REG(results[1]);
+			data->temp_hyst[nr] = TEMP_TO_REG(nr + 1, results[1]);
 			vt1211_write_value(client,
 					    VT1211_REG_TEMP_HYST(nr + 1),
 					    data->temp_hyst[nr]);

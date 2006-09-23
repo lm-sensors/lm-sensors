@@ -8,6 +8,8 @@ lm_sensors CHANGES file
                             Comment out all set statements
                             Add an it8716 section
                             Add a w83793 section
+                            Adjust the vt1211 section to match the new driver
+                             interface
   Library: Fix device scan when no i2c support is present
            Add support for W83627EHF voltage inputs and alarms
            Add support for the smsc47m192 driver
@@ -17,6 +19,7 @@ lm_sensors CHANGES file
            Add support for the W83793 chip (Yuan Mu)
            Map the 2.6 adm1026's fan8 to fan0
            Missing sysfs busses and classes are not errors
+           Change vt1211 temp3-7 magnitude from 1 to 3
   Makefile: Don't grep autoconf.h on user-space targets
             Fix depmod on non-running kernel version
             Remove empty include directories on make user_uninstall
@@ -36,6 +39,8 @@ lm_sensors CHANGES file
                      Add VT8237A and VT8251
   Module lm83: Add LM82 support (2.6 backport)
   Module vt1211: The VT1211 has no in6
+                 Rework the voltage and temperature conversions and the
+                  temperature input order to match the Linux 2.6 driver
   Module w83781d: Use real-time alarm registers when possible (2.6 backport)
                   Add specific alarm and beep defines for the W83791D
   Module w83792d: Fix PWM range (2.6 backport)
