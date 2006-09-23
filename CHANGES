@@ -98,6 +98,7 @@ lm_sensors CHANGES file
                           Use sysfs for PCI device enumeration
                           Add generic PCI SMBus adapter detection
                           Add generic Super-I/O logical device detection
+                          Add SMSC LPC47M172/182 detection
 
 
 2.10.0 (20060214)

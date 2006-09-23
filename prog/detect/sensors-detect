@@ -1665,7 +1665,7 @@ $chip_kern26_w83791d = {
 	logdev => 0x0a,
       },
       {
-	name => "SMSC LPC47M10x/13x Super IO Fan Sensors",
+	name => "SMSC LPC47M10x/112/13x Super IO Fan Sensors",
 	driver => "smsc47m1",
 	devid => 0x59,
 	logdev => 0x0a,
@@ -1695,9 +1695,16 @@ $chip_kern26_w83791d = {
 	logdev => 0x0a,
       },
       {
-	name => "SMSC LPC47M172 Super IO",
-	driver => "not-a-sensor",
+	name => "SMSC LPC47M172 Super IO Fan Sensors",
+	driver => "to-be-written",
 	devid => 0x14,
+	logdev => 0x0a,
+      },
+      {
+	name => "SMSC LPC47M182 Super IO Fan Sensors",
+	driver => "to-be-written",
+	devid => 0x74,
+	logdev => 0x0a,
       },
       {
         name => "SMSC LPC47B397-NC Super IO",
