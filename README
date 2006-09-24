@@ -14,7 +14,8 @@ OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
 FOR 2.6 KERNELS, use only the userspace tools in this package!
 Build and install them with 'make user' and 'make user_install'.
 The kernel modules in this package will NOT compile for 2.6;
-use the drivers already in the 2.6 kernel.
+use the drivers already in the 2.6 kernel. Check the QUICKSTART
+file for brief installation instructions please.
 
 =============================================================================
 

@@ -12,7 +12,7 @@ FOR 2.5/2.6 KERNELS, do not attempt to compile the modules in this package.
     Use the drivers already in the 2.5/2.6 kernel tree.
     If you are running a 2.5/2.6 kernel, the ONLY thing you need to
     do is 'make user' and 'make user_install'. Do NOT follow the rest
-    of these instructions.
+    of these instructions. Please check the QUICKSTART instead.
 
 
 =============================================================================
