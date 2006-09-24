@@ -2,6 +2,7 @@ lm_sensors CHANGES file
 -----------------------
 
 2.10.1 (2006????)
+  File README.package: Delete.
   File doc/busses/i2c-piix4: Update (2.6 backport)
   File doc/developers/sysfs-interface: Update
   File etc/sensors.conf.eg: Add an smsc47m192 section
