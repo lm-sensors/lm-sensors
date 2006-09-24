@@ -2258,7 +2258,7 @@ sub adapter_pci_detection
                $try->{driver}, pci_busid($device), $try->{procid};
         if ($try->{driver} eq "to-be-tested") {
           print "\nWe are currently looking for testers for this adapter!\n".
-                "Please see http://www.lm-sensors.org/wiki/NewDrivers\n".
+                "Please check the http://www.lm-sensors.org/wiki/Devices\n".
                 "and/or contact us if you want to help.\n\n";
           print "Continue... ";
           <STDIN>;
@@ -5177,9 +5177,8 @@ sub generate_modprobes
        #check return value from modprobe in case modprobe -l isn't supported
        if((($? >> 8) == 0) && ! $modulefound) {
          $modprobes .= "# Warning: the required module $chip->{driver} is not currently installed\n".
-                       "# on your system. For status of 2.6 kernel ports see\n".
-                       "# http://www.lm-sensors.org/wiki/SupportedDevices and\n".
-                       "# http://www.lm-sensors.org/wiki/NewDrivers. If driver is built\n".
+                       "# on your system. For status of 2.6 kernel ports check the\n".
+                       "# http://www.lm-sensors.org/wiki/Devices If driver is built\n".
                        "# into the kernel, or unavailable, comment out the following line.\n";
        }
        $modprobes .= "modprobe $chip->{driver}\n";
@@ -5370,8 +5369,8 @@ sub main
           "I2C or SMBus adapter that is not supported. See doc/FAQ,\n",
           "doc/lm_sensors-FAQ.html or http://www.lm-sensors.org/wiki/FAQ\n",
           "(FAQ #4.24.3) for further information.\n",
-          "If you find out what chips are on your board, see\n",
-          "http://www.lm-sensors.org/wiki/NewDrivers for driver status.\n";
+          "If you find out what chips are on your board, check\n",
+          "the http://www.lm-sensors.org/wiki/Devices for driver status.\n";
     exit;
   }
 

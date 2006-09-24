@@ -335,16 +335,15 @@ We don't support boards, we support chips. @xref{Section 3.2.1, What chips are o
 This we have good answers for.
 @itemize
 @item Sorted by Manufacturer:   @file{README}
-@item Sorted by Manufacturer:   @uref{http://www.lm-sensors.org/wiki/SupportedDevices}
+@item Sorted by Manufacturer:   @uref{http://www.lm-sensors.org/wiki/Devices}
 @item Sorted by Sensor Driver:  @file{doc/chips/SUMMARY}
-@item Newest Driver Status:     @uref{http://www.lm-sensors.org/wiki/NewDrivers}
 @end itemize
 
 
 @anchor{Section 3.2.4}
 @subsection Anybody working on a driver for chip XYZ?
 
-Newest Driver Status: @uref{http://www.lm-sensors.org/wiki/NewDrivers}
+Newest Driver Status: @uref{http://www.lm-sensors.org/wiki/Devices}
 
 
 @node Section 3.3, Section 3.4, Section 3.2, Installation
@@ -1131,8 +1130,8 @@ But in any case you should figure out what is on the board:
 @end enumerate
 
 When you know what chips you have, check the
-@uref{http://www.lm-sensors.org/wiki/NewDrivers, Newest Driver Status} web page to
-see if support has been added for your chip in a later release or in CVS.
+@uref{http://www.lm-sensors.org/wiki/Devices, Driver Status} web page to
+see if support has been added for your chip in a later release or in SVN.
 
 
 @node Section 4.25, Section 4.26, Section 4.24, Problems

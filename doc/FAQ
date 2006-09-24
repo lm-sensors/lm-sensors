@@ -373,17 +373,14 @@ This we have good answers for.
    * Sorted by Manufacturer:   `README'
 
    * Sorted by Manufacturer:
-     `http://www.lm-sensors.org/wiki/SupportedDevices'
+     `http://www.lm-sensors.org/wiki/Devices'
 
    * Sorted by Sensor Driver:  `doc/chips/SUMMARY'
-
-   * Newest Driver Status:
-     `http://www.lm-sensors.org/wiki/NewDrivers'
 
 3.2.4 Anybody working on a driver for chip XYZ?
 -----------------------------------------------
 
-Newest Driver Status: `http://www.lm-sensors.org/wiki/NewDrivers'
+Newest Driver Status: `http://www.lm-sensors.org/wiki/Devices'
 
 3.3 Which modules should I insert?
 ==================================
@@ -1098,8 +1095,8 @@ Either
      website.
 
    When you know what chips you have, check the Newest Driver Status
-(http://www.lm-sensors.org/wiki/NewDrivers) web page to see if support
-has been added for your chip in a later release or in CVS.
+(http://www.lm-sensors.org/wiki/Devices) web page to see if support
+has been added for your chip in a later release or in SVN.
 
 4.25 Sensors says `Error: Line xxx: zzzzzzz'
 ============================================

@@ -114,7 +114,7 @@ We also support some miscellaneous chips:
 
 
 The list above may be out of date;
-see our New Drivers page at http://www.lm-sensors.org/wiki/NewDrivers
+see our Devices page at http://www.lm-sensors.org/wiki/Devices
 for the latest information on supported devices.
 You may also refer to doc/chips/SUMMARY for details on what each chip
 can monitor.
