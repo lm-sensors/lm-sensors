@@ -1,6 +1,8 @@
 lm_sensors CHANGES file
 -----------------------
 
+2.10.2 (2006????)
+
 2.10.1 (20060924)
   File doc/developers/checklist renamed to dev/developers/release_checklist
           with clarifications and updates for new SVN server.
