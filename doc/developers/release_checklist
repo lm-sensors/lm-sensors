@@ -1,28 +1,29 @@
 CHECKLIST FOR NEW RELEASES
 ==========================
 
-release:
-- check out i2c and lm_sensors2
+Release steps:
+- Check out i2c and lm-sensors
 - Update if necessary, the version number of libsensors
   (edit lib/Module.mk and change LIBMAINVER and/or LIBMINORVER)
   Remember: update main number when interface changes, minor if new
   functionality is added, and patch if only bugs are fixed.
-  `cvs diff -r Vx-y-z lib' is your friend.
+  `svn diff -r Vx-y-z lib' is your friend.
 - Update both CHANGES files (add the release date)
 - Verify i2c dependency instructions in README, QUICKSTART, and INSTALL,
   update if necessary
 - Update lm_sensors.lsm and send it to the LSM by mailing it to 
   lsm@execpc.com with the subject `add' (no quotes).
-- update lm_sensors2/version.h and i2c/kernel/i2c.h, and cvs commit it
-- Tag the release using CVS ('cvs tag V#-#-#' from the dist root)
-- remove empty directories (e.g. rmdir `find . -type d`)
-- remove 'CVS' related files/directories (e.g. rm -fR `find . -name CVS`)
-- rename i2c and lm_sensors2 to i2c-#.#.# and lm_sensors-#.#.#
-- tar it up and post it (sign it!)
+- Update lm_sensors2/version.h and i2c/kernel/i2c.h
+- Commit
+- Tag the release using SVN ('???' from the dist root)
+- Remove empty directories (e.g. rmdir `find . -type d`)
+- Remove 'SVN' related files/directories (e.g. rm -fR `find . -name .svn`)
+- Rename i2c and lm_sensors2 to i2c-#.#.# and lm_sensors-#.#.#
+- tar it up and post it (sign it)
 
-misc:
-- copy to mirrors
-- announce on Freshmeat
-- clear support area of unanswered tickets
-- Add "-CVS" back to version consts in cvs, and ???? for dates
-- prep CHANGES files for next release
+After release, remember to:
+- Copy to mirrors
+- Announce on Freshmeat
+- Clear support area of unanswered tickets
+- Put back ???? for dates
+- Prep CHANGES files for next release

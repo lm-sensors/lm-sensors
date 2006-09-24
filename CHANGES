@@ -1,7 +1,7 @@
 lm_sensors CHANGES file
 -----------------------
 
-2.10.1 (2006????)
+2.10.1 (20060924)
   File README.package: Delete.
   File doc/busses/i2c-piix4: Update (2.6 backport)
   File doc/developers/sysfs-interface: Update
