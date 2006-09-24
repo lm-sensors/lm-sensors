@@ -15,23 +15,23 @@ addition, there is one kernel module for each piece of hardware - whether
 this is an I2C bus adapter, an SMBus adapter or a sensors chip.
 
 The kernel modules communicate their information through both the /proc
-and sysctl interfaces. To keep things uncomplicated, the sensor chips always 
-advert their measurements 'as is'. This means that the values they
-report are not immediately relevant to you - they must first be scaled
-and translated to correspond to the real world.
+and sysctl interfaces (Linux 2.4) or the /sys interface (Linux 2.6). To
+keep things uncomplicated, the sensor chips always advert their
+measurements 'as is'. This means that the values they report are not
+immediately relevant to you - they must first be scaled and translated
+to correspond to the real world.
 
 It is also possible to communicate directly with chips on an I2C bus
 or SMBus. This is done through /dev files. This is useful if you 
 quickly want to test how a certain chip behaves, without having to
-write a kernel driver. It is also dangerous; several applications could
-access the same chip at the same time.
+write a kernel driver.
 
 Note that all other parts of this package function in so-called user-space.
 This is important, because bugs in kernel-space might crash your
 computer or do other bad things. And kernel memory can not be swapped out!
 
 Applications could (and can) directly read the sensor values through the 
-/proc or the sysctl interfaces. This is harder then it sounds; because
+/proc, sysctl or /sys interfaces. This is harder than it sounds; because
 no two chips are the same, the information they communicate may also
 be very unlike. This would mean that every application would have to know
 about every type of chip. But there is a better solution.
@@ -56,8 +56,8 @@ a new application is started, you can change configuration values without
 having to recompile anything.
 
 This package does not contain a nice graphical monitor. Look at the file
-doc/useful_addresses for pointers to such programs. It does contain an
-example console program that reports all current sensors values. This
+doc/useful_addresses.html for pointers to such programs. It does contain
+an example console program that reports all current sensors values. This
 program is called 'sensors'. You can use it as a reference implementation
 for more intricate programs.
 

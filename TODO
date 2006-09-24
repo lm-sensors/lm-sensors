@@ -2,12 +2,6 @@ LM-Sensors TODO list
 Contact us if you have comments or wish to help.
 ------------------------------------------------
 
-I2C CODE CHANGES
-================
-
-See TODO in the i2c package.
-
-
 KERNEL MODULES
 ==============
 
@@ -44,10 +38,6 @@ KERNEL MODULES
 
 * "uninstall" Makefile target.
 
-* mkpatch. Trace back Configure changes from 2.5 tree and
-  have it make clean diffs.
-  Applies to both i2c and sensors.
-
 * ACPI and SMBus host
  - ACPI subsystem may access SMBus host too. Locks?
  - On my ancient board using i2c-via, suspend and power switch status
@@ -64,36 +54,37 @@ KERNEL MODULES
   /proc and libsensors; report errors through /proc 'alarms' or
   new 'fail' entry? See adm1021 for a partial example.
 
-* Add string function in sensors.o
 * ALL: cleanup_module is void; check also that cleaning up is done
   properly, now we know that the module will be unloaded whatever we
   do.
+
 * ALL chip drivers: add a readonly insmod option so we don't cause APM/ACPI
   to go insane.
+
 * gl518sm: using iterate==2 causes a tread to be started. this thread remains
   even after setting iterate==1 and/or removing the gl518sm module
   <koenig@uranus.tat.physik.uni-tuebingen.de>
+
 * LM78 detection: Tom Webster has proven that the reset bit in the 
   id register can be one (strange!)
+
 * maxilife.c: Introduce new insmod variables
+
 * maxilife.c: Round REG_TO_VID correctly
+
 * icspll.c: Rewrite. The current implementation simply can't work at all.
   It needs i2c-level access (too bad for SMBus-only adapters).
-* w83781d: Some features are still unsupported for the W8378[23].
-  Also, alarms seem to give strange results
-  sometimes, and there are some other minor problems, as indicated by
-  Jonathan Bradshaw <jonathan@NrgUp.Com>
+
 * Support 10-bit addresses. At this moment, they are supported nowhere, except
   in Simon Vogl's i2c modules.
-* Better general locking, or at least a once-over to check no race-conditions
-  remain. This is part of the SMP-safeness, and can better be done at once.
+
 * adm9240: check whether the current voltage computations are correct.
   Probably not, as they are different from the datasheet specifications.
   Also check for the supported dallas chip.
+
 * lm80: Check how OS alarms work. At page 17 of the sheet, it tells
   something completely different from the description at page 25.
-* gl518sm: Assume that new values are close to old values, so start with
-  trying to use a small range near the old values (already partially done)
+
 * Add MTP006F chip: http://www.myson.com/Pcd/MTP006/Mtp006.pdf
   gfiala@s.netic.de (Guido Fiala) has one on his mainboard
 
@@ -111,23 +102,11 @@ LIBRARY
     temp_over, temp_hyst }
 
 * reload does not work (Bison/Flex problem?).
+
 * Some library routines are pretty inefficient right now.
+
 * Library should be split in more separate files, for better linking
   behaviour.
+
 * Some adm9240 labels start with a digit; change this, it leads to confusing
   syntax in the conf file (they have to be quoted)
-
-
-PROGRAMS
-========
-
-* Sensors program needs to print a + before lm75 temperatures
-
-
-OTHERS
-======
-
-* Examine watchdog-4.3 or later of meskes@debian.org (Michael Meskes)
-  tsx-11.mit.edu /pub/linux/sources/sbin or 
-  sunsite.unc.edu /pub/linux/system/daemons/watchdog
-
