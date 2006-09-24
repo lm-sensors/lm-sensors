@@ -1,74 +1,15 @@
 Installing Modules
 ==================
 
-For 2.4+ kernels that use the new directory structure
-under /lib/modules/x.y.z/ ,
-'make install' will install modules in the subdirectories
-kernel/drivers/i2c and kernel/drivers/sensors. This puts
-the modules in the same location as a kernel
-'make modules_install' does so that there will not
-be duplicate modules.
-
-For older kernels, 'make install' will install the modules
-in the subdirectory misc .
-
-If the kernel headers for the kernel you are running are
-not in /usr/src/linux, you should do
-'make install LINUX=/path-to-linux-source', otherwise
-the modules may get installed into the wrong
-kernel version directory under /lib/modules.
+'make install' will install the kernel modules modules in the
+subdirectories /lib/modules/$version/kernel/drivers/i2c and
+/lib/modules/$version/kernel/drivers/sensors. This puts the modules
+in the same location as a kernel 'make modules_install' does so
+that there will be no duplicate modules.
 
 If 'make install' fails, particularly on Mandrake kernels,
-see FAQ #3.8. (fix MODPREF in the Makefile).
-
-After 'make install', you must do 'depmod'.
-
-If you have symbol errors, do 'depmod -e' to identify
-the particluar modules with errors. Then see #3.9 in
-the FAQ for additional assistance.
+see FAQ #3.8 (fix MODPREF in the Makefile) and #3.9.
 
 For details on options that apply to most modules, see
 doc/chips/MODPARMS. For details on options specific to particular
 modules, see the documentation in doc/chips/ and doc/busses/.
-
-
-Older documentation
--------------------
-
-The hardcore way is to insmod each of them by hand. This is not very
-practical, though. It is better to install them in a subdirectory that
-modprobe examines. /lib/modules/current/extra/misc comes to mind, or
-perhaps /lib/modules/`uname -r`/extra/misc (depending on your distribution).
-You need to add this path to your /etc/modules.conf (or /etc/conf.modules,
-which file is used depends on your distribution):
-  (modules-2.0.0, modutils-2.3.x):
-    path[misc]=/lib/modules/current/extra/misc
-  (modutils-2.1.x):
-    path=/lib/modules/current/extra
-Do always a `depmod -a' after changing either your configuration file or 
-changing a module in one of the module directories; you also need to do
-a 'killall -HUP kerneld' if you still use kerneld (kernel 2.2.x usually
-uses kmod); this command is probably not even needed for kerneld, so
-don't worry about it too much).
-
-Now you can do 'modprobe lm78', and all dependent modules are loaded
-automatically. You could, of course, add this statement (and related
-statements for other drivers) somewhere in your rc files. But, most
-distributions are set up to load automatically all files in the
-'boot' directories on system start, so why not use this? The best
-way to do this is to create directory /lib/modules/boot, and to
-put *links* to the real modules in there. Why links? Well, by linking
-to /lib/modules/current/whatever, this will function for any kernel
-(provided /lib/modules/current is correctly set up to point to the
-current kernel). So:
-  mkdir -p /lib/modules/boot
-  ln -s ../current/extra/misc/lm78.o /lib/modules/boot/lm78.o
-  # etc.
-
-It is also possible to specify default options, that you would normally
-enter at the insmod command, in the configuration file. The syntax is
-as follows:
-  options i2c-core debug=2
-
-With the above, the managing of all those modules is suddenly no problem
-at all!
