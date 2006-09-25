@@ -15,15 +15,19 @@ Release steps:
   lsm@execpc.com with the subject `add' (no quotes).
 - Update lm_sensors2/version.h and i2c/kernel/i2c.h
 - Commit
-- Tag the release using SVN ('???' from the dist root)
+- Tag the release using SVN:
+  svn copy http://lm-sensors.org/svn/lm-sensors/trunk \
+      http://lm-sensors.org/svn/lm-sensors/tags/V2-x-x \
+      -m "Create tag 'V2-x-x'."
 - Remove empty directories (e.g. rmdir `find . -type d`)
 - Remove 'SVN' related files/directories (e.g. rm -fR `find . -name .svn`)
 - Rename i2c and lm_sensors2 to i2c-#.#.# and lm_sensors-#.#.#
-- tar it up and post it (sign it)
+- Tar it up and post it (sign it)
+- Make sure the file permissions on both the archives and the signatures
+  are correct (664)
 
 After release, remember to:
 - Copy to mirrors
 - Announce on Freshmeat
-- Clear support area of unanswered tickets
 - Put back ???? for dates
 - Prep CHANGES files for next release
