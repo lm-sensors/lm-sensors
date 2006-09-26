@@ -1331,6 +1331,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { smsc47m192_detect(@_); },
      },
      {
+       name => "SMSC DME1737",
+       driver => "to-be-written",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { dme1737_detect(@_); },
+     },
+     {
        name => "Fintek F75111R/RG/N (GPIO)",
        driver => "to-be-written",
        i2c_addrs => [0x4e], # 0x37 not probed
@@ -1722,6 +1728,12 @@ $chip_kern26_w83791d = {
         name => "SMSC LPC47M584-NC Super IO",
         # No datasheet
         devid => 0x76,
+      },
+      {
+	name => "SMSC DME1737 Super IO",
+	# Hardware monitoring features are accessed on the SMBus
+	driver => "not-a-sensor",
+	devid => 0x78,
       },
     ],
   },
@@ -4592,6 +4604,27 @@ sub smsc47m192_detect
            and (i2c_smbus_read_byte_data($file, 0x47) & 0x70) == 0x00
            and (i2c_smbus_read_byte_data($file, 0x49) & 0xFE) == 0x80;
   return ($addr == 0x2d ? 6 : 5);
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+#        We assume an i2c_set_slave_addr was already done.
+# $_[1]: Address
+# Returns: undef if not detected, 5 or 6 if detected.
+# Registers used:
+#   0x3E: Manufacturer ID
+#   0x3F: Version/Stepping
+#   0x40: Configuration (2 reserved bits)
+#   0x42: Interrupt Status 2 (1 reserved bit)
+#   0x43: VID (2 reserved bits)
+sub dme1737_detect
+{
+  my ($file, $addr) = @_;
+  return unless i2c_smbus_read_byte_data($file, 0x3E) == 0x55
+           and (i2c_smbus_read_byte_data($file, 0x3F) & 0xF8) == 0x88
+           and (i2c_smbus_read_byte_data($file, 0x40) & 0xC4) == 0x04
+           and (i2c_smbus_read_byte_data($file, 0x42) & 0x02) == 0x00
+           and (i2c_smbus_read_byte_data($file, 0x43) & 0xC0) == 0x00;
+  return ($addr == 0x2e ? 6 : 5);
 }
 
 # $_[0]: Chip to detect
