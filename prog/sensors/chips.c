@@ -1,7 +1,8 @@
 /*
     chips.c - Part of sensors, a user-space program for hardware monitoring
-    Copyright (c) 1998-2003 Frodo Looijaard <frodol@dds.nl>, Mark D.
-    Studebaker <mdsxyz123@yahoo.com> and the lm_sensors team
+    Copyright (c) 1998-2003 Frodo Looijaard <frodol@dds.nl>
+                            and Mark D. Studebaker <mdsxyz123@yahoo.com>
+    Copyright (c) 2003-2006 The lm_sensors team
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1561,11 +1562,8 @@ void print_lm85(const sensors_chip_name *name)
   char *label;
   double cur, min, max;
   int alarms, alarm_mask = 0, valid;
-  int is85, is1027, is7463, is6d100;
+  int is1027, is7463, is6d100;
 
-  is85 = !strcmp(name->prefix,"lm85")
-         || !strcmp(name->prefix,"lm85b")
-         || !strcmp(name->prefix,"lm85c") ;
   is1027 = !strcmp(name->prefix,"adm1027")
            || !strcmp(name->prefix,"adt7463") ;
   is7463 = !strcmp(name->prefix, "adt7463");
