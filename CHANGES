@@ -1,7 +1,7 @@
 lm_sensors CHANGES file
 -----------------------
 
-2.10.2 (2006????)
+SVN HEAD
   Program sensors-detect: Add SMSC DME1737 detection
 
 2.10.1 (20060924)
