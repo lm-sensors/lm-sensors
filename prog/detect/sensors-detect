@@ -1830,6 +1830,12 @@ $chip_kern26_w83791d = {
 	driver => "not-a-sensor",
 	devid => 0x0206,
       },
+      {
+	name => "EPoX EP1308 Super IO",
+	driver => "to-be-written",
+	devid => 0x0541,
+	logdev => 0x04,
+      },
     ],
   },
 );

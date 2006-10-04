@@ -3,6 +3,7 @@ lm_sensors CHANGES file
 
 SVN HEAD
   Program sensors-detect: Add SMSC DME1737 detection
+                          Add EPoX EP1308 detection (Hans Edgington)
 
 2.10.1 (20060924)
   File doc/developers/checklist renamed to dev/developers/release_checklist
