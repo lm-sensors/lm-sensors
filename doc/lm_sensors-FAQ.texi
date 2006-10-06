@@ -1063,9 +1063,7 @@ of manufacturers' IDs are at the bottom of @file{doc/chips/SUMMARY}.
 
 A clock chip. Often, accessing these clock chips in the wrong
 way will instantly crash your computer. Sensors-detect carefully
-avoids these chips. If you really really want to play with your clock
-chip you can look at @file{kernel/chips/icspll.c} in our package. But we
-do not recommend it. You have been warned.
+avoids these chips, and you should do too.  You have been warned.
 
 
 @anchor{What is at I2C addresses 0x50 - 0x57}

@@ -72,9 +72,6 @@ KERNEL MODULES
 
 * maxilife.c: Round REG_TO_VID correctly
 
-* icspll.c: Rewrite. The current implementation simply can't work at all.
-  It needs i2c-level access (too bad for SMBus-only adapters).
-
 * Support 10-bit addresses. At this moment, they are supported nowhere, except
   in Simon Vogl's i2c modules.
 

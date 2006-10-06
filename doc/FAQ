@@ -372,8 +372,7 @@ motherboard XYZ: Section 3.2.1.
 This we have good answers for.
    * Sorted by Manufacturer:   `README'
 
-   * Sorted by Manufacturer:
-     `http://www.lm-sensors.org/wiki/Devices'
+   * Sorted by Manufacturer:   `http://www.lm-sensors.org/wiki/Devices'
 
    * Sorted by Sensor Driver:  `doc/chips/SUMMARY'
 
@@ -1031,9 +1030,7 @@ manufacturers' IDs are at the bottom of `doc/chips/SUMMARY'.
 
 A clock chip. Often, accessing these clock chips in the wrong way will
 instantly crash your computer. Sensors-detect carefully avoids these
-chips. If you really really want to play with your clock chip you can
-look at `kernel/chips/icspll.c' in our package. But we do not recommend
-it. You have been warned.
+chips, and you should do too.  You have been warned.
 
 4.23.2 What is at I2C addresses 0x50 - 0x57?
 --------------------------------------------
@@ -1094,9 +1091,9 @@ Either
   3. Check the Motherboard Monitor (http://mbm.livewiredev.com/)
      website.
 
-   When you know what chips you have, check the Newest Driver Status
-(http://www.lm-sensors.org/wiki/Devices) web page to see if support
-has been added for your chip in a later release or in SVN.
+   When you know what chips you have, check the Driver Status
+(http://www.lm-sensors.org/wiki/Devices) web page to see if support has
+been added for your chip in a later release or in SVN.
 
 4.25 Sensors says `Error: Line xxx: zzzzzzz'
 ============================================

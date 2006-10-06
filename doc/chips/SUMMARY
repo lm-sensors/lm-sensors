@@ -282,9 +282,6 @@ eeprom
 	Memory SPD (serial presence detect) eeproms - reads locations only
 	Xeon scratch eeproms - reads locations only
 
-icspll
-	supported clock chips - reads registers only
-
 ltc1710
 	ltc1710	two switches only
 
