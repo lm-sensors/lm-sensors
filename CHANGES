@@ -2,6 +2,9 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  Library: Add support for the pc87247 driver (fans only)
+  Program sensord: Add pc87247 support (fans only)
+  Program sensors: Add pc87247 support (fans only)
   Program sensors-detect: Add SMSC DME1737 detection
                           Add EPoX EP1308 detection (Hans Edgington)
 

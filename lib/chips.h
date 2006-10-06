@@ -1933,6 +1933,14 @@
 #define SENSORS_PC87360_VID		240	/* R */
 #define SENSORS_PC87360_VRM		241	/* RW */
 
+#define SENSORS_PC87427_PREFIX "pc87427"
+
+/* fan n from 1 to 8 */
+#define SENSORS_PC87427_FAN(n)		(n)		/* R */
+#define SENSORS_PC87427_FAN_MIN(n)	(16 + (n))	/* RW */
+#define SENSORS_PC87427_FAN_ALARM(n)	(32 + (n))	/* R */
+#define SENSORS_PC87427_FAN_FAULT(n)	(48 + (n))	/* R */
+
 #define SENSORS_LM92_PREFIX "lm92"
 
 #define SENSORS_LM92_TEMP_HIGH		1	/* RW */

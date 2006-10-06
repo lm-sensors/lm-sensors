@@ -4810,6 +4810,30 @@ void print_pc87366(const sensors_chip_name *name)
   print_vid_info(name, SENSORS_PC87360_VID, SENSORS_PC87360_VRM);
 }
 
+void print_pc87427(const sensors_chip_name *name)
+{
+  char *label;
+  double cur, min, alarm, fault;
+  int valid, i;
+
+  for (i = 1; i <= 8; i++) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_PC87427_FAN(i),
+                                     &label, &valid) &&
+        !sensors_get_feature(*name, SENSORS_PC87427_FAN(i), &cur) &&
+        !sensors_get_feature(*name, SENSORS_PC87427_FAN_MIN(i), &min) &&
+        !sensors_get_feature(*name, SENSORS_PC87427_FAN_ALARM(i), &alarm) &&
+        !sensors_get_feature(*name, SENSORS_PC87427_FAN_FAULT(i), &fault)) {
+      if (valid) {
+        print_label(label, 10);
+        printf("%4.0f RPM  (min = %4.0f RPM)          %s\n",
+               cur, min,
+               fault ? "FAULT" : alarm ? "ALARM" : "");
+      }
+    }
+  }
+  free(label);
+}
+
 static void lm92_print_temp (float n_cur,float n_high,float n_low,float n_crit,float n_hyst)
 {
 	if (fahrenheit) {

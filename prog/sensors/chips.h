@@ -60,6 +60,7 @@ extern void print_smsc47m192(const sensors_chip_name *name);
 extern void print_pc87360(const sensors_chip_name *name);
 extern void print_pc87364(const sensors_chip_name *name);
 extern void print_pc87366(const sensors_chip_name *name);
+extern void print_pc87427(const sensors_chip_name *name);
 extern void print_lm92(const sensors_chip_name *name);
 extern void print_vt8231(const sensors_chip_name *name);
 extern void print_bmc(const sensors_chip_name *name);

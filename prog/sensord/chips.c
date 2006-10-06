@@ -118,6 +118,13 @@ fmtFans_0
 }
 
 static const char *
+fmtFans_nodiv_0
+(const double values[], int alarm, int beep) {
+  sprintf (buff, "%.0f RPM (min = %.0f RPM)", values[0], values[1]);
+  return fmtExtra (alarm, beep);
+}
+
+static const char *
 fmtMHz_2
 (const double values[], int alarm, int beep) {
   sprintf (buff, "%.2f MHz (min = %.2f MHz, max = %.2f MHz)", values[0], values[1], values[2]);
@@ -1093,6 +1100,37 @@ static const ChipDescriptor pc87360_chip = {
   pc87360_names, pc87360_features, SENSORS_PC87360_ALARMS_TEMP, 0
 };
 
+/** PC87427 **/
+
+static const char *pc87427_names[] = {
+  SENSORS_PC87427_PREFIX,
+  NULL
+};
+
+static const FeatureDescriptor pc87427_features[] = {
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_PC87427_FAN(1), SENSORS_PC87427_FAN_MIN(1), -1, -1 } },
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_PC87427_FAN(2), SENSORS_PC87427_FAN_MIN(2), -1, -1 } },
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_PC87427_FAN(3), SENSORS_PC87427_FAN_MIN(3), -1, -1 } },
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_PC87427_FAN(4), SENSORS_PC87427_FAN_MIN(4), -1, -1 } },
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_PC87427_FAN(5), SENSORS_PC87427_FAN_MIN(5), -1, -1 } },
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_PC87427_FAN(6), SENSORS_PC87427_FAN_MIN(6), -1, -1 } },
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_PC87427_FAN(7), SENSORS_PC87427_FAN_MIN(7), -1, -1 } },
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_PC87427_FAN(8), SENSORS_PC87427_FAN_MIN(8), -1, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor pc87427_chip = {
+  pc87427_names, pc87427_features, 0, 0
+};
+
 /** W83627EHF **/
 
 static const char *w83627ehf_names[] = {
@@ -1191,6 +1229,7 @@ const ChipDescriptor * const knownChips[] = {
   &it87_chip,
   &asb100_chip,
   &pc87360_chip,
+  &pc87427_chip,
   &w83627ehf_chip,
   &f71805f_chip,
   NULL
