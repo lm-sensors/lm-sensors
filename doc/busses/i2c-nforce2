@@ -7,7 +7,7 @@ Supported adapters:
     * nVidia nForce2 SMBus PCI interface
       (10de:0064, included in nForce2 MCP,
        10de:0084, included in nForce2 Ultra 400 MCP)
-      Datasheet: not publically available, but seems to be similar to the
+      Datasheet: not publicly available, but seems to be similar to the
                  AMD-8111 SMBus 2.0 adapter.
 
     * nVidia nForce3 SMBus PCI interface

@@ -6,8 +6,9 @@ Supported adapters:
     * AMD-8111 SMBus 2.0 PCI interface
 
 Datasheets:
-	AMD datasheet not yet available, but almost everything can be found in
-        publically available ACPI 2.0 specification, which the adapter follows.
+	AMD datasheet not yet available, but almost everything can be found
+	in the publicly available ACPI 2.0 specification, which the adapter
+	follows.
 
 Author: Vojtech Pavlik <vojtech@suse.cz>
 
