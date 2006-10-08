@@ -3,6 +3,7 @@ lm_sensors CHANGES file
 
 SVN HEAD
   Library: Add support for the pc87247 driver (fans only)
+           Probe for busses before chips
   Module icspll: Delete. It was useless and dangerous.
   Program sensord: Add pc87247 support (fans only)
   Program sensors: Add pc87247 support (fans only)
