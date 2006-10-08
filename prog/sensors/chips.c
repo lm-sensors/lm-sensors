@@ -6072,8 +6072,7 @@ void print_f71805f(const sensors_chip_name *name)
         printf("%4.0f RPM  (min = %4.0f RPM)                  %s\n",
                cur, min, (alarms & (1 << (i - 1))) ? "ALARM" : "");
       }
-    } else
-      printf("ERROR: Can't get fan%d data!\n", i);
+    }
     free(label);
   }
 

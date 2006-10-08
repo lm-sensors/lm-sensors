@@ -7,6 +7,7 @@ SVN HEAD
   Module icspll: Delete. It was useless and dangerous.
   Program sensord: Add pc87247 support (fans only)
   Program sensors: Add pc87247 support (fans only)
+                   Hide error on missing f71805f fan
   Program sensors-detect: Add SMSC DME1737 detection
                           Add EPoX EP1308 detection (Hans Edgington)
 
