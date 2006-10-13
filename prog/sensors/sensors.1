@@ -21,11 +21,17 @@
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
-.TH sensors 1  "June 2, 2002" "" "Linux User's Manual"
+.TH sensors 1  "October 2006" "" "Linux User's Manual"
 .SH NAME
-sensors \- printing sensors information
+sensors \- print sensors information
 .SH SYNOPSIS
 .B sensors [
+.I options
+.B ] [
+.I chips
+.B ]
+.br
+.B sensors -s [
 .I options
 .B ] [
 .I chips
@@ -33,8 +39,10 @@ sensors \- printing sensors information
 
 .SH DESCRIPTION
 .B sensors
-is used to show the current readings of all sensor chips, and to set all limits
-as specified in the configuration file.
+is used to show the current readings of all sensor chips.
+.br
+.B sensors -s
+is used to set all limits as specified in the configuration file.
 
 .B sensors
 knows about certain chips, and outputs nicely formatted readings for them; but
@@ -44,36 +52,30 @@ knows about them.
 
 .SH OPTIONS
 .IP "-c config-file"
-Specify a configuration file. If no file is specified, the name `sensors.conf'
-is used. If the name does not contain a directory slash, or this parameter
-is not present, the following path is examined:
-.BR /etc ,
-.BR /usr/lib/sensors ,
-.BR /usr/local/lib/sensors ,
-.BR /usr/lib ,
-.BR /usr/local/lib ,
-.B .
+Specify a configuration file. If no file is specified, `/etc/sensors.conf'
+is used. Use `-c /dev/null' to temporarily disable this default configuration
+file.
 .IP -h
-Prints a help text
+Print a help text and exit.
 .IP -s
-Evaluates all `set' statements in the configuration file. You must probably
+Evaluate all `set' statements in the configuration file and exit. You must
 be `root' to do this. If this parameter is not specified, no `set' statement
 is evaluated.
 .IP -a
-Show the algorithm for each chipset. Note that algorithms are no more named
+Show the algorithm for each chip. Note that algorithms are no more named
 since Linux 2.6, so this option is deprecated and will probably go away in
 a near future.
 .IP -A
-Do not show the adapter for each chipset.
+Do not show the adapter for each chip.
 .IP -U
 Hide unknown chips.
 .IP -u
-Treats all chips as unknown ones. Output will be of much lower quality;
+Treat all chips as unknown ones. Output will be of much lower quality;
 this option is only added for testing purposes.
 .IP -v
-Returns the program version.
+Print the program version and exit.
 .IP -f
-Prints the temperatures in degrees Fahrenheit instead of Celsius.
+Print the temperatures in degrees Fahrenheit instead of Celsius.
 .SH FILES
 .I /etc/sensors.conf
 .RS
