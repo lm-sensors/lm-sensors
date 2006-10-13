@@ -94,8 +94,7 @@ int sensors_read_proc_bus(void)
       line[strlen(line)-1] = '\0';
     if (! (border = rindex(line,'\t')))
       goto ERROR;
-    if (! (entry.algorithm = strdup(border+1)))
-      goto FAT_ERROR;
+    /* Skip algorithm name */
     *border='\0';
     if (! (border = rindex(line,'\t')))
       goto ERROR;
@@ -109,7 +108,6 @@ int sensors_read_proc_bus(void)
       goto ERROR;
     if (sensors_parse_i2cbus_name(line,&entry.number))
       goto ERROR;
-    sensors_strip_of_spaces(entry.algorithm);
     sensors_strip_of_spaces(entry.adapter);
     sensors_add_proc_bus(&entry);
     lineno++;

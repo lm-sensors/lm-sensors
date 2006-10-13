@@ -207,15 +207,9 @@ int sensors_read_sysfs_bus(void)
 
 		if (!strncmp(entry.adapter, "ISA ", 4)) {
 			entry.number = SENSORS_CHIP_NAME_BUS_ISA;
-			entry.algorithm = strdup("ISA bus algorithm");
 		} else if (sscanf(clsdev->name, "i2c-%d", &entry.number) != 1) {
 			entry.number = SENSORS_CHIP_NAME_BUS_DUMMY;
-			entry.algorithm = strdup("Dummy bus algorithm");
-		} else
-			entry.algorithm = strdup("Unavailable from sysfs");
-
-		if (!entry.algorithm)
-			sensors_fatal_error(__FUNCTION__, "out of memory");
+		}
 
 		sensors_add_proc_bus(&entry);
 	}

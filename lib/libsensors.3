@@ -24,9 +24,9 @@
 .\"
 .\" References consulted:
 .\"     libsensors source code
-.TH libsensors 3  "December 30, 1998" "" "Linux Programmer's Manual"
+.TH libsensors 3  "October 2006" "" "Linux Programmer's Manual"
 .SH NAME
-libsensors \- publically accessible functions provided by the sensors library
+libsensors \- publicly accessible functions provided by the sensors library
 .SH SYNOPSIS
 .nf
 .B #include <sensors/sensors.h>
@@ -39,7 +39,6 @@ libsensors \- publically accessible functions provided by the sensors library
                        \fBsensors_chip_name chip2);\fP
 .B int sensors_chip_name_has_wildcards(sensors_chip_name chip);
 .B const char *sensors_get_adapter_name(int bus_nr);
-.B const char *sensors_get_algorithm_name(int bus_nr);
 .B int sensors_get_label(sensors_chip_name name, int feature, 
                       \fBchar **result);\fP
 .B int sensors_get_feature(sensors_chip_name name, int feature,
@@ -79,9 +78,14 @@ Check whether the chip name is an 'absolute' name, which can only match one chip
 
 .B const char *sensors_get_adapter_name(int bus_nr);
 .br
+This function returns the adapter name of a bus number, as used within the
+sensors_chip_name structure. If it could not be found, it returns NULL.
+
 .B const char *sensors_get_algorithm_name(int bus_nr);
 .br
-These functions return the adapter and algorithm names of a bus number, as used within the sensors_chip_name structure. If it could not be found, it returns NULL
+This function used to return the algorithm name of a bus number.
+It is now deprecated and returns an arbitrary string. It will be dropped
+in a later version of the library so you should stop using it.
 
 \fBint sensors_get_label(sensors_chip_name name, int feature,
                       char **result);\fP

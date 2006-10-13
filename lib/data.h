@@ -111,11 +111,10 @@ typedef struct sensors_chip {
 } sensors_chip;
 
 /* Config file bus declaration: the i2c bus number, combined with adapter
-   and algorithm names */
+   name */
 typedef struct sensors_bus {
   int number;
   char *adapter;
-  char *algorithm;
   int lineno;
 } sensors_bus;
 

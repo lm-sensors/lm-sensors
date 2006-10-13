@@ -134,6 +134,7 @@ input:	  /* empty */
 ;
 
 line:	  bus_statement EOL
+	| busalgo_statement EOL
 	| label_statement EOL
 	| set_statement EOL
 	| chip_statement EOL
@@ -142,14 +143,24 @@ line:	  bus_statement EOL
 	| error	EOL
 ;
 
-bus_statement:	  BUS i2cbus_name adapter_name algorithm_name
+bus_statement:	  BUS i2cbus_name adapter_name
 		  { sensors_bus new_el;
 		    new_el.lineno = $1;
                     new_el.number = $2;
                     new_el.adapter = $3;
-                    new_el.algorithm = $4;
 		    bus_add_el(&new_el);
 		  }
+;
+
+/* for compatibility, deprecated */
+busalgo_statement:	  BUS i2cbus_name adapter_name algorithm_name
+			  { sensors_bus new_el;
+			    new_el.lineno = $1;
+	                    new_el.number = $2;
+	                    new_el.adapter = $3;
+			    free($4);
+			    bus_add_el(&new_el);
+			  }
 ;
 
 label_statement:	  LABEL function_name string

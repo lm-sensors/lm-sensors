@@ -103,7 +103,6 @@ void free_chip_name(sensors_chip_name name)
 void free_bus(sensors_bus bus)
 {
   free(bus.adapter);
-  free(bus.algorithm);
 }
 
 void free_chip(sensors_chip chip)

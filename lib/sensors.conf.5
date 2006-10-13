@@ -23,7 +23,7 @@
 .\"
 .\" References consulted:
 .\"     sensors.conf.eg by Frodo Looijaard
-.TH sensors.conf 5  "February 8, 1999" "" "Linux Programmer's Manual"
+.TH sensors.conf 5  "October 2006" "" "Linux Programmer's Manual"
 .SH NAME
 sensors.conf \- libsensors configuration file
 
@@ -124,7 +124,7 @@ accompanied by an example line. Please ignore line wrap\-arounds.
 .SS BUS STATEMENT
 
 .RS
-bus "i2c\-0" "SMBus PIIX4 adapter at e800" "Non\-I2C SMBus adapter"
+bus "i2c\-0" "SMBus PIIX4 adapter at e800"
 .RE
 
 A
@@ -139,12 +139,18 @@ The first argument is the bus number. It is the literal text
 followed by a number. As there is a dash in this argument, it must
 always be quoted.
 
-The second and third arguments are the 
-description texts. They must be exactly match the texts as they appear in
-.IR /proc/bus/i2c ,
-except for trailing spaces, which are removed both from the /proc
-entries and the arguments. The adapter description comes first, followed
-by the algorithm description.
+The second argument is the adapter name, it must match exactly the
+adapter name as it appears in
+.I /proc/bus/i2c
+(2.4 kernel)
+or
+.I /sys/class/i2c-adapter/i2c-*/device/name
+(2.6 kernel).
+It should always be quoted as well as it will most certainly contain
+spaces or dashes.
+
+There used to be a third argument, the algorithm name. For compatibility
+reasons, the parser still accepts this third argument, but ignores it.
 
 The
 .I bus

@@ -317,20 +317,10 @@ const char *sensors_get_adapter_name(int bus_nr)
 	return NULL;
 }
 
+/* This function is deprecated and will be dropped soon. */
 const char *sensors_get_algorithm_name(int bus_nr)
 {
-	int i;
-
-	if (bus_nr == SENSORS_CHIP_NAME_BUS_ISA)
-		return "ISA algorithm";
-	if (bus_nr == SENSORS_CHIP_NAME_BUS_PCI)
-		return "PCI algorithm";
-	if (bus_nr == SENSORS_CHIP_NAME_BUS_DUMMY)
-		return "Dummy algorithm";
-	for (i = 0; i < sensors_proc_bus_count; i++)
-		if (sensors_proc_bus[i].number == bus_nr)
-			return sensors_proc_bus[i].algorithm;
-	return NULL;
+	return "No longer available";
 }
 
 /* nr1-1 is the last main feature found; nr2-1 is the last subfeature found */

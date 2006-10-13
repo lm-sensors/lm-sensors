@@ -68,10 +68,12 @@ extern int sensors_match_chip(sensors_chip_name chip1,
    if there are wildcards. */
 extern int sensors_chip_name_has_wildcards(sensors_chip_name chip);
 
-/* These functions return the adapter and algorithm names of a bus number,
+/* This function returns the adapter name of a bus number,
    as used within the sensors_chip_name structure. If it could not be found, 
    it returns NULL */
 extern const char *sensors_get_adapter_name(int bus_nr);
+
+/* This function is deprecated and will be dropped soon. */
 extern const char *sensors_get_algorithm_name(int bus_nr);
 
 /* Look up the label which belongs to this chip. Note that chip should not
