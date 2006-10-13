@@ -149,7 +149,7 @@ static void set_degstr(void)
 int main (int argc, char *argv[])
 {
   int c,res,i,error;
-  char *config_file_name = NULL;
+  const char *config_file_name = ETCDIR "/" DEFAULT_CONFIG_FILE_NAME;
 
   struct option long_opts[] =  {
     { "help", no_argument, NULL, 'h' },
@@ -187,7 +187,7 @@ int main (int argc, char *argv[])
       print_version();
       exit(0);
     case 'c':
-      config_file_name = strdup(optarg);
+      config_file_name = optarg;
       break;
     case 's':
       do_sets = 1;
@@ -229,11 +229,7 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
-
-  if (config_file_name == NULL)
-    config_file_name = strdup(ETCDIR "/" DEFAULT_CONFIG_FILE_NAME);
   open_config_file(config_file_name);
-
   if ((res = sensors_init(config_file))) {
     fprintf(stderr,"%s\n",sensors_strerror(res));
     if (res == -SENSORS_ERR_PROC)
@@ -243,9 +239,7 @@ int main (int argc, char *argv[])
               "was compiled with sysfs support!\n");
     exit(1);
   }
-
   close_config_file(config_file_name);
-  free(config_file_name);
 
   /* build the degrees string */
   set_degstr();

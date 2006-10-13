@@ -9,6 +9,7 @@ SVN HEAD
   Program sensord: Add pc87247 support (fans only)
   Program sensors: Add pc87247 support (fans only)
                    Hide error on missing f71805f fan
+                   Handle option -c more efficiently
   Program sensors-detect: Add SMSC DME1737 detection
                           Add EPoX EP1308 detection (Hans Edgington)
 
