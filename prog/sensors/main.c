@@ -203,6 +203,9 @@ int main (int argc, char *argv[])
     case 'u':
       do_unknown = 1;
       break;
+    case 'a':
+      /* Ignore for compatibility */
+      break;
     default:
       fprintf(stderr,"Internal error while parsing options!\n");
       exit(1);
