@@ -6234,6 +6234,25 @@ void print_k8temp(const sensors_chip_name *name)
  }
 }
 
+void print_coretemp(const sensors_chip_name *name)
+{
+  char *label;
+  double cur, over, alarm;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_CORETEMP_TEMP1, &label, &valid)
+   && !sensors_get_feature(*name, SENSORS_CORETEMP_TEMP1, &cur)
+   && !sensors_get_feature(*name, SENSORS_CORETEMP_TEMP1_CRIT_ALARM, &alarm)
+   && !sensors_get_feature(*name, SENSORS_CORETEMP_TEMP1_CRIT, &over)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, over, 0, MAXONLY, 0, 0);
+      printf(" %s\n", alarm ? "ALARM" : "");
+    }
+  } else
+    printf("ERROR: Can't get temperature data!\n");
+  free(label);
+}
 
 void print_unknown_chip(const sensors_chip_name *name)
 {

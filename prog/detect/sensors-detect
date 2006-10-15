@@ -1848,6 +1848,11 @@ $chip_kern26_w83791d = {
     driver => "k8temp",
     detect => sub { k8temp_pci_detect(); },
   },
+  {
+    name => "Intel Core family thermal sensor",
+    driver => "coretemp",
+    detect => sub { coretemp_detect(); },
+  },
 );
 
 #######################
@@ -5124,6 +5129,20 @@ sub k8temp_pci_detect
 	return 9;
 }
 
+# Returns: undef if not detected, (9) if detected.
+sub coretemp_detect
+{
+	my $probecpu;
+	foreach $probecpu (@cpu) {
+		if ($probecpu->{'vendor_id'} eq 'GenuineIntel' && 
+				$probecpu->{'cpu family'} == 6 &&
+				($probecpu->{'model'} == 14 ||
+				 $probecpu->{'model'} == 15)) {
+			return 9;
+		}
+	}
+	return;
+}
 
 ################
 # MAIN PROGRAM #

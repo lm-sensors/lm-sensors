@@ -5,6 +5,7 @@ SVN HEAD
   Library: Add support for the pc87247 driver (fans only)
            Probe for busses before chips
            Drop support for algorithm names
+           Add support for coretemp driver   
   Man page i2cdetect.8: Describe the output convention
   Man page sensors.1: Update (option -c) and clean up
   Module icspll: Delete. It was useless and dangerous.
@@ -16,6 +17,7 @@ SVN HEAD
                    Drop option -a (show algorithm names)
   Program sensors-detect: Add SMSC DME1737 detection
                           Add EPoX EP1308 detection (Hans Edgington)
+                          Add Intel Core thermal sensor detection
 
 2.10.1 (20060924)
   File doc/developers/checklist renamed to dev/developers/release_checklist

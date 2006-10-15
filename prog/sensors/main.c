@@ -418,6 +418,7 @@ struct match matches[] = {
 	{ "f71805f", print_f71805f },
  	{ "abituguru", print_abituguru },
  	{ "k8temp", print_k8temp },
+ 	{ "coretemp", print_coretemp },
 	{ NULL, NULL }
 };
 

@@ -6028,6 +6028,16 @@ static sensors_chip_feature k8temp_features[] =
     { 0 }
   };
 
+static sensors_chip_feature coretemp_features[] =
+  {
+    { SENSORS_CORETEMP_TEMP1, "temp1", NOMAP, NOMAP,
+                       R, NOSYSCTL, VALUE(2), 0 },
+    { SENSORS_CORETEMP_TEMP1_CRIT, "temp1_crit", SENSORS_CORETEMP_TEMP1,
+                       SENSORS_CORETEMP_TEMP1, R, NOSYSCTL, VALUE(1), 0 },
+    { SENSORS_CORETEMP_TEMP1_CRIT_ALARM, "temp1_crit_alarm", SENSORS_CORETEMP_TEMP1,
+                       NOMAP, R, NOSYSCTL, VALUE(1), 0 },
+    { 0 }
+  };
 
 sensors_chip_features sensors_chip_features_list[] =
 {
@@ -6136,5 +6146,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_F71805F_PREFIX, f71805f_features },
  { SENSORS_ABITUGURU_PREFIX, abituguru_features },
  { SENSORS_K8TEMP_PREFIX, k8temp_features },
+ { SENSORS_CORETEMP_PREFIX, coretemp_features },
  { 0 }
 };

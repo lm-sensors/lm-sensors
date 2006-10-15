@@ -2224,4 +2224,11 @@
 #define SENSORS_K8TEMP_TEMP3	0x03 /* R */
 #define SENSORS_K8TEMP_TEMP4	0x04 /* R */
 
+/* coretemp */
+
+#define SENSORS_CORETEMP_PREFIX "coretemp"
+#define SENSORS_CORETEMP_TEMP1			0x01 /* R */
+#define SENSORS_CORETEMP_TEMP1_CRIT		0x02 /* R */
+#define SENSORS_CORETEMP_TEMP1_CRIT_ALARM	0x03 /* R */
+
 #endif /* def LIB_SENSORS_CHIPS_H */
