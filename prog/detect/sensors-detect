@@ -2057,6 +2057,35 @@ sub kernel_version_at_least
   return 0;
 }
 
+# @cpu is a list of reference to hashes, one hash per CPU.
+# Each entry has the following keys: vendor_id, cpu family, model,
+# model name and stepping, directly taken from /proc/cpuinfo.
+use vars qw(@cpu);
+
+sub initialize_cpu_list
+{
+  open(local *INPUTFILE, "/proc/cpuinfo") or die "Can't access /proc/cpuinfo!";
+  local $_;
+  my %entry;
+  while (<INPUTFILE>) {
+    if (m/^processor\s*:\s*(\d+)/) {
+      push @cpu, \%entry if scalar keys(%entry); # Previous entry
+      %entry = (); # New entry
+      next;
+    }
+    if (m/^(vendor_id|cpu family|model|model name|stepping)\s*:\s*(.+)$/) {
+      my $k = $1;
+      my $v = $2;
+      $v =~ s/\s+/ /g;	# Merge multiple spaces
+      $v =~ s/ $//;	# Trim trailing space
+      $entry{$k} = $v;
+      next;
+    }
+  }
+  push @cpu, \%entry if scalar keys(%entry); # Last entry
+  close INPUTFILE;
+}
+
 ###########
 # MODULES #
 ###########
@@ -5282,6 +5311,7 @@ sub main
   initialize_modules_list;
   initialize_modules_supported;
   initialize_kernel_version;
+  initialize_cpu_list();
 
   print "# sensors-detect revision $revision\n\n";
 
