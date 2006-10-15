@@ -2870,6 +2870,13 @@ sub scan_isa_bus
 
 use vars qw(%superio);
 
+# The following are taken from the PNP ISA spec (so it's supposed
+# to be common to all Super I/O chips):
+#  devidreg: The device ID register(s)
+#  logdevreg: The logical device register
+#  actreg: The activation register within the logical device
+#  actmask: The activation bit in the activation register
+#  basereg: The I/O base register within the logical device
 %superio = (
   devidreg => 0x20,
   logdevreg => 0x07,
@@ -2970,13 +2977,6 @@ sub probe_superio($$$)
                                         $new_hash;
 }
 
-# The following are taken from the PNP ISA spec (so it's supposed
-# to be common to all Super I/0 chips):
-#  devidreg: The device ID register(s)
-#  logdevreg: The logical device register
-#  actreg: The activation register within the logical device
-#  actmask: The activation bit in the activation register
-#  basereg: The I/O base register within the logical device
 sub scan_superio
 {
   my ($addrreg, $datareg) = @_;
