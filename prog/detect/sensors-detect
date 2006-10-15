@@ -47,7 +47,7 @@ $ENV{PATH} = '/usr/local/sbin:'.$ENV{PATH}
 # CONSTANT DECLARATIONS #
 #########################
 
-use vars qw(@pci_adapters @chip_ids @superio_ids $revision);
+use vars qw(@pci_adapters @chip_ids @superio_ids @cpu_ids $revision);
 
 $revision = '$Revision$ ($Date$)';
 $revision =~ s/\$\w+: (.*?) \$/$1/g;
@@ -1385,12 +1385,6 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { fintek_detect(7, @_); },
      },
      {
-       name => "AMD K8 thermal sensors",
-       driver => "k8temp",
-       isa_addrs => [ 0 ],
-       isa_detect => sub { k8temp_pci_detect(); },
-     },
-     {
        name => "Philips Semiconductors SAA1064",
        driver => "saa1064",
        i2c_addrs => [0x38..0x3b],
@@ -1837,6 +1831,22 @@ $chip_kern26_w83791d = {
 	logdev => 0x04,
       },
     ],
+  },
+);
+
+# Drivers for CPU embedded sensors
+# Each entry must have the following fields:
+#  name: The CPU family name
+#  driver: The driver name. Put "to-be-written" if no driver is available.
+#  detect: Detection callback function. No parameter will be passed to
+#          this function, it must use global lists of PCI devices, CPU,
+#          etc. It must return a confidence value, undef if no supported
+#          CPU is found.
+@cpu_ids = (
+  {
+    name => "AMD K8 thermal sensors",
+    driver => "k8temp",
+    detect => sub { k8temp_pci_detect(); },
   },
 );
 
@@ -2699,6 +2709,7 @@ sub add_isa_to_chips_detected
     $misdetected_ref = $main_entry->{misdetected};
     for ($i = 0; $i < @{$main_entry->{detected}}; $i++) {
       if (exists $detected_ref->[$i]->{isa_addr} and
+          exists $datahash->{isa_addr} and
           $detected_ref->[$i]->{isa_addr} == $datahash->{isa_addr}) {
         if ($detected_ref->[$i]->{conf} >= $datahash->{conf}) {
           push @$new_misdetected_ref, $datahash
@@ -3019,6 +3030,26 @@ sub scan_superio
     }
 
     exit_superio($addrreg, $datareg);
+  }
+}
+
+
+sub scan_cpu($)
+{
+  my $entry = shift;
+  my $confidence;
+
+  printf("\%-60s", "$entry->{name}... ");
+  if (defined ($confidence = $entry->{detect}())) {
+    print "Success!\n";
+    printf "    (driver `%s')\n", $entry->{driver};
+    my $new_hash = {
+      conf => $confidence,
+      chipname => $entry->{name},
+    };
+    add_isa_to_chips_detected(undef, $entry->{driver}, $new_hash);
+  } else {
+    print "No\n";
   }
 }
 
@@ -5120,18 +5151,18 @@ sub print_chips_report
         }
         print ")"
       }
-      print "\n";
+      print "\n    ";
     }
     if ($is_isa) {
-      print "    " if  $is_i2c;
+      print "ISA bus";
       if ($data->{isa_addr}) {
-        printf "ISA bus address 0x%04x (Busdriver `i2c-isa')\n", 
-               $data->{isa_addr};
-      } else {
-        print "ISA bus, undetermined address (Busdriver `i2c-isa')\n";
+        printf ", address 0x%x", $data->{isa_addr};
       }
+      print " (Busdriver `i2c-isa')"
+        unless kernel_version_at_least(2, 6, 18);
+      print "\n    ";
     }
-    printf "    Chip `%s' (confidence: %d)\n",
+    printf "Chip `%s' (confidence: %d)\n",
            $data->{chipname},  $data->{conf};
   }
 }
@@ -5175,7 +5206,6 @@ sub generate_modprobes
   # Collect all adapters used
   $nr = 0;
   $isa = 0;
-  $modprobes .= "# I2C adapter drivers\n";
   foreach $chip (@chips_detected) {
     foreach $detection (@{$chip->{detected}}) {
       # If there is more than one bus detected by a driver, they are
@@ -5198,6 +5228,7 @@ sub generate_modprobes
     }
   }
 
+  $modprobes .= "# I2C adapter drivers\n" if $nr;
   for ($i = 0; $i < $nr; $i++) {
     foreach $adap (@adapters) {
       next unless exists $adap->{nr_later} and $adap->{nr_later} == $i;
@@ -5429,6 +5460,15 @@ sub main
     scan_superio(0x2e, 0x2f);
     scan_superio(0x4e, 0x4f);
     close_ioports();
+  }
+  print "\n";
+
+  print "Some CPU may also contain embedded sensors.\n";
+  print "Do you want to scan for CPU embedded sensors? (YES/no): ";
+  unless (<STDIN> =~ /^\s*n/i) {
+    foreach my $entry (@cpu_ids) {
+      scan_cpu($entry);
+    }
   }
   print "\n";
 
