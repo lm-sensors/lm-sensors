@@ -8,6 +8,7 @@ SVN HEAD
   Man page i2cdetect.8: Describe the output convention
   Man page sensors.1: Update (option -c) and clean up
   Module icspll: Delete. It was useless and dangerous.
+  Program i2cdetect: Make the output clearer
   Program sensord: Add pc87247 support (fans only)
   Program sensors: Add pc87247 support (fans only)
                    Hide error on missing f71805f fan

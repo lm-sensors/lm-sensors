@@ -103,7 +103,7 @@ int scan_i2c_bus(int file, const int mode, const int first, const int last)
 			}
 
 			if (res < 0)
-				printf("XX ");
+				printf("-- ");
 			else
 				printf("%02x ", i+j);
 		}
