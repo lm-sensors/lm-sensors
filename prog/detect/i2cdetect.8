@@ -1,4 +1,4 @@
-.TH I2CDETECT 8 "April 2006"
+.TH I2CDETECT 8 "October 2006"
 .SH NAME
 i2cdetect \- detect I2C chips
 
@@ -30,6 +30,17 @@ i2cdetect can also be used to query the functionalities of an I2C bus
 
 .SH WARNING
 This program can confuse your I2C bus, cause data loss and worse!
+
+.SH INTERPRETING THE OUTPUT
+Each cell in the output table will contain one of the following symbols:
+.IP \(bu "\w'\(bu'u+1n"
+"XX". The address was probed but no chip answered.
+.IP \(bu
+"UU". Probing was skipped, because this address is currently in use by
+a driver. This strongly suggests that there is a chip at this address.
+.IP \(bu
+An address number in hexadecimal, e.g. "2d" or "4e". A chip
+was found at this address.
 
 .SH OPTIONS
 .TP

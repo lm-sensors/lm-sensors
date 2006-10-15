@@ -5,6 +5,7 @@ SVN HEAD
   Library: Add support for the pc87247 driver (fans only)
            Probe for busses before chips
            Drop support for algorithm names
+  Man page i2cdetect.8: Describe the output convention
   Man page sensors.1: Update (option -c) and clean up
   Module icspll: Delete. It was useless and dangerous.
   Program sensord: Add pc87247 support (fans only)
