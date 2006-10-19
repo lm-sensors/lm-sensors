@@ -214,6 +214,7 @@ smsc47m1
 	(all are reported as a "smsc47m1")
 	smsc47b27x	-	-	2	2	no	yes (LPC)
 	smsc47m10x	-	-	2	2	no	yes (LPC)
+	smsc47m112	-	-	2	2	no	yes (LPC)
 	smsc47m13x	-	-	2	2	no	yes (LPC)
 	smsc47m14x	-	-	2	2	no	yes (LPC)
 	smsc47m15x	-	-	2	2	no	yes (LPC)
