@@ -33,6 +33,8 @@ static char *buffer;
 
 char sensors_lex_error[100];
 
+int sensors_yylineno;
+
 #define buffer_malloc() sensors_malloc_array(&buffer,&buffer_count,\
                                              &buffer_max,1)
 #define buffer_free() sensors_free_array(&buffer,&buffer_count,\
@@ -46,155 +48,224 @@ char sensors_lex_error[100];
 
 %}
 
-/* Scanner for configuration files */
+ /* Scanner for configuration files */
 
 %option nodefault
 %option noyywrap
-%option yylineno
 %option nounput
 
-/* States. 'Normal' states STRING and MIDDLE share some rules; other states
-   have only their own rules */
-%s MIDDLE
+ /* All states are exclusive */
+
+%x MIDDLE
 %x STRING
 %x ERR
 
-/* Any whitespace-like character */
-BLANK		[[:space:]]
+ /* Any whitespace-like character */
+
+BLANK		[ \f\t\v]
 
 IDCHAR		[[:alnum:]_]
 
-/* Note: `10', `10.4' and `.4' are valid, `10.' is not */
+ /* Note: `10', `10.4' and `.4' are valid, `10.' is not */
+
 FLOAT   [[:digit:]]*\.?[[:digit:]]+
 
-/* Only positive whole numbers are recognized here */
+ /* Only positive whole numbers are recognized here */
+
 NUM	0|([1-9][[:digit:]]*)
 
-/* Only number between 1 and 255, octally represented. */
+ /* Only number between 1 and 255, octally represented. */
+
 OCTESC		(1[0-7]{0,2})|([2-7][0-7]?)|(0[1-7][0-7]?)|(00[1-7])
 
 
 %%
 
+ /*
+  * STATE: INITIAL
+  */
 
- /* End of line: It may be the end of this line. Same for End of file. */
-<MIDDLE>\n	|
-<MIDDLE><<EOF>> {
-		  BEGIN(INITIAL);
-		  return EOL;
+<INITIAL>{
+
+<<EOF>>		{ /* EOF from this state terminates */
+		  return 0;
 		}
 
- /* We want to match any blank, except End of line; that is why we have to
-    match whitespace one by one! */
-{BLANK}		/* Eat up a blank */
+{BLANK}+	; /* eat as many blanks as possible at once */
 
- /* Escaped End of line: eat and be happy */
-<MIDDLE>\\\n	/* Eat this! */
+{BLANK}*\n	{ /* eat a bare newline (possibly preceded by blanks) */
+		  sensors_yylineno++;
+		}
 
- /* Remove a comment; we do not change the state, this is done when the \n is
-    eaten */
-#[^\n]*		/* Eat this! */
+ /* comments */
 
- /* Some keywords at the beginning of lines */
-<INITIAL>"label" {
+#.*		; /* eat the rest of the line after comment char */
+
+#.*\n		{ /* eat the rest of the line after comment char */
+		  sensors_yylineno++;
+		}
+
+ /*
+  * Keywords must be followed by whitespace - eat that too.
+  * If there isn't trailing whitespace, we still need to
+  * accept it as lexically correct (even though the parser
+  * will reject it anyway.)
+  */
+
+label{BLANK}*	{
 		  sensors_yylval.line = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return LABEL;
 		}
 
-<INITIAL>"set"	{
+set{BLANK}*	{
 		  sensors_yylval.line = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return SET;
 		}
 
-<INITIAL>"compute" {
+compute{BLANK}*	{
 		  sensors_yylval.line = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return COMPUTE;
 		}
 
-<INITIAL>"bus"	{
+bus{BLANK}*	{
 		  sensors_yylval.line = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return BUS;
 		}
 
-<INITIAL>"chip"	{
+chip{BLANK}*	{
 		  sensors_yylval.line = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return CHIP;
 		}
-<INITIAL>"ignore" {
+
+ignore{BLANK}*	{
 		  sensors_yylval.line = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return IGNORE;
 		}
 
  /* Anything else at the beginning of a line is an error */
-<INITIAL>.	{
+
+[a-z]+		|
+.		{
 		  yymore();
 		  BEGIN(ERR);
-		}
-
-<ERR>[^\n]*\n	{
-		  BEGIN(INITIAL);
 		  strcpy(sensors_lex_error,"Invalid keyword");
 		  return ERROR;
 		}
+}
+
+ /*
+  * STATE: ERROR
+  */
+
+<ERR>{
+
+.*		; /* eat whatever is left on this line */
+
+\n		{
+		  BEGIN(INITIAL);
+		  sensors_yylineno++;
+		  return EOL;
+		}
+}
+
+ /*
+  * STATE: MIDDLE
+  */
+
+<MIDDLE>{
+
+{BLANK}+	; /* eat as many blanks as possible at once */
+
+\n		{ /* newline here sends EOL token to parser */
+		  BEGIN(INITIAL);
+		  sensors_yylineno++;
+		  return EOL;
+		}
+
+<<EOF>>		{ /* EOF here sends EOL token to parser also */
+		  BEGIN(INITIAL);
+		  return EOL;
+		}
+
+\\{BLANK}*\n	{ /* eat an escaped newline with no state change */
+		  sensors_yylineno++;
+		}
+
+ /* comments */
+
+#.*		; /* eat the rest of the line after comment char */
+
+#.*\n		{ /* eat the rest of the line after comment char */
+		  BEGIN(INITIAL);
+		  sensors_yylineno++;
+		  return EOL;
+		}
 
  /* A number */
-<MIDDLE>{FLOAT}	{
+
+{FLOAT}		{
 		  sensors_yylval.value = atof(sensors_yytext);
 		  return FLOAT;
 		}
 
  /* Some operators */
-<MIDDLE>"+"	{
-		  return '+';
-		}
 
-<MIDDLE>"-"	{
-		  return '-';
-		}
-
-<MIDDLE>"*"	{
-		  return '*';
-		}
-
-<MIDDLE>"/"	{
-		  return '/';
-		}
-
-<MIDDLE>"("	{
-		  return '(';
-		}
-
-<MIDDLE>")"	{
-		  return ')';
-		}
-<MIDDLE>","	{
-		  return ',';
-		}
-<MIDDLE>"@"	{
-		  return '@';
-		}
-<MIDDLE>"^"	{
-		  return '^';
-		}
-<MIDDLE>"`"	{
-		  return '`';
-		}
+"+"		return '+';
+"-"		return '-';
+"*"		return '*';
+"/"		return '/';
+"("		return '(';
+")"		return ')';
+","		return ',';
+"@"		return '@';
+"^"		return '^';
+"`"		return '`';
 
  /* Quoted string */
-<MIDDLE>\"	{
+
+\"		{
 		  buffer_malloc();
 		  BEGIN(STRING);
 		}
 
+ /* A normal, unquoted identifier */
+
+{IDCHAR}+	{
+		  sensors_yylval.name = strdup(sensors_yytext);
+		  if (! sensors_yylval.name)
+		    sensors_fatal_error("conf-lex.l",
+                                        "Allocating a new string");
+		  
+		  return NAME;
+		}
+
+ /* anything else is bogus */
+
+.		|
+[[:digit:]]*\.	|
+\\{BLANK}*	{
+		  yymore();
+		  BEGIN(ERR);
+		  return ERROR;
+		}
+}
+
+ /*
+  * STATE: STRING
+  */
+
+<STRING>{
+
  /* Oops, newline while in a string is not good */
-<STRING>\n	|
-<STRING>\\\n	{
+
+\n		|
+\\\n		{
 		  buffer_add_char("\0");
 		  strcpy(sensors_lex_error,"No matching double quote");
 		  buffer_free();
@@ -203,7 +274,8 @@ OCTESC		(1[0-7]{0,2})|([2-7][0-7]?)|(0[1-7][0-7]?)|(00[1-7])
 		}
 
  /* At the end */
-<STRING>\"	{
+
+\"		{
 		  buffer_add_char("\0");
 		  sensors_yylval.name = strdup(buffer);
 		  if (! sensors_yylval.name)
@@ -214,60 +286,61 @@ OCTESC		(1[0-7]{0,2})|([2-7][0-7]?)|(0[1-7][0-7]?)|(00[1-7])
 		  return NAME;
 		}
 
-<STRING>\\a	{
+\\a		{
 		  buffer_add_char("\a");
 		}
 
-<STRING>\\b	{
+\\b		{
 		  buffer_add_char("\b");
 		}
 
-<STRING>\\f	{
+\\f		{
 		  buffer_add_char("\f");
 		}
 
-<STRING>\\n	{
+\\n		{
 		  buffer_add_char("\n");
 		}
 
-<STRING>\\r	{
+\\r		{
 		  buffer_add_char("\r");
 		}
 
-<STRING>\\t	{
+\\t		{
 		  buffer_add_char("\t");
 		}
 
-<STRING>\\v	{
+\\v		{
 		  buffer_add_char("\v");
 		}
 
  /* We can't support \0, this would cause havoc! */
-<STRING>\\{OCTESC} {
+
+\\{OCTESC}	{
 		  int res;
 		  sscanf(sensors_yytext+1,"%o",&res);
 		  buffer_add_char(&res);
 		}
 
  /* Other escapes: just copy the character behind the slash */
-<STRING>\\.	{
+
+\\.		{
 		  buffer_add_char(&sensors_yytext[1]);
 		}
 
- /* Anything else */
-<STRING>[^\\\n\"]+ {
-		  buffer_add_string(sensors_yytext);
+ /* This prevents backing up; it is otherwise purely redundant */
+
+\\00		{
+		  buffer_add_char("00");
 		}
 
- /* A normal, unquoted identifier */
-<MIDDLE>{IDCHAR}+ {
-		  sensors_yylval.name = strdup(sensors_yytext);
-		  if (! sensors_yylval.name)
-		    sensors_fatal_error("conf-lex.l",
-                                        "Allocating a new string");
-		  
-		  return NAME;
+ /* Anything else (including a bare '\' which may be followed by EOF) */
+
+\\		|
+[^\\\n\"]+	{
+		  buffer_add_string(sensors_yytext);
 		}
+}
 
 %%
 
@@ -289,6 +362,7 @@ int sensors_scanner_init(FILE *input)
 		return -1;
 
 	sensors_yy_switch_to_buffer(scan_buf);
+	sensors_yylineno = 1;
 	return 0;
 }
 

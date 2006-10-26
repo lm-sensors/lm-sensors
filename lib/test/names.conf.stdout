@@ -1,0 +1,28 @@
+2: LABEL
+2: NAME: foo
+2: NAME: bar
+3: EOL
+5: LABEL
+6: NAME: foo
+6: NAME: bar
+7: EOL
+9: LABEL
+10: NAME: abcdefg
+11: NAME: hijklmnop
+12: NAME: qrs
+13: NAME: tuv
+14: NAME: wx
+15: NAME: yz
+16: NAME: a0123456789
+17: NAME: 982lksdf
+18: NAME: _abcd
+19: NAME: 1234_
+20: NAME: _
+21: NAME: foo_bar_baz
+22: NAME: liajesiajef82197fjadf
+23: EOL
+25: LABEL
+25: NAME: foo
+25: NAME: bar
+25: EOL
+25: EOF
