@@ -7,6 +7,8 @@ SVN HEAD
            Probe for busses before chips
            Drop support for algorithm names
            Add support for coretemp driver   
+           Major update/optimization of config-file scanner
+           Add config-file scanner regression tests
   Man page i2cdetect.8: Describe the output convention
   Man page sensors.1: Update (option -c) and clean up
   Module icspll: Delete. It was useless and dangerous.
