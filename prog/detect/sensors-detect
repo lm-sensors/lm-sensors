@@ -1830,6 +1830,12 @@ $chip_kern26_w83791d = {
 	devid => 0x0541,
 	logdev => 0x04,
       },
+      {
+	# Shouldn't be in this family, but seems to be still.
+	name => "ITE IT8708F Super IO",
+	driver => "not-a-sensor",
+	devid => 0x8708,
+      },
     ],
   },
 );
