@@ -336,7 +336,7 @@ else
 endif
 
 clean::
-	$(RM) lm_sensors-*
+	$(RM) lm_sensors-* lex.backup
 
 user_uninstall::
 
@@ -476,5 +476,11 @@ manhtml:
 %c: %y
 	$(BISON) -p sensors_yy -d $< -o $@
 
+ifeq ($(DEBUG),1)
+FLEX_FLAGS := -Psensors_yy -t -b -Cf
+else
+FLEX_FLAGS := -Psensors_yy -t -Cf
+endif
+
 %.c: %.l
-	$(FLEX) -Psensors_yy -t -b -Cf $< > $@
+	$(FLEX) $(FLEX_FLAGS) $< > $@
