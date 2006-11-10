@@ -35,6 +35,8 @@ void help(void);
 int init(char *device,int addr);
 int content_write(int file, int addr);
 int content_read(int file, int addr);
+int inode_write(int file, int dev_addr, int lenght);
+int inode_read(int file, int dev_addr, void *p_inode);
 void pheader(int file, int addr);
 void  erase(int file,int addr,int eeprom_size);	
 void made_address(int addr,unsigned char *buf);
@@ -78,22 +80,10 @@ void help(void)
 
 int main(int argc, char *argv[]){
 
-	int i,j,res,i2cbus,address,size,file;                                         
-	struct i2c_msg *msgs,msg[2];
-	int nmsgs,addr;
-	char *pbuf;
+	int i, file, addr;
 	int  action; //in this variable will be (-r,-w,-e)
 	char device[45];
 	int force;
-	
-
-	
-	struct i2c_ioctl_rdwr_data {
-	
-	 	struct i2c_msg *msgs;  /* ptr to array of simple messages */              
-	    int nmsgs;             /* number of messages to exchange */ 
-	} msgst,*pmsgst;
-	
 
 	p_ind=&m_ind;
 	force=0;
@@ -228,8 +218,6 @@ int block_write(int file,int dev_addr,int eeprom_addr,unsigned char *buf,int len
 
 		unsigned char buff[2];
 		struct i2c_msg msg[2];
-		char *pbuff;
-		int j;
 		
 		struct i2c_ioctl_rdwr_data {
 	
@@ -287,12 +275,8 @@ int block_write(int file,int dev_addr,int eeprom_addr,unsigned char *buf,int len
 
 int block_read(int file,int dev_addr,int eeprom_addr,unsigned char *buf){
 
-	
-	int ln,i,j;
-	
-
+	int ln;
 	char buff[2]; //={0x0,0x0};
-	char pom;
 	
 	struct i2c_msg msg[2];
 		
@@ -328,7 +312,7 @@ int block_read(int file,int dev_addr,int eeprom_addr,unsigned char *buf){
 	
 	
 
-	if (ln=ioctl(file,I2C_RDWR,&msgst) < 0){
+	if ((ln = ioctl(file, I2C_RDWR, &msgst)) < 0) {
 
 			fprintf(stderr,                                                             
 	                  "Error: Read error:%d\n",ln);
@@ -356,9 +340,7 @@ int block_read(int file,int dev_addr,int eeprom_addr,unsigned char *buf){
 
 void made_address(int addr,unsigned char *buf){
 
-
-		int i,j,k;
-		char a;
+		int k;
 		
 		//addr = addr & 0xFFFF; /*odstranim nepoterbne bity*/
 
@@ -414,7 +396,7 @@ int content_write(int file, int addr){
 
 	unsigned char buf[MAX_BLK_SIZE];
 	unsigned char pom; 
-	int dat,i,j,k,delka,addr_cnt ;
+	int i, j, k, delka, addr_cnt;
 	
 	delka=0;
 	addr_cnt=HEAD_SIZE;
@@ -469,7 +451,7 @@ int content_write(int file, int addr){
 
 	}
 
-	return;
+	return 0;
 	
 }
 
@@ -477,8 +459,7 @@ int content_write(int file, int addr){
 int content_read(int file, int addr){
 
 	unsigned char buf[MAX_BLK_SIZE];
-	unsigned char pom; 
-	int dat,i,j,k,delka,addr_cnt ;
+	int i, j, k, delka;
 	
 	delka=0;
 	k=0;
@@ -513,7 +494,7 @@ int content_read(int file, int addr){
 		
 	}
 
-	return;
+	return 0;
 	
 }
 
@@ -522,8 +503,7 @@ int content_read(int file, int addr){
 void erase(int file, int addr,int eeprom_size){
 
 	unsigned char buf[MAX_BLK_SIZE];
-	unsigned char pom; 
-	int dat,i,j,k,delka,addr_cnt ;
+	int i, j, k, delka;
 	
 	delka=0;
 	k=0;
@@ -602,8 +582,6 @@ int  inode_write(int file,int dev_addr,int lenght){
 
 		unsigned char buff[2];
 		struct i2c_msg msg[2];
-		char *pbuff;
-		int j;
 		
 		struct i2c_ioctl_rdwr_data {
 	
@@ -661,11 +639,8 @@ int inode_read(int file,int dev_addr,void *p_inode ){
 
 	
 	#define  POK  32
-	int ln,i;
-	
-
+	int ln;
 	char buff[2]; //={0x0,0x0};
-	char pom;
 	
 	struct i2c_msg msg[2];
 		
@@ -698,7 +673,7 @@ int inode_read(int file,int dev_addr,void *p_inode ){
 	msgst.nmsgs = 2;
 	
 
-	if (ln=ioctl(file,I2C_RDWR,&msgst) < 0){
+	if ((ln = ioctl(file, I2C_RDWR, &msgst)) < 0) {
 
 			fprintf(stderr,                                                             
 	                  "Error: Read error:%d\n",ln);

@@ -1,6 +1,6 @@
 #eepromer  Makefile
 
-CFLAGS = -O2 -I../../kernel/include
+CFLAGS = -O2 -I../../kernel/include -Wall
 
 all:  eepromer eeprom eeprog
 

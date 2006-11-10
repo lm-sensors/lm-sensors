@@ -12,6 +12,7 @@ SVN HEAD
   Man page i2cdetect.8: Describe the output convention
   Man page sensors.1: Update (option -c) and clean up
   Module icspll: Delete. It was useless and dangerous.
+  Program eepromer: Fix loads of warnings
   Program i2cdetect: Make the output clearer
   Program py-smbus: New! Python i2c-dev bindings (prog/py-smbus)
   Program sensord: Add pc87247 support (fans only)
