@@ -2392,9 +2392,9 @@ use constant I2C_FUNC_SMBUS_READ_BYTE	=> 0x00020000;
 sub i2c_get_funcs($)
 {
   my $file = shift;
-  my $funcs;
+  my $funcs = pack "L", 0; # Allocate space
 
-  ioctl $file, IOCTL_I2C_FUNCS, $funcs='' or return -1;
+  ioctl $file, IOCTL_I2C_FUNCS, $funcs or return -1;
   $funcs = unpack "L", $funcs;
 
   return $funcs;

@@ -22,6 +22,7 @@ SVN HEAD
   Program sensors-detect: Add SMSC DME1737 detection
                           Add EPoX EP1308 detection (Hans Edgington)
                           Add Intel Core thermal sensor detection
+                          Preallocate memory for I2C_FUNCS ioctl (#2138)
 
 2.10.1 (20060924)
   File doc/developers/checklist renamed to dev/developers/release_checklist
