@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 	int i, j, res, i2cbus, address, size, file;
 	int bank = 0, bankreg = 0x4E, old_bank = 0;
 	char filename[20];
-	long funcs;
+	unsigned long funcs;
 	int block[256];
 	int pec = 0, even = 0;
 	int flags = 0;

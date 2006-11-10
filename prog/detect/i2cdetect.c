@@ -153,7 +153,7 @@ static const struct func all_func[] = {
 	{ }
 };
 
-void print_functionality(long funcs)
+void print_functionality(unsigned long funcs)
 {
 	int i;
 	
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 	char *end;
 	int i2cbus, file, res;
 	char filename[20];
-	long funcs;
+	unsigned long funcs;
 	int mode = MODE_AUTO;
 	int first = 0x03, last = 0x77;
 	int flags = 0;

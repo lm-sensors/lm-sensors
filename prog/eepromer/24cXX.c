@@ -69,7 +69,8 @@ static int i2c_write_3b(struct eeprom *e, __u8 buf[3])
 
 int eeprom_open(char *dev_fqn, int addr, int type, struct eeprom* e)
 {
-	int funcs, fd, r;
+	int fd, r;
+	unsigned long funcs;
 	e->fd = e->addr = 0;
 	e->dev = 0;
 	

@@ -54,7 +54,7 @@ static struct adap_type adap_types[5] = {
 
 static enum adt i2c_get_funcs(int i2cbus)
 {
-	long funcs;
+	unsigned long funcs;
 	int file;
 	char filename[20];
 	enum adt ret;

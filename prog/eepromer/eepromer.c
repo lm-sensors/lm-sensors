@@ -79,7 +79,6 @@ void help(void)
 int main(int argc, char *argv[]){
 
 	int i,j,res,i2cbus,address,size,file;                                         
-	long funcs;
 	struct i2c_msg *msgs,msg[2];
 	int nmsgs,addr;
 	char *pbuf;
@@ -376,7 +375,7 @@ void made_address(int addr,unsigned char *buf){
 int init(char *device,int addr) { 
 
 	int file;	
-	long funcs;
+	unsigned long funcs;
 
 	if ((file = open(device,O_RDWR)) < 0) {
 	

@@ -51,7 +51,7 @@ void help(void)
 
 int check_funcs(int file, int i2cbus, int size, int daddress, int pec)
 {
-	long funcs;
+	unsigned long funcs;
 
 	/* check adapter functionality */
 	if (ioctl(file, I2C_FUNCS, &funcs) < 0) {

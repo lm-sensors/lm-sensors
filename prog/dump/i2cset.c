@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	int value, daddress, vmask = 0;
 	int e1;
 	char filename[20];
-	long funcs;
+	unsigned long funcs;
 	int pec = 0;
 	int flags = 0;
 	int yes = 0, version = 0;
