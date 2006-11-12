@@ -1,0 +1,53 @@
+1: CHIP
+1: NAME: blah-*
+2: EOL
+4: LABEL
+4: NAME: foo
+4: NAME: bar
+5: EOL
+7: LABEL
+8: NAME: foo
+8: NAME: bar
+9: EOL
+11: LABEL
+11: NAME: abcdefg
+11: NAME: hijklmnop
+12: EOL
+12: LABEL
+12: NAME: qrs
+12: NAME: tuv
+13: EOL
+13: LABEL
+13: NAME: wx
+13: NAME: yz
+14: EOL
+14: LABEL
+14: NAME: a0123456789
+14: NAME: 982lksdf
+15: EOL
+15: LABEL
+15: NAME: _abcd
+15: NAME: 1234_
+16: EOL
+16: LABEL
+16: NAME: _
+16: NAME: foo_bar_baz
+17: EOL
+17: LABEL
+17: NAME: liajesiajef82197fjadf
+17: NAME: blah
+18: EOL
+21: LABEL
+21: NAME: escapes
+21: NAME: 
+	\?'"
+22: EOL
+25: LABEL
+25: NAME: more
+25: NAME: hello
+26: EOL
+28: LABEL
+28: NAME: blue
+28: NAME: green
+28: EOL
+28: EOF
