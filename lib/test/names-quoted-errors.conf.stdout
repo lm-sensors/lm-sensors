@@ -1,0 +1,19 @@
+1: CHIP
+1: NAME: blah-*
+2: EOL
+4: LABEL
+4: ERROR
+5: EOL
+7: LABEL
+7: NAME: in1
+7: ERROR
+8: EOL
+10: LABEL
+10: NAME: in2
+10: NAME: baz
+11: EOL
+13: LABEL
+13: NAME: in3
+13: ERROR
+13: EOL
+13: EOF

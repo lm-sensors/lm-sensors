@@ -41,6 +41,8 @@ my @scenarios = (
 		desc => 'invalid, unquoted names' },
 	{ base => 'names-quoted', status => 0,
 		desc => 'normal, quoted names' },
+	{ base => 'names-quoted-errors', status => 0,
+		desc => 'invalid, quoted names' },
 );
 
 plan tests => ($#scenarios + 1) * 3;
