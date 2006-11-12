@@ -6031,6 +6031,7 @@ void print_f71805f(const sensors_chip_name *name)
   char *label;
   double cur, min, max;
   int alarms, valid, i;
+  const int is_f71872f = !strcmp(name->prefix, "f71872f");
 
   if (!sensors_get_feature(*name, SENSORS_F71805F_ALARMS_IN, &cur))
     alarms = cur + 0.5;
@@ -6039,7 +6040,7 @@ void print_f71805f(const sensors_chip_name *name)
     alarms = 0;
   }
 
-  for (i = 0; i < 9; i++) {
+  for (i = 0; i < (is_f71872f ? 11 : 9); i++) {
     if (!sensors_get_label_and_valid(*name, SENSORS_F71805F_IN(i),
         &label, &valid)
      && !sensors_get_feature(*name, SENSORS_F71805F_IN(i), &cur)

@@ -5816,7 +5816,7 @@ static sensors_chip_feature smsc47b397_features[] =
 
 static sensors_chip_feature f71805f_features[] =
 {
-/* 9 voltage inputs */
+/* 9 to 11 voltage inputs */
 	{ SENSORS_F71805F_IN(0), "in0", NOMAP, NOMAP, R,
 	  F71805F_SYSCTL_IN0, VALUE(3), 3 },
 	{ SENSORS_F71805F_IN(1), "in1", NOMAP, NOMAP, R,
@@ -5835,6 +5835,10 @@ static sensors_chip_feature f71805f_features[] =
 	  F71805F_SYSCTL_IN7, VALUE(3), 3 },
 	{ SENSORS_F71805F_IN(8), "in8", NOMAP, NOMAP, R,
 	  F71805F_SYSCTL_IN8, VALUE(3), 3 },
+	{ SENSORS_F71805F_IN(9), "in9", NOMAP, NOMAP, R,
+	  NOSYSCTL, VALUE(3), 3 },
+	{ SENSORS_F71805F_IN(10), "in10", NOMAP, NOMAP, R,
+	  NOSYSCTL, VALUE(3), 3 },
 	{ SENSORS_F71805F_IN_MIN(0), "in0_min",
 	  SENSORS_F71805F_IN(0), SENSORS_F71805F_IN(0), RW,
 	  F71805F_SYSCTL_IN0, VALUE(1), 3 },
@@ -5862,6 +5866,12 @@ static sensors_chip_feature f71805f_features[] =
 	{ SENSORS_F71805F_IN_MIN(8), "in8_min",
 	  SENSORS_F71805F_IN(8), SENSORS_F71805F_IN(8), RW,
 	  F71805F_SYSCTL_IN8, VALUE(1), 3 },
+	{ SENSORS_F71805F_IN_MIN(9), "in9_min",
+	  SENSORS_F71805F_IN(9), SENSORS_F71805F_IN(9), RW,
+	  NOSYSCTL, VALUE(1), 3 },
+	{ SENSORS_F71805F_IN_MIN(10), "in10_min",
+	  SENSORS_F71805F_IN(10), SENSORS_F71805F_IN(10), RW,
+	  NOSYSCTL, VALUE(1), 3 },
 	{ SENSORS_F71805F_IN_MAX(0), "in0_max",
 	  SENSORS_F71805F_IN(0), SENSORS_F71805F_IN(0), RW,
 	  F71805F_SYSCTL_IN0, VALUE(2), 3 },
@@ -5889,6 +5899,12 @@ static sensors_chip_feature f71805f_features[] =
 	{ SENSORS_F71805F_IN_MAX(8), "in8_max",
 	  SENSORS_F71805F_IN(8), SENSORS_F71805F_IN(8), RW,
 	  F71805F_SYSCTL_IN8, VALUE(2), 3 },
+	{ SENSORS_F71805F_IN_MAX(9), "in9_max",
+	  SENSORS_F71805F_IN(9), SENSORS_F71805F_IN(9), RW,
+	  NOSYSCTL, VALUE(2), 3 },
+	{ SENSORS_F71805F_IN_MAX(10), "in10_max",
+	  SENSORS_F71805F_IN(10), SENSORS_F71805F_IN(10), RW,
+	  NOSYSCTL, VALUE(2), 3 },
 /* 3 fan tachometers */
 	{ SENSORS_F71805F_FAN(1), "fan1", NOMAP, NOMAP, R,
 	  F71805F_SYSCTL_FAN1, VALUE(2), 0 },
@@ -6144,6 +6160,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_LM93_PREFIX, lm93_features },
  { SENSORS_SMSC47B397_PREFIX, smsc47b397_features },
  { SENSORS_F71805F_PREFIX, f71805f_features },
+ { SENSORS_F71872F_PREFIX, f71805f_features },
  { SENSORS_ABITUGURU_PREFIX, abituguru_features },
  { SENSORS_K8TEMP_PREFIX, k8temp_features },
  { SENSORS_CORETEMP_PREFIX, coretemp_features },

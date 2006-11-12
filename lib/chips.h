@@ -2178,10 +2178,11 @@
 #define SENSORS_SMSC47B397_FAN3		0x13 /* R */
 #define SENSORS_SMSC47B397_FAN4		0x14 /* R */
 
-/* Fintek F71805F chip */
+/* Fintek F71805F/FG and F71872F/FG chips */
 #define SENSORS_F71805F_PREFIX		"f71805f"
+#define SENSORS_F71872F_PREFIX		"f71872f"
 
-/* in n from 0 to 8 */
+/* in n from 0 to 10 */
 #define SENSORS_F71805F_IN(n)		(1 + (n))
 #define SENSORS_F71805F_IN_MIN(n)	(16 + (n))
 #define SENSORS_F71805F_IN_MAX(n)	(31 + (n))
