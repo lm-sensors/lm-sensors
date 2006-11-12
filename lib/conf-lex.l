@@ -262,19 +262,37 @@ ignore{BLANK}*	{
 
 <STRING>{
 
- /* Oops, newline while in a string is not good */
+ /* Oops, newline or EOF while in a string is not good */
 
 \n		|
 \\\n		{
 		  buffer_add_char("\0");
-		  strcpy(sensors_lex_error,"No matching double quote");
+		  strcpy(sensors_lex_error,
+			"No matching double quote.");
 		  buffer_free();
-		  BEGIN(INITIAL);
+		  yyless(0);
+		  BEGIN(ERR);
+		  return ERROR;
+		}
+
+<<EOF>>		{
+		  strcpy(sensors_lex_error,
+			"Reached end-of-file without a matching double quote.");
+		  BEGIN(MIDDLE);
 		  return ERROR;
 		}
 
  /* At the end */
 
+\"\"		{
+		  buffer_add_char("\0");
+		  strcpy(sensors_lex_error,
+			"Quoted strings must be separated by whitespace.");
+		  buffer_free();
+		  BEGIN(ERR);
+		  return ERROR;
+		}
+		
 \"		{
 		  buffer_add_char("\0");
 		  sensors_yylval.name = strdup(buffer);
