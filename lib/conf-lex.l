@@ -152,7 +152,6 @@ ignore{BLANK}*	{
 
 [a-z]+		|
 .		{
-		  yymore();
 		  BEGIN(ERR);
 		  strcpy(sensors_lex_error,"Invalid keyword");
 		  return ERROR;
@@ -250,7 +249,6 @@ ignore{BLANK}*	{
 .		|
 [[:digit:]]*\.	|
 \\{BLANK}*	{
-		  yymore();
 		  BEGIN(ERR);
 		  return ERROR;
 		}
@@ -304,33 +302,13 @@ ignore{BLANK}*	{
 		  return NAME;
 		}
 
-\\a		{
-		  buffer_add_char("\a");
-		}
-
-\\b		{
-		  buffer_add_char("\b");
-		}
-
-\\f		{
-		  buffer_add_char("\f");
-		}
-
-\\n		{
-		  buffer_add_char("\n");
-		}
-
-\\r		{
-		  buffer_add_char("\r");
-		}
-
-\\t		{
-		  buffer_add_char("\t");
-		}
-
-\\v		{
-		  buffer_add_char("\v");
-		}
+\\a		buffer_add_char("\a");
+\\b		buffer_add_char("\b");
+\\f		buffer_add_char("\f");
+\\n		buffer_add_char("\n");
+\\r		buffer_add_char("\r");
+\\t		buffer_add_char("\t");
+\\v		buffer_add_char("\v");
 
  /* We can't support \0, this would cause havoc! */
 
