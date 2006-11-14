@@ -26,6 +26,7 @@ SVN HEAD
                           Add EPoX EP1308 detection (Hans Edgington)
                           Add Intel Core thermal sensor detection
                           Preallocate memory for I2C_FUNCS ioctl (#2138)
+                          Prevent misdetection of MAX6633/MAX6634/MAX6635
 
 2.10.1 (20060924)
   File doc/developers/checklist renamed to dev/developers/release_checklist

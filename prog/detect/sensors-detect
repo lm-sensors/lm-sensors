@@ -3368,6 +3368,9 @@ sub lm92_detect
   my $low = i2c_smbus_read_word_data($file, 0x04);
   my $high = i2c_smbus_read_word_data($file, 0x05);
 
+  return if $conf == 0 and $hyst == 0 and $crit == 0
+        and $low == 0 and $high == 0;
+
   return if $chip == 0
         and i2c_smbus_read_word_data($file, 0x07) != 0x0180;
   
