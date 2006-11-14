@@ -5446,7 +5446,7 @@ sub main
     my ($dev_nr, $type, $adap) = /^i2c-(\d+)\s+(\S+)\s+(.*?) *(\t|$)/;
     next if ($type eq "dummy" || $type eq "isa");
     print "\n";
-    print "Next adapter: $adap\n";
+    print "Next adapter: $adap (i2c-$dev_nr)\n";
     print "Do you want to scan it? (YES/no/selectively): ";
     
     $inp = <STDIN>;
