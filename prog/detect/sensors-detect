@@ -1820,15 +1820,15 @@ $chip_kern26_w83791d = {
 	logdev => 0x04,
       },
       {
-	name => "Fintek F81218D Super IO",
-	driver => "not-a-sensor",
-	devid => 0x0206,
-      },
-      {
 	name => "Fintek F71882FG Super IO Sensors",
 	driver => "to-be-written",
 	devid => 0x0541,
 	logdev => 0x04,
+      },
+      {
+	name => "Fintek F81218D Super IO",
+	driver => "not-a-sensor",
+	devid => 0x0206,
       },
       {
 	# Shouldn't be in this family, but seems to be still.
