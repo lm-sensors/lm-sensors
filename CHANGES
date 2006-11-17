@@ -23,7 +23,7 @@ SVN HEAD
                    Drop option -a (show algorithm names)
                    Add f71872f support
   Program sensors-detect: Add SMSC DME1737 detection
-                          Add EPoX EP1308 detection (Hans Edgington)
+                          Add Fintek F71882FG and EPoX EP1308 detection
                           Add Intel Core thermal sensor detection
                           Preallocate memory for I2C_FUNCS ioctl (#2138)
                           Prevent misdetection of MAX6633/MAX6634/MAX6635
