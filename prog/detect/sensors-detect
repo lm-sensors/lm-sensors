@@ -72,6 +72,13 @@ $revision =~ s/ \([^()]*\)//;
      } , 
      { 
        vendid => 0x8086,
+       devid  => 0x7603,
+       procid => "Intel 82372FB PIIX5 ACPI",
+       driver => "to-be-tested",
+       match => qr/^SMBus PIIX4 adapter at /,
+     } , 
+     { 
+       vendid => 0x8086,
        devid  => 0x719b,
        procid => "Intel 82443MX Mobile",
        driver => "i2c-piix4",
@@ -151,6 +158,13 @@ $revision =~ s/ \([^()]*\)//;
        vendid => 0x8086,
        devid  => 0x283E,
        procid => "Intel ICH8",
+       driver => "i2c-i801",
+       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
+     }, 
+     { 
+       vendid => 0x8086,
+       devid  => 0x2930,
+       procid => "Intel ICH9",
        driver => "i2c-i801",
        match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      }, 
@@ -512,6 +526,20 @@ $revision =~ s/ \([^()]*\)//;
        match => qr/^SMBus nForce2 adapter at /,
      },
      {
+       vendid => 0x10de,
+       devid => 0x03eb,
+       procid => "nVidia Corporation nForce4 SMBus (MCP61)",
+       driver => "to-be-tested",
+       match => qr/^SMBus nForce2 adapter at /,
+     },
+     {
+       vendid => 0x10de,
+       devid => 0x0446,
+       procid => "nVidia Corporation nForce4 SMBus (MCP65)",
+       driver => "to-be-tested",
+       match => qr/^SMBus nForce2 adapter at /,
+     },
+     {
        vendid => 0x1166,
        devid  => 0x0200,
        procid => "ServerWorks OSB4 South Bridge",
@@ -634,6 +662,13 @@ $revision =~ s/ \([^()]*\)//;
        devid  => 0x4372,
        procid => "ATI Technologies Inc ATI SMBus",
        driver => "i2c-piix4",
+       match => qr/^SMBus PIIX4 adapter at /,
+     } , 
+     { 
+       vendid => 0x1002,
+       devid  => 0x4385,
+       procid => "ATI Technologies Inc ATI SMBus",
+       driver => "to-be-tested",
        match => qr/^SMBus PIIX4 adapter at /,
      } , 
      {
