@@ -150,14 +150,14 @@ $revision =~ s/ \([^()]*\)//;
      { 
        vendid => 0x8086,
        devid  => 0x27DA,
-       procid => "Intel ICH7",
+       procid => "Intel 82801G ICH7",
        driver => "i2c-i801",
        match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      } , 
      { 
        vendid => 0x8086,
        devid  => 0x283E,
-       procid => "Intel ICH8",
+       procid => "Intel 82801H ICH8",
        driver => "i2c-i801",
        match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      }, 
