@@ -28,16 +28,6 @@
 #include "lib/chips.h"
 #include "kernel/include/sensors.h"
 
-/* NB:
- *
- * The following chips from prog/sensors are not (yet) supported:
- *
- * lm87 mtp008 fscpos fscscy pcf8591 vt1211 smsc47m1 lm92 adm1024 lm83
- */
-
-/* NB: missing from sensors (and this) but in lib/chips.h:
- * "gl520sm", "thmc50", "adm1022" */
-
 /* TODO: Temp in C/F */
 
 /** formatters **/
