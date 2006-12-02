@@ -1191,6 +1191,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { lm90_detect(4, @_); },
      },
      {
+       name => "Maxim MAX6648/MAX6692",
+       driver => "to-be-written",
+       i2c_addrs => [0x4c],
+       i2c_detect => sub { lm90_detect(6, @_); },
+     },
+     {
        name => "National Semiconductor LM63",
        driver => "lm63",
        i2c_addrs => [0x4c],
@@ -3560,7 +3566,7 @@ sub lm83_detect
 
 # $_[0]: Chip to detect
 #   (0 = LM90, 1=LM89/LM99, 2=LM86, 3=ADM1032, 4=MAX6657/MAX6658/MAX6659,
-#    5 = ADT7461)
+#    5 = ADT7461, 6 = MAX6648/MAX6692)
 # $_[1]: A reference to the file descriptor to access this chip.
 #        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
@@ -3622,6 +3628,13 @@ sub lm90_detect
     return if $mid != 0x41;     # Analog Devices
     return 8 if $cid == 0x61;   # ADT7461
   }
+  if ($chip == 6) {
+    return if ($conf & 0x3f) != 0;
+    return if $rate > 0x07;
+    return if $mid != 0x4d;     # Maxim
+    return if $cid != 0x59;     # MAX6648/MAX6692
+    return 8;
+  }    
   return;
 }
 
