@@ -17,6 +17,7 @@ SVN HEAD
   Program i2cdetect: Make the output clearer
   Program py-smbus: New! Python i2c-dev bindings (prog/py-smbus)
   Program sensord: Add pc87247 support (fans only)
+                   Add vt1211 support (#2150)
   Program sensors: Add pc87247 support (fans only)
                    Hide error on missing f71805f fan
                    Handle option -c more efficiently
@@ -27,6 +28,7 @@ SVN HEAD
                           Add Intel Core thermal sensor detection
                           Preallocate memory for I2C_FUNCS ioctl (#2138)
                           Prevent misdetection of MAX6633/MAX6634/MAX6635
+                          Add Intel ICH9 detection
 
 2.10.1 (20060924)
   File doc/developers/checklist renamed to dev/developers/release_checklist

@@ -1196,6 +1196,53 @@ static const ChipDescriptor f71805f_chip = {
   f71805f_names, f71805f_features, SENSORS_F71805F_ALARMS_TEMP, 0
 };
 
+/** VT1211 **/
+
+static const char *vt1211_names[] = {
+  SENSORS_VT1211_PREFIX, NULL
+};
+
+static const FeatureDescriptor vt1211_features[] = {
+  { fmtVolts_2, rrdF2, DataType_voltage, VT1211_ALARM_IN0, 0,
+    { SENSORS_VT1211_IN0, SENSORS_VT1211_IN0_MIN, SENSORS_VT1211_IN0_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, VT1211_ALARM_IN1, 0,
+    { SENSORS_VT1211_IN1, SENSORS_VT1211_IN1_MIN, SENSORS_VT1211_IN1_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, VT1211_ALARM_IN2, 0,
+    { SENSORS_VT1211_IN2, SENSORS_VT1211_IN2_MIN, SENSORS_VT1211_IN2_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, VT1211_ALARM_IN3, 0,
+    { SENSORS_VT1211_IN3, SENSORS_VT1211_IN3_MIN, SENSORS_VT1211_IN3_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, VT1211_ALARM_IN4, 0,
+    { SENSORS_VT1211_IN4, SENSORS_VT1211_IN4_MIN, SENSORS_VT1211_IN4_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, VT1211_ALARM_IN5, 0,
+    { SENSORS_VT1211_IN5, SENSORS_VT1211_IN5_MIN, SENSORS_VT1211_IN5_MAX, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, VT1211_ALARM_FAN1, 0,
+    { SENSORS_VT1211_FAN1, SENSORS_VT1211_FAN1_MIN, SENSORS_VT1211_FAN1_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, VT1211_ALARM_FAN2, 0,
+    { SENSORS_VT1211_FAN2, SENSORS_VT1211_FAN2_MIN, SENSORS_VT1211_FAN2_DIV, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, VT1211_ALARM_TEMP1, 0,
+    { SENSORS_VT1211_TEMP1, SENSORS_VT1211_TEMP1_OVER, SENSORS_VT1211_TEMP1_HYST, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, VT1211_ALARM_TEMP2, 0,
+    { SENSORS_VT1211_TEMP2, SENSORS_VT1211_TEMP2_OVER, SENSORS_VT1211_TEMP2_HYST, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, VT1211_ALARM_TEMP3, 0,
+    { SENSORS_VT1211_TEMP3, SENSORS_VT1211_TEMP3_OVER, SENSORS_VT1211_TEMP3_HYST, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, VT1211_ALARM_TEMP4, 0,
+    { SENSORS_VT1211_TEMP4, SENSORS_VT1211_TEMP4_OVER, SENSORS_VT1211_TEMP4_HYST, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, VT1211_ALARM_TEMP5, 0,
+    { SENSORS_VT1211_TEMP5, SENSORS_VT1211_TEMP5_OVER, SENSORS_VT1211_TEMP5_HYST, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, VT1211_ALARM_TEMP6, 0,
+    { SENSORS_VT1211_TEMP6, SENSORS_VT1211_TEMP6_OVER, SENSORS_VT1211_TEMP6_HYST, -1 } },
+  { fmtTemps_1_0, rrdF1, DataType_temperature, VT1211_ALARM_TEMP7, 0,
+    { SENSORS_VT1211_TEMP7, SENSORS_VT1211_TEMP7_OVER, SENSORS_VT1211_TEMP7_HYST, -1 } },
+  { fmtVolt_3, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_VT1211_VID, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor vt1211_chip = {
+  vt1211_names, vt1211_features, SENSORS_VT1211_ALARMS, 0
+};
+
+
 /** ALL **/
 
 const ChipDescriptor * const knownChips[] = {
@@ -1222,5 +1269,6 @@ const ChipDescriptor * const knownChips[] = {
   &pc87427_chip,
   &w83627ehf_chip,
   &f71805f_chip,
+  &vt1211_chip,
   NULL
 };
