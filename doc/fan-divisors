@@ -4,9 +4,10 @@ Fan reading problems and solutions
 If you aren't getting the expected readings on your fans,
 try the following:
 
-- Do you get a fan reading in the BIOS or in DOS?
+- Do you get a fan reading in the BIOS or using a different OS?
   If not, you may not have a fan with a tachometer output.
-  Look and see. Fans with tachometer outputs have THREE wires.
+  Look and see. Fans with tachometer outputs have at least 3 wires.
+  Fans with only 2 wires cannot, in general, report their speed.
 
 - Try experimenting with the fan divisor settings:
 
@@ -24,7 +25,6 @@ Fan Divisor	Minimum RPM	Maximum RPM
  32		 166		  42187		""
  64		  83		  21093		""
 128		  41		  10546		""
-
 
 Pick a divisor so that the nominal RPM is about 50%
 above the minimum. This is a good compromise between
@@ -46,13 +46,9 @@ accuracy.
 How to change fan divisors
 --------------------------
 
-  Method 1: "echo x y z > /proc/sys/dev/sensors/...../fan_div"
-  where 'x y z' are the fan divisors for the three fans and '...'
-  is the sensor in question.
-
-  Method 2: Put an entry "set fanx_div y" in the appropriate section
-  of /etc/sensors.conf and rerun 'sensors -s'.
-  (x is the number of the fan 1-3 and y is the divisor).
+Put an entry "set fanN_div X" in the appropriate section of
+/etc/sensors.conf and run 'sensors -s'
+(N is the number of the fan, and X is the divisor you want).
 
 
 Further details
@@ -69,7 +65,7 @@ The term 'fan divisor' is a misnomer because it doesn't divide
 the fan signal, it divides the 22.5 kHz clock.
 Thus you _increase_ the divisor if you have a slow fan.
 
-The drivers account for the 'fan divisor' in its calculation
+The drivers account for the 'fan divisor' in their calculation
 of RPM. So changing the fan divisor will NOT change the
 nominal RPM reading, it will only affect the minimum and maximum
 readings and the accuracy of the readings.
@@ -86,18 +82,16 @@ fans do not approach 1,000,000 RPM !
 Fan readings 2X too high
 ------------------------
 
-This is caused by a fan clock which is actually half the expected
-22.5 kHz, or by a fan which outputs twice as many pulses per revolution
-as expected.
+This is rare, but can happen. This is typically caused by a fan which
+outputs 4 pulses by revolution, instead of the standard 2.
 
 As we learned above, you can _not_ fix this by changing
 the fan divisor. You must add entries into the appropriate
 section of /etc/sensors.conf:
 
-	compute fan1  @/2,  2*@
-	compute fan2  @/2,  2*@
-	compute fan3  @/2,  2*@
+	compute fanN  @/2,  2*@
 
+(N is the number of the fan)
 
 
 

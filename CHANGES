@@ -3,6 +3,7 @@ lm_sensors CHANGES file
 
 SVN HEAD
   RPM: Obsolete, removed
+  File doc/fan-divisors: Update
   Library: Add support for the pc87247 driver (fans only)
            Probe for busses before chips
            Drop support for algorithm names
