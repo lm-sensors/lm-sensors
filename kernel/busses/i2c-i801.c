@@ -33,6 +33,7 @@
     ICH7		27DA   ("")
     ESB2 		269B   ("")
     ICH8		283E   ("")
+    ICH9		2930   ("")
 
     This driver supports several versions of Intel's I/O Controller Hubs (ICH).
     For SMBus support, they are similar to the PIIX4 and are part
@@ -96,6 +97,11 @@
 /* ICH8 is undefined */
 #ifndef PCI_DEVICE_ID_INTEL_ICH8_5
 #define PCI_DEVICE_ID_INTEL_ICH8_5	0x283e
+#endif
+
+/* ICH9 is undefined */
+#ifndef PCI_DEVICE_ID_INTEL_ICH9_6
+#define PCI_DEVICE_ID_INTEL_ICH9_6	0x2930
 #endif
 
 #ifdef I2C_CLIENT_PEC
@@ -172,7 +178,8 @@ static int __devinit i801_setup(struct pci_dev *dev)
 	    dev->device == PCI_DEVICE_ID_INTEL_ESB2_17 ||	
 	    dev->device == PCI_DEVICE_ID_INTEL_ICH6_16 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_ICH7_17 ||
-	    dev->device == PCI_DEVICE_ID_INTEL_ICH8_5)
+	    dev->device == PCI_DEVICE_ID_INTEL_ICH8_5 ||
+	    dev->device == PCI_DEVICE_ID_INTEL_ICH9_6)
 		isich4 = 1;
 	else
 		isich4 = 0;
@@ -672,6 +679,12 @@ static struct pci_device_id i801_ids[] __devinitdata = {
 	{
 		.vendor =	PCI_VENDOR_ID_INTEL,
 		.device =	PCI_DEVICE_ID_INTEL_ICH8_5,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_INTEL,
+		.device =	PCI_DEVICE_ID_INTEL_ICH9_6,
 		.subvendor =	PCI_ANY_ID,
 		.subdevice =	PCI_ANY_ID,
 	},

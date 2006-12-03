@@ -49,7 +49,8 @@ At least the following I2C/SMBus adapters are supported:
   Apple Hydra (used on some PPC machines)
   ATI IXP200, IXP300, IXP400
   DEC 21272/21274 (Tsunami/Typhoon - on Alpha boards)
-  Intel I801 ICH/ICH0/ICH2/ICH3/ICH4/ICH5/ICH6/ICH7/ICH8 (82801xx), 6300ESB
+  Intel ICH/ICH0/ICH2/ICH3/ICH4/ICH5/ICH6/ICH7/ICH8/ICH9 (82801xx)
+  Intel 6300ESB, 631xESB/632xESB (ESB2)
   Intel PIIX4 (used in many Intel chipsets)
   Intel I810/I810E/I815/I845G GMCH
   Intel 82443MX (440MX)

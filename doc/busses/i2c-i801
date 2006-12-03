@@ -14,7 +14,7 @@ Supported adapters:
   * Intel 82801EB/ER (ICH5)
   * Intel 6300ESB/ESB2
   * Intel 82801FB/FR/FW/FRW (ICH6)
-  * Intel ICH7/ICH8
+  * Intel ICH7/ICH8/ICH9
     Datasheets: Publicly available at the Intel website
 
 Authors: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock

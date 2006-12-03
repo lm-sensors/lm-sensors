@@ -13,6 +13,7 @@ SVN HEAD
            Add f71872f support
   Man page i2cdetect.8: Describe the output convention
   Man page sensors.1: Update (option -c) and clean up
+  Module i2c-i801: Add ICH9 support
   Module icspll: Delete. It was useless and dangerous.
   Program eepromer: Fix loads of warnings
   Program i2cdetect: Make the output clearer
