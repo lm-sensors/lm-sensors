@@ -888,6 +888,30 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { adt7467_detect(1, @_); },
      },
      {
+       name => "Andigilog aSC7511",
+       driver => "to-be-written",
+       i2c_addrs => [0x4c],
+       i2c_detect => sub { andigilog_aSC7511_detect(0, @_); },
+     },
+     {
+       name => "Andigilog aSC7512",
+       driver => "to-be-written",
+       i2c_addrs => [0x58],
+       i2c_detect => sub { andigilog_detect(0, @_); },
+     },
+     {
+       name => "Andigilog aSC7611",
+       driver => "to-be-written",
+       i2c_addrs => [0x2c, 0x2d, 0x2e],
+       i2c_detect => sub { andigilog_detect(1, @_); },
+     },
+     {
+       name => "Andigilog aSC7621",
+       driver => "to-be-written",
+       i2c_addrs => [0x2c, 0x2d, 0x2e],
+       i2c_detect => sub { andigilog_detect(2, @_); },
+     },
+     {
        name => "National Semiconductor LM87",
        driver => "lm87",
        i2c_addrs => [0x2c..0x2e],
@@ -3887,6 +3911,61 @@ sub adt7473_detect
     return 5;
   }
   return
+}
+
+# $_[0]: Chip to detect
+#   (0 = aSC7512, 1 = aSC7611, 2 = aSC7621)
+# $_[1]: A reference to the file descriptor to access this chip.
+# $_[2]: Address (unused)
+# Returns: undef if not detected, 1 if detected.
+# Registers used:
+#   0x3e: Manufacturer ID (0x61)
+#   0x3f: Version
+
+sub andigilog_detect
+{
+  my ($chip, $file, $addr) = @_;
+  my $mid = i2c_smbus_read_byte_data($file, 0x3e);
+  my $cid = i2c_smbus_read_byte_data($file, 0x3f);
+
+  return if ($mid != 0x61);
+
+  if ($chip == 0) {
+    return if $cid != 0x62;
+    return 5;
+  }
+
+  if ($chip == 1) {
+    return if $cid != 0x69;
+    return 5;
+  }
+
+  if ($chip == 2) {
+    return if $cid != 0x6C;
+    return 5;
+  }
+
+  return;
+}
+
+# $_[0]: Chip to detect
+#   (0 = aSC7511)
+# $_[1]: A reference to the file descriptor to access this chip.
+# $_[2]: Address (unused)
+# Returns: undef if not detected, 1 if detected.
+# Registers used:
+#   0xfe: Manufacturer ID
+#   0xff: Die Code
+sub andigilog_aSC7511_detect
+{
+  my ($chip, $file, $addr) = @_;
+  my $mid = i2c_smbus_read_byte_data($file, 0xfe);
+
+  if ($chip == 0) {
+    return if $mid != 0x61;     # Andigilog
+    return 1;
+  }
+  return;
 }
 
 # $_[0]: Vendor to check for
