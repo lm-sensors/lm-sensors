@@ -134,7 +134,7 @@ use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs
  "Thesys", "Solbourne Computer", "Allied-Signal", "Dialog",
  "Media Vision", "Level One Communication"],
 ["Cirrus Logic", "National Instruments", "ILC Data Device", "Alcatel Mietec",
- "Micro Linear", "Univ. of NC", "JTAG Technologies", "Loral",
+ "Micro Linear", "Univ. of NC", "JTAG Technologies", "BAE Systems",
  "Nchip", "Galileo Tech", "Bestlink Systems", "Graychip",
  "GENNUM", "VideoLogic", "Robert Bosch", "Chip Express",
  "DATARAM", "United Microelec Corp.", "TCSI", "Smart Modular",
@@ -218,8 +218,9 @@ use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs
  "Ritek Corp", "empowerTel Networks", "Hypertec", "Cavium Networks",
  "PLX Technology", "Massana Design", "Intrinsity", "Valence Semiconductor",
  "Terawave Communications", "IceFyre Semiconductor", "Primarion", "Picochip Designs Ltd",
- "Silverback Systems", "Jade Star Technologies", "Pijnenburg Securealink", "MemorySolutioN",
- "Cambridge Silicon Radio", "Swissbit", "Nazomi Communications", "eWave System",
+ "Silverback Systems", "Jade Star Technologies", "Pijnenburg Securealink",
+ "TakeMS International AG", "Cambridge Silicon Radio",
+ "Swissbit", "Nazomi Communications", "eWave System",
  "Rockwell Collins", "Picocel Co., Ltd.", "Alphamosaic Ltd", "Sandburst",
  "SiCon Video", "NanoAmp Solutions", "Ericsson Technology", "PrairieComm",
  "Mitac International", "Layer N Networks", "MtekVision", "Allegro Networks",
@@ -280,7 +281,15 @@ use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs
  "SiCortex, Inc.", "Ventura Technology Group", "eASIC", "M.H.S. SAS", "Micro Star International", 
  "Rapport Inc.", "Makway International", "Broad Reach Engineering Co.", 
  "Semiconductor Mfg Intl Corp", "SiConnect", "FCI USA Inc.", "Validity Sensors", 
- "Coney Technology Co. Ltd.", "Spans Logic", "Neterion Inc."]);
+ "Coney Technology Co. Ltd.", "Spans Logic", "Neterion Inc.", "Qimonda",
+ "New Japan Radio Co. Ltd.", "Velogix", "Montalvo Systems", "iVivity Inc.", "Walton Chaintech",
+ "AENEON", "Lorom Industrial Co. Ltd.", "Radiospire Networks", "Sensio Technologies, Inc.",
+ "Nethra Imaging", "Hexon Technology Pte Ltd", "CompuStocx (CSX)", "Methode Electronics, Inc.",
+ "Connect One Ltd.", "Opulan Technologies", "Septentrio NV", "Goldenmars Technology Inc.",
+ "Kreton Corporation", "Cochlear Ltd.", "Altair Semiconductor", "NetEffect, Inc.",
+ "Spansion, Inc.", "Taiwan Semiconductor Mfg", "Emphany Systems Inc.",
+ "ApaceWave Technologies", "Mobilygen Corporation", "Tego", "Cswitch Corporation",
+ "Haier (Beijing) IC Design Co.", "MetaRAM", "Axel Electronics Co. Ltd."]);
 
 $use_sysfs = -d '/sys/bus';
 
