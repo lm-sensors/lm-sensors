@@ -18,6 +18,7 @@ SVN HEAD
   Program eepromer: Fix loads of warnings
   Program i2cdetect: Make the output clearer
   Program py-smbus: New! Python i2c-dev bindings (prog/py-smbus)
+  Programs dump/*: More robust handling of user inputs
   Program sensord: Add pc87247 support (fans only)
                    Add vt1211 support (#2150)
   Program sensors: Add pc87247 support (fans only)
@@ -32,6 +33,7 @@ SVN HEAD
                           Prevent misdetection of MAX6633/MAX6634/MAX6635
                           Add Intel ICH9 detection
                           Add Maxim MAX6648/MAX6692 detection
+
 
 2.10.1 (20060924)
   File doc/developers/checklist renamed to dev/developers/release_checklist

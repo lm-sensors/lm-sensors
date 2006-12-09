@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include "util.h"
 
 
 /* To keep glibc2 happy */
@@ -161,8 +162,6 @@ int main(int argc, char *argv[])
 	}
 
 	if (!yes) {
-		char s[2];
-
 		fprintf(stderr, "WARNING! Running this program can cause "
 		        "system crashes, data loss and worse!\n");
 
@@ -179,8 +178,7 @@ int main(int argc, char *argv[])
 
 		fprintf(stderr, "Continue? [Y/n] ");
 		fflush(stderr);
-		if (!fgets(s, 2, stdin)
-		 || (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y')) {
+		if (!user_ack(1)) {
 			fprintf(stderr, "Aborting on user request.\n");
 			exit(0);
 		}
@@ -224,8 +222,6 @@ int main(int argc, char *argv[])
 		value = (value & vmask) | (oldvalue & ~vmask);
 
 		if (!yes) {
-			char s[2];
-			
 			fprintf(stderr, "Old value 0x%02x, write mask "
 				"0x%02x: Will write 0x%02x to %s "
 				"0x%02x\n", oldvalue, vmask, value,
@@ -234,8 +230,7 @@ int main(int argc, char *argv[])
 
 			fprintf(stderr, "Continue? [Y/n] ");
 			fflush(stderr);
-			if (!fgets(s, 2, stdin)
-			 || (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y')) {
+			if (!user_ack(1)) {
 				fprintf(stderr, "Aborting on user request.\n");
 				exit(0);
 			}

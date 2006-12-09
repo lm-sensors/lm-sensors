@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-
+#include "util.h"
 #include "superio.h"
 
 
@@ -230,8 +230,6 @@ int main(int argc, char *argv[])
 	}
 
 	if (!yes) {
-		char s[2];
-
 		fprintf(stderr, "WARNING! Running this program can cause "
 		        "system crashes, data loss and worse!\n");
 
@@ -248,8 +246,7 @@ int main(int argc, char *argv[])
 
 		fprintf(stderr, "Continue? [Y/n] ");
 		fflush(stderr);
-		if (!fgets(s, 2, stdin)
-		 || (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y')) {
+		if (!user_ack(1)) {
 			fprintf(stderr, "Aborting on user request.\n");
 			exit(0);
 		}

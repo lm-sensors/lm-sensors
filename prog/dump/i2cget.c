@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "util.h"
 #include "i2cbusses.h"
 #include "i2c-dev.h"
 #include "version.h"
@@ -116,7 +117,6 @@ int set_slave(int file, int address)
 
 int confirm(const char *filename, int address, int size, int daddress, int pec)
 {
-	char s[2];
 	int dont = 0;
 
 	fprintf(stderr, "WARNING! This program can confuse your I2C "
@@ -156,8 +156,7 @@ int confirm(const char *filename, int address, int size, int daddress, int pec)
 
 	fprintf(stderr, "Continue? [%s] ", dont ? "y/N" : "Y/n");
 	fflush(stderr);
-	if (!fgets(s, 2, stdin)
-	 || ((s[0] != '\n' || dont) && s[0] != 'y' && s[0] != 'Y')) {
+	if (!user_ack(!dont)) {
 		fprintf(stderr, "Aborting on user request.\n");
 		return 0;
 	}
