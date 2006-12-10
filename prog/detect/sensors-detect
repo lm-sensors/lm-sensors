@@ -1924,6 +1924,11 @@ $chip_kern26_w83791d = {
     driver => "coretemp",
     detect => sub { coretemp_detect(); },
   },
+  {
+    name => "Intel AMB FB-DIMM thermal sensor",
+    driver => "to-be-written",
+    detect => sub { intel_amb_detect(); },
+  },
 );
 
 #######################
@@ -5263,6 +5268,13 @@ sub k8temp_pci_detect
 }
 
 # Returns: undef if not detected, (9) if detected.
+sub intel_amb_detect
+{
+	return unless exists $pci_list{'8086:a620'};
+	return 9;
+}
+
+# Returns: undef if not detected, (9) if detected.
 sub coretemp_detect
 {
 	my $probecpu;
@@ -5615,8 +5627,8 @@ sub main
   }
   print "\n";
 
-  print "Some CPU may also contain embedded sensors.\n";
-  print "Do you want to scan for CPU embedded sensors? (YES/no): ";
+  print "Some CPUs or memory controllers may also contain embedded sensors.\n";
+  print "Do you want to scan for them? (YES/no): ";
   unless (<STDIN> =~ /^\s*n/i) {
     foreach my $entry (@cpu_ids) {
       scan_cpu($entry);
