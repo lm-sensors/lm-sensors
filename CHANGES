@@ -33,6 +33,7 @@ SVN HEAD
                           Prevent misdetection of MAX6633/MAX6634/MAX6635
                           Add Intel ICH9 detection
                           Add Maxim MAX6648/MAX6692 detection
+                          Improve ADM1029 detection
 
 
 2.10.1 (20060924)

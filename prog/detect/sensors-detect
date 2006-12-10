@@ -3709,12 +3709,10 @@ sub lm63_detect
 # $_[0]: Chip to detect
 #   (0 = ADM1029)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
-# $_[2]: Address
-# Returns: undef if not detected, 3 to 9 if detected.
+# $_[2]: Address (unused)
+# Returns: undef if not detected, 6 if detected.
 # Registers used:
 #   0x02, 0x03: Fan support
-#   0x05: GPIO config
 #   0x07, 0x08, 0x09: Fan config
 #   0x0d: Manufacturer ID
 #   0x0e: Chip ID / die revision
@@ -3723,24 +3721,18 @@ sub adm1029_detect
   my ($chip, $file, $addr) = @_;
   my $mid = i2c_smbus_read_byte_data($file, 0x0d);
   my $cid = i2c_smbus_read_byte_data($file, 0x0e);
-  my $fansc = i2c_smbus_read_byte_data($file, 0x02);
-  my $fanss = i2c_smbus_read_byte_data($file, 0x03);
-  my $gpio = i2c_smbus_read_byte_data($file, 0x05);
-  my $fanas = i2c_smbus_read_byte_data($file, 0x07);
-  my $fanhps = i2c_smbus_read_byte_data($file, 0x08);
-  my $fanfs = i2c_smbus_read_byte_data($file, 0x09);
-  my $confidence = 3;
 
   if ($chip == 0) {
-    return if $mid != 0x41;     # Analog Devices
-    $confidence++ if ($cid & 0xF0) == 0x00; # ADM1029
-    $confidence+=2 if ($fansc & 0xFC) == 0x00
-                   && ($fanss & 0xFC) == 0x00;
-    $confidence+=2 if ($fanas & 0xFC) == 0x00
-                   && ($fanhps & 0xFC) == 0x00
-                   && ($fanfs & 0xFC) == 0x00;
-    $confidence++ if ($gpio & 0x80) == 0x00;
-    return $confidence;
+    return unless $mid == 0x41;             # Analog Devices
+    return unless ($cid & 0xF0) == 0x00;    # ADM1029
+
+    # Extra check on unused bits
+    foreach my $reg (0x02, 0x03, 0x07, 0x08, 0x09) {
+      my $fancfg = i2c_smbus_read_byte_data($file, $reg);
+      return unless ($fancfg & 0xFC) == 0x00;
+    }
+
+    return 7;
   }
   return;
 }
