@@ -3960,10 +3960,15 @@ sub andigilog_aSC7511_detect
 {
   my ($chip, $file, $addr) = @_;
   my $mid = i2c_smbus_read_byte_data($file, 0xfe);
+  my $die = i2c_smbus_read_byte_data($file, 0xff);
 
   if ($chip == 0) {
     return if $mid != 0x61;     # Andigilog
-    return 1;
+    if ($die == 0x0) {
+        return 3;
+    } else {
+        return 1;
+    }
   }
   return;
 }
