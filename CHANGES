@@ -34,6 +34,8 @@ SVN HEAD
                           Add Intel ICH9 detection
                           Add Maxim MAX6648/MAX6692 detection
                           Improve ADM1029 detection
+                          Add Andigilog chips detection
+                          Add Intel AMB FB-DIMM thermal sensor detection
 
 
 2.10.1 (20060924)
