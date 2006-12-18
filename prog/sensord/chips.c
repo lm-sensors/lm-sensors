@@ -1121,10 +1121,10 @@ static const ChipDescriptor pc87427_chip = {
   pc87427_names, pc87427_features, 0, 0
 };
 
-/** W83627EHF **/
+/** W83627EHF & W83627DHG **/
 
 static const char *w83627ehf_names[] = {
-  SENSORS_W83627EHF_PREFIX, NULL
+  SENSORS_W83627EHF_PREFIX, SENSORS_W83627DHG_PREFIX, NULL
 };
 
 static const FeatureDescriptor w83627ehf_features[] = {

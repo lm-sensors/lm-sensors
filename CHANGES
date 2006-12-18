@@ -23,6 +23,7 @@ SVN HEAD
   Programs dump/*: More robust handling of user inputs
   Program sensord: Add pc87247 support (fans only)
                    Add vt1211 support (#2150)
+                   Add w83627dhg support (David Holl, #2157)
   Program sensors: Add pc87247 support (fans only)
                    Hide error on missing f71805f fan
                    Handle option -c more efficiently
