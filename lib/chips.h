@@ -868,9 +868,11 @@
 #define SENSORS_W83L785TS_TEMP_OVER	52 /* R for now */
 
 
-/* Winbond W83627EHF Super-I/O chips */
+/* Winbond W83627EHF & W83627DHG Super-I/O chips */
+/* (W83627DHG is similar to W83627EHF but no in9) */
 
 #define SENSORS_W83627EHF_PREFIX	"w83627ehf"
+#define SENSORS_W83627DHG_PREFIX	"w83627dhg"
 
 #define SENSORS_W83627EHF_IN0		1 /* R */
 #define SENSORS_W83627EHF_IN1		2 /* R */

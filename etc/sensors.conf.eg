@@ -2632,7 +2632,7 @@ chip "lm92-*"
 
 # Winbond W83627EHF configuration originally contributed by Leon Moonen
 # This is for an Asus P5P800, voltages for A8V-E SE.
-chip "w83627ehf-*"
+chip "w83627ehf-*" "w83627dhg-*"
 
     label in0 "VCore"
     label in2 "AVCC"
@@ -2640,6 +2640,8 @@ chip "w83627ehf-*"
     label in7 "VSB"
     label in8 "VBAT"
 
+# The W83627DHG has no in9, uncomment the following line
+#    ignore in9
 
 # +12V is in1 and +5V is in6 as recommended by datasheet 
     compute in1 @*(1+(56/10)),  @/(1+(56/10))

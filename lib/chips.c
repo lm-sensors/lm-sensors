@@ -1954,6 +1954,7 @@ static sensors_chip_feature w83l785ts_features[] =
   };
 
 /* No support for Linux 2.4 yet (sysctl) */
+/* W83627DHG uses same structure excluding in9* */
 static sensors_chip_feature w83627ehf_features[] =
   {
     { SENSORS_W83627EHF_IN0, "in0", NOMAP, NOMAP, 
@@ -6080,6 +6081,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_W83793_PREFIX, w83793_features },
  { SENSORS_W83L785TS_PREFIX, w83l785ts_features },
  { SENSORS_W83627EHF_PREFIX, w83627ehf_features },
+ { SENSORS_W83627DHG_PREFIX, w83627ehf_features }, /* Similar to W83627EHF but no in9 */
  { SENSORS_AS99127F_PREFIX, as99127f_features },
  { SENSORS_ASB100_PREFIX, asb100_features },
  { SENSORS_ADM9240_PREFIX, adm9240_features },

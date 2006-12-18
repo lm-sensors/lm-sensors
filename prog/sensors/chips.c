@@ -2895,10 +2895,15 @@ void print_w83l785ts(const sensors_chip_name *name)
 void print_w83627ehf(const sensors_chip_name *name)
 {
   char *label;
-  int i, valid;
+  int i, valid, num_in;
   double cur, min, div, max, alarm, over, hyst;
 
-  for (i = 0; i < 10; i++) {
+  if (!strcmp(name->prefix, "w83627dhg"))
+    num_in = 9;
+  else
+    num_in = 10;
+
+  for (i = 0; i < num_in; i++) {
     if (!sensors_get_label_and_valid(*name,SENSORS_W83627EHF_IN0+i,
         &label,&valid)
       && !sensors_get_feature(*name,SENSORS_W83627EHF_IN0+i,&cur)

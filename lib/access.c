@@ -460,6 +460,8 @@ int sensors_do_this_chip_sets(sensors_chip_name name)
 				continue;
 			}
 			if ((res = sensors_set_feature(name, feature_nr, value))) {
+				sensors_parse_error("Can't set feature.",
+						chip->sets[i].lineno);
 				err = res;
 				continue;
 			}
