@@ -1258,7 +1258,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "Analog Devices ADM1029",
-       driver => "to-be-written",
+       driver => "adm1029",
        i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { adm1029_detect(0, @_); },
      },
@@ -3718,6 +3718,7 @@ sub lm63_detect
 # Returns: undef if not detected, 6 if detected.
 # Registers used:
 #   0x02, 0x03: Fan support
+#   0x06: Temperature support
 #   0x07, 0x08, 0x09: Fan config
 #   0x0d: Manufacturer ID
 #   0x0e: Chip ID / die revision
@@ -3726,15 +3727,20 @@ sub adm1029_detect
   my ($chip, $file, $addr) = @_;
   my $mid = i2c_smbus_read_byte_data($file, 0x0d);
   my $cid = i2c_smbus_read_byte_data($file, 0x0e);
+  my $cfg;
 
   if ($chip == 0) {
     return unless $mid == 0x41;             # Analog Devices
     return unless ($cid & 0xF0) == 0x00;    # ADM1029
 
     # Extra check on unused bits
-    foreach my $reg (0x02, 0x03, 0x07, 0x08, 0x09) {
-      my $fancfg = i2c_smbus_read_byte_data($file, $reg);
-      return unless ($fancfg & 0xFC) == 0x00;
+    $cfg = i2c_smbus_read_byte_data($file, 0x02);
+    return unless $cfg == 0x03;
+    $cfg = i2c_smbus_read_byte_data($file, 0x06);
+    return unless ($cfg & 0xF9) == 0x01;
+    foreach my $reg (0x03, 0x07, 0x08, 0x09) {
+      $cfg = i2c_smbus_read_byte_data($file, $reg);
+      return unless ($cfg & 0xFC) == 0x00;
     }
 
     return 7;
