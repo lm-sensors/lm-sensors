@@ -12,6 +12,7 @@ SVN HEAD
            Add config-file scanner regression tests
            Add f71872f support
            Add w83627dhg support (David Holl, #2157)
+           Get the i2c adapter names from classdev.name
   Man page i2cdetect.8: Describe the output convention
   Man page sensors.1: Update (option -c) and clean up
   Module i2c-i801: Add ICH9 support

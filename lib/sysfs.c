@@ -197,7 +197,11 @@ int sensors_read_sysfs_bus(void)
 
 		if (!(dev = sysfs_get_classdev_device(clsdev)))
 			continue;
-		if (!(attr = sysfs_get_device_attr(dev, "name")))
+		/* Get the adapter name from the classdev "name" attribute
+		 * (Linux 2.6.20 and later). If it fails, fall back to
+		 * the device "name" attribute (for older kernels). */
+		if (!(attr = sysfs_get_classdev_attr(clsdev, "name"))
+		 && !(attr = sysfs_get_device_attr(dev, "name")))
 			continue;
 
 		/* NB: attr->value[attr->len-1] == '\n'; chop that off */
