@@ -454,13 +454,13 @@ int sensors_do_this_chip_sets(sensors_chip_name name)
 			res = sensors_eval_expr(name, chip->sets[i].value, 0,
 					      &value);
 			if (res) {
-				sensors_parse_error("Parsing expression",
+				sensors_parse_error("Error parsing expression",
 						    chip->sets[i].lineno);
 				err = res;
 				continue;
 			}
 			if ((res = sensors_set_feature(name, feature_nr, value))) {
-				sensors_parse_error("Can't set feature.",
+				sensors_parse_error("Failed to set feature",
 						chip->sets[i].lineno);
 				err = res;
 				continue;
