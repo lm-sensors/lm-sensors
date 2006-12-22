@@ -71,6 +71,7 @@ extern void print_lm93(const sensors_chip_name *name);
 extern void print_max1619(const sensors_chip_name *name);
 extern void print_xeontemp(const sensors_chip_name *name);
 extern void print_max6650(const sensors_chip_name *name);
+extern void print_adm1029(const sensors_chip_name *name);
 extern void print_adm1031(const sensors_chip_name *name);
 extern void print_smsc47b397(const sensors_chip_name *name);
 extern void print_f71805f(const sensors_chip_name *name);

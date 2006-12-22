@@ -362,6 +362,71 @@ static sensors_chip_feature adm1023_features[] =
   };
 
 
+static sensors_chip_feature adm1029_features[] =
+  {
+       { SENSORS_ADM1029_TEMP1, "temp1",
+                               NOMAP, NOMAP,
+                               R, NOSYSCTL, VALUE(3), 3 },
+       { SENSORS_ADM1029_TEMP1_MAX, "temp1_max",
+                               SENSORS_ADM1029_TEMP1,
+                               SENSORS_ADM1029_TEMP1,
+                               RW, NOSYSCTL, VALUE(1), 3 },
+       { SENSORS_ADM1029_TEMP1_MIN, "temp1_min",
+                               SENSORS_ADM1029_TEMP1,
+                               SENSORS_ADM1029_TEMP1,
+                               RW, NOSYSCTL, VALUE(2), 3 },
+
+       { SENSORS_ADM1029_TEMP2, "temp2",
+                               NOMAP, NOMAP,
+                               R, NOSYSCTL, VALUE(3), 3 },
+       { SENSORS_ADM1029_TEMP2_MAX, "temp2_max",
+                               SENSORS_ADM1029_TEMP2,
+                               SENSORS_ADM1029_TEMP2,
+                               RW, NOSYSCTL, VALUE(1), 3 },
+       { SENSORS_ADM1029_TEMP2_MIN, "temp2_min",
+                               SENSORS_ADM1029_TEMP2,
+                               SENSORS_ADM1029_TEMP2,
+                               RW, NOSYSCTL, VALUE(2), 3 },
+
+       { SENSORS_ADM1029_TEMP3, "temp3",
+                               NOMAP, NOMAP,
+                               R, NOSYSCTL, VALUE(3), 3 },
+       { SENSORS_ADM1029_TEMP3_MAX, "temp3_max",
+                               SENSORS_ADM1029_TEMP3,
+                               SENSORS_ADM1029_TEMP3,
+                               RW, NOSYSCTL, VALUE(1), 3 },
+       { SENSORS_ADM1029_TEMP3_MIN, "temp3_min",
+                               SENSORS_ADM1029_TEMP3,
+                               SENSORS_ADM1029_TEMP3,
+                               RW, NOSYSCTL, VALUE(2), 3 },
+
+       { SENSORS_ADM1029_FAN1, "fan1",
+                               NOMAP, NOMAP,
+                               R, NOSYSCTL, VALUE(2), 0 },
+       { SENSORS_ADM1029_FAN1_MIN, "fan1_min",
+                               SENSORS_ADM1029_FAN1,
+                               SENSORS_ADM1029_FAN1,
+                               RW, NOSYSCTL, VALUE(1), 0 },
+       { SENSORS_ADM1029_FAN1_DIV, "fan1_div",
+                               SENSORS_ADM1029_FAN1,
+                               NOMAP,
+                               RW, NOSYSCTL, VALUE(1), 0 },
+
+       { SENSORS_ADM1029_FAN2, "fan2",
+                               NOMAP, NOMAP,
+                               R, NOSYSCTL, VALUE(2), 0 },
+       { SENSORS_ADM1029_FAN2_MIN, "fan2_min",
+                               SENSORS_ADM1029_FAN2,
+                               SENSORS_ADM1029_FAN2,
+                               RW, NOSYSCTL, VALUE(1), 0 },
+       { SENSORS_ADM1029_FAN2_DIV, "fan2_div",
+                               SENSORS_ADM1029_FAN2,
+                               NOMAP,
+                               RW, NOSYSCTL, VALUE(2), 0 },
+       { 0 }
+  };
+
+
 static sensors_chip_feature adm1030_features[] =
   {
     { SENSORS_ADM1031_TEMP1, "temp1",
@@ -6157,6 +6222,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_MAX1619_PREFIX, max1619_features },
  { SENSORS_XEONTEMP_PREFIX, xeontemp_features },
  { SENSORS_MAX6650_PREFIX, max6650_features },
+ { SENSORS_ADM1029_PREFIX, adm1029_features },
  { SENSORS_ADM1030_PREFIX, adm1030_features },
  { SENSORS_ADM1031_PREFIX, adm1031_features },
  { SENSORS_LM93_PREFIX, lm93_features },

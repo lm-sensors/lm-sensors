@@ -5391,6 +5391,83 @@ void print_lm90(const sensors_chip_name *name)
   free(label);
 }
 
+void print_adm1029(const sensors_chip_name *name)
+{
+	char *label;
+	double cur, high, low, fan_div;
+	int valid;
+
+	if (!sensors_get_label_and_valid(*name, SENSORS_ADM1029_TEMP1,
+		&label, &valid)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_TEMP1, &cur)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_TEMP1_MAX, &high)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_TEMP1_MIN, &low)) {
+		if (valid) {
+			print_label(label, 10);
+			print_temp_info(cur, high, low, MINMAX, 0, 0);
+			printf("\n");
+		}
+	} else
+		printf("ERROR: Can't get local temperature data!\n");
+	free(label);
+
+	if (!sensors_get_label_and_valid(*name, SENSORS_ADM1029_TEMP2,
+		&label, &valid)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_TEMP2, &cur)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_TEMP2_MAX, &high)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_TEMP2_MIN, &low)) {
+		if (valid) {
+			print_label(label, 10);
+			print_temp_info(cur, high, low, MINMAX, 0, 0);
+			printf("\n");
+		}
+	} else
+		printf("ERROR: Can't get remote1 temperature data!\n");
+	free(label);
+
+	if (!sensors_get_label_and_valid(*name, SENSORS_ADM1029_TEMP3,
+		&label, &valid)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_TEMP3, &cur)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_TEMP3_MAX, &high)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_TEMP3_MIN, &low)) {
+		if (valid) {
+			print_label(label, 10);
+			print_temp_info(cur, high, low, MINMAX, 0, 0);
+			printf("\n");
+		}
+	} else
+		printf("ERROR: Can't get remote2 temperature data!\n");
+	free(label);
+
+	if (!sensors_get_label_and_valid(*name, SENSORS_ADM1029_FAN1,
+		&label, &valid)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_FAN1, &cur)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_FAN1_MIN, &low)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_FAN1_DIV, &fan_div)) {
+		if (valid) {
+			print_label(label, 10);
+			printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)\n",
+				cur, low, fan_div);
+		}
+	} else
+		printf("ERROR: Can't get fan1 data!\n");
+	free(label);
+
+	if (!sensors_get_label_and_valid(*name, SENSORS_ADM1029_FAN2,
+		&label, &valid)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_FAN2, &cur)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_FAN2_MIN, &low)
+	 && !sensors_get_feature(*name, SENSORS_ADM1029_FAN2_DIV, &fan_div)) {
+		if (valid) {
+			print_label(label, 10);
+			printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)\n",
+				cur, low , fan_div);
+		}
+	} else
+		printf("ERROR: Can't get fan2 data!\n");
+	free(label);
+}
+
 void print_lm63(const sensors_chip_name *name)
 {
   char *label;
