@@ -5274,10 +5274,15 @@ sub k8temp_pci_detect
 }
 
 # Returns: undef if not detected, (9) if detected.
+# the device 0xa620 should not be visible on host PCI bus, gateway
+# must be used
 sub intel_amb_detect
 {
-	return unless exists $pci_list{'8086:a620'};
-	return 9;
+	if ((exists $pci_list{'8086:a620'}) ||
+	   (exists $pci_list{'8086:25f0'})) {
+		return 9;
+	}
+	return;
 }
 
 # Returns: undef if not detected, (9) if detected.
