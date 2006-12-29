@@ -477,9 +477,9 @@ manhtml:
 	$(BISON) -p sensors_yy -d $< -o $@
 
 ifeq ($(DEBUG),1)
-FLEX_FLAGS := -Psensors_yy -t -b -Cf
+FLEX_FLAGS := -Psensors_yy -t -b -Cfe -8
 else
-FLEX_FLAGS := -Psensors_yy -t -Cf
+FLEX_FLAGS := -Psensors_yy -t -Cfe -8
 endif
 
 %.c: %.l
