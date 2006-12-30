@@ -276,6 +276,7 @@ ignore{BLANK}*	{
 <<EOF>>		{
 		  strcpy(sensors_lex_error,
 			"Reached end-of-file without a matching double quote.");
+		  buffer_free();
 		  BEGIN(MIDDLE);
 		  return ERROR;
 		}
