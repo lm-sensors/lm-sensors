@@ -17,6 +17,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../data.h"
 #include "../conf.h"
@@ -82,6 +83,7 @@ int main(void)
 	
 			case NAME:
 				printf("NAME: %s\n", sensors_yylval.name);
+				free(sensors_yylval.name);
 				break;
 	
 			case ERROR:
