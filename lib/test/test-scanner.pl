@@ -47,7 +47,14 @@ my @scenarios = (
 
 plan tests => ($#scenarios + 1) * 3;
 
-$test = Test::Cmd->new(prog => 'test-scanner', workdir => '');
+chomp(my $valgrind = `which valgrind 2>/dev/null`);
+
+if ($valgrind) {
+	$test = Test::Cmd->new(prog => "$valgrind --tool=memcheck --show-reachable=yes --leak-check=full --quiet ./test-scanner", workdir => '');
+} else {
+	diag("Couldn't find valgrind(1), running tests without it...");
+	$test = Test::Cmd->new(prog => "test-scanner", workdir => '');
+}
 
 foreach $scenario (@scenarios) {
 	my ($filename, @stdin, @stdout, @expout, @stderr, @experr, @diff);
