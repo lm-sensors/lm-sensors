@@ -246,7 +246,7 @@ int piix4_transaction(void)
 			return -1;
 		} else {
 #ifdef DEBUG
-			printk(KERN_DEBUG "i2c-piix4.o: Successfull!\n");
+			printk(KERN_DEBUG "i2c-piix4.o: Successful!\n");
 #endif
 		}
 	}

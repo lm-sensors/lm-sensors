@@ -145,7 +145,7 @@ static int sis630_transaction_start(int size, u8 *oldclock) {
                         DBG("Failed! (%02x)\n", temp);
 			return -1;
                 } else {
-                        DBG("Successfull!\n");
+                        DBG("Successful!\n");
 		}
         }
 

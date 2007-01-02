@@ -258,7 +258,7 @@ static int i801_transaction(void)
 			dev_dbg(I801_dev, "Failed! (%02x)\n", temp);
 			return -1;
 		} else {
-			dev_dbg(I801_dev, "Successfull!\n");
+			dev_dbg(I801_dev, "Successful!\n");
 		}
 	}
 

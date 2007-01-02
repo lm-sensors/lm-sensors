@@ -257,7 +257,7 @@ int sis5595_transaction(void)
 			return -1;
 		} else {
 #ifdef DEBUG
-			printk("i2c-sis5595.o: Successfull!\n");
+			printk("i2c-sis5595.o: Successful!\n");
 #endif
 		}
 	}
