@@ -37,13 +37,6 @@
 #define DEBUG 1
 */
 
-static unsigned short normal_i2c[] = { SENSORS_I2C_END };
-static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
-static unsigned int normal_isa[] = { SENSORS_ISA_END };
-static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
-
-SENSORS_INSMOD_1(bmcsensors);
-
 struct bmcsensors_data {
 	struct semaphore lock;
 	int sysctl_id;
@@ -218,8 +211,10 @@ static void ipmi_sprintf(u8 * to, u8 * from, u8 type, u8 length)
 		case 2: 	/* packed ascii */ /* if not a mult. of 3 this will run over */     
 			for(i = 0; i < length; i += 3) {
 				*to++ = *from & 0x3f;
-				*to++ = *from++ >> 6 | ((*from & 0xf)  << 2);
-				*to++ = *from++ >> 4 | ((*from & 0x3)  << 4);
+				*to++ = *from >> 6 | ((*(from+1) & 0xf)  << 2);
+				from++;
+				*to++ = *from >> 4 | ((*(from+1) & 0x3)  << 4);
+				from++;
 				*to++ = (*from++ >> 2) & 0x3f;
 			}
 			*to = 0;
@@ -298,7 +293,7 @@ static void bmcsensors_select_thresholds(struct sdrdata * sd)
 	}
 
 	/* swap lim1/lim2 if m < 0 or function is 1/x (but not both!) */
-	if(sd->m < 0 && sd->linear != 7 || sd->m >= 0 && sd->linear == 7) {
+	if((sd->m < 0 && sd->linear != 7) || (sd->m >= 0 && sd->linear == 7)) {
 		tmp = sd->lim1;
 		sd->lim1 = sd->lim2;
 		sd->lim2 = tmp;

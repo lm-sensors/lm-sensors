@@ -16,6 +16,7 @@ SVN HEAD
            Add adm1029 support (Corentin Labbe)
   Man page i2cdetect.8: Describe the output convention
   Man page sensors.1: Update (option -c) and clean up
+  Module bmcsensors: Fix several warnings
   Module i2c-i801: Add ICH9 support
   Module f71805f: Fix the device address decoding (2.6 backport)
   Module icspll: Delete. It was useless and dangerous.
