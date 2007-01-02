@@ -84,15 +84,11 @@ static struct i2c_driver bmcsensors_driver = {
 };
 
 static struct bmcsensors_data bmc_data;
-struct i2c_client bmc_client = {
-	"BMC Sensors",
-	1,                  /* fake should be 0 */
-	0,
-	0,
-	NULL,   /* adapter */
-	&bmcsensors_driver,
-	& bmc_data,
-	0
+static struct i2c_client bmc_client = {
+	.name		= "BMC Sensors",
+	.id		= 1,                  /* fake should be 0 */
+	.driver		= &bmcsensors_driver,
+	.data		= &bmc_data,
 };
 
 static int bmcsensors_initialized;
