@@ -99,7 +99,7 @@ function pwmdisable()
 		ENABLE=${1}_enable
 		if [ -w $ENABLE ]
 		then
-			echo 0 > $ENABLE
+			echo 0 > $ENABLE 2> /dev/null
 		fi
 	else
 		echo $MAX 0 > $1
@@ -114,8 +114,13 @@ function pwmenable()
 		ENABLE=${1}_enable
 		if [ -w $ENABLE ]
 		then
-			echo 1 > $ENABLE
+			echo 1 > $ENABLE 2> /dev/null
+			if [ $? -ne 0 ]
+			then
+				return 1
+			fi
 		fi
+		echo $MAX > $1
 	else
 		echo $MAX 1 > $1
 	fi
@@ -271,6 +276,11 @@ for i in $PWM
 do
 	echo Testing pwm control $i ...
 	pwmenable $i
+	if [ $? -ne 0 ]
+	then
+		echo "Manual control mode not supported, skipping."
+		continue
+	fi
 	pwmset $i 0
 	sleep $DELAY
 	if [ $? -ne 0 ]

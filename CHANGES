@@ -25,6 +25,7 @@ SVN HEAD
   Program i2cdetect: Make the output clearer
   Program py-smbus: New! Python i2c-dev bindings (prog/py-smbus)
   Programs dump/*: More robust handling of user inputs
+  Programs pwmconfig, fancontrol: Handle write errors for bash 3.1
   Program sensord: Add pc87247 support (fans only)
                    Add vt1211 support (#2150)
                    Add w83627dhg support (David Holl, #2157)
