@@ -25,6 +25,8 @@ SVN HEAD
   Program eepromer: Fix loads of warnings
   Program i2cdetect: Make the output clearer
   Program py-smbus: New! Python i2c-dev bindings (prog/py-smbus)
+  Program unhide_ICH_SMBus: New! Unhides the ICH SMBus even for 2.6 kernels
+                            without need of recompilation.
   Programs dump/*: More robust handling of user inputs
   Programs pwmconfig, fancontrol: Handle write errors for bash 3.1
   Program sensord: Add pc87247 support (fans only)

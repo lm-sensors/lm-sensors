@@ -1,18 +1,10 @@
 What is it?
 -----------
 
-NOTE:
-This module is for 2.4 kernels only. For 2.6 kernels,
-activation is handled by the code in drivers/pci/quirks.c
-in the kernel source. If you have the latest 2.6 kernel and
-the quirks code does not activate your SMBus, try adding support
-in quirks.c, recompile and test your new kernel, and then
-submit a patch to us. Contact us if you need assistance.
+It unhides the SMBus of Intel ICH southbridges hidden
+on ASUS P4B series. It is implemented as a module (p4b_smbus.o),
+or a shell script for the 2.6 kernel (unhide_ICH_SMBus).
 
-This is just a quick and dirty hack to get the hardware monitoring working
-on the ASUS P4B board under Linux.
-It works by turning on the SMBus PCI device.
-It is implemented as a module, p4b_smbus.o.
 It works with the following chips:
  * ICH2   (82801BA)
  * ICH2-M (82801BAM)
@@ -25,6 +17,24 @@ with the German support and learned that: "We do not want the users to be
 irritated by just another PCI Device in the Win98 device manager."
 Really funny :-).
 
+This module is for 2.4 kernels only. For 2.6 kernels, activation is
+handled by the code in drivers/pci/quirks.c in the kernel source. If you
+have the 2.6 kernel and the quirks code does not activate your SMBus,
+you may:
+
+ * check if you have kernel version from 2.6.17 to 2.6.19
+   If so you, need to disable ACPI sleep support and recompile kernel. 
+   If you don't use suspend try below instead of recompilation.
+
+ * run as root the ./unhide_ICH_SMBus script. It will unhide the bus 
+   and load the i2c-i801 driver.
+
+ * if above script works and you have latest kernel, you may 
+   try to fix the quirks.c, recompile and test your new kernel,
+   and then submit a patch to us. Contact us if you need assistance.
+
+Information for 2.4 users continues below.
+
 NOTE: As of kernel 2.4.23, the kernel activates the SMBus PCI device
 on the following boards:
  * Asus P4B
@@ -34,7 +44,6 @@ on the following boards:
  * Asus P4G8X Deluxe
 So this module is no longer required for these boards. For the other 
 affected boards, it still is.
-
 
 What does the module do?
 ------------------------

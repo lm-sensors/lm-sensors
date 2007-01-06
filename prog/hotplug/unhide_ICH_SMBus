@@ -1,0 +1,39 @@
+#!/bin/bash
+# (C) Rudolf Marek <r.marek@assembler.cz>,
+#     Jean Delvare <khali@linux-fr.org>
+#
+#    Thanks Jean Delvare and Oliver Dreier <oliver@dinux.de> for testing.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License version 2
+#    as published by the Free Software Foundation
+
+pcibus="/sys/bus/pci/slots/"
+device="00:1f"
+
+intel=`lspci -n -s $device.0 | grep 8086`
+
+if [ -z "$intel" ] ; then
+	echo "Not for your chipset - Intel (ICH) only"
+	exit 255;
+fi
+modprobe fakephp &> /dev/null
+
+if [ ! -d "$pcibus" ] ; then
+	echo "You need the fake PCI hotplug driver! (fakephp.ko and 2.6 kernel)"
+	exit 255;
+fi
+
+echo "Enabling SMBus PCI device ..."
+
+newval=$( printf '%x' $((0x$(setpci -s $device.0 f2.w) & 0xfff7))) 
+setpci -s $device.0 f2.w=$newval
+
+echo "Rescanning the bus ..."
+echo 1 > $pcibus/0000:$device.0/power 2>/dev/null
+if [ ! -d "$pcibus/0000:$device.3" ] ; then
+	echo "Failed to enable the SMBUS"
+	exit 253;
+fi
+echo "Done, loading i2c-i801 ..."
+modprobe i2c-i801  &> /dev/null
