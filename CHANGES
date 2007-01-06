@@ -29,6 +29,8 @@ SVN HEAD
   Program sensord: Add pc87247 support (fans only)
                    Add vt1211 support (#2150)
                    Add w83627dhg support (David Holl, #2157)
+                   Add w83627ehf voltage support (Dave Platt)
+                   Add k8temp support (Dave Platt)
   Program sensors: Add pc87247 support (fans only)
                    Hide error on missing f71805f fan
                    Handle option -c more efficiently

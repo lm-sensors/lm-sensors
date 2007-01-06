@@ -80,6 +80,13 @@ fmtTemps_minmax_0
 }
 
 static const char *
+fmtTemp_only
+(const double values[], int alarm, int beep) {
+  sprintf (buff, "%.1f C", values[0]);
+  return fmtExtra (alarm, beep);
+}
+
+static const char *
 fmtVolt_2
 (const double values[], int alarm, int beep) {
   sprintf (buff, "%+.2f V", values[0]);
@@ -1144,6 +1151,24 @@ static const FeatureDescriptor w83627ehf_features[] = {
     { SENSORS_W83627EHF_TEMP2, SENSORS_W83627EHF_TEMP2_OVER, SENSORS_W83627EHF_TEMP2_HYST, -1 } },
   { fmtTemps_1, rrdF1, DataType_temperature, 0, 0,
     { SENSORS_W83627EHF_TEMP3, SENSORS_W83627EHF_TEMP3_OVER, SENSORS_W83627EHF_TEMP3_HYST, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83627EHF_IN0, SENSORS_W83627EHF_IN0_MIN, SENSORS_W83627EHF_IN0_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83627EHF_IN1, SENSORS_W83627EHF_IN1_MIN, SENSORS_W83627EHF_IN1_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83627EHF_IN2, SENSORS_W83627EHF_IN2_MIN, SENSORS_W83627EHF_IN2_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83627EHF_IN3, SENSORS_W83627EHF_IN3_MIN, SENSORS_W83627EHF_IN3_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83627EHF_IN4, SENSORS_W83627EHF_IN4_MIN, SENSORS_W83627EHF_IN4_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83627EHF_IN5, SENSORS_W83627EHF_IN5_MIN, SENSORS_W83627EHF_IN5_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83627EHF_IN6, SENSORS_W83627EHF_IN6_MIN, SENSORS_W83627EHF_IN6_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83627EHF_IN7, SENSORS_W83627EHF_IN7_MIN, SENSORS_W83627EHF_IN7_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83627EHF_IN8, SENSORS_W83627EHF_IN8_MIN, SENSORS_W83627EHF_IN8_MAX, -1 } },
   { NULL }
 };
 
@@ -1242,6 +1267,22 @@ static const ChipDescriptor vt1211_chip = {
   vt1211_names, vt1211_features, SENSORS_VT1211_ALARMS, 0
 };
 
+/** K8 **/
+
+static const char *k8temp_names[] = {
+  SENSORS_K8TEMP_PREFIX, NULL
+};
+
+static const FeatureDescriptor k8temp_features[] = {
+  { fmtTemp_only, rrdF0, DataType_temperature, 0, 0,
+    { SENSORS_K8TEMP_TEMP1, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor k8temp_chip = {
+  k8temp_names, k8temp_features, 0, 0
+};
+
 
 /** ALL **/
 
@@ -1270,5 +1311,6 @@ const ChipDescriptor * const knownChips[] = {
   &w83627ehf_chip,
   &f71805f_chip,
   &vt1211_chip,
+  &k8temp_chip,
   NULL
 };
