@@ -1,7 +1,7 @@
 /*
  * p4b_smbus.c
  *
- * Initialize the SMBus device on ICH2/2-M/4/4-M (82801BA/BAM/DB/DBM)
+ * Initialize the SMBus device on ICH2/2-M/4/4-M/5 (82801BA/BAM/DB/DBM/EB)
  */
 /*
     Copyright (c) 2002 Ilja Rauhut <IljaRauhut@web.de> and
@@ -44,6 +44,8 @@
  *
  * Apr 13, 2004, modified for ICH4-M (82801DBM) -- Axel Thimm <Axel.Thimm@ATrpms.net>
  *               bugfix: register F2/bit 8 on ICH2* is bit 0 on ICH4*
+ *
+ * Jan 6, 2007, added support for the ICH5 -- Jean Delvare
  */
 
 
@@ -97,6 +99,14 @@ rmm    from lm_sensors-2.3.3:
 #define ICH4_M 0x24cc
 #define ICH4_SMBUS 0x24c3
 
+#define ICH5 0x24d0
+#define ICH5_SMBUS 0x24d3
+
+#define is_supported_smbus(id) \
+	((id) == ICH2_SMBUS || \
+	 (id) == ICH4_SMBUS || \
+	 (id) == ICH5_SMBUS)
+
 /* status, used to indicate that io space needs to be freed */
 static struct pci_dev *i801smbus = NULL;
 static int i801smbus_inserted = FALSE;
@@ -114,6 +124,8 @@ static unsigned long i801smbus_lock_flags = 0;
  * ICH4(-M): PCI-Device 0x8086:0x24c0(0x24cc)
  *           Bit 3: Disables SMBus Host Controller function.
  *           Bit 0: allows SMBus I/O space to be accessible when Bit 3 is set.
+ * ICH5:     PCI-Device 0x8086:0x24d0
+ *           Same as ICH4.
  */
 static int
 i801smbus_enable(struct pci_dev *dev, u16 testmask, u16 mask){
@@ -164,13 +176,13 @@ static int i801smbus_build(struct pci_dev **i801smbus, struct pci_bus *bus)
 	for  (id = 0, devfn = 0; devfn < 0xFF; devfn++) {
 		(*i801smbus)->devfn = devfn;
 	    	ret = pci_read_config_word(*i801smbus, PCI_DEVICE_ID, &id);
-		if (ret == 0 && (ICH2_SMBUS == id || ICH4_SMBUS == id)) {
+		if (ret == 0 && is_supported_smbus(id)) {
 		    	pci_read_config_word(*i801smbus, PCI_VENDOR_ID, &vid);
 			if(vid == 0x8086)
 				break;
 		}
 	}
-	if (!(ICH2_SMBUS == id || ICH4_SMBUS == id)) {	
+	if (!is_supported_smbus(id)) {	
 		DBG("i801smbus: i801smbus not found although i801 present - strange.\n");
 		return -EACCES;
 	} else {
@@ -223,6 +235,14 @@ int init_module(void)
 	    return -EPERM;
 	  }
 	
+	dev = pci_find_device(0x8086, ICH5_SMBUS, NULL);
+
+	if (dev) 
+	  {
+	    printk("i801smbus: SMBus already active\n");
+	    return -EPERM;
+	  }
+	
 	/* Are we operating a i801 chipset */
 	if ((dev = pci_find_device(0x8086, ICH2, NULL)) != 0)
 	  {
@@ -248,9 +268,16 @@ int init_module(void)
 	    testmask = 0x008;
 	    mask = 0xfff6;
 	  }
+	else if ((dev = pci_find_device(0x8086, ICH5, NULL)) != 0)
+	  {
+	    printk(KERN_INFO "i801smbus: Found Intel ICH5 (82801EB)\n");
+	    testmask = 0x008;
+	    mask = 0xfff6;
+	  }
 	else
 	  {
-	    printk("i801smbus: INTEL ICH2/2-M/4/4-M (82801BA/BAM/DB/DBM) not found.\n");
+	    printk(KERN_NOTICE "i801smbus: No supported Intel ICH (82801) "
+		   "chip found\n");
 	    return -ENODEV ;
 	  }
 
@@ -311,13 +338,3 @@ MODULE_AUTHOR("Ilja Rauhut <IljaRauhut@web.de>, "
 MODULE_DESCRIPTION("i801smbus PCI Inserter");
 
 #endif				/* MODULE */
-
-
-
-
-
-
-
-
-
-

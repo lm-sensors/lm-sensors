@@ -19,6 +19,7 @@ SVN HEAD
   Module bmcsensors: Fix several warnings
                      Fix fragile structure initialization
   Module i2c-i801: Add ICH9 support
+  Module p4b_smbus: Add support for the ICH5
   Module f71805f: Fix the device address decoding (2.6 backport)
   Module icspll: Delete. It was useless and dangerous.
   Program eepromer: Fix loads of warnings
