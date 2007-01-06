@@ -1169,6 +1169,8 @@ static const FeatureDescriptor w83627ehf_features[] = {
     { SENSORS_W83627EHF_IN7, SENSORS_W83627EHF_IN7_MIN, SENSORS_W83627EHF_IN7_MAX, -1 } },
   { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
     { SENSORS_W83627EHF_IN8, SENSORS_W83627EHF_IN8_MIN, SENSORS_W83627EHF_IN8_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83627EHF_IN9, SENSORS_W83627EHF_IN9_MIN, SENSORS_W83627EHF_IN9_MAX, -1 } },
   { NULL }
 };
 
