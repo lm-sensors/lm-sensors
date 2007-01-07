@@ -11,6 +11,18 @@
 pcibus="/sys/bus/pci/slots/"
 device="00:1f"
 
+if [ "$UID" -ne 0 ] ; then
+	echo "You need to be root to run this script!"
+	exit 252
+fi
+
+smbus=`lspci -n -s $device.3 | grep -i '0c05: *8086'`
+if [ -n "$smbus" ] ; then
+	echo "ICH SMBus is already there!"
+	lspci -s $device.3
+	exit
+fi
+
 intel=`lspci -n -s $device.0 | grep 8086`
 
 if [ -z "$intel" ] ; then
@@ -35,5 +47,14 @@ if [ ! -d "$pcibus/0000:$device.3" ] ; then
 	echo "Failed to enable the SMBUS"
 	exit 253;
 fi
-echo "Done, loading i2c-i801 ..."
-modprobe i2c-i801  &> /dev/null
+
+if [ ! -d "/sys/bus/pci/drivers/i801_smbus" ] ; then
+	echo "Loading i2c-i801 ..."
+	modprobe i2c-i801
+	if [ $? -ne 0 ] ; then
+		exit 251
+	fi
+fi
+
+lspci -s $device.3
+echo "Done!"
