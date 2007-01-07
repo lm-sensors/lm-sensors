@@ -101,9 +101,16 @@ else
 fi
 
 DIR=/proc/sys/dev/sensors
-SDIR=/sys/bus/i2c/devices
 if [ ! -d $DIR ]
 then
+	# For Linux 2.6, detect if config file uses the hwmon class or not yet
+	if echo "$AFCPWM[0]" | grep '^hwmon[0-9]'
+	then
+		SDIR=/sys/class/hwmon
+	else
+		SDIR=/sys/bus/i2c/devices
+	fi
+
 	if [ ! -d $SDIR ]
 	then
 		echo $0: 'No sensors found! (did you load the necessary modules?)'
@@ -118,14 +125,36 @@ cd $DIR
 # $1 = pwm file name
 function pwmdisable()
 {
-	if [ "$SYSFS" = "1" ]
+	if [ -n "$SYSFS" ]
 	then
-		echo $MAX > $1
 		ENABLE=${1}_enable
-		if [ -f $ENABLE ]
+		# No enable file? Just set to max
+		if [ ! -f $ENABLE ]
 		then
-			echo 0 > $ENABLE 2> /dev/null
+			echo $MAX > $1
+			return 0
 		fi
+
+		# Try pwmN_enable=0
+		echo 0 > $ENABLE 2> /dev/null
+		if [ `cat $ENABLE` -eq 0 ]
+		then
+			# Success
+			return 0
+		fi
+
+		# It didn't work, try pwmN_enable=1 pwmN=255
+		echo 1 > $ENABLE 2> /dev/null
+		echo $MAX > $1
+		if [ `cat $ENABLE` -eq 1 -a `cat $1` -ge 190 ]
+		then
+			# Success
+			return 0
+		fi
+
+		# Nothing worked
+		echo "$ENABLE stuck to" `cat $ENABLE` >&2
+		return 1
 	else
 		echo $MAX 0 > $1
 	fi

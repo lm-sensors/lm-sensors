@@ -42,33 +42,42 @@ DELAY=5 # 3 seconds delay is too short for large fans, thus I increased it to 5
 MAX=255
 
 DIR=/proc/sys/dev/sensors
-SDIR=/sys/bus/i2c/devices
 if [ ! -d $DIR ]
 then
-	if [ ! -d $SDIR ]
+	if [ -d "/sys/class/hwmon" ]
 	then
+		SYSFS=2
+		DIR="/sys/class/hwmon"
+	elif [ -d "/sys/bus/i2c/devices" ]
+	then
+		SYSFS=1
+		DIR="/sys/bus/i2c/devices"
+	else
 		echo $0: 'No sensors found! (modprobe sensor modules?)'
 		exit 1
-	else
-		SYSFS=1
-		DIR=$SDIR
 	fi	
 fi
 
 cd $DIR
-DRIVERS=`echo *-*`
-if [ "*-*" = "$DRIVERS" ]
+if [ "$SYSFS" = "2" ]
+then
+	PREFIX='hwmon*/device'
+else
+	PREFIX='*-*'
+fi
+DEVICES=`echo $PREFIX`
+if [ "$PREFIX" = "$DEVICES" ]
 then
 	echo $0: 'No sensors found! (modprobe sensor modules?)'
 	exit 1
 fi
 
-MATCH='*/pwm[1-9]'
+MATCH=$PREFIX/'pwm[1-9]'
 PWM=`echo $MATCH`
 if [ "$SYSFS" = "1" -a "$MATCH" = "$PWM" ]
 then
 	# Deprecated naming scheme (used in kernels 2.6.5 to 2.6.9)
-	MATCH='*/fan[1-9]_pwm'
+	MATCH=$PREFIX/'fan[1-9]_pwm'
 	PWM=`echo $MATCH`
 fi
 if [ "$MATCH" = "$PWM" ]
@@ -77,11 +86,11 @@ then
 	exit 1
 fi
 
-if [ "$SYSFS" = "1" ]
+if [ -n "$SYSFS" ]
 then
-	MATCH='*/fan[1-9]_input'
+	MATCH=$PREFIX/'fan[1-9]_input'
 else
-	MATCH='*/fan[1-9]'
+	MATCH=$PREFIX/'fan[1-9]'
 fi
 FAN=`echo $MATCH`
 if [ "$MATCH" = "$FAN" ]
@@ -90,17 +99,49 @@ then
 	exit 1
 fi
 
+# $1 = padding
+# Only works with Linux 2.6
+function print_devices()
+{
+	for device in $DEVICES
+	do
+		echo "$1$device is `cat $device/name`"
+	done
+}
+
 # $1 = pwm file name
 function pwmdisable()
 {
-	if [ "$SYSFS" = "1" ]
+	if [ -n "$SYSFS" ]
 	then
-		echo $MAX > $1
 		ENABLE=${1}_enable
-		if [ -w $ENABLE ]
+		# No enable file? Just set to max
+		if [ ! -f $ENABLE ]
 		then
-			echo 0 > $ENABLE 2> /dev/null
+			echo $MAX > $1
+			return 0
 		fi
+
+		# Try pwmN_enable=0
+		echo 0 > $ENABLE 2> /dev/null
+		if [ "`cat $ENABLE`" -eq 0 ]
+		then
+			# Success
+			return 0
+		fi
+
+		# It didn't work, try pwmN_enable=1 pwmN=255
+		echo 1 > $ENABLE 2> /dev/null
+		echo $MAX > $1
+		if [ "`cat $ENABLE`" -eq 1 -a "`cat $1`" -ge 190 ]
+		then
+			# Success
+			return 0
+		fi
+
+		# Nothing worked
+		echo "$ENABLE stuck to `cat $ENABLE`" >&2
+		return 1
 	else
 		echo $MAX 0 > $1
 	fi
@@ -109,7 +150,7 @@ function pwmdisable()
 # $1 = pwm file name
 function pwmenable()
 {
-	if [ "$SYSFS" = "1" ]
+	if [ -n "$SYSFS" ]
 	then
 		ENABLE=${1}_enable
 		if [ -w $ENABLE ]
@@ -132,6 +173,13 @@ function pwmset()
 	echo $2 > $1
 }
 
+if [ -n "$SYSFS" ]
+then
+	echo 'Found the following devices:'
+	print_devices "   "
+	echo
+fi
+
 echo 'Found the following PWM controls:'
 for i in $PWM
 do
@@ -139,6 +187,12 @@ do
 	if [ -w $i ]
 	then
 		pwmdisable $i
+		if [ $? -ne 0 ]
+		then
+			echo "Failed to set pwm$i to full speed" >&2
+			echo "Something's wrong, check your fans!" >&2
+			exit 1
+		fi
 	else
 		NOTROOT=1
 	fi
@@ -372,11 +426,11 @@ then
 	exit
 fi
 
-if [ "$SYSFS" = "1" ]
+if [ -n "$SYSFS" ]
 then
-	MATCH='*/temp[1-9]_input'
+	MATCH=$PREFIX/'temp[1-9]_input'
 else
-	MATCH='*/temp[1-9]'
+	MATCH=$PREFIX/'temp[1-9]'
 fi
 TEMPS=`echo $MATCH`
 if [ "$MATCH" = "$TEMPS" ]
@@ -422,6 +476,22 @@ function LoadConfig {
 	MAXTEMP=`egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP=//g'`
 	MINSTART=`egrep '^MINSTART=.*$' $1 | sed -e 's/MINSTART=//g'`
 	MINSTOP=`egrep '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP=//g'`
+
+	# Check for configuration change
+	local item
+	for item in $FCFANS
+	do
+		if [ ! -f "`echo $item | sed -e 's/=.*$//'`" ]
+		then
+			echo "Configuration appears to be outdated, discarded"
+			FCTEMPS=""
+			FCFANS=""
+			MINTEMP=""
+			MAXTEMP=""
+			MINSTART=""
+			MINSTOP=""
+		fi
+	done
 }
 
 LoadConfig $FCCONFIG
@@ -529,12 +599,18 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 	"`echo ${pwmactive} |sed -e 's/ /\n/g' | egrep \"${pwms}\"`" )
 		pwmsed=`echo ${pwms} | sed -e 's/\//\\\\\//g'` #escape / for sed
 		echo
+		if [ -n "$SYSFS" ]
+		then
+			echo 'Devices:'
+			print_devices ""
+			echo
+		fi
 		echo 'Current temperature readings are as follows:'
 		for j in $TEMPS
 		do
 			# this will return the first field if there's only one (sysfs)
 			S=`cat $j | cut -d' ' -f3`
-			if [ "$SYSFS" = "1" ]
+			if [ -n "$SYSFS" ]
 			then
 				let S="$S / 1000"
 			fi

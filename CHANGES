@@ -29,6 +29,7 @@ SVN HEAD
                             without need of recompilation.
   Programs dump/*: More robust handling of user inputs
   Programs pwmconfig, fancontrol: Handle write errors for bash 3.1
+                                  Add support for non-i2c drivers
   Program sensord: Add pc87247 support (fans only)
                    Add vt1211 support (#2150)
                    Add w83627dhg support (David Holl, #2157)
