@@ -308,7 +308,7 @@ static const struct match matches[] = {
 static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	int *sysmag, char *altsysname)
 {
-	const char * name = feature->name;
+	const char * name = feature->data.name;
 	char last;
 	char check; /* used to verify end of string */
 	int num;

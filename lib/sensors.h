@@ -131,7 +131,7 @@ typedef struct sensors_feature_data {
   int number;
   const char *name;
   int mapping;
-  int unused;
+  int compute_mapping;
   int mode;
 } sensors_feature_data;
 

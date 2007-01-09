@@ -100,8 +100,8 @@ const sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix,
 	for (i = 0; sensors_chip_features_list[i].prefix; i++)
 		if (!strcasecmp(sensors_chip_features_list[i].prefix, prefix)) {
 			features = sensors_chip_features_list[i].feature;
-			for (j = 0; features[j].name; j++)
-				if (features[j].number == feature)
+			for (j = 0; features[j].data.name; j++)
+				if (features[j].data.number == feature)
 					return features + j;
 		}
 	return NULL;
@@ -119,8 +119,8 @@ const sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
 	for (i = 0; sensors_chip_features_list[i].prefix; i++)
 		if (!strcasecmp(sensors_chip_features_list[i].prefix, prefix)) {
 			features = sensors_chip_features_list[i].feature;
-			for (j = 0; features[j].name; j++)
-				if (!strcasecmp(features[j].name, feature))
+			for (j = 0; features[j].data.name; j++)
+				if (!strcasecmp(features[j].data.name, feature))
 					return features + j;
 		}
 	return NULL;
@@ -158,7 +158,7 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->labels_count; i++)
-			if (!strcasecmp(featureptr->name,chip->labels[i].name)){
+			if (!strcasecmp(featureptr->data.name,chip->labels[i].name)){
 				if (*result)
 					free(*result);
 				if (!(*result = strdup(chip->labels[i].value)))
@@ -168,7 +168,7 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
 			}
 
 	/* No label, return the feature name instead */
-	if (!(*result = strdup(featureptr->name)))
+	if (!(*result = strdup(featureptr->data.name)))
 		sensors_fatal_error("sensors_get_label",
 				    "Allocating label text");
 	return 0;
@@ -187,18 +187,18 @@ int sensors_get_ignored(sensors_chip_name name, int feature)
 		return -SENSORS_ERR_WILDCARDS;
 	if (!(featureptr = sensors_lookup_feature_nr(name.prefix, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if (featureptr->logical_mapping == SENSORS_NO_MAPPING)
+	if (featureptr->data.mapping == SENSORS_NO_MAPPING)
 		alt_featureptr = NULL;
 	else if (!(alt_featureptr =
 		   sensors_lookup_feature_nr(name.prefix,
-					     featureptr->logical_mapping)))
+					     featureptr->data.mapping)))
 		return -SENSORS_ERR_NO_ENTRY;
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->ignores_count; i++)
-			if (!strcasecmp(featureptr->name, chip->ignores[i].name))
+			if (!strcasecmp(featureptr->data.name, chip->ignores[i].name))
 				return 0; /* Exact match always overrules! */
 			else if (alt_featureptr &&
-				 !strcasecmp(alt_featureptr->name,
+				 !strcasecmp(alt_featureptr->data.name,
 					     chip->ignores[i].name))
 				res = 0;
 	return res;
@@ -221,20 +221,20 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
 		return -SENSORS_ERR_WILDCARDS;
 	if (!(main_feature = sensors_lookup_feature_nr(name.prefix, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if (main_feature->compute_mapping == SENSORS_NO_MAPPING)
+	if (main_feature->data.compute_mapping == SENSORS_NO_MAPPING)
 		alt_feature = NULL;
 	else if (!(alt_feature = sensors_lookup_feature_nr(name.prefix,
-					main_feature->compute_mapping)))
+					main_feature->data.compute_mapping)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if (!(main_feature->mode & SENSORS_MODE_R))
+	if (!(main_feature->data.mode & SENSORS_MODE_R))
 		return -SENSORS_ERR_ACCESS_R;
 	for (chip = NULL;
 	     !expr && (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; !final_expr && (i < chip->computes_count); i++) {
-			if (!strcasecmp(main_feature->name, chip->computes[i].name)) {
+			if (!strcasecmp(main_feature->data.name, chip->computes[i].name)) {
 				expr = chip->computes[i].from_proc;
 				final_expr = 1;
-			} else if (alt_feature && !strcasecmp(alt_feature->name,
+			} else if (alt_feature && !strcasecmp(alt_feature->data.name,
 					       chip->computes[i].name)) {
 				expr = chip->computes[i].from_proc;
 			}
@@ -265,20 +265,20 @@ int sensors_set_feature(sensors_chip_name name, int feature, double value)
 		return -SENSORS_ERR_WILDCARDS;
 	if (!(main_feature = sensors_lookup_feature_nr(name.prefix, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if (main_feature->compute_mapping == SENSORS_NO_MAPPING)
+	if (main_feature->data.compute_mapping == SENSORS_NO_MAPPING)
 		alt_feature = NULL;
 	else if (!(alt_feature = sensors_lookup_feature_nr(name.prefix,
-					     main_feature->compute_mapping)))
+					     main_feature->data.compute_mapping)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if (!(main_feature->mode & SENSORS_MODE_W))
+	if (!(main_feature->data.mode & SENSORS_MODE_W))
 		return -SENSORS_ERR_ACCESS_W;
 	for (chip = NULL;
 	     !expr && (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; !final_expr && (i < chip->computes_count); i++)
-			if (!strcasecmp(main_feature->name, chip->computes[i].name)) {
+			if (!strcasecmp(main_feature->data.name, chip->computes[i].name)) {
 				expr = chip->computes->to_proc;
 				final_expr = 1;
-			} else if (alt_feature && !strcasecmp(alt_feature->name,
+			} else if (alt_feature && !strcasecmp(alt_feature->data.name,
 					       chip->computes[i].name)) {
 				expr = chip->computes[i].to_proc;
 			}
@@ -334,24 +334,23 @@ const sensors_feature_data *sensors_get_all_features(sensors_chip_name name,
 		if (!strcasecmp(sensors_chip_features_list[i].prefix, name.prefix)) {
 			feature_list = sensors_chip_features_list[i].feature;
 			if (!*nr1 && !*nr2) {	/* Return the first entry */
-				if (!feature_list[0].name)	/* The list may be empty */
+				if (!feature_list[0].data.name)	/* The list may be empty */
 					return NULL;
 				*nr1 = *nr2 = 1;
-				return (sensors_feature_data *)feature_list;
+				return &feature_list->data;
 			}
-			for ((*nr2)++; feature_list[*nr2 - 1].name; (*nr2)++)
-				if (feature_list[*nr2 - 1].logical_mapping ==
-				    feature_list[*nr1 - 1].number)
-					return (sensors_feature_data *)
-						(feature_list + *nr2 - 1);
+			for ((*nr2)++; feature_list[*nr2 - 1].data.name; (*nr2)++)
+				if (feature_list[*nr2 - 1].data.mapping ==
+				    feature_list[*nr1 - 1].data.number)
+					return &((feature_list + *nr2 - 1)->data);
 			for ((*nr1)++;
-			     feature_list[*nr1 - 1].name
-			     && (feature_list[*nr1 - 1].logical_mapping !=
+			     feature_list[*nr1 - 1].data.name
+			     && (feature_list[*nr1 - 1].data.mapping !=
 				 SENSORS_NO_MAPPING); (*nr1)++) ;
 			*nr2 = *nr1;
-			if (!feature_list[*nr1 - 1].name)
+			if (!feature_list[*nr1 - 1].data.name)
 				return NULL;
-			return (sensors_feature_data *)(feature_list + *nr1 - 1);
+			return &((feature_list + *nr1 - 1)->data);
 		}
 	return NULL;
 }
@@ -375,7 +374,7 @@ int sensors_eval_expr(sensors_chip_name chipname, const sensors_expr * expr,
 		if (!(feature = sensors_lookup_feature_name(chipname.prefix,
 							    expr->data.var)))
 			return SENSORS_ERR_NO_ENTRY;
-		if (!(res = sensors_get_feature(chipname, feature->number, result)))
+		if (!(res = sensors_get_feature(chipname, feature->data.number, result)))
 			return res;
 		return 0;
 	}
@@ -439,7 +438,7 @@ int sensors_do_this_chip_sets(sensors_chip_name name)
 				err = SENSORS_ERR_NO_ENTRY;
 				continue;
 			}
-			feature_nr = feature->number;
+			feature_nr = feature->data.number;
 
 			/* Check whether we already set this feature */
 			for (j = 0; j < feature_count; j++)

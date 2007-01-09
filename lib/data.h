@@ -150,11 +150,7 @@ typedef struct sensors_proc_chips_entry {
      Scaling can be positive or negative but negative values aren't
      very useful because the driver can scale that direction itself. */
 typedef struct sensors_chip_feature {
-  int number;
-  const char *name;
-  int logical_mapping;
-  int compute_mapping;
-  int mode;
+  sensors_feature_data data;
   int sysctl;
   int offset;
   int scaling;
