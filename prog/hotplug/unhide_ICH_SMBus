@@ -7,6 +7,16 @@
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 2
 #    as published by the Free Software Foundation
+#
+# Supports the following Intel ICH chipsets:
+#              PCI ID
+#   ICH2      8086:2440
+#   ICH2-M    8086:244C
+#   ICH3      8086:2480
+#   ICH3-M    8086:248C
+#   ICH4      8086:24C0
+#   ICH4-M    8086:24CC
+#   ICH5      8086:24D0
 
 pcibus="/sys/bus/pci/slots/"
 device="00:1f"
@@ -23,10 +33,10 @@ if [ -n "$smbus" ] ; then
 	exit
 fi
 
-intel=`lspci -n -s $device.0 | grep 8086`
-
+intel=`lspci -n -s $device.0 | grep -i '8086:24[48CD][0C]'`
 if [ -z "$intel" ] ; then
 	echo "Not for your chipset - Intel (ICH) only"
+	echo "Supported: ICH2, ICH2-M, ICH3, ICH3-M, ICH4, ICH4-M, ICH5"
 	exit 255;
 fi
 modprobe fakephp &> /dev/null
