@@ -43,6 +43,7 @@ SVN HEAD
                    Add f71872f support
                    Add w83627dhg support (David Holl, #2157)
                    Add adm1029 support (Corentin Labbe)
+                   Hide error on missing w83793 temp (Gong Jun)
   Program sensors-detect: Add SMSC DME1737 detection
                           Add Fintek F71882FG and EPoX EP1308 detection
                           Add Intel Core thermal sensor detection

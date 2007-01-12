@@ -3013,8 +3013,7 @@ void print_w83793(const sensors_chip_name *name)
         print_temp_info(cur, over, hyst, HYST, i <= 4 ? 1 : 0, i <= 4 ? 1 : 0);
         printf(" %s\n", alarm ? "ALARM" : "");
       }
-    } else
-      printf("ERROR: Can't get TEMP%d data!\n", i);
+    }
     free(label);
   }
 
