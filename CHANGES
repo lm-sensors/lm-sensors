@@ -4,6 +4,7 @@ lm_sensors CHANGES file
 SVN HEAD
   RPM: Obsolete, removed
   File doc/fan-divisors: Update
+  File sensors_vid.h: Trim VID values to correct number of bits (2.6 backport)
   Library: Add support for the pc87247 driver (fans only)
            Probe for busses before chips
            Drop support for algorithm names
