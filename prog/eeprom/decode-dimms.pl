@@ -381,8 +381,8 @@ sub printl ($$) # print a line w/ label and value
 		print "<tr><td valign=top>$label</td><td>$value</td></tr>\n";
 	} else {
 		my @values = split /\n/, $value;
-		printf "%-47s %-32s\n", $label, shift @values;
-		printf "%-47s %-32s\n", "", $_ foreach (@values);
+		printf "%-47s %s\n", $label, shift @values;
+		printf "%-47s %s\n", "", $_ foreach (@values);
 	}
 }
 

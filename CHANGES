@@ -22,6 +22,7 @@ SVN HEAD
   Module p4b_smbus: Add support for the ICH5
   Module f71805f: Fix the device address decoding (2.6 backport)
   Module icspll: Delete. It was useless and dangerous.
+  Program decode-dimms.pl: Remove spaces at end of lines
   Program eepromer: Fix loads of warnings
   Program i2cdetect: Make the output clearer
   Program py-smbus: New! Python i2c-dev bindings (prog/py-smbus)
