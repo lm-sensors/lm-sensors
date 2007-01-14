@@ -47,15 +47,13 @@ use POSIX;
 $ENV{PATH} = "/bin:/usr/bin";
 
 ##### Configuration #####
-use constant DEBUG => 1;
+use constant DEBUG => 0;
 use constant MAX   => 255;
 
 use constant PIDFILE  => '/var/run/fancontrol.pid';
 use constant CONFFILE => '/etc/fancontrol';
 use constant LOGFILE  => '/var/log/fancontrol/fancontrol.log';
 use constant ERRFILE  => '/var/log/fancontrol/fancontrol.err';
-
-use constant SDIR => '/sys/bus/i2c/devices';
 ### End Configuration ###
 
 our $interval;
@@ -119,13 +117,21 @@ our $sysfs = 0;
 our $dir = '/proc/sys/dev/sensors';
 if (!(-d $dir))
    {
-     if (!(-d SDIR))
+     if ($afcpwm[0] =~ m/^hwmon\d/)
+       {
+         $dir = '/sys/class/hwmon';
+       }
+     else
+       {
+         $dir = '/sys/bus/i2c/devices';
+       }
+
+     if (!(-d $dir))
        { die("No sensors found! (are the necessary modules loaded?) : 
 $!\n"); }
      else
        {
          $sysfs = 1;
-         $dir = SDIR;
        }
    }
 
@@ -173,13 +179,13 @@ $minstop);
    while($_ = <F>)
      {
        if ($_ =~ /^\s+$/)                { next; }
-       elsif ($_ =~ /^INTERVAL=(.*)$/) { $interval = $1; next; }
-       elsif ($_ =~ /^FCTEMPS=(.*)$/)  { $fctemps = $1;  next; }
-       elsif ($_ =~ /^FCFANS=(.*)$/)   { $fcfans = $1;   next; }
-       elsif ($_ =~ /^MINTEMP=(.*)$/)  { $mintemp = $1;  next; }
-       elsif ($_ =~ /^MAXTEMP=(.*)$/)  { $maxtemp = $1;  next; }
-       elsif ($_ =~ /^MINSTART=(.*)$/) { $minstart = $1; next; }
-       elsif ($_ =~ /^MINSTOP=(.*)$/)  { $minstop = $1;  next; }
+       elsif ($_ =~ /^INTERVAL=\s*(.*)$/) { $interval = $1; next; }
+       elsif ($_ =~ /^FCTEMPS=\s*(.*)$/)  { $fctemps = $1;  next; }
+       elsif ($_ =~ /^FCFANS=\s*(.*)$/)   { $fcfans = $1;   next; }
+       elsif ($_ =~ /^MINTEMP=\s*(.*)$/)  { $mintemp = $1;  next; }
+       elsif ($_ =~ /^MAXTEMP=\s*(.*)$/)  { $maxtemp = $1;  next; }
+       elsif ($_ =~ /^MINSTART=\s*(.*)$/) { $minstart = $1; next; }
+       elsif ($_ =~ /^MINSTOP=\s*(.*)$/)  { $minstop = $1;  next; }
      }
    close(F);
 
