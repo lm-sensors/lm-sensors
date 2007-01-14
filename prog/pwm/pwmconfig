@@ -469,13 +469,13 @@ AskPath
 
 function LoadConfig {
 	echo "Loading configuration from $1 ..."
-	INTERVAL=`egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g'`
-	FCTEMPS=`egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS=//g'`
-	FCFANS=`egrep '^FCFANS=.*$' $1 | sed -e 's/FCFANS=//g'`
-	MINTEMP=`egrep '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP=//g'`
-	MAXTEMP=`egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP=//g'`
-	MINSTART=`egrep '^MINSTART=.*$' $1 | sed -e 's/MINSTART=//g'`
-	MINSTOP=`egrep '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP=//g'`
+	INTERVAL=`egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL= *//g'`
+	FCTEMPS=`egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS= *//g'`
+	FCFANS=`egrep '^FCFANS=.*$' $1 | sed -e 's/FCFANS= *//g'`
+	MINTEMP=`egrep '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP= *//g'`
+	MAXTEMP=`egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP= *//g'`
+	MINSTART=`egrep '^MINSTART=.*$' $1 | sed -e 's/MINSTART= *//g'`
+	MINSTOP=`egrep '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP= *//g'`
 
 	# Check for configuration change
 	local item
