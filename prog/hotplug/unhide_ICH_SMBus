@@ -68,3 +68,4 @@ fi
 
 lspci -s $device.3
 echo "Done!"
+echo "Remember: system suspend/resume is no longer safe to use."

@@ -27,7 +27,8 @@ you may:
    If you don't use suspend try below instead of recompilation.
 
  * run as root the ./unhide_ICH_SMBus script. It will unhide the bus 
-   and load the i2c-i801 driver.
+   and load the i2c-i801 driver. Beware that you should then no longer
+   use system suspend as bad things might happen on resume.
 
  * if above script works and you have latest kernel, you may 
    try to fix the quirks.c, recompile and test your new kernel,
