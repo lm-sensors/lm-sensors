@@ -1,7 +1,7 @@
 lm_sensors CHANGES file
 -----------------------
 
-SVN HEAD
+2.10.2 (20070115)
   RPM: Obsolete, removed
   File doc/fan-divisors: Update
   File sensors_vid.h: Trim VID values to correct number of bits (2.6 backport)
