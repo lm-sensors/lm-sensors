@@ -2,6 +2,9 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  Program sensors-detect: Only probe relevant I2C addresses
+                          Drop ARP-capable device detection
+
 
 2.10.2 (20070115)
   RPM: Obsolete, removed
