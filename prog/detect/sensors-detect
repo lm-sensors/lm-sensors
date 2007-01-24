@@ -2931,6 +2931,7 @@ sub scan_adapter
     next unless i2c_probe(\*FILE, $addr, $funcs);
     printf "Client found at address 0x%02x\n",$addr;
 
+    $| = 1;
     foreach $chip (@chip_ids) {
       if (exists $chip->{i2c_addrs} and contains $addr, @{$chip->{i2c_addrs}}) {
         printf("\%-60s", sprintf("Probing for `\%s'... ", $chip->{name}));
@@ -2962,12 +2963,14 @@ sub scan_adapter
         }
       }
     }
+    $| = 0;
   }
 }
 
 sub scan_isa_bus
 {
   my ($chip,$addr,$conf);
+  $| = 1;
   foreach $chip (@chip_ids) {
     next if not exists $chip->{isa_addrs} or not exists $chip->{isa_detect};
     foreach $addr (@{$chip->{isa_addrs}}) {
@@ -2989,6 +2992,7 @@ sub scan_isa_bus
       }
     }
   }
+  $| = 0;
 }
 
 use vars qw(%superio);
@@ -3107,6 +3111,7 @@ sub scan_superio
 
   printf("Probing for Super-I/O at 0x\%x/0x\%x\n", $addrreg, $datareg);
 
+  $| = 1;
   FAMILY: 
   foreach my $family (@superio_ids) {
     printf("\%-60s", "Trying family `$family->{family}'... ");
@@ -3143,6 +3148,7 @@ sub scan_superio
 
     exit_superio($addrreg, $datareg);
   }
+  $| = 0;
 }
 
 
@@ -5637,9 +5643,11 @@ sub main
   print "Some CPUs or memory controllers may also contain embedded sensors.\n";
   print "Do you want to scan for them? (YES/no): ";
   unless (<STDIN> =~ /^\s*n/i) {
+    $| = 1;
     foreach my $entry (@cpu_ids) {
       scan_cpu($entry);
     }
+    $| = 0;
   }
   print "\n";
 

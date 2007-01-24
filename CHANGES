@@ -8,6 +8,7 @@ SVN HEAD
                            (Olexiy Avramchenko)
                           Add VIA CX700 detection
                           Drop legacy W83627HF ISA detection
+                          Don't bufferize stdout during probes
 
 
 2.10.2 (20070115)
