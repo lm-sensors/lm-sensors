@@ -3201,7 +3201,6 @@ sub chip_special_cases
 
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, (7) if detected.
 # Registers used: 0x58
@@ -3214,7 +3213,6 @@ sub mtp008_detect
   
 # $_[0]: Chip to detect (0 = LM78, 1 = LM78-J, 2 = LM79)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, (6) if detected.
 # Registers used:
@@ -3289,7 +3287,6 @@ sub lm78_alias_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, 3 or 6 if detected;
 #   6 means that the temperatures make sense;
@@ -3363,7 +3360,6 @@ sub lm75_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, 3 or 6 if detected;
 #   6 means that the temperatures make sense;
@@ -3446,7 +3442,6 @@ sub lm77_detect
 
 # $_[0]: Chip to detect (0 = LM92, 1 = LM76, 2 = MAX6633/MAX6634/MAX6635)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, 2 or 4 if detected;
 # Registers used:
@@ -3496,7 +3491,6 @@ sub lm92_detect
 }
   
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, 3 if detected
 # Registers used:
@@ -3523,7 +3517,6 @@ sub ds1621_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, 1 to 3 if detected.
 # Registers used:
@@ -3586,7 +3579,6 @@ sub lm80_detect
 # $_[0]: Chip to detect
 #   (0 = LM82/LM83)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, 4 to 8 if detected.
 # Registers used:
@@ -3628,7 +3620,6 @@ sub lm83_detect
 #   (0 = LM90, 1=LM89/LM99, 2=LM86, 3=ADM1032, 4=MAX6657/MAX6658/MAX6659,
 #    5 = ADT7461, 6 = MAX6648/MAX6692)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, 4, 6 or 8 if detected.
 #   The Maxim chips have a low confidence value (4)
@@ -3701,7 +3692,6 @@ sub lm90_detect
 # $_[0]: Chip to detect
 #   (1 = LM63, 2 = F75363SG)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address (unused)
 # Returns: undef if not detected, 8 if detected.
 # Registers used:
@@ -3782,7 +3772,6 @@ sub adm1029_detect
 # $_[0]: Chip to detect
 #   (0 = ADM1030, 1=ADM1031)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, 3 to 7 (ADM1031) or 9 (ADM1030)
 #          if detected.
@@ -3868,7 +3857,6 @@ sub adm1034_detect
 #   (0 = ADT7467/ADT7468, 1 = ADT7476, 2 = ADT7462, 3 = ADT7466,
 #    4 = ADT7470)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, 5 or 7 if detected.
 # Registers used:
@@ -4036,7 +4024,6 @@ sub lm85_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, (7) if detected.
 # Registers used: 0x3E, 0x3F
@@ -4054,7 +4041,6 @@ sub lm87_detect
 #                        5 = AS99127F (rev.2), 6 = ASB100, 7 = W83791D,
 #                        8 = W83792D, 9 = W83627EHF 10 = W83627DHG)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, (8,addr1,addr2) if detected, but only
 #          if the LM75 chip emulation is enabled.
@@ -4153,7 +4139,6 @@ sub w83793_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, 3 if detected
 # Registers used:
@@ -4260,7 +4245,6 @@ sub w83781d_isa_detect
 
 # $_[0]: Chip to detect (0 = Revision 0x00, 1 = Revision 0x80)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, (6) if detected.
 # Registers used:
@@ -4281,7 +4265,6 @@ sub gl518sm_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, (5) if detected.
 # Registers used:
@@ -4300,7 +4283,6 @@ sub gl520sm_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, (5) if detected.
 # Registers used:
@@ -4315,7 +4297,6 @@ sub gl525sm_detect
 
 # $_[0]: Chip to detect (0 = ADM9240, 1 = DS1780, 2 = LM81)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, (7) if detected.
 # Registers used:
@@ -4339,7 +4320,6 @@ sub adm9240_detect
 
 # $_[0]: Chip to detect (0 = ADM1022, 1 = THMC50, 2 = ADM1028)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, (8) if detected.
 # Registers used:
@@ -4365,7 +4345,6 @@ sub adm1022_detect
 
 # $_[0]: Chip to detect (0 = ADM1025, 1 = NE1619)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, (8) if detected.
 # Registers used:
@@ -4394,7 +4373,6 @@ sub adm1025_detect
 
 # $_[0]: Chip to detect (0 = ADM1026)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, (8) if detected.
 # Registers used:
@@ -4412,7 +4390,6 @@ sub adm1026_detect
 
 # $_[0]: Chip to detect (0 = ADM1024)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, (8) if detected.
 # Registers used:
@@ -4434,7 +4411,6 @@ sub adm1024_detect
 #   (0 = ADM1021, 1 = ADM1021A/ADM1023, 2 = MAX1617, 3 = MAX1617A, 4 = THMC10,
 #    5 = LM84, 6 = GL523, 7 = MC1066)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, 3 if simply detected, 5 if detected and
 #          manufacturer ID matches, 7 if detected and manufacturer ID and
@@ -4521,7 +4497,6 @@ sub adm1021_detect
 # $_[0]: Chip to detect
 #   (0 = MAX1619)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, 7 if detected
 # Registers used:
@@ -4570,7 +4545,6 @@ sub ite_overclock_detect
 
 # $_[0]: Chip to detect (0 = IT8712F)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, 7 or 8 if detected (tops LM78).
 # Registers used:
@@ -4686,7 +4660,6 @@ sub eeprom_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, (1) if detected.
 # Registers used:
@@ -4722,7 +4695,6 @@ sub ddcmonitor_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, (8) if detected.
 # Registers used:
@@ -4744,7 +4716,6 @@ sub fscpos_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, (8) if detected.
 # Registers used:
@@ -4766,7 +4737,6 @@ sub fscscy_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, (8) if detected.
 # Registers used:
@@ -4788,7 +4758,6 @@ sub fscher_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We assume an i2c_set_slave_addr was already done.
 # $_[1]: Address (unused)
 # Returns: undef if not detected, 5 if detected.
 # Registers used:
@@ -4803,7 +4772,6 @@ sub lm93_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, (7) if detected.
 # Registers used:
@@ -4833,7 +4801,6 @@ sub m5879_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, 5 or 6 if detected.
 # Registers used:
@@ -4852,7 +4819,6 @@ sub smsc47m192_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, 5 or 6 if detected.
 # Registers used:
@@ -4877,7 +4843,6 @@ sub dme1737_detect
 #    4 = F75375S/SP, 5 = F75387SG/RG, 6 = F75383M/S/F75384M/S,
 #    7 = custom power control IC)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We assume an i2c_set_slave_addr was already done.
 # $_[2]: Address (unused)
 # Returns: undef if not detected, 7 if detected.
 # Registers used:
@@ -4914,7 +4879,6 @@ sub fintek_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, 4 or 7 if detected
 # Detection is based on the fact that the SAA1064 has only one readable
@@ -4937,7 +4901,6 @@ sub saa1064_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, 1 if detected
 # Detection is rather difficult, since the PCA9540 has a single register.
@@ -4956,7 +4919,6 @@ sub pca9540_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We assume an i2c_set_slave_addr was already done.
 # $_[1]: Address (unused)
 # Returns: undef if not detected, 1 if detected
 # Detection is rather difficult, since the PCA9556 only has 4 registers
@@ -4985,7 +4947,6 @@ sub pca9556_detect
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: undef if not detected, 3 if detected
 sub max6900_detect
@@ -5055,7 +5016,6 @@ sub max6900_detect
 # The address (0x09) is specified by the SMBus standard so it's likely
 # that this really is a smart battery charger.
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: 5
 sub smartbatt_chgr_detect
@@ -5075,7 +5035,6 @@ sub smartbatt_chgr_detect
 # The address (0x0a) is specified by the SMBus standard so it's likely
 # that this really is a smart battery manager/selector.
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: 5
 sub smartbatt_mgr_detect
@@ -5095,7 +5054,6 @@ sub smartbatt_mgr_detect
 # The address (0x0b) is specified by the SMBus standard so it's likely
 # that this really is a smart battery.
 # $_[0]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[1]: Address
 # Returns: 5
 sub smartbatt_detect
@@ -5170,7 +5128,6 @@ sub w83l784r_detect
 
 # $_[0]: Chip to detect (0 = W83L785TS-S)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, 8 if detected
 # Registers used:
@@ -5189,7 +5146,6 @@ sub w83l785ts_detect
 # $_[0]: Chip to detect. Always zero for now, but available for future use
 #        if somebody finds a way to distinguish MAX6650 and MAX6651.
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 # Returns: undef if not detected, 4 if detected.
 #
@@ -5245,7 +5201,6 @@ sub max6655_detect
 
 # $_[0]: Chip to detect (0 = VT1211)
 # $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
 # $_[2]: Address
 #
 # This isn't very good detection.
