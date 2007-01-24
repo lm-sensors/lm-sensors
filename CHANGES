@@ -4,6 +4,8 @@ lm_sensors CHANGES file
 SVN HEAD
   Program sensors-detect: Only probe relevant I2C addresses
                           Drop ARP-capable device detection
+                          Add Maxim MAX6655/MAX6656 detection
+                           (Olexiy Avramchenko)
 
 
 2.10.2 (20070115)

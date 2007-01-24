@@ -1144,6 +1144,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { max6650_detect(0, @_); },
      },
      {
+       name => "Maxim MAX6655/MAX6656",
+       driver => "max6655",
+       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+       i2c_detect => sub { max6655_detect(0, @_); },
+     },
+     {
        name => "TI THMC10",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
@@ -5207,6 +5213,23 @@ sub max6650_detect
   return if i2c_smbus_read_byte_data($file,0x08) & 0xE0;
   return if i2c_smbus_read_byte_data($file,0x14) & 0xE0;
   return if ($conf & 0xC0) or ($conf & 0x07) > 4;
+
+  return 4;
+}
+
+# $_[0]: Chip to detect. Always zero.
+# $_[1]: A reference to the file descriptor to access this chip.
+# $_[2]: Address.
+#
+# Returns: undef if not detected, 4 if detected.
+sub max6655_detect
+{
+  my ($chip, $file, $addr) = @_;
+
+  # checking RDID (Device ID)
+  return unless i2c_smbus_read_byte_data($file, 0xfe) == 0x0a;
+  # checking RDRV (Manufacturer ID)
+  return unless i2c_smbus_read_byte_data($file, 0xff) == 0x4d;
 
   return 4;
 }
