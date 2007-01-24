@@ -3130,7 +3130,7 @@ sub scan_superio
       if (($chip->{devid} > 0xff && ($val & ($chip->{devid_mask} || 0xffff)) == $chip->{devid})
        || ($chip->{devid} <= 0xff && ($val >> 8) == $chip->{devid})) {
         probe_superio($addrreg, $datareg, $chip);
-      	$found++;
+        $found++;
       }
     }
 
@@ -3335,7 +3335,7 @@ sub lm75_detect
     return if i2c_smbus_read_word_data($file, $i + 0x05) != $os;
     return if i2c_smbus_read_word_data($file, $i + 0x06) != $os;
     return if i2c_smbus_read_word_data($file, $i + 0x07) != $os;
-	$cur_varies = 1
+    $cur_varies = 1
       if (! $cur_varies) and
         i2c_smbus_read_word_data($file, $i) != $cur;
   }
@@ -4615,7 +4615,7 @@ sub eeprom_detect
 	} else {
 		return 1;
 	}
-  }	
+  }
   if ($chip == 2) {
 	# check for 'shadow' write-protect register at 0x30-0x37
 	# could be dangerous
