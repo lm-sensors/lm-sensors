@@ -5221,7 +5221,7 @@ sub max6650_detect
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address.
 #
-# Returns: undef if not detected, 4 if detected.
+# Returns: undef if not detected, 6 if detected.
 sub max6655_detect
 {
   my ($chip, $file, $addr) = @_;
@@ -5230,8 +5230,13 @@ sub max6655_detect
   return unless i2c_smbus_read_byte_data($file, 0xfe) == 0x0a;
   # checking RDRV (Manufacturer ID)
   return unless i2c_smbus_read_byte_data($file, 0xff) == 0x4d;
+  # checking unused bits (conversion rate, extended temperature)
+  return unless i2c_smbus_read_byte_data($file, 0x04) & 0xf8;
+  return unless i2c_smbus_read_byte_data($file, 0x10) & 0x1f;
+  return unless i2c_smbus_read_byte_data($file, 0x11) & 0x1f;
+  return unless i2c_smbus_read_byte_data($file, 0x12) & 0x1f;
 
-  return 4;
+  return 6;
 }
 
 # $_[0]: Chip to detect (0 = VT1211)
