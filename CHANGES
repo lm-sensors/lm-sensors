@@ -6,6 +6,7 @@ SVN HEAD
                           Drop ARP-capable device detection
                           Add Maxim MAX6655/MAX6656 detection
                            (Olexiy Avramchenko)
+                          Add VIA CX700 detection
 
 
 2.10.2 (20070115)
