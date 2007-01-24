@@ -975,13 +975,10 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "Winbond W83627HF",
-       driver => "w83781d",
-       i2c_addrs => [0x20..0x2f], 
+       driver => "use-isa-instead",
+       i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { w83781d_detect(3, @_); },
-       isa_addrs => [0x290],
-       isa_detect => sub { w83781d_isa_detect(3, @_); },
-       alias_detect => sub { w83781d_alias_detect(3, @_); },
-     } ,
+     },
      {
        name => "Winbond W83627EHF",
        driver => "use-isa-instead",
@@ -1826,6 +1823,7 @@ $chip_kern26_w83791d = {
 	driver => "w83627hf",
 	devid => 0x52,
 	logdev => 0x0b,
+	alias_detect => sub { w83781d_alias_detect(3, @_); },
       },
       {
 	name => "Winbond W83627THF Super IO Sensors",
@@ -4229,7 +4227,7 @@ sub w83781d_alias_detect
   return 1;
 }
 
-# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83627HF)
+# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D)
 # $_[1]: Address
 # Returns: undef if not detected, (8) if detected.
 sub w83781d_isa_detect
@@ -4256,7 +4254,6 @@ sub w83781d_isa_detect
   $reg1 = &$read_proc(0x58);
   return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
   return if $chip == 1 and  ($reg1 & 0xfe) != 0x30;
-  return if $chip == 3 and  ($reg1 & 0xfe) != 0x20;
 
   return 8;
 }

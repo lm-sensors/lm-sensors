@@ -7,6 +7,7 @@ SVN HEAD
                           Add Maxim MAX6655/MAX6656 detection
                            (Olexiy Avramchenko)
                           Add VIA CX700 detection
+                          Drop legacy W83627HF ISA detection
 
 
 2.10.2 (20070115)
