@@ -1363,13 +1363,6 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_addrs => [0x57],
        i2c_detect => sub { eeprom_detect(1, @_); },
      },
-# Disabled by default (potentially dangerous)
-#     {
-#       name => "SPD EEPROM with Software Write-Protect",
-#       driver => "eeprom",
-#       i2c_addrs => [0x50..0x57],
-#       i2c_detect => sub { eeprom_detect(2, @_); },
-#     },
      {
        name => "EDID EEPROM",
        driver => "eeprom",
@@ -4568,13 +4561,11 @@ sub ite_alias_detect
   return 1;
 }
 
-# $_[0]: Chip to detect (0 = SPD EEPROM, 1 = Sony Vaio EEPROM,
-#                        2 = SPD EEPROM with Software Write Protect)
+# $_[0]: Chip to detect (0 = SPD EEPROM, 1 = Sony Vaio EEPROM)
 # $_[1]: A reference to the file descriptor to access this chip
 # $_[2]: Address
-# Returns: 8 for a memory eeprom (9 if write-protect register found),
-#          4 to 9 for a Sony Vaio eeprom,
-#          1 for an unknown eeprom (2 if write-protect register found)
+# Returns: 8 for a memory eeprom
+#          4 to 9 for a Sony Vaio eeprom
 # Registers used:
 #   0-63: SPD Data and Checksum
 #   0x80-0x83: Sony Vaio Data ("PCG-")
@@ -4588,34 +4579,14 @@ sub eeprom_detect
   my $checksum = 0;
 
   # Check the checksum for validity (works for most DIMMs and RIMMs)
-  if ($chip != 1) {
-	  for (my $i = 0; $i <= 62; $i ++) {
-	    $checksum += i2c_smbus_read_byte_data($file,$i);
-	  }
-	  $checksum &= 255;
-	  $checksum -= i2c_smbus_read_byte_data($file,63);
-  }     
   if ($chip == 0) {
-	if($checksum == 0) {
-		return 8;
-	} else {
-		return 1;
+	for (my $i = 0; $i <= 62; $i++) {
+	  $checksum += i2c_smbus_read_byte_data($file, $i);
 	}
-  }
-  if ($chip == 2) {
-	# check for 'shadow' write-protect register at 0x30-0x37
-	# could be dangerous
-	i2c_set_slave_addr($file,$addr - 0x20);
-	if(i2c_smbus_write_quick($file, SMBUS_WRITE) >= 0 &&
-	   i2c_smbus_read_byte_data($file,0x80) == -1) {
-		i2c_set_slave_addr($file,$addr);
-		if($checksum == 0) {
-			return (9, $addr - 0x20);
-		} else {
-			return (2, $addr - 0x20);
-		}
-	}
-	i2c_set_slave_addr($file,$addr);
+	$checksum &= 255;
+
+	return 8
+	  if $checksum == i2c_smbus_read_byte_data($file, 63);
 	return;
   }
 
@@ -4647,15 +4618,12 @@ sub eeprom_detect
 
 # $_[0]: A reference to the file descriptor to access this chip.
 # $_[1]: Address
-# Returns: undef if not detected, (1) if detected.
+# Returns: undef if not detected, 8 if detected.
 # Registers used:
 #   0x00..0x07: DDC signature
-#   0x08..0x7E: checksumed area
-#   0x7F:       checksum
 sub ddcmonitor_detect
 {
   my ($file,$addr) = @_;
-  my $i;
 
   return unless
     i2c_smbus_read_byte_data($file,0x00) == 0x00 and
@@ -4667,16 +4635,6 @@ sub ddcmonitor_detect
     i2c_smbus_read_byte_data($file,0x06) == 0xFF and
     i2c_smbus_read_byte_data($file,0x07) == 0x00;
 
-  # Check the checksum for validity.
-  my $checksum = 0;
-  for ($i = 0; $i <= 127; $i = $i + 1) {
-    $checksum = $checksum + i2c_smbus_read_byte_data($file,$i);
-  }
-  $checksum=$checksum & 255;
-  if ($checksum != 0) {
-    # I have one such monitor...
-    return (2,$addr+1,$addr+2,$addr+3,$addr+4,$addr+5,$addr+6,$addr+7);
-  }
   return (8,$addr+1,$addr+2,$addr+3,$addr+4,$addr+5,$addr+6,$addr+7);
 }
 

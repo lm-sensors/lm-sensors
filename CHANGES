@@ -10,6 +10,7 @@ SVN HEAD
                           Drop legacy W83627HF ISA detection
                           Don't bufferize stdout during probes
                           Speed up the LM75 and LM77 detection
+                          Clean up the EEPROM detection
 
 
 2.10.2 (20070115)
