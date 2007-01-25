@@ -3314,7 +3314,6 @@ sub lm75_detect
   my $i;
   my ($file,$addr) = @_;
   my $cur = i2c_smbus_read_word_data($file,0x00);
-  my $cur_varies = 0;
   my $conf = i2c_smbus_read_byte_data($file,0x01);
 
   my $hyst = i2c_smbus_read_word_data($file,0x02);
@@ -3329,25 +3328,14 @@ sub lm75_detect
   return if i2c_smbus_read_word_data($file,0x06) != $os;
   return if i2c_smbus_read_word_data($file,0x07) != $os;
 
-  for ($i = 0x00; $i < 0xff; $i += 8) {
+  for ($i = 8; $i <= 248; $i += 40) {
     return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf;
     return if i2c_smbus_read_word_data($file, $i + 0x02) != $hyst;
-    return if i2c_smbus_read_word_data($file, $i + 0x04) != $hyst;
-    return if i2c_smbus_read_word_data($file, $i + 0x05) != $hyst;
-    return if i2c_smbus_read_word_data($file, $i + 0x06) != $hyst;
-    return if i2c_smbus_read_word_data($file, $i + 0x07) != $hyst;
     return if i2c_smbus_read_word_data($file, $i + 0x03) != $os;
-    return if i2c_smbus_read_word_data($file, $i + 0x04) != $os;
-    return if i2c_smbus_read_word_data($file, $i + 0x05) != $os;
-    return if i2c_smbus_read_word_data($file, $i + 0x06) != $os;
-    return if i2c_smbus_read_word_data($file, $i + 0x07) != $os;
-    $cur_varies = 1
-      if (! $cur_varies) and
-        i2c_smbus_read_word_data($file, $i) != $cur;
   }
 
   # All registers hold the same value, obviously a misdetection
-  return if (! $cur_varies) and $conf == ($cur & 0xff) and $cur == $hyst
+  return if $conf == ($cur & 0xff) and $cur == $hyst
     and $cur == $os;
 
   $cur = swap_bytes($cur);
@@ -3389,7 +3377,6 @@ sub lm77_detect
   my $i;
   my ($file,$addr) = @_;
   my $cur = i2c_smbus_read_word_data($file,0x00);
-  my $cur_varies = 0;
   my $conf = i2c_smbus_read_byte_data($file,0x01);
   my $hyst = i2c_smbus_read_word_data($file,0x02);
   my $os = i2c_smbus_read_word_data($file,0x03);
@@ -3402,23 +3389,16 @@ sub lm77_detect
   return if i2c_smbus_read_word_data($file,0x06) != $high;
   return if i2c_smbus_read_word_data($file,0x07) != $high;
 
-  for ($i = 0x00; $i < 0xff; $i += 8) {
+  for ($i = 8; $i <= 248; $i += 40) {
     return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf;
     return if i2c_smbus_read_word_data($file, $i + 0x02) != $hyst;
     return if i2c_smbus_read_word_data($file, $i + 0x03) != $os;
     return if i2c_smbus_read_word_data($file, $i + 0x04) != $low;
-    return if i2c_smbus_read_word_data($file, $i + 0x06) != $low;
-    return if i2c_smbus_read_word_data($file, $i + 0x07) != $low;
     return if i2c_smbus_read_word_data($file, $i + 0x05) != $high;
-    return if i2c_smbus_read_word_data($file, $i + 0x06) != $high;
-    return if i2c_smbus_read_word_data($file, $i + 0x07) != $high;
-    $cur_varies = 1
-      if (! $cur_varies) and
-        i2c_smbus_read_word_data($file, $i) != $cur;
   }
 
   # All registers hold the same value, obviously a misdetection
-  return if (! $cur_varies) and $conf == ($cur & 0xff) and $cur == $hyst
+  return if $conf == ($cur & 0xff) and $cur == $hyst
     and $cur == $os and $cur == $low and $cur == $high;
 
   $cur = swap_bytes($cur);
