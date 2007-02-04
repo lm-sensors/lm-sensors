@@ -1142,6 +1142,24 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { adm1021_detect(3, @_); },
      },
      {
+       name => "Maxim MAX1668",
+       driver => "max1668",
+       i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
+       i2c_detect => sub { max1668_detect(0, @_); },
+     },
+     {
+       name => "Maxim MAX1805",
+       driver => "max1668",
+       i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
+       i2c_detect => sub { max1668_detect(1, @_); },
+     },
+     {
+       name => "Maxim MAX1989",
+       driver => "max1668",
+       i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
+       i2c_detect => sub { max1668_detect(2, @_); },
+     },
+     {
        name => "Maxim MAX6650/MAX6651",
        driver => "max6650",
        i2c_addrs => [0x1b,0x1f,0x48,0x4b],
@@ -4471,6 +4489,29 @@ sub adm1021_detect
   return 3 if ($chip == 2) or ($chip == 5);
   return 7 if $chip <= 3;
   return 5;
+}
+
+# $_[0]: Chip to detect
+#   (0 = MAX1668, 1 = MAX1805, 2 = MAX1989)
+# $_[1]: A reference to the file descriptor to access this chip.
+#        We may assume an i2c_set_slave_addr was already done.
+# $_[2]: Address
+# Returns: undef if not detected, 7 if detected
+# Registers used:
+#   0xfe: Company ID
+#   0xff: Device ID
+sub max1668_detect
+{
+  my ($chip, $file, $addr) = @_;
+  my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
+  my $dev_id = i2c_smbus_read_byte_data($file, 0xff);
+
+  return if $man_id != 0x4d;
+  return if $chip == 0 and $dev_id != 0x03;
+  return if $chip == 1 and $dev_id != 0x05;
+  return if $chip == 2 and $dev_id != 0x0b;
+
+  return 7;
 }
 
 # $_[0]: Chip to detect
