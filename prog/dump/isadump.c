@@ -47,16 +47,6 @@
 unsigned long isa_io_base = 0; /* XXX for now */
 #endif /* __powerpc__ */
 
-char hexchar(int i)
-{
-	if ((i >= 0) && (i <= 9))
-		return '0' + i;
-	else if (i <= 15)
-		return 'a' - 10 + i;
-	else
-		return 'X';
-}
-
 void help(void)
 {
 	fprintf(stderr,
@@ -305,7 +295,7 @@ int main(int argc, char *argv[])
 				outb(i+j, addrreg);
 				res = inb(datareg);
 			}
-			printf("%c%c ", hexchar(res/16), hexchar(res%16));
+			printf("%02x ", res);
 		}
 		printf("\n");
 	}
