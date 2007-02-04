@@ -2,6 +2,7 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  Man page i2cdetect.8: Scanning range can be restricted
   Program sensors-detect: Only probe relevant I2C addresses
                           Drop ARP-capable device detection
                           Add Maxim MAX6655/MAX6656 detection
