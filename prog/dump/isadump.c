@@ -298,6 +298,7 @@ int main(int argc, char *argv[])
 			superio_write_key(addrreg, enter_key);
 
 		for (j = 0; j < 16; j++) {
+			fflush(stdout);
 			if (flat) {
 				res = inb(addrreg + i + j);
 			} else {	

@@ -61,6 +61,8 @@ int scan_i2c_bus(int file, const int mode, const int first, const int last)
 	for (i = 0; i < 128; i += 16) {
 		printf("%02x: ", i);
 		for(j = 0; j < 16; j++) {
+			fflush(stdout);
+
 			/* Skip unwanted addresses */
 			if (i+j < first || i+j > last) {
 				printf("   ");

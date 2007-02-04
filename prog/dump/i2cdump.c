@@ -345,6 +345,7 @@ int main(int argc, char *argv[])
 		for (i = 0; i < 256; i+=16) {
 			printf("%02x: ", i);
 			for (j = 0; j < 16; j++) {
+				fflush(stdout);
 				if (size == I2C_SMBUS_BYTE_DATA) {
 					block[i+j] = res =
 					  i2c_smbus_read_byte_data(file, i+j);
