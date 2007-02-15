@@ -22,6 +22,7 @@ SVN HEAD
                           Don't bufferize stdout during probes
                           Speed up the LM75 and LM77 detection
                           Clean up the EEPROM detection
+                          Add Dallas DS75 detection
 
 
 2.10.2 (20070115)

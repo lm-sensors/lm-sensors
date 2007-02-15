@@ -819,8 +819,14 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        name => "National Semiconductor LM75",
        driver => "lm75",
        i2c_addrs => [0x48..0x4f],
-       i2c_detect => sub { lm75_detect(@_); },
-     } ,
+       i2c_detect => sub { lm75_detect(0, @_); },
+     },
+     {
+       name => "Dallas Semiconductor DS75",
+       driver => "lm75",
+       i2c_addrs => [0x48..0x4f],
+       i2c_detect => sub { lm75_detect(1, @_); },
+     },
      {
        name => "National Semiconductor LM77",
        driver => "lm77",
@@ -3303,8 +3309,9 @@ sub lm78_alias_detect
   return 1;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
+# $_[0]: Chip to detect (0 = LM75, 1 = DS75)
+# $_[1]: A reference to the file descriptor to access this chip.
+# $_[2]: Address (unused)
 # Returns: undef if not detected, 3 or 6 if detected;
 #   6 means that the temperatures make sense;
 #   3 means that the temperatures look strange;
@@ -3320,29 +3327,33 @@ sub lm78_alias_detect
 # real registers and will always return the last returned value. This isn't
 # documented.
 # Note that register 0x00 may change, so we can't use the modulo trick on it.
+# The DS75 is a bit different, it doesn't cycle over 8-byte boundaries, and
+# all register addresses from 0x04 to 0x0f behave like 0x04-0x07 do for
+# the LM75.
 sub lm75_detect
 {
   my $i;
-  my ($file,$addr) = @_;
+  my ($chip, $file, $addr) = @_;
   my $cur = i2c_smbus_read_word_data($file,0x00);
   my $conf = i2c_smbus_read_byte_data($file,0x01);
 
   my $hyst = i2c_smbus_read_word_data($file,0x02);
-  return if i2c_smbus_read_word_data($file,0x04) != $hyst;
-  return if i2c_smbus_read_word_data($file,0x05) != $hyst;
-  return if i2c_smbus_read_word_data($file,0x06) != $hyst;
-  return if i2c_smbus_read_word_data($file,0x07) != $hyst;
+  my $maxreg = $chip == 1 ? 0x0f : 0x07;
+  for $i (0x04 .. $maxreg) {
+    return if i2c_smbus_read_word_data($file, $i) != $hyst;
+  }
 
   my $os = i2c_smbus_read_word_data($file,0x03);
-  return if i2c_smbus_read_word_data($file,0x04) != $os;
-  return if i2c_smbus_read_word_data($file,0x05) != $os;
-  return if i2c_smbus_read_word_data($file,0x06) != $os;
-  return if i2c_smbus_read_word_data($file,0x07) != $os;
+  for $i (0x04 .. $maxreg) {
+    return if i2c_smbus_read_word_data($file, $i) != $os;
+  }
 
-  for ($i = 8; $i <= 248; $i += 40) {
-    return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf;
-    return if i2c_smbus_read_word_data($file, $i + 0x02) != $hyst;
-    return if i2c_smbus_read_word_data($file, $i + 0x03) != $os;
+  if ($chip == 0) {
+    for ($i = 8; $i <= 248; $i += 40) {
+      return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf
+             or i2c_smbus_read_word_data($file, $i + 0x02) != $hyst
+             or i2c_smbus_read_word_data($file, $i + 0x03) != $os;
+    }
   }
 
   # All registers hold the same value, obviously a misdetection
@@ -3353,7 +3364,8 @@ sub lm75_detect
   $hyst = swap_bytes($hyst);
   $os = swap_bytes($os);
   # Unused bits
-  return if ($conf & 0xe0);
+  return if $chip == 0 and ($conf & 0xe0);
+  return if $chip == 1 and ($conf & 0x80);
 
   $cur = $cur >> 8;
   $hyst = $hyst >> 8;
