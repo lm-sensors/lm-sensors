@@ -880,7 +880,7 @@ static void bmcsensors_update_client(struct i2c_client *client)
 		if(state != STATE_READING) {
 			state = STATE_READING;
 #ifdef DEBUG
-			printk(KERN_DEBUG "bmcsensors.o: starting update\n", j);
+			printk(KERN_DEBUG "bmcsensors.o: starting update\n");
 #endif
 			bmcsensors_get_reading(client, 0);
 		}
@@ -888,7 +888,7 @@ static void bmcsensors_update_client(struct i2c_client *client)
 		while(state == STATE_READING && j++ < 100)
 			bmc_do_pause(HZ / 25);
 #ifdef DEBUG
-		printk("bmcsensors.o: update complete; j = %d\n", j);
+		printk(KERN_DEBUG "bmcsensors.o: update complete; j = %d\n", j);
 #endif
 		data->last_updated = jiffies;
 		data->valid = 1;
