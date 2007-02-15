@@ -4,6 +4,7 @@ lm_sensors CHANGES file
 SVN HEAD
   Man page i2cdetect.8: Scanning range can be restricted
   Module bmcsensors: Fix debugging messages
+  Module i2c-ali1563: Improve the status messages (2.6 backport)
   Module i2c-amd8111: Cleanups (2.6 backport)
                       Fix initialization race (2.6 backport)
   Module i2c-nforce2: Drop unused reference to pci_dev (2.6 backport)
