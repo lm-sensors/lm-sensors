@@ -1418,7 +1418,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { m5879_detect(@_); },
      },
      {
-       name => "SMSC LPC47M15x, LPC47M192 or LPC47M997",
+       name => "SMSC LPC47M15x/192/292/997",
        driver => "smsc47m192",
        i2c_addrs => [0x2c..0x2d],
        i2c_detect => sub { smsc47m192_detect(@_); },
@@ -1767,6 +1767,12 @@ $chip_kern26_w83791d = {
 	name => "SMSC LPC47M15x/192/997 Super IO Fan Sensors",
 	driver => "smsc47m1",
 	devid => 0x60,
+	logdev => 0x0a,
+      },
+      {
+	name => "SMSC LPC47M292 Super IO Fan Sensors",
+	driver => "smsc47m1",
+	devid => 0x6b,
 	logdev => 0x0a,
       },
       {

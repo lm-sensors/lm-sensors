@@ -26,6 +26,7 @@ SVN HEAD
                           Speed up the LM75 and LM77 detection
                           Clean up the EEPROM detection
                           Add Dallas DS75 detection
+                          Add SMSC LPC47M292 detection
 
 
 2.10.2 (20070115)
