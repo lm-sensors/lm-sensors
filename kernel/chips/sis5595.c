@@ -161,8 +161,7 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define DIV_FROM_REG(val) (1 << (val))
 #define DIV_TO_REG(val) ((val)==8?3:(val)==4?2:(val)==1?0:1)
 
-/* For the SIS5595, we need to keep some data in memory. That
-   data is pointed to by sis5595_list[NR]->data. The structure itself is
+/* For the SIS5595, we need to keep some data in memory. It is
    dynamically allocated, at the time when the new sis5595 client is
    allocated. */
 struct sis5595_data {

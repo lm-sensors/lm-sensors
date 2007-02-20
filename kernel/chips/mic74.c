@@ -54,8 +54,7 @@ SENSORS_INSMOD_1(mic74);
 /* Initial values */
 /* All registers are 0, except for MIC74_REG_DATA which is 0xFF */
 
-/* For each registered MIC74, we need to keep some data in memory. That
-   data is pointed to by mic74_list[NR]->data. The structure itself is
+/* For each registered MIC74, we need to keep some data in memory. It is
    dynamically allocated, at the same time when a new mic74 client is
    allocated. */
 struct mic74_data {

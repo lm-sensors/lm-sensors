@@ -112,8 +112,7 @@ SENSORS_INSMOD_2(adm1025, ne1619);
 
 #define ALARMS_FROM_REG(val) (val)
 
-/* For each registered ADM1025, we need to keep some data in memory. That
-   data is pointed to by adm1025_list[NR]->data. The structure itself is
+/* For each registered ADM1025, we need to keep some data in memory. It is
    dynamically allocated, at the same time when a new adm1025 client is
    allocated. */
 struct adm1025_data {

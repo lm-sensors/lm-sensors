@@ -143,8 +143,7 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 #define VID_FROM_REG(val) ((val)==0x1f?0:(val)>=0x10?510-(val)*10:\
                            205-(val)*5)
 
-/* For each registered ADM1024, we need to keep some data in memory. That
-   data is pointed to by adm1024_list[NR]->data. The structure itself is
+/* For each registered ADM1024, we need to keep some data in memory. It is
    dynamically allocated, at the same time when a new adm1024 client is
    allocated. */
 struct adm1024_data {

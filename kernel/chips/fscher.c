@@ -103,8 +103,7 @@ SENSORS_INSMOD_1(fscher);
 
 /* Initial limits */
 
-/* For each registered FSCHER, we need to keep some data in memory. That
-   data is pointed to by fscher_list[NR]->data. The structure itself is
+/* For each registered FSCHER, we need to keep some data in memory. It is
    dynamically allocated, at the same time when a new fscher client is
    allocated. */
 struct fscher_data {

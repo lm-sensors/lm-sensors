@@ -107,8 +107,7 @@ SENSORS_INSMOD_1(fscpos);
 
 /* Initial limits */
 
-/* For each registered FSCPOS, we need to keep some data in memory. That
-   data is pointed to by fscpos_list[NR]->data. The structure itself is
+/* For each registered FSCPOS, we need to keep some data in memory. It is
    dynamically allocated, at the same time when a new fscpos client is
    allocated. */
 struct fscpos_data {

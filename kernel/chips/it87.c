@@ -215,8 +215,7 @@ extern inline u8 DIV_TO_REG(long val)
 }
 #define DIV_FROM_REG(val) (1 << (val))
 
-/* For each registered IT87, we need to keep some data in memory. That
-   data is pointed to by it87_list[NR]->data. The structure itself is
+/* For each registered IT87, we need to keep some data in memory. It is
    dynamically allocated, at the same time when a new it87 client is
    allocated. */
 struct it87_data {
