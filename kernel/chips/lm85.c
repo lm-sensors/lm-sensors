@@ -373,7 +373,6 @@ struct lm85_autofan {
 
 struct lm85_data {
 	struct i2c_client client;
-	struct semaphore lock;
 	int sysctl_id;
 	enum chips type;
 

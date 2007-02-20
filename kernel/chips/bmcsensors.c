@@ -38,7 +38,6 @@
 */
 
 struct bmcsensors_data {
-	struct semaphore lock;
 	int sysctl_id;
 
 	struct semaphore update_lock;

@@ -298,7 +298,6 @@ static int adm1026_scaling[] = {  /* .001 Volts */
 
 struct adm1026_data {
 	struct i2c_client client;
-	struct semaphore lock;
 	int sysctl_id;
 	enum chips type;
 
