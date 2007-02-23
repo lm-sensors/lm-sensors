@@ -4664,6 +4664,34 @@ static sensors_chip_feature smsc47m1_features[] =
     { { 0 }, 0 }
   };
 
+static sensors_chip_feature smsc47m2_features[] =
+  { 
+    { { SENSORS_SMSC47M1_FAN1, "fan1", NOMAP, NOMAP, R },
+                               SMSC47M1_SYSCTL_FAN1, VALUE(2), 0 },
+    { { SENSORS_SMSC47M1_FAN2, "fan2", NOMAP, NOMAP, R },
+                               SMSC47M1_SYSCTL_FAN2, VALUE(2), 0 },
+    { { SENSORS_SMSC47M1_FAN3, "fan3", NOMAP, NOMAP, R },
+                               SMSC47M1_SYSCTL_FAN3, VALUE(2), 0 },
+    { { SENSORS_SMSC47M1_FAN1_MIN, "fan1_min", SENSORS_SMSC47M1_FAN1,
+                                   SENSORS_SMSC47M1_FAN1, RW },
+                                   SMSC47M1_SYSCTL_FAN1, VALUE(1), 0 },
+    { { SENSORS_SMSC47M1_FAN2_MIN, "fan2_min", SENSORS_SMSC47M1_FAN2,
+                                   SENSORS_SMSC47M1_FAN2, RW },
+                                   SMSC47M1_SYSCTL_FAN2, VALUE(1), 0 },
+    { { SENSORS_SMSC47M1_FAN3_MIN, "fan3_min", SENSORS_SMSC47M1_FAN3,
+                                   SENSORS_SMSC47M1_FAN3, RW },
+                                   SMSC47M1_SYSCTL_FAN3, VALUE(1), 0 },
+    { { SENSORS_SMSC47M1_FAN1_DIV, "fan1_div", SENSORS_SMSC47M1_FAN1, NOMAP, RW },
+                                   SMSC47M1_SYSCTL_FAN_DIV, VALUE(1), 0 },
+    { { SENSORS_SMSC47M1_FAN2_DIV, "fan2_div", SENSORS_SMSC47M1_FAN2, NOMAP, RW },
+                                   SMSC47M1_SYSCTL_FAN_DIV, VALUE(2), 0 },
+    { { SENSORS_SMSC47M1_FAN3_DIV, "fan3_div", SENSORS_SMSC47M1_FAN3, NOMAP, RW },
+                                   SMSC47M1_SYSCTL_FAN_DIV, VALUE(3), 0 },
+    { { SENSORS_SMSC47M1_ALARMS, "alarms", NOMAP, NOMAP, R },
+                                 SMSC47M1_SYSCTL_ALARMS, VALUE(1), 0 },
+    { { 0 }, 0 }
+  };
+
 static sensors_chip_feature smsc47m192_features[] =
   { 
     { { SENSORS_SMSC47M192_IN(0), "in0", NOMAP, NOMAP, R }, 
@@ -6005,6 +6033,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_VT1211_PREFIX, vt1211_features }, 
  { SENSORS_SMSC47M192_PREFIX, smsc47m192_features }, 
  { SENSORS_SMSC47M1_PREFIX, smsc47m1_features }, 
+ { SENSORS_SMSC47M2_PREFIX, smsc47m2_features }, 
  { SENSORS_PC87360_PREFIX, pc87360_features }, 
  { SENSORS_PC87363_PREFIX, pc87360_features }, 
  { SENSORS_PC87364_PREFIX, pc87360_features }, 

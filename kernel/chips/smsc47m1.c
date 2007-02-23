@@ -38,7 +38,8 @@ static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
 static unsigned int normal_isa[] = { 0x0000, SENSORS_ISA_END };
 static unsigned int normal_isa_range[] = { SENSORS_ISA_END };
 
-SENSORS_INSMOD_1(smsc47m1);
+SENSORS_INSMOD_2(smsc47m1, smsc47m2);
+static u8 devid;
 
 /* modified from kernel/include/traps.c */
 #define	REG	0x2e	/* The register to read/write */
@@ -87,8 +88,13 @@ superio_exit(void)
  * can do much more besides (device id 0x60).
  * The LPC47M997 is undocumented, but seems to be compatible with
  * the LPC47M192, and has the same device id.
+ * The LPC47M292 (device id 0x6B) is somewhat compatible, but it
+ * supports a 3rd fan, and the pin configuration registers are
+ * unfortunately different.
  */
-#define SMSC_DEVID_MATCH(id) ((id) == 0x51 || (id) == 0x59 || (id) == 0x5F || (id) == 0x60)
+#define SMSC_DEVID_MATCH(id)	((id) == 0x51 || (id) == 0x59 || \
+				 (id) == 0x5F || (id) == 0x60 || \
+				 (id) == 0x6B)
 
 #define SMSC_ACT_REG 0x30
 #define SMSC_BASE_REG 0x60
@@ -99,10 +105,17 @@ superio_exit(void)
 #define SMSC47M1_REG_TPIN2 0x33
 #define SMSC47M1_REG_TPIN1 0x34
 #define SMSC47M1_REG_PPIN(nr) (0x37 - (nr))
-#define SMSC47M1_REG_PWM(nr) (0x55 + (nr))
 #define SMSC47M1_REG_FANDIV 0x58
-#define SMSC47M1_REG_FAN(nr) (0x58 + (nr))
-#define SMSC47M1_REG_FAN_MIN(nr) (0x5a + (nr))
+
+static const u8 SMSC47M1_REG_PWM[3] = { 0x56, 0x57, 0x69 };
+static const u8 SMSC47M1_REG_FAN[3] = { 0x59, 0x5a, 0x6b };
+static const u8 SMSC47M1_REG_FAN_MIN[3] = { 0x5b, 0x5c, 0x6c };
+
+#define SMSC47M2_REG_ALARM6 0x09
+#define SMSC47M2_REG_TPIN3 0x2d
+#define SMSC47M2_REG_TPIN2 0x37
+#define SMSC47M2_REG_TPIN1 0x38
+#define SMSC47M2_REG_FANDIV3 0x6a
 
 static inline u8 MIN_TO_REG(long rpm, int div)
 {
@@ -127,16 +140,17 @@ struct smsc47m1_data {
 	struct i2c_client client;
 	struct semaphore lock;
 	int sysctl_id;
+	enum chips type;
 
 	struct semaphore update_lock;
 	char valid;		/* !=0 if following fields are valid */
 	unsigned long last_updated;	/* In jiffies */
 
-	u8 fan[2];		/* Register value */
-	u8 fan_min[2];		/* Register value */
-	u8 fan_div[2];		/* Register encoding, shifted right */
+	u8 fan[3];		/* Register value */
+	u8 fan_min[3];		/* Register value */
+	u8 fan_div[3];		/* Register encoding, shifted right */
 	u8 alarms;		/* Register encoding */
-	u8 pwm[2];		/* Register value (bit 0 is disable) */
+	u8 pwm[3];		/* Register value (bit 0 is disable) */
 };
 
 
@@ -172,13 +186,16 @@ static struct i2c_driver smsc47m1_driver = {
 /* -- SENSORS SYSCTL START -- */
 #define SMSC47M1_SYSCTL_FAN1 1101   /* Rotations/min */
 #define SMSC47M1_SYSCTL_FAN2 1102
+#define SMSC47M1_SYSCTL_FAN3 1103
 #define SMSC47M1_SYSCTL_PWM1 1401
 #define SMSC47M1_SYSCTL_PWM2 1402
+#define SMSC47M1_SYSCTL_PWM3 1403
 #define SMSC47M1_SYSCTL_FAN_DIV 2000        /* 1, 2, 4 or 8 */
 #define SMSC47M1_SYSCTL_ALARMS 2004    /* bitvector */
 
 #define SMSC47M1_ALARM_FAN1 0x0001
 #define SMSC47M1_ALARM_FAN2 0x0002
+#define SMSC47M1_ALARM_FAN3 0x0004
 
 /* -- SENSORS SYSCTL END -- */
 
@@ -198,6 +215,26 @@ static ctl_table smsc47m1_dir_table_template[] = {
 	{0}
 };
 
+static ctl_table smsc47m2_dir_table_template[] = {
+	{SMSC47M1_SYSCTL_FAN1, "fan1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smsc47m1_fan},
+	{SMSC47M1_SYSCTL_FAN2, "fan2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smsc47m1_fan},
+	{SMSC47M1_SYSCTL_FAN3, "fan3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smsc47m1_fan},
+	{SMSC47M1_SYSCTL_FAN_DIV, "fan_div", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smsc47m1_fan_div},
+	{SMSC47M1_SYSCTL_ALARMS, "alarms", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smsc47m1_alarms},
+	{SMSC47M1_SYSCTL_PWM1, "pwm1", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smsc47m1_pwm},
+	{SMSC47M1_SYSCTL_PWM2, "pwm2", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smsc47m1_pwm},
+	{SMSC47M1_SYSCTL_PWM3, "pwm3", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &smsc47m1_pwm},
+	{0}
+};
+
 static int smsc47m1_attach_adapter(struct i2c_adapter *adapter)
 {
 	return i2c_detect(adapter, &addr_data, smsc47m1_detect);
@@ -208,8 +245,8 @@ static int __init smsc47m1_find(int *address)
 	u16 val;
 
 	superio_enter();
-	val= superio_inb(DEVID);
-	if (!SMSC_DEVID_MATCH(val)) {
+	devid = superio_inb(DEVID);
+	if (!SMSC_DEVID_MATCH(devid)) {
 		superio_exit();
 		return -ENODEV;
 	}
@@ -237,8 +274,8 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 	struct i2c_client *new_client;
 	struct smsc47m1_data *data;
 	int err = 0;
-	const char *type_name = "smsc47m1";
-	const char *client_name = "47M1xx chip";
+	const char *type_name;
+	const char *client_name;
 
 	if (!i2c_is_isa_adapter(adapter)) {
 		return 0;
@@ -263,6 +300,33 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 		return -ENOMEM;
 	}
 
+	switch (devid) {
+	case 0x51:
+		kind = smsc47m1;
+		type_name = "smsc47m1";
+		client_name = "LPC47B27x chip";
+		break;
+	case 0x5F:
+		kind = smsc47m1;
+		type_name = "smsc47m1";
+		client_name = "LPC47M14x chip";
+		break;
+	case 0x60:
+		kind = smsc47m1;
+		type_name = "smsc47m1";
+		client_name = "LPC47M192 chip";
+		break;
+	case 0x6B:
+		kind = smsc47m2;
+		type_name = "smsc47m2";
+		client_name = "LPC47M292 chip";
+		break;
+	default:
+		kind = smsc47m1;
+		type_name = "smsc47m1";
+		client_name = "LPC47M1xx chip";
+	}
+
 	new_client = &data->client;
 	new_client->addr = address;
 	init_MUTEX(&data->lock);
@@ -273,6 +337,7 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 
 	request_region(address, SMSC_EXTENT, "smsc47m1-fans");
 	strcpy(new_client->name, client_name);
+	data->type = kind;
 	data->valid = 0;
 	init_MUTEX(&data->update_lock);
 
@@ -281,7 +346,9 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 
 	if ((i = i2c_register_entry((struct i2c_client *) new_client,
 					type_name,
-					smsc47m1_dir_table_template,
+					kind == smsc47m2 ?
+						smsc47m2_dir_table_template :
+						smsc47m1_dir_table_template,
 					THIS_MODULE)) < 0) {
 		err = i;
 		goto ERROR4;
@@ -338,27 +405,51 @@ static int smsc47m1_write_value(struct i2c_client *client, u8 reg, u8 value)
 
 static void smsc47m1_init_client(struct i2c_client *client)
 {
-	/* configure pins for tach function */
-	smsc47m1_write_value(client, SMSC47M1_REG_TPIN1, 0x05);
-	smsc47m1_write_value(client, SMSC47M1_REG_TPIN2, 0x05);
+	struct smsc47m1_data *data = client->data;
+	u8 reg;
+
+	switch (data->type) {
+	case smsc47m2:
+		/* For the new LPC47M292 chip, I prefer to play it safe and
+		   only report the pin configuration */
+		reg = smsc47m1_read_value(client, SMSC47M2_REG_TPIN1);
+		if ((reg & 0x0d) != 0x09)
+			printk(KERN_NOTICE "smsc47m1: GP35 not configured for "
+			       "fan input, ignore fan1 values\n");
+		reg = smsc47m1_read_value(client, SMSC47M2_REG_TPIN2);
+		if ((reg & 0x0d) != 0x09)
+			printk(KERN_NOTICE "smsc47m1: GP34 not configured for "
+			       "fan input, ignore fan2 values\n");
+		reg = smsc47m1_read_value(client, SMSC47M2_REG_TPIN3);
+		if ((reg & 0x0d) != 0x0d)
+			printk(KERN_NOTICE "smsc47m1: GP33 not configured for "
+			       "fan input, ignore fan3 values\n");
+		break;
+	default:
+		/* configure pins for tach function */
+		smsc47m1_write_value(client, SMSC47M1_REG_TPIN1, 0x05);
+		smsc47m1_write_value(client, SMSC47M1_REG_TPIN2, 0x05);
+	}
 }
 
 static void smsc47m1_update_client(struct i2c_client *client)
 {
 	struct smsc47m1_data *data = client->data;
-	int i;
 
 	down(&data->update_lock);
 
 	if ((jiffies - data->last_updated > HZ + HZ / 2) ||
 	    (jiffies < data->last_updated) || !data->valid) {
-		for (i = 1; i <= 2; i++) {
-			data->fan[i - 1] =
-			    smsc47m1_read_value(client, SMSC47M1_REG_FAN(i));
-			data->fan_min[i - 1] =
-			    smsc47m1_read_value(client, SMSC47M1_REG_FAN_MIN(i));
-			data->pwm[i - 1] =
-			    smsc47m1_read_value(client, SMSC47M1_REG_PWM(i));
+		int i, fan_nr;
+		fan_nr = data->type == smsc47m2 ? 3 : 2;
+
+		for (i = 0; i < fan_nr; i++) {
+			data->fan[i] =
+			    smsc47m1_read_value(client, SMSC47M1_REG_FAN[i]);
+			data->fan_min[i] =
+			    smsc47m1_read_value(client, SMSC47M1_REG_FAN_MIN[i]);
+			data->pwm[i] =
+			    smsc47m1_read_value(client, SMSC47M1_REG_PWM[i]);
 		}
 
 		i = smsc47m1_read_value(client, SMSC47M1_REG_FANDIV);
@@ -368,6 +459,18 @@ static void smsc47m1_update_client(struct i2c_client *client)
 		        smsc47m1_read_value(client, SMSC47M1_REG_ALARM1) >> 6;
 		if(data->alarms)
 			smsc47m1_write_value(client, SMSC47M1_REG_ALARM1, 0xc0);
+
+		if (fan_nr >= 3) {
+			data->fan_div[2] = (smsc47m1_read_value(client,
+					    SMSC47M2_REG_FANDIV3) >> 4) & 0x03;
+			data->alarms |=	(smsc47m1_read_value(client,
+					 SMSC47M2_REG_ALARM6) & 0x40) >> 4;
+			if (data->alarms & 0x04)
+				smsc47m1_write_value(client,
+						     SMSC47M2_REG_ALARM6,
+						     0x40);
+		}
+
 		data->last_updated = jiffies;
 		data->valid = 1;
 	}
@@ -380,26 +483,24 @@ void smsc47m1_fan(struct i2c_client *client, int operation, int ctl_name,
 		 int *nrels_mag, long *results)
 {
 	struct smsc47m1_data *data = client->data;
-	int nr = ctl_name - SMSC47M1_SYSCTL_FAN1 + 1;
+	int nr = ctl_name - SMSC47M1_SYSCTL_FAN1;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		smsc47m1_update_client(client);
-		results[0] = MIN_FROM_REG(data->fan_min[nr - 1],
-					  DIV_FROM_REG(data->fan_div[nr - 1]));
-		results[1] = FAN_FROM_REG(data->fan[nr - 1],
-					  DIV_FROM_REG(data->fan_div[nr - 1]),
-		                          data->fan_min[nr - 1]);
+		results[0] = MIN_FROM_REG(data->fan_min[nr],
+					  DIV_FROM_REG(data->fan_div[nr]));
+		results[1] = FAN_FROM_REG(data->fan[nr],
+					  DIV_FROM_REG(data->fan_div[nr]),
+		                          data->fan_min[nr]);
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->fan_min[nr - 1] = MIN_TO_REG(results[0],
-							   DIV_FROM_REG
-							   (data->
-							    fan_div[nr-1]));
-			smsc47m1_write_value(client, SMSC47M1_REG_FAN_MIN(nr),
-					    data->fan_min[nr - 1]);
+			data->fan_min[nr] = MIN_TO_REG(results[0],
+					    DIV_FROM_REG(data->fan_div[nr]));
+			smsc47m1_write_value(client, SMSC47M1_REG_FAN_MIN[nr],
+					    data->fan_min[nr]);
 		}
 	}
 }
@@ -433,6 +534,13 @@ void smsc47m1_fan_div(struct i2c_client *client, int operation,
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		old = smsc47m1_read_value(client, SMSC47M1_REG_FANDIV);
+		if (*nrels_mag >= 3 && data->type == smsc47m2) {
+			data->fan_div[2] = DIV_TO_REG(results[2]);
+			smsc47m1_write_value(client, SMSC47M2_REG_FANDIV3,
+				(smsc47m1_read_value(client,
+				 SMSC47M2_REG_FANDIV3) & 0xcf)
+				| (data->fan_div[2] << 4));
+		}
 		if (*nrels_mag >= 2) {
 			data->fan_div[1] = DIV_TO_REG(results[1]);
 			old = (old & 0x3f) | (data->fan_div[1] << 6);
@@ -449,31 +557,31 @@ void smsc47m1_pwm(struct i2c_client *client, int operation, int ctl_name,
 		 int *nrels_mag, long *results)
 {
 	struct smsc47m1_data *data = client->data;
-	int nr = 1 + ctl_name - SMSC47M1_SYSCTL_PWM1;
+	int nr = ctl_name - SMSC47M1_SYSCTL_PWM1;
 
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		smsc47m1_update_client(client);
-		results[0] = PWM_FROM_REG(data->pwm[nr - 1]);
-		results[1] = !(data->pwm[nr - 1] & 0x01);
+		results[0] = PWM_FROM_REG(data->pwm[nr]);
+		results[1] = !(data->pwm[nr] & 0x01);
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->pwm[nr - 1] = smsc47m1_read_value(client,
-					    SMSC47M1_REG_PWM(nr)) & 0x81;
-			data->pwm[nr - 1] |= PWM_TO_REG(results[0]);
+			data->pwm[nr] = smsc47m1_read_value(client,
+					    SMSC47M1_REG_PWM[nr]) & 0x81;
+			data->pwm[nr] |= PWM_TO_REG(results[0]);
 			if (*nrels_mag >= 2) {
 				if (results[1]) {
 					/* enable PWM */
-					data->pwm[nr - 1] &= 0xfe;
+					data->pwm[nr] &= 0xfe;
 				} else {
 					/* disable PWM */
-					data->pwm[nr - 1] |= 0x01;
+					data->pwm[nr] |= 0x01;
 				}
 			}
-			smsc47m1_write_value(client, SMSC47M1_REG_PWM(nr),
-					     data->pwm[nr - 1]);
+			smsc47m1_write_value(client, SMSC47M1_REG_PWM[nr],
+					     data->pwm[nr]);
 		}
 	}
 }

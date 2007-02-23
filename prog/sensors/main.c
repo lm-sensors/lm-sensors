@@ -391,6 +391,7 @@ struct match matches[] = {
 	{ "vt1211", print_vt1211 },
 	{ "smsc47m192", print_smsc47m192 },
 	{ "smsc47m1", print_smsc47m1 },
+	{ "smsc47m2", print_smsc47m1 },
 	{ "pc87360", print_pc87360 },
 	{ "pc87363", print_pc87360 },
 	{ "pc87364", print_pc87364 },

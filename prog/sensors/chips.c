@@ -4595,6 +4595,7 @@ void print_smsc47m1(const sensors_chip_name *name)
   char *label;
   double cur, min, div;
   int alarms, valid, i;
+  int is_m2 = !strcmp(name->prefix, "smsc47m2");
 
   if (!sensors_get_feature(*name,SENSORS_SMSC47M1_ALARMS,&cur)) 
     alarms = cur + 0.5;
@@ -4603,7 +4604,7 @@ void print_smsc47m1(const sensors_chip_name *name)
     alarms = 0;
   }
 
-  for (i=0; i<2; i++) { /* 2 fans */
+  for (i = 0; i < (is_m2 ? 3 : 2); i++) { /* 2 or 3 fans */
     if (!sensors_get_label_and_valid(*name, SENSORS_SMSC47M1_FAN1+i, &label, &valid)
      && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1+i, &cur)
      && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1_DIV+i, &div)

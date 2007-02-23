@@ -5,6 +5,7 @@ SVN HEAD
   Library: Do not skip i2c adapters with only a class device and no
             physical device. This change is required to survive the
             planned struct class_dev removal from future 2.6 kernels.
+           Add support for the SMSC LPC47M292 fans (prefix smsc47m2)
   Man page i2cdetect.8: Scanning range can be restricted
   Module bmcsensors: Fix debugging messages
   Module i2c-ali1563: Improve the status messages (2.6 backport)
@@ -14,7 +15,9 @@ SVN HEAD
   Module i2c-nforce2: Drop unused reference to pci_dev (2.6 backport)
   Module i2c-piix4: Add ATI SB600 support (2.6 backport)
   Module i2c-viapro: Add CX700 support (2.6 backport)
+  Module smsc47m1: Add SMSC LPC47M292 support
   Programs i2cdetect, i2cdump, isadump: Flush output in real time
+  Program sensors: Add smsc47m2 support (fans)
   Program sensors-detect: Only probe relevant I2C addresses
                           Drop ARP-capable device detection
                           Add Maxim MAX6655/MAX6656 detection
