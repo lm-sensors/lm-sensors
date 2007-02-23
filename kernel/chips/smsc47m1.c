@@ -138,7 +138,6 @@ static inline u8 MIN_TO_REG(long rpm, int div)
 
 struct smsc47m1_data {
 	struct i2c_client client;
-	struct semaphore lock;
 	int sysctl_id;
 	enum chips type;
 
@@ -158,10 +157,6 @@ static int smsc47m1_attach_adapter(struct i2c_adapter *adapter);
 static int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int smsc47m1_detach_client(struct i2c_client *client);
-
-static int smsc47m1_read_value(struct i2c_client *client, u8 register);
-static int smsc47m1_write_value(struct i2c_client *client, u8 register,
-			       u8 value);
 static void smsc47m1_update_client(struct i2c_client *client);
 static void smsc47m1_init_client(struct i2c_client *client);
 
@@ -329,7 +324,6 @@ int smsc47m1_detect(struct i2c_adapter *adapter, int address,
 
 	new_client = &data->client;
 	new_client->addr = address;
-	init_MUTEX(&data->lock);
 	new_client->data = data;
 	new_client->adapter = adapter;
 	new_client->driver = &smsc47m1_driver;
@@ -385,22 +379,15 @@ static int smsc47m1_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-static int smsc47m1_read_value(struct i2c_client *client, u8 reg)
+static inline int smsc47m1_read_value(struct i2c_client *client, u8 reg)
 {
-	int res;
-
-	down(&(((struct smsc47m1_data *) (client->data))->lock));
-	res = inb_p(client->addr + reg);
-	up(&(((struct smsc47m1_data *) (client->data))->lock));
-	return res;
+	return inb_p(client->addr + reg);
 }
 
-static int smsc47m1_write_value(struct i2c_client *client, u8 reg, u8 value)
+static inline void smsc47m1_write_value(struct i2c_client *client, u8 reg,
+		u8 value)
 {
-	down(&(((struct smsc47m1_data *) (client->data))->lock));
 	outb_p(value, client->addr + reg);
-	up(&(((struct smsc47m1_data *) (client->data))->lock));
-	return 0;
 }
 
 static void smsc47m1_init_client(struct i2c_client *client)
