@@ -537,14 +537,14 @@ $revision =~ s/ \([^()]*\)//;
        vendid => 0x10de,
        devid => 0x03eb,
        procid => "nVidia Corporation nForce4 SMBus (MCP61)",
-       driver => "to-be-tested",
+       driver => "i2c-nforce2",
        match => qr/^SMBus nForce2 adapter at /,
      },
      {
        vendid => 0x10de,
        devid => 0x0446,
        procid => "nVidia Corporation nForce4 SMBus (MCP65)",
-       driver => "to-be-tested",
+       driver => "i2c-nforce2",
        match => qr/^SMBus nForce2 adapter at /,
      },
      {
