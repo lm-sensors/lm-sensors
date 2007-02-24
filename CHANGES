@@ -32,6 +32,7 @@ SVN HEAD
                           Add Dallas DS75 detection
                           Add SMSC LPC47M292 detection
                           Add nVidia MCP61 and MCP65 detection
+                          Fix ADM1028 detection
 
 
 2.10.2 (20070115)
