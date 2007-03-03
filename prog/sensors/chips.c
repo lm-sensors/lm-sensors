@@ -2896,7 +2896,7 @@ void print_w83627ehf(const sensors_chip_name *name)
 {
   char *label;
   int i, valid, num_in;
-  double cur, min, div, max, alarm, over, hyst;
+  double cur, min, fdiv, max, alarm, over, hyst;
 
   if (!strcmp(name->prefix, "w83627dhg"))
     num_in = 9;
@@ -2929,8 +2929,8 @@ void print_w83627ehf(const sensors_chip_name *name)
       if (valid) {
         print_label(label,10);
         printf("%4.0f RPM  (min = %4.0f RPM", cur, min);
-        if (!sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_DIV+i, &div))
-          printf(", div = %1.0f", div);
+        if (!sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_DIV+i, &fdiv))
+          printf(", div = %1.0f", fdiv);
         printf(")");
         if (!sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_ALARM+i,
                                  &alarm) && alarm)
@@ -4593,7 +4593,7 @@ void print_vt1211(const sensors_chip_name *name)
 void print_smsc47m1(const sensors_chip_name *name)
 {
   char *label;
-  double cur, min, div;
+  double cur, min, fdiv;
   int alarms, valid, i;
   int is_m2 = !strcmp(name->prefix, "smsc47m2");
 
@@ -4607,12 +4607,12 @@ void print_smsc47m1(const sensors_chip_name *name)
   for (i = 0; i < (is_m2 ? 3 : 2); i++) { /* 2 or 3 fans */
     if (!sensors_get_label_and_valid(*name, SENSORS_SMSC47M1_FAN1+i, &label, &valid)
      && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1+i, &cur)
-     && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1_DIV+i, &div)
+     && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1_DIV+i, &fdiv)
      && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1_MIN+i, &min)) {
       if (valid) {
         print_label(label, 10);
         printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
-               cur, min, div, alarms&(SMSC47M1_ALARM_FAN1<<i) ?
+               cur, min, fdiv, alarms&(SMSC47M1_ALARM_FAN1<<i) ?
                "ALARM" : "");
       }
     }
@@ -5543,7 +5543,7 @@ void print_lm63(const sensors_chip_name *name)
 void print_adm1031(const sensors_chip_name *name)
 {
   char *label;
-  double cur, high, low, crit, div;
+  double cur, high, low, crit, fdiv;
   int valid, alarms, i;
   int is_1031 = !strncmp("adm1031", name->prefix, 7);
 
@@ -5559,10 +5559,10 @@ void print_adm1031(const sensors_chip_name *name)
 				       &label, &valid)
 	  && !sensors_get_feature(*name, SENSORS_ADM1031_FAN1+i*10, &cur)
 	  && !sensors_get_feature(*name, SENSORS_ADM1031_FAN1_MIN+i*10, &low)
-	  && !sensors_get_feature(*name, SENSORS_ADM1031_FAN1_DIV+i*10, &div)) {
+	  && !sensors_get_feature(*name, SENSORS_ADM1031_FAN1_DIV+i*10, &fdiv)) {
 	  if (valid) {
 	      print_label(label, 10);
-	      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)", cur, low, div);
+	      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)", cur, low, fdiv);
 	      printf(" %s\n",
 		     alarms&(ADM1031_ALARM_FAN1_FLT<<(i*8))?"FAULT":
 		     alarms&(ADM1031_ALARM_FAN1_MIN<<(i*8))?"ALARM":"");
@@ -5741,7 +5741,7 @@ void print_max6650(const sensors_chip_name *name)
   static const struct
   {
     int tag;
-    char *name;
+    const char *name;
   }
   tach_list[] =
   {
@@ -5818,17 +5818,17 @@ static void print_asb100_fan(const sensors_chip_name *name, int alarm,
 	int fan, int fan_div, int fan_min)
 {
   char *label;
-  double cur, div, min;
+  double cur, fdiv, min;
   int valid;
 
   if (!sensors_get_label_and_valid(*name,fan,&label,&valid) &&
       !sensors_get_feature(*name,fan,&cur) &&
-      !sensors_get_feature(*name,fan_div,&div) &&
+      !sensors_get_feature(*name,fan_div, &fdiv) &&
       !sensors_get_feature(*name,fan_min,&min)) {
     if (valid) {
       print_label(label,10);
       printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)              %s\n",
-           cur, min, div, alarm ? "ALARM" : "");
+           cur, min, fdiv, alarm ? "ALARM" : "");
     }
   } else
     printf("ERROR: Can't get FAN data! (0x%04x)\n", fan);
