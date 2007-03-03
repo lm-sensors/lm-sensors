@@ -18,6 +18,7 @@ SVN HEAD
   Module smsc47m1: Add SMSC LPC47M292 support
                    Get rid of a useless semaphore (2.6 backport)
   Programs i2cdetect, i2cdump, isadump: Flush output in real time
+  Program i2cdump: Cleaner output in SMBus block read mode
   Program sensors: Add smsc47m2 support (fans)
                    Fix -A option (hide adapter name) on error
   Program sensors-detect: Only probe relevant I2C addresses
