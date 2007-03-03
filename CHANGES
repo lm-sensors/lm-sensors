@@ -19,6 +19,7 @@ SVN HEAD
                    Get rid of a useless semaphore (2.6 backport)
   Programs i2cdetect, i2cdump, isadump: Flush output in real time
   Program sensors: Add smsc47m2 support (fans)
+                   Fix -A option (hide adapter name) on error
   Program sensors-detect: Only probe relevant I2C addresses
                           Drop ARP-capable device detection
                           Add Maxim MAX6655/MAX6656 detection
