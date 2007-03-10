@@ -1625,6 +1625,12 @@ $chip_kern26_w83791d = {
     chips =>
     [
       {
+	name => "Nat. Semi. PC8374L Super IO Sensors",
+	driver => "to-be-written",
+	devid => 0xf1,
+	logdev => 0x08,
+      },
+      {
 	name => "Nat. Semi. PC87351 Super IO Fan Sensors",
 	driver => "to-be-written",
 	devid => 0xe2,
