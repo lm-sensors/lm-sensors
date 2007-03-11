@@ -1818,6 +1818,12 @@ $chip_kern26_w83791d = {
         logdev => 0x08,
       },
       {
+        name => "SMSC SCH5504-NS Super IO",
+        # No datasheet
+        driver => "not-a-sensor",
+        devid => 0x79,
+      },
+      {
         name => "SMSC LPC47M584-NC Super IO",
         # No datasheet
         devid => 0x76,

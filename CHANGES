@@ -40,6 +40,7 @@ SVN HEAD
                           Add nVidia MCP61 and MCP65 detection
                           Fix ADM1028 detection
                           Add Nat. Semi. PC8347L Super-I/O detection
+                          Add SMSC SCH5504 Super-I/O detection (no sensors)
 
 
 2.10.2 (20070115)
