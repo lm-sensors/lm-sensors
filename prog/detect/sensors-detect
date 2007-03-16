@@ -1497,7 +1497,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "Maxim MAX6900",
-       driver => "to-be-written",
+       driver => "not-a-sensor",
        i2c_addrs => [0x50],
        i2c_detect => sub { max6900_detect(@_); },
      },
