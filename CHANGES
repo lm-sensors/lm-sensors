@@ -10,6 +10,7 @@ SVN HEAD
 	    is gone
            Compile with -D_REENTRANT
            Fix support of Linux 2.6's max6650 driver
+           Fix max1619 support
   Man page i2cdetect.8: Scanning range can be restricted
   Module bmcsensors: Fix debugging messages
   Module i2c-ali1563: Improve the status messages (2.6 backport)
