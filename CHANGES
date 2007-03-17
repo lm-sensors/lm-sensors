@@ -43,6 +43,7 @@ SVN HEAD
                           Fix ADM1028 detection
                           Add Nat. Semi. PC8347L Super-I/O detection
                           Add SMSC SCH5504 Super-I/O detection (no sensors)
+                          Make the LM78 and W83781D detection safer
 
 
 2.10.2 (20070115)

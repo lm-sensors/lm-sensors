@@ -3286,8 +3286,8 @@ sub lm78_isa_detect
   return if inb ($addr + 2) != $val or inb ($addr + 3) != $val or 
             inb ($addr + 7) != $val;
 
-  $val = inb($addr + 5) & 0x7f;
-  outb($addr + 5, ~$val & 0xff);
+  $val = inb($addr + 5);
+  outb($addr + 5, ~$val & 0x7f);
   if ((inb ($addr+5) & 0x7f) != (~ $val & 0x7f)) {
     outb($addr+5,$val);
     return;
@@ -4250,8 +4250,8 @@ sub w83781d_isa_detect
   return if inb ($addr + 2) != $val or inb ($addr + 3) != $val or
             inb ($addr + 7) != $val;
 
-  $val = inb($addr + 5) & 0x7f;
-  outb($addr+5, ~$val & 0xff);
+  $val = inb($addr + 5);
+  outb($addr+5, ~$val & 0x7f);
   if ((inb ($addr+5) & 0x7f) != (~ $val & 0x7f)) {
     outb($addr+5,$val);
     return;
