@@ -9,6 +9,7 @@ SVN HEAD
            Recognize i2c-isa-based devices as such even after class_dev
 	    is gone
            Compile with -D_REENTRANT
+           Fix support of Linux 2.6's max6650 driver
   Man page i2cdetect.8: Scanning range can be restricted
   Module bmcsensors: Fix debugging messages
   Module i2c-ali1563: Improve the status messages (2.6 backport)

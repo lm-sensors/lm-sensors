@@ -5690,8 +5690,10 @@ static sensors_chip_feature max6650_features[] =
                                    MAX6650_SYSCTL_FAN3, VALUE(1), 0 },
     { { SENSORS_MAX6650_FAN4_TACH, "fan4", NOMAP, NOMAP, R }, 
                                    MAX6650_SYSCTL_FAN4, VALUE(1), 0 },
-    { { SENSORS_MAX6650_SPEED, "speed", NOMAP, NOMAP, RW }, 
-                               MAX6650_SYSCTL_SPEED, VALUE(1), 0 },
+    { { SENSORS_MAX6650_SPEED, "speed", SENSORS_MAX6650_FAN1_TACH,
+                               SENSORS_MAX6650_FAN1_TACH, RW }, 
+                               MAX6650_SYSCTL_SPEED, VALUE(1), 0,
+                               "fan1_target", 0 },
     { { 0 }, 0 }
   };
 
