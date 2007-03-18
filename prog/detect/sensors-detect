@@ -3299,11 +3299,11 @@ sub lm78_isa_detect
                 ($chip == 1 and $reg == 0x40) or
                 ($chip == 2 and ($reg & 0xfe) == 0xc0);
 
-  # Explicitely prevent misdetection of Winbond chips
+  # Explicitly prevent misdetection of Winbond chips
   $reg = &$readproc(0x4f);
   return if $reg == 0xa3 || $reg == 0x5c;
 
-  # Explicitely prevent misdetection of ITE chips
+  # Explicitly prevent misdetection of ITE chips
   $reg = &$readproc(0x58);
   return if $reg == 0x90;
 
