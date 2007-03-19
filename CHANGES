@@ -1,7 +1,7 @@
 lm_sensors CHANGES file
 -----------------------
 
-SVN HEAD
+2.10.3 (20070319)
   Library: Do not skip i2c adapters with only a class device and no
             physical device. This change is required to survive the
             planned struct class_dev removal from future 2.6 kernels.
