@@ -4,6 +4,7 @@ lm_sensors CHANGES file
 SVN HEAD
   Program isadump: Detect when address bit 7 is a busy flag
   Program sensors: Drop ddcmon and eeprom support
+  Program sensors-detect: Stop Super-I/O probe after first family success
 
 
 2.10.3 (20070319)

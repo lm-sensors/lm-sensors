@@ -1571,50 +1571,10 @@ $chip_kern26_w83791d = {
 #      generic probing if we fail to recognize the chip.
 #  enter: The password sequence to write to the address register
 #  chips: Array of chips
+# The order of families matters, because we stop as soon as one family
+# succeeds. So we have to list families with shorter password sequences
+# first.
 @superio_ids = (
-  {
-    family => "ITE",
-    guess => 0x290,
-    enter =>
-    {
-      0x2e => [0x87, 0x01, 0x55, 0x55],
-      0x4e => [0x87, 0x01, 0x55, 0xaa],
-    },
-    chips =>
-    [
-      {
-	name => "ITE IT8702F Super IO Sensors",
-	driver => "to-be-written",
-	devid => 0x8702,
-	logdev => 0x04,
-      },
-      {
-	name => "ITE IT8705F Super IO Sensors",
-	driver => "it87",
-	devid => 0x8705,
-	logdev => 0x04,
-      },
-      {
-	name => "ITE IT8712F Super IO Sensors",
-	driver => "it87",
-	devid => 0x8712,
-	logdev => 0x04,
-	alias_detect => sub { ite_alias_detect(0, @_); },
-      },
-      {
-	name => "ITE IT8716F Super IO Sensors",
-	driver => "it87",
-	devid => 0x8716,
-	logdev => 0x04,
-      },
-      {
-	name => "ITE IT8718F Super IO Sensors",
-	driver => "it87",
-	devid => 0x8718,
-	logdev => 0x04,
-      },
-    ],
-  },
   {
     family => "National Semiconductor",
     enter =>
@@ -1941,6 +1901,49 @@ $chip_kern26_w83791d = {
 	name => "ITE IT8708F Super IO",
 	driver => "not-a-sensor",
 	devid => 0x8708,
+      },
+    ],
+  },
+  {
+    family => "ITE",
+    guess => 0x290,
+    enter =>
+    {
+      0x2e => [0x87, 0x01, 0x55, 0x55],
+      0x4e => [0x87, 0x01, 0x55, 0xaa],
+    },
+    chips =>
+    [
+      {
+	name => "ITE IT8702F Super IO Sensors",
+	driver => "to-be-written",
+	devid => 0x8702,
+	logdev => 0x04,
+      },
+      {
+	name => "ITE IT8705F Super IO Sensors",
+	driver => "it87",
+	devid => 0x8705,
+	logdev => 0x04,
+      },
+      {
+	name => "ITE IT8712F Super IO Sensors",
+	driver => "it87",
+	devid => 0x8712,
+	logdev => 0x04,
+	alias_detect => sub { ite_alias_detect(0, @_); },
+      },
+      {
+	name => "ITE IT8716F Super IO Sensors",
+	driver => "it87",
+	devid => 0x8716,
+	logdev => 0x04,
+      },
+      {
+	name => "ITE IT8718F Super IO Sensors",
+	driver => "it87",
+	devid => 0x8718,
+	logdev => 0x04,
       },
     ],
   },
@@ -3147,6 +3150,8 @@ sub scan_superio
   printf("Probing for Super-I/O at 0x\%x/0x\%x\n", $addrreg, $datareg);
 
   $| = 1;
+# reset state to avoid false positives
+  exit_superio($addrreg, $datareg);
   FAMILY: 
   foreach my $family (@superio_ids) {
     printf("\%-60s", "Trying family `$family->{family}'... ");
@@ -3182,6 +3187,7 @@ sub scan_superio
     }
 
     exit_superio($addrreg, $datareg);
+    last FAMILY;
   }
   $| = 0;
 }
