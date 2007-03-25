@@ -2,6 +2,7 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  Library: Clean up pwm symbol names translation
   Program isadump: Detect when address bit 7 is a busy flag
   Program sensors: Drop ddcmon and eeprom support
   Program sensors-detect: Stop Super-I/O probe after first family success

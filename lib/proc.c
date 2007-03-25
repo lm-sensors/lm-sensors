@@ -247,7 +247,7 @@ struct match {
 
 static const struct match matches[] = {
 	{ "beeps", "beep_mask", 0 },
-	{ "pwm", "fan1_pwm", 0 },
+	{ "pwm", "pwm1", 0, "fan1_pwm" },
 	{ "vid", "cpu0_vid", INMAG, "in0_ref" },
 	{ "remote_temp", "temp2_input", TEMPMAG },
 	{ "remote_temp_hyst", "temp2_max_hyst", TEMPMAG },
@@ -259,14 +259,6 @@ static const struct match matches[] = {
 	{ "temp_over", "temp1_max", TEMPMAG },
 	{ "temp_high", "temp1_max", TEMPMAG },
 	{ "temp_crit", "temp1_crit", TEMPMAG },
-	{ "pwm1", "pwm1", 0, "fan1_pwm" },
-	{ "pwm2", "pwm2", 0, "fan2_pwm" },
-	{ "pwm3", "pwm3", 0, "fan3_pwm" },
-	{ "pwm4", "pwm4", 0, "fan4_pwm" },
-	{ "pwm1_enable", "pwm1_enable", 0, "fan1_pwm_enable" },
-	{ "pwm2_enable", "pwm2_enable", 0, "fan2_pwm_enable" },
-	{ "pwm3_enable", "pwm3_enable", 0, "fan3_pwm_enable" },
-	{ "pwm4_enable", "pwm4_enable", 0, "fan4_pwm_enable" },
 	{ NULL, NULL }
 };
 
@@ -357,13 +349,15 @@ static int getsysname(const sensors_chip_feature *feature, char *sysname,
 		return 0;
 	}
 	if(sscanf(name, "pwm%d%c", &num, &check) == 1) {
-		sprintf(sysname, "fan%d_pwm", num);
+		strcpy(sysname, name);
 		*sysmag = 0;
+		sprintf(altsysname, "fan%d_pwm", num);
 		return 0;
 	}
 	if(sscanf(name, "pwm%d_enabl%c%c", &num, &last, &check) == 2 && last == 'e') {
-		sprintf(sysname, "fan%d_pwm_enable", num);
+		strcpy(sysname, name);
 		*sysmag = 0;
+		sprintf(altsysname, "fan%d_pwm_enable", num);
 		return 0;
 	}
 
