@@ -382,8 +382,6 @@ struct match matches[] = {
 	{ "it8712", print_it87 },
 	{ "it8716", print_it87 },
 	{ "it8718", print_it87 },
-	{ "ddcmon", print_ddcmon },
-	{ "eeprom", print_eeprom },
 	{ "fscpos", print_fscpos },
 	{ "fscscy", print_fscscy },
 	{ "fscher", print_fscher },
