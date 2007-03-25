@@ -1,6 +1,10 @@
 lm_sensors CHANGES file
 -----------------------
 
+SVN HEAD
+  Program isadump: Detect when address bit 7 is a busy flag
+
+
 2.10.3 (20070319)
   Library: Do not skip i2c adapters with only a class device and no
             physical device. This change is required to survive the
