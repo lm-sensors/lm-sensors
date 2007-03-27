@@ -1425,7 +1425,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "SMSC DME1737",
-       driver => "to-be-written",
+       driver => "dme1737",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { dme1737_detect(@_); },
      },
@@ -1558,6 +1558,8 @@ $chip_kern26_w83791d = {
 #      Put in "not-a-sensor" if the chip doesn't have hardware monitoring
 #      capabilities (listing such chips here removes the need of manual
 #      lookup when people report them).
+#      Put in exactly "via-smbus-only" if this is a Super-I/O chip whose
+#      hardware monitoring registers can only be accessed via the SMBus.
 #  devid: The device ID(s) we have to match (base device)
 #  devid_mask (optional): Bitmask to apply before checking the device ID
 #  logdev: The logical device containing the sensors
@@ -1791,8 +1793,16 @@ $chip_kern26_w83791d = {
       {
 	name => "SMSC DME1737 Super IO",
 	# Hardware monitoring features are accessed on the SMBus
-	driver => "not-a-sensor",
+	driver => "via-smbus-only",
 	devid => 0x78,
+      },
+      {
+	name => "SMSC DME1737 Super IO",
+	# The DME1737 shows up twice in this list because it can return either
+	# 0x78 or 0x77 as its device ID.
+	# Hardware monitoring features are accessed on the SMBus
+	driver => "via-smbus-only",
+	devid => 0x77,
       },
     ],
   },
@@ -3108,6 +3118,10 @@ sub probe_superio($$$)
   }
   if ($chip->{driver} eq "not-a-sensor") {
     print "\n    (no hardware monitoring capabilities)\n";
+    return;
+  }
+  if ($chip->{driver} eq "via-smbus-only") {
+    print "\n    (hardware monitoring capabilities accessible via SMBus only)\n";
     return;
   }
 
@@ -4845,17 +4859,15 @@ sub smsc47m192_detect
 # Registers used:
 #   0x3E: Manufacturer ID
 #   0x3F: Version/Stepping
-#   0x40: Configuration (2 reserved bits)
-#   0x42: Interrupt Status 2 (1 reserved bit)
-#   0x43: VID (2 reserved bits)
+#   0x73: Read-only test register (4 test bits)
+#   0x8A: Read-only test register (7 test bits)
 sub dme1737_detect
 {
   my ($file, $addr) = @_;
-  return unless i2c_smbus_read_byte_data($file, 0x3E) == 0x55
+  return unless i2c_smbus_read_byte_data($file, 0x3E) == 0x5c
            and (i2c_smbus_read_byte_data($file, 0x3F) & 0xF8) == 0x88
-           and (i2c_smbus_read_byte_data($file, 0x40) & 0xC4) == 0x04
-           and (i2c_smbus_read_byte_data($file, 0x42) & 0x02) == 0x00
-           and (i2c_smbus_read_byte_data($file, 0x43) & 0xC0) == 0x00;
+           and (i2c_smbus_read_byte_data($file, 0x73) & 0x0F) == 0x09
+           and (i2c_smbus_read_byte_data($file, 0x8A) & 0x7F) == 0x4D;
   return ($addr == 0x2e ? 6 : 5);
 }
 

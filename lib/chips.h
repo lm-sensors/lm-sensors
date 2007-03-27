@@ -2262,4 +2262,34 @@
 #define SENSORS_CORETEMP_TEMP1_CRIT		0x02 /* R */
 #define SENSORS_CORETEMP_TEMP1_CRIT_ALARM	0x03 /* R */
 
+/* DME1737 */
+
+#define SENSORS_DME1737_PREFIX "dme1737"
+
+/* in n from 0 to 6 */
+#define SENSORS_DME1737_IN(n)			(0x01 + (n)) /* R */
+#define SENSORS_DME1737_IN_MIN(n)		(0x11 + (n)) /* RW */
+#define SENSORS_DME1737_IN_MAX(n)		(0x21 + (n)) /* RW */
+#define SENSORS_DME1737_IN_ALARM(n)		(0x31 + (n)) /* R */
+
+/* temp n from 1 to 3*/
+#define SENSORS_DME1737_TEMP(n)			(0x41 + (n)) /* R */
+#define SENSORS_DME1737_TEMP_MIN(n)		(0x51 + (n)) /* RW */
+#define SENSORS_DME1737_TEMP_MAX(n)		(0x61 + (n)) /* RW */
+#define SENSORS_DME1737_TEMP_ALARM(n)		(0x71 + (n)) /* R */
+#define SENSORS_DME1737_TEMP_FAULT(n)		(0x81 + (n)) /* R */
+
+/* fan n from 1 to 6 */
+#define SENSORS_DME1737_FAN(n)			(0x91 + (n)) /* R */
+#define SENSORS_DME1737_FAN_MIN(n)		(0xa1 + (n)) /* RW */
+#define SENSORS_DME1737_FAN_ALARM(n)		(0xb1 + (n)) /* R */
+
+/* pwm n from 1 to 3 and 5 to 6 */
+#define SENSORS_DME1737_PWM(n)			(0xc1 + (n)) /* RW */
+#define SENSORS_DME1737_PWM_ENABLE(n)		(0xd1 + (n)) /* RW */
+#define SENSORS_DME1737_PWM_FREQ(n)		(0xe1 + (n)) /* RW */
+
+#define SENSORS_DME1737_VID			(0xf0) /* R */
+#define SENSORS_DME1737_VRM			(0xf1) /* RW */
+
 #endif /* def LIB_SENSORS_CHIPS_H */

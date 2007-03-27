@@ -2813,3 +2813,70 @@ chip "k8temp-*"
    label temp2 "Core0 Temp"
    label temp3 "Core1 Temp"
    label temp4 "Core1 Temp"
+
+
+#
+# Sample configuration for the SMSC DME1737 and ASUS A8000
+#
+chip "dme1737-*"
+
+# Voltage inputs
+   label in0   "V5stby"
+   label in1   "Vccp"
+   label in2   "V3.3"
+   label in3   "V5"
+   label in4   "V12"
+   label in5   "V3.3stby"
+   label in6   "Vbat"
+
+# Temperature inputs
+   label temp1   "RD1 Temp"
+   label temp2   "Int Temp"
+   label temp3   "CPU Temp"
+
+# Fan inputs
+   label fan1   "CPU_Fan"
+   label fan2   "Fan2"
+   label fan3   "Fan3"
+   label fan4   "Fan4"
+   label fan5   "Fan5"
+   label fan6   "Fan6"
+
+# PWM Outputs
+   label pwm1   "CPU_PWM"
+   label pwm2   "Fan2_PWM"
+   label pwm3   "Fan3_PWM"
+   label pwm5   "Fan5_PWM"
+   label pwm6   "Fan6_PWM"
+
+# Set voltage limits
+#   set in0_min   5.0 * 0.95
+#   set in0_max   5.0 * 1.05
+#   set in1_min   1.4 * 0.95
+#   set in1_max   1.4 * 1.05
+#   set in2_min   3.3 * 0.95
+#   set in2_max   3.3 * 1.05
+#   set in3_min   5.0 * 0.95
+#   set in3_max   5.0 * 1.05
+#   set in4_min  12.0 * 0.95
+#   set in4_max  12.0 * 1.05
+#   set in5_min   3.3 * 0.95
+#   set in5_max   3.3 * 1.05
+#   set in6_min   3.0 * 0.95
+#   set in6_max   3.0 * 1.05
+
+# Set Temp Limits
+#   set temp1_min 10
+#   set temp1_max 75
+#   set temp2_min 10
+#   set temp2_max 75
+#   set temp3_min 10
+#   set temp3_max 75
+
+# Set Fan limits
+#   set fan1_min 1000
+#   set fan2_min 1000
+#   set fan3_min 1000
+#   set fan4_min 1000
+#   set fan5_min 1000
+#   set fan6_min 1000

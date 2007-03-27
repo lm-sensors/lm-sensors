@@ -2,10 +2,14 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  File sensors.conf.eg: Add a dme1737 section
   Library: Clean up pwm symbol names translation
+           Add dme1737 support
   Program isadump: Detect when address bit 7 is a busy flag
   Program sensors: Drop ddcmon and eeprom support
+                   Add dme1737 support
   Program sensors-detect: Stop Super-I/O probe after first family success
+                          Fix SMSC DME1737 detection
 
 
 2.10.3 (20070319)

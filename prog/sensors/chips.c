@@ -5926,6 +5926,121 @@ void print_coretemp(const sensors_chip_name *name)
   free(label);
 }
 
+static void print_dme1737_in(const sensors_chip_name *name, int i)
+{
+  char *label;
+  double cur, min, max, alarm;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_DME1737_IN(i), &label,
+				   &valid) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_IN(i), &cur) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_IN_MIN(i), &min) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_IN_MAX(i), &max) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_IN_ALARM(i), &alarm)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)  %s\n",
+	     cur, min, max, alarm ? "ALARM" : "");
+    }
+  } else {
+    printf("ERROR: Can't get in%d data!\n", i);
+  }
+  free(label);
+}
+
+static void print_dme1737_temp(const sensors_chip_name *name, int i)
+{
+  char *label;
+  double cur, min, max, alarm, fault;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_DME1737_TEMP(i), &label,
+				   &valid) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_TEMP(i), &cur) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_MIN(i), &min) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_MAX(i), &max) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_ALARM(i), &alarm) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_FAULT(i), &fault)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, max, min, MINMAX, 0, 0);
+      printf("%s  %s\n", fault ? "FAULT" : "", alarm ? "ALARM" : "");
+    }
+  } else {
+    printf("ERROR: Can't get temp%d data!\n", i);
+  }
+  free(label);
+}
+
+static void print_dme1737_fan(const sensors_chip_name *name, int i)
+{
+  char *label;
+  double cur, min, alarm;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_DME1737_FAN(i), &label,
+				   &valid) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_FAN(i), &cur) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_FAN_MIN(i), &min) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_FAN_ALARM(i), &alarm)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%4.0f RPM  (min = %4.0f RPM)  %s\n", 
+	     cur, min, alarm ? "ALARM" : "");
+    }
+  } else {
+    printf("ERROR: Can't get fan%d data!\n", i);
+  }
+  free(label);
+}
+
+static void print_dme1737_pwm(const sensors_chip_name *name, int i)
+{
+  char *label;
+  double cur, enable, freq;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_DME1737_PWM(i), &label,
+				   &valid) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_PWM(i), &cur) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_PWM_ENABLE(i), &enable) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_PWM_FREQ(i), &freq)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%4.0f      (enable = %1.0f, freq = %6.0f Hz)\n", cur, enable, freq);
+    }
+  } else {
+    printf("ERROR: Can't get pwm%d data!\n", i);
+  }
+  free(label);
+}
+
+void print_dme1737(const sensors_chip_name *name)
+{
+  int i;
+
+  for (i = 0; i < 7; i++) {
+    print_dme1737_in(name, i);
+  }
+
+  for (i = 1; i < 4; i++) {
+    print_dme1737_temp(name, i);
+  }
+
+  for (i = 1; i < 7; i++) {
+    print_dme1737_fan(name, i);
+  }
+
+  for (i = 1; i < 7; i++) {
+    if (i == 4)
+      continue;
+    print_dme1737_pwm(name, i);
+  }
+
+  print_vid_info(name, SENSORS_DME1737_VID, SENSORS_DME1737_VRM);
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;
