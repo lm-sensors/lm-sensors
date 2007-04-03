@@ -8,6 +8,7 @@ i2cdetect \- detect I2C chips
 .RI [ -a ]
 .RI [ -q | -r ]
 .I i2cbus
+.RI [ "first last" ]
 .br
 .B i2cdetect
 .I -F
@@ -24,6 +25,8 @@ i2cdetect is a userspace program to scan an I2C bus for devices. It
 outputs a table with the list of detected devices on the specified bus.
 \fIi2cbus\fR indicates the number of the I2C bus to be scanned, and
 should correspond to one of the busses listed by \fIi2cdetect -l\fR.
+The optional parameters \fIfirst\fR and \fIlast\fR restrict the scanning
+range (default: from 0x03 to 0x77).
 .PP
 i2cdetect can also be used to query the functionalities of an I2C bus
 (see option \fB-F\fP.)

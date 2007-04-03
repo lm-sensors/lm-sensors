@@ -47,7 +47,7 @@ At least the following I2C/SMBus adapters are supported:
   AMD 756, 766, 768 and 8111
   AMD 8111 SMBus 2.0
   Apple Hydra (used on some PPC machines)
-  ATI IXP200, IXP300, IXP400
+  ATI IXP200, IXP300, IXP400, SB600
   DEC 21272/21274 (Tsunami/Typhoon - on Alpha boards)
   Intel ICH/ICH0/ICH2/ICH3/ICH4/ICH5/ICH6/ICH7/ICH8/ICH9 (82801xx)
   Intel 6300ESB, 631xESB/632xESB (ESB2)
@@ -60,7 +60,7 @@ At least the following I2C/SMBus adapters are supported:
   SMSC Victory66
   3Dfx Voodoo 3 and Banshee
   VIA Technologies VT82C586B, VT82C596A/B, VT82C686A/B, VT8231,
-                   VT8233, VT8233A, VT8235, VT8237R/A and VT8251
+                   VT8233, VT8233A, VT8235, VT8237R/A, VT8251, CX700
 
 
 At least the following hardware sensor chips are supported:

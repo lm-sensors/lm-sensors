@@ -16,6 +16,10 @@ Supported chips:
 	http://www.smsc.com/main/datasheets/47m14x.pdf
 	http://www.smsc.com/main/tools/discontinued/47m15x.pdf
 	http://www.smsc.com/main/datasheets/47m192.pdf
+  * SMSC LPC47M292
+    Prefix: 'smsc47m2'
+    Addresses scanned: none, address read from Super I/O config space
+    Datasheet: Not public
   * SMSC LPC47M997
     Addresses scanned: none, address read from Super I/O config space
     Prefix: 'smsc47m1'
@@ -41,9 +45,9 @@ Description
 The Standard Microsystems Corporation (SMSC) 47M1xx Super I/O chips
 contain monitoring and PWM control circuitry for two fans.
 
-The 47M15x and 47M192 chips contain a full 'hardware monitoring block'
-in addition to the fan monitoring and control. The hardware monitoring
-block is not supported by the driver.
+The LPC47M15x, LPC47M192 and LPC47M292 chips contain a full 'hardware
+monitoring block' in addition to the fan monitoring and control. The
+hardware monitoring block is not supported by the driver.
 
 No documentation is available for the 47M997, but it has the same device
 ID as the 47M15x and 47M192 chips and seems to be compatible therewith.

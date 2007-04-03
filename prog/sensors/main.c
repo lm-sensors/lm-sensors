@@ -382,8 +382,6 @@ struct match matches[] = {
 	{ "it8712", print_it87 },
 	{ "it8716", print_it87 },
 	{ "it8718", print_it87 },
-	{ "ddcmon", print_ddcmon },
-	{ "eeprom", print_eeprom },
 	{ "fscpos", print_fscpos },
 	{ "fscscy", print_fscscy },
 	{ "fscher", print_fscher },
@@ -391,6 +389,7 @@ struct match matches[] = {
 	{ "vt1211", print_vt1211 },
 	{ "smsc47m192", print_smsc47m192 },
 	{ "smsc47m1", print_smsc47m1 },
+	{ "smsc47m2", print_smsc47m1 },
 	{ "pc87360", print_pc87360 },
 	{ "pc87363", print_pc87360 },
 	{ "pc87364", print_pc87364 },
@@ -422,12 +421,12 @@ struct match matches[] = {
  	{ "abituguru", print_abituguru },
  	{ "k8temp", print_k8temp },
  	{ "coretemp", print_coretemp },
+ 	{ "dme1737", print_dme1737 },
 	{ NULL, NULL }
 };
 
 void do_a_print(sensors_chip_name name)
 {
-  const char *adap;
   struct match *m;
 
   /* do we know how to display it? */
@@ -439,11 +438,13 @@ void do_a_print(sensors_chip_name name)
     return;
 
   printf("%s\n",sprintf_chip_name(name));
-  adap = sensors_get_adapter_name(name.bus);
-  if (adap && !hide_adapter)
-    printf("Adapter: %s\n",adap);
-  if (!adap)
-    fprintf(stderr, "Can't get adapter name for bus %d\n", name.bus);
+  if (!hide_adapter) {
+    const char *adap = sensors_get_adapter_name(name.bus);
+    if (adap)
+      printf("Adapter: %s\n", adap);
+    else
+      fprintf(stderr, "Can't get adapter name for bus %d\n", name.bus);
+  }
   if (do_unknown)
     print_unknown_chip(&name);
   else {

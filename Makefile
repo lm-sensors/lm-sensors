@@ -279,7 +279,7 @@ LIBCPPFLAGS := $(ALL_CPPFLAGS)
 ifdef SYSFS_SUPPORT
 LIBCPPFLAGS := $(LIBCPPFLAGS) -DSYSFS_SUPPORT
 endif
-LIBCFLAGS := -fpic $(ALL_CFLAGS)
+LIBCFLAGS := -fpic -D_REENTRANT $(ALL_CFLAGS)
 
 .PHONY: all user clean install user_install uninstall user_uninstall version package
 

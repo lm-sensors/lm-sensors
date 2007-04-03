@@ -233,8 +233,7 @@ enum maxi_type { cristal, cognac, ashaki, nba };
 enum sensor_type { fan, temp, vid, pll, lcd, alarm };
 
 /* For each registered MaxiLife controller, we need to keep some data in
-   memory. That data is pointed to by maxi_list[NR]->data. The structure
-   itself is dynamically allocated, at the same time when a new MaxiLife
+   memory. It is dynamically allocated, at the same time when a new MaxiLife
    client is allocated. We assume MaxiLife will only be present on the
    SMBus and not on the ISA bus. */
 struct maxi_data {

@@ -47,16 +47,6 @@
 unsigned long isa_io_base = 0; /* XXX for now */
 #endif /* __powerpc__ */
 
-char hexchar(int i)
-{
-	if ((i >= 0) && (i <= 9))
-		return '0' + i;
-	else if (i <= 15)
-		return 'a' - 10 + i;
-	else
-		return 'X';
-}
-
 void help(void)
 {
 	fprintf(stderr,
@@ -298,13 +288,18 @@ int main(int argc, char *argv[])
 			superio_write_key(addrreg, enter_key);
 
 		for (j = 0; j < 16; j++) {
+			fflush(stdout);
 			if (flat) {
 				res = inb(addrreg + i + j);
 			} else {	
 				outb(i+j, addrreg);
+				if (i+j == 0 && (inb(addrreg) & 0x80)) {
+					/* Bit 7 appears to be a busy flag */
+					range = 128;
+				}
 				res = inb(datareg);
 			}
-			printf("%c%c ", hexchar(res/16), hexchar(res%16));
+			printf("%02x ", res);
 		}
 		printf("\n");
 	}

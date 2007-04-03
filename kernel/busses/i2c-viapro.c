@@ -4,7 +4,7 @@
     Copyright (c) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>, Kyösti Mälkki <kmalkki@cc.hut.fi>,
     Mark D. Studebaker <mdsxyz123@yahoo.com>
-    Copyright (C) 2005  Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2005 - 2007  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
    VT8237R            0x3227             yes
    VT8237A            0x3337             yes
    VT8251             0x3287             yes
+   CX700              0x8324             yes
 
    Note: we assume there can only be one device, with one SMBus interface.
 */
@@ -63,13 +64,17 @@
 #ifndef PCI_DEVICE_ID_VIA_8237
 #define PCI_DEVICE_ID_VIA_8237	0x3227
 #endif
-/* 8237A is undefined as for the kernel 2.4.33 */
+/* 8237A is undefined */
 #ifndef PCI_DEVICE_ID_VIA_8237A
 #define PCI_DEVICE_ID_VIA_8237A	0x3337
 #endif
-/* 8251 is undefined as for the kernel 2.4.33 */
+/* 8251 is undefined */
 #ifndef PCI_DEVICE_ID_VIA_8251
 #define PCI_DEVICE_ID_VIA_8251	0x3287
+#endif
+/* CX700 is undefined */
+#ifndef PCI_DEVICE_ID_VIA_CX700
+#define PCI_DEVICE_ID_VIA_CX700	0x8324
 #endif
 
 #define SMBBA1		0x90
@@ -418,6 +423,7 @@ found:
 	dev_dbg(pdev, "VT596_smba = 0x%X\n", vt596_smba);
 
 	switch (id->device) {
+	case PCI_DEVICE_ID_VIA_CX700:
 	case PCI_DEVICE_ID_VIA_8251:
 	case PCI_DEVICE_ID_VIA_8237:
 	case PCI_DEVICE_ID_VIA_8237A:
@@ -512,6 +518,13 @@ static struct pci_device_id vt596_ids[] __initdata = {
 	{
 		.vendor		= PCI_VENDOR_ID_VIA,
 		.device 	= PCI_DEVICE_ID_VIA_8251,
+		.subvendor	= PCI_ANY_ID,
+		.subdevice	= PCI_ANY_ID,
+		.driver_data	= SMBBA3
+	},
+	{
+		.vendor		= PCI_VENDOR_ID_VIA,
+		.device 	= PCI_DEVICE_ID_VIA_CX700,
 		.subvendor	= PCI_ANY_ID,
 		.subdevice	= PCI_ANY_ID,
 		.driver_data	= SMBBA3

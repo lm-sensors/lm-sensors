@@ -220,6 +220,8 @@ smsc47m1
 	smsc47m15x	-	-	2	2	no	yes (LPC)
 	smsc47m192	-	-	2	2	no	yes (LPC)
 	smsc47m997	-	-	2	2	no	yes (LPC)
+	(reported as a "smsc47m2")
+	smsc47m292	-	-	3	3	no	yes (LPC)
 
 thmc50
 	adm1022		3	2	-	1 dac	yes	no

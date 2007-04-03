@@ -4,7 +4,7 @@ Sensors chip driver for MAXIM MAX6650 / MAX6651 fan controllers
 Chip notes
 ----------
 
-The MAX6551 is a fan controller. It has two distinct functions:
+The MAX6651 is a fan controller. It has two distinct functions:
 
 1) Speed control, with feedback, for a single fan. The code can write
    to a register requesting that the fan run at a certain speed, and the
@@ -14,7 +14,7 @@ The MAX6551 is a fan controller. It has two distinct functions:
 2) Speed measurement (tachometers) for up to four fans, including the 
    controlled one.
 
-The MAX6550 is similar but only has one measurement tachometer.
+The MAX6650 is similar but only has one measurement tachometer.
 
 Both chips have a few general purpose i/o pins, some of which can be 
 configured to have special functions. At the time of writing an overview 
@@ -22,7 +22,7 @@ of the chip, with links to the datasheet, can be seen at:
 
      http://www.maxim-ic.com/quick_view2.cfm/qv_pk/2296/ln/en
 
-If that has moved searching for MAX6550 from Maxim's home page should 
+If that has moved searching for MAX6650 from Maxim's home page should 
 work.
 
 Driver state
@@ -79,9 +79,9 @@ Bugs
    configuration dynamically instead of assuming that some other code has 
    done it.
 
- o It does not differentiate between a MAX6550 and a MAX6551, as I can
-   see no obvious way to do this. It has only been tested with a MAX6551 
-   so if anyone gets a board with a MAX6550 to test with maybe something 
+ o It does not differentiate between a MAX6650 and a MAX6651, as I can
+   see no obvious way to do this. It has only been tested with a MAX6651 
+   so if anyone gets a board with a MAX6650 to test with maybe something 
    will be revealed, such as the three missing tachometer registers
    returning all ones or something. (OK, so maybe I should have called
    this driver max6651, and ignored the max6650 totally...)
@@ -96,13 +96,13 @@ The module will autodetect the presence of a max6650 or max6651 at any
 of the four possible I2C addresses for these devices. There is no ID 
 register, but there are several registers with all zero bits at the 
 high end. The driver checks that all of these are in fact zero before
-declaring the chip to be a MAX6550/1.
+declaring the chip to be a MAX6650/1.
 
 sensors-detect
 --------------
 
 Support for MAX6650/1 has been added to sensors-detect. It has been
-tested as correctly detecting a MAX6551 at I2C address 0x1B. Like the
+tested as correctly detecting a MAX6651 at I2C address 0x1B. Like the
 driver, it cannot yet distinguish a MAX6650 and MAX6651.
 
 prog/sensors

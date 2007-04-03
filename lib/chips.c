@@ -4664,6 +4664,34 @@ static sensors_chip_feature smsc47m1_features[] =
     { { 0 }, 0 }
   };
 
+static sensors_chip_feature smsc47m2_features[] =
+  { 
+    { { SENSORS_SMSC47M1_FAN1, "fan1", NOMAP, NOMAP, R },
+                               SMSC47M1_SYSCTL_FAN1, VALUE(2), 0 },
+    { { SENSORS_SMSC47M1_FAN2, "fan2", NOMAP, NOMAP, R },
+                               SMSC47M1_SYSCTL_FAN2, VALUE(2), 0 },
+    { { SENSORS_SMSC47M1_FAN3, "fan3", NOMAP, NOMAP, R },
+                               SMSC47M1_SYSCTL_FAN3, VALUE(2), 0 },
+    { { SENSORS_SMSC47M1_FAN1_MIN, "fan1_min", SENSORS_SMSC47M1_FAN1,
+                                   SENSORS_SMSC47M1_FAN1, RW },
+                                   SMSC47M1_SYSCTL_FAN1, VALUE(1), 0 },
+    { { SENSORS_SMSC47M1_FAN2_MIN, "fan2_min", SENSORS_SMSC47M1_FAN2,
+                                   SENSORS_SMSC47M1_FAN2, RW },
+                                   SMSC47M1_SYSCTL_FAN2, VALUE(1), 0 },
+    { { SENSORS_SMSC47M1_FAN3_MIN, "fan3_min", SENSORS_SMSC47M1_FAN3,
+                                   SENSORS_SMSC47M1_FAN3, RW },
+                                   SMSC47M1_SYSCTL_FAN3, VALUE(1), 0 },
+    { { SENSORS_SMSC47M1_FAN1_DIV, "fan1_div", SENSORS_SMSC47M1_FAN1, NOMAP, RW },
+                                   SMSC47M1_SYSCTL_FAN_DIV, VALUE(1), 0 },
+    { { SENSORS_SMSC47M1_FAN2_DIV, "fan2_div", SENSORS_SMSC47M1_FAN2, NOMAP, RW },
+                                   SMSC47M1_SYSCTL_FAN_DIV, VALUE(2), 0 },
+    { { SENSORS_SMSC47M1_FAN3_DIV, "fan3_div", SENSORS_SMSC47M1_FAN3, NOMAP, RW },
+                                   SMSC47M1_SYSCTL_FAN_DIV, VALUE(3), 0 },
+    { { SENSORS_SMSC47M1_ALARMS, "alarms", NOMAP, NOMAP, R },
+                                 SMSC47M1_SYSCTL_ALARMS, VALUE(1), 0 },
+    { { 0 }, 0 }
+  };
+
 static sensors_chip_feature smsc47m192_features[] =
   { 
     { { SENSORS_SMSC47M192_IN(0), "in0", NOMAP, NOMAP, R }, 
@@ -5638,13 +5666,17 @@ static sensors_chip_feature max1619_features[] =
                                     MAX1619_SYSCTL_LOCAL_TEMP, VALUE(1), 0 },
     { { SENSORS_MAX1619_REMOTE_TEMP, "temp2", NOMAP, NOMAP, R }, 
                                      MAX1619_SYSCTL_REMOTE_TEMP, VALUE(3), 0 },
-    { { SENSORS_MAX1619_REMOTE_HIGH, "temp2_min", NOMAP, NOMAP, RW }, 
-                                     MAX1619_SYSCTL_REMOTE_TEMP, VALUE(2), 0 },
-    { { SENSORS_MAX1619_REMOTE_LOW, "temp2_max", NOMAP, NOMAP, RW }, 
-                                    MAX1619_SYSCTL_REMOTE_TEMP, VALUE(1), 0 },
-    { { SENSORS_MAX1619_REMOTE_MAX, "temp2_crit", NOMAP, NOMAP, RW }, 
+    { { SENSORS_MAX1619_REMOTE_LOW, "temp2_min", SENSORS_MAX1619_REMOTE_TEMP,
+                                    SENSORS_MAX1619_REMOTE_TEMP, RW }, 
+                                    MAX1619_SYSCTL_REMOTE_TEMP, VALUE(2), 0 },
+    { { SENSORS_MAX1619_REMOTE_HIGH, "temp2_max", SENSORS_MAX1619_REMOTE_TEMP,
+                                     SENSORS_MAX1619_REMOTE_TEMP, RW }, 
+                                     MAX1619_SYSCTL_REMOTE_TEMP, VALUE(1), 0 },
+    { { SENSORS_MAX1619_REMOTE_MAX, "temp2_crit", SENSORS_MAX1619_REMOTE_TEMP,
+                                    SENSORS_MAX1619_REMOTE_TEMP, RW }, 
                                     MAX1619_SYSCTL_REMOTE_CRIT, VALUE(1), 0 },
-    { { SENSORS_MAX1619_REMOTE_HYST, "temp2_hyst", NOMAP, NOMAP, RW }, 
+    { { SENSORS_MAX1619_REMOTE_HYST, "temp2_hyst", SENSORS_MAX1619_REMOTE_TEMP,
+                                     SENSORS_MAX1619_REMOTE_TEMP, RW }, 
                                      MAX1619_SYSCTL_REMOTE_CRIT, VALUE(2), 0, 
                                      "temp2_crit_hyst", 3 },
     { { SENSORS_MAX1619_ALARMS, "alarms", NOMAP, NOMAP, R }, 
@@ -5662,8 +5694,10 @@ static sensors_chip_feature max6650_features[] =
                                    MAX6650_SYSCTL_FAN3, VALUE(1), 0 },
     { { SENSORS_MAX6650_FAN4_TACH, "fan4", NOMAP, NOMAP, R }, 
                                    MAX6650_SYSCTL_FAN4, VALUE(1), 0 },
-    { { SENSORS_MAX6650_SPEED, "speed", NOMAP, NOMAP, RW }, 
-                               MAX6650_SYSCTL_SPEED, VALUE(1), 0 },
+    { { SENSORS_MAX6650_SPEED, "speed", SENSORS_MAX6650_FAN1_TACH,
+                               SENSORS_MAX6650_FAN1_TACH, RW }, 
+                               MAX6650_SYSCTL_SPEED, VALUE(1), 0,
+                               "fan1_target", 0 },
     { { 0 }, 0 }
   };
 
@@ -5931,6 +5965,89 @@ static sensors_chip_feature coretemp_features[] =
     { { 0 }, 0 }
   };
 
+#define SENSORS_DME1737_IN_FEATURES(nr) \
+	{ { SENSORS_DME1737_IN(nr), "in" #nr, \
+		NOMAP, NOMAP, R }, \
+		NOSYSCTL, VALUE(3), 3 }, \
+	{ { SENSORS_DME1737_IN_MIN(nr), "in" #nr "_min", \
+		SENSORS_DME1737_IN(nr), SENSORS_DME1737_IN(nr), RW }, \
+		NOSYSCTL, VALUE(1), 3 }, \
+	{ { SENSORS_DME1737_IN_MAX(nr), "in" #nr "_max", \
+		SENSORS_DME1737_IN(nr), SENSORS_DME1737_IN(nr), RW }, \
+		NOSYSCTL, VALUE(2), 3 }, \
+	{ { SENSORS_DME1737_IN_ALARM(nr), "in" #nr "_alarm", \
+		SENSORS_DME1737_IN(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(1), 0 }
+
+#define SENSORS_DME1737_TEMP_FEATURES(nr) \
+	{ { SENSORS_DME1737_TEMP(nr), "temp" #nr, \
+		NOMAP, NOMAP, R }, \
+		NOSYSCTL, VALUE(3), 3 }, \
+	{ { SENSORS_DME1737_TEMP_MIN(nr), "temp" #nr "_min", \
+		SENSORS_DME1737_TEMP(nr), SENSORS_DME1737_TEMP(nr), RW }, \
+		NOSYSCTL, VALUE(2), 3 }, \
+	{ { SENSORS_DME1737_TEMP_MAX(nr), "temp" #nr "_max", \
+		SENSORS_DME1737_TEMP(nr), SENSORS_DME1737_TEMP(nr), RW }, \
+		NOSYSCTL, VALUE(1), 3 }, \
+	{ { SENSORS_DME1737_TEMP_ALARM(nr), "temp" #nr "_alarm", \
+		SENSORS_DME1737_TEMP(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(1), 0 }, \
+	{ { SENSORS_DME1737_TEMP_FAULT(nr), "temp" #nr "_fault", \
+		SENSORS_DME1737_TEMP(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(2), 0 }
+
+#define SENSORS_DME1737_FAN_FEATURES(nr) \
+	{ { SENSORS_DME1737_FAN(nr), "fan" #nr, \
+		NOMAP, NOMAP, R }, \
+		NOSYSCTL, VALUE(2), 0 }, \
+	{ { SENSORS_DME1737_FAN_MIN(nr), "fan" #nr "_min", \
+		SENSORS_DME1737_FAN(nr), SENSORS_DME1737_FAN(nr), RW }, \
+		NOSYSCTL, VALUE(1), 0 }, \
+	{ { SENSORS_DME1737_FAN_ALARM(nr), "fan" #nr "_alarm", \
+		SENSORS_DME1737_FAN(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(1), 0 }
+
+#define SENSORS_DME1737_PWM_FEATURES(nr) \
+	{ { SENSORS_DME1737_PWM(nr), "pwm" #nr, \
+		NOMAP, NOMAP, RW }, \
+		NOSYSCTL, VALUE(1), 0 }, \
+	{ { SENSORS_DME1737_PWM_ENABLE(nr), "pwm" #nr "_enable", \
+		SENSORS_DME1737_PWM(nr), SENSORS_DME1737_PWM(nr), RW }, \
+		NOSYSCTL, VALUE(2), 0 }, \
+	{ { SENSORS_DME1737_PWM_FREQ(nr), "pwm" #nr "_freq", \
+		SENSORS_DME1737_PWM(nr), SENSORS_DME1737_PWM(nr), RW }, \
+		NOSYSCTL, VALUE(3), 0 }
+
+static sensors_chip_feature dme1737_features[] =
+{
+	SENSORS_DME1737_IN_FEATURES(0),
+	SENSORS_DME1737_IN_FEATURES(1),
+	SENSORS_DME1737_IN_FEATURES(2),
+	SENSORS_DME1737_IN_FEATURES(3),
+	SENSORS_DME1737_IN_FEATURES(4),
+	SENSORS_DME1737_IN_FEATURES(5),
+	SENSORS_DME1737_IN_FEATURES(6),
+	SENSORS_DME1737_TEMP_FEATURES(1),
+	SENSORS_DME1737_TEMP_FEATURES(2),
+	SENSORS_DME1737_TEMP_FEATURES(3),
+	SENSORS_DME1737_FAN_FEATURES(1),
+	SENSORS_DME1737_FAN_FEATURES(2),
+	SENSORS_DME1737_FAN_FEATURES(3),
+	SENSORS_DME1737_FAN_FEATURES(4),
+	SENSORS_DME1737_FAN_FEATURES(5),
+	SENSORS_DME1737_FAN_FEATURES(6),
+	SENSORS_DME1737_PWM_FEATURES(1),
+	SENSORS_DME1737_PWM_FEATURES(2),
+	SENSORS_DME1737_PWM_FEATURES(3),
+	SENSORS_DME1737_PWM_FEATURES(5),
+	SENSORS_DME1737_PWM_FEATURES(6),
+	{ { SENSORS_DME1737_VID, "cpu0_vid", NOMAP, NOMAP, R },
+		NOSYSCTL, VALUE(1), 3 },
+	{ { SENSORS_DME1737_VRM, "vrm", NOMAP, NOMAP, RW },
+		NOSYSCTL, VALUE(1), 1 },
+	{ { 0 }, 0 }
+};
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -6005,6 +6122,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_VT1211_PREFIX, vt1211_features }, 
  { SENSORS_SMSC47M192_PREFIX, smsc47m192_features }, 
  { SENSORS_SMSC47M1_PREFIX, smsc47m1_features }, 
+ { SENSORS_SMSC47M2_PREFIX, smsc47m2_features }, 
  { SENSORS_PC87360_PREFIX, pc87360_features }, 
  { SENSORS_PC87363_PREFIX, pc87360_features }, 
  { SENSORS_PC87364_PREFIX, pc87360_features }, 
@@ -6042,5 +6160,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_ABITUGURU_PREFIX, abituguru_features },
  { SENSORS_K8TEMP_PREFIX, k8temp_features },
  { SENSORS_CORETEMP_PREFIX, coretemp_features },
+ { SENSORS_DME1737_PREFIX, dme1737_features },
  { 0 }
 };

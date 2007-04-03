@@ -234,7 +234,7 @@ sub pwmdisable($)
        else
          { die("$dir/$p : $!"); }
 
-       my $enable = "$dir/$p/pwm/pwm_enable";
+       my $enable = "$dir/${p}_enable";
        if (-f $enable)
          {
            if (open(F, ">$enable"))
@@ -243,7 +243,7 @@ sub pwmdisable($)
                close(F);
              }
            else
-             { die("$dir/$p/pwm/pwm_enable : $!"); }
+             { die("$enable : $!"); }
          }
      }
    else
@@ -267,7 +267,7 @@ sub pwmenable($)
 
    if ($sysfs == 1)
      {
-       my $enable = "$dir/$p/pwm/pwm_enable";
+       my $enable = "$dir/${p}_enable";
        if (-f $enable)
          {
            if (open(F, ">$enable"))
@@ -276,7 +276,7 @@ sub pwmenable($)
                close(F);
              }
            else
-             { die("$dir/$p : $!\n"); }
+             { die("$enable : $!\n"); }
          }
      }
    else

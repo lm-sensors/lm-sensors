@@ -246,8 +246,7 @@ static inline u8 DIV_TO_REG(long val, enum chips type)
    bad. Quite a lot of bookkeeping is done. A real driver can often cut
    some corners. */
 
-/* For each registered W83781D, we need to keep some data in memory. That
-   data is pointed to by w83781d_list[NR]->data. The structure itself is
+/* For each registered W83781D, we need to keep some data in memory. It is
    dynamically allocated, at the same time when a new w83781d client is
    allocated. */
 struct w83781d_data {

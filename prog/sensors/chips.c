@@ -2896,7 +2896,7 @@ void print_w83627ehf(const sensors_chip_name *name)
 {
   char *label;
   int i, valid, num_in;
-  double cur, min, div, max, alarm, over, hyst;
+  double cur, min, fdiv, max, alarm, over, hyst;
 
   if (!strcmp(name->prefix, "w83627dhg"))
     num_in = 9;
@@ -2929,8 +2929,8 @@ void print_w83627ehf(const sensors_chip_name *name)
       if (valid) {
         print_label(label,10);
         printf("%4.0f RPM  (min = %4.0f RPM", cur, min);
-        if (!sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_DIV+i, &div))
-          printf(", div = %1.0f", div);
+        if (!sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_DIV+i, &fdiv))
+          printf(", div = %1.0f", fdiv);
         printf(")");
         if (!sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_ALARM+i,
                                  &alarm) && alarm)
@@ -3214,417 +3214,6 @@ void print_maxilife(const sensors_chip_name *name)
    } else
       printf("ERROR: Can't get VID4 data!\n");
    free(label);
-}
-
-void print_ddcmon(const sensors_chip_name *name)
-{
-	char  *label;
-	double a, b, c;
-	int    valid, i;
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_MAN_ID, &label, &valid)
-    && !sensors_get_feature(*name, SENSORS_DDCMON_MAN_ID, &a)) {
-      if (valid) {
-         i = (int) a;	
-         print_label(label, 24);
-         printf("%c%c%c\n",
-          ((i >> 10) & 0x1f) + 'A' - 1, ((i >> 5) & 0x1f) + 'A' - 1,
-          (i & 0x1f) + 'A' - 1);
-      }
-   } else
-      printf("ERROR: data 1\n");
-   free(label);
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_PROD_ID, &label, &valid)
-    && !sensors_get_feature(*name, SENSORS_DDCMON_PROD_ID, &a)) {
-      if (valid) {
-         i = (int) a;	
-         print_label(label, 24);
-         printf("0x%04X\n", i);
-      }
-   } else
-      printf("ERROR: data 2\n");
-   free(label);
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_SERIAL, &label,&valid) &&
-       !sensors_get_feature(*name, SENSORS_DDCMON_SERIAL, &a)) {
-      if (valid) {
-         print_label(label, 24);
-         printf("%d\n", (int) a);
-      }
-   } else
-      printf("ERROR: data 3\n");
-   free(label);
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_YEAR, &label, &valid)
-    && !sensors_get_feature(*name, SENSORS_DDCMON_YEAR, &a)
-    && !sensors_get_feature(*name, SENSORS_DDCMON_WEEK, &b)) {
-      if (valid) {
-         print_label(label, 24);
-         printf("%d-W%d\n", (int) a, (int) b);
-      }
-   } else
-      printf("ERROR: data 4\n");
-   free(label);
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_EDID_VER, &label, &valid)
-    && !sensors_get_feature(*name, SENSORS_DDCMON_EDID_VER, &a)
-    && !sensors_get_feature(*name, SENSORS_DDCMON_EDID_REV, &b)) {
-      if (valid) {
-         print_label(label, 24);
-         printf("%d.%d\n", (int) a, (int) b);
-      }
-   } else
-      printf("ERROR: data 5\n");
-   free(label);
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_VERSIZE, &label,&valid) &&
-       !sensors_get_feature(*name, SENSORS_DDCMON_VERSIZE, &a) &&
-       !sensors_get_feature(*name, SENSORS_DDCMON_HORSIZE, &b)) {
-      if (valid) {
-         print_label(label, 24);
-         printf("%dx%d\n", (int) a, (int) b);
-      }
-   } else
-      printf("ERROR: data 6\n");
-   free(label);
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_GAMMA, &label, &valid)
-    && !sensors_get_feature(*name, SENSORS_DDCMON_GAMMA, &a)) {
-      if (valid) {
-         print_label(label, 24);
-         printf("%.02f\n", a);
-      }
-   } else
-      printf("ERROR: data 7\n");
-   free(label);
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_DPMS, &label, &valid)
-    && !sensors_get_feature(*name, SENSORS_DDCMON_DPMS, &a)) {
-      if (valid) {
-         i = (int) a;
-         print_label(label, 24);
-         if (i & 0xe0) {
-            printf("%s%s%s%s%s\n",
-               i & 0x20 ? "Active Off" : "",
-               (i & 0x40) && (i & 0x20) ? ", ": "",
-               i & 0x40 ? "Suspend" : "",
-               (i & 0x80) && (i & 0x60) ? ", ": "",
-               i & 0x80 ? "Standby" : "");
-         } else {
-            printf("None supported\n");
-         }
-      }
-   } else
-      printf("ERROR: data 8\n");
-   free(label);
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_TIMINGS, &label,&valid) &&
-       !sensors_get_feature(*name, SENSORS_DDCMON_TIMINGS, &a)) {
-      if (valid) {
-         i = (int) a;
-         if (i & 0x03) { /* 720x400 */
-            print_label(label, 24);
-            printf("720x400 @ %s%s%s Hz\n",
-               i & 0x01 ? "70" : "",
-               (i & 0x02) && (i & 0x01) ? "/" : "",
-               i & 0x02 ? "88" : "");
-         }
-         if (i & 0x3c) { /* 640x480 */
-            print_label(label, 24);
-            printf("640x480 @ %s%s%s%s%s%s%s Hz\n",
-               i & 0x04 ? "60" : "",
-               (i & 0x08) && (i & 0x04) ? "/" : "",
-               i & 0x08 ? "67" : "",
-               (i & 0x10) && (i & 0x0c) ? "/" : "",
-               i & 0x10 ? "72" : "",
-               (i & 0x20) && (i & 0x1c) ? "/" : "",
-               i & 0x20 ? "75" : "");
-         }
-         i >>= 6;
-         if (i & 0x0f) { /* 800x600 */
-            print_label(label, 24);
-            printf("800x600 @ %s%s%s%s%s%s%s Hz\n",
-               i & 0x01 ? "56" : "",
-               (i & 0x02) && (i & 0x01) ? "/" : "",
-               i & 0x02 ? "60" : "",
-               (i & 0x04) && (i & 0x03) ? "/" : "",
-               i & 0x04 ? "72" : "",
-               (i & 0x08) && (i & 0x07) ? "/" : "",
-               i & 0x08 ? "75" : "");
-         }
-         if (i & 0x10) { /* 832x624 */
-            print_label(label, 24);
-            printf("832x624 @ 75 Hz\n");
-         }
-         i >>= 5;
-         if (i & 0x0f) { /* 1024x768 */
-            print_label(label, 24);
-            printf("1024x768 @ %s%s%s%s%s%s%s Hz\n",
-               i & 0x01 ? "87i" : "",
-               (i & 0x02) && (i & 0x01) ? "/" : "",
-               i & 0x02 ? "60" : "",
-               (i & 0x04) && (i & 0x03) ? "/" : "",
-               i & 0x04 ? "70" : "",
-               (i & 0x08) && (i & 0x07) ? "/" : "",
-               i & 0x08 ? "75" : "");
-         }
-         if (i & 0x100) { /* 1152x870 */
-            print_label(label, 24);
-            printf("1152x870 @ 75 Hz\n");
-         }
-         if (i & 0x10) { /* 1280x1024 */
-            print_label(label, 24);
-            printf("1280x1024 @ 75 Hz\n");
-         }
-      }
-   } else
-      printf("ERROR: data 9\n");
-   free(label);
-
-   for(i = 0; i < 8; i++) {
-      if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_TIMING1_HOR + i * 3, &label, &valid)
-       && !sensors_get_feature(*name, SENSORS_DDCMON_TIMING1_HOR + i * 3, &a)
-       && !sensors_get_feature(*name, SENSORS_DDCMON_TIMING1_VER + i * 3, &b)
-       && !sensors_get_feature(*name, SENSORS_DDCMON_TIMING1_REF + i * 3, &c)) {
-         if (valid && ((int) a) != 0) {
-            print_label(label, 24);
-            printf("%dx%d @ %d Hz\n", (int) a, (int) b, (int) c);
-         }
-      } else
-         printf("ERROR: data 10-%d\n", i+1);
-      free(label);
-   }
-   
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_VERSYNCMIN, &label,&valid) &&
-       !sensors_get_feature(*name, SENSORS_DDCMON_VERSYNCMIN, &a) &&
-       !sensors_get_feature(*name, SENSORS_DDCMON_VERSYNCMAX, &b)) {
-      if (valid && ((int) a) != 0) {
-         print_label(label, 24);
-         printf("%d-%d\n", (int) a, (int) b);
-      }
-   } else
-      printf("ERROR: data 11\n");
-   free(label);
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_HORSYNCMIN, &label,&valid) &&
-       !sensors_get_feature(*name, SENSORS_DDCMON_HORSYNCMIN, &a) &&
-       !sensors_get_feature(*name, SENSORS_DDCMON_HORSYNCMAX, &b)) {
-      if (valid && ((int) a) != 0) {
-         print_label(label, 24);
-         printf("%d-%d\n", (int) a, (int) b);
-      }
-   } else
-      printf("ERROR: data 12\n");
-   free(label);
-
-   if (!sensors_get_label_and_valid(*name, SENSORS_DDCMON_MAXCLOCK, &label, &valid)
-    && !sensors_get_feature(*name, SENSORS_DDCMON_MAXCLOCK, &a)) {
-      if (valid && ((int) a) != 0) {
-         print_label(label, 24);
-         printf("%d\n", (int) a);
-      }
-   } else
-      printf("ERROR: data 13\n");
-   free(label);
-
-   printf("Note that the ddcmon driver is deprecated and will be deleted soon.\n");
-   printf("Please use the eeprom driver and the ddcmon and/or decode-edid.pl\n"
-          "scripts instead.\n");
-}
-
-/*
- * (Khali, 2003-07-17) Almost entierly rewritten. Reindented for clarity,
- * simplified at some places, added support for EDID EEPROMs (well,
- * redirection more than support).
- * (Khali, 2003-08-09) Rewrote Sony Vaio EEPROMs detection, and move it
- * to the top. This should prevent such EEPROMs from being accidentally
- * detected as valid memory modules.
- * (Khali, 2004-02-23) Add support for Shuttle EEPROMs, which contain
- * MAC ethernet addresses.
- */
-void print_eeprom(const sensors_chip_name *name)
-{
-	char *label;
-	double a, b, c, d;
-	int valid, i, type;
-
-	/* handle Sony Vaio EEPROMs first */
-	if (name->addr == 0x57) {
- 		char buffer[33];
-
-		/* first make sure it is a Sony Vaio EEPROM */
-		if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_NAME, &label, &valid)
-		 && valid) {
-			for (i = 0; i < 4; i++)
-				if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a))
-					buffer[i] = (char) a;
-			if (strncmp(buffer, "PCG-", 4) == 0
-			 || strncmp(buffer, "VGN-", 4) == 0) {
-				/* must be a real Sony Vaio EEPROM */
-				memset(buffer + 4, '\0', 29);
-				for (a = 1; i < 32 && a != 0; i++) /* stop at first zero */
-					if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_NAME+i, &a)
-					 && a != 0)
-						buffer[i] = (char) a;
-				print_label(label, 24);
-				printf("%s\n", buffer);
-				free(label);
-
-				memset(buffer, '\0', i);
-				if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_VAIO_SERIAL, &label, &valid)
-				 && valid) {
-					for (i = 0, a = 1; i < 32 && a != 0; i++) /* stop at first zero */
-						if (!sensors_get_feature(*name, SENSORS_EEPROM_VAIO_SERIAL+i, &a)
-						 && a != 0)
-							buffer[i] = (char) a;
-					print_label(label, 24);
-					printf("%s\n", buffer);
-				} else
-					printf("ERROR: data Vaio 3\n");
-				free(label);
-
-				printf("Note that eeprom support will be dropped from "
-				       "libsensors soon.\nPlease use the decode-vaio.pl "
-				       "script instead.\n");
-				return;
-			}
-		} else
-			printf("ERROR: data Vaio 2\n");
-		free(label);
-	}
-
-	/* then Shuttle EEPROMs */
-	if (name->addr == 0x53) {
- 		unsigned char buffer[6];
-
-		/* first make sure it is a Shuttle EEPROM */
-		if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_SHUTTLE, &label, &valid)
-		 && valid) {
-			for (i = 0; i < 3; i++)
-				if (!sensors_get_feature(*name, SENSORS_EEPROM_SHUTTLE+i, &a))
-					buffer[i] = (unsigned char) a;
-			if (buffer[0] == 0x00
-			 && buffer[1] == 0x30
-			 && buffer[2] == 0x1b)
-			{
-				/* must be a real Shuttle EEPROM */
-				for (i = 4; i < 6; i++)
-					if (!sensors_get_feature(*name, SENSORS_EEPROM_SHUTTLE+i, &a))
-						buffer[i] = (unsigned char) a;
-
-				print_label(label, 24);
-				printf("%02X:%02X:%02X:%02X:%02X:%02X\n", buffer[0],
-					buffer[1], buffer[2], buffer[3], buffer[4], buffer[5]);
-				free(label);
-				
-				return;
-			}
-		} else
-			printf("ERROR: data Shuttle\n");
-		free(label);
-	}
-
-	if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_TYPE, &label, &valid)
-	 && !sensors_get_feature(*name, SENSORS_EEPROM_TYPE, &a)) {
-		if (valid) {
-			type = (int) a;
-			switch (type) {
-				case 1:
-					print_label(label, 24);
-					printf("DRDRAM RIMM\n");
-					break;
-				case 2:
-					print_label(label, 24);
-					printf("EDO\n");
-					break;
-				case 4:
-					print_label(label, 24);
-					printf("SDR SDRAM DIMM\n");
-					break;
-				case 7:
-					print_label(label, 24);
-					printf("DDR SDRAM DIMM\n");
-					break;
-				case 8:
-					print_label(label, 24);
-					printf("DDR2 SDRAM DIMM\n");
-					break;
-				case 17:
-					print_label(label, 24);
-					printf("RAMBUS RIMM\n");
-					break;
-				case 255: /* EDID EEPROM? */
-					break;
-				default:
-					printf("Unknown EEPROM type (%d)\n", type);
-					free(label);
-					return;
-			}
-		} else {
-			free(label);
-			return;
-		}
-	} else {
-		free(label);
-		printf("Memory type: Unavailable\n");
-		return;
-	}
-	free(label);
-
-	if (type == 255) { /* EDID EEPROM */
-		/* make sure it is an EDID EEPROM */
-		if (!sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a)
-		 && !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b)
-		 && !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c)
-		 && !sensors_get_feature(*name, SENSORS_EEPROM_EDID_HEADER, &d)) {
-			if (((int) a) != 255 || ((int) b) != 255 || ((int) c) != 255
-			 || ((int) d) != 0)
-				printf("Unknown EEPROM type (255).\n");
-			else if (name->addr == 0x50)
-				/* must be an EDID EEPROM */
-				printf("Use the ddcmon and/or decode-edid.pl scripts.\n");
-		} else
-			printf("ERROR: data EDID\n");
-		return;
-	}
-
-	/* regular memory chips */
-	if (!sensors_get_label_and_valid(*name, SENSORS_EEPROM_ROWADDR, &label, &valid)
-	 && !sensors_get_feature(*name, SENSORS_EEPROM_ROWADDR, &a)
-	 && !sensors_get_feature(*name, SENSORS_EEPROM_COLADDR, &b)
-	 && !sensors_get_feature(*name, SENSORS_EEPROM_NUMROWS, &c)
-	 && !sensors_get_feature(*name, SENSORS_EEPROM_BANKS, &d)
-	 && valid) {
-	 	int k = 0; /* multiplier, 0 if invalid */
-		print_label(label, 24);
-		if (type == 17) { /* RAMBUS */
-			i = (((int) a) & 0x0f) + (((int) a) >> 4) + (((int) c) & 0x07) - 13;
-			k = 1;
-		} else if (type == 1) { /* DRDRAM */
-			i = (((int) b) & 0x0f) + (((int) b) >> 4) + (((int) c) & 0x07) - 13;
-			k = 1;
-		} else if (type == 8) { /* DDR2 */
-			i = (((int) a) & 0x0f) + (((int) b) & 0x0f) - 17;
-			k = ((((int) c) & 0x7) + 1) * ((int) d);
-		} else { /* SDRAM */
-			i = (((int) a) & 0x0f) + (((int) b) & 0x0f) - 17;
-			if (((int) c) <= 8 && ((int) d) <= 8)
-				k = ((int) c) * ((int) d);
-		}
-		if(i > 0 && i <= 12 && k > 0)
-			printf("%d\n", (1 << i) * k);
-		else
-			printf("invalid (%d %d %d %d)\n",
-				(int) a, (int) b, (int) c, (int) d);
-	} else
-		printf("ERROR: data 2\n");
-	free(label);
-
-	printf("Note that eeprom support will be dropped from "
-	       "libsensors soon.\nPlease use the decode-dimms.pl "
-	       "script instead.\n");
 }
 
 void print_it87(const sensors_chip_name *name)
@@ -4593,8 +4182,9 @@ void print_vt1211(const sensors_chip_name *name)
 void print_smsc47m1(const sensors_chip_name *name)
 {
   char *label;
-  double cur, min, div;
+  double cur, min, fdiv;
   int alarms, valid, i;
+  int is_m2 = !strcmp(name->prefix, "smsc47m2");
 
   if (!sensors_get_feature(*name,SENSORS_SMSC47M1_ALARMS,&cur)) 
     alarms = cur + 0.5;
@@ -4603,15 +4193,15 @@ void print_smsc47m1(const sensors_chip_name *name)
     alarms = 0;
   }
 
-  for (i=0; i<2; i++) { /* 2 fans */
+  for (i = 0; i < (is_m2 ? 3 : 2); i++) { /* 2 or 3 fans */
     if (!sensors_get_label_and_valid(*name, SENSORS_SMSC47M1_FAN1+i, &label, &valid)
      && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1+i, &cur)
-     && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1_DIV+i, &div)
+     && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1_DIV+i, &fdiv)
      && !sensors_get_feature(*name, SENSORS_SMSC47M1_FAN1_MIN+i, &min)) {
       if (valid) {
         print_label(label, 10);
         printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
-               cur, min, div, alarms&(SMSC47M1_ALARM_FAN1<<i) ?
+               cur, min, fdiv, alarms&(SMSC47M1_ALARM_FAN1<<i) ?
                "ALARM" : "");
       }
     }
@@ -5542,7 +5132,7 @@ void print_lm63(const sensors_chip_name *name)
 void print_adm1031(const sensors_chip_name *name)
 {
   char *label;
-  double cur, high, low, crit, div;
+  double cur, high, low, crit, fdiv;
   int valid, alarms, i;
   int is_1031 = !strncmp("adm1031", name->prefix, 7);
 
@@ -5558,10 +5148,10 @@ void print_adm1031(const sensors_chip_name *name)
 				       &label, &valid)
 	  && !sensors_get_feature(*name, SENSORS_ADM1031_FAN1+i*10, &cur)
 	  && !sensors_get_feature(*name, SENSORS_ADM1031_FAN1_MIN+i*10, &low)
-	  && !sensors_get_feature(*name, SENSORS_ADM1031_FAN1_DIV+i*10, &div)) {
+	  && !sensors_get_feature(*name, SENSORS_ADM1031_FAN1_DIV+i*10, &fdiv)) {
 	  if (valid) {
 	      print_label(label, 10);
-	      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)", cur, low, div);
+	      printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)", cur, low, fdiv);
 	      printf(" %s\n",
 		     alarms&(ADM1031_ALARM_FAN1_FLT<<(i*8))?"FAULT":
 		     alarms&(ADM1031_ALARM_FAN1_MIN<<(i*8))?"ALARM":"");
@@ -5740,7 +5330,7 @@ void print_max6650(const sensors_chip_name *name)
   static const struct
   {
     int tag;
-    char *name;
+    const char *name;
   }
   tach_list[] =
   {
@@ -5817,17 +5407,17 @@ static void print_asb100_fan(const sensors_chip_name *name, int alarm,
 	int fan, int fan_div, int fan_min)
 {
   char *label;
-  double cur, div, min;
+  double cur, fdiv, min;
   int valid;
 
   if (!sensors_get_label_and_valid(*name,fan,&label,&valid) &&
       !sensors_get_feature(*name,fan,&cur) &&
-      !sensors_get_feature(*name,fan_div,&div) &&
+      !sensors_get_feature(*name,fan_div, &fdiv) &&
       !sensors_get_feature(*name,fan_min,&min)) {
     if (valid) {
       print_label(label,10);
       printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)              %s\n",
-           cur, min, div, alarm ? "ALARM" : "");
+           cur, min, fdiv, alarm ? "ALARM" : "");
     }
   } else
     printf("ERROR: Can't get FAN data! (0x%04x)\n", fan);
@@ -6334,6 +5924,121 @@ void print_coretemp(const sensors_chip_name *name)
   } else
     printf("ERROR: Can't get temperature data!\n");
   free(label);
+}
+
+static void print_dme1737_in(const sensors_chip_name *name, int i)
+{
+  char *label;
+  double cur, min, max, alarm;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_DME1737_IN(i), &label,
+				   &valid) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_IN(i), &cur) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_IN_MIN(i), &min) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_IN_MAX(i), &max) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_IN_ALARM(i), &alarm)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)  %s\n",
+	     cur, min, max, alarm ? "ALARM" : "");
+    }
+  } else {
+    printf("ERROR: Can't get in%d data!\n", i);
+  }
+  free(label);
+}
+
+static void print_dme1737_temp(const sensors_chip_name *name, int i)
+{
+  char *label;
+  double cur, min, max, alarm, fault;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_DME1737_TEMP(i), &label,
+				   &valid) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_TEMP(i), &cur) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_MIN(i), &min) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_MAX(i), &max) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_ALARM(i), &alarm) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_FAULT(i), &fault)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, max, min, MINMAX, 0, 0);
+      printf("%s  %s\n", fault ? "FAULT" : "", alarm ? "ALARM" : "");
+    }
+  } else {
+    printf("ERROR: Can't get temp%d data!\n", i);
+  }
+  free(label);
+}
+
+static void print_dme1737_fan(const sensors_chip_name *name, int i)
+{
+  char *label;
+  double cur, min, alarm;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_DME1737_FAN(i), &label,
+				   &valid) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_FAN(i), &cur) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_FAN_MIN(i), &min) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_FAN_ALARM(i), &alarm)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%4.0f RPM  (min = %4.0f RPM)  %s\n", 
+	     cur, min, alarm ? "ALARM" : "");
+    }
+  } else {
+    printf("ERROR: Can't get fan%d data!\n", i);
+  }
+  free(label);
+}
+
+static void print_dme1737_pwm(const sensors_chip_name *name, int i)
+{
+  char *label;
+  double cur, enable, freq;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_DME1737_PWM(i), &label,
+				   &valid) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_PWM(i), &cur) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_PWM_ENABLE(i), &enable) &&
+      !sensors_get_feature(*name, SENSORS_DME1737_PWM_FREQ(i), &freq)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%4.0f      (enable = %1.0f, freq = %6.0f Hz)\n", cur, enable, freq);
+    }
+  } else {
+    printf("ERROR: Can't get pwm%d data!\n", i);
+  }
+  free(label);
+}
+
+void print_dme1737(const sensors_chip_name *name)
+{
+  int i;
+
+  for (i = 0; i < 7; i++) {
+    print_dme1737_in(name, i);
+  }
+
+  for (i = 1; i < 4; i++) {
+    print_dme1737_temp(name, i);
+  }
+
+  for (i = 1; i < 7; i++) {
+    print_dme1737_fan(name, i);
+  }
+
+  for (i = 1; i < 7; i++) {
+    if (i == 4)
+      continue;
+    print_dme1737_pwm(name, i);
+  }
+
+  print_vid_info(name, SENSORS_DME1737_VID, SENSORS_DME1737_VRM);
 }
 
 void print_unknown_chip(const sensors_chip_name *name)

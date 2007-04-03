@@ -151,8 +151,7 @@ SENSORS_INSMOD_1(fscscy);
 
 /* Initial limits */
 
-/* For each registered FSCSCY, we need to keep some data in memory. That
-   data is pointed to by fscscy_list[NR]->data. The structure itself is
+/* For each registered FSCSCY, we need to keep some data in memory. It is
    dynamically allocated, at the same time when a new fscscy client is
    allocated. */
 struct fscscy_data {

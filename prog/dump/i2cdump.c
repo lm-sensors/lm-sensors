@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	int bank = 0, bankreg = 0x4E, old_bank = 0;
 	char filename[20];
 	unsigned long funcs;
-	int block[256];
+	int block[256], s_length = 0;
 	int pec = 0, even = 0;
 	int flags = 0;
 	int yes = 0, version = 0;
@@ -310,6 +310,9 @@ int main(int argc, char *argv[])
 			if (size == I2C_SMBUS_BLOCK_DATA) {
 				res = i2c_smbus_read_block_data(file, bank,
 				      cblock);
+				/* Remember returned block length for a nicer
+				   display later */
+				s_length = res;
 			} else {
 				for (res = 0; res < 256; res += i) {
 					i = i2c_smbus_read_i2c_block_data(file,
@@ -327,8 +330,9 @@ int main(int argc, char *argv[])
 				res = 256;
 			for (i = 0; i < res; i++)
 				block[i] = cblock[i];
-			for (i = res; i < 256; i++)
-				block[i] = -1;
+			if (size != I2C_SMBUS_BLOCK_DATA)
+				for (i = res; i < 256; i++)
+					block[i] = -1;
 		}
 
 		if (size == I2C_SMBUS_BYTE) {
@@ -343,8 +347,11 @@ int main(int argc, char *argv[])
 		printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f"
 		       "    0123456789abcdef\n");
 		for (i = 0; i < 256; i+=16) {
+			if (size == I2C_SMBUS_BLOCK_DATA && i >= s_length)
+				break;
 			printf("%02x: ", i);
 			for (j = 0; j < 16; j++) {
+				fflush(stdout);
 				if (size == I2C_SMBUS_BYTE_DATA) {
 					block[i+j] = res =
 					  i2c_smbus_read_byte_data(file, i+j);
@@ -364,7 +371,10 @@ int main(int argc, char *argv[])
 				} else
 					res = block[i+j];
 
-				if (res < 0) {
+				if (size == I2C_SMBUS_BLOCK_DATA
+				 && i+j >= s_length) {
+					printf("   ");
+				} else if (res < 0) {
 					printf("XX ");
 					if (size == I2C_SMBUS_WORD_DATA)
 						printf("XX ");
@@ -377,7 +387,12 @@ int main(int argc, char *argv[])
 					j++;
 			}
 			printf("   ");
+
 			for (j = 0; j < 16; j++) {
+				if (size == I2C_SMBUS_BLOCK_DATA
+				 && i+j >= s_length)
+					break;
+
 				res = block[i+j];
 				if (res < 0)
 					printf("X");
@@ -393,8 +408,6 @@ int main(int argc, char *argv[])
 					printf("%c", res & 0xff);
 			}
 			printf("\n");
-			if (size == I2C_SMBUS_BLOCK_DATA && i == 16)
-				break;
 		}
 	} else {
 		printf("     0,8  1,9  2,a  3,b  4,c  5,d  6,e  7,f\n");

@@ -2,6 +2,60 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  File sensors.conf.eg: Add a dme1737 section
+  Library: Clean up pwm symbol names translation
+           Add dme1737 support
+  Program isadump: Detect when address bit 7 is a busy flag
+  Program sensors: Drop ddcmon and eeprom support
+                   Add dme1737 support
+  Program sensors-detect: Stop Super-I/O probe after first family success
+                          Fix SMSC DME1737 detection
+
+
+2.10.3 (20070319)
+  Library: Do not skip i2c adapters with only a class device and no
+            physical device. This change is required to survive the
+            planned struct class_dev removal from future 2.6 kernels.
+           Add support for the SMSC LPC47M292 fans (prefix smsc47m2)
+           Recognize i2c-isa-based devices as such even after class_dev
+	    is gone
+           Compile with -D_REENTRANT
+           Fix support of Linux 2.6's max6650 driver
+           Fix max1619 support
+  Man page i2cdetect.8: Scanning range can be restricted
+  Module bmcsensors: Fix debugging messages
+  Module i2c-ali1563: Improve the status messages (2.6 backport)
+                      Fix device initialization (2.6 backport)
+  Module i2c-amd8111: Cleanups (2.6 backport)
+                      Fix initialization race (2.6 backport)
+  Module i2c-nforce2: Drop unused reference to pci_dev (2.6 backport)
+  Module i2c-piix4: Add ATI SB600 support (2.6 backport)
+  Module i2c-viapro: Add CX700 support (2.6 backport)
+  Module smsc47m1: Add SMSC LPC47M292 support
+                   Get rid of a useless semaphore (2.6 backport)
+  Programs i2cdetect, i2cdump, isadump: Flush output in real time
+  Program i2cdump: Cleaner output in SMBus block read mode
+  Program fancontrol.pl: Fix pwmN_enable access (#2190)
+  Program sensors: Add smsc47m2 support (fans)
+                   Fix -A option (hide adapter name) on error
+  Program sensors-detect: Only probe relevant I2C addresses
+                          Drop ARP-capable device detection
+                          Add Maxim MAX6655/MAX6656 detection
+                           (Olexiy Avramchenko)
+                          Add Maxim MAX1668, MAX1805, MAX1989 detection
+                          Add VIA CX700 detection
+                          Drop legacy W83627HF ISA detection
+                          Don't bufferize stdout during probes
+                          Speed up the LM75 and LM77 detection
+                          Clean up the EEPROM detection
+                          Add Dallas DS75 detection
+                          Add SMSC LPC47M292 detection
+                          Add nVidia MCP61 and MCP65 detection
+                          Fix ADM1028 detection
+                          Add Nat. Semi. PC8347L Super-I/O detection
+                          Add SMSC SCH5504 Super-I/O detection (no sensors)
+                          Make the LM78 and W83781D detection safer
+
 
 2.10.2 (20070115)
   RPM: Obsolete, removed

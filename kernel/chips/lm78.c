@@ -111,8 +111,7 @@ static inline u8 FAN_TO_REG(long rpm, int div)
    bad. Quite a lot of bookkeeping is done. A real driver can often cut
    some corners. */
 
-/* For each registered LM78, we need to keep some data in memory. That
-   data is pointed to by lm78_list[NR]->data. The structure itself is
+/* For each registered LM78, we need to keep some data in memory. It is
    dynamically allocated, at the same time when a new lm78 client is
    allocated. */
 struct lm78_data {
