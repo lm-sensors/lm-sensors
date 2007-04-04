@@ -10,6 +10,7 @@ SVN HEAD
                    Add dme1737 support
   Program sensors-detect: Stop Super-I/O probe after first family success
                           Fix SMSC DME1737 detection
+                          Add /usr/sbin to the PATH (#2199)
 
 
 2.10.3 (20070319)

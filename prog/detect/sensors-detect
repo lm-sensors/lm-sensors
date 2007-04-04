@@ -4,7 +4,7 @@
 #    sensors-detect - Detect PCI bus and chips
 #    Copyright (C) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
 #    Copyright (C) 2000 - 2004  The lm_sensors team
-#    Copyright (C) 2005 - 2006  Jean Delvare <khali@linux-fr.org>
+#    Copyright (C) 2005 - 2007  Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,14 +34,12 @@ use Fcntl;
 use POSIX;
 use File::Basename;
 
-# Just in case a root user doesn't have /sbin in his/her path for some reason
-# (was seen once)
-$ENV{PATH} = '/sbin:'.$ENV{PATH}
-	unless $ENV{PATH} =~ m,(^|:)/sbin/?(:|$),;
-# Same for /usr/local/sbin since we need i2cdetect which is installed there
-# by default (reported by Lennard Klein)
-$ENV{PATH} = '/usr/local/sbin:'.$ENV{PATH}
-	unless $ENV{PATH} =~ m,(^|:)/usr/local/sbin/?(:|$),;
+# We will call modprobe and i2cdetect, which typically live in either /sbin,
+# /usr/sbin or /usr/local/bin. So make sure these are all in the PATH.
+foreach ('/usr/sbin', '/usr/local/sbin', '/sbin') {
+	$ENV{PATH} = "$_:".$ENV{PATH}
+		unless $ENV{PATH} =~ m/(^|:)$_\/?(:|$)/;
+}
 
 #########################
 # CONSTANT DECLARATIONS #
