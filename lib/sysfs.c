@@ -96,8 +96,7 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 		feature.data.compute_mapping = SENSORS_NO_MAPPING;
 			
 		if (pmatch[2].rm_so != -1) {
-			if (!strncmp(name + pmatch[2].rm_so, "_input",
-					pmatch[2].rm_eo - pmatch[2].rm_so)) {
+			if (!strcmp(name + pmatch[2].rm_so, "_input")) {
 				int last_match;
 				
 				/* copy only the part before the _ */

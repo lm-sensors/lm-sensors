@@ -598,7 +598,7 @@ sensors_feature_type sensors_feature_get_type(
 
 	submatches = matches[i].submatches;
 	for(i = 0; submatches[i].name != 0; i++)
-		if (!strncmp(name + pmatch[3].rm_so, submatches[i].name, size_second))
+		if (!strcmp(name + pmatch[3].rm_so, submatches[i].name))
 			return submatches[i].type;
 	
 	return SENSORS_FEATURE_UNKNOWN;
