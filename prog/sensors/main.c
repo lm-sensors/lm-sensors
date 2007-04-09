@@ -34,6 +34,7 @@
 #include "lib/error.h"
 #include "chips.h"
 #include "version.h"
+#include "chips_generic.h"
 
 #define PROGRAM "sensors"
 #define VERSION LM_VERSION
@@ -54,7 +55,7 @@ static const char *sprintf_chip_name(sensors_chip_name name);
 #define CHIPS_MAX 20
 sensors_chip_name chips[CHIPS_MAX];
 int chips_count=0;
-int do_sets, do_unknown, fahrenheit, hide_adapter, hide_unknown;
+int do_sets, do_unknown, fahrenheit, hide_adapter, hide_unknown, do_generic;
 
 char degstr[5]; /* store the correct string to print degrees */
 
@@ -74,6 +75,7 @@ void print_long_help(void)
   printf("  -U, --no-unknown      Do not show unknown chips\n");
   printf("  -u, --unknown         Treat chips as unknown ones (testing only)\n");
   printf("  -v, --version         Display the program version\n");
+  printf("  -g, --generic         Use generic printing routine for all chips (testing only)\n"); 
   printf("\n");
   printf("Use `-' after `-c' to read the config file from stdin.\n");
   printf("If no chips are specified, all chip info will be printed.\n");
@@ -161,6 +163,7 @@ int main (int argc, char *argv[])
     { "unknown", no_argument, NULL, 'u' },
     /* next option accepted for compatibility, but otherwise ignored */
     { "algorithm", no_argument, NULL, 'a' },
+    { "generic", no_argument, NULL, 'g'},
     { 0,0,0,0 }
   };
 
@@ -170,8 +173,9 @@ int main (int argc, char *argv[])
   do_sets = 0;
   hide_adapter = 0;
   hide_unknown = 0;
+  do_generic = 0;
   while (1) {
-    c = getopt_long(argc,argv,"hsvfaAUc:u",long_opts,NULL);
+    c = getopt_long(argc,argv,"hsvfaAUc:ug",long_opts,NULL);
     if (c == EOF)
       break;
     switch(c) {
@@ -205,6 +209,9 @@ int main (int argc, char *argv[])
       break;
     case 'a':
       /* Ignore for compatibility */
+      break;
+    case 'g':
+      do_generic = 1;
       break;
     default:
       fprintf(stderr,"Internal error while parsing options!\n");
@@ -447,9 +454,11 @@ void do_a_print(sensors_chip_name name)
   }
   if (do_unknown)
     print_unknown_chip(&name);
+  else if(do_generic)
+    print_generic_chip(&name);
   else {
     if(m->prefix == NULL)
-	print_unknown_chip(&name);
+	print_generic_chip(&name);
     else
 	m->fn(&name);
   }
