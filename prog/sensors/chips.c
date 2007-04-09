@@ -29,7 +29,7 @@
 #include "lib/error.h"
 #include "kernel/include/sensors.h"
 
-static void print_label(const char *label, int space);
+void print_label(const char *label, int space);
 static void print_temp_info(float, float, float, int, int, int);
 static inline float deg_ctof( float );
 
@@ -41,16 +41,11 @@ inline float deg_ctof( float cel )
    return ( cel * ( 9.0F / 5.0F ) + 32.0F );
 }
 
-#define HYST 0
-#define MINMAX 1
-#define MAXONLY 2
-#define CRIT 3
-#define SINGLE 4
-#define HYSTONLY 5
 /* minmax = 0 for limit/hysteresis, 1 for max/min, 2 for max only;
    curprec and limitprec are # of digits after decimal point
-   for the current temp and the limits */
-void print_temp_info(float n_cur, float n_over, float n_hyst,
+   for the current temp and the limits
+   note: symbolic constants defined in chips.h */
+void print_temp_info_real(float n_cur, float n_over, float n_hyst, float n_lim,
                      int minmax, int curprec, int limitprec)
 {
    if (fahrenheit) {
@@ -86,8 +81,20 @@ void print_temp_info(float n_cur, float n_over, float n_hyst,
 	printf( "%+6.*f%s  (hyst = %+5.*f%s)                   ",
 	    curprec, n_cur, degstr,
 	    limitprec, n_over, degstr);
+   else if(minmax == LIM)
+	printf("%+6.*f%s  (low  = %+5.*f%s, high = %+5.*f%s, lim = %+5.*f%s)  ",
+	    curprec, n_cur, degstr,
+	    limitprec, n_hyst, degstr,
+	    limitprec, n_over, degstr,
+	    limitprec, n_lim, degstr);
    else
 	printf("Unknown temperature mode!");
+}
+
+void print_temp_info(float n_cur, float n_over, float n_hyst,
+                     int minmax, int curprec, int limitprec)
+{
+  print_temp_info_real(n_cur, n_over, n_hyst, 0, minmax, curprec, limitprec);
 }
 
 void print_label(const char *label, int space)
@@ -113,7 +120,7 @@ int sensors_get_label_and_valid(sensors_chip_name name, int feature, char **labe
   return err;
 }
 
-void print_vid_info(const sensors_chip_name *name, int f_vid, int f_vrm)
+void print_vid_info_real(const sensors_chip_name *name, int f_vid, int f_vrm, int label_size)
 {
   char *label;
   int valid;
@@ -122,7 +129,7 @@ void print_vid_info(const sensors_chip_name *name, int f_vid, int f_vrm)
   if (!sensors_get_label_and_valid(*name,f_vid,&label,&valid)
       && !sensors_get_feature(*name,f_vid,&vid) ) {
     if (valid) {
-      print_label(label,10);
+      print_label(label, label_size);
       if(!sensors_get_feature(*name,f_vrm,&vrm))
 	printf("%+6.3f V  (VRM Version %.1f)\n",vid,vrm);
       else
@@ -131,6 +138,11 @@ void print_vid_info(const sensors_chip_name *name, int f_vid, int f_vrm)
   }
   free(label);
 }
+
+void print_vid_info(const sensors_chip_name *name, int f_vid, int f_vrm)
+{
+  print_vid_info_real(name, f_vid, f_vrm, 10);
+}	
 
 /* Chip-specific print routines start here */
 

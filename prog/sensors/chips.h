@@ -78,4 +78,21 @@ extern void print_k8temp(const sensors_chip_name *name);
 extern void print_coretemp(const sensors_chip_name *name);
 extern void print_dme1737(const sensors_chip_name *name);
 
+/* some functions used by chips_generic.c */
+#define HYST 0
+#define MINMAX 1
+#define MAXONLY 2
+#define CRIT 3
+#define SINGLE 4
+#define HYSTONLY 5
+#define LIM 6
+void print_temp_info_real(float n_cur, float n_over, float n_hyst, float n_lim,
+                     int minmax, int curprec, int limitprec);
+		     
+void print_vid_info_real(const sensors_chip_name *name, int f_vid, int f_vrm, int label_size);
+
+void print_label(const char *label, int space);
+
+int sensors_get_label_and_valid(sensors_chip_name name, int feature, char **label,
+                        int *valid);
 #endif /* def PROG_SENSORS_CHIPS_H */
