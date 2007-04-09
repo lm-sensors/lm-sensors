@@ -146,6 +146,38 @@ typedef struct sensors_feature_data {
 extern const sensors_feature_data *sensors_get_all_features 
              (sensors_chip_name name, int *nr1,int *nr2);
 
+typedef enum sensors_feature_type {
+  SENSORS_FEATURE_TEMP = 0,
+  SENSORS_FEATURE_TEMP_ALARM,
+  SENSORS_FEATURE_TEMP_HYST,
+  SENSORS_FEATURE_TEMP_OVER,
+  SENSORS_FEATURE_TEMP_MAX,
+  SENSORS_FEATURE_TEMP_MIN,
+  SENSORS_FEATURE_TEMP_HIGH,
+  SENSORS_FEATURE_TEMP_LOW,
+  SENSORS_FEATURE_TEMP_LIM,
+  SENSORS_FEATURE_TEMP_CRIT,
+  
+  SENSORS_FEATURE_IN,
+  SENSORS_FEATURE_IN_ALARM,
+  SENSORS_FEATURE_IN_MIN,
+  SENSORS_FEATURE_IN_MAX,
+  SENSORS_FEATURE_IN_MIN_ALARM,
+  SENSORS_FEATURE_IN_MAX_ALARM,
+  
+  SENSORS_FEATURE_FAN,
+  SENSORS_FEATURE_FAN_ALARM,
+  SENSORS_FEATURE_FAN_MIN,
+  SENSORS_FEATURE_FAN_DIV,
+  
+  SENSORS_FEATURE_VID,
+  SENSORS_FEATURE_VRM,
+  
+  SENSORS_FEATURE_UNKNOWN
+} sensors_feature_type;
+
+sensors_feature_type sensors_feature_get_type(
+  const sensors_feature_data *feature);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

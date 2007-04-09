@@ -496,3 +496,67 @@ int sensors_do_all_sets(void)
 	};
 	return sensors_do_chip_sets(name);
 }
+
+/* Return the feature type based on the feature name */
+sensors_feature_type sensors_feature_get_type(
+	const sensors_feature_data *feature)
+{
+	const char *name;	
+	
+	/* this will only work when the sensors_chip_feature is obtained through 
+		sensors_get_all_features */
+	if (((const struct sensors_chip_feature *)feature)->sysname)
+		name = ((const struct sensors_chip_feature *)feature)->sysname;
+	else
+		name = feature->name;
+	
+	if (strstr(name, "temp")) {
+		if (strlen(name) == 5)
+			return SENSORS_FEATURE_TEMP;
+		
+		if (strstr(name, "hyst"))
+			return SENSORS_FEATURE_TEMP_HYST;
+		
+		if (strstr(name, "over"))
+			return SENSORS_FEATURE_TEMP_OVER;
+		
+		if (strstr(name, "max"))
+			return SENSORS_FEATURE_TEMP_MAX;
+		
+		if (strstr(name, "min"))
+			return SENSORS_FEATURE_TEMP_MIN;
+		
+		if (strstr(name, "low"))
+			return SENSORS_FEATURE_TEMP_LOW;
+		
+		if (strstr(name, "crit"))
+			return SENSORS_FEATURE_TEMP_CRIT;
+	} else if (strstr(name, "in") && name[0] != 'f') {
+		if (strlen(name) == 3 || strstr(name, "input"))
+			return SENSORS_FEATURE_IN;
+		
+		if (strstr(name, "max"))
+			return SENSORS_FEATURE_IN_MAX;
+		
+		if (strstr(name, "min"))
+			return SENSORS_FEATURE_IN_MIN;
+		
+		if (strstr(name, "alarm"))
+			return SENSORS_FEATURE_IN_ALARM;
+	} else if (strstr(name, "fan")) {
+		if (strlen(name) == 4)
+			return SENSORS_FEATURE_FAN;
+		
+		if (strstr(name, "min"))
+			return SENSORS_FEATURE_FAN_MIN;
+		
+		if (strstr(name, "div"))
+			return SENSORS_FEATURE_FAN_DIV;
+	} else if (!strcmp(name, "vrm")) {
+		return SENSORS_FEATURE_VRM;
+	} else if (strstr(name, "vid")) {
+		return SENSORS_FEATURE_VID;
+	}
+	
+	return SENSORS_FEATURE_UNKNOWN;
+}
