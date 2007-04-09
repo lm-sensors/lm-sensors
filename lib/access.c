@@ -535,8 +535,14 @@ sensors_feature_type sensors_feature_get_type(
 		if (strlen(name) == 3 || strstr(name, "input"))
 			return SENSORS_FEATURE_IN;
 		
+		if (strstr(name, "max_alarm"))
+			return SENSORS_FEATURE_IN_MAX_ALARM;
+		
 		if (strstr(name, "max"))
 			return SENSORS_FEATURE_IN_MAX;
+		
+		if (strstr(name, "min_alarm"))
+			return SENSORS_FEATURE_IN_MIN_ALARM;
 		
 		if (strstr(name, "min"))
 			return SENSORS_FEATURE_IN_MIN;

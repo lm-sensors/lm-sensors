@@ -95,7 +95,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
   char *label;
   int valid, type;
   const int size = SENSORS_FEATURE_TEMP_CRIT - SENSORS_FEATURE_TEMP;
-  short has_features[SENSORS_FEATURE_TEMP_CRIT - SENSORS_FEATURE_TEMP] = {0, };
+  short has_features[SENSORS_FEATURE_TEMP_CRIT - SENSORS_FEATURE_TEMP] = {0, 0, 0, 0, 0, 0, 0, 0, 0 };
   double feature_vals[SENSORS_FEATURE_TEMP_CRIT - SENSORS_FEATURE_TEMP] = {0.0, };
   
   if (sensors_get_label_and_valid(*name, feature->number, &label, &valid)) {
@@ -224,7 +224,7 @@ static void print_generic_chip_in(const sensors_chip_name *name,
 {
   const int size = SENSORS_FEATURE_IN_MAX_ALARM - SENSORS_FEATURE_IN;
   int valid;
-  short has_features[SENSORS_FEATURE_IN_MAX_ALARM - SENSORS_FEATURE_IN] = {0, };
+  short has_features[SENSORS_FEATURE_IN_MAX_ALARM - SENSORS_FEATURE_IN] = {0, 0, 0, 0, 0 };
   double feature_vals[SENSORS_FEATURE_IN_MAX_ALARM - SENSORS_FEATURE_IN] = {0.0, };
   double val, alarm_max, alarm_min;
   char *label;
