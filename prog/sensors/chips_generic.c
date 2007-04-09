@@ -20,11 +20,10 @@
 */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "chips_generic.h"
 #include "chips.h"
-
-#define PRINT_SENSORS_LABEL_SIZE 12
 
 static int get_feature_value(const sensors_chip_name *name, 
                              const sensors_feature_data *feature, 
@@ -85,11 +84,28 @@ static void sensors_get_available_features(const sensors_chip_name *name,
   }
 }
 
+static int sensors_get_label_size(const sensors_chip_name *name)
+{
+  int i, j, valid;
+  const sensors_feature_data *iter;
+  char *label;
+  int max_size = 11; /* Initialised to 11 as minumum label-width */
+
+  i = j = 0;
+  while((iter = sensors_get_all_features(*name, &i, &j))) {
+    if (!sensors_get_label_and_valid(*name, iter->number, &label, &valid) &&
+        valid && strlen(label) > max_size)
+      max_size = strlen(label);
+    free(label);
+  }
+  return max_size + 1;
+}
+
 #define TEMP_FEATURE(x) has_features[x - SENSORS_FEATURE_TEMP - 1]
 #define TEMP_FEATURE_VAL(x) feature_vals[x - SENSORS_FEATURE_TEMP - 1]
 static void print_generic_chip_temp(const sensors_chip_name *name, 
                                     const sensors_feature_data *feature,
-                                    int i, int j)
+                                    int i, int j, int label_size)
 {
   double val, max, min, lim = 0.0;
   char *label;
@@ -168,7 +184,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
     type = SINGLE;
   }
   
-  print_label(label, PRINT_SENSORS_LABEL_SIZE);
+  print_label(label, label_size);
   free(label);
   
   if (type == LIM) {
@@ -207,7 +223,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
       sensors_get_label_and_valid(*name, subfeature->number, &label, &valid);
       
       if (valid) {
-        print_label(label, PRINT_SENSORS_LABEL_SIZE);
+        print_label(label, label_size);
         free(label);
         print_temp_info_real(max, min, 0, 0.0, type, 1, 0);
         printf("\n");
@@ -220,7 +236,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
 #define IN_FEATURE_VAL(x) feature_vals[x - SENSORS_FEATURE_IN - 1]
 static void print_generic_chip_in(const sensors_chip_name *name, 
                                   const sensors_feature_data *feature,
-                                  int i, int j)
+                                  int i, int j, int label_size)
 {
   const int size = SENSORS_FEATURE_IN_MAX_ALARM - SENSORS_FEATURE_IN;
   int valid;
@@ -246,7 +262,7 @@ static void print_generic_chip_in(const sensors_chip_name *name,
   sensors_get_available_features(name, feature, i, j, has_features, feature_vals,
       size, SENSORS_FEATURE_IN);
   
-  print_label(label, PRINT_SENSORS_LABEL_SIZE);
+  print_label(label, label_size);
   free(label);
   printf("%+6.2f V", val);
   
@@ -283,7 +299,7 @@ static void print_generic_chip_in(const sensors_chip_name *name,
 #define FAN_FEATURE_VAL(x) feature_vals[x - SENSORS_FEATURE_FAN - 1]
 static void print_generic_chip_fan(const sensors_chip_name *name, 
                                    const sensors_feature_data *feature,
-                                   int i, int j)
+                                   int i, int j, int label_size)
 {
   char *label;
   int valid;
@@ -308,7 +324,7 @@ static void print_generic_chip_fan(const sensors_chip_name *name,
     return;
   }
   
-  print_label(label, PRINT_SENSORS_LABEL_SIZE);
+  print_label(label, label_size);
   free(label);
   printf("%4.0f RPM", val);
   
@@ -335,7 +351,7 @@ static void print_generic_chip_fan(const sensors_chip_name *name,
 
 static void print_generic_chip_vid(const sensors_chip_name *name, 
                                    const sensors_feature_data *feature,
-                                   int i, int j)
+                                   int i, int j, int label_size)
 {
   const sensors_feature_data *vrm_feature;
   
@@ -345,15 +361,17 @@ static void print_generic_chip_vid(const sensors_chip_name *name,
   }
   
   if (vrm_feature != NULL)
-    print_vid_info_real(name, feature->number, vrm_feature->number, PRINT_SENSORS_LABEL_SIZE);
+    print_vid_info_real(name, feature->number, vrm_feature->number, label_size);
   else
-    print_vid_info_real(name, feature->number, -1, PRINT_SENSORS_LABEL_SIZE);
+    print_vid_info_real(name, feature->number, -1, label_size);
 }
 
 void print_generic_chip(const sensors_chip_name *name)
 {
   const sensors_feature_data *feature;
-  int i,j;
+  int i,j, label_size;
+  
+  label_size = sensors_get_label_size(name);
   
   i = j = 0;
   while((feature = sensors_get_all_features(*name, &i, &j))) {
@@ -362,13 +380,13 @@ void print_generic_chip(const sensors_chip_name *name)
     
     switch(sensors_feature_get_type(feature)) {
       case SENSORS_FEATURE_TEMP:
-        print_generic_chip_temp(name, feature, i, j); break;
+        print_generic_chip_temp(name, feature, i, j, label_size); break;
       case SENSORS_FEATURE_IN:
-        print_generic_chip_in(name, feature, i, j); break;
+        print_generic_chip_in(name, feature, i, j, label_size); break;
       case SENSORS_FEATURE_FAN:
-        print_generic_chip_fan(name, feature, i, j); break;
+        print_generic_chip_fan(name, feature, i, j, label_size); break;
       case SENSORS_FEATURE_VID:
-        print_generic_chip_vid(name, feature, i, j); break;
+        print_generic_chip_vid(name, feature, i, j, label_size); break;
       default: continue;
     }
   }
