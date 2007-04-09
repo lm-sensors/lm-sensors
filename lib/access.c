@@ -20,12 +20,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <regex.h>
 #include "access.h"
 #include "sensors.h"
 #include "data.h"
 #include "error.h"
 #include "proc.h"
 #include "general.h"
+
+#define GET_TYPE_REGEX "\\([[:alpha:]]\\{1,\\}\\)[[:digit:]]\\{0,\\}\\(_\\([[:alpha:]]\\{1,\\}\\)\\)\\{0,1\\}"
+
+#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#define container_of(ptr, type, member) ({                      \
+        const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
+        (type *)( (const char *)__mptr - offsetof(type,member) );})
 
 static int sensors_do_this_chip_sets(sensors_chip_name name);
 
@@ -497,72 +505,101 @@ int sensors_do_all_sets(void)
 	return sensors_do_chip_sets(name);
 }
 
+/* Static mappings for use by sensors_feature_get_type() */
+struct feature_type_match
+{
+	const char *name;
+	sensors_feature_type type;
+	
+	struct feature_type_match *submatches;
+};
+
+static struct feature_type_match temp_matches[] = {
+	{ "max", SENSORS_FEATURE_TEMP_MAX },
+	{ "min", SENSORS_FEATURE_TEMP_MIN },
+	{ "type", SENSORS_FEATURE_TEMP_SENS },
+	{ "hyst", SENSORS_FEATURE_TEMP_HYST },
+	{ "over", SENSORS_FEATURE_TEMP_OVER },
+	{ "max", SENSORS_FEATURE_TEMP_MAX },
+	{ "min", SENSORS_FEATURE_TEMP_MIN },
+	{ "low", SENSORS_FEATURE_TEMP_LOW },
+	{ "crit", SENSORS_FEATURE_TEMP_CRIT },
+	{ "fault", SENSORS_FEATURE_TEMP_FAULT },
+	{ "alarm", SENSORS_FEATURE_TEMP_ALARM },
+	{ "type", SENSORS_FEATURE_TEMP_SENS },
+	{ 0 }
+};
+
+static struct feature_type_match in_matches[] = {
+	{ "max", SENSORS_FEATURE_IN_MAX },
+	{ "max_alarm", SENSORS_FEATURE_IN_MAX_ALARM },
+	{ "min", SENSORS_FEATURE_IN_MIN },
+	{ "min_alarm", SENSORS_FEATURE_IN_MIN_ALARM },
+	{ "alarm", SENSORS_FEATURE_IN_ALARM },
+	{ 0 }
+};
+
+static struct feature_type_match fan_matches[] = {
+	{ "min", SENSORS_FEATURE_FAN_MIN },
+	{ "div", SENSORS_FEATURE_FAN_DIV },
+	{ "alarm", SENSORS_FEATURE_FAN_ALARM },
+	{ "fault", SENSORS_FEATURE_FAN_FAULT },
+	{ 0 }
+};
+
+static struct feature_type_match matches[] = { 
+	{ "temp", SENSORS_FEATURE_TEMP, temp_matches },
+	{ "in", SENSORS_FEATURE_IN, in_matches },
+	{ "fan", SENSORS_FEATURE_FAN, fan_matches },
+	{ "vrm", SENSORS_FEATURE_VRM, 0 },
+	{ "vid", SENSORS_FEATURE_VID, 0 },
+	{ "sensor", SENSORS_FEATURE_TEMP_SENS, 0 }, 
+	{ 0 }
+};
+
 /* Return the feature type based on the feature name */
 sensors_feature_type sensors_feature_get_type(
 	const sensors_feature_data *feature)
 {
-	const char *name;	
+	const char *name;
+	regex_t preg;
+	regmatch_t pmatch[4];
+	int size_first, size_second, retval, i;
+	struct feature_type_match *submatches;
 	
-	/* this will only work when the sensors_chip_feature is obtained through 
-		sensors_get_all_features */
-	if (((const struct sensors_chip_feature *)feature)->sysname)
-		name = ((const struct sensors_chip_feature *)feature)->sysname;
+	/* use sysname if exists */
+	if (container_of(feature, const struct sensors_chip_feature, data)->sysname)
+		name = container_of(feature, const struct sensors_chip_feature, data)->sysname;
 	else
 		name = feature->name;
 	
-	if (strstr(name, "temp")) {
-		if (strlen(name) == 5)
-			return SENSORS_FEATURE_TEMP;
-		
-		if (strstr(name, "hyst"))
-			return SENSORS_FEATURE_TEMP_HYST;
-		
-		if (strstr(name, "over"))
-			return SENSORS_FEATURE_TEMP_OVER;
-		
-		if (strstr(name, "max"))
-			return SENSORS_FEATURE_TEMP_MAX;
-		
-		if (strstr(name, "min"))
-			return SENSORS_FEATURE_TEMP_MIN;
-		
-		if (strstr(name, "low"))
-			return SENSORS_FEATURE_TEMP_LOW;
-		
-		if (strstr(name, "crit"))
-			return SENSORS_FEATURE_TEMP_CRIT;
-	} else if (strstr(name, "in") && name[0] != 'f') {
-		if (strlen(name) == 3 || strstr(name, "input"))
-			return SENSORS_FEATURE_IN;
-		
-		if (strstr(name, "max_alarm"))
-			return SENSORS_FEATURE_IN_MAX_ALARM;
-		
-		if (strstr(name, "max"))
-			return SENSORS_FEATURE_IN_MAX;
-		
-		if (strstr(name, "min_alarm"))
-			return SENSORS_FEATURE_IN_MIN_ALARM;
-		
-		if (strstr(name, "min"))
-			return SENSORS_FEATURE_IN_MIN;
-		
-		if (strstr(name, "alarm"))
-			return SENSORS_FEATURE_IN_ALARM;
-	} else if (strstr(name, "fan")) {
-		if (strlen(name) == 4)
-			return SENSORS_FEATURE_FAN;
-		
-		if (strstr(name, "min"))
-			return SENSORS_FEATURE_FAN_MIN;
-		
-		if (strstr(name, "div"))
-			return SENSORS_FEATURE_FAN_DIV;
-	} else if (!strcmp(name, "vrm")) {
-		return SENSORS_FEATURE_VRM;
-	} else if (strstr(name, "vid")) {
-		return SENSORS_FEATURE_VID;
-	}
+	regcomp(&preg, GET_TYPE_REGEX, 0);
+	
+	retval = regexec(&preg, name, 4, pmatch, 0);
+	
+	regfree(&preg);
+	
+	if (retval == -1)
+		return SENSORS_FEATURE_UNKNOWN;
+	
+	size_first = pmatch[1].rm_eo - pmatch[1].rm_so;
+	size_second = pmatch[3].rm_eo - pmatch[3].rm_so;
+	
+	for(i = 0; matches[i].name != 0; i++)
+		if (!strncmp(name, matches[i].name, size_first))
+			break;
+	
+	if (matches[i].name == NULL) /* no match */
+		return SENSORS_FEATURE_UNKNOWN;
+	else if (size_second == 0) /* single type */
+		return matches[i].type;
+	else if (matches[i].submatches == NULL) /* not single type, but no submatches */
+		return SENSORS_FEATURE_UNKNOWN;
+
+	submatches = matches[i].submatches;
+	for(i = 0; submatches[i].name != 0; i++)
+		if (!strncmp(name + pmatch[3].rm_so, submatches[i].name, size_second))
+			return submatches[i].type;
 	
 	return SENSORS_FEATURE_UNKNOWN;
 }

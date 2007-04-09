@@ -21,6 +21,7 @@
 #define LIB_SENSORS_SENSORS_H
 
 #include <stdio.h>
+#include <limits.h>
 
 /* Publicly accessible library functions */
 
@@ -147,8 +148,10 @@ extern const sensors_feature_data *sensors_get_all_features
              (sensors_chip_name name, int *nr1,int *nr2);
 
 typedef enum sensors_feature_type {
-  SENSORS_FEATURE_TEMP = 0,
+  SENSORS_FEATURE_TEMP = 0x0,
   SENSORS_FEATURE_TEMP_ALARM,
+  SENSORS_FEATURE_TEMP_FAULT,
+  SENSORS_FEATURE_TEMP_SENS,
   SENSORS_FEATURE_TEMP_HYST,
   SENSORS_FEATURE_TEMP_OVER,
   SENSORS_FEATURE_TEMP_MAX,
@@ -158,26 +161,28 @@ typedef enum sensors_feature_type {
   SENSORS_FEATURE_TEMP_LIM,
   SENSORS_FEATURE_TEMP_CRIT,
   
-  SENSORS_FEATURE_IN,
+  SENSORS_FEATURE_IN = 0x100,
   SENSORS_FEATURE_IN_ALARM,
   SENSORS_FEATURE_IN_MIN,
   SENSORS_FEATURE_IN_MAX,
   SENSORS_FEATURE_IN_MIN_ALARM,
   SENSORS_FEATURE_IN_MAX_ALARM,
   
-  SENSORS_FEATURE_FAN,
+  SENSORS_FEATURE_FAN = 0x200,
   SENSORS_FEATURE_FAN_ALARM,
+  SENSORS_FEATURE_FAN_FAULT,
   SENSORS_FEATURE_FAN_MIN,
   SENSORS_FEATURE_FAN_DIV,
   
-  SENSORS_FEATURE_VID,
+  SENSORS_FEATURE_VID = 0x300,
   SENSORS_FEATURE_VRM,
   
-  SENSORS_FEATURE_UNKNOWN
+  SENSORS_FEATURE_UNKNOWN = INT_MAX
 } sensors_feature_type;
 
-sensors_feature_type sensors_feature_get_type(
-  const sensors_feature_data *feature);
+sensors_feature_type sensors_feature_get_type
+  	     (const sensors_feature_data *feature);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
