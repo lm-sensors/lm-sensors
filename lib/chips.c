@@ -22,6 +22,8 @@
 #include "sensors.h"
 #include "kernel/include/sensors.h"
 
+#define PLACEHOLDER_ELEMENTS {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}
+
 /* For each chip, a list of features;
    For each feature, the number, its name, the logical mapping (for example,
    fan1_div belongs to fan1), the compute mapping, an access field, the 
@@ -6161,5 +6163,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_K8TEMP_PREFIX, k8temp_features },
  { SENSORS_CORETEMP_PREFIX, coretemp_features },
  { SENSORS_DME1737_PREFIX, dme1737_features },
+ PLACEHOLDER_ELEMENTS,
  { 0 }
 };

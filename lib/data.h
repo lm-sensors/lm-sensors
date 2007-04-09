@@ -191,4 +191,7 @@ extern int sensors_proc_bus_max;
 
 extern sensors_chip_features sensors_chip_features_list[];
 
+/* this should match the total number of elements in PLACEHOLDER_ELEMENTS */
+#define N_PLACEHOLDER_ELEMENTS 10
+
 #endif /* def LIB_SENSORS_DATA_H */

@@ -24,6 +24,7 @@
 #include <limits.h>
 #include <errno.h>
 #include <sysfs/libsysfs.h>
+#include <regex.h>
 #include "data.h"
 #include "error.h"
 #include "access.h"
@@ -33,6 +34,137 @@
 int sensors_found_sysfs = 0;
 
 char sensors_sysfs_mount[NAME_MAX];
+
+#define DYNAMIC_CHIP_REGEX "\\([[:alpha:]]\\{1,\\}[[:digit:]]\\{0,\\}\\)\\(\\_[[:alpha:]]\\{1,\\}\\)\\{0,1\\}"
+
+static int sensors_read_dynamic_chip_check_mapping(
+	sensors_chip_feature *minor,
+	sensors_chip_feature *major,
+	regmatch_t *pmatch)
+{
+	if (pmatch[1].rm_so == -1 || pmatch[2].rm_so == -1 || 
+			strncmp(minor->data.name, major->data.name, 
+			pmatch[1].rm_eo - pmatch[1].rm_so)) {
+		return 0;
+	} else {
+		minor->data.mapping = 
+			minor->data.compute_mapping = 
+			major->data.number;
+			
+		return 1;
+	}
+}
+
+static 
+sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
+{
+	int fnum = 1, i, last_major = -1;
+	struct sysfs_attribute *attr;
+	struct dlist *attrs;
+	sensors_chip_features ret = {0, 0};
+	sensors_chip_feature features[256], *dyn_features;
+	regex_t preg;
+	regmatch_t pmatch[3];
+	char *name;
+		
+	attrs = sysfs_get_device_attributes(sysdir);
+	
+	if (attrs == NULL)
+		return ret;
+	
+	regcomp(&preg, DYNAMIC_CHIP_REGEX, 0);
+		
+	dlist_for_each_data(attrs, attr, struct sysfs_attribute) {
+		sensors_chip_feature feature = { { 0, }, 0, };	
+		name = attr->name;
+		
+		if (!strcmp(name, "name")) {
+			ret.prefix = strndup(attr->value, strlen(attr->value) - 1);
+			continue;
+		} else if (regexec(&preg, name, 3, pmatch, 0) != 0) {
+			continue;
+		}
+		
+		feature.data.number = fnum;
+		feature.data.mode = (attr->method & (SYSFS_METHOD_SHOW|SYSFS_METHOD_STORE)) == 
+											(SYSFS_METHOD_SHOW|SYSFS_METHOD_STORE) ?
+											SENSORS_MODE_RW :
+							(attr->method & SYSFS_METHOD_SHOW) ? SENSORS_MODE_R :
+							(attr->method & SYSFS_METHOD_STORE) ? SENSORS_MODE_W :
+							SENSORS_MODE_NO_RW;
+		feature.data.mapping = SENSORS_NO_MAPPING;
+		feature.data.compute_mapping = SENSORS_NO_MAPPING;
+			
+		if (pmatch[2].rm_so != -1) {
+			if (!strncmp(name + pmatch[2].rm_so, "_input",
+					pmatch[2].rm_eo - pmatch[2].rm_so)) {
+				int last_match;
+				
+				/* copy only the part before the _ */
+				feature.data.name = strndup(name, 
+					pmatch[1].rm_eo - pmatch[1].rm_so);
+				
+				/* check if the features previously read are sub devices of this major
+				   and update their mapping accordingly */ 
+				last_match = fnum - 1;
+				for(i = fnum - 2; i >= 0; i--) {
+					if (regexec(&preg, features[i].data.name, 3, pmatch, 0) == -1 ||
+							!sensors_read_dynamic_chip_check_mapping(&features[i],
+							&feature, pmatch)) {
+						break;						
+					} else {
+						last_match = i;
+					}
+				}
+				
+				/* if so the major should be in the list before any minor feature,
+					so swap with the oldest read */
+				if (last_match < fnum - 1) {
+					sensors_chip_feature tmp = features[last_match];
+					features[last_match] = feature;
+					features[fnum - 1] = tmp;
+							
+					last_major = last_match;
+					
+					goto NEXT_NUM; /* NOTE: goto used */
+				} else {
+					last_major = fnum - 1;
+				}
+				
+			} else {
+				feature.data.name = strdup(name);
+			
+				if (last_major != -1 && 
+						!sensors_read_dynamic_chip_check_mapping(&feature,
+								&features[last_major], pmatch)) {
+					last_major = -1; /* no more features for current major */
+				}
+			}
+		} else {
+			feature.data.name = strdup(name);
+		}
+			
+		features[fnum - 1] = feature;		
+NEXT_NUM:
+		fnum++;
+	}
+		
+	regfree(&preg);
+	
+	dyn_features = malloc(sizeof(sensors_chip_feature) * fnum);
+	if (dyn_features == NULL) {
+		sensors_fatal_error(__FUNCTION__,"Out of memory");
+	}
+	
+	for(i = 0; i < fnum - 1; i++) {
+		dyn_features[i] = features[i];
+	}
+	dyn_features[fnum - 1].data.name = 0;
+	
+	ret.feature = dyn_features;
+	
+	return ret;
+}
 
 /* returns !0 if sysfs filesystem was found, 0 otherwise */
 int sensors_init_sysfs(void)
@@ -46,7 +178,8 @@ int sensors_init_sysfs(void)
 /* returns: 0 if successful, !0 otherwise */
 static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 {
-	int domain, bus, slot, fn;
+	static int total_dynamic = 0;
+	int domain, bus, slot, fn, i;
 	struct sysfs_attribute *attr, *bus_attr;
 	char bus_path[SYSFS_PATH_MAX];
 	sensors_proc_chips_entry entry;
@@ -102,7 +235,25 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 		entry.name.bus = SENSORS_CHIP_NAME_BUS_PCI;
 	} else
 		return -SENSORS_ERR_PARSE;
+	
+	/* check whether this chip is known in the static list */ 
+	for (i = 0; sensors_chip_features_list[i].prefix; i++)
+		if (!strcasecmp(sensors_chip_features_list[i].prefix, entry.name.prefix))
+			break;
 
+	/* if no chip definition matches */
+	if (!sensors_chip_features_list[i].prefix && 
+		total_dynamic < N_PLACEHOLDER_ELEMENTS) {
+		sensors_chip_features n_entry = sensors_read_dynamic_chip(dev);
+
+		/* skip to end of list */
+		for(i = 0; sensors_chip_features_list[i].prefix; i++);
+
+		sensors_chip_features_list[i] = n_entry;	
+
+		total_dynamic++;
+	}
+		
 	sensors_add_proc_chips(&entry);
 
 	return 0;
