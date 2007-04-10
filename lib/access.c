@@ -515,27 +515,24 @@ struct feature_type_match
 };
 
 static struct feature_type_match temp_matches[] = {
-	{ "max", SENSORS_FEATURE_TEMP_MAX },
-	{ "min", SENSORS_FEATURE_TEMP_MIN },
-	{ "type", SENSORS_FEATURE_TEMP_SENS },
 	{ "hyst", SENSORS_FEATURE_TEMP_HYST },
 	{ "over", SENSORS_FEATURE_TEMP_OVER },
 	{ "max", SENSORS_FEATURE_TEMP_MAX },
 	{ "min", SENSORS_FEATURE_TEMP_MIN },
 	{ "low", SENSORS_FEATURE_TEMP_LOW },
 	{ "crit", SENSORS_FEATURE_TEMP_CRIT },
-	{ "fault", SENSORS_FEATURE_TEMP_FAULT },
 	{ "alarm", SENSORS_FEATURE_TEMP_ALARM },
+	{ "fault", SENSORS_FEATURE_TEMP_FAULT },
 	{ "type", SENSORS_FEATURE_TEMP_SENS },
 	{ 0 }
 };
 
 static struct feature_type_match in_matches[] = {
-	{ "max", SENSORS_FEATURE_IN_MAX },
-	{ "max_alarm", SENSORS_FEATURE_IN_MAX_ALARM },
 	{ "min", SENSORS_FEATURE_IN_MIN },
-	{ "min_alarm", SENSORS_FEATURE_IN_MIN_ALARM },
+	{ "max", SENSORS_FEATURE_IN_MAX },
 	{ "alarm", SENSORS_FEATURE_IN_ALARM },
+	{ "min_alarm", SENSORS_FEATURE_IN_MIN_ALARM },
+	{ "max_alarm", SENSORS_FEATURE_IN_MAX_ALARM },
 	{ 0 }
 };
 
@@ -562,10 +559,11 @@ sensors_feature_type sensors_feature_get_type(
 	const sensors_feature_data *feature)
 {
 	const char *name;
-	regex_t preg;
 	regmatch_t pmatch[4];
 	int size_first, size_second, retval, i;
 	struct feature_type_match *submatches;
+	static regex_t reg;
+	static regex_t *preg = NULL;
 	
 	/* use sysname if exists */
 	if (container_of(feature, const struct sensors_chip_feature, data)->sysname)
@@ -573,11 +571,12 @@ sensors_feature_type sensors_feature_get_type(
 	else
 		name = feature->name;
 	
-	regcomp(&preg, GET_TYPE_REGEX, 0);
+	if (!preg) {
+		regcomp(&reg, GET_TYPE_REGEX, 0);
+		preg = &reg;
+	}
 	
-	retval = regexec(&preg, name, 4, pmatch, 0);
-	
-	regfree(&preg);
+	retval = regexec(preg, name, 4, pmatch, 0);
 	
 	if (retval == -1)
 		return SENSORS_FEATURE_UNKNOWN;

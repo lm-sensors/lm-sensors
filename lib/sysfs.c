@@ -21,10 +21,10 @@
 #define _GNU_SOURCE
 
 #include <string.h>
+#include <stdlib.h>
 #include <limits.h>
 #include <errno.h>
 #include <sysfs/libsysfs.h>
-#include <regex.h>
 #include "data.h"
 #include "error.h"
 #include "access.h"
@@ -35,130 +35,136 @@ int sensors_found_sysfs = 0;
 
 char sensors_sysfs_mount[NAME_MAX];
 
-#define DYNAMIC_CHIP_REGEX "\\([[:alpha:]]\\{1,\\}[[:digit:]]\\{0,\\}\\)\\(\\_[[:alpha:]]\\{1,\\}\\)\\{0,1\\}"
-
-static int sensors_read_dynamic_chip_check_mapping(
-	sensors_chip_feature *minor,
-	sensors_chip_feature *major,
-	regmatch_t *pmatch)
-{
-	if (pmatch[1].rm_so == -1 || pmatch[2].rm_so == -1 || 
-			strncmp(minor->data.name, major->data.name, 
-			pmatch[1].rm_eo - pmatch[1].rm_so)) {
-		return 0;
-	} else {
-		minor->data.mapping = 
-			minor->data.compute_mapping = 
-			major->data.number;
-			
-		return 1;
-	}
-}
+#define MAX_SENSORS_PER_TYPE 16
 
 static 
 sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 {
-	int fnum = 1, i, last_major = -1;
+	int i, type, fnum = 1;
 	struct sysfs_attribute *attr;
 	struct dlist *attrs;
 	sensors_chip_features ret = {0, 0};
-	sensors_chip_feature features[256], *dyn_features;
-	regex_t preg;
-	regmatch_t pmatch[3];
+	/* room for all 3  (in, fan, temp) types, with all their subfeatures
+	   + misc features. We use a large sparse table at first to store all
+	   found features, so that we can store them sorted at type and index
+	   and then later create a dense sorted table */
+	sensors_chip_feature features[MAX_SENSORS_PER_TYPE *
+		SENSORS_FEATURE_MAX_SUB_FEATURES * 3 +
+		SENSORS_FEATURE_MAX_SUB_FEATURES];
+	sensors_chip_feature *dyn_features;
 	char *name;
 		
 	attrs = sysfs_get_device_attributes(sysdir);
 	
 	if (attrs == NULL)
 		return ret;
-	
-	regcomp(&preg, DYNAMIC_CHIP_REGEX, 0);
 		
+	memset(features, 0, sizeof(features));
+	
 	dlist_for_each_data(attrs, attr, struct sysfs_attribute) {
-		sensors_chip_feature feature = { { 0, }, 0, };	
+		sensors_chip_feature feature = { { 0, }, 0, };
 		name = attr->name;
 		
 		if (!strcmp(name, "name")) {
 			ret.prefix = strndup(attr->value, strlen(attr->value) - 1);
 			continue;
-		} else if (regexec(&preg, name, 3, pmatch, 0) != 0) {
+		} 
+		
+		/* check for _input extension and remove */
+		i = strlen(name);
+		if (i > 6 && !strcmp(name + i - 6, "_input"))
+			feature.data.name = strndup(name, i-6);
+		else
+			feature.data.name = strdup(name);
+
+		type = sensors_feature_get_type(&feature.data);
+		if (type == SENSORS_FEATURE_UNKNOWN) {
+			free((char *)feature.data.name);
+			continue;
+		}
+			
+		/* Get N as in this is the N-th in / fan / temp sensor */
+		switch (type & 0xFF00) {
+			case SENSORS_FEATURE_IN:
+				i = strtol(name + 2, NULL, 10);
+				break;
+			case SENSORS_FEATURE_FAN:
+				i = strtol(name + 3, NULL, 10);
+				if (i) i--;
+				break;
+			case SENSORS_FEATURE_TEMP:
+				i = strtol(name + 4, NULL, 10);
+				if (i) i--;
+				break;
+			case SENSORS_FEATURE_VID: /* first misc feature */
+				i = 0;
+				break;
+		}
+		
+		if (i >= MAX_SENSORS_PER_TYPE) {
+			fprintf(stderr, "libsensors error, more sensors of one"
+				" type then MAX_SENSORS_PER_TYPE, ignoring "
+				"feature: %s\n", name);
+			free((char *)feature.data.name);
 			continue;
 		}
 		
-		feature.data.number = fnum;
-		feature.data.mode = (attr->method & (SYSFS_METHOD_SHOW|SYSFS_METHOD_STORE)) == 
-											(SYSFS_METHOD_SHOW|SYSFS_METHOD_STORE) ?
-											SENSORS_MODE_RW :
-							(attr->method & SYSFS_METHOD_SHOW) ? SENSORS_MODE_R :
-							(attr->method & SYSFS_METHOD_STORE) ? SENSORS_MODE_W :
-							SENSORS_MODE_NO_RW;
-		feature.data.mapping = SENSORS_NO_MAPPING;
-		feature.data.compute_mapping = SENSORS_NO_MAPPING;
-			
-		if (pmatch[2].rm_so != -1) {
-			if (!strcmp(name + pmatch[2].rm_so, "_input")) {
-				int last_match;
-				
-				/* copy only the part before the _ */
-				feature.data.name = strndup(name, 
-					pmatch[1].rm_eo - pmatch[1].rm_so);
-				
-				/* check if the features previously read are sub devices of this major
-				   and update their mapping accordingly */ 
-				last_match = fnum - 1;
-				for(i = fnum - 2; i >= 0; i--) {
-					if (regexec(&preg, features[i].data.name, 3, pmatch, 0) == -1 ||
-							!sensors_read_dynamic_chip_check_mapping(&features[i],
-							&feature, pmatch)) {
-						break;						
-					} else {
-						last_match = i;
-					}
-				}
-				
-				/* if so the major should be in the list before any minor feature,
-					so swap with the oldest read */
-				if (last_match < fnum - 1) {
-					sensors_chip_feature tmp = features[last_match];
-					features[last_match] = feature;
-					features[fnum - 1] = tmp;
-							
-					last_major = last_match;
-					
-					goto NEXT_NUM; /* NOTE: goto used */
-				} else {
-					last_major = fnum - 1;
-				}
-				
-			} else {
-				feature.data.name = strdup(name);
-			
-				if (last_major != -1 && 
-						!sensors_read_dynamic_chip_check_mapping(&feature,
-								&features[last_major], pmatch)) {
-					last_major = -1; /* no more features for current major */
-				}
-			}
-		} else {
-			feature.data.name = strdup(name);
+		/* "calculate" a place to store the feature in our sparse,
+		   sorted table */
+		i = (type >> 8) * MAX_SENSORS_PER_TYPE *
+			SENSORS_FEATURE_MAX_SUB_FEATURES +
+			i * SENSORS_FEATURE_MAX_SUB_FEATURES + (type & 0xFF);
+		
+		if (features[i].data.name) {			
+			fprintf(stderr, "libsensors error, trying to add dupli"
+				"cate feature: %s to dynamic feature table\n",
+				name);
+			free((char *)feature.data.name);
+			continue;
 		}
+		
+		/* fill in the other feature members */
+		feature.data.number = i + 1;
 			
-		features[fnum - 1] = feature;		
-NEXT_NUM:
+		if ( (type & 0xFF00) == SENSORS_FEATURE_VID ||
+				(type & 0x00FF) == 0) {
+			/* misc sensor or main feature */
+			feature.data.mapping = SENSORS_NO_MAPPING;
+			feature.data.compute_mapping = SENSORS_NO_MAPPING;
+		} else if (type & 0x10) {
+			/* sub feature without compute mapping */
+			feature.data.mapping = i -
+				i % SENSORS_FEATURE_MAX_SUB_FEATURES + 1;
+			feature.data.compute_mapping = SENSORS_NO_MAPPING;
+		} else {
+			feature.data.mapping = i -
+				i % SENSORS_FEATURE_MAX_SUB_FEATURES + 1;
+			feature.data.compute_mapping = feature.data.mapping;
+		}
+		
+		feature.data.mode =
+			(attr->method & (SYSFS_METHOD_SHOW|SYSFS_METHOD_STORE))
+			 == (SYSFS_METHOD_SHOW|SYSFS_METHOD_STORE) ?
+			SENSORS_MODE_RW : (attr->method & SYSFS_METHOD_SHOW) ?
+			SENSORS_MODE_R : (attr->method & SYSFS_METHOD_STORE) ?
+			SENSORS_MODE_W : SENSORS_MODE_NO_RW;
+
+		features[i] = feature;
 		fnum++;
 	}
-		
-	regfree(&preg);
-	
-	dyn_features = malloc(sizeof(sensors_chip_feature) * fnum);
+
+	dyn_features = calloc(fnum, sizeof(sensors_chip_feature));
 	if (dyn_features == NULL) {
 		sensors_fatal_error(__FUNCTION__,"Out of memory");
 	}
 	
-	for(i = 0; i < fnum - 1; i++) {
-		dyn_features[i] = features[i];
+	fnum = 0;
+	for(i = 0; i < sizeof(features)/sizeof(sensors_chip_feature); i++) {
+		if (features[i].data.name) {
+			dyn_features[fnum] = features[i];
+			fnum++;
+		}
 	}
-	dyn_features[fnum - 1].data.name = 0;
 	
 	ret.feature = dyn_features;
 	

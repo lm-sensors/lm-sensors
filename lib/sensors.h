@@ -147,11 +147,25 @@ typedef struct sensors_feature_data {
 extern const sensors_feature_data *sensors_get_all_features 
              (sensors_chip_name name, int *nr1,int *nr2);
 
+/* This enum contains some "magic" used by sensors_read_dynamic_chip() from
+   lib/sysfs.c . All the sensor-types (in, fan, temp, misc) are a multiple of
+   0x100 apart, and sensor features which should not have a compute_mapping to
+   the _input feature start at 0x?10. */
 typedef enum sensors_feature_type {
-  SENSORS_FEATURE_TEMP = 0x0,
-  SENSORS_FEATURE_TEMP_ALARM,
-  SENSORS_FEATURE_TEMP_FAULT,
-  SENSORS_FEATURE_TEMP_SENS,
+  SENSORS_FEATURE_IN = 0x000,
+  SENSORS_FEATURE_IN_MIN,
+  SENSORS_FEATURE_IN_MAX,
+  SENSORS_FEATURE_IN_ALARM = 0x010,
+  SENSORS_FEATURE_IN_MIN_ALARM,
+  SENSORS_FEATURE_IN_MAX_ALARM,
+  
+  SENSORS_FEATURE_FAN = 0x100,
+  SENSORS_FEATURE_FAN_MIN,
+  SENSORS_FEATURE_FAN_ALARM = 0x110,
+  SENSORS_FEATURE_FAN_FAULT,
+  SENSORS_FEATURE_FAN_DIV,
+  
+  SENSORS_FEATURE_TEMP = 0x200,
   SENSORS_FEATURE_TEMP_HYST,
   SENSORS_FEATURE_TEMP_OVER,
   SENSORS_FEATURE_TEMP_MAX,
@@ -160,24 +174,18 @@ typedef enum sensors_feature_type {
   SENSORS_FEATURE_TEMP_LOW,
   SENSORS_FEATURE_TEMP_LIM,
   SENSORS_FEATURE_TEMP_CRIT,
-  
-  SENSORS_FEATURE_IN = 0x100,
-  SENSORS_FEATURE_IN_ALARM,
-  SENSORS_FEATURE_IN_MIN,
-  SENSORS_FEATURE_IN_MAX,
-  SENSORS_FEATURE_IN_MIN_ALARM,
-  SENSORS_FEATURE_IN_MAX_ALARM,
-  
-  SENSORS_FEATURE_FAN = 0x200,
-  SENSORS_FEATURE_FAN_ALARM,
-  SENSORS_FEATURE_FAN_FAULT,
-  SENSORS_FEATURE_FAN_MIN,
-  SENSORS_FEATURE_FAN_DIV,
+  SENSORS_FEATURE_TEMP_ALARM = 0x210,
+  SENSORS_FEATURE_TEMP_FAULT,
+  SENSORS_FEATURE_TEMP_SENS,
   
   SENSORS_FEATURE_VID = 0x300,
   SENSORS_FEATURE_VRM,
   
-  SENSORS_FEATURE_UNKNOWN = INT_MAX
+  SENSORS_FEATURE_UNKNOWN = INT_MAX,
+  
+  /* special the largest number of subfeatures used, iow the 
+     highest ## from all the 0x?## above + 1*/
+  SENSORS_FEATURE_MAX_SUB_FEATURES = 19
 } sensors_feature_type;
 
 sensors_feature_type sensors_feature_get_type
