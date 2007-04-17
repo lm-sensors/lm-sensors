@@ -23,7 +23,7 @@
 .\"
 .\" References consulted:
 .\"     sensors.conf.eg by Frodo Looijaard
-.TH sensors.conf 5  "October 2006" "" "Linux Programmer's Manual"
+.TH sensors.conf 5  "April 2007" "" "Linux Programmer's Manual"
 .SH NAME
 sensors.conf \- libsensors configuration file
 
@@ -168,7 +168,7 @@ in the source distribution can help you generate these lines.
 .SS CHIP STATEMENT
 
 .RS
-chip "lm78\-*" "*\-isa\-*" "*\-i2c\-3"
+chip "lm78\-*" "lm79\-*"
 .RE
 
 The 
@@ -191,12 +191,7 @@ statement.
 A chip description is built from a couple of elements, separated by
 dashes. To complicate matters, sometimes an element can also contain
 dashes. This complicates the parsing algorithm, but is not too confusing
-for humans (we hope!). The chip descriptions are equal to those
-appearing in
-.IR /proc/sys/dev/sensors ,
-but may contain the 
-.I *
-wildcard.
+for humans (we hope!).
 
 The first element is the name of the chip type. Sometimes a single driver
 implements several chip types, with several names. The driver documentation
@@ -205,7 +200,8 @@ should tell you. You may substitute the wildcard operator
 for this element.
 
 The second element is the name of the bus. This is either
-.I isa
+.IR isa ,
+.I pci
 or
 .IR i2c-N ,
 with 
@@ -215,10 +211,10 @@ being any number as binded with a
 statement. You may substitute the wildcard operator
 .I *
 for this element, or only for the number of the I2C bus
-(which means 'any non-ISA bus').
+(which means 'any I2C bus').
 
-The third element is the hexadecimal address. This is a number between 0 and
-ffff for the ISA bus, and between 0 and 7f for an I2C bus. You may substitute
+The third element is the hexadecimal address of the chip. The valid range
+depends on the bus type. You may substitute
 the wildcard operator
 .I *
 for this element. 
@@ -227,34 +223,34 @@ There are some folding rules for wildcards to make things easier for humans
 to read. Also, you can't specify the address if you wildcard the complete
 second element. The following are all valid chip type specification based
 on 
-.I lm78\-i2c\-10\-5e
+.I lm78\-i2c\-1\-2d
 or
-.IR lm78\-isa\-10dd :
+.IR lm78\-isa\-0290 :
 
 .RS
-lm78\-i2c\-10\-5e     
+lm78\-i2c\-1\-2d
 .sp 0
-lm78\-i2c\-10\-*     
+lm78\-i2c\-1\-*
 .sp 0
-lm78\-i2c\-*\-5e    
+lm78\-i2c\-*\-2d
 .sp 0
-lm78\-i2c\-*\-*    
+lm78\-i2c\-*\-*
 .sp 0
-lm78\-isa\-10dd  
+lm78\-isa\-0290
 .sp 0
 lm78\-isa\-*    
 .sp 0
 lm78\-*       
 .sp 0
-*\-i2c\-10\-5e
+*\-i2c\-1\-2d
 .sp 0
-*\-i2c\-10\-*
+*\-i2c\-1\-*
 .sp 0
-*\-i2c\-*\-5e
+*\-i2c\-*\-2d
 .sp 0
 *\-i2c-*\-*
 .sp 0
-*\-isa\-10dd
+*\-isa\-0290
 .sp 0
 *\-isa\-*
 .sp 0
