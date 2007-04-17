@@ -29,7 +29,9 @@
 if [ $# -ne 2 ]
 then
 	echo "usage: $0 database.rrd sensor"
-	echo "       sensor example: w83781d-isa-0290 (2.4) or 0-0290 (2.6)"
+	echo "       sensor example: w83781d-isa-0290 (2.4 kernel)"
+	echo "                       0-0290 (early 2.6 kernel)"
+	echo "                       hwmon0 (kernel 2.6.14 or later)"
 	exit 1
 fi
 #
@@ -38,19 +40,23 @@ RRDB=$1
 
 SENSDIR=/proc/sys/dev/sensors
 SDIR=/sys/bus/i2c/devices
-if [ ! -d $SENSDIR ]
+HWMONDIR=/sys/class/hwmon
+SENSDEV=$2
+if [ -d $HWMONDIR ]
 then
-	if [ ! -d $SDIR ]
-	then
-		echo $0: 'No sensors found! (modprobe sensor modules?)'
-		exit 1
-	else
-		SYSFS=1
-		SENSDIR=$SDIR
-	fi	
+	SYSFS=1
+	SENSDIR=$HWMONDIR
+	SENSDEV=$SENSDEV/device
+elif [ -d $SDIR ]
+then
+	SYSFS=1
+	SENSDIR=$SDIR
+elif [ ! -d $SENSDIR]
+then
+	echo $0: 'No sensors found! (modprobe sensor modules?)'
+	exit 1
 fi
 
-SENSDEV=$2
 SENS=$SENSDIR/$SENSDEV
 if [ ! -r $SENS ]
 then

@@ -6,6 +6,7 @@ SVN HEAD
   Library: Clean up pwm symbol names translation
            Add dme1737 support
   Program isadump: Detect when address bit 7 is a busy flag
+  Program sens_update_rrd: Support non-i2c devices (hwmon class)
   Program sensors: Drop ddcmon and eeprom support
                    Add dme1737 support
   Program sensors-detect: Stop Super-I/O probe after first family success
