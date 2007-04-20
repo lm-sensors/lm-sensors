@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 #    sens_update_rrd -
 #	Update a sensors rrd database.

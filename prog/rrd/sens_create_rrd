@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 #    sens_create_rrd -
 #	Create a sensors rrd database of 14 sensor readings

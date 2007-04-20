@@ -7,7 +7,9 @@ SVN HEAD
            Add dme1737 support
   Man page sensors.conf.5: Update the chip statement section
   Program isadump: Detect when address bit 7 is a busy flag
-  Program sens_update_rrd: Support non-i2c devices (hwmon class)
+  Program rrd: Support non-i2c devices (hwmon class)
+               Add missing shell declarations
+               Update URI
   Program sensors: Drop ddcmon and eeprom support
                    Add dme1737 support
   Program sensors-detect: Stop Super-I/O probe after first family success

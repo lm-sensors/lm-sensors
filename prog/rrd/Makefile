@@ -13,9 +13,12 @@ MACH=`uname -n`
 # 2.4 kernels
 #SENSDEV=w83781d-isa-0290
 #SENSDIR=/proc/sys/dev/sensors/$(SENSDEV)
-# 2.6 kernels
-SENSDEV=0-0290
-SENSDIR=/sys/bus/i2c/devices/$(SENSDEV)
+# 2.6 kernels up to 2.6.13
+#SENSDEV=0-0290
+#SENSDIR=/sys/bus/i2c/devices/$(SENSDEV)
+# 2.6.14 and later kernels
+SENSDEV=hwmon0
+SENSDIR=/sys/class/hwmon/$(SENSDEV)/device
 ################################################
 # Everything below here should be fine
 #
