@@ -4,18 +4,14 @@
 USER=apache
 # CRONTAB not used
 #CRONTAB=/var/spool/cron/tabs/$(USER)
-RRDPATH=/usr/local/rrdtool/bin
+RRDPATH=/usr/bin
 BINPATH=/usr/local/bin
 RRDDIR=/var/lib/sensors-rrd
 APACHE=/var/www/html
 APACHDIR=$(APACHE)/senspix
 MACH=`uname -n`
-# 2.4 kernels
-#SENSDEV=w83781d-isa-0290
-#SENSDIR=/proc/sys/dev/sensors/$(SENSDEV)
-# 2.6 kernels
-SENSDEV=0-0290
-SENSDIR=/sys/bus/i2c/devices/$(SENSDEV)
+SENSDEV=hwmon0
+SENSDIR=/sys/class/hwmon/$(SENSDEV)/device
 ################################################
 # Everything below here should be fine
 #

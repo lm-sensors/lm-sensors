@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 #    sens_create_rrd -
 #	Create a sensors rrd database of 14 sensor readings
@@ -19,7 +20,7 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-RRDPATH=/usr/local/rrdtool/bin
+RRDPATH=/usr/bin
 RRDB=$1
 #Heartbeat 15 minutes
 HB=900

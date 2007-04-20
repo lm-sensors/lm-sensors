@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 #    sens_update_rrd -
 #	Update a sensors rrd database.
@@ -37,7 +38,7 @@ else
 	HWMON=hwmon0
 fi
 #
-RRDPATH=/usr/local/rrdtool/bin
+RRDPATH=/usr/bin
 RRDB=$1
 
 SENSDIR=/sys/class/hwmon
