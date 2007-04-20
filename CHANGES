@@ -5,6 +5,7 @@ SVN HEAD
   File sensors.conf.eg: Add a dme1737 section
   Library: Clean up pwm symbol names translation
            Add dme1737 support
+  Man page sensors.conf.5: Update the chip statement section
   Program isadump: Detect when address bit 7 is a busy flag
   Program rrd: Support only hwmon class devices
                Look for rrd in /usr/bin by default
