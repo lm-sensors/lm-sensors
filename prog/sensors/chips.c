@@ -1641,7 +1641,7 @@ void print_lm85(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM85_IN3_MAX,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+6.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
+      printf("%+7.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
            (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN3?"ALARM":"");
       if (is1027) { printf(alarm_mask&LM85_ALARM_IN3?" MASKED":""); }
       putchar( '\n' );
@@ -1655,7 +1655,7 @@ void print_lm85(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM85_IN4_MAX,&max)) {
     if (valid) {
       print_label(label,10);
-      printf("%+6.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
+      printf("%+7.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
            (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN4?"ALARM":"");
       if (is1027) { printf(alarm_mask&LM85_ALARM_IN4?" MASKED":""); }
       putchar( '\n' );
@@ -1671,7 +1671,7 @@ void print_lm85(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_LM85_IN5_MAX,&max)) {
       if (valid) {
         print_label(label,10);
-        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+        printf("%+7.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&LM85_ALARM_IN5?"ALARM":"");
       }
     } else
@@ -1683,7 +1683,7 @@ void print_lm85(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_LM85_IN6_MAX,&max)) {
       if (valid) {
         print_label(label,10);
-        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+        printf("%+7.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&LM85_ALARM_IN6?"ALARM":"");
       }
     } else
@@ -1695,7 +1695,7 @@ void print_lm85(const sensors_chip_name *name)
         !sensors_get_feature(*name,SENSORS_LM85_IN7_MAX,&max)) {
       if (valid) {
         print_label(label,10);
-        printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
+        printf("%+7.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&LM85_ALARM_IN7?"ALARM":"");
       }
     } else
