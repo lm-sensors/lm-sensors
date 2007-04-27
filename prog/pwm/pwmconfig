@@ -248,6 +248,10 @@ echo
 PLOTTER=gnuplot
 STEP=15
 PDELAY=2
+# Use a smaller step for low PWM values as this is typically where the
+# more important fan speed changes are happening.
+STEP2=2
+STEP2_BELOW=31
 
 function pwmdetail()
 {
@@ -315,7 +319,12 @@ function pwmdetail()
 			fi
 			break
 		fi
-		let pwm=$pwm-$STEP
+		if [ $pwm -lt $STEP2_BELOW ]
+		then
+			let pwm=$pwm-$STEP2
+		else
+			let pwm=$pwm-$STEP
+		fi
 	done
 	pwmdisable $P	
 	if [ "$PLOT" = "y" ]
