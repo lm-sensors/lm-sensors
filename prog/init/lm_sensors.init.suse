@@ -13,7 +13,7 @@
 ### END INIT INFO
 # chkconfig: 2345 26 74
 # description: sensors is used for monitoring motherboard sensor values.
-# config: /etc/sysconfig/sensors
+# config: /etc/sysconfig/lm_sensors
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@
 # See also the lm_sensors homepage at:
 #     http://www.lm-sensors.org
 
-# It uses a config file /etc/sysconfig/sensors that contains the modules to
-# be loaded/unloaded. That file is sourced into this one.
+# It uses a config file /etc/sysconfig/lm_sensors that contains the modules
+# to be loaded/unloaded. That file is sourced into this one.
 
 # The format of that file a shell script that simply defines the modules 
 # in order as normal shell variables with the special names:
