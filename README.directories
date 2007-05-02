@@ -8,8 +8,6 @@ The directories within this package:
   The kernel modules: I2C/SMBus master drivers, and sensor chip drivers.
 * lib
   The user-space sensors support library code.
-* mkpatch
-  A script for creating a kernel patch.
 * prog
   Several supporting programs. Includes programs for detecting installed
   hardware and recommending specific modules to install.

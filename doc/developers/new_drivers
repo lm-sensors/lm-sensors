@@ -58,8 +58,7 @@ steps apply.
 
 * Add the driver to the Module.mk (the makefile).
   Usually, you can just add it to KERNEL{CHIPS,DRIVERS}TARGETS in the
-  Module.mk file in the directory itself. Put it at the beginning,
-  where the comment says to put drivers NOT included in mkpatch.
+  Module.mk file in the directory itself.
 
 * Make sure it compiles cleanly.
   Check compilation with 'make DEBUG=1' if you use debugging
@@ -144,24 +143,6 @@ Checklist for us to do on the webpage:
 * Update entry on 'new drivers' page
 
 ---------------------------------------------------------------------
-Checklist for mkpatch support, after the driver is tested and stable:
-
-* Add .c file to mkpatch/FILES.
-
-* Add makefile entry in mkpatch/mkpatch.pl (2 places - old and new formats).
-  (don't bother with old format, obsolete)
-
-* Add config help to mkpatch/mkpatch.pl.
-
-* Add config entry to mkpatch/Config.in (chip drivers only)
-
-* Add config entry in mkpatch/mkpatch.pl (bus drivers only)
-
-* Move .o reference in kernel/[chips,busses]/Module.mk
-  from first to second section.
-
-
----------------------------------------------------------------------
 Checklist for _adding_ support for a chip to an _existing_ driver:
 
 * Make the changes to the driver itself.
@@ -172,12 +153,6 @@ Checklist for _adding_ support for a chip to an _existing_ driver:
   (chip drivers only).
 
 * Add entries for the new prefix to etc/sensors.conf.eg (chip drivers only).
-
-* Update config help in mkpatch/mkpatch.pl.
-
-* Update config entry in mkpatch/Config.in (chip drivers only)
-
-* Update config entry in mkpatch/mkpatch.pl (bus drivers only)
 
 * Update doc/[chips,busses]/xxx file
 

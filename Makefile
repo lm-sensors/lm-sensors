@@ -176,7 +176,6 @@ ifneq ($(MAKECMDGOALS),user_uninstall)
 ifneq ($(MAKECMDGOALS),package)
 ifneq ($(MAKECMDGOALS),userpackage)
 ifneq ($(MAKECMDGOALS),manhtml)
-SRCDIRS += mkpatch
 SRCDIRS += kernel kernel/busses kernel/chips
 endif
 endif

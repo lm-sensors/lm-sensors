@@ -8,6 +8,7 @@ SVN HEAD
            Add dme1737 support
   Man page sensors.conf.5: Update the chip statement section
   Program isadump: Detect when address bit 7 is a busy flag
+  Program mkpatch: Delete
   Program pwmconfig: Use smaller steps for low PWM values
   Program rrd: Support only hwmon class devices
                Look for rrd in /usr/bin by default

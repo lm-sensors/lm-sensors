@@ -18,34 +18,11 @@ FOR 2.5/2.6 KERNELS, do not attempt to compile the modules in this package.
 =============================================================================
 These are the installation instruction for the lm_sensors package.
 
-There are two ways in which you can compile and install this package.
-Option 1 is much easier and is recommended.
-
- 1. Complete separate from kernel compilation
-    (only for 2.4 kernels 2.4.10 or later)
-    This will generate a set of modules which can be inserted and removed
-    as needed; nothing will be written into the kernel tree;
-
- 2. Patching of the kernel
-    (only for 2.4 kernels 2.4.13 or later)
-    This will patch your kernel source tree. You must recompile your kernel
-    to take advantage of this. But it makes it possible to compile drivers
-    into the kernel itself, instead of having to add them as modules.
-    ** AFTER YOU COMPILED AND INSTALLED YOUR KERNEL, YOU WILL STILL HAVE TO 
-    ** COMPILE THIS PACKAGE TO GET THE USERLAND UTILITIES!
-    ** NOT ALL MODULES ARE PATCHED INTO THE KERNEL. SEE BELOW.
-
-
-
-Each of these ways will be described below in detail.
-
 NOTE: MAKE SURE YOU HAVE THE I2C-ALGO-BIT DRIVER (PART OF THE I2C PACKAGE)
       COMPILED INTO YOUR KERNEL OR AVAILABLE AS A MODULE; SOME I2C/SMBUS
       MASTER DRIVERS DEPEND ON IT!
 
-NOTE: IN EACH CASE, YOU WILL HAVE TO GET AND INSTALL THE I2C PACKAGE FIRST!
-      SET COMPILE_KERNEL TO 0 IN THE MAIN MAKEFILE FOR OPTION 2, UNLESS
-      YOU NEED ALPHA OR BETA DRIVERS (SEE BELOW)
+NOTE: YOU WILL HAVE TO GET AND INSTALL THE I2C PACKAGE FIRST!
 
 NOTE: PLEASE READ THE DOCUMENTATION IN THE DOC SUBDIRECTORY IF YOU GET STUCK!
 
@@ -58,24 +35,7 @@ any 2.4 kernel (and will never be).
 Therefore, you must download and install the i2c package with
 the same version number or higher as this lm_sensors package.
 
-All i2c components are distributed in
-a separate package. There are install instructions in that package. If
-you want to use compilation option 2 (patching the kernel) for lm_sensors,
-you will have to use compilation option 3 (patching the kernel) for i2c
-too. If you want to use compilation option 1 (compiling as modules) for
-lm_sensors, you may use either compilation option 1 or 2 (compiling as
-modules) or compilation option 3 (patching the kernel for i2c). See the
-table below.
-
-                                          LM_SENSORS
-I2C                      | option 1 (modules)      option 2 (patch kernel)
--------------------------+------------------------------------------------
-option 1 (modules)       |      YES                      NO
-option 2 (modules)       |      YES                      YES
-option 3 (patch kernel)  |      YES                      YES
-
-
-If you use compilation option 1 (compiling as modules) for lm_sensors, you
+You
 will have to make very sure the correct i2c header files are found. If you
 get weird compilation errors, this is almost certainly going wrong. The
 i2c header files are in a i2c subdirectory of either /usr/local/include 
@@ -84,12 +44,9 @@ options 2 and 3). Especially if you have in the past placed the header
 files in /usr/local/include, this will probably go wrong. See below on
 how to fix this.
 
-NOTE: option 3 only works with 2.4 kernels 2.4.13 or later;
-      options 1 and 2 only work with 2.4 kernels 2.4.10 or later.
 
-
-Mixing old and new, and using beta drivers (compilation option 1)
-=================================================================
+Mixing old and new, and using beta drivers
+==========================================
 
 It is possible that you are running a previously patched kernel, or
 a very new kernel which already has limited or full i2c or lm_sensors
@@ -109,20 +66,14 @@ On the other hand, if you know what you are doing, compilation will
 be smart. Drivers that are compiled right into your kernel will not 
 be compiled as a module again.  You could do nothing with them anyway.
 
-Sometimes, you want to patch your kernel, but find that certain alpha
-or beta drivers are not included in the patch. This is on purpose: we
-do not want to polute the kernel tree with things of which we are not
-confident they work. In this case, patch the kernel, compile it, and
-then compile lm_sensors with COMPILE_KERNEL set to 1.
 
-
-Having a proper kernel tree (compilation option 1)
-==================================================
+Having a proper kernel tree
+===========================
 
 Usually, if you compile a user-space application, you can get away with
 having a different version of the kernel running than the version of the
 kernel header files against which you compiled it. But a perfect match
-is needed for the first two compilation options above.
+is needed here.
 
 Let's say you want to use the lm_sensors modules with the kernel 2.4.32 you
 are running now. What you need, is the original tree in which you
@@ -149,8 +100,8 @@ as distributed on ftp://ftp.kernel/org/pub/linux/kernel, and not one
 patched by your distribution.
 
 
-Separate from kernel compilation (compilation option 1)
-=======================================================
+Compilation
+===========
 
 This will compile and install the complete lm_sensors package. Though 
 nothing is written to your kernel tree, a proper tree is still needed 
@@ -176,8 +127,8 @@ information, which is regenerated on the spot.
 Please continue reading this file before you start compiling.
 
 
-Makefile configuration variables (compilation option 1)
-==============================================================
+Makefile configuration variables
+================================
 
 SHELL (default: /bin/sh)
   You may have to specify the full path to Bash here, if /bin/sh is some
@@ -187,16 +138,6 @@ KERNELVERSION
   The version of the currently running kernel.
 LINUX (default: /lib/modules/$(KERNELVERSION)/build)
   The location of your kernel tree.
-COMPILE_KERNEL
-  Determine whether you want to consider the kernel modules for compilation
-  at all. By default, compilation option 1 will only compile and install
-  those modules which are not built into the kernel.
-  If some modules are built into your kernel, and this package is much 
-  newer, you may find you can not insert the newly compiled modules. 
-  Sorry.
-  You may want to set this to 0 if you have just patched and compiled
-  your kernel using the same version of this package, and just want to
-  compile the user-space tools.
 I2C_HEADERS (default: /usr/local/include)
   This lists where the i2c headers are found. If you used compilation
   option 1 for the i2c package, the default will be right. If you used
@@ -243,40 +184,6 @@ MANOWN (default: root)
   Owner of manual pages.
 MANGRP (default: root)
   Group of manual pages.
-
-
-Patching the kernel (compilation option 2)
-==========================================
-
-There is a special script which should be able to generate diffs against
-any 2.4 kernel (2.4.10 or later).  Please report any problems to our
-mailing list.  It *is* safe to run it if your kernel already has the
-lm_sensors drivers.  It will only work if you applied the i2c patches first.
-
-** Only a subset of the modules in lm_sensors are patched into the        **
-** kernel by the script. See the file mkpatch/FILES to see if the         **
-** modules you need are included. If a module you need is NOT listed      **
-** in mkpatch/FILES, it will not be patched, and you MUST use option 1.   **
-** If you are not sure what modules you need, run `sensors-detect' first. **
-
-The kernel diffs are generated by the program `mkpatch.pl' in the mkpatch
-subdirectory. It needs two arguments: the first one is the root of the
-lm_sensors package, the second one is the root of the kernel tree against
-which the diffs will be generated. For example:
-  cd /tmp/lm_sensors-2.10.0
-  mkpatch/mkpatch.pl . /usr/src/linux > /tmp/sensors-2.10.0.patch
-You can apply the diffs as usual:
-  cd /usr/src/linux
-  patch -p1 -E < /tmp/sensors-2.10.0.patch
-Generation and application can easily be done in one step:
-  mkpatch/mkpatch.pl . /usr/src/linux | patch -p1 -E -d /usr/src/linux
-The generated diffs are of course only valid for the kernel version 
-against which mkpatch.pl was run.
-
-Once you have applied the patches, you can configure and compile your
-kernel as usual. You will see the sensors configuration screen under the
-`Character Devices' menu in menuconfig, but it will only be available
-if you selected base I2C support.
 
 
 Using the sensors package
