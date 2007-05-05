@@ -5,7 +5,7 @@ The directories within this package:
 * etc
   A sample configuration file for the 'sensors' program.
 * kernel
-  The kernel modules: I2C/SMBus master drivers, and sensor chip drivers.
+  The kernel modules: sensor chip drivers.
 * lib
   The user-space sensors support library code.
 * prog

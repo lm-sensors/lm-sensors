@@ -77,11 +77,3 @@ lock bit for the base address registers.
 Also, the temperature reading in sis5595 is usually wrong.
 Different formulas are required for different versions of
 the chip and different motherboards.
-
-================================
-bus drivers (all)
-
-Rmmod'ing a bus driver when the /proc directory for a chip
-driver on that bus is in use may cause a kernel oops, because
-the chip driver gets removed too. See ticket #331 for details.
-Not likely to happen. No obvious way to fix.

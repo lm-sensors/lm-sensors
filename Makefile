@@ -176,7 +176,7 @@ ifneq ($(MAKECMDGOALS),user_uninstall)
 ifneq ($(MAKECMDGOALS),package)
 ifneq ($(MAKECMDGOALS),userpackage)
 ifneq ($(MAKECMDGOALS),manhtml)
-SRCDIRS += kernel kernel/busses kernel/chips
+SRCDIRS += kernel kernel/chips
 endif
 endif
 endif
@@ -367,9 +367,7 @@ userpackage: version clean $(KERNELINCLUDEDIR)/sensors.h
 	find $$lmpackage/ -type f | grep -v ^$$lmpackage/$$lmpackage$$ | \
 	                            grep -v ^$$lmpackage/$$lmpackage.tar$$ | \
 	                            grep -v ^$$lmpackage/doc/chips | \
-	                            grep -v ^$$lmpackage/doc/busses | \
 	                            grep -v ^$$lmpackage/kernel/chips | \
-	                            grep -v ^$$lmpackage/kernel/busses | \
 	                            grep -v ^$$lmpackage/$$ | \
 	                            grep -v /CVS | \
 	                            grep -v /\\.# | \

@@ -7,10 +7,9 @@ Description: Hardware health monitoring package for Linux. It consists of
              of a library to allow applications to read this data more
              easily, and of an example program to pretty print this data.
              LM78, LM79, LM80, W83781D and GL518SM sensor chips are 
-             supported, among others. PIIX4 and VIA chipset SMBus
-             implementations are supported, as well as many I2C busses.
+             supported, among others.
              Version 2 is a complete non-compatible modular rewrite of this 
-             package, with full I2C and SMBus support.
+             package.
 Keywords: kernel module SMBus sensors LM78 health
 Author: frodol@dds.nl (Frodo Looijaard)
         phil@netroedge.com (Philip Edelbrock)
