@@ -1,7 +1,7 @@
 Installing Modules
 ==================
 
-'make install' will install the kernel modules modules in the
+'make install' will install the kernel modules in the
 subdirectories /lib/modules/$version/kernel/drivers/i2c and
 /lib/modules/$version/kernel/drivers/sensors. This puts the modules
 in the same location as a kernel 'make modules_install' does so
