@@ -20,6 +20,8 @@ Supported adapters:
       (10de:0034, included in nForce4 MCP-04)
       (10de:0264, included in nForce4 MCP51)
       (10de:0368, included in nForce4 MCP55)
+      (10de:03eb, included in nForce MCP61)
+      (10de:0446, included in nForce MCP65)
       Datasheet: same as for nForce2 SMBus PCI interface
 
 Author: Hans-Frieder Vogt <hfvogt@arcor.de>
