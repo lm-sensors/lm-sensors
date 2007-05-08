@@ -6041,6 +6041,41 @@ void print_dme1737(const sensors_chip_name *name)
   print_vid_info(name, SENSORS_DME1737_VID, SENSORS_DME1737_VRM);
 }
 
+void print_applesmc(const sensors_chip_name *name)
+{
+	char *label;
+	double cur, min, max, safe;
+	int valid;
+	int i;
+
+	for (i = 0; i < 12; i++) {
+		if (!sensors_get_label_and_valid(*name, SENSORS_APPLESMC_TEMP(i), &label, &valid)
+		 && !sensors_get_feature(*name, SENSORS_APPLESMC_TEMP(i), &cur)) {
+			if (valid) {
+				print_label(label, 10);
+				print_temp_info(cur, 0, 0, SINGLE, 0, 0);
+				printf("\n");
+			}
+		}
+		free(label);
+	}
+
+	for (i = 0; i < 2; i++) {
+		if (!sensors_get_label_and_valid(*name, SENSORS_APPLESMC_FAN(i), &label, &valid)
+		 && !sensors_get_feature(*name, SENSORS_APPLESMC_FAN(i), &cur)
+		 && !sensors_get_feature(*name, SENSORS_APPLESMC_FAN_MIN(i), &min)
+		 && !sensors_get_feature(*name, SENSORS_APPLESMC_FAN_MAX(i), &max)
+		 && !sensors_get_feature(*name, SENSORS_APPLESMC_FAN_SAFE(i), &safe)) {
+			if (valid) {
+				print_label(label, 10);
+				printf("%4.0f RPM (safe = %4.0f RPM, min = %4.0f RPM, max = %4.0f RPM)\n",
+				       cur, safe, min, max);
+			}
+		}
+		free(label);
+	}
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;

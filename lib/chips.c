@@ -6048,6 +6048,51 @@ static sensors_chip_feature dme1737_features[] =
 	{ { 0 }, 0 }
 };
 
+static sensors_chip_feature applesmc_features[] =
+  {
+    { { SENSORS_APPLESMC_TEMP(0), "temp1", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_TEMP(1), "temp2", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_TEMP(2), "temp3", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_TEMP(3), "temp4", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_TEMP(4), "temp5", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_TEMP(5), "temp6", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_TEMP(6), "temp7", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_TEMP(7), "temp8", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_TEMP(8), "temp9", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_TEMP(9), "temp10", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_TEMP(10), "temp11", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_TEMP(11), "temp12", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(1), 3 },
+    { { SENSORS_APPLESMC_FAN(0), "fan1", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(2), 0 },
+    { { SENSORS_APPLESMC_FAN(1), "fan2", NOMAP, NOMAP, R }, 
+                                NOSYSCTL, VALUE(2), 0 },
+    { { SENSORS_APPLESMC_FAN_MIN(0), "fan1_min", SENSORS_APPLESMC_FAN(0), 
+		  SENSORS_APPLESMC_FAN(0), R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_APPLESMC_FAN_MIN(1), "fan2_min", SENSORS_APPLESMC_FAN(1),
+		  SENSORS_APPLESMC_FAN(1), R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_APPLESMC_FAN_MAX(0), "fan1_max", SENSORS_APPLESMC_FAN(0), 
+		  SENSORS_APPLESMC_FAN(0), R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_APPLESMC_FAN_MAX(1), "fan2_max", SENSORS_APPLESMC_FAN(1),
+		  SENSORS_APPLESMC_FAN(1), R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_APPLESMC_FAN_SAFE(0), "fan1_safe", SENSORS_APPLESMC_FAN(0),
+		  SENSORS_APPLESMC_FAN(0), R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_APPLESMC_FAN_SAFE(1), "fan2_safe", SENSORS_APPLESMC_FAN(1),
+		  SENSORS_APPLESMC_FAN(1), R }, NOSYSCTL, VALUE(1), 0 },
+    { { 0 }, 0 }
+  };
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -6161,5 +6206,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_K8TEMP_PREFIX, k8temp_features },
  { SENSORS_CORETEMP_PREFIX, coretemp_features },
  { SENSORS_DME1737_PREFIX, dme1737_features },
+ { SENSORS_APPLESMC_PREFIX, applesmc_features },
  { 0 }
 };

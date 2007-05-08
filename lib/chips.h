@@ -2292,4 +2292,17 @@
 #define SENSORS_DME1737_VID			(0xf0) /* R */
 #define SENSORS_DME1737_VRM			(0xf1) /* RW */
 
+/* applesmc */
+
+#define SENSORS_APPLESMC_PREFIX "applesmc"
+
+/* temp n from 0 to 11 */
+#define SENSORS_APPLESMC_TEMP(n)		(0x01 + (n)) /* R */
+
+/* fan n from 0 to 1 */
+#define SENSORS_APPLESMC_FAN(n)			(0x21 + (n)) /* R */
+#define SENSORS_APPLESMC_FAN_MIN(n)		(0x41 + (n)) /* R */
+#define SENSORS_APPLESMC_FAN_MAX(n)		(0x61 + (n)) /* R */
+#define SENSORS_APPLESMC_FAN_SAFE(n)		(0x81 + (n)) /* R */
+
 #endif /* def LIB_SENSORS_CHIPS_H */
