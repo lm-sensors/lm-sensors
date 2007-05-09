@@ -4,36 +4,32 @@ See doc/useful_addresses.html for a link to this article.
 
 There is one big Makefile in the root of this package. It includes many
 other files; one for each directory in which source code is found. These
-included files are called 'Module.mk'. There is a separate set of Makefiles
-in the i2c/ directories; these are Simon Vogl's original Makefiles, and
-not referred by the main package Makefile.
+included files are called 'Module.mk'.
 
 There are several interesting targets defined through this Makefile:
   * all
     Create everything in all directories.
-  * all-i2c, all-src, ...
-    Create everything in the designated directory.
+  * user
+    Build only user-space tools.
   * install
     Install everything from all directories.
-  * install-i2c, install-src, ...
-    Install everything in the designated directory.
+  * user_install
+    Install only user-space tools.
+  * user_uninstall
+    Uninstall user-space tools.
   * clean
     Remove anything which can be regenerated from all directories. A call
     of 'make clean' (without any other targets) will ignore any .d files;
     this is useful when they are out of date (and prevent the calling of
     any other target).
-  * clean-i2c, clean-src, ...
-    Remove anything which can be regenerated from the designated directory.
   * version
     Regenerate version.h, using the current date for the date-stamp, and
     a user-supplied version number.
   * package
     Create a .tar.gz file containing everything except the SVN directories.
-  * src/lm78.o, i2c/i2c-core.o, ...
-    You can of course also specify one or more targets to make.
 
 The best way to understand the Module.mk subfiles is to examine one of them,
-for example src/Module.mk. They are not too difficult to understand.
+for example lib/Module.mk. They are not too difficult to understand.
 
 There are several variables which can be set in the main Makefile. You can
 also specify them on the command-line; this overrules any definitions 
