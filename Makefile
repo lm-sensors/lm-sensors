@@ -177,7 +177,7 @@ ifneq ($(MAKECMDGOALS),package)
 ifneq ($(MAKECMDGOALS),userpackage)
 ifneq ($(MAKECMDGOALS),manhtml)
 SRCDIRS += mkpatch
-SRCDIRS += kernel kernel/busses kernel/chips
+SRCDIRS += kernel/busses kernel/chips
 endif
 endif
 endif
