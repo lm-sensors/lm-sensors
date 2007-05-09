@@ -20,21 +20,8 @@
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := kernel/include
 KERNELINCLUDEDIR := $(MODULE_DIR)
-KERNELCHIPSDIR := kernel/chips
 
 KERNELINCLUDEFILES := $(MODULE_DIR)/i2c-dev.h $(MODULE_DIR)/sensors.h
-
-$(KERNELINCLUDEDIR)/sensors.h: $(KERNELINCLUDEDIR)/sensors.h.template
-	cat $@.template > $@
-	$(AWK) '/SENSORS SYSCTL START/,/SENSORS SYSCTL END/' $(KERNELCHIPSDIR)/*.c >> $@
-	echo '#endif' >> $@
-
-$(KERNELINCLUDEDIR)/sensors.hd:
-	( $(GREP) 'SENSORS SYSCTL START' /dev/null $(KERNELCHIPSDIR)/*.c | \
-	  $(SED) -e 's/:.*//' -e 's#^#$(KERNELINCLUDEDIR)/sensors.h: #' ) > $@
-
-# Get dependencies of sensors.h
-INCLUDEFILES += $(MODULE_DIR)/sensors.hd
 
 REMOVEKERNELINC := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(SYSINCLUDEDIR)/%,$(KERNELINCLUDEFILES))
 
@@ -50,8 +37,3 @@ user_uninstall::
 	$(RM) $(REMOVEKERNELINC)
 # Remove directory if empty, ignore failure
 	$(RMDIR) $(DESTDIR)$(SYSINCLUDEDIR) 2> /dev/null || true
-
-clean-all-kernel-include:
-	$(RM) $(KERNELINCLUDEDIR)/*.h.install $(KERNELINCLUDEDIR)/sensors.h $(KERNELINCLUDEDIR)/sensors.hd
-
-clean :: clean-all-kernel-include

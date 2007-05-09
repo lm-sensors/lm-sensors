@@ -1,11 +1,11 @@
 The directories within this package:
 
 * doc
-  Documentation about the modules within this package, and all other things.
+  Documentation.
 * etc
   A sample configuration file for the 'sensors' program.
 * kernel
-  The kernel modules: sensor chip drivers.
+  A few kernel-related header files.
 * lib
   The user-space sensors support library code.
 * prog

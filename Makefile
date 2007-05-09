@@ -27,38 +27,6 @@
 # I think so, but I have not tested it.
 #SHELL := /usr/bin/bash
 
-# The currently running kernel version. This is used right below to
-# determine where the kernel sources can be found.
-KERNELVERSION := $(shell uname -r)
-
-# The location of linux itself. This is used to find the kernel headers
-# and other things.
-#LINUX := /usr/src/linux
-LINUX := $(shell if [ -L "/lib/modules/$(KERNELVERSION)/build" ] ; \
-	then echo "/lib/modules/$(KERNELVERSION)/build" ; \
-	else echo "/usr/src/linux" ; fi)
-LINUX_HEADERS := $(LINUX)/include
-
-# If you have installed the i2c header at some other place (like 
-# /usr/local/include/linux), set that directory here. Please check this out
-# if you get strange compilation errors; the default Linux i2c headers
-# may be used mistakenly. Note: This should point to the directory
-# *above* the linux/ subdirectory, so to /usr/local/include in the
-# above example.
-I2C_HEADERS := /usr/local/include
-#I2C_HEADERS := $(LINUX_HEADERS)
-
-ifneq ($(MAKECMDGOALS),user)
-ifneq ($(MAKECMDGOALS),user_install)
-ifneq ($(MAKECMDGOALS),user_uninstall)
-SMP := $(shell if grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_SMP[[:space:]]*1' $(LINUX_HEADERS)/linux/autoconf.h ; \
-               then echo 1; else echo 0; fi)
-MODVER := $(shell if grep -q '^[[:space:]]*\#define[[:space:]]*CONFIG_MODVERSIONS[[:space:]]*1' $(LINUX_HEADERS)/linux/autoconf.h ; \
-                  then echo 1; else echo 0; fi)
-endif
-endif
-endif
-
 # Uncomment the second line if you are a developer. This will enable many
 # additional warnings at compile-time
 WARN := 0
@@ -80,34 +48,8 @@ PREFIX := /usr/local
 # Your C compiler
 CC := gcc
 
-# This is the main modules directory into which the modules will be installed.
-# The magic invocation will return something like this:
-#   /lib/modules/2.4.29
-KERNELVERSION := $(shell $(CC) -I$(LINUX_HEADERS) -E etc/config.c | grep uts_release | cut -f 2 -d'"')
-MODPREF := /lib/modules/$(KERNELVERSION)
-
-# When building userspace for use with 2.4.x series kernels, we turn off
-# sysfs support by default.  You can override this (e.g. if you want
-# to build binaries that work for both 2.4.x, and 2.6.x and above)
-# by uncommenting the line after the next endif.  Keep in mind, if and only
-# if you do this: you will need to install the libsysfs libraries on your
-# kernel 2.4.x systems also.
-ifeq (,$(findstring /2.4., $(MODPREF)))
-	SYSFS_SUPPORT := 1
-else
-	SYSFS_SUPPORT :=
-endif
-#SYSFS_SUPPORT := 1
-
-# Prevent 2.6+ users from using improper targets, as this won't work.
-ifeq (,$(findstring /2.4., $(MODPREF)))
-    ifeq (, $(MAKECMDGOALS))
-        $(error For 2.6 kernels and later, use "make user")
-    endif
-    ifeq (install, $(MAKECMDGOALS))
-        $(error For 2.6 kernels and later, use "make user_install")
-    endif
-endif
+# Build with sysfs support
+SYSFS_SUPPORT := 1
 
 # This is the directory where sensors.conf will be installed, if no other
 # configuration file is found
@@ -170,19 +112,6 @@ MACHINE := $(shell uname -m)
 
 # The subdirectories we need to build things in 
 SRCDIRS :=
-ifneq ($(MAKECMDGOALS),user)
-ifneq ($(MAKECMDGOALS),user_install)
-ifneq ($(MAKECMDGOALS),user_uninstall)
-ifneq ($(MAKECMDGOALS),package)
-ifneq ($(MAKECMDGOALS),userpackage)
-ifneq ($(MAKECMDGOALS),manhtml)
-SRCDIRS += kernel kernel/chips
-endif
-endif
-endif
-endif
-endif
-endif
 SRCDIRS += kernel/include
 SRCDIRS += lib prog/detect prog/dump prog/eeprom prog/pwm \
            prog/sensors prog/xeon ${PROG_EXTRA:%=prog/%} etc
@@ -204,11 +133,10 @@ SED := sed
 # Determine the default compiler flags
 # Set CFLAGS or CPPFLAGS above to add your own flags to all.
 # ALLCPPFLAGS/ALLCFLAGS are common flags, plus any user-specified overrides from the environment or make command line.
-# MODCPPFLAGS/MODCFLAGS is to create in-kernel object files (modules).
-# PROGCPPFLAGS/PROGCFLAGS is to create non-kernel object files (which are linked into executables).
+# PROGCPPFLAGS/PROGCFLAGS is to create regular object files (which are linked into executables).
 # ARCPPFLAGS/ARCFLAGS are used to create archive object files (static libraries).
 # LIBCPPFLAGS/LIBCFLAGS are for shared library objects.
-ALL_CPPFLAGS := -I. -Ikernel/include -I$(I2C_HEADERS)
+ALL_CPPFLAGS := -I. -Ikernel/include
 ALL_CFLAGS := -Wall
 
 ifeq ($(DEBUG),1)
@@ -226,47 +154,6 @@ endif
 ALL_CPPFLAGS += $(CPPFLAGS)
 ALL_CFLAGS += $(CFLAGS)
 
-MODCPPFLAGS :=
-MODCFLAGS := -fno-strict-aliasing
-
-ifeq ($(MACHINE),alpha)
-MODCFLAGS += -ffixed-8 -mno-fp-regs -mcpu=ev56
-endif
-
-ifeq ($(MACHINE),x86_64)
-MODCFLAGS += -fno-common -fomit-frame-pointer -mno-red-zone \
-	     -mcmodel=kernel -fno-reorder-blocks -finline-limit=2000 -fno-strength-reduce
-endif
-
-ifeq ($(MACHINE),mips)
-MODCFLAGS += -mabi=32 -mips3 -Wa,-32 -Wa,-mips3 -Wa,--trap
-endif
-
-ifeq ($(MACHINE),sparc32)
-MODCFLAGS += -m32 -pipe -mno-fpu -fcall-used-g5 -fcall-used-g7
-endif
-
-ifeq ($(MACHINE),sparc64)
-MODCFLAGS += -m64 -pipe -mno-fpu -mcpu=ultrasparc -mcmodel=medlow \
-	     -ffixed-g4 -fcall-used-g5 -fcall-used-g7 -Wno-sign-compare \
-	     -Wa,--undeclared-regs
-endif
-
-ifeq ($(SMP),1)
-MODCPPFLAGS += -D__SMP__
-endif
-
-ifeq ($(MODVER),1)
-MODCPPFLAGS += -DMODVERSIONS -include $(LINUX_HEADERS)/linux/modversions.h
-endif
-
-# This magic is from the kernel Makefile.
-# Extra cflags for kbuild 2.4.  The default is to forbid includes by kernel code
-# from user space headers.
-kbuild_2_4_nostdinc := -nostdinc $(shell LC_ALL=C $(CC) -print-search-dirs | sed -ne 's/install: \(.*\)/-I \1include/gp')
-
-MODCPPFLAGS += -D__KERNEL__ -DMODULE -DEXPORT_SYMTAB -fomit-frame-pointer $(ALL_CPPFLAGS) -I$(LINUX_HEADERS) $(kbuild_2_4_nostdinc)
-MODCFLAGS += $(ALL_CFLAGS)
 PROGCPPFLAGS := -DETCDIR="\"$(ETCDIR)\"" $(ALL_CPPFLAGS) -Wundef
 PROGCFLAGS := $(ALL_CFLAGS)
 ARCPPFLAGS := $(ALL_CPPFLAGS)
@@ -317,22 +204,6 @@ user_install::
 	@echo "***    to fit your needs again."
 all :: user
 install :: all user_install
-ifeq ($(DESTDIR),)
-	-if [ -r $(MODPREF)/build/System.map -a -x /sbin/depmod ] ; then \
-	  /sbin/depmod -a -F $(MODPREF)/build/System.map $(KERNELVERSION) ; \
-	fi
-else
-	@echo "*** This is a \`staged' install using \"$(DESTDIR)\" as prefix."
-	@echo "***"
-	@echo "*** Once the modules have been moved to their final destination"
-	@echo "*** you must run the command \"/sbin/depmod -a\"."
-	@echo "***"
-	@echo "*** Alternatively, if you build a package (e.g. rpm), include the"
-	@echo "*** command \"/sbin/depmod -a\" in the post-(un)install procedure."
-	@echo "***"
-	@echo "*** The depmod command mentioned above may generate errors. We are"
-	@echo "*** aware of the problem and are working on a solution."
-endif
 
 clean::
 	$(RM) lm_sensors-* lex.backup
@@ -340,8 +211,6 @@ clean::
 user_uninstall::
 
 uninstall :: user_uninstall
-	@echo "*** Note:"
-	@echo "***  * Kernel modules were not uninstalled."
 
 # This is tricky, but it works like a charm. It needs lots of utilities
 # though: cut, find, gzip, ln, tail and tar.
@@ -359,23 +228,6 @@ package: version clean
         $(RM) $$lmpackage.tar $$lmpackage
 	cat doc/developers/checklist
 
-# doesn't work well yet... needs Makefile changes too
-userpackage: version clean $(KERNELINCLUDEDIR)/sensors.h
-	lmversion=`tail -1 version.h|cut -f 2 -d \"`; \
-	lmpackage=lm_sensors-user-$$lmversion; \
-	ln -s . $$lmpackage;  \
-	find $$lmpackage/ -type f | grep -v ^$$lmpackage/$$lmpackage$$ | \
-	                            grep -v ^$$lmpackage/$$lmpackage.tar$$ | \
-	                            grep -v ^$$lmpackage/doc/chips | \
-	                            grep -v ^$$lmpackage/kernel/chips | \
-	                            grep -v ^$$lmpackage/$$ | \
-	                            grep -v /CVS | \
-	                            grep -v /\\.# | \
-	                            tar rvf $$lmpackage.tar -T -; \
-        gzip -9 $$lmpackage.tar ;\
-        $(RM) $$lmpackage.tar $$lmpackage
-	cat doc/developers/checklist
-
 version:
 	$(RM) version.h
 	echo '#define LM_DATE "'`date +'%Y%m%d'`\" > version.h
@@ -384,28 +236,11 @@ version:
 
 help:
 	@echo 'Make targets are:'
-	@echo '  all (default): build modules and userspace programs'
-	@echo '  install: install modules and userspace programs'
-	@echo '  user: build userspace programs'
-	@echo '  user_install: install userspace programs'
-	@echo '  user_uninstall: remove userspace programs'
+	@echo '  all (default): build library and userspace programs'
+	@echo '  install: install library and userspace programs'
+	@echo '  uninstall: uninstall library and userspace programs'
 	@echo '  clean: cleanup'
 	@echo '  package: create a distribution package'
-
-$(LINUX)/.config:
-	@echo
-	@echo "Error - missing file $(LINUX)/.config !! "
-	@echo "  Verify kernel source is in $(LINUX) and then"
-	@echo "  cd to $(LINUX) and run 'make config' !!"
-	@echo
-	@echo "Exception: if you're using a stock RedHat kernel..."
-	@echo "  (1) Install the appropriate kernel-source RPM."
-	@echo "  (2) Copy the appropriate config..."
-	@echo "      from $(LINUX)/configs/<...>"
-	@echo "      to $(LINUX)/.config"
-	@echo "  (3) Do *NOT* 'make dep' or 'make config'."
-	@echo
-	@exit 1
 
 # Generate html man pages to be copied to the lm_sensors website.
 # This uses the man2html from here
@@ -426,16 +261,6 @@ manhtml:
 
 # We need to create dependency files. Tricky. The sed rule puts dir/file.d and
 # dir/file.c in front of the dependency file rule.
-
-# .o files are used for modules
-# depend on the kernel config file!
-%.o: %.c $(LINUX)/.config
-	$(CC) $(MODCPPFLAGS) $(MODCFLAGS) -c $< -o $@
-
-%.d: %.c $(LINUX)/.config
-	$(CC) -M -MG $(MODCPPFLAGS) $(MODCFLAGS) $< | \
-	$(SED) -e 's@^\(.*\)\.o:@$*.d $*.o: Makefile '`dirname $*.d`/Module.mk' @' > $@
-
 
 
 # .ro files are used for programs (as opposed to modules)
