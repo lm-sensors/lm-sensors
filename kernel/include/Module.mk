@@ -52,6 +52,6 @@ user_uninstall::
 	$(RMDIR) $(DESTDIR)$(SYSINCLUDEDIR) 2> /dev/null || true
 
 clean-all-kernel-include:
-	$(RM) $(KERNELINCLUDEDIR)/*.h.install $(KERNELINCLUDEDIR)/sensors.h $(KERNELINCLUDEDIR)/sensors.hd
+	$(RM) $(KERNELINCLUDEDIR)/sensors.h $(KERNELINCLUDEDIR)/sensors.hd
 
 clean :: clean-all-kernel-include
