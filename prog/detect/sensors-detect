@@ -1953,6 +1953,12 @@ $chip_kern26_w83791d = {
 	devid => 0x8718,
 	logdev => 0x04,
       },
+      {
+	name => "ITE IT8726F Super IO Sensors",
+	driver => "to-be-tested",
+	devid => 0x8726,
+	logdev => 0x04,
+      },
     ],
   },
 );
