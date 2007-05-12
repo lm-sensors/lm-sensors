@@ -98,8 +98,6 @@ LIBRARY
     enum sensor-type { volt, fan, temp, volt_min, volt_max, fan_div, fan_min,
     temp_over, temp_hyst }
 
-* reload does not work (Bison/Flex problem?).
-
 * Some library routines are pretty inefficient right now.
 
 * Library should be split in more separate files, for better linking
