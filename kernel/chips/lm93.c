@@ -1109,7 +1109,7 @@ static void lm93_prochot(struct i2c_client *client, int operation,
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		lm93_update_client(client);
 		results[0] = data->prochot_max[nr];
-		results[1] = data->block4[nr].avg;
+		results[1] = data->block4[nr].cur;
 		results[2] = data->block4[nr].avg;
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
