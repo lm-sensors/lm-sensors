@@ -198,10 +198,6 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 			" subclient\n"))
 		return 0;
 
-	/* also ignore eeproms */
-	if (!strcmp(attr->value, "eeprom\n"))
-		return 0;
-
 	/* NB: attr->value[attr->len-1] == '\n'; chop that off */
 	entry.name.prefix = strndup(attr->value, attr->len - 1);
 	if (!entry.name.prefix)
