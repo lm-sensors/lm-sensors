@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
 				res = inb(addrreg + i + j);
 			} else {	
 				outb(i+j, addrreg);
-				if (i+j == 0 && (inb(addrreg) & 0x80)) {
+				if (i+j == 0 && inb(addrreg) == 0x80) {
 					/* Bit 7 appears to be a busy flag */
 					range = 128;
 				}
