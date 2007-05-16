@@ -10,6 +10,7 @@ SVN HEAD
   Man page sensors.conf.5: Update the chip statement section
   Module i2c-nforce2: Add nForce MCP61, MCP65 support (2.6 backport)
   Program isadump: Detect when address bit 7 is a busy flag
+                   Fix Super-I/O exit sequence for Winbond/Fintek chips
   Program pwmconfig: Use smaller steps for low PWM values
   Program rrd: Support non-i2c devices (hwmon class)
                Add missing shell declarations

@@ -66,6 +66,10 @@ void superio_write_key(int addrreg, unsigned char *key)
 
 void superio_reset(int addrreg, int datareg)
 {
+	/* Some chips (SMSC, Winbond) want this */
+	outb(0xaa, addrreg);
+
+	/* Return to "Wait For Key" state (PNP-ISA spec) */
 	outb(0x02, addrreg);
 	outb(0x02, datareg);
 }
