@@ -21,6 +21,7 @@ SVN HEAD
   Program sensors-detect: Stop Super-I/O probe after first family success
                           Fix SMSC DME1737 detection
                           Add /usr/sbin to the PATH (#2199)
+                          Add ATI SB700 detection
 
 
 2.10.3 (20070319)

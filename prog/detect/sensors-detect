@@ -666,17 +666,24 @@ $revision =~ s/ \([^()]*\)//;
      { 
        vendid => 0x1002,
        devid  => 0x4372,
-       procid => "ATI Technologies Inc ATI SMBus",
+       procid => "ATI Technologies Inc IXP SB400 SMBus Controller",
        driver => "i2c-piix4",
        match => qr/^SMBus PIIX4 adapter at /,
      } , 
      { 
        vendid => 0x1002,
        devid  => 0x4385,
-       procid => "ATI Technologies Inc ATI SMBus",
+       procid => "ATI Technologies Inc SB600 SMBus",
        driver => "i2c-piix4",
        match => qr/^SMBus PIIX4 adapter at /,
      } , 
+     {
+       vendid => 0x1002,
+       devid  => 0x4395,
+       procid => "ATI Technologies Inc SB700 SMBus",
+       driver => "i2c-piix4",
+       match => qr/^SMBus PIIX4 adapter at /,
+     }, 
      {
        vendid => 0x100B,
        devid => 0x0500,
