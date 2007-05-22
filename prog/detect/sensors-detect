@@ -1261,6 +1261,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { lm90_detect(6, @_); },
      },
      {
+       name => "Maxim MAX6680/MAX6681",
+       driver => "lm90",
+       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+       i2c_detect => sub { lm90_detect(7, @_); },
+     },
+     {
        name => "National Semiconductor LM63",
        driver => "lm63",
        i2c_addrs => [0x4c],
@@ -3670,12 +3676,12 @@ sub lm83_detect
 
 # $_[0]: Chip to detect
 #   (0 = LM90, 1=LM89/LM99, 2=LM86, 3=ADM1032, 4=MAX6657/MAX6658/MAX6659,
-#    5 = ADT7461, 6 = MAX6648/MAX6692)
+#    5 = ADT7461, 6 = MAX6648/MAX6692, 7 = MAX6680/MAX6681)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address
 # Returns: undef if not detected, 4, 6 or 8 if detected.
-#   The Maxim chips have a low confidence value (4)
-#   because they don't have a die revision register.
+#   The Maxim chips MAX6657, MAX6658 and MAX6659 have a low confidence
+#   value (4) because they don't have a die revision register.
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
@@ -3738,6 +3744,13 @@ sub lm90_detect
     return if $cid != 0x59;     # MAX6648/MAX6692
     return 8;
   }    
+  if ($chip == 7) {
+    return if ($conf & 0x03) != 0;
+    return if $rate > 0x07;
+    return if $mid != 0x4d;     # Maxim
+    return if $cid != 0x01;     # MAX6680/MAX6681
+    return 6;
+  }
   return;
 }
 

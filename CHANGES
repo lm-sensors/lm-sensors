@@ -27,6 +27,7 @@ SVN HEAD
                           Fix SMSC DME1737 detection
                           Add /usr/sbin to the PATH (#2199)
                           Add ATI SB700 detection
+                          Add Maxim MAX6680/MAX6681 detection
 
 
 2.10.3 (20070319)
