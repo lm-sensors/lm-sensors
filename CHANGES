@@ -18,6 +18,7 @@ SVN HEAD
   Program sensors: Drop ddcmon and eeprom support
                    Add dme1737 support
                    Add applesmc support
+                   Add max6680 support
   Program sensors-detect: Stop Super-I/O probe after first family success
                           Fix SMSC DME1737 detection
                           Add /usr/sbin to the PATH (#2199)

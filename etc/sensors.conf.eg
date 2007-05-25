@@ -1961,7 +1961,7 @@ chip "max1619-*"
 #   set temp2_hyst  40
 
 
-chip "lm90-*" "adm1032-*" "lm86-*" "max6657-*" "adt7461-*"
+chip "lm90-*" "adm1032-*" "lm86-*" "max6657-*" "adt7461-*" "max6680-*"
 
    label temp1 "M/B Temp"
    label temp2 "CPU Temp"

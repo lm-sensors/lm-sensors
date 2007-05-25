@@ -407,6 +407,7 @@ struct match matches[] = {
 	{ "lm86", print_lm90 },
 	{ "max6657", print_lm90 },
 	{ "adt7461", print_lm90 },
+	{ "max6680", print_lm90 },
 	{ "lm63", print_lm63 },
 	{ "xeontemp", print_xeontemp },
 	{ "max6650", print_max6650 },
