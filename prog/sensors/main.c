@@ -332,7 +332,7 @@ struct match {
 };
 
 struct match matches[] = {
-	{ "ds1621", print_ds1621 },
+/*	{ "ds1621", print_ds1621 }, */
 	{ "lm75", print_lm75 },
 	{ "adm1021", print_adm1021 },
 	{ "max1617", print_adm1021 },
@@ -408,12 +408,12 @@ struct match matches[] = {
 	{ "bmc", print_bmc },
 	{ "adm1026", print_adm1026 },
 	{ "lm83", print_lm83 },
-	{ "lm90", print_lm90 },
+/*	{ "lm90", print_lm90 },
 	{ "adm1032", print_lm90 },
 	{ "lm99", print_lm90 },
 	{ "lm86", print_lm90 },
 	{ "max6657", print_lm90 },
-	{ "adt7461", print_lm90 },
+	{ "adt7461", print_lm90 }, */
 	{ "lm63", print_lm63 },
 	{ "xeontemp", print_xeontemp },
 	{ "max6650", print_max6650 },
@@ -423,8 +423,8 @@ struct match matches[] = {
 	{ "adm1031", print_adm1031 },
 	{ "lm93", print_lm93 },
 	{ "smsc47b397", print_smsc47b397 },
-	{ "f71805f", print_f71805f },
-	{ "f71872f", print_f71805f },
+/*	{ "f71805f", print_f71805f },
+	{ "f71872f", print_f71805f }, */
 // 	{ "abituguru", print_abituguru },
 // 	{ "k8temp", print_k8temp },
  	{ "coretemp", print_coretemp },
