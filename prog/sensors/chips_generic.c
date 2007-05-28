@@ -144,26 +144,15 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
       } else {
         type = MINMAX;
       }
+    } else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX_HYST)) {
+      min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX_HYST);
+      type = HYST;
     } else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT)) {
       min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT);
       type = CRIT;
-    } else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_HYST)) {
-      min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_HYST);
-      type = HYST;
     } else {
       min = 0;
       type = MAXONLY;
-    }
-  } else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_HYST)) {
-    min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_HYST);
-    
-    if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_OVER)) {
-      max = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_OVER);
-      type = HYST;
-    } else {
-      max = min;
-      max = 0;
-      type = HYSTONLY;
     }
   } else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_LOW)) {
     min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_LOW);
@@ -208,23 +197,25 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
   if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_FAULT) &&
       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_FAULT) > 0.5) {
     printf(" FAULT");
-  } else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_ALARM) && 
-      TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_ALARM) > 0.5) {
+  } else
+  if ((TEMP_FEATURE(SENSORS_FEATURE_TEMP_ALARM) && 
+       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_ALARM) > 0.5)
+   || (type == MINMAX &&
+       TEMP_FEATURE(SENSORS_FEATURE_TEMP_MIN_ALARM) && 
+       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MIN_ALARM) > 0.5)
+   || (type == MINMAX &&
+       TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX_ALARM) && 
+       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX_ALARM) > 0.5)) {
     printf(" ALARM");
   }
   printf("\n");
   
-  if (type == MINMAX && TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT))
-  {
+  if (type != CRIT && TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT)) {
     const sensors_feature_data *subfeature;
     max = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT);
     
-    if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_HYST)) {
-      min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_HYST);
-      type = HYSTONLY;
-    } else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX) && 
-        !TEMP_FEATURE(SENSORS_FEATURE_TEMP_MIN)) {
-      min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX);
+    if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_HYST)) {
+      min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_HYST);
       type = HYSTONLY;
     } else {
       type = SINGLE;
@@ -239,7 +230,11 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
       if (valid) {
         print_label(label, label_size);
         free(label);
-        print_temp_info_real(max, min, 0, 0.0, type, 1, 0);
+        print_temp_info_real(max, min, 0, 0.0, type, 1, 1);
+        if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_ALARM) &&
+            TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_ALARM) > 0.5) {
+          printf(" ALARM");
+        }
         printf("\n");
       }
     }
