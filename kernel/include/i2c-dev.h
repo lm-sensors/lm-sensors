@@ -106,8 +106,9 @@ union i2c_smbus_data {
 #define I2C_SMBUS_WORD_DATA	    3
 #define I2C_SMBUS_PROC_CALL	    4
 #define I2C_SMBUS_BLOCK_DATA	    5
-#define I2C_SMBUS_I2C_BLOCK_DATA    6
+#define I2C_SMBUS_I2C_BLOCK_BROKEN  6
 #define I2C_SMBUS_BLOCK_PROC_CALL   7		/* SMBus 2.0 */
+#define I2C_SMBUS_I2C_BLOCK_DATA    8
 
 
 /* ----- commands for the ioctl like i2c_command call:
@@ -271,12 +272,20 @@ static inline __s32 i2c_smbus_write_block_data(int file, __u8 command,
 }
 
 /* Returns the number of read bytes */
+/* Until kernel 2.6.22, the length is hardcoded to 32 bytes. If you
+   ask for less than 32 bytes, your code will only work with kernels
+   2.6.23 and later. */
 static inline __s32 i2c_smbus_read_i2c_block_data(int file, __u8 command,
-                                                  __u8 *values)
+                                                  __u8 length, __u8 *values)
 {
 	union i2c_smbus_data data;
 	int i;
+
+	if (length > 32)
+		length = 32;
+	data.block[0] = length;
 	if (i2c_smbus_access(file,I2C_SMBUS_READ,command,
+	                     length == 32 ? I2C_SMBUS_I2C_BLOCK_BROKEN :
 	                      I2C_SMBUS_I2C_BLOCK_DATA,&data))
 		return -1;
 	else {
@@ -297,7 +306,7 @@ static inline __s32 i2c_smbus_write_i2c_block_data(int file, __u8 command,
 		data.block[i] = values[i-1];
 	data.block[0] = length;
 	return i2c_smbus_access(file,I2C_SMBUS_WRITE,command,
-	                        I2C_SMBUS_I2C_BLOCK_DATA, &data);
+	                        I2C_SMBUS_I2C_BLOCK_BROKEN, &data);
 }
 
 /* Returns the number of read bytes */
