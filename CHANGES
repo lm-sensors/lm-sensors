@@ -2,6 +2,7 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  File i2c-dev.h: Support I2C block reads with specified length
   All bus modules and documentation: Delete
   All chip modules and documentation: Delete
   Legacy hotplug modules and documentation: Delete
@@ -13,6 +14,7 @@ SVN HEAD
            Add dme1737 support
            Delete support of non-sensor drivers (ddcmon, eeprom)
   Man page sensors.conf.5: Update the chip statement section
+  Program i2cdump: Use the new I2C block read function
   Program isadump: Detect when address bit 7 is a busy flag
                    Fix Super-I/O exit sequence for Winbond/Fintek chips
   Program mkpatch: Delete

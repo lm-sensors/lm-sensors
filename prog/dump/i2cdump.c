@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
 			} else {
 				for (res = 0; res < 256; res += i) {
 					i = i2c_smbus_read_i2c_block_data(file,
-						res, cblock + res);
+						res, 32, cblock + res);
 					if (i <= 0)
 						break;
 				}
