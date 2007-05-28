@@ -61,7 +61,7 @@ void print_temp_info_real(float n_cur, float n_over, float n_hyst, float n_lim,
 	    limitprec, n_hyst, degstr,
 	    limitprec, n_over, degstr);
    else if(minmax == MAXONLY)
-	printf("%+6.*f%s  (high = %+5.*f%s)                    ",
+	printf("%+6.*f%s  (high = %+5.*f%s)                  ",
 	    curprec, n_cur, degstr,
 	    limitprec, n_over, degstr);
    else if(minmax == CRIT)
@@ -78,7 +78,7 @@ void print_temp_info_real(float n_cur, float n_over, float n_hyst, float n_lim,
 	printf("%+6.*f%s",
 	    curprec, n_cur, degstr);
    else if(minmax == HYSTONLY)
-	printf( "%+6.*f%s  (hyst = %+5.*f%s)                   ",
+	printf("%+6.*f%s  (hyst = %+5.*f%s)                  ",
 	    curprec, n_cur, degstr,
 	    limitprec, n_over, degstr);
    else if(minmax == LIM)

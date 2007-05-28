@@ -25,6 +25,7 @@ SVN HEAD
                Update URI
   Program sensors: Drop ddcmon and eeprom support
                    Add dme1737 support
+                   Fix alignment of alarm for one-limit temperatures
   Program sensors-detect: Stop Super-I/O probe after first family success
                           Fix SMSC DME1737 detection
                           Add /usr/sbin to the PATH (#2199)
