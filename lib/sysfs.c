@@ -37,6 +37,29 @@ char sensors_sysfs_mount[NAME_MAX];
 
 #define MAX_SENSORS_PER_TYPE 16
 
+static
+int get_type_scaling(int type)
+{
+	switch (type & 0xFF10) {
+	case SENSORS_FEATURE_IN:
+	case SENSORS_FEATURE_TEMP:
+		return 3;
+	case SENSORS_FEATURE_FAN:
+		return 0;
+	}
+
+	switch (type) {
+	case SENSORS_FEATURE_VID:
+		return 3;
+	case SENSORS_FEATURE_VRM:
+		return 1;
+	default:
+		return 0;
+	}
+
+	return 0;
+}
+
 static 
 sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 {
@@ -148,6 +171,8 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 			SENSORS_MODE_RW : (attr->method & SYSFS_METHOD_SHOW) ?
 			SENSORS_MODE_R : (attr->method & SYSFS_METHOD_STORE) ?
 			SENSORS_MODE_W : SENSORS_MODE_NO_RW;
+
+		feature.scaling = get_type_scaling(type);
 
 		features[i] = feature;
 		fnum++;
