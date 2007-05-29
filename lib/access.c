@@ -515,11 +515,9 @@ struct feature_type_match
 };
 
 static struct feature_type_match temp_matches[] = {
-	{ "over", SENSORS_FEATURE_TEMP_OVER },
 	{ "max", SENSORS_FEATURE_TEMP_MAX },
 	{ "max_hyst", SENSORS_FEATURE_TEMP_MAX_HYST },
 	{ "min", SENSORS_FEATURE_TEMP_MIN },
-	{ "low", SENSORS_FEATURE_TEMP_LOW },
 	{ "crit", SENSORS_FEATURE_TEMP_CRIT },
 	{ "crit_hyst", SENSORS_FEATURE_TEMP_CRIT_HYST },
 	{ "alarm", SENSORS_FEATURE_TEMP_ALARM },

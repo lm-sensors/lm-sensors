@@ -154,20 +154,6 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
       min = 0;
       type = MAXONLY;
     }
-  } else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_LOW)) {
-    min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_LOW);
-    
-    if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_HIGH)) {
-      max = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_HIGH);
-    } else { /* TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_OVER) */
-      max = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_OVER);
-    }
-    
-    type = MINMAX;
-  } else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_OVER)) {
-    max = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_OVER);
-    min = 0;
-    type = MAXONLY;
   } else {
     min = max = 0;
     type = SINGLE;
