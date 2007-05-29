@@ -82,9 +82,6 @@ KERNEL MODULES
 * lm80: Check how OS alarms work. At page 17 of the sheet, it tells
   something completely different from the description at page 25.
 
-* Add MTP006F chip: http://www.myson.com/Pcd/MTP006/Mtp006.pdf
-  gfiala@s.netic.de (Guido Fiala) has one on his mainboard
-
 
 LIBRARY
 =======
