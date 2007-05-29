@@ -36,8 +36,6 @@ KERNEL MODULES
   correctly now, and it is possible to rmmod adapter while one of its
   clients is in use.
 
-* "uninstall" Makefile target.
-
 * ACPI and SMBus host
  - ACPI subsystem may access SMBus host too. Locks?
  - On my ancient board using i2c-via, suspend and power switch status
@@ -81,9 +79,6 @@ KERNEL MODULES
 
 * lm80: Check how OS alarms work. At page 17 of the sheet, it tells
   something completely different from the description at page 25.
-
-* Add MTP006F chip: http://www.myson.com/Pcd/MTP006/Mtp006.pdf
-  gfiala@s.netic.de (Guido Fiala) has one on his mainboard
 
 
 LIBRARY
