@@ -30,7 +30,6 @@
 #include "kernel/include/sensors.h"
 
 void print_label(const char *label, int space);
-static void print_temp_info(float, float, float, int, int, int);
 static inline float deg_ctof( float );
 
 extern int fahrenheit;
@@ -45,7 +44,7 @@ inline float deg_ctof( float cel )
    curprec and limitprec are # of digits after decimal point
    for the current temp and the limits
    note: symbolic constants defined in chips.h */
-void print_temp_info_real(float n_cur, float n_over, float n_hyst, float n_lim,
+void print_temp_info(float n_cur, float n_over, float n_hyst,
                      int minmax, int curprec, int limitprec)
 {
    if (fahrenheit) {
@@ -81,20 +80,8 @@ void print_temp_info_real(float n_cur, float n_over, float n_hyst, float n_lim,
 	printf("%+6.*f%s  (hyst = %+5.*f%s)                  ",
 	    curprec, n_cur, degstr,
 	    limitprec, n_over, degstr);
-   else if(minmax == LIM)
-	printf("%+6.*f%s  (low  = %+5.*f%s, high = %+5.*f%s, lim = %+5.*f%s)  ",
-	    curprec, n_cur, degstr,
-	    limitprec, n_hyst, degstr,
-	    limitprec, n_over, degstr,
-	    limitprec, n_lim, degstr);
    else
 	printf("Unknown temperature mode!");
-}
-
-void print_temp_info(float n_cur, float n_over, float n_hyst,
-                     int minmax, int curprec, int limitprec)
-{
-  print_temp_info_real(n_cur, n_over, n_hyst, 0, minmax, curprec, limitprec);
 }
 
 void print_label(const char *label, int space)

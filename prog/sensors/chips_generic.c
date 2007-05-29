@@ -107,7 +107,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
                                     const sensors_feature_data *feature,
                                     int i, int j, int label_size)
 {
-  double val, max, min, lim = 0.0;
+  double val, max, min;
   char *label;
   int valid, type;
   const int size = SENSORS_FEATURE_TEMP_SENS - SENSORS_FEATURE_TEMP;
@@ -137,13 +137,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
     
     if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MIN)) {
       min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MIN);
-      
-      if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_LIM)) {
-        lim = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_LIM);
-        type = LIM;
-      } else {
-        type = MINMAX;
-      }
+      type = MINMAX;
     } else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX_HYST)) {
       min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX_HYST);
       type = HYST;
@@ -162,11 +156,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
   print_label(label, label_size);
   free(label);
   
-  if (type == LIM) {
-    print_temp_info_real(val, max, min, lim, type, 1, 1);
-  } else {
-    print_temp_info_real(val, max, min, 0.0, type, 1, 1);
-  }
+  print_temp_info(val, max, min, type, 1, 1);
   
   /* print out temperature sensor info */
   if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_SENS)) {
@@ -216,7 +206,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
       if (valid) {
         print_label(label, label_size);
         free(label);
-        print_temp_info_real(max, min, 0, 0.0, type, 1, 1);
+        print_temp_info(max, min, 0, type, 1, 1);
         if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_ALARM) &&
             TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_ALARM) > 0.5) {
           printf(" ALARM");
