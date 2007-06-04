@@ -1,9 +1,10 @@
-.TH I2CGET 8 "September 2005"
+.TH I2CGET 8 "June 2007"
 .SH "NAME"
 i2cget \- read from I2C/SMBus chip registers
 
 .SH SYNOPSIS
 .B i2cget
+.RB [ -f ]
 .RB [ -y ]
 .I i2cbus
 .I chip-address
@@ -20,6 +21,13 @@ bus (or SMBus).
 .TP
 .B -V
 Display the version and exit.
+.TP
+.B -f
+Force access to the device even if it is already busy. By default, i2cget
+will refuse to access a device which is already under the control of a
+kernel driver. Using this flag is dangerous, it can seriously confuse the
+kernel driver in question. It can also cause i2cget to return an invalid
+value. So use at your own risk and only if you know what you're doing.
 .TP
 .B -y
 Disable interactive mode. By default, i2cget will wait for a confirmation

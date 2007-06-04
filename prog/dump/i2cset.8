@@ -1,9 +1,10 @@
-.TH I2CSET 8 "September 2005"
+.TH I2CSET 8 "June 2007"
 .SH "NAME"
 i2cset \- set I2C registers
 
 .SH SYNOPSIS
 .B i2cset
+.RB [ -f ]
 .RB [ -y ]
 .I i2cbus
 .I chip-address
@@ -23,6 +24,14 @@ bus.
 .TP
 .B -V
 Display the version and exit.
+.TP
+.B -f
+Force access to the device even if it is already busy. By default, i2cset
+will refuse to access a device which is already under the control of a
+kernel driver. Using this flag is dangerous, it can seriously confuse the
+kernel driver in question. It can also cause i2cset to silently write to
+the wrong register. So use at your own risk and only if you know what
+you're doing.
 .TP
 .B -y
 Disable interactive mode. By default, i2cset will wait for a confirmation

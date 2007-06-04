@@ -33,7 +33,7 @@ void help(void) __attribute__ ((noreturn));
 
 void help(void)
 {
-	fprintf(stderr, "Syntax: i2cset [-y] I2CBUS CHIP-ADDRESS DATA-ADDRESS "
+	fprintf(stderr, "Syntax: i2cset [-f] [-y] I2CBUS CHIP-ADDRESS DATA-ADDRESS "
 	        "VALUE [MODE] [MASK]\n"
 	        "        i2cset -V\n"
 	        "  MODE is 'b[yte]' or 'w[ord]' (default b)\n"
@@ -53,12 +53,13 @@ int main(int argc, char *argv[])
 	unsigned long funcs;
 	int pec = 0;
 	int flags = 0;
-	int yes = 0, version = 0;
+	int force = 0, yes = 0, version = 0;
 
 	/* handle (optional) flags first */
 	while (1+flags < argc && argv[1+flags][0] == '-') {
 		switch (argv[1+flags][1]) {
 		case 'V': version = 1; break;
+		case 'f': force = 1; break;
 		case 'y': yes = 1; break;
 		default:
 			fprintf(stderr, "Warning: Unsupported flag "
@@ -160,13 +161,8 @@ int main(int argc, char *argv[])
 		break;
 	}
 
-	/* use FORCE so that we can write registers even when
-	   a driver is also running */
-	if (ioctl(file, I2C_SLAVE_FORCE, address) < 0) {
-		fprintf(stderr, "Error: Could not set address to %d: %s\n",
-		        address, strerror(errno));
+	if (set_slave_addr(file, address, force) < 0)
 		exit(1);
-	}
 
 	if (!yes) {
 		int dont = 0;

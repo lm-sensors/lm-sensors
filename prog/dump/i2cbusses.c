@@ -243,3 +243,17 @@ int open_i2c_dev(const int i2cbus, char *filename, const int quiet)
 	
 	return file;
 }
+
+int set_slave_addr(int file, int address, int force)
+{
+	/* With force, let the user read from/write to the registers
+	   even when a driver is also running */
+	if (ioctl(file, force ? I2C_SLAVE_FORCE : I2C_SLAVE, address) < 0) {
+		fprintf(stderr,
+		        "Error: Could not set address to 0x%02x: %s\n",
+		        address, strerror(errno));
+		return -errno;
+	}
+
+	return 0;
+}

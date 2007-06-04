@@ -36,8 +36,8 @@ void help(void) __attribute__ ((noreturn));
 
 void help(void)
 {
-	fprintf(stderr, "Syntax: i2cget [-y] I2CBUS CHIP-ADDRESS [DATA-ADDRESS "
-	        "[MODE]]\n"
+	fprintf(stderr, "Syntax: i2cget [-f] [-y] I2CBUS CHIP-ADDRESS "
+	        "[DATA-ADDRESS [MODE]]\n"
 	        "        i2cget -V\n"
 	        "  MODE can be: 'b' (read byte data, default)\n"
 	        "               'w' (read word data)\n"
@@ -102,19 +102,6 @@ int check_funcs(int file, int i2cbus, int size, int daddress, int pec)
 	return 0;
 }
 
-int set_slave(int file, int address)
-{
-	/* use FORCE so that we can read registers even when
-	   a driver is also running */
-	if (ioctl(file, I2C_SLAVE_FORCE, address) < 0) {
-		fprintf(stderr, "Error: Could not set address to %d: %s\n",
-		        address, strerror(errno));
-		return -1;
-	}
-
-	return 0;
-}
-
 int confirm(const char *filename, int address, int size, int daddress, int pec)
 {
 	int dont = 0;
@@ -173,12 +160,13 @@ int main(int argc, char *argv[])
 	char filename[20];
 	int pec = 0;
 	int flags = 0;
-	int yes = 0, version = 0;
+	int force = 0, yes = 0, version = 0;
 
 	/* handle (optional) flags first */
 	while (1+flags < argc && argv[1+flags][0] == '-') {
 		switch (argv[1+flags][1]) {
 		case 'V': version = 1; break;
+		case 'f': force = 1; break;
 		case 'y': yes = 1; break;
 		default:
 			fprintf(stderr, "Warning: Unsupported flag "
@@ -235,7 +223,7 @@ int main(int argc, char *argv[])
 	file = open_i2c_dev(i2cbus, filename, 0);
 	if (file < 0
 	 || check_funcs(file, i2cbus, size, daddress, pec)
-	 || set_slave(file, address))
+	 || set_slave_addr(file, address, force))
 		exit(1);
 
 	if (!yes && !confirm(filename, address, size, daddress, pec))
