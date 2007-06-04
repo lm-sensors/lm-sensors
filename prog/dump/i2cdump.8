@@ -1,9 +1,10 @@
-.TH I2CDUMP 8 "April 2006"
+.TH I2CDUMP 8 "June 2007"
 .SH NAME
 i2cdump \- examine I2C registers
 
 .SH SYNOPSIS
 .B i2cdump
+.RB [ -f ]
 .RB [ -y ]
 .I i2cbus
 .I address
@@ -21,6 +22,13 @@ visible through the I2C bus.
 .TP
 .B -V
 Display the version and exit.
+.TP
+.B -f
+Force access to the device even if it is already busy. By default, i2cdump
+will refuse to access a device which is already under the control of a
+kernel driver. Using this flag is dangerous, it can seriously confuse the
+kernel driver in question. It can also cause i2cdump to return invalid
+results. So use at your own risk and only if you know what you're doing.
 .TP
 .B -y
 Disable interactive mode. By default, i2cdump will wait for a confirmation

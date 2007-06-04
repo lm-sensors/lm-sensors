@@ -14,6 +14,7 @@ SVN HEAD
            Add dme1737 support
            Delete support of non-sensor drivers (ddcmon, eeprom)
   Man page sensors.conf.5: Update the chip statement section
+  Programs i2cdump, i2cget, i2cset: Do not force the slave address by default
   Program i2cdump: Use the new I2C block read function
   Program isadump: Detect when address bit 7 is a busy flag
                    Fix Super-I/O exit sequence for Winbond/Fintek chips
