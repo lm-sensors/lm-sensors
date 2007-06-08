@@ -1513,18 +1513,6 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { max6900_detect(@_); },
      },
      {
-       name => "IPMI BMC KCS",
-       driver => "bmcsensors",
-       isa_addrs => [ 0x0ca0 ],
-       isa_detect => sub { ipmi_kcs_detect(@_); },
-     },
-     {
-       name => "IPMI BMC SMIC",
-       driver => "bmcsensors",
-       isa_addrs => [ 0x0ca8 ],
-       isa_detect => sub { ipmi_smic_detect(@_); },
-     },
-     {
        name => "Smart Battery Charger",
        driver => "to-be-written",
        i2c_addrs => [0x09],
@@ -1546,20 +1534,48 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
 
 # Special case chip information goes here and would be included in
 # the chip_special_cases routine below
-use vars qw($chip_kern24_w83791d $chip_kern26_w83791d);
-$chip_kern24_w83791d = {
-	name => "Winbond W83791D",
-	driver => "w83781d",
-	i2c_addrs => [0x2c..0x2f],
-	i2c_detect => sub { w83781d_detect(7, @_); },
-};
+use vars qw(@chip_kern24_ids @chip_kern26_ids);
+@chip_kern24_ids = (
+     {
+       name => "Winbond W83791D",
+       driver => "w83781d",
+       i2c_addrs => [0x2c..0x2f],
+       i2c_detect => sub { w83781d_detect(7, @_); },
+     },
+     {
+       name => "IPMI BMC KCS",
+       driver => "bmcsensors",
+       isa_addrs => [0x0ca0],
+       isa_detect => sub { ipmi_kcs_detect(@_); },
+     },
+     {
+       name => "IPMI BMC SMIC",
+       driver => "bmcsensors",
+       isa_addrs => [0x0ca8],
+       isa_detect => sub { ipmi_smic_detect(@_); },
+     },
+);
 
-$chip_kern26_w83791d = {
-	name => "Winbond W83791D",
-	driver => "w83791d",
-	i2c_addrs => [0x2c..0x2f],
-	i2c_detect => sub { w83781d_detect(7, @_); },
-};
+@chip_kern26_ids = (
+     {
+       name => "Winbond W83791D",
+       driver => "w83791d",
+       i2c_addrs => [0x2c..0x2f],
+       i2c_detect => sub { w83781d_detect(7, @_); },
+     },
+     {
+       name => "IPMI BMC KCS",
+       driver => "ipmisensors",
+       isa_addrs => [0x0ca0],
+       isa_detect => sub { ipmi_kcs_detect(@_); },
+     },
+     {
+       name => "IPMI BMC SMIC",
+       driver => "ipmisensors",
+       isa_addrs => [0x0ca8],
+       isa_detect => sub { ipmi_smic_detect(@_); },
+     },
+);
 
 # This is a list of all recognized superio chips. 
 # Each entry must have the following fields:
@@ -3257,9 +3273,9 @@ sub chip_special_cases
 	# Based on the kernel, add the appropriate chip structure to the
 	# chip_ids detection list
 	if (kernel_version_at_least(2, 6, 0)) {
-		push @chip_ids, $chip_kern26_w83791d;
+		push @chip_ids, @chip_kern26_ids;
 	} else {
-		push @chip_ids, $chip_kern24_w83791d;
+		push @chip_ids, @chip_kern24_ids;
 	}
 }
 
@@ -5409,7 +5425,7 @@ sub generate_modprobes
   my ($prefer_isa) = @_;
 
   my ($chip,$detection,$nr,$i,@optionlist,@probelist,$driver,$isa,$adap);
-  my $bmcsensors = 0;
+  my $ipmi = 0;
   my @adapters;
   my $modprobes = "";
   my $configfile = "";
@@ -5449,8 +5465,9 @@ sub generate_modprobes
           not (exists $detection->{i2c_driver} and not $prefer_isa)) {
            $isa=1;
       }
-      if ($chip->{driver} eq "bmcsensors") {
-           $bmcsensors=1;
+      if ($chip->{driver} eq "bmcsensors" || 
+          $chip->{driver} eq "ipmisensors") {
+           $ipmi = 1;
       }
     }
   }
@@ -5475,9 +5492,13 @@ sub generate_modprobes
   # i2c-isa is loaded automatically (as a dependency) since 2.6.14,
   # and will soon be gone.
   $modprobes .= "modprobe i2c-isa\n" if ($isa && !kernel_version_at_least(2, 6, 18));
-  if ($bmcsensors) {
+  if ($ipmi) {
     $modprobes .= "# You must also install and load the IPMI modules\n";
-    $modprobes .= "modprobe i2c-ipmi\n";
+    if (kernel_version_at_least(2, 6, 0)) {
+      $modprobes .= "modprobe ipmi-si\n";
+    } else {
+      $modprobes .= "modprobe i2c-ipmi\n";
+    }
   }
 
   # Now determine the chip probe lines
