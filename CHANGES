@@ -29,6 +29,7 @@ SVN HEAD
                           Add ATI SB700 detection
                           Add Maxim MAX6680/MAX6681 detection
                           Add IT8726F detection
+                          Fix IPMI support for 2.6 kernels
 
 
 2.10.3 (20070319)
