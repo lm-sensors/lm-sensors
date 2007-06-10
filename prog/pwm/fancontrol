@@ -2,12 +2,12 @@
 #
 # Simple script implementing a temperature dependent fan speed control
 #
-# Version 0.64
+# Version 0.65
 #
 # Usage: fancontrol [CONFIGFILE]
 #
 # Dependencies:
-#   bash, awk, egrep, sed, lm_sensors :)
+#   bash, egrep, sed, cut, sleep, lm_sensors :)
 #
 # Please send any questions, comments or success stories to
 # marius.reiner@hdev.de
@@ -104,7 +104,7 @@ DIR=/proc/sys/dev/sensors
 if [ ! -d $DIR ]
 then
 	# For Linux 2.6, detect if config file uses the hwmon class or not yet
-	if echo "$AFCPWM[0]" | grep '^hwmon[0-9]'
+	if echo "${AFCPWM[0]}" | egrep -q '^hwmon[0-9]'
 	then
 		SDIR=/sys/class/hwmon
 	else
@@ -196,11 +196,6 @@ function restorefans()
 
 trap restorefans SIGHUP SIGINT SIGQUIT SIGTERM SIGKILL
 
-# function doing all the math
-function calc () {
-	awk "BEGIN { print $@ }"
-}
-
 # main function
 function UpdateFanSpeeds {
 	let fcvcount=0
@@ -215,36 +210,43 @@ function UpdateFanSpeeds {
 		minsa=${AFCMINSTART[$fcvcount]}
 		minso=${AFCMINSTOP[$fcvcount]}
 		
-		tval=`cat ${tsens}`
+		read tval < ${tsens}
 		if [ $? -ne 0 ]
 		then
 			echo "Error reading temperature from $DIR/$tsens"
 			restorefans
 		fi
-		tval=`echo ${tval} |cut -d' ' -f3 |cut -d'.' -f1`
 		if [ "$SYSFS" = "1" ]
 		then
-			let tval="$tval / 1000"
+			let tval="($tval+500)/1000"
+		else
+			tval=`echo ${tval} | cut -d' ' -f3 | cut -d'.' -f1`
 		fi
 
-		pwmpval=`cat ${pwmo}`
+		read pwmpval < ${pwmo}
 		if [ $? -ne 0 ]
 		then
 			echo "Error reading PWM value from $DIR/$pwmo"
 			restorefans
 		fi
-		pwmpval=`echo ${pwmpval} | cut -d' ' -f1`
+		if [ "$SYSFS" != "1" ]
+		then
+			pwmpval=`echo ${pwmpval} | cut -d' ' -f1`
+		fi
 		
 		# If fanspeed-sensor output shall be used, do it
 		if [[ -n ${fan} ]]
 		then
-			fanval=`cat ${fan}`
+			read fanval < ${fan}
 			if [ $? -ne 0 ]
 			then
 				echo "Error reading Fan value from $DIR/$fan"
 				restorefans
 			fi
-			fanval=`echo ${fanval} | cut -d' ' -f2`
+			if [ "$SYSFS" != "1" ]
+			then
+				fanval=`echo ${fanval} | cut -d' ' -f2`
+			fi
 		else
 			fanval=1  # set it to a non zero value, so the rest of the script still works
 		fi
@@ -270,7 +272,7 @@ function UpdateFanSpeeds {
 		  then pwmval=255 # at specified maxtemp switch to 100%
 		else 
 		  # calculate the new value from temperature and settings
-		  pwmval=`calc "(((${tval}-${mint})/(${maxt}-${mint}))^2*(255-${minso})+${minso})" |cut -d'.' -f1`
+		  let pwmval="((${tval}-${mint})**2)*(255-${minso})/((${maxt}-${mint})**2)+${minso}"
 		  if [ $pwmpval -eq 0 -o $fanval -eq 0 ]
 		  then # if fan was stopped start it using a safe value
 		  	echo $minsa > $pwmo
