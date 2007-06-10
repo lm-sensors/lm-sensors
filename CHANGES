@@ -14,6 +14,7 @@ SVN HEAD
   Program i2cdump: Use the new I2C block read function
   Program isadump: Detect when address bit 7 is a busy flag
                    Fix Super-I/O exit sequence for Winbond/Fintek chips
+  Program fancontrol: Use let for arithmetic evaluation
   Program pwmconfig: Use smaller steps for low PWM values
   Program rrd: Support non-i2c devices (hwmon class)
                Add missing shell declarations
