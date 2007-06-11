@@ -2,7 +2,7 @@
 #
 # Simple script implementing a temperature dependent fan speed control
 #
-# Version 0.65
+# Version 0.66
 #
 # Usage: fancontrol [CONFIGFILE]
 #
@@ -22,6 +22,7 @@
 #
 #
 #    Copyright 2003 Marius Reiner <marius.reiner@hdev.de>
+#    Copyright (C) 2007 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -55,6 +56,8 @@ function LoadConfig {
 	MINSTOP=`egrep '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP=//g'`
 	# optional settings:
 	FCFANS=`egrep '^FCFANS=.*$' $1 | sed -e 's/FCFANS=//g'`
+	MINPWM=`egrep '^MINPWM=.*$' $1 | sed -e 's/MINPWM=//g'`
+	MAXPWM=`egrep '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM=//g'`
 	
 	# Check whether all mandatory settings are set
 	if [[ -z ${INTERVAL} || -z ${FCTEMPS} || -z ${MINTEMP} || -z ${MAXTEMP} || -z ${MINSTART} || -z ${MINSTOP} ]]
@@ -62,8 +65,12 @@ function LoadConfig {
 		echo "Some mandatory settings missing, please check your config file!"
 		exit 1
 	fi
-	# here the other settings should be verified
-	
+	if [ "$INTERVAL" -le 0 ]
+	then
+		echo "Error in configuration file:"
+		echo "INTERVAL must be at least 1"
+		exit 1
+	fi
 
 	# write settings to arrays for easier use and print them
         echo
@@ -80,6 +87,43 @@ function LoadConfig {
 		AFCMAXTEMP[$fcvcount]=`echo $MAXTEMP |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
 		AFCMINSTART[$fcvcount]=`echo $MINSTART |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
 		AFCMINSTOP[$fcvcount]=`echo $MINSTOP |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		AFCMINPWM[$fcvcount]=`echo $MINPWM |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		[ -z "${AFCMINPWM[$fcvcount]}" ] && AFCMINPWM[$fcvcount]=0
+		AFCMAXPWM[$fcvcount]=`echo $MAXPWM |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		[ -z "${AFCMAXPWM[$fcvcount]}" ] && AFCMAXPWM[$fcvcount]=255
+
+		# verify the validity of the settings
+		if [ "${AFCMINTEMP[$fcvcount]}" -ge "${AFCMAXTEMP[$fcvcount]}" ]
+		then
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):"
+			echo "MINTEMP must be less than MAXTEMP"
+			exit 1
+		fi
+		if [ "${AFCMAXPWM[$fcvcount]}" -gt 255 ]
+		then
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):"
+			echo "MAXPWM must be at most 255"
+			exit 1
+		fi
+		if [ "${AFCMINSTOP[$fcvcount]}" -ge "${AFCMAXPWM[$fcvcount]}" ]
+		then
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):"
+			echo "MINSTOP must be less than MAXPWM"
+			exit 1
+		fi
+		if [ "${AFCMINSTOP[$fcvcount]}" -lt "${AFCMINPWM[$fcvcount]}" ]
+		then
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):"
+			echo "MINSTOP must be greater than or equal to MINPWM"
+			exit 1
+		fi
+		if [ "${AFCMINPWM[$fcvcount]}" -lt 0 ]
+		then
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):"
+			echo "MINPWM must be at least 0"
+			exit 1
+		fi
+
 		echo
 		echo "Settings for ${AFCPWM[$fcvcount]}:"
 		echo "  Depends on ${AFCTEMP[$fcvcount]}"
@@ -88,6 +132,8 @@ function LoadConfig {
 		echo "  MAXTEMP=${AFCMAXTEMP[$fcvcount]}"
 		echo "  MINSTART=${AFCMINSTART[$fcvcount]}"
 		echo "  MINSTOP=${AFCMINSTOP[$fcvcount]}"
+		echo "  MINPWM=${AFCMINPWM[$fcvcount]}"
+		echo "  MAXPWM=${AFCMAXPWM[$fcvcount]}"
 		let fcvcount=fcvcount+1
 	done
 	echo
@@ -209,6 +255,8 @@ function UpdateFanSpeeds {
 		maxt=${AFCMAXTEMP[$fcvcount]}
 		minsa=${AFCMINSTART[$fcvcount]}
 		minso=${AFCMINSTOP[$fcvcount]}
+		minpwm=${AFCMINPWM[$fcvcount]}
+		maxpwm=${AFCMAXPWM[$fcvcount]}
 		
 		read tval < ${tsens}
 		if [ $? -ne 0 ]
@@ -261,18 +309,20 @@ function UpdateFanSpeeds {
 			echo "maxt=$maxt"
 			echo "minsa=$minsa"
 			echo "minso=$minso"
+			echo "minpwm=$minpwm"
+			echo "maxpwm=$maxpwm"
 			echo "tval=$tval"
 			echo "pwmpval=$pwmpval"
 			echo "fanval=$fanval"
 		fi
 		
 		if (( $tval <= $mint ))
-		  then pwmval=0 # at specified mintemp shut fan off
+		  then pwmval=$minpwm # below min temp, use defined min pwm
 		elif (( $tval >= $maxt ))
-		  then pwmval=255 # at specified maxtemp switch to 100%
+		  then pwmval=$maxpwm # over max temp, use defined max pwm
 		else 
 		  # calculate the new value from temperature and settings
-		  let pwmval="((${tval}-${mint})**2)*(255-${minso})/((${maxt}-${mint})**2)+${minso}"
+		  let pwmval="((${tval}-${mint})**2)*(${maxpwm}-${minso})/((${maxt}-${mint})**2)+${minso}"
 		  if [ $pwmpval -eq 0 -o $fanval -eq 0 ]
 		  then # if fan was stopped start it using a safe value
 		  	echo $minsa > $pwmo

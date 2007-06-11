@@ -17,7 +17,10 @@ SVN HEAD
   Program fancontrol: Use let for arithmetic evaluation
                       No longer need awk and grep
                       Limit calls to external programs (Linux 2.6 only)
+                      Check for configuration file validity
+                      Support optional min and max PWM values
   Program pwmconfig: Use smaller steps for low PWM values
+                     Support optional min and max PWM values
   Program rrd: Support non-i2c devices (hwmon class)
                Add missing shell declarations
                Update URI
