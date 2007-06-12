@@ -19,6 +19,7 @@ SVN HEAD
   Program isadump: Detect when address bit 7 is a busy flag
                    Fix Super-I/O exit sequence for Winbond/Fintek chips
   Program mkpatch: Delete
+  Program fancontrol: Use let for arithmetic evaluation
   Program pwmconfig: Use smaller steps for low PWM values
   Program rrd: Support only hwmon class devices
                Look for rrd in /usr/bin by default

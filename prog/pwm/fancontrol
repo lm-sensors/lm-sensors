@@ -2,7 +2,7 @@
 #
 # Simple script implementing a temperature dependent fan speed control
 #
-# Version 0.63
+# Version 0.64
 #
 # Usage: fancontrol [CONFIGFILE]
 #
@@ -188,7 +188,7 @@ function restorefans()
 	do
 		pwmo=${AFCPWM[$fcvcount]}
 		pwmdisable $pwmo
-		fcvcount=$fcvcount+1
+		let fcvcount=$fcvcount+1
 	done
 	echo 'Verify fans have returned to full speed'
 	exit 1
@@ -287,7 +287,7 @@ function UpdateFanSpeeds {
 		then
 			echo "new pwmval=$pwmval"
 		fi
-		fcvcount=$fcvcount+1
+		let fcvcount=$fcvcount+1
 	done
 }
 
@@ -302,7 +302,7 @@ do
 		echo "Error enabling PWM on $DIR/$pwmo"
 		restorefans
 	fi
-	fcvcount=$fcvcount+1
+	let fcvcount=$fcvcount+1
 done
 
 echo 'Starting automatic fan control...'
@@ -313,40 +313,3 @@ do
 	UpdateFanSpeeds
 	sleep $INTERVAL
 done
-
-# some old stuff/missing features, will clean this up soon
-#if ( test "$regulationtype" = "quad" ) ; then
-#  while true ; do
-#    temp=`cat ${temp1} | cut -b 12-13`
-#    if (( ${temp} < ${mintemp} )) ;
-#    	then pwm=0
-#    elif (( ${temp} > ${maxtemp} )) ;
-#    	then pwm=255
-#    else
-#	pwm=`calc "((10/(${maxtemp}-${mintemp})*(${temp}-${mintemp}))^2/1000*(${maxtemp}-${mintemp})*(255-${minspeed})+${minspeed})"`
-#	#no optimization here for readability (or sloth :))
-#    fi ;
-#    echo $pwm > ${pwm1} ;
-#
-#    sleep 10 ;
-#  done ;
-
-#elif ( test "$regulationtype" = "exp" ) ; then
-  #add support for exponential calculation here
-
-#else
-#  pwmconst=$[(255-${minspeed})/(${maxtemp}-${mintemp})]
-#  while true ; do
-#    let temp=`cat temp1 | cut -b 12-13` ;
-#    if (( ${temp} < ${mintemp} )) ;
-#        then pwm=0
-#    elif (( ${temp} > ${maxtemp} )) ;
-#        then pwm=255
-#    else
-#    	pwm=$[(${temp}-${mintemp})*${pwmconst}+${minspeed}]
-#    fi ;
-#    echo $pwm > pwm2 ;
-#
-#    sleep 10 ;
-#  done ;
-#fi
