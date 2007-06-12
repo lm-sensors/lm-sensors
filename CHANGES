@@ -24,6 +24,7 @@ SVN HEAD
                       Limit calls to external programs (Linux 2.6 only)
                       Check for configuration file validity
                       Support optional min and max PWM values
+                      Better integration with init scripts
   Program pwmconfig: Use smaller steps for low PWM values
                      Support optional min and max PWM values
   Program rrd: Support only hwmon class devices
