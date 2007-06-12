@@ -20,6 +20,8 @@ SVN HEAD
                    Fix Super-I/O exit sequence for Winbond/Fintek chips
   Program mkpatch: Delete
   Program fancontrol: Use let for arithmetic evaluation
+                      No longer need awk and grep
+                      Limit calls to external programs (Linux 2.6 only)
   Program pwmconfig: Use smaller steps for low PWM values
   Program rrd: Support only hwmon class devices
                Look for rrd in /usr/bin by default
