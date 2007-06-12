@@ -228,6 +228,7 @@ function pwmenable()
 
 function restorefans()
 {
+	local status=$1
 	echo 'Aborting, restoring fans...'
 	let fcvcount=0
 	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
@@ -237,10 +238,11 @@ function restorefans()
 		let fcvcount=$fcvcount+1
 	done
 	echo 'Verify fans have returned to full speed'
-	exit 1
+	exit $status
 }
 
-trap restorefans SIGHUP SIGINT SIGQUIT SIGTERM SIGKILL
+trap 'restorefans 0' SIGQUIT SIGTERM
+trap 'restorefans 1' SIGHUP SIGINT
 
 # main function
 function UpdateFanSpeeds {
@@ -262,7 +264,7 @@ function UpdateFanSpeeds {
 		if [ $? -ne 0 ]
 		then
 			echo "Error reading temperature from $DIR/$tsens"
-			restorefans
+			restorefans 1
 		fi
 		if [ "$SYSFS" = "1" ]
 		then
@@ -275,7 +277,7 @@ function UpdateFanSpeeds {
 		if [ $? -ne 0 ]
 		then
 			echo "Error reading PWM value from $DIR/$pwmo"
-			restorefans
+			restorefans 1
 		fi
 		if [ "$SYSFS" != "1" ]
 		then
@@ -289,7 +291,7 @@ function UpdateFanSpeeds {
 			if [ $? -ne 0 ]
 			then
 				echo "Error reading Fan value from $DIR/$fan"
-				restorefans
+				restorefans 1
 			fi
 			if [ "$SYSFS" != "1" ]
 			then
@@ -326,14 +328,15 @@ function UpdateFanSpeeds {
 		  if [ $pwmpval -eq 0 -o $fanval -eq 0 ]
 		  then # if fan was stopped start it using a safe value
 		  	echo $minsa > $pwmo
-			sleep 1
+			# Sleep while still handling signals
+			read < <(exec sleep 1)
 		  fi
 		fi
 		echo $pwmval > $pwmo # write new value to pwm output
 		if [ $? -ne 0 ]
 		then
 			echo "Error writing PWM value to $DIR/$pwmo"
-			restorefans
+			restorefans 1
 		fi
 		if [ "$DEBUG" != "" ]
 		then
@@ -352,7 +355,7 @@ do
 	if [ $? -ne 0 ]
 	then
 		echo "Error enabling PWM on $DIR/$pwmo"
-		restorefans
+		restorefans 1
 	fi
 	let fcvcount=$fcvcount+1
 done
@@ -363,5 +366,6 @@ echo 'Starting automatic fan control...'
 while true
 do
 	UpdateFanSpeeds
-	sleep $INTERVAL
+	# Sleep while still handling signals
+	read < <(exec sleep $INTERVAL)
 done
