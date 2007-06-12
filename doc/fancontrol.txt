@@ -26,7 +26,7 @@ some fan fails, because you probably won't hear it anymore ;)
 
 Configuration
 
-Since most of you are going to use the prog/pwm/pwmconfig script, the config
+Since most of you are going to use the pwmconfig script, the config
 file syntax will be discussed last. First I'm going to describe the various
 variables available for changing fancontrol's behaviour:
 
@@ -35,7 +35,7 @@ INTERVAL
 	fancontrol will be executed
 
 FCTEMPS
-	Maps pwm outputs to temperature sensors so fancontrol know which
+	Maps pwm outputs to temperature sensors so fancontrol knows which
 	temperature sensors should be used for calculation of new values for
 	the corresponding pwm outputs.
 
@@ -45,29 +45,65 @@ FCFANS
 	stops unexpectedly.
 
 MINTEMP
-	The temperature at which the fan gets switched off completely.
+	The temperature below which the fan gets switched to minimum speed.
 
 MAXTEMP
-	The temperature at which the fan gets switched to full speed.
+	The temperature over which the fan gets switched to maximum speed.
 
 MINSTART
 	Sets the minimum speed at which the fan begins spinning. You should
 	use a safe value to be sure it works, even when the fan gets old.
 
 MINSTOP
-	The minimum speed at which the fan still spins. Use a save value here,
+	The minimum speed at which the fan still spins. Use a safe value here,
 	too.
 
-If you set up your configuration by hand, be sure to include ALL variables and
-use valid values, there's no error handling yet! The file format is a bit
-strange:
+MINPWM
+	The PWM value to use when the temperature is below MINTEMP.
+	Typically, this will be either 0 if it is OK for the fan to plain
+	stop, or the same value as MINSTOP if you don't want the fan to
+	ever stop.
+	If this value isn't defined, it defaults to 0 (stopped fan).
 
-VARIABLE=chip/pwmdev=value chip/pwmdev2=value2 [...] VARIABLE2=[...]
+MAXPWM
+	The PWM value to use when the temperature is over MAXTEMP.
+	If this value isn't defined, it defaults to 255 (full speed).
+
+A graph might help you understand how the different values relate
+to each other:
+
+    PWM ^
+    255 +
+        |
+        |
+        |                             ,-------------- MAXPWM
+        |                           ,'.
+        |                         ,'  .
+        |                       ,'    .
+        |                     ,'      .
+        |                   ,'        .
+        |                 ,'          .
+        |       MINSTOP .'            .
+        |               |             .
+        |               |             .
+        |               |             .
+ MINPWM |---------------'             .
+        |               .             .
+        |               .             .
+        |               .             .
+      0 +---------------+-------------+---------------->
+                     MINTEMP       MAXTEMP            t (degree C)
+
+The configuration file format is a bit strange:
+
+VARIABLE=chip/pwmdev=value chip/pwmdev2=value2 [...]
+VARIABLE2=[...]
 
 Each variable has its own line. The variable name is followed by an equal sign
 and the device=value pairs. These consist of the relative path to the pwm
-output (from /proc/sys/dev/sensors/) for which the value is valid, equal sign
-followed by the value and are seperated by a blank.
+output (from /proc/sys/dev/sensors, /sys/bus/i2c/devices or /sys/class/hwmon
+depending on the kernel version) for which the value is valid, equal sign
+followed by the value and are separated by a blank.
 
 Example:
 
@@ -82,7 +118,7 @@ The algorithm
 
 fancontrol first reads its configuration, writes it to arrays and loops its
 main function.  This function gets the temperatures and fanspeeds from
-lm_sensors proc files and calculates new speeds depending on temperature
+kernel driver files and calculates new speeds depending on temperature
 changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the
 new values are written to the pwm outputs.  Currently the speed increases
 quadratically with rising temperature. This way you won't hear your fans most

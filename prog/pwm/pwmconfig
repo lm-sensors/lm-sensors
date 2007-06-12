@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# pwmconfig v0.7
+# pwmconfig v0.8
 # Tests the pwm outputs of sensors and configures fancontrol
 #
 #    Warning!!! This program will stop your fans, one at a time,
@@ -10,6 +10,7 @@
 #    program has exited!!!
 #
 #    Copyright 2003-2005 The lm_sensors project
+#    Copyright (C) 2007 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -485,6 +486,8 @@ function LoadConfig {
 	MAXTEMP=`egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP= *//g'`
 	MINSTART=`egrep '^MINSTART=.*$' $1 | sed -e 's/MINSTART= *//g'`
 	MINSTOP=`egrep '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP= *//g'`
+	MINPWM=`egrep '^MINPWM=.*$' $1 | sed -e 's/MINPWM= *//g'`
+	MAXPWM=`egrep '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM= *//g'`
 
 	# Check for configuration change
 	local item
@@ -499,6 +502,8 @@ function LoadConfig {
 			MAXTEMP=""
 			MINSTART=""
 			MINSTOP=""
+			MINPWM=""
+			MAXPWM=""
 		fi
 	done
 }
@@ -556,8 +561,10 @@ function SaveConfig {
 	echo "Saving configuration to $FCCONFIG..."
 	tmpfile=`mktemp -t pwmcfg.XXXXXXXXXX` || { echo "$0: Cannot create temporary file" >&2; exit 1;  }
 	trap " [ -f \"$tmpfile\" ] && /bin/rm -f -- \"$tmpfile\"" 0 1 2 3 13 15
-	egrep -v '(INTERVAL|FCTEMPS|FCFANS|MAXTEMP|MINTEMP|MINSTART|MINSTOP)' $FCCONFIG >$tmpfile
+	egrep -v '(INTERVAL|FCTEMPS|FCFANS|MAXTEMP|MINTEMP|MINSTART|MINSTOP|MINPWM|MAXPWM)' $FCCONFIG >$tmpfile
 	echo -e "INTERVAL=$INTERVAL\nFCTEMPS=$FCTEMPS\nFCFANS=$FCFANS\nMINTEMP=$MINTEMP\nMAXTEMP=$MAXTEMP\nMINSTART=$MINSTART\nMINSTOP=$MINSTOP" >>$tmpfile
+	[ -n "$MINPWM" ] && echo "MINPWM=$MINPWM" >>$tmpfile
+	[ -n "$MAXPWM" ] && echo "MAXPWM=$MAXPWM" >>$tmpfile
 	mv $tmpfile $FCCONFIG
 	#check if file was written correctly
 	echo 'Configuration saved'
@@ -599,6 +606,8 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			echo "  MAXTEMP=`echo $MAXTEMP |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
 			echo "  MINSTART=`echo $MINSTART |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
 			echo "  MINSTOP=`echo $MINSTOP |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
+			echo "  MINPWM=`echo $MINPWM |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
+			echo "  MAXPWM=`echo $MAXPWM |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
 		done
 		echo ;;
 
@@ -640,8 +649,8 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 				fi
 			fi
 			echo
-			echo 'Enter the low temperature (C)'
-			echo -n "at which the fan should be switched off ($DEFMINTEMP): "
+			echo 'Enter the low temperature (degree C)'
+			echo -n "below which the fan should spin at minimum speed ($DEFMINTEMP): "
 			read XMT
 			if [ "$XMT" = "" ]
 			then
@@ -654,8 +663,8 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 				MINTEMP="`echo $MINTEMP | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMT}"
 			fi
 			echo
-			echo 'Enter the high temperature (C)'
-			echo -n "at which the fan should be switched to full speed ($DEFMAXTEMP): "
+			echo 'Enter the high temperature (degree C)'
+			echo -n "over which the fan should spin at maximum speed ($DEFMAXTEMP): "
 			read XMT
 			if [ "$XMT" = "" ]
 			then
@@ -704,6 +713,32 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 				MINSTOP="${pwms}=${XMV}"
 			else
 				MINSTOP="`echo $MINSTOP | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMV}"
+			fi
+			echo
+			echo "Enter the PWM value (0-$XMV) to use when the temperature"
+			echo -n "is below the low temperature limit (0): "
+			read XMINP
+			if [ -n "$XMINP" ]
+			then
+				if [ "$MINPWM" = "" ]
+				then
+					MINPWM="${pwms}=${XMINP}"
+				else
+					MINPWM="`echo $MINPWM | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMINP}"
+				fi
+			fi
+			echo
+			echo "Enter the PWM value ($XMV-$MAX) to use when the temperature"
+			echo -n "is over the high temperature limit ($MAX): "
+			read XMAXP
+			if [ -n "$XMAXP" ]
+			then
+				if [ "$MAXPWM" = "" ]
+				then
+					MAXPWM="${pwms}=${XMAXP}"
+				else
+					MAXPWM="`echo $MAXPWM | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMAXP}"
+				fi
 			fi
 			echo
 			break;

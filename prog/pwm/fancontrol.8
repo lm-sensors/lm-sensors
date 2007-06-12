@@ -1,4 +1,4 @@
-.TH FANCONTROL 8 "January 27, 2005"
+.TH FANCONTROL 8 "June 2007"
 .SH NAME
 fancontrol \- automated software based fan speed regulation
 
@@ -49,10 +49,10 @@ Then \fBfancontrol\fP can check the fan speed and restart it if it
 stops unexpectedly.
 .TP
 .B MINTEMP
-The temperature below which the fan gets switched off completely.
+The temperature below which the fan gets switched to minimum speed.
 .TP
 .B MAXTEMP
-The temperature over which the fan gets switched to full speed.
+The temperature over which the fan gets switched to maximum speed.
 .TP
 .B MINSTART
 Sets the minimum speed at which the fan begins spinning. You should
@@ -61,10 +61,19 @@ use a safe value to be sure it works, even when the fan gets old.
 .B MINSTOP
 The minimum speed at which the fan still spins. Use a safe value here,
 too.
+.TP
+.B MINPWM
+The PWM value to use when the temperature is below MINTEMP.
+Typically, this will be either 0 if it is OK for the fan to plain
+stop, or the same value as MINSTOP if you don't want the fan to
+ever stop.
+If this value isn't defined, it defaults to 0 (stopped fan).
+.TP
+.B MAXPWM
+The PWM value to use when the temperature is over MAXTEMP.
+If this value isn't defined, it defaults to 255 (full speed).
 .PP
-If you set up your configuration by hand, be sure to include ALL variables and
-use valid values, there's no error handling yet! The file format is a bit
-strange:
+The configuration file format is a bit strange:
 .IP
 .nf
 VARIABLE=chip/pwmdev=value chip/pwmdev2=value2
@@ -73,8 +82,9 @@ VARIABLE2=...
 .PP
 Each variable has its own line. The variable name is followed by an equal sign
 and the device=value pairs. These consist of the relative path to the pwm
-output (from /proc/sys/dev/sensors/) for which the value is valid, equal sign
-followed by the value and are seperated by a blank. Example:
+output (from /proc/sys/dev/sensors, /sys/bus/i2c/devices or /sys/class/hwmon
+depending on the kernel version) for which the value is valid, equal sign
+followed by the value and are separated by a blank. Example:
 .IP
 MINTEMP=w83627hf-isa-0290/pwm2=40 w83627hf-isa-0290/pwm1=54
 .PP
@@ -86,7 +96,7 @@ editing the config file directly following the rules above.
 
 \fBfancontrol\fP first reads its configuration, writes it to arrays and loops its
 main function.  This function gets the temperatures and fanspeeds from
-lm_sensors proc files and calculates new speeds depending on temperature
+kernel driver files and calculates new speeds depending on temperature
 changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the
 new values are written to the PWM outputs. Currently the speed increases
 quadratically with rising temperature. This way you won't hear your fans most
