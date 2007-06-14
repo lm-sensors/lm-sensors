@@ -495,7 +495,7 @@ SMBus_read_i2c_block_data(SMBus *self, PyObject *args)
 	int addr, cmd;
 	union i2c_smbus_data data;
 
-	if (!PyArg_ParseTuple(args, "ii:read_block_data", &addr, &cmd))
+	if (!PyArg_ParseTuple(args, "ii:read_i2c_block_data", &addr, &cmd))
 		return NULL;
 
 	SMBus_SET_ADDR(self, addr);
