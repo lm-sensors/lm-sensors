@@ -41,8 +41,6 @@
 #include "version.h"
 #include "lm75.h"
 
-#define DEBUG 1
-
 /* The actual ISA address is read from Super-I/O configuration space */
 static unsigned short normal_i2c[] = { SENSORS_I2C_END };
 static unsigned short normal_i2c_range[] = { SENSORS_I2C_END };
