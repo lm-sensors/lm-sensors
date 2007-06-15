@@ -2897,20 +2897,66 @@ void print_w83627ehf(const sensors_chip_name *name)
   char *label;
   int i, valid, num_in;
   double cur, min, fdiv, max, alarm, over, hyst;
+  unsigned int in_alarms = 0, fan_alarms = 0, temp_alarms = 0;
 
   if (!strcmp(name->prefix, "w83627dhg"))
     num_in = 9;
   else
     num_in = 10;
 
+  /* For the 2.4 kernel driver, alarms are a bit harder to handle */
+  if (!sensors_get_feature(*name, SENSORS_W83627EHF_ALARMS, &cur)) {
+    unsigned long alarms = cur + 0.5;
+
+    if (alarms & W83627EHF_ALARM_IN0)
+      in_alarms |= (1 << 0);
+    if (alarms & W83627EHF_ALARM_IN1)
+      in_alarms |= (1 << 1);
+    if (alarms & W83627EHF_ALARM_IN2)
+      in_alarms |= (1 << 2);
+    if (alarms & W83627EHF_ALARM_IN3)
+      in_alarms |= (1 << 3);
+    if (alarms & W83627EHF_ALARM_IN4)
+      in_alarms |= (1 << 4);
+    if (alarms & W83627EHF_ALARM_IN5)
+      in_alarms |= (1 << 5);
+    if (alarms & W83627EHF_ALARM_IN6)
+      in_alarms |= (1 << 6);
+    if (alarms & W83627EHF_ALARM_IN7)
+      in_alarms |= (1 << 7);
+    if (alarms & W83627EHF_ALARM_IN8)
+      in_alarms |= (1 << 8);
+    if (num_in >= 10 && (alarms & W83627EHF_ALARM_IN9))
+      in_alarms |= (1 << 9);
+
+    if (alarms & W83627EHF_ALARM_FAN1)
+      fan_alarms |= (1 << 0);
+    if (alarms & W83627EHF_ALARM_FAN2)
+      fan_alarms |= (1 << 1);
+    if (alarms & W83627EHF_ALARM_FAN3)
+      fan_alarms |= (1 << 2);
+    if (alarms & W83627EHF_ALARM_FAN4)
+      fan_alarms |= (1 << 3);
+    if (alarms & W83627EHF_ALARM_FAN5)
+      fan_alarms |= (1 << 4);
+
+    if (alarms & W83627EHF_ALARM_TEMP1)
+      temp_alarms |= (1 << 0);
+    if (alarms & W83627EHF_ALARM_TEMP2)
+      temp_alarms |= (1 << 1);
+    if (alarms & W83627EHF_ALARM_TEMP3)
+      temp_alarms |= (1 << 2);
+  }
+
   for (i = 0; i < num_in; i++) {
     if (!sensors_get_label_and_valid(*name,SENSORS_W83627EHF_IN0+i,
         &label,&valid)
       && !sensors_get_feature(*name,SENSORS_W83627EHF_IN0+i,&cur)
       && !sensors_get_feature(*name,SENSORS_W83627EHF_IN0_MIN+i,&min)
-      && !sensors_get_feature(*name,SENSORS_W83627EHF_IN0_MAX+i,&max)
-      && !sensors_get_feature(*name,SENSORS_W83627EHF_IN0_ALARM+i,&alarm)) {
+      && !sensors_get_feature(*name,SENSORS_W83627EHF_IN0_MAX+i,&max)) {
       if (valid) {
+        if (sensors_get_feature(*name, SENSORS_W83627EHF_IN0_ALARM+i, &alarm))
+          alarm = in_alarms & (1 << i);
         print_label(label,10);
         printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V) %s\n",
                cur,min,max,alarm ? "ALARM" : "");
@@ -2932,8 +2978,9 @@ void print_w83627ehf(const sensors_chip_name *name)
         if (!sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_DIV+i, &fdiv))
           printf(", div = %1.0f", fdiv);
         printf(")");
-        if (!sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_ALARM+i,
-                                 &alarm) && alarm)
+        if (sensors_get_feature(*name, SENSORS_W83627EHF_FAN1_ALARM+i, &alarm))
+          alarm = fan_alarms & (1 << i);
+        if (alarm)
           printf(" ALARM");
         printf("\n");
       }
@@ -2951,8 +2998,9 @@ void print_w83627ehf(const sensors_chip_name *name)
       if (valid) {
         print_label(label,10);
         print_temp_info(cur, over, hyst, HYST, i ? 1 : 0, i ? 1 : 0);
-        if (!sensors_get_feature(*name, SENSORS_W83627EHF_TEMP1_ALARM+i,
-                                 &alarm) && alarm)
+        if (sensors_get_feature(*name, SENSORS_W83627EHF_TEMP1_ALARM+i, &alarm))
+          alarm = temp_alarms & (1 << i);
+        if (alarm)
           printf(" ALARM");
         printf("\n");
       }
