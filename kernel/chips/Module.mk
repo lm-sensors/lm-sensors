@@ -176,6 +176,9 @@ endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_W83627HF=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/w83627hf.o
 endif
+ifneq ($(shell if grep -q '^CONFIG_SENSORS_W83627EHF=y' $(LINUX)/.config; then echo 1; fi),1)
+KERNELCHIPSTARGETS += $(MODULE_DIR)/w83627ehf.o
+endif
 ifneq ($(shell if grep -q '^CONFIG_SENSORS_W83L785TS=y' $(LINUX)/.config; then echo 1; fi),1)
 KERNELCHIPSTARGETS += $(MODULE_DIR)/w83l785ts.o
 endif

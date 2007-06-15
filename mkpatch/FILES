@@ -65,6 +65,7 @@ kernel/chips/vt8231.c		drivers/sensors/vt8231.c
 kernel/chips/w83781d.c		drivers/sensors/w83781d.c
 kernel/chips/w83792d.c		drivers/sensors/w83792d.c
 kernel/chips/w83627hf.c		drivers/sensors/w83627hf.c
+kernel/chips/w83627ehf.c	drivers/sensors/w83627ehf.c
 kernel/chips/w83l785ts.c	drivers/sensors/w83l785ts.c
 kernel/chips/xeontemp.c		drivers/sensors/xeontemp.c
 kernel/include/sensors_compat.h	include/linux/sensors_compat.h

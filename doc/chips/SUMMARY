@@ -244,6 +244,9 @@ w83627hf
 	w83687thf	3	7	3	3 pw/da	no	yes (LPC)
 	w83697hf	2	8	2	2 pwm	no	yes (LPC)
 
+w83627ehf
+	w83627ehf	3	10	3-5	4 pwm	no	yes (LPC)
+
 w83781d
 	as99127f	3	7	3	-	yes	no
 	w83781d		3	7	3	-	yes	yes

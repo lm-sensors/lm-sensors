@@ -89,7 +89,8 @@ At least the following hardware sensor chips are supported:
   TI THMC10 and THMC50
   VIA Technologies VT1211, VT8231 and VT82C686A/B embedded sensors
   Winbond W83781D, W83782D, W83783S, W83791D, W83792D,
-          W83627HF, W83627THF, W83637HF, W83687THF and W83697HF
+          W83627HF, W83627THF, W83637HF, W83687THF, W83697HF,
+          W83627EHF/EHG
 
 
 We also support some miscellaneous chips:

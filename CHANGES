@@ -10,6 +10,7 @@ SVN HEAD
            Add applesmc support
   Man page sensors.conf.5: Update the chip statement section
   Module i2c-nforce2: Add nForce MCP61, MCP65 support (2.6 backport)
+  Module w83627ehf: New (2.6 backport)
   Programs i2cdump, i2cget, i2cset: Do not force the slave address by default
   Program i2cdump: Use the new I2C block read function
   Program isadump: Detect when address bit 7 is a busy flag
@@ -22,6 +23,7 @@ SVN HEAD
                       Better integration with init scripts
   Program pwmconfig: Use smaller steps for low PWM values
                      Support optional min and max PWM values
+  Program mkpatch: Include w83627ehf
   Program rrd: Support non-i2c devices (hwmon class)
                Add missing shell declarations
                Update URI

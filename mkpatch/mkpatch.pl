@@ -2,7 +2,7 @@
 
 #    mkpatch - Create patches against the Linux kernel
 #    Copyright (C) 1999  Frodo Looijaard <frodol@dds.nl>
-#    Copyright (C) 2005  Jean Delvare <khali@linux-fr.org>
+#    Copyright (C) 2005-2007  Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -135,6 +135,7 @@ sub gen_Documentation_Configure_help
            m@Winbond W83781D, W83782D, W83783S@ or
            m@Winbond W83792D@ or
            m@Winbond W83627HF, W83627THF@ or
+           m@Winbond W83627EHF/EHG@ or
            m@Winbond W83L785TS-S@ or
            m@EEprom \(DIMM\) reader@) {
       $_ = <INPUT>;
@@ -730,6 +731,16 @@ CONFIG_SENSORS_W83627HF
   them in the lm_sensors package, which you can download at
   http://www.lm-sensors.org/
 
+Winbond W83627EHF/EHG
+CONFIG_SENSORS_W83627EHF
+  If you say yes here you get support for the Winbond W83627EHF/EHG
+  sensor chips. This can also be built as a module which can be
+  inserted and removed while the kernel is running.
+
+  You will also need the latest user-space utilities: you can find
+  them in the lm_sensors package, which you can download at
+  http://www.lm-sensors.org/
+
 Winbond W83L785TS-S
 CONFIG_SENSORS_W83L785TS
   If you say yes here you get support for the Winbond W83L785TS-S
@@ -1063,6 +1074,7 @@ obj-$(CONFIG_SENSORS_VT8231)	+= vt8231.o
 obj-$(CONFIG_SENSORS_W83781D)	+= w83781d.o
 obj-$(CONFIG_SENSORS_W83792D)	+= w83792d.o
 obj-$(CONFIG_SENSORS_W83627HF)	+= w83627hf.o
+obj-$(CONFIG_SENSORS_W83627EHF)	+= w83627ehf.o
 obj-$(CONFIG_SENSORS_W83L785TS)	+= w83l785ts.o
 obj-$(CONFIG_SENSORS_XEONTEMP)	+= xeontemp.o
 
