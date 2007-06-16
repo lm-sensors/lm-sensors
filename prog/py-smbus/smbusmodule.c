@@ -513,7 +513,7 @@ SMBus_read_i2c_block_data(SMBus *self, PyObject *args)
 	data.block[0] = len;
 	/* save a bit of code by calling the access function directly */
 	if (i2c_smbus_access(self->fd, I2C_SMBUS_READ, (__u8)cmd,
-				len = 32 ? I2C_SMBUS_I2C_BLOCK_BROKEN:
+				len == 32 ? I2C_SMBUS_I2C_BLOCK_BROKEN:
 				I2C_SMBUS_I2C_BLOCK_DATA, &data)) {
 		PyErr_SetFromErrno(PyExc_IOError);
 		return NULL;
