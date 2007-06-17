@@ -39,6 +39,7 @@
 #include <linux/init.h>
 #include <asm/io.h>
 #include "version.h"
+#include "sensors_vid.h"
 #include "lm75.h"
 
 /* The actual ISA address is read from Super-I/O configuration space */
@@ -61,8 +62,11 @@ static int VAL;			/* The value to read/write */
 
 #define SIO_REG_LDSEL		0x07	/* Logical device select */
 #define SIO_REG_DEVID		0x20	/* Device ID (2 bytes) */
+#define SIO_REG_EN_VRM10	0x2C	/* GPIO3, GPIO4 selection */
 #define SIO_REG_ENABLE		0x30	/* Logical device enable */
 #define SIO_REG_ADDR		0x60	/* Logical device address (2 bytes) */
+#define SIO_REG_VID_CTRL	0xF0	/* VID control */
+#define SIO_REG_VID_DATA	0xF1	/* VID data */
 
 #define SIO_W83627EHF_ID	0x8850
 #define SIO_W83627EHG_ID	0x8860
@@ -212,6 +216,9 @@ struct w83627ehf_data {
 
 	u8 pwm_enable[4];	/* 1 for manual, 2+ for auto */
 	u8 pwm[4];
+
+	u8 vid;
+	u8 vrm;
 };
 
 /* The /proc/sys entries */
@@ -235,6 +242,8 @@ struct w83627ehf_data {
 #define W83627EHF_SYSCTL_TEMP1		1201	/* Degrees Celsius * 10 */
 #define W83627EHF_SYSCTL_TEMP2		1202
 #define W83627EHF_SYSCTL_TEMP3		1203
+#define W83627EHF_SYSCTL_VID		1300	/* Volts * 1000 */
+#define W83627EHF_SYSCTL_VRM		1301
 #define W83627EHF_SYSCTL_PWM1		1401
 #define W83627EHF_SYSCTL_PWM2		1402
 #define W83627EHF_SYSCTL_PWM3		1403
@@ -737,6 +746,61 @@ static void w83627ehf_pwm(struct i2c_client *client, int operation,
 	}
 }
 
+static void w83627ehf_vid(struct i2c_client *client, int operation,
+			  int ctl_name, int *nrels_mag, long *results)
+{
+	struct w83627ehf_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 3;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		results[0] = vid_from_reg(data->vid, data->vrm);
+		*nrels_mag = 1;
+	}
+}
+
+/* Change the VID input level, and read VID value again
+   This function assumes that the caller holds data->update_lock */
+static void w83627ehf_en_vrm10(struct w83627ehf_data *data, int enable)
+{
+	u8 reg;
+
+	superio_enter();
+	reg = superio_inb(SIO_REG_EN_VRM10) & ~0x08;
+	if (enable)
+		reg |= 0x08;
+	superio_outb(SIO_REG_EN_VRM10, reg);
+
+	superio_select(W83627EHF_LD_HWM);
+	if (superio_inb(SIO_REG_VID_CTRL) & 0x80)	/* VID input mode */
+		data->vid = superio_inb(SIO_REG_VID_DATA) & 0x3f;
+	superio_exit();
+}
+
+static void w83627ehf_vrm(struct i2c_client *client, int operation,
+			  int ctl_name, int *nrels_mag, long *results)
+{
+	struct w83627ehf_data *data = client->data;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 1;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		results[0] = data->vrm;
+		*nrels_mag = 1;
+	} else if (operation == SENSORS_PROC_REAL_WRITE) {
+		if (*nrels_mag >= 1) {
+			down(&data->update_lock);
+			/* We may have to change the VID input level */
+			if (data->vrm/10 != 10 && results[0]/10 == 10)
+				w83627ehf_en_vrm10(data, 1);
+			else if (data->vrm/10 == 10 && results[0]/10 != 10)
+				w83627ehf_en_vrm10(data, 0);
+			data->vrm = results[0];
+			up(&data->update_lock);
+		}
+	}
+}
+
 static ctl_table w83627ehf_dir_table_template[] = {
 	{W83627EHF_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83627ehf_in},
@@ -791,6 +855,11 @@ static ctl_table w83627ehf_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &w83627ehf_pwm},
 	{W83627EHF_SYSCTL_PWM4, "pwm4", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83627ehf_pwm},
+
+	{W83627EHF_SYSCTL_VID, "vid", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627ehf_vid},
+	{W83627EHF_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627ehf_vrm},
 	{0}
 };
 
@@ -869,8 +938,24 @@ static int w83627ehf_detect(struct i2c_adapter *adapter, int address,
 		data->fan_min[i] = w83627ehf_read_value(client,
 					W83627EHF_REG_FAN_MIN[i]);
 
-	/* fan4 and fan5 share some pins with the GPIO and serial flash */
+	/* Read VID value */
 	superio_enter();
+	superio_select(W83627EHF_LD_HWM);
+	if (superio_inb(SIO_REG_VID_CTRL) & 0x80)	/* VID input mode */
+		data->vid = superio_inb(SIO_REG_VID_DATA) & 0x3f;
+	else {
+		printk(KERN_NOTICE "w83627ehf: VID pins in output mode, CPU "
+		       "VID not available\n");
+		data->vid = 0x3f;
+	}
+
+	/* Wild guess, might not be correct */
+	if (superio_inb(SIO_REG_EN_VRM10) & 0x08)
+		data->vrm = 100;
+	else
+		data->vrm = 91;
+
+	/* fan4 and fan5 share some pins with the GPIO and serial flash */
 	fan5pin = superio_inb(0x24) & 0x2;
 	fan4pin = superio_inb(0x29) & 0x6;
 	superio_exit();

@@ -9,6 +9,7 @@ SVN HEAD
            Add dme1737 support
            Add applesmc support
            Add w83627ehf support (for Linux 2.4)
+           Add support for the w83627ehf VID function
   Man page sensors.conf.5: Update the chip statement section
   Module i2c-nforce2: Add nForce MCP61, MCP65 support (2.6 backport)
   Module w83627ehf: New (2.6 backport)
@@ -34,6 +35,7 @@ SVN HEAD
                    Add max6680 support
                    Fix alignment of alarm for one-limit temperatures
                    Add w83627ehf support (for Linux 2.4)
+                   Add support for the w83627ehf VID function
   Program sensors-detect: Stop Super-I/O probe after first family success
                           Fix SMSC DME1737 detection
                           Add /usr/sbin to the PATH (#2199)

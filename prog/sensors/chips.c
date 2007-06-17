@@ -3008,6 +3008,8 @@ void print_w83627ehf(const sensors_chip_name *name)
       printf("ERROR: Can't get TEMP%d data!\n", i + 1);
     free(label);
   }
+
+  print_vid_info(name, SENSORS_W83627EHF_VID, SENSORS_W83627EHF_VRM);
 }
 
 void print_w83793(const sensors_chip_name *name)

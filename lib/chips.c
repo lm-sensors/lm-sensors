@@ -2147,6 +2147,10 @@ static sensors_chip_feature w83627ehf_features[] =
     { { SENSORS_W83627EHF_TEMP3_HYST, "temp3_hyst", SENSORS_W83627EHF_TEMP3, 
                                       SENSORS_W83627EHF_TEMP3, RW }, 
                                       W83627EHF_SYSCTL_TEMP3, VALUE(2), 1 },
+    { { SENSORS_W83627EHF_VID, "vid", NOMAP, NOMAP, R },
+                                      W83627EHF_SYSCTL_VID, VALUE(1), 3 },
+    { { SENSORS_W83627EHF_VRM, "vrm", NOMAP, NOMAP, RW },
+                                      W83627EHF_SYSCTL_VRM, VALUE(1), 1 },
     { { SENSORS_W83627EHF_ALARMS, "alarms", NOMAP, NOMAP, R }, 
                                       W83627EHF_SYSCTL_ALARMS, VALUE(1), 0 },
     { { 0 }, 0 }
