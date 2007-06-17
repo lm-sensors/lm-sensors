@@ -589,10 +589,14 @@ static void store_fan_min(struct i2c_client *client, long val, int nr)
 	   fan min (unconditionally) */
 	if (new_div != data->fan_div[nr]) {
 		/* Preserve the fan speed reading */
-		if (new_div > data->fan_div[nr])
-			data->fan[nr] >>= new_div - data->fan_div[nr];
-		else
-			data->fan[nr] <<= data->fan_div[nr] - new_div;
+		if (data->fan[nr] != 0xff) {
+			if (new_div > data->fan_div[nr])
+				data->fan[nr] >>= new_div - data->fan_div[nr];
+			else if (data->fan[nr] & 0x80)
+				data->fan[nr] = 0xff;
+			else
+				data->fan[nr] <<= data->fan_div[nr] - new_div;
+		}
 
 #ifdef DEBUG
 		printk(KERN_DEBUG "w83627ehf: fan%u clock divider changed "
