@@ -625,8 +625,8 @@ static void w83627ehf_fan(struct i2c_client *client, int operation,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		w83627ehf_update_client(client);
 		if (data->has_fan & (1 << nr)) {
+			w83627ehf_update_client(client);
 			results[0] = fan_from_reg(data->fan_min[nr],
 					div_from_reg(data->fan_div[nr]));
 			results[1] = fan_from_reg(data->fan[nr],
@@ -978,11 +978,6 @@ static int w83627ehf_detect(struct i2c_adapter *adapter, int address,
 		goto exit_free;
 
 	w83627ehf_init_client(client);
-
-	/* A few vars need to be filled upon startup */
-	for (i = 0; i < 5; i++)
-		data->fan_min[i] = w83627ehf_read_value(client,
-					W83627EHF_REG_FAN_MIN[i]);
 
 	/* Read VID value */
 	superio_enter();
