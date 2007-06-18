@@ -894,6 +894,12 @@ static void w83627ehf_init_client(struct i2c_client *client)
 					      tmp & 0xfe);
 	}
 
+	/* Enable VBAT monitoring if needed */
+	tmp = w83627ehf_read_value(client, W83627EHF_REG_VBAT);
+	if (!(tmp & 0x01)) {
+		printk(KERN_INFO "w83627ehf: Enabling VBAT monitoring\n");
+		w83627ehf_write_value(client, W83627EHF_REG_VBAT, tmp | 0x01);
+	}
 }
 
 static int w83627ehf_detect(struct i2c_adapter *adapter, int address,
