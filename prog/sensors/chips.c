@@ -2998,6 +2998,11 @@ void print_w83627ehf(const sensors_chip_name *name)
       if (valid) {
         print_label(label,10);
         print_temp_info(cur, over, hyst, HYST, i ? 1 : 0, i ? 1 : 0);
+        if (!sensors_get_feature(*name, SENSORS_W83627EHF_TEMP1_TYPE+i, &cur)) {
+          int sensor = cur + 0.5;
+          printf("[%-10s]", sensor == 1 ? "CPU diode" :
+                            sensor == 2 ? "transistor" : "thermistor");
+        }
         if (sensors_get_feature(*name, SENSORS_W83627EHF_TEMP1_ALARM+i, &alarm))
           alarm = temp_alarms & (1 << i);
         if (alarm)

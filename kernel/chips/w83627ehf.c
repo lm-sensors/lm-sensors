@@ -209,6 +209,7 @@ struct w83627ehf_data {
 	u8 fan_min[5];
 	u8 fan_div[5];
 	u8 has_fan;		/* some fan inputs can be disabled */
+	u8 sensor[3];
 	u16 temp[3];
 	u16 temp_max[3];
 	u16 temp_hyst[3];
@@ -242,6 +243,9 @@ struct w83627ehf_data {
 #define W83627EHF_SYSCTL_TEMP1		1201	/* Degrees Celsius * 10 */
 #define W83627EHF_SYSCTL_TEMP2		1202
 #define W83627EHF_SYSCTL_TEMP3		1203
+#define W83627EHF_SYSCTL_SENSOR1	1211
+#define W83627EHF_SYSCTL_SENSOR2	1212
+#define W83627EHF_SYSCTL_SENSOR3	1213
 #define W83627EHF_SYSCTL_VID		1300	/* Volts * 1000 */
 #define W83627EHF_SYSCTL_VRM		1301
 #define W83627EHF_SYSCTL_PWM1		1401
@@ -805,6 +809,21 @@ static void w83627ehf_vrm(struct i2c_client *client, int operation,
 	}
 }
 
+static void w83627ehf_sensor(struct i2c_client *client, int operation,
+			     int ctl_name, int *nrels_mag, long *results)
+{
+	struct w83627ehf_data *data = client->data;
+	int nr = ctl_name - W83627EHF_SYSCTL_SENSOR1;
+
+	if (operation == SENSORS_PROC_REAL_INFO)
+		*nrels_mag = 0;
+	else if (operation == SENSORS_PROC_REAL_READ) {
+		w83627ehf_update_client(client);
+		results[0] = data->sensor[nr];
+		*nrels_mag = 1;
+	}
+}
+
 static ctl_table w83627ehf_dir_table_template[] = {
 	{W83627EHF_SYSCTL_IN0, "in0", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83627ehf_in},
@@ -864,6 +883,13 @@ static ctl_table w83627ehf_dir_table_template[] = {
 	 &i2c_sysctl_real, NULL, &w83627ehf_vid},
 	{W83627EHF_SYSCTL_VRM, "vrm", NULL, 0, 0644, NULL, &i2c_proc_real,
 	 &i2c_sysctl_real, NULL, &w83627ehf_vrm},
+
+	{W83627EHF_SYSCTL_SENSOR1, "sensor1", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627ehf_sensor},
+	{W83627EHF_SYSCTL_SENSOR2, "sensor2", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627ehf_sensor},
+	{W83627EHF_SYSCTL_SENSOR3, "sensor3", NULL, 0, 0444, NULL, &i2c_proc_real,
+	 &i2c_sysctl_real, NULL, &w83627ehf_sensor},
 	{0}
 };
 
@@ -875,8 +901,9 @@ static struct i2c_driver w83627ehf_driver;
 
 static void w83627ehf_init_client(struct i2c_client *client)
 {
+	struct w83627ehf_data *data = client->data;
 	int i;
-	u8 tmp;
+	u8 tmp, diode;
 
 	/* Start monitoring if needed */
 	tmp = w83627ehf_read_value(client, W83627EHF_REG_CONFIG);
@@ -899,6 +926,15 @@ static void w83627ehf_init_client(struct i2c_client *client)
 	if (!(tmp & 0x01)) {
 		printk(KERN_INFO "w83627ehf: Enabling VBAT monitoring\n");
 		w83627ehf_write_value(client, W83627EHF_REG_VBAT, tmp | 0x01);
+	}
+
+	/* Get thermal sensor types */
+	diode = w83627ehf_read_value(client, W83627EHF_REG_DIODE);
+	for (i = 0; i < 3; i++) {
+		if ((tmp & (0x02 << i)))
+			data->sensor[i] = (diode & (0x10 << i)) ? 1 : 2;
+		else
+			data->sensor[i] = 4; /* thermistor */
 	}
 }
 
