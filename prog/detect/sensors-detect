@@ -2244,11 +2244,12 @@ sub initialize_cpu_list
 {
   open(local *INPUTFILE, "/proc/cpuinfo") or die "Can't access /proc/cpuinfo!";
   local $_;
-  my %entry;
+  my $entry;
+
   while (<INPUTFILE>) {
     if (m/^processor\s*:\s*(\d+)/) {
-      push @cpu, \%entry if scalar keys(%entry); # Previous entry
-      %entry = (); # New entry
+      push @cpu, $entry if scalar keys(%{$entry}); # Previous entry
+      $entry = {}; # New entry
       next;
     }
     if (m/^(vendor_id|cpu family|model|model name|stepping)\s*:\s*(.+)$/) {
@@ -2256,11 +2257,11 @@ sub initialize_cpu_list
       my $v = $2;
       $v =~ s/\s+/ /g;	# Merge multiple spaces
       $v =~ s/ $//;	# Trim trailing space
-      $entry{$k} = $v;
+      $entry->{$k} = $v;
       next;
     }
   }
-  push @cpu, \%entry if scalar keys(%entry); # Last entry
+  push @cpu, $entry if scalar keys(%{$entry}); # Last entry
   close INPUTFILE;
 }
 
