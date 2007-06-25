@@ -74,9 +74,6 @@ extern int sensors_chip_name_has_wildcards(sensors_chip_name chip);
    it returns NULL */
 extern const char *sensors_get_adapter_name(int bus_nr);
 
-/* This function is deprecated and will be dropped soon. */
-extern const char *sensors_get_algorithm_name(int bus_nr);
-
 /* Look up the label which belongs to this chip. Note that chip should not
    contain wildcard values! *result is newly allocated (free it yourself).
    This function will return 0 on success, and <0 on failure.  This

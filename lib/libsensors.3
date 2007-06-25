@@ -24,7 +24,7 @@
 .\"
 .\" References consulted:
 .\"     libsensors source code
-.TH libsensors 3  "October 2006" "" "Linux Programmer's Manual"
+.TH libsensors 3  "June 2007" "" "Linux Programmer's Manual"
 .SH NAME
 libsensors \- publicly accessible functions provided by the sensors library
 .SH SYNOPSIS
@@ -80,12 +80,6 @@ Check whether the chip name is an 'absolute' name, which can only match one chip
 .br
 This function returns the adapter name of a bus number, as used within the
 sensors_chip_name structure. If it could not be found, it returns NULL.
-
-.B const char *sensors_get_algorithm_name(int bus_nr);
-.br
-This function used to return the algorithm name of a bus number.
-It is now deprecated and returns an arbitrary string. It will be dropped
-in a later version of the library so you should stop using it.
 
 \fBint sensors_get_label(sensors_chip_name name, int feature,
                       char **result);\fP

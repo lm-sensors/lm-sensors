@@ -152,7 +152,7 @@ Jean Delvare<br>
 <li><a href="#Section-4_002e24">4.24.3 Sensors-detect doesn't find any sensors!</a>
 </li></ul>
 <li><a href="#Section-4_002e25">4.25 Sensors says `<samp><span class="samp">Error: Line xxx: zzzzzzz</span></samp>'</a>
-<li><a href="#Section-4_002e26">4.26 Sensors only gives the name, adapter, and algorithm for my chip</a>
+<li><a href="#Section-4_002e26">4.26 Sensors only gives the name and adapter for my chip</a>
 <li><a href="#Section-4_002e27">4.27 Sensors says `<samp><span class="samp">ERROR: Can't get xxxxx data!</span></samp>'</a>
 <li><a href="#Section-4_002e28">4.28 Sensors doesn't find any sensors, just eeproms.</a>
 <li><a href="#Section-4_002e29">4.29 Inserting modules hangs my board</a>
@@ -897,7 +897,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a href="#Section-4_002e23">Section 4.23</a>:         What is at I2C address XXX? 
 <li><a href="#Section-4_002e24">Section 4.24</a>:         Sensors-detect doesn't work at all
 <li><a href="#Section-4_002e25">Section 4.25</a>:         Sensors says `<samp><span class="samp">Error: Line xxx: zzzzzzz</span></samp>'
-<li><a href="#Section-4_002e26">Section 4.26</a>:         Sensors only gives the name, adapter, and algorithm! 
+<li><a href="#Section-4_002e26">Section 4.26</a>:         Sensors only gives the name and adapter! 
 <li><a href="#Section-4_002e27">Section 4.27</a>:         Sensors says `<samp><span class="samp">ERROR: Can't get xxxxx data!</span></samp>'
 <li><a href="#Section-4_002e28">Section 4.28</a>:         Sensors doesn't find any sensors, just eeproms. 
 <li><a href="#Section-4_002e29">Section 4.29</a>:         Inserting modules hangs my board
@@ -1679,14 +1679,13 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 
 </div>
 
-<h3 class="section">4.26 Sensors only gives the name, adapter, and algorithm for my chip</h3>
+<h3 class="section">4.26 Sensors only gives the name and adapter for my chip</h3>
 
 <p>If <samp><span class="command">sensors</span></samp> only says this, for example, and doesn't
 provide any actual data at all:
 
 <pre class="example">     it87-isa-0290
      Adapter: ISA adapter
-     Algorithm: ISA algorithm
 </pre>
    <p>Your chip is not currently supported by <samp><span class="command">sensors</span></samp> and so all it
 does is print out that information. Get the latest release

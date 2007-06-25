@@ -94,7 +94,7 @@ lm_sensors
     4.24.2 Sensors-detect says "Can't open /dev/i2c[-/]0"
     4.24.3 Sensors-detect doesn't find any sensors!
   4.25 Sensors says `Error: Line xxx: zzzzzzz'
-  4.26 Sensors only gives the name, adapter, and algorithm for my chip
+  4.26 Sensors only gives the name and adapter for my chip
   4.27 Sensors says `ERROR: Can't get xxxxx data!'
   4.28 Sensors doesn't find any sensors, just eeproms.
   4.29 Inserting modules hangs my board
@@ -1103,15 +1103,14 @@ These are errors from the libsensors library in reading the
 it. If you have a parse error, perhaps you have to put the feature name
 in double quotes.
 
-4.26 Sensors only gives the name, adapter, and algorithm for my chip
-====================================================================
+4.26 Sensors only gives the name and adapter for my chip
+========================================================
 
 If `sensors' only says this, for example, and doesn't provide any
 actual data at all:
 
      it87-isa-0290
      Adapter: ISA adapter
-     Algorithm: ISA algorithm
 
    Your chip is not currently supported by `sensors' and so all it does
 is print out that information. Get the latest release and be sure you

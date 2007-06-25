@@ -161,8 +161,6 @@ int main (int argc, char *argv[])
     { "no-unknown", no_argument, NULL, 'U' },
     { "config-file", required_argument, NULL, 'c' },
     { "unknown", no_argument, NULL, 'u' },
-    /* next option accepted for compatibility, but otherwise ignored */
-    { "algorithm", no_argument, NULL, 'a' },
     { "generic", no_argument, NULL, 'g'},
     { 0,0,0,0 }
   };
@@ -175,7 +173,7 @@ int main (int argc, char *argv[])
   hide_unknown = 0;
   do_generic = 0;
   while (1) {
-    c = getopt_long(argc,argv,"hsvfaAUc:ug",long_opts,NULL);
+    c = getopt_long(argc, argv, "hsvfAUc:ug", long_opts, NULL);
     if (c == EOF)
       break;
     switch(c) {
@@ -206,9 +204,6 @@ int main (int argc, char *argv[])
       break;
     case 'u':
       do_unknown = 1;
-      break;
-    case 'a':
-      /* Ignore for compatibility */
       break;
     case 'g':
       do_generic = 1;

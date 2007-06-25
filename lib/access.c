@@ -325,12 +325,6 @@ const char *sensors_get_adapter_name(int bus_nr)
 	return NULL;
 }
 
-/* This function is deprecated and will be dropped soon. */
-const char *sensors_get_algorithm_name(int bus_nr)
-{
-	return "No longer available";
-}
-
 /* nr1-1 is the last main feature found; nr2-1 is the last subfeature found */
 const sensors_feature_data *sensors_get_all_features(sensors_chip_name name,
 						     int *nr1, int *nr2)

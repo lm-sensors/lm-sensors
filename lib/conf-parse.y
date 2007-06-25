@@ -120,7 +120,6 @@ static sensors_chip *current_chip = NULL;
 %type <expr> expression
 %type <bus> i2cbus_name
 %type <name> adapter_name
-%type <name> algorithm_name
 %type <name> function_name
 %type <name> string
 %type <chip> chip_name
@@ -134,7 +133,6 @@ input:	  /* empty */
 ;
 
 line:	  bus_statement EOL
-	| busalgo_statement EOL
 	| label_statement EOL
 	| set_statement EOL
 	| chip_statement EOL
@@ -150,17 +148,6 @@ bus_statement:	  BUS i2cbus_name adapter_name
                     new_el.adapter = $3;
 		    bus_add_el(&new_el);
 		  }
-;
-
-/* for compatibility, deprecated */
-busalgo_statement:	  BUS i2cbus_name adapter_name algorithm_name
-			  { sensors_bus new_el;
-			    new_el.lineno = $1;
-	                    new_el.number = $2;
-	                    new_el.adapter = $3;
-			    free($4);
-			    bus_add_el(&new_el);
-			  }
 ;
 
 label_statement:	  LABEL function_name string
@@ -311,11 +298,6 @@ i2cbus_name:	  NAME
 ;
 
 adapter_name:	  NAME
-		  { sensors_strip_of_spaces($1);
-		    $$ = $1; }
-;
-
-algorithm_name:	  NAME
 		  { sensors_strip_of_spaces($1);
 		    $$ = $1; }
 ;

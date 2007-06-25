@@ -238,9 +238,7 @@ int sensors_substitute_chip(sensors_chip_name *name,int lineno)
     return -SENSORS_ERR_BUS_NAME;
   }
 
-  /* We used to compare both the adapter and the algorithm names for
-     bus matching, but Linux 2.6 has no more names for algorithms, and
-     it was redundant anyway. So we now only rely on the adapter name. */
+  /* Compare the adapter names */
   for (j = 0; j < sensors_proc_bus_count; j++) {
     if (!strcmp(sensors_config_busses[i].adapter,
                 sensors_proc_bus[j].adapter)) {

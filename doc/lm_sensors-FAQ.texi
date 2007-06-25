@@ -561,7 +561,7 @@ to work.
 * Section 4.23::        What is at I2C address XXX?
 * Section 4.24::        Sensors-detect doesn't work at all
 * Section 4.25::        Sensors says @samp{Error: Line xxx: zzzzzzz}
-* Section 4.26::        Sensors only gives the name, adapter, and algorithm!
+* Section 4.26::        Sensors only gives the name and adapter!
 * Section 4.27::        Sensors says @samp{ERROR: Can't get xxxxx data!}
 * Section 4.28::        Sensors doesn't find any sensors, just eeproms.
 * Section 4.29::        Inserting modules hangs my board
@@ -1142,7 +1142,7 @@ to put the feature name in double quotes.
 
 
 @node Section 4.26, Section 4.27, Section 4.25, Problems
-@section Sensors only gives the name, adapter, and algorithm for my chip
+@section Sensors only gives the name and adapter for my chip
 
 If @command{sensors} only says this, for example, and doesn't
 provide any actual data at all:
@@ -1150,7 +1150,6 @@ provide any actual data at all:
 @example
 it87-isa-0290
 Adapter: ISA adapter
-Algorithm: ISA algorithm
 @end example
 
 Your chip is not currently supported by @command{sensors} and so all it
