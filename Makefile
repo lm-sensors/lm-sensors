@@ -48,9 +48,6 @@ PREFIX := /usr/local
 # Your C compiler
 CC := gcc
 
-# Build with sysfs support
-SYSFS_SUPPORT := 1
-
 # This is the directory where sensors.conf will be installed, if no other
 # configuration file is found
 ETCDIR := /etc
@@ -157,14 +154,8 @@ ALL_CFLAGS += $(CFLAGS)
 PROGCPPFLAGS := -DETCDIR="\"$(ETCDIR)\"" $(ALL_CPPFLAGS) -Wundef
 PROGCFLAGS := $(ALL_CFLAGS)
 ARCPPFLAGS := $(ALL_CPPFLAGS)
-ifdef SYSFS_SUPPORT
-ARCPPFLAGS := $(ARCPPFLAGS) -DSYSFS_SUPPORT
-endif
 ARCFLAGS := $(ALL_CFLAGS)
 LIBCPPFLAGS := $(ALL_CPPFLAGS)
-ifdef SYSFS_SUPPORT
-LIBCPPFLAGS := $(LIBCPPFLAGS) -DSYSFS_SUPPORT
-endif
 LIBCFLAGS := -fpic -D_REENTRANT $(ALL_CFLAGS)
 
 .PHONY: all user clean install user_install uninstall user_uninstall version package
