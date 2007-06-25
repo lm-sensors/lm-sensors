@@ -25,7 +25,6 @@
 #include "data.h"
 #include "error.h"
 #include "access.h"
-#include "general.h"
 
 static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	int *sysmag, char *altsysname);
