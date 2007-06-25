@@ -15,6 +15,7 @@ SVN HEAD
            Delete support of non-sensor drivers (ddcmon, eeprom)
            Always build with sysfs support
   Man page sensors.conf.5: Update the chip statement section
+  Programs doc/*: Delete, obsolete
   Programs i2cdump, i2cget, i2cset: Do not force the slave address by default
   Program i2cdump: Use the new I2C block read function
   Program isadump: Detect when address bit 7 is a busy flag
