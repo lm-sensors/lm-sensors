@@ -30,19 +30,6 @@ see useful_addresses.html.
   connected to them, as well as Super-I/O and misc chips. It also generates
   modprobe lines and module options. This program is interactive.
 
-* prog/doc/doc-features.pl (written in Perl, not installed)
-  This program is used to help us generate driver documentation; it scans
-  some C source programs to do this. Syntax:
-    ./doc-features.pl BASE [PREFIX...]
-  BASE is the path to the base directory of the lm_sensors tree
-  PREFIX is one of more prefixes of chips you want documented; if left out,
-  all chips are documented.
-
-* prog/doc/doc-insmod.pl (written in Perl, not installed)
-  This program is used to help us generate driver documentation; it reads
-  all module information and outputs insmod parameter information. Syntax:
-    ./doc-insmod.pl DRIVER
-
 * prog/dump/i2cdump (written in C, installed by 'make install')
   This program dumps the registers of an I2C device.
   Usual syntax:
