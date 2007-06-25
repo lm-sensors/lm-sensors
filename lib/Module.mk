@@ -32,8 +32,8 @@ LIBMAN5FILES := $(MODULE_DIR)/sensors.conf.5
 # changed in a backward incompatible way.  The interface is defined by
 # the public header files - in this case they are error.h, sensors.h,
 # chips.h.
-LIBMAINVER := 3
-LIBMINORVER := 1.3
+LIBMAINVER := 4
+LIBMINORVER := 0.0
 LIBVER := $(LIBMAINVER).$(LIBMINORVER)
 
 # The static lib name, the shared lib name, and the internal ('so') name of
