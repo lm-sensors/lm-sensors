@@ -1832,6 +1832,38 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids);
 	devid => 0x77,
       },
     ],
+    # Non-standard SMSC detection callback and chip list. These chips differ
+    # from the standard ones listed above in that the device ID register 
+    # address is 0x0d instead of 0x20 (as specified by the ISA PNP spec).
+    ns_detect => \&smsc_ns_detect_superio,
+    ns_chips =>
+    [
+      {
+	name => "SMSC FDC37C665 Super IO",
+	driver => "not-a-sensor",
+	devid => 0x65,
+      },
+      {
+	name => "SMSC FDC37C666 Super IO",
+	driver => "not-a-sensor",
+	devid => 0x66,
+      },
+      {
+	name => "SMSC FDC37C669 Super IO",
+	driver => "not-a-sensor",
+	devid => 0x03,
+      },
+      {
+	name => "SMSC FDC37N769 Super IO",
+	driver => "not-a-sensor",
+	devid => 0x28,
+      },
+      {
+	name => "SMSC LPC47N227 Super IO",
+	driver => "not-a-sensor",
+	devid => 0x5a,
+      },
+    ],
   },
   {
     family => "VIA/Winbond/Fintek",
@@ -3190,6 +3222,36 @@ sub probe_superio($$$)
                                         $new_hash;
 }
 
+# Detection routine for non-standard SMSC Super I/O chips
+# $_[0]: Super I/O LPC config/index port
+# $_[1]: Super I/O LPC data port
+# $_[2]: Reference to array of non-standard chips
+# Return values: 1 if non-standard chip found, 0 otherwise
+sub smsc_ns_detect_superio
+{
+    my ($addrreg, $datareg, $ns_chips) = @_;
+    my ($val, $chip);
+
+    # read alternate device ID register
+    outb($addrreg, 0x0d);
+    $val = inb($datareg);
+    if ($val == 0x00 || $val == 0xff) {
+	return 0;
+    }
+
+    print "Yes\n";
+
+    foreach $chip (@{$ns_chips}) {
+	if ($chip->{devid} == $val) {
+	    probe_superio($addrreg, $datareg, $chip);
+	    return 1;
+	}
+    }
+
+    printf("Found unknown non-standard chip with ID 0x%02x\n", $val);
+    return 1;
+}
+
 sub scan_superio
 {
   my ($addrreg, $datareg) = @_;
@@ -3206,6 +3268,12 @@ sub scan_superio
 # write the password
     foreach $val (@{$family->{enter}->{$addrreg}}) {
       outb($addrreg, $val);
+    }
+# call the non-standard detection routine first if it exists
+    if (defined($family->{ns_detect}) && 
+        &{$family->{ns_detect}}($addrreg, $datareg, $family->{ns_chips})) {
+      exit_superio($addrreg, $datareg);
+      last FAMILY;
     }
 # did it work?
     outb($addrreg, $superio{devidreg});

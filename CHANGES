@@ -45,6 +45,7 @@ SVN HEAD
                           Add Maxim MAX6680/MAX6681 detection
                           Add IT8726F detection
                           Fix IPMI support for 2.6 kernels
+                          Add detection for non-standard SMSC Super-I/Os
 
 
 2.10.3 (20070319)
