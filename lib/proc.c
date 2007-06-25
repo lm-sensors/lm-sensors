@@ -17,219 +17,75 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#include <stddef.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
 #include <dirent.h>
 
-#include "kernel/include/sensors.h"
 #include "data.h"
 #include "error.h"
 #include "access.h"
 #include "general.h"
-#include "sysfs.h"
-
-/* OK, this proves one thing: if there are too many chips detected, we get in
-   trouble. The limit is around 4096/sizeof(struct sensors_chip_data), which
-   works out to about 100 entries right now. That seems sensible enough,
-   but if we ever get at the point where more chips can be detected, we must
-   enlarge buf, and check that sysctl can handle larger buffers. */
-
-#define BUF_LEN 4096
-
-static char buf[BUF_LEN];
 
 static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	int *sysmag, char *altsysname);
 
-/* This reads /proc/sys/dev/sensors/chips into memory */
-int sensors_read_proc_chips(void)
-{
-  int res;
-
-  int name[3] = { CTL_DEV, DEV_SENSORS, SENSORS_CHIPS };
-  size_t buflen = BUF_LEN;
-  char *bufptr = buf;
-  sensors_proc_chips_entry entry;
-  int lineno;
-
-  if (sysctl(name, 3, bufptr, &buflen, NULL, 0))
-    return -SENSORS_ERR_PROC;
-
-  lineno = 1;
-  while (buflen >= sizeof(struct i2c_chips_data)) {
-    if ((res = 
-          sensors_parse_chip_name(((struct i2c_chips_data *) bufptr)->name, 
-                                   &entry.name))) {
-      sensors_parse_error("Parsing /proc/sys/dev/sensors/chips",lineno);
-      return res;
-    }
-    entry.sysctl = ((struct i2c_chips_data *) bufptr)->sysctl_id;
-    sensors_add_proc_chips(&entry);
-    bufptr += sizeof(struct i2c_chips_data);
-    buflen -= sizeof(struct i2c_chips_data);
-    lineno++;
-  }
-  return 0;
-}
-
-int sensors_read_proc_bus(void)
-{
-  FILE *f;
-  char line[255];
-  char *border;
-  sensors_bus entry;
-  int lineno;
-
-  f = fopen("/proc/bus/i2c","r");
-  if (!f)
-    return -SENSORS_ERR_PROC;
-  lineno=1;
-  while (fgets(line,255,f)) {
-    if (strlen(line) > 0)
-      line[strlen(line)-1] = '\0';
-    if (! (border = rindex(line,'\t')))
-      goto ERROR;
-    /* Skip algorithm name */
-    *border='\0';
-    if (! (border = rindex(line,'\t')))
-      goto ERROR;
-    if (! (entry.adapter = strdup(border + 1)))
-      goto FAT_ERROR;
-    *border='\0';
-    if (! (border = rindex(line,'\t')))
-      goto ERROR;
-    *border='\0';
-    if (strncmp(line,"i2c-",4))
-      goto ERROR;
-    if (sensors_parse_i2cbus_name(line,&entry.number))
-      goto ERROR;
-    sensors_strip_of_spaces(entry.adapter);
-    sensors_add_proc_bus(&entry);
-    lineno++;
-  }
-  fclose(f);
-  return 0;
-FAT_ERROR:
-  sensors_fatal_error("sensors_read_proc_bus","Allocating entry");
-ERROR:
-  sensors_parse_error("Parsing /proc/bus/i2c",lineno);
-  fclose(f);
-  return -SENSORS_ERR_PROC;
-}
-    
-
-/* This returns the first detected chip which matches the name */
-static int sensors_get_chip_id(sensors_chip_name name)
-{
-  int i;
-  for (i = 0; i < sensors_proc_chips_count; i++)
-    if (sensors_match_chip(name, sensors_proc_chips[i].name))
-      return sensors_proc_chips[i].sysctl;
-  return -SENSORS_ERR_NO_ENTRY;
-}
-  
-/* This reads a feature /proc or /sys file.
+/* This reads a feature from a sysfs file.
    Sysfs uses a one-value-per file system...
 */
 int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 {
-	int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
 	const sensors_chip_feature *the_feature;
-	size_t buflen = BUF_LEN;
 	int mag;
+	char n[NAME_MAX], altn[NAME_MAX];
+	FILE *f;
 
-	if (!sensors_found_sysfs)
-		if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
-			return sysctl_name[2];
 	if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if (sensors_found_sysfs) {
-		char n[NAME_MAX], altn[NAME_MAX];
-		FILE *f;
-		strcpy(n, name.busname);
-		strcat(n, "/");
-		strcpy(altn, n);
-		/* use rindex to append sysname to n */
-		getsysname(the_feature, rindex(n, '\0'), &mag, rindex(altn, '\0'));
-		if ((f = fopen(n, "r")) != NULL
-		 || (f = fopen(altn, "r")) != NULL) {
-			int res = fscanf(f, "%lf", value);
-			fclose(f);
-			if (res != 1)
-				return -SENSORS_ERR_PROC;
-			for (; mag > 0; mag --)
-				*value /= 10.0;
-		} else
+
+	strcpy(n, name.busname);
+	strcat(n, "/");
+	strcpy(altn, n);
+	/* use rindex to append sysname to n */
+	getsysname(the_feature, rindex(n, '\0'), &mag, rindex(altn, '\0'));
+	if ((f = fopen(n, "r")) != NULL
+	 || (f = fopen(altn, "r")) != NULL) {
+		int res = fscanf(f, "%lf", value);
+		fclose(f);
+		if (res != 1)
 			return -SENSORS_ERR_PROC;
-	} else {
-		sysctl_name[3] = the_feature->sysctl;
-		if (sysctl(sysctl_name, 4, buf, &buflen, NULL, 0))
-			return -SENSORS_ERR_PROC;
-		*value = *((long *) (buf + the_feature->offset));
-		for (mag = the_feature->scaling; mag > 0; mag --)
+		for (; mag > 0; mag --)
 			*value /= 10.0;
-		for (; mag < 0; mag ++)
-			*value *= 10.0;
-	}
+	} else
+		return -SENSORS_ERR_PROC;
+
 	return 0;
 }
   
 int sensors_write_proc(sensors_chip_name name, int feature, double value)
 {
-	int sysctl_name[4] = { CTL_DEV, DEV_SENSORS };
 	const sensors_chip_feature *the_feature;
-	size_t buflen = BUF_LEN;
 	int mag;
+	char n[NAME_MAX], altn[NAME_MAX];
+	FILE *f;
  
-	if (!sensors_found_sysfs)
-		if ((sysctl_name[2] = sensors_get_chip_id(name)) < 0)
-			return sysctl_name[2];
 	if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if (sensors_found_sysfs) {
-		char n[NAME_MAX], altn[NAME_MAX];
-		FILE *f;
-		strcpy(n, name.busname);
-		strcat(n, "/");
-		strcpy(altn, n);
-		/* use rindex to append sysname to n */
-		getsysname(the_feature, rindex(n, '\0'), &mag, rindex(altn, '\0'));
-		if ((f = fopen(n, "w")) != NULL
-		 || (f = fopen(altn, "w")) != NULL) {
-			for (; mag > 0; mag --)
-				value *= 10.0;
-			fprintf(f, "%d", (int) value);
-			fclose(f);
-		} else
-			return -SENSORS_ERR_PROC;
-	} else {
-		sysctl_name[3] = the_feature->sysctl;
-		if (sysctl(sysctl_name, 4, buf, &buflen, NULL, 0))
-			return -SENSORS_ERR_PROC;
-		/* The following line is known to solve random problems, still it
-		   can't be considered a definitive solution...
-		if (sysctl_name[0] != CTL_DEV) { sysctl_name[0] = CTL_DEV ; } */
-		for (mag = the_feature->scaling; mag > 0; mag --)
+
+	strcpy(n, name.busname);
+	strcat(n, "/");
+	strcpy(altn, n);
+	/* use rindex to append sysname to n */
+	getsysname(the_feature, rindex(n, '\0'), &mag, rindex(altn, '\0'));
+	if ((f = fopen(n, "w")) != NULL
+	 || (f = fopen(altn, "w")) != NULL) {
+		for (; mag > 0; mag --)
 			value *= 10.0;
-		for (; mag < 0; mag ++)
-			value /= 10.0;
-		* ((long *) (buf + the_feature->offset)) = (long) value;
-		buflen = the_feature->offset + sizeof(long);
-#ifdef DEBUG
-		/* The following get* calls don't do anything, they are here
-		   for debugging purposes only. Strace will show the
-		   returned values. */
-		getuid(); geteuid();
-		getgid(); getegid();
-#endif
-		if (sysctl(sysctl_name, 4, NULL, 0, buf, buflen))
-			return -SENSORS_ERR_PROC;
-	}
+		fprintf(f, "%d", (int) value);
+		fclose(f);
+	} else
+		return -SENSORS_ERR_PROC;
+
 	return 0;
 }
 

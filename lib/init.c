@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include "sensors.h"
 #include "data.h"
-#include "proc.h"
 #include "error.h"
 #include "access.h"
 #include "conf.h"
@@ -42,13 +41,10 @@ int sensors_init(FILE *input)
 {
   int res;
   sensors_cleanup();
-  if (sensors_init_sysfs()) {
-    if ((res = sensors_read_sysfs_bus()) || (res = sensors_read_sysfs_chips()))
-      return res;
-  } else {
-    if ((res = sensors_read_proc_bus()) || (res = sensors_read_proc_chips()))
-      return res;
-  }
+  if (!sensors_init_sysfs())
+    return -SENSORS_ERR_PROC;
+  if ((res = sensors_read_sysfs_bus()) || (res = sensors_read_sysfs_chips()))
+    return res;
   if ((res = sensors_scanner_init(input)))
     return -SENSORS_ERR_PARSE;
   if ((res = sensors_yyparse()))

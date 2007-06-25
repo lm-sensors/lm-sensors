@@ -31,8 +31,6 @@
 #include "general.h"
 #include "sysfs.h"
 
-int sensors_found_sysfs = 0;
-
 char sensors_sysfs_mount[NAME_MAX];
 
 #define MAX_SENSORS_PER_TYPE 16
@@ -200,9 +198,9 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 int sensors_init_sysfs(void)
 {
 	if (sysfs_get_mnt_path(sensors_sysfs_mount, NAME_MAX) == 0)
-		sensors_found_sysfs = 1;
+		return 1;
 
-	return sensors_found_sysfs;
+	return 0;
 }
 
 /* returns: 0 if successful, !0 otherwise */

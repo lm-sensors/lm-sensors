@@ -20,8 +20,6 @@
 #ifndef SENSORS_LIB_SYSFS_H
 #define SENSORS_LIB_SYSFS_H
 
-extern int sensors_found_sysfs;
-
 extern char sensors_sysfs_mount[];
 
 extern int sensors_init_sysfs(void);

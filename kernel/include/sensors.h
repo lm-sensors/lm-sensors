@@ -29,26 +29,6 @@
  */
 
 
-/* From linux/i2c-proc.h */
-
-/* Sysctl IDs */
-#ifdef DEV_HWMON
-#define DEV_SENSORS DEV_HWMON
-#else				/* ndef DEV_HWMOM */
-#define DEV_SENSORS 2		/* The id of the lm_sensors directory within the
-				   dev table */
-#endif				/* def DEV_HWMON */
-
-/* The maximum length of the prefix */
-#define SENSORS_PREFIX_MAX 20
-
-#define SENSORS_CHIPS 1
-struct i2c_chips_data {
-	int sysctl_id;
-	char name[SENSORS_PREFIX_MAX + 13];
-};
-
-
 /* -- SENSORS SYSCTL START -- */
 
 #define ADM1021_SYSCTL_TEMP 1200
