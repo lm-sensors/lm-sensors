@@ -20,6 +20,9 @@
 /* this define needed for strndup() */
 #define _GNU_SOURCE
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -197,10 +200,16 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 /* returns !0 if sysfs filesystem was found, 0 otherwise */
 int sensors_init_sysfs(void)
 {
-	if (sysfs_get_mnt_path(sensors_sysfs_mount, NAME_MAX) == 0)
-		return 1;
+	struct stat statbuf;
 
-	return 0;
+	/* libsysfs will return success even if sysfs is not mounted,
+	   so we have to double-check */
+	if (sysfs_get_mnt_path(sensors_sysfs_mount, NAME_MAX)
+	 || stat(sensors_sysfs_mount, &statbuf) < 0
+	 || statbuf.st_nlink <= 2)	/* Empty directory */
+		return 0;
+
+	return 1;
 }
 
 /* returns: 0 if successful, !0 otherwise */
