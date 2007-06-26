@@ -219,7 +219,7 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 	int domain, bus, slot, fn, i;
 	struct sysfs_attribute *attr, *bus_attr;
 	char bus_path[SYSFS_PATH_MAX];
-	sensors_proc_chips_entry entry;
+	sensors_chip_name name;
 
 	/* ignore any device without name attribute */
 	if (!(attr = sysfs_get_device_attr(dev, "name")))
@@ -231,22 +231,22 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 		return 0;
 
 	/* NB: attr->value[attr->len-1] == '\n'; chop that off */
-	entry.name.prefix = strndup(attr->value, attr->len - 1);
-	if (!entry.name.prefix)
+	name.prefix = strndup(attr->value, attr->len - 1);
+	if (!name.prefix)
 		sensors_fatal_error(__FUNCTION__, "out of memory");
 
-	entry.name.busname = strdup(dev->path);
-	if (!entry.name.busname)
+	name.busname = strdup(dev->path);
+	if (!name.busname)
 		sensors_fatal_error(__FUNCTION__, "out of memory");
 
-	if (sscanf(dev->name, "%d-%x", &entry.name.bus, &entry.name.addr) == 2) {
+	if (sscanf(dev->name, "%d-%x", &name.bus, &name.addr) == 2) {
 		/* find out if legacy ISA or not */
-		if (entry.name.bus == 9191)
-			entry.name.bus = SENSORS_CHIP_NAME_BUS_ISA;
+		if (name.bus == 9191)
+			name.bus = SENSORS_CHIP_NAME_BUS_ISA;
 		else {
 			snprintf(bus_path, sizeof(bus_path),
 				"%s/class/i2c-adapter/i2c-%d/device/name",
-				sensors_sysfs_mount, entry.name.bus);
+				sensors_sysfs_mount, name.bus);
 
 			if ((bus_attr = sysfs_open_attribute(bus_path))) {
 				if (sysfs_read_attribute(bus_attr))
@@ -254,24 +254,24 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 
 				if (bus_attr->value
 				 && !strncmp(bus_attr->value, "ISA ", 4))
-					entry.name.bus = SENSORS_CHIP_NAME_BUS_ISA;
+					name.bus = SENSORS_CHIP_NAME_BUS_ISA;
 
 				sysfs_close_attribute(bus_attr);
 			}
 		}
-	} else if (sscanf(dev->name, "%*[a-z0-9_].%d", &entry.name.addr) == 1) {
+	} else if (sscanf(dev->name, "%*[a-z0-9_].%d", &name.addr) == 1) {
 		/* must be new ISA (platform driver) */
-		entry.name.bus = SENSORS_CHIP_NAME_BUS_ISA;
+		name.bus = SENSORS_CHIP_NAME_BUS_ISA;
 	} else if (sscanf(dev->name, "%x:%x:%x.%x", &domain, &bus, &slot, &fn) == 4) {
 		/* PCI */
-		entry.name.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
-		entry.name.bus = SENSORS_CHIP_NAME_BUS_PCI;
+		name.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
+		name.bus = SENSORS_CHIP_NAME_BUS_PCI;
 	} else
 		return -SENSORS_ERR_PARSE;
 	
 	/* check whether this chip is known in the static list */ 
 	for (i = 0; sensors_chip_features_list[i].prefix; i++)
-		if (!strcasecmp(sensors_chip_features_list[i].prefix, entry.name.prefix))
+		if (!strcasecmp(sensors_chip_features_list[i].prefix, name.prefix))
 			break;
 
 	/* if no chip definition matches */
@@ -287,7 +287,7 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 		total_dynamic++;
 	}
 		
-	sensors_add_proc_chips(&entry);
+	sensors_add_proc_chips(&name);
 
 	return 0;
 }

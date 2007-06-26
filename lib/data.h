@@ -118,11 +118,6 @@ typedef struct sensors_bus {
   int lineno;
 } sensors_bus;
 
-/* /proc/sys/dev/sensors/chips line representation */
-typedef struct sensors_proc_chips_entry {
-  sensors_chip_name name;
-} sensors_proc_chips_entry;
-
 /* Internal data about a single chip feature.
    name is the string name used to refer to this feature (both in config
      files and through user functions);
@@ -164,13 +159,13 @@ extern sensors_bus *sensors_config_busses;
 extern int sensors_config_busses_count;
 extern int sensors_config_busses_max;
 
-extern sensors_proc_chips_entry *sensors_proc_chips;
+extern sensors_chip_name *sensors_proc_chips;
 extern int sensors_proc_chips_count;
 extern int sensors_proc_chips_max;
 
 #define sensors_add_proc_chips(el) sensors_add_array_el( \
 	(el), &sensors_proc_chips, &sensors_proc_chips_count,\
-	&sensors_proc_chips_max, sizeof(struct sensors_proc_chips_entry))
+	&sensors_proc_chips_max, sizeof(struct sensors_chip_name))
 
 extern sensors_bus *sensors_proc_bus;
 extern int sensors_proc_bus_count;

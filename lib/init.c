@@ -27,7 +27,6 @@
 #include "sysfs.h"
 #include "scanner.h"
 
-static void free_proc_chips_entry(sensors_proc_chips_entry entry);
 static void free_chip_name(sensors_chip_name name);
 static void free_bus(sensors_bus bus);
 static void free_chip(sensors_chip chip);
@@ -61,7 +60,7 @@ void sensors_cleanup(void)
   sensors_scanner_exit();
 
   for (i = 0; i < sensors_proc_chips_count; i++)
-    free_proc_chips_entry(sensors_proc_chips[i]);
+    free_chip_name(sensors_proc_chips[i]);
   free(sensors_proc_chips);
   sensors_proc_chips = NULL;
   sensors_proc_chips_count = sensors_proc_chips_max = 0;
@@ -83,11 +82,6 @@ void sensors_cleanup(void)
   free(sensors_proc_bus);
   sensors_proc_bus = NULL;
   sensors_proc_bus_count = sensors_proc_bus_max = 0;
-}
-
-void free_proc_chips_entry(sensors_proc_chips_entry entry)
-{
-    free_chip_name(entry.name);
 }
 
 void free_chip_name(sensors_chip_name name)

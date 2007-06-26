@@ -304,7 +304,7 @@ const sensors_chip_name *sensors_get_detected_chips(int *nr)
 {
 	const sensors_chip_name *res;
 	res = (*nr >= sensors_proc_chips_count ?
-			NULL : &sensors_proc_chips[*nr].name);
+			NULL : &sensors_proc_chips[*nr]);
 	(*nr)++;
 	return res;
 }

@@ -36,7 +36,7 @@ sensors_bus *sensors_config_busses = NULL;
 int sensors_config_busses_count = 0;
 int sensors_config_busses_max = 0;
 
-sensors_proc_chips_entry *sensors_proc_chips = NULL;
+sensors_chip_name *sensors_proc_chips = NULL;
 int sensors_proc_chips_count = 0;
 int sensors_proc_chips_max = 0;
 
