@@ -47,6 +47,7 @@ SVN HEAD
                           Fix IPMI support for 2.6 kernels
                           Add detection for non-standard SMSC Super-I/Os
                           No longer depend on i2cdetect
+                          Add SMSC SCH5317 detection
 
 
 2.10.3 (20070319)
