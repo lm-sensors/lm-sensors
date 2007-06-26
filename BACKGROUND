@@ -14,9 +14,8 @@ few general-purpose base kernel modules, which you always need. In
 addition, there is one kernel module for each piece of hardware - whether
 this is an I2C bus adapter, an SMBus adapter or a sensors chip.
 
-The kernel modules communicate their information through both the /proc
-and sysctl interfaces (Linux 2.4) or the /sys interface (Linux 2.6). To
-keep things uncomplicated, the sensor chips always advert their
+The kernel modules communicate their information through the /sys inter-
+face. To keep things uncomplicated, the sensor chips always advert their
 measurements 'as is'. This means that the values they report are not
 immediately relevant to you - they must first be scaled and translated
 to correspond to the real world.
@@ -31,7 +30,7 @@ This is important, because bugs in kernel-space might crash your
 computer or do other bad things. And kernel memory can not be swapped out!
 
 Applications could (and can) directly read the sensor values through the 
-/proc, sysctl or /sys interfaces. This is harder than it sounds; because
+/sys interface. This is harder than it sounds; because
 no two chips are the same, the information they communicate may also
 be very unlike. This would mean that every application would have to know
 about every type of chip. But there is a better solution.
