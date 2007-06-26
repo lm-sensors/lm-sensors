@@ -1807,6 +1807,12 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids);
         logdev => 0x08,
       },
       {
+        name => "SMSC SCH5317 Super IO",
+        driver => "smsc47b397",
+        devid => 0x85,
+        logdev => 0x08,
+      },
+      {
         name => "SMSC SCH5504-NS Super IO",
         # No datasheet
         driver => "not-a-sensor",
