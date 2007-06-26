@@ -46,6 +46,7 @@ SVN HEAD
                           Add IT8726F detection
                           Fix IPMI support for 2.6 kernels
                           Add detection for non-standard SMSC Super-I/Os
+                          No longer depend on i2cdetect
 
 
 2.10.3 (20070319)
