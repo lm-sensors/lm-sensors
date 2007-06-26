@@ -1950,7 +1950,6 @@ static sensors_chip_feature w83l785ts_features[] =
     { { 0 }, 0 }
   };
 
-/* No support for Linux 2.4 yet (sysctl) */
 /* W83627DHG uses same structure excluding in9* */
 static sensors_chip_feature w83627ehf_features[] =
   {
@@ -5718,11 +5717,11 @@ static sensors_chip_feature max6650_features[] =
 
 #define SENSORS_SMSC47B397_TEMP(nr) \
 	{ { SENSORS_SMSC47B397_TEMP##nr, "temp" #nr, NOMAP, NOMAP, R }, \
-	 	0, VALUE(1), 1 }
+	 	NOSYSCTL, VALUE(1), 0 }
 
 #define SENSORS_SMSC47B397_FAN(nr) \
 	{ { SENSORS_SMSC47B397_FAN##nr, "fan" #nr, NOMAP, NOMAP, R }, \
-		0, VALUE(1), 1 }
+		NOSYSCTL, VALUE(1), 0 }
 
 static sensors_chip_feature smsc47b397_features[] =
 {
