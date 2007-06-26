@@ -34,7 +34,7 @@ use Fcntl;
 use POSIX;
 use File::Basename;
 
-# We will call modprobe and i2cdetect, which typically live in either /sbin,
+# We will call modprobe, which typically lives in either /sbin,
 # /usr/sbin or /usr/local/bin. So make sure these are all in the PATH.
 foreach ('/usr/sbin', '/usr/local/sbin', '/sbin') {
 	$ENV{PATH} = "$_:".$ENV{PATH}
@@ -2297,6 +2297,45 @@ sub initialize_cpu_list
   close INPUTFILE;
 }
 
+# @i2c_adapters is a list of references to hashes, one hash per I2C/SMBus
+# adapter present on the system. Each entry has the following keys: name
+# (directly taken from either /proc/bus/i2c or /sys/class/i2c-adapter) and
+# driver.
+use vars qw(@i2c_adapters);
+
+sub initialize_i2c_adapters_list
+{
+  my $entry;
+  local $_;
+
+  if (defined $sysfs_root) {
+    my $class_dir = "${sysfs_root}/class/i2c-adapter";
+    opendir(local *ADAPTERS, $class_dir) or return;
+
+    while (defined($_ = readdir(ADAPTERS))) {
+      next unless m/^i2c-(\d+)$/;
+      $entry = {}; # New entry
+      $entry->{'name'} = sysfs_device_attribute("${class_dir}/i2c-$1", "name")
+                      || sysfs_device_attribute("${class_dir}/i2c-$1/device", "name");
+      $entry->{'driver'} = find_adapter_driver($entry->{'name'});
+      $i2c_adapters[$1] = $entry;
+    }
+    closedir(ADAPTERS);
+  } else {
+    open(local *INPUTFILE, "/proc/bus/i2c") or return;
+
+    while (<INPUTFILE>) {
+      my ($nr, $type, $name) = /^i2c-(\d+)\s+(\S+)\s+(.*?) *(\t|$)/;
+      next if ($type eq "dummy" || $type eq "isa");
+      $entry = {}; # New entry
+      $entry->{'name'} = $name;
+      $entry->{'driver'} = find_adapter_driver($name);
+      $i2c_adapters[$nr] = $entry;
+    }
+    close(INPUTFILE);
+  }
+}
+
 ###########
 # MODULES #
 ###########
@@ -2542,7 +2581,7 @@ sub adapter_pci_detection
   return @res;
 }
 
-# $_[0]: Adapter description as found in /proc/bus/i2c
+# $_[0]: Adapter description as found in /proc/bus/i2c or sysfs
 sub find_adapter_driver
 {
   my $adapter;
@@ -5495,25 +5534,12 @@ sub generate_modprobes
 
   my ($chip,$detection,$nr,$i,@optionlist,@probelist,$driver,$isa,$adap);
   my $ipmi = 0;
-  my @adapters;
   my $modprobes = "";
   my $configfile = "";
 
   # These are always needed
   $configfile .= "# I2C module options\n";
   $configfile .= "alias char-major-89 i2c-dev\n";
-
-  # Collect all loaded adapters
-  # i2cdetect -l either cats /proc/bus/i2c or scans sysfs for the same information
-  open(local *INPUTFILE, "i2cdetect -l |") or die "Couldn't find i2cdetect program!!";
-  local $_;
-  while (<INPUTFILE>) {
-    my ($dev_nr, $type, $adap) = /^i2c-(\d+)\s+(\S+)\s+(.*?) *(\t|$)/;
-    next if ($type eq "dummy" || $type eq "isa");
-    $adapters[$dev_nr]->{driver} = find_adapter_driver($adap);
-    $adapters[$dev_nr]->{adapname} = $adap;
-  }
-  close INPUTFILE;
 
   # Collect all adapters used
   $nr = 0;
@@ -5523,9 +5549,9 @@ sub generate_modprobes
       # If there is more than one bus detected by a driver, they are
       # still all added. So we number them in the correct order
       if (exists $detection->{i2c_driver} and
-          not exists $adapters[$detection->{i2c_devnr}]->{nr_later} and 
+          not exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later} and 
           not (exists $detection->{isa_addr} and $prefer_isa)) {
-         foreach $adap (@adapters) {
+         foreach $adap (@i2c_adapters) {
            next unless exists $adap->{driver};
            $adap->{nr_later} = $nr++ if $adap->{driver} eq $detection->{i2c_driver};
          }
@@ -5543,14 +5569,14 @@ sub generate_modprobes
 
   $modprobes .= "# I2C adapter drivers\n" if $nr;
   for ($i = 0; $i < $nr; $i++) {
-    foreach $adap (@adapters) {
+    foreach $adap (@i2c_adapters) {
       next unless exists $adap->{nr_later} and $adap->{nr_later} == $i;
       if ($adap->{driver} eq "UNKNOWN") {
-        $modprobes .= "# modprobe unknown adapter ".$adap->{adapname}."\n";
+        $modprobes .= "# modprobe unknown adapter ".$adap->{name}."\n";
       } elsif ($adap->{driver} eq "DISABLED") {
-        $modprobes .= "# modprobe disabled adapter ".$adap->{adapname}."\n";
+        $modprobes .= "# modprobe disabled adapter ".$adap->{name}."\n";
       } elsif ($adap->{driver} eq "to-be-written") {
-        $modprobes .= "# no driver available for adapter ".$adap->{adapname}."\n";
+        $modprobes .= "# no driver available for adapter ".$adap->{name}."\n";
       } else {
         $modprobes .= "modprobe $adap->{driver}\n"
           unless $modprobes =~ /modprobe $adap->{driver}\n/;
@@ -5602,10 +5628,10 @@ sub generate_modprobes
 
     # Handle misdetects
     foreach $detection (@{$chip->{misdetected}}) {
-      push @optionlist, $adapters[$detection->{i2c_devnr}]->{nr_later},
+      push @optionlist, $i2c_adapters[$detection->{i2c_devnr}]->{nr_later},
                        $detection->{i2c_addr}
            if exists $detection->{i2c_addr} and
-              exists $adapters[$detection->{i2c_devnr}]->{nr_later};
+              exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later};
       push @optionlist, -1, $detection->{isa_addr}
            if exists $detection->{isa_addr} and $isa;
     }
@@ -5614,10 +5640,10 @@ sub generate_modprobes
     foreach $detection (@{$chip->{detected}}) {
       if (exists $detection->{i2c_driver} and 
           exists $detection->{isa_addr} and
-          exists $adapters[$detection->{i2c_devnr}]->{nr_later} and
+          exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later} and
           $isa) {
         if ($prefer_isa) {
-          push @optionlist,$adapters[$detection->{i2c_devnr}]->{nr_later},
+          push @optionlist, $i2c_adapters[$detection->{i2c_devnr}]->{nr_later},
                            $detection->{i2c_addr};
         } else {
           push @optionlist, -1, $detection->{isa_addr}
@@ -5703,6 +5729,7 @@ sub main
 
   print "If you have undetectable or unsupported adapters, you can have them\n".
         "scanned by manually loading the modules before running this script.\n\n";
+  initialize_i2c_adapters_list();
 
   if (!exists($modules_list{"i2c-dev"})
    && !(defined $sysfs_root && -e "$sysfs_root/class/i2c-dev")) {
@@ -5732,12 +5759,9 @@ sub main
         "you can specify that address to remain unprobed.\n";
 
   my ($inp,@not_to_scan,$inp2);
-  # i2cdetect -l either cats /proc/bus/i2c or scans sysfs for the same information
-  open(local *INPUTFILE, "i2cdetect -l |") or die "Couldn't find i2cdetect program!!";
-  local $_;
-  while (<INPUTFILE>) {
-    my ($dev_nr, $type, $adap) = /^i2c-(\d+)\s+(\S+)\s+(.*?) *(\t|$)/;
-    next if ($type eq "dummy" || $type eq "isa");
+  for (my $dev_nr = 0; $dev_nr < @i2c_adapters; $dev_nr++) {
+    next unless exists $i2c_adapters[$dev_nr];
+    my $adap = $i2c_adapters[$dev_nr]->{'name'};
     print "\n";
     print "Next adapter: $adap (i2c-$dev_nr)\n";
     print "Do you want to scan it? (YES/no/selectively): ";
@@ -5754,7 +5778,7 @@ sub main
       chop $inp2;
       @not_to_scan = parse_not_to_scan 0,0x7f,$inp2;
     }
-    scan_adapter $dev_nr, $adap, find_adapter_driver($adap),
+    scan_adapter $dev_nr, $adap, $i2c_adapters[$dev_nr]->{'driver'},
                  \@not_to_scan   unless $inp =~ /^\s*[Nn]/;
   }
   print "\n";
