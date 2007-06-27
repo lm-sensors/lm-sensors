@@ -106,7 +106,7 @@ Details:
    be able to support new devices on-the-fly.
 
    sysfs access provides a method to read and write sensor values
-   for any driver using i2c-sensor, including ISA chip drivers.
+   for any driver, including ISA chip drivers.
 
    This method may also works well for shell and perl scripts
    written to access a specific device. Note that sysfs is
@@ -114,7 +114,7 @@ Details:
 
    Note that most drivers provide only raw sensor readings via /sys;
    many readings must be scaled or adjusted, and these adjustments
-   must often be changed by the user. An application using /proc must
+   must often be changed by the user. An application using /sys must
    generally provide adjustment facilities and the requirements
    of the adjustments can be quite complex. If you need adjustment
    facilities, consider the libsensors library, below.
