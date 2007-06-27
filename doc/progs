@@ -29,30 +29,9 @@ see useful_addresses.html.
      isadump 0x295 0x296
      isadump -k 0x55 0x2e 0x2f
 
-* prog/eeprom/decode-dimms.pl (perl script, installed by 'make install')
-  This program decodes the information found in a memory module SPD EEPROM.
-
-* prog/eeprom/decode-vaio.pl (perl script, installed by 'make install')
-  This program decodes the information in a Sony Vaio laptop
-  identification eeprom at 0x57.
-
-* prog/eeprom/ddcmon (perl script, installed by 'make install')
-  prog/eeprom/decode-edid.pl (perl script, installed by 'make install')
-  These programs decode the information found in a display EEPROM. They
-  require a bus driver for your video adapter, for DDC access to the display.
-
 * prog/eepromer/eepromer (written in C, not installed)
   This program reads and writes eeproms.
   Danger: Do not use this to write your DRAM DIMM eeproms.
-
-* prog/hotplug/m7101.o (kernel module, not installed)
-  An experimental kernel module to enable the Acer Labs 7101 PCI device.
-  See prog/hotplug/README for details.
-
-* prog/hotplug/p4b_smbus.o (kernel module, not installed)
-  An experimental kernel module to enable the i801 2443 PCI device
-  on Asus P4B boards.
-  See prog/hotplug/README.p4b for details.
 
 * prog/hotplug/unhide_ICH_SMBus (shell script, not installed)
   It unhides the ICH Intel SMBus for 2.6 kernels
@@ -109,6 +88,3 @@ see useful_addresses.html.
 * prog/tellerstats/gather.sh, tellerstats.sh (written in bash, not installed)
   These scripts gather sensors data and graph the data for web pages.
   See prog/tellerstats/README for more information.
-
-* prog/xeon/decode-xeon.pl (written in Perl, installed by 'make install')
-  ID ROM data decoding for Xeon processors.

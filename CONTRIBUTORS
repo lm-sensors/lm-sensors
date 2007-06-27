@@ -31,7 +31,6 @@ suggestions or problems.
   Added max1617, thmc10, gl523sm, and lm84 support to the adm1021 driver.
   Added lm81 support to the adm9240 driver.
   Added DDC support and i2c-algo-bit layer to the i2c-voodoo3 bus driver.
-  Author of the decode-xeon.pl xeon EEPROM decoder.
   Added the RRD interface.
   Author of the ddcmon, icspll, smbus-arp, smsc47m1,
   vt1211, and vt8231 chip drivers.
@@ -82,8 +81,6 @@ suggestions or problems.
   Author of the lm63, lm83, lm90 and w83l785ts SMBus chip drivers.
   Author of the f71805f and pc87360 Super-I/O chip drivers.
   Author of the i2c-amd756-s4882 and pca9540 SMBus multiplexing drivers.
-  Author of the decode-vaio.pl Vaio EEPROM decoder.
-  Author of the decode-edid.pl EDID data decoder.
   Perl scripts maintainer, tester, bug fixer, general support.
 * Vojtech Pavlik <vojtech@suse.cz>	
   Author of the i2c-amd8111 bus driver.
