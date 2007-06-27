@@ -29,10 +29,6 @@ see useful_addresses.html.
      isadump 0x295 0x296
      isadump -k 0x55 0x2e 0x2f
 
-* prog/eepromer/eepromer (written in C, not installed)
-  This program reads and writes eeproms.
-  Danger: Do not use this to write your DRAM DIMM eeproms.
-
 * prog/hotplug/unhide_ICH_SMBus (shell script, not installed)
   It unhides the ICH Intel SMBus for 2.6 kernels
 
