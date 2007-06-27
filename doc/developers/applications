@@ -11,8 +11,7 @@ From lowest-level to the highest-level, the access methods are:
 	1) Character device access to the i2c bus driver
 	   via /dev/i2c-x
 	2) I2C bus access functions as defined in kernel/include/i2c-dev.h
-	3A) /proc access to the chip device driver
-	3B) sysfs access to the chip device driver
+	3) sysfs access to the chip device driver
 	4) libsensors library
 	5) sensors program
 
@@ -60,40 +59,8 @@ Details:
    i2c-tools package).
 
 
-3A. /proc access (2.4 kernels)
------------------------------
-   Chip drivers using the i2c-proc module create subdirectories in
-   /proc/sys/dev/sensors which can be accessed directly by applications.
-   Naming and content standards for the entries in these subdirectories
-   is documented in the file doc/developers/proc. Note that these
-   standards may not be strictly followed.
-
-   If a new driver adheres to these standards then an application may
-   be able to support new devices on-the-fly.
-
-   /proc access provides a method to read and write sensor values
-   for any driver using i2c-proc, including ISA chip drivers.
-
-   This method also works well for shell and perl scripts
-   written to access a specific device. Note that i2c-proc is
-   standard in the kernel as of kernel 2.4.13.
-
-   Note that most drivers provide only raw sensor readings via /proc;
-   many readings must be scaled or adjusted, and these adjustments
-   must often be changed by the user. An application using /proc must
-   generally provide adjustment facilities and the requirements
-   of the adjustments can be quite complex. If you need adjustment
-   facilities, consider the libsensors library, below.
-
-   For examples of programs using /proc accesses, see
-   prog/eeprom/decode-dimms.pl, prog/matorb/displayit.pl,
-   prog/maxilife/writelcd.sh, prog/rrd/sens_update_rrd,
-   prog/pwm/fancontrol, and prog/pwm/pwmconfig.
-   Also search freshmeat for sensors applications.
-
-
-3B. sysfs access (2.6 kernels)
-------------------------------
+3. sysfs access
+---------------
    Chip drivers using the i2c-sensor module create subdirectories in
    the sysfs filesystem (usually /sys) which can be accessed
    directly by applications.
@@ -106,7 +73,7 @@ Details:
    be able to support new devices on-the-fly.
 
    sysfs access provides a method to read and write sensor values
-   for any driver using i2c-sensor, including ISA chip drivers.
+   for any driver, including ISA chip drivers.
 
    This method may also works well for shell and perl scripts
    written to access a specific device. Note that sysfs is
@@ -114,14 +81,14 @@ Details:
 
    Note that most drivers provide only raw sensor readings via /sys;
    many readings must be scaled or adjusted, and these adjustments
-   must often be changed by the user. An application using /proc must
+   must often be changed by the user. An application using /sys must
    generally provide adjustment facilities and the requirements
    of the adjustments can be quite complex. If you need adjustment
    facilities, consider the libsensors library, below.
 
    For an examples of a program using /sys accesses, see gkrellm.
-   See also lib/proc.c and prog/dump/i2cbusses.c for examples.
-   The sysfsutils package may also be helpful.
+   See also lib/proc.c and i2cbusses.c (in the i2c-tools package) for
+   examples. The sysfsutils package may also be helpful.
    Also search freshmeat for sensors and sysfs applications.
 
 
