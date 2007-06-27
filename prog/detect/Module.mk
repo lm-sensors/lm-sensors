@@ -22,27 +22,17 @@ MODULE_DIR := prog/detect
 PROGDETECTDIR := $(MODULE_DIR)
 
 PROGDETECTMAN8DIR := $(MANDIR)/man8
-PROGDETECTMAN8FILES := $(MODULE_DIR)/i2cdetect.8 $(MODULE_DIR)/sensors-detect.8
+PROGDETECTMAN8FILES := $(MODULE_DIR)/sensors-detect.8
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-PROGDETECTTARGETS := $(MODULE_DIR)/i2cdetect
-PROGDETECTSOURCES := $(MODULE_DIR)/i2cdetect.c
-PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect \
-                         $(MODULE_DIR)/i2cdetect
-
-# Include all dependency files. We use '.rd' to indicate this will create
-# executables.
-INCLUDEFILES += $(PROGDETECTSOURCES:.c=.rd)
+PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect
 
 REMOVEDETECTBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(SBINDIR)/%,$(PROGDETECTSBININSTALL))
 REMOVEDETECTMAN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(PROGDETECTMAN8DIR)/%,$(PROGDETECTMAN8FILES))
 
-all-prog-detect: $(PROGDETECTTARGETS)
+all-prog-detect:
 user :: all-prog-detect
-
-$(MODULE_DIR)/i2cdetect: $(MODULE_DIR)/i2cdetect.ro prog/dump/i2cbusses.ro
-	$(CC) $(EXLDFLAGS) -o $@ $^
 
 install-prog-detect: all-prog-detect
 	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGDETECTMAN8DIR)
@@ -55,5 +45,4 @@ user_uninstall::
 	$(RM) $(REMOVEDETECTMAN)
 
 clean-prog-detect:
-	$(RM) $(PROGDETECTDIR)/*.rd $(PROGDETECTDIR)/*.ro $(PROGDETECTTARGETS)
 clean :: clean-prog-detect

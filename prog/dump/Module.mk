@@ -22,18 +22,13 @@ MODULE_DIR := prog/dump
 PROGDUMPDIR := $(MODULE_DIR)
 
 PROGDUMPMAN8DIR := $(MANDIR)/man8
-PROGDUMPMAN8FILES := $(MODULE_DIR)/i2cdump.8 $(MODULE_DIR)/i2cset.8 \
-		     $(MODULE_DIR)/i2cget.8
+PROGDUMPMAN8FILES :=
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-PROGDUMPTARGETS := $(MODULE_DIR)/i2cdump $(MODULE_DIR)/i2cset \
-		   $(MODULE_DIR)/i2cget
-PROGDUMPSOURCES := $(MODULE_DIR)/i2cdump.c $(MODULE_DIR)/i2cset.c \
-		   $(MODULE_DIR)/i2cget.c $(MODULE_DIR)/i2cbusses.c \
-		   $(MODULE_DIR)/util.c
-PROGDUMPBININSTALL := $(MODULE_DIR)/i2cdump $(MODULE_DIR)/i2cset \
-		      $(MODULE_DIR)/i2cget
+PROGDUMPTARGETS :=
+PROGDUMPSOURCES := $(MODULE_DIR)/util.c
+PROGDUMPBININSTALL :=
 
 # Only build isadump and isaset on x86 machines.
 ifneq (,$(findstring $(MACHINE), i386 i486 i586 i686 x86_64))
@@ -53,15 +48,6 @@ REMOVEDUMPMAN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(PROGDUMPMAN8DIR)/%,$(PRO
 
 all-prog-dump: $(PROGDUMPTARGETS)
 user :: all-prog-dump
-
-$(MODULE_DIR)/i2cdump: $(MODULE_DIR)/i2cdump.ro $(MODULE_DIR)/i2cbusses.ro $(MODULE_DIR)/util.ro
-	$(CC) $(EXLDFLAGS) -o $@ $^
-
-$(MODULE_DIR)/i2cset: $(MODULE_DIR)/i2cset.ro $(MODULE_DIR)/i2cbusses.ro $(MODULE_DIR)/util.ro
-	$(CC) $(EXLDFLAGS) -o $@ $^
-
-$(MODULE_DIR)/i2cget: $(MODULE_DIR)/i2cget.ro $(MODULE_DIR)/i2cbusses.ro $(MODULE_DIR)/util.ro
-	$(CC) $(EXLDFLAGS) -o $@ $^
 
 $(MODULE_DIR)/isadump: $(MODULE_DIR)/isadump.ro $(MODULE_DIR)/superio.ro $(MODULE_DIR)/util.ro
 	$(CC) $(EXLDFLAGS) -o $@ $^

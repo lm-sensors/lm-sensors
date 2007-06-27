@@ -34,7 +34,7 @@ Details:
    bus are being accessed. No access is provided for non-i2c
    busses such as ISA.
 
-   For good examples, see prog/detect/i2cdetect.c and
+   For good examples, see i2cdetect.c (in the i2c-tools package) and
    prog/detect/sensors-detect.
 
 
@@ -56,8 +56,8 @@ Details:
    bus are being accessed. No access is provided for non-i2c
    busses such as ISA.
 
-   For good examples, see prog/detect/i2cdetect.c,
-   prog/dump/i2cdump.c, and prog/dump/i2cset.c.
+   For good examples, see i2cdetect.c, i2cdump.c, and i2cset.c (all in the
+   i2c-tools package).
 
 
 3A. /proc access (2.4 kernels)

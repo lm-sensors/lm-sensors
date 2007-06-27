@@ -18,33 +18,10 @@ see useful_addresses.html.
 * prog/daemon/healthd.sh (written in bash, not installed)
   An example of a very simple hardware health monitoring daemon.
 
-* prog/detect/i2cdetect (written in C, installed by 'make install')
-  This program scans your complete I2C or SMBus adapter for connected devices.
-  Syntax:
-    i2cdetect 0
-  Here the '0' stands for the bus number (run "i2cdetect -l"
-  to list all installed busses).
-
 * prog/detect/sensors-detect (written in Perl, installed by 'make install')
   This program tries to detect the available SMBus adapters and the chips
   connected to them, as well as Super-I/O and misc chips. It also generates
   modprobe lines and module options. This program is interactive.
-
-* prog/dump/i2cdump (written in C, installed by 'make install')
-  This program dumps the registers of an I2C device.
-  Usual syntax:
-    i2cdump 0 0x4c b
-  Here the '0' stands for the bus number (run i2cdump with no arguments 
-  to list all installed busses).
-  '0x49' is the device address, and 'b' or 'w' stands for byte
-  or word data.
-
-* prog/dump/i2cset (written in C, installed by 'make install')
-  prog/dump/i2cget (written in C, installed by 'make install')
-  These programs are used to write to or read from a register of an
-  I2C device. Usual syntax:
-    i2cset bus device address data
-    i2cget bus device address
 
 * prog/dump/isadump (written in C, installed by 'make install')
   This program dumps the registers of ISA or Super-I/O chips.
