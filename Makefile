@@ -110,8 +110,8 @@ MACHINE := $(shell uname -m)
 # The subdirectories we need to build things in 
 SRCDIRS :=
 SRCDIRS += kernel/include
-SRCDIRS += lib prog/detect prog/dump prog/eeprom prog/pwm \
-           prog/sensors prog/xeon ${PROG_EXTRA:%=prog/%} etc
+SRCDIRS += lib prog/detect prog/dump prog/pwm \
+           prog/sensors ${PROG_EXTRA:%=prog/%} etc
 SRCDIRS += lib/test
 
 # Some often-used commands with default options
