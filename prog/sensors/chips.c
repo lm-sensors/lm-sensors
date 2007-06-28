@@ -29,14 +29,10 @@
 #include "lib/error.h"
 #include "kernel/include/sensors.h"
 
-static void print_label(const char *label, int space);
-static void print_temp_info(float, float, float, int, int, int);
-static inline float deg_ctof( float );
-
 extern int fahrenheit;
 extern char degstr[5];
 
-inline float deg_ctof( float cel )
+static inline float deg_ctof(float cel)
 {
    return ( cel * ( 9.0F / 5.0F ) + 32.0F );
 }
@@ -50,8 +46,8 @@ inline float deg_ctof( float cel )
 /* minmax = 0 for limit/hysteresis, 1 for max/min, 2 for max only;
    curprec and limitprec are # of digits after decimal point
    for the current temp and the limits */
-void print_temp_info(float n_cur, float n_over, float n_hyst,
-                     int minmax, int curprec, int limitprec)
+static void print_temp_info(float n_cur, float n_over, float n_hyst,
+                            int minmax, int curprec, int limitprec)
 {
    if (fahrenheit) {
       n_cur  = deg_ctof(n_cur);
@@ -90,7 +86,7 @@ void print_temp_info(float n_cur, float n_over, float n_hyst,
 	printf("Unknown temperature mode!");
 }
 
-void print_label(const char *label, int space)
+static void print_label(const char *label, int space)
 {
   int len=strlen(label)+1;
   if (len > space)
@@ -99,8 +95,8 @@ void print_label(const char *label, int space)
     printf("%s:%*s", label, space - len, "");
 }
 
-int sensors_get_label_and_valid(sensors_chip_name name, int feature, char **label,
-                        int *valid)
+static int sensors_get_label_and_valid(sensors_chip_name name, int feature,
+                                       char **label, int *valid)
 {
   int err;
   err = sensors_get_label(name,feature,label);
@@ -113,7 +109,7 @@ int sensors_get_label_and_valid(sensors_chip_name name, int feature, char **labe
   return err;
 }
 
-void print_vid_info(const sensors_chip_name *name, int f_vid, int f_vrm)
+static void print_vid_info(const sensors_chip_name *name, int f_vid, int f_vrm)
 {
   char *label;
   int valid;

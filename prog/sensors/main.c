@@ -324,7 +324,7 @@ struct match {
 	void (*fn) (const sensors_chip_name *name);
 };
 
-struct match matches[] = {
+static struct match matches[] = {
 	{ "ds1621", print_ds1621 },
 	{ "lm75", print_lm75 },
 	{ "adm1021", print_adm1021 },
