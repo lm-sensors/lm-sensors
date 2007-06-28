@@ -26,13 +26,10 @@
 #include "chips.h"
 #include "lib/sensors.h"
 
-void print_label(const char *label, int space);
-static inline float deg_ctof( float );
-
 extern int fahrenheit;
 extern char degstr[5];
 
-inline float deg_ctof( float cel )
+static inline float deg_ctof(float cel)
 {
    return ( cel * ( 9.0F / 5.0F ) + 32.0F );
 }
@@ -122,11 +119,6 @@ void print_vid_info_real(const sensors_chip_name *name, int f_vid, int f_vrm, in
   }
   free(label);
 }
-
-void print_vid_info(const sensors_chip_name *name, int f_vid, int f_vrm)
-{
-  print_vid_info_real(name, f_vid, f_vrm, 10);
-}	
 
 void print_unknown_chip(const sensors_chip_name *name)
 {
