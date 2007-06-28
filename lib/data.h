@@ -147,7 +147,7 @@ typedef struct sensors_chip_feature {
 
 /* Internal data about all features of a type of chip */
 typedef struct sensors_chip_features {
-  const char *prefix;
+  struct sensors_chip_name chip;
   struct sensors_chip_feature *feature;
 } sensors_chip_features;
 

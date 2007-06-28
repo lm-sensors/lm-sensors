@@ -44,11 +44,11 @@ sensors_bus *sensors_proc_bus = NULL;
 int sensors_proc_bus_count = 0;
 int sensors_proc_bus_max = 0;
 
-#define PLACEHOLDER_ELEMENTS {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}
+#define PLACEHOLDER_ELEMENTS {{0}}, {{0}}, {{0}}, {{0}}, {{0}}, {{0}}, {{0}}, {{0}}, {{0}}, {{0}}
 
 sensors_chip_features sensors_chip_features_list[] = {
   PLACEHOLDER_ELEMENTS,
-  { 0 }
+  { { 0 } }
 };
 
 static int sensors_substitute_chip(sensors_chip_name *name,int lineno);

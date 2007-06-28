@@ -99,14 +99,14 @@ sensors_chip *sensors_for_all_config_chips(sensors_chip_name chip_name,
 /* Look up a resource in the intern chip list, and return a pointer to it. 
    Do not modify the struct the return value points to! Returns NULL if 
    not found.*/
-const sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix,
+const sensors_chip_feature *sensors_lookup_feature_nr(const sensors_chip_name *chip,
 						      int feature)
 {
 	int i, j;
 	const sensors_chip_feature *features;
 
-	for (i = 0; sensors_chip_features_list[i].prefix; i++)
-		if (!strcasecmp(sensors_chip_features_list[i].prefix, prefix)) {
+	for (i = 0; sensors_chip_features_list[i].chip.prefix; i++)
+		if (sensors_match_chip(sensors_chip_features_list[i].chip, *chip)) {
 			features = sensors_chip_features_list[i].feature;
 			for (j = 0; features[j].data.name; j++)
 				if (features[j].data.number == feature)
@@ -118,14 +118,14 @@ const sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix,
 /* Look up a resource in the intern chip list, and return a pointer to it. 
    Do not modify the struct the return value points to! Returns NULL if 
    not found.*/
-const sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
+const sensors_chip_feature *sensors_lookup_feature_name(const sensors_chip_name *chip,
 							const char *feature)
 {
 	int i, j;
 	const sensors_chip_feature *features;
 
-	for (i = 0; sensors_chip_features_list[i].prefix; i++)
-		if (!strcasecmp(sensors_chip_features_list[i].prefix, prefix)) {
+	for (i = 0; sensors_chip_features_list[i].chip.prefix; i++)
+		if (sensors_match_chip(sensors_chip_features_list[i].chip, *chip)) {
 			features = sensors_chip_features_list[i].feature;
 			for (j = 0; features[j].data.name; j++)
 				if (!strcasecmp(features[j].data.name, feature))
@@ -161,7 +161,7 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
 	*result = NULL;
 	if (sensors_chip_name_has_wildcards(name))
 		return -SENSORS_ERR_WILDCARDS;
-	if (!(featureptr = sensors_lookup_feature_nr(name.prefix, feature)))
+	if (!(featureptr = sensors_lookup_feature_nr(&name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
@@ -193,12 +193,12 @@ int sensors_get_ignored(sensors_chip_name name, int feature)
 	res = 1;
 	if (sensors_chip_name_has_wildcards(name))
 		return -SENSORS_ERR_WILDCARDS;
-	if (!(featureptr = sensors_lookup_feature_nr(name.prefix, feature)))
+	if (!(featureptr = sensors_lookup_feature_nr(&name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 	if (featureptr->data.mapping == SENSORS_NO_MAPPING)
 		alt_featureptr = NULL;
 	else if (!(alt_featureptr =
-		   sensors_lookup_feature_nr(name.prefix,
+		   sensors_lookup_feature_nr(&name,
 					     featureptr->data.mapping)))
 		return -SENSORS_ERR_NO_ENTRY;
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
@@ -227,11 +227,11 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
 
 	if (sensors_chip_name_has_wildcards(name))
 		return -SENSORS_ERR_WILDCARDS;
-	if (!(main_feature = sensors_lookup_feature_nr(name.prefix, feature)))
+	if (!(main_feature = sensors_lookup_feature_nr(&name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 	if (main_feature->data.compute_mapping == SENSORS_NO_MAPPING)
 		alt_feature = NULL;
-	else if (!(alt_feature = sensors_lookup_feature_nr(name.prefix,
+	else if (!(alt_feature = sensors_lookup_feature_nr(&name,
 					main_feature->data.compute_mapping)))
 		return -SENSORS_ERR_NO_ENTRY;
 	if (!(main_feature->data.mode & SENSORS_MODE_R))
@@ -271,11 +271,11 @@ int sensors_set_feature(sensors_chip_name name, int feature, double value)
 
 	if (sensors_chip_name_has_wildcards(name))
 		return -SENSORS_ERR_WILDCARDS;
-	if (!(main_feature = sensors_lookup_feature_nr(name.prefix, feature)))
+	if (!(main_feature = sensors_lookup_feature_nr(&name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 	if (main_feature->data.compute_mapping == SENSORS_NO_MAPPING)
 		alt_feature = NULL;
-	else if (!(alt_feature = sensors_lookup_feature_nr(name.prefix,
+	else if (!(alt_feature = sensors_lookup_feature_nr(&name,
 					     main_feature->data.compute_mapping)))
 		return -SENSORS_ERR_NO_ENTRY;
 	if (!(main_feature->data.mode & SENSORS_MODE_W))
@@ -332,8 +332,8 @@ const sensors_feature_data *sensors_get_all_features(sensors_chip_name name,
 	sensors_chip_feature *feature_list;
 	int i;
 
-	for (i = 0; sensors_chip_features_list[i].prefix; i++)
-		if (!strcasecmp(sensors_chip_features_list[i].prefix, name.prefix)) {
+	for (i = 0; sensors_chip_features_list[i].chip.prefix; i++)
+		if (sensors_match_chip(sensors_chip_features_list[i].chip, name)) {
 			feature_list = sensors_chip_features_list[i].feature;
 			if (!*nr1 && !*nr2) {	/* Return the first entry */
 				if (!feature_list[0].data.name)	/* The list may be empty */
@@ -373,7 +373,7 @@ int sensors_eval_expr(sensors_chip_name chipname, const sensors_expr * expr,
 		return 0;
 	}
 	if (expr->kind == sensors_kind_var) {
-		if (!(feature = sensors_lookup_feature_name(chipname.prefix,
+		if (!(feature = sensors_lookup_feature_name(&chipname,
 							    expr->data.var)))
 			return SENSORS_ERR_NO_ENTRY;
 		if (!(res = sensors_get_feature(chipname, feature->data.number, result)))
@@ -432,7 +432,7 @@ int sensors_do_this_chip_sets(sensors_chip_name name)
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->sets_count; i++) {
-			feature = sensors_lookup_feature_name(name.prefix,
+			feature = sensors_lookup_feature_name(&name,
 							chip->sets[i].name);
 			if (!feature) {
 				sensors_parse_error("Unknown feature name",

@@ -67,7 +67,7 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 	int i, type, fnum = 1;
 	struct sysfs_attribute *attr;
 	struct dlist *attrs;
-	sensors_chip_features ret = {0, 0};
+	sensors_chip_features ret = {{0}, 0};
 	/* room for all 3  (in, fan, temp) types, with all their subfeatures
 	   + misc features. We use a large sparse table at first to store all
 	   found features, so that we can store them sorted at type and index
@@ -90,7 +90,7 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 		name = attr->name;
 		
 		if (!strcmp(name, "name")) {
-			ret.prefix = strndup(attr->value, strlen(attr->value) - 1);
+			ret.chip.prefix = strndup(attr->value, strlen(attr->value) - 1);
 			continue;
 		} 
 		
@@ -269,18 +269,13 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 	} else
 		return -SENSORS_ERR_PARSE;
 	
-	/* check whether this chip is known in the static list */ 
-	for (i = 0; sensors_chip_features_list[i].prefix; i++)
-		if (!strcasecmp(sensors_chip_features_list[i].prefix, name.prefix))
-			break;
-
-	/* if no chip definition matches */
-	if (!sensors_chip_features_list[i].prefix && 
-		total_dynamic < N_PLACEHOLDER_ELEMENTS) {
+	if (total_dynamic < N_PLACEHOLDER_ELEMENTS) {
 		sensors_chip_features n_entry = sensors_read_dynamic_chip(dev);
+		n_entry.chip.addr = name.addr;
+		n_entry.chip.bus = name.bus;
 
 		/* skip to end of list */
-		for(i = 0; sensors_chip_features_list[i].prefix; i++);
+		for(i = 0; sensors_chip_features_list[i].chip.prefix; i++);
 
 		sensors_chip_features_list[i] = n_entry;	
 

@@ -39,7 +39,7 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 	char n[NAME_MAX], altn[NAME_MAX];
 	FILE *f;
 
-	if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
+	if (!(the_feature = sensors_lookup_feature_nr(&name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 
 	strcpy(n, name.busname);
@@ -68,7 +68,7 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 	char n[NAME_MAX], altn[NAME_MAX];
 	FILE *f;
  
-	if (! (the_feature = sensors_lookup_feature_nr(name.prefix,feature)))
+	if (!(the_feature = sensors_lookup_feature_nr(&name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 
 	strcpy(n, name.busname);

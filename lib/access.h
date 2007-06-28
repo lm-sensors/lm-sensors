@@ -36,14 +36,14 @@ extern sensors_chip *sensors_for_all_config_chips(sensors_chip_name chip_name,
 /* Look up a resource in the intern chip list, and return a pointer to it.
    Do not modify the struct the return value points to! Returns NULL if
    not found. */
-extern const sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix,
+extern const sensors_chip_feature *sensors_lookup_feature_nr(const sensors_chip_name *chip,
                                                              int feature);
 
 /* Look up a resource in the intern chip list, and return a pointer to it.
    Do not modify the struct the return value points to! Returns NULL if
    not found.*/
 extern const sensors_chip_feature *sensors_lookup_feature_name
-                                  (const char *prefix, const char *feature);
+                                  (const sensors_chip_name *chip, const char *feature);
 
 /* Substitute configuration bus numbers with real-world /proc bus numbers
    in the chips lists */
