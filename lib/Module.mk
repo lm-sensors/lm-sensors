@@ -46,7 +46,7 @@ LIBTARGETS := $(MODULE_DIR)/$(LIBSTLIBNAME) $(MODULE_DIR)/$(LIBSHLIBNAME) \
               $(MODULE_DIR)/$(LIBSHSONAME) $(MODULE_DIR)/$(LIBSHBASENAME)
 
 LIBCSOURCES := $(MODULE_DIR)/data.c $(MODULE_DIR)/general.c \
-               $(MODULE_DIR)/error.c $(MODULE_DIR)/chips.c \
+               $(MODULE_DIR)/error.c \
                $(MODULE_DIR)/proc.c $(MODULE_DIR)/access.c \
                $(MODULE_DIR)/init.c $(MODULE_DIR)/sysfs.c
 
