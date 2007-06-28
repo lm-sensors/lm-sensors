@@ -30,8 +30,7 @@ LIBMAN5FILES := $(MODULE_DIR)/sensors.conf.5
 # The main and minor version of the library
 # The library soname (major number) must be changed if and only if the interface is
 # changed in a backward incompatible way.  The interface is defined by
-# the public header files - in this case they are error.h, sensors.h,
-# chips.h.
+# the public header files - in this case they are error.h and sensors.h.
 LIBMAINVER := 4
 LIBMINORVER := 0.0
 LIBVER := $(LIBMAINVER).$(LIBMINORVER)
@@ -57,8 +56,7 @@ LIBSTOBJECTS := $(LIBCSOURCES:.c=.ao) $(LIBOTHEROBJECTS:.o=.ao)
 LIBEXTRACLEAN := $(MODULE_DIR)/conf-parse.h $(MODULE_DIR)/conf-parse.c \
                  $(MODULE_DIR)/conf-lex.c
 
-LIBHEADERFILES := $(MODULE_DIR)/error.h $(MODULE_DIR)/sensors.h \
-                  $(MODULE_DIR)/chips.h
+LIBHEADERFILES := $(MODULE_DIR)/error.h $(MODULE_DIR)/sensors.h
 
 # How to create the shared library
 $(MODULE_DIR)/$(LIBSHLIBNAME): $(LIBSHOBJECTS)
