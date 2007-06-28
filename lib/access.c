@@ -554,25 +554,18 @@ static struct feature_type_match matches[] = {
 sensors_feature_type sensors_feature_get_type(
 	const sensors_feature_data *feature)
 {
-	const char *name;
 	regmatch_t pmatch[4];
 	int size_first, size_second, retval, i;
 	struct feature_type_match *submatches;
 	static regex_t reg;
 	static regex_t *preg = NULL;
 	
-	/* use sysname if exists */
-	if (container_of(feature, const struct sensors_chip_feature, data)->sysname)
-		name = container_of(feature, const struct sensors_chip_feature, data)->sysname;
-	else
-		name = feature->name;
-	
 	if (!preg) {
 		regcomp(&reg, GET_TYPE_REGEX, 0);
 		preg = &reg;
 	}
 	
-	retval = regexec(preg, name, 4, pmatch, 0);
+	retval = regexec(preg, feature->name, 4, pmatch, 0);
 	
 	if (retval == -1)
 		return SENSORS_FEATURE_UNKNOWN;
@@ -581,7 +574,7 @@ sensors_feature_type sensors_feature_get_type(
 	size_second = pmatch[3].rm_eo - pmatch[3].rm_so;
 	
 	for(i = 0; matches[i].name != 0; i++)
-		if (!strncmp(name, matches[i].name, size_first))
+		if (!strncmp(feature->name, matches[i].name, size_first))
 			break;
 	
 	if (matches[i].name == NULL) /* no match */
@@ -593,7 +586,7 @@ sensors_feature_type sensors_feature_get_type(
 
 	submatches = matches[i].submatches;
 	for(i = 0; submatches[i].name != 0; i++)
-		if (!strcmp(name + pmatch[3].rm_so, submatches[i].name))
+		if (!strcmp(feature->name + pmatch[3].rm_so, submatches[i].name))
 			return submatches[i].type;
 	
 	return SENSORS_FEATURE_UNKNOWN;

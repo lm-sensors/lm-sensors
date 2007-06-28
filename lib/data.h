@@ -140,9 +140,6 @@ typedef struct sensors_bus {
 typedef struct sensors_chip_feature {
   sensors_feature_data data;
   int scaling;
-  const char *sysname;
-  int sysscaling;
-  const char *altsysname;
 } sensors_chip_feature;
 
 /* Internal data about all features of a type of chip */
