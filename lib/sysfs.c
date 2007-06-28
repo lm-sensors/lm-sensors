@@ -103,7 +103,7 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 
 		type = sensors_feature_get_type(&feature.data);
 		if (type == SENSORS_FEATURE_UNKNOWN) {
-			free((char *)feature.data.name);
+			free(feature.data.name);
 			continue;
 		}
 			
@@ -129,7 +129,7 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 			fprintf(stderr, "libsensors error, more sensors of one"
 				" type then MAX_SENSORS_PER_TYPE, ignoring "
 				"feature: %s\n", name);
-			free((char *)feature.data.name);
+			free(feature.data.name);
 			continue;
 		}
 		
@@ -143,7 +143,7 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 			fprintf(stderr, "libsensors error, trying to add dupli"
 				"cate feature: %s to dynamic feature table\n",
 				name);
-			free((char *)feature.data.name);
+			free(feature.data.name);
 			continue;
 		}
 		

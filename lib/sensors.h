@@ -127,7 +127,7 @@ extern const sensors_chip_name *sensors_get_detected_chips(int *nr);
    chip. */
 typedef struct sensors_feature_data {
   int number;
-  const char *name;
+  char *name;
   int mapping;
   int compute_mapping;
   int mode;
