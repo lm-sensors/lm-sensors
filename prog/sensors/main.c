@@ -55,7 +55,7 @@ static const char *sprintf_chip_name(sensors_chip_name name);
 #define CHIPS_MAX 20
 sensors_chip_name chips[CHIPS_MAX];
 int chips_count=0;
-int do_sets, do_unknown, fahrenheit, hide_adapter, hide_unknown, do_generic;
+int do_sets, do_unknown, fahrenheit, hide_adapter, hide_unknown;
 
 char degstr[5]; /* store the correct string to print degrees */
 
@@ -75,7 +75,6 @@ void print_long_help(void)
   printf("  -U, --no-unknown      Do not show unknown chips\n");
   printf("  -u, --unknown         Treat chips as unknown ones (testing only)\n");
   printf("  -v, --version         Display the program version\n");
-  printf("  -g, --generic         Use generic printing routine for all chips (testing only)\n"); 
   printf("\n");
   printf("Use `-' after `-c' to read the config file from stdin.\n");
   printf("If no chips are specified, all chip info will be printed.\n");
@@ -161,7 +160,6 @@ int main (int argc, char *argv[])
     { "no-unknown", no_argument, NULL, 'U' },
     { "config-file", required_argument, NULL, 'c' },
     { "unknown", no_argument, NULL, 'u' },
-    { "generic", no_argument, NULL, 'g'},
     { 0,0,0,0 }
   };
 
@@ -171,9 +169,8 @@ int main (int argc, char *argv[])
   do_sets = 0;
   hide_adapter = 0;
   hide_unknown = 0;
-  do_generic = 0;
   while (1) {
-    c = getopt_long(argc, argv, "hsvfAUc:ug", long_opts, NULL);
+    c = getopt_long(argc, argv, "hsvfAUc:u", long_opts, NULL);
     if (c == EOF)
       break;
     switch(c) {
@@ -204,9 +201,6 @@ int main (int argc, char *argv[])
       break;
     case 'u':
       do_unknown = 1;
-      break;
-    case 'g':
-      do_generic = 1;
       break;
     default:
       fprintf(stderr,"Internal error while parsing options!\n");
