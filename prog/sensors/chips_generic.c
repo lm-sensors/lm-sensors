@@ -251,30 +251,35 @@ static void print_generic_chip_in(const sensors_chip_name *name,
   free(label);
   printf("%+6.2f V", val);
   
+  if (IN_FEATURE(SENSORS_FEATURE_IN_MIN))
+    printf("  (min = %+6.2f V", IN_FEATURE_VAL(SENSORS_FEATURE_IN_MIN));
+  
   if (IN_FEATURE(SENSORS_FEATURE_IN_MAX)) {
-    printf("  (min = %+6.2f V, max = %+6.2f V)", 
-    IN_FEATURE_VAL(SENSORS_FEATURE_IN_MIN),
-    IN_FEATURE_VAL(SENSORS_FEATURE_IN_MAX));
+    if (IN_FEATURE(SENSORS_FEATURE_IN_MIN))
+      printf(", ");
+    else
+      printf("  (");
+    printf("max = %+6.2f V)", IN_FEATURE_VAL(SENSORS_FEATURE_IN_MAX));
+  }
+  
+  if (IN_FEATURE(SENSORS_FEATURE_IN_MAX_ALARM) ||
+      IN_FEATURE(SENSORS_FEATURE_IN_MIN_ALARM)) {
+    alarm_max = IN_FEATURE_VAL(SENSORS_FEATURE_IN_MAX_ALARM);
+    alarm_min = IN_FEATURE_VAL(SENSORS_FEATURE_IN_MIN_ALARM);
     
-    if (IN_FEATURE(SENSORS_FEATURE_IN_MAX_ALARM) && 
-        IN_FEATURE(SENSORS_FEATURE_IN_MIN_ALARM)) {
-      alarm_max = IN_FEATURE_VAL(SENSORS_FEATURE_IN_MAX_ALARM);
-      alarm_min = IN_FEATURE_VAL(SENSORS_FEATURE_IN_MIN_ALARM);
+    if (alarm_min || alarm_max) {
+      printf(" ALARM (");
       
-      if (alarm_min || alarm_max) {
-        printf(" ALARM (");
-        
-        if (alarm_min)
-          printf("MIN");
-        if (alarm_max)
-          printf("%sMAX", (alarm_min) ? "," : "");
-        
-        printf(")");
-      }
-    } else if (IN_FEATURE(SENSORS_FEATURE_IN_ALARM)) {
-      printf("   %s", 
-      IN_FEATURE_VAL(SENSORS_FEATURE_IN_ALARM) > 0.5 ? "ALARM" : "");
+      if (alarm_min)
+        printf("MIN");
+      if (alarm_max)
+        printf("%sMAX", (alarm_min) ? ", " : "");
+      
+      printf(")");
     }
+  } else if (IN_FEATURE(SENSORS_FEATURE_IN_ALARM)) {
+    printf("   %s", 
+    IN_FEATURE_VAL(SENSORS_FEATURE_IN_ALARM) ? "ALARM" : "");
   }
   
   printf("\n");
