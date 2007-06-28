@@ -20,7 +20,6 @@
 #include "chips.h"
 #include "data.h"
 #include "sensors.h"
-#include "kernel/include/sensors.h"
 
 #define PLACEHOLDER_ELEMENTS {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}
 
