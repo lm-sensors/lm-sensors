@@ -105,9 +105,9 @@ const sensors_chip_feature *sensors_lookup_feature_nr(const sensors_chip_name *c
 	int i, j;
 	const sensors_chip_feature *features;
 
-	for (i = 0; sensors_chip_features_list[i].chip.prefix; i++)
-		if (sensors_match_chip(sensors_chip_features_list[i].chip, *chip)) {
-			features = sensors_chip_features_list[i].feature;
+	for (i = 0; i < sensors_proc_chips_count; i++)
+		if (sensors_match_chip(sensors_proc_chips[i].chip, *chip)) {
+			features = sensors_proc_chips[i].feature;
 			for (j = 0; features[j].data.name; j++)
 				if (features[j].data.number == feature)
 					return features + j;
@@ -124,9 +124,9 @@ const sensors_chip_feature *sensors_lookup_feature_name(const sensors_chip_name 
 	int i, j;
 	const sensors_chip_feature *features;
 
-	for (i = 0; sensors_chip_features_list[i].chip.prefix; i++)
-		if (sensors_match_chip(sensors_chip_features_list[i].chip, *chip)) {
-			features = sensors_chip_features_list[i].feature;
+	for (i = 0; i < sensors_proc_chips_count; i++)
+		if (sensors_match_chip(sensors_proc_chips[i].chip, *chip)) {
+			features = sensors_proc_chips[i].feature;
 			for (j = 0; features[j].data.name; j++)
 				if (!strcasecmp(features[j].data.name, feature))
 					return features + j;
@@ -304,7 +304,7 @@ const sensors_chip_name *sensors_get_detected_chips(int *nr)
 {
 	const sensors_chip_name *res;
 	res = (*nr >= sensors_proc_chips_count ?
-			NULL : &sensors_proc_chips[*nr]);
+			NULL : &sensors_proc_chips[*nr].chip);
 	(*nr)++;
 	return res;
 }
@@ -332,9 +332,9 @@ const sensors_feature_data *sensors_get_all_features(sensors_chip_name name,
 	sensors_chip_feature *feature_list;
 	int i;
 
-	for (i = 0; sensors_chip_features_list[i].chip.prefix; i++)
-		if (sensors_match_chip(sensors_chip_features_list[i].chip, name)) {
-			feature_list = sensors_chip_features_list[i].feature;
+	for (i = 0; i < sensors_proc_chips_count; i++)
+		if (sensors_match_chip(sensors_proc_chips[i].chip, name)) {
+			feature_list = sensors_proc_chips[i].feature;
 			if (!*nr1 && !*nr2) {	/* Return the first entry */
 				if (!feature_list[0].data.name)	/* The list may be empty */
 					return NULL;

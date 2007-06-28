@@ -28,6 +28,7 @@
 #include "scanner.h"
 
 static void free_chip_name(sensors_chip_name name);
+static void free_chip_features(sensors_chip_feature *features);
 static void free_bus(sensors_bus bus);
 static void free_chip(sensors_chip chip);
 static void free_label(sensors_label label);
@@ -59,8 +60,10 @@ void sensors_cleanup(void)
 
   sensors_scanner_exit();
 
-  for (i = 0; i < sensors_proc_chips_count; i++)
-    free_chip_name(sensors_proc_chips[i]);
+  for (i = 0; i < sensors_proc_chips_count; i++) {
+    free_chip_name(sensors_proc_chips[i].chip);
+    free_chip_features(sensors_proc_chips[i].feature);
+  }
   free(sensors_proc_chips);
   sensors_proc_chips = NULL;
   sensors_proc_chips_count = sensors_proc_chips_max = 0;
@@ -88,6 +91,15 @@ void free_chip_name(sensors_chip_name name)
 {
   free(name.prefix);
   free(name.busname);
+}
+
+void free_chip_features(sensors_chip_feature *features)
+{
+  int i;
+
+  for (i = 0; features[i].data.name; i++)
+    free(features[i].data.name);
+  free(features);
 }
 
 void free_bus(sensors_bus bus)

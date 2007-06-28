@@ -159,13 +159,13 @@ extern sensors_bus *sensors_config_busses;
 extern int sensors_config_busses_count;
 extern int sensors_config_busses_max;
 
-extern sensors_chip_name *sensors_proc_chips;
+extern sensors_chip_features *sensors_proc_chips;
 extern int sensors_proc_chips_count;
 extern int sensors_proc_chips_max;
 
 #define sensors_add_proc_chips(el) sensors_add_array_el( \
 	(el), &sensors_proc_chips, &sensors_proc_chips_count,\
-	&sensors_proc_chips_max, sizeof(struct sensors_chip_name))
+	&sensors_proc_chips_max, sizeof(struct sensors_chip_features))
 
 extern sensors_bus *sensors_proc_bus;
 extern int sensors_proc_bus_count;
@@ -174,10 +174,5 @@ extern int sensors_proc_bus_max;
 #define sensors_add_proc_bus(el) sensors_add_array_el( \
 	(el), &sensors_proc_bus, &sensors_proc_bus_count,\
 	&sensors_proc_bus_max, sizeof(struct sensors_bus))
-
-extern sensors_chip_features sensors_chip_features_list[];
-
-/* this should match the total number of elements in PLACEHOLDER_ELEMENTS */
-#define N_PLACEHOLDER_ELEMENTS 10
 
 #endif /* def LIB_SENSORS_DATA_H */

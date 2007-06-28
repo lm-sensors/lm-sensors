@@ -61,13 +61,12 @@ int get_type_scaling(int type)
 	return 0;
 }
 
-static 
-sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
+static int sensors_read_dynamic_chip(sensors_chip_features *chip,
+				     struct sysfs_device *sysdir)
 {
 	int i, type, fnum = 1;
 	struct sysfs_attribute *attr;
 	struct dlist *attrs;
-	sensors_chip_features ret = {{0}, 0};
 	/* room for all 3  (in, fan, temp) types, with all their subfeatures
 	   + misc features. We use a large sparse table at first to store all
 	   found features, so that we can store them sorted at type and index
@@ -81,7 +80,7 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 	attrs = sysfs_get_device_attributes(sysdir);
 	
 	if (attrs == NULL)
-		return ret;
+		return -ENOENT;
 		
 	memset(features, 0, sizeof(features));
 	
@@ -90,7 +89,7 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 		name = attr->name;
 		
 		if (!strcmp(name, "name")) {
-			ret.chip.prefix = strndup(attr->value, strlen(attr->value) - 1);
+			/* Already done */
 			continue;
 		} 
 		
@@ -192,9 +191,9 @@ sensors_chip_features sensors_read_dynamic_chip(struct sysfs_device *sysdir)
 		}
 	}
 	
-	ret.feature = dyn_features;
+	chip->feature = dyn_features;
 	
-	return ret;
+	return 0;
 }
 
 /* returns !0 if sysfs filesystem was found, 0 otherwise */
@@ -215,11 +214,10 @@ int sensors_init_sysfs(void)
 /* returns: 0 if successful, !0 otherwise */
 static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 {
-	static int total_dynamic = 0;
-	int domain, bus, slot, fn, i;
+	int domain, bus, slot, fn;
 	struct sysfs_attribute *attr, *bus_attr;
 	char bus_path[SYSFS_PATH_MAX];
-	sensors_chip_name name;
+	sensors_chip_features entry;
 
 	/* ignore any device without name attribute */
 	if (!(attr = sysfs_get_device_attr(dev, "name")))
@@ -231,22 +229,22 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 		return 0;
 
 	/* NB: attr->value[attr->len-1] == '\n'; chop that off */
-	name.prefix = strndup(attr->value, attr->len - 1);
-	if (!name.prefix)
+	entry.chip.prefix = strndup(attr->value, attr->len - 1);
+	if (!entry.chip.prefix)
 		sensors_fatal_error(__FUNCTION__, "out of memory");
 
-	name.busname = strdup(dev->path);
-	if (!name.busname)
+	entry.chip.busname = strdup(dev->path);
+	if (!entry.chip.busname)
 		sensors_fatal_error(__FUNCTION__, "out of memory");
 
-	if (sscanf(dev->name, "%d-%x", &name.bus, &name.addr) == 2) {
+	if (sscanf(dev->name, "%d-%x", &entry.chip.bus, &entry.chip.addr) == 2) {
 		/* find out if legacy ISA or not */
-		if (name.bus == 9191)
-			name.bus = SENSORS_CHIP_NAME_BUS_ISA;
+		if (entry.chip.bus == 9191)
+			entry.chip.bus = SENSORS_CHIP_NAME_BUS_ISA;
 		else {
 			snprintf(bus_path, sizeof(bus_path),
 				"%s/class/i2c-adapter/i2c-%d/device/name",
-				sensors_sysfs_mount, name.bus);
+				sensors_sysfs_mount, entry.chip.bus);
 
 			if ((bus_attr = sysfs_open_attribute(bus_path))) {
 				if (sysfs_read_attribute(bus_attr))
@@ -254,35 +252,24 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 
 				if (bus_attr->value
 				 && !strncmp(bus_attr->value, "ISA ", 4))
-					name.bus = SENSORS_CHIP_NAME_BUS_ISA;
+					entry.chip.bus = SENSORS_CHIP_NAME_BUS_ISA;
 
 				sysfs_close_attribute(bus_attr);
 			}
 		}
-	} else if (sscanf(dev->name, "%*[a-z0-9_].%d", &name.addr) == 1) {
+	} else if (sscanf(dev->name, "%*[a-z0-9_].%d", &entry.chip.addr) == 1) {
 		/* must be new ISA (platform driver) */
-		name.bus = SENSORS_CHIP_NAME_BUS_ISA;
+		entry.chip.bus = SENSORS_CHIP_NAME_BUS_ISA;
 	} else if (sscanf(dev->name, "%x:%x:%x.%x", &domain, &bus, &slot, &fn) == 4) {
 		/* PCI */
-		name.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
-		name.bus = SENSORS_CHIP_NAME_BUS_PCI;
+		entry.chip.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
+		entry.chip.bus = SENSORS_CHIP_NAME_BUS_PCI;
 	} else
 		return -SENSORS_ERR_PARSE;
 	
-	if (total_dynamic < N_PLACEHOLDER_ELEMENTS) {
-		sensors_chip_features n_entry = sensors_read_dynamic_chip(dev);
-		n_entry.chip.addr = name.addr;
-		n_entry.chip.bus = name.bus;
-
-		/* skip to end of list */
-		for(i = 0; sensors_chip_features_list[i].chip.prefix; i++);
-
-		sensors_chip_features_list[i] = n_entry;	
-
-		total_dynamic++;
-	}
-		
-	sensors_add_proc_chips(&name);
+	if (sensors_read_dynamic_chip(&entry, dev) < 0)
+		return -SENSORS_ERR_PARSE;
+	sensors_add_proc_chips(&entry);
 
 	return 0;
 }
