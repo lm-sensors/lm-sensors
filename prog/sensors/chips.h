@@ -24,60 +24,6 @@
 
 extern void print_unknown_chip(const sensors_chip_name *name);
 
-extern void print_asb100(const sensors_chip_name *name);
-extern void print_ds1621(const sensors_chip_name *name);
-extern void print_mtp008(const sensors_chip_name *name);
-extern void print_lm75(const sensors_chip_name *name);
-extern void print_adm1021(const sensors_chip_name *name);
-extern void print_adm1024(const sensors_chip_name *name);
-extern void print_adm1025(const sensors_chip_name *name);
-extern void print_adm1026(const sensors_chip_name *name);
-extern void print_adm9240(const sensors_chip_name *name);
-extern void print_lm78(const sensors_chip_name *name);
-extern void print_sis5595(const sensors_chip_name *name);
-extern void print_via686a(const sensors_chip_name *name);
-extern void print_gl518(const sensors_chip_name *name);
-extern void print_gl520(const sensors_chip_name *name);
-extern void print_lm80(const sensors_chip_name *name);
-extern void print_lm85(const sensors_chip_name *name);
-extern void print_w83781d(const sensors_chip_name *name);
-extern void print_w83792d(const sensors_chip_name *name);
-extern void print_w83793(const sensors_chip_name *name);
-extern void print_w83l785ts(const sensors_chip_name *name);
-extern void print_w83627ehf(const sensors_chip_name *name);
-extern void print_maxilife(const sensors_chip_name *name);
-extern void print_lm87(const sensors_chip_name *name);
-extern void print_it87(const sensors_chip_name *name);
-extern void print_fscpos(const sensors_chip_name *name);
-extern void print_fscscy(const sensors_chip_name *name);
-extern void print_fscher(const sensors_chip_name *name);
-extern void print_pcf8591(const sensors_chip_name *name);
-extern void print_vt1211(const sensors_chip_name *name);
-extern void print_smsc47m1(const sensors_chip_name *name);
-extern void print_smsc47m192(const sensors_chip_name *name);
-extern void print_pc87360(const sensors_chip_name *name);
-extern void print_pc87364(const sensors_chip_name *name);
-extern void print_pc87366(const sensors_chip_name *name);
-extern void print_pc87427(const sensors_chip_name *name);
-extern void print_lm92(const sensors_chip_name *name);
-extern void print_vt8231(const sensors_chip_name *name);
-extern void print_bmc(const sensors_chip_name *name);
-extern void print_lm83(const sensors_chip_name *name);
-extern void print_lm90(const sensors_chip_name *name);
-extern void print_lm63(const sensors_chip_name *name);
-extern void print_lm93(const sensors_chip_name *name);
-extern void print_max1619(const sensors_chip_name *name);
-extern void print_xeontemp(const sensors_chip_name *name);
-extern void print_max6650(const sensors_chip_name *name);
-extern void print_adm1029(const sensors_chip_name *name);
-extern void print_adm1031(const sensors_chip_name *name);
-extern void print_smsc47b397(const sensors_chip_name *name);
-extern void print_f71805f(const sensors_chip_name *name);
-extern void print_abituguru(const sensors_chip_name *name);
-extern void print_k8temp(const sensors_chip_name *name);
-extern void print_coretemp(const sensors_chip_name *name);
-extern void print_dme1737(const sensors_chip_name *name);
-
 /* some functions used by chips_generic.c */
 #define HYST 0
 #define MINMAX 1

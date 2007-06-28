@@ -316,122 +316,9 @@ const char *sprintf_chip_name(sensors_chip_name name)
   return buf;
 }
 
-struct match {
-	const char * prefix;
-	void (*fn) (const sensors_chip_name *name);
-};
-
-struct match matches[] = {
-/*	{ "ds1621", print_ds1621 }, */
-	{ "lm75", print_lm75 },
-	{ "adm1021", print_adm1021 },
-	{ "max1617", print_adm1021 },
-	{ "max1617a", print_adm1021 },
-	{ "thmc10", print_adm1021 },
-	{ "lm84", print_adm1021 },
-	{ "gl523", print_adm1021 },
-	{ "adm1023", print_adm1021 },
-	{ "mc1066", print_adm1021 },
-	{ "adm9240", print_adm9240 },
-	{ "ds1780", print_adm9240 },
-	{ "lm81", print_adm9240 },
-	{ "lm78", print_lm78 },
-	{ "lm78-j", print_lm78 },
-	{ "lm79", print_lm78 },
-	{ "mtp008", print_mtp008 },
-	{ "sis5595", print_sis5595 },
-	{ "via686a", print_via686a },
-	{ "lm80", print_lm80 },
-	{ "lm85", print_lm85 },
-	{ "lm85b", print_lm85 },
-	{ "lm85c", print_lm85 },
-	{ "adm1027", print_lm85 },
-	{ "adt7463", print_lm85 },
-	{ "emc6d100", print_lm85 },
-	{ "emc6d102", print_lm85 },
-	{ "lm87", print_lm87 },
-	{ "gl518sm", print_gl518 },
-	{ "gl520sm", print_gl520 },
-	{ "adm1025", print_adm1025 },
-	{ "ne1619", print_adm1025 },
-	{ "adm1024", print_adm1024 },
-	{ "w83781d", print_w83781d },
-	{ "w83782d", print_w83781d },
-	{ "w83783d", print_w83781d },
-	{ "w83627hf", print_w83781d },
-	{ "w83627thf", print_w83781d },
-	{ "w83637hf", print_w83781d },
-	{ "w83697hf", print_w83781d },
-	{ "w83687thf", print_w83781d },
-	{ "w83627ehf", print_w83627ehf },
-	{ "w83627dhg", print_w83627ehf },
-	{ "w83791d", print_w83781d },
-	{ "w83792d", print_w83792d },
-	{ "w83793", print_w83793 },
-	{ "w83l785ts", print_w83l785ts },
-	{ "as99127f", print_w83781d },
-	{ "maxilife", print_maxilife },
-	{ "maxilife-cg", print_maxilife },
-	{ "maxilife-co", print_maxilife },
-	{ "maxilife-as", print_maxilife },
-	{ "maxilife-nba", print_maxilife },
-	{ "it87", print_it87 },
-	{ "it8712", print_it87 },
-	{ "it8716", print_it87 },
-	{ "it8718", print_it87 },
-	{ "fscpos", print_fscpos },
-	{ "fscscy", print_fscscy },
-	{ "fscher", print_fscher },
-	{ "pcf8591", print_pcf8591 },
-	{ "vt1211", print_vt1211 },
-	{ "smsc47m192", print_smsc47m192 },
-	{ "smsc47m1", print_smsc47m1 },
-	{ "smsc47m2", print_smsc47m1 },
-	{ "pc87360", print_pc87360 },
-	{ "pc87363", print_pc87360 },
-	{ "pc87364", print_pc87364 },
-	{ "pc87365", print_pc87366 },
-	{ "pc87366", print_pc87366 },
-	{ "pc87427", print_pc87427 },
-	{ "lm92", print_lm92 },
-	{ "vt8231", print_vt8231 },
-	{ "bmc", print_bmc },
-	{ "adm1026", print_adm1026 },
-	{ "lm83", print_lm83 },
-/*	{ "lm90", print_lm90 },
-	{ "adm1032", print_lm90 },
-	{ "lm99", print_lm90 },
-	{ "lm86", print_lm90 },
-	{ "max6657", print_lm90 },
-	{ "adt7461", print_lm90 }, */
-	{ "lm63", print_lm63 },
-	{ "xeontemp", print_xeontemp },
-	{ "max6650", print_max6650 },
-	{ "asb100", print_asb100 },
-	{ "adm1029", print_adm1029 },
-	{ "adm1030", print_adm1031 },
-	{ "adm1031", print_adm1031 },
-	{ "lm93", print_lm93 },
-	{ "smsc47b397", print_smsc47b397 },
-/*	{ "f71805f", print_f71805f },
-	{ "f71872f", print_f71805f }, */
-// 	{ "abituguru", print_abituguru },
-// 	{ "k8temp", print_k8temp },
- 	{ "coretemp", print_coretemp },
- 	{ "dme1737", print_dme1737 },
-	{ NULL, NULL }
-};
-
 void do_a_print(sensors_chip_name name)
 {
-  struct match *m;
-
-  /* do we know how to display it? */
-  for(m = matches; m->prefix != NULL; m++) {
-    if(!strcmp(name.prefix, m->prefix)) break;
-  }
-
-  if(m->prefix==NULL && hide_unknown)
+  if (hide_unknown)
     return;
 
   printf("%s\n",sprintf_chip_name(name));
@@ -444,13 +331,7 @@ void do_a_print(sensors_chip_name name)
   }
   if (do_unknown)
     print_unknown_chip(&name);
-  else if(do_generic)
+  else
     print_generic_chip(&name);
-  else {
-    if(m->prefix == NULL)
-	print_generic_chip(&name);
-    else
-	m->fn(&name);
-  }
   printf("\n");
 }
