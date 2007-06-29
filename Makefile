@@ -132,7 +132,7 @@ SBINDIR := $(PREFIX)/sbin
 # You should not need to change this. It is the basic directory into which
 # include files will be installed. The actual directory will be 
 # $(INCLUDEDIR)/linux for system include files, and $(INCLUDEDIR)/sensors
-# for library include files. If PREFIX equals the default /usr/local/bin,
+# for library include files. If PREFIX equals the default /usr/local,
 # you will be able to use '#include <linux/sensors.h>' regardless of the
 # current kernel selected.
 INCLUDEDIR := $(PREFIX)/include
