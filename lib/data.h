@@ -134,9 +134,7 @@ typedef struct sensors_bus {
      SENSORS_MODE_RW, for unaccessible, readable, writable, and both readable
      and writable.
    scaling is the number of decimal points to scale by.
-     Divide the read value by 10**scaling to get the real value.
-     Scaling can be positive or negative but negative values aren't
-     very useful because the driver can scale that direction itself. */
+     Divide the read value by 10**scaling to get the real value. */
 typedef struct sensors_chip_feature {
   sensors_feature_data data;
   int scaling;
