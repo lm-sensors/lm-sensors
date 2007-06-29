@@ -239,10 +239,6 @@ LIBINCLUDEDIR (default: $(INCLUDEDIR)/sensors)
   Installation directory for libsensors include files.
 MANDIR (default: $(PREFIX)/man)
   Base installation directory for manual pages.
-MANOWN (default: root)
-  Owner of manual pages.
-MANGRP (default: root)
-  Group of manual pages.
 
 
 Patching the kernel (compilation option 2)
