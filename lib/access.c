@@ -535,13 +535,17 @@ static struct feature_type_match fan_matches[] = {
 	{ 0 }
 };
 
+static struct feature_type_match cpu_matches[] = {
+	{ "vid", SENSORS_FEATURE_VID },
+	{ 0 }
+};
+
 static struct feature_type_match matches[] = { 
 	{ "temp", SENSORS_FEATURE_TEMP, temp_matches },
 	{ "in", SENSORS_FEATURE_IN, in_matches },
 	{ "fan", SENSORS_FEATURE_FAN, fan_matches },
+	{ "cpu", SENSORS_FEATURE_UNKNOWN, cpu_matches },
 	{ "vrm", SENSORS_FEATURE_VRM, 0 },
-	{ "vid", SENSORS_FEATURE_VID, 0 },
-	{ "sensor", SENSORS_FEATURE_TEMP_SENS, 0 }, 
 	{ 0 }
 };
 
