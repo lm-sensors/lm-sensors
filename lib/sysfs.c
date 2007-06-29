@@ -165,12 +165,10 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			feature.data.compute_mapping = feature.data.mapping;
 		}
 		
-		feature.data.mode =
-			(attr->method & (SYSFS_METHOD_SHOW|SYSFS_METHOD_STORE))
-			 == (SYSFS_METHOD_SHOW|SYSFS_METHOD_STORE) ?
-			SENSORS_MODE_RW : (attr->method & SYSFS_METHOD_SHOW) ?
-			SENSORS_MODE_R : (attr->method & SYSFS_METHOD_STORE) ?
-			SENSORS_MODE_W : SENSORS_MODE_NO_RW;
+		if (attr->method & SYSFS_METHOD_SHOW)
+			feature.data.mode |= SENSORS_MODE_R;
+		if (attr->method & SYSFS_METHOD_STORE)
+			feature.data.mode |= SENSORS_MODE_W;
 
 		feature.scaling = get_type_scaling(type);
 
