@@ -103,21 +103,9 @@ patched by your distribution.
 Compilation
 ===========
 
-This will compile and install the complete lm_sensors package. Though 
-nothing is written to your kernel tree, a proper tree is still needed 
-for this. See earlier for what a proper kernel tree is.
-
-At the top of the Makefile are a couple of configuration variables that
-you may want to change. As far as possible, the Makefile tries to figure
-out by itself their settings, but it is possible to overrule them. A list
-is found below. Most important are the variables that determine where
-your kernel is located (LINUX=/lib/modules/KERNELVERSION/build, usually
-links to /usr/src/linux or something similar), where the i2c header files
-are (I2C_HEADERS=/usr/local/include) and where you want to install 
-your modules (MODDIR=/lib/modules/KERNELVERSION) and header files
-(LINUX_INCLUDE_DIR=/usr/local/include/linux). You can see that the
-installation locations are choosen in such a way that they are separate
-from the true kernel.
+This will compile and install the complete lm_sensors package. At the
+top of the Makefile are a couple of configuration variables that you may
+want to change. A list is found below.
 
 Compilation is done by `make all'; `make install' installs the package.
 You will get a lot of warnings about files which are not found, all 
@@ -134,25 +122,6 @@ SHELL (default: /bin/sh)
   You may have to specify the full path to Bash here, if /bin/sh is some
   other shell. There have been conflicting reports on whether this is 
   needed.
-KERNELVERSION
-  The version of the currently running kernel.
-LINUX (default: /lib/modules/$(KERNELVERSION)/build)
-  The location of your kernel tree.
-I2C_HEADERS (default: /usr/local/include)
-  This lists where the i2c headers are found. If you used compilation
-  option 1 for the i2c package, the default will be right. If you used
-  compilation options 2 or 3, it will not, and may actually cause
-  problems if you have the left-overs of a previous installation.
-  If you have weird compilation problems, try to change this to
-  $(LINUX_HEADERS).
-SMP
-  This must be set to 1 for a SMP kernel. The magic invocation should
-  determine this automatically, so you should not have to bother with 
-  this.
-MODVER
-  This must be set to 1 if CONFIG_MODVERSIONS is defined. The magic
-  invocation should determine this automatically, so you should not
-  have to bother with this.
 WARN (default: 0)
   Generate additional compilation warnings; mainly interesting for
   developers.
@@ -162,8 +131,6 @@ DEBUG (default: 0)
   so by the lm_sensors team.
 PREFIX (default: /usr/local)
   Prefix for almost all installation directories.
-MODPREF (default: /lib/modules/$(KERNELVERSION))
-  The location where the kernel modules will be installed.
 ETCDIR (default: /etc)
   Installation location of the sensors.conf configuration file.
 LIBDIR (default: $(PREFIX)/lib)
@@ -178,10 +145,6 @@ LIBINCLUDEDIR (default: $(INCLUDEDIR)/sensors)
   Installation directory for libsensors include files.
 MANDIR (default: $(PREFIX)/man)
   Base installation directory for manual pages.
-MANOWN (default: root)
-  Owner of manual pages.
-MANGRP (default: root)
-  Group of manual pages.
 
 
 Using the sensors package
