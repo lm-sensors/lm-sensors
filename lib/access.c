@@ -30,11 +30,6 @@
 
 #define GET_TYPE_REGEX "\\([[:alpha:]]\\{1,\\}\\)[[:digit:]]\\{0,\\}\\(_\\([[:alpha:]]\\{1,\\}\\)\\)\\{0,1\\}"
 
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
-#define container_of(ptr, type, member) ({                      \
-        const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
-        (type *)( (const char *)__mptr - offsetof(type,member) );})
-
 static int sensors_do_this_chip_sets(sensors_chip_name name);
 
 /* Compare two chips name descriptions, to see whether they could match.
