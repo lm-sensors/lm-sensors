@@ -70,12 +70,8 @@ SBINDIR := $(PREFIX)/sbin
 
 # You should not need to change this. It is the basic directory into which
 # include files will be installed. The actual directory will be 
-# $(INCLUDEDIR)/linux for system include files, and $(INCLUDEDIR)/sensors
-# for library include files. If PREFIX equals the default /usr/local/bin,
-# you will be able to use '#include <linux/sensors.h>' regardless of the
-# current kernel selected.
+# $(INCLUDEDIR)/sensors for library include files.
 INCLUDEDIR := $(PREFIX)/include
-SYSINCLUDEDIR := $(INCLUDEDIR)/linux
 LIBINCLUDEDIR := $(INCLUDEDIR)/sensors
 
 # You should not need to change this. It is the base directory under which the
@@ -109,7 +105,6 @@ MACHINE := $(shell uname -m)
 
 # The subdirectories we need to build things in 
 SRCDIRS :=
-SRCDIRS += kernel/include
 SRCDIRS += lib prog/detect prog/dump prog/pwm \
            prog/sensors ${PROG_EXTRA:%=prog/%} etc
 SRCDIRS += lib/test
@@ -133,7 +128,7 @@ SED := sed
 # PROGCPPFLAGS/PROGCFLAGS is to create regular object files (which are linked into executables).
 # ARCPPFLAGS/ARCFLAGS are used to create archive object files (static libraries).
 # LIBCPPFLAGS/LIBCFLAGS are for shared library objects.
-ALL_CPPFLAGS := -I. -Ikernel/include
+ALL_CPPFLAGS := -I.
 ALL_CFLAGS := -Wall
 
 ifeq ($(DEBUG),1)

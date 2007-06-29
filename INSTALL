@@ -174,8 +174,6 @@ SBINDIR (default: $(PREFIX)/sbin)
   Installation directory of system administrator-only programs.
 INCLUDEDIR (default: $(PREFIX)/include)
   Base installation directory for include files (see next two vars).
-SYSINCLUDEDIR (default: $(INCLUDEDIR)/linux)
-  Installation directory for system include files.
 LIBINCLUDEDIR (default: $(INCLUDEDIR)/sensors)
   Installation directory for libsensors include files.
 MANDIR (default: $(PREFIX)/man)
