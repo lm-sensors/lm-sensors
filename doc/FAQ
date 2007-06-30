@@ -1035,10 +1035,9 @@ chips, and you should do too.  You have been warned.
 4.23.2 What is at I2C addresses 0x50 - 0x57?
 --------------------------------------------
 
-EEPROMs on your SDRAM DIMMs. Load the eeprom module to look at some
-basic data in `sensors' or use the program
-`prog/eeprom/decode-dimms.pl' to get more information than you ever
-wanted.
+EEPROMs on your SDRAM DIMMs. Load the eeprom module and use the script
+`decode-dimms.pl' (in the i2c-tools package) to get more information
+than you ever wanted.
 
 4.23.3 What is at I2C addresses 0x30 - 0x37?
 --------------------------------------------

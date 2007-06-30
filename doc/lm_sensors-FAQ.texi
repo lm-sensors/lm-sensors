@@ -1069,9 +1069,9 @@ avoids these chips, and you should do too.  You have been warned.
 @anchor{What is at I2C addresses 0x50 - 0x57}
 @subsection What is at I2C addresses 0x50 - 0x57?
 
-EEPROMs on your SDRAM DIMMs. Load the eeprom module to
-look at some basic data in @command{sensors} or use the program
-@command{prog/eeprom/decode-dimms.pl} to get more information than you ever wanted.
+EEPROMs on your SDRAM DIMMs. Load the eeprom module and use the script
+@command{decode-dimms.pl} (in the i2c-tools package)
+to get more information than you ever wanted.
 
 
 @anchor{What is at I2C addresses 0x30 - 0x37}
