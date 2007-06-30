@@ -48,6 +48,7 @@ SVN HEAD
                           Add detection for non-standard SMSC Super-I/Os
                           No longer depend on i2cdetect
                           Add SMSC SCH5317 detection
+                          Drop detection of most non-sensors I2C chips
 
 
 2.10.3 (20070319)

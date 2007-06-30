@@ -1388,20 +1388,17 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "SPD EEPROM",
-       driver => "eeprom",
-       i2c_addrs => [0x50..0x57],
-       i2c_detect => sub { eeprom_detect(0, @_); },
-     },
-     {
-       name => "Sony Vaio EEPROM",
-       driver => "eeprom",
-       i2c_addrs => [0x57],
-       i2c_detect => sub { eeprom_detect(1, @_); },
+       driver => "not-a-sensor",
+       # Can also live at 0x54-0x57, but we don't care: we only check
+       # for SPD and EDID EEPROMs because some hardware monitoring chips
+       # can live at 0x50-0x53.
+       i2c_addrs => [0x50..0x53],
+       i2c_detect => sub { eeprom_detect(@_); },
      },
      {
        name => "EDID EEPROM",
-       driver => "eeprom",
-       i2c_addrs => [0x50],
+       driver => "not-a-sensor",
+       i2c_addrs => [0x50..0x53],
        i2c_detect => sub { ddcmonitor_detect(@_); },
      },
      {
@@ -1442,7 +1439,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "Fintek F75111R/RG/N (GPIO)",
-       driver => "to-be-written",
+       driver => "not-a-sensor",
        i2c_addrs => [0x4e], # 0x37 not probed
        i2c_detect => sub { fintek_detect(1, @_); },
      },
@@ -1489,40 +1486,10 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { fintek_detect(7, @_); },
      },
      {
-       name => "Philips Semiconductors SAA1064",
-       driver => "saa1064",
-       i2c_addrs => [0x38..0x3b],
-       i2c_detect => sub { saa1064_detect(@_); },
-     },
-     {
        name => "Philips Semiconductors PCA9540",
        driver => "pca9540",
        i2c_addrs => [0x70],
        i2c_detect => sub { pca9540_detect(@_); },
-     },
-     {
-       name => "Philips Semiconductors PCA9556",
-       driver => "to-be-written",
-       i2c_addrs => [0x18..0x1f],
-       i2c_detect => sub { pca9556_detect(@_); },
-     },
-     {
-       name => "Maxim MAX6900",
-       driver => "not-a-sensor",
-       i2c_addrs => [0x50],
-       i2c_detect => sub { max6900_detect(@_); },
-     },
-     {
-       name => "Smart Battery Charger",
-       driver => "to-be-written",
-       i2c_addrs => [0x09],
-       i2c_detect => sub { smartbatt_chgr_detect(@_); },
-     },
-     {
-       name => "Smart Battery Manager/Selector",
-       driver => "to-be-written",
-       i2c_addrs => [0x0a],
-       i2c_detect => sub { smartbatt_mgr_detect(@_); },
      },
      {
        name => "Smart Battery",
@@ -4806,58 +4773,25 @@ sub ite_alias_detect
   return 1;
 }
 
-# $_[0]: Chip to detect (0 = SPD EEPROM, 1 = Sony Vaio EEPROM)
-# $_[1]: A reference to the file descriptor to access this chip
-# $_[2]: Address
+# $_[0]: A reference to the file descriptor to access this chip
+# $_[1]: Address
 # Returns: 8 for a memory eeprom
-#          4 to 9 for a Sony Vaio eeprom
 # Registers used:
 #   0-63: SPD Data and Checksum
-#   0x80-0x83: Sony Vaio Data ("PCG-")
-#   0xe2, 0xe5, 0xe8, 0xeb, Oxee: Sony Vaio Timestamp constant bytes.
-#   0x1a-0x1c: Sony Vaio MAC address
-# This detection function is a bit tricky; this is to workaround
-# wrong misdetection messages that would else arise.
 sub eeprom_detect
 {
-  my ($chip,$file,$addr) = @_;
+  my ($file, $addr) = @_;
   my $checksum = 0;
 
   # Check the checksum for validity (works for most DIMMs and RIMMs)
-  if ($chip == 0) {
-	for (my $i = 0; $i <= 62; $i++) {
-	  $checksum += i2c_smbus_read_byte_data($file, $i);
-	}
-	$checksum &= 255;
-
-	return 8
-	  if $checksum == i2c_smbus_read_byte_data($file, 63);
-	return;
+  for (my $i = 0; $i <= 62; $i++) {
+    $checksum += i2c_smbus_read_byte_data($file, $i);
   }
+  $checksum &= 255;
 
-  # Look for a Sony Vaio EEPROM ($chip == 1)
-  my $vaioconf = 1;
-  $vaioconf += 4
-    if i2c_smbus_read_byte_data($file,0x80) == 0x50
-    && i2c_smbus_read_byte_data($file,0x81) == 0x43
-    && i2c_smbus_read_byte_data($file,0x82) == 0x47
-    && i2c_smbus_read_byte_data($file,0x83) == 0x2d;
-  $vaioconf += 5
-    if i2c_smbus_read_byte_data($file,0xe2) == 0x2f
-    && i2c_smbus_read_byte_data($file,0xe5) == 0x2f
-    && i2c_smbus_read_byte_data($file,0xe8) == 0x20
-    && i2c_smbus_read_byte_data($file,0xeb) == 0x3a
-    && i2c_smbus_read_byte_data($file,0xee) == 0x3a;
-  $vaioconf += 3
-    if i2c_smbus_read_byte_data($file,0x1a) == 0x08
-    && i2c_smbus_read_byte_data($file,0x1b) == 0x00
-    && i2c_smbus_read_byte_data($file,0x1c) == 0x46;
-  $vaioconf = 9
-    if $vaioconf > 9;
+  return 8
+    if $checksum == i2c_smbus_read_byte_data($file, 63);
 
-  if ($vaioconf > 1) {
-    return $vaioconf;
-  }
   return;
 }
 
@@ -4880,7 +4814,7 @@ sub ddcmonitor_detect
     i2c_smbus_read_byte_data($file,0x06) == 0xFF and
     i2c_smbus_read_byte_data($file,0x07) == 0x00;
 
-  return (8,$addr+1,$addr+2,$addr+3,$addr+4,$addr+5,$addr+6,$addr+7);
+  return 8;
 }
 
 # $_[0]: A reference to the file descriptor to access this chip.
@@ -5067,28 +5001,6 @@ sub fintek_detect
 
 # $_[0]: A reference to the file descriptor to access this chip.
 # $_[1]: Address
-# Returns: undef if not detected, 4 or 7 if detected
-# Detection is based on the fact that the SAA1064 has only one readable
-# register, and thus ignores the read address. This register can have value
-# 0x80 (first read since power-up) or 0x00.
-sub saa1064_detect
-{
-	my ($file,$addr) = @_;
-	my $status = i2c_smbus_read_byte_data ($file, 0x00);
-
-	return if ($status & 0x7f) != 0x00;
-
-	for (my $i=0 ; $i<256; $i++) {
-		return if i2c_smbus_read_byte_data ($file, $i) != 0x00;
-	}
-
-	return 7
-		if $status == 0x80;
-	return 4;
-}
-
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
 # Returns: undef if not detected, 1 if detected
 # Detection is rather difficult, since the PCA9540 has a single register.
 # Fortunately, no other device is known to live at this address.
@@ -5103,138 +5015,6 @@ sub pca9540_detect
 	return if $reg != i2c_smbus_read_byte($file);
 
 	return 1;
-}
-
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address (unused)
-# Returns: undef if not detected, 1 if detected
-# Detection is rather difficult, since the PCA9556 only has 4 registers
-# and no unused bit. We use the fact that the registers cycle over
-# 4 addresses boundaries, and the logic rules between registers.
-sub pca9556_detect
-{
-	my ($file, $addr) = @_;
-	my $input = i2c_smbus_read_byte_data($file, 0x00);
-	my $output = i2c_smbus_read_byte_data($file, 0x01);
-	my $invert = i2c_smbus_read_byte_data($file, 0x02);
-	my $config = i2c_smbus_read_byte_data($file, 0x03);
-
-	# Pins configured for output (config = 0) must obey the following
-	# rule: input = output ^ invert
-
-	return unless ($input & ~$config) == (($output ^ $invert) & ~$config);
-
-	for (my $i = 5; $i < 254 ; $i+=4) {
-		return unless i2c_smbus_read_byte_data($file, $i) == $output;
-		return unless i2c_smbus_read_byte_data($file, $i+1) == $invert;
-		return unless i2c_smbus_read_byte_data($file, $i+2) == $config;
-	}
-
-	return 1;
-}
-
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 3 if detected
-sub max6900_detect
-{
-	my ($file,$addr) = @_;
-	my $reg;
-	
-	# SEC
-	$reg = i2c_smbus_read_byte_data ($file, 0x81);
-	return if
-		($reg & 0xF0) > 0x50 or
-		($reg & 0x0F) > 9;
-
-	# MIN
-	$reg = i2c_smbus_read_byte_data ($file, 0x83);
-	return if
-		($reg & 0xF0) > 0x50 or
-		($reg & 0x0F) > 9;
-
-	# HR
-	$reg = i2c_smbus_read_byte_data ($file, 0x85);
-	return if
-		($reg & 0x40) != 0x00 or
-		($reg & 0x0F) > 9;
-
-	# DATE
-	$reg = i2c_smbus_read_byte_data ($file, 0x87);
-	return if
-		$reg == 0x00 or
-		($reg & 0xF0) > 0x30 or
-		($reg & 0x0F) > 9;
-
-	# MONTH
-	$reg = i2c_smbus_read_byte_data ($file, 0x89);
-	return if
-		$reg == 0x00 or
-		($reg & 0xF0) > 0x10 or
-		($reg & 0x0F) > 9;
-
-	# DAY
-	$reg = i2c_smbus_read_byte_data ($file, 0x8B);
-	return if
-		$reg == 0 or
-		$reg > 7;
-
-	# YEAR
-	$reg = i2c_smbus_read_byte_data ($file, 0x8D);
-	return if
-		($reg & 0xF0) > 0x90 or
-		($reg & 0x0F) > 9;
-
-	# CONTROL
-	$reg = i2c_smbus_read_byte_data ($file, 0x8F);
-	return if
-		($reg & 0x7F) != 0x00;
-
-	# CENTURY
-	$reg = i2c_smbus_read_byte_data ($file, 0x93);
-	return if
-		($reg & 0xF0) > 0x90 or
-		($reg & 0x0F) > 9;
-
-	return 3;
-}
-
-# This checks for non-FFFF values for SpecInfo and Status.
-# The address (0x09) is specified by the SMBus standard so it's likely
-# that this really is a smart battery charger.
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: 5
-sub smartbatt_chgr_detect
-{
-  my ($file,$addr) = @_;
-  # check some registers
-  if (i2c_smbus_read_word_data($file,0x11) == 0xffff) {
-  	return;
-  }
-  if (i2c_smbus_read_word_data($file,0x13) == 0xffff) {
-  	return;
-  }
-  return (5);
-}
-
-# This checks for non-FFFF values for State and Info.
-# The address (0x0a) is specified by the SMBus standard so it's likely
-# that this really is a smart battery manager/selector.
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: 5
-sub smartbatt_mgr_detect
-{
-  my ($file,$addr) = @_;
-  # check some registers
-  if (i2c_smbus_read_word_data($file,0x01) == 0xffff) {
-  	return;
-  }
-  if (i2c_smbus_read_word_data($file,0x04) == 0xffff) {
-  	return;
-  }
-  return (5);
 }
 
 # This checks for non-FFFF values for temperature, voltage, and current.
@@ -5862,13 +5642,6 @@ sub main
     if (@{$chip->{misdetected}}) {
       print "  Misdetects:\n";
       print_chips_report $chip->{misdetected};
-    }
-
-    # People are easily confused
-    if ($chip->{driver} eq "eeprom") {
-      print "\n  EEPROMs are *NOT* sensors! They are data storage chips commonly\n",
-            "  found on memory modules (SPD), in monitors (EDID), or in some\n",
-            "  laptops, for example.\n";
     }
   }
   print "\n";
