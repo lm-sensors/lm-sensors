@@ -288,9 +288,6 @@ eeprom
 ltc1710
 	ltc1710	two switches only
 
-matorb
-	Matrix Orbital LCD displays
-
 pca9540
 	2-channel I2C multiplexer
 

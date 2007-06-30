@@ -40,9 +40,6 @@ see useful_addresses.html.
   A SysV init script to be installed in /etc/rc.d/init.d/
   It inserts the bus and chip modules and starts the sensord daemon.
 
-* prog/matorb/displayit.pl (written in Perl, not installed)
-  A simple Perl script to display a 'screen' on a Matrix Orbital Display.
-
 * prog/maxilife/sysinfo.sh (written in shell, not installed)
   Write system information to the HP Maxilife LCD display using writelcd.sh.
 
