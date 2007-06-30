@@ -1248,7 +1248,7 @@ eeprom support for all Linux 2.6 kernels, as it didn't fit well in the
 library code in the first place.
 
    Note that you can still obtain information about your EEPROMs by
-using the dedicated perl scripts in `prog/eeprom': `ddcmon',
+using the dedicated perl scripts in the i2c-tools package: `ddcmon',
 `decode-dimms.pl', `decode-edid.pl' and `decode-vaio.pl'.
 
 5 How to Ask for Help
