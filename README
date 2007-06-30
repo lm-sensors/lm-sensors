@@ -62,25 +62,15 @@ At least the following hardware sensor chips are supported:
                          LM80, LM81, LM82, LM83, LM84, LM85, LM86, LM87,
                          LM89, LM90, LM92, LM93, LM99, PC87360,
                          PC87363, PC87364, PC87365, PC87366
-  Philips NE1617, NE1617A, NE1619
+  Philips NE1617, NE1617A, NE1619, PCF8591
   SiS 5595, 950 embedded sensors
   SMSC 47M1xx embedded sensors, EMC6D100, EMC6D101, EMC6D102
   TI THMC10 and THMC50
   VIA Technologies VT1211, VT8231 and VT82C686A/B embedded sensors
   Winbond W83781D, W83782D, W83783S, W83791D, W83792D,
           W83627HF, W83627THF, W83637HF, W83687THF and W83697HF
-
-
-We also support some miscellaneous chips:
-  Dallas DS1307 real time clock
-  Intel Xeon processor embedded EEPROMs
-  Linear Technologies LTC1710
-  Philips Semiconductors PCF8574, PCF8591  
-  DDC Monitor embedded EEPROMs
-  SDRAM Dimms with Serial Presence Detect EEPROMs
   Smart Battery sensors
   IPMI-BMC sensors
-  Philips Semiconductors SAA1064
 
 
 The list above may be out of date;

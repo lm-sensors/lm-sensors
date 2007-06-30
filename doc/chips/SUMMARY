@@ -204,6 +204,9 @@ pc87360
 	pc87365		2	11	3	3 pwm	no	yes (LPC)
 	pc87366		3-4	11	3	3 pwm	no	yes (LPC)
 
+pcf8591
+	pcf8591		-	2-4	-	1 dac	yes	no
+
 sis5595
 	sis5595		0-1	4-5	2	-	no	yes
 
@@ -260,48 +263,6 @@ w83792d
 
 xeontemp
 	xeontemp	1	-	-	-	yes	no
-
-
-
-SUPPORTED NON-SENSOR CHIPS
---------------------------
-
-Driver  Chips
-------  -----
-
-bmcsensors
-	An interface to an IPMI BMC (Baseboard management controller)
-
-bt869
-	bt869 video modulator chip
-
-ddcmon
-	DDC-compliant monitor integrated eeproms - reads locations only
-
-ds1307
-	real-time clock
-
-eeprom
-	Memory SPD (serial presence detect) eeproms - reads locations only
-	Xeon scratch eeproms - reads locations only
-
-ltc1710
-	ltc1710	two switches only
-
-pca9540
-	2-channel I2C multiplexer
-
-pcf8574 & pcf8574a
-	Simple eight-bit parallel I/O
-
-pcf8591
-	Quad A/D + one D/A
-
-saa1064
-	4-digit LED-driver
-
-smbus-arp
-	An SMBus 2.0 ARP client
 
 
 -----------------------------------------------------------------------------
