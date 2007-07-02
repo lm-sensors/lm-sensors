@@ -78,8 +78,6 @@ static void sensors_get_available_features(const sensors_chip_name *name,
     if (get_feature_value(name, iter, &feature_vals[indx]))
       printf("ERROR: Can't get %s data!\n", iter->name);
     
-    /* some chips don't have all the features they claim to have */
-    /* has_features[indx] = (feature_vals[indx] != 127); */
     has_features[indx] = 1;
   }
 }
