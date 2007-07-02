@@ -1420,11 +1420,11 @@ static sensors_chip_feature w83782d_features[] =
     { { SENSORS_W83782D_BEEPS, "beeps", SENSORS_W83782D_ALARMS, 
                                SENSORS_W83782D_ALARMS, RW }, 
                                W83781D_SYSCTL_BEEP, VALUE(2), 0 },
-    { { SENSORS_W83782D_SENS1, "sensor1", NOMAP, NOMAP, RW }, 
+    { { SENSORS_W83782D_SENS1, "sensor1", SENSORS_W83782D_TEMP1, NOMAP, RW }, 
                                W83781D_SYSCTL_SENS1, VALUE(1), 0 },
-    { { SENSORS_W83782D_SENS2, "sensor2", NOMAP, NOMAP, RW }, 
+    { { SENSORS_W83782D_SENS2, "sensor2", SENSORS_W83782D_TEMP2, NOMAP, RW }, 
                                W83781D_SYSCTL_SENS2, VALUE(1), 0 },
-    { { SENSORS_W83782D_SENS3, "sensor3", NOMAP, NOMAP, RW }, 
+    { { SENSORS_W83782D_SENS3, "sensor3", SENSORS_W83782D_TEMP3, NOMAP, RW }, 
                                W83781D_SYSCTL_SENS3, VALUE(1), 0 },
     { { 0 }, 0 }
   };
@@ -1536,9 +1536,9 @@ static sensors_chip_feature w83783s_features[] =
     { { SENSORS_W83783S_BEEPS, "beeps", SENSORS_W83783S_ALARMS, 
                                SENSORS_W83783S_ALARMS, RW }, 
                                W83781D_SYSCTL_BEEP, VALUE(2), 0 },
-    { { SENSORS_W83783S_SENS1, "sensor1", NOMAP, NOMAP, RW }, 
+    { { SENSORS_W83783S_SENS1, "sensor1", SENSORS_W83782D_TEMP1, NOMAP, RW }, 
                                W83781D_SYSCTL_SENS1, VALUE(1), 0 },
-    { { SENSORS_W83783S_SENS2, "sensor2", NOMAP, NOMAP, RW }, 
+    { { SENSORS_W83783S_SENS2, "sensor2", SENSORS_W83782D_TEMP2, NOMAP, RW }, 
                                W83781D_SYSCTL_SENS2, VALUE(1), 0 },
     { { 0 }, 0 }
   };
@@ -4205,11 +4205,11 @@ static sensors_chip_feature it87_features[] =
                                IT87_SYSCTL_FAN_DIV, VALUE(3), 0 },
     { { SENSORS_IT87_ALARMS, "alarms", NOMAP, NOMAP, R }, 
                              IT87_SYSCTL_ALARMS, VALUE(1) },
-    { { SENSORS_IT87_SENS1, "sensor1", NOMAP, NOMAP, RW }, 
+    { { SENSORS_IT87_SENS1, "sensor1", SENSORS_IT87_TEMP1, NOMAP, RW }, 
                             IT87_SYSCTL_SENS1, VALUE(1), 0 },
-    { { SENSORS_IT87_SENS2, "sensor2", NOMAP, NOMAP, RW }, 
+    { { SENSORS_IT87_SENS2, "sensor2", SENSORS_IT87_TEMP2, NOMAP, RW }, 
                             IT87_SYSCTL_SENS2, VALUE(1), 0 },
-    { { SENSORS_IT87_SENS3, "sensor3", NOMAP, NOMAP, RW }, 
+    { { SENSORS_IT87_SENS3, "sensor3", SENSORS_IT87_TEMP3, NOMAP, RW }, 
                             IT87_SYSCTL_SENS3, VALUE(1), 0 },
     { { 0 }, 0 }
   };
@@ -5868,11 +5868,11 @@ static sensors_chip_feature f71805f_features[] =
     { { SENSORS_F71805F_TEMP_HYST(3), "temp3_hyst", SENSORS_F71805F_TEMP(3), 
                                    SENSORS_F71805F_TEMP(3), RW }, 
                                    F71805F_SYSCTL_TEMP3, VALUE(2), 0 },
-    { { SENSORS_F71805F_TEMP_TYPE(1), "sensor1", NOMAP, NOMAP, R }, 
+    { { SENSORS_F71805F_TEMP_TYPE(1), "sensor1", SENSORS_F71805F_TEMP(1), NOMAP, R }, 
                                    F71805F_SYSCTL_SENSOR1, VALUE(1), 0 },
-    { { SENSORS_F71805F_TEMP_TYPE(2), "sensor2", NOMAP, NOMAP, R }, 
+    { { SENSORS_F71805F_TEMP_TYPE(2), "sensor2", SENSORS_F71805F_TEMP(2), NOMAP, R }, 
                                    F71805F_SYSCTL_SENSOR2, VALUE(1), 0 },
-    { { SENSORS_F71805F_TEMP_TYPE(3), "sensor3", NOMAP, NOMAP, R }, 
+    { { SENSORS_F71805F_TEMP_TYPE(3), "sensor3", SENSORS_F71805F_TEMP(3), NOMAP, R }, 
                                    F71805F_SYSCTL_SENSOR3, VALUE(1), 0 },
 /* 3 alarm bitvectors */
     { { SENSORS_F71805F_ALARMS_IN, "alarms_in", NOMAP, NOMAP, R }, 
