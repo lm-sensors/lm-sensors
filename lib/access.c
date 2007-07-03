@@ -27,7 +27,9 @@
 #include "proc.h"
 #include "general.h"
 
-static int sensors_do_this_chip_sets(sensors_chip_name name);
+static int sensors_eval_expr(sensors_chip_name chipname, 
+                             const sensors_expr *expr,
+                             double val, double *result);
 
 /* Compare two chips name descriptions, to see whether they could match.
    Return 0 if it does not match, return 1 if it does match. */
@@ -70,8 +72,9 @@ int sensors_match_chip(sensors_chip_name chip1, sensors_chip_name chip2)
    the struct the return value points to! 
    Note that this visits the list of chips from last to first. Usually,
    you want the match that was latest in the config file. */
-sensors_chip *sensors_for_all_config_chips(sensors_chip_name chip_name,
-					   const sensors_chip * last)
+static sensors_chip *
+sensors_for_all_config_chips(sensors_chip_name chip_name,
+			     const sensors_chip *last)
 {
 	int nr, i;
 	sensors_chip_name_list chips;
@@ -110,8 +113,8 @@ const sensors_chip_feature *sensors_lookup_feature_nr(const sensors_chip_name *c
 /* Look up a resource in the intern chip list, and return a pointer to it. 
    Do not modify the struct the return value points to! Returns NULL if 
    not found.*/
-const sensors_chip_feature *sensors_lookup_feature_name(const sensors_chip_name *chip,
-							const char *feature)
+static const sensors_chip_feature *
+sensors_lookup_feature_name(const sensors_chip_name *chip, const char *feature)
 {
 	int i, j;
 	const sensors_chip_feature *features;
@@ -349,6 +352,7 @@ const sensors_feature_data *sensors_get_all_features(sensors_chip_name name,
 	return NULL;
 }
 
+/* Evaluate an expression */
 int sensors_eval_expr(sensors_chip_name chipname, const sensors_expr * expr,
 		      double val, double *result)
 {
@@ -410,7 +414,7 @@ int sensors_eval_expr(sensors_chip_name chipname, const sensors_expr * expr,
 /* Execute all set statements for this particular chip. The chip may not 
    contain wildcards!  This function will return 0 on success, and <0 on 
    failure. */
-int sensors_do_this_chip_sets(sensors_chip_name name)
+static int sensors_do_this_chip_sets(sensors_chip_name name)
 {
 	sensors_chip *chip;
 	double value;
