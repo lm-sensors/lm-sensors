@@ -263,9 +263,6 @@ static int adm1026_scaling[] = {  /* .001 Volts */
 #define DAC_TO_REG(val) (SENSORS_LIMIT(val,0,255))
 #define DAC_FROM_REG(val) (val)
 
-/* sensors_vid.h defines vid_from_reg() */
-#define VID_FROM_REG(val,vrm) (vid_from_reg(val,vrm))
-
 #define ALARMS_FROM_REG(val) (val)
 
 /* Unlike some other drivers we DO NOT set initial limits.  Use
@@ -1556,7 +1553,7 @@ void adm1026_vid(struct i2c_client *client, int operation, int ctl_name,
 		*nrels_mag = 3;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		adm1026_update_client(client);
-		results[0] = VID_FROM_REG((data->vid)&0x3f,data->vrm);
+		results[0] = vid_from_reg((data->vid)&0x3f,data->vrm);
 		*nrels_mag = 1;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		down(&data->update_lock);
