@@ -49,17 +49,15 @@ Starting in lm_sensors 2.6.4 the VRM version is configurable.
 To configure the sensor chip for the correct voltage range,
 you must set the "vrm" correctly either via /proc, /sys,  or sensors.conf.
 
-To be compatible with previous lm_sensors versions, the vrm defaults
-to version 8.2. Generally, for recent motherboards, this will not
-be correct. Try 9.0 first.
-
 To change the vrm version to 9.0, for example, do the following
 after the chip module (in this example, w83781d) is loaded:
 
 	(kernel 2.4)
 	    echo 9.0 > /proc/sys/dev/sensors/w83781d-isa-0290/vrm
-	(kernel 2.6)
+	(kernel 2.6 up to 2.6.13)
 	    echo 90 > /sys/bus/i2c/devices/0-0290/vrm
+	(kernel 2.6.14 and later)
+	    echo 90 > /sys/class/hwmon/hwmon0/device/vrm
 
 Alternatively, add a line in /etc/sensors.conf in the w83781d section
 (you should put this line BEFORE any line that uses vid in a calculation):
@@ -74,8 +72,10 @@ After this, reading the vid either by
 
 	(kernel 2.4)
 	    cat /proc/sys/dev/sensors/w83781d-isa-0290/vid
-	(kernel 2.6 - divide the output by 1000)
-	    cat /sys/bus/i2c/devices/0-0290/in0_ref
+	(kernel 2.6 up to 2.6.13 - divide the output by 1000)
+	    cat /sys/bus/i2c/devices/0-0290/cpu0_vid
+	(kernel 2.6.14 and later - divide the output by 1000)
+	    cat /sys/class/hwmon/hwmon0/device/cpu0_vid
 
 or by
 
@@ -102,17 +102,20 @@ For those that do, the VRM support status is listed below.
 The following chip drivers support all the VRM versions via
 /etc/sensors.conf and the vrm entry in /proc or /sys:
 
-	adm1025, adm1026, asb100, lm85, lm87,
-	vt1211, vt8231, w83627hf, w83781d
+	adm1025, adm1026, asb100, lm85, lm87, pc87360,
+	vt1211, vt8231, w83627ehf, w83627hf, w83781d, w83792d
 
 
 The following chip drivers support only VRM 8.2 and cannot be changed:
 
-	adm1024, it87, mtp008
-	adm9240, gl520sm, lm78, maxilife
+	adm1024, it87, mtp008, adm9240, gl520sm, lm78
 
 If you have a board with one of these chips which needs advanced
 VRM support please email us.
+
+The following chip drivers support only VRM 10.0 and cannot be changed:
+
+	lm93
 
 ------------------
 Copyright (c) 2002-2004 Mark D. Studebaker
