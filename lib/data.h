@@ -170,4 +170,13 @@ extern int sensors_proc_bus_max;
 	(el), &sensors_proc_bus, &sensors_proc_bus_count,\
 	&sensors_proc_bus_max, sizeof(struct sensors_bus))
 
+/* Substitute configuration bus numbers with real-world /proc bus numbers
+   in the chips lists */
+int sensors_substitute_busses(void);
+
+
+/* Parse an i2c bus name into its components. Returns 0 on succes, a value from
+   error.h on failure. */
+int sensors_parse_i2cbus_name(const char *name, int *res);
+
 #endif /* def LIB_SENSORS_DATA_H */

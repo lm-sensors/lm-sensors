@@ -29,13 +29,4 @@
 extern const sensors_chip_feature *sensors_lookup_feature_nr(const sensors_chip_name *chip,
                                                              int feature);
 
-/* Substitute configuration bus numbers with real-world /proc bus numbers
-   in the chips lists */
-extern int sensors_substitute_busses(void);
-
-
-/* Parse an i2c bus name into its components. Returns 0 on succes, a value from
-   error.h on failure. */
-extern int sensors_parse_i2cbus_name(const char *name, int *res);
-
 #endif /* def LIB_SENSORS_ACCESS_H */

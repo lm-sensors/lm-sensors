@@ -87,9 +87,9 @@ INCLUDEFILES += $(LIBCSOURCES:.c=.ld) $(LIBCSOURCES:.c=.ad)
 
 # Special warning prevention for flex-generated files
 $(MODULE_DIR)/conf-lex.ao: $(MODULE_DIR)/conf-lex.c
-	$(CC) $(ARCPPFLAGS) $(ARCFLAGS) -Wno-unused -c $< -o $@
+	$(CC) $(ARCPPFLAGS) $(ARCFLAGS) -Wno-unused -Wno-missing-prototypes -c $< -o $@
 $(MODULE_DIR)/conf-lex.lo: $(MODULE_DIR)/conf-lex.c
-	$(CC) $(LIBCPPFLAGS) $(LIBCFLAGS) -Wno-unused -c $< -o $@
+	$(CC) $(LIBCPPFLAGS) $(LIBCFLAGS) -Wno-unused -Wno-missing-prototypes -c $< -o $@
 
 REMOVELIBST := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(LIBDIR)/%,$(LIB_DIR)/$(LIBSTLIBNAME))
 REMOVELIBSH := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(LIBDIR)/%,$(LIB_DIR)/$(LIBSHLIBNAME))

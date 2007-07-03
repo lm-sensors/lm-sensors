@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "error.h"
+#include "general.h"
 
 static void sensors_default_parse_error(const char *err, int lineno);
 static void sensors_default_fatal_error(const char *proc,const char *err);
@@ -43,13 +44,11 @@ static const char *errorlist[] =
    /* SENSORS_ERR_ACCESS_R  */ "Can't read"
  };
 
-#define ERROR_LIST_LEN (sizeof(errorlist) / sizeof(char *))
-
 const char *sensors_strerror(int errnum)
 {
   if (errnum < 0)
     errnum = -errnum;
-  if (errnum >= ERROR_LIST_LEN)
+  if (errnum >= ARRAY_SIZE(errorlist))
     errnum = 0;
   return errorlist[errnum];
 } 

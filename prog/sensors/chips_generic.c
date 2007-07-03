@@ -64,7 +64,7 @@ static void sensors_get_available_features(const sensors_chip_name *name,
       iter->mapping != SENSORS_NO_MAPPING &&
       iter->mapping == feature->number) {
     sensors_feature_type type = sensors_feature_get_type(iter);
-    unsigned int indx;
+    int indx;
     
     if (type == SENSORS_FEATURE_UNKNOWN)
       continue;
@@ -87,7 +87,7 @@ static int sensors_get_label_size(const sensors_chip_name *name)
   int i, j, valid;
   const sensors_feature_data *iter;
   char *label;
-  int max_size = 11; /* Initialised to 11 as minumum label-width */
+  unsigned int max_size = 11; /* Initialised to 11 as minumum label-width */
 
   i = j = 0;
   while((iter = sensors_get_all_features(*name, &i, &j))) {

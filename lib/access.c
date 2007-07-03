@@ -488,23 +488,30 @@ int sensors_do_chip_sets(sensors_chip_name name)
    calling sensors_do_chip_sets with an all wildcards chip name */
 int sensors_do_all_sets(void)
 {
-	sensors_chip_name name = { SENSORS_CHIP_NAME_PREFIX_ANY,
-		SENSORS_CHIP_NAME_BUS_ANY,
-		SENSORS_CHIP_NAME_ADDR_ANY
+	static const sensors_chip_name name = {
+		.prefix	= SENSORS_CHIP_NAME_PREFIX_ANY,
+		.bus	= SENSORS_CHIP_NAME_BUS_ANY,
+		.addr	= SENSORS_CHIP_NAME_ADDR_ANY,
 	};
 	return sensors_do_chip_sets(name);
 }
 
 /* Static mappings for use by sensors_feature_get_type() */
+struct feature_subtype_match
+{
+	const char *name;
+	sensors_feature_type type;
+};
+
 struct feature_type_match
 {
 	const char *name;
 	sensors_feature_type type;
 	
-	struct feature_type_match *submatches;
+	const struct feature_subtype_match *submatches;
 };
 
-static struct feature_type_match temp_matches[] = {
+static const struct feature_subtype_match temp_matches[] = {
 	{ "max", SENSORS_FEATURE_TEMP_MAX },
 	{ "max_hyst", SENSORS_FEATURE_TEMP_MAX_HYST },
 	{ "min", SENSORS_FEATURE_TEMP_MIN },
@@ -516,29 +523,29 @@ static struct feature_type_match temp_matches[] = {
 	{ "crit_alarm", SENSORS_FEATURE_TEMP_CRIT_ALARM },
 	{ "fault", SENSORS_FEATURE_TEMP_FAULT },
 	{ "type", SENSORS_FEATURE_TEMP_SENS },
-	{ 0 }
+	{ NULL, 0 }
 };
 
-static struct feature_type_match in_matches[] = {
+static const struct feature_subtype_match in_matches[] = {
 	{ "min", SENSORS_FEATURE_IN_MIN },
 	{ "max", SENSORS_FEATURE_IN_MAX },
 	{ "alarm", SENSORS_FEATURE_IN_ALARM },
 	{ "min_alarm", SENSORS_FEATURE_IN_MIN_ALARM },
 	{ "max_alarm", SENSORS_FEATURE_IN_MAX_ALARM },
-	{ 0 }
+	{ NULL, 0 }
 };
 
-static struct feature_type_match fan_matches[] = {
+static const struct feature_subtype_match fan_matches[] = {
 	{ "min", SENSORS_FEATURE_FAN_MIN },
 	{ "div", SENSORS_FEATURE_FAN_DIV },
 	{ "alarm", SENSORS_FEATURE_FAN_ALARM },
 	{ "fault", SENSORS_FEATURE_FAN_FAULT },
-	{ 0 }
+	{ NULL, 0 }
 };
 
-static struct feature_type_match cpu_matches[] = {
+static const struct feature_subtype_match cpu_matches[] = {
 	{ "vid", SENSORS_FEATURE_VID },
-	{ 0 }
+	{ NULL, 0 }
 };
 
 static struct feature_type_match matches[] = { 
@@ -546,7 +553,6 @@ static struct feature_type_match matches[] = {
 	{ "in%d%c", SENSORS_FEATURE_IN, in_matches },
 	{ "fan%d%c", SENSORS_FEATURE_FAN, fan_matches },
 	{ "cpu%d%c", SENSORS_FEATURE_UNKNOWN, cpu_matches },
-	{ 0 }
 };
 
 /* Return the feature type based on the feature name */
@@ -555,13 +561,13 @@ sensors_feature_type sensors_feature_get_type(
 {
 	char c;
 	int i, nr, count;
-	struct feature_type_match *submatches;
+	const struct feature_subtype_match *submatches;
 	
-	for(i = 0; matches[i].name != 0; i++)
+	for (i = 0; i < ARRAY_SIZE(matches); i++)
 		if ((count = sscanf(feature->name, matches[i].name, &nr, &c)))
 			break;
 	
-	if (matches[i].name == NULL) /* no match */
+	if (i == ARRAY_SIZE(matches)) /* no match */
 		return SENSORS_FEATURE_UNKNOWN;
 	else if (count == 1) /* single type */
 		return matches[i].type;
@@ -571,7 +577,7 @@ sensors_feature_type sensors_feature_get_type(
 		return SENSORS_FEATURE_UNKNOWN;
 
 	submatches = matches[i].submatches;
-	for(i = 0; submatches[i].name != 0; i++)
+	for (i = 0; submatches[i].name != NULL; i++)
 		if (!strcmp(strchr(feature->name, '_') + 1, submatches[i].name))
 			return submatches[i].type;
 	

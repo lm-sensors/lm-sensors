@@ -83,7 +83,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	memset(features, 0, sizeof(features));
 	
 	dlist_for_each_data(attrs, attr, struct sysfs_attribute) {
-		sensors_chip_feature feature = { { 0, }, 0, };
+		sensors_chip_feature feature;
 		name = attr->name;
 		
 		if (!strcmp(name, "name")) {
@@ -91,6 +91,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			continue;
 		} 
 		
+		memset(&feature, 0, sizeof(sensors_chip_feature));
 		/* check for _input extension and remove */
 		i = strlen(name);
 		if (i > 6 && !strcmp(name + i - 6, "_input"))
@@ -180,7 +181,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	}
 	
 	fnum = 0;
-	for(i = 0; i < sizeof(features)/sizeof(sensors_chip_feature); i++) {
+	for(i = 0; i < ARRAY_SIZE(features); i++) {
 		if (features[i].data.name) {
 			dyn_features[fnum] = features[i];
 			fnum++;

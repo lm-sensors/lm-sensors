@@ -25,6 +25,7 @@
 #include "data.h"
 #include "error.h"
 #include "access.h"
+#include "proc.h"
 
 /* This reads a feature from a sysfs file.
    Sysfs uses a one-value-per file system...

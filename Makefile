@@ -140,7 +140,8 @@ endif
 
 ifeq ($(WARN),1)
 ALL_CFLAGS += -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
-            -Wcast-align -Wwrite-strings -Wnested-externs -Winline
+            -Wcast-align -Wwrite-strings -Wnested-externs -Winline -W \
+            -Wmissing-prototypes -Wundef
 endif
 
 ALL_CPPFLAGS += $(CPPFLAGS)
