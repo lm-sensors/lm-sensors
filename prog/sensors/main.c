@@ -94,7 +94,7 @@ void print_version(void)
 
 /* This examines global var config_file, and leaves the name there too. 
    It also opens config_file. */
-void open_config_file(const char* config_file_name)
+static void open_config_file(const char* config_file_name)
 {
   if (!strcmp(config_file_name,"-")) {
     config_file = stdin;
@@ -109,7 +109,7 @@ void open_config_file(const char* config_file_name)
   }
 }
     
-void close_config_file(const char* config_file_name)
+static void close_config_file(const char* config_file_name)
 {
   if (fclose(config_file) == EOF) {
     fprintf(stderr,"Could not close config file\n");
