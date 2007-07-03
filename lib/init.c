@@ -53,7 +53,7 @@ int sensors_init(FILE *input)
     return -SENSORS_ERR_PARSE;
   if ((res = sensors_yyparse()))
     return -SENSORS_ERR_PARSE;
-  if ((res = sensors_substitute_busses()));
+  if ((res = sensors_substitute_busses()))
     return res;
   return 0;
 }
