@@ -30,6 +30,7 @@
 #include "data.h"
 #include "error.h"
 #include "access.h"
+#include "proc.h"
 #include "general.h"
 #include "sysfs.h"
 
