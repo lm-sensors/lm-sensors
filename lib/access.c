@@ -20,15 +20,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <regex.h>
 #include "access.h"
 #include "sensors.h"
 #include "data.h"
 #include "error.h"
 #include "proc.h"
 #include "general.h"
-
-#define GET_TYPE_REGEX "\\([[:alpha:]]\\{1,\\}\\)[[:digit:]]\\{0,\\}\\(_\\([[:alpha:]]\\{1,\\}\\)\\)\\{0,1\\}"
 
 static int sensors_do_this_chip_sets(sensors_chip_name name);
 
@@ -541,11 +538,10 @@ static struct feature_type_match cpu_matches[] = {
 };
 
 static struct feature_type_match matches[] = { 
-	{ "temp", SENSORS_FEATURE_TEMP, temp_matches },
-	{ "in", SENSORS_FEATURE_IN, in_matches },
-	{ "fan", SENSORS_FEATURE_FAN, fan_matches },
-	{ "cpu", SENSORS_FEATURE_UNKNOWN, cpu_matches },
-	{ "vrm", SENSORS_FEATURE_VRM, 0 },
+	{ "temp%d%c", SENSORS_FEATURE_TEMP, temp_matches },
+	{ "in%d%c", SENSORS_FEATURE_IN, in_matches },
+	{ "fan%d%c", SENSORS_FEATURE_FAN, fan_matches },
+	{ "cpu%d%c", SENSORS_FEATURE_UNKNOWN, cpu_matches },
 	{ 0 }
 };
 
@@ -553,39 +549,30 @@ static struct feature_type_match matches[] = {
 sensors_feature_type sensors_feature_get_type(
 	const sensors_feature_data *feature)
 {
-	regmatch_t pmatch[4];
-	int size_first, size_second, retval, i;
+	char c;
+	int i, nr, count;
 	struct feature_type_match *submatches;
-	static regex_t reg;
-	static regex_t *preg = NULL;
 	
-	if (!preg) {
-		regcomp(&reg, GET_TYPE_REGEX, 0);
-		preg = &reg;
-	}
-	
-	retval = regexec(preg, feature->name, 4, pmatch, 0);
-	
-	if (retval == -1)
-		return SENSORS_FEATURE_UNKNOWN;
-	
-	size_first = pmatch[1].rm_eo - pmatch[1].rm_so;
-	size_second = pmatch[3].rm_eo - pmatch[3].rm_so;
+	/* vrm is special */
+	if (!strcmp(feature->name, "vrm"))
+		return SENSORS_FEATURE_VRM;
 	
 	for(i = 0; matches[i].name != 0; i++)
-		if (!strncmp(feature->name, matches[i].name, size_first))
+		if ((count = sscanf(feature->name, matches[i].name, &nr, &c)))
 			break;
 	
 	if (matches[i].name == NULL) /* no match */
 		return SENSORS_FEATURE_UNKNOWN;
-	else if (size_second == 0) /* single type */
+	else if (count == 1) /* single type */
 		return matches[i].type;
-	else if (matches[i].submatches == NULL) /* not single type, but no submatches */
+
+	/* assert: count == 2 */
+	if (c != '_')
 		return SENSORS_FEATURE_UNKNOWN;
 
 	submatches = matches[i].submatches;
 	for(i = 0; submatches[i].name != 0; i++)
-		if (!strcmp(feature->name + pmatch[3].rm_so, submatches[i].name))
+		if (!strcmp(strchr(feature->name, '_') + 1, submatches[i].name))
 			return submatches[i].type;
 	
 	return SENSORS_FEATURE_UNKNOWN;
