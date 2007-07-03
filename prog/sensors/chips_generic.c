@@ -249,16 +249,14 @@ static void print_generic_chip_in(const sensors_chip_name *name,
   free(label);
   printf("%+6.2f V", val);
   
-  if (IN_FEATURE(SENSORS_FEATURE_IN_MIN))
-    printf("  (min = %+6.2f V", IN_FEATURE_VAL(SENSORS_FEATURE_IN_MIN));
-  
-  if (IN_FEATURE(SENSORS_FEATURE_IN_MAX)) {
-    if (IN_FEATURE(SENSORS_FEATURE_IN_MIN))
-      printf(", ");
-    else
-      printf("  (");
-    printf("max = %+6.2f V)", IN_FEATURE_VAL(SENSORS_FEATURE_IN_MAX));
-  }
+  if (IN_FEATURE(SENSORS_FEATURE_IN_MIN) && IN_FEATURE(SENSORS_FEATURE_IN_MAX))
+    printf("  (min = %+6.2f V, max = %+6.2f V)",
+      IN_FEATURE_VAL(SENSORS_FEATURE_IN_MIN),
+      IN_FEATURE_VAL(SENSORS_FEATURE_IN_MAX));
+  else if (IN_FEATURE(SENSORS_FEATURE_IN_MIN))
+    printf("  (min = %+6.2f V)", IN_FEATURE_VAL(SENSORS_FEATURE_IN_MIN));
+  else if (IN_FEATURE(SENSORS_FEATURE_IN_MAX))
+    printf("  (max = %+6.2f V)", IN_FEATURE_VAL(SENSORS_FEATURE_IN_MAX));
   
   if (IN_FEATURE(SENSORS_FEATURE_IN_MAX_ALARM) ||
       IN_FEATURE(SENSORS_FEATURE_IN_MIN_ALARM)) {
@@ -319,16 +317,21 @@ static void print_generic_chip_fan(const sensors_chip_name *name,
   sensors_get_available_features(name, feature, i, j, has_features, feature_vals,
       size, SENSORS_FEATURE_FAN);
   
-  if (FAN_FEATURE(SENSORS_FEATURE_FAN_MIN)) {
-    printf("  (min = %4.0f RPM", FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_MIN));
-    
-    if (FAN_FEATURE(SENSORS_FEATURE_FAN_DIV)) {
-      printf(", div = %1.0f", FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_DIV));  
-    }
-    
-    printf(")");
-  }
+  if (FAN_FEATURE(SENSORS_FEATURE_FAN_MIN) &&
+      FAN_FEATURE(SENSORS_FEATURE_FAN_DIV))
+    printf("  (min = %4.0f RPM, div = %1.0f)",
+      FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_MIN),
+      FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_DIV));
+  else if (FAN_FEATURE(SENSORS_FEATURE_FAN_MIN))
+    printf("  (min = %4.0f RPM)", FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_MIN));
+  else if (FAN_FEATURE(SENSORS_FEATURE_FAN_DIV))
+    printf("  (div = %1.0f)", FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_DIV));
   
+  /* ALARM and FAULT features */
+  if (FAN_FEATURE(SENSORS_FEATURE_FAN_FAULT) &&
+      FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_FAULT)) {
+    printf(" FAULT");
+  } else
   if (FAN_FEATURE(SENSORS_FEATURE_FAN_ALARM) && 
       FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_ALARM)) {
     printf(" ALARM");
