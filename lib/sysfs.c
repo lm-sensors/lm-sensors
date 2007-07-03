@@ -52,8 +52,6 @@ int get_type_scaling(int type)
 	switch (type) {
 	case SENSORS_FEATURE_VID:
 		return 3;
-	case SENSORS_FEATURE_VRM:
-		return 1;
 	default:
 		return 0;
 	}

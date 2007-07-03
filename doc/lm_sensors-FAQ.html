@@ -1106,9 +1106,8 @@ and change the min and max settings for the Processor Core voltage
 (often in0_min and in0_max) in that file so that they don't depend on vid.
 
    <p>The CPU nominal voltage is computed from VID lines according to a formula
-that depends on the CPU type. Most chips that report a VID value can be
-configured to use either VRM 8.2 (for Pentium III) or VRM 9.0 (for Pentium 4
-and Athlon). You chose which one you want through <samp><span class="file">/etc/sensors.conf</span></samp>. 
+that depends on the CPU type. Since Linux 2.6.14, the right formula is
+selected automatically. 
 See <samp><span class="file">doc/vid</span></samp> for more information.
 
 <div class="node">

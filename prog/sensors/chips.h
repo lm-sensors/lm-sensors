@@ -34,7 +34,7 @@ extern void print_unknown_chip(const sensors_chip_name *name);
 void print_temp_info(float n_cur, float n_over, float n_hyst,
                      int minmax, int curprec, int limitprec);
 		     
-void print_vid_info_real(const sensors_chip_name *name, int f_vid, int f_vrm, int label_size);
+void print_vid_info(const sensors_chip_name *name, int f_vid, int label_size);
 
 void print_label(const char *label, int space);
 

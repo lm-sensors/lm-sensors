@@ -553,10 +553,6 @@ sensors_feature_type sensors_feature_get_type(
 	int i, nr, count;
 	struct feature_type_match *submatches;
 	
-	/* vrm is special */
-	if (!strcmp(feature->name, "vrm"))
-		return SENSORS_FEATURE_VRM;
-	
 	for(i = 0; matches[i].name != 0; i++)
 		if ((count = sscanf(feature->name, matches[i].name, &nr, &c)))
 			break;

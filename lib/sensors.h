@@ -176,7 +176,6 @@ typedef enum sensors_feature_type {
   SENSORS_FEATURE_TEMP_SENS,
   
   SENSORS_FEATURE_VID = 0x300,
-  SENSORS_FEATURE_VRM,
   
   SENSORS_FEATURE_UNKNOWN = INT_MAX,
   

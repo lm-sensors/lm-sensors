@@ -337,23 +337,6 @@ static void print_generic_chip_fan(const sensors_chip_name *name,
   printf("\n");
 }
 
-static void print_generic_chip_vid(const sensors_chip_name *name, 
-                                   const sensors_feature_data *feature,
-                                   int i, int j, int label_size)
-{
-  const sensors_feature_data *vrm_feature;
-  
-  while((vrm_feature = sensors_get_all_features(*name, &i, &j))) {
-    if (sensors_feature_get_type(vrm_feature) == SENSORS_FEATURE_VRM)
-      break;
-  }
-  
-  if (vrm_feature != NULL)
-    print_vid_info_real(name, feature->number, vrm_feature->number, label_size);
-  else
-    print_vid_info_real(name, feature->number, -1, label_size);
-}
-
 void print_generic_chip(const sensors_chip_name *name)
 {
   const sensors_feature_data *feature;
@@ -374,7 +357,7 @@ void print_generic_chip(const sensors_chip_name *name)
       case SENSORS_FEATURE_FAN:
         print_generic_chip_fan(name, feature, i, j, label_size); break;
       case SENSORS_FEATURE_VID:
-        print_generic_chip_vid(name, feature, i, j, label_size); break;
+        print_vid_info(name, feature->number, label_size); break;
       default: continue;
     }
   }

@@ -234,7 +234,6 @@
 # This is a library dependency.
 # A 'set fan1_div' statement must go before a 'set fan1_min' statement,
 # because the driver uses the divisor in calculating the minimum.
-# Also, one should set vrm prior to using vid in any formula.
 #
 #
 # BUS LINES
@@ -475,9 +474,6 @@ chip "w83782d-*" "w83627hf-*"
     compute in6 (3.14 * @) -  7.71  ,  (@ +  7.71) / 3.14
     compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
 
-# adjust this if your vid is wrong; see doc/vid
-#   set vrm 9.0
-
 # set limits to  5% for the critical voltages
 # set limits to 10% for the non-critical voltages
 # set limits to 20% for the battery voltage
@@ -537,9 +533,6 @@ chip "w83783s-*"
     compute in4 ((28/10)+1)*@  ,  @/((28/10)+1)
     compute in5 (5.14 * @) - 14.91  ,  (@ + 14.91) / 5.14
     compute in6 (3.14 * @) -  7.71  ,  (@ +  7.71) / 3.14
-
-# adjust this if your vid is wrong; see doc/vid
-#   set vrm 9.0
 
 # set limits to  5% for the critical voltages
 # set limits to 10% for the non-critical voltages
@@ -687,9 +680,6 @@ chip "w83627thf-*" "w83637hf-*"
     compute in3 ((34/51)+1)*@, @/((34/51)+1)
     compute in4 (5.14*@)-14.91, (@+14.91)/5.14
     compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
-
-# adjust this if your vid is wrong; see doc/vid
-#   set vrm 9.0
 
 # set limits to  5% for the critical voltages
 # set limits to 10% for the non-critical voltages
@@ -885,9 +875,6 @@ chip "as99127f-*"
 # Most boards have no temp3 by default, except for dual-CPU boards.
 #   label temp3 "CPU 2 Temp"
 #   ignore temp3
-
-# adjust this if your vid is wrong; see doc/vid
-#   set vrm 9.0
 
 # set limits to  5% for the critical voltages
 # set limits to 10% for the non-critical voltages
@@ -1335,9 +1322,6 @@ chip "adm1025-*" "ne1619-*"
     label in3 "+5V"
     label in4 "+12V"
     label in5 "VCC"
-
-# Adjust this if your vid is wrong; see doc/vid
-#   set vrm 9.0
 
 # Tolerate a 5% deviance for CPU power-supply
 #    set in1_min vid * 0.95
@@ -2095,9 +2079,6 @@ chip "vt1211-*"
     compute in3  @ * (1 +  14 / 10),  @ / (1 +  14 / 10)
     compute in4  @ * (1 +  47 / 10),  @ / (1 +  47 / 10)
 
-# Adjust this if your vid is wrong (for 2.4 only); see doc/vid
-#   set vrm 9.1
-
 #   set in0_min 3.3 * 0.95
 #   set in0_max 3.3 * 1.05
 #   set in1_min 2.5 * 0.95
@@ -2330,8 +2311,6 @@ chip "smsc47m192-*"
 # This example was tested vs. Asus P4S333
 #
 chip "asb100-*"
-# adjust this if your vid is wrong; see doc/vid
-    #set vrm 9.0
 
     label in0 "VCore 1"
     #set in0_min vid * 0.95
@@ -2449,10 +2428,6 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
 #   ignore fan3
 #   ignore fan4
 
-# Set VRM version
-# adjust this if your vid is wrong; see doc/vid
-#   set vrm  9.1   # Pentium 4
-
 # Set voltage limits
 #   set in0_min  1.5 * 0.95
 #   set in0_max  1.5 * 1.05
@@ -2479,9 +2454,6 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
 chip "pc87366-*"
 
 # Voltage inputs
-
-# Set VRM version (default 9.0)
-#   set vrm     9.0
 
    label in7   "Vsb"
    label in8   "Vdd"

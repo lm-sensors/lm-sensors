@@ -101,20 +101,17 @@ int sensors_get_label_and_valid(sensors_chip_name name, int feature, char **labe
   return err;
 }
 
-void print_vid_info_real(const sensors_chip_name *name, int f_vid, int f_vrm, int label_size)
+void print_vid_info(const sensors_chip_name *name, int f_vid, int label_size)
 {
   char *label;
   int valid;
-  double vid, vrm;
+  double vid;
 
   if (!sensors_get_label_and_valid(*name,f_vid,&label,&valid)
       && !sensors_get_feature(*name,f_vid,&vid) ) {
     if (valid) {
       print_label(label, label_size);
-      if(!sensors_get_feature(*name,f_vrm,&vrm))
-	printf("%+6.3f V  (VRM Version %.1f)\n",vid,vrm);
-      else
-	printf("%+6.3f V\n",vid);
+      printf("%+6.3f V\n", vid);
     }
   }
   free(label);
