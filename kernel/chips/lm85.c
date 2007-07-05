@@ -186,7 +186,7 @@ static int lm85_scaling[] = {  /* .001 Volts */
 #define INS_FROM_REG(n,val) (INSEXT_FROM_REG(n,val,0))
 
 /* FAN speed is measured using 90kHz clock */
-#define FAN_TO_REG(val)  (SENSORS_LIMIT( (val)<=0?0: 5400000/(val),0,65534))
+#define FAN_TO_REG(val)  ((val)<=0?0xffff:SENSORS_LIMIT(5400000/(val),1,65534))
 #define FAN_FROM_REG(val) ((val)==0?-1:(val)==0xffff?0:5400000/(val))
 
 /* Temperature is reported in .01 degC increments */
