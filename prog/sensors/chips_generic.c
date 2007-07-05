@@ -159,12 +159,14 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
   /* print out temperature sensor info */
   if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_SENS)) {
     int sens = (int)TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_SENS);
-    printf("sensor = %s  ", sens == 0 ? "disabled" :
-                            sens == 1 ? "diode" :
-                            sens == 2 ? "transistor" :
-                            sens == 3 ? "thermal diode" :
-                            sens == 4 ? "thermistor" :
-                            "unkown");
+    printf("sensor = %s", sens == 0 ? "disabled" :
+                          sens == 1 ? "diode" :
+                          sens == 2 ? "transistor" :
+                          sens == 3 ? "thermal diode" :
+                          sens == 4 ? "thermistor" :
+                          sens == 5 ? "AMD AMDSI" :
+                          sens == 6 ? "Intel PECI" :
+                          "unknown");
   }
   
   /* ALARM and FAULT features */
