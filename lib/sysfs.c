@@ -393,3 +393,68 @@ exit0:
 	return ret;
 }
 
+int sensors_read_sysfs_attr(sensors_chip_name name, int feature, double *value)
+{
+	const sensors_chip_feature *the_feature;
+	int mag;
+	char n[NAME_MAX];
+	FILE *f;
+	int dummy;
+	char check;
+	const char *suffix = "";
+
+	if (!(the_feature = sensors_lookup_feature_nr(&name, feature)))
+		return -SENSORS_ERR_NO_ENTRY;
+
+	/* REVISIT: this is a ugly hack */
+	if (sscanf(the_feature->data.name, "in%d%c", &dummy, &check) == 1
+	 || sscanf(the_feature->data.name, "fan%d%c", &dummy, &check) == 1
+	 || sscanf(the_feature->data.name, "temp%d%c", &dummy, &check) == 1)
+		suffix = "_input";
+
+	snprintf(n, NAME_MAX, "%s/%s%s", name.busname, the_feature->data.name,
+		 suffix);
+	if ((f = fopen(n, "r"))) {
+		int res = fscanf(f, "%lf", value);
+		fclose(f);
+		if (res != 1)
+			return -SENSORS_ERR_PROC;
+		for (mag = the_feature->scaling; mag > 0; mag --)
+			*value /= 10.0;
+	} else
+		return -SENSORS_ERR_PROC;
+
+	return 0;
+}
+  
+int sensors_write_sysfs_attr(sensors_chip_name name, int feature, double value)
+{
+	const sensors_chip_feature *the_feature;
+	int mag;
+	char n[NAME_MAX];
+	FILE *f;
+	int dummy;
+	char check;
+	const char *suffix = "";
+ 
+	if (!(the_feature = sensors_lookup_feature_nr(&name, feature)))
+		return -SENSORS_ERR_NO_ENTRY;
+
+	/* REVISIT: this is a ugly hack */
+	if (sscanf(the_feature->data.name, "in%d%c", &dummy, &check) == 1
+	 || sscanf(the_feature->data.name, "fan%d%c", &dummy, &check) == 1
+	 || sscanf(the_feature->data.name, "temp%d%c", &dummy, &check) == 1)
+		suffix = "_input";
+
+	snprintf(n, NAME_MAX, "%s/%s%s", name.busname, the_feature->data.name,
+		 suffix);
+	if ((f = fopen(n, "w"))) {
+		for (mag = the_feature->scaling; mag > 0; mag --)
+			value *= 10.0;
+		fprintf(f, "%d", (int) value);
+		fclose(f);
+	} else
+		return -SENSORS_ERR_PROC;
+
+	return 0;
+}

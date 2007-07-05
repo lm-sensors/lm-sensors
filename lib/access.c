@@ -24,7 +24,7 @@
 #include "sensors.h"
 #include "data.h"
 #include "error.h"
-#include "proc.h"
+#include "sysfs.h"
 #include "general.h"
 
 static int sensors_eval_expr(sensors_chip_name chipname, 
@@ -258,7 +258,7 @@ int sensors_get_feature(sensors_chip_name name, int feature, double *result)
 				expr = chip->computes[i].from_proc;
 			}
 		}
-	if (sensors_read_proc(name, feature, &val))
+	if (sensors_read_sysfs_attr(name, feature, &val))
 		return -SENSORS_ERR_PROC;
 	if (!expr)
 		*result = val;
@@ -306,7 +306,7 @@ int sensors_set_feature(sensors_chip_name name, int feature, double value)
 	if (expr)
 		if ((res = sensors_eval_expr(name, expr, value, &to_write)))
 			return res;
-	if (sensors_write_proc(name, feature, to_write))
+	if (sensors_write_sysfs_attr(name, feature, to_write))
 		return -SENSORS_ERR_PROC;
 	return 0;
 }
