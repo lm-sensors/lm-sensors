@@ -15,6 +15,7 @@ SVN HEAD
   Man page sensors.conf.5: Update the chip statement section
   Module i2c-nforce2: Add nForce MCP61, MCP65 support (2.6 backport)
   Module lm85: Fix setting the fan speed min limit to 0
+  Module thmc50: Fix the i2c address range
   Module w83627ehf: New (2.6 backport)
   Programs i2cdump, i2cget, i2cset: Do not force the slave address by default
   Program i2cdump: Use the new I2C block read function

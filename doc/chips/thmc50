@@ -6,12 +6,12 @@ Status: Complete and some-what tested
 Supported chips: 
   * Analog Devices ADM1022
     Prefix: 'adm1022'
-    Addresses scanned: I2C 0x2D - 0x2F
-    Datasheet: Publicly available at the Analog Devices website
+    Addresses scanned: I2C 0x2C - 0x2E
+    Datasheet: http://www.analog.com/en/prod/0,2877,ADM1022,00.html
   * Texas Instruments THMC50
     Prefix: 'thmc50'
-    Addresses scanned: I2C 0x2D - 0x2F
-    Datasheet: Publicly available at the Texas Instruments' website
+    Addresses scanned: I2C 0x2C - 0x2E
+    Datasheet: http://focus.ti.com/docs/prod/folders/print/thmc50.html
 
 Authors: Frodo Looijaard <frodol@dds.nl> and 
          Philip Edelbrock <phil@netroedge.com>
