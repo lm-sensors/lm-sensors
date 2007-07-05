@@ -70,7 +70,7 @@ static void sensors_get_available_features(const sensors_chip_name *name,
       continue;
     
     indx = type - first_val - 1;
-    if (indx >= size) {
+    if (indx < 0 || indx >= size) {
       printf("ERROR: Bug in sensors: index out of bound");
       return;
     }
