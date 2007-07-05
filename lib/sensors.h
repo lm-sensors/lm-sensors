@@ -145,7 +145,7 @@ extern const sensors_feature_data *sensors_get_all_features
              (sensors_chip_name name, int *nr1,int *nr2);
 
 /* This enum contains some "magic" used by sensors_read_dynamic_chip() from
-   lib/sysfs.c . All the sensor-types (in, fan, temp, misc) are a multiple of
+   lib/sysfs.c. All the sensor types (in, fan, temp, vid) are a multiple of
    0x100 apart, and sensor features which should not have a compute_mapping to
    the _input feature start at 0x?10. */
 typedef enum sensors_feature_type {

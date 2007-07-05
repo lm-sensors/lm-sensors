@@ -66,12 +66,12 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	struct sysfs_attribute *attr;
 	struct dlist *attrs;
 	/* room for all 3  (in, fan, temp) types, with all their subfeatures
-	   + misc features. We use a large sparse table at first to store all
+	   + VID. We use a large sparse table at first to store all
 	   found features, so that we can store them sorted at type and index
 	   and then later create a dense sorted table */
 	sensors_chip_feature features[MAX_SENSORS_PER_TYPE *
 		SENSORS_FEATURE_MAX_SUB_FEATURES * 3 +
-		SENSORS_FEATURE_MAX_SUB_FEATURES];
+		MAX_SENSORS_PER_TYPE];
 	sensors_chip_feature *dyn_features;
 	char *name;
 		
@@ -105,7 +105,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			continue;
 		}
 			
-		/* Get N as in this is the N-th in / fan / temp sensor */
+		/* Get N as in this is the N-th in / fan / temp / vid */
 		switch (type & 0xFF00) {
 			case SENSORS_FEATURE_IN:
 				i = strtol(name + 2, NULL, 10);
@@ -118,8 +118,8 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 				i = strtol(name + 4, NULL, 10);
 				if (i) i--;
 				break;
-			case SENSORS_FEATURE_VID: /* first misc feature */
-				i = 0;
+			case SENSORS_FEATURE_VID:
+				i = strtol(name + 3, NULL, 10);
 				break;
 		}
 		
@@ -133,9 +133,15 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		
 		/* "calculate" a place to store the feature in our sparse,
 		   sorted table */
-		i = (type >> 8) * MAX_SENSORS_PER_TYPE *
-			SENSORS_FEATURE_MAX_SUB_FEATURES +
-			i * SENSORS_FEATURE_MAX_SUB_FEATURES + (type & 0xFF);
+		if (type == SENSORS_FEATURE_VID) {
+			i += MAX_SENSORS_PER_TYPE *
+			     SENSORS_FEATURE_MAX_SUB_FEATURES * 3;
+		} else {
+			i = (type >> 8) * MAX_SENSORS_PER_TYPE *
+				SENSORS_FEATURE_MAX_SUB_FEATURES +
+				i * SENSORS_FEATURE_MAX_SUB_FEATURES +
+				(type & 0xFF);
+		}
 		
 		if (features[i].data.name) {			
 			fprintf(stderr, "libsensors error, trying to add dupli"
@@ -148,9 +154,8 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		/* fill in the other feature members */
 		feature.data.number = i + 1;
 			
-		if ( (type & 0xFF00) == SENSORS_FEATURE_VID ||
-				(type & 0x00FF) == 0) {
-			/* misc sensor or main feature */
+		if ((type & 0x00FF) == 0) {
+			/* main feature */
 			feature.data.mapping = SENSORS_NO_MAPPING;
 			feature.data.compute_mapping = SENSORS_NO_MAPPING;
 		} else if (type & 0x10) {
