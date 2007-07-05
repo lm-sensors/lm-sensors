@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "chips.h"
 #include "lib/sensors.h"
@@ -41,40 +42,38 @@ static inline float deg_ctof(float cel)
 void print_temp_info(float n_cur, float n_over, float n_hyst,
                      int minmax, int curprec, int limitprec)
 {
+   /* note: deg_ctof() will preserve HUGEVAL */
    if (fahrenheit) {
       n_cur  = deg_ctof(n_cur);
       n_over = deg_ctof(n_over);
       n_hyst = deg_ctof(n_hyst);
    }
 
-/* use %* to pass precision as an argument */
+   /* use %* to pass precision as an argument */
+   if (n_cur != HUGE_VAL)
+      printf("%+6.*f%s  ", curprec, n_cur, degstr);
+   else
+      printf("FAULT     ");
+
    if(minmax == MINMAX)
-	printf("%+6.*f%s  (low  = %+5.*f%s, high = %+5.*f%s)  ",
-	    curprec, n_cur, degstr,
+	printf("(low  = %+5.*f%s, high = %+5.*f%s)  ",
 	    limitprec, n_hyst, degstr,
 	    limitprec, n_over, degstr);
    else if(minmax == MAXONLY)
-	printf("%+6.*f%s  (high = %+5.*f%s)                  ",
-	    curprec, n_cur, degstr,
+	printf("(high = %+5.*f%s)                  ",
 	    limitprec, n_over, degstr);
    else if(minmax == CRIT)
-	printf("%+6.*f%s  (high = %+5.*f%s, crit = %+5.*f%s)  ",
-	    curprec, n_cur, degstr,
+	printf("(high = %+5.*f%s, crit = %+5.*f%s)  ",
 	    limitprec, n_over, degstr,
 	    limitprec, n_hyst, degstr);
    else if(minmax == HYST)
-	printf("%+6.*f%s  (high = %+5.*f%s, hyst = %+5.*f%s)  ",
-	    curprec, n_cur, degstr,
+	printf("(high = %+5.*f%s, hyst = %+5.*f%s)  ",
 	    limitprec, n_over, degstr,
 	    limitprec, n_hyst, degstr);
-   else if(minmax == SINGLE)
-	printf("%+6.*f%s",
-	    curprec, n_cur, degstr);
    else if(minmax == HYSTONLY)
-	printf("%+6.*f%s  (hyst = %+5.*f%s)                  ",
-	    curprec, n_cur, degstr,
+	printf("(hyst = %+5.*f%s)                  ",
 	    limitprec, n_over, degstr);
-   else
+   else if(minmax != SINGLE)
 	printf("Unknown temperature mode!");
 }
 

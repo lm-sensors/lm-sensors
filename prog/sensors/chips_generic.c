@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "chips_generic.h"
 #include "chips.h"
@@ -151,6 +152,10 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
     type = SINGLE;
   }
   
+  if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_FAULT) &&
+      TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_FAULT))
+    val = HUGE_VAL;
+  
   print_label(label, label_size);
   free(label);
   
@@ -169,11 +174,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
                           "unknown");
   }
   
-  /* ALARM and FAULT features */
-  if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_FAULT) &&
-      TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_FAULT) > 0.5) {
-    printf(" FAULT");
-  } else
+  /* ALARM features */
   if ((TEMP_FEATURE(SENSORS_FEATURE_TEMP_ALARM) && 
        TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_ALARM) > 0.5)
    || (type == MINMAX &&
@@ -314,7 +315,12 @@ static void print_generic_chip_fan(const sensors_chip_name *name,
   
   print_label(label, label_size);
   free(label);
-  printf("%4.0f RPM", val);
+
+  if (FAN_FEATURE(SENSORS_FEATURE_FAN_FAULT) &&
+      FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_FAULT))
+    printf("FAULT   ");
+  else
+    printf("%4.0f RPM", val);
   
   sensors_get_available_features(name, feature, i, j, has_features, feature_vals,
       size, SENSORS_FEATURE_FAN);
@@ -329,11 +335,6 @@ static void print_generic_chip_fan(const sensors_chip_name *name,
   else if (FAN_FEATURE(SENSORS_FEATURE_FAN_DIV))
     printf("  (div = %1.0f)", FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_DIV));
   
-  /* ALARM and FAULT features */
-  if (FAN_FEATURE(SENSORS_FEATURE_FAN_FAULT) &&
-      FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_FAULT)) {
-    printf(" FAULT");
-  } else
   if (FAN_FEATURE(SENSORS_FEATURE_FAN_ALARM) && 
       FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_ALARM)) {
     printf(" ALARM");
