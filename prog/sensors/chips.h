@@ -74,6 +74,7 @@ extern void print_adm1031(const sensors_chip_name *name);
 extern void print_smsc47b397(const sensors_chip_name *name);
 extern void print_f71805f(const sensors_chip_name *name);
 extern void print_abituguru(const sensors_chip_name *name);
+extern void print_abituguru3(const sensors_chip_name *name);
 extern void print_k8temp(const sensors_chip_name *name);
 extern void print_coretemp(const sensors_chip_name *name);
 extern void print_dme1737(const sensors_chip_name *name);

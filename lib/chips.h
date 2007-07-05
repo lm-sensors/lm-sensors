@@ -2236,8 +2236,9 @@
 #define SENSORS_F71805F_ALARMS_FAN	201
 #define SENSORS_F71805F_ALARMS_TEMP	202
 
-/* Abit uGuru chip */
+/* Abit uGuru chips */
 #define SENSORS_ABITUGURU_PREFIX "abituguru"
+#define SENSORS_ABITUGURU3_PREFIX "abituguru3"
 
 /* in n from 0 to 10 */
 #define SENSORS_ABITUGURU_IN(n)			(0x01 + (n)) /* R */

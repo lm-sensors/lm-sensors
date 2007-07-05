@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
 #include "access.h"
 #include "sensors.h"
 #include "data.h"
@@ -148,6 +149,8 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
 {
 	const sensors_chip *chip;
 	const sensors_chip_feature *featureptr;
+	char buf[128], path[PATH_MAX];
+	FILE *f;
 	int i;
 
 	*result = NULL;
@@ -159,16 +162,30 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->labels_count; i++)
 			if (!strcasecmp(featureptr->data.name,chip->labels[i].name)){
-				if (*result)
-					free(*result);
-				if (!(*result = strdup(chip->labels[i].value)))
-					sensors_fatal_error("sensors_get_label",
-							    "Allocating label text");
-				return 0;
+				*result = strdup(chip->labels[i].value);
+				goto sensors_get_label_exit;
 			}
 
+	/* No user specified label, check for a _label sysfs file */
+	snprintf(path, PATH_MAX, "%s/%s_label", name.busname,
+		featureptr->data.name);
+	
+	if ((f = fopen(path, "r"))) {
+		i = fread(buf, 1, sizeof(buf) - 1, f);
+		fclose(f);
+		if (i > 0) {
+			/* i - 1 to strip the '\n' at the end */
+			buf[i - 1] = 0;
+			*result = strdup(buf);
+			goto sensors_get_label_exit;
+		}
+	}
+
 	/* No label, return the feature name instead */
-	if (!(*result = strdup(featureptr->data.name)))
+	*result = strdup(featureptr->data.name);
+	
+sensors_get_label_exit:
+	if (*result == NULL)
 		sensors_fatal_error("sensors_get_label",
 				    "Allocating label text");
 	return 0;

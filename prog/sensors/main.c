@@ -420,6 +420,7 @@ static struct match matches[] = {
 	{ "f71805f", print_f71805f },
 	{ "f71872f", print_f71805f },
  	{ "abituguru", print_abituguru },
+ 	{ "abituguru3", print_abituguru3 },
  	{ "k8temp", print_k8temp },
  	{ "coretemp", print_coretemp },
  	{ "dme1737", print_dme1737 },

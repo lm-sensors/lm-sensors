@@ -5834,7 +5834,7 @@ static void print_abituguru_in(const sensors_chip_name *name, int in,
           !sensors_get_feature(*name, in_min_alarm, &alarm_low) &&
           !sensors_get_feature(*name, in_max_alarm, &alarm_high)) {
         print_label(label, 23);
-        printf("%+6.2f V (min %+6.2f V, max %+6.2f V)",
+        printf("%+6.2f V  (min %+6.2f V, max %+6.2f V)",
                cur, min, max);
         if (alarm_low || alarm_high) {
           printf(" ALARM (");
@@ -5845,8 +5845,7 @@ static void print_abituguru_in(const sensors_chip_name *name, int in,
           printf(")");
         }
         printf("\n");
-      } else
-        printf("ERROR: Can't get IN data! (0x%04x)\n", in);
+      }
     }
     free(label);
   }
@@ -5874,8 +5873,7 @@ static void print_abituguru_temp(const sensors_chip_name *name, int temp,
           printf(" ALARM\n");
         else
           printf("\n");
-      } else
-        printf("ERROR: Can't get TEMP data! (0x%04x)\n", temp);
+      }
     }
     free(label);
   }
@@ -5897,10 +5895,9 @@ static void print_abituguru_fan(const sensors_chip_name *name, int fan,
           !sensors_get_feature(*name, fan_alarm, &alarm) &&
           !sensors_get_feature(*name, fan_min, &min)) {
         print_label(label, 23);
-        printf("%4.0f RPM (min %4.0f RPM)               %s\n",
+        printf("%4.0f RPM  (min %4.0f RPM)               %s\n",
                cur, min, alarm ? "ALARM" : "");
-      } else
-        printf("ERROR: Can't get FAN data! (0x%04x)\n", fan);
+      }
     }
     free(label);
   }
@@ -5921,6 +5918,25 @@ void print_abituguru(const sensors_chip_name *name)
       SENSORS_ABITUGURU_TEMP_CRIT(i));
 
   for (i=1; i<=6; i++)
+    print_abituguru_fan(name, SENSORS_ABITUGURU_FAN(i),
+      SENSORS_ABITUGURU_FAN_ALARM(i), SENSORS_ABITUGURU_FAN_MIN(i));
+}
+
+void print_abituguru3(const sensors_chip_name *name)
+{
+  int i;
+
+  for (i=0; i<14; i++)
+    print_abituguru_in(name, SENSORS_ABITUGURU_IN(i),
+      SENSORS_ABITUGURU_IN_MIN(i), SENSORS_ABITUGURU_IN_MIN_ALARM(i),
+      SENSORS_ABITUGURU_IN_MAX(i), SENSORS_ABITUGURU_IN_MAX_ALARM(i));
+
+  for (i=1; i<=7; i++)
+    print_abituguru_temp(name, SENSORS_ABITUGURU_TEMP(i),
+      SENSORS_ABITUGURU_TEMP_ALARM(i), SENSORS_ABITUGURU_TEMP_MAX(i),
+      SENSORS_ABITUGURU_TEMP_CRIT(i));
+
+  for (i=1; i<=8; i++)
     print_abituguru_fan(name, SENSORS_ABITUGURU_FAN(i),
       SENSORS_ABITUGURU_FAN_ALARM(i), SENSORS_ABITUGURU_FAN_MIN(i));
 }
