@@ -1628,9 +1628,13 @@
 #define SENSORS_IT87_FAN1 31 /* R */
 #define SENSORS_IT87_FAN2 32 /* R */
 #define SENSORS_IT87_FAN3 33 /* R */
+#define SENSORS_IT87_FAN4 34 /* R */
+#define SENSORS_IT87_FAN5 35 /* R */
 #define SENSORS_IT87_FAN1_MIN 41 /* RW */
 #define SENSORS_IT87_FAN2_MIN 42 /* RW */
 #define SENSORS_IT87_FAN3_MIN 43 /* RW */
+#define SENSORS_IT87_FAN4_MIN 44 /* RW */
+#define SENSORS_IT87_FAN5_MIN 45 /* RW */
 #define SENSORS_IT87_TEMP1 51 /* R */
 #define SENSORS_IT87_TEMP2 52 /* R */
 #define SENSORS_IT87_TEMP3 53 /* R */

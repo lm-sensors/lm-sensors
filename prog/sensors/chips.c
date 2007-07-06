@@ -3271,7 +3271,11 @@ void print_it87(const sensors_chip_name *name)
 {
   char *label;
   double cur, min, max, fdiv, sens;
-  int alarms, valid;
+  int alarms, valid, fan45;
+
+  /* The IT8716F, IT8718F and late revisions of the IT8712F have two
+     additional (optional) fan inputs */
+  fan45 = strcmp(name->prefix, "it87");
 
   if (!sensors_get_feature(*name,SENSORS_IT87_ALARMS, &cur)) {
     alarms = cur + 0.5;
@@ -3430,6 +3434,29 @@ void print_it87(const sensors_chip_name *name)
     }
   }
   free(label);
+
+  if (fan45) {
+    if (!sensors_get_label_and_valid(*name, SENSORS_IT87_FAN4, &label, &valid) &&
+        !sensors_get_feature(*name, SENSORS_IT87_FAN4, &cur) &&
+        !sensors_get_feature(*name, SENSORS_IT87_FAN4_MIN, &min)) {
+      if (valid) {
+        print_label(label, 10);
+        printf("%4.0f RPM  (min = %4.0f RPM)                   %s\n",
+               cur, min, alarms&IT87_ALARM_FAN4?"ALARM":"");
+      }
+    }
+    free(label);
+    if (!sensors_get_label_and_valid(*name, SENSORS_IT87_FAN5, &label, &valid) &&
+        !sensors_get_feature(*name, SENSORS_IT87_FAN5, &cur) &&
+        !sensors_get_feature(*name, SENSORS_IT87_FAN5_MIN, &min)) {
+      if (valid) {
+        print_label(label, 10);
+        printf("%4.0f RPM  (min = %4.0f RPM)                   %s\n",
+               cur, min, alarms&IT87_ALARM_FAN5?"ALARM":"");
+      }
+    }
+    free(label);
+  }
 
   if (!sensors_get_label_and_valid(*name,SENSORS_IT87_TEMP1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_IT87_TEMP1,&cur) &&
