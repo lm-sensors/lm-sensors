@@ -4469,7 +4469,9 @@ sub adm1022_detect
   return unless ($chip == 0 and $reg == 0x41) or
                 ($chip == 1 and $reg == 0x49) or
                 ($chip == 2 and $reg == 0x41);
-  return unless (i2c_smbus_read_byte_data($file,0x40) & 0x80) == 0x00;
+  $reg = i2c_smbus_read_byte_data($file,0x40);
+  return if ($reg & 0x10);			# Soft Reset always reads 0
+  return if ($chip != 0 and ($reg & 0x80));	# Reserved on THMC50 and ADM1028
   $reg = i2c_smbus_read_byte_data($file, 0x3f) & 0xf0;
   return unless ($chip == 0 and $reg == 0xc0) or
                 ($chip == 1 and $reg == 0xc0) or
