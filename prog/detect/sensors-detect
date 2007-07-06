@@ -5632,7 +5632,9 @@ sub main
   print "#----cut here----\n".
         $modprobes.
         "# sleep 2 # optional\n".
-        "/usr/local/bin/sensors -s # recommended\n".
+        (-e '/usr/bin/sensors' ?
+          "/usr/bin/sensors -s # recommended\n" :
+          "/usr/local/bin/sensors -s # recommended\n") .
         "#----cut here----\n\n";
 
   print "If you have some drivers built into your kernel, the list above will\n".
