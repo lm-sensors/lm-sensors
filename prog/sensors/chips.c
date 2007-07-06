@@ -6130,6 +6130,106 @@ void print_applesmc(const sensors_chip_name *name)
 	}
 }
 
+static void print_f71882fg_in(const sensors_chip_name *name, int i)
+{
+  char *label;
+  double cur, max, alarm;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_F71882FG_IN(i), &label,
+				   &valid) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_IN(i), &cur) && (i != 1 || (
+      !sensors_get_feature(*name, SENSORS_F71882FG_IN_MAX(i), &max) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_IN_ALARM(i), &alarm)))) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%+6.2f V", cur);
+      if (i == 1)
+        printf("  (max = %+6.2f V)  %s", max, alarm ? "ALARM" : "");
+      printf("\n");        
+    }
+  } else {
+    printf("ERROR: Can't get in%d data!\n", i);
+  }
+  free(label);
+}
+
+static void print_f71882fg_fan(const sensors_chip_name *name, int i)
+{
+  char *label;
+  double cur, alarm;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_F71882FG_FAN(i), &label,
+				   &valid) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_FAN(i), &cur) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_FAN_ALARM(i), &alarm)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%4.0f RPM  %s\n", cur, alarm ? "ALARM" : "");
+    }
+  } else {
+    printf("ERROR: Can't get fan%d data!\n", i);
+  }
+  free(label);
+}
+
+static void print_f71882fg_temp(const sensors_chip_name *name, int i)
+{
+  char *label;
+  double cur, max, max_hyst, crit, crit_hyst, alarm, fault, type;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_F71882FG_TEMP(i), &label,
+				   &valid) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_TEMP(i), &cur) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_TEMP_MAX(i), &max) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_TEMP_MAX_HYST(i), &max_hyst) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_TEMP_CRIT(i), &crit) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_TEMP_CRIT_HYST(i), &crit_hyst) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_TEMP_ALARM(i), &alarm) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_TEMP_FAULT(i), &fault) &&
+      !sensors_get_feature(*name, SENSORS_F71882FG_TEMP_TYPE(i), &type)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, max, max_hyst, HYST, 0, 0);
+      printf("%s%s\n", fault ? "FAULT  " : "", alarm ? "ALARM" : "");
+
+      if (fahrenheit) {
+        crit = deg_ctof(crit);
+        crit_hyst = deg_ctof(crit_hyst);
+      }
+      printf("                    (crit = %+5.0f%s, hyst = %+5.0f%s)  ",
+             crit, degstr, crit_hyst, degstr);
+      printf("sensor = %s\n", (int)type == 0 ? "disabled" :
+                              (int)type == 1 ? "diode" :
+                              (int)type == 2 ? "transistor" :
+                              (int)type == 3 ? "thermal diode" :
+                              (int)type == 4 ? "thermistor" :
+                              (int)type == 5 ? "AMD AMDSI" :
+                              (int)type == 6 ? "Intel PECI" :
+                              "unknown");
+    }
+  } else {
+    printf("ERROR: Can't get temp%d data!\n", i);
+  }
+  free(label);
+}
+
+void print_f71882fg(const sensors_chip_name *name)
+{
+  int i;
+
+  for (i = 0; i <= 8; i++)
+    print_f71882fg_in(name, i);
+
+  for (i = 1; i <= 4; i++)
+    print_f71882fg_fan(name, i);
+
+  for (i = 1; i <= 3; i++)
+    print_f71882fg_temp(name, i);
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;

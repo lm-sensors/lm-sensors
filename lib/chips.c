@@ -6141,6 +6141,72 @@ static sensors_chip_feature applesmc_features[] =
     { { 0 }, 0 }
   };
 
+#define SENSORS_F71882FG_IN_FEATURES(nr) \
+	{ { SENSORS_F71882FG_IN(nr), "in" #nr, \
+		NOMAP, NOMAP, R }, \
+		NOSYSCTL, VALUE(3), 3 }
+
+#define SENSORS_F71882FG_TEMP_FEATURES(nr) \
+	{ { SENSORS_F71882FG_TEMP(nr), "temp" #nr, \
+		NOMAP, NOMAP, R }, \
+		NOSYSCTL, VALUE(3), 3 }, \
+	{ { SENSORS_F71882FG_TEMP_MAX(nr), "temp" #nr "_max", \
+		SENSORS_F71882FG_TEMP(nr), SENSORS_F71882FG_TEMP(nr), RW }, \
+		NOSYSCTL, VALUE(1), 3 }, \
+	{ { SENSORS_F71882FG_TEMP_MAX_HYST(nr), "temp" #nr "_max_hyst", \
+		SENSORS_F71882FG_TEMP(nr), SENSORS_F71882FG_TEMP(nr), RW }, \
+		NOSYSCTL, VALUE(2), 3 }, \
+	{ { SENSORS_F71882FG_TEMP_CRIT(nr), "temp" #nr "_crit", \
+		SENSORS_F71882FG_TEMP(nr), SENSORS_F71882FG_TEMP(nr), RW }, \
+		NOSYSCTL, VALUE(4), 3 }, \
+	{ { SENSORS_F71882FG_TEMP_CRIT_HYST(nr), "temp" #nr "_crit_hyst", \
+		SENSORS_F71882FG_TEMP(nr), SENSORS_F71882FG_TEMP(nr), R }, \
+		NOSYSCTL, VALUE(5), 3 }, \
+	{ { SENSORS_F71882FG_TEMP_ALARM(nr), "temp" #nr "_alarm", \
+		SENSORS_F71882FG_TEMP(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(1), 0 }, \
+	{ { SENSORS_F71882FG_TEMP_FAULT(nr), "temp" #nr "_fault", \
+		SENSORS_F71882FG_TEMP(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(2), 0 }, \
+	{ { SENSORS_F71882FG_TEMP_TYPE(nr), "temp" #nr "_type", \
+		SENSORS_F71882FG_TEMP(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(3), 0 }
+
+#define SENSORS_F71882FG_FAN_FEATURES(nr) \
+	{ { SENSORS_F71882FG_FAN(nr), "fan" #nr, \
+		NOMAP, NOMAP, R }, \
+		NOSYSCTL, VALUE(2), 0 }, \
+	{ { SENSORS_F71882FG_FAN_ALARM(nr), "fan" #nr "_alarm", \
+		SENSORS_F71882FG_FAN(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(1), 0 }
+
+static sensors_chip_feature f71882fg_features[] =
+{
+	SENSORS_F71882FG_IN_FEATURES(0),
+	SENSORS_F71882FG_IN_FEATURES(1),
+	{ { SENSORS_F71882FG_IN_MAX(1), "in1_max",
+		SENSORS_F71882FG_IN(1), SENSORS_F71882FG_IN(1), RW },
+		NOSYSCTL, VALUE(1), 3 },
+	{ { SENSORS_F71882FG_IN_ALARM(1), "in1_alarm",
+		SENSORS_F71882FG_IN(1), NOMAP, R },
+		NOSYSCTL, VALUE(1), 0 },
+	SENSORS_F71882FG_IN_FEATURES(2),
+	SENSORS_F71882FG_IN_FEATURES(3),
+	SENSORS_F71882FG_IN_FEATURES(4),
+	SENSORS_F71882FG_IN_FEATURES(5),
+	SENSORS_F71882FG_IN_FEATURES(6),
+	SENSORS_F71882FG_IN_FEATURES(7),
+	SENSORS_F71882FG_IN_FEATURES(8),
+	SENSORS_F71882FG_TEMP_FEATURES(1),
+	SENSORS_F71882FG_TEMP_FEATURES(2),
+	SENSORS_F71882FG_TEMP_FEATURES(3),
+	SENSORS_F71882FG_FAN_FEATURES(1),
+	SENSORS_F71882FG_FAN_FEATURES(2),
+	SENSORS_F71882FG_FAN_FEATURES(3),
+	SENSORS_F71882FG_FAN_FEATURES(4),
+	{ { 0 }, 0 }
+};
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -6257,5 +6323,6 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_CORETEMP_PREFIX, coretemp_features },
  { SENSORS_DME1737_PREFIX, dme1737_features },
  { SENSORS_APPLESMC_PREFIX, applesmc_features },
+ { SENSORS_F71882FG_PREFIX, f71882fg_features },
  { 0 }
 };

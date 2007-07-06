@@ -425,6 +425,7 @@ static struct match matches[] = {
  	{ "coretemp", print_coretemp },
  	{ "dme1737", print_dme1737 },
 	{ "applesmc", print_applesmc },
+	{ "f71882fg", print_f71882fg },
 	{ NULL, NULL }
 };
 

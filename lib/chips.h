@@ -2313,4 +2313,24 @@
 #define SENSORS_APPLESMC_FAN_MAX(n)		(0x61 + (n)) /* R */
 #define SENSORS_APPLESMC_FAN_SAFE(n)		(0x81 + (n)) /* R */
 
+/* Fintek F71882FG and F71883FG chips */
+#define SENSORS_F71882FG_PREFIX		"f71882fg"
+
+/* in n from 0 to 8 */
+#define SENSORS_F71882FG_IN(n)			(1 + (n))
+#define SENSORS_F71882FG_IN_MAX(n)		(16 + (n))
+#define SENSORS_F71882FG_IN_ALARM(n)		(31 + (n))
+/* fan n from 1 to 4 */
+#define SENSORS_F71882FG_FAN(n)			(50 + (n))
+#define SENSORS_F71882FG_FAN_ALARM(n)		(60 + (n))
+/* temp n from 1 to 3 */
+#define SENSORS_F71882FG_TEMP(n)		(80 + (n))
+#define SENSORS_F71882FG_TEMP_MAX(n)		(90 + (n))
+#define SENSORS_F71882FG_TEMP_MAX_HYST(n)	(100 + (n))
+#define SENSORS_F71882FG_TEMP_CRIT(n)		(110 + (n))
+#define SENSORS_F71882FG_TEMP_CRIT_HYST(n)	(120 + (n))
+#define SENSORS_F71882FG_TEMP_ALARM(n)		(130 + (n))
+#define SENSORS_F71882FG_TEMP_FAULT(n)		(140 + (n))
+#define SENSORS_F71882FG_TEMP_TYPE(n)		(150 + (n))
+
 #endif /* def LIB_SENSORS_CHIPS_H */

@@ -79,5 +79,6 @@ extern void print_k8temp(const sensors_chip_name *name);
 extern void print_coretemp(const sensors_chip_name *name);
 extern void print_dme1737(const sensors_chip_name *name);
 extern void print_applesmc(const sensors_chip_name *name);
+extern void print_f71882fg(const sensors_chip_name *name);
 
 #endif /* def PROG_SENSORS_CHIPS_H */
