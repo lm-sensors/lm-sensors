@@ -216,7 +216,7 @@ int main(int argc, char **argv){
     /***
      *** I'm not the one to blame of you screw your computer!
      ***/
-    if(rwmode & ! force){
+    if(rwmode && ! force){
 	unsigned char warnbuf[4];
 	fprintf(stderr,"**WARNING**\n");
 	fprintf(stderr," - \tYou have chosen to WRITE to this eeprom.\n");
