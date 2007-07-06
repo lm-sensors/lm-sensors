@@ -100,6 +100,14 @@ static int sensors_get_label_size(const sensors_chip_name *name)
   return max_size + 1;
 }
 
+extern int fahrenheit;
+extern char degstr[5];
+
+static inline float deg_ctof(float cel)
+{
+   return ( cel * ( 9.0F / 5.0F ) + 32.0F );
+}
+
 #define TEMP_FEATURE(x) has_features[x - SENSORS_FEATURE_TEMP - 1]
 #define TEMP_FEATURE_VAL(x) feature_vals[x - SENSORS_FEATURE_TEMP - 1]
 static void print_generic_chip_temp(const sensors_chip_name *name, 
@@ -161,6 +169,43 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
   
   print_temp_info(val, max, min, type, 1, 1);
   
+  /* ALARM features */
+  if ((TEMP_FEATURE(SENSORS_FEATURE_TEMP_ALARM) && 
+       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_ALARM) > 0.5)
+   || (type == MINMAX &&
+       TEMP_FEATURE(SENSORS_FEATURE_TEMP_MIN_ALARM) && 
+       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MIN_ALARM) > 0.5)
+   || (type == MINMAX &&
+       TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX_ALARM) && 
+       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX_ALARM) > 0.5)
+   || (type == CRIT &&
+       TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_ALARM) && 
+       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_ALARM) > 0.5)) {
+    printf("ALARM  ");
+  }
+  
+  if (type != CRIT && TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT)) {
+    if (fahrenheit) {
+      TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT) = deg_ctof(
+        TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT));
+      TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_HYST) = deg_ctof(
+        TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_HYST));
+    }
+    
+    if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_HYST))
+      printf("\n%*s(crit = %+5.1f%s, hyst = %+5.1f%s)  ", label_size + 10, "", 
+        TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT), degstr,
+        TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_HYST), degstr);
+    else
+      printf("\n%*s(crit = %+5.1f%s)  ", label_size + 10, "", 
+        TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT), degstr);
+
+    if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_ALARM) &&
+        TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_ALARM)) {
+      printf("ALARM  ");
+    }
+  }       
+
   /* print out temperature sensor info */
   if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_SENS)) {
     int sens = (int)TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_SENS);
@@ -173,49 +218,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
                           sens == 6 ? "Intel PECI" :
                           "unknown");
   }
-  
-  /* ALARM features */
-  if ((TEMP_FEATURE(SENSORS_FEATURE_TEMP_ALARM) && 
-       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_ALARM) > 0.5)
-   || (type == MINMAX &&
-       TEMP_FEATURE(SENSORS_FEATURE_TEMP_MIN_ALARM) && 
-       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MIN_ALARM) > 0.5)
-   || (type == MINMAX &&
-       TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX_ALARM) && 
-       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX_ALARM) > 0.5)) {
-    printf(" ALARM");
-  }
   printf("\n");
-  
-  if (type != CRIT && TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT)) {
-    const sensors_feature_data *subfeature;
-    max = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT);
-    
-    if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_HYST)) {
-      min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_HYST);
-      type = HYSTONLY;
-    } else {
-      type = SINGLE;
-      min = 0.0;
-    }
-    
-    subfeature = sensors_get_sub_feature_by_type(name, feature, i, j, 
-        SENSORS_FEATURE_TEMP_CRIT);
-    if (subfeature) {
-      sensors_get_label_and_valid(*name, subfeature->number, &label, &valid);
-      
-      if (valid) {
-        print_label(label, label_size);
-        free(label);
-        print_temp_info(max, min, 0, type, 1, 1);
-        if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_ALARM) &&
-            TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_ALARM) > 0.5) {
-          printf(" ALARM");
-        }
-        printf("\n");
-      }
-    }
-  }       
 }
 
 #define IN_FEATURE(x) has_features[x - SENSORS_FEATURE_IN - 1]
@@ -337,7 +340,7 @@ static void print_generic_chip_fan(const sensors_chip_name *name,
   
   if (FAN_FEATURE(SENSORS_FEATURE_FAN_ALARM) && 
       FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_ALARM)) {
-    printf(" ALARM");
+    printf("  ALARM");
   }       
   
   printf("\n");
