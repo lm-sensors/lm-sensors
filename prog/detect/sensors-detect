@@ -2168,6 +2168,8 @@ sub initialize_conf
     $modules_conf = '/etc/modules.conf';
   } elsif (-f '/etc/conf.modules') {
     $modules_conf = '/etc/conf.modules';
+  } elsif (-f '/etc/modprobe.conf') {
+    $modules_conf = '/etc/modprobe.conf';
   } else { # default
     $modules_conf = '/etc/modules.conf';
   }
