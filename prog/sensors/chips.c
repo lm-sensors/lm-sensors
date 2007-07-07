@@ -1558,12 +1558,13 @@ void print_lm85(const sensors_chip_name *name)
   char *label;
   double cur, min, max;
   int alarms, alarm_mask = 0, valid;
-  int is1027, is7463, is6d100;
+  int is1027, is7463, is6d100, xadc;
 
   is1027 = !strcmp(name->prefix,"adm1027")
            || !strcmp(name->prefix,"adt7463") ;
   is7463 = !strcmp(name->prefix, "adt7463");
   is6d100 = !strcmp(name->prefix,"emc6d100") ;
+  xadc = is1027 || !strcmp(name->prefix, "emc6d102");
 
   if (!sensors_get_feature(*name,SENSORS_LM85_ALARMS,&cur)) 
     alarms = cur + 0.5;
@@ -1584,7 +1585,7 @@ void print_lm85(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+7.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
-           (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN0?"ALARM":"");
+           (xadc?3:2),cur,min,max,alarms&LM85_ALARM_IN0?"ALARM":"");
       if (is1027) { printf(alarm_mask&LM85_ALARM_IN0?" MASKED":""); }
       putchar( '\n' );
     }
@@ -1598,7 +1599,7 @@ void print_lm85(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+7.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
-           (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN1?"ALARM":"");
+           (xadc?3:2),cur,min,max,alarms&LM85_ALARM_IN1?"ALARM":"");
       if (is1027) { printf(alarm_mask&LM85_ALARM_IN1?" MASKED":""); }
       putchar( '\n' );
     }
@@ -1612,7 +1613,7 @@ void print_lm85(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+7.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
-           (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN2?"ALARM":"");
+           (xadc?3:2),cur,min,max,alarms&LM85_ALARM_IN2?"ALARM":"");
       if (is1027) { printf(alarm_mask&LM85_ALARM_IN2?" MASKED":""); }
       putchar( '\n' );
     }
@@ -1626,7 +1627,7 @@ void print_lm85(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+7.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
-           (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN3?"ALARM":"");
+           (xadc?3:2),cur,min,max,alarms&LM85_ALARM_IN3?"ALARM":"");
       if (is1027) { printf(alarm_mask&LM85_ALARM_IN3?" MASKED":""); }
       putchar( '\n' );
     }
@@ -1640,7 +1641,7 @@ void print_lm85(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       printf("%+7.*f V  (min = %+6.2f V, max = %+6.2f V)   %s",
-           (is1027?3:2),cur,min,max,alarms&LM85_ALARM_IN4?"ALARM":"");
+           (xadc?3:2),cur,min,max,alarms&LM85_ALARM_IN4?"ALARM":"");
       if (is1027) { printf(alarm_mask&LM85_ALARM_IN4?" MASKED":""); }
       putchar( '\n' );
     }
@@ -1746,7 +1747,7 @@ void print_lm85(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM85_TEMP1_MAX,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX, (is1027 ? 2 : 0), 0);
+      print_temp_info( cur, max, min, MINMAX, (xadc ? 2 : 0), 0);
       printf( "   %s %s %s\n",
                  alarms&LM85_ALARM_TEMP1?"ALARM":"",
                  alarms&LM85_ALARM_TEMP1_FAULT?"FAULT":"",
@@ -1762,7 +1763,7 @@ void print_lm85(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM85_TEMP2_MAX,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX, (is1027 ? 2 : 0), 0);
+      print_temp_info( cur, max, min, MINMAX, (xadc ? 2 : 0), 0);
       printf( "   %s %s\n",
                  alarms&LM85_ALARM_TEMP2?"ALARM":"",
                  is1027&&(alarm_mask&LM85_ALARM_TEMP2)?"MASKED":""
@@ -1777,7 +1778,7 @@ void print_lm85(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_LM85_TEMP3_MAX,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, max, min, MINMAX, (is1027 ? 2 : 0), 0);
+      print_temp_info( cur, max, min, MINMAX, (xadc ? 2 : 0), 0);
       printf( "   %s %s %s\n",
                  alarms&LM85_ALARM_TEMP3?"ALARM":"",
                  alarms&LM85_ALARM_TEMP3_FAULT?"FAULT":"",

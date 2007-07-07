@@ -16,6 +16,7 @@ SVN HEAD
   Man page sensors.conf.5: Update the chip statement section
   Module i2c-nforce2: Add nForce MCP61, MCP65 support (2.6 backport)
   Module lm85: Fix setting the fan speed min limit to 0
+               Add support for the EMC6D102 extra resolution bits
   Module thmc50: Fix the i2c address range
   Module w83627ehf: New (2.6 backport)
   Programs i2cdump, i2cget, i2cset: Do not force the slave address by default
@@ -43,6 +44,7 @@ SVN HEAD
                    Add support for the w83627ehf VID function
                    Add support for the w83627ehf thermal sensor types
                    Add support for it87 fan4 and fan5
+                   Display the extra resolution bits of the emc6d102
   Program sensors-detect: Stop Super-I/O probe after first family success
                           Fix SMSC DME1737 detection
                           Add /usr/sbin to the PATH (#2199)

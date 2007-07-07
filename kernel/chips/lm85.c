@@ -165,6 +165,11 @@ SENSORS_INSMOD_6(lm85b, lm85c, adm1027, adt7463, emc6d100, emc6d102);
 #define EMC6D100_REG_IN_MIN(nr) (0x73 + ((nr)-5) * 2)
 #define EMC6D100_REG_IN_MAX(nr) (0x74 + ((nr)-5) * 2)
 
+#define EMC6D102_REG_EXTEND_ADC1 0x85
+#define EMC6D102_REG_EXTEND_ADC2 0x86
+#define EMC6D102_REG_EXTEND_ADC3 0x87
+#define EMC6D102_REG_EXTEND_ADC4 0x88
+
 /* Conversions. Rounding and limit checking is only done on the TO_REG 
    variants. Note that you should be a bit careful with which arguments
    these macros are called: arguments may be evaluated more than once.
@@ -1162,6 +1167,26 @@ static void lm85_update_client(struct i2c_client *client)
 			    lm85_read_value(client, EMC6D100_REG_ALARM3) << 16;
 
 			break ;
+		case emc6d102 :
+			/* Have to read LSB bits after the MSB ones because
+			   the reading of the MSB bits has frozen the
+			   LSBs (backward from the ADM1027).
+			   We use only two extra bits per channel, and encode
+			   them in the same format the ADM1027 uses, to keep the
+			   rest of the code unchanged.
+			 */
+			i = lm85_read_value(client, EMC6D102_REG_EXTEND_ADC1);
+			data->extend_adc = (i & 0xcc) << 8; /* temp3, temp1 */
+			i = lm85_read_value(client, EMC6D102_REG_EXTEND_ADC2);
+			data->extend_adc |= (i & 0x0c) << 10; /* temp2 */
+			data->extend_adc |= (i & 0xc0) << 2; /* in4 */
+			i = lm85_read_value(client, EMC6D102_REG_EXTEND_ADC3);
+			data->extend_adc |= (i & 0x0c) >> 2; /* in0 */
+			data->extend_adc |= i & 0xc0; /* in3 */
+			i = lm85_read_value(client, EMC6D102_REG_EXTEND_ADC4);
+			data->extend_adc |= i & 0x0c; /* in1 */
+			data->extend_adc |= (i & 0xc0) >> 2; /* in2 */
+			break;
 		default : break ; /* no warnings */
 		}
 
