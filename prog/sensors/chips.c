@@ -1560,9 +1560,8 @@ void print_lm85(const sensors_chip_name *name)
   int alarms, alarm_mask = 0, valid;
   int is1027, is7463, is6d100, xadc;
 
-  is1027 = !strcmp(name->prefix,"adm1027")
-           || !strcmp(name->prefix,"adt7463") ;
   is7463 = !strcmp(name->prefix, "adt7463");
+  is1027 = is7463 || !strcmp(name->prefix, "adm1027");
   is6d100 = !strcmp(name->prefix,"emc6d100") ;
   xadc = is1027 || !strcmp(name->prefix, "emc6d102");
 
