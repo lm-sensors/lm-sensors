@@ -9,6 +9,8 @@ SVN HEAD
   Library: Clean up pwm symbol names translation
            Add dme1737 support
            Add applesmc support
+           Add abituguru3 support
+           Add f71882fg support
            Add w83627ehf support (for Linux 2.4)
            Add support for the w83627ehf VID function
            Add support for the w83627ehf thermal sensor types
@@ -39,6 +41,8 @@ SVN HEAD
                    Add dme1737 support
                    Add applesmc support
                    Add max6680 support
+                   Add abituguru3 support
+                   Add f71882fg support
                    Fix alignment of alarm for one-limit temperatures
                    Add w83627ehf support (for Linux 2.4)
                    Add support for the w83627ehf VID function
