@@ -321,7 +321,7 @@ static void print_generic_chip_fan(const sensors_chip_name *name,
 
   if (FAN_FEATURE(SENSORS_FEATURE_FAN_FAULT) &&
       FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_FAULT))
-    printf("FAULT   ");
+    printf("   FAULT");
   else
     printf("%4.0f RPM", val);
   

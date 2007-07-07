@@ -53,7 +53,7 @@ void print_temp_info(float n_cur, float n_over, float n_hyst,
    if (n_cur != HUGE_VAL)
       printf("%+6.*f%s  ", curprec, n_cur, degstr);
    else
-      printf("FAULT     ");
+      printf("   FAULT  ");
 
    if(minmax == MINMAX)
 	printf("(low  = %+5.*f%s, high = %+5.*f%s)  ",
