@@ -6228,10 +6228,7 @@ static void print_f71882fg_temp(const sensors_chip_name *name, int i)
       }
       printf("                    (crit = %+5.0f%s, hyst = %+5.0f%s)  ",
              crit, degstr, crit_hyst, degstr);
-      printf("sensor = %s\n", (int)type == 0 ? "disabled" :
-                              (int)type == 1 ? "diode" :
-                              (int)type == 2 ? "transistor" :
-                              (int)type == 3 ? "thermal diode" :
+      printf("sensor = %s\n", (int)type == 2 ? "transistor" :
                               (int)type == 4 ? "thermistor" :
                               (int)type == 5 ? "AMD AMDSI" :
                               (int)type == 6 ? "Intel PECI" :
