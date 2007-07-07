@@ -2164,13 +2164,9 @@ sub initialize_conf
     }
   }
 
-  if (-f '/etc/modules.conf') {
-    $modules_conf = '/etc/modules.conf';
-  } elsif (-f '/etc/conf.modules') {
-    $modules_conf = '/etc/conf.modules';
-  } elsif (-f '/etc/modprobe.conf') {
+  if (kernel_version_at_least(2, 6, 0)) {
     $modules_conf = '/etc/modprobe.conf';
-  } else { # default
+  } else {
     $modules_conf = '/etc/modules.conf';
   }
 
@@ -5439,11 +5435,11 @@ sub main
     exit -1;
   }
 
+  initialize_kernel_version();
   initialize_conf;
   initialize_proc_pci;
   initialize_modules_list;
   initialize_modules_supported;
-  initialize_kernel_version;
   initialize_cpu_list();
 
   print "# sensors-detect revision $revision\n\n";
