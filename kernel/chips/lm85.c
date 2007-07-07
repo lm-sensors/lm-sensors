@@ -888,6 +888,7 @@ static int lm85_detect(struct i2c_adapter *adapter, int address,
 	data->therm_ovfl = 0;
 
 	init_MUTEX(&data->update_lock);
+	data->extend_adc = 0;
 
 	/* Initialize the LM85 chip */
 	lm85_init_client(new_client);
@@ -1114,7 +1115,6 @@ static void lm85_update_client(struct i2c_client *client)
 			    lm85_read_value(client, ADM1027_REG_EXTEND_ADC);
 			break ;
 		default :
-			data->extend_adc = 0 ;
 			break ;
 		}
 
@@ -1140,7 +1140,7 @@ static void lm85_update_client(struct i2c_client *client)
 
 		data->alarms = lm85_read_value(client, LM85_REG_ALARM);
 
-		switch( ((struct lm85_data *)(client->data))->type ) {
+		switch( data->type ) {
 		case adt7463 :
 			/* REG_THERM code duplicated in therm_signal() */
 			i = lm85_read_value(client, ADT7463_REG_THERM);
@@ -1228,7 +1228,7 @@ static void lm85_update_client(struct i2c_client *client)
 		i = lm85_read_value(client, LM85_REG_AFAN_HYST2);
 		data->zone[2].hyst = (i>>4) & 0x0f ;
 
-		switch( ((struct lm85_data *)(client->data))->type ) {
+		switch( data->type ) {
 		case lm85b :
 		case lm85c :
 			data->tach_mode = lm85_read_value(client,
@@ -1300,7 +1300,7 @@ void lm85_in(struct i2c_client *client, int operation, int ctl_name,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 3;  /* 1.000 */
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		int  ext = 0 ;
+		int ext;
 		lm85_update_client(client);
 		ext = EXT_FROM_REG(data->extend_adc, nr);
 		results[0] = INS_FROM_REG(nr,data->in_min[nr]);
@@ -1363,7 +1363,7 @@ void lm85_temp(struct i2c_client *client, int operation, int ctl_name,
 	if (operation == SENSORS_PROC_REAL_INFO)
 		*nrels_mag = 2;
 	else if (operation == SENSORS_PROC_REAL_READ) {
-		int  ext = 0 ;
+		int ext;
 		lm85_update_client(client);
 
 		/* +5 for offset of temp data in ext reg */
