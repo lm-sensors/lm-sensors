@@ -99,3 +99,11 @@ Winbond		Asus P4P800-X, Pentium 4 2.8 GHz, 512 MB RAM	2006-08
 		This board has an (hidden) Intel 82801EB	Jean Delvare
 		(ICH5) SMBus with SPD EEPROMs connected, and
 		a Winbond W83627THF hardware monitoring chip.
+
+Observit	Intel D865GSA, Celeron D-352, 128 MB RAM	2007-06
+		Resulted in: backport of the w83627ehf driver	Jean Delvare
+		to Linux 2.4, improvements to the Linux 2.6
+		w83627ehf driver.
+
+Observit	Intel D865GBF, Celeron 2.4 GHz, 512 MB RAM	2007-06
+		Resulted in: improvements to the lm85 driver.	Jean Delvare
