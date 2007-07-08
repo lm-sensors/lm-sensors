@@ -52,6 +52,7 @@ SVN HEAD
                           Add SMSC SCH5317 detection
                           Drop detection of most non-sensors I2C chips
                           Fix ADM1022 detection
+                          Add detection of many SMSC Super-I/O chips
 
 
 2.10.3 (20070319)
