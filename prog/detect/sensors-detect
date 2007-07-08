@@ -1674,10 +1674,71 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids);
     chips =>
     [
       {
+	name => "SMSC DME1737 Super IO",
+	# Hardware monitoring features are accessed on the SMBus
+	driver => "via-smbus-only",
+	devid => 0x78,
+      },
+      {
+	name => "SMSC DME1737 Super IO",
+	# The DME1737 shows up twice in this list because it can return either
+	# 0x78 or 0x77 as its device ID.
+	# Hardware monitoring features are accessed on the SMBus
+	driver => "via-smbus-only",
+	devid => 0x77,
+      },
+      {
+	name => "SMSC FDC37B72x Super IO",
+	driver => "not-a-sensor",
+	devid => 0x4c,
+      },
+      {
+	name => "SMSC FDC37B78x Super IO",
+	driver => "not-a-sensor",
+	devid => 0x44,
+      },
+      {
+	name => "SMSC FDC37C672 Super IO",
+	driver => "not-a-sensor",
+	devid => 0x40,
+      },
+      {
+	name => "SMSC FDC37M707 Super IO",
+	driver => "not-a-sensor",
+	devid => 0x42,
+      },
+      {
+	name => "SMSC FDC37M81x Super IO",
+	driver => "not-a-sensor",
+	devid => 0x4d,
+      },
+      {
 	name => "SMSC LPC47B27x Super IO Fan Sensors",
 	driver => "smsc47m1",
 	devid => 0x51,
 	logdev => 0x0a,
+      },
+      {
+	name => "SMSC LPC47B34x Super IO",
+	driver => "not-a-sensor",
+	devid => 0x56,
+      },
+      {
+	name => "SMSC LPC47B357 Super IO",
+	# no datasheet
+	devid => 0x5d,
+      },
+      {
+	name => "SMSC LPC47B37x Super IO Fan Sensors",
+	driver => "to-be-written",
+	devid => 0x52,
+	logdev => 0x0a,
+      },
+      {
+	name => "SMSC LPC47B397-NC Super IO",
+	driver => "smsc47b397",
+	devid => 0x6f,
+	logdev => 0x08,
       },
       {
 	name => "SMSC LPC47M10x/112/13x Super IO Fan Sensors",
@@ -1698,10 +1759,33 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids);
 	logdev => 0x0a,
       },
       {
+	name => "SMSC LPC47M172 Super IO Fan Sensors",
+	driver => "to-be-written",
+	devid => 0x14,
+	logdev => 0x0a,
+      },
+      {
+	name => "SMSC LPC47M182 Super IO Fan Sensors",
+	driver => "to-be-written",
+	devid => 0x74,
+	logdev => 0x0a,
+      },
+      {
 	name => "SMSC LPC47M292 Super IO Fan Sensors",
 	driver => "smsc47m1",
 	devid => 0x6b,
 	logdev => 0x0a,
+      },
+      {
+	name => "SMSC LPC47M584-NC Super IO",
+	# No datasheet
+	devid => 0x76,
+      },
+      {
+	name => "SMSC LPC47N252 Super IO Fan Sensors",
+	driver => "to-be-written",
+	devid => 0x0e,
+	logdev => 0x09,
       },
       {
 	name => "SMSC LPC47S42x Super IO Fan Sensors",
@@ -1716,59 +1800,49 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids);
 	logdev => 0x0a,
       },
       {
-	name => "SMSC LPC47M172 Super IO Fan Sensors",
+	name => "SMSC LPC47U33x Super IO Fan Sensors",
 	driver => "to-be-written",
-	devid => 0x14,
+	devid => 0x54,
 	logdev => 0x0a,
       },
       {
-	name => "SMSC LPC47M182 Super IO Fan Sensors",
+	name => "SMSC SCH3112 Super IO",
+	driver => "dme1737",
+	devid => 0x7c,
+      },
+      {
+	name => "SMSC SCH3114 Super IO",
+	driver => "dme1737",
+	devid => 0x7d,
+      },
+      {
+	name => "SMSC SCH3116 Super IO",
+	driver => "dme1737",
+	devid => 0x7f,
+      },
+      {
+	name => "SMSC SCH4307 Super IO Fan Sensors",
 	driver => "to-be-written",
-	devid => 0x74,
-	logdev => 0x0a,
+	devid => 0x90,
+	logdev => 0x08,
       },
       {
-        name => "SMSC LPC47B397-NC Super IO",
-        driver => "smsc47b397",
-        devid => 0x6f,
-        logdev => 0x08,
+	name => "SMSC SCH5307-NS Super IO",
+	driver => "smsc47b397",
+	devid => 0x81,
+	logdev => 0x08,
       },
       {
-        name => "SMSC SCH5307-NS Super IO",
-        driver => "smsc47b397",
-        devid => 0x81,
-        logdev => 0x08,
+	name => "SMSC SCH5317 Super IO",
+	driver => "smsc47b397",
+	devid => 0x85,
+	logdev => 0x08,
       },
       {
-        name => "SMSC SCH5317 Super IO",
-        driver => "smsc47b397",
-        devid => 0x85,
-        logdev => 0x08,
-      },
-      {
-        name => "SMSC SCH5504-NS Super IO",
-        # No datasheet
-        driver => "not-a-sensor",
-        devid => 0x79,
-      },
-      {
-        name => "SMSC LPC47M584-NC Super IO",
-        # No datasheet
-        devid => 0x76,
-      },
-      {
-	name => "SMSC DME1737 Super IO",
-	# Hardware monitoring features are accessed on the SMBus
-	driver => "via-smbus-only",
-	devid => 0x78,
-      },
-      {
-	name => "SMSC DME1737 Super IO",
-	# The DME1737 shows up twice in this list because it can return either
-	# 0x78 or 0x77 as its device ID.
-	# Hardware monitoring features are accessed on the SMBus
-	driver => "via-smbus-only",
-	devid => 0x77,
+	name => "SMSC SCH5504-NS Super IO",
+	# No datasheet
+	driver => "not-a-sensor",
+	devid => 0x79,
       },
     ],
     # Non-standard SMSC detection callback and chip list. These chips differ
