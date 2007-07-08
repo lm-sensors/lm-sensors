@@ -209,6 +209,11 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
   /* print out temperature sensor info */
   if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_SENS)) {
     int sens = (int)TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_SENS);
+    
+    /* older kernels / drivers sometimes report a beta value for thermistors */
+    if (sens > 1000) 
+      sens = 4;
+    
     printf("sensor = %s", sens == 0 ? "disabled" :
                           sens == 1 ? "diode" :
                           sens == 2 ? "transistor" :
