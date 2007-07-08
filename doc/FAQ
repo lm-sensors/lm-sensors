@@ -691,7 +691,7 @@ settings for the Processor Core voltage (often in0_min and in0_max) in
 that file so that they don't depend on vid.
 
    The CPU nominal voltage is computed from VID lines according to a
-formula that depends on the CPU type. Since Linux 2.6.14, the right
+formula that depends on the CPU type. Since Linux 2.6.9, the right
 formula is selected automatically.  See `doc/vid' for more information.
 
 4.8 I read sensor values several times a second, but they are only updated only each second or so. Why?
@@ -1063,9 +1063,9 @@ not loaded and you did not run sensors-detect as root.
 -----------------------------------------------------
 
 Your `/dev/i2c-0,' `/dev/i2c0', or `/dev/i2c/0' files do not exist or
-you did not run `sensors-detect' as root.  Run the script
-`prog/mkdev/mkdev.sh' to create the `/dev/i2c-x' files.  Run `devfs' in
-the kernel to get the `/dev/i2c/x' files.
+you did not run `sensors-detect' as root.  Use `MAKEDEV' or `mknod' to
+create the `/dev/i2c-x' files.  Run `devfs' in the kernel to get the
+`/dev/i2c/x' files.
 
 4.24.3 Sensors-detect doesn't find any sensors!
 -----------------------------------------------

@@ -157,11 +157,6 @@ on which it depends.
 You can not use demand-loading; you will have to issue explicit modprobe
 instructions. 
 
-If you have an older installation, you will probably have to create the
-i2c device files in the /dev directory. They are called /dev/i2c-%d,
-and are character devices with major device number 89 and minor device 
-number %d. The script prog/mkdev/mkdev.sh will create the files for you.
-
 There is a scanning program installed called sensors-detect. It
 will scan all available I2C and SMBus adapters for all known devices,
 and will also look for ISA, PCI and Super-I/O chips with sensors,

@@ -22,6 +22,7 @@ SVN HEAD
   Program isadump: Detect when address bit 7 is a busy flag
                    Fix Super-I/O exit sequence for Winbond/Fintek chips
   Program matorb/displayit: Delete, obsolete
+  Program mkdev.sh: Delete, obsolete
   Program mkpatch: Delete
   Program fancontrol: Use let for arithmetic evaluation
                       No longer need awk and grep

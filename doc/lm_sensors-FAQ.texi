@@ -1104,7 +1104,7 @@ was not loaded and you did not run sensors-detect as root.
 
 Your @file{/dev/i2c-0,} @file{/dev/i2c0}, or @file{/dev/i2c/0} files do not exist
 or you did not run @command{sensors-detect} as root.
-Run the script @command{prog/mkdev/mkdev.sh} to create the @file{/dev/i2c-x} files.
+Use @command{MAKEDEV} or @command{mknod} to create the @file{/dev/i2c-x} files.
 Run @command{devfs} in the kernel to get the @file{/dev/i2c/x} files.
 
 

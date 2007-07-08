@@ -1106,7 +1106,7 @@ and change the min and max settings for the Processor Core voltage
 (often in0_min and in0_max) in that file so that they don't depend on vid.
 
    <p>The CPU nominal voltage is computed from VID lines according to a formula
-that depends on the CPU type. Since Linux 2.6.14, the right formula is
+that depends on the CPU type. Since Linux 2.6.9, the right formula is
 selected automatically. 
 See <samp><span class="file">doc/vid</span></samp> for more information.
 
@@ -1625,7 +1625,7 @@ was not loaded and you did not run sensors-detect as root.
 
 <p>Your <samp><span class="file">/dev/i2c-0,</span></samp> <samp><span class="file">/dev/i2c0</span></samp>, or <samp><span class="file">/dev/i2c/0</span></samp> files do not exist
 or you did not run <samp><span class="command">sensors-detect</span></samp> as root. 
-Run the script <samp><span class="command">prog/mkdev/mkdev.sh</span></samp> to create the <samp><span class="file">/dev/i2c-x</span></samp> files. 
+Use <samp><span class="command">MAKEDEV</span></samp> or <samp><span class="command">mknod</span></samp> to create the <samp><span class="file">/dev/i2c-x</span></samp> files. 
 Run <samp><span class="command">devfs</span></samp> in the kernel to get the <samp><span class="file">/dev/i2c/x</span></samp> files.
 
    <p><a name="Sensors_002ddetect-doesnt-find-any-sensors"></a>
