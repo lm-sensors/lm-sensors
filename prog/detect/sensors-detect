@@ -2174,10 +2174,13 @@ sub initialize_conf
     if (! -c '/dev/i2c-0' && -x '/sbin/MAKEDEV') {
       system("/sbin/MAKEDEV i2c");
     }
+    if (! -c '/dev/i2c-0' && -x '/dev/MAKEDEV') {
+      system("/dev/MAKEDEV i2c");
+    }
     if (-c '/dev/i2c-0') {
       $dev_i2c = '/dev/i2c-';
     } else { # default
-      print "No i2c device files found. Use prog/mkdev/mkdev.sh to create them.\n";
+      print "No i2c device files found.\n";
       exit -1;
     }
   }
