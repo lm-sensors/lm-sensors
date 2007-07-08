@@ -46,10 +46,6 @@ see useful_addresses.html.
 * prog/maxilife/writelcd.sh (written in shell, not installed)
   Write a string to the HP Maxilife LCD display.
 
-* prog/mkdev/mkdev.sh (written in bash, not installed)
-  This script creates the /dev/i2c-* files. Please check the source before
-  you run it, as you may need to set some variables first.
-
 * prog/pwm/pwmconfig (shell script, installed by 'make install')
   Formerly pwmtest, tests the pwm (pulse width modulation) outputs of sensors
   for their effect on the fans and helps to setup the configfile for fancontrol.
