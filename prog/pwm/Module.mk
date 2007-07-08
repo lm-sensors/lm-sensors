@@ -22,7 +22,6 @@ PROGPWMMAN8DIR := $(MANDIR)/man8
 PROGPWMMAN8FILES := $(MODULE_DIR)/fancontrol.8 $(MODULE_DIR)/pwmconfig.8
 
 PROGPWMTARGETS := $(MODULE_DIR)/fancontrol \
-                  $(MODULE_DIR)/fancontrol.pl \
                   $(MODULE_DIR)/pwmconfig
 
 REMOVEPWMBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(SBINDIR)/%,$(PROGPWMTARGETS))

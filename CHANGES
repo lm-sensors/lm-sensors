@@ -30,6 +30,7 @@ SVN HEAD
                       Support optional min and max PWM values
                       Better integration with init scripts
                       Use linear control instead of quadratic
+  Program fancontrol.pl: Delete, redundant
   Program pwmconfig: Use smaller steps for low PWM values
                      Support optional min and max PWM values
   Program rrd: Support only hwmon class devices
