@@ -120,16 +120,14 @@ fancontrol first reads its configuration, writes it to arrays and loops its
 main function.  This function gets the temperatures and fanspeeds from
 kernel driver files and calculates new speeds depending on temperature
 changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the
-new values are written to the pwm outputs.  Currently the speed increases
-quadratically with rising temperature. This way you won't hear your fans most
-of the time at best.
+new values are written to the pwm outputs.  The pwm value increases
+linearly with rising temperature.
 
 
 Planned features
 
 rc-scripts for some gnu/linux-distributions
 smoother regulation (temp interpolation)
-other curve styles (linear, exponential)
 gui for configuration
 
 If you have other wishes or want to contribute something, please let me know:

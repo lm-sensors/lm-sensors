@@ -390,7 +390,7 @@ sub UpdateFanSpeeds()
          { $pwmval = MAX; }
        else
          {
-           $pwmval = eval ( ($tval - $mint) / ($maxt - $mint) )**2 ;
+           $pwmval = eval ( ($tval - $mint) / ($maxt - $mint) );
            $pwmval *= (255 - $minso);
            $pwmval += $minso;
            $pwmval = int($pwmval);

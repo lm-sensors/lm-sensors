@@ -29,6 +29,7 @@ SVN HEAD
                       Check for configuration file validity
                       Support optional min and max PWM values
                       Better integration with init scripts
+                      Use linear control instead of quadratic
   Program pwmconfig: Use smaller steps for low PWM values
                      Support optional min and max PWM values
   Program rrd: Support only hwmon class devices
