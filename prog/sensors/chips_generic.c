@@ -33,24 +33,6 @@ static int get_feature_value(const sensors_chip_name *name,
   return sensors_get_feature(*name, feature->number, val);
 }
 
-static const sensors_feature_data*
-sensors_get_sub_feature_by_type(const sensors_chip_name *name, 
-                                const sensors_feature_data *feature, 
-                                int i, int j,
-                                enum sensors_feature_type type)
-{
-  const sensors_feature_data *iter;
-  
-  while((iter = sensors_get_all_features(*name, &i, &j)) && 
-      iter->mapping != SENSORS_NO_MAPPING &&
-      iter->mapping == feature->number) {
-    if (sensors_feature_get_type(iter) == type)
-      return iter;
-  }
-  
-  return NULL;
-}
-
 static void sensors_get_available_features(const sensors_chip_name *name, 
                                            const sensors_feature_data *feature, 
                                            int i, int j, 
