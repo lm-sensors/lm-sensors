@@ -63,6 +63,7 @@ SVN HEAD
                           Drop detection of most non-sensors I2C chips
                           Fix ADM1022 detection
                           Add detection of many SMSC Super-I/O chips
+                          Add Fintek F71806FG and F71862FG detection
 
 
 2.10.3 (20070319)
