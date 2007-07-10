@@ -37,6 +37,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern const char *libsensors_version;
+
 /* A chip name is encoded is in this structure */
 typedef struct sensors_chip_name {
   char *prefix;

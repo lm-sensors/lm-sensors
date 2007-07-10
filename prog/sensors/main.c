@@ -41,7 +41,6 @@
 #define DEFAULT_CONFIG_FILE_NAME "sensors.conf"
 
 FILE *config_file;
-extern const char *libsensors_version;
 
 extern int main(int argc, char *arv[]);
 static void print_short_help(void);
