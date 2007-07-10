@@ -154,7 +154,7 @@ ARCFLAGS := $(ALL_CFLAGS)
 LIBCPPFLAGS := $(ALL_CPPFLAGS)
 LIBCFLAGS := -fpic -D_REENTRANT $(ALL_CFLAGS)
 
-.PHONY: all user clean install user_install uninstall user_uninstall version package
+.PHONY: all user clean install user_install uninstall user_uninstall package
 
 # Make all the default rule
 all::
@@ -201,7 +201,7 @@ uninstall :: user_uninstall
 
 # This is tricky, but it works like a charm. It needs lots of utilities
 # though: cut, find, gzip, ln, tail and tar.
-package: version clean
+package: version.h clean
 	lmversion=`tail -1 version.h|cut -f 2 -d \"`; \
 	lmpackage=lm_sensors-$$lmversion; \
 	ln -s . $$lmpackage;  \
@@ -214,12 +214,6 @@ package: version clean
         gzip -9 $$lmpackage.tar ;\
         $(RM) $$lmpackage.tar $$lmpackage
 	cat doc/developers/checklist
-
-version:
-	$(RM) version.h
-	echo '#define LM_DATE "'`date +'%Y%m%d'`\" > version.h
-	echo -n 'Version: '; \
-	echo '#define LM_VERSION "'`read VER; echo $$VER`\" >> version.h
 
 help:
 	@echo 'Make targets are:'

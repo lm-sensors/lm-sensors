@@ -26,7 +26,6 @@
 #include "../version.h"
 
 const char *libsensors_version = LM_VERSION;
-const char *libsensors_date = LM_DATE;
 
 sensors_chip *sensors_config_chips = NULL;
 int sensors_config_chips_count = 0;
