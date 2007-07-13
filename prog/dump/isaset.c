@@ -43,7 +43,7 @@
 unsigned long isa_io_base = 0; /* XXX for now */
 #endif /* __powerpc__ */
 
-void help(void)
+static void help(void)
 {
 	fprintf(stderr,
 	        "Syntax for I2C-like access:\n"
