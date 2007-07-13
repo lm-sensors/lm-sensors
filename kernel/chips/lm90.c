@@ -31,7 +31,7 @@
  * Devices. That chip is similar to the LM90, with a few differences
  * that are not handled by this driver. Complete datasheet can be
  * obtained from Analog's website at:
- *   http://products.analog.com/products/info.asp?product=ADM1032
+ *   http://www.analog.com/en/prod/0,2877,ADM1032,00.html
  * Among others, it has a higher accuracy than the LM90, much like the
  * LM86 does.
  *
@@ -49,7 +49,7 @@
  * register values are decoded differently) it is ignored by this
  * driver. Complete datasheet can be obtained from Analog's website
  * at:
- *   http://products.analog.com/products/info.asp?product=ADT7461
+ *   http://www.analog.com/en/prod/0,2877,ADT7461,00.html
  *
  * Since the LM90 was the first chipset supported by this driver, most
  * comments will refer to this chipset, but are actually general and
