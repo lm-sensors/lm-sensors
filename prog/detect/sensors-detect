@@ -3121,7 +3121,7 @@ sub scan_adapter
           if (@chips) {
             print ", other addresses:";
             @chips = sort @chips;
-            foreach $other_addr (sort @chips) {
+            foreach $other_addr (@chips) {
               printf(" 0x%02x",$other_addr);
             }
           }
