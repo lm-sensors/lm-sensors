@@ -735,8 +735,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
 #  name: The full chip name
 #  driver: The driver name (without .o extension). Put in exactly
 #      "to-be-written" if it is not yet available. Put in exactly
-#      "not-a-sensor" if it is not a hardware monitoring chip and
-#      there is no known driver for it.
+#      "not-a-sensor" if it is not a hardware monitoring chip.
 #      Put in exactly "use-isa-instead" if no i2c driver will be written.
 #  i2c_addrs (optional): For I2C chips, the range of valid I2C addresses to
 #      probe. Recommend avoiding 0x69 because of clock chips.
@@ -3112,8 +3111,13 @@ sub scan_adapter
       if (exists $chip->{i2c_addrs} and contains $addr, @{$chip->{i2c_addrs}}) {
         printf("\%-60s", sprintf("Probing for `\%s'... ", $chip->{name}));
         if (($conf,@chips) = &{$chip->{i2c_detect}} (\*FILE ,$addr)) {
-          print "Success!\n",
-                "    (confidence $conf, driver `$chip->{driver}')";
+          if ($chip->{driver} eq "not-a-sensor") {
+            print "Yes\n",
+                  "    (confidence $conf, not a hardware monitoring chip";
+          } else {
+            print "Success!\n",
+                  "    (confidence $conf, driver `$chip->{driver}'";
+          }
           if (@chips) {
             print ", other addresses:";
             @chips = sort @chips;
@@ -3121,7 +3125,11 @@ sub scan_adapter
               printf(" 0x%02x",$other_addr);
             }
           }
-          printf "\n";
+          printf ")\n";
+
+          next if ($chip->{driver} eq "not-a-sensor"
+                || $chip->{driver} eq "use-isa-instead");
+
           $new_hash = { conf => $conf,
                         i2c_addr => $addr,
                         chipname => $chip->{name},
@@ -5438,8 +5446,6 @@ sub generate_modprobes
   $modprobes .= "# Chip drivers\n";
   foreach $chip (@chips_detected) {
     next if not @{$chip->{detected}};
-    next if $chip->{driver} eq "not-a-sensor";    
-    next if $chip->{driver} eq "use-isa-instead";
     if ($chip->{driver} eq "to-be-written") {
       $modprobes .= "# no driver for $chip->{detected}[0]{chipname} yet\n";
     } else {
@@ -5671,8 +5677,6 @@ sub main
 
   my ($chip,$data);
   foreach $chip (@chips_detected) {
-    next if $chip->{driver} eq "not-a-sensor";
-    next if $chip->{driver} eq "use-isa-instead";
     print "\nDriver `$chip->{driver}' ";
     if (@{$chip->{detected}}) {
       if (@{$chip->{misdetected}}) {
