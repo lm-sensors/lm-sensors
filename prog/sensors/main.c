@@ -441,6 +441,11 @@ void do_a_print(sensors_chip_name name)
   if(m->prefix==NULL && hide_unknown)
     return;
 
+  /* Explicitly reject eeprom and ddcmon, we no longer support them
+     but libsensors may */
+  if (!strcmp(name.prefix, "eeprom") || !strcmp(name.prefix, "ddcmon"))
+    return;
+
   printf("%s\n",sprintf_chip_name(name));
   if (!hide_adapter) {
     const char *adap = sensors_get_adapter_name(name.bus);
