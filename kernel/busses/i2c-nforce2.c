@@ -322,7 +322,7 @@ static struct pci_device_id nforce2_ids[] = {
 
 
 static int __devinit nforce2_probe_smb(struct pci_dev *dev, int bar,
-	int alt_reg, struct nforce2_smbus *smbus, char *name)
+	int alt_reg, struct nforce2_smbus *smbus, const char *name)
 {
 	int error;
 
