@@ -313,7 +313,7 @@ static void bmcsensors_select_thresholds(struct sdrdata * sd)
 /* After we have received all the SDR entries and picked out the ones
    we are interested in, build a table of the /proc entries and register with i2c.
 */
-static void bmcsensors_build_proc_table()
+static void bmcsensors_build_proc_table(void)
 {
 	int i;
 	int temps = 0, volts = 0, currs = 0, fans = 0;
