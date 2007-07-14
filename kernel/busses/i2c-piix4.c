@@ -113,9 +113,10 @@ static struct pci_driver piix4_driver;
  * Get DMI information.
  */
 
+extern int is_unsafe_smbus;
+
 static int __devinit ibm_dmi_probe(void)
 {
-	extern int is_unsafe_smbus;
 	return is_unsafe_smbus;
 }
 #endif
