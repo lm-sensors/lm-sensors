@@ -86,11 +86,6 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		sensors_chip_feature feature;
 		name = attr->name;
 		
-		if (!strcmp(name, "name")) {
-			/* Already done */
-			continue;
-		} 
-		
 		memset(&feature, 0, sizeof(sensors_chip_feature));
 		/* check for _input extension and remove */
 		i = strlen(name);
