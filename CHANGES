@@ -1,7 +1,7 @@
 lm_sensors CHANGES file
 -----------------------
 
-SVN HEAD
+2.10.4 (20070716)
   File doc/vid: Update the sysfs paths, update the chip lists
   File i2c-dev.h: Support I2C block reads with specified length
   File sensors.conf.eg: Add a dme1737 section

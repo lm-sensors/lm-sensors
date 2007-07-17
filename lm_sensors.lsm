@@ -1,17 +1,17 @@
 Begin3
 Title: lm_sensors
-Version: 2.10.3
+Version: 2.10.4
 Entered-date: 29DEC98
 Description: Hardware health monitoring package for Linux. It consists of 
              kernel modules to access sensor chips and SMBus hardware,
              of a library to allow applications to read this data more
              easily, and of an example program to pretty print this data.
              LM78, LM79, LM80, W83781D and GL518SM sensor chips are 
-             supported, among others. PIIX4 and VIA chipset SMBus
+             supported, among many others. PIIX4 and VIA chipset SMBus
              implementations are supported, as well as many I2C busses.
              Version 2 is a complete non-compatible modular rewrite of this 
              package, with full I2C and SMBus support.
-Keywords: kernel module SMBus sensors LM78 health
+Keywords: kernel module SMBus sensors LM78 health I2C voltage fan-speed
 Author: frodol@dds.nl (Frodo Looijaard)
         phil@netroedge.com (Philip Edelbrock)
 	and other great contributors
