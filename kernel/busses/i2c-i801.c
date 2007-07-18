@@ -22,10 +22,10 @@
 
 /*
     SUPPORTED DEVICES	PCI ID
-    82801AA		2413           
-    82801AB		2423           
-    82801BA		2443           
-    82801CA/CAM		2483           
+    82801AA		2413
+    82801AB		2423
+    82801BA		2443
+    82801CA/CAM		2483
     82801DB		24C3   (HW PEC supported, 32 byte buffer not supported)
     82801EB		24D3   (HW PEC supported, 32 byte buffer not supported)
     6300ESB		25A4   ("")
@@ -157,10 +157,6 @@ MODULE_PARM_DESC(force_addr,
 		 "Forcibly enable the I801 at the given address. "
 		 "EXTREMELY DANGEROUS!");
 
-static int i801_transaction(void);
-static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
-				  int command, int hwpec);
-
 static unsigned short i801_smba;
 static struct pci_driver i801_driver;
 static struct pci_dev *I801_dev;
@@ -175,7 +171,7 @@ static int __devinit i801_setup(struct pci_dev *dev)
 	if (dev->device == PCI_DEVICE_ID_INTEL_82801DB_3 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_82801EB_3 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_ESB_4 ||
-	    dev->device == PCI_DEVICE_ID_INTEL_ESB2_17 ||	
+	    dev->device == PCI_DEVICE_ID_INTEL_ESB2_17 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_ICH6_16 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_ICH7_17 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_ICH8_5 ||
@@ -335,23 +331,19 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		len = data->block[0];
 		if (len < 1)
 			len = 1;
-		if (len > 32)
-			len = 32;
+		if (len > I2C_SMBUS_BLOCK_MAX)
+			len = I2C_SMBUS_BLOCK_MAX;
 		outb_p(len, SMBHSTDAT0);
 		outb_p(data->block[1], SMBBLKDAT);
 	} else {
 		len = 32;	/* max for reads */
 	}
 
-	if(isich4 && command != I2C_SMBUS_I2C_BLOCK_DATA) {
-		/* set 32 byte buffer */
-	}
-
 	for (i = 1; i <= len; i++) {
 		if (i == len && read_write == I2C_SMBUS_READ)
 			smbcmd = I801_BLOCK_LAST;
 		else if (command == I2C_SMBUS_I2C_BLOCK_DATA &&
-		         read_write == I2C_SMBUS_READ)
+			 read_write == I2C_SMBUS_READ)
 			smbcmd = I801_I2C_BLOCK_DATA;
 		else
 			smbcmd = I801_BLOCK_DATA;
@@ -365,13 +357,13 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		/* Make sure the SMBus host is ready to start transmitting */
 		temp = inb_p(SMBHSTSTS);
 		if (i == 1) {
-			/* Erronenous conditions before transaction: 
+			/* Erroneous conditions before transaction:
 			 * Byte_Done, Failed, Bus_Err, Dev_Err, Intr, Host_Busy */
-			errmask=0x9f; 
+			errmask = 0x9f;
 		} else {
-			/* Erronenous conditions during transaction: 
+			/* Erroneous conditions during transaction:
 			 * Failed, Bus_Err, Dev_Err, Intr */
-			errmask=0x1e; 
+			errmask = 0x1e;
 		}
 		if (temp & errmask) {
 			dev_dbg(I801_dev, "SMBus busy (%02x). "
@@ -381,7 +373,7 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 				dev_err(I801_dev,
 					"Reset failed! (%02x)\n", temp);
 				result = -1;
-                                goto END;
+				goto END;
 			}
 			if (i != 1) {
 				/* if die in middle of block transaction, fail */
@@ -399,8 +391,8 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 			i2c_delay(1);
 			temp = inb_p(SMBHSTSTS);
 		}
-		    while ((!(temp & 0x80))
-			   && (timeout++ < MAX_TIMEOUT));
+		while ((!(temp & 0x80))
+		       && (timeout++ < MAX_TIMEOUT));
 
 		/* If the SMBus is still busy, we give up */
 		if (timeout >= MAX_TIMEOUT) {
@@ -425,8 +417,8 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 				len = inb_p(SMBHSTDAT0);
 				if (len < 1)
 					len = 1;
-				if (len > 32)
-					len = 32;
+				if (len > I2C_SMBUS_BLOCK_MAX)
+					len = I2C_SMBUS_BLOCK_MAX;
 				data->block[0] = len;
 			} else {
 				/* if slave returns < 32 bytes transaction will fail */
@@ -468,7 +460,7 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		if (timeout >= MAX_TIMEOUT) {
 			dev_dbg(I801_dev, "PEC Timeout!\n");
 		}
-		outb_p(temp, SMBHSTSTS); 
+		outb_p(temp, SMBHSTSTS);
 	}
 	result = 0;
 END:
@@ -596,7 +588,7 @@ static u32 i801_func(struct i2c_adapter *adapter)
 #endif
 #if 0
 	     | (isich5 ? I2C_FUNC_SMBUS_READ_I2C_BLOCK
-	               : 0)
+		       : 0)
 #endif
 	    ;
 }
