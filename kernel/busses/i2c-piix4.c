@@ -23,7 +23,7 @@
    Supports:
 	Intel PIIX4, 440MX
 	Serverworks OSB4, CSB5, CSB6, HT-1000
-	ATI IXP200, IXP300, IXP400, SB600
+	ATI IXP200, IXP300, IXP400, SB600, SB700
 	SMSC Victory66
 
    Note: we assume there can only be one device, with one SMBus interface.
@@ -440,6 +440,7 @@ static struct i2c_adapter piix4_adapter = {
 #define PCI_DEVICE_ID_ATI_IXP300_SMBUS	0x4363
 #define PCI_DEVICE_ID_ATI_IXP400_SMBUS	0x4372
 #define PCI_DEVICE_ID_ATI_IXP600_SMBUS	0x4385
+#define PCI_DEVICE_ID_ATI_IXP700_SMBUS	0x4395
 
 #ifndef PCI_DEVICE_ID_SERVERWORKS_CSB6
 #define PCI_DEVICE_ID_SERVERWORKS_CSB6 0x0203
@@ -479,6 +480,13 @@ static struct pci_device_id piix4_ids[] __devinitdata = {
 	{
 		.vendor =	PCI_VENDOR_ID_ATI,
 		.device =	PCI_DEVICE_ID_ATI_IXP600_SMBUS,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+		.driver_data =	0,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_ATI,
+		.device =	PCI_DEVICE_ID_ATI_IXP700_SMBUS,
 		.subvendor =	PCI_ANY_ID,
 		.subdevice =	PCI_ANY_ID,
 		.driver_data =	0,
