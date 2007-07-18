@@ -6046,7 +6046,7 @@ static void print_dme1737_temp(const sensors_chip_name *name, int i)
     if (valid) {
       print_label(label, 10);
       print_temp_info(cur, max, min, MINMAX, 0, 0);
-      printf("%s  %s\n", fault ? "FAULT" : "", alarm ? "ALARM" : "");
+      printf("%s%s\n", fault ? "FAULT  " : "", alarm ? "ALARM" : "");
     }
   } else {
     printf("ERROR: Can't get temp%d data!\n", i);
