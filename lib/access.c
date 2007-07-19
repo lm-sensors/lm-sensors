@@ -522,8 +522,6 @@ struct feature_subtype_match
 struct feature_type_match
 {
 	const char *name;
-	sensors_feature_type type;
-	
 	const struct feature_subtype_match *submatches;
 };
 
@@ -568,10 +566,10 @@ static const struct feature_subtype_match cpu_matches[] = {
 };
 
 static struct feature_type_match matches[] = { 
-	{ "temp%d%c", SENSORS_FEATURE_UNKNOWN, temp_matches },
-	{ "in%d%c", SENSORS_FEATURE_UNKNOWN, in_matches },
-	{ "fan%d%c", SENSORS_FEATURE_UNKNOWN, fan_matches },
-	{ "cpu%d%c", SENSORS_FEATURE_UNKNOWN, cpu_matches },
+	{ "temp%d%c", temp_matches },
+	{ "in%d%c", in_matches },
+	{ "fan%d%c", fan_matches },
+	{ "cpu%d%c", cpu_matches },
 };
 
 /* Return the feature type and channel number based on the feature name */
@@ -585,18 +583,13 @@ sensors_feature_type sensors_feature_get_type(const char *name, int *nr)
 		if ((count = sscanf(name, matches[i].name, nr, &c)))
 			break;
 	
-	if (i == ARRAY_SIZE(matches)) /* no match */
-		return SENSORS_FEATURE_UNKNOWN;
-	else if (count == 1) /* single type */
-		return matches[i].type;
-
-	/* assert: count == 2 */
-	if (c != '_')
-		return SENSORS_FEATURE_UNKNOWN;
+	if (i == ARRAY_SIZE(matches) || count != 2 || c != '_')
+		return SENSORS_FEATURE_UNKNOWN;  /* no match */
 
 	submatches = matches[i].submatches;
+	name = strchr(name + 3, '_') + 1;
 	for (i = 0; submatches[i].name != NULL; i++)
-		if (!strcmp(strchr(name, '_') + 1, submatches[i].name))
+		if (!strcmp(name, submatches[i].name))
 			return submatches[i].type;
 	
 	return SENSORS_FEATURE_UNKNOWN;
