@@ -125,27 +125,6 @@ extern const sensors_chip_name *sensors_get_detected_chips(int *nr);
    mapping is available */
 #define SENSORS_NO_MAPPING -1
 
-/* This structure is used when you want to get all features of a specific
-   chip. */
-typedef struct sensors_feature_data {
-  int number;
-  char *name;
-  int mapping;
-  int compute_mapping;
-  int mode;
-} sensors_feature_data;
-
-/* This returns all features of a specific chip. They are returned in 
-   bunches: everything with the same mapping is returned just after each
-   other, with the master feature in front (that feature does not map to
-   itself, but has SENSORS_NO_MAPPING as mapping field). nr1 and nr2 are
-   two internally used variables. Set both to zero to start again at the
-   begin of the list. If no more features are found NULL is returned.
-   Do not try to change the returned structure; you will corrupt internal
-   data structures. */
-extern const sensors_feature_data *sensors_get_all_features 
-             (sensors_chip_name name, int *nr1,int *nr2);
-
 /* This enum contains some "magic" used by sensors_read_dynamic_chip() from
    lib/sysfs.c. All the sensor types (in, fan, temp, vid) are a multiple of
    0x100 apart, and sensor features which should not have a compute_mapping to
@@ -186,8 +165,27 @@ typedef enum sensors_feature_type {
   SENSORS_FEATURE_MAX_SUB_FEATURES = 22
 } sensors_feature_type;
 
-sensors_feature_type sensors_feature_get_type
-  	     (const sensors_feature_data *feature);
+/* This structure is used when you want to get all features of a specific
+   chip. */
+typedef struct sensors_feature_data {
+  int number;
+  char *name;
+  sensors_feature_type type;
+  int mapping;
+  int compute_mapping;
+  int mode;
+} sensors_feature_data;
+
+/* This returns all features of a specific chip. They are returned in
+   bunches: everything with the same mapping is returned just after each
+   other, with the master feature in front (that feature does not map to
+   itself, but has SENSORS_NO_MAPPING as mapping field). nr1 and nr2 are
+   two internally used variables. Set both to zero to start again at the
+   begin of the list. If no more features are found NULL is returned.
+   Do not try to change the returned structure; you will corrupt internal
+   data structures. */
+extern const sensors_feature_data *sensors_get_all_features
+             (sensors_chip_name name, int *nr1,int *nr2);
 
 #ifdef __cplusplus
 }

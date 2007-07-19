@@ -148,6 +148,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		
 		/* fill in the other feature members */
 		feature.data.number = i + 1;
+		feature.data.type = type;
 			
 		if ((type & 0x00FF) == 0) {
 			/* main feature */

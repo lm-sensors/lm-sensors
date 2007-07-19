@@ -46,13 +46,9 @@ static void sensors_get_available_features(const sensors_chip_name *name,
   while((iter = sensors_get_all_features(*name, &i, &j)) && 
       iter->mapping != SENSORS_NO_MAPPING &&
       iter->mapping == feature->number) {
-    sensors_feature_type type = sensors_feature_get_type(iter);
     int indx;
     
-    if (type == SENSORS_FEATURE_UNKNOWN)
-      continue;
-    
-    indx = type - first_val - 1;
+    indx = iter->type - first_val - 1;
     if (indx < 0 || indx >= size) {
       printf("ERROR: Bug in sensors: index out of bound");
       return;
@@ -345,7 +341,7 @@ void print_generic_chip(const sensors_chip_name *name)
     if (feature->mapping != SENSORS_NO_MAPPING)
       continue;
     
-    switch(sensors_feature_get_type(feature)) {
+    switch (feature->type) {
       case SENSORS_FEATURE_TEMP:
         print_generic_chip_temp(name, feature, i, j, label_size); break;
       case SENSORS_FEATURE_IN:
