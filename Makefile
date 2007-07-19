@@ -29,8 +29,8 @@
 
 # Uncomment the second line if you are a developer. This will enable many
 # additional warnings at compile-time
-WARN := 0
-#WARN := 1
+#WARN := 0
+WARN := 1
 
 # Uncomment the second line if you want to get (loads of) debug information
 # at run-time.
@@ -154,7 +154,7 @@ ARCFLAGS := $(ALL_CFLAGS)
 LIBCPPFLAGS := $(ALL_CPPFLAGS)
 LIBCFLAGS := -fpic -D_REENTRANT $(ALL_CFLAGS)
 
-.PHONY: all user clean install user_install uninstall user_uninstall package
+.PHONY: all user clean install user_install uninstall user_uninstall
 
 # Make all the default rule
 all::
@@ -166,11 +166,7 @@ ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),uninstall)
 ifneq ($(MAKECMDGOALS),user_uninstall)
 ifneq ($(MAKECMDGOALS),help)
-ifneq ($(MAKECMDGOALS),package)
-ifneq ($(MAKECMDGOALS),userpackage)
 include $(INCLUDEFILES)
-endif
-endif
 endif
 endif
 endif
@@ -199,29 +195,12 @@ user_uninstall::
 
 uninstall :: user_uninstall
 
-# This is tricky, but it works like a charm. It needs lots of utilities
-# though: cut, find, gzip, ln, tail and tar.
-package: version.h clean
-	lmversion=`tail -1 version.h|cut -f 2 -d \"`; \
-	lmpackage=lm_sensors-$$lmversion; \
-	ln -s . $$lmpackage;  \
-	find $$lmpackage/ -type f | grep -v ^$$lmpackage/$$lmpackage$$ | \
-	                            grep -v ^$$lmpackage/$$lmpackage.tar$$ | \
-	                            grep -v ^$$lmpackage/$$ | \
-	                            grep -v /CVS | \
-	                            grep -v /\\.# | \
-	                            tar rvf $$lmpackage.tar -T -; \
-        gzip -9 $$lmpackage.tar ;\
-        $(RM) $$lmpackage.tar $$lmpackage
-	cat doc/developers/checklist
-
 help:
 	@echo 'Make targets are:'
 	@echo '  all (default): build library and userspace programs'
 	@echo '  install: install library and userspace programs'
 	@echo '  uninstall: uninstall library and userspace programs'
 	@echo '  clean: cleanup'
-	@echo '  package: create a distribution package'
 
 # Generate html man pages to be copied to the lm_sensors website.
 # This uses the man2html from here
