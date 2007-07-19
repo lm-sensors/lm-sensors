@@ -29,6 +29,6 @@
 extern const sensors_chip_feature *sensors_lookup_feature_nr(const sensors_chip_name *chip,
                                                              int feature);
 
-sensors_feature_type sensors_feature_get_type(const sensors_feature_data *feature);
+sensors_feature_type sensors_feature_get_type(const char *name, int *nr);
 
 #endif /* def LIB_SENSORS_ACCESS_H */

@@ -85,7 +85,12 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	dlist_for_each_data(attrs, attr, struct sysfs_attribute) {
 		sensors_chip_feature feature;
 		name = attr->name;
+		int nr;
 		
+		type = sensors_feature_get_type(name, &nr);
+		if (type == SENSORS_FEATURE_UNKNOWN)
+			continue;
+
 		memset(&feature, 0, sizeof(sensors_chip_feature));
 		/* check for _input extension and remove */
 		i = strlen(name);
@@ -94,31 +99,16 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		else
 			feature.data.name = strdup(name);
 
-		type = sensors_feature_get_type(&feature.data);
-		if (type == SENSORS_FEATURE_UNKNOWN) {
-			free(feature.data.name);
-			continue;
-		}
-			
-		/* Get N as in this is the N-th in / fan / temp / vid */
+		/* Adjust the channel number */
 		switch (type & 0xFF00) {
-			case SENSORS_FEATURE_IN:
-				i = strtol(name + 2, NULL, 10);
-				break;
 			case SENSORS_FEATURE_FAN:
-				i = strtol(name + 3, NULL, 10);
-				if (i) i--;
-				break;
 			case SENSORS_FEATURE_TEMP:
-				i = strtol(name + 4, NULL, 10);
-				if (i) i--;
-				break;
-			case SENSORS_FEATURE_VID:
-				i = strtol(name + 3, NULL, 10);
+				if (nr)
+					nr--;
 				break;
 		}
 		
-		if (i >= MAX_SENSORS_PER_TYPE) {
+		if (nr >= MAX_SENSORS_PER_TYPE) {
 			fprintf(stderr, "libsensors error, more sensors of one"
 				" type then MAX_SENSORS_PER_TYPE, ignoring "
 				"feature: %s\n", name);
@@ -129,12 +119,12 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		/* "calculate" a place to store the feature in our sparse,
 		   sorted table */
 		if (type == SENSORS_FEATURE_VID) {
-			i += MAX_SENSORS_PER_TYPE *
+			i = nr + MAX_SENSORS_PER_TYPE *
 			     SENSORS_FEATURE_MAX_SUB_FEATURES * 3;
 		} else {
 			i = (type >> 8) * MAX_SENSORS_PER_TYPE *
 				SENSORS_FEATURE_MAX_SUB_FEATURES +
-				i * SENSORS_FEATURE_MAX_SUB_FEATURES +
+				nr * SENSORS_FEATURE_MAX_SUB_FEATURES +
 				(type & 0xFF);
 		}
 		

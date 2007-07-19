@@ -528,6 +528,7 @@ struct feature_type_match
 };
 
 static const struct feature_subtype_match temp_matches[] = {
+	{ "input", SENSORS_FEATURE_TEMP },
 	{ "max", SENSORS_FEATURE_TEMP_MAX },
 	{ "max_hyst", SENSORS_FEATURE_TEMP_MAX_HYST },
 	{ "min", SENSORS_FEATURE_TEMP_MIN },
@@ -543,6 +544,7 @@ static const struct feature_subtype_match temp_matches[] = {
 };
 
 static const struct feature_subtype_match in_matches[] = {
+	{ "input", SENSORS_FEATURE_IN },
 	{ "min", SENSORS_FEATURE_IN_MIN },
 	{ "max", SENSORS_FEATURE_IN_MAX },
 	{ "alarm", SENSORS_FEATURE_IN_ALARM },
@@ -552,6 +554,7 @@ static const struct feature_subtype_match in_matches[] = {
 };
 
 static const struct feature_subtype_match fan_matches[] = {
+	{ "input", SENSORS_FEATURE_FAN },
 	{ "min", SENSORS_FEATURE_FAN_MIN },
 	{ "div", SENSORS_FEATURE_FAN_DIV },
 	{ "alarm", SENSORS_FEATURE_FAN_ALARM },
@@ -565,22 +568,21 @@ static const struct feature_subtype_match cpu_matches[] = {
 };
 
 static struct feature_type_match matches[] = { 
-	{ "temp%d%c", SENSORS_FEATURE_TEMP, temp_matches },
-	{ "in%d%c", SENSORS_FEATURE_IN, in_matches },
-	{ "fan%d%c", SENSORS_FEATURE_FAN, fan_matches },
+	{ "temp%d%c", SENSORS_FEATURE_UNKNOWN, temp_matches },
+	{ "in%d%c", SENSORS_FEATURE_UNKNOWN, in_matches },
+	{ "fan%d%c", SENSORS_FEATURE_UNKNOWN, fan_matches },
 	{ "cpu%d%c", SENSORS_FEATURE_UNKNOWN, cpu_matches },
 };
 
-/* Return the feature type based on the feature name */
-sensors_feature_type sensors_feature_get_type(
-	const sensors_feature_data *feature)
+/* Return the feature type and channel number based on the feature name */
+sensors_feature_type sensors_feature_get_type(const char *name, int *nr)
 {
 	char c;
-	int i, nr, count;
+	int i, count;
 	const struct feature_subtype_match *submatches;
 	
 	for (i = 0; i < ARRAY_SIZE(matches); i++)
-		if ((count = sscanf(feature->name, matches[i].name, &nr, &c)))
+		if ((count = sscanf(name, matches[i].name, nr, &c)))
 			break;
 	
 	if (i == ARRAY_SIZE(matches)) /* no match */
@@ -594,7 +596,7 @@ sensors_feature_type sensors_feature_get_type(
 
 	submatches = matches[i].submatches;
 	for (i = 0; submatches[i].name != NULL; i++)
-		if (!strcmp(strchr(feature->name, '_') + 1, submatches[i].name))
+		if (!strcmp(strchr(name, '_') + 1, submatches[i].name))
 			return submatches[i].type;
 	
 	return SENSORS_FEATURE_UNKNOWN;
