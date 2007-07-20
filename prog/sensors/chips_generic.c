@@ -44,7 +44,6 @@ static void sensors_get_available_features(const sensors_chip_name *name,
   const sensors_feature_data *iter;
   
   while((iter = sensors_get_all_features(*name, &i, &j)) && 
-      iter->mapping != SENSORS_NO_MAPPING &&
       iter->mapping == feature->number) {
     int indx;
     
