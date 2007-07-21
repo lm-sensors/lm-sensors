@@ -347,8 +347,6 @@ const sensors_feature_data *sensors_get_all_features(sensors_chip_name name,
 		if (sensors_match_chip(sensors_proc_chips[i].chip, name)) {
 			feature_list = sensors_proc_chips[i].feature;
 			if (!*nr1 && !*nr2) {	/* Return the first entry */
-				if (!feature_list[0].data.name)	/* The list may be empty */
-					return NULL;
 				*nr1 = *nr2 = 1;
 				return &feature_list->data;
 			}

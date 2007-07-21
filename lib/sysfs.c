@@ -166,6 +166,11 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		fnum++;
 	}
 
+	if (fnum == 1) { /* No feature */
+		chip->feature = NULL;
+		return 0;
+	}
+
 	dyn_features = calloc(fnum, sizeof(sensors_chip_feature));
 	if (dyn_features == NULL) {
 		sensors_fatal_error(__FUNCTION__,"Out of memory");
@@ -203,6 +208,7 @@ int sensors_init_sysfs(void)
 static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 {
 	int domain, bus, slot, fn;
+	int err = -SENSORS_ERR_PARSE;
 	struct sysfs_attribute *attr, *bus_attr;
 	char bus_path[SYSFS_PATH_MAX];
 	sensors_chip_features entry;
@@ -259,6 +265,10 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 	
 	if (sensors_read_dynamic_chip(&entry, dev) < 0)
 		goto exit_free;
+	if (!entry.feature) { /* No feature, discard chip */
+		err = 0;
+		goto exit_free;
+	}
 	sensors_add_proc_chips(&entry);
 
 	return 0;
@@ -266,7 +276,7 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 exit_free:
 	free(entry.chip.prefix);
 	free(entry.chip.busname);
-	return -SENSORS_ERR_PARSE;
+	return err;
 }
 
 /* returns 0 if successful, !0 otherwise */
