@@ -15,6 +15,7 @@ SVN HEAD
            Delete procfs and sysctl support (Linux 2.4)
            Delete all remnants of algorithm names
            Drop all the chip-specific support
+           Fix a memory leak on error
   Makefile: Drop the package and version targets
   Man page sensors.conf.5: Update the chip statement section
   Programs doc/*: Delete, obsolete

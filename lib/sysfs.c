@@ -235,8 +235,10 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 				sensors_sysfs_mount, entry.chip.bus);
 
 			if ((bus_attr = sysfs_open_attribute(bus_path))) {
-				if (sysfs_read_attribute(bus_attr))
-					return -SENSORS_ERR_PARSE;
+				if (sysfs_read_attribute(bus_attr)) {
+					sysfs_close_attribute(bus_attr);
+					goto exit_free;
+				}
 
 				if (bus_attr->value
 				 && !strncmp(bus_attr->value, "ISA ", 4))
@@ -253,13 +255,18 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 		entry.chip.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
 		entry.chip.bus = SENSORS_CHIP_NAME_BUS_PCI;
 	} else
-		return -SENSORS_ERR_PARSE;
+		goto exit_free;
 	
 	if (sensors_read_dynamic_chip(&entry, dev) < 0)
-		return -SENSORS_ERR_PARSE;
+		goto exit_free;
 	sensors_add_proc_chips(&entry);
 
 	return 0;
+
+exit_free:
+	free(entry.chip.prefix);
+	free(entry.chip.busname);
+	return -SENSORS_ERR_PARSE;
 }
 
 /* returns 0 if successful, !0 otherwise */
