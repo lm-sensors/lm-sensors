@@ -3,6 +3,7 @@ lm_sensors CHANGES file
 
 SVN HEAD
   Library: Fix a memory leak on error
+           Speed up sensors_get_ignored() a bit
   Module i2c-piix4: Add ATI SB700 support (2.6 backport)
 
 
