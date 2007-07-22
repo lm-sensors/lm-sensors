@@ -108,8 +108,8 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
   }
   
   if (get_feature_value(name, feature, &val)) {
+    printf("ERROR: Can't get %s data!\n", label);
     free(label);
-    printf("ERROR: Can't get temperature data!\n");
     return;
   }
   
@@ -227,6 +227,7 @@ static void print_generic_chip_in(const sensors_chip_name *name,
   
   if (get_feature_value(name, feature, &val)) {
     printf("ERROR: Can't get %s data!\n", label);
+    free(label);
     return;
   }
   
