@@ -217,11 +217,6 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 	if (!(attr = sysfs_get_device_attr(dev, "name")))
 		return 0;
 
-	/* ignore subclients */
-	if (attr->len >= 11 && !strcmp(attr->value + attr->len - 11,
-			" subclient\n"))
-		return 0;
-
 	/* NB: attr->value[attr->len-1] == '\n'; chop that off */
 	entry.chip.prefix = strndup(attr->value, attr->len - 1);
 	if (!entry.chip.prefix)
