@@ -16,6 +16,7 @@ SVN HEAD
            Delete all remnants of algorithm names
            Drop all the chip-specific support
            Fix a memory leak on error
+           Speed up sensors_get_ignored() a bit
   Makefile: Drop the package and version targets
   Man page sensors.conf.5: Update the chip statement section
   Programs doc/*: Delete, obsolete
