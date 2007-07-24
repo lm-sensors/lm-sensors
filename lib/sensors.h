@@ -179,13 +179,13 @@ typedef struct sensors_feature_data {
 /* This returns all features of a specific chip. They are returned in
    bunches: everything with the same mapping is returned just after each
    other, with the master feature in front (that feature does not map to
-   itself, but has SENSORS_NO_MAPPING as mapping field). nr1 and nr2 are
-   two internally used variables. Set both to zero to start again at the
+   itself, but has SENSORS_NO_MAPPING as mapping field). nr is
+   an internally used variable. Set it to zero to start again at the
    begin of the list. If no more features are found NULL is returned.
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
 extern const sensors_feature_data *sensors_get_all_features
-             (sensors_chip_name name, int *nr1,int *nr2);
+             (sensors_chip_name name, int *nr);
 
 #ifdef __cplusplus
 }

@@ -49,7 +49,7 @@ libsensors \- publicly accessible functions provided by the sensors library
 .B extern int sensors_do_all_sets(void);
 .B const sensors_chip_name *sensors_get_detected_chips(int *nr);
 .B const sensors_feature_data *sensors_get_all_features 
-             \fB(sensors_chip_name name, int *nr1,int *nr2);\fP
+             \fB(sensors_chip_name name, int *nr);\fP
 .B const char *libsensors_version;
 .fi
 .SH DESCRIPTION
@@ -133,9 +133,15 @@ The mode field can be one of:
 SENSORS_MODE_NO_RW, SENSORS_MODE_R, SENSORS_MODE_W or SENSORS_MODE_RW.
 
 \fBconst sensors_feature_data *sensors_get_all_features
-      (sensors_chip_name name, int *nr1,int *nr2);\fP
+      (sensors_chip_name name, int *nr);\fP
 .br
-This returns all features of a specific chip. They are returned in bunches: everything with the same mapping is returned just after each other, with the master feature in front (that feature does not map to itself, but has SENSORS_NO_MAPPING as mapping field). nr1 and nr2 are two internally used variables. Set both to zero to start again at the begin of the list. If no more features are found NULL is returned. Do not try to change the returned structure; you will corrupt internal data structures.
+This returns all features of a specific chip. They are returned in bunches:
+everything with the same mapping is returned just after each other, with
+the master feature in front (that feature does not map to itself, but
+has SENSORS_NO_MAPPING as mapping field). nr is an internally used variable.
+Set it to zero to start again at the begin of the list. If no more features
+are found NULL is returned. Do not try to change the returned structure; you
+will corrupt internal data structures.
 
 \fBconst char *libsensors_version;\fP
 .br

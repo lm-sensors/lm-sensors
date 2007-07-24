@@ -118,13 +118,13 @@ void print_vid_info(const sensors_chip_name *name, int f_vid, int label_size)
 
 void print_unknown_chip(const sensors_chip_name *name)
 {
-  int a,b,valid;
+  int a, valid;
   const sensors_feature_data *data;
   char *label;
   double val;
  
-  a=b=0;
-  while((data=sensors_get_all_features(*name,&a,&b))) {
+  a = 0;
+  while((data=sensors_get_all_features(*name, &a))) {
     if (sensors_get_label_and_valid(*name,data->number,&label,&valid)) {
       printf("ERROR: Can't get feature `%s' data!\n",data->name);
       continue;

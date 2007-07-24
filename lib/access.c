@@ -333,9 +333,9 @@ const char *sensors_get_adapter_name(int bus_nr)
 	return NULL;
 }
 
-/* nr1-1 is the last main feature found; nr2-1 is the last subfeature found */
+/* nr-1 is the last feature returned */
 const sensors_feature_data *sensors_get_all_features(sensors_chip_name name,
-						     int *nr1, int *nr2)
+						     int *nr)
 {
 	sensors_chip_feature *feature_list;
 	int i;
@@ -343,22 +343,9 @@ const sensors_feature_data *sensors_get_all_features(sensors_chip_name name,
 	for (i = 0; i < sensors_proc_chips_count; i++)
 		if (sensors_match_chip(sensors_proc_chips[i].chip, name)) {
 			feature_list = sensors_proc_chips[i].feature;
-			if (!*nr1 && !*nr2) {	/* Return the first entry */
-				*nr1 = *nr2 = 1;
-				return &feature_list->data;
-			}
-			for ((*nr2)++; feature_list[*nr2 - 1].data.name; (*nr2)++)
-				if (feature_list[*nr2 - 1].data.mapping ==
-				    feature_list[*nr1 - 1].data.number)
-					return &((feature_list + *nr2 - 1)->data);
-			for ((*nr1)++;
-			     feature_list[*nr1 - 1].data.name
-			     && (feature_list[*nr1 - 1].data.mapping !=
-				 SENSORS_NO_MAPPING); (*nr1)++) ;
-			*nr2 = *nr1;
-			if (!feature_list[*nr1 - 1].data.name)
+			if (!feature_list[*nr].data.name)
 				return NULL;
-			return &((feature_list + *nr1 - 1)->data);
+			return &feature_list[(*nr)++].data;
 		}
 	return NULL;
 }
