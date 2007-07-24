@@ -38,6 +38,4 @@ void print_vid_info(const sensors_chip_name *name, int f_vid, int label_size);
 
 void print_label(const char *label, int space);
 
-int sensors_get_label_and_valid(sensors_chip_name name, int feature, char **label,
-                        int *valid);
 #endif /* def PROG_SENSORS_CHIPS_H */
