@@ -91,12 +91,7 @@ int sensors_get_label_and_valid(sensors_chip_name name, int feature, char **labe
 {
   int err;
   err = sensors_get_label(name,feature,label);
-  if (!err)
-    err = sensors_get_ignored(name,feature);
-  if (err >= 0) {
-    *valid = err;
-    err = 0;
-  }
+  *valid = !err;
   return err;
 }
 

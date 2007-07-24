@@ -83,11 +83,6 @@ extern const char *sensors_get_adapter_name(int bus_nr);
 extern int sensors_get_label(sensors_chip_name name, int feature, 
                              char **result);
 
-/* Looks up whether a feature should be ignored. Returns <0 on failure,
-   0 if it should be ignored, 1 if it is valid. This function takes
-   logical mappings into account. */
-extern int sensors_get_ignored(sensors_chip_name name, int fature);
-
 /* Read the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure.  */

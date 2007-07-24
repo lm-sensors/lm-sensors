@@ -193,7 +193,10 @@ sensors_get_label_exit:
 	return 0;
 }
 
-int sensors_get_ignored(sensors_chip_name name, int feature)
+/* Looks up whether a feature should be ignored. Returns <0 on failure,
+   0 if it should be ignored, 1 if it is valid. This function takes
+   logical mappings into account. */
+static int sensors_get_ignored(sensors_chip_name name, int feature)
 {
 	const sensors_chip *chip;
 	const sensors_chip_feature *featureptr;
@@ -343,6 +346,9 @@ const sensors_feature_data *sensors_get_all_features(sensors_chip_name name,
 	for (i = 0; i < sensors_proc_chips_count; i++)
 		if (sensors_match_chip(sensors_proc_chips[i].chip, name)) {
 			feature_list = sensors_proc_chips[i].feature;
+			while (feature_list[*nr].data.name
+			    && sensors_get_ignored(name, feature_list[*nr].data.number) != 1)
+				(*nr)++;
 			if (!feature_list[*nr].data.name)
 				return NULL;
 			return &feature_list[(*nr)++].data;
