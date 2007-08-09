@@ -94,10 +94,6 @@ extern int sensors_set_feature(sensors_chip_name name, int feature,
    wildcards!  This function will return 0 on success, and <0 on failure. */
 extern int sensors_do_chip_sets(sensors_chip_name name);
 
-/* Execute all set statements for all detected chips. This is the same as
-   calling sensors_do_chip_sets with an all wildcards chip name */
-extern int sensors_do_all_sets(void);
-
 /* This function returns all detected chips, one by one. To start at the
    beginning of the list, use 0 for nr; NULL is returned if we are
    at the end of the list. Do not try to change these chip names, as 

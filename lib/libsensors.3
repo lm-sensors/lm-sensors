@@ -45,7 +45,6 @@ libsensors \- publicly accessible functions provided by the sensors library
 .B int sensors_set_feature(sensors_chip_name name, int feature,
                         \fBdouble value);\fP
 .B int sensors_do_chip_sets(sensors_chip_name name);
-.B extern int sensors_do_all_sets(void);
 .B const sensors_chip_name *sensors_get_detected_chips(int *nr);
 .B const sensors_feature_data *sensors_get_all_features 
              \fB(sensors_chip_name name, int *nr);\fP
@@ -94,10 +93,6 @@ Set the value of a feature of a certain chip. Note that chip should not contain 
 .B int sensors_do_chip_sets(sensors_chip_name name);
 .br
 Execute all set statements for this particular chip. The chip may contain wildcards!  This function will return 0 on success, and <0 on failure.
-
-.B int sensors_do_all_sets(void);
-.br
-Execute all set statements for all detected chips. This is the same as calling sensors_do_chip_sets with an all wildcards chip name
 
 \fBconst sensors_chip_name *sensors_get_detected_chips
                         (int *nr);\fP

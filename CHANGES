@@ -18,6 +18,7 @@ SVN HEAD
            Fix a memory leak on error
            Speed up sensors_get_ignored() a bit
            No longer export sensors_chip_name_has_wildcards()
+           Delete sensors_do_all_sets(), unused
   Makefile: Drop the package and version targets
   Man page sensors.conf.5: Update the chip statement section
   Programs doc/*: Delete, obsolete

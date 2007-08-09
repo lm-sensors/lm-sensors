@@ -483,18 +483,6 @@ int sensors_do_chip_sets(sensors_chip_name name)
 	return res;
 }
 
-/* Execute all set statements for all detected chips. This is the same as
-   calling sensors_do_chip_sets with an all wildcards chip name */
-int sensors_do_all_sets(void)
-{
-	static const sensors_chip_name name = {
-		.prefix	= SENSORS_CHIP_NAME_PREFIX_ANY,
-		.bus	= SENSORS_CHIP_NAME_BUS_ANY,
-		.addr	= SENSORS_CHIP_NAME_ADDR_ANY,
-	};
-	return sensors_do_chip_sets(name);
-}
-
 /* Static mappings for use by sensors_feature_get_type() */
 struct feature_subtype_match
 {
