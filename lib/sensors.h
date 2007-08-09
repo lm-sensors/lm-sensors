@@ -66,11 +66,6 @@ extern int sensors_parse_chip_name(const char *orig_name,
 extern int sensors_match_chip(sensors_chip_name chip1, 
                               sensors_chip_name chip2);
 
-/* Check whether the chip name is an 'absolute' name, which can only match
-   one chip, or whether it has wildcards. Returns 0 if it is absolute, 1
-   if there are wildcards. */
-extern int sensors_chip_name_has_wildcards(sensors_chip_name chip);
-
 /* This function returns the adapter name of a bus number,
    as used within the sensors_chip_name structure. If it could not be found, 
    it returns NULL */

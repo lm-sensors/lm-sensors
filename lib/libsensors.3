@@ -37,7 +37,6 @@ libsensors \- publicly accessible functions provided by the sensors library
                             \fBsensors_chip_name *res);\fP
 .B int sensors_match_chip(sensors_chip_name chip1, 
                        \fBsensors_chip_name chip2);\fP
-.B int sensors_chip_name_has_wildcards(sensors_chip_name chip);
 .B const char *sensors_get_adapter_name(int bus_nr);
 .B int sensors_get_label(sensors_chip_name name, int feature, 
                       \fBchar **result);\fP
@@ -71,11 +70,6 @@ Parse a chip name to the internal representation. Return 0 on succes, <0 on erro
                        sensors_chip_name chip2);\fP
 .br
 Compare two chips name descriptions, to see whether they could match. Return 0 if it does not match, return 1 if it does match.
-
-\fBint sensors_chip_name_has_wildcards
-    (sensors_chip_name chip);\fP
-.br
-Check whether the chip name is an 'absolute' name, which can only match one chip, or whether it has wildcards. Returns 0 if it is absolute, 1 if there are wildcards.
 
 .B const char *sensors_get_adapter_name(int bus_nr);
 .br

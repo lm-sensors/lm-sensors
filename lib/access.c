@@ -132,7 +132,7 @@ sensors_lookup_feature_name(const sensors_chip_name *chip, const char *feature)
 /* Check whether the chip name is an 'absolute' name, which can only match
    one chip, or whether it has wildcards. Returns 0 if it is absolute, 1
    if there are wildcards. */
-int sensors_chip_name_has_wildcards(sensors_chip_name chip)
+static int sensors_chip_name_has_wildcards(sensors_chip_name chip)
 {
 	if ((chip.prefix == SENSORS_CHIP_NAME_PREFIX_ANY) ||
 	    (chip.bus == SENSORS_CHIP_NAME_BUS_ANY) ||
