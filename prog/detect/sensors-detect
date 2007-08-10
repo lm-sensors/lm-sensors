@@ -2339,6 +2339,7 @@ sub initialize_i2c_adapters_list
       $entry = {}; # New entry
       $entry->{'name'} = sysfs_device_attribute("${class_dir}/i2c-$1", "name")
                       || sysfs_device_attribute("${class_dir}/i2c-$1/device", "name");
+      next if $entry->{'name'} eq "ISA main adapter";
       $entry->{'driver'} = find_adapter_driver($entry->{'name'});
       $i2c_adapters[$1] = $entry;
     }
