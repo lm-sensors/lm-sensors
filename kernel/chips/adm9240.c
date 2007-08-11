@@ -356,7 +356,7 @@ static int adm9240_detect(struct i2c_adapter *adapter, int address,
 		client_name = "LM81 chip";
 	} else {
 #ifdef DEBUG
-		printk("adm9240.o: Internal error: unknown kind (%d)?!?",
+		printk("adm9240.o: Internal error: unknown kind (%d)\n",
 		       kind);
 #endif
 		goto ERROR1;

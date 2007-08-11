@@ -343,7 +343,7 @@ int pca954x_detect(struct i2c_adapter *adapter, int address,
                 break;
         }
         if (i < 0) {
-		printk(KERN_ERR "%s: Internal error: unknown kind (%d)",
+		printk(KERN_ERR "%s: Internal error: unknown kind (%d)\n",
                        __FUNCTION__, kind);
 		goto ERROR1;
         }

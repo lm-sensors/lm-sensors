@@ -174,7 +174,7 @@ int ltc1710_detect(struct i2c_adapter *adapter, int address,
 		client_name = "LTC1710 chip";
 	} else {
 #ifdef DEBUG
-		printk("ltc1710.o: Internal error: unknown kind (%d)?!?",
+		printk("ltc1710.o: Internal error: unknown kind (%d)\n",
 		       kind);
 #endif
 		goto ERROR1;

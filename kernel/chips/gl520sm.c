@@ -308,7 +308,7 @@ static int gl520_detect(struct i2c_adapter *adapter, int address,
 		sprintf(client_name, "GL520SM Revision %02x chip", i);
 	} else {
 #ifdef DEBUG
-		printk("gl520sm.o: Internal error: unknown kind (%d)?!?",
+		printk("gl520sm.o: Internal error: unknown kind (%d)\n",
 		       kind);
 #endif
 		goto ERROR1;

@@ -889,7 +889,7 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
  		client_name = "W83791D chip";
 	} else {
 #ifdef DEBUG
-		printk(KERN_ERR "w83781d.o: Internal error: unknown kind (%d)?!?",
+		printk(KERN_ERR "w83781d.o: Internal error: unknown kind (%d)\n",
 		       kind);
 #endif
 		err = -ENODEV;

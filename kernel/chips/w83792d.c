@@ -690,7 +690,7 @@ static int w83792d_detect(struct i2c_adapter *adapter, int address,
  		type_name = "w83792d";
  		client_name = "W83792D chip";
 	} else {
-		printk(KERN_ERR "w83792d: Internal error: unknown kind (%d)?!?",
+		printk(KERN_ERR "w83792d: Internal error: unknown kind (%d)\n",
 		       kind);
 		LEAVE()
 		goto ERROR1;

@@ -551,7 +551,7 @@ static int it87_detect(struct i2c_adapter *adapter, int address,
 		client_name = "IT8712 chip";
 	} else {
 #ifdef DEBUG
-		printk("it87.o: Internal error: unknown kind (%d)?!?",
+		printk("it87.o: Internal error: unknown kind (%d)\n",
 		       kind);
 #endif
 		goto ERROR1;

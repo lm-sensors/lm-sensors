@@ -361,7 +361,7 @@ static int adm1024_detect(struct i2c_adapter *adapter, int address,
 		client_name = "ADM1024 chip";
 	} else {
 #ifdef DEBUG
-		printk("adm1024.o: Internal error: unknown kind (%d)?!?",
+		printk("adm1024.o: Internal error: unknown kind (%d)\n",
 		       kind);
 #endif
 		goto ERROR1;

@@ -184,7 +184,7 @@ static int lm75_detect(struct i2c_adapter *adapter, int address,
 		type_name = "lm75";
 		client_name = "LM75 chip";
 	} else {
-		pr_debug("lm75.o: Internal error: unknown kind (%d)?!?", kind);
+		pr_debug("lm75.o: Internal error: unknown kind (%d)\n", kind);
 		goto error1;
 	}
 

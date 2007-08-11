@@ -221,7 +221,7 @@ int thmc50_detect(struct i2c_adapter *adapter, int address,
 		client_name = "THMC50 chip";
 	} else {
 #ifdef DEBUG
-		printk("thmc50.o: Internal error: unknown kind (%d)?!?",
+		printk("thmc50.o: Internal error: unknown kind (%d)\n",
 		       kind);
 #endif
 		goto ERROR1;

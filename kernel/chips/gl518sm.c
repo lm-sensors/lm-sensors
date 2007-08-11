@@ -324,7 +324,7 @@ static int gl518_detect(struct i2c_adapter *adapter, int address,
 		client_name = "GL518SM Revision 0x80 chip";
 	} else {
 #ifdef DEBUG
-		printk("gl518sm.o: Internal error: unknown kind (%d)?!?",
+		printk("gl518sm.o: Internal error: unknown kind (%d)\n",
 		       kind);
 #endif
 		goto ERROR1;

@@ -868,7 +868,7 @@ static int lm85_detect(struct i2c_adapter *adapter, int address,
 		template_used = 0;
 		break;
 	default :
-		printk("lm85: Internal error, invalid kind (%d)!", kind);
+		printk("lm85: Internal error, invalid kind (%d)!\n", kind);
 		err = -EFAULT ;
 		goto ERROR1;
 	}

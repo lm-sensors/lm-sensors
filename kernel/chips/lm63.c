@@ -356,7 +356,7 @@ static void lm63_init_client(struct i2c_client *client)
 	/* Start converting if needed */
 	if (data->config & 0x40) { /* standby */
 #ifdef DEBUG
-		printk(KERN_DEBUG "lm63: Switching to operational mode");
+		printk(KERN_DEBUG "lm63: Switching to operational mode\n");
 #endif
 		data->config &= 0xA7;
 		i2c_smbus_write_byte_data(client, LM63_REG_CONFIG1,

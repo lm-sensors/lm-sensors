@@ -711,7 +711,7 @@ static int adm1026_detect(struct i2c_adapter *adapter, int address,
 		break ;
 #endif
 	default :
-		printk("adm1026: Internal error, invalid kind (%d)!", kind);
+		printk("adm1026: Internal error, invalid kind (%d)!\n", kind);
 		err = -EFAULT ;
 		goto ERROR1;
 	}

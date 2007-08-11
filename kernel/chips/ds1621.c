@@ -231,7 +231,7 @@ static int ds1621_detect(struct i2c_adapter *adapter, int address,
 		client_name = "DS1621 chip";
 	} else {
 #ifdef DEBUG
-		printk("ds1621.o: Internal error: unknown kind (%d)?!?",
+		printk("ds1621.o: Internal error: unknown kind (%d)\n",
 		       kind);
 #endif
 		goto ERROR1;

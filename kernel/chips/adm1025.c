@@ -311,7 +311,7 @@ static int adm1025_detect(struct i2c_adapter *adapter, int address,
 		client_name = "NE1619 chip";		
 	} else {
 #ifdef DEBUG
-		printk("adm1025.o: Internal error: unknown kind (%d)?!?",
+		printk("adm1025.o: Internal error: unknown kind (%d)\n",
 		       kind);
 #endif
 		goto ERROR1;

@@ -290,7 +290,7 @@ static int lm80_detect(struct i2c_adapter *adapter, int address,
 		client_name = "LM80 chip";
 	} else {
 #ifdef DEBUG
-		printk("lm80.o: Internal error: unknown kind (%d)?!?",
+		printk("lm80.o: Internal error: unknown kind (%d)\n",
 		       kind);
 #endif
 		goto ERROR1;
