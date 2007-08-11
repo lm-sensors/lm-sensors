@@ -70,11 +70,6 @@ static int eeprom_detect(struct i2c_adapter *adapter, int address,
 			 unsigned short flags, int kind);
 static int eeprom_detach_client(struct i2c_client *client);
 
-#if 0
-static int eeprom_write_value(struct i2c_client *client, u8 reg,
-			      u8 value);
-#endif
-
 static void eeprom_contents(struct i2c_client *client, int operation,
 			    int ctl_name, int *nrels_mag, long *results);
 static void eeprom_update_client(struct i2c_client *client, u8 slice);
@@ -254,15 +249,6 @@ static int eeprom_detach_client(struct i2c_client *client)
 	return 0;
 }
 
-
-#if 0
-/* No writes yet (PAE) */
-static int eeprom_write_value(struct i2c_client *client, u8 reg, u8 value)
-{
-	return i2c_smbus_write_byte_data(client, reg, value);
-}
-#endif
-
 static void eeprom_update_client(struct i2c_client *client, u8 slice)
 {
 	struct eeprom_data *data = client->data;
@@ -342,10 +328,6 @@ void eeprom_contents(struct i2c_client *client, int operation,
 		}
 #endif
 		*nrels_mag = 16;
-	} else if (operation == SENSORS_PROC_REAL_WRITE) {
-
-/* No writes to the EEPROM (yet, anyway) (PAE) */
-		printk("eeprom.o: No writes to EEPROMs supported!\n");
 	}
 }
 
