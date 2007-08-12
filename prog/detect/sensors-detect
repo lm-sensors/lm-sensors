@@ -3465,8 +3465,6 @@ sub mtp008_detect
 #   0x40: Configuration
 #   0x48: Full I2C Address
 #   0x49: Device ID
-# Note that this function is always called through a closure, so the
-# arguments are shifted by one place.
 sub lm78_detect
 {
   my $reg;
@@ -4824,8 +4822,6 @@ sub ite_overclock_detect
 #   0x48: Full I2C Address
 #   0x58: Mfr ID
 #   0x5b: Device ID (not on IT8705)
-# Note that this function is always called through a closure, so the
-# arguments are shifted by one place.
 sub ite_detect
 {
   my $reg;
@@ -5179,8 +5175,6 @@ sub w83l784r_detect
 # Returns: undef if not detected, 8 if detected
 # Registers used:
 #   0x4C-4E: Mfr and Chip ID
-# Note that this function is always called through a closure, so the
-# arguments are shifted by one place.
 sub w83l785ts_detect
 {
   my ($chip,$file,$addr) = @_;
