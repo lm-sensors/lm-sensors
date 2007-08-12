@@ -2764,7 +2764,7 @@ static sensors_chip_feature thmc50_features[] =
                                          SENSORS_THMC50_REMOTE_TEMP, RW }, 
                                          THMC50_SYSCTL_REMOTE_TEMP, VALUE(1), 
                                          0 },
-    { { SENSORS_THMC50_INTER_MASK, "analog output", NOMAP, NOMAP, RW }, 
+    { { SENSORS_THMC50_ANALOG_OUT, "analog output", NOMAP, NOMAP, RW }, 
                                    THMC50_SYSCTL_ANALOG_OUT, VALUE(1), 0,
                                    "pwm1", 0 },
     { { SENSORS_THMC50_INTER, "interrupts", NOMAP, NOMAP, R }, 
