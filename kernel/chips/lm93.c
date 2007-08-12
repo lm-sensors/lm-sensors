@@ -303,7 +303,7 @@ struct lm93_data {
 	u16 block5[4];
 
 	/* block6 has a lot of data we don't need */
-	struct { u8 min; u8 max; } temp_lim[3];
+	struct { u8 min; u8 max; } temp_lim[4];
 
 	/* vin1 - vin16: low and high limits */
 	struct { u8 min; u8 max; } block7[16];
