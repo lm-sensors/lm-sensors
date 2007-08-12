@@ -849,7 +849,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "Analog Devices ADT7470",
-       driver => "to-be-written",
+       driver => "adt7470",
        i2c_addrs => [0x2c, 0x2e, 0x2f],
        i2c_detect => sub { adt7467_detect(4, @_); },
      },
