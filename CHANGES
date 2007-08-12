@@ -59,6 +59,8 @@ SVN HEAD
                           Fix ADM1022 detection
                           Add detection of many SMSC Super-I/O chips
                           Add Fintek F71806FG and F71862FG detection
+                          Add Winbond W83L786NR/NG/R/G detection
+                          Add Winbond W83L771W/G detection
 
 
 2.10.3 (20070319)

@@ -1004,17 +1004,23 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { mozart_detect(2, @_); },
      } ,
      {
-       name => "Winbond W83L784R/AR",
+       name => "Winbond W83L784R/AR/G",
        driver => "to-be-written",
        i2c_addrs => [0x2d],
        i2c_detect => sub { w83l784r_detect(0, @_); },
      } ,
      {
-       name => "Winbond W83L785R",
+       name => "Winbond W83L785R/G",
        driver => "to-be-written",
        i2c_addrs => [0x2d],
        i2c_detect => sub { w83l784r_detect(1, @_); },
      } ,
+     {
+       name => "Winbond W83L786NR/NG/R/G",
+       driver => "to-be-written",
+       i2c_addrs => [0x2e, 0x2f],
+       i2c_detect => sub { w83l784r_detect(2, @_); },
+     },
      {
        name => "Winbond W83L785TS-S",
        driver => "w83l785ts",
@@ -1230,6 +1236,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        driver => "lm90",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
        i2c_detect => sub { lm90_detect(7, @_); },
+     },
+     {
+       name => "Winbond W83L771W/G",
+       driver => "lm90",
+       i2c_addrs => [0x4c],
+       i2c_detect => sub { lm90_detect(8, @_); },
      },
      {
        name => "National Semiconductor LM63",
@@ -3838,7 +3850,8 @@ sub lm83_detect
 
 # $_[0]: Chip to detect
 #   (0 = LM90, 1=LM89/LM99, 2=LM86, 3=ADM1032, 4=MAX6657/MAX6658/MAX6659,
-#    5 = ADT7461, 6 = MAX6648/MAX6692, 7 = MAX6680/MAX6681)
+#    5 = ADT7461, 6 = MAX6648/MAX6692, 7 = MAX6680/MAX6681,
+#    8 = W83L771W/G)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address
 # Returns: undef if not detected, 4, 6 or 8 if detected.
@@ -3911,6 +3924,13 @@ sub lm90_detect
     return if $rate > 0x07;
     return if $mid != 0x4d;     # Maxim
     return if $cid != 0x01;     # MAX6680/MAX6681
+    return 6;
+  }
+  if ($chip == 8) {
+    return if ($conf & 0x2a) != 0;
+    return if $rate > 0x09;
+    return if $mid != 0x5c;     # Winbond
+    return if $cid != 0x00;     # W83L771W/G
     return 6;
   }
   return;
@@ -5116,19 +5136,18 @@ sub ipmi_smic_detect
   return (4);
 }
 
-# $_[0]: Chip to detect (0 = W83L784R/AR, 1 = W83L785R)
+# $_[0]: Chip to detect (0 = W83L784R/AR/G, 1 = W83L785R/G,
+#                        2 = W83L786NR/NG/R/G)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address
 # Returns: undef if not detected, 6 or 8 if detected
 # Registers used:
 #   0x40: Configuration
-#   0x4a: Full I2C Address (not W83L785R)
-#   0x4b: I2C addresses of emulated LM75 chips (not W83L785R)
+#   0x4a: Full I2C Address (W83L784R only)
+#   0x4b: I2C addresses of emulated LM75 chips (W83L784R only)
 #   0x4c: Winbond Vendor ID (Low Byte)
 #   0x4d: Winbond Vendor ID (High Byte)
 #   0x4e: Chip ID
-# Note that this function is always called through a closure, so the
-# arguments are shifted by one place.
 sub w83l784r_detect
 {
   my ($reg,@res);
@@ -5139,16 +5158,16 @@ sub w83l784r_detect
     and i2c_smbus_read_byte_data($file,0x4a) != $addr;
   return unless i2c_smbus_read_byte_data($file,0x4c) == 0xa3;
   return unless i2c_smbus_read_byte_data($file,0x4d) == 0x5c;
-  return if $chip == 0
-    and i2c_smbus_read_byte_data($file,0x4e) != 0x50;
-  return if $chip == 1
-    and i2c_smbus_read_byte_data($file,0x4e) != 0x60;
 
-  $reg = i2c_smbus_read_byte_data($file,0x4b);
+  $reg = i2c_smbus_read_byte_data($file, 0x4e);
+  return if $chip == 0 and $reg != 0x50;
+  return if $chip == 1 and $reg != 0x60;
+  return if $chip == 2 and $reg != 0x80;
 
-  return 6 if $chip == 1; # W83L785R doesn't have subclients
+  return 6 if $chip != 0; # No subclients
   
   @res = (8);
+  $reg = i2c_smbus_read_byte_data($file, 0x4b);
   push @res, ($reg & 0x07) + 0x48 unless $reg & 0x08 ;
   push @res, (($reg & 0x70) >> 4) + 0x48 unless $reg & 0x80;
   return @res;
