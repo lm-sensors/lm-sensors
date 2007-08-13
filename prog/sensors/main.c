@@ -259,7 +259,7 @@ int do_the_real_work(int *error)
   *error = 0;
   for (chip_nr = 0; (chip = sensors_get_detected_chips(&chip_nr));)
     for(i = 0; i < chips_count; i++)
-      if (sensors_match_chip(*chip,chips[i])) {
+      if (sensors_match_chip(chip, &chips[i])) {
         if(do_sets) {
           if (do_a_set(*chip))
             *error = 1;
@@ -276,7 +276,7 @@ int do_a_set(sensors_chip_name name)
 {
   int res;
 
-  if ((res = sensors_do_chip_sets(name))) {
+  if ((res = sensors_do_chip_sets(&name))) {
     if (res == -SENSORS_ERR_PROC) {
       fprintf(stderr,"%s: %s for writing;\n",sprintf_chip_name(name),
               sensors_strerror(res));

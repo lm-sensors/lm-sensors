@@ -63,8 +63,8 @@ extern int sensors_parse_chip_name(const char *orig_name,
 
 /* Compare two chips name descriptions, to see whether they could match.
    Return 0 if it does not match, return 1 if it does match. */
-extern int sensors_match_chip(sensors_chip_name chip1, 
-                              sensors_chip_name chip2);
+extern int sensors_match_chip(const sensors_chip_name *chip1,
+                              const sensors_chip_name *chip2);
 
 /* This function returns the adapter name of a bus number,
    as used within the sensors_chip_name structure. If it could not be found, 
@@ -75,24 +75,24 @@ extern const char *sensors_get_adapter_name(int bus_nr);
    contain wildcard values! *result is newly allocated (free it yourself).
    This function will return 0 on success, and <0 on failure.  This
    function takes logical mappings into account. */
-extern int sensors_get_label(sensors_chip_name name, int feature, 
+extern int sensors_get_label(const sensors_chip_name *name, int feature,
                              char **result);
 
 /* Read the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure.  */
-extern int sensors_get_feature(sensors_chip_name name, int feature,
+extern int sensors_get_feature(const sensors_chip_name *name, int feature,
                                double *result);
 
 /* Set the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
-extern int sensors_set_feature(sensors_chip_name name, int feature,
+extern int sensors_set_feature(const sensors_chip_name *name, int feature,
                                double value);
 
 /* Execute all set statements for this particular chip. The chip may contain
    wildcards!  This function will return 0 on success, and <0 on failure. */
-extern int sensors_do_chip_sets(sensors_chip_name name);
+extern int sensors_do_chip_sets(const sensors_chip_name *name);
 
 /* This function returns all detected chips, one by one. To start at the
    beginning of the list, use 0 for nr; NULL is returned if we are
@@ -171,7 +171,7 @@ typedef struct sensors_feature_data {
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
 extern const sensors_feature_data *sensors_get_all_features
-             (sensors_chip_name name, int *nr);
+             (const sensors_chip_name *name, int *nr);
 
 #ifdef __cplusplus
 }

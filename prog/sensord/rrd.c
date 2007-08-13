@@ -141,7 +141,7 @@ applyToFeatures
 
   while ((ret == 0) && ((chip = sensors_get_detected_chips (&i)) != NULL)) {
     for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
-      if (sensors_match_chip (*chip, chipNames[j])) {
+      if (sensors_match_chip (chip, &chipNames[j])) {
         int index0, subindex, chipindex = -1;
         for (index0 = 0; knownChips[index0]; ++ index0)
           for (subindex = 0; knownChips[index0]->names[subindex]; ++ subindex)

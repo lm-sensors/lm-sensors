@@ -35,19 +35,19 @@ libsensors \- publicly accessible functions provided by the sensors library
 .B void sensors_cleanup(void);
 .B int sensors_parse_chip_name(const char *orig_name,
                             \fBsensors_chip_name *res);\fP
-.B int sensors_match_chip(sensors_chip_name chip1, 
-                       \fBsensors_chip_name chip2);\fP
+.B int sensors_match_chip(const sensors_chip_name *chip1,
+                       \fBconst sensors_chip_name *chip2);\fP
 .B const char *sensors_get_adapter_name(int bus_nr);
-.B int sensors_get_label(sensors_chip_name name, int feature, 
+.B int sensors_get_label(const sensors_chip_name *name, int feature,
                       \fBchar **result);\fP
-.B int sensors_get_feature(sensors_chip_name name, int feature,
+.B int sensors_get_feature(const sensors_chip_name *name, int feature,
                         \fBdouble *result);\fP
-.B int sensors_set_feature(sensors_chip_name name, int feature,
+.B int sensors_set_feature(const sensors_chip_name *name, int feature,
                         \fBdouble value);\fP
-.B int sensors_do_chip_sets(sensors_chip_name name);
+.B int sensors_do_chip_sets(const sensors_chip_name *name);
 .B const sensors_chip_name *sensors_get_detected_chips(int *nr);
 .B const sensors_feature_data *sensors_get_all_features 
-             \fB(sensors_chip_name name, int *nr);\fP
+             \fB(const sensors_chip_name *name, int *nr);\fP
 .B const char *libsensors_version;
 .fi
 .SH DESCRIPTION
@@ -65,8 +65,8 @@ Clean-up function: You can't access anything after this, until the next sensors_
 .br
 Parse a chip name to the internal representation. Return 0 on succes, <0 on error.
 
-\fBint sensors_match_chip(sensors_chip_name chip1,
-                       sensors_chip_name chip2);\fP
+\fBint sensors_match_chip(const sensors_chip_name *chip1,
+                       const sensors_chip_name *chip2);\fP
 .br
 Compare two chips name descriptions, to see whether they could match. Return 0 if it does not match, return 1 if it does match.
 
@@ -75,22 +75,22 @@ Compare two chips name descriptions, to see whether they could match. Return 0 i
 This function returns the adapter name of a bus number, as used within the
 sensors_chip_name structure. If it could not be found, it returns NULL.
 
-\fBint sensors_get_label(sensors_chip_name name, int feature,
+\fBint sensors_get_label(const sensors_chip_name *name, int feature,
                       char **result);\fP
 .br
 Look up the label which belongs to this chip. Note that chip should not contain wildcard values! *result is newly allocated (free it yourself). This function will return 0 on success, and <0 on failure.
 
-\fBint sensors_get_feature(sensors_chip_name name,
+\fBint sensors_get_feature(const sensors_chip_name *name,
                         int feature, double *result);\fP
 .br
 Read the value of a feature of a certain chip. Note that chip should not contain wildcard values! This function will return 0 on success, and <0 on failure.
 
-\fBint sensors_set_feature(sensors_chip_name name,
+\fBint sensors_set_feature(const sensors_chip_name *name,
                         int feature, double value);\fP
 .br
 Set the value of a feature of a certain chip. Note that chip should not contain wildcard values! This function will return 0 on success, and <0 on failure.
 
-.B int sensors_do_chip_sets(sensors_chip_name name);
+.B int sensors_do_chip_sets(const sensors_chip_name *name);
 .br
 Execute all set statements for this particular chip. The chip may contain wildcards!  This function will return 0 on success, and <0 on failure.
 
@@ -122,7 +122,7 @@ The mode field can be one of:
 SENSORS_MODE_NO_RW, SENSORS_MODE_R, SENSORS_MODE_W or SENSORS_MODE_RW.
 
 \fBconst sensors_feature_data *sensors_get_all_features
-      (sensors_chip_name name, int *nr);\fP
+      (const sensors_chip_name *name, int *nr);\fP
 .br
 This returns all features of a specific chip. They are returned in bunches:
 everything with the same mapping is returned just after each other, with

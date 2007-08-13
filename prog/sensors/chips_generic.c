@@ -30,7 +30,7 @@ static int get_feature_value(const sensors_chip_name *name,
                              const sensors_feature_data *feature, 
                              double *val)
 {
-  return sensors_get_feature(*name, feature->number, val);
+  return sensors_get_feature(name, feature->number, val);
 }
 
 static void sensors_get_available_features(const sensors_chip_name *name, 
@@ -43,7 +43,7 @@ static void sensors_get_available_features(const sensors_chip_name *name,
 {
   const sensors_feature_data *iter;
   
-  while((iter = sensors_get_all_features(*name, &i)) &&
+  while((iter = sensors_get_all_features(name, &i)) &&
       iter->mapping == feature->number) {
     int indx;
     
@@ -68,8 +68,8 @@ static int sensors_get_label_size(const sensors_chip_name *name)
   unsigned int max_size = 11; /* Initialised to 11 as minumum label-width */
 
   i = 0;
-  while((iter = sensors_get_all_features(*name, &i))) {
-    if (!sensors_get_label(*name, iter->number, &label) &&
+  while((iter = sensors_get_all_features(name, &i))) {
+    if (!sensors_get_label(name, iter->number, &label) &&
         strlen(label) > max_size)
       max_size = strlen(label);
     free(label);
@@ -98,7 +98,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
   short has_features[SENSORS_FEATURE_TEMP_SENS - SENSORS_FEATURE_TEMP] = {0, };
   double feature_vals[SENSORS_FEATURE_TEMP_SENS - SENSORS_FEATURE_TEMP] = {0.0, };
   
-  if (sensors_get_label(*name, feature->number, &label)) {
+  if (sensors_get_label(name, feature->number, &label)) {
     free(label);
     printf("ERROR: Can't get temperature label!\n");
     return;
@@ -212,7 +212,7 @@ static void print_generic_chip_in(const sensors_chip_name *name,
   double val, alarm_max, alarm_min;
   char *label;
   
-  if (sensors_get_label(*name, feature->number, &label)) {
+  if (sensors_get_label(name, feature->number, &label)) {
     free(label);
     printf("ERROR: Can't get in label!\n");
     return;
@@ -275,7 +275,7 @@ static void print_generic_chip_fan(const sensors_chip_name *name,
   double feature_vals[SENSORS_FEATURE_FAN_DIV - SENSORS_FEATURE_FAN] = {0.0, };
   double val;
   
-  if (sensors_get_label(*name, feature->number, &label)) {
+  if (sensors_get_label(name, feature->number, &label)) {
     printf("ERROR: Can't get fan label!\n");
     free(label);
     return;
@@ -326,7 +326,7 @@ void print_generic_chip(const sensors_chip_name *name)
   label_size = sensors_get_label_size(name);
   
   i = 0;
-  while((feature = sensors_get_all_features(*name, &i))) {
+  while((feature = sensors_get_all_features(name, &i))) {
     if (feature->mapping != SENSORS_NO_MAPPING)
       continue;
     
