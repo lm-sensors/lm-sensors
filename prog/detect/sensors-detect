@@ -1379,8 +1379,14 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { ddcmonitor_detect(@_); },
      },
      {
-       name => "FSC Poseidon",
+       name => "FSC Poseidon I",
        driver => "fscpos",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fscpeg_detect(@_); },
+     },
+     {
+       name => "FSC Poseidon II",
+       driver => "to-be-written",
        i2c_addrs => [0x73],
        i2c_detect => sub { fscpos_detect(@_); },
      },
@@ -1395,6 +1401,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        driver => "fscher",
        i2c_addrs => [0x73],
        i2c_detect => sub { fscher_detect(@_); },
+     },
+     {
+       name => "FSC Heimdal",
+       driver => "to-be-written",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fschmd_detect(@_); },
      },
      {
        name => "ALi M5879",
@@ -4898,8 +4910,8 @@ sub ddcmonitor_detect
 # $_[1]: Address
 # Returns: undef if not detected, (8) if detected.
 # Registers used:
-#   0x00-0x02: Identification ('P','E','G' -> Pegasus ? :-)
-sub fscpos_detect
+#   0x00-0x02: Identification ('P','E','G' -> Pegasus ? :-) aka Poseidon I
+sub fscpeg_detect
 {
   my ($file,$addr) = @_;
   # check the first 3 registers
@@ -4910,6 +4922,27 @@ sub fscpos_detect
   	return;
   }
   if (i2c_smbus_read_byte_data($file,0x02) != 0x47) {
+  	return;
+  }
+  return (8);
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+# $_[1]: Address
+# Returns: undef if not detected, (8) if detected.
+# Registers used:
+#   0x00-0x02: Identification 'P','O','S' -> Poseideon II
+sub fscpos_detect
+{
+  my ($file,$addr) = @_;
+  # check the first 3 registers
+  if (i2c_smbus_read_byte_data($file,0x00) != 0x50) {
+  	return;
+  }
+  if (i2c_smbus_read_byte_data($file,0x01) != 0x4F) {
+  	return;
+  }
+  if (i2c_smbus_read_byte_data($file,0x02) != 0x53) {
   	return;
   }
   return (8);
@@ -4952,6 +4985,27 @@ sub fscher_detect
   	return;
   }
   if (i2c_smbus_read_byte_data($file,0x02) != 0x52) {
+  	return;
+  }
+  return (8);
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+# $_[1]: Address
+# Returns: undef if not detected, (8) if detected.
+# Registers used:
+#   0x00-0x02: Identification ('H','M','D')
+sub fschmd_detect
+{
+  my ($file,$addr) = @_;
+  # check the first 3 registers
+  if (i2c_smbus_read_byte_data($file,0x00) != 0x48) {
+  	return;
+  }
+  if (i2c_smbus_read_byte_data($file,0x01) != 0x4D) {
+  	return;
+  }
+  if (i2c_smbus_read_byte_data($file,0x02) != 0x44) {
   	return;
   }
   return (8);
