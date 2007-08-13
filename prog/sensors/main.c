@@ -46,10 +46,10 @@ extern int main(int argc, char *arv[]);
 static void print_short_help(void);
 static void print_long_help(void);
 static void print_version(void);
-static void do_a_print(sensors_chip_name name);
-static int do_a_set(sensors_chip_name name);
+static void do_a_print(const sensors_chip_name *name);
+static int do_a_set(const sensors_chip_name *name);
 static int do_the_real_work(int *error);
-static const char *sprintf_chip_name(sensors_chip_name name);
+static const char *sprintf_chip_name(const sensors_chip_name *name);
 
 #define CHIPS_MAX 20
 sensors_chip_name chips[CHIPS_MAX];
@@ -261,10 +261,10 @@ int do_the_real_work(int *error)
     for(i = 0; i < chips_count; i++)
       if (sensors_match_chip(chip, &chips[i])) {
         if(do_sets) {
-          if (do_a_set(*chip))
+          if (do_a_set(chip))
             *error = 1;
         } else
-          do_a_print(*chip);
+          do_a_print(chip);
         i = chips_count;
 	cnt++;
       }
@@ -272,11 +272,11 @@ int do_the_real_work(int *error)
 }
 
 /* returns 1 on error */
-int do_a_set(sensors_chip_name name)
+int do_a_set(const sensors_chip_name *name)
 {
   int res;
 
-  if ((res = sensors_do_chip_sets(&name))) {
+  if ((res = sensors_do_chip_sets(name))) {
     if (res == -SENSORS_ERR_PROC) {
       fprintf(stderr,"%s: %s for writing;\n",sprintf_chip_name(name),
               sensors_strerror(res));
@@ -293,38 +293,40 @@ int do_a_set(sensors_chip_name name)
   return 0;
 }
 
-const char *sprintf_chip_name(sensors_chip_name name)
+const char *sprintf_chip_name(const sensors_chip_name *name)
 {
   #define BUF_SIZE 200
   static char buf[BUF_SIZE];
 
-  if (name.bus == SENSORS_CHIP_NAME_BUS_ISA)
-    snprintf(buf,BUF_SIZE,"%s-isa-%04x",name.prefix,name.addr);
-  else if (name.bus == SENSORS_CHIP_NAME_BUS_PCI)
-    snprintf(buf,BUF_SIZE,"%s-pci-%04x",name.prefix,name.addr);
-  else if (name.bus == SENSORS_CHIP_NAME_BUS_DUMMY)
-    snprintf(buf,BUF_SIZE,"%s-%s-%04x",name.prefix,name.busname,name.addr);
+  if (name->bus == SENSORS_CHIP_NAME_BUS_ISA)
+    snprintf(buf, BUF_SIZE, "%s-isa-%04x", name->prefix, name->addr);
+  else if (name->bus == SENSORS_CHIP_NAME_BUS_PCI)
+    snprintf(buf, BUF_SIZE, "%s-pci-%04x", name->prefix, name->addr);
+  else if (name->bus == SENSORS_CHIP_NAME_BUS_DUMMY)
+    snprintf(buf, BUF_SIZE, "%s-%s-%04x", name->prefix, name->busname,
+             name->addr);
   else
-    snprintf(buf,BUF_SIZE,"%s-i2c-%d-%02x",name.prefix,name.bus,name.addr);
+    snprintf(buf, BUF_SIZE, "%s-i2c-%d-%02x", name->prefix, name->bus,
+             name->addr);
   return buf;
 }
 
-void do_a_print(sensors_chip_name name)
+void do_a_print(const sensors_chip_name *name)
 {
   if (hide_unknown)
     return;
 
   printf("%s\n",sprintf_chip_name(name));
   if (!hide_adapter) {
-    const char *adap = sensors_get_adapter_name(name.bus);
+    const char *adap = sensors_get_adapter_name(name->bus);
     if (adap)
       printf("Adapter: %s\n", adap);
     else
-      fprintf(stderr, "Can't get adapter name for bus %d\n", name.bus);
+      fprintf(stderr, "Can't get adapter name for bus %d\n", name->bus);
   }
   if (do_unknown)
-    print_unknown_chip(&name);
+    print_unknown_chip(name);
   else
-    print_generic_chip(&name);
+    print_generic_chip(name);
   printf("\n");
 }

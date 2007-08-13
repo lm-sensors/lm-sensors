@@ -35,7 +35,7 @@
 
 int
 getValid
-(sensors_chip_name name, int feature, int *valid) {
+(const sensors_chip_name *name, int feature, int *valid) {
   int err;
   err = sensors_get_ignored (name, feature);
   if (err >= 0) {
@@ -47,19 +47,19 @@ getValid
 
 int
 getLabel
-(sensors_chip_name name, int feature, char **label) {
+(const sensors_chip_name *name, int feature, char **label) {
   int err;
-  err = sensors_get_label (&name, feature, label);
+  err = sensors_get_label (name, feature, label);
   return err;
 }
 
 int
 getRawLabel
-(sensors_chip_name name, int feature, const char **label) {
+(const sensors_chip_name *name, int feature, const char **label) {
   const sensors_feature_data *rawFeature;
   int nr1 = 0, nr2 = 0, err = 0;
   do {
-    rawFeature = sensors_get_all_features (&name, &nr1, &nr2);
+    rawFeature = sensors_get_all_features (name, &nr1, &nr2);
   } while (rawFeature && (rawFeature->number != feature));
   /* TODO: Ensure labels match RRD construct and are not repeated! */
   if (!rawFeature) {
@@ -110,10 +110,10 @@ readUnknownChip
     int valid = 0;
     double value;
     
-    if (getValid (*chip, sensor->number, &valid)) {
+    if (getValid (chip, sensor->number, &valid)) {
       sensorLog (LOG_ERR, "Error getting sensor validity: %s/%s", chip->prefix, sensor->name);
       ret = 20;
-    } else if (getLabel (*chip, sensor->number, &label)) {
+    } else if (getLabel (chip, sensor->number, &label)) {
       sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, sensor->name);
       ret = 21;
     } else if (!valid) {
@@ -170,10 +170,10 @@ doKnownChip
 
     if ((action == DO_SCAN) && !alarm) {
       continue;
-    } else if (getValid (*chip, labelNumber, &valid)) {
+    } else if (getValid (chip, labelNumber, &valid)) {
       sensorLog (LOG_ERR, "Error getting sensor validity: %s/#%d", chip->prefix, labelNumber);
       ret = 22;
-    } else if (getLabel (*chip, labelNumber, &label)) {
+    } else if (getLabel (chip, labelNumber, &label)) {
       sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
       ret = 22;
     } else if (valid) {

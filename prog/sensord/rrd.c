@@ -157,13 +157,13 @@ applyToFeatures
             const char *rawLabel = NULL;
             char *label = NULL;
             int valid = 0;
-            if (getValid (*chip, labelNumber, &valid)) {
+            if (getValid (chip, labelNumber, &valid)) {
               sensorLog (LOG_ERR, "Error getting sensor validity: %s/#%d", chip->prefix, labelNumber);
               ret = -1;
-            } else if (getRawLabel (*chip, labelNumber, &rawLabel)) {
+            } else if (getRawLabel (chip, labelNumber, &rawLabel)) {
               sensorLog (LOG_ERR, "Error getting raw sensor label: %s/#%d", chip->prefix, labelNumber);
               ret = -1;
-            } else if (getLabel (*chip, labelNumber, &label)) {
+            } else if (getLabel (chip, labelNumber, &label)) {
               sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
               ret = -1;
             } else if (valid) {
