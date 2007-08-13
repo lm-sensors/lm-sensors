@@ -29,9 +29,11 @@ extern int sensors_read_sysfs_chips(void);
 extern int sensors_read_sysfs_bus(void);
 
 /* Read a value out of a sysfs attribute file */
-int sensors_read_sysfs_attr(sensors_chip_name name, int feature, double *value);
+int sensors_read_sysfs_attr(const sensors_chip_name *name, int feature,
+			    double *value);
 
 /* Write a value to a sysfs attribute file */
-int sensors_write_sysfs_attr(sensors_chip_name name, int feature, double value);
+int sensors_write_sysfs_attr(const sensors_chip_name *name, int feature,
+			     double value);
 
 #endif /* !SENSORS_LIB_SYSFS_H */

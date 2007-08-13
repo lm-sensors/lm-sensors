@@ -27,14 +27,14 @@
 #include "sysfs.h"
 #include "scanner.h"
 
-static void free_chip_name(sensors_chip_name name);
+static void free_chip_name(sensors_chip_name *name);
 static void free_chip_features(sensors_chip_feature *features);
-static void free_bus(sensors_bus bus);
-static void free_chip(sensors_chip chip);
-static void free_label(sensors_label label);
-static void free_set(sensors_set set);
-static void free_compute(sensors_compute compute);
-static void free_ignore(sensors_ignore ignore);
+static void free_bus(sensors_bus *bus);
+static void free_chip(sensors_chip *chip);
+static void free_label(sensors_label *label);
+static void free_set(sensors_set *set);
+static void free_compute(sensors_compute *compute);
+static void free_ignore(sensors_ignore *ignore);
 static void free_expr(sensors_expr *expr);
 
 int sensors_init(FILE *input)
@@ -61,7 +61,7 @@ void sensors_cleanup(void)
   sensors_scanner_exit();
 
   for (i = 0; i < sensors_proc_chips_count; i++) {
-    free_chip_name(sensors_proc_chips[i].chip);
+    free_chip_name(&sensors_proc_chips[i].chip);
     free_chip_features(sensors_proc_chips[i].feature);
   }
   free(sensors_proc_chips);
@@ -69,28 +69,28 @@ void sensors_cleanup(void)
   sensors_proc_chips_count = sensors_proc_chips_max = 0;
   
   for (i = 0; i < sensors_config_busses_count; i++)
-    free_bus(sensors_config_busses[i]);
+    free_bus(&sensors_config_busses[i]);
   free(sensors_config_busses);
   sensors_config_busses = NULL;
   sensors_config_busses_count = sensors_config_busses_max = 0;
 
   for (i = 0; i < sensors_config_chips_count; i++)
-    free_chip(sensors_config_chips[i]);
+    free_chip(&sensors_config_chips[i]);
   free(sensors_config_chips);
   sensors_config_chips = NULL;
   sensors_config_chips_count = sensors_config_chips_max = 0;
 
   for (i = 0; i < sensors_proc_bus_count; i++)
-    free_bus(sensors_proc_bus[i]);
+    free_bus(&sensors_proc_bus[i]);
   free(sensors_proc_bus);
   sensors_proc_bus = NULL;
   sensors_proc_bus_count = sensors_proc_bus_max = 0;
 }
 
-void free_chip_name(sensors_chip_name name)
+void free_chip_name(sensors_chip_name *name)
 {
-  free(name.prefix);
-  free(name.busname);
+  free(name->prefix);
+  free(name->busname);
 }
 
 void free_chip_features(sensors_chip_feature *features)
@@ -102,63 +102,63 @@ void free_chip_features(sensors_chip_feature *features)
   free(features);
 }
 
-void free_bus(sensors_bus bus)
+void free_bus(sensors_bus *bus)
 {
-  free(bus.adapter);
+  free(bus->adapter);
 }
 
-void free_chip(sensors_chip chip)
+void free_chip(sensors_chip *chip)
 {
   int i;
 
-  for (i = 0; i < chip.chips.fits_count; i++)
-    free_chip_name(chip.chips.fits[i]);
-  free(chip.chips.fits);
-  chip.chips.fits_count = chip.chips.fits_max = 0;
+  for (i = 0; i < chip->chips.fits_count; i++)
+    free_chip_name(&chip->chips.fits[i]);
+  free(chip->chips.fits);
+  chip->chips.fits_count = chip->chips.fits_max = 0;
 
-  for (i = 0; i < chip.labels_count; i++)
-    free_label(chip.labels[i]);
-  free(chip.labels);
-  chip.labels_count = chip.labels_max = 0;
+  for (i = 0; i < chip->labels_count; i++)
+    free_label(&chip->labels[i]);
+  free(chip->labels);
+  chip->labels_count = chip->labels_max = 0;
 
-  for (i = 0; i < chip.sets_count; i++)
-    free_set(chip.sets[i]);
-  free(chip.sets);
-  chip.sets_count = chip.sets_max = 0;
+  for (i = 0; i < chip->sets_count; i++)
+    free_set(&chip->sets[i]);
+  free(chip->sets);
+  chip->sets_count = chip->sets_max = 0;
 
-  for (i = 0; i < chip.computes_count; i++)
-    free_compute(chip.computes[i]);
-  free(chip.computes);
-  chip.computes_count = chip.computes_max = 0;
+  for (i = 0; i < chip->computes_count; i++)
+    free_compute(&chip->computes[i]);
+  free(chip->computes);
+  chip->computes_count = chip->computes_max = 0;
 
-  for (i = 0; i < chip.ignores_count; i++)
-    free_ignore(chip.ignores[i]);
-  free(chip.ignores);
-  chip.ignores_count = chip.ignores_max = 0;
+  for (i = 0; i < chip->ignores_count; i++)
+    free_ignore(&chip->ignores[i]);
+  free(chip->ignores);
+  chip->ignores_count = chip->ignores_max = 0;
 }
 
-void free_label(sensors_label label)
+void free_label(sensors_label *label)
 {
-  free(label.name);
-  free(label.value);
+  free(label->name);
+  free(label->value);
 }
 
-void free_set(sensors_set set)
+void free_set(sensors_set *set)
 {
-  free(set.name);
-  free_expr(set.value);
+  free(set->name);
+  free_expr(set->value);
 }
 
-void free_compute(sensors_compute compute)
+void free_compute(sensors_compute *compute)
 {
-  free(compute.name);
-  free_expr(compute.from_proc);
-  free_expr(compute.to_proc);
+  free(compute->name);
+  free_expr(compute->from_proc);
+  free_expr(compute->to_proc);
 }
 
-void free_ignore(sensors_ignore ignore)
+void free_ignore(sensors_ignore *ignore)
 {
-  free(ignore.name);
+  free(ignore->name);
 }
 
 void free_expr(sensors_expr *expr)

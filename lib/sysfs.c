@@ -396,7 +396,8 @@ exit0:
 	return ret;
 }
 
-int sensors_read_sysfs_attr(sensors_chip_name name, int feature, double *value)
+int sensors_read_sysfs_attr(const sensors_chip_name *name, int feature,
+			    double *value)
 {
 	const sensors_chip_feature *the_feature;
 	int mag;
@@ -406,7 +407,7 @@ int sensors_read_sysfs_attr(sensors_chip_name name, int feature, double *value)
 	char check;
 	const char *suffix = "";
 
-	if (!(the_feature = sensors_lookup_feature_nr(&name, feature)))
+	if (!(the_feature = sensors_lookup_feature_nr(name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 
 	/* REVISIT: this is a ugly hack */
@@ -415,7 +416,7 @@ int sensors_read_sysfs_attr(sensors_chip_name name, int feature, double *value)
 	 || sscanf(the_feature->data.name, "temp%d%c", &dummy, &check) == 1)
 		suffix = "_input";
 
-	snprintf(n, NAME_MAX, "%s/%s%s", name.busname, the_feature->data.name,
+	snprintf(n, NAME_MAX, "%s/%s%s", name->busname, the_feature->data.name,
 		 suffix);
 	if ((f = fopen(n, "r"))) {
 		int res = fscanf(f, "%lf", value);
@@ -430,7 +431,8 @@ int sensors_read_sysfs_attr(sensors_chip_name name, int feature, double *value)
 	return 0;
 }
   
-int sensors_write_sysfs_attr(sensors_chip_name name, int feature, double value)
+int sensors_write_sysfs_attr(const sensors_chip_name *name, int feature,
+			     double value)
 {
 	const sensors_chip_feature *the_feature;
 	int mag;
@@ -440,7 +442,7 @@ int sensors_write_sysfs_attr(sensors_chip_name name, int feature, double value)
 	char check;
 	const char *suffix = "";
  
-	if (!(the_feature = sensors_lookup_feature_nr(&name, feature)))
+	if (!(the_feature = sensors_lookup_feature_nr(name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 
 	/* REVISIT: this is a ugly hack */
@@ -449,7 +451,7 @@ int sensors_write_sysfs_attr(sensors_chip_name name, int feature, double value)
 	 || sscanf(the_feature->data.name, "temp%d%c", &dummy, &check) == 1)
 		suffix = "_input";
 
-	snprintf(n, NAME_MAX, "%s/%s%s", name.busname, the_feature->data.name,
+	snprintf(n, NAME_MAX, "%s/%s%s", name->busname, the_feature->data.name,
 		 suffix);
 	if ((f = fopen(n, "w"))) {
 		for (mag = the_feature->scaling; mag > 0; mag --)
