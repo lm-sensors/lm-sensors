@@ -186,9 +186,7 @@ statement is ignored upto the next
 statement.
 
 A chip description is built from a couple of elements, separated by
-dashes. To complicate matters, sometimes an element can also contain
-dashes. This complicates the parsing algorithm, but is not too confusing
-for humans (we hope!).
+dashes.
 
 The first element is the name of the chip type. Sometimes a single driver
 implements several chip types, with several names. The driver documentation
@@ -216,10 +214,10 @@ the wildcard operator
 .I *
 for this element. 
 
-There are some folding rules for wildcards to make things easier for humans
-to read. Also, you can't specify the address if you wildcard the complete
-second element. The following are all valid chip type specification based
-on 
+Note that it wouldn't make any sense to specify the address without the
+bus type. For this reason, the address part is plain omitted when the bus
+type isn't specified.
+The following are all valid chip type specification based on
 .I lm78\-i2c\-1\-2d
 or
 .IR lm78\-isa\-0290 :
@@ -250,10 +248,6 @@ lm78\-*
 *\-isa\-0290
 .sp 0
 *\-isa\-*
-.sp 0
-*\-*
-.sp 0
-*
 .RE
 
 .SS COMPUTE STATEMENT

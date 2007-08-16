@@ -22,6 +22,7 @@ SVN HEAD
            Pass structures by reference
            Drop support for dummy type
            New function sensors_snprintf_chip_name()
+           Drop support for dashes in chip names
   Makefile: Drop the package and version targets
   Man page sensors.conf.5: Update the chip statement section
   Programs doc/*: Delete, obsolete
