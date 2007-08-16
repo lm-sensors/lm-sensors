@@ -190,10 +190,6 @@ int sensors_parse_i2cbus_name(const char *name, int *res)
 {
   int i;
 
-  if (! strcmp(name,"isa")) {
-    *res = SENSORS_CHIP_NAME_BUS_ISA;
-    return 0;
-  }
   if (strncmp(name,"i2c-",4)) {
     return -SENSORS_ERR_BUS_NAME;
   }

@@ -374,16 +374,14 @@ int sensors_read_sysfs_bus(void)
 		      (attr = sysfs_get_device_attr(dev, "name"))))
 			continue;
 
+		if (sscanf(clsdev->name, "i2c-%d", &entry.number) != 1 ||
+		    entry.number == 9191) /* legacy ISA */
+			continue;
+
 		/* NB: attr->value[attr->len-1] == '\n'; chop that off */
 		entry.adapter = strndup(attr->value, attr->len - 1);
 		if (!entry.adapter)
 			sensors_fatal_error(__FUNCTION__, "out of memory");
-
-		if (!strncmp(entry.adapter, "ISA ", 4)) {
-			entry.number = SENSORS_CHIP_NAME_BUS_ISA;
-		} else if (sscanf(clsdev->name, "i2c-%d", &entry.number) != 1) {
-			continue;
-		}
 
 		sensors_add_proc_bus(&entry);
 	}
