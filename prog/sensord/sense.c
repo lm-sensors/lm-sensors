@@ -74,12 +74,8 @@ static const char *
 chipName
 (const sensors_chip_name *chip) {
   static char buffer[256];
-  if (chip->bus == SENSORS_CHIP_NAME_BUS_ISA)
-    sprintf (buffer, "%s-isa-%04x", chip->prefix, chip->addr);
-  else if (chip->bus == SENSORS_CHIP_NAME_BUS_PCI)
-	    sprintf (buffer, "%s-pci-%04x", chip->prefix, chip->addr);
-  else
-    sprintf (buffer, "%s-i2c-%d-%02x", chip->prefix, chip->bus, chip->addr);
+  if (sensors_snprintf_chip_name(buffer, 256, chip) < 0)
+    return NULL;
   return buffer;
 }
 

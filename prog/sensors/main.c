@@ -298,13 +298,8 @@ const char *sprintf_chip_name(const sensors_chip_name *name)
   #define BUF_SIZE 200
   static char buf[BUF_SIZE];
 
-  if (name->bus == SENSORS_CHIP_NAME_BUS_ISA)
-    snprintf(buf, BUF_SIZE, "%s-isa-%04x", name->prefix, name->addr);
-  else if (name->bus == SENSORS_CHIP_NAME_BUS_PCI)
-    snprintf(buf, BUF_SIZE, "%s-pci-%04x", name->prefix, name->addr);
-  else
-    snprintf(buf, BUF_SIZE, "%s-i2c-%d-%02x", name->prefix, name->bus,
-             name->addr);
+  if (sensors_snprintf_chip_name(buf, BUF_SIZE, name) < 0)
+    return NULL;
   return buf;
 }
 

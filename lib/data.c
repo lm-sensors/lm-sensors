@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "access.h"
 #include "error.h"
 #include "data.h"
 #include "sensors.h"
@@ -152,6 +153,25 @@ SUCCES:
 ERROR:
   free(name);
   return -SENSORS_ERR_CHIP_NAME;
+}
+
+int sensors_snprintf_chip_name(char *str, size_t size,
+			       const sensors_chip_name *chip)
+{
+	if (sensors_chip_name_has_wildcards(chip))
+		return -SENSORS_ERR_WILDCARDS;
+
+	switch (chip->bus) {
+	case SENSORS_CHIP_NAME_BUS_ISA:
+		return snprintf(str, size, "%s-isa-%04x", chip->prefix,
+				chip->addr);
+	case SENSORS_CHIP_NAME_BUS_PCI:
+		return snprintf(str, size, "%s-pci-%04x", chip->prefix,
+				chip->addr);
+	default:
+		return snprintf(str, size, "%s-i2c-%d-%02x", chip->prefix,
+				chip->bus, chip->addr);
+	}
 }
 
 int sensors_parse_i2cbus_name(const char *name, int *res)

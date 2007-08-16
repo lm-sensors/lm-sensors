@@ -60,6 +60,12 @@ extern void sensors_cleanup(void);
 extern int sensors_parse_chip_name(const char *orig_name,
                                    sensors_chip_name *res);
 
+/* Print a chip name from its internal representation. Note that chip should
+   not contain wildcard values! Return the number of characters printed on
+   success (same as snprintf), <0 on error. */
+int sensors_snprintf_chip_name(char *str, size_t size,
+			       const sensors_chip_name *chip);
+
 /* Compare two chips name descriptions, to see whether they could match.
    Return 0 if it does not match, return 1 if it does match. */
 extern int sensors_match_chip(const sensors_chip_name *chip1,

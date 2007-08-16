@@ -21,6 +21,7 @@ SVN HEAD
            Delete sensors_do_all_sets(), unused
            Pass structures by reference
            Drop support for dummy type
+           New function sensors_snprintf_chip_name()
   Makefile: Drop the package and version targets
   Man page sensors.conf.5: Update the chip statement section
   Programs doc/*: Delete, obsolete
