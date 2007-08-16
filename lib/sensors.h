@@ -36,7 +36,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* A chip name is encoded is in this structure */
+/* A chip name is encoded in this structure */
 typedef struct sensors_chip_name {
   char *prefix;
   int bus;
@@ -44,7 +44,7 @@ typedef struct sensors_chip_name {
   char *busname;	/* if dummy */
 } sensors_chip_name;
 
-/* (Re)load the configuration file and the detected chips list. If this 
+/* (Re)load the configuration file and the detected chips list. If this
     returns a value unequal to zero, you are in trouble; you can not
     assume anything will be initialized properly. */
 extern int sensors_init(FILE *input);
@@ -53,14 +53,14 @@ extern int sensors_init(FILE *input);
    this, until the next sensors_init() call! */
 extern void sensors_cleanup(void);
 
-/* Parse a chip name to the internal representation. Return 0 on succes, <0
+/* Parse a chip name to the internal representation. Return 0 on success, <0
    on error. */
 extern int sensors_parse_chip_name(const char *orig_name,
                                    sensors_chip_name *res);
 
 /* Compare two chips name descriptions, to see whether they could match.
    Return 0 if it does not match, return 1 if it does match. */
-extern int sensors_match_chip(sensors_chip_name chip1, 
+extern int sensors_match_chip(sensors_chip_name chip1,
                               sensors_chip_name chip2);
 
 /* Check whether the chip name is an 'absolute' name, which can only match
@@ -69,7 +69,7 @@ extern int sensors_match_chip(sensors_chip_name chip1,
 extern int sensors_chip_name_has_wildcards(sensors_chip_name chip);
 
 /* This function returns the adapter name of a bus number,
-   as used within the sensors_chip_name structure. If it could not be found, 
+   as used within the sensors_chip_name structure. If it could not be found,
    it returns NULL */
 extern const char *sensors_get_adapter_name(int bus_nr);
 
@@ -80,7 +80,7 @@ extern const char *sensors_get_algorithm_name(int bus_nr);
    contain wildcard values! *result is newly allocated (free it yourself).
    This function will return 0 on success, and <0 on failure.  This
    function takes logical mappings into account. */
-extern int sensors_get_label(sensors_chip_name name, int feature, 
+extern int sensors_get_label(sensors_chip_name name, int feature,
                              char **result);
 
 /* Looks up whether a feature should be ignored. Returns <0 on failure,
@@ -110,7 +110,7 @@ extern int sensors_do_all_sets(void);
 
 /* This function returns all detected chips, one by one. To start at the
    beginning of the list, use 0 for nr; NULL is returned if we are
-   at the end of the list. Do not try to change these chip names, as 
+   at the end of the list. Do not try to change these chip names, as
    they point to internal structures! Do not use nr for anything else. */
 extern const sensors_chip_name *sensors_get_detected_chips(int *nr);
 
@@ -135,7 +135,7 @@ typedef struct sensors_feature_data {
   int mode;
 } sensors_feature_data;
 
-/* This returns all features of a specific chip. They are returned in 
+/* This returns all features of a specific chip. They are returned in
    bunches: everything with the same mapping is returned just after each
    other, with the master feature in front (that feature does not map to
    itself, but has SENSORS_NO_MAPPING as mapping field). nr1 and nr2 are
@@ -143,7 +143,7 @@ typedef struct sensors_feature_data {
    begin of the list. If no more features are found NULL is returned.
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
-extern const sensors_feature_data *sensors_get_all_features 
+extern const sensors_feature_data *sensors_get_all_features
              (sensors_chip_name name, int *nr1,int *nr2);
 
 #ifdef __cplusplus

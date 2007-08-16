@@ -63,7 +63,7 @@ static int sensors_substitute_chip(sensors_chip_name *name,int lineno);
    be any decimal i2c bus number. '5e' can be any hexadecimal i2c device
    address, and '10dd' any hexadecimal isa address.
 
-   If '*' is used in prefixes, together with dashes, ambigious parses are
+   If '*' is used in prefixes, together with dashes, ambiguous parses are
    introduced. In that case, the prefix is kept as small as possible.
 
    The 'prefix' part in the result is freshly allocated. All old contents
@@ -81,7 +81,7 @@ int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res)
 
   /* Play it safe */
   res->busname = NULL;
-  
+
   if (! name)
     sensors_fatal_error("sensors_parse_chip_name","Allocating new name");
   /* First split name in upto four pieces. */
@@ -89,7 +89,7 @@ int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res)
     *part4++ = '\0';
   if ((part3 = strrchr(name,'-')))
     *part3++ = '\0';
-  if ((part2 = strrchr(name,'-'))) 
+  if ((part2 = strrchr(name,'-')))
     *part2++ = '\0';
 
   /* No dashes found? */
@@ -99,7 +99,7 @@ int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res)
       res->bus = SENSORS_CHIP_NAME_BUS_ANY;
       res->addr = SENSORS_CHIP_NAME_ADDR_ANY;
       goto SUCCES;
-    } else 
+    } else
       goto ERROR;
   }
 
@@ -110,7 +110,7 @@ int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res)
     if ((strlen(part4) > 4) || (strlen(part4) == 0))
       goto ERROR;
     res->addr = 0;
-    for (i = 0; ; i++) { 
+    for (i = 0; ; i++) {
       switch (part4[i]) {
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
@@ -154,7 +154,7 @@ DONE:;
     if ((strlen(part3) > 3) || (strlen(part3) == 0))
       goto ERROR;
     res->bus = 0;
-    for (i = 0; ; i++) { 
+    for (i = 0; ; i++) {
       switch (part3[i]) {
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
@@ -178,11 +178,11 @@ DONE2:;
       sensors_fatal_error("sensors_parse_chip_name","Allocating new busname");
   } else
     goto ERROR;
-    
+
   if (!strcmp(name,"*"))
     res->prefix = SENSORS_CHIP_NAME_PREFIX_ANY;
   else if (! (res->prefix = strdup(name)))
-    sensors_fatal_error("sensors_parse_chip_name","Allocating new name");
+    sensors_fatal_error("sensors_parse_chip_name", "Allocating name prefix");
   goto SUCCES;
 
 SUCCES:
@@ -210,7 +210,7 @@ int sensors_parse_i2cbus_name(const char *name, int *res)
   if ((strlen(name) > 3) || (strlen(name) == 0))
     return -SENSORS_ERR_BUS_NAME;
   *res = 0;
-  for (i = 0; ; i++) { 
+  for (i = 0; ; i++) {
     switch (name[i]) {
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
@@ -255,13 +255,13 @@ int sensors_substitute_chip(sensors_chip_name *name,int lineno)
   return 0;
 }
 
-      
+
 int sensors_substitute_busses(void)
 {
   int err,i,j,lineno;
   sensors_chip_name_list *chips;
   int res=0;
-  
+
   for(i = 0; i < sensors_config_chips_count; i++) {
     lineno = sensors_config_chips[i].lineno;
     chips = &sensors_config_chips[i].chips;
