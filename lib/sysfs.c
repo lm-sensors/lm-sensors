@@ -222,8 +222,8 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 	if (!entry.chip.prefix)
 		sensors_fatal_error(__FUNCTION__, "out of memory");
 
-	entry.chip.busname = strdup(dev->path);
-	if (!entry.chip.busname)
+	entry.chip.path = strdup(dev->path);
+	if (!entry.chip.path)
 		sensors_fatal_error(__FUNCTION__, "out of memory");
 
 	if (sscanf(dev->name, "%d-%x", &entry.chip.bus, &entry.chip.addr) == 2) {
@@ -270,7 +270,7 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 
 exit_free:
 	free(entry.chip.prefix);
-	free(entry.chip.busname);
+	free(entry.chip.path);
 	return err;
 }
 
@@ -416,7 +416,7 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name, int feature,
 	 || sscanf(the_feature->data.name, "temp%d%c", &dummy, &check) == 1)
 		suffix = "_input";
 
-	snprintf(n, NAME_MAX, "%s/%s%s", name->busname, the_feature->data.name,
+	snprintf(n, NAME_MAX, "%s/%s%s", name->path, the_feature->data.name,
 		 suffix);
 	if ((f = fopen(n, "r"))) {
 		int res = fscanf(f, "%lf", value);
@@ -451,7 +451,7 @@ int sensors_write_sysfs_attr(const sensors_chip_name *name, int feature,
 	 || sscanf(the_feature->data.name, "temp%d%c", &dummy, &check) == 1)
 		suffix = "_input";
 
-	snprintf(n, NAME_MAX, "%s/%s%s", name->busname, the_feature->data.name,
+	snprintf(n, NAME_MAX, "%s/%s%s", name->path, the_feature->data.name,
 		 suffix);
 	if ((f = fopen(n, "w"))) {
 		for (mag = the_feature->scaling; mag > 0; mag --)

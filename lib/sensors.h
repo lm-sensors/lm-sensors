@@ -43,7 +43,7 @@ typedef struct sensors_chip_name {
   char *prefix;
   int bus;
   int addr;
-  char *busname;
+  char *path;
 } sensors_chip_name;
 
 /* (Re)load the configuration file and the detected chips list. If this 

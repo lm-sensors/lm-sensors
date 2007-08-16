@@ -170,7 +170,7 @@ int sensors_get_label(const sensors_chip_name *name, int feature, char **result)
 			}
 
 	/* No user specified label, check for a _label sysfs file */
-	snprintf(path, PATH_MAX, "%s/%s_label", name->busname,
+	snprintf(path, PATH_MAX, "%s/%s_label", name->path,
 		featureptr->data.name);
 	
 	if ((f = fopen(path, "r"))) {
