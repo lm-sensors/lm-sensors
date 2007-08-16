@@ -162,64 +162,63 @@ int sensors_snprintf_chip_name(char *str, size_t size,
 
 int sensors_parse_i2cbus_name(const char *name, int *res)
 {
-  char *endptr;
+	char *endptr;
 
-  if (strncmp(name,"i2c-",4)) {
-    return -SENSORS_ERR_BUS_NAME;
-  }
-  name += 4;
-  *res = strtoul(name, &endptr, 10);
-  if (*name == '\0' || *endptr != '\0' || *res < 0)
-    return -SENSORS_ERR_BUS_NAME;
-  return 0;
+	if (strncmp(name, "i2c-", 4)) {
+		return -SENSORS_ERR_BUS_NAME;
+	}
+	name += 4;
+	*res = strtoul(name, &endptr, 10);
+	if (*name == '\0' || *endptr != '\0' || *res < 0)
+		return -SENSORS_ERR_BUS_NAME;
+	return 0;
 }
 
-
-int sensors_substitute_chip(sensors_chip_name *name,int lineno)
+int sensors_substitute_chip(sensors_chip_name *name, int lineno)
 {
-  int i,j;
-  for (i = 0; i < sensors_config_busses_count; i++)
-    if (sensors_config_busses[i].number == name->bus)
-      break;
+	int i, j;
+	for (i = 0; i < sensors_config_busses_count; i++)
+		if (sensors_config_busses[i].number == name->bus)
+			break;
 
-  if (i == sensors_config_busses_count) {
-    sensors_parse_error("Undeclared i2c bus referenced",lineno);
-    name->bus = sensors_proc_bus_count;
-    return -SENSORS_ERR_BUS_NAME;
-  }
+	if (i == sensors_config_busses_count) {
+		sensors_parse_error("Undeclared i2c bus referenced", lineno);
+		name->bus = sensors_proc_bus_count;
+		return -SENSORS_ERR_BUS_NAME;
+	}
 
-  /* Compare the adapter names */
-  for (j = 0; j < sensors_proc_bus_count; j++) {
-    if (!strcmp(sensors_config_busses[i].adapter,
-                sensors_proc_bus[j].adapter)) {
-      name->bus = sensors_proc_bus[j].number;
-      return 0;
-    }
-  }
+	/* Compare the adapter names */
+	for (j = 0; j < sensors_proc_bus_count; j++) {
+		if (!strcmp(sensors_config_busses[i].adapter,
+			    sensors_proc_bus[j].adapter)) {
+			name->bus = sensors_proc_bus[j].number;
+			return 0;
+		}
+	}
 
-  /* We did not find anything. sensors_proc_bus_count is not a valid
-     bus number, so it will never be matched. Good. */
-  name->bus = sensors_proc_bus_count;
-  return 0;
+	/* We did not find anything. sensors_proc_bus_count is not
+	   a valid bus number, so it will never be matched. Good. */
+	name->bus = sensors_proc_bus_count;
+	return 0;
 }
 
-      
 int sensors_substitute_busses(void)
 {
-  int err,i,j,lineno;
-  sensors_chip_name_list *chips;
-  int res=0;
-  
-  for(i = 0; i < sensors_config_chips_count; i++) {
-    lineno = sensors_config_chips[i].lineno;
-    chips = &sensors_config_chips[i].chips;
-    for(j = 0; j < chips->fits_count; j++)
-      if ((chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ISA) &&
-          (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_PCI) &&
-          (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY) &&
-          (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY_I2C))
-        if ((err = sensors_substitute_chip(chips->fits+j, lineno)))
-          res = err;
-  }
-  return res;
+	int err, i, j, lineno;
+	sensors_chip_name_list *chips;
+	int res = 0;
+
+	for (i = 0; i < sensors_config_chips_count; i++) {
+		lineno = sensors_config_chips[i].lineno;
+		chips = &sensors_config_chips[i].chips;
+		for (j = 0; j < chips->fits_count; j++)
+			if (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ISA &&
+			    chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_PCI &&
+			    chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY &&
+			    chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY_I2C)
+				if ((err = sensors_substitute_chip(chips->fits+j,
+								   lineno)))
+					res = err;
+	}
+	return res;
 }

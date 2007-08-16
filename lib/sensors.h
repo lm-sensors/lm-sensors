@@ -38,27 +38,26 @@ extern "C" {
 
 extern const char *libsensors_version;
 
-/* A chip name is encoded is in this structure */
+/* A chip name is encoded in this structure */
 typedef struct sensors_chip_name {
-  char *prefix;
-  int bus;
-  int addr;
-  char *path;
+	char *prefix;
+	int bus;
+	int addr;
+	char *path;
 } sensors_chip_name;
 
-/* (Re)load the configuration file and the detected chips list. If this 
+/* (Re)load the configuration file and the detected chips list. If this
     returns a value unequal to zero, you are in trouble; you can not
     assume anything will be initialized properly. */
-extern int sensors_init(FILE *input);
+int sensors_init(FILE *input);
 
 /* Clean-up function: You can't access anything after
    this, until the next sensors_init() call! */
-extern void sensors_cleanup(void);
+void sensors_cleanup(void);
 
-/* Parse a chip name to the internal representation. Return 0 on succes, <0
+/* Parse a chip name to the internal representation. Return 0 on success, <0
    on error. */
-extern int sensors_parse_chip_name(const char *orig_name,
-                                   sensors_chip_name *res);
+int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res);
 
 /* Print a chip name from its internal representation. Note that chip should
    not contain wildcard values! Return the number of characters printed on
@@ -68,43 +67,42 @@ int sensors_snprintf_chip_name(char *str, size_t size,
 
 /* Compare two chips name descriptions, to see whether they could match.
    Return 0 if it does not match, return 1 if it does match. */
-extern int sensors_match_chip(const sensors_chip_name *chip1,
-                              const sensors_chip_name *chip2);
+int sensors_match_chip(const sensors_chip_name *chip1,
+		       const sensors_chip_name *chip2);
 
 /* This function returns the adapter name of a bus number,
-   as used within the sensors_chip_name structure. If it could not be found, 
+   as used within the sensors_chip_name structure. If it could not be found,
    it returns NULL */
-extern const char *sensors_get_adapter_name(int bus_nr);
+const char *sensors_get_adapter_name(int bus_nr);
 
 /* Look up the label which belongs to this chip. Note that chip should not
    contain wildcard values! *result is newly allocated (free it yourself).
    This function will return 0 on success, and <0 on failure.  This
    function takes logical mappings into account. */
-extern int sensors_get_label(const sensors_chip_name *name, int feature,
-                             char **result);
+int sensors_get_label(const sensors_chip_name *name, int feature,
+		      char **result);
 
 /* Read the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure.  */
-extern int sensors_get_feature(const sensors_chip_name *name, int feature,
-                               double *result);
+int sensors_get_feature(const sensors_chip_name *name, int feature,
+			double *result);
 
 /* Set the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
-extern int sensors_set_feature(const sensors_chip_name *name, int feature,
-                               double value);
+int sensors_set_feature(const sensors_chip_name *name, int feature,
+			double value);
 
 /* Execute all set statements for this particular chip. The chip may contain
    wildcards!  This function will return 0 on success, and <0 on failure. */
-extern int sensors_do_chip_sets(const sensors_chip_name *name);
+int sensors_do_chip_sets(const sensors_chip_name *name);
 
 /* This function returns all detected chips, one by one. To start at the
    beginning of the list, use 0 for nr; NULL is returned if we are
-   at the end of the list. Do not try to change these chip names, as 
+   at the end of the list. Do not try to change these chip names, as
    they point to internal structures! Do not use nr for anything else. */
-extern const sensors_chip_name *sensors_get_detected_chips(int *nr);
-
+const sensors_chip_name *sensors_get_detected_chips(int *nr);
 
 /* These defines are used in the mode field of sensors_feature_data */
 #define SENSORS_MODE_NO_RW 0
@@ -121,50 +119,50 @@ extern const sensors_chip_name *sensors_get_detected_chips(int *nr);
    0x100 apart, and sensor features which should not have a compute_mapping to
    the _input feature start at 0x?10. */
 typedef enum sensors_feature_type {
-  SENSORS_FEATURE_IN = 0x000,
-  SENSORS_FEATURE_IN_MIN,
-  SENSORS_FEATURE_IN_MAX,
-  SENSORS_FEATURE_IN_ALARM = 0x010,
-  SENSORS_FEATURE_IN_MIN_ALARM,
-  SENSORS_FEATURE_IN_MAX_ALARM,
-  
-  SENSORS_FEATURE_FAN = 0x100,
-  SENSORS_FEATURE_FAN_MIN,
-  SENSORS_FEATURE_FAN_ALARM = 0x110,
-  SENSORS_FEATURE_FAN_FAULT,
-  SENSORS_FEATURE_FAN_DIV,
-  
-  SENSORS_FEATURE_TEMP = 0x200,
-  SENSORS_FEATURE_TEMP_MAX,
-  SENSORS_FEATURE_TEMP_MAX_HYST,
-  SENSORS_FEATURE_TEMP_MIN,
-  SENSORS_FEATURE_TEMP_CRIT,
-  SENSORS_FEATURE_TEMP_CRIT_HYST,
-  SENSORS_FEATURE_TEMP_ALARM = 0x210,
-  SENSORS_FEATURE_TEMP_MAX_ALARM,
-  SENSORS_FEATURE_TEMP_MIN_ALARM,
-  SENSORS_FEATURE_TEMP_CRIT_ALARM,
-  SENSORS_FEATURE_TEMP_FAULT,
-  SENSORS_FEATURE_TEMP_SENS,
-  
-  SENSORS_FEATURE_VID = 0x300,
-  
-  SENSORS_FEATURE_UNKNOWN = INT_MAX,
-  
-  /* special the largest number of subfeatures used, iow the 
-     highest ## from all the 0x?## above + 1*/
-  SENSORS_FEATURE_MAX_SUB_FEATURES = 22
+	SENSORS_FEATURE_IN = 0x000,
+	SENSORS_FEATURE_IN_MIN,
+	SENSORS_FEATURE_IN_MAX,
+	SENSORS_FEATURE_IN_ALARM = 0x010,
+	SENSORS_FEATURE_IN_MIN_ALARM,
+	SENSORS_FEATURE_IN_MAX_ALARM,
+
+	SENSORS_FEATURE_FAN = 0x100,
+	SENSORS_FEATURE_FAN_MIN,
+	SENSORS_FEATURE_FAN_ALARM = 0x110,
+	SENSORS_FEATURE_FAN_FAULT,
+	SENSORS_FEATURE_FAN_DIV,
+
+	SENSORS_FEATURE_TEMP = 0x200,
+	SENSORS_FEATURE_TEMP_MAX,
+	SENSORS_FEATURE_TEMP_MAX_HYST,
+	SENSORS_FEATURE_TEMP_MIN,
+	SENSORS_FEATURE_TEMP_CRIT,
+	SENSORS_FEATURE_TEMP_CRIT_HYST,
+	SENSORS_FEATURE_TEMP_ALARM = 0x210,
+	SENSORS_FEATURE_TEMP_MAX_ALARM,
+	SENSORS_FEATURE_TEMP_MIN_ALARM,
+	SENSORS_FEATURE_TEMP_CRIT_ALARM,
+	SENSORS_FEATURE_TEMP_FAULT,
+	SENSORS_FEATURE_TEMP_SENS,
+
+	SENSORS_FEATURE_VID = 0x300,
+
+	SENSORS_FEATURE_UNKNOWN = INT_MAX,
+
+	/* special the largest number of subfeatures used, iow the
+	   highest ## from all the 0x?## above + 1*/
+	SENSORS_FEATURE_MAX_SUB_FEATURES = 22
 } sensors_feature_type;
 
 /* This structure is used when you want to get all features of a specific
    chip. */
 typedef struct sensors_feature_data {
-  int number;
-  char *name;
-  sensors_feature_type type;
-  int mapping;
-  int compute_mapping;
-  int mode;
+	int number;
+	char *name;
+	sensors_feature_type type;
+	int mapping;
+	int compute_mapping;
+	int mode;
 } sensors_feature_data;
 
 /* This returns all features of a specific chip. They are returned in
@@ -175,7 +173,7 @@ typedef struct sensors_feature_data {
    begin of the list. If no more features are found NULL is returned.
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
-extern const sensors_feature_data *sensors_get_all_features
+const sensors_feature_data *sensors_get_all_features
              (const sensors_chip_name *name, int *nr);
 
 #ifdef __cplusplus
