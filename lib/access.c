@@ -326,8 +326,6 @@ const char *sensors_get_adapter_name(int bus_nr)
 		return "ISA adapter";
 	if (bus_nr == SENSORS_CHIP_NAME_BUS_PCI)
 		return "PCI adapter";
-	if (bus_nr == SENSORS_CHIP_NAME_BUS_DUMMY)
-		return "Dummy adapter";
 	for (i = 0; i < sensors_proc_bus_count; i++)
 		if (sensors_proc_bus[i].number == bus_nr)
 			return sensors_proc_bus[i].adapter;

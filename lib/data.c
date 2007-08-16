@@ -171,10 +171,6 @@ DONE2:;
     if (part2)
       *(part2-1) = '-';
     *(part3-1) = '-';
-  } else if(part3 && part4) {
-    res->bus = SENSORS_CHIP_NAME_BUS_DUMMY;
-    if (! (res->busname = strdup(part3)))
-      sensors_fatal_error("sensors_parse_chip_name","Allocating new busname");
   } else
     goto ERROR;
     
@@ -202,8 +198,7 @@ int sensors_parse_i2cbus_name(const char *name, int *res)
     return 0;
   }
   if (strncmp(name,"i2c-",4)) {
-    *res = SENSORS_CHIP_NAME_BUS_DUMMY;
-    return 0;
+    return -SENSORS_ERR_BUS_NAME;
   }
   name += 4;
   if ((strlen(name) > 3) || (strlen(name) == 0))
@@ -265,7 +260,6 @@ int sensors_substitute_busses(void)
     for(j = 0; j < chips->fits_count; j++)
       if ((chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ISA) &&
           (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_PCI) &&
-          (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_DUMMY) &&
           (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY) &&
           (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY_I2C))
         if ((err = sensors_substitute_chip(chips->fits+j, lineno)))

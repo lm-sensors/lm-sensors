@@ -29,7 +29,6 @@
 #define SENSORS_CHIP_NAME_BUS_ISA -1
 #define SENSORS_CHIP_NAME_BUS_ANY -2
 #define SENSORS_CHIP_NAME_BUS_ANY_I2C -3
-#define SENSORS_CHIP_NAME_BUS_DUMMY -4
 #define SENSORS_CHIP_NAME_BUS_PCI -5
 #define SENSORS_CHIP_NAME_ADDR_ANY -1
 
@@ -44,7 +43,7 @@ typedef struct sensors_chip_name {
   char *prefix;
   int bus;
   int addr;
-  char *busname;	/* if dummy */
+  char *busname;
 } sensors_chip_name;
 
 /* (Re)load the configuration file and the detected chips list. If this 

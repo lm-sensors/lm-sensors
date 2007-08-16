@@ -382,7 +382,7 @@ int sensors_read_sysfs_bus(void)
 		if (!strncmp(entry.adapter, "ISA ", 4)) {
 			entry.number = SENSORS_CHIP_NAME_BUS_ISA;
 		} else if (sscanf(clsdev->name, "i2c-%d", &entry.number) != 1) {
-			entry.number = SENSORS_CHIP_NAME_BUS_DUMMY;
+			continue;
 		}
 
 		sensors_add_proc_bus(&entry);
