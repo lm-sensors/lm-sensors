@@ -237,7 +237,7 @@ int main (int argc, char *argv[])
     sensors_cleanup();
     exit(error);
   } else {
-    if(chips[0].prefix == SENSORS_CHIP_NAME_PREFIX_ANY)
+    if (optind == argc) /* No chip name on command line */
 	    fprintf(stderr,
 	            "No sensors found!\n"
 	            "Make sure you loaded all the kernel drivers you need.\n"
