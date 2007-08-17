@@ -99,7 +99,6 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
   double feature_vals[SENSORS_FEATURE_TEMP_SENS - SENSORS_FEATURE_TEMP] = {0.0, };
   
   if (sensors_get_label(name, feature->number, &label)) {
-    free(label);
     printf("ERROR: Can't get temperature label!\n");
     return;
   }
@@ -213,7 +212,6 @@ static void print_generic_chip_in(const sensors_chip_name *name,
   char *label;
   
   if (sensors_get_label(name, feature->number, &label)) {
-    free(label);
     printf("ERROR: Can't get in label!\n");
     return;
   }
@@ -277,7 +275,6 @@ static void print_generic_chip_fan(const sensors_chip_name *name,
   
   if (sensors_get_label(name, feature->number, &label)) {
     printf("ERROR: Can't get fan label!\n");
-    free(label);
     return;
   }
   
