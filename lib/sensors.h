@@ -78,8 +78,8 @@ extern const char *sensors_get_algorithm_name(int bus_nr);
 
 /* Look up the label which belongs to this chip. Note that chip should not
    contain wildcard values! *result is newly allocated (free it yourself).
-   This function will return 0 on success, and <0 on failure.  This
-   function takes logical mappings into account. */
+   This function will return 0 on success, and <0 on failure.
+   If no label exists for this feature, its name is returned itself. */
 extern int sensors_get_label(sensors_chip_name name, int feature,
                              char **result);
 
