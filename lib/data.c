@@ -92,7 +92,8 @@ int sensors_parse_chip_name(const char *name, sensors_chip_name *res)
 	/* Then we have either a sole "*" (all chips with this name) or a bus
 	   type and an address. */
 	if (!strcmp(name, "*")) {
-		res->bus = SENSORS_CHIP_NAME_BUS_ANY;
+		res->bus.type = SENSORS_BUS_TYPE_ANY;
+		res->bus.nr = SENSORS_BUS_NR_ANY;
 		res->addr = SENSORS_CHIP_NAME_ADDR_ANY;
 		return 0;
 	}
@@ -100,11 +101,11 @@ int sensors_parse_chip_name(const char *name, sensors_chip_name *res)
 	if (!(dash = strchr(name, '-')))
 		goto ERROR;
 	if (!strncmp(name, "i2c", dash - name))
-		res->bus = SENSORS_CHIP_NAME_BUS_ANY_I2C;
+		res->bus.type = SENSORS_BUS_TYPE_I2C;
 	else if (!strncmp(name, "isa", dash - name))
-		res->bus = SENSORS_CHIP_NAME_BUS_ISA;
+		res->bus.type = SENSORS_BUS_TYPE_ISA;
 	else if (!strncmp(name, "pci", dash - name))
-		res->bus = SENSORS_CHIP_NAME_BUS_PCI;
+		res->bus.type = SENSORS_BUS_TYPE_PCI;
 	else
 		goto ERROR;
 	name = dash + 1;
@@ -112,17 +113,21 @@ int sensors_parse_chip_name(const char *name, sensors_chip_name *res)
 	/* Some bus types (i2c) have an additional bus number. For these, the
 	   next part is either a "*" (any bus of that type) or a decimal
 	   number. */
-	switch (res->bus) {
-	case SENSORS_CHIP_NAME_BUS_ANY_I2C:
+	switch (res->bus.type) {
+	case SENSORS_BUS_TYPE_I2C:
 		if (!strncmp(name, "*-", 2)) {
+			res->bus.nr = SENSORS_BUS_NR_ANY;
 			name += 2;
 			break;
 		}
 
-		res->bus = strtoul(name, &dash, 10);
-		if (*name == '\0' || *dash != '-' || res->bus < 0)
+		res->bus.nr = strtoul(name, &dash, 10);
+		if (*name == '\0' || *dash != '-' || res->bus.nr < 0)
 			goto ERROR;
 		name = dash + 1;
+		break;
+	default:
+		res->bus.nr = SENSORS_BUS_NR_ANY;
 	}
 
 	/* Last part is the chip address, or "*" for any address. */
@@ -147,17 +152,19 @@ int sensors_snprintf_chip_name(char *str, size_t size,
 	if (sensors_chip_name_has_wildcards(chip))
 		return -SENSORS_ERR_WILDCARDS;
 
-	switch (chip->bus) {
-	case SENSORS_CHIP_NAME_BUS_ISA:
+	switch (chip->bus.type) {
+	case SENSORS_BUS_TYPE_ISA:
 		return snprintf(str, size, "%s-isa-%04x", chip->prefix,
 				chip->addr);
-	case SENSORS_CHIP_NAME_BUS_PCI:
+	case SENSORS_BUS_TYPE_PCI:
 		return snprintf(str, size, "%s-pci-%04x", chip->prefix,
 				chip->addr);
-	default:
-		return snprintf(str, size, "%s-i2c-%d-%02x", chip->prefix,
-				chip->bus, chip->addr);
+	case SENSORS_BUS_TYPE_I2C:
+		return snprintf(str, size, "%s-i2c-%hd-%02x", chip->prefix,
+				chip->bus.nr, chip->addr);
 	}
+
+	return -SENSORS_ERR_CHIP_NAME;
 }
 
 int sensors_parse_i2cbus_name(const char *name, int *res)
@@ -178,12 +185,13 @@ int sensors_substitute_chip(sensors_chip_name *name, int lineno)
 {
 	int i, j;
 	for (i = 0; i < sensors_config_busses_count; i++)
-		if (sensors_config_busses[i].number == name->bus)
+		if (name->bus.type == SENSORS_BUS_TYPE_I2C &&
+		    sensors_config_busses[i].number == name->bus.nr)
 			break;
 
 	if (i == sensors_config_busses_count) {
 		sensors_parse_error("Undeclared i2c bus referenced", lineno);
-		name->bus = sensors_proc_bus_count;
+		name->bus.nr = sensors_proc_bus_count;
 		return -SENSORS_ERR_BUS_NAME;
 	}
 
@@ -191,14 +199,14 @@ int sensors_substitute_chip(sensors_chip_name *name, int lineno)
 	for (j = 0; j < sensors_proc_bus_count; j++) {
 		if (!strcmp(sensors_config_busses[i].adapter,
 			    sensors_proc_bus[j].adapter)) {
-			name->bus = sensors_proc_bus[j].number;
+			name->bus.nr = sensors_proc_bus[j].number;
 			return 0;
 		}
 	}
 
 	/* We did not find anything. sensors_proc_bus_count is not
 	   a valid bus number, so it will never be matched. Good. */
-	name->bus = sensors_proc_bus_count;
+	name->bus.nr = sensors_proc_bus_count;
 	return 0;
 }
 
@@ -211,14 +219,16 @@ int sensors_substitute_busses(void)
 	for (i = 0; i < sensors_config_chips_count; i++) {
 		lineno = sensors_config_chips[i].lineno;
 		chips = &sensors_config_chips[i].chips;
-		for (j = 0; j < chips->fits_count; j++)
-			if (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ISA &&
-			    chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_PCI &&
-			    chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY &&
-			    chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY_I2C)
-				if ((err = sensors_substitute_chip(chips->fits+j,
-								   lineno)))
-					res = err;
+		for (j = 0; j < chips->fits_count; j++) {
+			/* We can only substitute if a specific bus number
+			   is given. */
+			if (chips->fits[j].bus.nr == SENSORS_BUS_NR_ANY)
+				continue;
+
+			err = sensors_substitute_chip(&chips->fits[j], lineno);
+			if (err)
+				res = err;
+		}
 	}
 	return res;
 }

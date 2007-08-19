@@ -226,14 +226,16 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 	if (!entry.chip.path)
 		sensors_fatal_error(__FUNCTION__, "out of memory");
 
-	if (sscanf(dev->name, "%d-%x", &entry.chip.bus, &entry.chip.addr) == 2) {
+	if (sscanf(dev->name, "%hd-%x", &entry.chip.bus.nr, &entry.chip.addr) == 2) {
 		/* find out if legacy ISA or not */
-		if (entry.chip.bus == 9191)
-			entry.chip.bus = SENSORS_CHIP_NAME_BUS_ISA;
-		else {
+		if (entry.chip.bus.nr == 9191) {
+			entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
+			entry.chip.bus.nr = 0;
+		} else {
+			entry.chip.bus.type = SENSORS_BUS_TYPE_I2C;
 			snprintf(bus_path, sizeof(bus_path),
 				"%s/class/i2c-adapter/i2c-%d/device/name",
-				sensors_sysfs_mount, entry.chip.bus);
+				sensors_sysfs_mount, entry.chip.bus.nr);
 
 			if ((bus_attr = sysfs_open_attribute(bus_path))) {
 				if (sysfs_read_attribute(bus_attr)) {
@@ -242,19 +244,23 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 				}
 
 				if (bus_attr->value
-				 && !strncmp(bus_attr->value, "ISA ", 4))
-					entry.chip.bus = SENSORS_CHIP_NAME_BUS_ISA;
+				 && !strncmp(bus_attr->value, "ISA ", 4)) {
+					entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
+					entry.chip.bus.nr = 0;
+				}
 
 				sysfs_close_attribute(bus_attr);
 			}
 		}
 	} else if (sscanf(dev->name, "%*[a-z0-9_].%d", &entry.chip.addr) == 1) {
 		/* must be new ISA (platform driver) */
-		entry.chip.bus = SENSORS_CHIP_NAME_BUS_ISA;
+		entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
+		entry.chip.bus.nr = 0;
 	} else if (sscanf(dev->name, "%x:%x:%x.%x", &domain, &bus, &slot, &fn) == 4) {
 		/* PCI */
 		entry.chip.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
-		entry.chip.bus = SENSORS_CHIP_NAME_BUS_PCI;
+		entry.chip.bus.type = SENSORS_BUS_TYPE_PCI;
+		entry.chip.bus.nr = 0;
 	} else
 		goto exit_free;
 	

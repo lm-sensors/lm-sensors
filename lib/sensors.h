@@ -1,6 +1,7 @@
 /*
     sensors.h - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,11 +27,13 @@
 /* Publicly accessible library functions */
 
 #define SENSORS_CHIP_NAME_PREFIX_ANY NULL
-#define SENSORS_CHIP_NAME_BUS_ISA -1
-#define SENSORS_CHIP_NAME_BUS_ANY -2
-#define SENSORS_CHIP_NAME_BUS_ANY_I2C -3
-#define SENSORS_CHIP_NAME_BUS_PCI -5
 #define SENSORS_CHIP_NAME_ADDR_ANY -1
+
+#define SENSORS_BUS_TYPE_ANY	(-1)
+#define SENSORS_BUS_TYPE_I2C	0
+#define SENSORS_BUS_TYPE_ISA	1
+#define SENSORS_BUS_TYPE_PCI	2
+#define SENSORS_BUS_NR_ANY	(-1)
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,10 +41,15 @@ extern "C" {
 
 extern const char *libsensors_version;
 
+typedef struct sensors_bus_id {
+	short type;
+	short nr;
+} sensors_bus_id;
+
 /* A chip name is encoded in this structure */
 typedef struct sensors_chip_name {
 	char *prefix;
-	int bus;
+	sensors_bus_id bus;
 	int addr;
 	char *path;
 } sensors_chip_name;
@@ -70,10 +78,10 @@ int sensors_snprintf_chip_name(char *str, size_t size,
 int sensors_match_chip(const sensors_chip_name *chip1,
 		       const sensors_chip_name *chip2);
 
-/* This function returns the adapter name of a bus number,
+/* This function returns the adapter name of a bus,
    as used within the sensors_chip_name structure. If it could not be found,
    it returns NULL */
-const char *sensors_get_adapter_name(int bus_nr);
+const char *sensors_get_adapter_name(const sensors_bus_id *bus);
 
 /* Look up the label which belongs to this chip. Note that chip should not
    contain wildcard values! *result is newly allocated (free it yourself).

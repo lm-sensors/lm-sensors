@@ -209,7 +209,8 @@ int main (int argc, char *argv[])
 
   if (optind == argc) {
     chips[0].prefix = SENSORS_CHIP_NAME_PREFIX_ANY;
-    chips[0].bus = SENSORS_CHIP_NAME_BUS_ANY;
+    chips[0].bus.type = SENSORS_BUS_TYPE_ANY;
+    chips[0].bus.nr = SENSORS_BUS_NR_ANY;
     chips[0].addr = SENSORS_CHIP_NAME_ADDR_ANY;
     chips_count = 1;
   } else 
@@ -310,11 +311,11 @@ void do_a_print(const sensors_chip_name *name)
 
   printf("%s\n",sprintf_chip_name(name));
   if (!hide_adapter) {
-    const char *adap = sensors_get_adapter_name(name->bus);
+    const char *adap = sensors_get_adapter_name(&name->bus);
     if (adap)
       printf("Adapter: %s\n", adap);
     else
-      fprintf(stderr, "Can't get adapter name for bus %d\n", name->bus);
+      fprintf(stderr, "Can't get adapter name\n");
   }
   if (do_unknown)
     print_unknown_chip(name);

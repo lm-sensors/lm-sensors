@@ -1,6 +1,7 @@
 /*
     access.c - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,22 +42,15 @@ int sensors_match_chip(const sensors_chip_name *chip1,
 	    strcasecmp(chip1->prefix, chip2->prefix))
 		return 0;
 
-	if ((chip1->bus != SENSORS_CHIP_NAME_BUS_ANY) &&
-	    (chip2->bus != SENSORS_CHIP_NAME_BUS_ANY) &&
-	    (chip1->bus != chip2->bus)) {
+	if ((chip1->bus.type != SENSORS_BUS_TYPE_ANY) &&
+	    (chip2->bus.type != SENSORS_BUS_TYPE_ANY) &&
+	    (chip1->bus.type != chip2->bus.type))
+		return 0;
 
-		if ((chip1->bus == SENSORS_CHIP_NAME_BUS_ISA) ||
-		    (chip2->bus == SENSORS_CHIP_NAME_BUS_ISA))
-			return 0;
-
-		if ((chip1->bus == SENSORS_CHIP_NAME_BUS_PCI) ||
-		    (chip2->bus == SENSORS_CHIP_NAME_BUS_PCI))
-			return 0;
-
-		if ((chip1->bus != SENSORS_CHIP_NAME_BUS_ANY_I2C) &&
-		    (chip2->bus != SENSORS_CHIP_NAME_BUS_ANY_I2C))
-			return 0;
-	}
+	if ((chip1->bus.nr != SENSORS_BUS_NR_ANY) &&
+	    (chip2->bus.nr != SENSORS_BUS_NR_ANY) &&
+	    (chip1->bus.nr != chip2->bus.nr))
+		return 0;
 
 	if ((chip1->addr != chip2->addr) &&
 	    (chip1->addr != SENSORS_CHIP_NAME_ADDR_ANY) &&
@@ -136,8 +130,8 @@ sensors_lookup_feature_name(const sensors_chip_name *chip, const char *feature)
 int sensors_chip_name_has_wildcards(const sensors_chip_name *chip)
 {
 	if ((chip->prefix == SENSORS_CHIP_NAME_PREFIX_ANY) ||
-	    (chip->bus == SENSORS_CHIP_NAME_BUS_ANY) ||
-	    (chip->bus == SENSORS_CHIP_NAME_BUS_ANY_I2C) ||
+	    (chip->bus.type == SENSORS_BUS_TYPE_ANY) ||
+	    (chip->bus.nr == SENSORS_BUS_NR_ANY) ||
 	    (chip->addr == SENSORS_CHIP_NAME_ADDR_ANY))
 		return 1;
 	else
@@ -318,16 +312,21 @@ const sensors_chip_name *sensors_get_detected_chips(int *nr)
 	return res;
 }
 
-const char *sensors_get_adapter_name(int bus_nr)
+const char *sensors_get_adapter_name(const sensors_bus_id *bus)
 {
 	int i;
 
-	if (bus_nr == SENSORS_CHIP_NAME_BUS_ISA)
+	/* bus types with a single instance */
+	switch (bus->type) {
+	case SENSORS_BUS_TYPE_ISA:
 		return "ISA adapter";
-	if (bus_nr == SENSORS_CHIP_NAME_BUS_PCI)
+	case SENSORS_BUS_TYPE_PCI:
 		return "PCI adapter";
+	}
+
+	/* bus types with several instances */
 	for (i = 0; i < sensors_proc_bus_count; i++)
-		if (sensors_proc_bus[i].number == bus_nr)
+		if (sensors_proc_bus[i].number == bus->nr)
 			return sensors_proc_bus[i].adapter;
 	return NULL;
 }

@@ -288,7 +288,8 @@ parseChips
 (int argc, char **argv) {
   if (optind == argc) {
     chipNames[0].prefix = SENSORS_CHIP_NAME_PREFIX_ANY;
-    chipNames[0].bus = SENSORS_CHIP_NAME_BUS_ANY;
+    chipNames[0].bus.type = SENSORS_BUS_TYPE_ANY;
+    chipNames[0].bus.nr = SENSORS_BUS_NR_ANY;
     chipNames[0].addr = SENSORS_CHIP_NAME_ADDR_ANY;
     numChipNames = 1;
   } else {
