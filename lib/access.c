@@ -322,6 +322,10 @@ const char *sensors_get_adapter_name(const sensors_bus_id *bus)
 		return "ISA adapter";
 	case SENSORS_BUS_TYPE_PCI:
 		return "PCI adapter";
+	/* SPI should not be here, but for now SPI adapters have no name
+	   so we don't have any custom string to return. */
+	case SENSORS_BUS_TYPE_SPI:
+		return "SPI adapter";
 	}
 
 	/* bus types with several instances */

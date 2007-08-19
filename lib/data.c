@@ -106,15 +106,18 @@ int sensors_parse_chip_name(const char *name, sensors_chip_name *res)
 		res->bus.type = SENSORS_BUS_TYPE_ISA;
 	else if (!strncmp(name, "pci", dash - name))
 		res->bus.type = SENSORS_BUS_TYPE_PCI;
+	else if (!strncmp(name, "spi", dash - name))
+		res->bus.type = SENSORS_BUS_TYPE_SPI;
 	else
 		goto ERROR;
 	name = dash + 1;
 
-	/* Some bus types (i2c) have an additional bus number. For these, the
-	   next part is either a "*" (any bus of that type) or a decimal
-	   number. */
+	/* Some bus types (i2c, spi) have an additional bus number.
+	   For these, the next part is either a "*" (any bus of that type)
+	   or a decimal number. */
 	switch (res->bus.type) {
 	case SENSORS_BUS_TYPE_I2C:
+	case SENSORS_BUS_TYPE_SPI:
 		if (!strncmp(name, "*-", 2)) {
 			res->bus.nr = SENSORS_BUS_NR_ANY;
 			name += 2;
@@ -161,6 +164,9 @@ int sensors_snprintf_chip_name(char *str, size_t size,
 				chip->addr);
 	case SENSORS_BUS_TYPE_I2C:
 		return snprintf(str, size, "%s-i2c-%hd-%02x", chip->prefix,
+				chip->bus.nr, chip->addr);
+	case SENSORS_BUS_TYPE_SPI:
+		return snprintf(str, size, "%s-spi-%hd-%x", chip->prefix,
 				chip->bus.nr, chip->addr);
 	}
 

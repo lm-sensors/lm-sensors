@@ -252,6 +252,10 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 				sysfs_close_attribute(bus_attr);
 			}
 		}
+	} else if (sscanf(dev->name, "spi%hd.%d", &entry.chip.bus.nr,
+			  &entry.chip.addr) == 2) {
+		/* SPI */
+		entry.chip.bus.type = SENSORS_BUS_TYPE_SPI;
 	} else if (sscanf(dev->name, "%*[a-z0-9_].%d", &entry.chip.addr) == 1) {
 		/* must be new ISA (platform driver) */
 		entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
