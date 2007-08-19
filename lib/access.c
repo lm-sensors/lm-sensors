@@ -326,7 +326,8 @@ const char *sensors_get_adapter_name(const sensors_bus_id *bus)
 
 	/* bus types with several instances */
 	for (i = 0; i < sensors_proc_bus_count; i++)
-		if (sensors_proc_bus[i].number == bus->nr)
+		if (sensors_proc_bus[i].bus.type == bus->type &&
+		    sensors_proc_bus[i].bus.nr == bus->nr)
 			return sensors_proc_bus[i].adapter;
 	return NULL;
 }

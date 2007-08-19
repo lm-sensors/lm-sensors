@@ -110,10 +110,10 @@ typedef struct sensors_chip {
   int lineno;
 } sensors_chip;
 
-/* Config file bus declaration: the i2c bus number, combined with adapter
+/* Config file bus declaration: the bus type and number, combined with adapter
    name */
 typedef struct sensors_bus {
-  int number;
+  sensors_bus_id bus;
   char *adapter;
   int lineno;
 } sensors_bus;
@@ -175,8 +175,8 @@ extern int sensors_proc_bus_max;
 int sensors_substitute_busses(void);
 
 
-/* Parse an i2c bus name into its components. Returns 0 on succes, a value from
+/* Parse a bus id into its components. Returns 0 on succes, a value from
    error.h on failure. */
-int sensors_parse_i2cbus_name(const char *name, int *res);
+int sensors_parse_bus_id(const char *name, sensors_bus_id *bus);
 
 #endif /* def LIB_SENSORS_DATA_H */

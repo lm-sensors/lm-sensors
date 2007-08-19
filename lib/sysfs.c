@@ -380,9 +380,10 @@ int sensors_read_sysfs_bus(void)
 		      (attr = sysfs_get_device_attr(dev, "name"))))
 			continue;
 
-		if (sscanf(clsdev->name, "i2c-%d", &entry.number) != 1 ||
-		    entry.number == 9191) /* legacy ISA */
+		if (sscanf(clsdev->name, "i2c-%hd", &entry.bus.nr) != 1 ||
+		    entry.bus.nr == 9191) /* legacy ISA */
 			continue;
+		entry.bus.type = SENSORS_BUS_TYPE_I2C;
 
 		/* NB: attr->value[attr->len-1] == '\n'; chop that off */
 		entry.adapter = strndup(attr->value, attr->len - 1);

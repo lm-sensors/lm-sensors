@@ -167,7 +167,7 @@ int sensors_snprintf_chip_name(char *str, size_t size,
 	return -SENSORS_ERR_CHIP_NAME;
 }
 
-int sensors_parse_i2cbus_name(const char *name, int *res)
+int sensors_parse_bus_id(const char *name, sensors_bus_id *bus)
 {
 	char *endptr;
 
@@ -175,8 +175,9 @@ int sensors_parse_i2cbus_name(const char *name, int *res)
 		return -SENSORS_ERR_BUS_NAME;
 	}
 	name += 4;
-	*res = strtoul(name, &endptr, 10);
-	if (*name == '\0' || *endptr != '\0' || *res < 0)
+	bus->type = SENSORS_BUS_TYPE_I2C;
+	bus->nr = strtoul(name, &endptr, 10);
+	if (*name == '\0' || *endptr != '\0' || bus->nr < 0)
 		return -SENSORS_ERR_BUS_NAME;
 	return 0;
 }
@@ -185,12 +186,12 @@ int sensors_substitute_chip(sensors_chip_name *name, int lineno)
 {
 	int i, j;
 	for (i = 0; i < sensors_config_busses_count; i++)
-		if (name->bus.type == SENSORS_BUS_TYPE_I2C &&
-		    sensors_config_busses[i].number == name->bus.nr)
+		if (sensors_config_busses[i].bus.type == name->bus.type &&
+		    sensors_config_busses[i].bus.nr == name->bus.nr)
 			break;
 
 	if (i == sensors_config_busses_count) {
-		sensors_parse_error("Undeclared i2c bus referenced", lineno);
+		sensors_parse_error("Undeclared bus id referenced", lineno);
 		name->bus.nr = sensors_proc_bus_count;
 		return -SENSORS_ERR_BUS_NAME;
 	}
@@ -199,7 +200,7 @@ int sensors_substitute_chip(sensors_chip_name *name, int lineno)
 	for (j = 0; j < sensors_proc_bus_count; j++) {
 		if (!strcmp(sensors_config_busses[i].adapter,
 			    sensors_proc_bus[j].adapter)) {
-			name->bus.nr = sensors_proc_bus[j].number;
+			name->bus.nr = sensors_proc_bus[j].bus.nr;
 			return 0;
 		}
 	}
