@@ -192,7 +192,7 @@ int sensors_substitute_chip(sensors_chip_name *name, int lineno)
 
 	if (i == sensors_config_busses_count) {
 		sensors_parse_error("Undeclared bus id referenced", lineno);
-		name->bus.nr = sensors_proc_bus_count;
+		name->bus.nr = SENSORS_BUS_NR_IGNORE;
 		return -SENSORS_ERR_BUS_NAME;
 	}
 
@@ -205,9 +205,9 @@ int sensors_substitute_chip(sensors_chip_name *name, int lineno)
 		}
 	}
 
-	/* We did not find anything. sensors_proc_bus_count is not
-	   a valid bus number, so it will never be matched. Good. */
-	name->bus.nr = sensors_proc_bus_count;
+	/* We did not find a matching bus name, simply ignore this chip
+	   config entry. */
+	name->bus.nr = SENSORS_BUS_NR_IGNORE;
 	return 0;
 }
 

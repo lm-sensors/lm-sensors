@@ -34,6 +34,7 @@
 #define SENSORS_BUS_TYPE_ISA	1
 #define SENSORS_BUS_TYPE_PCI	2
 #define SENSORS_BUS_NR_ANY	(-1)
+#define SENSORS_BUS_NR_IGNORE	(-2)
 
 #ifdef __cplusplus
 extern "C" {
