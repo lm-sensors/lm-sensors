@@ -33,9 +33,9 @@
 # ----------
 # A 'chip' line specifies what the following 'label', 'compute', 'set' and
 # 'ignore' lines refer to. In this case, until the
-# next 'chip' line, everything refers to all lm78, lm78-j and lm79
+# next 'chip' line, everything refers to all lm78 and lm79
 # chips. Other examples are *-isa-* for everything on the ISA bus, and
-# lm78-j-i2c-*-4e for all lm78-j chips on address 0x4e of any I2C bus.
+# lm78-i2c-*-4e for all lm78 chips on address 0x4e of any I2C bus.
 #
 # If more chip statements match a specific chip, they are all considered.
 # Later lines overrule earlier lines, so if you set the in0 label for
@@ -43,7 +43,7 @@
 # "That" is used for LM78 chips on the ISA bus, and "This" for LM78
 # chips on a non-ISA bus.
 #
-#	chip "lm78-*" "lm78-j-*" "lm79-*"
+#	chip "lm78-*" "lm79-*"
 #
 #
 # FEATURE NAMES
@@ -274,7 +274,7 @@
 #### Here begins the real configuration file
 
 
-chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*"
+chip "lm78-*" "lm79-*" "w83781d-*"
 
 # These are as advised in the LM78 and LM79 data sheets, and used on almost
 # any mainboard we have seen.
@@ -1051,78 +1051,6 @@ chip "lm80-*"
 #    set temp_hot_max  52
 #    set temp_os_hyst  57
 #    set temp_os_max   62
-
-
-chip "maxilife-cg-*" "maxilife-co-*" "maxilife-as-*"
-
-   label fan1  "HDD Fan"
-   label fan2  "PCI Fan"
-   label fan3  "CPU Fan"
-   ignore fan4
-
-   label temp2 "PCI Temp"
-   label temp4 "HDD Temp"
-   label temp5 "CPU Temp"
-   ignore temp6
-
-   label vid1  "V+12"
-   ignore vid5
-
-# vid1 need to be scaled by 6.337 other voltages
-# require no scaling
-
-   compute vid1 6.337*@ , @/6.337
-
-
-chip "maxilife-cg-*"
-
-   ignore temp1
-   label temp3  "BX Temp"
-
-   label vid2   "Vcpu1"
-   label vid3   "Vcpu2"
-   ignore vid4
-
-
-chip "maxilife-co-*"
-
-   label temp1  "CPU 1 Temp"
-   label temp3  "CPU 2 Temp"
-
-   label vid2   "Vcpu1"
-   label vid3   "Vcpu2"
-   label vid4   "VcacheL2"
-
-
-chip "maxilife-as-*"
-
-   ignore temp1
-   ignore temp3
-
-   label vid2   "Vcpu"
-   ignore vid3
-   ignore vid4
-
-
-chip "maxilife-nba-*"
-
-   label fan1  "CPU Fan"
-   label fan2  "PCI Fan"
-   label fan3  "HDD Fan"
-   label fan4  "Heat Sink Fan"
-
-   label temp1  "CPU 1 Temp"
-   label temp2  "CPU 2 Temp"
-   label temp3  "PCI/Ambient Temp"
-   label temp4  "HDD Temp"
-   label temp5  "Motherboard Temp"
-   label temp6  "CPU Reference Temp"
-
-   label vid1  "V+12"
-   label vid2  "Vcpu1"
-   label vid3  "Vcpu2"
-   label vid4  "VcacheL2"
-   label vid5  "V-12"
 
 
 chip "via686a-*"
