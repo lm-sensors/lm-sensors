@@ -225,6 +225,8 @@ int sensors_parse_i2cbus_name(const char *name, int *res)
 }
 
 
+#define SENSORS_CHIP_NAME_BUS_IGNORE -42
+
 int sensors_substitute_chip(sensors_chip_name *name,int lineno)
 {
   int i,j;
@@ -234,7 +236,7 @@ int sensors_substitute_chip(sensors_chip_name *name,int lineno)
 
   if (i == sensors_config_busses_count) {
     sensors_parse_error("Undeclared i2c bus referenced",lineno);
-    name->bus = sensors_proc_bus_count;
+    name->bus = SENSORS_CHIP_NAME_BUS_IGNORE;
     return -SENSORS_ERR_BUS_NAME;
   }
 
@@ -249,9 +251,9 @@ int sensors_substitute_chip(sensors_chip_name *name,int lineno)
     }
   }
 
-  /* We did not find anything. sensors_proc_bus_count is not a valid
-     bus number, so it will never be matched. Good. */
-  name->bus = sensors_proc_bus_count;
+  /* We did not find a matching bus name, simply ignore this chip
+     config entry. */
+  name->bus = SENSORS_CHIP_NAME_BUS_IGNORE;
   return 0;
 }
 
