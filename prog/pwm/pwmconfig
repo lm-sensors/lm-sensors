@@ -190,7 +190,7 @@ do
 		pwmdisable $i
 		if [ $? -ne 0 ]
 		then
-			echo "Failed to set pwm$i to full speed" >&2
+			echo "Failed to set $i to full speed" >&2
 			echo "Something's wrong, check your fans!" >&2
 			exit 1
 		fi
