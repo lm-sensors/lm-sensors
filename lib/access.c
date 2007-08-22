@@ -139,27 +139,27 @@ int sensors_chip_name_has_wildcards(const sensors_chip_name *chip)
 }
 
 /* Look up the label which belongs to this chip. Note that chip should not
-   contain wildcard values! *result is newly allocated (free it yourself).
-   This function will return 0 on success, and <0 on failure.
+   contain wildcard values! The returned string is newly allocated (free it
+   yourself). On failure, NULL is returned.
    If no label exists for this feature, its name is returned itself. */
-int sensors_get_label(const sensors_chip_name *name, int feature, char **result)
+char *sensors_get_label(const sensors_chip_name *name, int feature)
 {
+	char *label;
 	const sensors_chip *chip;
 	const sensors_chip_feature *featureptr;
 	char buf[128], path[PATH_MAX];
 	FILE *f;
 	int i;
 
-	*result = NULL;
 	if (sensors_chip_name_has_wildcards(name))
-		return -SENSORS_ERR_WILDCARDS;
+		return NULL;
 	if (!(featureptr = sensors_lookup_feature_nr(name, feature)))
-		return -SENSORS_ERR_NO_ENTRY;
+		return NULL;
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->labels_count; i++)
 			if (!strcasecmp(featureptr->data.name,chip->labels[i].name)){
-				*result = strdup(chip->labels[i].value);
+				label = strdup(chip->labels[i].value);
 				goto sensors_get_label_exit;
 			}
 
@@ -173,19 +173,19 @@ int sensors_get_label(const sensors_chip_name *name, int feature, char **result)
 		if (i > 0) {
 			/* i - 1 to strip the '\n' at the end */
 			buf[i - 1] = 0;
-			*result = strdup(buf);
+			label = strdup(buf);
 			goto sensors_get_label_exit;
 		}
 	}
 
 	/* No label, return the feature name instead */
-	*result = strdup(featureptr->data.name);
+	label = strdup(featureptr->data.name);
 	
 sensors_get_label_exit:
-	if (*result == NULL)
+	if (!label)
 		sensors_fatal_error("sensors_get_label",
 				    "Allocating label text");
-	return 0;
+	return label;
 }
 
 /* Looks up whether a feature should be ignored. Returns

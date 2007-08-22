@@ -88,11 +88,10 @@ int sensors_match_chip(const sensors_chip_name *chip1,
 const char *sensors_get_adapter_name(const sensors_bus_id *bus);
 
 /* Look up the label which belongs to this chip. Note that chip should not
-   contain wildcard values! *result is newly allocated (free it yourself).
-   This function will return 0 on success, and <0 on failure.
+   contain wildcard values! The returned string is newly allocated (free it
+   yourself). On failure, NULL is returned.
    If no label exists for this feature, its name is returned itself. */
-int sensors_get_label(const sensors_chip_name *name, int feature,
-		      char **result);
+char *sensors_get_label(const sensors_chip_name *name, int feature);
 
 /* Read the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0

@@ -163,7 +163,7 @@ applyToFeatures
             } else if (getRawLabel (chip, labelNumber, &rawLabel)) {
               sensorLog (LOG_ERR, "Error getting raw sensor label: %s/#%d", chip->prefix, labelNumber);
               ret = -1;
-            } else if (getLabel (chip, labelNumber, &label)) {
+            } else if (!(label = sensors_get_label (chip, labelNumber))) {
               sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
               ret = -1;
             } else if (valid) {

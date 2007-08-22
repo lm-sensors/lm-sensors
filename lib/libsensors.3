@@ -38,8 +38,7 @@ libsensors \- publicly accessible functions provided by the sensors library
 .B int sensors_match_chip(const sensors_chip_name *chip1,
                        \fBconst sensors_chip_name *chip2);\fP
 .B const char *sensors_get_adapter_name(int bus_nr);
-.B int sensors_get_label(const sensors_chip_name *name, int feature,
-                      \fBchar **result);\fP
+.B char *sensors_get_label(const sensors_chip_name *name, int feature);\fP
 .B int sensors_get_feature(const sensors_chip_name *name, int feature,
                         \fBdouble *result);\fP
 .B int sensors_set_feature(const sensors_chip_name *name, int feature,
@@ -78,10 +77,12 @@ Compare two chips name descriptions, to see whether they could match. Return 0 i
 This function returns the adapter name of a bus number, as used within the
 sensors_chip_name structure. If it could not be found, it returns NULL.
 
-\fBint sensors_get_label(const sensors_chip_name *name, int feature,
-                      char **result);\fP
+\fBchar *sensors_get_label(const sensors_chip_name *name, int feature);\fP
 .br
-Look up the label which belongs to this chip. Note that chip should not contain wildcard values! *result is newly allocated (free it yourself). This function will return 0 on success, and <0 on failure.
+Look up the label which belongs to this chip. Note that chip should not
+contain wildcard values! The returned string is newly allocated (free it
+yourself). On failure, NULL is returned.
+If no label exists for this feature, its name is returned itself.
 
 \fBint sensors_get_feature(const sensors_chip_name *name,
                         int feature, double *result);\fP

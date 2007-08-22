@@ -46,14 +46,6 @@ getValid
 }
 
 int
-getLabel
-(const sensors_chip_name *name, int feature, char **label) {
-  int err;
-  err = sensors_get_label (name, feature, label);
-  return err;
-}
-
-int
 getRawLabel
 (const sensors_chip_name *name, int feature, const char **label) {
   const sensors_feature_data *rawFeature;
@@ -109,7 +101,7 @@ readUnknownChip
     if (getValid (chip, sensor->number, &valid)) {
       sensorLog (LOG_ERR, "Error getting sensor validity: %s/%s", chip->prefix, sensor->name);
       ret = 20;
-    } else if (getLabel (chip, sensor->number, &label)) {
+    } else if (!(label = sensors_get_label (chip, sensor->number))) {
       sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, sensor->name);
       ret = 21;
     } else if (!valid) {
@@ -169,7 +161,7 @@ doKnownChip
     } else if (getValid (chip, labelNumber, &valid)) {
       sensorLog (LOG_ERR, "Error getting sensor validity: %s/#%d", chip->prefix, labelNumber);
       ret = 22;
-    } else if (getLabel (chip, labelNumber, &label)) {
+    } else if (!(label = sensors_get_label (chip, labelNumber))) {
       sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
       ret = 22;
     } else if (valid) {
