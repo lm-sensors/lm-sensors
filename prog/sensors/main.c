@@ -54,7 +54,7 @@ static const char *sprintf_chip_name(const sensors_chip_name *name);
 #define CHIPS_MAX 20
 sensors_chip_name chips[CHIPS_MAX];
 int chips_count=0;
-int do_sets, do_unknown, fahrenheit, hide_adapter, hide_unknown;
+int do_sets, do_unknown, fahrenheit, hide_adapter;
 
 char degstr[5]; /* store the correct string to print degrees */
 
@@ -71,7 +71,6 @@ void print_long_help(void)
   printf("  -s, --set             Execute `set' statements too (root only)\n");
   printf("  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n");
   printf("  -A, --no-adapter      Do not show adapter for each chip\n");
-  printf("  -U, --no-unknown      Do not show unknown chips\n");
   printf("  -u, --unknown         Treat chips as unknown ones (testing only)\n");
   printf("  -v, --version         Display the program version\n");
   printf("\n");
@@ -156,7 +155,6 @@ int main (int argc, char *argv[])
     { "version", no_argument, NULL, 'v'},
     { "fahrenheit", no_argument, NULL, 'f' },
     { "no-adapter", no_argument, NULL, 'A' },
-    { "no-unknown", no_argument, NULL, 'U' },
     { "config-file", required_argument, NULL, 'c' },
     { "unknown", no_argument, NULL, 'u' },
     { 0,0,0,0 }
@@ -167,9 +165,8 @@ int main (int argc, char *argv[])
   do_unknown = 0;
   do_sets = 0;
   hide_adapter = 0;
-  hide_unknown = 0;
   while (1) {
-    c = getopt_long(argc, argv, "hsvfAUc:u", long_opts, NULL);
+    c = getopt_long(argc, argv, "hsvfAc:u", long_opts, NULL);
     if (c == EOF)
       break;
     switch(c) {
@@ -194,9 +191,6 @@ int main (int argc, char *argv[])
       break;
     case 'A':
       hide_adapter = 1;
-      break;
-    case 'U':
-      hide_unknown = 1;
       break;
     case 'u':
       do_unknown = 1;
@@ -306,9 +300,6 @@ const char *sprintf_chip_name(const sensors_chip_name *name)
 
 void do_a_print(const sensors_chip_name *name)
 {
-  if (hide_unknown)
-    return;
-
   printf("%s\n",sprintf_chip_name(name));
   if (!hide_adapter) {
     const char *adap = sensors_get_adapter_name(&name->bus);

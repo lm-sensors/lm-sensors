@@ -1,4 +1,5 @@
 .\" Copyright 1999 Frodo Looijaard <frodol@dds.nl>
+.\" Copyright (C) 2007 Jean Delvare <khali@linux-fr.org>
 .\" sensors is distributed under the GPL
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
@@ -21,7 +22,7 @@
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
-.TH sensors 1  "October 2006" "" "Linux User's Manual"
+.TH sensors 1  "August 2007" "" "Linux User's Manual"
 .SH NAME
 sensors \- print sensors information
 .SH SYNOPSIS
@@ -44,12 +45,6 @@ is used to show the current readings of all sensor chips.
 .B sensors -s
 is used to set all limits as specified in the configuration file.
 
-.B sensors
-knows about certain chips, and outputs nicely formatted readings for them; but
-it can also display the information of unknown chips, as long as 
-.I libsensors
-knows about them.
-
 .SH OPTIONS
 .IP "-c config-file"
 Specify a configuration file. If no file is specified, `/etc/sensors.conf'
@@ -63,8 +58,6 @@ be `root' to do this. If this parameter is not specified, no `set' statement
 is evaluated.
 .IP -A
 Do not show the adapter for each chip.
-.IP -U
-Hide unknown chips.
 .IP -u
 Treat all chips as unknown ones. Output will be of much lower quality;
 this option is only added for testing purposes.
