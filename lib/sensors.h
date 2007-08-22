@@ -96,14 +96,14 @@ char *sensors_get_label(const sensors_chip_name *name, int feature);
 /* Read the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure.  */
-int sensors_get_feature(const sensors_chip_name *name, int feature,
-			double *result);
+int sensors_get_value(const sensors_chip_name *name, int feature,
+		      double *value);
 
 /* Set the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
-int sensors_set_feature(const sensors_chip_name *name, int feature,
-			double value);
+int sensors_set_value(const sensors_chip_name *name, int feature,
+		      double value);
 
 /* Execute all set statements for this particular chip. The chip may contain
    wildcards!  This function will return 0 on success, and <0 on failure. */

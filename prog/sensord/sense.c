@@ -108,7 +108,7 @@ readUnknownChip
       /* skip invalid */
     } else if (!(sensor->mode & SENSORS_MODE_R)) {
       sensorLog (LOG_INFO, "%s: %s", sensor->name, label);
-    } else if ((ret = sensors_get_feature (chip, sensor->number, &value))) {
+    } else if ((ret = sensors_get_value (chip, sensor->number, &value))) {
       sensorLog (LOG_ERR, "Error getting sensor data: %s/%s: %s", chip->prefix, sensor->name, sensors_strerror (ret));
       ret = 22;
     } else {
@@ -133,7 +133,7 @@ doKnownChip
   if (action == DO_READ)
     ret = idChip (chip);
   if (!ret && descriptor->alarmNumber) {
-    if ((ret = sensors_get_feature (chip, descriptor->alarmNumber, &tmp))) {
+    if ((ret = sensors_get_value (chip, descriptor->alarmNumber, &tmp))) {
       sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, descriptor->alarmNumber, sensors_strerror (ret));
       ret = 20;
     } else {
@@ -141,7 +141,7 @@ doKnownChip
     }
   }
   if (!ret && descriptor->beepNumber) {
-    if ((ret = sensors_get_feature (chip, descriptor->beepNumber, &tmp))) {
+    if ((ret = sensors_get_value (chip, descriptor->beepNumber, &tmp))) {
       sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, descriptor->beepNumber, sensors_strerror (ret));
       ret = 21;
     } else {
@@ -168,7 +168,7 @@ doKnownChip
       double values[MAX_DATA];
 
       for (subindex = 0; !ret && (feature->dataNumbers[subindex] >= 0); ++ subindex) {
-        if ((ret = sensors_get_feature (chip, feature->dataNumbers[subindex], values + subindex))) {
+        if ((ret = sensors_get_value (chip, feature->dataNumbers[subindex], values + subindex))) {
           sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, feature->dataNumbers[subindex], sensors_strerror (ret));
           ret = 23;
         }

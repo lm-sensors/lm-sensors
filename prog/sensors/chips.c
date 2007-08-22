@@ -92,7 +92,7 @@ void print_vid_info(const sensors_chip_name *name, int f_vid, int label_size)
   double vid;
 
   if ((label = sensors_get_label(name, f_vid))
-      && !sensors_get_feature(name, f_vid, &vid)) {
+      && !sensors_get_value(name, f_vid, &vid)) {
     print_label(label, label_size);
     printf("%+6.3f V\n", vid);
   }
@@ -113,7 +113,7 @@ void print_unknown_chip(const sensors_chip_name *name)
       continue;
     }
     if (data->mode & SENSORS_MODE_R) {
-      if(sensors_get_feature(name, data->number, &val)) {
+      if (sensors_get_value(name, data->number, &val)) {
         printf("ERROR: Can't get feature `%s' data!\n",data->name);
         continue;
       }

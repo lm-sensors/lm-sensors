@@ -30,7 +30,7 @@ static int get_feature_value(const sensors_chip_name *name,
                              const sensors_feature_data *feature, 
                              double *val)
 {
-  return sensors_get_feature(name, feature->number, val);
+  return sensors_get_value(name, feature->number, val);
 }
 
 static void sensors_get_available_features(const sensors_chip_name *name, 

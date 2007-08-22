@@ -216,8 +216,8 @@ static int sensors_get_ignored(const sensors_chip_name *name,
 /* Read the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
-int sensors_get_feature(const sensors_chip_name *name, int feature,
-			double *result)
+int sensors_get_value(const sensors_chip_name *name, int feature,
+		      double *result)
 {
 	const sensors_chip_feature *main_feature;
 	const sensors_chip_feature *alt_feature;
@@ -261,8 +261,8 @@ int sensors_get_feature(const sensors_chip_name *name, int feature,
 /* Set the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
-int sensors_set_feature(const sensors_chip_name *name, int feature,
-			double value)
+int sensors_set_value(const sensors_chip_name *name, int feature,
+		      double value)
 {
 	const sensors_chip_feature *main_feature;
 	const sensors_chip_feature *alt_feature;
@@ -377,7 +377,7 @@ int sensors_eval_expr(const sensors_chip_name *name,
 		if (!(feature = sensors_lookup_feature_name(name,
 							    expr->data.var)))
 			return SENSORS_ERR_NO_ENTRY;
-		if (!(res = sensors_get_feature(name, feature->data.number, result)))
+		if (!(res = sensors_get_value(name, feature->data.number, result)))
 			return res;
 		return 0;
 	}
@@ -461,7 +461,7 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 				err = res;
 				continue;
 			}
-			if ((res = sensors_set_feature(name, feature_nr, value))) {
+			if ((res = sensors_set_value(name, feature_nr, value))) {
 				sensors_parse_error("Failed to set feature",
 						chip->sets[i].lineno);
 				err = res;
