@@ -116,10 +116,8 @@ int sensors_do_chip_sets(const sensors_chip_name *name);
 const sensors_chip_name *sensors_get_detected_chips(int *nr);
 
 /* These defines are used in the mode field of sensors_feature_data */
-#define SENSORS_MODE_NO_RW 0
 #define SENSORS_MODE_R 1
 #define SENSORS_MODE_W 2
-#define SENSORS_MODE_RW 3
 
 /* This define is used in the mapping field of sensors_feature_data if no
    mapping is available */

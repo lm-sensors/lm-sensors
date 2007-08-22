@@ -121,9 +121,8 @@ This structure is used when you want to get all features of a specific chip.
 .br
 } sensors_feature_data;\fP
 .br
-The mode field can be one of:
-.br
-SENSORS_MODE_NO_RW, SENSORS_MODE_R, SENSORS_MODE_W or SENSORS_MODE_RW.
+The mode field is a bitfield, its value is a combination of
+SENSORS_MODE_R (readable) and SENSORS_MODE_W (writable).
 
 \fBconst sensors_feature_data *sensors_get_all_features
       (const sensors_chip_name *name, int *nr);\fP
