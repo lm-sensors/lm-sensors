@@ -56,9 +56,11 @@ typedef struct sensors_chip_name {
 	char *path;
 } sensors_chip_name;
 
-/* (Re)load the configuration file and the detected chips list. If this
-    returns a value unequal to zero, you are in trouble; you can not
-    assume anything will be initialized properly. */
+/* Load the configuration file and the detected chips list. If this
+   returns a value unequal to zero, you are in trouble; you can not
+   assume anything will be initialized properly. If you want to
+   reload the configuration file, call sensors_cleanup() below before
+   calling sensors_init() again. */
 int sensors_init(FILE *input);
 
 /* Clean-up function: You can't access anything after

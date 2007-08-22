@@ -53,7 +53,10 @@ libsensors \- publicly accessible functions provided by the sensors library
 .SH DESCRIPTION
 .B int sensors_init(FILE *input);
 .br
-(Re)load the configuration file and the detected chips list. If this returns a value unequal to zero, you are in trouble; you can not assume anything will be initialized properly.
+Load the configuration file and the detected chips list. If this returns a
+value unequal to zero, you are in trouble; you can not assume anything will
+be initialized properly. If you want to reload the configuration file, call
+sensors_cleanup() below before calling sensors_init() again.
 
 .B void sensors_cleanup(void);
 .br

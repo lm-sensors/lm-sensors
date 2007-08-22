@@ -90,8 +90,10 @@ loadConfig
     sensorLog (LOG_ERR, "Error stating sensors configuration file: %s", cfgPath);
     ret = 10;
   } else if (!reload || (difftime (stats.st_mtime, cfgLastModified) > 0.0)) {
-    if (reload)
+    if (reload) {
       sensorLog (LOG_INFO, "configuration reloading");
+      sensors_cleanup ();
+    }
     if (!(cfg = fopen (cfgPath, "r"))) {
       sensorLog (LOG_ERR, "Error opening sensors configuration file: %s", cfgPath);
       ret = 11;

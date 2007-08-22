@@ -40,7 +40,7 @@ static void free_expr(sensors_expr *expr);
 int sensors_init(FILE *input)
 {
   int res;
-  sensors_cleanup();
+
   if (!sensors_init_sysfs())
     return -SENSORS_ERR_PROC;
   if ((res = sensors_read_sysfs_bus()) || (res = sensors_read_sysfs_chips()))
