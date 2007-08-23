@@ -25,6 +25,7 @@ SVN HEAD
            Drop support for dashes in chip names
            Add support for devices on SPI adapters
   Makefile: Drop the package and version targets
+  Man pages: Drop "conforming to" sections
   Man page sensors.conf.5: Update the chip statement section
   Programs doc/*: Delete, obsolete
   Programs i2cdump, i2cget, i2cset: Do not force the slave address by default
