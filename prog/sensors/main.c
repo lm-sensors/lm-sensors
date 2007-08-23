@@ -54,7 +54,7 @@ static const char *sprintf_chip_name(const sensors_chip_name *name);
 #define CHIPS_MAX 20
 sensors_chip_name chips[CHIPS_MAX];
 int chips_count=0;
-int do_sets, do_unknown, fahrenheit, hide_adapter;
+int do_sets, do_raw, fahrenheit, hide_adapter;
 
 char degstr[5]; /* store the correct string to print degrees */
 
@@ -71,7 +71,7 @@ void print_long_help(void)
   printf("  -s, --set             Execute `set' statements too (root only)\n");
   printf("  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n");
   printf("  -A, --no-adapter      Do not show adapter for each chip\n");
-  printf("  -u, --unknown         Treat chips as unknown ones (testing only)\n");
+  printf("  -u                    Raw output (debugging only)\n");
   printf("  -v, --version         Display the program version\n");
   printf("\n");
   printf("Use `-' after `-c' to read the config file from stdin.\n");
@@ -156,13 +156,12 @@ int main (int argc, char *argv[])
     { "fahrenheit", no_argument, NULL, 'f' },
     { "no-adapter", no_argument, NULL, 'A' },
     { "config-file", required_argument, NULL, 'c' },
-    { "unknown", no_argument, NULL, 'u' },
     { 0,0,0,0 }
   };
 
   setlocale(LC_CTYPE, "");
 
-  do_unknown = 0;
+  do_raw = 0;
   do_sets = 0;
   hide_adapter = 0;
   while (1) {
@@ -193,7 +192,7 @@ int main (int argc, char *argv[])
       hide_adapter = 1;
       break;
     case 'u':
-      do_unknown = 1;
+      do_raw = 1;
       break;
     default:
       fprintf(stderr,"Internal error while parsing options!\n");
@@ -308,8 +307,8 @@ void do_a_print(const sensors_chip_name *name)
     else
       fprintf(stderr, "Can't get adapter name\n");
   }
-  if (do_unknown)
-    print_unknown_chip(name);
+  if (do_raw)
+    print_chip_raw(name);
   else
     print_generic_chip(name);
   printf("\n");

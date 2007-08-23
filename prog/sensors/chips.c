@@ -99,7 +99,7 @@ void print_vid_info(const sensors_chip_name *name, int f_vid, int label_size)
   free(label);
 }
 
-void print_unknown_chip(const sensors_chip_name *name)
+void print_chip_raw(const sensors_chip_name *name)
 {
   int a;
   const sensors_feature_data *data;

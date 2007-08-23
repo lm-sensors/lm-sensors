@@ -22,7 +22,7 @@
 
 #include "lib/sensors.h"
 
-extern void print_unknown_chip(const sensors_chip_name *name);
+extern void print_chip_raw(const sensors_chip_name *name);
 
 /* some functions used by chips_generic.c */
 #define HYST 0
