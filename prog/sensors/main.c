@@ -39,25 +39,16 @@
 #define VERSION			LM_VERSION
 #define DEFAULT_CONFIG_FILE	ETCDIR "/sensors.conf"
 
-extern int main(int argc, char *arv[]);
-static void print_short_help(void);
-static void print_long_help(void);
-static void print_version(void);
-static void do_a_print(const sensors_chip_name *name);
-static int do_a_set(const sensors_chip_name *name);
-static int do_the_real_work(const sensors_chip_name *chip, int *error);
-static const char *sprintf_chip_name(const sensors_chip_name *name);
-
 int do_sets, do_raw, fahrenheit, hide_adapter;
 
 char degstr[5]; /* store the correct string to print degrees */
 
-void print_short_help(void)
+static void print_short_help(void)
 {
 	printf("Try `%s -h' for more information\n", PROGRAM);
 }
 
-void print_long_help(void)
+static void print_long_help(void)
 {
 	printf("Usage: %s [OPTION]... [CHIP]...\n", PROGRAM);
 	printf("  -c, --config-file     Specify a config file (default: %s)\n",
@@ -81,7 +72,7 @@ void print_long_help(void)
 	     "\tlm78-*");
 }
 
-void print_version(void)
+static void print_version(void)
 {
 	printf("%s version %s with libsensors version %s\n", PROGRAM, VERSION,
 	       libsensors_version);
@@ -144,7 +135,77 @@ static void set_degstr(void)
 	strcpy(degstr, deg_default_text[fahrenheit]);
 }
 
-int main (int argc, char *argv[])
+static const char *sprintf_chip_name(const sensors_chip_name *name)
+{
+#define BUF_SIZE 200
+	static char buf[BUF_SIZE];
+
+	if (sensors_snprintf_chip_name(buf, BUF_SIZE, name) < 0)
+		return NULL;
+	return buf;
+}
+
+static void do_a_print(const sensors_chip_name *name)
+{
+	printf("%s\n", sprintf_chip_name(name));
+	if (!hide_adapter) {
+		const char *adap = sensors_get_adapter_name(&name->bus);
+		if (adap)
+			printf("Adapter: %s\n", adap);
+		else
+			fprintf(stderr, "Can't get adapter name\n");
+	}
+	if (do_raw)
+		print_chip_raw(name);
+	else
+		print_generic_chip(name);
+	printf("\n");
+}
+
+/* returns 1 on error */
+static int do_a_set(const sensors_chip_name *name)
+{
+	int res;
+
+	if ((res = sensors_do_chip_sets(name))) {
+		if (res == -SENSORS_ERR_PROC) {
+			fprintf(stderr, "%s: %s for writing;\n",
+				sprintf_chip_name(name),
+				sensors_strerror(res));
+			fprintf(stderr, "Run as root?\n");
+			return 1;
+		} else if (res == -SENSORS_ERR_ACCESS_W) {
+			fprintf(stderr,
+				"%s: At least one \"set\" statement failed\n",
+				sprintf_chip_name(name));
+		} else {
+			fprintf(stderr, "%s: %s\n", sprintf_chip_name(name),
+				sensors_strerror(res));
+		}
+	}
+	return 0;
+}
+
+/* returns number of chips found */
+static int do_the_real_work(const sensors_chip_name *match, int *error)
+{
+	const sensors_chip_name *chip;
+	int chip_nr;
+	int cnt = 0;
+
+	chip_nr = 0;
+	while ((chip = sensors_get_detected_chips(match, &chip_nr))) {
+		if (do_sets) {
+			if (do_a_set(chip))
+				*error = 1;
+		} else
+			do_a_print(chip);
+		cnt++;
+	}
+	return cnt;
+}
+
+int main(int argc, char *argv[])
 {
 	int c, res, i, error;
 	const char *config_file_name = DEFAULT_CONFIG_FILE;
@@ -241,74 +302,4 @@ int main (int argc, char *argv[])
 exit:
 	sensors_cleanup();
 	exit(res);
-}
-
-/* returns number of chips found */
-int do_the_real_work(const sensors_chip_name *match, int *error)
-{
-	const sensors_chip_name *chip;
-	int chip_nr;
-	int cnt = 0;
-
-	chip_nr = 0;
-	while ((chip = sensors_get_detected_chips(match, &chip_nr))) {
-		if (do_sets) {
-			if (do_a_set(chip))
-				*error = 1;
-		} else
-			do_a_print(chip);
-		cnt++;
-	}
-	return cnt;
-}
-
-/* returns 1 on error */
-int do_a_set(const sensors_chip_name *name)
-{
-	int res;
-
-	if ((res = sensors_do_chip_sets(name))) {
-		if (res == -SENSORS_ERR_PROC) {
-			fprintf(stderr, "%s: %s for writing;\n",
-				sprintf_chip_name(name),
-				sensors_strerror(res));
-			fprintf(stderr, "Run as root?\n");
-			return 1;
-		} else if (res == -SENSORS_ERR_ACCESS_W) {
-			fprintf(stderr,
-				"%s: At least one \"set\" statement failed\n",
-				sprintf_chip_name(name));
-		} else {
-			fprintf(stderr, "%s: %s\n", sprintf_chip_name(name),
-				sensors_strerror(res));
-		}
-	}
-	return 0;
-}
-
-const char *sprintf_chip_name(const sensors_chip_name *name)
-{
-#define BUF_SIZE 200
-	static char buf[BUF_SIZE];
-
-	if (sensors_snprintf_chip_name(buf, BUF_SIZE, name) < 0)
-		return NULL;
-	return buf;
-}
-
-void do_a_print(const sensors_chip_name *name)
-{
-	printf("%s\n", sprintf_chip_name(name));
-	if (!hide_adapter) {
-		const char *adap = sensors_get_adapter_name(&name->bus);
-		if (adap)
-			printf("Adapter: %s\n", adap);
-		else
-			fprintf(stderr, "Can't get adapter name\n");
-	}
-	if (do_raw)
-		print_chip_raw(name);
-	else
-		print_generic_chip(name);
-	printf("\n");
 }
