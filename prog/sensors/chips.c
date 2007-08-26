@@ -85,10 +85,7 @@ static void print_temp_info(float n_cur, float n_over, float n_hyst,
 static void print_label(const char *label, int space)
 {
 	int len = strlen(label)+1;
-	if (len > space)
-		printf("%s:\n%*s", label, space, "");
-	else
-		printf("%s:%*s", label, space - len, "");
+	printf("%s:%*s", label, space - len, "");
 }
 
 static void print_vid_info(const sensors_chip_name *name, int f_vid,
