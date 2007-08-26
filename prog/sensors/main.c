@@ -66,7 +66,7 @@ void print_long_help(void)
   printf("  -c, --config-file     Specify a config file (default: %s)\n",
          DEFAULT_CONFIG_FILE);
   puts("  -h, --help            Display this help text\n"
-       "  -s, --set             Execute `set' statements too (root only)\n"
+       "  -s, --set             Execute `set' statements (root only)\n"
        "  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n"
        "  -A, --no-adapter      Do not show adapter for each chip\n"
        "  -u                    Raw output (debugging only)\n"

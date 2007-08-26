@@ -125,7 +125,7 @@ static const char *daemonSyntax =
 
 static const char *appSyntax =
   "  -a, --alarm-scan          -- only scan for alarms\n"
-  "  -s, --set                 -- execute set statements too (root only)\n"
+  "  -s, --set                 -- execute set statements (root only)\n"
   "  -r, --rrd-file <file>     -- only update RRD file\n"
   "  -c, --config-file <file>  -- configuration file (default sensors.conf)\n"
   "  -d, --debug               -- display some debug information\n"
