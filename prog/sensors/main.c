@@ -68,7 +68,7 @@ void print_long_help(void)
   printf("Usage: %s [OPTION]... [CHIP]...\n",PROGRAM);
   printf("  -c, --config-file     Specify a config file (default: " ETCDIR "/" DEFAULT_CONFIG_FILE_NAME ")\n");
   printf("  -h, --help            Display this help text\n");
-  printf("  -s, --set             Execute `set' statements too (root only)\n");
+  printf("  -s, --set             Execute `set' statements (root only)\n");
   printf("  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n");
   printf("  -A, --no-adapter      Do not show adapter for each chip\n");
   printf("  -U, --no-unknown      Do not show unknown chips\n");
