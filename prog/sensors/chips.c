@@ -32,7 +32,7 @@
 extern int fahrenheit;
 extern char degstr[5];
 
-static inline float deg_ctof(float cel)
+static inline double deg_ctof(double cel)
 {
    return ( cel * ( 9.0F / 5.0F ) + 32.0F );
 }
@@ -46,7 +46,7 @@ static inline float deg_ctof(float cel)
 /* minmax = 0 for limit/hysteresis, 1 for max/min, 2 for max only;
    curprec and limitprec are # of digits after decimal point
    for the current temp and the limits */
-static void print_temp_info(float n_cur, float n_over, float n_hyst,
+static void print_temp_info(double n_cur, double n_over, double n_hyst,
                             int minmax, int curprec, int limitprec)
 {
    if (fahrenheit) {
@@ -4506,7 +4506,8 @@ void print_pc87427(const sensors_chip_name *name)
   free(label);
 }
 
-static void lm92_print_temp (float n_cur,float n_high,float n_low,float n_crit,float n_hyst)
+static void lm92_print_temp(double n_cur, double n_high, double n_low,
+			    double n_crit, double n_hyst)
 {
 	if (fahrenheit) {
 		n_cur = deg_ctof (n_cur);
