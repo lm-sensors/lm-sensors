@@ -139,41 +139,39 @@ applyToFeatures
   const sensors_chip_name *chip;
   int i = 0, j, ret = 0, num = 0;
 
-  while ((ret == 0) && ((chip = sensors_get_detected_chips (&i)) != NULL)) {
-    for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
-      if (sensors_match_chip (chip, &chipNames[j])) {
-        int index0, subindex, chipindex = -1;
-        for (index0 = 0; knownChips[index0]; ++ index0)
-          for (subindex = 0; knownChips[index0]->names[subindex]; ++ subindex)
-            if (!strcmp (chip->prefix, knownChips[index0]->names[subindex]))
-              chipindex = index0;
-        if (chipindex >= 0) {
-          const ChipDescriptor *descriptor = knownChips[chipindex];
-          const FeatureDescriptor *features = descriptor->features;
+  for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
+    while ((ret == 0) && ((chip = sensors_get_detected_chips (&chipNames[j], &i)) != NULL)) {
+      int index0, subindex, chipindex = -1;
+      for (index0 = 0; knownChips[index0]; ++ index0)
+        for (subindex = 0; knownChips[index0]->names[subindex]; ++ subindex)
+          if (!strcmp (chip->prefix, knownChips[index0]->names[subindex]))
+            chipindex = index0;
+      if (chipindex >= 0) {
+        const ChipDescriptor *descriptor = knownChips[chipindex];
+        const FeatureDescriptor *features = descriptor->features;
 
-          for (index0 = 0; (ret == 0) && (num < MAX_RRD_SENSORS) && features[index0].format; ++ index0) {
-            const FeatureDescriptor *feature = features + index0;
-            int labelNumber = feature->dataNumbers[0];
-            const char *rawLabel = NULL;
-            char *label = NULL;
-            int valid = 0;
-            if (getValid (chip, labelNumber, &valid)) {
-              sensorLog (LOG_ERR, "Error getting sensor validity: %s/#%d", chip->prefix, labelNumber);
-              ret = -1;
-            } else if (getRawLabel (chip, labelNumber, &rawLabel)) {
-              sensorLog (LOG_ERR, "Error getting raw sensor label: %s/#%d", chip->prefix, labelNumber);
-              ret = -1;
-            } else if (!(label = sensors_get_label (chip, labelNumber))) {
-              sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
-              ret = -1;
-            } else if (valid) {
-              rrdCheckLabel (rawLabel, num);
-              ret = fn (data, rrdLabels[num], label, feature);
-              ++ num;
-            }
-            if (label)
-              free (label);
+        for (index0 = 0; (ret == 0) && (num < MAX_RRD_SENSORS) && features[index0].format; ++ index0) {
+          const FeatureDescriptor *feature = features + index0;
+          int labelNumber = feature->dataNumbers[0];
+          const char *rawLabel = NULL;
+          char *label = NULL;
+          int valid = 0;
+          if (getValid (chip, labelNumber, &valid)) {
+            sensorLog (LOG_ERR, "Error getting sensor validity: %s/#%d", chip->prefix, labelNumber);
+            ret = -1;
+          } else if (getRawLabel (chip, labelNumber, &rawLabel)) {
+            sensorLog (LOG_ERR, "Error getting raw sensor label: %s/#%d", chip->prefix, labelNumber);
+            ret = -1;
+          } else if (!(label = sensors_get_label (chip, labelNumber))) {
+            sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
+            ret = -1;
+          } else if (valid) {
+            rrdCheckLabel (rawLabel, num);
+            ret = fn (data, rrdLabels[num], label, feature);
+            ++ num;
           }
+          if (label)
+            free (label);
         }
       }
     }

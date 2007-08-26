@@ -238,11 +238,9 @@ doChips
   const sensors_chip_name *chip;
   int i = 0, j, ret = 0;
 
-  while ((ret == 0) && ((chip = sensors_get_detected_chips (&i)) != NULL)) {
-    for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
-      if (sensors_match_chip (chip, &chipNames[j])) {
-        ret = doChip (chip, action);
-      }
+  for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
+    while ((ret == 0) && ((chip = sensors_get_detected_chips (&chipNames[j], &i)) != NULL)) {
+      ret = doChip (chip, action);
     }
   }
 

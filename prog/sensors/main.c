@@ -251,18 +251,18 @@ int do_the_real_work(int *error)
   int cnt = 0;
 
   *error = 0;
-  for (chip_nr = 0; (chip = sensors_get_detected_chips(&chip_nr));)
-    for(i = 0; i < chips_count; i++)
-      if (sensors_match_chip(chip, &chips[i])) {
-        if(do_sets) {
-          if (do_a_set(chip))
-            *error = 1;
-        } else
-          do_a_print(chip);
-        i = chips_count;
-	cnt++;
-      }
-   return(cnt);
+  for (i = 0; i < chips_count; i++) {
+    chip_nr = 0;
+    while ((chip = sensors_get_detected_chips(&chips[i], &chip_nr))) {
+      if (do_sets) {
+        if (do_a_set(chip))
+          *error = 1;
+      } else
+        do_a_print(chip);
+      cnt++;
+    }
+  }
+  return cnt;
 }
 
 /* returns 1 on error */

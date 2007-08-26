@@ -109,11 +109,13 @@ int sensors_set_value(const sensors_chip_name *name, int feature,
    wildcards!  This function will return 0 on success, and <0 on failure. */
 int sensors_do_chip_sets(const sensors_chip_name *name);
 
-/* This function returns all detected chips, one by one. To start at the
-   beginning of the list, use 0 for nr; NULL is returned if we are
-   at the end of the list. Do not try to change these chip names, as
-   they point to internal structures! Do not use nr for anything else. */
-const sensors_chip_name *sensors_get_detected_chips(int *nr);
+/* This function returns all detected chips that match a given chip name,
+   one by one. If no chip name is provided, all detected chips are returned.
+   To start at the beginning of the list, use 0 for nr; NULL is returned if
+   we are at the end of the list. Do not try to change these chip names, as
+   they point to internal structures! */
+const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
+						    *match, int *nr);
 
 /* These defines are used in the mode field of sensors_feature_data */
 #define SENSORS_MODE_R 1

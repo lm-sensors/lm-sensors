@@ -303,13 +303,17 @@ int sensors_set_value(const sensors_chip_name *name, int feature,
 	return 0;
 }
 
-const sensors_chip_name *sensors_get_detected_chips(int *nr)
+const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
+						    *match, int *nr)
 {
 	const sensors_chip_name *res;
-	res = (*nr >= sensors_proc_chips_count ?
-			NULL : &sensors_proc_chips[*nr].chip);
-	(*nr)++;
-	return res;
+
+	while (*nr < sensors_proc_chips_count) {
+		res = &sensors_proc_chips[(*nr)++].chip;
+		if (!match || sensors_match_chip(res, match))
+			return res;
+	}
+	return NULL;
 }
 
 const char *sensors_get_adapter_name(const sensors_bus_id *bus)
@@ -480,12 +484,11 @@ int sensors_do_chip_sets(const sensors_chip_name *name)
 	const sensors_chip_name *found_name;
 	int res = 0;
 
-	for (nr = 0; (found_name = sensors_get_detected_chips(&nr));)
-		if (sensors_match_chip(name, found_name)) {
-			this_res = sensors_do_this_chip_sets(found_name);
-			if (!res)
-				res = this_res;
-		}
+	for (nr = 0; (found_name = sensors_get_detected_chips(name, &nr));) {
+		this_res = sensors_do_this_chip_sets(found_name);
+		if (this_res)
+			res = this_res;
+	}
 	return res;
 }
 
