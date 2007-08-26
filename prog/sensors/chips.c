@@ -24,11 +24,9 @@
 #include <string.h>
 #include <math.h>
 
+#include "main.h"
 #include "chips.h"
 #include "lib/sensors.h"
-
-extern int fahrenheit;
-extern char degstr[5];
 
 static inline float deg_ctof(float cel)
 {

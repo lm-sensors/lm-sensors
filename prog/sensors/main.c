@@ -32,6 +32,7 @@
 
 #include "lib/sensors.h"
 #include "lib/error.h"
+#include "main.h"
 #include "chips.h"
 #include "version.h"
 
@@ -39,8 +40,9 @@
 #define VERSION			LM_VERSION
 #define DEFAULT_CONFIG_FILE	ETCDIR "/sensors.conf"
 
-int do_sets, do_raw, fahrenheit, hide_adapter;
+static int do_sets, do_raw, hide_adapter;
 
+int fahrenheit;
 char degstr[5]; /* store the correct string to print degrees */
 
 static void print_short_help(void)
