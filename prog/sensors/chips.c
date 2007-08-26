@@ -84,13 +84,6 @@ void print_chip_raw(const sensors_chip_name *name)
 	}
 }
 
-static int get_feature_value(const sensors_chip_name *name,
-			     const sensors_feature_data *feature,
-			     double *val)
-{
-	return sensors_get_value(name, feature->number, val);
-}
-
 static void sensors_get_available_features(const sensors_chip_name *name,
 					   const sensors_feature_data *feature,
 					   int i, short *has_features,
@@ -109,7 +102,7 @@ static void sensors_get_available_features(const sensors_chip_name *name,
 			return;
 		}
 
-		if (get_feature_value(name, iter, &feature_vals[indx]))
+		if (sensors_get_value(name, iter->number, &feature_vals[indx]))
 			printf("ERROR: Can't get %s data!\n", iter->name);
 
 		has_features[indx] = 1;
@@ -177,7 +170,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
 		return;
 	}
 
-	if (get_feature_value(name, feature, &val)) {
+	if (sensors_get_value(name, feature->number, &val)) {
 		printf("ERROR: Can't get %s data!\n", label);
 		free(label);
 		return;
@@ -297,7 +290,7 @@ static void print_generic_chip_in(const sensors_chip_name *name,
 		return;
 	}
 
-	if (get_feature_value(name, feature, &val)) {
+	if (sensors_get_value(name, feature->number, &val)) {
 		printf("ERROR: Can't get %s data!\n", label);
 		free(label);
 		return;
@@ -362,7 +355,7 @@ static void print_generic_chip_fan(const sensors_chip_name *name,
 		return;
 	}
 
-	if (get_feature_value(name, feature, &val)) {
+	if (sensors_get_value(name, feature->number, &val)) {
 		printf("ERROR: Can't get %s data!\n", label);
 		free(label);
 		return;
