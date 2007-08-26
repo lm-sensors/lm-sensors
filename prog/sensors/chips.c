@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "main.h"
 #include "chips.h"
@@ -41,20 +40,13 @@ static inline float deg_ctof(float cel)
 #define HYSTONLY 5
 
 /* symbolic constants for minmax defined above */
-static void print_temp_info(float n_cur, float n_over, float n_hyst,
-			    int minmax)
+static void print_temp_limits(float n_over, float n_hyst,
+			      int minmax)
 {
-	/* note: deg_ctof() will preserve HUGEVAL */
 	if (fahrenheit) {
-		n_cur = deg_ctof(n_cur);
 		n_over = deg_ctof(n_over);
 		n_hyst = deg_ctof(n_hyst);
 	}
-
-	if (n_cur != HUGE_VAL)
-		printf("%+6.1f%s  ", n_cur, degstr);
-	else
-		printf("   FAULT  ");
 
 	if (minmax == MINMAX)
 		printf("(low  = %+5.1f%s, high = %+5.1f%s)  ",
@@ -230,14 +222,18 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
 		type = SINGLE;
 	}
 
-	if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_FAULT) &&
-	    TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_FAULT))
-		val = HUGE_VAL;
-
 	print_label(label, label_size);
 	free(label);
 
-	print_temp_info(val, max, min, type);
+	if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_FAULT) &&
+	    TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_FAULT)) {
+		printf("   FAULT  ");
+	} else {
+		if (fahrenheit)
+			val = deg_ctof(val);
+		printf("%+6.1f%s  ", val, degstr);
+	}
+	print_temp_limits(max, min, type);
 
 	/* ALARM features */
 	if ((TEMP_FEATURE(SENSORS_FEATURE_TEMP_ALARM) &&
