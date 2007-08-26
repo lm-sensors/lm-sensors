@@ -30,14 +30,14 @@
 #define HAVE_ICONV
 #endif
 
-#include "lib/sensors.h" 
+#include "lib/sensors.h"
 #include "lib/error.h"
 #include "chips.h"
 #include "version.h"
 #include "chips_generic.h"
 
-#define PROGRAM "sensors"
-#define VERSION LM_VERSION
+#define PROGRAM			"sensors"
+#define VERSION			LM_VERSION
 #define DEFAULT_CONFIG_FILE	ETCDIR "/sensors.conf"
 
 FILE *config_file;
@@ -57,254 +57,260 @@ char degstr[5]; /* store the correct string to print degrees */
 
 void print_short_help(void)
 {
-  printf("Try `%s -h' for more information\n",PROGRAM);
+	printf("Try `%s -h' for more information\n", PROGRAM);
 }
 
 void print_long_help(void)
 {
-  printf("Usage: %s [OPTION]... [CHIP]...\n",PROGRAM);
-  printf("  -c, --config-file     Specify a config file (default: %s)\n",
-         DEFAULT_CONFIG_FILE);
-  puts("  -h, --help            Display this help text\n"
-       "  -s, --set             Execute `set' statements (root only)\n"
-       "  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n"
-       "  -A, --no-adapter      Do not show adapter for each chip\n"
-       "  -u                    Raw output (debugging only)\n"
-       "  -v, --version         Display the program version\n"
-       "\n"
-       "Use `-' after `-c' to read the config file from stdin.\n"
-       "If no chips are specified, all chip info will be printed.\n"
-       "Example chip names:\n"
-       "\tlm78-i2c-0-2d\t*-i2c-0-2d\n"
-       "\tlm78-i2c-0-*\t*-i2c-0-*\n"
-       "\tlm78-i2c-*-2d\t*-i2c-*-2d\n"
-       "\tlm78-i2c-*-*\t*-i2c-*-*\n"
-       "\tlm78-isa-0290\t*-isa-0290\n"
-       "\tlm78-isa-*\t*-isa-*\n"
-       "\tlm78-*");
+	printf("Usage: %s [OPTION]... [CHIP]...\n", PROGRAM);
+	printf("  -c, --config-file     Specify a config file (default: %s)\n",
+	       DEFAULT_CONFIG_FILE);
+	puts("  -h, --help            Display this help text\n"
+	     "  -s, --set             Execute `set' statements (root only)\n"
+	     "  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n"
+	     "  -A, --no-adapter      Do not show adapter for each chip\n"
+	     "  -u                    Raw output (debugging only)\n"
+	     "  -v, --version         Display the program version\n"
+	     "\n"
+	     "Use `-' after `-c' to read the config file from stdin.\n"
+	     "If no chips are specified, all chip info will be printed.\n"
+	     "Example chip names:\n"
+	     "\tlm78-i2c-0-2d\t*-i2c-0-2d\n"
+	     "\tlm78-i2c-0-*\t*-i2c-0-*\n"
+	     "\tlm78-i2c-*-2d\t*-i2c-*-2d\n"
+	     "\tlm78-i2c-*-*\t*-i2c-*-*\n"
+	     "\tlm78-isa-0290\t*-isa-0290\n"
+	     "\tlm78-isa-*\t*-isa-*\n"
+	     "\tlm78-*");
 }
 
 void print_version(void)
 {
-  printf("%s version %s with libsensors version %s\n", PROGRAM, VERSION, libsensors_version);
+	printf("%s version %s with libsensors version %s\n", PROGRAM, VERSION,
+	       libsensors_version);
 }
 
-/* This examines global var config_file, and leaves the name there too. 
+/* This examines global var config_file, and leaves the name there too.
    It also opens config_file. */
 static void open_config_file(const char* config_file_name)
 {
-  if (!strcmp(config_file_name,"-")) {
-    config_file = stdin;
-    return;
-  }
+	if (!strcmp(config_file_name, "-")) {
+		config_file = stdin;
+		return;
+	}
 
-  config_file = fopen(config_file_name, "r");
-  if (!config_file) {
-    fprintf(stderr, "Could not open config file\n");
-    perror(config_file_name);
-    exit(1);
-  }
+	config_file = fopen(config_file_name, "r");
+	if (!config_file) {
+		fprintf(stderr, "Could not open config file\n");
+		perror(config_file_name);
+		exit(1);
+	}
 }
-    
+
 static void close_config_file(const char* config_file_name)
 {
-  if (fclose(config_file) == EOF) {
-    fprintf(stderr,"Could not close config file\n");
-    perror(config_file_name);
-  }
+	if (fclose(config_file) == EOF) {
+		fprintf(stderr, "Could not close config file\n");
+		perror(config_file_name);
+	}
 }
 
 static void set_degstr(void)
 {
-  const char *deg_default_text[2] = {" C", " F"};
+	const char *deg_default_text[2] = { " C", " F" };
 
 #ifdef HAVE_ICONV
-  /* Size hardcoded for better performance.
-     Don't forget to count the trailing \0! */
-  size_t deg_latin1_size = 3;
-  char *deg_latin1_text[2] = {"\260C", "\260F"};
-  size_t nconv;
-  size_t degstr_size = sizeof(degstr);
-  char *degstr_ptr = degstr;
+	/* Size hardcoded for better performance.
+	   Don't forget to count the trailing \0! */
+	size_t deg_latin1_size = 3;
+	char *deg_latin1_text[2] = { "\260C", "\260F" };
+	size_t nconv;
+	size_t degstr_size = sizeof(degstr);
+	char *degstr_ptr = degstr;
 
-  iconv_t cd = iconv_open(nl_langinfo(CODESET), "ISO-8859-1");
-  if (cd != (iconv_t) -1) {
-    nconv = iconv(cd, &(deg_latin1_text[fahrenheit]), &deg_latin1_size,
-                  &degstr_ptr, &degstr_size);
-    iconv_close(cd);
-    
-    if (nconv != (size_t) -1)
-      return;	   
-  }
+	iconv_t cd = iconv_open(nl_langinfo(CODESET), "ISO-8859-1");
+	if (cd != (iconv_t) -1) {
+		nconv = iconv(cd, &(deg_latin1_text[fahrenheit]),
+			      &deg_latin1_size, &degstr_ptr, &degstr_size);
+		iconv_close(cd);
+
+		if (nconv != (size_t) -1)
+			return;
+	}
 #endif /* HAVE_ICONV */
 
-  /* There was an error during the conversion, use the default text */
-  strcpy(degstr, deg_default_text[fahrenheit]);
+	/* There was an error during the conversion, use the default text */
+	strcpy(degstr, deg_default_text[fahrenheit]);
 }
 
 int main (int argc, char *argv[])
 {
-  int c,res,i,error;
-  const char *config_file_name = DEFAULT_CONFIG_FILE;
+	int c, res, i, error;
+	const char *config_file_name = DEFAULT_CONFIG_FILE;
 
-  struct option long_opts[] =  {
-    { "help", no_argument, NULL, 'h' },
-    { "set", no_argument, NULL, 's' },
-    { "version", no_argument, NULL, 'v'},
-    { "fahrenheit", no_argument, NULL, 'f' },
-    { "no-adapter", no_argument, NULL, 'A' },
-    { "config-file", required_argument, NULL, 'c' },
-    { 0,0,0,0 }
-  };
+	struct option long_opts[] =  {
+		{ "help", no_argument, NULL, 'h' },
+		{ "set", no_argument, NULL, 's' },
+		{ "version", no_argument, NULL, 'v'},
+		{ "fahrenheit", no_argument, NULL, 'f' },
+		{ "no-adapter", no_argument, NULL, 'A' },
+		{ "config-file", required_argument, NULL, 'c' },
+		{ 0, 0, 0, 0 }
+	};
 
-  setlocale(LC_CTYPE, "");
+	setlocale(LC_CTYPE, "");
 
-  do_raw = 0;
-  do_sets = 0;
-  hide_adapter = 0;
-  while (1) {
-    c = getopt_long(argc, argv, "hsvfAc:u", long_opts, NULL);
-    if (c == EOF)
-      break;
-    switch(c) {
-    case ':':
-    case '?':
-      print_short_help();
-      exit(1);
-    case 'h':
-      print_long_help();
-      exit(0);
-    case 'v':
-      print_version();
-      exit(0);
-    case 'c':
-      config_file_name = optarg;
-      break;
-    case 's':
-      do_sets = 1;
-      break;
-    case 'f':
-      fahrenheit = 1;
-      break;
-    case 'A':
-      hide_adapter = 1;
-      break;
-    case 'u':
-      do_raw = 1;
-      break;
-    default:
-      fprintf(stderr,"Internal error while parsing options!\n");
-      exit(1);
-    }
-  }
+	do_raw = 0;
+	do_sets = 0;
+	hide_adapter = 0;
+	while (1) {
+		c = getopt_long(argc, argv, "hsvfAc:u", long_opts, NULL);
+		if (c == EOF)
+			break;
+		switch(c) {
+		case ':':
+		case '?':
+			print_short_help();
+			exit(1);
+		case 'h':
+			print_long_help();
+			exit(0);
+		case 'v':
+			print_version();
+			exit(0);
+		case 'c':
+			config_file_name = optarg;
+			break;
+		case 's':
+			do_sets = 1;
+			break;
+		case 'f':
+			fahrenheit = 1;
+			break;
+		case 'A':
+			hide_adapter = 1;
+			break;
+		case 'u':
+			do_raw = 1;
+			break;
+		default:
+			fprintf(stderr,
+				"Internal error while parsing options!\n");
+			exit(1);
+		}
+	}
 
-  open_config_file(config_file_name);
-  if ((res = sensors_init(config_file))) {
-    fprintf(stderr, "sensors_init: %s\n", sensors_strerror(res));
-    exit(1);
-  }
-  close_config_file(config_file_name);
+	open_config_file(config_file_name);
+	if ((res = sensors_init(config_file))) {
+		fprintf(stderr, "sensors_init: %s\n", sensors_strerror(res));
+		exit(1);
+	}
+	close_config_file(config_file_name);
 
-  /* build the degrees string */
-  set_degstr();
+	/* build the degrees string */
+	set_degstr();
 
-  if (optind == argc) { /* No chip name on command line */
-    if (!do_the_real_work(NULL, &error)) {
-      fprintf(stderr,
-              "No sensors found!\n"
-              "Make sure you loaded all the kernel drivers you need.\n"
-              "Try sensors-detect to find out which these are.\n");
-      error = 1;
-    }
-  } else {
-    int cnt = 0;
-    sensors_chip_name chip;
+	if (optind == argc) { /* No chip name on command line */
+		if (!do_the_real_work(NULL, &error)) {
+			fprintf(stderr,
+				"No sensors found!\n"
+				"Make sure you loaded all the kernel drivers you need.\n"
+				"Try sensors-detect to find out which these are.\n");
+			error = 1;
+		}
+	} else {
+		int cnt = 0;
+		sensors_chip_name chip;
 
-    for (i = optind; i < argc; i++) {
-      if (sensors_parse_chip_name(argv[i], &chip)) {
-        fprintf(stderr, "Parse error in chip name `%s'\n", argv[i]);
-        print_short_help();
-        error = 1;
-        goto exit;
-      }
-      cnt += do_the_real_work(&chip, &error);
-    }
+		for (i = optind; i < argc; i++) {
+			if (sensors_parse_chip_name(argv[i], &chip)) {
+				fprintf(stderr,
+					"Parse error in chip name `%s'\n",
+					argv[i]);
+				print_short_help();
+				error = 1;
+				goto exit;
+			}
+			cnt += do_the_real_work(&chip, &error);
+		}
 
-    if (!cnt) {
-      fprintf(stderr, "Specified sensor(s) not found!\n");
-      error = 1;
-    }
-  }
+		if (!cnt) {
+			fprintf(stderr, "Specified sensor(s) not found!\n");
+			error = 1;
+		}
+	}
 
 exit:
-  sensors_cleanup();
-  exit(res);
+	sensors_cleanup();
+	exit(res);
 }
 
 /* returns number of chips found */
 int do_the_real_work(const sensors_chip_name *match, int *error)
 {
-  const sensors_chip_name *chip;
-  int chip_nr;
-  int cnt = 0;
+	const sensors_chip_name *chip;
+	int chip_nr;
+	int cnt = 0;
 
-  chip_nr = 0;
-  while ((chip = sensors_get_detected_chips(match, &chip_nr))) {
-    if (do_sets) {
-      if (do_a_set(chip))
-        *error = 1;
-    } else
-      do_a_print(chip);
-    cnt++;
-  }
-  return cnt;
+	chip_nr = 0;
+	while ((chip = sensors_get_detected_chips(match, &chip_nr))) {
+		if (do_sets) {
+			if (do_a_set(chip))
+				*error = 1;
+		} else
+			do_a_print(chip);
+		cnt++;
+	}
+	return cnt;
 }
 
 /* returns 1 on error */
 int do_a_set(const sensors_chip_name *name)
 {
-  int res;
+	int res;
 
-  if ((res = sensors_do_chip_sets(name))) {
-    if (res == -SENSORS_ERR_PROC) {
-      fprintf(stderr,"%s: %s for writing;\n",sprintf_chip_name(name),
-              sensors_strerror(res));
-      fprintf(stderr,"Run as root?\n");
-      return 1;
-    } else if (res == -SENSORS_ERR_ACCESS_W) {
-      fprintf(stderr, "%s: At least one \"set\" statement failed\n",
-              sprintf_chip_name(name));
-    } else {
-      fprintf(stderr,"%s: %s\n",sprintf_chip_name(name),
-              sensors_strerror(res));
-    }
-  }
-  return 0;
+	if ((res = sensors_do_chip_sets(name))) {
+		if (res == -SENSORS_ERR_PROC) {
+			fprintf(stderr, "%s: %s for writing;\n",
+				sprintf_chip_name(name),
+				sensors_strerror(res));
+			fprintf(stderr, "Run as root?\n");
+			return 1;
+		} else if (res == -SENSORS_ERR_ACCESS_W) {
+			fprintf(stderr,
+				"%s: At least one \"set\" statement failed\n",
+				sprintf_chip_name(name));
+		} else {
+			fprintf(stderr, "%s: %s\n", sprintf_chip_name(name),
+				sensors_strerror(res));
+		}
+	}
+	return 0;
 }
 
 const char *sprintf_chip_name(const sensors_chip_name *name)
 {
-  #define BUF_SIZE 200
-  static char buf[BUF_SIZE];
+#define BUF_SIZE 200
+	static char buf[BUF_SIZE];
 
-  if (sensors_snprintf_chip_name(buf, BUF_SIZE, name) < 0)
-    return NULL;
-  return buf;
+	if (sensors_snprintf_chip_name(buf, BUF_SIZE, name) < 0)
+		return NULL;
+	return buf;
 }
 
 void do_a_print(const sensors_chip_name *name)
 {
-  printf("%s\n",sprintf_chip_name(name));
-  if (!hide_adapter) {
-    const char *adap = sensors_get_adapter_name(&name->bus);
-    if (adap)
-      printf("Adapter: %s\n", adap);
-    else
-      fprintf(stderr, "Can't get adapter name\n");
-  }
-  if (do_raw)
-    print_chip_raw(name);
-  else
-    print_generic_chip(name);
-  printf("\n");
+	printf("%s\n", sprintf_chip_name(name));
+	if (!hide_adapter) {
+		const char *adap = sensors_get_adapter_name(&name->bus);
+		if (adap)
+			printf("Adapter: %s\n", adap);
+		else
+			fprintf(stderr, "Can't get adapter name\n");
+	}
+	if (do_raw)
+		print_chip_raw(name);
+	else
+		print_generic_chip(name);
+	printf("\n");
 }
