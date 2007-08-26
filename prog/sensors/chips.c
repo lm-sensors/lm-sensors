@@ -6265,7 +6265,7 @@ void print_unknown_chip(const sensors_chip_name *name)
   a=b=0;
   while((data=sensors_get_all_features(*name,&a,&b))) {
     if (sensors_get_label_and_valid(*name,data->number,&label,&valid)) {
-      printf("ERROR: Can't get feature `%s' data!\n",data->name);
+      printf("ERROR: Can't get feature `%s' label!\n", data->name);
       continue;
     }
     if (! valid)
