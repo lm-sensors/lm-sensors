@@ -48,8 +48,7 @@ void print_chip_raw(const sensors_chip_name *name)
 				continue;
 			}
 			if (data->mapping != SENSORS_NO_MAPPING)
-				printf("  %s: %.2f (%s)\n", label, val,
-				       data->name);
+				printf("  %s: %.2f\n", label, val);
 			else
 				printf("%s: %.2f (%s)\n", label, val,
 				       data->name);
