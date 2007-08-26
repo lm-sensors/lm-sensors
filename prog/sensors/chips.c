@@ -32,44 +32,6 @@ static inline float deg_ctof(float cel)
 	return cel * (9.0F / 5.0F) + 32.0F;
 }
 
-#define HYST 0
-#define MINMAX 1
-#define MAXONLY 2
-#define CRIT 3
-#define SINGLE 4
-#define HYSTONLY 5
-
-/* symbolic constants for minmax defined above */
-static void print_temp_limits(float n_over, float n_hyst,
-			      int minmax)
-{
-	if (fahrenheit) {
-		n_over = deg_ctof(n_over);
-		n_hyst = deg_ctof(n_hyst);
-	}
-
-	if (minmax == MINMAX)
-		printf("(low  = %+5.1f%s, high = %+5.1f%s)  ",
-		       n_hyst, degstr,
-		       n_over, degstr);
-	else if (minmax == MAXONLY)
-		printf("(high = %+5.1f%s)                  ",
-		       n_over, degstr);
-	else if (minmax == CRIT)
-		printf("(high = %+5.1f%s, crit = %+5.1f%s)  ",
-		       n_over, degstr,
-		       n_hyst, degstr);
-	else if (minmax == HYST)
-		printf("(high = %+5.1f%s, hyst = %+5.1f%s)  ",
-		       n_over, degstr,
-		       n_hyst, degstr);
-	else if (minmax == HYSTONLY)
-		printf("(hyst = %+5.1f%s)                  ",
-		       n_over, degstr);
-	else if (minmax != SINGLE)
-		printf("Unknown temperature mode!");
-}
-
 static void print_label(const char *label, int space)
 {
 	int len = strlen(label)+1;
@@ -173,15 +135,39 @@ static int sensors_get_label_size(const sensors_chip_name *name)
 	return max_size + 1;
 }
 
+static void print_temp_limits(float limit1, float limit2,
+			      const char *name1, const char *name2, int alarm)
+{
+	if (fahrenheit) {
+		limit1 = deg_ctof(limit1);
+		limit2 = deg_ctof(limit2);
+        }
+
+	if (name2) {
+		printf("(%-4s = %+5.1f%s, %-4s = %+5.1f%s)  ",
+		       name1, limit1, degstr,
+		       name2, limit2, degstr);
+	} else if (name1) {
+		printf("(%-4s = %+5.1f%s)                  ",
+		       name1, limit1, degstr);
+	} else {
+		printf("                                  ");
+	}
+
+	if (alarm)
+		printf("ALARM  ");
+}
+
 #define TEMP_FEATURE(x)		has_features[x - SENSORS_FEATURE_TEMP - 1]
 #define TEMP_FEATURE_VAL(x)	feature_vals[x - SENSORS_FEATURE_TEMP - 1]
 static void print_generic_chip_temp(const sensors_chip_name *name,
 				    const sensors_feature_data *feature,
 				    int i, int label_size)
 {
-	double val, max, min;
+	double val, limit1, limit2;
+	const char *s1, *s2;
+	int alarm, crit_displayed = 0;
 	char *label;
-	int type;
 	const int size = SENSORS_FEATURE_TEMP_SENS - SENSORS_FEATURE_TEMP;
 	short has_features[SENSORS_FEATURE_TEMP_SENS - SENSORS_FEATURE_TEMP] = { 0, };
 	double feature_vals[SENSORS_FEATURE_TEMP_SENS - SENSORS_FEATURE_TEMP] = { 0.0, };
@@ -201,25 +187,45 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
 				       feature_vals, size,
 				       SENSORS_FEATURE_TEMP);
 
+	alarm = TEMP_FEATURE(SENSORS_FEATURE_TEMP_ALARM) &&
+		TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_ALARM);
 	if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX)) {
-		max = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX);
+		if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX_ALARM) &&
+		    TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX_ALARM))
+			alarm |= 1;
 
-		if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MIN)) {
-			min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MIN);
-			type = MINMAX;
-		} else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX_HYST)) {
-			min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX_HYST);
-			type = HYST;
-		} else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT)) {
-			min = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT);
-			type = CRIT;
+     		if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MIN)) {
+			limit1 = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MIN);
+			s1 = "low";
+			limit2 = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX);
+			s2 = "high";
+
+			if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MIN_ALARM) &&
+			    TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MIN_ALARM))
+				alarm |= 1;
 		} else {
-			min = 0;
-			type = MAXONLY;
+			limit1 = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX);
+			s1 = "high";
+
+			if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX_HYST)) {
+				limit2 = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX_HYST);
+				s2 = "hyst";
+			} else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT)) {
+				limit2 = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT);
+				s2 = "crit";
+
+				if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_ALARM) &&
+				    TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_ALARM))
+					alarm |= 1;
+				crit_displayed = 1;
+			} else {
+				limit2 = 0;
+				s2 = NULL;
+			}
 		}
 	} else {
-		min = max = 0;
-		type = SINGLE;
+		limit1 = limit2 = 0;
+		s1 = s2 = NULL;
 	}
 
 	print_label(label, label_size);
@@ -233,48 +239,25 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
 			val = deg_ctof(val);
 		printf("%+6.1f%s  ", val, degstr);
 	}
-	print_temp_limits(max, min, type);
+	print_temp_limits(limit1, limit2, s1, s2, alarm);
 
-	/* ALARM features */
-	if ((TEMP_FEATURE(SENSORS_FEATURE_TEMP_ALARM) &&
-	     TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_ALARM) > 0.5)
-	 || (type == MINMAX &&
-	     TEMP_FEATURE(SENSORS_FEATURE_TEMP_MIN_ALARM) &&
-	     TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MIN_ALARM) > 0.5)
-	 || (type == MINMAX &&
-	     TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX_ALARM) &&
-	     TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_MAX_ALARM) > 0.5)
-	 || (type == CRIT &&
-	     TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_ALARM) &&
-	     TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_ALARM) > 0.5)) {
-		printf("ALARM  ");
-	}
+	if (!crit_displayed && TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT)) {
+		limit1 = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT);
+		s1 = "crit";
 
-	if (type != CRIT && TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT)) {
-		if (fahrenheit) {
-			TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT) = deg_ctof(
-				TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT));
-			TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_HYST) = deg_ctof(
-				TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_HYST));
+		if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_HYST)) {
+			limit2 = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_HYST);
+			s2 = "hyst";
+		} else {
+			limit2 = 0;
+			s2 = NULL;
 		}
 
-		if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_HYST))
-			printf("\n%*s(crit = %+5.1f%s, hyst = %+5.1f%s)  ",
-			       label_size + 10, "",
-			       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT),
-			       degstr,
-			       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_HYST),
-			       degstr);
-		else
-			printf("\n%*s(crit = %+5.1f%s)  ",
-			       label_size + 10, "",
-			       TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT),
-			       degstr);
+		alarm = TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_ALARM) &&
+			TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_ALARM);
 
-		if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_ALARM) &&
-		    TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_ALARM)) {
-			printf("ALARM  ");
-		}
+		printf("\n%*s", label_size + 10, "");
+		print_temp_limits(limit1, limit2, s1, s2, alarm);
 	}
 
 	/* print out temperature sensor info */
