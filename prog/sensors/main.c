@@ -39,8 +39,6 @@
 #define VERSION			LM_VERSION
 #define DEFAULT_CONFIG_FILE	ETCDIR "/sensors.conf"
 
-FILE *config_file;
-
 extern int main(int argc, char *arv[]);
 static void print_short_help(void);
 static void print_long_help(void);
@@ -89,29 +87,33 @@ void print_version(void)
 	       libsensors_version);
 }
 
-/* This examines global var config_file, and leaves the name there too.
-   It also opens config_file. */
-static void open_config_file(const char* config_file_name)
+/* Return 0 on success, and an exit error code otherwise */
+static int read_config_file(const char *config_file_name)
 {
-	if (!strcmp(config_file_name, "-")) {
-		config_file = stdin;
-		return;
-	}
+	FILE *config_file;
+	int err;
 
-	config_file = fopen(config_file_name, "r");
+	if (!strcmp(config_file_name, "-"))
+		config_file = stdin;
+	else
+		config_file = fopen(config_file_name, "r");
+
 	if (!config_file) {
 		fprintf(stderr, "Could not open config file\n");
 		perror(config_file_name);
-		exit(1);
+		return 1;
 	}
-}
 
-static void close_config_file(const char* config_file_name)
-{
-	if (fclose(config_file) == EOF) {
-		fprintf(stderr, "Could not close config file\n");
-		perror(config_file_name);
+	err = sensors_init(config_file);
+	if (err) {
+		fprintf(stderr, "sensors_init: %s\n", sensors_strerror(err));
+		return 1;
 	}
+
+	if (fclose(config_file) == EOF)
+		perror(config_file_name);
+
+	return 0;
 }
 
 static void set_degstr(void)
@@ -199,12 +201,9 @@ int main (int argc, char *argv[])
 		}
 	}
 
-	open_config_file(config_file_name);
-	if ((res = sensors_init(config_file))) {
-		fprintf(stderr, "sensors_init: %s\n", sensors_strerror(res));
-		exit(1);
-	}
-	close_config_file(config_file_name);
+	res = read_config_file(config_file_name);
+	if (res)
+		exit(res);
 
 	/* build the degrees string */
 	set_degstr();
