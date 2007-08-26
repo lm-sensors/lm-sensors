@@ -175,6 +175,8 @@ static int sensors_get_label_size(const sensors_chip_name *name)
 
 	i = 0;
 	while ((iter = sensors_get_all_features(name, &i))) {
+		if (iter->mapping != SENSORS_NO_MAPPING)
+			continue;
 		if ((label = sensors_get_label(name, iter->number)) &&
 		    strlen(label) > max_size)
 			max_size = strlen(label);
