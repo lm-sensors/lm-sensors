@@ -38,7 +38,7 @@
 
 #define PROGRAM "sensors"
 #define VERSION LM_VERSION
-#define DEFAULT_CONFIG_FILE_NAME "sensors.conf"
+#define DEFAULT_CONFIG_FILE	ETCDIR "/sensors.conf"
 
 FILE *config_file;
 
@@ -63,7 +63,8 @@ void print_short_help(void)
 void print_long_help(void)
 {
   printf("Usage: %s [OPTION]... [CHIP]...\n",PROGRAM);
-  printf("  -c, --config-file     Specify a config file (default: " ETCDIR "/" DEFAULT_CONFIG_FILE_NAME ")\n");
+  printf("  -c, --config-file     Specify a config file (default: %s)\n",
+         DEFAULT_CONFIG_FILE);
   printf("  -h, --help            Display this help text\n");
   printf("  -s, --set             Execute `set' statements too (root only)\n");
   printf("  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n");
@@ -144,7 +145,7 @@ static void set_degstr(void)
 int main (int argc, char *argv[])
 {
   int c,res,i,error;
-  const char *config_file_name = ETCDIR "/" DEFAULT_CONFIG_FILE_NAME;
+  const char *config_file_name = DEFAULT_CONFIG_FILE;
 
   struct option long_opts[] =  {
     { "help", no_argument, NULL, 'h' },
