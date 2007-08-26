@@ -62,7 +62,7 @@ void print_chip_raw(const sensors_chip_name *name)
 	a = 0;
 	while ((data = sensors_get_all_features(name, &a))) {
 		if (!(label = sensors_get_label(name, data->number))) {
-			printf("ERROR: Can't get feature `%s' data!\n",
+			printf("ERROR: Can't get feature `%s' label!\n",
 			       data->name);
 			continue;
 		}
