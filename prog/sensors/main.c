@@ -160,7 +160,7 @@ static void do_a_print(const sensors_chip_name *name)
 	if (do_raw)
 		print_chip_raw(name);
 	else
-		print_generic_chip(name);
+		print_chip(name);
 	printf("\n");
 }
 

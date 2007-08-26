@@ -23,6 +23,6 @@
 #include "lib/sensors.h"
 
 void print_chip_raw(const sensors_chip_name *name);
-void print_generic_chip(const sensors_chip_name *name);
+void print_chip(const sensors_chip_name *name);
 
 #endif /* def PROG_SENSORS_CHIPS_H */
