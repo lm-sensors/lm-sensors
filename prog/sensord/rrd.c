@@ -155,17 +155,14 @@ applyToFeatures
           int labelNumber = feature->dataNumbers[0];
           const char *rawLabel = NULL;
           char *label = NULL;
-          int valid = 0;
-          if (getValid (chip, labelNumber, &valid)) {
-            sensorLog (LOG_ERR, "Error getting sensor validity: %s/#%d", chip->prefix, labelNumber);
-            ret = -1;
-          } else if (getRawLabel (chip, labelNumber, &rawLabel)) {
+
+          if (getRawLabel (chip, labelNumber, &rawLabel)) {
             sensorLog (LOG_ERR, "Error getting raw sensor label: %s/#%d", chip->prefix, labelNumber);
             ret = -1;
           } else if (!(label = sensors_get_label (chip, labelNumber))) {
             sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
             ret = -1;
-          } else if (valid) {
+          } else  {
             rrdCheckLabel (rawLabel, num);
             ret = fn (data, rrdLabels[num], label, feature);
             ++ num;

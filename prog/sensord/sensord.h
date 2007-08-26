@@ -58,7 +58,6 @@ extern int unloadLib (void);
 
 /* from sense.c */
 
-extern int getValid (const sensors_chip_name *name, int feature, int *valid);
 extern int getRawLabel (const sensors_chip_name *name, int feature, const char **label);
 
 extern int readChips (void);

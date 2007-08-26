@@ -34,18 +34,6 @@
 #define DO_RRD 3
 
 int
-getValid
-(const sensors_chip_name *name, int feature, int *valid) {
-  int err;
-  err = sensors_get_ignored (name, feature);
-  if (err >= 0) {
-    *valid = err;
-    err = 0;
-  }
-  return err;
-}
-
-int
 getRawLabel
 (const sensors_chip_name *name, int feature, const char **label) {
   const sensors_feature_data *rawFeature;
@@ -95,17 +83,11 @@ readUnknownChip
 
   while ((ret == 0) && ((sensor = sensors_get_all_features (chip, &index0, &index1)) != NULL)) {
     char *label = NULL;
-    int valid = 0;
     double value;
     
-    if (getValid (chip, sensor->number, &valid)) {
-      sensorLog (LOG_ERR, "Error getting sensor validity: %s/%s", chip->prefix, sensor->name);
-      ret = 20;
-    } else if (!(label = sensors_get_label (chip, sensor->number))) {
+    if (!(label = sensors_get_label (chip, sensor->number))) {
       sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, sensor->name);
       ret = 21;
-    } else if (!valid) {
-      /* skip invalid */
     } else if (!(sensor->mode & SENSORS_MODE_R)) {
       sensorLog (LOG_INFO, "%s: %s", sensor->name, label);
     } else if ((ret = sensors_get_value (chip, sensor->number, &value))) {
@@ -154,17 +136,13 @@ doKnownChip
     int alarm = alarms & feature->alarmMask;
     int beep = beeps & feature->beepMask;
     char *label = NULL;
-    int valid = 0;
 
     if ((action == DO_SCAN) && !alarm) {
       continue;
-    } else if (getValid (chip, labelNumber, &valid)) {
-      sensorLog (LOG_ERR, "Error getting sensor validity: %s/#%d", chip->prefix, labelNumber);
-      ret = 22;
     } else if (!(label = sensors_get_label (chip, labelNumber))) {
       sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
       ret = 22;
-    } else if (valid) {
+    } else {
       double values[MAX_DATA];
 
       for (subindex = 0; !ret && (feature->dataNumbers[subindex] >= 0); ++ subindex) {
