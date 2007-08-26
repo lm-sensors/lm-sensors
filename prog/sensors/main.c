@@ -65,23 +65,23 @@ void print_long_help(void)
   printf("Usage: %s [OPTION]... [CHIP]...\n",PROGRAM);
   printf("  -c, --config-file     Specify a config file (default: %s)\n",
          DEFAULT_CONFIG_FILE);
-  printf("  -h, --help            Display this help text\n");
-  printf("  -s, --set             Execute `set' statements too (root only)\n");
-  printf("  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n");
-  printf("  -A, --no-adapter      Do not show adapter for each chip\n");
-  printf("  -u                    Raw output (debugging only)\n");
-  printf("  -v, --version         Display the program version\n");
-  printf("\n");
-  printf("Use `-' after `-c' to read the config file from stdin.\n");
-  printf("If no chips are specified, all chip info will be printed.\n");
-  printf("Example chip names:\n");
-  printf("\tlm78-i2c-0-2d\t*-i2c-0-2d\n");
-  printf("\tlm78-i2c-0-*\t*-i2c-0-*\n");
-  printf("\tlm78-i2c-*-2d\t*-i2c-*-2d\n");
-  printf("\tlm78-i2c-*-*\t*-i2c-*-*\n");
-  printf("\tlm78-isa-0290\t*-isa-0290\n");
-  printf("\tlm78-isa-*\t*-isa-*\n");
-  printf("\tlm78-*\n");
+  puts("  -h, --help            Display this help text\n"
+       "  -s, --set             Execute `set' statements too (root only)\n"
+       "  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n"
+       "  -A, --no-adapter      Do not show adapter for each chip\n"
+       "  -u                    Raw output (debugging only)\n"
+       "  -v, --version         Display the program version\n"
+       "\n"
+       "Use `-' after `-c' to read the config file from stdin.\n"
+       "If no chips are specified, all chip info will be printed.\n"
+       "Example chip names:\n"
+       "\tlm78-i2c-0-2d\t*-i2c-0-2d\n"
+       "\tlm78-i2c-0-*\t*-i2c-0-*\n"
+       "\tlm78-i2c-*-2d\t*-i2c-*-2d\n"
+       "\tlm78-i2c-*-*\t*-i2c-*-*\n"
+       "\tlm78-isa-0290\t*-isa-0290\n"
+       "\tlm78-isa-*\t*-isa-*\n"
+       "\tlm78-*");
 }
 
 void print_version(void)
