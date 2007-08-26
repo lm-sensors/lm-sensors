@@ -34,7 +34,6 @@
 #include "lib/error.h"
 #include "chips.h"
 #include "version.h"
-#include "chips_generic.h"
 
 #define PROGRAM			"sensors"
 #define VERSION			LM_VERSION
