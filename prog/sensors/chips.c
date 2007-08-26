@@ -27,31 +27,6 @@
 #include "chips.h"
 #include "lib/sensors.h"
 
-static inline double deg_ctof(double cel)
-{
-	return cel * (9.0F / 5.0F) + 32.0F;
-}
-
-static void print_label(const char *label, int space)
-{
-	int len = strlen(label)+1;
-	printf("%s:%*s", label, space - len, "");
-}
-
-static void print_vid_info(const sensors_chip_name *name, int f_vid,
-			   int label_size)
-{
-	char *label;
-	double vid;
-
-	if ((label = sensors_get_label(name, f_vid))
-	 && !sensors_get_value(name, f_vid, &vid)) {
-		print_label(label, label_size);
-		printf("%+6.3f V\n", vid);
-	}
-	free(label);
-}
-
 void print_chip_raw(const sensors_chip_name *name)
 {
 	int a;
@@ -82,6 +57,31 @@ void print_chip_raw(const sensors_chip_name *name)
 			printf("(%s)\n", label);
 		free(label);
 	}
+}
+
+static inline double deg_ctof(double cel)
+{
+	return cel * (9.0F / 5.0F) + 32.0F;
+}
+
+static void print_label(const char *label, int space)
+{
+	int len = strlen(label)+1;
+	printf("%s:%*s", label, space - len, "");
+}
+
+static void print_vid_info(const sensors_chip_name *name, int f_vid,
+			   int label_size)
+{
+	char *label;
+	double vid;
+
+	if ((label = sensors_get_label(name, f_vid))
+	 && !sensors_get_value(name, f_vid, &vid)) {
+		print_label(label, label_size);
+		printf("%+6.3f V\n", vid);
+	}
+	free(label);
 }
 
 static void sensors_get_available_features(const sensors_chip_name *name,
