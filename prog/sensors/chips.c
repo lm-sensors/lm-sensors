@@ -6268,14 +6268,14 @@ void print_unknown_chip(const sensors_chip_name *name)
       printf("ERROR: Can't get feature `%s' label!\n", data->name);
       continue;
     }
-    if (! valid)
+    if (!valid) {
+      free(label);
       continue;
+    }
     if (data->mode & SENSORS_MODE_R) {
-      if(sensors_get_feature(*name,data->number,&val)) {
+      if(sensors_get_feature(*name,data->number,&val))
         printf("ERROR: Can't get feature `%s' data!\n",data->name);
-        continue;
-      }
-      if (data->mapping != SENSORS_NO_MAPPING)
+      else if (data->mapping != SENSORS_NO_MAPPING)
         printf("  %s: %.2f (%s)\n",label,val,data->name);
       else
         printf("%s: %.2f (%s)\n",label,val,data->name);
