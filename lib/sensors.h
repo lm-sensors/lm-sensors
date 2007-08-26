@@ -77,11 +77,6 @@ int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res);
 int sensors_snprintf_chip_name(char *str, size_t size,
 			       const sensors_chip_name *chip);
 
-/* Compare two chips name descriptions, to see whether they could match.
-   Return 0 if it does not match, return 1 if it does match. */
-int sensors_match_chip(const sensors_chip_name *chip1,
-		       const sensors_chip_name *chip2);
-
 /* This function returns the adapter name of a bus,
    as used within the sensors_chip_name structure. If it could not be found,
    it returns NULL */

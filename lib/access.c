@@ -34,7 +34,7 @@ static int sensors_eval_expr(const sensors_chip_name *name,
 
 /* Compare two chips name descriptions, to see whether they could match.
    Return 0 if it does not match, return 1 if it does match. */
-int sensors_match_chip(const sensors_chip_name *chip1,
+static int sensors_match_chip(const sensors_chip_name *chip1,
 		       const sensors_chip_name *chip2)
 {
 	if ((chip1->prefix != SENSORS_CHIP_NAME_PREFIX_ANY) &&

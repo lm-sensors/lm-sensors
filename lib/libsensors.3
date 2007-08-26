@@ -35,8 +35,6 @@ libsensors \- publicly accessible functions provided by the sensors library
 .B void sensors_cleanup(void);
 .B int sensors_parse_chip_name(const char *orig_name,
                             \fBsensors_chip_name *res);\fP
-.B int sensors_match_chip(const sensors_chip_name *chip1,
-                       \fBconst sensors_chip_name *chip2);\fP
 .B const char *sensors_get_adapter_name(int bus_nr);
 .B char *sensors_get_label(const sensors_chip_name *name, int feature);\fP
 .B int sensors_get_value(const sensors_chip_name *name, int feature,
@@ -67,11 +65,6 @@ Clean-up function: You can't access anything after this, until the next sensors_
                             sensors_chip_name *res);\fP
 .br
 Parse a chip name to the internal representation. Return 0 on succes, <0 on error.
-
-\fBint sensors_match_chip(const sensors_chip_name *chip1,
-                       const sensors_chip_name *chip2);\fP
-.br
-Compare two chips name descriptions, to see whether they could match. Return 0 if it does not match, return 1 if it does match.
 
 .B const char *sensors_get_adapter_name(int bus_nr);
 .br
