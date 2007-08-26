@@ -27,7 +27,7 @@
 #include "chips.h"
 #include "lib/sensors.h"
 
-static inline float deg_ctof(float cel)
+static inline double deg_ctof(double cel)
 {
 	return cel * (9.0F / 5.0F) + 32.0F;
 }
@@ -135,7 +135,7 @@ static int sensors_get_label_size(const sensors_chip_name *name)
 	return max_size + 1;
 }
 
-static void print_temp_limits(float limit1, float limit2,
+static void print_temp_limits(double limit1, double limit2,
 			      const char *name1, const char *name2, int alarm)
 {
 	if (fahrenheit) {
