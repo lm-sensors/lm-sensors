@@ -53,6 +53,7 @@ SVN HEAD
   Program sensors: Drop all the chip-specific support
                    Fix alignment of alarm for one-limit temperatures
                    Drop option -U
+                   Fix a memory leak on error (with -u)
   Program sensors-detect: Stop Super-I/O probe after first family success
                           Fix SMSC DME1737 detection
                           Add /usr/sbin to the PATH (#2199)

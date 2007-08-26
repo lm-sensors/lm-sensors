@@ -42,12 +42,10 @@ void print_chip_raw(const sensors_chip_name *name)
 			continue;
 		}
 		if (data->mode & SENSORS_MODE_R) {
-			if (sensors_get_value(name, data->number, &val)) {
+			if (sensors_get_value(name, data->number, &val))
 				printf("ERROR: Can't get feature `%s' data!\n",
 				       data->name);
-				continue;
-			}
-			if (data->mapping != SENSORS_NO_MAPPING)
+			else if (data->mapping != SENSORS_NO_MAPPING)
 				printf("  %s: %.2f\n", label, val);
 			else
 				printf("%s: %.2f (%s)\n", label, val,
