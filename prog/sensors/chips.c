@@ -40,12 +40,9 @@ static inline float deg_ctof(float cel)
 #define SINGLE 4
 #define HYSTONLY 5
 
-/* minmax = 0 for limit/hysteresis, 1 for max/min, 2 for max only;
-   curprec and limitprec are # of digits after decimal point
-   for the current temp and the limits
-   note: symbolic constants defined in chips.h */
+/* symbolic constants for minmax defined above */
 static void print_temp_info(float n_cur, float n_over, float n_hyst,
-			    int minmax, int curprec, int limitprec)
+			    int minmax)
 {
 	/* note: deg_ctof() will preserve HUGEVAL */
 	if (fahrenheit) {
@@ -54,30 +51,29 @@ static void print_temp_info(float n_cur, float n_over, float n_hyst,
 		n_hyst = deg_ctof(n_hyst);
 	}
 
-	/* use %* to pass precision as an argument */
 	if (n_cur != HUGE_VAL)
-		printf("%+6.*f%s  ", curprec, n_cur, degstr);
+		printf("%+6.1f%s  ", n_cur, degstr);
 	else
 		printf("   FAULT  ");
 
 	if (minmax == MINMAX)
-		printf("(low  = %+5.*f%s, high = %+5.*f%s)  ",
-		       limitprec, n_hyst, degstr,
-		       limitprec, n_over, degstr);
+		printf("(low  = %+5.1f%s, high = %+5.1f%s)  ",
+		       n_hyst, degstr,
+		       n_over, degstr);
 	else if (minmax == MAXONLY)
-		printf("(high = %+5.*f%s)                  ",
-		       limitprec, n_over, degstr);
+		printf("(high = %+5.1f%s)                  ",
+		       n_over, degstr);
 	else if (minmax == CRIT)
-		printf("(high = %+5.*f%s, crit = %+5.*f%s)  ",
-		       limitprec, n_over, degstr,
-		       limitprec, n_hyst, degstr);
+		printf("(high = %+5.1f%s, crit = %+5.1f%s)  ",
+		       n_over, degstr,
+		       n_hyst, degstr);
 	else if (minmax == HYST)
-		printf("(high = %+5.*f%s, hyst = %+5.*f%s)  ",
-		       limitprec, n_over, degstr,
-		       limitprec, n_hyst, degstr);
+		printf("(high = %+5.1f%s, hyst = %+5.1f%s)  ",
+		       n_over, degstr,
+		       n_hyst, degstr);
 	else if (minmax == HYSTONLY)
-		printf("(hyst = %+5.*f%s)                  ",
-		       limitprec, n_over, degstr);
+		printf("(hyst = %+5.1f%s)                  ",
+		       n_over, degstr);
 	else if (minmax != SINGLE)
 		printf("Unknown temperature mode!");
 }
@@ -241,7 +237,7 @@ static void print_generic_chip_temp(const sensors_chip_name *name,
 	print_label(label, label_size);
 	free(label);
 
-	print_temp_info(val, max, min, type, 1, 1);
+	print_temp_info(val, max, min, type);
 
 	/* ALARM features */
 	if ((TEMP_FEATURE(SENSORS_FEATURE_TEMP_ALARM) &&
