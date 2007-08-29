@@ -231,11 +231,13 @@ int sensors_get_value(const sensors_chip_name *name, int feature,
 		return -SENSORS_ERR_WILDCARDS;
 	if (!(main_feature = sensors_lookup_feature_nr(name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
+
 	if (main_feature->data.compute_mapping == SENSORS_NO_MAPPING)
 		alt_feature = NULL;
-	else if (!(alt_feature = sensors_lookup_feature_nr(name,
-					main_feature->data.compute_mapping)))
-		return -SENSORS_ERR_NO_ENTRY;
+	else
+		alt_feature = sensors_lookup_feature_nr(name,
+					main_feature->data.compute_mapping);
+
 	if (!(main_feature->data.mode & SENSORS_MODE_R))
 		return -SENSORS_ERR_ACCESS_R;
 	for (chip = NULL;
@@ -276,11 +278,13 @@ int sensors_set_value(const sensors_chip_name *name, int feature,
 		return -SENSORS_ERR_WILDCARDS;
 	if (!(main_feature = sensors_lookup_feature_nr(name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
+
 	if (main_feature->data.compute_mapping == SENSORS_NO_MAPPING)
 		alt_feature = NULL;
-	else if (!(alt_feature = sensors_lookup_feature_nr(name,
-					     main_feature->data.compute_mapping)))
-		return -SENSORS_ERR_NO_ENTRY;
+	else
+		alt_feature = sensors_lookup_feature_nr(name,
+					main_feature->data.compute_mapping);
+
 	if (!(main_feature->data.mode & SENSORS_MODE_W))
 		return -SENSORS_ERR_ACCESS_W;
 	for (chip = NULL;
