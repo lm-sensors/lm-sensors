@@ -144,9 +144,9 @@ static void print_chip_temp(const sensors_chip_name *name,
 	const char *s1, *s2;
 	int alarm, crit_displayed = 0;
 	char *label;
-	const int size = SENSORS_FEATURE_TEMP_SENS - SENSORS_FEATURE_TEMP;
-	short has_features[SENSORS_FEATURE_TEMP_SENS - SENSORS_FEATURE_TEMP] = { 0, };
-	double feature_vals[SENSORS_FEATURE_TEMP_SENS - SENSORS_FEATURE_TEMP] = { 0.0, };
+	const int size = SENSORS_FEATURE_TEMP_TYPE - SENSORS_FEATURE_TEMP;
+	short has_features[SENSORS_FEATURE_TEMP_TYPE - SENSORS_FEATURE_TEMP] = { 0, };
+	double feature_vals[SENSORS_FEATURE_TEMP_TYPE - SENSORS_FEATURE_TEMP] = { 0.0, };
 
 	if (!(label = sensors_get_label(name, feature->number))) {
 		printf("ERROR: Can't get temperature label!\n");
@@ -237,8 +237,8 @@ static void print_chip_temp(const sensors_chip_name *name,
 	}
 
 	/* print out temperature sensor info */
-	if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_SENS)) {
-		int sens = (int)TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_SENS);
+	if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_TYPE)) {
+		int sens = (int)TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_TYPE);
 
 		/* older kernels / drivers sometimes report a beta value for
 		   thermistors */

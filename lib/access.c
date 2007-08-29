@@ -521,7 +521,7 @@ static const struct feature_subtype_match temp_matches[] = {
 	{ "max_alarm", SENSORS_FEATURE_TEMP_MAX_ALARM },
 	{ "crit_alarm", SENSORS_FEATURE_TEMP_CRIT_ALARM },
 	{ "fault", SENSORS_FEATURE_TEMP_FAULT },
-	{ "type", SENSORS_FEATURE_TEMP_SENS },
+	{ "type", SENSORS_FEATURE_TEMP_TYPE },
 	{ NULL, 0 }
 };
 
