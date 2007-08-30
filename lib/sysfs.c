@@ -36,7 +36,11 @@
 
 char sensors_sysfs_mount[NAME_MAX];
 
-#define MAX_SENSORS_PER_TYPE 16
+#define MAX_SENSORS_PER_TYPE	16
+/* Room for all 3 types (in, fan, temp) with all their subfeatures + VID */
+#define ALL_POSSIBLE_FEATURES	(MAX_SENSORS_PER_TYPE *			\
+				 SENSORS_FEATURE_MAX_SUB_FEATURES * 3	\
+				 + MAX_SENSORS_PER_TYPE)
 
 static
 int get_type_scaling(int type)
@@ -65,13 +69,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	int i, type, fnum = 1;
 	struct sysfs_attribute *attr;
 	struct dlist *attrs;
-	/* room for all 3  (in, fan, temp) types, with all their subfeatures
-	   + VID. We use a large sparse table at first to store all
-	   found features, so that we can store them sorted at type and index
-	   and then later create a dense sorted table */
-	sensors_chip_feature features[MAX_SENSORS_PER_TYPE *
-		SENSORS_FEATURE_MAX_SUB_FEATURES * 3 +
-		MAX_SENSORS_PER_TYPE];
+	sensors_chip_feature *features;
 	sensors_chip_feature *dyn_features;
 	char *name;
 		
@@ -80,7 +78,12 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	if (attrs == NULL)
 		return -ENOENT;
 		
-	memset(features, 0, sizeof(features));
+	/* We use a large sparse table at first to store all found features,
+	   so that we can store them sorted at type and index and then later
+	   create a dense sorted table. */
+	features = calloc(ALL_POSSIBLE_FEATURES, sizeof(sensors_chip_feature));
+	if (!features)
+		sensors_fatal_error(__FUNCTION__, "Out of memory");
 	
 	dlist_for_each_data(attrs, attr, struct sysfs_attribute) {
 		sensors_chip_feature feature;
@@ -168,7 +171,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 
 	if (fnum == 1) { /* No feature */
 		chip->feature = NULL;
-		return 0;
+		goto exit_free;
 	}
 
 	dyn_features = calloc(fnum, sizeof(sensors_chip_feature));
@@ -177,7 +180,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	}
 	
 	fnum = 0;
-	for(i = 0; i < ARRAY_SIZE(features); i++) {
+	for(i = 0; i < ALL_POSSIBLE_FEATURES; i++) {
 		if (features[i].data.name) {
 			dyn_features[fnum] = features[i];
 			fnum++;
@@ -186,6 +189,8 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	
 	chip->feature = dyn_features;
 	
+exit_free:
+	free(features);
 	return 0;
 }
 
