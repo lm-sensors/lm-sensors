@@ -37,9 +37,9 @@
 char sensors_sysfs_mount[NAME_MAX];
 
 #define MAX_SENSORS_PER_TYPE	16
+#define MAX_SUB_FEATURES	22
 /* Room for all 3 types (in, fan, temp) with all their subfeatures + VID */
-#define ALL_POSSIBLE_FEATURES	(MAX_SENSORS_PER_TYPE *			\
-				 SENSORS_FEATURE_MAX_SUB_FEATURES * 3	\
+#define ALL_POSSIBLE_FEATURES	(MAX_SENSORS_PER_TYPE * MAX_SUB_FEATURES * 3 \
 				 + MAX_SENSORS_PER_TYPE)
 
 static
@@ -122,12 +122,10 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		/* "calculate" a place to store the feature in our sparse,
 		   sorted table */
 		if (type == SENSORS_FEATURE_VID) {
-			i = nr + MAX_SENSORS_PER_TYPE *
-			     SENSORS_FEATURE_MAX_SUB_FEATURES * 3;
+			i = nr + MAX_SENSORS_PER_TYPE * MAX_SUB_FEATURES * 3;
 		} else {
 			i = (type >> 8) * MAX_SENSORS_PER_TYPE *
-				SENSORS_FEATURE_MAX_SUB_FEATURES +
-				nr * SENSORS_FEATURE_MAX_SUB_FEATURES +
+				MAX_SUB_FEATURES + nr * MAX_SUB_FEATURES +
 				(type & 0xFF);
 		}
 		
@@ -149,12 +147,10 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			feature.data.compute_mapping = SENSORS_NO_MAPPING;
 		} else if (type & 0x10) {
 			/* sub feature without compute mapping */
-			feature.data.mapping = i -
-				i % SENSORS_FEATURE_MAX_SUB_FEATURES + 1;
+			feature.data.mapping = i - i % MAX_SUB_FEATURES + 1;
 			feature.data.compute_mapping = SENSORS_NO_MAPPING;
 		} else {
-			feature.data.mapping = i -
-				i % SENSORS_FEATURE_MAX_SUB_FEATURES + 1;
+			feature.data.mapping = i - i % MAX_SUB_FEATURES + 1;
 			feature.data.compute_mapping = feature.data.mapping;
 		}
 		

@@ -154,10 +154,6 @@ typedef enum sensors_feature_type {
 	SENSORS_FEATURE_VID = 0x300,
 
 	SENSORS_FEATURE_UNKNOWN = INT_MAX,
-
-	/* special the largest number of subfeatures used, iow the
-	   highest ## from all the 0x?## above + 1*/
-	SENSORS_FEATURE_MAX_SUB_FEATURES = 22
 } sensors_feature_type;
 
 /* This structure is used when you want to get all features of a specific
