@@ -113,8 +113,8 @@ typedef struct sensors_chip {
 /* Config file bus declaration: the bus type and number, combined with adapter
    name */
 typedef struct sensors_bus {
-  sensors_bus_id bus;
   char *adapter;
+  sensors_bus_id bus;
   int lineno;
 } sensors_bus;
 

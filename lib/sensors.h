@@ -159,8 +159,8 @@ typedef enum sensors_feature_type {
 /* This structure is used when you want to get all features of a specific
    chip. */
 typedef struct sensors_feature_data {
-	int number;
 	char *name;
+	int number;
 	sensors_feature_type type;
 	int mapping;
 	int compute_mapping;
