@@ -12,6 +12,7 @@ SVN HEAD
   Program sensors-detect: Don't probe i2c-isa as a regular i2c bus
                           Add Winbond W83L786NR/NG/R/G detection
                           Add Winbond W83L771W/G detection
+                          Add Intel Tolapai SMBus detection
 
 
 2.10.4 (20070716)

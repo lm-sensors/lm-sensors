@@ -166,7 +166,14 @@ $revision =~ s/ \([^()]*\)//;
        procid => "Intel ICH9",
        driver => "i2c-i801",
        match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
-     }, 
+     },
+     { 
+       vendid => 0x8086,
+       devid  => 0x5032,
+       procid => "Intel Tolapai",
+       driver => "i2c-i801",
+       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
+     },  
      { 
        vendid => 0x1106,
        devid  => 0x3040,
