@@ -22,11 +22,11 @@
 
 extern char sensors_sysfs_mount[];
 
-extern int sensors_init_sysfs(void);
+int sensors_init_sysfs(void);
 
-extern int sensors_read_sysfs_chips(void);
+int sensors_read_sysfs_chips(void);
 
-extern int sensors_read_sysfs_bus(void);
+int sensors_read_sysfs_bus(void);
 
 /* Read a value out of a sysfs attribute file */
 int sensors_read_sysfs_attr(const sensors_chip_name *name, int feature,

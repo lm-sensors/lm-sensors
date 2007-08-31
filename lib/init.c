@@ -39,137 +39,138 @@ static void free_expr(sensors_expr *expr);
 
 int sensors_init(FILE *input)
 {
-  int res;
+	int res;
 
-  if (!sensors_init_sysfs())
-    return -SENSORS_ERR_PROC;
-  if ((res = sensors_read_sysfs_bus()) || (res = sensors_read_sysfs_chips()))
-    return res;
-  if ((res = sensors_scanner_init(input)))
-    return -SENSORS_ERR_PARSE;
-  if ((res = sensors_yyparse()))
-    return -SENSORS_ERR_PARSE;
-  if ((res = sensors_substitute_busses()))
-    return res;
-  return 0;
+	if (!sensors_init_sysfs())
+		return -SENSORS_ERR_PROC;
+	if ((res = sensors_read_sysfs_bus()) ||
+	    (res = sensors_read_sysfs_chips()))
+		return res;
+	if ((res = sensors_scanner_init(input)))
+		return -SENSORS_ERR_PARSE;
+	if ((res = sensors_yyparse()))
+		return -SENSORS_ERR_PARSE;
+	if ((res = sensors_substitute_busses()))
+		return res;
+	return 0;
 }
 
 void sensors_cleanup(void)
 {
-  int i;
+	int i;
 
-  sensors_scanner_exit();
+	sensors_scanner_exit();
 
-  for (i = 0; i < sensors_proc_chips_count; i++) {
-    free_chip_name(&sensors_proc_chips[i].chip);
-    free_chip_features(sensors_proc_chips[i].feature);
-  }
-  free(sensors_proc_chips);
-  sensors_proc_chips = NULL;
-  sensors_proc_chips_count = sensors_proc_chips_max = 0;
-  
-  for (i = 0; i < sensors_config_busses_count; i++)
-    free_bus(&sensors_config_busses[i]);
-  free(sensors_config_busses);
-  sensors_config_busses = NULL;
-  sensors_config_busses_count = sensors_config_busses_max = 0;
+	for (i = 0; i < sensors_proc_chips_count; i++) {
+		free_chip_name(&sensors_proc_chips[i].chip);
+		free_chip_features(sensors_proc_chips[i].feature);
+	}
+	free(sensors_proc_chips);
+	sensors_proc_chips = NULL;
+	sensors_proc_chips_count = sensors_proc_chips_max = 0;
 
-  for (i = 0; i < sensors_config_chips_count; i++)
-    free_chip(&sensors_config_chips[i]);
-  free(sensors_config_chips);
-  sensors_config_chips = NULL;
-  sensors_config_chips_count = sensors_config_chips_max = 0;
+	for (i = 0; i < sensors_config_busses_count; i++)
+		free_bus(&sensors_config_busses[i]);
+	free(sensors_config_busses);
+	sensors_config_busses = NULL;
+	sensors_config_busses_count = sensors_config_busses_max = 0;
 
-  for (i = 0; i < sensors_proc_bus_count; i++)
-    free_bus(&sensors_proc_bus[i]);
-  free(sensors_proc_bus);
-  sensors_proc_bus = NULL;
-  sensors_proc_bus_count = sensors_proc_bus_max = 0;
+	for (i = 0; i < sensors_config_chips_count; i++)
+		free_chip(&sensors_config_chips[i]);
+	free(sensors_config_chips);
+	sensors_config_chips = NULL;
+	sensors_config_chips_count = sensors_config_chips_max = 0;
+
+	for (i = 0; i < sensors_proc_bus_count; i++)
+		free_bus(&sensors_proc_bus[i]);
+	free(sensors_proc_bus);
+	sensors_proc_bus = NULL;
+	sensors_proc_bus_count = sensors_proc_bus_max = 0;
 }
 
 void free_chip_name(sensors_chip_name *name)
 {
-  free(name->prefix);
-  free(name->path);
+	free(name->prefix);
+	free(name->path);
 }
 
 void free_chip_features(sensors_chip_feature *features)
 {
-  int i;
+	int i;
 
-  for (i = 0; features[i].data.name; i++)
-    free(features[i].data.name);
-  free(features);
+	for (i = 0; features[i].data.name; i++)
+		free(features[i].data.name);
+	free(features);
 }
 
 void free_bus(sensors_bus *bus)
 {
-  free(bus->adapter);
+	free(bus->adapter);
 }
 
 void free_chip(sensors_chip *chip)
 {
-  int i;
+	int i;
 
-  for (i = 0; i < chip->chips.fits_count; i++)
-    free_chip_name(&chip->chips.fits[i]);
-  free(chip->chips.fits);
-  chip->chips.fits_count = chip->chips.fits_max = 0;
+	for (i = 0; i < chip->chips.fits_count; i++)
+		free_chip_name(&chip->chips.fits[i]);
+	free(chip->chips.fits);
+	chip->chips.fits_count = chip->chips.fits_max = 0;
 
-  for (i = 0; i < chip->labels_count; i++)
-    free_label(&chip->labels[i]);
-  free(chip->labels);
-  chip->labels_count = chip->labels_max = 0;
+	for (i = 0; i < chip->labels_count; i++)
+		free_label(&chip->labels[i]);
+	free(chip->labels);
+	chip->labels_count = chip->labels_max = 0;
 
-  for (i = 0; i < chip->sets_count; i++)
-    free_set(&chip->sets[i]);
-  free(chip->sets);
-  chip->sets_count = chip->sets_max = 0;
+	for (i = 0; i < chip->sets_count; i++)
+		free_set(&chip->sets[i]);
+	free(chip->sets);
+	chip->sets_count = chip->sets_max = 0;
 
-  for (i = 0; i < chip->computes_count; i++)
-    free_compute(&chip->computes[i]);
-  free(chip->computes);
-  chip->computes_count = chip->computes_max = 0;
+	for (i = 0; i < chip->computes_count; i++)
+		free_compute(&chip->computes[i]);
+	free(chip->computes);
+	chip->computes_count = chip->computes_max = 0;
 
-  for (i = 0; i < chip->ignores_count; i++)
-    free_ignore(&chip->ignores[i]);
-  free(chip->ignores);
-  chip->ignores_count = chip->ignores_max = 0;
+	for (i = 0; i < chip->ignores_count; i++)
+		free_ignore(&chip->ignores[i]);
+	free(chip->ignores);
+	chip->ignores_count = chip->ignores_max = 0;
 }
 
 void free_label(sensors_label *label)
 {
-  free(label->name);
-  free(label->value);
+	free(label->name);
+	free(label->value);
 }
 
 void free_set(sensors_set *set)
 {
-  free(set->name);
-  free_expr(set->value);
+	free(set->name);
+	free_expr(set->value);
 }
 
 void free_compute(sensors_compute *compute)
 {
-  free(compute->name);
-  free_expr(compute->from_proc);
-  free_expr(compute->to_proc);
+	free(compute->name);
+	free_expr(compute->from_proc);
+	free_expr(compute->to_proc);
 }
 
 void free_ignore(sensors_ignore *ignore)
 {
-  free(ignore->name);
+	free(ignore->name);
 }
 
 void free_expr(sensors_expr *expr)
 {
-  if ((expr->kind) == sensors_kind_var)
-    free(expr->data.var);
-  else if ((expr->kind) == sensors_kind_sub) {
-    if (expr->data.subexpr.sub1)
-      free_expr(expr->data.subexpr.sub1);
-    if (expr->data.subexpr.sub2)
-      free_expr(expr->data.subexpr.sub2);
-  }
-  free(expr);
+	if ((expr->kind) == sensors_kind_var)
+		free(expr->data.var);
+	else if ((expr->kind) == sensors_kind_sub) {
+		if (expr->data.subexpr.sub1)
+			free_expr(expr->data.subexpr.sub1);
+		if (expr->data.subexpr.sub2)
+			free_expr(expr->data.subexpr.sub2);
+	}
+	free(expr);
 }

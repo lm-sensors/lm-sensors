@@ -25,16 +25,16 @@
    made between the current number of elements and the maximum number.
    You can only add elements at the end. Primitive, but very useful
    for internal use. */
-extern void sensors_malloc_array(void *list, int *num_el, int *max_el,
-                                 int el_size);
-extern void sensors_free_array(void *list, int *num_el, int *max_el);
-extern void sensors_add_array_el(const void *el, void *list, int *num_el,
-                                 int *max_el, int el_size);
-extern void sensors_add_array_els(const void *els, int nr_els, void *list,
-                                  int *num_el, int *max_el, int el_size);
+void sensors_malloc_array(void *list, int *num_el, int *max_el,
+			  int el_size);
+void sensors_free_array(void *list, int *num_el, int *max_el);
+void sensors_add_array_el(const void *el, void *list, int *num_el,
+			  int *max_el, int el_size);
+void sensors_add_array_els(const void *els, int nr_els, void *list,
+			   int *num_el, int *max_el, int el_size);
 
 /* Strip a string of all terminating spaces */
-extern void sensors_strip_of_spaces(char *name);
+void sensors_strip_of_spaces(char *name);
 
 #define ARRAY_SIZE(arr)	(int)(sizeof(arr) / sizeof((arr)[0]))
 

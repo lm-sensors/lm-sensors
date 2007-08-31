@@ -21,12 +21,12 @@
 #define LIB_SENSORS_CONF_H
 
 /* This is defined in conf-lex.l */
-extern int sensors_yylex(void);
+int sensors_yylex(void);
 extern char sensors_lex_error[];
 extern int sensors_yylineno;
 extern FILE *sensors_yyin;
 
 /* This is defined in conf-parse.y */
-extern int sensors_yyparse(void);
+int sensors_yyparse(void);
 
 #endif /* LIB_SENSORS_CONF_H */

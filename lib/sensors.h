@@ -176,7 +176,7 @@ typedef struct sensors_feature_data {
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
 const sensors_feature_data *sensors_get_all_features
-             (const sensors_chip_name *name, int *nr);
+		(const sensors_chip_name *name, int *nr);
 
 #ifdef __cplusplus
 }

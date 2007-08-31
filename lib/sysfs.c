@@ -72,24 +72,24 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	sensors_chip_feature *features;
 	sensors_chip_feature *dyn_features;
 	char *name;
-		
+
 	attrs = sysfs_get_device_attributes(sysdir);
-	
+
 	if (attrs == NULL)
 		return -ENOENT;
-		
+
 	/* We use a large sparse table at first to store all found features,
 	   so that we can store them sorted at type and index and then later
 	   create a dense sorted table. */
 	features = calloc(ALL_POSSIBLE_FEATURES, sizeof(sensors_chip_feature));
 	if (!features)
 		sensors_fatal_error(__FUNCTION__, "Out of memory");
-	
+
 	dlist_for_each_data(attrs, attr, struct sysfs_attribute) {
 		sensors_chip_feature feature;
 		name = attr->name;
 		int nr;
-		
+
 		type = sensors_feature_get_type(name, &nr);
 		if (type == SENSORS_FEATURE_UNKNOWN)
 			continue;
@@ -110,7 +110,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 					nr--;
 				break;
 		}
-		
+
 		if (nr >= MAX_SENSORS_PER_TYPE) {
 			fprintf(stderr, "libsensors error, more sensors of one"
 				" type then MAX_SENSORS_PER_TYPE, ignoring "
@@ -118,7 +118,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			free(feature.data.name);
 			continue;
 		}
-		
+
 		/* "calculate" a place to store the feature in our sparse,
 		   sorted table */
 		if (type == SENSORS_FEATURE_VID) {
@@ -128,19 +128,19 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 				MAX_SUB_FEATURES + nr * MAX_SUB_FEATURES +
 				(type & 0xFF);
 		}
-		
-		if (features[i].data.name) {			
+
+		if (features[i].data.name) {
 			fprintf(stderr, "libsensors error, trying to add dupli"
 				"cate feature: %s to dynamic feature table\n",
 				name);
 			free(feature.data.name);
 			continue;
 		}
-		
+
 		/* fill in the other feature members */
 		feature.data.number = i + 1;
 		feature.data.type = type;
-			
+
 		if ((type & 0x00FF) == 0) {
 			/* main feature */
 			feature.data.mapping = SENSORS_NO_MAPPING;
@@ -153,7 +153,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			feature.data.mapping = i - i % MAX_SUB_FEATURES + 1;
 			feature.data.compute_mapping = feature.data.mapping;
 		}
-		
+
 		if (attr->method & SYSFS_METHOD_SHOW)
 			feature.data.mode |= SENSORS_MODE_R;
 		if (attr->method & SYSFS_METHOD_STORE)
@@ -172,19 +172,19 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 
 	dyn_features = calloc(fnum, sizeof(sensors_chip_feature));
 	if (dyn_features == NULL) {
-		sensors_fatal_error(__FUNCTION__,"Out of memory");
+		sensors_fatal_error(__FUNCTION__, "Out of memory");
 	}
-	
+
 	fnum = 0;
-	for(i = 0; i < ALL_POSSIBLE_FEATURES; i++) {
+	for (i = 0; i < ALL_POSSIBLE_FEATURES; i++) {
 		if (features[i].data.name) {
 			dyn_features[fnum] = features[i];
 			fnum++;
 		}
 	}
-	
+
 	chip->feature = dyn_features;
-	
+
 exit_free:
 	free(features);
 	return 0;
@@ -268,7 +268,7 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 		entry.chip.bus.nr = 0;
 	} else
 		goto exit_free;
-	
+
 	if (sensors_read_dynamic_chip(&entry, dev) < 0)
 		goto exit_free;
 	if (!entry.feature) { /* No feature, discard chip */
@@ -440,7 +440,7 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name, int feature,
 
 	return 0;
 }
-  
+
 int sensors_write_sysfs_attr(const sensors_chip_name *name, int feature,
 			     double value)
 {
@@ -451,7 +451,7 @@ int sensors_write_sysfs_attr(const sensors_chip_name *name, int feature,
 	int dummy;
 	char check;
 	const char *suffix = "";
- 
+
 	if (!(the_feature = sensors_lookup_feature_nr(name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 

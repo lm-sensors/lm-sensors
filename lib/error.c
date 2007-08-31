@@ -23,43 +23,43 @@
 #include "general.h"
 
 static void sensors_default_parse_error(const char *err, int lineno);
-static void sensors_default_fatal_error(const char *proc,const char *err);
+static void sensors_default_fatal_error(const char *proc, const char *err);
 
-void (*sensors_parse_error) (const char *err, int lineno) = 
-                                                  sensors_default_parse_error;
-void (*sensors_fatal_error) (const char *proc, const char *err) = 
-                                                  sensors_default_fatal_error;
+void (*sensors_parse_error) (const char *err, int lineno) =
+						sensors_default_parse_error;
+void (*sensors_fatal_error) (const char *proc, const char *err) =
+						sensors_default_fatal_error;
 
-static const char *errorlist[] =
- { /* Unknown error         */ "sensors_strerror: Unknown error!",
-   /* SENSORS_ERR_WILDCARDS */ "Wildcard found in chip name",
-   /* SENSORS_ERR_NO_ENTRY  */ "No such feature known",
-   /* SENSORS_ERR_ACCESS    */ "Can't read or write",
-   /* SENSORS_ERR_PROC      */ "Can't access sysfs file",
-   /* SENSORS_ERR_DIV_ZERO  */ "Divide by zero",
-   /* SENSORS_ERR_CHIP_NAME */ "Can't parse chip name",
-   /* SENSORS_ERR_BUS_NAME  */ "Can't parse bus name",
-   /* SENSORS_ERR_PARSE     */ "General parse error",
-   /* SENSORS_ERR_ACCESS_W  */ "Can't write",
-   /* SENSORS_ERR_ACCESS_R  */ "Can't read"
- };
+static const char *errorlist[] = {
+	/* Unknown error         */ "sensors_strerror: Unknown error!",
+	/* SENSORS_ERR_WILDCARDS */ "Wildcard found in chip name",
+	/* SENSORS_ERR_NO_ENTRY  */ "No such feature known",
+	/* SENSORS_ERR_ACCESS    */ "Can't read or write",
+	/* SENSORS_ERR_PROC      */ "Can't access sysfs file",
+	/* SENSORS_ERR_DIV_ZERO  */ "Divide by zero",
+	/* SENSORS_ERR_CHIP_NAME */ "Can't parse chip name",
+	/* SENSORS_ERR_BUS_NAME  */ "Can't parse bus name",
+	/* SENSORS_ERR_PARSE     */ "General parse error",
+	/* SENSORS_ERR_ACCESS_W  */ "Can't write",
+	/* SENSORS_ERR_ACCESS_R  */ "Can't read",
+};
 
 const char *sensors_strerror(int errnum)
 {
-  if (errnum < 0)
-    errnum = -errnum;
-  if (errnum >= ARRAY_SIZE(errorlist))
-    errnum = 0;
-  return errorlist[errnum];
-} 
+	if (errnum < 0)
+		errnum = -errnum;
+	if (errnum >= ARRAY_SIZE(errorlist))
+		errnum = 0;
+	return errorlist[errnum];
+}
 
 void sensors_default_parse_error(const char *err, int lineno)
 {
-  fprintf(stderr,"Error: Line %d: %s\n",lineno,err);
+	fprintf(stderr, "Error: Line %d: %s\n", lineno, err);
 }
 
 void sensors_default_fatal_error(const char *proc, const char *err)
 {
-  fprintf(stderr,"Fatal error in `%s': %s\n",proc,err);
-  exit(1);
+	fprintf(stderr, "Fatal error in `%s': %s\n", proc, err);
+	exit(1);
 }

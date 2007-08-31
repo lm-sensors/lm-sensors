@@ -27,95 +27,97 @@
    data. */
 
 /* Kinds of expression operators recognized */
-typedef enum sensors_operation { 
-  sensors_add, sensors_sub, sensors_multiply, sensors_divide, 
-  sensors_negate, sensors_exp, sensors_log } sensors_operation;
+typedef enum sensors_operation {
+	sensors_add, sensors_sub, sensors_multiply, sensors_divide,
+	sensors_negate, sensors_exp, sensors_log,
+} sensors_operation;
 
 /* An expression can have several forms */
 typedef enum sensors_expr_kind {
-  sensors_kind_val, sensors_kind_source, sensors_kind_var, 
-  sensors_kind_sub } sensors_expr_kind;
+	sensors_kind_val, sensors_kind_source, sensors_kind_var,
+	sensors_kind_sub
+} sensors_expr_kind;
 
 /* An expression. It is either a floating point value, a variable name,
    an operation on subexpressions, or the special value 'sub' } */
 struct sensors_expr;
 
 typedef struct sensors_subexpr {
-  sensors_operation op;
-  struct sensors_expr *sub1;
-  struct sensors_expr *sub2;
+	sensors_operation op;
+	struct sensors_expr *sub1;
+	struct sensors_expr *sub2;
 } sensors_subexpr;
 
 typedef struct sensors_expr {
-  sensors_expr_kind kind;
-  union {
-    double val;
-    char *var;
-    sensors_subexpr subexpr;
-  } data;
+	sensors_expr_kind kind;
+	union {
+		double val;
+		char *var;
+		sensors_subexpr subexpr;
+	} data;
 } sensors_expr;
 
 /* Config file label declaration: a feature name, combined with the label
    value */
 typedef struct sensors_label {
-  char *name;
-  char *value;
-  int lineno;
+	char *name;
+	char *value;
+	int lineno;
 } sensors_label;
 
 /* Config file set declaration: a feature name, combined with an expression */
 typedef struct sensors_set {
-  char *name;
-  sensors_expr *value;
-  int lineno;
+	char *name;
+	sensors_expr *value;
+	int lineno;
 } sensors_set;
 
-/* Config file compute declaration: a feature name, combined with two 
+/* Config file compute declaration: a feature name, combined with two
    expressions */
 typedef struct sensors_compute {
-  char *name;
-  sensors_expr *from_proc;
-  sensors_expr *to_proc;
-  int lineno;
+	char *name;
+	sensors_expr *from_proc;
+	sensors_expr *to_proc;
+	int lineno;
 } sensors_compute;
 
 /* Config file ignore declaration: a feature name */
 typedef struct sensors_ignore {
-  char *name;
-  int lineno;
+	char *name;
+	int lineno;
 } sensors_ignore;
 
 /* A list of chip names, used to represent a config file chips declaration */
 typedef struct sensors_chip_name_list {
-  sensors_chip_name *fits;
-  int fits_count;
-  int fits_max;
+	sensors_chip_name *fits;
+	int fits_count;
+	int fits_max;
 } sensors_chip_name_list;
 
 /* A config file chip block */
 typedef struct sensors_chip {
-  sensors_chip_name_list chips;
-  sensors_label *labels;
-  int labels_count;
-  int labels_max;
-  sensors_set *sets;
-  int sets_count;
-  int sets_max;
-  sensors_compute *computes;
-  int computes_count;
-  int computes_max;
-  sensors_ignore *ignores;
-  int ignores_count;
-  int ignores_max;
-  int lineno;
+	sensors_chip_name_list chips;
+	sensors_label *labels;
+	int labels_count;
+	int labels_max;
+	sensors_set *sets;
+	int sets_count;
+	int sets_max;
+	sensors_compute *computes;
+	int computes_count;
+	int computes_max;
+	sensors_ignore *ignores;
+	int ignores_count;
+	int ignores_max;
+	int lineno;
 } sensors_chip;
 
 /* Config file bus declaration: the bus type and number, combined with adapter
    name */
 typedef struct sensors_bus {
-  char *adapter;
-  sensors_bus_id bus;
-  int lineno;
+	char *adapter;
+	sensors_bus_id bus;
+	int lineno;
 } sensors_bus;
 
 /* Internal data about a single chip feature.
@@ -135,14 +137,14 @@ typedef struct sensors_bus {
    scaling is the number of decimal points to scale by.
      Divide the read value by 10**scaling to get the real value. */
 typedef struct sensors_chip_feature {
-  sensors_feature_data data;
-  int scaling;
+	sensors_feature_data data;
+	int scaling;
 } sensors_chip_feature;
 
 /* Internal data about all features of a type of chip */
 typedef struct sensors_chip_features {
-  struct sensors_chip_name chip;
-  struct sensors_chip_feature *feature;
+	struct sensors_chip_name chip;
+	struct sensors_chip_feature *feature;
 } sensors_chip_features;
 
 extern sensors_chip *sensors_config_chips;

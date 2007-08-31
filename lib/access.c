@@ -29,8 +29,8 @@
 #include "general.h"
 
 static int sensors_eval_expr(const sensors_chip_name *name,
-                             const sensors_expr *expr,
-                             double val, double *result);
+			     const sensors_expr *expr,
+			     double val, double *result);
 
 /* Compare two chips name descriptions, to see whether they could match.
    Return 0 if it does not match, return 1 if it does match. */
@@ -158,7 +158,7 @@ char *sensors_get_label(const sensors_chip_name *name, int feature)
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->labels_count; i++)
-			if (!strcasecmp(featureptr->data.name,chip->labels[i].name)){
+			if (!strcasecmp(featureptr->data.name, chip->labels[i].name)) {
 				label = strdup(chip->labels[i].value);
 				goto sensors_get_label_exit;
 			}

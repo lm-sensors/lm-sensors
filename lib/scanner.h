@@ -20,8 +20,8 @@
 #ifndef LIB_SENSORS_SCANNER_H
 #define LIB_SENSORS_SCANNER_H
 
-extern int sensors_scanner_init(FILE *input);
-extern void sensors_scanner_exit(void);
+int sensors_scanner_init(FILE *input);
+void sensors_scanner_exit(void);
 
 #endif
 

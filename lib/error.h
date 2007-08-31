@@ -39,7 +39,7 @@ extern "C" {
 /* This function returns a pointer to a string which describes the error.
    errnum may be negative (the corresponding positive error is returned).
    You may not modify the result! */
-extern const char *sensors_strerror(int errnum);
+const char *sensors_strerror(int errnum);
 
 /* This function is called when a parse error is detected. Give it a new
    value, and your own function is called instead of the default (which
