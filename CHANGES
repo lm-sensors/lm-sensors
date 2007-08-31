@@ -70,6 +70,7 @@ SVN HEAD
                           Add Fintek F71806FG and F71862FG detection
                           Add Winbond W83L786NR/NG/R/G detection
                           Add Winbond W83L771W/G detection
+                          Add Intel Tolapai SMBus detection
 
 
 2.10.3 (20070319)
