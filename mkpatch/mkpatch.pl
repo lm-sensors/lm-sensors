@@ -225,8 +225,8 @@ Intel 82371AB PIIX4(E), ServerWorks OSB4, CSB5, CSB6, HT-1000
 CONFIG_I2C_PIIX4
   If you say yes to this option, support will be included for the
   Intel PIIX4, PIIX4E, 443MX, Serverworks OSB4, CSB5, CSB6 and
-  HT-1000, ATI IXP200, IXP300, IXP400, SB600 and SB700, and SMSC
-  Victory66 mainboard SMBus interfaces.
+  HT-1000, ATI IXP200, IXP300, IXP400, SB600, SB700 and SB800, and
+  SMSC Victory66 mainboard SMBus interfaces.
   
   This can also be built as a module which can be inserted and removed
   while the kernel is running.

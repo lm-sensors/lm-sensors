@@ -7,7 +7,7 @@ SVN HEAD
            Fix thmc50 support for Linux 2.6
   Makefile: Fix kernel version detection (#2187)
   Module fscher: Add missing read of control register (2.6 backport)
-  Module i2c-piix4: Add ATI SB700 support (2.6 backport)
+  Module i2c-piix4: Add ATI SB700 and SB800 support (2.6 backport)
   Module lm93: Fix an array overrun (2.6 backport)
   Program sensors: Fix a memory leak on error (with -u)
   Program sensors-detect: Don't probe i2c-isa as a regular i2c bus
