@@ -83,8 +83,10 @@ CC := gcc
 # This is the main modules directory into which the modules will be installed.
 # The magic invocation will return something like this:
 #   /lib/modules/2.4.29
-KERNELVERSION := $(shell $(CC) -I$(LINUX_HEADERS) -E etc/config.c | grep uts_release | cut -f 2 -d'"')
-MODPREF := /lib/modules/$(KERNELVERSION)
+ifneq (,$(findstring /2.4., /$(KERNELVERSION)))
+	UTSRELEASE := $(shell $(CC) -I$(LINUX_HEADERS) -E etc/config.c | grep uts_release | cut -f 2 -d'"')
+	MODPREF := /lib/modules/$(UTSRELEASE)
+endif
 
 # When building userspace for use with 2.4.x series kernels, we turn off
 # sysfs support by default.  You can override this (e.g. if you want
@@ -92,7 +94,7 @@ MODPREF := /lib/modules/$(KERNELVERSION)
 # by uncommenting the line after the next endif.  Keep in mind, if and only
 # if you do this: you will need to install the libsysfs libraries on your
 # kernel 2.4.x systems also.
-ifeq (,$(findstring /2.4., $(MODPREF)))
+ifeq (,$(findstring /2.4., /$(KERNELVERSION)))
 	SYSFS_SUPPORT := 1
 else
 	SYSFS_SUPPORT :=
@@ -100,7 +102,7 @@ endif
 #SYSFS_SUPPORT := 1
 
 # Prevent 2.6+ users from using improper targets, as this won't work.
-ifeq (,$(findstring /2.4., $(MODPREF)))
+ifeq (,$(findstring /2.4., /$(KERNELVERSION)))
     ifeq (, $(MAKECMDGOALS))
         $(error For 2.6 kernels and later, use "make user")
     endif
@@ -320,7 +322,7 @@ all :: user
 install :: all user_install
 ifeq ($(DESTDIR),)
 	-if [ -r $(MODPREF)/build/System.map -a -x /sbin/depmod ] ; then \
-	  /sbin/depmod -a -F $(MODPREF)/build/System.map $(KERNELVERSION) ; \
+	  /sbin/depmod -a -F $(MODPREF)/build/System.map $(UTSRELEASE) ; \
 	fi
 else
 	@echo "*** This is a \`staged' install using \"$(DESTDIR)\" as prefix."
