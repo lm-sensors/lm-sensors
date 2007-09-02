@@ -136,7 +136,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		}
 
 		/* fill in the other feature members */
-		feature.data.number = i + 1;
+		feature.data.number = i;
 		feature.data.type = type;
 
 		if ((type & 0x00FF) == 0) {
@@ -145,10 +145,10 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			feature.data.compute_mapping = SENSORS_NO_MAPPING;
 		} else if (type & 0x10) {
 			/* sub feature without compute mapping */
-			feature.data.mapping = i - i % MAX_SUB_FEATURES + 1;
+			feature.data.mapping = i - i % MAX_SUB_FEATURES;
 			feature.data.compute_mapping = SENSORS_NO_MAPPING;
 		} else {
-			feature.data.mapping = i - i % MAX_SUB_FEATURES + 1;
+			feature.data.mapping = i - i % MAX_SUB_FEATURES;
 			feature.data.compute_mapping = feature.data.mapping;
 		}
 
