@@ -411,17 +411,15 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name, int feature,
 	int mag;
 	char n[NAME_MAX];
 	FILE *f;
-	int dummy;
-	char check;
 	const char *suffix = "";
 
 	if (!(the_feature = sensors_lookup_feature_nr(name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 
 	/* REVISIT: this is a ugly hack */
-	if (sscanf(the_feature->data.name, "in%d%c", &dummy, &check) == 1
-	 || sscanf(the_feature->data.name, "fan%d%c", &dummy, &check) == 1
-	 || sscanf(the_feature->data.name, "temp%d%c", &dummy, &check) == 1)
+	if (the_feature->data.type == SENSORS_FEATURE_IN
+	 || the_feature->data.type == SENSORS_FEATURE_FAN
+	 || the_feature->data.type == SENSORS_FEATURE_TEMP)
 		suffix = "_input";
 
 	snprintf(n, NAME_MAX, "%s/%s%s", name->path, the_feature->data.name,
@@ -446,17 +444,15 @@ int sensors_write_sysfs_attr(const sensors_chip_name *name, int feature,
 	int mag;
 	char n[NAME_MAX];
 	FILE *f;
-	int dummy;
-	char check;
 	const char *suffix = "";
 
 	if (!(the_feature = sensors_lookup_feature_nr(name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 
 	/* REVISIT: this is a ugly hack */
-	if (sscanf(the_feature->data.name, "in%d%c", &dummy, &check) == 1
-	 || sscanf(the_feature->data.name, "fan%d%c", &dummy, &check) == 1
-	 || sscanf(the_feature->data.name, "temp%d%c", &dummy, &check) == 1)
+	if (the_feature->data.type == SENSORS_FEATURE_IN
+	 || the_feature->data.type == SENSORS_FEATURE_FAN
+	 || the_feature->data.type == SENSORS_FEATURE_TEMP)
 		suffix = "_input";
 
 	snprintf(n, NAME_MAX, "%s/%s%s", name->path, the_feature->data.name,
