@@ -59,8 +59,6 @@ int get_type_scaling(int type)
 	default:
 		return 0;
 	}
-
-	return 0;
 }
 
 static int sensors_read_dynamic_chip(sensors_chip_features *chip,
