@@ -9,6 +9,7 @@ SVN HEAD
            Fix lm93 VID support for Linux 2.6
            Fix adm1024 support for Linux 2.6
            Fix maxilife support for Linux 2.6
+           Fix magnitude of temperature offsets in Linux 2.6
   Makefile: Fix kernel version detection (#2187)
   Module fscher: Add missing read of control register (2.6 backport)
   Module i2c-piix4: Add ATI SB700 and SB800 support (2.6 backport)

@@ -290,6 +290,7 @@ static const struct match matches[] = {
 		temp%d_low -> temp%d_min
 		temp%d_crit -> temp%d_crit (for magnitude)
 		temp%d_state -> temp%d_status
+		temp%d_offset -> temp%d_offset (for magnitude)
 		temp%d -> temp%d_input
 		sensor%d -> temp%d_type
 	AND all conversions listed in the matches[] structure above.
@@ -412,6 +413,11 @@ static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	if(sscanf(name, "temp%d_stat%c%c", &num, &last, &check) == 2 && last == 'e') {
 		sprintf(sysname, "temp%d_status", num);
 		*sysmag = 0;
+		return 0;
+	}
+	if(sscanf(name, "temp%d_offse%c%c", &num, &last, &check) == 2 && last == 't') {
+		sprintf(sysname, "temp%d_offset", num);
+		*sysmag = TEMPMAG;
 		return 0;
 	}
 	if(sscanf(name, "temp%d%c", &num, &check) == 1) {
