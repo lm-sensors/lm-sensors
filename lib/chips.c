@@ -3080,7 +3080,7 @@ static sensors_chip_feature adm1026_features[] = {
                                     ADM1026_SYSCTL_TEMP_TMIN1, VALUE(1), 0 },
     { { SENSORS_ADM1026_TEMP1_THERM, "temp1_therm", SENSORS_ADM1026_TEMP1, 
                                      SENSORS_ADM1026_TEMP1, RW }, 
-                                     ADM1026_SYSCTL_TEMP_THERM1, VALUE(1), 0 },
+                                     ADM1026_SYSCTL_TEMP_THERM1, VALUE(1), 0, "temp1_crit", 3 },
     { { SENSORS_ADM1026_TEMP2, "temp2", NOMAP, NOMAP, R }, 
                                ADM1026_SYSCTL_TEMP2, VALUE(3), 0 },
     { { SENSORS_ADM1026_TEMP2_MIN, "temp2_min", SENSORS_ADM1026_TEMP2, 
@@ -3097,7 +3097,7 @@ static sensors_chip_feature adm1026_features[] = {
                                     ADM1026_SYSCTL_TEMP_TMIN2, VALUE(1), 0 },
     { { SENSORS_ADM1026_TEMP2_THERM, "temp2_therm", SENSORS_ADM1026_TEMP2, 
                                      SENSORS_ADM1026_TEMP2, RW }, 
-                                     ADM1026_SYSCTL_TEMP_THERM2, VALUE(1), 0 },
+                                     ADM1026_SYSCTL_TEMP_THERM2, VALUE(1), 0, "temp2_crit", 3 },
     { { SENSORS_ADM1026_TEMP3, "temp3", NOMAP, NOMAP, R }, 
                                ADM1026_SYSCTL_TEMP3, VALUE(3), 0 },
     { { SENSORS_ADM1026_TEMP3_MIN, "temp3_min", SENSORS_ADM1026_TEMP3, 
@@ -3114,7 +3114,7 @@ static sensors_chip_feature adm1026_features[] = {
                                     ADM1026_SYSCTL_TEMP_TMIN3, VALUE(1), 0 },
     { { SENSORS_ADM1026_TEMP3_THERM, "temp3_therm", SENSORS_ADM1026_TEMP3, 
                                      SENSORS_ADM1026_TEMP3, RW }, 
-                                     ADM1026_SYSCTL_TEMP_THERM3, VALUE(1), 0 },
+                                     ADM1026_SYSCTL_TEMP_THERM3, VALUE(1), 0, "temp3_crit", 3 },
     { { 0 }, 0 }
   };
 
