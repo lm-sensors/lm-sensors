@@ -1182,7 +1182,7 @@
 /* THMC50/ADM1022 chips */
 
 #define SENSORS_THMC50_PREFIX "thmc50"
-/* Cheat on LM84,GL523,THMC10 for now - no separate #defines */
+/* Cheat on ADM1022 for now - no separate #defines */
 #define SENSORS_ADM1022_PREFIX "adm1022"
 
 #define SENSORS_THMC50_TEMP 51 /* R */
