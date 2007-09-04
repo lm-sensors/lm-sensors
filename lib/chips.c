@@ -1193,11 +1193,6 @@ static sensors_chip_feature as99127f_features[] =
 		SENSORS_LM93_TEMP##nr, SENSORS_LM93_TEMP##nr, RW }, \
 		LM93_SYSCTL_TEMP##nr, VALUE(2), 1 }
 
-/* macro for LM93 VID entries */
-#define SENSORS_LM93_VID(nr) \
-	{ { SENSORS_LM93_VID##nr, "vid" #nr, NOMAP, NOMAP, R }, \
-		 LM93_SYSCTL_VID##nr, VALUE(1), 3 }
-
 static sensors_chip_feature lm93_features[] = {
 	SENSORS_LM93_IN_MIN_MAX(1),
 	SENSORS_LM93_IN_MIN_MAX(2),
@@ -1222,8 +1217,10 @@ static sensors_chip_feature lm93_features[] = {
 	SENSORS_LM93_TEMP_MIN_MAX(1),
 	SENSORS_LM93_TEMP_MIN_MAX(2),
 	SENSORS_LM93_TEMP_MIN_MAX(3),
-	SENSORS_LM93_VID(1),
-	SENSORS_LM93_VID(2),
+    { { SENSORS_LM93_VID1, "vid1", NOMAP, NOMAP, R },
+                          LM93_SYSCTL_VID1, VALUE(1), 3, "cpu0_vid", 3, "vid1" },
+    { { SENSORS_LM93_VID1, "vid2", NOMAP, NOMAP, R },
+                          LM93_SYSCTL_VID2, VALUE(1), 3, "cpu1_vid", 3, "vid2" },
     { { SENSORS_LM93_ALARMS, "alarms", NOMAP, NOMAP, R }, 
                           LM93_SYSCTL_ALARMS, VALUE(1), 0 },
     { { 0 }, 0 }

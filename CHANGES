@@ -6,6 +6,7 @@ SVN HEAD
            Speed up sensors_get_ignored() a bit
            Fix thmc50 support for Linux 2.6
            Fix bmcsensors support for Linux 2.6
+           Fix lm93 VID support for Linux 2.6
   Makefile: Fix kernel version detection (#2187)
   Module fscher: Add missing read of control register (2.6 backport)
   Module i2c-piix4: Add ATI SB700 and SB800 support (2.6 backport)
