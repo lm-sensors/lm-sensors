@@ -11,6 +11,7 @@ SVN HEAD
            Fix maxilife support for Linux 2.6
            Fix magnitude of temperature offsets in Linux 2.6
            Fix adm1026 critical temperature limits for Linux 2.6
+           Fix smsc47m192 temperature faults
   Makefile: Fix kernel version detection (#2187)
   Module fscher: Add missing read of control register (2.6 backport)
   Module i2c-piix4: Add ATI SB700 and SB800 support (2.6 backport)
