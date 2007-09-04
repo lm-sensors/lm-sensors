@@ -273,21 +273,22 @@ static const struct match matches[] = {
 	Common conversions are as follows:
 		fan%d_min -> fan%d_min (for magnitude)
 		fan%d_state -> fan%d_status
-		fan%d -> fan_input%d
-		pwm%d -> fan%d_pwm
-		pwm%d_enable -> fan%d_pwm_enable
+		fan%d -> fan%d_input
+		pwm%d -> fan%d_pwm (alt. name)
+		pwm%d_enable -> fan%d_pwm_enable (alt. name)
 		in%d_max -> in%d_max (for magnitude)
 		in%d_min -> in%d_min (for magnitude)
 		in%d -> in%d_input
 		vin%d_max -> in%d_max
 		vin%d_min -> in%d_min
-		vin%d -> in_input%d
+		vin%d -> in%d_input
 		temp%d_over -> temp%d_max
 		temp%d_hyst -> temp%d_max_hyst
 		temp%d_max -> temp%d_max (for magnitude)
 		temp%d_high -> temp%d_max
 		temp%d_min -> temp%d_min (for magnitude)
 		temp%d_low -> temp%d_min
+		temp%d_crit -> temp%d_crit (for magnitude)
 		temp%d_state -> temp%d_status
 		temp%d -> temp%d_input
 		sensor%d -> temp%d_type
