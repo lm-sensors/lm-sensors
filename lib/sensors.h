@@ -154,6 +154,8 @@ typedef enum sensors_feature_type {
 
 	SENSORS_FEATURE_VID = 0x300,
 
+	SENSORS_FEATURE_BEEP_ENABLE = 0x1100,
+
 	SENSORS_FEATURE_UNKNOWN = INT_MAX,
 } sensors_feature_type;
 

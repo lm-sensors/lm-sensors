@@ -38,9 +38,10 @@ char sensors_sysfs_mount[NAME_MAX];
 
 #define MAX_SENSORS_PER_TYPE	20
 #define MAX_SUB_FEATURES	6
-/* Room for all 3 types (in, fan, temp) with all their subfeatures + VID */
+/* Room for all 3 types (in, fan, temp) with all their subfeatures + VID
+   + misc features */
 #define ALL_POSSIBLE_FEATURES	(MAX_SENSORS_PER_TYPE * MAX_SUB_FEATURES * 6 \
-				 + MAX_SENSORS_PER_TYPE)
+				 + MAX_SENSORS_PER_TYPE + 1)
 
 static
 int get_type_scaling(int type)
@@ -109,9 +110,15 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 
 		/* "calculate" a place to store the feature in our sparse,
 		   sorted table */
-		if (type == SENSORS_FEATURE_VID) {
+		switch (type) {
+		case SENSORS_FEATURE_VID:
 			i = nr + MAX_SENSORS_PER_TYPE * MAX_SUB_FEATURES * 6;
-		} else {
+			break;
+		case SENSORS_FEATURE_BEEP_ENABLE:
+			i = MAX_SENSORS_PER_TYPE * MAX_SUB_FEATURES * 6 +
+			    MAX_SENSORS_PER_TYPE;
+			break;
+		default:
 			i = (type >> 8) * MAX_SENSORS_PER_TYPE *
 			    MAX_SUB_FEATURES * 2 + nr * MAX_SUB_FEATURES * 2 +
 			    ((type & 0x10) >> 4) * MAX_SUB_FEATURES +

@@ -390,6 +390,20 @@ static void print_chip_vid(const sensors_chip_name *name, int f_vid,
 	free(label);
 }
 
+static void print_chip_beep_enable(const sensors_chip_name *name, int f_beep,
+				   int label_size)
+{
+	char *label;
+	double beep_enable;
+
+	if ((label = sensors_get_label(name, f_beep))
+	 && !sensors_get_value(name, f_beep, &beep_enable)) {
+		print_label(label, label_size);
+		printf("%s\n", beep_enable ? "enabled" : "disabled");
+	}
+	free(label);
+}
+
 void print_chip(const sensors_chip_name *name)
 {
 	const sensors_feature_data *feature;
@@ -414,6 +428,10 @@ void print_chip(const sensors_chip_name *name)
 			break;
 		case SENSORS_FEATURE_VID:
 			print_chip_vid(name, feature->number, label_size);
+			break;
+		case SENSORS_FEATURE_BEEP_ENABLE:
+			print_chip_beep_enable(name, feature->number,
+					       label_size);
 			break;
 		default:
 			continue;

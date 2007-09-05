@@ -562,6 +562,12 @@ sensors_feature_type sensors_feature_get_type(const char *name, int *nr)
 	int i, count;
 	const struct feature_subtype_match *submatches;
 	
+	/* Special case */
+	if (!strcmp(name, "beep_enable")) {
+		*nr = 0;
+		return SENSORS_FEATURE_BEEP_ENABLE;
+	}
+
 	for (i = 0; i < ARRAY_SIZE(matches); i++)
 		if ((count = sscanf(name, matches[i].name, nr, &c)))
 			break;
