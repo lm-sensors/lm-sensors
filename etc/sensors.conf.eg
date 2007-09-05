@@ -53,13 +53,11 @@
 # These features are defined for each chip in lib/chips.c.
 #
 # Undefined features will be silently ignored in 'label' and 'compute' lines.
-# Undefined features in 'set' lines will result in 'Unknonw feature name'
+# Undefined features in 'set' lines will result in 'Unknown feature name'
 # when running 'sensors -s'.
 #
 # Unfortunately, feature names starting with a number must be in
 # double quotes or you get "parse error, expecting 'NAME'".
-#
-# If you have trouble, verify the features in lib/chips.c!!!
 #
 #
 # LABEL LINES
@@ -68,10 +66,6 @@
 # mainboard. Programs can retrieve these names and display them.
 # If no label is specified for a certain feature, the default name
 # (ie. 'fan1' for fan1) is used.
-#
-# If you specify a label for in1, this label is also used for in1_min and
-# in1_max, unless they have their own labels declared. There are several
-# of these logical groups.
 #
 # These are as advised in the LM78 and LM79 data sheets, and used on most
 # boards we have seen.
@@ -88,20 +82,17 @@
 # COMPUTE LINES
 # -------------
 # A compute line describes how to scale a certain feature. There are
-# two expressions in it: the first describes how the /proc value must
+# two expressions in it: the first describes how the driver value must
 # be translated to a user value, the second how a user value must be
-# translated to a /proc value. '@' is the value to operate on. You may
-# refer to other readable features (like '2 * vid').
+# translated to a driver value. '@' is the value to operate on. You may
+# refer to other readable features (like 'cpu0_vid * 1.05').
 #
 # The following operators are valid: + - * / ( ) ^ `
-# ^ is e**x and ` is ln(x) (valid in library version 2.0.0 /
-# lm_sensors 2.8.0 or higher)
+# ^ is e**x and ` is ln(x)
 #
-# Like for the label statement, there are logical groups here. They are
-# sometimes a bit different, though. For example, fan1_div is in the
-# logical label group of fan1 (it gets the same label if none is declared
-# for it), but it is not in the compute group of fan1 (as it uses a
-# completely different system of values).
+# Where it makes sense, compute lines are inherited by subfeatures.
+# For example, the compute line for 'in0' is automatically applied to
+# 'in0_min' and 'in0_max' as well.
 #
 #
 # VOLTAGE COMPUTATION DETAILS
@@ -171,16 +162,12 @@
 #	compute temp1 @+5,@-5
 #
 # Sensor type adjustments (certain chips only):
-# ...Set temp1 to processor's thermal diode:
-#	set temp1_type 1 (Winbond chips)
-#	set temp1_type 3 (IT87xx and MTP008 chips)
-#
-# ...Set temp1 sensor to 3904 transistor:
-#	set temp1_type 2 (Winbond chips)
-#
-# ...Set temp1 to thermistor:
-#	set temp1_type 3435 (Winbond chips)
-#	set temp1_type 2 (IT87xx and MTP008 chips)
+#	set temp1_type 1    # PII/Celeron Diode
+#	set temp1_type 2    # 3904 transistor
+#	set temp1_type 3    # thermal diode
+#	set temp1_type 4    # thermistor
+#	set temp1_type 5    # AMD AMDSI
+#	set temp1_type 6    # Intel PECI
 #
 # Often, a temperature sensor is disconnected; disable it with an ignore line:
 #	ignore temp3
@@ -203,9 +190,9 @@
 #	set temp1_max 40
 #	set temp1_max_hyst 37
 #
-# Think of tempx_over as 'alarm set' and tempx_hyst as 'alarm clear'
-# thresholds. In most cases the 'over' value should be higher than
-# the 'hyst' value by several degrees.
+# Think of tempx_max as 'alarm set' and tempx_max_hyst as 'alarm clear'
+# thresholds. In most cases the 'max' value should be higher than
+# the 'max_hyst' value by several degrees.
 #
 # All the set statements from this file are commented out by default.
 # The reason is that the proper limits are highly system-dependent,
@@ -216,11 +203,10 @@
 #
 # IGNORE LINES
 # ------------
-# Ignore statements tell certain features are not wanted. User programs can
-# still read them if they really want, though; this is just an advisory
-# marking. 'in0' would also invalidate 'in0_max' and 'in0_min'.
+# Ignore statements tell certain features are not wanted. As with compute
+# statements, 'ignore in0' would also invalidate 'in0_max' and 'in0_min'.
 # 'ignore' does not disable anything in the actual sensor chip; it
-# simply advises the user program to not access that data.
+# simply prevents the user program from accessing that data.
 #
 #	ignore in0
 #
@@ -373,8 +359,7 @@ chip "lm78-*" "lm79-*" "w83781d-*"
 
 chip "lm75-*"
 
-# Most boards don't need scaling. Following is
-# for the Asus TX97-E. If it doesn't work for you, feel free to complain.
+# Most boards don't need scaling. Following is for the Asus TX97-E.
 #   compute temp1 @*2.0, @/2.0
 
 # Examples for temperature limits
@@ -439,7 +424,6 @@ chip "sis5595-*"
 #   compute temp1 ((X * ((1.20 * @) - 62.77)) - Y), ...
 
 # examples for sis5595 temperature limits;
-# for sis5595, temp_hyst is really the low limit, not a hysteresis value
 #    set temp1_max      40
 #    set temp1_max_hyst 37
 
@@ -661,9 +645,6 @@ chip "w83627thf-*" "w83637hf-*"
 # Note that in1 (+12V) is the usual in4, and in4 (-12V) is the usual in5.
 # Data sheet is obviously wrong for in4, the usual formula should work.
 # No in5 nor in6.
-# sensors doesn't need the ignore lines but sensord does...
-    ignore in5
-    ignore in6
 
     label in0 "VCore"
     label in1 "+12V"
@@ -939,9 +920,7 @@ chip "gl520sm-*"
 # The GL520SM has two application modes. In mode 1 it has two thermistor
 # inputs, in mode 2 it has only one and an extra (negative) voltage input.
 # The mode is supposed to be set properly by your BIOS so you should not
-# need to change it. You can force it below if really needed though.
-# Note that this means that you have either temp2 or vin4 but never both
-# at the same time.
+# need to change it. Note that you have either temp2 or in4, not both.
 
   label in0 "+5V"
   label in1 "+3.3V"
@@ -975,8 +954,7 @@ chip "gl520sm-*"
 chip "lm80-*"
 
 # The values below should be correct if you own a qdi BX (brilliant1)
-# mainboard. If not, please contact us, so we can figure out better readings.
-# Many thanks go to Peter T. Breuer <ptb@it.uc3m.es> for helping us figure
+# mainboard. Many thanks go to Peter T. Breuer for helping us figure
 # out how to handle the LM80.
 
 # For positive voltages (in0..in4), two resistors are used, with the following
@@ -1034,10 +1012,10 @@ chip "lm80-*"
 # All 4 of these limits apply to the single temperature sensor.
 # "crit" may or may not do anything on your motherboard but it should
 #  be set higher than the "max" thresholds.
-#    set temp1_max_hyst 45
-#    set temp1_max  52
+#    set temp1_max_hyst   45
+#    set temp1_max        52
 #    set temp1_crit_hyst  57
-#    set temp1_crit   62
+#    set temp1_crit       62
 
 
 chip "via686a-*"
@@ -1045,17 +1023,16 @@ chip "via686a-*"
 # VIA is very specific about the voltage sensor inputs, and our labels
 # reflect what they say.  Unfortunately, they are not at all specific about
 # how to convert any of the register values to real units.  Fortunately,
-# Jonathan Yew <j.teh@iname.com> and Alex van Kaam <darkside@chello.nl>
-# came through with some data for temp conversion and formulae for voltage
-# conversion. However, the conversions should be regarded as our best guess-
-# YMMV.
+# Jonathan Yew and Alex van Kaam came through with some data for temp
+# conversion and formulae for voltage conversion. However, the conversions
+# should be regarded as our best guess - YMMV.
 
 # On the Tyan S1598, the 2.5V sensor reads 0 and is not displayed in the BIOS.
-# Linas Vepstas <linas@linas.org> reports that this sensor shows nothing of
+# Linas Vepstas reports that this sensor shows nothing of
 # interest on the Abit KA7 (Athlon), and is also not displayed in the BIOS.
-# Likewise, Johannes Drechsel-Burkhard <jdb@chello.at> reports that this
+# Likewise, Johannes Drechsel-Burkhard reports that this
 # sensor is unavailable in the BIOS of his MSI K7T Pro (Thunderbird).  So,
-# if you have one of these boards you may want to uncomment the 'ignore 2.5V'
+# if you have one of these boards you may want to uncomment the 'ignore in1'
 # line below.
 
     label in0 "CPU core"
@@ -1075,7 +1052,7 @@ chip "via686a-*"
 # different from temp1 & temp2 (as noted above, VIA has not provided
 # conversion info).  So, you may wish to 'ignore temp3'.
 
-# Johannes Drechsel-Burkhard <jdb@chello.at> notes that on his MSI K7T Pro,
+# Johannes Drechsel-Burkhard notes that on his MSI K7T Pro,
 # temp1 is the CPU temp and temp2 is the SYS temp. Hugo van der Merwe notes
 # the same for his Gigabyte GA-7DXC, Olivier Martin for his Gigabyte
 # GA-7ZM and Patrick Thomson for his Chaintech CT-5ATA. 
@@ -1102,9 +1079,9 @@ chip "via686a-*"
 #    set in4_min 12 * 0.9
 #    set in4_max 12 * 1.1
 
-# Set your temp limits here.  Remember, 'tempX_over' is the temp at which an
-# alarm is triggered, and 'tempX_hyst' is the temp at which an alarm turns off.
-# Setting tempX_hyst to a few degrees below the corresponding tempX_over
+# Set your temp limits here.  Remember, 'tempX_max' is the temp at which an
+# alarm is triggered, and 'tempX_max_hyst' is the temp at which an alarm turns off.
+# Setting tempX_max_hyst to a few degrees below the corresponding tempX_max
 # prevents an oscillation between alarm on and off states.  This kind of
 # oscillation is known as hyteresis, thus the name.  (You typically get the
 # most serious and troublesome hysteresis when a sensor triggers something to
@@ -1124,101 +1101,6 @@ chip "via686a-*"
     #set fan1_min 5000
     #set fan2_min 5000
 
-
-chip "mtp008-*"
-
-# The values below should be correct if you own a Tyan S1834D motherboard.
-# If not, please contact us, so we can figure out better readings.
-# FOR TYAN S2510 SEE END OF THIS SECTION.
-
-# For positive voltages outside the 0..4.09V range (in2..in4), two resistors
-# are used, with the following formula (R1,R2: resistor values, Vs: read
-# voltage, Vin: pin voltage)
-#   Vin = Vs * (R2 / (R1 + R2))
-# For negative voltages (in5) two resistors are used, with the following
-# formula (R3,R4: resistor values, Vs: read voltage, Vin: pin voltage)
-#   Vin = ((4.096 - Vs) * (R3 / (R3 + R4))) + Vs
-
-# Here are the official MTP008 data sheet values:
-#       Vs      R1,R3   R2,R4    Vin
-#      +12.0    28000   10000   +3.16
-#      -12.0   232000   56000   +0.96
-#       -5.0   120000   56000   +1.20
-
-    label in0 "VCore1"
-    label in1 "+3.3V"
-    label in2 "+12V"
-    label in3 "Vcore2"
-    ignore in4
-    label in5 "-12V"
-    label in6 "Vtt"
-
-    label fan1 "CPU1 Fan"
-    label fan2 "CPU2 Fan"
-    label fan3 "fan3"
-
-    label temp1 "CPU1 Temp"
-    label temp2 "CPU2 Temp"
-    ignore temp3
-
-    compute in2 @ * 38 / 10,		@ * 10 / 38
-    compute in5 (@ * 36 - 118.61) / 7,	(118.61 + 7 * @) / 36
-
-# examples for temperature limits
-#    set temp1_max      40
-#    set temp1_max_hyst 37
-#    set temp2_max      52
-#    set temp2_max_hyst 47
-#    set temp3_max      52
-#    set temp3_max_hyst 47
-
-# End of standard mtp008 configuration
-
-# TYAN S2510 INFORMATION
-# This motherboard has two mtp008's which are hooked up differently,
-# so they must be configured separately.
-# For this motherboard, COMMENT OUT the above mtp008 section and
-# UNCOMMENT the following two sections.
-#
-#chip "mtp008-i2c-*-2c"
-#    label in0 "VCore1"
-#    set in0_min 1.60
-#    set in0_max 1.80
-#    label in1 "+3.3V"
-#    label in2 "+12V"
-#    label in3 "Vcore2"
-#    set in3_min 1.60
-#    set in3_max 1.80
-#    ignore in4
-#    label in5 "-12V"
-#    label in6 "Vtt"
-#    label fan1 "CPU1 Fan"
-#    label fan2 "CPU2 Fan"
-#    label fan3 "fan3"
-#    label temp1 "CPU1 Temp"
-#    label temp2 "CPU2 Temp"
-#    ignore temp3
-#    compute in2 @ * 38 / 10,		@ * 10 / 38
-#    compute in5 (@ * 36 - 118.61) / 7,	(118.61 + 7 * @) / 36
-#
-#chip "mtp008-i2c-*-2e"
-#    ignore in0
-#    label in1 "+3.3V"
-#    ignore in2
-#    label in3 "+5V"
-#    set in3_min 4.50
-#    set in3_max 5.50
-#    ignore in4
-#    label in5 "+3.3V"
-#    ignore in6
-#    label fan1 "fan4"
-#    label fan2 "fan5"
-#    label fan3 "fan6"
-#    ignore temp1
-#    label temp2 "MB Temp"
-#    set temp2_max 52
-#    set temp2_max_hyst 47
-#    ignore temp3
 
 chip "adm1025-*" "ne1619-*"
 
@@ -1280,23 +1162,6 @@ chip "lm87-*"
 # motherboard connections match these labels, and that the
 # driver computations are correct. Therefore they do not need to
 # be overridden here.
-#
-# Note: AIN1 (-12?), AIN2 (-5?) and temp3 require changing
-# #defines in the driver and recompiling!!!
-# This does not apply to the Linux 2.6 driver.
-#
-# This chip has non-standard entries in lib/chips.c so
-# the feature names are quite different from other chips.
-# For this chip, libsensors anticipates the correct labeling.
-# This is great if it's correct but makes it a little more
-# difficult if you want to change it.
-#
-# This may not have been a good idea, so it may be changed in the future.
-# Here is an entry with everything commented out so you can
-# uncomment the appropriate line if you want to change it.
-#
-# Warning - feature names starting with a number must be enclosed
-# with double quotes.
 
    label in0  "+2.5V"
    label in1  "VCore"
@@ -1346,86 +1211,16 @@ chip "lm87-*"
 #   set temp3_max  70
 
 # LM87 AIN1 and AIN2 Section
-# As described above, the driver must be recompiled to use either or
-# both of these. -12 and -5 may be reversed on your board, this is
+# -12 and -5 may be reversed on your board, this is
 # just a guess, the datasheet gives no guidance.
-# Note that the Linux 2.6 driver needs no recompilation, it'll read the
-# configuration from the chip.
 #   label in6 "-12V"
 #   label in7 "-5V"
+#   compute in6 (7.50 * @) - 21.45  ,  (@ + 21.45) / 7.50
+#   compute in7 (4.05 * @) - 10.07  ,  (@ + 10.07) / 4.05
 #   set in6_min -12 * 0.95
 #   set in7_min -5 * 0.95
 #   set in6_max -12 * 1.05
 #   set in7_max -5 * 1.05
-#   compute in6 (7.50 * @) - 21.45  ,  (@ + 21.45) / 7.50
-#   compute in7 (4.05 * @) - 10.07  ,  (@ + 10.07) / 4.05
-
-chip "adm9240-*" "ds1780-*" "lm81-*"
-#
-# These chips have non-standard entries in lib/chips.c so
-# the feature names are quite different from other chips.
-# For these chips, libsensors anticipates the correct labeling.
-# This is great if it's correct but makes it a little more
-# difficult if you want to change it.
-#
-# This may not have been a good idea, so it may be changed in the future.
-# Here is an entry with everything commented out so you can
-# uncomment the appropriate line if you want to change it.
-#
-# Warning - feature names starting with a number must be enclosed
-# with double quotes.
-#
-#   label in0 "xxx"
-#   label in1 "xxx"
-#   label in2 "xxx"
-#   label in3 "xxx"
-#   label in4 "xxx"
-#   label in5 "xxx"
-#   label fan1 "xxx"
-#   label fan2 "xxx"
-#   label temp1 "xxx"
-#
-#   set in1_min xxx
-#   set in0_min xxx
-#   set in2_min xxx
-#   set in3_min xxx
-#   set in4_min xxx
-#   set in5_min xxx
-#
-#   set in1_max xxx
-#   set in0_max xxx
-#   set in2_max xxx
-#   set in3_max xxx
-#   set in4_max xxx
-#   set in5_max xxx
-#
-#   set fan1_div xxx	Note: do not uncomment with kernel 2.6 driver
-#   set fan2_div xxx	Note: do not uncomment with kernel 2.6 driver
-#   set fan1_min xxx
-#   set fan2_min xxx
-#   set temp1_max_hyst xxx
-#   set temp1_max xxx
-
-#   compute in0 xxx
-#   compute in1 xxx
-#   compute in2 xxx
-#   compute in3 xxx
-#   compute in4 xxx
-#   compute in5 xxx
-#   compute temp1 xxx
-
-chip "adm1024-*"
-#
-# These settings work for me, adjust for your system
-#
-    label fan1 "CPU1 fan"
-    label fan2 "CPU2 fan"
-    label temp1 "SYS Temp"
-    label temp2 "CPU2 Temp"
-    label temp3 "CPU1 Temp"
-    ignore in0 # This register is also used for temp3
-    ignore in1
-    ignore in5
 
 
 chip "it87-*" "it8712-*"
@@ -1510,7 +1305,6 @@ chip "it87-*" "it8712-*"
 # Important - if your temperature readings are completely whacky
 # you probably need to change the sensor type.
 # Adujst and uncomment the appropriate lines below.
-# The old method (modprobe it87 temp_type=0xXX) is no longer supported.
 #
 # 2 = thermistor; 3 = thermal diode; 0 = unused
 #   set temp1_type 3
@@ -1547,55 +1341,6 @@ chip "it87-*" "it8712-*"
 #   set fan2_min 3000
 #   ignore fan3
 #   set fan3_min 3000
-
-# The following is for the Inside Technologies 786LCD which uses either a
-# IT8705F or a SIS950 for monitoring with the SIS630.
-#
-# delete or comment out above it87 section and uncomment the following.
-#chip "it87-*"
-#    label in0 "VCore 1"
-#    label in1 "VCore 2"
-#    label in2 "+3.3V"
-#    label in3 "+5V"
-#    label in4 "+12V"
-#    label in5 "3.3 Stdby"
-#    label in6 "-12V"
-#    label in7 "Stdby"
-#    label in8 "VBat"
-    # in0 will depend on your processor VID value, set to voltage specified in
-    # bios setup screen
-#    set in0_min 1.7 * 0.95
-#    set in0_max 1.7 * 1.05
-#    set in1_min 2.4
-#    set in1_max 2.6
-#    set in2_min 3.3 * 0.95
-#    set in2_max 3.3 * 1.05
-#    set in3_min 5.0 * 0.95
-#    set in3_max 5.0 * 1.05
-    # +- 12V are very poor tolerance on this board. Verified with voltmeter
-#    set in4_min 12 * 0.90
-#    set in4_max 12 * 1.10
-#    set in5_min 3.3 * 0.95
-#    set in5_max 3.3 * 1.05
-#    set in6_max -12 * 0.90
-#    set in6_min -12 * 1.10
-#    set in7_min 5 * 0.95
-#    set in7_max 5 * 1.05
-    # vid not monitored by IT8705F
-#    ignore  cpu0_vid
-
-#    compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
-#    compute in4 ((30/10) +1)*@  , @/((30/10) +1)
-#    compute in6 (1+232/56)*@ - 4.096*232/56, (@ + 4.096*232/56)/(1+232/56)
-#    compute in7 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
-    # Temperature
-#    label temp1       "CPU Temp"
-#    ignore temp2
-#    ignore temp3
-    # Fans
-#    set fan1_min 3000
-#    ignore fan2
-#    ignore fan3
 
 
 chip "it8716-*"
@@ -2046,7 +1791,6 @@ chip "vt8231-*"
 # Thermistor calculations
 # 3435 is the thermistor beta, 2.2 is the reference voltage.
 # '^' is the e**x operator; '`' is the ln(x) operator
-# (valid in library version 1.4.0 / lm_sensors 2.7.1 or higher)
 # This assumes that the thermistor forms a resistor divider with a resistor
 # equal to its nominal value at 25 degrees C.
 
@@ -2063,24 +1807,11 @@ chip "vt8231-*"
 #    set fan1_min 3000
 #    set fan2_min 3000
 
-chip "bmc-*"
-#
-# You should not need compute lines here, the driver will
-# do all the conversions.
-# For label lines, copy from syslog/dmesg when the bmcsensors
-# module is inserted.
-#
-# for example:
-# label temp1 "Ambient Temp"
-
 
 chip "smsc47m1-*"
 
 # SMSC LPC47M10x, LPC47M13x, LPC47M14x and LPC47B27x chips
 
-# We don't set the fan mins by default anymore because they may not exist
-# when using the Linux 2.6 driver (since we respect the original chip
-# configuration).
 #    set fan1_min 3000
 #    set fan2_min 3000
 
@@ -2429,9 +2160,6 @@ chip "w83627ehf-*" "w83627dhg-*"
     label in3 "3VCC"
     label in7 "VSB"
     label in8 "VBAT"
-
-# The W83627DHG has no in9, uncomment the following line
-#    ignore in9
 
 # +12V is in1 and +5V is in6 as recommended by datasheet 
     compute in1 @*(1+(56/10)),  @/(1+(56/10))
