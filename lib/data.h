@@ -132,7 +132,7 @@ typedef struct sensors_bus {
    compute_mapping is like logical_mapping, only it refers to another
      feature whose compute line will be inherited (a group could be fan and
      fan_max, but not fan_div)
-   mode is a bitfield, its value is a combination of SENSORS_MODE_R (readable)
+   flags is a bitfield, its value is a combination of SENSORS_MODE_R (readable)
      and SENSORS_MODE_W (writable).
    scaling is the number of decimal points to scale by.
      Divide the read value by 10**scaling to get the real value. */

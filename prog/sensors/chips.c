@@ -41,7 +41,7 @@ void print_chip_raw(const sensors_chip_name *name)
 			       data->name);
 			continue;
 		}
-		if (data->mode & SENSORS_MODE_R) {
+		if (data->flags & SENSORS_MODE_R) {
 			if (sensors_get_value(name, data->number, &val))
 				printf("ERROR: Can't get feature `%s' data!\n",
 				       data->name);

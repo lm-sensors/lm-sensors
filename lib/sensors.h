@@ -112,7 +112,7 @@ int sensors_do_chip_sets(const sensors_chip_name *name);
 const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
 						    *match, int *nr);
 
-/* These defines are used in the mode field of sensors_feature_data */
+/* These defines are used in the flags field of sensors_feature_data */
 #define SENSORS_MODE_R 1
 #define SENSORS_MODE_W 2
 
@@ -164,7 +164,7 @@ typedef struct sensors_feature_data {
 	sensors_feature_type type;
 	int mapping;
 	int compute_mapping;
-	int mode;
+	unsigned int flags;
 } sensors_feature_data;
 
 /* This returns all features of a specific chip. They are returned in

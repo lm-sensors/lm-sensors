@@ -88,7 +88,7 @@ readUnknownChip
     if (!(label = sensors_get_label (chip, sensor->number))) {
       sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, sensor->name);
       ret = 21;
-    } else if (!(sensor->mode & SENSORS_MODE_R)) {
+    } else if (!(sensor->flags & SENSORS_MODE_R)) {
       sensorLog (LOG_INFO, "%s: %s", sensor->name, label);
     } else if ((ret = sensors_get_value (chip, sensor->number, &value))) {
       sensorLog (LOG_ERR, "Error getting sensor data: %s/%s: %s", chip->prefix, sensor->name, sensors_strerror (ret));

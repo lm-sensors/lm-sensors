@@ -153,9 +153,9 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		}
 
 		if (attr->method & SYSFS_METHOD_SHOW)
-			feature.data.mode |= SENSORS_MODE_R;
+			feature.data.flags |= SENSORS_MODE_R;
 		if (attr->method & SYSFS_METHOD_STORE)
-			feature.data.mode |= SENSORS_MODE_W;
+			feature.data.flags |= SENSORS_MODE_W;
 
 		feature.scaling = get_type_scaling(type);
 
