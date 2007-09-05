@@ -80,10 +80,9 @@ static void sensors_get_available_features(const sensors_chip_name *name,
 		int indx;
 
 		indx = iter->type - first_val - 1;
-		if (indx < 0 || indx >= size) {
-			printf("ERROR: Bug in sensors: index out of bound");
-			return;
-		}
+		if (indx < 0 || indx >= size)
+			/* New feature in libsensors? Ignore. */
+			continue;
 
 		if (sensors_get_value(name, iter->number, &feature_vals[indx]))
 			printf("ERROR: Can't get %s data!\n", iter->name);
