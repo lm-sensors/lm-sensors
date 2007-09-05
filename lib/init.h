@@ -1,5 +1,5 @@
 /*
-    data.h - Part of libsensors, a Linux library for reading sensor data.
+    init.h - Part of libsensors, a Linux library for reading sensor data.
     Copyright (C) 2007  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
