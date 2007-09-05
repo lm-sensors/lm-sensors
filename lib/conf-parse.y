@@ -298,8 +298,7 @@ bus_id:		  NAME
 ;
 
 adapter_name:	  NAME
-		  { sensors_strip_of_spaces($1);
-		    $$ = $1; }
+		  { $$ = $1; }
 ;
 
 function_name:	  NAME
