@@ -96,6 +96,9 @@ const sensors_chip_feature *sensors_lookup_feature_nr(const sensors_chip_name *c
 
 	for (i = 0; i < sensors_proc_chips_count; i++)
 		if (sensors_match_chip(&sensors_proc_chips[i].chip, chip)) {
+			if (feature < 0 ||
+			    feature >= sensors_proc_chips[i].feature_count)
+				return NULL;
 			return sensors_proc_chips[i].feature + feature;
 		}
 	return NULL;
@@ -113,7 +116,7 @@ sensors_lookup_feature_name(const sensors_chip_name *chip, const char *feature)
 	for (i = 0; i < sensors_proc_chips_count; i++)
 		if (sensors_match_chip(&sensors_proc_chips[i].chip, chip)) {
 			features = sensors_proc_chips[i].feature;
-			for (j = 0; features[j].data.name; j++)
+			for (j = 0; j < sensors_proc_chips[i].feature_count; j++)
 				if (!strcasecmp(features[j].data.name, feature))
 					return features + j;
 		}
@@ -350,10 +353,10 @@ const sensors_feature_data *sensors_get_all_features(const sensors_chip_name *na
 	for (i = 0; i < sensors_proc_chips_count; i++)
 		if (sensors_match_chip(&sensors_proc_chips[i].chip, name)) {
 			feature_list = sensors_proc_chips[i].feature;
-			while (feature_list[*nr].data.name
+			while (*nr < sensors_proc_chips[i].feature_count
 			    && sensors_get_ignored(name, &feature_list[*nr]))
 				(*nr)++;
-			if (!feature_list[*nr].data.name)
+			if (*nr == sensors_proc_chips[i].feature_count)
 				return NULL;
 			return &feature_list[(*nr)++].data;
 		}

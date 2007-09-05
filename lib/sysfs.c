@@ -64,7 +64,7 @@ int get_type_scaling(int type)
 static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 				     struct sysfs_device *sysdir)
 {
-	int i, type, fnum = 1;
+	int i, type, fnum = 0;
 	struct sysfs_attribute *attr;
 	struct dlist *attrs;
 	sensors_chip_feature *features;
@@ -160,7 +160,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		fnum++;
 	}
 
-	if (fnum == 1) { /* No feature */
+	if (!fnum) { /* No feature */
 		chip->feature = NULL;
 		goto exit_free;
 	}
@@ -194,6 +194,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	}
 
 	chip->feature = dyn_features;
+	chip->feature_count = fnum;
 
 exit_free:
 	free(features);

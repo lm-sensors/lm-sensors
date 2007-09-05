@@ -51,13 +51,13 @@ static void free_chip_name(sensors_chip_name *name)
 	free(name->path);
 }
 
-static void free_chip_features(sensors_chip_feature *features)
+static void free_chip_features(sensors_chip_features *features)
 {
 	int i;
 
-	for (i = 0; features[i].data.name; i++)
-		free(features[i].data.name);
-	free(features);
+	for (i = 0; i < features->feature_count; i++)
+		free(features->feature[i].data.name);
+	free(features->feature);
 }
 
 static void free_bus(sensors_bus *bus)
@@ -140,7 +140,7 @@ void sensors_cleanup(void)
 
 	for (i = 0; i < sensors_proc_chips_count; i++) {
 		free_chip_name(&sensors_proc_chips[i].chip);
-		free_chip_features(sensors_proc_chips[i].feature);
+		free_chip_features(&sensors_proc_chips[i]);
 	}
 	free(sensors_proc_chips);
 	sensors_proc_chips = NULL;

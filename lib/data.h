@@ -143,6 +143,7 @@ typedef struct sensors_chip_feature {
 typedef struct sensors_chip_features {
 	struct sensors_chip_name chip;
 	struct sensors_chip_feature *feature;
+	int feature_count;
 } sensors_chip_features;
 
 extern sensors_chip *sensors_config_chips;
