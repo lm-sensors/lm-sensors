@@ -71,7 +71,7 @@ static void free_label(sensors_label *label)
 	free(label->value);
 }
 
-static void free_expr(sensors_expr *expr)
+void free_expr(sensors_expr *expr)
 {
 	if (expr->kind == sensors_kind_var)
 		free(expr->data.var);
