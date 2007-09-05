@@ -178,13 +178,17 @@ MANPAGES := $(LIBMAN3FILES) $(LIBMAN5FILES) $(PROGDETECTMAN8FILES) $(PROGDUMPMAN
 
 user ::
 user_install::
-	@echo "*** Important note:"
+	@echo "*** Important notes:"
 	@echo "***  * The libsensors configuration file ($(ETCDIR)/sensors.conf) is never"
 	@echo "***    overwritten by our installation process, so that you won't lose"
 	@echo "***    your personal settings in that file. You still can get our latest"
 	@echo "***    default config file in etc/sensors.conf.eg and manually copy it to"
 	@echo "***    $(ETCDIR)/sensors.conf if you want. You will then want to edit it"
 	@echo "***    to fit your needs again."
+	@echo "***  * The format of $(ETCDIR)/sensors.conf changed with lm-sensors 3.0.0."
+	@echo "***    If you have a custom configuration file using the old format, you"
+	@echo "***    can convert it using the sensors-conf-convert script. Otherwise just"
+	@echo "***    overwrite your old configuration file with the new default one."
 all :: user
 install :: all user_install
 

@@ -29,6 +29,7 @@ SVN HEAD
   Man pages: Drop "conforming to" sections
   Man page sensors.conf.5: Update the chip statement section
   Programs doc/*: Delete, obsolete
+  Program etc/sensors-conf-convert: New
   Programs i2cdump, i2cget, i2cset: Do not force the slave address by default
   Program i2cdump: Use the new I2C block read function
   Program isadump: Detect when address bit 7 is a busy flag
