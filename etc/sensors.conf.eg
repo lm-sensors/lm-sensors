@@ -246,7 +246,7 @@
 # -----
 # Some chips support alarms with beep warnings. When an alarm is triggered
 # you can be warned by a beeping signal through your computer speaker. It
-# is possible to enable beeps for all alarms on a chip using the following 
+# is possible to enable beeps for all alarms on a chip using the following
 # line:
 #
 # 	set beep_enable 1
@@ -781,7 +781,7 @@ chip "w83793-*"
 
     label temp1 "CPU1 Temp"
     label temp2 "CPU2 Temp"
-    
+
 # fan1 adjustments examples
 
 #   set fan1_min 1500
@@ -830,7 +830,7 @@ chip "as99127f-*"
 # for temp2. Quoting Artur Gawryszczak (edited to reflect subsequent fixes
 # to the driver):
 # "I guess, that the formula "(@*15/43)+25, (@-25)*43/15" is correct
-# for those Asus motherboards, which get CPU temperature from internal 
+# for those Asus motherboards, which get CPU temperature from internal
 # thermal diode (Pentium Coppermine, and above), while no formula is needed
 # for Athlon/Duron boards, which use a thermistor in the socket."
 # An alternative formula was then found and reported by Victor G. Marimon.
@@ -1055,7 +1055,7 @@ chip "via686a-*"
 # Johannes Drechsel-Burkhard notes that on his MSI K7T Pro,
 # temp1 is the CPU temp and temp2 is the SYS temp. Hugo van der Merwe notes
 # the same for his Gigabyte GA-7DXC, Olivier Martin for his Gigabyte
-# GA-7ZM and Patrick Thomson for his Chaintech CT-5ATA. 
+# GA-7ZM and Patrick Thomson for his Chaintech CT-5ATA.
 # Thomas Anglmaier notes: on Epox EP-7kxa temp2 is CPU and temp1 is SYS.
 
     label temp1 "SYS Temp"
@@ -1856,7 +1856,7 @@ chip "smsc47m192-*"
 #   Haven't yet heard from any board that has 1.8V connected, so
 #   this might be more appropriate:
 #   ignore in7
-    
+
     label temp1 "Chip Temp"
 #    set temp1_min   0
 #    set temp1_max   60
@@ -2161,7 +2161,7 @@ chip "w83627ehf-*" "w83627dhg-*"
     label in7 "VSB"
     label in8 "VBAT"
 
-# +12V is in1 and +5V is in6 as recommended by datasheet 
+# +12V is in1 and +5V is in6 as recommended by datasheet
     compute in1 @*(1+(56/10)),  @/(1+(56/10))
     compute in6 @*(1+(22/10)),  @/(1+(22/10))
 #    set in1_min   12.0*0.9
@@ -2192,7 +2192,7 @@ chip "w83627ehf-*" "w83627dhg-*"
    label temp1     "Sys Temp"
    label temp2     "CPU Temp"
    label temp3     "AUX Temp"
-   
+
 #  ignore temp3
 #  set temp1_max       45
 #  set temp1_max_hyst  40
@@ -2430,7 +2430,7 @@ chip "f71882fg-*"
     label in8         "Battery"
 
 # never change the in0, in7 and in8 compute, these are hardwired in the chip!
-    compute in0       (@ * 2), (@ / 2) 
+    compute in0       (@ * 2), (@ / 2)
     compute in2       (@ * 2), (@ / 2)
     compute in3       (@ * 2), (@ / 2)
     compute in4       (@ * 5.25), (@ / 5.25)
