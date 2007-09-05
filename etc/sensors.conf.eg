@@ -172,15 +172,15 @@
 #
 # Sensor type adjustments (certain chips only):
 # ...Set temp1 to processor's thermal diode:
-#	set sensor1 1 (Winbond chips)
-#	set sensor1 3 (IT87xx and MTP008 chips)
+#	set temp1_type 1 (Winbond chips)
+#	set temp1_type 3 (IT87xx and MTP008 chips)
 #
 # ...Set temp1 sensor to 3904 transistor:
-#	set sensor1 2 (Winbond chips)
+#	set temp1_type 2 (Winbond chips)
 #
 # ...Set temp1 to thermistor:
-#	set sensor1 3435 (Winbond chips)
-#	set sensor1 2 (IT87xx and MTP008 chips)
+#	set temp1_type 3435 (Winbond chips)
+#	set temp1_type 2 (IT87xx and MTP008 chips)
 #
 # Often, a temperature sensor is disconnected; disable it with an ignore line:
 #	ignore temp3
@@ -198,10 +198,10 @@
 #
 # Here are some examples:
 #
-#	set in0_max vid*1.05
-#	set in0_min vid*0.95
-#	set temp1_over 40
-#	set temp1_hyst 37
+#	set in0_max cpu0_vid*1.05
+#	set in0_min cpu0_vid*0.95
+#	set temp1_max 40
+#	set temp1_max_hyst 37
 #
 # Think of tempx_over as 'alarm set' and tempx_hyst as 'alarm clear'
 # thresholds. In most cases the 'over' value should be higher than
@@ -240,7 +240,7 @@
 # ---------
 # There is one other feature: the 'bus' statement. An example is below.
 #
-#	bus "i2c-0" "SMBus PIIX4 adapter at e800" "Non-I2C SMBus adapter"
+#	bus "i2c-0" "SMBus PIIX4 adapter at e800"
 #
 # If we refer from now on to 'i2c-0' in 'chip' lines, this will run-time
 # be matched to this bus. So even if the PIIX4 is called 'i2c-5' at that
@@ -324,32 +324,32 @@ chip "lm78-*" "lm79-*" "w83781d-*"
 
 # Here, we assume the VID readings are valid, and we use a max. 5% deviation
 
-#    set in0_min vid*0.95
-#    set in0_max vid*1.05
-#    set in1_min vid*0.95
-#    set in1_max vid*1.05
+#    set in0_min cpu0_vid*0.95
+#    set in0_max cpu0_vid*1.05
+#    set in1_min cpu0_vid*0.95
+#    set in1_max cpu0_vid*1.05
 #    set in2_min 3.3 * 0.95
 #    set in2_max 3.3 * 1.05
 #    set in3_min 5.0 * 0.95
 #    set in3_max 5.0 * 1.05
 #    set in4_min 12 * 0.95
 #    set in4_max 12 * 1.05
-#    set in5_max -12 * 0.95
-#    set in5_min -12 * 1.05
-#    set in6_max -5 * 0.95
-#    set in6_min -5 * 1.05
+#    set in5_min -12 * 0.95
+#    set in5_max -12 * 1.05
+#    set in6_min -5 * 0.95
+#    set in6_max -5 * 1.05
 
-# Examples for lm78, lm78j, lm79 temperature limits
-#    set temp_over 40
-#    set temp_hyst 37
+# Examples for lm78, lm79 temperature limits
+#    set temp1_max      40
+#    set temp1_max_hyst 37
 
 # Examples for w83781d temperature limits
-#    set temp1_over 40
-#    set temp1_hyst 37
-#    set temp2_over 52
-#    set temp2_hyst 47
-#    set temp3_over 52
-#    set temp3_hyst 47
+#    set temp1_max      40
+#    set temp1_max_hyst 37
+#    set temp2_max      52
+#    set temp2_max_hyst 47
+#    set temp3_max      52
+#    set temp3_max_hyst 47
 
 # Examples of fan low speed limits
 #    set fan1_min 3000
@@ -364,7 +364,7 @@ chip "lm78-*" "lm79-*" "w83781d-*"
 # In case a lm78 is used together with a lm75, the lm78 temp sensor will
 # generally show the M/B temperature while the lm75 temp sensor will show
 # the CPU temperature.
-#    label temp "M/B Temp"
+#    label temp1 "M/B Temp"
 
 # Uncomment the following line to enable beeps for all alarms on this chip
 #    set beep_enable 1
@@ -375,16 +375,16 @@ chip "lm75-*"
 
 # Most boards don't need scaling. Following is
 # for the Asus TX97-E. If it doesn't work for you, feel free to complain.
-#   compute temp @*2.0, @/2.0
+#   compute temp1 @*2.0, @/2.0
 
 # Examples for temperature limits
-#    set temp_over 70	
-#    set temp_hyst 65	
+#    set temp1_max      70
+#    set temp1_max_hyst 65
 
 # In case a lm75 is used together with a lm78, the lm78 temp sensor will
 # generally show the M/B temperature while the lm75 temp sensor will show
 # the CPU temperature.
-#    label temp "CPU Temp"
+#    label temp1 "CPU Temp"
 
 
 chip "sis5595-*"
@@ -420,7 +420,7 @@ chip "sis5595-*"
 # The inverse of the driver formula is x = (1.20t - 62.77)
 # So the final formula is newt = (.345(1.20t - 62.77)) - 12).
 # Put this in the sensors.conf file as
-# compute temp ((.345 * ((1.20 * @) - 62.77)) - 12), ...
+# compute temp1 ((.345 * ((1.20 * @) - 62.77)) - 12), ...
 # where ... is the inverse function I leave to you.
 #
 # Look in your 'Vendor.ini' file to see which one is present
@@ -430,18 +430,18 @@ chip "sis5595-*"
 # Fix up a 'compute' line to match your thermistor type.
 # Warning. You still don't have enough information to do this.
 #	     ThermistorType     = NTC-10KC15-1608-1P (10K at 25C; Beta = 3435)
-#   compute temp ((X * ((1.20 * @) - 62.77)) - Y), ...
+#   compute temp1 ((X * ((1.20 * @) - 62.77)) - Y), ...
 #	     ThermistorType     = NTC-103KC15-1608-1P  (??)
-#   compute temp ((X * ((1.20 * @) - 62.77)) - Y), ...
+#   compute temp1 ((X * ((1.20 * @) - 62.77)) - Y), ...
 #	     ThermistorType     = NTC-103AT-2 (10K at 25C; Beta = 3435)
-#   compute temp ((X * ((1.20 * @) - 62.77)) - Y), ...
+#   compute temp1 ((X * ((1.20 * @) - 62.77)) - Y), ...
 #	     ThermistorType     = NTC-103JT   (10K at 25C; Beta = 3435)
-#   compute temp ((X * ((1.20 * @) - 62.77)) - Y), ...
+#   compute temp1 ((X * ((1.20 * @) - 62.77)) - Y), ...
 
 # examples for sis5595 temperature limits;
 # for sis5595, temp_hyst is really the low limit, not a hysteresis value
-#    set temp_over 40
-#    set temp_hyst 37
+#    set temp1_max      40
+#    set temp1_max_hyst 37
 
 
 chip "w83782d-*" "w83627hf-*"
@@ -478,10 +478,10 @@ chip "w83782d-*" "w83627hf-*"
 # set limits to 10% for the non-critical voltages
 # set limits to 20% for the battery voltage
 
-#    set in0_min vid*0.95
-#    set in0_max vid*1.05
-#    set in1_min vid*0.95
-#    set in1_max vid*1.05
+#    set in0_min cpu0_vid*0.95
+#    set in0_max cpu0_vid*1.05
+#    set in1_min cpu0_vid*0.95
+#    set in1_max cpu0_vid*1.05
 #    set in2_min 3.3 * 0.95
 #    set in2_max 3.3 * 1.05
 #    set in3_min 5.0 * 0.95
@@ -501,17 +501,17 @@ chip "w83782d-*" "w83627hf-*"
 # 1 = PII/Celeron Diode; 2 = 3904 transistor;
 # 3435 = thermistor with Beta = 3435
 # If temperature changes very little, try 1 or 2.
-#   set sensor1 1
-#   set sensor2 2
-#   set sensor3 3435
+#   set temp1_type 1
+#   set temp2_type 2
+#   set temp3_type 3435
 
 # examples for temperature limits
-#    set temp1_over 40
-#    set temp1_hyst 37
-#    set temp2_over 52
-#    set temp2_hyst 47
-#    set temp3_over 52
-#    set temp3_hyst 47
+#    set temp1_max      40
+#    set temp1_max_hyst 37
+#    set temp2_max      52
+#    set temp2_max_hyst 47
+#    set temp3_max      52
+#    set temp3_max_hyst 47
 
 
 chip "w83783s-*"
@@ -538,8 +538,8 @@ chip "w83783s-*"
 # set limits to 10% for the non-critical voltages
 # set limits to 20% for the battery voltage
 
-#   set in0_min vid*0.95
-#   set in0_max vid*1.05
+#   set in0_min cpu0_vid*0.95
+#   set in0_max cpu0_vid*1.05
 #   set in2_min 3.3 * 0.95
 #   set in2_max 3.3 * 1.05
 #   set in3_min 5.0 * 0.95
@@ -555,14 +555,14 @@ chip "w83783s-*"
 # 1 = PII/Celeron Diode; 2 = 3904 transistor;
 # 3435 = thermistor with Beta = 3435
 # If temperature changes very little, try 1 or 2.
-#   set sensor1 1
-#   set sensor2 2
+#   set temp1_type 1
+#   set temp2_type 2
 
 # examples for temperature limits
-#    set temp1_over 40
-#    set temp1_hyst 37
-#    set temp2_over 52
-#    set temp2_hyst 47
+#    set temp1_max      40
+#    set temp1_max_hyst 37
+#    set temp2_max      52
+#    set temp2_max_hyst 47
 
 
 chip "w83697hf-*"
@@ -640,15 +640,15 @@ chip "w83697hf-*"
 # 1 = PII/Celeron Diode; 2 = 3904 transistor;
 # 3435 = thermistor with Beta = 3435
 # If temperature changes very little, try 1 or 2.
-#   set sensor1 1
-#   set sensor2 2
-#   set sensor3 3435
+#   set temp1_type 1
+#   set temp2_type 2
+#   set temp3_type 3435
 
 # examples for temperature limits
-#    set temp1_over 40
-#    set temp1_hyst 37
-#    set temp2_over 52
-#    set temp2_hyst 47
+#    set temp1_max      40
+#    set temp1_max_hyst 37
+#    set temp2_max      52
+#    set temp2_max_hyst 47
 
 
 chip "w83627thf-*" "w83637hf-*"
@@ -686,8 +686,8 @@ chip "w83627thf-*" "w83637hf-*"
 # set limits to 20% for the battery voltage
 # if your vid is wrong, you'll need to adjust in0_min and in0_max
 
-#   set in0_min vid * 0.95
-#   set in0_max vid * 1.05
+#   set in0_min cpu0_vid * 0.95
+#   set in0_max cpu0_vid * 1.05
 #   set in1_min 12 * 0.90
 #   set in1_max 12 * 1.10
 #   set in2_min 3.3 * 0.95
@@ -705,21 +705,21 @@ chip "w83627thf-*" "w83637hf-*"
 # 1 = PII/Celeron Diode; 2 = 3904 transistor;
 # 3435 = thermistor with Beta = 3435
 # If temperature changes very little, try 1 or 2.
-#   set sensor1 1
-#   set sensor2 2
-#   set sensor3 3435
+#   set temp1_type 1
+#   set temp2_type 2
+#   set temp3_type 3435
 
     label temp1 "M/B Temp"
     label temp2 "CPU Temp"
 #   ignore temp3
 
 # examples for temperature limits
-#    set temp1_over 40
-#    set temp1_hyst 37
-#    set temp2_over 52
-#    set temp2_hyst 47
-#    set temp3_over 52
-#    set temp3_hyst 47
+#    set temp1_max      40
+#    set temp1_max_hyst 37
+#    set temp2_max      52
+#    set temp2_max_hyst 47
+#    set temp3_max      52
+#    set temp3_max_hyst 47
 
 #   ignore fan1
     label fan2 "CPU Fan"
@@ -775,8 +775,8 @@ chip "w83792d-*"
 
 # temp2 limits examples
 
-#    set temp2_over 42
-#    set temp2_hyst 37
+#    set temp2_max      42
+#    set temp2_max_hyst 37
 
 # ignore examples
 
@@ -880,28 +880,28 @@ chip "as99127f-*"
 # set limits to 10% for the non-critical voltages
 # set limits to 20% for the battery voltage
 
-#    set in0_min vid*0.95
-#    set in0_max vid*1.05
-#    set in1_min vid*0.95
-#    set in1_max vid*1.05
+#    set in0_min cpu0_vid*0.95
+#    set in0_max cpu0_vid*1.05
+#    set in1_min cpu0_vid*0.95
+#    set in1_max cpu0_vid*1.05
 #    set in2_min 3.3 * 0.95
 #    set in2_max 3.3 * 1.05
 #    set in3_min 5.0 * 0.95
 #    set in3_max 5.0 * 1.05
 #    set in4_min 12 * 0.90
 #    set in4_max 12 * 1.10
-#    set in5_max -12 * 0.90
-#    set in5_min -12 * 1.10
-#    set in6_max -5 * 0.95
-#    set in6_min -5 * 1.05
+#    set in5_min -12 * 0.90
+#    set in5_max -12 * 1.10
+#    set in6_min -5 * 0.95
+#    set in6_max -5 * 1.05
 
 # examples for temperature limits
-#    set temp1_over 40
-#    set temp1_hyst 37
-#    set temp2_over 52
-#    set temp2_hyst 47
-#    set temp3_over 52
-#    set temp3_hyst 47
+#    set temp1_max      40
+#    set temp1_max_hyst 37
+#    set temp2_max      52
+#    set temp2_max_hyst 47
+#    set temp3_max      52
+#    set temp3_max_hyst 47
 
 
 chip "gl518sm-*"
@@ -911,30 +911,25 @@ chip "gl518sm-*"
 # Factors and labels taken from GL518SM datasheet, they seem to give
 # reasonable values with EISCA connected Fan78
 
-  label vdd "+5V"
-  label vin1 "+3.3V"
-  label vin2 "+12V"
-  label vin3 "Vcore"
+  label in0 "+5V"
+  label in1 "+3.3V"
+  label in2 "+12V"
+  label in3 "Vcore"
 
-# vin2 depends on external resistors (4,7k and 15k assumed here)
-# vin1 and vin3 require no scaling
+# in2 depends on external resistors (4,7k and 15k assumed here)
+# in1 and in3 require no scaling
 
-  compute vin2 (197/47)*@  ,  @/(197/47)
+  compute in2 (197/47)*@  ,  @/(197/47)
 
-#  set vdd_min 4.8
-#  set vdd_max 5.2
-#  set vin1_min 3.20
-#  set vin1_max 3.40
-#  set vin2_min 11.0
-#  set vin2_max 13.0
-#  set vin3_min 2.10
-#  set vin3_max 2.30
-#  set fan1_off 0
+#  set in0_min 4.8
+#  set in0_max 5.2
+#  set in1_min 3.20
+#  set in1_max 3.40
+#  set in2_min 11.0
+#  set in2_max 13.0
+#  set in3_min 2.10
+#  set in3_max 2.30
 #  set fan2_min 0
-
-# Do NOT uncomment the following line with the Linux 2.6 kernel driver,
-# as it'll raise an error.
-# set iterate 2
 
 
 chip "gl520sm-*"
@@ -948,35 +943,33 @@ chip "gl520sm-*"
 # Note that this means that you have either temp2 or vin4 but never both
 # at the same time.
 
-# set two_temps 1
+  label in0 "+5V"
+  label in1 "+3.3V"
+  label in2 "+12V"
+  label in3 "Vcore"
+  label in4 "-12V"
 
-  label vdd "+5V"
-  label vin1 "+3.3V"
-  label vin2 "+12V"
-  label vin3 "Vcore"
-  label vin4 "-12V"
+# in1 and in3 require no scaling
+# in2 depends on external resistors (4,7k and 15k assumed)
 
-# vin1 and vin3 require no scaling
-# vin2 depends on external resistors (4,7k and 15k assumed)
-
-# vin4 = ((R1+R2)/R2)*@ - (R1/R2)*vdd
+# in4 = ((R1+R2)/R2)*@ - (R1/R2)*vdd
 #
 #       -12 --| R1 |---t---| R2 |-- +5
 #                      |
 #                    vin4
 #
 
-  compute vin2 (197/47)*@  ,  @/(197/47)
-  compute vin4 (5*@)-(4*vdd) , (@+4*vdd)/5
+  compute in2 (197/47)*@  ,  @/(197/47)
+  compute in4 (5*@)-(4*in0) , (@+4*in0)/5
 
-#  set vdd_min 4.8
-#  set vdd_max 5.2
-#  set vin1_min 3.20
-#  set vin1_max 3.40
-#  set vin2_min 11.0
-#  set vin2_max 13.0
-#  set vin3_min 2.10
-#  set vin3_max 2.30
+#  set in0_min 4.8
+#  set in0_max 5.2
+#  set in1_min 3.20
+#  set in1_max 3.40
+#  set in2_min 11.0
+#  set in2_max 13.0
+#  set in3_min 2.10
+#  set in3_max 2.30
 
 
 chip "lm80-*"
@@ -1038,19 +1031,13 @@ chip "lm80-*"
 #    set in6_min -5 * 1.05
 #    set in6_max -5 * 0.95
 
-# examples for lm80 temperature limits
-# WARNING - nonstandard names and functions for the lm80!!!
 # All 4 of these limits apply to the single temperature sensor.
-# "hot" is like the standard alarm for most chips.
-# "os" is the threshold for the overtemperature shutdown output.
-# "os" may or may not do anything on your motherboard but it should
-#  be set higher than the "hot" thresholds.
-# Note that the /proc file 'temp" also has five entries instead of
-# the usual three.
-#    set temp_hot_hyst 45
-#    set temp_hot_max  52
-#    set temp_os_hyst  57
-#    set temp_os_max   62
+# "crit" may or may not do anything on your motherboard but it should
+#  be set higher than the "max" thresholds.
+#    set temp1_max_hyst 45
+#    set temp1_max  52
+#    set temp1_crit_hyst  57
+#    set temp1_crit   62
 
 
 chip "via686a-*"
@@ -1071,12 +1058,12 @@ chip "via686a-*"
 # if you have one of these boards you may want to uncomment the 'ignore 2.5V'
 # line below.
 
-    label "2.0V" "CPU core"
-    label "2.5V" "+2.5V"
-    #ignore "2.5V"
-    label "3.3V" "I/O"
-    label "5.0V" "+5V"
-    label "12V" "+12V"
+    label in0 "CPU core"
+    label in1 "+2.5V"
+    #ignore in1
+    label in2 "I/O"
+    label in3 "+5V"
+    label in4 "+12V"
 
     label fan1  "CPU Fan"
     label fan2  "P/S Fan"
@@ -1125,12 +1112,12 @@ chip "via686a-*"
 # we would still get some oscillation when the temp hovers around the limit
 # due to noise.)
 
-#    set temp1_hyst 40
-#    set temp1_over 45
-#    set temp2_hyst 55
-#    set temp2_over 60
-#    set temp3_hyst 60
-#    set temp3_over 65
+#    set temp1_max_hyst 40
+#    set temp1_max      45
+#    set temp2_max_hyst 55
+#    set temp2_max      60
+#    set temp3_max_hyst 60
+#    set temp3_max      65
 
 # You could set your fan limits too, but the defaults should be fine.
 
@@ -1178,12 +1165,12 @@ chip "mtp008-*"
     compute in5 (@ * 36 - 118.61) / 7,	(118.61 + 7 * @) / 36
 
 # examples for temperature limits
-#    set temp1_over 40
-#    set temp1_hyst 37
-#    set temp2_over 52
-#    set temp2_hyst 47
-#    set temp3_over 52
-#    set temp3_hyst 47
+#    set temp1_max      40
+#    set temp1_max_hyst 37
+#    set temp2_max      52
+#    set temp2_max_hyst 47
+#    set temp3_max      52
+#    set temp3_max_hyst 47
 
 # End of standard mtp008 configuration
 
@@ -1229,8 +1216,8 @@ chip "mtp008-*"
 #    label fan3 "fan6"
 #    ignore temp1
 #    label temp2 "MB Temp"
-#    set temp2_over 52
-#    set temp2_hyst 47
+#    set temp2_max 52
+#    set temp2_max_hyst 47
 #    ignore temp3
 
 chip "adm1025-*" "ne1619-*"
@@ -1252,8 +1239,8 @@ chip "adm1025-*" "ne1619-*"
     label in5 "VCC"
 
 # Tolerate a 5% deviance for CPU power-supply
-#    set in1_min vid * 0.95
-#    set in1_max vid * 1.05
+#    set in1_min cpu0_vid * 0.95
+#    set in1_max cpu0_vid * 1.05
 # Tolerate a 10% deviance for other voltages
 #    set in0_min 2.5 * 0.90
 #    set in0_max 2.5 * 1.10
@@ -1277,10 +1264,10 @@ chip "adm1025-*" "ne1619-*"
 # Temperatures
     label temp1 "CPU Temp"
     label temp2 "M/B Temp"
-#    set temp1_low 10
-#    set temp1_high 60
-#    set temp2_low 10
-#    set temp2_high 45
+#    set temp1_min 10
+#    set temp1_max 60
+#    set temp2_min 10
+#    set temp2_max 45
 
 
 chip "lm87-*"
@@ -1311,34 +1298,34 @@ chip "lm87-*"
 # Warning - feature names starting with a number must be enclosed
 # with double quotes.
 
-   label "2.5V"  "+2.5V"
-   label Vccp1   "VCore"
-   label "3.3V"  "+3.3V"
-   label "5V"    "+5V"
-   label "12V"   "+12V"
-#   label Vccp2   "VCore2"
+   label in0  "+2.5V"
+   label in1  "VCore"
+   label in2  "+3.3V"
+   label in3  "+5V"
+   label in4  "+12V"
+#   label in5  "VCore2"
 
    label fan1 "CPU Fan"
 #   label fan2 "Case Fan"
    label temp1 "M/B Temp"
-   label CPU_Temp "CPU Temp"
+   label temp2 "CPU Temp"
 #   label temp3 "AUX Temp"
 
-#   set Vccp1_min    vid * 0.95
-#   set Vccp1_max    vid * 1.05
-#   set "3.3V_min"   3.3 * 0.92
-#   set "3.3V_max"   3.3 * 1.08
-#   set "5V_min"       5 * 0.92
-#   set "5V_max"       5 * 1.08
-#   set "12V_min"     12 * 0.90
-#   set "12V_max"     12 * 1.10
+#   set in1_min  cpu0_vid * 0.95
+#   set in1_max  cpu0_vid * 1.05
+#   set in2_min  3.3 * 0.92
+#   set in2_max  3.3 * 1.08
+#   set in3_min    5 * 0.92
+#   set in3_max    5 * 1.08
+#   set in4_min   12 * 0.90
+#   set in4_max   12 * 1.10
 
 # These ones are mutually exclusive with temp3. If you have temp3,
 # comment out these lines as they will trigger errors on "sensors -s".
-#   set "2.5V_min"   2.5 * 0.92
-#   set "2.5V_max"   2.5 * 1.08
-#   set Vccp2_min    vid * 0.95
-#   set Vccp2_max    vid * 1.05
+#   set in0_min  2.5 * 0.92
+#   set in0_max  2.5 * 1.08
+#   set in5_min  cpu0_vid * 0.95
+#   set in5_max  cpu0_vid * 1.05
 
 # Increase fan clock dividers if your fans read 0 RPM while you know
 # they are connected and running.
@@ -1364,14 +1351,14 @@ chip "lm87-*"
 # just a guess, the datasheet gives no guidance.
 # Note that the Linux 2.6 driver needs no recompilation, it'll read the
 # configuration from the chip.
-#   label AIN1 "-12V"
-#   label AIN2 "-5V"
-#   set AIN1_min -12 * 0.95
-#   set AIN2_min -5 * 0.95
-#   set AIN1_max -12 * 1.05
-#   set AIN2_max -5 * 1.05
-#   compute AIN1 (7.50 * @) - 21.45  ,  (@ + 21.45) / 7.50
-#   compute AIN2 (4.05 * @) - 10.07  ,  (@ + 10.07) / 4.05
+#   label in6 "-12V"
+#   label in7 "-5V"
+#   set in6_min -12 * 0.95
+#   set in7_min -5 * 0.95
+#   set in6_max -12 * 1.05
+#   set in7_max -5 * 1.05
+#   compute in6 (7.50 * @) - 21.45  ,  (@ + 21.45) / 7.50
+#   compute in7 (4.05 * @) - 10.07  ,  (@ + 10.07) / 4.05
 
 chip "adm9240-*" "ds1780-*" "lm81-*"
 #
@@ -1388,44 +1375,44 @@ chip "adm9240-*" "ds1780-*" "lm81-*"
 # Warning - feature names starting with a number must be enclosed
 # with double quotes.
 #
-#   label "2.5V" "xxx"
-#   label Vccp1 "xxx"
-#   label "3.3V" "xxx"
-#   label "5V" "xxx"
-#   label "12V" "xxx"
-#   label Vccp2 "xxx"
+#   label in0 "xxx"
+#   label in1 "xxx"
+#   label in2 "xxx"
+#   label in3 "xxx"
+#   label in4 "xxx"
+#   label in5 "xxx"
 #   label fan1 "xxx"
 #   label fan2 "xxx"
-#   label temp "xxx"
+#   label temp1 "xxx"
 #
-#   set Vccp1_min xxx
-#   set "2.5V_min" xxx
-#   set "3.3V_min" xxx
-#   set "5V_min" xxx
-#   set "12V_min" xxx
-#   set Vccp2_min xxx
+#   set in1_min xxx
+#   set in0_min xxx
+#   set in2_min xxx
+#   set in3_min xxx
+#   set in4_min xxx
+#   set in5_min xxx
 #
-#   set Vccp1_max xxx
-#   set "2.5V_max" xxx
-#   set "3.3V_max" xxx
-#   set "5V_max" xxx
-#   set "12V_max" xxx
-#   set Vccp2_max xxx
+#   set in1_max xxx
+#   set in0_max xxx
+#   set in2_max xxx
+#   set in3_max xxx
+#   set in4_max xxx
+#   set in5_max xxx
 #
 #   set fan1_div xxx	Note: do not uncomment with kernel 2.6 driver
 #   set fan2_div xxx	Note: do not uncomment with kernel 2.6 driver
 #   set fan1_min xxx
 #   set fan2_min xxx
-#   set temp1_hyst xxx
-#   set temp1_over xxx
+#   set temp1_max_hyst xxx
+#   set temp1_max xxx
 
-#   compute "2.5V" xxx
-#   compute Vccp1 xxx
-#   compute "3.3V" xxx
-#   compute "5V" xxx
-#   compute "12V" xxx
-#   compute Vccp2 xxx
-#   compute temp xxx
+#   compute in0 xxx
+#   compute in1 xxx
+#   compute in2 xxx
+#   compute in3 xxx
+#   compute in4 xxx
+#   compute in5 xxx
+#   compute temp1 xxx
 
 chip "adm1024-*"
 #
@@ -1433,12 +1420,12 @@ chip "adm1024-*"
 #
     label fan1 "CPU1 fan"
     label fan2 "CPU2 fan"
-    label temp "SYS Temp"
-    label temp1 "CPU2 Temp"
-    label temp2 "CPU1 Temp"
-    ignore "2.5V" # This register is also used for temp2
-    ignore "Vccp1"
-    ignore "Vccp2"
+    label temp1 "SYS Temp"
+    label temp2 "CPU2 Temp"
+    label temp3 "CPU1 Temp"
+    ignore in0 # This register is also used for temp3
+    ignore in1
+    ignore in5
 
 
 chip "it87-*" "it8712-*"
@@ -1456,10 +1443,6 @@ chip "it87-*" "it8712-*"
     label in6 "-5V"
     label in7 "Stdby"
     label in8 "VBat"
-
-    # vid is not monitored by IT8705F
-    # comment out if you have IT8712
-    ignore  vid
 
 # Incubus Saturnus reports that the IT87 chip on Asus A7V8X-X seems
 # to report the VCORE voltage approximately 0.05V higher than the board's
@@ -1530,22 +1513,22 @@ chip "it87-*" "it8712-*"
 # The old method (modprobe it87 temp_type=0xXX) is no longer supported.
 #
 # 2 = thermistor; 3 = thermal diode; 0 = unused
-#   set sensor1 3
-#   set sensor2 3
-#   set sensor3 3
+#   set temp1_type 3
+#   set temp2_type 3
+#   set temp3_type 3
 # If a given sensor isn't used, you will probably want to ignore it
 # (see ignore statement right below).
 
     label temp1       "M/B Temp"
-#    set   temp1_over  40
-#    set   temp1_low   15
+#    set   temp1_max   40
+#    set   temp1_min   15
     label temp2       "CPU Temp"
-#    set   temp2_over  45
-#    set   temp2_low   15
+#    set   temp2_max   45
+#    set   temp2_min   15
 #   ignore temp3
     label temp3       "Temp3"
-#    set   temp3_over  45
-#    set   temp3_low   15
+#    set   temp3_max   45
+#    set   temp3_min   15
 
 # The A7V8X-X has temperatures inverted, and needs a conversion for
 # CPU temp. Thanks to Preben Randhol for the formula.
@@ -1599,7 +1582,7 @@ chip "it87-*" "it8712-*"
 #    set in7_min 5 * 0.95
 #    set in7_max 5 * 1.05
     # vid not monitored by IT8705F
-#    ignore  vid
+#    ignore  cpu0_vid
 
 #    compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
 #    compute in4 ((30/10) +1)*@  , @/((30/10) +1)
@@ -1637,8 +1620,8 @@ chip "it8716-*"
 
 # If vid (nominal CPU voltage) isn't correct, hardcode the correct value
 # instead.
-#    set in0_min  vid * 0.95
-#    set in0_max  vid * 1.05
+#    set in0_min  cpu0_vid * 0.95
+#    set in0_max  cpu0_vid * 1.05
 #    set in1_min  1.8 * 0.95
 #    set in1_max  1.8 * 1.05
 #    set in2_min  3.3 * 0.95
@@ -1663,9 +1646,9 @@ chip "it8716-*"
 # appropriate lines below.
 #
 # 2 = thermistor; 3 = thermal diode; 0 = unused
-#   set sensor1  3
-#   set sensor2  3
-#   set sensor3  3
+#   set temp1_type  3
+#   set temp2_type  3
+#   set temp3_type  3
 
 # If a given sensor isn't used, you will probably want to ignore it
 # as well (see ignore statement right below).
@@ -1676,10 +1659,10 @@ chip "it8716-*"
 #   label  temp2  "M/B Temp"
 #   ignore temp3
 
-#   set temp1_over  60
-#   set temp1_low   10
-#   set temp2_over  50
-#   set temp2_low   10
+#   set temp1_max  60
+#   set temp1_min  10
+#   set temp2_max  50
+#   set temp2_min  10
 
 # Fans
 
@@ -1711,9 +1694,9 @@ chip "fscpos-*"
 
 # Voltage
 
-    label volt12      "+12V"
-    label volt5       "+5V"
-    label voltbatt    "Battery"
+    label in0         "+12V"
+    label in1         "+5V"
+    label in2         "Battery"
 
 
 chip "fscscy-*"
@@ -1737,9 +1720,9 @@ chip "fscscy-*"
 
 # Voltage
 
-    label volt12      "+12V"
-    label volt5       "+5V"
-    label voltbatt    "+3.3V"
+    label in0         "+12V"
+    label in1         "+5V"
+    label in2         "+3.3V"
 
 
 chip "fscher-*"
@@ -1767,25 +1750,6 @@ chip "fscher-*"
     compute in1       (@ * (20 * 33) / 255) + (0 / 100), (@ - (0 / 100)) * 255 / (20 * 33)
     compute in2       (@ * (10 * 33) / 255) + (0 / 100), (@ - (0 / 100)) * 255 / (10 * 33)
 
-# Read documentation before enabling pwm settings
-# (see the fscher driver documentation in the kernel tree)
-# WARNING: IMPROPER VALUES MAY DAMAGE YOUR SYSTEM DUE TO OVERHEATING!
-
-# Allow fans to turn off
-#    set pwm1          0
-#    set pwm2          0
-#    set pwm3          0
-
-# Min cooling
-#    set pwm1          2
-#    set pwm2          1
-#    set pwm3          1
-
-# Max cooling
-#    set pwm1          255
-#    set pwm2          255
-#    set pwm3          255
-
 
 chip "pcf8591-*"
 #
@@ -1793,44 +1757,33 @@ chip "pcf8591-*"
 #
 # Analog inputs
 
-   ignore ain_conf
-# Since Linux 2.6, input configuration is set as module parameter,
-# so the line below is for older kernels only.
-#  set    ain_conf    0
-
 # You may discard ch2 and ch3 if you don't use them (depends on the input
 # configuration)
-#  ignore ch2
-#  ignore ch3
+#  ignore in2
+#  ignore in3
 
-   label  ch0         "Chan. 0"
-   label  ch1         "Chan. 1"
-   label  ch2         "Chan. 2"
-   label  ch3         "Chan. 3"
+   label  in0         "Chan. 0"
+   label  in1         "Chan. 1"
+   label  in2         "Chan. 2"
+   label  in3         "Chan. 3"
 
 # The driver assumes Vref = 2.56V and Agnd = 0V. If it doesn't match
 # your hardware, you have to use compute lines. The example below is
 # correct for Vref = 5.0V and Agnd = 0V.
-#  compute ch0 (@ * 500 / 256), (@ * 256 / 500)
-#  compute ch1 (@ * 500 / 256), (@ * 256 / 500)
-#  compute ch2 (@ * 500 / 256), (@ * 256 / 500)
-#  compute ch3 (@ * 500 / 256), (@ * 256 / 500)
+#  compute in0 (@ * 500 / 256), (@ * 256 / 500)
+#  compute in1 (@ * 500 / 256), (@ * 256 / 500)
+#  compute in2 (@ * 500 / 256), (@ * 256 / 500)
+#  compute in3 (@ * 500 / 256), (@ * 256 / 500)
 
-# Analog output
-
-   ignore aout_enable
-#   set    aout_enable 1
-   label  aout        "Output"
-#   set    aout        0
 
 chip "adm1021-*" "adm1023-*" "max1617-*" "max1617a-*" "thmc10-*" "lm84-*" "gl523sm-*" "mc1066-*"
 
-   label temp 		"Board Temp"
-   label remote_temp	"CPU Temp"
-#   set temp_low		40
-#   set temp_over		70
-#   set remote_temp_low		40
-#   set remote_temp_over	70
+   label temp1 		"Board Temp"
+   label temp2		"CPU Temp"
+#   set temp1_min	40
+#   set temp1_max	70
+#   set temp2_min	40
+#   set temp2_max	70
 
 chip "lm83-*"
 
@@ -1844,15 +1797,15 @@ chip "lm83-*"
 #   ignore temp4
 
 # change high limits to fit your needs
-#   set temp1_high 55
-#   set temp2_high 60
-#   set temp3_high 65
-#   set temp4_high 60
+#   set temp1_max 55
+#   set temp2_max 60
+#   set temp3_max 65
+#   set temp4_max 60
 
 # change critical limit to fit your needs
 # only one limit for all four temperatures
 # should be higher than each of the high limits above
-#   set tcrit 85
+#   set temp3_crit 85
 
 
 chip "max1619-*"
@@ -1865,27 +1818,27 @@ chip "max1619-*"
 #   set temp2_max   100
 
 # change critical limit and hysteresis to fit your needs
-#   set temp2_crit  50
-#   set temp2_hyst  40
+#   set temp2_crit       50
+#   set temp2_crit_hyst  40
 
 
 chip "lm90-*" "adm1032-*" "lm86-*" "max6657-*" "adt7461-*" "max6680-*"
 
    label temp1 "M/B Temp"
    label temp2 "CPU Temp"
-   label tcrit1 "M/B Crit"
-   label tcrit2 "CPU Crit"
+   label temp1_crit "M/B Crit"
+   label temp2_crit "CPU Crit"
 
 # change high and low limits to fit your needs
-#   set temp1_low  10
-#   set temp1_high 55
-#   set temp2_low  10
-#   set temp2_high 66
+#   set temp1_min 10
+#   set temp1_max 55
+#   set temp2_min 10
+#   set temp2_max 66
 
 # change critical limits to fit your needs
 # should be higher than the corresponding high limit above
-#   set tcrit1 75
-#   set tcrit2 85
+#   set temp1_crit 75
+#   set temp2_crit 85
 
 # change the hysteresis values (to critical limits) to fit your needs
 # note #1: hyst2 will be automatically set with the same delta
@@ -1893,14 +1846,14 @@ chip "lm90-*" "adm1032-*" "lm86-*" "max6657-*" "adt7461-*" "max6680-*"
 # for both channels, cannot hold values greater than 31, so the delta
 # between critical temperatures and respective absolute hysteresis can
 # never exceed this value
-#   set hyst1 70
+#   set temp1_crit_hyst 70
 
 chip "lm99-*"
 
    label temp1 "G/C Temp"
    label temp2 "GPU Temp"
-   label tcrit1 "G/C Crit"
-   label tcrit2 "GPU Crit"
+   label temp1_crit "G/C Crit"
+   label temp2_crit "GPU Crit"
 
 # note #1: only the LM99 needs this; for a LM89, comment the compute line
 # out
@@ -1910,15 +1863,15 @@ chip "lm99-*"
    compute temp2 @+16, @-16
 
 # change high and low limits to fit your needs
-#   set temp1_low  10
-#   set temp1_high 90
-#   set temp2_low  10
-#   set temp2_high 100
+#   set temp1_min  10
+#   set temp1_max  90
+#   set temp2_min  10
+#   set temp2_max 100
 
 # change critical limits to fit your needs
 # should be higher than the corresponding high limit above
-#   set tcrit1 100
-#   set tcrit2 110
+#   set temp1_crit 100
+#   set temp2_crit 110
 
 # change the hysteresis values (to critical limits) to fit your needs
 # note #1: hyst2 will be automatically set with the same delta
@@ -1926,7 +1879,7 @@ chip "lm99-*"
 # for both channels, cannot hold values greater than 31, so the delta
 # between critical temperatures and respective absolute hysteresis can
 # never exceed this value
-#   set hyst1 105
+#   set temp1_crit_hyst 105
 
 
 chip "lm63-*"
@@ -1937,42 +1890,14 @@ chip "lm63-*"
    label fan1        "CPU Fan"
 
 # Change limits to fit your needs. Note that temp2_crit is read-only.
-#   set temp1_high       50
-#   set temp2_low        10
-#   set temp2_high       70
+#   set temp1_max        50
+#   set temp2_min        10
+#   set temp2_max        70
 #   set temp2_crit_hyst  75
 #   set fan1_min         2000
 
 
 chip "vt1211-*"
-
-#							1 for temp, 0 for volt.
-#	Sensor		Voltage Mode	Temp Mode	config bit
-#	--------	------------	---------	--------------
-#	Reading 1			temp1
-#	Reading 3			temp2   	
-#	UCH1/Reading2	in0		temp3		0x04 (4)
-#	UCH2		in1		temp4		0x08 (8)
-#	UCH3		in2		temp5		0x10 (16)
-#	UCH4		in3		temp6		0x20 (32)
-#	UCH5		in4		temp7		0x40 (64)
-#	3.3V		in5
-
-# Set uch1-2 to temp mode, uch3-5 to voltage mode. This works only 
-# for the 2.4 driver. For the 2.6 driver use the uch_config module parameter.
-# If the value doesn't match the hardware wiring, you'll get weird readings!
-#    set config 12
-
-# The 2.6 driver will automatically ignore the inputs which are not
-# configured, but the 2.4 driver will not so you'll need to add ignore
-# statements depending on the config value above.
-#   ignore in0
-#   ignore in1
-#   ignore temp3
-#   ignore temp4
-    ignore temp5
-    ignore temp6
-    ignore temp7
 
     label in0 "+3.3V"
     label in1 "+2.5V"
@@ -2012,8 +1937,8 @@ chip "vt1211-*"
 #   set in1_min 2.5 * 0.95
 #   set in1_max 2.5 * 1.05
 # If your vid is wrong, hardcode the CPU voltage (e.g. 1.4)
-#   set in2_min vid * 0.97
-#   set in2_max vid * 1.03
+#   set in2_min cpu0_vid * 0.97
+#   set in2_max cpu0_vid * 1.03
 #   set in3_min 5.0 * 0.95
 #   set in3_max 5.0 * 1.05
 #   set in4_min 12.0 * 0.90
@@ -2061,41 +1986,19 @@ chip "vt1211-*"
     compute temp7  1 / (1 / 298.15 - (` (2.2 / @ - 1)) / 3435) - 273.15, \
                    2.2 / (1 + (^ (3435 / 298.15 - 3435 / (273.15 + @))))
 
-#    set temp1_hyst 80
-#    set temp1_over 85
-#    set temp2_hyst 60
-#    set temp2_over 65
-#    set temp3_hyst 60
-#    set temp3_over 65
-#    set temp4_hyst 40
-#    set temp4_over 45
+#    set temp1_max_hyst 80
+#    set temp1_max      85
+#    set temp2_max_hyst 60
+#    set temp2_max      65
+#    set temp3_max_hyst 60
+#    set temp3_max      65
+#    set temp4_max_hyst 40
+#    set temp4_max      45
 
 #    set fan1_min 3000
 #    set fan2_min 3000
 
 chip "vt8231-*"
-#
-#							1 for temp, 0 for volt.
-#	Sensor		Voltage Mode	Temp Mode	config bit
-#	--------	------------	---------	--------------
-#	Reading 1			temp1
-#	UCH1		in0		temp2		0x04 (4)
-#	UCH2		in1		temp3		0x08 (8)
-#	UCH3		in2		temp4		0x10 (16)
-#	UCH4		in3		temp5		0x20 (32)
-#	UCH5		in4		temp6		0x40 (64)
-#	3.3V		in5
-#
-# Hardware default is UCH1 in temp mode, UCH2-5 in voltage mode
-# Note that the Linux 2.6 driver will not let you change the channel
-# configuration. In theory, the BIOS should have done it properly.
-#   set config 4
-
-#    ignore in0
-#    ignore temp3
-#    ignore temp4
-#    ignore temp5
-#    ignore temp6
 
     label in1 "+2.5V"
     label in2 "VCore"
@@ -2152,10 +2055,10 @@ chip "vt8231-*"
     compute temp3  1 / (1 / 298.15 - (` (2.2 / @ - 1)) / 3435) - 273.15, \
                    2.2 / (1 + (^ (3435 / 298.15 - 3435 / (273.15 + @))))
 
-#    set temp1_hyst 60
-#    set temp1_over 65
-#    set temp2_hyst 40
-#    set temp2_over 45
+#    set temp1_max_hyst 60
+#    set temp1_max      65
+#    set temp2_max_hyst 40
+#    set temp2_max      45
 
 #    set fan1_min 3000
 #    set fan2_min 3000
@@ -2192,8 +2095,8 @@ chip "smsc47m192-*"
 #    set in0_max  2.5 * 1.05
 
     label in1 "VCore"
-#    set in1_min  vid * 0.95
-#    set in1_max  vid * 1.05
+#    set in1_min  cpu0_vid * 0.95
+#    set in1_max  cpu0_vid * 1.05
 
     label in2 "+3.3V"
 #    set in2_min  3.3 * 0.95
@@ -2241,13 +2144,13 @@ chip "smsc47m192-*"
 chip "asb100-*"
 
     label in0 "VCore 1"
-    #set in0_min vid * 0.95
-    #set in0_max vid * 1.05
+    #set in0_min cpu0_vid * 0.95
+    #set in0_max cpu0_vid * 1.05
 
     label in1 "VCore 2"
     ignore in1
-    #set in1_min vid * 0.95
-    #set in1_max vid * 1.05
+    #set in1_min cpu0_vid * 0.95
+    #set in1_max cpu0_vid * 1.05
 
     label in2 "+3.3V"
     #set in2_min 3.3 * 0.95
@@ -2276,25 +2179,25 @@ chip "asb100-*"
     #set in6_min -5  * 1.05
 
     label temp1 "M/B Temp"
-    #set temp1_over 45
-    #set temp1_hyst 40
+    #set temp1_max      45
+    #set temp1_max_hyst 40
 
     label temp2 "CPU Temp (Intel)"
     #ignore temp2
-    #set temp2_over 60
-    #set temp2_hyst 50
+    #set temp2_max      60
+    #set temp2_max_hyst 50
 
     # PWRTMP connector on P4S333, for external sensor
     label temp3 "Power Temp"
     #ignore temp3
-    #set temp3_over 45
-    #set temp3_hyst 40
+    #set temp3_max      45
+    #set temp3_max_hyst 40
 
 
     # Used for Athlon diode, ignore for P4S333
     label temp4 "CPU Temp (AMD)"
-    #set temp4_over 60
-    #set temp4_hyst 50
+    #set temp4_max      60
+    #set temp4_max_hyst 50
     #ignore temp4
 
     label fan1 "CPU Fan"
@@ -2334,11 +2237,6 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
 #   label fan3   "Fan3"
 #   label fan4   "Fan4"
 
-# PWM Outputs
-   label pwm1   "CPU_PWM"
-   label pwm2   "Fan2_PWM"
-   label pwm3   "Fan3_PWM"
-
 # Voltage scaling is done on-chip.  No 'compute' directive
 # should be necessary.  If in0 has external scaling set
 # it here.
@@ -2347,9 +2245,7 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
 
 # Adjust fans speeds for actual pulses per rev
 #   compute fan1  @ * 2,  @ / 2    # 1 pulse per rev
-#   set fan1_ppr  1                # ADM1027 or ADT7463
 #   compute fan2  @ / 2,  @ * 2    # 4 pulse per rev
-#   set fan2_ppr  4                # ADM1027 or ADT7463
 
 # Ignore fans you (or your motherboard) don't have
 #   ignore fan2
@@ -2359,8 +2255,8 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
 # Set voltage limits
 #   set in0_min  1.5 * 0.95
 #   set in0_max  1.5 * 1.05
-#   set in1_min  vid * 0.95
-#   set in1_max  vid * 1.05
+#   set in1_min  cpu0_vid * 0.95
+#   set in1_max  cpu0_vid * 1.05
 #   set in2_min  3.3 * 0.95
 #   set in2_max  3.3 * 1.05
 #   set in3_min  5.0 * 0.95
@@ -2512,18 +2408,16 @@ chip "w83l785ts-*"
 
 chip "lm92-*"
 
-   label temp "CPU Temp"
+   label temp1 "CPU Temp"
 
 # Change limits as you see fit
-#   set temp_low 14
-#   set temp_high 60
-#   set temp_crit 72
-# Hysteresis is computed from critical limit for Linux 2.6,
-# and from high limit for Linux 2.4. That might change in the future.
-# Whatever, the same relative hysteresis is used for all of low, high
+#   set temp1_min 14
+#   set temp1_max 60
+#   set temp1_crit 72
+# Hysteresis is computed from critical limit
+# The same relative hysteresis is used for all of low, high
 # and critical limits.
-#   set temp_hyst 70 # Linux 2.6
-#   set temp_hyst 58 # Linux 2.4
+#   set temp1_crit_hyst 70
 
 
 # Winbond W83627EHF configuration originally contributed by Leon Moonen
@@ -2572,10 +2466,10 @@ chip "w83627ehf-*" "w83627dhg-*"
    label temp3     "AUX Temp"
    
 #  ignore temp3
-#  set temp1_over  45
-#  set temp1_hyst  40
-#  set temp2_over  45
-#  set temp2_hyst  40
+#  set temp1_max       45
+#  set temp1_max_hyst  40
+#  set temp2_max       45
+#  set temp2_max_hyst  40
 
 
 # Fintek F71805F/FG configuration
@@ -2637,12 +2531,12 @@ chip "f71805f-*"
    label temp2 "Sys Temp"
    label temp3 "Aux Temp"
 
-   #set temp1_max   60
-   #set temp1_hyst  58
-   #set temp2_max   50
-   #set temp2_hyst  48
-   #set temp3_max   50
-   #set temp3_hyst  48
+   #set temp1_max       60
+   #set temp1_max_hyst  58
+   #set temp2_max       50
+   #set temp2_max_hyst  48
+   #set temp3_max       50
+   #set temp3_max_hyst  48
 
 
 # Abit Uguru sensor part configuration.
@@ -2737,13 +2631,6 @@ chip "dme1737-*"
    label fan4   "Fan4"
    label fan5   "Fan5"
    label fan6   "Fan6"
-
-# PWM Outputs
-   label pwm1   "CPU_PWM"
-   label pwm2   "Fan2_PWM"
-   label pwm3   "Fan3_PWM"
-   label pwm5   "Fan5_PWM"
-   label pwm6   "Fan6_PWM"
 
 # Set voltage limits
 #   set in0_min   5.0 * 0.95
