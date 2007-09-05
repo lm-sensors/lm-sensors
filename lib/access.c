@@ -92,15 +92,11 @@ sensors_for_all_config_chips(const sensors_chip_name *name,
 const sensors_chip_feature *sensors_lookup_feature_nr(const sensors_chip_name *chip,
 						      int feature)
 {
-	int i, j;
-	const sensors_chip_feature *features;
+	int i;
 
 	for (i = 0; i < sensors_proc_chips_count; i++)
 		if (sensors_match_chip(&sensors_proc_chips[i].chip, chip)) {
-			features = sensors_proc_chips[i].feature;
-			for (j = 0; features[j].data.name; j++)
-				if (features[j].data.number == feature)
-					return features + j;
+			return sensors_proc_chips[i].feature + feature;
 		}
 	return NULL;
 }

@@ -178,6 +178,21 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		}
 	}
 
+	/* Renumber the features linearly, so that feature number N is at
+	   position N in the array. This allows for O(1) look-ups. */
+	for (i = 0; i < fnum; i++) {
+		int j, old;
+
+		old = dyn_features[i].data.number;
+		dyn_features[i].data.number = i;
+		for (j = i + 1;
+		     j < fnum && dyn_features[j].data.mapping != SENSORS_NO_MAPPING;
+		     j++) {
+			if (dyn_features[j].data.mapping == old)
+				dyn_features[j].data.mapping = i;
+		}
+	}
+
 	chip->feature = dyn_features;
 
 exit_free:
