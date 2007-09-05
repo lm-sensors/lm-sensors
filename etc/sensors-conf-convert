@@ -357,7 +357,9 @@ BEGIN
 			qr/\bfan\d_(max|safe)\b/,
 		],
 	);
+}
 
+if ($. == 1) {
 	print "# Converted by sensors-conf-convert on ".localtime()."\n";
 }
 
