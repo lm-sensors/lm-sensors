@@ -26,6 +26,7 @@
 #include "conf.h"
 #include "sysfs.h"
 #include "scanner.h"
+#include "init.h"
 
 int sensors_init(FILE *input)
 {

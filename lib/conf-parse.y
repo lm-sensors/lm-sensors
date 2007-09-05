@@ -29,6 +29,7 @@
 #include "error.h"
 #include "conf.h"
 #include "access.h"
+#include "init.h"
 
 /* These two functions are defined in conf-lex.l */
 extern int sensors_yylex(void);
@@ -37,8 +38,6 @@ extern int sensors_yylineno;
 
 static void sensors_yyerror(const char *err);
 static sensors_expr *malloc_expr(void);
-/* free_expr is defined in init.c */
-void free_expr(sensors_expr *expr);
 
 static sensors_chip *current_chip = NULL;
 
