@@ -131,12 +131,9 @@ typedef struct sensors_bus {
      fan_div)
    flags is a bitfield, its value is a combination of SENSORS_MODE_R (readable),
      SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING (affected by the
-     computation rules of the main feature).
-   scaling is the number of decimal points to scale by.
-     Divide the read value by 10**scaling to get the real value. */
+     computation rules of the main feature). */
 typedef struct sensors_chip_feature {
 	sensors_feature_data data;
-	int scaling;
 } sensors_chip_feature;
 
 /* Internal data about all features of a type of chip */

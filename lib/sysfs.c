@@ -48,16 +48,16 @@ int get_type_scaling(int type)
 	switch (type & 0xFF10) {
 	case SENSORS_FEATURE_IN:
 	case SENSORS_FEATURE_TEMP:
-		return 3;
+		return 1000;
 	case SENSORS_FEATURE_FAN:
-		return 0;
+		return 1;
 	}
 
 	switch (type) {
 	case SENSORS_FEATURE_VID:
-		return 3;
+		return 1000;
 	default:
-		return 0;
+		return 1;
 	}
 }
 
@@ -154,8 +154,6 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			feature.data.flags |= SENSORS_MODE_R;
 		if (attr->method & SYSFS_METHOD_STORE)
 			feature.data.flags |= SENSORS_MODE_W;
-
-		feature.scaling = get_type_scaling(type);
 
 		features[i] = feature;
 		fnum++;
@@ -422,7 +420,6 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name, int feature,
 			    double *value)
 {
 	const sensors_chip_feature *the_feature;
-	int mag;
 	char n[NAME_MAX];
 	FILE *f;
 	const char *suffix = "";
@@ -443,8 +440,7 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name, int feature,
 		fclose(f);
 		if (res != 1)
 			return -SENSORS_ERR_PROC;
-		for (mag = the_feature->scaling; mag > 0; mag --)
-			*value /= 10.0;
+		*value /= get_type_scaling(the_feature->data.type);
 	} else
 		return -SENSORS_ERR_PROC;
 
@@ -455,7 +451,6 @@ int sensors_write_sysfs_attr(const sensors_chip_name *name, int feature,
 			     double value)
 {
 	const sensors_chip_feature *the_feature;
-	int mag;
 	char n[NAME_MAX];
 	FILE *f;
 	const char *suffix = "";
@@ -472,8 +467,7 @@ int sensors_write_sysfs_attr(const sensors_chip_name *name, int feature,
 	snprintf(n, NAME_MAX, "%s/%s%s", name->path, the_feature->data.name,
 		 suffix);
 	if ((f = fopen(n, "w"))) {
-		for (mag = the_feature->scaling; mag > 0; mag --)
-			value *= 10.0;
+		value *= get_type_scaling(the_feature->data.type);
 		fprintf(f, "%d", (int) value);
 		fclose(f);
 	} else
