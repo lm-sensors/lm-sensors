@@ -137,7 +137,6 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		}
 
 		/* fill in the other feature members */
-		feature.data.number = i;
 		feature.data.type = type;
 
 		if ((type & 0x00FF) == 0) {
@@ -145,7 +144,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			feature.data.mapping = SENSORS_NO_MAPPING;
 		} else {
 			/* sub feature */
-			feature.data.mapping = i - i % (MAX_SUB_FEATURES * 2);
+			/* The mapping is set below after numbering */
 			if (!(type & 0x10))
 				feature.data.flags |= SENSORS_COMPUTE_MAPPING;
 		}
@@ -177,17 +176,18 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		}
 	}
 
-	/* Renumber the features linearly, so that feature number N is at
+	/* Number the features linearly, so that feature number N is at
 	   position N in the array. This allows for O(1) look-ups. */
 	for (i = 0; i < fnum; i++) {
-		int j, old;
+		int j;
 
-		old = dyn_features[i].data.number;
 		dyn_features[i].data.number = i;
-		for (j = i + 1;
-		     j < fnum && dyn_features[j].data.mapping != SENSORS_NO_MAPPING;
-		     j++) {
-			if (dyn_features[j].data.mapping == old)
+		if (dyn_features[i].data.mapping == SENSORS_NO_MAPPING) {
+			/* Main feature, set the mapping field of all its
+			   subfeatures */
+			for (j = i + 1; j < fnum &&
+			     dyn_features[j].data.mapping != SENSORS_NO_MAPPING;
+			     j++)
 				dyn_features[j].data.mapping = i;
 		}
 	}
