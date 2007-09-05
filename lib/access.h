@@ -34,6 +34,4 @@ const sensors_chip_feature *sensors_lookup_feature_nr(const sensors_chip_name *c
    if there are wildcards. */
 int sensors_chip_name_has_wildcards(const sensors_chip_name *chip);
 
-sensors_feature_type sensors_feature_get_type(const char *name, int *nr);
-
 #endif /* def LIB_SENSORS_ACCESS_H */

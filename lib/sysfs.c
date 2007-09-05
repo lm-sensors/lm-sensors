@@ -64,6 +64,97 @@ int get_type_scaling(int type)
 	}
 }
 
+/* Static mappings for use by sensors_feature_get_type() */
+struct feature_subtype_match
+{
+	const char *name;
+	sensors_feature_type type;
+};
+
+struct feature_type_match
+{
+	const char *name;
+	const struct feature_subtype_match *submatches;
+};
+
+static const struct feature_subtype_match temp_matches[] = {
+	{ "input", SENSORS_FEATURE_TEMP },
+	{ "max", SENSORS_FEATURE_TEMP_MAX },
+	{ "max_hyst", SENSORS_FEATURE_TEMP_MAX_HYST },
+	{ "min", SENSORS_FEATURE_TEMP_MIN },
+	{ "crit", SENSORS_FEATURE_TEMP_CRIT },
+	{ "crit_hyst", SENSORS_FEATURE_TEMP_CRIT_HYST },
+	{ "alarm", SENSORS_FEATURE_TEMP_ALARM },
+	{ "min_alarm", SENSORS_FEATURE_TEMP_MIN_ALARM },
+	{ "max_alarm", SENSORS_FEATURE_TEMP_MAX_ALARM },
+	{ "crit_alarm", SENSORS_FEATURE_TEMP_CRIT_ALARM },
+	{ "fault", SENSORS_FEATURE_TEMP_FAULT },
+	{ "type", SENSORS_FEATURE_TEMP_TYPE },
+	{ "offset", SENSORS_FEATURE_TEMP_OFFSET },
+	{ NULL, 0 }
+};
+
+static const struct feature_subtype_match in_matches[] = {
+	{ "input", SENSORS_FEATURE_IN },
+	{ "min", SENSORS_FEATURE_IN_MIN },
+	{ "max", SENSORS_FEATURE_IN_MAX },
+	{ "alarm", SENSORS_FEATURE_IN_ALARM },
+	{ "min_alarm", SENSORS_FEATURE_IN_MIN_ALARM },
+	{ "max_alarm", SENSORS_FEATURE_IN_MAX_ALARM },
+	{ NULL, 0 }
+};
+
+static const struct feature_subtype_match fan_matches[] = {
+	{ "input", SENSORS_FEATURE_FAN },
+	{ "min", SENSORS_FEATURE_FAN_MIN },
+	{ "div", SENSORS_FEATURE_FAN_DIV },
+	{ "alarm", SENSORS_FEATURE_FAN_ALARM },
+	{ "fault", SENSORS_FEATURE_FAN_FAULT },
+	{ NULL, 0 }
+};
+
+static const struct feature_subtype_match cpu_matches[] = {
+	{ "vid", SENSORS_FEATURE_VID },
+	{ NULL, 0 }
+};
+
+static struct feature_type_match matches[] = {
+	{ "temp%d%c", temp_matches },
+	{ "in%d%c", in_matches },
+	{ "fan%d%c", fan_matches },
+	{ "cpu%d%c", cpu_matches },
+};
+
+/* Return the feature type and channel number based on the feature name */
+static
+sensors_feature_type sensors_feature_get_type(const char *name, int *nr)
+{
+	char c;
+	int i, count;
+	const struct feature_subtype_match *submatches;
+
+	/* Special case */
+	if (!strcmp(name, "beep_enable")) {
+		*nr = 0;
+		return SENSORS_FEATURE_BEEP_ENABLE;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(matches); i++)
+		if ((count = sscanf(name, matches[i].name, nr, &c)))
+			break;
+
+	if (i == ARRAY_SIZE(matches) || count != 2 || c != '_')
+		return SENSORS_FEATURE_UNKNOWN;  /* no match */
+
+	submatches = matches[i].submatches;
+	name = strchr(name + 3, '_') + 1;
+	for (i = 0; submatches[i].name != NULL; i++)
+		if (!strcmp(name, submatches[i].name))
+			return submatches[i].type;
+
+	return SENSORS_FEATURE_UNKNOWN;
+}
+
 static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 				     struct sysfs_device *sysdir)
 {
