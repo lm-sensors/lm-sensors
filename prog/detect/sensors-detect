@@ -5449,11 +5449,7 @@ sub generate_modprobes
   my ($chip,$detection,$nr,$i,@optionlist,@probelist,$driver,$isa,$adap);
   my $ipmi = 0;
   my $modprobes = "";
-  my $configfile = "";
-
-  # These are always needed
-  $configfile .= "# I2C module options\n";
-  $configfile .= "alias char-major-89 i2c-dev\n";
+  my $configfile;
 
   # Collect all adapters used
   $nr = 0;
@@ -5564,6 +5560,7 @@ sub generate_modprobes
     }
 
     next if not (@probelist or @optionlist);
+    $configfile = "# hwmon module options\n" unless defined $configfile;
     $configfile .= "options $chip->{driver}";
     $configfile .= sprintf " ignore=%d,0x%02x",shift @optionlist, 
                                                shift @optionlist
@@ -5776,11 +5773,13 @@ sub main
      
   print "\n";
   my ($modprobes, $configfile) = generate_modprobes 1;	# 1 == prefer ISA
-  print "To make the sensors modules behave correctly, add these lines to\n".
-        "$modules_conf:\n\n";
-  print "#----cut here----\n".
-        $configfile.
-        "#----cut here----\n\n";
+  if (defined $configfile) {
+    print "To make the sensors modules behave correctly, add these lines to\n".
+          "$modules_conf:\n\n";
+    print "#----cut here----\n".
+          $configfile.
+          "#----cut here----\n\n";
+  }
 
   print "To load everything that is needed, add this to some /etc/rc* file:\n\n";
   print "#----cut here----\n".
