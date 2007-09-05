@@ -59,6 +59,7 @@ static void print_long_help(void)
 	     "  -s, --set             Execute `set' statements (root only)\n"
 	     "  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n"
 	     "  -A, --no-adapter      Do not show adapter for each chip\n"
+	     "      --bus-list        Generate bus statements for sensors.conf\n"
 	     "  -u                    Raw output (debugging only)\n"
 	     "  -v, --version         Display the program version\n"
 	     "\n"
@@ -207,9 +208,35 @@ static int do_the_real_work(const sensors_chip_name *match, int *error)
 	return cnt;
 }
 
+/* List the buses in a format suitable for sensors.conf. We only list
+   bus types for which bus statements are actually useful and supported.
+   Known bug: i2c buses with number >= 32 or 64 could be listed several
+   times. Very unlikely to ever happen, though. */
+static void print_bus_list(void)
+{
+	const sensors_chip_name *chip;
+	int chip_nr;
+	unsigned long seen_i2c = 0;
+
+	chip_nr = 0;
+	while ((chip = sensors_get_detected_chips(NULL, &chip_nr))) {
+		switch (chip->bus.type) {
+		case SENSORS_BUS_TYPE_I2C:
+			if (chip->bus.nr < (int)sizeof(unsigned long) * 8) {
+				if (seen_i2c & (1 << chip->bus.nr))
+					break;
+				seen_i2c |= 1 << chip->bus.nr;
+			}
+			printf("bus \"i2c-%d\" \"%s\"\n", chip->bus.nr,
+			       sensors_get_adapter_name(&chip->bus));
+			break;
+		}
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	int c, res, i, error;
+	int c, res, i, error, do_bus_list;
 	const char *config_file_name = DEFAULT_CONFIG_FILE;
 
 	struct option long_opts[] =  {
@@ -219,6 +246,7 @@ int main(int argc, char *argv[])
 		{ "fahrenheit", no_argument, NULL, 'f' },
 		{ "no-adapter", no_argument, NULL, 'A' },
 		{ "config-file", required_argument, NULL, 'c' },
+		{ "bus-list", no_argument, NULL, 'B' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -226,6 +254,7 @@ int main(int argc, char *argv[])
 
 	do_raw = 0;
 	do_sets = 0;
+	do_bus_list = 0;
 	hide_adapter = 0;
 	while (1) {
 		c = getopt_long(argc, argv, "hsvfAc:u", long_opts, NULL);
@@ -257,6 +286,9 @@ int main(int argc, char *argv[])
 		case 'u':
 			do_raw = 1;
 			break;
+		case 'B':
+			do_bus_list = 1;
+			break;
 		default:
 			fprintf(stderr,
 				"Internal error while parsing options!\n");
@@ -271,7 +303,9 @@ int main(int argc, char *argv[])
 	/* build the degrees string */
 	set_degstr();
 
-	if (optind == argc) { /* No chip name on command line */
+	if (do_bus_list) {
+		print_bus_list();
+	} else if (optind == argc) { /* No chip name on command line */
 		if (!do_the_real_work(NULL, &error)) {
 			fprintf(stderr,
 				"No sensors found!\n"

@@ -237,9 +237,7 @@
 #
 #	chip "lm75-i2c-0-*"
 #
-# You should really use the output of /proc/bus/chips to generate bus lines,
-# because one mistyped characted will inhibit the match. Wildcards are not
-# yet supported; spaces at the end are ignored, though.
+# You can use "sensors --bus-list" to generate bus lines for your system.
 #
 #
 # BEEPS

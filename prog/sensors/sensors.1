@@ -22,7 +22,7 @@
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
-.TH sensors 1  "August 2007" "lm-sensors 3" "Linux User's Manual"
+.TH sensors 1  "September 2007" "lm-sensors 3" "Linux User's Manual"
 .SH NAME
 sensors \- print sensors information
 .SH SYNOPSIS
@@ -33,10 +33,10 @@ sensors \- print sensors information
 .B ]
 .br
 .B sensors -s [
-.I options
-.B ] [
 .I chips
 .B ]
+.br
+.B sensors --bus-list
 
 .SH DESCRIPTION
 .B sensors
@@ -44,6 +44,9 @@ is used to show the current readings of all sensor chips.
 .br
 .B sensors -s
 is used to set all limits as specified in the configuration file.
+.br
+.B sensors --bus-list
+is used to generate bus statements suitable for the configuration file.
 
 .SH OPTIONS
 .IP "-c config-file"
@@ -64,6 +67,12 @@ Raw output. This mode is only meant for debugging.
 Print the program version and exit.
 .IP -f
 Print the temperatures in degrees Fahrenheit instead of Celsius.
+.IP --bus-list
+Generate bus statements suitable for using in sensors.conf. Such bus statements
+are only needed if you have several chips sharing the same address on different
+buses of the same type. As bus numbers are usually not guaranteed to be stable
+over reboots, these statements let you refer to each bus by its name rather
+than numbers.
 .SH FILES
 .I /etc/sensors.conf
 .RS
