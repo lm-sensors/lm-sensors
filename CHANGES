@@ -28,6 +28,7 @@ SVN HEAD
   Makefile: Drop the package and version targets
   Man pages: Drop "conforming to" sections
   Man page sensors.conf.5: Update the chip statement section
+  Program config/grab_busses.sh: Delete, obsolete
   Programs doc/*: Delete, obsolete
   Program etc/sensors-conf-convert: New
   Programs i2cdump, i2cget, i2cset: Do not force the slave address by default

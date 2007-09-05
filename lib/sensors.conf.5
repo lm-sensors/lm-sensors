@@ -23,7 +23,7 @@
 .\"
 .\" References consulted:
 .\"     sensors.conf.eg by Frodo Looijaard
-.TH sensors.conf 5  "June 2007" "lm-sensors 3" "Linux Programmer's Manual"
+.TH sensors.conf 5  "September 2007" "lm-sensors 3" "Linux User's Manual"
 .SH NAME
 sensors.conf \- libsensors configuration file
 
@@ -141,11 +141,7 @@ always be quoted.
 
 The second argument is the adapter name, it must match exactly the
 adapter name as it appears in
-.I /proc/bus/i2c
-(2.4 kernel)
-or
-.I /sys/class/i2c-adapter/i2c-*/device/name
-(2.6 kernel).
+.IR /sys/class/i2c-adapter/i2c-*/name .
 It should always be quoted as well as it will most certainly contain
 spaces or dashes.
 
@@ -158,9 +154,9 @@ all
 .I bus
 statements together at the top of your configuration file.
 
-The program
-.I prog/config/grab_busses.sh
-in the source distribution can help you generate these lines.
+Running
+.B sensors --bus-list
+will generate these lines for you.
 
 .SS CHIP STATEMENT
 

@@ -9,12 +9,6 @@ For more elaborate programs (for example, GUI sensor displays),
 see useful_addresses.html.
 
 
-* prog/config/grab_busses.sh (written in bash and awk, not installed)
-  This program helps you generate the `bus' statements for your configuration
-  file. It read /proc/bus/i2c (or the file specified on the command-line),
-  and prints to stdout `bus' statements reflecting the currently detected
-  adapters.
-
 * prog/daemon/healthd.sh (written in bash, not installed)
   An example of a very simple hardware health monitoring daemon.
 
