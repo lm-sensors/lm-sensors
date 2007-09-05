@@ -84,21 +84,12 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		sensors_fatal_error(__FUNCTION__, "Out of memory");
 
 	dlist_for_each_data(attrs, attr, struct sysfs_attribute) {
-		sensors_chip_feature feature;
 		name = attr->name;
 		int nr;
 
 		type = sensors_feature_get_type(name, &nr);
 		if (type == SENSORS_FEATURE_UNKNOWN)
 			continue;
-
-		memset(&feature, 0, sizeof(sensors_chip_feature));
-		/* check for _input extension and remove */
-		i = strlen(name);
-		if (i > 6 && !strcmp(name + i - 6, "_input"))
-			feature.data.name = strndup(name, i-6);
-		else
-			feature.data.name = strdup(name);
 
 		/* Adjust the channel number */
 		switch (type & 0xFF00) {
@@ -113,7 +104,6 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			fprintf(stderr, "libsensors error, more sensors of one"
 				" type then MAX_SENSORS_PER_TYPE, ignoring "
 				"feature: %s\n", name);
-			free(feature.data.name);
 			continue;
 		}
 
@@ -132,29 +122,34 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			fprintf(stderr, "libsensors error, trying to add dupli"
 				"cate feature: %s to dynamic feature table\n",
 				name);
-			free(feature.data.name);
 			continue;
 		}
 
-		/* fill in the other feature members */
-		feature.data.type = type;
+		/* fill in the feature members */
+		features[i].data.type = type;
+
+		/* check for _input extension and remove */
+		nr = strlen(name);
+		if (nr > 6 && !strcmp(name + nr - 6, "_input"))
+			features[i].data.name = strndup(name, nr - 6);
+		else
+			features[i].data.name = strdup(name);
 
 		if ((type & 0x00FF) == 0) {
 			/* main feature */
-			feature.data.mapping = SENSORS_NO_MAPPING;
+			features[i].data.mapping = SENSORS_NO_MAPPING;
 		} else {
 			/* sub feature */
 			/* The mapping is set below after numbering */
 			if (!(type & 0x10))
-				feature.data.flags |= SENSORS_COMPUTE_MAPPING;
+				features[i].data.flags |= SENSORS_COMPUTE_MAPPING;
 		}
 
 		if (attr->method & SYSFS_METHOD_SHOW)
-			feature.data.flags |= SENSORS_MODE_R;
+			features[i].data.flags |= SENSORS_MODE_R;
 		if (attr->method & SYSFS_METHOD_STORE)
-			feature.data.flags |= SENSORS_MODE_W;
+			features[i].data.flags |= SENSORS_MODE_W;
 
-		features[i] = feature;
 		fnum++;
 	}
 
