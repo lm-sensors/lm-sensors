@@ -113,14 +113,13 @@ This structure is used when you want to get all features of a specific chip.
 .br
   int mapping;
 .br
-  int compute_mapping;
-.br
   unsigned int flags;
 .br
 } sensors_feature_data;\fP
 .br
 The flags field is a bitfield, its value is a combination of
-SENSORS_MODE_R (readable) and SENSORS_MODE_W (writable).
+SENSORS_MODE_R (readable), SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING
+(affected by the computation rules of the main feature).
 
 \fBconst sensors_feature_data *sensors_get_all_features
       (const sensors_chip_name *name, int *nr);\fP

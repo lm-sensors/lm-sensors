@@ -113,8 +113,9 @@ const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
 						    *match, int *nr);
 
 /* These defines are used in the flags field of sensors_feature_data */
-#define SENSORS_MODE_R 1
-#define SENSORS_MODE_W 2
+#define SENSORS_MODE_R			1
+#define SENSORS_MODE_W			2
+#define SENSORS_COMPUTE_MAPPING		4
 
 /* This define is used in the mapping field of sensors_feature_data if no
    mapping is available */
@@ -122,7 +123,7 @@ const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
 
 /* This enum contains some "magic" used by sensors_read_dynamic_chip() from
    lib/sysfs.c. All the sensor types (in, fan, temp, vid) are a multiple of
-   0x100 apart, and sensor features which should not have a compute_mapping to
+   0x100 apart, and sensor features which should not have a compute mapping to
    the _input feature start at 0x?10. */
 typedef enum sensors_feature_type {
 	SENSORS_FEATURE_IN = 0x000,
@@ -163,7 +164,6 @@ typedef struct sensors_feature_data {
 	int number;
 	sensors_feature_type type;
 	int mapping;
-	int compute_mapping;
 	unsigned int flags;
 } sensors_feature_data;
 

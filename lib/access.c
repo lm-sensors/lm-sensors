@@ -190,7 +190,7 @@ sensors_get_label_exit:
 
 /* Looks up whether a feature should be ignored. Returns
    1 if it should be ignored, 0 if not. This function takes
-   logical mappings into account. */
+   mappings into account. */
 static int sensors_get_ignored(const sensors_chip_name *name,
 			       const sensors_chip_feature *feature)
 {
@@ -232,11 +232,11 @@ int sensors_get_value(const sensors_chip_name *name, int feature,
 	if (!(main_feature = sensors_lookup_feature_nr(name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 
-	if (main_feature->data.compute_mapping == SENSORS_NO_MAPPING)
-		alt_feature = NULL;
-	else
+	if (main_feature->data.flags & SENSORS_COMPUTE_MAPPING)
 		alt_feature = sensors_lookup_feature_nr(name,
-					main_feature->data.compute_mapping);
+					main_feature->data.mapping);
+	else
+		alt_feature = NULL;
 
 	if (!(main_feature->data.flags & SENSORS_MODE_R))
 		return -SENSORS_ERR_ACCESS_R;
@@ -279,11 +279,11 @@ int sensors_set_value(const sensors_chip_name *name, int feature,
 	if (!(main_feature = sensors_lookup_feature_nr(name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 
-	if (main_feature->data.compute_mapping == SENSORS_NO_MAPPING)
-		alt_feature = NULL;
-	else
+	if (main_feature->data.flags & SENSORS_COMPUTE_MAPPING)
 		alt_feature = sensors_lookup_feature_nr(name,
-					main_feature->data.compute_mapping);
+					main_feature->data.mapping);
+	else
+		alt_feature = NULL;
 
 	if (!(main_feature->data.flags & SENSORS_MODE_W))
 		return -SENSORS_ERR_ACCESS_W;

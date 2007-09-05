@@ -125,15 +125,13 @@ typedef struct sensors_bus {
      files and through user functions);
    number is the internal feature number, used in many functions to refer
      to this feature
-   logical_mapping is either SENSORS_NO_MAPPING if this is feature is the
+   mapping is either SENSORS_NO_MAPPING if this is feature is the
      main element of category; or it is the number of a feature with which
      this feature is logically grouped (a group could be fan, fan_max and
      fan_div)
-   compute_mapping is like logical_mapping, only it refers to another
-     feature whose compute line will be inherited (a group could be fan and
-     fan_max, but not fan_div)
-   flags is a bitfield, its value is a combination of SENSORS_MODE_R (readable)
-     and SENSORS_MODE_W (writable).
+   flags is a bitfield, its value is a combination of SENSORS_MODE_R (readable),
+     SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING (affected by the
+     computation rules of the main feature).
    scaling is the number of decimal points to scale by.
      Divide the read value by 10**scaling to get the real value. */
 typedef struct sensors_chip_feature {

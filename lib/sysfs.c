@@ -142,14 +142,11 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		if ((type & 0x00FF) == 0) {
 			/* main feature */
 			feature.data.mapping = SENSORS_NO_MAPPING;
-			feature.data.compute_mapping = SENSORS_NO_MAPPING;
-		} else if (type & 0x10) {
-			/* sub feature without compute mapping */
-			feature.data.mapping = i - i % MAX_SUB_FEATURES;
-			feature.data.compute_mapping = SENSORS_NO_MAPPING;
 		} else {
+			/* sub feature */
 			feature.data.mapping = i - i % MAX_SUB_FEATURES;
-			feature.data.compute_mapping = feature.data.mapping;
+			if (!(type & 0x10))
+				feature.data.flags |= SENSORS_COMPUTE_MAPPING;
 		}
 
 		if (attr->method & SYSFS_METHOD_SHOW)
