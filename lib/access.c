@@ -521,6 +521,7 @@ static const struct feature_subtype_match temp_matches[] = {
 	{ "crit_alarm", SENSORS_FEATURE_TEMP_CRIT_ALARM },
 	{ "fault", SENSORS_FEATURE_TEMP_FAULT },
 	{ "type", SENSORS_FEATURE_TEMP_TYPE },
+	{ "offset", SENSORS_FEATURE_TEMP_OFFSET },
 	{ NULL, 0 }
 };
 

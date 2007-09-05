@@ -1,6 +1,7 @@
 /*
     sysfs.c - Part of libsensors, a library for reading Linux sensor data
     Copyright (c) 2005 Mark M. Hoffman <mhoffman@lightlink.com>
+    Copyright (C) 2007 Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +38,7 @@
 char sensors_sysfs_mount[NAME_MAX];
 
 #define MAX_SENSORS_PER_TYPE	20
-#define MAX_SUB_FEATURES	6
+#define MAX_SUB_FEATURES	7
 /* Room for all 3 types (in, fan, temp) with all their subfeatures + VID
    + misc features */
 #define ALL_POSSIBLE_FEATURES	(MAX_SENSORS_PER_TYPE * MAX_SUB_FEATURES * 6 \
@@ -56,6 +57,7 @@ int get_type_scaling(int type)
 
 	switch (type) {
 	case SENSORS_FEATURE_VID:
+	case SENSORS_FEATURE_TEMP_OFFSET:
 		return 1000;
 	default:
 		return 1;
