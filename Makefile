@@ -141,7 +141,7 @@ endif
 ifeq ($(WARN),1)
 ALL_CFLAGS += -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
             -Wcast-align -Wwrite-strings -Wnested-externs -Winline -W \
-            -Wmissing-prototypes -Wundef
+            -Wmissing-prototypes
 endif
 
 ALL_CPPFLAGS += $(CPPFLAGS)
