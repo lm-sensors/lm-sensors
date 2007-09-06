@@ -2274,9 +2274,10 @@
 #define SENSORS_CORETEMP_TEMP1_CRIT		0x02 /* R */
 #define SENSORS_CORETEMP_TEMP1_CRIT_ALARM	0x03 /* R */
 
-/* DME1737 */
+/* DME1737 chips */
 
 #define SENSORS_DME1737_PREFIX "dme1737"
+#define SENSORS_SCH311X_PREFIX "sch311x"
 
 /* in n from 0 to 6 */
 #define SENSORS_DME1737_IN(n)			(0x01 + (n)) /* R */

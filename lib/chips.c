@@ -6320,6 +6320,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_K8TEMP_PREFIX, k8temp_features },
  { SENSORS_CORETEMP_PREFIX, coretemp_features },
  { SENSORS_DME1737_PREFIX, dme1737_features },
+ { SENSORS_SCH311X_PREFIX, dme1737_features },
  { SENSORS_APPLESMC_PREFIX, applesmc_features },
  { SENSORS_F71882FG_PREFIX, f71882fg_features },
  { 0 }
