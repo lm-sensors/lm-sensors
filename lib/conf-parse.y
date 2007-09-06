@@ -30,11 +30,6 @@
 #include "conf.h"
 #include "access.h"
 
-/* These two functions are defined in conf-lex.l */
-extern int sensors_yylex(void);
-extern char sensors_lex_error[];
-extern int sensors_yylineno;
-
 static void sensors_yyerror(const char *err);
 static sensors_expr *malloc_expr(void);
 
