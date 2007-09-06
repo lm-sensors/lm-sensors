@@ -29,6 +29,7 @@
 #include "error.h"
 #include "conf.h"
 #include "access.h"
+#include "init.h"
 
 static void sensors_yyerror(const char *err);
 static sensors_expr *malloc_expr(void);
@@ -71,15 +72,6 @@ static sensors_chip *current_chip = NULL;
                                                   &(list).fits_count,\
                                                   &(list).fits_max, \
 		                                  sizeof(sensors_chip_name));
-
-/* YYERROR can only be called in rules, not in other functions, so this must
-   be a macro */
-#define check_current_chip()\
-  do { if (! current_chip) {\
-      sensors_yyerror("Label, Set or Compute statement before first chip statement");\
-      YYERROR;\
-    }\
-  } while (0)
 
 %}
 
@@ -160,7 +152,12 @@ busalgo_statement:	  BUS i2cbus_name adapter_name algorithm_name
 
 label_statement:	  LABEL function_name string
 			  { sensors_label new_el;
-			    check_current_chip();
+			    if (!current_chip) {
+			      sensors_yyerror("Label statement before first chip statement");
+			      free($2);
+			      free($3);
+			      YYERROR;
+			    }
 			    new_el.lineno = $1;
 			    new_el.name = $2;
 			    new_el.value = $3;
@@ -170,7 +167,12 @@ label_statement:	  LABEL function_name string
 
 set_statement:	  SET function_name expression
 		  { sensors_set new_el;
-		    check_current_chip();
+		    if (!current_chip) {
+		      sensors_yyerror("Set statement before first chip statement");
+		      free($2);
+		      free_expr($3);
+		      YYERROR;
+		    }
 		    new_el.lineno = $1;
 		    new_el.name = $2;
 		    new_el.value = $3;
@@ -180,7 +182,13 @@ set_statement:	  SET function_name expression
 
 compute_statement:	  COMPUTE function_name expression ',' expression
 			  { sensors_compute new_el;
-			    check_current_chip();
+			    if (!current_chip) {
+			      sensors_yyerror("Compute statement before first chip statement");
+			      free($2);
+			      free_expr($3);
+			      free_expr($5);
+			      YYERROR;
+			    }
 			    new_el.lineno = $1;
 			    new_el.name = $2;
 			    new_el.from_proc = $3;
@@ -191,7 +199,11 @@ compute_statement:	  COMPUTE function_name expression ',' expression
 
 ignore_statement:	IGNORE function_name
 			{ sensors_ignore new_el;
-			  check_current_chip();
+			  if (!current_chip) {
+			    sensors_yyerror("Ignore statement before first chip statement");
+			    free($2);
+			    YYERROR;
+			  }
 			  new_el.lineno = $1;
 			  new_el.name = $2;
 			  ignore_add_el(&new_el);

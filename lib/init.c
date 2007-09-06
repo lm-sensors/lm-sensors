@@ -27,6 +27,7 @@
 #include "conf.h"
 #include "sysfs.h"
 #include "scanner.h"
+#include "init.h"
 
 static void free_proc_chips_entry(sensors_proc_chips_entry entry);
 static void free_chip_name(sensors_chip_name name);
@@ -36,7 +37,6 @@ static void free_label(sensors_label label);
 static void free_set(sensors_set set);
 static void free_compute(sensors_compute compute);
 static void free_ignore(sensors_ignore ignore);
-static void free_expr(sensors_expr *expr);
 
 int sensors_init(FILE *input)
 {
