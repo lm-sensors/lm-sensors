@@ -53,7 +53,7 @@
 # These features are defined for each chip in lib/chips.c.
 #
 # Undefined features will be silently ignored in 'label' and 'compute' lines.
-# Undefined features in 'set' lines will result in 'Unknonw feature name'
+# Undefined features in 'set' lines will result in 'Unknown feature name'
 # when running 'sensors -s'.
 #
 # Unfortunately, feature names starting with a number must be in
@@ -374,8 +374,7 @@ chip "lm78-*" "lm78-j-*" "lm79-*" "w83781d-*"
 
 chip "lm75-*"
 
-# Most boards don't need scaling. Following is
-# for the Asus TX97-E. If it doesn't work for you, feel free to complain.
+# Most boards don't need scaling. Following is for the Asus TX97-E.
 #   compute temp @*2.0, @/2.0
 
 # Examples for temperature limits
