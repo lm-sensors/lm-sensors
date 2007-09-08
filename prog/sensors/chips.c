@@ -198,6 +198,22 @@ static void print_chip_temp(const sensors_chip_name *name,
 				s2 = NULL;
 			}
 		}
+	} else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT)) {
+		limit1 = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT);
+		s1 = "crit";
+
+		if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_HYST)) {
+			limit2 = TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_HYST);
+			s2 = "hyst";
+		} else {
+			limit2 = 0;
+			s2 = NULL;
+		}
+
+		if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_CRIT_ALARM) &&
+		    TEMP_FEATURE_VAL(SENSORS_FEATURE_TEMP_CRIT_ALARM))
+			alarm |= 1;
+		crit_displayed = 1;
 	} else {
 		limit1 = limit2 = 0;
 		s1 = s2 = NULL;
