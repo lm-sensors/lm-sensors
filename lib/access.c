@@ -27,6 +27,7 @@
 #include "error.h"
 #include "proc.h"
 #include "general.h"
+#include "sysfs.h"
 
 static int sensors_do_this_chip_sets(sensors_chip_name name);
 
@@ -149,8 +150,6 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
 {
 	const sensors_chip *chip;
 	const sensors_chip_feature *featureptr;
-	char buf[128], path[PATH_MAX];
-	FILE *f;
 	int i;
 
 	*result = NULL;
@@ -166,18 +165,23 @@ int sensors_get_label(sensors_chip_name name, int feature, char **result)
 				goto sensors_get_label_exit;
 			}
 
-	/* No user specified label, check for a _label sysfs file */
-	snprintf(path, PATH_MAX, "%s/%s_label", name.busname,
-		featureptr->data.name);
-	
-	if ((f = fopen(path, "r"))) {
-		i = fread(buf, 1, sizeof(buf) - 1, f);
-		fclose(f);
-		if (i > 0) {
-			/* i - 1 to strip the '\n' at the end */
-			buf[i - 1] = 0;
-			*result = strdup(buf);
-			goto sensors_get_label_exit;
+	if (sensors_found_sysfs) {
+		char buf[128], path[PATH_MAX];
+		FILE *f;
+
+		/* No user specified label, check for a _label sysfs file */
+		snprintf(path, PATH_MAX, "%s/%s_label", name.busname,
+			featureptr->data.name);
+
+		if ((f = fopen(path, "r"))) {
+			i = fread(buf, 1, sizeof(buf) - 1, f);
+			fclose(f);
+			if (i > 0) {
+				/* i - 1 to strip the '\n' at the end */
+				buf[i - 1] = 0;
+				*result = strdup(buf);
+				goto sensors_get_label_exit;
+			}
 		}
 	}
 
