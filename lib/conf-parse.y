@@ -157,7 +157,7 @@ set_statement:	  SET function_name expression
 		    if (!current_chip) {
 		      sensors_yyerror("Set statement before first chip statement");
 		      free($2);
-		      free($3);
+		      free_expr($3);
 		      YYERROR;
 		    }
 		    new_el.lineno = $1;
