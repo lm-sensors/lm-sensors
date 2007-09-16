@@ -141,13 +141,13 @@ endif
 ifeq ($(WARN),1)
 ALL_CFLAGS += -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual \
             -Wcast-align -Wwrite-strings -Wnested-externs -Winline -W \
-            -Wmissing-prototypes
+            -Wmissing-prototypes -Wundef
 endif
 
 ALL_CPPFLAGS += $(CPPFLAGS)
 ALL_CFLAGS += $(CFLAGS)
 
-PROGCPPFLAGS := -DETCDIR="\"$(ETCDIR)\"" $(ALL_CPPFLAGS) -Wundef
+PROGCPPFLAGS := -DETCDIR="\"$(ETCDIR)\"" $(ALL_CPPFLAGS)
 PROGCFLAGS := $(ALL_CFLAGS)
 ARCPPFLAGS := $(ALL_CPPFLAGS)
 ARCFLAGS := $(ALL_CFLAGS)
