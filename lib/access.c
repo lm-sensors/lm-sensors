@@ -39,7 +39,7 @@ static int sensors_match_chip(const sensors_chip_name *chip1,
 {
 	if ((chip1->prefix != SENSORS_CHIP_NAME_PREFIX_ANY) &&
 	    (chip2->prefix != SENSORS_CHIP_NAME_PREFIX_ANY) &&
-	    strcasecmp(chip1->prefix, chip2->prefix))
+	    strcmp(chip1->prefix, chip2->prefix))
 		return 0;
 
 	if ((chip1->bus.type != SENSORS_BUS_TYPE_ANY) &&
@@ -117,7 +117,7 @@ sensors_lookup_feature_name(const sensors_chip_name *chip, const char *feature)
 		if (sensors_match_chip(&sensors_proc_chips[i].chip, chip)) {
 			features = sensors_proc_chips[i].feature;
 			for (j = 0; j < sensors_proc_chips[i].feature_count; j++)
-				if (!strcasecmp(features[j].data.name, feature))
+				if (!strcmp(features[j].data.name, feature))
 					return features + j;
 		}
 	return NULL;
@@ -157,7 +157,7 @@ char *sensors_get_label(const sensors_chip_name *name, int feature)
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->labels_count; i++)
-			if (!strcasecmp(featureptr->data.name, chip->labels[i].name)) {
+			if (!strcmp(featureptr->data.name, chip->labels[i].name)) {
 				label = strdup(chip->labels[i].value);
 				goto sensors_get_label_exit;
 			}
@@ -205,9 +205,9 @@ static int sensors_get_ignored(const sensors_chip_name *name,
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->ignores_count; i++)
-			if (!strcasecmp(feature->data.name, chip->ignores[i].name) ||
+			if (!strcmp(feature->data.name, chip->ignores[i].name) ||
 			    (main_feature_name &&
-			     !strcasecmp(main_feature_name, chip->ignores[i].name)))
+			     !strcmp(main_feature_name, chip->ignores[i].name)))
 				return 1;
 	return 0;
 }
@@ -242,10 +242,10 @@ int sensors_get_value(const sensors_chip_name *name, int feature,
 	for (chip = NULL;
 	     !expr && (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; !final_expr && (i < chip->computes_count); i++) {
-			if (!strcasecmp(main_feature->data.name, chip->computes[i].name)) {
+			if (!strcmp(main_feature->data.name, chip->computes[i].name)) {
 				expr = chip->computes[i].from_proc;
 				final_expr = 1;
-			} else if (alt_feature && !strcasecmp(alt_feature->data.name,
+			} else if (alt_feature && !strcmp(alt_feature->data.name,
 					       chip->computes[i].name)) {
 				expr = chip->computes[i].from_proc;
 			}
@@ -289,10 +289,10 @@ int sensors_set_value(const sensors_chip_name *name, int feature,
 	for (chip = NULL;
 	     !expr && (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; !final_expr && (i < chip->computes_count); i++)
-			if (!strcasecmp(main_feature->data.name, chip->computes[i].name)) {
+			if (!strcmp(main_feature->data.name, chip->computes[i].name)) {
 				expr = chip->computes->to_proc;
 				final_expr = 1;
-			} else if (alt_feature && !strcasecmp(alt_feature->data.name,
+			} else if (alt_feature && !strcmp(alt_feature->data.name,
 					       chip->computes[i].name)) {
 				expr = chip->computes[i].to_proc;
 			}
