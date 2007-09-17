@@ -427,6 +427,8 @@ static struct match matches[] = {
  	{ "sch311x", print_dme1737 },
 	{ "applesmc", print_applesmc },
 	{ "f71882fg", print_f71882fg },
+	{ "thmc50", print_thmc50 },
+	{ "adm1022", print_thmc50 },
 	{ NULL, NULL }
 };
 

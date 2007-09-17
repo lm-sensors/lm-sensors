@@ -6251,6 +6251,55 @@ void print_f71882fg(const sensors_chip_name *name)
     print_f71882fg_temp(name, i);
 }
 
+void print_thmc50(const sensors_chip_name *name)
+{
+  char *label;
+  double cur, hyst, over;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_THMC50_TEMP,
+                                   &label, &valid) &&
+      !sensors_get_feature(*name, SENSORS_THMC50_TEMP, &cur) &&
+      !sensors_get_feature(*name, SENSORS_THMC50_TEMP_HYST, &hyst) &&
+      !sensors_get_feature(*name, SENSORS_THMC50_TEMP_OVER, &over)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, over, hyst, MINMAX, 0, 0);
+      printf("\n");
+    }
+  } else
+    printf("ERROR: Can't get temperature1 data!\n");
+  free(label);
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_THMC50_REMOTE_TEMP,
+                                   &label, &valid) &&
+      !sensors_get_feature(*name, SENSORS_THMC50_REMOTE_TEMP, &cur) &&
+      !sensors_get_feature(*name, SENSORS_THMC50_REMOTE_TEMP_HYST, &hyst) &&
+      !sensors_get_feature(*name, SENSORS_THMC50_REMOTE_TEMP_OVER, &over)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, over, hyst, MINMAX, 0, 0);
+      printf("\n");
+    }
+  } else
+    printf("ERROR: Can't get temperature2 data!\n");
+  free(label);
+
+  if (!sensors_get_label_and_valid(*name, SENSORS_ADM1022_REMOTE_TEMP2,
+                                   &label, &valid) &&
+      !sensors_get_feature(*name, SENSORS_ADM1022_REMOTE_TEMP2, &cur) &&
+      !sensors_get_feature(*name, SENSORS_ADM1022_REMOTE_TEMP2_HYST, &hyst) &&
+      !sensors_get_feature(*name, SENSORS_ADM1022_REMOTE_TEMP2_OVER, &over)) {
+    if (valid) {
+      print_label(label, 10);
+      print_temp_info(cur, over, hyst, MINMAX, 0, 0);
+      printf("\n");
+    }
+  }
+  /* No error if files are missing as it will happen for original thmc50 */
+  free(label);
+}
+
 void print_unknown_chip(const sensors_chip_name *name)
 {
   int a,b,valid;
