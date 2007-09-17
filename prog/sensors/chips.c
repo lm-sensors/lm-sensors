@@ -6016,17 +6016,17 @@ static void print_dme1737_in(const sensors_chip_name *name, int i)
 
   if (!sensors_get_label_and_valid(*name, SENSORS_DME1737_IN(i), &label,
 				   &valid) &&
-      !sensors_get_feature(*name, SENSORS_DME1737_IN(i), &cur) &&
-      !sensors_get_feature(*name, SENSORS_DME1737_IN_MIN(i), &min) &&
-      !sensors_get_feature(*name, SENSORS_DME1737_IN_MAX(i), &max) &&
-      !sensors_get_feature(*name, SENSORS_DME1737_IN_ALARM(i), &alarm)) {
-    if (valid) {
+      valid) {
+    if (!sensors_get_feature(*name, SENSORS_DME1737_IN(i), &cur) &&
+        !sensors_get_feature(*name, SENSORS_DME1737_IN_MIN(i), &min) &&
+        !sensors_get_feature(*name, SENSORS_DME1737_IN_MAX(i), &max) &&
+        !sensors_get_feature(*name, SENSORS_DME1737_IN_ALARM(i), &alarm)) {
       print_label(label, 10);
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)  %s\n",
 	     cur, min, max, alarm ? "ALARM" : "");
+    } else {
+      printf("ERROR: Can't get in%d data!\n", i);
     }
-  } else {
-    printf("ERROR: Can't get in%d data!\n", i);
   }
   free(label);
 }
@@ -6039,18 +6039,18 @@ static void print_dme1737_temp(const sensors_chip_name *name, int i)
 
   if (!sensors_get_label_and_valid(*name, SENSORS_DME1737_TEMP(i), &label,
 				   &valid) &&
-      !sensors_get_feature(*name, SENSORS_DME1737_TEMP(i), &cur) &&
-      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_MIN(i), &min) &&
-      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_MAX(i), &max) &&
-      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_ALARM(i), &alarm) &&
-      !sensors_get_feature(*name, SENSORS_DME1737_TEMP_FAULT(i), &fault)) {
-    if (valid) {
+      valid) {
+    if (!sensors_get_feature(*name, SENSORS_DME1737_TEMP(i), &cur) &&
+        !sensors_get_feature(*name, SENSORS_DME1737_TEMP_MIN(i), &min) &&
+        !sensors_get_feature(*name, SENSORS_DME1737_TEMP_MAX(i), &max) &&
+        !sensors_get_feature(*name, SENSORS_DME1737_TEMP_ALARM(i), &alarm) &&
+        !sensors_get_feature(*name, SENSORS_DME1737_TEMP_FAULT(i), &fault)) {
       print_label(label, 10);
       print_temp_info(cur, max, min, MINMAX, 0, 0);
       printf("%s%s\n", fault ? "FAULT  " : "", alarm ? "ALARM" : "");
+    } else {
+      printf("ERROR: Can't get temp%d data!\n", i);
     }
-  } else {
-    printf("ERROR: Can't get temp%d data!\n", i);
   }
   free(label);
 }
@@ -6071,8 +6071,6 @@ static void print_dme1737_fan(const sensors_chip_name *name, int i)
       printf("%4.0f RPM  (min = %4.0f RPM)  %s\n", 
 	     cur, min, alarm ? "ALARM" : "");
     }
-  } else {
-    printf("ERROR: Can't get fan%d data!\n", i);
   }
   free(label);
 }
@@ -6092,8 +6090,6 @@ static void print_dme1737_pwm(const sensors_chip_name *name, int i)
       print_label(label, 10);
       printf("%4.0f      (enable = %1.0f, freq = %6.0f Hz)\n", cur, enable, freq);
     }
-  } else {
-    printf("ERROR: Can't get pwm%d data!\n", i);
   }
   free(label);
 }
