@@ -25,8 +25,6 @@
 #include <string.h>
 
 #include "sensord.h"
-#include "lib/chips.h"
-#include "kernel/include/sensors.h"
 
 /* TODO: Temp in C/F */
 
