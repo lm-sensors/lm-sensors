@@ -946,8 +946,6 @@ static const FeatureDescriptor maxilife_features[] = {
     { SENSORS_MAXI_CG_FAN2, SENSORS_MAXI_CG_FAN2_MIN, SENSORS_MAXI_CG_FAN2_DIV, -1 } },
   { fmtFans_Maxilife, rrdFans_Maxilife, DataType_rpm, MAXI_ALARM_FAN3, 0,
     { SENSORS_MAXI_CG_FAN3, SENSORS_MAXI_CG_FAN3_MIN, SENSORS_MAXI_CG_FAN3_DIV, -1 } },
-  { fmtMHz_Maxilife, rrdMHz_Maxilife, DataType_mhz, MAXI_ALARM_PLL, 0,
-    { SENSORS_MAXI_CG_PLL, SENSORS_MAXI_CG_PLL_MIN, SENSORS_MAXI_CG_PLL_MAX, -1 } },
   { fmtVolts_Maxilife, rrdVolts_Maxilife, DataType_voltage, MAXI_ALARM_VID1, 0,
     { SENSORS_MAXI_CG_VID1, SENSORS_MAXI_CG_VID1_MIN, SENSORS_MAXI_CG_VID1_MAX, -1 } },
   { fmtVolts_Maxilife, rrdVolts_Maxilife, DataType_voltage, MAXI_ALARM_VID2, 0,

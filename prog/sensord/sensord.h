@@ -82,7 +82,6 @@ typedef enum {
   DataType_voltage = 0,
   DataType_rpm,
   DataType_temperature,
-  DataType_mhz,
   DataType_other = -1
 } DataType;
 

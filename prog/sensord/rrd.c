@@ -203,10 +203,6 @@ rrdGetSensors_DS
         min = "0";
         max = "250";
         break;
-      case DataType_mhz:
-        min = "0";
-        max = "U";
-        break;
       default:
         min = max = "U";
         break;
