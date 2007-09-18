@@ -362,14 +362,14 @@ static void print_chip_fan(const sensors_chip_name *name,
 	print_label(label, label_size);
 	free(label);
 
+	sensors_get_available_features(name, feature, i, has_features,
+				       feature_vals, size, SENSORS_FEATURE_FAN);
+
 	if (FAN_FEATURE(SENSORS_FEATURE_FAN_FAULT) &&
 	    FAN_FEATURE_VAL(SENSORS_FEATURE_FAN_FAULT))
 		printf("   FAULT");
 	else
 		printf("%4.0f RPM", val);
-
-	sensors_get_available_features(name, feature, i, has_features,
-				       feature_vals, size, SENSORS_FEATURE_FAN);
 
 	if (FAN_FEATURE(SENSORS_FEATURE_FAN_MIN) &&
 	    FAN_FEATURE(SENSORS_FEATURE_FAN_DIV))
