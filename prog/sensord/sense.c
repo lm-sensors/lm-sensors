@@ -37,9 +37,9 @@ int
 getRawLabel
 (const sensors_chip_name *name, int feature, const char **label) {
   const sensors_feature_data *rawFeature;
-  int nr1 = 0, nr2 = 0, err = 0;
+  int nr = 0, err = 0;
   do {
-    rawFeature = sensors_get_all_features (name, &nr1, &nr2);
+    rawFeature = sensors_get_all_features (name, &nr);
   } while (rawFeature && (rawFeature->number != feature));
   /* TODO: Ensure labels match RRD construct and are not repeated! */
   if (!rawFeature) {
@@ -65,7 +65,7 @@ idChip
   const char *adapter;
 
   sensorLog (LOG_INFO, "Chip: %s", chipName (chip));
-  adapter = sensors_get_adapter_name (chip->bus);
+  adapter = sensors_get_adapter_name (&chip->bus);
   if (adapter)
     sensorLog (LOG_INFO, "Adapter: %s", adapter);
   
@@ -76,12 +76,12 @@ static int
 readUnknownChip
 (const sensors_chip_name *chip) {
   const sensors_feature_data *sensor;
-  int index0 = 0, index1 = 0;
+  int index0 = 0;
   int ret = 0;
 
   ret = idChip (chip);
 
-  while ((ret == 0) && ((sensor = sensors_get_all_features (chip, &index0, &index1)) != NULL)) {
+  while ((ret == 0) && ((sensor = sensors_get_all_features (chip, &index0)) != NULL)) {
     char *label = NULL;
     double value;
     
