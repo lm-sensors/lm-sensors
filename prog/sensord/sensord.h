@@ -20,8 +20,6 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#define version "0.6.3"
-
 #include "lib/sensors.h"
 
 extern void sensorLog (int priority, const char *fmt, ...);

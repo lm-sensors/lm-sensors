@@ -28,6 +28,7 @@
 
 #include "sensord.h"
 #include "lib/error.h"
+#include "version.h"
 
 #define MAX_CHIP_NAMES 32
 
@@ -231,7 +232,7 @@ parseArgs
           return -1;
         break;
       case 'v':
-        printf ("sensord version %s\n", version);
+        printf ("sensord version %s\n", LM_VERSION);
         exit (EXIT_SUCCESS);
         break;
       case 'h':
