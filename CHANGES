@@ -56,6 +56,7 @@ SVN HEAD
   Program sensord: Syncronize the version with lm-sensors
                    Drop all the chip-specific support
                    Fix a memory leak when daemonizing
+                   Fix memory leaks in command line parsing
   Program sensors: Drop all the chip-specific support
                    Fix alignment of alarm for one-limit temperatures
                    Drop option -U
