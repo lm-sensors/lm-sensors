@@ -212,24 +212,20 @@ parseArgs
         doSet = 1;
         break;
       case 'c':
-        if ((sensorsCfgFile = strdup (optarg)) == NULL)
-          return -1;
+        sensorsCfgFile = optarg;
         break;
       case 'p':
-        if ((pidFile = strdup (optarg)) == NULL)
-          return -1;
+        pidFile = optarg;
         break;
       case 'r':
-        if ((rrdFile = strdup (optarg)) == NULL)
-          return -1;
+        rrdFile = optarg;
         break;
       case 'd':
         debug = 1;
         break;
       case 'g':
         doCGI = 1;
-        if ((cgiDir = strdup (optarg)) == NULL)
-          return -1;
+        cgiDir = optarg;
         break;
       case 'v':
         printf ("sensord version %s\n", LM_VERSION);
