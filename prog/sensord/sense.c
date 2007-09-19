@@ -73,37 +73,6 @@ idChip
 }
 
 static int
-readUnknownChip
-(const sensors_chip_name *chip) {
-  const sensors_feature_data *sensor;
-  int index0 = 0;
-  int ret = 0;
-
-  ret = idChip (chip);
-
-  while ((ret == 0) && ((sensor = sensors_get_all_features (chip, &index0)) != NULL)) {
-    char *label = NULL;
-    double value;
-    
-    if (!(label = sensors_get_label (chip, sensor->number))) {
-      sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, sensor->name);
-      ret = 21;
-    } else if (!(sensor->flags & SENSORS_MODE_R)) {
-      sensorLog (LOG_INFO, "%s: %s", sensor->name, label);
-    } else if ((ret = sensors_get_value (chip, sensor->number, &value))) {
-      sensorLog (LOG_ERR, "Error getting sensor data: %s/%s: %s", chip->prefix, sensor->name, sensors_strerror (ret));
-      ret = 22;
-    } else {
-      sensorLog (LOG_INFO, "  %s%s: %.2f", (sensor->mapping == SENSORS_NO_MAPPING) ? "" : "-", label, value);
-    }
-    if (label)
-      free (label);
-  }
-  
-  return ret;
-}
-
-static int
 doKnownChip
 (const sensors_chip_name *chip, const ChipDescriptor *descriptor, int action) {
   const FeatureDescriptor *features = descriptor->features;
@@ -203,8 +172,7 @@ doChip
       ret = doKnownChip (chip, descriptor, action);
       free (descriptor->features);
       free (descriptor);
-    } else if (action == DO_READ)
-      ret = readUnknownChip (chip);
+    }
   }
   return ret;
 }
