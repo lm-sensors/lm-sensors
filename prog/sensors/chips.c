@@ -26,6 +26,7 @@
 #include "main.h"
 #include "chips.h"
 #include "lib/sensors.h"
+#include "lib/error.h"
 
 void print_chip_raw(const sensors_chip_name *name)
 {
@@ -77,15 +78,19 @@ static void sensors_get_available_features(const sensors_chip_name *name,
 
 	while ((iter = sensors_get_all_features(name, &i)) &&
 	       iter->mapping == feature->number) {
-		int indx;
+		int indx, err;
 
 		indx = iter->type - first_val - 1;
 		if (indx < 0 || indx >= size)
 			/* New feature in libsensors? Ignore. */
 			continue;
 
-		if (sensors_get_value(name, iter->number, &feature_vals[indx]))
-			printf("ERROR: Can't get %s data!\n", iter->name);
+		err = sensors_get_value(name, iter->number, &feature_vals[indx]);
+		if (err) {
+			printf("ERROR: Can't get %s data: %s\n", iter->name,
+			       sensors_strerror(err));
+			continue;
+		}
 
 		has_features[indx] = 1;
 	}
