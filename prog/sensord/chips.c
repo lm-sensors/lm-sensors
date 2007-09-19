@@ -43,27 +43,6 @@ fmtExtra
 }
 
 static const char *
-fmtValu_0
-(const double values[], int alarm, int beep) {
-  sprintf (buff, "%.0f", values[0]);
-  return fmtExtra (alarm, beep);
-}
-
-static const char *
-fmtTemps_0
-(const double values[], int alarm, int beep) {
-  sprintf (buff, "%.0f C (limit = %.0f C, hysteresis = %.0f C)", values[0], values[1], values[2]);
-  return fmtExtra (alarm, beep);
-}
-
-static const char *
-fmtTemps_1_0
-(const double values[], int alarm, int beep) {
-  sprintf (buff, "%.1f C (limit = %.0f C, hysteresis = %.0f C)", values[0], values[1], values[2]);
-  return fmtExtra (alarm, beep);
-}
-
-static const char *
 fmtTemps_1
 (const double values[], int alarm, int beep) {
   sprintf (buff, "%.1f C (limit = %.1f C, hysteresis = %.1f C)", values[0], values[1], values[2]);
@@ -123,27 +102,6 @@ static const char *
 fmtFan_only
 (const double values[], int alarm, int beep) {
   sprintf (buff, "%.0f RPM", values[0]);
-  return fmtExtra (alarm, beep);
-}
-
-static const char *
-fmtMHz_2
-(const double values[], int alarm, int beep) {
-  sprintf (buff, "%.2f MHz (min = %.2f MHz, max = %.2f MHz)", values[0], values[1], values[2]);
-  return fmtExtra (alarm, beep);
-}
-
-static const char *
-fmtChassisIntrusionDetection
-(const double values[], int alarm, int beep) {
-  sprintf (buff, "Chassis intrusion detection");
-  return fmtExtra (alarm, beep);
-}
-
-static const char *
-fmtBoardTemperatureInput
-(const double values[], int alarm, int beep) {
-  sprintf (buff, "Board temperature input"); /* N.B: "(usually LM75 chips)" */
   return fmtExtra (alarm, beep);
 }
 
