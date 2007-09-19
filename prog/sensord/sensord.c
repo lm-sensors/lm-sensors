@@ -164,6 +164,7 @@ daemonize
   } else if (pid != 0) {
     fprintf (file, "%d\n", pid);
     fclose (file);
+    unloadLib ();
     exit (EXIT_SUCCESS);
   }
 
