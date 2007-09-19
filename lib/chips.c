@@ -2764,7 +2764,7 @@ static sensors_chip_feature thmc50_features[] =
                                            SENSORS_ADM1022_REMOTE_TEMP2, RW }, 
                                            NOSYSCTL, VALUE(2), 
                                            0, "temp3_min", 3 },
-    { { SENSORS_ADM1022_REMOTE_TEMP2_OVER, "remote2_temp_over", 
+    { { SENSORS_ADM1022_REMOTE_TEMP2_OVER, "remote_temp2_over", 
                                            SENSORS_ADM1022_REMOTE_TEMP2, 
                                            SENSORS_ADM1022_REMOTE_TEMP2, RW }, 
                                            NOSYSCTL, VALUE(1), 
