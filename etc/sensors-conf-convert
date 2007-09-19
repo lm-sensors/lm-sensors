@@ -165,10 +165,16 @@ BEGIN
 		"thmc50" => {
 			qr/\btemp_hyst\b/		=> sub { "temp1_min" },
 			qr/\bremote_temp_hyst\b/	=> sub { "temp2_min" },
+			qr/\bremote_temp2\b/		=> sub { "temp3" },
+			qr/\bremote_temp2_hyst\b/	=> sub { "temp3_min" },
+			qr/\bremote_temp2_over\b/	=> sub { "temp3_max" },
 		},
 		"adm1022" => {
 			qr/\btemp_hyst\b/		=> sub { "temp1_min" },
 			qr/\bremote_temp_hyst\b/	=> sub { "temp2_min" },
+			qr/\bremote_temp2\b/		=> sub { "temp3" },
+			qr/\bremote_temp2_hyst\b/	=> sub { "temp3_min" },
+			qr/\bremote_temp2_over\b/	=> sub { "temp3_max" },
 		},
 		"adm1026" => {
 			qr/\bfan(\d)(|_div|_min)\b/	=> sub { "fan".($1+1).$2 },
