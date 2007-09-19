@@ -2926,3 +2926,15 @@ chip "f71882fg-*"
     compute in6       (@ * 5.25), (@ / 5.25)
     compute in7       (@ * 2), (@ / 2)
     compute in8       (@ * 2), (@ / 2)
+
+
+chip "adm1022-*" "thmc50-*"
+
+   label temp "M/B Temp"
+   # Single CPU setup
+   label remote_temp "CPU Temp"
+
+   # Dual CPU setup (ADM1022 only)
+   #label remote_temp "CPU0 Temp"
+   #label remote_temp2 "CPU1 Temp"
+
