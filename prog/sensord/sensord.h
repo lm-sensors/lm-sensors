@@ -91,14 +91,13 @@ typedef struct {
   DataType type;
   int alarmMask;
   int beepMask;
-  const int dataNumbers[MAX_DATA + 1]; /* First entry is used for the label */
+  int dataNumbers[MAX_DATA + 1]; /* First entry is used for the label */
 } FeatureDescriptor;
 
 typedef struct {
-  const char * const *names;
-  const FeatureDescriptor *features;
+  FeatureDescriptor *features;
   int alarmNumber;
   int beepNumber;
 } ChipDescriptor;
 
-extern const ChipDescriptor * const knownChips[];
+extern ChipDescriptor * generateChipDescriptor (const sensors_chip_name *chip);

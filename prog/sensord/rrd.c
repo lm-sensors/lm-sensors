@@ -141,14 +141,11 @@ applyToFeatures
 
   for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
     while ((ret == 0) && ((chip = sensors_get_detected_chips (&chipNames[j], &i)) != NULL)) {
-      int index0, subindex, chipindex = -1;
-      for (index0 = 0; knownChips[index0]; ++ index0)
-        for (subindex = 0; knownChips[index0]->names[subindex]; ++ subindex)
-          if (!strcmp (chip->prefix, knownChips[index0]->names[subindex]))
-            chipindex = index0;
-      if (chipindex >= 0) {
-        const ChipDescriptor *descriptor = knownChips[chipindex];
+      ChipDescriptor *descriptor;
+      descriptor = generateChipDescriptor (chip);
+      if (descriptor) {
         const FeatureDescriptor *features = descriptor->features;
+        int index0;
 
         for (index0 = 0; (ret == 0) && (num < MAX_RRD_SENSORS) && features[index0].format; ++ index0) {
           const FeatureDescriptor *feature = features + index0;
@@ -170,6 +167,8 @@ applyToFeatures
           if (label)
             free (label);
         }
+        free (descriptor->features);
+        free (descriptor);
       }
     }
   }

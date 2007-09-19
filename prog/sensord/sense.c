@@ -197,14 +197,13 @@ doChip
   if (action == DO_SET) {
     ret = setChip (chip);
   } else {
-    int index0, subindex, chipindex = -1;
-    for (index0 = 0; knownChips[index0]; ++ index0)
-      for (subindex = 0; knownChips[index0]->names[subindex]; ++ subindex)
-        if (!strcmp (chip->prefix, knownChips[index0]->names[subindex]))
-          chipindex = index0;
-    if (chipindex >= 0)
-      ret = doKnownChip (chip, knownChips[chipindex], action);
-    else if (action == DO_READ)
+    ChipDescriptor *descriptor;
+    descriptor = generateChipDescriptor (chip);
+    if (descriptor) {
+      ret = doKnownChip (chip, descriptor, action);
+      free (descriptor->features);
+      free (descriptor);
+    } else if (action == DO_READ)
       ret = readUnknownChip (chip);
   }
   return ret;
