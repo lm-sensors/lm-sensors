@@ -86,8 +86,8 @@ rrdNextChar
 
 static void
 rrdCheckLabel
-(const char *rawLabel, int index) {
-  char *buffer = rrdLabels[index];
+(const char *rawLabel, int index0) {
+  char *buffer = rrdLabels[index0];
   int i, j, okay;
   
   i = 0;
@@ -104,7 +104,7 @@ rrdCheckLabel
 
   j = 0;
   okay = (i > 0);
-  while (okay && (j < index)) /* locate duplicates */
+  while (okay && (j < index0)) /* locate duplicates */
     okay = strcmp (rrdLabels[j ++], buffer);
 
   while (!okay) { /* uniquify duplicate labels with _? or _?? */
@@ -128,7 +128,7 @@ rrdCheckLabel
     }
     j = 0;
     okay = 1;
-    while (okay && (j < index))
+    while (okay && (j < index0))
       okay = strcmp (rrdLabels[j ++], buffer);
   }
 }
@@ -283,12 +283,12 @@ rrdInit
 
 struct gr {
   DataType type;
-  char *h2;
-  char *image;
-  char *title;
-  char *axisTitle;
-  char *axisDefn;
-  char *options;
+  const char *h2;
+  const char *image;
+  const char *title;
+  const char *axisTitle;
+  const char *axisDefn;
+  const char *options;
   int loadAvg;
 };
 
@@ -366,7 +366,14 @@ static struct gr graphs[] = {
     "-s -1w --alt-autoscale",
     0
   }, {
-    DataType_other
+    DataType_other,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    0
   }  
 };
 

@@ -79,7 +79,7 @@ static struct {
   { "local4", LOG_LOCAL4 }, { "local5", LOG_LOCAL5 },
   { "local6", LOG_LOCAL6 }, { "local7", LOG_LOCAL7 },
   { "daemon", LOG_DAEMON }, { "user", LOG_USER },
-  { NULL }
+  { NULL, 0 }
 };
 
 static int
