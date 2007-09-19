@@ -18,6 +18,7 @@ SVN HEAD
   Module fscher: Add missing read of control register (2.6 backport)
   Module i2c-piix4: Add ATI SB700 and SB800 support (2.6 backport)
   Module lm93: Fix an array overrun (2.6 backport)
+  Program sensord: Fix f71805f fans
   Program sensors: Fix a memory leak on error (with -u)
                    Add sch311x support
                    Hide error on missing dme1737 fan and pwm
