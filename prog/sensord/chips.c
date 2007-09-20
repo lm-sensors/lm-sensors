@@ -1285,6 +1285,80 @@ static const ChipDescriptor k8temp_chip = {
   k8temp_names, k8temp_features, 0, 0
 };
 
+/** W83793 **/
+
+static const char *w83793_names[] = {
+  SENSORS_W83793_PREFIX, NULL
+};
+
+static const FeatureDescriptor w83793_features[] = {
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(1), SENSORS_W83793_FAN_MIN(1), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(2), SENSORS_W83793_FAN_MIN(2), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(3), SENSORS_W83793_FAN_MIN(3), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(4), SENSORS_W83793_FAN_MIN(4), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(5), SENSORS_W83793_FAN_MIN(5), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(6), SENSORS_W83793_FAN_MIN(6), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(7), SENSORS_W83793_FAN_MIN(7), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(8), SENSORS_W83793_FAN_MIN(8), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(9), SENSORS_W83793_FAN_MIN(9), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(10), SENSORS_W83793_FAN_MIN(10), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(11), SENSORS_W83793_FAN_MIN(11), -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, 0, 0,
+    { SENSORS_W83793_FAN(12), SENSORS_W83793_FAN_MIN(12), -1 } },
+  { fmtTemps_1, rrdF1, DataType_temperature, 0, 0,
+    { SENSORS_W83793_TEMP(1), SENSORS_W83793_TEMP_CRIT(1), SENSORS_W83793_TEMP_CRIT_HYST(1), -1 } },
+  { fmtTemps_1, rrdF1, DataType_temperature, 0, 0,
+    { SENSORS_W83793_TEMP(2), SENSORS_W83793_TEMP_CRIT(2), SENSORS_W83793_TEMP_CRIT_HYST(2), -1 } },
+  { fmtTemps_1, rrdF1, DataType_temperature, 0, 0,
+    { SENSORS_W83793_TEMP(3), SENSORS_W83793_TEMP_CRIT(3), SENSORS_W83793_TEMP_CRIT_HYST(3), -1 } },
+  { fmtTemps_1, rrdF1, DataType_temperature, 0, 0,
+    { SENSORS_W83793_TEMP(4), SENSORS_W83793_TEMP_CRIT(4), SENSORS_W83793_TEMP_CRIT_HYST(4), -1 } },
+  { fmtTemps_0, rrdF0, DataType_temperature, 0, 0,
+    { SENSORS_W83793_TEMP(5), SENSORS_W83793_TEMP_CRIT(5), SENSORS_W83793_TEMP_CRIT_HYST(5), -1 } },
+  { fmtTemps_0, rrdF0, DataType_temperature, 0, 0,
+    { SENSORS_W83793_TEMP(6), SENSORS_W83793_TEMP_CRIT(6), SENSORS_W83793_TEMP_CRIT_HYST(6), -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83793_IN(0), SENSORS_W83793_IN_MIN(0), SENSORS_W83793_IN_MAX(0), -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83793_IN(1), SENSORS_W83793_IN_MIN(1), SENSORS_W83793_IN_MAX(1), -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83793_IN(2), SENSORS_W83793_IN_MIN(2), SENSORS_W83793_IN_MAX(2), -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83793_IN(3), SENSORS_W83793_IN_MIN(3), SENSORS_W83793_IN_MAX(3), -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83793_IN(4), SENSORS_W83793_IN_MIN(4), SENSORS_W83793_IN_MAX(4), -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83793_IN(5), SENSORS_W83793_IN_MIN(5), SENSORS_W83793_IN_MAX(5), -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83793_IN(6), SENSORS_W83793_IN_MIN(6), SENSORS_W83793_IN_MAX(6), -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83793_IN(7), SENSORS_W83793_IN_MIN(7), SENSORS_W83793_IN_MAX(7), -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83793_IN(8), SENSORS_W83793_IN_MIN(8), SENSORS_W83793_IN_MAX(8), -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, 0, 0,
+    { SENSORS_W83793_IN(9), SENSORS_W83793_IN_MIN(9), SENSORS_W83793_IN_MAX(9), -1 } },
+  { fmtVolt_3, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_W83793_VID0, -1 } },
+  { fmtVolt_3, rrdF3, DataType_voltage, 0, 0,
+    { SENSORS_W83793_VID1, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor w83793_chip = {
+  w83793_names, w83793_features, 0, 0
+};
+
 
 /** ALL **/
 
@@ -1314,5 +1388,6 @@ const ChipDescriptor * const knownChips[] = {
   &f71805f_chip,
   &vt1211_chip,
   &k8temp_chip,
+  &w83793_chip,
   NULL
 };

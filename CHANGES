@@ -23,6 +23,7 @@ SVN HEAD
                    Syncronize the version with lm-sensors
                    Fix a memory leak when daemonizing
                    Fix memory leaks in command line parsing
+                   Add w83793 support
   Program sensors: Fix a memory leak on error (with -u)
                    Add sch311x support
                    Hide error on missing dme1737 fan and pwm
