@@ -168,9 +168,9 @@ static void fillChipVoltage (FeatureDescriptor *voltage,
                              const sensors_chip_name *name,
                              const sensors_feature_data *feature, int i)
 {
-  const int size = SENSORS_FEATURE_IN_MAX_ALARM - SENSORS_FEATURE_IN;
-  short has_features[SENSORS_FEATURE_IN_MAX_ALARM - SENSORS_FEATURE_IN] = { 0, };
-  int feature_nrs[SENSORS_FEATURE_IN_MAX_ALARM - SENSORS_FEATURE_IN];
+  const int size = SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN;
+  short has_features[SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN] = { 0, };
+  int feature_nrs[SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN];
   int pos = 0;
 
   voltage->rrd = rrdF2;
@@ -202,8 +202,12 @@ static void fillChipVoltage (FeatureDescriptor *voltage,
   } else {
     voltage->alarmNumber = -1;
   }
-  /* beep support missing for now */
-  voltage->beepNumber = -1;
+  /* beep if applicable */
+  if (IN_FEATURE(SENSORS_FEATURE_IN_BEEP)) {
+    voltage->beepNumber = IN_FEATURE_NR(SENSORS_FEATURE_IN_ALARM);
+  } else {
+    voltage->beepNumber = -1;
+  }
 }
 
 #define TEMP_FEATURE(x)      has_features[x - SENSORS_FEATURE_TEMP - 1]
@@ -212,9 +216,9 @@ static void fillChipTemperature (FeatureDescriptor *temperature,
                                  const sensors_chip_name *name,
                                  const sensors_feature_data *feature, int i)
 {
-  const int size = SENSORS_FEATURE_TEMP_TYPE - SENSORS_FEATURE_TEMP;
-  short has_features[SENSORS_FEATURE_TEMP_TYPE - SENSORS_FEATURE_TEMP] = { 0, };
-  int feature_nrs[SENSORS_FEATURE_TEMP_TYPE - SENSORS_FEATURE_TEMP];
+  const int size = SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP;
+  short has_features[SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP] = { 0, };
+  int feature_nrs[SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP];
   int pos = 0;
 
   temperature->rrd = rrdF1;
@@ -249,8 +253,12 @@ static void fillChipTemperature (FeatureDescriptor *temperature,
   } else {
     temperature->alarmNumber = -1;
   }
-  /* beep support missing for now */
-  temperature->beepNumber = -1;
+  /* beep if applicable */
+  if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_BEEP)) {
+    temperature->beepNumber = TEMP_FEATURE_NR(SENSORS_FEATURE_TEMP_BEEP);
+  } else {
+    temperature->beepNumber = -1;
+  }
 }
 
 #define FAN_FEATURE(x)      has_features[x - SENSORS_FEATURE_FAN - 1]
@@ -259,9 +267,9 @@ static void fillChipFan (FeatureDescriptor *fan,
                          const sensors_chip_name *name,
                          const sensors_feature_data *feature, int i)
 {
-  const int size = SENSORS_FEATURE_FAN_DIV - SENSORS_FEATURE_FAN;
-  short has_features[SENSORS_FEATURE_FAN_DIV - SENSORS_FEATURE_FAN] = { 0, };
-  int feature_nrs[SENSORS_FEATURE_FAN_DIV - SENSORS_FEATURE_FAN];
+  const int size = SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN;
+  short has_features[SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN] = { 0, };
+  int feature_nrs[SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN];
   int pos = 0;
 
   fan->rrd = rrdF0;
@@ -292,8 +300,12 @@ static void fillChipFan (FeatureDescriptor *fan,
   } else {
     fan->alarmNumber = -1;
   }
-  /* beep support missing for now */
-  fan->beepNumber = -1;
+  /* beep if applicable */
+  if (FAN_FEATURE(SENSORS_FEATURE_FAN_BEEP)) {
+    fan->beepNumber = FAN_FEATURE_NR(SENSORS_FEATURE_FAN_BEEP);
+  } else {
+    fan->beepNumber = -1;
+  }
 }
 
 static void fillChipVid (FeatureDescriptor *vid,
