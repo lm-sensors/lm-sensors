@@ -263,24 +263,24 @@ static void fillChipFan (FeatureDescriptor *fan,
   fan->dataNumbers[pos] = -1;
 }
 
-static void fillChipVid (FeatureDescriptor *voltage,
+static void fillChipVid (FeatureDescriptor *vid,
                          const sensors_feature_data *feature)
 {
-  voltage->format = fmtVolt_3;
-  voltage->rrd = rrdF3;
-  voltage->type = DataType_voltage;
-  voltage->dataNumbers[0] = feature->number;
-  voltage->dataNumbers[1] = -1;
+  vid->format = fmtVolt_3;
+  vid->rrd = rrdF3;
+  vid->type = DataType_voltage;
+  vid->dataNumbers[0] = feature->number;
+  vid->dataNumbers[1] = -1;
 }
 
-static void fillChipBeepEnable (FeatureDescriptor *voltage,
+static void fillChipBeepEnable (FeatureDescriptor *beepen,
                                 const sensors_feature_data *feature)
 {
-  voltage->format = fmtSoundAlarm;
-  voltage->rrd = rrdF0;
-  voltage->type = DataType_other;
-  voltage->dataNumbers[0] = feature->number;
-  voltage->dataNumbers[1] = -1;
+  beepen->format = fmtSoundAlarm;
+  beepen->rrd = rrdF0;
+  beepen->type = DataType_other;
+  beepen->dataNumbers[0] = feature->number;
+  beepen->dataNumbers[1] = -1;
 }
 
 /* Note that alarms and beeps are no longer (or not yet) supported */
