@@ -191,6 +191,19 @@ static void fillChipVoltage (FeatureDescriptor *voltage,
   
   /* terminate the list */
   voltage->dataNumbers[pos] = -1;
+
+  /* alarm if applicable */
+  if (IN_FEATURE(SENSORS_FEATURE_IN_ALARM)) {
+    voltage->alarmNumber = IN_FEATURE_NR(SENSORS_FEATURE_IN_ALARM);
+  } else if (IN_FEATURE(SENSORS_FEATURE_IN_MIN_ALARM)) {
+    voltage->alarmNumber = IN_FEATURE_NR(SENSORS_FEATURE_IN_MIN_ALARM);
+  } else if (IN_FEATURE(SENSORS_FEATURE_IN_MAX_ALARM)) {
+    voltage->alarmNumber = IN_FEATURE_NR(SENSORS_FEATURE_IN_MAX_ALARM);
+  } else {
+    voltage->alarmNumber = -1;
+  }
+  /* beep support missing for now */
+  voltage->beepNumber = -1;
 }
 
 #define TEMP_FEATURE(x)      has_features[x - SENSORS_FEATURE_TEMP - 1]
@@ -227,6 +240,17 @@ static void fillChipTemperature (FeatureDescriptor *temperature,
   
   /* terminate the list */
   temperature->dataNumbers[pos] = -1;
+
+  /* alarm if applicable */
+  if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_ALARM)) {
+    temperature->alarmNumber = TEMP_FEATURE_NR(SENSORS_FEATURE_TEMP_ALARM);
+  } else if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX_ALARM)) {
+    temperature->alarmNumber = TEMP_FEATURE_NR(SENSORS_FEATURE_TEMP_MAX_ALARM);
+  } else {
+    temperature->alarmNumber = -1;
+  }
+  /* beep support missing for now */
+  temperature->beepNumber = -1;
 }
 
 #define FAN_FEATURE(x)      has_features[x - SENSORS_FEATURE_FAN - 1]
@@ -261,6 +285,15 @@ static void fillChipFan (FeatureDescriptor *fan,
   
   /* terminate the list */
   fan->dataNumbers[pos] = -1;
+
+  /* alarm if applicable */
+  if (FAN_FEATURE(SENSORS_FEATURE_FAN_ALARM)) {
+    fan->alarmNumber = FAN_FEATURE_NR(SENSORS_FEATURE_FAN_ALARM);
+  } else {
+    fan->alarmNumber = -1;
+  }
+  /* beep support missing for now */
+  fan->beepNumber = -1;
 }
 
 static void fillChipVid (FeatureDescriptor *vid,
@@ -269,6 +302,8 @@ static void fillChipVid (FeatureDescriptor *vid,
   vid->format = fmtVolt_3;
   vid->rrd = rrdF3;
   vid->type = DataType_voltage;
+  vid->alarmNumber = -1;
+  vid->beepNumber = -1;
   vid->dataNumbers[0] = feature->number;
   vid->dataNumbers[1] = -1;
 }
@@ -279,6 +314,8 @@ static void fillChipBeepEnable (FeatureDescriptor *beepen,
   beepen->format = fmtSoundAlarm;
   beepen->rrd = rrdF0;
   beepen->type = DataType_other;
+  beepen->alarmNumber = -1;
+  beepen->beepNumber = -1;
   beepen->dataNumbers[0] = feature->number;
   beepen->dataNumbers[1] = -1;
 }

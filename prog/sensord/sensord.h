@@ -89,15 +89,13 @@ typedef struct {
   FormatterFN format;
   RRDFN rrd;
   DataType type;
-  int alarmMask;
-  int beepMask;
+  int alarmNumber;
+  int beepNumber;
   int dataNumbers[MAX_DATA + 1]; /* First entry is used for the label */
 } FeatureDescriptor;
 
 typedef struct {
   FeatureDescriptor *features;
-  int alarmNumber;
-  int beepNumber;
 } ChipDescriptor;
 
 extern ChipDescriptor * generateChipDescriptor (const sensors_chip_name *chip);

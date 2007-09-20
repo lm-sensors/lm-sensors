@@ -76,43 +76,45 @@ static int
 doKnownChip
 (const sensors_chip_name *chip, const ChipDescriptor *descriptor, int action) {
   const FeatureDescriptor *features = descriptor->features;
-  int alarms = 0, beeps = 0;
   int index0, subindex;
   int ret = 0;
   double tmp;
 
   if (action == DO_READ)
     ret = idChip (chip);
-  if (!ret && descriptor->alarmNumber) {
-    if ((ret = sensors_get_value (chip, descriptor->alarmNumber, &tmp))) {
-      sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, descriptor->alarmNumber, sensors_strerror (ret));
-      ret = 20;
-    } else {
-      alarms = (int) (tmp + 0.5);
-    }
-  }
-  if (!ret && descriptor->beepNumber) {
-    if ((ret = sensors_get_value (chip, descriptor->beepNumber, &tmp))) {
-      sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, descriptor->beepNumber, sensors_strerror (ret));
-      ret = 21;
-    } else {
-      beeps = (int) (tmp + 0.5);
-    }
-  }
   for (index0 = 0; (ret == 0) && features[index0].format; ++ index0) {
     const FeatureDescriptor *feature = features + index0;
     int labelNumber = feature->dataNumbers[0];
-    int alarm = alarms & feature->alarmMask;
-    int beep = beeps & feature->beepMask;
+    int alarm, beep;
     char *label = NULL;
 
-    if ((action == DO_SCAN) && !alarm) {
-      continue;
-    } else if (!(label = sensors_get_label (chip, labelNumber))) {
+    if (!(label = sensors_get_label (chip, labelNumber))) {
       sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
       ret = 22;
     } else {
       double values[MAX_DATA];
+
+      alarm = 0;
+      if (!ret && feature->alarmNumber != -1) {
+        if ((ret = sensors_get_value (chip, feature->alarmNumber, &tmp))) {
+          sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, feature->alarmNumber, sensors_strerror (ret));
+          ret = 20;
+        } else {
+          alarm = (int) (tmp + 0.5);
+        }
+      }
+      if ((action == DO_SCAN) && !alarm)
+        continue;
+
+      beep = 0;
+      if (!ret && feature->beepNumber != -1) {
+        if ((ret = sensors_get_value (chip, feature->beepNumber, &tmp))) {
+          sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, feature->beepNumber, sensors_strerror (ret));
+          ret = 21;
+        } else {
+          beep = (int) (tmp + 0.5);
+        }
+      }
 
       for (subindex = 0; !ret && (feature->dataNumbers[subindex] >= 0); ++ subindex) {
         if ((ret = sensors_get_value (chip, feature->dataNumbers[subindex], values + subindex))) {
