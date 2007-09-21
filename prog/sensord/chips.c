@@ -332,12 +332,11 @@ static void fillChipBeepEnable (FeatureDescriptor *beepen,
   beepen->dataNumbers[1] = -1;
 }
 
-/* Note that alarms and beeps are no longer (or not yet) supported */
-ChipDescriptor * generateChipDescriptor (const sensors_chip_name *chip)
+static
+FeatureDescriptor * generateChipFeatures (const sensors_chip_name *chip)
 {
 	int nr, count = 1;
 	const sensors_feature_data *sensor;
-	ChipDescriptor *descriptor;
 	FeatureDescriptor *features;
 
 	/* How many main features do we have? */
@@ -348,14 +347,9 @@ ChipDescriptor * generateChipDescriptor (const sensors_chip_name *chip)
 	}
 
 	/* Allocate the memory we need */
-	descriptor = calloc(1, sizeof(ChipDescriptor));
 	features = calloc(count, sizeof(FeatureDescriptor));
-	if (!descriptor || !features) {
-		free(descriptor);
-		free(features);
+	if (!features)
 		return NULL;
-	}
-	descriptor->features = features;
 
 	/* Fill in the data structures */
 	count = 0;
@@ -387,5 +381,43 @@ ChipDescriptor * generateChipDescriptor (const sensors_chip_name *chip)
 		count++;
 	}
 
-	return descriptor;
+	return features;
+}
+
+ChipDescriptor * knownChips;
+
+int initKnownChips (void)
+{
+  int nr, count = 1;
+  const sensors_chip_name *name;
+
+  /* How many chips do we have? */
+  nr = 0;
+  while ((name = sensors_get_detected_chips(NULL, &nr)))
+    count++;
+
+  /* Allocate the memory we need */
+  knownChips = calloc(count, sizeof(ChipDescriptor));
+  if (!knownChips)
+    return 1;
+
+  /* Fill in the data structures */
+  count = 0;
+  nr = 0;
+  while ((name = sensors_get_detected_chips(NULL, &nr))) {
+    knownChips[count].name = name;
+    if ((knownChips[count].features = generateChipFeatures(name)))
+      count++;
+  }
+
+  return 0;
+}
+
+void freeKnownChips (void)
+{
+  int index0;
+
+  for (index0 = 0; knownChips[index0].features; index0++)
+    free (knownChips[index0].features);
+  free (knownChips);
 }

@@ -116,18 +116,28 @@ loadConfig
 int
 loadLib
 (void) {
-  return loadConfig (0);
+  int ret;
+  ret = loadConfig (0);
+  if (!ret)
+    ret = initKnownChips ();
+  return ret;
 }
 
 int
 reloadLib
 (void) {
-  return loadConfig (1);
+  int ret;
+  freeKnownChips ();
+  ret = loadConfig (1);
+  if (!ret)
+    ret = initKnownChips ();
+  return ret;
 }
 
 int
 unloadLib
 (void) {
+  freeKnownChips ();
   sensors_cleanup ();
   return 0;  
 }

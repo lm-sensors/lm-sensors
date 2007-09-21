@@ -141,11 +141,18 @@ applyToFeatures
 
   for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
     while ((ret == 0) && ((chip = sensors_get_detected_chips (&chipNames[j], &i)) != NULL)) {
-      ChipDescriptor *descriptor;
-      descriptor = generateChipDescriptor (chip);
-      if (descriptor) {
+      int index0, chipindex = -1;
+      for (index0 = 0; knownChips[index0].features; ++ index0)
+        /* Trick: we compare addresses here. We know it works because both
+           pointers were returned by sensors_get_detected_chips(), so they
+           refer to libsensors internal structures, which do not move. */
+        if (knownChips[index0].name == chip) {
+          chipindex = index0;
+          break;
+        }
+      if (chipindex >= 0) {
+        const ChipDescriptor *descriptor = &knownChips[chipindex];
         const FeatureDescriptor *features = descriptor->features;
-        int index0;
 
         for (index0 = 0; (ret == 0) && (num < MAX_RRD_SENSORS) && features[index0].format; ++ index0) {
           const FeatureDescriptor *feature = features + index0;
@@ -167,8 +174,6 @@ applyToFeatures
           if (label)
             free (label);
         }
-        free (descriptor->features);
-        free (descriptor);
       }
     }
   }

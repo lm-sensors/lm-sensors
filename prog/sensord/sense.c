@@ -168,13 +168,17 @@ doChip
   if (action == DO_SET) {
     ret = setChip (chip);
   } else {
-    ChipDescriptor *descriptor;
-    descriptor = generateChipDescriptor (chip);
-    if (descriptor) {
-      ret = doKnownChip (chip, descriptor, action);
-      free (descriptor->features);
-      free (descriptor);
-    }
+    int index0, chipindex = -1;
+    for (index0 = 0; knownChips[index0].features; ++ index0)
+      /* Trick: we compare addresses here. We know it works because both
+         pointers were returned by sensors_get_detected_chips(), so they
+         refer to libsensors internal structures, which do not move. */
+      if (knownChips[index0].name == chip) {
+        chipindex = index0;
+        break;
+      }
+    if (chipindex >= 0)
+      ret = doKnownChip (chip, &knownChips[chipindex], action);
   }
   return ret;
 }

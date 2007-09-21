@@ -95,7 +95,10 @@ typedef struct {
 } FeatureDescriptor;
 
 typedef struct {
+  const sensors_chip_name *name;
   FeatureDescriptor *features;
 } ChipDescriptor;
 
-extern ChipDescriptor * generateChipDescriptor (const sensors_chip_name *chip);
+extern ChipDescriptor * knownChips;
+extern int initKnownChips (void);
+extern void freeKnownChips (void);
