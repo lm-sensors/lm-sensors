@@ -163,7 +163,6 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	struct dlist *attrs;
 	sensors_chip_feature *features;
 	sensors_chip_feature *dyn_features;
-	char *name;
 
 	attrs = sysfs_get_device_attributes(sysdir);
 
@@ -178,7 +177,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		sensors_fatal_error(__FUNCTION__, "Out of memory");
 
 	dlist_for_each_data(attrs, attr, struct sysfs_attribute) {
-		name = attr->name;
+		char *name = attr->name;
 		int nr;
 
 		type = sensors_feature_get_type(name, &nr);
