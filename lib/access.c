@@ -28,7 +28,7 @@
 #include "sysfs.h"
 #include "general.h"
 
-static int sensors_eval_expr(const sensors_chip_name *name,
+static int sensors_eval_expr(const sensors_chip_features *chip_features,
 			     const sensors_expr *expr,
 			     double val, double *result);
 
@@ -126,23 +126,18 @@ sensors_lookup_feature_nr(const sensors_chip_features *chip, int feat_nr)
 	return chip->feature + feat_nr;
 }
 
-/* Look up a resource in the intern chip list, and return a pointer to it. 
+/* Look up a subfeature by name, and return a pointer to it.
    Do not modify the struct the return value points to! Returns NULL if 
    not found.*/
 static const sensors_subfeature *
-sensors_lookup_subfeature_name(const sensors_chip_name *chip,
+sensors_lookup_subfeature_name(const sensors_chip_features *chip,
 			       const char *name)
 {
-	int i, j;
-	const sensors_subfeature *subfeatures;
+	int j;
 
-	for (i = 0; i < sensors_proc_chips_count; i++)
-		if (sensors_match_chip(&sensors_proc_chips[i].chip, chip)) {
-			subfeatures = sensors_proc_chips[i].subfeature;
-			for (j = 0; j < sensors_proc_chips[i].subfeature_count; j++)
-				if (!strcmp(subfeatures[j].name, name))
-					return subfeatures + j;
-		}
+	for (j = 0; j < chip->subfeature_count; j++)
+		if (!strcmp(chip->subfeature[j].name, name))
+			return chip->subfeature + j;
 	return NULL;
 }
 
@@ -267,7 +262,7 @@ int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
 		return -SENSORS_ERR_PROC;
 	if (!expr)
 		*result = val;
-	else if ((res = sensors_eval_expr(name, expr, val, result)))
+	else if ((res = sensors_eval_expr(chip_features, expr, val, result)))
 		return res;
 	return 0;
 }
@@ -315,7 +310,8 @@ int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
 
 	to_write = value;
 	if (expr)
-		if ((res = sensors_eval_expr(name, expr, value, &to_write)))
+		if ((res = sensors_eval_expr(chip_features, expr,
+					     value, &to_write)))
 			return res;
 	if (sensors_write_sysfs_attr(name, subfeature, to_write))
 		return -SENSORS_ERR_PROC;
@@ -402,7 +398,7 @@ sensors_get_all_subfeatures(const sensors_chip_name *name,
 }
 
 /* Evaluate an expression */
-int sensors_eval_expr(const sensors_chip_name *name,
+int sensors_eval_expr(const sensors_chip_features *chip_features,
 		      const sensors_expr *expr,
 		      double val, double *result)
 {
@@ -419,18 +415,20 @@ int sensors_eval_expr(const sensors_chip_name *name,
 		return 0;
 	}
 	if (expr->kind == sensors_kind_var) {
-		if (!(subfeature = sensors_lookup_subfeature_name(name,
+		if (!(subfeature = sensors_lookup_subfeature_name(chip_features,
 							    expr->data.var)))
 			return SENSORS_ERR_NO_ENTRY;
-		if (!(res = sensors_get_value(name, subfeature->number,
-					      result)))
+		if (!(res = sensors_get_value(&chip_features->chip,
+					      subfeature->number, result)))
 			return res;
 		return 0;
 	}
-	if ((res = sensors_eval_expr(name, expr->data.subexpr.sub1, val, &res1)))
+	if ((res = sensors_eval_expr(chip_features, expr->data.subexpr.sub1,
+				     val, &res1)))
 		return res;
 	if (expr->data.subexpr.sub2 &&
-	    (res = sensors_eval_expr(name, expr->data.subexpr.sub2, val, &res2)))
+	    (res = sensors_eval_expr(chip_features, expr->data.subexpr.sub2,
+				     val, &res2)))
 		return res;
 	switch (expr->data.subexpr.op) {
 	case sensors_add:
@@ -467,15 +465,18 @@ int sensors_eval_expr(const sensors_chip_name *name,
    failure. */
 static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 {
+	const sensors_chip_features *chip_features;
 	sensors_chip *chip;
 	double value;
 	int i;
 	int err = 0, res;
 	const sensors_subfeature *subfeature;
 
+	chip_features = sensors_lookup_chip(name);	/* Can't fail */
+
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->sets_count; i++) {
-			subfeature = sensors_lookup_subfeature_name(name,
+			subfeature = sensors_lookup_subfeature_name(chip_features,
 							chip->sets[i].name);
 			if (!subfeature) {
 				sensors_parse_error("Unknown feature name",
@@ -484,8 +485,9 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 				continue;
 			}
 
-			res = sensors_eval_expr(name, chip->sets[i].value, 0,
-					      &value);
+			res = sensors_eval_expr(chip_features,
+						chip->sets[i].value, 0,
+						&value);
 			if (res) {
 				sensors_parse_error("Error parsing expression",
 						    chip->sets[i].lineno);
