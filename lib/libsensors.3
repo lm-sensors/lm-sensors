@@ -37,9 +37,9 @@ libsensors \- publicly accessible functions provided by the sensors library
                             \fBsensors_chip_name *res);\fP
 .B const char *sensors_get_adapter_name(int bus_nr);
 .B char *sensors_get_label(const sensors_chip_name *name, const sensors_feature *feature);\fP
-.B int sensors_get_value(const sensors_chip_name *name, int feature,
+.B int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
                       \fBdouble *value);\fP
-.B int sensors_set_value(const sensors_chip_name *name, int feature,
+.B int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
                       \fBdouble value);\fP
 .B int sensors_do_chip_sets(const sensors_chip_name *name);
 .B const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
@@ -78,15 +78,17 @@ contain wildcard values! The returned string is newly allocated (free it
 yourself). On failure, NULL is returned.
 If no label exists for this feature, its name is returned itself.
 
-\fBint sensors_get_value(const sensors_chip_name *name,
-                      int feature, double *value);\fP
+\fBint sensors_get_value(const sensors_chip_name *name, int subfeat_nr, double *value);\fP
 .br
-Read the value of a feature of a certain chip. Note that chip should not contain wildcard values! This function will return 0 on success, and <0 on failure.
+Read the value of a subfeature of a certain chip. Note that chip should not
+contain wildcard values! This function will return 0 on success, and <0 on
+failure.
 
-\fBint sensors_set_value(const sensors_chip_name *name,
-                      int feature, double value);\fP
+\fBint sensors_set_value(const sensors_chip_name *name, int subfeat_nr, double value);\fP
 .br
-Set the value of a feature of a certain chip. Note that chip should not contain wildcard values! This function will return 0 on success, and <0 on failure.
+Set the value of a subfeature of a certain chip. Note that chip should not
+contain wildcard values! This function will return 0 on success, and <0 on
+failure.
 
 .B int sensors_do_chip_sets(const sensors_chip_name *name);
 .br

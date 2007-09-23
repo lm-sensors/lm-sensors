@@ -84,23 +84,23 @@ const char *sensors_get_adapter_name(const sensors_bus_id *bus);
 
 typedef struct sensors_feature sensors_feature;
 
-/* Look up the label which belongs to this chip. Note that chip should not
+/* Look up the label for a given feature. Note that chip should not
    contain wildcard values! The returned string is newly allocated (free it
    yourself). On failure, NULL is returned.
    If no label exists for this feature, its name is returned itself. */
 char *sensors_get_label(const sensors_chip_name *name,
 			const sensors_feature *feature);
 
-/* Read the value of a feature of a certain chip. Note that chip should not
+/* Read the value of a subfeature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure.  */
-int sensors_get_value(const sensors_chip_name *name, int feature,
+int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
 		      double *value);
 
-/* Set the value of a feature of a certain chip. Note that chip should not
+/* Set the value of a subfeature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
-int sensors_set_value(const sensors_chip_name *name, int feature,
+int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
 		      double value);
 
 /* Execute all set statements for this particular chip. The chip may contain
@@ -126,8 +126,8 @@ const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
 
 /* This enum contains some "magic" used by sensors_read_dynamic_chip() from
    lib/sysfs.c. All the sensor types (in, fan, temp, vid) are a multiple of
-   0x100 apart, and sensor features which should not have a compute mapping to
-   the _input feature start at 0x?10. */
+   0x100 apart, and sensor subfeatures which should not have a compute
+   mapping to the _input subfeature start at 0x?10. */
 typedef enum sensors_feature_type {
 	SENSORS_FEATURE_IN = 0x000,
 	SENSORS_FEATURE_IN_MIN,
@@ -176,7 +176,7 @@ struct sensors_feature {
 /* Data about a single chip subfeature:
    name is the string name used to refer to this subfeature (in config files)
    number is the internal subfeature number, used in many functions to refer
-     to this feature
+     to this subfeature
    type is the subfeature type
    mapping is either SENSORS_NO_MAPPING if this subfeature is the
      main element of category; or it is the number of a subfeature with which

@@ -33,7 +33,7 @@ void (*sensors_fatal_error) (const char *proc, const char *err) =
 static const char *errorlist[] = {
 	/* Unknown error         */ "sensors_strerror: Unknown error!",
 	/* SENSORS_ERR_WILDCARDS */ "Wildcard found in chip name",
-	/* SENSORS_ERR_NO_ENTRY  */ "No such feature known",
+	/* SENSORS_ERR_NO_ENTRY  */ "No such subfeature known",
 	/* SENSORS_ERR_ACCESS    */ "Can't read or write",
 	/* SENSORS_ERR_PROC      */ "Can't access sysfs file",
 	/* SENSORS_ERR_DIV_ZERO  */ "Divide by zero",

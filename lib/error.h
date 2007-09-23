@@ -21,7 +21,7 @@
 #define LIB_SENSORS_ERROR_H
 
 #define SENSORS_ERR_WILDCARDS 1 /* Wildcard found in chip name */
-#define SENSORS_ERR_NO_ENTRY 2  /* No such feature known */
+#define SENSORS_ERR_NO_ENTRY 2  /* No such subfeature known */
 #define SENSORS_ERR_ACCESS 3    /* Can't read or write */
 #define SENSORS_ERR_PROC 4      /* Can't access /proc file */
 #define SENSORS_ERR_DIV_ZERO 5  /* Divide by zero */

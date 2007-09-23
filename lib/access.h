@@ -23,11 +23,12 @@
 #include "sensors.h"
 #include "data.h"
 
-/* Look up a resource in the intern chip list, and return a pointer to it.
+/* Look up a subfeature in the intern chip list, and return a pointer to it.
    Do not modify the struct the return value points to! Returns NULL if
    not found. */
-const sensors_subfeature *sensors_lookup_feature_nr(const sensors_chip_name *chip,
-						      int feature);
+const sensors_subfeature *
+sensors_lookup_subfeature_nr(const sensors_chip_name *chip,
+			     int subfeat_nr);
 
 /* Check whether the chip name is an 'absolute' name, which can only match
    one chip, or whether it has wildcards. Returns 0 if it is absolute, 1

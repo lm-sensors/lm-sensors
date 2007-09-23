@@ -65,7 +65,8 @@ typedef struct sensors_label {
 	int lineno;
 } sensors_label;
 
-/* Config file set declaration: a feature name, combined with an expression */
+/* Config file set declaration: a subfeature name, combined with an
+   expression */
 typedef struct sensors_set {
 	char *name;
 	sensors_expr *value;
@@ -120,7 +121,7 @@ typedef struct sensors_bus {
 	int lineno;
 } sensors_bus;
 
-/* Internal data about all features of a type of chip */
+/* Internal data about all features and subfeatures of a chip */
 typedef struct sensors_chip_features {
 	struct sensors_chip_name chip;
 	struct sensors_feature *feature;
