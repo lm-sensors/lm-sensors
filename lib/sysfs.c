@@ -213,15 +213,17 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		switch (sftype & 0xFF00) {
 			case SENSORS_SUBFEATURE_FAN_INPUT:
 			case SENSORS_SUBFEATURE_TEMP_INPUT:
-				if (nr)
-					nr--;
+				nr--;
 				break;
 		}
 
-		if (nr >= MAX_SENSORS_PER_TYPE) {
-			fprintf(stderr, "libsensors error, more sensors of one"
-				" type then MAX_SENSORS_PER_TYPE, ignoring "
-				"subfeature: %s\n", name);
+		if (nr < 0 || nr >= MAX_SENSORS_PER_TYPE) {
+			/* More sensors of one type than MAX_SENSORS_PER_TYPE,
+			   we have to ignore it */
+#ifdef DEBUG
+			sensors_fatal_error(__FUNCTION__,
+					    "Increase MAX_SENSORS_PER_TYPE!");
+#endif
 			continue;
 		}
 
@@ -243,9 +245,10 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		}
 
 		if (all_subfeatures[i].name) {
-			fprintf(stderr, "libsensors error, trying to add dupli"
-				"cate subfeature: %s to dynamic feature table\n",
-				name);
+#ifdef DEBUG
+			sensors_fatal_error(__FUNCTION__,
+					    "Duplicate subfeature");
+#endif
 			continue;
 		}
 
