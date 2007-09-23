@@ -89,7 +89,7 @@ sensors_for_all_config_chips(const sensors_chip_name *name,
 /* Look up a subfeature in the intern chip list, and return a pointer to it.
    Do not modify the struct the return value points to! Returns NULL if 
    not found.*/
-const sensors_subfeature *
+static const sensors_subfeature *
 sensors_lookup_subfeature_nr(const sensors_chip_name *chip,
 			     int subfeat_nr)
 {
