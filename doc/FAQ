@@ -355,10 +355,9 @@ for candidates, then *note Help::)
 
   3. Check the manufacturer's website or ask their support
 
-  4. Check the Motherboard Monitor (http://mbm.livewiredev.com/)
-     website and the "links"
-     (http://www.lm-sensors.org/wiki/UsefulLinks) page on our website
-     (http://www.lm-sensors.org) some good cross-references.
+  4. Check the "links" (http://www.lm-sensors.org/wiki/UsefulLinks)
+     page on our website (http://www.lm-sensors.org) some good
+     cross-references.
 
 3.2.2 Do you support motherboard XYZ?
 -------------------------------------
@@ -863,13 +862,12 @@ it was misidentified. We are working on improving that too.
 --------------------------------------
 
 Do you own an ASUS motherboard?  Perhaps your chip is being
-misidentified.  Look on the motherboard (or at
-`http://mbm.livewiredev.com') for a 'Winbond' or Asus chip.  Often the
-real device is an Asus as99127f. If so, the driver can be forced to
-recognize the as99127f with `force_as99127f=BUS,0x2d' where `BUS' is
-your i2c bus number.  Cat /proc/bus/i2c to see a list of bus numbers.
-Read the w83781d module documentation (`doc/chips/w83781d') for more
-details.
+misidentified.  Look on the motherboard for a 'Winbond' or Asus chip.
+Often the real device is an Asus as99127f. If so, the driver can be
+forced to recognize the as99127f with `force_as99127f=BUS,0x2d' where
+`BUS' is your i2c bus number.  Cat /proc/bus/i2c to see a list of bus
+numbers.  Read the w83781d module documentation (`doc/chips/w83781d')
+for more details.
 
 4.17.6 Bus hangs on Ali 1543 on Asus P5A boards!
 ------------------------------------------------
@@ -1087,9 +1085,6 @@ Either
   1. Look at your motherboard.
 
   2. Check the manufacturer's website.
-
-  3. Check the Motherboard Monitor (http://mbm.livewiredev.com/)
-     website.
 
    When you know what chips you have, check the Driver Status
 (http://www.lm-sensors.org/wiki/Devices) web page to see if support has

@@ -317,7 +317,7 @@ If that doesn't work:
 @enumerate 2
 @item Look at your motherboard.
 @item Check the manufacturer's website or ask their support
-@item Check the @uref{http://mbm.livewiredev.com/, Motherboard Monitor} website and the
+@item Check the
 @uref{http://www.lm-sensors.org/wiki/UsefulLinks, "links"}
 page on @uref{http://www.lm-sensors.org, our website} some good cross-references.
 @end enumerate
@@ -903,8 +903,7 @@ misidentified. We are working on improving that too.
 @subsection Bad readings from a w8378[12]d!
 
 Do you own an ASUS motherboard?  Perhaps your chip is being
-misidentified.  Look on the motherboard (or at
-@uref{http://mbm.livewiredev.com}) for a 'Winbond' or Asus chip.
+misidentified.  Look on the motherboard for a 'Winbond' or Asus chip.
 Often the real device is an Asus as99127f. If so, the driver can be
 forced to recognize the as99127f with
 @command{force_as99127f=BUS,0x2d} where @code{BUS} is your i2c bus number.
@@ -1124,7 +1123,6 @@ But in any case you should figure out what is on the board:
 @enumerate
 @item Look at your motherboard.
 @item Check the manufacturer's website.
-@item Check the @uref{http://mbm.livewiredev.com/, Motherboard Monitor} website.
 @end enumerate
 
 When you know what chips you have, check the
