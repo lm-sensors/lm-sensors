@@ -48,7 +48,7 @@ char sensors_sysfs_mount[NAME_MAX];
 static
 int get_type_scaling(sensors_subfeature_type type)
 {
-	switch (type & 0xFF10) {
+	switch (type & 0xFF80) {
 	case SENSORS_SUBFEATURE_IN_INPUT:
 	case SENSORS_SUBFEATURE_TEMP_INPUT:
 		return 1000;
@@ -240,8 +240,8 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		default:
 			i = (sftype >> 8) * MAX_SENSORS_PER_TYPE *
 			    MAX_SUBFEATURES * 2 + nr * MAX_SUBFEATURES * 2 +
-			    ((sftype & 0x10) >> 4) * MAX_SUBFEATURES +
-			    (sftype & 0x0F);
+			    ((sftype & 0x80) >> 7) * MAX_SUBFEATURES +
+			    (sftype & 0x7F);
 		}
 
 		if (all_subfeatures[i].name) {
@@ -255,7 +255,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		/* fill in the subfeature members */
 		all_subfeatures[i].type = sftype;
 		all_subfeatures[i].name = strdup(name);
-		if (!(sftype & 0x10))
+		if (!(sftype & 0x80))
 			all_subfeatures[i].flags |= SENSORS_COMPUTE_MAPPING;
 		if (attr->method & SYSFS_METHOD_SHOW)
 			all_subfeatures[i].flags |= SENSORS_MODE_R;
