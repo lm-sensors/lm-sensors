@@ -33,26 +33,6 @@
 #define DO_SET 2
 #define DO_RRD 3
 
-int
-getRawLabel
-(const sensors_chip_name *name, int feature, const char **label) {
-  const sensors_subfeature *mainfeat, *sub;
-  int a, b;
-
-  a = 0;
-  while ((mainfeat = sensors_get_features(name, &a))) {
-    b = 0;
-    while ((sub = sensors_get_all_subfeatures(name, mainfeat->number, &b))) {
-      if (sub->number == feature) {
-        *label = sub->name;
-	return 0;
-      }
-    }
-  }
-  /* TODO: Ensure labels match RRD construct and are not repeated! */
-  return -1;
-}
-
 static const char *
 chipName
 (const sensors_chip_name *chip) {
@@ -87,12 +67,11 @@ doKnownChip
     ret = idChip (chip);
   for (index0 = 0; (ret == 0) && features[index0].format; ++ index0) {
     const FeatureDescriptor *feature = features + index0;
-    int labelNumber = feature->dataNumbers[0];
     int alarm, beep;
     char *label = NULL;
 
-    if (!(label = sensors_get_label (chip, labelNumber))) {
-      sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
+    if (!(label = sensors_get_label (chip, feature->feature))) {
+      sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, feature->feature->name);
       ret = 22;
     } else {
       double values[MAX_DATA];

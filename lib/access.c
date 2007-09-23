@@ -141,30 +141,27 @@ int sensors_chip_name_has_wildcards(const sensors_chip_name *chip)
    contain wildcard values! The returned string is newly allocated (free it
    yourself). On failure, NULL is returned.
    If no label exists for this feature, its name is returned itself. */
-char *sensors_get_label(const sensors_chip_name *name, int feature)
+char *sensors_get_label(const sensors_chip_name *name,
+			const sensors_feature *feature)
 {
 	char *label;
 	const sensors_chip *chip;
-	const sensors_subfeature *featureptr;
 	char buf[128], path[PATH_MAX];
 	FILE *f;
 	int i;
 
 	if (sensors_chip_name_has_wildcards(name))
 		return NULL;
-	if (!(featureptr = sensors_lookup_feature_nr(name, feature)))
-		return NULL;
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->labels_count; i++)
-			if (!strcmp(featureptr->name, chip->labels[i].name)) {
+			if (!strcmp(feature->name, chip->labels[i].name)) {
 				label = strdup(chip->labels[i].value);
 				goto sensors_get_label_exit;
 			}
 
 	/* No user specified label, check for a _label sysfs file */
-	snprintf(path, PATH_MAX, "%s/%s_label", name->path,
-		featureptr->name);
+	snprintf(path, PATH_MAX, "%s/%s_label", name->path, feature->name);
 	
 	if ((f = fopen(path, "r"))) {
 		i = fread(buf, 1, sizeof(buf) - 1, f);
@@ -178,7 +175,7 @@ char *sensors_get_label(const sensors_chip_name *name, int feature)
 	}
 
 	/* No label, return the feature name instead */
-	label = strdup(featureptr->name);
+	label = strdup(feature->name);
 	
 sensors_get_label_exit:
 	if (!label)
@@ -188,26 +185,16 @@ sensors_get_label_exit:
 }
 
 /* Looks up whether a feature should be ignored. Returns
-   1 if it should be ignored, 0 if not. This function takes
-   mappings into account. */
+   1 if it should be ignored, 0 if not. */
 static int sensors_get_ignored(const sensors_chip_name *name,
-			       const sensors_subfeature *feature)
+			       const sensors_feature *feature)
 {
 	const sensors_chip *chip;
-	const char *main_feature_name;
 	int i;
-
-	if (feature->mapping == SENSORS_NO_MAPPING)
-		main_feature_name = NULL;
-	else
-		main_feature_name = sensors_lookup_feature_nr(name,
-					feature->mapping)->name;
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->ignores_count; i++)
-			if (!strcmp(feature->name, chip->ignores[i].name) ||
-			    (main_feature_name &&
-			     !strcmp(main_feature_name, chip->ignores[i].name)))
+			if (!strcmp(feature->name, chip->ignores[i].name))
 				return 1;
 	return 0;
 }
@@ -352,42 +339,47 @@ sensors_get_all_features(const sensors_chip_name *name, int *nr)
 	for (i = 0; i < sensors_proc_chips_count; i++)
 		if (sensors_match_chip(&sensors_proc_chips[i].chip, name)) {
 			subfeature_list = sensors_proc_chips[i].subfeature;
-			while (*nr < sensors_proc_chips[i].subfeature_count
-			    && sensors_get_ignored(name, &subfeature_list[*nr]))
-				(*nr)++;
-			if (*nr == sensors_proc_chips[i].subfeature_count)
+			if (*nr >= sensors_proc_chips[i].subfeature_count)
 				return NULL;
 			return &subfeature_list[(*nr)++];
 		}
 	return NULL;
 }
 
-const sensors_subfeature *
+const sensors_feature *
 sensors_get_features(const sensors_chip_name *name, int *nr)
 {
-	const sensors_subfeature *feature;
+	const sensors_feature *feature_list;
+	int i;
 
-	while ((feature = sensors_get_all_features(name, nr))) {
-		if (feature->mapping == SENSORS_NO_MAPPING)
-			return feature;
-	}
+	for (i = 0; i < sensors_proc_chips_count; i++)
+		if (sensors_match_chip(&sensors_proc_chips[i].chip, name)) {
+			feature_list = sensors_proc_chips[i].feature;
+			while (*nr < sensors_proc_chips[i].feature_count
+			    && sensors_get_ignored(name, &feature_list[*nr]))
+				(*nr)++;
+			if (*nr >= sensors_proc_chips[i].feature_count)
+				return NULL;
+			return &feature_list[(*nr)++];
+		}
 	return NULL;	/* end of list */
 }
 
 const sensors_subfeature *
-sensors_get_all_subfeatures(const sensors_chip_name *name, int feature, int *nr)
+sensors_get_all_subfeatures(const sensors_chip_name *name,
+			const sensors_feature *feature, int *nr)
 {
 	const sensors_subfeature *subfeature;
 
 	/* Seek directly to the first subfeature */
-	if (*nr < feature)
-		*nr = feature;
+	if (*nr < feature->first_subfeature)
+		*nr = feature->first_subfeature;
 
 	subfeature = sensors_get_all_features(name, nr);
 	if (!subfeature)
 		return NULL;	/* end of list */
-	if (subfeature->number == feature ||
-	    subfeature->mapping == feature)
+	if (subfeature->number == feature->first_subfeature ||
+	    subfeature->mapping == feature->first_subfeature)
 		return subfeature;
 	return NULL;		/* end of subfeature list */
 }

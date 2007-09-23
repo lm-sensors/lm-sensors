@@ -82,11 +82,14 @@ int sensors_snprintf_chip_name(char *str, size_t size,
    it returns NULL */
 const char *sensors_get_adapter_name(const sensors_bus_id *bus);
 
+typedef struct sensors_feature sensors_feature;
+
 /* Look up the label which belongs to this chip. Note that chip should not
    contain wildcard values! The returned string is newly allocated (free it
    yourself). On failure, NULL is returned.
    If no label exists for this feature, its name is returned itself. */
-char *sensors_get_label(const sensors_chip_name *name, int feature);
+char *sensors_get_label(const sensors_chip_name *name,
+			const sensors_feature *feature);
 
 /* Read the value of a feature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
@@ -163,6 +166,13 @@ typedef enum sensors_feature_type {
 	SENSORS_FEATURE_UNKNOWN = INT_MAX,
 } sensors_feature_type;
 
+/* Data about a single chip feature (or category leader) */
+struct sensors_feature {
+	char *name;
+	int first_subfeature;
+	sensors_feature_type type;
+};
+
 /* Data about a single chip subfeature:
    name is the string name used to refer to this subfeature (in config files)
    number is the internal subfeature number, used in many functions to refer
@@ -188,7 +198,7 @@ typedef struct sensors_subfeature {
    more features are found NULL is returned.
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
-const sensors_subfeature *
+const sensors_feature *
 sensors_get_features(const sensors_chip_name *name, int *nr);
 
 /* This returns all subfeatures of a given main feature (including that
@@ -198,7 +208,8 @@ sensors_get_features(const sensors_chip_name *name, int *nr);
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
 const sensors_subfeature *
-sensors_get_all_subfeatures(const sensors_chip_name *name, int feature, int *nr);
+sensors_get_all_subfeatures(const sensors_chip_name *name,
+			    const sensors_feature *feature, int *nr);
 
 #ifdef __cplusplus
 }

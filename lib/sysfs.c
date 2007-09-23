@@ -163,6 +163,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	struct dlist *attrs;
 	sensors_subfeature *features;
 	sensors_subfeature *dyn_subfeatures;
+	sensors_feature *dyn_features;
 
 	attrs = sysfs_get_device_attributes(sysdir);
 
@@ -288,6 +289,31 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 
 	chip->subfeature = dyn_subfeatures;
 	chip->subfeature_count = fnum;
+
+	/* And now the main features */
+	fnum = 0;
+	for (i = 0; i < chip->subfeature_count; i++) {
+		if (chip->subfeature[i].mapping == SENSORS_NO_MAPPING)
+			fnum++;
+	}
+
+	dyn_features = calloc(fnum, sizeof(sensors_feature));
+	if (dyn_features == NULL) {
+		sensors_fatal_error(__FUNCTION__, "Out of memory");
+	}
+
+	fnum = 0;
+	for (i = 0; i < chip->subfeature_count; i++) {
+		if (chip->subfeature[i].mapping == SENSORS_NO_MAPPING) {
+			dyn_features[fnum].name = strdup(chip->subfeature[i].name);
+			dyn_features[fnum].first_subfeature = i;
+			dyn_features[fnum].type = chip->subfeature[i].type;
+			fnum++;
+		}
+	}
+
+	chip->feature = dyn_features;
+	chip->feature_count = fnum;
 
 exit_free:
 	free(features);

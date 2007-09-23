@@ -56,8 +56,6 @@ extern int unloadLib (void);
 
 /* from sense.c */
 
-extern int getRawLabel (const sensors_chip_name *name, int feature, const char **label);
-
 extern int readChips (void);
 extern int scanChips (void);
 extern int setChips (void);
@@ -91,7 +89,8 @@ typedef struct {
   DataType type;
   int alarmNumber;
   int beepNumber;
-  int dataNumbers[MAX_DATA + 1]; /* First entry is used for the label */
+  const sensors_feature *feature;
+  int dataNumbers[MAX_DATA + 1];
 } FeatureDescriptor;
 
 typedef struct {

@@ -156,15 +156,11 @@ applyToFeatures
 
         for (index0 = 0; (ret == 0) && (num < MAX_RRD_SENSORS) && features[index0].format; ++ index0) {
           const FeatureDescriptor *feature = features + index0;
-          int labelNumber = feature->dataNumbers[0];
-          const char *rawLabel = NULL;
+          const char *rawLabel = features->feature->name;
           char *label = NULL;
 
-          if (getRawLabel (chip, labelNumber, &rawLabel)) {
-            sensorLog (LOG_ERR, "Error getting raw sensor label: %s/#%d", chip->prefix, labelNumber);
-            ret = -1;
-          } else if (!(label = sensors_get_label (chip, labelNumber))) {
-            sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
+          if (!(label = sensors_get_label (chip, features->feature))) {
+            sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, rawLabel);
             ret = -1;
           } else  {
             rrdCheckLabel (rawLabel, num);
