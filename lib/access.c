@@ -86,41 +86,44 @@ sensors_for_all_config_chips(const sensors_chip_name *name,
 	return NULL;
 }
 
-/* Look up a subfeature in the intern chip list, and return a pointer to it.
-   Do not modify the struct the return value points to! Returns NULL if 
+/* Look up a chip in the intern chip list, and return a pointer to it.
+   Do not modify the struct the return value points to! Returns NULL if
    not found.*/
-static const sensors_subfeature *
-sensors_lookup_subfeature_nr(const sensors_chip_name *chip,
-			     int subfeat_nr)
+static const sensors_chip_features *
+sensors_lookup_chip(const sensors_chip_name *name)
 {
 	int i;
 
 	for (i = 0; i < sensors_proc_chips_count; i++)
-		if (sensors_match_chip(&sensors_proc_chips[i].chip, chip)) {
-			if (subfeat_nr < 0 ||
-			    subfeat_nr >= sensors_proc_chips[i].subfeature_count)
-				return NULL;
-			return sensors_proc_chips[i].subfeature + subfeat_nr;
-		}
+		if (sensors_match_chip(&sensors_proc_chips[i].chip, name))
+			return &sensors_proc_chips[i];
+
 	return NULL;
 }
 
-/* Look up a feature in the intern chip list, and return a pointer to it.
+/* Look up a subfeature of the given chip, and return a pointer to it.
+   Do not modify the struct the return value points to! Returns NULL if
+   not found.*/
+static const sensors_subfeature *
+sensors_lookup_subfeature_nr(const sensors_chip_features *chip,
+			     int subfeat_nr)
+{
+	if (subfeat_nr < 0 ||
+	    subfeat_nr >= chip->subfeature_count)
+		return NULL;
+	return chip->subfeature + subfeat_nr;
+}
+
+/* Look up a feature of the given chip, and return a pointer to it.
    Do not modify the struct the return value points to! Returns NULL if
    not found.*/
 static const sensors_feature *
-sensors_lookup_feature_nr(const sensors_chip_name *chip, int feat_nr)
+sensors_lookup_feature_nr(const sensors_chip_features *chip, int feat_nr)
 {
-	int i;
-
-	for (i = 0; i < sensors_proc_chips_count; i++)
-		if (sensors_match_chip(&sensors_proc_chips[i].chip, chip)) {
-			if (feat_nr < 0 ||
-			    feat_nr >= sensors_proc_chips[i].feature_count)
-				return NULL;
-			return sensors_proc_chips[i].feature + feat_nr;
-		}
-	return NULL;
+	if (feat_nr < 0 ||
+	    feat_nr >= chip->feature_count)
+		return NULL;
+	return chip->feature + feat_nr;
 }
 
 /* Look up a resource in the intern chip list, and return a pointer to it. 
@@ -225,6 +228,7 @@ static int sensors_get_ignored(const sensors_chip_name *name,
 int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
 		      double *result)
 {
+	const sensors_chip_features *chip_features;
 	const sensors_subfeature *subfeature;
 	const sensors_expr *expr = NULL;
 	double val;
@@ -232,7 +236,10 @@ int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
 
 	if (sensors_chip_name_has_wildcards(name))
 		return -SENSORS_ERR_WILDCARDS;
-	if (!(subfeature = sensors_lookup_subfeature_nr(name, subfeat_nr)))
+	if (!(chip_features = sensors_lookup_chip(name)))
+		return -SENSORS_ERR_NO_ENTRY;
+	if (!(subfeature = sensors_lookup_subfeature_nr(chip_features,
+							subfeat_nr)))
 		return -SENSORS_ERR_NO_ENTRY;
 	if (!(subfeature->flags & SENSORS_MODE_R))
 		return -SENSORS_ERR_ACCESS_R;
@@ -242,7 +249,7 @@ int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
 		const sensors_feature *feature;
 		const sensors_chip *chip;
 
-		feature = sensors_lookup_feature_nr(name,
+		feature = sensors_lookup_feature_nr(chip_features,
 					subfeature->mapping);
 
 		chip = NULL;
@@ -271,6 +278,7 @@ int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
 int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
 		      double value)
 {
+	const sensors_chip_features *chip_features;
 	const sensors_subfeature *subfeature;
 	const sensors_expr *expr = NULL;
 	int i, res;
@@ -278,7 +286,10 @@ int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
 
 	if (sensors_chip_name_has_wildcards(name))
 		return -SENSORS_ERR_WILDCARDS;
-	if (!(subfeature = sensors_lookup_subfeature_nr(name, subfeat_nr)))
+	if (!(chip_features = sensors_lookup_chip(name)))
+		return -SENSORS_ERR_NO_ENTRY;
+	if (!(subfeature = sensors_lookup_subfeature_nr(chip_features,
+							subfeat_nr)))
 		return -SENSORS_ERR_NO_ENTRY;
 	if (!(subfeature->flags & SENSORS_MODE_W))
 		return -SENSORS_ERR_ACCESS_W;
@@ -288,7 +299,7 @@ int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
 		const sensors_feature *feature;
 		const sensors_chip *chip;
 
-		feature = sensors_lookup_feature_nr(name,
+		feature = sensors_lookup_feature_nr(chip_features,
 					subfeature->mapping);
 
 		chip = NULL;
