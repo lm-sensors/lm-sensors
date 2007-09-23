@@ -84,7 +84,7 @@ static double get_value(const sensors_chip_name *name, int subfeat_nr)
 	return val;
 }
 
-static int sensors_get_label_size(const sensors_chip_name *name)
+static int get_label_size(const sensors_chip_name *name)
 {
 	int i;
 	const sensors_feature *iter;
@@ -434,7 +434,7 @@ void print_chip(const sensors_chip_name *name)
 	const sensors_feature *feature;
 	int i, label_size;
 
-	label_size = sensors_get_label_size(name);
+	label_size = get_label_size(name);
 
 	i = 0;
 	while ((feature = sensors_get_features(name, &i))) {
