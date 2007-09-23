@@ -221,6 +221,15 @@ const sensors_subfeature *
 sensors_get_all_subfeatures(const sensors_chip_name *name,
 			    const sensors_feature *feature, int *nr);
 
+/* This returns the subfeature of the given type for a given main feature,
+   if it exists, NULL otherwise.
+   Do not try to change the returned structure; you will corrupt internal
+   data structures. */
+const sensors_subfeature *
+sensors_get_subfeature(const sensors_chip_name *name,
+		       const sensors_feature *feature,
+		       sensors_subfeature_type type);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

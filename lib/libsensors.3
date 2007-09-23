@@ -46,6 +46,7 @@ libsensors \- publicly accessible functions provided by the sensors library
                                                     \fB*match, int *nr);\fP
 .B const sensors_feature *sensors_get_features(const sensors_chip_name *name, int *nr);\fP
 .B const sensors_subfeature *sensors_get_all_subfeatures(const sensors_chip_name *name, const sensors_feature *feature, int *nr);\fP
+.B const sensors_subfeature *sensors_get_subfeature(const sensors_chip_name *name, const sensors_feature *feature, sensors_subfeature_type type);\fP
 .B const char *libsensors_version;
 .fi
 .SH DESCRIPTION
@@ -137,6 +138,13 @@ data structures.
 This returns all subfeatures of a given main feature. nr is an internally
 used variable. Set it to zero to start at the begin of the list. If no
 more subfeatures are found NULL is returned.
+Do not try to change the returned structure; you will corrupt internal
+data structures.
+
+\fBconst sensors_subfeature *sensors_get_subfeature(const sensors_chip_name *name, const sensors_feature *feature, sensors_subfeature_type type);\fP
+.br
+This returns the subfeature of the given type for a given main feature,
+if it exists, NULL otherwise.
 Do not try to change the returned structure; you will corrupt internal
 data structures.
 

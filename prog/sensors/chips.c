@@ -70,32 +70,18 @@ static void print_label(const char *label, int space)
 	printf("%s:%*s", label, space - len, "");
 }
 
-static void sensors_get_available_features(const sensors_chip_name *name,
-					   const sensors_feature *feature,
-					   short *has_features,
-					   double *feature_vals, int size,
-					   int first_val)
+static double get_value(const sensors_chip_name *name, int subfeat_nr)
 {
-	const sensors_subfeature *iter;
-	int i = 0;
+	double val;
+	int err;
 
-	while ((iter = sensors_get_all_subfeatures(name, feature, &i))) {
-		int indx, err;
-
-		indx = iter->type - first_val;
-		if (indx < 0 || indx >= size)
-			/* New feature in libsensors? Ignore. */
-			continue;
-
-		err = sensors_get_value(name, iter->number, &feature_vals[indx]);
-		if (err) {
-			printf("ERROR: Can't get %s data: %s\n", iter->name,
-			       sensors_strerror(err));
-			continue;
-		}
-
-		has_features[indx] = 1;
+	err = sensors_get_value(name, subfeat_nr, &val);
+	if (err) {
+		printf("ERROR: Can't get value of subfeature %d: %s\n",
+		       subfeat_nr, sensors_strerror(err));
+		val = 0;
 	}
+	return val;
 }
 
 static int sensors_get_label_size(const sensors_chip_name *name)
@@ -138,59 +124,69 @@ static void print_temp_limits(double limit1, double limit2,
 		printf("ALARM  ");
 }
 
-#define TEMP_FEATURE(x)		has_features[x - SENSORS_SUBFEATURE_TEMP_INPUT]
-#define TEMP_FEATURE_VAL(x)	feature_vals[x - SENSORS_SUBFEATURE_TEMP_INPUT]
 static void print_chip_temp(const sensors_chip_name *name,
 			    const sensors_feature *feature,
 			    int label_size)
 {
+	const sensors_subfeature *sf, *sfmin, *sfmax, *sfcrit, *sfhyst;
 	double val, limit1, limit2;
 	const char *s1, *s2;
 	int alarm, crit_displayed = 0;
 	char *label;
-	const int size = SENSORS_SUBFEATURE_TEMP_TYPE - SENSORS_SUBFEATURE_TEMP_INPUT + 1;
-	short has_features[SENSORS_SUBFEATURE_TEMP_TYPE - SENSORS_SUBFEATURE_TEMP_INPUT + 1] = { 0, };
-	double feature_vals[SENSORS_SUBFEATURE_TEMP_TYPE - SENSORS_SUBFEATURE_TEMP_INPUT + 1] = { 0.0, };
 
 	if (!(label = sensors_get_label(name, feature))) {
 		printf("ERROR: Can't get temperature label!\n");
 		return;
 	}
+	print_label(label, label_size);
+	free(label);
 
-	sensors_get_available_features(name, feature, has_features,
-				       feature_vals, size,
-				       SENSORS_SUBFEATURE_TEMP_INPUT);
-	val = TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_INPUT);
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_TEMP_INPUT);
+	val = sf ? get_value(name, sf->number) : 0;
 
-	alarm = TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_ALARM) &&
-		TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_ALARM);
-	if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_MAX)) {
-		if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_MAX_ALARM) &&
-		    TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_MAX_ALARM))
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_TEMP_ALARM);
+	alarm = sf && get_value(name, sf->number);
+
+	sfmin = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_TEMP_MIN);
+	sfmax = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_TEMP_MAX);
+	sfcrit = sensors_get_subfeature(name, feature,
+					SENSORS_SUBFEATURE_TEMP_CRIT);
+	if (sfmax) {
+		sf = sensors_get_subfeature(name, feature,
+					SENSORS_SUBFEATURE_TEMP_MAX_ALARM);
+		if (sf && get_value(name, sf->number))
 			alarm |= 1;
 
-     		if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_MIN)) {
-			limit1 = TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_MIN);
+     		if (sfmin) {
+			limit1 = get_value(name, sfmin->number);
 			s1 = "low";
-			limit2 = TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_MAX);
+			limit2 = get_value(name, sfmax->number);
 			s2 = "high";
 
-			if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_MIN_ALARM) &&
-			    TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_MIN_ALARM))
+			sf = sensors_get_subfeature(name, feature,
+					SENSORS_SUBFEATURE_TEMP_MIN_ALARM);
+			if (sf && get_value(name, sf->number))
 				alarm |= 1;
 		} else {
-			limit1 = TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_MAX);
+			limit1 = get_value(name, sfmax->number);
 			s1 = "high";
 
-			if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_MAX_HYST)) {
-				limit2 = TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_MAX_HYST);
+			sfhyst = sensors_get_subfeature(name, feature,
+					SENSORS_SUBFEATURE_TEMP_MAX_HYST);
+			if (sfhyst) {
+				limit2 = get_value(name, sfhyst->number);
 				s2 = "hyst";
-			} else if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_CRIT)) {
-				limit2 = TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_CRIT);
+			} else if (sfcrit) {
+				limit2 = get_value(name, sfcrit->number);
 				s2 = "crit";
 
-				if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_CRIT_ALARM) &&
-				    TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_CRIT_ALARM))
+				sf = sensors_get_subfeature(name, feature,
+					SENSORS_SUBFEATURE_TEMP_CRIT_ALARM);
+				if (sf && get_value(name, sf->number))
 					alarm |= 1;
 				crit_displayed = 1;
 			} else {
@@ -198,20 +194,23 @@ static void print_chip_temp(const sensors_chip_name *name,
 				s2 = NULL;
 			}
 		}
-	} else if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_CRIT)) {
-		limit1 = TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_CRIT);
+	} else if (sfcrit) {
+		limit1 = get_value(name, sfcrit->number);
 		s1 = "crit";
 
-		if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_CRIT_HYST)) {
-			limit2 = TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_CRIT_HYST);
+		sfhyst = sensors_get_subfeature(name, feature,
+					SENSORS_SUBFEATURE_TEMP_CRIT_HYST);
+		if (sfhyst) {
+			limit2 = get_value(name, sfhyst->number);
 			s2 = "hyst";
 		} else {
 			limit2 = 0;
 			s2 = NULL;
 		}
 
-		if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_CRIT_ALARM) &&
-		    TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_CRIT_ALARM))
+		sf = sensors_get_subfeature(name, feature,
+					SENSORS_SUBFEATURE_TEMP_CRIT_ALARM);
+		if (sf && get_value(name, sf->number))
 			alarm |= 1;
 		crit_displayed = 1;
 	} else {
@@ -219,11 +218,10 @@ static void print_chip_temp(const sensors_chip_name *name,
 		s1 = s2 = NULL;
 	}
 
-	print_label(label, label_size);
-	free(label);
 
-	if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_FAULT) &&
-	    TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_FAULT)) {
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_TEMP_FAULT);
+	if (sf && get_value(name, sf->number)) {
 		printf("   FAULT  ");
 	} else {
 		if (fahrenheit)
@@ -232,28 +230,34 @@ static void print_chip_temp(const sensors_chip_name *name,
 	}
 	print_temp_limits(limit1, limit2, s1, s2, alarm);
 
-	if (!crit_displayed && TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_CRIT)) {
-		limit1 = TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_CRIT);
+	if (!crit_displayed && sfcrit) {
+		limit1 = get_value(name, sfcrit->number);
 		s1 = "crit";
 
-		if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_CRIT_HYST)) {
-			limit2 = TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_CRIT_HYST);
+		sfhyst = sensors_get_subfeature(name, feature,
+					SENSORS_SUBFEATURE_TEMP_CRIT_HYST);
+		if (sfhyst) {
+			limit2 = get_value(name, sfhyst->number);
 			s2 = "hyst";
 		} else {
 			limit2 = 0;
 			s2 = NULL;
 		}
 
-		alarm = TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_CRIT_ALARM) &&
-			TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_CRIT_ALARM);
+		sf = sensors_get_subfeature(name, feature,
+					SENSORS_SUBFEATURE_TEMP_CRIT_ALARM);
+		if (sf && get_value(name, sf->number))
+			alarm |= 1;
 
 		printf("\n%*s", label_size + 10, "");
 		print_temp_limits(limit1, limit2, s1, s2, alarm);
 	}
 
 	/* print out temperature sensor info */
-	if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_TYPE)) {
-		int sens = (int)TEMP_FEATURE_VAL(SENSORS_SUBFEATURE_TEMP_TYPE);
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_TEMP_TYPE);
+	if (sf) {
+		int sens = (int)get_value(name, sf->number);
 
 		/* older kernels / drivers sometimes report a beta value for
 		   thermistors */
@@ -271,15 +275,11 @@ static void print_chip_temp(const sensors_chip_name *name,
 	printf("\n");
 }
 
-#define IN_FEATURE(x)		has_features[x - SENSORS_SUBFEATURE_IN_INPUT]
-#define IN_FEATURE_VAL(x)	feature_vals[x - SENSORS_SUBFEATURE_IN_INPUT]
 static void print_chip_in(const sensors_chip_name *name,
 			  const sensors_feature *feature,
 			  int label_size)
 {
-	const int size = SENSORS_SUBFEATURE_IN_MAX_ALARM - SENSORS_SUBFEATURE_IN_INPUT + 1;
-	short has_features[SENSORS_SUBFEATURE_IN_MAX_ALARM - SENSORS_SUBFEATURE_IN_INPUT + 1] = { 0, };
-	double feature_vals[SENSORS_SUBFEATURE_IN_MAX_ALARM - SENSORS_SUBFEATURE_IN_INPUT + 1] = { 0.0, };
+	const sensors_subfeature *sf, *sfmin, *sfmax;
 	double val, alarm_max, alarm_min;
 	char *label;
 
@@ -287,32 +287,38 @@ static void print_chip_in(const sensors_chip_name *name,
 		printf("ERROR: Can't get in label!\n");
 		return;
 	}
-
-	sensors_get_available_features(name, feature, has_features,
-				       feature_vals, size,
-				       SENSORS_SUBFEATURE_IN_INPUT);
-	val = IN_FEATURE_VAL(SENSORS_SUBFEATURE_IN_INPUT);
-
 	print_label(label, label_size);
 	free(label);
+
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_IN_INPUT);
+	val = sf ? get_value(name, sf->number) : 0;
 	printf("%+6.2f V", val);
 
-	if (IN_FEATURE(SENSORS_SUBFEATURE_IN_MIN) &&
-	    IN_FEATURE(SENSORS_SUBFEATURE_IN_MAX))
+	sfmin = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_IN_MIN);
+	sfmax = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_IN_MAX);
+	if (sfmin && sfmax)
 		printf("  (min = %+6.2f V, max = %+6.2f V)",
-		       IN_FEATURE_VAL(SENSORS_SUBFEATURE_IN_MIN),
-		       IN_FEATURE_VAL(SENSORS_SUBFEATURE_IN_MAX));
-	else if (IN_FEATURE(SENSORS_SUBFEATURE_IN_MIN))
+		       get_value(name, sfmin->number),
+		       get_value(name, sfmax->number));
+	else if (sfmin)
 		printf("  (min = %+6.2f V)",
-		       IN_FEATURE_VAL(SENSORS_SUBFEATURE_IN_MIN));
-	else if (IN_FEATURE(SENSORS_SUBFEATURE_IN_MAX))
+		       get_value(name, sfmin->number));
+	else if (sfmax)
 		printf("  (max = %+6.2f V)",
-		       IN_FEATURE_VAL(SENSORS_SUBFEATURE_IN_MAX));
+		       get_value(name, sfmax->number));
 
-	if (IN_FEATURE(SENSORS_SUBFEATURE_IN_MAX_ALARM) ||
-	    IN_FEATURE(SENSORS_SUBFEATURE_IN_MIN_ALARM)) {
-		alarm_max = IN_FEATURE_VAL(SENSORS_SUBFEATURE_IN_MAX_ALARM);
-		alarm_min = IN_FEATURE_VAL(SENSORS_SUBFEATURE_IN_MIN_ALARM);
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_IN_ALARM);
+	sfmin = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_IN_MIN_ALARM);
+	sfmax = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_IN_MAX_ALARM);
+	if (sfmin || sfmax) {
+		alarm_max = sfmax ? get_value(name, sfmax->number) : 0;
+		alarm_min = sfmin ? get_value(name, sfmin->number) : 0;
 
 		if (alarm_min || alarm_max) {
 			printf(" ALARM (");
@@ -324,59 +330,57 @@ static void print_chip_in(const sensors_chip_name *name,
 
 			printf(")");
 		}
-	} else if (IN_FEATURE(SENSORS_SUBFEATURE_IN_ALARM)) {
+	} else if (sf) {
 		printf("   %s",
-		IN_FEATURE_VAL(SENSORS_SUBFEATURE_IN_ALARM) ? "ALARM" : "");
+		       get_value(name, sf->number) ? "ALARM" : "");
 	}
 
 	printf("\n");
 }
 
-#define FAN_FEATURE(x)		has_features[x - SENSORS_SUBFEATURE_FAN_INPUT]
-#define FAN_FEATURE_VAL(x)	feature_vals[x - SENSORS_SUBFEATURE_FAN_INPUT]
 static void print_chip_fan(const sensors_chip_name *name,
 			   const sensors_feature *feature,
 			   int label_size)
 {
+	const sensors_subfeature *sf, *sfmin, *sfdiv;
 	char *label;
-	const int size = SENSORS_SUBFEATURE_FAN_DIV - SENSORS_SUBFEATURE_FAN_INPUT + 1;
-	short has_features[SENSORS_SUBFEATURE_FAN_DIV - SENSORS_SUBFEATURE_FAN_INPUT + 1] = { 0, };
-	double feature_vals[SENSORS_SUBFEATURE_FAN_DIV - SENSORS_SUBFEATURE_FAN_INPUT + 1] = { 0.0, };
 	double val;
 
 	if (!(label = sensors_get_label(name, feature))) {
 		printf("ERROR: Can't get fan label!\n");
 		return;
 	}
-
 	print_label(label, label_size);
 	free(label);
 
-	sensors_get_available_features(name, feature, has_features,
-				       feature_vals, size,
-				       SENSORS_SUBFEATURE_FAN_INPUT);
-	val = FAN_FEATURE_VAL(SENSORS_SUBFEATURE_FAN_INPUT);
-
-	if (FAN_FEATURE(SENSORS_SUBFEATURE_FAN_FAULT) &&
-	    FAN_FEATURE_VAL(SENSORS_SUBFEATURE_FAN_FAULT))
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_FAN_INPUT);
+	val = sf ? get_value(name, sf->number) : 0;
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_FAN_FAULT);
+	if (sf && get_value(name, sf->number))
 		printf("   FAULT");
 	else
 		printf("%4.0f RPM", val);
 
-	if (FAN_FEATURE(SENSORS_SUBFEATURE_FAN_MIN) &&
-	    FAN_FEATURE(SENSORS_SUBFEATURE_FAN_DIV))
+	sfmin = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_FAN_MIN);
+	sfdiv = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_FAN_DIV);
+	if (sfmin && sfdiv)
 		printf("  (min = %4.0f RPM, div = %1.0f)",
-		       FAN_FEATURE_VAL(SENSORS_SUBFEATURE_FAN_MIN),
-		       FAN_FEATURE_VAL(SENSORS_SUBFEATURE_FAN_DIV));
-	else if (FAN_FEATURE(SENSORS_SUBFEATURE_FAN_MIN))
+		       get_value(name, sfmin->number),
+		       get_value(name, sfdiv->number));
+	else if (sfmin)
 		printf("  (min = %4.0f RPM)",
-		       FAN_FEATURE_VAL(SENSORS_SUBFEATURE_FAN_MIN));
-	else if (FAN_FEATURE(SENSORS_SUBFEATURE_FAN_DIV))
+		       get_value(name, sfmin->number));
+	else if (sfdiv)
 		printf("  (div = %1.0f)",
-		       FAN_FEATURE_VAL(SENSORS_SUBFEATURE_FAN_DIV));
+		       get_value(name, sfdiv->number));
 
-	if (FAN_FEATURE(SENSORS_SUBFEATURE_FAN_ALARM) &&
-	    FAN_FEATURE_VAL(SENSORS_SUBFEATURE_FAN_ALARM)) {
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_FAN_ALARM);
+	if (sf && get_value(name, sf->number)) {
 		printf("  ALARM");
 	}
 
@@ -390,9 +394,9 @@ static void print_chip_vid(const sensors_chip_name *name,
 	char *label;
 	const sensors_subfeature *subfeature;
 	double vid;
-	int i = 0;
 
-	subfeature = sensors_get_all_subfeatures(name, feature, &i);
+	subfeature = sensors_get_subfeature(name, feature,
+					    SENSORS_SUBFEATURE_VID);
 	if (!subfeature)
 		return;
 
@@ -411,9 +415,9 @@ static void print_chip_beep_enable(const sensors_chip_name *name,
 	char *label;
 	const sensors_subfeature *subfeature;
 	double beep_enable;
-	int i = 0;
 
-	subfeature = sensors_get_all_subfeatures(name, feature, &i);
+	subfeature = sensors_get_subfeature(name, feature,
+					    SENSORS_SUBFEATURE_BEEP_ENABLE);
 	if (!subfeature)
 		return;
 

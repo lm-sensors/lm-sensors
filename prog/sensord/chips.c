@@ -140,52 +140,26 @@ rrdF3
   return buff;
 }
 
-static void getAvailableFeatures (const sensors_chip_name *name,
-                                  const sensors_feature *feature,
-                                  short *has_features,
-                                  int *feature_nrs, int size,
-                                  int first_val)
-{
-  const sensors_subfeature *iter;
-  int i = 0;
-
-  while ((iter = sensors_get_all_subfeatures(name, feature, &i))) {
-    int index0;
-
-    index0 = iter->type - first_val;
-    if (index0 < 0 || index0 >= size)
-      /* New feature in libsensors? Ignore. */
-      continue;
-
-    has_features[index0] = 1;
-    feature_nrs[index0] = iter->number;
-  }
-}
-
-#define IN_FEATURE(x)      has_features[x - SENSORS_SUBFEATURE_IN_INPUT]
-#define IN_FEATURE_NR(x)   feature_nrs[x - SENSORS_SUBFEATURE_IN_INPUT]
 static void fillChipVoltage (FeatureDescriptor *voltage,
                              const sensors_chip_name *name,
                              const sensors_feature *feature)
 {
-  const int size = SENSORS_SUBFEATURE_IN_BEEP - SENSORS_SUBFEATURE_IN_INPUT + 1;
-  short has_features[SENSORS_SUBFEATURE_IN_BEEP - SENSORS_SUBFEATURE_IN_INPUT + 1] = { 0, };
-  int feature_nrs[SENSORS_SUBFEATURE_IN_BEEP - SENSORS_SUBFEATURE_IN_INPUT + 1];
+  const sensors_subfeature *sf, *sfmin, *sfmax;
   int pos = 0;
 
   voltage->rrd = rrdF2;
   voltage->type = DataType_voltage;
 
-  getAvailableFeatures (name, feature, has_features,
-                        feature_nrs, size, SENSORS_SUBFEATURE_IN_INPUT);
+  sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_IN_INPUT);
+  if (sf)
+    voltage->dataNumbers[pos++] = sf->number;
 
-  voltage->dataNumbers[pos++] = IN_FEATURE_NR(SENSORS_SUBFEATURE_IN_INPUT);
-
-  if (IN_FEATURE(SENSORS_SUBFEATURE_IN_MIN) &&
-      IN_FEATURE(SENSORS_SUBFEATURE_IN_MAX)) {
+  sfmin = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_IN_MIN);
+  sfmax = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_IN_MAX);
+  if (sfmin && sfmax) {
     voltage->format = fmtVolts_2;
-    voltage->dataNumbers[pos++] = IN_FEATURE_NR(SENSORS_SUBFEATURE_IN_MIN);
-    voltage->dataNumbers[pos++] = IN_FEATURE_NR(SENSORS_SUBFEATURE_IN_MAX);
+    voltage->dataNumbers[pos++] = sfmin->number;
+    voltage->dataNumbers[pos++] = sfmax->number;
   } else {
     voltage->format = fmtVolt_2;
   }
@@ -194,52 +168,46 @@ static void fillChipVoltage (FeatureDescriptor *voltage,
   voltage->dataNumbers[pos] = -1;
 
   /* alarm if applicable */
-  if (IN_FEATURE(SENSORS_SUBFEATURE_IN_ALARM)) {
-    voltage->alarmNumber = IN_FEATURE_NR(SENSORS_SUBFEATURE_IN_ALARM);
-  } else if (IN_FEATURE(SENSORS_SUBFEATURE_IN_MIN_ALARM)) {
-    voltage->alarmNumber = IN_FEATURE_NR(SENSORS_SUBFEATURE_IN_MIN_ALARM);
-  } else if (IN_FEATURE(SENSORS_SUBFEATURE_IN_MAX_ALARM)) {
-    voltage->alarmNumber = IN_FEATURE_NR(SENSORS_SUBFEATURE_IN_MAX_ALARM);
+  if ((sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_IN_ALARM)) ||
+      (sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_IN_MIN_ALARM)) ||
+      (sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_IN_MAX_ALARM))) {
+    voltage->alarmNumber = sf->number;
   } else {
     voltage->alarmNumber = -1;
   }
   /* beep if applicable */
-  if (IN_FEATURE(SENSORS_SUBFEATURE_IN_BEEP)) {
-    voltage->beepNumber = IN_FEATURE_NR(SENSORS_SUBFEATURE_IN_ALARM);
+  if ((sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_IN_BEEP))) {
+    voltage->beepNumber = sf->number;
   } else {
     voltage->beepNumber = -1;
   }
 }
 
-#define TEMP_FEATURE(x)      has_features[x - SENSORS_SUBFEATURE_TEMP_INPUT]
-#define TEMP_FEATURE_NR(x)   feature_nrs[x - SENSORS_SUBFEATURE_TEMP_INPUT]
 static void fillChipTemperature (FeatureDescriptor *temperature,
                                  const sensors_chip_name *name,
                                  const sensors_feature *feature)
 {
-  const int size = SENSORS_SUBFEATURE_TEMP_BEEP - SENSORS_SUBFEATURE_TEMP_INPUT + 1;
-  short has_features[SENSORS_SUBFEATURE_TEMP_BEEP - SENSORS_SUBFEATURE_TEMP_INPUT + 1] = { 0, };
-  int feature_nrs[SENSORS_SUBFEATURE_TEMP_BEEP - SENSORS_SUBFEATURE_TEMP_INPUT + 1];
+  const sensors_subfeature *sf, *sfmin, *sfmax, *sfhyst;
   int pos = 0;
 
   temperature->rrd = rrdF1;
   temperature->type = DataType_temperature;
 
-  getAvailableFeatures (name, feature, has_features,
-                        feature_nrs, size, SENSORS_SUBFEATURE_TEMP_INPUT);
+  sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_TEMP_INPUT);
+  if (sf)
+    temperature->dataNumbers[pos++] = sf->number;
 
-  temperature->dataNumbers[pos++] = TEMP_FEATURE_NR(SENSORS_SUBFEATURE_TEMP_INPUT);
-
-  if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_MIN) &&
-      TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_MAX)) {
+  sfmin = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_TEMP_MIN);
+  sfmax = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_TEMP_MAX);
+  sfhyst = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_TEMP_MAX_HYST);
+  if (sfmin && sfmax) {
     temperature->format = fmtTemps_minmax_1;
-    temperature->dataNumbers[pos++] = TEMP_FEATURE_NR(SENSORS_SUBFEATURE_TEMP_MIN);
-    temperature->dataNumbers[pos++] = TEMP_FEATURE_NR(SENSORS_SUBFEATURE_TEMP_MAX);
-  } else if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_MAX) &&
-             TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_MAX_HYST)) {
+    temperature->dataNumbers[pos++] = sfmin->number;
+    temperature->dataNumbers[pos++] = sfmax->number;
+  } else if (sfmax && sfhyst) {
     temperature->format = fmtTemps_1;
-    temperature->dataNumbers[pos++] = TEMP_FEATURE_NR(SENSORS_SUBFEATURE_TEMP_MAX);
-    temperature->dataNumbers[pos++] = TEMP_FEATURE_NR(SENSORS_SUBFEATURE_TEMP_MAX_HYST);
+    temperature->dataNumbers[pos++] = sfmax->number;
+    temperature->dataNumbers[pos++] = sfhyst->number;
   } else {
     temperature->format = fmtTemp_only;
   }
@@ -248,45 +216,41 @@ static void fillChipTemperature (FeatureDescriptor *temperature,
   temperature->dataNumbers[pos] = -1;
 
   /* alarm if applicable */
-  if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_ALARM)) {
-    temperature->alarmNumber = TEMP_FEATURE_NR(SENSORS_SUBFEATURE_TEMP_ALARM);
-  } else if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_MAX_ALARM)) {
-    temperature->alarmNumber = TEMP_FEATURE_NR(SENSORS_SUBFEATURE_TEMP_MAX_ALARM);
+  if ((sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_TEMP_ALARM)) ||
+      (sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_TEMP_MAX_ALARM))) {
+    temperature->alarmNumber = sf->number;
   } else {
     temperature->alarmNumber = -1;
   }
   /* beep if applicable */
-  if (TEMP_FEATURE(SENSORS_SUBFEATURE_TEMP_BEEP)) {
-    temperature->beepNumber = TEMP_FEATURE_NR(SENSORS_SUBFEATURE_TEMP_BEEP);
+  if ((sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_TEMP_BEEP))) {
+    temperature->beepNumber = sf->number;
   } else {
     temperature->beepNumber = -1;
   }
 }
 
-#define FAN_FEATURE(x)      has_features[x - SENSORS_SUBFEATURE_FAN_INPUT]
-#define FAN_FEATURE_NR(x)   feature_nrs[x - SENSORS_SUBFEATURE_FAN_INPUT]
 static void fillChipFan (FeatureDescriptor *fan,
                          const sensors_chip_name *name,
                          const sensors_feature *feature)
 {
-  const int size = SENSORS_SUBFEATURE_FAN_BEEP - SENSORS_SUBFEATURE_FAN_INPUT + 1;
-  short has_features[SENSORS_SUBFEATURE_FAN_BEEP - SENSORS_SUBFEATURE_FAN_INPUT + 1] = { 0, };
-  int feature_nrs[SENSORS_SUBFEATURE_FAN_BEEP - SENSORS_SUBFEATURE_FAN_INPUT + 1];
+  const sensors_subfeature *sf, *sfmin, *sfdiv;
   int pos = 0;
 
   fan->rrd = rrdF0;
   fan->type = DataType_rpm;
 
-  getAvailableFeatures (name, feature, has_features,
-                        feature_nrs, size, SENSORS_SUBFEATURE_FAN_INPUT);
+  sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_FAN_INPUT);
+  if (sf)
+    fan->dataNumbers[pos++] = sf->number;
 
-  fan->dataNumbers[pos++] = FAN_FEATURE_NR(SENSORS_SUBFEATURE_FAN_INPUT);
-
-  if (FAN_FEATURE(SENSORS_SUBFEATURE_FAN_MIN)) {
-    fan->dataNumbers[pos++] = FAN_FEATURE_NR(SENSORS_SUBFEATURE_FAN_MIN);
-    if (FAN_FEATURE(SENSORS_SUBFEATURE_FAN_DIV)) {
+  sfmin = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_FAN_MIN);
+  if (sfmin) {
+    fan->dataNumbers[pos++] = sfmin->number;
+    sfdiv = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_FAN_DIV);
+    if (sfdiv) {
       fan->format = fmtFans_0;
-      fan->dataNumbers[pos++] = FAN_FEATURE_NR(SENSORS_SUBFEATURE_FAN_DIV);
+      fan->dataNumbers[pos++] = sfdiv->number;
     } else {
       fan->format = fmtFans_nodiv_0;
     }
@@ -298,14 +262,16 @@ static void fillChipFan (FeatureDescriptor *fan,
   fan->dataNumbers[pos] = -1;
 
   /* alarm if applicable */
-  if (FAN_FEATURE(SENSORS_SUBFEATURE_FAN_ALARM)) {
-    fan->alarmNumber = FAN_FEATURE_NR(SENSORS_SUBFEATURE_FAN_ALARM);
+  sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_FAN_ALARM);
+  if (sf) {
+    fan->alarmNumber = sf->number;
   } else {
     fan->alarmNumber = -1;
   }
   /* beep if applicable */
-  if (FAN_FEATURE(SENSORS_SUBFEATURE_FAN_BEEP)) {
-    fan->beepNumber = FAN_FEATURE_NR(SENSORS_SUBFEATURE_FAN_BEEP);
+  sf = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_FAN_BEEP);
+  if (sf) {
+    fan->beepNumber = sf->number;
   } else {
     fan->beepNumber = -1;
   }
@@ -315,10 +281,9 @@ static void fillChipVid (FeatureDescriptor *vid,
                          const sensors_chip_name *name,
                          const sensors_feature *feature)
 {
-  int i = 0;
   const sensors_subfeature *sub;
 
-  sub = sensors_get_all_subfeatures(name, feature, &i);
+  sub = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_VID);
   if (!sub)
     return;
 
@@ -335,10 +300,9 @@ static void fillChipBeepEnable (FeatureDescriptor *beepen,
                                 const sensors_chip_name *name,
                                 const sensors_feature *feature)
 {
-  int i = 0;
   const sensors_subfeature *sub;
 
-  sub = sensors_get_all_subfeatures(name, feature, &i);
+  sub = sensors_get_subfeature(name, feature, SENSORS_SUBFEATURE_BEEP_ENABLE);
   if (!sub)
     return;
 

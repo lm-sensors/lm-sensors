@@ -393,6 +393,25 @@ sensors_get_all_subfeatures(const sensors_chip_name *name,
 	return NULL;	/* end of subfeature list */
 }
 
+const sensors_subfeature *
+sensors_get_subfeature(const sensors_chip_name *name,
+		       const sensors_feature *feature,
+		       sensors_subfeature_type type)
+{
+	const sensors_chip_features *chip;
+	int i;
+
+	if (!(chip = sensors_lookup_chip(name)))
+		return NULL;	/* No such chip */
+
+	for (i = feature->first_subfeature; i < chip->subfeature_count &&
+	     chip->subfeature[i].mapping == feature->number; i++) {
+		if (chip->subfeature[i].type == type)
+			return &chip->subfeature[i];
+	}
+	return NULL;	/* No such subfeature */
+}
+
 /* Evaluate an expression */
 int sensors_eval_expr(const sensors_chip_features *chip_features,
 		      const sensors_expr *expr,
