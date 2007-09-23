@@ -152,7 +152,7 @@ static void getAvailableFeatures (const sensors_chip_name *name,
   while ((iter = sensors_get_all_subfeatures(name, feature->number, &i))) {
     int index0;
 
-    index0 = iter->type - first_val - 1;
+    index0 = iter->type - first_val;
     if (index0 < 0 || index0 >= size)
       /* New feature in libsensors? Ignore. */
       continue;
@@ -162,23 +162,24 @@ static void getAvailableFeatures (const sensors_chip_name *name,
   }
 }
 
-#define IN_FEATURE(x)      has_features[x - SENSORS_FEATURE_IN - 1]
-#define IN_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_IN - 1]
+#define IN_FEATURE(x)      has_features[x - SENSORS_FEATURE_IN]
+#define IN_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_IN]
 static void fillChipVoltage (FeatureDescriptor *voltage,
                              const sensors_chip_name *name,
                              const sensors_subfeature *feature)
 {
-  const int size = SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN;
-  short has_features[SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN] = { 0, };
-  int feature_nrs[SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN];
+  const int size = SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN + 1;
+  short has_features[SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN + 1] = { 0, };
+  int feature_nrs[SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN + 1];
   int pos = 0;
 
   voltage->rrd = rrdF2;
   voltage->type = DataType_voltage;
-  voltage->dataNumbers[pos++] = feature->number;
 
   getAvailableFeatures (name, feature, has_features,
                         feature_nrs, size, SENSORS_FEATURE_IN);
+
+  voltage->dataNumbers[pos++] = IN_FEATURE_NR(SENSORS_FEATURE_IN);
 
   if (IN_FEATURE(SENSORS_FEATURE_IN_MIN) &&
       IN_FEATURE(SENSORS_FEATURE_IN_MAX)) {
@@ -210,23 +211,24 @@ static void fillChipVoltage (FeatureDescriptor *voltage,
   }
 }
 
-#define TEMP_FEATURE(x)      has_features[x - SENSORS_FEATURE_TEMP - 1]
-#define TEMP_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_TEMP - 1]
+#define TEMP_FEATURE(x)      has_features[x - SENSORS_FEATURE_TEMP]
+#define TEMP_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_TEMP]
 static void fillChipTemperature (FeatureDescriptor *temperature,
                                  const sensors_chip_name *name,
                                  const sensors_subfeature *feature)
 {
-  const int size = SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP;
-  short has_features[SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP] = { 0, };
-  int feature_nrs[SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP];
+  const int size = SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP + 1;
+  short has_features[SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP + 1] = { 0, };
+  int feature_nrs[SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP + 1];
   int pos = 0;
 
   temperature->rrd = rrdF1;
   temperature->type = DataType_temperature;
-  temperature->dataNumbers[pos++] = feature->number;
 
   getAvailableFeatures (name, feature, has_features,
                         feature_nrs, size, SENSORS_FEATURE_TEMP);
+
+  temperature->dataNumbers[pos++] = TEMP_FEATURE_NR(SENSORS_FEATURE_TEMP);
 
   if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MIN) &&
       TEMP_FEATURE(SENSORS_FEATURE_TEMP_MAX)) {
@@ -261,23 +263,24 @@ static void fillChipTemperature (FeatureDescriptor *temperature,
   }
 }
 
-#define FAN_FEATURE(x)      has_features[x - SENSORS_FEATURE_FAN - 1]
-#define FAN_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_FAN - 1]
+#define FAN_FEATURE(x)      has_features[x - SENSORS_FEATURE_FAN]
+#define FAN_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_FAN]
 static void fillChipFan (FeatureDescriptor *fan,
                          const sensors_chip_name *name,
                          const sensors_subfeature *feature)
 {
-  const int size = SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN;
-  short has_features[SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN] = { 0, };
-  int feature_nrs[SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN];
+  const int size = SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN + 1;
+  short has_features[SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN + 1] = { 0, };
+  int feature_nrs[SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN + 1];
   int pos = 0;
 
   fan->rrd = rrdF0;
   fan->type = DataType_rpm;
-  fan->dataNumbers[pos++] = feature->number;
 
   getAvailableFeatures (name, feature, has_features,
                         feature_nrs, size, SENSORS_FEATURE_FAN);
+
+  fan->dataNumbers[pos++] = FAN_FEATURE_NR(SENSORS_FEATURE_FAN);
 
   if (FAN_FEATURE(SENSORS_FEATURE_FAN_MIN)) {
     fan->dataNumbers[pos++] = FAN_FEATURE_NR(SENSORS_FEATURE_FAN_MIN);
