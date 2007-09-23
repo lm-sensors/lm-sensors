@@ -458,13 +458,9 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 {
 	sensors_chip *chip;
 	double value;
-	int i, j;
+	int i;
 	int err = 0, res;
 	const sensors_subfeature *subfeature;
-	int *feature_list = NULL;
-	int feature_count = 0;
-	int feature_max = 0;
-	int subfeat_nr;
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->sets_count; i++) {
@@ -476,17 +472,6 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 				err = SENSORS_ERR_NO_ENTRY;
 				continue;
 			}
-			subfeat_nr = subfeature->number;
-
-			/* Check whether we already set this feature */
-			for (j = 0; j < feature_count; j++)
-				if (feature_list[j] == subfeat_nr)
-					break;
-			if (j != feature_count)
-				continue;
-			sensors_add_array_el(&subfeat_nr, &feature_list,
-					     &feature_count, &feature_max,
-					     sizeof(int));
 
 			res = sensors_eval_expr(name, chip->sets[i].value, 0,
 					      &value);
@@ -496,14 +481,14 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 				err = res;
 				continue;
 			}
-			if ((res = sensors_set_value(name, subfeat_nr, value))) {
+			if ((res = sensors_set_value(name, subfeature->number,
+						     value))) {
 				sensors_parse_error("Failed to set value",
 						chip->sets[i].lineno);
 				err = res;
 				continue;
 			}
 		}
-	free(feature_list);
 	return err;
 }
 
