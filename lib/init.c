@@ -57,7 +57,7 @@ static void free_chip_features(sensors_chip_features *features)
 	int i;
 
 	for (i = 0; i < features->feature_count; i++)
-		free(features->feature[i].data.name);
+		free(features->feature[i].name);
 	free(features->feature);
 }
 

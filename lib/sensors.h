@@ -163,8 +163,18 @@ typedef enum sensors_feature_type {
 	SENSORS_FEATURE_UNKNOWN = INT_MAX,
 } sensors_feature_type;
 
-/* This structure is used when you want to get all features of a specific
-   chip. */
+/* Data about a single chip feature:
+   name is the string name used to refer to this feature (in config files)
+   number is the internal feature number, used in many functions to refer
+     to this feature
+   type is the feature or subfeature type
+   mapping is either SENSORS_NO_MAPPING if this is feature is the
+     main element of category; or it is the number of a feature with which
+     this subfeature is logically grouped (a group could be fan, fan_min
+     and fan_div)
+   flags is a bitfield, its value is a combination of SENSORS_MODE_R (readable),
+     SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING (affected by the
+     computation rules of the main feature) */
 typedef struct sensors_feature_data {
 	char *name;
 	int number;

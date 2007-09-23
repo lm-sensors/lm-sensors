@@ -120,26 +120,10 @@ typedef struct sensors_bus {
 	int lineno;
 } sensors_bus;
 
-/* Internal data about a single chip feature.
-   name is the string name used to refer to this feature (both in config
-     files and through user functions);
-   number is the internal feature number, used in many functions to refer
-     to this feature
-   mapping is either SENSORS_NO_MAPPING if this is feature is the
-     main element of category; or it is the number of a feature with which
-     this feature is logically grouped (a group could be fan, fan_max and
-     fan_div)
-   flags is a bitfield, its value is a combination of SENSORS_MODE_R (readable),
-     SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING (affected by the
-     computation rules of the main feature). */
-typedef struct sensors_chip_feature {
-	sensors_feature_data data;
-} sensors_chip_feature;
-
 /* Internal data about all features of a type of chip */
 typedef struct sensors_chip_features {
 	struct sensors_chip_name chip;
-	struct sensors_chip_feature *feature;
+	struct sensors_feature_data *feature;
 	int feature_count;
 } sensors_chip_features;
 

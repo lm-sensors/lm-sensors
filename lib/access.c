@@ -89,7 +89,7 @@ sensors_for_all_config_chips(const sensors_chip_name *name,
 /* Look up a resource in the intern chip list, and return a pointer to it. 
    Do not modify the struct the return value points to! Returns NULL if 
    not found.*/
-const sensors_chip_feature *sensors_lookup_feature_nr(const sensors_chip_name *chip,
+const sensors_feature_data *sensors_lookup_feature_nr(const sensors_chip_name *chip,
 						      int feature)
 {
 	int i;
@@ -107,17 +107,17 @@ const sensors_chip_feature *sensors_lookup_feature_nr(const sensors_chip_name *c
 /* Look up a resource in the intern chip list, and return a pointer to it. 
    Do not modify the struct the return value points to! Returns NULL if 
    not found.*/
-static const sensors_chip_feature *
+static const sensors_feature_data *
 sensors_lookup_feature_name(const sensors_chip_name *chip, const char *feature)
 {
 	int i, j;
-	const sensors_chip_feature *features;
+	const sensors_feature_data *features;
 
 	for (i = 0; i < sensors_proc_chips_count; i++)
 		if (sensors_match_chip(&sensors_proc_chips[i].chip, chip)) {
 			features = sensors_proc_chips[i].feature;
 			for (j = 0; j < sensors_proc_chips[i].feature_count; j++)
-				if (!strcmp(features[j].data.name, feature))
+				if (!strcmp(features[j].name, feature))
 					return features + j;
 		}
 	return NULL;
@@ -145,7 +145,7 @@ char *sensors_get_label(const sensors_chip_name *name, int feature)
 {
 	char *label;
 	const sensors_chip *chip;
-	const sensors_chip_feature *featureptr;
+	const sensors_feature_data *featureptr;
 	char buf[128], path[PATH_MAX];
 	FILE *f;
 	int i;
@@ -157,14 +157,14 @@ char *sensors_get_label(const sensors_chip_name *name, int feature)
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->labels_count; i++)
-			if (!strcmp(featureptr->data.name, chip->labels[i].name)) {
+			if (!strcmp(featureptr->name, chip->labels[i].name)) {
 				label = strdup(chip->labels[i].value);
 				goto sensors_get_label_exit;
 			}
 
 	/* No user specified label, check for a _label sysfs file */
 	snprintf(path, PATH_MAX, "%s/%s_label", name->path,
-		featureptr->data.name);
+		featureptr->name);
 	
 	if ((f = fopen(path, "r"))) {
 		i = fread(buf, 1, sizeof(buf) - 1, f);
@@ -178,7 +178,7 @@ char *sensors_get_label(const sensors_chip_name *name, int feature)
 	}
 
 	/* No label, return the feature name instead */
-	label = strdup(featureptr->data.name);
+	label = strdup(featureptr->name);
 	
 sensors_get_label_exit:
 	if (!label)
@@ -191,21 +191,21 @@ sensors_get_label_exit:
    1 if it should be ignored, 0 if not. This function takes
    mappings into account. */
 static int sensors_get_ignored(const sensors_chip_name *name,
-			       const sensors_chip_feature *feature)
+			       const sensors_feature_data *feature)
 {
 	const sensors_chip *chip;
 	const char *main_feature_name;
 	int i;
 
-	if (feature->data.mapping == SENSORS_NO_MAPPING)
+	if (feature->mapping == SENSORS_NO_MAPPING)
 		main_feature_name = NULL;
 	else
 		main_feature_name = sensors_lookup_feature_nr(name,
-					feature->data.mapping)->data.name;
+					feature->mapping)->name;
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->ignores_count; i++)
-			if (!strcmp(feature->data.name, chip->ignores[i].name) ||
+			if (!strcmp(feature->name, chip->ignores[i].name) ||
 			    (main_feature_name &&
 			     !strcmp(main_feature_name, chip->ignores[i].name)))
 				return 1;
@@ -218,8 +218,8 @@ static int sensors_get_ignored(const sensors_chip_name *name,
 int sensors_get_value(const sensors_chip_name *name, int feature,
 		      double *result)
 {
-	const sensors_chip_feature *main_feature;
-	const sensors_chip_feature *alt_feature;
+	const sensors_feature_data *main_feature;
+	const sensors_feature_data *alt_feature;
 	const sensors_chip *chip;
 	const sensors_expr *expr = NULL;
 	double val;
@@ -231,21 +231,21 @@ int sensors_get_value(const sensors_chip_name *name, int feature,
 	if (!(main_feature = sensors_lookup_feature_nr(name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 
-	if (main_feature->data.flags & SENSORS_COMPUTE_MAPPING)
+	if (main_feature->flags & SENSORS_COMPUTE_MAPPING)
 		alt_feature = sensors_lookup_feature_nr(name,
-					main_feature->data.mapping);
+					main_feature->mapping);
 	else
 		alt_feature = NULL;
 
-	if (!(main_feature->data.flags & SENSORS_MODE_R))
+	if (!(main_feature->flags & SENSORS_MODE_R))
 		return -SENSORS_ERR_ACCESS_R;
 	for (chip = NULL;
 	     !expr && (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; !final_expr && (i < chip->computes_count); i++) {
-			if (!strcmp(main_feature->data.name, chip->computes[i].name)) {
+			if (!strcmp(main_feature->name, chip->computes[i].name)) {
 				expr = chip->computes[i].from_proc;
 				final_expr = 1;
-			} else if (alt_feature && !strcmp(alt_feature->data.name,
+			} else if (alt_feature && !strcmp(alt_feature->name,
 					       chip->computes[i].name)) {
 				expr = chip->computes[i].from_proc;
 			}
@@ -265,8 +265,8 @@ int sensors_get_value(const sensors_chip_name *name, int feature,
 int sensors_set_value(const sensors_chip_name *name, int feature,
 		      double value)
 {
-	const sensors_chip_feature *main_feature;
-	const sensors_chip_feature *alt_feature;
+	const sensors_feature_data *main_feature;
+	const sensors_feature_data *alt_feature;
 	const sensors_chip *chip;
 	const sensors_expr *expr = NULL;
 	int i, res;
@@ -278,21 +278,21 @@ int sensors_set_value(const sensors_chip_name *name, int feature,
 	if (!(main_feature = sensors_lookup_feature_nr(name, feature)))
 		return -SENSORS_ERR_NO_ENTRY;
 
-	if (main_feature->data.flags & SENSORS_COMPUTE_MAPPING)
+	if (main_feature->flags & SENSORS_COMPUTE_MAPPING)
 		alt_feature = sensors_lookup_feature_nr(name,
-					main_feature->data.mapping);
+					main_feature->mapping);
 	else
 		alt_feature = NULL;
 
-	if (!(main_feature->data.flags & SENSORS_MODE_W))
+	if (!(main_feature->flags & SENSORS_MODE_W))
 		return -SENSORS_ERR_ACCESS_W;
 	for (chip = NULL;
 	     !expr && (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; !final_expr && (i < chip->computes_count); i++)
-			if (!strcmp(main_feature->data.name, chip->computes[i].name)) {
+			if (!strcmp(main_feature->name, chip->computes[i].name)) {
 				expr = chip->computes->to_proc;
 				final_expr = 1;
-			} else if (alt_feature && !strcmp(alt_feature->data.name,
+			} else if (alt_feature && !strcmp(alt_feature->name,
 					       chip->computes[i].name)) {
 				expr = chip->computes[i].to_proc;
 			}
@@ -347,7 +347,7 @@ const char *sensors_get_adapter_name(const sensors_bus_id *bus)
 const sensors_feature_data *sensors_get_all_features(const sensors_chip_name *name,
 						     int *nr)
 {
-	sensors_chip_feature *feature_list;
+	sensors_feature_data *feature_list;
 	int i;
 
 	for (i = 0; i < sensors_proc_chips_count; i++)
@@ -358,7 +358,7 @@ const sensors_feature_data *sensors_get_all_features(const sensors_chip_name *na
 				(*nr)++;
 			if (*nr == sensors_proc_chips[i].feature_count)
 				return NULL;
-			return &feature_list[(*nr)++].data;
+			return &feature_list[(*nr)++];
 		}
 	return NULL;
 }
@@ -370,7 +370,7 @@ int sensors_eval_expr(const sensors_chip_name *name,
 {
 	double res1, res2;
 	int res;
-	const sensors_chip_feature *feature;
+	const sensors_feature_data *feature;
 
 	if (expr->kind == sensors_kind_val) {
 		*result = expr->data.val;
@@ -384,7 +384,7 @@ int sensors_eval_expr(const sensors_chip_name *name,
 		if (!(feature = sensors_lookup_feature_name(name,
 							    expr->data.var)))
 			return SENSORS_ERR_NO_ENTRY;
-		if (!(res = sensors_get_value(name, feature->data.number, result)))
+		if (!(res = sensors_get_value(name, feature->number, result)))
 			return res;
 		return 0;
 	}
@@ -432,7 +432,7 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 	double value;
 	int i, j;
 	int err = 0, res;
-	const sensors_chip_feature *feature;
+	const sensors_feature_data *feature;
 	int *feature_list = NULL;
 	int feature_count = 0;
 	int feature_max = 0;
@@ -448,7 +448,7 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 				err = SENSORS_ERR_NO_ENTRY;
 				continue;
 			}
-			feature_nr = feature->data.number;
+			feature_nr = feature->number;
 
 			/* Check whether we already set this feature */
 			for (j = 0; j < feature_count; j++)
