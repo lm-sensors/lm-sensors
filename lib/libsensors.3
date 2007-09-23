@@ -104,8 +104,24 @@ To start at the beginning of the list, use 0 for nr; NULL is returned if
 we are at the end of the list. Do not try to change these chip names, as
 they point to internal structures!
 
-This structure contains information related to a given subfeature of a
+This structure contains information related to a given feature of a
 specific chip.
+.br
+\fBtypedef struct sensors_feature {
+.br
+  const char *name;
+.br
+  int number;
+.br
+  sensors_feature_type type;
+.br
+} sensors_feature;\fP
+.br
+There are other member not documented here, which are only meant for libsensors
+internal use.
+
+This structure contains information related to a given subfeature of a
+specific chip feature.
 .br
 \fBtypedef struct sensors_subfeature {
 .br
@@ -113,7 +129,7 @@ specific chip.
 .br
   int number;
 .br
-  sensors_feature_type type;
+  sensors_subfeature_type type;
 .br
   int mapping;
 .br
