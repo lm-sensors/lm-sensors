@@ -358,43 +358,39 @@ const char *sensors_get_adapter_name(const sensors_bus_id *bus)
 const sensors_feature *
 sensors_get_features(const sensors_chip_name *name, int *nr)
 {
-	const sensors_feature *feature_list;
-	int i;
+	const sensors_chip_features *chip;
 
-	for (i = 0; i < sensors_proc_chips_count; i++)
-		if (sensors_match_chip(&sensors_proc_chips[i].chip, name)) {
-			feature_list = sensors_proc_chips[i].feature;
-			while (*nr < sensors_proc_chips[i].feature_count
-			    && sensors_get_ignored(name, &feature_list[*nr]))
-				(*nr)++;
-			if (*nr >= sensors_proc_chips[i].feature_count)
-				return NULL;
-			return &feature_list[(*nr)++];
-		}
-	return NULL;	/* end of list */
+	if (!(chip = sensors_lookup_chip(name)))
+		return NULL;	/* No such chip */
+
+	while (*nr < chip->feature_count
+	    && sensors_get_ignored(name, &chip->feature[*nr]))
+		(*nr)++;
+	if (*nr >= chip->feature_count)
+		return NULL;
+	return &chip->feature[(*nr)++];
 }
 
 const sensors_subfeature *
 sensors_get_all_subfeatures(const sensors_chip_name *name,
 			const sensors_feature *feature, int *nr)
 {
+	const sensors_chip_features *chip;
 	const sensors_subfeature *subfeature;
-	int i;
+
+	if (!(chip = sensors_lookup_chip(name)))
+		return NULL;	/* No such chip */
 
 	/* Seek directly to the first subfeature */
 	if (*nr < feature->first_subfeature)
 		*nr = feature->first_subfeature;
 
-	for (i = 0; i < sensors_proc_chips_count; i++)
-		if (sensors_match_chip(&sensors_proc_chips[i].chip, name)) {
-			if (*nr >= sensors_proc_chips[i].subfeature_count)
-				return NULL;	/* end of list */
-			subfeature = &sensors_proc_chips[i].subfeature[(*nr)++];
-			if (subfeature->mapping == feature->number)
-				return subfeature;
-			return NULL;	/* end of subfeature list */
-		}
-	return NULL;		/* no matching chip */
+	if (*nr >= chip->subfeature_count)
+		return NULL;	/* end of list */
+	subfeature = &chip->subfeature[(*nr)++];
+	if (subfeature->mapping == feature->number)
+		return subfeature;
+	return NULL;	/* end of subfeature list */
 }
 
 /* Evaluate an expression */
