@@ -258,8 +258,9 @@ int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
 			}
 	}
 
-	if (sensors_read_sysfs_attr(name, subfeature, &val))
-		return -SENSORS_ERR_PROC;
+	res = sensors_read_sysfs_attr(name, subfeature, &val);
+	if (res)
+		return res;
 	if (!expr)
 		*result = val;
 	else if ((res = sensors_eval_expr(chip_features, expr, val, result)))
@@ -313,9 +314,7 @@ int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
 		if ((res = sensors_eval_expr(chip_features, expr,
 					     value, &to_write)))
 			return res;
-	if (sensors_write_sysfs_attr(name, subfeature, to_write))
-		return -SENSORS_ERR_PROC;
-	return 0;
+	return sensors_write_sysfs_attr(name, subfeature, to_write);
 }
 
 const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
