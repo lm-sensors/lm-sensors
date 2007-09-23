@@ -141,12 +141,12 @@ rrdF3
 }
 
 static void getAvailableFeatures (const sensors_chip_name *name,
-                                  const sensors_feature_data *feature,
+                                  const sensors_subfeature *feature,
                                   short *has_features,
                                   int *feature_nrs, int size,
                                   int first_val)
 {
-  const sensors_feature_data *iter;
+  const sensors_subfeature *iter;
   int i = 0;
 
   while ((iter = sensors_get_all_subfeatures(name, feature->number, &i))) {
@@ -166,7 +166,7 @@ static void getAvailableFeatures (const sensors_chip_name *name,
 #define IN_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_IN - 1]
 static void fillChipVoltage (FeatureDescriptor *voltage,
                              const sensors_chip_name *name,
-                             const sensors_feature_data *feature)
+                             const sensors_subfeature *feature)
 {
   const int size = SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN;
   short has_features[SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN] = { 0, };
@@ -214,7 +214,7 @@ static void fillChipVoltage (FeatureDescriptor *voltage,
 #define TEMP_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_TEMP - 1]
 static void fillChipTemperature (FeatureDescriptor *temperature,
                                  const sensors_chip_name *name,
-                                 const sensors_feature_data *feature)
+                                 const sensors_subfeature *feature)
 {
   const int size = SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP;
   short has_features[SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP] = { 0, };
@@ -265,7 +265,7 @@ static void fillChipTemperature (FeatureDescriptor *temperature,
 #define FAN_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_FAN - 1]
 static void fillChipFan (FeatureDescriptor *fan,
                          const sensors_chip_name *name,
-                         const sensors_feature_data *feature)
+                         const sensors_subfeature *feature)
 {
   const int size = SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN;
   short has_features[SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN] = { 0, };
@@ -309,7 +309,7 @@ static void fillChipFan (FeatureDescriptor *fan,
 }
 
 static void fillChipVid (FeatureDescriptor *vid,
-                         const sensors_feature_data *feature)
+                         const sensors_subfeature *feature)
 {
   vid->format = fmtVolt_3;
   vid->rrd = rrdF3;
@@ -321,7 +321,7 @@ static void fillChipVid (FeatureDescriptor *vid,
 }
 
 static void fillChipBeepEnable (FeatureDescriptor *beepen,
-                                const sensors_feature_data *feature)
+                                const sensors_subfeature *feature)
 {
   beepen->format = fmtSoundAlarm;
   beepen->rrd = rrdF0;
@@ -336,7 +336,7 @@ static
 FeatureDescriptor * generateChipFeatures (const sensors_chip_name *chip)
 {
 	int nr, count = 1;
-	const sensors_feature_data *sensor;
+	const sensors_subfeature *sensor;
 	FeatureDescriptor *features;
 
 	/* How many main features do we have? */

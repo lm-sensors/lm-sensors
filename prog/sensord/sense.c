@@ -36,7 +36,7 @@
 int
 getRawLabel
 (const sensors_chip_name *name, int feature, const char **label) {
-  const sensors_feature_data *mainfeat, *sub;
+  const sensors_subfeature *mainfeat, *sub;
   int a, b;
 
   a = 0;

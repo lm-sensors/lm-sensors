@@ -56,9 +56,9 @@ static void free_chip_features(sensors_chip_features *features)
 {
 	int i;
 
-	for (i = 0; i < features->feature_count; i++)
-		free(features->feature[i].name);
-	free(features->feature);
+	for (i = 0; i < features->subfeature_count; i++)
+		free(features->subfeature[i].name);
+	free(features->subfeature);
 }
 
 static void free_bus(sensors_bus *bus)

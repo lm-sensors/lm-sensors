@@ -123,8 +123,8 @@ typedef struct sensors_bus {
 /* Internal data about all features of a type of chip */
 typedef struct sensors_chip_features {
 	struct sensors_chip_name chip;
-	struct sensors_feature_data *feature;
-	int feature_count;
+	struct sensors_subfeature *subfeature;
+	int subfeature_count;
 } sensors_chip_features;
 
 extern sensors_chip *sensors_config_chips;

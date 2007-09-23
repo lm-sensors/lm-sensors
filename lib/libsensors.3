@@ -103,9 +103,10 @@ To start at the beginning of the list, use 0 for nr; NULL is returned if
 we are at the end of the list. Do not try to change these chip names, as
 they point to internal structures!
 
-This structure is used when you want to get all features of a specific chip.
+This structure contains information related to a given subfeature of a
+specific chip.
 .br
-\fBtypedef struct sensors_feature_data {
+\fBtypedef struct sensors_subfeature {
 .br
   const char *name;
 .br
@@ -117,7 +118,7 @@ This structure is used when you want to get all features of a specific chip.
 .br
   unsigned int flags;
 .br
-} sensors_feature_data;\fP
+} sensors_subfeature;\fP
 .br
 The flags field is a bitfield, its value is a combination of
 SENSORS_MODE_R (readable), SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING

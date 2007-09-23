@@ -31,7 +31,7 @@
 void print_chip_raw(const sensors_chip_name *name)
 {
 	int a, b;
-	const sensors_feature_data *feature, *sub;
+	const sensors_subfeature *feature, *sub;
 	char *label;
 	double val;
 
@@ -73,12 +73,12 @@ static void print_label(const char *label, int space)
 }
 
 static void sensors_get_available_features(const sensors_chip_name *name,
-					   const sensors_feature_data *feature,
+					   const sensors_subfeature *feature,
 					   short *has_features,
 					   double *feature_vals, int size,
 					   int first_val)
 {
-	const sensors_feature_data *iter;
+	const sensors_subfeature *iter;
 	int i = 0;
 
 	while ((iter = sensors_get_all_subfeatures(name, feature->number, &i))) {
@@ -103,7 +103,7 @@ static void sensors_get_available_features(const sensors_chip_name *name,
 static int sensors_get_label_size(const sensors_chip_name *name)
 {
 	int i;
-	const sensors_feature_data *iter;
+	const sensors_subfeature *iter;
 	char *label;
 	unsigned int max_size = 11;	/* 11 as minumum label width */
 
@@ -143,7 +143,7 @@ static void print_temp_limits(double limit1, double limit2,
 #define TEMP_FEATURE(x)		has_features[x - SENSORS_FEATURE_TEMP - 1]
 #define TEMP_FEATURE_VAL(x)	feature_vals[x - SENSORS_FEATURE_TEMP - 1]
 static void print_chip_temp(const sensors_chip_name *name,
-			    const sensors_feature_data *feature,
+			    const sensors_subfeature *feature,
 			    int label_size)
 {
 	double val, limit1, limit2;
@@ -281,7 +281,7 @@ static void print_chip_temp(const sensors_chip_name *name,
 #define IN_FEATURE(x)		has_features[x - SENSORS_FEATURE_IN - 1]
 #define IN_FEATURE_VAL(x)	feature_vals[x - SENSORS_FEATURE_IN - 1]
 static void print_chip_in(const sensors_chip_name *name,
-			  const sensors_feature_data *feature,
+			  const sensors_subfeature *feature,
 			  int label_size)
 {
 	const int size = SENSORS_FEATURE_IN_MAX_ALARM - SENSORS_FEATURE_IN;
@@ -346,7 +346,7 @@ static void print_chip_in(const sensors_chip_name *name,
 #define FAN_FEATURE(x)		has_features[x - SENSORS_FEATURE_FAN - 1]
 #define FAN_FEATURE_VAL(x)	feature_vals[x - SENSORS_FEATURE_FAN - 1]
 static void print_chip_fan(const sensors_chip_name *name,
-			   const sensors_feature_data *feature,
+			   const sensors_subfeature *feature,
 			   int label_size)
 {
 	char *label;
@@ -428,7 +428,7 @@ static void print_chip_beep_enable(const sensors_chip_name *name, int f_beep,
 
 void print_chip(const sensors_chip_name *name)
 {
-	const sensors_feature_data *feature;
+	const sensors_subfeature *feature;
 	int i, label_size;
 
 	label_size = sensors_get_label_size(name);

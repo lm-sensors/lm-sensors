@@ -112,12 +112,12 @@ int sensors_do_chip_sets(const sensors_chip_name *name);
 const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
 						    *match, int *nr);
 
-/* These defines are used in the flags field of sensors_feature_data */
+/* These defines are used in the flags field of sensors_subfeature */
 #define SENSORS_MODE_R			1
 #define SENSORS_MODE_W			2
 #define SENSORS_COMPUTE_MAPPING		4
 
-/* This define is used in the mapping field of sensors_feature_data if no
+/* This define is used in the mapping field of sensors_subfeature if no
    mapping is available */
 #define SENSORS_NO_MAPPING -1
 
@@ -163,32 +163,32 @@ typedef enum sensors_feature_type {
 	SENSORS_FEATURE_UNKNOWN = INT_MAX,
 } sensors_feature_type;
 
-/* Data about a single chip feature:
-   name is the string name used to refer to this feature (in config files)
-   number is the internal feature number, used in many functions to refer
+/* Data about a single chip subfeature:
+   name is the string name used to refer to this subfeature (in config files)
+   number is the internal subfeature number, used in many functions to refer
      to this feature
-   type is the feature or subfeature type
-   mapping is either SENSORS_NO_MAPPING if this is feature is the
-     main element of category; or it is the number of a feature with which
+   type is the subfeature type
+   mapping is either SENSORS_NO_MAPPING if this subfeature is the
+     main element of category; or it is the number of a subfeature with which
      this subfeature is logically grouped (a group could be fan, fan_min
      and fan_div)
    flags is a bitfield, its value is a combination of SENSORS_MODE_R (readable),
      SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING (affected by the
      computation rules of the main feature) */
-typedef struct sensors_feature_data {
+typedef struct sensors_subfeature {
 	char *name;
 	int number;
 	sensors_feature_type type;
 	int mapping;
 	unsigned int flags;
-} sensors_feature_data;
+} sensors_subfeature;
 
 /* This returns all main features of a specific chip. nr is an internally
    used variable. Set it to zero to start at the begin of the list. If no
    more features are found NULL is returned.
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
-const sensors_feature_data *
+const sensors_subfeature *
 sensors_get_features(const sensors_chip_name *name, int *nr);
 
 /* This returns all subfeatures of a given main feature (including that
@@ -197,7 +197,7 @@ sensors_get_features(const sensors_chip_name *name, int *nr);
    features are found NULL is returned.
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
-const sensors_feature_data *
+const sensors_subfeature *
 sensors_get_all_subfeatures(const sensors_chip_name *name, int feature, int *nr);
 
 #ifdef __cplusplus

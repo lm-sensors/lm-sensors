@@ -161,8 +161,8 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	int i, type, fnum = 0;
 	struct sysfs_attribute *attr;
 	struct dlist *attrs;
-	sensors_feature_data *features;
-	sensors_feature_data *dyn_features;
+	sensors_subfeature *features;
+	sensors_subfeature *dyn_subfeatures;
 
 	attrs = sysfs_get_device_attributes(sysdir);
 
@@ -172,7 +172,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	/* We use a large sparse table at first to store all found features,
 	   so that we can store them sorted at type and index and then later
 	   create a dense sorted table. */
-	features = calloc(ALL_POSSIBLE_FEATURES, sizeof(sensors_feature_data));
+	features = calloc(ALL_POSSIBLE_FEATURES, sizeof(sensors_subfeature));
 	if (!features)
 		sensors_fatal_error(__FUNCTION__, "Out of memory");
 
@@ -253,41 +253,41 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	}
 
 	if (!fnum) { /* No feature */
-		chip->feature = NULL;
+		chip->subfeature = NULL;
 		goto exit_free;
 	}
 
-	dyn_features = calloc(fnum, sizeof(sensors_feature_data));
-	if (dyn_features == NULL) {
+	dyn_subfeatures = calloc(fnum, sizeof(sensors_subfeature));
+	if (dyn_subfeatures == NULL) {
 		sensors_fatal_error(__FUNCTION__, "Out of memory");
 	}
 
 	fnum = 0;
 	for (i = 0; i < ALL_POSSIBLE_FEATURES; i++) {
 		if (features[i].name) {
-			dyn_features[fnum] = features[i];
+			dyn_subfeatures[fnum] = features[i];
 			fnum++;
 		}
 	}
 
-	/* Number the features linearly, so that feature number N is at
+	/* Number the subfeatures linearly, so that feature number N is at
 	   position N in the array. This allows for O(1) look-ups. */
 	for (i = 0; i < fnum; i++) {
 		int j;
 
-		dyn_features[i].number = i;
-		if (dyn_features[i].mapping == SENSORS_NO_MAPPING) {
+		dyn_subfeatures[i].number = i;
+		if (dyn_subfeatures[i].mapping == SENSORS_NO_MAPPING) {
 			/* Main feature, set the mapping field of all its
 			   subfeatures */
 			for (j = i + 1; j < fnum &&
-			     dyn_features[j].mapping != SENSORS_NO_MAPPING;
+			     dyn_subfeatures[j].mapping != SENSORS_NO_MAPPING;
 			     j++)
-				dyn_features[j].mapping = i;
+				dyn_subfeatures[j].mapping = i;
 		}
 	}
 
-	chip->feature = dyn_features;
-	chip->feature_count = fnum;
+	chip->subfeature = dyn_subfeatures;
+	chip->subfeature_count = fnum;
 
 exit_free:
 	free(features);
@@ -375,7 +375,7 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 
 	if (sensors_read_dynamic_chip(&entry, dev) < 0)
 		goto exit_free;
-	if (!entry.feature) { /* No feature, discard chip */
+	if (!entry.subfeature) { /* No feature, discard chip */
 		err = 0;
 		goto exit_free;
 	}
@@ -513,7 +513,7 @@ exit0:
 int sensors_read_sysfs_attr(const sensors_chip_name *name, int feature,
 			    double *value)
 {
-	const sensors_feature_data *the_feature;
+	const sensors_subfeature *the_feature;
 	char n[NAME_MAX];
 	FILE *f;
 	const char *suffix = "";
@@ -544,7 +544,7 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name, int feature,
 int sensors_write_sysfs_attr(const sensors_chip_name *name, int feature,
 			     double value)
 {
-	const sensors_feature_data *the_feature;
+	const sensors_subfeature *the_feature;
 	char n[NAME_MAX];
 	FILE *f;
 	const char *suffix = "";
