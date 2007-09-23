@@ -46,7 +46,7 @@ char sensors_sysfs_mount[NAME_MAX];
 				 + MAX_SENSORS_PER_TYPE + 1)
 
 static
-int get_type_scaling(int type)
+int get_type_scaling(sensors_subfeature_type type)
 {
 	switch (type & 0xFF10) {
 	case SENSORS_SUBFEATURE_IN_INPUT:
