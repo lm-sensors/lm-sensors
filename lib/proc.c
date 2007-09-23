@@ -93,16 +93,16 @@ int sensors_read_proc_bus(void)
   while (fgets(line,255,f)) {
     if (strlen(line) > 0)
       line[strlen(line)-1] = '\0';
-    if (! (border = rindex(line,'\t')))
+    if (! (border = strrchr(line,'\t')))
       goto ERROR;
     /* Skip algorithm name */
     *border='\0';
-    if (! (border = rindex(line,'\t')))
+    if (! (border = strrchr(line,'\t')))
       goto ERROR;
     if (! (entry.adapter = strdup(border + 1)))
       goto FAT_ERROR;
     *border='\0';
-    if (! (border = rindex(line,'\t')))
+    if (! (border = strrchr(line,'\t')))
       goto ERROR;
     *border='\0';
     if (strncmp(line,"i2c-",4))
@@ -155,8 +155,8 @@ int sensors_read_proc(sensors_chip_name name, int feature, double *value)
 		strcpy(n, name.busname);
 		strcat(n, "/");
 		strcpy(altn, n);
-		/* use rindex to append sysname to n */
-		getsysname(the_feature, rindex(n, '\0'), &mag, rindex(altn, '\0'));
+		/* use strrchr to append sysname to n */
+		getsysname(the_feature, strrchr(n, '\0'), &mag, strrchr(altn, '\0'));
 		if ((f = fopen(n, "r")) != NULL
 		 || (f = fopen(altn, "r")) != NULL) {
 			int res = fscanf(f, "%lf", value);
@@ -198,8 +198,8 @@ int sensors_write_proc(sensors_chip_name name, int feature, double value)
 		strcpy(n, name.busname);
 		strcat(n, "/");
 		strcpy(altn, n);
-		/* use rindex to append sysname to n */
-		getsysname(the_feature, rindex(n, '\0'), &mag, rindex(altn, '\0'));
+		/* use strrchr to append sysname to n */
+		getsysname(the_feature, strrchr(n, '\0'), &mag, strrchr(altn, '\0'));
 		if ((f = fopen(n, "w")) != NULL
 		 || (f = fopen(altn, "w")) != NULL) {
 			for (; mag > 0; mag --)

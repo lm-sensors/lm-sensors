@@ -185,7 +185,7 @@ found:
 				fprintf(stderr, "%s: read error\n", n);
 				continue;
 			}
-			if((border = index(x, '\n')) != NULL)
+			if((border = strchr(x, '\n')) != NULL)
 				*border = 0;
 			if(count++ == 0 && !procfmt)
 				fprintf(stderr,"  Installed I2C busses:\n");
