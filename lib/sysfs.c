@@ -541,15 +541,12 @@ exit0:
 	return ret;
 }
 
-int sensors_read_sysfs_attr(const sensors_chip_name *name, int subfeat_nr,
+int sensors_read_sysfs_attr(const sensors_chip_name *name,
+			    const sensors_subfeature *subfeature,
 			    double *value)
 {
-	const sensors_subfeature *subfeature;
 	char n[NAME_MAX];
 	FILE *f;
-
-	if (!(subfeature = sensors_lookup_subfeature_nr(name, subfeat_nr)))
-		return -SENSORS_ERR_NO_ENTRY;
 
 	snprintf(n, NAME_MAX, "%s/%s", name->path, subfeature->name);
 	if ((f = fopen(n, "r"))) {
@@ -564,15 +561,12 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name, int subfeat_nr,
 	return 0;
 }
 
-int sensors_write_sysfs_attr(const sensors_chip_name *name, int subfeat_nr,
+int sensors_write_sysfs_attr(const sensors_chip_name *name,
+			     const sensors_subfeature *subfeature,
 			     double value)
 {
-	const sensors_subfeature *subfeature;
 	char n[NAME_MAX];
 	FILE *f;
-
-	if (!(subfeature = sensors_lookup_subfeature_nr(name, subfeat_nr)))
-		return -SENSORS_ERR_NO_ENTRY;
 
 	snprintf(n, NAME_MAX, "%s/%s", name->path, subfeature->name);
 	if ((f = fopen(n, "w"))) {
