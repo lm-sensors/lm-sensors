@@ -85,7 +85,7 @@ $(MODULE_DIR)/conf-parse.h: $(MODULE_DIR)/conf-parse.c
 INCLUDEFILES += $(LIBCSOURCES:.c=.ld) $(LIBCSOURCES:.c=.ad)
 
 # Special warning prevention for flex-generated files
-FLEXNOWARN:=-Wno-shadow -Wno-undef -Wno-unused -Wno-missing-prototypes
+FLEXNOWARN:=-Wno-shadow -Wno-undef -Wno-unused -Wno-missing-prototypes -Wno-sign-compare
 $(MODULE_DIR)/conf-lex.ao: $(MODULE_DIR)/conf-lex.c
 	$(CC) $(ARCPPFLAGS) $(ARCFLAGS) $(FLEXNOWARN) -c $< -o $@
 $(MODULE_DIR)/conf-lex.lo: $(MODULE_DIR)/conf-lex.c
