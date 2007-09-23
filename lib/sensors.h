@@ -178,7 +178,9 @@ struct sensors_feature {
 	char *name;
 	int number;
 	sensors_feature_type type;
+	/* Members below are for libsensors internal use only */
 	int first_subfeature;
+	int padding1;
 };
 
 /* Data about a single chip subfeature:
