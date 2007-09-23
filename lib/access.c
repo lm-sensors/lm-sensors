@@ -343,9 +343,8 @@ const char *sensors_get_adapter_name(const sensors_bus_id *bus)
 	return NULL;
 }
 
-/* nr-1 is the last feature returned */
-const sensors_feature_data *sensors_get_all_features(const sensors_chip_name *name,
-						     int *nr)
+static const sensors_feature_data *
+sensors_get_all_features(const sensors_chip_name *name, int *nr)
 {
 	sensors_feature_data *feature_list;
 	int i;
@@ -361,6 +360,36 @@ const sensors_feature_data *sensors_get_all_features(const sensors_chip_name *na
 			return &feature_list[(*nr)++];
 		}
 	return NULL;
+}
+
+const sensors_feature_data *
+sensors_get_features(const sensors_chip_name *name, int *nr)
+{
+	const sensors_feature_data *feature;
+
+	while ((feature = sensors_get_all_features(name, nr))) {
+		if (feature->mapping == SENSORS_NO_MAPPING)
+			return feature;
+	}
+	return NULL;	/* end of list */
+}
+
+const sensors_feature_data *
+sensors_get_all_subfeatures(const sensors_chip_name *name, int feature, int *nr)
+{
+	const sensors_feature_data *subfeature;
+
+	/* Seek directly to the first subfeature */
+	if (*nr < feature)
+		*nr = feature;
+
+	subfeature = sensors_get_all_features(name, nr);
+	if (!subfeature)
+		return NULL;	/* end of list */
+	if (subfeature->number == feature ||
+	    subfeature->mapping == feature)
+		return subfeature;
+	return NULL;		/* end of subfeature list */
 }
 
 /* Evaluate an expression */

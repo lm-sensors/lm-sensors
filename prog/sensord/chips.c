@@ -142,14 +142,14 @@ rrdF3
 
 static void getAvailableFeatures (const sensors_chip_name *name,
                                   const sensors_feature_data *feature,
-                                  int i, short *has_features,
+                                  short *has_features,
                                   int *feature_nrs, int size,
                                   int first_val)
 {
   const sensors_feature_data *iter;
+  int i = 0;
 
-  while ((iter = sensors_get_all_features (name, &i)) &&
-         iter->mapping == feature->number) {
+  while ((iter = sensors_get_all_subfeatures(name, feature->number, &i))) {
     int index0;
 
     index0 = iter->type - first_val - 1;
@@ -166,7 +166,7 @@ static void getAvailableFeatures (const sensors_chip_name *name,
 #define IN_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_IN - 1]
 static void fillChipVoltage (FeatureDescriptor *voltage,
                              const sensors_chip_name *name,
-                             const sensors_feature_data *feature, int i)
+                             const sensors_feature_data *feature)
 {
   const int size = SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN;
   short has_features[SENSORS_FEATURE_IN_BEEP - SENSORS_FEATURE_IN] = { 0, };
@@ -177,7 +177,7 @@ static void fillChipVoltage (FeatureDescriptor *voltage,
   voltage->type = DataType_voltage;
   voltage->dataNumbers[pos++] = feature->number;
 
-  getAvailableFeatures (name, feature, i, has_features,
+  getAvailableFeatures (name, feature, has_features,
                         feature_nrs, size, SENSORS_FEATURE_IN);
 
   if (IN_FEATURE(SENSORS_FEATURE_IN_MIN) &&
@@ -214,7 +214,7 @@ static void fillChipVoltage (FeatureDescriptor *voltage,
 #define TEMP_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_TEMP - 1]
 static void fillChipTemperature (FeatureDescriptor *temperature,
                                  const sensors_chip_name *name,
-                                 const sensors_feature_data *feature, int i)
+                                 const sensors_feature_data *feature)
 {
   const int size = SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP;
   short has_features[SENSORS_FEATURE_TEMP_BEEP - SENSORS_FEATURE_TEMP] = { 0, };
@@ -225,7 +225,7 @@ static void fillChipTemperature (FeatureDescriptor *temperature,
   temperature->type = DataType_temperature;
   temperature->dataNumbers[pos++] = feature->number;
 
-  getAvailableFeatures (name, feature, i, has_features,
+  getAvailableFeatures (name, feature, has_features,
                         feature_nrs, size, SENSORS_FEATURE_TEMP);
 
   if (TEMP_FEATURE(SENSORS_FEATURE_TEMP_MIN) &&
@@ -265,7 +265,7 @@ static void fillChipTemperature (FeatureDescriptor *temperature,
 #define FAN_FEATURE_NR(x)   feature_nrs[x - SENSORS_FEATURE_FAN - 1]
 static void fillChipFan (FeatureDescriptor *fan,
                          const sensors_chip_name *name,
-                         const sensors_feature_data *feature, int i)
+                         const sensors_feature_data *feature)
 {
   const int size = SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN;
   short has_features[SENSORS_FEATURE_FAN_BEEP - SENSORS_FEATURE_FAN] = { 0, };
@@ -276,7 +276,7 @@ static void fillChipFan (FeatureDescriptor *fan,
   fan->type = DataType_rpm;
   fan->dataNumbers[pos++] = feature->number;
 
-  getAvailableFeatures (name, feature, i, has_features,
+  getAvailableFeatures (name, feature, has_features,
                         feature_nrs, size, SENSORS_FEATURE_FAN);
 
   if (FAN_FEATURE(SENSORS_FEATURE_FAN_MIN)) {
@@ -341,10 +341,8 @@ FeatureDescriptor * generateChipFeatures (const sensors_chip_name *chip)
 
 	/* How many main features do we have? */
 	nr = 0;
-	while ((sensor = sensors_get_all_features(chip, &nr))) {
-		if (sensor->mapping == SENSORS_NO_MAPPING)
-			count++;
-	}
+	while ((sensor = sensors_get_features(chip, &nr)))
+		count++;
 
 	/* Allocate the memory we need */
 	features = calloc(count, sizeof(FeatureDescriptor));
@@ -354,19 +352,16 @@ FeatureDescriptor * generateChipFeatures (const sensors_chip_name *chip)
 	/* Fill in the data structures */
 	count = 0;
 	nr = 0;
-	while ((sensor = sensors_get_all_features(chip, &nr))) {
-		if (sensor->mapping != SENSORS_NO_MAPPING)
-			continue;
-
+	while ((sensor = sensors_get_features(chip, &nr))) {
 		switch (sensor->type) {
 		case SENSORS_FEATURE_TEMP:
-			fillChipTemperature(&features[count], chip, sensor, nr);
+			fillChipTemperature(&features[count], chip, sensor);
 			break;
 		case SENSORS_FEATURE_IN:
-			fillChipVoltage(&features[count], chip, sensor, nr);
+			fillChipVoltage(&features[count], chip, sensor);
 			break;
 		case SENSORS_FEATURE_FAN:
-			fillChipFan(&features[count], chip, sensor, nr);
+			fillChipFan(&features[count], chip, sensor);
 			break;
 		case SENSORS_FEATURE_VID:
 			fillChipVid(&features[count], sensor);

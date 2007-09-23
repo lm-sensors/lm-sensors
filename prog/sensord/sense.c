@@ -36,18 +36,21 @@
 int
 getRawLabel
 (const sensors_chip_name *name, int feature, const char **label) {
-  const sensors_feature_data *rawFeature;
-  int nr = 0, err = 0;
-  do {
-    rawFeature = sensors_get_all_features (name, &nr);
-  } while (rawFeature && (rawFeature->number != feature));
-  /* TODO: Ensure labels match RRD construct and are not repeated! */
-  if (!rawFeature) {
-    err = -1;
-  } else {
-    *label = rawFeature->name;
+  const sensors_feature_data *mainfeat, *sub;
+  int a, b;
+
+  a = 0;
+  while ((mainfeat = sensors_get_features(name, &a))) {
+    b = 0;
+    while ((sub = sensors_get_all_subfeatures(name, mainfeat->number, &b))) {
+      if (sub->number == feature) {
+        *label = sub->name;
+	return 0;
+      }
+    }
   }
-  return err;
+  /* TODO: Ensure labels match RRD construct and are not repeated! */
+  return -1;
 }
 
 static const char *

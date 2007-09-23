@@ -183,16 +183,22 @@ typedef struct sensors_feature_data {
 	unsigned int flags;
 } sensors_feature_data;
 
-/* This returns all features of a specific chip. They are returned in
-   bunches: everything with the same mapping is returned just after each
-   other, with the master feature in front (that feature does not map to
-   itself, but has SENSORS_NO_MAPPING as mapping field). nr is
-   an internally used variable. Set it to zero to start again at the
-   begin of the list. If no more features are found NULL is returned.
+/* This returns all main features of a specific chip. nr is an internally
+   used variable. Set it to zero to start at the begin of the list. If no
+   more features are found NULL is returned.
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
-const sensors_feature_data *sensors_get_all_features
-		(const sensors_chip_name *name, int *nr);
+const sensors_feature_data *
+sensors_get_features(const sensors_chip_name *name, int *nr);
+
+/* This returns all subfeatures of a given main feature (including that
+   main feature itself, in first position.) nr is an internally used
+   variable. Set it to zero to start at the begin of the list. If no more
+   features are found NULL is returned.
+   Do not try to change the returned structure; you will corrupt internal
+   data structures. */
+const sensors_feature_data *
+sensors_get_all_subfeatures(const sensors_chip_name *name, int feature, int *nr);
 
 #ifdef __cplusplus
 }
