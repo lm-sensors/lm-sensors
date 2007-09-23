@@ -344,7 +344,7 @@ int sensors_init_sysfs(void)
 static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 {
 	int domain, bus, slot, fn;
-	int err = -SENSORS_ERR_PARSE;
+	int err = -SENSORS_ERR_KERNEL;
 	struct sysfs_attribute *attr, *bus_attr;
 	char bus_path[SYSFS_PATH_MAX];
 	sensors_chip_features entry;
@@ -430,13 +430,13 @@ static int sensors_read_sysfs_chips_compat(void)
 
 	if (!(bus = sysfs_open_bus("i2c"))) {
 		if (errno && errno != ENOENT)
-			ret = -SENSORS_ERR_PROC;
+			ret = -SENSORS_ERR_NO_DEVS;
 		goto exit0;
 	}
 
 	if (!(devs = sysfs_get_bus_devices(bus))) {
 		if (errno && errno != ENOENT)
-			ret = -SENSORS_ERR_PROC;
+			ret = -SENSORS_ERR_NO_DEVS;
 		goto exit1;
 	}
 
@@ -467,14 +467,14 @@ int sensors_read_sysfs_chips(void)
 
 	if (!(clsdevs = sysfs_get_class_devices(cls))) {
 		if (errno && errno != ENOENT)
-			ret = -SENSORS_ERR_PROC;
+			ret = -SENSORS_ERR_NO_DEVS;
 		goto exit;
 	}
 
 	dlist_for_each_data(clsdevs, clsdev, struct sysfs_class_device) {
 		struct sysfs_device *dev;
 		if (!(dev = sysfs_get_classdev_device(clsdev))) {
-			ret = -SENSORS_ERR_PROC;
+			ret = -SENSORS_ERR_NO_DEVS;
 			goto exit;
 		}
 		if ((ret = sensors_read_one_sysfs_chip(dev)))
@@ -498,13 +498,13 @@ int sensors_read_sysfs_bus(void)
 
 	if (!(cls = sysfs_open_class("i2c-adapter"))) {
 		if (errno && errno != ENOENT)
-			ret = -SENSORS_ERR_PROC;
+			ret = -SENSORS_ERR_KERNEL;
 		goto exit0;
 	}
 
 	if (!(clsdevs = sysfs_get_class_devices(cls))) {
 		if (errno && errno != ENOENT)
-			ret = -SENSORS_ERR_PROC;
+			ret = -SENSORS_ERR_KERNEL;
 		goto exit1;
 	}
 
@@ -553,10 +553,10 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name,
 		int res = fscanf(f, "%lf", value);
 		fclose(f);
 		if (res != 1)
-			return -SENSORS_ERR_PROC;
+			return -SENSORS_ERR_KERNEL;
 		*value /= get_type_scaling(subfeature->type);
 	} else
-		return -SENSORS_ERR_PROC;
+		return -SENSORS_ERR_KERNEL;
 
 	return 0;
 }
@@ -574,7 +574,7 @@ int sensors_write_sysfs_attr(const sensors_chip_name *name,
 		fprintf(f, "%d", (int) value);
 		fclose(f);
 	} else
-		return -SENSORS_ERR_PROC;
+		return -SENSORS_ERR_KERNEL;
 
 	return 0;
 }

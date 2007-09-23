@@ -1,6 +1,7 @@
 /*
     error.c - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,11 +32,11 @@ void (*sensors_fatal_error) (const char *proc, const char *err) =
 						sensors_default_fatal_error;
 
 static const char *errorlist[] = {
-	/* Unknown error         */ "sensors_strerror: Unknown error!",
+	/* Invalid error code    */ NULL,
 	/* SENSORS_ERR_WILDCARDS */ "Wildcard found in chip name",
 	/* SENSORS_ERR_NO_ENTRY  */ "No such subfeature known",
-	/* SENSORS_ERR_ACCESS    */ "Can't read or write",
-	/* SENSORS_ERR_PROC      */ "Can't access sysfs file",
+	/* SENSORS_ERR_NO_DEVS   */ "No devices found",
+	/* SENSORS_ERR_KERNEL    */ "Kernel interface error",
 	/* SENSORS_ERR_DIV_ZERO  */ "Divide by zero",
 	/* SENSORS_ERR_CHIP_NAME */ "Can't parse chip name",
 	/* SENSORS_ERR_BUS_NAME  */ "Can't parse bus name",

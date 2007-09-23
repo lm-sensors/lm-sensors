@@ -33,7 +33,7 @@ int sensors_init(FILE *input)
 	int res;
 
 	if (!sensors_init_sysfs())
-		return -SENSORS_ERR_PROC;
+		return -SENSORS_ERR_KERNEL;
 	if ((res = sensors_read_sysfs_bus()) ||
 	    (res = sensors_read_sysfs_chips()))
 		return res;

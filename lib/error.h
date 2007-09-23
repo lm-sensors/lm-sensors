@@ -1,6 +1,7 @@
 /*
     error.h - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,8 +23,8 @@
 
 #define SENSORS_ERR_WILDCARDS	1 /* Wildcard found in chip name */
 #define SENSORS_ERR_NO_ENTRY	2 /* No such subfeature known */
-#define SENSORS_ERR_ACCESS	3 /* Can't read or write */
-#define SENSORS_ERR_PROC	4 /* Can't access /proc file */
+#define SENSORS_ERR_NO_DEVS	3 /* No devices found */
+#define SENSORS_ERR_KERNEL	4 /* Kernel interface error */
 #define SENSORS_ERR_DIV_ZERO	5 /* Divide by zero */
 #define SENSORS_ERR_CHIP_NAME	6 /* Can't parse chip name */
 #define SENSORS_ERR_BUS_NAME	7 /* Can't parse bus name */

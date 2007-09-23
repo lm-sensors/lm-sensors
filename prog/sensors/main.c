@@ -171,8 +171,8 @@ static int do_a_set(const sensors_chip_name *name)
 	int res;
 
 	if ((res = sensors_do_chip_sets(name))) {
-		if (res == -SENSORS_ERR_PROC) {
-			fprintf(stderr, "%s: %s for writing;\n",
+		if (res == -SENSORS_ERR_KERNEL) {
+			fprintf(stderr, "%s: %s;\n",
 				sprintf_chip_name(name),
 				sensors_strerror(res));
 			fprintf(stderr, "Run as root?\n");
