@@ -185,6 +185,7 @@ struct ds {
 static int
 rrdGetSensors_DS
 (void *_data, const char *rawLabel, const char *label, const FeatureDescriptor *feature) {
+  (void) label; /* no warning */
   if (!feature || feature->rrd) {
     struct ds *data = (struct ds *) _data;
     char *ptr = rrdBuff + data->num * RRD_BUFF;
@@ -287,6 +288,7 @@ static int
 rrdCGI_DEF
 (void *_data, const char *rawLabel, const char *label, const FeatureDescriptor *feature) {
   struct gr *data = (struct gr *) _data;
+  (void) label; /* no warning */
   if (!feature || (feature->rrd && (feature->type == data->type)))
     printf ("\n\tDEF:%s=%s:%s:AVERAGE", rawLabel, rrdFile, rawLabel);
   return 0;
