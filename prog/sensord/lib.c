@@ -79,10 +79,8 @@ loadConfig
   if (!strcmp (cfgPath, "-")) {
     if (!reload) {
       if ((ret = sensors_init (stdin))) {
-        if (ret == -SENSORS_ERR_PROC)
-          sensorLog (LOG_ERR, "Error reading /proc or /sys; modules probably not loaded");
-        else
-          sensorLog (LOG_ERR, "Error %d loading sensors configuration file: <stdin>", ret);
+        sensorLog (LOG_ERR, "Error loading sensors configuration file <stdin>: %s",
+                   sensors_strerror (ret));
         ret = 12;
       }
     }
@@ -98,10 +96,8 @@ loadConfig
       sensorLog (LOG_ERR, "Error opening sensors configuration file: %s", cfgPath);
       ret = 11;
     } else if ((ret = sensors_init (cfg))) {
-      if (ret == -SENSORS_ERR_PROC)
-        sensorLog (LOG_ERR, "Error reading /proc or /sys; modules probably not loaded");
-      else
-        sensorLog (LOG_ERR, "Error %d loading sensors configuration file: %s", ret, cfgPath);
+      sensorLog (LOG_ERR, "Error loading sensors configuration file %s: %s",
+                 cfgPath, sensors_strerror (ret));
       ret = 11;
     } else {
       cfgLastModified = stats.st_mtime;
