@@ -330,22 +330,6 @@ const char *sensors_get_adapter_name(const sensors_bus_id *bus)
 	return NULL;
 }
 
-static const sensors_subfeature *
-sensors_get_all_features(const sensors_chip_name *name, int *nr)
-{
-	sensors_subfeature *subfeature_list;
-	int i;
-
-	for (i = 0; i < sensors_proc_chips_count; i++)
-		if (sensors_match_chip(&sensors_proc_chips[i].chip, name)) {
-			subfeature_list = sensors_proc_chips[i].subfeature;
-			if (*nr >= sensors_proc_chips[i].subfeature_count)
-				return NULL;
-			return &subfeature_list[(*nr)++];
-		}
-	return NULL;
-}
-
 const sensors_feature *
 sensors_get_features(const sensors_chip_name *name, int *nr)
 {
@@ -370,18 +354,23 @@ sensors_get_all_subfeatures(const sensors_chip_name *name,
 			const sensors_feature *feature, int *nr)
 {
 	const sensors_subfeature *subfeature;
+	int i;
 
 	/* Seek directly to the first subfeature */
 	if (*nr < feature->first_subfeature)
 		*nr = feature->first_subfeature;
 
-	subfeature = sensors_get_all_features(name, nr);
-	if (!subfeature)
-		return NULL;	/* end of list */
-	if (subfeature->number == feature->first_subfeature ||
-	    subfeature->mapping == feature->first_subfeature)
-		return subfeature;
-	return NULL;		/* end of subfeature list */
+	for (i = 0; i < sensors_proc_chips_count; i++)
+		if (sensors_match_chip(&sensors_proc_chips[i].chip, name)) {
+			if (*nr >= sensors_proc_chips[i].subfeature_count)
+				return NULL;	/* end of list */
+			subfeature = &sensors_proc_chips[i].subfeature[(*nr)++];
+			if (subfeature->number == feature->first_subfeature ||
+			    subfeature->mapping == feature->first_subfeature)
+				return subfeature;
+			return NULL;	/* end of subfeature list */
+		}
+	return NULL;		/* no matching chip */
 }
 
 /* Evaluate an expression */
