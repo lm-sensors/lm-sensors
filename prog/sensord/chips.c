@@ -373,19 +373,19 @@ FeatureDescriptor * generateChipFeatures (const sensors_chip_name *chip)
 	nr = 0;
 	while ((sensor = sensors_get_features(chip, &nr))) {
 		switch (sensor->type) {
-		case SENSORS_SUBFEATURE_TEMP_INPUT:
+		case SENSORS_FEATURE_TEMP:
 			fillChipTemperature(&features[count], chip, sensor);
 			break;
-		case SENSORS_SUBFEATURE_IN_INPUT:
+		case SENSORS_FEATURE_IN:
 			fillChipVoltage(&features[count], chip, sensor);
 			break;
-		case SENSORS_SUBFEATURE_FAN_INPUT:
+		case SENSORS_FEATURE_FAN:
 			fillChipFan(&features[count], chip, sensor);
 			break;
-		case SENSORS_SUBFEATURE_VID:
+		case SENSORS_FEATURE_VID:
 			fillChipVid(&features[count], chip, sensor);
 			break;
-		case SENSORS_SUBFEATURE_BEEP_ENABLE:
+		case SENSORS_FEATURE_BEEP_ENABLE:
 			fillChipBeepEnable(&features[count], chip, sensor);
 			break;
 		default:

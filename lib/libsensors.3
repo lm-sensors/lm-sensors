@@ -134,10 +134,9 @@ data structures.
 
 \fBconst sensors_subfeature *sensors_get_all_subfeatures(const sensors_chip_name *name, const sensors_feature *feature, int *nr);\fP
 .br
-This returns all subfeatures of a given main feature (including that
-main feature itself, in first position.) nr is an internally used
-variable. Set it to zero to start at the begin of the list. If no more
-subfeatures are found NULL is returned.
+This returns all subfeatures of a given main feature. nr is an internally
+used variable. Set it to zero to start at the begin of the list. If no
+more subfeatures are found NULL is returned.
 Do not try to change the returned structure; you will corrupt internal
 data structures.
 

@@ -124,6 +124,16 @@ const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
    mapping is available */
 #define SENSORS_NO_MAPPING -1
 
+/* These must match the subfeature constants below (shifted by 8 bits) */
+typedef enum sensors_feature_type {
+	SENSORS_FEATURE_IN		= 0x00,
+	SENSORS_FEATURE_FAN		= 0x01,
+	SENSORS_FEATURE_TEMP		= 0x02,
+	SENSORS_FEATURE_VID		= 0x10,
+	SENSORS_FEATURE_BEEP_ENABLE	= 0x11,
+	SENSORS_FEATURE_UNKNOWN		= INT_MAX,
+} sensors_feature_type;
+
 /* This enum contains some "magic" used by sensors_read_dynamic_chip() from
    lib/sysfs.c. All the sensor types (in, fan, temp, vid) are a multiple of
    0x100 apart, and sensor subfeatures which should not have a compute
@@ -169,8 +179,9 @@ typedef enum sensors_subfeature_type {
 /* Data about a single chip feature (or category leader) */
 struct sensors_feature {
 	char *name;
+	int number;
+	sensors_feature_type type;
 	int first_subfeature;
-	sensors_subfeature_type type;
 };
 
 /* Data about a single chip subfeature:
@@ -201,10 +212,9 @@ typedef struct sensors_subfeature {
 const sensors_feature *
 sensors_get_features(const sensors_chip_name *name, int *nr);
 
-/* This returns all subfeatures of a given main feature (including that
-   main feature itself, in first position.) nr is an internally used
-   variable. Set it to zero to start at the begin of the list. If no more
-   features are found NULL is returned.
+/* This returns all subfeatures of a given main feature. nr is an internally
+   used variable. Set it to zero to start at the begin of the list. If no
+   more features are found NULL is returned.
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
 const sensors_subfeature *

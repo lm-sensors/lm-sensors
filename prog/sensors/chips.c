@@ -435,19 +435,19 @@ void print_chip(const sensors_chip_name *name)
 	i = 0;
 	while ((feature = sensors_get_features(name, &i))) {
 		switch (feature->type) {
-		case SENSORS_SUBFEATURE_TEMP_INPUT:
+		case SENSORS_FEATURE_TEMP:
 			print_chip_temp(name, feature, label_size);
 			break;
-		case SENSORS_SUBFEATURE_IN_INPUT:
+		case SENSORS_FEATURE_IN:
 			print_chip_in(name, feature, label_size);
 			break;
-		case SENSORS_SUBFEATURE_FAN_INPUT:
+		case SENSORS_FEATURE_FAN:
 			print_chip_fan(name, feature, label_size);
 			break;
-		case SENSORS_SUBFEATURE_VID:
+		case SENSORS_FEATURE_VID:
 			print_chip_vid(name, feature, label_size);
 			break;
-		case SENSORS_SUBFEATURE_BEEP_ENABLE:
+		case SENSORS_FEATURE_BEEP_ENABLE:
 			print_chip_beep_enable(name, feature, label_size);
 			break;
 		default:

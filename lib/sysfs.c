@@ -65,6 +65,25 @@ int get_type_scaling(int type)
 	}
 }
 
+static
+char *get_feature_name(sensors_feature_type ftype, char *sfname)
+{
+	char *name, *underscore;
+
+	switch (ftype) {
+	case SENSORS_FEATURE_IN:
+	case SENSORS_FEATURE_FAN:
+	case SENSORS_FEATURE_TEMP:
+		underscore = strchr(sfname, '_');
+		name = strndup(sfname, underscore - sfname);
+		break;
+	default:
+		name = strdup(sfname);
+	}
+
+	return name;
+}
+
 /* Static mappings for use by sensors_subfeature_get_type() */
 struct subfeature_type_match
 {
@@ -160,12 +179,14 @@ sensors_subfeature_type sensors_subfeature_get_type(const char *name, int *nr)
 static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 				     struct sysfs_device *sysdir)
 {
-	int i, type, fnum = 0;
+	int i, fnum = 0, sfnum = 0, prev_slot;
 	struct sysfs_attribute *attr;
 	struct dlist *attrs;
 	sensors_subfeature *all_subfeatures;
 	sensors_subfeature *dyn_subfeatures;
 	sensors_feature *dyn_features;
+	sensors_feature_type ftype;
+	sensors_subfeature_type sftype;
 
 	attrs = sysfs_get_device_attributes(sysdir);
 
@@ -184,12 +205,12 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		char *name = attr->name;
 		int nr;
 
-		type = sensors_subfeature_get_type(name, &nr);
-		if (type == SENSORS_SUBFEATURE_UNKNOWN)
+		sftype = sensors_subfeature_get_type(name, &nr);
+		if (sftype == SENSORS_SUBFEATURE_UNKNOWN)
 			continue;
 
 		/* Adjust the channel number */
-		switch (type & 0xFF00) {
+		switch (sftype & 0xFF00) {
 			case SENSORS_SUBFEATURE_FAN_INPUT:
 			case SENSORS_SUBFEATURE_TEMP_INPUT:
 				if (nr)
@@ -206,7 +227,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 
 		/* "calculate" a place to store the subfeature in our sparse,
 		   sorted table */
-		switch (type) {
+		switch (sftype) {
 		case SENSORS_SUBFEATURE_VID:
 			i = nr + MAX_SENSORS_PER_TYPE * MAX_SUBFEATURES * 6;
 			break;
@@ -215,10 +236,10 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			    MAX_SENSORS_PER_TYPE;
 			break;
 		default:
-			i = (type >> 8) * MAX_SENSORS_PER_TYPE *
+			i = (sftype >> 8) * MAX_SENSORS_PER_TYPE *
 			    MAX_SUBFEATURES * 2 + nr * MAX_SUBFEATURES * 2 +
-			    ((type & 0x10) >> 4) * MAX_SUBFEATURES +
-			    (type & 0x0F);
+			    ((sftype & 0x10) >> 4) * MAX_SUBFEATURES +
+			    (sftype & 0x0F);
 		}
 
 		if (all_subfeatures[i].name) {
@@ -229,93 +250,75 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		}
 
 		/* fill in the subfeature members */
-		all_subfeatures[i].type = type;
-
-		/* check for _input extension and remove */
-		nr = strlen(name);
-		if (nr > 6 && !strcmp(name + nr - 6, "_input"))
-			all_subfeatures[i].name = strndup(name, nr - 6);
-		else
-			all_subfeatures[i].name = strdup(name);
-
-		if ((type & 0x00FF) == 0) {
-			/* main subfeature */
-			all_subfeatures[i].mapping = SENSORS_NO_MAPPING;
-		} else {
-			/* The mapping is set below after numbering */
-			if (!(type & 0x10))
-				all_subfeatures[i].flags |= SENSORS_COMPUTE_MAPPING;
-		}
-
+		all_subfeatures[i].type = sftype;
+		all_subfeatures[i].name = strdup(name);
+		if (!(sftype & 0x10))
+			all_subfeatures[i].flags |= SENSORS_COMPUTE_MAPPING;
 		if (attr->method & SYSFS_METHOD_SHOW)
 			all_subfeatures[i].flags |= SENSORS_MODE_R;
 		if (attr->method & SYSFS_METHOD_STORE)
 			all_subfeatures[i].flags |= SENSORS_MODE_W;
 
-		fnum++;
+		sfnum++;
 	}
 
-	if (!fnum) { /* No subfeature */
+	if (!sfnum) { /* No subfeature */
 		chip->subfeature = NULL;
 		goto exit_free;
 	}
 
-	dyn_subfeatures = calloc(fnum, sizeof(sensors_subfeature));
-	if (dyn_subfeatures == NULL) {
-		sensors_fatal_error(__FUNCTION__, "Out of memory");
-	}
-
-	fnum = 0;
+	/* How many main features? */
+	prev_slot = -1;
 	for (i = 0; i < ALL_POSSIBLE_SUBFEATURES; i++) {
-		if (all_subfeatures[i].name) {
-			dyn_subfeatures[fnum] = all_subfeatures[i];
+		if (!all_subfeatures[i].name)
+			continue;
+
+		if (i >= MAX_SENSORS_PER_TYPE * MAX_SUBFEATURES * 6 ||
+		    i / (MAX_SUBFEATURES * 2) != prev_slot) {
 			fnum++;
+			prev_slot = i / (MAX_SUBFEATURES * 2);
 		}
 	}
 
-	/* Number the subfeatures linearly, so that subfeature number N is at
-	   position N in the array. This allows for O(1) look-ups. */
-	for (i = 0; i < fnum; i++) {
-		int j;
+	dyn_subfeatures = calloc(sfnum, sizeof(sensors_subfeature));
+	dyn_features = calloc(fnum, sizeof(sensors_feature));
+	if (!dyn_subfeatures || !dyn_features)
+		sensors_fatal_error(__FUNCTION__, "Out of memory");
 
-		dyn_subfeatures[i].number = i;
-		if (dyn_subfeatures[i].mapping == SENSORS_NO_MAPPING) {
-			/* Main feature, set the mapping field of all its
-			   subfeatures */
-			for (j = i + 1; j < fnum &&
-			     dyn_subfeatures[j].mapping != SENSORS_NO_MAPPING;
-			     j++)
-				dyn_subfeatures[j].mapping = i;
+	/* Copy from the sparse array to the compact array */
+	sfnum = 0;
+	fnum = -1;
+	prev_slot = -1;
+	for (i = 0; i < ALL_POSSIBLE_SUBFEATURES; i++) {
+		if (!all_subfeatures[i].name)
+			continue;
+
+		/* New main feature? */
+		if (i >= MAX_SENSORS_PER_TYPE * MAX_SUBFEATURES * 6 ||
+		    i / (MAX_SUBFEATURES * 2) != prev_slot) {
+			ftype = all_subfeatures[i].type >> 8;
+			fnum++;
+			prev_slot = i / (MAX_SUBFEATURES * 2);
+
+			dyn_features[fnum].name = get_feature_name(ftype,
+						all_subfeatures[i].name);
+			dyn_features[fnum].number = fnum;
+			dyn_features[fnum].first_subfeature = sfnum;
+			dyn_features[fnum].type = ftype;
 		}
+
+		dyn_subfeatures[sfnum] = all_subfeatures[i];
+		dyn_subfeatures[sfnum].number = sfnum;
+		/* Back to the feature */
+		dyn_subfeatures[sfnum].mapping = fnum;
+
+		sfnum++;
 	}
 
 	chip->subfeature = dyn_subfeatures;
-	chip->subfeature_count = fnum;
-
-	/* And now the main features */
-	fnum = 0;
-	for (i = 0; i < chip->subfeature_count; i++) {
-		if (chip->subfeature[i].mapping == SENSORS_NO_MAPPING)
-			fnum++;
-	}
-
-	dyn_features = calloc(fnum, sizeof(sensors_feature));
-	if (dyn_features == NULL) {
-		sensors_fatal_error(__FUNCTION__, "Out of memory");
-	}
-
-	fnum = 0;
-	for (i = 0; i < chip->subfeature_count; i++) {
-		if (chip->subfeature[i].mapping == SENSORS_NO_MAPPING) {
-			dyn_features[fnum].name = strdup(chip->subfeature[i].name);
-			dyn_features[fnum].first_subfeature = i;
-			dyn_features[fnum].type = chip->subfeature[i].type;
-			fnum++;
-		}
-	}
-
+	chip->subfeature_count = sfnum;
 	chip->feature = dyn_features;
-	chip->feature_count = fnum;
+	chip->feature_count = ++fnum;
 
 exit_free:
 	free(all_subfeatures);
@@ -544,19 +547,11 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name, int subfeat_nr,
 	const sensors_subfeature *subfeature;
 	char n[NAME_MAX];
 	FILE *f;
-	const char *suffix = "";
 
 	if (!(subfeature = sensors_lookup_subfeature_nr(name, subfeat_nr)))
 		return -SENSORS_ERR_NO_ENTRY;
 
-	/* REVISIT: this is a ugly hack */
-	if (subfeature->type == SENSORS_SUBFEATURE_IN_INPUT
-	 || subfeature->type == SENSORS_SUBFEATURE_FAN_INPUT
-	 || subfeature->type == SENSORS_SUBFEATURE_TEMP_INPUT)
-		suffix = "_input";
-
-	snprintf(n, NAME_MAX, "%s/%s%s", name->path, subfeature->name,
-		 suffix);
+	snprintf(n, NAME_MAX, "%s/%s", name->path, subfeature->name);
 	if ((f = fopen(n, "r"))) {
 		int res = fscanf(f, "%lf", value);
 		fclose(f);
@@ -575,19 +570,11 @@ int sensors_write_sysfs_attr(const sensors_chip_name *name, int subfeat_nr,
 	const sensors_subfeature *subfeature;
 	char n[NAME_MAX];
 	FILE *f;
-	const char *suffix = "";
 
 	if (!(subfeature = sensors_lookup_subfeature_nr(name, subfeat_nr)))
 		return -SENSORS_ERR_NO_ENTRY;
 
-	/* REVISIT: this is a ugly hack */
-	if (subfeature->type == SENSORS_SUBFEATURE_IN_INPUT
-	 || subfeature->type == SENSORS_SUBFEATURE_FAN_INPUT
-	 || subfeature->type == SENSORS_SUBFEATURE_TEMP_INPUT)
-		suffix = "_input";
-
-	snprintf(n, NAME_MAX, "%s/%s%s", name->path, subfeature->name,
-		 suffix);
+	snprintf(n, NAME_MAX, "%s/%s", name->path, subfeature->name);
 	if ((f = fopen(n, "w"))) {
 		value *= get_type_scaling(subfeature->type);
 		fprintf(f, "%d", (int) value);
