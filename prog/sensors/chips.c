@@ -261,8 +261,7 @@ void print_adm1021(const sensors_chip_name *name)
         print_label(label,10);
         printf("%4.0f\n",cur);
       }
-    } else
-      printf("ERROR: Can't get die-code data!\n");
+    }
     free(label);
   }
 }
