@@ -11,8 +11,8 @@ Release steps:
 - Update both CHANGES files (add the release date)
 - Verify i2c dependency instructions in README, QUICKSTART, and INSTALL,
   update if necessary
-- Update lm_sensors.lsm and send it to the LSM by mailing it to 
-  lsm@execpc.com with the subject `add' (no quotes).
+- Update lm_sensors.lsm (Version and Entered-date) and send it to the LSM
+  by mailing it to lsm@qqx.org with the subject `add' (no quotes).
 - Update lm_sensors2/version.h and i2c/kernel/i2c.h
 - Commit
 - Tag the release using SVN:
