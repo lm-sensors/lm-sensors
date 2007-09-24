@@ -3,11 +3,9 @@ The directories within this package:
 * doc
   Documentation.
 * etc
-  A sample configuration file for the 'sensors' program.
-* kernel
-  A few kernel-related header files.
+  A sample configuration file for libsensors.
 * lib
-  The user-space sensors support library code.
+  The user-space sensors support library code (libsensors).
 * prog
   Several supporting programs. Includes programs for detecting installed
   hardware and recommending specific modules to install.
