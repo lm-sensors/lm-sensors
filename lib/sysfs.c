@@ -404,8 +404,12 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 		entry.chip.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
 		entry.chip.bus.type = SENSORS_BUS_TYPE_PCI;
 		entry.chip.bus.nr = 0;
-	} else
-		goto exit_free;
+	} else {
+		/* platform device with no id? */
+		entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
+		entry.chip.bus.nr = 0;
+		entry.chip.addr = 0;
+	}
 
 	if (sensors_read_dynamic_chip(&entry, dev) < 0)
 		goto exit_free;
