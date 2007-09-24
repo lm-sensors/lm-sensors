@@ -1,127 +1,66 @@
-=============================================================================
+OVERVIEW OF THE LM-SENSORS PACKAGE
+==================================
 
-     FOR QUICK INSTALLATION INSTRUCTIONS SEE THE 'QUICKSTART' FILE.
-     FOR FULL INSTALLATION INSTRUCTIONS SEE THE 'INSTALL' FILE.
-     FOR THE FAQ SEE THE 'doc/FAQ' or 'doc/lm_sensors-FAQ.html' FILES.
+The lm-sensors package, version 3, provides user-space support for the
+hardware monitoring drivers in Linux 2.6.5 and later. For older kernel
+versions, you have to use lm-sensors version 2.
 
-=============================================================================
+The directories within this package:
 
-OVERVIEW OF THE LM_SENSORS PACKAGE AND SUMMARY OF SUPPORTED DEVICES
-
-!!! This package is ONLY for 2.6 and 2.4 kernels (2.4.10 or later).   !!!
-!!! For 2.4 kernels, this package requires i2c-2.9.0 or later.        !!!
-
-FOR 2.6 KERNELS, use only the userspace tools in this package!
-Build and install them with 'make user' and 'make user_install'.
-The kernel modules in this package will NOT compile for 2.6;
-use the drivers already in the 2.6 kernel. Check the QUICKSTART
-file for brief installation instructions please.
-
-=============================================================================
-
-This is the completely rewritten version 2 of lm_sensors, a collection of
-modules for general SMBus[1] access and hardware monitoring.
-Version 1 is now officially unsupported.
-
-WARNING! The drivers in this package will work on reasonably recent 2.4
-kernels only (2.4.10 and later).
-Use lm_sensors-2.4.5 for 2.0 kernels.
-Use lm_sensors-2.7.0 for 2.2, and early 2.4 (up to 2.4.9) kernels.
-Use the drivers already in the kernel for 2.6 kernels; if you need
-additional drivers in 2.6 please port and submit them to us.
-
-HOWEVER, the userspace tools in this package will work for
-both 2.4 and 2.6 kernels.
-
-The I2C[2] package in existing 2.4 kernels is NOT sufficient
-for compilation of this package. You need i2c-2.9.0 or later.
-
-See the lm_sensors download page for further guidance:
-  http://www.lm-sensors.org/wiki/Download
+* doc
+  Documentation.
+* etc
+  A sample configuration file for libsensors, and a script to convert
+  lm-sensors version 2 configuration files to work with version 3.
+* lib
+  The user-space sensors support library code (libsensors).
+* prog
+  Several supporting programs. The most important ones are:
+  - sensors-detect: A program for detecting installed hardware and
+    recommending specific modules to load.
+  - sensors: A console tool to report sensor readings and set new
+    sensor limits.
+  - sensord: A daemon to watch sensor values and log problems. It
+    includes RRD support.
 
 
-=============================================================================
+INSTALLING LM-SENSORS
+---------------------
 
-At least the following hardware sensor chips are supported:
-  Analog Devices ADM1021, ADM1021A, ADM1022, ADM1023, ADM1024,
-                 ADM1025, ADM1026, ADM1027, ADM1030, ADM1031,
-                 ADM1032, ADM9240, ADT7461 and ADT7463
-  Asus AS99127F, ASB100 Bach
-  Dallas Semiconductor DS75, DS1621, DS1625, DS1775, and DS1780
-  Hewlett Packard Maxilife (several revisions including '99 NBA)
-  Fintek F71805F/FG
-  Fujitsu Siemens Poseidon, Scylla, Hermes
-  Genesys Logic GL518SM, GL520SM, GL523SM
-  Intel Xeon processor embedded sensors
-  ITE IT8705F, IT8712F
-  Maxim MAX1617, MAX1617A, MAX1619, MAX6650, MAX6651,
-        MAX6633, MAX6634, MAX6635, MAX6657, MAX6658, MAX6659
-  Microchip TC1068, TCM1617, TCN75
-  Myson MTP008
-  National Semiconductor LM63, LM75, LM76, LM78, LM78-J, LM79,
-                         LM80, LM81, LM82, LM83, LM84, LM85, LM86, LM87,
-                         LM89, LM90, LM92, LM93, LM99, PC87360,
-                         PC87363, PC87364, PC87365, PC87366
-  Philips NE1617, NE1617A, NE1619, PCF8591
-  SiS 5595, 950 embedded sensors
-  SMSC 47M1xx embedded sensors, EMC6D100, EMC6D101, EMC6D102
-  TI THMC10 and THMC50
-  VIA Technologies VT1211, VT8231 and VT82C686A/B embedded sensors
-  Winbond W83781D, W83782D, W83783S, W83791D, W83792D,
-          W83627HF, W83627THF, W83637HF, W83687THF and W83697HF
-  Smart Battery sensors
-  IPMI-BMC sensors
+See the INSTALL file.
 
 
-The list above may be out of date;
-see our Devices page at http://www.lm-sensors.org/wiki/Devices
-for the latest information on supported devices.
-You may also refer to doc/chips/SUMMARY for details on what each chip
-can monitor.
-
-
-We always appreciate testers. If you own a specific monitoring chip we do
-not yet (properly) support, and are willing to help us out, please contact
-us. Even if you have no programming knowledge, you could help us by running
-new modules and reporting on the results and output. If you want to offer
-more substantial help, this is very welcome too, of course.
-
-
-Don't ask us whether we support a particular mainboard; we do not know.
-We *do* know what hardware we support, but usually, it is easier to
-install everything and run sensors-detect. It will tell you what hardware
-you have (and incidentally, what corresponding drivers are needed).
-
-
-SMBus, also known as System Management Bus, is a protocol for communicating
-through a I2C ('I squared C') bus. Many modern mainboards have a System
-Management Bus. There are a lot of devices which can be connected to a
-SMBus; the most notable are modern memory chips with EEPROM memories and
-chips for hardware monitoring.
+HARDWARE SUPPORT
+----------------
 
 Most modern mainboards incorporate some form of hardware monitoring chips.
 These chips read things like chip temperatures, fan rotation speeds and
 voltage levels. There are quite a few different chips which can be used by
 mainboard builders for approximately the same results.
 
-Hardware monitoring chips often have an SMBus or I2C interface. Some are
-connected to ISA bus instead. Some of them can do both, in which case we
-either support both access methods (old drivers) or only support ISA
-access (new drivers) as it is faster.
+Laptops, on the other hand, rarely expose any hardware monitoring
+chip. They often have some BIOS and/or ACPI magic to get the CPU
+temperature value, but that's about it. For such laptops, the lm-sensors
+package is of no use (sensors-detect will not find anything), and you have
+to use acpi instead.
 
-Because the SMBus is just a special case of the generalized I2C bus, we can
-simulate the SMBus protocol on plain I2C busses. These busses are sometimes
-used in other parts of your computer. If a supported chip is attached to
-one of these additional busses, they can be used too.
+This package doesn't contain chip-specific knowledge. It will support all
+the hardware monitoring chips your kernel has drivers for. In other words,
+if you find out that you have unsupported hardware (e.g. sensors-detect
+told you so) then it means that you need a more recent kernel, or you
+even need to wait for a new kernel driver to be written. Updating the
+lm-sensors package itself will not help.
 
-Please read INSTALL before trying to compile and install these modules.
-There is a lot of additional documentation in the doc/ subdirectory.
+
+OTHER INFORMATION
+-----------------
 
 The developers of this package can be reached through a mailing-list
 (see http://www.lm-sensors.org/wiki/AuthorsAndContributors). Do not hesitate
 to mail us if you have questions, suggestions, problems, want to
 contribute, or just want to report it works for you. But please try to
-read the documentation and FAQ before you ask any questions!
+read the documentation and FAQ before you ask any questions! It's all
+under doc/.
 
 The latest version of this package can always be found at:
 http://www.lm-sensors.org/wiki/Download. Pre-release versions can be
@@ -134,8 +73,3 @@ Note that libsensors falls under the GPL, not the LGPL.  In more human
 language, that means it is FORBIDDEN to link any application to the
 library, even to the shared version, if the application itself does not
 fall under the GPL.
-
-
------
-[1] SMBus is a trademark of Intel Corporation
-[2] I2C is a trademark of Philips Corporation
