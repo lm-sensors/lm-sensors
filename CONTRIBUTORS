@@ -1,97 +1,15 @@
-This package could not have been created without the help of many, many people.
-The most notable contributors are listed below. You are probably best off
-to use the mailing list (see
-http://www.lm-sensors.org/wiki/AuthorsAndContributors) if you have questions,
-suggestions or problems.
+Here is a list of the main contributors to lm-sensors version 3.
 
-* Alexander Larsson <alla@lysator.liu.se>
-  Wrote the original lm78 module; lm_sensors version 1 was no more than an
-  extension of this module. He still likes to keep an eye on current
-  developments, but is usually too busy with other things to do much work
-  on them
-* Philip Edelbrock <phil@netroedge.com>
-  Took up the development of the Alex' lm78 module. Responsible for most
-  SMBus code, and many, many other things. He is still one of the main
-  developers of the current package.
-* Frodo Looijaard <frodol@dds.nl>
-  Took up the development of Alex' lm78 module. Large pieces of code were
-  written by him. Designed lm_sensors version 2, and wrote most of its
-  core code, including many drivers.
-* William Morgan <wmorgan@cmu.edu>
-  Helped with some patches in lm_sensors version 1. He provided us with
-  the original CVS archive, and even managed to explain to us how to use
-  it.
-* Kyösti Mälkki <kmalkki@cc.hut.fi>
-  Author of the i2c-via and i2c-viapro host drivers. Sis5595 hack.
-  Extended support for GL518SM and GL520SM sensors.
-* Mark D. Studebaker <mdsxyz123@yahoo.com>
-  Author of the i2c-ali15x3, i2c-i801, and i2c-i810 bus drivers.
-  Author (with Bob Dougherty) of the via686a driver.
-  Added w83782d, w83783s, w83627hf, and as99127f support to the w83781d driver.
-  Added max1617, thmc10, gl523sm, and lm84 support to the adm1021 driver.
-  Added lm81 support to the adm9240 driver.
-  Added DDC support and i2c-algo-bit layer to the i2c-voodoo3 bus driver.
-  Added the RRD interface.
-  Author of the smsc47m1, vt1211, and vt8231 chip drivers.
-* Bob Dougherty <bobd@stanford.edu>
-  Author (with MDS) of the via686a driver.
-* Jonathan Teh Soon Yew <j.teh@iname.com> and Alex van Kaam <darkside@chello.nl>
-  Contributed conversion factor data for the via686a driver.
-* Geert Uytterhoeven <geert@linux-m68k.org>
-  Author of the i2c-hydra driver.
-* Adrian Baugh (http://www.adrianbaugh.org.uk/)
-  Original author of wmsensors;
-  he also tested lots of things, and helped us out on several occasions.
-* Fons Rademakers <Fons.Rademakers@cern.ch>
-  Author of the maxilife module (which could only be written under NDA)
-* Merlin Hughes <merlin@merlin.org>
-  Author of the AMD756 module and sensord.
-* Constantine Gavrilov <const-g@xpert.com>
-  Created and maintains the RPM files
-* Simon Vogl <simon@tk.uni-linz.ac.at>
-  Wrote the new i2c kernel driver. This driver is indispensable for the
-  workings of lm_sensors version 2.
-* Gerd Knorr <kraxel@cs.tu-berlin.de> (?)
-  Designed the i2c structs, which made it possible to use the smbus-is-
-  just-an-i2c-extension approach.
-* Chen-Yuan Wu <gwu@esoft.com>
-  Author of the adm1025 driver.
-* Kris Van Hees <aedil@alchar.org>
-  Author of the mtp008 chip driver.
-* Ken Bowley <ken@opnix.com>
-  Author of the adm1024 driver
-* Oleg I. Vdovikin <vdovikin@jscc.ru>
-  Author of the DEC Tsunami bus driver.
-* Christophe Gauthron <chrisg@0-in.com>
-  Author of the IT87 driver.
-* Hermann Jung <hej@odn.de>
-  Author of the fscpos driver.
-* Aurelien Jarno <aurelien@aurel32.net>
-  Author of the pcf8591 driver.
-* Abraham vd Merwe <abraham@2d3d.co.za>
-  Author of the LM92 driver.
-* Mark M. Hoffman <mhoffman@lightlink.com>
-  Author of the i2c-sis645 bus driver.
-  Added Asus ASB100 Bach support to the w83781d driver.
-* Alexander Malysh <amalysh@web.de>
-  Author of the i2c-sis630 bus driver.
-  Added Onsemi MC1066 support to the adm1021 driver.
-* Jean Delvare <khali@linux-fr.org>
-  Author of the lm63, lm83, lm90 and w83l785ts SMBus chip drivers.
-  Author of the f71805f and pc87360 Super-I/O chip drivers.
-  Author of the i2c-amd756-s4882 SMBus multiplexing driver.
-  Perl scripts maintainer, tester, bug fixer, general support.
-* Vojtech Pavlik <vojtech@suse.cz>	
-  Author of the i2c-amd8111 bus driver.
-  Added support for amd8111 SMBus 1.0 controller to i2c-amd756.
-* Philip Pokorny <ppokorny@penguincomputing.com>
-  Author of the LM85 chip driver.
-  Author of the ADM1026 chip driver.
-* John Morris <john.morris@spirentcom.com>
-  Author of the MAX6650 chip driver.
-* Reinhard Nissl <rnissl@gmx.de>
-  Author of the fscher driver.
-* Alexey Fisher <fishor@mail.ru>
-  Author of the max1619 chip driver.
-* Rudolf Marek <r.marek@assembler.cz>
-  Various fixes and support handling
+* Frodo Looijaard
+  Original author of libsensors, sensors and isadump.
+* Merlin Hughes
+  Original author of sensord.
+* Bob Schlaermann
+  Dynamic chip feature detection (a.k.a. generic chip support) in
+  libsensors and sensors.
+* Mark M. Hoffman
+  Many improvements to the libsensors configuration file scanner.
+* Jean Delvare
+  New libsensors API, and migration of sensors and sensord thereto.
+  Many optimizations in libsensors and sensors.
+  Configuration file converter.
