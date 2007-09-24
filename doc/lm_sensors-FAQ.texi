@@ -567,8 +567,7 @@ to work.
 * Section 4.29::        Inserting modules hangs my board
 * Section 4.30::        Inserting modules slows down my board
 * Section 4.31::        Problems on particular motherboards
-* Section 4.32::        Problems on particular systems
-* Section 4.33::        Problems on 2.6 kernels
+* Section 4.32::        Problems on 2.6 kernels
 @end menu
 
 
@@ -1240,13 +1239,7 @@ For board hangs, see support ticket 721 for information.
 Also @ref{Section 4.29, Inserting modules hangs my board}.
 
 
-@node Section 4.32, Section 4.33, Section 4.31, Problems
-@section Problems on particular systems
-
-For IBM systems, see @file{README.thinkpad}.
-
-
-@node Section 4.33, , Section 4.32, Problems
+@node Section 4.32, , Section 4.31, Problems
 @section Problems on 2.6 kernels
 
 Not all drivers have been ported to 2.6. If your favorite driver is not
@@ -1586,6 +1579,7 @@ will email you announcement.
 @appendix Revision History of This Document
 
 @itemize
+@item Rev 2.19 (JD) Removed 4.32 (Thinkpad-specific issues), 2007-09-24
 @item Rev 2.18 (JD) Removed version 1 specifics part, 2005-12-17
 @item Rev 2.17 (JD) Added 5.9 (why we don't support undocumented chips),
 	removed 6.9 (doesn't apply to the new mailing list), 2005-10-05

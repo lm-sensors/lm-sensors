@@ -104,10 +104,9 @@ lm_sensors
     4.31.2 Tyan 2460, 2462
     4.31.3 Tyan 2466
     4.31.4 Tyan 2688
-  4.32 Problems on particular systems
-  4.33 Problems on 2.6 kernels
-    4.33.1 i2c-viapro and via686a
-    4.33.2 Where are my EEPROMs?
+  4.32 Problems on 2.6 kernels
+    4.32.1 i2c-viapro and via686a
+    4.32.2 Where are my EEPROMs?
 5 How to Ask for Help
   5.1 What to send us when asking for help
   5.2 What to do if a module won't insert?
@@ -1201,12 +1200,7 @@ See support tickets 941, 840, and 841 for information.
 For board hangs, see support ticket 721 for information.  Also *Note
 Inserting modules hangs my board: Section 4.29.
 
-4.32 Problems on particular systems
-===================================
-
-For IBM systems, see `README.thinkpad'.
-
-4.33 Problems on 2.6 kernels
+4.32 Problems on 2.6 kernels
 ============================
 
 Not all drivers have been ported to 2.6. If your favorite driver is not
@@ -1215,7 +1209,7 @@ not get a proper review yet.  If you would like to port the driver, see
 the file Documentation/i2c/porting-clients in the 2.6 kernel tree for
 help, then send us the ported driver when you are done.
 
-4.33.1 i2c-viapro and via686a
+4.32.1 i2c-viapro and via686a
 -----------------------------
 
 Until kernel 2.6.11, there was a PCI resource conflict between
@@ -1224,7 +1218,7 @@ integrated sensors driver for VIA bridges). This caused the second
 loaded driver to silently fail working. So do not load both i2c-viapro
 and via686a together unless you have a recent kernel.
 
-4.33.2 Where are my EEPROMs?
+4.32.2 Where are my EEPROMs?
 ----------------------------
 
 The 2.6.14-rc1 kernel introduced the hwmon class, which groups all

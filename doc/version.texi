@@ -1,2 +1,2 @@
-@set UPDATED 17 December 2005
-@set VERSION 2.18
+@set UPDATED 24 September 2007
+@set VERSION 2.19

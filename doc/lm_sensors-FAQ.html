@@ -164,11 +164,10 @@ Jean Delvare<br>
 <li><a href="#Section-4_002e31">4.31.3 Tyan 2466</a>
 <li><a href="#Section-4_002e31">4.31.4 Tyan 2688</a>
 </li></ul>
-<li><a href="#Section-4_002e32">4.32 Problems on particular systems</a>
-<li><a href="#Section-4_002e33">4.33 Problems on 2.6 kernels</a>
+<li><a href="#Section-4_002e32">4.32 Problems on 2.6 kernels</a>
 <ul>
-<li><a href="#Section-4_002e33">4.33.1 i2c-viapro and via686a</a>
-<li><a href="#Section-4_002e33">4.33.2 Where are my EEPROMs?</a>
+<li><a href="#Section-4_002e32">4.32.1 i2c-viapro and via686a</a>
+<li><a href="#Section-4_002e32">4.32.2 Where are my EEPROMs?</a>
 </li></ul>
 </li></ul>
 <li><a name="toc_Help" href="#Help">5 How to Ask for Help</a>
@@ -903,8 +902,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <li><a href="#Section-4_002e29">Section 4.29</a>:         Inserting modules hangs my board
 <li><a href="#Section-4_002e30">Section 4.30</a>:         Inserting modules slows down my board
 <li><a href="#Section-4_002e31">Section 4.31</a>:         Problems on particular motherboards
-<li><a href="#Section-4_002e32">Section 4.32</a>:         Problems on particular systems
-<li><a href="#Section-4_002e33">Section 4.33</a>:         Problems on 2.6 kernels
+<li><a href="#Section-4_002e32">Section 4.32</a>:         Problems on 2.6 kernels
 </ul>
 
 <div class="node">
@@ -1817,26 +1815,12 @@ Also <a href="#Section-4_002e29">Inserting modules hangs my board</a>.
 <p><hr>
 <a name="Section-4.32"></a>
 <a name="Section-4_002e32"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#Section-4_002e33">Section 4.33</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e31">Section 4.31</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
 
 </div>
 
-<h3 class="section">4.32 Problems on particular systems</h3>
-
-<p>For IBM systems, see <samp><span class="file">README.thinkpad</span></samp>.
-
-<div class="node">
-<p><hr>
-<a name="Section-4.33"></a>
-<a name="Section-4_002e33"></a>
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#Section-4_002e32">Section 4.32</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Problems">Problems</a>
-
-</div>
-
-<h3 class="section">4.33 Problems on 2.6 kernels</h3>
+<h3 class="section">4.32 Problems on 2.6 kernels</h3>
 
 <p>Not all drivers have been ported to 2.6. If your favorite driver is not
 in 2.6, the reason is that nobody has ported it, or the ported code did
@@ -1845,7 +1829,7 @@ If you would like to port the driver, see the file
 Documentation/i2c/porting-clients in the 2.6 kernel tree for help,
 then send us the ported driver when you are done.
 
-<h4 class="subsection">4.33.1 i2c-viapro and via686a</h4>
+<h4 class="subsection">4.32.1 i2c-viapro and via686a</h4>
 
 <p>Until kernel 2.6.11, there was a PCI resource conflict between
 i2c-viapro (the SMBus driver for VIA bridges) and via686a (the integrated
@@ -1853,7 +1837,7 @@ sensors driver for VIA bridges). This caused the second loaded driver to
 silently fail working. So do not load both i2c-viapro and via686a together
 unless you have a recent kernel.
 
-<h4 class="subsection">4.33.2 Where are my EEPROMs?</h4>
+<h4 class="subsection">4.32.2 Where are my EEPROMs?</h4>
 
 <p>The 2.6.14-rc1 kernel introduced the hwmon class, which groups all
 hardware monitoring drivers in a logical way. The goal was to help
