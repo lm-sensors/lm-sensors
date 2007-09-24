@@ -23,14 +23,13 @@
 
 #define SENSORS_ERR_WILDCARDS	1 /* Wildcard found in chip name */
 #define SENSORS_ERR_NO_ENTRY	2 /* No such subfeature known */
-#define SENSORS_ERR_NO_DEVS	3 /* No devices found */
+#define SENSORS_ERR_ACCESS_R	3 /* Can't read */
 #define SENSORS_ERR_KERNEL	4 /* Kernel interface error */
 #define SENSORS_ERR_DIV_ZERO	5 /* Divide by zero */
 #define SENSORS_ERR_CHIP_NAME	6 /* Can't parse chip name */
 #define SENSORS_ERR_BUS_NAME	7 /* Can't parse bus name */
 #define SENSORS_ERR_PARSE	8 /* General parse error */
 #define SENSORS_ERR_ACCESS_W	9 /* Can't write */
-#define SENSORS_ERR_ACCESS_R	10 /* Can't read */
 
 #ifdef __cplusplus
 extern "C" {
