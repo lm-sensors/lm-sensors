@@ -120,10 +120,6 @@ const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
 #define SENSORS_MODE_W			2
 #define SENSORS_COMPUTE_MAPPING		4
 
-/* This define is used in the mapping field of sensors_subfeature if no
-   mapping is available */
-#define SENSORS_NO_MAPPING -1
-
 typedef enum sensors_feature_type {
 	SENSORS_FEATURE_IN		= 0x00,
 	SENSORS_FEATURE_FAN		= 0x01,
@@ -188,10 +184,9 @@ struct sensors_feature {
    number is the internal subfeature number, used in many functions to refer
      to this subfeature
    type is the subfeature type
-   mapping is either SENSORS_NO_MAPPING if this subfeature is the
-     main element of category; or it is the number of a subfeature with which
-     this subfeature is logically grouped (a group could be fan, fan_min
-     and fan_div)
+   mapping is the number of a main feature this subfeature belongs to
+     (for example subfeatures fan1_input, fan1_min, fan1_div and fan1_alarm
+      are mapped to main feature fan1)
    flags is a bitfield, its value is a combination of SENSORS_MODE_R (readable),
      SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING (affected by the
      computation rules of the main feature) */
