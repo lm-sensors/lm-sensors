@@ -18,7 +18,6 @@ Release steps:
   svn copy http://lm-sensors.org/svn/lm-sensors/trunk \
       http://lm-sensors.org/svn/lm-sensors/tags/V2-x-x \
       -m "Create tag 'V2-x-x'."
-- Remove empty directories (e.g. rmdir `find . -type d`)
 - Remove 'SVN' related files/directories (e.g. rm -fR `find . -name .svn`)
 - Rename lm_sensors2 to lm_sensors-#.#.#
 - Tar it up and post it (sign it)
