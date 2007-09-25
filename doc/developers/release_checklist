@@ -9,8 +9,9 @@ Release steps:
   functionality is added, and patch if only bugs are fixed.
   `svn diff -r Vx-y-z lib' is your friend.
 - Update the CHANGES file (add the release date)
-- Update lm_sensors.lsm and send it to the LSM by mailing it to 
-  lsm@execpc.com with the subject `add' (no quotes).
+- Update lm_sensors.lsm (Version, Entered-date and Primary-site) and send
+  it to the LSM by mailing it to lsm@qqx.org with the subject `add' (no
+  quotes).
 - Update version.h
 - Commit
 - Tag the release using SVN:
