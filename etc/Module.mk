@@ -31,6 +31,14 @@ install-etc:
 	if [ ! -e $(DESTDIR)$(ETCINSTALL) ] ; then \
 	  $(INSTALL) -m 644 $(ETCTARGET) $(DESTDIR)$(ETCINSTALL); \
 	fi
+	$(MKDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 755 $(MODULE_DIR)/sensors-conf-convert $(DESTDIR)$(BINDIR)
+
 user_install :: install-etc
+
+uninstall-etc:
+	$(RM) $(DESTDIR)$(BINDIR)/sensors-conf-convert
+
+user_uninstall :: uninstall-etc
 
 # No clean rule
