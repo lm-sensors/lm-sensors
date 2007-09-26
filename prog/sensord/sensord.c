@@ -117,7 +117,10 @@ sensord
     }
   }
 
-  sensorLog (LOG_INFO, "sensord %s", ret ? "failed" : "stopped");
+  if (ret)
+    sensorLog (LOG_INFO, "sensord failed (%d)", ret);
+  else
+    sensorLog (LOG_INFO, "sensord stopped");
 
   return ret;
 }

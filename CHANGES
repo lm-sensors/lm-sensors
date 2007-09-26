@@ -1,5 +1,8 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN
+  sensord: Log the error code on failure
+
 3.0.0-rc1 (2007-09-25)
   Initial release
