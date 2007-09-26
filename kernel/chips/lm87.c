@@ -289,12 +289,10 @@ static struct i2c_driver LM87_driver = {
 #define LM87_ALARM_FAN2         0x0080
 #define LM87_ALARM_IN4          0x0100
 #define LM87_ALARM_IN5          0x0200
-#define LM87_ALARM_RESERVED1    0x0400
-#define LM87_ALARM_RESERVED2    0x0800
 #define LM87_ALARM_CHAS         0x1000
 #define LM87_ALARM_THERM_SIG    0x2000
 #define LM87_ALARM_TEMP2_FAULT  0x4000
-#define LM87_ALARM_TEMP3_FAULT 0x08000
+#define LM87_ALARM_TEMP3_FAULT  0x8000
 
 /* -- SENSORS SYSCTL END -- */
 
