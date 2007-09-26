@@ -5,6 +5,7 @@ SVN
   Makefile: Add sensors-conf-convert to make install
   sensord: Log the error code on failure
   sensors: Fix spurious critical temperature alarm
+  sensors-conf-convert: Add a short help text
 
 3.0.0-rc1 (2007-09-25)
   Initial release
