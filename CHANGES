@@ -25,6 +25,7 @@ SVN HEAD
                    Fix memory leaks in command line parsing
                    Add w83793 support
                    Log the error code on failure
+                   Add lm87 support
   Program sensors: Fix a memory leak on error (with -u)
                    Add sch311x support
                    Hide error on missing dme1737 fan and pwm

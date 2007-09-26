@@ -547,6 +547,42 @@ static const ChipDescriptor lm80_chip = {
   lm80_names, lm80_features, SENSORS_LM80_ALARMS, 0
 };
 
+/** LM87 **/
+
+static const char *lm87_names[] = {
+  SENSORS_LM87_PREFIX, NULL
+};
+
+static const FeatureDescriptor lm87_features[] = {
+  { fmtVolts_2, rrdF2, DataType_voltage, LM87_ALARM_IN0, 0,
+    { SENSORS_LM87_IN0, SENSORS_LM87_IN0_MIN, SENSORS_LM87_IN0_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM87_ALARM_IN1, 0,
+    { SENSORS_LM87_IN1, SENSORS_LM87_IN1_MIN, SENSORS_LM87_IN1_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM87_ALARM_IN2, 0,
+    { SENSORS_LM87_IN2, SENSORS_LM87_IN2_MIN, SENSORS_LM87_IN2_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM87_ALARM_IN3, 0,
+    { SENSORS_LM87_IN3, SENSORS_LM87_IN3_MIN, SENSORS_LM87_IN3_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM87_ALARM_IN4, 0,
+    { SENSORS_LM87_IN4, SENSORS_LM87_IN4_MIN, SENSORS_LM87_IN4_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM87_ALARM_IN5, 0,
+    { SENSORS_LM87_IN5, SENSORS_LM87_IN5_MIN, SENSORS_LM87_IN5_MAX, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, LM87_ALARM_FAN1, 0,
+    { SENSORS_LM87_FAN1, SENSORS_LM87_FAN1_MIN, SENSORS_LM87_FAN1_DIV, -1 } },
+  { fmtFans_0, rrdF0, DataType_rpm, LM87_ALARM_FAN2, 0,
+    { SENSORS_LM87_FAN2, SENSORS_LM87_FAN2_MIN, SENSORS_LM87_FAN2_DIV, -1 } },
+  { fmtTemps_minmax_0, rrdF1, DataType_temperature, LM87_ALARM_TEMP1, 0,
+    { SENSORS_LM87_TEMP1, SENSORS_LM87_TEMP1_HYST, SENSORS_LM87_TEMP1_OVER, -1 } },
+  { fmtTemps_minmax_0, rrdF1, DataType_temperature, LM87_ALARM_TEMP2, 0,
+    { SENSORS_LM87_TEMP2, SENSORS_LM87_TEMP2_HYST, SENSORS_LM87_TEMP2_OVER, -1 } },
+  { fmtTemps_minmax_0, rrdF1, DataType_temperature, LM87_ALARM_TEMP3, 0,
+    { SENSORS_LM87_TEMP3, SENSORS_LM87_TEMP3_HYST, SENSORS_LM87_TEMP3_OVER, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor lm87_chip = {
+  lm87_names, lm87_features, SENSORS_LM87_ALARMS, 0
+};
+
 /** IT87 (thanks to Mike Black) **/
 
 static const char *it87_names[] = {
@@ -1371,6 +1407,7 @@ const ChipDescriptor * const knownChips[] = {
   &lm75_chip,
   &lm78_chip,
   &lm80_chip,
+  &lm87_chip,
   &max1617_chip,
   &maxilife_chip,
   &sis5595_chip,
