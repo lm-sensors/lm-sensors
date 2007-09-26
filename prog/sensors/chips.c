@@ -246,8 +246,7 @@ static void print_chip_temp(const sensors_chip_name *name,
 
 		sf = sensors_get_subfeature(name, feature,
 					SENSORS_SUBFEATURE_TEMP_CRIT_ALARM);
-		if (sf && get_value(name, sf->number))
-			alarm |= 1;
+		alarm = sf && get_value(name, sf->number);
 
 		printf("\n%*s", label_size + 10, "");
 		print_temp_limits(limit1, limit2, s1, s2, alarm);
