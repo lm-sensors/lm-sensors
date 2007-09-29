@@ -343,7 +343,3 @@ This may help identify a chip after doing a 'i2cdump [bus] [address]'.
 0xDA	Dallas
 
 [A-Z]{3} at 0x00-0x02: Fujitsu-Siemens
-
-
-------------------
-Copyright (c) 2001-2005 The lm_sensors group

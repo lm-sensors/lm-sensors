@@ -3,7 +3,7 @@
 #    tellerstats.sh                  3
 #	generate graphs from the data
 #
-#    Copyright 2001 The lm_sensors group
+#    Copyright (C) 2001  Philip Edelbrock
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
