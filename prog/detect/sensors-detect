@@ -2185,14 +2185,6 @@ sub inb
 # Returns: -1 on failure, 0 on success.
 sub outb
 {
-  if ($_[1] > 0xff)
-  {
-    my ($package, $filename, $line, $sub) = caller(1);
-    print "\n*** Called outb with value=$_[1] from line $line\n",
-          "*** (in $sub). PLEASE REPORT!\n",
-          "*** Terminating.\n";
-    exit(-1);
-  }
   my $towrite = pack "C", $_[1];
   sysseek IOPORTS, $_[0], 0 or return -1;
   my $nrchars = syswrite IOPORTS, $towrite, 1;
