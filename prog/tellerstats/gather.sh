@@ -6,7 +6,7 @@
 #	Don't run manually as root or else files in data/ will get
 #	root ownership then your (non-root) cron daemon won't work
 #
-#    Copyright 2001 The lm_sensors group
+#    Copyright (C) 2001  Philip Edelbrock
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
