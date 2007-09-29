@@ -39,7 +39,7 @@ void print_chip_raw(const sensors_chip_name *name)
 	a = 0;
 	while ((feature = sensors_get_features(name, &a))) {
 		if (!(label = sensors_get_label(name, feature))) {
-			printf("ERROR: Can't get feature label!\n");
+			fprintf(stderr, "ERROR: Can't get feature label!\n");
 			continue;
 		}
 		printf("%s:\n", label);
@@ -49,8 +49,9 @@ void print_chip_raw(const sensors_chip_name *name)
 		while ((sub = sensors_get_all_subfeatures(name, feature, &b))) {
 			if (sub->flags & SENSORS_MODE_R) {
 				if (sensors_get_value(name, sub->number, &val))
-					printf("ERROR: Can't get feature `%s' "
-					       "data!\n", sub->name);
+					fprintf(stderr, "ERROR: Can't get "
+						"feature `%s' data!\n",
+						sub->name);
 				else
 					printf("  %s: %.2f\n", sub->name, val);
 			} else
@@ -77,8 +78,8 @@ static double get_value(const sensors_chip_name *name, int subfeat_nr)
 
 	err = sensors_get_value(name, subfeat_nr, &val);
 	if (err) {
-		printf("ERROR: Can't get value of subfeature %d: %s\n",
-		       subfeat_nr, sensors_strerror(err));
+		fprintf(stderr, "ERROR: Can't get value of subfeature %d: %s\n",
+			subfeat_nr, sensors_strerror(err));
 		val = 0;
 	}
 	return val;
@@ -135,7 +136,7 @@ static void print_chip_temp(const sensors_chip_name *name,
 	char *label;
 
 	if (!(label = sensors_get_label(name, feature))) {
-		printf("ERROR: Can't get temperature label!\n");
+		fprintf(stderr, "ERROR: Can't get temperature label!\n");
 		return;
 	}
 	print_label(label, label_size);
@@ -283,7 +284,7 @@ static void print_chip_in(const sensors_chip_name *name,
 	char *label;
 
 	if (!(label = sensors_get_label(name, feature))) {
-		printf("ERROR: Can't get in label!\n");
+		fprintf(stderr, "ERROR: Can't get in label!\n");
 		return;
 	}
 	print_label(label, label_size);
@@ -346,7 +347,7 @@ static void print_chip_fan(const sensors_chip_name *name,
 	double val;
 
 	if (!(label = sensors_get_label(name, feature))) {
-		printf("ERROR: Can't get fan label!\n");
+		fprintf(stderr, "ERROR: Can't get fan label!\n");
 		return;
 	}
 	print_label(label, label_size);

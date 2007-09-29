@@ -7,6 +7,7 @@ SVN
               Differentiate between different read error types
   sensord: Log the error code on failure
   sensors: Fix spurious critical temperature alarm
+           Print error messages to stderr
   sensors-conf-convert: Add a short help text
 
 3.0.0-rc1 (2007-09-25)
