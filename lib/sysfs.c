@@ -577,9 +577,11 @@ int sensors_write_sysfs_attr(const sensors_chip_name *name,
 
 	snprintf(n, NAME_MAX, "%s/%s", name->path, subfeature->name);
 	if ((f = fopen(n, "w"))) {
+		int res;
 		value *= get_type_scaling(subfeature->type);
-		fprintf(f, "%d", (int) value);
-		fclose(f);
+		res = fprintf(f, "%d", (int) value);
+		if (fclose(f) || res < 0)
+			return -SENSORS_ERR_ACCESS_W;
 	} else
 		return -SENSORS_ERR_KERNEL;
 
