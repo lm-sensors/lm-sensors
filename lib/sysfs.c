@@ -557,9 +557,24 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name,
 
 	snprintf(n, NAME_MAX, "%s/%s", name->path, subfeature->name);
 	if ((f = fopen(n, "r"))) {
-		int res = fscanf(f, "%lf", value);
-		if (fclose(f) || res != 1)
-			return -SENSORS_ERR_ACCESS_R;
+		int res, err = 0;
+
+		errno = 0;
+		res = fscanf(f, "%lf", value);
+		if (res == EOF && errno == EIO)
+			err = -SENSORS_ERR_IO;
+		else if (res != 1)
+			err = -SENSORS_ERR_ACCESS_R;
+		res = fclose(f);
+		if (err)
+			return err;
+
+		if (res == EOF) {
+			if (errno == EIO)
+				return -SENSORS_ERR_IO;
+			else 
+				return -SENSORS_ERR_ACCESS_R;
+		}
 		*value /= get_type_scaling(subfeature->type);
 	} else
 		return -SENSORS_ERR_KERNEL;
@@ -576,11 +591,24 @@ int sensors_write_sysfs_attr(const sensors_chip_name *name,
 
 	snprintf(n, NAME_MAX, "%s/%s", name->path, subfeature->name);
 	if ((f = fopen(n, "w"))) {
-		int res;
+		int res, err = 0;
+
 		value *= get_type_scaling(subfeature->type);
 		res = fprintf(f, "%d", (int) value);
-		if (fclose(f) || res < 0)
-			return -SENSORS_ERR_ACCESS_W;
+		if (res == -EIO)
+			err = -SENSORS_ERR_IO;
+		else if (res < 0)
+			err = -SENSORS_ERR_ACCESS_W;
+		res = fclose(f);
+		if (err)
+			return err;
+
+		if (res == EOF) {
+			if (errno == EIO)
+				return -SENSORS_ERR_IO;
+			else 
+				return -SENSORS_ERR_ACCESS_W;
+		}
 	} else
 		return -SENSORS_ERR_KERNEL;
 

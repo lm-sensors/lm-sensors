@@ -42,6 +42,7 @@ static const char *errorlist[] = {
 	/* SENSORS_ERR_BUS_NAME  */ "Can't parse bus name",
 	/* SENSORS_ERR_PARSE     */ "General parse error",
 	/* SENSORS_ERR_ACCESS_W  */ "Can't write",
+	/* SENSORS_ERR_IO        */ "I/O error",
 };
 
 const char *sensors_strerror(int errnum)

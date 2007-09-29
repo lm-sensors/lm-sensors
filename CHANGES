@@ -5,6 +5,7 @@ SVN
   Makefile: Add sensors-conf-convert to make install
   libsensors: Notify the caller when writing a value fails
               Differentiate between different read error types
+              Report I/O errors as such
   sensord: Log the error code on failure
   sensors: Fix spurious critical temperature alarm
            Print error messages to stderr
