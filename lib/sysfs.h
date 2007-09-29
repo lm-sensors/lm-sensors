@@ -1,6 +1,7 @@
 /*
     sysfs.h - part of libsensors, a library for reading Linux sensor data
-    Copyright (C) Mark M. Hoffman <mhoffman@lightlink.com>
+    Copyright (C)             Mark M. Hoffman <mhoffman@lightlink.com>
+    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
