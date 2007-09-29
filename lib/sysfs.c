@@ -558,9 +558,8 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name,
 	snprintf(n, NAME_MAX, "%s/%s", name->path, subfeature->name);
 	if ((f = fopen(n, "r"))) {
 		int res = fscanf(f, "%lf", value);
-		fclose(f);
-		if (res != 1)
-			return -SENSORS_ERR_KERNEL;
+		if (fclose(f) || res != 1)
+			return -SENSORS_ERR_ACCESS_R;
 		*value /= get_type_scaling(subfeature->type);
 	} else
 		return -SENSORS_ERR_KERNEL;

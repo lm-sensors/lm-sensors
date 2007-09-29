@@ -4,6 +4,7 @@ lm-sensors CHANGES file
 SVN
   Makefile: Add sensors-conf-convert to make install
   libsensors: Notify the caller when writing a value fails
+              Differentiate between different read error types
   sensord: Log the error code on failure
   sensors: Fix spurious critical temperature alarm
   sensors-conf-convert: Add a short help text
