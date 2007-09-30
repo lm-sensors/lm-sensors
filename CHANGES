@@ -10,6 +10,7 @@ SVN
   sensors: Fix spurious critical temperature alarm
            Print error messages to stderr
            Make error messages more helpful and consistent
+           Better handling of the fault flags
   sensors-conf-convert: Add a short help text
 
 3.0.0-rc1 (2007-09-25)

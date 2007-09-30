@@ -148,10 +148,6 @@ static void print_chip_temp(const sensors_chip_name *name,
 	free(label);
 
 	sf = sensors_get_subfeature(name, feature,
-				    SENSORS_SUBFEATURE_TEMP_INPUT);
-	val = sf ? get_value(name, sf) : 0;
-
-	sf = sensors_get_subfeature(name, feature,
 				    SENSORS_SUBFEATURE_TEMP_ALARM);
 	alarm = sf && get_value(name, sf);
 
@@ -230,9 +226,15 @@ static void print_chip_temp(const sensors_chip_name *name,
 	if (sf && get_value(name, sf)) {
 		printf("   FAULT  ");
 	} else {
-		if (fahrenheit)
-			val = deg_ctof(val);
-		printf("%+6.1f%s  ", val, degstr);
+		sf = sensors_get_subfeature(name, feature,
+					    SENSORS_SUBFEATURE_TEMP_INPUT);
+		if (sf) {
+			val = get_value(name, sf);
+			if (fahrenheit)
+				val = deg_ctof(val);
+			printf("%+6.1f%s  ", val, degstr);
+		} else
+			printf("     N/A  ");
 	}
 	print_temp_limits(limit1, limit2, s1, s2, alarm);
 
@@ -350,7 +352,6 @@ static void print_chip_fan(const sensors_chip_name *name,
 {
 	const sensors_subfeature *sf, *sfmin, *sfdiv;
 	char *label;
-	double val;
 
 	if (!(label = sensors_get_label(name, feature))) {
 		fprintf(stderr, "ERROR: Can't get label of feature %s!\n",
@@ -361,14 +362,17 @@ static void print_chip_fan(const sensors_chip_name *name,
 	free(label);
 
 	sf = sensors_get_subfeature(name, feature,
-				    SENSORS_SUBFEATURE_FAN_INPUT);
-	val = sf ? get_value(name, sf) : 0;
-	sf = sensors_get_subfeature(name, feature,
 				    SENSORS_SUBFEATURE_FAN_FAULT);
 	if (sf && get_value(name, sf))
 		printf("   FAULT");
-	else
-		printf("%4.0f RPM", val);
+	else {
+		sf = sensors_get_subfeature(name, feature,
+					    SENSORS_SUBFEATURE_FAN_INPUT);
+		if (sf)
+			printf("%4.0f RPM", get_value(name, sf));
+		else
+			printf("     N/A");
+	}
 
 	sfmin = sensors_get_subfeature(name, feature,
 				       SENSORS_SUBFEATURE_FAN_MIN);
