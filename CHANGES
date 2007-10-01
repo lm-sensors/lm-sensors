@@ -35,6 +35,7 @@ SVN HEAD
                           Add Winbond W83L786NR/NG/R/G detection
                           Add Winbond W83L771W/G detection
                           Add Intel Tolapai SMBus detection
+                          Fix SMSC SCH311x detection
 
 
 2.10.4 (20070716)
