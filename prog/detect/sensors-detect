@@ -1831,16 +1831,19 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids);
 	name => "SMSC SCH3112 Super IO",
 	driver => "dme1737",
 	devid => 0x7c,
+	logdev => 0x0a,
       },
       {
 	name => "SMSC SCH3114 Super IO",
 	driver => "dme1737",
 	devid => 0x7d,
+	logdev => 0x0a,
       },
       {
 	name => "SMSC SCH3116 Super IO",
 	driver => "dme1737",
 	devid => 0x7f,
+	logdev => 0x0a,
       },
       {
 	name => "SMSC SCH4307 Super IO Fan Sensors",
