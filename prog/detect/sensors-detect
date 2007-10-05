@@ -1921,20 +1921,20 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids);
 	alias_detect => sub { vt1211_alias_detect(0, @_); },
       },
       {
-	name => "Winbond W83627HF Super IO Sensors",
+	name => "Winbond W83627HF/F/HG/G Super IO Sensors",
 	driver => "w83627hf",
 	devid => 0x52,
 	logdev => 0x0b,
 	alias_detect => sub { w83781d_alias_detect(3, @_); },
       },
       {
-	name => "Winbond W83627THF Super IO Sensors",
+	name => "Winbond W83627THF/THG Super IO Sensors",
 	driver => "w83627hf",
 	devid => 0x82,
 	logdev => 0x0b,
       },
       {
-	name => "Winbond W83637HF Super IO Sensors",
+	name => "Winbond W83637HF/HG Super IO Sensors",
 	driver => "w83627hf",
 	devid => 0x70,
 	logdev => 0x0b,
@@ -1946,19 +1946,19 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids);
 	logdev => 0x0b,
       },
       {
-	name => "Winbond W83697HF Super IO Sensors",
+	name => "Winbond W83697HF/F/HG Super IO Sensors",
 	driver => "w83627hf",
 	devid => 0x60,
 	logdev => 0x0b,
       },
       {
-	name => "Winbond W83697SF/UF Super IO PWM",
+	name => "Winbond W83697SF/UF/UG Super IO PWM",
 	driver => "to-be-written",
 	devid => 0x68,
 	logdev => 0x0b,
       },
       {
-	name => "Winbond W83627EHF/EHG Super IO Sensors",
+	name => "Winbond W83627EHF/EF/EHG/EG Super IO Sensors",
 	driver => "w83627ehf",
 	# W83627EHF datasheet says 0x886x but 0x8853 was seen, thus the
 	# broader mask. W83627EHG was seen with ID 0x8863.
