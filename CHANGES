@@ -37,6 +37,7 @@ SVN HEAD
                           Add Winbond W83L771W/G detection
                           Add Intel Tolapai SMBus detection
                           Fix SMSC SCH311x detection
+                          Add AMD K10 CPU sensor detection 
 
 
 2.10.4 (20070716)
