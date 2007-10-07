@@ -49,9 +49,8 @@ extern int parseChips (int argc, char **argv);
 
 /* from lib.c */
 
-extern int initLib (void);
-extern int loadLib (void);
-extern int reloadLib (void);
+extern int loadLib (const char *cfgPath);
+extern int reloadLib (const char *cfgPath);
 extern int unloadLib (void);
 
 /* from sense.c */

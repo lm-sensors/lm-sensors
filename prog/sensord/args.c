@@ -30,10 +30,12 @@
 #include "lib/error.h"
 #include "version.h"
 
+#define DEFAULT_CONFIG_FILE	ETCDIR "/sensors.conf"
+
 #define MAX_CHIP_NAMES 32
 
 int isDaemon = 0;
-const char *sensorsCfgFile = "sensors.conf";
+const char *sensorsCfgFile = DEFAULT_CONFIG_FILE;
 const char *pidFile = "/var/run/sensord.pid";
 const char *rrdFile = NULL;
 const char *cgiDir = NULL;
@@ -102,7 +104,7 @@ static const char *daemonSyntax =
   "  -t, --rrd-interval <time> -- interval between updating RRD file (default 5m)\n"
   "  -T, --rrd-no-average      -- switch RRD in non-average mode\n"
   "  -r, --rrd-file <file>     -- RRD file (default <none>)\n"
-  "  -c, --config-file <file>  -- configuration file (default sensors.conf)\n"
+  "  -c, --config-file <file>  -- configuration file (default " DEFAULT_CONFIG_FILE ")\n"
   "  -p, --pid-file <file>     -- PID file (default /var/run/sensord.pid)\n"
   "  -f, --syslog-facility <f> -- syslog facility to use (default local4)\n"
   "  -g, --rrd-cgi <img-dir>   -- output an RRD CGI script and exit\n"
@@ -114,8 +116,7 @@ static const char *daemonSyntax =
   "Specify a value of 0 for any interval to disable that operation;\n"
   "for example, specify --log-interval 0 to only scan for alarms."
   "\n"
-  "If no path is specified, a list of directories is examined for the config file;\n"
-  "specify the filename `-' to read the config file from stdin.\n"
+  "Specify the filename `-' to read the config file from stdin.\n"
   "\n"
   "If no chips are specified, all chip info will be printed.\n"
   "\n"
@@ -128,13 +129,12 @@ static const char *appSyntax =
   "  -a, --alarm-scan          -- only scan for alarms\n"
   "  -s, --set                 -- execute set statements (root only)\n"
   "  -r, --rrd-file <file>     -- only update RRD file\n"
-  "  -c, --config-file <file>  -- configuration file (default sensors.conf)\n"
+  "  -c, --config-file <file>  -- configuration file (default " DEFAULT_CONFIG_FILE ")\n"
   "  -d, --debug               -- display some debug information\n"
   "  -v, --version             -- display version and exit\n"
   "  -h, --help                -- display help and exit\n"
   "\n"
-  "If no path is specified, a list of directories is examined for the config file;\n"
-  "specify the filename `-' to read the config file from stdin.\n"
+  "Specify the filename `-' to read the config file from stdin.\n"
   "\n"
   "If no chips are specified, all chip info will be printed.\n";
 

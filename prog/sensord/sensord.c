@@ -87,7 +87,7 @@ sensord
 
   while (!done && (ret == 0)) {
     if (ret == 0)
-      ret = reloadLib ();
+      ret = reloadLib (sensorsCfgFile);
     if ((ret == 0) && scanTime) { /* should I scan on the read cycle? */
       ret = scanChips ();
       if (scanValue <= 0)
@@ -198,8 +198,7 @@ main
       parseChips (argc, argv))
     exit (EXIT_FAILURE);
   
-  if (initLib () ||
-      loadLib ())
+  if (loadLib (sensorsCfgFile))
     exit (EXIT_FAILURE);
 
   if (isDaemon)
