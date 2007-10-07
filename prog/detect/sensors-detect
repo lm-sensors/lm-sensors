@@ -2083,6 +2083,11 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids);
     detect => sub { k8temp_pci_detect(); },
   },
   {
+    name => "AMD K10 thermal sensors",
+    driver => "to-be-written",
+    detect => sub { k10temp_pci_detect(); },
+  },
+  {
     name => "Intel Core family thermal sensor",
     driver => "coretemp",
     detect => sub { coretemp_detect(); },
@@ -5354,6 +5359,12 @@ sub via8231_pci_detect
 sub k8temp_pci_detect
 {
 	return unless exists $pci_list{'1022:1103'};
+	return 9;
+}
+
+sub k10temp_pci_detect
+{
+	return unless exists $pci_list{'1022:1203'};
 	return 9;
 }
 
