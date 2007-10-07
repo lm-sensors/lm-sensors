@@ -21,7 +21,7 @@
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
-.TH sensord 8  "October 23, 2002" "Version 0.6.3" "Linux System Administration"
+.TH sensord 8  "October 2007" "" "Linux System Administration"
 .SH NAME
 sensord \- Sensor information logging daemon.
 .SH SYNOPSIS
@@ -208,11 +208,7 @@ failure or an unacceptable temperature or voltage. However, some
 sensor chips do not support alarms, while others are incorrectly
 configured and may signal alarms incorrectly.
 
-Typically, an alarm will only be signaled once,
-even if the critical condition persists. This means that it is very
-easy to miss an alarm!
-
-In other cases, however, uninteresting alarms (e.g., chassis
+Sometimes, uninteresting alarms (e.g., chassis
 intrusion detection) will be repeated continuously. You can
 configure
 .BR libsensors (3)
@@ -383,10 +379,7 @@ Errors encountered by this daemon are logged to
 .BR syslogd (8)
 after which the daemon will exit.
 .SH BUGS
-.B Sensord
-doesn't yet cope with the flipped alarm bits on
-.IR AS99127F
-chips. Round-robin database support doesn't cope with
+Round-robin database support doesn't cope with
 multiple sensor chips having duplicate sensor labels.
 .SH FILES
 .I /etc/sensors.conf
