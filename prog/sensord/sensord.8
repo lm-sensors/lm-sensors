@@ -40,11 +40,6 @@ or a round-robin database (RRD)
 and to alert when a sensor alarm is signalled; for example, if a
 fan fails, a temperature limit is exceeded, etc.
 
-.B Sensord
-knows about certain chips, and outputs nicely formatted readings for them; but
-it can also display the information of unknown chips, as long as 
-.BR libsensors (3)
-knows about them.
 .SH OPTIONS
 .IP "-i, --interval time"
 Specify the interval between scanning for sensor alarms; the default is to
@@ -205,32 +200,11 @@ failure or an unacceptable temperature or voltage. However, some
 sensor chips do not support alarms, while others are incorrectly
 configured and may signal alarms incorrectly.
 
-Typically, an alarm will only be signaled once,
-even if the critical condition persists. This means that it is very
-easy to miss an alarm!
+Note that some drivers may lack support for alarm reporting
+even though the chips they support do have alarms. As of Linux 2.6.23,
+many drivers still don't report alarms in a format suitable for
+libsensors 3.
 
-In other cases, however, uninteresting alarms (e.g., chassis
-intrusion detection) will be repeated continuously. You can
-configure
-.BR libsensors (3)
-to ignore unwanted sensor reading such as these by placing an
-`ignore' entry in the appropriate chip-specific section of the
-.BR sensors.conf (5)
-configuration file.
-
-For example, I have the following entry:
-.IP
-.nf
-# Sample /etc/sensors.conf entry
-chip "w83782d-*"
-    ignore "alarms"
-.fi
-.PP
-In this case, `alarms' was the sensor label reported in
-the relevant sensor log message.
-
-Alternatively, you may be able to reset the alarm with your
-BIOS.
 .SH BEEPS
 If you see `(beep)' beside any sensor reading, that just means that
 your system is configured to issue an audio warning from the
@@ -380,10 +354,7 @@ Errors encountered by this daemon are logged to
 .BR syslogd (8)
 after which the daemon will exit.
 .SH BUGS
-.B Sensord
-doesn't yet cope with the flipped alarm bits on
-.IR AS99127F
-chips. Round-robin database support doesn't cope with
+Round-robin database support doesn't cope with
 multiple sensor chips having duplicate sensor labels.
 .SH FILES
 .I /etc/sensors.conf
