@@ -7,6 +7,8 @@ SVN
               Differentiate between different read error types
               Report I/O errors as such
   sensord: Log the error code on failure
+           Drop the configuration file search path mechanism (#2259)
+           Manual page update
   sensors: Fix spurious critical temperature alarm
            Print error messages to stderr
            Make error messages more helpful and consistent
