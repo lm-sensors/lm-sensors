@@ -15,6 +15,7 @@ SVN
            Better handling of the fault flags
   sensors-conf-convert: Add a short help text
   sensors-detect: Fix SMSC SCH311x detection
+                  Add AMD K10 CPU sensor detection 
 
 3.0.0-rc1 (2007-09-25)
   Initial release
