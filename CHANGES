@@ -14,7 +14,7 @@ SVN
            Make error messages more helpful and consistent
            Better handling of the fault flags
   sensors-conf-convert: Add a short help text
-  sennsors-detect: Fix SMSC SCH311x detection
+  sensors-detect: Fix SMSC SCH311x detection
 
 3.0.0-rc1 (2007-09-25)
   Initial release
