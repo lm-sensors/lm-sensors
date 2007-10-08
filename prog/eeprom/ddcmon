@@ -64,7 +64,7 @@ if (-r '/proc/modules')
 	unless ($found)
 	{
 		print STDERR
-			"This script required the eeprom module to be loaded.\n";
+			"This script requires the eeprom module to be loaded.\n";
 		exit 1;
 	}
 }
