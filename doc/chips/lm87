@@ -6,7 +6,7 @@ Status: Complete and somewhat tested
 Supported chips:
   * National Semiconductor LM87
     Prefix: 'lm87'
-    Addresses scanned: I2C 0x2c - 0x2f
+    Addresses scanned: I2C 0x2c - 0x2e
     Datasheet: http://www.national.com/pf/LM/LM87.html
 
 Authors: Frodo Looijaard <frodol@dds.nl>,
