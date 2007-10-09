@@ -1150,7 +1150,7 @@ chip "adm1025-*" "ne1619-*"
 #    set temp2_max 45
 
 
-chip "lm87-*"
+chip "lm87-*" "adm1024-*"
 #
 # The LM87 has integrated scaling resistors, rather
 # than external resistors common to most sensor devices.
