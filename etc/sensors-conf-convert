@@ -155,8 +155,9 @@ BEGIN
 			qr/"5V(|_min|_max)"/		=> sub { "in3$1" },
 			qr/"12V(|_min|_max)"/		=> sub { "in4$1" },
 			qr/\bVccp2(|_min|_max)\b/	=> sub { "in5$1" },
+			qr/\btemp_hyst\b/		=> sub { "temp1_min" },
 			qr/\btemp(\d)\b/		=> sub { "temp".($1+1) },
-			qr/\btemp(\d)_hyst\b/		=> sub { "temp".($1+1)."_max_hyst" },
+			qr/\btemp(\d)_hyst\b/		=> sub { "temp".($1+1)."_min" },
 			qr/\btemp(\d)_over\b/		=> sub { "temp".($1+1)."_max" },
 		},
 		"maxilife" => {
