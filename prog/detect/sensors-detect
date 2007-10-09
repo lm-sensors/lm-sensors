@@ -1093,12 +1093,6 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { adm1025_detect(1, @_); },
      },
      {
-       name => "Analog Devices ADM1024",
-       driver => "adm1024",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1024_detect(0, @_); },
-     },
-     {
        name => "Analog Devices ADM1021",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a,0x29..0x2b,0x4c..0x4e],
@@ -1492,6 +1486,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
 use vars qw(@chip_kern24_ids @chip_kern26_ids);
 @chip_kern24_ids = (
      {
+       name => "Analog Devices ADM1024",
+       driver => "adm1024",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { adm1024_detect(0, @_); },
+     },
+     {
        name => "Winbond W83791D",
        driver => "w83781d",
        i2c_addrs => [0x2c..0x2f],
@@ -1512,6 +1512,12 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids);
 );
 
 @chip_kern26_ids = (
+     {
+       name => "Analog Devices ADM1024",
+       driver => "lm87",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { adm1024_detect(0, @_); },
+     },
      {
        name => "Winbond W83791D",
        driver => "w83791d",
