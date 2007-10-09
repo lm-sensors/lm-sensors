@@ -435,8 +435,7 @@ void print_adm1024(const sensors_chip_name *name)
       printf( "%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&ADM1024_ALARM_IN0?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN0 data!\n");
+  } /* No error, can be missing */
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_ADM1024_IN1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_ADM1024_IN1,&cur) &&
@@ -495,8 +494,7 @@ void print_adm1024(const sensors_chip_name *name)
       printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
              cur,min,max,alarms&ADM1024_ALARM_IN5?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get IN5 data!\n");
+  } /* No error, can be missing */
   free(label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_ADM1024_FAN1,&label,&valid) &&
@@ -508,8 +506,7 @@ void print_adm1024(const sensors_chip_name *name)
       printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
              cur,min,fdiv, alarms&ADM1024_ALARM_FAN1?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get FAN1 data!\n");
+  } /* No error, can be missing */
   free(label);
   if (!sensors_get_label_and_valid(*name,SENSORS_ADM1024_FAN2,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_ADM1024_FAN2,&cur) &&
@@ -520,8 +517,7 @@ void print_adm1024(const sensors_chip_name *name)
       printf("%4.0f RPM  (min = %4.0f RPM, div = %1.0f)          %s\n",
              cur,min,fdiv, alarms&ADM1024_ALARM_FAN2?"ALARM":"");
     }
-  } else
-    printf("ERROR: Can't get FAN2 data!\n");
+  } /* No error, can be missing */
   free(label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_ADM1024_TEMP,&label,&valid) &&
@@ -530,7 +526,7 @@ void print_adm1024(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1024_TEMP_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, min, max, HYST, 1, 0);
+      print_temp_info(cur, max, min, MINMAX, 0, 0);
       printf( " %s\n", alarms & ADM1024_ALARM_TEMP ? "ALARM" : "" );
     }
   } else
@@ -543,7 +539,7 @@ void print_adm1024(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1024_TEMP1_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, min, max, HYST, 1, 0);
+      print_temp_info(cur, max, min, MINMAX, 0, 0);
       printf( " %s\n", alarms & ADM1024_ALARM_TEMP1 ? "ALARM" : "" );
     }
   } else
@@ -556,11 +552,10 @@ void print_adm1024(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_ADM1024_TEMP2_OVER,&max)) {
     if (valid) {
       print_label(label,10);
-      print_temp_info( cur, min, max, HYST, 1, 0);
+      print_temp_info(cur, max, min, MINMAX, 0, 0);
       printf( " %s\n", alarms & ADM1024_ALARM_TEMP2 ? "ALARM" : "" );
     }
-  } else
-    printf("ERROR: Can't get TEMP2 data!\n");
+  } /* No error, can be missing */
   free(label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_ADM1024_VID,&label,&valid) &&
