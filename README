@@ -75,13 +75,14 @@ the effort and can simply link with libsensors and work out of the box.
 APPLICATIONS
 ------------
 
-This package does not contain a nice graphical monitor. Look at the file
-doc/useful_addresses.html for pointers to such programs. It does contain
-an example console program that reports all current sensors values. This
-program is called 'sensors'. You can use it as a reference implementation
-for more intricate programs. It also contains a daemon watching for
-sensor values, logging alarms and feeding an RRD database with the sensor
-measurements.
+This package contains an example console program that reports all current
+sensors values. This program is called 'sensors'. You can use it as a
+reference implementation for more intricate programs. It also contains a
+daemon watching for sensor values, logging alarms and feeding an RRD
+database with the sensor measurements.
+
+This package does not contain a nice graphical monitor. See
+http://www.lm-sensors.org/wiki/UsefulLinks for pointers to such programs.
 
 
 OTHER INFORMATION

@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN
+  useful_addresses.html: Moved to the wiki
   Makefile: Add sensors-conf-convert to make install
   libsensors: Notify the caller when writing a value fails
               Differentiate between different read error types
