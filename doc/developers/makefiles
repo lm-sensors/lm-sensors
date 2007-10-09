@@ -1,6 +1,6 @@
 The Makefiles in this package are rather advanced. They are partially based
-on the article "Recursive Make considered Harmful", written by Peter Miller.
-See doc/useful_addresses.html for a link to this article.
+on the article "Recursive Make considered Harmful", written by Peter Miller:
+  http://miller.emu.id.au/pmiller/books/rmch/
 
 There is one big Makefile in the root of this package. It includes many
 other files; one for each directory in which source code is found. These

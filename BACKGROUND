@@ -55,11 +55,11 @@ to know about it. And because the configuration file is reread each time
 a new application is started, you can change configuration values without
 having to recompile anything.
 
-This package does not contain a nice graphical monitor. Look at the file
-doc/useful_addresses.html for pointers to such programs. It does contain
-an example console program that reports all current sensors values. This
-program is called 'sensors'. You can use it as a reference implementation
-for more intricate programs.
+This package does not contain a nice graphical monitor. See
+http://www.lm-sensors.org/wiki/UsefulLinks for pointers to such programs.
+It does contain an example console program that reports all current sensors
+values. This program is called 'sensors'. You can use it as a reference
+implementation for more intricate programs.
 
 There are many, many kernel modules in this package, and there are lots
 of different sensor chips supported. Sometimes, it can be hard to 

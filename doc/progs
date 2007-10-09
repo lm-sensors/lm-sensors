@@ -6,7 +6,7 @@ These programs are generally small utilities used for debugging,
 and installation of the lm_sensors package, and for demonstrating
 the use of the drivers and libraries in this package.
 For more elaborate programs (for example, GUI sensor displays),
-see useful_addresses.html.
+see http://www.lm-sensors.org/wiki/UsefulLinks.
 
 
 * prog/config/grab_busses.sh (written in bash and awk, not installed)
