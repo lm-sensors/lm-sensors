@@ -1,7 +1,7 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN
+3.0.0-rc2 (2007-10-10)
   useful_addresses.html: Moved to the wiki
   Makefile: Add sensors-conf-convert to make install
   libsensors: Notify the caller when writing a value fails
