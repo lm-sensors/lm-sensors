@@ -2341,4 +2341,26 @@
 #define SENSORS_F71882FG_TEMP_FAULT(n)		(140 + (n))
 #define SENSORS_F71882FG_TEMP_TYPE(n)		(150 + (n))
 
+/* Fujitsu Siemens Computers Heimdal and Heracles */
+#define SENSORS_FSCHMD_PREFIX		"fscher"
+#define SENSORS_FSCHRC_PREFIX		"fscher"
+
+/* Note, we start with feature numbers of 60+ to not have any overlapping
+   features with the old FSCPOS, FSCSCY and FSCHER feature lists, as the
+   FSCHMD feature defines for features only exported by the new FSCHMD driver
+   are reused in the feature lists of the FSCPOS, FSCSCY and FSCHER */
+   
+/* in n from 0 to 3 */
+#define SENSORS_FSCHMD_IN(n)			(60 + (n))
+/* fan n from 1 to 5 (4 for the hrc) */
+#define SENSORS_FSCHMD_FAN(n)			(70 + (n))
+#define SENSORS_FSCHMD_FAN_DIV(n)		(80 + (n))
+#define SENSORS_FSCHMD_FAN_ALARM(n)		(90 + (n))
+#define SENSORS_FSCHMD_FAN_FAULT(n)		(100 + (n))
+/* temp n from 1 to 5 (3 for the hrc) */
+#define SENSORS_FSCHMD_TEMP(n)			(110 + (n))
+#define SENSORS_FSCHMD_TEMP_MAX(n)		(120 + (n))
+#define SENSORS_FSCHMD_TEMP_ALARM(n)		(130 + (n))
+#define SENSORS_FSCHMD_TEMP_FAULT(n)		(140 + (n))
+
 #endif /* def LIB_SENSORS_CHIPS_H */

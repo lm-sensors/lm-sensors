@@ -272,7 +272,8 @@ static const struct match matches[] = {
 	Common magnitudes are #defined above.
 	Common conversions are as follows:
 		fan%d_min -> fan%d_min (for magnitude)
-		fan%d_state -> fan%d_status
+		fan%d_state -> fan%d_status (for old fscxxx drv)
+		fan%d_ripple -> fan%d_div (for old fscxxx drv, alt. name)
 		fan%d -> fan%d_input
 		pwm%d -> fan%d_pwm (alt. name)
 		pwm%d_enable -> fan%d_pwm_enable (alt. name)
@@ -289,7 +290,7 @@ static const struct match matches[] = {
 		temp%d_min -> temp%d_min (for magnitude)
 		temp%d_low -> temp%d_min
 		temp%d_crit -> temp%d_crit (for magnitude)
-		temp%d_state -> temp%d_status
+		temp%d_state -> temp%d_status (for old fscxxx drv)
 		temp%d_offset -> temp%d_offset (for magnitude)
 		temp%d -> temp%d_input
 		sensor%d -> temp%d_type
@@ -343,6 +344,12 @@ static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	}
 	if(sscanf(name, "fan%d_stat%c%c", &num, &last, &check) == 2 && last == 'e') {
 		sprintf(sysname, "fan%d_status", num);
+		*sysmag = 0;
+		return 0;
+	}
+	if(sscanf(name, "fan%d_rippl%c%c", &num, &last, &check) == 2 && last == 'e') {
+		strcpy(sysname, name);
+		sprintf(altsysname, "fan%d_div", num);
 		*sysmag = 0;
 		return 0;
 	}
@@ -448,7 +455,8 @@ static int getsysname(const sensors_chip_feature *feature, char *sysname,
 
 /* give up, use old name (probably won't work though...) */
 /* known to be the same:
-	"alarms", "beep_enable", "vrm", "fan%d_div"
+	"alarms", "beep_enable", "vrm", "fan%d_div" (except old fscxxx drivers
+	which use fan%d_ripple, fixed using altsysname for new drv. GRR)
 */
 	strcpy(sysname, name);
 	*sysmag = feature->scaling;

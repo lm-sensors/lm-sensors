@@ -3517,9 +3517,16 @@ void print_fscpos(const sensors_chip_name *name)
   double voltage, temp, state, fan;
   int valid;
 
+  /* Check for the non standard temp1_state sysfs attr the old driver uses
+     if it isn't present we are talking to the new fschmd driver */
+  if (sensors_get_feature(*name,SENSORS_FSCPOS_TEMP1_STATE,&state) != 0) {
+    print_fscpos_fschmd(name);
+    return;
+  }
+
+  /* no need to read TEMP1_STATE, as we just successfully did that above */
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCPOS_TEMP1,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP1,&temp) &&
-      !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP1_STATE,&state)) { 
+      !sensors_get_feature(*name,SENSORS_FSCPOS_TEMP1,&temp)) {
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x01)
@@ -3637,11 +3644,18 @@ void print_fscscy(const sensors_chip_name *name)
   char *label;
   double voltage, temp, templim, state, fan;
   int valid;
+  
+  /* Check for the non standard temp1_state sysfs attr the old driver uses
+     if it isn't present we are talking to the new fschmd driver */
+  if (sensors_get_feature(*name,SENSORS_FSCSCY_TEMP1_STATE,&state) != 0) {
+    print_fscscy_fschmd(name);
+    return;
+  }
 
+  /* no need to read TEMP1_STATE, as we just successfully did that above */
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCSCY_TEMP1,&label,&valid) &&
       !sensors_get_feature(*name,SENSORS_FSCSCY_TEMP1,&temp) &&
-      !sensors_get_feature(*name,SENSORS_FSCSCY_TEMP1_LIM,&templim) &&
-      !sensors_get_feature(*name,SENSORS_FSCSCY_TEMP1_STATE,&state)) { 
+      !sensors_get_feature(*name,SENSORS_FSCSCY_TEMP1_LIM,&templim)) {
     if (valid) {
       print_label(label,10);
 	if((int) state & 0x01)
@@ -3819,9 +3833,16 @@ void print_fscher(const sensors_chip_name *name)
   double voltage, temp, state, fan;
   int valid;
   
+  /* Check for the non standard temp1_state sysfs attr the old driver uses
+     if it isn't present we are talking to the new fschmd driver */
+  if (sensors_get_feature(*name,SENSORS_FSCHER_TEMP1_STATE,&state) != 0) {
+    print_fscher_fschmd(name);
+    return;
+  }
+
+  /* no need to read TEMP1_STATE, as we just successfully did that above */
   if (!sensors_get_label_and_valid(*name,SENSORS_FSCHER_TEMP1,&label,&valid)
-      && !sensors_get_feature(*name,SENSORS_FSCHER_TEMP1,&temp)
-      && !sensors_get_feature(*name,SENSORS_FSCHER_TEMP1_STATE,&state)) { 
+      && !sensors_get_feature(*name,SENSORS_FSCHER_TEMP1,&temp)) {
     if (valid) {
       print_label(label,10);
       if((int) state & 0x01)
@@ -6280,6 +6301,148 @@ void print_thmc50(const sensors_chip_name *name)
   }
   /* No error if files are missing as it will happen for original thmc50 */
   free(label);
+}
+
+static void print_fschmd_in(const sensors_chip_name *name, int i,
+  int in_feature)
+{
+  char *label;
+  double cur;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, in_feature, &label, &valid) &&
+      !sensors_get_feature(*name, in_feature, &cur)) {
+    if (valid) {
+      print_label(label, 10);
+      printf("%+6.2f V\n", cur);
+    }
+  } else {
+    printf("ERROR: Can't get in%d data!\n", i);
+  }
+  free(label);
+}
+
+static void print_fschmd_fan(const sensors_chip_name *name, int i,
+  int fan_feature, int fan_div_feature)
+{
+  char *label;
+  double cur, div, alarm, fault;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, fan_feature, &label, &valid) &&
+      !sensors_get_feature(*name, fan_feature, &cur) &&
+      !sensors_get_feature(*name, fan_div_feature, &div) &&
+      !sensors_get_feature(*name, SENSORS_FSCHMD_FAN_ALARM(i), &alarm) &&
+      !sensors_get_feature(*name, SENSORS_FSCHMD_FAN_FAULT(i), &fault)) {
+    if (valid) {
+      print_label(label, 10);
+      if (fault)
+        printf("   FAULT\n");
+      else
+        printf("%4.0f RPM  (div = %1.0f)  %s\n", cur, div,
+               alarm ? "ALARM" : "");
+    }
+  } 
+  /* no error on failure as we get used for various FSC chips and not all
+     have the same amount of fan sensors */
+  
+  free(label);
+}
+
+static void print_fschmd_temp(const sensors_chip_name *name, int i,
+  int temp_feature, int temp_max_feature)
+{
+  char *label;
+  double cur, max, alarm, fault;
+  int valid;
+
+  if (!sensors_get_label_and_valid(*name, temp_feature, &label, &valid) &&
+      !sensors_get_feature(*name, temp_feature, &cur) &&
+      (!temp_max_feature ||
+       !sensors_get_feature(*name, temp_max_feature, &max)) &&
+      !sensors_get_feature(*name, SENSORS_FSCHMD_TEMP_ALARM(i), &alarm) &&
+      !sensors_get_feature(*name, SENSORS_FSCHMD_TEMP_FAULT(i), &fault)) {
+    if (valid) {
+      print_label(label, 10);
+      if (fault)
+        printf("   FAULT\n");
+      else {
+        /* The fscpos doesn't have max temp limits */
+        if (temp_max_feature)
+          print_temp_info(cur, max, 0, MAXONLY, 1, 1);
+        else
+          print_temp_info(cur, 0, 0, SINGLE, 1, 1);
+        printf("%s\n", alarm ? "ALARM" : "");
+      }
+    }
+  }
+  /* no error on failure as we get used for various FSC chips and not all
+     have the same amount of temp sensors */
+
+  free(label);
+}
+
+void print_fschmd(const sensors_chip_name *name)
+{
+  int i;
+  
+  for (i = 0; i <= 2; i++)
+    print_fschmd_in(name, i, SENSORS_FSCHMD_IN(i));
+
+  for (i = 1; i <= 6; i++)
+    print_fschmd_fan(name, i, SENSORS_FSCHMD_FAN(i),
+                     SENSORS_FSCHMD_FAN_DIV(i));
+
+  for (i = 1; i <= 5; i++)
+    print_fschmd_temp(name, i, SENSORS_FSCHMD_TEMP(i),
+                      SENSORS_FSCHMD_TEMP_MAX(i));
+}
+
+void print_fscpos_fschmd(const sensors_chip_name *name)
+{
+  int i;
+  
+  for (i = 0; i < 3; i++)
+    print_fschmd_in(name, i, SENSORS_FSCPOS_VOLTAGE1 + i);
+
+  for (i = 0; i < 3; i++)
+    print_fschmd_fan(name, i + 1, SENSORS_FSCPOS_FAN1 + i,
+                     SENSORS_FSCPOS_FAN1_RIPPLE + i);
+
+  for (i = 0; i < 3; i++)
+    print_fschmd_temp(name, i + 1, SENSORS_FSCPOS_TEMP1 + i, 0);
+}
+
+void print_fscscy_fschmd(const sensors_chip_name *name)
+{
+  int i;
+  
+  for (i = 0; i < 3; i++)
+    print_fschmd_in(name, i, SENSORS_FSCSCY_VOLTAGE1 + i);
+
+  for (i = 0; i < 6; i++)
+    print_fschmd_fan(name, i + 1, SENSORS_FSCSCY_FAN1 + i,
+                     SENSORS_FSCSCY_FAN1_RIPPLE + i);
+
+  for (i = 0; i < 4; i++)
+    print_fschmd_temp(name, i + 1, SENSORS_FSCSCY_TEMP1 + i,
+                      SENSORS_FSCSCY_TEMP1_MAX + i);
+}
+
+void print_fscher_fschmd(const sensors_chip_name *name)
+{
+  int i;
+  
+  for (i = 0; i < 3; i++)
+    print_fschmd_in(name, i, SENSORS_FSCHER_VOLTAGE1 + i);
+
+  for (i = 0; i < 3; i++)
+    print_fschmd_fan(name, i + 1, SENSORS_FSCHER_FAN1 + i,
+                     SENSORS_FSCHER_FAN1_RIPPLE + i);
+
+  for (i = 0; i < 3; i++)
+    print_fschmd_temp(name, i + 1, SENSORS_FSCHER_TEMP1 + i,
+                      SENSORS_FSCHMD_TEMP_MAX(i + 1));
 }
 
 void print_unknown_chip(const sensors_chip_name *name)

@@ -81,5 +81,9 @@ extern void print_dme1737(const sensors_chip_name *name);
 extern void print_applesmc(const sensors_chip_name *name);
 extern void print_f71882fg(const sensors_chip_name *name);
 extern void print_thmc50(const sensors_chip_name *name);
+extern void print_fschmd(const sensors_chip_name *name);
+extern void print_fscpos_fschmd(const sensors_chip_name *name);
+extern void print_fscscy_fschmd(const sensors_chip_name *name);
+extern void print_fscher_fschmd(const sensors_chip_name *name);
 
 #endif /* def PROG_SENSORS_CHIPS_H */

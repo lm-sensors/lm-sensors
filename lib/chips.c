@@ -4301,6 +4301,31 @@ static sensors_chip_feature fscpos_features[] =
     { { SENSORS_FSCPOS_WDOG_CONTROL, "wdog_control", SENSORS_FSCPOS_WDOG_PRESET, 
                                      SENSORS_FSCPOS_WDOG_PRESET, RW }, 
                                      FSCPOS_SYSCTL_WDOG, VALUE(3), 0 },
+    /* below this line are features only exported with the new fschmd drv */
+    { { SENSORS_FSCHMD_TEMP_ALARM(1), "temp1_alarm", SENSORS_FSCPOS_TEMP1, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_ALARM(2), "temp2_alarm", SENSORS_FSCPOS_TEMP2, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_ALARM(3), "temp3_alarm", SENSORS_FSCPOS_TEMP3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_FAULT(1), "temp1_fault", SENSORS_FSCPOS_TEMP1, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_FAULT(2), "temp2_fault", SENSORS_FSCPOS_TEMP2, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_FAULT(3), "temp3_fault", SENSORS_FSCPOS_TEMP3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(1), "fan1_alarm", SENSORS_FSCPOS_FAN1, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(2), "fan2_alarm", SENSORS_FSCPOS_FAN2, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(3), "fan3_alarm", SENSORS_FSCPOS_FAN3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(1), "fan1_fault", SENSORS_FSCPOS_FAN1, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(2), "fan2_fault", SENSORS_FSCPOS_FAN2, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(3), "fan3_fault", SENSORS_FSCPOS_FAN3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
     { { 0 }, 0 }
   };
 
@@ -4448,6 +4473,47 @@ static sensors_chip_feature fscscy_features[] =
     { { SENSORS_FSCSCY_WDOG_CONTROL, "wdog_control", SENSORS_FSCSCY_WDOG_PRESET, 
                                      SENSORS_FSCSCY_WDOG_PRESET, RW }, 
                                      FSCSCY_SYSCTL_WDOG, VALUE(3), 0 },
+    /* below this line are features only exported with the new fschmd drv */
+    { { SENSORS_FSCHMD_TEMP_ALARM(1), "temp1_alarm", SENSORS_FSCSCY_TEMP1, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_ALARM(2), "temp2_alarm", SENSORS_FSCSCY_TEMP2, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_ALARM(3), "temp3_alarm", SENSORS_FSCSCY_TEMP3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_ALARM(4), "temp4_alarm", SENSORS_FSCSCY_TEMP4,
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_FAULT(1), "temp1_fault", SENSORS_FSCSCY_TEMP1, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_FAULT(2), "temp2_fault", SENSORS_FSCSCY_TEMP2, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_FAULT(3), "temp3_fault", SENSORS_FSCSCY_TEMP3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_FAULT(4), "temp4_fault", SENSORS_FSCSCY_TEMP4,
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(1), "fan1_alarm", SENSORS_FSCSCY_FAN1, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(2), "fan2_alarm", SENSORS_FSCSCY_FAN2, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(3), "fan3_alarm", SENSORS_FSCSCY_FAN3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(4), "fan4_alarm", SENSORS_FSCSCY_FAN4, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(5), "fan5_alarm", SENSORS_FSCSCY_FAN5, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(6), "fan6_alarm", SENSORS_FSCSCY_FAN6, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(1), "fan1_fault", SENSORS_FSCSCY_FAN1, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(2), "fan2_fault", SENSORS_FSCSCY_FAN2, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(3), "fan3_fault", SENSORS_FSCSCY_FAN3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(4), "fan4_fault", SENSORS_FSCSCY_FAN4, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(5), "fan5_fault", SENSORS_FSCSCY_FAN5, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(6), "fan6_fault", SENSORS_FSCSCY_FAN6, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
     { { 0 }, 0 }
   };
 
@@ -4518,6 +4584,40 @@ static sensors_chip_feature fscscy_features[] =
     { { SENSORS_FSCHER_WDOG_CONTROL, "wdog_control", SENSORS_FSCHER_WDOG_PRESET, 
                                      SENSORS_FSCHER_WDOG_PRESET, RW }, 
                                      FSCHER_SYSCTL_WDOG, VALUE(3), 0 },
+    /* below this line are features only exported with the new fschmd drv */
+    { { SENSORS_FSCHMD_TEMP_MAX(1), "temp1_max", SENSORS_FSCHER_TEMP1,
+                                    SENSORS_FSCHER_TEMP1, RW },
+                                    NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_MAX(2), "temp2_max", SENSORS_FSCHER_TEMP2,
+                                    SENSORS_FSCHER_TEMP2, RW },
+                                    NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_MAX(3), "temp3_max", SENSORS_FSCHER_TEMP3,
+                                    SENSORS_FSCHER_TEMP3, RW },
+                                    NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_ALARM(1), "temp1_alarm", SENSORS_FSCHER_TEMP1,
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_ALARM(2), "temp2_alarm", SENSORS_FSCHER_TEMP2,
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_ALARM(3), "temp3_alarm", SENSORS_FSCHER_TEMP3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_FAULT(1), "temp1_fault", SENSORS_FSCHER_TEMP1, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_FAULT(2), "temp2_fault", SENSORS_FSCHER_TEMP2, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_TEMP_FAULT(3), "temp3_fault", SENSORS_FSCHER_TEMP3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(1), "fan1_alarm", SENSORS_FSCHER_FAN1, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(2), "fan2_alarm", SENSORS_FSCHER_FAN2, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_ALARM(3), "fan3_alarm", SENSORS_FSCHER_FAN3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(1), "fan1_fault", SENSORS_FSCHER_FAN1, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(2), "fan2_fault", SENSORS_FSCHER_FAN2, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
+    { { SENSORS_FSCHMD_FAN_FAULT(3), "fan3_fault", SENSORS_FSCHER_FAN3, 
+                                    NOMAP, R }, NOSYSCTL, VALUE(1), 0 },
     { { 0 }, 0 }
   };
 
@@ -6218,6 +6318,72 @@ static sensors_chip_feature f71882fg_features[] =
 	{ { 0 }, 0 }
 };
 
+#define SENSORS_FSCHMD_IN_FEATURES(nr) \
+	{ { SENSORS_FSCHMD_IN(nr), "in" #nr, \
+		NOMAP, NOMAP, R }, \
+		NOSYSCTL, VALUE(3), 3 }
+
+#define SENSORS_FSCHMD_TEMP_FEATURES(nr) \
+	{ { SENSORS_FSCHMD_TEMP(nr), "temp" #nr, \
+		NOMAP, NOMAP, R }, \
+		NOSYSCTL, VALUE(3), 3 }, \
+	{ { SENSORS_FSCHMD_TEMP_MAX(nr), "temp" #nr "_max", \
+		SENSORS_FSCHMD_TEMP(nr), SENSORS_FSCHMD_TEMP(nr), RW }, \
+		NOSYSCTL, VALUE(1), 3 }, \
+	{ { SENSORS_FSCHMD_TEMP_ALARM(nr), "temp" #nr "_alarm", \
+		SENSORS_FSCHMD_TEMP(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(1), 0 }, \
+	{ { SENSORS_FSCHMD_TEMP_FAULT(nr), "temp" #nr "_fault", \
+		SENSORS_FSCHMD_TEMP(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(2), 0 }
+
+#define SENSORS_FSCHMD_FAN_FEATURES(nr) \
+	{ { SENSORS_FSCHMD_FAN(nr), "fan" #nr, \
+		NOMAP, NOMAP, R }, \
+		NOSYSCTL, VALUE(2), 0 }, \
+	{ { SENSORS_FSCHMD_FAN_DIV(nr), "fan" #nr "_div", \
+		SENSORS_FSCHMD_FAN(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(1), 0 }, \
+	{ { SENSORS_FSCHMD_FAN_ALARM(nr), "fan" #nr "_alarm", \
+		SENSORS_FSCHMD_FAN(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(1), 0 }, \
+	{ { SENSORS_FSCHMD_FAN_FAULT(nr), "fan" #nr "_fault", \
+		SENSORS_FSCHMD_FAN(nr), NOMAP, R }, \
+		NOSYSCTL, VALUE(1), 0 }
+
+static sensors_chip_feature fschmd_features[] =
+{
+	SENSORS_FSCHMD_IN_FEATURES(0),
+	SENSORS_FSCHMD_IN_FEATURES(1),
+	SENSORS_FSCHMD_IN_FEATURES(2),
+	SENSORS_FSCHMD_TEMP_FEATURES(1),
+	SENSORS_FSCHMD_TEMP_FEATURES(2),
+	SENSORS_FSCHMD_TEMP_FEATURES(3),
+	SENSORS_FSCHMD_TEMP_FEATURES(4),
+	SENSORS_FSCHMD_TEMP_FEATURES(5),
+	SENSORS_FSCHMD_FAN_FEATURES(1),
+	SENSORS_FSCHMD_FAN_FEATURES(2),
+	SENSORS_FSCHMD_FAN_FEATURES(3),
+	SENSORS_FSCHMD_FAN_FEATURES(4),
+	SENSORS_FSCHMD_FAN_FEATURES(5),
+	{ { 0 }, 0 }
+};
+
+static sensors_chip_feature fschrc_features[] =
+{
+	SENSORS_FSCHMD_IN_FEATURES(0),
+	SENSORS_FSCHMD_IN_FEATURES(1),
+	SENSORS_FSCHMD_IN_FEATURES(2),
+	SENSORS_FSCHMD_TEMP_FEATURES(1),
+	SENSORS_FSCHMD_TEMP_FEATURES(2),
+	SENSORS_FSCHMD_TEMP_FEATURES(3),
+	SENSORS_FSCHMD_FAN_FEATURES(1),
+	SENSORS_FSCHMD_FAN_FEATURES(2),
+	SENSORS_FSCHMD_FAN_FEATURES(3),
+	SENSORS_FSCHMD_FAN_FEATURES(4),
+	{ { 0 }, 0 }
+};
+
 sensors_chip_features sensors_chip_features_list[] =
 {
  { SENSORS_LM78_PREFIX, lm78_features },
@@ -6336,5 +6502,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_SCH311X_PREFIX, dme1737_features },
  { SENSORS_APPLESMC_PREFIX, applesmc_features },
  { SENSORS_F71882FG_PREFIX, f71882fg_features },
+ { SENSORS_FSCHMD_PREFIX, fschmd_features },
+ { SENSORS_FSCHRC_PREFIX, fschrc_features },
  { 0 }
 };
