@@ -18,7 +18,7 @@
 #   ICH4-M    8086:24CC
 #   ICH5      8086:24D0
 
-pcibus="/sys/bus/pci/slots/"
+pcibus="/sys/bus/pci/slots"
 device="00:1f"
 
 if [ "$UID" -ne 0 ] ; then
