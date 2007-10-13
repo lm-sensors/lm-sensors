@@ -6335,15 +6335,15 @@ static sensors_chip_feature f71882fg_features[] =
 		NOSYSCTL, VALUE(1), 0 }, \
 	{ { SENSORS_FSCHMD_TEMP_FAULT(nr), "temp" #nr "_fault", \
 		SENSORS_FSCHMD_TEMP(nr), NOMAP, R }, \
-		NOSYSCTL, VALUE(2), 0 }
+		NOSYSCTL, VALUE(1), 0 }
 
 #define SENSORS_FSCHMD_FAN_FEATURES(nr) \
 	{ { SENSORS_FSCHMD_FAN(nr), "fan" #nr, \
 		NOMAP, NOMAP, R }, \
-		NOSYSCTL, VALUE(2), 0 }, \
+		NOSYSCTL, VALUE(1), 0 }, \
 	{ { SENSORS_FSCHMD_FAN_DIV(nr), "fan" #nr "_div", \
 		SENSORS_FSCHMD_FAN(nr), NOMAP, R }, \
-		NOSYSCTL, VALUE(1), 0 }, \
+		NOSYSCTL, VALUE(nr), 0 }, \
 	{ { SENSORS_FSCHMD_FAN_ALARM(nr), "fan" #nr "_alarm", \
 		SENSORS_FSCHMD_FAN(nr), NOMAP, R }, \
 		NOSYSCTL, VALUE(1), 0 }, \
