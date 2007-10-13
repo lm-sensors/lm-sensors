@@ -6321,12 +6321,12 @@ static sensors_chip_feature f71882fg_features[] =
 #define SENSORS_FSCHMD_IN_FEATURES(nr) \
 	{ { SENSORS_FSCHMD_IN(nr), "in" #nr, \
 		NOMAP, NOMAP, R }, \
-		NOSYSCTL, VALUE(3), 3 }
+		NOSYSCTL, VALUE(1), 3 }
 
 #define SENSORS_FSCHMD_TEMP_FEATURES(nr) \
 	{ { SENSORS_FSCHMD_TEMP(nr), "temp" #nr, \
 		NOMAP, NOMAP, R }, \
-		NOSYSCTL, VALUE(3), 3 }, \
+		NOSYSCTL, VALUE(2), 3 }, \
 	{ { SENSORS_FSCHMD_TEMP_MAX(nr), "temp" #nr "_max", \
 		SENSORS_FSCHMD_TEMP(nr), SENSORS_FSCHMD_TEMP(nr), RW }, \
 		NOSYSCTL, VALUE(1), 3 }, \
