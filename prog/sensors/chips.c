@@ -6326,12 +6326,12 @@ static void print_fschmd_fan(const sensors_chip_name *name, int i,
   int fan_feature, int fan_div_feature)
 {
   char *label;
-  double cur, div, alarm, fault;
+  double cur, fdiv, alarm, fault;
   int valid;
 
   if (!sensors_get_label_and_valid(*name, fan_feature, &label, &valid) &&
       !sensors_get_feature(*name, fan_feature, &cur) &&
-      !sensors_get_feature(*name, fan_div_feature, &div) &&
+      !sensors_get_feature(*name, fan_div_feature, &fdiv) &&
       !sensors_get_feature(*name, SENSORS_FSCHMD_FAN_ALARM(i), &alarm) &&
       !sensors_get_feature(*name, SENSORS_FSCHMD_FAN_FAULT(i), &fault)) {
     if (valid) {
@@ -6339,7 +6339,7 @@ static void print_fschmd_fan(const sensors_chip_name *name, int i,
       if (fault)
         printf("   FAULT\n");
       else
-        printf("%4.0f RPM  (div = %1.0f)  %s\n", cur, div,
+        printf("%4.0f RPM  (div = %1.0f)  %s\n", cur, fdiv,
                alarm ? "ALARM" : "");
     }
   } 
