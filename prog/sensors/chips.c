@@ -6354,10 +6354,9 @@ static void print_fschmd_fan(const sensors_chip_name *name, int i,
         printf("%4.0f RPM  (div = %1.0f)  %s\n", cur, fdiv,
                alarm ? "ALARM" : "");
     }
-  } 
-  /* no error on failure as we get used for various FSC chips and not all
-     have the same amount of fan sensors */
-  
+  } else {
+    printf("ERROR: Can't get fan%d data!\n", i);
+  }
   free(label);
 }
 
@@ -6387,25 +6386,33 @@ static void print_fschmd_temp(const sensors_chip_name *name, int i,
         printf("%s\n", alarm ? "ALARM" : "");
       }
     }
+  } else {
+    printf("ERROR: Can't get temp%d data!\n", i);
   }
-  /* no error on failure as we get used for various FSC chips and not all
-     have the same amount of temp sensors */
-
   free(label);
 }
 
 void print_fschmd(const sensors_chip_name *name)
 {
   int i;
+  int no_fan_sensors, no_temp_sensors;
+
+  if (!strcmp(name->prefix,"fschmd")) {
+    no_fan_sensors = 5;
+    no_temp_sensors = 5;
+  } else { /* fschrc */
+    no_fan_sensors = 4;
+    no_temp_sensors = 3;
+  }
   
   for (i = 0; i <= 2; i++)
     print_fschmd_in(name, i, SENSORS_FSCHMD_IN(i));
 
-  for (i = 1; i <= 6; i++)
+  for (i = 1; i <= no_fan_sensors; i++)
     print_fschmd_fan(name, i, SENSORS_FSCHMD_FAN(i),
                      SENSORS_FSCHMD_FAN_DIV(i));
 
-  for (i = 1; i <= 5; i++)
+  for (i = 1; i <= no_temp_sensors; i++)
     print_fschmd_temp(name, i, SENSORS_FSCHMD_TEMP(i),
                       SENSORS_FSCHMD_TEMP_MAX(i));
 }

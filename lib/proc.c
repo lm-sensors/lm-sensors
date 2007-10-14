@@ -455,8 +455,7 @@ static int getsysname(const sensors_chip_feature *feature, char *sysname,
 
 /* give up, use old name (probably won't work though...) */
 /* known to be the same:
-	"alarms", "beep_enable", "vrm", "fan%d_div" (except old fscxxx drivers
-	which use fan%d_ripple, fixed using altsysname for new drv. GRR)
+	"alarms", "beep_enable", "vrm", "fan%d_div"
 */
 	strcpy(sysname, name);
 	*sysmag = feature->scaling;

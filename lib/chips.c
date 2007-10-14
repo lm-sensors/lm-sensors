@@ -6342,7 +6342,7 @@ static sensors_chip_feature f71882fg_features[] =
 		NOMAP, NOMAP, R }, \
 		NOSYSCTL, VALUE(1), 0 }, \
 	{ { SENSORS_FSCHMD_FAN_DIV(nr), "fan" #nr "_div", \
-		SENSORS_FSCHMD_FAN(nr), NOMAP, R }, \
+		SENSORS_FSCHMD_FAN(nr), NOMAP, RW }, \
 		NOSYSCTL, VALUE(nr), 0 }, \
 	{ { SENSORS_FSCHMD_FAN_ALARM(nr), "fan" #nr "_alarm", \
 		SENSORS_FSCHMD_FAN(nr), NOMAP, R }, \
