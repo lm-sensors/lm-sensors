@@ -3571,10 +3571,11 @@ void print_fscpos(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN1_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x08)
-	  printf("\tfaulty\n");
-	else
-	  printf("\t%6.0f RPM\n", fan);
+      if((int) state & 0x08)
+        printf("\tFAULT");
+      else
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN1 data!\n");
@@ -3585,10 +3586,11 @@ void print_fscpos(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN2_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x08)
-	  printf("\tfaulty\n");
-	else
-	  printf("\t%6.0f RPM\n", fan);
+      if((int) state & 0x08)
+        printf("\tFAULT");
+      else
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN2 data!\n");
@@ -3599,10 +3601,11 @@ void print_fscpos(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCPOS_FAN3_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x08)
-	  printf("\tfaulty\n");
-	else
-	  printf("\t%6.0f RPM\n", fan);
+      if((int) state & 0x08)
+        printf("\tFAULT");
+      else
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN3 data!\n");
@@ -3717,10 +3720,11 @@ void print_fscscy(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN1_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x08)
-	  printf("\tfaulty\n");
-	else
-	  printf("\t%6.0f RPM\n", fan);
+      if((int) state & 0x08)
+        printf("\tFAULT");
+      else
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN1 data!\n");
@@ -3731,10 +3735,11 @@ void print_fscscy(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN2_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x08)
-	  printf("\tfaulty\n");
-	else
-	  printf("\t%6.0f RPM\n", fan);
+      if((int) state & 0x08)
+        printf("\tFAULT");
+      else
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN2 data!\n");
@@ -3745,10 +3750,11 @@ void print_fscscy(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN3_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x08)
-	  printf("\tfaulty\n");
-	else
-	  printf("\t%6.0f RPM\n", fan);
+      if((int) state & 0x08)
+        printf("\tFAULT");
+      else
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN3 data!\n");
@@ -3759,10 +3765,11 @@ void print_fscscy(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN4_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x08)
-	  printf("\tfaulty\n");
-	else
-	  printf("\t%6.0f RPM\n", fan);
+      if((int) state & 0x08)
+        printf("\tFAULT");
+      else
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN4 data!\n");
@@ -3773,10 +3780,11 @@ void print_fscscy(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN5_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x08)
-	  printf("\tfaulty\n");
-	else
-	  printf("\t%6.0f RPM\n", fan);
+      if((int) state & 0x08)
+        printf("\tFAULT");
+      else
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN5 data!\n");
@@ -3787,10 +3795,11 @@ void print_fscscy(const sensors_chip_name *name)
       !sensors_get_feature(*name,SENSORS_FSCSCY_FAN6_STATE,&state)) { 
     if (valid) {
       print_label(label,10);
-	if((int) state & 0x08)
-	  printf("\tfaulty\n");
-	else
-	  printf("\t%6.0f RPM\n", fan);
+      if((int) state & 0x08)
+        printf("\tFAULT");
+      else
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN6 data!\n");
@@ -3888,9 +3897,10 @@ void print_fscher(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       if((int) state & 0x08)
-        printf("\tfaulty\n");
+        printf("\tFAULT");
       else
-        printf("\t%6.0f RPM\n", fan);
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN1 data!\n");
@@ -3902,9 +3912,10 @@ void print_fscher(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       if((int) state & 0x08)
-        printf("\tfaulty\n");
+        printf("\tFAULT");
       else
-        printf("\t%6.0f RPM\n", fan);
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN2 data!\n");
@@ -3916,9 +3927,10 @@ void print_fscher(const sensors_chip_name *name)
     if (valid) {
       print_label(label,10);
       if((int) state & 0x08)
-        printf("\tfaulty\n");
+        printf("\tFAULT");
       else
-        printf("\t%6.0f RPM\n", fan);
+        printf("\t%6.0f RPM", fan);
+      printf( "  %s\n", ((int) state & 0x04) ? "ALARM" : "" );
     }
   } else
     printf("ERROR: Can't get FAN3 data!\n");
