@@ -15,6 +15,7 @@ Supported adapters:
   * Intel 6300ESB/ESB2
   * Intel 82801FB/FR/FW/FRW (ICH6)
   * Intel ICH7/ICH8/ICH9
+  * Intel Tolapai
     Datasheets: Publicly available at the Intel website
 
 Authors: Frodo Looijaard <frodol@dds.nl>, Philip Edelbrock

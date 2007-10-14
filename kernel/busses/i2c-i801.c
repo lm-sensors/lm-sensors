@@ -104,6 +104,10 @@
 #define PCI_DEVICE_ID_INTEL_ICH9_6	0x2930
 #endif
 
+#ifndef PCI_DEVICE_ID_INTEL_TOLAPAI_1
+#define PCI_DEVICE_ID_INTEL_TOLAPAI_1	0x5032
+#endif
+
 #ifdef I2C_CLIENT_PEC
 #define HAVE_PEC
 #endif
@@ -175,7 +179,8 @@ static int __devinit i801_setup(struct pci_dev *dev)
 	    dev->device == PCI_DEVICE_ID_INTEL_ICH6_16 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_ICH7_17 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_ICH8_5 ||
-	    dev->device == PCI_DEVICE_ID_INTEL_ICH9_6)
+	    dev->device == PCI_DEVICE_ID_INTEL_ICH9_6 ||
+	    dev->device == PCI_DEVICE_ID_INTEL_TOLAPAI_1)
 		isich4 = 1;
 	else
 		isich4 = 0;
@@ -677,6 +682,12 @@ static struct pci_device_id i801_ids[] __devinitdata = {
 	{
 		.vendor =	PCI_VENDOR_ID_INTEL,
 		.device =	PCI_DEVICE_ID_INTEL_ICH9_6,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_INTEL,
+		.device =	PCI_DEVICE_ID_INTEL_TOLAPAI_1,
 		.subvendor =	PCI_ANY_ID,
 		.subdevice =	PCI_ANY_ID,
 	},

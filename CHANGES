@@ -19,6 +19,7 @@ SVN HEAD
   Makefile: Fix kernel version detection (#2187)
   Man page sensord.8: Update
   Module fscher: Add missing read of control register (2.6 backport)
+  Module i2c-i801: Add Tolapai support (2.6 backport)
   Module i2c-piix4: Add ATI SB700 and SB800 support (2.6 backport)
   Module lm93: Fix an array overrun (2.6 backport)
   Program sensord: Fix f71805f fans
