@@ -134,10 +134,6 @@ static struct pci_driver nforce2_driver;
 static s32 nforce2_access(struct i2c_adapter *adap, u16 addr,
 		       unsigned short flags, char read_write,
 		       u8 command, int size, union i2c_smbus_data *data);
-/*
-static int nforce2_block_transaction(union i2c_smbus_data *data,
-				  char read_write, int i2c_enable);
- */
 static u32 nforce2_func(struct i2c_adapter *adapter);
 
 
@@ -278,8 +274,8 @@ u32 nforce2_func(struct i2c_adapter *adapter)
 {
 	/* other functionality might be possible, but is not tested */
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
-	    I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA /* |
-	    I2C_FUNC_SMBUS_BLOCK_DATA */;
+	    I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA |
+	    I2C_FUNC_SMBUS_HWPEC_CALC;
 }
 
 static void nforce2_inc(struct i2c_adapter *adapter)
