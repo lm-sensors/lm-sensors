@@ -94,7 +94,7 @@ int check_funcs(int file, int i2cbus, int size, int daddress, int pec)
 	}
 
 	if (pec
-	 && !(funcs & (I2C_FUNC_SMBUS_HWPEC_CALC | I2C_FUNC_I2C))) {
+	 && !(funcs & (I2C_FUNC_SMBUS_PEC | I2C_FUNC_I2C))) {
 		fprintf(stderr, "Warning: Adapter for i2c bus %d does "
 		        "not seem to support PEC\n", i2cbus);
 	}
