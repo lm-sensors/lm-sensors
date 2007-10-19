@@ -1372,28 +1372,10 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { ddcmonitor_detect(@_); },
      },
      {
-       name => "FSC Poseidon I",
-       driver => "fscpos",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fscpeg_detect(@_); },
-     },
-     {
        name => "FSC Poseidon II",
        driver => "to-be-written",
        i2c_addrs => [0x73],
        i2c_detect => sub { fscpos_detect(@_); },
-     },
-     {
-       name => "FSC Scylla",
-       driver => "fscscy",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fscscy_detect(@_); },
-     },
-     {
-       name => "FSC Hermes",
-       driver => "fscher",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fscher_detect(@_); },
      },
      {
        name => "FSC Heimdal",
@@ -1489,7 +1471,8 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
 
 # Special case chip information goes here and would be included in
 # the chip_special_cases routine below
-use vars qw(@chip_kern24_ids @chip_kern26_ids);
+use vars qw(@chip_kern24_ids @chip_kern26_ids @chip_kern_lt_26_24_ids
+            @chip_kern_gt_eq_26_24_ids);
 @chip_kern24_ids = (
      {
        name => "Analog Devices ADM1024",
@@ -1543,6 +1526,50 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids);
        isa_detect => sub { ipmi_smic_detect(@_); },
      },
 );
+
+# sigh special case for old seperate FSC drivers to new merged one mapping
+@chip_kern_lt_26_24_ids = (
+     {
+       name => "FSC Poseidon I",
+       driver => "fscpos",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fscpeg_detect(@_); },
+     },
+     {
+       name => "FSC Scylla",
+       driver => "fscscy",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fscscy_detect(@_); },
+     },
+     {
+       name => "FSC Hermes",
+       driver => "fscher",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fscher_detect(@_); },
+     },
+);
+
+@chip_kern_gt_eq_26_24_ids = (
+     {
+       name => "FSC Poseidon I",
+       driver => "fschmd",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fscpeg_detect(@_); },
+     },
+     {
+       name => "FSC Scylla",
+       driver => "fschmd",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fscscy_detect(@_); },
+     },
+     {
+       name => "FSC Hermes",
+       driver => "fschmd",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fscher_detect(@_); },
+     },
+);
+
 
 # This is a list of all recognized superio chips. 
 # Each entry must have the following fields:
@@ -3445,8 +3472,14 @@ sub scan_cpu($)
 # This routine follows the pattern of the SiS adapter special cases
 sub chip_special_cases
 {
-	# Based on the kernel, add the appropriate chip structure to the
+	# Based on the kernel, add the appropriate chip structures to the
 	# chip_ids detection list
+	if (kernel_version_at_least(2, 6, 24)) {
+		push @chip_ids, @chip_kern_gt_eq_26_24_ids;
+	} else {
+		push @chip_ids, @chip_kern_lt_26_24_ids;
+	}
+
 	if (kernel_version_at_least(2, 6, 0)) {
 		push @chip_ids, @chip_kern26_ids;
 	} else {
