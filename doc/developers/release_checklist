@@ -27,7 +27,6 @@ Release steps:
 After release, remember to:
 - Copy to mirrors
 - Announce on Freshmeat
-- Put back ???? for dates
 - Prep CHANGES files for next release
 - Mark the corresponding release milestone as complete using trac-admin
   e.g. 'trac-admin /srv/lm-sensors.org/trac milestone completed 2.10.2 2006-12-31'
