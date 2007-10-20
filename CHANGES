@@ -43,6 +43,7 @@ SVN HEAD
                           Fix SMSC SCH311x detection
                           Add AMD K10 CPU sensor detection 
                           Fix SMSC LPC47B357/M967 detection
+                          Select the right driver for FSC chips
 
 
 2.10.4 (20070716)
