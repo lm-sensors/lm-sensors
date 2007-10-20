@@ -3,6 +3,7 @@ lm-sensors CHANGES file
 
 SVN HEAD
   sensors-detect: Fix SMSC LPC47B357/M967 detection
+                  Select the right driver for FSC chips
 
 3.0.0-rc2 (2007-10-10)
   useful_addresses.html: Moved to the wiki

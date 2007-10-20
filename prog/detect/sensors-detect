@@ -1471,8 +1471,8 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
 
 # Special case chip information goes here and would be included in
 # the chip_special_cases routine below
-use vars qw(@chip_kern24_ids @chip_kern26_ids @chip_kern_lt_26_24_ids
-            @chip_kern_gt_eq_26_24_ids);
+use vars qw(@chip_kern24_ids @chip_kern26_ids
+            @chip_oldfsc_ids @chip_fschmd_ids);
 @chip_kern24_ids = (
      {
        name => "Analog Devices ADM1024",
@@ -1528,7 +1528,7 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids @chip_kern_lt_26_24_ids
 );
 
 # sigh special case for old seperate FSC drivers to new merged one mapping
-@chip_kern_lt_26_24_ids = (
+@chip_oldfsc_ids = (
      {
        name => "FSC Poseidon I",
        driver => "fscpos",
@@ -1549,7 +1549,7 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids @chip_kern_lt_26_24_ids
      },
 );
 
-@chip_kern_gt_eq_26_24_ids = (
+@chip_fschmd_ids = (
      {
        name => "FSC Poseidon I",
        driver => "fschmd",
@@ -3475,9 +3475,9 @@ sub chip_special_cases
 	# Based on the kernel, add the appropriate chip structures to the
 	# chip_ids detection list
 	if (kernel_version_at_least(2, 6, 24)) {
-		push @chip_ids, @chip_kern_gt_eq_26_24_ids;
+		push @chip_ids, @chip_fschmd_ids;
 	} else {
-		push @chip_ids, @chip_kern_lt_26_24_ids;
+		push @chip_ids, @chip_oldfsc_ids;
 	}
 
 	if (kernel_version_at_least(2, 6, 0)) {
