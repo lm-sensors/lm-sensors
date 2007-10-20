@@ -31,8 +31,6 @@
 #include "sensord.h"
 #include "lib/error.h"
 
-static time_t cfgLastModified;
-
 static int
 loadConfig
 (const char *cfgPath, int reload) {
@@ -51,7 +49,7 @@ loadConfig
   } else if (stat (cfgPath, &stats) < 0) {
     sensorLog (LOG_ERR, "Error stating sensors configuration file: %s", cfgPath);
     ret = 10;
-  } else if (!reload || (difftime (stats.st_mtime, cfgLastModified) > 0.0)) {
+  } else {
     if (reload) {
       sensorLog (LOG_INFO, "configuration reloading");
       sensors_cleanup ();
@@ -63,8 +61,6 @@ loadConfig
       sensorLog (LOG_ERR, "Error loading sensors configuration file %s: %s",
                  cfgPath, sensors_strerror (ret));
       ret = 11;
-    } else {
-      cfgLastModified = stats.st_mtime;
     }
     if (cfg)
       fclose (cfg);

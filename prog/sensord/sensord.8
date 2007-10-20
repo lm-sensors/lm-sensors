@@ -133,6 +133,9 @@ modules for chips in which you have no interest.
 Upon receipt of a SIGTERM (see
 .BR signal (7)
 for details) this daemon should gracefully shut down.
+
+Upon receipt of a SIGHUP, this daemon will rescan the kernel interface
+for chips and features, and reload the libsensors configuration file.
 .SH LOGGING
 All messages from this daemon are logged to
 .BR syslog (3)

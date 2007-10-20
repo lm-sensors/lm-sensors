@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  sensord: Reload config on SIGHUP rather than automatically
   sensors-detect: Fix SMSC LPC47B357/M967 detection
                   Select the right driver for FSC chips
 

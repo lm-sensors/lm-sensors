@@ -37,6 +37,7 @@
 static int logOpened = 0;
 
 static volatile sig_atomic_t done = 0;
+static volatile sig_atomic_t reload = 0;
 
 #define LOG_BUFFER 4096
 
@@ -69,6 +70,9 @@ signalHandler
     case SIGTERM:
       done = 1;
       break;
+    case SIGHUP:
+      reload = 1;
+      break;
   }
 }
 
@@ -86,8 +90,10 @@ sensord
   sensorLog (LOG_INFO, "sensord started");
 
   while (!done && (ret == 0)) {
-    if (ret == 0)
+    if (reload) {
       ret = reloadLib (sensorsCfgFile);
+      reload = 0;
+    }
     if ((ret == 0) && scanTime) { /* should I scan on the read cycle? */
       ret = scanChips ();
       if (scanValue <= 0)
@@ -156,8 +162,9 @@ daemonize
   }
   
   /* I should use sigaction but... */
-  if (signal (SIGTERM, signalHandler) == SIG_ERR) {
-    perror ("signal(SIGTERM)");
+  if (signal (SIGTERM, signalHandler) == SIG_ERR ||
+      signal (SIGHUP, signalHandler) == SIG_ERR) {
+    perror ("signal");
     exit (EXIT_FAILURE);
   }
 
