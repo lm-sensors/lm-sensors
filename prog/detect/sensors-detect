@@ -1487,6 +1487,12 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
        i2c_detect => sub { w83781d_detect(7, @_); },
      },
      {
+       name => "FSC Scylla",
+       driver => "fscscy",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fscscy_detect(@_); },
+     },
+     {
        name => "IPMI BMC KCS",
        driver => "bmcsensors",
        isa_addrs => [0x0ca0],
@@ -1514,6 +1520,12 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
        i2c_detect => sub { w83781d_detect(7, @_); },
      },
      {
+       name => "FSC Scylla",
+       driver => "fschmd",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fscscy_detect(@_); },
+     },
+     {
        name => "IPMI BMC KCS",
        driver => "ipmisensors",
        isa_addrs => [0x0ca0],
@@ -1536,12 +1548,6 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
        i2c_detect => sub { fscpeg_detect(@_); },
      },
      {
-       name => "FSC Scylla",
-       driver => "fscscy",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fscscy_detect(@_); },
-     },
-     {
        name => "FSC Hermes",
        driver => "fscher",
        i2c_addrs => [0x73],
@@ -1555,12 +1561,6 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
        driver => "fschmd",
        i2c_addrs => [0x73],
        i2c_detect => sub { fscpeg_detect(@_); },
-     },
-     {
-       name => "FSC Scylla",
-       driver => "fschmd",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fscscy_detect(@_); },
      },
      {
        name => "FSC Hermes",
