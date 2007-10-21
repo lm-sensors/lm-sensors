@@ -5,6 +5,7 @@ SVN HEAD
   sensord: Reload config on SIGHUP rather than automatically
   sensors-detect: Fix SMSC LPC47B357/M967 detection
                   Select the right driver for FSC chips
+  sensors-detect-stat.pl: Handle alternative chip lists
 
 3.0.0-rc2 (2007-10-10)
   useful_addresses.html: Moved to the wiki
