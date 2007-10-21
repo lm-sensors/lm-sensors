@@ -31,7 +31,7 @@ SVN HEAD
                    Add w83793 support
                    Log the error code on failure
                    Add lm87 support
-  Program sensors: Fix a memory leak on error (with -u)
+  Program sensors: Fix a memory leaks on error
                    Add sch311x support
                    Hide error on missing dme1737 fan and pwm
                    Add thmc50/adm1022 support

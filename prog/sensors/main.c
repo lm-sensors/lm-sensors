@@ -229,16 +229,18 @@ int main (int argc, char *argv[])
       }
 
   open_config_file(config_file_name);
-  if ((res = sensors_init(config_file))) {
+  res = sensors_init(config_file);
+  close_config_file(config_file_name);
+  if (res) {
     fprintf(stderr,"%s\n",sensors_strerror(res));
     if (res == -SENSORS_ERR_PROC)
       fprintf(stderr,
               "Kernel interface access error\n"
               "For 2.6 kernels, make sure you have mounted sysfs and libsensors\n"
               "was compiled with sysfs support!\n");
+    sensors_cleanup();
     exit(1);
   }
-  close_config_file(config_file_name);
 
   /* build the degrees string */
   set_degstr();
