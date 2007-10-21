@@ -3,7 +3,7 @@
 # sensors-detect-stat.pl
 # Statistical analysis of sensors-detect i2c addresses scanner
 # Part of the lm_sensors project
-# Copyright (C) 2003-2004  Jean Delvare <khali@linux-fr.org>
+# Copyright (C) 2003-2007  Jean Delvare <khali@linux-fr.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 use strict;
-use vars qw(%histo $chips $file);
+use vars qw(%histo $chips $file $skip);
 
 # Where is sensors-detect?
 # Use first argument, else try default locations.
@@ -51,8 +51,21 @@ if (! -r $file)
 
 # Get the data.
 open (SD, $file) || die;
+$skip = 0;
 while (<SD>)
 {
+	# Some chips are handled differently depending on the kernel
+	# version, avoid counting them twice.
+	if (m/^\@chip_kern24_ids\s*=/ || m/^\@chip_oldfsc_ids\s*=/) {
+		$skip = 1;
+		next;
+	}
+	if ($skip && m/^\);$/) {
+		$skip = 0;
+		next;
+	}
+	next if $skip;
+
 	# The regular expression may seem a little bit complex, but we wouldn't
 	# want to exec malicious code.
 	next unless m/^\s*i2c_addrs\s*=>\s*(\[( *0x[\dA-Fa-f]{2}( *\.\. *0x[\dA-Fa-f]{2})? *,?)+\])\s*,/;

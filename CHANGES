@@ -44,6 +44,7 @@ SVN HEAD
                           Add AMD K10 CPU sensor detection 
                           Fix SMSC LPC47B357/M967 detection
                           Select the right driver for FSC chips
+  Program sensors-detect-stat.pl: Handle alternative chip lists
 
 
 2.10.4 (20070716)
