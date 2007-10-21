@@ -25,13 +25,13 @@ SVN HEAD
   Module i2c-piix4: Add ATI SB700 and SB800 support (2.6 backport)
   Module lm93: Fix an array overrun (2.6 backport)
   Program sensord: Fix f71805f fans
-                   Syncronize the version with lm-sensors
+                   Synchronize the version with lm-sensors
                    Fix a memory leak when daemonizing
                    Fix memory leaks in command line parsing
                    Add w83793 support
                    Log the error code on failure
                    Add lm87 support
-  Program sensors: Fix a memory leaks on error
+  Program sensors: Fix two memory leaks on error
                    Add sch311x support
                    Hide error on missing dme1737 fan and pwm
                    Add thmc50/adm1022 support
@@ -749,7 +749,7 @@ SVN HEAD
                    module
                    Include i2c-nforce2
   Program sensord: New --rrd-no-average parameter
-                   Syncronize time slots with rrd
+                   Synchronize time slots with rrd
                    Fix W83781D temp3 alarm (Aurelien Jarno)
                    Add ASB100 support (Andrew May)
   Program sensors: Fully support the PC87360 family
