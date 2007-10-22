@@ -287,7 +287,7 @@ static void print_chip_in(const sensors_chip_name *name,
 			  int label_size)
 {
 	const sensors_subfeature *sf, *sfmin, *sfmax;
-	double val, alarm_max, alarm_min;
+	double alarm_max, alarm_min;
 	char *label;
 
 	if (!(label = sensors_get_label(name, feature))) {
@@ -300,8 +300,10 @@ static void print_chip_in(const sensors_chip_name *name,
 
 	sf = sensors_get_subfeature(name, feature,
 				    SENSORS_SUBFEATURE_IN_INPUT);
-	val = sf ? get_value(name, sf) : 0;
-	printf("%+6.2f V", val);
+	if (sf)
+		printf("%+6.2f V", get_value(name, sf));
+	else
+		printf("     N/A");
 
 	sfmin = sensors_get_subfeature(name, feature,
 				       SENSORS_SUBFEATURE_IN_MIN);
