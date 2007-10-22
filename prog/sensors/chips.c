@@ -1036,12 +1036,11 @@ void print_gl518(const sensors_chip_name *name)
  * of the GL518SM, we cannot read their values. This is detected when the
  * reading would be 0.0 V and displayed as "(n/a)" instead. */
   if (!sensors_get_label_and_valid(*name,SENSORS_GL518_VDD,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_GL518_VDD,&cur) &&
       !sensors_get_feature(*name,SENSORS_GL518_VDD_MIN,&min) &&
       !sensors_get_feature(*name,SENSORS_GL518_VDD_MAX,&max)) {
     if (valid) {
       print_label(label,10);
-      if (cur == 0.0)
+      if (sensors_get_feature(*name, SENSORS_GL518_VDD, &cur) || cur == 0.0)
         printf("(n/a)     ");
       else
         printf("%+6.2f V  ",cur);
@@ -1054,12 +1053,11 @@ void print_gl518(const sensors_chip_name *name)
   free(label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_GL518_VIN1,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_GL518_VIN1,&cur) &&
       !sensors_get_feature(*name,SENSORS_GL518_VIN1_MIN,&min) &&
       !sensors_get_feature(*name,SENSORS_GL518_VIN1_MAX,&max)) {
     if (valid) {
       print_label(label,10);
-      if (cur == 0.0)
+      if (sensors_get_feature(*name, SENSORS_GL518_VIN1, &cur) || cur == 0.0)
         printf("(n/a)     ");
       else
         printf("%+6.2f V  ",cur);
@@ -1072,12 +1070,11 @@ void print_gl518(const sensors_chip_name *name)
   free(label);
 
   if (!sensors_get_label_and_valid(*name,SENSORS_GL518_VIN2,&label,&valid) &&
-      !sensors_get_feature(*name,SENSORS_GL518_VIN2,&cur) &&
       !sensors_get_feature(*name,SENSORS_GL518_VIN2_MIN,&min) &&
       !sensors_get_feature(*name,SENSORS_GL518_VIN2_MAX,&max)) {
     if (valid) {
       print_label(label,10);
-      if (cur == 0.0)
+      if (sensors_get_feature(*name, SENSORS_GL518_VIN2, &cur) || cur == 0.0)
         printf("(n/a)     ");
       else
         printf("%+6.2f V  ",cur);
