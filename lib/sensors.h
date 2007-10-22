@@ -24,6 +24,12 @@
 
 /* Publicly accessible library functions */
 
+/* libsensors API version define, first digit is the major version (changed
+   when the API + ABI breaks), the third digit is incremented to track small
+   API additions like new flags / enum values. The second digit is for tracking
+   larger additions like new methods. */
+#define SENSORS_API_VERSION 0x300
+
 #define SENSORS_CHIP_NAME_PREFIX_ANY NULL
 #define SENSORS_CHIP_NAME_BUS_ISA -1
 #define SENSORS_CHIP_NAME_BUS_ANY -2
