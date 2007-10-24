@@ -1486,6 +1486,14 @@ chip "fscher-*"
     label in1         "+5V"
     label in2         "Battery"
 
+# Uncomment the computes line below when using the old fscher driver, leave
+# them commented when using the newer unified fschmd driver
+#
+#                            M    R             O               O                  M    R
+#    compute in0       (@ * (49 * 33) / 255) + (0 / 100), (@ - (0 / 100)) * 255 / (49 * 33)
+#    compute in1       (@ * (20 * 33) / 255) + (0 / 100), (@ - (0 / 100)) * 255 / (20 * 33)
+#    compute in2       (@ * (10 * 33) / 255) + (0 / 100), (@ - (0 / 100)) * 255 / (10 * 33)
+
 
 chip "pcf8591-*"
 #
