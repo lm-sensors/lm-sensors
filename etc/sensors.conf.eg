@@ -1852,6 +1852,9 @@ chip "fscher-*"
     label in1         "+5V"
     label in2         "Battery"
 
+# Note: comment the compute lines below when using the newer unified fschmd
+# driver, as that driver does the scaling in the driver
+
 # Compute Voltages using mainboard dependant MRO-values
 # (see doc/chips/fscher)
 #                           M    R             O               O                  M    R
@@ -1861,6 +1864,10 @@ chip "fscher-*"
 
 # Read documentation before enabling pwm settings (see doc/chips/fscher)
 # WARNING: IMPROPER VALUES MAY DAMAGE YOUR SYSTEM DUE TO OVERHEATING!
+
+# Note these set statements will not work with the newer unified fschmd driver
+# The functionality is still available using standard sysfs attributes for
+# pwm control: pwm#_auto_point1_pwm (which are not accessible through sensors)
 
 # Allow fans to turn off
 #    set pwm1          0
