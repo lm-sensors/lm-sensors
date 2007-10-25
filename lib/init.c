@@ -39,28 +39,33 @@ int sensors_init(FILE *input)
 		return -SENSORS_ERR_KERNEL;
 	if ((res = sensors_read_sysfs_bus()) ||
 	    (res = sensors_read_sysfs_chips()))
-		return res;
+		goto exit_cleanup;
 
+	res = -SENSORS_ERR_PARSE;
 	if (input) {
 		if (sensors_scanner_init(input) ||
 		    sensors_yyparse())
-			return -SENSORS_ERR_PARSE;
+			goto exit_cleanup;
 	} else {
 		/* No configuration provided, use default */
 		input = fopen(DEFAULT_CONFIG_FILE, "r");
 		if (!input)
-			return -SENSORS_ERR_PARSE;
+			goto exit_cleanup;
 		if (sensors_scanner_init(input) ||
 		    sensors_yyparse()) {
 			fclose(input);
-			return -SENSORS_ERR_PARSE;
+			goto exit_cleanup;
 		}
 		fclose(input);
 	}
 
 	if ((res = sensors_substitute_busses()))
-		return res;
+		goto exit_cleanup;
 	return 0;
+
+exit_cleanup:
+	sensors_cleanup();
+	return res;
 }
 
 static void free_chip_name(sensors_chip_name *name)
