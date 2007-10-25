@@ -11,6 +11,7 @@ SVN HEAD
   sensors: Fix file handle leak on library initialization error
            Handle the case where voltage measurements aren't available
            No default configuration file name
+           Install as sensors again
   sensors.conf.eg: Install as sensors3.conf
   sensors-detect: Fix SMSC LPC47B357/M967 detection
                   Select the right driver for FSC chips

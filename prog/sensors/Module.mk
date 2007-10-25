@@ -26,7 +26,7 @@ PROGSENSORSMAN1FILES := $(MODULE_DIR)/sensors.1
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-PROGSENSORSTARGETS := $(MODULE_DIR)/sensors3
+PROGSENSORSTARGETS := $(MODULE_DIR)/sensors
 PROGSENSORSSOURCES := $(MODULE_DIR)/main.c $(MODULE_DIR)/chips.c
 
 # Include all dependency files. We use '.rd' to indicate this will create
