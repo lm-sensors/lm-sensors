@@ -38,7 +38,7 @@ loadConfig
   FILE *cfg = NULL;
   int ret = 0;
 
-  if (!strcmp (cfgPath, "-")) {
+  if (cfgPath && !strcmp (cfgPath, "-")) {
     if (!reload) {
       if ((ret = sensors_init (stdin))) {
         sensorLog (LOG_ERR, "Error loading sensors configuration file <stdin>: %s",
@@ -46,7 +46,7 @@ loadConfig
         ret = 12;
       }
     }
-  } else if (stat (cfgPath, &stats) < 0) {
+  } else if (cfgPath && stat (cfgPath, &stats) < 0) {
     sensorLog (LOG_ERR, "Error stating sensors configuration file: %s", cfgPath);
     ret = 10;
   } else {
@@ -54,12 +54,12 @@ loadConfig
       sensorLog (LOG_INFO, "configuration reloading");
       sensors_cleanup ();
     }
-    if (!(cfg = fopen (cfgPath, "r"))) {
+    if (cfgPath && !(cfg = fopen (cfgPath, "r"))) {
       sensorLog (LOG_ERR, "Error opening sensors configuration file: %s", cfgPath);
       ret = 11;
     } else if ((ret = sensors_init (cfg))) {
       sensorLog (LOG_ERR, "Error loading sensors configuration file %s: %s",
-                 cfgPath, sensors_strerror (ret));
+                 cfgPath ? cfgPath : "(default)", sensors_strerror (ret));
       ret = 11;
     }
     if (cfg)

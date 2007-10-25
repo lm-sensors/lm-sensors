@@ -30,12 +30,10 @@
 #include "lib/error.h"
 #include "version.h"
 
-#define DEFAULT_CONFIG_FILE	ETCDIR "/sensors.conf"
-
 #define MAX_CHIP_NAMES 32
 
 int isDaemon = 0;
-const char *sensorsCfgFile = DEFAULT_CONFIG_FILE;
+const char *sensorsCfgFile = NULL;
 const char *pidFile = "/var/run/sensord.pid";
 const char *rrdFile = NULL;
 const char *cgiDir = NULL;
@@ -104,7 +102,7 @@ static const char *daemonSyntax =
   "  -t, --rrd-interval <time> -- interval between updating RRD file (default 5m)\n"
   "  -T, --rrd-no-average      -- switch RRD in non-average mode\n"
   "  -r, --rrd-file <file>     -- RRD file (default <none>)\n"
-  "  -c, --config-file <file>  -- configuration file (default " DEFAULT_CONFIG_FILE ")\n"
+  "  -c, --config-file <file>  -- configuration file\n"
   "  -p, --pid-file <file>     -- PID file (default /var/run/sensord.pid)\n"
   "  -f, --syslog-facility <f> -- syslog facility to use (default local4)\n"
   "  -g, --rrd-cgi <img-dir>   -- output an RRD CGI script and exit\n"
@@ -129,7 +127,7 @@ static const char *appSyntax =
   "  -a, --alarm-scan          -- only scan for alarms\n"
   "  -s, --set                 -- execute set statements (root only)\n"
   "  -r, --rrd-file <file>     -- only update RRD file\n"
-  "  -c, --config-file <file>  -- configuration file (default " DEFAULT_CONFIG_FILE ")\n"
+  "  -c, --config-file <file>  -- configuration file\n"
   "  -d, --debug               -- display some debug information\n"
   "  -v, --version             -- display version and exit\n"
   "  -h, --help                -- display help and exit\n"
