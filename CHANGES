@@ -6,6 +6,7 @@ SVN HEAD
   sensord: Reload config on SIGHUP rather than automatically
   sensors: Fix file handle leak on library initialization error
            Handle the case where voltage measurements aren't available
+           No default configuration file name
   sensors-detect: Fix SMSC LPC47B357/M967 detection
                   Select the right driver for FSC chips
   sensors-detect-stat.pl: Handle alternative chip lists

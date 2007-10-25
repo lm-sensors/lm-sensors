@@ -39,7 +39,6 @@
 
 #define PROGRAM			"sensors"
 #define VERSION			LM_VERSION
-#define DEFAULT_CONFIG_FILE	ETCDIR "/sensors.conf"
 
 static int do_sets, do_raw, hide_adapter;
 
@@ -54,9 +53,8 @@ static void print_short_help(void)
 static void print_long_help(void)
 {
 	printf("Usage: %s [OPTION]... [CHIP]...\n", PROGRAM);
-	printf("  -c, --config-file     Specify a config file (default: %s)\n",
-	       DEFAULT_CONFIG_FILE);
-	puts("  -h, --help            Display this help text\n"
+	puts("  -c, --config-file     Specify a config file\n"
+	     "  -h, --help            Display this help text\n"
 	     "  -s, --set             Execute `set' statements (root only)\n"
 	     "  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n"
 	     "  -A, --no-adapter      Do not show adapter for each chip\n"
@@ -88,15 +86,20 @@ static int read_config_file(const char *config_file_name)
 	FILE *config_file;
 	int err;
 
-	if (!strcmp(config_file_name, "-"))
-		config_file = stdin;
-	else
-		config_file = fopen(config_file_name, "r");
+	if (config_file_name) {
+		if (!strcmp(config_file_name, "-"))
+			config_file = stdin;
+		else
+			config_file = fopen(config_file_name, "r");
 
-	if (!config_file) {
-		fprintf(stderr, "Could not open config file\n");
-		perror(config_file_name);
-		return 1;
+		if (!config_file) {
+			fprintf(stderr, "Could not open config file\n");
+			perror(config_file_name);
+			return 1;
+		}
+	} else {
+		/* Use libsensors default */
+		config_file = NULL;
 	}
 
 	err = sensors_init(config_file);
@@ -106,7 +109,7 @@ static int read_config_file(const char *config_file_name)
 		return 1;
 	}
 
-	if (fclose(config_file) == EOF)
+	if (config_file && fclose(config_file) == EOF)
 		perror(config_file_name);
 
 	return 0;
@@ -239,7 +242,7 @@ static void print_bus_list(void)
 int main(int argc, char *argv[])
 {
 	int c, res, i, error, do_bus_list;
-	const char *config_file_name = DEFAULT_CONFIG_FILE;
+	const char *config_file_name = NULL;
 
 	struct option long_opts[] =  {
 		{ "help", no_argument, NULL, 'h' },
