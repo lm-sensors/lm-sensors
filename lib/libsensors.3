@@ -24,7 +24,7 @@
 .\"
 .\" References consulted:
 .\"     libsensors source code
-.TH libsensors 3  "June 2007" "lm-sensors 3" "Linux Programmer's Manual"
+.TH libsensors 3  "October 2007" "lm-sensors 3" "Linux Programmer's Manual"
 .SH NAME
 libsensors \- publicly accessible functions provided by the sensors library
 .SH SYNOPSIS
@@ -56,6 +56,9 @@ Load the configuration file and the detected chips list. If this returns a
 value unequal to zero, you are in trouble; you can not assume anything will
 be initialized properly. If you want to reload the configuration file, call
 sensors_cleanup() below before calling sensors_init() again.
+
+If FILE is NULL, the default configuration file is used (see the FILES
+section below). Most applications will want to do that.
 
 .B void sensors_cleanup(void);
 .br
@@ -167,6 +170,13 @@ data structures.
 \fBconst char *libsensors_version;\fP
 .br
 A string representing the version of libsensors.
+
+.SH FILES
+.I /etc/sensors.conf
+.RS
+The system-wide
+.BR libsensors (3)
+configuration file.
 
 .SH SEE ALSO
 sensors.conf(5)

@@ -29,6 +29,8 @@
 #include "scanner.h"
 #include "init.h"
 
+#define DEFAULT_CONFIG_FILE	ETCDIR "/sensors.conf"
+
 int sensors_init(FILE *input)
 {
 	int res;
@@ -38,10 +40,24 @@ int sensors_init(FILE *input)
 	if ((res = sensors_read_sysfs_bus()) ||
 	    (res = sensors_read_sysfs_chips()))
 		return res;
-	if ((res = sensors_scanner_init(input)))
-		return -SENSORS_ERR_PARSE;
-	if ((res = sensors_yyparse()))
-		return -SENSORS_ERR_PARSE;
+
+	if (input) {
+		if (sensors_scanner_init(input) ||
+		    sensors_yyparse())
+			return -SENSORS_ERR_PARSE;
+	} else {
+		/* No configuration provided, use default */
+		input = fopen(DEFAULT_CONFIG_FILE, "r");
+		if (!input)
+			return -SENSORS_ERR_PARSE;
+		if (sensors_scanner_init(input) ||
+		    sensors_yyparse()) {
+			fclose(input);
+			return -SENSORS_ERR_PARSE;
+		}
+		fclose(input);
+	}
+
 	if ((res = sensors_substitute_busses()))
 		return res;
 	return 0;
