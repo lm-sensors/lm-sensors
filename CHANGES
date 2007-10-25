@@ -4,6 +4,7 @@ lm-sensors CHANGES file
 SVN HEAD
   libsensors: Add a default configuration file
               Fix memory leaks on initialization error
+              Make the configuration file optional
   sensord: Reload config on SIGHUP rather than automatically
            No default configuration file name
   sensors: Fix file handle leak on library initialization error

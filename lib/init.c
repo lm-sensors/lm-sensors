@@ -49,14 +49,14 @@ int sensors_init(FILE *input)
 	} else {
 		/* No configuration provided, use default */
 		input = fopen(DEFAULT_CONFIG_FILE, "r");
-		if (!input)
-			goto exit_cleanup;
-		if (sensors_scanner_init(input) ||
-		    sensors_yyparse()) {
+		if (input) {
+			if (sensors_scanner_init(input) ||
+			    sensors_yyparse()) {
+				fclose(input);
+				goto exit_cleanup;
+			}
 			fclose(input);
-			goto exit_cleanup;
 		}
-		fclose(input);
 	}
 
 	if ((res = sensors_substitute_busses()))
