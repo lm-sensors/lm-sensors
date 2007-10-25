@@ -367,7 +367,7 @@ BEGIN
 
 	if (defined $ARGV[0] && ($ARGV[0] eq '-h' || $ARGV[0] eq '--help')) {
 		print "Convert sensors.conf from lm-sensors 2 format to lm-sensors 3 format\n",
-		      "Typical usage: sensors-conf-convert /etc/sensors.conf\n";
+		      "Typical usage: sensors-conf-convert < /etc/sensors.conf > /etc/sensors3.conf\n";
 		exit 0;
 	}
 }

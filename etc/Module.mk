@@ -21,7 +21,7 @@
 MODULE_DIR := etc
 
 ETCTARGET := $(MODULE_DIR)/sensors.conf.eg
-ETCINSTALL := $(ETCDIR)/sensors.conf
+ETCINSTALL := $(ETCDIR)/sensors3.conf
 
 
 # No all rule

@@ -71,7 +71,7 @@ program to get a report of all detected sensor devices. Chek the manual
 page for available options.
 
 The initial output of `sensors' will not be perfect. You have to adjust
-the configuration file (/etc/sensors.conf) to match your motherboard.
+the configuration file (/etc/sensors3.conf) to match your motherboard.
 This includes (re)labelling inputs, ignoring unused inputs, changing
 voltage compute lines and setting limits. Write down all the sensor
 information your BIOS displays as a hint to what you are supposed to

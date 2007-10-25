@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include "sensors.h"
 #include "data.h"
 #include "error.h"
@@ -29,7 +30,8 @@
 #include "scanner.h"
 #include "init.h"
 
-#define DEFAULT_CONFIG_FILE	ETCDIR "/sensors.conf"
+#define DEFAULT_CONFIG_FILE	ETCDIR "/sensors3.conf"
+#define ALT_CONFIG_FILE		ETCDIR "/sensors.conf"
 
 int sensors_init(FILE *input)
 {
@@ -49,6 +51,8 @@ int sensors_init(FILE *input)
 	} else {
 		/* No configuration provided, use default */
 		input = fopen(DEFAULT_CONFIG_FILE, "r");
+		if (!input && errno == ENOENT)
+			input = fopen(ALT_CONFIG_FILE, "r");
 		if (input) {
 			if (sensors_scanner_init(input) ||
 			    sensors_yyparse()) {

@@ -23,7 +23,7 @@
 .\"
 .\" References consulted:
 .\"     sensors.conf.eg by Frodo Looijaard
-.TH sensors.conf 5  "September 2007" "lm-sensors 3" "Linux User's Manual"
+.TH sensors.conf 5  "October 2007" "lm-sensors 3" "Linux User's Manual"
 .SH NAME
 sensors.conf \- libsensors configuration file
 
@@ -393,6 +393,16 @@ There is one exception to this rule: if a statement only applies because
 the feature is in the same class as the feature the statement contains,
 and there is anywhere else a statement for this specific class member,
 that one takes always precedence.
+
+.SH FILES
+.I /etc/sensors3.conf
+.br
+.I /etc/sensors.conf
+.RS
+The system-wide
+.BR libsensors (3)
+configuration file. /etc/sensors3.conf is tried first, and if it doesn't exist,
+/etc/sensors.conf is used instead.
 
 .SH SEE ALSO
 libsensors(3)

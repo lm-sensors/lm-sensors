@@ -5,11 +5,13 @@ SVN HEAD
   libsensors: Add a default configuration file
               Fix memory leaks on initialization error
               Make the configuration file optional
+              Change the default configuration file to /etc/sensors3.conf
   sensord: Reload config on SIGHUP rather than automatically
            No default configuration file name
   sensors: Fix file handle leak on library initialization error
            Handle the case where voltage measurements aren't available
            No default configuration file name
+  sensors.conf.eg: Install as sensors3.conf
   sensors-detect: Fix SMSC LPC47B357/M967 detection
                   Select the right driver for FSC chips
   sensors-detect-stat.pl: Handle alternative chip lists

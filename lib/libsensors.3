@@ -172,11 +172,14 @@ data structures.
 A string representing the version of libsensors.
 
 .SH FILES
+.I /etc/sensors3.conf
+.br
 .I /etc/sensors.conf
 .RS
 The system-wide
 .BR libsensors (3)
-configuration file.
+configuration file. /etc/sensors3.conf is tried first, and if it doesn't exist,
+/etc/sensors.conf is used instead.
 
 .SH SEE ALSO
 sensors.conf(5)
