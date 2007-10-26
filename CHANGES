@@ -1,6 +1,9 @@
 lm_sensors CHANGES file
 -----------------------
 
+SVN-HEAD
+  
+
 2.10.5 (20071024)
   File i2c-dev.h: Rename I2C_FUNC_SMBUS_HWPEC_CALC to I2C_FUNC_SMBUS_PEC
   File sensors.conf.eg: Add a thmc50 section
