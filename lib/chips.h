@@ -2342,8 +2342,8 @@
 #define SENSORS_F71882FG_TEMP_TYPE(n)		(150 + (n))
 
 /* Fujitsu Siemens Computers Heimdal and Heracles */
-#define SENSORS_FSCHMD_PREFIX		"fscher"
-#define SENSORS_FSCHRC_PREFIX		"fscher"
+#define SENSORS_FSCHMD_PREFIX		"fschmd"
+#define SENSORS_FSCHRC_PREFIX		"fschrc"
 
 /* Note, we start with feature numbers of 60+ to not have any overlapping
    features with the old FSCPOS, FSCSCY and FSCHER feature lists, as the
