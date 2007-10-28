@@ -1,1 +1,1 @@
-#define LM_VERSION "3.0.0-rc2"
+#define LM_VERSION "3.0.0-rc3"
