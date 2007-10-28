@@ -1,6 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN HEAD
+  sensors-detect: Add Texas Instruments TMP401 detection
+
 3.0.0-rc3 (2007-10-28)
   libsensors: Add a default configuration file
               Fix memory leaks on initialization error
