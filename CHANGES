@@ -2,7 +2,7 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN-HEAD
-  
+  Library: Fix fschrc and fschmd support
 
 2.10.5 (20071024)
   File i2c-dev.h: Rename I2C_FUNC_SMBUS_HWPEC_CALC to I2C_FUNC_SMBUS_PEC
