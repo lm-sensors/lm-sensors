@@ -3,6 +3,7 @@ lm-sensors CHANGES file
 
 SVN HEAD
   sensors-detect: Add Texas Instruments TMP401 detection
+                  Mention the f75375s driver
 
 3.0.0-rc3 (2007-10-28)
   libsensors: Add a default configuration file
