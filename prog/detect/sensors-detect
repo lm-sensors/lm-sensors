@@ -1427,13 +1427,13 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "Fintek F75373S/SG",
-       driver => "to-be-written",
+       driver => "f75375s",
        i2c_addrs => [0x2d..0x2e],
        i2c_detect => sub { fintek_detect(3, @_); },
      },
      {
        name => "Fintek F75375S/SP",
-       driver => "to-be-written",
+       driver => "f75375s",
        i2c_addrs => [0x2d..0x2e],
        i2c_detect => sub { fintek_detect(4, @_); },
      },
