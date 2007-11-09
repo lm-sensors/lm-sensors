@@ -1796,6 +1796,11 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	devid => 0x5d,
       },
       {
+	name => "SMSC LPC47B367-NC Super IO",
+	driver => "not-a-sensor",
+	devid => 0x6d,
+      },
+      {
 	name => "SMSC LPC47B37x Super IO Fan Sensors",
 	driver => "to-be-written",
 	devid => 0x52,

@@ -5,6 +5,7 @@ SVN-HEAD
   Library: Fix fschrc and fschmd support
   Program sensors-detect: Add Texas Instruments TMP401 detection
                           Mention the f75375s driver
+                          Add SMSC LPC47B367-NC detection (no sensors)
 
 2.10.5 (20071024)
   File i2c-dev.h: Rename I2C_FUNC_SMBUS_HWPEC_CALC to I2C_FUNC_SMBUS_PEC
