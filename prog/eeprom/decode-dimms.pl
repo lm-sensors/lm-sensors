@@ -69,12 +69,14 @@
 #  SPD revision decoding depends on memory type
 #  use more user-friendly labels
 #  fix HTML formatted output on checksum error
+# Version 1.5  2007-11-08  Jean Delvare <khali@linux-fr.org>
+#  fix module speed (DDR2 SDRAM)
 #
 #
 # EEPROM data decoding for SDRAM DIMM modules. 
 #
-# Two assumptions: lm_sensors-2.x installed,
-# and Perl is at /usr/bin/perl
+# The eeprom driver must be loaded. For kernels older than 2.6.0, the
+# eeprom driver can be found in the lm-sensors package.
 #
 # use the following command line switches
 #  -f, --format            print nice html output
@@ -863,6 +865,7 @@ sub decode_ddr2_sdram($)
 {
 	my $bytes = shift;
 	my ($l, $temp);
+	my $ctime;
 
 # SPD revision
 	if ($bytes->[62] != 0xff) {
@@ -874,15 +877,15 @@ sub decode_ddr2_sdram($)
 	prints "Memory Characteristics";
 
 	$l = "Maximum module speed";
-	$temp = ($bytes->[9] >> 4) + ($bytes->[9] & 0xf) * 0.1;
-	my $ddrclk = 4 * (1000 / $temp);
+	$ctime = ddr2_sdram_ctime($bytes->[9]);
+	my $ddrclk = 2 * (1000 / $ctime);
 	my $tbits = ($bytes->[7] * 256) + $bytes->[6];
-	if (($bytes->[11] == 2) || ($bytes->[11] == 1)) { $tbits = $tbits - 8; }
+	if ($bytes->[11] & 0x03) { $tbits = $tbits - 8; }
 	my $pcclk = int ($ddrclk * $tbits / 8);
-	$pcclk += 100 if ($pcclk % 100) >= 50; # Round properly
+	# Round down to comply with Jedec
 	$pcclk = $pcclk - ($pcclk % 100);
 	$ddrclk = int ($ddrclk);
-	printl $l, "${ddrclk}MHz (PC${pcclk})";
+	printl $l, "${ddrclk}MHz (PC2-${pcclk})";
 
 #size computation
 	my $k=0;
@@ -910,9 +913,6 @@ sub decode_ddr2_sdram($)
 	my $trcd;
 	my $trp;
 	my $tras;
-	my $ctime;
-	
-	$ctime = ddr2_sdram_ctime($bytes->[9]);
 	
 	$trcd =($bytes->[29] >> 2)+(($bytes->[29] & 3)*0.25);
 	$trp =($bytes->[27] >> 2)+(($bytes->[27] & 3)*0.25);
