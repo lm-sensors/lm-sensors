@@ -5800,7 +5800,7 @@ void print_f71805f(const sensors_chip_name *name)
         printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)  %s\n",
                cur, min, max, (alarms & (1 << i)) ? "ALARM" : "");
       }
-    } else
+    } else if (!is_f71872f)
       printf("ERROR: Can't get in%d data!\n", i);
     free(label);
   }
