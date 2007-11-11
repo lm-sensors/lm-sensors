@@ -4,6 +4,7 @@ lm_sensors CHANGES file
 SVN-HEAD
   Library: Fix fschrc and fschmd support
   Program decode-dimms.pl: Fix DDR2 SDRAM module speed decoding
+                           Update manufacturer IDs.
   Program sensors-detect: Add Texas Instruments TMP401 detection
                           Mention the f75375s driver
                           Add SMSC LPC47B367-NC detection (no sensors)
