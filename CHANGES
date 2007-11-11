@@ -5,6 +5,7 @@ SVN HEAD
   sensors-detect: Add Texas Instruments TMP401 detection
                   Mention the f75375s driver
                   Add SMSC LPC47B367-NC detection (no sensors)
+                  Reduce w83781d/lm78 I2C address probing range
 
 3.0.0-rc3 (2007-10-28)
   libsensors: Add a default configuration file

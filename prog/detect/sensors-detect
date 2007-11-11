@@ -760,7 +760,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      {
        name => "National Semiconductor LM78",
        driver => "lm78",
-       i2c_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x28..0x2f], 
        i2c_detect => sub { lm78_detect(0, @_); },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect(0, @_); },
@@ -769,7 +769,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      {
        name => "National Semiconductor LM78-J",
        driver => "lm78",
-       i2c_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x28..0x2f], 
        i2c_detect => sub { lm78_detect(1, @_); },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect(1, @_); },
@@ -778,7 +778,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      {
        name => "National Semiconductor LM79",
        driver => "lm78",
-       i2c_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x28..0x2f], 
        i2c_detect => sub { lm78_detect(2, @_); },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect(2, @_); },
@@ -910,7 +910,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        name => "Winbond W83781D",
        driver => "w83781d",
        i2c_detect => sub { w83781d_detect(0, @_); },
-       i2c_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x28..0x2f], 
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect(0, @_); },
        alias_detect => sub { w83781d_alias_detect(0, @_); },
@@ -918,7 +918,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      {
        name => "Winbond W83782D",
        driver => "w83781d",
-       i2c_addrs => [0x20..0x2f], 
+       i2c_addrs => [0x28..0x2f], 
        i2c_detect => sub { w83781d_detect(1, @_); },
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect(1, @_); },
