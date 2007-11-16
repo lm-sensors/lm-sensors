@@ -6,6 +6,7 @@ SVN-HEAD
   Makefile: Revert changeset 4738, fix bug #2187 differently
   Module eeprom: Hide Sony Vaio serial numbers to regular users (2.6 backport)
                  Drop useless debugging log messages
+                 Recognize VGN as a valid Sony Vaio name prefix (2.6 backport)
   Program decode-dimms.pl: Fix DDR2 SDRAM module speed decoding
                            Update manufacturer IDs.
   Program sensors: Hide spurious errors on missing f71872f voltage inputs
