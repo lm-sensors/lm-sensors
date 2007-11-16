@@ -320,17 +320,7 @@ void eeprom_contents(struct i2c_client *client, int operation,
 		else
 			for (i = 0; i < 16; i++)
 				results[i] = data->data[i + nr * 16];
-#ifdef DEBUG
-		printk(KERN_DEBUG "eeprom.o: 0x%X EEPROM contents (row %d):",
-		       client->addr, nr + 1);
-		if (nr == 0 && data->nature == NATURE_VAIO)
-		 	printk(" <hidden for security reasons>\n");
-		else {
-			for (i = 0; i < 16; i++)
-				printk(" 0x%02X", data->data[i + nr * 16]);
-			printk("\n");
-		}
-#endif
+
 		*nrels_mag = 16;
 	}
 }
