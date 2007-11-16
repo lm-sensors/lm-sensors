@@ -207,7 +207,7 @@ static int eeprom_detect(struct i2c_adapter *adapter, int address,
 		 && i2c_smbus_read_byte(new_client) == 'G'
 		 && i2c_smbus_read_byte(new_client) == '-') {
 			printk(KERN_INFO "Vaio EEPROM detected, "
-			       "enabling password protection\n");
+			       "enabling privacy protection\n");
 			data->nature = NATURE_VAIO;
 		}
 	}
@@ -308,9 +308,13 @@ void eeprom_contents(struct i2c_client *client, int operation,
 		*nrels_mag = 0;
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		eeprom_update_client(client, nr >> 1);
-		/* Hide Vaio security settings to regular users */
-		if (nr == 0 && data->nature == NATURE_VAIO
-		 && !capable(CAP_SYS_ADMIN))
+		/* Hide Vaio private settings to regular users:
+		   - BIOS passwords: bytes 0x00 to 0x0f (row 0)
+		   - UUID: bytes 0x10 to 0x1f (row 1)
+		   - Serial number: 0xc0 to 0xdf (rows 12 and 13) */
+		if (data->nature == NATURE_VAIO
+		 && !capable(CAP_SYS_ADMIN)
+		 && (nr == 0 || nr == 1 || nr == 12 || nr == 13))
 			for (i = 0; i < 16; i++)
 				results[i] = 0;
 		else
