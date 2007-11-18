@@ -3,6 +3,7 @@ lm-sensors CHANGES file
 
 SVN HEAD
   pwmconfig: Better diagnostics in pwmdisable
+             Give the fans some time to spin up
   sensors-detect: Add Texas Instruments TMP401 detection
                   Mention the f75375s driver
                   Add SMSC LPC47B367-NC detection (no sensors)
