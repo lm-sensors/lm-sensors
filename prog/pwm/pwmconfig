@@ -132,15 +132,21 @@ function pwmdisable()
 
 		# It didn't work, try pwmN_enable=1 pwmN=255
 		echo 1 > $ENABLE 2> /dev/null
+		if [ "`cat $ENABLE`" -ne 1 ]
+		then
+			echo "$ENABLE stuck to `cat $ENABLE`" >&2
+			return 1
+		fi
+
 		echo $MAX > $1
-		if [ "`cat $ENABLE`" -eq 1 -a "`cat $1`" -ge 190 ]
+		if [ "`cat $1`" -ge 190 ]
 		then
 			# Success
 			return 0
 		fi
 
 		# Nothing worked
-		echo "$ENABLE stuck to `cat $ENABLE`" >&2
+		echo "$1 stuck to `cat $1`" >&2
 		return 1
 	else
 		echo $MAX 0 > $1
