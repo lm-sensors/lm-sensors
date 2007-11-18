@@ -10,6 +10,7 @@ SVN-HEAD
   Program decode-dimms.pl: Fix DDR2 SDRAM module speed decoding
                            Update manufacturer IDs.
   Program pwmconfig: Better diagnostics in pwmdisable
+                     Give the fans some time to spin up
   Program sensors: Hide spurious errors on missing f71872f voltage inputs
   Program sensors-detect: Add Texas Instruments TMP401 detection
                           Mention the f75375s driver

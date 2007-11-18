@@ -205,6 +205,8 @@ do
 done
 
 echo
+echo "Giving the fans some time to reach full speed..."
+sleep $DELAY
 echo 'Found the following fan sensors:'
 for i in $FAN
 do
