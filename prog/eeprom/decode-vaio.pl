@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Copyright (C) 2002-2006 Jean Delvare <khali@linux-fr.org>
+# Copyright (C) 2002-2007 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -43,6 +43,8 @@
 #  Revision might be a Service Tag.
 # Version 1.4  2006-09-20  Jean Delvare <khali@linux-fr.org>
 #  Detect and skip false positives (e.g. EDID EEPROMs).
+# Version 1.5  2007-11-19  Jean Delvare <khali@linux-fr.org>
+#  UUID and serial number might be hidden
 #
 # EEPROM data decoding for Sony Vaio laptops. 
 #
@@ -80,6 +82,8 @@
 use strict;
 use Fcntl qw(:DEFAULT :seek);
 use vars qw($sysfs $found);
+
+use constant ONLYROOT	=> "Readable only by root";
 
 sub print_item
 {
@@ -175,7 +179,14 @@ sub decode_uuid
 		}
 	}
 
-	return($string);
+	if ($string eq '00000000-0000-0000-0000-000000000000')
+	{
+		return(ONLYROOT);
+	}
+	else
+	{
+		return($string);
+	}
 }
 
 sub vaio_decode
@@ -187,7 +198,8 @@ sub vaio_decode
 	return 0 unless $name =~ m/^[A-Z-]{4}/;
 
 	print_item('Machine Name', $name);
-	print_item('Serial Number', decode_string($bus, $addr, 192, 32));
+	my $serial = decode_string($bus, $addr, 192, 32);
+	print_item('Serial Number', $serial ? $serial : ONLYROOT);
 	print_item('UUID', decode_uuid($bus, $addr, 16));
 	my $revision = decode_string($bus, $addr, 160, 10);
 	print_item(length($revision) > 2 ? 'Service Tag' : 'Revision',
@@ -201,8 +213,8 @@ sub vaio_decode
 BEGIN
 {
 	print("Sony Vaio EEPROM Decoder\n");
-	print("Copyright (C) 2002-2006  Jean Delvare\n");
-	print("Version 1.4\n\n");
+	print("Copyright (C) 2002-2007  Jean Delvare\n");
+	print("Version 1.5\n\n");
 }
 
 END
