@@ -46,6 +46,7 @@
 # Version 1.5  2007-11-19  Jean Delvare <khali@linux-fr.org>
 #  UUID and serial number might be hidden
 #  The model name is actually the first half of the asset tag
+#  The timestamp is only 18-byte long
 #
 # EEPROM data decoding for Sony Vaio laptops. 
 #
@@ -225,7 +226,7 @@ sub vaio_decode
 	print_item('Asset Tag', decode_string($bus, $addr, 170, 4).
 				decode_hexa($bus, $addr, 174, 12));
 	print_item('OEM Data', decode_string($bus, $addr, 32, 16));
-	print_item('Timestamp', decode_string($bus, $addr, 224, 32));
+	print_item('Timestamp', decode_string($bus, $addr, 224, 18));
 	return 1;
 }
 
