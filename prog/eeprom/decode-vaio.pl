@@ -65,6 +65,7 @@
 #   PCG-GR114EK  : OK
 #   PCG-GR114SK  : OK
 #   PCG-GR214EP  : OK
+#   PCG-GRT955MP : OK
 #   PCG-GRX316G  : OK
 #   PCG-GRX570   : OK
 #   PCG-GRX600K  : OK
@@ -73,11 +74,12 @@
 #   PCG-Z600NE   : No EEPROM
 #   VGN-S260     : OK
 #   VGN-S4M/S    : OK
+#   VGN-TZ11MN/N : OK
 # Any feedback appreciated anyway.
 #
 # Thanks to Werner Heuser, Carsten Blume, Christian Gennerat, Joe Wreschnig,
-# Xavier Roche, Sebastien Lefevre, Lars Heer, Steve Dobson, Kent Hunt and
-# others for their precious help.
+# Xavier Roche, Sebastien Lefevre, Lars Heer, Steve Dobson, Kent Hunt,
+# Timo Hoenig and others for their precious help.
 
 
 use strict;
