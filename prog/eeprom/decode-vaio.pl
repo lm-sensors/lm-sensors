@@ -45,6 +45,7 @@
 #  Detect and skip false positives (e.g. EDID EEPROMs).
 # Version 1.5  2007-11-19  Jean Delvare <khali@linux-fr.org>
 #  UUID and serial number might be hidden
+#  The model name is actually the first half of the asset tag
 #
 # EEPROM data decoding for Sony Vaio laptops. 
 #
@@ -163,6 +164,21 @@ sub decode_string
 	return($string);
 }
 
+sub decode_hexa
+{
+	my ($bus, $addr, $offset, $length) = @_;
+
+	my @bytes = unpack('C*', read_eeprom_bytes($bus, $addr, $offset, $length));
+	my $string='';
+
+	for(my $i=0;$i<$length;$i++)
+	{
+		$string.=sprintf('%02X', shift(@bytes));
+	}
+
+	return($string);
+}
+
 sub decode_uuid
 {
 	my ($bus,$addr,$base) = @_;
@@ -204,7 +220,8 @@ sub vaio_decode
 	my $revision = decode_string($bus, $addr, 160, 10);
 	print_item(length($revision) > 2 ? 'Service Tag' : 'Revision',
 		   $revision);
-	print_item('Model Name', 'PCG-'.decode_string($bus, $addr, 170, 4));
+	print_item('Asset Tag', decode_string($bus, $addr, 170, 4).
+				decode_hexa($bus, $addr, 174, 12));
 	print_item('OEM Data', decode_string($bus, $addr, 32, 16));
 	print_item('Timestamp', decode_string($bus, $addr, 224, 32));
 	return 1;
