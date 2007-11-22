@@ -19,6 +19,7 @@
 # 'simply expanded variable'. That means that its value is substituted
 # verbatim in the rules, until it is redefined. 
 MODULE_DIR := etc
+ETC_DIR := $(MODULE_DIR)
 
 ETCTARGET := $(MODULE_DIR)/sensors.conf.eg
 ETCINSTALL := $(ETCDIR)/sensors3.conf
@@ -32,7 +33,7 @@ install-etc:
 	  $(INSTALL) -m 644 $(ETCTARGET) $(DESTDIR)$(ETCINSTALL); \
 	fi
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 755 $(MODULE_DIR)/sensors-conf-convert $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 755 $(ETC_DIR)/sensors-conf-convert $(DESTDIR)$(BINDIR)
 
 user_install :: install-etc
 
