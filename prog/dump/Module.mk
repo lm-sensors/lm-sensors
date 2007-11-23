@@ -22,22 +22,14 @@ MODULE_DIR := prog/dump
 PROGDUMPDIR := $(MODULE_DIR)
 
 PROGDUMPMAN8DIR := $(MANDIR)/man8
-PROGDUMPMAN8FILES :=
+PROGDUMPMAN8FILES := $(MODULE_DIR)/isadump.8 $(MODULE_DIR)/isaset.8
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-PROGDUMPTARGETS :=
-PROGDUMPSOURCES := $(MODULE_DIR)/util.c
-PROGDUMPBININSTALL :=
-
-# Only build isadump and isaset on x86 machines.
-ifneq (,$(findstring $(MACHINE), i386 i486 i586 i686 x86_64))
-PROGDUMPMAN8FILES += $(MODULE_DIR)/isadump.8 $(MODULE_DIR)/isaset.8
-PROGDUMPTARGETS += $(MODULE_DIR)/isadump $(MODULE_DIR)/isaset
-PROGDUMPSOURCES += $(MODULE_DIR)/isadump.c $(MODULE_DIR)/isaset.c \
-		   $(MODULE_DIR)/superio.c
-PROGDUMPBININSTALL += $(MODULE_DIR)/isadump $(MODULE_DIR)/isaset
-endif
+PROGDUMPTARGETS := $(MODULE_DIR)/isadump $(MODULE_DIR)/isaset
+PROGDUMPSOURCES := $(MODULE_DIR)/util.c $(MODULE_DIR)/isadump.c \
+		   $(MODULE_DIR)/isaset.c $(MODULE_DIR)/superio.c
+PROGDUMPBININSTALL := $(MODULE_DIR)/isadump $(MODULE_DIR)/isaset
 
 # Include all dependency files. We use '.rd' to indicate this will create
 # executables.

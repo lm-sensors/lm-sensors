@@ -99,9 +99,12 @@ MACHINE := $(shell uname -m)
 # to do this. 
 
 # The subdirectories we need to build things in 
-SRCDIRS :=
-SRCDIRS += lib prog/detect prog/dump prog/pwm \
+SRCDIRS := lib prog/detect prog/pwm \
            prog/sensors ${PROG_EXTRA:%=prog/%} etc
+# Only build isadump and isaset on x86 machines.
+ifneq (,$(findstring $(MACHINE), i386 i486 i586 i686 x86_64))
+SRCDIRS += prog/dump
+endif
 SRCDIRS += lib/test
 
 # Some often-used commands with default options
