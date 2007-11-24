@@ -9,9 +9,7 @@ Release steps:
   functionality is added, and patch if only bugs are fixed.
   `svn diff -r Vx-y-z lib' is your friend.
 - Update the CHANGES file (add the release date)
-- Update lm_sensors.lsm (Version, Entered-date and Primary-site) and send
-  it to the LSM by mailing it to lsm@qqx.org with the subject `add' (no
-  quotes).
+- Update lm_sensors.lsm (Version, Entered-date and Primary-site)
 - Update version.h
 - Commit
 - Tag the release using SVN:
@@ -29,15 +27,17 @@ Release steps:
   scp lm_sensors-3.x.x.tar.bz2* \
       devel.atrpms.net:/srv/lm-sensors.org/dl/lm-sensors/releases
 - Set correct permissions:
-  ssh devel.atrpms.net chmod 664
+  ssh devel.atrpms.net chmod 664 \
       '/srv/lm-sensors.org/dl/lm-sensors/releases/lm_sensors-3.x.x.tar.bz2*'
 
 After release, remember to:
 - Copy to mirrors
 - Update the Download page on lm-sensors.org, then add a news item
 - Announce on Freshmeat
-- Change CHANGES and version.h back to SVN
+- Add "+SVN" to version.h
 - Mark the corresponding release milestone as complete using trac-admin
-  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone completed 2.10.2 2006-12-31'
+  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone completed 3.0.0 2007-11-24'
 - Create a new release milestone using trac-admin
-  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone add 2.10.2 2006-12-31'
+  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone add 3.0.1 2008-02-15'
+- Send lm_sensors.lsm to the LSM by mailing it to lsm@qqx.org with the
+  subject `add' (no quotes)
