@@ -20,6 +20,9 @@
 /* this define needed for strndup() */
 #define _GNU_SOURCE
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -38,7 +41,13 @@ char sensors_sysfs_mount[NAME_MAX];
 /* returns !0 if sysfs filesystem was found, 0 otherwise */
 int sensors_init_sysfs(void)
 {
-	if (sysfs_get_mnt_path(sensors_sysfs_mount, NAME_MAX) == 0)
+	struct stat statbuf;
+
+	/* libsysfs will return success even if sysfs is not mounted,
+	   so we have to double-check */
+	if (sysfs_get_mnt_path(sensors_sysfs_mount, NAME_MAX) == 0
+	 && stat(sensors_sysfs_mount, &statbuf) == 0
+	 && statbuf.st_nlink > 2)
 		sensors_found_sysfs = 1;
 
 	return sensors_found_sysfs;
