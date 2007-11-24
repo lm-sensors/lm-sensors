@@ -6,7 +6,7 @@
               IT8712F  Super I/O chip w/LPC interface & SMBus
               SiS950   A clone of the IT8705F
 
-    Copyright (c) 2001 Chris Gauthron <chrisg@0-in.com> 
+    Copyright (c) 2001 Chris Gauthron
     Largely inspired by lm78.c of the same package
 
     This program is free software; you can redistribute it and/or modify
@@ -1121,7 +1121,7 @@ static void __exit sm_it87_exit(void)
 }
 
 
-MODULE_AUTHOR("Chris Gauthron <chrisg@0-in.com>");
+MODULE_AUTHOR("Chris Gauthron");
 MODULE_DESCRIPTION("IT8705F, IT8712F, Sis950 driver");
 MODULE_PARM(update_vbat, "i");
 MODULE_PARM_DESC(update_vbat, "Update vbat if set else return powerup value");
