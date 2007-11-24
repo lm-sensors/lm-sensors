@@ -67,7 +67,7 @@ sensors, and give you a list of what kernel drivers you need to load
 (using modprobe).
 
 After loading the suggested drivers, you can use the installed sensors
-program to get a report of all detected sensor devices. Chek the manual
+program to get a report of all detected sensor devices. Check the manual
 page for available options.
 
 The initial output of `sensors' will not be perfect. You have to adjust
