@@ -1,8 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN HEAD
+3.0.0 (2007-11-24)
   Makefile: Fix MODULE_DIR usage in etc
+            Fix build on PPC
   pwmconfig: Better diagnostics in pwmdisable
              Give the fans some time to spin up
   sensors-detect: Add Texas Instruments TMP401 detection
