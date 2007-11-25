@@ -32,5 +32,7 @@ After release, remember to:
 - Prep CHANGES files for next release
 - Mark the corresponding release milestone as complete using trac-admin
   e.g. 'trac-admin /srv/lm-sensors.org/trac milestone completed 2.10.2 2006-12-31'
+- Create a new version for the bug tracking system using trac-admin
+  e.g. 'trac-admin /srv/lm-sensors.org/trac version add 2.10.2 2006-12-31'
 - Create a new release milestone using trac-admin
-  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone add 2.10.2 2006-12-31'
+  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone add 2.10.3 2007-03-31'
