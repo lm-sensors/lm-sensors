@@ -37,6 +37,8 @@ After release, remember to:
 - Add "+SVN" to version.h
 - Mark the corresponding release milestone as complete using trac-admin
   e.g. 'trac-admin /srv/lm-sensors.org/trac milestone completed 3.0.0 2007-11-24'
+- Create a new version for the bug tracking system using trac-admin
+  e.g. 'trac-admin /srv/lm-sensors.org/trac version add 3.0.0 2007-11-24'
 - Create a new release milestone using trac-admin
   e.g. 'trac-admin /srv/lm-sensors.org/trac milestone add 3.0.1 2008-02-15'
 - Send lm_sensors.lsm to the LSM by mailing it to lsm@qqx.org with the
