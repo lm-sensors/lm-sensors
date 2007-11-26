@@ -115,35 +115,35 @@ user :: all-lib
 # so we can't make any assumptions.
 install-lib: all-lib
 	$(MKDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(LIBINCLUDEDIR) $(DESTDIR)$(LIBMAN3DIR) $(DESTDIR)$(LIBMAN5DIR)
-	@if [ ! -e "$(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)" ] ; then \
+	@if [ -z "$(DESTDIR)" -a ! -e "$(LIBDIR)/$(LIBSHSONAME)" ] ; then \
 	     echo '******************************************************************************' ; \
 	     echo 'Warning: This is the first installation of the $(LIBSHSONAME)*' ; \
-	     echo '         library files in $(DESTDIR)$(LIBDIR)!' ; \
+	     echo '         library files in $(LIBDIR)!' ; \
 	     echo '         You must update the library cache or the userspace tools may fail' ; \
 	     echo '         or have unpredictable results!' ; \
-		 echo '         Run the following command: /sbin/ldconfig' ; \
+	     echo '         Run the following command: /sbin/ldconfig' ; \
 	     echo '******************************************************************************' ; \
 	fi
 	$(INSTALL) -m 644 $(LIB_DIR)/$(LIBSTLIBNAME) $(DESTDIR)$(LIBDIR)
 	$(INSTALL) -m 755 $(LIB_DIR)/$(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)
 	$(LN) $(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)
 	$(LN) $(LIBSHSONAME) $(DESTDIR)$(LIBDIR)/$(LIBSHBASENAME)
-	@if [ "$(DESTDIR)$(LIBDIR)" != "/usr/lib" -a "$(DESTDIR)$(LIBDIR)" != "/lib" ] ; then \
+	@if [ -z "$(DESTDIR)" -a "$(LIBDIR)" != "/usr/lib" -a "$(LIBDIR)" != "/lib" ] ; then \
 	   if [ -e "/usr/lib/$(LIBSHSONAME)" -o -e "/usr/lib/$(LIBSHBASENAME)" ] ; then \
 	     echo '******************************************************************************' ; \
 	     echo 'Warning: You have at least one $(LIBSHBASENAME) library file in /usr/lib' ; \
-	     echo '         and the new library files are in $(DESTDIR)$(LIBDIR)!' ; \
+	     echo '         and the new library files are in $(LIBDIR)!' ; \
 	     echo '         These old files must be removed or the userspace tools may fail' ; \
 	     echo '         or have unpredictable results!' ; \
 	     echo '         Run the following command: rm /usr/lib/$(LIBSHBASENAME)*' ; \
 	     echo '******************************************************************************' ; \
 	   fi ; \
-	   grep -q '^$(DESTDIR)$(LIBDIR)$$' /etc/ld.so.conf || \
-	   grep -q '^$(DESTDIR)$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
-	   grep -q '[[:space:]:,]$(DESTDIR)$(LIBDIR)$$' /etc/ld.so.conf || \
-	   grep -q '[[:space:]:,]$(DESTDIR)$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
+	   grep -q '^$(LIBDIR)$$' /etc/ld.so.conf || \
+	   grep -q '^$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
+	   grep -q '[[:space:]:,]$(LIBDIR)$$' /etc/ld.so.conf || \
+	   grep -q '[[:space:]:,]$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
 		( echo '******************************************************************************' ; \
-		  echo 'Warning: Library directory $(DESTDIR)$(LIBDIR) is not in /etc/ld.so.conf!' ; \
+		  echo 'Warning: Library directory $(LIBDIR) is not in /etc/ld.so.conf!' ; \
 		  echo '         Add it and run /sbin/ldconfig for the userspace tools to work.' ; \
 		  echo '******************************************************************************' ) ; \
 	fi
