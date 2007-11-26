@@ -1,6 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN
+  sensors-detect: Drop PCA9540 detection
+
 3.0.0 (2007-11-24)
   Makefile: Fix MODULE_DIR usage in etc
             Fix build on PPC
