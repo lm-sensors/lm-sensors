@@ -20,6 +20,7 @@ SVN-HEAD
                           Mention the f75375s driver
                           Add SMSC LPC47B367-NC detection (no sensors)
                           Reduce w83781d/lm78 I2C address probing range
+                          Drop PCA9540 detection
 
 2.10.5 (20071024)
   File i2c-dev.h: Rename I2C_FUNC_SMBUS_HWPEC_CALC to I2C_FUNC_SMBUS_PEC

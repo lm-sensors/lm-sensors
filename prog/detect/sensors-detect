@@ -1462,12 +1462,6 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { fintek_detect(7, @_); },
      },
      {
-       name => "Philips Semiconductors PCA9540",
-       driver => "pca9540",
-       i2c_addrs => [0x70],
-       i2c_detect => sub { pca9540_detect(@_); },
-     },
-     {
        name => "Smart Battery",
        driver => "smartbatt",
        i2c_addrs => [0x0b],
@@ -5211,24 +5205,6 @@ sub fintek_detect
   }
 
   return 7;
-}
-
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 1 if detected
-# Detection is rather difficult, since the PCA9540 has a single register.
-# Fortunately, no other device is known to live at this address.
-sub pca9540_detect
-{
-	my ($file, $addr) = @_;
-	my $reg = i2c_smbus_read_byte($file);
-
-	return if ($reg & 0xfa);
-	return if $reg != i2c_smbus_read_byte($file);
-	return if $reg != i2c_smbus_read_byte($file);
-	return if $reg != i2c_smbus_read_byte($file);
-
-	return 1;
 }
 
 # This checks for non-FFFF values for temperature, voltage, and current.
