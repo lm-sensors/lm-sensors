@@ -5448,7 +5448,9 @@ sub coretemp_detect
 		if ($probecpu->{'vendor_id'} eq 'GenuineIntel' && 
 				$probecpu->{'cpu family'} == 6 &&
 				($probecpu->{'model'} == 14 ||
-				 $probecpu->{'model'} == 15)) {
+				 $probecpu->{'model'} == 15 ||
+				 $probecpu->{'model'} == 16 ||
+				 $probecpu->{'model'} == 17)) {
 			return 9;
 		}
 	}
