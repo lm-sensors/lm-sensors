@@ -16,6 +16,7 @@ SVN-HEAD
   Program pwmconfig: Better diagnostics in pwmdisable
                      Give the fans some time to spin up
   Program sensors: Hide spurious errors on missing f71872f voltage inputs
+                   Hide spurious errors on missing adm1026 inputs
   Program sensors-detect: Add Texas Instruments TMP401 detection
                           Mention the f75375s driver
                           Add SMSC LPC47B367-NC detection (no sensors)

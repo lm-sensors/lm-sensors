@@ -4849,7 +4849,8 @@ void print_adm1026(const sensors_chip_name *name)
         printf("%+6.2f V  (min = %+6.2f V, max = %+6.2f V)   %s\n",
                cur,min,max,(alarms&adm1026_alarms_in[i])?"ALARM":"");
       }
-    } else {
+    } else if (i != 8 && i != 9) { /* in8 and in9 are mutually exclusive
+                                      with temp3 */
       printf("ERROR: Can't get IN%d data!\n",i);
     }
     free(label);
@@ -4897,7 +4898,7 @@ void print_adm1026(const sensors_chip_name *name)
         print_temp_info( cur, max, min, MINMAX, 0, 0);
 	puts( (alarms&adm1026_alarms_temp[i])?"   ALARM":"" );
       }
-    } else {
+    } else if (i != 2) { /* temp3 is mutually exclusive with in8+in9 */
       printf("ERROR: Can't get TEMP%d data!\n",i+1);
     }
     free(label);
