@@ -2041,7 +2041,6 @@ void emc6d100_in(struct i2c_client *client, int operation, int ctl_name,
 static int __init sm_lm85_init(void)
 {
 	printk("lm85: Version %s (%s)\n", LM_VERSION, LM_DATE);
-	printk("lm85: See http://www.penguincomputing.com/lm_sensors for more info.\n" );
 	return i2c_add_driver(&lm85_driver);
 }
 
