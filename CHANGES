@@ -5,6 +5,7 @@ SVN-HEAD
   Library: Fix fschrc and fschmd support
            Fix sysfs presence detection
   Makefile: Revert changeset 4738, fix bug #2187 differently
+  Module adm1026: Various cleanups
   Module eeprom: Hide Sony Vaio serial numbers to regular users (2.6 backport)
                  Drop useless debugging log messages
                  Recognize VGN as a valid Sony Vaio name prefix (2.6 backport)

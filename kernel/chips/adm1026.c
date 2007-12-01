@@ -33,7 +33,7 @@
                  Most (all?) drivers assume two pulses per rev fans
                  and the old scaling was producing double the RPM's
                  Thanks to Jerome Hsiao @ Arima for pointing this out.
-	2004-01-27   Remove use of temporary ID.
+    2004-01-27   Remove use of temporary ID.
                  Define addresses as a range.
 */
 
@@ -296,7 +296,6 @@ static int adm1026_scaling[] = {  /* .001 Volts */
 struct adm1026_data {
 	struct i2c_client client;
 	int sysctl_id;
-	enum chips type;
 
 	struct semaphore update_lock;
 	int valid;		/* !=0 if following fields are valid */
@@ -469,7 +468,6 @@ static int adm1026_id = 0;
 #define ADM1026_ALARM_IN8     (1L << 26)
 #define ADM1026_ALARM_THERM   (1L << 27)
 #define ADM1026_ALARM_AFC_FAN (1L << 28)
-#define ADM1026_ALARM_UNUSED  (1L << 29)
 #define ADM1026_ALARM_CI      (1L << 30)
 /* -- SENSORS SYSCTL END -- */
 
@@ -725,7 +723,6 @@ static int adm1026_detect(struct i2c_adapter *adapter, int address,
 	    );
 
 	/* Housekeeping values */
-	data->type = kind;
 	data->valid = 0;
 
 	/* Set the VRM version */
@@ -855,7 +852,6 @@ static void adm1026_init_client(struct i2c_client *client)
 			    client->id );
 	}
 
-	value = data->config3 ;
 	if( data->config3 & CFG3_GPIO16_ENABLE ) {
 		printk("adm1026(%d): GPIO16 enabled.  THERM pin disabled.\n",
 			    client->id );
@@ -1721,7 +1717,6 @@ void adm1026_gpio_mask(struct i2c_client *client, int operation,
 static int __init sm_adm1026_init(void)
 {
 	printk("adm1026: Version %s (%s)\n", LM_VERSION, LM_DATE);
-	printk("adm1026: See http://www.penguincomputing.com/lm_sensors for more info.\n" );
 	return i2c_add_driver(&adm1026_driver);
 }
 
