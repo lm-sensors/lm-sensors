@@ -299,7 +299,7 @@ static const struct match matches[] = {
 	If that fails, returns old /proc feature name and magnitude.
 
 	References: doc/developers/proc in the lm_sensors package;
-	            Documentation/i2c/sysfs_interface in the kernel
+	            Documentation/hwmon/sysfs-interface in the kernel
 */
 static int getsysname(const sensors_chip_feature *feature, char *sysname,
 	int *sysmag, char *altsysname)
