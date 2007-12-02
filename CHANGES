@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN
+  documentation: Update the application writing guidelines
   Makefile: No warnings about ld configuration for staged installations
   sensors-detect: Drop PCA9540 detection
 
