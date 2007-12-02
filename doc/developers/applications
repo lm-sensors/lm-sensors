@@ -44,7 +44,7 @@ Details:
    and in doc/dev-interface in the i2c package or
    Documentation/i2c/dev-interface in the linux kernel sources.
    Note that these used to be defined in <linux/i2c-dev.h> in the kernel
-   source tree. However, userspace applications are not supposed to	
+   source tree. However, userspace applications are not supposed to
    include kernel headers, so the inline functions were removed from
    the kernel file in recent kernels. Use the header file in this package
    instead.
@@ -94,11 +94,11 @@ Details:
 
 3B. sysfs access (2.6 kernels)
 ------------------------------
-   Chip drivers using the i2c-sensor module create subdirectories in
+   Chip drivers using the hwmon module create subdirectories in
    the sysfs filesystem (usually /sys) which can be accessed
    directly by applications.
    Naming and content standards for the entries in these subdirectories
-   is documented in the file Documentation/i2c/sysfs-interface in the
+   is documented in the file Documentation/hwmon/sysfs-interface in the
    2.6 kernel source tree. Note that these standards may not be
    strictly followed.
 
@@ -108,7 +108,7 @@ Details:
    sysfs access provides a method to read and write sensor values
    for any driver, including ISA chip drivers.
 
-   This method may also works well for shell and perl scripts
+   This method may also work well for shell and perl scripts
    written to access a specific device. Note that sysfs is
    standard in 2.6 kernels.
 
@@ -119,7 +119,7 @@ Details:
    of the adjustments can be quite complex. If you need adjustment
    facilities, consider the libsensors library, below.
 
-   For an examples of a program using /sys accesses, see gkrellm.
+   For an example of a program using /sys accesses, see gkrellm.
    See also lib/proc.c and prog/dump/i2cbusses.c for examples.
    The sysfsutils package may also be helpful.
    Also search freshmeat for sensors and sysfs applications.
@@ -148,7 +148,7 @@ Details:
    does not fall under the GPL. This may or may not be changed in the future.
    Contact us if you wish to discuss your application.
 
-   For an examples of a program using libsensors accesses, see
+   For an example of a program using libsensors accesses, see
    prog/sensors/sensors. Also search freshmeat for sensors applications.
 
 5. sensors program
