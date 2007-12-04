@@ -110,6 +110,21 @@ function print_devices()
 }
 
 # $1 = pwm file name
+function is_pwm_auto()
+{
+	if [ -n "$SYSFS" ]
+	then
+		ENABLE=${1}_enable
+		if [ -f $ENABLE -a "`cat $ENABLE`" -gt 1 ]
+		then
+			return 0
+		fi
+	fi
+
+	return 1
+}
+
+# $1 = pwm file name
 function pwmdisable()
 {
 	if [ -n "$SYSFS" ]
@@ -192,6 +207,20 @@ do
 	echo "   $i"
 	if [ -w $i ]
 	then
+		# First check if PWM output is in automatic mode
+		if is_pwm_auto $i
+		then
+			echo "$i is currently setup for automatic speed control."
+			echo 'In general, automatic mode is preferred over manual mode, as'
+			echo 'it is more efficient and it reacts faster. Are you sure that'
+			echo -n 'you want to setup this output for manual control? (n) '
+			read X
+			if [ "$X" = "" -o "$X" != "y" -a "$X" != "Y" ]
+			then
+				continue
+			fi
+		fi
+
 		pwmdisable $i
 		if [ $? -ne 0 ]
 		then
