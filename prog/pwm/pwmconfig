@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# pwmconfig v0.8
+# pwmconfig v0.9
 # Tests the pwm outputs of sensors and configures fancontrol
 #
 #    Warning!!! This program will stop your fans, one at a time,
@@ -123,7 +123,7 @@ function pwmdisable()
 		fi
 
 		# Try pwmN_enable=0
-		echo 0 > $ENABLE 2> /dev/null
+		echo 0 2>/dev/null > $ENABLE
 		if [ "`cat $ENABLE`" -eq 0 ]
 		then
 			# Success
@@ -131,7 +131,7 @@ function pwmdisable()
 		fi
 
 		# It didn't work, try pwmN_enable=1 pwmN=255
-		echo 1 > $ENABLE 2> /dev/null
+		echo 1 2>/dev/null > $ENABLE
 		if [ "`cat $ENABLE`" -ne 1 ]
 		then
 			echo "$ENABLE stuck to `cat $ENABLE`" >&2
@@ -161,7 +161,7 @@ function pwmenable()
 		ENABLE=${1}_enable
 		if [ -w $ENABLE ]
 		then
-			echo 1 > $ENABLE 2> /dev/null
+			echo 1 2>/dev/null > $ENABLE
 			if [ $? -ne 0 ]
 			then
 				return 1
@@ -195,14 +195,23 @@ do
 		pwmdisable $i
 		if [ $? -ne 0 ]
 		then
-			echo "Failed to set $i to full speed" >&2
-			echo "Something's wrong, check your fans!" >&2
-			exit 1
+			echo "Manual control mode not supported, skipping $i."
+		elif [ "$GOODPWM" = "" ]
+		then
+			GOODPWM=$i
+		else
+			GOODPWM="$GOODPWM $i"
 		fi
 	else
 		NOTROOT=1
 	fi
 done
+
+if [ "$GOODPWM" = "" ]
+then
+	echo 'There are no usable PWM outputs.'
+	exit 1
+fi
 
 echo
 echo "Giving the fans some time to reach full speed..."
@@ -343,7 +352,7 @@ function pwmdetail()
 	echo
 }
 
-for i in $PWM
+for i in $GOODPWM
 do
 	echo Testing pwm control $i ...
 	pwmenable $i

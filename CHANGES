@@ -4,6 +4,8 @@ lm-sensors CHANGES file
 SVN
   documentation: Update the application writing guidelines
   Makefile: No warnings about ld configuration for staged installations
+  pwmconfig: Really hide errors on sysfs writes
+             Deal gracefully with read-only pwm_enable files
   sensors-detect: Drop PCA9540 detection
 
 3.0.0 (2007-11-24)
