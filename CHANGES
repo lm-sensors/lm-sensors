@@ -16,6 +16,8 @@ SVN-HEAD
                           Fix the timestamp decoding
   Program pwmconfig: Better diagnostics in pwmdisable
                      Give the fans some time to spin up
+                     Really hide errors on sysfs writes
+                     Deal gracefully with read-only pwm_enable files
   Program sensors: Hide spurious errors on missing f71872f voltage inputs
                    Hide spurious errors on missing adm1026 inputs
   Program sensors-detect: Add Texas Instruments TMP401 detection
