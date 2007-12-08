@@ -1692,12 +1692,12 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	logdev => 0x0f,
       },
       {
-	name => "Nat. Semi. PC87371 Super IO",
+	name => "Nat. Semi. PC87317 Super IO",
 	driver => "not-a-sensor",
 	devid => 0xd0,
       },
       {
-	name => "Nat. Semi. PC97371 Super IO",
+	name => "Nat. Semi. PC97317 Super IO",
 	driver => "not-a-sensor",
 	devid => 0xdf,
       },
