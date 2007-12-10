@@ -547,6 +547,46 @@ static const ChipDescriptor lm80_chip = {
   lm80_names, lm80_features, SENSORS_LM80_ALARMS, 0
 };
 
+/** LM85 **/
+
+static const char *lm85_names[] = {
+  SENSORS_LM85_PREFIX, SENSORS_LM85B_PREFIX, SENSORS_LM85C_PREFIX,
+  SENSORS_ADM1027_PREFIX, SENSORS_ADT7463_PREFIX,
+  SENSORS_EMC6D100_PREFIX, SENSORS_EMC6D102_PREFIX, NULL
+};
+
+static const FeatureDescriptor lm85_features[] = {
+  { fmtVolts_2, rrdF2, DataType_voltage, LM85_ALARM_IN0, 0,
+    { SENSORS_LM85_IN0, SENSORS_LM85_IN0_MIN, SENSORS_LM85_IN0_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM85_ALARM_IN1, 0,
+    { SENSORS_LM85_IN1, SENSORS_LM85_IN1_MIN, SENSORS_LM85_IN1_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM85_ALARM_IN2, 0,
+    { SENSORS_LM85_IN2, SENSORS_LM85_IN2_MIN, SENSORS_LM85_IN2_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM85_ALARM_IN3, 0,
+    { SENSORS_LM85_IN3, SENSORS_LM85_IN3_MIN, SENSORS_LM85_IN3_MAX, -1 } },
+  { fmtVolts_2, rrdF2, DataType_voltage, LM85_ALARM_IN4, 0,
+    { SENSORS_LM85_IN4, SENSORS_LM85_IN4_MIN, SENSORS_LM85_IN4_MAX, -1 } },
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, LM85_ALARM_FAN1, 0,
+    { SENSORS_LM85_FAN1, SENSORS_LM85_FAN1_MIN, -1 } },
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, LM85_ALARM_FAN2, 0,
+    { SENSORS_LM85_FAN2, SENSORS_LM85_FAN2_MIN, -1 } },
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, LM85_ALARM_FAN3, 0,
+    { SENSORS_LM85_FAN3, SENSORS_LM85_FAN3_MIN, -1 } },
+  { fmtFans_nodiv_0, rrdF0, DataType_rpm, LM85_ALARM_FAN4, 0,
+    { SENSORS_LM85_FAN4, SENSORS_LM85_FAN4_MIN, -1 } },
+  { fmtTemps_minmax_0, rrdF1, DataType_temperature, LM85_ALARM_TEMP1, 0,
+    { SENSORS_LM85_TEMP1, SENSORS_LM85_TEMP1_MIN, SENSORS_LM85_TEMP1_MAX, -1 } },
+  { fmtTemps_minmax_0, rrdF1, DataType_temperature, LM85_ALARM_TEMP2, 0,
+    { SENSORS_LM85_TEMP2, SENSORS_LM85_TEMP2_MIN, SENSORS_LM85_TEMP2_MAX, -1 } },
+  { fmtTemps_minmax_0, rrdF1, DataType_temperature, LM85_ALARM_TEMP3, 0,
+    { SENSORS_LM85_TEMP3, SENSORS_LM85_TEMP3_MIN, SENSORS_LM85_TEMP3_MAX, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor lm85_chip = {
+  lm85_names, lm85_features, SENSORS_LM85_ALARMS, 0
+};
+
 /** LM87 **/
 
 static const char *lm87_names[] = {
@@ -1407,6 +1447,7 @@ const ChipDescriptor * const knownChips[] = {
   &lm75_chip,
   &lm78_chip,
   &lm80_chip,
+  &lm85_chip,
   &lm87_chip,
   &max1617_chip,
   &maxilife_chip,

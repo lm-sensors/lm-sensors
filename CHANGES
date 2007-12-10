@@ -19,6 +19,7 @@ SVN-HEAD
                      Really hide errors on sysfs writes
                      Deal gracefully with read-only pwm_enable files
                      Warn about outputs found in automatic mode
+  Program sensord: Add lm85 support
   Program sensors: Hide spurious errors on missing f71872f voltage inputs
                    Hide spurious errors on missing adm1026 inputs
   Program sensors-detect: Add Texas Instruments TMP401 detection
