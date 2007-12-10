@@ -3,6 +3,7 @@ lm-sensors CHANGES file
 
 SVN
   documentation: Update the application writing guidelines
+  libsensors: No longer depend on libsysfs
   Makefile: No warnings about ld configuration for staged installations
   pwmconfig: Really hide errors on sysfs writes
              Deal gracefully with read-only pwm_enable files

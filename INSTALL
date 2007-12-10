@@ -14,11 +14,9 @@ Build-time dependencies:
 * gcc
 * bison
 * flex
-* libsysfs header files (from sysfsutils-devel)
 * rrd header files (optional, for sensord)
 
 Run-time dependencies:
-* libsysfs (from sysfsutils)
 * perl (for sensors-detect)
 * rrd (optional, for sensord)
 * proper kernel configuration (see below)
