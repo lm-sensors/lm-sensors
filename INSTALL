@@ -18,7 +18,7 @@ Build-time dependencies:
 
 Run-time dependencies:
 * perl (for sensors-detect)
-* rrd (optional, for sensord)
+* rrdtool >= 1.2.1 (optional, for sensord)
 * proper kernel configuration (see below)
 
 

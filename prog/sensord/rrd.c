@@ -40,7 +40,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <getopt.h>
 #include <rrd.h>
 
 #include "sensord.h"
@@ -251,10 +250,6 @@ rrdInit
         argc += num;
         argv[argc ++] = rraBuff;
         argv[argc] = NULL;
-        optind = 1;
-        opterr = 0;
-        optopt = '?';
-        optarg = NULL;
         if ((ret = rrd_create (argc, (char **) /* WEAK */ argv))) {
           sensorLog (LOG_ERR, "Error creating RRD file: %s: %s", rrdFile, rrd_get_error ());
         }
@@ -417,10 +412,6 @@ rrdUpdate
     const char *argv[] = {
       "sensord", rrdFile, rrdBuff, NULL
     };
-    optind = 1;
-    opterr = 0;
-    optopt = '?';
-    optarg = NULL;
     if ((ret = rrd_update (3, (char **) /* WEAK */ argv))) {
       sensorLog (LOG_ERR, "Error updating RRD file: %s: %s", rrdFile, rrd_get_error ());
     }
