@@ -44,7 +44,6 @@
 #include <rrd.h>
 
 #include "sensord.h"
-#include "lib/error.h"
 
 #define DO_READ 0
 #define DO_SCAN 1
