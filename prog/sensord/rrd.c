@@ -294,12 +294,36 @@ rrdCGI_DEF
   return 0;
 }
 
+/* Compute an arbitrary color based on the sensor label. This is preferred
+   over a random value because this guarantees that daily and weekly charts
+   will use the same colors. */
+static int
+rrdCGI_color
+(const char *label) {
+  unsigned long color = 0, brightness;
+  const char *c;
+
+  for (c = label; *c; c++) {
+    color = (color << 6) + (color >> (*c & 7));
+    color ^= (*c) * 0x401;
+  }
+  color &= 0xffffff;
+  /* Adjust very light colors */
+  brightness = (color & 0xff) + ((color >> 8) & 0xff) + (color >> 16);
+  if (brightness > 672)
+    color &= 0x7f7f7f;
+  /* Adjust very dark colors */
+  else if (brightness < 96)
+    color |= 0x808080;
+  return color;
+}
+
 static int
 rrdCGI_LINE
 (void *_data, const char *rawLabel, const char *label, const FeatureDescriptor *feature) {
   struct gr *data = (struct gr *) _data;
   if (!feature || (feature->rrd && (feature->type == data->type)))
-    printf ("\n\tLINE2:%s#%.6x:\"%s\"", rawLabel, (int) random () & 0xffffff, label);
+    printf ("\n\tLINE2:%s#%.6x:\"%s\"", rawLabel, rrdCGI_color(label), label);
   return 0;
 }
 
