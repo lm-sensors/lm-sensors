@@ -313,8 +313,10 @@ int main(int argc, char *argv[])
 				for (res = 0; res < 256; res += i) {
 					i = i2c_smbus_read_i2c_block_data(file,
 						res, 32, cblock + res);
-					if (i <= 0)
+					if (i <= 0) {
+						res = i;
 						break;
+					}
 				}
 			}
 			if (res <= 0) {

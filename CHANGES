@@ -14,6 +14,7 @@ SVN-HEAD
   Program decode-vaio.pl: Private data might not be readable by non-root users
                           Print the asset tag
                           Fix the timestamp decoding
+  Program i2cdump: Fix I2C block mode error code
   Program pwmconfig: Better diagnostics in pwmdisable
                      Give the fans some time to spin up
                      Really hide errors on sysfs writes
