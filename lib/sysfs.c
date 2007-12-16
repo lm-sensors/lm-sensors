@@ -73,7 +73,7 @@ static char *sysfs_read_attr(const char *device, const char *attr)
  * local errors, or a negative error value if any call fails.
  */
 static int sysfs_foreach_classdev(const char *class_name,
-				   int (*func)(char *, const char*))
+				   int (*func)(const char *, const char *))
 {
 	char path[NAME_MAX];
 	int path_off, ret;
@@ -105,7 +105,7 @@ static int sysfs_foreach_classdev(const char *class_name,
  * local errors, or a negative error value if any call fails.
  */
 static int sysfs_foreach_busdev(const char *bus_type,
-				 int (*func)(char *, const char*))
+				 int (*func)(const char *, const char *))
 {
 	char path[NAME_MAX];
 	int path_off, ret;
@@ -455,7 +455,7 @@ int sensors_init_sysfs(void)
 }
 
 /* returns: 0 if successful, !0 otherwise */
-static int sensors_read_one_sysfs_chip(char *dev_path, const char *dev_name)
+static int sensors_read_one_sysfs_chip(const char *dev_path, const char *dev_name)
 {
 	int domain, bus, slot, fn;
 	int err = -SENSORS_ERR_KERNEL;
@@ -539,20 +539,20 @@ static int sensors_read_sysfs_chips_compat(void)
 	return 0;
 }
 
-static int sensors_add_hwmon_device(char *path, const char *classdev)
+static int sensors_add_hwmon_device(const char *path, const char *classdev)
 {
+	char linkpath[NAME_MAX];
 	char device[NAME_MAX];
-	int path_off = strlen(path);
 	int dev_len;
 	(void)classdev; /* hide warning */
 
-	snprintf(path + path_off, NAME_MAX - path_off, "/device");
-	dev_len = readlink(path, device, NAME_MAX - 1);
+	snprintf(linkpath, NAME_MAX, "%s/device", path);
+	dev_len = readlink(linkpath, device, NAME_MAX - 1);
 	if (dev_len < 0)
 		return -SENSORS_ERR_KERNEL;
 	device[dev_len] = '\0';
 
-	return sensors_read_one_sysfs_chip(path, strrchr(device, '/') + 1);
+	return sensors_read_one_sysfs_chip(linkpath, strrchr(device, '/') + 1);
 }
 
 /* returns 0 if successful, !0 otherwise */
@@ -572,7 +572,7 @@ int sensors_read_sysfs_chips(void)
 }
 
 /* returns 0 if successful, !0 otherwise */
-static int sensors_add_i2c_bus(char *path, const char *classdev)
+static int sensors_add_i2c_bus(const char *path, const char *classdev)
 {
 	sensors_bus entry;
 
