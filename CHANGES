@@ -11,6 +11,7 @@ SVN
   sensord: Fix rrd support (#2276)
            Use the same colors for daily and weekly charts
            Drop workaround needed by old versions of rrdtool
+  sensors.conf.eg: Fix voltage value references (g520sm, lm80, pc87366)
   sensors-detect: Drop PCA9540 detection
 
 3.0.0 (2007-11-24)
