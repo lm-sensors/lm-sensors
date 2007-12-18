@@ -431,7 +431,7 @@ int sensors_eval_expr(const sensors_chip_features *chip_features,
 	if (expr->kind == sensors_kind_var) {
 		if (!(subfeature = sensors_lookup_subfeature_name(chip_features,
 							    expr->data.var)))
-			return SENSORS_ERR_NO_ENTRY;
+			return -SENSORS_ERR_NO_ENTRY;
 		if (!(res = sensors_get_value(&chip_features->chip,
 					      subfeature->number, result)))
 			return res;
@@ -495,7 +495,7 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 			if (!subfeature) {
 				sensors_parse_error("Unknown feature name",
 						    chip->sets[i].lineno);
-				err = SENSORS_ERR_NO_ENTRY;
+				err = -SENSORS_ERR_NO_ENTRY;
 				continue;
 			}
 
