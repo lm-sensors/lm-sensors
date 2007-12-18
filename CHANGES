@@ -13,6 +13,7 @@ SVN
            Drop workaround needed by old versions of rrdtool
   sensors.conf.eg: Fix voltage value references (g520sm, lm80, pc87366)
   sensors-detect: Drop PCA9540 detection
+                  Improve sysconfig and modprobe.d integration
 
 3.0.0 (2007-11-24)
   Makefile: Fix MODULE_DIR usage in etc
