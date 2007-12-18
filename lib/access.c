@@ -29,6 +29,10 @@
 #include "general.h"
 #include "sysfs.h"
 
+static int sensors_eval_expr(sensors_chip_name chipname, 
+                             const sensors_expr *expr,
+                             double val, double *result);
+
 static int sensors_do_this_chip_sets(sensors_chip_name name);
 
 /* Compare two chips name descriptions, to see whether they could match.
@@ -373,6 +377,7 @@ const sensors_feature_data *sensors_get_all_features(sensors_chip_name name,
 	return NULL;
 }
 
+/* Evaluate an expression */
 int sensors_eval_expr(sensors_chip_name chipname, const sensors_expr * expr,
 		      double val, double *result)
 {

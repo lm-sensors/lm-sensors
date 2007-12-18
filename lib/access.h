@@ -54,10 +54,4 @@ extern int sensors_substitute_busses(void);
    error.h on failure. */
 extern int sensors_parse_i2cbus_name(const char *name, int *res);
 
-/* Evaluate an expression */
-extern int sensors_eval_expr(sensors_chip_name chipname, 
-                             const sensors_expr *expr,
-                             double val, double *result);
-
-
 #endif /* def LIB_SENSORS_ACCESS_H */
