@@ -5924,16 +5924,20 @@ EOT
           "for initialization at boot time.\n"
       unless -f "/etc/init.d/lm_sensors";
 
-    print "You should now start the lm_sensors service to load the required\n".
-          "kernel modules.\n\n";
+    if (-x "/sbin/insserv" && -f "/etc/init.d/lm_sensors") {
+      system("/sbin/insserv", "/etc/init.d/lm_sensors");
+    } else {
+      print "You should now start the lm_sensors service to load the required\n".
+            "kernel modules.\n\n";
+    }
   } else {
-    print "To load everything that is needed, add this to e.g. /etc/rc.d/rc.local:\n\n";
+    print "To load everything that is needed, add this to one of the system\n".
+          "initialization scripts (e.g. /etc/rc.d/rc.local):\n\n";
     print "#----cut here----\n".
           $modprobes.
-          "# sleep 2 # optional\n".
           (-e '/usr/bin/sensors' ?
-            "/usr/bin/sensors -s # recommended\n" :
-            "/usr/local/bin/sensors -s # recommended\n") .
+            "/usr/bin/sensors -s\n" :
+            "/usr/local/bin/sensors -s\n") .
           "#----cut here----\n\n";
 
     print "If you have some drivers built into your kernel, the list above will\n".
