@@ -31,6 +31,7 @@ SVN-HEAD
                           Add Intel Celeron 4xx and Penryn (CPU on 45nm)
                            detection
                           Improve sysconfig and modprobe.d integration
+  Program unhide_ICH_SMBus: Add support for the 82801AA (ICH)
 
 2.10.5 (20071024)
   File i2c-dev.h: Rename I2C_FUNC_SMBUS_HWPEC_CALC to I2C_FUNC_SMBUS_PEC
