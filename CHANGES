@@ -14,6 +14,7 @@ SVN
   sensors.conf.eg: Fix voltage value references (g520sm, lm80, pc87366)
   sensors-detect: Drop PCA9540 detection
                   Improve sysconfig and modprobe.d integration
+  unhide_ICH_SMBus: Add support for the 82801AA (ICH)
 
 3.0.0 (2007-11-24)
   Makefile: Fix MODULE_DIR usage in etc

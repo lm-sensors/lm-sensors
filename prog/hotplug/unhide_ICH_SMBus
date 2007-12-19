@@ -10,6 +10,7 @@
 #
 # Supports the following Intel ICH chipsets:
 #              PCI ID
+#   ICH       8086:2410
 #   ICH2      8086:2440
 #   ICH2-M    8086:244C
 #   ICH3      8086:2480
@@ -33,10 +34,10 @@ if [ -n "$smbus" ] ; then
 	exit
 fi
 
-intel=`lspci -n -s $device.0 | grep -i '8086:24[48CD][0C]'`
+intel=`lspci -n -s $device.0 | grep -i '8086:24[148CD][0C]'`
 if [ -z "$intel" ] ; then
 	echo "Not for your chipset - Intel (ICH) only"
-	echo "Supported: ICH2, ICH2-M, ICH3, ICH3-M, ICH4, ICH4-M, ICH5"
+	echo "Supported: ICH, ICH2, ICH2-M, ICH3, ICH3-M, ICH4, ICH4-M, ICH5"
 	exit 255;
 fi
 modprobe fakephp &> /dev/null
