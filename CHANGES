@@ -4,6 +4,7 @@ lm_sensors CHANGES file
 SVN-HEAD
   Library: Fix fschrc and fschmd support
            Fix sysfs presence detection
+           Don't choke on unrecognized devices (#2087)
   Makefile: Revert changeset 4738, fix bug #2187 differently
   Module adm1026: Various cleanups
   Module eeprom: Hide Sony Vaio serial numbers to regular users (2.6 backport)

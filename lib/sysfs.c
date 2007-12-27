@@ -60,6 +60,7 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 	struct sysfs_attribute *attr, *bus_attr;
 	char bus_path[SYSFS_PATH_MAX];
 	sensors_proc_chips_entry entry;
+	int err = -SENSORS_ERR_PARSE;
 
 	/* ignore any device without name attribute */
 	if (!(attr = sysfs_get_device_attr(dev, "name")))
@@ -112,8 +113,11 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 		/* PCI */
 		entry.name.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
 		entry.name.bus = SENSORS_CHIP_NAME_BUS_PCI;
-	} else
+	} else {
+		/* Ignore unknown devices */
+		err = 0;
 		goto exit_free;
+	}
 
 	sensors_add_proc_chips(&entry);
 
@@ -122,7 +126,7 @@ static int sensors_read_one_sysfs_chip(struct sysfs_device *dev)
 exit_free:
 	free(entry.name.prefix);
 	free(entry.name.busname);
-	return -SENSORS_ERR_PARSE;
+	return err;
 }
 
 /* returns 0 if successful, !0 otherwise */
