@@ -1913,6 +1913,12 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	driver => "not-a-sensor",
 	devid => 0x79,
       },
+      {
+	name => "SMSC SCH5514D-NS Super IO",
+	# No datasheet
+	driver => "not-a-sensor",
+	devid => 0x83,
+      },
     ],
     # Non-standard SMSC detection callback and chip list. These chips differ
     # from the standard ones listed above in that the device ID register 

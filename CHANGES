@@ -32,6 +32,7 @@ SVN-HEAD
                           Add Intel Celeron 4xx and Penryn (CPU on 45nm)
                            detection
                           Improve sysconfig and modprobe.d integration
+                          Add SMSC SCH5514D-NS detection (no sensors)
   Program unhide_ICH_SMBus: Add support for the 82801AA (ICH)
 
 2.10.5 (20071024)
