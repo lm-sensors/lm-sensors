@@ -105,7 +105,8 @@ static int read_config_file(const char *config_file_name)
 	err = sensors_init(config_file);
 	if (err) {
 		fprintf(stderr, "sensors_init: %s\n", sensors_strerror(err));
-		fclose(config_file);
+		if (config_file)
+			fclose(config_file);
 		return 1;
 	}
 
