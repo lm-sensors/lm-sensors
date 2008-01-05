@@ -461,6 +461,9 @@ static int sensors_read_one_sysfs_chip(const char *dev_path, const char *dev_nam
 	int err = -SENSORS_ERR_KERNEL;
 	char *bus_attr;
 	char bus_path[NAME_MAX];
+	char linkpath[NAME_MAX];
+	char subsys_path[NAME_MAX], *subsys;
+	int sub_len;
 	sensors_chip_features entry;
 
 	/* ignore any device without name attribute */
@@ -471,7 +474,29 @@ static int sensors_read_one_sysfs_chip(const char *dev_path, const char *dev_nam
 	if (!entry.chip.path)
 		sensors_fatal_error(__FUNCTION__, "out of memory");
 
-	if (sscanf(dev_name, "%hd-%x", &entry.chip.bus.nr, &entry.chip.addr) == 2) {
+	/* Find bus type */
+	snprintf(linkpath, NAME_MAX, "%s/subsystem", dev_path);
+	sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
+	if (sub_len < 0 && errno == ENOENT) {
+		/* Fallback to "bus" link for kernels <= 2.6.17 */
+		snprintf(linkpath, NAME_MAX, "%s/bus", dev_path);
+		sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
+	}
+	if (sub_len < 0) {
+		/* Older kernels (<= 2.6.11) have neither the subsystem
+		   symlink nor the bus symlink */
+		if (errno == ENOENT)
+			subsys = NULL;
+		else
+			goto exit_free;
+	} else {
+		subsys_path[sub_len] = '\0';
+		subsys = strrchr(subsys_path, '/') + 1;
+	}
+
+	if ((!subsys || !strcmp(subsys, "i2c")) &&
+	    sscanf(dev_name, "%hd-%x", &entry.chip.bus.nr,
+		   &entry.chip.addr) == 2) {
 		/* find out if legacy ISA or not */
 		if (entry.chip.bus.nr == 9191) {
 			entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
@@ -491,24 +516,30 @@ static int sensors_read_one_sysfs_chip(const char *dev_path, const char *dev_nam
 				free(bus_attr);
 			}
 		}
-	} else if (sscanf(dev_name, "spi%hd.%d", &entry.chip.bus.nr,
-			  &entry.chip.addr) == 2) {
+	} else
+	if ((!subsys || !strcmp(subsys, "spi")) &&
+	    sscanf(dev_name, "spi%hd.%d", &entry.chip.bus.nr,
+		   &entry.chip.addr) == 2) {
 		/* SPI */
 		entry.chip.bus.type = SENSORS_BUS_TYPE_SPI;
-	} else if (sscanf(dev_name, "%*[a-z0-9_].%d", &entry.chip.addr) == 1) {
+	} else
+	if ((!subsys || !strcmp(subsys, "platform"))) {
 		/* must be new ISA (platform driver) */
+		if (sscanf(dev_name, "%*[a-z0-9_].%d", &entry.chip.addr) != 1)
+			entry.chip.addr = 0;
 		entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
 		entry.chip.bus.nr = 0;
-	} else if (sscanf(dev_name, "%x:%x:%x.%x", &domain, &bus, &slot, &fn) == 4) {
+	} else
+	if ((!subsys || !strcmp(subsys, "pci")) &&
+	    sscanf(dev_name, "%x:%x:%x.%x", &domain, &bus, &slot, &fn) == 4) {
 		/* PCI */
 		entry.chip.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
 		entry.chip.bus.type = SENSORS_BUS_TYPE_PCI;
 		entry.chip.bus.nr = 0;
 	} else {
-		/* platform device with no id? */
-		entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
-		entry.chip.bus.nr = 0;
-		entry.chip.addr = 0;
+		/* Ignore unknown device */
+		err = 0;
+		goto exit_free;
 	}
 
 	if (sensors_read_dynamic_chip(&entry, dev_path) < 0)
