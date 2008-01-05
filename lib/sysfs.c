@@ -454,8 +454,10 @@ int sensors_init_sysfs(void)
 	return 1;
 }
 
-/* returns: 0 if successful, !0 otherwise */
-static int sensors_read_one_sysfs_chip(const char *dev_path, const char *dev_name)
+/* returns: number of devices added (0 or 1) if successful, <0 otherwise */
+static int sensors_read_one_sysfs_chip(const char *dev_path,
+				       const char *dev_name,
+				       const char *hwmon_path)
 {
 	int domain, bus, slot, fn;
 	int err = -SENSORS_ERR_KERNEL;
@@ -467,10 +469,10 @@ static int sensors_read_one_sysfs_chip(const char *dev_path, const char *dev_nam
 	sensors_chip_features entry;
 
 	/* ignore any device without name attribute */
-	if (!(entry.chip.prefix = sysfs_read_attr(dev_path, "name")))
+	if (!(entry.chip.prefix = sysfs_read_attr(hwmon_path, "name")))
 		return 0;
 
-	entry.chip.path = strdup(dev_path);
+	entry.chip.path = strdup(hwmon_path);
 	if (!entry.chip.path)
 		sensors_fatal_error(__FUNCTION__, "out of memory");
 
@@ -542,7 +544,7 @@ static int sensors_read_one_sysfs_chip(const char *dev_path, const char *dev_nam
 		goto exit_free;
 	}
 
-	if (sensors_read_dynamic_chip(&entry, dev_path) < 0)
+	if (sensors_read_dynamic_chip(&entry, hwmon_path) < 0)
 		goto exit_free;
 	if (!entry.subfeature) { /* No subfeature, discard chip */
 		err = 0;
@@ -550,7 +552,7 @@ static int sensors_read_one_sysfs_chip(const char *dev_path, const char *dev_nam
 	}
 	sensors_add_proc_chips(&entry);
 
-	return 0;
+	return 1;
 
 exit_free:
 	free(entry.chip.prefix);
@@ -558,12 +560,23 @@ exit_free:
 	return err;
 }
 
+static int sensors_add_hwmon_device_compat(const char *path,
+					   const char *dev_name)
+{
+	int err;
+
+	err = sensors_read_one_sysfs_chip(path, dev_name, path);
+	if (err < 0)
+		return err;
+	return 0;
+}
+
 /* returns 0 if successful, !0 otherwise */
 static int sensors_read_sysfs_chips_compat(void)
 {
 	int ret;
 
-	ret = sysfs_foreach_busdev("i2c", sensors_read_one_sysfs_chip);
+	ret = sysfs_foreach_busdev("i2c", sensors_add_hwmon_device_compat);
 	if (ret && ret != ENOENT)
 		return -SENSORS_ERR_KERNEL;
 
@@ -573,8 +586,8 @@ static int sensors_read_sysfs_chips_compat(void)
 static int sensors_add_hwmon_device(const char *path, const char *classdev)
 {
 	char linkpath[NAME_MAX];
-	char device[NAME_MAX];
-	int dev_len;
+	char device[NAME_MAX], *device_p;
+	int dev_len, err;
 	(void)classdev; /* hide warning */
 
 	snprintf(linkpath, NAME_MAX, "%s/device", path);
@@ -582,8 +595,16 @@ static int sensors_add_hwmon_device(const char *path, const char *classdev)
 	if (dev_len < 0)
 		return -SENSORS_ERR_KERNEL;
 	device[dev_len] = '\0';
+	device_p = strrchr(device, '/') + 1;
 
-	return sensors_read_one_sysfs_chip(linkpath, strrchr(device, '/') + 1);
+	/* The attributes we want might be those of the hwmon class device,
+	   or those of the device itself. */
+	err = sensors_read_one_sysfs_chip(linkpath, device_p, path);
+	if (err == 0)
+		err = sensors_read_one_sysfs_chip(linkpath, device_p, linkpath);
+	if (err < 0)
+		return err;
+	return 0;
 }
 
 /* returns 0 if successful, !0 otherwise */
