@@ -18,6 +18,7 @@ SVN
   sensors-detect: Drop PCA9540 detection
                   Improve sysconfig and modprobe.d integration
                   Add SMSC SCH5514D-NS detection (no sensors)
+                  Lower the confidence of MAX6650/MAX6651
   unhide_ICH_SMBus: Add support for the 82801AA (ICH)
 
 3.0.0 (2007-11-24)

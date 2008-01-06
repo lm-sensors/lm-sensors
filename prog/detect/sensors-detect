@@ -5307,7 +5307,7 @@ sub w83l785ts_detect
 #        if somebody finds a way to distinguish MAX6650 and MAX6651.
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address
-# Returns: undef if not detected, 4 if detected.
+# Returns: undef if not detected, 3 if detected.
 #
 # The max6650 has no device ID register. However, a few registers have
 # spare bits, which are documented as being always zero on read. We read
@@ -5334,7 +5334,7 @@ sub max6650_detect
   return if i2c_smbus_read_byte_data($file,0x14) & 0xE0;
   return if ($conf & 0xC0) or ($conf & 0x07) > 4;
 
-  return 4;
+  return 3;
 }
 
 # $_[0]: Chip to detect. Always zero.
