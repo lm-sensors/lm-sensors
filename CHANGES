@@ -33,6 +33,7 @@ SVN-HEAD
                            detection
                           Improve sysconfig and modprobe.d integration
                           Add SMSC SCH5514D-NS detection (no sensors)
+                          Lower the confidence of MAX6650/MAX6651
   Program unhide_ICH_SMBus: Add support for the 82801AA (ICH)
 
 2.10.5 (20071024)
