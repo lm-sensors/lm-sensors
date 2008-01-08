@@ -115,9 +115,12 @@ function is_pwm_auto()
 	if [ -n "$SYSFS" ]
 	then
 		ENABLE=${1}_enable
-		if [ -f $ENABLE -a "`cat $ENABLE`" -gt 1 ]
+		if [ -f $ENABLE ]
 		then
-			return 0
+			if [ "`cat $ENABLE`" -gt 1 ]
+			then
+				return 0
+			fi
 		fi
 	fi
 
