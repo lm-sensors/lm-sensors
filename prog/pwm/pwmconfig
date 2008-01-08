@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# pwmconfig v0.9
+# pwmconfig $Revision$
 # Tests the pwm outputs of sensors and configures fancontrol
 #
 #    Warning!!! This program will stop your fans, one at a time,
