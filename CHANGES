@@ -10,6 +10,7 @@ SVN
   pwmconfig: Really hide errors on sysfs writes
              Deal gracefully with read-only pwm_enable files
              Warn about outputs found in automatic mode
+             Repeat available configuration options before prompt (#2289)
   sensord: Fix rrd support (#2276)
            Use the same colors for daily and weekly charts
            Drop workaround needed by old versions of rrdtool

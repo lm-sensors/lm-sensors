@@ -622,7 +622,11 @@ DEFMAXTEMP=60
 DEFMINSTART=150
 DEFMINSTOP=100
 
-#the section below has a high potential for usability improvements
+# "select" won't reapeat the list of options, so we enclose it in a
+# never-ending loop so that it starts over again with each iteration.
+# I admit it's not exactly nice, but I do not have a better idea to
+# keep usability at an acceptable level.
+while [ 1 ] ; do
 echo
 echo 'Select fan output to configure, or other action:'
 select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show configuration"; do
@@ -630,8 +634,9 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 	"Change INTERVAL")
 		echo
 		echo "Current interval is $INTERVAL seconds."
-		echo -n "Enter the interval at which fancontrol should update PWM values (in s):"
-		read INTERVAL ;; #check user input here
+		echo -n "Enter the interval at which fancontrol should update PWM values (in s): "
+		read INTERVAL #check user input here
+		break ;;
 	"Just quit")
 		exit ;;
 	"Save and quit")
@@ -654,7 +659,8 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			echo "  MINPWM=`echo $MINPWM |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
 			echo "  MAXPWM=`echo $MAXPWM |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
 		done
-		echo ;;
+		echo
+		break ;;
 
 	"`echo ${pwmactive} |sed -e 's/ /\n/g' | egrep \"${pwms}\"`" )
 		pwmsed=`echo ${pwms} | sed -e 's/\//\\\\\//g'` #escape / for sed
@@ -787,11 +793,12 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			fi
 			echo
 			break;
-		done ;;
+		done
+		break ;;
 	
 	*)
-		grep $pwm
-
-		echo "No such option. Enter a number." ;;
+		echo "No such option. Enter a number."
+		break ;;
 	esac
+done
 done
