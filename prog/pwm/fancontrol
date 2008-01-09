@@ -82,6 +82,13 @@ function LoadConfig {
 	let fcvcount=0
 	for fcv in $FCTEMPS
 	do
+		if ! echo $fcv | egrep -q '='
+		then
+			echo "Error in configuration file:"
+			echo "FCTEMPS value is improperly formatted"
+			exit 1
+		fi
+
 		AFCPWM[$fcvcount]=`echo $fcv |cut -d'=' -f1`
 		AFCTEMP[$fcvcount]=`echo $fcv |cut -d'=' -f2`
 		AFCFAN[$fcvcount]=`echo $FCFANS |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
