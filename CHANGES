@@ -11,6 +11,7 @@ SVN
              Deal gracefully with read-only pwm_enable files
              Warn about outputs found in automatic mode
              Repeat available configuration options before prompt (#2289)
+             Fix duplicate warning message when config file is broken
   fancontrol: Detect improperly formatted FCTEMPS value (#2293)
   sensord: Fix rrd support (#2276)
            Use the same colors for daily and weekly charts
