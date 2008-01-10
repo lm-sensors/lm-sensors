@@ -17,6 +17,7 @@ SVN-HEAD
                           Print the asset tag
                           Fix the timestamp decoding
   Program i2cdump: Fix I2C block mode error code
+  Program fancontrol: Detect improperly formatted FCTEMPS value (#2293)
   Program pwmconfig: Better diagnostics in pwmdisable
                      Give the fans some time to spin up
                      Really hide errors on sysfs writes
