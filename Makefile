@@ -33,6 +33,9 @@ WARN := 1
 DEBUG := 0
 #DEBUG := 1
 
+# Note that all the installation paths below can also be set on the make
+# command line (e.g. "make PREFIX=/usr").
+
 # If you want to install at some other place then at from which you will run
 # everything, set DESTDIR to the extra prefix.
 DESTDIR :=

@@ -7,6 +7,7 @@ SVN
               Don't guess the bus type from the device ID format (#2240)
               Add support for attributes in the hwmon class device (#2260)
   Makefile: No warnings about ld configuration for staged installations
+            Document the variable overriding mechanism (#2296)
   pwmconfig: Really hide errors on sysfs writes
              Deal gracefully with read-only pwm_enable files
              Warn about outputs found in automatic mode
