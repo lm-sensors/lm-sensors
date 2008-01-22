@@ -35,6 +35,8 @@ SVN
                   Add SMSC LPC47B367-NC detection (no sensors)
                   Reduce w83781d/lm78 I2C address probing range
                   Add Intel Celeron 4xx and Penryn (CPU on 45nm) detection 
+                  Add Fintek F71858DG detection
+                  Add Fintek F81216D detection (no sensors)
 
 3.0.0-rc3 (2007-10-28)
   libsensors: Add a default configuration file
