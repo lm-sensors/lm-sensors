@@ -626,7 +626,7 @@ DEFMAXTEMP=60
 DEFMINSTART=150
 DEFMINSTOP=100
 
-# "select" won't reapeat the list of options, so we enclose it in a
+# "select" won't repeat the list of options, so we enclose it in a
 # never-ending loop so that it starts over again with each iteration.
 # I admit it's not exactly nice, but I do not have a better idea to
 # keep usability at an acceptable level.
