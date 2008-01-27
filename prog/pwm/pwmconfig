@@ -660,8 +660,10 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			echo "  MAXTEMP=`echo $MAXTEMP |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
 			echo "  MINSTART=`echo $MINSTART |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
 			echo "  MINSTOP=`echo $MINSTOP |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
-			echo "  MINPWM=`echo $MINPWM |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
-			echo "  MAXPWM=`echo $MAXPWM |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
+			XMINP=`echo $MINPWM | sed -e "s/ /\n/g" | egrep "${pwmo}" | sed -e "s/.*=//g"`
+			[ -n "$XMINP" ] && echo "  MINPWM=$XMINP"
+			XMAXP=`echo $MAXPWM | sed -e "s/ /\n/g" | egrep "${pwmo}" | sed -e "s/.*=//g"`
+			[ -n "$XMAXP" ] && echo "  MAXPWM=$XMAXP"
 		done
 		echo
 		break ;;
