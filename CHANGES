@@ -1,7 +1,7 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN
+3.0.1 (2008-01-28)
   documentation: Update the application writing guidelines
   libsensors: No longer depend on libsysfs (#2262)
               Don't guess the bus type from the device ID format (#2240)
