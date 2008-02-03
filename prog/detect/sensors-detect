@@ -1411,7 +1411,13 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        name => "SMSC DME1737",
        driver => "dme1737",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { dme1737_detect(@_); },
+       i2c_detect => sub { dme1737_detect(1, @_); },
+     },
+     {
+       name => "SMSC SCH5027D-NW",
+       driver => "dme1737",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { dme1737_detect(2, @_); },
      },
      {
        name => "Fintek F75111R/RG/N (GPIO)",
@@ -1894,6 +1900,12 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	driver => "to-be-written",
 	devid => 0x90,
 	logdev => 0x08,
+      },
+      {
+	name => "SMSC SCH5027D-NW Super IO",
+	# Hardware monitoring features are accessed on the SMBus
+	driver => "via-smbus-only",
+	devid => 0x89,
       },
       {
 	name => "SMSC SCH5307-NS Super IO",
@@ -4342,12 +4354,21 @@ sub lm85_detect
 {
   my ($vendor,$file,$addr) = @_;
   return if (i2c_smbus_read_byte_data($file,0x3e)) != $vendor ;
-  return if (i2c_smbus_read_byte_data($file,0x3f) & 0xf0) != 0x60;
+
+  my $verstep = i2c_smbus_read_byte_data($file,0x3f);
+  return if ($verstep & 0xf0) != 0x60;
 
   if ($vendor == 0x41) # Analog Devices
   {
     return if i2c_smbus_read_byte_data($file, 0x3d) != 0x27;
     return (8);
+  }
+
+  if ($vendor == 0x5c) # SMSC
+  {
+    # Return undef if this is a SCH5027
+    return if $verstep >= 0x69 and
+        i2c_smbus_read_byte_data($file, 0xba) == 0x0f;
   }
 
   return (7);
@@ -5166,21 +5187,34 @@ sub smsc47m192_detect
   return ($addr == 0x2d ? 6 : 5);
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
+# $_[0]: Chip to detect
+#        (1 = DME1737, 2 = SCH5027)
+# $_[1]: A reference to the file descriptor to access this chip.
+# $_[2]: Address
 # Returns: undef if not detected, 5 or 6 if detected.
 # Registers used:
 #   0x3E: Manufacturer ID
 #   0x3F: Version/Stepping
 #   0x73: Read-only test register (4 test bits)
 #   0x8A: Read-only test register (7 test bits)
+#   0xBA: Read-only test register (8 test bits)
 sub dme1737_detect
 {
-  my ($file, $addr) = @_;
-  return unless i2c_smbus_read_byte_data($file, 0x3E) == 0x5c
-           and (i2c_smbus_read_byte_data($file, 0x3F) & 0xF8) == 0x88
-           and (i2c_smbus_read_byte_data($file, 0x73) & 0x0F) == 0x09
-           and (i2c_smbus_read_byte_data($file, 0x8A) & 0x7F) == 0x4D;
+  my ($chip, $file, $addr) = @_;
+  my $vendor = i2c_smbus_read_byte_data($file, 0x3E);
+  my $verstep = i2c_smbus_read_byte_data($file, 0x3F);
+
+  return unless $vendor == 0x5C; # SMSC
+
+  if ($chip == 1) { # DME1737
+      return unless ($verstep & 0xF8) == 0x88 and
+          (i2c_smbus_read_byte_data($file, 0x73) & 0x0F) == 0x09 and
+          (i2c_smbus_read_byte_data($file, 0x8A) & 0x7F) == 0x4D;
+  } elsif ($chip == 2) { # SCH5027
+      return unless $verstep >= 0x69 and $verstep <= 0x6F and
+          i2c_smbus_read_byte_data($file, 0xBA) == 0x0F;
+  }
+
   return ($addr == 0x2e ? 6 : 5);
 }
 
