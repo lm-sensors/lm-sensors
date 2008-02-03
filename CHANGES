@@ -1,6 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN
+  sensors-detect: Add SMSC SCH5027D detection
+
 3.0.1 (2008-01-28)
   documentation: Update the application writing guidelines
   libsensors: No longer depend on libsysfs (#2262)
