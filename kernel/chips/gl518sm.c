@@ -85,12 +85,12 @@ static inline u8 FAN_TO_REG(long rpm, int div)
 	if (rpm == 0)
 		return 255;
 	rpm = SENSORS_LIMIT(rpm, 1, 1000000);
-	return SENSORS_LIMIT((960000 + rpm * div / 2) / (rpm * div), 1,
+	return SENSORS_LIMIT((480000 + rpm * div / 2) / (rpm * div), 1,
 			     254);
 }
 
 #define FAN_FROM_REG(val,div) \
- ( (val)==0 ? 0 : (val)==255 ? 0 : (960000/((val)*(div))) )
+ ( (val)==0 ? 0 : (val)==255 ? 0 : (480000/((val)*(div))) )
 
 #define IN_TO_REG(val) (SENSORS_LIMIT((((val)*10+8)/19),0,255))
 #define IN_FROM_REG(val) (((val)*19)/10)
