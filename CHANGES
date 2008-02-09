@@ -14,6 +14,7 @@ SVN-HEAD
   Module gl518sm: Fix fan speed reading (2.6 backport)
   Module gl520sm: Fix fan speed reading (2.6 backport)
   Module lm90: Use generic i2c reads during detection (2.6 backport)
+  Module w83627hf: Enable VBAT monitoring (#2282, 2.6 backport)
   Program decode-dimms.pl: Fix DDR2 SDRAM module speed decoding
                            Update manufacturer IDs.
   Program decode-vaio.pl: Private data might not be readable by non-root users
