@@ -34,7 +34,7 @@ int g_quiet;
 #define usage_if(a) do { do_usage_if( a , __LINE__); } while(0);
 void do_usage_if(int b, int line)
 {
-const static char *eeprog_usage = 
+	static const char *eeprog_usage =
 "eeprog " VERSION ", a 24Cxx EEPROM reader/writer\n"
 "Copyright (c) 2003 by Stefano Barbato - All rights reserved.\n"
 "Usage: eeprog [-fqxdh] [-16|-8] [ -r addr[:count] | -w addr ]  /dev/i2c-N  i2c-address\n" 
