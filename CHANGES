@@ -44,6 +44,7 @@ SVN-HEAD
                           Add Fintek F71858DG detection
                           Add Fintek F81216D detection (no sensors)
                           Add SMSC SCH5027D detection
+                          Do not access I/O ports on PPC
   Program unhide_ICH_SMBus: Add support for the 82801AA (ICH)
 
 2.10.5 (20071024)

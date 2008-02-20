@@ -3,7 +3,7 @@
 #
 #    sensors-detect - Detect PCI bus and chips
 #    Copyright (C) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
-#    Copyright (C) 2004 - 2007  Jean Delvare <khali@linux-fr.org>
+#    Copyright (C) 2004 - 2008  Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -2366,12 +2366,13 @@ sub initialize_conf
 # [2] -> SUBLEVEL
 # [3] -> EXTRAVERSION
 #
-use vars qw(@kernel_version);
+use vars qw(@kernel_version $kernel_arch);
 
 sub initialize_kernel_version
 {
   `uname -r` =~ /(\d+)\.(\d+)\.(\d+)(.*)/;
   @kernel_version = ($1, $2, $3, $4);
+  chomp($kernel_arch = `uname -m`);
 }
 
 sub kernel_version_at_least
@@ -5810,27 +5811,31 @@ sub main
   }
   print "\n";
 
-  print "Some chips are also accessible through the ISA I/O ports. We have to\n".
-        "write to arbitrary I/O ports to probe them. This is usually safe though.\n".
-        "Yes, you do have ISA I/O ports even if you do not have any ISA slots!\n";
-  print "Do you want to scan the ISA I/O ports? (YES/no): ";
-  unless (<STDIN> =~ /^\s*n/i) {
-    initialize_ioports();
-    scan_isa_bus();
-    close_ioports();
-  }
-  print "\n";
+  # Skip "random" I/O port probing on PPC
+  if ($kernel_arch ne 'ppc'
+   && $kernel_arch ne 'ppc64') {
+    print "Some chips are also accessible through the ISA I/O ports. We have to\n".
+          "write to arbitrary I/O ports to probe them. This is usually safe though.\n".
+          "Yes, you do have ISA I/O ports even if you do not have any ISA slots!\n";
+    print "Do you want to scan the ISA I/O ports? (YES/no): ";
+    unless (<STDIN> =~ /^\s*n/i) {
+      initialize_ioports();
+      scan_isa_bus();
+      close_ioports();
+    }
+    print "\n";
 
-  print "Some Super I/O chips may also contain sensors. We have to write to\n".
-        "standard I/O ports to probe them. This is usually safe.\n";
-  print "Do you want to scan for Super I/O sensors? (YES/no): ";
-  unless (<STDIN> =~ /^\s*n/i) {
-    initialize_ioports();
-    scan_superio(0x2e, 0x2f);
-    scan_superio(0x4e, 0x4f);
-    close_ioports();
+    print "Some Super I/O chips may also contain sensors. We have to write to\n".
+          "standard I/O ports to probe them. This is usually safe.\n";
+    print "Do you want to scan for Super I/O sensors? (YES/no): ";
+    unless (<STDIN> =~ /^\s*n/i) {
+      initialize_ioports();
+      scan_superio(0x2e, 0x2f);
+      scan_superio(0x4e, 0x4f);
+      close_ioports();
+    }
+    print "\n";
   }
-  print "\n";
 
   print "Some CPUs or memory controllers may also contain embedded sensors.\n";
   print "Do you want to scan for them? (YES/no): ";
