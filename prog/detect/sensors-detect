@@ -1327,24 +1327,6 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { adm1022_detect(2, @_); },
      },
      {
-       name => "Silicon Integrated Systems SIS5595",
-       driver => "sis5595",
-       isa_addrs => [ 0 ],
-       isa_detect => sub { sis5595_pci_detect(); },
-     },
-     {
-       name => "VIA VT82C686 Integrated Sensors",
-       driver => "via686a",
-       isa_addrs => [ 0 ],
-       isa_detect => sub { via686a_pci_detect(); },
-     },
-     {
-       name => "VIA VT8231 Integrated Sensors",
-       driver => "vt8231",
-       isa_addrs => [ 0 ],
-       isa_detect => sub { via8231_pci_detect(); },
-     },
-     {
        name => "VIA VT1211 (I2C)",
        driver => "use-isa-instead",
        i2c_addrs => [0x2d],
@@ -2150,6 +2132,21 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 #          etc. It must return a confidence value, undef if no supported
 #          CPU is found.
 @cpu_ids = (
+  {
+    name => "Silicon Integrated Systems SIS5595",
+    driver => "sis5595",
+    detect => sub { sis5595_pci_detect(); },
+  },
+  {
+    name => "VIA VT82C686 Integrated Sensors",
+    driver => "via686a",
+    detect => sub { via686a_pci_detect(); },
+  },
+  {
+    name => "VIA VT8231 Integrated Sensors",
+    driver => "vt8231",
+    detect => sub { via8231_pci_detect(); },
+  },
   {
     name => "AMD K8 thermal sensors",
     driver => "k8temp",
@@ -3256,8 +3253,8 @@ sub scan_isa_bus
   foreach $chip (@chip_ids) {
     next if not exists $chip->{isa_addrs} or not exists $chip->{isa_detect};
     foreach $addr (@{$chip->{isa_addrs}}) {
-      printf("\%-60s", sprintf("Probing for `\%s'\%s... ", $chip->{name},
-                               $addr ? sprintf(" at 0x\%x", $addr) : ''));
+      printf("\%-60s", sprintf("Probing for `\%s'\ at 0x\%x... ", $chip->{name},
+                               $addr));
       $conf = &{$chip->{isa_detect}} ($addr);
       print("No\n"), next if not defined $conf;
       print "Success!\n";
@@ -5837,8 +5834,8 @@ sub main
     print "\n";
   }
 
-  print "Some CPUs or memory controllers may also contain embedded sensors.\n";
-  print "Do you want to scan for them? (YES/no): ";
+  print "Some south bridges, CPUs or memory controllers may also contain \n";
+  print "embedded sensors. Do you want to scan for them? (YES/no): ";
   unless (<STDIN> =~ /^\s*n/i) {
     $| = 1;
     foreach my $entry (@cpu_ids) {
