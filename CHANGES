@@ -6,6 +6,7 @@ SVN-HEAD
            Fix sysfs presence detection
            Don't choke on unrecognized devices (#2087)
            Fix lm93 vid2 access (#2295)
+           No in1 on w83783s
   Makefile: Revert changeset 4738, fix bug #2187 differently
   Module adm1026: Various cleanups
   Module eeprom: Hide Sony Vaio serial numbers to regular users (2.6 backport)
@@ -31,6 +32,7 @@ SVN-HEAD
   Program sensord: Add lm85 support
   Program sensors: Hide spurious errors on missing f71872f voltage inputs
                    Hide spurious errors on missing adm1026 inputs
+                   Fix W83783S prefix matching
   Program sensors-detect: Add Texas Instruments TMP401 detection
                           Mention the f75375s driver
                           Add SMSC LPC47B367-NC detection (no sensors)

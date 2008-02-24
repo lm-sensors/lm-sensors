@@ -362,7 +362,7 @@ static struct match matches[] = {
 	{ "adm1024", print_adm1024 },
 	{ "w83781d", print_w83781d },
 	{ "w83782d", print_w83781d },
-	{ "w83783d", print_w83781d },
+	{ "w83783s", print_w83781d },
 	{ "w83627hf", print_w83781d },
 	{ "w83627thf", print_w83781d },
 	{ "w83637hf", print_w83781d },
