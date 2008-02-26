@@ -49,6 +49,7 @@ SVN-HEAD
                           Do not access I/O ports on PPC
                           Move south bridge sensor detection to the right
                            section
+                          Run chip_special_cases() earlier
   Program unhide_ICH_SMBus: Add support for the 82801AA (ICH)
 
 2.10.5 (20071024)
