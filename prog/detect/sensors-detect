@@ -5709,6 +5709,9 @@ sub main
   initialize_conf;
   initialize_proc_pci;
   initialize_modules_list;
+  # make sure any special case chips are added to the chip_ids list before
+  # making the support modules list
+  chip_special_cases();
   initialize_modules_supported;
   initialize_cpu_list();
 
@@ -5773,9 +5776,6 @@ sub main
     print "\n";
   }
 
-  # Before looking for chips, make sure any special case chips are
-  # added to the chip_ids list
-  chip_special_cases();
   $i2c_addresses_to_scan = i2c_addresses_to_scan();
 
   print "We are now going to do the I2C/SMBus adapter probings. Some chips may\n",

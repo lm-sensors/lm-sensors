@@ -5,6 +5,7 @@ SVN-HEAD
   sensors-detect: Add SMSC SCH5027D detection
                   Do not access I/O ports on PPC
                   Move south bridge sensor detection to the right section
+                  Run chip_special_cases() earlier
 
 3.0.1 (2008-01-28)
   documentation: Update the application writing guidelines
