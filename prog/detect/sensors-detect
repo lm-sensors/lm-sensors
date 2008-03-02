@@ -1902,6 +1902,14 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	logdev => 0x08,
       },
       {
+	name => "SMSC SCH5317 Super IO",
+	# The SCH5317 shows up twice in this list because it can return either
+	# 0x85 or 0x8c as its device ID.
+	driver => "smsc47b397",
+	devid => 0x8c,
+	logdev => 0x08,
+      },
+      {
 	name => "SMSC SCH5504-NS Super IO",
 	# No datasheet
 	driver => "not-a-sensor",
