@@ -1,7 +1,7 @@
 /*
     sysfs.c - Part of libsensors, a library for reading Linux sensor data
     Copyright (c) 2005 Mark M. Hoffman <mhoffman@lightlink.com>
-    Copyright (C) 2007 Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007-2008 Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ static char *sysfs_read_attr(const char *device, const char *attr)
 	/* Last byte is a '\n'; chop that off */
 	p = strndup(buf, strlen(buf) - 1);
 	if (!p)
-		sensors_fatal_error(__FUNCTION__, "out of memory");
+		sensors_fatal_error(__func__, "Out of memory");
 	return p;
 }
 
@@ -311,7 +311,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	all_subfeatures = calloc(ALL_POSSIBLE_SUBFEATURES,
 				 sizeof(sensors_subfeature));
 	if (!all_subfeatures)
-		sensors_fatal_error(__FUNCTION__, "Out of memory");
+		sensors_fatal_error(__func__, "Out of memory");
 
 	while ((ent = readdir(dir))) {
 		char *name = ent->d_name;
@@ -336,7 +336,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			/* More sensors of one type than MAX_SENSORS_PER_TYPE,
 			   we have to ignore it */
 #ifdef DEBUG
-			sensors_fatal_error(__FUNCTION__,
+			sensors_fatal_error(__func__,
 					    "Increase MAX_SENSORS_PER_TYPE!");
 #endif
 			continue;
@@ -361,8 +361,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 
 		if (all_subfeatures[i].name) {
 #ifdef DEBUG
-			sensors_fatal_error(__FUNCTION__,
-					    "Duplicate subfeature");
+			sensors_fatal_error(__func__, "Duplicate subfeature");
 #endif
 			continue;
 		}
@@ -399,7 +398,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	dyn_subfeatures = calloc(sfnum, sizeof(sensors_subfeature));
 	dyn_features = calloc(fnum, sizeof(sensors_feature));
 	if (!dyn_subfeatures || !dyn_features)
-		sensors_fatal_error(__FUNCTION__, "Out of memory");
+		sensors_fatal_error(__func__, "Out of memory");
 
 	/* Copy from the sparse array to the compact array */
 	sfnum = 0;
@@ -474,7 +473,7 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 
 	entry.chip.path = strdup(hwmon_path);
 	if (!entry.chip.path)
-		sensors_fatal_error(__FUNCTION__, "out of memory");
+		sensors_fatal_error(__func__, "Out of memory");
 
 	/* Find bus type */
 	snprintf(linkpath, NAME_MAX, "%s/subsystem", dev_path);
