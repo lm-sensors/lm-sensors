@@ -62,7 +62,7 @@ int sensors_yylineno;
 
  /* Any whitespace-like character */
 
-BLANK		[ \f\t\v]
+BLANK		[ \f\r\t\v]
 
 IDCHAR		[[:alnum:]_]
 
