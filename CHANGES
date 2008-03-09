@@ -1,6 +1,9 @@
 lm_sensors CHANGES file
 -----------------------
 
+SVN-HEAD
+  Program sensors-detect: New device ID for the SMSC SCH5317
+
 2.10.6 "Welcome Home Lina" (20080306)
   Library: Fix fschrc and fschmd support
            Fix sysfs presence detection
