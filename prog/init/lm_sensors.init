@@ -28,31 +28,6 @@
 # in order as normal shell variables with the special names:
 #    MODULE_1, MODULE_2, MODULE_3, etc.
 
-if grep -q sysfs /proc/mounts; then
-	WITHSYS=1
-else
-	WITHSYS=0
-fi
-
-if [ $WITHSYS == "0" ]; then
-	# If sensors isn't supported by the kernel, try loading the module...
-	[ -e /proc/sys/dev/sensors ] || /sbin/modprobe i2c-proc >/dev/null 2>&1
-
-	# Don't bother if /proc/sensors still doesn't exist, kernel doesn't have
-	# support for sensors.
-	[ -e /proc/sys/dev/sensors ] || exit 0
-
-	# If sensors was not already running, unload the module...
-	[ -e /var/lock/subsys/lm_sensors ] || /sbin/modprobe -r i2c-proc >/dev/null 2>&1
-fi
-
-CONFIG=/etc/sysconfig/lm_sensors
-[ -r "$CONFIG" ] || exit 0
-grep '^MODULE_' $CONFIG >/dev/null 2>&1 || exit 0
-
-# Load config file
-. "$CONFIG"
-
 PSENSORS=/usr/local/bin/sensors
 
 if [ ! -x $PSENSORS ]; then
@@ -65,7 +40,47 @@ fi
 RETVAL=0
 prog="lm_sensors"
 
+# This functions checks if sensor support is compiled into the kernel, if
+# sensors are configured, and loads the config file
+check_sensors() {
+	if grep -q sysfs /proc/mounts; then
+		WITHSYS=1
+	else
+		WITHSYS=0
+	fi
+
+	if [ $WITHSYS == "0" ]; then
+		# If sensors isn't supported by the kernel, try loading the module...
+		[ -e /proc/sys/dev/sensors ] || /sbin/modprobe i2c-proc >/dev/null 2>&1
+
+		# Don't bother if /proc/sensors still doesn't exist, kernel doesn't have
+		# support for sensors.
+		if ! [ -e /proc/sys/dev/sensors ]; then
+			echo -n "$1 $prog: kernel does not have sensors support"
+			echo_failure
+			echo
+			exit 5
+		fi
+
+		# If sensors was not already running, unload the module...
+		[ -e /var/lock/subsys/lm_sensors ] || /sbin/modprobe -r i2c-proc >/dev/null 2>&1
+	fi
+
+	CONFIG=/etc/sysconfig/lm_sensors
+	if ! [ -r "$CONFIG" ] || ! grep '^MODULE_' $CONFIG >/dev/null 2>&1; then
+		echo -n "$1 $prog: not configured, run sensors-detect"
+		echo_warning
+		echo
+		exit 6
+	fi
+
+	# Load config file
+	. "$CONFIG"
+}
+
 start() {
+	check_sensors "Starting"
+
 	echo -n "Starting $prog: loading module "
 
 	modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
@@ -89,6 +104,8 @@ start() {
 }
 
 stop() {
+	check_sensors "Stopping"
+
 	echo -n "Stopping $prog: "
 
 	modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
@@ -116,12 +133,14 @@ stop() {
 dostatus() {
 	$PSENSORS
 	RETVAL=$?
+	if [ $RETVAL -ne 0 ]; then
+		RETVAL=3
+	fi
 }
 
 restart() {
 	stop
 	start
-	RETVAL=$?
 }
 
 condrestart() {
@@ -147,7 +166,7 @@ case "$1" in
 	;;
   *)
 	echo "Usage: $0 {start|stop|status|restart|reload|condrestart}"
-	exit 1
+	exit 3
 esac
 
 exit $RETVAL
