@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# chkconfig: 2345 26 74
+# chkconfig: - 26 74
 # description: sensors is used for monitoring motherboard sensor values.
 # config: /etc/sysconfig/lm_sensors
 #
