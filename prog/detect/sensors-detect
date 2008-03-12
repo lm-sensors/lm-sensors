@@ -5713,6 +5713,11 @@ sub main
     exit -1;
   }
 
+  if (-x "/sbin/service" && -f "/etc/init.d/lm_sensors" &&
+      -f "/var/lock/subsys/lm_sensors") {
+    system("/sbin/service", "lm_sensors", "stop");
+  }
+
   initialize_kernel_version();
   initialize_conf;
   initialize_proc_pci;
@@ -5988,6 +5993,11 @@ EOT
 
     if (-x "/sbin/insserv" && -f "/etc/init.d/lm_sensors") {
       system("/sbin/insserv", "/etc/init.d/lm_sensors");
+    } elsif (-x "/sbin/chkconfig" && -f "/etc/init.d/lm_sensors") {
+      system("/sbin/chkconfig", "lm_sensors", "on");
+      if (-x "/sbin/service") {
+        system("/sbin/service", "lm_sensors", "start");
+      }
     } else {
       print "You should now start the lm_sensors service to load the required\n".
             "kernel modules.\n\n";
