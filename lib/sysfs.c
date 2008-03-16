@@ -524,18 +524,18 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 		/* SPI */
 		entry.chip.bus.type = SENSORS_BUS_TYPE_SPI;
 	} else
-	if ((!subsys || !strcmp(subsys, "platform"))) {
-		/* must be new ISA (platform driver) */
-		if (sscanf(dev_name, "%*[a-z0-9_].%d", &entry.chip.addr) != 1)
-			entry.chip.addr = 0;
-		entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
-		entry.chip.bus.nr = 0;
-	} else
 	if ((!subsys || !strcmp(subsys, "pci")) &&
 	    sscanf(dev_name, "%x:%x:%x.%x", &domain, &bus, &slot, &fn) == 4) {
 		/* PCI */
 		entry.chip.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
 		entry.chip.bus.type = SENSORS_BUS_TYPE_PCI;
+		entry.chip.bus.nr = 0;
+	} else
+	if ((!subsys || !strcmp(subsys, "platform"))) {
+		/* must be new ISA (platform driver) */
+		if (sscanf(dev_name, "%*[a-z0-9_].%d", &entry.chip.addr) != 1)
+			entry.chip.addr = 0;
+		entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
 		entry.chip.bus.nr = 0;
 	} else {
 		/* Ignore unknown device */
