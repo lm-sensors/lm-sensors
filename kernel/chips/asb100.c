@@ -294,9 +294,6 @@ static struct i2c_driver asb100_driver = {
 #define ASB100_ALARM_CHAS	0x1000
 #define ASB100_ALARM_TEMP3	0x2000
 
-#define ASB100_ALARM_IN7	0x10000 /* ? */
-#define ASB100_ALARM_IN8	0x20000	/* ? */
-
 /* -- SENSORS SYSCTL END -- */
 
 /* These files are created for each detected chip. This is just a template;
