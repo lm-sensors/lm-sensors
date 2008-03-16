@@ -182,10 +182,8 @@ int sensors_read_sysfs_chips(void)
 
 	dlist_for_each_data(clsdevs, clsdev, struct sysfs_class_device) {
 		struct sysfs_device *dev;
-		if (!(dev = sysfs_get_classdev_device(clsdev))) {
-			ret = -SENSORS_ERR_PROC;
-			goto exit;
-		}
+		if (!(dev = sysfs_get_classdev_device(clsdev)))
+			continue;
 		if ((ret = sensors_read_one_sysfs_chip(dev)))
 			goto exit;
 	}

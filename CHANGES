@@ -2,12 +2,13 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN-HEAD
+  Library: Don't choke on unrecognized devices, part 2
   Program sensors-detect: New device ID for the SMSC SCH5317
 
 2.10.6 "Welcome Home Lina" (20080306)
   Library: Fix fschrc and fschmd support
            Fix sysfs presence detection
-           Don't choke on unrecognized devices (#2087)
+           Don't choke on unrecognized devices, part 1 (#2087)
            Fix lm93 vid2 access (#2295)
            No in1 on w83783s
            Support DOS-style configuration files again (#2284)
