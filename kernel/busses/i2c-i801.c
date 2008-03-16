@@ -39,7 +39,7 @@
     For SMBus support, they are similar to the PIIX4 and are part
     of Intel's '810' and other chipsets.
     See the doc/busses/i2c-i801 file for details.
-    I2C Block Read supported for ICH5 and higher.
+    I2C Block Read not supported.
     Block Process Call are not supported.
 */
 
@@ -145,7 +145,7 @@
 #define I801_WORD_DATA		0x0C
 #define I801_PROC_CALL		0x10	/* later chips only, unimplemented */
 #define I801_BLOCK_DATA		0x14
-#define I801_I2C_BLOCK_DATA	0x18	/* ich4 and later */
+#define I801_I2C_BLOCK_DATA	0x18	/* unimplemented */
 #define I801_BLOCK_LAST		0x34
 #define I801_I2C_BLOCK_LAST	0x38	/* unimplemented */
 #define I801_START		0x40
@@ -165,7 +165,6 @@ static unsigned short i801_smba;
 static struct pci_driver i801_driver;
 static struct pci_dev *I801_dev;
 static int isich4;	/* is PEC supported? */
-static int isich5;	/* is i2c block read supported? */
 
 static int __devinit i801_setup(struct pci_dev *dev)
 {
@@ -184,7 +183,6 @@ static int __devinit i801_setup(struct pci_dev *dev)
 		isich4 = 1;
 	else
 		isich4 = 0;
-	isich5 = isich4 && dev->device != PCI_DEVICE_ID_INTEL_82801DB_3;
 
 	/* Determine the address of the SMBus area */
 	if (force_addr) {
@@ -325,7 +323,7 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 			pci_read_config_byte(I801_dev, SMBHSTCFG, &hostc);
 			pci_write_config_byte(I801_dev, SMBHSTCFG,
 					      hostc | SMBHSTCFG_I2C_EN);
-		} else if (!isich5) {
+		} else {
 			dev_err(I801_dev,
 				"I2C_SMBUS_I2C_BLOCK_READ unsupported!\n");
 			return -1;
@@ -347,9 +345,6 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 	for (i = 1; i <= len; i++) {
 		if (i == len && read_write == I2C_SMBUS_READ)
 			smbcmd = I801_BLOCK_LAST;
-		else if (command == I2C_SMBUS_I2C_BLOCK_DATA &&
-			 read_write == I2C_SMBUS_READ)
-			smbcmd = I801_I2C_BLOCK_DATA;
 		else
 			smbcmd = I801_BLOCK_DATA;
 		outb_p(smbcmd | ENABLE_INT9, SMBHSTCNT);
@@ -418,17 +413,12 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		}
 
 		if (i == 1 && read_write == I2C_SMBUS_READ) {
-			if (command != I2C_SMBUS_I2C_BLOCK_DATA) {
-				len = inb_p(SMBHSTDAT0);
-				if (len < 1)
-					len = 1;
-				if (len > I2C_SMBUS_BLOCK_MAX)
-					len = I2C_SMBUS_BLOCK_MAX;
-				data->block[0] = len;
-			} else {
-				/* if slave returns < 32 bytes transaction will fail */
-				data->block[0] = 32;
-			}
+			len = inb_p(SMBHSTDAT0);
+			if (len < 1)
+				len = 1;
+			if (len > I2C_SMBUS_BLOCK_MAX)
+				len = I2C_SMBUS_BLOCK_MAX;
+			data->block[0] = len;
 		}
 
 		/* Retrieve/store value in SMBBLKDAT */
@@ -590,10 +580,6 @@ static u32 i801_func(struct i2c_adapter *adapter)
 	    I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_WRITE_I2C_BLOCK
 #ifdef HAVE_PEC
 	     | (isich4 ? I2C_FUNC_SMBUS_HWPEC_CALC : 0)
-#endif
-#if 0
-	     | (isich5 ? I2C_FUNC_SMBUS_READ_I2C_BLOCK
-		       : 0)
 #endif
 	    ;
 }
