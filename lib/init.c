@@ -19,8 +19,10 @@
     MA 02110-1301 USA.
 */
 
+#include <locale.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 #include "sensors.h"
 #include "data.h"
@@ -33,6 +35,31 @@
 
 #define DEFAULT_CONFIG_FILE	ETCDIR "/sensors3.conf"
 #define ALT_CONFIG_FILE		ETCDIR "/sensors.conf"
+
+/* Wrapper around sensors_yyparse(), which clears the locale so that
+   the decimal numbers are always parsed properly. */
+static int sensors_parse(void)
+{
+	int res;
+	char *locale;
+
+	/* Remember the current locale and clear it */
+	locale = setlocale(LC_ALL, NULL);
+	if (locale) {
+		locale = strdup(locale);
+		setlocale(LC_ALL, "C");
+	}
+
+	res = sensors_yyparse();
+
+	/* Restore the old locale */
+	if (locale) {
+		setlocale(LC_ALL, locale);
+		free(locale);
+	}
+
+	return res;
+}
 
 int sensors_init(FILE *input)
 {
@@ -47,7 +74,7 @@ int sensors_init(FILE *input)
 	res = -SENSORS_ERR_PARSE;
 	if (input) {
 		if (sensors_scanner_init(input) ||
-		    sensors_yyparse())
+		    sensors_parse())
 			goto exit_cleanup;
 	} else {
 		/* No configuration provided, use default */
@@ -56,7 +83,7 @@ int sensors_init(FILE *input)
 			input = fopen(ALT_CONFIG_FILE, "r");
 		if (input) {
 			if (sensors_scanner_init(input) ||
-			    sensors_yyparse()) {
+			    sensors_parse()) {
 				fclose(input);
 				goto exit_cleanup;
 			}
