@@ -532,7 +532,8 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 		entry.chip.bus.type = SENSORS_BUS_TYPE_PCI;
 		entry.chip.bus.nr = 0;
 	} else
-	if ((!subsys || !strcmp(subsys, "platform"))) {
+	if ((!subsys || !strcmp(subsys, "platform") ||
+			!strcmp(subsys, "of_platform"))) {
 		/* must be new ISA (platform driver) */
 		if (sscanf(dev_name, "%*[a-z0-9_].%d", &entry.chip.addr) != 1)
 			entry.chip.addr = 0;
