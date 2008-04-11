@@ -249,7 +249,8 @@ int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
 					subfeature->mapping);
 
 		chip = NULL;
-		while ((chip = sensors_for_all_config_chips(name, chip)))
+		while (!expr &&
+		       (chip = sensors_for_all_config_chips(name, chip)))
 			for (i = 0; i < chip->computes_count; i++) {
 				if (!strcmp(feature->name,
 					    chip->computes[i].name)) {
@@ -300,7 +301,8 @@ int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
 					subfeature->mapping);
 
 		chip = NULL;
-		while ((chip = sensors_for_all_config_chips(name, chip)))
+		while (!expr &&
+		       (chip = sensors_for_all_config_chips(name, chip)))
 			for (i = 0; i < chip->computes_count; i++) {
 				if (!strcmp(feature->name,
 					    chip->computes[i].name)) {
