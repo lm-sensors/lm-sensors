@@ -31,19 +31,19 @@
    when the API + ABI breaks), the third digit is incremented to track small
    API additions like new flags / enum values. The second digit is for tracking
    larger additions like new methods. */
-#define SENSORS_API_VERSION 0x401
+#define SENSORS_API_VERSION		0x401
 
-#define SENSORS_CHIP_NAME_PREFIX_ANY NULL
-#define SENSORS_CHIP_NAME_ADDR_ANY -1
+#define SENSORS_CHIP_NAME_PREFIX_ANY	NULL
+#define SENSORS_CHIP_NAME_ADDR_ANY	(-1)
 
-#define SENSORS_BUS_TYPE_ANY	(-1)
-#define SENSORS_BUS_TYPE_I2C	0
-#define SENSORS_BUS_TYPE_ISA	1
-#define SENSORS_BUS_TYPE_PCI	2
-#define SENSORS_BUS_TYPE_SPI	3
+#define SENSORS_BUS_TYPE_ANY		(-1)
+#define SENSORS_BUS_TYPE_I2C		0
+#define SENSORS_BUS_TYPE_ISA		1
+#define SENSORS_BUS_TYPE_PCI		2
+#define SENSORS_BUS_TYPE_SPI		3
 #define SENSORS_BUS_TYPE_VIRTUAL	4
-#define SENSORS_BUS_NR_ANY	(-1)
-#define SENSORS_BUS_NR_IGNORE	(-2)
+#define SENSORS_BUS_NR_ANY		(-1)
+#define SENSORS_BUS_NR_IGNORE		(-2)
 
 #ifdef __cplusplus
 extern "C" {
