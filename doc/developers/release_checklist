@@ -10,6 +10,7 @@ Release steps:
   `svn diff -r Vx-y-z lib' is your friend.
 - Update the CHANGES file (add the release date)
 - Update lm_sensors.lsm (Version, Entered-date and Primary-site)
+- Update libsensors-API.txt
 - Update version.h
 - Commit
 - Tag the release using SVN:
