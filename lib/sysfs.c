@@ -476,6 +476,15 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 	if (!entry.chip.path)
 		sensors_fatal_error(__func__, "Out of memory");
 
+	if (dev_path == NULL) {
+		/* Virtual device */
+		entry.chip.bus.type = SENSORS_BUS_TYPE_VIRTUAL;
+		entry.chip.bus.nr = 0;
+		/* For now we assume that virtual devices are unique */
+		entry.chip.addr = 0;
+		goto done;
+	}
+
 	/* Find bus type */
 	snprintf(linkpath, NAME_MAX, "%s/subsystem", dev_path);
 	sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
@@ -545,6 +554,7 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 		goto exit_free;
 	}
 
+done:
 	if (sensors_read_dynamic_chip(&entry, hwmon_path) < 0)
 		goto exit_free;
 	if (!entry.subfeature) { /* No subfeature, discard chip */
@@ -593,16 +603,20 @@ static int sensors_add_hwmon_device(const char *path, const char *classdev)
 
 	snprintf(linkpath, NAME_MAX, "%s/device", path);
 	dev_len = readlink(linkpath, device, NAME_MAX - 1);
-	if (dev_len < 0)
-		return -SENSORS_ERR_KERNEL;
-	device[dev_len] = '\0';
-	device_p = strrchr(device, '/') + 1;
+	if (dev_len < 0) {
+		/* No device link? Treat as virtual */
+		err = sensors_read_one_sysfs_chip(NULL, NULL, path);
+	} else {
+		device[dev_len] = '\0';
+		device_p = strrchr(device, '/') + 1;
 
-	/* The attributes we want might be those of the hwmon class device,
-	   or those of the device itself. */
-	err = sensors_read_one_sysfs_chip(linkpath, device_p, path);
-	if (err == 0)
-		err = sensors_read_one_sysfs_chip(linkpath, device_p, linkpath);
+		/* The attributes we want might be those of the hwmon class
+		   device, or those of the device itself. */
+		err = sensors_read_one_sysfs_chip(linkpath, device_p, path);
+		if (err == 0)
+			err = sensors_read_one_sysfs_chip(linkpath, device_p,
+							  linkpath);
+	}
 	if (err < 0)
 		return err;
 	return 0;

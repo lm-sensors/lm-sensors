@@ -1,0 +1,14 @@
+libsensors API history
+======================
+
+SENSORS_API_VERSION tracks the evolutions made to the libsensors API
+over time. This document summarizes these evolutions so that application
+authors can quickly figure out how to test for the availability of a
+given new feature.
+
+0x401	lm-sensors SVN
+* Added bus type "virtual":
+  #define SENSORS_BUS_TYPE_VIRTUAL	4
+
+0x400	lm-sensors 3.0.0 to 3.0.1
+* Initial API.

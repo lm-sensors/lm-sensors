@@ -5,6 +5,7 @@ SVN-HEAD
   libsensors: Use __func__ instead of __FUNCTION__
               Parse the configuration file in C locale
               Late compute statements override early ones
+              Support virtual hwmon devices (#2309)
   sensors-detect: Add SMSC SCH5027D detection
                   Do not access I/O ports on PPC
                   Move south bridge sensor detection to the right section
