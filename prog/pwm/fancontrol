@@ -2,7 +2,7 @@
 #
 # Simple script implementing a temperature dependent fan speed control
 #
-# Version 0.66
+# Version 0.67
 #
 # Usage: fancontrol [CONFIGFILE]
 #
