@@ -22,7 +22,7 @@
 #
 #
 #    Copyright 2003 Marius Reiner <marius.reiner@hdev.de>
-#    Copyright (C) 2007 Jean Delvare <khali@linux-fr.org>
+#    Copyright (C) 2007-2008 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,10 +41,17 @@
 #
 #
 
+PIDFILE="/var/run/fancontrol.pid"
+
 #DEBUG=1
 MAX=255
 
-echo $$ > /var/run/fancontrol.pid
+if [ -f "$PIDFILE" ]
+then
+	echo "File $PIDFILE exists, is fancontrol already running?"
+	exit 1
+fi
+echo $$ > "$PIDFILE"
 
 declare -i pwmval
 
@@ -248,6 +255,7 @@ function restorefans()
 		let fcvcount=$fcvcount+1
 	done
 	echo 'Verify fans have returned to full speed'
+	rm -f "$PIDFILE"
 	exit $status
 }
 

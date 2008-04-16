@@ -34,7 +34,6 @@ stop()
    echo -n "Stopping fancontrol daemon"
    killproc $FANCONTROL
    RETVAL=$?
-   rm -f $PIDFILE
    rm -f /var/lock/subsys/fancontrol
    echo
 }

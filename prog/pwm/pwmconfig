@@ -27,6 +27,18 @@
 #    MA 02110-1301 USA.
 #
 #
+
+PIDFILE="/var/run/fancontrol.pid"
+
+if [ -f "$PIDFILE" ]
+then
+	echo "File $PIDFILE exists. This typically means that the"
+	echo "fancontrol deamon is running. You should stop it before running pwmconfig."
+	echo "If you are certain that fancontrol is not running, then you can delete"
+	echo "$PIDFILE manually."
+	exit 1
+fi
+
 echo 'This program will search your sensors for pulse width modulation (pwm)'
 echo 'controls, and test each one to see if it controls a fan on'
 echo 'your motherboard. Note that many motherboards do not have pwm'

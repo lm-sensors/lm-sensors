@@ -9,6 +9,9 @@ SVN-HEAD
   pwmconfig: Don't create the configuration file before it's needed
              Don't preserve configuration file customizations
              Fix permissions of the configuration file
+             Don't start if fancontrol is running (#2299)
+  fancontrol: Don't start if already running (#2299)
+              Delete fancontrol.pid at exit time (#2299)
   sensors-detect: Add SMSC SCH5027D detection
                   Do not access I/O ports on PPC
                   Move south bridge sensor detection to the right section
