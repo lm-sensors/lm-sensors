@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN-HEAD
+  sensors: Print energy and power sensors
   libsensors: Use __func__ instead of __FUNCTION__
               Parse the configuration file in C locale
               Late compute statements override early ones
