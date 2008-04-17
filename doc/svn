@@ -18,7 +18,7 @@ To update the code, do a svn update from within the i2c or lm-sensors
 directories. Please read the README and INSTALL files of your working copy
 for how to build the code. Also read the related files in the 'doc' directory
 for info regarding the different bus and chip drivers. Lastly, you can use
-the regular svn commands on the files (like cvs log [filename]) to see the
+the regular svn commands on the files (like svn log [filename]) to see the
 comments made by the developers as changes were made.
 
 If you're not familiar with the use of Subversion we recommend the excellent

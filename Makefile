@@ -353,7 +353,7 @@ package: version clean
 	find $$lmpackage/ -type f | grep -v ^$$lmpackage/$$lmpackage$$ | \
 	                            grep -v ^$$lmpackage/$$lmpackage.tar$$ | \
 	                            grep -v ^$$lmpackage/$$ | \
-	                            grep -v /CVS | \
+	                            grep -v /\\.svn | \
 	                            grep -v /\\.# | \
 	                            tar rvf $$lmpackage.tar -T -; \
         gzip -9 $$lmpackage.tar ;\
@@ -372,7 +372,7 @@ userpackage: version clean $(KERNELINCLUDEDIR)/sensors.h
 	                            grep -v ^$$lmpackage/kernel/chips | \
 	                            grep -v ^$$lmpackage/kernel/busses | \
 	                            grep -v ^$$lmpackage/$$ | \
-	                            grep -v /CVS | \
+	                            grep -v /\\.svn | \
 	                            grep -v /\\.# | \
 	                            tar rvf $$lmpackage.tar -T -; \
         gzip -9 $$lmpackage.tar ;\
