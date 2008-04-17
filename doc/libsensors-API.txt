@@ -6,6 +6,16 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
+0x402	lm-sensors SVN
+* Added support for power and energy sensors
+SENSORS_FEATURE_POWER = 3
+SENSORS_FEATURE_ENERGY = 4
+SENSORS_SUBFEATURE_POWER_AVERAGE
+SENSORS_SUBFEATURE_POWER_AVERAGE_HIGHEST
+SENSORS_SUBFEATURE_POWER_AVERAGE_LOWEST
+SENSORS_SUBFEATURE_POWER_AVERAGE_INTERVAL
+SENSORS_SUBFEATURE_ENERGY_INPUT
+
 0x401	lm-sensors SVN
 * Added bus type "virtual":
   #define SENSORS_BUS_TYPE_VIRTUAL	4

@@ -6,6 +6,7 @@ SVN-HEAD
               Parse the configuration file in C locale
               Late compute statements override early ones
               Support virtual hwmon devices (#2309)
+              Support power and energy sensors
   pwmconfig: Don't create the configuration file before it's needed
              Don't preserve configuration file customizations
              Fix permissions of the configuration file
