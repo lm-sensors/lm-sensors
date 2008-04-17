@@ -2,7 +2,6 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN-HEAD
-  sensors: Print energy and power sensors with automatically scaled units
   libsensors: Use __func__ instead of __FUNCTION__
               Parse the configuration file in C locale
               Late compute statements override early ones
@@ -19,6 +18,7 @@ SVN-HEAD
                   Move south bridge sensor detection to the right section
                   Run chip_special_cases() earlier
                   New device ID for the SMSC SCH5317
+  sensors: Print energy and power sensors with automatically scaled units
 
 3.0.1 (2008-01-28)
   documentation: Update the application writing guidelines
