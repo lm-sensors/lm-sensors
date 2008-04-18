@@ -14,12 +14,13 @@ SVN-HEAD
              Don't start if fancontrol is running (#2299)
   fancontrol: Don't start if already running (#2299)
               Delete fancontrol.pid at exit time (#2299)
+  sensors: Print energy and power sensors with automatically scaled units
   sensors-detect: Add SMSC SCH5027D detection
                   Do not access I/O ports on PPC
                   Move south bridge sensor detection to the right section
                   Run chip_special_cases() earlier
                   New device ID for the SMSC SCH5317
-  sensors: Print energy and power sensors with automatically scaled units
+		  Add SMSC SCH5127 detection
 
 3.0.1 (2008-01-28)
   documentation: Update the application writing guidelines
