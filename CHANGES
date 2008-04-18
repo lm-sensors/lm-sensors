@@ -5,6 +5,7 @@ SVN-HEAD
   Library: Don't choke on unrecognized devices, part 2
   Module i2c-i801: Drop broken I2C block read support
   Program sensors-detect: New device ID for the SMSC SCH5317
+                          Add SMSC SCH5127 detection
 
 2.10.6 "Welcome Home Lina" (20080306)
   Library: Fix fschrc and fschmd support

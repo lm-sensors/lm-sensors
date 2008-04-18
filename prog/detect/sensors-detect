@@ -1891,6 +1891,12 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	devid => 0x89,
       },
       {
+	name => "SMSC SCH5127 Super IO",
+	driver => "dme1737",
+	devid => 0x86,
+	logdev => 0x0a,
+      },
+      {
 	name => "SMSC SCH5307-NS Super IO",
 	driver => "smsc47b397",
 	devid => 0x81,
