@@ -1250,6 +1250,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { lm63_detect(1, @_); },
      },
      {
+       name => "National Semiconductor LM64",
+       driver => "to-be-written", # lm63
+       i2c_addrs => [0x18, 0x4e],
+       i2c_detect => sub { lm63_detect(3, @_); },
+     },
+     {
        name => "Fintek F75363SG",
        driver => "lm63", # Not yet
        i2c_addrs => [0x4c],
@@ -4050,16 +4056,15 @@ sub lm90_detect
 }
 
 # $_[0]: Chip to detect
-#   (1 = LM63, 2 = F75363SG)
+#   (1 = LM63, 2 = F75363SG, 3 = LM64)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address (unused)
-# Returns: undef if not detected, 8 if detected.
+# Returns: undef if not detected, 6 if detected.
 # Registers used:
 #   0xfe: Manufacturer ID
 #   0xff: Chip ID / die revision
 #   0x03: Configuration (two or three unused bits)
 #   0x16: Alert mask (two or three unused bits)
-#   0x03-0x0e: Mirrored registers (five pairs)
 sub lm63_detect
 {
   my ($chip, $file, $addr) = @_;
@@ -4078,18 +4083,15 @@ sub lm63_detect
     return if $mid != 0x23    # Fintek
            || $cid != 0x20;   # F75363SG
     return if ($conf & 0x1a) != 0x00
-           || ($mask & 0x84) != 0x00;  
+           || ($mask & 0x84) != 0x00;
+  } elsif ($chip == 3) {
+    return if $mid != 0x01    # National Semiconductor
+           || $cid != 0x51;   # LM64
+    return if ($conf & 0x18) != 0x00
+           || ($mask & 0xa4) != 0xa4;
   }
 
-  # For compatibility with the LM86, some registers are mirrored
-  # to alternative locations
-  return if $conf != i2c_smbus_read_byte_data($file, 0x09);
-  foreach my $i (0x04, 0x05, 0x07, 0x08) {
-    return if i2c_smbus_read_byte_data($file, $i)
-           != i2c_smbus_read_byte_data($file, $i+6);
-  }
-
-  return 8;
+  return 6;
 }
 
 # $_[0]: Chip to detect
