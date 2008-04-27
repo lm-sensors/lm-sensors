@@ -21,6 +21,7 @@ SVN-HEAD
                   Run chip_special_cases() earlier
                   New device ID for the SMSC SCH5317
 		  Add SMSC SCH5127 detection
+                  Add National Semiconductor LM64 detection
 
 3.0.1 (2008-01-28)
   documentation: Update the application writing guidelines
