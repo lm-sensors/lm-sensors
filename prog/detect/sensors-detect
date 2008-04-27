@@ -2080,6 +2080,11 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	devid => 0x0206,
       },
       {
+	name => "Asus F8000 Super IO",
+	# No information available
+	devid => 0x0581,
+      },
+      {
 	# Shouldn't be in this family, but seems to be still.
 	name => "ITE IT8708F Super IO",
 	driver => "not-a-sensor",
