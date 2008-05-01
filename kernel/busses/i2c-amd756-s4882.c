@@ -230,7 +230,8 @@ ERROR2:
 	kfree(s4882_adapter);
 	s4882_adapter = NULL;
 ERROR1:
-	i2c_del_adapter(&amd756_smbus);
+	/* Restore physical bus */
+	i2c_add_adapter(&amd756_smbus);
 ERROR0:
 	return error;
 }

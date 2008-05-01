@@ -3,6 +3,7 @@ lm_sensors CHANGES file
 
 SVN-HEAD
   Library: Don't choke on unrecognized devices, part 2
+  Module i2c-amd756-s4882: Fix an error path (2.6 backport)
   Module i2c-i801: Drop broken I2C block read support
   Module i2c-piix4: Minor cleanups (2.6 backport)
   Module i2c-sis5595: Minor cleanups (2.6 backport)
