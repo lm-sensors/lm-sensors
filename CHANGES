@@ -4,6 +4,7 @@ lm_sensors CHANGES file
 SVN-HEAD
   Library: Don't choke on unrecognized devices, part 2
   Module i2c-i801: Drop broken I2C block read support
+  Module i2c-piix4: Minor cleanups (2.6 backport)
   Program sensors-detect: New device ID for the SMSC SCH5317
                           Add SMSC SCH5127 detection
                           Add National Semiconductor LM64 detection
