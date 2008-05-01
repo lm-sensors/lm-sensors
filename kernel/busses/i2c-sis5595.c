@@ -357,12 +357,6 @@ s32 sis5595_access(struct i2c_adapter * adap, u16 addr,
 		     I2C_SMBUS_PROC_CALL) ? SIS5595_PROC_CALL :
 		    SIS5595_WORD_DATA;
 		break;
-/*
-	case I2C_SMBUS_BLOCK_DATA:
-		printk("sis5595.o: Block data not yet implemented!\n");
-		return -1;
-		break;
-*/
 	default:
 		printk
 		    (KERN_WARNING "sis5595.o: Unsupported transaction %d\n", size);
@@ -380,9 +374,7 @@ s32 sis5595_access(struct i2c_adapter * adap, u16 addr,
 
 
 	switch (size) {
-	case SIS5595_BYTE:	/* Where is the result put? I assume here it is in
-				   SMB_DATA but it might just as well be in the
-				   SMB_CMD. No clue in the docs */
+	case SIS5595_BYTE:
 	case SIS5595_BYTE_DATA:
 		data->byte = sis5595_read(SMB_BYTE);
 		break;
