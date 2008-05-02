@@ -6,6 +6,7 @@ SVN-HEAD
   Module asb100: Remove some dead code (2.6 backport)
   Module i2c-amd756-s4882: Fix an error path (2.6 backport)
   Module i2c-i801: Drop broken I2C block read support
+                   Add ICH10 support
   Module i2c-piix4: Minor cleanups (2.6 backport)
   Module i2c-sis5595: Minor cleanups (2.6 backport)
   Module lm75: Fix an incorrect comment (2.6 backport)

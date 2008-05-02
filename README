@@ -51,7 +51,7 @@ At least the following I2C/SMBus adapters are supported:
   DEC 21272/21274 (Tsunami/Typhoon - on Alpha boards)
   Intel ICH/ICH0/ICH2/ICH3/ICH4/ICH5/ICH6/ICH7/ICH8/ICH9 (82801xx)
   Intel 6300ESB, 631xESB/632xESB (ESB2)
-  Intel Tolapai
+  Intel Tolapai, ICH10
   Intel PIIX4 (used in many Intel chipsets)
   Intel I810/I810E/I815/I845G GMCH
   Intel 82443MX (440MX)
