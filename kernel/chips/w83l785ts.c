@@ -317,8 +317,7 @@ static u8 w83l785ts_read_value(struct i2c_client *client, u8 reg, u8 defval)
 		mdelay(i);
 	}
 
-	printk(KERN_ERR "w83l785ts.o: Couldn't read value from register. "
-		"Please report.\n");
+	printk(KERN_ERR "w83l785ts.o: Couldn't read value from register.\n");
 	return defval;
 }
 
