@@ -5570,7 +5570,6 @@ sub print_chips_report
   }
 }
 
-# $_[0]: 1 if ISA bus is prefered, 0 for SMBus
 # We build here an array adapters, indexed on the number the adapter has
 # at this moment (we assume only loaded adapters are interesting at all;
 # everything that got scanned also got loaded). Each entry is a reference
@@ -5582,8 +5581,6 @@ sub print_chips_report
 # A second array, called 
 sub generate_modprobes
 {
-  my ($prefer_isa) = @_;
-
   my ($chip,$detection,$nr,$i,@optionlist,@probelist,$driver,$isa,$adap);
   my $ipmi = 0;
   my $modprobes = "";
@@ -5598,14 +5595,13 @@ sub generate_modprobes
       # still all added. So we number them in the correct order
       if (exists $detection->{i2c_driver} and
           not exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later} and 
-          not (exists $detection->{isa_addr} and $prefer_isa)) {
+          not exists $detection->{isa_addr}) { # Always use ISA access if possible
          foreach $adap (@i2c_adapters) {
            next unless exists $adap->{driver};
            $adap->{nr_later} = $nr++ if $adap->{driver} eq $detection->{i2c_driver};
          }
       }
-      if (exists $detection->{isa_addr} and
-          not (exists $detection->{i2c_driver} and not $prefer_isa)) {
+      if (exists $detection->{isa_addr}) {
            $isa=1;
       }
       if ($chip->{driver} eq "bmcsensors" || 
@@ -5679,21 +5675,16 @@ sub generate_modprobes
            if exists $detection->{i2c_addr} and
               exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later};
       push @optionlist, -1, $detection->{isa_addr}
-           if exists $detection->{isa_addr} and $isa;
+           if exists $detection->{isa_addr};
     }
 
     # Handle aliases
     foreach $detection (@{$chip->{detected}}) {
       if (exists $detection->{i2c_driver} and 
           exists $detection->{isa_addr} and
-          exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later} and
-          $isa) {
-        if ($prefer_isa) {
-          push @optionlist, $i2c_adapters[$detection->{i2c_devnr}]->{nr_later},
-                           $detection->{i2c_addr};
-        } else {
-          push @optionlist, -1, $detection->{isa_addr}
-        }
+          exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later}) {
+        push @optionlist, $i2c_adapters[$detection->{i2c_devnr}]->{nr_later},
+                          $detection->{i2c_addr};
       }
     }
 
@@ -5914,7 +5905,7 @@ sub main
   }
   print "\n";
 
-  my ($modprobes, $configfile) = generate_modprobes 1;	# 1 == prefer ISA
+  my ($modprobes, $configfile) = generate_modprobes();
 
   if (defined $configfile) {
     my $have_modprobe_d = -d '/etc/modprobe.d';
