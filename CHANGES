@@ -8,6 +8,7 @@ SVN-HEAD
   Module i2c-i801: Drop broken I2C block read support
   Module i2c-piix4: Minor cleanups (2.6 backport)
   Module i2c-sis5595: Minor cleanups (2.6 backport)
+  Module lm75: Fix an incorrect comment (2.6 backport)
   Program sensors-detect: New device ID for the SMSC SCH5317
                           Add SMSC SCH5127 detection
                           Add National Semiconductor LM64 detection
