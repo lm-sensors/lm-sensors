@@ -14,6 +14,7 @@ SVN-HEAD
                           Add SMSC SCH5127 detection
                           Add National Semiconductor LM64 detection
                           Add Asus F8000 detection
+                          Add Intel ICH10 (bus) detection
 
 2.10.6 "Welcome Home Lina" (20080306)
   Library: Fix fschrc and fschmd support
