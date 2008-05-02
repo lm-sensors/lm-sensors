@@ -1925,8 +1925,9 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
       },
       {
 	name => "Asus F8000 Super IO",
-	# No information available
+	driver => "to-be-written",
 	devid => 0x0581,
+	logdev => 0x04,
       },
       {
 	# Shouldn't be in this family, but seems to be still.

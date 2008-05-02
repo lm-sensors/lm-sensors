@@ -13,6 +13,7 @@ SVN-HEAD
   Program sensors-detect: New device ID for the SMSC SCH5317
                           Add SMSC SCH5127 detection
                           Add National Semiconductor LM64 detection
+                          Add Asus F8000 detection
 
 2.10.6 "Welcome Home Lina" (20080306)
   Library: Fix fschrc and fschmd support
