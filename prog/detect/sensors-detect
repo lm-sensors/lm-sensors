@@ -1128,7 +1128,9 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      {
        name => "Maxim MAX6633/MAX6634/MAX6635",
        driver => "lm92",
-       i2c_addrs => [0x40..0x4f],
+       i2c_addrs => [0x48..0x4f], # The MAX6633 can also use 0x40-0x47 but we
+                                  # don't want to probe these addresses, it's
+                                  # dangerous.
        i2c_detect => sub { lm92_detect(2, @_); },
      },
      {
