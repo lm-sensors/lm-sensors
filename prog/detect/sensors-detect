@@ -2073,6 +2073,20 @@ sub contains
   return 0;
 }
 
+# Address can be decimal or hexadecimal
+sub valid_address
+{
+  my $value = shift;
+
+  if ($value !~ m/^(0x[0-9a-f]+|[0-9]+)$/i) {
+    print "$value is not a valid address, sorry.\n";
+    exit -1;
+  }
+  $value = oct($value) if $value =~ /^0x/i;
+
+  return $value;
+}
+
 sub parse_not_to_scan
 {
   my ($min,$max,$to_parse) = @_;
@@ -2080,15 +2094,19 @@ sub parse_not_to_scan
   my @res;
   my $range;
   foreach $range (@ranges) {
-    my ($start,$end) = split /\s*-s*/, $range;
-    $start = oct $start if $start =~ /^0/;
+    my ($start, $end) = split /\s*-\s*/, $range;
+    $start = valid_address($start);
     if (defined $end) {
-      $end = oct $end if $end =~ /^0/;
+      $end = valid_address($end);
+      if ($end <= $start) {
+        print "$start-$end is not a valid range, sorry.\n";
+        exit -1;
+      }
       $start = $min if $start < $min;
       $end = $max if $end > $max;
-      push @res, ($start+0..$end+0);
+      push @res, ($start..$end);
     } else {
-      push @res, $start+0 if $start >= $min and $start <= $max;
+      push @res, $start if $start >= $min and $start <= $max;
     }
   }
   return sort { $a <=> $b } @res;
@@ -3041,6 +3059,8 @@ sub scan_adapter
   # Now scan each address in turn
   foreach $addr (@{$i2c_addresses_to_scan}) {
     # As the not_to_scan list is sorted, we can check it fast
+    shift @not_to_scan # User skipped an address which we didn't intend to probe anyway
+      while (@not_to_scan and $not_to_scan[0] < $addr);
     if (@not_to_scan and $not_to_scan[0] == $addr) {
       shift @not_to_scan;
       next;
@@ -5675,7 +5695,7 @@ sub main
             "Addresses: ";
       $inp2 = <STDIN>;
       chop $inp2;
-      @not_to_scan = parse_not_to_scan 0,0x7f,$inp2;
+      @not_to_scan = parse_not_to_scan(0x03, 0x77, $inp2);
     }
     scan_adapter $dev_nr, $adap, $i2c_adapters[$dev_nr]->{'driver'},
                  \@not_to_scan   unless $inp =~ /^\s*[Nn]/;
