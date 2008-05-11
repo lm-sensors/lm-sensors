@@ -2761,6 +2761,43 @@ sub i2c_probe($$$)
   }
 }
 
+# $_[0]: Reference to an opened file handle
+# Returns: 1 if the device is safe to access, 0 else.
+# This function is meant to prevent access to 1-register-only devices,
+# which are designed to be accessed with SMBus receive byte and SMBus send
+# byte transactions (i.e. short reads and short writes) and treat SMBus
+# read byte as a real write followed by a read. The device detection
+# routines would write random values to the chip with possibly very nasty
+# results for the hardware. Note that this function won't catch all such
+# chips, as it assumes that reads and writes relate to the same register,
+# but that's the best we can do.
+sub i2c_safety_check
+{
+  my ($file) = @_;
+  my $data;
+
+  # First we receive a byte from the chip, and remember it.
+  $data = i2c_smbus_read_byte($file);
+  return 1 if ($data < 0);
+
+  # We receive a byte again; very likely to be the same for
+  # 1-register-only devices.
+  return 1 if (i2c_smbus_read_byte($file) != $data);
+
+  # Then we try a standard byte read, with a register offset equal to
+  # the byte we received; we should receive the same byte value in return.
+  return 1 if (i2c_smbus_read_byte_data($file, $data) != $data);
+
+  # Then we try a standard byte read, with a slightly different register
+  # offset; we should again receive the same byte value in return.
+  return 1 if (i2c_smbus_read_byte_data($file, $data ^ 1) != ($data ^ 1));
+
+  # Apprently this is a 1-register-only device, restore the original register
+  # value and leave it alone.
+  i2c_smbus_read_byte_data($file, $data);
+  return 0;
+}
+
 ####################
 # ADAPTER SCANNING #
 ####################
@@ -3107,6 +3144,10 @@ sub scan_adapter
 
     next unless i2c_probe(\*FILE, $addr, $funcs);
     printf "Client found at address 0x%02x\n",$addr;
+    if (!i2c_safety_check(\*FILE)) {
+      print "Seems to be a 1-register-only device, skipping.\n";
+      next;
+    }
 
     $| = 1;
     foreach $chip (@chip_ids) {
