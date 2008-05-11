@@ -910,7 +910,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { adm9240_detect(0, @_); },
      },
      {
-       name => "Dallas Semiconductor DS1621",
+       name => "Dallas Semiconductor DS1621/DS1631",
        driver => "ds1621",
        i2c_addrs => [0x48..0x4f],
        i2c_detect => sub { ds1621_detect(@_); },
@@ -3812,7 +3812,10 @@ sub ds1621_detect
   return if ($slope != 0x10 || $counter > $slope);
 
   my $temp = i2c_smbus_read_word_data($file,0xAA);
-  return if $temp < 0 || ($temp & 0x7f00);
+  return if $temp < 0 || ($temp & 0x0f00);
+  # On the DS1631, the following two checks are too strict in theory,
+  # but in practice I very much doubt that anyone will set temperature
+  # limits not a multiple of 0.5 degrees C.
   my $high = i2c_smbus_read_word_data($file,0xA1);
   return if $high < 0 || ($high & 0x7f00);
   my $low = i2c_smbus_read_word_data($file,0xA2);

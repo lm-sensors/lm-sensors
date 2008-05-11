@@ -20,6 +20,7 @@ SVN-HEAD
                           Fix the parsing of I2C addresses not to scan
                           Detect and skip 1-register-only I2C devices
                           Avoid SMBus word transactions where possible
+                          Add Dallas DS1631 detection
 
 2.10.6 "Welcome Home Lina" (20080306)
   Library: Fix fschrc and fschmd support
