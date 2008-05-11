@@ -26,6 +26,7 @@ SVN-HEAD
                   Add Intel ICH10 (bus) detection
                   Don't probe I2C addresses 0x40-0x47
                   Fix the parsing of I2C addresses not to scan
+                  Detect and skip 1-register-only I2C devices
 
 3.0.1 (2008-01-28)
   documentation: Update the application writing guidelines
