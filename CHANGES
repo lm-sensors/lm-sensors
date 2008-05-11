@@ -28,6 +28,7 @@ SVN-HEAD
                   Fix the parsing of I2C addresses not to scan
                   Detect and skip 1-register-only I2C devices
                   Avoid SMBus word transactions where possible
+                  Add Dallas DS1631 detection
 
 3.0.1 (2008-01-28)
   documentation: Update the application writing guidelines
