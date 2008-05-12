@@ -170,9 +170,10 @@ static int
 doChips
 (int action) {
   const sensors_chip_name *chip;
-  int i = 0, j, ret = 0;
+  int i, j, ret = 0;
 
   for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
+    i = 0;
     while ((ret == 0) && ((chip = sensors_get_detected_chips (&chipNames[j], &i)) != NULL)) {
       ret = doChip (chip, action);
     }
