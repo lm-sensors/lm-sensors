@@ -1435,6 +1435,29 @@ static const ChipDescriptor w83793_chip = {
   w83793_names, w83793_features, 0, 0
 };
 
+/** LM90 **/
+
+static const char *lm90_names[] = {
+  SENSORS_LM90_PREFIX, SENSORS_ADM1032_PREFIX, SENSORS_LM99_PREFIX, SENSORS_LM86_PREFIX,
+  SENSORS_MAX6657_PREFIX, SENSORS_ADT7461_PREFIX, NULL
+};
+
+static const FeatureDescriptor lm90_features[] = {
+  { fmtTemps_PC87360_1, rrdF1, DataType_temperature,
+    LM90_ALARM_LOCAL_HIGH | LM90_ALARM_LOCAL_LOW | LM90_ALARM_LOCAL_CRIT, 0,
+    { SENSORS_LM90_LOCAL_TEMP, SENSORS_LM90_LOCAL_LOW,
+      SENSORS_LM90_LOCAL_HIGH, SENSORS_LM90_LOCAL_TCRIT, -1 } },
+  { fmtTemps_PC87360_1, rrdF1, DataType_temperature,
+    LM90_ALARM_REMOTE_HIGH | LM90_ALARM_REMOTE_LOW | LM90_ALARM_REMOTE_CRIT, 0,
+    { SENSORS_LM90_REMOTE_TEMP, SENSORS_LM90_REMOTE_LOW,
+      SENSORS_LM90_REMOTE_HIGH, SENSORS_LM90_REMOTE_TCRIT, -1 } },
+  { NULL }
+};
+
+static const ChipDescriptor lm90_chip = {
+  lm90_names, lm90_features, SENSORS_LM90_ALARMS, 0
+};
+
 
 /** ALL **/
 
@@ -1467,5 +1490,6 @@ const ChipDescriptor * const knownChips[] = {
   &vt1211_chip,
   &k8temp_chip,
   &w83793_chip,
+  &lm90_chip,
   NULL
 };
