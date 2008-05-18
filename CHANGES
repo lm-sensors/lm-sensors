@@ -1,7 +1,7 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN-HEAD
+3.0.2 (2008-05-18)
   documentation: Delete the FAQ, now maintained on the wiki
   libsensors: Use __func__ instead of __FUNCTION__
               Parse the configuration file in C locale
