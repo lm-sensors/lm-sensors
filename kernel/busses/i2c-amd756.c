@@ -206,9 +206,7 @@ static s32 amd756_access(struct i2c_adapter * adap, u16 addr,
 {
 	int i, len;
 
-	/** TODO: Should I supporte the 10-bit transfers? */
 	switch (size) {
-	/* TODO: proc call is supported, I'm just not sure what to do here... */
 	case I2C_SMBUS_QUICK:
 		outw_p(((addr & 0x7f) << 1) | (read_write & 0x01),
 		       SMB_HOST_ADDRESS);
@@ -312,7 +310,7 @@ static u32 amd756_func(struct i2c_adapter *adapter)
 {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |
 	    I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA |
-	    I2C_FUNC_SMBUS_BLOCK_DATA | I2C_FUNC_SMBUS_PROC_CALL;
+	    I2C_FUNC_SMBUS_BLOCK_DATA;
 }
 
 static struct i2c_algorithm smbus_algorithm = {
