@@ -1,6 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN-HEAD
+  sensors-detect: Add Intel SCH (bus) support
+
 3.0.2 (2008-05-18)
   documentation: Delete the FAQ, now maintained on the wiki
   libsensors: Use __func__ instead of __FUNCTION__
