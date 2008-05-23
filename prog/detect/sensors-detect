@@ -669,22 +669,46 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { lm80_detect(@_); },
      },
      {
-       name => "National Semiconductor LM85 or LM96000",
+       name => "National Semiconductor LM85",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(0x01, @_); },
+       i2c_detect => sub { lm85_detect(0, @_); },
      },
      {
-       name => "Analog Devices ADM1027, ADT7460 or ADT7463",
+       name => "National Semiconductor LM96000",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(0x41, @_); },
+       i2c_detect => sub { lm85_detect(1, @_); },
      },
      {
-       name => "SMSC EMC6D100, EMC6D101 or EMC6D102",
+       name => "Analog Devices ADM1027",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(0x5c, @_); },
+       i2c_detect => sub { lm85_detect(2, @_); },
+     },
+     {
+       name => "Analog Devices ADT7460 or ADT7463",
+       driver => "lm85",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { lm85_detect(3, @_); },
+     },
+     {
+       name => "SMSC EMC6D100 or EMC6D101",
+       driver => "lm85",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { lm85_detect(4, @_); },
+     },
+     {
+       name => "SMSC EMC6D102",
+       driver => "lm85",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { lm85_detect(5, @_); },
+     },
+     {
+       name => "SMSC EMC6D103",
+       driver => "lm85",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { lm85_detect(6, @_); },
      },
      {
        name => "Analog Devices ADT7462",
@@ -4330,8 +4354,9 @@ sub andigilog_aSC7511_detect
   return;
 }
 
-# $_[0]: Vendor to check for
-#   (0x01 = National Semi, 0x41 = Analog Dev, 0x5c = SMSC)
+# $_[0]: Chip to detect
+#   (0 = LM85, 1 = LM96000, 2 = ADM1027, 3 = ADT7463,
+#    4 = EMC6D100/101, 5 = EMC6D102, 6 = EMC6D103)
 # $_[1]: A reference to the file descriptor to access this chip.
 # #_[2]: Base address.
 # Returns: undef if not detected, (7) or (8) if detected.
@@ -4341,27 +4366,41 @@ sub andigilog_aSC7511_detect
 # Constants used: 0x01 == National Semiconductor Vendor Id.
 #                 0x41 == Analog Devices Vendor Id.
 #                 0x5c == SMSC Vendor Id.
-#		  0x60 == Version number. The lower 4 stepping
-#			  bits are masked and ignored.
 sub lm85_detect
 {
-  my ($vendor, $file, $addr) = @_;
-  return if (i2c_smbus_read_byte_data($file, 0x3e)) != $vendor;
-
+  my ($chip, $file, $addr) = @_;
+  my $vendor = i2c_smbus_read_byte_data($file, 0x3e);
   my $verstep = i2c_smbus_read_byte_data($file, 0x3f);
-  return if ($verstep & 0xf0) != 0x60;
+
+  if ($chip == 0) {
+    return if $vendor != 0x01;	# National Semiconductor
+    return if $verstep != 0x60	# LM85 C
+           && $verstep != 0x62;	# LM85 B
+  } elsif ($chip == 1) {
+    return if $vendor != 0x01;	# National Semiconductor
+    return if $verstep != 0x68;	# LM96000
+  } elsif ($chip == 2) {
+    return if $vendor != 0x41;	# Analog Devices
+    return if $verstep != 0x60;	# ADM1027
+  } elsif ($chip == 3) {
+    return if $vendor != 0x41;	# Analog Devices
+    return if $verstep != 0x62;	# ADT7463
+  } elsif ($chip == 4) {
+    return if $vendor != 0x5c;	# SMSC
+    return if $verstep != 0x60	# EMC6D100/101 A0
+           && $verstep != 0x61;	# EMC6D100/101 A1
+  } elsif ($chip == 5) {
+    return if $vendor != 0x5c;	# SMSC
+    return if $verstep != 0x65;	# EMC6D102
+  } elsif ($chip == 6) {
+    return if $vendor != 0x5c;	# SMSC
+    return if $verstep != 0x68;	# EMC6D103
+  }
 
   if ($vendor == 0x41) # Analog Devices
   {
     return if i2c_smbus_read_byte_data($file, 0x3d) != 0x27;
     return (8);
-  }
-
-  if ($vendor == 0x5c) # SMSC
-  {
-    # Return undef if this is a SCH5027
-    return if $verstep >= 0x69 and
-        i2c_smbus_read_byte_data($file, 0xba) == 0x0f;
   }
 
   return (7);
