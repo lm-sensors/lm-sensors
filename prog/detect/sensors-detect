@@ -4344,14 +4344,12 @@ sub lm85_detect
   my $verstep = i2c_smbus_read_byte_data($file, 0x3f);
   return if ($verstep & 0xf0) != 0x60;
 
-  if ($vendor == 0x41) # Analog Devices
-  {
+  if ($vendor == 0x41) { # Analog Devices
     return if i2c_smbus_read_byte_data($file, 0x3d) != 0x27;
     return (8);
   }
 
-  if ($vendor == 0x5c) # SMSC
-  {
+  if ($vendor == 0x5c) { # SMSC
     # Return undef if this is a SCH5027
     return if $verstep >= 0x69 and
         i2c_smbus_read_byte_data($file, 0xba) == 0x0f;
@@ -4786,13 +4784,10 @@ sub adm1021_detect
   return if $chip == 7 and $man_id != 0x54;
 
   # Check unused bits
-  if ($chip == 5) # LM84
-  {
+  if ($chip == 5) { # LM84
     return if ($status & 0xab) != 0;
     return if ($conf & 0x7f) != 0;
-  }
-  else
-  {
+  } else {
     return if ($status & 0x03) != 0;
     return if ($conf & 0x3f) != 0;
     return if ($convrate & 0xf8) != 0;
@@ -4802,8 +4797,7 @@ sub adm1021_detect
   # We verify several assertions (6 for the MAX1617, 4 for the LM84) and
   # discard the chip if any fail. Note that these checks are not done
   # by the adm1021 driver.
-  if ($chip == 2 || $chip == 5)
-  {
+  if ($chip == 2 || $chip == 5) {
     my $lte = i2c_smbus_read_byte_data($file, 0x00);
     my $rte = i2c_smbus_read_byte_data($file, 0x01);
     my $lhi = i2c_smbus_read_byte_data($file, 0x05);
@@ -4820,8 +4814,7 @@ sub adm1021_detect
     # Negative high limits
     return if ($lhi & 0x80) or ($rhi & 0x80);
     # Low limits over high limits
-    if ($chip != 5) # LM84 doesn't have low limits
-    {
+    if ($chip != 5) { # LM84 doesn't have low limits
       $llo-=256 if ($llo & 0x80);
       $rlo-=256 if ($rlo & 0x80);
       return if ($llo > $lhi) or ($rlo > $rhi);
