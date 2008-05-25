@@ -4,6 +4,7 @@ lm-sensors CHANGES file
 SVN-HEAD
   sensors-detect: Add Intel SCH (bus) support
                   Add SMSC EMC6D103 support
+                  Improve MAX6657, MAX6658, MAX6659 detection
 
 3.0.2 (2008-05-18)
   documentation: Delete the FAQ, now maintained on the wiki

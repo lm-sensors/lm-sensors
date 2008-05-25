@@ -1094,13 +1094,13 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        name => "Maxim MAX6657/MAX6658/MAX6659",
        driver => "lm90",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect(4, @_); },
+       i2c_detect => sub { max6657_detect(@_); },
      },
      {
        name => "Maxim MAX6659",
        driver => "lm90",
        i2c_addrs => [0x4d..0x4e], # 0x4c is handled above
-       i2c_detect => sub { lm90_detect(4, @_); },
+       i2c_detect => sub { max6657_detect(@_); },
      },
      {
        name => "Maxim MAX6648/MAX6692",
@@ -3958,14 +3958,12 @@ sub lm83_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = LM90, 1=LM89/LM99, 2=LM86, 3=ADM1032, 4=MAX6657/MAX6658/MAX6659,
+#   (0 = LM90, 1 = LM89/LM99, 2 = LM86, 3 = ADM1032,
 #    5 = ADT7461, 6 = MAX6648/MAX6692, 7 = MAX6680/MAX6681,
-#    8 = W83L771W/G), 9 = TI TMP401
+#    8 = W83L771W/G, 9 = TI TMP401)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address
-# Returns: undef if not detected, 4, 6 or 8 if detected.
-#   The Maxim chips MAX6657, MAX6658 and MAX6659 have a low confidence
-#   value (4) because they don't have a die revision register.
+# Returns: undef if not detected, 6 or 8 if detected.
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
@@ -4005,15 +4003,7 @@ sub lm90_detect
     return if ($conf & 0x3f) != 0;
     return if $rate > 0x0a;
     return if $mid != 0x41;     # Analog Devices
-    return 8 if ($cid & 0xf0) == 0x40; # ADM1032
-  }
-  if ($chip == 4) {
-    return if ($conf & 0x1f) != ($mid & 0x0f); # No low nibble,
-                                               # returns previous low nibble
-    return if $rate > 0x09;
-    return if $mid != 0x4d;     # Maxim
-    return if $cid != 0x4d;     # No register, returns previous value
-    return 4;
+    return 6 if ($cid & 0xf0) == 0x40; # ADM1032
   }
   if ($chip == 5) {
     return if ($conf & 0x1b) != 0;
@@ -4033,7 +4023,7 @@ sub lm90_detect
     return if $rate > 0x07;
     return if $mid != 0x4d;     # Maxim
     return if $cid != 0x01;     # MAX6680/MAX6681
-    return 6;
+    return 8;
   }
   if ($chip == 8) {
     return if ($conf & 0x2a) != 0;
@@ -4047,9 +4037,41 @@ sub lm90_detect
     return if $rate > 0x0F;
     return if $mid != 0x55;     # Texas Instruments
     return if $cid != 0x11;     # TMP401
-    return 6;
+    return 8;
   }
   return;
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+# $_[1]: Address
+# Returns: undef if not detected, 5 if detected.
+# Registers used:
+#   0x03: Configuration (no low nibble)
+#   0x04: Conversion rate
+#   0xfe: Manufacturer ID
+#   0xff: no register
+sub max6657_detect
+{
+  my ($file, $addr) = @_;
+  my $mid = i2c_smbus_read_byte_data($file, 0xfe);
+  my $cid = i2c_smbus_read_byte_data($file, 0xff);
+  my $conf = i2c_smbus_read_byte_data($file, 0x03);
+
+  return if $mid != 0x4d;     # Maxim
+  return if ($conf & 0x1f) != 0x0d; # No low nibble,
+                                    # returns previous low nibble
+  return if $cid != 0x4d;     # No register, returns previous value
+
+  my $rate = i2c_smbus_read_byte_data($file, 0x04);
+  return if $rate > 0x09;
+
+  $cid = i2c_smbus_read_byte_data($file, 0xff);
+  $conf = i2c_smbus_read_byte_data($file, 0x03);
+  return if ($conf & 0x0f) != $rate; # No low nibble,
+                                     # returns previous low nibble
+  return if $cid != $rate;    # No register, returns previous value
+
+  return 5;
 }
 
 # $_[0]: Chip to detect
