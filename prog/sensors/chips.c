@@ -4991,6 +4991,7 @@ void print_lm90(const sensors_chip_name *name)
   char *label;
   double cur, high, low, hyst;
   int valid, alarms;
+  const int is_max6657 = !strcmp(name->prefix, "max6657");
 
   if (!sensors_get_feature(*name, SENSORS_LM90_ALARMS, &cur))
     alarms = cur + 0.5;
@@ -5006,7 +5007,7 @@ void print_lm90(const sensors_chip_name *name)
    && !sensors_get_feature(*name, SENSORS_LM90_LOCAL_LOW, &low)) {
     if (valid) {
       print_label(label, 10);
-      print_temp_info(cur, high, low, MINMAX, 0, 0);
+      print_temp_info(cur, high, low, MINMAX, is_max6657 ? 1 : 0, 0);
       printf(" %s\n",
         alarms&LM90_ALARM_LOCAL_CRIT?"CRITICAL":
       	alarms&(LM90_ALARM_LOCAL_HIGH|LM90_ALARM_LOCAL_LOW)?"ALARM":"");
